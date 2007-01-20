@@ -1,0 +1,96 @@
+.globals.categories:
+..Page:&nbsp;
+..Concept:Concept
+..Class:Class
+..Spec:Class Specialization
+..Shortcut:Shortcut
+..Function:Function
+..Memvar:Data Member
+..Memfunc:Member Function
+..Metafunction:Metafunction
+..Tag:Tag
+..Adaption:Adaption
+..Demo:Example Program
+.
+.globals.indexes:
+..Page:Overview
+..Concept:Concepts
+..Class:Classes
+..Spec:Specializations
+..Shortcut:Shortcuts
+..Function:Functions
+..Metafunction:Metafunctions
+..Tag:Tags
+..Adaption:Adaptions
+..Demo:Examples
+.
+.globals.sections:
+..Page:SeqAn Documentation
+..class:Member of
+..general:Specialization of
+..spec:Specializations
+..param:Parameters
+..returns:Return Values
+..type:Types
+..value:Values
+..memvar:Data Members
+..memfunc:Member Functions
+..function:Functions
+..remarks:Remarks
+..example:Examples
+..demo:Example Programs
+..demofor:See
+..include:Include Headers
+..see:See Also
+..implements:Implements
+..conceptimplements:Provided by
+..concept:Required by
+..conceptmemvar:Required Member Variables
+..conceptmemfunc:Required Member Functions
+..conceptfunc:Required Functions
+..conceptmetafunc:Required Metafunctions
+..conceptusedby:Used By
+..baseconcept:Extends
+..childconcept:Refinements
+..shortcut:Shortcuts
+..shortcutfor:Shortcut for
+.
+.globals.subsections:
+..metafunction:Metafunctions:
+..type:Types:
+..concept:Concepts:
+..value:Values:
+..default:Default:
+..remarks:Remarks:
+..note:Note:
+..see:See:
+.
+.globals.project:
+..name:SeqAn
+..footline:SeqAn - Sequence Analysis Library - <a href="http://www.seqan.de">www.seqan.de</a>
+..indexcategory:Page
+.
+.globals.relations:
+..memfunc:Memfunc.*.class
+..memvar:Memvar.*.class
+..function:Function.*.param.*.type
+..function:Function.*.returns.*.type
+..function:Function.*.returns.type
+..type:Metafunction.*.param.*.type
+..derived:Class.*.base
+..derived:Spec.*.base
+..spec:Class.*.general
+..spec:Spec.*.general
+..see:*.*.see
+..conceptmemvar:Memvar.*.concept
+..conceptmemfunc:Memfunc.*.concept
+..conceptfunc:Function.*.concept
+..conceptmetafunc:Metafunction.*.concept
+..conceptusedby:Function.*.param.*.concept
+..conceptimplements:*.*.implements
+..childconcept:Concept.*.baseconcept
+..demofor:*.*.demo
+..demo:*.*.demofor
+..shortcut:*.*.shortcutfor
+..shortcutfor:*.*.shortcut
+.

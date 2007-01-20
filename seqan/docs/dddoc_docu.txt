@@ -1,0 +1,159 @@
+DDDOC - "Dot-Dot-Doc" - Das SEQAN Dokumentationssystem
+
+Autor: Andreas Döring, doering@inf.fu-berlin.de
+Anmerkung: Diese Doku ist nicht unbedingt vollständig. 
+
+
+1. Prinzipien:
+==============
+- Die Dokumentation ist eine große, hierarchisch gegliederte Datenstruktur ("Baum")
+- Sie ist auf mehrere Dateien verteilt.
+- Diese Dateien sind entweder spezielle dddoc-Dateien (Endung: ".dddoc"), oder aber C++-Sourcen.
+- In C++ Sourcen gelten Kommentare, die mit /** oder mit /// beginnen, als Bereiche, in denen dddoc-Information steht.
+- Python-Skripts durchsuchen alle Dateien des Projekts, sammeln die Information zusammen und generieren anschließend daraus die Dokumentation.
+- Bislang ist die generierte Dokumentation in HTML, später soll z.B. auch LaTeX dazu kommen.
+
+
+
+2. Notation:
+============
+- Die Dokumentation wird in Form eines dddoc-Baumes gespeichert.
+- Jeder Konten in einem dddoc-Baum besitzt einen ID-String.
+- Den Pfad im dddoc-Baum von der Wurzel zu einem Knoten notiert man durch Aufzählen der ID-Strings aller Knoten auf diesem Pfad, wobei man die ID-Strings durch "." voneinander abtrennt. Beispiel: "Tiere.Haustiere.Hunde.Waldi"
+- Jeder Knoten in einem dddoc-Baum besitzt einen (eventuell leeren) Text. Existieren mehrere Einträge für den gleichen Knoten, so werden alle Texte hintereinander gehängt.
+- Ein Eintrag in die Datenstruktur hat die Form ".[Pfad]:[Text]". Dabei muss der Eintrag mit einer neuen Zeile beginnen, d.h. das erste Zeichen in der Zeile ist ".".
+- Ein Pfad wird als Unterpfad eines vorangegangenen Pfades des selben Kommentarblocks interpretiert, wenn er mit einem Punkt beginnt. Beginnt ein Pfad mit n Punkten, so bezieht er sich auf den letzten davor stehenden Pfad mit n-1 Punkten. 
+- Besondere Zeichen in ID-Strings wie ", ., : oder \ können entweder durch ein weiteres vorgestelltes \ escaped oder in "" geschrieben werden (siehe Beispiel 3).
+- In Texten (nicht in den ID-Strings) sind auch LaTeX-Sonderzeichen erlaubt, z.B. \Sigma, \in, \leftarrow. Die Liste mit allen verfügbaren Zeichen steht in dddoc_html_trans.py.
+
+
+Beispiel 1:
+
+.Tiere.Haustiere
+..Hund.Waldi
+...Name:Waldemar
+...Alter:5
+..Katze.Minka
+...Alter:2
+
+Das ist das selbe wie:
+
+.Tiere.Haustiere.Hund.Waldi.Name:Waldemar
+.Tiere.Haustiere.Hund.Waldi.Alter:5
+.Tiere.Haustiere.Katze.Minka.Alter:2
+
+
+Beispiel 2:
+
+.Adresse.Name:Andreas Döring
+..Kommentar:Dies ist ein Kommentar,
+der über mehrere Zeilen geht.
+..Kommentar:Dies wird an den anderen Kommentar angehängt.
+
+
+Beispiel 3:
+
+.Domainen."www.microsoft.com":Microsoft Homepage
+.Domainen.www\.google\.de\:8080:Suchmaschine
+
+Achtung: Inzwischen funktioniert das mit den \ nicht mehr, da \ für Latex-Zeichen verwendet wird.
+
+
+3. Aufbau der Dokumentation:
+============================
+Die Pfade in dddoc haben die Form: "[Category].[Name].[Section].[Rest]":
+
+- [Category]: Einer der folgenden Knoten: "Class", "Spec", "Function", "Memfunc", "Memvar", "Adaption", "Metafunction", "Tag", und außerdem "Internal" und "globals"
+	"Internal" dient zur Dokumentation interner Entitäten, die nicht zum offiziellen Benutzerinterface der Bibliothek gehören. Auf Entitäten dieser Kategory sollte aus anderen Kategorien heraus nicht verlinkt werden oder umgekehrt.
+	"globals" speichert Metainformation und Konstanten, die bei der Erzeugung der Dokumentation verwendet werden. Außerdem werden die Indexpages für die einzelnen Kategorien hier definiert.
+
+- [Name]: Der Name der in diesem Eintrag dokumentierten Entität, d.h. der Funktion, Klasse, usw. Kann auch im Einzelfall vom tatsächlichen Namen abweichen. 
+    Enthält der Name ein "#"-Zeichen, so wird lediglich der String hinter dem (ersten) "#"-Zeichen dargestellt.
+    Dies sollte z.B. bei Memfunc und Memvar-Einträgen geschehen: Vor dem "#"-Zeichen schreibe man den Klassennamen, hinter das "#"-Zeichen den Namen des Members.
+
+- [Section]: Art der Information zu [Name]: "summary", "description", "cat", "signature", "param", "returns", "value", "remarks", "example", "demo", "see", "class", "memfunc", "memvar", "general", "spec", "type", "function", "file"
+
+- [Rest]: Je nach [Section] kann der Pfad auf unterschiedliche Weise weitergehen:
+	Bei "summary", "cat", "signature", "see", "class", "general", "spec", "type", "memfunc" und "function" ist kein [Rest]-Pfad erlaubt.
+	Bei "remarks", "description" und "example" gibt es entweder keinen [Rest]-Pfad, oder er hat die Form "[Subsection]".
+	Bei "param", "returns" und "value" hat der [Rest]-Pfad die Form "[Name2]" oder "[Name2].[Subsection]", oder aber es gibt keinen [Rest]-Pfad.
+	
+- [Subsection]: Kann je nach [Section] einen der folgenden Werte annehmen: "type", "value", "default", "remarks", "note", "see", "text", "code", "image"
+
+- [Name2]: Gibt den Namen eines Arguments ("param"), Rückgabewertes ("returns") oder Wertes ("value") an.
+
+
+
+4. Sections
+===========
+- title: Titel der Seite (optional). Default ist [Name].
+- summary: Kurzbeschreibung der Entität.
+- description: Weiterer Text oder Code zur Beschreibung der Entität.
+- cat: Unterkategorie. Die Dokumentation erscheint in der Dokumentation unterhalb von [Category] in einem Unterordner. Eine Entität kann mehrere Unterkategorien besitzen, in diesem Fall erscheint die Dokumentation in verschiedenen Unterordnern.
+- signature: Abstrahiertes Codestück, dass die Verwendung der Entität verdeutlicht. Beispiel: "length(container)"
+- param: Funktionsargument.
+- returns: Rückgabewert.
+- value: Ein Wert, den die Entität annehmen kann.
+- remarks: Kommentartext oder -code.
+- example: Beispieltext oder -code.
+- demo: Link auf eine Democode-Seite.
+- (demofor: Rückverweis von demo)
+- see: Querverweis zu einer anderen Entität. Ein Rückverweis wird automatisch hinzugefügt.
+- class: Bei Memberfunktionen: Name der zu der Entität gehörenden Klasse.
+- memfunc: Bei Klassen: Eine Memberfunktion.
+- memvar: Bei Klassen: Eine Membervariable (data member).
+- general: Bei Spezialisierungen: Die zugehörige generelle Klasse
+- spec: Bei Klassen: Eine Spezialisierung
+- type: 
+- function:
+- file: Zeigt einen Source File an. Siehe unten.
+- include: Name des Header-Files, das included werden muss, um die Entität zu benutzen.
+- concept: Name des Concepts zu dem die Entität (Metafunction, Member Variables, Member Functions, Functions) gehört.
+- implements: Name eines Concepts, dass die aktuelle Klasse/Spec implementiert; Name eines "Parent"-Concepts, von dem sich das aktuelle Concept ableitet.
+(- conceptmetafunc, conceptmemvar, conceptmemfunc, conceptfunc, conceptimplements, conceptusedby, conceptchild: Rückverweise von concept, implements)
+- hidefromindex: Entität nicht in Indexen (Navigation/Übersichtsseiten) aufführen.
+- shortcutfor: Link auf Entität, für die aktueller Eintrag ein Shortcut ist. (Subsection "signature" gibt die komplette typedef signatur an)
+(- shortcut: Rückverweis für shortcutfor)
+
+
+5. Formatierungen
+=================
+- In manche Textbereiche können Querverweise auf andere Entitäten eingefügt werden. Das Format hierfür ist @[Category].[Name]@ oder @[Category].[Name].[Displaytext]@. Wird [Displaytext] angegeben, so wird dieser Text angezeigt, ansonsten [Name]. Man beachte, dass in bestimmten Fällen, wie z.B. bei [Section]="see", der Text automatisch als Querverweis aufgefasst wird, d.h. ohne umschließende @-Zeichen.
+- Soll ein Text als C++-Code gesetzt werden, so schreibt man ihn zwischen zwei $. Beispiel: $int x$.
+
+
+6. Subsections
+==============
+6.1 image:
+- Bilder immer ohne Endung ".png" bzw. ".esp" angeben. Im HTML-Export wird automatisch ".png" angehängt - man verwende dafür also das ".png"-Format.
+- Alle Bilder im "img"-Ordner ablegen.
+- Der Titel des Bildes kann optional hinter ":" angehängt werden. Z.B:
+
+..remarks.image:seqan_logo_large:Dies ist das große SeqAn-Logo.
+
+6.2 param: 
+Anzeige einer Tabellenzeile
+
+
+7. Beispiele:
+=============
+Siehe im Code von SEQAN.
+
+8. Indexpages:
+=============
+Der Text der Indexpages für die einzelnen Kategorien werden in .globals.indexpage.[Category] definiert.
+z.B. ".globals.indexpage.Metafunction"
+
+In Indexpages verwendbare Sections:
+- title
+- summary
+- text
+- remarks
+- example
+- see
+
+
+9. Source Files:
+==================
+Mit der Section "file" eingebundene Datei.
+Zeilen der Datei, die mit "///" beginnen, werden als Kommentar gesetzt.

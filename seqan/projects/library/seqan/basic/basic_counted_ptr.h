@@ -1,0 +1,104 @@
+/*
+ *  counted_ptr.h
+ *  genindex
+ *
+ *  Created by David Weese on 17.07.05.
+ *
+ */
+
+#ifndef SEQAN_HEADER_BASIC_COUNTED_PTR_H
+#define SEQAN_HEADER_BASIC_COUNTED_PTR_H
+
+// THIS FILE IS CURRENTLY NOT USED
+
+namespace SEQAN_NAMESPACE_MAIN
+{
+
+	//////////////////////////////////////////////////////////////////////////////
+	// counted pointer
+
+	template < typename Type >
+	struct CountedPtr
+	{
+		typedef CountedPtr		_Self;
+		typedef CountedPtr*	    _SelfPtr;
+		typedef CountedPtr&	    _SelfRef;
+
+		typedef Type&			reference;
+		typedef const Type&		const_reference;
+		typedef Type*			pointer;
+
+        explicit CountedPtr(pointer p = 0): // allocate a new counter
+            itsCounter(0)
+        {
+            if (p) itsCounter = new counter(p);
+        }
+
+        CountedPtr(const _Self& r) throw() {
+            acquire(r.itsCounter);
+        }
+
+        ~CountedPtr() {
+            release();
+        }
+
+        CountedPtr& operator=(const _Self& r)
+        {
+            if (this != &r) {
+                release();
+                acquire(r.itsCounter);
+            }
+            return *this;
+        }
+
+        reference operator*() const throw() {
+            return *itsCounter->ptr;
+        }
+
+        pointer operator->() const throw() {
+            return itsCounter->ptr;
+        }
+
+        pointer get() const throw() {
+            return itsCounter ? itsCounter->ptr : 0;
+        }
+
+        bool unique() const throw() {
+            return (itsCounter ? itsCounter->count == 1 : true);
+        }
+
+		inline operator pointer () const {
+            return get();
+		}
+
+    private:
+
+        struct counter {
+            pointer     ptr;
+            unsigned    count;
+            counter(pointer p = 0, unsigned c = 1):
+                ptr(p),
+                count(c) { }
+        }* itsCounter;
+
+        void acquire(counter* c) throw()
+        { // increment the count
+            itsCounter = c;
+            if (c) ++c->count;
+        }
+
+        void release()
+        { // decrement the count, delete if it is 0
+            if (itsCounter) {
+                if (--itsCounter->count == 0) {
+                    delete itsCounter->ptr;
+                    delete itsCounter;
+                }
+                itsCounter = 0;
+            }
+        }
+    };
+
+}
+
+#endif

@@ -1,0 +1,87 @@
+
+
+.Demo.Allocators:
+..summary:Examples for memory allocation.
+..file:../../projects/demos/allocator.cpp
+..see:Spec.Single Pool Allocator
+..see:Spec.Multi Pool Allocator
+..demofor:Function.allocate
+..demofor:Function.deallocate
+..demofor:Function.arrayConstruct
+..demofor:Function.arrayDestruct
+..demofor:Function.Allocator#clear
+..demofor:Class.Allocator
+..demofor:Function.arrayConstruct
+..demofor:Function.arrayDestruct
+.
+
+
+.Demo.Alphabets:
+..summary:Examples for common alphabets.
+..description
+...text:SeqAn offers some common alphabets like @Spec.Dna@, @Spec.Iupac@, and @Spec.AminoAcid@, which are all @Concept.Simple Type.simple types@.
+..file:../../projects/demos/alphabet.cpp
+..demofor:Spec.Dna
+..demofor:Spec.Dna5
+..demofor:Spec.Iupac
+..demofor:Spec.AminoAcid
+.
+
+
+.Demo.Iterator Basics:
+..summary:Simple iterator functions.
+..file:../../projects/demos/iterator.cpp
+..demofor:Metafunction.Iterator
+..demofor:Function.begin
+..demofor:Function.end
+..demofor:Function.getValue
+..demofor:Function.value
+..demofor:Function.setValue
+..demofor:Function.goBegin
+..demofor:Function.goEnd
+..demofor:Function.atBegin
+..demofor:Function.atEnd
+..demofor:Function.goNext
+..demofor:Function.goPrevious
+.
+
+
+.Demo.Rooted Iterators:
+..summary:Example for some functions for handling (rooted) iterators.
+..file:../../projects/demos/rooted_iterator.cpp
+..demofor:Metafunction.Iterator
+..demofor:Function.container
+..demofor:Function.end
+..demofor:Function.position
+..demofor:Tag.Iterator Spec
+..see:Demo.Iterator Basics
+.
+
+
+
+.Demo.String Basics:
+..summary:Basic string class handling.
+..file:../../projects/demos/string_1.cpp
+..demofor:Class.String
+.
+
+
+
+.Demo.Index:
+..summary:Example for using a finder of an index.
+..file:../../projects/demos/index.cpp
+..demofor:Class.Index
+..demofor:Class.Finder
+..demofor:Function.find
+.
+
+
+
+
+.Demo.Suffix Array:
+..summary:Example for how to create a suffix array and use it as a dictionary.
+..file:../../projects/demos/sufarray.cpp
+..demofor:Function.createSuffixArray
+.
+
+
