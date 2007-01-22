@@ -226,7 +226,7 @@ using namespace seqan;
 		bool result = true;
         time_t start, pool, mapperPart, mapper, sorter;
         time(&start);
-/*
+
 //____________________________________________________________________________
 		::std::cout << "Testing External Vector ... " << ::std::endl;
 		if (testExternalString(maxSize) || (result = false)) {
@@ -253,7 +253,7 @@ using namespace seqan;
 
 		time(&mapper);
 		::std::cout << " " << (mapper - pool) << " seconds" << ::std::endl;
-*/
+
 //____________________________________________________________________________
 		::std::cout << "Testing partially filled Mapper ... " << ::std::endl;
 		if (testPartiallyFilledMapper(maxSize) || (result = false)) {
