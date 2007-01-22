@@ -42,7 +42,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		stack_updown.push(TPair(0, 0));
 		stack_nextl.push(TPair(0, 0));
 
-		dest.undefinedValue = TPair(length(lcpIn), 0);		// use an invalid position (length(lcpIn)) as undefined value 
+		dest.undefinedValue = TPair(supremumValue<TSize>(), 0);		// undefined value for unused entries
 		resize(dest, length(lcpIn));
 		beginRead(lcpIn);
 		beginWrite(dest);
