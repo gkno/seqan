@@ -179,7 +179,7 @@ namespace SEQAN_NAMESPACE_MAIN
 						I = buf.begin + (dstPos - offset);
 
 						#ifdef SEQAN_DEBUG
-							if (I < cur) {
+							if (!partiallyFilled && I < cur) {
 								printf("Mapper assertion failed: I=%x < cur=%x\n", I, cur); 
 								break;
 							}
@@ -340,8 +340,11 @@ namespace SEQAN_NAMESPACE_MAIN
 				endOfs = pool.dataSize(pageNo);
 				if (curOfs < endOfs) {
 					// this page is partially filled and needs to be filled up with undefined entries
-					for(unsigned i = curOfs; i < endOfs; ++i)
-						push(pool.undefinedValue);
+					for(unsigned i = curOfs; i < endOfs; ++i) {
+						*cb.cur = pool.undefinedValue;
+						if (++cb.cur == cb.end)
+							writeBucket(cb, pageNo, pool.pageSize, pool.file);
+					}
 					pool._partiallyFilled = true;
 				}
 				writeBucket(*cb, pageNo, pool.pageSize, pool.file);
@@ -468,8 +471,11 @@ namespace SEQAN_NAMESPACE_MAIN
 				endOfs = pool.dataSize(pageNo);
 				if (curOfs < endOfs) {
 					// this page is partially filled and needs to be filled up with undefined entries
-					for(unsigned i = curOfs; i < endOfs; ++i)
-						push(pool.undefinedValue);
+					for(unsigned i = curOfs; i < endOfs; ++i) {
+						*cb->cur = pool.undefinedValue;
+						if (++cb->cur == cb->end)
+							_writeBucket(*cb, pageNo);
+					}
 					pool._partiallyFilled = true;
 				}
 				_writeBucket(*cb, pageNo);
