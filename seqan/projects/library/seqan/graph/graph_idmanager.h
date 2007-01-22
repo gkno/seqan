@@ -124,6 +124,15 @@ releaseId(IdManager<TIdType, TSpec>& idm,
 }
 
 template<typename TIdType, typename TSpec>
+inline void 
+releaseAll(IdManager<TIdType, TSpec>& idm) 
+{
+	SEQAN_CHECKPOINT
+	idm.data_freeIds.clear();
+	idm.data_endId = 0;
+}
+
+template<typename TIdType, typename TSpec>
 inline typename Size<IdManager<TIdType, TSpec> >::Type 
 getIdUpperBound(IdManager<TIdType, TSpec> const& idm)
 {
@@ -246,6 +255,14 @@ releaseId(IdManager<void, TSpec>& idm,
 {
 	SEQAN_CHECKPOINT
 	if (idm.data_idCount > 0) --idm.data_idCount;
+}
+
+template<typename TSpec>
+inline void 
+releaseAll(IdManager<void, TSpec>& idm) 
+{
+	SEQAN_CHECKPOINT
+	idm.data_idCount = 0;
 }
 
 template<typename TSpec>

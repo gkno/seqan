@@ -105,6 +105,14 @@ _copy(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const& source,
 }
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec>
+inline typename Size<Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> >::Type 
+numEdges(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const& g) 
+{
+	SEQAN_CHECKPOINT
+	return idCount(g.data_id_managerE);
+}
+
+template<typename TCargo, typename TEdgeSpec, typename TSpec>
 inline void
 clearEdges(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec>& g) 
 {
@@ -277,6 +285,15 @@ removeEdge(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec>& g,
 	releaseId(g.data_id_managerE, _getId(current));
 	valueDestruct(current);
 	deallocate(g.data_allocator, current, 1);
+}
+
+template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TEdgeDescriptor>
+void 
+removeEdge(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec>& g,
+		   TEdgeDescriptor const edge)
+{
+	SEQAN_CHECKPOINT
+	removeEdge(g, sourceVertex(g,edge), targetVertex(g,edge));
 }
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TVertexDescriptor> 
@@ -464,6 +481,7 @@ write(TFile & target,
 	  TIDString const &,
 	  Raw)
 {
+	SEQAN_CHECKPOINT
 	typedef Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> TGraph;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
 	typedef typename Iterator<TGraph, VertexIterator<> >::Type TVertexIterator;

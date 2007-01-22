@@ -47,14 +47,6 @@ numVertices(Graph<TEdges, TSpec> const& g)
 }
 
 
-template<typename TEdges, typename TSpec>
-inline typename Size<Graph<TEdges, TSpec> >::Type 
-numEdges(Graph<TEdges, TSpec> const& g) 
-{
-	SEQAN_CHECKPOINT
-	return idCount(g.data_id_managerE);
-}
-
 template<typename TEdges, typename TSpec, typename TVertexDescriptor>
 inline typename Size<Graph<TEdges, TSpec> >::Type 
 degree(Graph<TEdges, TSpec> const& g, 
@@ -116,7 +108,8 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 // Graph Functions relying on graph data structure
 //////////////////////////////////////////////////////////////////////////////
-// _copy(source,dest,transpose) 
+// _copy(source,dest,transpose)
+// numEdges(graph)
 // removeOutEdges(graph, vertex);
 // removeInEdges(graph, vertex);
 // removeVertex(graph, vertex);
@@ -127,6 +120,7 @@ SEQAN_CHECKPOINT
 // addEdge(graph,source,target) 
 // addEdge(graph,source,target,cargo)
 // removeEdge(graph,source,target) 
+// removeEdge(graph, EdgeDescriptor)
 // targetVertex(graph, edge);
 // sourceVertex(graph, edge);
 // getAdjacencyMatrix(graph, mat);

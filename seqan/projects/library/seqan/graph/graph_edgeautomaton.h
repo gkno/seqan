@@ -4,7 +4,7 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 //////////////////////////////////////////////////////////////////////////////
-//	Graph - EdgeStump
+//	Graph - EdgeAutomaton
 //////////////////////////////////////////////////////////////////////////////
 template<typename TCargo, typename TSpec>
 class EdgeAutomaton
@@ -25,7 +25,7 @@ class EdgeAutomaton<void, TSpec>
 };
 
 //////////////////////////////////////////////////////////////////////////////
-// EdgeStump Specific Metafunctions
+// EdgeAutomaton Specific Metafunctions
 //////////////////////////////////////////////////////////////////////////////
 template<typename T>
 struct Cargo;
@@ -55,23 +55,23 @@ struct Cargo<EdgeAutomaton<void, TSpec> const> {
 //////////////////////////////////////////////////////////////////////////////
 template<typename TCargo, typename TSpec>
 inline typename Cargo<EdgeAutomaton<TCargo, TSpec> const>::Type&
-getCargo(EdgeAutomaton<TCargo, TSpec> const* es)
+getCargo(EdgeAutomaton<TCargo, TSpec> const& es)
 {
 	SEQAN_CHECKPOINT
-	return es->data_cargo;
+	return es.data_cargo;
 }
 
 template<typename TCargo, typename TSpec>
 inline typename Cargo<EdgeAutomaton<TCargo, TSpec> >::Type&
-getCargo(EdgeAutomaton<TCargo, TSpec>* es) 
+getCargo(EdgeAutomaton<TCargo, TSpec>& es) 
 {
 	SEQAN_CHECKPOINT
-	return es->data_cargo;
+	return es.data_cargo;
 }
 
 template<typename TSpec>
 inline typename Cargo<EdgeAutomaton<void, TSpec> const>::Type
-getCargo(EdgeAutomaton<void, TSpec> const* es) 
+getCargo(EdgeAutomaton<void, TSpec> const& es) 
 {
 	SEQAN_CHECKPOINT
 	// No real cargo
@@ -80,7 +80,7 @@ getCargo(EdgeAutomaton<void, TSpec> const* es)
 
 template<typename TSpec>
 inline typename Cargo<EdgeAutomaton<void, TSpec> >::Type
-getCargo(EdgeAutomaton<void, TSpec>* es) 
+getCargo(EdgeAutomaton<void, TSpec>& es) 
 {
 	SEQAN_CHECKPOINT
 	// No real cargo
@@ -89,24 +89,24 @@ getCargo(EdgeAutomaton<void, TSpec>* es)
 
 template<typename TCargo, typename TSpec>
 inline typename Cargo<EdgeAutomaton<TCargo, TSpec> >::Type& 
-cargo(EdgeAutomaton<TCargo, TSpec>* es) 
+cargo(EdgeAutomaton<TCargo, TSpec>& es) 
 {
 	SEQAN_CHECKPOINT
-	return es->data_cargo;
+	return es.data_cargo;
 }
 
 template<typename TCargo, typename TSpec>
 inline typename Cargo<EdgeAutomaton<TCargo, TSpec> const>::Type& 
-cargo(EdgeAutomaton<TCargo, TSpec> const* es) 
+cargo(EdgeAutomaton<TCargo, TSpec> const& es) 
 {
 	SEQAN_CHECKPOINT
-	return es->data_cargo;
+	return es.data_cargo;
 }
 
 
 template<typename TSpec>
 inline typename Cargo<EdgeAutomaton<void, TSpec> >::Type
-cargo(EdgeAutomaton<void, TSpec>* es) 
+cargo(EdgeAutomaton<void, TSpec>& es) 
 {
 	SEQAN_CHECKPOINT
 	// No real cargo
@@ -115,7 +115,7 @@ cargo(EdgeAutomaton<void, TSpec>* es)
 
 template<typename TSpec>
 inline typename Cargo<EdgeAutomaton<void, TSpec> const>::Type
-cargo(EdgeAutomaton<void, TSpec> const* es) 
+cargo(EdgeAutomaton<void, TSpec> const& es) 
 {
 	SEQAN_CHECKPOINT
 	// No real cargo
@@ -124,16 +124,16 @@ cargo(EdgeAutomaton<void, TSpec> const* es)
 
 template<typename TCargo, typename TSpec, typename TCargo2>
 inline void 
-assignCargo(EdgeAutomaton<TCargo, TSpec>* es,
+assignCargo(EdgeAutomaton<TCargo, TSpec>& es,
 			TCargo2 const& t) 
 {
 	SEQAN_CHECKPOINT
-	es->data_cargo = t;
+	es.data_cargo = t;
 }
 
 template<typename TSpec, typename TCargo2>
 inline void 
-assignCargo(EdgeAutomaton<void, TSpec>* es, 
+assignCargo(EdgeAutomaton<void, TSpec>& es, 
 			TCargo2 const& t) 
 {
 	SEQAN_CHECKPOINT
@@ -142,43 +142,83 @@ assignCargo(EdgeAutomaton<void, TSpec>* es,
 
 template<typename TCargo, typename TSpec, typename TVertexDescriptor>
 inline void 
-assignTarget(EdgeAutomaton<TCargo, TSpec>* es, 
-			 TVertexDescriptor const t) 
+assignTarget(EdgeAutomaton<TCargo, TSpec>& es, 
+	     TVertexDescriptor const t) 
 {
 	SEQAN_CHECKPOINT
-	es->data_target = t;
+	es.data_target = t;
 }
+
+template<typename TSpec, typename TVertexDescriptor>
+inline void 
+assignTarget(EdgeAutomaton<void, TSpec>& es, 
+	     TVertexDescriptor t) 
+{
+	SEQAN_CHECKPOINT
+	es.data_target = t;
+}
+
 
 template<typename TCargo, typename TSpec>
 inline typename VertexDescriptor<EdgeAutomaton<TCargo, TSpec> >::Type&
-target(EdgeAutomaton<TCargo, TSpec>* es) 
+target(EdgeAutomaton<TCargo, TSpec>& es) 
 {
 	SEQAN_CHECKPOINT
-	return es->data_target;
+	return es.data_target;
 }
 
 template<typename TCargo, typename TSpec>
 inline typename VertexDescriptor<EdgeAutomaton<TCargo, TSpec> >::Type
-target(EdgeAutomaton<TCargo, TSpec> const* es) 
+target(EdgeAutomaton<TCargo, TSpec> const& es) 
 {
 	SEQAN_CHECKPOINT
-	return es->data_target;
+	return es.data_target;
 }
 
 template<typename TCargo, typename TSpec>
 inline typename VertexDescriptor<EdgeAutomaton<TCargo, TSpec> const>::Type 
-getTarget(EdgeAutomaton<TCargo, TSpec> const* es) 
+getTarget(EdgeAutomaton<TCargo, TSpec> const& es) 
 {
 	SEQAN_CHECKPOINT
-	return es->data_target;
+	return es.data_target;
 }
 
 template<typename TCargo, typename TSpec>
 inline typename VertexDescriptor<EdgeAutomaton<TCargo, TSpec> >::Type 
-getTarget(EdgeAutomaton<TCargo, TSpec>* es) 
+getTarget(EdgeAutomaton<TCargo, TSpec>& es) 
 {
 	SEQAN_CHECKPOINT
-	return es->data_target;
+	return es.data_target;
+}
+
+template<typename TCargo, typename TSpec, typename TId>
+void 
+_assignId(EdgeAutomaton<TCargo, TSpec>& es, 
+		  TId const id) 
+{
+	// Should be never called!!!
+	SEQAN_ASSERT(false)
+	return 0;
+}
+
+template<typename TCargo, typename TSpec>
+inline typename Id<EdgeStump<TCargo, TSpec> const>::Type
+_getId(EdgeAutomaton<TCargo, TSpec> const& es) 
+{
+	// Should be never called!!!
+	SEQAN_ASSERT(false)
+	return 0;
+}
+
+//_getId must be called on EdgeDescriptor
+template<typename TVertexDescriptor, typename TAlphabet>
+inline typename Id<TVertexDescriptor>::Type
+_getId(Pair<TVertexDescriptor, TAlphabet> const& ed)
+{
+	SEQAN_CHECKPOINT
+	typedef typename Size<TAlphabet>::Type TSize;
+	TSize alph_size = ValueSize<TAlphabet>::VALUE;
+	return (ed.i1 * alph_size + (TSize) ed.i2);
 }
 
 }// namespace SEQAN_NAMESPACE_MAIN
