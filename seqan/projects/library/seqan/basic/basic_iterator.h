@@ -25,8 +25,8 @@ that are available for rooted iterators.
 ..see:Concept.Iterator
 */
 
-struct TagFull_;
-typedef Tag<TagFull_> const Rooted;
+struct TagRooted_;
+typedef Tag<TagRooted_> const Rooted;
 
 struct TagStandard_;
 typedef Tag<TagStandard_> const Standard;

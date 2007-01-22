@@ -100,6 +100,15 @@ struct IsContiguous< TValue const [SIZE] >
 
 //////////////////////////////////////////////////////////////////////////////
 
+
+template <typename T>
+inline typename Iterator<T *, typename DefaultIteratorSpec<T>::Type>::Type 
+begin(T * me)
+{
+SEQAN_CHECKPOINT
+	return begin(me, typename DefaultIteratorSpec<T>::Type()) ;
+}
+
 ///.Function.begin.param.object.type:Adaption.char array
 
 template <typename TValue>
@@ -127,7 +136,8 @@ begin(TValue * me,
 	  Tag<TSpec> const tag_)
 {
 SEQAN_CHECKPOINT
-	return me;
+	typedef typename Iterator<TValue *, Tag<TSpec> const>::Type TIterator;
+	return TIterator(me, begin(me, Standard()));
 }
 
 template <typename TValue, typename TSpec>
@@ -136,7 +146,8 @@ begin(TValue const * me,
 	  Tag<TSpec> const tag_)
 {
 SEQAN_CHECKPOINT
-	return me;
+	typedef typename Iterator<TValue const *, Tag<TSpec> const>::Type TIterator;
+	return TIterator(me, begin(me, Standard()));
 }
 
 //////////////////////////////////////////////////////////////////////////////

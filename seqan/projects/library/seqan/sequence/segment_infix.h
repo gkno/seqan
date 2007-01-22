@@ -253,13 +253,6 @@ SEQAN_CHECKPOINT
 		me.data_begin_position = new_begin - begin(host(me));
 	}
 
-	friend inline void 
-	setBegin(typename Iterator<Segment, Rooted>::Type new_begin)
-	{
-SEQAN_CHECKPOINT
-		container(new_begin).data_begin_position = hostIterator(new_begin) - begin(host(container(new_begin)), Standard());
-	}
-
 
 //____________________________________________________________________________
 
@@ -348,10 +341,10 @@ SEQAN_CHECKPOINT
 	}
 
 	friend inline void 
-	setEnd(typename Iterator<Segment, Rooted>::Type new_end)
+	setEnd(Segment & me)
 	{
 SEQAN_CHECKPOINT
-		container(new_end).data_end_position = hostIterator(new_end) - begin(host(container(new_end)), Standard());
+		setEnd(me, end(host(me)));
 	}
 
 //____________________________________________________________________________
@@ -663,6 +656,30 @@ SEQAN_CHECKPOINT
 		host(t), 
 		beginPosition(t) + pos_begin, 
 		beginPosition(t) + pos_end);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//setBegin
+
+
+template <typename TIterator>
+inline void 
+setBegin(TIterator new_begin)
+{
+SEQAN_CHECKPOINT
+	setBegin(host(new_begin), hostIterator(new_begin));
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+//setEnd
+
+template <typename TIterator>
+inline void 
+setEnd(TIterator new_end)
+{
+SEQAN_CHECKPOINT
+	setEnd(host(new_end), new_end);
 }
 
 //////////////////////////////////////////////////////////////////////////////

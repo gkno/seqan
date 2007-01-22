@@ -63,12 +63,14 @@ public:
 SEQAN_CHECKPOINT
 		data_iterator = TIterator();
 	}
+/*
 	Iter(typename _Parameter<TContainer>::Type container_):
 		data_container(_toPointer(container_)),
 		data_iterator(begin(container_))
 	{
 SEQAN_CHECKPOINT
 	}
+*/
 	Iter(typename _Parameter<TContainer>::Type container_, TIterator it_):
 		data_container(_toPointer(container_)),
 		data_iterator(it_)
