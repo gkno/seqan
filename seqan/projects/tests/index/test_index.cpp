@@ -44,25 +44,8 @@ void testBuild()
 
         save(esa, "corpus/chlamydia");
 }
-/*
-template <typename TSpec>
-struct PSTSkip;
 
-template < typename TIndex, typename TSpec >
-class Iter< TIndex, VSTree< TopDown< ParentLinks<PSTSkip<TSpec> > > > >:
-	public Iter< TIndex, VSTree< TopDown< ParentLinks<> > > >
-{
-	unsigned threshold;
-};
 
-template < typename TIndex, typename TSpec >
-inline void _goNext(Iter< TIndex, VSTree< TopDown< ParentLinks<PSTSkip<TSpec> > > > > &it, Preorder const) {
-	// preorder dfs
-	if (!goDown(it) && !goRight(it))
-		while (goUp(it) && !goRight(it));
-	if (isRoot(it)) clear(it);
-}
-*/
 void testSTreeIterators()
 {
 		typedef Index<String<char>, Index_ESA<> > TIndex;
@@ -114,6 +97,7 @@ void testSuperMaxRepeats()
 
 }
 
+
 void testMUMs()
 {
 /*		typedef StringSet< String<char, External<> > > TText;
@@ -131,6 +115,7 @@ void testMUMs()
         std::cout << "supermaximal repeats: " << counter << std::endl;
 */
 }
+
 
 template <typename TAlgorithmSpec>
 void testFind()
@@ -171,6 +156,7 @@ void testFind()
 		SEQAN_TASSERT(pos[1] == 0);
 		SEQAN_TASSERT(pos[0] == 26);
 }
+
 
 void Main_TestQGram();
 
