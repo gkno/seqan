@@ -427,6 +427,18 @@ void Test_Automaton() {
 	// If no map is specified it is assumed that an edge cargo exists!!!
 	pred = getPredecessorVertex(automaton,pred,'5');
 	SEQAN_TASSERT(pred == 2)
+
+	// Now using shortcuts
+	succ = getLastSuccessorVertex(automaton,rootVertex,"7262");
+	SEQAN_TASSERT(succ == 1)
+	pred = getLastPredecessorVertex(automaton,succ,"385");
+	SEQAN_TASSERT(pred == 2)
+	String<char> input("7262");
+	succ = getLastSuccessorVertex(automaton,rootVertex, input);
+	SEQAN_TASSERT(succ == 1)
+	String<char> input2("385");
+	pred = getLastPredecessorVertex(automaton,succ, input2);
+	SEQAN_TASSERT(pred == 2)
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -733,6 +745,18 @@ void Test_Graph() {
 	SEQAN_TASSERT(pred == 5)
 	// If no map is specified it is assumed that an edge cargo exists!!!
 	pred = getPredecessorVertex(automaton,pred,'5');
+	SEQAN_TASSERT(pred == 2)
+
+	// Now using shortcuts
+	succ = getLastSuccessorVertex(automaton,rootVertex,"7262");
+	SEQAN_TASSERT(succ == 1)
+	pred = getLastPredecessorVertex(automaton,succ,"385");
+	SEQAN_TASSERT(pred == 2)
+	String<char> input("7262");
+	succ = getLastSuccessorVertex(automaton,rootVertex, input);
+	SEQAN_TASSERT(succ == 1)
+	String<char> input2("385");
+	pred = getLastPredecessorVertex(automaton,succ, input2);
 	SEQAN_TASSERT(pred == 2)
 }
 

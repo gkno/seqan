@@ -274,7 +274,8 @@ removeEdge(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec>& g,
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename Size<TGraph>::Type TSize;
 	TVertexDescriptor nilVal = _get_nil<TVertexDescriptor>();
-	g.data_vertex[edge.i1].data_edge[(TSize) edge.i2].data_target=nilVal;
+	TAlphabet letter(edge.i2);
+	g.data_vertex[edge.i1].data_edge[(TSize) letter].data_target=nilVal;
 }
 
 
@@ -330,7 +331,8 @@ targetVertex(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> const& g,
 
 	typedef Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> TGraph;
 	typedef typename Size<TAlphabet>::Type TSize;
-	return g.data_vertex[edge.i1].data_edge[(TSize) edge.i2].data_target;
+	TAlphabet letter(edge.i2);
+	return g.data_vertex[edge.i1].data_edge[(TSize) letter].data_target;
 }
 
 template<typename TAlphabet, typename TCargo, typename TEdgeSpec, typename TSpec, typename TMatrix>
@@ -378,7 +380,8 @@ getSuccessorVertex(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> const& 
 	SEQAN_ASSERT(idInUse(g.data_id_managerV, vertex) == true)
 	typedef Graph<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> > TGraph;
 	typedef typename Size<TAlphabet>::Type TSize;
-	return g.data_vertex[vertex].data_edge[(TSize) c].data_target;
+	TAlphabet letter(c);
+	return g.data_vertex[vertex].data_edge[(TSize) letter].data_target;
 }
 
 template<typename TAlphabet, typename TCargo, typename TEdgeSpec, typename TSpec, typename TVertexDescriptor, typename TChar>
@@ -393,12 +396,13 @@ getPredecessorVertex(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> const
 	typedef Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> TGraph;
 	typedef typename EdgeType<TGraph>::Type TEdge;
 	typedef typename Size<TGraph>::Type TSize;
+	TAlphabet letter(c);
 	TSize table_length = ValueSize<TAlphabet>::VALUE;
 	TVertexDescriptor nilVal = _get_nil<TVertexDescriptor>();
 	typedef typename Iterator<String<AutomatonEdgeArray<TEdge, TAlphabet> > const>::Type TIterConst;
 	for(TIterConst it = begin(g.data_vertex);!atEnd(it);goNext(it)) {
-		if (((getValue(it)).data_edge[(TSize) c].data_target!=nilVal) &&
-			((getValue(it)).data_edge[(TSize) c].data_target==vertex))
+		if (((getValue(it)).data_edge[(TSize) letter].data_target!=nilVal) &&
+			((getValue(it)).data_edge[(TSize) letter].data_target==vertex))
 		{
 			return position(it);
 	    }

@@ -482,77 +482,68 @@ void TransitiveClosure() {
 void AutomatonTest() {
 //____________________________________________________________________________
 // Automaton
-	typedef char CargoType;
-	typedef EdgeList<CargoType> EdgeType;
-	typedef VertexDescriptor<Graph<EdgeType> >::Type VertexDescriptorType;
-	typedef EdgeDescriptor<Graph<EdgeType> >::Type EdgeDescriptorType;
-	typedef Size<Graph<EdgeType> >::Type TSize;
-
-	//Create the graph
-	Graph<EdgeType> automaton;
+	typedef Graph<Automaton<Dna> > DnaAutomaton;
+	typedef VertexDescriptor<DnaAutomaton>::Type VertexDescriptorType;
+	typedef EdgeDescriptor<DnaAutomaton>::Type EdgeDescriptorType;
+		
+	//Create the automaton
+	DnaAutomaton automaton;
 
 	// Add vertices and edges
-	VertexDescriptorType rootVertex = addVertex(automaton); // A = 0
-	addVertex(automaton); // B = 1
-	addVertex(automaton); // C = 2
-	addVertex(automaton); // D = 3
-	addVertex(automaton); // E = 4
-	addVertex(automaton); // F = 5
-	addEdge(automaton,0,1,'2');
-	addEdge(automaton,1,0,'1');
-	addEdge(automaton,4,0,'6');
-	addEdge(automaton,0,3,'7');
-	addEdge(automaton,1,1,'3');
-	addEdge(automaton,1,2,'4');
-	addEdge(automaton,5,1,'8');
-	addEdge(automaton,2,5,'5');
-	addEdge(automaton,3,4,'2');
-	addEdge(automaton,5,3,'7');
-
-	// Vertex names are handled in an external property map
-	char names[] = {'A', 'B', 'C', 'D', 'E', 'F'};
-	String<char> nameMap;
-	initVertexMap(automaton,nameMap, names);
-
-	std::cout << "A simple forward walk through the automaton:" << std::endl;
-	std::cout << getProperty(nameMap, rootVertex) << " -7-> ";
-	VertexDescriptorType succ = getSuccessorVertex(automaton,rootVertex,'7');
-	std::cout << getProperty(nameMap, succ) << " -2-> ";
-	succ = getSuccessorVertex(automaton,succ,'2');
-	std::cout << getProperty(nameMap, succ) << " -6-> ";
-	succ = getSuccessorVertex(automaton,succ,'6');
-	std::cout << getProperty(nameMap, succ) << " -2-> ";
-	succ = getSuccessorVertex(automaton,succ,'2');
-	std::cout << getProperty(nameMap, succ) << std::endl;
-	std::cout << "...and now let's walk backwards:" << std::endl;
-	VertexDescriptorType pred = succ;
-	std::cout << getProperty(nameMap, pred) << " <-8- ";
-	pred = getPredecessorVertex(automaton,pred,'8');
-	std::cout << getProperty(nameMap, pred) << " <-5- ";
-	pred = getPredecessorVertex(automaton,pred,'5');
-	std::cout << getProperty(nameMap, pred) << " <-4- ";
-	pred = getPredecessorVertex(automaton,pred,'4');
-	std::cout << getProperty(nameMap, pred) << " <-3- ";
-	pred = getPredecessorVertex(automaton,pred,'3');
-	std::cout << getProperty(nameMap, pred) << std::endl;
+	VertexDescriptorType rootVertex = addVertex(automaton); // 0
+	addVertex(automaton); // 1
+	addVertex(automaton); // 2
+	addVertex(automaton); // 3
+	addVertex(automaton); // 4
+	addVertex(automaton); // 5
+	addEdge(automaton,0,1,'C');
+	addEdge(automaton,1,0,'A');
+	addEdge(automaton,4,0,'G');
+	addEdge(automaton,0,3,'T');
+	addEdge(automaton,1,1,'G');
+	addEdge(automaton,1,2,'T');
+	addEdge(automaton,5,1,'T');
+	addEdge(automaton,2,5,'C');
+	addEdge(automaton,3,4,'G');
+	addEdge(automaton,5,3,'A');
 
 	// Print automaton
-	std::cout << "Automaton - State: (Input, NextState)" << std::endl;
-	typedef Iterator<Graph<EdgeType> , VertexIterator<> >::Type TVertexIterator;
-	TVertexIterator it(automaton);
-	while(!atEnd(it)) {
-		VertexDescriptorType source = getValue(it);
-		std::cout << getProperty(nameMap, source) << ": ";
-		typedef Iterator<Graph<EdgeType>, OutEdgeIterator<> >::Type TOutEdgeIterator;
-		TOutEdgeIterator itout(automaton,source);
-		for(;!atEnd(itout);goNext(itout)) {
-			VertexDescriptorType sink = targetVertex(automaton, getValue(itout));
-			std::cout << "(" << getCargo(getValue(itout)) << "/" << getProperty(nameMap, sink) << "), ";
-		}
-		std::cout << std::endl;
-		goNext(it);
-	}
+	std::cout << automaton << std::endl;
+
+	// Perform walks on it
+	std::cout << "A simple forward walk through the automaton:" << std::endl;
+	std::cout << rootVertex << " -T-> ";
+	VertexDescriptorType succ = getSuccessorVertex(automaton,rootVertex,'T');
+	std::cout << succ << " -G-> ";
+	succ = getSuccessorVertex(automaton,succ,'G');
+	std::cout << succ << " -G-> ";
+	succ = getSuccessorVertex(automaton,succ,'G');
+	std::cout << succ << " -C-> ";
+	succ = getSuccessorVertex(automaton,succ,'C');
+	std::cout << succ << std::endl;
+	std::cout << "...and now let's walk backwards:" << std::endl;
+	VertexDescriptorType pred = succ;
+	std::cout << pred << " <-T- ";
+	pred = getPredecessorVertex(automaton,pred,'T');
+	std::cout << pred << " <-C- ";
+	pred = getPredecessorVertex(automaton,pred,'C');
+	std::cout << pred << " <-T- ";
+	pred = getPredecessorVertex(automaton,pred,'T');
+	std::cout << pred << " <-G- ";
+	pred = getPredecessorVertex(automaton,pred,'G');
+	std::cout << pred << std::endl;
+	std::cout << "------------------------------" << std::endl;
+	std::cout << "Multiple forward transitions at once:" << std::endl;
+	std::cout << rootVertex << " -TGGC-> ";
+	succ = getLastSuccessorVertex(automaton,rootVertex,"TGGC");
+	std::cout << succ << std::endl;
+	std::cout << "Multiple backward transitions at once:" << std::endl;
+	std::cout << succ << " <-TC- ";
+	pred = getLastPredecessorVertex(automaton,succ,"TC");
+	std::cout << pred << std::endl;
 }
+
+//////////////////////////////////////////////////////////////////////////////
 
 int main ()
 {
