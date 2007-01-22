@@ -468,11 +468,11 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 */
 
 	template < typename TIndex, class TSpec >
-	inline typename Infix<typename Fibre<TIndex, ESA_SA>::Type>::Type getOccurences(Iter< TIndex, VSTree<TSpec> > const &it) {
+	inline typename Infix< typename Fibre<TIndex, ESA_SA>::Type const >::Type getOccurences(Iter< TIndex, VSTree<TSpec> > const &it) {
 		if (_isSizeInval(value(it).i2))
-			return infix(indexRawText(container(it)), value(it).i1, length(indexRawText(container(it))));
+			return infix(indexSA(container(it)), value(it).i1, length(indexSA(container(it))));
 		else
-			return infix(indexRawText(container(it)), value(it).i1, value(it).i2);
+			return infix(indexSA(container(it)), value(it).i1, value(it).i2);
 	}
 
 /**
