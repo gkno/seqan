@@ -36,7 +36,6 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef TMap        Map;
 		typedef TSize		SizeType;
         typedef TFile       File;
-		enum { PosEmpty = ~(SizeType)0 };						// position to indentify uninitialized entries
     };
 
 /**
@@ -60,7 +59,6 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef TMap						Map;
 		typedef typename Size<TFile>::Type	SizeType;
         typedef TFile						File;
-		enum { PosEmpty = ~(SizeType)0 };						// position to indentify uninitialized entries
     };
 
 /**
@@ -128,22 +126,32 @@ namespace SEQAN_NAMESPACE_MAIN
         PageFrame< TValue, typename TConfig::File, Dynamic<> > &buf,
         BufferHandler< Pool< TValue, MapperSpec<TConfig> >, ReadFileSpec > &me)
     {
-        typename Size< Pool< TValue, MapperSpec<TConfig> > >::Type offset = buf.pageNo;
+        typedef typename Size< Pool< TValue, MapperSpec<TConfig> > >::Type TSize;
+
+		bool partiallyFilled = me.pool._partiallyFilled;
+		TSize undefinedPos = me.pool.undefinedValue;
+		TSize offset = buf.pageNo;
+		TSize dstPos;
 	    offset *= (unsigned)pageSize(buf);
 
 		typename TConfig::Map M = me.pool.handlerArgs;
         for(TValue *cur = buf.begin; cur != buf.end; ++cur) {
 
-            #ifdef SEQAN_DEBUG
-                if (!(M(*cur) >= offset && M(*cur) < offset + pageSize(buf))) {
-                    printf("Mapper assertion failed: %x not in [%x,%x) at %x ", M(*cur), offset, offset + pageSize(buf), cur - buf.begin);
+			dstPos = M(*cur);
+
+			if (partiallyFilled && dstPos == undefinedPos) 
+				continue;							// don't move undefined values
+
+			#ifdef SEQAN_DEBUG
+                if (!(dstPos >= offset && dstPos < offset + pageSize(buf))) {
+                    printf("Mapper assertion failed: %x not in [%x,%x) at %x ", dstPos, offset, offset + pageSize(buf), cur - buf.begin);
                     ::std::cout << "element is " << *cur << ::std::endl;
                 }
             #else
-                assert(M(*cur) >= offset && M(*cur) < offset + pageSize(buf));
+                assert(dstPos >= offset && dstPos < offset + pageSize(buf));
             #endif
 
-            TValue *I = buf.begin + (M(*cur) - offset);
+            TValue *I = buf.begin + (dstPos - offset);
             if (I != cur) {
 				TValue tmp;
 				TValue *refPrev = cur, *refNext = &tmp;
@@ -152,28 +160,35 @@ namespace SEQAN_NAMESPACE_MAIN
 					*refNext = *I;
 					*I = *refPrev;
 
-					#ifdef SEQAN_DEBUG
-						if (!(M(*refNext) >= offset && M(*refNext) < offset + pageSize(buf))) {
-							printf("Mapper assertion failed: %x not in [%x,%x) at %x ", M(*refNext), offset, offset + pageSize(buf), refNext - buf.begin);
-							::std::cout << "element is " << *refNext << ::std::endl;
-						}
-                        TValue *oldI = I;
-					#else
-						assert(M(*refNext) >= offset && M(*refNext) < offset + pageSize(buf));
-					#endif
+					dstPos = M(*refNext);
 
-					I = buf.begin + (M(*refNext) - offset);
+					if (partiallyFilled && dstPos == undefinedPos)
+						I = cur;					// move the undefined value to an arbitrary free position (*cur)
+					else 
+					{
+						#ifdef SEQAN_DEBUG
+							if (!(dstPos >= offset && dstPos < offset + pageSize(buf))) {
+								printf("Mapper assertion failed: %x not in [%x,%x) at %x ", dstPos, offset, offset + pageSize(buf), refNext - buf.begin);
+								::std::cout << "element is " << *refNext << ::std::endl;
+							}
+							TValue *oldI = I;
+						#else
+							assert(dstPos >= offset && dstPos < offset + pageSize(buf));
+						#endif
 
-                    #ifdef SEQAN_DEBUG
-                        if (I < cur) {
-                            printf("Mapper assertion failed: I=%x < cur=%x\n", I, cur); 
-                            break;
-                        }
-                        if (I == oldI) {
-                            printf("Mapper assertion failed: I=%x in endless loop\n", I); 
-                            break;
-                        }
-                    #endif
+						I = buf.begin + (dstPos - offset);
+
+						#ifdef SEQAN_DEBUG
+							if (I < cur) {
+								printf("Mapper assertion failed: I=%x < cur=%x\n", I, cur); 
+								break;
+							}
+							if (I == oldI) {
+								printf("Mapper assertion failed: I=%x in endless loop\n", I); 
+								break;
+							}
+						#endif
+					}
 
 					TValue *_swap = refNext;
 					refNext = refPrev;
@@ -317,9 +332,20 @@ namespace SEQAN_NAMESPACE_MAIN
 
         inline void end() {
             // flush all cache buckets to disk and compact cache
+			pool._partiallyFilled = false;
 			unsigned pageNo = 0;
-            for(typename Cache::iterator cb = cache.begin(); cb != cache.end(); ++cb, ++pageNo)
+			unsigned curOfs, endOfs;
+			for(typename Cache::iterator cb = cache.begin(); cb != cache.end(); ++cb, ++pageNo) {
+				curOfs = cb->pageOfs + (cb->cur - cb->begin);
+				endOfs = pool.dataSize(pageNo);
+				if (curOfs < endOfs) {
+					// this page is partially filled and needs to be filled up with undefined entries
+					for(unsigned i = curOfs; i < endOfs; ++i)
+						push(pool.undefinedValue);
+					pool._partiallyFilled = true;
+				}
 				writeBucket(*cb, pageNo, pool.pageSize, pool.file);
+			}
 			flush(pool.file);
             cancel();
         }
@@ -434,9 +460,20 @@ namespace SEQAN_NAMESPACE_MAIN
 
         inline void end() {
             // flush all cache buckets to disk and compact cache
+			pool._partiallyFilled = false;
 			unsigned pageNo = 0;
-            for(typename Cache::iterator cb = cache.begin(); cb != cache.end(); ++cb, ++pageNo)
+			unsigned curOfs, endOfs;
+			for(typename Cache::iterator cb = cache.begin(); cb != cache.end(); ++cb, ++pageNo) {
+				curOfs = cb->pageOfs + (cb->cur - cb->begin);
+				endOfs = pool.dataSize(pageNo);
+				if (curOfs < endOfs) {
+					// this page is partially filled and needs to be filled up with undefined entries
+					for(unsigned i = curOfs; i < endOfs; ++i)
+						push(pool.undefinedValue);
+					pool._partiallyFilled = true;
+				}
 				_writeBucket(*cb, pageNo);
+			}
             chain.waitForAll();
 			flush(pool.file);
             cancel();
