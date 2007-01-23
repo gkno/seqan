@@ -956,7 +956,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 	template < typename TIndex, class TSpec >
 	inline bool isRightTerminal(Iter<TIndex, VSTree<TSpec> > const &it) {
 		// do we reach a leaf in a suffix tree with trailing '$'
-		return (*it).i2 == length(container(it));
+		return (getOccurence(it) + _repLength(it)) == length(container(it));
 	}
 
 /**
