@@ -48,8 +48,8 @@ namespace SEQAN_NAMESPACE_MAIN
         TIterator           end;
 
         IteratorBuffer():
-            begin(NULL),
-            end(NULL) {}
+            begin(TIterator()),
+            end(TIterator()) {}
 
 		IteratorBuffer(TIterator _begin, TIterator _end):
             begin(_begin),
