@@ -470,17 +470,17 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 
 		bool operator== (const iterator &I) const {
-			assert(host == I.host);
+			SEQAN_ASSERT(host == I.host);
 			return objNo == I.objNo && cur == I.cur;
 		}
 
 		bool operator!= (const iterator &I) const {
-			assert(host == I.host);
+			SEQAN_ASSERT(host == I.host);
 			return objNo != I.objNo || cur != I.cur;
 		}
 
 		bool operator< (const iterator &I) const {
-			assert(host == I.host);
+			SEQAN_ASSERT(host == I.host);
 			return objNo < I.objNo || (objNo == I.objNo && cur < I.cur);
 		}
 

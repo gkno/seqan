@@ -215,17 +215,17 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
 
 		inline bool operator== (const iterator &I) const {
-			assert(vector == I.vector);
+			SEQAN_ASSERT(vector == I.vector);
 			return offset == I.offset;
 		}
 
 		inline bool operator!= (const iterator &I) const {
-			assert(vector == I.vector);
+			SEQAN_ASSERT(vector == I.vector);
 			return offset != I.offset;
 		}
 
 		inline bool operator< (const iterator &I) const {
-			assert(vector == I.vector);
+			SEQAN_ASSERT(vector == I.vector);
 			return offset < I.offset;
 		}
 	};
@@ -327,17 +327,17 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
 
 		inline bool operator== (const iterator &I) const {
-			assert(vector == I.vector);
+			SEQAN_ASSERT(vector == I.vector);
 			return offset == I.offset;
 		}
 
 		inline bool operator!= (const iterator &I) const {
-			assert(vector == I.vector);
+			SEQAN_ASSERT(vector == I.vector);
 			return offset != I.offset;
 		}
 
 		inline bool operator< (const iterator &I) const {
-			assert(vector == I.vector);
+			SEQAN_ASSERT(vector == I.vector);
 			return offset < I.offset;
 		}		
 	};
@@ -576,17 +576,17 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
 
 		inline bool operator== (const iterator &I) const {
-			assert(vector == I.vector);
+			SEQAN_ASSERT(vector == I.vector);
 			return pageNo == I.pageNo && pageOfs == I.pageOfs;
 		}
 
 		inline bool operator!= (const iterator &I) const {
-			assert(vector == I.vector);
+			SEQAN_ASSERT(vector == I.vector);
 			return pageNo != I.pageNo || pageOfs != I.pageOfs;
 		}
 
 		inline bool operator< (const iterator &I) const {
-			assert(vector == I.vector);
+			SEQAN_ASSERT(vector == I.vector);
 			return pageNo < I.pageNo || (pageNo == I.pageNo && pageOfs < I.pageOfs);
 		}
     };
@@ -842,17 +842,17 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
 
 		inline bool operator== (const iterator &I) const {
-			assert(vector == I.vector);
+			SEQAN_ASSERT(vector == I.vector);
 			return pageNo == I.pageNo && pageOfs == I.pageOfs;
 		}
 
 		inline bool operator!= (const iterator &I) const {
-			assert(vector == I.vector);
+			SEQAN_ASSERT(vector == I.vector);
 			return pageNo != I.pageNo || pageOfs != I.pageOfs;
 		}
 
 		inline bool operator< (const iterator &I) const {
-			assert(vector == I.vector);
+			SEQAN_ASSERT(vector == I.vector);
 			return pageNo < I.pageNo || (pageNo == I.pageNo && pageOfs < I.pageOfs);
 		}
 
