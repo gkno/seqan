@@ -31,8 +31,16 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	template < typename TBuffer >
+	void blank(TBuffer buf) {
+		typename Size<TBuffer>::Type i, s = length(buf);
+		typename Value<TBuffer>::Type c = typename Value<TBuffer>::Type();
+		for(i = 0; i < s; i++)
+            buf[i] = c;
+	}
+
+	template < typename TBuffer >
 	void randomize(TBuffer buf) {
-		typename Size<TBuffer>::Type i, s = size(buf);
+		typename Size<TBuffer>::Type i, s = length(buf);
 		for(i = 0; i < s; i++)
             buf[i] = rand() % s;
 	}
@@ -228,7 +236,7 @@ namespace SEQAN_NAMESPACE_MAIN
             return false;
         }
         
-        if (length(LCP) != length(s) - 1) {
+        if (length(LCP) != length(s)) {
             printf("isLCPTable: length is bad: LCP=%d, s=%d\n", length(LCP), length(s));
             return false;
         }

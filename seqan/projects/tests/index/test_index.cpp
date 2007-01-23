@@ -6,8 +6,8 @@
 #include <vector>
 #include <time.h>
 
-#define SEQAN_DEBUG
-#define SEQAN_TEST
+//#define SEQAN_DEBUG
+//#define SEQAN_TEST
 
 #include <seqan/index.h>
 
@@ -157,15 +157,16 @@ void testFind()
 		SEQAN_TASSERT(pos[0] == 26);
 }
 
-
+//bool testIndexCreation();
 void Main_TestQGram();
-
 
 int main()
 {
 	SEQAN_TREPORT("TEST BEGIN")
 
+//		testIndexCreation();
 		Main_TestQGram();
+
 //		testFind<ESA_MLR>();
 //		testBuild();
 		testSTreeIterators();
