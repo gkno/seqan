@@ -15,14 +15,17 @@ namespace SEQAN_NAMESPACE_MAIN
 //namespace SEQAN_NAMESPACE_PIPELINING
 //{
 
-    template < const unsigned m, const unsigned DC[], typename compress = void >
+    template < const unsigned m, typename compress = void >
 	struct Sampler;
 
-    template < typename TInput, const unsigned m, const unsigned DC[], typename compress >
-    struct Value< Pipe< TInput, Sampler<m, DC, compress> > > {
+    template < typename TInput, const unsigned m, typename compress >
+    struct Value< Pipe< TInput, Sampler<m, compress> > > {
         typedef Tuple<typename Value<TInput>::Type, m, compress>		mTuple;
         typedef Pair<typename Size<TInput>::Type, mTuple, Compressed>	Type;
     };
+
+	template <int I, typename T = void>
+	struct _SkewDC;
 
 
 /**
@@ -47,8 +50,8 @@ The m-tuples are substrings of the input stream beginning at positions $i$, with
 
     //////////////////////////////////////////////////////////////////////////////
     // sampler class
-    template < typename TInput, const unsigned m, const unsigned DC[], typename compress >
-    struct Pipe< TInput, Sampler<m, DC, compress> >
+    template < typename TInput, const unsigned m, typename compress >
+    struct Pipe< TInput, Sampler<m, compress> >
     {
         typedef typename Value<Pipe>::Type  OutType;
         typedef typename Size<Pipe>::Type   SizeType;
@@ -68,8 +71,8 @@ The m-tuples are substrings of the input stream beginning at positions $i$, with
         
         inline void prepare() {
             memset<sizeof(filter), 0>(filter);
-            for(unsigned i = 1; i <= DC[0]; i++)
-                filter[DC[i]] = true;
+			for(unsigned i = 1; i <= _SkewDC<m>::VALUE[0]; i++)
+                filter[_SkewDC<m>::VALUE[i]] = true;
 
             idx = length(in);
             idxMod = idx % m;
@@ -146,8 +149,8 @@ The m-tuples are substrings of the input stream beginning at positions $i$, with
 
     //////////////////////////////////////////////////////////////////////////////
     // sampler class (uses bit compression)
-    template < typename TInput, const unsigned m, const unsigned DC[] >
-    struct Pipe< TInput, Sampler<m, DC, Compressed> >
+    template < typename TInput, const unsigned m >
+    struct Pipe< TInput, Sampler<m, Compressed> >
     {
         typedef typename Value<Pipe>::Type  OutType;
         typedef typename Size<Pipe>::Type   SizeType;
@@ -165,8 +168,8 @@ The m-tuples are substrings of the input stream beginning at positions $i$, with
         
         inline void prepare() {
             memset<sizeof(filter), 0>(filter);
-            for(unsigned i = 1; i <= DC[0]; i++)
-                filter[DC[i]] = true;
+            for(unsigned i = 1; i <= _SkewDC<m>::VALUE[0]; i++)
+                filter[_SkewDC<m>::VALUE[i]] = true;
 
             tmp.i1 = length(in);
             idxMod = tmp.i1 % m;
@@ -227,25 +230,25 @@ The m-tuples are substrings of the input stream beginning at positions $i$, with
 
     //////////////////////////////////////////////////////////////////////////////
     // global pipe functions
-    template < typename TInput, const unsigned int m, const unsigned DC[], typename compress >
-	inline bool control(Pipe< TInput, Sampler<m, DC, compress> > &me, ControlBeginRead const &command) {
+    template < typename TInput, const unsigned int m, typename compress >
+	inline bool control(Pipe< TInput, Sampler<m, compress> > &me, ControlBeginRead const &command) {
         if (!control(me.in, command)) return false;
         me.prepare();
 		return true;
     }
 
-    template < typename TInput, const unsigned int m, const unsigned DC[], typename compress >
-	inline bool control(Pipe< TInput, Sampler<m, DC, compress> > &me, ControlEof const &command) {
+    template < typename TInput, const unsigned int m, typename compress >
+	inline bool control(Pipe< TInput, Sampler<m, compress> > &me, ControlEof const &command) {
 		return me._rest == 0;
     }
 
-    template < typename TInput, const unsigned int m, const unsigned DC[], typename compress >
-    inline typename Size< Pipe< TInput, Sampler<m, DC, compress> > >::Type
-	length(Pipe< TInput, Sampler<m, DC, compress> > &me) {
-        typename Size< Pipe< TInput, Sampler<m, DC> > >::Type _size = 0, n = length(me.in);
-        for(unsigned i = 1; i <= DC[0]; i++)
-            if (DC[i])
-                _size += (n + m - DC[i]) / m;
+    template < typename TInput, const unsigned int m, typename compress >
+    inline typename Size< Pipe< TInput, Sampler<m, compress> > >::Type
+	length(Pipe< TInput, Sampler<m, compress> > &me) {
+        typename Size< Pipe< TInput, Sampler<m> > >::Type _size = 0, n = length(me.in);
+        for(unsigned i = 1; i <= _SkewDC<m>::VALUE[0]; i++)
+            if (_SkewDC<m>::VALUE[i])
+                _size += (n + m - _SkewDC<m>::VALUE[i]) / m;
             else
                 _size += n / m;
         return _size;

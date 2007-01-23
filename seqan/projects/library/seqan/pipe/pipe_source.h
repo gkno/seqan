@@ -107,6 +107,10 @@ namespace SEQAN_NAMESPACE_MAIN
 		BufferHandler(Pipe &_pipe):
 			pipe(_pipe) {}
 
+		template <typename TSize>
+		BufferHandler(Pipe &_pipe, TSize):
+			pipe(_pipe) {}
+
         inline Buffer& begin() {            
             return buffer = Buffer(pipe.begin, pipe.end);
         }
@@ -163,6 +167,10 @@ namespace SEQAN_NAMESPACE_MAIN
         Buffer	buffer;
 
 		BufferHandler(Pipe &_pipe):
+			pipe(_pipe) {}
+
+		template <typename TSize>
+		BufferHandler(Pipe &_pipe, TSize):
 			pipe(_pipe) {}
 
         inline Buffer& first() {
