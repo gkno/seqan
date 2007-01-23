@@ -118,7 +118,7 @@ namespace SEQAN_NAMESPACE_MAIN
 						if (k != windowSize || rest == 0) {
 							out.i1 = (*invertedSAIn).i1 - 1;
 							push(dest, out);
-							//assert(!seenISA[out.i1] && 0 <= out.i1 && out.i1 < n);
+							//SEQAN_ASSERT(!seenISA[out.i1] && 0 <= out.i1 && out.i1 < n);
 							//seen[out.i1] = true;
 							++_pushes;
 
@@ -160,7 +160,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		push(dest, Pair<TSize, TSize, Compressed>(length(textIn) - 1, 0));
 
 		printf("pushes:%d length:%d\n", _pushes, length(textIn));
-        //assert(_pushes == length(textIn));
+        //SEQAN_ASSERT(_pushes == length(textIn));
         //for (unsigned i = 0; i < n; ++i)
         //    if (!seen[i])
         //        printf("___%d______HUH?\n",i);

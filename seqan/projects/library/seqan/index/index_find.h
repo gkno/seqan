@@ -169,7 +169,7 @@ namespace SEQAN_NAMESPACE_MAIN
                 return *this;
             }
 			_iSize -= mid();
-            assert(_iSize != 0);    // _xSize/2 is less than _iSize by invariant
+            SEQAN_ASSERT(_iSize != 0);    // _xSize/2 is less than _iSize by invariant
 
             // step down right
             _descendRight();
