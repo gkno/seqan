@@ -43,7 +43,7 @@ void testQGramIndexSchnell3()
 	
 	String<TPosition> pos;
     //int pos_size = intPow((int)ValueSize<Dna>::VALUE, q - numGaps(shape));
-	int pos_size = (int) pow((int)ValueSize<Dna>::VALUE, q - numGaps(shape));
+	int pos_size = (int) pow((float)ValueSize<Dna>::VALUE, q - numGaps(shape));
 	pos_size += 1;		// damit der letzte Zeiger ein Nachfolgerzeiger hat, um zu wissen wann er stoppen muss
 	resize(pos, pos_size);
 	for(int i = 0; i < pos_size; ++i)
@@ -84,7 +84,7 @@ void testQGramIndexSchnell2()
 	resize(index, length(text) - q + 2);	// # q-Grams in der Query +1, damit der letzte Zeiger ein Nachfolgezeiger hat um zu stoppen
 	
 	String<TPosition> pos;
-    int pos_size = (int)pow((int)ValueSize<Dna>::VALUE, q - numGaps(shape));
+    int pos_size = (int)pow((float)ValueSize<Dna>::VALUE, q - numGaps(shape));
 	pos_size += 1;		// damit der letzte Zeiger ein Nachfolgerzeiger hat, um zu wissen wann er stoppen muss
 	resize(pos, pos_size);
 	for(int i = 0; i < pos_size; ++i)
@@ -115,7 +115,7 @@ void testQGramIndex()
 	resize(index, length(text) - q + 2);	// # q-Grams in der Query +1, damit der letzte Zeiger ein Nachfolgezeiger hat um zu stoppen
 	
 	String<TPosition> pos;
-    int pos_size = (int)pow((int)ValueSize<Dna>::VALUE, q - numGaps(shape));
+    int pos_size = (int)pow((float)ValueSize<Dna>::VALUE, q - numGaps(shape));
 	pos_size += 1;		// damit der letzte Zeiger ein Nachfolgerzeiger hat, um zu wissen wann er stoppen muss
 	resize(pos, pos_size);
 	for(int i = 0; i < pos_size; ++i)
