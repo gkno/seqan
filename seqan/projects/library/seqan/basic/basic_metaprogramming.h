@@ -20,9 +20,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ///Empty Data Class.
 struct Nothing {};
 struct Yes { enum { value = true }; };
-extern Yes * yes;
 struct No { enum { value = false }; };
-extern No * no;
 
 //! \brief IF template metaprogramming statement
 

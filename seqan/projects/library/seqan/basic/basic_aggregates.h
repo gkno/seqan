@@ -87,8 +87,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		Pair(_T const &_i1, _T const &_i2): i1(_i1), i2(_i2) {}
     };
 
-    template <typename _T1, typename _T2>
-	std::ostream& operator<<(std::ostream &out, Pair<_T1,_T2> const &p) {
+    template <typename _T1, typename _T2, typename _Compression>
+	std::ostream& operator<<(std::ostream &out, Pair<_T1,_T2,_Compression> const &p) {
 		out << "< " << p.i1 << " , " << p.i2 << " >";
 		return out;
 	}
@@ -187,8 +187,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		Triple(_T const &_i1, _T const &_i2, _T const &_i3): i1(_i1), i2(_i2), i3(_i3) {}
     };
 
-    template <typename _T1, typename _T2, typename _T3>
-	std::ostream& operator<<(std::ostream &out, Triple<_T1,_T2,_T3> const &t) {
+    template <typename _T1, typename _T2, typename _T3, typename _Compression>
+	std::ostream& operator<<(std::ostream &out, Triple<_T1,_T2,_T3,_Compression> const &t) {
 		out << "< " << t.i1 << " , " << t.i2 << " , " << t.i3 << " >";
 		return out;
 	}
@@ -219,13 +219,11 @@ namespace SEQAN_NAMESPACE_MAIN
 //		friend std::ostream& operator<<(std::ostream&, const Tuple&);
 
         _T& operator[](const int k) {
-            assert(k >= 0 && k < size);
+            SEQAN_ASSERT(k >= 0 && k < size);
             return i[k];
         }
         const _T& operator[](const int k) const {
-            #ifdef SEQAN_DEBUG
-                assert(k >= 0 && k < size);
-            #endif
+            SEQAN_ASSERT(k >= 0 && k < size);
             return i[k];
         }
 		_T* operator&() { return i; }
@@ -262,9 +260,7 @@ namespace SEQAN_NAMESPACE_MAIN
         CT i;
 
         const _T operator[](const int k) const {
-            #ifdef SEQAN_DEBUG
-                assert(k >= 0 && k < size);
-            #endif
+            SEQAN_ASSERT(k >= 0 && k < size);
             return (i >> (size - 1 - k) * bitSize) & bitMask;
         }
         inline CT operator<<=(int shift) {

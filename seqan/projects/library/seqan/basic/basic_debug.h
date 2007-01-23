@@ -19,40 +19,40 @@
 #ifdef SEQAN_DEBUG
 
 //throw a fatal debug report if _cond is false
-#define SEQAN_ASSERT(_cond) if (!(_cond)) ::SEQAN_NAMESPACE_MAIN::debug::Error< ::SEQAN_NAMESPACE_MAIN::debug::Check >(__FILE__, __LINE__, #_cond " is FALSE");
+#define SEQAN_ASSERT(_cond) { if (!(_cond)) ::SEQAN_NAMESPACE_MAIN::debug::Error< ::SEQAN_NAMESPACE_MAIN::debug::Check >(__FILE__, __LINE__, #_cond " is FALSE"); }
 #define SEQAN_ASSERT1(_cond) SEQAN_ASSERT(_cond)
-#define SEQAN_ASSERT2(_cond, _comment) if (!(_cond)) ::SEQAN_NAMESPACE_MAIN::debug::Error< ::SEQAN_NAMESPACE_MAIN::debug::Check >(__FILE__, __LINE__, _comment);
+#define SEQAN_ASSERT2(_cond, _comment) { if (!(_cond)) ::SEQAN_NAMESPACE_MAIN::debug::Error< ::SEQAN_NAMESPACE_MAIN::debug::Check >(__FILE__, __LINE__, _comment); }
 
 //throw a debug report if _cond is false
-#define SEQAN_CHECK(_cond) if (!(_cond)) ::SEQAN_NAMESPACE_MAIN::debug::Message< ::SEQAN_NAMESPACE_MAIN::debug::Check >(__FILE__, __LINE__, #_cond " is FALSE");
+#define SEQAN_CHECK(_cond) { if (!(_cond)) ::SEQAN_NAMESPACE_MAIN::debug::Message< ::SEQAN_NAMESPACE_MAIN::debug::Check >(__FILE__, __LINE__, #_cond " is FALSE"); }
 #define SEQAN_CHECK1(_cond) SEQAN_CHECK(_cond)
-#define SEQAN_CHECK2(_cond, _comment) if (!(_cond)) ::SEQAN_NAMESPACE_MAIN::debug::Message< ::SEQAN_NAMESPACE_MAIN::debug::Check >(__FILE__, __LINE__, _comment);
+#define SEQAN_CHECK2(_cond, _comment) { if (!(_cond)) ::SEQAN_NAMESPACE_MAIN::debug::Message< ::SEQAN_NAMESPACE_MAIN::debug::Check >(__FILE__, __LINE__, _comment); }
 
-#define SEQAN_DO(_cond) if (!(_cond)) ::SEQAN_NAMESPACE_MAIN::debug::Message< ::SEQAN_NAMESPACE_MAIN::debug::Check >(__FILE__, __LINE__, #_cond " is FALSE");
+#define SEQAN_DO(_cond) { if (!(_cond)) ::SEQAN_NAMESPACE_MAIN::debug::Message< ::SEQAN_NAMESPACE_MAIN::debug::Check >(__FILE__, __LINE__, #_cond " is FALSE"); }
 #define SEQAN_DO1(_cond) SEQAN_DO(_cond)
-#define SEQAN_DO2(_cond, _comment) if (!(_cond)) ::SEQAN_NAMESPACE_MAIN::debug::Error< ::SEQAN_NAMESPACE_MAIN::debug::Check >(__FILE__, __LINE__, _comment);
+#define SEQAN_DO2(_cond, _comment) { if (!(_cond)) ::SEQAN_NAMESPACE_MAIN::debug::Error< ::SEQAN_NAMESPACE_MAIN::debug::Check >(__FILE__, __LINE__, _comment); }
 
 //report a message
-#define SEQAN_ABORT(_comment) ::SEQAN_NAMESPACE_MAIN::debug::Error< ::SEQAN_NAMESPACE_MAIN::debug::Report >(__FILE__, __LINE__, _comment);
-#define SEQAN_REPORT(_comment) ::SEQAN_NAMESPACE_MAIN::debug::Message< ::SEQAN_NAMESPACE_MAIN::debug::Report >(__FILE__, __LINE__, _comment);
+#define SEQAN_ABORT(_comment) { ::SEQAN_NAMESPACE_MAIN::debug::Error< ::SEQAN_NAMESPACE_MAIN::debug::Report >(__FILE__, __LINE__, _comment); }
+#define SEQAN_REPORT(_comment) { ::SEQAN_NAMESPACE_MAIN::debug::Message< ::SEQAN_NAMESPACE_MAIN::debug::Report >(__FILE__, __LINE__, _comment); }
 
 #else //#ifdef SEQAN_DEBUG
 
 //disable debug reports in release built
-#define SEQAN_ASSERT(_cond)
-#define SEQAN_ASSERT1(_cond)
-#define SEQAN_ASSERT2(_cond, _comment)
+#define SEQAN_ASSERT(_cond) {}
+#define SEQAN_ASSERT1(_cond) {}
+#define SEQAN_ASSERT2(_cond, _comment) {}
 
-#define SEQAN_CHECK(_cond)
-#define SEQAN_CHECK1(_cond)
-#define SEQAN_CHECK2(_cond, _comment)
+#define SEQAN_CHECK(_cond) {}
+#define SEQAN_CHECK1(_cond) {}
+#define SEQAN_CHECK2(_cond, _comment) {}
 
-#define SEQAN_DO(_cond) _cond;
+#define SEQAN_DO(_cond) { _cond; }
 #define SEQAN_DO1(_cond) SEQAN_DO(_cond)
-#define SEQAN_DO2(_cond, _comment) _cond;
+#define SEQAN_DO2(_cond, _comment) { _cond; }
 
-#define SEQAN_ABORT(_comment)
-#define SEQAN_REPORT(_comment)
+#define SEQAN_ABORT(_comment) {}
+#define SEQAN_REPORT(_comment) {}
 
 #endif //#ifdef SEQAN_DEBUG
 
@@ -60,31 +60,31 @@
 
 //test a condition and report test result
 #define SEQAN_TASSERT(_cond) \
-	if (!(_cond)) ::SEQAN_NAMESPACE_MAIN::debug::Error< ::SEQAN_NAMESPACE_MAIN::debug::Check >(__FILE__, __LINE__, "(" #_cond ") is FALSE"); 
+	{ if (!(_cond)) ::SEQAN_NAMESPACE_MAIN::debug::Error< ::SEQAN_NAMESPACE_MAIN::debug::Check >(__FILE__, __LINE__, "(" #_cond ") is FALSE"); }
 #define SEQAN_TASSERT1(_cond) SEQAN_TASSERT(_cond)
 #define SEQAN_TASSERT2(_cond, _comment) \
-	if (!(_cond)) ::SEQAN_NAMESPACE_MAIN::debug::Error< ::SEQAN_NAMESPACE_MAIN::debug::Check >(__FILE__, __LINE__, _comment); 
+	{ if (!(_cond)) ::SEQAN_NAMESPACE_MAIN::debug::Error< ::SEQAN_NAMESPACE_MAIN::debug::Check >(__FILE__, __LINE__, _comment); }
 
 #define SEQAN_TCHECK(_cond) \
-	if (_cond) ::SEQAN_NAMESPACE_MAIN::debug::Result< ::SEQAN_NAMESPACE_MAIN::debug::Check >(__FILE__, __LINE__, "(" #_cond ") is TRUE"); \
-	else ::SEQAN_NAMESPACE_MAIN::debug::Result< ::SEQAN_NAMESPACE_MAIN::debug::Check >(__FILE__, __LINE__, "(" #_cond ") is FALSE");
+	{ if (_cond) ::SEQAN_NAMESPACE_MAIN::debug::Result< ::SEQAN_NAMESPACE_MAIN::debug::Check >(__FILE__, __LINE__, "(" #_cond ") is TRUE"); \
+	else ::SEQAN_NAMESPACE_MAIN::debug::Result< ::SEQAN_NAMESPACE_MAIN::debug::Check >(__FILE__, __LINE__, "(" #_cond ") is FALSE"); }
 #define SEQAN_TCHECK1(_cond) SEQAN_TCHECK(_cond)
 #define SEQAN_TCHECK2(_cond, _comment) \
-	if (_cond) ::SEQAN_NAMESPACE_MAIN::debug::Result< ::SEQAN_NAMESPACE_MAIN::debug::Check >(__FILE__, __LINE__, _comment);
+	{ if (_cond) ::SEQAN_NAMESPACE_MAIN::debug::Result< ::SEQAN_NAMESPACE_MAIN::debug::Check >(__FILE__, __LINE__, _comment); }
 
 //report a test result
-#define SEQAN_TABORT(_comment) ::SEQAN_NAMESPACE_MAIN::debug::Error< ::SEQAN_NAMESPACE_MAIN::debug::Report >(__FILE__, __LINE__, _comment);
-#define SEQAN_TREPORT(_comment) ::SEQAN_NAMESPACE_MAIN::debug::Result< ::SEQAN_NAMESPACE_MAIN::debug::Report >(__FILE__, __LINE__, _comment);
+#define SEQAN_TABORT(_comment) { ::SEQAN_NAMESPACE_MAIN::debug::Error< ::SEQAN_NAMESPACE_MAIN::debug::Report >(__FILE__, __LINE__, _comment); }
+#define SEQAN_TREPORT(_comment) { ::SEQAN_NAMESPACE_MAIN::debug::Result< ::SEQAN_NAMESPACE_MAIN::debug::Report >(__FILE__, __LINE__, _comment); }
 
 #else //#ifdef SEQAN_TEST
 
-#define SEQAN_TASSERT(_cond)
-#define SEQAN_TASSERT1(_cond)
-#define SEQAN_TASSERT2(_cond, _comment)
+#define SEQAN_TASSERT(_cond) {}
+#define SEQAN_TASSERT1(_cond) {}
+#define SEQAN_TASSERT2(_cond, _comment) {}
 
-#define SEQAN_TCHECK(_cond)
-#define SEQAN_TABORT(_comment)
-#define SEQAN_TREPORT(_comment)
+#define SEQAN_TCHECK(_cond) {}
+#define SEQAN_TABORT(_comment) {}
+#define SEQAN_TREPORT(_comment) {}
 
 #endif //#ifdef SEQAN_TEST
 
