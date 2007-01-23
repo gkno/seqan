@@ -160,12 +160,12 @@ namespace SEQAN_NAMESPACE_MAIN
         // *** SPECIALIZATION ***
 
         // use compression if lessorequal 16 different values per char
-        typedef typename IF< 
+/*        typedef typename IF< 
             (BitsPerValue<_TypeOf(TInput)>::VALUE > 0) && 
             (BitsPerValue<_TypeOf(TInput)>::VALUE <= 4), 
             Compressed, 
-            void>::Type compress;
-//        typedef void compress;
+            void>::Type compress;*/
+        typedef void compress;
 
         // use skew3 for recursion (more I/O-efficient)
         typedef Skew7 recurseSpec;

@@ -32,7 +32,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < typename TBuffer >
 	void randomize(TBuffer buf) {
-		typename Size<TBuffer>::Type i, s = size(buf);
+		typename Size<TBuffer>::Type i, s = length(buf);
 		for(i = 0; i < s; i++)
             buf[i] = rand() % s;
 	}

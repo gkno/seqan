@@ -237,15 +237,16 @@ namespace SEQAN_NAMESPACE_MAIN
     };
 
 
-    template < int _size >
-    struct BitVector {
-        typedef typename BitVector<_size + 1>::Type Type;
+    template < unsigned char _size >
+	struct _BitVector {
+        typedef typename _BitVector<_size + 1>::Type Type;
     };
 
-    template <> struct BitVector<8> { typedef unsigned char Type; };
-    template <> struct BitVector<16> { typedef unsigned short Type; };
-    template <> struct BitVector<32> { typedef unsigned int Type; };
-    template <> struct BitVector<64> { typedef __int64 Type; };
+    template <> struct _BitVector<8> { typedef unsigned char Type; };
+    template <> struct _BitVector<16> { typedef unsigned short Type; };
+    template <> struct _BitVector<32> { typedef unsigned int Type; };
+    template <> struct _BitVector<64> { typedef __int64 Type; };
+    template <> struct _BitVector<255> { typedef void Type; };
 
     template <typename _T, int _size>
     struct Tuple<_T, _size, Compressed> {
@@ -255,7 +256,7 @@ namespace SEQAN_NAMESPACE_MAIN
         enum { bitSize = BitsPerValue<_T>::VALUE };
         enum { bitMask = (1 << bitSize) - 1 };
         enum { mask = (1 << (size * bitSize)) - 1 };
-        typedef typename BitVector< bitSize * size >::Type CT;
+        typedef typename _BitVector< bitSize * size >::Type CT;
         
         CT i;
 
