@@ -716,7 +716,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 	// lcp is the longest prefix of pattern and path
 	template < typename TText, class TSpec, typename TString, typename TSize >
 	inline bool _goDownString(Iter< Index<TText, Index_ESA<> >, VSTree< TopDown<TSpec> > > &node, TString const &pattern, TSize &lcp) {
-		typedef typename Infix< typename Fibre<TIndex, ESA_RawText>::Type const >::Type	TInfix;
+		typedef typename Infix< typename Fibre<Index<TText, Index_ESA<> >, ESA_RawText>::Type const >::Type	TInfix;
 		typedef typename Iterator<TInfix>::Type											IText;
 		typedef typename Iterator<TString const>::Type									IPattern;
 		

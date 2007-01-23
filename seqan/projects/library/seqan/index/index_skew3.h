@@ -22,12 +22,14 @@ namespace SEQAN_NAMESPACE_MAIN
     // external Skew3 algorithm
     //////////////////////////////////////////////////////////////////////////////
 
-	template <typename T = void>
-	struct _SkewDC3 {
+	template <typename T>
+	struct _SkewDC<3, T> {
 		static const unsigned VALUE[];
 	};
 
-	template <typename T> const unsigned _SkewDC3<T>::VALUE = { 2,   1, 2 };
+	template <typename T>
+	const unsigned _SkewDC<3, T>::VALUE[] = { 2,   1, 2 };
+
 
     // *** COMPARATORS & MAPS ***
         
@@ -115,7 +117,7 @@ namespace SEQAN_NAMESPACE_MAIN
         // *** SPECIALIZATION ***
 
         // step 1
-		typedef Pipe< TInput, Sampler<3, _SkewDC3<>::VALUE > >  TSamplerDC3;          
+		typedef Pipe< TInput, Sampler<3> >  TSamplerDC3;
                                         typedef skew3_ncomp<_TypeOf(TSamplerDC3)> ncomp_t;
         typedef Pool< _TypeOf(TSamplerDC3), SorterSpec< SorterConfigSize<ncomp_t, _TSizeOf(TSamplerDC3) > > > TSortTuples;
 		typedef Pipe< TSortTuples, Namer<ncomp_t> > TNamer;
@@ -223,7 +225,7 @@ namespace SEQAN_NAMESPACE_MAIN
                 {
                     String<typename Value<TFilter>::Type, Alloc<> > _text;
                     _text << filter;
-                    assert(isSuffixArray(recurse, _text));
+                    SEQAN_ASSERT(isSuffixArray(recurse, _text));
                 }
                 #endif
 
@@ -406,7 +408,7 @@ namespace SEQAN_NAMESPACE_MAIN
             {
 			    createSuffixArray(SA12, s12, Skew3(), name, maxdepth, depth + 1);
                 #ifdef SEQAN_TEST_SKEW3
-                    assert(isSuffixArray(SA12, s12));
+                    SEQAN_ASSERT(isSuffixArray(SA12, s12));
                 #endif
             }
 			// store unique names in s12 using the suffix array
