@@ -246,7 +246,7 @@ namespace SEQAN_NAMESPACE_MAIN
     template <> struct _BitVector<16> { typedef unsigned short Type; };
     template <> struct _BitVector<32> { typedef unsigned int Type; };
     template <> struct _BitVector<64> { typedef __int64 Type; };
-    template <> struct _BitVector<255> { typedef void Type; };
+    template <> struct _BitVector<255> { typedef __int64 Type; };
 
     template <typename _T, int _size>
     struct Tuple<_T, _size, Compressed> {
@@ -259,6 +259,10 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef typename _BitVector< bitSize * size >::Type CT;
         
         CT i;
+
+		Tuple() {
+			SEQAN_ASSERT(bitSize * size <= sizeof(CT) * 8);
+		}
 
         const _T operator[](const int k) const {
             SEQAN_ASSERT(k >= 0 && k < size);

@@ -159,7 +159,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		// trailing zero
 		push(dest, Pair<TSize, TSize, Compressed>(length(textIn) - 1, 0));
 
-		printf("pushes:%d length:%d\n", _pushes, length(textIn));
+		//printf("pushes:%d length:%d\n", _pushes, length(textIn));
         //SEQAN_ASSERT(_pushes == length(textIn));
         //for (unsigned i = 0; i < n; ++i)
         //    if (!seen[i])

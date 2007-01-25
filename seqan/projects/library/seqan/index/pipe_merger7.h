@@ -71,8 +71,7 @@ namespace SEQAN_NAMESPACE_MAIN
             SizeType nb = b.i.i2[DC7_NINDX[b.stream][shft]];
             if (na < nb) return false;
             if (na > nb) return true;
-            SEQAN_ASSERT(false);  //names are unique -> we should never get here
-            return (a.i.i1 < b.i.i1);
+            return (a.i.i1 < b.i.i1);	// (we get here, only if the last 7 chars in the text are NULL)
         }
     };
 

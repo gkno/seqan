@@ -6,8 +6,8 @@
 #include <vector>
 #include <time.h>
 
-//#define SEQAN_DEBUG
-//#define SEQAN_TEST
+#define SEQAN_DEBUG
+#define SEQAN_TEST
 
 #include <seqan/index.h>
 
@@ -50,7 +50,8 @@ void testSTreeIterators()
 {
 		typedef Index<String<char>, Index_ESA<> > TIndex;
 
-		String<char> text("acaaacatatz");
+//		String<char> text("acaaacatatz");
+		String<char> text("AAAAAGGGGG");
 		TIndex index(text);
 		//Iter<TIndex, VSTree< TopDown< ParentLinks<> > > > it(index);
 		Iter<TIndex, VSTree< BottomUp<> > > it(index);
@@ -157,7 +158,7 @@ void testFind()
 		SEQAN_TASSERT(pos[0] == 26);
 }
 
-//bool testIndexCreation();
+bool testIndexCreation();
 void Main_TestQGram();
 
 int main()
@@ -165,7 +166,7 @@ int main()
 	SEQAN_TREPORT("TEST BEGIN")
 
 //		testIndexCreation();
-		Main_TestQGram();
+//		Main_TestQGram();
 
 //		testFind<ESA_MLR>();
 //		testBuild();

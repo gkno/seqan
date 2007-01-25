@@ -13,7 +13,7 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 	template < typename TBuffer >
-	void permute(TBuffer buf) {
+	void permute(TBuffer &buf) {
 		typename Size<TBuffer>::Type i, j, s = length(buf);
 //        srand( (unsigned)time( NULL ) );
 		for(i = 0; i < s; i++)
@@ -31,7 +31,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	template < typename TBuffer >
-	void blank(TBuffer buf) {
+	void blank(TBuffer &buf) {
 		typename Size<TBuffer>::Type i, s = length(buf);
 		typename Value<TBuffer>::Type c = typename Value<TBuffer>::Type();
 		for(i = 0; i < s; i++)
@@ -39,10 +39,17 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	template < typename TBuffer >
-	void randomize(TBuffer buf) {
+	void randomize(TBuffer &buf) {
 		typename Size<TBuffer>::Type i, s = length(buf);
 		for(i = 0; i < s; i++)
             buf[i] = rand() % s;
+	}
+
+	template < typename TBuffer >
+	void textRandomize(TBuffer &buf) {
+		typename Size<TBuffer>::Type i, s = length(buf);
+		for(i = 0; i < s; i++)
+			buf[i] = '@' + rand() % 2;//('z'-'@');
 	}
 
 	template < typename TValue >
@@ -132,7 +139,11 @@ namespace SEQAN_NAMESPACE_MAIN
         TSize n = length(s);
 	    for(TSize i = 1; i < n; ++i) {
 		    if (!__sleq(begin(s) + SA[i-1], begin(s) + SA[i], n-SA[i-1], n-SA[i])) {
-			    printf("isSorted: sort error s_%d(%d) >= s_%d(%d)\n",i-1,SA[i-1],i,SA[i]);
+			    printf("isSorted: sort error s_%d(SA[%d]) >= s_%d(SA[%d])\n",SA[i-1],i-1,SA[i],i);
+
+			String<unsigned, External<> > safile;
+			if (!open(safile,"error.sa")) printf("could not open ERROR.SA\n");
+			safile = SA;
 			    return false;
 		    }
 	    }
@@ -147,7 +158,13 @@ namespace SEQAN_NAMESPACE_MAIN
         TSize prev = *SA; ++SA;
 	    for(TSize i = 1; !eof(SA); ++SA, ++i) {
 		    if (!__sleq(begin(s) + prev, begin(s) + *SA, n-prev, n-*SA)) {
-                printf("isSorted: sort error s_%d(%d) >= s_%d(%d)\n",i-1,prev,i,*SA);
+                printf("isSorted: sort error s_%d(SA[%d]) >= s_%d(SA[%d])\n",prev,i-1,*SA,i);
+				endRead(SA);
+
+			String<unsigned, External<> > safile;
+			if (!open(safile,"error.sa")) printf("could not open ERROR.SA\n");
+			safile << SA;
+
 			    return false;
 		    }
 		    prev = *SA;
@@ -222,10 +239,13 @@ namespace SEQAN_NAMESPACE_MAIN
 
         if (!isSorted(SA, s)) {
             std::cout<<"isSuffixArray: SA is not sorted!\n";
-            return false;
+			String<unsigned char, External<> > textfile;
+			if (!open(textfile,"error.txt")) printf("could not open ERROR.TXT\n");
+			textfile=s;
+			return false;
         }
 
-        std::cout<<"SATest OK! n="<<length(s)<<std::endl;
+//        std::cout<<"SATest OK! n="<<length(s)<<std::endl;
         return true;
     }
 
@@ -251,7 +271,7 @@ namespace SEQAN_NAMESPACE_MAIN
             return false;
         }
 
-        std::cout<<"LCPTest OK! n="<<length(s)<<std::endl;
+//        std::cout<<"LCPTest OK! n="<<length(s)<<std::endl;
         return true;
     }
 
@@ -271,7 +291,7 @@ namespace SEQAN_NAMESPACE_MAIN
             ++b;
         }
 
-        std::cout<<"EQUALTest OK! n="<<length(a)<<std::endl;
+//        std::cout<<"EQUALTest OK! n="<<length(_a)<<std::endl;
         return true;
     }
 

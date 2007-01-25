@@ -31,6 +31,12 @@ namespace SEQAN_NAMESPACE_MAIN
 	const unsigned _SkewDC<7, T>::VALUE[] = { 3,   1, 2, 4 };
 
 
+#ifdef SEQAN_TEST_SKEW7
+	template <typename TSufArray, typename TText>
+    bool isSuffixArray(TSufArray &SA, TText const &s);	// forward declaration of a verification function
+#endif
+
+
     // *** COMPARATORS & MAPS ***
         
     template <typename InType, typename Result = int>
@@ -38,18 +44,18 @@ namespace SEQAN_NAMESPACE_MAIN
         inline Result operator()(const InType &a, const InType &b) const
         {
 			typedef typename InType::T1 SizeType;
-            typedef typename InType::T2 Triple;
-            const typename Triple::T *sa = a.i2.i;
-            const typename Triple::T *sb = b.i2.i;
+            typedef typename InType::T2 Septet;
+            const typename Septet::T *sa = a.i2.i;
+            const typename Septet::T *sb = b.i2.i;
 
-            SizeType n = Triple::size;
+            SizeType n = Septet::size;
             if (a.i1 < n) n = a.i1;
             if (b.i1 < n) n = b.i1;
             for(SizeType i = 0; i < n; i++, ++sa, ++sb) {
                 if (*sa == *sb) continue;
                 return (*sa < *sb)? -1 : 1;
             }
-            if (n < Triple::size) {
+            if (n < Septet::size) {
                 return (a.i1 < b.i1)? -1 : 1;
             } else
                 return 0;
@@ -289,7 +295,7 @@ namespace SEQAN_NAMESPACE_MAIN
                 {
                     String<typename Value<TFilter>::Type, Alloc<> > _text;
                     _text << filter;
-                    SEQAN_ASSERT(isSuffixArray(recurse, _text));
+                    SEQAN_DO(isSuffixArray(recurse, _text));
                 }
                 #endif
 
@@ -366,6 +372,7 @@ namespace SEQAN_NAMESPACE_MAIN
     //////////////////////////////////////////////////////////////////////////////
 	// typedefs and helpers
 
+	// compares n characters and in case of equality the names a2 and b2 (no clipping)
     template <typename T, typename ST> inline
     bool _leqSkew7(const T * a1, ST a2,   const T * b1, ST b2,   ST n)
     { // lexic. order for n-tupels
@@ -376,17 +383,18 @@ namespace SEQAN_NAMESPACE_MAIN
         return (a2 <= b2);
     }
 
+	// compares at most the last n characters (a) with b (clipping)
     template <typename T, typename ST> inline
     bool _leqSkew7(const T * a,   const T * b,   ST n)
     { // lexic. order for n-tupels
-        for(ST i = 1; i < n; ++i, ++a, ++b) {
+        for(ST i = 0; i < n; ++i, ++a, ++b) {
             if (lexLess(*a, *b)) return true;
             if (lexLess(*b, *a)) return false;
         }
-        return (*a <= *b);
+        return true;	// a is shorter than b
     }
 
-
+	// compares two suffixes of residue classes a and b
     template <typename T, typename ST, typename TString> inline
     bool _leqSkew7(int a, int b,   const T* spos[], const ST tpos[], const bool islast[], const TString &s124, const int adjust[7][7])
     {
@@ -408,7 +416,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	// Alternative Skew Implementation
 	// find the suffix array SA of s[0..n-1] in {0..K}^n
 	//
-	// the following algorithm divides the suffixes in seven remainder classes
+	// the following algorithm divides the suffixes in seven residue classes
 	// that results in a more space and time efficient division
 	// 
 	// difference cover is {3,5,6} and corresponds to {1,2,4}'
@@ -429,9 +437,12 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Value<TSuffixArray>::Type TSize;
 		typedef typename Value<TText>::Type TValue;
 
+		SEQAN_ASSERT(IsContiguous<TText>::VALUE);
+		SEQAN_ASSERT(IsContiguous<TSuffixArray>::VALUE);
+
 		#ifdef SEQAN_DEBUG_INDEX
 			if (sizeof(TSize) > 4)
-				::std::cout << "WARNING: TSize size is greater 4 (Skew3)" << ::std::endl;
+				::std::cout << "WARNING: TSize is more than 32 bit long (Skew3). This is probably not what you want." << ::std::endl;
         #endif
 
 		TSize n = length(s);
@@ -521,7 +532,7 @@ namespace SEQAN_NAMESPACE_MAIN
             {
 			    createSuffixArray(SA124, s124, Skew7(), name, maxdepth, depth + 1);
 			    #ifdef SEQAN_TEST_SKEW7
-				    SEQAN_ASSERT(isSuffixArray(SA124, s124));
+				    SEQAN_DO(isSuffixArray(SA124, s124));
 			    #endif
             }
 			// store unique names in s124 using the suffix array

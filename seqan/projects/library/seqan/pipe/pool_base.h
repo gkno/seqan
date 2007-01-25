@@ -86,15 +86,15 @@ namespace SEQAN_NAMESPACE_MAIN
 
     struct PoolParameters
     {
-/*        enum { DefaultMemBufferSize     = 128 * 1024*1024,
+        enum { DefaultMemBufferSize     = 128 * 1024*1024,
                DefaultPageSize          = 32 * 1024*1024,
                DefaultBucketBufferSize  = 64 * 1024*1024,
                DefaultReadAheadBuffers  = 2,
                DefaultWriteBackBuffers  = 2,
                DefaultWriteBackBuckets  = 16,
                DefaultAbsoluteSizes     = true };
-*/
 
+/*
         enum { DefaultMemBufferSize     = 0*8192,//64 * 1024*1024,
                DefaultPageSize          = 2 * 1024*1024,
                DefaultBucketBufferSize  = 6 * 1024*1024,
@@ -102,7 +102,7 @@ namespace SEQAN_NAMESPACE_MAIN
                DefaultWriteBackBuffers  = 4,
                DefaultWriteBackBuckets  = 16,
                DefaultAbsoluteSizes     = true };
-
+*/
         unsigned memBufferSize;
         unsigned pageSize;
         unsigned bucketBufferSize;

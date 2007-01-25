@@ -94,6 +94,7 @@ namespace SEQAN_NAMESPACE_MAIN
         typename Size<TTextInput>::Type p = length(textIn);
         unsigned r = (unsigned)(p % 7);
 
+
         // BEGIN I: PREFILL
 
         switch (r) {
@@ -190,7 +191,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 /* 5 */             __cp_(o1,3,__cp_(o2,4,__cp_(o3,5,   0)));
 
-/* 4 */                o1.i2[1] = o2.i2[2] =            0;
+/* 4 */                o1.i2[1] = o2.i2[2] = o3.i2[2] = 0;
                     __cp_(o1,4,                         0);
             if (r >= 3) push(out3, o3);
             if (r >= 2) push(out124, o2);

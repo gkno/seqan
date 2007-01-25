@@ -31,25 +31,31 @@ namespace SEQAN_NAMESPACE_MAIN
 	const unsigned _SkewDC<3, T>::VALUE[] = { 2,   1, 2 };
 
 
-    // *** COMPARATORS & MAPS ***
+#ifdef SEQAN_TEST_SKEW3
+	template <typename TSufArray, typename TText>
+    bool isSuffixArray(TSufArray &SA, TText const &s);	// forward declaration of a verification function
+#endif
+
+
+	// *** COMPARATORS & MAPS ***
         
     template <typename InType, typename Result = int>
     struct skew3_ncomp : public std::binary_function<InType,InType,Result> {
         inline Result operator()(const InType &a, const InType &b) const
         {
 			typedef typename InType::T1 SizeType;
-            typedef typename InType::T2 Triple;
-            const typename Triple::T *sa = a.i2.i;
-            const typename Triple::T *sb = b.i2.i;
+            typedef typename InType::T2 Triplet;
+            const typename Triplet::T *sa = a.i2.i;
+            const typename Triplet::T *sb = b.i2.i;
 
-            SizeType n = Triple::size;
+            SizeType n = Triplet::size;
             if (a.i1 < n) n = a.i1;
             if (b.i1 < n) n = b.i1;
             for(SizeType i = 0; i < n; i++, ++sa, ++sb) {
                 if (*sa == *sb) continue;
                 return (*sa < *sb)? -1 : 1;
             }
-            if (n < Triple::size) {
+            if (n < Triplet::size) {
                 return (a.i1 < b.i1)? -1 : 1;
             } else
                 return 0;
@@ -225,7 +231,7 @@ namespace SEQAN_NAMESPACE_MAIN
                 {
                     String<typename Value<TFilter>::Type, Alloc<> > _text;
                     _text << filter;
-                    SEQAN_ASSERT(isSuffixArray(recurse, _text));
+                    SEQAN_DO(isSuffixArray(recurse, _text));
                 }
                 #endif
 
@@ -338,7 +344,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		#ifdef SEQAN_DEBUG_INDEX
 			if (sizeof(TSize) > 4)
-				::std::cout << "WARNING: TSize size is greater 4 (Skew3)" << ::std::endl;
+				::std::cout << "WARNING: TSize is more than 32 bit long (Skew3). This is probably not what you want." << ::std::endl;
         #endif
 
 		TSize n = length(s);
@@ -408,7 +414,7 @@ namespace SEQAN_NAMESPACE_MAIN
             {
 			    createSuffixArray(SA12, s12, Skew3(), name, maxdepth, depth + 1);
                 #ifdef SEQAN_TEST_SKEW3
-                    SEQAN_ASSERT(isSuffixArray(SA12, s12));
+                    SEQAN_DO(isSuffixArray(SA12, s12));
                 #endif
             }
 			// store unique names in s12 using the suffix array
