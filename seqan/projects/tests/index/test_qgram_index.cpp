@@ -1,3 +1,4 @@
+/*
 #include <iostream>
 #include <fstream>
 #include <typeinfo>
@@ -168,3 +169,4 @@ void Main_TestQGram()
 	//	testQGramIndexSchnell2<GappedShape1,QGram1>();
 	SEQAN_TREPORT("TEST QGRAM END")
 }
+*/
