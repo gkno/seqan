@@ -15,7 +15,7 @@ namespace SEQAN_NAMESPACE_MAIN
 template <typename TValue>
 class Score<TValue, Simple>
 {
-private:
+public:
 	TValue data_match;
 	TValue data_mismatch;
 	TValue data_gap_extend;
@@ -63,6 +63,16 @@ public:
 	}
 
 //____________________________________________________________________________
+};
+//////////////////////////////////////////////////////////////////////////////
+
+//Shortcut:
+
+typedef Score< > SimpleScore;
+
+//////////////////////////////////////////////////////////////////////////////
+
+//____________________________________________________________________________
 /**.Function.scoreMatch:
 ..class:Class.Score
 ..cat:Alignments
@@ -74,16 +84,18 @@ public:
 ..see:Function.scoreGapExtend
 ..see:Function.scoreGapOpen
 */
-	friend inline TValue &
-	scoreMatch(Score & me)
-	{
-		return me.data_match;
-	}
-	friend inline TValue const &
-	scoreMatch(Score const & me)
-	{
-		return me.data_match;
-	}
+template <typename TValue>
+inline TValue &
+scoreMatch(Score<TValue, Simple> & me)
+{
+	return me.data_match;
+}
+template <typename TValue>
+inline TValue const &
+scoreMatch(Score<TValue, Simple> const & me)
+{
+	return me.data_match;
+}
 
 /**.Function.scoreMismatch:
 ..class:Class.Score
@@ -96,16 +108,18 @@ public:
 ..see:Function.scoreGapExtend
 ..see:Function.scoreGapOpen
 */
-	friend inline TValue &
-	scoreMismatch(Score & me)
-	{
-		return me.data_mismatch;
-	}
-	friend inline TValue const &
-	scoreMismatch(Score const & me)
-	{
-		return me.data_mismatch;
-	}
+template <typename TValue>
+inline TValue &
+scoreMismatch(Score<TValue, Simple> & me)
+{
+	return me.data_mismatch;
+}
+template <typename TValue>
+inline TValue const &
+scoreMismatch(Score<TValue, Simple> const & me)
+{
+	return me.data_mismatch;
+}
 /**.Function.scoreGapExtend:
 ..class:Class.Score
 ..cat:Alignments
@@ -117,16 +131,18 @@ public:
 ..see:Function.scoreMatch
 ..see:Function.scoreGapOpen
 */
-	friend inline TValue &
-	scoreGapExtend(Score & me)
-	{
-		return me.data_gap_extend;
-	}
-	friend inline TValue const &
-	scoreGapExtend(Score const & me)
-	{
-		return me.data_gap_extend;
-	}
+template <typename TValue>
+inline TValue &
+scoreGapExtend(Score<TValue, Simple> & me)
+{
+	return me.data_gap_extend;
+}
+template <typename TValue>
+inline TValue const &
+scoreGapExtend(Score<TValue, Simple> const & me)
+{
+	return me.data_gap_extend;
+}
 /**.Function.scoreGapOpen:
 ..class:Class.Score
 ..cat:Alignments
@@ -138,25 +154,18 @@ public:
 ..see:Function.scoreGapExtend
 ..see:Function.scoreMatch
 */
-	template <typename T>
-	friend inline T &
-	scoreGapOpen(Score<T, Simple> & me)
-	{
-		return me.data_gap_open;
-	}
-	friend inline TValue const &
-	scoreGapOpen(Score<TValue, Simple> const & me)
-	{
-		return me.data_gap_open;
-	}
-
-//____________________________________________________________________________
-};
-//////////////////////////////////////////////////////////////////////////////
-
-//Shortcut:
-
-typedef Score< > SimpleScore;
+template <typename TValue>
+inline TValue &
+scoreGapOpen(Score<TValue, Simple> & me)
+{
+	return me.data_gap_open;
+}
+template <typename TValue>
+inline TValue const &
+scoreGapOpen(Score<TValue, Simple> const & me)
+{
+	return me.data_gap_open;
+}
 
 //////////////////////////////////////////////////////////////////////////////
 

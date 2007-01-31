@@ -227,7 +227,7 @@ in which $hayNo$ is the haystack index and $pos$ the local position of the hit.
 			_empty(true) {}
 
 		Finder(THaystack &haystack):
-			data_iterator(haystack),
+			data_iterator(begin(haystack, Rooted() )),
 			_empty(true) {}
 
 		Finder(TIterator &iter):

@@ -27,7 +27,7 @@ namespace SEQAN_NAMESPACE_MAIN
 template <typename TNeedle, typename TScoreValue, typename TScoreSpec>
 class Pattern<TNeedle, Score<TScoreValue, TScoreSpec> >
 {
-private:
+public:
 	typedef Score<TScoreValue, TScoreSpec> TScore;
 	typedef typename Value<TScore>::Type TTabValue;
 
@@ -44,21 +44,27 @@ SEQAN_CHECKPOINT
 		create(data_score);
 	}
 
-	Pattern(typename _Parameter<TScore>::Type _score_func, TTabValue _limit = 0): 
+	Pattern(TNeedle & _needle, 
+			TScore & _score_func, 
+			TTabValue _limit = 0): 
 		data_score(_score_func),
 		data_limit(_limit)
 	{ 
 SEQAN_CHECKPOINT
+		setHost(*this, _needle);
 	}
 
-	Pattern(TTabValue _limit): 
+	Pattern(TNeedle & _needle,
+			TTabValue _limit = 0): 
 		data_limit(_limit)
 	{ 
 SEQAN_CHECKPOINT
 		create(data_score);
+		setHost(*this, _needle);
 	}
 
 	Pattern(Pattern const & other): 
+		data_needle( other.data_needle ),
 		data_score( other.data_score ), 
 		data_limit( other.data_limit ),
 		data_tab( other.data_tab )
@@ -97,14 +103,14 @@ SEQAN_CHECKPOINT
 //____________________________________________________________________________
 
 	friend inline TScore const & 
-	score(Pattern & me)
+	scoring(Pattern & me)
 	{
 SEQAN_CHECKPOINT
 		return value(me.data_score);
 	}
 
 	friend inline void
-	setScore(Pattern const & me, Score<TScoreValue, TScoreSpec> const & score)
+	setScoring(Pattern const & me, Score<TScoreValue, TScoreSpec> const & score)
 	{
 SEQAN_CHECKPOINT
 		me.data_score = score;
@@ -170,7 +176,7 @@ setHost(Pattern<TNeedle, Score<TScoreValue, Simple> > & me, TNeedle2 const & ndl
 	typedef String<TScoreValue> TTab;
 	typedef typename Iterator<TTab, Standard>::Type TIterator;
 
-	TScoreValue score_gap = scoreGapExtend(score(me));
+	TScoreValue score_gap = scoreGapExtend(scoring(me));
 
 	TTab & string_tab = _dataTab(me);
 
@@ -202,6 +208,18 @@ setHost(Pattern<TNeedle, Score<TScoreValue, Simple> > & me, TNeedle2 & ndl)
 {
 	setHost(me, reinterpret_cast<TNeedle const &>(ndl));
 }
+
+//////////////////////////////////////////////////////////////////////////////
+// returns the score of the last hit position found (note:position = end of occurrence in haystack)
+
+template <typename TNeedle, typename TScoreValue>
+inline TScoreValue
+getScore(Pattern<TNeedle, Score<TScoreValue, Simple> > & me)
+{
+	return front(me.data_tab);
+}
+
+
 //////////////////////////////////////////////////////////////////////////////
 // find, findNext
 //////////////////////////////////////////////////////////////////////////////
@@ -221,9 +239,9 @@ _find_score_simple_proportional(TFinder & finder, Pattern<TNeedle, Score<TScoreV
 
 	String<TScoreValue> & string_tab = _dataTab(me);
 
-	TScoreValue score_gap = scoreGapExtend(score(me));
-	TScoreValue score_match = scoreMatch(score(me));
-	TScoreValue score_mismatch = scoreMismatch(score(me));
+	TScoreValue score_gap = scoreGapExtend(scoring(me));
+	TScoreValue score_match = scoreMatch(scoring(me));
+	TScoreValue score_mismatch = scoreMismatch(scoring(me));
 
 	//init table
 
@@ -294,9 +312,7 @@ template <typename TFinder, typename TNeedle, typename TScoreValue>
 inline bool 
 find(TFinder & finder, Pattern<TNeedle, Score<TScoreValue, Simple> > & me)
 {
-	Score<TScoreValue, Simple>(); //dummy that forces instantiation of Score-Type
-
-	if (scoreGapOpen(score(me)))
+	if (scoreGapOpen(scoring(me)))
 	{
 		return _find_score_simple_affine(finder, me);
 	}

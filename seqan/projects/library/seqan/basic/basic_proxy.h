@@ -242,14 +242,14 @@ inline typename Convert<TTarget, Proxy<TSpec> >::Type
 convertImpl(Convert<TTarget, T> const,
 			Proxy<TSpec> & source)
 {
-	return getValue(source);
+	return convert<TTarget>(getValue(source));
 }
 template <typename TTarget, typename T, typename TSpec>
 inline typename Convert<TTarget, Proxy<TSpec> const>::Type
 convertImpl(Convert<TTarget, T> const,
 			Proxy<TSpec> const & source)
 {
-	return getValue(source);
+	return convert<TTarget>(getValue(source));
 }
 //////////////////////////////////////////////////////////////////////////////
 // operator ==

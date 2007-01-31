@@ -51,6 +51,7 @@ void Test_Stream()
 	strm_5.open(TEST_PATH "testfile.txt", ios_base::in);
 	strm_5 >> str_5;
 	strm_5.close();
+	std::cout << str_5;
 	SEQAN_TASSERT(str_5 == "Testfile")
 
 
@@ -576,12 +577,13 @@ void Test_Fasta_Write()
 	FILE * file_4 = fopen(TEST_PATH "my_fasta.txt", "r");
 	SEQAN_TASSERT(file_4);
 
-	String<Dna> str_4;
+	String<char> str_4;
 	readID(file_4, str_4, Fasta());
 	SEQAN_TASSERT(str_4 == "Identifier1");
 
-	read(file_4, str_4, Fasta());
-	SEQAN_TASSERT(str_4 == str_3);
+	String<Dna> str_4a;
+	read(file_4, str_4a, Fasta());
+	SEQAN_TASSERT(str_4a == str_3);
 
 //____________________________________________________________________________
 // Test virtual file format object
@@ -704,6 +706,17 @@ void Test_FastaAlign() {
 	SEQAN_TASSERT(source(row(align4,1)) == "xyz");
 
 	fclose(file_3);
+
+//____________________________________________________________________________
+// Dna5 File format output
+
+	Align<String<Dna>, ArrayGaps> align5;
+	resize(rows(align5), 2);
+	assignSource(row(align5, 0), "aaccggtt");
+	assignSource(row(align5, 1), "accgtttt");
+	needlemanWunsch(align5, SimpleScore());
+	std::cout << align5 << "\n\n";
+
 
 //____________________________________________________________________________
 // Test virtual file format object

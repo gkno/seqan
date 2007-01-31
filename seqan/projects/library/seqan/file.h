@@ -15,6 +15,7 @@
 
 #include <seqan/file/stream.h>
 #include <seqan/file/cstream.h>
+#include <seqan/file/stream_algorithms.h>
 
 #include <seqan/file/file_format_raw.h>
 #include <seqan/file/file_format_fasta.h>

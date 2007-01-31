@@ -30,6 +30,9 @@ struct Value<FILE *>
 
 //////////////////////////////////////////////////////////////////////////////
 
+template <typename T>
+struct _IsTellSeekStream;
+
 template <>
 struct _IsTellSeekStream<FILE *>
 {
@@ -76,28 +79,20 @@ SEQAN_CHECKPOINT
 
 ///.Internal._streamPut.param.stream.type:Adaption."std::FILE *"
 
+
+template <typename TChar>
 inline void
 _streamPut(::std::FILE * target,
-		   char character)
+		   TChar character)
 {
 SEQAN_CHECKPOINT
 	putc(character, target);
 }
 
+
 //////////////////////////////////////////////////////////////////////////////
 
 ///.Internal._streamPut.param.stream.type:Adaption."std::FILE *"
-
-inline void
-_streamPutInt(::std::FILE * target,
-			  int number)
-{
-SEQAN_CHECKPOINT
-	char str[BitsPerValue<int>::VALUE];
-	sprintf(str, "%d", number);
-	_streamWrite(target, str);
-}
-
 
 //////////////////////////////////////////////////////////////////////////////
 
