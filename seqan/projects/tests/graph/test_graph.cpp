@@ -233,7 +233,7 @@ void Test_EdgeAutomaton() {
 
 void Test_Automaton() {
 //____________________________________________________________________________
-// Standard automaton: No edge cargo, no edge id
+// Standard automaton: No edge cargo
 
 	typedef Graph<Automaton<Dna> > StandardAutomaton;
 	typedef VertexDescriptor<StandardAutomaton>::Type TVertexDescriptor;
@@ -277,6 +277,13 @@ void Test_Automaton() {
 	SEQAN_TASSERT(inDegree(g, 1) == 1)
 	SEQAN_TASSERT(inDegree(g, 0) == 1)	
 	SEQAN_TASSERT(degree(g, 0) == 3)
+
+	// Test a property map
+	std::string nameEd[] = {"ar", "ae"};
+	String<std::string> edMap;
+	initEdgeMap(g,edMap, nameEd);
+	SEQAN_TASSERT(getProperty(edMap, e1) == "ar")
+	SEQAN_TASSERT(getProperty(edMap, e2) == "ae")
 
 	// Add more vertices and edges
 	addVertex(g);  //2
@@ -384,6 +391,29 @@ void Test_Automaton() {
 		}
 	}
 
+	// Test iterators
+	std::cout << g << std::endl;
+	typedef Iterator<StandardAutomaton, VertexIterator<> >::Type TVertexIterator;
+	TVertexIterator itVert(g);
+	SEQAN_TASSERT(getValue(itVert) == 1)
+	++itVert;
+	SEQAN_TASSERT(getValue(itVert) == 2)
+	itVert++;
+	SEQAN_TASSERT(getValue(itVert) == 4)
+	goNext(itVert);
+	SEQAN_TASSERT(atEnd(itVert) == true)
+/*
+
+	//typedef Iterator<StandardAutomaton, OutEdgeIterator<> >::Type TOutEdgeIterator;
+	Graph<Automaton<Dna, void, Default()>, Default()> test;
+	Iter<Graph<Automaton<Dna, void, Default()>, Default()>, GraphIterator<OutEdgeIterator<Default()> > > itA(test, 0);
+	//typedef Iter<StandardAutomaton, GraphIterator<OutEdgeIterator<> > > TOutEdgeIterator;
+	//TOutEdgeIterator itEdge(g);
+
+	exit(0);
+	*/
+
+
 //____________________________________________________________________________
 // Automaton
 	typedef VertexDescriptor<Graph<Automaton<char> > >::Type VertexDescriptorType;
@@ -407,38 +437,39 @@ void Test_Automaton() {
 	addEdge(automaton,5,3,'7');
 
 	VertexDescriptorType succ;
-	succ = getSuccessorVertex(automaton,rootVertex,'7');
+	succ = getSuccessor(automaton,rootVertex,'7');
 	SEQAN_TASSERT(succ == 3)
 	// Throws an error in debug mode because edge does not exist
-	//succ = getSuccessorVertex(automaton,rootVertex,'6');
-	succ = getSuccessorVertex(automaton,succ,'2');
+	//succ = getSuccessor(automaton,rootVertex,'6');
+	succ = getSuccessor(automaton,succ,'2');
 	SEQAN_TASSERT(succ == 4)
-	succ = getSuccessorVertex(automaton,succ,'6');
+	succ = getSuccessor(automaton,succ,'6');
 	SEQAN_TASSERT(succ == 0)
 	// If no map is specified it is assumed that an edge cargo exists!!!
-	succ = getSuccessorVertex(automaton,succ,'2');
+	succ = getSuccessor(automaton,succ,'2');
 	SEQAN_TASSERT(succ == 1)
 	// Go backwards
 	VertexDescriptorType pred;
-	pred = getPredecessorVertex(automaton,succ,'3');
+	pred = getPredecessor(automaton,succ,'3');
 	SEQAN_TASSERT(pred == 1)
-	pred = getPredecessorVertex(automaton,pred,'8');
+	pred = getPredecessor(automaton,pred,'8');
 	SEQAN_TASSERT(pred == 5)
 	// If no map is specified it is assumed that an edge cargo exists!!!
-	pred = getPredecessorVertex(automaton,pred,'5');
+	pred = getPredecessor(automaton,pred,'5');
 	SEQAN_TASSERT(pred == 2)
 
 	// Now using shortcuts
-	succ = getLastSuccessorVertex(automaton,rootVertex,"7262");
+	succ = parseString(automaton,rootVertex,"7262");
 	SEQAN_TASSERT(succ == 1)
-	pred = getLastPredecessorVertex(automaton,succ,"385");
-	SEQAN_TASSERT(pred == 2)
+	std::string str = "7262";
+	succ = parseString(automaton,rootVertex, str.begin(), str.end());
+	SEQAN_TASSERT(succ == 1)
+	String<char> str2("7262");
+	succ = parseString(automaton,rootVertex, begin(str2), end(str2));
+	SEQAN_TASSERT(succ == 1)
 	String<char> input("7262");
-	succ = getLastSuccessorVertex(automaton,rootVertex, input);
+	succ = parseString(automaton,rootVertex, input);
 	SEQAN_TASSERT(succ == 1)
-	String<char> input2("385");
-	pred = getLastPredecessorVertex(automaton,succ, input2);
-	SEQAN_TASSERT(pred == 2)
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -726,38 +757,33 @@ void Test_Graph() {
 	InternalMap<char> eMap;
 	initEdgeMap(automaton,eMap);
 	VertexDescriptorType succ;
-	succ = getSuccessorVertex(automaton,rootVertex,eMap,'7');
+	succ = getSuccessor(automaton,rootVertex,eMap,'7');
 	SEQAN_TASSERT(succ == 3)
 	// Throws an error in debug mode because edge does not exist
-	// succ = getSuccessorVertex(automaton,rootVertex,eMap,'6');
-	succ = getSuccessorVertex(automaton,succ,eMap,'2');
+	// succ = getSuccessor(automaton,rootVertex,eMap,'6');
+	succ = getSuccessor(automaton,succ,eMap,'2');
 	SEQAN_TASSERT(succ == 4)
-	succ = getSuccessorVertex(automaton,succ,eMap,'6');
+	succ = getSuccessor(automaton,succ,eMap,'6');
 	SEQAN_TASSERT(succ == 0)
 	// If no map is specified it is assumed that an edge cargo exists!!!
-	succ = getSuccessorVertex(automaton,succ,'2');
+	succ = getSuccessor(automaton,succ,'2');
 	SEQAN_TASSERT(succ == 1)
 	// Go backwards
 	VertexDescriptorType pred;
-	pred = getPredecessorVertex(automaton,succ,eMap,'3');
+	pred = getPredecessor(automaton,succ,eMap,'3');
 	SEQAN_TASSERT(pred == 1)
-	pred = getPredecessorVertex(automaton,pred,eMap,'8');
+	pred = getPredecessor(automaton,pred,eMap,'8');
 	SEQAN_TASSERT(pred == 5)
 	// If no map is specified it is assumed that an edge cargo exists!!!
-	pred = getPredecessorVertex(automaton,pred,'5');
+	pred = getPredecessor(automaton,pred,'5');
 	SEQAN_TASSERT(pred == 2)
 
 	// Now using shortcuts
-	succ = getLastSuccessorVertex(automaton,rootVertex,"7262");
+	succ = parseString(automaton,rootVertex,"7262");
 	SEQAN_TASSERT(succ == 1)
-	pred = getLastPredecessorVertex(automaton,succ,"385");
-	SEQAN_TASSERT(pred == 2)
 	String<char> input("7262");
-	succ = getLastSuccessorVertex(automaton,rootVertex, input);
+	succ = parseString(automaton,rootVertex, input);
 	SEQAN_TASSERT(succ == 1)
-	String<char> input2("385");
-	pred = getLastPredecessorVertex(automaton,succ, input2);
-	SEQAN_TASSERT(pred == 2)
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -804,6 +830,19 @@ void Test_GraphExternalProperty() {
 	initVertexMap(g,nameMap, names);
 	SEQAN_TASSERT(getProperty(nameMap, v0) == 'r')
 	SEQAN_TASSERT(getProperty(nameMap, v1) == 's')
+
+	std::string nameEd[] = {"ar", "ae"};
+	String<std::string> edMap;
+	initEdgeMap(g,edMap, nameEd);
+	SEQAN_TASSERT(getProperty(edMap, e1) == "ar")
+	SEQAN_TASSERT(getProperty(edMap, e2) == "ae")
+
+
+
+	// Test prior resize before graph is created
+	reserve(nameMap, 200);
+	// Test prior resize before graph is created
+	reserve(nameMap, 200);
 }
 
 
@@ -870,6 +909,9 @@ void Test_GraphInternalProperty() {
 	InternalMap<unsigned int> const edgeMap2(edgeMap);
 	SEQAN_TASSERT(getProperty(edgeMap2, edge1) == 3)
 	SEQAN_TASSERT(property(edgeMap2, edge1) == 3)
+
+	// Test dummy call
+	reserve(edgeMap, 200);
 	
 
 	// Second Variant: Pointer to member using a class
@@ -893,6 +935,9 @@ void Test_GraphInternalProperty() {
 	SEQAN_TASSERT(getProperty(eMap6, e1) == 'z')
 	SEQAN_TASSERT(getProperty(eMap6, e2) == 'd')
 	SEQAN_TASSERT(property(eMap6, e2) == 'd')
+	
+	// Test dummy call
+	reserve(eMap4, 200);
 
 	// Third Variant: Raw pointer to member
 	char TPair:: * pseudo_map = &TPair::i1;
@@ -902,6 +947,9 @@ void Test_GraphInternalProperty() {
 	SEQAN_TASSERT(getProperty(pseudo_map, e2) == 'w')
 	property(pseudo_map,e1)='k';
 	SEQAN_TASSERT(getProperty(pseudo_map, e1) == 'k')
+
+	// Test dummy call
+	reserve(pseudo_map, 200);
 }
 
 
@@ -977,14 +1025,17 @@ void Test_GraphStack() {
 void Test_GraphVertexIterator() {
 //____________________________________________________________________________
 // Graph VertexIterator
-	typedef VertexDescriptor<Graph<> >::Type TVertexDescriptor;
-	typedef EdgeDescriptor<Graph<> >::Type TEdgeDescriptor;
+	// Works on all graph types
+	//typedef Graph<Automaton<Dna> > TGraph;
+	typedef Graph<EdgeList<char> > TGraph;
+	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	
-	Graph<> g;
+	TGraph g;
 	TVertexDescriptor v0 = addVertex(g);
-	TEdgeDescriptor e1 =addEdge(g,v0,v0);
+	TEdgeDescriptor e1 =addEdge(g,v0,v0,'c');
 	TVertexDescriptor v1 = addVertex(g);
-	TEdgeDescriptor e2 =addEdge(g,0,1);
+	TEdgeDescriptor e2 =addEdge(g,0,1,'t');
 	addVertex(g); //2
 	addVertex(g); //3
 	addVertex(g); //4
@@ -992,7 +1043,7 @@ void Test_GraphVertexIterator() {
 	//Tricky case -> id 0 is released
 	removeVertex(g,v0);
 	removeVertex(g,3);
-	typedef Iterator<Graph<>, VertexIterator<> >::Type TVertexIterator;
+	typedef Iterator<TGraph, VertexIterator<> >::Type TVertexIterator;
 	TVertexIterator it(g);
 	SEQAN_TASSERT(atBegin(it)==true)
 	SEQAN_TASSERT(getValue(it)==1)

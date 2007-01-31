@@ -95,68 +95,46 @@ removeVertex(Graph<TEdges, TSpec>& g,
 	releaseId(g.data_id_managerV, v); // Release id
 }
 
+
+template<typename TEdges, typename TSpec, typename TVertexDescriptor, typename TIterator>
+inline typename VertexDescriptor<Graph<TEdges, TSpec> >::Type 
+parseString(Graph<TEdges, TSpec> const& g,
+			TVertexDescriptor const vertex,
+			TIterator beginIt,
+			TIterator endIt)
+{
+	SEQAN_CHECKPOINT
+	SEQAN_ASSERT(idInUse(g.data_id_managerV, vertex) == true)
+	TVertexDescriptor nilVal = _get_nil<TVertexDescriptor>();
+	TVertexDescriptor succ = vertex;
+	while (beginIt!=endIt) {
+		TVertexDescriptor tmp = getSuccessor(g,succ,*beginIt);
+		if (tmp == nilVal) break;
+		succ = tmp;
+		++beginIt;
+	}
+	return succ;
+}
+
+
 template<typename TEdges, typename TSpec, typename TVertexDescriptor, typename TCharacters>
 inline typename VertexDescriptor<Graph<TEdges, TSpec> >::Type 
-getLastSuccessorVertex(Graph<TEdges, TSpec> const& g,
+parseString(Graph<TEdges, TSpec> const& g,
 				   TVertexDescriptor const vertex,
 				   TCharacters const& chars)
 {
 	SEQAN_CHECKPOINT
-	SEQAN_ASSERT(idInUse(g.data_id_managerV, vertex) == true)
-	typedef typename Size<TCharacters>::Type TSize;
-	TVertexDescriptor succ = vertex;
-	for(TSize i=0;i<length(chars);++i) {
-		succ = getSuccessorVertex(g,succ,getValue(chars, i));
-	}
-	return succ;
+	return parseString(g,vertex,begin(chars),end(chars));
 }
 
 template<typename TEdges, typename TSpec, typename TVertexDescriptor, typename TCharacters>
 inline typename VertexDescriptor<Graph<TEdges, TSpec> >::Type 
-getLastSuccessorVertex(Graph<TEdges, TSpec> const& g,
+parseString(Graph<TEdges, TSpec> const& g,
 				   TVertexDescriptor const vertex,
 				   TCharacters const* chars)
 {
 	SEQAN_CHECKPOINT
-	SEQAN_ASSERT(idInUse(g.data_id_managerV, vertex) == true)
-	typedef typename Size<TCharacters>::Type TSize;
-	TVertexDescriptor succ = vertex;
-	for(TSize i=0;i<length(chars);++i) {
-		succ = getSuccessorVertex(g,succ,chars[i]);
-	}
-	return succ;
-}
-
-template<typename TEdges, typename TSpec, typename TVertexDescriptor, typename TCharacters>
-inline typename VertexDescriptor<Graph<TEdges, TSpec> >::Type 
-getLastPredecessorVertex(Graph<TEdges, TSpec> const& g,
-						 TVertexDescriptor const vertex,
-						 TCharacters const& chars)
-{
-	SEQAN_CHECKPOINT
-	SEQAN_ASSERT(idInUse(g.data_id_managerV, vertex) == true)
-	typedef typename Size<TCharacters>::Type TSize;
-	TVertexDescriptor succ = vertex;
-	for(TSize i=0;i<length(chars);++i) {
-		succ = getPredecessorVertex(g,succ,getValue(chars, i));
-	}
-	return succ;
-}
-
-template<typename TEdges, typename TSpec, typename TVertexDescriptor, typename TCharacters>
-inline typename VertexDescriptor<Graph<TEdges, TSpec> >::Type 
-getLastPredecessorVertex(Graph<TEdges, TSpec> const& g,
-						 TVertexDescriptor const vertex,
-						 TCharacters const* chars)
-{
-	SEQAN_CHECKPOINT
-	SEQAN_ASSERT(idInUse(g.data_id_managerV, vertex) == true)
-	typedef typename Size<TCharacters>::Type TSize;
-	TVertexDescriptor succ = vertex;
-	for(TSize i=0;i<length(chars);++i) {
-		succ = getPredecessorVertex(g,succ,chars[i]);
-	}
-	return succ;
+	return parseString(g,vertex,chars,chars+length(chars));
 }
 
 template <typename TStream, typename TEdges, typename TSpec>
@@ -188,10 +166,10 @@ SEQAN_CHECKPOINT
 // targetVertex(graph, edge);
 // sourceVertex(graph, edge);
 // getAdjacencyMatrix(graph, mat);
-// getPredecessorVertex(graph, vertex, edegMap, char)
-// getPredecessorVertex(graph, vertex, char)
-// getSuccessorVertex(graph, vertex, edegMap, char)
-// getSuccessorVertex(graph, vertex, char)
+// getPredecessor(graph, vertex, edegMap, char)
+// getPredecessor(graph, vertex, char)
+// getSuccessor(graph, vertex, edegMap, char)
+// getSuccessor(graph, vertex, char)
 
 
 

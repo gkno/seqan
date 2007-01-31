@@ -369,7 +369,7 @@ sourceVertex(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const& g,
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TVertexDescriptor, typename TChar>
 inline typename VertexDescriptor<Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> >::Type 
-getSuccessorVertex(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const& g,
+getSuccessor(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const& g,
 				   TVertexDescriptor vertex,
 				   TChar const c) 
 {
@@ -379,12 +379,12 @@ getSuccessorVertex(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const& g,
 	typedef typename Cargo<TEdgeStump>::Type TInternalCargo;
 	InternalMap<TInternalCargo> eMap;
 	initEdgeMap(g,eMap);
-	return getSuccessorVertex(g,vertex,eMap,c);
+	return getSuccessor(g,vertex,eMap,c);
 }
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TEdgeLabelMap, typename TVertexDescriptor, typename TChar>
 inline typename VertexDescriptor<Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> >::Type 
-getSuccessorVertex(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const& g,
+getSuccessor(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const& g,
 				   TVertexDescriptor vertex,
 				   TEdgeLabelMap const& eMap,
 				   TChar const c) 
@@ -406,7 +406,7 @@ getSuccessorVertex(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const& g,
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TVertexDescriptor, typename TChar>
 inline typename VertexDescriptor<Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> >::Type 
-getPredecessorVertex(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const& g,
+getPredecessor(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const& g,
 				   TVertexDescriptor vertex,
 				   TChar const c) 
 {
@@ -416,12 +416,12 @@ getPredecessorVertex(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const& g,
    	typedef typename Cargo<TEdgeStump>::Type TInternalCargo;
 	InternalMap<TInternalCargo> eMap;
 	initEdgeMap(g,eMap);
-	return getPredecessorVertex(g,vertex,eMap,c);
+	return getPredecessor(g,vertex,eMap,c);
 }
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TEdgeLabelMap, typename TVertexDescriptor, typename TChar>
 inline typename VertexDescriptor<Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> >::Type 
-getPredecessorVertex(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const& g,
+getPredecessor(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const& g,
 				   TVertexDescriptor vertex,
 				   TEdgeLabelMap const& eMap,
 				   TChar const c) 
@@ -484,13 +484,12 @@ write(TFile & target,
 	SEQAN_CHECKPOINT
 	typedef Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> TGraph;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
-	typedef typename Iterator<TGraph, VertexIterator<> >::Type TVertexIterator;
-	TVertexIterator it(const_cast<Graph<EdgeList<TCargo, TEdgeSpec>, TSpec>&>(g));
+	typedef typename Iterator<String<TEdgeStump*> const>::Type TIterConst;
 	_streamWrite(target,"Adjacency list:\n");
-	for(;!atEnd(it);goNext(it)) {
-		_streamPutInt(target, getValue(it));
+	for(TIterConst it = begin(g.data_vertex);!atEnd(it);goNext(it)) {
+		_streamPutInt(target, position(it));
 		_streamWrite(target," -> ");
-		TEdgeStump const* current = getValue(g.data_vertex, getValue(it));
+		TEdgeStump const* current = getValue(it);
 		while(current!=0) {
 			_streamPutInt(target, current->data_target);
 			_streamPut(target, ',');
@@ -498,13 +497,12 @@ write(TFile & target,
 		}
 		_streamPut(target, '\n');
 	}
-	goBegin(it);
 	_streamWrite(target,"Edge list:\n");
-	for(;!atEnd(it);goNext(it)) {
-		TEdgeStump const* current = getValue(g.data_vertex, getValue(it));
+	for(TIterConst it = begin(g.data_vertex);!atEnd(it);goNext(it)) {
+		TEdgeStump const* current = getValue(it);
 		while(current!=0) {
 			_streamWrite(target,"Source: ");
-			_streamPutInt(target, getValue(it));		
+			_streamPutInt(target, position(it));		
 			_streamPut(target, ',');
 			_streamWrite(target,"Target: ");
 			_streamPutInt(target, current->data_target);

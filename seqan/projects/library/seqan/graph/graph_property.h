@@ -23,16 +23,27 @@ initVertexMap(Graph<TEdges, TSpec> const& g,
 	resize(pm, getIdUpperBound(g.data_id_managerV));
 }
 
-
 template<typename TEdges, typename TSpec, typename TPropertyMap>
 inline void
 initEdgeMap(Graph<TEdges, TSpec> const& g,
-			 TPropertyMap& pm)
+			  TPropertyMap& pm)
 {
 	SEQAN_CHECKPOINT
 	resize(pm, getIdUpperBound(g.data_id_managerE));
 }
 
+template<typename TAlphabet, typename TCargo, typename TEdgeSpec, typename TSpec, typename TPropertyMap>
+inline void
+initEdgeMap(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> const& g,
+			 TPropertyMap& pm)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	TSize y_length = ValueSize<TAlphabet>::VALUE;
+	TSize x_length = numVertices(g);
+	resize(pm, x_length * y_length);
+}
 
 // Simple _getId function to get the id for a vertex descriptor which is the id!
 template<typename TId>
@@ -142,6 +153,21 @@ initEdgeMap(Graph<TEdges, TSpec> const& g,
 	SEQAN_CHECKPOINT
 }
 
+template<typename TEdges, typename TSpec, typename TContainer, unsigned int const MemberId>
+inline void
+initEdgeMap(Graph<TEdges, TSpec>& g,
+			InternalMap<TContainer, MemberId>& pm)
+{
+}
+
+template<typename TContainer, unsigned int const MemberId, typename TSize>
+inline void
+reserve(InternalMap<TContainer, MemberId>& pm,
+		TSize size)
+{
+	SEQAN_CHECKPOINT
+	// Internal Map -> Do nothing
+}
 
 template<typename T1, typename T2, typename TEdgeDescriptor, typename TValue>
 inline void
@@ -313,10 +339,27 @@ struct Value<InternalPointerMap<TValue TClass::*, TPMember> > {
 //////////////////////////////////////////////////////////////////////////////
 template<typename TEdges, typename TSpec, typename TPropmap, TPropmap const Instance>
 inline void
-initEdgeMap(Graph<TEdges, TSpec> const& g,
+initEdgeMap(Graph<TEdges, TSpec>& g,
 			InternalPointerMap<TPropmap, Instance>& pm)
 {
 	SEQAN_CHECKPOINT
+}
+
+template<typename TEdges, typename TSpec, typename TPropmap, TPropmap const Instance>
+inline void
+initEdgeMap(Graph<TEdges, TSpec> const& g,
+			InternalPointerMap<TPropmap, Instance>& pm)
+{
+}
+
+
+template<typename TPropmap, TPropmap const Instance, typename TSize>
+inline void
+reserve(InternalPointerMap<TPropmap, Instance>& pm,
+		TSize s)
+{
+	SEQAN_CHECKPOINT
+	// Internal Map -> Do nothing
 }
 
 
@@ -396,6 +439,22 @@ initEdgeMap(Graph<TEdges, TSpec> const& g,
 {
 }
 
+template <typename TEdges, typename TSpec, typename TClass, typename TValue> 
+inline void
+initEdgeMap(Graph<TEdges, TSpec>& g,
+			 TValue TClass:: * ptr_to_member)
+{
+}
+
+template<typename TClass, typename TValue, typename TSize>
+inline void
+reserve(TValue TClass:: * ptr_to_member,
+		TSize s)
+{
+	SEQAN_CHECKPOINT
+	// Internal Map -> Do nothing
+}
+
 template <typename TClass, typename TValue, typename TEdgeDescriptor> 
 inline void 
 assignProperty(TValue TClass:: * ptr_to_member, 
@@ -446,17 +505,18 @@ initVertexMap(Graph<TEdges, TSpec> const& g,
 	}
 }
 
-template<typename TEdges, typename TSpec, typename TPropertyMap, typename TProperties>
+template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TPropertyMap, typename TProperties>
 inline void
-initEdgeMap(Graph<TEdges, TSpec>& g,
+initEdgeMap(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec>& g,
 			  TPropertyMap& pm,
 			  TProperties const& prop)
 {
 	SEQAN_CHECKPOINT
 	initEdgeMap(g,pm);
-	typedef typename Id<Graph<TEdges, TSpec> >::Type TIdType;
-	typedef typename VertexDescriptor<Graph<TEdges, TSpec> >::Type TVertexDescriptor;
-	typedef typename EdgeType<Graph<TEdges, TSpec> >::Type TEdgeStump;
+	typedef typename Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> TGraph;
+	typedef typename Id<TGraph>::Type TIdType;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename EdgeType<TGraph>::Type TEdgeStump;
 	for(TIdType id = getIdLowerBound(g.data_id_managerV);id<getIdUpperBound(g.data_id_managerV);++id) {
 		if (!idInUse(g.data_id_managerV, id)) continue;
 		TEdgeStump* current = getValue(g.data_vertex, id);
@@ -466,23 +526,34 @@ initEdgeMap(Graph<TEdges, TSpec>& g,
 		}
 	}
 }
-/*
-template<typename TContainer, unsigned int const MemberId>
-struct MemberType
+
+template<typename TAlphabet, typename TCargo, typename TEdgeSpec, typename TSpec, typename TPropertyMap, typename TProperties>
+inline void
+initEdgeMap(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> const& g,
+			  TPropertyMap& pm,
+			  TProperties const& prop)
 {
-
-};
-
-template<typename T1, typename T2>
-struct MemberType<Pair<T1, T2>, 1> {
-	typedef T1 Pair<T1, T2>:: * Type;
-};
-
-template<typename T1, typename T2>
-struct MemberType<Pair<T1, T2>, 2> {
-	typedef T2 Pair<T1, T2>:: * Type;
-};
-*/
+	SEQAN_CHECKPOINT
+	initEdgeMap(g,pm);
+	typedef typename Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> TGraph;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef typename EdgeType<TGraph>::Type TEdge;
+	typedef typename Size<TGraph>::Type TSize;
+	TSize count=0;
+	TSize table_length = ValueSize<TAlphabet>::VALUE;
+	TVertexDescriptor nilVal = _get_nil<TVertexDescriptor>();
+	typedef typename Iterator<String<AutomatonEdgeArray<TEdge, TAlphabet> > const>::Type TIterConst;
+	for(TIterConst it = begin(g.data_vertex);!atEnd(it);goNext(it)) {
+		if (!idInUse(g.data_id_managerV, position(it))) continue;
+		for(TSize i=0;i<table_length;++i) {
+			if ((getValue(it)).data_edge[i].data_target!=nilVal) {
+				assignProperty(pm,TEdgeDescriptor(position(it),TAlphabet(i)),prop[count]);
+				++count;
+			}
+		}
+	}
+}
 
 
 

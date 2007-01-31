@@ -372,7 +372,7 @@ getAdjacencyMatrix(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> const& 
 
 template<typename TAlphabet, typename TCargo, typename TEdgeSpec, typename TSpec, typename TVertexDescriptor, typename TChar>
 inline typename VertexDescriptor<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> >::Type 
-getSuccessorVertex(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> const& g,
+getSuccessor(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> const& g,
 				   TVertexDescriptor vertex,
 				   TChar const c) 
 {
@@ -386,7 +386,7 @@ getSuccessorVertex(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> const& 
 
 template<typename TAlphabet, typename TCargo, typename TEdgeSpec, typename TSpec, typename TVertexDescriptor, typename TChar>
 inline typename VertexDescriptor<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> >::Type 
-getPredecessorVertex(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> const& g,
+getPredecessor(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> const& g,
 					 TVertexDescriptor vertex,
 					 TChar const c) 
 {

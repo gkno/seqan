@@ -5,12 +5,13 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 //////////////////////////////////////////////////////////////////////////////
-// Graph OutEdgeIterator
+// OutEdgeIterator for EdgeList
 //////////////////////////////////////////////////////////////////////////////
-template<typename TGraph, typename TSpec>
-class Iter<TGraph, GraphIterator<OutEdgeIterator<TSpec> > > 
+template<typename TCargo, typename TEdgeSpec, typename TGraphSpec, typename TSpec>
+class Iter<Graph<EdgeList<TCargo, TEdgeSpec>, TGraphSpec>, GraphIterator<OutEdgeIterator<TSpec> > > 
 {
 public:
+	typedef Graph<EdgeList<TCargo, TEdgeSpec>, TGraphSpec> TGraph;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	TGraph const* data_host;
@@ -53,6 +54,33 @@ public:
 //____________________________________________________________________________
 };
 
+//////////////////////////////////////////////////////////////////////////////
+// Graph OutEdgeIterator for Automaton
+//////////////////////////////////////////////////////////////////////////////
+template<typename TAlphabet, typename TCargo, typename TEdgeSpec, typename TSpec, typename TIteratorSpec>
+class Iter<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec>, GraphIterator<OutEdgeIterator<TIteratorSpec> > > 
+{
+public:
+	typedef typename Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> TGraph;
+	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	TGraph const* data_host;
+	TEdgeDescriptor data_edge;
+
+	Iter()	
+	{
+		SEQAN_CHECKPOINT
+	}
+
+	Iter(TGraph const& _graph, TVertexDescriptor const v) : 
+		data_host(&_graph),
+		data_edge(getValue(_graph.data_vertex,v))
+	{
+		SEQAN_CHECKPOINT
+	}
+//____________________________________________________________________________
+};
+
 
 //////////////////////////////////////////////////////////////////////////////
 // Graph OutEdgeIterator - Metafunctions
@@ -67,6 +95,18 @@ template<typename TGraph, typename TIteratorSpec>
 struct Iterator<TGraph const, OutEdgeIterator<TIteratorSpec> >
 {	
 	typedef Iter<TGraph const, GraphIterator<OutEdgeIterator<TIteratorSpec> > > Type;
+};
+
+template<typename TAlphabet, typename TCargo, typename TEdgeSpec, typename TSpec, typename TIteratorSpec>
+struct Iterator<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec>, OutEdgeIterator<TIteratorSpec> >
+{	
+	typedef Iter<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec>, GraphIterator<OutEdgeIterator<TIteratorSpec> > > Type;
+};
+
+template<typename TAlphabet, typename TCargo, typename TEdgeSpec, typename TSpec, typename TIteratorSpec>
+struct Iterator<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> const, OutEdgeIterator<TIteratorSpec> >
+{	
+	typedef Iter<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> const, GraphIterator<OutEdgeIterator<TIteratorSpec> > > Type;
 };
 
 template<typename TGraph, typename TIteratorSpec>

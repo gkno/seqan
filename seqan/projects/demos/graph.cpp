@@ -489,23 +489,63 @@ void AutomatonTest() {
 	//Create the automaton
 	DnaAutomaton automaton;
 
+	// Property maps used during graph creation
+	// Do not use this way unless you really need to
+	String<char> propMap;
+	reserve(propMap, 6);		// Maximum of 6 vertices
+	String<char> propMapEdges; 
+	reserve(propMapEdges, 100); // Maximum of edges does not work here 
+								// because ids depend on size of alphabet and number of vertices
+								// Size of alphabet * number of vertices is safe
+	
 	// Add vertices and edges
 	VertexDescriptorType rootVertex = addVertex(automaton); // 0
-	addVertex(automaton); // 1
-	addVertex(automaton); // 2
-	addVertex(automaton); // 3
-	addVertex(automaton); // 4
-	addVertex(automaton); // 5
-	addEdge(automaton,0,1,'C');
-	addEdge(automaton,1,0,'A');
-	addEdge(automaton,4,0,'G');
-	addEdge(automaton,0,3,'T');
-	addEdge(automaton,1,1,'G');
-	addEdge(automaton,1,2,'T');
-	addEdge(automaton,5,1,'T');
-	addEdge(automaton,2,5,'C');
-	addEdge(automaton,3,4,'G');
-	addEdge(automaton,5,3,'A');
+	assignProperty(propMap, rootVertex, 'a');
+	VertexDescriptorType v = addVertex(automaton); // 1
+	assignProperty(propMap, v, 'b');
+	v = addVertex(automaton); // 2
+	assignProperty(propMap, v, 'c');
+	v = addVertex(automaton); // 3
+	assignProperty(propMap, v, 'd');
+	v = addVertex(automaton); // 4
+	assignProperty(propMap, v, 'e');
+	v = addVertex(automaton); // 5
+	assignProperty(propMap, v, 'f');
+	EdgeDescriptorType edge1 = addEdge(automaton,0,1,'C');
+	assignProperty(propMapEdges, edge1, 'a');
+	EdgeDescriptorType edge3 = addEdge(automaton,1,0,'A');
+	assignProperty(propMapEdges, edge3, 'c');
+	EdgeDescriptorType e = addEdge(automaton,4,0,'G');
+	assignProperty(propMapEdges, e, 'h');
+	e = addEdge(automaton,0,3,'T');
+	assignProperty(propMapEdges, e, 'b');
+	e = addEdge(automaton,1,1,'G');
+	assignProperty(propMapEdges, e, 'd');
+	e = addEdge(automaton,1,2,'T');
+	assignProperty(propMapEdges, e, 'e');
+	e = addEdge(automaton,5,1,'T');
+	assignProperty(propMapEdges, e, 'i');
+	e = addEdge(automaton,2,5,'C');
+	assignProperty(propMapEdges, e, 'f');
+	e = addEdge(automaton,3,4,'G');
+	assignProperty(propMapEdges, e, 'g');
+	e = addEdge(automaton,5,3,'A');
+	assignProperty(propMapEdges, e, 'j');
+
+	// Property maps used after graph creation -> Much better :-)
+	String<std::string> nameMap;
+	initVertexMap(automaton, nameMap);
+	typedef Iterator<DnaAutomaton, VertexIterator<> >::Type TVertexIterator;
+	TVertexIterator it(automaton);
+	std::string str = "Hallo";
+	for(;!atEnd(it);goNext(it)) {
+		assignProperty(nameMap, getValue(it), std::string(str));
+		str = str.append("o");
+	}
+	// Similarly for edge maps
+	String<unsigned int> edMap;
+	unsigned int props[] = {0,1,2,3,4,5,6,7,8,9};
+	initEdgeMap(automaton, edMap, props);
 
 	// Print automaton
 	std::cout << automaton << std::endl;
@@ -513,34 +553,43 @@ void AutomatonTest() {
 	// Perform walks on it
 	std::cout << "A simple forward walk through the automaton:" << std::endl;
 	std::cout << rootVertex << " -T-> ";
-	VertexDescriptorType succ = getSuccessorVertex(automaton,rootVertex,'T');
+	VertexDescriptorType succ = getSuccessor(automaton,rootVertex,'T');
 	std::cout << succ << " -G-> ";
-	succ = getSuccessorVertex(automaton,succ,'G');
+	succ = getSuccessor(automaton,succ,'G');
 	std::cout << succ << " -G-> ";
-	succ = getSuccessorVertex(automaton,succ,'G');
+	succ = getSuccessor(automaton,succ,'G');
 	std::cout << succ << " -C-> ";
-	succ = getSuccessorVertex(automaton,succ,'C');
+	succ = getSuccessor(automaton,succ,'C');
 	std::cout << succ << std::endl;
 	std::cout << "...and now let's walk backwards:" << std::endl;
 	VertexDescriptorType pred = succ;
 	std::cout << pred << " <-T- ";
-	pred = getPredecessorVertex(automaton,pred,'T');
+	pred = getPredecessor(automaton,pred,'T');
 	std::cout << pred << " <-C- ";
-	pred = getPredecessorVertex(automaton,pred,'C');
+	pred = getPredecessor(automaton,pred,'C');
 	std::cout << pred << " <-T- ";
-	pred = getPredecessorVertex(automaton,pred,'T');
+	pred = getPredecessor(automaton,pred,'T');
 	std::cout << pred << " <-G- ";
-	pred = getPredecessorVertex(automaton,pred,'G');
+	pred = getPredecessor(automaton,pred,'G');
 	std::cout << pred << std::endl;
 	std::cout << "------------------------------" << std::endl;
 	std::cout << "Multiple forward transitions at once:" << std::endl;
 	std::cout << rootVertex << " -TGGC-> ";
-	succ = getLastSuccessorVertex(automaton,rootVertex,"TGGC");
+	succ = parseString(automaton,rootVertex,"TGGC");
 	std::cout << succ << std::endl;
-	std::cout << "Multiple backward transitions at once:" << std::endl;
-	std::cout << succ << " <-TC- ";
-	pred = getLastPredecessorVertex(automaton,succ,"TC");
-	std::cout << pred << std::endl;
+
+	goBegin(it);
+	std::cout << "All vertices: ";
+	for(;!atEnd(it);goNext(it)) {
+		std::cout << getValue(it) << "(" << getProperty(nameMap, getValue(it)) << "," << getProperty(propMap, getValue(it)) << "), ";
+	}
+	std::cout << std::endl;
+	std::cout << "Some edge properties:" << std::endl;
+	std::cout << getProperty(propMapEdges, edge1) << std::endl;
+	std::cout << getProperty(propMapEdges, edge3) << std::endl;
+	std::cout << getProperty(edMap, edge1) << std::endl;
+	std::cout << getProperty(edMap, edge3) << std::endl;
+
 }
 
 //////////////////////////////////////////////////////////////////////////////
