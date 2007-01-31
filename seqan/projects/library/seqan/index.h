@@ -39,11 +39,11 @@
 #include <seqan/index/index_childtab.h>
 #include <seqan/index/index_bwt.h>
 
-#include <seqan/index/shape_base.h>
-#include <seqan/index/shape_qgram1.h>
-#include <seqan/index/shape_qgram2.h>
-#include <seqan/index/shape_qgram3.h>
-#include <seqan/index/index_qgram.h>
+//#include <seqan/index/shape_base.h>
+//#include <seqan/index/shape_qgram1.h>
+//#include <seqan/index/shape_qgram2.h>
+//#include <seqan/index/shape_qgram3.h>
+//#include <seqan/index/index_qgram.h>
 //____________________________________________________________________________
 // enhanced suffix array (suffix tree)
 
