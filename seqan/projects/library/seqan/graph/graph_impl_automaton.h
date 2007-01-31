@@ -3,6 +3,7 @@
 
 namespace SEQAN_NAMESPACE_MAIN
 {
+
 template<typename TEdge, typename TAlphabet>
 class AutomatonEdgeArray {
 public:
@@ -448,6 +449,37 @@ write(TFile & target,
 		_streamPut(target, '\n');
 	}
 }
+
+
+
+template<typename TAlphabet, typename TCargo, typename TEdgeSpec, typename TSpec, typename TPropertyMap, typename TProperties>
+inline void
+initEdgeMap(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> const& g,
+			  TPropertyMap& pm,
+			  TProperties const& prop)
+{
+	SEQAN_CHECKPOINT
+	initEdgeMap(g,pm);
+	typedef Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> TGraph;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef typename EdgeType<TGraph>::Type TEdge;
+	typedef typename Size<TGraph>::Type TSize;
+	TSize count=0;
+	TSize table_length = ValueSize<TAlphabet>::VALUE;
+	TVertexDescriptor nilVal = _get_nil<TVertexDescriptor>();
+	typedef typename Iterator<String<AutomatonEdgeArray<TEdge, TAlphabet> > const>::Type TIterConst;
+	for(TIterConst it = begin(g.data_vertex);!atEnd(it);goNext(it)) {
+		if (!idInUse(g.data_id_managerV, position(it))) continue;
+		for(TSize i=0;i<table_length;++i) {
+			if ((getValue(it)).data_edge[i].data_target!=nilVal) {
+				assignProperty(pm,TEdgeDescriptor(position(it),TAlphabet(i)),prop[count]);
+				++count;
+			}
+		}
+	}
+}
+
 
 }// namespace SEQAN_NAMESPACE_MAIN
 

@@ -392,7 +392,6 @@ void Test_Automaton() {
 	}
 
 	// Test iterators
-	std::cout << g << std::endl;
 	typedef Iterator<StandardAutomaton, VertexIterator<> >::Type TVertexIterator;
 	TVertexIterator itVert(g);
 	SEQAN_TASSERT(getValue(itVert) == 1)
@@ -402,16 +401,140 @@ void Test_Automaton() {
 	SEQAN_TASSERT(getValue(itVert) == 4)
 	goNext(itVert);
 	SEQAN_TASSERT(atEnd(itVert) == true)
-/*
 
-	//typedef Iterator<StandardAutomaton, OutEdgeIterator<> >::Type TOutEdgeIterator;
-	Graph<Automaton<Dna, void, Default()>, Default()> test;
-	Iter<Graph<Automaton<Dna, void, Default()>, Default()>, GraphIterator<OutEdgeIterator<Default()> > > itA(test, 0);
-	//typedef Iter<StandardAutomaton, GraphIterator<OutEdgeIterator<> > > TOutEdgeIterator;
-	//TOutEdgeIterator itEdge(g);
+	addEdge(g,1,2,'T');
+	typedef Iterator<StandardAutomaton, OutEdgeIterator<> >::Type TOutEdgeIterator;
+	TOutEdgeIterator itEdge(g,1);
+	// Slow
+	SEQAN_TASSERT(sourceVertex(g, getValue(itEdge))==1)
+	SEQAN_TASSERT(targetVertex(g, getValue(itEdge))==4)
+	// Fast
+	SEQAN_TASSERT(sourceVertex(itEdge)==1)
+	SEQAN_TASSERT(targetVertex(itEdge)==4)
+	
+	SEQAN_TASSERT(sourceVertex(g, value(itEdge))==1)
+	SEQAN_TASSERT(targetVertex(g, *itEdge)==4)
+	SEQAN_TASSERT(atEnd(itEdge)==false)
+	SEQAN_TASSERT(atBegin(itEdge)==true)
+	goNext(itEdge);
+	SEQAN_TASSERT(sourceVertex(itEdge)==1)
+	SEQAN_TASSERT(targetVertex(itEdge)==2)
+	++itEdge;
+	itEdge++;
+	SEQAN_TASSERT(atEnd(itEdge)==true)
+	SEQAN_TASSERT(atBegin(itEdge)==false)
+	goPrevious(itEdge);
+	SEQAN_TASSERT(sourceVertex(g, getValue(itEdge))==1)
+	SEQAN_TASSERT(targetVertex(g, getValue(itEdge))==2)
+	--itEdge;
+	itEdge++; 
+	SEQAN_TASSERT(sourceVertex(g, getValue(itEdge))==1)
+	SEQAN_TASSERT(targetVertex(g, getValue(itEdge))==2)
+	itEdge--;
+	itEdge--;
+	SEQAN_TASSERT(atBegin(itEdge)==true)
+	TOutEdgeIterator itEdge2(itEdge);
+	TOutEdgeIterator itEdge3;
+	itEdge3 = itEdge;
+	SEQAN_TASSERT(itEdge == itEdge2)
+	SEQAN_TASSERT(itEdge2 == itEdge3)
+	goEnd(itEdge);
+	SEQAN_TASSERT(itEdge2 != itEdge)
+	goEnd(itEdge2);
+	SEQAN_TASSERT(itEdge2 == itEdge)
+	goBegin(itEdge2);
+	SEQAN_TASSERT(atBegin(itEdge2)==true)
+	SEQAN_TASSERT(&g == &hostGraph(itEdge))
 
-	exit(0);
-	*/
+	typedef Iterator<StandardAutomaton, EdgeIterator<> >::Type TEdgeIterator;
+	TEdgeIterator itEd(g);
+	SEQAN_TASSERT(sourceVertex(g, getValue(itEd))==1)
+	SEQAN_TASSERT(targetVertex(g, getValue(itEd))==4)
+	SEQAN_TASSERT(sourceVertex(g, value(itEd))==1)
+	SEQAN_TASSERT(targetVertex(g, *itEd)==4)
+	SEQAN_TASSERT(atEnd(itEd)==false)
+	SEQAN_TASSERT(atBegin(itEd)==true)
+	goNext(itEd);
+	SEQAN_TASSERT(sourceVertex(g, getValue(itEd))==1)
+	SEQAN_TASSERT(targetVertex(g, getValue(itEd))==2)
+	SEQAN_TASSERT(atEnd(itEd)==false)
+	SEQAN_TASSERT(atBegin(itEd)==false)
+	++itEd;
+	SEQAN_TASSERT(atEnd(itEd)==false)
+	SEQAN_TASSERT(atBegin(itEd)==false)
+	// Slow
+	SEQAN_TASSERT(sourceVertex(g, getValue(itEd))==2)
+	SEQAN_TASSERT(targetVertex(g, getValue(itEd))==4)
+	// Fast
+	SEQAN_TASSERT(sourceVertex(itEd)==2)
+	SEQAN_TASSERT(targetVertex(itEd)==4)
+	itEd++;
+	itEd++;
+	SEQAN_TASSERT(atEnd(itEd)==true)
+	SEQAN_TASSERT(atBegin(itEd)==false)
+	goPrevious(itEd);
+	SEQAN_TASSERT(sourceVertex(g, getValue(itEd))==2)
+	SEQAN_TASSERT(targetVertex(g, getValue(itEd))==4)
+	--itEd;
+	SEQAN_TASSERT(sourceVertex(g, getValue(itEd))==1)
+	SEQAN_TASSERT(targetVertex(g, getValue(itEd))==2)
+	TEdgeIterator itEd2(g);
+	TEdgeIterator itEd3;
+	goBegin(itEd);
+	itEd3 = itEd;
+	SEQAN_TASSERT(itEd == itEd2)
+	SEQAN_TASSERT(itEd2 == itEd3)
+	goEnd(itEd);
+	SEQAN_TASSERT(itEd2 != itEd)
+	goEnd(itEd2);
+	SEQAN_TASSERT(itEd2 == itEd)
+	goBegin(itEd2);
+	SEQAN_TASSERT(itEd2 != itEd)
+	SEQAN_TASSERT(&hostGraph(itEd) == &g)
+
+	typedef Iterator<StandardAutomaton, AdjacencyIterator<> >::Type TAdjacencyIterator;
+	TAdjacencyIterator itAd(g,1);
+	SEQAN_TASSERT(getValue(itAd) == 4)
+	SEQAN_TASSERT(&hostGraph(itAd) == &g)
+	SEQAN_TASSERT(value(itAd) == 4)
+	SEQAN_TASSERT(*itAd == 4)
+	SEQAN_TASSERT(atEnd(itAd)==false)
+	SEQAN_TASSERT(atBegin(itAd)==true)
+	goNext(itAd);
+	SEQAN_TASSERT(getValue(itAd)==2)
+	SEQAN_TASSERT(atEnd(itAd)==false)
+	SEQAN_TASSERT(atBegin(itAd)==false)
+	++itAd;
+	SEQAN_TASSERT(atEnd(itAd)==true)
+	SEQAN_TASSERT(atBegin(itAd)==false)
+	goBegin(itAd);
+	itAd++;
+	itAd++;
+	itAd++;
+	SEQAN_TASSERT(atEnd(itAd)==true)
+	SEQAN_TASSERT(atBegin(itAd)==false)
+	goPrevious(itAd);
+	SEQAN_TASSERT(getValue(itAd)==2)
+	--itAd;
+	SEQAN_TASSERT(getValue(itAd)==4)
+	SEQAN_TASSERT(atEnd(itAd)==false)
+	SEQAN_TASSERT(atBegin(itAd)==true)
+	goEnd(itAd);
+	itAd--;
+	SEQAN_TASSERT(getValue(itAd)==2)
+	goBegin(itAd);
+	TAdjacencyIterator itAd2(itAd);
+	TAdjacencyIterator itAd3;
+	itAd3 = itAd;
+	SEQAN_TASSERT(itAd == itAd2)
+	SEQAN_TASSERT(itAd2 == itAd3)
+	goEnd(itAd);
+	SEQAN_TASSERT(itAd2 != itAd)
+	goEnd(itAd2);
+	SEQAN_TASSERT(itAd2 == itAd)
+	goBegin(itAd2);
+	SEQAN_TASSERT(itAd2 != itAd)
+
 
 
 //____________________________________________________________________________
