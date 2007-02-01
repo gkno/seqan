@@ -31,7 +31,7 @@ class Graph<EdgeList<TCargo, TEdgeSpec>, TSpec>
 		template<typename TEdgeArray, typename TSize>
 		Graph(TEdgeArray edges, TSize size) {
 			SEQAN_CHECKPOINT
-			_copy(edges,size,*this);
+			_copyGraph(edges,size,*this);
 		}
 
 
@@ -44,7 +44,7 @@ class Graph<EdgeList<TCargo, TEdgeSpec>, TSpec>
 			data_allocator(_other.data_allocator)
 		{
 			SEQAN_CHECKPOINT
-			_copy(_other, *this);		
+			_copyGraph(_other, *this);		
 		}
 	
 		Graph const& operator = (Graph const & _other) {
@@ -52,7 +52,7 @@ class Graph<EdgeList<TCargo, TEdgeSpec>, TSpec>
 			if (this == &_other) return *this;
 			clear(*this);
 			data_allocator = _other.data_allocator;
-			_copy(_other, *this);
+			_copyGraph(_other, *this);
 			return *this;
 		}
 };
@@ -63,7 +63,7 @@ class Graph<EdgeList<TCargo, TEdgeSpec>, TSpec>
 //////////////////////////////////////////////////////////////////////////////
 template<typename TCargo, typename TEdgeSpec, typename TSpec>
 inline void
-_copy(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const& source, 
+_copyGraph(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const& source, 
 	  Graph<EdgeList<TCargo, TEdgeSpec>, TSpec>& dest,
 	  bool transpose = false) 
 {

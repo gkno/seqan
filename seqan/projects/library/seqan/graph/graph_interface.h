@@ -20,7 +20,7 @@ _createVertices(Graph<TEdges, TSpec>& g,
 	
 template<typename TEdgeArray, typename TSize, typename TEdges, typename TSpec>
 inline void
-_copy(TEdgeArray const edges, 
+_copyGraph(TEdgeArray const edges, 
 	  TSize const size, 
 	  Graph<TEdges, TSpec>& dest) 
 {
@@ -79,7 +79,7 @@ transpose(Graph<TEdges, TSpec> const& source,
 		  Graph<TEdges, TSpec>& dest)
 {
 	SEQAN_CHECKPOINT
-	_copy(source, dest, true);
+	_copyGraph(source, dest, true);
 }
 
 template<typename TEdges, typename TSpec, typename TVertexDescriptor>
@@ -150,7 +150,7 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 // Graph Functions relying on graph data structure
 //////////////////////////////////////////////////////////////////////////////
-// _copy(source,dest,transpose)
+// _copyGraph(source,dest,transpose)
 // numEdges(graph)
 // removeOutEdges(graph, vertex);
 // removeInEdges(graph, vertex);

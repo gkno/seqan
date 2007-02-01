@@ -593,10 +593,141 @@ void Test_Automaton() {
 	String<char> input("7262");
 	succ = parseString(automaton,rootVertex, input);
 	SEQAN_TASSERT(succ == 1)
+
+	// Additional cargo
+	typedef Graph<Automaton<Dna, short> > TGraph9;
+	typedef VertexDescriptor<TGraph9>::Type TVertexDescriptor9;
+	typedef EdgeDescriptor<TGraph9>::Type TEdgeDescriptor9;
+	typedef Size<TGraph9>::Type TSize9;
+
+	TGraph9 g9;
+	TVertexDescriptor9 vert0 = addVertex(g9);
+	TVertexDescriptor9 vert1 = addVertex(g9);
+	Dna aDna('a');
+	Dna gDna('g');
+	TEdgeDescriptor9 edg1 = addEdge(g9,0,1,aDna,12);
+	TEdgeDescriptor9 edg2 = addEdge(g9,1,0,gDna,21);
+	TGraph9 g10;
+	transpose(g9, g10);
+	SEQAN_TASSERT(getCargo(g9.data_vertex[0].data_edge[(TSize9) aDna])==12)
+	SEQAN_TASSERT(getCargo(g9.data_vertex[1].data_edge[(TSize9) gDna])==21)
+	SEQAN_TASSERT(getCargo(g10.data_vertex[1].data_edge[(TSize9) aDna])==12)
+	SEQAN_TASSERT(getCargo(g10.data_vertex[0].data_edge[(TSize9) gDna])==21)
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
+void Test_WordGraph() {
+//____________________________________________________________________________
+// Standard automaton: No edge cargo
+
+	typedef Graph<Automaton<Dna, void, WordGraph<> > > TWordGraph;
+	typedef VertexDescriptor<TWordGraph>::Type TVertexDescriptor;
+	typedef EdgeDescriptor<TWordGraph>::Type TEdgeDescriptor;
+	
+
+	TWordGraph g;
+	SEQAN_TASSERT(numVertices(g) == 0)
+	SEQAN_TASSERT(numEdges(g) == 0)
+	SEQAN_TASSERT(empty(g) == true)
+
+	// Add vertex
+	TVertexDescriptor v0 = addVertex(g);
+	SEQAN_TASSERT(v0 == 0)
+	SEQAN_TASSERT(outDegree(g, v0) == 0)	
+	SEQAN_TASSERT(inDegree(g, 0) == 0)
+	SEQAN_TASSERT(degree(g, 0) == 0)
+	SEQAN_TASSERT(numVertices(g) == 1)
+	SEQAN_TASSERT(empty(g) == false)
+	addVertex(g);
+	addVertex(g);
+	TVertexDescriptor v3 = addVertex(g);
+
+
+	// Add edge
+	TEdgeDescriptor e1 =addEdge(g,v0,v3,"ag");
+	SEQAN_TASSERT(_getId(e1) == 0)
+	SEQAN_TASSERT(targetVertex(g, e1) == 3)
+	SEQAN_TASSERT(sourceVertex(g, e1) == 0) 
+	SEQAN_TASSERT(numEdges(g) == 1)
+	SEQAN_TASSERT(outDegree(g, v0) == 1)	
+	SEQAN_TASSERT(inDegree(g, v0) == 0)
+	SEQAN_TASSERT(degree(g, v0) == 1)
+
+	// Add further edges and vertices
+	addVertex(g);
+	TVertexDescriptor v5 = addVertex(g);
+	TEdgeDescriptor e2 =addEdge(g,0,5,"g");
+	SEQAN_TASSERT(_getId(e2) == 2) //Third letter, first vertex --> 0*4 + 2 
+	SEQAN_TASSERT(v5 == 5)
+	SEQAN_TASSERT(numVertices(g) == 6)
+	SEQAN_TASSERT(targetVertex(g, e2) == 5)
+	SEQAN_TASSERT(sourceVertex(g, e2) == 0)
+	SEQAN_TASSERT(numEdges(g) == 2)
+	SEQAN_TASSERT(outDegree(g, v0) == 2)	
+	SEQAN_TASSERT(inDegree(g, 5) == 1)
+	SEQAN_TASSERT(degree(g, 0) == 2)
+	SEQAN_TASSERT(getSuccessor(g, 0, "g") == 5)
+	SEQAN_TASSERT(getSuccessor(g, 0, String<Dna>("ag")) == 3)  // The whole edge label or just the first letter
+	SEQAN_TASSERT(getSuccessor(g, 0, "a") == _get_nil<TVertexDescriptor>())
+	SEQAN_TASSERT(getPredecessor(g, 3, "a") == _get_nil<TVertexDescriptor>())
+	SEQAN_TASSERT(getPredecessor(g, 3, "ag") == 0)
+	SEQAN_TASSERT(getPredecessor(g, 5, 'g') == 0)
+	addVertex(g);
+	addVertex(g);
+	addEdge(g,3,1,"aggg");
+	addEdge(g,3,4,"gg");
+	addEdge(g,5,2,"aggg");
+	addEdge(g,5,7,"g");
+	addEdge(g,7,6,"g");
+	SEQAN_TASSERT(parseString(g, 0, "agaggg") == 1)
+	SEQAN_TASSERT(parseString(g, 0, "aga") == 3)  // Does not reach 1
+	SEQAN_TASSERT(parseString(g, 0, 'g') == 5)
+	SEQAN_TASSERT(parseString(g, 0, "ggg") == 6)
+	SEQAN_TASSERT(parseString(g, 0, "gaggg") == 2)
+	SEQAN_TASSERT(parseString(g, 0, "gagggg") == 2)
+
+	TWordGraph g_tmp(g);
+	SEQAN_TASSERT(numVertices(g_tmp) == 8)
+	SEQAN_TASSERT(parseString(g_tmp, 0, "agaggg") == 1)
+	SEQAN_TASSERT(inDegree(g_tmp, 5) == 1)
+	SEQAN_TASSERT(degree(g_tmp, 0) == 2)
+	TWordGraph g_assign;
+	g_assign = g;
+	SEQAN_TASSERT(numVertices(g_assign) == 8)
+	SEQAN_TASSERT(parseString(g_assign, 0, "agaggg") == 1)
+	SEQAN_TASSERT(inDegree(g_assign, 5) == 1)
+	SEQAN_TASSERT(degree(g_assign, 0) == 2)
+
+	// Transpose
+	transpose(g, g_tmp);
+	SEQAN_TASSERT(numVertices(g_tmp) == 8)
+	SEQAN_TASSERT(parseString(g_tmp, 2, "aggg") == 5)
+	SEQAN_TASSERT(inDegree(g_tmp, 5) == 2)
+	SEQAN_TASSERT(outDegree(g_tmp, 0) == 0)
+
+	// Additional cargo
+	typedef Graph<Automaton<Dna, short, WordGraph<> > > TWordGraph2;
+	typedef VertexDescriptor<TWordGraph2>::Type TVertexDescriptor2;
+	typedef EdgeDescriptor<TWordGraph2>::Type TEdgeDescriptor2;
+	typedef Size<TWordGraph2>::Type TSize2;
+
+	TWordGraph2 g2;
+	TVertexDescriptor2 vert0 = addVertex(g2);
+	TVertexDescriptor2 vert1 = addVertex(g2);
+	TEdgeDescriptor2 ed0 = addEdge(g2,vert0,vert1,String<Dna>("acgt"),12);
+	TEdgeDescriptor2 ed1 = addEdge(g2,vert1,vert0,"tgca",21);
+	SEQAN_TASSERT(getCargo(g2.data_vertex[0].data_edge[(TSize2) Dna('a')])==12)
+	SEQAN_TASSERT(getCargo(g2.data_vertex[1].data_edge[(TSize2) Dna('t')])==21)
+	TWordGraph2 g2_transpose;
+	transpose(g2,g2_transpose);
+	SEQAN_TASSERT(getCargo(g2_transpose.data_vertex[1].data_edge[(TSize2) Dna('a')])==12)
+	SEQAN_TASSERT(getCargo(g2_transpose.data_vertex[0].data_edge[(TSize2) Dna('t')])==21)
+	clearEdges(g2_transpose);
+	SEQAN_TASSERT(numEdges(g2_transpose) == 0)
+}
+
+//////////////////////////////////////////////////////////////////////////////
 
 void Test_Graph() {
 //____________________________________________________________________________
@@ -2082,6 +2213,7 @@ int main()
 	Test_EdgeStump();
 	Test_EdgeAutomaton();
 	Test_Automaton();
+	Test_WordGraph();
 	Test_Graph();
 	Test_GraphExternalProperty();
 	Test_GraphInternalProperty();
@@ -2111,6 +2243,7 @@ int main()
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_edgelist.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_edgeautomaton.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_automaton.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_wordgraph.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_algorithm.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_stack.h");
 	

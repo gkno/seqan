@@ -42,6 +42,8 @@
 // Automaton
 #include <seqan/graph/graph_edgeautomaton.h>
 #include <seqan/graph/graph_impl_automaton.h>
+// Special automaton: Word graph
+#include <seqan/graph/graph_impl_wordgraph.h>
 
 // Graph drawing
 #include <seqan/graph/graph_drawing.h>

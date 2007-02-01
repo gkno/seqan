@@ -6,10 +6,10 @@ using namespace seqan;
 void BreadthFirstSearch() {
 //____________________________________________________________________________
 // Breadth-First Search
-
-	typedef VertexDescriptor<Graph<> >::Type TVertexDescriptor;
-	typedef EdgeDescriptor<Graph<> >::Type TEdgeDescriptor;
-	typedef Size<Graph<> >::Type TSize;
+	typedef Graph<> TGraph;
+	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef Size<TGraph>::Type TSize;
 
 	//Number of edges
 	TSize numEdges = 20;
@@ -19,7 +19,7 @@ void BreadthFirstSearch() {
 	char names[] = {'r', 's', 't', 'u', 'v', 'w', 'x', 'y'};
 	
 	//Create the graph
-	Graph<> g(edges, numEdges);
+	TGraph g(edges, numEdges);
 	std::cout << g << std::endl;
 	String<char> nameMap;
 	initVertexMap(g,nameMap, names);
@@ -33,7 +33,7 @@ void BreadthFirstSearch() {
 	
 	// Output
 	std::cout << "Breadth-First search: " << std::endl;
-	typedef Iterator<Graph<>, VertexIterator<> >::Type TVertexIterator;
+	typedef Iterator<TGraph, VertexIterator<> >::Type TVertexIterator;
 	TVertexIterator it(g);
 	while(!atEnd(it)) {
 		std::cout << "Vertex " << getProperty(nameMap, getValue(it)) << ": ";
