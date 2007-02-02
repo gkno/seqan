@@ -125,6 +125,7 @@ int main()
 	Test_OnlineAlg<ShiftAnd>();
 	Test_OnlineAlg<ShiftOr>();
 	Test_OnlineAlg<BndmAlgo>();
+	Test_OnlineAlg<BomAlgo>();
 
 	Test_Various();
 
@@ -140,6 +141,7 @@ int main()
 	debug::verifyCheckpoints("projects/library/seqan/find/find_shiftand.h");
 	debug::verifyCheckpoints("projects/library/seqan/find/find_shiftor.h");
 	debug::verifyCheckpoints("projects/library/seqan/find/find_bndm.h");
+	debug::verifyCheckpoints("projects/library/seqan/find/find_bom.h");
 
 
 

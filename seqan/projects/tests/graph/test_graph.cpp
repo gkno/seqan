@@ -727,6 +727,25 @@ void Test_WordGraph() {
 	SEQAN_TASSERT(numEdges(g2_transpose) == 0)
 }
 
+
+//////////////////////////////////////////////////////////////////////////////
+
+void Test_Oracle() {
+	Graph<Automaton<char> > g;
+	createOracleOnReverse(g,"announce");
+	SEQAN_TASSERT(parseString(g, 0, "e") == 1)
+	SEQAN_TASSERT(parseString(g, 0, "ec") == 2)
+	SEQAN_TASSERT(parseString(g, 0, "n") == 3)
+	SEQAN_TASSERT(parseString(g, 0, "a") == 8)
+	SEQAN_TASSERT(parseString(g, 0, "nn") == 7)
+
+	Graph<Automaton<Dna> > g2;
+	createOracle(g2,"ATATA");
+	SEQAN_TASSERT(parseString(g2, 0, "A") == 1)
+	SEQAN_TASSERT(parseString(g2, 0, "T") == 2)
+	SEQAN_TASSERT(parseString(g2, 0, "AT") == 2)
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 void Test_Graph() {
@@ -2214,6 +2233,7 @@ int main()
 	Test_EdgeAutomaton();
 	Test_Automaton();
 	Test_WordGraph();
+	Test_Oracle();
 	Test_Graph();
 	Test_GraphExternalProperty();
 	Test_GraphInternalProperty();
@@ -2244,6 +2264,7 @@ int main()
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_edgeautomaton.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_automaton.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_wordgraph.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_oracle.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_algorithm.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_stack.h");
 	
