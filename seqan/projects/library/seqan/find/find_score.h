@@ -63,6 +63,13 @@ SEQAN_CHECKPOINT
 		setHost(*this, _needle);
 	}
 
+	Pattern(TTabValue _limit): 
+		data_limit(_limit)
+	{ 
+SEQAN_CHECKPOINT
+		create(data_score);
+	}
+
 	Pattern(Pattern const & other): 
 		data_needle( other.data_needle ),
 		data_score( other.data_score ), 
