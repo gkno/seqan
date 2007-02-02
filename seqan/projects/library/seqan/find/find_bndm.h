@@ -126,6 +126,7 @@ void setHost (Pattern<TNeedle, BndmAlgo> & me, TNeedle2 & needle)
 template <typename TFinder, typename TNeedle>
 bool _findBndm_SmallNeedle(TFinder & finder, Pattern<TNeedle, BndmAlgo> & me) {
 	SEQAN_CHECKPOINT
+	if (me.haystackLength < me.needleLength) return false;
 	while (position(finder) <= me.haystackLength - me.needleLength) {
 		me.last=me.needleLength;
 		unsigned int j=me.needleLength;

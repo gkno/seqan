@@ -86,21 +86,20 @@ inline bool
 find(TFinder & finder, Pattern<TNeedle, BomAlgo> & me) 
 {
 	SEQAN_CHECKPOINT
-
+	
 	if (empty(finder)) {
 		goBegin(finder);
 		me.haystackLength = length(container(finder));
 	} else
 		finder+=me.step;
 
+	if (me.haystackLength < me.needleLength) return false;
 	typedef typename Value<TNeedle>::Type TAlphabet;
 	typedef Graph<Automaton<TAlphabet> > TOracle;
 	typedef typename Size<TNeedle>::Type TSize;
 	typedef typename VertexDescriptor<TOracle>::Type TVertexDescriptor;
 	typedef typename EdgeDescriptor<TOracle>::Type TEdgeDescriptor;
 	TVertexDescriptor nilVal = _get_nil<TVertexDescriptor>();
-	TSize needleLength;		
-	TSize haystackLength;
 	while (position(finder) <= me.haystackLength - me.needleLength) {
 		TVertexDescriptor current = (TVertexDescriptor) 0;
 		TSize j = me.needleLength;
