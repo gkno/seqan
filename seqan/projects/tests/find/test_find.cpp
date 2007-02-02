@@ -83,7 +83,7 @@ void Test_Various()
 	String<char> ndl("ist");
 
 //	Pattern<String<char>, Horspool> horsp(ndl);
-	Iterator<String<char>, Rooted>::Type it(haystk);
+	Iterator<String<char>, Rooted>::Type it = begin(haystk);
 /*
 	while (find(it, horsp))
 		printf("%i\n", position(it));
