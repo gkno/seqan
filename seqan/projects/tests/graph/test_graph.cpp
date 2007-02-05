@@ -302,6 +302,15 @@ void Test_Automaton() {
 	SEQAN_TASSERT(numEdges(g) == 5)
 	SEQAN_TASSERT(outDegree(g, v3) == 3)	
 
+	// Output
+	// Raw output
+	std::cout << g << std::endl;
+	// File output
+	fstream strm;
+	strm.open(TEST_PATH "my_automaton.dot", ios_base::out | ios_base::trunc);
+	write(strm,g,DotDrawing());
+	strm.close();
+
 	// Remove edges
 	removeEdge(g,my_edge);
 	removeEdge(g,0,1);
@@ -687,6 +696,15 @@ void Test_WordGraph() {
 	SEQAN_TASSERT(parseString(g, 0, "gaggg") == 2)
 	SEQAN_TASSERT(parseString(g, 0, "gagggg") == 2)
 
+	// Output
+	// Raw output
+	std::cout << g << std::endl;
+	// File output
+	fstream strm;
+	strm.open(TEST_PATH "my_wordgraph.dot", ios_base::out | ios_base::trunc);
+	write(strm,g,DotDrawing());
+	strm.close();
+
 	TWordGraph g_tmp(g);
 	SEQAN_TASSERT(numVertices(g_tmp) == 8)
 	SEQAN_TASSERT(parseString(g_tmp, 0, "agaggg") == 1)
@@ -808,20 +826,18 @@ void Test_Graph() {
 	SEQAN_TASSERT(numEdges(g) == 5)
 	SEQAN_TASSERT(outDegree(g, v3) == 3)	
 	
-	/*
 	// Graph drawing
-	// Raw output
-	//std::cout << g << std::endl;
-
-	// File output
 	removeEdge(g,0,0); // ToDo: Self edges
 	addEdge(g,4,3);  
-	FILE * file = fopen(TEST_PATH "my_graph.tex", "w");
-	write(file, g, PsTricks());
-	fclose(file);
+	// Raw output
+	std::cout << g << std::endl;
+	// File output
+	fstream strm;
+	strm.open(TEST_PATH "my_graph.dot", ios_base::out | ios_base::trunc);
+	write(strm,g,DotDrawing());
+	strm.close();
 	removeEdge(g,4,3);
 	addEdge(g,0,0);
-*/
 
 	// Remove edges
 	removeEdge(g,my_edge);
