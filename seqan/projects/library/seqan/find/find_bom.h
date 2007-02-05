@@ -5,21 +5,21 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 //////////////////////////////////////////////////////////////////////////////
-// BndmAlgo
+// BomAlgo
 //////////////////////////////////////////////////////////////////////////////
 
 /**
 .Spec.BomAlgo:
-..summary: Exact string matching using backward oracle matching.
+..summary: Backward Oracle Matching algorithm. Exact string matching using a factor oracle.
 ..general:Class.Pattern
 ..cat:Pattern Matching
 ..signature:Pattern<TNeedle, BomAlgo>
 ..param.TNeedle:The needle type.
 ...type:Class.String
-..remarks.text:Types of needle and haystack have to match.
+..remarks.text:The types of the needle and the haystack have to match.
 */
 
-///.Class.Pattern.param.TSpec.type:Spec.BndmAlgo
+///.Class.Pattern.param.TSpec.type:Spec.BomAlgo
 
 struct _BomAlgo;
 typedef Tag<_BomAlgo> BomAlgo;
@@ -70,6 +70,7 @@ setHost (Pattern<TNeedle, BomAlgo> & me, TNeedle2 const& needle)
 	me.step = 0;
 	clear(me.oracle);
 	createOracleOnReverse(me.oracle,needle);
+	assignRoot(me.oracle,0);
 }
 
 template <typename TNeedle, typename TNeedle2>
@@ -101,7 +102,7 @@ find(TFinder & finder, Pattern<TNeedle, BomAlgo> & me)
 	typedef typename EdgeDescriptor<TOracle>::Type TEdgeDescriptor;
 	TVertexDescriptor nilVal = _get_nil<TVertexDescriptor>();
 	while (position(finder) <= me.haystackLength - me.needleLength) {
-		TVertexDescriptor current = (TVertexDescriptor) 0;
+		TVertexDescriptor current = getRoot(me.oracle);
 		TSize j = me.needleLength;
 		while ((j>0) &&
 				(current != nilVal))

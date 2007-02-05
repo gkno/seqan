@@ -10,14 +10,13 @@ namespace SEQAN_NAMESPACE_MAIN
 
 /**
 .Spec.ShiftAnd:
-..summary: Exact string matching using bit-parallelism. Applicable to small strings and small alphabets.
+..summary: Exact string matching using bit parallelism. The Shift-And algorithm is applicable to search small patterns in texts using a small alphabet.
 ..general:Class.Pattern
 ..cat:Pattern Matching
 ..signature:Pattern<TNeedle, ShiftAnd>
 ..param.TNeedle:The needle type.
 ...type:Class.String
-..remarks.text:Needle-length and the size of the alphabet have to fit in a machine word.
-..remarks.text:Types of needle and haystack have to match.
+..remarks.text:The types of the needle and the haystack have to match.
 */
 
 ///.Class.Pattern.param.TSpec.type:Spec.ShiftAnd
@@ -36,11 +35,14 @@ private:
 
 //____________________________________________________________________________
 public:
-	unsigned int* table;			// Look up table for each character in the alphabet (called B in "Navarro")
-	unsigned int* prefSufMatch;		// Set of all the prefixes of needle that match a suffix of haystack (called D in "Navarro")
-	unsigned int alphabetSize;		// e.g., char --> 256
-	unsigned int needleLength;		// e.g., needleLength=33 --> blockCount=2 (iff w=32 bits)
-	unsigned int blockCount;		// #unsigned ints required to store needle	
+	typedef typename Size<TNeedle>::Type TSize;
+	typedef typename Value<TNeedle>::Type TAlphabet;
+	typedef typename Size<TAlphabet>::Type TAlphabetSize;
+	TAlphabetSize* table;			// Look up table for each character in the alphabet (called B in "Navarro")
+	TAlphabetSize* prefSufMatch;		// Set of all the prefixes of needle that match a suffix of haystack (called D in "Navarro")
+	TAlphabetSize alphabetSize;		// e.g., char --> 256
+	TSize needleLength;		// e.g., needleLength=33 --> blockCount=2 (iff w=32 bits)
+	TSize blockCount;		// #unsigned ints required to store needle	
 
 //____________________________________________________________________________
 
@@ -73,6 +75,7 @@ template <typename TNeedle, typename TNeedle2>
 void setHost (Pattern<TNeedle, ShiftAnd> & me, TNeedle2 const & needle) {
 	SEQAN_CHECKPOINT
 	typedef typename Value<TNeedle>::Type TValue;
+	typedef typename Size<TNeedle>::Type TSize;
 	if (me.table != 0) {
 		deallocate(me, me.table, me.alphabetSize * me.blockCount);
 		deallocate(me, me.prefSufMatch, me.blockCount);
@@ -82,7 +85,7 @@ void setHost (Pattern<TNeedle, ShiftAnd> & me, TNeedle2 const & needle) {
 	me.needleLength = length(needle);
 	me.alphabetSize = ValueSize<TValue>::VALUE;
 	if (me.needleLength<1) me.blockCount=1;
-	else me.blockCount=((me.needleLength-1) / BitsPerValue<unsigned int>::VALUE)+1;
+	else me.blockCount=((me.needleLength-1) / BitsPerValue<TSize>::VALUE)+1;
 			
 	allocate (me, me.table, me.blockCount * me.alphabetSize);
 	arrayFill (me.table, me.table + me.blockCount * me.alphabetSize, 0);
@@ -90,10 +93,10 @@ void setHost (Pattern<TNeedle, ShiftAnd> & me, TNeedle2 const & needle) {
 	allocate (me, me.prefSufMatch, me.blockCount);
 	arrayFill (me.prefSufMatch, me.prefSufMatch + me.blockCount, 0);
 
-	for (unsigned int j = 0; j < me.needleLength; ++j) {
+	for (TSize j = 0; j < me.needleLength; ++j) {
 		// Determine character position in array table
-		unsigned int pos = static_cast<unsigned int>(getValue(needle,j));
-		me.table[me.blockCount*pos + j / BitsPerValue<unsigned int>::VALUE] |= (1<<(j%BitsPerValue<unsigned int>::VALUE));
+		TSize pos = convert<TSize>(getValue(needle,j));
+		me.table[me.blockCount*pos + j / BitsPerValue<TSize>::VALUE] |= (1<<(j%BitsPerValue<TSize>::VALUE));
 	}
 
 	/*
@@ -126,9 +129,10 @@ void setHost (Pattern<TNeedle, ShiftAnd> & me, TNeedle2 & needle)
 template <typename TFinder, typename TNeedle>
 bool _findShiftAnd_SmallNeedle(TFinder & finder, Pattern<TNeedle, ShiftAnd> & me) {
 	SEQAN_CHECKPOINT
-	unsigned int compare = (1 << (me.needleLength-1));
+	typedef typename Size<TNeedle>::Type TSize;
+	TSize compare = (1 << (me.needleLength-1));
 	while (!atEnd(finder)) {
-		unsigned int pos = static_cast<unsigned int>(*finder);
+		TSize pos = convert<TSize>(*finder);
 		me.prefSufMatch[0] = ((me.prefSufMatch[0] << 1) | 1) & me.table[me.blockCount*pos];
 		if ((me.prefSufMatch[0] & compare) != 0) {
 			finder-=(me.needleLength-1);
@@ -142,17 +146,18 @@ bool _findShiftAnd_SmallNeedle(TFinder & finder, Pattern<TNeedle, ShiftAnd> & me
 template <typename TFinder, typename TNeedle>
 bool _findShiftAnd_LargeNeedle(TFinder & finder, Pattern<TNeedle, ShiftAnd> & me) {
 	SEQAN_CHECKPOINT
-	unsigned int compare = (1 << ((me.needleLength-1) % BitsPerValue<unsigned int>::VALUE));
+	typedef typename Size<TNeedle>::Type TSize;
+	TSize compare = (1 << ((me.needleLength-1) % BitsPerValue<TSize>::VALUE));
 	while (!atEnd(finder)) {
-		unsigned int pos = static_cast<unsigned int>(*finder);
-		unsigned int carry = 1;
-		for(unsigned int block=0;block<me.blockCount;++block) {
-			bool newCarry = ((me.prefSufMatch[block] & (1<< (BitsPerValue<unsigned int>::VALUE - 1)))!=0); 
+		TSize pos = convert<TSize>(*finder);
+		TSize carry = 1;
+		for(TSize block=0;block<me.blockCount;++block) {
+			bool newCarry = ((me.prefSufMatch[block] & (1<< (BitsPerValue<TSize>::VALUE - 1)))!=0); 
 			me.prefSufMatch[block]<<=1;
 			me.prefSufMatch[block]|=carry;
 			carry = newCarry;
 		}
-		for(unsigned int block=0;block<me.blockCount;++block) me.prefSufMatch[block] &= me.table[me.blockCount*pos+block];
+		for(TSize block=0;block<me.blockCount;++block) me.prefSufMatch[block] &= me.table[me.blockCount*pos+block];
 		if ((me.prefSufMatch[me.blockCount-1] & compare) != 0) {
 			finder-=(me.needleLength-1);
 			return true; 
