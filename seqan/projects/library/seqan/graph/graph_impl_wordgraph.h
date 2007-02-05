@@ -17,16 +17,18 @@ class Graph<Automaton<TAlphabet, TCargo, WordGraph<TSpec> >, TGraphSpec>
 	public:
 		typedef typename Id<Graph>::Type TIdType;
 		typedef typename EdgeType<Graph>::Type TEdge;
+		typedef typename VertexDescriptor<Graph>::Type TVertexDescriptor;
 
 		String<AutomatonEdgeArray<TEdge, TAlphabet> > data_vertex;		// List of tables
 		IdManager<TIdType> data_id_managerV;
+		TVertexDescriptor root;
 		String<String<TAlphabet> > data_edge_label;
 	
 
 //____________________________________________________________________________
 
 
-		Graph() {
+		Graph() : root(0) {
 			SEQAN_CHECKPOINT
 		}
 

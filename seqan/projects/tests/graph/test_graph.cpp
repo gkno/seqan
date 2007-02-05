@@ -651,7 +651,16 @@ void Test_WordGraph() {
 	addVertex(g);
 	addVertex(g);
 	TVertexDescriptor v3 = addVertex(g);
-
+	SEQAN_TASSERT(isRoot(g, 0) == true)
+	SEQAN_TASSERT(getRoot(g) == 0)
+	assignRoot(g,3);
+	SEQAN_TASSERT(getRoot(g) == 3)
+	SEQAN_TASSERT(isRoot(g, 0) == false)
+	SEQAN_TASSERT(isRoot(g, 3) == true)
+	root(g) = 2;
+	SEQAN_TASSERT(getRoot(g) == 2)
+	SEQAN_TASSERT(isRoot(g, 3) == false)
+	SEQAN_TASSERT(isRoot(g, 2) == true)
 
 	// Add edge
 	TEdgeDescriptor e1 =addEdge(g,v0,v3,"ag");
@@ -710,6 +719,7 @@ void Test_WordGraph() {
 	SEQAN_TASSERT(parseString(g_tmp, 0, "agaggg") == 1)
 	SEQAN_TASSERT(inDegree(g_tmp, 5) == 1)
 	SEQAN_TASSERT(degree(g_tmp, 0) == 2)
+	SEQAN_TASSERT(isRoot(g_tmp, 2) == true)
 	TWordGraph g_assign;
 	g_assign = g;
 	SEQAN_TASSERT(numVertices(g_assign) == 8)
@@ -723,6 +733,8 @@ void Test_WordGraph() {
 	SEQAN_TASSERT(parseString(g_tmp, 2, "aggg") == 5)
 	SEQAN_TASSERT(inDegree(g_tmp, 5) == 2)
 	SEQAN_TASSERT(outDegree(g_tmp, 0) == 0)
+	SEQAN_TASSERT(isRoot(g_tmp, 2) == true)
+
 
 	// Additional cargo
 	typedef Graph<Automaton<Dna, short, WordGraph<> > > TWordGraph2;
