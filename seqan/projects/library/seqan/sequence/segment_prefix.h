@@ -64,7 +64,7 @@ source object; the host object is not modified.
 Note that this is a special case, since all other copy operations result in changes 
 of the host object.
 ...text:$begin$ must be a valid position/iterator in $host$.
-If $begin$ is omitted, the suffix segment corresponding to
+If $begin$ is omitted, the prefix segment corresponding to
 the whole sequence $host$ is constructed.
 This is the same segment that is returned by @Function.goBegin@.
 */
@@ -446,41 +446,41 @@ operator --(Segment<THost, PrefixSegment> & segment)
 ..see:Function.infix
 */
 
-template <typename T, typename TPosBegin>
-inline typename Suffix<T>::Type
-prefix(T & t, TPosBegin pos_begin)
+template <typename T, typename TPosEnd>
+inline typename Prefix<T>::Type
+prefix(T & t, TPosEnd pos_end)
 {
 SEQAN_CHECKPOINT
-	return typename Suffix<T>::Type(t, pos_begin);
+	return typename Prefix<T>::Type(t, pos_end);
 }
 
-template <typename T, typename TPosBegin>
-inline typename Suffix<T *>::Type
-prefix(T * t, TPosBegin pos_begin)
+template <typename T, typename TPosEnd>
+inline typename Prefix<T *>::Type
+prefix(T * t, TPosEnd pos_end)
 {
 SEQAN_CHECKPOINT
-	return typename Suffix<T *>::Type (t, pos_begin);
+	return typename Prefix<T *>::Type (t, pos_end);
 }
 
-template <typename T, typename TPosBegin>
-inline typename Suffix<Segment<T, SuffixSegment> >::Type
-prefix(Segment<T, SuffixSegment> & t, TPosBegin pos_begin)
+template <typename T, typename TPosEnd>
+inline typename Prefix<Segment<T, PrefixSegment> >::Type
+prefix(Segment<T, PrefixSegment> & t, TPosEnd pos_end)
 {
 SEQAN_CHECKPOINT
-	return typename Suffix<Segment<T, SuffixSegment> >::Type (
+	return typename Prefix<Segment<T, PrefixSegment> >::Type (
 		host(t), 
-		beginPosition(t) + pos_begin);
+		beginPosition(t) + pos_end);
 }
 
-template <typename T, typename TPosBegin>
-inline typename Suffix<Segment<T, InfixSegment> >::Type
-prefix(Segment<T, InfixSegment> & t, TPosBegin pos_begin)
+template <typename T, typename TPosEnd>
+inline typename Prefix<Segment<T, InfixSegment> >::Type
+prefix(Segment<T, InfixSegment> & t, TPosEnd pos_end)
 {
 SEQAN_CHECKPOINT
-	return typename Suffix<Segment<T, InfixSegment> >::Type (
+	return typename Prefix<Segment<T, InfixSegment> >::Type (
 		host(t), 
-		beginPosition(t) + pos_begin, 
-		endPosition(t));
+		beginPosition(t),
+		beginPosition(t) + pos_end);
 }
 
 //////////////////////////////////////////////////////////////////////////////
