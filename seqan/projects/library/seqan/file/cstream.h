@@ -80,10 +80,9 @@ SEQAN_CHECKPOINT
 ///.Internal._streamPut.param.stream.type:Adaption."std::FILE *"
 
 
-template <typename TChar>
 inline void
 _streamPut(::std::FILE * target,
-		   TChar character)
+		   char character)
 {
 SEQAN_CHECKPOINT
 	putc(character, target);

@@ -51,7 +51,6 @@ void Test_Stream()
 	strm_5.open(TEST_PATH "testfile.txt", ios_base::in);
 	strm_5 >> str_5;
 	strm_5.close();
-	std::cout << str_5;
 	SEQAN_TASSERT(str_5 == "Testfile")
 
 
@@ -661,6 +660,23 @@ void Test_FastaAlign() {
 
 	fclose(file_1);
 
+	FILE * file_11 = fopen(TEST_PATH "fasta_align_dna.txt", "r");
+	SEQAN_TASSERT(file_11);
+	
+	Align<String<Dna>, ArrayGaps> align11;
+	read(file_11, align11, FastaAlign());
+	SEQAN_TASSERT(source(row(align11,0)) == "CTACGAAAGGTCGTGTCACGATGTCCGCAAGGGATGGCATTGCATAGAGGAATTGATTGCAACCTACGAAA");
+	SEQAN_TASSERT(source(row(align11,1)) == "CTTAATGTCCCGCGTACAAGGGATAGCATGTGGCATAGAGGAATAGAATAGCAGCCTACGAAA");
+	String<String<char> > str_ids11;
+	readIDs(file_11, str_ids11, FastaAlign());
+	SEQAN_TASSERT(value(str_ids11,0) == "SEQ1");
+	SEQAN_TASSERT(value(str_ids11,1) == "SEQ2");
+	fclose(file_11);
+
+	FILE * file_44 = fopen(TEST_PATH "my_fasta_align_dna.txt", "w");
+	write(file_44, align11, str_ids11, FastaAlign());
+	fclose(file_44);
+
 //____________________________________________________________________________
 // FASTA  Align from iostream
 
@@ -673,6 +689,13 @@ void Test_FastaAlign() {
 	SEQAN_TASSERT(length(source(row(align2,1))) == 362);
 	SEQAN_TASSERT(length(source(row(align2,2))) == 335);
 
+	Align<String<Dna>, ArrayGaps> align22;
+	fstream strm_12;
+	strm_12.open(TEST_PATH "fasta_align_dna.txt", ios_base::in);
+	read(strm_12, align22, FastaAlign());
+	strm_12.close();
+	SEQAN_TASSERT(source(row(align22,0)) == "CTACGAAAGGTCGTGTCACGATGTCCGCAAGGGATGGCATTGCATAGAGGAATTGATTGCAACCTACGAAA");
+	SEQAN_TASSERT(source(row(align22,1)) == "CTTAATGTCCCGCGTACAAGGGATAGCATGTGGCATAGAGGAATAGAATAGCAGCCTACGAAA");
 
 //____________________________________________________________________________
 // FASTA Align to C stream
@@ -715,7 +738,6 @@ void Test_FastaAlign() {
 	assignSource(row(align5, 0), "aaccggtt");
 	assignSource(row(align5, 1), "accgtttt");
 	needlemanWunsch(align5, SimpleScore());
-	std::cout << align5 << "\n\n";
 
 
 //____________________________________________________________________________
@@ -767,8 +789,6 @@ void Test_CGViz() {
 	SEQAN_TASSERT(value(str_ids1,2) == "CATH_HUMAN");
 	fclose(file_1);
 
-	// Raw output to console
-	std::cout << align << std::endl;
 
 //____________________________________________________________________________
 // Output in CGViz format

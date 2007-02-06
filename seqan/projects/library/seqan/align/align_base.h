@@ -404,7 +404,10 @@ SEQAN_CHECKPOINT
 				//_streamWriteRange(target, iter(row_, begin_), iter(row_, begin_ + windowSize_));
 			} else {
 				for(unsigned int j = 0;j<windowSize_;++j) {
-					if ((row(source, (i-1)/2)[begin_+j]==row(source, (i+1)/2)[begin_+j]) && (row(source, (i-1)/2)[begin_+j]!='-')) {
+					if ((!isGap(row(source, (i-1)/2), begin_+j)) &&
+						(!isGap(row(source, (i+1)/2), begin_+j)) &&
+						(row(source, (i-1)/2)[begin_+j]==row(source, (i+1)/2)[begin_+j]))
+					{
 						_streamPut(target, '|');
 					} else {
 						_streamPut(target, ' ');
