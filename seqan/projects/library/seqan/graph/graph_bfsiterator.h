@@ -199,7 +199,7 @@ goNext(Iter<TGraph, GraphIterator<BfsIterator<TSpec> > >& it)
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	TVertexDescriptor u = it.data_queue.front();
 	it.data_queue.pop_front();
-	typedef Iterator<Graph<>, AdjacencyIterator<> >::Type TAdjacencyIterator;
+	typedef typename Iterator<TGraph, AdjacencyIterator<> >::Type TAdjacencyIterator;
 	TAdjacencyIterator itad(*it.data_host,u);
 	for(;!atEnd(itad);goNext(itad)) {
 		TVertexDescriptor v = getValue(itad);

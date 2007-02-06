@@ -399,9 +399,7 @@ getSuccessor(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const& g,
 		if (getProperty(eMap,current) == c) return targetVertex(g,current);
 		current=current->data_next;
 	}
-	// We should never reach this point
-	SEQAN_ASSERT(false)
-	return 0;
+	return _get_nil<TVertexDescriptor>();
 }
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TVertexDescriptor, typename TChar>

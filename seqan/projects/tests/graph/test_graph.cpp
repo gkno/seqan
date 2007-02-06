@@ -778,6 +778,48 @@ void Test_Oracle() {
 
 //////////////////////////////////////////////////////////////////////////////
 
+void Test_Trie() {
+	Graph<Automaton<char> > g;
+	String<String<unsigned int> > pos;
+	String<String<char> > keywords;
+	appendValue(keywords, String<char>("announce"));
+	appendValue(keywords, String<char>("annual"));
+	appendValue(keywords, String<char>("annually"));
+	createTrie(g,pos,keywords);
+
+	// Output
+	// File output
+	fstream strm;
+	strm.open(TEST_PATH "my_trie.dot", ios_base::out | ios_base::trunc);
+	String<String<char> > nodeMap;
+	_createTrieNodeNames(g, pos, nodeMap);
+	String<String<char> > edgeMap;
+	_createEdgeNames(g,edgeMap);
+	write(strm,g,nodeMap,edgeMap,DotDrawing());
+	strm.close();
+
+	Graph<Automaton<Dna> > gDna;
+	clear(pos);
+	String<String<Dna> > keyw;
+	appendValue(keyw, String<Dna>("ATATATA"));
+	appendValue(keyw, String<Dna>("TATAT"));
+	appendValue(keyw, String<Dna>("ACGATAT"));
+	createTrie(gDna,pos,keyw);
+
+	// Output
+	// File output
+	fstream strm2;
+	strm2.open(TEST_PATH "my_trie_dna.dot", ios_base::out | ios_base::trunc);
+	clear(nodeMap);
+	_createTrieNodeNames(gDna, pos, nodeMap);
+	clear(edgeMap);
+	_createEdgeNames(gDna,edgeMap);
+	write(strm2,gDna,nodeMap,edgeMap,DotDrawing());
+	strm2.close();
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 void Test_Graph() {
 //____________________________________________________________________________
 // Graph without edge cargo but with edge ids
@@ -2262,6 +2304,7 @@ int main()
 	Test_Automaton();
 	Test_WordGraph();
 	Test_Oracle();
+	Test_Trie();
 	Test_Graph();
 	Test_GraphExternalProperty();
 	Test_GraphInternalProperty();
@@ -2293,6 +2336,7 @@ int main()
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_automaton.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_wordgraph.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_oracle.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_trie.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_algorithm.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_stack.h");
 	

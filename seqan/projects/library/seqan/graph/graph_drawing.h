@@ -63,7 +63,8 @@ template <typename TEdges, typename TSpec, typename TNodeMap>
 void _createNodeNames(Graph<TEdges, TSpec> const& g,
 		      TNodeMap& nodeMap)
 {
-        typedef Graph<TEdges, TSpec> TGraph;
+	SEQAN_CHECKPOINT
+    typedef Graph<TEdges, TSpec> TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	initVertexMap(g, nodeMap);
 	char strV[BitsPerValue<TVertexDescriptor>::VALUE];
@@ -71,7 +72,7 @@ void _createNodeNames(Graph<TEdges, TSpec> const& g,
 	typedef typename Iterator<TGraph, VertexIterator<> >::Type TConstIter;
 	TConstIter it(g);
 	for(;!atEnd(it);++it) {
-		sprintf(strV, "%d", *it);
+		sprintf(strV, "\"%d\"", *it);
 		assignProperty(nodeMap, *it, String<char>(strV));
 	}
 }
@@ -80,10 +81,11 @@ template <typename TCargo, typename TEdgeSpec, typename TSpec, typename TEdgeMap
 void _createEdgeNames(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const& g,
 		      TEdgeMap& edgeMap)
 {
+	SEQAN_CHECKPOINT
 	typedef Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> TGraph;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	initEdgeMap(g, edgeMap);
-	char strE[3+2*(BitsPerValue<TEdgeDescriptor>::VALUE)];
+	char strE[2*BitsPerValue<TEdgeDescriptor>::VALUE];
 
 	typedef typename Iterator<TGraph, EdgeIterator<> >::Type TConstEdIter;
 	TConstEdIter itEd(g);
@@ -97,13 +99,14 @@ template <typename TAlphabet, typename TCargo, typename TEdgeSpec, typename TSpe
 void _createEdgeNames(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> const& g,
 		      TEdgeMap& edgeMap)
 {
+	SEQAN_CHECKPOINT
 	typedef Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> TGraph;
 	initEdgeMap(g, edgeMap);
 
 	typedef typename Iterator<TGraph, EdgeIterator<> >::Type TConstEdIter;
 	TConstEdIter itEd(g);
 	for(;!atEnd(itEd);++itEd) {
-		assignProperty(edgeMap, *itEd, (*itEd).i2);
+		assignProperty(edgeMap, *itEd, String<char>((*itEd).i2));
 	}
 }
 
@@ -111,6 +114,7 @@ template <typename TAlphabet, typename TCargo, typename TSpec, typename TGraphSp
 void _createEdgeNames(Graph<Automaton<TAlphabet, TCargo, WordGraph<TSpec> >, TGraphSpec> const& g,
 		      TEdgeMap& edgeMap)
 {
+	SEQAN_CHECKPOINT
 	typedef Graph<Automaton<TAlphabet, TCargo, WordGraph<TSpec> >, TGraphSpec> TGraph;
 	initEdgeMap(g, edgeMap);
 
@@ -123,7 +127,7 @@ void _createEdgeNames(Graph<Automaton<TAlphabet, TCargo, WordGraph<TSpec> >, TGr
 		value(str,0) = (*itEd).i2;
 		typename Iterator<String<TAlphabet> >::Type it = begin(label);
 		for(;!atEnd(it);++it) {
-			char c = getValue(it);
+			char c = convert<char>(getValue(it));
 			value(str,position(it) + 1) = c;
 		}
 		assignProperty(edgeMap, *itEd, str);

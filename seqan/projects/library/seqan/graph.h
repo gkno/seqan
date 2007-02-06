@@ -46,6 +46,8 @@
 #include <seqan/graph/graph_impl_wordgraph.h>
 // Special automaton: Oracle
 #include <seqan/graph/graph_impl_oracle.h>
+// Special automaton: Trie
+#include <seqan/graph/graph_impl_trie.h>
 
 
 // Graph drawing
