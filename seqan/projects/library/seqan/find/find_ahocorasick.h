@@ -17,6 +17,8 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TNeedle:The needle type, a string of keywords.
 ...type:Class.String
 ..remarks.text:The types of the keywords in the needle container and the haystack have to match.
+..remarks.text:Matching positions do not come in order because we report beginning positions of matches.
+..remarks.text:Likewise, if multiple keywords match at a given position no pre-specified order is guaranteed.
 */
 
 ///.Class.Pattern.param.TSpec.type:Spec.AhoCorasick
@@ -41,7 +43,7 @@ public:
 	typedef Graph<Automaton<TAlphabet> > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	
-	TNeedle data_needle;
+	Holder<TNeedle> data_needle;
 	String<TVertexDescriptor> data_supplyMap;
 	String<String<TSize> > data_terminalStateMap;
 	TGraph data_graph;
@@ -49,18 +51,18 @@ public:
 	// To restore the automaton after a hit
 	String<TSize> data_endPositions;	// All remaining keyword indices
 	TSize data_keywordIndex;			// Current keyword that produced a hit
-	TSize data_lastPosition;			// Last position in the finder
+	TSize data_needleLength;			// Last length of needle to reposition finder
 	TVertexDescriptor data_lastState;   // Last state in the trie
 
 //____________________________________________________________________________
 
 	Pattern() {
-SEQAN_CHECKPOINT
 	}
 
 	template <typename TNeedle2>
 	Pattern(TNeedle2 const & ndl)
 	{
+		SEQAN_CHECKPOINT
 		setHost(*this, ndl);
 	}
 
@@ -69,6 +71,28 @@ SEQAN_CHECKPOINT
 	}
 //____________________________________________________________________________
 };
+
+
+//////////////////////////////////////////////////////////////////////////////
+// Host Metafunctions
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TNeedle>
+struct Host< Pattern<TNeedle, AhoCorasick> >
+{
+	typedef TNeedle Type;
+};
+
+template <typename TNeedle>
+struct Host< Pattern<TNeedle, AhoCorasick> const>
+{
+	typedef TNeedle const Type;
+};
+
+
+//////////////////////////////////////////////////////////////////////////////
+// Functions
+//////////////////////////////////////////////////////////////////////////////
 
 template <typename TNeedle>
 inline void
@@ -84,7 +108,7 @@ _createAcTrie(Pattern<TNeedle, AhoCorasick> & me)
 	TVertexDescriptor nilVal = _get_nil<TVertexDescriptor>();
 
 	// Create regular trie
-	createTrie(me.data_graph,me.data_terminalStateMap, me.data_needle);
+	createTrie(me.data_graph,me.data_terminalStateMap, host(me));
 
 	// Create parent map
 	String<TVertexDescriptor> parentMap;
@@ -150,7 +174,7 @@ void setHost (Pattern<TNeedle, AhoCorasick> & me, TNeedle2 const & needle) {
 	clear(me.data_endPositions);
 	me.data_keywordIndex = 0;
 	_createAcTrie(me);
-	me.data_lastPosition = 0;
+	me.data_needleLength = 0;
 	me.data_lastState = getRoot(me.data_graph);
 
 	/*
@@ -176,6 +200,26 @@ setHost (Pattern<TNeedle, AhoCorasick> & me, TNeedle2 & needle)
 	setHost(me, reinterpret_cast<TNeedle2 const &>(needle));
 }
 
+//____________________________________________________________________________
+
+template <typename TNeedle>
+inline typename Host<Pattern<TNeedle, AhoCorasick>const>::Type & 
+host(Pattern<TNeedle, AhoCorasick> & me)
+{
+SEQAN_CHECKPOINT
+	return value(me.data_needle);
+}
+
+template <typename TNeedle>
+inline typename Host<Pattern<TNeedle, AhoCorasick>const>::Type & 
+host(Pattern<TNeedle, AhoCorasick> const & me)
+{
+SEQAN_CHECKPOINT
+	return value(me.data_needle);
+}
+
+//____________________________________________________________________________
+
 
 template <typename TNeedle>
 inline typename Size<TNeedle>::Type
@@ -194,24 +238,24 @@ inline bool find(TFinder & finder, Pattern<TNeedle, AhoCorasick> & me) {
 	typedef Graph<Automaton<TAlphabet> > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	
-	// Process left-over hits
-	if (!empty(me.data_endPositions)) {
-		me.data_keywordIndex = me.data_endPositions[length(me.data_endPositions)-1];
-		if (length(me.data_endPositions) > 1) resize(me.data_endPositions, (length(me.data_endPositions)-1));
-		else clear(me.data_endPositions);
-		goBegin(finder);
-		finder += me.data_lastPosition;
-		finder -= (length(me.data_needle[me.data_keywordIndex])-1);
-		return true;
-	}
-
 	if (empty(finder))
 		goBegin(finder);
 	else {
-		goBegin(finder);
-		finder += me.data_lastPosition;
-		++finder;
+		finder += me.data_needleLength;
+		++finder; // Set forward the finder
 	}
+
+	// Process left-over hits
+	if (!empty(me.data_endPositions)) {
+		--finder; // Set back the finder
+		me.data_keywordIndex = me.data_endPositions[length(me.data_endPositions)-1];
+		me.data_needleLength = length(getValue(host(me), me.data_keywordIndex))-1;
+		if (length(me.data_endPositions) > 1) resize(me.data_endPositions, (length(me.data_endPositions)-1));
+		else clear(me.data_endPositions);
+		finder -= me.data_needleLength;
+		return true;
+	}
+
 
 
 	TVertexDescriptor current = me.data_lastState;
@@ -230,12 +274,12 @@ inline bool find(TFinder & finder, Pattern<TNeedle, AhoCorasick> & me) {
 		}
 		me.data_endPositions = getProperty(me.data_terminalStateMap,current);
 		if (!empty(me.data_endPositions)) {
-			me.data_lastPosition = position(finder);
 			me.data_keywordIndex = me.data_endPositions[length(me.data_endPositions)-1];
+			me.data_needleLength = length(getValue(host(me), me.data_keywordIndex))-1;
 			if (length(me.data_endPositions) > 1) resize(me.data_endPositions, length(me.data_endPositions)-1);
 			else clear(me.data_endPositions);
 			me.data_lastState = current;
-			finder -= (length(me.data_needle[me.data_keywordIndex])-1);
+			finder -= me.data_needleLength;
 			return true;
 		}
 		++finder;

@@ -36,8 +36,11 @@ void Test_OnlineAlg()
 	while (find(finder, pattern))
 		append(pos,position(finder));
 
+	SEQAN_TASSERT(host(pattern) == needle);
+	SEQAN_TASSERT(host(reinterpret_cast<Pattern<String<char>, TAlgorithmSpec> const &>(pattern)) == needle);
 	SEQAN_TASSERT(pos[0] == 5);
 	SEQAN_TASSERT(pos[1] == 31);
+	SEQAN_TASSERT(length(pos) == 2);
 
 //____________________________________________________________________________
 // Test2 - large needle
@@ -55,9 +58,10 @@ void Test_OnlineAlg()
 
 	SEQAN_TASSERT(pos[0] == 0);
 	SEQAN_TASSERT(pos[1] == 26);
+	SEQAN_TASSERT(length(pos) == 2);
 
 //____________________________________________________________________________
-// Test3 - different alphabet
+// Test3 - different alphabet, small needle
 
 	String<Dna> hstk = "aaaaaaacaa";
 	Finder<String<Dna> > finderDna(hstk);
@@ -76,6 +80,27 @@ void Test_OnlineAlg()
 	SEQAN_TASSERT(pos[4] == 4);
 	SEQAN_TASSERT(pos[5] == 5);
 	SEQAN_TASSERT(pos[6] == 8);
+	SEQAN_TASSERT(length(pos) == 7);
+
+//____________________________________________________________________________
+// Test4 - different alphabet, large needle
+	String<Dna> text = "taaaataaaataaaataaaataaaataaaataaaataaaataaaataaaataaaataaaataaaataaaat";
+	Finder<String<Dna> > finderText(text);
+
+	String<Dna> query = "taaaataaaataaaataaaataaaataaaataaaataaaataaaat";
+	setHost(pattern, query);
+
+	clear(pos);
+	while (find(finderText, pattern)) 
+		append(pos,position(finderText));
+
+	SEQAN_TASSERT(pos[0] == 0);
+	SEQAN_TASSERT(pos[1] == 5);
+	SEQAN_TASSERT(pos[2] == 10);
+	SEQAN_TASSERT(pos[3] == 15);
+	SEQAN_TASSERT(pos[4] == 20);
+	SEQAN_TASSERT(pos[5] == 25);
+	SEQAN_TASSERT(length(pos) == 6);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -98,8 +123,11 @@ void Test_OnlineAlgMulti()
 	while (find(finder, pattern))
 		append(pos,position(finder));
 
+	SEQAN_TASSERT(host(pattern) == keywords);
+	SEQAN_TASSERT(host(reinterpret_cast<Pattern<TNeedle, TAlgorithmSpec> const &>(pattern)) == keywords);
 	SEQAN_TASSERT(pos[0] == 5);
 	SEQAN_TASSERT(pos[1] == 31);
+	SEQAN_TASSERT(length(pos) == 2);
 
 	haystack = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefgaabcdef";
 	setHost(finder, haystack);
@@ -115,6 +143,7 @@ void Test_OnlineAlgMulti()
 
 	SEQAN_TASSERT(pos[0] == 0);
 	SEQAN_TASSERT(pos[1] == 26);
+	SEQAN_TASSERT(length(pos) == 2);
 
 
 	String<Dna> hstk = "aaaaaaacaa";
@@ -136,6 +165,26 @@ void Test_OnlineAlgMulti()
 	SEQAN_TASSERT(pos[4] == 4);
 	SEQAN_TASSERT(pos[5] == 5);
 	SEQAN_TASSERT(pos[6] == 8);
+	SEQAN_TASSERT(length(pos) == 7);
+
+	String<Dna> text = "taaaataaaataaaataaaataaaataaaataaaataaaataaaataaaataaaataaaataaaataaaat";
+	Finder<String<Dna> > finderText(text);
+
+	clear(dna_keywords);
+	appendValue(dna_keywords, String<Dna>("taaaataaaataaaataaaataaaataaaataaaataaaataaaat"));
+	setHost(pattern, dna_keywords);
+
+	clear(pos);
+	while (find(finderText, pattern)) 
+		append(pos,position(finderText));
+
+	SEQAN_TASSERT(pos[0] == 0);
+	SEQAN_TASSERT(pos[1] == 5);
+	SEQAN_TASSERT(pos[2] == 10);
+	SEQAN_TASSERT(pos[3] == 15);
+	SEQAN_TASSERT(pos[4] == 20);
+	SEQAN_TASSERT(pos[5] == 25);
+	SEQAN_TASSERT(length(pos) == 6);
 
 //____________________________________________________________________________
 // Test2 - Multiple keywords
@@ -160,6 +209,8 @@ void Test_OnlineAlgMulti()
 	SEQAN_TASSERT(keywordIndex[0] == 1);
 	SEQAN_TASSERT(finderPos[1] == 7);
 	SEQAN_TASSERT(keywordIndex[1] == 0);
+	SEQAN_TASSERT(length(finderPos) == 2);
+	SEQAN_TASSERT(length(keywordIndex) == 2);
 
 	String<Dna> hstDna("AGATACGATATATAC");
 	Finder<String<Dna> > fdDna(hstDna);
@@ -184,6 +235,8 @@ void Test_OnlineAlgMulti()
 	SEQAN_TASSERT(keywordIndex[1] == 1);
 	SEQAN_TASSERT(finderPos[2] == 7);
 	SEQAN_TASSERT(keywordIndex[2] == 0);
+	SEQAN_TASSERT(length(finderPos) == 3);
+	SEQAN_TASSERT(length(keywordIndex) == 3);
 }
 
 
@@ -257,6 +310,7 @@ int main()
 	debug::verifyCheckpoints("projects/library/seqan/find/find_shiftor.h");
 	debug::verifyCheckpoints("projects/library/seqan/find/find_bndm.h");
 	debug::verifyCheckpoints("projects/library/seqan/find/find_bom.h");
+	debug::verifyCheckpoints("projects/library/seqan/find/find_ahocorasick.h");
 
 
 

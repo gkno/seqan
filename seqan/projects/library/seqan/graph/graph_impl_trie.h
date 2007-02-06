@@ -8,7 +8,7 @@ template<typename TAlphabet, typename TCargo, typename TEdgeSpec, typename TSpec
 inline void
 createTrie(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec>& g,
 		   String<String<TPos> >& terminalStateMap,
-		   String<String<TChar> >& keywords)
+		   String<String<TChar> > const& keywords)
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> TGraph;
@@ -18,10 +18,10 @@ createTrie(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec>& g,
 	TVertexDescriptor nilVal = _get_nil<TVertexDescriptor>();
 	TVertexDescriptor root = addVertex(g);
 	assignRoot(g,root);
-	typename Iterator<String<String<TChar> > >::Type it = begin(keywords);
+	typename Iterator<String<String<TChar> > const>::Type it = begin(keywords);
 	for(;!atEnd(it);goNext(it)) {
 		TVertexDescriptor current = root;
-		typename Iterator<String<TChar> >::Type sIt = begin(*it);
+		typename Iterator<String<TChar> const>::Type sIt = begin(*it);
 		for(;!atEnd(sIt);goNext(sIt)) {
 			if (getSuccessor(g, current, *sIt) == nilVal) break;
 			current = getSuccessor(g, current, *sIt);

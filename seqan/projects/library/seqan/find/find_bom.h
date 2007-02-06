@@ -37,6 +37,7 @@ private:
 public:
 	typedef typename Value<TNeedle>::Type TAlphabet;
 	typedef typename Size<TNeedle>::Type TSize;
+	Holder<TNeedle> data_needle;
 	TSize needleLength;		
 	TSize haystackLength;
 	TSize step;
@@ -45,12 +46,12 @@ public:
 //____________________________________________________________________________
 
 	Pattern() {	
-SEQAN_CHECKPOINT
 	}
 
 	template <typename TNeedle2>
 	Pattern(TNeedle2 const & ndl)
 	{
+SEQAN_CHECKPOINT
 		setHost(*this, ndl);
 	}
 
@@ -59,7 +60,27 @@ SEQAN_CHECKPOINT
 	}
 //____________________________________________________________________________
 };
-		
+
+//////////////////////////////////////////////////////////////////////////////
+// Host Metafunctions
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TNeedle>
+struct Host< Pattern<TNeedle, BomAlgo> >
+{
+	typedef TNeedle Type;
+};
+
+template <typename TNeedle>
+struct Host< Pattern<TNeedle, BomAlgo> const>
+{
+	typedef TNeedle const Type;
+};
+
+
+//////////////////////////////////////////////////////////////////////////////
+// Functions
+//////////////////////////////////////////////////////////////////////////////
 
 template <typename TNeedle, typename TNeedle2>
 inline void 
@@ -71,6 +92,7 @@ setHost (Pattern<TNeedle, BomAlgo> & me, TNeedle2 const& needle)
 	clear(me.oracle);
 	createOracleOnReverse(me.oracle,needle);
 	assignRoot(me.oracle,0);
+	me.data_needle = needle;
 }
 
 template <typename TNeedle, typename TNeedle2>
@@ -80,6 +102,25 @@ setHost (Pattern<TNeedle, BomAlgo> & me, TNeedle2 & needle)
 	setHost(me, reinterpret_cast<TNeedle2 const &>(needle));
 }
 
+//____________________________________________________________________________
+
+template <typename TNeedle>
+inline typename Host<Pattern<TNeedle, BomAlgo>const>::Type & 
+host(Pattern<TNeedle, BomAlgo> & me)
+{
+SEQAN_CHECKPOINT
+	return value(me.data_needle);
+}
+
+template <typename TNeedle>
+inline typename Host<Pattern<TNeedle, BomAlgo>const>::Type & 
+host(Pattern<TNeedle, BomAlgo> const & me)
+{
+SEQAN_CHECKPOINT
+	return value(me.data_needle);
+}
+
+//____________________________________________________________________________
 
 
 template <typename TFinder, typename TNeedle>

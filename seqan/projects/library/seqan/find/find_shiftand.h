@@ -35,19 +35,18 @@ private:
 
 //____________________________________________________________________________
 public:
-	typedef typename Size<TNeedle>::Type TSize;
-	typedef typename Value<TNeedle>::Type TAlphabet;
-	typedef typename Size<TAlphabet>::Type TAlphabetSize;
-	TAlphabetSize* table;			// Look up table for each character in the alphabet (called B in "Navarro")
-	TAlphabetSize* prefSufMatch;		// Set of all the prefixes of needle that match a suffix of haystack (called D in "Navarro")
-	TAlphabetSize alphabetSize;		// e.g., char --> 256
-	TSize needleLength;		// e.g., needleLength=33 --> blockCount=2 (iff w=32 bits)
-	TSize blockCount;		// #unsigned ints required to store needle	
+	typedef unsigned int TWord;
+
+	Holder<TNeedle> data_needle;
+	TWord* table;			// Look up table for each character in the alphabet (called B in "Navarro")
+	TWord* prefSufMatch;		// Set of all the prefixes of needle that match a suffix of haystack (called D in "Navarro")
+	TWord alphabetSize;		// e.g., char --> 256
+	TWord needleLength;		// e.g., needleLength=33 --> blockCount=2 (iff w=32 bits)
+	TWord blockCount;		// #unsigned ints required to store needle	
 
 //____________________________________________________________________________
 
 	Pattern() {
-SEQAN_CHECKPOINT
 		table = 0;
 		prefSufMatch=0;
 	}
@@ -70,12 +69,31 @@ SEQAN_CHECKPOINT
 //____________________________________________________________________________
 };
 
+//////////////////////////////////////////////////////////////////////////////
+// Host Metafunctions
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TNeedle>
+struct Host< Pattern<TNeedle, ShiftAnd> >
+{
+	typedef TNeedle Type;
+};
+
+template <typename TNeedle>
+struct Host< Pattern<TNeedle, ShiftAnd> const>
+{
+	typedef TNeedle const Type;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+// Functions
+//////////////////////////////////////////////////////////////////////////////
 
 template <typename TNeedle, typename TNeedle2>
 void setHost (Pattern<TNeedle, ShiftAnd> & me, TNeedle2 const & needle) {
 	SEQAN_CHECKPOINT
+	typedef unsigned int TWord;
 	typedef typename Value<TNeedle>::Type TValue;
-	typedef typename Size<TNeedle>::Type TSize;
 	if (me.table != 0) {
 		deallocate(me, me.table, me.alphabetSize * me.blockCount);
 		deallocate(me, me.prefSufMatch, me.blockCount);
@@ -85,7 +103,7 @@ void setHost (Pattern<TNeedle, ShiftAnd> & me, TNeedle2 const & needle) {
 	me.needleLength = length(needle);
 	me.alphabetSize = ValueSize<TValue>::VALUE;
 	if (me.needleLength<1) me.blockCount=1;
-	else me.blockCount=((me.needleLength-1) / BitsPerValue<TSize>::VALUE)+1;
+	else me.blockCount=((me.needleLength-1) / BitsPerValue<TWord>::VALUE)+1;
 			
 	allocate (me, me.table, me.blockCount * me.alphabetSize);
 	arrayFill (me.table, me.table + me.blockCount * me.alphabetSize, 0);
@@ -93,11 +111,13 @@ void setHost (Pattern<TNeedle, ShiftAnd> & me, TNeedle2 const & needle) {
 	allocate (me, me.prefSufMatch, me.blockCount);
 	arrayFill (me.prefSufMatch, me.prefSufMatch + me.blockCount, 0);
 
-	for (TSize j = 0; j < me.needleLength; ++j) {
+	for (TWord j = 0; j < me.needleLength; ++j) {
 		// Determine character position in array table
-		TSize pos = convert<TSize>(getValue(needle,j));
-		me.table[me.blockCount*pos + j / BitsPerValue<TSize>::VALUE] |= (1<<(j%BitsPerValue<TSize>::VALUE));
+		TWord pos = convert<TWord>(getValue(needle,j));
+		me.table[me.blockCount*pos + j / BitsPerValue<TWord>::VALUE] |= (1<<(j%BitsPerValue<TWord>::VALUE));
 	}
+
+	me.data_needle = needle;
 
 	/*
 	// Debug code
@@ -124,15 +144,34 @@ void setHost (Pattern<TNeedle, ShiftAnd> & me, TNeedle2 & needle)
 	setHost(me, reinterpret_cast<TNeedle2 const &>(needle));
 }
 
+//____________________________________________________________________________
+
+template <typename TNeedle>
+inline typename Host<Pattern<TNeedle, ShiftAnd>const>::Type & 
+host(Pattern<TNeedle, ShiftAnd> & me)
+{
+SEQAN_CHECKPOINT
+	return value(me.data_needle);
+}
+
+template <typename TNeedle>
+inline typename Host<Pattern<TNeedle, ShiftAnd>const>::Type & 
+host(Pattern<TNeedle, ShiftAnd> const & me)
+{
+SEQAN_CHECKPOINT
+	return value(me.data_needle);
+}
+
+//____________________________________________________________________________
 
 
 template <typename TFinder, typename TNeedle>
 bool _findShiftAnd_SmallNeedle(TFinder & finder, Pattern<TNeedle, ShiftAnd> & me) {
 	SEQAN_CHECKPOINT
-	typedef typename Size<TNeedle>::Type TSize;
-	TSize compare = (1 << (me.needleLength-1));
+	typedef unsigned int TWord;
+	TWord compare = (1 << (me.needleLength-1));
 	while (!atEnd(finder)) {
-		TSize pos = convert<TSize>(*finder);
+		TWord pos = convert<TWord>(*finder);
 		me.prefSufMatch[0] = ((me.prefSufMatch[0] << 1) | 1) & me.table[me.blockCount*pos];
 		if ((me.prefSufMatch[0] & compare) != 0) {
 			finder-=(me.needleLength-1);
@@ -140,24 +179,25 @@ bool _findShiftAnd_SmallNeedle(TFinder & finder, Pattern<TNeedle, ShiftAnd> & me
 		}
 		goNext(finder);
 	}
-	return 0;
+	return false;
 }
 
 template <typename TFinder, typename TNeedle>
 bool _findShiftAnd_LargeNeedle(TFinder & finder, Pattern<TNeedle, ShiftAnd> & me) {
 	SEQAN_CHECKPOINT
-	typedef typename Size<TNeedle>::Type TSize;
-	TSize compare = (1 << ((me.needleLength-1) % BitsPerValue<TSize>::VALUE));
+	typedef unsigned int TWord;
+	
+	TWord compare = (1 << ((me.needleLength-1) % BitsPerValue<TWord>::VALUE));
 	while (!atEnd(finder)) {
-		TSize pos = convert<TSize>(*finder);
-		TSize carry = 1;
-		for(TSize block=0;block<me.blockCount;++block) {
-			bool newCarry = ((me.prefSufMatch[block] & (1<< (BitsPerValue<TSize>::VALUE - 1)))!=0); 
+		TWord pos = convert<TWord>(*finder);
+		TWord carry = 1;
+		for(TWord block=0;block<me.blockCount;++block) {
+			bool newCarry = ((me.prefSufMatch[block] & (1<< (BitsPerValue<TWord>::VALUE - 1)))!=0); 
 			me.prefSufMatch[block]<<=1;
 			me.prefSufMatch[block]|=carry;
 			carry = newCarry;
 		}
-		for(TSize block=0;block<me.blockCount;++block) me.prefSufMatch[block] &= me.table[me.blockCount*pos+block];
+		for(TWord block=0;block<me.blockCount;++block) me.prefSufMatch[block] &= me.table[me.blockCount*pos+block];
 		if ((me.prefSufMatch[me.blockCount-1] & compare) != 0) {
 			finder-=(me.needleLength-1);
 			return true; 
@@ -175,7 +215,7 @@ bool _findShiftAnd_LargeNeedle(TFinder & finder, Pattern<TNeedle, ShiftAnd> & me
 		*/
 		goNext(finder);
 	}
-	return 0;
+	return false;
 }
 
 template <typename TFinder, typename TNeedle>
