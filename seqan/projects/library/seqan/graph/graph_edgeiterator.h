@@ -197,7 +197,8 @@ goNext(Iter<TGraph, GraphIterator<EdgeIterator<TSpec> > >& it)
 			while((!atEnd(it.data_vertex_it)) && 
 					(atEnd(it.data_edge_it))) {
 				++it.data_vertex_it;
-				if (!idInUse(hostGraph(it).data_id_managerV, getValue(it.data_vertex_it))) continue;
+				if ((atEnd(it.data_vertex_it)) ||
+					(!idInUse(hostGraph(it).data_id_managerV, getValue(it.data_vertex_it)))) continue;
 				typedef typename Iterator<TGraph, OutEdgeIterator<> >::Type TOutEdgeIterator;
 				it.data_edge_it = TOutEdgeIterator(hostGraph(it), getValue(it.data_vertex_it));			
 			}

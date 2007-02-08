@@ -11,12 +11,12 @@ template<typename TIdType, typename TSpec>
 class IdManager 
 {
 	public:
-		std::deque< TIdType > data_freeIds;
-		TIdType data_endId;
+		String<TIdType> data_freeIds;  
+		String<bool> data_in_use;   //1 = in use, 0 = not in use
 
 //____________________________________________________________________________	
 	public:
-		IdManager() : data_endId(0) 
+		IdManager()
 		{
 			SEQAN_CHECKPOINT
 		}
@@ -30,7 +30,7 @@ class IdManager
 		{
 			SEQAN_CHECKPOINT
 			data_freeIds = _other.data_freeIds;
-			data_endId = _other.data_endId;
+			data_in_use = _other.data_in_use;
 		}
 
 		IdManager const& 
@@ -39,7 +39,7 @@ class IdManager
 			SEQAN_CHECKPOINT
 			if (this == &_other) return *this;
 			data_freeIds = _other.data_freeIds;
-			data_endId = _other.data_endId;
+			data_in_use = _other.data_in_use;
 			return *this;
 		}
 
@@ -79,12 +79,14 @@ obtainId(IdManager<TIdType, TSpec>& idm)
 	SEQAN_CHECKPOINT
 
 	TIdType id;
-	if (!idm.data_freeIds.empty()) {
-		id = idm.data_freeIds.front();
-		idm.data_freeIds.pop_front();
+	if (!empty(idm.data_freeIds)) {
+		id = getValue(idm.data_freeIds, length(idm.data_freeIds) - 1);
+		_setLength(idm.data_freeIds, length(idm.data_freeIds) - 1);
+		assignValue(idm.data_in_use, id, true);
 	} else {
-		id = idm.data_endId;
-		++idm.data_endId;
+		id = length(idm.data_in_use);
+		resize(idm.data_in_use, id + 1, Generous());
+		assignValue(idm.data_in_use, id, true);
 	}
 	return id;
 }
@@ -96,30 +98,11 @@ releaseId(IdManager<TIdType, TSpec>& idm,
 {
 	SEQAN_CHECKPOINT
 	SEQAN_ASSERT(idInUse(idm,id) == true)
-
-	if (id == idm.data_endId - 1) {
-		--idm.data_endId;
-		// Trim the data_freeIds if possible
-		while ( (idm.data_endId != 0) && 
-				(!idm.data_freeIds.empty()) &&
-				(idm.data_freeIds.back() == idm.data_endId - 1)) 
-		{
-				idm.data_freeIds.pop_back();
-				--idm.data_endId;
-		}
+	if (id == length(idm.data_in_use) - 1) {
+		_setLength(idm.data_in_use, length(idm.data_in_use) - 1);
 	} else {
-		if (idm.data_freeIds.empty()) idm.data_freeIds.push_back(id);
-		else if (id < idm.data_freeIds.front()) idm.data_freeIds.push_front(id);
-		else if (id > idm.data_freeIds.back()) idm.data_freeIds.push_back(id);
-		else {
-			typedef typename std::deque<TIdType>::iterator TDequeIterator;
-			for(TDequeIterator pos = idm.data_freeIds.begin(); pos != idm.data_freeIds.end(); ++pos) {
-				if (id < *pos) {
-					idm.data_freeIds.insert(pos, id);
-					break;
-				}
-			}
-		}
+		assignValue(idm.data_in_use, id, false);
+		appendValue(idm.data_freeIds, id);
 	}
 }
 
@@ -128,8 +111,8 @@ inline void
 releaseAll(IdManager<TIdType, TSpec>& idm) 
 {
 	SEQAN_CHECKPOINT
-	idm.data_freeIds.clear();
-	idm.data_endId = 0;
+	clear(idm.data_freeIds);
+	clear(idm.data_in_use);
 }
 
 template<typename TIdType, typename TSpec>
@@ -137,7 +120,7 @@ inline typename Size<IdManager<TIdType, TSpec> >::Type
 getIdUpperBound(IdManager<TIdType, TSpec> const& idm)
 {
 	SEQAN_CHECKPOINT
-	return idm.data_endId;
+	return length(idm.data_in_use);
 }
 
 template<typename TIdType, typename TSpec>
@@ -146,12 +129,10 @@ getIdLowerBound(IdManager<TIdType, TSpec> const& idm)
 {
 	SEQAN_CHECKPOINT
 	typedef typename Size<IdManager<TIdType, TSpec> >::Type TSize;
-	TSize count = 0;
-	for(TSize it = 0; it < idm.data_freeIds.size(); ++it) {
-		if (idm.data_freeIds[it] != count) return count;
-		++count;
+	for(TSize it = 0; it < length(idm.data_in_use); ++it) {
+		if (getValue(idm.data_in_use, it)) return it;
 	}
-	return count;
+	return 0;
 }
 
 template<typename TIdType, typename TSpec>
@@ -159,7 +140,7 @@ inline typename Size<IdManager<TIdType, TSpec> >::Type
 idCount(IdManager<TIdType, TSpec> const& idm)
 {
 	SEQAN_CHECKPOINT
-	return (idm.data_endId - idm.data_freeIds.size());
+	return (length(idm.data_in_use) - length(idm.data_freeIds));
 }
 
 template<typename TIdType, typename TSpec, typename TId>
@@ -168,11 +149,8 @@ idInUse(IdManager<TIdType, TSpec> const& idm,
 		TId const id)
 {
 	SEQAN_CHECKPOINT
-	if (id >= idm.data_endId) return false;
-	for(unsigned int it = 0; ((it < idm.data_freeIds.size()) && (idm.data_freeIds[it]<=id)); ++it) {
-		if (idm.data_freeIds[it] == id) return false;
-	}
-	return true;
+	SEQAN_ASSERT(id < length(idm.data_in_use))
+	return getValue(idm.data_in_use, id);
 }
 
 

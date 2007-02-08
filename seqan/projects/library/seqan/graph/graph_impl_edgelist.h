@@ -135,14 +135,7 @@ clearVertices(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec>& g)
 {
 	SEQAN_CHECKPOINT
 	clearEdges(g);
-	typedef Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> TGraph;
-	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	typedef typename EdgeType<TGraph>::Type TEdgeStump;
-	typedef typename Iterator<String<TEdgeStump*> >::Type TIter;
-	for(TIter it = begin(g.data_vertex);!atEnd(it);goNext(it)) {
-		TVertexDescriptor vertex = position(it);
-		if(idInUse(g.data_id_managerV, vertex)) releaseId(g.data_id_managerV, vertex);
-	}
+	releaseAll(g.data_id_managerV);
 	clear(g.data_vertex);
 }
 

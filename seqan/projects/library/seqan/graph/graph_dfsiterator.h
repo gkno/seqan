@@ -11,10 +11,10 @@ template<typename TGraph, typename TSpec>
 class Iter<TGraph, GraphIterator<DfsIterator<TSpec> > > 
 {
 public:
-	typedef typename VertexDescriptor<TGraph >::Type TVertexDescriptor;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	TGraph const* data_host;
 	TVertexDescriptor data_source;
-	String<bool> data_tokenMap;
+	String<bool> data_tokenMap;			// Which vertices have been visited
 	std::deque<TVertexDescriptor> data_queue;
 
 	void _init() {

@@ -50,12 +50,11 @@ void Test_IdManager() {
 	SEQAN_TASSERT(idInUse(idm,2) == false)
 	SEQAN_TASSERT(idCount(idm) == 2)
 	SEQAN_TASSERT(getIdUpperBound(idm) == 5)
-	// Ensure a minimum id range
-	releaseId(idm,4);
+	releaseId(idm,4);  // Now we can shrink id range
 	SEQAN_TASSERT(idCount(idm) == 1)
-	SEQAN_TASSERT(getIdUpperBound(idm) == 1)
+	SEQAN_TASSERT(getIdUpperBound(idm) == 4)
 
-	// Smallest Ids are reused first
+	// Ids are reused
 	id=obtainId(idm);
 	id=obtainId(idm);
 	id=obtainId(idm);
@@ -67,21 +66,18 @@ void Test_IdManager() {
 	SEQAN_TASSERT(idInUse(idm,0) == false)
 	SEQAN_TASSERT(getIdLowerBound(idm) == 1)
 	releaseId(idm,2);
+	SEQAN_TASSERT(idInUse(idm,2) == false)
 	id=obtainId(idm);
-	SEQAN_TASSERT(id == 0)
-	SEQAN_TASSERT(idInUse(idm,0) == true)
+	SEQAN_TASSERT(id == 2)
+	SEQAN_TASSERT(idInUse(idm,2) == true)
 	
 	// Check copy constructor and assignment operator
 	IdManager<> idm2(idm);
 	SEQAN_TASSERT(idCount(idm2) == 3)
-	id=obtainId(idm2);
-	SEQAN_TASSERT(id == 2)
-	idm = idm2;
-	SEQAN_TASSERT(idCount(idm) == 4)
-	releaseAll(idm);
-	SEQAN_TASSERT(idCount(idm) == 0)
-	SEQAN_TASSERT(getIdUpperBound(idm) == 0)
-	SEQAN_TASSERT(getIdLowerBound(idm) == 0)
+	releaseAll(idm2);
+	SEQAN_TASSERT(idCount(idm2) == 0)
+	SEQAN_TASSERT(getIdUpperBound(idm2) == 0)
+	SEQAN_TASSERT(getIdLowerBound(idm2) == 0)
 
 
 //____________________________________________________________________________
@@ -120,9 +116,9 @@ void Test_IdManager() {
 	id_dummy = id_dummy2;
 	SEQAN_TASSERT(idCount(id_dummy) == 4)
 	releaseAll(id_dummy);
-	SEQAN_TASSERT(idCount(idm) == 0)
-	SEQAN_TASSERT(getIdUpperBound(idm) == 0)
-	SEQAN_TASSERT(getIdLowerBound(idm) == 0)
+	SEQAN_TASSERT(idCount(id_dummy) == 0)
+	SEQAN_TASSERT(getIdUpperBound(id_dummy) == 0)
+	SEQAN_TASSERT(getIdLowerBound(id_dummy) == 0)
 }
 
 //////////////////////////////////////////////////////////////////////////////
