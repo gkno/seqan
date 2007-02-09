@@ -17,6 +17,8 @@
 #include <seqan/graph.h>
 #include <seqan/find/find_bom.h>
 #include <seqan/find/find_ahocorasick.h>
+#include <seqan/find/find_multiple_shiftand.h>
+#include <seqan/find/find_set_horspool.h>
 
 
 //#include <seqan/find/find_multi.h>

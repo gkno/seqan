@@ -237,6 +237,60 @@ void Test_OnlineAlgMulti()
 	SEQAN_TASSERT(keywordIndex[2] == 0);
 	SEQAN_TASSERT(length(finderPos) == 3);
 	SEQAN_TASSERT(length(keywordIndex) == 3);
+
+//____________________________________________________________________________
+// Test2 - Multiple keywords that do not fit into a machine word
+	String<Dna> my_haystack("AGATACGATATATACAGATACGATATATACAGATACGATATATACAGATACGATATATACAGATACGATATATAC");
+	Finder<String<Dna> > my_finder(my_haystack);
+
+	typedef String<String<Dna> > TNeedle_My;
+	TNeedle_My my_keywords;
+	appendValue(my_keywords, String<Dna>("ATATATA"));
+	appendValue(my_keywords, String<Dna>("ACCGATCCAT"));
+	appendValue(my_keywords, String<Dna>("TATAT"));
+	appendValue(my_keywords, String<Dna>("ACCGAT"));
+	appendValue(my_keywords, String<Dna>("ACGATAT"));
+	appendValue(my_keywords, String<Dna>("CCAA"));
+	Pattern<TNeedle_My, TAlgorithmSpec> my_pattern(my_keywords);
+
+	clear(finderPos);
+	clear(keywordIndex);
+	while (find(my_finder, my_pattern)) {
+		//std::cout << position(my_finder) << "-" << position(my_pattern) << std::endl;
+		append(finderPos,position(my_finder));
+		append(keywordIndex,position(my_pattern));
+	}
+
+	SEQAN_TASSERT(finderPos[0] == 4);
+	SEQAN_TASSERT(keywordIndex[0] == 4);
+	SEQAN_TASSERT(finderPos[1] == 8);
+	SEQAN_TASSERT(keywordIndex[1] == 2);
+	SEQAN_TASSERT(finderPos[2] == 7);
+	SEQAN_TASSERT(keywordIndex[2] == 0);
+	SEQAN_TASSERT(finderPos[3] == 19);
+	SEQAN_TASSERT(keywordIndex[3] == 4);
+	SEQAN_TASSERT(finderPos[4] == 23);
+	SEQAN_TASSERT(keywordIndex[4] == 2);
+	SEQAN_TASSERT(finderPos[5] == 22);
+	SEQAN_TASSERT(keywordIndex[5] == 0);
+	SEQAN_TASSERT(finderPos[6] == 34);
+	SEQAN_TASSERT(keywordIndex[6] == 4);
+	SEQAN_TASSERT(finderPos[7] == 38);
+	SEQAN_TASSERT(keywordIndex[7] == 2);
+	SEQAN_TASSERT(finderPos[8] == 37);
+	SEQAN_TASSERT(keywordIndex[8] == 0);
+	SEQAN_TASSERT(finderPos[9] == 49);
+	SEQAN_TASSERT(keywordIndex[9] == 4);
+	SEQAN_TASSERT(finderPos[10] == 53);
+	SEQAN_TASSERT(keywordIndex[10] == 2);
+	SEQAN_TASSERT(finderPos[11] == 52);
+	SEQAN_TASSERT(keywordIndex[11] == 0);
+	SEQAN_TASSERT(finderPos[12] == 64);
+	SEQAN_TASSERT(keywordIndex[12] == 4);
+	SEQAN_TASSERT(finderPos[13] == 68);
+	SEQAN_TASSERT(keywordIndex[13] == 2);
+	SEQAN_TASSERT(finderPos[14] == 67);
+	SEQAN_TASSERT(keywordIndex[14] == 0);
 }
 
 
@@ -294,6 +348,7 @@ int main()
 	Test_OnlineAlg<BomAlgo>();
 	
 	Test_OnlineAlgMulti<AhoCorasick>();
+	Test_OnlineAlgMulti<MultipleShiftAnd>();
 
 	Test_Various();
 
@@ -311,7 +366,8 @@ int main()
 	debug::verifyCheckpoints("projects/library/seqan/find/find_bndm.h");
 	debug::verifyCheckpoints("projects/library/seqan/find/find_bom.h");
 	debug::verifyCheckpoints("projects/library/seqan/find/find_ahocorasick.h");
-
+	debug::verifyCheckpoints("projects/library/seqan/find/find_multiple_shiftand.h");
+	debug::verifyCheckpoints("projects/library/seqan/find/find_set_horspool.h");
 
 
 	SEQAN_TREPORT("TEST END")
