@@ -350,6 +350,25 @@ int main()
 	Test_OnlineAlgMulti<AhoCorasick>();
 	Test_OnlineAlgMulti<MultipleShiftAnd>();
 
+
+	// ToDo: SetHorspool -> Preprocessing done!
+	String<char> hst("annual_announce");
+	Finder<String<char> > fd(hst);
+
+	typedef String<String<char> > TN;
+	TN kyw;
+	appendValue(kyw, String<char>("announce"));
+	appendValue(kyw, String<char>("annual"));
+	appendValue(kyw, String<char>("annually"));
+	Pattern<TN, SetHorspool> pt(kyw);
+
+	String<unsigned int> finderPos;
+	String<unsigned int> keywordIndex;
+	while (find(fd, pt)) {
+		append(finderPos,position(fd));
+		append(keywordIndex,position(pt));
+	}
+
 	Test_Various();
 
 //	testMyersUkkonen("accagaatatggagatctagggatcca", "agata", -2);
