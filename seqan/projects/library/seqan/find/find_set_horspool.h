@@ -35,9 +35,14 @@ private:
 
 //____________________________________________________________________________
 public:
-	typedef unsigned int TWord;
 	typedef typename Size<TNeedle>::Type TSize;
+	typedef typename Value<TNeedle>::Type TValue;
+	typedef typename Value<TValue>::Type TAlphabet;
 	Holder<TNeedle> data_needle;
+	Graph<Automaton<TAlphabet> > data_reverseTrie;  // Search trie
+	String<String<TSize> > data_terminalStateMap;
+	String<TSize> data_dMap;	// Jump table
+	TSize data_lmin;
 	TSize data_keywordIndex;			// Current keyword that produced a hit
 	TSize data_needleLength;			// Last length of needle to reposition finder
 
@@ -81,7 +86,52 @@ struct Host< Pattern<TNeedle, SetHorspool> const>
 template <typename TNeedle, typename TNeedle2>
 void setHost (Pattern<TNeedle, SetHorspool> & me, TNeedle2 const & needle) {
 	SEQAN_CHECKPOINT
+	typedef typename Value<TNeedle>::Type TKeyword;
+	typedef typename Size<TKeyword>::Type TSize;
+	typedef typename Value<TKeyword>::Type TAlphabet;
+
+	// clean-up
+	clear(me.data_reverseTrie);
+	clear(me.data_terminalStateMap);
+	clear(me.data_dMap);
+
+	// Create Trie
+	createTrieOnReverse(me.data_reverseTrie,me.data_terminalStateMap,needle);
+	assignRoot(me.data_reverseTrie,0);
 	me.data_needle = needle;
+
+	// Create jump map
+	TSize alphabet_size = ValueSize<TAlphabet>::VALUE;
+	resize(me.data_dMap, alphabet_size);
+	me.data_lmin = _get_infinity<TSize>();
+	typename Iterator<TNeedle2 const>::Type it = begin(needle);
+	for(;!atEnd(it);goNext(it)) {
+		TSize tmp = length(*it)-1;
+		if (tmp<me.data_lmin) me.data_lmin = tmp;
+	}
+	for(TSize i=0;i<alphabet_size;++i) {
+		me.data_dMap[i]=me.data_lmin;
+	}
+	goBegin(it);
+	for(;!atEnd(it);goNext(it)) {
+		for(TSize pos = 0;pos < length(*it) - 1; ++pos) {
+			TSize ind = convert<TSize>((*it)[pos]);	
+			if ((length(*it)- 1 - pos) < me.data_dMap[ind]) {
+				me.data_dMap[ind] = (length(*it) - 1 - pos);
+			}
+		}
+	}
+
+	/*
+	fstream strm;
+	strm.open(TEST_PATH "my_trie.dot", ios_base::out | ios_base::trunc);
+	String<String<char> > nodeMap;
+	_createTrieNodeNames(me.data_reverseTrie, me.data_terminalStateMap, nodeMap);
+	String<String<char> > edgeMap;
+	_createEdgeNames(me.data_reverseTrie,edgeMap);
+	write(strm,me.data_reverseTrie,nodeMap,edgeMap,DotDrawing());
+	strm.close();
+	*/
 }
 
 template <typename TNeedle, typename TNeedle2>
