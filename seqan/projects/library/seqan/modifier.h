@@ -3,8 +3,10 @@
 
 
 #include <seqan/sequence.h>
-#include <seqan/modifier/modifier_string.h>
 #include <seqan/modifier/modifier_iterator.h>
+#include <seqan/modifier/modifier_string.h>
+
+#include <seqan/modifier/modifier_view.h>
 
 
 #endif //#ifndef SEQAN_HEADER_...
