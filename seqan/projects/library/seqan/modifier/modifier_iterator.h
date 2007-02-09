@@ -15,6 +15,19 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Class.ModifiedIterator:
+..summary:Allows to modify arbitrary iterators by specializing what differs from an origin.
+..cat:Modifiers
+..signature:ModifiedIterator<THost[, TSpec]>
+..param.THost:Original iterator.
+...type:Concept.Iterator
+..param.TSpec:The modifier type.
+...metafunction:Metafunction.Spec
+..implements:Concept.Iterator
+..remarks:$THost$ can also be a modified iterator, so you can create custom iterators by combining predefined ones.
+*/
+
 	template < typename THost, typename TSpec = void >
 	class ModifiedIterator {
 	public:

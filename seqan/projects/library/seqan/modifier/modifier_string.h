@@ -15,6 +15,19 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Class.ModifiedString:
+..summary:Allows to modify arbitrary strings by specializing what differs from an origin.
+..cat:Modifiers
+..signature:ModifiedIterator<THost[, TSpec]>
+..param.THost:Original iterator.
+...type:Concept.Iterator
+..param.TSpec:The modifier type.
+...metafunction:Metafunction.Spec
+..implements:Concept.Container
+..remarks:$THost$ can also be a modified string, so you can create custom strings by combining predefined ones.
+*/
+
 	template < typename THost, typename TSpec = void >
 	class ModifiedString {
 	public:
@@ -53,39 +66,6 @@ namespace SEQAN_NAMESPACE_MAIN
 	struct Spec< ModifiedString<THost, TSpec> const > {
 		typedef TSpec Type;
 	};
-
-/*
-	template < typename THost, typename TSpec >
-	struct Value< ModifiedString<THost, TSpec> >:
-		Value<THost> {};
-
-	template < typename THost, typename TSpec >
-	struct Value< ModifiedString<THost, TSpec> const>:
-		Value<THost const> {};
-
-
-	template < typename THost, typename TSpec >
-	struct GetValue< ModifiedString<THost, TSpec> >:
-		GetValue<THost> {};
-
-	template < typename THost, typename TSpec >
-	struct GetValue< ModifiedString<THost, TSpec> const >:
-		GetValue<THost const> {};
-
-
-	template < typename THost, typename TSpec >
-	struct Reference< ModifiedString<THost, TSpec> >:
-		Reference<THost> {};
-
-	template < typename THost, typename TSpec >
-	struct Reference< ModifiedString<THost, TSpec> const >:
-		Reference<THost const> {};
-
-
-	template < typename THost, typename TSpec >
-	struct Size< ModifiedString<THost, TSpec> >:
-		Size<THost> {};
-*/
 
 
 	// use Value, GetValue, Reference, Size, ... from corresponding iterator
@@ -126,7 +106,6 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < typename THost, typename TSpec >
 	struct Difference< ModifiedString<THost, TSpec> >:
 		Difference< typename Iterator< ModifiedString<THost, TSpec> >::Type > {};
-
 
 
 
@@ -235,53 +214,14 @@ namespace SEQAN_NAMESPACE_MAIN
 	//////////////////////////////////////////////////////////////////////////////
 	// value
 	//////////////////////////////////////////////////////////////////////////////
-/*
-class type_info {
-public:
-    _CRTIMP virtual ~type_info();
-    _CRTIMP bool operator==(const type_info& rhs) const;
-    _CRTIMP bool operator!=(const type_info& rhs) const;
-    _CRTIMP int before(const type_info& rhs) const;
-    _CRTIMP const char* name() const;
-    _CRTIMP const char* raw_name() const;
-};
-	template <typename THost, typename TSpec, typename TPos>
-	inline typename Reference<ModifiedString<THost, TSpec> >::Type 
-	value(ModifiedString<THost, TSpec> & me, TPos pos)
-	{
-	SEQAN_CHECKPOINT
-//		return typename Reference<ModifiedString<THost, TSpec> >::Type = *(begin(me) + pos);
-	typedef typename Iterator<ModifiedString<THost, TSpec> >::Type TIter;
-	typedef ModifiedIterator<typename Iterator<THost>::Type, TSpec> TIterB;
-	typedef typename Reference<TIter>::Type TIter1;
-	typedef typename Reference<TIterB>::Type TIter2;
-	typedef typename Reference<ModifiedString<THost, TSpec> >::Type TIter3;
-	typedef unsigned & TRef1;
-	typedef Reference<unsigned>::Type TRef2;
-		TIter it = begin(me);
-		it = it + pos;
-//		::std::cout << value(it);
-		::std::cout << typeid(TIter).name() << ::std::endl;
-		::std::cout << typeid(TIterB).name() << ::std::endl;
-		::std::cout << typeid(TIter1).name() << ::std::endl;
-		::std::cout << typeid(TIter2).name() << ::std::endl;
-		::std::cout << typeid(TIter3).name() << ::std::endl;
-		::std::cout << typeid(TRef1).name() << ::std::endl;
-		::std::cout << typeid(TRef2).name() << ::std::endl;
-//		typename Reference<TIter>::Type ref=value(it);
-//	static typename Value<TIter>::Type ref = 0;
 
-//		return *it ;
-		return *(begin(me) + pos);
-	}
-*/
-	template <typename THost, typename TSpec, typename TPos>
+    template <typename THost, typename TSpec, typename TPos>
 	inline typename Reference<ModifiedString<THost, TSpec> >::Type 
 	value(ModifiedString<THost, TSpec> & me, TPos pos)
 	{
 		return value(begin(me) + pos);
 	}
-/*
+
 	template <typename THost, typename TSpec, typename TPos>
 	inline typename Reference<ModifiedString<THost, TSpec> const >::Type 
 	value(ModifiedString<THost, TSpec> const & me, TPos pos)
@@ -289,7 +229,7 @@ public:
 	SEQAN_CHECKPOINT
 		return value(begin(me) + pos);
 	}
-*/
+
 	//////////////////////////////////////////////////////////////////////////////
 	// length
 	//////////////////////////////////////////////////////////////////////////////
