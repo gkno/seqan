@@ -875,7 +875,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 
 	template < typename TIndex, class TSpec >
 	inline typename Infix< typename Fibre<TIndex, ESA_RawText>::Type const >::Type 
-	parentEdgeLabel(Iter< TIndex, VSTree<TSpec> >  &it) {
+	parentEdgeLabel(Iter< TIndex, VSTree< TopDown< ParentLinks<TSpec> > > >  &it) {
 		typename Size<TIndex>::Type occ = getOccurence(it), last_len, len;
 
 		if (isRoot(it)) {
