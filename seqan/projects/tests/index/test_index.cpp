@@ -19,7 +19,7 @@ using namespace seqan;
 //////////////////////////////////////////////////////////////////////////////
 
 
-
+/*
 void testBuild()
 {
 		typedef String<char> TText;
@@ -44,17 +44,76 @@ void testBuild()
 
         save(esa, "corpus/chlamydia");
 }
+*/
+void testMultiIndex()
+{
+		typedef String<Dna5> TText;
+		typedef StringSet< TText, ConcatDirect<> > TMulti;
+
+		String<Dna5> t[6];
+		//t[0] = "caterpillar";
+		//t[1] = "catwoman";
+		//t[2] = "pillow";
+		//t[3] = "willow";
+		//t[4] = "ill";
+		//t[5] = "wow";
+
+
+		t[0] = "caggctcgcgt";
+		t[1] = "caggaacg";
+		t[2] = "tcgttg";
+		t[3] = "tggtcg";
+		t[4] = "agg";
+		t[5] = "ctg";
+
+
+        Index<TMulti> esa;
+		for(unsigned i=0; i<6; ++i)
+			appendValue(indexText(esa), t[i]);
+
+		typedef Pair<int,int> TPair;
+		String<TPair> sa;
+
+		indexRequire(esa, ESA_SA());
+		indexRequire(esa, ESA_LCP());
+		indexRequire(esa, ESA_BWT());
+
+		for(int i=0; i<length(indexRawSA(esa)); ++i)
+			cout << saAt(i,esa) << " = " << indexRawSA(esa)[i] << "    " << endl;
+		for(int i=0; i<length(indexRawSA(esa)); ++i)
+			cout << bwtAt(i,esa) << " = " << indexBWT(esa).tab[i] << "    " << endl;
+		for(int i=0; i<length(indexRawSA(esa)); ++i)
+			cout << lcpAt(i,esa) << " = " << indexLCP(esa)[i] << "    " << endl;
+
+/*
+
+		resize(sa, length(indexRawText(esa)));
+		createSuffixArrayExt(sa, indexText(esa), Skew7());
+
+		for(int i=0; i<length(indexRawText(esa)); ++i)
+			cout << indexRawText(esa)[i] << "    ";
+		for(int i=0; i<length(sa); ++i)
+			cout << sa[i] << "    " << suffix(t[getValueI1(sa[i])], getValueI2(sa[i])) << endl;
+
+		String<unsigned> lcp;
+		resize(lcp, length(indexRawText(esa)));
+		createLCPTableExt(lcp, indexText(esa), sa, Kasai());
+
+		for(int i=0; i<length(sa); ++i)
+			cout << lcp[i] << "    " << suffix(t[getValueI1(sa[i])], getValueI2(sa[i])) << endl;*/
+}
+
 
 
 void testSTreeIterators()
 {
 		typedef Index<String<char>, Index_ESA<> > TIndex;
 
-//		String<char> text("acaaacatatz");
-		String<char> text("AAAAAGGGGG");
+		String<char> text("acaaacatatz");
+//		String<char> text("AAAAAGGGGG");
 		TIndex index(text);
-		//Iter<TIndex, VSTree< TopDown< ParentLinks<> > > > it(index);
-		Iter<TIndex, VSTree< BottomUp<> > > it(index);
+		Iter<TIndex, VSTree< TopDown< ParentLinks<Preorder> > > > it(index);
+		//Iter<TIndex, VSTree< BottomUp<> > > it(index);
 
 		cout << "SA       = ";
 		for(unsigned i=0; i<length(indexSA(index)); ++i)
@@ -73,12 +132,12 @@ void testSTreeIterators()
 
 //		while (goDown(it));
 		while (!atEnd(it)) {
-			std::cout << value(it) << " = " << _repLength(it) << "  " << representative(it) << std::endl;
-			goNext(it,Postorder());
+			std::cout << value(it) << " = " << representative(it) << "    edge:" << parentEdgeLabel(it) << std::endl;
+			goNext(it);
 		}
 }
 
-
+/*
 void testSuperMaxRepeats()
 {
 
@@ -97,7 +156,7 @@ void testSuperMaxRepeats()
         std::cout << "supermaximal repeats: " << counter << std::endl;
 
 }
-
+*/
 
 void testMUMs()
 {
@@ -117,7 +176,7 @@ void testMUMs()
 */
 }
 
-
+/*
 template <typename TAlgorithmSpec>
 void testFind()
 {
@@ -157,7 +216,7 @@ void testFind()
 		SEQAN_TASSERT(pos[1] == 0);
 		SEQAN_TASSERT(pos[0] == 26);
 }
-
+*/
 bool testIndexCreation();
 void Main_TestQGram();
 
@@ -170,6 +229,7 @@ int main()
 
 //		testFind<ESA_MLR>();
 //		testBuild();
+//		testMultiIndex();
 		testSTreeIterators();
 /*		testSuperMaxRepeats();
 		testMUMs();	
