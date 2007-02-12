@@ -45,6 +45,7 @@ void testBuild()
         save(esa, "corpus/chlamydia");
 }
 */
+/*
 void testMultiIndex()
 {
 		typedef String<Dna5> TText;
@@ -102,7 +103,7 @@ void testMultiIndex()
 		for(int i=0; i<length(sa); ++i)
 			cout << lcp[i] << "    " << suffix(t[getValueI1(sa[i])], getValueI2(sa[i])) << endl;*/
 }
-
+*/
 
 
 void testSTreeIterators()
