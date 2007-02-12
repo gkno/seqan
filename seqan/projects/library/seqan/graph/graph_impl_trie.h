@@ -4,87 +4,84 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 
-template<typename TAlphabet, typename TCargo, typename TEdgeSpec, typename TSpec, typename TPos, typename TChar>
+template<typename TAlphabet, typename TCargo, typename TEdgeSpec, typename TSpec, typename TTerminalStateMap, typename TKeyword, typename TPos>
 inline void
-createTrie(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec>& g,
-		   String<String<TPos> >& terminalStateMap,
-		   String<String<TChar> > const& keywords)
+_addStringToTrie(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec>& g,
+				 TTerminalStateMap& terminalStateMap,
+				 TKeyword const& str,
+				 TPos const& keywordIndex)
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
-	typedef typename Size<String<TChar> >::Type TSize;
+	typedef typename Size<TKeyword>::Type TSize;
+
+	TVertexDescriptor current = getRoot(g);
 	TVertexDescriptor nilVal = _get_nil<TVertexDescriptor>();
+	typename Iterator<TKeyword const>::Type sIt = begin(str);
+	for(;!atEnd(sIt);goNext(sIt)) {
+		if (getSuccessor(g, current, *sIt) == nilVal) break;
+		current = getSuccessor(g, current, *sIt);
+	}
+	for(;!atEnd(sIt);goNext(sIt)) {
+		TVertexDescriptor newState = addVertex(g);
+		resize(terminalStateMap, numVertices(g), Generous());
+		assignProperty(terminalStateMap,newState,String<TPos>());
+		addEdge(g,current,newState,*sIt);
+		current = newState;
+	}
+	String<TPos> tmp = getProperty(terminalStateMap,current);
+	appendValue(tmp, keywordIndex);
+	assignProperty(terminalStateMap,current,tmp);
+}
+
+template<typename TAlphabet, typename TCargo, typename TEdgeSpec, typename TSpec, typename TTerminalStateMap, typename TKeywords>
+inline void
+createTrie(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec>& g,
+		   TTerminalStateMap& terminalStateMap,
+		   TKeywords const& keywords)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> TGraph;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef typename Position<TKeywords>::Type TPos;
 	TVertexDescriptor root = addVertex(g);
 	assignRoot(g,root);
-	typename Iterator<String<String<TChar> > const>::Type it = begin(keywords);
+	resize(terminalStateMap, numVertices(g), Generous());
+	assignProperty(terminalStateMap,root,String<TPos>());
+	typename Iterator<TKeywords const>::Type it = begin(keywords);
 	for(;!atEnd(it);goNext(it)) {
-		TVertexDescriptor current = root;
-		typename Iterator<String<TChar> const>::Type sIt = begin(*it);
-		for(;!atEnd(sIt);goNext(sIt)) {
-			if (getSuccessor(g, current, *sIt) == nilVal) break;
-			current = getSuccessor(g, current, *sIt);
-		}
-		for(;!atEnd(sIt);goNext(sIt)) {
-			TVertexDescriptor newState = addVertex(g);
-			addEdge(g,current,newState,*sIt);
-			current = newState;
-		}
-		if (length(terminalStateMap) <= current) {
-			resize(terminalStateMap,current+1);
-		}
-		if (empty(getProperty(terminalStateMap,current))) {
-			assignProperty(terminalStateMap,current,String<TPos>(position(it)));
-		} else {
-			String<TPos> tmp = getProperty(terminalStateMap,current);
-			appendValue(tmp, position(it));
-			assignProperty(terminalStateMap,current,tmp);
-		}
+		_addStringToTrie(g,terminalStateMap,*it,position(it));
 	}
 }
 
-template<typename TAlphabet, typename TCargo, typename TEdgeSpec, typename TSpec, typename TPos, typename TChar>
+template<typename TAlphabet, typename TCargo, typename TEdgeSpec, typename TSpec, typename TTerminalStateMap, typename TKeywords>
 inline void
 createTrieOnReverse(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec>& g,
-					String<String<TPos> >& terminalStateMap,
-					String<String<TChar> > const& keywords)
+					TTerminalStateMap& terminalStateMap,
+					TKeywords const& keywords)
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
-	typedef typename Size<String<TChar> >::Type TSize;
-	TVertexDescriptor nilVal = _get_nil<TVertexDescriptor>();
+	typedef typename Position<TKeywords>::Type TPos;
 	TVertexDescriptor root = addVertex(g);
 	assignRoot(g,root);
-	typename Iterator<String<String<TChar> > const>::Type it = begin(keywords);
+	resize(terminalStateMap, numVertices(g), Generous());
+	assignProperty(terminalStateMap,root,String<TPos>());
+	typename Iterator<TKeywords const>::Type it = begin(keywords);
 	for(;!atEnd(it);goNext(it)) {
-		TVertexDescriptor current = root;
-		typename Iterator<String<TChar> const>::Type sIt = end(*it);
+		typedef typename Value<TKeywords>::Type TKeyword;
+		TKeyword tmp;
+		typename Iterator<TKeyword const>::Type sIt = end(*it);
 		while(!atBegin(sIt)) {
 			goPrevious(sIt);
-			if (getSuccessor(g, current, *sIt) == nilVal) break;
-			current = getSuccessor(g, current, *sIt);
+			appendValue(tmp,*sIt);
 		}
-		bool firstIteration = true;
-		while(!atBegin(sIt)) {
-			if (!firstIteration) goPrevious(sIt);
-			TVertexDescriptor newState = addVertex(g);
-			addEdge(g,current,newState,*sIt);
-			current = newState;
-			firstIteration = false;
-		}
-		if (length(terminalStateMap) <= current) {
-			resize(terminalStateMap,current+1);
-		}
-		if (empty(getProperty(terminalStateMap,current))) {
-			assignProperty(terminalStateMap,current,String<TPos>(position(it)));
-		} else {
-			String<TPos> tmp = getProperty(terminalStateMap,current);
-			appendValue(tmp, position(it));
-			assignProperty(terminalStateMap,current,tmp);
-		}
+		_addStringToTrie(g,terminalStateMap,tmp,position(it));
 	}
 }
 

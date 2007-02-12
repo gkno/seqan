@@ -291,6 +291,50 @@ void Test_OnlineAlgMulti()
 	SEQAN_TASSERT(keywordIndex[13] == 2);
 	SEQAN_TASSERT(finderPos[14] == 67);
 	SEQAN_TASSERT(keywordIndex[14] == 0);
+
+
+//____________________________________________________________________________
+// Multiple duplicated keywords with overlapping matches
+	String<Dna> my2_haystack("aaaacaaa");
+	Finder<String<Dna> > my2_finder(my2_haystack);
+
+	typedef String<String<Dna> > TNeedle_My2;
+	TNeedle_My2 my2_keywords;
+	appendValue(my2_keywords, String<Dna>("aa"));
+	appendValue(my2_keywords, String<Dna>("aaa"));
+	appendValue(my2_keywords, String<Dna>("ac"));
+	appendValue(my2_keywords, String<Dna>("aac"));
+	appendValue(my2_keywords, String<Dna>("gctccacctgacctagcccatggggcccaaatttccggccttaattcccattt"));
+	Pattern<TNeedle_My2, TAlgorithmSpec> my2_pattern(my2_keywords);
+
+	clear(finderPos);
+	clear(keywordIndex);
+	while (find(my2_finder, my2_pattern)) {
+		//std::cout << position(my2_finder) << ":" << position(my2_pattern) << std::endl;
+		append(finderPos,position(my2_finder));
+		append(keywordIndex,position(my2_pattern));
+	}
+
+	SEQAN_TASSERT(finderPos[0] == 0);
+	SEQAN_TASSERT(keywordIndex[0] == 0);
+	SEQAN_TASSERT(finderPos[1] == 1);
+	SEQAN_TASSERT(keywordIndex[1] == 0);
+	SEQAN_TASSERT(finderPos[2] == 0);
+	SEQAN_TASSERT(keywordIndex[2] == 1);
+	SEQAN_TASSERT(finderPos[3] == 2);
+	SEQAN_TASSERT(keywordIndex[3] == 0);
+	SEQAN_TASSERT(finderPos[4] == 1);
+	SEQAN_TASSERT(keywordIndex[4] == 1);
+	SEQAN_TASSERT(finderPos[5] == 3);
+	SEQAN_TASSERT(keywordIndex[5] == 2);
+	SEQAN_TASSERT(finderPos[6] == 2);
+	SEQAN_TASSERT(keywordIndex[6] == 3);
+	SEQAN_TASSERT(finderPos[7] == 5);
+	SEQAN_TASSERT(keywordIndex[7] == 0);
+	SEQAN_TASSERT(finderPos[8] == 6);
+	SEQAN_TASSERT(keywordIndex[8] == 0);
+	SEQAN_TASSERT(finderPos[9] == 5);
+	SEQAN_TASSERT(keywordIndex[9] == 1);
 }
 
 
@@ -349,25 +393,8 @@ int main()
 	
 	Test_OnlineAlgMulti<AhoCorasick>();
 	Test_OnlineAlgMulti<MultipleShiftAnd>();
+	Test_OnlineAlgMulti<SetHorspool>();
 
-
-	// ToDo: SetHorspool -> Preprocessing done!
-	String<char> hst("annual_announce");
-	Finder<String<char> > fd(hst);
-
-	typedef String<String<char> > TN;
-	TN kyw;
-	appendValue(kyw, String<char>("announce"));
-	appendValue(kyw, String<char>("annual"));
-	appendValue(kyw, String<char>("annually"));
-	Pattern<TN, SetHorspool> pt(kyw);
-
-	String<unsigned int> finderPos;
-	String<unsigned int> keywordIndex;
-	while (find(fd, pt)) {
-		append(finderPos,position(fd));
-		append(keywordIndex,position(pt));
-	}
 
 	Test_Various();
 

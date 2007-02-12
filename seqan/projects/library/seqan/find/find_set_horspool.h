@@ -38,13 +38,18 @@ public:
 	typedef typename Size<TNeedle>::Type TSize;
 	typedef typename Value<TNeedle>::Type TValue;
 	typedef typename Value<TValue>::Type TAlphabet;
+	typedef Graph<Automaton<TAlphabet> > TGraph;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	
 	Holder<TNeedle> data_needle;
 	Graph<Automaton<TAlphabet> > data_reverseTrie;  // Search trie
 	String<String<TSize> > data_terminalStateMap;
 	String<TSize> data_dMap;	// Jump table
 	TSize data_lmin;
+	String<TSize> data_endPositions;	// All remaining keyword indices
 	TSize data_keywordIndex;			// Current keyword that produced a hit
 	TSize data_needleLength;			// Last length of needle to reposition finder
+	TVertexDescriptor data_lastState;   // Last state in the trie
 
 //____________________________________________________________________________
 
@@ -94,6 +99,8 @@ void setHost (Pattern<TNeedle, SetHorspool> & me, TNeedle2 const & needle) {
 	clear(me.data_reverseTrie);
 	clear(me.data_terminalStateMap);
 	clear(me.data_dMap);
+	clear(me.data_endPositions);
+	me.data_lmin=0;
 
 	// Create Trie
 	createTrieOnReverse(me.data_reverseTrie,me.data_terminalStateMap,needle);
@@ -106,7 +113,7 @@ void setHost (Pattern<TNeedle, SetHorspool> & me, TNeedle2 const & needle) {
 	me.data_lmin = _get_infinity<TSize>();
 	typename Iterator<TNeedle2 const>::Type it = begin(needle);
 	for(;!atEnd(it);goNext(it)) {
-		TSize tmp = length(*it)-1;
+		TSize tmp = length(*it);
 		if (tmp<me.data_lmin) me.data_lmin = tmp;
 	}
 	for(TSize i=0;i<alphabet_size;++i) {
@@ -172,12 +179,70 @@ position(Pattern<TNeedle, SetHorspool> & me)
 template <typename TFinder, typename TNeedle>
 inline bool find(TFinder & finder, Pattern<TNeedle, SetHorspool> & me) {
 	SEQAN_CHECKPOINT
-	if (empty(finder))
-		goBegin(finder);
-	else
+	typedef typename Value<TNeedle>::Type TKeyword;
+	typedef typename Size<TKeyword>::Type TSize;
+	typedef typename Value<TKeyword>::Type TAlphabet;
+	typedef Graph<Automaton<TAlphabet> > TGraph;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+
+	TVertexDescriptor current = getRoot(me.data_reverseTrie); 
+
+	// Process left-over hits
+	if (!empty(me.data_endPositions)) {
 		finder += me.data_needleLength;
+		current = me.data_lastState;
+		me.data_keywordIndex = me.data_endPositions[length(me.data_endPositions)-1];
+		me.data_needleLength = length(getValue(host(me), me.data_keywordIndex))-1;
+		if (length(me.data_endPositions) > 1) resize(me.data_endPositions, (length(me.data_endPositions)-1));
+		else clear(me.data_endPositions);
+		me.data_lastState = current;
+		finder -= me.data_needleLength;
+		return true;
+	}
 
+	TVertexDescriptor nilVal = _get_nil<TVertexDescriptor>();
+	TSize j = 0;
+	if (empty(finder)) {
+		goBegin(finder);
+		finder += me.data_lmin - 1;
+	} else {
+		finder += me.data_needleLength;
+		j = me.data_needleLength + 1;
+		current = me.data_lastState;
+	}
 
+	TSize haystackLength = length(container(finder));
+	bool oldMatch = true;
+	// Do not change to !atEnd(finder) because of jump map!
+	while(position(finder) < haystackLength) {
+		while ((position(finder)>=j) && 
+				(getSuccessor(me.data_reverseTrie, current, *(finder-j))!= nilVal))
+		{
+			me.data_endPositions = getProperty(me.data_terminalStateMap,current);
+			if ((!oldMatch) && (!empty(me.data_endPositions))) break;
+			current = getSuccessor(me.data_reverseTrie, current, *(finder-j));
+			if (current == nilVal) break;
+			++j;
+			oldMatch = false;
+		}
+		me.data_endPositions = getProperty(me.data_terminalStateMap,current);
+		if ((!oldMatch) &&
+			(!empty(me.data_endPositions)))
+		{
+			me.data_keywordIndex = me.data_endPositions[length(me.data_endPositions)-1];
+			me.data_needleLength = length(getValue(host(me), me.data_keywordIndex))-1;
+			if (length(me.data_endPositions) > 1) resize(me.data_endPositions, length(me.data_endPositions)-1);
+			else clear(me.data_endPositions);
+			me.data_lastState = current;
+			finder -= me.data_needleLength;
+			return true;
+		}
+		oldMatch = false;
+		TSize ind = convert<TSize>(*finder);	
+		setPosition(finder, position(finder) + getValue(me.data_dMap, ind));
+		j = 0;
+		current = getRoot(me.data_reverseTrie);
+	}
 	return false;
 }
 

@@ -45,8 +45,9 @@ public:
 	TWord alphabetSize;		// e.g., char --> 256
 	TWord totalLength;		// Lenght of concatenated keywords
 	TWord blockCount;		// #unsigned ints required to store needle	
-	TSize data_keywordIndex;			// Current keyword that produced a hit
-	TSize data_needleLength;			// Last length of needle to reposition finder
+	std::deque<Pair<TSize, TSize> > data_keyword;  // All keywords that produced a hit here
+	TSize data_keywordIndex;  // Last keyword index
+	TSize data_needleLength;  // Last needle length
 
 //____________________________________________________________________________
 
@@ -146,6 +147,7 @@ void setHost (Pattern<TNeedle, MultipleShiftAnd> & me, TNeedle2 const & needle) 
 		me.df[(j - 1) / BitsPerValue<TWord>::VALUE] |= (1<<((j-1)%BitsPerValue<TWord>::VALUE));
 	}
 	me.data_needle = needle;
+	me.data_keyword.clear();
 
 	/*
 	// Debug code
@@ -226,6 +228,7 @@ template <typename TFinder, typename TNeedle>
 bool _findShiftAnd_SmallNeedle(TFinder & finder, Pattern<TNeedle, MultipleShiftAnd> & me) {
 	SEQAN_CHECKPOINT
 	typedef unsigned int TWord;
+	typedef typename Size<TNeedle>::Type TSize;
 	while (!atEnd(finder)) {
 		TWord pos = convert<TWord>(*finder);
 		me.prefSufMatch[0] = ((me.prefSufMatch[0] << 1) | me.di[0]) & me.table[me.blockCount*pos];
@@ -259,12 +262,14 @@ bool _findShiftAnd_SmallNeedle(TFinder & finder, Pattern<TNeedle, MultipleShiftA
 				std::cout << std::endl;
 				*/
 				if ((me.prefSufMatch[0] & test) != 0) {
-					me.data_keywordIndex = position(it);
-					me.data_needleLength = length(*it);
-					finder -= (me.data_needleLength - 1);
-					return true;
+					me.data_keyword.push_back(Pair<TSize,TSize>(position(it),length(*it)));
 				}
 			}
+			me.data_keywordIndex = (me.data_keyword.front()).i1;
+			me.data_needleLength = (me.data_keyword.front()).i2;
+			me.data_keyword.pop_front();
+			finder -= (me.data_needleLength - 1);
+			return true;
 		}
 		goNext(finder);
 	}
@@ -274,7 +279,7 @@ bool _findShiftAnd_SmallNeedle(TFinder & finder, Pattern<TNeedle, MultipleShiftA
 template <typename TFinder, typename TNeedle>
 bool _findShiftAnd_LargeNeedle(TFinder & finder, Pattern<TNeedle, MultipleShiftAnd> & me) {
 	SEQAN_CHECKPOINT
-
+	typedef typename Size<TNeedle>::Type TSize;
 	typedef unsigned int TWord;
 	while (!atEnd(finder)) {
 		TWord pos = convert<TWord>(*finder);
@@ -329,13 +334,15 @@ bool _findShiftAnd_LargeNeedle(TFinder & finder, Pattern<TNeedle, MultipleShiftA
 				*/
 
 				if ((me.prefSufMatch[(j - 1) / BitsPerValue<TWord>::VALUE] & test[(j - 1) / BitsPerValue<TWord>::VALUE]) != 0) {
-					me.data_keywordIndex = position(it);
-					me.data_needleLength = length(*it);
-					finder -= (me.data_needleLength - 1);
-					return true;
+					me.data_keyword.push_back(Pair<TSize,TSize>(position(it),length(*it)));			
 				}
 				deallocate(me, test, me.blockCount);
 			}
+			me.data_keywordIndex = (me.data_keyword.front()).i1;
+			me.data_needleLength = (me.data_keyword.front()).i2;
+			me.data_keyword.pop_front();
+			finder -= (me.data_needleLength - 1);
+			return true;
 		}
 		goNext(finder);
 	}
@@ -345,6 +352,18 @@ bool _findShiftAnd_LargeNeedle(TFinder & finder, Pattern<TNeedle, MultipleShiftA
 template <typename TFinder, typename TNeedle>
 inline bool find(TFinder & finder, Pattern<TNeedle, MultipleShiftAnd> & me) {
 	SEQAN_CHECKPOINT
+
+	// Check for left-over keywords
+	if (!me.data_keyword.empty()) {
+		finder += me.data_needleLength - 1;
+		me.data_keywordIndex = (me.data_keyword.front()).i1;
+		me.data_needleLength = (me.data_keyword.front()).i2;
+		me.data_keyword.pop_front();
+		finder -= (me.data_needleLength - 1);
+		return true;
+	}
+
+
 	if (empty(finder))
 		goBegin(finder);
 	else
