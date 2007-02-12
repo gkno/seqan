@@ -208,34 +208,50 @@ This interval is the @Function.value@ of the iterator.
 
 	template < typename TIndex, typename TSpec >
 	inline void goNextImpl(Iter<TIndex, VSTree< BottomUp<TSpec> > > &it, Postorder const) {
-		// postorder dfs via lcp-table
-		if (isRoot(it)) {
-			_dfsClear(it);
+		do {
+			// postorder dfs via lcp-table
+			if (isRoot(it)) {
+				_dfsClear(it);
+				return;
+			}
+
+			typedef typename Size<TIndex>::Type TSize;
+			typedef typename Iter<TIndex, VSTree< BottomUp<TSpec> > >::TStackEntry TStackEntry;
+			TStackEntry	top = _atomicTop(it.history);
+			TSize		lcp_i = lcpAt(_dfsRange(it).i2 - 1, container(it));
+
+			if (lcp_i < top.i2) {
+				_postorderPop(it);			// go up
+				return;
+			}
+
+			if (lcp_i > top.i2) {
+				top.i1 = _dfsRange(it).i1;
+				top.i2 = lcp_i;
+				_postorderPush(it, top);		// go down
+			}
+
+			// skip $ leafs
+			if (getOccurence(it) + lcp_i == length(container(it))) {
+			if ((_dfsRange(it).i1 = _dfsRange(it).i2++) == length(container(it))) {
+				_postorderPop(it);
+				_dfsRange(it).i2 = _dfsRange(it).i1;
+			} else {
+				_postorderLeaf(it);
+			}
+			::std::cout << value(it) << ::std::endl;
+				continue;
+			}
+
+			// last lcp entry (== 0) causes removal of toplevel interval
+			if ((_dfsRange(it).i1 = _dfsRange(it).i2++) == length(container(it))) {
+				_postorderPop(it);
+				_dfsRange(it).i2 = _dfsRange(it).i1;
+			} else {
+				_postorderLeaf(it);
+			}
 			return;
-		}
-
-		typedef typename Size<TIndex>::Type TSize;
-		typedef typename Iter<TIndex, VSTree< BottomUp<TSpec> > >::TStackEntry TStackEntry;
-		TStackEntry	top = _atomicTop(it.history);
-		TSize		lcp_i = lcpAt(_dfsRange(it).i2 - 1, container(it));
-
-        if (lcp_i < top.i2) {
-			_postorderPop(it);			// go up
-			return;
-		}
-
-		if (lcp_i > top.i2) {
-			top.i1 = _dfsRange(it).i1;
-            top.i2 = lcp_i;
-			_postorderPush(it, top);		// go down
-        }
-
-		// last lcp entry (== 0) causes removal of toplevel interval
-		if ((_dfsRange(it).i1 = _dfsRange(it).i2++) == length(container(it))) {
-			_postorderPop(it);
-			_dfsRange(it).i2 = _dfsRange(it).i1;
-		} else
-			_postorderLeaf(it);
+		} while (true);
 	}
 /*
 	// asumes the history container to be a vector
@@ -845,6 +861,35 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 		}
 		return false;
 	}
+
+/**
+.Function.parentEdgeLabel:
+..summary:Returns a substring representing the edge from an $iterator$ node to its parent.
+..cat:Index
+..signature:parentEdgeLabel(iterator)
+..param.iterator:An iterater of a Suffix Tree.
+...type:Spec.TopDownHistory Iterator
+..returns:An @Spec.InfixSegment@ of the raw text of an index (see @Tag.ESA_RawText@).
+If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TIndex, ESA_RawText>::Type>::Type$.
+*/
+
+	template < typename TIndex, class TSpec >
+	inline typename Infix< typename Fibre<TIndex, ESA_RawText>::Type const >::Type 
+	parentEdgeLabel(Iter< TIndex, VSTree<TSpec> >  &it) {
+		typename Size<TIndex>::Type occ = getOccurence(it), last_len, len;
+
+		if (isRoot(it)) {
+			last_len = 0;
+			len = 0;
+		} else {
+			Pair<typename Size<TIndex>::Type> last;
+			_historyTop(it, last);
+			last_len = _repLength(container(it), last);
+			len = _repLength(it);
+		}
+		return infix(indexRawText(container(it)), occ + last_len, occ + len);
+	}
+
 
 ///.Function.clear.param.iterator.type:Spec.BottomUp Iterator
 ///.Function.clear.param.iterator.type:Spec.TopDownHistory Iterator
