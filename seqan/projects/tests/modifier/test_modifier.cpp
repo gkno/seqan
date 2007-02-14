@@ -26,7 +26,12 @@ using namespace seqan;
 		InType delta;
 
 		CaesarChiffre() {}
-		CaesarChiffre(InType _delta): delta(_delta) {}
+		CaesarChiffre(InType _delta) {
+			if (_delta < 0)
+				delta = ('z' - 'a' + 1) - (-_delta) % ('z' - 'a' + 1);
+			else
+				delta = _delta;
+		}
 
         inline Result operator()(InType x) const {
 			if (('a' <= x) && (x <= 'z')) return (x - 'a' + delta) % ('z' - 'a' + 1) + 'a';
@@ -132,6 +137,32 @@ void testStrings()
 		cout << "*** Test4: alphabet conversion ***" << endl;
 		cout << "origin: " << originDNA << endl;
 		cout << "Dna5:   " << dna << endl << endl;
+
+	//____________________________________________________________________________
+	// Test5 - nested modifiers
+
+		typedef CaesarChiffre<char> TEncode;
+		typedef ModifiedString< 
+					ModifiedString< 
+						ModifiedString< 
+							String<char>, 
+							ModView<TEncode> 
+						>, 
+						ModView<TEncode> 
+					>, 
+					ModView<TEncode>
+				> TModStringNested;
+
+		TModStringNested nested(origin);
+
+		TEncode enc2(2), enc3(3), enc_5(-5);
+
+		assignModViewFunctor(nested, enc2);
+		assignModViewFunctor(host(nested), enc3);
+		assignModViewFunctor(host(host(nested)), enc_5);
+
+		cout << "*** Test5: nested modifiers ***" << endl;
+		cout << "nested: " << nested << endl << endl;
 
 }
 
