@@ -37,15 +37,15 @@ namespace SEQAN_NAMESPACE_MAIN
 */
 
 	// standard storage 
-	template <typename _T1, typename _T2 = _T1, typename _Compression = void>
+	template <typename _T1, typename _T2 = _T1, typename TCompression = void>
     struct Pair {
         typedef _T1 T1;
         typedef _T2 T2;
 	    _T1 i1;
 	    _T2 i2;
-		Pair() {}
-		Pair(Pair const &_p): i1(_p.i1), i2(_p.i2) {}
-		Pair(_T1 const &_i1, _T2 const &_i2): i1(_i1), i2(_i2) {}
+		inline Pair() {}
+		inline Pair(Pair const &_p): i1(_p.i1), i2(_p.i2) {}
+		inline Pair(_T1 const &_i1, _T2 const &_i2): i1(_i1), i2(_i2) {}
     };
 
 #ifdef PLATFORM_WINDOWS
@@ -56,9 +56,9 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef _T2 T2;
 	    _T1 i1;
 	    _T2 i2;
-		Pair() {}
-		Pair(Pair const &_p): i1(_p.i1), i2(_p.i2) {}
-		Pair(_T1 const &_i1, _T2 const &_i2): i1(_i1), i2(_i2) {}
+		inline Pair() {}
+		inline Pair(Pair const &_p): i1(_p.i1), i2(_p.i2) {}
+		inline Pair(_T1 const &_i1, _T2 const &_i2): i1(_i1), i2(_i2) {}
     };
     #pragma pack(pop)
 #else
@@ -68,9 +68,9 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef _T2 T2;
         _T1 i1;
         _T2 i2;
-		Pair() {}
-		Pair(Pair const &_p): i1(_p.i1), i2(_p.i2) {}
-		Pair(_T1 const &_i1, _T2 const &_i2): i1(_i1), i2(_i2) {}
+		inline Pair() {}
+		inline Pair(Pair const &_p): i1(_p.i1), i2(_p.i2) {}
+		inline Pair(_T1 const &_i1, _T2 const &_i2): i1(_i1), i2(_i2) {}
     }__attribute__((packed));
 #endif
 
@@ -81,17 +81,32 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef _T T2;
         _T i1;
         _T i2;
-		Pair() {}
-		Pair(Pair const &_p): i1(_p.i1), i2(_p.i2) {}
-		Pair(_T const &_i1): i1(_i1), i2() {}
-		Pair(_T const &_i1, _T const &_i2): i1(_i1), i2(_i2) {}
+		inline Pair() {}
+		inline Pair(Pair const &_p): i1(_p.i1), i2(_p.i2) {}
+		inline Pair(_T const &_i1): i1(_i1), i2() {}
+		inline Pair(_T const &_i1, _T const &_i2): i1(_i1), i2(_i2) {}
     };
 
-    template <typename _T1, typename _T2, typename _Compression>
-	std::ostream& operator<<(std::ostream &out, Pair<_T1,_T2,_Compression> const &p) {
+    template <typename _T1, typename _T2, typename TCompression>
+	std::ostream& operator<<(std::ostream &out, Pair<_T1,_T2,TCompression> const &p) {
 		out << "< " << p.i1 << " , " << p.i2 << " >";
 		return out;
 	}
+
+	template <typename T1, typename T2, typename TCompression>
+	struct Value< Pair<T1, T2, TCompression>, 1 > {
+		typedef T1 Type;
+	};
+
+	template <typename T1, typename T2, typename TCompression>
+	struct Value< Pair<T1, T2, TCompression>, 2 > {
+		typedef T2 Type;
+	};
+
+	template <typename T1, typename T2, typename TCompression>
+	struct Spec< Pair<T1, T2, TCompression> > {
+		typedef TCompression Type;
+	};
 
 
 //____________________________________________________________________________
@@ -127,7 +142,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..class:Class.Triple
 ..summary:T3 object
 */
-    template <typename _T1, typename _T2 = _T1, typename _T3 = _T1, typename _Compression = void>
+    template <typename _T1, typename _T2 = _T1, typename _T3 = _T1, typename TCompression = void>
     struct Triple {
         typedef _T1 T1;
         typedef _T2 T2;
@@ -135,9 +150,9 @@ namespace SEQAN_NAMESPACE_MAIN
         _T1 i1;
         _T2 i2;
         _T3 i3;
-		Triple() {}
-		Triple(Triple const &_p): i1(_p.i1), i2(_p.i2), i3(_p.i3) {}
-		Triple(_T1 const &_i1, _T2 const &_i2, _T3 const &_i3): i1(_i1), i2(_i2), i3(_i3) {}
+		inline Triple() {}
+		inline Triple(Triple const &_p): i1(_p.i1), i2(_p.i2), i3(_p.i3) {}
+		inline Triple(_T1 const &_i1, _T2 const &_i2, _T3 const &_i3): i1(_i1), i2(_i2), i3(_i3) {}
     };
 
 
@@ -151,9 +166,9 @@ namespace SEQAN_NAMESPACE_MAIN
         _T1 i1;
         _T2 i2;
         _T3 i3;
-		Triple() {}
-		Triple(Triple const &_p): i1(_p.i1), i2(_p.i2), i3(_p.i3) {}
-		Triple(_T1 const &_i1, _T2 const &_i2, _T3 const &_i3): i1(_i1), i2(_i2), i3(_i3) {}
+		inline Triple() {}
+		inline Triple(Triple const &_p): i1(_p.i1), i2(_p.i2), i3(_p.i3) {}
+		inline Triple(_T1 const &_i1, _T2 const &_i2, _T3 const &_i3): i1(_i1), i2(_i2), i3(_i3) {}
     };
     #pragma pack(pop)
 #else
@@ -165,11 +180,11 @@ namespace SEQAN_NAMESPACE_MAIN
         _T1 i1;
         _T2 i2;
         _T3 i3;
-		Triple() {}
-		Triple(Triple const &_p): i1(_p.i1), i2(_p.i2), i3(_p.i3) {}
-		Triple(_T1 const &_i1): i1(_i1) {}
-		Triple(_T1 const &_i1, _T2 const &_i2): i1(_i1), i2(_i2) {}
-		Triple(_T1 const &_i1, _T2 const &_i2, _T3 const &_i3): i1(_i1), i2(_i2), i3(_i3) {}
+		inline Triple() {}
+		inline Triple(Triple const &_p): i1(_p.i1), i2(_p.i2), i3(_p.i3) {}
+		inline Triple(_T1 const &_i1): i1(_i1) {}
+		inline Triple(_T1 const &_i1, _T2 const &_i2): i1(_i1), i2(_i2) {}
+		inline Triple(_T1 const &_i1, _T2 const &_i2, _T3 const &_i3): i1(_i1), i2(_i2), i3(_i3) {}
     }__attribute__((packed));
 #endif
 
@@ -182,16 +197,36 @@ namespace SEQAN_NAMESPACE_MAIN
         _T i1;
         _T i2;
         _T i3;
-		Triple() {}
-		Triple(Triple const &_p): i1(_p.i1), i2(_p.i2), i3(_p.i3) {}
-		Triple(_T const &_i1, _T const &_i2, _T const &_i3): i1(_i1), i2(_i2), i3(_i3) {}
+		inline Triple() {}
+		inline Triple(Triple const &_p): i1(_p.i1), i2(_p.i2), i3(_p.i3) {}
+		inline Triple(_T const &_i1, _T const &_i2, _T const &_i3): i1(_i1), i2(_i2), i3(_i3) {}
     };
 
-    template <typename _T1, typename _T2, typename _T3, typename _Compression>
-	std::ostream& operator<<(std::ostream &out, Triple<_T1,_T2,_T3,_Compression> const &t) {
+    template <typename _T1, typename _T2, typename _T3, typename TCompression>
+	std::ostream& operator<<(std::ostream &out, Triple<_T1,_T2,_T3,TCompression> const &t) {
 		out << "< " << t.i1 << " , " << t.i2 << " , " << t.i3 << " >";
 		return out;
 	}
+
+	template <typename T1, typename T2, typename T3, typename TCompression>
+	struct Value< Triple<T1, T2, T3, TCompression>, 1 > {
+		typedef T1 Type;
+	};
+
+	template <typename T1, typename T2, typename T3, typename TCompression>
+	struct Value< Triple<T1, T2, T3, TCompression>, 2 > {
+		typedef T2 Type;
+	};
+
+	template <typename T1, typename T2, typename T3, typename TCompression>
+	struct Value< Triple<T1, T2, T3, TCompression>, 3 > {
+		typedef T3 Type;
+	};
+
+	template <typename T1, typename T2, typename T3, typename TCompression>
+	struct Spec< Triple<T1, T2, T3, TCompression> > {
+		typedef TCompression Type;
+	};
 
 
 //____________________________________________________________________________
@@ -211,27 +246,27 @@ namespace SEQAN_NAMESPACE_MAIN
 ...default:void.
 ..see:Spec.Sampler
 */
-    template <typename _T, int _size, typename _Compression = void>
+    template <typename _T, int _size, typename TCompression = void>
     struct Tuple {
         typedef _T T;
         enum { size = _size };
         _T i[_size];
 //		friend std::ostream& operator<<(std::ostream&, const Tuple&);
 
-        _T& operator[](const int k) {
+        inline _T& operator[](const int k) {
             SEQAN_ASSERT(k >= 0 && k < size);
             return i[k];
         }
-        const _T& operator[](const int k) const {
+        inline const _T& operator[](const int k) const {
             SEQAN_ASSERT(k >= 0 && k < size);
             return i[k];
         }
-		_T* operator&() { return i; }
-		const _T* operator&() const { return i; }
+		inline _T* operator&() { return i; }
+		inline const _T* operator&() const { return i; }
 
 		// has to be inline because elements (like this tuple) of packed structs can't be arguments
 		template <typename _S>
-		inline _S const assignAt(int k, _S const source) {
+		inline _S const assignValueAt(int k, _S const source) {
 			return i[k] = source;
 		}
     };
@@ -260,11 +295,11 @@ namespace SEQAN_NAMESPACE_MAIN
         
         CT i;
 
-		Tuple() {
+		inline Tuple() {
 			SEQAN_ASSERT(bitSize * size <= sizeof(CT) * 8);
 		}
 
-        const _T operator[](const int k) const {
+        inline const _T operator[](const int k) const {
             SEQAN_ASSERT(k >= 0 && k < size);
             return (i >> (size - 1 - k) * bitSize) & bitMask;
         }
@@ -285,12 +320,12 @@ namespace SEQAN_NAMESPACE_MAIN
         inline void operator|=(SimpleType<T, TSpec> const &t) {
             i |= t.value;
         }
-		CT* operator&() { return &i; }
-		const CT* operator&() const { return &i; }
+		inline CT* operator&() { return &i; }
+		inline const CT* operator&() const { return &i; }
 
 		// has to be inline because elements (like this tuple) of packed structs can't be arguments
 		template <typename _S>
-		inline _S const assignAt(int k, _S const source) {
+		inline _S const assignValueAt(int k, _S const source) {
 			typedef Tuple<_T, _size, Compressed> Tup;
 			typename Tup::CT mask = Tup::bitMask << ((_size - 1 - k) * bitSize);
 			i = (i & ~mask) | ((CT)source << ((_size - 1 - k) * bitSize));
@@ -298,8 +333,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
     };
 
-    template <typename _T, int _size, typename _Compression>
-	inline int length(Tuple<_T, _size, _Compression> const &me) { return _size; }
+    template <typename _T, int _size, typename TCompression>
+	inline int length(Tuple<_T, _size, TCompression> const &me) { return _size; }
 
     template <typename _T, int _size, typename _S>
     inline _S const assignAt(Tuple<_T, _size, void> &me, int k, _S const source) {
@@ -307,7 +342,7 @@ namespace SEQAN_NAMESPACE_MAIN
     }
 
     template <typename _T, int _size, typename _S>
-    inline _S const assignAt(Tuple<_T, _size, Compressed> &me, int k, _S const source) {
+    inline _S const assignValueAt(Tuple<_T, _size, Compressed> &me, int k, _S const source) {
         typedef Tuple<_T, _size, Compressed> Tup;
         typename Tup::CT mask = Tup::bitMask << ((_size - 1 - k) * me.bitSize);
         me.i = (me.i & ~mask) | source << ((_size - 1 - k) * me.bitSize);
@@ -315,15 +350,15 @@ namespace SEQAN_NAMESPACE_MAIN
     }
 
     template <typename _T, typename _S, typename _Spec, int _size>
-    inline SimpleType<_S, _Spec> const & assignAt(Tuple<_T, _size, Compressed> &me, int k, SimpleType<_S, _Spec> const &source) {
+    inline SimpleType<_S, _Spec> const & assignValueAt(Tuple<_T, _size, Compressed> &me, int k, SimpleType<_S, _Spec> const &source) {
         typedef Tuple<_T, _size, Compressed> Tup;
         typename Tup::CT mask = Tup::bitMask << ((_size - 1 - k) * me.bitSize);
         me.i = (me.i & ~mask) | source.value << ((_size - 1 - k) * me.bitSize);
         return source;
     }
 
-    template <typename _T, int _size, typename _Compression>
-	std::ostream& operator<<(std::ostream& out, Tuple<_T,_size,_Compression> const &a) {
+    template <typename _T, int _size, typename TCompression>
+	std::ostream& operator<<(std::ostream& out, Tuple<_T,_size,TCompression> const &a) {
 		out << "[";
 		if (a.size > 0)
 			out << a[0];
@@ -332,6 +367,61 @@ namespace SEQAN_NAMESPACE_MAIN
 		out << "]";
 		return out;
 	}
+
+
+	template <typename T1, typename T2, typename TCompression>
+	inline T1 getValueI1(Pair<T1, T2, TCompression> const &pair) {
+		return pair.i1;
+	}
+
+	template <typename T1, typename T2, typename TCompression>
+	inline T2 getValueI2(Pair<T1, T2, TCompression> const &pair) {
+		return pair.i2;
+	}
+
+	template <typename T1, typename T2, typename TCompression, typename T>
+	inline void assignValueI1(Pair<T1, T2, TCompression> &pair, T const &_i) {
+		pair.i1 = _i;
+	}
+
+	template <typename T1, typename T2, typename TCompression, typename T>
+	inline void assignValueI2(Pair<T1, T2, TCompression> &pair, T const &_i) {
+		pair.i2 = _i;
+	}
+
+
+
+	template <typename T1, typename T2, typename T3, typename TCompression>
+	inline T1 getValueI1(Triple<T1, T2, T3, TCompression> const &triple) {
+		return triple.i1;
+	}
+
+	template <typename T1, typename T2, typename T3, typename TCompression>
+	inline T2 getValueI2(Triple<T1, T2, T3, TCompression> const &triple) {
+		return triple.i2;
+	}
+
+	template <typename T1, typename T2, typename T3, typename TCompression>
+	inline T3 getValueI3(Triple<T1, T2, T3, TCompression> const &triple) {
+		return triple.i3;
+	}
+
+	template <typename T1, typename T2, typename T3, typename TCompression, typename T>
+	inline T const assignValueI1(Triple<T1, T2, T3, TCompression> &triple, T const &_i) {
+		return triple.i1 = _i;
+	}
+
+	template <typename T1, typename T2, typename T3, typename TCompression, typename T>
+	inline T const assignValueI2(Triple<T1, T2, T3, TCompression> &triple, T const &_i) {
+		return triple.i2 = _i;
+	}
+
+	template <typename T1, typename T2, typename T3, typename TCompression, typename T>
+	inline T const assignValueI3(Triple<T1, T2, T3, TCompression> &triple, T const &_i) {
+		return triple.i3 = _i;
+	}
+
+
 
 }// namespace SEQAN_NAMESPACE_MAIN
 
