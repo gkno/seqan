@@ -18,7 +18,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..example.code:Value<String<char> >::Type c; //c has type char
 */
 
-template <typename T>
+template <typename T, const int i = 0>
 struct Value
 {
 	typedef T Type;
@@ -167,6 +167,26 @@ struct Host
 
 template <typename T>
 struct Spec;
+
+//____________________________________________________________________________
+
+/**
+.Metafunction.Cargo:
+..summary:Additional data of a class. 
+..signature:Cargo<T>::Type
+..param.T:Type for which the cargo is determined.
+..returns.param.Type:Cargo of $T$.
+..remarks:The definition of Cargo allows the addition of user specific data to existing data structures.
+*/
+
+template <typename T>
+struct Cargo {
+	typedef Nothing Type;
+};
+template <typename T>
+struct Cargo<T const> {
+	typedef typename Cargo<T>::Type const Type;
+};
 
 //____________________________________________________________________________
 
