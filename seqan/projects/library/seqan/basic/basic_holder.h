@@ -547,8 +547,9 @@ template <typename TValue>
 struct Holder<TValue, Simple>
 {
 	typedef typename Value<Holder>::Type THolderValue;
+	typedef typename _Parameter<THolderValue>::Type THolderParameter;
 
-	THolderValue data_value;
+	mutable THolderValue data_value;
 //____________________________________________________________________________
 
 	Holder()
@@ -589,7 +590,7 @@ SEQAN_CHECKPOINT
 		return *this;
 	}
 
-	operator typename _Parameter<THolderValue>::Type()
+	operator THolderParameter()
 	{
 SEQAN_CHECKPOINT
 		return *data_value;
