@@ -72,11 +72,14 @@ namespace SEQAN_NAMESPACE_MAIN
         return "r";
     }
 
-	template <typename Dummy>
-    inline bool open(FILE* &me, const char *fileName, int openMode = OPEN_RDWR + OPEN_CREATE | OPEN_APPEND) {
+    inline bool open(FILE* &me, const char *fileName, int openMode) {
 		SEQAN_PROADD(PROOPENFILES, 1);
         return (me = fopen(fileName, _getCStyleOpenMode(openMode))) != NULL;
     }
+
+    inline bool open(FILE* &me, const char *fileName) {
+		return open(me, fileName, OPEN_RDWR + OPEN_CREATE | OPEN_APPEND);
+	}
 
     inline bool openTemp(FILE* &me) {
 		SEQAN_PROSUB(PROOPENFILES, 1);

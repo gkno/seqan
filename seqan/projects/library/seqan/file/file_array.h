@@ -207,12 +207,17 @@ namespace SEQAN_NAMESPACE_MAIN
     //////////////////////////////////////////////////////////////////////////////
     // generic open/close interface
     template < typename TFileArray >
-    inline bool _openTempFArray(TFileArray &me, int openMode = OPEN_RDWR + OPEN_CREATE) {
+    inline bool _openTempFArray(TFileArray &me, int openMode) {
 		bool result = true;
 		for(int i = 0; i < length(me); ++i)
 			result &= openTemp(me[i], openMode);
 		return result;
     }
+
+    template < typename TFileArray >
+    inline bool _openTempFArray(TFileArray &me) {
+		return _openTempFArray(me, OPEN_RDWR + OPEN_CREATE);
+	}
 
     template < typename TFileArray >
     inline bool _reopenFArray(TFileArray &me, int openMode) {
@@ -273,7 +278,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
     template < __int64 _FileSize, typename TFile >
-	inline bool open(File< Chained<_FileSize, TFile> > &me, const char *fileName, int openMode = OPEN_RDWR + OPEN_CREATE | OPEN_APPEND) {
+	inline bool open(File< Chained<_FileSize, TFile> > &me, const char *fileName, int openMode) {
 		me.baseName = fileName;
 		me.openMode = openMode;
 		me.temporary = false;
@@ -282,14 +287,14 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
     template < __int64 _FileSize, typename TFile >
-	inline bool openTemp(File< Chained<_FileSize, TFile> > &me, int openMode = OPEN_RDWR + OPEN_CREATE) {
+	inline bool openTemp(File< Chained<_FileSize, TFile> > &me, int openMode) {
 		me.openMode = openMode;
 		me.temporary = true;
 		return true;
 	}
 
     template < unsigned _FileCount, typename TFile >
-	inline bool openTemp(File< Striped<_FileCount, TFile> > &me, int openMode = OPEN_RDWR + OPEN_CREATE) {
+	inline bool openTemp(File< Striped<_FileCount, TFile> > &me, int openMode) {
 		return _openTempFArray(me, openMode);
 	}
 

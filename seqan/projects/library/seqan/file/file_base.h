@@ -224,8 +224,13 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 */
 
     template < typename TSpec >
-    inline bool open(File<TSpec> &me, const char *fileName, int openMode = OPEN_RDWR + OPEN_CREATE | OPEN_APPEND) {
+    inline bool open(File<TSpec> &me, const char *fileName, int openMode) {
         return me.open(fileName, openMode);
+    }
+
+    template < typename TSpec >
+    inline bool open(File<TSpec> &me, const char *fileName) {
+        return open(me, fileName, OPEN_RDWR + OPEN_CREATE | OPEN_APPEND);
     }
 
 /**
@@ -373,7 +378,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 */
 
 	template < typename TSpec, typename TPos >
-    inline typename Position< File<TSpec> >::Type seek(File<TSpec> &me, TPos const fileOfs, int origin = SEEK_BEGIN) {
+    inline typename Position< File<TSpec> >::Type seek(File<TSpec> &me, TPos const fileOfs, int origin) {
 		typename Position< File<TSpec> >::Type newOfs = me.seek(fileOfs, origin);
         #ifdef SEQAN_DEBUG_OR_TEST_
             if (origin == SEEK_BEGIN && newOfs != fileOfs)
@@ -382,6 +387,10 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
         return newOfs;
     }
     
+	template < typename TSpec, typename TPos >
+    inline typename Position< File<TSpec> >::Type seek(File<TSpec> &me, TPos const fileOfs) {
+		return seek(me, fileOfs, SEEK_BEGIN);
+	}
 /**
 .Function.tell:
 ..summary:Gets the current file pointer.
