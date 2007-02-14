@@ -17,8 +17,6 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 // generic metaprogramming
 
-///Empty Data Class.
-struct Nothing {};
 struct Yes { enum { VALUE = true }; };
 struct No { enum { VALUE = false }; };
 
