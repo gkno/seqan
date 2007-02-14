@@ -40,6 +40,12 @@ namespace SEQAN_NAMESPACE_MAIN
         Pipe(TInput &_in): in(_in) {}
     };
 
+	// base class for multiple sequence algorithms
+	// to hold extra information about desired position type (TPair)
+	// and the type storing absolute sequence offsets (TLimitsString)
+    template <typename TSpec, typename TPair, typename TLimitsString>
+	struct Multi;
+
 /**
 .Class.Bundle2:
 ..cat:Aggregates
@@ -312,8 +318,6 @@ SEQAN_CHECKPOINT
 	struct ControlClear {};
 	struct ControlBeginRead {};
 	struct ControlEndRead {};
-	struct ControlAddListener {};
-	struct ControlDelListener {};
 
     template < typename TInput, typename TSpec, typename TCommand >
 	inline bool control(Pipe<TInput, TSpec> &me, TCommand const &command) {
@@ -368,16 +372,6 @@ SEQAN_CHECKPOINT
     template < typename TInput, typename TSpec >
 	inline bool endRead(Pipe<TInput, TSpec> &me) {
         return control(me, ControlEndRead());
-    }
-
-    template < typename TInput, typename TSpec >
-	inline bool addListener(Pipe<TInput, TSpec> &me) {
-        return control(me, ControlAddListener());
-    }
-
-    template < typename TInput, typename TSpec >
-	inline bool delListener(Pipe<TInput, TSpec> &me) {
-        return control(me, ControlDelListener());
     }
 
 

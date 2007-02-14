@@ -19,8 +19,8 @@ namespace SEQAN_NAMESPACE_MAIN
     {
         Compare C;
         MergeStreamComparer(Compare &_C): C(_C) { }
-        bool operator()(const PageBucket<TValue> &a,
-			            const PageBucket<TValue> &b) const {
+        inline bool operator()(const PageBucket<TValue> &a,
+			                   const PageBucket<TValue> &b) const {
             return C(static_cast<const TValue&>(*(a.cur)),
                      static_cast<const TValue&>(*(b.cur))) > 0;
         }

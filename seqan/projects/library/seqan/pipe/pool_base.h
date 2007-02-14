@@ -650,7 +650,6 @@ namespace SEQAN_NAMESPACE_MAIN
         {
 			_init(_conf);
             _setSize(0);
-            control(src, ControlAddListener());
         }
         
         template < typename TInput, typename TPipeSpec >
@@ -660,7 +659,6 @@ namespace SEQAN_NAMESPACE_MAIN
         {
 			_init(_conf);
             _setSize(0);
-            control(src, ControlAddListener());
         }
         
         Pool(File &_file, const PoolParameters &_conf = PoolParameters()):
@@ -733,7 +731,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
         //////////////////////////////////////////////////////////////////////////////
-		// auto-disposal interface
+		// auto-disposal interface (deprecated)
 
         inline void addListener() {
             if (!listeners) return;
@@ -996,7 +994,7 @@ namespace SEQAN_NAMESPACE_MAIN
     }
 
     template < typename TValue, typename TSpec >
-    inline void pop(Pool<TValue, TSpec> &me, TValue const &_Ref) {
+    inline void pop(Pool<TValue, TSpec> &me, TValue &_Ref) {
         me.pop(_Ref);
     }
 
@@ -1101,18 +1099,6 @@ SEQAN_CHECKPOINT
 		    return me.endWrite();
         }
 
-		template < typename TValue, typename TSpec >
-	    inline bool control(Pool< TValue, TSpec > &me, ControlAddListener const &command) {
-		    me.addListener();
-		    return true;
-	    }
-    	
-		template < typename TValue, typename TSpec >
-	    inline bool control(Pool< TValue, TSpec > &me, ControlDelListener const &command) {
-		    me.delListener();
-		    return true;
-	    }
-
 ///.Function.atEnd.param.iterator.type:Class.Pool
 
 		template < typename TValue, typename TSpec >
@@ -1131,16 +1117,6 @@ SEQAN_CHECKPOINT
 	    inline bool endRead(Pool< TValue, TSpec > &me) {
 SEQAN_CHECKPOINT
             return control(me, ControlEndRead());
-        }
-
-		template < typename TValue, typename TSpec >
-	    inline bool addListener(Pool< TValue, TSpec > &me) {
-            return control(me, ControlAddListener());
-        }
-
-		template < typename TValue, typename TSpec >
-	    inline bool delListener(Pool< TValue, TSpec > &me) {
-            return control(me, ControlDelListener());
         }
 
 	//}

@@ -15,17 +15,29 @@ namespace SEQAN_NAMESPACE_MAIN
 //namespace SEQAN_NAMESPACE_PIPELINING
 //{
 
-    template < const unsigned m, typename compress = void >
+	template <int I, typename T = void>
+	struct _SkewDC;
+
+//////////////////////////////////////////////////////////////////////////////
+
+	template < const unsigned m, typename TCompression = void >
 	struct Sampler;
 
-    template < typename TInput, const unsigned m, typename compress >
-    struct Value< Pipe< TInput, Sampler<m, compress> > > {
-        typedef Tuple<typename Value<TInput>::Type, m, compress>		mTuple;
+    template < typename TInput, const unsigned m, typename TCompression >
+    struct Value< Pipe< TInput, Sampler<m, TCompression> > > {
+        typedef Tuple<typename Value<TInput>::Type, m, TCompression>	mTuple;
         typedef Pair<typename Size<TInput>::Type, mTuple, Compressed>	Type;
     };
 
-	template <int I, typename T = void>
-	struct _SkewDC;
+//////////////////////////////////////////////////////////////////////////////
+
+    template < typename TInput, const unsigned m, typename TCompression, typename TPair, typename TLimitsString >
+    struct Value< Pipe< TInput, Multi<Sampler<m, TCompression>, TPair, TLimitsString> > > {
+        typedef Tuple<typename Value<TInput>::Type, m, TCompression>	mTuple;
+        typedef Pair<TPair, mTuple, Compressed>							Type;
+    };
+
+//////////////////////////////////////////////////////////////////////////////
 
 
 /**
@@ -33,25 +45,25 @@ namespace SEQAN_NAMESPACE_MAIN
 ..cat:Pipelining
 ..general:Class.Pipe
 ..summary:Outputs m-tuples beginning at a position of difference cover DC.
-..signature:Pipe<TInput, Sampler<m, DC[, compress]> >
+..signature:Pipe<TInput, Sampler<m, DC[, TCompression]> >
 ..param.TInput:The type of the pipeline module this module reads from.
 ..param.m:The tuple size.
 ..param.DC:A set of non-negative integers less than $m$.
 ..param.DC:$DC[0]$ contains the size of the set and $DC[1..DC[0]]$ contains the distinct and ordered elements.
-..param.compress:Enable/Disable compression.
-..param.compress:If $void$, no compression is used.
-..param.compress:If $Compressed$, bit-compressed @Class.Tuple@s are used.
+..param.TCompression:Enable/Disable compression.
+..param.TCompression:If $void$, no compression is used.
+..param.TCompression:If $Compressed$, bit-compressed @Class.Tuple@s are used.
 ...default:void.
 ..example:The set ${1,2,4}$ is represented by $int DC[] = { 3, 1, 2, 4 }$.
-..remarks:The output type is a @Class.Pair@ of size type and @Class.Tuple@ of input elements and length m (i.e. $Pair<Size<TInput>::Type, Tuple<Value<TInput>::Type, m, compress> >$).
+..remarks:The output type is a @Class.Pair@ of size type and @Class.Tuple@ of input elements and length m (i.e. $Pair<Size<TInput>::Type, Tuple<Value<TInput>::Type, m, TCompression> >$).
 ..remarks:The first output field contains the beginning position of the m-tuple in the second field.
 The m-tuples are substrings of the input stream beginning at positions $i$, with $i mod m$ is element of the set DC.
 */
 
     //////////////////////////////////////////////////////////////////////////////
     // sampler class
-    template < typename TInput, const unsigned m, typename compress >
-    struct Pipe< TInput, Sampler<m, compress> >
+    template < typename TInput, const unsigned m, typename TCompression >
+    struct Pipe< TInput, Sampler<m, TCompression> >
     {
         typedef typename Value<Pipe>::Type  OutType;
         typedef typename Size<Pipe>::Type   SizeType;
@@ -116,30 +128,31 @@ The m-tuples are substrings of the input stream beginning at positions $i$, with
         
         Pipe& operator++() {
             unsigned skipped = 0;
-            if (!last)
-                do {
-                    outRef->i2.i[skipped++] = *in;
-                    ++in;
-                    if (idxMod == 0) idxMod = m;
-                    --idxMod; --idx;
-                    if (eof(in)) {
-                        last = true;
-                        while (!filter[idxMod]) {
-                            outRef->i2.i[skipped++] = 0;
-                            if (idxMod == 0) idxMod = m;
-                            --idxMod; --idx;
-                        };
-                        break;
-                    }
-                } while (!filter[idxMod]);
-            else
-                do {
-                    outRef->i2.i[skipped++] = 0;
-                    if (idxMod == 0) idxMod = m;
-                    --idxMod; --idx;
-                } while (!filter[idxMod]);
+			if (--_rest) {
+				if (!last)
+					do {
+						outRef->i2.i[skipped++] = *in;
+						++in;
+						if (idxMod == 0) idxMod = m;
+						--idxMod; --idx;
+						if (eof(in)) {
+							last = true;
+							while (!filter[idxMod]) {
+								outRef->i2.i[skipped++] = 0;
+								if (idxMod == 0) idxMod = m;
+								--idxMod; --idx;
+							};
+							break;
+						}
+					} while (!filter[idxMod]);
+				else
+					do {
+						outRef->i2.i[skipped++] = 0;
+						if (idxMod == 0) idxMod = m;
+						--idxMod; --idx;
+					} while (!filter[idxMod]);
+			}
             rotate(skipped);
-            --_rest;
             tmpRef->i1 = idx;
             swap();
             return *this;
@@ -199,52 +212,54 @@ The m-tuples are substrings of the input stream beginning at positions $i$, with
         }
         
         Pipe& operator++() {
-            if (!last)
-                do {
-                    tmp.i2 <<= 1;
-                    tmp.i2 |= *in;
-                    ++in;
-                    if (idxMod == 0) idxMod = m;
-                    --idxMod; --tmp.i1;
-                    if (eof(in)) {
-                        last = true;
-                        while (!filter[idxMod]) {
-                            tmp.i2 <<= 1;
-                            if (idxMod == 0) idxMod = m;
-                            --idxMod; --tmp.i1;
-                        };
-                        break;
-                    }
-                } while (!filter[idxMod]);
-            else
-                do {
-                    tmp.i2 <<= 1;
-                    if (idxMod == 0) idxMod = m;
-                    --idxMod; --tmp.i1;
-                } while (!filter[idxMod]);
-            --_rest;
+			if (--_rest) {
+				if (!last)
+					do {
+						tmp.i2 <<= 1;
+						tmp.i2 |= *in;
+						++in;
+						if (idxMod == 0) idxMod = m;
+						--idxMod; --tmp.i1;
+						if (eof(in)) {
+							last = true;
+							while (!filter[idxMod]) {
+								tmp.i2 <<= 1;
+								if (idxMod == 0) idxMod = m;
+								--idxMod; --tmp.i1;
+							};
+							break;
+						}
+					} while (!filter[idxMod]);
+				else
+					do {
+						tmp.i2 <<= 1;
+						if (idxMod == 0) idxMod = m;
+						--idxMod; --tmp.i1;
+					} while (!filter[idxMod]);
+			}
             return *this;
         }        
     };
 
 
+
     //////////////////////////////////////////////////////////////////////////////
     // global pipe functions
-    template < typename TInput, const unsigned int m, typename compress >
-	inline bool control(Pipe< TInput, Sampler<m, compress> > &me, ControlBeginRead const &command) {
+    template < typename TInput, const unsigned int m, typename TCompression >
+	inline bool control(Pipe< TInput, Sampler<m, TCompression> > &me, ControlBeginRead const &command) {
         if (!control(me.in, command)) return false;
         me.prepare();
 		return true;
     }
 
-    template < typename TInput, const unsigned int m, typename compress >
-	inline bool control(Pipe< TInput, Sampler<m, compress> > &me, ControlEof const &command) {
+    template < typename TInput, const unsigned int m, typename TCompression >
+	inline bool control(Pipe< TInput, Sampler<m, TCompression> > &me, ControlEof const &command) {
 		return me._rest == 0;
     }
 
-    template < typename TInput, const unsigned int m, typename compress >
-    inline typename Size< Pipe< TInput, Sampler<m, compress> > >::Type
-	length(Pipe< TInput, Sampler<m, compress> > &me) {
+    template < typename TInput, const unsigned int m, typename TCompression >
+    inline typename Size< Pipe< TInput, Sampler<m, TCompression> > >::Type
+	length(Pipe< TInput, Sampler<m, TCompression> > &me) {
         typename Size< Pipe< TInput, Sampler<m> > >::Type _size = 0, n = length(me.in);
         for(unsigned i = 1; i <= _SkewDC<m>::VALUE[0]; i++)
             if (_SkewDC<m>::VALUE[i])
@@ -252,6 +267,344 @@ The m-tuples are substrings of the input stream beginning at positions $i$, with
             else
                 _size += n / m;
         return _size;
+    }
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+
+	template <typename TPair, typename TLimits, const unsigned m = 0>
+	struct _PairDecrementer {
+		typename Iterator<TLimits const>::Type	it, itEnd;
+		typename Value<TLimits>::Type			old;
+
+		TPair		pos;
+		unsigned	residue;
+
+		_PairDecrementer() {}
+		_PairDecrementer(TLimits const &_limits) { setHost(*this, _limits); }
+
+		inline operator TPair () const {
+			return pos;
+		}
+
+		inline TPair const & operator-- () {
+			typename Value<TPair,2>::Type i2 = getValueI2(pos);
+			if (i2 > 1) {
+				--i2;
+				if (residue == 0) residue = m;
+				--residue;
+			} 
+			else
+			{
+				i2 = 0;
+				while (!i2 && (it != itEnd))
+				{
+					assignValueI1(pos, getValueI1(pos) + 1);
+					i2 = (*it - old);
+					old = *it;
+					++it;
+				} 
+				residue = i2 % m;
+			}
+			assignValueI2(pos, i2);
+			return pos;
+		}
+	};
+
+	template <typename TPair, typename TLimits, const unsigned m, typename TLimits2>
+	void setHost(_PairDecrementer<TPair, TLimits, m> &me, TLimits2 const &limits) {
+		me.it = begin(limits);
+		me.itEnd = end(limits);
+		me.old = 0;
+		assignValueI1(me.pos, 0);
+		assignValueI2(me.pos, 0);
+		if (length(limits) > 1) {
+			++me.it;
+			--me;
+			assignValueI1(me.pos, getValueI1(me.pos) - 1);
+		} else
+			me.residue = 0;
+	}
+
+
+	template <typename TPair, typename TLimits>
+	struct _PairDecrementer<TPair, TLimits, 0> {
+		typename Iterator<TLimits const>::Type	it, itEnd;
+		typename Value<TLimits>::Type			old;
+
+		TPair		pos;
+
+		_PairDecrementer() {}
+		_PairDecrementer(TLimits const &_limits) { setHost(*this, _limits); }
+
+		inline operator TPair () const {
+			return pos;
+		}
+
+		inline TPair const & operator-- () {
+			typename Value<TPair,2>::Type i2 = getValueI2(pos);
+			if (i2 > 1)
+				--i2;
+			else
+			{
+				i2 = 0;
+				while (!i2 && (it != itEnd))
+				{
+					assignValueI1(pos, getValueI1(pos) + 1);
+					i2 = (*it - old);
+					old = *it;
+					++it;
+				} 
+			}
+			assignValueI2(pos, i2);
+			return pos;
+		}
+	};
+
+	template <typename TPair, typename TLimits, typename TLimits2>
+	void setHost(_PairDecrementer<TPair, TLimits, 0> &me, TLimits2 const &limits) {
+		me.it = begin(limits);
+		me.itEnd = end(limits);
+		me.old = 0;
+		assignValueI1(me.pos, 0);
+		assignValueI2(me.pos, 0);
+		if (length(limits) > 1) {
+			++me.it;
+			--me;
+			assignValueI1(me.pos, getValueI1(me.pos) - 1);
+		}
+	}
+
+
+    //////////////////////////////////////////////////////////////////////////////
+    // sampler class
+    template < typename TInput, const unsigned m, typename TCompression, typename TPair, typename TLimitsString >
+    struct Pipe< TInput, Multi<Sampler<m, TCompression>, TPair, TLimitsString> >
+    {
+        typedef typename Value<Pipe>::Type  OutType;
+        typedef typename Size<Pipe>::Type   SizeType;
+
+		typedef _PairDecrementer<TPair, TLimitsString, m>	Decrementer;
+
+		TInput		&in;
+        bool		filter[m];
+        Decrementer	localPos;
+		SizeType	_size, _rest;
+        OutType		tmp1, tmp2;
+        OutType		*outRef, *tmpRef;
+        bool		last;
+
+		TLimitsString const &limits;
+        
+        Pipe(TInput& _in, TLimitsString const &_limits):
+            in(_in),
+			limits(_limits),
+            outRef(&tmp1),
+            tmpRef(&tmp2) {}
+       
+        inline void prepare() {
+            memset<sizeof(filter), 0>(filter);
+			for(unsigned i = 1; i <= _SkewDC<m>::VALUE[0]; i++)
+                filter[_SkewDC<m>::VALUE[i]] = true;
+
+			setHost(localPos, limits);
+
+			while (!filter[localPos.residue] && !eof(in)) {
+                ++in;
+				--localPos;
+            }
+            _rest = length(*this);
+            fill(m);
+            swap();
+        }
+        
+        inline void fill(int f) {
+            int i;
+            for(i = 0; i < f && !eof(in); ++i, ++in)
+                tmpRef->i2.i[i] = *in;
+            last = eof(in);
+            for(; i < f; ++i)
+                tmpRef->i2.i[i] = 0;
+            tmpRef->i1 = localPos;
+        }
+        
+        inline void rotate(int r) {
+            for(unsigned i = 0; i < m; ++i, ++r) {
+                if (r == m) r = 0;
+                tmpRef->i2.i[i] = outRef->i2.i[r];
+            }
+        }
+        
+        inline void swap() {
+            OutType *newOutRef = tmpRef;
+            tmpRef = outRef;
+            outRef = newOutRef;
+        }
+        
+        inline OutType const& operator*() {
+            return *outRef;
+        }
+        
+        Pipe& operator++() {
+            unsigned skipped = 0;
+			if (--_rest) {
+				if (!last)
+					do {
+						outRef->i2.i[skipped++] = *in;
+						++in;
+						--localPos;
+						if (eof(in)) {
+							last = true;
+							while (!filter[localPos.residue]) {
+								outRef->i2.i[skipped++] = 0;
+								--localPos;
+							};
+							break;
+						}
+					} while (!filter[localPos.residue]);
+				else
+					do {
+						outRef->i2.i[skipped++] = 0;
+						--localPos;
+					} while (!filter[localPos.residue]);
+				rotate(skipped);
+				tmpRef->i1 = localPos;
+				swap();
+			}
+            return *this;
+        }        
+    };
+
+
+    //////////////////////////////////////////////////////////////////////////////
+    // sampler class (uses bit compression)
+	template < typename TInput, const unsigned m, typename TPair, typename TLimitsString >
+    struct Pipe< TInput, Multi<Sampler<m, Compressed>, TPair, TLimitsString> >
+    {
+        typedef typename Value<Pipe>::Type  OutType;
+        typedef typename Size<Pipe>::Type   SizeType;
+        typedef typename OutType::T2        TTuple;
+
+		typedef _PairDecrementer<TPair, TLimitsString, m>	Decrementer;
+
+		TInput		&in;
+        bool		filter[m];
+        SizeType	_size, _rest;
+        Decrementer	localPos;
+        OutType		tmp;
+        bool		last;
+
+		TLimitsString const &limits;
+        
+        Pipe(TInput& _in, TLimitsString const &_limits):
+            in(_in),
+			limits(_limits) {}
+        
+        inline void prepare() {
+            memset<sizeof(filter), 0>(filter);
+            for(unsigned i = 1; i <= _SkewDC<m>::VALUE[0]; i++)
+                filter[_SkewDC<m>::VALUE[i]] = true;
+
+			setHost(localPos, limits);
+
+			while (!filter[localPos.residue] && !eof(in)) {
+                ++in;
+				--localPos;
+            }
+            _rest = length(*this);
+            fill(m);
+        }
+        
+        inline void fill(int f) {
+            int i;
+            tmp.i2.i = 0;
+            for(i = 0; i < f && !eof(in); ++i, ++in) {
+                tmp.i2 <<= 1;
+                tmp.i2 |= *in;
+            }
+            last = eof(in);
+            tmp.i2.i <<= (f - i);
+			tmp.i1 = localPos;
+        }
+        
+        inline OutType const& operator*() {
+            return tmp;
+        }
+        
+        Pipe& operator++() {
+			if (--_rest) {
+				if (!last)
+					do {
+						tmp.i2 <<= 1;
+						tmp.i2 |= *in;
+						++in;
+						--localPos;
+						if (eof(in)) {
+							last = true;
+							while (!filter[localPos.residue]) {
+								tmp.i2 <<= 1;
+								--localPos;
+							};
+							break;
+						}
+					} while (!filter[localPos.residue]);
+				else
+					do {
+						tmp.i2 <<= 1;
+						--localPos;
+					} while (!filter[localPos.residue]);
+			}
+            tmp.i1 = localPos;
+            return *this;
+        }        
+    };
+
+
+
+    //////////////////////////////////////////////////////////////////////////////
+    // global pipe functions
+	template < typename TInput, const unsigned m, typename TCompression, typename TPair, typename TLimitsString >
+	inline bool control(Pipe< TInput, Multi<Sampler<m, TCompression>, TPair, TLimitsString> > &me, ControlBeginRead const &command) {
+        if (!control(me.in, command)) return false;
+        me.prepare();
+		return true;
+    }
+
+	template < typename TInput, const unsigned m, typename TCompression, typename TPair, typename TLimitsString >
+	inline bool control(Pipe< TInput, Multi<Sampler<m, TCompression>, TPair, TLimitsString> > &me, ControlEof const &command) {
+		return me._rest == 0;
+    }
+
+	template < typename TInput, const unsigned m, typename TCompression, typename TPair, typename TLimitsString >
+    inline typename Size< Pipe< TInput, Multi<Sampler<m, TCompression>, TPair, TLimitsString> > >::Type
+	length(Pipe< TInput, Multi<Sampler<m, TCompression>, TPair, TLimitsString> > &me)
+	{
+		typedef typename Size< Pipe< TInput, Multi<Sampler<m, TCompression>, TPair, TLimitsString> > >::Type TSize;
+		typename Iterator<TLimitsString const>::Type it = begin(me.limits), itEnd = end(me.limits);
+		
+		if (it == itEnd) return 0;
+
+		TSize sum = 0;
+		TSize size;
+		TSize old = *it; ++it;
+
+		while (it != itEnd) {
+			size = *it - old;
+			old = *it;
+			
+			for(unsigned i = 1; i <= _SkewDC<m>::VALUE[0]; i++)
+				if (_SkewDC<m>::VALUE[i])
+					sum += (size + m - _SkewDC<m>::VALUE[i]) / m;
+				else
+					sum += size / m;
+
+			++it;
+		}
+
+        return sum;
     }
 //}
 

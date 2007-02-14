@@ -16,18 +16,18 @@ namespace SEQAN_NAMESPACE_MAIN
 //{
     
     template <typename InType, typename Result = typename InType::T1>
-    struct getI1 : public std::unary_function<InType,Result> {
-        Result operator()(const InType& x) const { return x.i1; }
+    struct filterI1 : public std::unary_function<InType,Result> {
+        inline Result operator()(const InType& x) const { return x.i1; }
     };
 
     template <typename InType, typename Result = typename InType::T2>
-    struct getI2 : public std::unary_function<InType,Result> {
-        Result operator()(const InType& x) const { return x.i2; }
+    struct filterI2 : public std::unary_function<InType,Result> {
+        inline Result operator()(const InType& x) const { return x.i2; }
     };
 
     template <typename InType, typename Result = typename InType::T3>
-    struct getI3 : public std::unary_function<InType,Result> {
-        Result operator()(const InType& x) const { return x.i3; }
+    struct filterI3 : public std::unary_function<InType,Result> {
+        inline Result operator()(const InType& x) const { return x.i3; }
     };
 
 
