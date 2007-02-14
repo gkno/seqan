@@ -94,9 +94,14 @@ namespace SEQAN_NAMESPACE_MAIN
 		e.reset();
 	}
 
-    inline bool waitForAll(Event eventList[], DWORD count, DWORD timeout_millis = Event::Infinite)
+    inline bool waitForAll(Event eventList[], DWORD count, DWORD timeout_millis)
 	{
 		return WaitForMultipleObjects(count, &eventList[0].hEvent, true, timeout_millis) != WAIT_TIMEOUT;
+	}
+    
+    inline bool waitForAll(Event eventList[], DWORD count)
+	{
+		return WaitForMultipleObjects(count, &eventList[0].hEvent, true, Event::Infinite) != WAIT_TIMEOUT;
 	}
     
 	inline int waitForAny(Event eventList[], DWORD count, DWORD timeout_millis)
@@ -197,8 +202,12 @@ namespace SEQAN_NAMESPACE_MAIN
 	//////////////////////////////////////////////////////////////////////////////
 	// global event functions
 
-	inline bool open(Event &e, bool initial = false) {
+	inline bool open(Event &e, bool initial) {
 		return e.open(initial);
+	}
+
+	inline bool open(Event &e) {
+		return open(e, false);
 	}
 
 	inline bool close(Event &e) {

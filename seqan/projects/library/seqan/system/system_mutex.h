@@ -126,8 +126,12 @@ namespace SEQAN_NAMESPACE_MAIN
 	//////////////////////////////////////////////////////////////////////////////
 	// global mutex functions
 
-	inline bool open(Mutex &m, bool initial = false) {
+	inline bool open(Mutex &m, bool initial) {
 		return m.open(initial);
+	}
+
+	inline bool open(Mutex &m) {
+		return open(m, false);
 	}
 
 	inline bool close(Mutex &m) {
