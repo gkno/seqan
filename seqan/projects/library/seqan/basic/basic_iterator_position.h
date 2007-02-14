@@ -28,7 +28,7 @@ struct PositionIterator;
 template <typename TContainer>
 class Iter<TContainer, PositionIterator>
 {
-private:
+public:
 	typedef typename Position<TContainer>::Type TPosition;
 
 	typename _Pointer<TContainer>::Type data_container;
@@ -65,6 +65,12 @@ SEQAN_CHECKPOINT
 		data_position(other_.data_position)
 	{
 SEQAN_CHECKPOINT
+	}
+	template <typename TContainer2, typename TSpec2>
+	Iter(Iter<TContainer2, TSpec2> const & other_)
+	{
+SEQAN_CHECKPOINT
+		assign(*this, other_);
 	}
 	~Iter()
 	{
@@ -310,6 +316,20 @@ operator -= (Iter<TContainer, PositionIterator> & left,
 SEQAN_CHECKPOINT
 	setPosition(left, position(left) - right);
 	return left;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// assign (Conversion)
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TTargetContainer, typename TSource>
+inline void
+assign(Iter<TTargetContainer, PositionIterator> & target,
+	   TSource const & source)
+{
+SEQAN_CHECKPOINT
+	target.data_container = container(source);
+	target.data_position = position(source);
 }
 
 //////////////////////////////////////////////////////////////////////////////

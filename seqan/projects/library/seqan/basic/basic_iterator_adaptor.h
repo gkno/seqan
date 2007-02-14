@@ -63,7 +63,7 @@ public:
 SEQAN_CHECKPOINT
 		data_iterator = TIterator();
 	}
-/*
+/*//TODO: welches "begin" zur initialisierung von "data_iterator" aufrufen?
 	Iter(typename _Parameter<TContainer>::Type container_):
 		data_container(_toPointer(container_)),
 		data_iterator(begin(container_))
@@ -424,20 +424,20 @@ SEQAN_CHECKPOINT
 	return atEnd(me, container(me));
 }
 
-
 //////////////////////////////////////////////////////////////////////////////
-// assign
+// assign (Conversion)
 //////////////////////////////////////////////////////////////////////////////
-/* ??? TODO: more sophisticated iterator conversion/assignment
 
-template <typename TContainer, typename TIterator, typename TSpec, typename TSource>
+template <typename TTargetContainer, typename TIterator, typename TSpec, typename TSource>
 inline void
-assign(Iter<TContainer, AdaptorIterator<TIterator, TSpec> > & me,
+assign(Iter<TTargetContainer, AdaptorIterator<TIterator, TSpec> > & target,
 	   TSource const & source)
 {
 SEQAN_CHECKPOINT
+	target.data_container = container(source);
+	target.data_iterator = begin(container(source)) + position(source);
 }
-*/
+
 //////////////////////////////////////////////////////////////////////////////
 
 } //namespace SEQAN_NAMESPACE_MAIN

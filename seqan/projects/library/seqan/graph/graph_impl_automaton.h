@@ -130,9 +130,16 @@ template<typename TAlphabet, typename TCargo, typename TEdgeSpec, typename TSpec
 inline void
 _copyGraph(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> const& source,
 	  Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec>& dest,
-	  bool transpose = false)
+	  bool transpose)
 {
 	_copyAutomatonGraph(source,dest,transpose);
+}
+template<typename TAlphabet, typename TCargo, typename TEdgeSpec, typename TSpec>
+inline void
+_copyGraph(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> const& source,
+	  Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec>& dest)
+{
+	_copyGraph(source,dest,false);
 }
 
 template<typename TAlphabet, typename TCargo, typename TEdgeSpec, typename TSpec>

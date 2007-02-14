@@ -302,7 +302,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline int length(Tuple<_T, _size, _Compression> const &me) { return _size; }
 
     template <typename _T, int _size, typename _S>
-    inline _S const assignAt(Tuple<_T, _size> &me, int k, _S const source) {
+    inline _S const assignAt(Tuple<_T, _size, void> &me, int k, _S const source) {
         return me.i[k] = source;
     }
 

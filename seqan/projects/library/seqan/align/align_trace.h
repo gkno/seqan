@@ -128,8 +128,8 @@ _initMembers(AlignTrace<TSize, TSpec> & me)
 template <typename TSize, typename TSpec, typename TCoordinates>
 inline void
 _CoordinatesToPositions(AlignTrace<TSize, TSpec> & me,
-						TCoordinates const & coordinates_
-						TSize & position_
+						TCoordinates const & coordinates_,
+						TSize & position_,
 						unsigned char & bit_position)
 {
 	for (unsigned int i=dimension(me)-1; i > 0; --i)
@@ -311,7 +311,7 @@ operator ++ (Navi< AlignTrace<TSize, TSpec>, TSpec2> & me)
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TSize, typename TSpec>
+template <typename TSize, typename TSpec, typename TSpec2>
 inline void
 goPrevious(Navi< AlignTrace<TSize, TSpec>, TSpec2 > & me,
 		   unsigned int dimension_)
@@ -349,7 +349,7 @@ operator -- (Navi< AlignTrace<TSize, TSpec>, TSpec2> & me)
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TSize, typename TSpec>
+template <typename TSize, typename TSpec, typename TSpec2>
 inline void
 moveNextBit(Navi< AlignTrace<TSize, TSpec>, TSpec2 > & me)
 {
@@ -366,7 +366,7 @@ moveNextBit(Navi< AlignTrace<TSize, TSpec>, TSpec2 > & me)
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TSize, typename TSpec>
+template <typename TSize, typename TSpec, typename TSpec2>
 inline void
 movePreviousBit(Navi< AlignTrace<TSize, TSpec>, TSpec2 > & me)
 {

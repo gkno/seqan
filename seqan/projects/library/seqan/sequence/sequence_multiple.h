@@ -196,7 +196,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 	template < typename TString >
-    inline void appendValue(StringSet< TString, ConcatDirect<> > &me, TString &obj) {
+    inline void appendValue(StringSet< TString, ConcatDirect<void> > &me, TString &obj) {
         append(me.concat, obj);
         appendValue(me.limits, lengthSum(me) + length(obj));
     }

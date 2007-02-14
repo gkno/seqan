@@ -44,6 +44,8 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 
+template <typename TSpec> struct Proxy;
+
 template<typename TTargetSpec, typename TSource>
 inline void 
 assign(Proxy<TTargetSpec> & target,

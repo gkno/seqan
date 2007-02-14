@@ -4,6 +4,10 @@
 #include <seqan/sequence.h>
 #include <seqan/score.h>
 
+#ifdef SEQAN_SWITCH_USE_FORWARDS
+#include <seqan/find/find_generated_forwards.h>
+#endif
+
 #include <seqan/find/find_base.h>
 
 #include <seqan/find/find_horspool.h>

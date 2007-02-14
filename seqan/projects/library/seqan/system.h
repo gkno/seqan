@@ -16,6 +16,9 @@
 # include <aio.h>
 #endif
 
+#ifdef SEQAN_SWITCH_USE_FORWARDS
+//#include <seqan/system/system_generated_forwards.h>
+#endif
 
 #include <seqan/system/system_base.h>
 #include <seqan/system/system_mutex.h>

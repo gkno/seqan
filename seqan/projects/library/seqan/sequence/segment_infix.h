@@ -340,13 +340,14 @@ SEQAN_CHECKPOINT
 		me.data_end_position = new_end - begin(host(me));
 	}
 
+/* //unnoetig
 	friend inline void 
 	setEnd(Segment & me)
 	{
 SEQAN_CHECKPOINT
 		setEnd(me, end(host(me)));
 	}
-
+*/
 //____________________________________________________________________________
 
 
@@ -667,7 +668,7 @@ inline void
 setBegin(TIterator new_begin)
 {
 SEQAN_CHECKPOINT
-	setBegin(host(new_begin), hostIterator(new_begin));
+	setBegin(container(new_begin), hostIterator(new_begin));
 }
 
 
@@ -679,7 +680,7 @@ inline void
 setEnd(TIterator new_end)
 {
 SEQAN_CHECKPOINT
-	setEnd(host(new_end), new_end);
+	setEnd(container(new_end), new_end);
 }
 
 //////////////////////////////////////////////////////////////////////////////

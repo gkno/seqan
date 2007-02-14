@@ -11,6 +11,13 @@
 #include <seqan/basic.h>
 #include <seqan/sequence.h>
 #include <seqan/file.h>
+
+
+#ifdef SEQAN_SWITCH_USE_FORWARDS
+#include <seqan/graph/graph_generated_forwards.h>
+#endif
+
+
 #include <seqan/graph/graph_stack.h>
 #include <seqan/align/matrix_base.h>
 

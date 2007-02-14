@@ -83,6 +83,8 @@ struct Reference<Iter<TContainer, TSpec> const>:
 
 ///.Metafunction.Container.param.T.type:Class.Iter
 
+template <typename T> struct Container;
+
 template <typename TContainer, typename TSpec>
 struct Container<Iter<TContainer, TSpec> >
 {
@@ -190,6 +192,7 @@ position(Iter<TContainer, TSpec> const & me,
 SEQAN_CHECKPOINT
 	return position(me);
 }
+
 
 //////////////////////////////////////////////////////////////////////////////
 

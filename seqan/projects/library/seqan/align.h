@@ -4,6 +4,10 @@
 #include <seqan/sequence.h>
 #include <seqan/score.h>
 
+#ifdef SEQAN_SWITCH_USE_FORWARDS
+#include <seqan/align/align_generated_forwards.h>
+#endif
+
 #include <seqan/align/gaps_base.h>
 #include <seqan/align/gaps_iterator_base.h>
 

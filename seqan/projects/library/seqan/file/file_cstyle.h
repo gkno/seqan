@@ -29,12 +29,13 @@ namespace SEQAN_NAMESPACE_MAIN
 	    typedef long Type;
     };
 */
+/*
     template <>
     struct Size< FILE* >
     {
 	    typedef size_t Type;
     };
-
+*/
     template <>
     struct Position< FILE* >
     {
@@ -92,9 +93,13 @@ namespace SEQAN_NAMESPACE_MAIN
     }
 
     template < typename TPos >
-    inline Size<FILE*>::Type seek(FILE* me, TPos const fileOfs, int origin = SEEK_BEGIN) {
+    inline Size<FILE*>::Type seek(FILE* me, TPos const fileOfs, int origin) {
         fseek(me, fileOfs, origin);
 		return ftell(me);
+    }
+    template < typename TPos >
+    inline Size<FILE*>::Type seek(FILE* me, TPos const fileOfs) {
+		return seek(me, fileOfs, SEEK_BEGIN);
     }
 
     inline Size<FILE*>::Type tell(FILE* me) {

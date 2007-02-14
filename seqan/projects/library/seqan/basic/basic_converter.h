@@ -91,7 +91,6 @@ convert(TSource const & source)
 	return convertImpl(Convert<TTarget, TSource>(), source);
 }
 
-
 //////////////////////////////////////////////////////////////////////////////
 }// namespace SEQAN_NAMESPACE_MAIN
 

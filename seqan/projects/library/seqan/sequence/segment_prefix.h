@@ -232,13 +232,14 @@ SEQAN_CHECKPOINT
 
 //____________________________________________________________________________
 
+/* //unnoetig
 	friend inline void 
 	setEnd(Segment & me)
 	{
 SEQAN_CHECKPOINT
 		me.data_end_position = length(host(me));
 	}
-
+*/
 	friend inline void 
 	setEnd(Segment & me, typename Position<Segment>::Type new_end)
 	{

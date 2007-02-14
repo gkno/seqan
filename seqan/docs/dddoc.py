@@ -158,7 +158,7 @@ def sortLineCompare(left, right):
     elif left.id < right.id: return -1
     else: return 1
        
- ################################################################################
+################################################################################
          
 def sortLinesByOcc(left, right):
     if left.id < right.id: return -1

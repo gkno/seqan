@@ -14,7 +14,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ...signature:String<char, Alloc<> >
 */
 
-typedef String<char, Alloc<> > CharString;
+typedef String<char, Alloc<void> > CharString;
 
 //____________________________________________________________________________
 
@@ -40,7 +40,7 @@ typedef Iterator<CharString, Rooted>::Type CharIterator;
 ...signature:String<wchar_t, Alloc<> >
 */
 
-typedef String<wchar_t, Alloc<> > UnicodeString;
+typedef String<wchar_t, Alloc<void> > UnicodeString;
 
 //____________________________________________________________________________
 
@@ -67,7 +67,7 @@ typedef Iterator<UnicodeString, Rooted>::Type UnicodeIterator;
 ..see:Spec.Dna
 */
 
-typedef String<Dna, Alloc<> > DnaString;
+typedef String<Dna, Alloc<void> > DnaString;
 
 //____________________________________________________________________________
 
@@ -96,7 +96,7 @@ typedef Iterator<DnaString, Rooted>::Type DnaIterator;
 ..see:Shortcut.DnaString
 */
 
-typedef String<Dna5, Alloc<> > Dna5String;
+typedef String<Dna5, Alloc<void> > Dna5String;
 
 //____________________________________________________________________________
 
@@ -125,7 +125,7 @@ typedef Iterator<Dna5String, Rooted>::Type Dna5Iterator;
 ..see:Spec.Iupac
 */
 
-typedef String<Iupac, Alloc<> > IupacString;
+typedef String<Iupac, Alloc<void> > IupacString;
 
 //____________________________________________________________________________
 
@@ -153,7 +153,7 @@ typedef Iterator<IupacString, Rooted>::Type IupacIterator;
 ..see:Spec.AminoAcid
 */
 
-typedef String<AminoAcid, Alloc<> > Peptide;
+typedef String<AminoAcid, Alloc<void> > Peptide;
 
 //____________________________________________________________________________
 

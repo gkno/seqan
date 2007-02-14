@@ -1,6 +1,7 @@
 import os
 import copy
 import string
+import sys
 
 ################################################################################
 
@@ -11,7 +12,12 @@ TYPEDEFS = {}
 
 ################################################################################
 
-def main(project_path, project):
+def main(project_path):
+    pos1 = project_path.rfind('/')
+    if (pos1 < 0):
+        exit ('ERROR: wrong argument "' + project_path + '"');
+        
+    project = project_path[pos1+1:]
     
     for root, dirs, files in os.walk(project_path):
         for file in files:
@@ -19,19 +25,19 @@ def main(project_path, project):
                 continue
             path = os.path.join(root, file)
             if testFileType(path):
-                print ".",
                 parseFile(path)
         if 'CVS' in dirs:
             dirs.remove('CVS')
         if '.svn' in dirs:
             dirs.remove('.svn')
-            
-    outAll(project_path, project)
+    
+    if FUNCS != {}:        
+        outAll(project_path, project)
 
 ################################################################################
 
 def forwardFilename(project):
-    return project + "_forward.h"
+    return project + "_generated_forwards.h"
 
 ################################################################################
 
@@ -49,7 +55,15 @@ def parseFile(filename):
     lines = f.readlines()
     f.close()
     
+    for line in lines:
+        if (line.find("SEQAN_NO_GENERATED_FORWARDS") >= 0):
+            print "-",
+            return
+    
+    print ".",
+
     sigs = preprocess(lines, filename);
+    
     createEntries(sigs)
 
 ################################################################################
@@ -75,13 +89,30 @@ def preprocess(lines, filename):
     str = ""
     
     for line in lines:
-        line = line.strip()
         lineNumber += 1;
 
-        if inDefine or (line.find("#define") >= 0):
+        line = line.strip()
+    
+        #remove some characters to make parsing simpler
+        line = line.replace("'}'", "");
+        line = line.replace("'{'", "");
+        line = line.replace("';'", "");
+        line = line.replace("'\"'", "");
+        line = line.replace('\\"', "");
+        
+
+        #skip multiline defines
+        if inDefine or ((not inComment) and (not inString) and (line.find("#define") >= 0)):
             inDefine = isMultiLine(line)
             continue
             
+        if len(line) <= 0: 
+            continue
+
+        #skip preprocessor lines
+        if (not inComment) and (not inString) and (line[0]=="#"):
+            continue
+
         while len(line) > 0 :
             if inComment:
                 pos1 = line.find("*/")
@@ -175,7 +206,10 @@ def process2(str):
     if pos1 >= 0:
         str = str[pos1+1:]
         
+    str = removeBases(str)
+        
     str = str.replace('template<', 'template <')
+    str = str.replace('template < ', 'template <')
     str = str.replace(' operator ', ' operator')
         
     str = str.strip()
@@ -190,8 +224,7 @@ def isNamespace(str):
     pos1 = str.rfind(' ')
     if pos1 < 0: return ""
     while (pos1 > 0) and (str[pos1] == ' '): pos1 -= 1
-    pos2 = str.rfind('namespace')
-    if  (pos2 > 0) and (pos2 >= pos1 - 8):
+    if (pos1 >= 8) and (str[pos1-8:pos1+1] == 'namespace'):
         return str[pos1 + 1:].strip()
     else:
         return ""
@@ -201,13 +234,12 @@ def isNamespace(str):
 # determines whether a signature is a struct declaration
 
 def isStuctDeclaration(str):
-    str = str.strip()
+    str = removeBases(str)
+    
     pos1 = str.rfind(' ')
     if pos1 < 0: return False
     while (pos1 > 0) and (str[pos1] == ' '): pos1 -= 1
-    pos2 = str.rfind('struct')
-    pos3 = str.rfind('class')
-    return ((pos2 >= pos1 - 5) and (pos2 >= 0)) or ((pos3 >= pos1 - 6) and (pos3 >= 0))
+    return ((pos1 >= 5) and (str[pos1-5:pos1+1] == 'struct')) or ((pos1 >= 4) and (str[pos1-4:pos1+1] == 'class'))
    
 ################################################################################
 # determines whether a signature is typedef
@@ -216,6 +248,18 @@ def isTypedef(str):
     str = str.strip()
     return (str[:7] == "typedef") and (str.find('::') < 0)
 
+################################################################################
+# removes list of base class 
+
+def removeBases(str):
+    pos1 = -2
+    while pos1 < len(str):
+        pos1 = str.find(':', pos1 + 2)
+        if pos1 < 0: return str
+        if (pos1 == len(str)-1) or (str[pos1+1]!=':'): return str[:pos1]
+        
+    return str.strip()
+    
 ################################################################################
 # gets a list of [filename, lineNumber, signature, namespaces] tupels
 # analyse signature and adds entries in FUNCS and CLASSES
@@ -315,15 +359,13 @@ def getFuncName(sig):
 
 def getStructName(sig):
     sig = sig.strip()
-    pos1 = sig.rfind(':')
-    if pos1 >= 0: sig = sig[0:pos1-1]
-    
+
     pos1 = sig.rfind(' ')
     if pos1 < 0: return ""
     
     while (pos1 > 0) and (sig[pos1] == ' '): pos1 -= 1
     
-    if (sig.rfind('class') >= pos1 - 4) or (sig.rfind('struct') >= pos1 - 5):
+    if ((pos1 >= 5) and (sig[pos1-5:pos1+1] == 'struct')) or ((pos1 >= 4) and (sig[pos1-4:pos1+1] == 'class')):
         name = sig[pos1 + 1:].strip()
         if (name.find('<') >= 0): return ""
         else: return name
@@ -346,8 +388,17 @@ def getTypedefName(sig):
 # main Function for output of forward header
 
 def outAll(path, project):
-    str =  "//////////////////////////////////////////////////////////////////////////////\n"
-    str += "// note: this file is automatically generated.\n\n"
+    
+    header_switch = "SEQAN_HEADER_" + project + "_GENERATED_FORWARDS_H"
+
+    str = ""
+    str += "#ifndef " + header_switch.upper() + " \n"
+    str += "#define " + header_switch.upper() + " \n\n"
+    
+    str += "//////////////////////////////////////////////////////////////////////////////\n"
+    str += "// NOTE: This file is automatically generated by build_forwards.py\n"
+    str += "//       Do not edit this file manually!\n"
+    str += "//////////////////////////////////////////////////////////////////////////////\n\n\n"
 
     str += "//////////////////////////////////////////////////////////////////////////////\n"
     str += "// CLASSES\n"
@@ -360,6 +411,8 @@ def outAll(path, project):
     str += "\n//////////////////////////////////////////////////////////////////////////////\n"
     str += "// FUNCTIONS\n"
     str += outList(FUNCS)
+    
+    str += "#endif\n"
 
     filename = os.path.join(path, forwardFilename(project))
     fl = file(filename, "w")
@@ -416,7 +469,15 @@ def outChangeNamespaces(old_namespaces, new_namespaces):
     return str + "\n"
 
 ################################################################################
-        
-main ('../projects/library/seqan/sequence', 'sequence')
-#main ('.')
+# Start: parse arguments and call main
+
+#main("../projects/library/seqan")
+
+
+if len(sys.argv) < 2: 
+    exit ('too few arguments');
+
+#if (os.path.exists("V:/seqan2/" + sys.argv[1])):
+print "create forwards for", sys.argv[1]
+main (sys.argv[1]);
 

@@ -80,33 +80,33 @@ struct Reference<Alterator<TIterator, Convert<TTargetValue> > const>
 // value
 
 template <typename TIterator, typename TTargetValue>
-inline typename Reference<Alterator<TIterator, Convert<TTargetValue> > >::Type 
-value(Alterator<TIterator, Convert<TTargetValue> > & me)
+inline typename Reference<Alterator<TIterator, Convert<TTargetValue, void> > >::Type 
+value(Alterator<TIterator, Convert<TTargetValue, void> > & me)
 {
 SEQAN_CHECKPOINT
-	return typename Reference<Alterator<TIterator, Convert<TTargetValue> > >::Type(me);
+	return typename Reference<Alterator<TIterator, Convert<TTargetValue, void> > >::Type(me);
 }
 template <typename TIterator, typename TTargetValue>
-inline typename Reference<Alterator<TIterator, Convert<TTargetValue> > const>::Type 
-value(Alterator<TIterator, Convert<TTargetValue> > const & me)
+inline typename Reference<Alterator<TIterator, Convert<TTargetValue, void> > const>::Type 
+value(Alterator<TIterator, Convert<TTargetValue, void> > const & me)
 {
 SEQAN_CHECKPOINT
-	return typename Reference<Alterator<TIterator, Convert<TTargetValue> > const>::Type(me);
+	return typename Reference<Alterator<TIterator, Convert<TTargetValue, void> > const>::Type(me);
 }
 
 //////////////////////////////////////////////////////////////////////////////
 // getValue
 
 template <typename TIterator, typename TTargetValue>
-inline typename GetValue<Alterator<TIterator, Convert<TTargetValue> > >::Type 
-getValue(Alterator<TIterator, Convert<TTargetValue> > & me)
+inline typename GetValue<Alterator<TIterator, Convert<TTargetValue, void> > >::Type 
+getValue(Alterator<TIterator, Convert<TTargetValue, void> > & me)
 {
 SEQAN_CHECKPOINT
 	return convert<TTargetValue>(getValue(me));
 }
 template <typename TIterator, typename TTargetValue>
-inline typename GetValue<Alterator<TIterator, Convert<TTargetValue> > const>::Type 
-getValue(Alterator<TIterator, Convert<TTargetValue> > const & me)
+inline typename GetValue<Alterator<TIterator, Convert<TTargetValue, void> > const>::Type 
+getValue(Alterator<TIterator, Convert<TTargetValue, void> > const & me)
 {
 SEQAN_CHECKPOINT
 	return convert<TTargetValue>(getValue(me));
@@ -119,8 +119,8 @@ SEQAN_CHECKPOINT
 
 template <typename TIteratorLeft, typename TLeft, typename TIteratorRight, typename TRight>
 inline bool 
-operator == (Proxy<IteratorProxy<Alterator<TIteratorLeft, Convert<TLeft> > > > const & left_,
-			 Proxy<IteratorProxy<Alterator<TIteratorRight, Convert<TRight> > > > const & right_)
+operator == (Proxy<IteratorProxy<Alterator<TIteratorLeft, Convert<TLeft, void> > > > const & left_,
+			 Proxy<IteratorProxy<Alterator<TIteratorRight, Convert<TRight, void> > > > const & right_)
 {
 SEQAN_CHECKPOINT
 	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
@@ -128,7 +128,7 @@ SEQAN_CHECKPOINT
 }
 template <typename TIteratorLeft, typename TLeft, typename TRight>
 inline bool 
-operator == (Proxy<IteratorProxy<Alterator<TIteratorLeft, Convert<TLeft> > > > const & left_,
+operator == (Proxy<IteratorProxy<Alterator<TIteratorLeft, Convert<TLeft, void> > > > const & left_,
 			 TRight const & right_)
 {
 SEQAN_CHECKPOINT
@@ -137,7 +137,7 @@ SEQAN_CHECKPOINT
 }
 template <typename TIteratorLeft, typename TLeft, typename TRightSpec>
 inline bool 
-operator == (Proxy<IteratorProxy<Alterator<TIteratorLeft, Convert<TLeft> > > > const & left_,
+operator == (Proxy<IteratorProxy<Alterator<TIteratorLeft, Convert<TLeft, void> > > > const & left_,
 			 Proxy<TRightSpec> const & right_)
 {
 SEQAN_CHECKPOINT
@@ -148,7 +148,7 @@ SEQAN_CHECKPOINT
 template <typename TLeft, typename TIteratorRight, typename TRight>
 inline bool 
 operator == (TLeft const & left_,
-			 Proxy<IteratorProxy<Alterator<TIteratorRight, Convert<TRight> > > > const & right_)
+			 Proxy<IteratorProxy<Alterator<TIteratorRight, Convert<TRight, void> > > > const & right_)
 {
 SEQAN_CHECKPOINT
 	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
@@ -157,7 +157,7 @@ SEQAN_CHECKPOINT
 template <typename TLeftSpec, typename TIteratorRight, typename TRight>
 inline bool 
 operator == (Proxy<TLeftSpec> const & left_,
-			 Proxy<IteratorProxy<Alterator<TIteratorRight, Convert<TRight> > > > const & right_)
+			 Proxy<IteratorProxy<Alterator<TIteratorRight, Convert<TRight, void> > > > const & right_)
 {
 SEQAN_CHECKPOINT
 	typedef typename Value<Proxy<TLeftSpec> >::Type TLeft;

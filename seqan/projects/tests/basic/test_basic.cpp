@@ -309,7 +309,7 @@ void Test_Iter()
 	char arr1[] = "XYZ";
 	char arr2[] = "abcdefg";
 
-	TIterator it1(arr1);
+	TIterator it1 = begin(arr1);
 	SEQAN_TASSERT(container(it1) == arr1);
 	SEQAN_TASSERT(*it1 == 'X')
 
@@ -384,7 +384,7 @@ void Test_Iterator_Adaptor()
 	Test_Iter<TSpec>();
 
 	char arr1[] = "abc";
-	TIterator it1(arr1);
+	TIterator it1 = begin(arr1);
 	char * ptr1 = it1;
 	SEQAN_TASSERT(*ptr1 == 'a');
 }

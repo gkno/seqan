@@ -26,7 +26,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..see:Tag.File Format
 */
 template <typename TFile, typename TData, typename TMeta>
-inline FileFormat<TFile, TData, TMeta> &
+inline FileFormat<TFile, TData, TMeta, void> &
 guessFileFormat(TFile & file,
 				TData & data)
 {

@@ -206,12 +206,12 @@ struct Iterator<SimpleType<TValue, TSpec> const, Standard>
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TTarget, typename T, typename TSourceValue, typename TSourceSpec>
-inline TTarget
+inline typename _RemoveConst<TTarget>::Type
 convertImpl(Convert<TTarget, T> const,
 			SimpleType<TSourceValue, TSourceSpec> const & source_)
 {
 SEQAN_CHECKPOINT
-	TTarget target_;
+	typename _RemoveConst<TTarget>::Type target_;
 	assign(target_, source_);
 	return target_;
 }
@@ -1066,25 +1066,6 @@ inline void assign(AminoAcid & target, Unicode c_source)
 {
 SEQAN_CHECKPOINT
 	target.value = _Translate_Table_Ascii_2_AA<>::VALUE[(unsigned char) c_source];
-}
-
-//////////////////////////////////////////////////////////////////////////////
-// gapValue
-//////////////////////////////////////////////////////////////////////////////
-
-inline char const &
-gapValueImpl(char *)
-{
-SEQAN_CHECKPOINT
-	static char const _gap = '-';
-	return _gap;
-}
-inline char const &
-gapValueImpl(char const *)
-{
-SEQAN_CHECKPOINT
-	static char const _gap = '-';
-	return _gap;
 }
 
 //////////////////////////////////////////////////////////////////////////////

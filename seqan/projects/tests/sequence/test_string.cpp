@@ -653,8 +653,8 @@ void Test_Segment()
 	assign(infix(str_1, 6, 8), "the test", 14);
 	SEQAN_TASSERT(str_1 == "begin the test")
 
-	setEnd(infix_1);
-	SEQAN_TASSERT(infix_1 == "")
+//	setEnd(infix_1);
+//	SEQAN_TASSERT(infix_1 == "")
 
 //____________________________________________________________________________
 // test infix iteration

@@ -28,7 +28,7 @@ struct SimpleAlloc;
 //////////////////////////////////////////////////////////////////////////////
 
 
-typedef Allocator<SimpleAlloc<> > SimpleAllocator;
+typedef Allocator<SimpleAlloc<Default> > SimpleAllocator;
 
 template <typename TParentAllocator>
 struct Allocator<SimpleAlloc<TParentAllocator> >

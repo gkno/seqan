@@ -8,6 +8,12 @@
 
 #include <seqan/sequence.h>
 
+#include <seqan/file/file_forwards.h>
+
+#ifdef SEQAN_SWITCH_USE_FORWARDS
+#include <seqan/file/file_generated_forwards.h>
+#endif
+
 #include <seqan/file/chunk_collector.h>
 #include <seqan/file/meta.h>
 

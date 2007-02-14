@@ -13,7 +13,12 @@
 #define SEQAN_NAMESPACE_MAIN seqan 
 
 #include <seqan/platform.h>
-    
+
+#include <seqan/basic/basic_forwards.h>
+#ifdef SEQAN_SWITCH_USE_FORWARDS
+#include <seqan/basic/basic_generated_forwards.h>
+#endif
+
 #include <seqan/basic/basic_debug.h>
 #include <seqan/basic/basic_definition.h>
 #include <seqan/basic/basic_type.h>
@@ -29,18 +34,22 @@
 
 #include <seqan/basic/basic_converter.h>
 #include <seqan/basic/basic_compare.h>
-#include <seqan/basic/basic_proxy.h>
 #include <seqan/basic/basic_operator.h>
-#include <seqan/basic/basic_transport.h>
 
 #include <seqan/basic/basic_host.h>
+
 #include <seqan/basic/basic_iterator.h>
 #include <seqan/basic/basic_iterator_base.h>
+
+#include <seqan/basic/basic_transport.h>
+
 #include <seqan/basic/basic_iterator_simple.h>
 #include <seqan/basic/basic_iterator_adaptor.h>
 #include <seqan/basic/basic_iterator_position.h>
 #include <seqan/basic/basic_iterator_adapt_std.h>
 //#include <seqan/basic_identifier.h>
+
+#include <seqan/basic/basic_proxy.h>
 
 #include <seqan/basic/basic_pointer.h>
 
@@ -50,6 +59,8 @@
 
 #include <seqan/basic/basic_alphabet_interface.h>
 #include <seqan/basic/basic_alphabet_trait_basic.h>
+
+#include <seqan/basic/basic_alphabet_interface2.h>
 
 #include <seqan/basic/basic_alphabet_simple_tabs.h>
 #include <seqan/basic/basic_alphabet_simple.h>

@@ -24,12 +24,12 @@ but immediately allocated and deallocated using $ParentAllocator$.
 */
 
 
-template <typename TParentAllocator = SimpleAllocator>
+template <typename TParentAllocator = Allocator<SimpleAlloc<Default> > >
 struct MultiPool;
 
 //////////////////////////////////////////////////////////////////////////////
 
-typedef Allocator<MultiPool<> > PoolAllocator;
+typedef Allocator<MultiPool<Allocator<SimpleAlloc<Default> > > > PoolAllocator;
 
 template <typename TParentAllocator>
 struct Allocator<MultiPool<TParentAllocator> >

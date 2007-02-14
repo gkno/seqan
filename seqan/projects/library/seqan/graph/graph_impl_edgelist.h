@@ -65,7 +65,7 @@ template<typename TCargo, typename TEdgeSpec, typename TSpec>
 inline void
 _copyGraph(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const& source, 
 	  Graph<EdgeList<TCargo, TEdgeSpec>, TSpec>& dest,
-	  bool transpose = false) 
+	  bool transpose) 
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> TGraph;
@@ -102,6 +102,13 @@ _copyGraph(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const& source,
 	}
 	dest.data_id_managerV = source.data_id_managerV;
 	dest.data_id_managerE = source.data_id_managerE;
+}
+template<typename TCargo, typename TEdgeSpec, typename TSpec>
+inline void
+_copyGraph(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const& source, 
+	  Graph<EdgeList<TCargo, TEdgeSpec>, TSpec>& dest) 
+{
+	_copyGraph(source, dest, false);
 }
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec>

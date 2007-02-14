@@ -5,6 +5,10 @@
 
 //____________________________________________________________________________
 
+#ifdef SEQAN_SWITCH_USE_FORWARDS
+#include <seqan/modifier/modifier_generated_forwards.h>
+#endif
+
 #include <seqan/sequence.h>
 #include <seqan/modifier/modifier_iterator.h>
 #include <seqan/modifier/modifier_string.h>

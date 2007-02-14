@@ -56,7 +56,7 @@ template<typename TAlphabet, typename TCargo, typename TSpec, typename TGraphSpe
 inline void
 _copyGraph(Graph<Automaton<TAlphabet, TCargo, WordGraph<TSpec> >, TGraphSpec> const& source,
 		   Graph<Automaton<TAlphabet, TCargo, WordGraph<TSpec> >, TGraphSpec>& dest,
-		   bool transpose = false)
+		   bool transpose)
 {
 	_copyAutomatonGraph(source, dest, transpose);
 	resize(dest.data_edge_label,length(source.data_edge_label));
@@ -81,6 +81,13 @@ _copyGraph(Graph<Automaton<TAlphabet, TCargo, WordGraph<TSpec> >, TGraphSpec> co
 			}
 		}
 	}
+}
+template<typename TAlphabet, typename TCargo, typename TSpec, typename TGraphSpec>
+inline void
+_copyGraph(Graph<Automaton<TAlphabet, TCargo, WordGraph<TSpec> >, TGraphSpec> const& source,
+		   Graph<Automaton<TAlphabet, TCargo, WordGraph<TSpec> >, TGraphSpec>& dest)
+{
+	_copyGraph(source, dest, false);
 }
 
 template<typename TAlphabet, typename TCargo, typename TSpec, typename TGraphSpec>

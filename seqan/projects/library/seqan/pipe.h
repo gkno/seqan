@@ -14,6 +14,10 @@
 #include <seqan/file.h>
 #include <seqan/basic/basic_volatile_ptr.h>
 
+#ifdef SEQAN_SWITCH_USE_FORWARDS
+#include <seqan/pipe/pipe_generated_forwards.h>
+#endif
+
 #include <seqan/pipe/pipe_base.h>
 #include <seqan/pipe/pipe_caster.h>
 #include <seqan/pipe/pipe_counter.h>
