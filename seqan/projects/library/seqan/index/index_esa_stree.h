@@ -107,7 +107,7 @@ This interval is the @Function.value@ of the iterator.
 	public:
 
 		typedef	Pair<typename Size<TIndex>::Type>	TPair, TStackEntry;
-		typedef ::std::vector<TStackEntry>			TStack;
+		typedef String<TStackEntry, Block<> >		TStack;
 		typedef Iter								iterator;
 
 		TIndex	const	&_index;	// container of all necessary tables
@@ -135,7 +135,7 @@ This interval is the @Function.value@ of the iterator.
 			_range(_childRange),
 			history(_origin.history)
 		{
-			_historyPush(*this, value(_origin));
+			push(history, value(_origin));
 		}
 	};
 
@@ -159,7 +159,7 @@ This interval is the @Function.value@ of the iterator.
 
 		typedef typename Size<TIndex>::Type	TSize;
 		typedef	Pair<TSize>						TPair, TStackEntry;
-		typedef ::std::stack<TStackEntry>		TStack;
+		typedef String<TStackEntry, Block<> >	TStack;
 		typedef Iter							iterator;
 
 		TIndex	const	&_index;	// container of all necessary tables
@@ -174,8 +174,12 @@ This interval is the @Function.value@ of the iterator.
 			indexRequire(__index, ESA_SA());
 			indexRequire(__index, ESA_LCP());
 
-			_lcp = length(_index) - saAt(0, _index);
-			history.push(TStackEntry(0,0));
+			if (empty(indexSA(__index))) {
+				_lcp = 0;
+				return;
+			}
+			_lcp = suffixLength(getOccurence(*this), container(*this));
+			push(history, TStackEntry(0,0));
 		}
 
 		Iter(Iter const &_origin):
@@ -188,19 +192,19 @@ This interval is the @Function.value@ of the iterator.
 
 	// standard push/pop handlers of lcp-dfs-traversal
 	template < typename TIndex, typename TSpec >
-	inline void _postorderPop(Iter<TIndex, TSpec> &it) {
-        _dfsRange(it).i1 = _atomicTop(it.history).i1;
-		_dfsLCP(it) = _atomicTop(it.history).i2;
-		_atomicPop(it.history);
+	inline void _postorderPop(Iter<TIndex, VSTree< BottomUp<TSpec> > > &it) {
+        _dfsRange(it).i1 = top(it.history).i1;
+		_dfsLCP(it) = top(it.history).i2;
+		pop(it.history);
 	}
 
 	template < typename TIndex, typename TSpec, typename TElement >
-	inline void _postorderPush(Iter<TIndex, TSpec> &it, TElement const &e) {
-		_atomicPush(it.history, e);
+	inline void _postorderPush(Iter<TIndex, VSTree< BottomUp<TSpec> > > &it, TElement const &e) {
+		push(it.history, e);
 	}
 
 	template < typename TIndex, typename TSpec >
-	inline void _postorderLeaf(Iter<TIndex, TSpec> &it) {
+	inline void _postorderLeaf(Iter<TIndex, VSTree< BottomUp<TSpec> > > &it) {
 		_setSizeInval(_dfsLCP(it));
 		//length(container(it)) - saAt(_dfsRange(it).i1, container(it));
 	}
@@ -208,6 +212,7 @@ This interval is the @Function.value@ of the iterator.
 
 	template < typename TIndex, typename TSpec >
 	inline void goNextImpl(Iter<TIndex, VSTree< BottomUp<TSpec> > > &it, Postorder const) {
+		TIndex const &index = container(it);
 		do {
 			// postorder dfs via lcp-table
 			if (isRoot(it)) {
@@ -217,95 +222,41 @@ This interval is the @Function.value@ of the iterator.
 
 			typedef typename Size<TIndex>::Type TSize;
 			typedef typename Iter<TIndex, VSTree< BottomUp<TSpec> > >::TStackEntry TStackEntry;
-			TStackEntry	top = _atomicTop(it.history);
-			TSize		lcp_i = lcpAt(_dfsRange(it).i2 - 1, container(it));
+			TStackEntry	_top_ = top(it.history);
+			TSize		lcp_i = lcpAt(_dfsRange(it).i2 - 1, index);
 
-			if (lcp_i < top.i2) {
+			if (lcp_i < _top_.i2) {
 				_postorderPop(it);			// go up
 				return;
 			}
 
-			if (lcp_i > top.i2) {
-				top.i1 = _dfsRange(it).i1;
-				top.i2 = lcp_i;
-				_postorderPush(it, top);		// go down
-			}
-
-			// skip $ leafs
-			if (getOccurence(it) + lcp_i == length(container(it))) {
-			if ((_dfsRange(it).i1 = _dfsRange(it).i2++) == length(container(it))) {
-				_postorderPop(it);
-				_dfsRange(it).i2 = _dfsRange(it).i1;
-			} else {
-				_postorderLeaf(it);
-			}
-			::std::cout << value(it) << ::std::endl;
-				continue;
+			if (lcp_i > _top_.i2) {
+				_top_.i1 = _dfsRange(it).i1;
+				_top_.i2 = lcp_i;
+				_postorderPush(it, _top_);		// go down
 			}
 
 			// last lcp entry (== 0) causes removal of toplevel interval
-			if ((_dfsRange(it).i1 = _dfsRange(it).i2++) == length(container(it))) {
+			if ((_dfsRange(it).i1 = _dfsRange(it).i2++) == length(index)) {
 				_postorderPop(it);
 				_dfsRange(it).i2 = _dfsRange(it).i1;
 			} else {
+				// skip $ leafs
+				if (suffixLength(saAt(_dfsRange(it).i1, index), index) == lcpAt(_dfsRange(it).i1, index))
+					continue;
 				_postorderLeaf(it);
 			}
 			return;
 		} while (true);
 	}
-/*
-	// asumes the history container to be a vector
-	template < typename TIndex, typename TSpec, typename TEntry, typename THandler >
-	inline void goNextImpl(Iter<TIndex, TSpec> &it, ::std::vector<TEntry> &history, THandler &handler) {
-		// postorder dfs via lcp-table
-		if (isRoot(it)) {
-			_dfsClear(it);
-			return;
-		}
-
-		typedef typename Size<TIndex>::Type TSize;
-		typedef typename Iter<TIndex, TSpec>::TStackEntry TStackEntry;
-		TStackEntry	top = history.back();
-		TSize		lcp_i = lcpAt(_dfsRange(it).i2 - 1, container(it));
-
-        if (lcp_i < top.i2) {
-			handler.beforeUp(it);
-            _dfsRange(it).i1 = history.back().i1;
-			_dfsLCP(it) = history.back().i2;
-			history.pop_back();		// go up
-			handler.afterUp(it);
-			return;
-		}
-
-		if (lcp_i > top.i2) {
-			handler.beforeDown(it);
-			top.i1 = _dfsRange(it).i1;
-            top.i2 = lcp_i;
-			history.push_back(top);	// go down
-			handler.afterDown(it);
-        }
-
-		// last lcp entry (== 0) causes removal of toplevel interval
-		if ((_dfsRange(it).i1 = _dfsRange(it).i2++) == length(container(it))) {
-			handler.beforeUp(it);
-			_dfsRange(it).i2 = _dfsRange(it).i1;
-            _dfsRange(it).i1 = 0;
-            history.pop_back();
-			_dfsLCP(it) = history.back().i2;
-			handler.afterUp(it);
-		} else
-			_setSizeInval(_dfsLCP(it))
-			//length(container(it)) - saAt(_dfsRange(it).i1, container(it));
-	}
-*/
 
 	template < typename TIndex, typename TSpec >
 	inline typename Size<TIndex>::Type _repLength(Iter< TIndex, VSTree<BottomUp<TSpec> > > const &it) {
 		typename Size<TIndex>::Type lcp;
-		if (!_isSizeInval(lcp = _dfsLCP(it)))
+		if (!_isSizeInval(lcp = it._lcp))
 			return lcp;
 		else
-			return length(container(it)) - saAt(_dfsRange(it).i1, container(it));
+			return suffixLength(getOccurence(it), container(it));
 	}
 
 
@@ -316,7 +267,7 @@ This interval is the @Function.value@ of the iterator.
 
 	template < typename TIndex, class TSize >
 	inline TSize _repLength(TIndex const &index, Pair<TSize> const &value) {
-		if (_isLeaf(value)) return length(index) - saAt(value.i1, index);
+		if (_isLeaf(value)) return suffixLength(saAt(value.i1, index), index);
 		if (_isRoot(value)) return 0;
 
 		TSize lval = _getUp(value.i2, index);
@@ -352,8 +303,8 @@ This interval is the @Function.value@ of the iterator.
 		typedef typename Size<TIndex>::Type TSize;
 
 		// push current intervals
-		_historyPush(a, value(a));
-		_historyPush(b, value(b));
+		push(a.history, value(a));
+		push(b.history, value(b));
 
 		TSize s = min(a.history.size(), b.history.size()), i0 = 0;
 		
@@ -372,9 +323,12 @@ This interval is the @Function.value@ of the iterator.
 		copy(a.history.begin(), a.history.begin() + i0, _lca.history.begin());
 
 		// pop current intervals
-		_historyPop(a);
-		_historyPop(b);
-		if (i0) _historyPop(_lca, value(_lca));
+		pop(a.history);
+		pop(b.history);
+		if (i0) {
+			value(_lca) = top(_lca.history);
+			pop(_lca.history);
+		}
 
 		return i0;
 	}
@@ -403,8 +357,8 @@ This interval is the @Function.value@ of the iterator.
 		typedef typename Size<TIndex>::Type TSize;
 
 		// push current intervals
-		_historyPush(a, value(a));
-		_historyPush(b, value(b));
+		push(a.history, value(a));
+		push(b.history, value(b));
 
 		TSize s = min(a.history.size(), b.history.size()), i0 = 0;
 		
@@ -422,8 +376,8 @@ This interval is the @Function.value@ of the iterator.
 		TSize _lcp = (i0 > 0)? _repLength(container(a), a.history[i0 - 1]): 0;
 
 		// pop current intervals
-		_historyPop(a);
-		_historyPop(b);
+		pop(a.history);
+		pop(b.history);
 
 		return _lcp;
 	}
@@ -462,24 +416,45 @@ This interval is the @Function.value@ of the iterator.
 ..summary:Returns an occurence of the @Function.representative@ substring in the index text.
 ..cat:Index
 ..signature:getOccurence(iterator)
-..param.iterator:An iterater of a Suffix Tree.
+..param.iterator:An iterator of a Suffix Tree.
 ...type:Spec.VSTree Iterator
-..returns:A position where the @Function.representative@ of $iterator$ occurs in the raw text (see @Tag.ESA_RawText@).
+..returns:A position where the @Function.representative@ of $iterator$ occurs in the text (see @Tag.ESA_Text@).
+...metafunction:Metafunction.SAValue.<TIndex>
 */
 
 	template < typename TIndex, class TSpec >
-	inline typename Size<TIndex>::Type getOccurence(Iter< TIndex, VSTree<TSpec> > const &it) {
+	inline typename SAValue<TIndex>::Type getOccurence(Iter< TIndex, VSTree<TSpec> > const &it) {
 		return saAt(value(it).i1, container(it));
+	}
+
+
+/**
+.Function.countOccurences:
+..summary:Returns the number of occurences of @Function.representative@ in the index text.
+..cat:Index
+..signature:countOccurences(iterator)
+..param.iterator:An iterator of a Suffix Tree.
+...type:Spec.VSTree Iterator
+..returns:The number of positions where the @Function.representative@ of $iterator$ occurs in the text (see @Tag.ESA_Text@).
+If $iterator$'s container type is $TIndex$ the return type is $Size<TIndex>::Type$.
+*/
+
+	template < typename TIndex, class TSpec >
+	inline typename Size<TIndex>::Type countOccurences(Iter< TIndex, VSTree<TSpec> > const &it) {
+		if (_isSizeInval(value(it).i2))
+			return length(indexSA(container(it))) - value(it).i1;
+		else
+			return value(it).i2 - value(it).i1;
 	}
 
 /**
 .Function.getOccurences:
-..summary:Returns all occurence of the @Function.representative@ substring in the index text.
+..summary:Returns all occurences of the @Function.representative@ substring in the index text.
 ..cat:Index
 ..signature:getOccurences(iterator)
-..param.iterator:An iterater of a Suffix Tree.
+..param.iterator:An iterator of a Suffix Tree.
 ...type:Spec.VSTree Iterator
-..returns:All positions where the @Function.representative@ of $iterator$ occurs in the raw text (see @Tag.ESA_RawText@).
+..returns:All positions where the @Function.representative@ of $iterator$ occurs in the text (see @Tag.ESA_Text@).
 If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TIndex, ESA_SA>::Type>::Type$.
 */
 
@@ -492,11 +467,30 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 	}
 
 /**
+.Function.getOccurencesBWT:
+..summary:Returns the characters left beside all occurence of the @Function.representative@ substring in the index text.
+..cat:Index
+..signature:getOccurencesBWT(iterator)
+..param.iterator:An iterator of a Suffix Tree.
+...type:Spec.VSTree Iterator
+..returns:All positions where the @Function.representative@ of $iterator$ occurs in the text (see @Tag.ESA_Text@).
+If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TIndex, ESA_BWT>::Type>::Type$.
+*/
+
+	template < typename TIndex, class TSpec >
+	inline typename Infix< typename Fibre<TIndex, ESA_BWT>::Type const >::Type getOccurencesBWT(Iter< TIndex, VSTree<TSpec> > const &it) {
+		if (_isSizeInval(value(it).i2))
+			return infix(indexBWT(container(it)), value(it).i1, length(indexSA(container(it))));
+		else
+			return infix(indexBWT(container(it)), value(it).i1, value(it).i2);
+	}
+
+/**
 .Function.representative:
 ..summary:Returns a substring representing the path from root to $iterator$ node.
 ..cat:Index
 ..signature:representative(iterator)
-..param.iterator:An iterater of a Suffix Tree.
+..param.iterator:An iterator of a Suffix Tree.
 ...type:Spec.VSTree Iterator
 ..returns:An @Spec.InfixSegment@ of the raw text of an index (see @Tag.ESA_RawText@).
 If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TIndex, ESA_RawText>::Type>::Type$.
@@ -504,8 +498,10 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 
 	template < typename TIndex, class TSpec >
 	inline typename Infix< typename Fibre<TIndex, ESA_RawText>::Type const >::Type 
-	representative(Iter< TIndex, VSTree<TSpec> >  &it) {
-		typename Size<TIndex>::Type occ = getOccurence(it), len = _repLength(it);
+	representative(Iter< TIndex, VSTree<TSpec> > &it) {
+		typedef typename Size<TIndex>::Type TSize;
+		TSize occ = posGlobalize(getOccurence(it), stringSetLimits(container(it)));
+		TSize len = _repLength(it);
 		return infix(indexRawText(container(it)), occ, occ + len);
 	}
 
@@ -543,7 +539,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 ..summary:Count the number of children of a tree node.
 ..cat:Index
 ..signature:countChildren(iterator)
-..param.iterator:An iterater of a Suffix Tree.
+..param.iterator:An iterator of a Suffix Tree.
 ...type:Spec.VSTree Iterator
 ..returns:The number of children of a tree node.
 If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Type$.
@@ -580,21 +576,21 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 			child.i2 = _getDown(value(it).i1, container(it));
 
 		TSize _lcp = lcpAt(child.i2 - 1, container(it));
-		if (rawtextAt(saAt(child.i1, container(it)) + _lcp, container(it)) == c) {
+		if (textAt(saAt(child.i1, container(it)) + _lcp, container(it)) == c) {
 			found = child;
 			return true;
 		}
 		child.i1 = child.i2;
 		while (_isNextl(child.i2, container(it))) {
 			child.i2 = _getNextl(child.i2, container(it));
-		if (rawtextAt(saAt(child.i1, container(it)) + _lcp, container(it)) == c) {
+		if (textAt(saAt(child.i1, container(it)) + _lcp, container(it)) == c) {
 				found = child;
 				return true;
 			}
 			child.i1 = child.i2;
 		}
 		if (!isRoot(it)) {
-			if (rawtextAt(saAt(child.i1, container(it)) + _lcp, container(it)) == c) {
+			if (textAt(saAt(child.i1, container(it)) + _lcp, container(it)) == c) {
 				found.i1 = child.i1;
 				found.i2 = value(it).i2;
 				return true;
@@ -604,83 +600,16 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 	}
 
 
-    //////////////////////////////////////////////////////////////////////////////
-	// unified access to stacks and vectors
-
-	template < typename TEntry, typename TStackEntry >
-	inline void _atomicPush(::std::stack<TEntry> &stack, TStackEntry const &entry)	{	stack.push(entry);		}
-
-	template < typename TEntry >
-	inline void _atomicPop(::std::stack<TEntry> &stack)								{	stack.pop();			}
-
-	template < typename TEntry, typename TStackEntry >
-	inline void _atomicTop(::std::stack<TEntry> const &stack, TStackEntry &entry)	{	entry = stack.top();	}
-
-	template < typename TEntry >
-	inline TEntry const & _atomicTop(::std::stack<TEntry> const &stack)				{	return stack.top();		}
-
-
-	template < typename TEntry, typename TStackEntry >
-	inline void _atomicPush(::std::vector<TEntry> &stack, TStackEntry const &entry)	{	stack.push_back(entry);	}
-
-	template < typename TEntry >
-	inline void _atomicPop(::std::vector<TEntry> &stack)							{	stack.pop_back();		}
-
-	template < typename TEntry, typename TStackEntry >
-	inline void _atomicTop(::std::vector<TEntry> const &stack, TStackEntry &entry)	{	entry = stack.back();	}
-
-	template < typename TEntry >
-	inline TEntry const & _atomicTop(::std::vector<TEntry> const &stack)			{	return stack.back();	}
-
-
-        
-    //////////////////////////////////////////////////////////////////////////////
-	// navigate through virtual suffix tree
-       
-	template < typename TIndex, class TSpec, typename TStackEntry >
-	inline void _historyPush(Iter< TIndex, VSTree<TSpec> > &it, TStackEntry value) {}
-
-	template < typename TIndex, class TSpec, typename TStackEntry >
-	inline void _historyPush(Iter< TIndex, VSTree< TopDown< ParentLinks<TSpec> > > > &it, TStackEntry value) {
-		_atomicPush(it.history, value);
-	}
-
-	template < typename TIndex, class TSpec, typename TStackEntry >
-	inline void _historyTop(Iter< TIndex, VSTree< TopDown< ParentLinks<TSpec> > > > const &it, TStackEntry &value) {
-		value = _atomicTop(it.history);
-	}
-
-	template < typename TIndex, class TSpec, typename TStackEntry >
-	inline void _historyPop(Iter< TIndex, VSTree< TopDown< ParentLinks<TSpec> > > > &it, TStackEntry &value) {
-		value = _atomicTop(it.history);
-		_atomicPop(it.history);
-	}
-
-	template < typename TIndex, class TSpec >
-	inline void _historyPop(Iter< TIndex, VSTree< TopDown< ParentLinks<TSpec> > > > &it) {
-		_atomicPop(it.history);
-	}
-
-/*
-	template < typename TIndex, class TSpec >
-	inline Pair<typename Size<TIndex>::Type> _historyPop(Iter< TIndex, VSTree< TopDown< ParentLinks<TSpec> > > > &it) {
-		Pair<typename Size<TIndex>::Type> p = _atomicTop(it);
-		_atomicPop(it.history);
-		return p;
-	}
-*/
-
-
 ///.Function.goNext.param.iterator.type:Spec.BottomUp Iterator
 ///.Function.goNext.param.iterator.type:Spec.TopDownHistory Iterator
 
-	template < typename TText, typename TSpecIndex, typename TSpecIter >
-	inline void goNext(Iter<Index<TText, TSpecIndex>, TSpecIter> &it) {
-		goNext(it, typename DefaultDFSOrder< Iter<Index<TText, TSpecIndex>, TSpecIter> >::Type());
+	template < typename TIndex, typename TSpec >
+	inline void goNext(Iter<TIndex, VSTree<TSpec> > &it) {
+		goNext(it, typename DefaultDFSOrder< Iter<TIndex, VSTree<TSpec> > >::Type());
 	}
 
-	template < typename TText, typename TSpecIndex, typename TSpecIter, typename TSpecTag >
-	inline void goNext(Iter<Index<TText, TSpecIndex>, TSpecIter> &it, Tag<TSpecTag> const tagOrder) {
+	template < typename TIndex, typename TSpec, typename TSpecTag >
+	inline void goNext(Iter<TIndex, VSTree<TSpec> > &it, Tag<TSpecTag> const tagOrder) {
 		goNextImpl(it, tagOrder);
 	}
 
@@ -692,7 +621,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 ..signature:bool goDown(iterator)
 ..signature:bool goDown(iterator, char)
 ..signature:bool goDown(iterator, text[, lcp])
-..param.iterator:An iterater of a Suffix Tree.
+..param.iterator:An iterator of a Suffix Tree.
 ...type:Spec.TopDown Iterator
 ..param.char:$iterator$ goes down the edge beginning with $char$.
 ..param.text:$iterator$ goes down the path representing $text$. If $text$ ends within an edge, $iterator$ will point to the child-end of this edge.
@@ -702,6 +631,18 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 ..remarks:$goDown(iterator)$ goes down the leftmost edge in the Suffix Tree, i.e. the edge beginning with the lexicographically smallest character.
 ..returns:$true$ if the edge or path to go down exists, otherwise $false$.
 */
+
+    //////////////////////////////////////////////////////////////////////////////
+	// unified history stack access for goDown(..)
+       
+	template < typename TIndex, class TSpec, typename TStackEntry >
+	inline void _historyPush(Iter< TIndex, VSTree<TSpec> > &it, TStackEntry value) {}
+
+	template < typename TIndex, class TSpec, typename TStackEntry >
+	inline void _historyPush(Iter< TIndex, VSTree< TopDown< ParentLinks<TSpec> > > > &it, TStackEntry value) {
+		push(it.history, value);
+	}
+
 
 	// go down the leftmost edge
 	template < typename TIndex, class TSpec >
@@ -798,7 +739,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 ..summary:Iterates up one edge to the parent in a tree.
 ..cat:Index
 ..signature:goUp(iterator)
-..param.iterator:An iterater of a Suffix Tree.
+..param.iterator:An iterator of a Suffix Tree.
 ...type:Spec.TopDownHistory Iterator
 */
 
@@ -806,7 +747,8 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 	template < typename TIndex, class TSpec >
 	inline bool goUp(Iter< TIndex, VSTree< TopDown< ParentLinks<TSpec> > > > &it) {
 		if (!isRoot(it)) {
-			_historyPop(it, value(it));
+			value(it) = top(it.history);
+			pop(it.history);
 			return true;
 		}
 		return false;
@@ -817,7 +759,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 ..summary:Iterates to the next sibling in a tree.
 ..cat:Index
 ..signature:goRight(iterator)
-..param.iterator:An iterater of a Suffix Tree.
+..param.iterator:An iterator of a Suffix Tree.
 ...type:Spec.TopDown Iterator
 */
 
@@ -846,16 +788,15 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 		if (value(it).i2 == length(container(it))) return false;		// right-most intervals have no right (would cause trouble with i2=\infty
 
 		if (!isRoot(it)) {
-			Pair<typename Size<TIndex>::Type> top;
-			_historyTop(it, top);
-			if (value(it).i2 < top.i2) {
+			Pair<typename Size<TIndex>::Type> _top_ = top(it.history);
+			if (value(it).i2 < _top_.i2) {
 				if (_isNextl(value(it).i2, container(it))) {
 					value(it).i1 = value(it).i2;
 					value(it).i2 = _getNextl(value(it).i2, container(it));
 					return true;
 				}
 				value(it).i1 = value(it).i2;
-				value(it).i2 = top.i2;
+				value(it).i2 = _top_.i2;
 				return true;
 			}
 		}
@@ -867,7 +808,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 ..summary:Returns a substring representing the edge from an $iterator$ node to its parent.
 ..cat:Index
 ..signature:parentEdgeLabel(iterator)
-..param.iterator:An iterater of a Suffix Tree.
+..param.iterator:An iterator of a Suffix Tree.
 ...type:Spec.TopDownHistory Iterator
 ..returns:An @Spec.InfixSegment@ of the raw text of an index (see @Tag.ESA_RawText@).
 If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TIndex, ESA_RawText>::Type>::Type$.
@@ -876,15 +817,15 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 	template < typename TIndex, class TSpec >
 	inline typename Infix< typename Fibre<TIndex, ESA_RawText>::Type const >::Type 
 	parentEdgeLabel(Iter< TIndex, VSTree< TopDown< ParentLinks<TSpec> > > >  &it) {
-		typename Size<TIndex>::Type occ = getOccurence(it), last_len, len;
+		typedef typename Size<TIndex>::Type TSize;
+		TSize occ = posGlobalize(getOccurence(it), stringSetLimits(container(it)));
+		TSize last_len, len;
 
 		if (isRoot(it)) {
 			last_len = 0;
 			len = 0;
 		} else {
-			Pair<typename Size<TIndex>::Type> last;
-			_historyTop(it, last);
-			last_len = _repLength(container(it), last);
+			last_len = _repLength(container(it), top(it.history));
 			len = _repLength(it);
 		}
 		return infix(indexRawText(container(it)), occ + last_len, occ + len);
@@ -967,14 +908,14 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 ..summary:Test whether iterator points to the root node.
 ..cat:Index
 ..signature:bool isRoot(iterator)
-..param.iterator:An iterater of a Suffix Tree.
+..param.iterator:An iterator of a Suffix Tree.
 ...type:Spec.VSTree Iterator
 ..returns:$true$ if $iterator$ points to the root of the tree, otherwise $false$.
 */
 
 	template < typename TIndex, class TSpec >
 	inline bool isRoot(Iter<TIndex, VSTree< BottomUp<TSpec> > > const &it) {
-		return it.history.empty();
+		return empty(it.history);
 	}
 
 	template < typename TIndex, class TSpec >
@@ -992,7 +933,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 ..summary:Test whether iterator points to a suffix.
 ..cat:Index
 ..signature:bool isRightTerminal(iterator)
-..param.iterator:An iterater of a Suffix Tree.
+..param.iterator:An iterator of a Suffix Tree.
 ...type:Spec.VSTree Iterator
 ..returns:$true$ if $iterator$ points to the node representing a suffix, otherwise $false$.
 ..remarks:Every leaf is also a right terminal (see @Function.isLeaf@), but not vice versa.
@@ -1001,7 +942,150 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 	template < typename TIndex, class TSpec >
 	inline bool isRightTerminal(Iter<TIndex, VSTree<TSpec> > const &it) {
 		// do we reach a leaf in a suffix tree with trailing '$'
-		return (getOccurence(it) + _repLength(it)) == length(container(it));
+		typename SAValue<TIndex>::Type pos = getOccurence(it);
+		return (getSeqOffset(pos, stringSetLimits(index)) + _repLength(it) 
+			== sequenceLength(getSeqNo(pos, stringSetLimits(index)), container(it)));
+	}
+
+/**
+.Function.isLeftMaximal:
+..summary:Test whether the occurences of an iterator's @Function.representative@ mutually differ in the character left of the hits.
+..cat:Index
+..signature:bool isLeftMaximal(iterator)
+..param.iterator:An iterator of a Suffix Tree.
+...type:Spec.VSTree Iterator
+..returns:$true$ if there are at least two different characters left of the occurences, otherwise $false$.
+..see:@Function.getOccurences@
+*/
+
+	template < typename TIndex, class TSpec >
+	inline bool isLeftMaximal(Iter<TIndex, VSTree<TSpec> > const &it)
+	{
+		typedef typename Infix< typename Fibre<TIndex, ESA_SA>::Type const >::Type	TOccs;
+		typedef typename Infix< typename Fibre<TIndex, ESA_BWT>::Type const >::Type	TOccsBWT;
+		typedef typename Value< typename Fibre<TIndex, ESA_BWT>::Type const >::Type	TValue;
+
+		typedef typename Iterator<TOccs>::Type TIter;
+		typedef typename Iterator<TOccsBWT>::Type TIterBWT;
+		
+		TIndex const &index = container(it);
+		typename StringSetLimits<typename Host<TIndex>::Type const>::Type &limits = stringSetLimits(index);
+
+		TOccs occs = getOccurences(it);
+		TOccsBWT bwts = getOccurencesBWT(it);
+
+		TIter oc = begin(occs), ocEnd = end(occs);
+		TIterBWT bw = begin(bwts);
+
+		if (oc == ocEnd) return true;
+		if (posAtFirstLocal(*oc, limits)) return true;
+
+		TValue seen = *bw;
+		++oc; 
+		++bw;
+		if (oc == ocEnd) return true;
+
+		do {
+			if (posAtFirstLocal(*oc, limits)) return true;
+			if (seen != *bw) return true;
+			++oc;
+			++bw;
+		} while (oc != ocEnd);
+
+		return false;
+	}
+
+/**
+.Function.isPartiallyLeftExtensible:
+..summary:Test whether the characters left of the two occurences of @Function.representative@ are equal.
+..cat:Index
+..signature:bool isPartiallyLeftExtensible(iterator)
+..param.iterator:An iterator of a Suffix Tree.
+...type:Spec.VSTree Iterator
+..returns:$true$ if there are at least two different characters left of the occurences, otherwise $false$.
+..see:@Function.getOccurences@
+*/
+
+	template < typename TIndex, class TSpec, typename TSet >
+	inline bool isPartiallyLeftExtensible(Iter<TIndex, VSTree<TSpec> > const &it, TSet &charSet)
+	{
+		typedef typename Infix< typename Fibre<TIndex, ESA_SA>::Type const >::Type	TOccs;
+		typedef typename Infix< typename Fibre<TIndex, ESA_BWT>::Type const >::Type	TOccsBWT;
+		typedef typename Value< typename Fibre<TIndex, ESA_BWT>::Type const >::Type	TValue;
+
+		typedef typename Iterator<TOccs>::Type TIter;
+		typedef typename Iterator<TOccsBWT>::Type TIterBWT;
+		
+		TIndex const &index = container(it);
+		typename StringSetLimits<typename Host<TIndex>::Type const>::Type &limits = stringSetLimits(index);
+
+		clear(charSet);
+
+		TOccs occs = getOccurences(it);
+		TOccsBWT bwts = getOccurencesBWT(it);
+
+		TIter oc = begin(occs), ocEnd = end(occs);
+		TIterBWT bw = begin(bwts);
+
+		while (oc != ocEnd) {
+			if (!posAtFirstLocal(*oc, limits)) {
+				TValue c = *bw;
+				if (in(c, charSet)) return true;
+				insert(c, charSet);
+			}
+			++oc;
+			++bw;
+		}
+
+		return false;
+	}
+
+	template < typename TIndex, class TSpec >
+	inline bool isPartiallyLeftExtensible(Iter<TIndex, VSTree<TSpec> > const &it)
+	{
+		typename Set<typename Value<TIndex>::Type>::Type set;
+		return isPartiallyLeftExtensible(it, set);
+	}
+
+/**
+.Function.isUnique:
+..summary:Test whether the @Function.representative@ occurs only once in every sequence.
+..cat:Index
+..signature:bool isUnique(iterator)
+..param.iterator:An iterator of a Suffix Tree.
+...type:Spec.VSTree Iterator
+..returns:$true$ if there are at least two different characters left of the occurences, otherwise $false$.
+..see:@Function.getOccurences@
+*/
+
+	template < typename TIndex, class TSpec, typename TSet >
+	inline bool isUnique(Iter<TIndex, VSTree<TSpec> > const &it, TSet &set)
+	{
+		typedef typename Infix< typename Fibre<TIndex, ESA_SA>::Type const >::Type TOccs;
+		typedef typename Iterator<TOccs>::Type TIter;
+		typedef typename Size<TIndex>::Type TSize;
+
+		TIndex const &index = container(it);
+
+		clear(set);
+
+		TOccs occs = getOccurences(it);
+		TIter oc = begin(occs), ocEnd = end(occs);
+
+		while (oc != ocEnd) {
+			TSize seqNo = getSeqNo(*oc, stringSetLimits(index));
+			if (in(seqNo, set)) return false;
+			insert(seqNo, set);
+			++oc;
+		}
+
+		return true;
+	}
+
+	template < typename TIndex, class TSpec >
+	inline bool isUnique(Iter<TIndex, VSTree<TSpec> > const &it) {
+		VectorSet<typename Size<TIndex>::Type, Alloc<> > set(countSequences(container(it)));
+		return isUnique(it, set);
 	}
 
 /**
@@ -1009,14 +1093,14 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 ..summary:Test whether iterator points to a node with only leaf-children.
 ..cat:Index
 ..signature:bool childrenAreLeaves(iterator)
-..param.iterator:An iterater of a Suffix Tree.
+..param.iterator:An iterator of a Suffix Tree.
 ...type:Spec.VSTree Iterator
 ..returns:$true$ if $iterator$ points to an inner node of the tree, whose children are leaves. Otherwise it is $false$.
 */
 
 	template < typename TIndex, class TSpec >
 	inline bool childrenAreLeaves(Iter<TIndex, VSTree<TSpec> > const &it) {
-		return countChildren(it) == (value(it).i2 - value(it).i1);
+		return countChildren(it) == countOccurences(it);
 	}
 
 /**
@@ -1024,7 +1108,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 ..summary:Test whether iterator points to a leaf.
 ..cat:Index
 ..signature:bool isLeaf(iterator)
-..param.iterator:An iterater of a Suffix Tree.
+..param.iterator:An iterator of a Suffix Tree.
 ...type:Spec.VSTree Iterator
 ..returns:$true$ if $iterator$ points to a leaf of the tree, otherwise $false$.
 */

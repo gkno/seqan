@@ -42,9 +42,11 @@ namespace SEQAN_NAMESPACE_MAIN
 
 			// bottom up repeat search iterators
 			struct SuperMaxRepeats;
+			struct SuperMaxRepeatsFast;
 			struct MaxRepeats;
 			struct MUMs;
 			struct MaxRepeatOccurences;
+
 
 /**
 .Tag.Preorder:

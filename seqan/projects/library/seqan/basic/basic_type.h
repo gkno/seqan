@@ -264,10 +264,8 @@ struct _ConstParameter
 	typedef T const & Type;
 };
 template <typename T>
-struct _ConstParameter<T const>
-{
-	typedef T & Type;
-};
+struct _ConstParameter<T const>:
+	public _ConstParameter<T> {};
 
 template <typename T>
 struct _ConstParameter<T *>

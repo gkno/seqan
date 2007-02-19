@@ -17,6 +17,7 @@
 #include <seqan/sequence.h>
 #include <seqan/sequence/sequence_multiple.h>
 #include <seqan/pipe.h>
+#include <seqan/modifier.h>
 
 #include <seqan/find/find_base.h>
 
@@ -30,9 +31,13 @@
 #include <seqan/index/pump_extender3.h>
 #include <seqan/index/pipe_merger3.h>
 #include <seqan/index/index_skew3.h>
+
 #include <seqan/index/pump_extender7.h>
 #include <seqan/index/pipe_merger7.h>
 #include <seqan/index/index_skew7.h>
+
+#include <seqan/index/pump_separator7.h>
+#include <seqan/index/index_skew7_multi.h>
 
 #include <seqan/index/index_mm.h>
 #include <seqan/index/index_sa_btree.h>
@@ -49,6 +54,7 @@
 //#include <seqan/index/shape_qgram2.h>
 //#include <seqan/index/shape_qgram3.h>
 //#include <seqan/index/index_qgram.h>
+
 //____________________________________________________________________________
 // enhanced suffix array (suffix tree)
 
@@ -56,8 +62,8 @@
 #include <seqan/index/index_shims.h>
 
 #include <seqan/index/index_esa_base.h>
-#include <seqan/index/index_esa_stree.h>
 #include <seqan/misc/misc_set.h>
+#include <seqan/index/index_esa_stree.h>
 #include <seqan/index/index_esa_algs.h>
 
 

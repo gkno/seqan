@@ -21,6 +21,7 @@
 #include <seqan/sequence/string_alloc.h>
 #include <seqan/sequence/string_array.h>
 #include <seqan/sequence/string_cstyle.h>
+#include <seqan/sequence/string_stack.h>
 #include <seqan/sequence/string_packed.h>
 #include <seqan/sequence/string_value_expand.h>
 

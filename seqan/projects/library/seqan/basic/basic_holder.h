@@ -556,17 +556,35 @@ struct Holder<TValue, Simple>
 	{
 SEQAN_CHECKPOINT
 	}
+	Holder(Holder & source_):
+		data_value(source_.data_value)
+	{
+SEQAN_CHECKPOINT
+	}
 	Holder(Holder const & source_):
 		data_value(source_.data_value)
 	{
 SEQAN_CHECKPOINT
 	}
+	template <typename TSource>
+	Holder(TSource & value_):
+		data_value(value_)
+	{
+SEQAN_CHECKPOINT
+	}
+	template <typename TSource>
+	Holder(TSource const & value_):
+		data_value(value_)
+	{
+SEQAN_CHECKPOINT
+	}
+/*
 	Holder(TValue const & value_):
 		data_value(value_)
 	{
 SEQAN_CHECKPOINT
 	}
-
+*/
 	~Holder()
 	{
 SEQAN_CHECKPOINT

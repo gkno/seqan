@@ -6,8 +6,8 @@
 #include <vector>
 #include <time.h>
 
-#define SEQAN_DEBUG
-#define SEQAN_TEST
+//#define SEQAN_DEBUG
+//#define SEQAN_TEST
 
 #include <seqan/index.h>
 
@@ -19,7 +19,7 @@ using namespace seqan;
 //////////////////////////////////////////////////////////////////////////////
 
 
-/*
+
 void testBuild()
 {
 		typedef String<char> TText;
@@ -44,8 +44,8 @@ void testBuild()
 
         save(esa, "corpus/chlamydia");
 }
-*/
-/*
+
+
 void testMultiIndex()
 {
 		typedef String<Dna5> TText;
@@ -67,17 +67,31 @@ void testMultiIndex()
 		t[4] = "agg";
 		t[5] = "ctg";
 
+		t[0] = "aaaaccccc";
+		t[1] = "aaaaaaccc";
+		t[2] = "aaccccccc";
 
         Index<TMulti> esa;
-		for(unsigned i=0; i<6; ++i)
+		for(unsigned i=0; i<3; ++i)
 			appendValue(indexText(esa), t[i]);
 
-		typedef Pair<int,int> TPair;
-		String<TPair> sa;
+		Iter<Index<TMulti>, VSTree< BottomUp<> > > it(esa);
+		while (!atEnd(it)) {
+			std::cout << value(it) << " = " << representative(it) /*<< "    edge:" << parentEdgeLabel(it) */<< std::endl;
+			goNext(it);
+		}
 
+/*
 		indexRequire(esa, ESA_SA());
-		indexRequire(esa, ESA_LCP());
 		indexRequire(esa, ESA_BWT());
+		for(int i=0; i<length(indexRawSA(esa)); ++i)
+			cout << saAt(i,esa) << " " << bwtAt(i,esa) << "    " << suffix(t[getValueI1(saAt(i,esa))], getValueI2(saAt(i,esa))) << endl;
+
+//		resize(indexLCP(esa), length(indexRawText(esa)));
+//		createLCPTableExt(indexLCP(esa), indexText(esa), indexSA(esa), Kasai());
+		indexRequire(esa, ESA_LCP());
+		for(int i=0; i<length(indexRawSA(esa)); ++i)
+			cout << lcpAt(i,esa) << "    " << suffix(t[getValueI1(saAt(i,esa))], getValueI2(saAt(i,esa))) << endl;
 
 		for(int i=0; i<length(indexRawSA(esa)); ++i)
 			cout << saAt(i,esa) << " = " << indexRawSA(esa)[i] << "    " << endl;
@@ -85,6 +99,7 @@ void testMultiIndex()
 			cout << bwtAt(i,esa) << " = " << indexBWT(esa).tab[i] << "    " << endl;
 		for(int i=0; i<length(indexRawSA(esa)); ++i)
 			cout << lcpAt(i,esa) << " = " << indexLCP(esa)[i] << "    " << endl;
+*/
 
 /*
 
@@ -93,17 +108,13 @@ void testMultiIndex()
 
 		for(int i=0; i<length(indexRawText(esa)); ++i)
 			cout << indexRawText(esa)[i] << "    ";
-		for(int i=0; i<length(sa); ++i)
-			cout << sa[i] << "    " << suffix(t[getValueI1(sa[i])], getValueI2(sa[i])) << endl;
 
 		String<unsigned> lcp;
 		resize(lcp, length(indexRawText(esa)));
 		createLCPTableExt(lcp, indexText(esa), sa, Kasai());
-
-		for(int i=0; i<length(sa); ++i)
-			cout << lcp[i] << "    " << suffix(t[getValueI1(sa[i])], getValueI2(sa[i])) << endl;*/
-}
 */
+}
+
 
 
 void testSTreeIterators()
@@ -138,18 +149,21 @@ void testSTreeIterators()
 		}
 }
 
-/*
-void testSuperMaxRepeats()
-{
 
-		typedef String<char, External<> > TText;
+template <typename TIteratorSpec>
+void testIteratorSpec()
+{
+//		typedef String<char, External<> > TText;
+		typedef String<char> TText;
 
         Index<TText> esa;
-        open(esa, "corpus/chlamydia");
+//        open(esa, "corpus/NC_000117.txt");
+		indexText(esa) = "HALLOBALLOHALLEBALLO";
 
-        Iterator< Index<TText>, SuperMaxRepeats >::Type it(esa, 20);
+        typename Iterator< Index<TText>, TIteratorSpec >::Type it(esa);
         unsigned counter = 0;
         while (!atEnd(it)) {
+				cout << representative(it) << "   " << value(it) << endl;
                 ++it;
                 ++counter;
         }
@@ -157,27 +171,37 @@ void testSuperMaxRepeats()
         std::cout << "supermaximal repeats: " << counter << std::endl;
 
 }
-*/
+
 
 void testMUMs()
 {
-/*		typedef StringSet< String<char, External<> > > TText;
+		typedef String<char> TText;
+		typedef StringSet< TText, ConcatDirect<> > TMulti;
+		typedef Index<TMulti, Index_ESA<> > TIndex;
 
-        Index<TText> esa;
-        open(esa, "corpus/chr1");
+		String<char> t[3];
+		if (!open(t[0], "corpus/NC_000117.txt") ||
+		    !open(t[1], "corpus/NC_002620.txt") ||
+			!open(t[2], "corpus/NC_007429.txt")) 
+		{
+			cout << "Could not read in all datasets" << endl;
+			return;
+		}
 
-        Iterator< Index<TText>, MUMs >::Type it(esa, 20);
-        unsigned counter = 0;
-        while (!atEnd(it)) {
-                ++it;
-                ++counter;
-        }
+        TIndex esa;
+		for(unsigned i=0; i<2; ++i)
+			appendValue(indexText(esa), t[i]);
 
-        std::cout << "supermaximal repeats: " << counter << std::endl;
-*/
+		Iter<TIndex, VSTree< BottomUp<MUMs> > > it(esa, 20);
+
+		while (!atEnd(it)) {
+			cout << representative(it) << endl;
+			++it;
+		}
+		cout << endl;
 }
 
-/*
+
 template <typename TAlgorithmSpec>
 void testFind()
 {
@@ -217,7 +241,8 @@ void testFind()
 		SEQAN_TASSERT(pos[1] == 0);
 		SEQAN_TASSERT(pos[0] == 26);
 }
-*/
+
+
 bool testIndexCreation();
 void Main_TestQGram();
 
@@ -228,13 +253,15 @@ int main()
 //		testIndexCreation();
 //		Main_TestQGram();
 
-//		testFind<ESA_MLR>();
+		testFind<ESA_MLR>();
 //		testBuild();
-//		testMultiIndex();
+		testMultiIndex();
 		testSTreeIterators();
-/*		testSuperMaxRepeats();
-		testMUMs();	
-*/
+		testIteratorSpec<SuperMaxRepeats>();
+		testIteratorSpec<SuperMaxRepeatsFast>();
+//		testIteratorSpec<MaxRepeats>();
+//		testMUMs();	
+
 	SEQAN_TREPORT("TEST END")
 		return 0;
 }

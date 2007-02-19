@@ -27,7 +27,7 @@ template <typename TValue, unsigned int ISize>
 class String<TValue, Array<ISize> >
 {
 protected:
-	TValue data_begin[ISize];
+	mutable TValue data_begin[ISize];
 	TValue * data_end;
 
 //____________________________________________________________________________

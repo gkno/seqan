@@ -18,7 +18,6 @@
 #endif
 
 
-#include <seqan/graph/graph_stack.h>
 #include <seqan/align/matrix_base.h>
 
 // Basic metafunctions

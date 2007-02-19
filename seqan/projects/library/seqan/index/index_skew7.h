@@ -126,7 +126,7 @@ namespace SEQAN_NAMESPACE_MAIN
         inline Result operator()(const InType &a, const InType &b) const
         {
             for(unsigned int i = 0; i < EXT_LENGTH; i++) {
-                if (a.i3[i] ==  b.i3[i]) continue;
+                if (a.i3[i] == b.i3[i]) continue;
                 return (a.i3[i] <  b.i3[i])? -1 : 1;
             }
             return (a.i2[0] < b.i2[0])? -1 : 1;
@@ -173,7 +173,7 @@ namespace SEQAN_NAMESPACE_MAIN
             void>::Type compress;*/
         typedef void compress;
 
-        // use skew3 for recursion (more I/O-efficient)
+        // use skew7 for recursion (more I/O-efficient)
         typedef Skew7 recurseSpec;
 
         // step 1
@@ -189,7 +189,7 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef Pool< _TypeOf(TNames_Sliced), MapperSpec< MapperConfigSize< nmap_linear_t, _TSizeOf(TNames_Sliced) > > > TNames_Linear_Unique;
 
         // non-unique names - recursion
-        typedef Pipe< TNames_Sliced, Filter< getI2<_TypeOf(TNames_Sliced)> > > TFilter;
+        typedef Pipe< TNames_Sliced, Filter< filterI2<_TypeOf(TNames_Sliced)> > > TFilter;
         typedef Pipe< TFilter, recurseSpec > TRecurse;
                                         typedef skew7_unslicer_func<_TypeOf(TRecurse)> unslicer_func_t;
         typedef Pipe< TRecurse, Filter<unslicer_func_t> > TUnslicer;
@@ -400,7 +400,7 @@ namespace SEQAN_NAMESPACE_MAIN
     {
         const T* sa = spos[a];
         const T* sb = spos[b];
-        ST shft = DC7_SHIFT[a][b];
+		ST shft = _SkewShift<7>::VALUE[a][b];
         if (sa > sb) {
             if ((a != 0) && (a < shft) && islast[a]) // do we need to clip?
                 return _leqSkew7 (sa,   sb,   a);

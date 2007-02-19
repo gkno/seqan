@@ -24,10 +24,204 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < typename TString, typename TSpec = ConcatVirtual<> >
 	class StringSet;
 
-    template <typename TString>
+    template <typename TObject>
 	struct Concatenator {
-		typedef TString Type;
+		typedef TObject Type;
 	};
+
+    template <typename TObject>
+	struct Concatenator<TObject const> {
+		typedef typename Concatenator<TObject>::Type const Type;
+	};
+
+
+	//////////////////////////////////////////////////////////////////////////////
+	// StringSet limits
+	//////////////////////////////////////////////////////////////////////////////
+
+	template <typename TString>
+	struct StringSetLimits {
+		typedef Nothing Type;
+	};
+
+	template <typename TString>
+	struct StringSetLimits<TString const> {
+		typedef typename StringSetLimits<TString>::Type const Type;
+	};
+
+	template <typename TString>
+	struct StringSetPosition {
+		typedef typename Size<TString>::Type	Type;
+	};
+
+	template <typename TString, typename TSpec>
+	struct StringSetLimits< StringSet<TString, TSpec> > {
+		typedef typename Size<TString>::Type	TSize;
+		typedef String<TSize>					Type;
+	};
+
+	template <typename TString, typename TSpec>
+	struct StringSetPosition< StringSet<TString, TSpec> > {
+		typedef typename Size<TString>::Type	TSize;
+		typedef Pair<TSize>						Type;
+	};
+
+
+
+	//////////////////////////////////////////////////////////////////////////////
+	// get StringSet limits
+	//////////////////////////////////////////////////////////////////////////////
+
+    template <typename TStringSet>
+	inline typename StringSetLimits<TStringSet>::Type & 
+	stringSetLimits(TStringSet &stringSet) {
+		return Nothing();
+	}
+
+    template <typename TStringSet>
+	inline typename StringSetLimits<TStringSet const>::Type & 
+	stringSetLimits(TStringSet const &stringSet) {
+		return Nothing();
+	}
+
+    template <typename TString, typename TSpec>
+	inline typename StringSetLimits< StringSet<TString, TSpec> >::Type & 
+	stringSetLimits(StringSet<TString, TSpec> &stringSet) {
+		return stringSet.limits;
+	}
+
+    template <typename TString, typename TSpec>
+	inline typename StringSetLimits< StringSet<TString, TSpec> const>::Type & 
+	stringSetLimits(StringSet<TString, TSpec> const &stringSet) {
+		return stringSet.limits;
+	}
+
+	//////////////////////////////////////////////////////////////////////////////
+	// 1 sequence
+	//////////////////////////////////////////////////////////////////////////////
+
+	template <typename TPosition>
+	inline TPosition getSeqNo(TPosition const &pos, Nothing const &) {
+		return 0;
+	}
+
+	template <typename TPosition>
+	inline TPosition getSeqOffset(TPosition const &pos, Nothing const &) {
+		return pos;
+	}
+
+	//////////////////////////////////////////////////////////////////////////////
+	// n sequences (position type is Pair)
+	//////////////////////////////////////////////////////////////////////////////
+
+	template <typename T1, typename T2, typename TCompression, typename TLimitsString>
+	inline T1 getSeqNo(Pair<T1, T2, TCompression> const &pos, TLimitsString const &) {
+		return getValueI1(pos);
+	}
+
+	template <typename T1, typename T2, typename TCompression, typename TLimitsString>
+	inline T2 getSeqOffset(Pair<T1, T2, TCompression> const &pos, TLimitsString const &) {
+		return getValueI2(pos);
+	}
+
+	//////////////////////////////////////////////////////////////////////////////
+	// n sequences (position type is an integral type)
+	//////////////////////////////////////////////////////////////////////////////
+
+	template <typename TPos, typename TLimitsString>
+	inline TPos getSeqNo(TPos const &pos, TLimitsString const &limits) {
+		typedef typename Iterator<TLimitsString const>::Type TIter;
+        TIter begin = limits.begin();
+        TIter upper = upper_bound(begin, limits.end(), pos) - 1;
+        return distance(begin, upper);
+	}
+
+	template <typename TPos, typename TLimitsString>
+	inline TPos getSeqOffset(TPos const &pos, TLimitsString const &limits) {
+		typedef typename Iterator<TLimitsString const>::Type TIter;
+        TIter begin = limits.begin();
+        TIter upper = upper_bound(begin, limits.end(), pos) - 1;
+        return pos - *upper;
+	}
+
+	//////////////////////////////////////////////////////////////////////////////
+	// local -> global position
+	//////////////////////////////////////////////////////////////////////////////
+
+	template <typename TPosition>
+	inline TPosition posGlobalize(TPosition const &pos, Nothing const &) {
+		return pos;
+	}
+
+	template <typename TLimitsString, typename T1, typename T2, typename TCompression>
+	inline typename Value<TLimitsString>::Type 
+	posGlobalize(Pair<T1, T2, TCompression> const &pos, TLimitsString const &limits) {
+		return limits[getSeqNo(pos, limits)] + getSeqOffset(pos, limits);
+	}
+
+	//////////////////////////////////////////////////////////////////////////////
+	// global -> local position
+	//////////////////////////////////////////////////////////////////////////////
+
+	template <typename TResult, typename TPosition>
+	inline void posLocalize(TResult &result, TPosition const &pos, Nothing const &) {
+		result = pos;
+	}
+
+	template <typename TResult, typename TSize, typename TSpec, typename TPosition>
+	inline void posLocalize(TResult &result, TPosition const &pos, String<TSize, TSpec> const &limits) {
+		typedef typename Iterator<String<TSize> const>::Type TIter;
+        TIter begin = limits.begin();
+        TIter upper = upper_bound(begin, limits.end(), pos) - 1;
+        result.i1 = distance(begin, upper);
+        result.i2 = pos - *upper;
+	}
+
+	//////////////////////////////////////////////////////////////////////////////
+	// position arithmetics
+	//////////////////////////////////////////////////////////////////////////////
+
+	// posAtFirstLocal
+	template <typename TPos, typename TLimitsString>
+	inline bool posAtFirstLocal(TPos pos, TLimitsString const &limits) {
+		return getSeqOffset(pos, limits) == 0;
+	}
+
+	// posPrev
+	template <typename TPos>
+	inline TPos posPrev(TPos pos) {
+		return pos - 1;
+	}
+
+	template <typename T1, typename T2, typename TCompression>
+	inline Pair<T1, T2, TCompression> posPrev(Pair<T1, T2, TCompression> const &pos) {
+		return Pair<T1, T2, TCompression>(getValueI1(pos), getValueI2(pos) - 1);
+	}
+
+	// posNext
+	template <typename TPos>
+	inline TPos posNext(TPos pos) {
+		return pos + 1;
+	}
+
+	template <typename T1, typename T2, typename TCompression>
+	inline Pair<T1, T2, TCompression> 
+	posNext(Pair<T1, T2, TCompression> const &pos) {
+		return Pair<T1, T2, TCompression>(getValueI1(pos), getValueI2(pos) + 1);
+	}
+
+	// posAdd
+	template <typename TPos, typename TDelta>
+	inline TPos posAdd(TPos pos, TDelta delta) {
+		return pos + delta;
+	}
+
+	template <typename T1, typename T2, typename TCompression, typename TDelta>
+	inline Pair<T1, T2, TCompression> 
+	posAdd(Pair<T1, T2, TCompression> const &pos, TDelta delta) {
+		return Pair<T1, T2, TCompression>(getValueI1(pos), getValueI2(pos) + delta);
+	}
+
 
 	//////////////////////////////////////////////////////////////////////////////
     // StringSet Container
@@ -38,9 +232,9 @@ namespace SEQAN_NAMESPACE_MAIN
     {
 	public:
 
-        typedef String< TString >						TStrings;
-        typedef String< typename Size<TString>::Type >	TLimits;
-		typedef typename Iterator<TLimits const>::Type  TLimitIterator;
+        typedef String<TString>								TStrings;
+		typedef typename StringSetLimits<StringSet>::Type	TLimits;
+		typedef typename Iterator<TLimits const>::Type		TLimitIterator;
 
 		typedef typename Value<TString>::Type			Type;
         typedef typename Size<TString>::Type			SizeType;
@@ -97,8 +291,8 @@ namespace SEQAN_NAMESPACE_MAIN
     class StringSet< TString, ConcatDirect<TLimiter> >
     {
 	public:
-        typedef String< typename Size<TString>::Type >	TLimits;
-        typedef typename Iterator<TLimits const>::Type	TLimitIterator;
+		typedef typename StringSetLimits<StringSet>::Type	TLimits;
+        typedef typename Iterator<TLimits const>::Type		TLimitIterator;
 
 		typedef typename Value<TString>::Type			Type;
         typedef typename Size<TString>::Type			SizeType;
@@ -129,6 +323,11 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		typename Concatenator<StringSet>::Type	concat;
 
+		StringSet() {
+			resize(limits, 1);
+			limits[0] = 0;
+		}
+
 //____________________________________________________________________________
 
 		template <typename TPos>
@@ -155,8 +354,24 @@ namespace SEQAN_NAMESPACE_MAIN
     };
 
     template < typename TString, typename TSpec >
+    struct Size< StringSet< TString, TSpec > > {
+		typedef typename Size< typename StringSetLimits< StringSet<TString, TSpec> >::Type >::Type Type;
+    };
+
+	// direct concatenation
+	template < typename TString, typename TSpec >
     struct Value< StringSet< TString, ConcatDirect<TSpec> > > {
 		typedef typename Infix<TString>::Type Type;
+    };
+
+    template < typename TString, typename TSpec >
+    struct GetValue< StringSet< TString, ConcatDirect<TSpec> > > {
+		typedef typename Infix<TString>::Type Type;
+    };
+
+    template < typename TString, typename TSpec >
+    struct GetValue< StringSet< TString, ConcatDirect<TSpec> > const > {
+		typedef typename Infix<TString const>::Type Type;
     };
 
     template < typename TString, typename TSpec >
@@ -165,24 +380,15 @@ namespace SEQAN_NAMESPACE_MAIN
     };
 
     template < typename TString, typename TSpec >
-	struct GetValue< StringSet< TString, ConcatDirect<TSpec> > > {
-		typedef typename Infix<TString>::Type Type;
+    struct Reference< StringSet< TString, ConcatDirect<TSpec> > const > {
+		typedef typename Infix<TString const>::Type Type;
     };
-
-    template < typename TString, typename TSpec >
-    struct Size< StringSet< TString, TSpec > > {
-		typedef typename Size< typename StringSet< TString, ConcatVirtual<TSpec> >::TLimits >::Type Type;
-    };
-
-
 
 
 //____________________________________________________________________________
 
 	template < typename TString, typename TSpec >
     inline typename Size<TString>::Type lengthSum(StringSet< TString, TSpec > const &me) {
-        if (empty(me.limits))
-			return 0;
         return back(me.limits);
     }
 
@@ -218,23 +424,28 @@ namespace SEQAN_NAMESPACE_MAIN
 //____________________________________________________________________________
 
     template < typename TString, typename TSpec >
-    inline typename Size<TString>::Type clear(StringSet< TString, ConcatVirtual<TSpec> > &me) {
+    inline typename Size<TString>::Type 
+	clear(StringSet< TString, ConcatVirtual<TSpec> > &me) {
 		clear(me.strings);
-		clear(me.limits);
+		resize(me.limits, 1);
+		me.limits = 0;
     }
 
     template < typename TString, typename TLimiter >
-    inline typename Size<TString>::Type clear(StringSet< TString, ConcatDirect<TLimiter> > &me) {
+    inline typename Size<TString>::Type 
+	clear(StringSet< TString, ConcatDirect<TLimiter> > &me) {
 		clear(me.concat_string);
-		clear(me.limits);
+		resize(me.limits, 1);
+		me.limits = 0;
     }
 
 //____________________________________________________________________________
 
 
     template < typename TString, typename TSpec >
-    inline typename Size< StringSet< TString, TSpec > >::Type length(StringSet< TString, TSpec > const &me) {
-        return length(me.limits);
+    inline typename Size< StringSet< TString, TSpec > >::Type 
+	length(StringSet< TString, TSpec > const &me) {
+        return length(me.limits) - 1;
     }
 
 //____________________________________________________________________________
@@ -248,13 +459,25 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	template < typename TString, typename TSpec, typename TPos >
+	inline typename Reference< StringSet< TString, ConcatVirtual<TSpec> > const >::Type
+	value(StringSet< TString, ConcatVirtual<TSpec> > const & me, TPos pos)
+	{
+		return me.strings[pos];
+	}
+
+
+	template < typename TString, typename TSpec, typename TPos >
 	inline typename Infix<TString>::Type
 	value(StringSet< TString, ConcatDirect<TSpec> > & me, TPos pos)
 	{
-		if (pos > 0)
-			return infix(me.concat, me.limits[pos - 1], me.limits[pos]);
-		else
-			return infix(me.concat, 0, me.limits[0]);
+		return infix(me.concat, me.limits[pos], me.limits[pos + 1]);
+	} 
+
+	template < typename TString, typename TSpec, typename TPos >
+	inline typename Infix<TString const>::Type
+	value(StringSet< TString, ConcatDirect<TSpec> > const & me, TPos pos)
+	{
+		return infix(me.concat, me.limits[pos], me.limits[pos + 1]);
 	} 
 
 //____________________________________________________________________________
@@ -335,6 +558,11 @@ namespace SEQAN_NAMESPACE_MAIN
 		return set.concat;
 	}
 
+	template <typename TString, typename TSpec>
+	inline typename Concatenator< StringSet<TString, TSpec> const>::Type & concat(StringSet<TString, TSpec> const &set) {
+		return set.concat;
+	}
+
 
 //____________________________________________________________________________
 
@@ -350,16 +578,16 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //____________________________________________________________________________
 
-	template < typename TStringSet, typename TSpec >
-	inline Iter< TStringSet, ConcatVirtual<TSpec> >
-	begin(TStringSet &set) {
-		return Iter< TStringSet, ConcatVirtual<TSpec> > (value(set.holder));
+	template < typename TString, typename TSSetSpec, typename TSpec >
+	inline Iter< StringSet<TString, TSSetSpec>, ConcatVirtual<TSpec> >
+	begin(StringSet<TString, TSSetSpec> &set) {
+		return Iter< StringSet<TString, TSSetSpec>, ConcatVirtual<TSpec> > (value(set.holder));
 	}
 
-	template < typename TStringSet, typename TSpec >
-	inline Iter< TStringSet, ConcatVirtual<TSpec> >
-	end(TStringSet &set) {
-		return Iter< TStringSet, ConcatVirtual<TSpec> > (value(set.holder), length(value(set.holder)), 0);
+	template < typename TString, typename TSSetSpec, typename TSpec >
+	inline Iter< StringSet<TString, TSSetSpec>, ConcatVirtual<TSpec> >
+	end(StringSet<TString, TSSetSpec> &set) {
+		return Iter< StringSet<TString, TSSetSpec>, ConcatVirtual<TSpec> > (value(set.holder), length(value(set.holder)), 0);
 	}
 
 
@@ -422,7 +650,6 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		//////////////////////////////////////////////////////////////////////////////
 		// iterator arithmetic
-
    		difference_type operator- (const iterator &I) const {
             return tell() - I.tell();
         }
@@ -512,10 +739,7 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 
         inline difference_type tell() {
-            difference_type offset = 0;
-            if (objNo != 0)
-                offset = host->limits[objNo - 1];
-			return offset + distance(begin, cur);
+			return host->limits[objNo] + distance(begin, cur);
         }
     };
 

@@ -18,27 +18,55 @@ namespace SEQAN_NAMESPACE_MAIN
 	//
 
 	template <typename TKey>
+	struct _VectorSet_KeySize {
+		enum {VALUE = ValueSize<TKey>::VALUE};
+	};
+
+	template <typename TKey, typename TObject>
+	struct _VectorSet_KeySize < Pair<TKey, TObject> > {
+		enum {VALUE = ValueSize<TKey>::VALUE};
+	};
+
+	template <typename TKey = char, typename TSpec = Alloc<> /*Array<_VectorSet_KeySize<TKey>::VALUE>*/ >
 	class VectorSet {
 	public:
 		typedef TKey							TValue;
 		typedef bool							TSetEntry;
-		typedef TSetEntry						TSetVector[ValueSize<TKey>::VALUE];
+		typedef String<TSetEntry, TSpec>		TSetVector;
+		typedef void*							TObjVector;
 		typedef typename Size<TSetVector>::Type	TSize;
 
 		TSetVector	vector;
 		TSize		size;
 
 		VectorSet():
-			size(0)	{}
+			size(0)	
+		{
+			autoSize(*this);
+		}
+
+		VectorSet(TSize _vectorSize):
+			size(0)	
+		{
+			resize(vector, _vectorSize);
+		}
+		
+		template <typename _TSet>
+		inline static void autoSize(_TSet &set) {}
+
+		template <typename _TKey>
+		inline static void autoSize(VectorSet<_TKey, Alloc<> > &set) {
+			resize(set.vector, (unsigned)ValueSize<_TKey>::VALUE);
+		}
 	};
 
-	template <typename TKey, typename TObject>
-	class VectorSet< Pair<TKey, TObject> > {
+	template <typename TKey, typename TObject, typename TSpec>
+	class VectorSet< Pair<TKey, TObject>, TSpec > {
 	public:
 		typedef Pair<TKey, TObject>				TValue;
 		typedef bool							TSetEntry;
-		typedef TSetEntry						TSetVector[ValueSize<TKey>::VALUE];
-		typedef TObject							TObjVector[ValueSize<TKey>::VALUE];
+		typedef String<TSetEntry, TSpec>		TSetVector;
+		typedef String<TObject, TSpec>			TObjVector;
 		typedef typename Size<TSetVector>::Type	TSize;
 
 		TSetVector	vector;
@@ -46,20 +74,38 @@ namespace SEQAN_NAMESPACE_MAIN
 		TSize		size;
 
 		VectorSet():
-			size(0) {}
+			size(0)	
+		{
+			autoSize(*this);
+		}
+
+		VectorSet(TSize _vectorSize):
+			size(0)	
+		{
+			resize(vector, _vectorSize);
+		}
+		
+		template <typename _TSet>
+		inline static void autoSize(_TSet &set) {}
+
+		template <typename _TKey>
+		inline static void autoSize(VectorSet<_TKey, Alloc<> > &set) {
+			resize(set.vector, (unsigned)ValueSize<_TKey>::VALUE);
+		}
 	};
 
-	template <typename TObject>
-	struct Value< VectorSet<TObject> > {
+	template <typename TObject, typename TSpec>
+	struct Value< VectorSet<TObject, TSpec> > {
 		typedef TObject Type;
 	};
-	template <typename TObject>
-	struct Size< VectorSet<TObject> > {
+	template <typename TObject, typename TSpec>
+	struct Size< VectorSet<TObject, TSpec> > {
 		typedef typename VectorSet<TObject>::TSize Type;
 	};
 
-	template <typename TObject>
-	inline typename Size< VectorSet<TObject> >::Type length(VectorSet<TObject> const &set) {
+	template <typename TObject, typename TSpec>
+	inline typename Size< VectorSet<TObject, TSpec> >::Type 
+	length(VectorSet<TObject, TSpec> const &set) {
 		return set.size;
 	}
 
@@ -69,35 +115,41 @@ namespace SEQAN_NAMESPACE_MAIN
 	struct _Set_SetVector {
 		typedef void* Type;
 	};
+	template <typename TSet>
+	struct _Set_SetVector<TSet const>:
+		public _Set_SetVector<TSet> {};
 	
 	template <typename TSet>
 	struct _Set_ObjVector {
 		typedef void* Type;
 	};
+	template <typename TSet>
+	struct _Set_ObjVector<TSet const>:
+		public _Set_ObjVector<TSet> {};
 
 
 
-	template <typename TKey>
-	struct _Set_SetVector< VectorSet<TKey> >
+	template <typename TKey, typename TSpec>
+	struct _Set_SetVector< VectorSet<TKey, TSpec> >
 	{
 		typedef typename VectorSet<TKey>::TSetVector Type;
 	};
 
-	template <typename TKey>
-	struct _Set_ObjVector< VectorSet<TKey> >
+	template <typename TKey, typename TSpec>
+	struct _Set_ObjVector< VectorSet<TKey, TSpec> >
 	{
 		typedef typename VectorSet<TKey>::TSetVector Type;
 	};
 
 
-	template <typename TKey, typename TObject>
-	struct _Set_SetVector< VectorSet< Pair<TKey, TObject> > >
+	template <typename TKey, typename TObject, typename TSpec>
+	struct _Set_SetVector< VectorSet< Pair<TKey, TObject>, TSpec > >
 	{
 		typedef typename VectorSet< Pair<TKey, TObject> >::TSetVector Type;
 	};
 
-	template <typename TKey, typename TObject>
-	struct _Set_ObjVector< VectorSet< Pair<TKey, TObject> > >
+	template <typename TKey, typename TObject, typename TSpec>
+	struct _Set_ObjVector< VectorSet< Pair<TKey, TObject>, TSpec > >
 	{
 		typedef typename VectorSet< Pair<TKey, TObject> >::TObjVector Type;
 	};
@@ -108,7 +160,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <typename TPair>
 	struct SetLess : public ::std::binary_function<TPair, TPair, bool> {
-		bool operator() (TPair const &a, TPair const &b) {
+		inline bool operator() (TPair const &a, TPair const &b) {
 			return a.i1 < b.i1;
 		}
 	};
@@ -171,14 +223,15 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <typename TVectorSet>
 	class Iter< TVectorSet, VectorSetIterator > {
-		typedef typename _Set_SetVector<TVectorSet>::Type	TSetVector;
-		typedef typename _Set_ObjVector<TVectorSet>::Type	TObjVector;
+		typedef typename _Set_SetVector<TVectorSet>::Type TSetVector;
+		typedef typename _Set_ObjVector<TVectorSet>::Type TObjVector;
 
 		typedef Iter								iterator;
 		typedef typename Value<TSetVector>::Type	TValue, value;
 		typedef typename Iterator<TSetVector>::Type	TSetPointer;
 		typedef typename Iterator<TObjVector>::Type	TObjPointer;
 
+	public:
 		TSetPointer	ptr, begin, end;
 		TObjPointer	obj;
 
@@ -191,7 +244,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			}
 		}
 
-		inline TValue operator*() { return TValue(ptr - begin, *obj); }
+//		inline TValue operator*() { return TValue(ptr - begin, *obj); }
 
 		inline iterator operator++() {
 			++ptr;
@@ -202,17 +255,18 @@ namespace SEQAN_NAMESPACE_MAIN
 			return *this;
 		}
 	};
-
+/*
 	template <typename TVectorSet>
 	class Iter< TVectorSet const, VectorSetIterator > {
-		typedef typename _Set_SetVector<TVectorSet>::Type	TSetVector;
-		typedef typename _Set_ObjVector<TVectorSet>::Type	TObjVector;
+		typedef typename TVectorSet::TSetVector		TSetVector;
+		typedef typename TVectorSet::TObjVector		TObjVector;
 
 		typedef Iter								iterator;
 		typedef typename Value<TSetVector>::Type	TValue, value;
 		typedef typename Iterator<TSetVector>::Type	TSetPointer;
 		typedef typename Iterator<TObjVector>::Type	TObjPointer;
 
+	public:
 		TSetPointer	ptr, begin, end;
 		TObjPointer	obj;
 
@@ -225,7 +279,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			}
 		}
 
-		inline TValue operator*() { return TValue(ptr - begin, *obj); }
+//		inline TValue operator*() { return TValue(ptr - begin, *obj); }
 
 		inline iterator operator++() {
 			++ptr;
@@ -236,32 +290,35 @@ namespace SEQAN_NAMESPACE_MAIN
 			return *this;
 		}
 	};
+*/
 
-
-	template <typename TObject>
-	struct Iterator< VectorSet<TObject> > {
-		typedef Iter<VectorSet<TObject>, VectorSetIterator> Type;
+	template <typename TObject, typename TSpec>
+	struct Iterator< VectorSet<TObject, TSpec> > {
+		typedef Iter<VectorSet<TObject, TSpec>, VectorSetIterator> Type;
 	};
-	template <typename TObject>
-	struct Iterator< VectorSet<TObject> const> {
-		typedef Iter<VectorSet<TObject> const, VectorSetIterator> Type;
+	template <typename TObject, typename TSpec>
+	struct Iterator< VectorSet<TObject, TSpec> const> {
+		typedef Iter<VectorSet<TObject, TSpec> const, VectorSetIterator> Type;
 	};
 
-	template <typename TValue>
-	finline void clear(VectorSet<TValue> &set) {
-		memset<sizeof(typename VectorSet<TValue>::TSetVector), 0>(set.vector);
+	template <typename TValue, typename TSpec>
+	finline void 
+	clear(VectorSet<TValue, TSpec> &set) {
+		arrayFill(begin(set.vector), end(set.vector), typename VectorSet<TValue, TSpec>::TSetEntry());
 		set.size = 0;
 	}
 
-	template <typename TKey, typename TSetKey>
-	finline void insert(TKey const &key, VectorSet<TSetKey> &set) {
+	template <typename TKey, typename TSetKey, typename TSpec>
+	finline void 
+	insert(TKey const &key, VectorSet<TSetKey, TSpec> &set) {
 		if (!set.vector[(unsigned)key]) {
 			++set.size;
 			set.vector[(unsigned)key] = true;
 		}
 	}
-	template <typename TPair, typename TSetKey, typename TSetObject>
-	finline void insert(TPair const &pair, VectorSet< Pair<TSetKey, TSetObject> > &set) {
+	template <typename TPair, typename TSetKey, typename TSetObject, typename TSpec>
+	finline void 
+	insert(TPair const &pair, VectorSet< Pair<TSetKey, TSetObject>, TSpec > &set) {
 		if (set.vector[(unsigned)pair.i1]) {
 			++set.size;
 			set.vector[(unsigned)pair.i1] = true;
@@ -269,44 +326,54 @@ namespace SEQAN_NAMESPACE_MAIN
 		set.obj[(unsigned)pair.i1] = pair.i2;
 	}
 
-	template <typename TKey, typename TValue>
-	finline void erase(TKey const &key, VectorSet<TValue> &set) {
+	template <typename TKey, typename TValue, typename TSpec>
+	finline void 
+	erase(TKey const &key, VectorSet<TValue, TSpec> &set) {
 		if (set.vector[(unsigned)key]) {
 			--set.size;
 			set.vector[(unsigned)key] = false;
 		}
 	}
 
-	template <typename TKey, typename TValue>
-	finline bool in(TKey const &key, VectorSet<TValue> const &set) {
+	template <typename TKey, typename TValue, typename TSpec>
+	finline bool 
+	in(TKey const &key, VectorSet<TValue, TSpec> const &set) {
 		return set.vector[(unsigned)key];
 	}
 
-	template <typename TKey, typename TSetKey>
-	inline typename Iterator< VectorSet<TSetKey> >::Type find(TKey const &key, VectorSet<TSetKey> &set) {
+	template <typename TKey, typename TSetKey, typename TSpec>
+	inline typename Iterator< VectorSet<TSetKey, TSpec> >::Type 
+	find(TKey const &key, VectorSet<TSetKey, TSpec> &set) {
 		if (in(key, set))
-			return Iter<VectorSet<TSetKey>, VectorSetIterator>(&set.vector[(unsigned)key], begin(set.vector), end(set.vector), begin(set.obj));
+			return Iter<VectorSet<TSetKey, TSpec>, VectorSetIterator>
+				(begin(set.vector) + (unsigned)key, begin(set.vector), end(set.vector), begin(set.obj));
 		else
 			return end(set);
 	}
-	template <typename TKey, typename TSetKey>
-	inline typename Iterator< VectorSet<TSetKey> const>::Type find(TKey const &key, VectorSet<TSetKey> const &set) {
+	template <typename TKey, typename TSetKey, typename TSpec>
+	inline typename Iterator< VectorSet<TSetKey, TSpec> const>::Type 
+	find(TKey const &key, VectorSet<TSetKey, TSpec> const &set) {
 		if (in(key, set))
-			return Iter<VectorSet<TSetKey> const, VectorSetIterator>(&set.vector[(unsigned)key], begin(set.vector), end(set.vector), begin(set.obj));
+			return Iter<VectorSet<TSetKey, TSpec> const, VectorSetIterator>
+				(begin(set.vector) + (unsigned)key, begin(set.vector), end(set.vector), begin(set.obj));
 		else
 			return end(set);
 	}
-	template <typename TKey, typename TSetKey, typename TSetObject>
-	inline Iter<VectorSet< Pair<TSetKey, TSetObject> >, VectorSetIterator> find(TKey const &key, VectorSet< Pair<TSetKey, TSetObject> > &set) {
+	template <typename TKey, typename TSetKey, typename TSetObject, typename TSpec>
+	inline Iter<VectorSet< Pair<TSetKey, TSetObject>, TSpec >, VectorSetIterator> 
+	find(TKey const &key, VectorSet< Pair<TSetKey, TSetObject>, TSpec > &set) {
 		if (in(key, set))
-			return Iter<VectorSet< Pair<TSetKey, TSetObject> >, VectorSetIterator>(&set.vector[(unsigned)key], begin(set.vector), end(set.vector), begin(set.obj));
+			return Iter<VectorSet< Pair<TSetKey, TSetObject>, TSpec >, VectorSetIterator>
+				(begin(set.vector) + (unsigned)key, begin(set.vector), end(set.vector), begin(set.obj));
 		else
 			return end(set);
 	}
-	template <typename TKey, typename TSetKey, typename TSetObject>
-	inline Iter<VectorSet< Pair<TSetKey, TSetObject> > const, VectorSetIterator> find(TKey const &key, VectorSet< Pair<TSetKey, TSetObject> > const &set) {
+	template <typename TKey, typename TSetKey, typename TSetObject, typename TSpec>
+	inline Iter<VectorSet< Pair<TSetKey, TSetObject>, TSpec > const, VectorSetIterator> 
+	find(TKey const &key, VectorSet< Pair<TSetKey, TSetObject>, TSpec > const &set) {
 		if (in(key, set))
-			return Iter<VectorSet< Pair<TSetKey, TSetObject> > const, VectorSetIterator>(&set.vector[(unsigned)key], begin(set.vector), end(set.vector), begin(set.obj));
+			return Iter<VectorSet< Pair<TSetKey, TSetObject>, TSpec > const, VectorSetIterator>
+				(begin(set.vector) + (unsigned)key, begin(set.vector), end(set.vector), begin(set.obj));
 		else
 			return end(set);
 	}
@@ -327,110 +394,138 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 	template <typename TKey>
-	inline void clear(::std::set<TKey> &set) {
+	inline void 
+	clear(::std::set<TKey> &set) {
 		set.clear();
 	}
 
 	template <typename TKey, typename TSetKey>
-	inline void insert(TKey const &key, ::std::set<TSetKey> &set) {
+	inline void 
+	insert(TKey const &key, ::std::set<TSetKey> &set) {
 		set.insert(key);
 	}
 
 	template <typename TKey, typename TSetKey>
-	inline void erase(TKey const &key, ::std::set<TSetKey> &set) {
+	inline void 
+	erase(TKey const &key, ::std::set<TSetKey> &set) {
 		set.erase(key);
 	}
 	template <typename TKey, typename TSetKey, typename TSetObject>
-	inline void erase(TKey const &key, ::std::set< Pair<TSetKey, TSetObject> > &set) {
+	inline void 
+	erase(TKey const &key, ::std::set< Pair<TSetKey, TSetObject> > &set) {
 		set.erase(Pair<TSetKey, TSetObject>(key, TSetObject()));
 	}
 
 	template <typename TKey, typename TSetKey>
-	inline bool in(TKey const &key, ::std::set<TSetKey> const &set) {
+	inline bool 
+	in(TKey const &key, ::std::set<TSetKey> const &set) {
 		return set.count(key) != 0;
 	}
 	template <typename TKey, typename TSetKey, typename TSetObject>
-	inline bool in(TKey const &key, ::std::set<Pair<TSetKey, TSetObject> > const &set) {
+	inline bool 
+	in(TKey const &key, ::std::set<Pair<TSetKey, TSetObject> > const &set) {
 		return set.count(Pair<TSetKey, TSetObject>(key, TSetObject())) != 0;
 	}
 
 	template <typename TKey>
-	inline typename Size< ::std::set<TKey> >::Type length(::std::set<TKey> const &set) {
+	inline typename Size< ::std::set<TKey> >::Type 
+	length(::std::set<TKey> const &set) {
 		return set.size();
 	}
 
 	template <typename TKey, typename TSetKey>
-	inline typename Iterator< ::std::set<TSetKey> >::Type find(TKey const &key, ::std::set<TSetKey> &set) {
+	inline typename Iterator< ::std::set<TSetKey> >::Type 
+	find(TKey const &key, ::std::set<TSetKey> &set) {
 		return set.find(key);
 	}
 	template <typename TKey, typename TSetKey>
-	inline typename Iterator< ::std::set<TSetKey> const>::Type find(TKey const &key, ::std::set<TSetKey> const &set) {
+	inline typename Iterator< ::std::set<TSetKey> const>::Type 
+	find(TKey const &key, ::std::set<TSetKey> const &set) {
 		return set.find(key);
 	}
 	template <typename TKey, typename TSetKey, typename TSetObject>
-	inline typename Iterator< ::std::set<Pair<TSetKey, TSetObject> > >::Type find(TKey const &key, ::std::set<Pair<TSetKey, TSetObject> > &set) {
+	inline typename Iterator< ::std::set<Pair<TSetKey, TSetObject> > >::Type 
+	find(TKey const &key, ::std::set<Pair<TSetKey, TSetObject> > &set) {
 		return set.find(Pair<TSetKey, TSetObject>(key, TSetObject()));
 	}
 	template <typename TKey, typename TSetKey, typename TSetObject>
-	inline typename Iterator< ::std::set<Pair<TSetKey, TSetObject> > const>::Type find(TKey const &key, ::std::set<Pair<TSetKey, TSetObject> > const &set) {
+	inline typename Iterator< ::std::set<Pair<TSetKey, TSetObject> > const>::Type 
+	find(TKey const &key, ::std::set<Pair<TSetKey, TSetObject> > const &set) {
 		return set.find(Pair<TSetKey, TSetObject>(key, TSetObject()));
 	}
 
 
 
-	template <typename TObject>
-	inline typename Iterator< VectorSet<TObject> >::Type begin(VectorSet<TObject> &set) {
-		return Iter<VectorSet<TObject>, VectorSetIterator> (begin(set.vector), begin(set.vector), end(set.vector), begin(set.obj));
+	template <typename TObject, typename TSpec>
+	inline typename Iterator< VectorSet<TObject, TSpec> >::Type 
+	begin(VectorSet<TObject, TSpec> &set) {
+		return Iter<VectorSet<TObject, TSpec>, VectorSetIterator> 
+			(begin(set.vector), begin(set.vector), end(set.vector), begin(set.obj));
 	}
-	template <typename TObject>
-	inline typename Iterator< VectorSet<TObject> const>::Type begin(VectorSet<TObject> const &set) {
-		return Iter<VectorSet<TObject>, VectorSetIterator> (begin(set.vector), begin(set.vector), end(set.vector), begin(set.obj));
+	template <typename TObject, typename TSpec>
+	inline typename Iterator< VectorSet<TObject, TSpec> const>::Type 
+	begin(VectorSet<TObject, TSpec> const &set) {
+		return Iter<VectorSet<TObject, TSpec>, VectorSetIterator> 
+			(begin(set.vector), begin(set.vector), end(set.vector), begin(set.obj));
 	}
-	template <typename TObject>
-	inline typename Iterator< VectorSet<TObject> >::Type end(VectorSet<TObject> &set) {
-		return Iter<VectorSet<TObject>, VectorSetIterator> (begin(set.vector), begin(set.vector), end(set.vector), begin(set.obj));
+	template <typename TObject, typename TSpec>
+	inline typename Iterator< VectorSet<TObject, TSpec> >::Type 
+	end(VectorSet<TObject, TSpec> &set) {
+		return Iter<VectorSet<TObject, TSpec>, VectorSetIterator> 
+			(begin(set.vector), begin(set.vector), end(set.vector), begin(set.obj));
 	}
-	template <typename TObject>
-	inline typename Iterator< VectorSet<TObject> const>::Type end(VectorSet<TObject> const &set) {
-		return Iter<VectorSet<TObject>, VectorSetIterator> (begin(set.vector), begin(set.vector), end(set.vector), begin(set.obj));
+	template <typename TObject, typename TSpec>
+	inline typename Iterator< VectorSet<TObject, TSpec> const>::Type 
+	end(VectorSet<TObject, TSpec> const &set) {
+		return Iter<VectorSet<TObject, TSpec>, VectorSetIterator> 
+			(begin(set.vector), begin(set.vector), end(set.vector), begin(set.obj));
 	}
 
 	template <typename TObject>
-	inline bool operator==(Iter<TObject, VectorSetIterator> const &a, Iter<TObject, VectorSetIterator> const &b) {
+	inline bool 
+	operator==(Iter<TObject, VectorSetIterator> const &a, Iter<TObject, VectorSetIterator> const &b) {
 		return a.ptr == b.ptr;
 	}
 	template <typename TObject>
-	inline bool operator!=(Iter<TObject, VectorSetIterator> const &a, Iter<TObject, VectorSetIterator> const &b) {
+	inline bool 
+	operator!=(Iter<TObject, VectorSetIterator> const &a, Iter<TObject, VectorSetIterator> const &b) {
 		return a.ptr != b.ptr;
 	}
 	template <typename TObject>
-	inline bool eof(Iter<TObject, VectorSetIterator> const &a) {
+	inline bool 
+	eof(Iter<TObject, VectorSetIterator> const &a) {
 		return a.ptr == a.end;
 	}
 
-	template <typename TKey>
-	inline TKey keyOf(Iter<VectorSet<TKey>, VectorSetIterator> const &it) {
+	template <typename TKey, typename TSpec>
+	inline TKey 
+	keyOf(Iter<VectorSet<TKey, TSpec>, VectorSetIterator> const &it) {
 		return it.ptr - it.begin;
 	}
-	template <typename TKey>
-	inline TKey keyOf(Iter<VectorSet<TKey> const, VectorSetIterator> const &it) {
+	template <typename TKey, typename TSpec>
+	inline TKey 
+	keyOf(Iter<VectorSet<TKey, TSpec> const, VectorSetIterator> const &it) {
 		return it.ptr - it.begin;
 	}
-	template <typename TKey, typename TObject>
-	inline TKey keyOf(Iter<VectorSet< Pair<TKey, TObject> >, VectorSetIterator> const &it) {
+	template <typename TKey, typename TObject, typename TSpec>
+	inline TKey 
+	keyOf(Iter<VectorSet< Pair<TKey, TObject>, TSpec >, VectorSetIterator> const &it) {
 		return it.ptr - it.begin;
 	}
-	template <typename TKey, typename TObject>
-	inline TKey keyOf(Iter<VectorSet< Pair<TKey, TObject> const>, VectorSetIterator> const &it) {
+	template <typename TKey, typename TObject, typename TSpec>
+	inline TKey 
+	keyOf(Iter<VectorSet< Pair<TKey, TObject> const>, VectorSetIterator> const &it) {
 		return it.ptr - it.begin;
 	}
-	template <typename TKey, typename TObject>
-	inline TObject& objectOf(Iter<VectorSet< Pair<TKey, TObject> >, VectorSetIterator> &it) {
-		return (*it.ptr).i2;
+	template <typename TKey, typename TObject, typename TSpec>
+	inline TObject& 
+	objectOf(Iter<VectorSet< Pair<TKey, TObject>, TSpec >, VectorSetIterator> const &it) {
+		return *it.obj;
 	}
 	template <typename TKey, typename TObject>
-	inline TObject const & objectOf(Iter<VectorSet< Pair<TKey, TObject> const>, VectorSetIterator> const &it) {
-		return (*it.ptr).i2;
+	inline TObject const & 
+	objectOf(Iter<VectorSet< Pair<TKey, TObject> const>, VectorSetIterator> const &it) {
+		return *it.obj;
 	}
 
 

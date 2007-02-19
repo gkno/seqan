@@ -277,8 +277,8 @@ The m-tuples are substrings of the input stream beginning at positions $i$, with
 
 	template <typename TPair, typename TLimits, const unsigned m = 0>
 	struct _PairDecrementer {
-		typename Iterator<TLimits const>::Type	it, itEnd;
-		typename Value<TLimits>::Type			old;
+		typename Iterator<TLimits const>::Type						it, itEnd;
+		typename _RemoveConst<typename Value<TLimits>::Type>::Type	old;
 
 		TPair		pos;
 		unsigned	residue;
@@ -332,8 +332,8 @@ The m-tuples are substrings of the input stream beginning at positions $i$, with
 
 	template <typename TPair, typename TLimits>
 	struct _PairDecrementer<TPair, TLimits, 0> {
-		typename Iterator<TLimits const>::Type	it, itEnd;
-		typename Value<TLimits>::Type			old;
+		typename Iterator<TLimits const>::Type						it, itEnd;
+		typename _RemoveConst<typename Value<TLimits>::Type>::Type	old;
 
 		TPair		pos;
 

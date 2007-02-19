@@ -23,6 +23,7 @@ namespace SEQAN_NAMESPACE_MAIN
     // external LCP algorithm (modified Kasai et al. for pipelining)
     //////////////////////////////////////////////////////////////////////////////
 
+
     template < typename TTextInput, typename TSuffixArrayInput >
     struct Value< Pipe< Bundle2< TTextInput, TSuffixArrayInput >, Kasai > > {
         typedef typename Size<TTextInput>::Type Type;
@@ -30,11 +31,11 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <typename InType, typename Result = typename InType::T2::T>
 	struct map_inverse : public ::std::unary_function<InType,Result> {
-        Result operator()(const InType& x) const
+        inline Result operator()(const InType& x) const
         { return x.i2[0]; }
     };
 
-    //////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////
     // lcp class
     template < typename TTextInput, typename TSuffixArrayInput >
     struct Pipe< Bundle2< TTextInput, TSuffixArrayInput >, Kasai >
@@ -46,8 +47,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		                                typedef typename Size<TTextInput>::Type	TSize;
 		typedef Pool< _TypeOf(TEchoer), MapperSpec< MapperConfigSize< map_inverse_t, TSize> > > TInverter;
 		                                typedef Pair<TSize,	TSize, Compressed> TCoreType;
-		typedef Pool< TCoreType, MapperSpec< MapperConfigSize< getI1<TCoreType>, TSize > > > TLinearMapper;
-        typedef Pipe< TLinearMapper, Filter< getI2<TCoreType> > > TFilter;
+		typedef Pool< TCoreType, MapperSpec< MapperConfigSize< filterI1<TCoreType>, TSize > > > TLinearMapper;
+        typedef Pipe< TLinearMapper, Filter< filterI2<TCoreType> > > TFilter;
 
 		TTextInput				*textIn;
         TSuffixArrayInput		*suffixArrayIn;
@@ -113,6 +114,113 @@ namespace SEQAN_NAMESPACE_MAIN
  	    return me.process(bundleIn.in1, bundleIn.in2);
     }
 
+
+
+    //////////////////////////////////////////////////////////////////////////////
+    // external LCP algorithm (optimized for multiple sequences)
+    //////////////////////////////////////////////////////////////////////////////
+
+
+    template < typename TTextInput, typename TSuffixArrayInput, typename TPair, typename TLimitsString >
+    struct Value< Pipe< Bundle2< TTextInput, TSuffixArrayInput >, Multi<Kasai, TPair, TLimitsString> > > {
+        typedef typename Size<TTextInput>::Type Type;
+    };
+
+	template <typename InType, typename TLimitsString, typename Result = typename Value<TLimitsString>::Type>
+	struct map_inverse_multi : public ::std::unary_function<InType,Result> {
+		TLimitsString const &limits;
+		map_inverse_multi(TLimitsString const &_limits) : limits(_limits) {}
+        inline Result operator()(const InType& x) const
+        {
+			return posGlobalize(x.i2[0], limits);
+		}
+    };
+
+    //////////////////////////////////////////////////////////////////////////////
+    // lcp class
+    template < typename TTextInput, typename TSuffixArrayInput, typename TPair, typename TLimitsString >
+    struct Pipe< Bundle2< TTextInput, TSuffixArrayInput >, Multi<Kasai, TPair, TLimitsString> >
+    {
+        // *** SPECIALIZATION ***
+
+        typedef Pipe< TSuffixArrayInput, Echoer<2,false> > TEchoer;
+                                        typedef map_inverse_multi<_TypeOf(TEchoer), TLimitsString, _TSizeOf(TEchoer)> map_inverse_t;
+		                                typedef typename Size<TTextInput>::Type	TSize;
+		typedef Pool< _TypeOf(TEchoer), MapperSpec< MapperConfigSize< map_inverse_t, TSize> > > TInverter;
+		                                typedef Pair<TSize,	TSize, Compressed> TCoreType;
+		typedef Pool< TCoreType, MapperSpec< MapperConfigSize< filterI1<TCoreType>, TSize > > > TLinearMapper;
+        typedef Pipe< TLinearMapper, Filter< filterI2<TCoreType> > > TFilter;
+
+		TTextInput				*textIn;
+        TSuffixArrayInput		*suffixArrayIn;
+        TLinearMapper           mapper;
+		TFilter					in;
+		TLimitsString const		&limits;
+        const LcpConfig			conf;
+        
+        Pipe(TLimitsString const &_limits):
+            in(mapper),
+			limits(_limits)	{}
+
+        Pipe(TLimitsString const &_limits, const LcpConfig &_conf):
+            in(mapper),
+			limits(_limits),
+			conf(_conf) {}
+
+        Pipe(Bundle2< TTextInput, TSuffixArrayInput > const &_bundleIn, TLimitsString const &_limits):
+            textIn(&_bundleIn.in1),
+			suffixArrayIn(&_bundleIn.in2),
+            in(mapper),
+			limits(_limits) {}
+
+        Pipe(Bundle2< TTextInput, TSuffixArrayInput > const &_bundleIn, TLimitsString const &_limits, const LcpConfig &_conf):
+            textIn(&_bundleIn.in1),
+			suffixArrayIn(&_bundleIn.in2),
+            in(mapper),
+			limits(_limits),
+			conf(_conf) {}
+        
+        inline void process() {
+            process(*textIn, *suffixArrayIn);
+        }
+
+		template < typename _TTextInput, typename _TSuffixArrayInput >
+        bool process(_TTextInput &textIn, _TSuffixArrayInput &suffixArrayIn) {
+
+            // *** INSTANTIATION ***
+			
+			TEchoer						echoer(suffixArrayIn);
+			map_inverse_t				map_inverse(limits);
+			TInverter					inverter(echoer, map_inverse);
+
+            #ifdef SEQAN_DEBUG_INDEX
+                ::std::cout << "  invert suffix array\n";
+            #endif
+			inverter << echoer;
+			SEQAN_PROMARK("Suffix-Array invertiert");
+
+			lcp_process_multi(textIn, limits, inverter, mapper);
+            return true;
+        }
+
+        inline typename Value<Pipe>::Type const operator*() const {
+            return *in;
+        }
+        
+        inline Pipe& operator++() {
+            ++in;
+            return *this;
+        }
+	};
+
+    // not sure which interface is more intuitive, we support both
+    // you can call "skew << pipe" or "skew_t skew(pipe); skew.process()"
+    // for the first we would need no _in member
+	template < typename TInput, typename _TTextInput, typename _TSuffixArrayInput, typename TPair, typename TLimitsString >
+    inline bool operator<<(Pipe< TInput, Multi<Kasai, TPair, TLimitsString> > &me, Bundle2< _TTextInput, _TSuffixArrayInput > const &bundleIn) {
+ 	    return me.process(bundleIn.in1, bundleIn.in2);
+    }
+
 /**
 .Function.createLCPTable:
 ..summary:Creates a lcp table from a given text and suffix array.
@@ -128,23 +236,28 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < 
         typename TLCPTable,
-        typename TValue, 
-		typename TConfig,
+        typename TValue1,
+        typename TValue2,
+		typename TConfig1,
+		typename TConfig2,
+		typename TSpec,
 		typename TObject, 
 		typename ConstrSpec>
 	void createLCPTable(
 		TLCPTable &LCP,
-		TObject &s,
-		String< TValue, External<TConfig> > &SA,
+		StringSet< String<TValue1, External<TConfig1> >, TSpec > &s,
+		String< TValue2, External<TConfig2> > &SA,
 		Kasai const &spec)
 	{
         createLCPTableExt(LCP, s, SA, spec);
 	}
 
 
+
     //////////////////////////////////////////////////////////////////////////////
     // internal Kasai algorithm
     //////////////////////////////////////////////////////////////////////////////
+
 
     template < typename TLCPTable,
                typename TText,
@@ -287,6 +400,111 @@ namespace SEQAN_NAMESPACE_MAIN
             ::std::cout << "  sigma: " << sigma << std::endl;
         #endif
 	}
+
+
+	// Kasai in-place for multiple sequences
+    template < typename TLCPTable,
+			   typename TString,
+			   typename TSpec,
+               typename TSuffixArray >
+    void createLCPTable(
+		TLCPTable &LCP,
+		StringSet<TString, TSpec> const &sset,
+		TSuffixArray const &SA,
+		KasaiInPlace const &)
+	{
+		typedef typename Concatenator<StringSet<TString, TSpec> const>::Type	TText;
+		typedef typename StringSetLimits<StringSet<TString, TSpec> const>::Type	TLimitsString;
+		typedef typename Value<TSuffixArray>::Type								TPair;
+		typedef _PairDecrementer<TPair, TLimitsString>							TDecrementer;
+		typedef typename Value<TLCPTable>::Type									TSize;
+
+		#ifdef SEQAN_DEBUG_INDEX
+			if (sizeof(TSize) > 4)
+				::std::cout << "WARNING: TSize size is greater 4 (Kasai)" << ::std::endl;
+        #endif
+
+		TText &s = concat(sset);
+		TSize n = length(s);
+        if (n < 2) return;
+
+        #ifdef SEQAN_DEBUG_INDEX
+            TSize lcpMax = 0, lcpAvrg = 0, lcpNumer = 0, sigma = 1;	// for lcpMax, lcpMean, |Sigma|
+        #endif
+
+		TSize mark = ~(~0u>>1);
+		TSize mask =   ~0u>>1;
+
+		TLimitsString const &limits = stringSetLimits(sset);
+		{
+			typename Iterator<TSuffixArray const>::Type itSA = begin(SA);
+			for(TSize i = 0; i < n; ++i, ++itSA)
+				LCP[posGlobalize(*itSA, limits)] = i;
+		}
+		
+		SEQAN_PROMARK("Suffix-Array invertiert");
+        #ifdef SEQAN_DEBUG_INDEX
+			::std::cout << "Suffix-Array invertiert" << ::std::endl;
+		#endif
+
+		typename Iterator<TText const>::Type Ibegin = begin(s), Iend = end(s);
+        typename Iterator<TText const>::Type I = Ibegin, J;
+
+		TDecrementer dec(limits);
+
+		for(TSize i = 0, h = 0, j, isa; i < n; ++i, --dec) {
+			if ((isa = LCP[i] + 1) < n) {
+				j = posGlobalize(SA[isa], limits);
+				J = Ibegin + h + j;
+
+                for(TSize hMax = Min(getValueI2((TPair)dec), n - j); h < hMax && *I == *J; ++I, ++J, ++h);
+				LCP[i] = h | mark;
+                #ifdef SEQAN_DEBUG_INDEX
+                    if ((lcpNumer += h) > n) {
+                        lcpNumer -= n;
+                        ++lcpAvrg;
+                    }
+                    if (lcpMax < h) lcpMax = h;
+					if (!h) ++sigma;
+                #endif
+			}
+			if (h) 
+				--h;
+			else 
+				++I;
+        }
+
+		LCP[posGlobalize(SA[n - 1], limits)] = mark;
+
+		SEQAN_PROMARK("permutierte LCP-Tabelle erzeugt");
+        #ifdef SEQAN_DEBUG_INDEX
+			::std::cout << "permutierte LCP-Tabelle erzeugt" << ::std::endl;
+		#endif
+        for(TSize sa_j, i = 0, j, tmp; i < n; ++i)
+			if (LCP[i] & mark) {
+				j = i;
+				tmp = LCP[j];
+				sa_j = posGlobalize(SA[j], limits);
+				while (sa_j != i) {
+					LCP[j] = LCP[sa_j] & mask;
+					j = sa_j;
+					sa_j = posGlobalize(SA[j], limits);
+				}
+				LCP[j] = tmp & mask;
+			}
+        #ifdef SEQAN_DEBUG_INDEX
+			::std::cout << "LCP-Tabelle erzeugt" << ::std::endl;
+		#endif
+
+        #ifdef SEQAN_DEBUG_INDEX
+            ::std::cout << "  n: " << n;
+            ::std::cout << "  lcpMax: " << lcpMax;
+            ::std::cout << "  lcpAvrg: " << (TSize)(lcpAvrg + (lcpNumer + n/2) / n);
+            ::std::cout << "  sigma: " << sigma << std::endl;
+        #endif
+	}
+
+
 
 //}
 

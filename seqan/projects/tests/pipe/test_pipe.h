@@ -39,12 +39,12 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < typename TValue >
 	struct IdentityMap : public std::unary_function< TValue, TValue > {
-		TValue operator() (TValue const i) { return i; }
+		inline TValue operator() (TValue const i) { return i; }
 	};
 
 	template < typename TValue >
 	struct SimpleCompare : public std::binary_function< TValue const, TValue const, int > {
-		int operator() (TValue const a, TValue const b) const {
+		inline int operator() (TValue const a, TValue const b) const {
             if (a < b) return -1;
             if (a > b) return 1;
             return 0;

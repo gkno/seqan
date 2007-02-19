@@ -9,7 +9,7 @@ namespace SEQAN_NAMESPACE_MAIN
 // Host Functions
 //////////////////////////////////////////////////////////////////////////////
 //these functions assume that the hosted object exports a function "_dataHost"
-//that returns a reference to a holder type given by Host<T>::Type & 
+//that returns a reference to a holder type of Host<T>::Type & 
 
 //////////////////////////////////////////////////////////////////////////////
 

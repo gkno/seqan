@@ -1,5 +1,5 @@
 /*
- *  skew3.h
+ *  index_skew3.h
  *  genindex
  *
  *  Created by David Weese on 17.07.05.
@@ -135,7 +135,7 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef Pool< _TypeOf(TNames_Sliced), MapperSpec< MapperConfigSize< nmap_linear_t, _TSizeOf(TNames_Sliced) > > > TNames_Linear_Unique;
 
         // non-unique names - recursion
-        typedef Pipe< TNames_Sliced, Filter< getI2<_TypeOf(TNames_Sliced)> > > TFilter;
+        typedef Pipe< TNames_Sliced, Filter< filterI2<_TypeOf(TNames_Sliced)> > > TFilter;
         typedef Pipe< TFilter, Skew3 > TRecurse;
                                         typedef skew3_unslicer_func<_TypeOf(TRecurse)> unslicer_func_t;
         typedef Pipe< TRecurse, Filter<unslicer_func_t> > TUnslicer;

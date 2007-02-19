@@ -23,7 +23,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..general:Class.ModifiedString
 ..signature:ModifiedIterator<THost, ModView<TFunctor> >
 ..signature:ModifiedString<THost, ModView<TFunctor> >
-..param.THost:Original iterator.
+..param.THost:Original string/iterator.
 ...type:Concept.Iterator
 ..param.TFunctor:A unary function (see STL's $unary_function$).
 ...remarks:The argument type of $TFunctor$ must be $VALUE<THost>::Type$.
@@ -180,6 +180,12 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
 
 		explicit ModifiedString(TFunctor const &_func) {
+			cargo(*this).func = _func;
+		}
+
+		explicit ModifiedString(ModifiedString const &_origin, TFunctor const &_func):
+			data_host(_origin.data_host)
+		{
 			cargo(*this).func = _func;
 		}
 

@@ -1202,22 +1202,22 @@ the operation need not to change the capacity at all.
 ...note:This operation may invalidate iterators of $object$.
 ..see:Function.capacity
 */
-template <typename T>
+template <typename T, typename TSize>
 inline typename Size<T>::Type 
 reserve(
 	T & me, 
-	typename Size<T>::Type new_capacity,
+	TSize new_capacity,
 	Insist)
 {
 SEQAN_CHECKPOINT
 	return new_capacity;
 }
 
-template <typename T>
+template <typename T, typename TSize>
 inline typename Size<T>::Type 
 reserve(
 	T & me, 
-	typename Size<T>::Type new_capacity,
+	TSize new_capacity,
 	Limit)
 {
 SEQAN_CHECKPOINT
@@ -1226,11 +1226,11 @@ SEQAN_CHECKPOINT
 	return new_capacity;
 }
 
-template <typename T>
+template <typename T, typename TSize>
 inline typename Size<T>::Type 
 reserve(
 	T & me, 
-	typename Size<T>::Type new_capacity)
+	TSize new_capacity)
 {
 SEQAN_CHECKPOINT
 	return reserve(me, new_capacity, typename DefaultOverflowExplicit<T>::Type());

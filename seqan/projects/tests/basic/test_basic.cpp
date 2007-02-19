@@ -213,6 +213,11 @@ void Test_Holder()
 	addRef(i2);
 	releaseRef(i1);
 	releaseRef(i2);
+
+//test const object holders
+/*
+	typedef char Bla[100];
+	Holder<Bla const> cho1 = "test";*/
 }
 
 //////////////////////////////////////////////////////////////////////////////

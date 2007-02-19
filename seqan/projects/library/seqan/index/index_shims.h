@@ -61,6 +61,46 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 
+	// build suffix array (external) for mutliple sequences
+	template < 
+		typename TSA, 
+		typename TString, 
+		typename TSpec,
+		typename ConstrSpec >
+	void createSuffixArrayExt(
+		TSA &suffixArray,
+		StringSet<TString, TSpec> &stringSet,
+		ConstrSpec const &)
+	{
+        // signed characters behave different than unsigned when compared
+        // to get the same index with signed or unsigned chars we simply cast them to unsigned
+        // before feeding them into the pipeline
+		typedef typename Concatenator<StringSet<TString, TSpec> >::Type TConcat;
+        typedef typename _MakeUnsigned< typename Value<TConcat>::Type >::Type TUValue;
+		typedef Multi<
+			ConstrSpec, 
+			typename Value<TSA>::Type, 
+			typename StringSetLimits<StringSet<TString, TSpec> >::Type > MultiConstrSpec;
+
+        // specialization
+		typedef Pipe< TConcat, Source<> >				src_t;
+        typedef Pipe< src_t, Caster<TUValue> >          unsigner_t;
+		typedef Pipe< unsigner_t, MultiConstrSpec >	    creator_t;
+
+		// instantiation
+		src_t		src(concat(stringSet));
+        unsigner_t  unsigner(src);
+		creator_t	creator(stringSetLimits(stringSet));
+
+		// processing
+		creator << unsigner;
+		suffixArray << creator;
+		#ifdef SEQAN_TEST_INDEX
+			isSuffixArray(suffixArray, stringSet);
+		#endif
+	}
+
+
 	// build lcp table with an external pipelining algorithm (ext kasai, ...)
 	template < 
         typename TLCPTable,
@@ -74,7 +114,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		ConstrSpec const &spec = Kasai())
 	{
 		// specialization
-		typedef Pipe< TObject, Source<> >					        srcText_t;
+		typedef Pipe< TObject, Source<> >							srcText_t;
 		typedef Pipe< TSA, Source<> >   							srcSA_t;
 	    typedef Pipe< Bundle2< srcText_t, srcSA_t >, ConstrSpec >	creator_t;
 
@@ -82,6 +122,44 @@ namespace SEQAN_NAMESPACE_MAIN
 		srcText_t	srcText(text);
 		srcSA_t		srcSA(suffixArray);
 		creator_t	creator;
+
+		// processing
+	    creator << bundle2(srcText, srcSA);
+		LCP << creator;
+		#ifdef SEQAN_TEST_INDEX
+			isLCPTable(LCP, suffixArray, text);
+		#endif
+	}
+
+
+	// build lcp table (external) for mutliple sequences
+	template < 
+        typename TLCPTable,
+		typename TString,
+		typename TSpec,
+        typename TSA,
+		typename ConstrSpec >
+	void createLCPTableExt(
+		TLCPTable &LCP,
+		StringSet<TString, TSpec> &stringSet,
+		TSA &suffixArray,
+		ConstrSpec const &spec = Kasai())
+	{
+		typedef typename Concatenator<StringSet<TString, TSpec> >::Type TConcat;
+		typedef Multi<
+			ConstrSpec, 
+			typename Value<TSA>::Type, 
+			typename StringSetLimits<StringSet<TString, TSpec> >::Type > MultiConstrSpec;
+
+		// specialization
+		typedef Pipe< TConcat, Source<> >								srcText_t;
+		typedef Pipe< TSA, Source<> >   								srcSA_t;
+	    typedef Pipe< Bundle2< srcText_t, srcSA_t >, MultiConstrSpec >	creator_t;
+
+		// instantiation
+		srcText_t	srcText(concat(stringSet));
+		srcSA_t		srcSA(suffixArray);
+		creator_t	creator(stringSetLimits(stringSet));
 
 		// processing
 	    creator << bundle2(srcText, srcSA);
@@ -519,14 +597,14 @@ SEQAN_CHECKPOINT
 	template <typename TText, typename TSpec, typename TSpecAlg>
 	inline bool indexCreate(Index<TText, Index_ESA<TSpec> > &index, ESA_SA const, TSpecAlg const alg) {
 		resize(indexSA(index), length(indexRawText(index)), Exact());
-		createSuffixArray(indexSA(index), indexRawText(index), alg);
+		createSuffixArray(indexSA(index), indexText(index), alg);
 		return true;
 	}
 
 	template <typename TText, typename TSpec, typename TSpecAlg>
 	inline bool indexCreate(Index<TText, Index_ESA<TSpec> > &index, ESA_LCP const, TSpecAlg const alg) {
 		resize(indexLCP(index), length(indexRawText(index)), Exact());
-		createLCPTable(indexLCP(index), indexRawText(index), indexSA(index), alg);
+		createLCPTable(indexLCP(index), indexText(index), indexSA(index), alg);
 		return true;
 	}
 
@@ -540,8 +618,8 @@ SEQAN_CHECKPOINT
 
 	template <typename TText, typename TSpec>
 	inline bool indexCreate(Index<TText, Index_ESA<TSpec> > &index, ESA_BWT const, BWT const) {
-		resize(indexBWT(index).tab, length(indexRawText(index)), Exact());
-		createBWTable(indexBWT(index), indexRawText(index), indexSA(index));
+		resize(indexBWT(index), length(indexRawText(index)), Exact());
+		createBWTable(indexBWT(index), indexRawText(index), indexRawSA(index));
 		return true;
 	}
 
@@ -568,6 +646,11 @@ SEQAN_CHECKPOINT
 	template <typename TText, typename TSpec, typename TFibre>
 	inline bool indexSupplied(Index<TText, Index_ESA<TSpec> > &index, TFibre const fibre) {
 		return !empty(getFibre(index, fibre));
+	}
+
+	template <typename TText, typename TSpec>
+	inline bool indexSupplied(Index<TText, Index_ESA<TSpec> > &index, ESA_BWT) {
+		return !empty(getFibre(index, ESA_BWT()));
 	}
 
 /**
@@ -688,7 +771,7 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 		name = fileName;	append(name, ".sa");	open(getFibre(index, ESA_SA()), toCString(name), openMode);
 		name = fileName;	append(name, ".lcp");	open(getFibre(index, ESA_LCP()), toCString(name), openMode);
 		name = fileName;	append(name, ".child");	open(getFibre(index, ESA_ChildTab()), toCString(name), openMode);
-		name = fileName;	append(name, ".bwt");	open(getFibre(index, ESA_BWT()).tab, toCString(name), openMode);
+		name = fileName;	append(name, ".bwt");	open(getFibre(index, ESA_BWT()), toCString(name), openMode);
 		return true;
 	}
 
@@ -706,7 +789,7 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 		name = fileName;	append(name, ".sa");	save(getFibre(index, ESA_SA()), toCString(name));
 		name = fileName;	append(name, ".lcp");	save(getFibre(index, ESA_LCP()), toCString(name));
 		name = fileName;	append(name, ".child");	save(getFibre(index, ESA_ChildTab()), toCString(name));
-		name = fileName;	append(name, ".bwt");	save(getFibre(index, ESA_BWT()).tab, toCString(name));
+		name = fileName;	append(name, ".bwt");	save(getFibre(index, ESA_BWT()), toCString(name));
 		return true;
 	}
 

@@ -112,8 +112,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		typedef Pair<TSize, TValue, Compressed>		TCoreType;		// (i, lcptab[i])
 
-		typedef Pool< TCoreType, MapperSpec< MapperConfigSize< getI1<TCoreType>, TSize > > > TLinearMapper;
-        typedef Pipe< TLinearMapper, Filter< getI2<TCoreType> > > TFilter;
+		typedef Pool< TCoreType, MapperSpec< MapperConfigSize< filterI1<TCoreType>, TSize > > > TLinearMapper;
+        typedef Pipe< TLinearMapper, Filter< filterI2<TCoreType> > > TFilter;
 
 		TLCPInput		*lcpIn;
         TLinearMapper   mapper;

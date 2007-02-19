@@ -35,13 +35,6 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef Pipe< void, AbstractSource< OutType12, SizeType > > Out12;
         //Out0 out0;
         //Out12 out12;
-        
-        Pipe(Bundle2< TTextInput, TNameInput > &_in)
-            //out0(_textIn.size() / 3),
-            //out12(_nameIn.size())
-        {
-            addListener(_in); 
-        }
     };
         
     template < typename TTextInput, typename TNameInput, typename TOut0, typename TOut12 >

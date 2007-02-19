@@ -8,4 +8,5 @@
 //#include "../../demos/sufarray.cpp"
 //#include "../../demos/index.cpp"
 //#include "../../demos/graph.cpp"
+//#include "../../demos/graph.cpp"
 #include "../../demos/find.cpp"

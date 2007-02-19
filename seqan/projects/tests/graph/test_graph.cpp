@@ -1297,7 +1297,7 @@ void Test_GraphStack() {
 //____________________________________________________________________________
 // Graph stack
 
-    String<int, BlockString<2> > stack;
+    String<int, Block<2> > stack;
 	SEQAN_TASSERT(empty(stack) == true)
 	push_back(stack,1);
 	SEQAN_TASSERT(top(stack)==1)
@@ -1319,14 +1319,14 @@ void Test_GraphStack() {
 	SEQAN_TASSERT(empty(stack) == true)
 	push_back(stack,20);
 	SEQAN_TASSERT(top(stack)==20)
-	String<char, BlockString<2> > wS("hallo");
+	String<char, Block<2> > wS("hallo");
 	SEQAN_TASSERT(top(wS)=='o')
 	SEQAN_TASSERT(wS[2]=='l')
 	wS = "new_stack";
 	SEQAN_TASSERT(top(wS)=='k')
 	SEQAN_TASSERT(wS[2]=='w')
 	SEQAN_TASSERT(length(wS)==9)
-	typedef Iterator<String<char,BlockString<2> >, Standard>::Type TIter;
+	typedef Iterator<String<char,Block<2> >, Standard>::Type TIter;
 	TIter it = begin(wS, Standard());
 	TIter itEnd = end(wS, Standard());
 	SEQAN_TASSERT(*it=='n')
@@ -1345,9 +1345,9 @@ void Test_GraphStack() {
 	appendValue(wS, 'A');
 	SEQAN_TASSERT(wS[2]=='A')
 	int a = 20;
-	String<int, BlockString<2> > test(a);
+	String<int, Block<2> > test(a);
 	SEQAN_TASSERT(test[0]==20)
-	String<int, BlockString<2> > test2(test);
+	String<int, Block<2> > test2(test);
 	SEQAN_TASSERT(test2[0]==20)
 	test[0]=10;
 	SEQAN_TASSERT(test[0]==10)
@@ -1355,7 +1355,7 @@ void Test_GraphStack() {
 	test2 = test;
 	SEQAN_TASSERT(test[0]==10)
 	SEQAN_TASSERT(test2[0]==10)
-	String<char, BlockString<2> > const test3("Hallo");
+	String<char, Block<2> > const test3("Hallo");
 	SEQAN_TASSERT(test3[0]=='H')
 }
 

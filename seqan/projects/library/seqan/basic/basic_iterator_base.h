@@ -146,13 +146,13 @@ SEQAN_CHECKPOINT
 }
 
 template <typename TContainer, typename TSpec>
-inline Iter<TContainer, TSpec> const &
+inline Iter<TContainer, TSpec> const
 operator ++ (Iter<TContainer, TSpec> & me, int)
 {
 SEQAN_CHECKPOINT
 	Iter<TContainer, TSpec> temp_(me);
 	goNext(me);
-	return me;
+	return temp_;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -169,13 +169,13 @@ SEQAN_CHECKPOINT
 }
 
 template <typename TContainer, typename TSpec>
-inline Iter<TContainer, TSpec> const &
+inline Iter<TContainer, TSpec> const
 operator -- (Iter<TContainer, TSpec> & me, int)
 {
 SEQAN_CHECKPOINT
 	Iter<TContainer, TSpec> temp_(me);
 	goPrevious(me);
-	return me;
+	return temp_;
 }
 
 //////////////////////////////////////////////////////////////////////////////

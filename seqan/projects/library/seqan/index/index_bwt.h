@@ -17,51 +17,38 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	struct BWT {};
 
+
     //////////////////////////////////////////////////////////////////////////////
     // external BWT algorithm
     //////////////////////////////////////////////////////////////////////////////
+
 
     template < typename TTextInput, typename TSuffixArrayInput >
     struct Value< Pipe< Bundle2< TTextInput, TSuffixArrayInput >, BWT > > {
         typedef typename Value<TTextInput>::Type Type;
     };
 
-	template <typename TValue, typename Result = TValue>
-    struct _scanUndefined : public std::unary_function<TValue,TValue> {
-		typedef typename TValue::T1 TSize;
-		TSize &undef;
-
-		_scanUndefined(TSize &_undef): undef(_undef) {}
-        TValue const & operator()(TValue const &x) const {
-			if (x.i1 == 0) undef = x.i2;
-			return x; 
-		}
-    };
-
-
 	//////////////////////////////////////////////////////////////////////////////
-    // Enhanced class (outputs only the childtab (3rd) column of the Enhanced Suffix Array)
+    // bwt class
     template < typename TTextInput, typename TSuffixArrayInput >
     struct Pipe< Bundle2< TTextInput, TSuffixArrayInput >, BWT >
     {
         // *** SPECIALIZATION ***
 
         typedef Pipe< TSuffixArrayInput, Counter > TSA;
-		typedef Pipe< TSA, Filter<_scanUndefined<_TypeOf(TSA)> > > TScanner;
 		                                typedef typename Size<TTextInput>::Type	TSize;
-		typedef Pool< _TypeOf(TScanner), MapperSpec< MapperConfigSize< getI1<_TypeOf(TScanner)>, TSize> > > TInverter;
-        typedef Pipe< TInverter, Filter< getI2<_TypeOf(TInverter)> > > TCounterFilter;
+		typedef Pool< _TypeOf(TSA), MapperSpec< MapperConfigSize< filterI1<_TypeOf(TSA)>, TSize> > > TInverter;
+        typedef Pipe< TInverter, Filter< filterI2<_TypeOf(TInverter)> > > TCounterFilter;
 		typedef Pipe< TTextInput, Shifter< -1, false > > TShiftText;
 
 		typedef Pipe< Bundle2< TCounterFilter, TShiftText >, Joiner > TJoiner;
-		typedef Pool< _TypeOf(TJoiner), MapperSpec< MapperConfigSize< getI1<_TypeOf(TJoiner)>, TSize> > > TLinearMapper;
-        typedef Pipe< TLinearMapper, Filter< getI2<_TypeOf(TLinearMapper)> > > TFilter;
+		typedef Pool< _TypeOf(TJoiner), MapperSpec< MapperConfigSize< filterI1<_TypeOf(TJoiner)>, TSize> > > TLinearMapper;
+        typedef Pipe< TLinearMapper, Filter< filterI2<_TypeOf(TLinearMapper)> > > TFilter;
 
 		TTextInput			*textIn;
 		TSuffixArrayInput	*suffixArrayIn;
         TLinearMapper		mapper;
 		TFilter				in;
-		TSize				undefined;
         
         Pipe():
             in(mapper) {}
@@ -81,7 +68,6 @@ namespace SEQAN_NAMESPACE_MAIN
             // *** INSTANTIATION ***
 			
 			TSA							sa(suffixArrayIn);
-			TScanner					scanner(sa, _scanUndefined<_TypeOf(TSA)>(undefined));
 			TInverter					inverter;
 			TCounterFilter				filter(inverter);
 			
@@ -122,11 +108,11 @@ namespace SEQAN_NAMESPACE_MAIN
     }
 
 
-	template < typename TBWTStruct,
+	template < typename TBWT,
                typename TText,
 			   typename TSA >
     void createBWTableExt(
-		TBWTStruct &bwt,
+		TBWT &bwt,
 		TText &s,
 		TSA &SA)
 	{
@@ -142,8 +128,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		// processing
 	    creator << bundle2(srcText, srcSA);
-		bwt.tab << creator;
-		bwt.undefined = creator.undefined;
+		bwt << creator;
 	}
 
 /**
@@ -160,30 +145,156 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < typename TValue,
 			   typename TConfig,
-               typename TText,
+               typename TBWT,
 			   typename TSA >
     inline void createBWTable(
-		BWTStruct< String<TValue, External<TConfig> > > &childtab,
-		TText &s,
+		TBWT &bwt,
+		String<TValue, External<TConfig> > &s,
 		TSA &sa)
 	{
-		createBWTableExt(childtab, s, sa);
+		createBWTableExt(bwt, s, sa);
 	}
+
+
+
+    //////////////////////////////////////////////////////////////////////////////
+    // external BWT algorithm (optimized for multiple sequences)
+    //////////////////////////////////////////////////////////////////////////////
+
+
+    template < typename TTextInput, typename TSuffixArrayInput, typename TPair, typename TLimitsString >
+    struct Value< Pipe< Bundle2< TTextInput, TSuffixArrayInput >, Multi<BWT, TPair, TLimitsString> > > {
+        typedef typename Value<TTextInput>::Type Type;
+    };
+
+	template <typename InType, typename TLimitsString, typename Result = typename Value<TLimitsString>::Type>
+	struct filter_globalizer : public ::std::unary_function<InType,Result> {
+		TLimitsString const &limits;
+		filter_globalizer(TLimitsString const &_limits) : limits(_limits) {}
+        inline Result operator()(const InType& x) const
+        {
+			return posGlobalize(x, limits);
+		}
+    };
+
+
+	//////////////////////////////////////////////////////////////////////////////
+    // bwt class
+    template < typename TTextInput, typename TSuffixArrayInput, typename TPair, typename TLimitsString >
+    struct Pipe< Bundle2< TTextInput, TSuffixArrayInput >, Multi<BWT, TPair, TLimitsString> >
+    {
+        // *** SPECIALIZATION ***
+
+										typedef filter_globalizer<_TypeOf(TSuffixArrayInput), TLimitsString, _TSizeOf(TSuffixArrayInput)> filter_globalizer_t;
+		typedef Pipe< TSuffixArrayInput, Filter<filter_globalizer_t> > TGlobalizer;
+        typedef Pipe< TGlobalizer, Counter > TSA;
+		                                typedef typename Size<TTextInput>::Type	TSize;
+		typedef Pool< _TypeOf(TSA), MapperSpec< MapperConfigSize< filterI1<_TypeOf(TSA)>, TSize> > > TInverter;
+        typedef Pipe< TInverter, Filter< filterI2<_TypeOf(TInverter)> > > TCounterFilter;
+		typedef Pipe< TTextInput, Shifter< -1, false > > TShiftText;
+
+		typedef Pipe< Bundle2< TCounterFilter, TShiftText >, Joiner > TJoiner;
+		typedef Pool< _TypeOf(TJoiner), MapperSpec< MapperConfigSize< filterI1<_TypeOf(TJoiner)>, TSize> > > TLinearMapper;
+        typedef Pipe< TLinearMapper, Filter< filterI2<_TypeOf(TLinearMapper)> > > TFilter;
+
+		TTextInput			*textIn;
+		TSuffixArrayInput	*suffixArrayIn;
+        TLinearMapper		mapper;
+		TFilter				in;
+
+		TLimitsString const	&limits;
+        
+        Pipe(TLimitsString const &_limits):
+            in(mapper),
+			limits(_limits)	{}
+
+        Pipe(Bundle2< TTextInput, TSuffixArrayInput > const &_bundleIn, TLimitsString const &_limits):
+            textIn(&_bundleIn.in1),
+			suffixArrayIn(&_bundleIn.in2),
+            in(mapper),
+			limits(_limits)	{}
+
+        inline void process() {
+            process(*textIn, *suffixArrayIn);
+        }
+
+		template < typename _TTextInput, typename _TSuffixArrayInput >
+        bool process(_TTextInput &textIn, _TSuffixArrayInput &suffixArrayIn) {
+
+            // *** INSTANTIATION ***
+			
+			TGlobalizer					globalizer(suffixArrayIn, limits);
+			TSA							sa(globalizer);
+			TInverter					inverter;
+			TCounterFilter				filter(inverter);
+			
+            #ifdef SEQAN_DEBUG_INDEX
+                ::std::cout << "  invert suffix array\n";
+            #endif
+			inverter << sa;
+			SEQAN_PROMARK("Suffix-Array invertiert");
+
+			TShiftText					shifter(textIn);
+			TJoiner						joiner(bundle2(filter, shifter));
+			
+            #ifdef SEQAN_DEBUG_INDEX
+                ::std::cout << "  de-invert suffix array\n";
+            #endif
+			mapper << joiner;
+			SEQAN_PROMARK("Suffix-Array linearisiert");
+
+            return true;
+        }
+
+        inline typename Value<Pipe>::Type const operator*() const {
+            return *in;
+        }
+        
+        inline Pipe& operator++() {
+            ++in;
+            return *this;
+        }
+	};
+
+    // not sure which interface is more intuitive, we support both
+    // you can call "bwt << pipe" or "bwt_t bwt(pipe); bwt.process()"
+    // for the first we would need no _in member
+	template < typename TInput, typename _TTextInput, typename _TSuffixArrayInput, typename TPair, typename TLimitsString >
+    inline bool operator<<(Pipe< TInput, Multi<BWT, TPair, TLimitsString> > &me, Bundle2< _TTextInput, _TSuffixArrayInput > const &bundleIn) {
+ 	    return me.process(bundleIn.in1, bundleIn.in2);
+    }
+
+	template < typename TValue,
+			   typename TConfig,
+			   typename TSpec,
+               typename TBWT,
+			   typename TSA >
+    inline void createBWTable(
+		TBWT &bwt,
+		StringSet< String<TValue, External<TConfig> >, TSpec > &s,
+		TSA &sa)
+	{
+		createBWTableExt(bwt, s, sa);
+	}
+
+
 
 
     //////////////////////////////////////////////////////////////////////////////
     // internal BWT algorithm
     //////////////////////////////////////////////////////////////////////////////
 
-    template < typename TBWTStruct,
+
+    template < typename TBWT,
                typename TText,
                typename TSuffixArray >
     void createBWTable(
-		TBWTStruct &bwt,
+		TBWT &bwt,
 		TText &s,
-		TSuffixArray &SA)
+		TSuffixArray const &SA)
 	{
-		typedef typename Value<TSuffixArray>::Type TSize;
+		typedef typename Value<TSuffixArray>::Type	TValue;
+		typedef typename Size<TSuffixArray>::Type	TSize;
 
 		#ifdef SEQAN_DEBUG_INDEX
 			if (sizeof(TSize) > 4)
@@ -192,13 +303,13 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		TSize n = length(s);
 
-		for(TSize i = 0, sa; i < n; ++i)
-			if (sa = SA[i])
-				bwt.tab[i] = s[sa - 1];
-			else {
-				bwt.tab[i] = TSize();
-				bwt.undefined = i;
-			}
+		for(TSize i = 0; i < n; ++i) {
+			TValue sa = SA[i];
+			if (sa)
+				bwt[i] = s[sa - 1];
+			else
+				bwt[i] = TSize();
+		}
 	}
 
 //}

@@ -72,11 +72,19 @@ struct _RemoveConst
 	typedef T Type;
 };
 template <typename T>
-struct _RemoveConst<T const>
-{
-	typedef T Type;
-};
+struct _RemoveConst<T const>:
+	public _RemoveConst<T> {};
 
+template <typename T>
+struct _RemoveConst<T const *>
+{
+	typedef T * Type;
+};
+template <typename T, size_t I>
+struct _RemoveConst<T const [I]>
+{
+	typedef T * Type;
+};
 
 //////////////////////////////////////////////////////////////////////////////
 /**
