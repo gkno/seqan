@@ -1,0 +1,59 @@
+/*
+ *  pump_separator7.h
+ *  SeqAn
+ *
+ *  Created by David Weese on 30.01.07.
+ *
+ */
+
+#ifndef SEQAN_HEADER_INDEX_PUMP_SEPARATOR_H
+#define SEQAN_HEADER_INDEX_PUMP_SEPARATOR_H
+
+namespace SEQAN_NAMESPACE_MAIN
+{
+
+
+    template < 
+		typename TInput, typename TFunctor,
+		typename TOut1, typename TOut2, typename TOut4 
+	>
+    static void skew7_separate_slices(
+		TInput &in, TFunctor const &funcSlice,
+		TOut1 &out1, TOut2 &out2, TOut4 &out4)
+    {
+		beginRead(in);
+
+		resize(out1, funcSlice.n1);
+		resize(out2, funcSlice.n2);
+		resize(out4, funcSlice.n4);
+
+		beginWrite(out1);
+		beginWrite(out2);
+		beginWrite(out4);
+
+		typename Value<TInput>::Type i;
+		while (!eof(in)) {
+			pop(in, i);
+			if (i.i1 < funcSlice.n4) {
+				push(out4, i);
+			} else 
+				if (i.i1 < funcSlice.n24) {
+					i.i1 -= funcSlice.n4;
+					push(out2, i);
+				} else {
+					i.i1 -= funcSlice.n24;
+					push(out1, i);
+				}
+		}
+
+		endWrite(out4);
+		endWrite(out2);
+		endWrite(out1);
+		endRead(in);
+    }
+    
+//}
+
+}
+
+#endif
