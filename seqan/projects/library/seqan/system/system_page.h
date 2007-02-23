@@ -876,20 +876,20 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		inline void _dump() {
 			for(unsigned i = 0; i < _PriorityLevels; ++i) {
-                std::cout << "|";
+                ::std::cout << "|";
                 PageLRUList::const_iterator I = lruList[i].end();
                 PageLRUList::const_iterator first = lruList[i].begin();
 				while (I != first) {
 					--I;
                     PageFrame &pf = (*this)[*I];
-                    std::cout << pf.pageNo;
-                    if (pf.dirty) std::cout << "*";
-                    else          std::cout << " ";
-                    if (pf.status == PageFrame::READY) std::cout << "  ";
-                    else                               std::cout << ". ";
+                    ::std::cout << pf.pageNo;
+                    if (pf.dirty) ::std::cout << "*";
+                    else          ::std::cout << " ";
+                    if (pf.status == PageFrame::READY) ::std::cout << "  ";
+                    else                               ::std::cout << ". ";
 				};
             }
-            std::cout << std::endl;
+            ::std::cout << std::endl;
 		}
 
         // Function is a functor which is called with a PageFrame object,

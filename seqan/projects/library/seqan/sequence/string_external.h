@@ -1078,18 +1078,18 @@ namespace SEQAN_NAMESPACE_MAIN
         void _dumpCache() {
             for(int i = 0; i < cache.size(); ++i) {
                 PageFrameRef pf = cache[i];
-                std::cout << "[" << pf.pageNo << "]";
+                ::std::cout << "[" << pf.pageNo << "]";
                 if (pf.dirty)
-                    std::cout << "*";
+                    ::std::cout << "*";
                 else
-                    std::cout << " ";
+                    ::std::cout << " ";
 
                 if (pf.status == PageFrame::READY)
-                    std::cout << "   ";
+                    ::std::cout << "   ";
                 else
-                    std::cout << ".  ";
+                    ::std::cout << ".  ";
             }
-            std::cout << std::endl;
+            ::std::cout << std::endl;
         }
 
 

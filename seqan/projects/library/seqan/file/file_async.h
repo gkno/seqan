@@ -385,7 +385,7 @@ namespace SEQAN_NAMESPACE_MAIN
     inline bool waitFor(aiocb_win32 &request) {
         SEQAN_PROTIMESTART(tw);
 		if (!waitFor(request.xmitDone, 60000))
-            std::cout << "waitFor timeout\n";
+            ::std::cout << "waitFor timeout\n";
         SEQAN_PROADD(PROCWAIT, SEQAN_PROTIMEDIFF(tw));
         return true;
 	}

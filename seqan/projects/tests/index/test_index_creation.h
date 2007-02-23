@@ -122,10 +122,10 @@ namespace SEQAN_NAMESPACE_MAIN
         for(ST i = 0; i < n; i++, ++s1, ++s2) {
             if (lexLess(*s1,*s2)) return 1;
             if (lexLess(*s2,*s1)) {
-                std::cout<<(lexLess(*s2,*s1));
-                std::cout<<*s1;
-                std::cout<<*s2;
-                std::cout << "after " << i << " compares not " << (unsigned)*s1 << " leq " << (unsigned)*s2 << std::endl;
+                ::std::cout<<(lexLess(*s2,*s1));
+                ::std::cout<<*s1;
+                ::std::cout<<*s2;
+                ::std::cout << "after " << i << " compares not " << (unsigned)*s1 << " leq " << (unsigned)*s2 << std::endl;
                 return 0;
             }
         }
@@ -181,7 +181,7 @@ namespace SEQAN_NAMESPACE_MAIN
         for(ST i = 0; i < n; i++, ++s1, ++s2) {
             if (lexLess(*s1,*s2)) return (i == lcp);
             if (lexLess(*s2,*s1)) {
-                std::cout << "after " << i << " compares not " << (unsigned)*s1 << " leq " << (unsigned)*s2 << std::endl;
+                ::std::cout << "after " << i << " compares not " << (unsigned)*s1 << " leq " << (unsigned)*s2 << std::endl;
                 return false;
             }
         }
@@ -233,19 +233,19 @@ namespace SEQAN_NAMESPACE_MAIN
         }
         
         if (!isPermutation(SA)) {
-            std::cout<<"isSuffixArray: SA is not a permutation!\n";
+            ::std::cout<<"isSuffixArray: SA is not a permutation!\n";
             return false;
         }
 
         if (!isSorted(SA, s)) {
-            std::cout<<"isSuffixArray: SA is not sorted!\n";
+            ::std::cout<<"isSuffixArray: SA is not sorted!\n";
 			String<unsigned char, External<> > textfile;
 			if (!open(textfile,"error.txt")) printf("could not open ERROR.TXT\n");
 			textfile=s;
 			return false;
         }
 
-//        std::cout<<"SATest OK! n="<<length(s)<<std::endl;
+//        ::std::cout<<"SATest OK! n="<<length(s)<<std::endl;
         return true;
     }
 
@@ -262,16 +262,16 @@ namespace SEQAN_NAMESPACE_MAIN
         }
         
         if (!isPermutation(SA)) {
-            std::cout<<"isLCPTable: SA is not a permutation!\n";
+            ::std::cout<<"isLCPTable: SA is not a permutation!\n";
             return false;
         }
 
         if (!isSortedLCP(LCP, SA, s)) {
-            std::cout<<"isLCPTable: SA is not sorted!\n";
+            ::std::cout<<"isLCPTable: SA is not sorted!\n";
             return false;
         }
 
-//        std::cout<<"LCPTest OK! n="<<length(s)<<std::endl;
+//        ::std::cout<<"LCPTest OK! n="<<length(s)<<std::endl;
         return true;
     }
 
@@ -284,14 +284,14 @@ namespace SEQAN_NAMESPACE_MAIN
         IB b = begin(_b);
         while (a!=e) {
             if (!(*a == *b)) {
-                std::cout << "isEqual: difference at " << (e-a) << " a=" << *a << "  b=" << *b << std::endl;
+                ::std::cout << "isEqual: difference at " << (e-a) << " a=" << *a << "  b=" << *b << std::endl;
                 return false;
             }
             ++a;
             ++b;
         }
 
-//        std::cout<<"EQUALTest OK! n="<<length(_a)<<std::endl;
+//        ::std::cout<<"EQUALTest OK! n="<<length(_a)<<std::endl;
         return true;
     }
 

@@ -168,7 +168,7 @@ void testIteratorSpec()
                 ++counter;
         }
 
-        std::cout << "supermaximal repeats: " << counter << std::endl;
+        ::std::cout << "supermaximal repeats: " << counter << std::endl;
 
 }
 
