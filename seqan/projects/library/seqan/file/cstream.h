@@ -155,6 +155,9 @@ SEQAN_CHECKPOINT
 // Stream operators for FILE *
 //////////////////////////////////////////////////////////////////////////////
 
+// ISO C++ operators are only allowed for classes, not for pointers
+
+/*
 template <typename TSource>
 inline FILE *
 operator << (FILE * target, 
@@ -194,7 +197,7 @@ SEQAN_CHECKPOINT
 	read(source, target);
 	return source;
 }
-
+*/
 
 //////////////////////////////////////////////////////////////////////////////
 
