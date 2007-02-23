@@ -173,7 +173,7 @@ void testIteratorSpec()
 }
 
 
-void testMUMs()
+void simpleMUMmer()
 {
 		typedef String<char> TText;
 		typedef StringSet< TText, ConcatDirect<> > TMulti;
@@ -189,16 +189,30 @@ void testMUMs()
 		}
 
         TIndex esa;
-		for(unsigned i=0; i<2; ++i)
-			appendValue(indexText(esa), t[i]);
+		for(int i = 0; i < 2; ++i)
+			appendValue(indexText(esa), t[i]);			// add sequences to multiple index
 
-		Iter<TIndex, VSTree< BottomUp<MUMs> > > it(esa, 20);
+		Iterator<TIndex, MUMs>::Type it(esa, 20);		// set minimum MUM length to 20
+		String< SAValue<TIndex>::Type > occs;			// temp. string storing the hit positions
 
-		while (!atEnd(it)) {
-			cout << representative(it) << endl;
+		cout << resetiosflags(ios::left);
+		while (!atEnd(it)) 
+		{
+			occs = getOccurences(it);					// gives hit positions (seqNo,seqOfs)
+			orderOccurences(occs);						// order them by seqNo
+			
+			for(int i = 0; i < length(occs); ++i)
+			   	cout << setw(8)
+				     << getValueI2(occs[i])	+ 1			// output them in MUMmer's output format
+					 << "  ";
+
+			cout << setw(8) 
+				 << repLength(it)
+				 << endl;
+
 			++it;
 		}
-		cout << endl;
+		cout << setiosflags(ios::left) << endl;
 }
 
 
@@ -253,15 +267,16 @@ int main()
 //		testIndexCreation();
 //		Main_TestQGram();
 
-		testFind<ESA_MLR>();
-//		testBuild();
-		testMultiIndex();
 		testSTreeIterators();
+/*
+		testFind<ESA_MLR>();
+		testBuild();
+		testMultiIndex();
 		testIteratorSpec<SuperMaxRepeats>();
 		testIteratorSpec<SuperMaxRepeatsFast>();
-//		testIteratorSpec<MaxRepeats>();
-//		testMUMs();	
-
+		testIteratorSpec<MaxRepeats>();
+		simpleMUMmer();	
+*/
 	SEQAN_TREPORT("TEST END")
 		return 0;
 }

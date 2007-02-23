@@ -561,6 +561,27 @@ SEQAN_CHECKPOINT
 		return !atEnd(finder);
 	}
 
+//____________________________________________________________________________
+
+	template <typename TOccValue>
+	struct _SAValueLess:
+		public ::std::less<TOccValue> {};
+
+	template <typename T1, typename T2, typename TCompression>
+	struct _SAValueLess< Pair<T1,T2,TCompression> >:
+		public ::std::binary_function< Pair<T1,T2,TCompression>, Pair<T1,T2,TCompression>, bool> 
+	{
+		inline bool operator()(const Pair<T1,T2,TCompression> &a, const Pair<T1,T2,TCompression> &b) const {
+			return	getValueI1(a) < getValueI1(b) ||
+					getValueI1(a) == getValueI1(b) && getValueI2(a) < getValueI2(b);
+		}
+	};
+
+	template <typename TValue, typename TSpec>
+	inline void orderOccurences(String<TValue, TSpec> &occString)
+	{
+		::std::sort(begin(occString, Standard()), end(occString, Standard()), _SAValueLess<TValue>());
+	}
 
 	//////////////////////////////////////////////////////////////////////////////
 	// index creation
@@ -704,7 +725,7 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 
 	template < typename TValue, typename TSpec >
 	inline bool open(String<TValue, TSpec> &string, const char *fileName, int dummy = OPEN_RDONLY) {
-		String<TValue, External<> > extString;
+		String<TValue, External< ExternalConfigManualOpen<> > > extString;
 		if (!open(extString, fileName, OPEN_RDONLY)) return false;
 		string = extString;
 		return true;

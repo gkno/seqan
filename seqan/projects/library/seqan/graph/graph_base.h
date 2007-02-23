@@ -24,11 +24,6 @@ struct VertexDescriptor {
 	typedef typename Id<TGraph>::Type Type;
 };
 
-template<typename TGraph>
-struct VertexDescriptor<TGraph const> {
-	typedef typename Id<TGraph const>::Type Type;
-};
-
 // EdgeDescriptor: Varies for different graph types
 template<typename T>
 struct EdgeDescriptor;

@@ -320,11 +320,7 @@ struct DefaultOverflowImplicit<String<TValue, Alloc<TSpec> > const >
 template <typename TValue, typename TSpec>
 struct IsContiguous< String<TValue, Alloc<TSpec> > >
 {
-	enum { VALUE = true };
-};
-template <typename TValue, typename TSpec>
-struct IsContiguous< String<TValue, Alloc<TSpec> > const >
-{
+    typedef True Type;
 	enum { VALUE = true };
 };
 

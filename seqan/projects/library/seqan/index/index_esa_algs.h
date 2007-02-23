@@ -68,7 +68,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			goNext(it, Postorder());
 		} while (!atEnd(it) && 
 			     !(	(countOccurences(it) == it.seqCount) && 
-					(_repLength(it) >= it.minLength) &&
+					(repLength(it) >= it.minLength) &&
 					isUnique(it) && 
 					isLeftMaximal(it)) );
 	}
@@ -121,7 +121,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			goNext(it, Postorder());
 		} while (!atEnd(it) && 
 			     !(	childrenAreLeaves(it) && 
-					(_repLength(it) >= it.minLength) &&
+					(repLength(it) >= it.minLength) &&
 					!isPartiallyLeftExtensible(it, it.charSet)) );
 	}
 		
@@ -260,6 +260,8 @@ namespace SEQAN_NAMESPACE_MAIN
 			TBase(_tree),
 			minLength(0)
 		{
+			indexRequire(_tree, ESA_BWT());
+			push(setStack, TSet());
 			resize(posList, length(_tree));
 			goNext(*this);
 		}
@@ -268,6 +270,8 @@ namespace SEQAN_NAMESPACE_MAIN
 			TBase(_tree),
 			minLength(_minLength)
 		{
+			indexRequire(_tree, ESA_BWT());
+			push(setStack, TSet());
 			resize(posList, length(_tree));
 			goNext(*this);
 		}
@@ -322,7 +326,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	template < typename TSTree >
-	inline typename Size<TSTree>::Type _repLength(Iter< TSTree, VSTree< BottomUp<MaxRepeats> > > const &it) {
+	inline typename Size<TSTree>::Type repLength(Iter< TSTree, VSTree< BottomUp<MaxRepeats> > > const &it) {
 		return top(it.history).i2;
 	}
 
@@ -367,6 +371,21 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	template < typename TSTree, typename TElement >
+	inline void _postorderPush(Iter<TSTree, VSTree< BottomUp<MaxRepeats> > > &it, TElement const &e) 
+	{
+		typedef Iter<TSTree, VSTree< BottomUp<> > > TBase;
+		_postorderPush((TBase&)it, e);
+	
+		typedef typename Value<TSTree>::Type	TValue;
+		typedef typename Size<TSTree>::Type		TSize;
+		typedef _FractionHeader<TSize>			TFractionHeader;
+		typedef Pair<TValue, TFractionHeader>	TFraction;
+		typedef typename Set<TFraction>::Type	TSet;
+
+		push(it.setStack, TSet());
+	}
+
+	template < typename TSTree >
 	inline void _postorderLeaf(Iter<TSTree, VSTree< BottomUp<MaxRepeats> > > &it) 
 	{
 		typedef Iter<TSTree, VSTree< BottomUp<> > > TBase;
@@ -378,7 +397,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef Pair<TValue, TFractionHeader>	TFraction;
 
 		TSize index = _dfsRange(it).i1;
-		if (!posAtFirstLocal(saAt(index, container(it))))
+		if (!posAtFirstLocal(saAt(index, container(it)), stringSetLimits(it)))
 			insert(TFraction(bwtAt(index, container(it)), TFractionHeader(index, index, 1)), top(it.setStack));
 		_setSizeInval(it.posList[index]);
 	}

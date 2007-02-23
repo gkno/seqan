@@ -95,6 +95,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	struct Reference< ModifiedString<THost, TSpec> const >:
 		Reference< typename Iterator< ModifiedString<THost, TSpec> const >::Type > {};
 
+///.Metafunction.Size.param.T.type:Class.ModifiedString
+
 	template < typename THost, typename TSpec >
 	struct Size< ModifiedString<THost, TSpec> >:
 		Size< typename Iterator< ModifiedString<THost, TSpec> >::Type > {};
@@ -108,6 +110,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		Difference< typename Iterator< ModifiedString<THost, TSpec> >::Type > {};
 
 
+///.Metafunction.Iterator.param.T.type:Class.ModifiedString
 
 	template <typename THost, typename TSpec>
 	struct Iterator< ModifiedString<THost, TSpec>, Standard > {
@@ -130,6 +133,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	};
 
 
+///.Metafunction.Host.param.T.type:Class.ModifiedString
+
 	template < typename THost, typename TSpec >
 	struct Host< ModifiedString<THost, TSpec> > {
 		typedef THost Type;
@@ -138,6 +143,15 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < typename THost, typename TSpec >
 	struct Host< ModifiedString<THost, TSpec> const > {
 		typedef THost const Type;
+	};
+
+
+///.Metafunction.IsSequence.param.T.type:Class.ModifiedString
+
+	template < typename THost, typename TSpec >
+	struct IsSequence< ModifiedString<THost, TSpec> > {
+		typedef True Type;
+		enum { VALUE = true };
 	};
 
 

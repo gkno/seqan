@@ -79,22 +79,40 @@ struct IsContiguous;
 template <typename TValue>
 struct IsContiguous< TValue * >
 {
+    typedef True Type;
 	enum { VALUE = true };
 };
-template <typename TValue>
-struct IsContiguous< TValue * const>
-{
-	enum { VALUE = true };
-};
-
 template <typename TValue, size_t SIZE>
 struct IsContiguous< TValue [SIZE] >
 {
+    typedef True Type;
 	enum { VALUE = true };
 };
 template <typename TValue, size_t SIZE>
 struct IsContiguous< TValue const [SIZE] >
 {
+    typedef True Type;
+	enum { VALUE = true };
+};
+
+///.Metafunction.IsString.param.T.type:Adaption.char array
+
+template <typename TValue>
+struct IsSequence< TValue * >
+{
+    typedef True Type;
+	enum { VALUE = true };
+};
+template <typename TValue, size_t SIZE>
+struct IsSequence< TValue [SIZE] >
+{
+    typedef True Type;
+	enum { VALUE = true };
+};
+template <typename TValue, size_t SIZE>
+struct IsSequence< TValue const [SIZE] >
+{
+    typedef True Type;
 	enum { VALUE = true };
 };
 

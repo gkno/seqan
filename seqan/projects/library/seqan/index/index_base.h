@@ -110,11 +110,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	};
 
 	template <typename T>
-	struct VertexDescriptor {};
-
-	template <typename T>
-	struct VertexDescriptor<T const>:
-		VertexDescriptor<T> {};
+	struct VertexDescriptor;
 
 
 /**
@@ -502,6 +498,9 @@ They differ if the index text is a set of strings. Then, raw text is the concate
 	struct VertexDescriptor< Index<TText, Index_ESA<TSpec> > > {
 		typedef Pair< typename Size< Index<TText, Index_ESA<TSpec> > >::Type > Type;
 	};
+	template < typename TText, typename TSpec >
+	struct VertexDescriptor< Index<TText, Index_ESA<TSpec> > const >:
+		public VertexDescriptor< Index<TText, Index_ESA<TSpec> > > {};
 
 
 

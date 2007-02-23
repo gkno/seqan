@@ -255,7 +255,7 @@ SEQAN_CHECKPOINT
 	return value(rows(me), _pos);
 }
 template <typename TSource, typename TSpec, typename TPosition>
-inline typename Row< Align<TSource, TSpec> const>::Type &
+inline typename Row< Align<TSource, TSpec> const>::Type const &
 row(Align<TSource, TSpec> const & me, 
 	TPosition _pos)
 {

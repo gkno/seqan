@@ -193,11 +193,7 @@ struct DefaultOverflowExplicit<String<TValue, Packed<THostspec> > const>:
 template <typename TValue, typename THostspec>
 struct IsContiguous<String<TValue, Packed<THostspec> > >
 {
-	enum { VALUE = false };
-};
-template <typename TValue, typename THostspec>
-struct IsContiguous<String<TValue, Packed<THostspec> > const>
-{
+    typedef False Type;
 	enum { VALUE = false };
 };
 
@@ -1147,7 +1143,7 @@ SEQAN_CHECKPOINT
 //____________________________________________________________________________
 
 template <typename TContainer, typename THostspec>
-inline typename Position<Iter<TContainer, Packed<THostspec> > >::Type  
+inline typename Difference<Iter<TContainer, Packed<THostspec> > >::Type  
 operator - (Iter<TContainer, Packed<THostspec> > const & left,
 			Iter<TContainer, Packed<THostspec> > const & right)
 {

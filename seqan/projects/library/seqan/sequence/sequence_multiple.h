@@ -73,13 +73,13 @@ namespace SEQAN_NAMESPACE_MAIN
 	//////////////////////////////////////////////////////////////////////////////
 
     template <typename TStringSet>
-	inline typename StringSetLimits<TStringSet>::Type & 
+	inline typename StringSetLimits<TStringSet>::Type
 	stringSetLimits(TStringSet &stringSet) {
 		return Nothing();
 	}
 
     template <typename TStringSet>
-	inline typename StringSetLimits<TStringSet const>::Type & 
+	inline typename StringSetLimits<TStringSet const>::Type
 	stringSetLimits(TStringSet const &stringSet) {
 		return Nothing();
 	}

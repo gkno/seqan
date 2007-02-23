@@ -17,9 +17,6 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 // generic metaprogramming
 
-struct Yes { enum { VALUE = true }; };
-struct No { enum { VALUE = false }; };
-
 //! \brief IF template metaprogramming statement
 
 //! If \c Flag is \c true then \c IF<>::result is of type Type1
@@ -41,13 +38,15 @@ struct IF<false,Type1,Type2>
 template <class Type1, class Type2>
 struct TYPECMP
 {
-    enum { VALUE = false };
+    typedef False Type;
+	enum { VALUE = false };
 };
 
 template <class Type1>
 struct TYPECMP<Type1, Type1>
 {
-    enum { VALUE = true }; 
+    typedef True Type;
+	enum { VALUE = true };
 };
 
 const int DEFAULT = ~(~0u >> 1); // initialize with the smallest int

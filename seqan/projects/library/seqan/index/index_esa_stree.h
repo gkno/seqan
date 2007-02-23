@@ -251,7 +251,7 @@ This interval is the @Function.value@ of the iterator.
 	}
 
 	template < typename TIndex, typename TSpec >
-	inline typename Size<TIndex>::Type _repLength(Iter< TIndex, VSTree<BottomUp<TSpec> > > const &it) {
+	inline typename Size<TIndex>::Type repLength(Iter< TIndex, VSTree<BottomUp<TSpec> > > const &it) {
 		typename Size<TIndex>::Type lcp;
 		if (!_isSizeInval(lcp = it._lcp))
 			return lcp;
@@ -261,12 +261,12 @@ This interval is the @Function.value@ of the iterator.
 
 
 	template < typename TIndex, typename TSpec >
-	inline typename Size<TIndex>::Type _repLength(Iter< TIndex, VSTree<TopDown<TSpec> > > const &it) {
-		return _repLength(container(it), value(it));
+	inline typename Size<TIndex>::Type repLength(Iter< TIndex, VSTree<TopDown<TSpec> > > const &it) {
+		return repLength(container(it), value(it));
 	}
 
 	template < typename TIndex, class TSize >
-	inline TSize _repLength(TIndex const &index, Pair<TSize> const &value) {
+	inline TSize repLength(TIndex const &index, Pair<TSize> const &value) {
 		if (_isLeaf(value)) return suffixLength(saAt(value.i1, index), index);
 		if (_isRoot(value)) return 0;
 
@@ -373,7 +373,7 @@ This interval is the @Function.value@ of the iterator.
 				s = m;
 		}
 
-		TSize _lcp = (i0 > 0)? _repLength(container(a), a.history[i0 - 1]): 0;
+		TSize _lcp = (i0 > 0)? repLength(container(a), a.history[i0 - 1]): 0;
 
 		// pop current intervals
 		pop(a.history);
@@ -501,7 +501,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 	representative(Iter< TIndex, VSTree<TSpec> > &it) {
 		typedef typename Size<TIndex>::Type TSize;
 		TSize occ = posGlobalize(getOccurence(it), stringSetLimits(container(it)));
-		TSize len = _repLength(it);
+		TSize len = repLength(it);
 		return infix(indexRawText(container(it)), occ, occ + len);
 	}
 
@@ -825,8 +825,8 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 			last_len = 0;
 			len = 0;
 		} else {
-			last_len = _repLength(container(it), top(it.history));
-			len = _repLength(it);
+			last_len = repLength(container(it), top(it.history));
+			len = repLength(it);
 		}
 		return infix(indexRawText(container(it)), occ + last_len, occ + len);
 	}
@@ -943,7 +943,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 	inline bool isRightTerminal(Iter<TIndex, VSTree<TSpec> > const &it) {
 		// do we reach a leaf in a suffix tree with trailing '$'
 		typename SAValue<TIndex>::Type pos = getOccurence(it);
-		return (getSeqOffset(pos, stringSetLimits(index)) + _repLength(it) 
+		return (getSeqOffset(pos, stringSetLimits(index)) + repLength(it) 
 			== sequenceLength(getSeqNo(pos, stringSetLimits(index)), container(it)));
 	}
 

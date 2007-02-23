@@ -49,8 +49,8 @@ typedef Tag<Move_> const Move;
 ..value.True:The logical value "true".
 ..value.False:The logical value "false".
 */
-struct True {};
-struct False {};
+struct True { enum { VALUE = true }; };
+struct False { enum { VALUE = false }; };
 
 
 //////////////////////////////////////////////////////////////////////////////

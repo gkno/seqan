@@ -177,13 +177,16 @@ struct DefaultOverflowExplicit<Segment<THost, TSpec > const >:
 ///.Metafunction.IsContiguous.param.T.type:Class.Segment
 
 template <typename THost, typename TSpec>
-struct IsContiguous< Segment<THost, TSpec> >
-{
-	enum { VALUE = true };
-};
+struct IsContiguous< Segment<THost, TSpec> >:
+	public IsContiguous<THost> {};
+
+//////////////////////////////////////////////////////////////////////////////
+
+///.Metafunction.IsSequence.param.T.type:Class.Segment
+
 template <typename THost, typename TSpec>
-struct IsContiguous< Segment<THost, TSpec> const >
-{
+struct IsSequence< Segment<THost, TSpec> > {
+    typedef True Type;
 	enum { VALUE = true };
 };
 

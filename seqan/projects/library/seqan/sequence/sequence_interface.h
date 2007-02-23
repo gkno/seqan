@@ -107,8 +107,33 @@ struct DefaultOverflowExplicit
 template <typename T>
 struct IsContiguous
 {
+    typedef False Type;
 	enum { VALUE = false };
 };
+template <typename T>
+struct IsContiguous<T const>:
+	public IsContiguous<T> {};
+
+//////////////////////////////////////////////////////////////////////////////
+// IsSequence
+//////////////////////////////////////////////////////////////////////////////
+/**
+.Metafunction.IsSequence:
+..summary:Determines whether a container stores its elements in sequential order.
+..signature:IsSequence<T>::VALUE
+..param.T:Type that is tested for being a sequence.
+..returns.param.VALUE:$true$ if $T$ is a sequence, $false$ otherwise.
+..remarks:For example @Class.String@, @Class.Segment@, and @Class.ModifierString@ return $true$.
+*/
+template <typename T>
+struct IsSequence
+{
+    typedef False Type;
+	enum { VALUE = false };
+};
+template <typename T>
+struct IsSequence<T const>:
+	public IsSequence<T> {};
 
 //////////////////////////////////////////////////////////////////////////////
 // identification

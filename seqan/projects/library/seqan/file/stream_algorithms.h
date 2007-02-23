@@ -30,6 +30,29 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 
+template <typename TTarget, typename T1, typename T2, typename TCompression>
+inline void
+_streamWrite(TTarget & target,
+			 Pair<T1, T2, TCompression> const & source)
+{
+SEQAN_CHECKPOINT
+	_streamWrite(target, getValueI1(source));
+	_streamWrite(target, getValueI2(source));
+}
+
+template <typename TTarget, typename T1, typename T2, typename T3, typename TCompression>
+inline void
+_streamWrite(TTarget & target,
+			 Triple<T1, T2, T3, TCompression> const & source)
+{
+SEQAN_CHECKPOINT
+	_streamWrite(target, getValueI1(source));
+	_streamWrite(target, getValueI2(source));
+	_streamWrite(target, getValueI3(source));
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 
 
 /**
@@ -47,28 +70,50 @@ _streamWrite(TTarget & target,
 			 TSource const & source)
 {
 SEQAN_CHECKPOINT
+	_streamWriteSeq(target, source, typename IsSequence<TSource const>::Type());
+}
+
+//____________________________________________________________________________
+
+template <typename TTarget, typename TSource>
+inline void
+_streamWriteSeq(TTarget & target,
+				TSource const & source,
+				False const)
+{
+	_streamPut(target, source);
+}
+
+//____________________________________________________________________________
+
+template <typename TTarget, typename TSource>
+inline void
+_streamWriteSeq(TTarget & target,
+				TSource const & source,
+				True const)
+{
+SEQAN_CHECKPOINT
 	typename Iterator<TSource const, Standard>::Type it = begin(source, Standard());
 	typename Iterator<TSource const, Standard>::Type it_end = end(source, Standard());
 
 	for (; it < it_end; ++it)
 	{
 		typename GetValue<TSource const>::Type val_ = getValue(it);
-		_streamPut(target, val_);
+		_streamWrite(target, val_);
 	}
 }
 
-//____________________________________________________________________________
-
 template <typename TTarget, typename TSourceValue>
 inline void
-_streamWrite(TTarget & target,
-			 TSourceValue const * source)
+_streamWriteSeq(TTarget & target,
+			    TSourceValue const * source,
+				True const)
 {
 SEQAN_CHECKPOINT
 
 	for (; !atEnd(source); ++source)
 	{
-		_streamPut(target, *source);
+		_streamWrite(target, *source);
 	}
 }
 

@@ -44,6 +44,17 @@ namespace SEQAN_NAMESPACE_MAIN
 		enum { TempByDefault = _TempByDefault };
     };
 
+    template < typename _TFile = File<>,            // default file type
+               unsigned _PageSize = 1 * 1024 * 1024,// 1MTypes per default
+			   unsigned _Frames = 2 >			    // simultanous frames
+    struct ExternalConfigManualOpen {
+        typedef _TFile TFile;
+        typedef typename Size<_TFile>::Type SizeType;
+        enum { PageSize = _PageSize };
+        enum { Frames = _Frames };
+		enum { TempByDefault = false };				// don't open temp. file in default c'tor
+    };
+
     // custom size type
     template < typename TSize,
 		       typename _TFile = File<>,            // default file type
@@ -931,7 +942,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 			if (TempByDefault)
 				if (!openTemp())
-					std::cout << "Vector couldn't open temp. file";
+					::std::cout << "External String couldn't open temporary file" << ::std::endl;
 
 			resize(__size);
             keepFirst = false;
@@ -1240,7 +1251,7 @@ namespace SEQAN_NAMESPACE_MAIN
                     if (frameNo < 0 || frameNo == except) return;   // no lowlevel-page left for prefetching
 				    PageFrameRef pf = cache[frameNo];
                     #ifdef SEQAN_VERBOSE
-                        printf("prefetch: page %d\n", pageNo);
+						::std::cout << "prefetch: page " << pageNo << ::std::endl;
                     #endif
 
                     // *** frame is choosen ***
@@ -1290,7 +1301,7 @@ namespace SEQAN_NAMESPACE_MAIN
                     if (writeThrough) {
                         #ifdef SEQAN_VERBOSE
                             if (pf.dirty)
-                                printf("writeThrough: page %d\n", pageNo);
+								::std::cout << "writeThrough: page " << pageNo << ::std::endl;
                         #endif
 					    flush(pf);							        // write if dirty
                     }
@@ -1563,6 +1574,14 @@ namespace SEQAN_NAMESPACE_MAIN
     struct Value< VectorFwdIterator<TVector> >		{ typedef typename Value<TVector>::Type Type; };
 	template < typename TVector >
     struct Value< VectorFwdConstIterator<TVector> > { typedef typename Value<TVector>::Type Type; };
+
+	template < typename TVector >
+	struct Reference< VectorConstIterator<TVector> >:
+		public Reference< typename Value<TVector>::Type const > {};
+
+	template < typename TVector >
+	struct Reference< VectorFwdConstIterator<TVector> >:
+		public Reference< typename Value<TVector>::Type const > {};
 
 	template < typename TVector >
     struct Size< VectorIterator<TVector> >			{ typedef typename Size<TVector>::Type Type; };

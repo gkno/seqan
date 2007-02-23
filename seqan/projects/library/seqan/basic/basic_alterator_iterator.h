@@ -440,7 +440,7 @@ SEQAN_CHECKPOINT
 //____________________________________________________________________________
 
 template <typename THost, typename TSpec>
-inline typename Position<Alterator<THost, TSpec> >::Type  
+inline typename Difference<Alterator<THost, TSpec> >::Type  
 operator - (Alterator<THost, TSpec> const & left,
 			Alterator<THost, TSpec> const & right)
 {

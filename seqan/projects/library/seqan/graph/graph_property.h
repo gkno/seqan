@@ -65,7 +65,7 @@ assignProperty(TPropertyMap& pm,
 }
 
 template<typename TPropertyMap, typename TDescriptor>
-inline typename Value<TPropertyMap const>::Type
+inline typename GetValue<TPropertyMap const>::Type
 getProperty(TPropertyMap const& pm,
 			TDescriptor const d)
 {
@@ -74,7 +74,7 @@ getProperty(TPropertyMap const& pm,
 }
 
 template<typename TPropertyMap, typename TDescriptor>
-inline typename Value<TPropertyMap>::Type&
+inline typename Reference<TPropertyMap>::Type
 property(TPropertyMap& pm,
 		TDescriptor const d)
 {
@@ -83,7 +83,7 @@ property(TPropertyMap& pm,
 }
 
 template<typename TPropertyMap, typename TDescriptor>
-inline typename Value<TPropertyMap const>::Type&
+inline typename Reference<TPropertyMap const>::Type
 property(TPropertyMap const& pm,
 		TDescriptor const d)
 {

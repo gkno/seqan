@@ -197,11 +197,7 @@ struct DefaultOverflowExplicit<String<TValue, Array<ISize> > const >
 template <typename TValue, unsigned int ISize>
 struct IsContiguous< String<TValue, Array<ISize> > >
 {
-	enum { VALUE = true };
-};
-template <typename TValue, unsigned int ISize>
-struct IsContiguous< String<TValue, Array<ISize> > const >
-{
+    typedef True Type;
 	enum { VALUE = true };
 };
 

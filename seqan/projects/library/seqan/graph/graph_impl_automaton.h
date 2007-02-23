@@ -454,10 +454,10 @@ removeInEdges(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec>& g,
 	for(TIter it = begin(g.data_vertex);!atEnd(it);goNext(it)) {
 		if (!idInUse(g.data_id_managerV, position(it))) continue;
 		for(TSize i=0;i<table_length;++i) {
-			if (((getValue(it)).data_edge[i].data_target!=nilVal) &&
-				((getValue(it)).data_edge[i].data_target==vertex))
+			if (((value(it)).data_edge[i].data_target!=nilVal) &&
+				((value(it)).data_edge[i].data_target==vertex))
 			{
-				(getValue(it)).data_edge[i].data_target=nilVal;
+				(value(it)).data_edge[i].data_target=nilVal;
 			}
 		}
 	}

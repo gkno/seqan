@@ -33,8 +33,8 @@ namespace SEQAN_NAMESPACE_MAIN {
 		typedef Allocator<SimpleAlloc<> >			TAllocator;
 
 	public:
-		typedef typename Iterator<TBlock>::Type		TBlockIter;
-		typedef String<PBlock>						TBlockTable;
+		typedef typename Iterator<TBlock, Standard>::Type	TBlockIter;
+		typedef String<PBlock>								TBlockTable;
 
 		TBlockTable		blocks;
 		TBlockIter		blockFirst, blockLast;	// current block boundaries

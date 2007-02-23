@@ -168,11 +168,7 @@ struct DefaultOverflowExplicit<String< TValue, ValueExpand<THost, TMap, TSpec> >
 template <typename TValue, typename THost, typename TMap, typename TSpec>
 struct IsContiguous<String< TValue, ValueExpand<THost, TMap, TSpec> > >
 {
-	enum { VALUE = false };
-};
-template <typename TValue, typename THost, typename TMap, typename TSpec>
-struct IsContiguous<String< TValue, ValueExpand<THost, TMap, TSpec> > const>
-{
+    typedef False Type;
 	enum { VALUE = false };
 };
 

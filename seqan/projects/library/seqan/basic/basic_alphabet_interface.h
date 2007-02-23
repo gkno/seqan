@@ -28,6 +28,9 @@ struct IsSimple
 {
 	typedef False Type;
 };
+template <typename T>
+struct IsSimple<T const>:
+	public IsSimple<T> {};
 
 //////////////////////////////////////////////////////////////////////////////
 //very basic Alphabets
@@ -50,23 +53,104 @@ typedef wchar_t Unicode;
 so the constructed object must support move construction.
 ..remarks:The type of the destructed object is the @Metafunction.Value.value type@ of $iterator$.
 */
+
+struct _ValueConstructor 
+{
+	template <typename TIterator>
+	static inline void
+	construct(TIterator it)
+	{
+		typedef typename Value<TIterator>::Type TValue;
+		new( & value(it) ) TValue;
+	}
+
+	template <typename TIterator, typename TParam>
+	static inline void
+	construct(TIterator it,
+			  TParam const & param_)
+	{
+		typedef typename Value<TIterator>::Type TValue;
+		new( & value(it) ) TValue(param_);
+	}
+
+	template <typename TIterator, typename TParam>
+	static inline void
+	construct(TIterator it,
+			  TParam const & param_,
+			  Move tag)
+	{
+		typedef typename Value<TIterator>::Type TValue;
+		new( & value(it) ) TValue(param_, tag);
+	}
+};
+
+struct _ValueConstructorProxy 
+{
+	template <typename TIterator>
+	static inline void construct(TIterator) {}
+
+	template <typename TIterator, typename TParam>
+	static inline void construct(TIterator, TParam const &) {}
+
+	template <typename TIterator, typename TParam>
+	static inline void construct(TIterator, TParam const &, Move) {}
+};
+
+//____________________________________________________________________________
+
+struct _ValueDestructor 
+{
+	template <typename TIterator>
+	static inline void
+	destruct(TIterator it)
+	{
+		typedef typename Value<TIterator>::Type TValue;
+		value(it).~TValue();
+	}
+};
+struct _ValueDestructorProxy 
+{
+	template <typename TIterator>
+	static inline void destruct(TIterator) {}
+};
+
+//____________________________________________________________________________
+
 template <typename TIterator>
 inline void
 valueConstruct(TIterator it)
 {
 SEQAN_CHECKPOINT
-	typedef typename Value<TIterator>::Type TValue;
-	new( & getValue(it) ) TValue;
+	IF<
+		TYPECMP<
+			typename Value<TIterator>::Type &,
+			typename Reference<TIterator>::Type
+		>::VALUE,
+	// THEN
+		_ValueConstructor,			// true,  types are equal
+	// ELSE
+		_ValueConstructorProxy		// false, types differ -> value() returns a proxy
+	>::Type::construct(it);
 }
+
 template <typename TIterator, typename TParam>
 inline void
 valueConstruct(TIterator it,
 			   TParam const & param_)
 {
 SEQAN_CHECKPOINT
-	typedef typename Value<TIterator>::Type TValue;
-	new( & getValue(it) ) TValue(param_);
+	IF<
+		TYPECMP<
+			typename Value<TIterator>::Type &,
+			typename Reference<TIterator>::Type
+		>::VALUE,
+	// THEN
+		_ValueConstructor,			// true,  types are equal
+	// ELSE
+		_ValueConstructorProxy		// false, types differ -> value() returns a proxy
+	>::Type::construct(it, param_);
 }
+
 template <typename TIterator, typename TParam>
 inline void
 valueConstruct(TIterator it,
@@ -74,8 +158,16 @@ valueConstruct(TIterator it,
 			   Move tag)
 {
 SEQAN_CHECKPOINT
-	typedef typename Value<TIterator>::Type TValue;
-	new( & getValue(it) ) TValue(param_, tag);
+	IF<
+		TYPECMP<
+			typename Value<TIterator>::Type &,
+			typename Reference<TIterator>::Type
+		>::VALUE,
+	// THEN
+		_ValueConstructor,			// true,  types are equal
+	// ELSE
+		_ValueConstructorProxy		// false, types differ -> value() returns a proxy
+	>::Type::construct(it, param_, tag);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -94,8 +186,16 @@ inline void
 valueDestruct(TIterator it)
 {
 SEQAN_CHECKPOINT
-	typedef typename Value<TIterator>::Type TValue;
-	getValue(it).~TValue();
+	IF<
+		TYPECMP<
+			typename Value<TIterator>::Type &,
+			typename Reference<TIterator>::Type
+		>::VALUE,
+	// THEN
+		_ValueDestructor,			// true,  types are equal
+	// ELSE
+		_ValueDestructorProxy		// false, types differ -> value() returns a proxy
+	>::Type::destruct(it);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -685,6 +785,9 @@ struct BitsPerValue
 {
 	enum { VALUE = sizeof(TValue) * 8 };
 };
+template <typename TValue>
+struct BitsPerValue<TValue const>:
+	public BitsPerValue<TValue> {};
 
 //////////////////////////////////////////////////////////////////////////////
 //ValueSize

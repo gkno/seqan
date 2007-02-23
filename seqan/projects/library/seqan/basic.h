@@ -22,6 +22,7 @@
 #include <seqan/basic/basic_debug.h>
 #include <seqan/basic/basic_definition.h>
 #include <seqan/basic/basic_type.h>
+#include <seqan/basic/basic_metaprogramming.h>
 
 #include <seqan/basic/basic_allocator_interface.h>
 #include <seqan/basic/basic_allocator_to_std.h>
@@ -68,7 +69,6 @@
 //#include <seqan/basic/basic_counted_ptr>
 #include <seqan/basic/basic_volatile_ptr.h>
 
-#include <seqan/basic/basic_metaprogramming.h>
 #include <seqan/basic/basic_aggregates.h>
 
 #endif //#ifndef SEQAN_HEADER_...

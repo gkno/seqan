@@ -350,6 +350,17 @@ operator + (Iter<TContainer, AdaptorIterator<TIterator, TSpec> > const & left,
 SEQAN_CHECKPOINT
 	return Iter<TContainer, AdaptorIterator<TIterator, TSpec> >(container(left), hostIterator(left) + right);
 }
+
+// STL adaption (the upper function wouldn't be found)
+template <typename TContainer, typename TIterator, typename TSpec>
+inline Iter<TContainer, AdaptorIterator<TIterator, TSpec> >  
+operator + (Iter<TContainer, AdaptorIterator<TIterator, TSpec> > const & left,
+			int right)
+{
+SEQAN_CHECKPOINT
+	return Iter<TContainer, AdaptorIterator<TIterator, TSpec> >(container(left), hostIterator(left) + right);
+}
+
 template <typename TContainer, typename TIterator, typename TSpec, typename TIntegral>
 inline Iter<TContainer, AdaptorIterator<TIterator, TSpec> >  
 operator + (TIntegral left,
@@ -373,6 +384,17 @@ SEQAN_CHECKPOINT
 	return left;
 }
 
+// STL adaption (the upper function wouldn't be found)
+template <typename TContainer, typename TIterator, typename TSpec>
+inline Iter<TContainer, AdaptorIterator<TIterator, TSpec> > &
+operator += (Iter<TContainer, AdaptorIterator<TIterator, TSpec> > & left,
+			 int right)
+{
+SEQAN_CHECKPOINT
+	hostIterator(left) += right;
+	return left;
+}
+
 //////////////////////////////////////////////////////////////////////////////
 // operator -
 //////////////////////////////////////////////////////////////////////////////
@@ -386,10 +408,20 @@ SEQAN_CHECKPOINT
 	return Iter<TContainer, AdaptorIterator<TIterator, TSpec> >(container(left), hostIterator(left) - right);
 }
 
+// STL adaption (the upper function wouldn't be found)
+template <typename TContainer, typename TIterator, typename TSpec>
+inline Iter<TContainer, AdaptorIterator<TIterator, TSpec> >  
+operator - (Iter<TContainer, AdaptorIterator<TIterator, TSpec> > const & left,
+			int right)
+{
+SEQAN_CHECKPOINT
+	return Iter<TContainer, AdaptorIterator<TIterator, TSpec> >(container(left), hostIterator(left) - right);
+}
+
 //____________________________________________________________________________
 
 template <typename TContainer, typename TIterator, typename TSpec>
-inline typename Position<Iter<TContainer, AdaptorIterator<TIterator, TSpec> > >::Type  
+inline typename Difference<Iter<TContainer, AdaptorIterator<TIterator, TSpec> > >::Type  
 operator - (Iter<TContainer, AdaptorIterator<TIterator, TSpec> > const & left,
 			Iter<TContainer, AdaptorIterator<TIterator, TSpec> > const & right)
 {
@@ -405,6 +437,17 @@ template <typename TContainer, typename TIterator, typename TSpec, typename TInt
 inline Iter<TContainer, AdaptorIterator<TIterator, TSpec> > &
 operator -= (Iter<TContainer, AdaptorIterator<TIterator, TSpec> > & left,
 			 TIntegral right)
+{
+SEQAN_CHECKPOINT
+	hostIterator(left) -= right;
+	return left;
+}
+
+// STL adaption (the upper function wouldn't be found)
+template <typename TContainer, typename TIterator, typename TSpec>
+inline Iter<TContainer, AdaptorIterator<TIterator, TSpec> > &
+operator -= (Iter<TContainer, AdaptorIterator<TIterator, TSpec> > & left,
+			 int right)
 {
 SEQAN_CHECKPOINT
 	hostIterator(left) -= right;

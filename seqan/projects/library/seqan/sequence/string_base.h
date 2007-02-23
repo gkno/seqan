@@ -50,9 +50,9 @@ struct Value<String<TValue, TSpec> >
 	typedef TValue Type;
 };
 template <typename TValue, typename TSpec>
-struct Value<String<TValue, TSpec> const >
+struct Value<String<TValue, TSpec> const >:
+	public Value<String<TValue, TSpec> >
 {
-	typedef TValue const Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -65,9 +65,19 @@ struct Spec<String<TValue, TSpec> >
 	typedef TSpec Type;
 };
 template <typename TValue, typename TSpec>
-struct Spec<String<TValue, TSpec> const>
+struct Spec<String<TValue, TSpec> const>:
+	public Spec<String<TValue, TSpec> >
 {
-	typedef TSpec Type;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
+///.Metafunction.IsSequence.param.T.type:Class.String
+
+template <typename TValue, typename TSpec>
+struct IsSequence<String<TValue, TSpec> > {
+    typedef True Type;
+	enum { VALUE = true };
 };
 
 //////////////////////////////////////////////////////////////////////////////

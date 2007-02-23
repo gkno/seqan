@@ -296,7 +296,7 @@ SEQAN_CHECKPOINT
 //____________________________________________________________________________
 
 template <typename TContainer>
-inline typename Position<Iter<TContainer, PositionIterator> >::Type  
+inline typename Difference<Iter<TContainer, PositionIterator> >::Type  
 operator - (Iter<TContainer, PositionIterator> const & left,
 			Iter<TContainer, PositionIterator> const & right)
 {

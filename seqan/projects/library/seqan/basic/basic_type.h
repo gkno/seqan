@@ -47,7 +47,12 @@ Do not confuse it with @Function.value@ that returns a @Metafunction.Reference.r
 template <typename T>
 struct GetValue
 {
-	typedef typename Value<T>::Type & Type;
+	typedef typename Value<T>::Type const & Type;
+};
+template <typename T>
+struct GetValue<T const>:
+	public GetValue<T>
+{
 };
 
 //____________________________________________________________________________
@@ -65,6 +70,11 @@ template <typename T>
 struct Reference
 {
 	typedef typename Value<T>::Type & Type;
+};
+template <typename T>
+struct Reference<T const>
+{
+	typedef typename Value<T>::Type const & Type;
 };
 
 //____________________________________________________________________________

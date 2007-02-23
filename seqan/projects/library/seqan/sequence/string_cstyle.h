@@ -353,11 +353,7 @@ struct DefaultOverflowImplicit<String<TValue, CStyle> >
 template <typename TValue>
 struct IsContiguous< String<TValue, CStyle > >
 {
-	enum { VALUE = true };
-};
-template <typename TValue>
-struct IsContiguous< String<TValue, CStyle > const >
-{
+    typedef True Type;
 	enum { VALUE = true };
 };
 
