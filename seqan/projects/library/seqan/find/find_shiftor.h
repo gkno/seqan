@@ -120,9 +120,9 @@ void setHost (Pattern<TNeedle, ShiftOr> & me, TNeedle2 const & needle) {
 
 	/*
 	// Debug code
-	std::cout << "Alphabet size: " << me.alphabetSize << std::endl;
-	std::cout << "Needle length: " << me.needleLength << std::endl;
-	std::cout << "Block count: " << me.blockCount << std::endl;
+	std::cout << "Alphabet size: " << me.alphabetSize << ::std::endl;
+	std::cout << "Needle length: " << me.needleLength << ::std::endl;
+	std::cout << "Block count: " << me.blockCount << ::std::endl;
 
 	for(unsigned int i=0;i<me.alphabetSize;++i) {
 		if ((i<97) || (i>122)) continue;
@@ -132,7 +132,7 @@ void setHost (Pattern<TNeedle, ShiftOr> & me, TNeedle2 const & needle) {
 				std::cout << ((me.table[me.blockCount*i+j] & (1<<(bit_pos % BitsPerValue<unsigned int>::VALUE))) !=0);
 			}
 		}
-		std::cout << std::endl;
+		std::cout << ::std::endl;
 	}
 	*/
 }
@@ -210,7 +210,7 @@ bool _findShiftOr_LargeNeedle(TFinder & finder, Pattern<TNeedle, ShiftOr> & me) 
 				std::cout << ((me.prefSufMatch[j] & (1<<(bit_pos % BitsPerValue<unsigned int>::VALUE))) !=0);
 			}
 		}
-		std::cout << std::endl;
+		std::cout << ::std::endl;
 		*/
 		goNext(finder);
 	}

@@ -53,12 +53,12 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	template < typename TValue >
-	struct IdentityMap : public std::unary_function< TValue, TValue > {
+	struct IdentityMap : public ::std::unary_function< TValue, TValue > {
 		inline TValue operator() (TValue const i) { return i; }
 	};
 
 	template < typename TValue >
-	struct SimpleCompare : public std::binary_function< TValue const, TValue const, int > {
+	struct SimpleCompare : public ::std::binary_function< TValue const, TValue const, int > {
 		inline int operator() (TValue const a, TValue const b) const {
             if (a < b) return -1;
             if (a > b) return 1;
@@ -125,7 +125,7 @@ namespace SEQAN_NAMESPACE_MAIN
                 ::std::cout<<(lexLess(*s2,*s1));
                 ::std::cout<<*s1;
                 ::std::cout<<*s2;
-                ::std::cout << "after " << i << " compares not " << (unsigned)*s1 << " leq " << (unsigned)*s2 << std::endl;
+                ::std::cout << "after " << i << " compares not " << (unsigned)*s1 << " leq " << (unsigned)*s2 << ::std::endl;
                 return 0;
             }
         }
@@ -181,7 +181,7 @@ namespace SEQAN_NAMESPACE_MAIN
         for(ST i = 0; i < n; i++, ++s1, ++s2) {
             if (lexLess(*s1,*s2)) return (i == lcp);
             if (lexLess(*s2,*s1)) {
-                ::std::cout << "after " << i << " compares not " << (unsigned)*s1 << " leq " << (unsigned)*s2 << std::endl;
+                ::std::cout << "after " << i << " compares not " << (unsigned)*s1 << " leq " << (unsigned)*s2 << ::std::endl;
                 return false;
             }
         }
@@ -284,7 +284,7 @@ namespace SEQAN_NAMESPACE_MAIN
         IB b = begin(_b);
         while (a!=e) {
             if (!(*a == *b)) {
-                ::std::cout << "isEqual: difference at " << (e-a) << " a=" << *a << "  b=" << *b << std::endl;
+                ::std::cout << "isEqual: difference at " << (e-a) << " a=" << *a << "  b=" << *b << ::std::endl;
                 return false;
             }
             ++a;

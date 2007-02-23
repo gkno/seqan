@@ -13,7 +13,7 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
     template < typename TValue, typename Compare >
-    struct MergeStreamComparer : public std::binary_function < PageBucket<TValue>,
+    struct MergeStreamComparer : public ::std::binary_function < PageBucket<TValue>,
 														       PageBucket<TValue>,
 														       bool>
     {
@@ -129,7 +129,7 @@ namespace SEQAN_NAMESPACE_MAIN
             cancel();
         }
 
-		struct insertBucket : public std::unary_function<PageBucket,void> {
+		struct insertBucket : public ::std::unary_function<PageBucket,void> {
 			Handler &me;
 			insertBucket(Handler &_me): me(_me) {}
 
@@ -234,7 +234,7 @@ namespace SEQAN_NAMESPACE_MAIN
             cancel();
         }
 
-		struct insertBucket : public std::unary_function<PageBucket,void> {
+		struct insertBucket : public ::std::unary_function<PageBucket,void> {
 			BufferHandler &me;
 			insertBucket(BufferHandler &_me): me(_me) {}
 

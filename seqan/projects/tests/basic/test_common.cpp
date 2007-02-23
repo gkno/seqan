@@ -57,7 +57,7 @@ void Test_Iterator_Adapt_Std()
 {
 //test SeqAn iterator to fulfill std iterator 
 
-	typedef std::iterator_traits<Iterator<char *, Rooted>::Type>::value_type T1;
+	typedef ::std::iterator_traits<Iterator<char *, Rooted>::Type>::value_type T1;
 	bool b1 = _isSameType<T1, char>();
 	SEQAN_TASSERT(b1)
 

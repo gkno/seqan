@@ -2,7 +2,7 @@
 #define SEQAN_HEADER_STD_STRING_H
 
 
-//Adaption for std::basic_string
+//Adaption for ::std::basic_string
 
 #include <string>
 
@@ -224,7 +224,7 @@ SEQAN_CHECKPOINT
 }
 
 //////////////////////////////////////////////////////////////////////////////
-//assign to std::basic_string
+//assign to ::std::basic_string
 
 ///.Function.assign.param.target.type:Adaption.std::basic_string
 ///.Function.assign.param.source.type:Adaption.std::basic_string
@@ -286,7 +286,7 @@ SEQAN_CHECKPOINT
 
 
 //////////////////////////////////////////////////////////////////////////////
-//append to std::basic_string
+//append to ::std::basic_string
 
 ///.Function.append.param.target.type:Adaption.std::basic_string
 ///.Function.append.param.source.type:Adaption.std::basic_string
@@ -357,7 +357,7 @@ SEQAN_CHECKPOINT
 
 
 //////////////////////////////////////////////////////////////////////////////
-//replace to std::basic_string
+//replace to ::std::basic_string
 
 ///.Function.replace.param.target.type:Adaption.std::basic_string
 ///.Function.replace.param.source.type:Adaption.std::basic_string

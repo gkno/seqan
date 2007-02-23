@@ -17,7 +17,7 @@ int main ()
 
 	for(; hits.i1 != hits.i2; ++hits.i1)
 		std::cout << *(hits.i1) << " ";
-	std::cout << std::endl;
+	std::cout << ::std::endl;
  
 	return 0;
 }

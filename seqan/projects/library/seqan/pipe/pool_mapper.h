@@ -297,7 +297,7 @@ namespace SEQAN_NAMESPACE_MAIN
             cancel();
         }
         
-		struct insertBucket : public std::unary_function<PageBucket,void> {
+		struct insertBucket : public ::std::unary_function<PageBucket,void> {
 			Handler &me;
 			insertBucket(Handler &_me): me(_me) {}
 
@@ -399,7 +399,7 @@ namespace SEQAN_NAMESPACE_MAIN
             cancel();
         }
         
-		struct insertBucket : public std::unary_function<PageBucket,void> {
+		struct insertBucket : public ::std::unary_function<PageBucket,void> {
 			Handler &me;
 			insertBucket(Handler &_me): me(_me) {}
 

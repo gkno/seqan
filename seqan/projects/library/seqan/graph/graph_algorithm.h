@@ -246,7 +246,7 @@ topological_sort(Graph<TEdges, TSpec> const& g,
 	depth_first_search(g, predMap, discoveryTimeMap, finishingTimeMap);
 
 	// Order vertices
-	typedef std::pair<unsigned int, unsigned int> TTimeVertexPair;
+	typedef ::std::pair<unsigned int, unsigned int> TTimeVertexPair;
 	std::priority_queue<TTimeVertexPair> q;
 	typedef typename Iterator<Graph<TEdges, TSpec>, VertexIterator<> >::Type TVertexIterator;
 	TVertexIterator it(g);
@@ -305,7 +305,7 @@ strongly_connected_components(Graph<TEdges, TSpec> const& g_source,
 	}
 
 	// Order vertices
-	typedef std::pair<unsigned int, unsigned int> TTimeVertexPair;
+	typedef ::std::pair<unsigned int, unsigned int> TTimeVertexPair;
 	std::priority_queue<TTimeVertexPair> q;
 	goBegin(it);
 	for(;!atEnd(it);++it) {

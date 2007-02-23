@@ -889,7 +889,7 @@ namespace SEQAN_NAMESPACE_MAIN
                     else                               ::std::cout << ". ";
 				};
             }
-            ::std::cout << std::endl;
+            ::std::cout << ::std::endl;
 		}
 
         // Function is a functor which is called with a PageFrame object,

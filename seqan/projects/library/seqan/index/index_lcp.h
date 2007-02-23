@@ -314,7 +314,7 @@ namespace SEQAN_NAMESPACE_MAIN
             ::std::cout << "  n: " << n;
             ::std::cout << "  lcpMax: " << lcpMax;
             ::std::cout << "  lcpAvrg: " << (TSize)(lcpAvrg + (lcpNumer + n/2) / n);
-            ::std::cout << "  sigma: " << sigma << std::endl;
+            ::std::cout << "  sigma: " << sigma << ::std::endl;
         #endif
 	}
 
@@ -397,7 +397,7 @@ namespace SEQAN_NAMESPACE_MAIN
             ::std::cout << "  n: " << n;
             ::std::cout << "  lcpMax: " << lcpMax;
             ::std::cout << "  lcpAvrg: " << (TSize)(lcpAvrg + (lcpNumer + n/2) / n);
-            ::std::cout << "  sigma: " << sigma << std::endl;
+            ::std::cout << "  sigma: " << sigma << ::std::endl;
         #endif
 	}
 
@@ -500,7 +500,7 @@ namespace SEQAN_NAMESPACE_MAIN
             ::std::cout << "  n: " << n;
             ::std::cout << "  lcpMax: " << lcpMax;
             ::std::cout << "  lcpAvrg: " << (TSize)(lcpAvrg + (lcpNumer + n/2) / n);
-            ::std::cout << "  sigma: " << sigma << std::endl;
+            ::std::cout << "  sigma: " << sigma << ::std::endl;
         #endif
 	}
 

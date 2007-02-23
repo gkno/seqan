@@ -26,7 +26,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		// public iterator interface
 
 		typedef IPipeIterator					iterator;
-		typedef std::forward_iterator_tag		iterator_category;
+		typedef ::std::forward_iterator_tag		iterator_category;
 		typedef typename Value<TInput>::Type	value_type;
 		typedef const value_type			    const_value_type;
 		typedef typename Size<TInput>::Type		difference_type;
@@ -112,7 +112,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		// public iterator interface
 
 		typedef OPipeIterator					iterator;
-		typedef std::forward_iterator_tag		iterator_category;
+		typedef ::std::forward_iterator_tag		iterator_category;
 		typedef typename Value<TOutput>::Type	value_type;
 		typedef typename Size<TOutput>::Type	difference_type;
 		typedef iterator*						pointer;

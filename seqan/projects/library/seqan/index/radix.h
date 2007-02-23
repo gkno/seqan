@@ -16,13 +16,13 @@ namespace SEQAN_NAMESPACE_MAIN
     // signed alphabet needs a function to map char to [0..n) not to [-128..128) like char does
 
     template < typename TValue >
-    struct RadixMap: public std::unary_function<TValue, unsigned> {
+    struct RadixMap: public ::std::unary_function<TValue, unsigned> {
         RadixMap(unsigned) {}
         inline TValue const & operator() (TValue const &x) const { return x; }
     };
 
     template <>
-    struct RadixMap<char>: public std::unary_function<char, unsigned> {
+    struct RadixMap<char>: public ::std::unary_function<char, unsigned> {
         RadixMap(unsigned) {}
         inline unsigned char const & operator() (char const & x) const {
             return reinterpret_cast<unsigned char const &>(x); 
@@ -30,7 +30,7 @@ namespace SEQAN_NAMESPACE_MAIN
     };
 
     template <typename TSpec>
-    struct RadixMap<SimpleType<char,TSpec> >: public std::unary_function<SimpleType<char,TSpec>, unsigned> {
+    struct RadixMap<SimpleType<char,TSpec> >: public ::std::unary_function<SimpleType<char,TSpec>, unsigned> {
         RadixMap(unsigned) {}
         inline unsigned operator() (SimpleType<char,TSpec> const & x) const {
             return (unsigned)x;

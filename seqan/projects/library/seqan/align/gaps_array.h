@@ -954,7 +954,7 @@ SEQAN_CHECKPOINT
 //____________________________________________________________________________
 
 //??? TODO: restliche Iterator-Funktionen (gibt's hier allerdings nicht alle)
-//??? TODO: typedefs für std::iterator_traits
+//??? TODO: typedefs für ::std::iterator_traits
 
 
 //////////////////////////////////////////////////////////////////////////////

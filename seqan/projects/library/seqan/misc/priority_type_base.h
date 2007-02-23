@@ -23,7 +23,7 @@ struct PriorityHeap;
 ..param.TSpec:The specializing type.
 ...default:@Spec.PriorityHeap@
 */
-template <typename TValue = int, typename TComparator = std::less<TValue>, typename TSpec = PriorityHeap>
+template <typename TValue = int, typename TComparator = ::std::less<TValue>, typename TSpec = PriorityHeap>
 class PriorityType;
 
 //////////////////////////////////////////////////////////////////////////////

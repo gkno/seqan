@@ -161,7 +161,7 @@
         _proFloat dumpNext;        
 
         _proTStates all, last;
-        std::string mark;
+        ::std::string mark;
         unsigned	lines;
 
         _proFile() {

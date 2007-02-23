@@ -539,7 +539,7 @@ SEQAN_CHECKPOINT
 			{
 SEQAN_CHECKPOINT
 				s_hash = _compute_SHIFT_Hash(hash(me),infix(value(ndl,i),j - window_width(me) + 1,j),haystack_host,window_width(me));
-				me.SHIFT[s_hash] = std::min(static_cast<size_t>(n_length) - (j + 1),static_cast<size_t>(me.SHIFT[s_hash]));
+				me.SHIFT[s_hash] = ::std::min(static_cast<size_t>(n_length) - (j + 1),static_cast<size_t>(me.SHIFT[s_hash]));
 				++j;
 			}
 
@@ -552,11 +552,11 @@ SEQAN_CHECKPOINT
 		data_needle = ndl;
 
 #ifdef SEQAN_DEBUG
-		std::cout << "initialized WuManber with following parameters" << std::endl;
+		std::cout << "initialized WuManber with following parameters" << ::std::endl;
 
-		std::cout << "lmin " << minLength(me) << std::endl;
-		std::cout << "q " << window_width(me) << std::endl;
-		std::cout << "number of needles " << ndl_size << std::endl;
+		std::cout << "lmin " << minLength(me) << ::std::endl;
+		std::cout << "q " << window_width(me) << ::std::endl;
+		std::cout << "number of needles " << ndl_size << ::std::endl;
 #endif
 	}
 

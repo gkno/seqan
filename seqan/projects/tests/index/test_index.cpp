@@ -77,7 +77,7 @@ void testMultiIndex()
 
 		Iter<Index<TMulti>, VSTree< BottomUp<> > > it(esa);
 		while (!atEnd(it)) {
-			std::cout << value(it) << " = " << representative(it) /*<< "    edge:" << parentEdgeLabel(it) */<< std::endl;
+			std::cout << value(it) << " = " << representative(it) /*<< "    edge:" << parentEdgeLabel(it) */<< ::std::endl;
 			goNext(it);
 		}
 
@@ -144,7 +144,7 @@ void testSTreeIterators()
 
 //		while (goDown(it));
 		while (!atEnd(it)) {
-			std::cout << value(it) << " = " << representative(it) << "    edge:" << parentEdgeLabel(it) << std::endl;
+			std::cout << value(it) << " = " << representative(it) << "    edge:" << parentEdgeLabel(it) << ::std::endl;
 			goNext(it);
 		}
 }
@@ -168,7 +168,7 @@ void testIteratorSpec()
                 ++counter;
         }
 
-        ::std::cout << "supermaximal repeats: " << counter << std::endl;
+        ::std::cout << "supermaximal repeats: " << counter << ::std::endl;
 
 }
 

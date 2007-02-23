@@ -27,7 +27,7 @@ namespace SEQAN_NAMESPACE_MAIN
     // *** COMPARATORS & MAPS ***
         
     template <typename InType, typename Result = int>
-    struct skew7_ncomp_multi : public std::binary_function<InType,InType,Result> {
+    struct skew7_ncomp_multi : public ::std::binary_function<InType,InType,Result> {
         inline Result operator()(const InType &a, const InType &b) const
         {
 			typedef typename InType::T1 LocalPos;
@@ -58,7 +58,7 @@ namespace SEQAN_NAMESPACE_MAIN
     // optimized for bitvectors
     template <typename T1, typename TValue, typename Result>
     struct skew7_ncomp_multi< Pair<T1, Tuple<TValue, 7, Compressed>, Compressed >, Result > :
-        public std::binary_function<
+        public ::std::binary_function<
             Pair<T1, Tuple<TValue, 7, Compressed>, Compressed >,
             Pair<T1, Tuple<TValue, 7, Compressed>, Compressed >,
             Result> {       
@@ -94,7 +94,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typename InType, typename TLimitsString, typename TResultSize = typename Value<TLimitsString>::Type,
 		typename Result = Pair<TResultSize, typename Value<InType,2>::Type, typename Spec<InType>::Type> >
     struct skew7_global_sliced_multi :
-		public std::unary_function<InType,Result> {
+		public ::std::unary_function<InType,Result> {
 
 		typedef TResultSize TSize;
 

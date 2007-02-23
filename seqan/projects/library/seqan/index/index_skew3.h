@@ -40,7 +40,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	// *** COMPARATORS & MAPS ***
         
     template <typename InType, typename Result = int>
-    struct skew3_ncomp : public std::binary_function<InType,InType,Result> {
+    struct skew3_ncomp : public ::std::binary_function<InType,InType,Result> {
         inline Result operator()(const InType &a, const InType &b) const
         {
 			typedef typename InType::T1 SizeType;
@@ -63,7 +63,7 @@ namespace SEQAN_NAMESPACE_MAIN
     };
 
     template <typename InType, typename Result = typename InType::T1>
-    struct skew3_nmap_linear : public std::unary_function<InType,Result> {
+    struct skew3_nmap_linear : public ::std::unary_function<InType,Result> {
         Result BN;
         skew3_nmap_linear(Result _BN):BN(_BN) { }
         inline Result operator()(const InType& x) const
@@ -71,7 +71,7 @@ namespace SEQAN_NAMESPACE_MAIN
     };
 
     template <typename InType, typename Result = typename InType::T1>
-    struct skew3_nmap_sliced : public std::unary_function<InType,Result> {
+    struct skew3_nmap_sliced : public ::std::unary_function<InType,Result> {
         Result BN, BN2;
         skew3_nmap_sliced(Result _BN):BN(_BN-1),BN2(_BN/2-1) { }
         inline Result operator()(const InType& x) const
@@ -80,7 +80,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
     template <typename InType, typename Result = InType>
-    struct skew3_unslicer_func : public std::unary_function<InType,Result> {
+    struct skew3_unslicer_func : public ::std::unary_function<InType,Result> {
         Result o1, o2, n2;
         skew3_unslicer_func(Result N):
             o1(N - (N + 2) % 3),
@@ -92,13 +92,13 @@ namespace SEQAN_NAMESPACE_MAIN
     };
 
     template <typename InType, typename Result = typename InType::T2::T>
-    struct skew3_nmap_extended : public std::unary_function<InType,Result> {
+    struct skew3_nmap_extended : public ::std::unary_function<InType,Result> {
         inline Result operator()(const InType& x) const
         { return x.i2[0]; }
     };
 
     template <typename InType, typename Result = int>
-    struct skew3_extend_comp : public std::binary_function<InType,InType,Result> {
+    struct skew3_extend_comp : public ::std::binary_function<InType,InType,Result> {
         inline Result operator()(const InType &a, const InType &b) const
         {
             return (a.i3[0] <  b.i3[0] ||

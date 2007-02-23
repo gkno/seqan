@@ -9,7 +9,7 @@ int main ()
 	std::cout << "hit at ";
 	while (find(finder, "be"))
 		std::cout << position(finder) << " ";
-	std::cout << std::endl;
+	std::cout << ::std::endl;
 
 	return 0;
 }

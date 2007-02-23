@@ -170,7 +170,7 @@ namespace SEQAN_NAMESPACE_MAIN
             ::std::cout << "  n: " << n;
             ::std::cout << "  lcpMax: " << lcpMax;
             ::std::cout << "  lcpAvrg: " << lcpAvrg + lcpNumer / (double)n;
-            ::std::cout << "  sigma: " << sigma << std::endl;
+            ::std::cout << "  sigma: " << sigma << ::std::endl;
         #endif
 
 //TODO: uncomment this line
@@ -334,7 +334,7 @@ namespace SEQAN_NAMESPACE_MAIN
             ::std::cout << "  n: " << n;
             ::std::cout << "  lcpMax: " << lcpMax;
             ::std::cout << "  lcpAvrg: " << lcpAvrg + lcpNumer / (double)n;
-            ::std::cout << "  sigma: " << sigma << std::endl;
+            ::std::cout << "  sigma: " << sigma << ::std::endl;
         #endif
 
 //TODO: uncomment this line

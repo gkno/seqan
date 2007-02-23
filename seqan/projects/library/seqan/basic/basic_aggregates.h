@@ -251,7 +251,7 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef _T T;
         enum { size = _size };
         _T i[_size];
-//		friend std::ostream& operator<<(std::ostream&, const Tuple&);
+//		friend ::std::ostream& operator<<(std::ostream&, const Tuple&);
 
         inline _T& operator[](const int k) {
             SEQAN_ASSERT(k >= 0 && k < size);

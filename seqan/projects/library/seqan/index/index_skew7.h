@@ -40,7 +40,7 @@ namespace SEQAN_NAMESPACE_MAIN
     // *** COMPARATORS & MAPS ***
         
     template <typename InType, typename Result = int>
-    struct skew7_ncomp : public std::binary_function<InType,InType,Result> {
+    struct skew7_ncomp : public ::std::binary_function<InType,InType,Result> {
         inline Result operator()(const InType &a, const InType &b) const
         {
 			typedef typename InType::T1 SizeType;
@@ -65,7 +65,7 @@ namespace SEQAN_NAMESPACE_MAIN
     // optimized for bitvectors
     template <typename T1, typename TValue, typename Result>
     struct skew7_ncomp< Pair<T1, Tuple<TValue, 7, Compressed>, Compressed >, Result > :
-        public std::binary_function<
+        public ::std::binary_function<
             Pair<T1, Tuple<TValue, 7, Compressed>, Compressed >,
             Pair<T1, Tuple<TValue, 7, Compressed>, Compressed >,
             Result> {       
@@ -82,7 +82,7 @@ namespace SEQAN_NAMESPACE_MAIN
     };
 
     template <typename InType, typename Result = typename InType::T1>
-    struct skew7_nmap_linear : public std::unary_function<InType,Result> {
+    struct skew7_nmap_linear : public ::std::unary_function<InType,Result> {
         Result BN4, BN;
         skew7_nmap_linear(Result _BN):BN4(_BN+1),BN(_BN) { }
         inline Result operator()(const InType& x) const
@@ -90,7 +90,7 @@ namespace SEQAN_NAMESPACE_MAIN
     };
 
     template <typename InType, typename Result = typename InType::T1>
-    struct skew7_nmap_sliced : public std::unary_function<InType,Result> {
+    struct skew7_nmap_sliced : public ::std::unary_function<InType,Result> {
         Result off[5];
         skew7_nmap_sliced(Result _BN)
         { off[1] = _BN - 1; off[2] = (2*_BN)/3 - 1; off[4] = _BN/3 - 1; }
@@ -100,7 +100,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
     template <typename InType, typename Result = InType>
-    struct skew7_unslicer_func : public std::unary_function<InType,Result> {
+    struct skew7_unslicer_func : public ::std::unary_function<InType,Result> {
         Result o1, o2, o4, n4, n24;
         skew7_unslicer_func(Result N):
             o1(N - (N + 6) % 7),
@@ -116,13 +116,13 @@ namespace SEQAN_NAMESPACE_MAIN
     };
 
     template <typename InType, typename Result = typename InType::T2::T>
-    struct skew7_nmap_extended : public std::unary_function<InType,Result> {
+    struct skew7_nmap_extended : public ::std::unary_function<InType,Result> {
         inline Result operator()(const InType& x) const
         { return x.i2[0]; }
     };
 
     template <typename InType, const int EXT_LENGTH, typename Result = int>
-    struct skew7_extend_comp : public std::binary_function<InType,InType,Result> {
+    struct skew7_extend_comp : public ::std::binary_function<InType,InType,Result> {
         inline Result operator()(const InType &a, const InType &b) const
         {
             for(unsigned int i = 0; i < EXT_LENGTH; i++) {
@@ -136,7 +136,7 @@ namespace SEQAN_NAMESPACE_MAIN
     // optimized for bitvectors
     template <typename T1, typename T2, typename T, const int _size, const int EXT_LENGTH, typename Result>
     struct skew7_extend_comp< Triple<T1,T2,Tuple<T,_size,Compressed>, Compressed>, EXT_LENGTH, Result> :
-        public std::binary_function<
+        public ::std::binary_function<
             Triple<T1,T2,Tuple<T,_size,Compressed>,Compressed>,
             Triple<T1,T2,Tuple<T,_size,Compressed>,Compressed>,
             Result> 

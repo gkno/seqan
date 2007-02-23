@@ -47,10 +47,10 @@ void _find(char const* path, String<char> ndl) {
 		(posShiftAnd == posBndmAlgo) &&
 		(posShiftAnd == posBomAlgo))
 	{
-		std::cout << "All Finder Match!" << std::endl;
-		std::cout << "Number of pattern occurences: " << length(posShiftAnd) << std::endl;
+		std::cout << "All Finder Match!" << ::std::endl;
+		std::cout << "Number of pattern occurences: " << length(posShiftAnd) << ::std::endl;
 	} else {
-		std::cout << "Mismatch!!!" << std::endl;
+		std::cout << "Mismatch!!!" << ::std::endl;
 		exit(0);
 	}
 }
@@ -106,23 +106,23 @@ void performanceTest(char const * path) {
 		startTime = time(0);
 		count = _measureTime<Horspool, TAlphabet>(haystack, needle); 
 		duration = time(0) - startTime;
-		std::cout << "Horspool;" << length(needle) << ";" << count << ";" << duration << std::endl;
+		std::cout << "Horspool;" << length(needle) << ";" << count << ";" << duration << ::std::endl;
 		startTime = time(0);
 		count = _measureTime<ShiftAnd, TAlphabet>(haystack, needle); 
 		duration = time(0) - startTime;
-		std::cout << "ShiftAnd;" << length(needle) << ";" << count << ";" << duration << std::endl;
+		std::cout << "ShiftAnd;" << length(needle) << ";" << count << ";" << duration << ::std::endl;
 		startTime = time(0);
 		count = _measureTime<ShiftOr, TAlphabet>(haystack, needle); 
 		duration = time(0) - startTime;
-		std::cout << "ShiftOr;" << length(needle) << ";" << count << ";" << duration << std::endl;
+		std::cout << "ShiftOr;" << length(needle) << ";" << count << ";" << duration << ::std::endl;
 		startTime = time(0);
 		count = _measureTime<BndmAlgo, TAlphabet>(haystack, needle); 
 		duration = time(0) - startTime;
-		std::cout << "BndmAlgo;" << length(needle) << ";" << count << ";" << duration << std::endl;
+		std::cout << "BndmAlgo;" << length(needle) << ";" << count << ";" << duration << ::std::endl;
 		startTime = time(0);
 		count = _measureTime<BomAlgo, TAlphabet>(haystack, needle); 
 		duration = time(0) - startTime;
-		std::cout << "BomAlgo;" << length(needle) << ";" << count << ";" << duration << std::endl;
+		std::cout << "BomAlgo;" << length(needle) << ";" << count << ";" << duration << ::std::endl;
 		appendValue(needle, 'C');
 		appendValue(needle, 'T');
 	}

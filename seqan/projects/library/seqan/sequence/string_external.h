@@ -87,9 +87,9 @@ namespace SEQAN_NAMESPACE_MAIN
 	//////////////////////////////////////////////////////////////////////////////
 	// simple vector based page table
 	template < typename T >
-	struct PageTable : public std::vector<T>
+	struct PageTable : public ::std::vector<T>
 	{
-		typedef std::vector<T> Base;
+		typedef ::std::vector<T> Base;
 
 		PageMapper(SizeType _maxPages, T _default = 0):
 			Base(_maxPages, _default) {}
@@ -153,7 +153,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		//////////////////////////////////////////////////////////////////////////////
 		// public iterator interface
 
-		typedef std::random_access_iterator_tag		iterator_category;
+		typedef ::std::random_access_iterator_tag		iterator_category;
 		typedef typename Vector::value_type			value_type;
 		typedef typename Vector::difference_type	difference_type;
 		typedef typename Vector::pointer			pointer;
@@ -265,7 +265,7 @@ namespace SEQAN_NAMESPACE_MAIN
         //////////////////////////////////////////////////////////////////////////////
 		// public iterator interface
 
-		typedef std::random_access_iterator_tag		iterator_category;
+		typedef ::std::random_access_iterator_tag		iterator_category;
 		typedef typename Vector::value_type			value_type;
 		typedef typename Vector::difference_type	difference_type;
 		typedef typename Vector::const_pointer	    pointer;
@@ -382,8 +382,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		// in fact this is also a random iterator, but you better use
 		// the VectorIterator class for *real* random access
-//		typedef std::bidirectional_iterator_tag		iterator_category;
-		typedef std::random_access_iterator_tag		iterator_category;
+//		typedef ::std::bidirectional_iterator_tag		iterator_category;
+		typedef ::std::random_access_iterator_tag		iterator_category;
 		typedef typename Vector::value_type			value_type;
 		typedef typename Vector::difference_type	difference_type;
 		typedef typename Vector::pointer			pointer;
@@ -633,8 +633,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		// in fact this is also a random iterator, but you better use
 		// the VectorIterator class for *real* random access
-//		typedef std::bidirectional_iterator_tag		iterator_category;
-		typedef std::random_access_iterator_tag		iterator_category;
+//		typedef ::std::bidirectional_iterator_tag		iterator_category;
+		typedef ::std::random_access_iterator_tag		iterator_category;
 		typedef typename Vector::value_type			value_type;
 		typedef typename Vector::difference_type	difference_type;
 		typedef typename Vector::const_pointer		pointer;
@@ -890,7 +890,7 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef typename TConfig::TFile     TFile;
         typedef typename TConfig::SizeType  SizeType;
 
-		typedef std::vector<int>						        PageTable;
+		typedef ::std::vector<int>						        PageTable;
 		typedef PageFrame<TValue, TFile, Fixed<_PageSize> >  	PageFrame;
 		typedef PageContainer<PageFrame, _Frames>		        Cache;
 		typedef PageFrame&								        PageFrameRef;
@@ -1089,7 +1089,7 @@ namespace SEQAN_NAMESPACE_MAIN
                 else
                     ::std::cout << ".  ";
             }
-            ::std::cout << std::endl;
+            ::std::cout << ::std::endl;
         }
 
 
@@ -1155,7 +1155,7 @@ namespace SEQAN_NAMESPACE_MAIN
                 waitFor(*I);
 		}
 
-		struct testIODone : public std::unary_function<PageFrameRef,bool> {
+		struct testIODone : public ::std::unary_function<PageFrameRef,bool> {
 			String &me;
 			testIODone(String &_me): me(_me) {}
 

@@ -256,7 +256,7 @@ void Test_OnlineAlgMulti()
 	clear(finderPos);
 	clear(keywordIndex);
 	while (find(my_finder, my_pattern)) {
-		//std::cout << position(my_finder) << "-" << position(my_pattern) << std::endl;
+		//std::cout << position(my_finder) << "-" << position(my_pattern) << ::std::endl;
 		append(finderPos,position(my_finder));
 		append(keywordIndex,position(my_pattern));
 	}
@@ -310,7 +310,7 @@ void Test_OnlineAlgMulti()
 	clear(finderPos);
 	clear(keywordIndex);
 	while (find(my2_finder, my2_pattern)) {
-		//std::cout << position(my2_finder) << ":" << position(my2_pattern) << std::endl;
+		//std::cout << position(my2_finder) << ":" << position(my2_pattern) << ::std::endl;
 		append(finderPos,position(my2_finder));
 		append(keywordIndex,position(my2_pattern));
 	}

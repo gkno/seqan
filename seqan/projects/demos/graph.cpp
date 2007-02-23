@@ -20,7 +20,7 @@ void BreadthFirstSearch() {
 	
 	//Create the graph
 	TGraph g(edges, numEdges);
-	std::cout << g << std::endl;
+	std::cout << g << ::std::endl;
 	String<char> nameMap;
 	initVertexMap(g,nameMap, names);
 
@@ -32,7 +32,7 @@ void BreadthFirstSearch() {
 	breadth_first_search(g, 1, predMap, distMap);
 	
 	// Output
-	std::cout << "Breadth-First search: " << std::endl;
+	std::cout << "Breadth-First search: " << ::std::endl;
 	typedef Iterator<TGraph, VertexIterator<> >::Type TVertexIterator;
 	TVertexIterator it(g);
 	while(!atEnd(it)) {
@@ -45,9 +45,9 @@ void BreadthFirstSearch() {
 		typedef Value<String<unsigned int> >::Type TPredVal;
 		TPredVal pre = getProperty(predMap, getValue(it));
 		if (pre != getNilPredecessor(g)) {
-			std::cout << ", Predecessor = " << getProperty(nameMap, pre) << std::endl;
+			std::cout << ", Predecessor = " << getProperty(nameMap, pre) << ::std::endl;
 		} else {
-			std::cout << ", Predecessor = nil" << std::endl;
+			std::cout << ", Predecessor = nil" << ::std::endl;
 		}
 		goNext(it);
 	}
@@ -72,7 +72,7 @@ void DepthFirstSearch() {
 
 	//Create the graph
 	Graph<> g(edges, numEdges);
-	std::cout << g << std::endl;
+	std::cout << g << ::std::endl;
 	String<char> nameMap;
 	initVertexMap(g,nameMap, names);
 
@@ -85,7 +85,7 @@ void DepthFirstSearch() {
 	depth_first_search(g, predMap, discoveryTimeMap, finishingTimeMap);
 
 	// Output
-	std::cout << "Depth-First search: " << std::endl;
+	std::cout << "Depth-First search: " << ::std::endl;
 	typedef Iterator<Graph<>, VertexIterator<> >::Type TVertexIterator;
 	TVertexIterator it(g);
 	while(!atEnd(it)) {
@@ -95,9 +95,9 @@ void DepthFirstSearch() {
 		typedef Value<String<unsigned int> >::Type TPredVal;
 		TPredVal pre = getProperty(predMap, getValue(it));
 		if (pre != getNilPredecessor(g)) {
-			std::cout << "Predecessor = " << getProperty(nameMap, pre) << std::endl;
+			std::cout << "Predecessor = " << getProperty(nameMap, pre) << ::std::endl;
 		} else {
-			std::cout << "Predecessor = nil" << std::endl;
+			std::cout << "Predecessor = nil" << ::std::endl;
 		}
 		goNext(it);
 	}
@@ -120,7 +120,7 @@ void TopologicalSort() {
 	
 	//Create the graph
 	Graph<> g(edges, numEdges);
-	std::cout << g << std::endl;
+	std::cout << g << ::std::endl;
 	String<std::string> nameMap;
 	initVertexMap(g,nameMap, names);
 
@@ -131,14 +131,14 @@ void TopologicalSort() {
 	topological_sort(g, order);
 
 	// Output
-	std::cout << "Topological sort: " << std::endl;
+	std::cout << "Topological sort: " << ::std::endl;
 	typedef Iterator<String<TVertexDescriptor> >::Type TStringIterator;
 	TStringIterator it = begin(order);
 	while(!atEnd(it)) {
 		std::cout << getProperty(nameMap, getValue(it)) << ",";
 		goNext(it);
 	}
-	std::cout << std::endl;
+	std::cout << ::std::endl;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -160,7 +160,7 @@ void StronglyConnectedComponents() {
 
 	//Create the graph
 	Graph<> g(edges, numEdges);
-	std::cout << g << std::endl;
+	std::cout << g << ::std::endl;
 	String<char> nameMap;
 	initVertexMap(g,nameMap, names);
 
@@ -171,12 +171,12 @@ void StronglyConnectedComponents() {
 	strongly_connected_components(g, component);
 
 	// Output
-	std::cout << "Strongly Connected Components: " << std::endl;
+	std::cout << "Strongly Connected Components: " << ::std::endl;
 	typedef Iterator<Graph<>, VertexIterator<> >::Type TVertexIterator;
 	TVertexIterator it(g);
 	while(!atEnd(it)) {
 		std::cout << "Vertex " << getProperty(nameMap, getValue(it)) << ": ";
-		std::cout << "Component = " << getProperty(component, getValue(it)) << std::endl;
+		std::cout << "Component = " << getProperty(component, getValue(it)) << ::std::endl;
 		goNext(it);
 	}
 }
@@ -198,7 +198,7 @@ void DagShortestPath() {
 	
 	//Create the graph
 	Graph<> g(edges, numEdges);
-	std::cout << g << std::endl;
+	std::cout << g << ::std::endl;
 	String<int> weightMap;
 	initEdgeMap(g,weightMap, weights);
 
@@ -210,13 +210,13 @@ void DagShortestPath() {
 	dag_shortest_path(g,1,weightMap,predMap,distMap);
 
 	// Output
-	std::cout << "Single-Source Shortest Paths in DAG: " << std::endl;
+	std::cout << "Single-Source Shortest Paths in DAG: " << ::std::endl;
 	typedef Iterator<Graph<>, VertexIterator<> >::Type TVertexIterator;
 	TVertexIterator it(g);
 	while(!atEnd(it)) {
 		std::cout << "Path from 1 to " << getValue(it) << ": ";
 		_print_path(g,predMap,(TVertexDescriptor) 1, getValue(it));
-		std::cout << " (Distance: " << getProperty(distMap, getValue(it)) << ")" << std::endl;
+		std::cout << " (Distance: " << getProperty(distMap, getValue(it)) << ")" << ::std::endl;
 		goNext(it);
 	}
 }
@@ -239,7 +239,7 @@ void BellmanFord() {
 
 	//Create the graph
 	Graph<> g(edges, numEdges);
-	std::cout << g << std::endl;
+	std::cout << g << ::std::endl;
 
 	// In parameters of Bellman-Ford
 	// Define the distances or weights of the edges
@@ -254,14 +254,14 @@ void BellmanFord() {
 	bool noNegativeCycle = bellman_ford_algorithm(g,0,weightMap,predMap,distMap);
 
 	// Output
-	std::cout << "Single-Source Shortest Paths: " << std::endl;
-	std::cout << "Graph without negative cycles? " << noNegativeCycle << std::endl;
+	std::cout << "Single-Source Shortest Paths: " << ::std::endl;
+	std::cout << "Graph without negative cycles? " << noNegativeCycle << ::std::endl;
 	typedef Iterator<Graph<>, VertexIterator<> >::Type TVertexIterator;
 	TVertexIterator it(g);
 	while(!atEnd(it)) {
 		std::cout << "Path from 0 to " << getValue(it) << ": ";
 		_print_path(g,predMap,(TVertexDescriptor) 0, getValue(it));
-		std::cout << " (Distance: " << getProperty(distMap, getValue(it)) << ")" << std::endl;
+		std::cout << " (Distance: " << getProperty(distMap, getValue(it)) << ")" << ::std::endl;
 		goNext(it);
 	}
 }
@@ -284,7 +284,7 @@ void Dijkstra() {
 
 	//Create the graph
 	Graph<> g(edges, numEdges);
-	std::cout << g << std::endl;
+	std::cout << g << ::std::endl;
 
 	// In parameters of Dijkstra
 	// Define the distances or weights of the edges
@@ -299,13 +299,13 @@ void Dijkstra() {
 	dijkstra(g,0,weightMap,predMap,distMap);
 
 	// Output
-	std::cout << "Single-Source Shortest Paths: " << std::endl;
+	std::cout << "Single-Source Shortest Paths: " << ::std::endl;
 	typedef Iterator<Graph<>, VertexIterator<> >::Type TVertexIterator;
 	TVertexIterator it(g);
 	while(!atEnd(it)) {
 		std::cout << "Path from 0 to " << getValue(it) << ": ";
 		_print_path(g,predMap,(TVertexDescriptor) 0, getValue(it));
-		std::cout << " (Distance: " << getProperty(distMap, getValue(it)) << ")" << std::endl;
+		std::cout << " (Distance: " << getProperty(distMap, getValue(it)) << ")" << ::std::endl;
 		goNext(it);
 	}
 }
@@ -332,7 +332,7 @@ void DijkstraInternalMap() {
 
 	//Create the graph
 	Graph<TEdges> g(edges, numEdges);
-	std::cout << g << std::endl;
+	std::cout << g << ::std::endl;
 
 	// In parameters of Dijkstra
 	// Define the distances or weights of the edges
@@ -352,13 +352,13 @@ void DijkstraInternalMap() {
 	dijkstra(g,0,intMap,predMap,distMap);
 
 	// Output
-	std::cout << "Single-Source Shortest Paths: " << std::endl;
+	std::cout << "Single-Source Shortest Paths: " << ::std::endl;
 	typedef Iterator<Graph<TEdges> , VertexIterator<> >::Type TVertexIterator;
 	TVertexIterator it(g);
 	while(!atEnd(it)) {
 		std::cout << "Path from 0 to " << getValue(it) << ": ";
 		_print_path(g,predMap,(TVertexDescriptor) 0, getValue(it));
-		std::cout << " (Distance: " << getProperty(distMap, getValue(it)) << ")" << std::endl;
+		std::cout << " (Distance: " << getProperty(distMap, getValue(it)) << ")" << ::std::endl;
 		goNext(it);
 	}
 }
@@ -381,7 +381,7 @@ void AllPairsShortestPath() {
 
 	//Create the graph
 	Graph<> g(edges, numEdges);
-	std::cout << g << std::endl;
+	std::cout << g << ::std::endl;
 
 	// In parameters
 	String<int> weightMap;
@@ -399,7 +399,7 @@ void AllPairsShortestPath() {
 		for (TSize col=0;col < len;++col) {
 			std::cout << row << "," << col << " (Distance=" << getValue(distMat, row*len + col) << "): "; 
 			_print_all_pairs_shortest_path(g,predMat,row,col);
-			std::cout << std::endl;
+			std::cout << ::std::endl;
 		}
 	}
 }
@@ -422,7 +422,7 @@ void FloydWarshall() {
 
 	//Create the graph
 	Graph<> g(edges, numEdges);
-	std::cout << g << std::endl;
+	std::cout << g << ::std::endl;
 
 	// In parameters
 	String<int> weightMap;
@@ -440,7 +440,7 @@ void FloydWarshall() {
 		for (TSize col=0;col < len;++col) {
 			std::cout << row << "," << col << " (Distance=" << getValue(distMat, row*len + col) << "): "; 
 			_print_all_pairs_shortest_path(g,predMat,row,col);
-			std::cout << std::endl;
+			std::cout << ::std::endl;
 		}
 	}
 }
@@ -462,7 +462,7 @@ void TransitiveClosure() {
 	
 	//Create the graph
 	Graph<> g(edges, numEdges);
-	std::cout << g << std::endl;
+	std::cout << g << ::std::endl;
 
 	// Transitive-Closure
 	Matrix<bool> closure;
@@ -473,7 +473,7 @@ void TransitiveClosure() {
 		for (TSize col=0;col < len;++col) {
 			std::cout << getValue(closure, row*len+col) << ",";
 		}
-		std::cout << std::endl;
+		std::cout << ::std::endl;
 	}
 }
 
@@ -539,7 +539,7 @@ void AutomatonTest() {
 	TVertexIterator it(automaton);
 	std::string str = "Hallo";
 	for(;!atEnd(it);goNext(it)) {
-		assignProperty(nameMap, getValue(it), std::string(str));
+		assignProperty(nameMap, getValue(it), ::std::string(str));
 		str = str.append("o");
 	}
 	// Similarly for edge maps
@@ -548,10 +548,10 @@ void AutomatonTest() {
 	initEdgeMap(automaton, edMap, props);
 
 	// Print automaton
-	std::cout << automaton << std::endl;
+	std::cout << automaton << ::std::endl;
 
 	// Perform walks on it
-	std::cout << "A simple forward walk through the automaton:" << std::endl;
+	std::cout << "A simple forward walk through the automaton:" << ::std::endl;
 	std::cout << rootVertex << " -T-> ";
 	VertexDescriptorType succ = getSuccessor(automaton,rootVertex,'T');
 	std::cout << succ << " -G-> ";
@@ -560,8 +560,8 @@ void AutomatonTest() {
 	succ = getSuccessor(automaton,succ,'G');
 	std::cout << succ << " -C-> ";
 	succ = getSuccessor(automaton,succ,'C');
-	std::cout << succ << std::endl;
-	std::cout << "...and now let's walk backwards:" << std::endl;
+	std::cout << succ << ::std::endl;
+	std::cout << "...and now let's walk backwards:" << ::std::endl;
 	VertexDescriptorType pred = succ;
 	std::cout << pred << " <-T- ";
 	pred = getPredecessor(automaton,pred,'T');
@@ -571,24 +571,24 @@ void AutomatonTest() {
 	pred = getPredecessor(automaton,pred,'T');
 	std::cout << pred << " <-G- ";
 	pred = getPredecessor(automaton,pred,'G');
-	std::cout << pred << std::endl;
-	std::cout << "------------------------------" << std::endl;
-	std::cout << "Multiple forward transitions at once:" << std::endl;
+	std::cout << pred << ::std::endl;
+	std::cout << "------------------------------" << ::std::endl;
+	std::cout << "Multiple forward transitions at once:" << ::std::endl;
 	std::cout << rootVertex << " -TGGC-> ";
 	succ = parseString(automaton,rootVertex,"TGGC");
-	std::cout << succ << std::endl;
+	std::cout << succ << ::std::endl;
 
 	goBegin(it);
 	std::cout << "All vertices: ";
 	for(;!atEnd(it);goNext(it)) {
 		std::cout << getValue(it) << "(" << getProperty(nameMap, getValue(it)) << "," << getProperty(propMap, getValue(it)) << "), ";
 	}
-	std::cout << std::endl;
-	std::cout << "Some edge properties:" << std::endl;
-	std::cout << getProperty(propMapEdges, edge1) << std::endl;
-	std::cout << getProperty(propMapEdges, edge3) << std::endl;
-	std::cout << getProperty(edMap, edge1) << std::endl;
-	std::cout << getProperty(edMap, edge3) << std::endl;
+	std::cout << ::std::endl;
+	std::cout << "Some edge properties:" << ::std::endl;
+	std::cout << getProperty(propMapEdges, edge1) << ::std::endl;
+	std::cout << getProperty(propMapEdges, edge3) << ::std::endl;
+	std::cout << getProperty(edMap, edge1) << ::std::endl;
+	std::cout << getProperty(edMap, edge3) << ::std::endl;
 
 }
 
@@ -599,47 +599,47 @@ int main ()
 //____________________________________________________________________________
 // Graph Algorithms
 	// Elementary graph algorithms
-	std::cout << "===================================" << std::endl;
-	std::cout << "----Breadth-Frist Search-----------" << std::endl;
+	std::cout << "===================================" << ::std::endl;
+	std::cout << "----Breadth-Frist Search-----------" << ::std::endl;
 	BreadthFirstSearch();
-	std::cout << "===================================" << std::endl;
-	std::cout << "----Depth-Frist Search-------------" << std::endl;
+	std::cout << "===================================" << ::std::endl;
+	std::cout << "----Depth-Frist Search-------------" << ::std::endl;
 	DepthFirstSearch();
-	std::cout << "===================================" << std::endl;
-	std::cout << "----Topological Sort---------------" << std::endl;
+	std::cout << "===================================" << ::std::endl;
+	std::cout << "----Topological Sort---------------" << ::std::endl;
 	TopologicalSort();
-	std::cout << "===================================" << std::endl;
-	std::cout << "----Strongly-Connected-Components--" << std::endl;
+	std::cout << "===================================" << ::std::endl;
+	std::cout << "----Strongly-Connected-Components--" << ::std::endl;
 	StronglyConnectedComponents();
 
 	// Single-Source shortest paths
-	std::cout << "===================================" << std::endl;
-	std::cout << "----DAG-Shortest Path--------------" << std::endl;
+	std::cout << "===================================" << ::std::endl;
+	std::cout << "----DAG-Shortest Path--------------" << ::std::endl;
 	DagShortestPath();
-	std::cout << "===================================" << std::endl;
-	std::cout << "----Bellman-Ford-------------------" << std::endl;
+	std::cout << "===================================" << ::std::endl;
+	std::cout << "----Bellman-Ford-------------------" << ::std::endl;
 	BellmanFord();
-	std::cout << "===================================" << std::endl;
-	std::cout << "----Dijkstra-----------------------" << std::endl;
+	std::cout << "===================================" << ::std::endl;
+	std::cout << "----Dijkstra-----------------------" << ::std::endl;
 	Dijkstra();
-	std::cout << "===================================" << std::endl;
-	std::cout << "----Dijkstra (Internal Map)--------" << std::endl;
+	std::cout << "===================================" << ::std::endl;
+	std::cout << "----Dijkstra (Internal Map)--------" << ::std::endl;
 	DijkstraInternalMap();
 
 	// All-Pairs Shortest paths
-	std::cout << "===================================" << std::endl;
-	std::cout << "----All-Pairs Shortest Path--------" << std::endl;
+	std::cout << "===================================" << ::std::endl;
+	std::cout << "----All-Pairs Shortest Path--------" << ::std::endl;
 	AllPairsShortestPath();
-	std::cout << "===================================" << std::endl;
-	std::cout << "----Floyd-Warshall-----------------" << std::endl;
+	std::cout << "===================================" << ::std::endl;
+	std::cout << "----Floyd-Warshall-----------------" << ::std::endl;
 	FloydWarshall();
-	std::cout << "===================================" << std::endl;
-	std::cout << "----Transitive-Closure-------------" << std::endl;
+	std::cout << "===================================" << ::std::endl;
+	std::cout << "----Transitive-Closure-------------" << ::std::endl;
 	TransitiveClosure();
 
 	// Automaton
-	std::cout << "===================================" << std::endl;
-	std::cout << "----Automaton----------------------" << std::endl;
+	std::cout << "===================================" << ::std::endl;
+	std::cout << "----Automaton----------------------" << ::std::endl;
 	AutomatonTest();
 
 	return 0;

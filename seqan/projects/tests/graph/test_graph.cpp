@@ -300,7 +300,7 @@ void Test_Automaton() {
 
 	// Output
 	// Raw output
-	std::cout << g << std::endl;
+	std::cout << g << ::std::endl;
 	// File output
 	fstream strm;
 	strm.open(TEST_PATH "my_automaton.dot", ios_base::out | ios_base::trunc);
@@ -703,7 +703,7 @@ void Test_WordGraph() {
 
 	// Output
 	// Raw output
-	std::cout << g << std::endl;
+	std::cout << g << ::std::endl;
 	// File output
 	fstream strm;
 	strm.open(TEST_PATH "my_wordgraph.dot", ios_base::out | ios_base::trunc);
@@ -880,7 +880,7 @@ void Test_Graph() {
 	removeEdge(g,0,0); // ToDo: Self edges
 	addEdge(g,4,3);  
 	// Raw output
-	std::cout << g << std::endl;
+	std::cout << g << ::std::endl;
 	// File output
 	fstream strm;
 	strm.open(TEST_PATH "my_graph.dot", ios_base::out | ios_base::trunc);
