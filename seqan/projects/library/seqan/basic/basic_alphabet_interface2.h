@@ -136,7 +136,7 @@ infimumValueImpl(T *)
 ..summary:Infimum for a given type.
 ..signature:infimumValue<T>()
 ..param.T:An ordered type.
-..returns:A value $inf$ that holds: $inf >= i$ for all values $i$ of type $T$.
+..returns:A value $inf$ that holds: $inf <= i$ for all values $i$ of type $T$.
 ..remarks.text:The function is implemented in @Function.infimumValueImpl@. 
 Do not specialize $infimumValue$, specialize @Function.infimumValueImpl@ instead!
 ..see:Function.infimumValueImpl
