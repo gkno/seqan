@@ -183,7 +183,7 @@ checkpoint(unsigned int line, char * file)
 	return true;
 }
 #define SEQAN_CHECKPOINT \
-	static bool checkpoint##__LINE__ = ::SEQAN_NAMESPACE_MAIN::debug::checkpoint(__LINE__, __FILE__);
+	::SEQAN_NAMESPACE_MAIN::debug::checkpoint(__LINE__, __FILE__);
 
 
 inline void 
