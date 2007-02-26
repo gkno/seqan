@@ -733,7 +733,7 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 
 	template < typename TValue, typename TSpec >
 	inline bool open(StringSet<String<TValue, TSpec> > &multi, const char *fileName, int dummy = OPEN_RDONLY) {
-		String<TValue, External<> > extString;
+		String<TValue, External< ExternalConfigManualOpen<> > > extString;
 		bool more = true;
 		char id[11]; // 2^32 has 10 decimal digits + 1 (0x00)
 		unsigned i = 0;
@@ -752,7 +752,7 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 	template < typename TValue, typename TSpec >
 	inline bool save(String<TValue, TSpec> &string, const char *fileName, int dummy = OPEN_WRONLY | OPEN_CREATE) {
 		if (length(string) == 0) return true;
-		String<TValue, External<> > extString;
+		String<TValue, External< ExternalConfigManualOpen<> > > extString;
 		if (!open(extString, fileName, OPEN_WRONLY | OPEN_CREATE)) return false;
 		extString = string;
 		return true;
@@ -761,7 +761,7 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 	template < typename TValue, typename TSpec, typename TSetSpec >
 	inline bool save(StringSet<String<TValue, TSpec>, TSetSpec > &multi, const char *fileName, int dummy = OPEN_WRONLY | OPEN_CREATE) {
 		if (length(multi) == 0) return true;
-		String<TValue, External<> > extString;
+		String<TValue, External< ExternalConfigManualOpen<> > > extString;
 		bool result = true;
 		char id[12]; // 2^32 has 10 decimal digits + 2 ('.' and 0x00)
 		for(unsigned i = 0; i < length(multi); ++i) {
@@ -786,8 +786,8 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 	{
 		String<char> name;
 		name = fileName;	append(name, ".txt");	
-		if (!open(getFibre(index, ESA_Text()), toCString(name), openMode) && 
-			!open(getFibre(index, ESA_Text()), fileName), openMode) return false;
+		if ((!open(getFibre(index, ESA_Text()), toCString(name), openMode)) && 
+			(!open(getFibre(index, ESA_Text()), fileName), openMode)) return false;
 
 		name = fileName;	append(name, ".sa");	open(getFibre(index, ESA_SA()), toCString(name), openMode);
 		name = fileName;	append(name, ".lcp");	open(getFibre(index, ESA_LCP()), toCString(name), openMode);
@@ -804,8 +804,8 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 	{
 		String<char> name;
 		name = fileName;	append(name, ".txt");	
-		if (!save(getFibre(index, ESA_Text()), toCString(name)) && 
-			!save(getFibre(index, ESA_Text()), fileName)) return false;
+		if ((!save(getFibre(index, ESA_Text()), toCString(name))) && 
+			(!save(getFibre(index, ESA_Text()), fileName))) return false;
 
 		name = fileName;	append(name, ".sa");	save(getFibre(index, ESA_SA()), toCString(name));
 		name = fileName;	append(name, ".lcp");	save(getFibre(index, ESA_LCP()), toCString(name));
