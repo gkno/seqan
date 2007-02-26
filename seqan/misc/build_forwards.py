@@ -2,6 +2,8 @@ import os
 import copy
 import string
 import sys
+from stat import *
+
 
 ################################################################################
 
@@ -12,7 +14,18 @@ TYPEDEFS = {}
 
 ################################################################################
 
-def main(project_path):
+def buildProject(project_path):
+    print "create forwards for", project_path
+
+    global FUNCS
+    FUNCS = {}
+    
+    global CLASSES
+    CLASSES = {}
+    
+    global TYPEDEFS
+    TYPEDEFS = {}
+    
     pos1 = project_path.rfind('/')
     if (pos1 < 0):
         exit ('ERROR: wrong argument "' + project_path + '"');
@@ -20,19 +33,21 @@ def main(project_path):
     project = project_path[pos1+1:]
     
     for root, dirs, files in os.walk(project_path):
+        if 'CVS' in dirs:
+            dirs.remove('CVS')
+        if '.svn' in dirs:
+            dirs.remove('.svn')
         for file in files:
             if file == forwardFilename(project):
                 continue
             path = os.path.join(root, file)
             if testFileType(path):
                 parseFile(path)
-        if 'CVS' in dirs:
-            dirs.remove('CVS')
-        if '.svn' in dirs:
-            dirs.remove('.svn')
-    
+                
     if FUNCS != {}:        
         outAll(project_path, project)
+        
+    print
 
 ################################################################################
 
@@ -279,41 +294,85 @@ def createEntries(sigs):
         else:
             name = getStructName(sig)
             if name != '':
-                addEntry(CLASSES, name, deleteDefaultArguments(entry, '<', '>'), namespaces)
+                addEntry(CLASSES, name, deleteDefaultArguments(entry, '<'), namespaces)
             else:
                 name = getFuncName(sig)
                 if name != '':
-                    addEntry(FUNCS, name, deleteDefaultArguments(entry, '(', ');'), namespaces)
+                    addEntry(FUNCS, name, deleteDefaultArguments(entry, '('), namespaces)
 
 
 ################################################################################
 # deletes all default arguments from argument lists
 # use delim = '>' for template argument lists and ')' for function argument lists
 
-def deleteDefaultArguments(str, start_delim, stop_delim):
+def deleteDefaultArguments(str, start_delim):
     ret = ""
 
     start = str.find(start_delim);
     if start >= 0: 
-        ret = str[:start]
-        str = str[start:]
+        ret = str[:start+1]
+        str = str[start+1:]
+        
+    str = str.replace("<<", "")
+    str = str.replace(">>", "")
 
     while str != "":
-        pos1 = str.find("=")
-        if pos1 < 0:
+        pos1 = findCharOutsideBrackets(str, 0, "=")
+        if (pos1 < 0) or (str[pos1] != "="):
             ret += str
             break
         ret += str[:pos1]
-        pos2 = str.find(",", pos1)
-        pos3 = str.rfind(stop_delim, pos1)
-        if ((pos2 > pos3) and (pos3 >= 0)) or (pos2 < 0): 
-            pos2 = pos3
+        pos2 = findCharOutsideBrackets(str, pos1, ",")
         if pos2 >= 0:
             str = str[pos2:]
         else:
+            print "ERROR while deleting default arguments"
             break
             
     return ret
+
+################################################################################
+# returns position of the first occurence of "char", or the position of the
+# first closing bracket, whatever comes first.
+# areas in brackets are ignored
+
+def findCharOutsideBrackets(str, start_pos, char, verbose = False):
+    pos = start_pos
+    edge_count = 0
+    while pos < len(str):
+        if verbose: 
+            print pos, edge_count
+            print str[pos:]
+        
+        p1 = str.find(char, pos)
+        p2 = str.find("<", pos)
+        p2a = str.find("(", pos)
+        p3 = str.find(">", pos)
+        p3a = str.find(")", pos)
+        
+        if (p2 < 0) or ((p2a >= 0) and (p2a < p2)): p2 = p2a
+         
+        if (p3 < 0) or ((p3a >= 0) and (p3a < p3)): p3 = p3a
+
+        if (p1 >= 0) and ((p2 < 0) or (p1 < p2)) and ((p3 < 0) or (p1 < p3)):
+            if edge_count == 0:
+                return p1
+            else:
+                pos = p1 + 1
+            
+        elif (p2 >= 0) and ((p3 < 0) or (p2 < p3)):
+            edge_count += 1
+            pos = p2 + 1
+            
+        elif (p3 >= 0):
+            if edge_count == 0:
+                return p3
+            else:
+                edge_count -= 1
+                pos = p3 + 1
+            
+        else:
+            return -1
 
 ################################################################################
 # returns the string that is inserted into the header
@@ -468,16 +527,39 @@ def outChangeNamespaces(old_namespaces, new_namespaces):
             
     return str + "\n"
 
+
+################################################################################
+# searches for projects without generated forward and build forward file
+# returns True if one or more files were built
+
+def buildAllForwards(project_path):
+    pos1 = project_path.rfind('/')
+    if (pos1 < 0): return False
+    project_path = project_path[:pos1]
+    
+    ret = False
+    
+    for f in os.listdir(project_path):
+        if (f == 'CVS') or (f == '.svn'): continue
+        p = project_path + "/" + f
+        m = os.stat(p)[ST_MODE]
+        if S_ISDIR(m):
+            file = p + "/" + forwardFilename(f)
+            if not os.path.exists(file):
+                ret = True
+                buildProject(p)
+    return ret
+
 ################################################################################
 # Start: parse arguments and call main
 
-#main("../projects/library/seqan")
+#buildProject("../projects/library/seqan")
 
 
 if len(sys.argv) < 2: 
     exit ('too few arguments');
 
 #if (os.path.exists("V:/seqan2/" + sys.argv[1])):
-print "create forwards for", sys.argv[1]
-main (sys.argv[1]);
+if not buildAllForwards(sys.argv[1]):
+    buildProject (sys.argv[1]);
 

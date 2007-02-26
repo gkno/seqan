@@ -15,7 +15,9 @@ namespace SEQAN_NAMESPACE_MAIN
 //namespace SEQAN_NAMESPACE_PIPELINING
 //{
 
-    template < int delta, bool omitBlank = false, bool _echoing = (delta < 0) >
+//    template < int delta, bool omitBlank = false, bool _echoing = (delta < 0) >
+//    struct Shifter;
+    template < int delta, bool omitBlank = false, bool _echoing = false >
     struct Shifter;
 
 
