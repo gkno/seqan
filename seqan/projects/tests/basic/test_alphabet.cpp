@@ -394,6 +394,58 @@ void TestSimpleTypeConversions()
 }
 
 //////////////////////////////////////////////////////////////////////////////
+//Test infimum / supremum values
+
+template <typename T>
+void TestExtremeValuesSigned()
+{
+	long double minVal = -1;
+	for(int e = 1; e < BitsPerValue<T>::VALUE; ++e)
+		minVal = 2*minVal;
+
+	long double maxVal = -minVal - 1;
+
+	::std::cout << ::std::endl << "Max/Min of " << typeid(T).name() << ::std::endl;
+	::std::cout << maxVal << " == " << SupremumValue<T>::VALUE << "(" << (T)SupremumValue<T>::VALUE << ")  " << supremumValue<T>() << ::std::endl;
+	::std::cout << minVal << " == " << InfimumValue<T>::VALUE << "(" << (T)InfimumValue<T>::VALUE << ")  " << infimumValue<T>() << ::std::endl;
+
+/*	SEQAN_ASSERT(maxVal == SupremumValue<T>::VALUE);
+	SEQAN_ASSERT(minVal == InfimumValue<T>::VALUE);*/
+}
+
+template <typename T>
+void TestExtremeValuesUnsigned()
+{
+	long double maxVal = 1;
+	for(int e = 0; e < BitsPerValue<T>::VALUE; ++e)
+		maxVal = 2*maxVal;
+	maxVal = maxVal - 1;
+
+
+	::std::cout << ::std::endl << "Max/Min of " << typeid(T).name() << ::std::endl;
+	::std::cout << maxVal << " == " << SupremumValue<T>::VALUE << "(" << (T)SupremumValue<T>::VALUE << ")  " << supremumValue<T>() << ::std::endl;
+	::std::cout << 0 << " == " << InfimumValue<T>::VALUE << "(" << (T)InfimumValue<T>::VALUE << ")  " << infimumValue<T>() << ::std::endl;
+/*
+	SEQAN_ASSERT(maxVal == SupremumValue<T>::VALUE);
+	SEQAN_ASSERT(0 == InfimumValue<T>::VALUE);*/
+}
+
+void TestExtremeValues()
+{
+	TestExtremeValuesSigned<signed char>();
+	TestExtremeValuesSigned<signed short>();
+	TestExtremeValuesSigned<signed int>();
+	TestExtremeValuesSigned<signed long>();
+	TestExtremeValuesUnsigned<unsigned char>();
+	TestExtremeValuesUnsigned<unsigned short>();
+	TestExtremeValuesUnsigned<unsigned int>();
+	TestExtremeValuesUnsigned<unsigned long>();
+/*	TestExtremeValues<float>();
+	TestExtremeValues<double>();
+	TestExtremeValues<long double>();*/
+}
+
+//////////////////////////////////////////////////////////////////////////////
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -409,6 +461,7 @@ void Main_Test_Alphabet()
 	TestSimpleType<Iupac>();
 	TestSimpleType<AminoAcid>();
 	TestSimpleTypeConversions();
+//	TestExtremeValues();
   
 	TestSimpleType<bool>();
 	TestArrayFunctions<char>(0xde, 0xad);

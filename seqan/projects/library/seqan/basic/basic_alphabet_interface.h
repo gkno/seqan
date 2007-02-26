@@ -805,7 +805,31 @@ struct BitsPerValue<TValue const>:
 template <typename T>
 struct ValueSize
 {
-	enum {VALUE = 1 << BitsPerValue<T>::VALUE};
+	enum { VALUE = 1 << BitsPerValue<T>::VALUE };
+};
+
+
+template < typename T, bool _isSigned = TYPECMP< typename _MakeSigned<T>::Type, T >::VALUE >
+struct SupremumValue
+{
+	enum { VALUE = ( ((1 << (BitsPerValue<T>::VALUE - 2)) - 1) << 1) + 1 };		// signed supremum
+};
+template <typename T>
+struct SupremumValue< T, false >
+{
+	enum { VALUE = ((T)~0) };					// unsigned supremum
+};
+
+
+template < typename T, bool _isSigned = TYPECMP< typename _MakeSigned<T>::Type, T >::VALUE >
+struct InfimumValue
+{
+	enum { VALUE = (T)~SupremumValue<T>::VALUE };	// signed infimum
+};
+template <typename T>
+struct InfimumValue< T, false >
+{
+	enum { VALUE = 0 };					// unsigned supremum
 };
 
 //////////////////////////////////////////////////////////////////////////////

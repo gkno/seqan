@@ -98,16 +98,15 @@ struct _MakeUnsigned
 	typedef T Type;
 };
 
+template <typename T>
+struct _MakeUnsigned<T const> {
+	typedef typename _MakeUnsigned<T>::Type const Type;
+};
+
 template <>
 struct _MakeUnsigned<char>
 {
 	typedef unsigned char Type;
-};
-
-template <>
-struct _MakeUnsigned<const char>
-{
-	typedef const unsigned char Type;
 };
 
 template <>
@@ -117,21 +116,9 @@ struct _MakeUnsigned<signed char>
 };
 
 template <>
-struct _MakeUnsigned<const signed char>
-{
-	typedef const unsigned char Type;
-};
-
-template <>
 struct _MakeUnsigned<int>
 {
 	typedef unsigned int Type;
-};
-
-template <>
-struct _MakeUnsigned<const int>
-{
-	typedef const unsigned int Type;
 };
 
 template <>
@@ -141,33 +128,16 @@ struct _MakeUnsigned<short>
 };
 
 template <>
-struct _MakeUnsigned<const short>
-{
-	typedef const unsigned short Type;
-};
-
-template <>
 struct _MakeUnsigned<long>
 {
 	typedef unsigned long Type;
 };
 
-template <>
-struct _MakeUnsigned<const long>
-{
-	typedef const unsigned long Type;
-};
 /*
 template <>
 struct _MakeUnsigned<long long>
 {
 	typedef unsigned long long Type;
-};
-
-template <>
-struct _MakeUnsigned<const long long>
-{
-	typedef const unsigned long long Type;
 };
 */
 
@@ -183,6 +153,11 @@ struct _MakeSigned
 	typedef T Type;
 };
 
+template <typename T>
+struct _MakeSigned<T const> {
+	typedef typename _MakeSigned<T>::Type const Type;
+};
+
 template <>
 struct _MakeSigned<char>
 {
@@ -190,69 +165,34 @@ struct _MakeSigned<char>
 };
 
 template <>
-struct _MakeSigned<const char>
-{
-	typedef const signed char Type;
-};
-
-template <>
-struct _MakeSigned<signed char>
+struct _MakeSigned<unsigned char>
 {
 	typedef signed char Type;
 };
 
 template <>
-struct _MakeSigned<const signed char>
-{
-	typedef const signed char Type;
-};
-
-template <>
-struct _MakeSigned<int>
+struct _MakeSigned<unsigned int>
 {
 	typedef signed int Type;
 };
 
 template <>
-struct _MakeSigned<const int>
-{
-	typedef const signed int Type;
-};
-
-template <>
-struct _MakeSigned<short>
+struct _MakeSigned<unsigned short>
 {
 	typedef signed short Type;
 };
 
 template <>
-struct _MakeSigned<const short>
-{
-	typedef const signed short Type;
-};
-
-template <>
-struct _MakeSigned<long>
+struct _MakeSigned<unsigned long>
 {
 	typedef signed long Type;
 };
 
-template <>
-struct _MakeSigned<const long>
-{
-	typedef const signed long Type;
-};
 /*
 template <>
-struct _MakeSigned<long long>
+struct _MakeSigned<unsigned long long>
 {
 	typedef signed long long Type;
-};
-
-template <>
-struct _MakeSigned<const long long>
-{
-	typedef const signed long long Type;
 };
 */
 

@@ -463,14 +463,14 @@ inline signed short const &
 supremumValueImpl(signed short *)
 {
 SEQAN_CHECKPOINT
-	static signed short const _value = 1 << (BitsPerValue<signed short>::VALUE - 1) - 1;
+	static signed short const _value = (((1 << (BitsPerValue<signed short>::VALUE - 2)) - 1) << 1) + 1;
 	return _value;
 }
 inline signed short const &
-infimumValueImpl(signed short *)
+infimumValueImpl(signed short *dummy)
 {
 SEQAN_CHECKPOINT
-	static signed short const _value = - (1 << (BitsPerValue<signed short>::VALUE - 1));
+	static signed short const _value = -supremumValueImpl(dummy) - 1;
 	return _value;
 }
 
@@ -484,7 +484,7 @@ inline unsigned short const &
 supremumValueImpl(unsigned short *)
 {
 SEQAN_CHECKPOINT
-	static unsigned short const _value = 1 << BitsPerValue<unsigned short>::VALUE - 1;
+	static unsigned short const _value = (((1 << (BitsPerValue<unsigned short>::VALUE - 1)) - 1) << 1) + 1;
 	return _value;
 }
 inline unsigned short const &
@@ -505,14 +505,14 @@ inline signed int const &
 supremumValueImpl(signed int *)
 {
 SEQAN_CHECKPOINT
-	static signed int const _value = 1 << (BitsPerValue<signed int>::VALUE - 1) - 1;
+	static signed int const _value = (((1 << (BitsPerValue<signed int>::VALUE - 2)) - 1) << 1) + 1;
 	return _value;
 }
 inline signed int const &
-infimumValueImpl(signed int *)
+infimumValueImpl(signed int *dummy)
 {
 SEQAN_CHECKPOINT
-	static signed int const _value = - (1 << (BitsPerValue<signed int>::VALUE - 1));
+	static signed int const _value = -supremumValueImpl(dummy) - 1;
 	return _value;
 }
 
@@ -547,14 +547,14 @@ inline signed long const &
 supremumValueImpl(signed long *)
 {
 SEQAN_CHECKPOINT
-	static signed long const _value = 1 << (BitsPerValue<signed long>::VALUE - 1) - 1;
+	static signed long const _value = (((1 << (BitsPerValue<signed long>::VALUE - 2)) - 1) << 1) + 1;
 	return _value;
 }
 inline signed long const &
-infimumValueImpl(signed long *)
+infimumValueImpl(signed long *dummy)
 {
 SEQAN_CHECKPOINT
-	static signed long const _value = - (1 << (BitsPerValue<signed long>::VALUE - 1));
+	static signed long const _value = -supremumValueImpl(dummy) - 1;
 	return _value;
 }
 
@@ -589,14 +589,14 @@ inline __int64 const &
 supremumValueImpl(__int64 *)
 {
 SEQAN_CHECKPOINT
-	static __int64 const _value = (__int64)1 << (BitsPerValue<__int64>::VALUE - 1) - 1;
+	static __int64 const _value = ((((__int64)1 << (BitsPerValue<__int64>::VALUE - 2)) - 1) << 1) + 1;
 	return _value;
 }
 inline __int64 const &
-infimumValueImpl(__int64 *)
+infimumValueImpl(__int64 *dummy)
 {
 SEQAN_CHECKPOINT
-	static __int64 const _value = - ((__int64)1 << (BitsPerValue<__int64>::VALUE - 1));
+	static __int64 const _value = -supremumValueImpl(dummy) - 1;
 	return _value;
 }
 
