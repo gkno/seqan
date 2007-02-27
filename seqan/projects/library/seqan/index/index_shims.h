@@ -724,15 +724,19 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 //____________________________________________________________________________
 
 	template < typename TValue, typename TSpec >
-	inline bool open(String<TValue, TSpec> &string, const char *fileName, int dummy = OPEN_RDONLY) {
+	inline bool open(String<TValue, TSpec> &string, const char *fileName, int openMode) {
 		String<TValue, External< ExternalConfigManualOpen<> > > extString;
-		if (!open(extString, fileName, OPEN_RDONLY)) return false;
+		if (!open(extString, fileName, openMode)) return false;
 		string = extString;
 		return true;
 	}
+	template < typename TValue, typename TSpec >
+	inline bool open(String<TValue, TSpec> &string, const char *fileName) {
+		return open(string, fileName, OPEN_RDONLY);
+	}
 
 	template < typename TValue, typename TSpec >
-	inline bool open(StringSet<String<TValue, TSpec> > &multi, const char *fileName, int dummy = OPEN_RDONLY) {
+	inline bool open(StringSet<String<TValue, TSpec> > &multi, const char *fileName, int openMode) {
 		String<TValue, External< ExternalConfigManualOpen<> > > extString;
 		bool more = true;
 		char id[11]; // 2^32 has 10 decimal digits + 1 (0x00)
@@ -741,25 +745,33 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 			sprintf(id, "%u", i);
 			String<char> name;
 			name = fileName;	append(name, id);
-			if (more = open(extString, toCString(name), OPEN_RDONLY)) {
+			if (more = open(extString, toCString(name), openMode)) {
 				getValue(multi, i) = extString;
 				close(extString);
 			}
 		}
 		return i > 1;
 	}
+	template < typename TValue, typename TSpec >
+	inline bool open(StringSet<String<TValue, TSpec> > &multi, const char *fileName) {
+		return open(multi, fileName, OPEN_RDONLY);
+	}
 
 	template < typename TValue, typename TSpec >
-	inline bool save(String<TValue, TSpec> &string, const char *fileName, int dummy = OPEN_WRONLY | OPEN_CREATE) {
+	inline bool save(String<TValue, TSpec> &string, const char *fileName, int openMode) {
 		if (length(string) == 0) return true;
 		String<TValue, External< ExternalConfigManualOpen<> > > extString;
-		if (!open(extString, fileName, OPEN_WRONLY | OPEN_CREATE)) return false;
+		if (!open(extString, fileName, openMode)) return false;
 		extString = string;
 		return true;
 	}
+	template < typename TValue, typename TSpec >
+	inline bool save(String<TValue, TSpec> &string, const char *fileName) {
+		return save(string, fileName, OPEN_WRONLY | OPEN_CREATE);
+	}
 
 	template < typename TValue, typename TSpec, typename TSetSpec >
-	inline bool save(StringSet<String<TValue, TSpec>, TSetSpec > &multi, const char *fileName, int dummy = OPEN_WRONLY | OPEN_CREATE) {
+	inline bool save(StringSet<String<TValue, TSpec>, TSetSpec > &multi, const char *fileName, int openMode) {
 		if (length(multi) == 0) return true;
 		String<TValue, External< ExternalConfigManualOpen<> > > extString;
 		bool result = true;
@@ -769,7 +781,7 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 			String<char> name;
 			name = fileName;	
 			append(name, &(id[0]));
-			if (open(extString, toCString(name), OPEN_WRONLY | OPEN_CREATE)) {
+			if (open(extString, toCString(name), openMode)) {
 				extString = getValue(multi, i);
 				close(extString);
 			} else
@@ -777,12 +789,16 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 		}
 		return result;
 	}
+	template < typename TValue, typename TSpec, typename TSetSpec >
+	inline bool save(StringSet<String<TValue, TSpec>, TSetSpec > &multi, const char *fileName) {
+		return save(multi, fileName, OPEN_WRONLY | OPEN_CREATE);
+	}
 
 	template < typename TObject, typename TSpec >
 	inline bool open(
 		Index< TObject, Index_ESA<TSpec> > &index, 
 		const char *fileName,
-		int openMode = OPEN_RDONLY)
+		int openMode)
 	{
 		String<char> name;
 		name = fileName;	append(name, ".txt");	
@@ -795,23 +811,37 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 		name = fileName;	append(name, ".bwt");	open(getFibre(index, ESA_BWT()), toCString(name), openMode);
 		return true;
 	}
+	template < typename TObject, typename TSpec >
+	inline bool open(
+		Index< TObject, Index_ESA<TSpec> > &index, 
+		const char *fileName) 
+	{
+		return open(index, fileName, OPEN_RDONLY);
+	}
 
 	template < typename TObject, typename TSpec >
 	inline bool save(
 		Index< TObject, Index_ESA<TSpec> > &index, 
 		const char *fileName,
-		int openMode = OPEN_RDONLY)
+		int openMode)
 	{
 		String<char> name;
 		name = fileName;	append(name, ".txt");	
-		if ((!save(getFibre(index, ESA_Text()), toCString(name))) && 
-			(!save(getFibre(index, ESA_Text()), fileName))) return false;
+		if ((!save(getFibre(index, ESA_Text()), toCString(name), openMode)) && 
+			(!save(getFibre(index, ESA_Text()), fileName), openMode)) return false;
 
-		name = fileName;	append(name, ".sa");	save(getFibre(index, ESA_SA()), toCString(name));
-		name = fileName;	append(name, ".lcp");	save(getFibre(index, ESA_LCP()), toCString(name));
-		name = fileName;	append(name, ".child");	save(getFibre(index, ESA_ChildTab()), toCString(name));
-		name = fileName;	append(name, ".bwt");	save(getFibre(index, ESA_BWT()), toCString(name));
+		name = fileName;	append(name, ".sa");	save(getFibre(index, ESA_SA()), toCString(name), openMode);
+		name = fileName;	append(name, ".lcp");	save(getFibre(index, ESA_LCP()), toCString(name), openMode);
+		name = fileName;	append(name, ".child");	save(getFibre(index, ESA_ChildTab()), toCString(name), openMode);
+		name = fileName;	append(name, ".bwt");	save(getFibre(index, ESA_BWT()), toCString(name), openMode);
 		return true;
+	}
+	template < typename TObject, typename TSpec >
+	inline bool save(
+		Index< TObject, Index_ESA<TSpec> > &index, 
+		const char *fileName)
+	{
+		return save(index, fileName, OPEN_WRONLY | OPEN_CREATE);
 	}
 
 }
