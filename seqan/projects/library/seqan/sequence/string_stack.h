@@ -325,6 +325,23 @@ $Iterator<T>::Type$ is the type of the iterator for $object$-type $T$.
 		appendValue(me, source);
 	}
 
+	template<typename TValue, unsigned int SPACE>
+	inline void 
+	push(String<TValue, Block<SPACE> >& me)
+	{
+	SEQAN_CHECKPOINT
+		if (me.lastValue == me.blockLast) {
+			typename Size< String<TValue, Block<SPACE> > >::Type last = length(me.blocks);
+
+			resize(me.blocks, last + 1, typename DefaultOverflowImplicit<String<TValue, Block<SPACE> > >::Type());
+			allocate(me.alloc, me.blocks[last], 1);
+			me.lastValue = me.blockFirst = begin(*me.blocks[last]);
+			me.blockLast = (me.blockFirst + (SPACE - 1));
+		} else
+			++me.lastValue;
+		valueConstruct(me.lastValue);
+	}
+	 
 	template<typename TValue, unsigned int SPACE, typename TVal>
 	inline void 
 	push_back(

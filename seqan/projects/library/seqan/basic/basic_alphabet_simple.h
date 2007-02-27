@@ -780,10 +780,7 @@ struct _Dna {};
 typedef SimpleType<unsigned char,_Dna> Dna;
 
 template <> struct ValueSize< Dna > { enum { VALUE = 4 }; };
-template <> struct ValueSize< Dna const > { enum { VALUE = 4 }; };
-
 template <> struct BitsPerValue< Dna > { enum { VALUE = 2 }; };
-template <> struct BitsPerValue< Dna const> { enum { VALUE = 2 }; };
 
 //____________________________________________________________________________
 
@@ -807,10 +804,7 @@ struct _Dna5 {};
 typedef SimpleType<unsigned char, _Dna5> Dna5;
 
 template <> struct ValueSize< Dna5 > { enum { VALUE = 5 }; };
-template <> struct ValueSize< Dna5 const > { enum { VALUE = 5 }; };
-
 template <> struct BitsPerValue< Dna5 > { enum { VALUE = 3 }; };
-template <> struct BitsPerValue< Dna5 const> { enum { VALUE = 3 }; };
 
 //____________________________________________________________________________
 
@@ -834,10 +828,7 @@ struct _Iupac {};
 typedef SimpleType<unsigned char, _Iupac> Iupac;
 
 template <> struct ValueSize< Iupac > { enum { VALUE = 16 }; };
-template <> struct ValueSize< Iupac const > { enum { VALUE = 16 }; };
-
 template <> struct BitsPerValue< Iupac > { enum { VALUE = 4 }; };
-template <> struct BitsPerValue< Iupac const> { enum { VALUE = 4 }; };
 
 
 //____________________________________________________________________________
@@ -864,10 +855,7 @@ struct _AminoAcid {};
 typedef SimpleType<unsigned char, _AminoAcid> AminoAcid;
 
 template <> struct ValueSize< AminoAcid > { enum { VALUE = 24 }; };
-template <> struct ValueSize< AminoAcid const > { enum { VALUE = 24 }; };
-
 template <> struct BitsPerValue< AminoAcid > { enum { VALUE = 5 }; };
-template <> struct BitsPerValue< AminoAcid const> { enum { VALUE = 5 }; };
 
 //////////////////////////////////////////////////////////////////////////////
 //ASCII

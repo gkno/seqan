@@ -42,7 +42,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		VectorSet():
 			size(0)	
 		{
-			autoSize(*this);
+			_autoSize(*this);
 		}
 
 		VectorSet(TSize _vectorSize):
@@ -52,11 +52,11 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
 		
 		template <typename _TSet>
-		inline static void autoSize(_TSet &set) {}
+		inline void _autoSize(_TSet &) {}
 
 		template <typename _TKey>
-		inline static void autoSize(VectorSet<_TKey, Alloc<> > &set) {
-			resize(set.vector, (unsigned)ValueSize<_TKey>::VALUE);
+		inline void _autoSize(VectorSet<_TKey, Alloc<> > &) {
+			resize(vector, (unsigned)ValueSize<TKey>::VALUE);
 		}
 	};
 
@@ -76,7 +76,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		VectorSet():
 			size(0)	
 		{
-			autoSize(*this);
+			_autoSize(*this);
 		}
 
 		VectorSet(TSize _vectorSize):
@@ -86,11 +86,12 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
 		
 		template <typename _TSet>
-		inline static void autoSize(_TSet &set) {}
+		inline void _autoSize(_TSet &) {}
 
 		template <typename _TKey>
-		inline static void autoSize(VectorSet<_TKey, Alloc<> > &set) {
-			resize(set.vector, (unsigned)ValueSize<_TKey>::VALUE);
+		inline void _autoSize(VectorSet<_TKey, Alloc<> > &) {
+			resize(vector, (unsigned)ValueSize<TKey>::VALUE);
+			resize(obj, (unsigned)ValueSize<TKey>::VALUE);
 		}
 	};
 

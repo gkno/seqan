@@ -271,7 +271,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			minLength(_minLength)
 		{
 			indexRequire(_tree, ESA_BWT());
-			push(setStack, TSet());
+			push(setStack);
 			resize(posList, length(_tree));
 			goNext(*this);
 		}
@@ -382,7 +382,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef Pair<TValue, TFractionHeader>	TFraction;
 		typedef typename Set<TFraction>::Type	TSet;
 
-		push(it.setStack, TSet());
+		push(it.setStack);
 	}
 
 	template < typename TSTree >

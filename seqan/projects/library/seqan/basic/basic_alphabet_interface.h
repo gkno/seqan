@@ -807,6 +807,9 @@ struct ValueSize
 {
 	enum { VALUE = 1 << BitsPerValue<T>::VALUE };
 };
+template <typename TValue>
+struct ValueSize<TValue const>:
+	public ValueSize<TValue> {};
 
 
 template < typename T, bool _isSigned = TYPECMP< typename _MakeSigned<T>::Type, T >::VALUE >

@@ -71,6 +71,11 @@ struct Row:
 {
 };
 
+template <typename T>
+struct Row<T const> {
+	typedef typename Row<T>::Type const Type;
+};
+
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 // Align
@@ -255,7 +260,7 @@ SEQAN_CHECKPOINT
 	return value(rows(me), _pos);
 }
 template <typename TSource, typename TSpec, typename TPosition>
-inline typename Row< Align<TSource, TSpec> const>::Type const &
+inline typename Row< Align<TSource, TSpec> const>::Type &
 row(Align<TSource, TSpec> const & me, 
 	TPosition _pos)
 {
