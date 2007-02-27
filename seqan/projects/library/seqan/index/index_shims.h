@@ -757,6 +757,33 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 		return open(multi, fileName, OPEN_RDONLY);
 	}
 
+	template < typename TObject, typename TSpec >
+	inline bool open(
+		Index< TObject, Index_ESA<TSpec> > &index, 
+		const char *fileName,
+		int openMode)
+	{
+		String<char> name;
+		name = fileName;	append(name, ".txt");	
+		if ((!open(getFibre(index, ESA_Text()), toCString(name), openMode)) && 
+			(!open(getFibre(index, ESA_Text()), fileName), openMode)) return false;
+
+		name = fileName;	append(name, ".sa");	open(getFibre(index, ESA_SA()), toCString(name), openMode);
+		name = fileName;	append(name, ".lcp");	open(getFibre(index, ESA_LCP()), toCString(name), openMode);
+		name = fileName;	append(name, ".child");	open(getFibre(index, ESA_ChildTab()), toCString(name), openMode);
+		name = fileName;	append(name, ".bwt");	open(getFibre(index, ESA_BWT()), toCString(name), openMode);
+		return true;
+	}
+	template < typename TObject, typename TSpec >
+	inline bool open(
+		Index< TObject, Index_ESA<TSpec> > &index, 
+		const char *fileName) 
+	{
+		return open(index, fileName, OPEN_RDONLY);
+	}
+
+//____________________________________________________________________________
+
 	template < typename TValue, typename TSpec >
 	inline bool save(String<TValue, TSpec> &string, const char *fileName, int openMode) {
 		if (length(string) == 0) return true;
@@ -792,31 +819,6 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 	template < typename TValue, typename TSpec, typename TSetSpec >
 	inline bool save(StringSet<String<TValue, TSpec>, TSetSpec > &multi, const char *fileName) {
 		return save(multi, fileName, OPEN_WRONLY | OPEN_CREATE);
-	}
-
-	template < typename TObject, typename TSpec >
-	inline bool open(
-		Index< TObject, Index_ESA<TSpec> > &index, 
-		const char *fileName,
-		int openMode)
-	{
-		String<char> name;
-		name = fileName;	append(name, ".txt");	
-		if ((!open(getFibre(index, ESA_Text()), toCString(name), openMode)) && 
-			(!open(getFibre(index, ESA_Text()), fileName), openMode)) return false;
-
-		name = fileName;	append(name, ".sa");	open(getFibre(index, ESA_SA()), toCString(name), openMode);
-		name = fileName;	append(name, ".lcp");	open(getFibre(index, ESA_LCP()), toCString(name), openMode);
-		name = fileName;	append(name, ".child");	open(getFibre(index, ESA_ChildTab()), toCString(name), openMode);
-		name = fileName;	append(name, ".bwt");	open(getFibre(index, ESA_BWT()), toCString(name), openMode);
-		return true;
-	}
-	template < typename TObject, typename TSpec >
-	inline bool open(
-		Index< TObject, Index_ESA<TSpec> > &index, 
-		const char *fileName) 
-	{
-		return open(index, fileName, OPEN_RDONLY);
 	}
 
 	template < typename TObject, typename TSpec >
