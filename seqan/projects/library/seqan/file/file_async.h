@@ -728,11 +728,11 @@ namespace SEQAN_NAMESPACE_MAIN
     enum { _AsyncIOSignal = SIGIO };
 
 	inline void printRequest(aiocb &request) {
-		printf("fildes:\t%x\n", request.aio_fildes);
-		printf("buffer:\t%x\n", request.aio_buf);
-		printf("offset:\t%x\n", request.aio_offset);
-		printf("nbytes:\t%x\n", request.aio_nbytes);
-		printf("event:\t%x\n", request.aio_sigevent.sigev_notify);
+		printf("fildes:\t%x\n", (unsigned int) request.aio_fildes);
+		printf("buffer:\t%x\n", (unsigned int) request.aio_buf);
+		printf("offset:\t%x\n", (unsigned int) request.aio_offset);
+		printf("nbytes:\t%x\n", (unsigned int) request.aio_nbytes);
+		printf("event:\t%x\n",  (unsigned int) request.aio_sigevent.sigev_notify);
 	}
 
     template < typename TConfig, typename TValue, typename TSize, typename TPos >

@@ -251,8 +251,10 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template < typename TFileArray >
     inline bool _flushFArray(TFileArray &me) {
+		bool result = true;
 		for(int i = 0; i < length(me); ++i)
-			flush(me[i]);
+			result &= flush(me[i]);
+		return result;
     }
 
     template < typename TFileArray, typename TRequest >

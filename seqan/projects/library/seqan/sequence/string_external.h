@@ -1645,6 +1645,7 @@ namespace SEQAN_NAMESPACE_MAIN
     save(String<TValue, External<TConfig> > &me, const char *fileName, int openMode = OPEN_RDWR + OPEN_CREATE | OPEN_APPEND) {
 		// External Strings are persistent, thus there is no need to save them
 		//ExtStringsDontNeedToBeSaved error;
+		return true;
 	}
 
 	template < typename TValue, typename TConfig >
@@ -1652,6 +1653,7 @@ namespace SEQAN_NAMESPACE_MAIN
     save(String<TValue, External<TConfig> > &me, typename TConfig::TFile file) {
 		// External Strings are persistent, thus there is no need to save them
 		//ExtStringsDontNeedToBeSaved error;
+		return true;
 	}
 
     template < typename TValue, typename TConfig >

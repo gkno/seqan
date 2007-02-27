@@ -77,6 +77,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
         static DWORD WINAPI _start(LPVOID _this) {
             reinterpret_cast<Thread*>(_this)->worker.run(&reinterpret_cast<Thread*>(_this));
+			return 0;	// return value should indicate success/failure
         }
     };
     
@@ -144,6 +145,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
         static void* _start(void* _this) {
             reinterpret_cast<Thread*>(_this)->worker.run(&reinterpret_cast<Thread*>(_this));
+			return 0;
         }
     };
     

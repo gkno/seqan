@@ -903,7 +903,7 @@ namespace SEQAN_NAMESPACE_MAIN
     struct Value< BufferHandler< String<TValue, External<TConfig> >, TSpec > > {
         typedef SimpleBuffer< TValue > Type;
     };
-/*
+
     // sequence -> external string
     template < typename TValue,
                typename TConfig,

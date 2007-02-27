@@ -21,9 +21,9 @@ namespace SEQAN_NAMESPACE_MAIN
 
 #else
 
-#define SEQAN_DO_SYS(_cond) _cond;
+#define SEQAN_DO_SYS(_cond) if (_cond);
 #define SEQAN_DO_SYS1(_cond) SEQAN_DO_SYS(_cond)
-#define SEQAN_DO_SYS2(_cond, _comment) _cond;
+#define SEQAN_DO_SYS2(_cond, _comment) if (_cond);
 
 #endif
 

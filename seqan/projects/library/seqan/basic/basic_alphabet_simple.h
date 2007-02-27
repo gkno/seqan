@@ -906,7 +906,7 @@ struct CompareType<Dna, Ascii> { typedef Dna Type; };
 inline void assign(Dna & target, Ascii c_source)
 {
 SEQAN_CHECKPOINT
-	target.value = _Translate_Table_Ascii_2_Dna<>::VALUE[c_source];
+	target.value = _Translate_Table_Ascii_2_Dna<>::VALUE[(unsigned char)c_source];
 }
 //____________________________________________________________________________
 
@@ -953,7 +953,7 @@ struct CompareType<Dna5, Ascii> { typedef Dna5 Type; };
 inline void assign(Dna5 & target, Ascii c_source)
 {
 SEQAN_CHECKPOINT
-	target.value = _Translate_Table_Ascii_2_Dna5<>::VALUE[c_source];
+	target.value = _Translate_Table_Ascii_2_Dna5<>::VALUE[(unsigned char) c_source];
 }
 //____________________________________________________________________________
 
@@ -1001,7 +1001,7 @@ struct CompareType<Iupac, Ascii> { typedef Iupac Type; };
 inline void assign(Iupac & target, Ascii c_source)
 {
 SEQAN_CHECKPOINT
-	target.value = _Translate_Table_Ascii_2_Iupac<>::VALUE[c_source];
+	target.value = _Translate_Table_Ascii_2_Iupac<>::VALUE[(unsigned char) c_source];
 }
 //____________________________________________________________________________
 
@@ -1044,7 +1044,7 @@ struct CompareType<AminoAcid, Ascii> { typedef AminoAcid Type; };
 inline void assign(AminoAcid & target, Ascii c_source)
 {
 SEQAN_CHECKPOINT
-	target.value = _Translate_Table_Ascii_2_AA<>::VALUE[c_source];
+	target.value = _Translate_Table_Ascii_2_AA<>::VALUE[(unsigned char) c_source];
 }
 //____________________________________________________________________________
 

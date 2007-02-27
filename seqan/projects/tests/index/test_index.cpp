@@ -201,7 +201,7 @@ void simpleMUMmer()
 			occs = getOccurences(it);					// gives hit positions (seqNo,seqOfs)
 			orderOccurences(occs);						// order them by seqNo
 			
-			for(int i = 0; i < length(occs); ++i)
+			for(unsigned i = 0; i < length(occs); ++i)
 			   	cout << setw(8)
 				     << getValueI2(occs[i])	+ 1			// output them in MUMmer's output format
 					 << "  ";
