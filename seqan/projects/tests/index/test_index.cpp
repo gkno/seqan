@@ -271,11 +271,11 @@ int main()
 //		testIteratorSpec<MaxRepeats>();
 
 		testFind<ESA_MLR>();
-		testBuild();
+//		testBuild();
 		testMultiIndex();
 		testIteratorSpec<SuperMaxRepeats>();
 		testIteratorSpec<SuperMaxRepeatsFast>();
-		simpleMUMmer();	
+//		simpleMUMmer();	
 
 	SEQAN_TREPORT("TEST END")
 		return 0;
