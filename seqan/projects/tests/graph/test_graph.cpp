@@ -1292,73 +1292,6 @@ void Test_GraphInternalProperty() {
 }
 
 
-
-void Test_GraphStack() {
-//____________________________________________________________________________
-// Graph stack
-
-    String<int, Block<2> > stack;
-	SEQAN_TASSERT(empty(stack) == true)
-	push_back(stack,1);
-	SEQAN_TASSERT(top(stack)==1)
-	SEQAN_TASSERT(stack[0]==1)
-	push_back(stack,20);
-	SEQAN_TASSERT(top(stack)==20)
-	SEQAN_TASSERT(stack[0]==1)
-	SEQAN_TASSERT(stack[1]==20)
-	push_back(stack,3);
-	SEQAN_TASSERT(top(stack)==3)
-	SEQAN_TASSERT(stack[2]==3)
-	pop_back(stack);
-	SEQAN_TASSERT(top(stack)==20)
-	SEQAN_TASSERT(empty(stack) == false)
-	pop_back(stack);
-	pop_back(stack);
-	pop_back(stack);
-	pop_back(stack);
-	SEQAN_TASSERT(empty(stack) == true)
-	push_back(stack,20);
-	SEQAN_TASSERT(top(stack)==20)
-	String<char, Block<2> > wS("hallo");
-	SEQAN_TASSERT(top(wS)=='o')
-	SEQAN_TASSERT(wS[2]=='l')
-	wS = "new_stack";
-	SEQAN_TASSERT(top(wS)=='k')
-	SEQAN_TASSERT(wS[2]=='w')
-	SEQAN_TASSERT(length(wS)==9)
-	typedef Iterator<String<char,Block<2> >, Standard>::Type TIter;
-	TIter it = begin(wS, Standard());
-	TIter itEnd = end(wS, Standard());
-	SEQAN_TASSERT(*it=='n')
-	++it;
-	SEQAN_TASSERT(*it=='e')
-	goNext(it);
-	SEQAN_TASSERT(*it=='w')
-	SEQAN_TASSERT(it != itEnd)
-	SEQAN_TASSERT(atEnd(it, wS)==false)
-	clear(wS);
-	SEQAN_TASSERT(empty(wS) == true)
-	append(wS, 'A');
-	SEQAN_TASSERT(top(wS)=='A')
-	append(wS, 'H');
-	SEQAN_TASSERT(wS[1]=='H')
-	appendValue(wS, 'A');
-	SEQAN_TASSERT(wS[2]=='A')
-	int a = 20;
-	String<int, Block<2> > test(a);
-	SEQAN_TASSERT(test[0]==20)
-	String<int, Block<2> > test2(test);
-	SEQAN_TASSERT(test2[0]==20)
-	test[0]=10;
-	SEQAN_TASSERT(test[0]==10)
-	SEQAN_TASSERT(test2[0]==20)
-	test2 = test;
-	SEQAN_TASSERT(test[0]==10)
-	SEQAN_TASSERT(test2[0]==10)
-	String<char, Block<2> > const test3("Hallo");
-	SEQAN_TASSERT(test3[0]=='H')
-}
-
 //////////////////////////////////////////////////////////////////////////////
 
 void Test_GraphVertexIterator() {
@@ -2304,7 +2237,6 @@ int main()
 	Test_Graph();
 	Test_GraphExternalProperty();
 	Test_GraphInternalProperty();
-	Test_GraphStack();
 	Test_GraphVertexIterator();
 	Test_GraphOutEdgeIterator();
 	Test_GraphEdgeIterator();
@@ -2328,13 +2260,13 @@ int main()
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_dfsiterator.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_edgestump.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_edgelist.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_edgelistu.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_edgeautomaton.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_automaton.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_wordgraph.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_oracle.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_trie.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_algorithm.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_stack.h");
 	
 	SEQAN_TREPORT("TEST END")
 

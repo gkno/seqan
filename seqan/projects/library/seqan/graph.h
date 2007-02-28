@@ -45,6 +45,7 @@
 // EdgeList
 #include <seqan/graph/graph_edgestump.h>
 #include <seqan/graph/graph_impl_edgelist.h>
+#include <seqan/graph/graph_impl_edgelistu.h>   // Undirected graph
 // Automaton
 #include <seqan/graph/graph_edgeautomaton.h>
 #include <seqan/graph/graph_impl_automaton.h>
