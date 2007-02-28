@@ -191,7 +191,7 @@ outDegree(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> const& g,
 	TSize table_length = ValueSize<TAlphabet>::VALUE;
 	TVertexDescriptor nilVal = _get_nil<TVertexDescriptor>();
 	for(TSize i=0;i<table_length;++i) {
-		if (g.data_vertex[vertex].data_edge[i].data_target!=nilVal) ++count;
+		if ( (TVertexDescriptor) g.data_vertex[vertex].data_edge[i].data_target!=nilVal) ++count;
 	}
 	return count;
 }
@@ -214,8 +214,8 @@ inDegree(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> const& g,
 	for(TIterConst it = begin(g.data_vertex);!atEnd(it);goNext(it)) {
 		if (!idInUse(g.data_id_managerV, position(it))) continue;
 		for(TSize i=0;i<table_length;++i) {
-			if (((getValue(it)).data_edge[i].data_target!=nilVal) &&
-				((getValue(it)).data_edge[i].data_target==vertex))
+			if (( (TVertexDescriptor) (getValue(it)).data_edge[i].data_target!=nilVal) &&
+				( (TVertexDescriptor) (getValue(it)).data_edge[i].data_target==vertex))
 			{
 				++count;
 			}
@@ -273,7 +273,7 @@ isRoot(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> const& g,
 	   TVertexDescriptor v)
 {
 	SEQAN_CHECKPOINT
-	return (g.root == v);
+	return ( (TVertexDescriptor) g.root == v);
 }
 
 template<typename TAlphabet, typename TCargo, typename TEdgeSpec, typename TSpec>
@@ -404,7 +404,7 @@ removeEdge(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec>& g,
 	typedef typename Size<TGraph>::Type TSize;
 	TSize table_length = ValueSize<TAlphabet>::VALUE;
 	for(TSize i=0;i<table_length;++i) {
-		if (g.data_vertex[source].data_edge[i].data_target==target) {
+		if ( (TVertexDescriptor) g.data_vertex[source].data_edge[i].data_target==target) {
 			_removeAutomatonEdge(g,TEdgeDescriptor(source,TAlphabet(i)));
 			break;
 		}
@@ -454,8 +454,8 @@ removeInEdges(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec>& g,
 	for(TIter it = begin(g.data_vertex);!atEnd(it);goNext(it)) {
 		if (!idInUse(g.data_id_managerV, position(it))) continue;
 		for(TSize i=0;i<table_length;++i) {
-			if (((value(it)).data_edge[i].data_target!=nilVal) &&
-				((value(it)).data_edge[i].data_target==vertex))
+			if (( (TVertexDescriptor) (value(it)).data_edge[i].data_target!=nilVal) &&
+				( (TVertexDescriptor) (value(it)).data_edge[i].data_target==vertex))
 			{
 				(value(it)).data_edge[i].data_target=nilVal;
 			}
@@ -540,12 +540,11 @@ getPredecessor(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> const& g,
 	typedef typename EdgeType<TGraph>::Type TEdge;
 	typedef typename Size<TGraph>::Type TSize;
 	TAlphabet letter(c);
-	TSize table_length = ValueSize<TAlphabet>::VALUE;
 	TVertexDescriptor nilVal = _get_nil<TVertexDescriptor>();
 	typedef typename Iterator<String<AutomatonEdgeArray<TEdge, TAlphabet> > const>::Type TIterConst;
 	for(TIterConst it = begin(g.data_vertex);!atEnd(it);goNext(it)) {
-		if (((getValue(it)).data_edge[(TSize) letter].data_target!=nilVal) &&
-			((getValue(it)).data_edge[(TSize) letter].data_target==vertex))
+		if (( (TVertexDescriptor) (getValue(it)).data_edge[(TSize) letter].data_target!=nilVal) &&
+			( (TVertexDescriptor) (getValue(it)).data_edge[(TSize) letter].data_target==vertex))
 		{
 			return position(it);
 	    }

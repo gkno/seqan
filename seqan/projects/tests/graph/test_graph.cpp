@@ -606,8 +606,8 @@ void Test_Automaton() {
 	typedef Size<TGraph9>::Type TSize9;
 
 	TGraph9 g9;
-	TVertexDescriptor9 vert0 = addVertex(g9);
-	TVertexDescriptor9 vert1 = addVertex(g9);
+	addVertex(g9);
+	addVertex(g9);
 	Dna aDna('a');
 	Dna gDna('g');
 	TEdgeDescriptor9 edg1 = addEdge(g9,0,1,aDna,12);
@@ -1200,7 +1200,7 @@ void Test_GraphInternalProperty() {
 	TVertexDescriptor v0 = addVertex(g);
 	TVertexDescriptor v1 = addVertex(g);
 	TEdgeDescriptor e1 =addEdge(g,v0,v0);
-	TEdgeDescriptor e2 =addEdge(g,0,1);
+	TEdgeDescriptor e2 =addEdge(g,v0,v1);
 
 	// First Variant: Explicit internal map with member Ids
 	InternalMap<TPair, 1> eMap1; // This property map is used to access the first member
@@ -1239,7 +1239,7 @@ void Test_GraphInternalProperty() {
 	addVertex(g2);
 	addVertex(g2);
 	TEdgeDescriptor2 edge1 =addEdge(g2,v0,v0);
-	TEdgeDescriptor2 edge2 =addEdge(g2,0,1);
+	addEdge(g2,0,1);
 	InternalMap<unsigned int> edgeMap;
 	initEdgeMap(g2,edgeMap);
 	assignProperty(edgeMap, edge1 ,3);
@@ -1372,9 +1372,9 @@ void Test_GraphVertexIterator() {
 	
 	TGraph g;
 	TVertexDescriptor v0 = addVertex(g);
-	TEdgeDescriptor e1 =addEdge(g,v0,v0,'c');
+	addEdge(g,v0,v0,'c');
 	TVertexDescriptor v1 = addVertex(g);
-	TEdgeDescriptor e2 =addEdge(g,0,1,'t');
+	addEdge(g,v0,v1,'t');
 	addVertex(g); //2
 	addVertex(g); //3
 	addVertex(g); //4
@@ -1436,9 +1436,9 @@ void Test_GraphOutEdgeIterator() {
 	
 	Graph<> g;
 	TVertexDescriptor v0 = addVertex(g);
-	TEdgeDescriptor e1 =addEdge(g,v0,v0);
+	addEdge(g,v0,v0);
 	TVertexDescriptor v1 = addVertex(g);
-	TEdgeDescriptor e2 =addEdge(g,0,1);
+	addEdge(g,v0,v1);
 	addVertex(g); //2
 	addVertex(g); //3
 	addVertex(g); //4
@@ -1504,9 +1504,9 @@ void Test_GraphEdgeIterator() {
 	
 	Graph<> g;
 	TVertexDescriptor v0 = addVertex(g);
-	TEdgeDescriptor e1 =addEdge(g,v0,v0);
+	addEdge(g,v0,v0);
 	TVertexDescriptor v1 = addVertex(g);
-	TEdgeDescriptor e2 =addEdge(g,0,1);
+	addEdge(g,v0,v1);
 	addVertex(g); //2
 	addVertex(g); //3
 	addVertex(g); //4
@@ -1582,9 +1582,9 @@ void Test_GraphAdjacencyIterator() {
 	
 	Graph<> g;
 	TVertexDescriptor v0 = addVertex(g);
-	TEdgeDescriptor e1 =addEdge(g,v0,v0);
+	addEdge(g,v0,v0);
 	TVertexDescriptor v1 = addVertex(g);
-	TEdgeDescriptor e2 =addEdge(g,0,1);
+	addEdge(g,v0,v1);
 	addVertex(g); //2
 	addVertex(g); //3
 	addVertex(g); //4
@@ -1952,7 +1952,7 @@ void Test_DagShortestPath() {
 	// DAG-Shortest path(Graph, sourceVertex_vertex, weightMap, predMap, distMap)
 	dag_shortest_path(g,1,weightMap,predMap,distMap);
 	
-	SEQAN_TASSERT(getProperty(distMap, 0) == getInfinityDistance(weightMap))
+	SEQAN_TASSERT(getProperty(distMap, 0) == (unsigned int) getInfinityDistance(weightMap))
 	SEQAN_TASSERT(getProperty(distMap, 1) == 0)
 	SEQAN_TASSERT(getProperty(distMap, 2) == 2)
 	SEQAN_TASSERT(getProperty(distMap, 3) == 6)

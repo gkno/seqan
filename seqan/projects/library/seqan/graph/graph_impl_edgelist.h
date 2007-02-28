@@ -182,7 +182,7 @@ inDegree(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const& g,
 	for(TIterConst it = begin(g.data_vertex);!atEnd(it);goNext(it)) {
 		TEdgeStump const* current = getValue(it);
 		while(current!=0) {
-			if (current->data_target==vertex) ++count;
+			if ( (TVertexDescriptor) current->data_target==vertex) ++count;
 			current = current->data_next;
 		}
 	}
@@ -269,7 +269,7 @@ removeEdge(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec>& g,
 	TEdgeStump* pred = 0;
 	TEdgeStump* current = getValue(g.data_vertex, source);
 	while(current != (TEdgeStump*) 0) {
-		if (current->data_target == target) break;
+		if ( (TVertexDescriptor) current->data_target == target) break;
 		pred = current;
 		current = current->data_next;
 	}
@@ -325,7 +325,7 @@ removeInEdges(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec>& g,
 		TEdgeStump* current = getValue(it);
 		TVertexDescriptor const sourceVertex = position(it);
 		while(current!=0) {
-			if (current->data_target==v) {
+			if ( (TVertexDescriptor) current->data_target==v) {
 				removeEdge(g, sourceVertex, v);
 				current = getValue(g.data_vertex, sourceVertex);
 			} else {

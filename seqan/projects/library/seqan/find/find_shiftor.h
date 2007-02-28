@@ -173,7 +173,7 @@ bool _findShiftOr_SmallNeedle(TFinder & finder, Pattern<TNeedle, ShiftOr> & me) 
 	while (!atEnd(finder)) {
 		TWord pos = convert<TWord>(*finder);
 		me.prefSufMatch[0] = (me.prefSufMatch[0] << 1) | me.table[me.blockCount*pos];
-		if ((me.prefSufMatch[0] | compare) != ~0) {
+		if ((me.prefSufMatch[0] | compare) != (TWord) ~0) {
 			finder-=(me.needleLength-1);
 			return true; 
 		}
@@ -197,7 +197,7 @@ bool _findShiftOr_LargeNeedle(TFinder & finder, Pattern<TNeedle, ShiftOr> & me) 
 			carry=newCarry;
 		}
 		for(TWord block=0;block<me.blockCount;++block) me.prefSufMatch[block] |= me.table[me.blockCount*pos+block];
-		if ((me.prefSufMatch[me.blockCount-1] | compare) != ~0) {
+		if ((me.prefSufMatch[me.blockCount-1] | compare) != (TWord) ~0) {
 			finder-=(me.needleLength-1);
 			return true;  
 		}

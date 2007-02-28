@@ -221,13 +221,12 @@ getPredecessor(Graph<Automaton<TAlphabet, TCargo, WordGraph<TSpec> >, TGraphSpec
 	typedef typename Size<TGraph>::Type TSize;
 	TAlphabet letter(getValue(label, 0));
 	String<TAlphabet> suf(suffix(label, 1));
-	TSize table_length = ValueSize<TAlphabet>::VALUE;
 	TVertexDescriptor nilVal = _get_nil<TVertexDescriptor>();
 	typedef typename Iterator<String<AutomatonEdgeArray<TEdge, TAlphabet> > const>::Type TIterConst;
 	for(TIterConst it = begin(g.data_vertex);!atEnd(it);goNext(it)) {
-		if ((getValue(it)).data_edge[(TSize) letter].data_target==nilVal) continue;
+		if ( (TVertexDescriptor) (getValue(it)).data_edge[(TSize) letter].data_target==nilVal) continue;
 		String<TAlphabet> edgeLabel(getProperty(g.data_edge_label, TEdgeDescriptor(position(it), letter)));
-		if (((getValue(it)).data_edge[(TSize) letter].data_target==vertex) &&
+		if (( (TVertexDescriptor) (getValue(it)).data_edge[(TSize) letter].data_target==vertex) &&
 			(edgeLabel == suf))
 		{
 			return position(it);
