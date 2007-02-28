@@ -95,8 +95,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
 
 	private:
-		SizeType _Count, _Count2;
 		FlatFwdIt _First, _Mid;
+		SizeType _Count, _Count2;
 	};
 
 

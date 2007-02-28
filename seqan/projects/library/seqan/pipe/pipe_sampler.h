@@ -401,9 +401,9 @@ The m-tuples are substrings of the input stream beginning at positions $i$, with
         
         Pipe(TInput& _in, TLimitsString const &_limits):
             in(_in),
-			limits(_limits),
             outRef(&tmp1),
-            tmpRef(&tmp2) {}
+            tmpRef(&tmp2),
+			limits(_limits) {}
        
         inline void prepare() {
             memset<sizeof(filter), 0>(filter);

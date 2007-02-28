@@ -30,8 +30,8 @@ SEQAN_CHECKPOINT
 
 	Shape(int num_gaps, int span):
 	span(span),
-	shape_len(span - num_gaps),
-	num_gaps(num_gaps)
+	num_gaps(num_gaps),
+	shape_len(span - num_gaps)
 	{
 SEQAN_CHECKPOINT
 		resize(shape, span - num_gaps);

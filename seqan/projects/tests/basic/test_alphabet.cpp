@@ -211,9 +211,12 @@ void TestAlphabetInterface()
 //////////////////////////////////////////////////////////////////////////////
 //Test value array functions for some types
 
-template <typename T>
-void TestArrayFunctions(T const val1, T const val2)
+template <typename T, typename _T>
+void TestArrayFunctions(_T const _val1, _T const _val2)
 {
+	T val1 = (T)_val1;
+	T val2 = (T)_val2;
+
 	T a = val1;
 
 	T a_buf1[200];
@@ -255,13 +258,13 @@ void TestArrayFunctions(T const val1, T const val2)
 	arrayCopy(a_buf1, a_buf1 + 50, a_buf1 + 20); 
 	for (int i=0; i < 50; ++i)
 	{
-		SEQAN_TASSERT(a_buf1[i+20] == i)
+		SEQAN_TASSERT(a_buf1[i+20] == (T)i)
 	}
 
 	arrayCopy(a_buf1 + 80, a_buf1 + 100, a_buf1 + 75); 
 	for (int i=80; i < 100; ++i)
 	{
-		SEQAN_TASSERT(a_buf1[i-5] == i)
+		SEQAN_TASSERT(a_buf1[i-5] == (T)i)
 	}
 
 	for (int i=0; i < 100; ++i) a_buf1[i] = i;
@@ -269,13 +272,13 @@ void TestArrayFunctions(T const val1, T const val2)
 	arrayClearSpace(a_buf1, 100, 50, 70); 
 	for (int i=50; i < 100; ++i)
 	{
-		SEQAN_TASSERT(a_buf1[i+20] == i)
+		SEQAN_TASSERT(a_buf1[i+20] == (T)i)
 	}
 
 	arrayClearSpace(a_buf1, 120, 70, 50); 
 	for (int i=50; i < 100; ++i)
 	{
-		SEQAN_TASSERT(a_buf1[i] == i)
+		SEQAN_TASSERT(a_buf1[i] == (T)i)
 	}
 
 }

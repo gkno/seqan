@@ -342,18 +342,20 @@ move(String<TTargetValue, Alloc<TSpec> > & target,
 
 ///.Function.reserve.param.object.type:Spec.Alloc String
 
-template <typename TValue, typename TSpec, typename TSize, typename TExpand>
-inline TSize 
+template <typename TValue, typename TSpec, typename _TSize, typename TExpand>
+inline typename Size< String<TValue, Alloc<TSpec> > >::Type
 reserve(
 	String<TValue, Alloc<TSpec> > & seq, 
-	TSize new_capacity,
+	_TSize new_capacity,
 	Tag<TExpand> const tag)
 {
 SEQAN_CHECKPOINT
-	typename Size< String<TValue, Alloc<TSpec> > >::Type old_capacity = capacity(seq);
-	if (old_capacity >= new_capacity) return new_capacity;
+	typedef typename Size< String<TValue, Alloc<TSpec> > >::Type TSize;
 
-	typename Size< String<TValue, Alloc<TSpec> > >::Type seq_length = length(seq);
+	TSize old_capacity = capacity(seq);
+	if (old_capacity >= (TSize)new_capacity) return new_capacity;
+
+	TSize seq_length = length(seq);
 	typename Value< String<TValue, Alloc<TSpec> > >::Type * old_array = _reallocateStorage(seq, new_capacity, tag);
 	if (old_array)
 	{//buffer was replaced, destruct old buffer
@@ -369,27 +371,30 @@ SEQAN_CHECKPOINT
 	return new_capacity;
 }
 
-template <typename TValue, typename TSpec, typename TSize>
-inline TSize 
+template <typename TValue, typename TSpec, typename _TSize>
+inline typename Size< String<TValue, Alloc<TSpec> > >::Type
 reserve(
 	String<TValue, Alloc<TSpec> > & me, 
-	TSize new_capacity,
+	_TSize new_capacity,
 	Limit)
 {
 SEQAN_CHECKPOINT
-	typename Size< String<TValue, Alloc<TSpec> > >::Type me_capacity = capacity(me);
-	if (me_capacity < new_capacity) return me_capacity;
+	typedef typename Size< String<TValue, Alloc<TSpec> > >::Type TSize;
+
+	TSize me_capacity = capacity(me);
+	if (me_capacity < (TSize)new_capacity) return me_capacity;
 	return new_capacity;
 }
 
-template <typename TValue, typename TSpec, typename TSize>
-inline TSize 
+template <typename TValue, typename TSpec, typename _TSize>
+inline typename Size< String<TValue, Alloc<TSpec> > >::Type
 reserve(
 	String<TValue, Alloc<TSpec> > & me, 
-	TSize new_capacity,
+	_TSize new_capacity,
 	Insist)
 {
 SEQAN_CHECKPOINT
+	typedef typename Size< String<TValue, Alloc<TSpec> > >::Type TSize;
 
 	return new_capacity;
 }

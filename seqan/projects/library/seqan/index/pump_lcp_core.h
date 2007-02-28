@@ -40,7 +40,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < typename TTextInput, typename TInvertedSAInput, typename TDest >
 	static void lcp_process(TTextInput &textIn, TInvertedSAInput &invertedSAIn, 
-						    TDest &dest, LcpConfig conf = LcpConfig())
+						    TDest &dest, LcpConfig conf)
 	{
 		typedef typename Value<TTextInput>::Type			TValue;
 		typedef typename Size<TTextInput>::Type				TSize;
@@ -57,7 +57,7 @@ namespace SEQAN_NAMESPACE_MAIN
         conf.absolutize((TValue*)NULL);
 		TBufReader reader(textIn, conf.windowSize);
 
-        Pair<TSize, TSize, Compressed> out;
+        Pair<TSize> out;
 		TSize windowBegin = 0;
 		TSize overlap = 0;
         TSize _pushes = 0;
@@ -157,7 +157,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			//printf("pops:%d pushes:%d overlaps:%d\n", _pops, _pushes, _olaps);
 		}
 		// trailing zero
-		push(dest, Pair<TSize, TSize, Compressed>(length(textIn) - 1, 0));
+		push(dest, Pair<TSize>(length(textIn) - 1, 0));
 
 		//printf("pushes:%d length:%d\n", _pushes, length(textIn));
         //SEQAN_ASSERT(_pushes == length(textIn));
@@ -179,6 +179,11 @@ namespace SEQAN_NAMESPACE_MAIN
         SEQAN_PROSET(PRODEPTH, 0);
     }
 
+	template < typename TTextInput, typename TInvertedSAInput, typename TDest >
+	static inline void lcp_process(TTextInput &textIn, TInvertedSAInput &invertedSAIn, TDest &dest)
+	{
+		lcp_process(textIn, invertedSAIn, dest, LcpConfig());
+	}
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -187,7 +192,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	static void lcp_process_multi(
 		TTextInput &textIn, TLimitsString const &limits, 
 		TInvertedSAInput &invertedSAIn, 
-		TDest &dest, LcpConfig conf = LcpConfig())
+		TDest &dest, LcpConfig conf)
 	{
 		typedef typename Value<TTextInput>::Type			TValue;
 		typedef typename Size<TTextInput>::Type				TSize;
@@ -206,7 +211,7 @@ namespace SEQAN_NAMESPACE_MAIN
         conf.absolutize((TValue*)NULL);
 		TBufReader reader(textIn, conf.windowSize);
 
-        Pair<TSize, TSize, Compressed> out;
+        Pair<TSize> out;
 		TSize windowBegin = 0;
 		TSize overlap = 0;
         TSize _pushes = 0;
@@ -321,7 +326,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			//printf("pops:%d pushes:%d overlaps:%d\n", _pops, _pushes, _olaps);
 		}
 		// trailing zero
-		push(dest, Pair<TSize, TSize, Compressed>(length(textIn) - 1, 0));
+		push(dest, Pair<TSize>(length(textIn) - 1, 0));
 
 		//printf("pushes:%d length:%d\n", _pushes, length(textIn));
         //SEQAN_ASSERT(_pushes == length(textIn));
@@ -342,6 +347,15 @@ namespace SEQAN_NAMESPACE_MAIN
 		endWrite(dest);
         SEQAN_PROSET(PRODEPTH, 0);
     }
+
+	template < typename TTextInput, typename TLimitsString, typename TInvertedSAInput, typename TDest >
+	static void lcp_process_multi(
+		TTextInput &textIn, TLimitsString const &limits, 
+		TInvertedSAInput &invertedSAIn, 
+		TDest &dest)
+	{
+		lcp_process_multi(textIn, limits, invertedSAIn, dest, LcpConfig());
+	}
 
 
 

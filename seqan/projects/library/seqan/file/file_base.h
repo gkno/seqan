@@ -675,6 +675,22 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
     template < typename TSpec, typename aRequest >
     inline bool cancel(File<TSpec> & me, aRequest & request) { return true; }
 
+
+	// little helpers
+
+	template <typename T1, typename T2> inline
+	T1 enclosingBlocks(T1 _size, T2 _blockSize) {
+		return (_size + _blockSize - 1) / _blockSize;
+	}
+
+	template <typename T1, typename T2> inline
+	T1 alignSize(T1 _size, T2 _aligning) {
+        if (_size < _aligning)
+            return _aligning;
+        else
+		    return (_size / _aligning) * (T1)_aligning;
+	}
+
 }
 
 #endif

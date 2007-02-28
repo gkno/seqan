@@ -39,8 +39,8 @@ void Test_Sequence_Interface()
 
 	SEQAN_TASSERT(beginPosition(c) == 0);			//beginPosition
 	SEQAN_TASSERT(beginPosition(d) == 0);			
-	SEQAN_TASSERT(endPosition(c) == end(c) - begin(c)); //endPosition
-	SEQAN_TASSERT(endPosition(d) == end(d) - begin(d));
+	SEQAN_TASSERT(endPosition(c) == (size_t)(end(c) - begin(c))); //endPosition
+	SEQAN_TASSERT(endPosition(d) == (size_t)(end(d) - begin(d)));
 
 	SEQAN_TASSERT(iter(c, endPosition(c)) == end(c));	//iter
 	SEQAN_TASSERT(iter(d, endPosition(d)) == end(d));
@@ -379,6 +379,7 @@ void TestStringBasics()
 	SEQAN_TASSERT(length(str3) <= capacity(str3));
 
 	typename Size<TMe>::Type len = length(str3);
+	SEQAN_TASSERT(len == 7);
 
 	//test begin and end
 	SEQAN_TASSERT(end(str3) == begin(str3) + 7);
@@ -544,9 +545,11 @@ void Test_String_CStyle()
 	SEQAN_TASSERT(str1 == str5)
 
 	char * cp1 = str1;
+	SEQAN_TASSERT(cp1 != NULL);
 
 	String<char, CStyle> const str6(strq);
 	char const * cp2 = str6;
+	SEQAN_TASSERT(cp2 != NULL);
 
 	str1 = str6;
 	SEQAN_TASSERT(str1 == str6)
@@ -796,10 +799,10 @@ void Test_Std_String()
 //____________________________________________________________________________
 
 	::std::string str_1("hamster");
-	SEQAN_TASSERT(end(str_1) - begin(str_1) == length(str_1))
+	SEQAN_TASSERT((size_t)(end(str_1) - begin(str_1)) == length(str_1))
 
 	::std::string const str_2("goldfish");
-	SEQAN_TASSERT(end(str_2) - begin(str_2) == length(str_2))
+	SEQAN_TASSERT((size_t)(end(str_2) - begin(str_2)) == length(str_2))
 
 	SEQAN_TASSERT(getValue(str_1, 0) == 'h')
 	SEQAN_TASSERT(getValue(str_1, 1) == 'a')

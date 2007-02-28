@@ -90,7 +90,66 @@ namespace SEQAN_NAMESPACE_MAIN
         }
     };
 
-    //////////////////////////////////////////////////////////////////////////////
+
+	//////////////////////////////////////////////////////////////////////////////
+	// simple class for fast random accessable containers buffers
+    template < typename TIterator, typename TValue, typename TSize >
+	struct IteratorBuffer {
+        typedef TValue      Type;
+        typedef TSize       SizeType;
+		typedef TIterator	Iterator;
+
+        TIterator           begin;
+        TIterator           end;
+
+        IteratorBuffer():
+            begin(TIterator()),
+            end(TIterator()) {}
+
+		IteratorBuffer(TIterator _begin, TIterator _end):
+            begin(_begin),
+            end(_end) {}
+
+        IteratorBuffer(TIterator _begin, SizeType _size):
+            begin(_begin),
+            end(_begin + _size) {}
+
+//        inline Type& operator[](SizeType i) { return begin[i]; }
+        inline Type const & operator[](SizeType i) const { return begin[i]; }
+    };
+
+    template < typename TIterator, typename TValue, typename TSize >
+    struct Iterator< IteratorBuffer<TIterator, TValue, TSize> >
+    {
+        typedef TIterator Type;
+    };
+
+    template < typename TIterator, typename TValue, typename TSize >
+    struct Value< IteratorBuffer<TIterator, TValue, TSize> >
+    {
+        typedef TValue Type;
+    };
+
+    template < typename TIterator, typename TValue, typename TSize >
+    struct Size< IteratorBuffer<TIterator, TValue, TSize> >
+    {
+        typedef TSize Type;
+    };
+
+    template < typename TIterator, typename TValue, typename TSize >
+    inline typename Size< IteratorBuffer<TIterator, TValue, TSize> >::Type
+    size(IteratorBuffer<TIterator, TValue, TSize> const &me) {
+        return me.end - me.begin;
+    }
+
+    template < typename TIterator, typename TValue, typename TSize >
+    inline typename Size< IteratorBuffer<TIterator, TValue, TSize> >::Type
+    length(IteratorBuffer<TIterator, TValue, TSize> const &me) {
+        return me.end - me.begin;
+    }
+
+
+	//////////////////////////////////////////////////////////////////////////////
 	// handler that manages a simple memory buffer
 	template < typename TInput >
 	struct BufferHandler< Pipe< TInput, Source<IteratorSpec> >, void >

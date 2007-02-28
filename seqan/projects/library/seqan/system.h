@@ -17,7 +17,8 @@
 #endif
 
 #ifdef SEQAN_SWITCH_USE_FORWARDS
-//#include <seqan/system/system_generated_forwards.h>
+#include <seqan/system/system_manual_forwards.h>
+#include <seqan/system/file_manual_forwards.h>
 #endif
 
 #include <seqan/system/system_base.h>
@@ -25,11 +26,8 @@
 #include <seqan/system/system_sema.h>
 #include <seqan/system/system_event.h>
 #include <seqan/system/system_thread.h>
-//#include <seqan/system/system_ioqueue.h>
 
-#include <seqan/system/system_page.h>
-#include <seqan/system/system_page_raid0.h>
-
-#include <seqan/system/system_profile.h>
+#include <seqan/system/file_sync.h>
+#include <seqan/system/file_async.h>
 
 #endif //#ifndef SEQAN_HEADER_...

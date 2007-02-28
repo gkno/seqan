@@ -280,7 +280,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		inline FilePtr seek(FilePtr pos, int origin = SEEK_SET) const {
             FilePtr result = ::lseek(handle, pos, origin);
 //			#ifdef SEQAN_DEBUG
-				if (result < 0) printf("seek returned %d %s\n", result, strerror(errno));
+				if (result < 0) printf("seek returned %d %s\n", (int)result, strerror(errno));
 //			#endif
 			return result;
 		}

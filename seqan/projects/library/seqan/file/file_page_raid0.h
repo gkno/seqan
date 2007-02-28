@@ -1,13 +1,13 @@
 /*
- *  system_page.h
+ *  file_page_raid0.h
  *  genindex
  *
  *  Created by David Weese on 17.07.05.
  *
  */
 
-#ifndef SEQAN_HEADER_SYSTEM_PAGE_RAID_H
-#define SEQAN_HEADER_SYSTEM_PAGE_RAID_H
+#ifndef SEQAN_HEADER_FILE_PAGE_RAID0_H
+#define SEQAN_HEADER_FILE_PAGE_RAID0_H
 
 
 //////////////////////////////////////////////////////////////////////////////

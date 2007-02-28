@@ -113,8 +113,8 @@ SEQAN_CHECKPOINT
 	}
 
 	Lexical(Lexical const & other):
-		data_compare(other.data_compare),
-		data_lcp(other.data_lcp)
+		data_lcp(other.data_lcp),
+		data_compare(other.data_compare)
 	{
 SEQAN_CHECKPOINT
 	};

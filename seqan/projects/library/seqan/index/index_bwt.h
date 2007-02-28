@@ -287,14 +287,14 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template < typename TBWT,
                typename TText,
-               typename TSuffixArray >
+               typename TSA >
     void createBWTable(
 		TBWT &bwt,
 		TText &s,
-		TSuffixArray const &SA)
+		TSA const &SA)
 	{
-		typedef typename Value<TSuffixArray>::Type	TValue;
-		typedef typename Size<TSuffixArray>::Type	TSize;
+		typedef typename Value<TSA>::Type	TValue;
+		typedef typename Size<TSA>::Type	TSize;
 
 		#ifdef SEQAN_DEBUG_INDEX
 			if (sizeof(TSize) > 4)

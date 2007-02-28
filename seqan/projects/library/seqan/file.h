@@ -32,15 +32,16 @@
 
 
 #include <seqan/file/file_base.h>
-#include <seqan/basic.h>
-#include <seqan/system.h>
 #include <seqan/file/file_cstyle.h>
-#include <seqan/file/file_sync.h>
-#include <seqan/file/file_async.h>
 #include <seqan/file/file_array.h>
+
+#include <seqan/system.h>	// (include will be removed soon)
 
 #include <seqan/pipe/pipe_base.h>
 #include <seqan/pipe/pipe_source.h>
-#include <seqan/sequence/string_external.h>
+
+#include <seqan/file/file_page.h>
+#include <seqan/file/file_page_raid0.h>
+#include <seqan/file/string_external.h>
 
 #endif //#ifndef SEQAN_HEADER_...

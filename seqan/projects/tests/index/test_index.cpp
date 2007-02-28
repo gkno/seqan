@@ -267,16 +267,16 @@ int main()
 //		testIndexCreation();
 //		Main_TestQGram();
 
-		testSTreeIterators();
-/*
+//		testSTreeIterators();
+//		testIteratorSpec<MaxRepeats>();
+
 		testFind<ESA_MLR>();
 		testBuild();
 		testMultiIndex();
 		testIteratorSpec<SuperMaxRepeats>();
 		testIteratorSpec<SuperMaxRepeatsFast>();
-		testIteratorSpec<MaxRepeats>();
 		simpleMUMmer();	
-*/
+
 	SEQAN_TREPORT("TEST END")
 		return 0;
 }

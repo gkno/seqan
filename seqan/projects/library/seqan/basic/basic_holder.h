@@ -362,6 +362,7 @@ SEQAN_CHECKPOINT
 		releaseRef(old_value);
 		}
 		break;
+	default:;
 	}
 }
 

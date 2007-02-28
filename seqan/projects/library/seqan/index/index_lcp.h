@@ -46,7 +46,7 @@ namespace SEQAN_NAMESPACE_MAIN
                                         typedef map_inverse<_TypeOf(TEchoer)> map_inverse_t;
 		                                typedef typename Size<TTextInput>::Type	TSize;
 		typedef Pool< _TypeOf(TEchoer), MapperSpec< MapperConfigSize< map_inverse_t, TSize> > > TInverter;
-		                                typedef Pair<TSize,	TSize, Compressed> TCoreType;
+		                                typedef Pair<TSize> TCoreType;
 		typedef Pool< TCoreType, MapperSpec< MapperConfigSize< filterI1<TCoreType>, TSize > > > TLinearMapper;
         typedef Pipe< TLinearMapper, Filter< filterI2<TCoreType> > > TFilter;
 
@@ -147,7 +147,7 @@ namespace SEQAN_NAMESPACE_MAIN
                                         typedef map_inverse_multi<_TypeOf(TEchoer), TLimitsString, _TSizeOf(TEchoer)> map_inverse_t;
 		                                typedef typename Size<TTextInput>::Type	TSize;
 		typedef Pool< _TypeOf(TEchoer), MapperSpec< MapperConfigSize< map_inverse_t, TSize> > > TInverter;
-		                                typedef Pair<TSize,	TSize, Compressed> TCoreType;
+		                                typedef Pair<TSize> TCoreType;
 		typedef Pool< TCoreType, MapperSpec< MapperConfigSize< filterI1<TCoreType>, TSize > > > TLinearMapper;
         typedef Pipe< TLinearMapper, Filter< filterI2<TCoreType> > > TFilter;
 
@@ -261,14 +261,14 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template < typename TLCPTable,
                typename TText,
-               typename TSuffixArray >
+               typename TSA >
     void createLCPTable(
 		TLCPTable &LCP,
 		TText const &s,
-		TSuffixArray const &SA,
+		TSA const &SA,
 		Kasai const &)
 	{
-		typedef typename Value<TSuffixArray>::Type TSize;
+		typedef typename Value<TSA>::Type TSize;
 
 		#ifdef SEQAN_DEBUG_INDEX
 			if (sizeof(TSize) > 4)
@@ -293,7 +293,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typename Iterator<TText const>::Type Ibegin = begin(s), Iend = end(s);
         typename Iterator<TText const>::Type I = Ibegin, J;
         for(TSize i = 0, h = 0, j, isa; i < n; ++i) {
-			if (isa = ISA[i]) {
+			if ((isa = ISA[i])) {
 				J = Ibegin + h + (j = SA[isa - 1]);
                 for(TSize hMax = Min(n - i, n - j); h < hMax && *I == *J; ++I, ++J, ++h);
 				LCP[isa - 1] = h;
@@ -323,14 +323,14 @@ namespace SEQAN_NAMESPACE_MAIN
 	// createLCPTableInPlace expects the lcp table to be of size n
     template < typename TLCPTable,
                typename TText,
-               typename TSuffixArray >
+               typename TSA >
     void createLCPTable(
 		TLCPTable &LCP,
 		TText const &s,
-		TSuffixArray const &SA,
+		TSA const &SA,
 		KasaiInPlace const &)
 	{
-		typedef typename Value<TSuffixArray>::Type TSize;
+		typedef typename Value<TSA>::Type TSize;
 
 		#ifdef SEQAN_DEBUG_INDEX
 			if (sizeof(TSize) > 4)
@@ -406,16 +406,16 @@ namespace SEQAN_NAMESPACE_MAIN
     template < typename TLCPTable,
 			   typename TString,
 			   typename TSpec,
-               typename TSuffixArray >
+               typename TSA >
     void createLCPTable(
 		TLCPTable &LCP,
 		StringSet<TString, TSpec> const &sset,
-		TSuffixArray const &SA,
+		TSA const &SA,
 		KasaiInPlace const &)
 	{
 		typedef typename Concatenator<StringSet<TString, TSpec> const>::Type	TText;
 		typedef typename StringSetLimits<StringSet<TString, TSpec> const>::Type	TLimitsString;
-		typedef typename Value<TSuffixArray>::Type								TPair;
+		typedef typename Value<TSA>::Type										TPair;
 		typedef _PairDecrementer<TPair, TLimitsString>							TDecrementer;
 		typedef typename Value<TLCPTable>::Type									TSize;
 
@@ -437,7 +437,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		TLimitsString const &limits = stringSetLimits(sset);
 		{
-			typename Iterator<TSuffixArray const>::Type itSA = begin(SA);
+			typename Iterator<TSA const>::Type itSA = begin(SA);
 			for(TSize i = 0; i < n; ++i, ++itSA)
 				LCP[posGlobalize(*itSA, limits)] = i;
 		}

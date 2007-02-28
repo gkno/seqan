@@ -45,7 +45,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..cat:Pipelining
 ..general:Class.Pipe
 ..summary:Outputs tuples of the $echoRepeats$ last elements of the input stream.
-..signature:Pipe<TInput, Shifter<echoRepeats, omitFirst> >
+..signature:Pipe<TInput, Echoer<echoRepeats, omitFirst> >
 ..param.TInput:The type of the pipeline module this module reads from.
 ..param.echoRepeats:The tuple length.
 ...remarks:The tuples contain elements $in[i]in[i-1]...in[i-(echoRepeats-1)]$.

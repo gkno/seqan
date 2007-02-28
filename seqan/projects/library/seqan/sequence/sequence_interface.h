@@ -1247,7 +1247,7 @@ reserve(
 {
 SEQAN_CHECKPOINT
 	typename Size<T>::Type me_capacity = capacity(me);
-	if (me_capacity < new_capacity) return me_capacity;
+	if (me_capacity < (typename Size<T>::Type) new_capacity) return me_capacity;
 	return new_capacity;
 }
 

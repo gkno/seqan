@@ -19,16 +19,16 @@ namespace SEQAN_NAMESPACE_MAIN
     // internal Manber Myers algorithm
     //////////////////////////////////////////////////////////////////////////////
 
-    template < typename TSuffixArray,
+    template < typename TSA,
                typename TText >
     void createSuffixArray(
-		TSuffixArray &SA,
+		TSA &SA,
 		TText &s,
 		ManberMyers const &,
-		unsigned K = ValueSize< typename Value<TText>::Type >::VALUE,
-        unsigned maxdepth = 0)
+		unsigned K,
+        unsigned maxdepth)
 	{
-		typedef typename Value<TSuffixArray>::Type TSize;
+		typedef typename Value<TSA>::Type TSize;
 		typedef typename Value<TText>::Type TValue;
 
 		TSize n = length(s);
@@ -113,19 +113,19 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
     // creates suffix array sorted by the first maxLCP chars of suffixes
-    template < typename TSuffixArray,
+    template < typename TSA,
                typename TText,
                typename TSize >
     inline void createSuffixArrayPart(
-		TSuffixArray &SA,
+		TSA &SA,
 		TText &s,
-		ManberMyers const &_dummy,
+		ManberMyers const &alg,
         TSize maxLCP,
         unsigned K = ValueSize< typename Value<TText>::Type >::VALUE)
     {
         unsigned depth = 0;
         for(TSize i = 1; i < maxLCP; i*=2) ++depth;
-        createSuffixArray(SA, s, _dummy, K, depth);
+        createSuffixArray(SA, s, alg, K, depth);
     }
 
 }

@@ -22,7 +22,7 @@ namespace SEQAN_NAMESPACE_MAIN
 .Memfunc.Pair#Pair:
 ..class:Class.Pair
 ..summary:Constructor
-..signature:Pair<T1, T2> ()
+..signature:Pair<T1, T2> ()	
 ..signature:Pair<T1, T2> (pair)
 ..signature:Pair<T1, T2> (i1, i2)
 ..param.pair:Other Pair object. (copy constructor)
@@ -48,20 +48,10 @@ namespace SEQAN_NAMESPACE_MAIN
 		inline Pair(_T1 const &_i1, _T2 const &_i2): i1(_i1), i2(_i2) {}
     };
 
+	// unaligned and unpadded storage (space efficient)
 #ifdef PLATFORM_WINDOWS
     #pragma pack(push,1)
-    template <typename _T1, typename _T2>
-    struct Pair<_T1, _T2, Compressed> {
-        typedef _T1 T1;
-        typedef _T2 T2;
-	    _T1 i1;
-	    _T2 i2;
-		inline Pair() {}
-		inline Pair(Pair const &_p): i1(_p.i1), i2(_p.i2) {}
-		inline Pair(_T1 const &_i1, _T2 const &_i2): i1(_i1), i2(_i2) {}
-    };
-    #pragma pack(pop)
-#else
+#endif
     template <typename _T1, typename _T2>
     struct Pair<_T1, _T2, Compressed> {
         typedef _T1 T1;
@@ -71,21 +61,14 @@ namespace SEQAN_NAMESPACE_MAIN
 		inline Pair() {}
 		inline Pair(Pair const &_p): i1(_p.i1), i2(_p.i2) {}
 		inline Pair(_T1 const &_i1, _T2 const &_i2): i1(_i1), i2(_i2) {}
-    }__attribute__((packed));
+	}
+#ifdef PLATFORM_GCC
+	__attribute__((packed))
 #endif
-
-    // do not pack two identical types
-    template <typename _T>
-    struct Pair<_T, _T, Compressed> {
-        typedef _T T1;
-        typedef _T T2;
-        _T i1;
-        _T i2;
-		inline Pair() {}
-		inline Pair(Pair const &_p): i1(_p.i1), i2(_p.i2) {}
-		inline Pair(_T const &_i1): i1(_i1), i2() {}
-		inline Pair(_T const &_i1, _T const &_i2): i1(_i1), i2(_i2) {}
-    };
+	;
+#ifdef PLATFORM_WINDOWS
+    #pragma pack(pop)
+#endif
 
     template <typename _T1, typename _T2, typename TCompression>
 	std::ostream& operator<<(std::ostream &out, Pair<_T1,_T2,TCompression> const &p) {
@@ -142,7 +125,9 @@ namespace SEQAN_NAMESPACE_MAIN
 ..class:Class.Triple
 ..summary:T3 object
 */
-    template <typename _T1, typename _T2 = _T1, typename _T3 = _T1, typename TCompression = void>
+
+	// standard storage 
+	template <typename _T1, typename _T2 = _T1, typename _T3 = _T1, typename TCompression = void>
     struct Triple {
         typedef _T1 T1;
         typedef _T2 T2;
@@ -155,9 +140,10 @@ namespace SEQAN_NAMESPACE_MAIN
 		inline Triple(_T1 const &_i1, _T2 const &_i2, _T3 const &_i3): i1(_i1), i2(_i2), i3(_i3) {}
     };
 
-
+	// unaligned and unpadded storage (space efficient)
 #ifdef PLATFORM_WINDOWS
     #pragma pack(push,1)
+#endif
     template <typename _T1, typename _T2, typename _T3>
     struct Triple<_T1, _T2, _T3, Compressed> {
         typedef _T1 T1;
@@ -169,40 +155,16 @@ namespace SEQAN_NAMESPACE_MAIN
 		inline Triple() {}
 		inline Triple(Triple const &_p): i1(_p.i1), i2(_p.i2), i3(_p.i3) {}
 		inline Triple(_T1 const &_i1, _T2 const &_i2, _T3 const &_i3): i1(_i1), i2(_i2), i3(_i3) {}
-    };
+    }
+#ifdef PLATFORM_GCC
+	__attribute__((packed))
+#endif
+	;
+#ifdef PLATFORM_WINDOWS
     #pragma pack(pop)
-#else
-    template <typename _T1, typename _T2, typename _T3>
-    struct Triple<_T1, _T2, _T3, Compressed> {
-        typedef _T1 T1;
-        typedef _T2 T2;
-        typedef _T3 T3;
-        _T1 i1;
-        _T2 i2;
-        _T3 i3;
-		inline Triple() {}
-		inline Triple(Triple const &_p): i1(_p.i1), i2(_p.i2), i3(_p.i3) {}
-		inline Triple(_T1 const &_i1): i1(_i1) {}
-		inline Triple(_T1 const &_i1, _T2 const &_i2): i1(_i1), i2(_i2) {}
-		inline Triple(_T1 const &_i1, _T2 const &_i2, _T3 const &_i3): i1(_i1), i2(_i2), i3(_i3) {}
-    }__attribute__((packed));
 #endif
 
-    // do not pack three identical types
-    template <typename _T>
-    struct Triple<_T, _T, _T, Compressed> {
-        typedef _T T1;
-        typedef _T T2;
-        typedef _T T3;
-        _T i1;
-        _T i2;
-        _T i3;
-		inline Triple() {}
-		inline Triple(Triple const &_p): i1(_p.i1), i2(_p.i2), i3(_p.i3) {}
-		inline Triple(_T const &_i1, _T const &_i2, _T const &_i3): i1(_i1), i2(_i2), i3(_i3) {}
-    };
-
-    template <typename _T1, typename _T2, typename _T3, typename TCompression>
+	template <typename _T1, typename _T2, typename _T3, typename TCompression>
 	std::ostream& operator<<(std::ostream &out, Triple<_T1,_T2,_T3,TCompression> const &t) {
 		out << "< " << t.i1 << " , " << t.i2 << " , " << t.i3 << " >";
 		return out;
@@ -246,7 +208,9 @@ namespace SEQAN_NAMESPACE_MAIN
 ...default:void.
 ..see:Spec.Sampler
 */
-    template <typename _T, int _size, typename TCompression = void>
+
+	// standard storage 
+	template <typename _T, int _size, typename TCompression = void>
     struct Tuple {
         typedef _T T;
         enum { size = _size };
@@ -283,6 +247,10 @@ namespace SEQAN_NAMESPACE_MAIN
     template <> struct _BitVector<64> { typedef __int64 Type; };
     template <> struct _BitVector<255> { typedef __int64 Type; };
 
+	// bit-compressed storage (space efficient)
+#ifdef PLATFORM_WINDOWS
+    #pragma pack(push,1)
+#endif
     template <typename _T, int _size>
     struct Tuple<_T, _size, Compressed> {
         typedef _T T;
@@ -331,7 +299,15 @@ namespace SEQAN_NAMESPACE_MAIN
 			i = (i & ~mask) | ((CT)source << ((_size - 1 - k) * bitSize));
 			return source;
 		}
-    };
+    }
+#ifdef PLATFORM_GCC
+	__attribute__((packed))
+#endif
+	;
+#ifdef PLATFORM_WINDOWS
+    #pragma pack(pop)
+#endif
+
 
     template <typename _T, int _size, typename TCompression>
 	inline int length(Tuple<_T, _size, TCompression> const &me) { return _size; }

@@ -62,7 +62,7 @@ SEQAN_CHECKPOINT
 	}
 
 	//cumulative sum
-	TValue len_pos = length(pos);
+	TPosition len_pos = length(pos);
 	i = 1;
 	while(i<len_pos)
 	{

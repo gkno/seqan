@@ -1111,7 +1111,7 @@ struct _Insert_Value_2_String
 SEQAN_CHECKPOINT
 		TValue temp_copy = _value; //temp copy because resizeSpace could invalidate _value
 		resizeSpace(me, 1, pos, pos, TExpand());
-		if (pos < length(me))
+		if ((typename Size<T>::Type) pos < length(me))
 		{
 			moveValue(me, pos, temp_copy);
 		}

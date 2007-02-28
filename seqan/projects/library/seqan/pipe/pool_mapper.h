@@ -508,7 +508,7 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 
         bool _writeBucket(PageBucket &cb, unsigned pageNo) {
-            if (cb.cur - cb.begin != clusterSize)
+            if ((unsigned)(cb.cur - cb.begin) != clusterSize)
                 return writeBucket(cb, pageNo, pool.pageSize, pool.file);
 
             PageFrame *pf = chain.getReadyPage();

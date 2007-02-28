@@ -396,7 +396,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	// compares two suffixes of residue classes a and b
     template <typename T, typename ST, typename TString> inline
-    bool _leqSkew7(int a, int b,   const T* spos[], const ST tpos[], const bool islast[], const TString &s124, const int adjust[7][7])
+    bool _leqSkew7(unsigned a, unsigned b,   const T* spos[], const ST tpos[], const bool islast[], const TString &s124, const int adjust[7][7])
     {
         const T* sa = spos[a];
         const T* sb = spos[b];
@@ -424,21 +424,21 @@ namespace SEQAN_NAMESPACE_MAIN
 	// * no trailing 0's required
 	// * no dummy triples in special cases
 
-    template < typename TSuffixArray,
+    template < typename TSA,
                typename TText >
     void createSuffixArray(
-		TSuffixArray &SA,
+		TSA &SA,
 		TText &s,
 		Skew7 const &,
-		unsigned K = ValueSize< typename Value<TText>::Type >::VALUE,
-        unsigned maxdepth = 0,
-		unsigned depth = 1)
+		unsigned K,
+        unsigned maxdepth,
+		unsigned depth)
     {
-		typedef typename Value<TSuffixArray>::Type TSize;
+		typedef typename Value<TSA>::Type TSize;
 		typedef typename Value<TText>::Type TValue;
 
 		SEQAN_ASSERT(IsContiguous<TText>::VALUE);
-		SEQAN_ASSERT(IsContiguous<TSuffixArray>::VALUE);
+		SEQAN_ASSERT(IsContiguous<TSA>::VALUE);
 
 		#ifdef SEQAN_DEBUG_INDEX
 			if (sizeof(TSize) > 4)
@@ -471,7 +471,7 @@ namespace SEQAN_NAMESPACE_MAIN
         String<TSize, Alloc<> > s124;
         resize(s124, _n124, Exact());
 		// we use SA[n-n124..n-1] as a temporary buffer instead of allocating one
-		typename Suffix<TSuffixArray>::Type SA124 = suffix(SA, n - _n124);
+		typename Suffix<TSA>::Type SA124 = suffix(SA, n - _n124);
 
 
 		// generate positions of mod 3, mod 5 and mod 6 suffixes
@@ -545,7 +545,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		// and allocate SA0, SA3, SA5 and SA6
 
 		{
-			typename Infix<TSuffixArray>::Type s3 = infix(SA, 0, _n[3]), s5 = infix(SA, _n[3], _n[3] + _n[5]);
+			typename Infix<TSA>::Type s3 = infix(SA, 0, _n[3]), s5 = infix(SA, _n[3], _n[3] + _n[5]);
 			String<TSize, Alloc<> > SA0, SA3, SA5, SA6;
 			resize(SA0, _n[0], Exact());
 			resize(SA3, _n[3], Exact());
@@ -745,12 +745,24 @@ namespace SEQAN_NAMESPACE_MAIN
         SEQAN_PROSUB(PRODEPTH, 1);
 	}
 
+    template < typename TSA,
+               typename TText >
+    inline void createSuffixArray(
+		TSA &SA,
+		TText &s,
+		Skew7 const &alg,
+		unsigned K,
+        unsigned maxdepth)
+	{
+		createSuffixArray(SA, s, alg, K, maxdepth, 1);
+	}
+
     // creates suffix array sorted by the first maxLCP chars of suffixes
-    template < typename TSuffixArray,
+    template < typename TSA,
                typename TText,
                typename TSize >
     inline void createSuffixArrayPart(
-		TSuffixArray &SA,
+		TSA &SA,
 		TText &s,
 		Skew7 const &_dummy,
         TSize maxLCP,

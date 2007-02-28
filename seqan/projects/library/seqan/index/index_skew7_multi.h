@@ -230,13 +230,13 @@ namespace SEQAN_NAMESPACE_MAIN
             
         Pipe(TLimitsString const &_limits) :
             textIn(NULL),
-			limits(_limits),
-			in(bundle5(sortedS0, sortedS3, sortedS5, sortedS6, sortedS124), _limits) {}
+			in(bundle5(sortedS0, sortedS3, sortedS5, sortedS6, sortedS124), _limits),
+			limits(_limits) {}
 
 		Pipe(TInput& _textIn, TLimitsString const &_limits) :
             textIn(&_textIn),
-			limits(_limits),
-			in(bundle5(sortedS0, sortedS3, sortedS5, sortedS6, sortedS124), _limits) {}
+			in(bundle5(sortedS0, sortedS3, sortedS5, sortedS6, sortedS124), _limits),
+			limits(_limits) {}
         
         inline void process(unsigned maxdepth = 0, unsigned depth = 1) {
             process(*textIn, maxdepth, depth);
@@ -381,23 +381,6 @@ namespace SEQAN_NAMESPACE_MAIN
     inline bool operator<<(Pipe< TInput, Multi<Skew7, TPair, TLimitsString> > &me, TObject &textIn) {
         return me.process(textIn);
     }
-
-	template < 
-		typename TSA, 
-		typename TValue, 
-		typename TConfig,
-		typename TSpec >
-	inline void createSuffixArray(
-		TSA &SA,
-		StringSet< String<TValue, TConfig/*External<TConfig> */>, TSpec > &s,
-		Skew7 const &spec,
-		unsigned K = ValueSize<TValue>::VALUE,
-        unsigned maxdepth = 0)
-	{
-        createSuffixArrayExt(SA, s, spec);
-	}
-
-
 
 }
 

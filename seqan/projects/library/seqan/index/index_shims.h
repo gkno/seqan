@@ -16,17 +16,6 @@ namespace SEQAN_NAMESPACE_MAIN
 	// explicit external creation (used as a wrapper-end by algorithms)
 	//////////////////////////////////////////////////////////////////////////////
 
-/**
-.Function.createSuffixArray:
-..summary:Creates a suffix array from a given text.
-..cat:Index
-..signature:createSuffixArray(suffixArray, text[, algo_tag])
-..param.suffixArray:A reference to the resulting suffix array.
-..param.text:A given text.
-..param.algo_tag:A tag that identifies the algorithm which is used for creation.
-..remarks:The size of $suffixArray$ must be at least $length(text)$ before calling this function.
-*/
-
 	// build suffix array with an external pipeling algorithm (skew3, skew7, ...)
 	template < 
 		typename TSA, 
@@ -101,6 +90,60 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 
+/**
+.Function.createSuffixArray:
+..summary:Creates a suffix array from a given text.
+..cat:Index
+..signature:createSuffixArray(suffixArray, text[, algo_tag])
+..param.suffixArray:A reference to the resulting suffix array.
+..param.text:A given text.
+..param.algo_tag:A tag that identifies the algorithm which is used for creation.
+..remarks:The size of $suffixArray$ must be at least $length(text)$ before calling this function.
+*/
+
+    template < typename TSA,
+               typename TText,
+			   typename TAlgSpec >
+    inline void createSuffixArray(
+		TSA &SA,
+		TText &s,
+		TAlgSpec const &alg)
+	{
+		// -> call internal memory algorithm with an extended interface (+ alphabet size, max_depth)
+		createSuffixArray(SA, s, alg, ValueSize< typename Value<TText>::Type >::VALUE, 0);
+	}
+
+	template < 
+		typename TSA, 
+		typename TValue, 
+		typename TConfig,
+		typename TAlgSpec >
+	inline void createSuffixArray(
+		TSA &SA,
+		String< TValue, External<TConfig> > &s,
+		TAlgSpec const &alg)
+	{
+		// -> explicitly create SA using external memory
+        createSuffixArrayExt(SA, s, alg);
+	}
+
+	template < 
+		typename TSA, 
+		typename TValue, 
+		typename TSpec,
+		typename TSSetSpec,
+		typename TAlgSpec >
+	inline void createSuffixArray(
+		TSA &SA,
+		StringSet< String<TValue, TSpec>, TSSetSpec > &s,
+		TAlgSpec const &)
+	{
+        createSuffixArrayExt(SA, s, Skew7());
+	}
+
+
+//____________________________________________________________________________
+
 	// build lcp table with an external pipelining algorithm (ext kasai, ...)
 	template < 
         typename TLCPTable,
@@ -111,7 +154,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TLCPTable &LCP,
 		TObject &text,
 		TSA &suffixArray,
-		ConstrSpec const &spec = Kasai())
+		ConstrSpec const &)
 	{
 		// specialization
 		typedef Pipe< TObject, Source<> >							srcText_t;
@@ -130,6 +173,17 @@ namespace SEQAN_NAMESPACE_MAIN
 			isLCPTable(LCP, suffixArray, text);
 		#endif
 	}
+	template < 
+        typename TLCPTable,
+		typename TObject, 
+        typename TSA >
+	inline void createLCPTableExt(
+		TLCPTable &LCP,
+		TObject &text,
+		TSA &suffixArray)
+	{
+		createLCPTableExt(LCP, text, suffixArray, Kasai());
+	}
 
 
 	// build lcp table (external) for mutliple sequences
@@ -143,7 +197,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TLCPTable &LCP,
 		StringSet<TString, TSpec> &stringSet,
 		TSA &suffixArray,
-		ConstrSpec const &spec = Kasai())
+		ConstrSpec const &)
 	{
 		typedef typename Concatenator<StringSet<TString, TSpec> >::Type TConcat;
 		typedef Multi<
@@ -167,6 +221,18 @@ namespace SEQAN_NAMESPACE_MAIN
 		#ifdef SEQAN_TEST_INDEX
 			isLCPTable(LCP, suffixArray, text);
 		#endif
+	}
+	template < 
+        typename TLCPTable,
+		typename TString,
+		typename TSpec,
+        typename TSA>
+	inline void createLCPTableExt(
+		TLCPTable &LCP,
+		StringSet<TString, TSpec> &stringSet,
+		TSA &suffixArray)
+	{
+		createLCPTableExt(LCP, stringSet, suffixArray, Kasai());
 	}
 
 
@@ -245,15 +311,15 @@ namespace SEQAN_NAMESPACE_MAIN
         typename TValue,
         typename TSpec,
         typename TText,
-        typename TSuffixArray,
+        typename TSA,
 		typename ConstrSpec >
     void createLCPETable(
 		String< TValue, TSpec > &LCPE,
 		TText &s,
-		TSuffixArray &SA,
+		TSA &SA,
 		ConstrSpec const &spec)
 	{
-        //TSuffixArray LCP;
+        //TSA LCP;
         //resize(LCP, length(s), Exact());
 		// we use LCPE[n-lcpSize..n-1] as a temporary buffer instead of allocating one
 		typename Suffix<String< TValue, TSpec > >::Type LCP = suffix(LCPE, length(LCPE) - length(s));
@@ -269,12 +335,12 @@ namespace SEQAN_NAMESPACE_MAIN
         typename TValue,
         typename TConfig,
         typename TText,
-        typename TSuffixArray,
+        typename TSA,
 		typename ConstrSpec >
     void createLCPETable(
 		String< TValue, External<TConfig> > &LCPE,
 		TText &s,
-		TSuffixArray &SA,
+		TSA &SA,
 		ConstrSpec const &spec)
 	{
         createLCPETableExt(LCPE, s, SA, spec);
@@ -284,16 +350,16 @@ namespace SEQAN_NAMESPACE_MAIN
         typename TValue,
         typename TSpec,
         typename TText,
-        typename TSuffixArray>
+        typename TSA>
     inline void createLCPETable(
 		String< TValue, TSpec > &LCPE,
 		TText &s,
-		TSuffixArray &SA)
+		TSA &SA)
 	{
 		CreateLCPETable(LCPE, s, SA, Kasai());
     }
 
-
+/*
 	// build enhanced LCP+SuffixArray table with an lcp algorithm
 	// and a dynamic programming tree construction alg
 
@@ -301,15 +367,15 @@ namespace SEQAN_NAMESPACE_MAIN
         typename TValue,
         typename TSpec,
         typename TText,
-        typename TSuffixArray,
+        typename TSA,
 		typename ConstrSpec >
     void createLCPHTable(
 		String< TValue, TSpec > &LCPH,
 		TText &s,
-		TSuffixArray &SA,
+		TSA &SA,
 		ConstrSpec const &spec = Kasai())
 	{
-        TSuffixArray LCP;
+        TSA LCP;
         resize(LCP, length(s), Exact());
         createLCPTable(LCP, s, SA, spec);
 		#ifdef SEQAN_TEST_INDEX
@@ -322,12 +388,12 @@ namespace SEQAN_NAMESPACE_MAIN
         typename TValue,
         typename TConfig,
         typename TText,
-        typename TSuffixArray,
+        typename TSA,
 		typename ConstrSpec >
     void createLCPHTable(
 		String< TValue, External<TConfig> > &LCPH,
 		TText &s,
-		TSuffixArray &SA,
+		TSA &SA,
 		ConstrSpec const &spec)
 	{
         createLCPHTableExt(LCPH, s, SA, spec);
@@ -337,15 +403,15 @@ namespace SEQAN_NAMESPACE_MAIN
 		typename TValue, 
         typename TSpec,
         typename TText,
-        typename TSuffixArray >
+        typename TSA >
 	void createLCPHTable(
 		String< TValue, TSpec > &LCPH,
 		TText &s,
-		TSuffixArray &SA)
+		TSA &SA)
 	{
 		createLCPHTable(LCPH, s, SA, Kasai());
 	}
-
+*/
 
 	// ESA finders
 
@@ -608,11 +674,6 @@ SEQAN_CHECKPOINT
 ..remarks:$indexCreate$ calls the fibre corresponding $createXXX(..)$ function (e.g. @Function.createSuffixArray@).
 */
 
-	template <typename TText, typename TSpec, typename TFibre>
-	inline bool indexCreate(Index<TText, Index_ESA<TSpec> > &index, TFibre const fibre) {
-		return indexCreate(index, fibre, typename DefaultIndexCreator<Index<TText, Index_ESA<TSpec> >, TFibre>::Type());
-	}
-
 	// table creators
 
 	template <typename TText, typename TSpec, typename TSpecAlg>
@@ -649,6 +710,11 @@ SEQAN_CHECKPOINT
 		resize(indexChildTab(index), length(indexRawText(index)), Exact());
 		createChildTable(indexChildTab(index), indexLCP(index));
 		return true;
+	}
+
+	template <typename TText, typename TSpec, typename TFibre>
+	inline bool indexCreate(Index<TText, Index_ESA<TSpec> > &index, TFibre const fibre) {
+		return indexCreate(index, fibre, typename DefaultIndexCreator<Index<TText, Index_ESA<TSpec> >, TFibre>::Type());
 	}
 
 	// automatic creation

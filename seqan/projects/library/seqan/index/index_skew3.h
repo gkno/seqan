@@ -293,10 +293,10 @@ namespace SEQAN_NAMESPACE_MAIN
 		TSA &SA,
 		String< TValue, External<TConfig> > &s,
 		Skew3 const &spec,
-		unsigned K = ValueSize<TValue>::VALUE,
-        unsigned maxdepth = 0)
+		unsigned K,
+        unsigned maxdepth)
 	{
-        createSuffixArrayExt(SA, s, spec);
+        createSuffixArrayExt(SA, s, spec, K, maxdepth);
 	}
 
 
@@ -329,17 +329,17 @@ namespace SEQAN_NAMESPACE_MAIN
 
     // creates suffix array SA of s
     // chars have to be in the range [0,K)
-    template < typename TSuffixArray,
+    template < typename TSA,
                typename TText >
     void createSuffixArray(
-		TSuffixArray &SA,
+		TSA &SA,
 		TText &s,
 		Skew3 const &,
-		unsigned K = ValueSize< typename Value<TText>::Type >::VALUE,
-        unsigned maxdepth = 0,
-        unsigned depth = 1 )
+		unsigned K,
+        unsigned maxdepth,
+        unsigned depth)
     {
-		typedef typename Value<TSuffixArray>::Type TSize;
+		typedef typename Value<TSA>::Type TSize;
 		typedef typename Value<TText>::Type TValue;
 
 		#ifdef SEQAN_DEBUG_INDEX
@@ -363,7 +363,7 @@ namespace SEQAN_NAMESPACE_MAIN
         String<TSize, Alloc<> > s12;
         resize(s12, n12, Exact());
 		// we use SA[n0..n-1] as a temporary buffer instead of allocating one;
-		typename Suffix<TSuffixArray>::Type SA12 = suffix(SA, n0);
+		typename Suffix<TSA>::Type SA12 = suffix(SA, n0);
    
 
 		// generate positions of mod 1 and mod 2 suffixes
@@ -430,7 +430,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		{
 			String<TSize, Alloc<> > SA0;
 			resize(SA0, n0, Exact());
-			typename Infix<TSuffixArray>::Type s0 = infix(SA, 0, n0);
+			typename Infix<TSA>::Type s0 = infix(SA, 0, n0);
 
 			// stably sort the mod 0 suffixes from SA12 by their first character
 			{
@@ -482,12 +482,24 @@ namespace SEQAN_NAMESPACE_MAIN
         SEQAN_PROSUB(PRODEPTH, 1);
     }
 
+    template < typename TSA,
+               typename TText >
+    inline void createSuffixArray(
+		TSA &SA,
+		TText &s,
+		Skew3 const &alg,
+		unsigned K,
+        unsigned maxdepth)
+	{
+		createSuffixArray(SA, s, alg, K, maxdepth, 1);
+	}
+
     // creates suffix array sorted by the first maxLCP chars of suffixes
-    template < typename TSuffixArray,
+    template < typename TSA,
                typename TText,
                typename TSize >
     inline void createSuffixArrayPart(
-		TSuffixArray &SA,
+		TSA &SA,
 		TText &s,
 		Skew3 const &_dummy,
         TSize maxLCP,

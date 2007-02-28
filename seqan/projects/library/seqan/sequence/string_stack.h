@@ -45,21 +45,24 @@ namespace SEQAN_NAMESPACE_MAIN {
 	      
 		public:
 			String():
-				lastValue(TBlockIter()),
-				blockLast(TBlockIter()) {}
+				blockFirst(TBlockIter()),
+				blockLast(TBlockIter()),
+				lastValue(TBlockIter()) {}
 
 			template<typename TSource>
 			String(TSource const& source):
-				lastValue(TBlockIter()),
-				blockLast(TBlockIter())
+				blockFirst(TBlockIter()),
+				blockLast(TBlockIter()),
+				lastValue(TBlockIter())
 			{
 			SEQAN_CHECKPOINT
 				assign(*this, source);
 			} 
 
 			String(String const & source):
-				lastValue(TBlockIter()),
-				blockLast(TBlockIter())
+				blockFirst(TBlockIter()),
+				blockLast(TBlockIter()),
+				lastValue(TBlockIter())
 			{
 			SEQAN_CHECKPOINT
 				assign(*this, source);

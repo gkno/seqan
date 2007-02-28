@@ -1,13 +1,13 @@
 /*
- *  system_page.h
- *  genindex
+ *  file_page.h
+ *  SeqAn
  *
  *  Created by David Weese on 17.07.05.
  *
  */
 
-#ifndef SEQAN_HEADER_SYSTEM_PAGE_H
-#define SEQAN_HEADER_SYSTEM_PAGE_H
+#ifndef SEQAN_HEADER_FILE_PAGE_H
+#define SEQAN_HEADER_FILE_PAGE_H
 
 #include <cassert>
 #include <limits>
@@ -23,83 +23,13 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //////////////////////////////////////////////////////////////////////////////
 
-	template <typename T1, typename T2> inline
-	T1 enclosingBlocks(T1 _size, T2 _blockSize) {
-		return (_size + _blockSize - 1) / _blockSize;
-	}
-
-	template <typename T1, typename T2> inline
-	T1 alignSize(T1 _size, T2 _aligning) {
-        if (_size < _aligning)
-            return _aligning;
-        else
-		    return (_size / _aligning) * (T1)_aligning;
-	}
-
-	//////////////////////////////////////////////////////////////////////////////
-	// simple class for fast random accessable containers buffers
-    template < typename TIterator, typename TValue, typename TSize >
-	struct IteratorBuffer {
-        typedef TValue      Type;
-        typedef TSize       SizeType;
-		typedef TIterator	Iterator;
-
-        TIterator           begin;
-        TIterator           end;
-
-        IteratorBuffer():
-            begin(TIterator()),
-            end(TIterator()) {}
-
-		IteratorBuffer(TIterator _begin, TIterator _end):
-            begin(_begin),
-            end(_end) {}
-
-        IteratorBuffer(TIterator _begin, SizeType _size):
-            begin(_begin),
-            end(_begin + _size) {}
-
-//        inline Type& operator[](SizeType i) { return begin[i]; }
-        inline Type const & operator[](SizeType i) const { return begin[i]; }
-    };
-
-    template < typename TIterator, typename TValue, typename TSize >
-    struct Iterator< IteratorBuffer<TIterator, TValue, TSize> >
-    {
-        typedef TIterator Type;
-    };
-
-    template < typename TIterator, typename TValue, typename TSize >
-    struct Value< IteratorBuffer<TIterator, TValue, TSize> >
-    {
-        typedef TValue Type;
-    };
-
-    template < typename TIterator, typename TValue, typename TSize >
-    struct Size< IteratorBuffer<TIterator, TValue, TSize> >
-    {
-        typedef TSize Type;
-    };
-
-    template < typename TIterator, typename TValue, typename TSize >
-    inline typename Size< IteratorBuffer<TIterator, TValue, TSize> >::Type
-    size(IteratorBuffer<TIterator, TValue, TSize> const &me) {
-        return me.end - me.begin;
-    }
-
-    template < typename TIterator, typename TValue, typename TSize >
-    inline typename Size< IteratorBuffer<TIterator, TValue, TSize> >::Type
-    length(IteratorBuffer<TIterator, TValue, TSize> const &me) {
-        return me.end - me.begin;
-    }
-
 
 	//////////////////////////////////////////////////////////////////////////////
 	// base class for memory buffers
-    template < typename TValue, typename TSize = unsigned >
+    template < typename TValue >
 	struct SimpleBuffer {
         typedef TValue      Type;
-        typedef TSize       SizeType;
+        typedef size_t		SizeType;
 
 		typedef	TValue&		TypeRef;
 		typedef TValue*     TypePtr;
@@ -107,7 +37,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		Iterator            begin;      // the beginning of the buffer
         Iterator            end;        // end of valid data
-        TSize               pageSize;   // size of allocated memory
+        SizeType            pageSize;   // size of allocated memory
 
         SimpleBuffer():
             begin(NULL),
@@ -142,10 +72,10 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef TValue Type;
     };
 
-    template < typename TValue, typename TSize >
-    struct Size< SimpleBuffer<TValue, TSize> >
+    template < typename TValue >
+    struct Size< SimpleBuffer<TValue> >
     {
-        typedef TSize Type;
+		typedef typename SimpleBuffer<TValue>::SizeType Type;
     };
 
     template < typename TValue >
@@ -251,12 +181,12 @@ namespace SEQAN_NAMESPACE_MAIN
 //        PageChain       *chain;     // related chain 
 
         PageFrame(/*BufChain *_chain = NULL*/):
+			Base(),
             dirty(false),
             pageNo(-1),
 			status(READY),
-            next(NULL),
-//            chain(_chain),
-			Base() { }
+//            chain(_chain) 
+			next(NULL) {}
     };
     
 
@@ -309,8 +239,8 @@ namespace SEQAN_NAMESPACE_MAIN
         inline Type const & operator[](SizeType i) const { return begin[i]; }
 	};
 
-    template < typename TValue, typename TFile, typename TSize >
-    inline void resize(PageFrame<TValue, TFile, Dynamic<> > &me, TSize size) {
+    template < typename TValue, typename TFile, typename TSpec, typename TSize >
+    inline void resize(PageFrame<TValue, TFile, Dynamic<TSpec> > &me, TSize size) {
         me.end = me.begin + size;
     }
 

@@ -121,13 +121,13 @@ bool testIndexCreation()
 //___create_child_table_______________________________________________________
 
 			resize(child, size);
-			for(unsigned i=0; i<size; ++i)
+			for(int i=0; i<size; ++i)
 				child[i] = supremumValue<unsigned>();
 			createChildTable(child, lcp);
 			cout << ".";
 
 			unsigned undefs=0;
-			for(unsigned i=0; i<size; ++i)
+			for(int i=0; i<size; ++i)
 				if (child[i] == supremumValue<unsigned>()) ++undefs;
 			if (undefs) ::std::cout << undefs << " undefined values";
 

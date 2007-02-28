@@ -276,7 +276,10 @@ log2(T val)
 template<typename _Tx> inline
 const _Tx& Min(const _Tx& _Left, const _Tx& _Right)
 {	// return smaller of _Left and _Right
-    return (_Right < _Left ? _Right : _Left);
+	if (_Left < _Right)
+		return _Left;
+	else
+		return _Right;
 }
 
 template<typename _Tx, typename _Ty> inline
@@ -288,7 +291,10 @@ _Tx Min(const _Tx& _Left, const _Ty& _Right)
 template<typename _Ty> inline
 const _Ty& Max(const _Ty& _Left, const _Ty& _Right)
 {	// return larger of _Left and _Right
-    return (_Left < _Right ? _Right : _Left);
+	if (_Left < _Right)
+		return _Right;
+	else
+		return _Left;
 }
 
 //////////////////////////////////////////////////////////////////////////////

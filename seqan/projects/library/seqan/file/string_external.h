@@ -1095,7 +1095,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
         // return a priority for a page frame (the higher is more persistent)
         inline typename PageFrame::Priority getPriority(int pageNo) const {
-            if (keepFirst && pageNo < cache.size() - 10) // save 1 for random access
+            if (keepFirst && pageNo < (int)(cache.size()) - 10) // save 1 for random access
                 return PageFrame::PERMANENT_LEVEL;
             else
                 return PageFrame::NORMAL_LEVEL;
@@ -1109,7 +1109,7 @@ namespace SEQAN_NAMESPACE_MAIN
                 if (pf.priority > PageFrame::NORMAL_LEVEL && pf.priority <= PageFrame::ITERATOR_LEVEL)
 					cache.upgrade(pf, PageFrame::PREFETCH_LEVEL);
 
-                if (pf.pageNo != _size / _PageSize)
+                if (pf.pageNo != (int)(_size / (SizeType)_PageSize))
     				writePage(pf, pf.pageNo, file);
                 else {
                     lastDiskPage = _size / _PageSize;
@@ -1132,7 +1132,7 @@ namespace SEQAN_NAMESPACE_MAIN
             }
 
 			if (pf.dirty) {                                 // write if dirty
-                if (pf.pageNo != _size / _PageSize) {
+                if (pf.pageNo != (int)(_size / (SizeType)_PageSize)) {
     				writePage(pf, pf.pageNo, file);
                     if (pf.pageNo >= lastDiskPage)
                         lastDiskPage = -1;       			// make lastDiskPage(Size) invalid because file size is aligned
@@ -1236,8 +1236,8 @@ namespace SEQAN_NAMESPACE_MAIN
         // prefetch is non-blocking and should speed up swapping
 		inline void prefetch(int pageBegin, int pageEnd, int except = -1) {
             if (!file) return;
-            if (pageBegin < 0)              pageBegin = 0;
-            if (pageEnd >= pager.size())    pageEnd = pager.size() - 1;
+            if (pageBegin < 0)					pageBegin = 0;
+            if (pageEnd >= (int)pager.size())	pageEnd = (int)pager.size() - 1;
             for(int pageNo = pageBegin; pageNo < pageEnd; ++pageNo) {
 			    int frameNo = pager[pageNo];
 				typename PageFrame::DataStatus dataStatus = static_cast<typename PageFrame::DataStatus>(frameNo);
@@ -1463,19 +1463,19 @@ namespace SEQAN_NAMESPACE_MAIN
     {
         typedef TValue                                                      Type;
         typedef typename Size< String<TValue, External<TConfig> > >::Type   SizeType;
-        typedef SimpleBuffer<TValue, SizeType>                              Buffer;
+        typedef SimpleBuffer<TValue>										Buffer;
 
         typedef Pipe< String<TValue, External<TConfig> >, Source<ContainerSpec> >   Pipe;
         typedef typename String<TValue, External<TConfig> >::VectorFwdConstIterator ISource;
 		typedef typename Iterator<Buffer>::Type										ITarget;
 
 		Pipe		&pipe;
-		unsigned	bufferSize;
+		size_t		bufferSize;
         SizeType    rest;
         Buffer		buffer;
 		ISource		source;
 
-		BufferHandler(Pipe &_pipe, unsigned requestedSize):
+		BufferHandler(Pipe &_pipe, size_t requestedSize):
 			pipe(_pipe),
 			bufferSize(requestedSize),
             rest(0) {}

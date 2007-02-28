@@ -679,10 +679,11 @@ namespace SEQAN_NAMESPACE_MAIN
 				return false;
 			}
 			if (!(close() && open(tmpFileName, openMode))) return false;
-			int result = ::unlink(tmpFileName);
             #ifdef SEQAN_DEBUG
-				if (result == -1) printf("Cannot unlink temp. file: %s\n", strerror(errno));
-            #endif
+				if (::unlink(tmpFileName) == -1) printf("Cannot unlink temp. file: %s\n", strerror(errno));
+            #else
+				::unlink(tmpFileName);
+			#endif
 			return true;
         }
 
@@ -725,7 +726,7 @@ namespace SEQAN_NAMESPACE_MAIN
     //////////////////////////////////////////////////////////////////////
     // event based read/write
 
-    enum { _AsyncIOSignal = SIGIO };
+//    enum { _AsyncIOSignal = SIGIO };
 
 	inline void printRequest(aiocb &request) {
 		printf("fildes:\t%x\n", (unsigned int) request.aio_fildes);
@@ -859,7 +860,7 @@ namespace SEQAN_NAMESPACE_MAIN
     template < typename TConfig, typename >
     inline void release(File<Async<TConfig> > & me, aiocb const &request) {
     }
-
+/*
     typedef void (*sighandler_t)(int);
     static unsigned _AsyncIOHandlerRefCount = 0;
     static struct sigaction _AsyncIOOldSig;
@@ -880,7 +881,7 @@ namespace SEQAN_NAMESPACE_MAIN
             return SIG_ERR;
         return oldSig.sa_handler;
     }
-
+*/
     
 	//////////////////////////////////////////////////////////////////////////////
 	// page aligned allocate for direct file io
@@ -897,7 +898,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
         int error = posix_memalign(reinterpret_cast<void**>(&data), sysconf(_SC_PAGESIZE), count * sizeof(TValue));
         if (error) {
-			printf("AlignAllocator: Could not allocate memory of size %x with aligning %x (%d)\n", count * sizeof(TValue), sysconf(_SC_PAGESIZE), error);
+			printf("AlignAllocator: Could not allocate memory of size %x with aligning %x (%d)\n", count * sizeof(TValue), (unsigned) sysconf(_SC_PAGESIZE), error);
             data = NULL;
         } else
             SEQAN_PROADD(PROMEMORY, sizeof(TValue) * count);

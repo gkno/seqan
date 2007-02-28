@@ -6,6 +6,7 @@
 #include <limits>
 
 #include <cstddef> //size_t
+#include <ctime>
 #include <iterator>
 #include <algorithm>
 #include <memory.h> // memset
@@ -20,6 +21,7 @@
 #endif
 
 #include <seqan/basic/basic_debug.h>
+#include <seqan/basic/basic_profile.h>
 #include <seqan/basic/basic_definition.h>
 #include <seqan/basic/basic_type.h>
 #include <seqan/basic/basic_metaprogramming.h>

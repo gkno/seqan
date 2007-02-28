@@ -253,7 +253,7 @@ SEQAN_CHECKPOINT
 	{
 		source_length = limit;
 	}
-	target.assign(begin(source, Standard()), begin(source, Standard()) + source_length);
+	target.assign(source_begin, source_begin + source_length);
 }
 
 //____________________________________________________________________________
@@ -323,7 +323,7 @@ SEQAN_CHECKPOINT
 		{
 			source_length = limit;
 		}
-		target.append(begin(source, Standard()), begin(source, Standard()) + source_length);
+		target.append(source_begin, source_begin + source_length);
 	}
 }
 

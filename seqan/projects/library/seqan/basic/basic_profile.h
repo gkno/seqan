@@ -1,13 +1,15 @@
 /*
- *  system_profile.h
- *  genindex
+ *  basic_profile.h
+ *  SeqAn
  *
  *  Created by David Weese on 17.07.05.
  *
  */
 
-#ifndef SEQAN_HEADER_SYSTEM_PROFILE_H
-#define SEQAN_HEADER_SYSTEM_PROFILE_H
+//SEQAN_NO_GENERATED_FORWARDS: no forwards are generated for this file
+
+#ifndef SEQAN_HEADER_BASIC_PROFILE_H
+#define SEQAN_HEADER_BASIC_PROFILE_H
 
 // todo: substitute defines with inlines
 #ifndef SEQAN_PROFILE
@@ -142,7 +144,8 @@
    	}
 
     #ifdef PLATFORM_WINDOWS
-        inline _proFloat sysTime() { return GetTickCount() * 1e-3; }
+//        inline _proFloat sysTime() { return GetTickCount() * 1e-3; }
+		inline _proFloat sysTime() { return ( (_proFloat) clock() ) / CLOCKS_PER_SEC; }
     #else
         inline _proFloat sysTime() {
 	        struct timespec tp;
