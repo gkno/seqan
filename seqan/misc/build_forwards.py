@@ -44,8 +44,8 @@ def buildProject(project_path):
             if testFileType(path):
                 parseFile(path)
                 
-    if FUNCS != {}:        
-        outAll(project_path, project)
+#    if FUNCS != {}:        
+    outAll(project_path, project)
         
     print
 
