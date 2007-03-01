@@ -1922,18 +1922,17 @@ void Test_GraphDfsIterator() {
 void Test_BreadthFirstSearch() {
 //____________________________________________________________________________
 // Breadth-First Search
-	typedef Graph<EdgeList<> > TGraph;
-	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
-	typedef Size<TGraph>::Type TSize;
+	typedef VertexDescriptor<Graph<> >::Type TVertexDescriptor;
+	typedef EdgeDescriptor<Graph<> >::Type TEdgeDescriptor;
+	typedef Size<Graph<> >::Type TSize;
 
 	//Number of edges
 	TSize numEdges = 20;
 	//Source, Target, Source, Target, Source, ...
-	TVertexDescriptor edges[] = {0,1, 0,4, 1,5, 2,5, 2,6, 2,3, 3,6, 3,7, 5,6, 6,7};
+	TVertexDescriptor edges[] = {0,1, 1,0, 0,4, 4,0, 1,5, 5,1, 2,5, 5,2, 2,6, 6,2, 2,3, 3,2, 3,6, 6,3, 3,7, 7,3, 5,6, 6,5, 6,7, 7,6};
 	
 	//Create the graph
-	TGraph g(edges, numEdges);
+	Graph<> g(edges, numEdges);
 
 	// Predecessor and distance map
 	String<unsigned int> predMap;
@@ -2484,6 +2483,7 @@ int main()
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_oracle.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_trie.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_algorithm.h");
+
 
 	SEQAN_TREPORT("TEST END")
 
