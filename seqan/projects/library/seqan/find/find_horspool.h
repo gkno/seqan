@@ -135,7 +135,7 @@ SEQAN_CHECKPOINT
 	SEQAN_ASSERT2(pos <= pos_max, "invalid search position")
 
 	//helper variables
-	typename Size<TFinder>::Type window_length = ndl_size - 1;
+	//typename Size<TFinder>::Type window_length = ndl_size - 1;
 	typename Position<TFinder>::Type new_pos;
 
 	if (empty(finder))

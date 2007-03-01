@@ -188,7 +188,7 @@ setHost(Pattern<TNeedle, Score<TScoreValue, Simple> > & me, TNeedle2 const & ndl
 	TTab & string_tab = _dataTab(me);
 
 	//allocate enough memory for one column of DP matrix
-	size_t got_length = resize(string_tab, length(ndl));
+	/*size_t got_length =*/ resize(string_tab, length(ndl));
 
 //	if (length(ndle) < got_length) throw(0); //???TODO: Throw "not enough memory" exception
 
