@@ -1,6 +1,6 @@
 /*
  *  basic_volatile_ptr.h
- *  genindex
+ *  SeqAn
  *
  *  Created by David Weese on 17.07.05.
  *

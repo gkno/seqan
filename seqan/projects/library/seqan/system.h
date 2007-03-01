@@ -9,7 +9,7 @@
 #ifdef PLATFORM_WINDOWS
 # include <windows.h>
 #else
-# include <limits>
+# include <climits>
 # include <pthread.h>
 # include <errno.h>
 # include <semaphore.h>

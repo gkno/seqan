@@ -1,6 +1,6 @@
 /*
  *  childtab.h
- *  genindex
+ *  SeqAn
  *
  *  Created by David Weese on 17.07.05.
  *

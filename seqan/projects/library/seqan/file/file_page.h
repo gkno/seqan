@@ -9,11 +9,6 @@
 #ifndef SEQAN_HEADER_FILE_PAGE_H
 #define SEQAN_HEADER_FILE_PAGE_H
 
-#include <cassert>
-#include <limits>
-#include <cstdio>
-#include <list>
-#include <vector>
 
 //////////////////////////////////////////////////////////////////////////////
 

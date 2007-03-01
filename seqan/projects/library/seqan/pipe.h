@@ -7,7 +7,7 @@
 #include <cassert>
 #include <functional>
 #include <iterator>
-#include <limits>
+#include <climits>
 #include <vector>
 #include <queue>
 

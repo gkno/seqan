@@ -1,6 +1,6 @@
 /*
  *  string_set.h
- *  genindex
+ *  SeqAn
  *
  *  Created by David Weese on 26.01.06.
  *

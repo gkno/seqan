@@ -4,6 +4,10 @@
 // should be set before anything else
 #define _FILE_OFFSET_BITS 64
 
+#include <climits>
+
+#include <cstdio>
+#include <list>
 #include <vector>
 
 #include <seqan/sequence.h>

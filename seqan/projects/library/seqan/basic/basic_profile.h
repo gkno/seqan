@@ -17,7 +17,7 @@
     #define SEQAN_PROSET(i,v)
     #define SEQAN_PROADD(i,v)
     #define SEQAN_PROSUB(i,v)
-	#define SEQAN_PROVAL(i)		0
+	#define SEQAN_PROVAL(i)			0
     #define SEQAN_PROEXTRAS(i)
     #define SEQAN_PROMARK(m)
     #define SEQAN_PROENDMARK(m)
