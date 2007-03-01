@@ -717,7 +717,7 @@ namespace SEQAN_NAMESPACE_MAIN
 				}
 
 				if (_newSize != 0) {
-					if (_newSize <= memBufferSize)
+					if (_newSize <= (size_type)memBufferSize)
 						allocPage(memBuffer, _newSize, *this);
                     else {
 						openTemp(file);

@@ -146,12 +146,12 @@ namespace SEQAN_NAMESPACE_MAIN
 				continue;							// don't move undefined values
 
 			#ifdef SEQAN_DEBUG
-                if (!(dstPos >= offset && dstPos < offset + pageSize(buf))) {
-                    printf("Mapper assertion failed: %x not in [%x,%x) at %x ", dstPos, offset, offset + pageSize(buf), cur - buf.begin);
+                if (!(dstPos >= offset && dstPos < offset + (TSize)pageSize(buf))) {
+                    printf("Mapper assertion failed: %x not in [%x,%x) at %x ", (unsigned)dstPos, (unsigned)offset, (unsigned)(offset + pageSize(buf)), (unsigned)(cur - buf.begin));
                     ::std::cout << "element is " << *cur << ::std::endl;
                 }
 			#endif
-            SEQAN_ASSERT(dstPos >= offset && dstPos < offset + pageSize(buf));
+            SEQAN_ASSERT(dstPos >= offset && dstPos < offset + (TSize)pageSize(buf));
 
             TValue *I = buf.begin + (dstPos - offset);
             if (I != cur) {
@@ -169,23 +169,23 @@ namespace SEQAN_NAMESPACE_MAIN
 					else 
 					{
 						#ifdef SEQAN_DEBUG
-							if (!(dstPos >= offset && dstPos < offset + pageSize(buf))) {
-								printf("Mapper assertion failed: %x not in [%x,%x) at %x ", dstPos, offset, offset + pageSize(buf), refNext - buf.begin);
+							if (!(dstPos >= offset && dstPos < offset + (TSize)pageSize(buf))) {
+								printf("Mapper assertion failed: %x not in [%x,%x) at %x ", (unsigned)dstPos, (unsigned)offset, (unsigned)(offset + pageSize(buf)), (unsigned)(refNext - buf.begin));
 								::std::cout << "element is " << *refNext << ::std::endl;
 							}
 							TValue *oldI = I;
 						#endif
-						SEQAN_ASSERT(dstPos >= offset && dstPos < offset + pageSize(buf));
+						SEQAN_ASSERT(dstPos >= offset && dstPos < offset + (TSize)pageSize(buf));
 
 						I = buf.begin + (dstPos - offset);
 
 						#ifdef SEQAN_DEBUG
 							if (!partiallyFilled && I < cur) {
-								printf("Mapper assertion failed: I=%x < cur=%x\n", I, cur); 
+								printf("Mapper assertion failed: I=%x < cur=%x\n", (unsigned)I, (unsigned)cur);
 								break;
 							}
 							if (I == oldI) {
-								printf("Mapper assertion failed: I=%x in endless loop\n", I); 
+								printf("Mapper assertion failed: I=%x in endless loop\n", (unsigned)I);
 								break;
 							}
 						#endif

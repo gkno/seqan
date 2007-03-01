@@ -870,7 +870,7 @@ namespace SEQAN_NAMESPACE_MAIN
         unsigned lastPageSize   = _size % _pageSize;
         unsigned pages          = _pages;
 
-        if (_bufferSize > _size)
+        if ((TSize)_bufferSize > _size)
             _bufferSize = _size;
 
         allocPage(_clusterBuffer, _bufferSize, me);
@@ -932,7 +932,7 @@ namespace SEQAN_NAMESPACE_MAIN
         unsigned lastPageSize   = _size % _pageSize;
         unsigned pages          = _pages;
 
-        if (_bufferSize > _size)
+        if ((TSize)_bufferSize > _size)
             _bufferSize = _size;
 
         unsigned clusterSize = _bufferSize / pages;

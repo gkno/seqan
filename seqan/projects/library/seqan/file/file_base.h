@@ -379,10 +379,11 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 
 	template < typename TSpec, typename TPos >
     inline typename Position< File<TSpec> >::Type seek(File<TSpec> &me, TPos const fileOfs, int origin) {
-		typename Position< File<TSpec> >::Type newOfs = me.seek(fileOfs, origin);
+		typedef typename Position< File<TSpec> >::Type TFilePos;
+		TFilePos newOfs = me.seek(fileOfs, origin);
         #ifdef SEQAN_DEBUG_OR_TEST_
-            if (origin == SEEK_BEGIN && newOfs != fileOfs)
-				printf("generic seek failed returned %x instead of %x\n", newOfs, fileOfs);
+            if (origin == SEEK_BEGIN && newOfs != (TFilePos)fileOfs)
+				printf("generic seek failed returned %x instead of %x\n", (unsigned)newOfs, (unsigned)fileOfs);
         #endif
         return newOfs;
     }
