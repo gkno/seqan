@@ -121,7 +121,7 @@ inline void
 valueConstruct(TIterator it)
 {
 SEQAN_CHECKPOINT
-	IF<
+	typedef typename IF<
 		TYPECMP<
 			typename Value<TIterator>::Type &,
 			typename Reference<TIterator>::Type
@@ -130,7 +130,9 @@ SEQAN_CHECKPOINT
 		_ValueConstructor,			// true,  types are equal
 	// ELSE
 		_ValueConstructorProxy		// false, types differ -> value() returns a proxy
-	>::Type::construct(it);
+	>::Type TConstructor;
+
+	TConstructor::construct(it);
 }
 
 template <typename TIterator, typename TParam>
@@ -139,7 +141,7 @@ valueConstruct(TIterator it,
 			   TParam const & param_)
 {
 SEQAN_CHECKPOINT
-	IF<
+	typedef typename IF<
 		TYPECMP<
 			typename Value<TIterator>::Type &,
 			typename Reference<TIterator>::Type
@@ -148,7 +150,9 @@ SEQAN_CHECKPOINT
 		_ValueConstructor,			// true,  types are equal
 	// ELSE
 		_ValueConstructorProxy		// false, types differ -> value() returns a proxy
-	>::Type::construct(it, param_);
+	>::Type TConstructor;
+
+	TConstructor::construct(it);
 }
 
 template <typename TIterator, typename TParam>
@@ -158,7 +162,7 @@ valueConstruct(TIterator it,
 			   Move tag)
 {
 SEQAN_CHECKPOINT
-	IF<
+	typedef typename IF<
 		TYPECMP<
 			typename Value<TIterator>::Type &,
 			typename Reference<TIterator>::Type
@@ -167,7 +171,9 @@ SEQAN_CHECKPOINT
 		_ValueConstructor,			// true,  types are equal
 	// ELSE
 		_ValueConstructorProxy		// false, types differ -> value() returns a proxy
-	>::Type::construct(it, param_, tag);
+	>::Type TConstructor;
+
+	TConstructor::construct(it);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -186,7 +192,7 @@ inline void
 valueDestruct(TIterator it)
 {
 SEQAN_CHECKPOINT
-	IF<
+	typedef typename IF<
 		TYPECMP<
 			typename Value<TIterator>::Type &,
 			typename Reference<TIterator>::Type
@@ -195,7 +201,9 @@ SEQAN_CHECKPOINT
 		_ValueDestructor,			// true,  types are equal
 	// ELSE
 		_ValueDestructorProxy		// false, types differ -> value() returns a proxy
-	>::Type::destruct(it);
+	>::Type TDestructor;
+
+	TDestructor::destruct(it);
 }
 
 //////////////////////////////////////////////////////////////////////////////

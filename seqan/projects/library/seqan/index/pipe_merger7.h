@@ -221,10 +221,12 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 
         template <typename T1, typename T2, typename T, const int _size>
-        inline static void _copy(SkewDCStream &dst, Triple<T1,T2,Tuple<T,_size,Compressed>,Compressed> const &src) {
+        inline static void _copy(SkewDCStream &dst, Triple<T1,T2,Tuple<T,_size,Compressed>,Compressed> const &src) 
+		{
+			typedef typename InType0::T3 CharTuple;
             memcpy(&dst.i.i2, &src.i2, sizeof(T2));
             dst.i.i3.i = src.i3.i;
-            dst.i.i3 <<= InType0::T3::size - _size;
+            dst.i.i3 <<= CharTuple::size - _size;
         }
 
         template <typename TInput>
@@ -335,11 +337,13 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 
         template <typename T1, typename T2, typename T, const int _size>
-        inline static void _copy(SkewDCStream &dst, Triple<T1,T2,Tuple<T,_size,Compressed>,Compressed> const &src) {
+        inline static void _copy(SkewDCStream &dst, Triple<T1,T2,Tuple<T,_size,Compressed>,Compressed> const &src) 
+		{
+			typedef typename InType0::T3 CharTuple;
             memcpy(&dst.i.i1, &src.i1, sizeof(T1));
             memcpy(&dst.i.i2, &src.i2, sizeof(T2));
             dst.i.i3.i = src.i3.i;
-            dst.i.i3 <<= InType0::T3::size - _size;
+            dst.i.i3 <<= CharTuple::size - _size;
         }
 
         template <typename TInput>
