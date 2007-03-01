@@ -816,6 +816,224 @@ void Test_Trie() {
 
 //////////////////////////////////////////////////////////////////////////////
 
+void Test_GraphU() {
+//____________________________________________________________________________
+// Graph without edge cargo but with edge ids
+
+	typedef Graph<EdgeListU<void> > StandardGraph;
+	typedef VertexDescriptor<StandardGraph>::Type TVertexDescriptor;
+	typedef EdgeDescriptor<StandardGraph>::Type TEdgeDescriptor;
+	
+	StandardGraph g;
+	SEQAN_TASSERT(numVertices(g) == 0)
+	SEQAN_TASSERT(numEdges(g) == 0)
+	SEQAN_TASSERT(empty(g) == true)
+
+	// Add vertex
+	TVertexDescriptor v0 = addVertex(g);
+	SEQAN_TASSERT(v0 == 0)
+	SEQAN_TASSERT(outDegree(g, v0) == 0)	
+	SEQAN_TASSERT(inDegree(g, 0) == 0)
+	SEQAN_TASSERT(degree(g, 0) == 0)
+	SEQAN_TASSERT(numVertices(g) == 1)
+	SEQAN_TASSERT(empty(g) == false)
+	
+	// Add edge
+	// TEdgeDescriptor e1 =addEdge(g,v0,v0);  // Self edges are not allowed in undirected graphs
+	TVertexDescriptor v1 = addVertex(g);
+	TEdgeDescriptor e =addEdge(g,0,1);
+	SEQAN_TASSERT(v1 == 1)
+	SEQAN_TASSERT(numVertices(g) == 2)
+	SEQAN_TASSERT(targetVertex(g, e) == 1)
+	SEQAN_TASSERT(sourceVertex(g, e) == 0)
+	SEQAN_TASSERT(numEdges(g) == 1)
+	SEQAN_TASSERT(outDegree(g, v0) == 1)	
+	SEQAN_TASSERT(inDegree(g, 1) == 1)
+	SEQAN_TASSERT(inDegree(g, 0) == 1)	
+	SEQAN_TASSERT(degree(g, 0) == 1)
+
+	// Add more vertices and edges
+	addVertex(g);  //2
+	TVertexDescriptor v3 = addVertex(g);  //3
+	addVertex(g);  //4
+	addEdge(g,3,4);
+	TEdgeDescriptor my_edge = addEdge(g,3,1);
+	addEdge(g,3,0);
+	SEQAN_TASSERT(v3 == 3)
+	SEQAN_TASSERT(numVertices(g) == 5)
+	SEQAN_TASSERT(targetVertex(g, my_edge) == 3)
+	SEQAN_TASSERT(sourceVertex(g, my_edge) == 1)
+	SEQAN_TASSERT(numEdges(g) == 4)
+	SEQAN_TASSERT(outDegree(g, v3) == 3)
+	SEQAN_TASSERT(inDegree(g, v3) == 3)
+	SEQAN_TASSERT(degree(g, v3) == 3)
+
+	// Graph drawing
+	// ToDo: Undirected edges required!
+	// Raw output
+	// std::cout << g << ::std::endl;
+
+	// Remove edges
+	removeEdge(g,my_edge);
+	removeEdge(g,0,1);
+	SEQAN_TASSERT(numEdges(g) == 2)
+
+	
+	// Remove vertices 
+	addVertex(g);  //5
+	TEdgeDescriptor e3 = addEdge(g,5,2);
+	addEdge(g,2,3);
+	addEdge(g,1,3);
+	addEdge(g,1,4);
+	SEQAN_TASSERT(outDegree(g, 3) == 4)
+	SEQAN_TASSERT(outDegree(g, 4) == 2)
+	removeVertex(g, v3);
+	SEQAN_TASSERT(outDegree(g, 4) == 1)
+	SEQAN_TASSERT(outDegree(g, 0) == 0)
+	SEQAN_TASSERT(numVertices(g) == 5)
+	SEQAN_TASSERT(numEdges(g) == 2)
+
+	// Clear graph
+	clearEdges(g);
+	SEQAN_TASSERT(numVertices(g) == 5)
+	SEQAN_TASSERT(numEdges(g) == 0)
+	addEdge(g,2,0);
+	addEdge(g,4,1);
+	clearVertices(g);
+	SEQAN_TASSERT(numVertices(g) == 0)
+	SEQAN_TASSERT(numEdges(g) == 0)
+	addVertex(g);addVertex(g);addVertex(g);
+	addVertex(g);addVertex(g);
+	addEdge(g,2,0);
+	addEdge(g,4,1);
+	clear(g);
+	SEQAN_TASSERT(numVertices(g) == 0)
+	SEQAN_TASSERT(numEdges(g) == 0)
+	addVertex(g);addVertex(g);addVertex(g);
+	addVertex(g);addVertex(g);
+	addEdge(g,2,0);
+	addEdge(g,4,1);
+	addEdge(g,4,2);
+	removeVertex(g,3);
+	SEQAN_TASSERT(numVertices(g) == 4)
+	SEQAN_TASSERT(numEdges(g) == 3)
+	SEQAN_TASSERT(outDegree(g, 4) == 2)
+	SEQAN_TASSERT(inDegree(g, 4) == 2)
+
+	// Transpose
+	transpose(g); 
+	SEQAN_TASSERT(numVertices(g) == 4)
+	SEQAN_TASSERT(numEdges(g) == 3)
+	SEQAN_TASSERT(outDegree(g, 4) == 2)
+	SEQAN_TASSERT(inDegree(g, 4) == 2)
+	StandardGraph g_copy(g);
+	SEQAN_TASSERT(numVertices(g_copy) == 4)
+	SEQAN_TASSERT(numEdges(g_copy) == 3)
+	SEQAN_TASSERT(outDegree(g_copy, 4) == 2)
+	SEQAN_TASSERT(inDegree(g_copy, 4) == 2)
+	addVertex(g_copy);
+	addEdge(g_copy,3,0);
+	g_copy = g;
+	SEQAN_TASSERT(numVertices(g_copy) == 4)
+	SEQAN_TASSERT(numEdges(g_copy) == 3)
+	SEQAN_TASSERT(outDegree(g_copy, 4) == 2)
+	SEQAN_TASSERT(inDegree(g_copy, 4) == 2)
+	//Copies the graph and transposes just the copy
+	transpose(g,g_copy);  // g does not change!
+	SEQAN_TASSERT(numVertices(g_copy) == 4)
+	SEQAN_TASSERT(numEdges(g_copy) == 3)
+	SEQAN_TASSERT(outDegree(g_copy, 4) == 2)
+	SEQAN_TASSERT(inDegree(g_copy, 4) == 2)
+
+	// Adjacency matrix
+	Matrix<unsigned int> mat;
+	getAdjacencyMatrix(g, mat);
+	unsigned int len = getIdUpperBound(g.data_id_managerV);
+	SEQAN_TASSERT(getValue(mat,0*len+2) == 1)
+	SEQAN_TASSERT(getValue(mat,3*len+2) == 0)
+	SEQAN_TASSERT(getValue(mat,0*len+2) == getValue(mat,2*len+0))
+	SEQAN_TASSERT(getValue(mat,1*len+4) == getValue(mat,4*len+1))
+	SEQAN_TASSERT(getValue(mat,2*len+4) == getValue(mat,4*len+2))
+
+
+//____________________________________________________________________________
+//Graph with edge cargo and edge ids
+	typedef Pair<char, int> TPair;
+	typedef EdgeListU<TPair> TEdges;
+	typedef VertexDescriptor<Graph<TEdges> >::Type TVertexDescriptor2;
+	typedef EdgeDescriptor<Graph<TEdges> >::Type TEdgeDescriptor2;
+
+	Graph<TEdges> g2;
+	SEQAN_TASSERT(numVertices(g2) == 0)
+	SEQAN_TASSERT(numEdges(g2) == 0)
+	TVertexDescriptor2 ver0 = addVertex(g2);
+	SEQAN_TASSERT(ver0 == 0)
+	SEQAN_TASSERT(numVertices(g2) == 1)
+	TVertexDescriptor2 ver1 = addVertex(g2);
+	SEQAN_TASSERT(ver1 == 1)
+	SEQAN_TASSERT(numVertices(g2) == 2)
+	TEdgeDescriptor2 ed1 =addEdge(g2,0,1);
+	SEQAN_TASSERT(targetVertex(g2, ed1) == 1)
+	SEQAN_TASSERT(sourceVertex(g2, ed1) == 0)
+	SEQAN_TASSERT(numEdges(g2) == 1)
+	assignCargo(ed1, TPair('a',3));
+	SEQAN_TASSERT((getCargo(ed1)).i1 == 'a')
+	SEQAN_TASSERT((getCargo(ed1)).i2 == 3)
+	cargo(ed1) = TPair('c',1);
+	SEQAN_TASSERT((getCargo(ed1)).i1 == 'c')
+	SEQAN_TASSERT((getCargo(ed1)).i2 == 1)
+	addVertex(g2);
+	addVertex(g2);
+	addVertex(g2);
+	TEdgeDescriptor2 ed4 =addEdge(g2,1,4);
+	cargo(ed4) = TPair('z',100);
+	removeVertex(g2, 2);
+	Graph<TEdges> g2_copy(g2);
+	SEQAN_TASSERT(numVertices(g2_copy) == 4)
+	SEQAN_TASSERT(numEdges(g2_copy) == 2)
+	clearEdges(g2_copy);
+	SEQAN_TASSERT(numVertices(g2_copy) == 4)
+	SEQAN_TASSERT(numEdges(g2_copy) == 0)
+	clearVertices(g2_copy);
+	SEQAN_TASSERT(numVertices(g2_copy) == 0)
+	addVertex(g2_copy);addVertex(g2_copy);
+	addEdge(g2_copy,0,1);
+	clear(g2_copy);
+	SEQAN_TASSERT(numVertices(g2_copy) == 0)
+	addVertex(g2_copy);addVertex(g2_copy);
+	addEdge(g2_copy,0,1);
+	transpose(g2, g2_copy);
+	SEQAN_TASSERT(outDegree(g2_copy, 0) == 1)
+	SEQAN_TASSERT(inDegree(g2_copy, 0) == 1)
+	SEQAN_TASSERT(numEdges(g2_copy) == 2)
+	TEdgeDescriptor2 edgCargo = addEdge(g2, 0, 3, TPair('m',3));
+	SEQAN_TASSERT((getCargo(edgCargo)).i1 == 'm')
+	SEQAN_TASSERT((getCargo(edgCargo)).i2 == 3)
+
+//____________________________________________________________________________
+//Graph without edge cargo and without edge ids
+	typedef EdgeListU<void, WithoutEdgeId> TEdges3;
+	typedef VertexDescriptor<Graph<TEdges3> >::Type TVertexDescriptor3;
+	typedef EdgeDescriptor<Graph<TEdges3> >::Type TEdgeDescriptor3;
+
+	Graph<TEdges3> g3;
+	addVertex(g3);addVertex(g3);addVertex(g3);
+	addVertex(g3);addVertex(g3);
+	addEdge(g3,1,4);
+	SEQAN_TASSERT(numVertices(g3) == 5)
+	SEQAN_TASSERT(numEdges(g3) == 1)
+	TEdgeDescriptor3 edge3 = addEdge(g3,0,4);
+	SEQAN_TASSERT(_getId(edge3) == 0);
+	SEQAN_TASSERT(getCargo(edge3) == (void*) 0);
+	addEdge(g3,0,2);
+	addEdge(g3,0,1);
+	removeEdge(g3,0,4);
+	removeEdge(g3,0,2);
+	SEQAN_TASSERT(numEdges(g3) == 2)
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 void Test_Graph() {
 //____________________________________________________________________________
 // Graph without edge cargo but with edge ids
@@ -937,10 +1155,7 @@ void Test_Graph() {
 	SEQAN_TASSERT(inDegree(g, 4) == 0)
 
 	// Transpose
-	StandardGraph g_tmp;
-	//Transposes the graph in-place
-	transpose(g, g_tmp); 
-	g = g_tmp;
+	transpose(g); 
 	SEQAN_TASSERT(numVertices(g) == 4)
 	SEQAN_TASSERT(numEdges(g) == 3)
 	SEQAN_TASSERT(outDegree(g, 4) == 0)
@@ -1707,17 +1922,18 @@ void Test_GraphDfsIterator() {
 void Test_BreadthFirstSearch() {
 //____________________________________________________________________________
 // Breadth-First Search
-	typedef VertexDescriptor<Graph<> >::Type TVertexDescriptor;
-	typedef EdgeDescriptor<Graph<> >::Type TEdgeDescriptor;
-	typedef Size<Graph<> >::Type TSize;
+	typedef Graph<EdgeList<> > TGraph;
+	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef Size<TGraph>::Type TSize;
 
 	//Number of edges
 	TSize numEdges = 20;
 	//Source, Target, Source, Target, Source, ...
-	TVertexDescriptor edges[] = {0,1, 1,0, 0,4, 4,0, 1,5, 5,1, 2,5, 5,2, 2,6, 6,2, 2,3, 3,2, 3,6, 6,3, 3,7, 7,3, 5,6, 6,5, 6,7, 7,6};
+	TVertexDescriptor edges[] = {0,1, 0,4, 1,5, 2,5, 2,6, 2,3, 3,6, 3,7, 5,6, 6,7};
 	
 	//Create the graph
-	Graph<> g(edges, numEdges);
+	TGraph g(edges, numEdges);
 
 	// Predecessor and distance map
 	String<unsigned int> predMap;
@@ -2235,6 +2451,7 @@ int main()
 	Test_Oracle();
 	Test_Trie();
 	Test_Graph();
+	Test_GraphU();
 	Test_GraphExternalProperty();
 	Test_GraphInternalProperty();
 	Test_GraphVertexIterator();
@@ -2267,7 +2484,7 @@ int main()
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_oracle.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_trie.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_algorithm.h");
-	
+
 	SEQAN_TREPORT("TEST END")
 
 	return 0;

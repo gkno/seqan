@@ -120,6 +120,16 @@ struct EdgeType<Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const> {
 	typedef EdgeStump<TCargo, TEdgeSpec> const Type;
 };
 
+template<typename TCargo, typename TEdgeSpec, typename TSpec>
+struct EdgeType<Graph<EdgeListU<TCargo, TEdgeSpec>, TSpec> > {
+	typedef EdgeStump<TCargo, TEdgeSpec> Type;
+};
+
+template<typename TCargo, typename TEdgeSpec, typename TSpec>
+struct EdgeType<Graph<EdgeListU<TCargo, TEdgeSpec>, TSpec> const> {
+	typedef EdgeStump<TCargo, TEdgeSpec> const Type;
+};
+
 template<typename TAlphabet, typename TCargo, typename TEdgeSpec, typename TSpec>
 struct EdgeType<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> > {
 	typedef EdgeAutomaton<TCargo, TEdgeSpec> Type;
@@ -140,6 +150,19 @@ template<typename TCargo, typename TEdgeSpec, typename TSpec>
 struct EdgeDescriptor<Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const>
 {
 	typedef typename EdgeType<Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const>::Type* Type;
+};
+
+
+template<typename TCargo, typename TEdgeSpec, typename TSpec>
+struct EdgeDescriptor<Graph<EdgeListU<TCargo, TEdgeSpec>, TSpec> > 
+{
+	typedef typename EdgeType<Graph<EdgeListU<TCargo, TEdgeSpec>, TSpec> >::Type* Type;
+};
+
+template<typename TCargo, typename TEdgeSpec, typename TSpec>
+struct EdgeDescriptor<Graph<EdgeListU<TCargo, TEdgeSpec>, TSpec> const>
+{
+	typedef typename EdgeType<Graph<EdgeListU<TCargo, TEdgeSpec>, TSpec> const>::Type* Type;
 };
 
 template<typename TAlphabet, typename TCargo, typename TEdgeSpec, typename TSpec>

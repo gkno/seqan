@@ -82,6 +82,16 @@ transpose(Graph<TEdges, TSpec> const& source,
 	_copyGraph(source, dest, true);
 }
 
+template<typename TEdges, typename TSpec>
+inline void 
+transpose(Graph<TEdges, TSpec>& g)
+{
+	SEQAN_CHECKPOINT
+	Graph<TEdges, TSpec> dest;
+	_copyGraph(g, dest, true);
+	g = dest;
+}
+
 template<typename TEdges, typename TSpec, typename TVertexDescriptor>
 inline void 
 removeVertex(Graph<TEdges, TSpec>& g, 

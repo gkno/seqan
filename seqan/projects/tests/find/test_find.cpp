@@ -390,11 +390,11 @@ int main()
 	Test_OnlineAlg<ShiftOr>();
 	Test_OnlineAlg<BndmAlgo>();
 	Test_OnlineAlg<BomAlgo>();
-	
+
+
 	Test_OnlineAlgMulti<AhoCorasick>();
 	Test_OnlineAlgMulti<MultipleShiftAnd>();
 	Test_OnlineAlgMulti<SetHorspool>();
-
 
 	Test_Various();
 
