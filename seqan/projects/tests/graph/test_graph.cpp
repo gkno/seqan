@@ -190,6 +190,86 @@ void Test_EdgeStump() {
 
 //////////////////////////////////////////////////////////////////////////////
 
+void Test_EdgeStumpU() {
+//____________________________________________________________________________
+// EdgeStumpU
+	// Default: EdgeStumpU without edge cargo but with edge id
+	EdgeStumpU<> es1;
+	_assignId(&es1, 4);
+	SEQAN_TASSERT(_getId(&es1) == 4)
+	assignTarget(&es1, 5);
+	SEQAN_TASSERT(getTarget(&es1) == 5)
+	assignSource(&es1, 3);
+	SEQAN_TASSERT(getSource(&es1) == 3)
+	assignCargo(&es1, 15);  //Does nothing
+	// No cargo -> pointer to 0
+	SEQAN_TASSERT(getCargo(&es1) == (void*) 0)
+	SEQAN_TASSERT(_getId(&es1) == 4)
+	EdgeStumpU<> const es_const(es1);
+	SEQAN_TASSERT(getCargo(&es1) == (void*) 0)
+	SEQAN_TASSERT(getTarget(&es_const) == 5)
+	SEQAN_TASSERT(getSource(&es_const) == 3)
+	
+	// EdgeStumpU with edge cargo and with edge id
+	EdgeStumpU<unsigned int> es2;
+	assignTarget(&es2, 1);
+	SEQAN_TASSERT(getTarget(&es2) == 1)
+	assignSource(&es2, 4);
+	SEQAN_TASSERT(getSource(&es2) == 4)
+	_assignId(&es2, 1);
+	SEQAN_TASSERT(_getId(&es2) == 1)
+	assignCargo(&es2, 1);
+	SEQAN_TASSERT(getCargo(&es2) == 1)
+	cargo(&es2) = 3;
+	SEQAN_TASSERT(getCargo(&es2) == 3)
+	EdgeStumpU<unsigned int> const es3(es2);
+	SEQAN_TASSERT(_getId(&es2) == 1)
+	SEQAN_TASSERT(getCargo(&es3) == 3)
+	SEQAN_TASSERT(cargo(&es3) == 3)
+	SEQAN_TASSERT(target(&es3) == 1)
+	SEQAN_TASSERT(source(&es3) == 4)
+
+	// EdgeStumpU without edge cargo and without edge id
+	EdgeStumpU<void, WithoutEdgeId> es4;
+	assignTarget(&es4, 3);
+	SEQAN_TASSERT(getTarget(&es4) == 3)
+	SEQAN_TASSERT(target(&es4) == 3)
+	target(&es4) = 1;
+	SEQAN_TASSERT(getTarget(&es4) == 1)
+	assignSource(&es4, 4);
+	SEQAN_TASSERT(getSource(&es4) == 4)
+	source(&es4) = 2;
+	SEQAN_TASSERT(getSource(&es4) == 2)
+	_assignId(&es4, 1); //Does nothing
+	SEQAN_TASSERT(_getId(&es4) == 0)
+	assignCargo(&es4, 1); //Does nothing
+	SEQAN_TASSERT(getCargo(&es4) == (void*) 0)
+	SEQAN_TASSERT(cargo(&es4) == (void*) 0); //Does nothing
+	EdgeStumpU<void, WithoutEdgeId> const es5(es4);
+	SEQAN_TASSERT(_getId(&es5) == 0)
+	SEQAN_TASSERT(getCargo(&es5) == 0)
+	SEQAN_TASSERT(cargo(&es5) == 0)
+
+	// EdgeStumpU with edge cargo and without edge id
+	EdgeStumpU<unsigned int, WithoutEdgeId> es6;
+	assignTarget(&es6, 1);
+	SEQAN_TASSERT(getTarget(&es6) == 1)
+	SEQAN_TASSERT(target(&es6) == 1)
+	source(&es6) = 2;
+	SEQAN_TASSERT(getSource(&es6) == 2)
+	SEQAN_TASSERT(source(&es6) == 2)
+	_assignId(&es6, 1); //Does nothing
+	SEQAN_TASSERT(_getId(&es6) == 0)
+	assignCargo(&es6, 1); 
+	SEQAN_TASSERT(getCargo(&es6) == 1)
+	SEQAN_TASSERT(cargo(&es6) == 1);
+	EdgeStumpU<unsigned int, WithoutEdgeId> const es7(es6);
+	SEQAN_TASSERT(_getId(&es7) == 0)
+	SEQAN_TASSERT(getCargo(&es7) == 1)
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 void Test_EdgeAutomaton() {
 //____________________________________________________________________________
 // EdgeAutomaton
@@ -871,7 +951,7 @@ void Test_GraphU() {
 	// Graph drawing
 	// ToDo: Undirected edges required!
 	// Raw output
-	// std::cout << g << ::std::endl;
+	// std::cout << g << std::endl;
 
 	// Remove edges
 	removeEdge(g,my_edge);
@@ -881,7 +961,7 @@ void Test_GraphU() {
 	
 	// Remove vertices 
 	addVertex(g);  //5
-	TEdgeDescriptor e3 = addEdge(g,5,2);
+	addEdge(g,5,2);
 	addEdge(g,2,3);
 	addEdge(g,1,3);
 	addEdge(g,1,4);
@@ -954,7 +1034,6 @@ void Test_GraphU() {
 	SEQAN_TASSERT(getValue(mat,0*len+2) == getValue(mat,2*len+0))
 	SEQAN_TASSERT(getValue(mat,1*len+4) == getValue(mat,4*len+1))
 	SEQAN_TASSERT(getValue(mat,2*len+4) == getValue(mat,4*len+2))
-
 
 //____________________________________________________________________________
 //Graph with edge cargo and edge ids
@@ -1031,6 +1110,122 @@ void Test_GraphU() {
 	removeEdge(g3,0,2);
 	SEQAN_TASSERT(numEdges(g3) == 2)
 }
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+void Test_GraphUIter() {
+//____________________________________________________________________________
+// Undirected graph iterators
+	typedef Graph<EdgeListU<> > TGraph;
+	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	
+
+	TGraph g;
+	addVertex(g);addVertex(g);addVertex(g);addVertex(g);
+	addVertex(g);addVertex(g);addVertex(g);addVertex(g);
+	removeVertex(g,0);
+	removeVertex(g,5);
+	addEdge(g,2,7);
+	addEdge(g,2,3);
+	addEdge(g,2,4);
+	addEdge(g,4,3);
+	addEdge(g,3,6);
+	addEdge(g,4,6);
+
+	typedef Iterator<TGraph, OutEdgeIterator<> >::Type TOutEdgeIterator;
+	TOutEdgeIterator itOutEdge(g,3);
+	// Both ways are fast for undirected graphs
+	SEQAN_TASSERT(sourceVertex(g, getValue(itOutEdge))==3)
+	SEQAN_TASSERT(targetVertex(g, getValue(itOutEdge))==6)
+	SEQAN_TASSERT(sourceVertex(itOutEdge)==3)
+	SEQAN_TASSERT(targetVertex(itOutEdge)==6)
+	SEQAN_TASSERT(sourceVertex(g, value(itOutEdge))==3)
+	SEQAN_TASSERT(targetVertex(g, *itOutEdge)==6)
+	SEQAN_TASSERT(atEnd(itOutEdge)==false)
+	SEQAN_TASSERT(atBegin(itOutEdge)==true)
+	goNext(itOutEdge);
+	SEQAN_TASSERT(atEnd(itOutEdge)==false)
+	SEQAN_TASSERT(atBegin(itOutEdge)==false)
+	SEQAN_TASSERT(sourceVertex(itOutEdge)==3)
+	SEQAN_TASSERT(targetVertex(itOutEdge)==4)
+	++itOutEdge;
+	itOutEdge++;
+	SEQAN_TASSERT(atEnd(itOutEdge)==true)
+	SEQAN_TASSERT(atBegin(itOutEdge)==false)
+	goPrevious(itOutEdge);
+	SEQAN_TASSERT(sourceVertex(g, getValue(itOutEdge))==2)
+	SEQAN_TASSERT(targetVertex(g, getValue(itOutEdge))==3)
+	--itOutEdge;
+	itOutEdge--; 
+	SEQAN_TASSERT(sourceVertex(g, getValue(itOutEdge))==3)
+	SEQAN_TASSERT(targetVertex(g, getValue(itOutEdge))==6)
+	itOutEdge--;
+	itOutEdge--;
+	SEQAN_TASSERT(atBegin(itOutEdge)==true)
+	TOutEdgeIterator itEdge2(itOutEdge);
+	TOutEdgeIterator itEdge3;
+	itEdge3 = itOutEdge;
+	SEQAN_TASSERT(itOutEdge == itEdge2)
+	SEQAN_TASSERT(itEdge2 == itEdge3)
+	goEnd(itOutEdge);
+	SEQAN_TASSERT(itEdge2 != itOutEdge)
+	goEnd(itEdge2);
+	SEQAN_TASSERT(itEdge2 == itOutEdge)
+	goBegin(itEdge2);
+	SEQAN_TASSERT(atBegin(itEdge2)==true)
+	SEQAN_TASSERT(&g == &hostGraph(itOutEdge))
+
+	std::cout << g << std::endl;
+	typedef Iterator<TGraph, EdgeIterator<> >::Type TEdgeIterator;
+	TEdgeIterator itEdge(g);
+	SEQAN_TASSERT(sourceVertex(g, getValue(itEdge))==2)
+	SEQAN_TASSERT(targetVertex(g, getValue(itEdge))==4)
+	SEQAN_TASSERT(atBegin(itEdge)==true)
+	SEQAN_TASSERT(atEnd(itEdge)==false)
+	goNext(itEdge);
+	SEQAN_TASSERT(sourceVertex(g, getValue(itEdge))==2)
+	SEQAN_TASSERT(targetVertex(g, getValue(itEdge))==3)
+	SEQAN_TASSERT(atBegin(itEdge)==false)
+	SEQAN_TASSERT(atEnd(itEdge)==false)
+	goNext(itEdge);
+	SEQAN_TASSERT(sourceVertex(g, getValue(itEdge))==2)
+	SEQAN_TASSERT(targetVertex(g, getValue(itEdge))==7)
+	++itEdge;
+	SEQAN_TASSERT(sourceVertex(g, getValue(itEdge))==3)
+	SEQAN_TASSERT(targetVertex(g, getValue(itEdge))==6)
+	itEdge++;
+	SEQAN_TASSERT(sourceVertex(g, getValue(itEdge))==3)
+	SEQAN_TASSERT(targetVertex(g, getValue(itEdge))==4)
+	goNext(itEdge);
+	SEQAN_TASSERT(sourceVertex(g, getValue(itEdge))==4)
+	SEQAN_TASSERT(targetVertex(g, getValue(itEdge))==6)
+	goNext(itEdge);
+	SEQAN_TASSERT(atBegin(itEdge)==false)
+	SEQAN_TASSERT(atEnd(itEdge)==true)
+	goPrevious(itEdge);	
+	SEQAN_TASSERT(sourceVertex(g, getValue(itEdge))==4)
+	SEQAN_TASSERT(targetVertex(g, getValue(itEdge))==6)
+	--itEdge;	
+	SEQAN_TASSERT(sourceVertex(g, getValue(itEdge))==3)
+	SEQAN_TASSERT(targetVertex(g, getValue(itEdge))==4)
+	itEdge--;	
+	SEQAN_TASSERT(sourceVertex(g, getValue(itEdge))==3)
+	SEQAN_TASSERT(targetVertex(g, getValue(itEdge))==6)
+	goPrevious(itEdge);	
+	SEQAN_TASSERT(sourceVertex(g, getValue(itEdge))==2)
+	SEQAN_TASSERT(targetVertex(g, getValue(itEdge))==7)
+	goPrevious(itEdge);	
+	SEQAN_TASSERT(sourceVertex(g, getValue(itEdge))==2)
+	SEQAN_TASSERT(targetVertex(g, getValue(itEdge))==3)
+	goPrevious(itEdge);	
+	SEQAN_TASSERT(sourceVertex(g, getValue(itEdge))==2)
+	SEQAN_TASSERT(targetVertex(g, getValue(itEdge))==4)
+	SEQAN_TASSERT(atBegin(itEdge)==true)
+	SEQAN_TASSERT(atEnd(itEdge)==false)
+}
+
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -1508,19 +1703,16 @@ void Test_GraphInternalProperty() {
 
 
 //////////////////////////////////////////////////////////////////////////////
-
+template <typename TGraphType>
 void Test_GraphVertexIterator() {
 //____________________________________________________________________________
 // Graph VertexIterator
-	// Works on all graph types
-	//typedef Graph<Automaton<Dna> > TGraph;
-	typedef Graph<EdgeList<char> > TGraph;
-	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef Graph<TGraphType> TGraph;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	
 	TGraph g;
 	TVertexDescriptor v0 = addVertex(g);
-	addEdge(g,v0,v0,'c');
 	TVertexDescriptor v1 = addVertex(g);
 	addEdge(g,v0,v1,'t');
 	addVertex(g); //2
@@ -1530,7 +1722,7 @@ void Test_GraphVertexIterator() {
 	//Tricky case -> id 0 is released
 	removeVertex(g,v0);
 	removeVertex(g,3);
-	typedef Iterator<TGraph, VertexIterator<> >::Type TVertexIterator;
+	typedef typename Iterator<TGraph, VertexIterator<> >::Type TVertexIterator;
 	TVertexIterator it(g);
 	SEQAN_TASSERT(atBegin(it)==true)
 	SEQAN_TASSERT(getValue(it)==1)
@@ -1576,22 +1768,24 @@ void Test_GraphVertexIterator() {
 
 //////////////////////////////////////////////////////////////////////////////
 
+template <typename TGraphType>
 void Test_GraphOutEdgeIterator() {
 //____________________________________________________________________________
-// Graph EdgeIterator
-	typedef VertexDescriptor<Graph<> >::Type TVertexDescriptor;
-	typedef EdgeDescriptor<Graph<> >::Type TEdgeDescriptor;
+// Graph OutEdgeIterator
+	typedef Graph<TGraphType> TGraph;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	
-	Graph<> g;
+	TGraph g;
 	TVertexDescriptor v0 = addVertex(g);
-	addEdge(g,v0,v0);
 	TVertexDescriptor v1 = addVertex(g);
-	addEdge(g,v0,v1);
 	addVertex(g); //2
+	addEdge(g,0,2,'t');
+	addEdge(g,v0,v1,'a');
 	addVertex(g); //3
 	addVertex(g); //4
 
-	typedef Iterator<Graph<>, OutEdgeIterator<> >::Type TOutEdgeIterator;
+	typedef typename Iterator<TGraph, OutEdgeIterator<> >::Type TOutEdgeIterator;
 	TOutEdgeIterator it(g, v0);
 	SEQAN_TASSERT(sourceVertex(g, getValue(it))==0)
 	SEQAN_TASSERT(targetVertex(g, getValue(it))==1)
@@ -1602,10 +1796,10 @@ void Test_GraphOutEdgeIterator() {
 	goNext(it);
 	// Slow
 	SEQAN_TASSERT(sourceVertex(g, getValue(it))==0)
-	SEQAN_TASSERT(targetVertex(g, getValue(it))==0)
+	SEQAN_TASSERT(targetVertex(g, getValue(it))==2)
 	// Fast
 	SEQAN_TASSERT(sourceVertex(it)==0)
-	SEQAN_TASSERT(targetVertex(it)==0)
+	SEQAN_TASSERT(targetVertex(it)==2)
 	SEQAN_TASSERT(atEnd(it)==false)
 	SEQAN_TASSERT(atBegin(it)==false)
 	++it;
@@ -1613,7 +1807,7 @@ void Test_GraphOutEdgeIterator() {
 	SEQAN_TASSERT(atBegin(it)==false)
 	goPrevious(it);
 	SEQAN_TASSERT(sourceVertex(g, getValue(it))==0)
-	SEQAN_TASSERT(targetVertex(g, getValue(it))==0)
+	SEQAN_TASSERT(targetVertex(g, getValue(it))==2)
 	--it;
 	// Slow
 	SEQAN_TASSERT(sourceVertex(g, getValue(it))==0)
@@ -1623,7 +1817,7 @@ void Test_GraphOutEdgeIterator() {
 	SEQAN_TASSERT(targetVertex(it)==1)
 	it++; 
 	SEQAN_TASSERT(sourceVertex(g, getValue(it))==0)
-	SEQAN_TASSERT(targetVertex(g, getValue(it))==0)
+	SEQAN_TASSERT(targetVertex(g, getValue(it))==2)
 	it--;
 	SEQAN_TASSERT(sourceVertex(g, getValue(it))==0)
 	SEQAN_TASSERT(targetVertex(g, getValue(it))==1)
@@ -1644,26 +1838,29 @@ void Test_GraphOutEdgeIterator() {
 
 //////////////////////////////////////////////////////////////////////////////
 
+	
+template <typename TGraphType>
 void Test_GraphEdgeIterator() {
 //____________________________________________________________________________
 // Graph EdgeIterator
-	typedef VertexDescriptor<Graph<> >::Type TVertexDescriptor;
-	typedef EdgeDescriptor<Graph<> >::Type TEdgeDescriptor;
+	typedef Graph<TGraphType> TGraph;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	
-	Graph<> g;
+	TGraph g;
 	TVertexDescriptor v0 = addVertex(g);
-	addEdge(g,v0,v0);
 	TVertexDescriptor v1 = addVertex(g);
-	addEdge(g,v0,v1);
 	addVertex(g); //2
+	addEdge(g,0,2,'t');
+	addEdge(g,v0,v1,'a');
 	addVertex(g); //3
 	addVertex(g); //4
 	addVertex(g); //5
-	addEdge(g,3,2);
-	addEdge(g,3,4);
-	addEdge(g,4,4);
+	addEdge(g,3,4,'t');
+	addEdge(g,2,3,'a');
+	addEdge(g,4,5,'a');
 
-	typedef Iterator<Graph<>, EdgeIterator<> >::Type TEdgeIterator;
+	typedef typename Iterator<TGraph, EdgeIterator<> >::Type TEdgeIterator;
 	TEdgeIterator it(g);
 	SEQAN_TASSERT(sourceVertex(g, getValue(it))==0)
 	SEQAN_TASSERT(targetVertex(g, getValue(it))==1)
@@ -1673,24 +1870,24 @@ void Test_GraphEdgeIterator() {
 	SEQAN_TASSERT(atBegin(it)==true)
 	goNext(it);
 	SEQAN_TASSERT(sourceVertex(g, getValue(it))==0)
-	SEQAN_TASSERT(targetVertex(g, getValue(it))==0)
+	SEQAN_TASSERT(targetVertex(g, getValue(it))==2)
 	SEQAN_TASSERT(atEnd(it)==false)
 	SEQAN_TASSERT(atBegin(it)==false)
 	++it;
 	SEQAN_TASSERT(atEnd(it)==false)
 	SEQAN_TASSERT(atBegin(it)==false)
 	// Slow
-	SEQAN_TASSERT(sourceVertex(g, getValue(it))==3)
-	SEQAN_TASSERT(targetVertex(g, getValue(it))==4)
+	SEQAN_TASSERT(sourceVertex(g, getValue(it))==2)
+	SEQAN_TASSERT(targetVertex(g, getValue(it))==3)
 	// Fast
-	SEQAN_TASSERT(sourceVertex(it)==3)
-	SEQAN_TASSERT(targetVertex(it)==4)
+	SEQAN_TASSERT(sourceVertex(it)==2)
+	SEQAN_TASSERT(targetVertex(it)==3)
 	it++;
 	SEQAN_TASSERT(sourceVertex(g, getValue(it))==3)
-	SEQAN_TASSERT(targetVertex(g, getValue(it))==2)
+	SEQAN_TASSERT(targetVertex(g, getValue(it))==4)
 	it++;
 	SEQAN_TASSERT(sourceVertex(g, getValue(it))==4)
-	SEQAN_TASSERT(targetVertex(g, getValue(it))==4)
+	SEQAN_TASSERT(targetVertex(g, getValue(it))==5)
 	++it;
 	SEQAN_TASSERT(atEnd(it)==true)
 	SEQAN_TASSERT(atBegin(it)==false)
@@ -1698,13 +1895,13 @@ void Test_GraphEdgeIterator() {
 	++it;
 	goPrevious(it);
 	SEQAN_TASSERT(sourceVertex(g, getValue(it))==4)
-	SEQAN_TASSERT(targetVertex(g, getValue(it))==4)
+	SEQAN_TASSERT(targetVertex(g, getValue(it))==5)
 	--it;
 	SEQAN_TASSERT(sourceVertex(g, getValue(it))==3)
-	SEQAN_TASSERT(targetVertex(g, getValue(it))==2)
-	it--;
-	SEQAN_TASSERT(sourceVertex(g, getValue(it))==3)
 	SEQAN_TASSERT(targetVertex(g, getValue(it))==4)
+	it--;
+	SEQAN_TASSERT(sourceVertex(g, getValue(it))==2)
+	SEQAN_TASSERT(targetVertex(g, getValue(it))==3)
 	TEdgeIterator it2(g);
 	TEdgeIterator it3;
 	goBegin(it);
@@ -1722,26 +1919,28 @@ void Test_GraphEdgeIterator() {
 
 //////////////////////////////////////////////////////////////////////////////
 
+template <typename TGraphType>
 void Test_GraphAdjacencyIterator() {
 //____________________________________________________________________________
 // Graph AdjacencyIterator
-	typedef VertexDescriptor<Graph<> >::Type TVertexDescriptor;
-	typedef EdgeDescriptor<Graph<> >::Type TEdgeDescriptor;
+	typedef Graph<TGraphType> TGraph;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	
-	Graph<> g;
+	TGraph g;
 	TVertexDescriptor v0 = addVertex(g);
-	addEdge(g,v0,v0);
 	TVertexDescriptor v1 = addVertex(g);
-	addEdge(g,v0,v1);
 	addVertex(g); //2
+	addEdge(g,0,2,'t');
+	addEdge(g,v0,v1,'a');
 	addVertex(g); //3
 	addVertex(g); //4
 	addVertex(g); //5
-	addEdge(g,3,2);
-	addEdge(g,3,4);
-	addEdge(g,4,4);
+	addEdge(g,3,2,'t');
+	addEdge(g,3,4,'a');
+	addEdge(g,4,5,'t');
 
-	typedef Iterator<Graph<>, AdjacencyIterator<> >::Type TAdjacencyIterator;
+	typedef typename Iterator<TGraph, AdjacencyIterator<> >::Type TAdjacencyIterator;
 	TAdjacencyIterator it(g,3);
 	SEQAN_TASSERT(getValue(it) == 4)
 	SEQAN_TASSERT(&hostGraph(it) == &g)
@@ -2442,23 +2641,53 @@ int main()
 {
 	SEQAN_TREPORT("TEST BEGIN")
 
+	// Test Id Manager
 	Test_IdManager();
+
+	// Test Different ways to store edges (depending on graph)
 	Test_EdgeStump();
+	Test_EdgeStumpU();
 	Test_EdgeAutomaton();
+
+	// Test Graph types
 	Test_Automaton();
 	Test_WordGraph();
 	Test_Oracle();
 	Test_Trie();
 	Test_Graph();
 	Test_GraphU();
+	Test_GraphUIter();
+
+	// Test property maps
 	Test_GraphExternalProperty();
 	Test_GraphInternalProperty();
-	Test_GraphVertexIterator();
-	Test_GraphOutEdgeIterator();
-	Test_GraphEdgeIterator();
-	Test_GraphAdjacencyIterator();
+
+	// Test all vertex iterators
+	Test_GraphVertexIterator<Automaton<char> >();
+	Test_GraphVertexIterator<EdgeList<char> >();
+	Test_GraphVertexIterator<EdgeListU<char> >();
+	
+	// Test all outedge iterators
+	Test_GraphOutEdgeIterator<Automaton<char> >();
+	Test_GraphOutEdgeIterator<EdgeList<char> >();
+	Test_GraphOutEdgeIterator<EdgeListU<char> >();
+
+	// Test all edge iterators
+	Test_GraphEdgeIterator<Automaton<char> >();
+	Test_GraphEdgeIterator<EdgeList<char> >();
+	Test_GraphEdgeIterator<EdgeListU<char> >();
+
+	// Test all adjacency iterators
+	Test_GraphAdjacencyIterator<Automaton<char> >();
+	Test_GraphAdjacencyIterator<EdgeList<char> >();
+	Test_GraphAdjacencyIterator<EdgeListU<char> >();
+
+	// Test bfs iterator
+	// ToDo: For different graph types
 	Test_GraphBfsIterator();
 	Test_GraphDfsIterator();
+
+	// Graph algorithms
 	Test_GraphAlgorithms();
 
 //____________________________________________________________________________
@@ -2475,6 +2704,7 @@ int main()
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_bfsiterator.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_dfsiterator.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_edgestump.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_edgestumpu.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_edgelist.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_edgelistu.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_edgeautomaton.h");
@@ -2483,7 +2713,6 @@ int main()
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_oracle.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_trie.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_algorithm.h");
-
 
 	SEQAN_TREPORT("TEST END")
 

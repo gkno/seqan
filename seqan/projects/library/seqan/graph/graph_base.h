@@ -46,6 +46,11 @@ typedef Tag<WithoutEdgeId_> const WithoutEdgeId;
 template<typename TCargo = void, typename TSpec = Default>
 class EdgeStump;
 
+//////////////////////////////////////////////////////////////////////////////
+// Default Edge Stump Undirected: No cargo but edge id
+//////////////////////////////////////////////////////////////////////////////
+template<typename TCargo = void, typename TSpec = Default>
+class EdgeStumpU;
 
 //////////////////////////////////////////////////////////////////////////////
 // Default Automaton Edge: No cargo and no edge id
@@ -122,12 +127,12 @@ struct EdgeType<Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const> {
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec>
 struct EdgeType<Graph<EdgeListU<TCargo, TEdgeSpec>, TSpec> > {
-	typedef EdgeStump<TCargo, TEdgeSpec> Type;
+	typedef EdgeStumpU<TCargo, TEdgeSpec> Type;
 };
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec>
 struct EdgeType<Graph<EdgeListU<TCargo, TEdgeSpec>, TSpec> const> {
-	typedef EdgeStump<TCargo, TEdgeSpec> const Type;
+	typedef EdgeStumpU<TCargo, TEdgeSpec> const Type;
 };
 
 template<typename TAlphabet, typename TCargo, typename TEdgeSpec, typename TSpec>
@@ -188,6 +193,11 @@ struct IdHandler<EdgeStump<TCargo, WithoutEdgeId>, TIdType> {
 	typedef IdManager<void> Type;
 };
 
+template<typename TCargo, typename TIdType>
+struct IdHandler<EdgeStumpU<TCargo, WithoutEdgeId>, TIdType> {
+	// Dummy IdManager
+	typedef IdManager<void> Type;
+};
 
 //////////////////////////////////////////////////////////////////////////////
 // Utility functions
