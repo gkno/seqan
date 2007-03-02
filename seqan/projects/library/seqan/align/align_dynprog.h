@@ -363,12 +363,12 @@ SEQAN_CHECKPOINT
 	TTargetSourceSegment str_0 = sourceSegment(row(target_, 0));
 	TTargetSourceSegment str_1 = sourceSegment(row(target_, 1));
 	typename Size<TTargetSourceSegment>::Type dim_0_len = length(str_0) + 1;
-	typename Size<TTargetSourceSegment>::Type dim_1_len = length(str_1) + 1;
+	//typename Size<TTargetSourceSegment>::Type dim_1_len = length(str_1) + 1;
 	
 	TScoreValue score_gap_open = scoreGapOpen(score_);
 	TScoreValue score_gap_diff = score_gap_open;
 	score_gap_open += scoreGapExtend(score_);
-	TScoreValue score_gap_extend = scoreGapExtend(score_);
+	//TScoreValue score_gap_extend = scoreGapExtend(score_);
 	
 	TMatrixIterator diag_source_ = begin(diag_matrix_);
 	TMatrixIterator hori_source_ = begin(hori_matrix_);

@@ -1,6 +1,8 @@
 #ifndef SEQAN_HEADER_PRIORITY_TYPE_BASE_H
 #define SEQAN_HEADER_PRIORITY_TYPE_BASE_H
 
+#include <functional>
+
 namespace SEQAN_NAMESPACE_MAIN
 {
 

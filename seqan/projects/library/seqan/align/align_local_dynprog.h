@@ -167,8 +167,8 @@ SEQAN_CHECKPOINT
 	//define some variables
 
 
-	TSize str1_length = length(str1_);
-	TSize str2_length = length(str2_);
+//	TSize str1_length = length(str1_);
+//	TSize str2_length = length(str2_);
 	TStringIterator x_begin = begin(str1_) - 1;
 	TStringIterator x_end = end(str1_) - 1;
 	TStringIterator y_begin = begin(str2_) - 1;

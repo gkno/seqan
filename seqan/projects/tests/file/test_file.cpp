@@ -546,7 +546,6 @@ void Test_Fasta_Read(char * path)
 	SEQAN_TASSERT(length(str_2) == 1065);
 
 	read(file_1, str_2, Fasta());
-	int x = length(str_2);
 	SEQAN_TASSERT(length(str_2) == 200);
 
 	fclose(file_1);

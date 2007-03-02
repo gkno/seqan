@@ -83,7 +83,7 @@ public:
 
 	FileFormat() {}
 	FileFormat(FileFormat const &) {}
-	~FileFormat() {}
+	virtual ~FileFormat() {}
 	FileFormat const & operator =(FileFormat const &) {}
 
 	inline void * 
@@ -154,7 +154,7 @@ public:
 
 	FileFormat() {}
 	FileFormat(FileFormat const &) {}
-	~FileFormat() {}
+	virtual ~FileFormat() {};
 	FileFormat const & operator =(FileFormat const &) {}
 
 	virtual void *

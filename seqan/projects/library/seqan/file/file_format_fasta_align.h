@@ -114,7 +114,7 @@ SEQAN_CHECKPOINT
 	
 	for(TSize i=0;i<numRows;++i) {
 		TSize begin = beg_end_length[i*3];
-		TSize end = beg_end_length[i*3+1];
+//		TSize end = beg_end_length[i*3+1];
 		count = beg_end_length[i*3+2];
 		
 		//Reserve space

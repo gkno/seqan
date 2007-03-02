@@ -300,7 +300,7 @@ void TestGapManipulation()
 	SEQAN_TASSERT(gaps5 == "h----e--ll-o"); // "--h----e--ll-o"
 	SEQAN_TASSERT(beginPosition(gaps5) == 2);
 
-	int x = countGaps(gaps5, 0);
+	SEQAN_TASSERT(countGaps(gaps5, 0) == 2);
 	SEQAN_TASSERT(countGaps(gaps5, 2) == 0);
 	SEQAN_TASSERT(countGaps(gaps5, 3) == 4);
 	SEQAN_TASSERT(countGaps(gaps5, 4) == 3);

@@ -76,10 +76,12 @@ SEQAN_CHECKPOINT
 	static void
 	read_(TFile & file,
 		TData & data,
-		TSize limit)
+		TSize _limit)
 	{
 SEQAN_CHECKPOINT
 		SEQAN_ASSERT(!_streamEOF(file))
+
+		typename Size<TData>::Type limit = _limit;
 
 		//determine length
 		typename Position<TFile>::Type begin_pos = _streamTellG(file);

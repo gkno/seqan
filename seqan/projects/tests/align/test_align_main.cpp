@@ -29,7 +29,7 @@ int main()
 	int score = needlemanWunsch(a, SimpleScore() );
 
 	cout << a;
-/*
+
 	Gaps<String<char >, ArrayGaps > gps;
 	assignSource(gps, "hallo");
 
