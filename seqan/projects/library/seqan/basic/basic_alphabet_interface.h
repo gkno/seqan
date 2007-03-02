@@ -152,7 +152,7 @@ SEQAN_CHECKPOINT
 		_ValueConstructorProxy		// false, types differ -> value() returns a proxy
 	>::Type TConstructor;
 
-	TConstructor::construct(it);
+	TConstructor::construct(it, param_);
 }
 
 template <typename TIterator, typename TParam>
@@ -173,7 +173,7 @@ SEQAN_CHECKPOINT
 		_ValueConstructorProxy		// false, types differ -> value() returns a proxy
 	>::Type TConstructor;
 
-	TConstructor::construct(it);
+	TConstructor::construct(it, param_, tag);
 }
 
 //////////////////////////////////////////////////////////////////////////////
