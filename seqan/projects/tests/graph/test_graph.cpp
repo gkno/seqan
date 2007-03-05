@@ -2695,8 +2695,10 @@ int main()
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_dfsiterator.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_edgestump.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_edgestumpu.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_edgestumpt.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_edgelist.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_edgelistu.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_tree.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_edgeautomaton.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_automaton.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_wordgraph.h");

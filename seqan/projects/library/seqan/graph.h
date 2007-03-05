@@ -43,10 +43,12 @@
 
 // Graph implementations
 // EdgeList
-#include <seqan/graph/graph_edgestump.h>
+#include <seqan/graph/graph_edgestump.h>   // Directed graph
 #include <seqan/graph/graph_edgestumpu.h>  // Undirected graph
-#include <seqan/graph/graph_impl_edgelist.h>
+#include <seqan/graph/graph_edgestumpt.h>  // Tree
+#include <seqan/graph/graph_impl_edgelist.h>  // directed graph
 #include <seqan/graph/graph_impl_edgelistu.h>   // Undirected graph
+#include <seqan/graph/graph_impl_tree.h>
 // Automaton
 #include <seqan/graph/graph_edgeautomaton.h>
 #include <seqan/graph/graph_impl_automaton.h>
