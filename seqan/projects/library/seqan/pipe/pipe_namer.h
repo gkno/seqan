@@ -69,7 +69,7 @@ namespace SEQAN_NAMESPACE_MAIN
             C(_C) {}
         
         inline typename Value<Pipe>::Type const & operator*() {
-            tmp.i1 = (*in).i1;
+            tmp.i1 = getValueI1(*in);
             return tmp;
         }
 

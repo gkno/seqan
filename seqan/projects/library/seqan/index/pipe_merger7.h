@@ -113,7 +113,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			// we get here, only if a septet crosses the boarder of
 			// 1) the single text (a/b.i.i1 is an ordinal number)
 			// 2) a sequence in a multiple sequence text (a/b.i.i1 is a Pair)
-			return crossBoarderCompare(a.i.i1, b.i.i1);
+			return crossBoarderCompare(getValueI1(a.i), getValueI1(b.i));
         }
     };
 
@@ -157,7 +157,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			// we get here, only if a septet crosses the boarder of
 			// 1) the single text (a/b.i.i1 is an ordinal number)
 			// 2) a sequence in a multiple sequence text (a/b.i.i1 is a Pair)
-			return crossBoarderCompare(a.i.i1, b.i.i1);
+			return crossBoarderCompare(getValueI1(a.i), getValueI1(b.i));
 		}
     };
 
@@ -361,8 +361,9 @@ namespace SEQAN_NAMESPACE_MAIN
             SkewDCStream s;
 
 			// calculate residue class from the suffix length
-			unsigned seqNo = getValueI1((*in.in5).i1);
-            s.stream = ((limits[seqNo + 1] - limits[seqNo]) - getValueI2((*in.in5).i1)) % 7;
+			typename Value<InType124,1>::Type in_in5_i1 = getValueI1(*in.in5);
+			unsigned seqNo = getValueI1(in_in5_i1);
+            s.stream = ((limits[seqNo + 1] - limits[seqNo]) - getValueI2(in_in5_i1)) % 7;
 
             _copy(s, *in.in5);
 			queue.push(s);
@@ -378,7 +379,8 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 
         inline typename Value<Pipe>::Type const operator*() {
-            return queue.top().i.i1;
+//            return queue.top().i.i1;
+            return getValueI1(queue.top().i);
         }
         
         Pipe& operator++() {

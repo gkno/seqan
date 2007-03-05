@@ -37,8 +37,8 @@ namespace SEQAN_NAMESPACE_MAIN
             const typename Septet::T *sb = b.i2.i;
 
             SizeType n = Septet::size;
-			SizeType aLeft = getValueI2(a.i1);
-			SizeType bLeft = getValueI2(b.i1);
+			SizeType aLeft = getValueI2(getValueI1(a));
+			SizeType bLeft = getValueI2(getValueI1(b));
 
             if (aLeft < n) n = aLeft;
             if (bLeft < n) n = bLeft;
@@ -49,7 +49,7 @@ namespace SEQAN_NAMESPACE_MAIN
             if (n < Septet::size) {
 				if (aLeft < bLeft) return -1;
 				if (aLeft > bLeft) return 1;
-				return (getValueI1(a.i1) > getValueI1(b.i1))? -1 : 1;
+				return (getValueI1(getValueI1(a)) > getValueI1(getValueI1(b)))? -1 : 1;
             }
             return 0;
         }
@@ -67,8 +67,8 @@ namespace SEQAN_NAMESPACE_MAIN
             const Pair<T1, Tuple<TValue, 7, Compressed>, Compressed > &b) const
         {
 			typedef typename T1::T2 SizeType;
-			SizeType aLeft = getValueI2(a.i1);
-			SizeType bLeft = getValueI2(b.i1);
+			SizeType aLeft = getValueI2(getValueI1(a));
+			SizeType bLeft = getValueI2(getValueI1(b));
 
 			if (aLeft >= 7 && bLeft >= 7) {
 				if (a.i2.i < b.i2.i) return -1;
@@ -86,7 +86,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			}
 			if (aLeft < bLeft) return -1;
 			if (aLeft > bLeft) return 1;
-			return (getValueI1(a.i1) > getValueI1(b.i1))? -1 : 1;
+			return (getValueI1(getValueI1(a)) > getValueI1(getValueI1(b)))? -1 : 1;
         }
     };
 
@@ -159,8 +159,9 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
 
 		inline Result operator()(const InType &x) const {
-			TSize seqOfs = getValueI2(x.i1);
-			return Result(off[seqOfs % 7][getValueI1(x.i1)] - seqOfs/7, x.i2);
+			typename Value<InType,1>::Type x_i1 = x.i1;
+			TSize seqOfs = getValueI2(x_i1);
+			return Result(off[seqOfs % 7][getValueI1(x_i1)] - seqOfs/7, x.i2);
 		}
     };
 
