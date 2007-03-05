@@ -15,6 +15,9 @@ TYPEDEFS = {}
 ################################################################################
 
 def buildProject(project_path):
+    if not os.path.exists(project_path):
+        return
+
     print "create forwards for", project_path
 
     global FUNCS
@@ -31,6 +34,7 @@ def buildProject(project_path):
         exit ('ERROR: wrong argument "' + project_path + '"');
         
     project = project_path[pos1+1:]
+    
     
     for root, dirs, files in os.walk(project_path):
         if 'CVS' in dirs:
