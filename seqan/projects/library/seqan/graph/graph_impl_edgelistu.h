@@ -28,13 +28,6 @@ class Graph<EdgeListU<TCargo, TEdgeSpec>, TSpec>
 		}
 
 
-		template<typename TEdgeArray, typename TSize>
-		Graph(TEdgeArray edges, TSize size) {
-			SEQAN_CHECKPOINT
-			_copyGraph(edges,size,*this);
-		}
-
-
 		~Graph() {
 			SEQAN_CHECKPOINT
 			clear(*this);
@@ -87,15 +80,16 @@ _copyGraph(Graph<EdgeListU<TCargo, TEdgeSpec>, TSpec> const& source,
 		TVertexDescriptor sourceVertex = position(it);
 		while(current != (TEdgeStumpU*) 0) {
 			TVertexDescriptor targetVertex = getTarget(current);
+
 			if (targetVertex != sourceVertex) {
-				// Create missing vertices
+				// Create missing vertices, targetVertex is always bigger than sourceVertex
 				_createVertices(dest,targetVertex);
 			
 				// Add edge
 				TEdgeDescriptor e = addEdge(dest, sourceVertex, targetVertex);
 				_assignId(e, _getId(current));
 				assignCargo(e, getCargo(current));
-				current = current->data_next_source;
+				current = current->data_next_source;  // Follow the link belonging to the source id
 			} else {
 				// Do nothing here because we don't want to create edges twice!!!
 				current = current->data_next_target;
@@ -113,7 +107,7 @@ inline void
 _copyGraph(Graph<EdgeListU<TCargo, TEdgeSpec>, TSpec> const& source,
 		   Graph<EdgeListU<TCargo, TEdgeSpec>, TSpec>& dest) 
 {
-	_copyGraph(source, dest, false);
+	_copyGraph(source, dest, false); // Never transpose because undirected and transposed undirected graph are equal
 }
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec>
@@ -189,6 +183,7 @@ inDegree(Graph<EdgeListU<TCargo, TEdgeSpec>, TSpec> const& g,
 		 TVertexDescriptor const vertex) 
 {
 	SEQAN_CHECKPOINT
+	// In-degree and out-degree are equal for undirected graphs
 	return outDegree(g,vertex);
 }
 
@@ -241,11 +236,13 @@ addEdge(Graph<EdgeListU<TCargo, TEdgeSpec>, TSpec>& g,
 	typedef typename EdgeType<TGraph>::Type TEdgeStumpU;
 	typedef typename Id<TGraph>::Type TId;
 
+	// Source must be the smaller vertex id
 	if (source > target) {
 		TVertexDescriptor tmp = target;
 		target = source;
 		source = tmp;
 	}
+
 	TEdgeStumpU* edge_ptr;
 	allocate(g.data_allocator, edge_ptr, 1);
 	valueConstruct(edge_ptr);

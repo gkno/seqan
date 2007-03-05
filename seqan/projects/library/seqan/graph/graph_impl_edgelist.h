@@ -27,14 +27,6 @@ class Graph<EdgeList<TCargo, TEdgeSpec>, TSpec>
 			SEQAN_CHECKPOINT
 		}
 
-
-		template<typename TEdgeArray, typename TSize>
-		Graph(TEdgeArray edges, TSize size) {
-			SEQAN_CHECKPOINT
-			_copyGraph(edges,size,*this);
-		}
-
-
 		~Graph() {
 			SEQAN_CHECKPOINT
 			clear(*this);
@@ -519,27 +511,7 @@ write(TFile & target,
 	}
 }
 
-template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TPropertyMap, typename TProperties>
-inline void
-initEdgeMap(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec>& g,
-			  TPropertyMap& pm,
-			  TProperties const& prop)
-{
-	SEQAN_CHECKPOINT
-	initEdgeMap(g,pm);
-	typedef Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> TGraph;
-	typedef typename Id<TGraph>::Type TIdType;
-	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	typedef typename EdgeType<TGraph>::Type TEdgeStump;
-	for(TIdType id = getIdLowerBound(g.data_id_managerV);id<getIdUpperBound(g.data_id_managerV);++id) {
-		if (!idInUse(g.data_id_managerV, id)) continue;
-		TEdgeStump* current = getValue(g.data_vertex, id);
-		while(current != (TEdgeStump*) 0) {
-			assignProperty(pm,current,prop[_getId(current)]);
-			current = current->data_next;
-		}
-	}
-}
+
 
 }// namespace SEQAN_NAMESPACE_MAIN
 

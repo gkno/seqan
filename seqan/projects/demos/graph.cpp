@@ -6,21 +6,23 @@ using namespace seqan;
 void BreadthFirstSearch() {
 //____________________________________________________________________________
 // Breadth-First Search
-	typedef Graph<> TGraph;
+	typedef Graph<EdgeListU<> > TGraph;
 	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	typedef Size<TGraph>::Type TSize;
 
 	//Number of edges
-	TSize numEdges = 20;
+	TSize numEdges = 10;
 	//Source, Target, Source, Target, Source, ...
-	TVertexDescriptor edges[] = {0,1, 1,0, 0,4, 4,0, 1,5, 5,1, 2,5, 5,2, 2,6, 6,2, 2,3, 3,2, 3,6, 6,3, 3,7, 7,3, 5,6, 6,5, 6,7, 7,6};
+	TVertexDescriptor edges[] = {0,1, 0,4, 1,5, 2,5, 2,6, 2,3, 3,6, 3,7, 5,6, 6,7};
 	// Vertex names
 	char names[] = {'r', 's', 't', 'u', 'v', 'w', 'x', 'y'};
 	
 	//Create the graph
-	TGraph g(edges, numEdges);
+	TGraph g;
+	addEdges(g, edges, numEdges);
 	std::cout << g << ::std::endl;
+	
 	String<char> nameMap;
 	initVertexMap(g,nameMap, names);
 
@@ -58,10 +60,10 @@ void BreadthFirstSearch() {
 void DepthFirstSearch() {
 //____________________________________________________________________________
 // Depth-First Search
-
-	typedef VertexDescriptor<Graph<> >::Type TVertexDescriptor;
-	typedef EdgeDescriptor<Graph<> >::Type TEdgeDescriptor;
-	typedef Size<Graph<> >::Type TSize;
+	typedef Graph<> TGraph;
+	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef Size<TGraph>::Type TSize;
 
 	//Number of edges
 	TSize numEdges = 8;
@@ -71,7 +73,8 @@ void DepthFirstSearch() {
 	char names[] = {'u', 'v', 'w', 'x', 'y', 'z'};
 
 	//Create the graph
-	Graph<> g(edges, numEdges);
+	TGraph g;
+	addEdges(g, edges, numEdges);
 	std::cout << g << ::std::endl;
 	String<char> nameMap;
 	initVertexMap(g,nameMap, names);
@@ -108,9 +111,10 @@ void DepthFirstSearch() {
 void TopologicalSort() {
 //____________________________________________________________________________
 // Topological Sort
-	typedef VertexDescriptor<Graph<> >::Type TVertexDescriptor;
-	typedef EdgeDescriptor<Graph<> >::Type TEdgeDescriptor;
-	typedef Size<Graph<> >::Type TSize;
+	typedef Graph<> TGraph;
+	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef Size<TGraph>::Type TSize;
 
 	//Number of edges
 	TSize numEdges = 9;
@@ -119,7 +123,8 @@ void TopologicalSort() {
 	std::string names[] = {"shirt", "tie", "jacket", "belt", "watch", "undershorts", "pants", "shoes", "socks"};
 	
 	//Create the graph
-	Graph<> g(edges, numEdges);
+	TGraph g;
+	addEdges(g, edges, numEdges);
 	std::cout << g << ::std::endl;
 	String<std::string> nameMap;
 	initVertexMap(g,nameMap, names);
@@ -147,9 +152,10 @@ void StronglyConnectedComponents() {
 //____________________________________________________________________________
 // Strongly-Connected-Components
 
-	typedef VertexDescriptor<Graph<> >::Type TVertexDescriptor;
-	typedef EdgeDescriptor<Graph<> >::Type TEdgeDescriptor;
-	typedef Size<Graph<> >::Type TSize;
+	typedef Graph<> TGraph;
+	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef Size<TGraph>::Type TSize;
 
 	//Number of edges
 	TSize numEdges = 14;
@@ -159,7 +165,8 @@ void StronglyConnectedComponents() {
 	char names[] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
 
 	//Create the graph
-	Graph<> g(edges, numEdges);
+	TGraph g;
+	addEdges(g, edges, numEdges);
 	std::cout << g << ::std::endl;
 	String<char> nameMap;
 	initVertexMap(g,nameMap, names);
@@ -186,9 +193,10 @@ void StronglyConnectedComponents() {
 void DagShortestPath() {
 //____________________________________________________________________________
 // DAG-Shortest Paths
-	typedef VertexDescriptor<Graph<> >::Type TVertexDescriptor;
-	typedef EdgeDescriptor<Graph<> >::Type TEdgeDescriptor;
-	typedef Size<Graph<> >::Type TSize;
+	typedef Graph<> TGraph;
+	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef Size<TGraph>::Type TSize;
 
 	//Number of edges
 	TSize numEdges = 10;
@@ -197,10 +205,11 @@ void DagShortestPath() {
 	int weights[] =             {3,   5,   6,   2,   2,   4,   7,   1,   -1,  -2};
 	
 	//Create the graph
-	Graph<> g(edges, numEdges);
-	std::cout << g << ::std::endl;
 	String<int> weightMap;
-	initEdgeMap(g,weightMap, weights);
+	TGraph g;
+	addEdges(g, edges, numEdges,weightMap, weights);
+	std::cout << g << ::std::endl;
+
 
 	// Predecessor map and distance map
 	String<unsigned int> predMap;
@@ -227,9 +236,10 @@ void BellmanFord() {
 //____________________________________________________________________________
 // Bellman-Ford
 
-	typedef VertexDescriptor<Graph<> >::Type TVertexDescriptor;
-	typedef EdgeDescriptor<Graph<> >::Type TEdgeDescriptor;
-	typedef Size<Graph<> >::Type TSize;
+	typedef Graph<> TGraph;
+	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef Size<TGraph>::Type TSize;
 
 	//Number of edges
 	TSize numEdges = 10;
@@ -238,13 +248,10 @@ void BellmanFord() {
 	unsigned int weights[] =    {10,  5,   1,   2,   4,   3,   9,   2,   7,   6};
 
 	//Create the graph
-	Graph<> g(edges, numEdges);
-	std::cout << g << ::std::endl;
-
-	// In parameters of Bellman-Ford
-	// Define the distances or weights of the edges
 	String<unsigned int> weightMap;
-	initEdgeMap(g,weightMap, weights);
+	TGraph g;
+	addEdges(g, edges, numEdges,weightMap, weights);
+	std::cout << g << ::std::endl;
 
 	// Out parameters of Bellman-Ford: Predecessor map and distance map
 	String<unsigned int> predMap;
@@ -272,9 +279,10 @@ void Dijkstra() {
 //____________________________________________________________________________
 // Dijkstra with external edge map
 
-	typedef VertexDescriptor<Graph<> >::Type TVertexDescriptor;
-	typedef EdgeDescriptor<Graph<> >::Type TEdgeDescriptor;
-	typedef Size<Graph<> >::Type TSize;
+	typedef Graph<> TGraph;
+	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef Size<TGraph>::Type TSize;
 
 	//Number of edges
 	TSize numEdges = 10;
@@ -283,13 +291,10 @@ void Dijkstra() {
 	unsigned int weights[] =    {10,  5,   1,   2,   4,   3,   9,   2,   7,   6};
 
 	//Create the graph
-	Graph<> g(edges, numEdges);
-	std::cout << g << ::std::endl;
-
-	// In parameters of Dijkstra
-	// Define the distances or weights of the edges
 	String<unsigned int> weightMap;
-	initEdgeMap(g,weightMap, weights);
+	TGraph g;
+	addEdges(g, edges, numEdges,weightMap, weights);
+	std::cout << g << ::std::endl;
 
 	// Out parameters of Dijkstra: Predecessor map and distance map
 	String<unsigned int> predMap;
@@ -320,9 +325,11 @@ void DijkstraInternalMap() {
 	typedef EdgeList<TEdgeCargo> TEdges;
 	//No edge ids require manual creation of the graph!!!
 	//typedef EdgeList<TEdgeCargo, WithoutEdgeId> TEdges;
-	typedef VertexDescriptor<Graph<TEdges> >::Type TVertexDescriptor;
-	typedef EdgeDescriptor<Graph<TEdges> >::Type TEdgeDescriptor;
-	typedef Size<Graph<TEdges> >::Type TSize;
+
+	typedef Graph<TEdges> TGraph;
+	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef Size<TGraph>::Type TSize;
 
 	//Number of edges
 	TSize numEdges = 10;
@@ -331,18 +338,15 @@ void DijkstraInternalMap() {
 	unsigned int weights[] =    {10,  5,   1,   2,   4,   3,   9,   2,   7,   6};
 
 	//Create the graph
-	Graph<TEdges> g(edges, numEdges);
-	std::cout << g << ::std::endl;
-
-	// In parameters of Dijkstra
-	// Define the distances or weights of the edges
 	// (1) Internal Map using member ids
 	InternalMap<unsigned int> intMap;
 	// (2) Internal Map using class
 	//InternalPointerMap<unsigned int TEdgeCargo:: *, &TEdgeCargo::member> intMap;
 	// (3) Internal Map using raw pointers to members
 	//unsigned int TEdgeCargo:: * intMap = &TEdgeCargo::member;
-	initEdgeMap(g,intMap, weights);
+	TGraph g;
+	addEdges(g, edges, numEdges,intMap, weights);
+	std::cout << g << ::std::endl;
 
 	// Out parameters of Dijkstra: Predecessor map and distance map
 	String<unsigned int> predMap;
@@ -368,10 +372,10 @@ void DijkstraInternalMap() {
 void AllPairsShortestPath() {
 //____________________________________________________________________________
 // All-Pairs Shortest Path
-
-	typedef VertexDescriptor<Graph<> >::Type TVertexDescriptor;
-	typedef EdgeDescriptor<Graph<> >::Type TEdgeDescriptor;
-	typedef Size<Graph<> >::Type TSize;
+	typedef Graph<> TGraph;
+	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef Size<TGraph>::Type TSize;
 
 	//Number of edges
 	TSize numEdges = 9;
@@ -380,12 +384,11 @@ void AllPairsShortestPath() {
 	int weights[] =    {3,   8,   -4,  1,   7,   4,   2,   -5,  6};
 
 	//Create the graph
-	Graph<> g(edges, numEdges);
+	String<int> weightMap;
+	TGraph g;
+	addEdges(g, edges, numEdges,weightMap, weights);
 	std::cout << g << ::std::endl;
 
-	// In parameters
-	String<int> weightMap;
-	initEdgeMap(g,weightMap, weights);
 	// Out parameter
 	Matrix<int> distMat;
 	Matrix<TVertexDescriptor> predMat;
@@ -410,9 +413,10 @@ void FloydWarshall() {
 //____________________________________________________________________________
 // Floyd Warshall
 
-	typedef VertexDescriptor<Graph<> >::Type TVertexDescriptor;
-	typedef EdgeDescriptor<Graph<> >::Type TEdgeDescriptor;
-	typedef Size<Graph<> >::Type TSize;
+	typedef Graph<> TGraph;
+	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef Size<TGraph>::Type TSize;
 
 	//Number of edges
 	TSize numEdges = 9;
@@ -421,12 +425,11 @@ void FloydWarshall() {
 	int weights[] =    {3,   8,   -4,  1,   7,   4,   2,   -5,  6};
 
 	//Create the graph
-	Graph<> g(edges, numEdges);
+	String<int> weightMap;
+	TGraph g;
+	addEdges(g,edges, numEdges,weightMap, weights);
 	std::cout << g << ::std::endl;
 
-	// In parameters
-	String<int> weightMap;
-	initEdgeMap(g,weightMap, weights);
 	// Out parameter
 	Matrix<int> distMat;
 	Matrix<TVertexDescriptor> predMat;
@@ -450,10 +453,10 @@ void FloydWarshall() {
 void TransitiveClosure() {
 //____________________________________________________________________________
 // Transitive Closure
-
-	typedef VertexDescriptor<Graph<> >::Type TVertexDescriptor;
-	typedef EdgeDescriptor<Graph<> >::Type TEdgeDescriptor;
-	typedef Size<Graph<> >::Type TSize;
+	typedef Graph<> TGraph;
+	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef Size<TGraph>::Type TSize;
 
 	//Number of edges
 	TSize numEdges = 5;
@@ -461,7 +464,8 @@ void TransitiveClosure() {
 	TVertexDescriptor edges[] = {3,0, 1,2, 2,1, 1,3, 3,2};
 	
 	//Create the graph
-	Graph<> g(edges, numEdges);
+	TGraph g;
+	addEdges(g, edges, numEdges);
 	std::cout << g << ::std::endl;
 
 	// Transitive-Closure
@@ -542,10 +546,6 @@ void AutomatonTest() {
 		assignProperty(nameMap, getValue(it), ::std::string(str));
 		str = str.append("o");
 	}
-	// Similarly for edge maps
-	String<unsigned int> edMap;
-	unsigned int props[] = {0,1,2,3,4,5,6,7,8,9};
-	initEdgeMap(automaton, edMap, props);
 
 	// Print automaton
 	std::cout << automaton << ::std::endl;
@@ -587,9 +587,6 @@ void AutomatonTest() {
 	std::cout << "Some edge properties:" << ::std::endl;
 	std::cout << getProperty(propMapEdges, edge1) << ::std::endl;
 	std::cout << getProperty(propMapEdges, edge3) << ::std::endl;
-	std::cout << getProperty(edMap, edge1) << ::std::endl;
-	std::cout << getProperty(edMap, edge3) << ::std::endl;
-
 }
 
 //////////////////////////////////////////////////////////////////////////////

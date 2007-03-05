@@ -12,8 +12,8 @@ class EdgeStumpU
 	public:
 		typedef typename VertexDescriptor<EdgeStumpU>::Type TVertexDescriptor;
 		typedef typename Id<EdgeStumpU>::Type TId;
-		TVertexDescriptor data_source;
-		TVertexDescriptor data_target;
+		TVertexDescriptor data_source;		// Smaller vertex id is always source
+		TVertexDescriptor data_target;		// Larger vertex id is always target
 		TId data_id;
 		TCargo data_cargo;
 		EdgeStumpU* data_next_source;

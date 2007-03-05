@@ -29,7 +29,7 @@ initEdgeMap(Graph<TEdges, TSpec> const& g,
 			  TPropertyMap& pm)
 {
 	SEQAN_CHECKPOINT
-	resize(pm, getIdUpperBound(g.data_id_managerE));
+	resize(pm, getIdUpperBound(g.data_id_managerE), Generous());
 }
 
 template<typename TAlphabet, typename TCargo, typename TEdgeSpec, typename TSpec, typename TPropertyMap>
@@ -42,7 +42,7 @@ initEdgeMap(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> const& g,
 	typedef typename Size<TGraph>::Type TSize;
 	TSize y_length = ValueSize<TAlphabet>::VALUE;
 	TSize x_length = numVertices(g);
-	resize(pm, x_length * y_length);
+	resize(pm, x_length * y_length, Generous());
 }
 
 // Simple _getId function to get the id for a vertex descriptor which is the id!

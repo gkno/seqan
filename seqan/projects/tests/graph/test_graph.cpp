@@ -354,13 +354,6 @@ void Test_Automaton() {
 	SEQAN_TASSERT(inDegree(g, 0) == 1)	
 	SEQAN_TASSERT(degree(g, 0) == 3)
 
-	// Test a property map
-	std::string nameEd[] = {"ar", "ae"};
-	String<std::string> edMap;
-	initEdgeMap(g,edMap, nameEd);
-	SEQAN_TASSERT(getProperty(edMap, e1) == "ar")
-	SEQAN_TASSERT(getProperty(edMap, e2) == "ae")
-
 	// Add more vertices and edges
 	addVertex(g);  //2
 	TVertexDescriptor v3 = addVertex(g);  //3
@@ -380,7 +373,7 @@ void Test_Automaton() {
 
 	// Output
 	// Raw output
-	std::cout << g << ::std::endl;
+	// std::cout << g << ::std::endl;
 	// File output
 	fstream strm;
 	strm.open(TEST_PATH "my_automaton.dot", ios_base::out | ios_base::trunc);
@@ -783,7 +776,7 @@ void Test_WordGraph() {
 
 	// Output
 	// Raw output
-	std::cout << g << ::std::endl;
+	// std::cout << g << ::std::endl;
 	// File output
 	fstream strm;
 	strm.open(TEST_PATH "my_wordgraph.dot", ios_base::out | ios_base::trunc);
@@ -1109,40 +1102,34 @@ void Test_GraphU() {
 	removeEdge(g3,0,4);
 	removeEdge(g3,0,2);
 	SEQAN_TASSERT(numEdges(g3) == 2)
-}
 
-
-//////////////////////////////////////////////////////////////////////////////
-
-void Test_GraphUIter() {
 //____________________________________________________________________________
 // Undirected graph iterators
-	typedef Graph<EdgeListU<> > TGraph;
-	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef Graph<EdgeListU<> > TGraphIter;
+	typedef VertexDescriptor<TGraphIter>::Type TVertexDescriptorIter;
+	typedef EdgeDescriptor<TGraphIter>::Type TEdgeDescriptorIter;
 	
+	TGraphIter gIter;
+	addVertex(gIter);addVertex(gIter);addVertex(gIter);addVertex(gIter);
+	addVertex(gIter);addVertex(gIter);addVertex(gIter);addVertex(gIter);
+	removeVertex(gIter,0);
+	removeVertex(gIter,5);
+	addEdge(gIter,2,7);
+	addEdge(gIter,2,3);
+	addEdge(gIter,2,4);
+	addEdge(gIter,4,3);
+	addEdge(gIter,3,6);
+	addEdge(gIter,4,6);
 
-	TGraph g;
-	addVertex(g);addVertex(g);addVertex(g);addVertex(g);
-	addVertex(g);addVertex(g);addVertex(g);addVertex(g);
-	removeVertex(g,0);
-	removeVertex(g,5);
-	addEdge(g,2,7);
-	addEdge(g,2,3);
-	addEdge(g,2,4);
-	addEdge(g,4,3);
-	addEdge(g,3,6);
-	addEdge(g,4,6);
-
-	typedef Iterator<TGraph, OutEdgeIterator<> >::Type TOutEdgeIterator;
-	TOutEdgeIterator itOutEdge(g,3);
+	typedef Iterator<TGraphIter, OutEdgeIterator<> >::Type TOutEdgeIterator;
+	TOutEdgeIterator itOutEdge(gIter,3);
 	// Both ways are fast for undirected graphs
-	SEQAN_TASSERT(sourceVertex(g, getValue(itOutEdge))==3)
-	SEQAN_TASSERT(targetVertex(g, getValue(itOutEdge))==6)
+	SEQAN_TASSERT(sourceVertex(gIter, getValue(itOutEdge))==3)
+	SEQAN_TASSERT(targetVertex(gIter, getValue(itOutEdge))==6)
 	SEQAN_TASSERT(sourceVertex(itOutEdge)==3)
 	SEQAN_TASSERT(targetVertex(itOutEdge)==6)
-	SEQAN_TASSERT(sourceVertex(g, value(itOutEdge))==3)
-	SEQAN_TASSERT(targetVertex(g, *itOutEdge)==6)
+	SEQAN_TASSERT(sourceVertex(gIter, value(itOutEdge))==3)
+	SEQAN_TASSERT(targetVertex(gIter, *itOutEdge)==6)
 	SEQAN_TASSERT(atEnd(itOutEdge)==false)
 	SEQAN_TASSERT(atBegin(itOutEdge)==true)
 	goNext(itOutEdge);
@@ -1155,12 +1142,12 @@ void Test_GraphUIter() {
 	SEQAN_TASSERT(atEnd(itOutEdge)==true)
 	SEQAN_TASSERT(atBegin(itOutEdge)==false)
 	goPrevious(itOutEdge);
-	SEQAN_TASSERT(sourceVertex(g, getValue(itOutEdge))==2)
-	SEQAN_TASSERT(targetVertex(g, getValue(itOutEdge))==3)
+	SEQAN_TASSERT(sourceVertex(gIter, getValue(itOutEdge))==2)
+	SEQAN_TASSERT(targetVertex(gIter, getValue(itOutEdge))==3)
 	--itOutEdge;
 	itOutEdge--; 
-	SEQAN_TASSERT(sourceVertex(g, getValue(itOutEdge))==3)
-	SEQAN_TASSERT(targetVertex(g, getValue(itOutEdge))==6)
+	SEQAN_TASSERT(sourceVertex(gIter, getValue(itOutEdge))==3)
+	SEQAN_TASSERT(targetVertex(gIter, getValue(itOutEdge))==6)
 	itOutEdge--;
 	itOutEdge--;
 	SEQAN_TASSERT(atBegin(itOutEdge)==true)
@@ -1175,53 +1162,53 @@ void Test_GraphUIter() {
 	SEQAN_TASSERT(itEdge2 == itOutEdge)
 	goBegin(itEdge2);
 	SEQAN_TASSERT(atBegin(itEdge2)==true)
-	SEQAN_TASSERT(&g == &hostGraph(itOutEdge))
+	SEQAN_TASSERT(&gIter == &hostGraph(itOutEdge))
 
-	std::cout << g << std::endl;
-	typedef Iterator<TGraph, EdgeIterator<> >::Type TEdgeIterator;
-	TEdgeIterator itEdge(g);
-	SEQAN_TASSERT(sourceVertex(g, getValue(itEdge))==2)
-	SEQAN_TASSERT(targetVertex(g, getValue(itEdge))==4)
+	
+	typedef Iterator<TGraphIter, EdgeIterator<> >::Type TEdgeIterator;
+	TEdgeIterator itEdge(gIter);
+	SEQAN_TASSERT(sourceVertex(gIter, getValue(itEdge))==2)
+	SEQAN_TASSERT(targetVertex(gIter, getValue(itEdge))==4)
 	SEQAN_TASSERT(atBegin(itEdge)==true)
 	SEQAN_TASSERT(atEnd(itEdge)==false)
 	goNext(itEdge);
-	SEQAN_TASSERT(sourceVertex(g, getValue(itEdge))==2)
-	SEQAN_TASSERT(targetVertex(g, getValue(itEdge))==3)
+	SEQAN_TASSERT(sourceVertex(gIter, getValue(itEdge))==2)
+	SEQAN_TASSERT(targetVertex(gIter, getValue(itEdge))==3)
 	SEQAN_TASSERT(atBegin(itEdge)==false)
 	SEQAN_TASSERT(atEnd(itEdge)==false)
 	goNext(itEdge);
-	SEQAN_TASSERT(sourceVertex(g, getValue(itEdge))==2)
-	SEQAN_TASSERT(targetVertex(g, getValue(itEdge))==7)
+	SEQAN_TASSERT(sourceVertex(gIter, getValue(itEdge))==2)
+	SEQAN_TASSERT(targetVertex(gIter, getValue(itEdge))==7)
 	++itEdge;
-	SEQAN_TASSERT(sourceVertex(g, getValue(itEdge))==3)
-	SEQAN_TASSERT(targetVertex(g, getValue(itEdge))==6)
+	SEQAN_TASSERT(sourceVertex(gIter, getValue(itEdge))==3)
+	SEQAN_TASSERT(targetVertex(gIter, getValue(itEdge))==6)
 	itEdge++;
-	SEQAN_TASSERT(sourceVertex(g, getValue(itEdge))==3)
-	SEQAN_TASSERT(targetVertex(g, getValue(itEdge))==4)
+	SEQAN_TASSERT(sourceVertex(gIter, getValue(itEdge))==3)
+	SEQAN_TASSERT(targetVertex(gIter, getValue(itEdge))==4)
 	goNext(itEdge);
-	SEQAN_TASSERT(sourceVertex(g, getValue(itEdge))==4)
-	SEQAN_TASSERT(targetVertex(g, getValue(itEdge))==6)
+	SEQAN_TASSERT(sourceVertex(gIter, getValue(itEdge))==4)
+	SEQAN_TASSERT(targetVertex(gIter, getValue(itEdge))==6)
 	goNext(itEdge);
 	SEQAN_TASSERT(atBegin(itEdge)==false)
 	SEQAN_TASSERT(atEnd(itEdge)==true)
 	goPrevious(itEdge);	
-	SEQAN_TASSERT(sourceVertex(g, getValue(itEdge))==4)
-	SEQAN_TASSERT(targetVertex(g, getValue(itEdge))==6)
+	SEQAN_TASSERT(sourceVertex(gIter, getValue(itEdge))==4)
+	SEQAN_TASSERT(targetVertex(gIter, getValue(itEdge))==6)
 	--itEdge;	
-	SEQAN_TASSERT(sourceVertex(g, getValue(itEdge))==3)
-	SEQAN_TASSERT(targetVertex(g, getValue(itEdge))==4)
+	SEQAN_TASSERT(sourceVertex(gIter, getValue(itEdge))==3)
+	SEQAN_TASSERT(targetVertex(gIter, getValue(itEdge))==4)
 	itEdge--;	
-	SEQAN_TASSERT(sourceVertex(g, getValue(itEdge))==3)
-	SEQAN_TASSERT(targetVertex(g, getValue(itEdge))==6)
+	SEQAN_TASSERT(sourceVertex(gIter, getValue(itEdge))==3)
+	SEQAN_TASSERT(targetVertex(gIter, getValue(itEdge))==6)
 	goPrevious(itEdge);	
-	SEQAN_TASSERT(sourceVertex(g, getValue(itEdge))==2)
-	SEQAN_TASSERT(targetVertex(g, getValue(itEdge))==7)
+	SEQAN_TASSERT(sourceVertex(gIter, getValue(itEdge))==2)
+	SEQAN_TASSERT(targetVertex(gIter, getValue(itEdge))==7)
 	goPrevious(itEdge);	
-	SEQAN_TASSERT(sourceVertex(g, getValue(itEdge))==2)
-	SEQAN_TASSERT(targetVertex(g, getValue(itEdge))==3)
+	SEQAN_TASSERT(sourceVertex(gIter, getValue(itEdge))==2)
+	SEQAN_TASSERT(targetVertex(gIter, getValue(itEdge))==3)
 	goPrevious(itEdge);	
-	SEQAN_TASSERT(sourceVertex(g, getValue(itEdge))==2)
-	SEQAN_TASSERT(targetVertex(g, getValue(itEdge))==4)
+	SEQAN_TASSERT(sourceVertex(gIter, getValue(itEdge))==2)
+	SEQAN_TASSERT(targetVertex(gIter, getValue(itEdge))==4)
 	SEQAN_TASSERT(atBegin(itEdge)==true)
 	SEQAN_TASSERT(atEnd(itEdge)==false)
 }
@@ -1293,7 +1280,7 @@ void Test_Graph() {
 	removeEdge(g,0,0); // ToDo: Self edges
 	addEdge(g,4,3);  
 	// Raw output
-	std::cout << g << ::std::endl;
+	// std::cout << g << ::std::endl;
 	// File output
 	fstream strm;
 	strm.open(TEST_PATH "my_graph.dot", ios_base::out | ios_base::trunc);
@@ -1537,17 +1524,22 @@ void Test_Graph() {
 
 //////////////////////////////////////////////////////////////////////////////
 
+template <typename TGraphType>
 void Test_GraphExternalProperty() {
 //____________________________________________________________________________
 // Graph external property maps
-	typedef VertexDescriptor<Graph<> >::Type TVertexDescriptor;
-	typedef EdgeDescriptor<Graph<> >::Type TEdgeDescriptor;
+	typedef Graph<TGraphType> TGraph;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef typename Size<TGraph>::Type TSize;
 	
-	Graph<> g;
+	TGraph g;
 	TVertexDescriptor v0 = addVertex(g);
 	TVertexDescriptor v1 = addVertex(g);
-	TEdgeDescriptor e1 =addEdge(g,v0,v0);
-	TEdgeDescriptor e2 =addEdge(g,0,1);
+	addVertex(g);
+	TEdgeDescriptor e2 =addEdge(g,0,2);
+	TEdgeDescriptor e1 =addEdge(g,v0,v1);
+
 	
 	// Test external property maps
 	String<int> dMap;
@@ -1574,24 +1566,22 @@ void Test_GraphExternalProperty() {
 	SEQAN_TASSERT(getProperty(dMap2, v1) == 2)
 	SEQAN_TASSERT(property(dMap2, v1) == 2)
 
-	char names[] = {'r', 's'};
+	clear(g);
+	addVertex(g);addVertex(g);addVertex(g);
+
+	char names[] = {'r', 's','t'};
 	String<char> nameMap;
 	initVertexMap(g,nameMap, names);
 	SEQAN_TASSERT(getProperty(nameMap, v0) == 'r')
 	SEQAN_TASSERT(getProperty(nameMap, v1) == 's')
-
+	
+	TVertexDescriptor edges[] = {0,1, 1,2};
+	TSize numEdges = 2;
 	std::string nameEd[] = {"ar", "ae"};
 	String<std::string> edMap;
-	initEdgeMap(g,edMap, nameEd);
-	SEQAN_TASSERT(getProperty(edMap, e1) == "ar")
-	SEQAN_TASSERT(getProperty(edMap, e2) == "ae")
-
-
-
-	// Test prior resize before graph is created
-	reserve(nameMap, 200);
-	// Test prior resize before graph is created
-	reserve(nameMap, 200);
+	addEdges(g, edges, numEdges, edMap, nameEd);
+	SEQAN_TASSERT(getProperty(edMap, 0) == "ar")
+	SEQAN_TASSERT(getProperty(edMap, 1) == "ae")
 }
 
 
@@ -1602,11 +1592,12 @@ void Test_GraphInternalProperty() {
 // Graph properties
 	typedef Pair<char, int> TPair;
 	typedef EdgeList<TPair> TEdges;
-	typedef VertexDescriptor<Graph<TEdges> >::Type TVertexDescriptor;
-	typedef EdgeDescriptor<Graph<TEdges> >::Type TEdgeDescriptor;
+	typedef Graph<TEdges> TGraph;
+	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 
 	// Create a simple graph
-	Graph<TEdges> g;
+	TGraph g;
 	TVertexDescriptor v0 = addVertex(g);
 	TVertexDescriptor v1 = addVertex(g);
 	TEdgeDescriptor e1 =addEdge(g,v0,v0);
@@ -2121,17 +2112,19 @@ void Test_GraphDfsIterator() {
 void Test_BreadthFirstSearch() {
 //____________________________________________________________________________
 // Breadth-First Search
-	typedef VertexDescriptor<Graph<> >::Type TVertexDescriptor;
-	typedef EdgeDescriptor<Graph<> >::Type TEdgeDescriptor;
-	typedef Size<Graph<> >::Type TSize;
+	typedef Graph<EdgeListU<> > TGraph;
+	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef Size<TGraph>::Type TSize;
 
 	//Number of edges
-	TSize numEdges = 20;
+	TSize numEdges = 10;
 	//Source, Target, Source, Target, Source, ...
-	TVertexDescriptor edges[] = {0,1, 1,0, 0,4, 4,0, 1,5, 5,1, 2,5, 5,2, 2,6, 6,2, 2,3, 3,2, 3,6, 6,3, 3,7, 7,3, 5,6, 6,5, 6,7, 7,6};
+	TVertexDescriptor edges[] = {0,1, 0,4, 1,5, 2,5, 2,6, 2,3, 3,6, 3,7, 5,6, 6,7};
 	
 	//Create the graph
-	Graph<> g(edges, numEdges);
+	TGraph g;
+	addEdges(g,edges, numEdges);
 
 	// Predecessor and distance map
 	String<unsigned int> predMap;
@@ -2173,7 +2166,8 @@ void Test_DepthFirstSearch() {
 	TVertexDescriptor edges[] = {0,3, 0,1, 1,4, 2,4, 2,5, 3,1, 4,3, 5,5};
 
 	//Create the graph
-	Graph<> g(edges, numEdges);
+	Graph<> g;
+	addEdges(g,edges, numEdges);
 
 	// Predecessor and distance map
 	String<unsigned int> predMap;
@@ -2218,7 +2212,8 @@ void Test_TopologicalSort() {
 	TVertexDescriptor edges[] = {0,3, 0,1, 1,2, 3,2, 5,7, 5,6, 6,7, 6,3, 8,7};
 	
 	//Create the graph
-	Graph<> g(edges, numEdges);
+	Graph<> g;
+	addEdges(g,edges, numEdges);
 
 	// Predecessor and distance map
 	String<TVertexDescriptor> order;
@@ -2253,7 +2248,8 @@ void Test_StronglyConnectedComponents() {
 	TVertexDescriptor edges[] = {1,0, 0,4, 2,1, 4,1, 5,1, 6,2, 3,2, 2,3, 7,3, 5,4, 6,5, 5,6, 7,6, 7,7};
 
 	//Create the graph
-	Graph<> g(edges, numEdges);
+	Graph<> g;
+	addEdges(g,edges, numEdges);
 
 	// Predecessor and distance map
 	String<unsigned int> component;
@@ -2288,9 +2284,9 @@ void Test_DagShortestPath() {
 	int weights[] =             {3,   5,   6,   2,   2,   4,   7,   1,   -1,  -2};
 	
 	//Create the graph
-	Graph<> g(edges, numEdges);
+	Graph<> g;
 	String<int> weightMap;
-	initEdgeMap(g,weightMap, weights);
+	addEdges(g,edges, numEdges,weightMap, weights);
 
 	// Predecessor map and distance map
 	String<unsigned int> predMap;
@@ -2330,12 +2326,9 @@ void Test_BellmanFord() {
 	unsigned int weights[] =    {10,  5,   1,   2,   4,   3,   9,   2,   7,   6};
 
 	//Create the graph
-	Graph<> g(edges, numEdges);
-
-	// In parameters of Bellman-Ford
-	// Define the distances or weights of the edges
+	Graph<> g;
 	String<unsigned int> weightMap;
-	initEdgeMap(g,weightMap, weights);
+	addEdges(g,edges, numEdges,weightMap, weights);
 
 	// Out parameters of Bellman-Ford: Predecessor map and distance map
 	String<unsigned int> predMap;
@@ -2374,12 +2367,9 @@ void Test_Dijkstra() {
 	unsigned int weights[] =    {10,  5,   1,   2,   4,   3,   9,   2,   7,   6};
 
 	//Create the graph
-	Graph<> g(edges, numEdges);
-
-	// In parameters of Dijkstra
-	// Define the distances or weights of the edges
+	Graph<> g;
 	String<unsigned int> weightMap;
-	initEdgeMap(g,weightMap, weights);
+	addEdges(g,edges, numEdges, weightMap, weights);
 
 	// Out parameters of Dijkstra: Predecessor map and distance map
 	String<unsigned int> predMap;
@@ -2417,11 +2407,10 @@ void Test_AllPairsShortestPath() {
 	int weights[] =    {3,   8,   -4,  1,   7,   4,   2,   -5,  6};
 
 	//Create the graph
-	Graph<> g(edges, numEdges);
-
-	// In parameters
+	Graph<> g;
 	String<int> weightMap;
-	initEdgeMap(g,weightMap, weights);
+	addEdges(g,edges, numEdges,weightMap, weights);
+
 	// Out parameter
 	Matrix<int> distMat;
 	Matrix<TVertexDescriptor> predMat;
@@ -2499,11 +2488,10 @@ void Test_FloydWarshall() {
 	int weights[] =    {3,   8,   -4,  1,   7,   4,   2,   -5,  6};
 
 	//Create the graph
-	Graph<> g(edges, numEdges);
-
-	// In parameters
+	Graph<> g;
 	String<int> weightMap;
-	initEdgeMap(g,weightMap, weights);
+	addEdges(g,edges, numEdges,weightMap, weights);
+
 	// Out parameter
 	Matrix<int> distMat;
 	Matrix<TVertexDescriptor> predMat;
@@ -2581,7 +2569,8 @@ void Test_TransitiveClosure() {
 	TVertexDescriptor edges[] = {3,0, 1,2, 2,1, 1,3, 3,2};
 	
 	//Create the graph
-	Graph<> g(edges, numEdges);
+	Graph<> g;
+	addEdges(g,edges, numEdges);
 
 	// Transitive-Closure
 	Matrix<bool> closure;
@@ -2644,40 +2633,41 @@ int main()
 	// Test Id Manager
 	Test_IdManager();
 
-	// Test Different ways to store edges (depending on graph)
+	// Test different ways to store edges (depending on graph)
 	Test_EdgeStump();
 	Test_EdgeStumpU();
 	Test_EdgeAutomaton();
 
 	// Test Graph types
-	Test_Automaton();
-	Test_WordGraph();
+	Test_Graph();	// Directed graphs
+	Test_GraphU();  // Undirected graphs
+	Test_Automaton();  // Automatons
+	// Others
+	Test_WordGraph(); 
 	Test_Oracle();
 	Test_Trie();
-	Test_Graph();
-	Test_GraphU();
-	Test_GraphUIter();
 
 	// Test property maps
-	Test_GraphExternalProperty();
+	Test_GraphExternalProperty<EdgeList<> >();
+	Test_GraphExternalProperty<EdgeListU<> >();
 	Test_GraphInternalProperty();
 
-	// Test all vertex iterators
+	// Test vertex iterators
 	Test_GraphVertexIterator<Automaton<char> >();
 	Test_GraphVertexIterator<EdgeList<char> >();
 	Test_GraphVertexIterator<EdgeListU<char> >();
 	
-	// Test all outedge iterators
+	// Test outedge iterators
 	Test_GraphOutEdgeIterator<Automaton<char> >();
 	Test_GraphOutEdgeIterator<EdgeList<char> >();
 	Test_GraphOutEdgeIterator<EdgeListU<char> >();
 
-	// Test all edge iterators
+	// Test edge iterators
 	Test_GraphEdgeIterator<Automaton<char> >();
 	Test_GraphEdgeIterator<EdgeList<char> >();
 	Test_GraphEdgeIterator<EdgeListU<char> >();
 
-	// Test all adjacency iterators
+	// Test adjacency iterators
 	Test_GraphAdjacencyIterator<Automaton<char> >();
 	Test_GraphAdjacencyIterator<EdgeList<char> >();
 	Test_GraphAdjacencyIterator<EdgeListU<char> >();

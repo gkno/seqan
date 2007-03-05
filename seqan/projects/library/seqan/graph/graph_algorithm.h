@@ -151,7 +151,10 @@ breadth_first_search(Graph<TEdges, TSpec> const& g,
 		typedef typename Iterator<Graph<TEdges, TSpec>, OutEdgeIterator<> >::Type TOutEdgeIterator;
 		TOutEdgeIterator itout(g,u);
 		for(;!atEnd(itout);goNext(itout)) {
-			TVertexDescriptor v = targetVertex(g, getValue(itout));
+			// Never use: targetVertex(g, getValue(itout))
+			// This would call targetVertex on an undirected edge descriptor. What is the target in an undirected edge?
+			// Definition makes sense only for an outedge iterator
+			TVertexDescriptor v = targetVertex(itout);
 			if (getProperty(tokenMap, v) == false) {
 				assignProperty(tokenMap, v, true);
 				assignProperty(distance, v, getProperty(distance,u) + 1);
