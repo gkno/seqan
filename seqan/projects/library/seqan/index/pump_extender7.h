@@ -106,11 +106,14 @@ namespace SEQAN_NAMESPACE_MAIN
             beginWrite(out6) &&
             beginWrite(out124))) return false;
 
-		typename Value<TOut0>::Type  o0;
-		typename Value<TOut3>::Type  o3;
-		typename Value<TOut5>::Type  o5;
-		typename Value<TOut6>::Type  o6;
-		typename Value<TOut124>::Type o1, o2, o4;
+		typename Value<TOut0>::Type   o0 = typename Value<TOut0>::Type();
+		typename Value<TOut124>::Type o1 = typename Value<TOut124>::Type();
+		typename Value<TOut124>::Type o2 = typename Value<TOut124>::Type();
+		typename Value<TOut3>::Type   o3 = typename Value<TOut3>::Type();
+		typename Value<TOut124>::Type o4 = typename Value<TOut124>::Type();
+		typename Value<TOut5>::Type   o5 = typename Value<TOut5>::Type();
+		typename Value<TOut6>::Type   o6 = typename Value<TOut6>::Type();
+
 
         typename Size<TTextInput>::Type p = length(textIn);
         unsigned r = (unsigned)(p % 7);
@@ -119,6 +122,10 @@ namespace SEQAN_NAMESPACE_MAIN
         // BEGIN I: PREFILL
 
         switch (r) {
+		case 7: 
+			// this case never occurs
+			// it only hides an 'uninitialized' warning...
+			__cp_(o0,0,typename Value<TTextInput>::Type());
         case 6:
 /* 6 */                                                                    __cp_(o6,0,    *textIn); ++textIn; o6.i1 = p--;
 
@@ -335,11 +342,16 @@ namespace SEQAN_NAMESPACE_MAIN
             beginWrite(out6) &&
             beginWrite(out124))) return false;
 
-		typename Value<TOut0>::Type   o0;
-		typename Value<TOut3>::Type   o3;
-		typename Value<TOut5>::Type   o5;
-		typename Value<TOut6>::Type   o6;
-		typename Value<TOut124>::Type o1, o2, o4;
+		typename Value<TOut0>::Type   o0 = typename Value<TOut0>::Type();
+		typename Value<TOut124>::Type o1 = typename Value<TOut124>::Type();
+		typename Value<TOut124>::Type o2 = typename Value<TOut124>::Type();
+		typename Value<TOut3>::Type   o3 = typename Value<TOut3>::Type();
+		typename Value<TOut124>::Type o4 = typename Value<TOut124>::Type();
+		typename Value<TOut5>::Type   o5 = typename Value<TOut5>::Type();
+		typename Value<TOut6>::Type   o6 = typename Value<TOut6>::Type();
+
+		// this hides an 'uninitialized' warning...
+		o0.i3 = typename Value<typename Value<TOut0>::Type, 3>::Type();
 
 		it = begin(limits);
 

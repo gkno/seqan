@@ -514,7 +514,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		{
 			TSize ofs[7] = {0, _n24, _n[4], 0, 0, 0, 0};
 			bool differ = true;
-			TValue c0, c1, c2, c3, c4, c5, c6;
+			TValue c0 = TValue(), c1 = TValue(), c2 = TValue(), c3 = TValue(), c4 = TValue(), c5 = TValue(), c6 = TValue();
 			for (TSize i = 0, clip = n - 6, l;  i < _n124;  i++) {
 				if ((l = SA124[i]) < clip) {
 					if (differ || s[l] != c0 || s[l+1] != c1 || s[l+2] != c2 || s[l+3] != c3 ||

@@ -276,11 +276,11 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef typename _BitVector< bitSize * size >::Type CT;
         
         CT i;
-
+/*
 		inline Tuple() {
 			SEQAN_ASSERT(bitSize * size <= sizeof(CT) * 8);
 		}
-
+*/
         inline const _T operator[](const int k) const {
             SEQAN_ASSERT(k >= 0 && k < size);
             return (i >> (size - 1 - k) * bitSize) & bitMask;

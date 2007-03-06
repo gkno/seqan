@@ -203,19 +203,19 @@ This interval is the @Function.value@ of the iterator.
         _dfsRange(it).i1 = top(it.history).i1;
 		_dfsLCP(it) = top(it.history).i2;
 		pop(it.history);
-		_dumpHistoryStack(it);
+//		_dumpHistoryStack(it);
 	}
 
 	template < typename TIndex, typename TSpec, typename TElement >
 	inline void _postorderPush(Iter<TIndex, VSTree< BottomUp<TSpec> > > &it, TElement const &e) {
 		push(it.history, e);
-		_dumpHistoryStack(it);
+//		_dumpHistoryStack(it);
 	}
 
 	template < typename TIndex, typename TSpec >
 	inline void _postorderLeaf(Iter<TIndex, VSTree< BottomUp<TSpec> > > &it) {
 		_setSizeInval(_dfsLCP(it));
-		_dumpHistoryStack(it);
+//		_dumpHistoryStack(it);
 		//length(container(it)) - saAt(_dfsRange(it).i1, container(it));
 	}
 
