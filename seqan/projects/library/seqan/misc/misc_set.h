@@ -117,16 +117,18 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef void* Type;
 	};
 	template <typename TSet>
-	struct _Set_SetVector<TSet const>:
-		public _Set_SetVector<TSet> {};
+	struct _Set_SetVector<TSet const> {
+		typedef typename _Set_SetVector<TSet>::Type const Type;
+	};
 	
 	template <typename TSet>
 	struct _Set_ObjVector {
 		typedef void* Type;
 	};
 	template <typename TSet>
-	struct _Set_ObjVector<TSet const>:
-		public _Set_ObjVector<TSet> {};
+	struct _Set_ObjVector<TSet const> {
+		typedef typename _Set_ObjVector<TSet>::Type const Type;
+	};
 
 
 
@@ -466,7 +468,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename TObject, typename TSpec>
 	inline typename Iterator< VectorSet<TObject, TSpec> const>::Type 
 	begin(VectorSet<TObject, TSpec> const &set) {
-		return Iter<VectorSet<TObject, TSpec>, VectorSetIterator> 
+		return Iter<VectorSet<TObject, TSpec> const, VectorSetIterator> 
 			(begin(set.vector), begin(set.vector), end(set.vector), begin(set.obj));
 	}
 	template <typename TObject, typename TSpec>
@@ -478,7 +480,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename TObject, typename TSpec>
 	inline typename Iterator< VectorSet<TObject, TSpec> const>::Type 
 	end(VectorSet<TObject, TSpec> const &set) {
-		return Iter<VectorSet<TObject, TSpec>, VectorSetIterator> 
+		return Iter<VectorSet<TObject, TSpec> const, VectorSetIterator> 
 			(begin(set.vector), begin(set.vector), end(set.vector), begin(set.obj));
 	}
 
@@ -515,7 +517,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 	template <typename TKey, typename TObject, typename TSpec>
 	inline TKey 
-	keyOf(Iter<VectorSet< Pair<TKey, TObject> const>, VectorSetIterator> const &it) {
+	keyOf(Iter<VectorSet< Pair<TKey, TObject>, TSpec > const, VectorSetIterator> const &it) {
 		return it.ptr - it.begin;
 	}
 	template <typename TKey, typename TObject, typename TSpec>
@@ -523,9 +525,9 @@ namespace SEQAN_NAMESPACE_MAIN
 	objectOf(Iter<VectorSet< Pair<TKey, TObject>, TSpec >, VectorSetIterator> const &it) {
 		return *it.obj;
 	}
-	template <typename TKey, typename TObject>
+	template <typename TKey, typename TObject, typename TSpec>
 	inline TObject const & 
-	objectOf(Iter<VectorSet< Pair<TKey, TObject> const>, VectorSetIterator> const &it) {
+	objectOf(Iter<VectorSet< Pair<TKey, TObject>, TSpec > const, VectorSetIterator> const &it) {
 		return *it.obj;
 	}
 

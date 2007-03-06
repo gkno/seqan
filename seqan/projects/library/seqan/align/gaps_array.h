@@ -78,97 +78,6 @@ SEQAN_CHECKPOINT
 SEQAN_CHECKPOINT
 	}
 
-//____________________________________________________________________________
-
-	friend inline String<TSize> &
-	_dataArr(Gaps & me)
-	{
-SEQAN_CHECKPOINT
-		return me.data_arr;
-	}
-	friend inline String<TSize> const &
-	_dataArr(Gaps const & me)
-	{
-SEQAN_CHECKPOINT
-		return me.data_arr;
-	}
-
-//____________________________________________________________________________
-	
-	friend inline Holder<TSource> &
-	_dataSource(Gaps & me)
-	{
-SEQAN_CHECKPOINT
-		return me.data_source;
-	}
-	friend inline Holder<TSource> const &
-	_dataSource(Gaps const & me)
-	{
-SEQAN_CHECKPOINT
-		return me.data_source;
-	}
-
-//____________________________________________________________________________
-
-	friend inline typename Position<Gaps>::Type
-	endPosition(Gaps & me)
-	{
-SEQAN_CHECKPOINT
-		return me.data_end_position;
-	}
-	friend inline typename Position<Gaps>::Type
-	endPosition(Gaps const & me)
-	{
-SEQAN_CHECKPOINT
-		return me.data_end_position;
-	}
-
-//____________________________________________________________________________
-
-	friend inline void
-	_setEndPosition(Gaps & me, typename Position<Gaps>::Type _pos)
-	{
-SEQAN_CHECKPOINT
-		me.data_end_position = _pos;
-	}
-
-//____________________________________________________________________________
-
-	friend inline TSourcePosition
-	sourceBeginPosition(Gaps const & me)
-	{
-SEQAN_CHECKPOINT
-		return me.data_source_begin_position;
-	}
-
-//____________________________________________________________________________
-
-	friend inline void
-	_setSourceBeginPosition(Gaps & me, TSourcePosition _pos)
-	{
-SEQAN_CHECKPOINT
-		me.data_source_begin_position = _pos;
-	}
-
-//____________________________________________________________________________
-
-	friend inline TSourcePosition
-	sourceEndPosition(Gaps const & me)
-	{
-SEQAN_CHECKPOINT
-		return me.data_source_end_position;
-	}
-//____________________________________________________________________________
-
-	friend inline void
-	_setSourceEndPosition(Gaps & me, TSourcePosition _pos)
-	{
-SEQAN_CHECKPOINT
-		me.data_source_end_position = _pos;
-	}
-
-//____________________________________________________________________________
-
 	inline typename Reference<Gaps>::Type
 	operator[](TViewPosition view_pos)
 	{
@@ -183,6 +92,107 @@ SEQAN_CHECKPOINT
 	}
 //____________________________________________________________________________
 };
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TSource>
+inline String<typename Size<Gaps<TSource, ArrayGaps> >::Type> &
+_dataArr(Gaps<TSource, ArrayGaps> & me)
+{
+SEQAN_CHECKPOINT
+	return me.data_arr;
+}
+template <typename TSource>
+inline String<typename Size<Gaps<TSource, ArrayGaps> >::Type> const &
+_dataArr(Gaps<TSource, ArrayGaps> const & me)
+{
+SEQAN_CHECKPOINT
+	return me.data_arr;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TSource>
+inline Holder<TSource> &
+_dataSource(Gaps<TSource, ArrayGaps> & me)
+{
+SEQAN_CHECKPOINT
+	return me.data_source;
+}
+template <typename TSource>
+inline Holder<TSource> const &
+_dataSource(Gaps<TSource, ArrayGaps> const & me)
+{
+SEQAN_CHECKPOINT
+	return me.data_source;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TSource>
+inline typename Position<Gaps<TSource, ArrayGaps> >::Type
+endPosition(Gaps<TSource, ArrayGaps> & me)
+{
+SEQAN_CHECKPOINT
+	return me.data_end_position;
+}
+template <typename TSource>
+inline typename Position<Gaps<TSource, ArrayGaps> >::Type
+endPosition(Gaps<TSource, ArrayGaps> const & me)
+{
+SEQAN_CHECKPOINT
+	return me.data_end_position;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TSource, typename TPosition>
+inline void 
+_setEndPosition(Gaps<TSource, ArrayGaps> & me, TPosition _pos)
+{
+SEQAN_CHECKPOINT
+	me.data_end_position = _pos;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TSource>
+inline typename Position<TSource>::Type
+sourceBeginPosition(Gaps<TSource, ArrayGaps> const & me)
+{
+SEQAN_CHECKPOINT
+	return me.data_source_begin_position;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TSource, typename TSourcePosition>
+inline void
+_setSourceBeginPosition(Gaps<TSource, ArrayGaps> & me, TSourcePosition _pos)
+{
+SEQAN_CHECKPOINT
+	me.data_source_begin_position = _pos;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TSource>
+inline typename Position<TSource>::Type
+sourceEndPosition(Gaps<TSource, ArrayGaps> const & me)
+{
+SEQAN_CHECKPOINT
+	return me.data_source_end_position;
+}
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TSource, typename TSourcePosition>
+inline void
+_setSourceEndPosition(Gaps<TSource, ArrayGaps> & me, TSourcePosition _pos)
+{
+SEQAN_CHECKPOINT
+	me.data_source_end_position = _pos;
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TSource, typename TSize>

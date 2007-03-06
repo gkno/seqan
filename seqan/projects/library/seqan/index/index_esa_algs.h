@@ -317,6 +317,30 @@ namespace SEQAN_NAMESPACE_MAIN
 				}
 			return sum;
 		}
+
+		inline void _dump() const {
+			::std::cout << "+++BEGIN+++++++++++++++++" << ::std::endl;
+			typename Iterator<TSetStack const>::Type it = begin(setStack), itEnd = end(setStack);
+			while (it != itEnd) {
+				TSet const &set = *it;
+				typename Iterator<TSet const>::Type sit = begin(set), sitEnd = end(set);
+
+				while (sit != sitEnd) {
+					::std::cout << keyOf(sit) << "::" << ::std::endl;
+					TFractionHeader head = objectOf(sit);
+					TSize i = head.begin;
+					while (!_isSizeInval(i)) {
+						::std::cout << saAt(i, container(*this)) << "  ";
+						i = posList[i];
+					}
+					++sit;
+				}
+
+				::std::cout << "_________________________" << ::std::endl;
+				++it;
+			}
+			::std::cout << "+++END+++++++++++++++++++" << ::std::endl;
+		}
 	};
 
 	template < typename TSTree >
@@ -346,6 +370,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TSet &child  = top(it.setStack);
 		TSet &parent = *(end(it.setStack) - 2);
 
+		it._dump();
 		TSetIterator _end = end(child);
 		for(TSetIterator i = begin(child); i != _end; ++i) {
 			if (in(keyOf(i), parent)) {	// append child fraction to parent's fraction
@@ -357,6 +382,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			} else
 				insert(TFraction(keyOf(i), objectOf(i)), parent);	// insert child fraction in parent's set
 		}
+		it._dump();
 	}
 
 	// maximal repeat push/pop handlers of lcp-dfs-traversal

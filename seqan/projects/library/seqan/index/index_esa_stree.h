@@ -190,22 +190,32 @@ This interval is the @Function.value@ of the iterator.
 	};
 
 
+	template < typename TIndex, typename TSpec >
+	inline void _dumpHistoryStack(Iter<TIndex, VSTree<TSpec> > &it) {
+		for(typename Size<TIndex>::Type i = 0; i < length(it.history); ++i)
+			::std::cout << it.history[i] << '\t';
+		::std::cout << value(it) << ::std::endl;		
+	}
+
 	// standard push/pop handlers of lcp-dfs-traversal
 	template < typename TIndex, typename TSpec >
 	inline void _postorderPop(Iter<TIndex, VSTree< BottomUp<TSpec> > > &it) {
         _dfsRange(it).i1 = top(it.history).i1;
 		_dfsLCP(it) = top(it.history).i2;
 		pop(it.history);
+		_dumpHistoryStack(it);
 	}
 
 	template < typename TIndex, typename TSpec, typename TElement >
 	inline void _postorderPush(Iter<TIndex, VSTree< BottomUp<TSpec> > > &it, TElement const &e) {
 		push(it.history, e);
+		_dumpHistoryStack(it);
 	}
 
 	template < typename TIndex, typename TSpec >
 	inline void _postorderLeaf(Iter<TIndex, VSTree< BottomUp<TSpec> > > &it) {
 		_setSizeInval(_dfsLCP(it));
+		_dumpHistoryStack(it);
 		//length(container(it)) - saAt(_dfsRange(it).i1, container(it));
 	}
 
@@ -387,6 +397,9 @@ This interval is the @Function.value@ of the iterator.
 	template < typename TIndex, class TSpec >
 	inline TIndex const & container(Iter< TIndex, VSTree<TSpec> > const &it) { return it._index; }
 
+	template < typename TIndex, class TSpec >
+	inline TIndex & container(Iter< TIndex, VSTree<TSpec> > &it) { return const_cast<TIndex&>(it._index); }
+
 
 ///.Function.value.param.iterator.type:Spec.VSTree Iterator
 
@@ -467,6 +480,87 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 	}
 
 /**
+.Function.alignment:
+..summary:Returns an alignment of the occurences of the @Function.representative@ substring in the index text.
+..cat:Index
+..signature:alignment(iterator)
+..param.iterator:An iterator of a Suffix Tree.
+...type:Spec.VSTree Iterator
+..returns:A local alignment corresponding to the seed of the $iterator$.
+..remarks:The @Function.representative@ must uniquely occur in every sequence (e.g. in MUMs), 
+otherwise the seed returned is one many.
+*/
+/*
+	template < typename TString, typename TSSetSpec, typename TIndexSpec, class TSpec >
+	inline typename Align<TString const, ArrayGaps>
+	alignment(Iter< Index< StringSet<TString, TSSetSpec>, TIndexSpec >, VSTree<TSpec> > const &it) 
+	{
+		typedef Index< StringSet<TString, TSSetSpec>, TIndexSpec > TIndex;
+		typename Infix< typename Fibre<TIndex, ESA_SA>::Type const >::Type TOccs;
+		typename Iterator<TOccs>::Type TIter;
+
+		Align<TString const, ArrayGaps> align;
+		TIndex const &index = container(it);
+		resize(rows(align), length(indexText(index)));	// resize alignment to number of sequences
+		TOccs occs = getOccurences(it);
+		typename Size<TIndex>::Type repLen = repLength(it);
+		TIter occ = begin(occs), occEnd = end(occs);
+		while (occ != occEnd) {
+			typename Size<TIndex>::Type seqNo = getSeqNo(*occ, stringSetLimits(index));
+			typename Size<TIndex>::Type seqOfs = getSeqOffset(*occ, stringSetLimits(index));
+			setSource(row(align, seqNo), value(indexText(index), seqNo), seqOfs, seqOfs + repLen);
+			++occ;
+		}
+		return align;
+	}
+
+	template < typename TString, typename TConcSpec, typename TIndexSpec, class TSpec >
+	inline typename Align<TString const, ArrayGaps>
+	alignment(Iter< Index< StringSet<TString, ConcatDirect<TConcSpec> >, TIndexSpec >, VSTree<TSpec> > const &it) 
+	{
+		typedef Index< StringSet<TString, ConcatDirect<TConcSpec> >, TIndexSpec > TIndex;
+		typedef typename Infix< typename Fibre<TIndex, ESA_SA>::Type const >::Type TOccs;
+		typedef typename Iterator<TOccs>::Type TIter;
+
+		Align<TString const, ArrayGaps> align;
+		TIndex const &index = container(it);
+		resize(rows(align), length(indexText(index)));	// resize alignment to number of sequences
+		TOccs occs = getOccurences(it);
+		typename Size<TIndex>::Type repLen = repLength(it);
+		TIter occ = begin(occs), occEnd = end(occs);
+		while (occ != occEnd) {
+			typename Size<TIndex>::Type seqNo = getSeqNo(*occ, stringSetLimits(index));
+			typename Size<TIndex>::Type globOfs = posGlobalize(*occ, stringSetLimits(index));
+			setSource(row(align, seqNo), concat(indexText(index)), globOfs, globOfs + repLen);
+			++occ;
+		}
+		return align;
+	}
+*/
+	template < typename TString, typename TConcSpec, typename TIndexSpec, class TSpec >
+	inline Align<TString, ArrayGaps>
+	alignment(Iter< Index< StringSet<TString, ConcatDirect<TConcSpec> >, TIndexSpec >, VSTree<TSpec> > &it) 
+	{
+		typedef Index< StringSet<TString, ConcatDirect<TConcSpec> >, TIndexSpec > TIndex;
+		typedef typename Infix< typename Fibre<TIndex, ESA_SA>::Type const >::Type TOccs;
+		typedef typename Iterator<TOccs>::Type TIter;
+
+		Align<TString, ArrayGaps> align;
+		TIndex &index = container(it);
+		resize(rows(align), length(indexText(index)));	// resize alignment to number of sequences
+		TOccs occs = getOccurences(it);
+		typename Size<TIndex>::Type repLen = repLength(it);
+		TIter occ = begin(occs), occEnd = end(occs);
+		while (occ != occEnd) {
+			typename Size<TIndex>::Type seqNo = getSeqNo(*occ, stringSetLimits((TIndex const&)index));
+			typename Size<TIndex>::Type globOfs = posGlobalize(*occ, stringSetLimits((TIndex const&)index));
+			setSource(row(align, seqNo), concat(indexText(index)), globOfs, globOfs + repLen);
+			++occ;
+		}
+		return align;
+	}
+
+/**
 .Function.getOccurencesBWT:
 ..summary:Returns the characters left beside all occurence of the @Function.representative@ substring in the index text.
 ..cat:Index
@@ -498,7 +592,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 
 	template < typename TIndex, class TSpec >
 	inline typename Infix< typename Fibre<TIndex, ESA_RawText>::Type const >::Type 
-	representative(Iter< TIndex, VSTree<TSpec> > &it) {
+	representative(Iter< TIndex, VSTree<TSpec> > const &it) {
 		typedef typename Size<TIndex>::Type TSize;
 		TSize occ = posGlobalize(getOccurence(it), stringSetLimits(container(it)));
 		TSize len = repLength(it);
@@ -816,7 +910,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 
 	template < typename TIndex, class TSpec >
 	inline typename Infix< typename Fibre<TIndex, ESA_RawText>::Type const >::Type 
-	parentEdgeLabel(Iter< TIndex, VSTree< TopDown< ParentLinks<TSpec> > > >  &it) {
+	parentEdgeLabel(Iter< TIndex, VSTree< TopDown< ParentLinks<TSpec> > > > const &it) {
 		typedef typename Size<TIndex>::Type TSize;
 		TSize occ = posGlobalize(getOccurence(it), stringSetLimits(container(it)));
 		TSize last_len, len;

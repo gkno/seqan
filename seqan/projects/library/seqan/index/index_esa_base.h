@@ -85,6 +85,11 @@ namespace SEQAN_NAMESPACE_MAIN
     };
 
 
+	struct ArrayGaps;
+
+	template <typename TSource, typename TSpec>
+	class Align;
+
 }
 
 #endif

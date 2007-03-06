@@ -127,7 +127,7 @@ namespace SEQAN_NAMESPACE_MAIN
     {
         typedef typename Size< Pool< TValue, MapperSpec<TConfig> > >::Type TSize;
 
-		TSize undefinedPos;
+		TSize undefinedPos = 0;
 		TSize offset = buf.pageNo;
 		TSize dstPos;
 	    offset *= (unsigned)pageSize(buf);

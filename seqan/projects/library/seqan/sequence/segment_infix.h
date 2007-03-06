@@ -106,8 +106,8 @@ SEQAN_CHECKPOINT
 	{
 SEQAN_CHECKPOINT
 	}
-	template <typename TSpec2>
-	Segment(Segment<THost, TSpec2> const & _other):
+	template <typename THost2, typename TSpec2>
+	Segment(Segment<THost2, TSpec2> const & _other):
 		data_host(host(_other)),
 		data_begin_position(beginPosition(_other)),
 		data_end_position(endPosition(_other))

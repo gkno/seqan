@@ -316,7 +316,7 @@ $Iterator<T>::Type$ is the type of the iterator for $object$-type $T$.
 			me.blockLast = (me.blockFirst + (SPACE - 1));
 		} else
 			++me.lastValue;
-		*me.lastValue = source;
+		valueConstruct(me.lastValue, source);
 	}
 	 
 	template<typename TValue, unsigned int SPACE, typename TVal>
@@ -379,6 +379,7 @@ $Iterator<T>::Type$ is the type of the iterator for $object$-type $T$.
 			typename Size< String<TValue, Block<SPACE> > >::Type last = length(me.blocks);
 
 			if (last) {
+				valueDestruct(me.lastValue);
 				deallocate(me.alloc, me.blocks[--last], 1);
 				resize(me.blocks, last);
 				if (last) {
@@ -386,8 +387,10 @@ $Iterator<T>::Type$ is the type of the iterator for $object$-type $T$.
 					me.lastValue = me.blockLast = (me.blockFirst + (SPACE - 1));
 				}
 			}
-		} else
+		} else {
+			valueDestruct(me.lastValue);
 			--me.lastValue;
+		}
 	}
 
 	template<typename TValue, unsigned int SPACE>
@@ -409,7 +412,10 @@ $Iterator<T>::Type$ is the type of the iterator for $object$-type $T$.
 	length(String<TValue, Block<SPACE> > const& me) 
 	{
 	SEQAN_CHECKPOINT
-		return length(me.blocks) * SPACE + (me.lastValue - me.blockFirst);
+		if (length(me.blocks))
+			return (length(me.blocks) - 1) * SPACE + (me.lastValue - me.blockFirst);
+		else
+			return 0;
 	}
 
 

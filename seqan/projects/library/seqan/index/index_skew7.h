@@ -93,7 +93,13 @@ namespace SEQAN_NAMESPACE_MAIN
     struct skew7_nmap_sliced : public ::std::unary_function<InType,Result> {
         Result off[5];
         skew7_nmap_sliced(Result _BN)
-        { off[1] = _BN - 1; off[2] = (2*_BN)/3 - 1; off[4] = _BN/3 - 1; }
+        { 
+			off[0] = 0;
+			off[1] = _BN - 1; 
+			off[2] = (2*_BN)/3 - 1; 
+			off[3] = 0;
+			off[4] = _BN/3 - 1; 
+		}
         inline Result operator()(const InType& x) const
         { return off[x.i1 % 7] - x.i1/7; }
     };
