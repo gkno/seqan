@@ -86,6 +86,16 @@ This interval is the @Function.value@ of the iterator.
 			_index(container(_origin)),
 			_range(_childRange),
 			topRight(value(_origin).i2) {}
+
+		template <typename TSpec>
+		Iter(Iter<TIndex, VSTree< TopDown< ParentLinks<TSpec> > > > const &_origin):
+			_index(container(_origin)),
+			_range(value(_origin)) 
+		{
+			if (!empty(_origin.history))
+				topRight = top(_origin.history).i2;
+		}
+
 	};
 
 
