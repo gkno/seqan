@@ -349,6 +349,14 @@ targetVertex(Iter<TGraph, GraphIterator<EdgeIterator<TSpec> > >& it)
 	return targetVertex(it.data_edge_it);
 }
 
+template<typename TAlphabet, typename TCargo, typename TEdgeSpec, typename TGraphSpec, typename TSpec>
+inline typename Alphabet<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TGraphSpec> >::Type
+label(Iter<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TGraphSpec>, GraphIterator<EdgeIterator<TSpec> > >& it)
+{
+	SEQAN_CHECKPOINT
+	return label(it.data_edge_it);
+}
+
 
 
 }// namespace SEQAN_NAMESPACE_MAIN

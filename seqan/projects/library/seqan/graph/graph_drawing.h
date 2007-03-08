@@ -106,7 +106,9 @@ void _createEdgeNames(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> cons
 	typedef typename Iterator<TGraph, EdgeIterator<> >::Type TConstEdIter;
 	TConstEdIter itEd(g);
 	for(;!atEnd(itEd);++itEd) {
-		assignProperty(edgeMap, *itEd, String<char>((*itEd).i2));
+		// ToDo
+		//assignProperty(edgeMap, *itEd, String<char>((*itEd).i2));
+		assignProperty(edgeMap, *itEd, "Bla");
 	}
 }
 
@@ -121,6 +123,8 @@ void _createEdgeNames(Graph<Automaton<TAlphabet, TCargo, WordGraph<TSpec> >, TGr
 	typedef typename Iterator<TGraph, EdgeIterator<> >::Type TConstEdIter;
 	TConstEdIter itEd(g);
 	for(;!atEnd(itEd);++itEd) {
+		String<char> str;
+		/*
 		String<TAlphabet> label = getProperty(g.data_edge_label, *itEd);
 		String<char> str;
 		resize(str,length(label)+1);
@@ -130,6 +134,7 @@ void _createEdgeNames(Graph<Automaton<TAlphabet, TCargo, WordGraph<TSpec> >, TGr
 			char c = convert<char>(getValue(it));
 			value(str,position(it) + 1) = c;
 		}
+		*/
 		assignProperty(edgeMap, *itEd, str);
 	}
 }

@@ -3,264 +3,140 @@
 
 namespace SEQAN_NAMESPACE_MAIN
 {
+
 //////////////////////////////////////////////////////////////////////////////
-// General Metafunctions
+// General Graph Metafunction
 //////////////////////////////////////////////////////////////////////////////
 
-// IdType	
+//////////////////////////////////////////////////////////////////////////////
+
+	
+/**
+.Metafunction.Id:
+..summary:Type of an object that represents an id.
+..signature:Id<T>::Type
+..param.T:Type for which a suitable id type is determined.
+..returns.param.Type:Id type.
+..remarks.text:The id type of a container is the type that is used to uniquely identify its elements.
+In most cases this type is unsigned int.
+..example.code:Id<Graph<> >::Type id; //id has type unsigned int
+*/
 template<typename T>
 struct Id {
 	typedef unsigned int Type;
 };
+
+//////////////////////////////////////////////////////////////////////////////
 
 template<typename T>
 struct Id<T const> {
 	typedef unsigned int Type;
 };
 
-// VertexDescriptor = Id (for all graphs)
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Metafunction.VertexDescriptor:
+..summary:Type of an object that represents a vertex descriptor.
+..signature:VertexDescriptor<T>::Type
+..param.T:Type T must be a graph. All graphs currently use ids as vertex descriptors.
+..returns.param.Type:VertexDescriptor type.
+..remarks.text:The vertex descriptor is a unique handle to a vertex in a graph.
+It is used in various graph functions, e.g., to add edges, to create OutEdge Iterators or to remove a vertex.
+It is also used to attach properties to vertices.
+..example.code:VertexDescriptor<Graph<> >::Type vD; //vD is a vertex descriptor
+*/
+template<typename T>
+struct VertexDescriptor;
+
 template<typename TGraph>
 struct VertexDescriptor {
 	typedef typename Id<TGraph>::Type Type;
 };
 
-// EdgeDescriptor: Varies for different graph types
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Metafunction.EdgeDescriptor:
+..summary:Type of an object that represents an edge descriptor.
+..signature:EdgeDescriptor<T>::Type
+..param.T:Type T must be a graph. All graphs currently use pointer to edge stumps as edge descriptors.
+..returns.param.Type:EdgeDescriptor type.
+..remarks.text:The edge descriptor is a unique handle to a given edge in a graph.
+It is used in various graph functions, e.g., to remove edges, to assign a cargo to an edge or to get the endpoints of an edge.
+It is also used to attach properties to edges.
+..example.code:EdgeDescriptor<Graph<> >::Type eD; //eD is an edge descriptor
+*/
 template<typename T>
 struct EdgeDescriptor;
 
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Metafunction.Cargo:
+..summary:Type of the cargo of an edge.
+..signature:Cargo<T>::Type
+..param.T:Edge type for which the cargo type is determined.
+..returns.param.Type:Cargo type.
+..remarks.text:The cargo type of an edge indicates the kind of information that is stored with the edge.
+..example.code:Cargo<EdgeStump<int, TSpec> >::Type c; //c has type int
+*/
+template<typename T>
+struct Cargo;
+
 
 //////////////////////////////////////////////////////////////////////////////
-// Default IdManager
-//////////////////////////////////////////////////////////////////////////////
-template<typename TIdType = unsigned int, typename TSpec = Default>
-class IdManager;
 
-// Tag for no edge id
+/**
+.Metafunction.EdgeType:
+..summary:Edge type of a graph object.
+..signature:EdgeType<T>::Type
+..param.T:Type T must be a graph.
+..returns.param.Type:Edge type.
+..remarks.text:The specific edge stump type that is used in a graph.
+..example.code:EdgeType<TGraph>::Type e; //e is an edge in TGraph
+*/
+template<typename T>
+struct EdgeType;
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Metafunction.Alphabet:
+..summary:Access to the Alphabet type.
+..signature:Alphabet<T>::Type
+..param.T:Type T must be a type that uses some kind of alphabet internally.
+..returns.param.Type:Alphabet type.
+..remarks.text:Type T can be for example an automaton where the alphabet type describes the domain of the transition labels.
+..example.code:Alphabet<Graph<Automaton<Dna> > >::Type alph; //alph is of type Dna
+*/
+template<typename T>
+struct Alphabet;
+
+
+//////////////////////////////////////////////////////////////////////////////
+// General Graph Tags
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Tag.WithoutEdgeId
+..summary:Indicates whether an edge stump has an edge id or not.
+..value.WithoutEdgeId:No edge id is stored in the edge stump. 
+*/
 struct WithoutEdgeId_;
 typedef Tag<WithoutEdgeId_> const WithoutEdgeId;
 
 
-//////////////////////////////////////////////////////////////////////////////
-// Default Edge Stump: No cargo but edge id
-//////////////////////////////////////////////////////////////////////////////
-template<typename TCargo = void, typename TSpec = Default>
-class EdgeStump;
-
-//////////////////////////////////////////////////////////////////////////////
-// Default Edge Stump Undirected: No cargo but edge id
-//////////////////////////////////////////////////////////////////////////////
-template<typename TCargo = void, typename TSpec = Default>
-class EdgeStumpU;
-
-//////////////////////////////////////////////////////////////////////////////
-// Default Edge Stump Tree: No cargo
-//////////////////////////////////////////////////////////////////////////////
-template<typename TCargo = void, typename TSpec = Default>
-class EdgeStumpT;
-
-//////////////////////////////////////////////////////////////////////////////
-// Default Automaton Edge: No cargo and no edge id
-//////////////////////////////////////////////////////////////////////////////
-template<typename TCargo = void, typename TSpec = Default>
-class EdgeAutomaton;
-
-
-//////////////////////////////////////////////////////////////////////////////
-// Default EdgeList
-//////////////////////////////////////////////////////////////////////////////
-template<typename TCargo = void, typename TSpec = Default>
-struct EdgeList;
-
-//////////////////////////////////////////////////////////////////////////////
-// Default EdgeListU
-//////////////////////////////////////////////////////////////////////////////
-template<typename TCargo = void, typename TSpec = Default>
-struct EdgeListU;
-
-//////////////////////////////////////////////////////////////////////////////
-// Default Tree
-//////////////////////////////////////////////////////////////////////////////
-template<typename TCargo = void, typename TSpec = Default>
-struct EdgeListT;
-
-//////////////////////////////////////////////////////////////////////////////
-// Default Automaton
-//////////////////////////////////////////////////////////////////////////////
-template<typename TAlphabet = char, typename TCargo = void, typename TSpec = Default>
-struct Automaton;
-
-
-//////////////////////////////////////////////////////////////////////////////
-// Default Graph: Directed Graph
-//////////////////////////////////////////////////////////////////////////////
-template<typename TEdges = EdgeList<>, typename TSpec = Default>
-class Graph;
-
-
-//////////////////////////////////////////////////////////////////////////////
-// Graph - Metafunctions
-//////////////////////////////////////////////////////////////////////////////
-template<typename TEdges, typename TSpec>
-struct Size<Graph<TEdges, TSpec> > {
-	typedef size_t Type;
-};
-
-template<typename TEdges, typename TSpec>
-struct Size<Graph<TEdges, TSpec> const> : Size<Graph<TEdges, TSpec> >
-{
-};
-
-
-template<typename T>
-struct Alphabet;
-
-template<typename TAlphabet, typename TCargo, typename TEdgeSpec>
-struct Alphabet<Automaton<TAlphabet, TCargo, TEdgeSpec> > {
-	typedef TAlphabet Type;
-};
-
-template<typename TAlphabet, typename TCargo, typename TEdgeSpec>
-struct Alphabet<Automaton<TAlphabet, TCargo, TEdgeSpec> const> {
-	typedef TAlphabet Type;
-};
-
-template<typename T>
-struct EdgeType;
-
-template<typename TCargo, typename TEdgeSpec, typename TSpec>
-struct EdgeType<Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> > {
-	typedef EdgeStump<TCargo, TEdgeSpec> Type;
-};
-
-template<typename TCargo, typename TEdgeSpec, typename TSpec>
-struct EdgeType<Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const> {
-	typedef EdgeStump<TCargo, TEdgeSpec> const Type;
-};
-
-template<typename TCargo, typename TEdgeSpec, typename TSpec>
-struct EdgeType<Graph<EdgeListU<TCargo, TEdgeSpec>, TSpec> > {
-	typedef EdgeStumpU<TCargo, TEdgeSpec> Type;
-};
-
-template<typename TCargo, typename TEdgeSpec, typename TSpec>
-struct EdgeType<Graph<EdgeListU<TCargo, TEdgeSpec>, TSpec> const> {
-	typedef EdgeStumpU<TCargo, TEdgeSpec> const Type;
-};
-
-template<typename TCargo, typename TEdgeSpec, typename TSpec>
-struct EdgeType<Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> > {
-	typedef EdgeStumpT<TCargo, TEdgeSpec> Type;
-};
-
-template<typename TCargo, typename TEdgeSpec, typename TSpec>
-struct EdgeType<Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> const> {
-	typedef EdgeStumpT<TCargo, TEdgeSpec> const Type;
-};
-
-template<typename TAlphabet, typename TCargo, typename TEdgeSpec, typename TSpec>
-struct EdgeType<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> > {
-	typedef EdgeAutomaton<TCargo, TEdgeSpec> Type;
-};
-
-template<typename TAlphabet, typename TCargo, typename TEdgeSpec, typename TSpec>
-struct EdgeType<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> const> {
-	typedef EdgeAutomaton<TCargo, TEdgeSpec> const Type;
-};
-
-template<typename TCargo, typename TEdgeSpec, typename TSpec>
-struct EdgeDescriptor<Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> > 
-{
-	typedef typename EdgeType<Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> >::Type* Type;
-};
-
-template<typename TCargo, typename TEdgeSpec, typename TSpec>
-struct EdgeDescriptor<Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const>
-{
-	typedef typename EdgeType<Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const>::Type* Type;
-};
-
-
-template<typename TCargo, typename TEdgeSpec, typename TSpec>
-struct EdgeDescriptor<Graph<EdgeListU<TCargo, TEdgeSpec>, TSpec> > 
-{
-	typedef typename EdgeType<Graph<EdgeListU<TCargo, TEdgeSpec>, TSpec> >::Type* Type;
-};
-
-template<typename TCargo, typename TEdgeSpec, typename TSpec>
-struct EdgeDescriptor<Graph<EdgeListU<TCargo, TEdgeSpec>, TSpec> const>
-{
-	typedef typename EdgeType<Graph<EdgeListU<TCargo, TEdgeSpec>, TSpec> const>::Type* Type;
-};
-
-template<typename TCargo, typename TEdgeSpec, typename TSpec>
-struct EdgeDescriptor<Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> > 
-{
-	typedef typename EdgeType<Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> >::Type* Type;
-};
-
-template<typename TCargo, typename TEdgeSpec, typename TSpec>
-struct EdgeDescriptor<Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> const>
-{
-	typedef typename EdgeType<Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> const>::Type* Type;
-};
-
-template<typename TAlphabet, typename TCargo, typename TEdgeSpec, typename TSpec>
-struct EdgeDescriptor<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> > 
-{
-	typedef Pair<typename VertexDescriptor<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> >::Type, TAlphabet> Type;
-};
-
-template<typename TAlphabet, typename TCargo, typename TEdgeSpec, typename TSpec>
-struct EdgeDescriptor<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> const>
-{
-	typedef Pair<typename VertexDescriptor<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> >::Type, TAlphabet> Type;
-};
-
-template<typename T, typename TIdType>
-struct IdHandler {
-	typedef IdManager<TIdType> Type;
-};
-
-template<typename TCargo, typename TIdType>
-struct IdHandler<EdgeStump<TCargo, WithoutEdgeId>, TIdType> {
-	// Dummy IdManager
-	typedef IdManager<void> Type;
-};
-
-template<typename TCargo, typename TIdType>
-struct IdHandler<EdgeStumpU<TCargo, WithoutEdgeId>, TIdType> {
-	// Dummy IdManager
-	typedef IdManager<void> Type;
-};
-
-//////////////////////////////////////////////////////////////////////////////
-// Utility functions
-//////////////////////////////////////////////////////////////////////////////
-template <typename T>
-inline T const
-_get_nil(T *)
-{
-	return ~0;
-}
-
-template <typename T>
-inline T const
-_get_nil()
-{
-SEQAN_CHECKPOINT
-	T * _tag = 0;
-	return _get_nil(_tag);
-}
-
-template <typename T>
-inline T const
-_get_infinity()
-{
-SEQAN_CHECKPOINT
-	T * _tag = 0;
-	return supremumValueImpl(_tag);
-}
-
+/**
+.Tag.EmptyMap
+..summary:Switch to indicate whether a property map is present or not.
+..value.EmptyMap:The property map is not present. 
+*/
+struct EmptyMap_;
+typedef Tag<EmptyMap_> const EmptyMap;
 
 }// namespace SEQAN_NAMESPACE_MAIN
 

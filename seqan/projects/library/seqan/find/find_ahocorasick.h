@@ -122,7 +122,7 @@ _createAcTrie(Pattern<TNeedle, AhoCorasick> & me)
 	TEdgeIterator itEd(me.data_graph);
 	for(;!atEnd(itEd);goNext(itEd)) {
 		assignProperty(parentMap, targetVertex(itEd), sourceVertex(itEd));
-		assignProperty(parentCharMap, targetVertex(itEd), ((*itEd).i2));
+		assignProperty(parentCharMap, targetVertex(itEd), label(itEd));
 	}
 
 	// Build AC

@@ -125,8 +125,7 @@ void Test_IdManager() {
 
 void Test_EdgeStump() {
 //____________________________________________________________________________
-// EdgeStump
-	// Default: EdgeStump without edge cargo but with edge id
+// EdgeStump Default: EdgeStump without edge cargo but with edge id
 	EdgeStump<> es1;
 	_assignId(&es1, 4);
 	SEQAN_TASSERT(_getId(&es1) == 4)
@@ -139,8 +138,8 @@ void Test_EdgeStump() {
 	EdgeStump<> const es_const(es1);
 	SEQAN_TASSERT(getCargo(&es1) == (void*) 0)
 	SEQAN_TASSERT(getTarget(&es_const) == 5)
-	
-	// EdgeStump with edge cargo and with edge id
+
+	// EdgeStump: EdgeStump with edge cargo and with edge id
 	EdgeStump<unsigned int> es2;
 	assignTarget(&es2, 1);
 	SEQAN_TASSERT(getTarget(&es2) == 1)
@@ -270,38 +269,120 @@ void Test_EdgeStumpU() {
 
 //////////////////////////////////////////////////////////////////////////////
 
-void Test_EdgeAutomaton() {
+void Test_EdgeStumpT() {
 //____________________________________________________________________________
-// EdgeAutomaton
+// EdgeStumpT
+	// Default: EdgeStumpT without edge cargo
+	EdgeStumpT<> es1;
+	assignChild(&es1, 5);
+	SEQAN_TASSERT(_getId(&es1) == 5)   // Child id = edge id
+	SEQAN_TASSERT(getChild(&es1) == 5)
+	SEQAN_TASSERT(child(&es1) == 5)
+	assignParent(&es1, 3);
+	SEQAN_TASSERT(getParent(&es1) == 3)
+	parent(&es1)=4;
+	SEQAN_TASSERT(getParent(&es1) == 4)
+	parent(&es1)=3;
+	assignCargo(&es1, 15);  //Does nothing
+	// No cargo -> pointer to 0
+	SEQAN_TASSERT(getCargo(&es1) == (void*) 0)
+	SEQAN_TASSERT(cargo(&es1) == (void*) 0)
+	SEQAN_TASSERT(_getId(&es1) == 5)
+	EdgeStumpT<> const es_const(es1);
+	SEQAN_TASSERT(getCargo(&es_const) == (void*) 0)
+	SEQAN_TASSERT(cargo(&es_const) == (void*) 0)
+	SEQAN_TASSERT(getChild(&es_const) == 5)
+	SEQAN_TASSERT(child(&es_const) == 5)
+	SEQAN_TASSERT(getParent(&es_const) == 3)
+	SEQAN_TASSERT(parent(&es_const) == 3)
+	
+	// EdgeStumpT with edge cargo
+	EdgeStumpT<unsigned int> es2;
+	assignChild(&es2, 1);
+	SEQAN_TASSERT(getChild(&es2) == 1)
+	assignParent(&es2, 4);
+	SEQAN_TASSERT(getParent(&es2) == 4)
+	SEQAN_TASSERT(_getId(&es2) == 1)
+	assignCargo(&es2, 7);
+	SEQAN_TASSERT(getCargo(&es2) == 7)
+	cargo(&es2) = 6;
+	SEQAN_TASSERT(getCargo(&es2) == 6)
+	EdgeStumpT<unsigned int> const es3(es2);
+	SEQAN_TASSERT(_getId(&es3) == 1)
+	SEQAN_TASSERT(getCargo(&es3) == 6)
+	SEQAN_TASSERT(cargo(&es3) == 6)
+	SEQAN_TASSERT(child(&es3) == 1)
+	SEQAN_TASSERT(parent(&es3) == 4)
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+void Test_EdgeStumpA() {
+//____________________________________________________________________________
+// EdgeStumpA
 	// Default edge automaton: No cargo
-	EdgeAutomaton<> ea1;
-	assignTarget(ea1, 5);
-	SEQAN_TASSERT(getTarget(ea1) == 5)
-	assignCargo(ea1, 15);  
-	SEQAN_TASSERT(getCargo(ea1) == (void*) 0)
-	SEQAN_TASSERT(cargo(ea1) == (void*) 0)
-	EdgeAutomaton<> const ea_const(ea1);
-	SEQAN_TASSERT(getCargo(ea1) == (void*) 0)
-	SEQAN_TASSERT(getCargo(ea_const) == (void*) 0)
-	SEQAN_TASSERT(cargo(ea_const) == (void*) 0)
-	//SEQAN_TASSERT(cargo(ea_const) == (void*) 0)
-	SEQAN_TASSERT(getTarget(ea_const) == 5)
-	SEQAN_TASSERT(target(ea_const) == 5)
+	EdgeStumpA<> ea1;
+	_assignId(&ea1, 4);
+	SEQAN_TASSERT(_getId(&ea1) == 4)
+	assignTarget(&ea1, 5);
+	SEQAN_TASSERT(getTarget(&ea1) == 5)
+	assignCargo(&ea1, 15);  
+	SEQAN_TASSERT(getCargo(&ea1) == (void*) 0)
+	SEQAN_TASSERT(cargo(&ea1) == (void*) 0)
+	EdgeStumpA<> const ea_const(ea1);
+	SEQAN_TASSERT(getCargo(&ea1) == (void*) 0)
+	SEQAN_TASSERT(getCargo(&ea_const) == (void*) 0)
+	SEQAN_TASSERT(cargo(&ea_const) == (void*) 0)
+	SEQAN_TASSERT(getTarget(&ea_const) == 5)
+	SEQAN_TASSERT(target(&ea_const) == 5)
+	SEQAN_TASSERT(getTarget(&ea_const) == 5)
 
+	// EdgeStumpA with edge cargo
+	EdgeStumpA<unsigned int> ea2;
+	_assignId(&ea2, 1);
+	SEQAN_TASSERT(_getId(&ea2) == 1)
+	assignTarget(&ea2, 1);
+	SEQAN_TASSERT(getTarget(&ea2) == 1)
+	target(&ea2) = 4;
+	SEQAN_TASSERT(getTarget(&ea2) == 4)
+	assignCargo(&ea2, 1);
+	SEQAN_TASSERT(getCargo(&ea2) == 1)
+	cargo(&ea2) = 3;
+	SEQAN_TASSERT(getCargo(&ea2) == 3)
+	EdgeStumpA<unsigned int> const ea3(ea2);
+	SEQAN_TASSERT(getCargo(&ea3) == 3)
+	SEQAN_TASSERT(cargo(&ea3) == 3)
 
-	// EdgeAutomaton with edge cargo
-	EdgeAutomaton<unsigned int> ea2;
-	assignTarget(ea2, 1);
-	SEQAN_TASSERT(getTarget(ea2) == 1)
-	target(ea2) = 4;
-	SEQAN_TASSERT(getTarget(ea2) == 4)
-	assignCargo(ea2, 1);
-	SEQAN_TASSERT(getCargo(ea2) == 1)
-	cargo(ea2) = 3;
-	SEQAN_TASSERT(getCargo(ea2) == 3)
-	EdgeAutomaton<unsigned int> const ea3(ea2);
-	SEQAN_TASSERT(getCargo(ea3) == 3)
-	SEQAN_TASSERT(cargo(ea3) == 3)
+	// EdgeStumpA without edge cargo and without edge id
+	EdgeStumpA<void, WithoutEdgeId> es4;
+	assignTarget(&es4, 3);
+	SEQAN_TASSERT(getTarget(&es4) == 3)
+	SEQAN_TASSERT(target(&es4) == 3)
+	target(&es4) = 1;
+	SEQAN_TASSERT(getTarget(&es4) == 1)
+	_assignId(&es4, 1); //Does nothing
+	SEQAN_TASSERT(_getId(&es4) == 0)
+	assignCargo(&es4, 1); //Does nothing
+	SEQAN_TASSERT(getCargo(&es4) == (void*) 0)
+	SEQAN_TASSERT(cargo(&es4) == (void*) 0); //Does nothing
+	EdgeStumpA<void, WithoutEdgeId> const es5(es4);
+	SEQAN_TASSERT(_getId(&es5) == 0)
+	SEQAN_TASSERT(getCargo(&es5) == 0)
+	SEQAN_TASSERT(cargo(&es5) == 0)
+
+	// EdgeStumpA with edge cargo and without edge id
+	EdgeStumpA<unsigned int, WithoutEdgeId> es6;
+	assignTarget(&es6, 1);
+	SEQAN_TASSERT(getTarget(&es6) == 1)
+	SEQAN_TASSERT(target(&es6) == 1)
+	_assignId(&es6, 1); //Does nothing
+	SEQAN_TASSERT(_getId(&es6) == 0)
+	assignCargo(&es6, 1); 
+	SEQAN_TASSERT(getCargo(&es6) == 1)
+	SEQAN_TASSERT(cargo(&es6) == 1);
+	EdgeStumpA<unsigned int, WithoutEdgeId> const es7(es6);
+	SEQAN_TASSERT(_getId(&es7) == 0)
+	SEQAN_TASSERT(getCargo(&es7) == 1)
 }
 
 
@@ -315,7 +396,6 @@ void Test_Automaton() {
 	typedef VertexDescriptor<StandardAutomaton>::Type TVertexDescriptor;
 	typedef EdgeDescriptor<StandardAutomaton>::Type TEdgeDescriptor;
 	
-
 	StandardAutomaton g;
 	SEQAN_TASSERT(numVertices(g) == 0)
 	SEQAN_TASSERT(numEdges(g) == 0)
@@ -343,7 +423,7 @@ void Test_Automaton() {
 	// Add further edges and vertices
 	TVertexDescriptor v1 = addVertex(g);
 	TEdgeDescriptor e2 =addEdge(g,0,1,'g');
-	SEQAN_TASSERT(_getId(e2) == 2)
+	SEQAN_TASSERT(_getId(e2) == 1)
 	SEQAN_TASSERT(v1 == 1)
 	SEQAN_TASSERT(numVertices(g) == 2)
 	SEQAN_TASSERT(targetVertex(g, e2) == 1)
@@ -358,9 +438,9 @@ void Test_Automaton() {
 	addVertex(g);  //2
 	TVertexDescriptor v3 = addVertex(g);  //3
 	addVertex(g);  //4
-	addEdge(g,3,4,'a');
+	addEdge(g,3,4,'g');
 	TEdgeDescriptor my_edge = addEdge(g,3,1,'c');
-	SEQAN_TASSERT(_getId(my_edge) == 13)
+	SEQAN_TASSERT(_getId(my_edge) == 3)
 	addEdge(g,3,0,'t');
 	SEQAN_TASSERT(v3 == 3)
 	SEQAN_TASSERT(numVertices(g) == 5)
@@ -380,9 +460,10 @@ void Test_Automaton() {
 	write(strm,g,DotDrawing());
 	strm.close();
 
+
 	// Remove edges
 	removeEdge(g,my_edge);
-	removeEdge(g,0,1);
+	removeEdge(g,0,1,'g');
 	SEQAN_TASSERT(numEdges(g) == 3)
 
 	// Remove vertices 
@@ -394,6 +475,8 @@ void Test_Automaton() {
 	SEQAN_TASSERT(outDegree(g, 1) == 1)
 	SEQAN_TASSERT(targetVertex(g, e3) == 3)
 	SEQAN_TASSERT(sourceVertex(g, e3) == 3)
+	SEQAN_TASSERT(numEdges(g) == 7)
+	std::cout << g << std::endl;
 	removeVertex(g, v3);
 	SEQAN_TASSERT(outDegree(g, 0) == 2)
 	SEQAN_TASSERT(outDegree(g, 1) == 0)
@@ -427,11 +510,8 @@ void Test_Automaton() {
 	SEQAN_TASSERT(outDegree(g, 4) == 2)
 	SEQAN_TASSERT(inDegree(g, 4) == 0)
 
-	// Transpose
-	StandardAutomaton g_tmp;
 	//Transposes the graph in-place
-	transpose(g, g_tmp); 
-	g = g_tmp;
+	transpose(g); 
 	SEQAN_TASSERT(numVertices(g) == 4)
 	SEQAN_TASSERT(numEdges(g) == 3)
 	SEQAN_TASSERT(outDegree(g, 4) == 0)
@@ -481,6 +561,7 @@ void Test_Automaton() {
 	SEQAN_TASSERT(atEnd(itVert) == true)
 
 	addEdge(g,1,2,'T');
+	std::cout << g << std::endl;
 	typedef Iterator<StandardAutomaton, OutEdgeIterator<> >::Type TOutEdgeIterator;
 	TOutEdgeIterator itEdge(g,1);
 	// Slow
@@ -687,10 +768,12 @@ void Test_Automaton() {
 	TEdgeDescriptor9 edg2 = addEdge(g9,1,0,gDna,21);
 	TGraph9 g10;
 	transpose(g9, g10);
-	SEQAN_TASSERT(getCargo(g9.data_vertex[0].data_edge[(TSize9) aDna])==12)
-	SEQAN_TASSERT(getCargo(g9.data_vertex[1].data_edge[(TSize9) gDna])==21)
-	SEQAN_TASSERT(getCargo(g10.data_vertex[1].data_edge[(TSize9) aDna])==12)
-	SEQAN_TASSERT(getCargo(g10.data_vertex[0].data_edge[(TSize9) gDna])==21)
+	TEdgeDescriptor9 edg1_10 = &g10.data_vertex[1].data_edge[(TSize9) aDna];
+	TEdgeDescriptor9 edg1_11 = &g10.data_vertex[0].data_edge[(TSize9) gDna];
+	SEQAN_TASSERT(getCargo(edg1)==12)
+	SEQAN_TASSERT(getCargo(edg2)==21)
+	SEQAN_TASSERT(getCargo(edg1_10)==12)
+	SEQAN_TASSERT(getCargo(edg1_11)==21)
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -699,7 +782,7 @@ void Test_WordGraph() {
 //____________________________________________________________________________
 // Standard automaton: No edge cargo
 
-	typedef Graph<Automaton<Dna, void, WordGraph<> > > TWordGraph;
+	typedef Graph<Automaton<Dna, String<Dna>, WordGraph<> > > TWordGraph;
 	typedef VertexDescriptor<TWordGraph>::Type TVertexDescriptor;
 	typedef EdgeDescriptor<TWordGraph>::Type TEdgeDescriptor;
 	
@@ -734,6 +817,8 @@ void Test_WordGraph() {
 	// Add edge
 	TEdgeDescriptor e1 =addEdge(g,v0,v3,"ag");
 	SEQAN_TASSERT(_getId(e1) == 0)
+	// First letter -> edge label, all other letters into the cargo
+	SEQAN_TASSERT(getCargo(e1) == "g")
 	SEQAN_TASSERT(targetVertex(g, e1) == 3)
 	SEQAN_TASSERT(sourceVertex(g, e1) == 0) 
 	SEQAN_TASSERT(numEdges(g) == 1)
@@ -745,7 +830,7 @@ void Test_WordGraph() {
 	addVertex(g);
 	TVertexDescriptor v5 = addVertex(g);
 	TEdgeDescriptor e2 =addEdge(g,0,5,"g");
-	SEQAN_TASSERT(_getId(e2) == 2) //Third letter, first vertex --> 0*4 + 2 
+	SEQAN_TASSERT(_getId(e2) == 1) //Third letter, first vertex --> 0*4 + 2 
 	SEQAN_TASSERT(v5 == 5)
 	SEQAN_TASSERT(numVertices(g) == 6)
 	SEQAN_TASSERT(targetVertex(g, e2) == 5)
@@ -803,27 +888,6 @@ void Test_WordGraph() {
 	SEQAN_TASSERT(inDegree(g_tmp, 5) == 2)
 	SEQAN_TASSERT(outDegree(g_tmp, 0) == 0)
 	SEQAN_TASSERT(isRoot(g_tmp, 2) == true)
-
-
-	// Additional cargo
-	typedef Graph<Automaton<Dna, short, WordGraph<> > > TWordGraph2;
-	typedef VertexDescriptor<TWordGraph2>::Type TVertexDescriptor2;
-	typedef EdgeDescriptor<TWordGraph2>::Type TEdgeDescriptor2;
-	typedef Size<TWordGraph2>::Type TSize2;
-
-	TWordGraph2 g2;
-	TVertexDescriptor2 vert0 = addVertex(g2);
-	TVertexDescriptor2 vert1 = addVertex(g2);
-	TEdgeDescriptor2 ed0 = addEdge(g2,vert0,vert1,String<Dna>("acgt"),12);
-	TEdgeDescriptor2 ed1 = addEdge(g2,vert1,vert0,"tgca",21);
-	SEQAN_TASSERT(getCargo(g2.data_vertex[0].data_edge[(TSize2) Dna('a')])==12)
-	SEQAN_TASSERT(getCargo(g2.data_vertex[1].data_edge[(TSize2) Dna('t')])==21)
-	TWordGraph2 g2_transpose;
-	transpose(g2,g2_transpose);
-	SEQAN_TASSERT(getCargo(g2_transpose.data_vertex[1].data_edge[(TSize2) Dna('a')])==12)
-	SEQAN_TASSERT(getCargo(g2_transpose.data_vertex[0].data_edge[(TSize2) Dna('t')])==21)
-	clearEdges(g2_transpose);
-	SEQAN_TASSERT(numEdges(g2_transpose) == 0)
 }
 
 
@@ -1524,6 +1588,43 @@ void Test_Graph() {
 
 //////////////////////////////////////////////////////////////////////////////
 
+void Test_Tree() {
+//____________________________________________________________________________
+// Tree without edge cargo
+
+	typedef Graph<EdgeListT<void> > TTree;
+	typedef VertexDescriptor<TTree>::Type TVertexDescriptor;
+	typedef EdgeDescriptor<TTree>::Type TEdgeDescriptor;
+	
+	TTree g;
+	TVertexDescriptor rootV = getRoot(g);
+	SEQAN_TASSERT(rootV == 0)
+	SEQAN_TASSERT(isRoot(g, rootV) == true)
+	SEQAN_TASSERT(root(g) == rootV)
+	TVertexDescriptor childC1 = addChild(g,rootV);
+	TVertexDescriptor childC2 = addChild(g,rootV);
+	TVertexDescriptor childC3 = addChild(g,rootV);	
+	SEQAN_TASSERT(childC1 == 1)
+	SEQAN_TASSERT(childC2 == 2)
+	SEQAN_TASSERT(childC3 == 3)
+/*
+	TVertexDescriptor childC2C1 = addChild(g,childC2);
+	TVertexDescriptor childC2C1C1 = addChild(g,childC2C1);
+	TVertexDescriptor childC2C1C1C1 = addChild(g,childC2C1C1);
+	TVertexDescriptor childC2C1C1C2 = addChild(g,childC2C1C1);
+	TVertexDescriptor childC4 = addChild(g,rootV);
+	SEQAN_TASSERT(numEdges(g) == 8)
+	SEQAN_TASSERT(numVertices(g) == 9)
+	removeChild(g, rootV, childC2);
+	SEQAN_TASSERT(numEdges(g) == 3)
+	SEQAN_TASSERT(numVertices(g) == 4)
+	
+	std::cout << g << std::endl;
+*/
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 template <typename TGraphType>
 void Test_GraphExternalProperty() {
 //____________________________________________________________________________
@@ -1650,10 +1751,6 @@ void Test_GraphInternalProperty() {
 	SEQAN_TASSERT(getProperty(edgeMap2, edge1) == 3)
 	SEQAN_TASSERT(property(edgeMap2, edge1) == 3)
 
-	// Test dummy call
-	reserve(edgeMap, 200);
-	
-
 	// Second Variant: Pointer to member using a class
 	InternalPointerMap<char TPair:: *, &TPair::i1> eMap4;
 	InternalPointerMap<int TPair:: *, &TPair::i2> eMap5;
@@ -1676,9 +1773,6 @@ void Test_GraphInternalProperty() {
 	SEQAN_TASSERT(getProperty(eMap6, e2) == 'd')
 	SEQAN_TASSERT(property(eMap6, e2) == 'd')
 	
-	// Test dummy call
-	reserve(eMap4, 200);
-
 	// Third Variant: Raw pointer to member
 	char TPair:: * pseudo_map = &TPair::i1;
 	assignProperty(pseudo_map, e1, 'z');
@@ -1687,9 +1781,6 @@ void Test_GraphInternalProperty() {
 	SEQAN_TASSERT(getProperty(pseudo_map, e2) == 'w')
 	property(pseudo_map,e1)='k';
 	SEQAN_TASSERT(getProperty(pseudo_map, e1) == 'k')
-
-	// Test dummy call
-	reserve(pseudo_map, 200);
 }
 
 
@@ -2633,14 +2724,16 @@ int main()
 	// Test Id Manager
 	Test_IdManager();
 
-	// Test different ways to store edges (depending on graph)
+	// Test EdgeStumps
 	Test_EdgeStump();
 	Test_EdgeStumpU();
-	Test_EdgeAutomaton();
+	Test_EdgeStumpT();
+	Test_EdgeStumpA();
 
 	// Test Graph types
 	Test_Graph();	// Directed graphs
 	Test_GraphU();  // Undirected graphs
+	//Test_Tree();	// Tree
 	Test_Automaton();  // Automatons
 	// Others
 	Test_WordGraph(); 
@@ -2699,7 +2792,7 @@ int main()
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_edgelist.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_edgelistu.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_tree.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_edgeautomaton.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_edgestumpa.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_automaton.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_wordgraph.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_oracle.h");

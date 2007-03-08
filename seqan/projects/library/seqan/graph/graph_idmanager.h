@@ -3,10 +3,28 @@
 
 namespace SEQAN_NAMESPACE_MAIN
 {
+//////////////////////////////////////////////////////////////////////////////
+// IdManager
+//////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////
-// Default IdManager
-//////////////////////////////////////////////////////////////////////////////
+// Default Id Manager
+template<typename TIdType = unsigned int, typename TSpec = Default>
+class IdManager;
+
+/**
+.Class.IdManager:
+..cat:Graph
+..summary:Id manager that provides unique ids for vertices and edges.
+..signature:IdManager<TIdType,TSpec>
+..param.TIdType:The id type of the managed ids.
+...metafunction:Metafunction.Value
+...remarks:Use the Value Metafunction to get the id type managed by a given id manager.
+...default:$unsigned int$
+..param.TSpec:The specializing type.
+...metafunction:Metafunction.Spec
+...default:$Default$, see @Tag.Default@.
+..include:graph.h
+*/
 template<typename TIdType, typename TSpec>
 class IdManager 
 {
@@ -48,8 +66,13 @@ class IdManager
 	
 
 //////////////////////////////////////////////////////////////////////////////
-// IdManager Specific Metafunctions
+// IdManager - Metafunctions
 //////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+
+///.Metafunction.Value.param.T.type:Class.IdManager
+
 template<typename TIdType, typename TSpec> 
 struct Value<IdManager<TIdType, TSpec> > 
 {
@@ -62,16 +85,65 @@ struct Value<IdManager<TIdType, TSpec> const>
 	typedef TIdType Type;
 };
 
-
-//////////////////////////////////////////////////////////////////////////////
-//	IdManager INTERFACE
 //////////////////////////////////////////////////////////////////////////////
 
+///.Metafunction.Spec.param.T.type:Class.IdManager
+
+template<typename TIdType, typename TSpec> 
+struct Spec<IdManager<TIdType, TSpec> > 
+{
+	typedef TSpec Type;
+};
+
+template<typename TIdType, typename TSpec> 
+struct Spec<IdManager<TIdType, TSpec> const> 
+{
+	typedef TSpec Type;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+// Graph - Metafunctions that require the Id Manager
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Metafunction.IdHandler:
+..summary:Type of an object that represents an Id Manager.
+..signature:IdHandler<T, TIdType>::Type
+..param.T:Type T must be an edge stump. All graphs currently use pointer to edge stumps as edge descriptors.
+..returns.param.Type:IdManager type.
+..remarks.text:The exact IdManager type depends on the edge stump.
+If the edge stump is id-free the IdManager simply counts edge ids, 
+otherwise it manages a list of free and used ids.
+..example.code:IdHandler<EdgeStump<int, WithoutEdgeId>, int>::Type idm; //idm is an simple Id Manager that solely counts ids
+*/
+template<typename T, typename TIdType>
+struct IdHandler {
+	typedef IdManager<TIdType> Type;
+};
 
 
 //////////////////////////////////////////////////////////////////////////////
-// Functions
+// FUNCTIONS
 //////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.obtainId:
+..cat:Graph
+..summary:Obtains a new id from the id manager.
+..signature:obtainId(idm)
+..param.idm:The IdManager.
+...type:Class.IdManager
+..returns:Returns a new unique id.
+..remarks:If it is a dummy id manager, i.e., IdManager<void>, the return type is (void*) 0.
+..see:Function.releaseId
+*/
+
+///.Function.obtainId.param.idm.type:Class.IdManager
+
 template<typename TIdType, typename TSpec>
 inline typename Value<IdManager<TIdType, TSpec> >::Type 
 obtainId(IdManager<TIdType, TSpec>& idm) 
@@ -91,6 +163,22 @@ obtainId(IdManager<TIdType, TSpec>& idm)
 	return id;
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.releaseId:
+..cat:Graph
+..summary:Releases a given id so it can be redistributed later on.
+..signature:releaseId(idm, id)
+..param.idm:The IdManager.
+...type:Class.IdManager
+..param.id:The id that is to be released.
+..returns:void
+..see:Function.obtainId
+*/
+
+///.Function.releaseId.param.idm.type:Class.IdManager
+
 template<typename TIdType, typename TSpec, typename TId>
 inline void 
 releaseId(IdManager<TIdType, TSpec>& idm, 
@@ -106,6 +194,22 @@ releaseId(IdManager<TIdType, TSpec>& idm,
 	}
 }
 
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.releaseAll:
+..cat:Graph
+..summary:Releases all ids handled by this id manager at once.
+..signature:releaseAll(idm)
+..param.idm:The IdManager.
+...type:Class.IdManager
+..returns:void
+..see:Function.releaseId
+*/
+
+///.Function.releaseAll.param.idm.type:Class.IdManager
+
 template<typename TIdType, typename TSpec>
 inline void 
 releaseAll(IdManager<TIdType, TSpec>& idm) 
@@ -115,6 +219,21 @@ releaseAll(IdManager<TIdType, TSpec>& idm)
 	clear(idm.data_in_use);
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.getIdUpperBound:
+..cat:Graph
+..summary:Returns the largest distributed id plus 1. That is, the return value is guaranteed to be an upper bound on all distributed ids.
+..signature:getIdUpperBound(idm)
+..param.idm:The IdManager.
+...type:Class.IdManager
+..returns:An upper bound on all distributed ids.
+..see:Function.getIdLowerBound
+*/
+
+///.Function.getIdUpperBound.param.idm.type:Class.IdManager
+
 template<typename TIdType, typename TSpec>
 inline typename Size<IdManager<TIdType, TSpec> >::Type 
 getIdUpperBound(IdManager<TIdType, TSpec> const& idm)
@@ -122,6 +241,21 @@ getIdUpperBound(IdManager<TIdType, TSpec> const& idm)
 	SEQAN_CHECKPOINT
 	return length(idm.data_in_use);
 }
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.getIdLowerBound:
+..cat:Graph
+..summary:Returns the smallest distributed id. That is, the return value is guaranteed to be the smallest id obtained so far.
+..signature:getIdLowerBound(idm)
+..param.idm:The IdManager.
+...type:Class.IdManager
+..returns:The smallest obtained id.
+..see:Function.getIdUpperBound
+*/
+
+///.Function.getIdLowerBound.param.idm.type:Class.IdManager
 
 template<typename TIdType, typename TSpec>
 inline typename Size<IdManager<TIdType, TSpec> >::Type 
@@ -135,6 +269,21 @@ getIdLowerBound(IdManager<TIdType, TSpec> const& idm)
 	return 0;
 }
 
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.idCount:
+..cat:Graph
+..summary:Determines the number of ids that were obtained.
+..signature:idCount(idm)
+..param.idm:The IdManager.
+...type:Class.IdManager
+..returns:Number of ids in use.
+*/
+
+///.Function.idCount.param.idm.type:Class.IdManager
+
 template<typename TIdType, typename TSpec>
 inline typename Size<IdManager<TIdType, TSpec> >::Type 
 idCount(IdManager<TIdType, TSpec> const& idm)
@@ -142,6 +291,22 @@ idCount(IdManager<TIdType, TSpec> const& idm)
 	SEQAN_CHECKPOINT
 	return (length(idm.data_in_use) - length(idm.data_freeIds));
 }
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.idInUse:
+..cat:Graph
+..summary:Checks whether the given id is in use or not.
+..signature:idInUse(idm, id)
+..param.idm:The IdManager.
+...type:Class.IdManager
+..param.id:The given id.
+..returns:True if the id was distributed, false otherwise.
+*/
+
+///.Function.idInUse.param.idm.type:Class.IdManager
 
 template<typename TIdType, typename TSpec, typename TId>
 inline bool 
@@ -157,6 +322,18 @@ idInUse(IdManager<TIdType, TSpec> const& idm,
 //////////////////////////////////////////////////////////////////////////////
 // Dummy IdManager
 //////////////////////////////////////////////////////////////////////////////
+
+/**
+.Spec.Counting IdManager:
+..cat:Graph
+..general:Class.IdManager
+..summary:Id Manager that just counts the number of ids in use.
+..signature:IdManager<void, TSpec>
+..param.TSpec:The specializing type.
+...metafunction:Metafunction.Spec
+...default:$Default$, see @Tag.Default@.
+..include:graph.h
+*/
 template<typename TSpec>
 class IdManager<void, TSpec> 
 {
@@ -195,8 +372,12 @@ class IdManager<void, TSpec>
 
 
 //////////////////////////////////////////////////////////////////////////////
-// Dummy IdManager Specific Metafunctions
+// Dummy IdManager - Metafunctions
 //////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+
+///.Metafunction.Value.param.T.type:Class.IdManager
 template<typename TSpec> 
 struct Value<IdManager<void, TSpec> > {
 	typedef unsigned int Type;
@@ -209,14 +390,12 @@ struct Value<IdManager<void, TSpec> const> {
 
 
 //////////////////////////////////////////////////////////////////////////////
-//	Dummy IdManager INTERFACE
+// FUNCTIONS
 //////////////////////////////////////////////////////////////////////////////
 
 
+//////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////
-// Functions
-//////////////////////////////////////////////////////////////////////////////
 template<typename TSpec>
 inline typename Value<IdManager<void, TSpec> >::Type 
 obtainId(IdManager<void, TSpec>& idm) 
@@ -225,6 +404,8 @@ obtainId(IdManager<void, TSpec>& idm)
 	++idm.data_idCount;
 	return 0;
 }
+
+//////////////////////////////////////////////////////////////////////////////
 
 template <typename TSpec, typename TId>
 inline void 
@@ -235,6 +416,8 @@ releaseId(IdManager<void, TSpec>& idm,
 	if (idm.data_idCount > 0) --idm.data_idCount;
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
 template<typename TSpec>
 inline void 
 releaseAll(IdManager<void, TSpec>& idm) 
@@ -242,6 +425,8 @@ releaseAll(IdManager<void, TSpec>& idm)
 	SEQAN_CHECKPOINT
 	idm.data_idCount = 0;
 }
+
+//////////////////////////////////////////////////////////////////////////////
 
 template<typename TSpec>
 inline typename Size<IdManager<void, TSpec> >::Type 
@@ -253,6 +438,8 @@ getIdUpperBound(IdManager<void, TSpec> const& idm)
 	return idm.data_idCount;
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
 template<typename TSpec>
 inline typename Size<IdManager<void, TSpec> >::Type 
 getIdLowerBound(IdManager<void, TSpec> const& idm)
@@ -261,6 +448,9 @@ getIdLowerBound(IdManager<void, TSpec> const& idm)
 	return 0;
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
+
 template <typename TSpec>
 inline typename Size<IdManager<void, TSpec> >::Type 
 idCount(IdManager<void, TSpec> const& idm)
@@ -268,6 +458,9 @@ idCount(IdManager<void, TSpec> const& idm)
 	SEQAN_CHECKPOINT
 	return idm.data_idCount;
 }
+
+//////////////////////////////////////////////////////////////////////////////
+
 
 template <typename TSpec, typename TId>
 inline bool 

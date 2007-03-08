@@ -14,20 +14,21 @@ addLetterToOracle(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec>& g,
 	typedef Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef typename Size<TGraph>::Type TSize;
 	TVertexDescriptor nilVal = _get_nil<TVertexDescriptor>();
 	TVertexDescriptor newState = addVertex(g);
 	TVertexDescriptor pred = newState - 1;
 	addEdge(g, pred, newState, c);
 	TVertexDescriptor k = getProperty(supplyState, pred);
 	while ((k!=nilVal) &&
-			(targetVertex(g,TEdgeDescriptor(k,c))==nilVal))
+			(getTarget(&g.data_vertex[k].data_edge[(TSize) TAlphabet(c)])==nilVal))
 	{
 		addEdge(g,k,newState,c);
 		k = getProperty(supplyState, k);
 	}
 	TVertexDescriptor s;
 	if (k==nilVal) s=0;
-	else s = targetVertex(g,TEdgeDescriptor(k,c));
+	else s = getTarget(&g.data_vertex[k].data_edge[(TSize) TAlphabet(c)]);
 	assignProperty(supplyState, newState, s);
 }
 

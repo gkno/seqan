@@ -121,7 +121,6 @@ public:
 	TSize data_begin;
 	TSize data_end;
 
-
 	Iter()	
 	{
 		SEQAN_CHECKPOINT
@@ -217,7 +216,7 @@ struct Iterator<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> const, Out
 template<typename TGraph, typename TIteratorSpec>
 struct Value<Iter<TGraph, GraphIterator<OutEdgeIterator<TIteratorSpec> > > >
 {
-	typedef typename EdgeDescriptor<TGraph >::Type Type;
+	typedef typename EdgeDescriptor<TGraph>::Type Type;
 };
 
 template<typename TGraph, typename TIteratorSpec>
@@ -226,6 +225,19 @@ struct Value<Iter<TGraph const, GraphIterator<OutEdgeIterator<TIteratorSpec> > >
 	typedef typename EdgeDescriptor<TGraph const>::Type Type;
 };
 
+template<typename TGraph, typename TIteratorSpec>
+struct Reference<Iter<TGraph, GraphIterator<OutEdgeIterator<TIteratorSpec> > > >
+{
+	typedef typename Value<Iter<TGraph, GraphIterator<OutEdgeIterator<TIteratorSpec> > > >::Type Type;
+};
+
+template<typename TGraph, typename TIteratorSpec>
+struct Reference<Iter<TGraph const, GraphIterator<OutEdgeIterator<TIteratorSpec> > > >
+{
+	typedef typename Value<Iter<TGraph const, GraphIterator<OutEdgeIterator<TIteratorSpec> > > >::Type Type;
+};
+
+/*
 template<typename TCargo, typename TEdgeSpec, typename TGraphSpec, typename TIteratorSpec>
 struct Reference<Iter<Graph<EdgeList<TCargo, TEdgeSpec>, TGraphSpec>, GraphIterator<OutEdgeIterator<TIteratorSpec> > > >
 {
@@ -253,15 +265,29 @@ struct Reference<Iter<Graph<EdgeListU<TCargo, TEdgeSpec>, TGraphSpec> const, Gra
 template<typename TAlphabet, typename TCargo, typename TEdgeSpec, typename TGraphSpec, typename TIteratorSpec>
 struct Reference<Iter<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TGraphSpec>, GraphIterator<OutEdgeIterator<TIteratorSpec> > > >
 {
-	typedef typename Value<Iter<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TGraphSpec>, GraphIterator<OutEdgeIterator<TIteratorSpec> > > >::Type Type;
+	typedef typename Value<Iter<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TGraphSpec>, GraphIterator<OutEdgeIterator<TIteratorSpec> > > >::Type& Type;
 };
 
 template<typename TAlphabet, typename TCargo, typename TEdgeSpec, typename TGraphSpec, typename TIteratorSpec>
 struct Reference<Iter<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TGraphSpec> const, GraphIterator<OutEdgeIterator<TIteratorSpec> > > >
 {
-	typedef typename Value<Iter<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TGraphSpec> const, GraphIterator<OutEdgeIterator<TIteratorSpec> > > >::Type Type;
+	typedef typename Value<Iter<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TGraphSpec> const, GraphIterator<OutEdgeIterator<TIteratorSpec> > > >::Type& Type;
+};
+*/
+
+template<typename TGraph, typename TIteratorSpec>
+struct GetValue<Iter<TGraph, GraphIterator<OutEdgeIterator<TIteratorSpec> > > >
+{
+	typedef typename Value<Iter<TGraph, GraphIterator<OutEdgeIterator<TIteratorSpec> > > >::Type Type;
 };
 
+template<typename TGraph, typename TIteratorSpec>
+struct GetValue<Iter<TGraph const, GraphIterator<OutEdgeIterator<TIteratorSpec> > > >
+{
+	typedef typename Value<Iter<TGraph const, GraphIterator<OutEdgeIterator<TIteratorSpec> > > >::Type Type;
+};
+
+/*
 template<typename TCargo, typename TEdgeSpec, typename TGraphSpec, typename TIteratorSpec>
 struct GetValue<Iter<Graph<EdgeList<TCargo, TEdgeSpec>, TGraphSpec>, GraphIterator<OutEdgeIterator<TIteratorSpec> > > >
 {
@@ -290,14 +316,15 @@ struct GetValue<Iter<Graph<EdgeListU<TCargo, TEdgeSpec>, TGraphSpec> const, Grap
 template<typename TAlphabet, typename TCargo, typename TEdgeSpec, typename TGraphSpec, typename TIteratorSpec>
 struct GetValue<Iter<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TGraphSpec>, GraphIterator<OutEdgeIterator<TIteratorSpec> > > >
 {
-	typedef typename Value<Iter<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TGraphSpec>, GraphIterator<OutEdgeIterator<TIteratorSpec> > > >::Type Type;
+	typedef typename Value<Iter<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TGraphSpec>, GraphIterator<OutEdgeIterator<TIteratorSpec> > > >::Type& Type;
 };
 
 template<typename TAlphabet, typename TCargo, typename TEdgeSpec, typename TGraphSpec, typename TIteratorSpec>
 struct GetValue<Iter<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TGraphSpec> const, GraphIterator<OutEdgeIterator<TIteratorSpec> > > >
 {
-	typedef typename Value<Iter<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TGraphSpec> const, GraphIterator<OutEdgeIterator<TIteratorSpec> > > >::Type Type;
+	typedef typename Value<Iter<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TGraphSpec> const, GraphIterator<OutEdgeIterator<TIteratorSpec> > > >::Type& Type;
 };
+*/
 
 
 
@@ -325,9 +352,8 @@ inline typename GetValue<Iter<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TGr
 getValue(Iter<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TGraphSpec>, GraphIterator<OutEdgeIterator<TSpec> > >& it)
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TGraphSpec> TGraph;
-	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
-	return TEdgeDescriptor(it.data_source,TAlphabet(it.data_pos));
+	typedef typename GetValue<Iter<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TGraphSpec>, GraphIterator<OutEdgeIterator<TSpec> > > >::Type TEdgeDescriptor;
+	return (&((const_cast<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TGraphSpec>*>(&hostGraph(it)))->data_vertex[it.data_source].data_edge[it.data_pos]));
 }
 
 template<typename TCargo, typename TEdgeSpec, typename TGraphSpec, typename TSpec>
@@ -353,7 +379,7 @@ value(Iter<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TGraphSpec>, GraphIter
 	SEQAN_CHECKPOINT
 	typedef Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TGraphSpec> TGraph;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
-	return TEdgeDescriptor(it.data_source,TAlphabet(it.data_pos));
+	return (&((const_cast<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TGraphSpec>*>(&hostGraph(it)))->data_vertex[it.data_source].data_edge[it.data_pos]));
 }
 
 template<typename TGraph, typename TSpec>
@@ -674,6 +700,14 @@ sourceVertex(Iter<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TGraphSpec>, Gr
 {
 	SEQAN_CHECKPOINT
 	return it.data_source;
+}
+
+template<typename TAlphabet, typename TCargo, typename TEdgeSpec, typename TGraphSpec, typename TSpec>
+inline typename Alphabet<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TGraphSpec> >::Type
+label(Iter<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TGraphSpec>, GraphIterator<OutEdgeIterator<TSpec> > >& it)
+{
+	SEQAN_CHECKPOINT
+	return TAlphabet(it.data_pos);
 }
 
 template<typename TCargo, typename TEdgeSpec, typename TGraphSpec, typename TSpec>

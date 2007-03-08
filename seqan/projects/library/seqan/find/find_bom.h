@@ -149,7 +149,7 @@ find(TFinder & finder, Pattern<TNeedle, BomAlgo> & me)
 				(current != nilVal))
 		{
 			TAlphabet c = *(finder+(j-1));
-			current = targetVertex(me.oracle,TEdgeDescriptor(current,c));
+			current = targetVertex(me.oracle, &me.oracle.data_vertex[current].data_edge[(TSize) c]);
 			--j;
 		}
 		if (current != nilVal) {
