@@ -30,6 +30,7 @@ void Test_IdManager() {
 	// Obtain Ids
 	TIdType id=obtainId(idm);
 	SEQAN_TASSERT(id == 0)
+	SEQAN_TASSERT(idInUse(idm,0) == true)
 	id=obtainId(idm);
 	SEQAN_TASSERT(id == 1)
 	id=obtainId(idm);
@@ -38,6 +39,7 @@ void Test_IdManager() {
 	SEQAN_TASSERT(id == 3)
 	id=obtainId(idm);
 	SEQAN_TASSERT(id == 4)
+	SEQAN_TASSERT(idInUse(idm,4) == true)
 	SEQAN_TASSERT(getIdUpperBound(idm) == 5)
 	SEQAN_TASSERT(idCount(idm) == 5)
 
@@ -451,15 +453,16 @@ void Test_Automaton() {
 	SEQAN_TASSERT(numEdges(g) == 5)
 	SEQAN_TASSERT(outDegree(g, v3) == 3)	
 
+	/*
 	// Output
 	// Raw output
-	// std::cout << g << ::std::endl;
+	std::cout << g << ::std::endl;
 	// File output
 	fstream strm;
 	strm.open(TEST_PATH "my_automaton.dot", ios_base::out | ios_base::trunc);
 	write(strm,g,DotDrawing());
 	strm.close();
-
+	*/
 
 	// Remove edges
 	removeEdge(g,my_edge);
@@ -476,7 +479,6 @@ void Test_Automaton() {
 	SEQAN_TASSERT(targetVertex(g, e3) == 3)
 	SEQAN_TASSERT(sourceVertex(g, e3) == 3)
 	SEQAN_TASSERT(numEdges(g) == 7)
-	std::cout << g << std::endl;
 	removeVertex(g, v3);
 	SEQAN_TASSERT(outDegree(g, 0) == 2)
 	SEQAN_TASSERT(outDegree(g, 1) == 0)
@@ -539,15 +541,10 @@ void Test_Automaton() {
 	// Adjacency matrix
 	Matrix<unsigned int> mat;
 	getAdjacencyMatrix(g, mat);
-	typedef Iterator<Matrix<TVertexDescriptor>,PositionIterator>::Type TMatrixIterator;
-	TMatrixIterator p = begin(mat);
-	TMatrixIterator endP = end(mat);
-	for(;p != endP;goNext(p)) {
-		if (*p == 1) {
-			// Both edges go to vertex 4
-			SEQAN_TASSERT(coordinate(p,0) == 4)
-		}
-	}
+	unsigned int len = length(mat,0);
+	SEQAN_TASSERT(getValue(mat,1*len+4) == 1)
+	SEQAN_TASSERT(getValue(mat,2*len+4) == 1)
+	SEQAN_TASSERT(getValue(mat,0*len+2) == 0)
 
 	// Test iterators
 	typedef Iterator<StandardAutomaton, VertexIterator<> >::Type TVertexIterator;
@@ -561,7 +558,6 @@ void Test_Automaton() {
 	SEQAN_TASSERT(atEnd(itVert) == true)
 
 	addEdge(g,1,2,'T');
-	std::cout << g << std::endl;
 	typedef Iterator<StandardAutomaton, OutEdgeIterator<> >::Type TOutEdgeIterator;
 	TOutEdgeIterator itEdge(g,1);
 	// Slow
@@ -697,7 +693,7 @@ void Test_Automaton() {
 
 
 //____________________________________________________________________________
-// Automaton
+// Automaton - Different alphabet
 	typedef VertexDescriptor<Graph<Automaton<char> > >::Type VertexDescriptorType;
 	typedef EdgeDescriptor<Graph<Automaton<char> > >::Type EdgeDescriptorType;
 	Graph<Automaton<char> > automaton;
@@ -759,8 +755,8 @@ void Test_Automaton() {
 	TEdgeDescriptor9 edg2 = addEdge(g9,1,0,gDna,21);
 	TGraph9 g10;
 	transpose(g9, g10);
-	TEdgeDescriptor9 edg1_10 = &g10.data_vertex[1].data_edge[(TSize9) aDna];
-	TEdgeDescriptor9 edg1_11 = &g10.data_vertex[0].data_edge[(TSize9) gDna];
+	TEdgeDescriptor9 edg1_10 = findEdge(g10, 1, aDna);
+	TEdgeDescriptor9 edg1_11 = findEdge(g10, 0, gDna);
 	SEQAN_TASSERT(getCargo(edg1)==12)
 	SEQAN_TASSERT(getCargo(edg2)==21)
 	SEQAN_TASSERT(getCargo(edg1_10)==12)
@@ -821,7 +817,7 @@ void Test_WordGraph() {
 	addVertex(g);
 	TVertexDescriptor v5 = addVertex(g);
 	TEdgeDescriptor e2 =addEdge(g,0,5,"g");
-	SEQAN_TASSERT(_getId(e2) == 1) //Third letter, first vertex --> 0*4 + 2 
+	SEQAN_TASSERT(_getId(e2) == 1) 
 	SEQAN_TASSERT(v5 == 5)
 	SEQAN_TASSERT(numVertices(g) == 6)
 	SEQAN_TASSERT(targetVertex(g, e2) == 5)
@@ -847,14 +843,16 @@ void Test_WordGraph() {
 	SEQAN_TASSERT(parseString(g, 0, "gaggg") == 2)
 	SEQAN_TASSERT(parseString(g, 0, "gagggg") == 2)
 
+	/*
 	// Output
 	// Raw output
-	// std::cout << g << ::std::endl;
+	std::cout << g << ::std::endl;
 	// File output
 	fstream strm;
 	strm.open(TEST_PATH "my_wordgraph.dot", ios_base::out | ios_base::trunc);
 	write(strm,g,DotDrawing());
 	strm.close();
+	*/
 
 	TWordGraph g_tmp(g);
 	SEQAN_TASSERT(numVertices(g_tmp) == 8)
@@ -1329,15 +1327,17 @@ void Test_Graph() {
 	SEQAN_TASSERT(outDegree(g, v3) == 3)	
 	
 	// Graph drawing
-	removeEdge(g,0,0); // ToDo: Self edges
-	addEdge(g,4,3);  
+	removeEdge(g,0,0); // ToDo: Drawing of self edges
+	addEdge(g,4,3);
+	/*
 	// Raw output
-	// std::cout << g << ::std::endl;
+	std::cout << g << ::std::endl;
 	// File output
 	fstream strm;
 	strm.open(TEST_PATH "my_graph.dot", ios_base::out | ios_base::trunc);
 	write(strm,g,DotDrawing());
 	strm.close();
+	*/
 	removeEdge(g,4,3);
 	addEdge(g,0,0);
 
@@ -1419,16 +1419,10 @@ void Test_Graph() {
 	// Adjacency matrix
 	Matrix<unsigned int> mat;
 	getAdjacencyMatrix(g, mat);
-	typedef Iterator<Matrix<TVertexDescriptor>,PositionIterator>::Type TMatrixIterator;
-	TMatrixIterator p = begin(mat);
-	TMatrixIterator endP = end(mat);
-	for(;p != endP;goNext(p)) {
-		if (*p == 1) {
-			// Both edges go to vertex 4
-			SEQAN_TASSERT(coordinate(p,0) == 4)
-		}
-	}
-
+	unsigned int len = length(mat, 0);
+	SEQAN_TASSERT(getValue(mat, 1*len+4) == 1)
+	SEQAN_TASSERT(getValue(mat, 2*len+4) == 1)
+	SEQAN_TASSERT(getValue(mat, 2*len+2) == 0)
 
 //____________________________________________________________________________
 //Graph with edge cargo and edge ids
@@ -1446,14 +1440,15 @@ void Test_Graph() {
 	TVertexDescriptor2 ver1 = addVertex(g2);
 	SEQAN_TASSERT(ver1 == 1)
 	SEQAN_TASSERT(numVertices(g2) == 2)
-	TEdgeDescriptor2 ed1 =addEdge(g2,ver0,ver0);
+	TEdgeDescriptor2 ed1 =addEdge(g2,ver0,ver0, TPair('a',3));
 	TEdgeDescriptor2 ed2 =addEdge(g2,0,1);
+	SEQAN_TASSERT((getCargo(ed1)).i1 == 'a')
+	SEQAN_TASSERT((getCargo(ed1)).i2 == 3)
 	SEQAN_TASSERT(targetVertex(g2, ed1) == v0)
 	SEQAN_TASSERT(targetVertex(g2, ed1) == 0)
 	SEQAN_TASSERT(sourceVertex(g2, ed1) == 0)
 	SEQAN_TASSERT(targetVertex(g2, ed2) == 1)
 	SEQAN_TASSERT(numEdges(g2) == 2)
-	assignCargo(ed1, TPair('a',3));
 	assignCargo(ed2, TPair('b',4));
 	SEQAN_TASSERT((getCargo(ed1)).i1 == 'a')
 	SEQAN_TASSERT((getCargo(ed1)).i2 == 3)
@@ -1514,6 +1509,16 @@ void Test_Graph() {
 	removeEdge(g3,0,4);
 	removeEdge(g3,0,2);
 	SEQAN_TASSERT(numEdges(g3) == 2)
+
+	clear(g);
+	TVertexDescriptor edges[] = {0,1, 1,2};
+	unsigned int numEdg = 2;
+	std::string nameEd[] = {"ar", "ae"};
+	addEdges(g, edges, numEdg);
+	String<std::string> edMap;
+	initEdgeMap(g, edMap, nameEd);
+	SEQAN_TASSERT(getProperty(edMap, 0) == "ar")
+	SEQAN_TASSERT(getProperty(edMap, 1) == "ae")
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1568,8 +1573,8 @@ void Test_GraphExternalProperty() {
 	TVertexDescriptor v0 = addVertex(g);
 	TVertexDescriptor v1 = addVertex(g);
 	addVertex(g);
-	TEdgeDescriptor e2 =addEdge(g,0,2);
-	TEdgeDescriptor e1 =addEdge(g,v0,v1);
+	TEdgeDescriptor e2 =addEdge(g,0,2,'t');
+	TEdgeDescriptor e1 =addEdge(g,v0,v1,'a');
 
 	
 	// Test external property maps
@@ -1605,15 +1610,6 @@ void Test_GraphExternalProperty() {
 	initVertexMap(g,nameMap, names);
 	SEQAN_TASSERT(getProperty(nameMap, v0) == 'r')
 	SEQAN_TASSERT(getProperty(nameMap, v1) == 's')
-	
-	TVertexDescriptor edges[] = {0,1, 1,2};
-	TSize numEdges = 2;
-	std::string nameEd[] = {"ar", "ae"};
-	addEdges(g, edges, numEdges);
-	String<std::string> edMap;
-	initEdgeMap(g, edMap, nameEd);
-	SEQAN_TASSERT(getProperty(edMap, 0) == "ar")
-	SEQAN_TASSERT(getProperty(edMap, 1) == "ae")
 }
 
 
@@ -1632,7 +1628,8 @@ void Test_GraphInternalProperty() {
 	TGraph g;
 	TVertexDescriptor v0 = addVertex(g);
 	TVertexDescriptor v1 = addVertex(g);
-	TEdgeDescriptor e1 =addEdge(g,v0,v0);
+	addVertex(g);
+	TEdgeDescriptor e1 =addEdge(g,0,2);
 	TEdgeDescriptor e2 =addEdge(g,v0,v1);
 
 	// First Variant: Explicit internal map with member Ids
@@ -2672,36 +2669,32 @@ int main()
 	Test_EdgeStumpA();
 
 	// Test Graph types
-	Test_Graph();	// Directed graphs
-	Test_GraphU();  // Undirected graphs
-	//Test_Tree();	// Tree
-	Test_Automaton();  // Automatons
-	// Others
-	Test_WordGraph(); 
+	Test_Graph();		// Directed graphs
+	Test_GraphU();		// Undirected graphs
+	Test_Tree();		// ToDo: Tree
+	Test_Automaton();	// Automatons
+	Test_WordGraph();	// Word Graph
+	
+	// Go on from here
 	Test_Oracle();
 	Test_Trie();
 
 	// Test property maps
-	Test_GraphExternalProperty<EdgeList<> >();
-	Test_GraphExternalProperty<EdgeListU<> >();
+	Test_GraphExternalProperty<EdgeList<char> >();
+	Test_GraphExternalProperty<EdgeListU<char> >();
+	Test_GraphExternalProperty<Automaton<char> >();
 	Test_GraphInternalProperty();
 
-	// Test vertex iterators
-	Test_GraphVertexIterator<Automaton<char> >();
+	// Test iterators
 	Test_GraphVertexIterator<EdgeList<char> >();
 	Test_GraphVertexIterator<EdgeListU<char> >();
-	
-	// Test outedge iterators
-	Test_GraphOutEdgeIterator<Automaton<char> >();
+	Test_GraphVertexIterator<Automaton<char> >();
 	Test_GraphOutEdgeIterator<EdgeList<char> >();
 	Test_GraphOutEdgeIterator<EdgeListU<char> >();
-
-	// Test edge iterators
-	Test_GraphEdgeIterator<Automaton<char> >();
+	Test_GraphOutEdgeIterator<Automaton<char> >();
 	Test_GraphEdgeIterator<EdgeList<char> >();
 	Test_GraphEdgeIterator<EdgeListU<char> >();
-
-	// Test adjacency iterators
+	Test_GraphEdgeIterator<Automaton<char> >();
 	Test_GraphAdjacencyIterator<Automaton<char> >();
 	Test_GraphAdjacencyIterator<EdgeList<char> >();
 	Test_GraphAdjacencyIterator<EdgeListU<char> >();

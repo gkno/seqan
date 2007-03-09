@@ -347,6 +347,7 @@ addEdge(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec>& g,
 	// NOP for an automaton because no label is given
 	// Should never be called
 	SEQAN_ASSERT(false)
+	return 0;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -363,12 +364,9 @@ addEdge(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec>& g,
 	SEQAN_ASSERT(idInUse(g.data_id_managerV, target) == true)
 	typedef Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> TGraph;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
-	typedef typename Id<TGraph>::Type TId;
-	typedef typename Size<TAlphabet>::Type TSize;
-	TAlphabet letter(label);
-	TEdgeDescriptor e = &g.data_vertex[source].data_edge[(TSize) letter];
-	TId id = obtainId(g.data_id_managerE);
-	_assignId(e, id);
+	
+	TEdgeDescriptor e = findEdge(g, source, label);
+	_assignId(e, obtainId(g.data_id_managerE));
 	assignTarget(e, target);
 	return e;
 }
@@ -738,6 +736,21 @@ findEdge(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec>& g,
 	return &g.data_vertex[v].data_edge[(TSize) label];
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TAlphabet, typename TCargo, typename TEdgeSpec, typename TSpec, typename TVertexDescriptor, typename TLabel>
+inline typename EdgeDescriptor<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> >::Type 
+findEdge(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> const& g,
+		 TVertexDescriptor const v,
+		 TLabel const c)
+{
+	SEQAN_CHECKPOINT
+	SEQAN_ASSERT(idInUse(g.data_id_managerV, v) == true)
+	
+	typedef Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> TGraph;
+	TGraph* graph = const_cast<TGraph*>(&g);
+	return findEdge(*graph, v, c);
+}
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -772,10 +785,7 @@ getSuccessor(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> const& g,
 {
 	SEQAN_CHECKPOINT
 	SEQAN_ASSERT(idInUse(g.data_id_managerV, vertex) == true)
-	typedef Graph<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> > TGraph;
-	typedef typename Size<TAlphabet>::Type TSize;
-	TAlphabet letter(c);
-	return g.data_vertex[vertex].data_edge[(TSize) letter].data_target;
+	return getTarget(findEdge(g, vertex, c));
 }
 
 //////////////////////////////////////////////////////////////////////////////

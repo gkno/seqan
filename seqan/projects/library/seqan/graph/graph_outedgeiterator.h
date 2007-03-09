@@ -353,8 +353,9 @@ inline typename GetValue<Iter<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TGr
 getValue(Iter<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TGraphSpec>, GraphIterator<OutEdgeIterator<TSpec> > >& it)
 {
 	SEQAN_CHECKPOINT
-	typedef typename GetValue<Iter<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TGraphSpec>, GraphIterator<OutEdgeIterator<TSpec> > > >::Type TEdgeDescriptor;
-	return (&((const_cast<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TGraphSpec>*>(&hostGraph(it)))->data_vertex[it.data_source].data_edge[it.data_pos]));
+	typedef Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TGraphSpec> TGraph;
+	TGraph * g = const_cast<TGraph*>(it.data_host);
+	return (&g->data_vertex[it.data_source].data_edge[it.data_pos]);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -385,8 +386,8 @@ value(Iter<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TGraphSpec>, GraphIter
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TGraphSpec> TGraph;
-	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
-	return (&((const_cast<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TGraphSpec>*>(&hostGraph(it)))->data_vertex[it.data_source].data_edge[it.data_pos]));
+	TGraph * g = const_cast<TGraph*>(it.data_host);
+	return (&g->data_vertex[it.data_source].data_edge[it.data_pos]);
 }
 
 //////////////////////////////////////////////////////////////////////////////

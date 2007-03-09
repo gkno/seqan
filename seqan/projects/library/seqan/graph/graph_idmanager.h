@@ -192,6 +192,9 @@ releaseId(IdManager<TIdType, TSpec>& idm,
 		assignValue(idm.data_in_use, id, false);
 		appendValue(idm.data_freeIds, id);
 	}
+	if (idCount(idm)==0) {
+		releaseAll(idm);
+	}
 }
 
 
