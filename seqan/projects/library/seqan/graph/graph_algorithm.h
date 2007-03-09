@@ -15,7 +15,7 @@ template<typename TEdges, typename TSpec>
 inline typename VertexDescriptor<Graph<TEdges, TSpec> >::Type
 getNilPredecessor(Graph<TEdges, TSpec> const& g)
 {
-	return _get_nil<typename VertexDescriptor<Graph<TEdges, TSpec> >::Type>();
+	return getNil<typename VertexDescriptor<Graph<TEdges, TSpec> >::Type>();
 }
 
 template<typename TWeightMap>
@@ -24,7 +24,7 @@ getInfinityDistance(TWeightMap const& weight)
 {
 	// ToDo
 	// We need to divide by 2 because of addition: infinity + something
-	return (_get_infinity<typename Value<TWeightMap>::Type>()/2);
+	return (getInfinity<typename Value<TWeightMap>::Type>()/2);
 }
 
 inline unsigned int
@@ -32,7 +32,7 @@ getInfinityDistance(EmptyMap)
 {
 	// ToDo
 	// We need to divide by 2 because of addition: infinity + something
-	return (_get_infinity<unsigned int>() / 2);
+	return (getInfinity<unsigned int>() / 2);
 }
 
 template<typename TEdges, typename TSpec, typename TVertexDescriptor, typename TWeightMap, typename TPredecessorMap, typename TDistanceMap>

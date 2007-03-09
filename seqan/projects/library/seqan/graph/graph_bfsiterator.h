@@ -150,7 +150,7 @@ operator * (Iter<TGraph, GraphIterator<BfsIterator<TSpec> > >& it)
 }
 
 template<typename TGraph, typename TSpec>
-inline typename HostGraph<Iter<TGraph, GraphIterator<BfsIterator<TSpec> > > >::Type const&
+inline typename Host<Iter<TGraph, GraphIterator<BfsIterator<TSpec> > > >::Type const&
 hostGraph(Iter<TGraph, GraphIterator<BfsIterator<TSpec> > >& it)
 {
 	SEQAN_CHECKPOINT

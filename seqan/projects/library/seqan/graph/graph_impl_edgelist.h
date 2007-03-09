@@ -22,7 +22,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TEdgeSpec:The specializing type for the edges.
 ...metafunction:Metafunction.Spec
 ...default:$Default$, see @Tag.Default@.
-..param.TSpec:The specializing type.
+..param.TSpec:The specializing type for the graph.
 ...metafunction:Metafunction.Spec
 ...default:$Default$, see @Tag.Default@.
 ..include:graph.h
@@ -150,9 +150,6 @@ _copyGraph(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const& source,
 ..returns:void
 */
 
-///.Function.transpose.param.source.type:Class.Graph
-///.Function.transpose.param.dest.type:Class.Graph
-
 template<typename TCargo, typename TEdgeSpec, typename TSpec>
 inline void 
 transpose(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const& source,
@@ -187,8 +184,6 @@ transpose(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec>& g)
 ..see:Function.numVertices
 */
 
-///.Function.numEdges.param.g.type:Class.Graph
-
 template<typename TCargo, typename TEdgeSpec, typename TSpec>
 inline typename Size<Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> >::Type 
 numEdges(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const& g) 
@@ -210,8 +205,6 @@ numEdges(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const& g)
 ..see:Function.numEdges
 */
 
-///.Function.numVertices.param.g.type:Class.Graph
-
 template<typename TCargo, typename TEdgeSpec, typename TSpec>
 inline typename Size<Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> >::Type 
 numVertices(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const& g) 
@@ -231,8 +224,6 @@ numVertices(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const& g)
 ...type:Class.Graph
 ..returns:True if empty, false otherwise.
 */
-
-///.Function.empty.param.g.type:Class.Graph
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec>
 inline bool 
@@ -255,8 +246,6 @@ empty(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const& g)
 ..see:Function.clearVertices
 ..see:Function.clear
 */
-
-///.Function.clearEdges.param.g.type:Class.Graph
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec>
 inline void
@@ -289,8 +278,6 @@ clearEdges(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec>& g)
 ..see:Function.clear
 */
 
-///.Function.clearVertices.param.g.type:Class.Graph
-
 template<typename TCargo, typename TEdgeSpec, typename TSpec>
 inline void
 clearVertices(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec>& g) 
@@ -316,8 +303,6 @@ clearVertices(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec>& g)
 ..see:Function.clearVertices
 */
 
-///.Function.clearVertices.param.g.type:Class.Graph
-
 template<typename TCargo, typename TEdgeSpec, typename TSpec>
 inline void 
 clear(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec>& g) 
@@ -342,8 +327,6 @@ clear(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec>& g)
 ..see:Function.degree
 */
 
-///.Function.outDegree.param.g.type:Class.Graph
-
 template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TVertexDescriptor> 
 inline typename Size<Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> >::Type 
 outDegree(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const& g, 
@@ -363,6 +346,22 @@ outDegree(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const& g,
 	}
 	return count;
 }
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.inDegree:
+..cat:Graph
+..summary:Number of incoming edges for a given vertex.
+..signature:inDegree(g, vertex)
+..param.g:A graph.
+...type:Class.Graph
+..param.g:A vertex descriptor.
+...type:Metafunction.VertexDescriptor
+..returns:Number of in-edges.
+..see:Function.outDegree
+..see:Function.degree
+*/
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TVertexDescriptor> 
 inline typename Size<Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> >::Type 
@@ -387,6 +386,22 @@ inDegree(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const& g,
 	return count;
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.degree:
+..cat:Graph
+..summary:Number of incident edges for a given vertex.
+..signature:degree(g, vertex)
+..param.g:A graph.
+...type:Class.Graph
+..param.g:A vertex descriptor.
+...type:Metafunction.VertexDescriptor
+..returns:Number of incident edges.
+..see:Function.outDegree
+..see:Function.inDegree
+*/
+
 template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TVertexDescriptor>
 inline typename Size<Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> >::Type 
 degree(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const& g, 
@@ -395,6 +410,20 @@ degree(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const& g,
 	SEQAN_CHECKPOINT
 	return (inDegree(g,vertex)+outDegree(g,vertex));
 }
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.addVertex:
+..cat:Graph
+..summary:Adds a new vertex to the graph.
+..signature:addVertex(g)
+..param.g:A graph.
+...type:Class.Graph
+..returns:A new vertex descriptor.
+...type:Metafunction.VertexDescriptor
+..see:Function.removeVertex
+*/
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec> 
 inline typename VertexDescriptor<Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> >::Type 
@@ -413,6 +442,21 @@ addVertex(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec>& g)
 	return vd;
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.removeVertex:
+..cat:Graph
+..summary:Removes a vertex.
+..signature:removeVertex(g, v)
+..param.g:A graph.
+...type:Class.Graph
+..param.v:A vertex descriptor.
+...type:Metafunction.VertexDescriptor
+..returns:void
+..see:Function.addVertex
+*/
+
 template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TVertexDescriptor>
 inline void 
 removeVertex(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec>& g, 
@@ -426,6 +470,33 @@ removeVertex(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec>& g,
 	releaseId(g.data_id_managerV, v); // Release id
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.addEdge:
+..cat:Graph
+..summary:Adds a new edge to the graph, either with or without cargo.
+For automatons a label is required.
+..signature:addEdge(g, source, target)
+..signature:addEdge(g, source, target, cargo)
+..signature:addEdge(g, source, target, label)
+..signature:addEdge(g, source, target, label, cargo)
+..param.g:A graph.
+...type:Class.Graph
+..param.source:A vertex descriptor.
+...type:Metafunction.VertexDescriptor
+..param.target:A second vertex descriptor.
+...type:Metafunction.VertexDescriptor
+..param.label:A label for the edge.
+...type:Metafunction.Alphabet
+...remarks:Can only be used with @Spec.Automaton@.
+..param.cargo:A cargo object.
+...type:Metafunction.Cargo
+..returns:A new edge descriptor.
+...type:Metafunction.EdgeDescriptor
+..see:Function.removeEdge
+..see:Function.addEdges
+*/
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TVertexDescriptor> 
 inline typename EdgeDescriptor<Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> >::Type 
@@ -455,6 +526,8 @@ addEdge(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec>& g,
 	return edge_ptr;
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
 template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TVertexDescriptor> 
 inline typename EdgeDescriptor<Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> >::Type 
 addEdge(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec>& g, 
@@ -470,7 +543,30 @@ addEdge(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec>& g,
 	return e;
 }
 
+//////////////////////////////////////////////////////////////////////////////
 
+/**
+.Function.removeEdge:
+..cat:Graph
+..summary:Adds a new edge to the graph, either with or without cargo.
+For automatons a label is required.
+..signature:removeEdge(g, source, target)
+..signature:removeEdge(g, source, target, label)
+..signature:removeEdge(g, e)
+..param.g:A graph.
+...type:Class.Graph
+..param.source:A vertex descriptor.
+...type:Metafunction.VertexDescriptor
+..param.target:A second vertex descriptor.
+...type:Metafunction.VertexDescriptor
+..param.label:A label for the edge.
+...type:Metafunction.Alphabet
+...remarks:Required to remove an edge in an @Spec.Automaton@.
+..param.e:An edge descriptor.
+...type:Metafunction.EdgeDescriptor
+..returns:void
+..see:Function.addEdge
+*/
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TVertexDescriptor>
 void 
@@ -507,6 +603,8 @@ removeEdge(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec>& g,
 	deallocate(g.data_allocator, current, 1);
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
 template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TEdgeDescriptor>
 void 
 removeEdge(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec>& g,
@@ -515,6 +613,21 @@ removeEdge(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec>& g,
 	SEQAN_CHECKPOINT
 	removeEdge(g, sourceVertex(g,edge), targetVertex(g,edge));
 }
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.removeOutEdges:
+..cat:Graph
+..summary:Removes the outgoing edges of a given vertex.
+..signature:removeOutEdges(g, v)
+..param.g:A graph.
+...type:Class.Graph
+..param.v:A vertex descriptor.
+...type:Metafunction.VertexDescriptor
+..returns:void
+..see:Function.removeInEdges
+*/
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TVertexDescriptor> 
 inline void 
@@ -531,6 +644,21 @@ removeOutEdges(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec>& g,
 		removeEdge(g,v,target);
 	}
 }
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.removeInEdges:
+..cat:Graph
+..summary:Removes the incoming edges of a given vertex.
+..signature:removeInEdges(g, v)
+..param.g:A graph.
+...type:Class.Graph
+..param.v:A vertex descriptor.
+...type:Metafunction.VertexDescriptor
+..returns:void
+..see:Function.removeOutEdges
+*/
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TVertexDescriptor> 
 inline void 
@@ -558,6 +686,24 @@ removeInEdges(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec>& g,
 }
 
 
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.targetVertex:
+..cat:Graph
+..summary:Returns the target vertex of an edge.
+In a tree the target vertex is always the child. In an undirected graph
+the larger vertex descriptor is the target.
+..signature:targetVertex(g, e)
+..param.g:A graph.
+...type:Class.Graph
+..param.e:An edge descriptor.
+...type:Metafunction.EdgeDescriptor
+..returns:A vertex descriptor.
+...type:Metafunction.VertexDescriptor
+..see:Function.sourceVertex
+*/
+
 template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TEdgeDescriptor>
 inline typename VertexDescriptor<Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> >::Type 
 targetVertex(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const& g,
@@ -566,6 +712,24 @@ targetVertex(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const& g,
 	SEQAN_CHECKPOINT
 	return getTarget(edge);
 }
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.sourceVertex:
+..cat:Graph
+..summary:Returns the source vertex of an edge.
+In a tree the source vertex is always the parent. In an undirected graph
+the smaller vertex descriptor is the source.
+..signature:sourceVertex(g, e)
+..param.g:A graph.
+...type:Class.Graph
+..param.e:An edge descriptor.
+...type:Metafunction.EdgeDescriptor
+..returns:A vertex descriptor.
+...type:Metafunction.VertexDescriptor
+..see:Function.targetVertex
+*/
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TEdgeDescriptor>
 inline typename VertexDescriptor<Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> >::Type 
@@ -587,6 +751,20 @@ sourceVertex(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const& g,
 	SEQAN_ASSERT(false)
 	return 0;
 }
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.getAdjacencyMatrix:
+..cat:Graph
+..summary:Returns an adjacency matrix representation of the graph.
+..signature:getAdjacencyMatrix(g, mat)
+..param.g:A graph.
+...type:Class.Graph
+..param.mat:A matrix.
+...type:Class.Matrix
+..returns:void
+*/
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TMatrix>
 inline void
@@ -617,6 +795,8 @@ getAdjacencyMatrix(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const& g,
 		}
 	}
 }
+
+//////////////////////////////////////////////////////////////////////////////
 
 template <typename TFile, typename TCargo, typename TEdgeSpec, typename TSpec, typename TIDString>
 inline void
@@ -662,130 +842,6 @@ write(TFile & target,
 		}
 	}
 }
-
-
-/*
-//////////////////////////////////////////////////////////////////////////////
-// Replaced by automaton
-//////////////////////////////////////////////////////////////////////////////
-template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TVertexDescriptor, typename TChar>
-inline typename VertexDescriptor<Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> >::Type 
-getSuccessor(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const& g,
-				   TVertexDescriptor vertex,
-				   TChar const c) 
-{
-	SEQAN_CHECKPOINT
-	typedef Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> TGraph;
-	typedef typename EdgeType<TGraph>::Type TEdgeStump;
-	typedef typename Cargo<TEdgeStump>::Type TInternalCargo;
-	InternalMap<TInternalCargo> eMap;
-	initEdgeMap(g,eMap);
-	return getSuccessor(g,vertex,eMap,c);
-}
-
-template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TEdgeLabelMap, typename TVertexDescriptor, typename TChar>
-inline typename VertexDescriptor<Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> >::Type 
-getSuccessor(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const& g,
-				   TVertexDescriptor vertex,
-				   TEdgeLabelMap const& eMap,
-				   TChar const c) 
-{
-	SEQAN_CHECKPOINT
-	SEQAN_ASSERT(idInUse(g.data_id_managerV, vertex) == true)
-
-	typedef Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> TGraph;
-	typedef typename EdgeType<TGraph>::Type TEdgeStump;
-	TEdgeStump const* current = getValue(g.data_vertex, vertex);
-	while(current!=(TEdgeStump*) 0) {
-		if (getProperty(eMap,current) == c) return targetVertex(g,current);
-		current=current->data_next;
-	}
-	return _get_nil<TVertexDescriptor>();
-}
-
-template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TVertexDescriptor, typename TChar>
-inline typename VertexDescriptor<Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> >::Type 
-getPredecessor(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const& g,
-				   TVertexDescriptor vertex,
-				   TChar const c) 
-{
-	SEQAN_CHECKPOINT
-	typedef Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> TGraph;
-	typedef typename EdgeType<TGraph>::Type TEdgeStump;
-   	typedef typename Cargo<TEdgeStump>::Type TInternalCargo;
-	InternalMap<TInternalCargo> eMap;
-	initEdgeMap(g,eMap);
-	return getPredecessor(g,vertex,eMap,c);
-}
-
-template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TEdgeLabelMap, typename TVertexDescriptor, typename TChar>
-inline typename VertexDescriptor<Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> >::Type 
-getPredecessor(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const& g,
-				   TVertexDescriptor vertex,
-				   TEdgeLabelMap const& eMap,
-				   TChar const c) 
-{
-	SEQAN_CHECKPOINT
-	SEQAN_ASSERT(idInUse(g.data_id_managerV, vertex) == true)
-	
-	typedef Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> TGraph;
-	typedef typename EdgeType<TGraph>::Type TEdgeStump;
-	typedef typename Iterator<String<TEdgeStump*> const>::Type TIterConst;
-	for(TIterConst it = begin(g.data_vertex);!atEnd(it);goNext(it)) {
-		TEdgeStump const* current = getValue(it);
-		while(current!=(TEdgeStump*) 0) {
-			if ((vertex = targetVertex(g,current)) &&
-				(getProperty(eMap,current) == c)) {
-					return position(it);
-			}
-			current=current->data_next;
-		}
-	}
-	// We should never reach this point
-	SEQAN_ASSERT(false)
-	return 0;
-}
-
-template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TVertexDescriptor, typename TIterator>
-inline typename VertexDescriptor<Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> >::Type 
-parseString(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const& g,
-			TVertexDescriptor const vertex,
-			TIterator beginIt,
-			TIterator endIt)
-{
-	SEQAN_CHECKPOINT
-	SEQAN_ASSERT(idInUse(g.data_id_managerV, vertex) == true)
-	TVertexDescriptor nilVal = _get_nil<TVertexDescriptor>();
-	TVertexDescriptor succ = vertex;
-	while (beginIt!=endIt) {
-		TVertexDescriptor tmp = getSuccessor(g,succ,*beginIt);
-		if (tmp == nilVal) break;
-		succ = tmp;
-		++beginIt;
-	}
-	return succ;
-}
-
-template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TVertexDescriptor, typename TCharacters>
-inline typename VertexDescriptor<Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> >::Type 
-parseString(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const& g,
-			TVertexDescriptor const vertex,
-			TCharacters const& chars)
-{
-	SEQAN_CHECKPOINT
-	return parseString(g,vertex,begin(chars),end(chars));
-}
-
-template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TVertexDescriptor, typename TCharacters>
-inline typename VertexDescriptor<Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> >::Type 
-parseString(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const& g,
-			TVertexDescriptor const vertex,
-			TCharacters const* chars)
-{
-	SEQAN_CHECKPOINT
-	return parseString(g,vertex,chars,chars+length(chars));
-}
-*/
 
 }// namespace SEQAN_NAMESPACE_MAIN
 

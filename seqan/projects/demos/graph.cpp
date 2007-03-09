@@ -567,17 +567,6 @@ void AutomatonTest() {
 	std::cout << succ << " -C-> ";
 	succ = getSuccessor(automaton,succ,'C');
 	std::cout << succ << ::std::endl;
-	std::cout << "...and now let's walk backwards:" << ::std::endl;
-	VertexDescriptorType pred = succ;
-	std::cout << pred << " <-T- ";
-	pred = getPredecessor(automaton,pred,'T');
-	std::cout << pred << " <-C- ";
-	pred = getPredecessor(automaton,pred,'C');
-	std::cout << pred << " <-T- ";
-	pred = getPredecessor(automaton,pred,'T');
-	std::cout << pred << " <-G- ";
-	pred = getPredecessor(automaton,pred,'G');
-	std::cout << pred << ::std::endl;
 	std::cout << "------------------------------" << ::std::endl;
 	std::cout << "Multiple forward transitions at once:" << ::std::endl;
 	std::cout << rootVertex << " -TGGC-> ";

@@ -141,7 +141,7 @@ find(TFinder & finder, Pattern<TNeedle, BomAlgo> & me)
 	typedef typename Size<TNeedle>::Type TSize;
 	typedef typename VertexDescriptor<TOracle>::Type TVertexDescriptor;
 	typedef typename EdgeDescriptor<TOracle>::Type TEdgeDescriptor;
-	TVertexDescriptor nilVal = _get_nil<TVertexDescriptor>();
+	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
 	while (position(finder) <= me.haystackLength - me.needleLength) {
 		TVertexDescriptor current = getRoot(me.oracle);
 		TSize j = me.needleLength;
@@ -149,7 +149,7 @@ find(TFinder & finder, Pattern<TNeedle, BomAlgo> & me)
 				(current != nilVal))
 		{
 			TAlphabet c = *(finder+(j-1));
-			current = targetVertex(me.oracle, &me.oracle.data_vertex[current].data_edge[(TSize) c]);
+			current = targetVertex(me.oracle, findEdge(me.oracle, current, c));
 			--j;
 		}
 		if (current != nilVal) {

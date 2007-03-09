@@ -125,6 +125,18 @@ struct Alphabet;
 struct WithoutEdgeId_;
 typedef Tag<WithoutEdgeId_> const WithoutEdgeId;
 
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Tag.DotDrawing
+..summary:Switch to trigger drawing in dot format.
+..value.DotDrawing:Graphs in dot format.
+*/
+
+struct TagDotDrawing_;
+typedef Tag<TagDotDrawing_> const DotDrawing;
+
+//////////////////////////////////////////////////////////////////////////////
 
 /**
 .Tag.EmptyMap

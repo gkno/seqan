@@ -18,7 +18,7 @@ _addStringToTrie(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec>& g,
 	typedef typename Size<TKeyword>::Type TSize;
 
 	TVertexDescriptor current = getRoot(g);
-	TVertexDescriptor nilVal = _get_nil<TVertexDescriptor>();
+	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
 	typename Iterator<TKeyword const>::Type sIt = begin(str);
 	for(;!atEnd(sIt);goNext(sIt)) {
 		if (getSuccessor(g, current, *sIt) == nilVal) break;

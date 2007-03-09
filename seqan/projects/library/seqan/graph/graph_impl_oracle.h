@@ -15,7 +15,7 @@ addLetterToOracle(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec>& g,
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	typedef typename Size<TGraph>::Type TSize;
-	TVertexDescriptor nilVal = _get_nil<TVertexDescriptor>();
+	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
 	TVertexDescriptor newState = addVertex(g);
 	TVertexDescriptor pred = newState - 1;
 	addEdge(g, pred, newState, c);
@@ -41,7 +41,7 @@ createOracle(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec>& g,
 	typedef Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename Size<TText>::Type TSize;
-	TVertexDescriptor nilVal = _get_nil<TVertexDescriptor>();
+	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
 	TSize len = length(text);
 	String<TVertexDescriptor> supplyState;
 	resize(supplyState, len+1);
@@ -61,7 +61,7 @@ createOracleOnReverse(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec>& g,
 	typedef Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename Size<TText>::Type TSize;
-	TVertexDescriptor nilVal = _get_nil<TVertexDescriptor>();
+	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
 	TSize len = length(text);
 	String<TVertexDescriptor> supplyState;
 	resize(supplyState, len+1);

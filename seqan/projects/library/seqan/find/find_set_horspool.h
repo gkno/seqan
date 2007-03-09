@@ -110,7 +110,7 @@ void setHost (Pattern<TNeedle, SetHorspool> & me, TNeedle2 const & needle) {
 	// Create jump map
 	TSize alphabet_size = ValueSize<TAlphabet>::VALUE;
 	resize(me.data_dMap, alphabet_size);
-	me.data_lmin = _get_infinity<TSize>();
+	me.data_lmin = getInfinity<TSize>();
 	typename Iterator<TNeedle2 const>::Type it = begin(needle);
 	for(;!atEnd(it);goNext(it)) {
 		TSize tmp = length(*it);
@@ -200,7 +200,7 @@ inline bool find(TFinder & finder, Pattern<TNeedle, SetHorspool> & me) {
 		return true;
 	}
 
-	TVertexDescriptor nilVal = _get_nil<TVertexDescriptor>();
+	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
 	TSize j = 0;
 	if (empty(finder)) {
 		goBegin(finder);

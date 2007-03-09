@@ -266,6 +266,23 @@ struct Value<InternalMap<T, 0> > {
 
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Function.initEdgeMap:
+..cat:Graph
+..summary:Initializes an edge map
+..signature:initEdgeMap(g, pm)
+..signature:initEdgeMap(g, pm, prop)
+..param.g:A Graph.
+...type:Class.Graph
+..param.pm:An Internal Property Map.
+...type:Class.InternalMap
+..param.prop:An optional array with properties that are to be assigned to the items in the property map.
+...remarks:For every edge id there must be an entry in the array.
+..returns:void
+*/
+
+///.Function.initEdgeMap.param.pm.type:Class.InternalMap
+
 template<typename TEdges, typename TSpec, typename TContainer, unsigned int const MemberId>
 inline void
 initEdgeMap(Graph<TEdges, TSpec> const& g,
@@ -547,6 +564,23 @@ struct Value<InternalPointerMap<TValue TClass::*, TPMember> > {
 
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Function.initEdgeMap:
+..cat:Graph
+..summary:Initializes an edge map
+..signature:initEdgeMap(g, pm)
+..signature:initEdgeMap(g, pm, prop)
+..param.g:A Graph.
+...type:Class.Graph
+..param.pm:An Internal Property Map.
+...type:Class.InternalPointerMap
+..param.prop:An optional array with properties that are to be assigned to the items in the property map.
+...remarks:For every edge id there must be an entry in the array.
+..returns:void
+*/
+
+///.Function.initEdgeMap.param.pm.type:Class.InternalPointerMap
+
 template<typename TEdges, typename TSpec, typename TPropmap, TPropmap const Instance>
 inline void
 initEdgeMap(Graph<TEdges, TSpec>& g,
@@ -710,7 +744,25 @@ struct Value<TValue TClass:: * const> {
 // Raw pointer to member - FUNCTIONS
 //////////////////////////////////////////////////////////////////////////////
 
+
 //////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.initEdgeMap:
+..cat:Graph
+..summary:Initializes an edge map
+..signature:initEdgeMap(g, pm)
+..signature:initEdgeMap(g, pm, prop)
+..param.g:A Graph.
+...type:Class.Graph
+..param.pm:An Internal Property Map.
+...type:Class.InternalRawMap
+..param.prop:An optional array with properties that are to be assigned to the items in the property map.
+...remarks:For every edge id there must be an entry in the array.
+..returns:void
+*/
+
+///.Function.initEdgeMap.param.pm.type:Class.InternalRawMap
 
 template <typename TEdges, typename TSpec, typename TClass, typename TValue> 
 inline void

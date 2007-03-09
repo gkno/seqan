@@ -175,6 +175,21 @@ struct EdgeType<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> const> {
 	typedef EdgeStumpA<TCargo, TEdgeSpec> const Type;
 };
 
+//////////////////////////////////////////////////////////////////////////////
+
+///.Metafunction.Cargo.param.T.type:Class.Graph
+
+template<typename TEdges, typename TSpec>
+struct Cargo<Graph<TEdges, TSpec> > {
+	typedef typename Cargo<typename EdgeType<Graph<TEdges, TSpec> >::Type>::Type TType;
+};
+
+
+template<typename TEdges, typename TSpec>
+struct Cargo<Graph<TEdges, TSpec> const> {
+	typedef typename Cargo<typename EdgeType<Graph<TEdges, TSpec> const>::Type>::Type TType;
+};
+
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -194,35 +209,60 @@ struct Alphabet<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> const> {
 };
 
 
-
+//////////////////////////////////////////////////////////////////////////////
+// Generic Graph Functions
+//////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
-// Utility functions
-//////////////////////////////////////////////////////////////////////////////
-template <typename T>
-inline T const
-_get_nil(T *)
-{
-	return ~0;
-}
 
+/**
+.Function.getInfinity:
+..cat:Graph
+..summary:Utility function returning a value that represents infinity.
+Useful for various graph algorithms, e.g., Dijkstra.
+..signature:getInfinity<T>()
+..returns:Pseudo infinity value for type T.
+..see:Function.getNil
+*/
 template <typename T>
 inline T const
-_get_nil()
-{
-SEQAN_CHECKPOINT
-	T * _tag = 0;
-	return _get_nil(_tag);
-}
-
-template <typename T>
-inline T const
-_get_infinity()
+getInfinity()
 {
 SEQAN_CHECKPOINT
 	T * _tag = 0;
 	return supremumValueImpl(_tag);
 }
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.getNil:
+..cat:Graph
+..summary:Utility function returning a value that represents nil.
+Useful for various graph algorithms, e.g., missing predecessors, vertices that have not been visited, etc.
+..signature:getNil<T>()
+..returns:Pseudo nil value for type T.
+..see:Function.getInfinity
+*/
+template <typename T>
+inline T const
+getNil(T *)
+{
+	return ~0;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename T>
+inline T const
+getNil()
+{
+SEQAN_CHECKPOINT
+	T * _tag = 0;
+	return getNil(_tag);
+}
+
+//////////////////////////////////////////////////////////////////////////////
 
 // Simple _getId function to get the id for a vertex descriptor which is the id!
 template<typename TId>
@@ -233,11 +273,38 @@ _getId(TId const id)
 	return id;
 }
 
+//////////////////////////////////////////////////////////////////////////////
 
+template<typename TEdges, typename TSpec, typename TVertexDescriptor>
+inline void
+_createVertices(Graph<TEdges, TSpec>& g,
+				TVertexDescriptor const maxId) 
+{
+		// Create missing vertices
+		while (maxId >= getIdUpperBound(g.data_id_managerV))
+		{
+			addVertex(g);
+		}
+}
 
 //////////////////////////////////////////////////////////////////////////////
-// Generic Graph Functions
-//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.addEdges:
+..cat:Graph
+..summary:Shortcut to add multiple edges at once.
+Creates vertices implicitly.
+..signature:addEdge(g, edges, size)
+..param.g:A graph.
+...type:Class.Graph
+..param.edges:An array of vertex descriptors. It is assumed that the
+edges are stored in the following way: Source1, Target1, Source2, Target2, Source3, ...
+...type:Metafunction.VertexDescriptor
+..param.size:Size of the array. Must be a multiple of 2.
+...type:Metafunction.Size
+..returns:void
+..see:Function.addEdge
+*/
 template<typename TEdges, typename TSpec, typename TEdgeArray, typename TSize>
 inline void
 addEdges(Graph<TEdges, TSpec>& dest,
@@ -258,17 +325,8 @@ addEdges(Graph<TEdges, TSpec>& dest,
 	}
 }
 
-template<typename TEdges, typename TSpec, typename TVertexDescriptor>
-inline void
-_createVertices(Graph<TEdges, TSpec>& g,
-				TVertexDescriptor const maxId) 
-{
-		// Create missing vertices
-		while (maxId >= getIdUpperBound(g.data_id_managerV))
-		{
-			addVertex(g);
-		}
-}
+
+//////////////////////////////////////////////////////////////////////////////
 
 template <typename TStream, typename TEdges, typename TSpec>
 inline TStream &

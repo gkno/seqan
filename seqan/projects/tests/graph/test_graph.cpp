@@ -730,15 +730,6 @@ void Test_Automaton() {
 	// If no map is specified it is assumed that an edge cargo exists!!!
 	succ = getSuccessor(automaton,succ,'2');
 	SEQAN_TASSERT(succ == 1)
-	// Go backwards
-	VertexDescriptorType pred;
-	pred = getPredecessor(automaton,succ,'3');
-	SEQAN_TASSERT(pred == 1)
-	pred = getPredecessor(automaton,pred,'8');
-	SEQAN_TASSERT(pred == 5)
-	// If no map is specified it is assumed that an edge cargo exists!!!
-	pred = getPredecessor(automaton,pred,'5');
-	SEQAN_TASSERT(pred == 2)
 
 	// Now using shortcuts
 	succ = parseString(automaton,rootVertex,"7262");
@@ -841,10 +832,7 @@ void Test_WordGraph() {
 	SEQAN_TASSERT(degree(g, 0) == 2)
 	SEQAN_TASSERT(getSuccessor(g, 0, "g") == 5)
 	SEQAN_TASSERT(getSuccessor(g, 0, String<Dna>("ag")) == 3)  // The whole edge label or just the first letter
-	SEQAN_TASSERT(getSuccessor(g, 0, "a") == _get_nil<TVertexDescriptor>())
-	SEQAN_TASSERT(getPredecessor(g, 3, "a") == _get_nil<TVertexDescriptor>())
-	SEQAN_TASSERT(getPredecessor(g, 3, "ag") == 0)
-	SEQAN_TASSERT(getPredecessor(g, 5, 'g') == 0)
+	SEQAN_TASSERT(getSuccessor(g, 0, "a") == getNil<TVertexDescriptor>())
 	addVertex(g);
 	addVertex(g);
 	addEdge(g,3,1,"aggg");

@@ -105,7 +105,7 @@ _createAcTrie(Pattern<TNeedle, AhoCorasick> & me)
 	typedef Graph<Automaton<TAlphabet> > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
-	TVertexDescriptor nilVal = _get_nil<TVertexDescriptor>();
+	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
 
 	// Create regular trie
 	createTrie(me.data_graph,me.data_terminalStateMap, host(me));
@@ -259,7 +259,7 @@ inline bool find(TFinder & finder, Pattern<TNeedle, AhoCorasick> & me) {
 
 
 	TVertexDescriptor current = me.data_lastState;
-	TVertexDescriptor nilVal = _get_nil<TVertexDescriptor>();
+	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
 	while (!atEnd(finder)) {
 		while ((getSuccessor(me.data_graph, current, *finder) == nilVal) &&
 			(getProperty(me.data_supplyMap, current) != nilVal))
