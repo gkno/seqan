@@ -7,9 +7,6 @@ namespace SEQAN_NAMESPACE_MAIN
 //	Graph - EdgeStumpA
 //////////////////////////////////////////////////////////////////////////////
 
-// Default Automaton Edge: No cargo but edge id
-template<typename TCargo = void, typename TSpec = Default>
-class EdgeStumpA;
 
 /**
 .Class.EdgeStumpA:

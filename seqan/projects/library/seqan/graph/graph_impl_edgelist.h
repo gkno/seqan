@@ -664,9 +664,8 @@ write(TFile & target,
 }
 
 
-
+/*
 //////////////////////////////////////////////////////////////////////////////
-// ToDo???
 // Replaced by automaton
 //////////////////////////////////////////////////////////////////////////////
 template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TVertexDescriptor, typename TChar>
@@ -786,6 +785,7 @@ parseString(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const& g,
 	SEQAN_CHECKPOINT
 	return parseString(g,vertex,chars,chars+length(chars));
 }
+*/
 
 }// namespace SEQAN_NAMESPACE_MAIN
 

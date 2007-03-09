@@ -205,9 +205,10 @@ void DagShortestPath() {
 	int weights[] =             {3,   5,   6,   2,   2,   4,   7,   1,   -1,  -2};
 	
 	//Create the graph
-	String<int> weightMap;
 	TGraph g;
-	addEdges(g, edges, numEdges,weightMap, weights);
+	addEdges(g, edges, numEdges);
+	String<int> weightMap;
+	initEdgeMap(g,weightMap, weights);
 	std::cout << g << ::std::endl;
 
 
@@ -248,9 +249,10 @@ void BellmanFord() {
 	unsigned int weights[] =    {10,  5,   1,   2,   4,   3,   9,   2,   7,   6};
 
 	//Create the graph
-	String<unsigned int> weightMap;
 	TGraph g;
-	addEdges(g, edges, numEdges,weightMap, weights);
+	addEdges(g, edges, numEdges);
+	String<unsigned int> weightMap;
+	initEdgeMap(g,weightMap, weights);
 	std::cout << g << ::std::endl;
 
 	// Out parameters of Bellman-Ford: Predecessor map and distance map
@@ -291,9 +293,10 @@ void Dijkstra() {
 	unsigned int weights[] =    {10,  5,   1,   2,   4,   3,   9,   2,   7,   6};
 
 	//Create the graph
-	String<unsigned int> weightMap;
 	TGraph g;
-	addEdges(g, edges, numEdges,weightMap, weights);
+	addEdges(g, edges, numEdges);
+	String<unsigned int> weightMap;
+	initEdgeMap(g,weightMap, weights);
 	std::cout << g << ::std::endl;
 
 	// Out parameters of Dijkstra: Predecessor map and distance map
@@ -345,7 +348,8 @@ void DijkstraInternalMap() {
 	// (3) Internal Map using raw pointers to members
 	//unsigned int TEdgeCargo:: * intMap = &TEdgeCargo::member;
 	TGraph g;
-	addEdges(g, edges, numEdges,intMap, weights);
+	addEdges(g, edges, numEdges);
+	initEdgeMap(g,intMap, weights);
 	std::cout << g << ::std::endl;
 
 	// Out parameters of Dijkstra: Predecessor map and distance map
@@ -384,9 +388,10 @@ void AllPairsShortestPath() {
 	int weights[] =    {3,   8,   -4,  1,   7,   4,   2,   -5,  6};
 
 	//Create the graph
-	String<int> weightMap;
 	TGraph g;
-	addEdges(g, edges, numEdges,weightMap, weights);
+	addEdges(g, edges, numEdges);
+	String<int> weightMap;
+	initEdgeMap(g,weightMap, weights);
 	std::cout << g << ::std::endl;
 
 	// Out parameter
@@ -425,9 +430,10 @@ void FloydWarshall() {
 	int weights[] =    {3,   8,   -4,  1,   7,   4,   2,   -5,  6};
 
 	//Create the graph
-	String<int> weightMap;
 	TGraph g;
-	addEdges(g,edges, numEdges,weightMap, weights);
+	addEdges(g,edges, numEdges);
+	String<int> weightMap;
+	initEdgeMap(g,weightMap, weights);
 	std::cout << g << ::std::endl;
 
 	// Out parameter

@@ -99,6 +99,22 @@ struct EdgeDescriptor<Graph<TEdges, TSpec> const>
 	typedef typename EdgeType<Graph<TEdges, TSpec> const>::Type* Type;
 };
 
+//////////////////////////////////////////////////////////////////////////////
+
+///.Metafunction.VertexDescriptor.param.T.type:Class.Graph
+
+template<typename TEdges, typename TSpec>
+struct VertexDescriptor<Graph<TEdges, TSpec> > 
+{
+	typedef typename Id<Graph<TEdges, TSpec> >::Type Type;
+};
+
+template<typename TEdges, typename TSpec>
+struct VertexDescriptor<Graph<TEdges, TSpec> const>
+{
+	typedef typename Id<Graph<TEdges, TSpec> >::Type Type;
+};
+
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -239,66 +255,6 @@ addEdges(Graph<TEdges, TSpec>& dest,
 		SEQAN_ASSERT(idInUse(dest.data_id_managerV, source) == true)
 		SEQAN_ASSERT(idInUse(dest.data_id_managerV, target) == true)
 		addEdge(dest, source, target);
-	}
-}
-
-template<typename TEdges, typename TSpec, typename TEdgeArray, typename TSize, typename TPropertyMap, typename TProperties>
-inline void
-addEdges(Graph<TEdges, TSpec>& dest,
-		 TEdgeArray const edges,
-		 TSize const size,
-		 TPropertyMap& pm,
-		 TProperties const& prop)
-{
-	SEQAN_CHECKPOINT
-	typedef Graph<TEdges, TSpec> TGraph;
-	typedef typename Id<TGraph>::Type TIdType;
-	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
-	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	for(TSize i=0;i<size;++i) {
-		TVertexDescriptor source = edges[2*i];
-		TVertexDescriptor target = edges[2*i+1];
-		// Create missing vertices
-		if (source>target) _createVertices(dest,source);
-		else _createVertices(dest,target);
-		// Add edge
-		SEQAN_ASSERT(idInUse(dest.data_id_managerV, source) == true)
-		SEQAN_ASSERT(idInUse(dest.data_id_managerV, target) == true)
-		TEdgeDescriptor e = addEdge(dest, source, target);
-		initEdgeMap(dest, pm);
-		assignProperty(pm,e,prop[i]);
-	}
-}
-
-template<typename TEdges, typename TSpec, typename TEdgeArray, typename TSize, typename TPropertyMap1, typename TProperties1, typename TPropertyMap2, typename TProperties2>
-inline void
-addEdges(Graph<TEdges, TSpec>& dest,
-		 TEdgeArray const edges,
-		 TSize const size,
-		 TPropertyMap1& pm1,
-		 TProperties1 const& prop1,
-		 TPropertyMap2& pm2,
-		 TProperties2 const& prop2)
-{
-	SEQAN_CHECKPOINT
-	typedef Graph<TEdges, TSpec> TGraph;
-	typedef typename Id<TGraph>::Type TIdType;
-	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
-	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	for(TSize i=0;i<size;++i) {
-		TVertexDescriptor source = edges[2*i];
-		TVertexDescriptor target = edges[2*i+1];
-		// Create missing vertices
-		if (source>target) _createVertices(dest,source);
-		else _createVertices(dest,target);
-		// Add edge
-		SEQAN_ASSERT(idInUse(dest.data_id_managerV, source) == true)
-		SEQAN_ASSERT(idInUse(dest.data_id_managerV, target) == true)
-		TEdgeDescriptor e = addEdge(dest, source, target);
-		initEdgeMap(dest, pm1);
-		assignProperty(pm1,e,prop1[i]);
-		initEdgeMap(dest, pm2);
-		assignProperty(pm2,e,prop2[i]);
 	}
 }
 

@@ -30,9 +30,9 @@
 #include <seqan/graph/graph_edgestumpt.h>	// Tree
 #include <seqan/graph/graph_edgestumpa.h>	// Automaton
 
-// Graph interface and property maps
+// Graph interface
 #include <seqan/graph/graph_interface.h>	// Basic graph stuff
-#include <seqan/graph/graph_property.h>		// Property maps
+
 
 // Graph types
 #include <seqan/graph/graph_impl_edgelist.h>	// Directed Graph
@@ -49,6 +49,9 @@
 #include <seqan/graph/graph_edgeiterator.h>
 #include <seqan/graph/graph_bfsiterator.h>
 #include <seqan/graph/graph_dfsiterator.h>
+
+// Graph property maps
+#include <seqan/graph/graph_property.h>		// Property maps
 
 // Special automaton: Oracle
 #include <seqan/graph/graph_impl_oracle.h>

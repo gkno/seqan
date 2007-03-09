@@ -34,12 +34,14 @@ It is indexed via VertexDescriptors or EdgeDescriptors.
 .Function.initVertexMap:
 ..cat:Graph
 ..summary:Initializes a vertex map. 
-That is, the String is resized to hold information for all vertices.
 ..signature:initVertexMap(g, pm)
+..signature:initVertexMap(g, pm, prop)
 ..param.g:A Graph.
 ...type:Class.Graph
 ..param.pm:An External Property Map.
 ...type:Class.String
+..param.prop:An optional array with properties that are to be assigned to the items in the property map.
+...remarks:For every vertex descriptor there must be an entry in the array.
 ..returns:void
 ..see:Function.initEdgeMap
 */
@@ -58,51 +60,17 @@ initVertexMap(Graph<TEdges, TSpec> const& g,
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.initVertexMap:
-..cat:Graph
-..summary:Array initializer for a vertex map. 
-..signature:initVertexMap(g, pm, prop)
-..param.g:A Graph.
-...type:Class.Graph
-..param.pm:An External Property Map.
-...type:Class.String
-..param.prop:An array with properties that are to be assigned to the items in the property map.
-...remarks:The length of the property map must match the length of the array.
-..returns:void
-..see:Function.initEdgeMap
-*/
-
-///.Function.initVertexMap.param.pm.type:Class.ExternalMap
-
-template<typename TEdges, typename TSpec, typename TPropertyMap, typename TProperties>
-inline void
-initVertexMap(Graph<TEdges, TSpec> const& g,
-			  TPropertyMap& pm,
-			  TProperties const& prop)
-{
-	SEQAN_CHECKPOINT
-	initVertexMap(g,pm);
-	unsigned int count = 0;
-	for(unsigned int i=0;i<length(pm);++i) {
-		if (idInUse(g.data_id_managerV,i)) {
-			assignProperty(pm,i,prop[count]);
-			++count;
-		}
-	}
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-/**
 .Function.initEdgeMap:
 ..cat:Graph
 ..summary:Initializes an edge map
-That is, the String is resized to hold information for all edges.
 ..signature:initEdgeMap(g, pm)
+..signature:initEdgeMap(g, pm, prop)
 ..param.g:A Graph.
 ...type:Class.Graph
 ..param.pm:An External Property Map.
 ...type:Class.String
+..param.prop:An optional array with properties that are to be assigned to the items in the property map.
+...remarks:For every edge id there must be an entry in the array.
 ..returns:void
 ..see:Function.initVertexMap
 */
@@ -117,7 +85,6 @@ initEdgeMap(Graph<TEdges, TSpec> const& g,
 	SEQAN_CHECKPOINT
 	resize(pm, getIdUpperBound(g.data_id_managerE), Generous());
 }
-
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -315,10 +282,6 @@ initEdgeMap(Graph<TEdges, TSpec>& g,
 			InternalMap<TContainer, MemberId>& pm)
 {
 }
-
-
-//////////////////////////////////////////////////////////////////////////////
-
 
 /**
 .Function.assignProperty:
@@ -853,6 +816,49 @@ getProperty(TValue TClass:: * const ptr_to_member,
 	SEQAN_CHECKPOINT
 	return (getCargo(e)).*ptr_to_member; 
 } 
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+// Init functions for all Maps - FUNCTIONS
+//////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TEdges, typename TSpec, typename TPropertyMap, typename TProperties>
+inline void
+initVertexMap(Graph<TEdges, TSpec> const& g,
+			  TPropertyMap& pm,
+			  TProperties const& prop)
+{
+	SEQAN_CHECKPOINT
+	initVertexMap(g,pm);
+	typedef Graph<TEdges, TSpec> TGraph;
+	typedef typename Iterator<TGraph, VertexIterator<> >::Type TVertexIterator;
+	TVertexIterator it(g);
+	for(;!atEnd(it);goNext(it)) {
+		assignProperty(pm,*it,prop[_getId(*it)]);
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TEdges, typename TSpec, typename TPropertyMap, typename TProperties>
+inline void
+initEdgeMap(Graph<TEdges, TSpec> const& g,
+			TPropertyMap& pm,
+			TProperties const& prop)
+{
+	SEQAN_CHECKPOINT
+	initEdgeMap(g,pm);
+	typedef Graph<TEdges, TSpec> TGraph;
+	typedef typename Iterator<TGraph, EdgeIterator<> >::Type TEdgeIterator;
+	TEdgeIterator it(g);
+	for(;!atEnd(it);goNext(it)) {
+		assignProperty(pm,*it,prop[_getId(*it)]);
+	}
+}
 
 }// namespace SEQAN_NAMESPACE_MAIN
 

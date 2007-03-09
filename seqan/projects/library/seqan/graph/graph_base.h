@@ -49,10 +49,6 @@ It is also used to attach properties to vertices.
 template<typename T>
 struct VertexDescriptor;
 
-template<typename TGraph>
-struct VertexDescriptor {
-	typedef typename Id<TGraph>::Type Type;
-};
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -137,6 +133,104 @@ typedef Tag<WithoutEdgeId_> const WithoutEdgeId;
 */
 struct EmptyMap_;
 typedef Tag<EmptyMap_> const EmptyMap;
+
+
+//////////////////////////////////////////////////////////////////////////////
+// Graph - Default edge stumps
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+
+// Default Edge Stump: No cargo but edge id
+template<typename TCargo = void, typename TSpec = Default>
+class EdgeStump;
+
+//////////////////////////////////////////////////////////////////////////////
+
+///.Metafunction.VertexDescriptor.param.T.type:Class.EdgeStump
+
+template<typename TCargo, typename TSpec>
+struct VertexDescriptor<EdgeStump<TCargo, TSpec> > 
+{
+	typedef typename Id<EdgeStump<TCargo, TSpec> >::Type Type;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TCargo, typename TSpec>
+struct VertexDescriptor<EdgeStump<TCargo, TSpec> const> 
+{
+	typedef typename Id<EdgeStump<TCargo, TSpec> >::Type Type;
+};
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+// Default Edge Stump Undirected: No cargo but edge id
+template<typename TCargo = void, typename TSpec = Default>
+class EdgeStumpU;
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+///.Metafunction.VertexDescriptor.param.T.type:Class.EdgeStumpU
+
+template<typename TCargo, typename TSpec>
+struct VertexDescriptor<EdgeStumpU<TCargo, TSpec> > 
+{
+	typedef typename Id<EdgeStumpU<TCargo, TSpec> >::Type Type;
+};
+
+template<typename TCargo, typename TSpec>
+struct VertexDescriptor<EdgeStumpU<TCargo, TSpec> const> 
+{
+	typedef typename Id<EdgeStumpU<TCargo, TSpec> >::Type Type;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
+// Default Edge Stump Tree: No cargo but edge id
+template<typename TCargo = void, typename TSpec = Default>
+class EdgeStumpT;
+
+//////////////////////////////////////////////////////////////////////////////
+
+///.Metafunction.VertexDescriptor.param.T.type:Class.EdgeStumpT
+
+template<typename TCargo, typename TSpec>
+struct VertexDescriptor<EdgeStumpT<TCargo, TSpec> > 
+{
+	typedef typename Id<EdgeStumpT<TCargo, TSpec> >::Type Type;
+};
+
+template<typename TCargo, typename TSpec>
+struct VertexDescriptor<EdgeStumpT<TCargo, TSpec> const> 
+{
+	typedef typename Id<EdgeStumpT<TCargo, TSpec> >::Type Type;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
+// Default Automaton Edge: No cargo but edge id
+template<typename TCargo = void, typename TSpec = Default>
+class EdgeStumpA;
+
+//////////////////////////////////////////////////////////////////////////////
+
+///.Metafunction.VertexDescriptor.param.T.type:Class.EdgeStumpA
+
+template<typename TCargo, typename TSpec>
+struct VertexDescriptor<EdgeStumpA<TCargo, TSpec> > 
+{
+	typedef typename Id<EdgeStumpA<TCargo, TSpec> >::Type Type;
+};
+
+template<typename TCargo, typename TSpec>
+struct VertexDescriptor<EdgeStumpA<TCargo, TSpec> const> 
+{
+	typedef typename Id<EdgeStumpA<TCargo, TSpec> >::Type Type;
+};
+
 
 }// namespace SEQAN_NAMESPACE_MAIN
 

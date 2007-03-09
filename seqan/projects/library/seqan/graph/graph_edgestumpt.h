@@ -7,11 +7,6 @@ namespace SEQAN_NAMESPACE_MAIN
 //	Graph - EdgeStumpT
 //////////////////////////////////////////////////////////////////////////////
 
-// Default Edge Stump Tree: No cargo but edge id
-template<typename TCargo = void, typename TSpec = Default>
-class EdgeStumpT;
-
-
 /**
 .Class.EdgeStumpT:
 ..cat:Graph
@@ -110,6 +105,7 @@ struct Spec<EdgeStumpT<TCargo, TSpec> const>
 {
 	typedef TSpec Type;
 };
+
 
 //////////////////////////////////////////////////////////////////////////////
 // FUNCTIONS

@@ -1526,64 +1526,6 @@ void Test_Graph() {
 	removeEdge(g3,0,4);
 	removeEdge(g3,0,2);
 	SEQAN_TASSERT(numEdges(g3) == 2)
-
-//____________________________________________________________________________
-// Automaton
-	typedef char CargoType;
-	typedef EdgeList<CargoType> EdgeType;
-	typedef VertexDescriptor<Graph<EdgeType> >::Type VertexDescriptorType;
-	typedef EdgeDescriptor<Graph<EdgeType> >::Type EdgeDescriptorType;
-	typedef Size<Graph<EdgeType> >::Type TSize;
-
-	//Create the graph
-	Graph<EdgeType> automaton;
-	VertexDescriptorType rootVertex = addVertex(automaton); // A = 0
-	addVertex(automaton); // B = 1
-	addVertex(automaton); // C = 2
-	addVertex(automaton); // D = 3
-	addVertex(automaton); // E = 4
-	addVertex(automaton); // F = 5
-	addEdge(automaton,0,1,'2');
-	addEdge(automaton,1,0,'1');
-	addEdge(automaton,4,0,'6');
-	addEdge(automaton,0,3,'7');
-	addEdge(automaton,1,1,'3');
-	addEdge(automaton,1,2,'4');
-	addEdge(automaton,5,1,'8');
-	addEdge(automaton,2,5,'5');
-	addEdge(automaton,3,4,'2');
-	addEdge(automaton,5,3,'7');
-
-	InternalMap<char> eMap;
-	initEdgeMap(automaton,eMap);
-	VertexDescriptorType succ;
-	succ = getSuccessor(automaton,rootVertex,eMap,'7');
-	SEQAN_TASSERT(succ == 3)
-	// Throws an error in debug mode because edge does not exist
-	// succ = getSuccessor(automaton,rootVertex,eMap,'6');
-	succ = getSuccessor(automaton,succ,eMap,'2');
-	SEQAN_TASSERT(succ == 4)
-	succ = getSuccessor(automaton,succ,eMap,'6');
-	SEQAN_TASSERT(succ == 0)
-	// If no map is specified it is assumed that an edge cargo exists!!!
-	succ = getSuccessor(automaton,succ,'2');
-	SEQAN_TASSERT(succ == 1)
-	// Go backwards
-	VertexDescriptorType pred;
-	pred = getPredecessor(automaton,succ,eMap,'3');
-	SEQAN_TASSERT(pred == 1)
-	pred = getPredecessor(automaton,pred,eMap,'8');
-	SEQAN_TASSERT(pred == 5)
-	// If no map is specified it is assumed that an edge cargo exists!!!
-	pred = getPredecessor(automaton,pred,'5');
-	SEQAN_TASSERT(pred == 2)
-
-	// Now using shortcuts
-	succ = parseString(automaton,rootVertex,"7262");
-	SEQAN_TASSERT(succ == 1)
-	String<char> input("7262");
-	succ = parseString(automaton,rootVertex, input);
-	SEQAN_TASSERT(succ == 1)
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1679,8 +1621,9 @@ void Test_GraphExternalProperty() {
 	TVertexDescriptor edges[] = {0,1, 1,2};
 	TSize numEdges = 2;
 	std::string nameEd[] = {"ar", "ae"};
+	addEdges(g, edges, numEdges);
 	String<std::string> edMap;
-	addEdges(g, edges, numEdges, edMap, nameEd);
+	initEdgeMap(g, edMap, nameEd);
 	SEQAN_TASSERT(getProperty(edMap, 0) == "ar")
 	SEQAN_TASSERT(getProperty(edMap, 1) == "ae")
 }
@@ -2376,8 +2319,10 @@ void Test_DagShortestPath() {
 	
 	//Create the graph
 	Graph<> g;
+	addEdges(g,edges, numEdges);
+
 	String<int> weightMap;
-	addEdges(g,edges, numEdges,weightMap, weights);
+	initEdgeMap(g, weightMap, weights);
 
 	// Predecessor map and distance map
 	String<unsigned int> predMap;
@@ -2418,8 +2363,10 @@ void Test_BellmanFord() {
 
 	//Create the graph
 	Graph<> g;
+	addEdges(g,edges, numEdges);
+	
 	String<unsigned int> weightMap;
-	addEdges(g,edges, numEdges,weightMap, weights);
+	initEdgeMap(g,weightMap, weights);
 
 	// Out parameters of Bellman-Ford: Predecessor map and distance map
 	String<unsigned int> predMap;
@@ -2459,8 +2406,10 @@ void Test_Dijkstra() {
 
 	//Create the graph
 	Graph<> g;
+	addEdges(g,edges, numEdges);
+
 	String<unsigned int> weightMap;
-	addEdges(g,edges, numEdges, weightMap, weights);
+	initEdgeMap(g , weightMap, weights);
 
 	// Out parameters of Dijkstra: Predecessor map and distance map
 	String<unsigned int> predMap;
@@ -2499,8 +2448,10 @@ void Test_AllPairsShortestPath() {
 
 	//Create the graph
 	Graph<> g;
-	String<int> weightMap;
-	addEdges(g,edges, numEdges,weightMap, weights);
+	addEdges(g,edges, numEdges);
+	
+	String<int> weightMap;	
+	initEdgeMap(g,weightMap, weights);
 
 	// Out parameter
 	Matrix<int> distMat;
@@ -2580,8 +2531,10 @@ void Test_FloydWarshall() {
 
 	//Create the graph
 	Graph<> g;
-	String<int> weightMap;
-	addEdges(g,edges, numEdges,weightMap, weights);
+	addEdges(g,edges, numEdges);
+	
+	String<int> weightMap;	
+	initEdgeMap(g,weightMap, weights);
 
 	// Out parameter
 	Matrix<int> distMat;

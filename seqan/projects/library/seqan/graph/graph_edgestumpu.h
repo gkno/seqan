@@ -7,11 +7,6 @@ namespace SEQAN_NAMESPACE_MAIN
 //	Graph - EdgeStumpU
 //////////////////////////////////////////////////////////////////////////////
 
-// Default Edge Stump Undirected: No cargo but edge id
-template<typename TCargo = void, typename TSpec = Default>
-class EdgeStumpU;
-
-
 /**
 .Class.EdgeStumpU:
 ..cat:Graph
