@@ -1152,6 +1152,9 @@ void Test_GraphU() {
 	removeEdge(g3,0,4);
 	removeEdge(g3,0,2);
 	SEQAN_TASSERT(numEdges(g3) == 2)
+	removeInEdges(g3,1);
+	SEQAN_TASSERT(numEdges(g3) == 0)
+	
 
 //____________________________________________________________________________
 // Undirected graph iterators
@@ -1536,26 +1539,141 @@ void Test_Tree() {
 	SEQAN_TASSERT(rootV == 0)
 	SEQAN_TASSERT(isRoot(g, rootV) == true)
 	SEQAN_TASSERT(root(g) == rootV)
+	SEQAN_TASSERT(empty(g) == true)
 	TVertexDescriptor childC1 = addChild(g,rootV);
+	TEdgeDescriptor childC1e = findEdge(g, rootV, childC1);
+	SEQAN_TASSERT(targetVertex(g, childC1e) == childC1) // Target in a tree = child
+	SEQAN_TASSERT(sourceVertex(g, childC1e) == rootV)  // Source in a tree = parent
+	SEQAN_TASSERT(childVertex(g, childC1e) == childC1)  // Shortcuts
+	SEQAN_TASSERT(parentVertex(g, childC1e) == rootV)
+	SEQAN_TASSERT(empty(g) == false)
+	SEQAN_TASSERT(outDegree(g, rootV) == 1)
 	TVertexDescriptor childC2 = addChild(g,rootV);
-	TVertexDescriptor childC3 = addChild(g,rootV);	
+	TVertexDescriptor childC3 = addChild(g,rootV);
+	SEQAN_TASSERT(outDegree(g, rootV) == 3)
 	SEQAN_TASSERT(childC1 == 1)
 	SEQAN_TASSERT(childC2 == 2)
 	SEQAN_TASSERT(childC3 == 3)
-/*
 	TVertexDescriptor childC2C1 = addChild(g,childC2);
 	TVertexDescriptor childC2C1C1 = addChild(g,childC2C1);
 	TVertexDescriptor childC2C1C1C1 = addChild(g,childC2C1C1);
 	TVertexDescriptor childC2C1C1C2 = addChild(g,childC2C1C1);
 	TVertexDescriptor childC4 = addChild(g,rootV);
+	SEQAN_TASSERT(inDegree(g, childC2C1) == 1) 
+	SEQAN_TASSERT(outDegree(g, childC2C1) == 1)
+	SEQAN_TASSERT(degree(g, childC2C1) == 2)
 	SEQAN_TASSERT(numEdges(g) == 8)
 	SEQAN_TASSERT(numVertices(g) == 9)
+	TEdgeDescriptor childC2C1C1e = findEdge(g, childC2C1C1, childC2C1);
+	SEQAN_TASSERT(childVertex(g, childC2C1C1e) == childC2C1C1)  
+	SEQAN_TASSERT(parentVertex(g, childC2C1C1e) == childC2C1)
 	removeChild(g, rootV, childC2);
 	SEQAN_TASSERT(numEdges(g) == 3)
 	SEQAN_TASSERT(numVertices(g) == 4)
-	
-	std::cout << g << std::endl;
-*/
+	SEQAN_TASSERT(empty(g) == false)
+	SEQAN_TASSERT(inDegree(g, rootV) == 0) 
+	SEQAN_TASSERT(outDegree(g, rootV) == 3)
+	SEQAN_TASSERT(degree(g, rootV) == 3)
+	childC2 = addChild(g,rootV);
+	childC2C1 = addChild(g,childC2);
+	childC2C1C1 = addChild(g,childC2C1);
+	childC2C1C1C1 = addChild(g,childC2C1C1);
+	childC2C1C1C2 = addChild(g,childC2C1C1);
+	removeAllChildren(g, rootV);
+	SEQAN_TASSERT(empty(g) == true)
+	SEQAN_TASSERT(numEdges(g) == 0)
+	SEQAN_TASSERT(numVertices(g) == 1) // Just the root
+	SEQAN_TASSERT(inDegree(g, rootV) == 0) 
+	SEQAN_TASSERT(outDegree(g, rootV) == 0)
+	SEQAN_TASSERT(degree(g, rootV) == 0)
+	addChild(g,rootV);addChild(g,rootV);
+	SEQAN_TASSERT(empty(g) == false)
+	SEQAN_TASSERT(numEdges(g) == 2)
+	clearEdges(g);
+	SEQAN_TASSERT(empty(g) == true)
+	SEQAN_TASSERT(numEdges(g) == 0)
+	addChild(g,rootV);addChild(g,rootV);
+	clearVertices(g);
+	SEQAN_TASSERT(empty(g) == true)
+	SEQAN_TASSERT(numEdges(g) == 0)
+	childC1 = addChild(g,rootV);
+	SEQAN_TASSERT(empty(g) == false)
+	SEQAN_TASSERT(numEdges(g) == 1)
+	childC3 = addChild(g,rootV);
+	childC2 = addChild(g,rootV);
+	childC2C1 = addChild(g,childC2);
+	childC2C1C1 = addChild(g,childC2C1);
+	childC2C1C1C1 = addChild(g,childC2C1C1);
+	childC2C1C1C2 = addChild(g,childC2C1C1);
+	childC4 = addChild(g,rootV);
+	Matrix<unsigned int> mat; 	// Adjacency matrix
+	getAdjacencyMatrix(g, mat);
+	unsigned int len = length(mat, 0);
+	SEQAN_TASSERT(getValue(mat, 0*len+8) == 1)
+	SEQAN_TASSERT(getValue(mat, 8*len+0) == 0)
+	SEQAN_TASSERT(getValue(mat, 3*len+0) == 0)
+	SEQAN_TASSERT(getValue(mat, 0*len+3) == 1)
+	SEQAN_TASSERT(getValue(mat, 0*len+4) == 0)
+	SEQAN_TASSERT(numEdges(g) == 8)
+	SEQAN_TASSERT(numVertices(g) == 9)
+	transpose(g); 
+	SEQAN_TASSERT(numEdges(g) == 8)
+	SEQAN_TASSERT(numVertices(g) == 9)
+	TTree g_copy(g);
+	SEQAN_TASSERT(numEdges(g) == 8)
+	SEQAN_TASSERT(numVertices(g) == 9)
+	clear(g_copy);
+	g_copy = g;
+	SEQAN_TASSERT(numEdges(g) == 8)
+	SEQAN_TASSERT(numVertices(g) == 9)
+	transpose(g,g_copy);  
+	SEQAN_TASSERT(numEdges(g) == 8)
+	SEQAN_TASSERT(numVertices(g) == 9)
+	removeOutEdges(g,childC2C1C1);
+	SEQAN_TASSERT(numEdges(g) == 6)
+	SEQAN_TASSERT(numVertices(g) == 7)
+	removeVertex(g,childC2C1);
+	SEQAN_TASSERT(numEdges(g) == 4)
+	SEQAN_TASSERT(numVertices(g) == 5)
+	removeInEdges(g,childC2);
+	SEQAN_TASSERT(numEdges(g) == 3)
+	SEQAN_TASSERT(numVertices(g) == 4)
+	removeOutEdges(g,rootV);
+	SEQAN_TASSERT(empty(g) == true)
+	addVertex(g);
+	TEdgeDescriptor my_edge = addEdge(g,0,1);
+	removeEdge(g,my_edge);
+
+	typedef Pair<char, int> TPair;
+	typedef EdgeListT<TPair> TEdges;
+	typedef Graph<TEdges> TCargoGraph;
+	typedef VertexDescriptor<TCargoGraph>::Type TVertexDescriptor2;
+	typedef EdgeDescriptor<TCargoGraph>::Type TEdgeDescriptor2;
+
+	TCargoGraph g2;
+	SEQAN_TASSERT(numVertices(g2) == 1)
+	SEQAN_TASSERT(numEdges(g2) == 0)
+	TVertexDescriptor2 ver1 = addChild(g2, getRoot(g2), TPair('a',3));
+	SEQAN_TASSERT(ver1 == 1)
+	SEQAN_TASSERT(numVertices(g2) == 2)
+	TVertexDescriptor2 ver2 = addChild(g2, getRoot(g2));
+	SEQAN_TASSERT(ver2 == 2)
+	SEQAN_TASSERT(numVertices(g2) == 3)
+	TEdgeDescriptor2 ed1 =findEdge(g2,getRoot(g2),ver1);
+	TEdgeDescriptor2 ed2 =findEdge(g2,getRoot(g2),ver2);
+	SEQAN_TASSERT((getCargo(ed1)).i1 == 'a')
+	SEQAN_TASSERT((getCargo(ed1)).i2 == 3)
+	SEQAN_TASSERT(targetVertex(g2, ed1) == ver1)
+	SEQAN_TASSERT(sourceVertex(g2, ed1) == getRoot(g2))
+	SEQAN_TASSERT(numEdges(g2) == 2)
+	assignCargo(ed2, TPair('b',4));
+	SEQAN_TASSERT((getCargo(ed1)).i1 == 'a')
+	SEQAN_TASSERT((getCargo(ed1)).i2 == 3)
+	SEQAN_TASSERT((getCargo(ed2)).i1 == 'b')
+	SEQAN_TASSERT((getCargo(ed2)).i2 == 4)
+	cargo(ed1) = TPair('c',1);
+	SEQAN_TASSERT((getCargo(ed1)).i1 == 'c')
+	SEQAN_TASSERT((getCargo(ed1)).i2 == 1)
 }
 
 //////////////////////////////////////////////////////////////////////////////

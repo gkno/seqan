@@ -708,14 +708,20 @@ isRoot(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> const& g,
 /**
 .Function.findEdge:
 ..cat:Spec.Automaton
-..summary:Given a vertex and a label findEdge finds the corresponding edge.
+..cat:Spec.Tree
+..summary:Finds an edge. 
+In an automaton an edge is uniquely defined by a vertex and a label.
+In a tree two adjacent vertices uniquely define an edge.
 ..signature:findEdge(g, v, c)
+..signature:findEdge(g, v, w)
 ..param.g:A graph.
 ...type:Class.Graph
 ..param.v:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
 ..param.c:An edge label.
 ...type:Metafunction.Alphabet
+..param.w:A vertex descriptor.
+...type:Metafunction.VertexDescriptor
 ..returns:An edge descriptor
 ...type:Metafunction.EdgeDescriptor
 */

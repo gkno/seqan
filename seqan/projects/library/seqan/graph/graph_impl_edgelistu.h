@@ -386,13 +386,13 @@ removeEdge(Graph<EdgeListU<TCargo, TEdgeSpec>, TSpec>& g,
 	TEdgeStumpU* predSource = 0;
 	TEdgeStumpU* current = getValue(g.data_vertex, source);
 	while(current != (TEdgeStumpU*) 0) {
-		TVertexDescriptor adjV = getTarget(current);
+		TVertexDescriptor adjV = (TVertexDescriptor) getTarget(current);
 		if (adjV != source) {
 			if ( adjV == target) break;
 			predSource = current;
 			current = current->data_next_source;
 		} else {
-			adjV = getSource(current);
+			adjV = (TVertexDescriptor) getSource(current);
 			if ( adjV == target) break;
 			predSource = current;
 			current = current->data_next_target;
@@ -406,13 +406,13 @@ removeEdge(Graph<EdgeListU<TCargo, TEdgeSpec>, TSpec>& g,
 	TEdgeStumpU* predTarget = 0;
 	current = getValue(g.data_vertex, target);
 	while(current != (TEdgeStumpU*) 0) {
-		TVertexDescriptor adjV = getTarget(current);
+		TVertexDescriptor adjV = (TVertexDescriptor) getTarget(current);
 		if (adjV != target) {
 			if ( adjV == source) break;
 			predTarget = current;
 			current = current->data_next_source;
 		} else {
-			adjV = getSource(current);
+			adjV = (TVertexDescriptor) getSource(current);
 			if ( adjV == source) break;
 			predTarget = current;
 			current = current->data_next_target;
@@ -480,8 +480,8 @@ removeOutEdges(Graph<EdgeListU<TCargo, TEdgeSpec>, TSpec>& g,
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	TEdgeDescriptor eD = getValue(g.data_vertex, v);
 	while(eD != (TEdgeStumpU*) 0) {
-		TVertexDescriptor target = getTarget(eD);
-		if (v == target) target = getSource(eD);
+		TVertexDescriptor target = (TVertexDescriptor) getTarget(eD);
+		if (v == target) target = (TVertexDescriptor) getSource(eD);
 		removeEdge(g,v,target);
 		eD = getValue(g.data_vertex, v);
 	}

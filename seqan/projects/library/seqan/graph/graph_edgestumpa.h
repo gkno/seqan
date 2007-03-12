@@ -374,7 +374,6 @@ template<typename TCargo, typename TSpec>
 inline typename Id<EdgeStumpA<TCargo, TSpec> const>::Type
 _getId(EdgeStumpA<TCargo, TSpec> const* es) 
 {
-	SEQAN_CHECKPOINT
 	return es->data_id;
 }
 

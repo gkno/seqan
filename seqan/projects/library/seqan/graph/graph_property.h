@@ -288,7 +288,6 @@ inline void
 initEdgeMap(Graph<TEdges, TSpec> const& g,
 			InternalMap<TContainer, MemberId>& pm)
 {
-	SEQAN_CHECKPOINT
 }
 
 //////////////////////////////////////////////////////////////////////////////
