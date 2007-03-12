@@ -1052,7 +1052,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 		TIndex const &index = container(it);
 		
 		return (getSeqOffset(pos, stringSetLimits(index)) + repLength(it) 
-			== sequenceLength(getSeqNo(pos, stringSetLimits(index)), container(it)));
+			== sequenceLength(getSeqNo(pos, stringSetLimits(index)), index));
 	}
 
 /**
