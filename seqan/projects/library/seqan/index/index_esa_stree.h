@@ -1049,10 +1049,12 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 	inline bool isRightTerminal(Iter<TIndex, VSTree<TSpec> > const &it) {
 		// do we reach a leaf in a suffix tree with trailing '$'
 		typename SAValue<TIndex>::Type pos = getOccurence(it);
+
 		TIndex const &index = container(it);
+		typename StringSetLimits<typename Host<TIndex>::Type const>::Type &limits = stringSetLimits(index);
 		
-		return (getSeqOffset(pos, stringSetLimits(index)) + repLength(it) 
-			== sequenceLength(getSeqNo(pos, stringSetLimits(index)), index));
+		return (getSeqOffset(pos, limits) + repLength(it) 
+			== sequenceLength(getSeqNo(pos, limits), index));
 	}
 
 /**
