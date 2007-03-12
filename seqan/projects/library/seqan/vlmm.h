@@ -44,7 +44,7 @@ public:
 
 	// use constructor for a relative threshold
 	Iter(TIndex &__index,float threshold):
-		Base(__index),RelativeThreshold(threshold),AbsoluteThreshold(0),Down(false),Up(0){}
+		Base(__index),AbsoluteThreshold(0),RelativeThreshold(threshold),Down(false),Up(0){}
 
 	Iter(Iter const &_origin):
 		Base(_origin) {}
@@ -96,7 +96,7 @@ inline bool goUp(Iter< TIndex, VSTree< TopDown< ParentLinks<ConstrainedTraversal
 template < typename TText, typename TSpec >
 inline void goNext(Iter< Index<TText, TSpec>, VSTree< TopDown< ParentLinks<ConstrainedTraversal<Absolute> > > > > &it) {
 	unsigned walk_down=0,not_finished = 1;
-	//cout << "do the iterator with AbsoluteeThreshol:"<<it.AbsoluteThreshold<<endl;
+	//std::cout << "do the iterator with AbsoluteeThreshol:"<<it.AbsoluteThreshold<<std::endl;
 	// resembles the construction of the VLMM-core of the context tree
 	// only takes nodes that occur at least AbsoluteThreshold times
 	// note: that we do not enforce that the tree is balanced
@@ -291,7 +291,7 @@ addVertex(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGraphSp
 	appendValue(g.data_marked, false);
 	resize(g.data_probability_vector,num,Generous());
 	//append Alphabetsize many 0s
-	for (int i = 0;i<table_length;++i)	
+	for (unsigned int i = 0;i<table_length;++i)	
 		append(g.data_probability_vector[num-1],0);
 		
 
@@ -331,7 +331,7 @@ if (vd == length(g.data_vertex)-1) {
 	unsigned int Length = length(g.data_vertex);
 	resize(g.data_probability_vector,Length,Generous());
 	//append Alphabetsize many 0s
-	for (int i = 0;i<table_length;++i)	
+	for (unsigned int i = 0;i<table_length;++i)	
 		append(g.data_probability_vector[Length-1],0);
 }
 
@@ -349,7 +349,6 @@ initMaps(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGraphSpe
 	typedef Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGraphSpec> TGraph;
 	typedef typename Size<TGraph>::Type TSize;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	TSize table_length = ValueSize<TAlphabet>::VALUE;
 	typedef typename EdgeType<TGraph >::Type TEdge;
 	unsigned num = numVertices(g);
 	resize(g.data_reverse_suffix_link,num);
@@ -492,7 +491,7 @@ initProbabilityVector(Iter<TIndex, VSTree< TopDown< ParentLinks<ConstrainedTrave
 	goDown(childs);
 	TAlphabet startCharacter;
 	unsigned fatherLength = repLength(it);
-	//cout <<"Cilds:" << representative(childs) << endl;
+	//std::cout <<"Cilds:" << representative(childs) << std::endl;
 	if( repLength(childs) > fatherLength){
 
 		startCharacter = value(representative(childs),fatherLength);
@@ -500,7 +499,7 @@ initProbabilityVector(Iter<TIndex, VSTree< TopDown< ParentLinks<ConstrainedTrave
 	}
 		while(goRight(childs)){
 
-			// cout << representative(childs) << endl;
+			// std::cout << representative(childs) << std::endl;
 			if(repLength(childs) > fatherLength){
 			startCharacter = value(representative(childs),fatherLength);
 			setProbability(target,node,startCharacter,(float)countOccurences(childs));
@@ -529,7 +528,7 @@ buildSuffixTreeFromIndex(Iter<TIndex, VSTree< TopDown< ParentLinks<ConstrainedTr
 
 	initProbabilityVector(it,target,root);
 	assignRoot(target,root);
-	cout << "first chars are done.."<<endl;
+	std::cout << "first chars are done.."<<std::endl;
 	//go to the first node
 	goNext(it);
 	while(!atEnd(it)){
@@ -548,13 +547,13 @@ buildSuffixTreeFromIndex(Iter<TIndex, VSTree< TopDown< ParentLinks<ConstrainedTr
 		}
 
 		child = addVertex(target);
-		cout << "Node:"<<child<<"  "<<value(it) << " = " << repLength(it)<< " " << representative(it) << "  toFather:"<<parentEdgeLabel(it)<<"  hits: "<<length(getOccurences(it))<<endl;
+		std::cout << "Node:"<<child<<"  "<<value(it) << " = " << repLength(it)<< " " << representative(it) << "  toFather:"<<parentEdgeLabel(it)<<"  hits: "<<length(getOccurences(it))<<std::endl;
 		setFather(target,father,child);
-		cout <<"set Father\t";
+		std::cout <<"set Father\t";
 		// set child relation with edgelabel
-		//cout <<"ParentEdgeLAbel:"<<parentEdgeLabel(it)<<endl;
+		//std::cout <<"ParentEdgeLAbel:"<<parentEdgeLabel(it)<<std::endl;
 		addEdge(target,father,child,parentEdgeLabel(it));
-		cout <<"set Edge\t";
+		std::cout <<"set Edge\t";
 		initProbabilityVector(it,target,child);
 		//// provisional set prob-vector of nodes
 		//TIter childs(it);
@@ -572,7 +571,7 @@ buildSuffixTreeFromIndex(Iter<TIndex, VSTree< TopDown< ParentLinks<ConstrainedTr
 		//	setProbability(target,child,startCharacter,(float)countOccurences(childs));
 		//	}
 		//}
-		cout << "added node:"<<child<<endl;
+		std::cout << "added node:"<<child<<std::endl;
 		// go to next valid node and add it to the graph
 		goNext(it);
 
@@ -686,7 +685,7 @@ parseString2(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGrap
 	TVertexDescriptor nilVal = _get_nil<TVertexDescriptor>();
 	TVertexDescriptor succ = vertex;
 	TSize pos = 0;
-	//cout <<"start parseString at node:"<< succ<<endl;
+	//std::cout <<"start parseString at node:"<< succ<<std::endl;
 	TAlphabet letter = value(label,pos);
 	TVertexDescriptor tmp = g.data_vertex[succ].data_edge[(TSize) letter].data_target;
 	++pos;
@@ -696,8 +695,8 @@ parseString2(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGrap
 				return tmp;
 
 		if(length(edgeString) > 0){
-			//cout <<"at  node:" << succ<<endl;
-			//cout << "infix: "<<infix(label,pos,pos+length(edgeString))<<" EdgeString:"<<edgeString<<endl;
+			//std::cout <<"at  node:" << succ<<std::endl;
+			//std::cout << "infix: "<<infix(label,pos,pos+length(edgeString))<<" EdgeString:"<<edgeString<<std::endl;
 			if ( (pos+length(edgeString)-1 < length(label) ) && edgeString == infix(label,pos,pos+length(edgeString))){
 				pos += length(edgeString);
 				if(pos == length(label))
@@ -753,7 +752,7 @@ addSuffixLinks(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > 
 // Having set these trivial cases we can treat every node the same way
 
 
-deque<TVertexDescriptor> queue;
+std::deque<TVertexDescriptor> queue;
 TOutEdgeIterator children(vlmm,root);
 while(!atEnd(children)){
 	TAlphabet childCharacter = children.data_pos;
@@ -769,7 +768,7 @@ while(!atEnd(children)){
 			father = getFather(vlmm,n);
 			String<TAlphabet> walkDown;
 			getChildLabel(vlmm,father,n,walkDown);
-			//cout << "go for SL of father:" << father<< " String:"<< walkDown<<endl;
+			//std::cout << "go for SL of father:" << father<< " String:"<< walkDown<<std::endl;
 			TVertexDescriptor fatherSuffixLink = getSuffixLink(vlmm,father);
 			target = parseString2(vlmm,fatherSuffixLink,walkDown);
 			SEQAN_ASSERT(target!=nilVal)
@@ -806,10 +805,10 @@ turnNodeCountsIntoProbability(Graph<Automaton<TAlphabet, TCargo , WordGraph < VL
 {
 	unsigned size = ValueSize<TAlphabet>::VALUE;
 	float sum = 0;;
-	for(int pos = 0;pos< size ;++pos)
+	for(unsigned int pos = 0;pos< size ;++pos)
 		sum = sum + getProbability(vlmm,node,pos);
 	SEQAN_ASSERT(sum != 0);
-	for(int pos = 0;pos< size;++pos)
+	for(unsigned int pos = 0;pos< size;++pos)
 		setProbability(vlmm,node,pos, (getProbability(vlmm,node,pos)/sum) );
 }
 
@@ -910,15 +909,15 @@ pruneTree(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > >,TGr
 	pruneTreeRecursively(vlmm,root,original,parameters);
 
 		for(unsigned i =0;i<numVertices(vlmm);++i){
-				cout << isMarked(vlmm,i)<< "  ";
+				std::cout << isMarked(vlmm,i)<< "  ";
 		}
-		cout <<endl;
+		std::cout <<std::endl;
 		for(unsigned i =0;i<length(original);++i){
-				cout << original[i]<< "  ";
+				std::cout << original[i]<< "  ";
 		}
-		cout <<endl;
+		std::cout <<std::endl;
 
-cout << "ready with the function\n";
+std::cout << "ready with the function\n";
 
  return;
 }
@@ -933,7 +932,6 @@ pruneTreeRecursively(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpe
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGraphSpec> TGraph;
-	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	typedef typename Size<TAlphabet>::Type TSize;
 	TSize table_length = ValueSize<TAlphabet>::VALUE;
@@ -942,10 +940,10 @@ pruneTreeRecursively(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpe
 
 	TVertexDescriptor next;
 	// check all outgoing reverse suffix links
-	for(int pos = 0;pos< table_length;++pos){
+	for(unsigned int pos = 0;pos< table_length;++pos){
 		next = getReverseSuffixLink(vlmm,node,pos);
 		if(next != nilVal){
-			cout <<" start Recursion from node:"<<node<<" char:"<<pos<<endl;
+			std::cout <<" start Recursion from node:"<<node<<" char:"<<pos<<std::endl;
 			pruneTreeRecursively(vlmm,next,original,parameters);
 		}
 		
@@ -967,13 +965,14 @@ pruneTreeRecursively(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpe
 		if(! isRoot(vlmm,father) ){
 				TVertexDescriptor target = getSuffixLink(vlmm,father);
 
-			cout <<"..check potential nodes above node:" <<node<<endl;
+			std::cout <<"..check potential nodes above node:" <<node<<std::endl;
 			TVertexDescriptor potVertex;
 			unsigned lastVertex = 0;
 			for(unsigned pos = 1;pos < length(childLabel);++pos ){
-				cout << "check string:" << prefix(childLabel,pos)<<" from node:"<< target<<endl;
+				std::cout << "check string:" << prefix(childLabel,pos)<<" from node:"<< target<<std::endl;
 				// potVertex = potentialVertex is the potential SuffixLinkFather of the node to be created
-				potVertex = parseString2(vlmm,target,prefix(childLabel,pos));
+				String<TAlphabet> prefixChildLabel = prefix(childLabel,pos);
+				potVertex = parseString2(vlmm,target,prefixChildLabel);
 				if( (potVertex != nilVal) && (potVertex < length(original)) && original[potVertex] && extendNode(vlmm,potVertex,value(childLabel,pos),parameters) ){
 					// find character for Reverse Suffix Link
 					TVertexDescriptor faader = getFather(vlmm,father);
@@ -1003,7 +1002,7 @@ pruneTreeRecursively(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpe
 				TAlphabet startChar = value(childLabel,0);
 				if(extendNode(vlmm,root,startChar,parameters))
 				{
-					cout <<"startChar" << startChar<<endl;
+					std::cout <<"startChar" << startChar<<std::endl;
 					father = splitEdge(vlmm,father,startChar,0);
 					smoothNode(vlmm,father,parameters);
 					setSuffixLink(vlmm,father,root);
@@ -1013,11 +1012,11 @@ pruneTreeRecursively(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpe
 			
 		} // else case
 	} // Label > 1
-	cout << "check keeping of node:" << node;
+	std::cout << "check keeping of node:" << node;
 	// all potential nodes are build
 	if( isMarked(vlmm,node) || (! pruneNode(vlmm,node,parameters)) ){
 		// node should be kept
-		cout <<" keep it"<<endl;
+		std::cout <<" keep it"<<std::endl;
 		setMarked(vlmm,node,true);
 		// bubble up and set all nodes on the way to the root true
 		TVertexDescriptor fatherSuffixLink = getSuffixLink(vlmm,node);
@@ -1035,12 +1034,12 @@ pruneTreeRecursively(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpe
 	else
 	{
 	// delete node
-		cout <<"  delete it"<<endl;
+		std::cout <<"  delete it"<<std::endl;
 		setMarked(vlmm,node,false);
 	//assignProperty(marked,node,false);
 	}
 
-	//cout <<"finished node:"<<node<<endl;
+	//std::cout <<"finished node:"<<node<<std::endl;
  return;
 }
 
@@ -1062,16 +1061,16 @@ buildPST(Index<TIndexType, Index_ESA<> > & index,
 	//Iter< TIndex, VSTree< TopDown< ParentLinks<ConstrainedTraversal<Absolute> > > > > it(index,2);
 
 	buildSuffixTreeFromIndex(it,vlmm);
-	cout << "constructed suffix tree core" <<endl;
+	std::cout << "constructed suffix tree core" <<std::endl;
 	initMaps(vlmm);
-	cout << "init all maps" <<endl;
+	std::cout << "init all maps" <<std::endl;
 	addSuffixLinks(vlmm);
-	cout << "added suffix links and reverse suffix links" <<endl;
-	cout <<vlmm;
+	std::cout << "added suffix links and reverse suffix links" <<std::endl;
+	std::cout <<vlmm;
 	pruneTree(vlmm,parameters);
-	cout << "pruned the PST" <<endl;
-	cout << vlmm;
-	cout << "READY!" <<endl;
+	std::cout << "pruned the PST" <<std::endl;
+	std::cout << vlmm;
+	std::cout << "READY!" <<std::endl;
 }
 
 //write the vlmm to a file in Easy-readable format,also used by the  << Operator
@@ -1100,12 +1099,12 @@ write(TFile & target,
 			_streamPut(target, ' ');
 			_streamPut(target, ' ');
 			_streamWrite(target, "SLink: ");
-			cout << g.data_suffix_link[sourceVertex];
+			std::cout << g.data_suffix_link[sourceVertex];
 			_streamWrite(target,"  (");
 
 			// wollte Wahrscheinlichleiten ausgeben
 		for(int i = 0;i<ValueSize<TAlphabet>::VALUE;++i){
-			cout <<value(g.data_probability_vector[sourceVertex],i);
+			std::cout <<value(g.data_probability_vector[sourceVertex],i);
 				//_streamPut(target,(float)value(g.data_probability_vector[sourceVertex],i));
 				if(i < (ValueSize<TAlphabet>::VALUE -1))
 						_streamPut(target, ' ');	
@@ -1170,7 +1169,7 @@ void write(TFile & file,
 		/* wollte Wahrscheinlichleiten ausgeben
 		_streamWrite(file, "|");
 		for(int i = 0;i<ValueSize<TAlphabet>::VALUE;++i){
-			//cout <<"write:"<<value(g.data_probability_vector[*it],i)<<endl;
+			//std::cout <<"write:"<<value(g.data_probability_vector[*it],i)<<std::endl;
 				_streamWrite(file,(int)value(g.data_probability_vector[*it],i));
 				if(i < (ValueSize<TAlphabet>::VALUE -1))
 						_streamPut(file, ':');	
