@@ -6,10 +6,10 @@
 int main()
 {
 	seqan::Peptide prot = "anypeptide";
-	std::cout << length(prot);  //output: 10
+	std::cout << length(prot) << std::endl;  //output: 10
 
 	prot += "anewend";
-	std::cout << prot;          //ouput: "ANYPEPTIDEANEWEND"
+	std::cout << prot << std::endl;          //ouput: "ANYPEPTIDEANEWEND"
 
 	return 0;
 }
