@@ -88,6 +88,28 @@ initEdgeMap(Graph<TEdges, TSpec> const& g,
 
 //////////////////////////////////////////////////////////////////////////////
 
+template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TPropertyMap>
+inline void
+initEdgeMap(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> const& g,
+			TPropertyMap& pm)
+{
+	SEQAN_CHECKPOINT
+	resize(pm, getIdUpperBound(g.data_id_managerV), Generous());
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TPropertyMap>
+inline void
+initEdgeMap(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>& g,
+			TPropertyMap& pm)
+{
+	SEQAN_CHECKPOINT
+	resize(pm, getIdUpperBound(g.data_id_managerV), Generous());
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 /**
 .Function.assignProperty:
 ..cat:Graph

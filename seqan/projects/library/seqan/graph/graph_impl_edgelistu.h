@@ -520,6 +520,7 @@ sourceVertex(Graph<EdgeListU<TCargo, TEdgeSpec>, TSpec> const& g,
 	return getSource(edge);
 }
 
+
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TMatrix>

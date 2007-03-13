@@ -1535,11 +1535,13 @@ void Test_Tree() {
 	typedef EdgeDescriptor<TTree>::Type TEdgeDescriptor;
 	
 	TTree g;
+	SEQAN_TASSERT(empty(g) == true)
+	createRoot(g);
 	TVertexDescriptor rootV = getRoot(g);
 	SEQAN_TASSERT(rootV == 0)
 	SEQAN_TASSERT(isRoot(g, rootV) == true)
 	SEQAN_TASSERT(root(g) == rootV)
-	SEQAN_TASSERT(empty(g) == true)
+	SEQAN_TASSERT(empty(g) == false)
 	TVertexDescriptor childC1 = addChild(g,rootV);
 	TEdgeDescriptor childC1e = findEdge(g, rootV, childC1);
 	SEQAN_TASSERT(targetVertex(g, childC1e) == childC1) // Target in a tree = child
@@ -1580,7 +1582,7 @@ void Test_Tree() {
 	childC2C1C1C1 = addChild(g,childC2C1C1);
 	childC2C1C1C2 = addChild(g,childC2C1C1);
 	removeAllChildren(g, rootV);
-	SEQAN_TASSERT(empty(g) == true)
+	SEQAN_TASSERT(empty(g) == false)
 	SEQAN_TASSERT(numEdges(g) == 0)
 	SEQAN_TASSERT(numVertices(g) == 1) // Just the root
 	SEQAN_TASSERT(inDegree(g, rootV) == 0) 
@@ -1590,12 +1592,13 @@ void Test_Tree() {
 	SEQAN_TASSERT(empty(g) == false)
 	SEQAN_TASSERT(numEdges(g) == 2)
 	clearEdges(g);
-	SEQAN_TASSERT(empty(g) == true)
+	SEQAN_TASSERT(empty(g) == false)
 	SEQAN_TASSERT(numEdges(g) == 0)
 	addChild(g,rootV);addChild(g,rootV);
 	clearVertices(g);
 	SEQAN_TASSERT(empty(g) == true)
 	SEQAN_TASSERT(numEdges(g) == 0)
+	createRoot(g);
 	childC1 = addChild(g,rootV);
 	SEQAN_TASSERT(empty(g) == false)
 	SEQAN_TASSERT(numEdges(g) == 1)
@@ -1639,10 +1642,13 @@ void Test_Tree() {
 	SEQAN_TASSERT(numEdges(g) == 3)
 	SEQAN_TASSERT(numVertices(g) == 4)
 	removeOutEdges(g,rootV);
-	SEQAN_TASSERT(empty(g) == true)
+	SEQAN_TASSERT(empty(g) == false) // Root is still present
 	addVertex(g);
 	TEdgeDescriptor my_edge = addEdge(g,0,1);
 	removeEdge(g,my_edge);
+
+//____________________________________________________________________________
+// Tree with cargo
 
 	typedef Pair<char, int> TPair;
 	typedef EdgeListT<TPair> TEdges;
@@ -1651,6 +1657,7 @@ void Test_Tree() {
 	typedef EdgeDescriptor<TCargoGraph>::Type TEdgeDescriptor2;
 
 	TCargoGraph g2;
+	createRoot(g2);
 	SEQAN_TASSERT(numVertices(g2) == 1)
 	SEQAN_TASSERT(numEdges(g2) == 0)
 	TVertexDescriptor2 ver1 = addChild(g2, getRoot(g2), TPair('a',3));
@@ -1729,7 +1736,6 @@ void Test_GraphExternalProperty() {
 	SEQAN_TASSERT(getProperty(nameMap, v0) == 'r')
 	SEQAN_TASSERT(getProperty(nameMap, v1) == 's')
 }
-
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -2789,7 +2795,7 @@ int main()
 	// Test Graph types
 	Test_Graph();		// Directed graphs
 	Test_GraphU();		// Undirected graphs
-	Test_Tree();		// ToDo: Tree
+	Test_Tree();		// Trees
 	Test_Automaton();	// Automatons
 	Test_WordGraph();	// Word Graph
 	
@@ -2800,13 +2806,17 @@ int main()
 	// Test property maps
 	Test_GraphExternalProperty<EdgeList<char> >();
 	Test_GraphExternalProperty<EdgeListU<char> >();
+	Test_GraphExternalProperty<EdgeListT<char> >();
 	Test_GraphExternalProperty<Automaton<char> >();
+	
 	Test_GraphInternalProperty();
 
 	// Test iterators
 	Test_GraphVertexIterator<EdgeList<char> >();
 	Test_GraphVertexIterator<EdgeListU<char> >();
+	//Test_GraphVertexIterator<EdgeListT<char> >();
 	Test_GraphVertexIterator<Automaton<char> >();
+
 	Test_GraphOutEdgeIterator<EdgeList<char> >();
 	Test_GraphOutEdgeIterator<EdgeListU<char> >();
 	Test_GraphOutEdgeIterator<Automaton<char> >();

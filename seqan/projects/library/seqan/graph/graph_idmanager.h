@@ -153,7 +153,7 @@ obtainId(IdManager<TIdType, TSpec>& idm)
 	TIdType id;
 	if (!empty(idm.data_freeIds)) {
 		id = getValue(idm.data_freeIds, length(idm.data_freeIds) - 1);
-		_setLength(idm.data_freeIds, length(idm.data_freeIds) - 1);
+		resize(idm.data_freeIds, length(idm.data_freeIds) - 1);
 		assignValue(idm.data_in_use, id, true);
 	} else {
 		id = length(idm.data_in_use);

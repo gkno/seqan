@@ -338,20 +338,6 @@ removeVertex(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec>& g,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TAlphabet, typename TCargo, typename TEdgeSpec, typename TSpec, typename TVertexDescriptor>
-inline typename EdgeDescriptor<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> >::Type 
-addEdge(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec>& g, 
-		TVertexDescriptor const source, 
-		TVertexDescriptor const target)
-{
-	// NOP for an automaton because no label is given
-	// Should never be called
-	SEQAN_ASSERT(false)
-	return 0;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
 template<typename TAlphabet, typename TCargo, typename TEdgeSpec, typename TSpec, typename TVertexDescriptor, typename TLabel>
 inline typename EdgeDescriptor<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> >::Type 
 addEdge(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec>& g, 

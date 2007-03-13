@@ -45,9 +45,8 @@ class Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>
 //____________________________________________________________________________
 
 
-		Graph() : data_root(0) {
+		Graph() : data_root(getNil<TVertexDescriptor>()) {
 			SEQAN_CHECKPOINT
-			addVertex(*this); // Add the root node
 		}
 
 
@@ -57,11 +56,10 @@ class Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>
 		}
 
 		Graph(Graph const & _other) :
-			data_root(0),
+			data_root(getNil<TVertexDescriptor>()),
 			data_allocator(_other.data_allocator)
 		{
 			SEQAN_CHECKPOINT
-			addVertex(*this); // Add the root node
 			_copyGraph(_other, *this);		
 		}
 	
@@ -165,7 +163,8 @@ inline typename Size<Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> >::Type
 numEdges(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> const& g) 
 {
 	SEQAN_CHECKPOINT
-	return (idCount(g.data_id_managerV) - 1);
+	if (!empty(g)) return (idCount(g.data_id_managerV) - 1);
+	else return 0;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -185,8 +184,7 @@ inline bool
 empty(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> const& g) 
 {
 	SEQAN_CHECKPOINT
-	// Just the root
-	return (idCount(g.data_id_managerV) == 1);
+	return (!idCount(g.data_id_managerV));
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -206,10 +204,11 @@ inline void
 clearVertices(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>& g) 
 {
 	SEQAN_CHECKPOINT
-	// No need to release ids because clearEdges removes the children
-	clearEdges(g);  // Root remains so no need to add again
-	// Do not clear data_vertex because this will erase the root!!!
-	// clear(g.data_vertex);
+	if (!empty(g)) {
+		clearEdges(g);	// No need to release ids because clearEdges removes the children
+		releaseId(g.data_id_managerV, getRoot(g)); // Release root id
+	}
+	clear(g.data_vertex);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -219,6 +218,9 @@ inline void
 clear(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>& g) 
 {
 	SEQAN_CHECKPOINT
+	typedef Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> TGraph;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	if (getRoot(g) == getNil<TVertexDescriptor>()) g.data_root=0;
 	clearVertices(g);
 }
 
@@ -287,7 +289,8 @@ removeVertex(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>& g,
 	// Should not be used on a tree
 	SEQAN_CHECKPOINT
 	SEQAN_ASSERT(idInUse(g.data_id_managerV, v) == true)
-	removeChild(g,_getParent(g, v),v);
+	if (!isRoot(g,v)) removeChild(g, (TVertexDescriptor) _getParent(g, v),v);
+	else clear(g);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -510,6 +513,29 @@ write(TFile & target,
 			current=current->data_next;
 		}
 	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.createRoot:
+..cat:Spec.Tree
+..summary:Creates the root in a tree.
+..signature:createRoot(g)
+..param.g:A graph.
+...type:Class.Graph
+..returns:void
+*/
+
+template<typename TCargo, typename TEdgeSpec, typename TSpec>
+inline void
+createRoot(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>& g)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> TGraph;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	TVertexDescriptor r = addVertex(g);
+	g.data_root = r;
 }
 
 //////////////////////////////////////////////////////////////////////////////
