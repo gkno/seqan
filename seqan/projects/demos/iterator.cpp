@@ -15,6 +15,7 @@ int main()
 		std::cout << *it;
 		++it;
 	}
+	std::cout << std::endl;
 ///Seqan offers an alternative style for accessing iterators that avoids operators.
 ///Note that the functions @Function.goBegin@ and @Function.atEnd@ do net get $str$ as arguments,
 /// because $it$ is a @Concept.Rooted Iterator.rooted iterator@.
@@ -33,10 +34,11 @@ int main()
 		goPrevious(it);
 		std::cout << getValue(it);
 	}
+	std::cout << std::endl;
 ///Another (write only) way to access the value of an iterator is @Function.assignValue@:
 	assignValue(begin(str), 'X');
 
-	std::cout << "\n" << str;        //output: "Xeno"
+	std::cout << str << std::endl;        //output: "Xeno"
 	
 
 	return 0;
