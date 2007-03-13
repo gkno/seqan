@@ -95,16 +95,16 @@ The m-tuples are substrings of the input stream beginning at positions $i$, with
                 --idxMod; --idx;
             }
             _rest = length(*this);
-            fill(m);
+            fill();
             swap();
         }
         
-        inline void fill(int f) {
+        inline void fill() {
             int i;
-            for(i = 0; i < f && !eof(in); ++i, ++in)
+            for(i = 0; i < m && !eof(in); ++i, ++in)
                 tmpRef->i2.i[i] = *in;
             last = eof(in);
-            for(; i < f; ++i)
+            for(; i < m; ++i)
                 tmpRef->i2.i[i] = 0;
             tmpRef->i1 = idx;
         }
@@ -193,18 +193,18 @@ The m-tuples are substrings of the input stream beginning at positions $i$, with
                 --idxMod; --tmp.i1;
             }
             _rest = length(*this);
-            fill(m);
+            fill();
         }
         
-        inline void fill(int f) {
+        inline void fill() {
             int i;
             tmp.i2.i = 0;
-            for(i = 0; i < f && !eof(in); ++i, ++in) {
+            for(i = 0; i < m && !eof(in); ++i, ++in) {
                 tmp.i2 <<= 1;
                 tmp.i2 |= *in;
             }
             last = eof(in);
-            tmp.i2.i <<= (f - i);
+            tmp.i2 <<= (m - i);
         }
         
         inline OutType const& operator*() {
@@ -417,16 +417,16 @@ The m-tuples are substrings of the input stream beginning at positions $i$, with
 				--localPos;
             }
             _rest = length(*this);
-            fill(m);
+            fill();
             swap();
         }
         
-        inline void fill(int f) {
+        inline void fill() {
             int i;
-            for(i = 0; i < f && !eof(in); ++i, ++in)
+            for(i = 0; i < m && !eof(in); ++i, ++in)
                 tmpRef->i2.i[i] = *in;
             last = eof(in);
-            for(; i < f; ++i)
+            for(; i < m; ++i)
                 tmpRef->i2.i[i] = 0;
             tmpRef->i1 = localPos;
         }
@@ -515,18 +515,18 @@ The m-tuples are substrings of the input stream beginning at positions $i$, with
 				--localPos;
             }
             _rest = length(*this);
-            fill(m);
+            fill();
         }
         
-        inline void fill(int f) {
+        inline void fill() {
             int i;
             tmp.i2.i = 0;
-            for(i = 0; i < f && !eof(in); ++i, ++in) {
+            for(i = 0; i < m && !eof(in); ++i, ++in) {
                 tmp.i2 <<= 1;
                 tmp.i2 |= *in;
             }
             last = eof(in);
-            tmp.i2.i <<= (f - i);
+            tmp.i2 <<= (m - i);
 			tmp.i1 = localPos;
         }
         
