@@ -127,264 +127,1035 @@ void Test_IdManager() {
 
 void Test_EdgeStump() {
 //____________________________________________________________________________
-// EdgeStump Default: EdgeStump without edge cargo but with edge id
-	EdgeStump<> es1;
+// Test all cargoless EdgeStumps in a list
+	// No cargo, list, source, id
+	EdgeStump<void, true, true, true> es1;
 	_assignId(&es1, 4);
 	SEQAN_TASSERT(_getId(&es1) == 4)
 	assignTarget(&es1, 5);
 	SEQAN_TASSERT(getTarget(&es1) == 5)
-	assignCargo(&es1, 15);  //Does nothing
-	// No cargo -> pointer to 0
-	SEQAN_TASSERT(getCargo(&es1) == (void*) 0)
-	SEQAN_TASSERT(_getId(&es1) == 4)
-	EdgeStump<> const es_const(es1);
-	SEQAN_TASSERT(getCargo(&es1) == (void*) 0)
-	SEQAN_TASSERT(getTarget(&es_const) == 5)
-
-	// EdgeStump: EdgeStump with edge cargo and with edge id
-	EdgeStump<unsigned int> es2;
-	assignTarget(&es2, 1);
-	SEQAN_TASSERT(getTarget(&es2) == 1)
-	_assignId(&es2, 1);
-	SEQAN_TASSERT(_getId(&es2) == 1)
-	assignCargo(&es2, 1);
-	SEQAN_TASSERT(getCargo(&es2) == 1)
-	cargo(&es2) = 3;
-	SEQAN_TASSERT(getCargo(&es2) == 3)
-	EdgeStump<unsigned int> const es3(es2);
-	SEQAN_TASSERT(_getId(&es2) == 1)
-	SEQAN_TASSERT(getCargo(&es3) == 3)
-	SEQAN_TASSERT(cargo(&es3) == 3)
-	SEQAN_TASSERT(target(&es3) == 1)
-
-	// EdgeStump without edge cargo and without edge id
-	EdgeStump<void, WithoutEdgeId> es4;
-	assignTarget(&es4, 3);
-	SEQAN_TASSERT(getTarget(&es4) == 3)
-	SEQAN_TASSERT(target(&es4) == 3)
-	target(&es4) = 1;
-	SEQAN_TASSERT(getTarget(&es4) == 1)
-	_assignId(&es4, 1); //Does nothing
-	SEQAN_TASSERT(_getId(&es4) == 0)
-	assignCargo(&es4, 1); //Does nothing
-	SEQAN_TASSERT(getCargo(&es4) == (void*) 0)
-	SEQAN_TASSERT(cargo(&es4) == (void*) 0); //Does nothing
-	EdgeStump<void, WithoutEdgeId> const es5(es4);
-	SEQAN_TASSERT(_getId(&es5) == 0)
-	SEQAN_TASSERT(getCargo(&es5) == 0)
-	SEQAN_TASSERT(cargo(&es5) == 0)
-
-	// EdgeStump with edge cargo and without edge id
-	EdgeStump<unsigned int, WithoutEdgeId> es6;
-	assignTarget(&es6, 1);
-	SEQAN_TASSERT(getTarget(&es6) == 1)
-	SEQAN_TASSERT(target(&es6) == 1)
-	_assignId(&es6, 1); //Does nothing
-	SEQAN_TASSERT(_getId(&es6) == 0)
-	assignCargo(&es6, 1); 
-	SEQAN_TASSERT(getCargo(&es6) == 1)
-	SEQAN_TASSERT(cargo(&es6) == 1);
-	EdgeStump<unsigned int, WithoutEdgeId> const es7(es6);
-	SEQAN_TASSERT(_getId(&es7) == 0)
-	SEQAN_TASSERT(getCargo(&es7) == 1)
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-void Test_EdgeStumpU() {
-//____________________________________________________________________________
-// EdgeStumpU
-	// Default: EdgeStumpU without edge cargo but with edge id
-	EdgeStumpU<> es1;
-	_assignId(&es1, 4);
-	SEQAN_TASSERT(_getId(&es1) == 4)
-	assignTarget(&es1, 5);
-	SEQAN_TASSERT(getTarget(&es1) == 5)
-	assignSource(&es1, 3);
-	SEQAN_TASSERT(getSource(&es1) == 3)
-	assignCargo(&es1, 15);  //Does nothing
-	// No cargo -> pointer to 0
-	SEQAN_TASSERT(getCargo(&es1) == (void*) 0)
-	SEQAN_TASSERT(_getId(&es1) == 4)
-	EdgeStumpU<> const es_const(es1);
-	SEQAN_TASSERT(getCargo(&es1) == (void*) 0)
-	SEQAN_TASSERT(getTarget(&es_const) == 5)
-	SEQAN_TASSERT(getSource(&es_const) == 3)
-	
-	// EdgeStumpU with edge cargo and with edge id
-	EdgeStumpU<unsigned int> es2;
-	assignTarget(&es2, 1);
-	SEQAN_TASSERT(getTarget(&es2) == 1)
-	assignSource(&es2, 4);
-	SEQAN_TASSERT(getSource(&es2) == 4)
-	_assignId(&es2, 1);
-	SEQAN_TASSERT(_getId(&es2) == 1)
-	assignCargo(&es2, 1);
-	SEQAN_TASSERT(getCargo(&es2) == 1)
-	cargo(&es2) = 3;
-	SEQAN_TASSERT(getCargo(&es2) == 3)
-	EdgeStumpU<unsigned int> const es3(es2);
-	SEQAN_TASSERT(_getId(&es2) == 1)
-	SEQAN_TASSERT(getCargo(&es3) == 3)
-	SEQAN_TASSERT(cargo(&es3) == 3)
-	SEQAN_TASSERT(target(&es3) == 1)
-	SEQAN_TASSERT(source(&es3) == 4)
-
-	// EdgeStumpU without edge cargo and without edge id
-	EdgeStumpU<void, WithoutEdgeId> es4;
-	assignTarget(&es4, 3);
-	SEQAN_TASSERT(getTarget(&es4) == 3)
-	SEQAN_TASSERT(target(&es4) == 3)
-	target(&es4) = 1;
-	SEQAN_TASSERT(getTarget(&es4) == 1)
-	assignSource(&es4, 4);
-	SEQAN_TASSERT(getSource(&es4) == 4)
-	source(&es4) = 2;
-	SEQAN_TASSERT(getSource(&es4) == 2)
-	_assignId(&es4, 1); //Does nothing
-	SEQAN_TASSERT(_getId(&es4) == 0)
-	assignCargo(&es4, 1); //Does nothing
-	SEQAN_TASSERT(getCargo(&es4) == (void*) 0)
-	SEQAN_TASSERT(cargo(&es4) == (void*) 0); //Does nothing
-	EdgeStumpU<void, WithoutEdgeId> const es5(es4);
-	SEQAN_TASSERT(_getId(&es5) == 0)
-	SEQAN_TASSERT(getCargo(&es5) == 0)
-	SEQAN_TASSERT(cargo(&es5) == 0)
-
-	// EdgeStumpU with edge cargo and without edge id
-	EdgeStumpU<unsigned int, WithoutEdgeId> es6;
-	assignTarget(&es6, 1);
-	SEQAN_TASSERT(getTarget(&es6) == 1)
-	SEQAN_TASSERT(target(&es6) == 1)
-	source(&es6) = 2;
-	SEQAN_TASSERT(getSource(&es6) == 2)
-	SEQAN_TASSERT(source(&es6) == 2)
-	_assignId(&es6, 1); //Does nothing
-	SEQAN_TASSERT(_getId(&es6) == 0)
-	assignCargo(&es6, 1); 
-	SEQAN_TASSERT(getCargo(&es6) == 1)
-	SEQAN_TASSERT(cargo(&es6) == 1);
-	EdgeStumpU<unsigned int, WithoutEdgeId> const es7(es6);
-	SEQAN_TASSERT(_getId(&es7) == 0)
-	SEQAN_TASSERT(getCargo(&es7) == 1)
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-void Test_EdgeStumpT() {
-//____________________________________________________________________________
-// EdgeStumpT
-	// Default: EdgeStumpT without edge cargo
-	EdgeStumpT<> es1;
-	assignChild(&es1, 5);
-	SEQAN_TASSERT(_getId(&es1) == 5)   // Child id = edge id
-	SEQAN_TASSERT(getChild(&es1) == 5)
-	SEQAN_TASSERT(child(&es1) == 5)
-	assignParent(&es1, 3);
-	SEQAN_TASSERT(getParent(&es1) == 3)
-	parent(&es1)=4;
-	SEQAN_TASSERT(getParent(&es1) == 4)
-	parent(&es1)=3;
-	assignCargo(&es1, 15);  //Does nothing
-	// No cargo -> pointer to 0
+	target(&es1)=7;
+	SEQAN_TASSERT(getTarget(&es1) == 7)
+	assignSource(&es1, 20);
+	SEQAN_TASSERT(getSource(&es1) == 20)
+	source(&es1)=30;
+	SEQAN_TASSERT(getSource(&es1) == 30)
+	assignCargo(&es1, 15);  //Does nothing, no cargo -> pointer to 0
 	SEQAN_TASSERT(getCargo(&es1) == (void*) 0)
 	SEQAN_TASSERT(cargo(&es1) == (void*) 0)
-	SEQAN_TASSERT(_getId(&es1) == 5)
-	EdgeStumpT<> const es_const(es1);
-	SEQAN_TASSERT(getCargo(&es_const) == (void*) 0)
-	SEQAN_TASSERT(cargo(&es_const) == (void*) 0)
-	SEQAN_TASSERT(getChild(&es_const) == 5)
-	SEQAN_TASSERT(child(&es_const) == 5)
-	SEQAN_TASSERT(getParent(&es_const) == 3)
-	SEQAN_TASSERT(parent(&es_const) == 3)
+	SEQAN_TASSERT(_getId(&es1) == 4)
+	EdgeStump<void, true, true, true> const es1_const(es1);
+	SEQAN_TASSERT(getCargo(&es1_const) == (void*) 0)
+	SEQAN_TASSERT(cargo(&es1_const) == (void*) 0)
+	SEQAN_TASSERT(getTarget(&es1_const) == 7)
+	SEQAN_TASSERT(target(&es1_const) == 7)
+	SEQAN_TASSERT(source(&es1_const) == 30)
+	SEQAN_TASSERT(getSource(&es1_const) == 30)
+	SEQAN_TASSERT(_getId(&es1_const) == 4)
+	EdgeStump<void, true, true, true> es11(es1);
+	EdgeStump<void, true, true, true> es12(es1);
+	nextT(&es1) = &es11;
+	SEQAN_TASSERT(getNextT(&es1) == &es11)
+	assignNextT(&es1, &es12);
+	SEQAN_TASSERT(getNextT(&es1) == &es12)
+	nextS(&es1) = &es11;
+	SEQAN_TASSERT(getNextS(&es1) == &es11)
+	SEQAN_TASSERT(getNextT(&es1) == &es12)
+	assignNextS(&es1, &es12);
+	SEQAN_TASSERT(getNextS(&es1) == &es12)
+
+	// No cargo, list, source, no id
+	EdgeStump<void, true, true, false> es2;
+	_assignId(&es2, 4);
+	SEQAN_TASSERT(_getId(&es2) == 0) // No id, always 0
+	assignTarget(&es2, 5);
+	SEQAN_TASSERT(getTarget(&es2) == 5)
+	target(&es2)=7;
+	SEQAN_TASSERT(getTarget(&es2) == 7)
+	assignSource(&es2, 20);
+	SEQAN_TASSERT(getSource(&es2) == 20)
+	source(&es2)=30;
+	SEQAN_TASSERT(getSource(&es2) == 30)
+	assignCargo(&es2, 15);  //Does nothing, no cargo -> pointer to 0
+	SEQAN_TASSERT(getCargo(&es2) == (void*) 0)
+	SEQAN_TASSERT(cargo(&es2) == (void*) 0)
+	SEQAN_TASSERT(_getId(&es2) == 0)
+	EdgeStump<void, true, true, false> const es2_const(es2);
+	SEQAN_TASSERT(getCargo(&es2_const) == (void*) 0)
+	SEQAN_TASSERT(cargo(&es2_const) == (void*) 0)
+	SEQAN_TASSERT(getTarget(&es2_const) == 7)
+	SEQAN_TASSERT(target(&es2_const) == 7)
+	SEQAN_TASSERT(source(&es2_const) == 30)
+	SEQAN_TASSERT(getSource(&es2_const) == 30)
+	SEQAN_TASSERT(_getId(&es2_const) == 0)
+	EdgeStump<void, true, true, false> es21(es2);
+	EdgeStump<void, true, true, false> es22(es2);
+	nextT(&es2) = &es21;
+	SEQAN_TASSERT(getNextT(&es2) == &es21)
+	assignNextT(&es2, &es22);
+	SEQAN_TASSERT(getNextT(&es2) == &es22)
+	nextS(&es2) = &es21;
+	SEQAN_TASSERT(getNextS(&es2) == &es21)
+	SEQAN_TASSERT(getNextT(&es2) == &es22)
+	assignNextS(&es2, &es22);
+	SEQAN_TASSERT(getNextS(&es2) == &es22)
+
+	// No cargo, list, no source, id
+	EdgeStump<void, true, false, true> es3;
+	_assignId(&es3, 4);
+	SEQAN_TASSERT(_getId(&es3) == 4)
+	assignTarget(&es3, 5);
+	SEQAN_TASSERT(getTarget(&es3) == 5)
+	target(&es3)=7;
+	SEQAN_TASSERT(getTarget(&es3) == 7)
+	assignSource(&es3, 20);
+	SEQAN_TASSERT(getSource(&es3) == 0)  // No source
+	SEQAN_TASSERT(source(&es3) == 0) // No source
+	assignCargo(&es3, 15);  //Does nothing, no cargo -> pointer to 0
+	SEQAN_TASSERT(getCargo(&es3) == (void*) 0)
+	SEQAN_TASSERT(cargo(&es3) == (void*) 0)
+	SEQAN_TASSERT(_getId(&es3) == 4)
+	EdgeStump<void, true, false, true> const es3_const(es3);
+	SEQAN_TASSERT(getCargo(&es3_const) == (void*) 0)
+	SEQAN_TASSERT(cargo(&es3_const) == (void*) 0)
+	SEQAN_TASSERT(getTarget(&es3_const) == 7)
+	SEQAN_TASSERT(target(&es3_const) == 7)
+	SEQAN_TASSERT(getSource(&es3_const) == 0)
+	SEQAN_TASSERT(source(&es3_const) == 0)
+	SEQAN_TASSERT(_getId(&es3_const) == 4)
+	EdgeStump<void, true, false, true> es31(es3);
+	EdgeStump<void, true, false, true> es32(es3);
+	nextT(&es3) = &es31;
+	SEQAN_TASSERT(getNextT(&es3) == &es31)
+	assignNextT(&es3, &es32);
+	SEQAN_TASSERT(getNextT(&es3) == &es32)
+	assignNextS(&es3, &es32); // No source
+	SEQAN_TASSERT(nextS(&es3) == 0)
+	SEQAN_TASSERT(getNextS(&es3) == 0)
+	SEQAN_TASSERT(getNextT(&es3) == &es32)
+
+	// No cargo, list, no source, no id
+	EdgeStump<void, true, false, false> es4;
+	_assignId(&es4, 4);
+	SEQAN_TASSERT(_getId(&es4) == 0) // No id
+	assignTarget(&es4, 5);
+	SEQAN_TASSERT(getTarget(&es4) == 5)
+	target(&es4)=7;
+	SEQAN_TASSERT(getTarget(&es4) == 7)
+	assignSource(&es4, 20);
+	SEQAN_TASSERT(getSource(&es4) == 0) // No source
+	SEQAN_TASSERT(source(&es4) == 0)
+	assignCargo(&es4, 15);  //Does nothing, no cargo -> pointer to 0
+	SEQAN_TASSERT(getCargo(&es4) == (void*) 0)
+	SEQAN_TASSERT(cargo(&es4) == (void*) 0)
+	SEQAN_TASSERT(_getId(&es4) == 0)
+	EdgeStump<void, true, false, false> const es4_const(es4);
+	SEQAN_TASSERT(getCargo(&es4_const) == (void*) 0)
+	SEQAN_TASSERT(cargo(&es4_const) == (void*) 0)
+	SEQAN_TASSERT(getTarget(&es4_const) == 7)
+	SEQAN_TASSERT(target(&es4_const) == 7)
+	SEQAN_TASSERT(getSource(&es4_const) == 0)
+	SEQAN_TASSERT(source(&es4_const) == 0)
+	SEQAN_TASSERT(_getId(&es4_const) == 0)
+	EdgeStump<void, true, false, false> es41(es4);
+	EdgeStump<void, true, false, false> es42(es4);
+	nextT(&es4) = &es41;
+	SEQAN_TASSERT(getNextT(&es4) == &es41)
+	assignNextT(&es4, &es42);
+	SEQAN_TASSERT(getNextT(&es4) == &es42)
+	assignNextS(&es4, &es42);
+	SEQAN_TASSERT(getNextS(&es4) == 0)
+	SEQAN_TASSERT(nextS(&es4) == 0)
+
+//____________________________________________________________________________
+// Test all EdgeStumps with cargo in a list
+	// Cargo, list, source, id
+	EdgeStump<unsigned int, true, true, true> es5;
+	_assignId(&es5, 4);
+	SEQAN_TASSERT(_getId(&es5) == 4)
+	assignTarget(&es5, 5);
+	SEQAN_TASSERT(getTarget(&es5) == 5)
+	target(&es5)=7;
+	SEQAN_TASSERT(getTarget(&es5) == 7)
+	assignSource(&es5, 20);
+	SEQAN_TASSERT(getSource(&es5) == 20)
+	source(&es5)=30;
+	SEQAN_TASSERT(getSource(&es5) == 30)
+	assignCargo(&es5, 15); 
+	SEQAN_TASSERT(getCargo(&es5) == 15)
+	SEQAN_TASSERT(cargo(&es5) == 15)
+	SEQAN_TASSERT(_getId(&es5) == 4)
+	EdgeStump<unsigned int, true, true, true> const es5_const(es5);
+	SEQAN_TASSERT(getCargo(&es5_const) == 15)
+	SEQAN_TASSERT(cargo(&es5_const) == 15)
+	SEQAN_TASSERT(getTarget(&es5_const) == 7)
+	SEQAN_TASSERT(target(&es5_const) == 7)
+	EdgeStump<unsigned int, true, true, true> es51(es5);
+	EdgeStump<unsigned int, true, true, true> es52(es5);
+	nextT(&es5) = &es51;
+	SEQAN_TASSERT(getNextT(&es5) == &es51)
+	assignNextT(&es5, &es52);
+	SEQAN_TASSERT(getNextT(&es5) == &es52)
+	nextS(&es5) = &es51;
+	SEQAN_TASSERT(getNextS(&es5) == &es51)
+	SEQAN_TASSERT(getNextT(&es5) == &es52)
+	assignNextS(&es5, &es52);
+	SEQAN_TASSERT(getNextS(&es5) == &es52)
+
+	// Cargo, list, source, no id
+	EdgeStump<unsigned int, true, true, false> es6;
+	_assignId(&es6, 4);
+	SEQAN_TASSERT(_getId(&es6) == 0) // No id, always 0
+	assignTarget(&es6, 5);
+	SEQAN_TASSERT(getTarget(&es6) == 5)
+	target(&es6)=7;
+	SEQAN_TASSERT(getTarget(&es6) == 7)
+	assignSource(&es6, 20);
+	SEQAN_TASSERT(getSource(&es6) == 20)
+	source(&es6)=30;
+	SEQAN_TASSERT(getSource(&es6) == 30)
+	assignCargo(&es6, 15); 
+	SEQAN_TASSERT(getCargo(&es6) == 15)
+	SEQAN_TASSERT(cargo(&es6) == 15)
+	SEQAN_TASSERT(_getId(&es6) == 0)
+	EdgeStump<unsigned int, true, true, false> const es6_const(es6);
+	SEQAN_TASSERT(getCargo(&es6_const) == 15)
+	SEQAN_TASSERT(cargo(&es6_const) == 15)
+	SEQAN_TASSERT(getTarget(&es6_const) == 7)
+	SEQAN_TASSERT(target(&es6_const) == 7)
+	EdgeStump<unsigned int, true, true, false> es61(es6);
+	EdgeStump<unsigned int, true, true, false> es62(es6);
+	nextT(&es6) = &es61;
+	SEQAN_TASSERT(getNextT(&es6) == &es61)
+	assignNextT(&es6, &es62);
+	SEQAN_TASSERT(getNextT(&es6) == &es62)
+	nextS(&es6) = &es61;
+	SEQAN_TASSERT(getNextS(&es6) == &es61)
+	SEQAN_TASSERT(getNextT(&es6) == &es62)
+	assignNextS(&es6, &es62);
+	SEQAN_TASSERT(getNextS(&es6) == &es62)
+
+	// Cargo, list, no source, id
+	EdgeStump<unsigned int, true, false, true> es7;
+	_assignId(&es7, 4);
+	SEQAN_TASSERT(_getId(&es7) == 4)
+	assignTarget(&es7, 5);
+	SEQAN_TASSERT(getTarget(&es7) == 5)
+	target(&es7)=7;
+	SEQAN_TASSERT(getTarget(&es7) == 7)
+	assignSource(&es7, 20);
+	SEQAN_TASSERT(getSource(&es7) == 0)  // No source
+	SEQAN_TASSERT(source(&es7) == 0) // No source
+	assignCargo(&es7, 15); 
+	SEQAN_TASSERT(getCargo(&es7) == 15)
+	SEQAN_TASSERT(cargo(&es7) == 15)
+	SEQAN_TASSERT(_getId(&es7) == 4)
+	EdgeStump<unsigned int, true, false, true> const es7_const(es7);
+	SEQAN_TASSERT(getCargo(&es7_const) == 15)
+	SEQAN_TASSERT(cargo(&es7_const) == 15)
+	SEQAN_TASSERT(getTarget(&es7_const) == 7)
+	SEQAN_TASSERT(target(&es7_const) == 7)
+	EdgeStump<unsigned int, true, false, true> es71(es7);
+	EdgeStump<unsigned int, true, false, true> es72(es7);
+	nextT(&es7) = &es71;
+	SEQAN_TASSERT(getNextT(&es7) == &es71)
+	assignNextT(&es7, &es72);
+	SEQAN_TASSERT(getNextT(&es7) == &es72)
+	assignNextS(&es7, &es72); // No source
+	SEQAN_TASSERT(nextS(&es7) == 0)
+	SEQAN_TASSERT(getNextS(&es7) == 0)
+	SEQAN_TASSERT(getNextT(&es7) == &es72)
+
+	// Cargo, list, no source, no id
+	EdgeStump<unsigned int, true, false, false> es8;
+	_assignId(&es8, 4);
+	SEQAN_TASSERT(_getId(&es8) == 0) // No id
+	assignTarget(&es8, 5);
+	SEQAN_TASSERT(getTarget(&es8) == 5)
+	target(&es8)=7;
+	SEQAN_TASSERT(getTarget(&es8) == 7)
+	assignSource(&es8, 20);
+	SEQAN_TASSERT(getSource(&es8) == 0) // No source
+	SEQAN_TASSERT(source(&es8) == 0)
+	assignCargo(&es8, 15); 
+	SEQAN_TASSERT(getCargo(&es8) == 15)
+	SEQAN_TASSERT(cargo(&es8) == 15)
+	SEQAN_TASSERT(_getId(&es8) == 0)
+	EdgeStump<unsigned int, true, false, false> const es8_const(es8);
+	SEQAN_TASSERT(getCargo(&es8_const) == 15)
+	SEQAN_TASSERT(cargo(&es8_const) == 15)
+	SEQAN_TASSERT(getTarget(&es8_const) == 7)
+	SEQAN_TASSERT(target(&es8_const) == 7)
+	EdgeStump<unsigned int, true, false, false> es81(es8);
+	EdgeStump<unsigned int, true, false, false> es82(es8);
+	nextT(&es8) = &es81;
+	SEQAN_TASSERT(getNextT(&es8) == &es81)
+	assignNextT(&es8, &es82);
+	SEQAN_TASSERT(getNextT(&es8) == &es82)
+	assignNextS(&es8, &es82);
+	SEQAN_TASSERT(getNextS(&es8) == 0)
+	SEQAN_TASSERT(nextS(&es8) == 0)
+
+//____________________________________________________________________________
+// Test all cargoless EdgeStumps in an array
+	// No cargo, no list, source, id
+	EdgeStump<void, false, true, true> es9;
+	_assignId(&es9, 4);
+	SEQAN_TASSERT(_getId(&es9) == 4)
+	assignTarget(&es9, 5);
+	SEQAN_TASSERT(getTarget(&es9) == 5)
+	target(&es9)=7;
+	SEQAN_TASSERT(getTarget(&es9) == 7)
+	assignSource(&es9, 20);
+	SEQAN_TASSERT(getSource(&es9) == 20)
+	source(&es9)=30;
+	SEQAN_TASSERT(getSource(&es9) == 30)
+	assignCargo(&es9, 15);  //Does nothing, no cargo -> pointer to 0
+	SEQAN_TASSERT(getCargo(&es9) == (void*) 0)
+	SEQAN_TASSERT(cargo(&es9) == (void*) 0)
+	SEQAN_TASSERT(_getId(&es9) == 4)
+	EdgeStump<void, false, true, true> const es9_const(es9);
+	SEQAN_TASSERT(getCargo(&es9_const) == (void*) 0)
+	SEQAN_TASSERT(cargo(&es9_const) == (void*) 0)
+	SEQAN_TASSERT(getTarget(&es9_const) == 7)
+	SEQAN_TASSERT(target(&es9_const) == 7)
+
+	// No cargo, no list, source, no id
+	EdgeStump<void, false, true, false> es10;
+	_assignId(&es10, 4);
+	SEQAN_TASSERT(_getId(&es10) == 0) // No id
+	assignTarget(&es10, 5);
+	SEQAN_TASSERT(getTarget(&es10) == 5)
+	target(&es10)=7;
+	SEQAN_TASSERT(getTarget(&es10) == 7)
+	assignSource(&es10, 20);
+	SEQAN_TASSERT(getSource(&es10) == 20)
+	source(&es10)=30;
+	SEQAN_TASSERT(getSource(&es10) == 30)
+	assignCargo(&es10, 15);  //Does nothing, no cargo -> pointer to 0
+	SEQAN_TASSERT(getCargo(&es10) == (void*) 0)
+	SEQAN_TASSERT(cargo(&es10) == (void*) 0)
+	SEQAN_TASSERT(_getId(&es10) == 0)
+	EdgeStump<void, false, true, false> const es10_const(es10);
+	SEQAN_TASSERT(getCargo(&es10_const) == (void*) 0)
+	SEQAN_TASSERT(cargo(&es10_const) == (void*) 0)
+	SEQAN_TASSERT(getTarget(&es10_const) == 7)
+	SEQAN_TASSERT(target(&es10_const) == 7)
+
+	// No cargo, no list, no source, id
+	EdgeStump<void, false, false, true> es_11;
+	_assignId(&es_11, 4);
+	SEQAN_TASSERT(_getId(&es_11) == 4)
+	assignTarget(&es_11, 5);
+	SEQAN_TASSERT(getTarget(&es_11) == 5)
+	target(&es_11)=7;
+	SEQAN_TASSERT(getTarget(&es_11) == 7)
+	assignSource(&es_11, 20);
+	SEQAN_TASSERT(getSource(&es_11) == 0) // No source
+	SEQAN_TASSERT(source(&es_11) == 0)
+	assignCargo(&es_11, 15);  //Does nothing, no cargo -> pointer to 0
+	SEQAN_TASSERT(getCargo(&es_11) == (void*) 0)
+	SEQAN_TASSERT(cargo(&es_11) == (void*) 0)
+	SEQAN_TASSERT(_getId(&es_11) == 4)
+	EdgeStump<void, false, false, true> const es_11_const(es_11);
+	SEQAN_TASSERT(getCargo(&es_11_const) == (void*) 0)
+	SEQAN_TASSERT(cargo(&es_11_const) == (void*) 0)
+	SEQAN_TASSERT(getTarget(&es_11_const) == 7)
+	SEQAN_TASSERT(target(&es_11_const) == 7)
+
 	
-	// EdgeStumpT with edge cargo
-	EdgeStumpT<unsigned int> es2;
-	assignChild(&es2, 1);
-	SEQAN_TASSERT(getChild(&es2) == 1)
-	assignParent(&es2, 4);
-	SEQAN_TASSERT(getParent(&es2) == 4)
-	SEQAN_TASSERT(_getId(&es2) == 1)
-	assignCargo(&es2, 7);
-	SEQAN_TASSERT(getCargo(&es2) == 7)
-	cargo(&es2) = 6;
-	SEQAN_TASSERT(getCargo(&es2) == 6)
-	EdgeStumpT<unsigned int> const es3(es2);
-	SEQAN_TASSERT(_getId(&es3) == 1)
-	SEQAN_TASSERT(getCargo(&es3) == 6)
-	SEQAN_TASSERT(cargo(&es3) == 6)
-	SEQAN_TASSERT(child(&es3) == 1)
-	SEQAN_TASSERT(parent(&es3) == 4)
+	// No cargo, no list, no source, no id
+	EdgeStump<void, false, false, false> es_12;
+	_assignId(&es_12, 4);
+	SEQAN_TASSERT(_getId(&es_12) == 0)
+	assignTarget(&es_12, 5);
+	SEQAN_TASSERT(getTarget(&es_12) == 5)
+	target(&es_12)=7;
+	SEQAN_TASSERT(getTarget(&es_12) == 7)
+	assignSource(&es_12, 20);
+	SEQAN_TASSERT(getSource(&es_12) == 0) // No source
+	SEQAN_TASSERT(source(&es_12) == 0)
+	assignCargo(&es_12, 15);  //Does nothing, no cargo -> pointer to 0
+	SEQAN_TASSERT(getCargo(&es_12) == (void*) 0)
+	SEQAN_TASSERT(cargo(&es_12) == (void*) 0)
+	SEQAN_TASSERT(_getId(&es_12) == 0)
+	EdgeStump<void, false, false, false> const es_12_const(es_12);
+	SEQAN_TASSERT(getCargo(&es_12_const) == (void*) 0)
+	SEQAN_TASSERT(cargo(&es_12_const) == (void*) 0)
+	SEQAN_TASSERT(getTarget(&es_12_const) == 7)
+	SEQAN_TASSERT(target(&es_12_const) == 7)
+
+//____________________________________________________________________________
+// Test all EdgeStumps with cargo in an array
+	// cargo, no list, source, id
+	EdgeStump<unsigned int, false, true, true> es_13;
+	_assignId(&es_13, 4);
+	SEQAN_TASSERT(_getId(&es_13) == 4)
+	assignTarget(&es_13, 5);
+	SEQAN_TASSERT(getTarget(&es_13) == 5)
+	target(&es_13)=7;
+	SEQAN_TASSERT(getTarget(&es_13) == 7)
+	assignSource(&es_13, 20);
+	SEQAN_TASSERT(getSource(&es_13) == 20)
+	source(&es_13)=30;
+	SEQAN_TASSERT(getSource(&es_13) == 30)
+	assignCargo(&es_13, 15);  
+	SEQAN_TASSERT(getCargo(&es_13) == 15)
+	SEQAN_TASSERT(cargo(&es_13) == 15)
+	SEQAN_TASSERT(_getId(&es_13) == 4)
+	EdgeStump<unsigned int, false, true, true> const es_13_const(es_13);
+	SEQAN_TASSERT(getCargo(&es_13_const) == 15)
+	SEQAN_TASSERT(cargo(&es_13_const) == 15)
+	SEQAN_TASSERT(getTarget(&es_13_const) == 7)
+	SEQAN_TASSERT(target(&es_13_const) == 7)
+
+	// cargo, no list, source, no id
+	EdgeStump<unsigned int, false, true, false> es_14;
+	_assignId(&es_14, 4);
+	SEQAN_TASSERT(_getId(&es_14) == 0) // No id
+	assignTarget(&es_14, 5);
+	SEQAN_TASSERT(getTarget(&es_14) == 5)
+	target(&es_14)=7;
+	SEQAN_TASSERT(getTarget(&es_14) == 7)
+	assignSource(&es_14, 20);
+	SEQAN_TASSERT(getSource(&es_14) == 20)
+	source(&es_14)=30;
+	SEQAN_TASSERT(getSource(&es_14) == 30)
+	assignCargo(&es_14, 15); 
+	SEQAN_TASSERT(getCargo(&es_14) == 15)
+	SEQAN_TASSERT(cargo(&es_14) == 15)
+	SEQAN_TASSERT(_getId(&es_14) == 0)
+	EdgeStump<unsigned int, false, true, false> const es_14_const(es_14);
+	SEQAN_TASSERT(getCargo(&es_14_const) == 15)
+	SEQAN_TASSERT(cargo(&es_14_const) == 15)
+	SEQAN_TASSERT(getTarget(&es_14_const) == 7)
+	SEQAN_TASSERT(target(&es_14_const) == 7)
+
+	// cargo, no list, no source, id
+	EdgeStump<unsigned int, false, false, true> es_15;
+	_assignId(&es_15, 4);
+	SEQAN_TASSERT(_getId(&es_15) == 4)
+	assignTarget(&es_15, 5);
+	SEQAN_TASSERT(getTarget(&es_15) == 5)
+	target(&es_15)=7;
+	SEQAN_TASSERT(getTarget(&es_15) == 7)
+	assignSource(&es_15, 20);
+	SEQAN_TASSERT(getSource(&es_15) == 0) // No source
+	SEQAN_TASSERT(source(&es_15) == 0)
+	assignCargo(&es_15, 15); 
+	SEQAN_TASSERT(getCargo(&es_15) == 15)
+	SEQAN_TASSERT(cargo(&es_15) == 15)
+	SEQAN_TASSERT(_getId(&es_15) == 4)
+	EdgeStump<unsigned int, false, false, true> const es_15_const(es_15);
+	SEQAN_TASSERT(getCargo(&es_15_const) == 15)
+	SEQAN_TASSERT(cargo(&es_15_const) == 15)
+	SEQAN_TASSERT(getTarget(&es_15_const) == 7)
+	SEQAN_TASSERT(target(&es_15_const) == 7)
+
+	// cargo, no list, no source, no id
+	EdgeStump<unsigned int, false, false, false> es_16;
+	_assignId(&es_16, 4);
+	SEQAN_TASSERT(_getId(&es_16) == 0)
+	assignTarget(&es_16, 5);
+	SEQAN_TASSERT(getTarget(&es_16) == 5)
+	target(&es_16)=7;
+	SEQAN_TASSERT(getTarget(&es_16) == 7)
+	assignSource(&es_16, 20);
+	SEQAN_TASSERT(getSource(&es_16) == 0) // No source
+	SEQAN_TASSERT(source(&es_16) == 0)
+	assignCargo(&es_16, 15);  
+	SEQAN_TASSERT(getCargo(&es_16) == 15)
+	SEQAN_TASSERT(cargo(&es_16) == 15)
+	SEQAN_TASSERT(_getId(&es_16) == 0)
+	EdgeStump<unsigned int, false, false, false> const es_16_const(es_16);
+	SEQAN_TASSERT(getCargo(&es_16_const) == 15)
+	SEQAN_TASSERT(cargo(&es_16_const) == 15)
+	SEQAN_TASSERT(getTarget(&es_16_const) == 7)
+	SEQAN_TASSERT(target(&es_16_const) == 7)
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
-void Test_EdgeStumpA() {
+void Test_Directed() {
 //____________________________________________________________________________
-// EdgeStumpA
-	// Default edge automaton: No cargo
-	EdgeStumpA<> ea1;
-	_assignId(&ea1, 4);
-	SEQAN_TASSERT(_getId(&ea1) == 4)
-	assignTarget(&ea1, 5);
-	SEQAN_TASSERT(getTarget(&ea1) == 5)
-	assignCargo(&ea1, 15);  
-	SEQAN_TASSERT(getCargo(&ea1) == (void*) 0)
-	SEQAN_TASSERT(cargo(&ea1) == (void*) 0)
-	EdgeStumpA<> const ea_const(ea1);
-	SEQAN_TASSERT(getCargo(&ea1) == (void*) 0)
-	SEQAN_TASSERT(getCargo(&ea_const) == (void*) 0)
-	SEQAN_TASSERT(cargo(&ea_const) == (void*) 0)
-	SEQAN_TASSERT(getTarget(&ea_const) == 5)
-	SEQAN_TASSERT(target(&ea_const) == 5)
-	SEQAN_TASSERT(getTarget(&ea_const) == 5)
+// Graph without edge cargo but with edge ids
 
-	// EdgeStumpA with edge cargo
-	EdgeStumpA<unsigned int> ea2;
-	_assignId(&ea2, 1);
-	SEQAN_TASSERT(_getId(&ea2) == 1)
-	assignTarget(&ea2, 1);
-	SEQAN_TASSERT(getTarget(&ea2) == 1)
-	target(&ea2) = 4;
-	SEQAN_TASSERT(getTarget(&ea2) == 4)
-	assignCargo(&ea2, 1);
-	SEQAN_TASSERT(getCargo(&ea2) == 1)
-	cargo(&ea2) = 3;
-	SEQAN_TASSERT(getCargo(&ea2) == 3)
-	EdgeStumpA<unsigned int> const ea3(ea2);
-	SEQAN_TASSERT(getCargo(&ea3) == 3)
-	SEQAN_TASSERT(cargo(&ea3) == 3)
+	typedef Graph<> StandardGraph;
+	typedef VertexDescriptor<StandardGraph>::Type TVertexDescriptor;
+	typedef EdgeDescriptor<StandardGraph>::Type TEdgeDescriptor;
+	
+	StandardGraph g;
+	SEQAN_TASSERT(numVertices(g) == 0)
+	SEQAN_TASSERT(numEdges(g) == 0)
+	SEQAN_TASSERT(empty(g) == true)
 
-	// EdgeStumpA without edge cargo and without edge id
-	EdgeStumpA<void, WithoutEdgeId> es4;
-	assignTarget(&es4, 3);
-	SEQAN_TASSERT(getTarget(&es4) == 3)
-	SEQAN_TASSERT(target(&es4) == 3)
-	target(&es4) = 1;
-	SEQAN_TASSERT(getTarget(&es4) == 1)
-	_assignId(&es4, 1); //Does nothing
-	SEQAN_TASSERT(_getId(&es4) == 0)
-	assignCargo(&es4, 1); //Does nothing
-	SEQAN_TASSERT(getCargo(&es4) == (void*) 0)
-	SEQAN_TASSERT(cargo(&es4) == (void*) 0); //Does nothing
-	EdgeStumpA<void, WithoutEdgeId> const es5(es4);
-	SEQAN_TASSERT(_getId(&es5) == 0)
-	SEQAN_TASSERT(getCargo(&es5) == 0)
-	SEQAN_TASSERT(cargo(&es5) == 0)
+	// Add vertex
+	TVertexDescriptor v0 = addVertex(g);
+	SEQAN_TASSERT(v0 == 0)
+	SEQAN_TASSERT(outDegree(g, v0) == 0)	
+	SEQAN_TASSERT(inDegree(g, 0) == 0)
+	SEQAN_TASSERT(degree(g, 0) == 0)
+	SEQAN_TASSERT(numVertices(g) == 1)
+	SEQAN_TASSERT(empty(g) == false)
+	
+	// Add edge
+	TEdgeDescriptor e1 =addEdge(g,v0,v0);
+	SEQAN_TASSERT(targetVertex(g, e1) == 0)
+	SEQAN_TASSERT(sourceVertex(g, e1) == 0)  //Expensive in standard graph!
+	SEQAN_TASSERT(numEdges(g) == 1)
+	SEQAN_TASSERT(outDegree(g, v0) == 1)	
+	SEQAN_TASSERT(inDegree(g, v0) == 1)
+	SEQAN_TASSERT(degree(g, v0) == 2)
+	
+	// Add further edges and vertices
+	TVertexDescriptor v1 = addVertex(g);
+	TEdgeDescriptor e2 =addEdge(g,0,1);
+	SEQAN_TASSERT(v1 == 1)
+	SEQAN_TASSERT(numVertices(g) == 2)
+	SEQAN_TASSERT(targetVertex(g, e2) == 1)
+	SEQAN_TASSERT(sourceVertex(g, e2) == 0)
+	SEQAN_TASSERT(numEdges(g) == 2)
+	SEQAN_TASSERT(outDegree(g, v0) == 2)	
+	SEQAN_TASSERT(inDegree(g, 1) == 1)
+	SEQAN_TASSERT(inDegree(g, 0) == 1)	
+	SEQAN_TASSERT(degree(g, 0) == 3)
+		
+	// Add more vertices and edges
+	addVertex(g);  //2
+	TVertexDescriptor v3 = addVertex(g);  //3
+	addVertex(g);  //4
+	addEdge(g,3,4);
+	TEdgeDescriptor my_edge = addEdge(g,3,1);
+	addEdge(g,3,0);
+	SEQAN_TASSERT(v3 == 3)
+	SEQAN_TASSERT(numVertices(g) == 5)
+	SEQAN_TASSERT(targetVertex(g, e2) == 1)
+	SEQAN_TASSERT(sourceVertex(g, e2) == 0)
+	SEQAN_TASSERT(targetVertex(g, my_edge) == 1)
+	SEQAN_TASSERT(sourceVertex(g, my_edge) == 3)
+	SEQAN_TASSERT(numEdges(g) == 5)
+	SEQAN_TASSERT(outDegree(g, v3) == 3)	
+	
+	// Graph drawing
+	removeEdge(g,0,0); // ToDo: Drawing of self edges
+	addEdge(g,4,3);
+	// Raw output
+	std::cout << g << ::std::endl;
+	// File output
+	fstream strm;
+	strm.open(TEST_PATH "my_graph.dot", ios_base::out | ios_base::trunc);
+	write(strm,g,DotDrawing());
+	strm.close();
+	removeEdge(g,4,3);
+	addEdge(g,0,0);
 
-	// EdgeStumpA with edge cargo and without edge id
-	EdgeStumpA<unsigned int, WithoutEdgeId> es6;
-	assignTarget(&es6, 1);
-	SEQAN_TASSERT(getTarget(&es6) == 1)
-	SEQAN_TASSERT(target(&es6) == 1)
-	_assignId(&es6, 1); //Does nothing
-	SEQAN_TASSERT(_getId(&es6) == 0)
-	assignCargo(&es6, 1); 
-	SEQAN_TASSERT(getCargo(&es6) == 1)
-	SEQAN_TASSERT(cargo(&es6) == 1);
-	EdgeStumpA<unsigned int, WithoutEdgeId> const es7(es6);
-	SEQAN_TASSERT(_getId(&es7) == 0)
-	SEQAN_TASSERT(getCargo(&es7) == 1)
+	// Remove edges
+	removeEdge(g,my_edge);
+	removeEdge(g,0,1);
+	SEQAN_TASSERT(numEdges(g) == 3)
+
+	// Remove vertices 
+	TEdgeDescriptor e3 = addEdge(g,3,3);
+	addEdge(g,1,3);
+	addEdge(g,0,3);
+	addEdge(g,0,4);
+	SEQAN_TASSERT(outDegree(g, 0) == 3)
+	SEQAN_TASSERT(outDegree(g, 1) == 1)
+	SEQAN_TASSERT(targetVertex(g, e3) == 3)
+	SEQAN_TASSERT(sourceVertex(g, e3) == 3)
+	removeVertex(g, v3);
+	SEQAN_TASSERT(outDegree(g, 0) == 2)
+	SEQAN_TASSERT(outDegree(g, 1) == 0)
+	SEQAN_TASSERT(numVertices(g) == 4)
+	SEQAN_TASSERT(numEdges(g) == 2)
+
+	// Clear graph
+	clearEdges(g);
+	SEQAN_TASSERT(numVertices(g) == 4)
+	SEQAN_TASSERT(numEdges(g) == 0)
+	addEdge(g,2,0);
+	addEdge(g,4,1);
+	clearVertices(g);
+	SEQAN_TASSERT(numVertices(g) == 0)
+	SEQAN_TASSERT(numEdges(g) == 0)
+	addVertex(g);addVertex(g);addVertex(g);
+	addVertex(g);addVertex(g);
+	addEdge(g,2,0);
+	addEdge(g,4,1);
+	clear(g);
+	SEQAN_TASSERT(numVertices(g) == 0)
+	SEQAN_TASSERT(numEdges(g) == 0)
+	addVertex(g);addVertex(g);addVertex(g);
+	addVertex(g);addVertex(g);
+	addEdge(g,2,0);
+	addEdge(g,4,1);
+	addEdge(g,4,2);
+	removeVertex(g,3);
+	SEQAN_TASSERT(numVertices(g) == 4)
+	SEQAN_TASSERT(numEdges(g) == 3)
+	SEQAN_TASSERT(outDegree(g, 4) == 2)
+	SEQAN_TASSERT(inDegree(g, 4) == 0)
+
+	// Transpose
+	transpose(g); 
+	SEQAN_TASSERT(numVertices(g) == 4)
+	SEQAN_TASSERT(numEdges(g) == 3)
+	SEQAN_TASSERT(outDegree(g, 4) == 0)
+	SEQAN_TASSERT(inDegree(g, 4) == 2)
+	StandardGraph g_copy(g);
+	SEQAN_TASSERT(numVertices(g_copy) == 4)
+	SEQAN_TASSERT(numEdges(g_copy) == 3)
+	SEQAN_TASSERT(outDegree(g_copy, 4) == 0)
+	SEQAN_TASSERT(inDegree(g_copy, 4) == 2)
+	addVertex(g_copy);
+	addEdge(g_copy,3,0);
+	g_copy = g;
+	SEQAN_TASSERT(numVertices(g_copy) == 4)
+	SEQAN_TASSERT(numEdges(g_copy) == 3)
+	SEQAN_TASSERT(outDegree(g_copy, 4) == 0)
+	SEQAN_TASSERT(inDegree(g_copy, 4) == 2)
+	//Copies the graph and transposes just the copy
+	transpose(g,g_copy);  // g does not change!
+	SEQAN_TASSERT(numVertices(g_copy) == 4)
+	SEQAN_TASSERT(numEdges(g_copy) == 3)
+	SEQAN_TASSERT(outDegree(g_copy, 4) == 2)
+	SEQAN_TASSERT(inDegree(g_copy, 4) == 0)
+	removeVertex(g,0);
+
+
+
+	// Adjacency matrix
+	Matrix<unsigned int> mat;
+	getAdjacencyMatrix(g, mat);
+	unsigned int len = length(mat, 0);
+	SEQAN_TASSERT(getValue(mat, 1*len+4) == 1)
+	SEQAN_TASSERT(getValue(mat, 2*len+4) == 1)
+	SEQAN_TASSERT(getValue(mat, 2*len+2) == 0)
+
+//____________________________________________________________________________
+//Graph with edge cargo and edge ids
+	typedef Pair<char, int> TPair;
+	typedef Directed<TPair> TEdges;
+	typedef VertexDescriptor<Graph<TEdges> >::Type TVertexDescriptor2;
+	typedef EdgeDescriptor<Graph<TEdges> >::Type TEdgeDescriptor2;
+
+	Graph<TEdges> g2;
+	SEQAN_TASSERT(numVertices(g2) == 0)
+	SEQAN_TASSERT(numEdges(g2) == 0)
+	TVertexDescriptor2 ver0 = addVertex(g2);
+	SEQAN_TASSERT(ver0 == 0)
+	SEQAN_TASSERT(numVertices(g2) == 1)
+	TVertexDescriptor2 ver1 = addVertex(g2);
+	SEQAN_TASSERT(ver1 == 1)
+	SEQAN_TASSERT(numVertices(g2) == 2)
+	TEdgeDescriptor2 ed1 =addEdge(g2,ver0,ver0, TPair('a',3));
+	TEdgeDescriptor2 ed2 =addEdge(g2,0,1);
+	SEQAN_TASSERT((getCargo(ed1)).i1 == 'a')
+	SEQAN_TASSERT((getCargo(ed1)).i2 == 3)
+	SEQAN_TASSERT(targetVertex(g2, ed1) == v0)
+	SEQAN_TASSERT(targetVertex(g2, ed1) == 0)
+	SEQAN_TASSERT(sourceVertex(g2, ed1) == 0)
+	SEQAN_TASSERT(targetVertex(g2, ed2) == 1)
+	SEQAN_TASSERT(numEdges(g2) == 2)
+	assignCargo(ed2, TPair('b',4));
+	SEQAN_TASSERT((getCargo(ed1)).i1 == 'a')
+	SEQAN_TASSERT((getCargo(ed1)).i2 == 3)
+	SEQAN_TASSERT((getCargo(ed2)).i1 == 'b')
+	SEQAN_TASSERT((getCargo(ed2)).i2 == 4)
+	cargo(ed1) = TPair('c',1);
+	SEQAN_TASSERT((getCargo(ed1)).i1 == 'c')
+	SEQAN_TASSERT((getCargo(ed1)).i2 == 1)
+	addVertex(g2);
+	addVertex(g2);
+	addVertex(g2);
+	TEdgeDescriptor2 ed4 =addEdge(g2,1,4);
+	cargo(ed4) = TPair('z',100);
+	removeVertex(g2, 2);
+	Graph<TEdges> g2_copy(g2);
+	SEQAN_TASSERT(numVertices(g2_copy) == 4)
+	SEQAN_TASSERT(numEdges(g2_copy) == 3)
+	clearEdges(g2_copy);
+	SEQAN_TASSERT(numVertices(g2_copy) == 4)
+	SEQAN_TASSERT(numEdges(g2_copy) == 0)
+	clearVertices(g2_copy);
+	SEQAN_TASSERT(numVertices(g2_copy) == 0)
+	addVertex(g2_copy);addVertex(g2_copy);
+	addEdge(g2_copy,0,1);
+	clear(g2_copy);
+	SEQAN_TASSERT(numVertices(g2_copy) == 0)
+	addVertex(g2_copy);addVertex(g2_copy);
+	addEdge(g2_copy,0,1);
+	SEQAN_TASSERT(numEdges(g2) == 3)
+	SEQAN_TASSERT(outDegree(g2, 0) == 2)
+	SEQAN_TASSERT(inDegree(g2, 0) == 1)
+	transpose(g2, g2_copy);
+	SEQAN_TASSERT(outDegree(g2_copy, 0) == 1)
+	SEQAN_TASSERT(inDegree(g2_copy, 0) == 2)
+	SEQAN_TASSERT(numEdges(g2_copy) == 3)
+	TEdgeDescriptor2 edgCargo = addEdge(g2, 0, 0, TPair('m',3));
+	SEQAN_TASSERT((getCargo(edgCargo)).i1 == 'm')
+	SEQAN_TASSERT((getCargo(edgCargo)).i2 == 3)
+
+//____________________________________________________________________________
+//Graph without edge cargo and without edge ids
+	typedef Directed<void, WithoutEdgeId> TEdges3;
+	typedef VertexDescriptor<Graph<TEdges3> >::Type TVertexDescriptor3;
+	typedef EdgeDescriptor<Graph<TEdges3> >::Type TEdgeDescriptor3;
+
+	Graph<TEdges3> g3;
+	addVertex(g3);addVertex(g3);addVertex(g3);
+	addVertex(g3);addVertex(g3);
+	addEdge(g3,1,4);
+	SEQAN_TASSERT(numVertices(g3) == 5)
+	SEQAN_TASSERT(numEdges(g3) == 1)
+	TEdgeDescriptor3 edge3 = addEdge(g3,0,4);
+	SEQAN_TASSERT(_getId(edge3) == 0);
+	SEQAN_TASSERT(getCargo(edge3) == (void*) 0);
+	addEdge(g3,0,2);
+	addEdge(g3,0,0);
+	removeEdge(g3,0,4);
+	removeEdge(g3,0,2);
+	SEQAN_TASSERT(numEdges(g3) == 2)
+
+		
+	clear(g);
+	TVertexDescriptor edges[] = {0,1, 1,2};
+	unsigned int numEdg = 2;
+	std::string nameEd[] = {"ar", "ae"};
+	addEdges(g, edges, numEdg);
+	String<std::string> edMap;
+	initEdgeMap(g, edMap, nameEd);
+	SEQAN_TASSERT(getProperty(edMap, 0) == "ar")
+	SEQAN_TASSERT(getProperty(edMap, 1) == "ae")
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+void Test_Undirected() {
+//____________________________________________________________________________
+// Graph without edge cargo but with edge ids
+
+	typedef Graph<Undirected<void> > StandardGraph;
+	typedef VertexDescriptor<StandardGraph>::Type TVertexDescriptor;
+	typedef EdgeDescriptor<StandardGraph>::Type TEdgeDescriptor;
+	
+	StandardGraph g;
+	SEQAN_TASSERT(numVertices(g) == 0)
+	SEQAN_TASSERT(numEdges(g) == 0)
+	SEQAN_TASSERT(empty(g) == true)
+
+	// Add vertex
+	TVertexDescriptor v0 = addVertex(g);
+	SEQAN_TASSERT(v0 == 0)
+	SEQAN_TASSERT(outDegree(g, v0) == 0)	
+	SEQAN_TASSERT(inDegree(g, 0) == 0)
+	SEQAN_TASSERT(degree(g, 0) == 0)
+	SEQAN_TASSERT(numVertices(g) == 1)
+	SEQAN_TASSERT(empty(g) == false)
+	
+	// Add edge
+	// TEdgeDescriptor e1 =addEdge(g,v0,v0);  // Self edges are not allowed in undirected graphs
+	TVertexDescriptor v1 = addVertex(g);
+	TEdgeDescriptor e =addEdge(g,0,1);
+	SEQAN_TASSERT(v1 == 1)
+	SEQAN_TASSERT(numVertices(g) == 2)
+	SEQAN_TASSERT(targetVertex(g, e) == 1)
+	SEQAN_TASSERT(sourceVertex(g, e) == 0)
+	SEQAN_TASSERT(numEdges(g) == 1)
+	SEQAN_TASSERT(outDegree(g, v0) == 1)	
+	SEQAN_TASSERT(inDegree(g, 1) == 1)
+	SEQAN_TASSERT(inDegree(g, 0) == 1)	
+	SEQAN_TASSERT(degree(g, 0) == 1)
+
+	// Add more vertices and edges
+	addVertex(g);  //2
+	TVertexDescriptor v3 = addVertex(g);  //3
+	addVertex(g);  //4
+	addEdge(g,3,4);
+	TEdgeDescriptor my_edge = addEdge(g,3,1);
+	addEdge(g,3,0);
+	SEQAN_TASSERT(v3 == 3)
+	SEQAN_TASSERT(numVertices(g) == 5)
+	SEQAN_TASSERT(targetVertex(g, my_edge) == 3)
+	SEQAN_TASSERT(sourceVertex(g, my_edge) == 1)
+	SEQAN_TASSERT(numEdges(g) == 4)
+	SEQAN_TASSERT(outDegree(g, v3) == 3)
+	SEQAN_TASSERT(inDegree(g, v3) == 3)
+	SEQAN_TASSERT(degree(g, v3) == 3)
+
+	// Graph drawing
+	// ToDo: Undirected edges required!
+	// Raw output
+	std::cout << g << std::endl;
+
+	// Remove edges
+	removeEdge(g,my_edge);
+	removeEdge(g,0,1);
+	SEQAN_TASSERT(numEdges(g) == 2)
+
+	
+	// Remove vertices 
+	addVertex(g);  //5
+	addEdge(g,5,2);
+	addEdge(g,2,3);
+	addEdge(g,1,3);
+	addEdge(g,1,4);
+	SEQAN_TASSERT(outDegree(g, 3) == 4)
+	SEQAN_TASSERT(outDegree(g, 4) == 2)
+	removeVertex(g, v3);
+	SEQAN_TASSERT(outDegree(g, 4) == 1)
+	SEQAN_TASSERT(outDegree(g, 0) == 0)
+	SEQAN_TASSERT(numVertices(g) == 5)
+	SEQAN_TASSERT(numEdges(g) == 2)
+
+	// Clear graph
+	clearEdges(g);
+	SEQAN_TASSERT(numVertices(g) == 5)
+	SEQAN_TASSERT(numEdges(g) == 0)
+	addEdge(g,2,0);
+	addEdge(g,4,1);
+	clearVertices(g);
+	SEQAN_TASSERT(numVertices(g) == 0)
+	SEQAN_TASSERT(numEdges(g) == 0)
+	addVertex(g);addVertex(g);addVertex(g);
+	addVertex(g);addVertex(g);
+	addEdge(g,2,0);
+	addEdge(g,4,1);
+	clear(g);
+	SEQAN_TASSERT(numVertices(g) == 0)
+	SEQAN_TASSERT(numEdges(g) == 0)
+	addVertex(g);addVertex(g);addVertex(g);
+	addVertex(g);addVertex(g);
+	addEdge(g,2,0);
+	addEdge(g,4,1);
+	addEdge(g,4,2);
+	removeVertex(g,3);
+	SEQAN_TASSERT(numVertices(g) == 4)
+	SEQAN_TASSERT(numEdges(g) == 3)
+	SEQAN_TASSERT(outDegree(g, 4) == 2)
+	SEQAN_TASSERT(inDegree(g, 4) == 2)
+
+	// Transpose
+	transpose(g); 
+	SEQAN_TASSERT(numVertices(g) == 4)
+	SEQAN_TASSERT(numEdges(g) == 3)
+	SEQAN_TASSERT(outDegree(g, 4) == 2)
+	SEQAN_TASSERT(inDegree(g, 4) == 2)
+	StandardGraph g_copy(g);
+	SEQAN_TASSERT(numVertices(g_copy) == 4)
+	SEQAN_TASSERT(numEdges(g_copy) == 3)
+	SEQAN_TASSERT(outDegree(g_copy, 4) == 2)
+	SEQAN_TASSERT(inDegree(g_copy, 4) == 2)
+	addVertex(g_copy);
+	addEdge(g_copy,3,0);
+	g_copy = g;
+	SEQAN_TASSERT(numVertices(g_copy) == 4)
+	SEQAN_TASSERT(numEdges(g_copy) == 3)
+	SEQAN_TASSERT(outDegree(g_copy, 4) == 2)
+	SEQAN_TASSERT(inDegree(g_copy, 4) == 2)
+	//Copies the graph and transposes just the copy
+	transpose(g,g_copy);  // g does not change!
+	SEQAN_TASSERT(numVertices(g_copy) == 4)
+	SEQAN_TASSERT(numEdges(g_copy) == 3)
+	SEQAN_TASSERT(outDegree(g_copy, 4) == 2)
+	SEQAN_TASSERT(inDegree(g_copy, 4) == 2)
+
+	// Adjacency matrix
+	Matrix<unsigned int> mat;
+	getAdjacencyMatrix(g, mat);
+	unsigned int len = getIdUpperBound(g.data_id_managerV);
+	SEQAN_TASSERT(getValue(mat,0*len+2) == 1)
+	SEQAN_TASSERT(getValue(mat,3*len+2) == 0)
+	SEQAN_TASSERT(getValue(mat,0*len+2) == getValue(mat,2*len+0))
+	SEQAN_TASSERT(getValue(mat,1*len+4) == getValue(mat,4*len+1))
+	SEQAN_TASSERT(getValue(mat,2*len+4) == getValue(mat,4*len+2))
+
+//____________________________________________________________________________
+//Graph with edge cargo and edge ids
+	typedef Pair<char, int> TPair;
+	typedef Undirected<TPair> TEdges;
+	typedef VertexDescriptor<Graph<TEdges> >::Type TVertexDescriptor2;
+	typedef EdgeDescriptor<Graph<TEdges> >::Type TEdgeDescriptor2;
+
+	Graph<TEdges> g2;
+	SEQAN_TASSERT(numVertices(g2) == 0)
+	SEQAN_TASSERT(numEdges(g2) == 0)
+	TVertexDescriptor2 ver0 = addVertex(g2);
+	SEQAN_TASSERT(ver0 == 0)
+	SEQAN_TASSERT(numVertices(g2) == 1)
+	TVertexDescriptor2 ver1 = addVertex(g2);
+	SEQAN_TASSERT(ver1 == 1)
+	SEQAN_TASSERT(numVertices(g2) == 2)
+	TEdgeDescriptor2 ed1 =addEdge(g2,0,1);
+	SEQAN_TASSERT(targetVertex(g2, ed1) == 1)
+	SEQAN_TASSERT(sourceVertex(g2, ed1) == 0)
+	SEQAN_TASSERT(numEdges(g2) == 1)
+	assignCargo(ed1, TPair('a',3));
+	SEQAN_TASSERT((getCargo(ed1)).i1 == 'a')
+	SEQAN_TASSERT((getCargo(ed1)).i2 == 3)
+	cargo(ed1) = TPair('c',1);
+	SEQAN_TASSERT((getCargo(ed1)).i1 == 'c')
+	SEQAN_TASSERT((getCargo(ed1)).i2 == 1)
+	addVertex(g2);
+	addVertex(g2);
+	addVertex(g2);
+	TEdgeDescriptor2 ed4 =addEdge(g2,1,4);
+	cargo(ed4) = TPair('z',100);
+	removeVertex(g2, 2);
+	Graph<TEdges> g2_copy(g2);
+	SEQAN_TASSERT(numVertices(g2_copy) == 4)
+	SEQAN_TASSERT(numEdges(g2_copy) == 2)
+	clearEdges(g2_copy);
+	SEQAN_TASSERT(numVertices(g2_copy) == 4)
+	SEQAN_TASSERT(numEdges(g2_copy) == 0)
+	clearVertices(g2_copy);
+	SEQAN_TASSERT(numVertices(g2_copy) == 0)
+	addVertex(g2_copy);addVertex(g2_copy);
+	addEdge(g2_copy,0,1);
+	clear(g2_copy);
+	SEQAN_TASSERT(numVertices(g2_copy) == 0)
+	addVertex(g2_copy);addVertex(g2_copy);
+	addEdge(g2_copy,0,1);
+	transpose(g2, g2_copy);
+	SEQAN_TASSERT(outDegree(g2_copy, 0) == 1)
+	SEQAN_TASSERT(inDegree(g2_copy, 0) == 1)
+	SEQAN_TASSERT(numEdges(g2_copy) == 2)
+	TEdgeDescriptor2 edgCargo = addEdge(g2, 0, 3, TPair('m',3));
+	SEQAN_TASSERT((getCargo(edgCargo)).i1 == 'm')
+	SEQAN_TASSERT((getCargo(edgCargo)).i2 == 3)
+
+//____________________________________________________________________________
+//Graph without edge cargo and without edge ids
+	typedef Undirected<void, WithoutEdgeId> TEdges3;
+	typedef VertexDescriptor<Graph<TEdges3> >::Type TVertexDescriptor3;
+	typedef EdgeDescriptor<Graph<TEdges3> >::Type TEdgeDescriptor3;
+
+	Graph<TEdges3> g3;
+	addVertex(g3);addVertex(g3);addVertex(g3);
+	addVertex(g3);addVertex(g3);
+	addEdge(g3,1,4);
+	SEQAN_TASSERT(numVertices(g3) == 5)
+	SEQAN_TASSERT(numEdges(g3) == 1)
+	TEdgeDescriptor3 edge3 = addEdge(g3,0,4);
+	SEQAN_TASSERT(_getId(edge3) == 0);
+	SEQAN_TASSERT(getCargo(edge3) == (void*) 0);
+	addEdge(g3,0,2);
+	addEdge(g3,0,1);
+	removeEdge(g3,0,4);
+	removeEdge(g3,0,2);
+	SEQAN_TASSERT(numEdges(g3) == 2)
+	removeInEdges(g3,1);
+	SEQAN_TASSERT(numEdges(g3) == 0)
+	
+
+//____________________________________________________________________________
+// Undirected graph iterators
+	typedef Graph<Undirected<> > TGraphIter;
+	typedef VertexDescriptor<TGraphIter>::Type TVertexDescriptorIter;
+	typedef EdgeDescriptor<TGraphIter>::Type TEdgeDescriptorIter;
+	
+	TGraphIter gIter;
+	addVertex(gIter);addVertex(gIter);addVertex(gIter);addVertex(gIter);
+	addVertex(gIter);addVertex(gIter);addVertex(gIter);addVertex(gIter);
+	removeVertex(gIter,0);
+	removeVertex(gIter,5);
+	addEdge(gIter,2,7);
+	addEdge(gIter,2,3);
+	addEdge(gIter,2,4);
+	addEdge(gIter,4,3);
+	addEdge(gIter,3,6);
+	addEdge(gIter,4,6);
+
+	typedef Iterator<TGraphIter, OutEdgeIterator<> >::Type TOutEdgeIterator;
+	TOutEdgeIterator itOutEdge(gIter,3);
+	// Both ways are fast for undirected graphs
+	SEQAN_TASSERT(sourceVertex(gIter, getValue(itOutEdge))==3)
+	SEQAN_TASSERT(targetVertex(gIter, getValue(itOutEdge))==6)
+	SEQAN_TASSERT(sourceVertex(itOutEdge)==3)
+	SEQAN_TASSERT(targetVertex(itOutEdge)==6)
+	SEQAN_TASSERT(sourceVertex(gIter, value(itOutEdge))==3)
+	SEQAN_TASSERT(targetVertex(gIter, *itOutEdge)==6)
+	SEQAN_TASSERT(atEnd(itOutEdge)==false)
+	SEQAN_TASSERT(atBegin(itOutEdge)==true)
+	goNext(itOutEdge);
+	SEQAN_TASSERT(atEnd(itOutEdge)==false)
+	SEQAN_TASSERT(atBegin(itOutEdge)==false)
+	SEQAN_TASSERT(sourceVertex(itOutEdge)==3)
+	SEQAN_TASSERT(targetVertex(itOutEdge)==4)
+	++itOutEdge;
+	itOutEdge++;
+	SEQAN_TASSERT(atEnd(itOutEdge)==true)
+	SEQAN_TASSERT(atBegin(itOutEdge)==false)
+	goPrevious(itOutEdge);
+	SEQAN_TASSERT(sourceVertex(gIter, getValue(itOutEdge))==2)
+	SEQAN_TASSERT(targetVertex(gIter, getValue(itOutEdge))==3)
+	--itOutEdge;
+	itOutEdge--; 
+	SEQAN_TASSERT(sourceVertex(gIter, getValue(itOutEdge))==3)
+	SEQAN_TASSERT(targetVertex(gIter, getValue(itOutEdge))==6)
+	itOutEdge--;
+	itOutEdge--;
+	SEQAN_TASSERT(atBegin(itOutEdge)==true)
+	TOutEdgeIterator itEdge2(itOutEdge);
+	TOutEdgeIterator itEdge3;
+	itEdge3 = itOutEdge;
+	SEQAN_TASSERT(itOutEdge == itEdge2)
+	SEQAN_TASSERT(itEdge2 == itEdge3)
+	goEnd(itOutEdge);
+	SEQAN_TASSERT(itEdge2 != itOutEdge)
+	goEnd(itEdge2);
+	SEQAN_TASSERT(itEdge2 == itOutEdge)
+	goBegin(itEdge2);
+	SEQAN_TASSERT(atBegin(itEdge2)==true)
+	SEQAN_TASSERT(&gIter == &hostGraph(itOutEdge))
+
+	
+	typedef Iterator<TGraphIter, EdgeIterator<> >::Type TEdgeIterator;
+	TEdgeIterator itEdge(gIter);
+	SEQAN_TASSERT(sourceVertex(gIter, getValue(itEdge))==2)
+	SEQAN_TASSERT(targetVertex(gIter, getValue(itEdge))==4)
+	SEQAN_TASSERT(atBegin(itEdge)==true)
+	SEQAN_TASSERT(atEnd(itEdge)==false)
+	goNext(itEdge);
+	SEQAN_TASSERT(sourceVertex(gIter, getValue(itEdge))==2)
+	SEQAN_TASSERT(targetVertex(gIter, getValue(itEdge))==3)
+	SEQAN_TASSERT(atBegin(itEdge)==false)
+	SEQAN_TASSERT(atEnd(itEdge)==false)
+	goNext(itEdge);
+	SEQAN_TASSERT(sourceVertex(gIter, getValue(itEdge))==2)
+	SEQAN_TASSERT(targetVertex(gIter, getValue(itEdge))==7)
+	++itEdge;
+	SEQAN_TASSERT(sourceVertex(gIter, getValue(itEdge))==3)
+	SEQAN_TASSERT(targetVertex(gIter, getValue(itEdge))==6)
+	itEdge++;
+	SEQAN_TASSERT(sourceVertex(gIter, getValue(itEdge))==3)
+	SEQAN_TASSERT(targetVertex(gIter, getValue(itEdge))==4)
+	goNext(itEdge);
+	SEQAN_TASSERT(sourceVertex(gIter, getValue(itEdge))==4)
+	SEQAN_TASSERT(targetVertex(gIter, getValue(itEdge))==6)
+	goNext(itEdge);
+	SEQAN_TASSERT(atBegin(itEdge)==false)
+	SEQAN_TASSERT(atEnd(itEdge)==true)
+	goPrevious(itEdge);	
+	SEQAN_TASSERT(sourceVertex(gIter, getValue(itEdge))==4)
+	SEQAN_TASSERT(targetVertex(gIter, getValue(itEdge))==6)
+	--itEdge;	
+	SEQAN_TASSERT(sourceVertex(gIter, getValue(itEdge))==3)
+	SEQAN_TASSERT(targetVertex(gIter, getValue(itEdge))==4)
+	itEdge--;	
+	SEQAN_TASSERT(sourceVertex(gIter, getValue(itEdge))==3)
+	SEQAN_TASSERT(targetVertex(gIter, getValue(itEdge))==6)
+	goPrevious(itEdge);	
+	SEQAN_TASSERT(sourceVertex(gIter, getValue(itEdge))==2)
+	SEQAN_TASSERT(targetVertex(gIter, getValue(itEdge))==7)
+	goPrevious(itEdge);	
+	SEQAN_TASSERT(sourceVertex(gIter, getValue(itEdge))==2)
+	SEQAN_TASSERT(targetVertex(gIter, getValue(itEdge))==3)
+	goPrevious(itEdge);	
+	SEQAN_TASSERT(sourceVertex(gIter, getValue(itEdge))==2)
+	SEQAN_TASSERT(targetVertex(gIter, getValue(itEdge))==4)
+	SEQAN_TASSERT(atBegin(itEdge)==true)
+	SEQAN_TASSERT(atEnd(itEdge)==false)
 }
 
 
@@ -453,7 +1224,6 @@ void Test_Automaton() {
 	SEQAN_TASSERT(numEdges(g) == 5)
 	SEQAN_TASSERT(outDegree(g, v3) == 3)	
 
-	/*
 	// Output
 	// Raw output
 	std::cout << g << ::std::endl;
@@ -462,7 +1232,6 @@ void Test_Automaton() {
 	strm.open(TEST_PATH "my_automaton.dot", ios_base::out | ios_base::trunc);
 	write(strm,g,DotDrawing());
 	strm.close();
-	*/
 
 	// Remove edges
 	removeEdge(g,my_edge);
@@ -843,7 +1612,6 @@ void Test_WordGraph() {
 	SEQAN_TASSERT(parseString(g, 0, "gaggg") == 2)
 	SEQAN_TASSERT(parseString(g, 0, "gagggg") == 2)
 
-	/*
 	// Output
 	// Raw output
 	std::cout << g << ::std::endl;
@@ -852,7 +1620,6 @@ void Test_WordGraph() {
 	strm.open(TEST_PATH "my_wordgraph.dot", ios_base::out | ios_base::trunc);
 	write(strm,g,DotDrawing());
 	strm.close();
-	*/
 
 	TWordGraph g_tmp(g);
 	SEQAN_TASSERT(numVertices(g_tmp) == 8)
@@ -879,658 +1646,11 @@ void Test_WordGraph() {
 
 //////////////////////////////////////////////////////////////////////////////
 
-void Test_Oracle() {
-	Graph<Automaton<char> > g;
-	createOracleOnReverse(g,"announce");
-	SEQAN_TASSERT(parseString(g, 0, "e") == 1)
-	SEQAN_TASSERT(parseString(g, 0, "ec") == 2)
-	SEQAN_TASSERT(parseString(g, 0, "n") == 3)
-	SEQAN_TASSERT(parseString(g, 0, "a") == 8)
-	SEQAN_TASSERT(parseString(g, 0, "nn") == 7)
-
-	Graph<Automaton<Dna> > g2;
-	createOracle(g2,"ATATA");
-	SEQAN_TASSERT(parseString(g2, 0, "A") == 1)
-	SEQAN_TASSERT(parseString(g2, 0, "T") == 2)
-	SEQAN_TASSERT(parseString(g2, 0, "AT") == 2)
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-void Test_Trie() {
-	Graph<Automaton<char> > g;
-	String<String<unsigned int> > pos;
-	String<String<char> > keywords;
-	appendValue(keywords, String<char>("announce"));
-	appendValue(keywords, String<char>("annual"));
-	appendValue(keywords, String<char>("annually"));
-	createTrie(g,pos,keywords);
-
-	// Output
-	// File output
-	fstream strm;
-	strm.open(TEST_PATH "my_trie.dot", ios_base::out | ios_base::trunc);
-	String<String<char> > nodeMap;
-	_createTrieNodeNames(g, pos, nodeMap);
-	String<String<char> > edgeMap;
-	_createEdgeNames(g,edgeMap);
-	write(strm,g,nodeMap,edgeMap,DotDrawing());
-	strm.close();
-
-	Graph<Automaton<Dna> > gDna;
-	clear(pos);
-	String<String<Dna> > keyw;
-	appendValue(keyw, String<Dna>("ATATATA"));
-	appendValue(keyw, String<Dna>("TATAT"));
-	appendValue(keyw, String<Dna>("ACGATAT"));
-	createTrie(gDna,pos,keyw);
-
-	// Output
-	// File output
-	fstream strm2;
-	strm2.open(TEST_PATH "my_trie_dna.dot", ios_base::out | ios_base::trunc);
-	clear(nodeMap);
-	_createTrieNodeNames(gDna, pos, nodeMap);
-	clear(edgeMap);
-	_createEdgeNames(gDna,edgeMap);
-	write(strm2,gDna,nodeMap,edgeMap,DotDrawing());
-	strm2.close();
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-void Test_GraphU() {
-//____________________________________________________________________________
-// Graph without edge cargo but with edge ids
-
-	typedef Graph<EdgeListU<void> > StandardGraph;
-	typedef VertexDescriptor<StandardGraph>::Type TVertexDescriptor;
-	typedef EdgeDescriptor<StandardGraph>::Type TEdgeDescriptor;
-	
-	StandardGraph g;
-	SEQAN_TASSERT(numVertices(g) == 0)
-	SEQAN_TASSERT(numEdges(g) == 0)
-	SEQAN_TASSERT(empty(g) == true)
-
-	// Add vertex
-	TVertexDescriptor v0 = addVertex(g);
-	SEQAN_TASSERT(v0 == 0)
-	SEQAN_TASSERT(outDegree(g, v0) == 0)	
-	SEQAN_TASSERT(inDegree(g, 0) == 0)
-	SEQAN_TASSERT(degree(g, 0) == 0)
-	SEQAN_TASSERT(numVertices(g) == 1)
-	SEQAN_TASSERT(empty(g) == false)
-	
-	// Add edge
-	// TEdgeDescriptor e1 =addEdge(g,v0,v0);  // Self edges are not allowed in undirected graphs
-	TVertexDescriptor v1 = addVertex(g);
-	TEdgeDescriptor e =addEdge(g,0,1);
-	SEQAN_TASSERT(v1 == 1)
-	SEQAN_TASSERT(numVertices(g) == 2)
-	SEQAN_TASSERT(targetVertex(g, e) == 1)
-	SEQAN_TASSERT(sourceVertex(g, e) == 0)
-	SEQAN_TASSERT(numEdges(g) == 1)
-	SEQAN_TASSERT(outDegree(g, v0) == 1)	
-	SEQAN_TASSERT(inDegree(g, 1) == 1)
-	SEQAN_TASSERT(inDegree(g, 0) == 1)	
-	SEQAN_TASSERT(degree(g, 0) == 1)
-
-	// Add more vertices and edges
-	addVertex(g);  //2
-	TVertexDescriptor v3 = addVertex(g);  //3
-	addVertex(g);  //4
-	addEdge(g,3,4);
-	TEdgeDescriptor my_edge = addEdge(g,3,1);
-	addEdge(g,3,0);
-	SEQAN_TASSERT(v3 == 3)
-	SEQAN_TASSERT(numVertices(g) == 5)
-	SEQAN_TASSERT(targetVertex(g, my_edge) == 3)
-	SEQAN_TASSERT(sourceVertex(g, my_edge) == 1)
-	SEQAN_TASSERT(numEdges(g) == 4)
-	SEQAN_TASSERT(outDegree(g, v3) == 3)
-	SEQAN_TASSERT(inDegree(g, v3) == 3)
-	SEQAN_TASSERT(degree(g, v3) == 3)
-
-	// Graph drawing
-	// ToDo: Undirected edges required!
-	// Raw output
-	// std::cout << g << std::endl;
-
-	// Remove edges
-	removeEdge(g,my_edge);
-	removeEdge(g,0,1);
-	SEQAN_TASSERT(numEdges(g) == 2)
-
-	
-	// Remove vertices 
-	addVertex(g);  //5
-	addEdge(g,5,2);
-	addEdge(g,2,3);
-	addEdge(g,1,3);
-	addEdge(g,1,4);
-	SEQAN_TASSERT(outDegree(g, 3) == 4)
-	SEQAN_TASSERT(outDegree(g, 4) == 2)
-	removeVertex(g, v3);
-	SEQAN_TASSERT(outDegree(g, 4) == 1)
-	SEQAN_TASSERT(outDegree(g, 0) == 0)
-	SEQAN_TASSERT(numVertices(g) == 5)
-	SEQAN_TASSERT(numEdges(g) == 2)
-
-	// Clear graph
-	clearEdges(g);
-	SEQAN_TASSERT(numVertices(g) == 5)
-	SEQAN_TASSERT(numEdges(g) == 0)
-	addEdge(g,2,0);
-	addEdge(g,4,1);
-	clearVertices(g);
-	SEQAN_TASSERT(numVertices(g) == 0)
-	SEQAN_TASSERT(numEdges(g) == 0)
-	addVertex(g);addVertex(g);addVertex(g);
-	addVertex(g);addVertex(g);
-	addEdge(g,2,0);
-	addEdge(g,4,1);
-	clear(g);
-	SEQAN_TASSERT(numVertices(g) == 0)
-	SEQAN_TASSERT(numEdges(g) == 0)
-	addVertex(g);addVertex(g);addVertex(g);
-	addVertex(g);addVertex(g);
-	addEdge(g,2,0);
-	addEdge(g,4,1);
-	addEdge(g,4,2);
-	removeVertex(g,3);
-	SEQAN_TASSERT(numVertices(g) == 4)
-	SEQAN_TASSERT(numEdges(g) == 3)
-	SEQAN_TASSERT(outDegree(g, 4) == 2)
-	SEQAN_TASSERT(inDegree(g, 4) == 2)
-
-	// Transpose
-	transpose(g); 
-	SEQAN_TASSERT(numVertices(g) == 4)
-	SEQAN_TASSERT(numEdges(g) == 3)
-	SEQAN_TASSERT(outDegree(g, 4) == 2)
-	SEQAN_TASSERT(inDegree(g, 4) == 2)
-	StandardGraph g_copy(g);
-	SEQAN_TASSERT(numVertices(g_copy) == 4)
-	SEQAN_TASSERT(numEdges(g_copy) == 3)
-	SEQAN_TASSERT(outDegree(g_copy, 4) == 2)
-	SEQAN_TASSERT(inDegree(g_copy, 4) == 2)
-	addVertex(g_copy);
-	addEdge(g_copy,3,0);
-	g_copy = g;
-	SEQAN_TASSERT(numVertices(g_copy) == 4)
-	SEQAN_TASSERT(numEdges(g_copy) == 3)
-	SEQAN_TASSERT(outDegree(g_copy, 4) == 2)
-	SEQAN_TASSERT(inDegree(g_copy, 4) == 2)
-	//Copies the graph and transposes just the copy
-	transpose(g,g_copy);  // g does not change!
-	SEQAN_TASSERT(numVertices(g_copy) == 4)
-	SEQAN_TASSERT(numEdges(g_copy) == 3)
-	SEQAN_TASSERT(outDegree(g_copy, 4) == 2)
-	SEQAN_TASSERT(inDegree(g_copy, 4) == 2)
-
-	// Adjacency matrix
-	Matrix<unsigned int> mat;
-	getAdjacencyMatrix(g, mat);
-	unsigned int len = getIdUpperBound(g.data_id_managerV);
-	SEQAN_TASSERT(getValue(mat,0*len+2) == 1)
-	SEQAN_TASSERT(getValue(mat,3*len+2) == 0)
-	SEQAN_TASSERT(getValue(mat,0*len+2) == getValue(mat,2*len+0))
-	SEQAN_TASSERT(getValue(mat,1*len+4) == getValue(mat,4*len+1))
-	SEQAN_TASSERT(getValue(mat,2*len+4) == getValue(mat,4*len+2))
-
-//____________________________________________________________________________
-//Graph with edge cargo and edge ids
-	typedef Pair<char, int> TPair;
-	typedef EdgeListU<TPair> TEdges;
-	typedef VertexDescriptor<Graph<TEdges> >::Type TVertexDescriptor2;
-	typedef EdgeDescriptor<Graph<TEdges> >::Type TEdgeDescriptor2;
-
-	Graph<TEdges> g2;
-	SEQAN_TASSERT(numVertices(g2) == 0)
-	SEQAN_TASSERT(numEdges(g2) == 0)
-	TVertexDescriptor2 ver0 = addVertex(g2);
-	SEQAN_TASSERT(ver0 == 0)
-	SEQAN_TASSERT(numVertices(g2) == 1)
-	TVertexDescriptor2 ver1 = addVertex(g2);
-	SEQAN_TASSERT(ver1 == 1)
-	SEQAN_TASSERT(numVertices(g2) == 2)
-	TEdgeDescriptor2 ed1 =addEdge(g2,0,1);
-	SEQAN_TASSERT(targetVertex(g2, ed1) == 1)
-	SEQAN_TASSERT(sourceVertex(g2, ed1) == 0)
-	SEQAN_TASSERT(numEdges(g2) == 1)
-	assignCargo(ed1, TPair('a',3));
-	SEQAN_TASSERT((getCargo(ed1)).i1 == 'a')
-	SEQAN_TASSERT((getCargo(ed1)).i2 == 3)
-	cargo(ed1) = TPair('c',1);
-	SEQAN_TASSERT((getCargo(ed1)).i1 == 'c')
-	SEQAN_TASSERT((getCargo(ed1)).i2 == 1)
-	addVertex(g2);
-	addVertex(g2);
-	addVertex(g2);
-	TEdgeDescriptor2 ed4 =addEdge(g2,1,4);
-	cargo(ed4) = TPair('z',100);
-	removeVertex(g2, 2);
-	Graph<TEdges> g2_copy(g2);
-	SEQAN_TASSERT(numVertices(g2_copy) == 4)
-	SEQAN_TASSERT(numEdges(g2_copy) == 2)
-	clearEdges(g2_copy);
-	SEQAN_TASSERT(numVertices(g2_copy) == 4)
-	SEQAN_TASSERT(numEdges(g2_copy) == 0)
-	clearVertices(g2_copy);
-	SEQAN_TASSERT(numVertices(g2_copy) == 0)
-	addVertex(g2_copy);addVertex(g2_copy);
-	addEdge(g2_copy,0,1);
-	clear(g2_copy);
-	SEQAN_TASSERT(numVertices(g2_copy) == 0)
-	addVertex(g2_copy);addVertex(g2_copy);
-	addEdge(g2_copy,0,1);
-	transpose(g2, g2_copy);
-	SEQAN_TASSERT(outDegree(g2_copy, 0) == 1)
-	SEQAN_TASSERT(inDegree(g2_copy, 0) == 1)
-	SEQAN_TASSERT(numEdges(g2_copy) == 2)
-	TEdgeDescriptor2 edgCargo = addEdge(g2, 0, 3, TPair('m',3));
-	SEQAN_TASSERT((getCargo(edgCargo)).i1 == 'm')
-	SEQAN_TASSERT((getCargo(edgCargo)).i2 == 3)
-
-//____________________________________________________________________________
-//Graph without edge cargo and without edge ids
-	typedef EdgeListU<void, WithoutEdgeId> TEdges3;
-	typedef VertexDescriptor<Graph<TEdges3> >::Type TVertexDescriptor3;
-	typedef EdgeDescriptor<Graph<TEdges3> >::Type TEdgeDescriptor3;
-
-	Graph<TEdges3> g3;
-	addVertex(g3);addVertex(g3);addVertex(g3);
-	addVertex(g3);addVertex(g3);
-	addEdge(g3,1,4);
-	SEQAN_TASSERT(numVertices(g3) == 5)
-	SEQAN_TASSERT(numEdges(g3) == 1)
-	TEdgeDescriptor3 edge3 = addEdge(g3,0,4);
-	SEQAN_TASSERT(_getId(edge3) == 0);
-	SEQAN_TASSERT(getCargo(edge3) == (void*) 0);
-	addEdge(g3,0,2);
-	addEdge(g3,0,1);
-	removeEdge(g3,0,4);
-	removeEdge(g3,0,2);
-	SEQAN_TASSERT(numEdges(g3) == 2)
-	removeInEdges(g3,1);
-	SEQAN_TASSERT(numEdges(g3) == 0)
-	
-
-//____________________________________________________________________________
-// Undirected graph iterators
-	typedef Graph<EdgeListU<> > TGraphIter;
-	typedef VertexDescriptor<TGraphIter>::Type TVertexDescriptorIter;
-	typedef EdgeDescriptor<TGraphIter>::Type TEdgeDescriptorIter;
-	
-	TGraphIter gIter;
-	addVertex(gIter);addVertex(gIter);addVertex(gIter);addVertex(gIter);
-	addVertex(gIter);addVertex(gIter);addVertex(gIter);addVertex(gIter);
-	removeVertex(gIter,0);
-	removeVertex(gIter,5);
-	addEdge(gIter,2,7);
-	addEdge(gIter,2,3);
-	addEdge(gIter,2,4);
-	addEdge(gIter,4,3);
-	addEdge(gIter,3,6);
-	addEdge(gIter,4,6);
-
-	typedef Iterator<TGraphIter, OutEdgeIterator<> >::Type TOutEdgeIterator;
-	TOutEdgeIterator itOutEdge(gIter,3);
-	// Both ways are fast for undirected graphs
-	SEQAN_TASSERT(sourceVertex(gIter, getValue(itOutEdge))==3)
-	SEQAN_TASSERT(targetVertex(gIter, getValue(itOutEdge))==6)
-	SEQAN_TASSERT(sourceVertex(itOutEdge)==3)
-	SEQAN_TASSERT(targetVertex(itOutEdge)==6)
-	SEQAN_TASSERT(sourceVertex(gIter, value(itOutEdge))==3)
-	SEQAN_TASSERT(targetVertex(gIter, *itOutEdge)==6)
-	SEQAN_TASSERT(atEnd(itOutEdge)==false)
-	SEQAN_TASSERT(atBegin(itOutEdge)==true)
-	goNext(itOutEdge);
-	SEQAN_TASSERT(atEnd(itOutEdge)==false)
-	SEQAN_TASSERT(atBegin(itOutEdge)==false)
-	SEQAN_TASSERT(sourceVertex(itOutEdge)==3)
-	SEQAN_TASSERT(targetVertex(itOutEdge)==4)
-	++itOutEdge;
-	itOutEdge++;
-	SEQAN_TASSERT(atEnd(itOutEdge)==true)
-	SEQAN_TASSERT(atBegin(itOutEdge)==false)
-	goPrevious(itOutEdge);
-	SEQAN_TASSERT(sourceVertex(gIter, getValue(itOutEdge))==2)
-	SEQAN_TASSERT(targetVertex(gIter, getValue(itOutEdge))==3)
-	--itOutEdge;
-	itOutEdge--; 
-	SEQAN_TASSERT(sourceVertex(gIter, getValue(itOutEdge))==3)
-	SEQAN_TASSERT(targetVertex(gIter, getValue(itOutEdge))==6)
-	itOutEdge--;
-	itOutEdge--;
-	SEQAN_TASSERT(atBegin(itOutEdge)==true)
-	TOutEdgeIterator itEdge2(itOutEdge);
-	TOutEdgeIterator itEdge3;
-	itEdge3 = itOutEdge;
-	SEQAN_TASSERT(itOutEdge == itEdge2)
-	SEQAN_TASSERT(itEdge2 == itEdge3)
-	goEnd(itOutEdge);
-	SEQAN_TASSERT(itEdge2 != itOutEdge)
-	goEnd(itEdge2);
-	SEQAN_TASSERT(itEdge2 == itOutEdge)
-	goBegin(itEdge2);
-	SEQAN_TASSERT(atBegin(itEdge2)==true)
-	SEQAN_TASSERT(&gIter == &hostGraph(itOutEdge))
-
-	
-	typedef Iterator<TGraphIter, EdgeIterator<> >::Type TEdgeIterator;
-	TEdgeIterator itEdge(gIter);
-	SEQAN_TASSERT(sourceVertex(gIter, getValue(itEdge))==2)
-	SEQAN_TASSERT(targetVertex(gIter, getValue(itEdge))==4)
-	SEQAN_TASSERT(atBegin(itEdge)==true)
-	SEQAN_TASSERT(atEnd(itEdge)==false)
-	goNext(itEdge);
-	SEQAN_TASSERT(sourceVertex(gIter, getValue(itEdge))==2)
-	SEQAN_TASSERT(targetVertex(gIter, getValue(itEdge))==3)
-	SEQAN_TASSERT(atBegin(itEdge)==false)
-	SEQAN_TASSERT(atEnd(itEdge)==false)
-	goNext(itEdge);
-	SEQAN_TASSERT(sourceVertex(gIter, getValue(itEdge))==2)
-	SEQAN_TASSERT(targetVertex(gIter, getValue(itEdge))==7)
-	++itEdge;
-	SEQAN_TASSERT(sourceVertex(gIter, getValue(itEdge))==3)
-	SEQAN_TASSERT(targetVertex(gIter, getValue(itEdge))==6)
-	itEdge++;
-	SEQAN_TASSERT(sourceVertex(gIter, getValue(itEdge))==3)
-	SEQAN_TASSERT(targetVertex(gIter, getValue(itEdge))==4)
-	goNext(itEdge);
-	SEQAN_TASSERT(sourceVertex(gIter, getValue(itEdge))==4)
-	SEQAN_TASSERT(targetVertex(gIter, getValue(itEdge))==6)
-	goNext(itEdge);
-	SEQAN_TASSERT(atBegin(itEdge)==false)
-	SEQAN_TASSERT(atEnd(itEdge)==true)
-	goPrevious(itEdge);	
-	SEQAN_TASSERT(sourceVertex(gIter, getValue(itEdge))==4)
-	SEQAN_TASSERT(targetVertex(gIter, getValue(itEdge))==6)
-	--itEdge;	
-	SEQAN_TASSERT(sourceVertex(gIter, getValue(itEdge))==3)
-	SEQAN_TASSERT(targetVertex(gIter, getValue(itEdge))==4)
-	itEdge--;	
-	SEQAN_TASSERT(sourceVertex(gIter, getValue(itEdge))==3)
-	SEQAN_TASSERT(targetVertex(gIter, getValue(itEdge))==6)
-	goPrevious(itEdge);	
-	SEQAN_TASSERT(sourceVertex(gIter, getValue(itEdge))==2)
-	SEQAN_TASSERT(targetVertex(gIter, getValue(itEdge))==7)
-	goPrevious(itEdge);	
-	SEQAN_TASSERT(sourceVertex(gIter, getValue(itEdge))==2)
-	SEQAN_TASSERT(targetVertex(gIter, getValue(itEdge))==3)
-	goPrevious(itEdge);	
-	SEQAN_TASSERT(sourceVertex(gIter, getValue(itEdge))==2)
-	SEQAN_TASSERT(targetVertex(gIter, getValue(itEdge))==4)
-	SEQAN_TASSERT(atBegin(itEdge)==true)
-	SEQAN_TASSERT(atEnd(itEdge)==false)
-}
-
-
-//////////////////////////////////////////////////////////////////////////////
-
-void Test_Graph() {
-//____________________________________________________________________________
-// Graph without edge cargo but with edge ids
-
-	typedef Graph<> StandardGraph;
-	typedef VertexDescriptor<Graph<> >::Type TVertexDescriptor;
-	typedef EdgeDescriptor<Graph<> >::Type TEdgeDescriptor;
-	
-	StandardGraph g;
-	SEQAN_TASSERT(numVertices(g) == 0)
-	SEQAN_TASSERT(numEdges(g) == 0)
-	SEQAN_TASSERT(empty(g) == true)
-	
-	// Add vertex
-	TVertexDescriptor v0 = addVertex(g);
-	SEQAN_TASSERT(v0 == 0)
-	SEQAN_TASSERT(outDegree(g, v0) == 0)	
-	SEQAN_TASSERT(inDegree(g, 0) == 0)
-	SEQAN_TASSERT(degree(g, 0) == 0)
-	SEQAN_TASSERT(numVertices(g) == 1)
-	SEQAN_TASSERT(empty(g) == false)
-	
-	// Add edge
-	TEdgeDescriptor e1 =addEdge(g,v0,v0);
-	SEQAN_TASSERT(targetVertex(g, e1) == 0)
-	SEQAN_TASSERT(sourceVertex(g, e1) == 0)  //Expensive in standard graph!
-	SEQAN_TASSERT(numEdges(g) == 1)
-	SEQAN_TASSERT(outDegree(g, v0) == 1)	
-	SEQAN_TASSERT(inDegree(g, v0) == 1)
-	SEQAN_TASSERT(degree(g, v0) == 2)
-	
-	// Add further edges and vertices
-	TVertexDescriptor v1 = addVertex(g);
-	TEdgeDescriptor e2 =addEdge(g,0,1);
-	SEQAN_TASSERT(v1 == 1)
-	SEQAN_TASSERT(numVertices(g) == 2)
-	SEQAN_TASSERT(targetVertex(g, e2) == 1)
-	SEQAN_TASSERT(sourceVertex(g, e2) == 0)
-	SEQAN_TASSERT(numEdges(g) == 2)
-	SEQAN_TASSERT(outDegree(g, v0) == 2)	
-	SEQAN_TASSERT(inDegree(g, 1) == 1)
-	SEQAN_TASSERT(inDegree(g, 0) == 1)	
-	SEQAN_TASSERT(degree(g, 0) == 3)
-	
-	// Add more vertices and edges
-	addVertex(g);  //2
-	TVertexDescriptor v3 = addVertex(g);  //3
-	addVertex(g);  //4
-	addEdge(g,3,4);
-	TEdgeDescriptor my_edge = addEdge(g,3,1);
-	addEdge(g,3,0);
-	SEQAN_TASSERT(v3 == 3)
-	SEQAN_TASSERT(numVertices(g) == 5)
-	SEQAN_TASSERT(targetVertex(g, e2) == 1)
-	SEQAN_TASSERT(sourceVertex(g, e2) == 0)
-	SEQAN_TASSERT(targetVertex(g, my_edge) == 1)
-	SEQAN_TASSERT(sourceVertex(g, my_edge) == 3)
-	SEQAN_TASSERT(numEdges(g) == 5)
-	SEQAN_TASSERT(outDegree(g, v3) == 3)	
-	
-	// Graph drawing
-	removeEdge(g,0,0); // ToDo: Drawing of self edges
-	addEdge(g,4,3);
-	/*
-	// Raw output
-	std::cout << g << ::std::endl;
-	// File output
-	fstream strm;
-	strm.open(TEST_PATH "my_graph.dot", ios_base::out | ios_base::trunc);
-	write(strm,g,DotDrawing());
-	strm.close();
-	*/
-	removeEdge(g,4,3);
-	addEdge(g,0,0);
-
-	// Remove edges
-	removeEdge(g,my_edge);
-	removeEdge(g,0,1);
-	SEQAN_TASSERT(numEdges(g) == 3)
-
-	// Remove vertices 
-	TEdgeDescriptor e3 = addEdge(g,3,3);
-	addEdge(g,1,3);
-	addEdge(g,0,3);
-	addEdge(g,0,4);
-	SEQAN_TASSERT(outDegree(g, 0) == 3)
-	SEQAN_TASSERT(outDegree(g, 1) == 1)
-	SEQAN_TASSERT(targetVertex(g, e3) == 3)
-	SEQAN_TASSERT(sourceVertex(g, e3) == 3)
-	removeVertex(g, v3);
-	SEQAN_TASSERT(outDegree(g, 0) == 2)
-	SEQAN_TASSERT(outDegree(g, 1) == 0)
-	SEQAN_TASSERT(numVertices(g) == 4)
-	SEQAN_TASSERT(numEdges(g) == 2)
-
-	// Clear graph
-	clearEdges(g);
-	SEQAN_TASSERT(numVertices(g) == 4)
-	SEQAN_TASSERT(numEdges(g) == 0)
-	addEdge(g,2,0);
-	addEdge(g,4,1);
-	clearVertices(g);
-	SEQAN_TASSERT(numVertices(g) == 0)
-	SEQAN_TASSERT(numEdges(g) == 0)
-	addVertex(g);addVertex(g);addVertex(g);
-	addVertex(g);addVertex(g);
-	addEdge(g,2,0);
-	addEdge(g,4,1);
-	clear(g);
-	SEQAN_TASSERT(numVertices(g) == 0)
-	SEQAN_TASSERT(numEdges(g) == 0)
-	addVertex(g);addVertex(g);addVertex(g);
-	addVertex(g);addVertex(g);
-	addEdge(g,2,0);
-	addEdge(g,4,1);
-	addEdge(g,4,2);
-	removeVertex(g,3);
-	SEQAN_TASSERT(numVertices(g) == 4)
-	SEQAN_TASSERT(numEdges(g) == 3)
-	SEQAN_TASSERT(outDegree(g, 4) == 2)
-	SEQAN_TASSERT(inDegree(g, 4) == 0)
-
-	// Transpose
-	transpose(g); 
-	SEQAN_TASSERT(numVertices(g) == 4)
-	SEQAN_TASSERT(numEdges(g) == 3)
-	SEQAN_TASSERT(outDegree(g, 4) == 0)
-	SEQAN_TASSERT(inDegree(g, 4) == 2)
-	StandardGraph g_copy(g);
-	SEQAN_TASSERT(numVertices(g_copy) == 4)
-	SEQAN_TASSERT(numEdges(g_copy) == 3)
-	SEQAN_TASSERT(outDegree(g_copy, 4) == 0)
-	SEQAN_TASSERT(inDegree(g_copy, 4) == 2)
-	addVertex(g_copy);
-	addEdge(g_copy,3,0);
-	g_copy = g;
-	SEQAN_TASSERT(numVertices(g_copy) == 4)
-	SEQAN_TASSERT(numEdges(g_copy) == 3)
-	SEQAN_TASSERT(outDegree(g_copy, 4) == 0)
-	SEQAN_TASSERT(inDegree(g_copy, 4) == 2)
-	//Copies the graph and transposes just the copy
-	transpose(g,g_copy);  // g does not change!
-	SEQAN_TASSERT(numVertices(g_copy) == 4)
-	SEQAN_TASSERT(numEdges(g_copy) == 3)
-	SEQAN_TASSERT(outDegree(g_copy, 4) == 2)
-	SEQAN_TASSERT(inDegree(g_copy, 4) == 0)
-	removeVertex(g,0);
-
-
-
-	// Adjacency matrix
-	Matrix<unsigned int> mat;
-	getAdjacencyMatrix(g, mat);
-	unsigned int len = length(mat, 0);
-	SEQAN_TASSERT(getValue(mat, 1*len+4) == 1)
-	SEQAN_TASSERT(getValue(mat, 2*len+4) == 1)
-	SEQAN_TASSERT(getValue(mat, 2*len+2) == 0)
-
-//____________________________________________________________________________
-//Graph with edge cargo and edge ids
-	typedef Pair<char, int> TPair;
-	typedef EdgeList<TPair> TEdges;
-	typedef VertexDescriptor<Graph<TEdges> >::Type TVertexDescriptor2;
-	typedef EdgeDescriptor<Graph<TEdges> >::Type TEdgeDescriptor2;
-
-	Graph<TEdges> g2;
-	SEQAN_TASSERT(numVertices(g2) == 0)
-	SEQAN_TASSERT(numEdges(g2) == 0)
-	TVertexDescriptor2 ver0 = addVertex(g2);
-	SEQAN_TASSERT(ver0 == 0)
-	SEQAN_TASSERT(numVertices(g2) == 1)
-	TVertexDescriptor2 ver1 = addVertex(g2);
-	SEQAN_TASSERT(ver1 == 1)
-	SEQAN_TASSERT(numVertices(g2) == 2)
-	TEdgeDescriptor2 ed1 =addEdge(g2,ver0,ver0, TPair('a',3));
-	TEdgeDescriptor2 ed2 =addEdge(g2,0,1);
-	SEQAN_TASSERT((getCargo(ed1)).i1 == 'a')
-	SEQAN_TASSERT((getCargo(ed1)).i2 == 3)
-	SEQAN_TASSERT(targetVertex(g2, ed1) == v0)
-	SEQAN_TASSERT(targetVertex(g2, ed1) == 0)
-	SEQAN_TASSERT(sourceVertex(g2, ed1) == 0)
-	SEQAN_TASSERT(targetVertex(g2, ed2) == 1)
-	SEQAN_TASSERT(numEdges(g2) == 2)
-	assignCargo(ed2, TPair('b',4));
-	SEQAN_TASSERT((getCargo(ed1)).i1 == 'a')
-	SEQAN_TASSERT((getCargo(ed1)).i2 == 3)
-	SEQAN_TASSERT((getCargo(ed2)).i1 == 'b')
-	SEQAN_TASSERT((getCargo(ed2)).i2 == 4)
-	cargo(ed1) = TPair('c',1);
-	SEQAN_TASSERT((getCargo(ed1)).i1 == 'c')
-	SEQAN_TASSERT((getCargo(ed1)).i2 == 1)
-	addVertex(g2);
-	addVertex(g2);
-	addVertex(g2);
-	TEdgeDescriptor2 ed4 =addEdge(g2,1,4);
-	cargo(ed4) = TPair('z',100);
-	removeVertex(g2, 2);
-	Graph<TEdges> g2_copy(g2);
-	SEQAN_TASSERT(numVertices(g2_copy) == 4)
-	SEQAN_TASSERT(numEdges(g2_copy) == 3)
-	clearEdges(g2_copy);
-	SEQAN_TASSERT(numVertices(g2_copy) == 4)
-	SEQAN_TASSERT(numEdges(g2_copy) == 0)
-	clearVertices(g2_copy);
-	SEQAN_TASSERT(numVertices(g2_copy) == 0)
-	addVertex(g2_copy);addVertex(g2_copy);
-	addEdge(g2_copy,0,1);
-	clear(g2_copy);
-	SEQAN_TASSERT(numVertices(g2_copy) == 0)
-	addVertex(g2_copy);addVertex(g2_copy);
-	addEdge(g2_copy,0,1);
-	SEQAN_TASSERT(numEdges(g2) == 3)
-	SEQAN_TASSERT(outDegree(g2, 0) == 2)
-	SEQAN_TASSERT(inDegree(g2, 0) == 1)
-	transpose(g2, g2_copy);
-	SEQAN_TASSERT(outDegree(g2_copy, 0) == 1)
-	SEQAN_TASSERT(inDegree(g2_copy, 0) == 2)
-	SEQAN_TASSERT(numEdges(g2_copy) == 3)
-	TEdgeDescriptor2 edgCargo = addEdge(g2, 0, 0, TPair('m',3));
-	SEQAN_TASSERT((getCargo(edgCargo)).i1 == 'm')
-	SEQAN_TASSERT((getCargo(edgCargo)).i2 == 3)
-
-
-//____________________________________________________________________________
-//Graph without edge cargo and without edge ids
-	typedef EdgeList<void, WithoutEdgeId> TEdges3;
-	typedef VertexDescriptor<Graph<TEdges3> >::Type TVertexDescriptor3;
-	typedef EdgeDescriptor<Graph<TEdges3> >::Type TEdgeDescriptor3;
-
-	Graph<TEdges3> g3;
-	addVertex(g3);addVertex(g3);addVertex(g3);
-	addVertex(g3);addVertex(g3);
-	addEdge(g3,1,4);
-	SEQAN_TASSERT(numVertices(g3) == 5)
-	SEQAN_TASSERT(numEdges(g3) == 1)
-	TEdgeDescriptor3 edge3 = addEdge(g3,0,4);
-	SEQAN_TASSERT(_getId(edge3) == 0);
-	SEQAN_TASSERT(getCargo(edge3) == (void*) 0);
-	addEdge(g3,0,2);
-	addEdge(g3,0,0);
-	removeEdge(g3,0,4);
-	removeEdge(g3,0,2);
-	SEQAN_TASSERT(numEdges(g3) == 2)
-
-	clear(g);
-	TVertexDescriptor edges[] = {0,1, 1,2};
-	unsigned int numEdg = 2;
-	std::string nameEd[] = {"ar", "ae"};
-	addEdges(g, edges, numEdg);
-	String<std::string> edMap;
-	initEdgeMap(g, edMap, nameEd);
-	SEQAN_TASSERT(getProperty(edMap, 0) == "ar")
-	SEQAN_TASSERT(getProperty(edMap, 1) == "ae")
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
 void Test_Tree() {
 //____________________________________________________________________________
 // Tree without edge cargo
 
-	typedef Graph<EdgeListT<void> > TTree;
+	typedef Graph<Tree<void> > TTree;
 	typedef VertexDescriptor<TTree>::Type TVertexDescriptor;
 	typedef EdgeDescriptor<TTree>::Type TEdgeDescriptor;
 	
@@ -1567,6 +1687,7 @@ void Test_Tree() {
 	SEQAN_TASSERT(numEdges(g) == 8)
 	SEQAN_TASSERT(numVertices(g) == 9)
 	TEdgeDescriptor childC2C1C1e = findEdge(g, childC2C1C1, childC2C1);
+	std::cout << g << std::endl;
 	SEQAN_TASSERT(childVertex(g, childC2C1C1e) == childC2C1C1)  
 	SEQAN_TASSERT(parentVertex(g, childC2C1C1e) == childC2C1)
 	removeChild(g, rootV, childC2);
@@ -1651,7 +1772,7 @@ void Test_Tree() {
 // Tree with cargo
 
 	typedef Pair<char, int> TPair;
-	typedef EdgeListT<TPair> TEdges;
+	typedef Tree<TPair> TEdges;
 	typedef Graph<TEdges> TCargoGraph;
 	typedef VertexDescriptor<TCargoGraph>::Type TVertexDescriptor2;
 	typedef EdgeDescriptor<TCargoGraph>::Type TEdgeDescriptor2;
@@ -1681,158 +1802,6 @@ void Test_Tree() {
 	cargo(ed1) = TPair('c',1);
 	SEQAN_TASSERT((getCargo(ed1)).i1 == 'c')
 	SEQAN_TASSERT((getCargo(ed1)).i2 == 1)
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename TGraphType>
-void Test_GraphExternalProperty() {
-//____________________________________________________________________________
-// Graph external property maps
-	typedef Graph<TGraphType> TGraph;
-	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
-	typedef typename Size<TGraph>::Type TSize;
-	
-	TGraph g;
-	TVertexDescriptor v0 = addVertex(g);
-	TVertexDescriptor v1 = addVertex(g);
-	addVertex(g);
-	TEdgeDescriptor e2 =addEdge(g,0,2,'t');
-	TEdgeDescriptor e1 =addEdge(g,v0,v1,'a');
-
-	
-	// Test external property maps
-	String<int> dMap;
-	initVertexMap(g,dMap);
-
-	String<char> eMap;
-	initEdgeMap(g,eMap);
-
-	assignProperty(dMap, v0, 3);
-	assignProperty(dMap, v1, 1);
-	assignProperty(eMap, e1, 'a');
-	assignProperty(eMap, e2, 'b');
-	SEQAN_TASSERT(getProperty(dMap, v0) == 3)
-	SEQAN_TASSERT(getProperty(dMap, v1) == 1)
-	SEQAN_TASSERT(getProperty(eMap, e2) == 'b')
-	SEQAN_TASSERT(getProperty(eMap, e1) == 'a')
-	property(dMap, v1) = 2;
-	property(eMap, e2) = 'c';
-	SEQAN_TASSERT(getProperty(dMap, v1) == 2)
-	SEQAN_TASSERT(getProperty(eMap, e2) == 'c')
-
-	String<int> const dMap2(dMap);
-	SEQAN_TASSERT(getProperty(dMap2, v0) == 3)
-	SEQAN_TASSERT(getProperty(dMap2, v1) == 2)
-	SEQAN_TASSERT(property(dMap2, v1) == 2)
-
-	clear(g);
-	addVertex(g);addVertex(g);addVertex(g);
-
-	char names[] = {'r', 's','t'};
-	String<char> nameMap;
-	initVertexMap(g,nameMap, names);
-	SEQAN_TASSERT(getProperty(nameMap, v0) == 'r')
-	SEQAN_TASSERT(getProperty(nameMap, v1) == 's')
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-void Test_GraphInternalProperty() {
-//____________________________________________________________________________
-// Graph properties
-	typedef Pair<char, int> TPair;
-	typedef EdgeList<TPair> TEdges;
-	typedef Graph<TEdges> TGraph;
-	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
-
-	// Create a simple graph
-	TGraph g;
-	TVertexDescriptor v0 = addVertex(g);
-	TVertexDescriptor v1 = addVertex(g);
-	addVertex(g);
-	TEdgeDescriptor e1 =addEdge(g,0,2);
-	TEdgeDescriptor e2 =addEdge(g,v0,v1);
-
-	// First Variant: Explicit internal map with member Ids
-	InternalMap<TPair, 1> eMap1; // This property map is used to access the first member
-	InternalMap<TPair, 2> eMap2; // This property map is used to access the second member
-	initEdgeMap(g,eMap1);
-	initEdgeMap(g,eMap2);
-	assignProperty(eMap1, e1, 'a');
-	assignProperty(eMap2, e1, 20);
-	assignProperty(eMap1, e2, 'b');
-	assignProperty(eMap2, e2, 50);
-	SEQAN_TASSERT(getProperty(eMap1, e1) == 'a')
-	SEQAN_TASSERT(getProperty(eMap2, e1) == 20)
-	SEQAN_TASSERT(getProperty(eMap1, e2) == 'b')
-	SEQAN_TASSERT(getProperty(eMap2, e2) == 50)
-	// Note: That these properties are stored inside the cargo of each edge
-	SEQAN_TASSERT(getCargo(e1).i1 == 'a')
-	SEQAN_TASSERT(getCargo(e1).i2 == 20)
-	SEQAN_TASSERT(getCargo(e2).i1 == 'b')
-	SEQAN_TASSERT(getCargo(e2).i2 == 50)
-	assignProperty(eMap1, e1, 'c');
-	assignProperty(eMap2, e1, 10);
-	SEQAN_TASSERT(getProperty(eMap1, e1) == 'c')
-	SEQAN_TASSERT(getProperty(eMap2, e1) == 10)
-	SEQAN_TASSERT(property(eMap1, e1) == 'c')
-	SEQAN_TASSERT(property(eMap2, e1) == 10)
-	InternalMap<TPair, 1> const eMap3(eMap1);
-	InternalMap<TPair, 2> const eMap31(eMap2);
-	SEQAN_TASSERT(getProperty(eMap3, e1) == 'c')
-	SEQAN_TASSERT(getProperty(eMap3, e2) == 'b')
-	SEQAN_TASSERT(getProperty(eMap31, e1) == 10)
-	SEQAN_TASSERT(property(eMap31, e1) == 10)
-	SEQAN_TASSERT(property(eMap3, e2) == 'b')
-	// Create a simple graph with unsigned int cargo
-	typedef EdgeDescriptor<Graph<EdgeList<unsigned int> > >::Type TEdgeDescriptor2;
-	Graph<EdgeList<unsigned int> > g2;
-	addVertex(g2);
-	addVertex(g2);
-	TEdgeDescriptor2 edge1 =addEdge(g2,v0,v0);
-	addEdge(g2,0,1);
-	InternalMap<unsigned int> edgeMap;
-	initEdgeMap(g2,edgeMap);
-	assignProperty(edgeMap, edge1 ,3);
-	SEQAN_TASSERT(getProperty(edgeMap, edge1) == 3)
-	SEQAN_TASSERT(property(edgeMap, edge1) == 3)
-	InternalMap<unsigned int> const edgeMap2(edgeMap);
-	SEQAN_TASSERT(getProperty(edgeMap2, edge1) == 3)
-	SEQAN_TASSERT(property(edgeMap2, edge1) == 3)
-
-	// Second Variant: Pointer to member using a class
-	InternalPointerMap<char TPair:: *, &TPair::i1> eMap4;
-	InternalPointerMap<int TPair:: *, &TPair::i2> eMap5;
-	initEdgeMap(g,eMap4);
-	initEdgeMap(g,eMap5);
-	assignProperty(eMap4, e1, 'c');
-	assignProperty(eMap5, e1, 10);
-	assignProperty(eMap4, e2, 'd');
-	assignProperty(eMap5, e2, 30);
-	SEQAN_TASSERT(getProperty(eMap4, e1) == 'c')
-	SEQAN_TASSERT(getProperty(eMap5, e1) == 10)
-	SEQAN_TASSERT(getProperty(eMap4, e2) == 'd')
-	SEQAN_TASSERT(getProperty(eMap5, e2) == 30)
-	property(eMap4,e1)='z';
-	property(eMap5,e1)=100;
-	SEQAN_TASSERT(getProperty(eMap4, e1) == 'z')
-	SEQAN_TASSERT(getProperty(eMap5, e1) == 100)
-	InternalPointerMap<char TPair:: *, &TPair::i1> const eMap6(eMap4);
-	SEQAN_TASSERT(getProperty(eMap6, e1) == 'z')
-	SEQAN_TASSERT(getProperty(eMap6, e2) == 'd')
-	SEQAN_TASSERT(property(eMap6, e2) == 'd')
-	
-	// Third Variant: Raw pointer to member
-	char TPair:: * pseudo_map = &TPair::i1;
-	assignProperty(pseudo_map, e1, 'z');
-	assignProperty(pseudo_map, e2, 'w');
-	SEQAN_TASSERT(getProperty(pseudo_map, e1) == 'z')
-	SEQAN_TASSERT(getProperty(pseudo_map, e2) == 'w')
-	property(pseudo_map,e1)='k';
-	SEQAN_TASSERT(getProperty(pseudo_map, e1) == 'k')
 }
 
 
@@ -2119,6 +2088,160 @@ void Test_GraphAdjacencyIterator() {
 
 //////////////////////////////////////////////////////////////////////////////
 
+template <typename TGraphType>
+void Test_GraphExternalProperty() {
+//____________________________________________________________________________
+// Graph external property maps
+	typedef Graph<TGraphType> TGraph;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef typename Size<TGraph>::Type TSize;
+	
+	TGraph g;
+	TVertexDescriptor v0 = addVertex(g);
+	TVertexDescriptor v1 = addVertex(g);
+	addVertex(g);
+	TEdgeDescriptor e2 =addEdge(g,0,2,'t');
+	TEdgeDescriptor e1 =addEdge(g,v0,v1,'a');
+
+	
+	// Test external property maps
+	String<int> dMap;
+	initVertexMap(g,dMap);
+
+	String<char> eMap;
+	initEdgeMap(g,eMap);
+
+	assignProperty(dMap, v0, 3);
+	assignProperty(dMap, v1, 1);
+	assignProperty(eMap, e1, 'a');
+	assignProperty(eMap, e2, 'b');
+	SEQAN_TASSERT(getProperty(dMap, v0) == 3)
+	SEQAN_TASSERT(getProperty(dMap, v1) == 1)
+	SEQAN_TASSERT(getProperty(eMap, e2) == 'b')
+	SEQAN_TASSERT(getProperty(eMap, e1) == 'a')
+	property(dMap, v1) = 2;
+	property(eMap, e2) = 'c';
+	SEQAN_TASSERT(getProperty(dMap, v1) == 2)
+	SEQAN_TASSERT(getProperty(eMap, e2) == 'c')
+
+	String<int> const dMap2(dMap);
+	SEQAN_TASSERT(getProperty(dMap2, v0) == 3)
+	SEQAN_TASSERT(getProperty(dMap2, v1) == 2)
+	SEQAN_TASSERT(property(dMap2, v1) == 2)
+
+	clear(g);
+	addVertex(g);addVertex(g);addVertex(g);
+
+	char names[] = {'r', 's','t'};
+	String<char> nameMap;
+	initVertexMap(g,nameMap, names);
+	SEQAN_TASSERT(getProperty(nameMap, v0) == 'r')
+	SEQAN_TASSERT(getProperty(nameMap, v1) == 's')
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+void Test_GraphInternalProperty() {
+//____________________________________________________________________________
+// Graph properties
+	typedef Pair<char, int> TPair;
+	typedef Directed<TPair> TEdges;
+	typedef Graph<TEdges> TGraph;
+	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+
+	// Create a simple graph
+	TGraph g;
+	TVertexDescriptor v0 = addVertex(g);
+	TVertexDescriptor v1 = addVertex(g);
+	addVertex(g);
+	TEdgeDescriptor e1 =addEdge(g,0,2);
+	TEdgeDescriptor e2 =addEdge(g,v0,v1);
+
+	// First Variant: Explicit internal map with member Ids
+	InternalMap<TPair, 1> eMap1; // This property map is used to access the first member
+	InternalMap<TPair, 2> eMap2; // This property map is used to access the second member
+	initEdgeMap(g,eMap1);
+	initEdgeMap(g,eMap2);
+	assignProperty(eMap1, e1, 'a');
+	assignProperty(eMap2, e1, 20);
+	assignProperty(eMap1, e2, 'b');
+	assignProperty(eMap2, e2, 50);
+	SEQAN_TASSERT(getProperty(eMap1, e1) == 'a')
+	SEQAN_TASSERT(getProperty(eMap2, e1) == 20)
+	SEQAN_TASSERT(getProperty(eMap1, e2) == 'b')
+	SEQAN_TASSERT(getProperty(eMap2, e2) == 50)
+	// Note: That these properties are stored inside the cargo of each edge
+	SEQAN_TASSERT(getCargo(e1).i1 == 'a')
+	SEQAN_TASSERT(getCargo(e1).i2 == 20)
+	SEQAN_TASSERT(getCargo(e2).i1 == 'b')
+	SEQAN_TASSERT(getCargo(e2).i2 == 50)
+	assignProperty(eMap1, e1, 'c');
+	assignProperty(eMap2, e1, 10);
+	SEQAN_TASSERT(getProperty(eMap1, e1) == 'c')
+	SEQAN_TASSERT(getProperty(eMap2, e1) == 10)
+	SEQAN_TASSERT(property(eMap1, e1) == 'c')
+	SEQAN_TASSERT(property(eMap2, e1) == 10)
+	InternalMap<TPair, 1> const eMap3(eMap1);
+	InternalMap<TPair, 2> const eMap31(eMap2);
+	SEQAN_TASSERT(getProperty(eMap3, e1) == 'c')
+	SEQAN_TASSERT(getProperty(eMap3, e2) == 'b')
+	SEQAN_TASSERT(getProperty(eMap31, e1) == 10)
+	SEQAN_TASSERT(property(eMap31, e1) == 10)
+	SEQAN_TASSERT(property(eMap3, e2) == 'b')
+	// Create a simple graph with unsigned int cargo
+	typedef EdgeDescriptor<Graph<Directed<unsigned int> > >::Type TEdgeDescriptor2;
+	Graph<Directed<unsigned int> > g2;
+	addVertex(g2);
+	addVertex(g2);
+	TEdgeDescriptor2 edge1 =addEdge(g2,v0,v0);
+	addEdge(g2,0,1);
+	InternalMap<unsigned int> edgeMap;
+	initEdgeMap(g2,edgeMap);
+	assignProperty(edgeMap, edge1 ,3);
+	SEQAN_TASSERT(getProperty(edgeMap, edge1) == 3)
+	SEQAN_TASSERT(property(edgeMap, edge1) == 3)
+	InternalMap<unsigned int> const edgeMap2(edgeMap);
+	SEQAN_TASSERT(getProperty(edgeMap2, edge1) == 3)
+	SEQAN_TASSERT(property(edgeMap2, edge1) == 3)
+
+	// Second Variant: Pointer to member using a class
+	InternalPointerMap<char TPair:: *, &TPair::i1> eMap4;
+	InternalPointerMap<int TPair:: *, &TPair::i2> eMap5;
+	initEdgeMap(g,eMap4);
+	initEdgeMap(g,eMap5);
+	assignProperty(eMap4, e1, 'c');
+	assignProperty(eMap5, e1, 10);
+	assignProperty(eMap4, e2, 'd');
+	assignProperty(eMap5, e2, 30);
+	SEQAN_TASSERT(getProperty(eMap4, e1) == 'c')
+	SEQAN_TASSERT(getProperty(eMap5, e1) == 10)
+	SEQAN_TASSERT(getProperty(eMap4, e2) == 'd')
+	SEQAN_TASSERT(getProperty(eMap5, e2) == 30)
+	property(eMap4,e1)='z';
+	property(eMap5,e1)=100;
+	SEQAN_TASSERT(getProperty(eMap4, e1) == 'z')
+	SEQAN_TASSERT(getProperty(eMap5, e1) == 100)
+	InternalPointerMap<char TPair:: *, &TPair::i1> const eMap6(eMap4);
+	SEQAN_TASSERT(getProperty(eMap6, e1) == 'z')
+	SEQAN_TASSERT(getProperty(eMap6, e2) == 'd')
+	SEQAN_TASSERT(property(eMap6, e2) == 'd')
+	
+	// Third Variant: Raw pointer to member
+	char TPair:: * pseudo_map = &TPair::i1;
+	assignProperty(pseudo_map, e1, 'z');
+	assignProperty(pseudo_map, e2, 'w');
+	SEQAN_TASSERT(getProperty(pseudo_map, e1) == 'z')
+	SEQAN_TASSERT(getProperty(pseudo_map, e2) == 'w')
+	property(pseudo_map,e1)='k';
+	SEQAN_TASSERT(getProperty(pseudo_map, e1) == 'k')
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
 void Test_GraphBfsIterator() {
 //____________________________________________________________________________
 // Graph BfsIterator
@@ -2251,11 +2374,73 @@ void Test_GraphDfsIterator() {
 	SEQAN_TASSERT(it2 != it)
 }
 
+
+//////////////////////////////////////////////////////////////////////////////
+
+void Test_Oracle() {
+	Graph<Automaton<char> > g;
+	createOracleOnReverse(g,"announce");
+	SEQAN_TASSERT(parseString(g, 0, "e") == 1)
+	SEQAN_TASSERT(parseString(g, 0, "ec") == 2)
+	SEQAN_TASSERT(parseString(g, 0, "n") == 3)
+	SEQAN_TASSERT(parseString(g, 0, "a") == 8)
+	SEQAN_TASSERT(parseString(g, 0, "nn") == 7)
+
+	Graph<Automaton<Dna> > g2;
+	createOracle(g2,"ATATA");
+	SEQAN_TASSERT(parseString(g2, 0, "A") == 1)
+	SEQAN_TASSERT(parseString(g2, 0, "T") == 2)
+	SEQAN_TASSERT(parseString(g2, 0, "AT") == 2)
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+void Test_Trie() {
+	Graph<Automaton<char> > g;
+	String<String<unsigned int> > pos;
+	String<String<char> > keywords;
+	appendValue(keywords, String<char>("announce"));
+	appendValue(keywords, String<char>("annual"));
+	appendValue(keywords, String<char>("annually"));
+	createTrie(g,pos,keywords);
+
+	// Output
+	// File output
+	fstream strm;
+	strm.open(TEST_PATH "my_trie.dot", ios_base::out | ios_base::trunc);
+	String<String<char> > nodeMap;
+	_createTrieNodeNames(g, pos, nodeMap);
+	String<String<char> > edgeMap;
+	_createEdgeNames(g,edgeMap);
+	write(strm,g,nodeMap,edgeMap,DotDrawing());
+	strm.close();
+
+	Graph<Automaton<Dna> > gDna;
+	clear(pos);
+	String<String<Dna> > keyw;
+	appendValue(keyw, String<Dna>("ATATATA"));
+	appendValue(keyw, String<Dna>("TATAT"));
+	appendValue(keyw, String<Dna>("ACGATAT"));
+	createTrie(gDna,pos,keyw);
+
+	// Output
+	// File output
+	fstream strm2;
+	strm2.open(TEST_PATH "my_trie_dna.dot", ios_base::out | ios_base::trunc);
+	clear(nodeMap);
+	_createTrieNodeNames(gDna, pos, nodeMap);
+	clear(edgeMap);
+	_createEdgeNames(gDna,edgeMap);
+	write(strm2,gDna,nodeMap,edgeMap,DotDrawing());
+	strm2.close();
+}
+
+
 //////////////////////////////////////////////////////////////////////////////
 void Test_BreadthFirstSearch() {
 //____________________________________________________________________________
 // Breadth-First Search
-	typedef Graph<EdgeListU<> > TGraph;
+	typedef Graph<Undirected<> > TGraph;
 	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	typedef Size<TGraph>::Type TSize;
@@ -2777,55 +2962,49 @@ void Test_GraphAlgorithms() {
 }
 
 
+
 //////////////////////////////////////////////////////////////////////////////
 
 int main() 
 {
 	SEQAN_TREPORT("TEST BEGIN")
 
-	// Test Id Manager
-	Test_IdManager();
-
-	// Test EdgeStumps
-	Test_EdgeStump();
-	Test_EdgeStumpU();
-	Test_EdgeStumpT();
-	Test_EdgeStumpA();
+	Test_IdManager();	// Test Id Manager
+	Test_EdgeStump();	// Test EdgeStumps
 
 	// Test Graph types
-	Test_Graph();		// Directed graphs
-	Test_GraphU();		// Undirected graphs
-	Test_Tree();		// Trees
+	Test_Directed();	// Directed graphs
+	Test_Undirected();	// Undirected graphs
 	Test_Automaton();	// Automatons
 	Test_WordGraph();	// Word Graph
-	
-	// Go on from here
-	Test_Oracle();
-	Test_Trie();
-
-	// Test property maps
-	Test_GraphExternalProperty<EdgeList<char> >();
-	Test_GraphExternalProperty<EdgeListU<char> >();
-	Test_GraphExternalProperty<EdgeListT<char> >();
-	Test_GraphExternalProperty<Automaton<char> >();
-	
-	Test_GraphInternalProperty();
+	Test_Tree();		// Trees
 
 	// Test iterators
-	Test_GraphVertexIterator<EdgeList<char> >();
-	Test_GraphVertexIterator<EdgeListU<char> >();
-	//Test_GraphVertexIterator<EdgeListT<char> >();
+	Test_GraphVertexIterator<Directed<char> >();
+	Test_GraphVertexIterator<Undirected<char> >();
+	//Test_GraphVertexIterator<Tree<char> >();
 	Test_GraphVertexIterator<Automaton<char> >();
-
-	Test_GraphOutEdgeIterator<EdgeList<char> >();
-	Test_GraphOutEdgeIterator<EdgeListU<char> >();
+	Test_GraphOutEdgeIterator<Directed<char> >();
+	Test_GraphOutEdgeIterator<Undirected<char> >();
 	Test_GraphOutEdgeIterator<Automaton<char> >();
-	Test_GraphEdgeIterator<EdgeList<char> >();
-	Test_GraphEdgeIterator<EdgeListU<char> >();
+	Test_GraphEdgeIterator<Directed<char> >();
+	Test_GraphEdgeIterator<Undirected<char> >();
 	Test_GraphEdgeIterator<Automaton<char> >();
 	Test_GraphAdjacencyIterator<Automaton<char> >();
-	Test_GraphAdjacencyIterator<EdgeList<char> >();
-	Test_GraphAdjacencyIterator<EdgeListU<char> >();
+	Test_GraphAdjacencyIterator<Directed<char> >();
+	Test_GraphAdjacencyIterator<Undirected<char> >();
+
+	// Test property maps
+	Test_GraphExternalProperty<Directed<char> >();
+	Test_GraphExternalProperty<Undirected<char> >();
+	//Test_GraphExternalProperty<Tree<char> >();
+	Test_GraphExternalProperty<Automaton<char> >();	
+	Test_GraphInternalProperty();
+
+
+	// Specialized automatons
+	Test_Oracle();
+	Test_Trie();
 
 	// Test bfs iterator
 	// ToDo: For different graph types
@@ -2836,27 +3015,24 @@ int main()
 	Test_GraphAlgorithms();
 
 //____________________________________________________________________________
-
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_base.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_idmanager.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_property.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_interface.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_edgestump.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_edgelist.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_edgelistu.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_automaton.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_wordgraph.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_tree.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_iterator.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_vertexiterator.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_outedgeiterator.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_adjacencyiterator.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_edgeiterator.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_property.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_bfsiterator.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_dfsiterator.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_edgestump.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_edgestumpu.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_edgestumpt.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_edgelist.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_edgelistu.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_tree.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_edgestumpa.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_automaton.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_wordgraph.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_drawing.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_oracle.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_trie.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_algorithm.h");

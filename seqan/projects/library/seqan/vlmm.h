@@ -1115,7 +1115,7 @@ write(TFile & target,
 				_streamWrite(target, "  deleted");
 		_streamWrite(target, "\n");
 	}
-		_streamWrite(target,"VLMM - EdgeList:\n");
+		_streamWrite(target,"VLMM - Directed:\n");
 
 	for(TIterConst it = begin(g.data_vertex);!atEnd(it);goNext(it)) {
 		if (!idInUse(g.data_id_managerV, position(it))) continue;

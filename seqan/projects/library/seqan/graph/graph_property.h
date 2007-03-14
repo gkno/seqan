@@ -90,7 +90,7 @@ initEdgeMap(Graph<TEdges, TSpec> const& g,
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TPropertyMap>
 inline void
-initEdgeMap(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> const& g,
+initEdgeMap(Graph<Tree<TCargo, TEdgeSpec>, TSpec> const& g,
 			TPropertyMap& pm)
 {
 	SEQAN_CHECKPOINT
@@ -101,7 +101,7 @@ initEdgeMap(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> const& g,
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TPropertyMap>
 inline void
-initEdgeMap(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>& g,
+initEdgeMap(Graph<Tree<TCargo, TEdgeSpec>, TSpec>& g,
 			TPropertyMap& pm)
 {
 	SEQAN_CHECKPOINT

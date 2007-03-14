@@ -18,28 +18,18 @@
 #endif
 
 
-// Basic metafunctions
+// Basic graph stuff
 #include <seqan/graph/graph_base.h>
-
-// Id manager
-#include <seqan/graph/graph_idmanager.h>
-
-// Various EdgeStumps
-#include <seqan/graph/graph_edgestump.h>	// Directed graph
-#include <seqan/graph/graph_edgestumpu.h>	// Undirected graph
-#include <seqan/graph/graph_edgestumpt.h>	// Tree
-#include <seqan/graph/graph_edgestumpa.h>	// Automaton
-
-// Graph interface
-#include <seqan/graph/graph_interface.h>	// Basic graph stuff
-
+#include <seqan/graph/graph_idmanager.h>	// Id manager
+#include <seqan/graph/graph_edgestump.h>	// EdgeStumps
+#include <seqan/graph/graph_interface.h>	// Graph metafunctions
 
 // Graph types
 #include <seqan/graph/graph_impl_edgelist.h>	// Directed Graph
 #include <seqan/graph/graph_impl_edgelistu.h>	// Undirected graph
 #include <seqan/graph/graph_impl_automaton.h>	// Automaton
-#include <seqan/graph/graph_impl_tree.h>		// Tree
 #include <seqan/graph/graph_impl_wordgraph.h>	// Specialized automaton: Word graph
+#include <seqan/graph/graph_impl_tree.h>		// Tree
 
 // Graph iterators
 #include <seqan/graph/graph_iterator.h>
@@ -47,23 +37,22 @@
 #include <seqan/graph/graph_outedgeiterator.h>
 #include <seqan/graph/graph_adjacencyiterator.h>
 #include <seqan/graph/graph_edgeiterator.h>
-#include <seqan/graph/graph_bfsiterator.h>
-#include <seqan/graph/graph_dfsiterator.h>
 
 // Graph property maps
-#include <seqan/graph/graph_property.h>		// Property maps
+#include <seqan/graph/graph_property.h>
 
-// Special automaton: Oracle
-#include <seqan/graph/graph_impl_oracle.h>
-// Special automaton: Trie
-#include <seqan/graph/graph_impl_trie.h>
+// Specialized iterators
+#include <seqan/graph/graph_bfsiterator.h>
+#include <seqan/graph/graph_dfsiterator.h>
 
 // Graph drawing
 #include <seqan/graph/graph_drawing.h>
 
+// Special automatons: Just create functions
+#include <seqan/graph/graph_impl_oracle.h>		// Oracle
+#include <seqan/graph/graph_impl_trie.h>		// Trie
+
 // Graph algorithms
 #include <seqan/graph/graph_algorithm.h>
-
-
 
 #endif //#ifndef SEQAN_HEADER_...

@@ -4,17 +4,17 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 
-// Default EdgeList
+// Default directed graph
 template<typename TCargo = void, typename TSpec = Default>
-struct EdgeList;
+struct Directed;
 
-// Default EdgeListU
+// Default undirected graph
 template<typename TCargo = void, typename TSpec = Default>
-struct EdgeListU;
+struct Undirected;
 
 // Default Tree
 template<typename TCargo = void, typename TSpec = Default>
-struct EdgeListT;
+struct Tree;
 
 // Default Automaton
 template<typename TAlphabet = char, typename TCargo = void, typename TSpec = Default>
@@ -33,13 +33,13 @@ struct Automaton;
 ..param.TEdges:The storage type for edges, e.g., edge list (adjacency list) or automaton (transition table).
 ...remarks:The default corresponds to a directed graph.
 The @Metafunction.EdgeType@ can be used to retrieve the type of the edge stump.
-...default:EdgeList<>
+...default:Directed<>
 ..param.TSpec:The specializing type.
 ...metafunction:Metafunction.Spec
 ...default:$Default$, see @Tag.Default@.
 ..include:graph.h
 */
-template<typename TEdges = EdgeList<>, typename TSpec = Default>
+template<typename TEdges = Directed<>, typename TSpec = Default>
 class Graph;
 
 
@@ -121,59 +121,102 @@ struct VertexDescriptor<Graph<TEdges, TSpec> const>
 ///.Metafunction.EdgeType.param.T.type:Class.Graph
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec>
-struct EdgeType<Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> > {
-	typedef EdgeStump<TCargo, TEdgeSpec> Type;
+struct EdgeType<Graph<Directed<TCargo, TEdgeSpec>, TSpec> > {
+	typedef EdgeStump<TCargo, true, false, true, TEdgeSpec> Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec>
-struct EdgeType<Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const> {
-	typedef EdgeStump<TCargo, TEdgeSpec> const Type;
+struct EdgeType<Graph<Directed<TCargo, TEdgeSpec>, TSpec> const> {
+	typedef EdgeStump<TCargo, true, false, true, TEdgeSpec> const Type;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TCargo, typename TSpec>
+struct EdgeType<Graph<Directed<TCargo, WithoutEdgeId>, TSpec> > {
+	typedef EdgeStump<TCargo, true, false, false, TSpec> Type;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TCargo, typename TSpec>
+struct EdgeType<Graph<Directed<TCargo, WithoutEdgeId>, TSpec> const> {
+	typedef EdgeStump<TCargo, true, false, false, TSpec> const Type;
 };
 
 
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec>
-struct EdgeType<Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> > {
-	typedef EdgeStumpT<TCargo, TEdgeSpec> Type;
+struct EdgeType<Graph<Tree<TCargo, TEdgeSpec>, TSpec> > {
+	typedef EdgeStump<TCargo, true, true, false, TEdgeSpec> Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec>
-struct EdgeType<Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> const> {
-	typedef EdgeStumpT<TCargo, TEdgeSpec> const Type;
+struct EdgeType<Graph<Tree<TCargo, TEdgeSpec>, TSpec> const> {
+	typedef EdgeStump<TCargo, true, true, false, TEdgeSpec> const Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec>
-struct EdgeType<Graph<EdgeListU<TCargo, TEdgeSpec>, TSpec> > {
-	typedef EdgeStumpU<TCargo, TEdgeSpec> Type;
+struct EdgeType<Graph<Undirected<TCargo, TEdgeSpec>, TSpec> > {
+	typedef EdgeStump<TCargo, true, true, true, TEdgeSpec> Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec>
-struct EdgeType<Graph<EdgeListU<TCargo, TEdgeSpec>, TSpec> const> {
-	typedef EdgeStumpU<TCargo, TEdgeSpec> const Type;
+struct EdgeType<Graph<Undirected<TCargo, TEdgeSpec>, TSpec> const> {
+	typedef EdgeStump<TCargo, true, true, true, TEdgeSpec> const Type;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TCargo, typename TSpec>
+struct EdgeType<Graph<Undirected<TCargo, WithoutEdgeId>, TSpec> > {
+	typedef EdgeStump<TCargo, true, true, false, TSpec> Type;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TCargo, typename TSpec>
+struct EdgeType<Graph<Undirected<TCargo, WithoutEdgeId>, TSpec> const> {
+	typedef EdgeStump<TCargo, true, true, false, TSpec> const Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TAlphabet, typename TCargo, typename TEdgeSpec, typename TSpec>
 struct EdgeType<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> > {
-	typedef EdgeStumpA<TCargo, TEdgeSpec> Type;
+	typedef EdgeStump<TCargo, false, false, true, TEdgeSpec> Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TAlphabet, typename TCargo, typename TEdgeSpec, typename TSpec>
 struct EdgeType<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> const> {
-	typedef EdgeStumpA<TCargo, TEdgeSpec> const Type;
+	typedef EdgeStump<TCargo, false, false, true, TSpec> const Type;
 };
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TAlphabet, typename TCargo, typename TSpec>
+struct EdgeType<Graph<Automaton<TAlphabet, TCargo, WithoutEdgeId>, TSpec> > {
+	typedef EdgeStump<TCargo, false, false, false, TSpec> Type;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TAlphabet, typename TCargo, typename TSpec>
+struct EdgeType<Graph<Automaton<TAlphabet, TCargo, WithoutEdgeId>, TSpec> const> {
+	typedef EdgeStump<TCargo, false, false, false, TSpec> const Type;
+};
+
 
 //////////////////////////////////////////////////////////////////////////////
 

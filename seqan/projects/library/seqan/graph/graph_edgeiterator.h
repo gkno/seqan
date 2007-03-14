@@ -280,9 +280,9 @@ goNext(Iter<TGraph, GraphIterator<EdgeIterator<TSpec> > >& it)
 
 template<typename TCargo, typename TEdgeSpec, typename TGraphSpec, typename TSpec>
 inline void
-goNext(Iter<Graph<EdgeListU<TCargo, TEdgeSpec>, TGraphSpec>, GraphIterator<EdgeIterator<TSpec> > >& it)
+goNext(Iter<Graph<Undirected<TCargo, TEdgeSpec>, TGraphSpec>, GraphIterator<EdgeIterator<TSpec> > >& it)
 {
-	typedef Graph<EdgeListU<TCargo, TEdgeSpec>, TGraphSpec> TGraph;
+	typedef Graph<Undirected<TCargo, TEdgeSpec>, TGraphSpec> TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	_goNextInternal(it);
 	TVertexDescriptor sourceV = sourceVertex(it.data_edge_it);
@@ -355,9 +355,9 @@ goPrevious(Iter<TGraph, GraphIterator<EdgeIterator<TSpec> > >& it)
 
 template<typename TCargo, typename TEdgeSpec, typename TGraphSpec, typename TSpec>
 inline void
-goPrevious(Iter<Graph<EdgeListU<TCargo, TEdgeSpec>, TGraphSpec>, GraphIterator<EdgeIterator<TSpec> > >& it)
+goPrevious(Iter<Graph<Undirected<TCargo, TEdgeSpec>, TGraphSpec>, GraphIterator<EdgeIterator<TSpec> > >& it)
 {
-	typedef Graph<EdgeListU<TCargo, TEdgeSpec>, TGraphSpec> TGraph;
+	typedef Graph<Undirected<TCargo, TEdgeSpec>, TGraphSpec> TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	_goPreviousInternal(it);
 	TVertexDescriptor sourceV = sourceVertex(it.data_edge_it);

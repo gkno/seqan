@@ -81,11 +81,11 @@ void _createNodeNames(Graph<TEdges, TSpec> const& g,
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TCargo, typename TEdgeSpec, typename TSpec, typename TEdgeMap>
-void _createEdgeNames(Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> const& g,
+void _createEdgeNames(Graph<Directed<TCargo, TEdgeSpec>, TSpec> const& g,
 		      TEdgeMap& edgeMap)
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<EdgeList<TCargo, TEdgeSpec>, TSpec> TGraph;
+	typedef Graph<Directed<TCargo, TEdgeSpec>, TSpec> TGraph;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	initEdgeMap(g, edgeMap);
 	char strE[2*BitsPerValue<TEdgeDescriptor>::VALUE];

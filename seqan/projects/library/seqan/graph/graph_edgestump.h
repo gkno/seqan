@@ -11,12 +11,20 @@ namespace SEQAN_NAMESPACE_MAIN
 .Class.EdgeStump:
 ..cat:Graph
 ..summary:The EdgeStump class encapsulates a single edge. 
-It represents a list node in the adjacency list of a directed graph.
-..signature:EdgeStump<TCargo,TSpec>
+It represents either a list node in the adjacency list of a graph or an array field in the transition table of an automaton.
+..signature:EdgeStump<TCargo, bool TList, bool TSource, bool TId, TSpec>
 ..param.TCargo:The cargo type of an edge.
 ...metafunction:Metafunction.Cargo
 ...remarks:The cargo can be used to store arbitrary information with an edge.
 ...default:$void$
+..param.TList:Boolean value that indicates whether it is a list node or not.
+...remarks:If it is a list node it has one or two next pointers.
+...default:$true$
+..param.TSource:Boolean value that indicates whether the source is stored in the EdgeStump or not.
+...remarks:If this value is true and it is a list node an additional source next pointer is present.
+...default:$false$
+..param.TId:Boolean value that indicates whether an id is stored in the EdgeStump or not.
+...default:$true$
 ..param.TSpec:The specializing type.
 ...metafunction:Metafunction.Spec
 ...default:$Default$, see @Tag.Default@.
@@ -26,7 +34,17 @@ Edge ids are used to append additional properties to edges with the help of exte
 ..include:graph.h
 */
 template<typename TCargo, typename TSpec>
-class EdgeStump
+class EdgeStump<TCargo, true, false, false, TSpec> 
+{
+	public:
+		typedef typename VertexDescriptor<EdgeStump>::Type TVertexDescriptor;
+		TVertexDescriptor data_target;
+		TCargo data_cargo;
+		EdgeStump* data_nextT;
+};
+
+template<typename TCargo, typename TSpec>
+class EdgeStump<TCargo, true, false, true, TSpec> 
 {
 	public:
 		typedef typename VertexDescriptor<EdgeStump>::Type TVertexDescriptor;
@@ -34,74 +52,165 @@ class EdgeStump
 		TVertexDescriptor data_target;
 		TId data_id;
 		TCargo data_cargo;
-		EdgeStump* data_next;
+		EdgeStump* data_nextT;
 };
 
-/**
-.Spec.Cargoless EdgeStump:
-..cat:Graph
-..general:Class.EdgeStump
-..summary:EdgeStump that does not reserve space for a cargo.
-..signature:EdgeStump<void, TSpec>
-..param.TSpec:The specializing type.
-...metafunction:Metafunction.Spec
-...default:$Default$, see @Tag.Default@.
-..remarks:This is the default EdgeStump.
-Edge ids can be used to append additional properties to edges with the help of external property maps.
-..include:graph.h
-*/
+template<typename TCargo, typename TSpec>
+class EdgeStump<TCargo, true, true, false, TSpec> 
+{
+	public:
+		typedef typename VertexDescriptor<EdgeStump>::Type TVertexDescriptor;
+		TVertexDescriptor data_target;
+		TVertexDescriptor data_source;
+		TCargo data_cargo;
+		EdgeStump* data_nextT;
+		EdgeStump* data_nextS;
+};
+
+
+template<typename TCargo, typename TSpec>
+class EdgeStump<TCargo, true, true, true, TSpec> 
+{
+	public:
+		typedef typename VertexDescriptor<EdgeStump>::Type TVertexDescriptor;
+		typedef typename Id<EdgeStump>::Type TId;
+		TVertexDescriptor data_target;
+		TVertexDescriptor data_source;
+		TId data_id;
+		TCargo data_cargo;
+		EdgeStump* data_nextT;
+		EdgeStump* data_nextS;
+};
+
+template<typename TCargo, typename TSpec>
+class EdgeStump<TCargo, false, false, false, TSpec>
+{
+	public:
+		typedef typename VertexDescriptor<EdgeStump>::Type TVertexDescriptor;
+		TVertexDescriptor data_target;
+		TCargo data_cargo;
+};
+
+template<typename TCargo, typename TSpec>
+class EdgeStump<TCargo, false, false, true, TSpec>
+{
+	public:
+		typedef typename VertexDescriptor<EdgeStump>::Type TVertexDescriptor;
+		typedef typename Id<EdgeStump>::Type TId;
+		TVertexDescriptor data_target;
+		TId data_id;
+		TCargo data_cargo;
+};
+
+template<typename TCargo, typename TSpec>
+class EdgeStump<TCargo, false, true, false, TSpec>
+{
+	public:
+		typedef typename VertexDescriptor<EdgeStump>::Type TVertexDescriptor;
+		TVertexDescriptor data_target;
+		TVertexDescriptor data_source;
+		TCargo data_cargo;
+};
+
+template<typename TCargo, typename TSpec>
+class EdgeStump<TCargo, false, true, true, TSpec>
+{
+	public:
+		typedef typename VertexDescriptor<EdgeStump>::Type TVertexDescriptor;
+		typedef typename Id<EdgeStump>::Type TId;
+		TVertexDescriptor data_target;
+		TVertexDescriptor data_source;
+		TId data_id;
+		TCargo data_cargo;
+};
+
+
+
+
+
+
+
 template<typename TSpec>
-class EdgeStump<void, TSpec> 
+class EdgeStump<void, true, false, false, TSpec> 
+{
+	public:
+		typedef typename VertexDescriptor<EdgeStump>::Type TVertexDescriptor;
+		TVertexDescriptor data_target;
+		EdgeStump* data_nextT;
+};
+
+template<typename TSpec>
+class EdgeStump<void, true, false, true, TSpec> 
 {
 	public:
 		typedef typename VertexDescriptor<EdgeStump>::Type TVertexDescriptor;
 		typedef typename Id<EdgeStump>::Type TId;
 		TVertexDescriptor data_target;
 		TId data_id;
-		EdgeStump* data_next;
+		EdgeStump* data_nextT;
 };
 
-/**
-.Spec.Id-free EdgeStump:
-..cat:Graph
-..general:Class.EdgeStump
-..summary:EdgeStump that does not store an id.
-..signature:EdgeStump<TCargo, WithoutEdgeId>
-..param.TCargo:The cargo type of an edge.
-...metafunction:Metafunction.Cargo
-...remarks:The cargo can be used to store arbitrary information with an edge.
-..remarks:Caution: If edge ids are omitted external property maps do not work.
-Necessary edge information can only be stored as an edge cargo.
-..include:graph.h
-*/
-template<typename TCargo>
-class EdgeStump<TCargo, WithoutEdgeId> 
+template<typename TSpec>
+class EdgeStump<void, true, true, false, TSpec> 
+{
+	public:
+		typedef typename VertexDescriptor<EdgeStump>::Type TVertexDescriptor;
+		TVertexDescriptor data_target;
+		TVertexDescriptor data_source;
+		EdgeStump* data_nextT;
+		EdgeStump* data_nextS;
+};
+
+
+template<typename TSpec>
+class EdgeStump<void, true, true, true, TSpec> 
 {
 	public:
 		typedef typename VertexDescriptor<EdgeStump>::Type TVertexDescriptor;
 		typedef typename Id<EdgeStump>::Type TId;
 		TVertexDescriptor data_target;
-		TCargo data_cargo;
-		EdgeStump* data_next;
+		TVertexDescriptor data_source;
+		TId data_id;
+		EdgeStump* data_nextT;
+		EdgeStump* data_nextS;
 };
 
-/**
-.Spec.Minimal EdgeStump:
-..cat:Graph
-..general:Class.EdgeStump
-..summary:EdgeStump without a cargo and without an id.
-..signature:EdgeStump<void, WithoutEdgeId>
-..remarks:Edges solely connect vertices. No additional edge information can be stored.
-..include:graph.h
-*/
-template<>
-class EdgeStump<void, WithoutEdgeId> 
+template<typename TSpec>
+class EdgeStump<void, false, false, false, TSpec>
 {
 	public:
-		typedef VertexDescriptor<EdgeStump>::Type TVertexDescriptor;
-		typedef Id<EdgeStump>::Type TId;
+		typedef typename VertexDescriptor<EdgeStump>::Type TVertexDescriptor;
 		TVertexDescriptor data_target;
-		EdgeStump* data_next;
+};
+
+template<typename TSpec>
+class EdgeStump<void, false, false, true, TSpec>
+{
+	public:
+		typedef typename VertexDescriptor<EdgeStump>::Type TVertexDescriptor;
+		typedef typename Id<EdgeStump>::Type TId;
+		TVertexDescriptor data_target;
+		TId data_id;
+};
+
+template<typename TSpec>
+class EdgeStump<void, false, true, false, TSpec>
+{
+	public:
+		typedef typename VertexDescriptor<EdgeStump>::Type TVertexDescriptor;
+		TVertexDescriptor data_target;
+		TVertexDescriptor data_source;
+};
+
+template<typename TSpec>
+class EdgeStump<void, false, true, true, TSpec>
+{
+	public:
+		typedef typename VertexDescriptor<EdgeStump>::Type TVertexDescriptor;
+		typedef typename Id<EdgeStump>::Type TId;
+		TVertexDescriptor data_target;
+		TVertexDescriptor data_source;
+		TId data_id;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -113,23 +222,23 @@ class EdgeStump<void, WithoutEdgeId>
 
 ///.Metafunction.Cargo.param.T.type:Class.EdgeStump
 
-template<typename TCargo, typename TSpec>
-struct Cargo<EdgeStump<TCargo, TSpec> > {
+template<typename TCargo, bool TList, bool TSource, bool TId, typename TSpec>
+struct Cargo<EdgeStump<TCargo, TList, TSource, TId, TSpec> > {
 	typedef TCargo Type;
 };
 
-template<typename TCargo, typename TSpec>
-struct Cargo<EdgeStump<TCargo, TSpec> const> {
+template<typename TCargo, bool TList, bool TSource, bool TId, typename TSpec>
+struct Cargo<EdgeStump<TCargo, TList, TSource, TId, TSpec> const> {
 	typedef TCargo const Type;
 };
 
-template<typename TSpec>
-struct Cargo<EdgeStump<void, TSpec> > {
+template<bool TList, bool TSource, bool TId, typename TSpec>
+struct Cargo<EdgeStump<void, TList, TSource, TId, TSpec> > {
 	typedef void* Type;
 };
 
-template<typename TSpec>
-struct Cargo<EdgeStump<void, TSpec> const> {
+template<bool TList, bool TSource, bool TId, typename TSpec>
+struct Cargo<EdgeStump<void, TList, TSource, TId, TSpec> const> {
 	typedef void* Type;
 };
 
@@ -137,14 +246,14 @@ struct Cargo<EdgeStump<void, TSpec> const> {
 
 ///.Metafunction.Spec.param.T.type:Class.EdgeStump
 
-template<typename TCargo, typename TSpec>
-struct Spec<EdgeStump<TCargo, TSpec> > 
+template<typename TCargo, bool TList, bool TSource, bool TId, typename TSpec>
+struct Spec<EdgeStump<TCargo, TList, TSource, TId, TSpec> > 
 {
 	typedef TSpec Type;
 };
 
-template<typename TCargo, typename TSpec>
-struct Spec<EdgeStump<TCargo, TSpec> const> 
+template<typename TCargo, bool TList, bool TSource, bool TId, typename TSpec>
+struct Spec<EdgeStump<TCargo, TList, TSource, TId, TSpec> const> 
 {
 	typedef TSpec Type;
 };
@@ -153,8 +262,9 @@ struct Spec<EdgeStump<TCargo, TSpec> const>
 
 ///.Metafunction.IdHandler.param.T.type:Class.EdgeStump
 
-template<typename TCargo, typename TIdType>
-struct IdHandler<EdgeStump<TCargo, WithoutEdgeId>, TIdType> {
+
+template<typename TCargo, bool TList, bool TSource, typename TSpec, typename TIdType>
+struct IdHandler<EdgeStump<TCargo, TList, TSource, false, TSpec>, TIdType> {
 	// Dummy IdManager
 	typedef IdManager<void> Type;
 };
@@ -182,9 +292,10 @@ struct IdHandler<EdgeStump<TCargo, WithoutEdgeId>, TIdType> {
 
 ///.Function.getCargo.param.es.type:Class.EdgeStump
 
-template<typename TCargo, typename TSpec>
-inline typename Cargo<EdgeStump<TCargo, TSpec> const>::Type&
-getCargo(EdgeStump<TCargo, TSpec> const* es)
+
+template<typename TCargo, bool TList, bool TSource, bool TId, typename TSpec>
+inline typename Cargo<EdgeStump<TCargo, TList, TSource, TId, TSpec> const>::Type&
+getCargo(EdgeStump<TCargo, TList, TSource, TId, TSpec> const* es)
 {
 	SEQAN_CHECKPOINT
 	return es->data_cargo;
@@ -192,9 +303,9 @@ getCargo(EdgeStump<TCargo, TSpec> const* es)
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TCargo, typename TSpec>
-inline typename Cargo<EdgeStump<TCargo, TSpec> >::Type&
-getCargo(EdgeStump<TCargo, TSpec>* es) 
+template<typename TCargo, bool TList, bool TSource, bool TId, typename TSpec>
+inline typename Cargo<EdgeStump<TCargo, TList, TSource, TId, TSpec> >::Type&
+getCargo(EdgeStump<TCargo, TList, TSource, TId, TSpec>* es) 
 {
 	SEQAN_CHECKPOINT
 	return es->data_cargo;
@@ -202,9 +313,9 @@ getCargo(EdgeStump<TCargo, TSpec>* es)
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TSpec>
-inline typename Cargo<EdgeStump<void, TSpec> const>::Type
-getCargo(EdgeStump<void, TSpec> const* es) 
+template<bool TList, bool TSource, bool TId, typename TSpec>
+inline typename Cargo<EdgeStump<void, TList, TSource, TId, TSpec> const>::Type
+getCargo(EdgeStump<void, TList, TSource, TId, TSpec> const* es) 
 {
 	SEQAN_CHECKPOINT
 	// No real cargo
@@ -213,9 +324,9 @@ getCargo(EdgeStump<void, TSpec> const* es)
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TSpec>
-inline typename Cargo<EdgeStump<void, TSpec> >::Type
-getCargo(EdgeStump<void, TSpec>* es) 
+template<bool TList, bool TSource, bool TId, typename TSpec>
+inline typename Cargo<EdgeStump<void, TList, TSource, TId, TSpec> >::Type
+getCargo(EdgeStump<void, TList, TSource, TId, TSpec>* es) 
 {
 	SEQAN_CHECKPOINT
 	// No real cargo
@@ -239,9 +350,9 @@ getCargo(EdgeStump<void, TSpec>* es)
 
 ///.Function.cargo.param.es.type:Class.EdgeStump
 
-template<typename TCargo, typename TSpec>
-inline typename Cargo<EdgeStump<TCargo, TSpec> const>::Type&
-cargo(EdgeStump<TCargo, TSpec> const* es) 
+template<typename TCargo, bool TList, bool TSource, bool TId, typename TSpec>
+inline typename Cargo<EdgeStump<TCargo, TList, TSource, TId, TSpec> const>::Type&
+cargo(EdgeStump<TCargo, TList, TSource, TId, TSpec> const* es) 
 {
 	SEQAN_CHECKPOINT
 	return es->data_cargo;
@@ -249,9 +360,9 @@ cargo(EdgeStump<TCargo, TSpec> const* es)
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TCargo, typename TSpec>
-inline typename Cargo<EdgeStump<TCargo, TSpec> >::Type& 
-cargo(EdgeStump<TCargo, TSpec>* es) 
+template<typename TCargo, bool TList, bool TSource, bool TId, typename TSpec>
+inline typename Cargo<EdgeStump<TCargo, TList, TSource, TId, TSpec> >::Type& 
+cargo(EdgeStump<TCargo, TList, TSource, TId, TSpec>* es) 
 {
 	SEQAN_CHECKPOINT
 	return es->data_cargo;
@@ -260,9 +371,9 @@ cargo(EdgeStump<TCargo, TSpec>* es)
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TSpec>
-inline typename Cargo<EdgeStump<void, TSpec> >::Type
-cargo(EdgeStump<void, TSpec>* es) 
+template<bool TList, bool TSource, bool TId, typename TSpec>
+inline typename Cargo<EdgeStump<void, TList, TSource, TId, TSpec> >::Type
+cargo(EdgeStump<void, TList, TSource, TId, TSpec>* es) 
 {
 	SEQAN_CHECKPOINT
 	// No real cargo
@@ -271,9 +382,9 @@ cargo(EdgeStump<void, TSpec>* es)
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TSpec>
-inline typename Cargo<EdgeStump<void, TSpec> const>::Type
-cargo(EdgeStump<void, TSpec> const* es) 
+template<bool TList, bool TSource, bool TId, typename TSpec>
+inline typename Cargo<EdgeStump<void, TList, TSource, TId, TSpec> const>::Type
+cargo(EdgeStump<void, TList, TSource, TId, TSpec> const* es) 
 {
 	SEQAN_CHECKPOINT
 	// No real cargo
@@ -290,18 +401,18 @@ cargo(EdgeStump<void, TSpec> const* es)
 ..param.es:Pointer to the EdgeStump.
 ...type:Class.EdgeStump
 ..param.cargo:New cargo object.
-...remarks:Type of the new cargo object must match Cargo<EdgeStump<TCargo,TSpec> >::Type.
+...remarks:Type of the new cargo object must match Cargo<EdgeStump<TCargo, TList, TSource, TId, TSpec> >::Type.
 ..returns:void
-..remarks:In Cargoless EdgeStumps this operation is a NOP.
+..remarks:In cargoless EdgeStumps this operation is a NOP.
 ..see:Function.cargo
 ..see:Funktion.getCargo
 */
 
 ///.Function.assignCargo.param.es.type:Class.EdgeStump
 
-template<typename TCargo, typename TSpec, typename TCargo2>
+template<typename TCargo, bool TList, bool TSource, bool TId, typename TSpec, typename TCargo2>
 inline void 
-assignCargo(EdgeStump<TCargo, TSpec>* es,
+assignCargo(EdgeStump<TCargo, TList, TSource, TId, TSpec>* es,
 			TCargo2 const& t) 
 {
 	SEQAN_CHECKPOINT
@@ -310,9 +421,9 @@ assignCargo(EdgeStump<TCargo, TSpec>* es,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TSpec, typename TCargo2>
+template<bool TList, bool TSource, bool TId, typename TSpec, typename TCargo2>
 inline void 
-assignCargo(EdgeStump<void, TSpec>* es, 
+assignCargo(EdgeStump<void, TList, TSource, TId, TSpec>* es, 
 			TCargo2 const& t) 
 {
 	SEQAN_CHECKPOINT
@@ -336,9 +447,9 @@ assignCargo(EdgeStump<void, TSpec>* es,
 
 ///.Function.assignTarget.param.es.type:Class.EdgeStump
 
-template<typename TCargo, typename TSpec, typename TVertexDescriptor>
+template<typename TCargo, bool TList, bool TSource, bool TId, typename TSpec, typename TVertexDescriptor>
 inline void 
-assignTarget(EdgeStump<TCargo, TSpec>* es, 
+assignTarget(EdgeStump<TCargo, TList, TSource, TId, TSpec>* es, 
 			 TVertexDescriptor const t) 
 {
 	SEQAN_CHECKPOINT
@@ -361,9 +472,9 @@ assignTarget(EdgeStump<TCargo, TSpec>* es,
 
 ///.Function.target.param.es.type:Class.EdgeStump
 
-template<typename TCargo, typename TSpec>
-inline typename VertexDescriptor<EdgeStump<TCargo, TSpec> >::Type&
-target(EdgeStump<TCargo, TSpec>* es) 
+template<typename TCargo, bool TList, bool TSource, bool TId, typename TSpec>
+inline typename VertexDescriptor<EdgeStump<TCargo, TList, TSource, TId, TSpec> >::Type&
+target(EdgeStump<TCargo, TList, TSource, TId, TSpec>* es) 
 {
 	SEQAN_CHECKPOINT
 	return es->data_target;
@@ -371,9 +482,9 @@ target(EdgeStump<TCargo, TSpec>* es)
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TCargo, typename TSpec>
-inline typename VertexDescriptor<EdgeStump<TCargo, TSpec> >::Type
-target(EdgeStump<TCargo, TSpec> const* es) 
+template<typename TCargo, bool TList, bool TSource, bool TId, typename TSpec>
+inline typename VertexDescriptor<EdgeStump<TCargo, TList, TSource, TId, TSpec> >::Type
+target(EdgeStump<TCargo, TList, TSource, TId, TSpec> const* es) 
 {
 	SEQAN_CHECKPOINT
 	return es->data_target;
@@ -385,7 +496,7 @@ target(EdgeStump<TCargo, TSpec> const* es)
 .Function.getTarget:
 ..cat:Graph
 ..summary:Get method for the target.
-..signature:target(es)
+..signature:getTarget(es)
 ..param.es:Pointer to the EdgeStump.
 ...type:Class.EdgeStump
 ..returns:Target vertex.
@@ -395,9 +506,9 @@ target(EdgeStump<TCargo, TSpec> const* es)
 
 ///.Function.getTarget.param.es.type:Class.EdgeStump
 
-template<typename TCargo, typename TSpec>
-inline typename VertexDescriptor<EdgeStump<TCargo, TSpec> const>::Type
-getTarget(EdgeStump<TCargo, TSpec> const* es) 
+template<typename TCargo, bool TList, bool TSource, bool TId, typename TSpec>
+inline typename VertexDescriptor<EdgeStump<TCargo, TList, TSource, TId, TSpec> const>::Type
+getTarget(EdgeStump<TCargo, TList, TSource, TId, TSpec> const* es) 
 {
 	SEQAN_CHECKPOINT
 	return es->data_target;
@@ -405,14 +516,358 @@ getTarget(EdgeStump<TCargo, TSpec> const* es)
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TCargo, typename TSpec>
-inline typename VertexDescriptor<EdgeStump<TCargo, TSpec> >::Type
-getTarget(EdgeStump<TCargo, TSpec>* es) 
+template<typename TCargo, bool TList, bool TSource, bool TId, typename TSpec>
+inline typename VertexDescriptor<EdgeStump<TCargo, TList, TSource, TId, TSpec> >::Type
+getTarget(EdgeStump<TCargo, TList, TSource, TId, TSpec>* es) 
 {
 	SEQAN_CHECKPOINT
 	return es->data_target;
 }
 
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.assignSource:
+..cat:Graph
+..summary:Assigns a source vertex to an edge.
+..signature:assignSource(es, t)
+..param.es:Pointer to the EdgeStump.
+...type:Class.EdgeStump
+..param.t:Source vertex.
+..returns:void
+..see:Function.source
+..see:Funktion.getSource
+*/
+
+///.Function.assignSource.param.es.type:Class.EdgeStump
+
+template<typename TCargo, bool TList, bool TSource, bool TId, typename TSpec, typename TVertexDescriptor>
+inline void 
+assignSource(EdgeStump<TCargo, TList, TSource, TId, TSpec>* es, 
+			 TVertexDescriptor const s) 
+{
+	SEQAN_CHECKPOINT
+	es->data_source = s;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TCargo, bool TList, bool TId, typename TSpec, typename TVertexDescriptor>
+inline void 
+assignSource(EdgeStump<TCargo, TList, false, TId, TSpec>* es, 
+			 TVertexDescriptor const s) 
+{
+	SEQAN_CHECKPOINT
+	// NOP
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.source:
+..cat:Graph
+..summary:Accesses the source of an EdgeStump.
+..signature:source(es)
+..param.es:Pointer to the EdgeStump.
+...type:Class.EdgeStump
+..returns:Reference to the source vertex.
+..see:Function.assignSource
+..see:Funktion.getSource
+*/
+
+///.Function.source.param.es.type:Class.EdgeStump
+
+template<typename TCargo, bool TList, bool TSource, bool TId, typename TSpec>
+inline typename VertexDescriptor<EdgeStump<TCargo, TList, TSource, TId, TSpec> >::Type&
+source(EdgeStump<TCargo, TList, TSource, TId, TSpec>* es) 
+{
+	SEQAN_CHECKPOINT
+	return es->data_source;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TCargo, bool TList, bool TSource, bool TId, typename TSpec>
+inline typename VertexDescriptor<EdgeStump<TCargo, TList, TSource, TId, TSpec> >::Type
+source(EdgeStump<TCargo, TList, TSource, TId, TSpec> const* es) 
+{
+	SEQAN_CHECKPOINT
+	return es->data_source;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+
+template<typename TCargo, bool TList, bool TId, typename TSpec>
+inline typename VertexDescriptor<EdgeStump<TCargo, TList, false, TId, TSpec> >::Type
+source(EdgeStump<TCargo, TList, false, TId, TSpec>* es) 
+{
+	SEQAN_CHECKPOINT
+	// No source available
+	return 0;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+
+template<typename TCargo, bool TList, bool TId, typename TSpec>
+inline typename VertexDescriptor<EdgeStump<TCargo, TList, false, TId, TSpec> >::Type
+source(EdgeStump<TCargo, TList, false, TId, TSpec> const* es) 
+{
+	SEQAN_CHECKPOINT
+	// No source available
+	return 0;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.getSource:
+..cat:Graph
+..summary:Get method for the source.
+..signature:getSource(es)
+..param.es:Pointer to the EdgeStump.
+...type:Class.EdgeStump
+..returns:Source vertex.
+..see:Function.assignSource
+..see:Funktion.source
+*/
+
+///.Function.getSource.param.es.type:Class.EdgeStump
+
+template<typename TCargo, bool TList, bool TSource, bool TId, typename TSpec>
+inline typename VertexDescriptor<EdgeStump<TCargo, TList, TSource, TId, TSpec> const>::Type
+getSource(EdgeStump<TCargo, TList, TSource, TId, TSpec> const* es) 
+{
+	SEQAN_CHECKPOINT
+	return es->data_source;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TCargo, bool TList, bool TSource, bool TId, typename TSpec>
+inline typename VertexDescriptor<EdgeStump<TCargo, TList, TSource, TId, TSpec> >::Type
+getSource(EdgeStump<TCargo, TList, TSource, TId, TSpec>* es) 
+{
+	SEQAN_CHECKPOINT
+	return es->data_source;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TCargo, bool TList, bool TId, typename TSpec>
+inline typename VertexDescriptor<EdgeStump<TCargo, TList, false, TId, TSpec> const>::Type
+getSource(EdgeStump<TCargo, TList, false, TId, TSpec> const* es) 
+{
+	SEQAN_CHECKPOINT
+	// Nop
+	return 0;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TCargo, bool TList, bool TId, typename TSpec>
+inline typename VertexDescriptor<EdgeStump<TCargo, TList, false, TId, TSpec> >::Type
+getSource(EdgeStump<TCargo, TList, false, TId, TSpec>* es) 
+{
+	SEQAN_CHECKPOINT
+	// Nop
+	return 0;
+}
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.assignNextT:
+..cat:Graph
+..summary:Assigns another EdgeStump to the next target pointer.
+..signature:assignNextT(es, es2)
+..param.es:Pointer to the EdgeStump.
+...type:Class.EdgeStump
+..param.es2:Pointer to the following EdgeStump.
+...type:Class.EdgeStump
+..returns:void
+..see:Function.nextT
+..see:Funktion.getNextT
+*/
+
+///.Function.assignNextT.param.es.type:Class.EdgeStump
+
+template<typename TCargo, bool TSource, bool TId, typename TSpec>
+inline void 
+assignNextT(EdgeStump<TCargo, true, TSource, TId, TSpec>* es, 
+			EdgeStump<TCargo, true, TSource, TId, TSpec>* es2) 
+{
+	SEQAN_CHECKPOINT
+	es->data_nextT = es2;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.nextT:
+..cat:Graph
+..summary:Accesses the next target pointer.
+..signature:nextT(es)
+..param.es:Pointer to the EdgeStump.
+...type:Class.EdgeStump
+..returns:Reference to the next target pointer.
+..see:Function.assignNextT
+..see:Funktion.getNextT
+*/
+
+///.Function.nextT.param.es.type:Class.EdgeStump
+
+template<typename TCargo, bool TSource, bool TId, typename TSpec>
+inline EdgeStump<TCargo, true, TSource, TId, TSpec>* &
+nextT(EdgeStump<TCargo, true, TSource, TId, TSpec>* es) 
+{
+	SEQAN_CHECKPOINT
+	return es->data_nextT;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.getNextT:
+..cat:Graph
+..summary:Get method for the next target pointer.
+..signature:getNextT(es)
+..param.es:Pointer to the EdgeStump.
+...type:Class.EdgeStump
+..returns:Pointer to the next edge stump in target list.
+..see:Function.assignNextT
+..see:Funktion.nextT
+*/
+
+///.Function.getNextT.param.es.type:Class.EdgeStump
+
+template<typename TCargo, bool TSource, bool TId, typename TSpec>
+inline EdgeStump<TCargo, true, TSource, TId, TSpec>*
+getNextT(EdgeStump<TCargo, true, TSource, TId, TSpec>* es) 
+{
+	SEQAN_CHECKPOINT
+	return es->data_nextT;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.assignNextS:
+..cat:Graph
+..summary:Assigns another EdgeStump to the next source pointer.
+..signature:assignNextS(es, es2)
+..param.es:Pointer to the EdgeStump.
+...type:Class.EdgeStump
+..param.es2:Pointer to the following EdgeStump.
+...type:Class.EdgeStump
+..returns:void
+..see:Function.nextS
+..see:Funktion.getNextS
+*/
+
+///.Function.assignNextS.param.es.type:Class.EdgeStump
+
+template<typename TCargo, bool TSource, bool TId, typename TSpec>
+inline void 
+assignNextS(EdgeStump<TCargo, true, TSource, TId, TSpec>* es, 
+			EdgeStump<TCargo, true, TSource, TId, TSpec>* es2) 
+{
+	SEQAN_CHECKPOINT
+	es->data_nextS = es2;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TCargo, bool TId, typename TSpec>
+inline void 
+assignNextS(EdgeStump<TCargo, true, false, TId, TSpec>* es, 
+			EdgeStump<TCargo, true, false, TId, TSpec>* es2) 
+{
+	SEQAN_CHECKPOINT
+	// Nop
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.nextS:
+..cat:Graph
+..summary:Accesses the next source pointer.
+..signature:nextS(es)
+..param.es:Pointer to the EdgeStump.
+...type:Class.EdgeStump
+..returns:Reference to the next source pointer.
+..see:Function.assignNextS
+..see:Funktion.getNextS
+*/
+
+///.Function.nextS.param.es.type:Class.EdgeStump
+
+template<typename TCargo, bool TSource, bool TId, typename TSpec>
+inline EdgeStump<TCargo, true, TSource, TId, TSpec>* &
+nextS(EdgeStump<TCargo, true, TSource, TId, TSpec>* es) 
+{
+	SEQAN_CHECKPOINT
+	return es->data_nextS;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TCargo, bool TId, typename TSpec>
+inline EdgeStump<TCargo, true, false, TId, TSpec>*
+nextS(EdgeStump<TCargo, true, false, TId, TSpec>* es) 
+{
+	SEQAN_CHECKPOINT
+	// Nop
+	return 0;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.getNextS:
+..cat:Graph
+..summary:Get method for the next source pointer.
+..signature:getNextS(es)
+..param.es:Pointer to the EdgeStump.
+...type:Class.EdgeStump
+..returns:Pointer to the next edge stump in source list.
+..see:Function.assignNextS
+..see:Funktion.nextS
+*/
+
+///.Function.getNextS.param.es.type:Class.EdgeStump
+
+template<typename TCargo, bool TId, typename TSpec>
+inline EdgeStump<TCargo, true, true, TId, TSpec>*
+getNextS(EdgeStump<TCargo, true, true, TId, TSpec> const* es) 
+{
+	SEQAN_CHECKPOINT
+	return es->data_nextS;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TCargo, bool TId, typename TSpec>
+inline EdgeStump<TCargo, true, false, TId, TSpec>*
+getNextS(EdgeStump<TCargo, true, false, TId, TSpec> const* es) 
+{
+	SEQAN_CHECKPOINT
+	// No source pointer
+	return 0;
+}
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
 // INTERNAL FUNCTIONS
@@ -420,10 +875,10 @@ getTarget(EdgeStump<TCargo, TSpec>* es)
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TCargo, typename TSpec, typename TId>
+template<typename TCargo, bool TList, bool TSource, typename TSpec, typename TId2>
 void 
-_assignId(EdgeStump<TCargo, TSpec>* es, 
-		  TId const id) 
+_assignId(EdgeStump<TCargo, TList, TSource, true, TSpec>* es, 
+		  TId2 const id) 
 {
 	SEQAN_CHECKPOINT
 	es->data_id = id;
@@ -431,10 +886,10 @@ _assignId(EdgeStump<TCargo, TSpec>* es,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TCargo, typename TId>
+template<typename TCargo, bool TList, bool TSource, typename TSpec, typename TId2>
 void 
-_assignId(EdgeStump<TCargo, WithoutEdgeId>* es, 
-		  TId const id) 
+_assignId(EdgeStump<TCargo, TList, TSource, false, TSpec>* es, 
+		  TId2 const id) 
 {
 	SEQAN_CHECKPOINT
 	// No id -> does nothing
@@ -442,9 +897,9 @@ _assignId(EdgeStump<TCargo, WithoutEdgeId>* es,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TCargo, typename TSpec>
-inline typename Id<EdgeStump<TCargo, TSpec> const>::Type
-_getId(EdgeStump<TCargo, TSpec> const* es) 
+template<typename TCargo, bool TList, bool TSource, typename TSpec>
+inline typename Id<EdgeStump<TCargo, TList, TSource, true, TSpec> const>::Type
+_getId(EdgeStump<TCargo, TList, TSource, true, TSpec> const* es) 
 {
 	SEQAN_CHECKPOINT
 	return es->data_id;
@@ -452,9 +907,9 @@ _getId(EdgeStump<TCargo, TSpec> const* es)
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TCargo, typename TSpec>
-inline typename Id<EdgeStump<TCargo, TSpec> >::Type
-_getId(EdgeStump<TCargo, TSpec>* es) 
+template<typename TCargo, bool TList, bool TSource, typename TSpec>
+inline typename Id<EdgeStump<TCargo, TList, TSource, true, TSpec> >::Type
+_getId(EdgeStump<TCargo, TList, TSource, true, TSpec>* es) 
 {
 	SEQAN_CHECKPOINT
 	return es->data_id;
@@ -462,9 +917,9 @@ _getId(EdgeStump<TCargo, TSpec>* es)
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TCargo>
-inline typename Id<EdgeStump<TCargo, WithoutEdgeId> >::Type 
-_getId(EdgeStump<TCargo, WithoutEdgeId> const* es) 
+template<typename TCargo, bool TList, bool TSource, typename TSpec>
+inline typename Id<EdgeStump<TCargo, TList, TSource, false, TSpec> >::Type 
+_getId(EdgeStump<TCargo, TList, TSource, false, TSpec> const* es) 
 {
 	SEQAN_CHECKPOINT
 	// No real id
@@ -473,14 +928,15 @@ _getId(EdgeStump<TCargo, WithoutEdgeId> const* es)
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TCargo>
-inline typename Id<EdgeStump<TCargo, WithoutEdgeId> >::Type 
-_getId(EdgeStump<TCargo, WithoutEdgeId>* es) 
+template<typename TCargo, bool TList, bool TSource, typename TSpec>
+inline typename Id<EdgeStump<TCargo, TList, TSource, false, TSpec> >::Type 
+_getId(EdgeStump<TCargo, TList, TSource, false, TSpec>* es) 
 {
 	SEQAN_CHECKPOINT
 	// No real id
 	return 0;
 }
+
 
 
 }// namespace SEQAN_NAMESPACE_MAIN

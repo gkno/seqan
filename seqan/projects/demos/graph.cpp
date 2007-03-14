@@ -6,7 +6,7 @@ using namespace seqan;
 void BreadthFirstSearch() {
 //____________________________________________________________________________
 // Breadth-First Search
-	typedef Graph<EdgeListU<> > TGraph;
+	typedef Graph<Undirected<> > TGraph;
 	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	typedef Size<TGraph>::Type TSize;
@@ -325,9 +325,9 @@ void DijkstraInternalMap() {
 // Dijkstra with internal property map
 	//typedef SimpleTypeToMember<unsigned int> TEdgeCargo;
 	typedef unsigned int TEdgeCargo;
-	typedef EdgeList<TEdgeCargo> TEdges;
+	typedef Directed<TEdgeCargo> TEdges;
 	//No edge ids require manual creation of the graph!!!
-	//typedef EdgeList<TEdgeCargo, WithoutEdgeId> TEdges;
+	//typedef Directed<TEdgeCargo, WithoutEdgeId> TEdges;
 
 	typedef Graph<TEdges> TGraph;
 	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;

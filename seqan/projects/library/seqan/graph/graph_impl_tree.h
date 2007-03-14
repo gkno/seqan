@@ -4,7 +4,7 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 //////////////////////////////////////////////////////////////////////////////
-// Graph - EdgeListT
+// Graph - Tree
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -14,7 +14,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..cat:Graph
 ..general:Class.Graph
 ..summary:A tree that stores the edges in an adjacency list.
-..signature:Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>
+..signature:Graph<Tree<TCargo, TEdgeSpec>, TSpec>
 ..param.TCargo:The cargo type that can be attached to the edges.
 ...metafunction:Metafunction.Cargo
 ...remarks:Use @Metafunction.Cargo@ to get the cargo type of the tree.
@@ -28,16 +28,16 @@ namespace SEQAN_NAMESPACE_MAIN
 ..include:graph.h
 */
 template<typename TCargo, typename TEdgeSpec, typename TSpec>
-class Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> 
+class Graph<Tree<TCargo, TEdgeSpec>, TSpec> 
 {
 	public:
 		typedef typename Id<Graph>::Type TIdType;
-		typedef typename EdgeType<Graph>::Type TEdgeStumpT;	
+		typedef typename EdgeType<Graph>::Type TEdgeStump;	
 		typedef typename VertexDescriptor<Graph>::Type TVertexDescriptor;
-		typedef Allocator<SinglePool<sizeof(TEdgeStumpT)> > TAllocator;
+		typedef Allocator<SinglePool<sizeof(TEdgeStump)> > TAllocator;
 		
 		TVertexDescriptor data_root;
-		String<TEdgeStumpT*> data_vertex;			// Pointers to EdgeStumpT lists
+		String<TEdgeStump*> data_vertex;			// Pointers to EdgeStumpT lists
 		IdManager<TIdType> data_id_managerV;
 		TAllocator data_allocator;
 		
@@ -82,37 +82,37 @@ class Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec>
 inline void
-_copyGraph(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> const& source,
-		   Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>& dest,
+_copyGraph(Graph<Tree<TCargo, TEdgeSpec>, TSpec> const& source,
+		   Graph<Tree<TCargo, TEdgeSpec>, TSpec>& dest,
 		   bool transpose) 
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> TGraph;
+	typedef Graph<Tree<TCargo, TEdgeSpec>, TSpec> TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
-	typedef typename EdgeType<TGraph>::Type TEdgeStumpT;
-	typedef typename Iterator<String<TEdgeStumpT*> const>::Type TIterConst;
-	typedef typename Iterator<String<TEdgeStumpT*> >::Type TIter;
+	typedef typename EdgeType<TGraph>::Type TEdgeStump;
+	typedef typename Iterator<String<TEdgeStump*> const>::Type TIterConst;
+	typedef typename Iterator<String<TEdgeStump*> >::Type TIter;
 	clear(dest);
 	resize(dest.data_vertex, length(source.data_vertex));
 	TIter itInit = begin(dest.data_vertex);
 	while(!atEnd(itInit)) {
-		*itInit = (TEdgeStumpT*) 0;
+		*itInit = (TEdgeStump*) 0;
 		goNext(itInit);
 	}
 	TIterConst it = begin(source.data_vertex);
 	while(!atEnd(it)) {
-		TEdgeStumpT const* current = getValue(it);
+		TEdgeStump* current = getValue(it);
 		TVertexDescriptor parentVertex = position(it);
-		while(current != (TEdgeStumpT*) 0) {
-			TVertexDescriptor childVertex = current->data_child;
+		while(current != (TEdgeStump*) 0) {
+			TVertexDescriptor childVertex = getTarget(current);
 			// Create missing vertices
 			if (parentVertex > childVertex) _createVertices(dest,parentVertex);
 			else _createVertices(dest,childVertex);
 			// Add edge
 			TEdgeDescriptor e = addEdge(dest, parentVertex, childVertex);
 			assignCargo(e, getCargo(current));
-			current = current->data_next;
+			current = getNextT(current);
 		}
 		goNext(it);
 	}
@@ -122,8 +122,8 @@ _copyGraph(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> const& source,
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec>
 inline void
-_copyGraph(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> const& source,
-		   Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>& dest) 
+_copyGraph(Graph<Tree<TCargo, TEdgeSpec>, TSpec> const& source,
+		   Graph<Tree<TCargo, TEdgeSpec>, TSpec>& dest) 
 {
 	// To transpose a tree doesn't make sense
 	_copyGraph(source, dest, false); 
@@ -138,8 +138,8 @@ _copyGraph(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> const& source,
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec>
 inline void
-transpose(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> const& source,
-		  Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>& dest)
+transpose(Graph<Tree<TCargo, TEdgeSpec>, TSpec> const& source,
+		  Graph<Tree<TCargo, TEdgeSpec>, TSpec>& dest)
 {
 	SEQAN_CHECKPOINT
 	// On a tree transpose makes no sense, just copy
@@ -151,7 +151,7 @@ transpose(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> const& source,
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec>
 inline void
-transpose(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> const& g)
+transpose(Graph<Tree<TCargo, TEdgeSpec>, TSpec> const& g)
 {
 	// Nothing to do
 }
@@ -159,8 +159,8 @@ transpose(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> const& g)
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec>
-inline typename Size<Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> >::Type 
-numEdges(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> const& g) 
+inline typename Size<Graph<Tree<TCargo, TEdgeSpec>, TSpec> >::Type 
+numEdges(Graph<Tree<TCargo, TEdgeSpec>, TSpec> const& g) 
 {
 	SEQAN_CHECKPOINT
 	if (!empty(g)) return (idCount(g.data_id_managerV) - 1);
@@ -170,8 +170,8 @@ numEdges(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> const& g)
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec>
-inline typename Size<Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> >::Type 
-numVertices(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> const& g) 
+inline typename Size<Graph<Tree<TCargo, TEdgeSpec>, TSpec> >::Type 
+numVertices(Graph<Tree<TCargo, TEdgeSpec>, TSpec> const& g) 
 {
 	SEQAN_CHECKPOINT
 	return idCount(g.data_id_managerV);
@@ -181,7 +181,7 @@ numVertices(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> const& g)
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec>
 inline bool 
-empty(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> const& g) 
+empty(Graph<Tree<TCargo, TEdgeSpec>, TSpec> const& g) 
 {
 	SEQAN_CHECKPOINT
 	return (!idCount(g.data_id_managerV));
@@ -191,7 +191,7 @@ empty(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> const& g)
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec>
 inline void
-clearEdges(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>& g) 
+clearEdges(Graph<Tree<TCargo, TEdgeSpec>, TSpec>& g) 
 {
 	SEQAN_CHECKPOINT
 	removeAllChildren(g, getRoot(g));
@@ -201,7 +201,7 @@ clearEdges(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>& g)
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec>
 inline void
-clearVertices(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>& g) 
+clearVertices(Graph<Tree<TCargo, TEdgeSpec>, TSpec>& g) 
 {
 	SEQAN_CHECKPOINT
 	if (!empty(g)) {
@@ -215,10 +215,10 @@ clearVertices(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>& g)
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec>
 inline void 
-clear(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>& g) 
+clear(Graph<Tree<TCargo, TEdgeSpec>, TSpec>& g) 
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> TGraph;
+	typedef Graph<Tree<TCargo, TEdgeSpec>, TSpec> TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	if (getRoot(g) == getNil<TVertexDescriptor>()) g.data_root=0;
 	clearVertices(g);
@@ -227,8 +227,8 @@ clear(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>& g)
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TVertexDescriptor> 
-inline typename Size<Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> >::Type 
-outDegree(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> const& g, 
+inline typename Size<Graph<Tree<TCargo, TEdgeSpec>, TSpec> >::Type 
+outDegree(Graph<Tree<TCargo, TEdgeSpec>, TSpec> const& g, 
 		  TVertexDescriptor const vertex) 
 {
 	SEQAN_CHECKPOINT
@@ -239,8 +239,8 @@ outDegree(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> const& g,
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TVertexDescriptor> 
-inline typename Size<Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> >::Type 
-inDegree(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> const& g, 
+inline typename Size<Graph<Tree<TCargo, TEdgeSpec>, TSpec> >::Type 
+inDegree(Graph<Tree<TCargo, TEdgeSpec>, TSpec> const& g, 
 		 TVertexDescriptor const vertex) 
 {
 	SEQAN_CHECKPOINT
@@ -253,8 +253,8 @@ inDegree(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> const& g,
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TVertexDescriptor> 
-inline typename Size<Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> >::Type 
-degree(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> const& g,
+inline typename Size<Graph<Tree<TCargo, TEdgeSpec>, TSpec> >::Type 
+degree(Graph<Tree<TCargo, TEdgeSpec>, TSpec> const& g,
 	   TVertexDescriptor const vertex) 
 {
 	return (inDegree(g,vertex)+outDegree(g,vertex));
@@ -263,18 +263,18 @@ degree(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> const& g,
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec> 
-inline typename VertexDescriptor<Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> >::Type 
-addVertex(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>& g) 
+inline typename VertexDescriptor<Graph<Tree<TCargo, TEdgeSpec>, TSpec> >::Type 
+addVertex(Graph<Tree<TCargo, TEdgeSpec>, TSpec>& g) 
 {
 	SEQAN_CHECKPOINT	
-	typedef Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> TGraph;
+	typedef Graph<Tree<TCargo, TEdgeSpec>, TSpec> TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	typedef typename EdgeType<TGraph>::Type TEdgeStumpT;
+	typedef typename EdgeType<TGraph>::Type TEdgeStump;
 	TVertexDescriptor vd = obtainId(g.data_id_managerV);
 	if (vd == length(g.data_vertex)) {
-		appendValue(g.data_vertex, (TEdgeStumpT*) 0); 
+		appendValue(g.data_vertex, (TEdgeStump*) 0); 
 	} else {
-		value(g.data_vertex, vd) = (TEdgeStumpT*) 0;
+		value(g.data_vertex, vd) = (TEdgeStump*) 0;
 	}
 	return vd;
 }
@@ -283,21 +283,21 @@ addVertex(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>& g)
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TVertexDescriptor>
 inline void 
-removeVertex(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>& g, 
+removeVertex(Graph<Tree<TCargo, TEdgeSpec>, TSpec>& g, 
 			 TVertexDescriptor const v) 
 {
 	// Should not be used on a tree
 	SEQAN_CHECKPOINT
 	SEQAN_ASSERT(idInUse(g.data_id_managerV, v) == true)
-	if (!isRoot(g,v)) removeChild(g, (TVertexDescriptor) _getParent(g, v),v);
+	if (!isRoot(g,v)) removeChild(g, (TVertexDescriptor) _getSource(g, v),v);
 	else clear(g);
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TVertexDescriptor> 
-inline typename EdgeDescriptor<Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> >::Type 
-addEdge(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>& g, 
+inline typename EdgeDescriptor<Graph<Tree<TCargo, TEdgeSpec>, TSpec> >::Type 
+addEdge(Graph<Tree<TCargo, TEdgeSpec>, TSpec>& g, 
 		TVertexDescriptor const parent, 
 		TVertexDescriptor const child) 
 {
@@ -305,18 +305,18 @@ addEdge(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>& g,
 	SEQAN_ASSERT(idInUse(g.data_id_managerV, parent) == true)
 	SEQAN_ASSERT(idInUse(g.data_id_managerV, child) == true)
 
-	typedef Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> TGraph;
-	typedef typename EdgeType<TGraph>::Type TEdgeStumpT;
+	typedef Graph<Tree<TCargo, TEdgeSpec>, TSpec> TGraph;
+	typedef typename EdgeType<TGraph>::Type TEdgeStump;
 	typedef typename Id<TGraph>::Type TId;
 
-	TEdgeStumpT* edge_ptr;
+	TEdgeStump* edge_ptr;
 	allocate(g.data_allocator, edge_ptr, 1);
 	valueConstruct(edge_ptr);
-	assignParent(edge_ptr, parent);
-	assignChild(edge_ptr, child);
-	edge_ptr->data_next = (TEdgeStumpT*) 0;
+	assignSource(edge_ptr, parent);
+	assignTarget(edge_ptr, child);
+	assignNextT(edge_ptr, (TEdgeStump*) 0);
 	if (getValue(g.data_vertex, parent)!=0) {
-		edge_ptr->data_next = getValue(g.data_vertex, parent);
+		assignNextT(edge_ptr, getValue(g.data_vertex, parent));
 	}
 	value(g.data_vertex, parent)=edge_ptr;
 	return edge_ptr;
@@ -325,14 +325,14 @@ addEdge(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>& g,
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TVertexDescriptor> 
-inline typename EdgeDescriptor<Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> >::Type 
-addEdge(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>& g, 
+inline typename EdgeDescriptor<Graph<Tree<TCargo, TEdgeSpec>, TSpec> >::Type 
+addEdge(Graph<Tree<TCargo, TEdgeSpec>, TSpec>& g, 
 		TVertexDescriptor const parent, 
 		TVertexDescriptor const child,
 		TCargo const cargo) 
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> TGraph;
+	typedef Graph<Tree<TCargo, TEdgeSpec>, TSpec> TGraph;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	TEdgeDescriptor e = addEdge(g,parent,child);
 	assignCargo(e,cargo);
@@ -343,7 +343,7 @@ addEdge(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>& g,
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TVertexDescriptor>
 void 
-removeEdge(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>& g,
+removeEdge(Graph<Tree<TCargo, TEdgeSpec>, TSpec>& g,
 		   TVertexDescriptor const parent,
 		   TVertexDescriptor const child) 
 {
@@ -351,24 +351,24 @@ removeEdge(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>& g,
 	SEQAN_ASSERT(idInUse(g.data_id_managerV, parent) == true)
 	SEQAN_ASSERT(idInUse(g.data_id_managerV, child) == true)
 	
-	typedef Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> TGraph;
-	typedef typename EdgeType<TGraph>::Type TEdgeStumpT;
+	typedef Graph<Tree<TCargo, TEdgeSpec>, TSpec> TGraph;
+	typedef typename EdgeType<TGraph>::Type TEdgeStump;
 
 	// Find edge and predecessor
-	TEdgeStumpT* pred = 0;
-	TEdgeStumpT* current = getValue(g.data_vertex, parent);
-	while(current != (TEdgeStumpT*) 0) {
-		if ( (TVertexDescriptor) current->data_child == child) break;
+	TEdgeStump* pred = 0;
+	TEdgeStump* current = getValue(g.data_vertex, parent);
+	while(current != (TEdgeStump*) 0) {
+		if ( (TVertexDescriptor) getTarget(current) == child) break;
 		pred = current;
-		current = current->data_next;
+		current = getNextT(current);
 	}
 	
 	// Not found?
-	if (current == (TEdgeStumpT*) 0) return;
+	if (current == (TEdgeStump*) 0) return;
 	
 	// Relink the next pointer of predecessor
-	if (pred != (TEdgeStumpT*) 0) pred->data_next = current->data_next;
-	else value(g.data_vertex, parent) = current->data_next;
+	if (pred != (TEdgeStump*) 0) assignNextT(pred, getNextT(current));
+	else value(g.data_vertex, parent) = getNextT(current);
 	
 	// Deallocate
 	valueDestruct(current);
@@ -379,7 +379,7 @@ removeEdge(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>& g,
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TEdgeDescriptor>
 void 
-removeEdge(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>& g,
+removeEdge(Graph<Tree<TCargo, TEdgeSpec>, TSpec>& g,
 		   TEdgeDescriptor const edge)
 {
 	// Should not be used on a tree
@@ -391,7 +391,7 @@ removeEdge(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>& g,
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TVertexDescriptor> 
 inline void 
-removeOutEdges(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>& g, 
+removeOutEdges(Graph<Tree<TCargo, TEdgeSpec>, TSpec>& g, 
 			   TVertexDescriptor const v) 
 {
 	// Should not be used on a tree
@@ -404,22 +404,22 @@ removeOutEdges(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>& g,
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TVertexDescriptor> 
 inline void 
-removeInEdges(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>& g,
+removeInEdges(Graph<Tree<TCargo, TEdgeSpec>, TSpec>& g,
 			  TVertexDescriptor const v) 
 {
 	// Should not be used on a tree
 	SEQAN_CHECKPOINT
 	if (v != g.data_root) {
 		removeAllChildren(g,v);
-		removeChild(g, _getParent(g,v), v);
+		removeChild(g, _getSource(g,v), v);
 	}
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TEdgeDescriptor>
-inline typename VertexDescriptor<Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> >::Type 
-targetVertex(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> const& g,
+inline typename VertexDescriptor<Graph<Tree<TCargo, TEdgeSpec>, TSpec> >::Type 
+targetVertex(Graph<Tree<TCargo, TEdgeSpec>, TSpec> const& g,
 			 TEdgeDescriptor const edge) 
 {
 	SEQAN_CHECKPOINT
@@ -429,8 +429,8 @@ targetVertex(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> const& g,
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TEdgeDescriptor>
-inline typename VertexDescriptor<Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> >::Type 
-sourceVertex(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> const& g,
+inline typename VertexDescriptor<Graph<Tree<TCargo, TEdgeSpec>, TSpec> >::Type 
+sourceVertex(Graph<Tree<TCargo, TEdgeSpec>, TSpec> const& g,
 			 TEdgeDescriptor const edge) 
 {
 	SEQAN_CHECKPOINT
@@ -441,13 +441,13 @@ sourceVertex(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> const& g,
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TMatrix>
 inline void
-getAdjacencyMatrix(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> const& g, 
+getAdjacencyMatrix(Graph<Tree<TCargo, TEdgeSpec>, TSpec> const& g, 
 				   TMatrix& mat) 
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> TGraph;
+	typedef Graph<Tree<TCargo, TEdgeSpec>, TSpec> TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	typedef typename EdgeType<TGraph>::Type TEdgeStumpT;
+	typedef typename EdgeType<TGraph>::Type TEdgeStump;
 	typedef typename Size<TMatrix>::Type TSize;
 	TSize len = getIdUpperBound(g.data_id_managerV);
 	setDimension(mat, 2);
@@ -456,14 +456,14 @@ getAdjacencyMatrix(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> const& g,
 	resize(mat);
 	for (TSize i=0;i<len*len;++i) value(mat,i) = 0;
 
-	typedef typename Iterator<String<TEdgeStumpT*> const>::Type TIterConst;
+	typedef typename Iterator<String<TEdgeStump*> const>::Type TIterConst;
 	for(TIterConst it = begin(g.data_vertex);!atEnd(it);goNext(it)) {
 		TVertexDescriptor parentV = position(it);
-		TEdgeStumpT const* current = getValue(it);
+		TEdgeStump* current = getValue(it);
 		while(current!=0) {
-			TVertexDescriptor childV = getChild(current);
+			TVertexDescriptor childV = getTarget(current);
 			assignValue(mat,parentV*len+childV, getValue(mat,parentV*len+childV)+1);
-			current=current->data_next;
+			current=getNextT(current);
 		}
 	}
 }
@@ -473,35 +473,35 @@ getAdjacencyMatrix(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> const& g,
 template <typename TFile, typename TCargo, typename TEdgeSpec, typename TSpec, typename TIDString>
 inline void
 write(TFile & target,
-	  Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> const& g,
+	  Graph<Tree<TCargo, TEdgeSpec>, TSpec> const& g,
 	  TIDString const &,
 	  Raw)
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> TGraph;
+	typedef Graph<Tree<TCargo, TEdgeSpec>, TSpec> TGraph;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
 	typedef typename Iterator<String<TEdgeStump*> const>::Type TIterConst;
 	_streamWrite(target,"Adjacency list:\n");
 	for(TIterConst it = begin(g.data_vertex);!atEnd(it);goNext(it)) {
 		_streamPutInt(target, position(it));
 		_streamWrite(target," -> ");
-		TEdgeStump const* current = getValue(it);
+		TEdgeStump* current = getValue(it);
 		while(current!=0) {
-			_streamPutInt(target, getChild(current));
+			_streamPutInt(target, getTarget(current));
 			_streamPut(target, ',');
-			current=current->data_next;
+			current=getNextT(current);
 		}
 		_streamPut(target, '\n');
 	}
 	_streamWrite(target,"Edge list:\n");
 	for(TIterConst it = begin(g.data_vertex);!atEnd(it);goNext(it)) {
-		TEdgeStump const* current = getValue(it);
+		TEdgeStump* current = getValue(it);
 		while(current!=0) {
 			_streamWrite(target,"Source: ");
 			_streamPutInt(target, position(it));		
 			_streamPut(target, ',');
 			_streamWrite(target,"Target: ");
-			_streamPutInt(target, getChild(current));
+			_streamPutInt(target, getTarget(current));
 			_streamPut(target, ' ');
 			_streamWrite(target,"(Id: ");
 			_streamPutInt(target, _getId(current));
@@ -510,7 +510,7 @@ write(TFile & target,
 			_streamWrite(target, typeid(getCargo(current)).name());
 			_streamPut(target, ')');
 			_streamPut(target, '\n');
-			current=current->data_next;
+			current=getNextT(current);
 		}
 	}
 }
@@ -529,10 +529,10 @@ write(TFile & target,
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec>
 inline void
-createRoot(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>& g)
+createRoot(Graph<Tree<TCargo, TEdgeSpec>, TSpec>& g)
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> TGraph;
+	typedef Graph<Tree<TCargo, TEdgeSpec>, TSpec> TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	TVertexDescriptor r = addVertex(g);
 	g.data_root = r;
@@ -541,8 +541,8 @@ createRoot(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>& g)
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec>
-inline typename VertexDescriptor<Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> >::Type&
-root(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>& g)
+inline typename VertexDescriptor<Graph<Tree<TCargo, TEdgeSpec>, TSpec> >::Type&
+root(Graph<Tree<TCargo, TEdgeSpec>, TSpec>& g)
 {
 	SEQAN_CHECKPOINT
 	return g.data_root;
@@ -551,8 +551,8 @@ root(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>& g)
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec>
-inline typename VertexDescriptor<Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> >::Type 
-getRoot(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> const& g)
+inline typename VertexDescriptor<Graph<Tree<TCargo, TEdgeSpec>, TSpec> >::Type 
+getRoot(Graph<Tree<TCargo, TEdgeSpec>, TSpec> const& g)
 {
 	SEQAN_CHECKPOINT
 	return g.data_root;
@@ -562,7 +562,7 @@ getRoot(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> const& g)
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TVertexDescriptor>
 inline bool
-isRoot(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> const& g,
+isRoot(Graph<Tree<TCargo, TEdgeSpec>, TSpec> const& g,
 	   TVertexDescriptor v)
 {
 	SEQAN_CHECKPOINT
@@ -585,20 +585,20 @@ isRoot(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> const& g,
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TVertexDescriptor>
 inline bool
-isLeaf(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> const& g,
+isLeaf(Graph<Tree<TCargo, TEdgeSpec>, TSpec> const& g,
 	   TVertexDescriptor v)
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> TGraph;
-	typedef typename EdgeType<TGraph>::Type TEdgeStumpT;
-	return (value(g.data_vertex, v) ==  (TEdgeStumpT*) 0);
+	typedef Graph<Tree<TCargo, TEdgeSpec>, TSpec> TGraph;
+	typedef typename EdgeType<TGraph>::Type TEdgeStump;
+	return (value(g.data_vertex, v) ==  (TEdgeStump*) 0);
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TVertexDescriptor>
-inline typename EdgeDescriptor<Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> >::Type 
-findEdge(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>& g,
+inline typename EdgeDescriptor<Graph<Tree<TCargo, TEdgeSpec>, TSpec> >::Type 
+findEdge(Graph<Tree<TCargo, TEdgeSpec>, TSpec>& g,
 		 TVertexDescriptor const v,
 		 TVertexDescriptor const w)
 {
@@ -606,17 +606,17 @@ findEdge(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>& g,
 	SEQAN_ASSERT(idInUse(g.data_id_managerV, v) == true)
 	SEQAN_ASSERT(idInUse(g.data_id_managerV, w) == true)
 	
-	typedef Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> TGraph;
-	typedef typename EdgeType<TGraph>::Type TEdgeStumpT;
-	TEdgeStumpT* current = getValue(g.data_vertex, v);
-	while((TEdgeStumpT*) current != 0) {
-		if (getChild(current) == w) return current;
-		current = current->data_next;
+	typedef Graph<Tree<TCargo, TEdgeSpec>, TSpec> TGraph;
+	typedef typename EdgeType<TGraph>::Type TEdgeStump;
+	TEdgeStump* current = getValue(g.data_vertex, v);
+	while((TEdgeStump*) current != 0) {
+		if (getTarget(current) == w) return current;
+		current = getNextT(current);
 	}
 	current = getValue(g.data_vertex, w);
-	while((TEdgeStumpT*) current != 0) {
-		if (getChild(current) == v) return current;
-		current = current->data_next;
+	while((TEdgeStump*) current != 0) {
+		if (getTarget(current) == v) return current;
+		current = getNextT(current);
 	}
 	// We should never reach this point
 	SEQAN_ASSERT(false)
@@ -626,21 +626,21 @@ findEdge(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>& g,
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TVertexDescriptor>
-inline typename VertexDescriptor<Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> >::Type 
-_getParent(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>& g,
+inline typename VertexDescriptor<Graph<Tree<TCargo, TEdgeSpec>, TSpec> >::Type 
+_getSource(Graph<Tree<TCargo, TEdgeSpec>, TSpec>& g,
 		   TVertexDescriptor const v)
 {
 	SEQAN_CHECKPOINT
 	SEQAN_ASSERT(idInUse(g.data_id_managerV, v) == true)
 		
-	typedef Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> TGraph;
-	typedef typename EdgeType<TGraph>::Type TEdgeStumpT;
-	typedef typename Iterator<String<TEdgeStumpT*> >::Type TIter;
+	typedef Graph<Tree<TCargo, TEdgeSpec>, TSpec> TGraph;
+	typedef typename EdgeType<TGraph>::Type TEdgeStump;
+	typedef typename Iterator<String<TEdgeStump*> >::Type TIter;
 	for(TIter it = begin(g.data_vertex);!atEnd(it);goNext(it)) {
-		TEdgeStumpT* current = getValue(it);
+		TEdgeStump* current = getValue(it);
 		while(current!=0) {
-			if ( getChild(current) ==v) return getParent(current);
-			else current = current->data_next;
+			if ( getTarget(current) ==v) return getSource(current);
+			else current = getNextT(current);
 		}
 	}
 	// We should never reach this point
@@ -663,20 +663,20 @@ _getParent(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>& g,
 */
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TVertexDescriptor> 
-inline typename Size<Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> >::Type 
-numChildren(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> const& g,
+inline typename Size<Graph<Tree<TCargo, TEdgeSpec>, TSpec> >::Type 
+numChildren(Graph<Tree<TCargo, TEdgeSpec>, TSpec> const& g,
 			TVertexDescriptor const vertex) 
 {
 	SEQAN_CHECKPOINT
 	SEQAN_ASSERT(idInUse(g.data_id_managerV, vertex) == true)
 
-	typedef Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> const TGraph;
-	typedef typename EdgeType<TGraph>::Type TEdgeStumpT;
+	typedef Graph<Tree<TCargo, TEdgeSpec>, TSpec> TGraph;
+	typedef typename EdgeType<TGraph>::Type TEdgeStump;
 	typedef typename Size<TGraph>::Type TSize;
 	TSize count=0;
-	TEdgeStumpT const* current = getValue(g.data_vertex, vertex);
+	TEdgeStump* current = getValue(g.data_vertex, vertex);
 	while(current!=0) {
-		current = current->data_next;
+		current = getNextT(current);
 		++count;
 	}
 	return count;
@@ -704,8 +704,8 @@ Optionally a cargo can be attached to the parent-child edge.
 */
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TVertexDescriptor> 
-inline typename VertexDescriptor<Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> >::Type 
-addChild(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>& g,
+inline typename VertexDescriptor<Graph<Tree<TCargo, TEdgeSpec>, TSpec> >::Type 
+addChild(Graph<Tree<TCargo, TEdgeSpec>, TSpec>& g,
 		 TVertexDescriptor parent) 
 {
 	SEQAN_CHECKPOINT
@@ -718,8 +718,8 @@ addChild(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>& g,
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TVertexDescriptor> 
-inline typename VertexDescriptor<Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> >::Type 
-addChild(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>& g,
+inline typename VertexDescriptor<Graph<Tree<TCargo, TEdgeSpec>, TSpec> >::Type 
+addChild(Graph<Tree<TCargo, TEdgeSpec>, TSpec>& g,
 		 TVertexDescriptor const parent,
 		 TCargo const cargo) 
 {
@@ -750,7 +750,7 @@ addChild(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>& g,
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TVertexDescriptor> 
 inline void 
-removeChild(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>& g,
+removeChild(Graph<Tree<TCargo, TEdgeSpec>, TSpec>& g,
 			TVertexDescriptor const parent,
 			TVertexDescriptor const child)
 {
@@ -778,15 +778,15 @@ removeChild(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>& g,
 
 template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TVertexDescriptor> 
 inline void 
-removeAllChildren(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>& g, 
+removeAllChildren(Graph<Tree<TCargo, TEdgeSpec>, TSpec>& g, 
 				  TVertexDescriptor const parent) 
 {
 	SEQAN_CHECKPOINT
 	SEQAN_ASSERT(idInUse(g.data_id_managerV, parent) == true)
-	typedef Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> TGraph;
-	typedef typename EdgeType<TGraph>::Type TEdgeStumpT;
+	typedef Graph<Tree<TCargo, TEdgeSpec>, TSpec> TGraph;
+	typedef typename EdgeType<TGraph>::Type TEdgeStump;
 
-	while(getValue(g.data_vertex, parent) != (TEdgeStumpT*) 0) {
+	while(getValue(g.data_vertex, parent) != (TEdgeStump*) 0) {
 		TVertexDescriptor child = childVertex(g,(getValue(g.data_vertex, parent)));
 		if (!isLeaf(g,child)) removeAllChildren(g,child);
 		removeEdge(g,parent, child);
@@ -810,12 +810,12 @@ removeAllChildren(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec>& g,
 ..see:Function.parentVertex
 */
 template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TEdgeDescriptor>
-inline typename VertexDescriptor<Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> >::Type 
-childVertex(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> const& g,
+inline typename VertexDescriptor<Graph<Tree<TCargo, TEdgeSpec>, TSpec> >::Type 
+childVertex(Graph<Tree<TCargo, TEdgeSpec>, TSpec> const& g,
 			TEdgeDescriptor const edge) 
 {
 	SEQAN_CHECKPOINT
-	return getChild(edge);
+	return getTarget(edge);
 }
 
 /**
@@ -832,12 +832,12 @@ childVertex(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> const& g,
 ..see:Function.parentVertex
 */
 template<typename TCargo, typename TEdgeSpec, typename TSpec, typename TEdgeDescriptor>
-inline typename VertexDescriptor<Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> >::Type 
-parentVertex(Graph<EdgeListT<TCargo, TEdgeSpec>, TSpec> const& g,
+inline typename VertexDescriptor<Graph<Tree<TCargo, TEdgeSpec>, TSpec> >::Type 
+parentVertex(Graph<Tree<TCargo, TEdgeSpec>, TSpec> const& g,
 			 TEdgeDescriptor const edge) 
 {
 	SEQAN_CHECKPOINT
-	return getParent(edge);
+	return getSource(edge);
 }
 
 
