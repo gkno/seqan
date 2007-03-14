@@ -3019,8 +3019,8 @@ int main()
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_idmanager.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_interface.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_edgestump.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_edgelist.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_edgelistu.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_directed.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_undirected.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_automaton.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_wordgraph.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_tree.h");

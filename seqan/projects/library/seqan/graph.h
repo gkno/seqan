@@ -25,8 +25,8 @@
 #include <seqan/graph/graph_interface.h>	// Graph metafunctions
 
 // Graph types
-#include <seqan/graph/graph_impl_edgelist.h>	// Directed Graph
-#include <seqan/graph/graph_impl_edgelistu.h>	// Undirected graph
+#include <seqan/graph/graph_impl_directed.h>	// Directed Graph
+#include <seqan/graph/graph_impl_undirected.h>	// Undirected graph
 #include <seqan/graph/graph_impl_automaton.h>	// Automaton
 #include <seqan/graph/graph_impl_wordgraph.h>	// Specialized automaton: Word graph
 #include <seqan/graph/graph_impl_tree.h>		// Tree
