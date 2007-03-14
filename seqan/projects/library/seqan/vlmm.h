@@ -528,7 +528,6 @@ buildSuffixTreeFromIndex(Iter<TIndex, VSTree< TopDown< ParentLinks<ConstrainedTr
 
 	initProbabilityVector(it,target,root);
 	assignRoot(target,root);
-	std::cout << "first chars are done.."<<std::endl;
 	//go to the first node
 	goNext(it);
 	while(!atEnd(it)){
@@ -547,13 +546,13 @@ buildSuffixTreeFromIndex(Iter<TIndex, VSTree< TopDown< ParentLinks<ConstrainedTr
 		}
 
 		child = addVertex(target);
-		std::cout << "Node:"<<child<<"  "<<value(it) << " = " << repLength(it)<< " " << representative(it) << "  toFather:"<<parentEdgeLabel(it)<<"  hits: "<<length(getOccurences(it))<<std::endl;
+		//std::cout << "Node:"<<child<<"  "<<value(it) << " = " << repLength(it)<< " " << representative(it) << "  toFather:"<<parentEdgeLabel(it)<<"  hits: "<<length(getOccurences(it))<<std::endl;
 		setFather(target,father,child);
-		std::cout <<"set Father\t";
+		//std::cout <<"set Father\t";
 		// set child relation with edgelabel
 		//std::cout <<"ParentEdgeLAbel:"<<parentEdgeLabel(it)<<std::endl;
 		addEdge(target,father,child,parentEdgeLabel(it));
-		std::cout <<"set Edge\t";
+		//std::cout <<"set Edge\t";
 		initProbabilityVector(it,target,child);
 		//// provisional set prob-vector of nodes
 		//TIter childs(it);
@@ -571,7 +570,7 @@ buildSuffixTreeFromIndex(Iter<TIndex, VSTree< TopDown< ParentLinks<ConstrainedTr
 		//	setProbability(target,child,startCharacter,(float)countOccurences(childs));
 		//	}
 		//}
-		std::cout << "added node:"<<child<<std::endl;
+		//std::cout << "added node:"<<child<<std::endl;
 		// go to next valid node and add it to the graph
 		goNext(it);
 
@@ -908,7 +907,7 @@ pruneTree(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > >,TGr
 
 	pruneTreeRecursively(vlmm,root,original,parameters);
 
-		for(unsigned i =0;i<numVertices(vlmm);++i){
+		/*for(unsigned i =0;i<numVertices(vlmm);++i){
 				std::cout << isMarked(vlmm,i)<< "  ";
 		}
 		std::cout <<std::endl;
@@ -917,7 +916,7 @@ pruneTree(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > >,TGr
 		}
 		std::cout <<std::endl;
 
-std::cout << "ready with the function\n";
+std::cout << "ready with the function\n";*/
 
  return;
 }
@@ -943,7 +942,7 @@ pruneTreeRecursively(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpe
 	for(unsigned int pos = 0;pos< table_length;++pos){
 		next = getReverseSuffixLink(vlmm,node,pos);
 		if(next != nilVal){
-			std::cout <<" start Recursion from node:"<<node<<" char:"<<pos<<std::endl;
+			//std::cout <<" start Recursion from node:"<<node<<" char:"<<pos<<std::endl;
 			pruneTreeRecursively(vlmm,next,original,parameters);
 		}
 		
@@ -958,6 +957,7 @@ pruneTreeRecursively(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpe
 	TVertexDescriptor father = getFather(vlmm,node);
 	String<TAlphabet> childLabel;
 	getChildLabel(vlmm,father,node,childLabel);
+	/*
 	// check for possible extended 
 	if(length(childLabel) > 1){
 		// seek the node in the tree which could be the suffix link father of the new node
@@ -1012,11 +1012,12 @@ pruneTreeRecursively(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpe
 			
 		} // else case
 	} // Label > 1
-	std::cout << "check keeping of node:" << node;
+	*/
+	//std::cout << "check keeping of node:" << node;
 	// all potential nodes are build
 	if( isMarked(vlmm,node) || (! pruneNode(vlmm,node,parameters)) ){
 		// node should be kept
-		std::cout <<" keep it"<<std::endl;
+		//std::cout <<" keep it"<<std::endl;
 		setMarked(vlmm,node,true);
 		// bubble up and set all nodes on the way to the root true
 		TVertexDescriptor fatherSuffixLink = getSuffixLink(vlmm,node);
@@ -1034,7 +1035,7 @@ pruneTreeRecursively(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpe
 	else
 	{
 	// delete node
-		std::cout <<"  delete it"<<std::endl;
+		//std::cout <<"  delete it"<<std::endl;
 		setMarked(vlmm,node,false);
 	//assignProperty(marked,node,false);
 	}
@@ -1063,13 +1064,13 @@ buildPST(Index<TIndexType, Index_ESA<> > & index,
 	buildSuffixTreeFromIndex(it,vlmm);
 	std::cout << "constructed suffix tree core" <<std::endl;
 	initMaps(vlmm);
-	std::cout << "init all maps" <<std::endl;
+	//std::cout << "init all maps" <<std::endl;
 	addSuffixLinks(vlmm);
-	std::cout << "added suffix links and reverse suffix links" <<std::endl;
-	std::cout <<vlmm;
+	//std::cout << "added suffix links and reverse suffix links" <<std::endl;
+	//std::cout <<vlmm;
 	pruneTree(vlmm,parameters);
-	std::cout << "pruned the PST" <<std::endl;
-	std::cout << vlmm;
+	//std::cout << "pruned the PST" <<std::endl;
+	//std::cout << vlmm;
 	std::cout << "READY!" <<std::endl;
 }
 
