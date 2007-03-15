@@ -19,11 +19,10 @@ namespace SEQAN_NAMESPACE_MAIN
 ...metafunction:Metafunction.Cargo
 ...remarks:Use @Metafunction.Cargo@ to get the cargo type of an undirected graph.
 ...default:$void$
-..param.TEdgeSpec:The specializing type for the edges.
-...metafunction:Metafunction.Spec
-...default:$Default$, see @Tag.Default@.
 ..param.TSpec:The specializing type for the graph.
 ...metafunction:Metafunction.Spec
+...remarks:Use WithoutEdgeId here to omit edge ids.
+Note: If edges do not store ids external property maps do not work.
 ...default:$Default$, see @Tag.Default@.
 ..include:graph.h
 */

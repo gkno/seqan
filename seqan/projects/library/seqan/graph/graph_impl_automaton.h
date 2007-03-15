@@ -41,11 +41,10 @@ public:
 ...metafunction:Metafunction.Cargo
 ...remarks:Use @Metafunction.Cargo@ to get the cargo type of an undirected graph.
 ...default:$void$
-..param.TEdgeSpec:The specializing type for the edges.
-...metafunction:Metafunction.Spec
-...default:$Default$, see @Tag.Default@.
 ..param.TSpec:The specializing type for the graph.
 ...metafunction:Metafunction.Spec
+...remarks:Use WithoutEdgeId here to omit edge ids.
+Note: If edges do not store ids external property maps do not work.
 ...default:$Default$, see @Tag.Default@.
 ..include:graph.h
 */
@@ -593,8 +592,8 @@ write(TFile & target,
 ..cat:Spec.Automaton
 ..summary:Assigns a new root vertex to the automaton.
 ..signature:assignRoot(g, vertex)
-..param.g:A graph.
-...type:Class.Graph
+..param.g:A automaton.
+...type:Spec.Automaton
 ..param.vertex:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
 ..returns:void
@@ -620,8 +619,9 @@ assignRoot(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 ..cat:Spec.Tree
 ..summary:Gets a reference to the root of the tree.
 ..signature:root(g)
-..param.g:A graph.
-...type:Class.Graph
+..param.g:A tree or an automaton.
+...type:Spec.Automaton
+...type:Spec.Tree
 ..returns:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
 ..see:Function.getRoot
@@ -645,8 +645,9 @@ root(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g)
 ..cat:Spec.Tree
 ..summary:Get method for the root of a tree or an automaton.
 ..signature:getRoot(g)
-..param.g:A graph.
-...type:Class.Graph
+..param.g:An automaton or a tree.
+...type:Spec.Automaton
+...type:Spec.Tree
 ..returns:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
 ..see:Function.assignRoot
@@ -670,8 +671,9 @@ getRoot(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g)
 ..cat:Spec.Tree
 ..summary:Tests whether a given vertex is the root or not.
 ..signature:isRoot(g, v)
-..param.g:A graph.
-...type:Class.Graph
+..param.g:An automaton or a tree.
+...type:Spec.Automaton
+...type:Spec.Tree
 ..param.v:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
 ..returns:True if vertex is the root.
@@ -700,8 +702,9 @@ In an automaton an edge is uniquely defined by a vertex and a label.
 In a tree two adjacent vertices uniquely define an edge.
 ..signature:findEdge(g, v, c)
 ..signature:findEdge(g, v, w)
-..param.g:A graph.
-...type:Class.Graph
+..param.g:An automaton or a tree.
+...type:Spec.Automaton
+...type:Spec.Tree
 ..param.v:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
 ..param.c:An edge label.
@@ -755,15 +758,16 @@ findEdge(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
 For an automaton a single character is required whereas for a word graph getSuccessor takes a string.
 ..signature:getSuccessor(g, v, c)
 ..signature:getSuccessor(g, v, str)
-..param.g:A graph.
-...type:Class.Graph
+..param.g:An automaton or a word graph.
+...type:Spec.Automaton
+...type:Spec.Word Graph
 ..param.v:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
 ..param.c:A label.
 ...type:Metafunction.Alphabet
 ..param.str:A string.
 ...type:Class.String
-..returns:A vertex descriptor or nil if not defined.
+..returns:A vertex descriptor or nil if successor is not defined.
 ...type:Metafunction.VertexDescriptor
 ..see:Function.parseString
 ..see:Function.getNil
@@ -789,8 +793,9 @@ getSuccessor(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
 ..summary:Parses a string one character at a time and moves accordingly in the automaton.
 ..signature:parseString(g, v, beginIt, endIt)
 ..signature:parseString(g, v, str)
-..param.g:A graph.
-...type:Class.Graph
+..param.g:An automaton or a word graph.
+...type:Spec.Automaton
+...type:Spec.Word Graph
 ..param.v:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
 ..param.beginIt:An iterator to the beginning of the string.

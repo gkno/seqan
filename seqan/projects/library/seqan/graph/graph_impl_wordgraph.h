@@ -16,17 +16,14 @@ struct WordGraph;
 /**
 .Spec.Word Graph:
 ..cat:Graph
-..general:Class.Graph
+..general:Spec.Automaton
 ..summary:A special automaton that stores words instead of single characters along its edges.
-..signature:Graph<Automaton<TAlphabet, String<TAlphabet>, WordGraph<TSpec> >, TGraphSpec>
+..signature:Graph<Automaton<TAlphabet, String<TAlphabet>, WordGraph<TSpec> > >
 ..param.TAlphabet:The alphabet type that is used for the words.
 ...metafunction:Metafunction.Alphabet
 ...remarks:Use @Metafunction.Alphabet@ to get the value type of the words.
 ...default:$char$
 ..param.TSpec:The specializing type.
-...metafunction:Metafunction.Spec
-...default:$Default$, see @Tag.Default@.
-..param.TGraphSpec:The specializing type for the graph.
 ...metafunction:Metafunction.Spec
 ...default:$Default$, see @Tag.Default@.
 ..include:graph.h

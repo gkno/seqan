@@ -19,11 +19,10 @@ namespace SEQAN_NAMESPACE_MAIN
 ...metafunction:Metafunction.Cargo
 ...remarks:Use @Metafunction.Cargo@ to get the cargo type of a directed graph.
 ...default:$void$
-..param.TEdgeSpec:The specializing type for the edges.
-...metafunction:Metafunction.Spec
-...default:$Default$, see @Tag.Default@.
 ..param.TSpec:The specializing type for the graph.
 ...metafunction:Metafunction.Spec
+...remarks:Use WithoutEdgeId here to omit edge ids.
+Note: If edges do not store ids external property maps do not work.
 ...default:$Default$, see @Tag.Default@.
 ..include:graph.h
 */
@@ -141,8 +140,7 @@ _copyGraph(Graph<Directed<TCargo, TSpec> > const& source,
 .Function.transpose:
 ..cat:Graph
 ..summary:Transposes a graph, either in-place or from source to dest.
-..signature:transpose(source, dest)
-..signature:transpose(source)
+..signature:transpose(source [, dest])
 ..param.source:Source graph.
 ...type:Class.Graph
 ..param.dest:Destination graph.
@@ -477,10 +475,8 @@ removeVertex(Graph<Directed<TCargo, TSpec> >& g,
 ..cat:Graph
 ..summary:Adds a new edge to the graph, either with or without cargo.
 For automatons a label is required.
-..signature:addEdge(g, source, target)
-..signature:addEdge(g, source, target, cargo)
-..signature:addEdge(g, source, target, label)
-..signature:addEdge(g, source, target, label, cargo)
+..signature:addEdge(g, source, target [,cargo | ,label])
+..signature:addEdge(g, source, target [,label ,cargo])
 ..param.g:A graph.
 ...type:Class.Graph
 ..param.source:A vertex descriptor.
@@ -548,10 +544,8 @@ addEdge(Graph<Directed<TCargo, TSpec> >& g,
 /**
 .Function.removeEdge:
 ..cat:Graph
-..summary:Adds a new edge to the graph, either with or without cargo.
-For automatons a label is required.
-..signature:removeEdge(g, source, target)
-..signature:removeEdge(g, source, target, label)
+..summary:Removes an edge from the graph. For automatons a label is required.
+..signature:removeEdge(g, source, target [, label])
 ..signature:removeEdge(g, e)
 ..param.g:A graph.
 ...type:Class.Graph
@@ -566,6 +560,7 @@ For automatons a label is required.
 ...type:Metafunction.EdgeDescriptor
 ..returns:void
 ..see:Function.addEdge
+..see:Function.addEdges
 */
 
 template<typename TCargo, typename TSpec, typename TVertexDescriptor>
@@ -692,8 +687,8 @@ removeInEdges(Graph<Directed<TCargo, TSpec> >& g,
 .Function.targetVertex:
 ..cat:Graph
 ..summary:Returns the target vertex of an edge.
-In a tree the target vertex is always the child. In an undirected graph
-the larger vertex descriptor is the target.
+In a tree the target vertex is always the child. 
+In an undirected graph the larger vertex descriptor of the two endpoints is the target.
 ..signature:targetVertex(g, e)
 ..param.g:A graph.
 ...type:Class.Graph
@@ -719,8 +714,10 @@ targetVertex(Graph<Directed<TCargo, TSpec> > const& g,
 .Function.sourceVertex:
 ..cat:Graph
 ..summary:Returns the source vertex of an edge.
-In a tree the source vertex is always the parent. In an undirected graph
-the smaller vertex descriptor is the source.
+In a tree the source vertex is always the parent. 
+In an undirected graph the smaller vertex descriptor is the source.
+Note: If source vertices are not stored in the EdgeStump this operation is expensive.
+Consider using sourceVertex directly on an edge iterator where this operation is fast!
 ..signature:sourceVertex(g, e)
 ..param.g:A graph.
 ...type:Class.Graph
@@ -759,9 +756,9 @@ sourceVertex(Graph<Directed<TCargo, TSpec> > const& g,
 ..cat:Graph
 ..summary:Returns an adjacency matrix representation of the graph.
 ..signature:getAdjacencyMatrix(g, mat)
-..param.g:A graph.
+..param.g:In-parameter: A graph.
 ...type:Class.Graph
-..param.mat:A matrix.
+..param.mat:Out-parameter: A matrix.
 ...type:Class.Matrix
 ..returns:void
 */
