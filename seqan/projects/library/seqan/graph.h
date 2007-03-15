@@ -41,16 +41,16 @@
 // Graph property maps
 #include <seqan/graph/graph_property.h>
 
-// Specialized iterators
-#include <seqan/graph/graph_bfsiterator.h>
-#include <seqan/graph/graph_dfsiterator.h>
+// Special automatons: Just create functions
+#include <seqan/graph/graph_impl_oracle.h>		// Oracle
+#include <seqan/graph/graph_impl_trie.h>		// Trie
 
 // Graph drawing
 #include <seqan/graph/graph_drawing.h>
 
-// Special automatons: Just create functions
-#include <seqan/graph/graph_impl_oracle.h>		// Oracle
-#include <seqan/graph/graph_impl_trie.h>		// Trie
+// Specialized iterators
+#include <seqan/graph/graph_bfsiterator.h>
+#include <seqan/graph/graph_dfsiterator.h>
 
 // Graph algorithms
 #include <seqan/graph/graph_algorithm.h>

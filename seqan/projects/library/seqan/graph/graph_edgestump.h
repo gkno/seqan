@@ -946,6 +946,17 @@ _assignId(EdgeStump<TCargo, TList, TSource, false, TSpec>* es,
 
 //////////////////////////////////////////////////////////////////////////////
 
+template<typename TCargo, bool TList, bool TSource, typename TId2>
+void 
+_assignId(EdgeStump<TCargo, TList, TSource, false, TreeTag>* es, 
+		  TId2 const id) 
+{
+	SEQAN_CHECKPOINT
+	// For a tree do nothing, child id = tree id
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 template<typename TCargo, bool TList, bool TSource, typename TSpec>
 inline typename Id<EdgeStump<TCargo, TList, TSource, true, TSpec> const>::Type
 _getId(EdgeStump<TCargo, TList, TSource, true, TSpec> const* es) 
@@ -962,6 +973,28 @@ _getId(EdgeStump<TCargo, TList, TSource, true, TSpec>* es)
 {
 	SEQAN_CHECKPOINT
 	return es->data_id;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TCargo, bool TList, bool TSource>
+inline typename Id<EdgeStump<TCargo, TList, TSource, false, TreeTag> const>::Type
+_getId(EdgeStump<TCargo, TList, TSource, false, TreeTag> const* es) 
+{
+	SEQAN_CHECKPOINT
+	// Child id = edge id in a tree
+	return es->data_target;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TCargo, bool TList, bool TSource>
+inline typename Id<EdgeStump<TCargo, TList, TSource, false, TreeTag> >::Type
+_getId(EdgeStump<TCargo, TList, TSource, false, TreeTag>* es) 
+{
+	SEQAN_CHECKPOINT
+	// Child id = edge id in a tree
+	return es->data_target;
 }
 
 //////////////////////////////////////////////////////////////////////////////

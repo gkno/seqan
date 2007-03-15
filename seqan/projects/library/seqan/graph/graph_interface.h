@@ -147,14 +147,14 @@ struct EdgeType<Graph<Directed<TCargo, WithoutEdgeId> > const> {
 
 template<typename TCargo, typename TSpec>
 struct EdgeType<Graph<Tree<TCargo, TSpec> > > {
-	typedef EdgeStump<TCargo, true, false, false, TSpec> Type;
+	typedef EdgeStump<TCargo, true, false, false, TreeTag> Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TCargo, typename TSpec>
 struct EdgeType<Graph<Tree<TCargo, TSpec> > const> {
-	typedef EdgeStump<TCargo, true, false, false, TSpec> const Type;
+	typedef EdgeStump<TCargo, true, false, false, TreeTag> const Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -338,6 +338,7 @@ Creates vertices implicitly.
 ...type:Class.Graph
 ..param.edges:An array of vertex descriptors. It is assumed that the
 edges are stored in the following way: Source1, Target1, Source2, Target2, Source3, ...
+For a tree the root must be the first vertex in this array and the enumeration is Parent, Child, Parent, Child, ...
 ...type:Metafunction.VertexDescriptor
 ..param.size:Size of the array. Must be a multiple of 2.
 ...type:Metafunction.Size

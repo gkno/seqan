@@ -270,7 +270,13 @@ addVertex(Graph<Tree<TCargo, TSpec> >& g)
 	typedef Graph<Tree<TCargo, TSpec> > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
-	TVertexDescriptor vd = obtainId(g.data_id_managerV);
+	TVertexDescriptor vd;
+	if (empty(g)) {
+		vd = obtainId(g.data_id_managerV);
+		g.data_root = vd;
+	} else {
+		vd = obtainId(g.data_id_managerV);
+	}
 	if (vd == length(g.data_vertex)) {
 		appendValue(g.data_vertex, (TEdgeStump*) 0);
 		fill(g.data_parent, vd + 1, getNil<TVertexDescriptor>(), Generous());
@@ -290,7 +296,7 @@ removeVertex(Graph<Tree<TCargo, TSpec> >& g,
 	// Should not be used on a tree
 	SEQAN_CHECKPOINT
 	SEQAN_ASSERT(idInUse(g.data_id_managerV, v) == true)
-	if (!isRoot(g,v)) removeChild(g, getValue(g.data_parent, v), v);
+	if (!isRoot(g,v)) removeChild(g, (TVertexDescriptor) getValue(g.data_parent, v), v);
 	else clear(g);
 }
 

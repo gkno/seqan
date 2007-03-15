@@ -129,6 +129,17 @@ typedef Tag<WithoutEdgeId_> const WithoutEdgeId;
 //////////////////////////////////////////////////////////////////////////////
 
 /**
+.Tag.TreeTag
+..summary:Indicates whether an edge stump belongs to a tree or not.
+..remarks:Only for internal use.
+..value.TreeTag:EdgeStump belongs to a tree.
+*/
+struct TreeTag_;
+typedef Tag<TreeTag_> const TreeTag;
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
 .Tag.DotDrawing
 ..summary:Switch to trigger drawing in dot format.
 ..value.DotDrawing:Graphs in dot format.

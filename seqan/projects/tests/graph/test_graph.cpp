@@ -1871,6 +1871,42 @@ void Test_GraphVertexIterator() {
 }
 
 //////////////////////////////////////////////////////////////////////////////
+void Test_GraphTreeVertexIterator() {
+//____________________________________________________________________________
+// Tree VertexIterator
+	typedef Graph<Tree<void> > TTree;
+	typedef VertexDescriptor<TTree>::Type TVertexDescriptor;
+	typedef EdgeDescriptor<TTree>::Type TEdgeDescriptor;
+	typedef Size<TTree>::Type TSize;
+	
+	TTree gV;
+	TSize numEdges = 8;
+	//Parent, Child, Parent, Child, ...
+	//The root must be the first vertex
+	TVertexDescriptor edges[] = {0,8, 0,3, 0,2, 0,1, 2,4, 4,5, 5,7, 5,6};
+	addEdges(gV,edges, numEdges);
+
+	typedef Iterator<TTree, VertexIterator<> >::Type TVertexIterator;
+	TVertexIterator itV(gV);
+	SEQAN_TASSERT(atBegin(itV)==true)
+	SEQAN_TASSERT(getValue(itV)==0)
+	SEQAN_TASSERT(value(itV)==0)
+	SEQAN_TASSERT(getValue(itV)==0)
+	goNext(itV);
+	SEQAN_TASSERT(atBegin(itV)==false)
+	SEQAN_TASSERT(getValue(itV)==1)
+	++itV;
+	SEQAN_TASSERT(getValue(itV)==2)
+	SEQAN_TASSERT(atEnd(itV)==false)
+	goPrevious(itV);
+	SEQAN_TASSERT((*itV)==1)
+	SEQAN_TASSERT(atEnd(itV)==false)
+	itV--;
+	SEQAN_TASSERT(getValue(itV)==0)
+	SEQAN_TASSERT(atBegin(itV)==true)
+}
+
+//////////////////////////////////////////////////////////////////////////////
 
 template <typename TGraphType>
 void Test_GraphOutEdgeIterator() {
@@ -2983,22 +3019,25 @@ int main()
 	// Test iterators
 	Test_GraphVertexIterator<Directed<char> >();
 	Test_GraphVertexIterator<Undirected<char> >();
-	//Test_GraphVertexIterator<Tree<char> >();
 	Test_GraphVertexIterator<Automaton<char> >();
+	Test_GraphTreeVertexIterator();
 	Test_GraphOutEdgeIterator<Directed<char> >();
 	Test_GraphOutEdgeIterator<Undirected<char> >();
+	Test_GraphOutEdgeIterator<Tree<char> >();
 	Test_GraphOutEdgeIterator<Automaton<char> >();
 	Test_GraphEdgeIterator<Directed<char> >();
 	Test_GraphEdgeIterator<Undirected<char> >();
+	Test_GraphEdgeIterator<Tree<char> >();
 	Test_GraphEdgeIterator<Automaton<char> >();
-	Test_GraphAdjacencyIterator<Automaton<char> >();
 	Test_GraphAdjacencyIterator<Directed<char> >();
 	Test_GraphAdjacencyIterator<Undirected<char> >();
+	Test_GraphAdjacencyIterator<Tree<char> >();
+	Test_GraphAdjacencyIterator<Automaton<char> >();
 
 	// Test property maps
 	Test_GraphExternalProperty<Directed<char> >();
 	Test_GraphExternalProperty<Undirected<char> >();
-	//Test_GraphExternalProperty<Tree<char> >();
+	Test_GraphExternalProperty<Tree<char> >();
 	Test_GraphExternalProperty<Automaton<char> >();	
 	Test_GraphInternalProperty();
 
