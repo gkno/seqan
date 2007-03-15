@@ -7,11 +7,13 @@ namespace SEQAN_NAMESPACE_MAIN
 //	Graph - EdgeStump
 //////////////////////////////////////////////////////////////////////////////
 
+//////////////////////////////////////////////////////////////////////////////
+
 /**
 .Class.EdgeStump:
 ..cat:Graph
 ..summary:The EdgeStump class encapsulates a single edge. 
-It represents either a list node in the adjacency list of a graph or an array field in the transition table of an automaton.
+It represents either a list node in the adjacency list of a graph or an array field if edges are stored in an array.
 ..signature:EdgeStump<TCargo, bool TList, bool TSource, bool TId, TSpec>
 ..param.TCargo:The cargo type of an edge.
 ...metafunction:Metafunction.Cargo
@@ -24,12 +26,13 @@ It represents either a list node in the adjacency list of a graph or an array fi
 ...remarks:If this value is true and it is a list node an additional source next pointer is present.
 ...default:$false$
 ..param.TId:Boolean value that indicates whether an id is stored in the EdgeStump or not.
+Note: Without edge ids external property maps do not work for edges!
 ...default:$true$
 ..param.TSpec:The specializing type.
 ...metafunction:Metafunction.Spec
 ...default:$Default$, see @Tag.Default@.
-..remarks:The default EdgeStump does not consider a cargo. 
-However, it does store an edge id.
+..remarks:The default EdgeStump in all graph types does not consider a cargo. 
+However, in default usage every graph does store an edge id. 
 Edge ids are used to append additional properties to edges with the help of external property maps.
 ..include:graph.h
 */
@@ -43,6 +46,8 @@ class EdgeStump<TCargo, true, false, false, TSpec>
 		EdgeStump* data_nextT;
 };
 
+//////////////////////////////////////////////////////////////////////////////
+
 template<typename TCargo, typename TSpec>
 class EdgeStump<TCargo, true, false, true, TSpec> 
 {
@@ -55,6 +60,8 @@ class EdgeStump<TCargo, true, false, true, TSpec>
 		EdgeStump* data_nextT;
 };
 
+//////////////////////////////////////////////////////////////////////////////
+
 template<typename TCargo, typename TSpec>
 class EdgeStump<TCargo, true, true, false, TSpec> 
 {
@@ -66,6 +73,8 @@ class EdgeStump<TCargo, true, true, false, TSpec>
 		EdgeStump* data_nextT;
 		EdgeStump* data_nextS;
 };
+
+//////////////////////////////////////////////////////////////////////////////
 
 
 template<typename TCargo, typename TSpec>
@@ -82,6 +91,8 @@ class EdgeStump<TCargo, true, true, true, TSpec>
 		EdgeStump* data_nextS;
 };
 
+//////////////////////////////////////////////////////////////////////////////
+
 template<typename TCargo, typename TSpec>
 class EdgeStump<TCargo, false, false, false, TSpec>
 {
@@ -90,6 +101,8 @@ class EdgeStump<TCargo, false, false, false, TSpec>
 		TVertexDescriptor data_target;
 		TCargo data_cargo;
 };
+
+//////////////////////////////////////////////////////////////////////////////
 
 template<typename TCargo, typename TSpec>
 class EdgeStump<TCargo, false, false, true, TSpec>
@@ -102,6 +115,8 @@ class EdgeStump<TCargo, false, false, true, TSpec>
 		TCargo data_cargo;
 };
 
+//////////////////////////////////////////////////////////////////////////////
+
 template<typename TCargo, typename TSpec>
 class EdgeStump<TCargo, false, true, false, TSpec>
 {
@@ -111,6 +126,8 @@ class EdgeStump<TCargo, false, true, false, TSpec>
 		TVertexDescriptor data_source;
 		TCargo data_cargo;
 };
+
+//////////////////////////////////////////////////////////////////////////////
 
 template<typename TCargo, typename TSpec>
 class EdgeStump<TCargo, false, true, true, TSpec>
@@ -124,11 +141,11 @@ class EdgeStump<TCargo, false, true, true, TSpec>
 		TCargo data_cargo;
 };
 
+//////////////////////////////////////////////////////////////////////////////
+//	Graph - Cargoless EdgeStump
+//////////////////////////////////////////////////////////////////////////////
 
-
-
-
-
+//////////////////////////////////////////////////////////////////////////////
 
 template<typename TSpec>
 class EdgeStump<void, true, false, false, TSpec> 
@@ -138,6 +155,8 @@ class EdgeStump<void, true, false, false, TSpec>
 		TVertexDescriptor data_target;
 		EdgeStump* data_nextT;
 };
+
+//////////////////////////////////////////////////////////////////////////////
 
 template<typename TSpec>
 class EdgeStump<void, true, false, true, TSpec> 
@@ -150,6 +169,8 @@ class EdgeStump<void, true, false, true, TSpec>
 		EdgeStump* data_nextT;
 };
 
+//////////////////////////////////////////////////////////////////////////////
+
 template<typename TSpec>
 class EdgeStump<void, true, true, false, TSpec> 
 {
@@ -160,6 +181,8 @@ class EdgeStump<void, true, true, false, TSpec>
 		EdgeStump* data_nextT;
 		EdgeStump* data_nextS;
 };
+
+//////////////////////////////////////////////////////////////////////////////
 
 
 template<typename TSpec>
@@ -175,6 +198,8 @@ class EdgeStump<void, true, true, true, TSpec>
 		EdgeStump* data_nextS;
 };
 
+//////////////////////////////////////////////////////////////////////////////
+
 template<typename TSpec>
 class EdgeStump<void, false, false, false, TSpec>
 {
@@ -182,6 +207,8 @@ class EdgeStump<void, false, false, false, TSpec>
 		typedef typename VertexDescriptor<EdgeStump>::Type TVertexDescriptor;
 		TVertexDescriptor data_target;
 };
+
+//////////////////////////////////////////////////////////////////////////////
 
 template<typename TSpec>
 class EdgeStump<void, false, false, true, TSpec>
@@ -193,6 +220,8 @@ class EdgeStump<void, false, false, true, TSpec>
 		TId data_id;
 };
 
+//////////////////////////////////////////////////////////////////////////////
+
 template<typename TSpec>
 class EdgeStump<void, false, true, false, TSpec>
 {
@@ -201,6 +230,8 @@ class EdgeStump<void, false, true, false, TSpec>
 		TVertexDescriptor data_target;
 		TVertexDescriptor data_source;
 };
+
+//////////////////////////////////////////////////////////////////////////////
 
 template<typename TSpec>
 class EdgeStump<void, false, true, true, TSpec>
@@ -216,7 +247,6 @@ class EdgeStump<void, false, true, true, TSpec>
 //////////////////////////////////////////////////////////////////////////////
 // EdgeStump - Metafunctions
 //////////////////////////////////////////////////////////////////////////////
-
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -290,8 +320,6 @@ struct IdHandler<EdgeStump<TCargo, TList, TSource, false, TSpec>, TIdType> {
 ..see:Funktion.assignCargo
 */
 
-///.Function.getCargo.param.es.type:Class.EdgeStump
-
 
 template<typename TCargo, bool TList, bool TSource, bool TId, typename TSpec>
 inline typename Cargo<EdgeStump<TCargo, TList, TSource, TId, TSpec> const>::Type&
@@ -348,7 +376,6 @@ getCargo(EdgeStump<void, TList, TSource, TId, TSpec>* es)
 ..see:Funktion.assignCargo
 */
 
-///.Function.cargo.param.es.type:Class.EdgeStump
 
 template<typename TCargo, bool TList, bool TSource, bool TId, typename TSpec>
 inline typename Cargo<EdgeStump<TCargo, TList, TSource, TId, TSpec> const>::Type&
@@ -408,8 +435,6 @@ cargo(EdgeStump<void, TList, TSource, TId, TSpec> const* es)
 ..see:Funktion.getCargo
 */
 
-///.Function.assignCargo.param.es.type:Class.EdgeStump
-
 template<typename TCargo, bool TList, bool TSource, bool TId, typename TSpec, typename TCargo2>
 inline void 
 assignCargo(EdgeStump<TCargo, TList, TSource, TId, TSpec>* es,
@@ -445,7 +470,6 @@ assignCargo(EdgeStump<void, TList, TSource, TId, TSpec>* es,
 ..see:Funktion.getTarget
 */
 
-///.Function.assignTarget.param.es.type:Class.EdgeStump
 
 template<typename TCargo, bool TList, bool TSource, bool TId, typename TSpec, typename TVertexDescriptor>
 inline void 
@@ -469,8 +493,6 @@ assignTarget(EdgeStump<TCargo, TList, TSource, TId, TSpec>* es,
 ..see:Function.assignTarget
 ..see:Funktion.getTarget
 */
-
-///.Function.target.param.es.type:Class.EdgeStump
 
 template<typename TCargo, bool TList, bool TSource, bool TId, typename TSpec>
 inline typename VertexDescriptor<EdgeStump<TCargo, TList, TSource, TId, TSpec> >::Type&
@@ -504,8 +526,6 @@ target(EdgeStump<TCargo, TList, TSource, TId, TSpec> const* es)
 ..see:Funktion.target
 */
 
-///.Function.getTarget.param.es.type:Class.EdgeStump
-
 template<typename TCargo, bool TList, bool TSource, bool TId, typename TSpec>
 inline typename VertexDescriptor<EdgeStump<TCargo, TList, TSource, TId, TSpec> const>::Type
 getTarget(EdgeStump<TCargo, TList, TSource, TId, TSpec> const* es) 
@@ -531,7 +551,9 @@ getTarget(EdgeStump<TCargo, TList, TSource, TId, TSpec>* es)
 .Function.assignSource:
 ..cat:Graph
 ..summary:Assigns a source vertex to an edge.
-..signature:assignSource(es, t)
+..remarks:A source vertex is not required in an edge stump.
+However, EdgeStumps can be configured to contain a source vertex, e.g., in undirected graphs.
+..signature:assignSource(es, s)
 ..param.es:Pointer to the EdgeStump.
 ...type:Class.EdgeStump
 ..param.t:Source vertex.
@@ -540,11 +562,9 @@ getTarget(EdgeStump<TCargo, TList, TSource, TId, TSpec>* es)
 ..see:Funktion.getSource
 */
 
-///.Function.assignSource.param.es.type:Class.EdgeStump
-
-template<typename TCargo, bool TList, bool TSource, bool TId, typename TSpec, typename TVertexDescriptor>
+template<typename TCargo, bool TList, bool TId, typename TSpec, typename TVertexDescriptor>
 inline void 
-assignSource(EdgeStump<TCargo, TList, TSource, TId, TSpec>* es, 
+assignSource(EdgeStump<TCargo, TList, true, TId, TSpec>* es, 
 			 TVertexDescriptor const s) 
 {
 	SEQAN_CHECKPOINT
@@ -568,6 +588,8 @@ assignSource(EdgeStump<TCargo, TList, false, TId, TSpec>* es,
 .Function.source:
 ..cat:Graph
 ..summary:Accesses the source of an EdgeStump.
+..remarks:A source vertex is not required in an edge stump.
+However, EdgeStumps can be configured to contain a source vertex, e.g., in undirected graphs.
 ..signature:source(es)
 ..param.es:Pointer to the EdgeStump.
 ...type:Class.EdgeStump
@@ -576,11 +598,9 @@ assignSource(EdgeStump<TCargo, TList, false, TId, TSpec>* es,
 ..see:Funktion.getSource
 */
 
-///.Function.source.param.es.type:Class.EdgeStump
-
-template<typename TCargo, bool TList, bool TSource, bool TId, typename TSpec>
-inline typename VertexDescriptor<EdgeStump<TCargo, TList, TSource, TId, TSpec> >::Type&
-source(EdgeStump<TCargo, TList, TSource, TId, TSpec>* es) 
+template<typename TCargo, bool TList, bool TId, typename TSpec>
+inline typename VertexDescriptor<EdgeStump<TCargo, TList, true, TId, TSpec> >::Type&
+source(EdgeStump<TCargo, TList, true, TId, TSpec>* es) 
 {
 	SEQAN_CHECKPOINT
 	return es->data_source;
@@ -588,9 +608,9 @@ source(EdgeStump<TCargo, TList, TSource, TId, TSpec>* es)
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TCargo, bool TList, bool TSource, bool TId, typename TSpec>
-inline typename VertexDescriptor<EdgeStump<TCargo, TList, TSource, TId, TSpec> >::Type
-source(EdgeStump<TCargo, TList, TSource, TId, TSpec> const* es) 
+template<typename TCargo, bool TList, bool TId, typename TSpec>
+inline typename VertexDescriptor<EdgeStump<TCargo, TList, true, TId, TSpec> >::Type
+source(EdgeStump<TCargo, TList, true, TId, TSpec> const* es) 
 {
 	SEQAN_CHECKPOINT
 	return es->data_source;
@@ -626,6 +646,8 @@ source(EdgeStump<TCargo, TList, false, TId, TSpec> const* es)
 .Function.getSource:
 ..cat:Graph
 ..summary:Get method for the source.
+..remarks:A source vertex is not required in an edge stump.
+However, EdgeStumps can be configured to contain a source vertex, e.g., in undirected graphs.
 ..signature:getSource(es)
 ..param.es:Pointer to the EdgeStump.
 ...type:Class.EdgeStump
@@ -634,11 +656,9 @@ source(EdgeStump<TCargo, TList, false, TId, TSpec> const* es)
 ..see:Funktion.source
 */
 
-///.Function.getSource.param.es.type:Class.EdgeStump
-
-template<typename TCargo, bool TList, bool TSource, bool TId, typename TSpec>
-inline typename VertexDescriptor<EdgeStump<TCargo, TList, TSource, TId, TSpec> const>::Type
-getSource(EdgeStump<TCargo, TList, TSource, TId, TSpec> const* es) 
+template<typename TCargo, bool TList, bool TId, typename TSpec>
+inline typename VertexDescriptor<EdgeStump<TCargo, TList, true, TId, TSpec> const>::Type
+getSource(EdgeStump<TCargo, TList, true, TId, TSpec> const* es) 
 {
 	SEQAN_CHECKPOINT
 	return es->data_source;
@@ -646,9 +666,9 @@ getSource(EdgeStump<TCargo, TList, TSource, TId, TSpec> const* es)
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TCargo, bool TList, bool TSource, bool TId, typename TSpec>
-inline typename VertexDescriptor<EdgeStump<TCargo, TList, TSource, TId, TSpec> >::Type
-getSource(EdgeStump<TCargo, TList, TSource, TId, TSpec>* es) 
+template<typename TCargo, bool TList, bool TId, typename TSpec>
+inline typename VertexDescriptor<EdgeStump<TCargo, TList, true, TId, TSpec> >::Type
+getSource(EdgeStump<TCargo, TList, true, TId, TSpec>* es) 
 {
 	SEQAN_CHECKPOINT
 	return es->data_source;
@@ -695,8 +715,6 @@ getSource(EdgeStump<TCargo, TList, false, TId, TSpec>* es)
 ..see:Funktion.getNextT
 */
 
-///.Function.assignNextT.param.es.type:Class.EdgeStump
-
 template<typename TCargo, bool TSource, bool TId, typename TSpec>
 inline void 
 assignNextT(EdgeStump<TCargo, true, TSource, TId, TSpec>* es, 
@@ -720,8 +738,6 @@ assignNextT(EdgeStump<TCargo, true, TSource, TId, TSpec>* es,
 ..see:Funktion.getNextT
 */
 
-///.Function.nextT.param.es.type:Class.EdgeStump
-
 template<typename TCargo, bool TSource, bool TId, typename TSpec>
 inline EdgeStump<TCargo, true, TSource, TId, TSpec>* &
 nextT(EdgeStump<TCargo, true, TSource, TId, TSpec>* es) 
@@ -731,6 +747,16 @@ nextT(EdgeStump<TCargo, true, TSource, TId, TSpec>* es)
 }
 
 //////////////////////////////////////////////////////////////////////////////
+
+template<typename TCargo, bool TSource, bool TId, typename TSpec>
+inline EdgeStump<TCargo, true, TSource, TId, TSpec>* &
+nextT(EdgeStump<TCargo, true, TSource, TId, TSpec> const* es) 
+{
+	return es->data_nextT;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 
 /**
 .Function.getNextT:
@@ -744,8 +770,6 @@ nextT(EdgeStump<TCargo, true, TSource, TId, TSpec>* es)
 ..see:Funktion.nextT
 */
 
-///.Function.getNextT.param.es.type:Class.EdgeStump
-
 template<typename TCargo, bool TSource, bool TId, typename TSpec>
 inline EdgeStump<TCargo, true, TSource, TId, TSpec>*
 getNextT(EdgeStump<TCargo, true, TSource, TId, TSpec>* es) 
@@ -757,11 +781,21 @@ getNextT(EdgeStump<TCargo, true, TSource, TId, TSpec>* es)
 
 //////////////////////////////////////////////////////////////////////////////
 
+template<typename TCargo, bool TSource, bool TId, typename TSpec>
+inline EdgeStump<TCargo, true, TSource, TId, TSpec>*
+getNextT(EdgeStump<TCargo, true, TSource, TId, TSpec> const* es) 
+{
+	return es->data_nextT;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 /**
 .Function.assignNextS:
 ..cat:Graph
 ..summary:Assigns another EdgeStump to the next source pointer.
 ..signature:assignNextS(es, es2)
+..remarks:EdgeStumps can be configured to have no source. Then there is no next source pointer.
 ..param.es:Pointer to the EdgeStump.
 ...type:Class.EdgeStump
 ..param.es2:Pointer to the following EdgeStump.
@@ -771,12 +805,10 @@ getNextT(EdgeStump<TCargo, true, TSource, TId, TSpec>* es)
 ..see:Funktion.getNextS
 */
 
-///.Function.assignNextS.param.es.type:Class.EdgeStump
-
-template<typename TCargo, bool TSource, bool TId, typename TSpec>
+template<typename TCargo, bool TId, typename TSpec>
 inline void 
-assignNextS(EdgeStump<TCargo, true, TSource, TId, TSpec>* es, 
-			EdgeStump<TCargo, true, TSource, TId, TSpec>* es2) 
+assignNextS(EdgeStump<TCargo, true, true, TId, TSpec>* es, 
+			EdgeStump<TCargo, true, true, TId, TSpec>* es2) 
 {
 	SEQAN_CHECKPOINT
 	es->data_nextS = es2;
@@ -801,6 +833,7 @@ assignNextS(EdgeStump<TCargo, true, false, TId, TSpec>* es,
 ..cat:Graph
 ..summary:Accesses the next source pointer.
 ..signature:nextS(es)
+..remarks:EdgeStumps can be configured to have no source. Then there is no next source pointer.
 ..param.es:Pointer to the EdgeStump.
 ...type:Class.EdgeStump
 ..returns:Reference to the next source pointer.
@@ -808,13 +841,20 @@ assignNextS(EdgeStump<TCargo, true, false, TId, TSpec>* es,
 ..see:Funktion.getNextS
 */
 
-///.Function.nextS.param.es.type:Class.EdgeStump
-
-template<typename TCargo, bool TSource, bool TId, typename TSpec>
-inline EdgeStump<TCargo, true, TSource, TId, TSpec>* &
-nextS(EdgeStump<TCargo, true, TSource, TId, TSpec>* es) 
+template<typename TCargo, bool TId, typename TSpec>
+inline EdgeStump<TCargo, true, true, TId, TSpec>* &
+nextS(EdgeStump<TCargo, true, true, TId, TSpec>* es) 
 {
 	SEQAN_CHECKPOINT
+	return es->data_nextS;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TCargo, bool TId, typename TSpec>
+inline EdgeStump<TCargo, true, true, TId, TSpec>* &
+nextS(EdgeStump<TCargo, true, true, TId, TSpec> const* es) 
+{
 	return es->data_nextS;
 }
 
@@ -831,10 +871,21 @@ nextS(EdgeStump<TCargo, true, false, TId, TSpec>* es)
 
 //////////////////////////////////////////////////////////////////////////////
 
+template<typename TCargo, bool TId, typename TSpec>
+inline EdgeStump<TCargo, true, false, TId, TSpec>*
+nextS(EdgeStump<TCargo, true, false, TId, TSpec> const* es) 
+{
+	// Nop
+	return 0;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 /**
 .Function.getNextS:
 ..cat:Graph
 ..summary:Get method for the next source pointer.
+..remarks:EdgeStumps can be configured to have no source. Then there is no next source pointer.
 ..signature:getNextS(es)
 ..param.es:Pointer to the EdgeStump.
 ...type:Class.EdgeStump
@@ -842,8 +893,6 @@ nextS(EdgeStump<TCargo, true, false, TId, TSpec>* es)
 ..see:Function.assignNextS
 ..see:Funktion.nextS
 */
-
-///.Function.getNextS.param.es.type:Class.EdgeStump
 
 template<typename TCargo, bool TId, typename TSpec>
 inline EdgeStump<TCargo, true, true, TId, TSpec>*

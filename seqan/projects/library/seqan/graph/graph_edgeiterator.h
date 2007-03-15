@@ -278,11 +278,11 @@ goNext(Iter<TGraph, GraphIterator<EdgeIterator<TSpec> > >& it)
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TCargo, typename TEdgeSpec, typename TGraphSpec, typename TSpec>
+template<typename TCargo, typename TGraphSpec, typename TSpec>
 inline void
-goNext(Iter<Graph<Undirected<TCargo, TEdgeSpec>, TGraphSpec>, GraphIterator<EdgeIterator<TSpec> > >& it)
+goNext(Iter<Graph<Undirected<TCargo, TGraphSpec> >, GraphIterator<EdgeIterator<TSpec> > >& it)
 {
-	typedef Graph<Undirected<TCargo, TEdgeSpec>, TGraphSpec> TGraph;
+	typedef Graph<Undirected<TCargo, TGraphSpec> > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	_goNextInternal(it);
 	TVertexDescriptor sourceV = sourceVertex(it.data_edge_it);
@@ -353,11 +353,11 @@ goPrevious(Iter<TGraph, GraphIterator<EdgeIterator<TSpec> > >& it)
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TCargo, typename TEdgeSpec, typename TGraphSpec, typename TSpec>
+template<typename TCargo, typename TGraphSpec, typename TSpec>
 inline void
-goPrevious(Iter<Graph<Undirected<TCargo, TEdgeSpec>, TGraphSpec>, GraphIterator<EdgeIterator<TSpec> > >& it)
+goPrevious(Iter<Graph<Undirected<TCargo, TGraphSpec> >, GraphIterator<EdgeIterator<TSpec> > >& it)
 {
-	typedef Graph<Undirected<TCargo, TEdgeSpec>, TGraphSpec> TGraph;
+	typedef Graph<Undirected<TCargo, TGraphSpec> > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	_goPreviousInternal(it);
 	TVertexDescriptor sourceV = sourceVertex(it.data_edge_it);
@@ -436,9 +436,9 @@ targetVertex(Iter<TGraph, GraphIterator<EdgeIterator<TSpec> > >& it)
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TAlphabet, typename TCargo, typename TEdgeSpec, typename TGraphSpec, typename TSpec>
-inline typename Alphabet<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TGraphSpec> >::Type
-label(Iter<Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TGraphSpec>, GraphIterator<EdgeIterator<TSpec> > >& it)
+template<typename TAlphabet, typename TCargo, typename TGraphSpec, typename TSpec>
+inline typename Alphabet<Graph<Automaton<TAlphabet, TCargo, TGraphSpec> > >::Type
+label(Iter<Graph<Automaton<TAlphabet, TCargo, TGraphSpec> >, GraphIterator<EdgeIterator<TSpec> > >& it)
 {
 	SEQAN_CHECKPOINT
 	return label(it.data_edge_it);

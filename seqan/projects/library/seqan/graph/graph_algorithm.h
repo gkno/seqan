@@ -11,11 +11,11 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 // Utility functions
 //////////////////////////////////////////////////////////////////////////////
-template<typename TEdges, typename TSpec>
-inline typename VertexDescriptor<Graph<TEdges, TSpec> >::Type
-getNilPredecessor(Graph<TEdges, TSpec> const& g)
+template<typename TSpec>
+inline typename VertexDescriptor<Graph<TSpec> >::Type
+getNilPredecessor(Graph<TSpec> const& g)
 {
-	return getNil<typename VertexDescriptor<Graph<TEdges, TSpec> >::Type>();
+	return getNil<typename VertexDescriptor<Graph<TSpec> >::Type>();
 }
 
 template<typename TWeightMap>
@@ -35,9 +35,9 @@ getInfinityDistance(EmptyMap)
 	return (getInfinity<unsigned int>() / 2);
 }
 
-template<typename TEdges, typename TSpec, typename TVertexDescriptor, typename TWeightMap, typename TPredecessorMap, typename TDistanceMap>
+template<typename TSpec, typename TVertexDescriptor, typename TWeightMap, typename TPredecessorMap, typename TDistanceMap>
 inline void 
-_initialize_single_source(Graph<TEdges, TSpec> const& g,
+_initialize_single_source(Graph<TSpec> const& g,
 							TVertexDescriptor const source,
 							TWeightMap const& weight,
 							TPredecessorMap& predecessor, 
@@ -47,7 +47,7 @@ _initialize_single_source(Graph<TEdges, TSpec> const& g,
 	typedef typename Value<TWeightMap>::Type TDistVal;
 	TPredVal nilPred = getNilPredecessor(g);
 	TDistVal infDist = getInfinityDistance(weight);
-	typedef typename Iterator<Graph<TEdges, TSpec>, VertexIterator<> >::Type TVertexIterator;
+	typedef typename Iterator<Graph<TSpec>, VertexIterator<> >::Type TVertexIterator;
 	TVertexIterator it(g);
 	while(!atEnd(it)) {
 		assignProperty(distance, getValue(it), infDist);
@@ -57,9 +57,9 @@ _initialize_single_source(Graph<TEdges, TSpec> const& g,
 	assignProperty(distance, source, 0);
 }
 
-template<typename TEdges, typename TSpec, typename TWeightMap, typename TPredecessorMap, typename TDistanceMap, typename TVertexDescriptor, typename TEdgeDescriptor>
+template<typename TSpec, typename TWeightMap, typename TPredecessorMap, typename TDistanceMap, typename TVertexDescriptor, typename TEdgeDescriptor>
 inline void 
-_relax(Graph<TEdges, TSpec> const& g,
+_relax(Graph<TSpec> const& g,
 	    TWeightMap const& weight,
 		TPredecessorMap& predecessor, 
 		TDistanceMap& distance,
@@ -73,9 +73,9 @@ _relax(Graph<TEdges, TSpec> const& g,
 	}
 }
 
-template<typename TEdges, typename TSpec, typename TPredecessorMap, typename TVertexDescriptor>
+template<typename TSpec, typename TPredecessorMap, typename TVertexDescriptor>
 inline void
-_print_path(Graph<TEdges, TSpec> const& g,
+_print_path(Graph<TSpec> const& g,
 		TPredecessorMap const& predecessor, 
 		TVertexDescriptor const source,
 		TVertexDescriptor const v)
@@ -90,9 +90,9 @@ _print_path(Graph<TEdges, TSpec> const& g,
 	}
 }
 
-template<typename TEdges, typename TSpec, typename TPredecessor, typename TVertexDescriptor>
+template<typename TSpec, typename TPredecessor, typename TVertexDescriptor>
 inline void
-_print_all_pairs_shortest_path(Graph<TEdges, TSpec> const& g,
+_print_all_pairs_shortest_path(Graph<TSpec> const& g,
 							    TPredecessor& predecessor, 
 								TVertexDescriptor const i,
 								TVertexDescriptor const j)
@@ -112,15 +112,15 @@ _print_all_pairs_shortest_path(Graph<TEdges, TSpec> const& g,
 //////////////////////////////////////////////////////////////////////////////
 // Breadth-first search
 //////////////////////////////////////////////////////////////////////////////
-template<typename TEdges, typename TSpec, typename TVertexDescriptor, typename TPredecessorMap, typename TDistanceMap>
+template<typename TSpec, typename TVertexDescriptor, typename TPredecessorMap, typename TDistanceMap>
 void
-breadth_first_search(Graph<TEdges, TSpec> const& g,
+breadth_first_search(Graph<TSpec> const& g,
 					 TVertexDescriptor const source,
 					 TPredecessorMap& predecessor, 
 					 TDistanceMap& distance)
 {
-	typedef typename Iterator<Graph<TEdges, TSpec>, EdgeIterator<> >::Type TEdgeIterator;
-	typedef typename Iterator<Graph<TEdges, TSpec>, VertexIterator<> >::Type TVertexIterator;
+	typedef typename Iterator<Graph<TSpec>, EdgeIterator<> >::Type TEdgeIterator;
+	typedef typename Iterator<Graph<TSpec>, VertexIterator<> >::Type TVertexIterator;
 	typedef typename Value<TPredecessorMap>::Type TPredVal;
 	typedef typename Value<TDistanceMap>::Type TWeightVal;
 
@@ -148,7 +148,7 @@ breadth_first_search(Graph<TEdges, TSpec> const& g,
 	while (!queue.empty()) {
 		TVertexDescriptor u = queue.front();
 		queue.pop_front();
-		typedef typename Iterator<Graph<TEdges, TSpec>, OutEdgeIterator<> >::Type TOutEdgeIterator;
+		typedef typename Iterator<Graph<TSpec>, OutEdgeIterator<> >::Type TOutEdgeIterator;
 		TOutEdgeIterator itout(g,u);
 		for(;!atEnd(itout);goNext(itout)) {
 			// Never use: targetVertex(g, getValue(itout))
@@ -168,9 +168,9 @@ breadth_first_search(Graph<TEdges, TSpec> const& g,
 //////////////////////////////////////////////////////////////////////////////
 // Depth-first search
 //////////////////////////////////////////////////////////////////////////////
-template<typename TEdges, typename TSpec, typename TVertexDescriptor, typename TTokenMap, typename TPredecessorMap, typename TDiscoveryTimeMap, typename TFinishingTimeMap, typename TVal>
+template<typename TSpec, typename TVertexDescriptor, typename TTokenMap, typename TPredecessorMap, typename TDiscoveryTimeMap, typename TFinishingTimeMap, typename TVal>
 void
-_dfs_visit(Graph<TEdges, TSpec> const& g,
+_dfs_visit(Graph<TSpec> const& g,
 		   TVertexDescriptor const u,
 		   TTokenMap& tokenMap,
 		   TPredecessorMap& predecessor,
@@ -181,7 +181,7 @@ _dfs_visit(Graph<TEdges, TSpec> const& g,
 	assignProperty(tokenMap, u, true);
 	++time;
 	assignProperty(disc, u, time);
-	typedef typename Iterator<Graph<TEdges, TSpec>, AdjacencyIterator<> >::Type TAdjacencyIterator;
+	typedef typename Iterator<Graph<TSpec>, AdjacencyIterator<> >::Type TAdjacencyIterator;
 	TAdjacencyIterator itad(g,u);
 	for(;!atEnd(itad);goNext(itad)) {
 		TVertexDescriptor v = getValue(itad);
@@ -195,15 +195,15 @@ _dfs_visit(Graph<TEdges, TSpec> const& g,
 }
 
 
-template<typename TEdges, typename TSpec, typename TPredecessorMap, typename TDiscoveryTimeMap, typename TFinishingTimeMap>
+template<typename TSpec, typename TPredecessorMap, typename TDiscoveryTimeMap, typename TFinishingTimeMap>
 void
-depth_first_search(Graph<TEdges, TSpec> const& g,
+depth_first_search(Graph<TSpec> const& g,
 					 TPredecessorMap& predecessor, 
 					 TDiscoveryTimeMap& disc,
 					 TFinishingTimeMap& finish)
 {
-	typedef typename Iterator<Graph<TEdges, TSpec>, EdgeIterator<> >::Type TEdgeIterator;
-	typedef typename Iterator<Graph<TEdges, TSpec>, VertexIterator<> >::Type TVertexIterator;
+	typedef typename Iterator<Graph<TSpec>, EdgeIterator<> >::Type TEdgeIterator;
+	typedef typename Iterator<Graph<TSpec>, VertexIterator<> >::Type TVertexIterator;
 	typedef typename Value<TPredecessorMap>::Type TPredVal;
 
 	// Initialization
@@ -224,7 +224,7 @@ depth_first_search(Graph<TEdges, TSpec> const& g,
 
 	goBegin(it);
 	for(;!atEnd(it);goNext(it)) {
-		typedef typename VertexDescriptor<Graph<TEdges, TSpec> >::Type TVertexDescriptor;
+		typedef typename VertexDescriptor<Graph<TSpec> >::Type TVertexDescriptor;
 		TVertexDescriptor u = getValue(it);
 		if (getProperty(tokenMap, u) == false) {
 			_dfs_visit(g, u, tokenMap, predecessor, disc, finish, time);
@@ -235,9 +235,9 @@ depth_first_search(Graph<TEdges, TSpec> const& g,
 //////////////////////////////////////////////////////////////////////////////
 // Topological sort
 //////////////////////////////////////////////////////////////////////////////
-template<typename TEdges, typename TSpec, typename TVertexDescriptor>
+template<typename TSpec, typename TVertexDescriptor>
 void
-topological_sort(Graph<TEdges, TSpec> const& g,
+topological_sort(Graph<TSpec> const& g,
 				 String<TVertexDescriptor>& topSort)
 {
 	// Initialization
@@ -251,7 +251,7 @@ topological_sort(Graph<TEdges, TSpec> const& g,
 	// Order vertices
 	typedef ::std::pair<unsigned int, unsigned int> TTimeVertexPair;
 	std::priority_queue<TTimeVertexPair> q;
-	typedef typename Iterator<Graph<TEdges, TSpec>, VertexIterator<> >::Type TVertexIterator;
+	typedef typename Iterator<Graph<TSpec>, VertexIterator<> >::Type TVertexIterator;
 	TVertexIterator it(g);
 	for(;!atEnd(it);++it) {
 		q.push(std::make_pair(getProperty(finishingTimeMap, getValue(it)), getValue(it)));
@@ -270,14 +270,14 @@ topological_sort(Graph<TEdges, TSpec> const& g,
 //////////////////////////////////////////////////////////////////////////////
 // Strongly connected components
 //////////////////////////////////////////////////////////////////////////////
-template<typename TEdges, typename TSpec, typename TComponents>
+template<typename TSpec, typename TComponents>
 void
-strongly_connected_components(Graph<TEdges, TSpec> const& g_source,
+strongly_connected_components(Graph<TSpec> const& g_source,
 				 				TComponents& components)
 {
 	// Initialization
-	typedef typename Iterator<Graph<TEdges, TSpec>, EdgeIterator<> >::Type TEdgeIterator;
-	typedef typename Iterator<Graph<TEdges, TSpec>, VertexIterator<> >::Type TVertexIterator;
+	typedef typename Iterator<Graph<TSpec>, EdgeIterator<> >::Type TEdgeIterator;
+	typedef typename Iterator<Graph<TSpec>, VertexIterator<> >::Type TVertexIterator;
 	typedef typename Value<TComponents>::Type TCompVal;
 	initVertexMap(g_source,components);
 	String<unsigned int> predMap;
@@ -287,7 +287,7 @@ strongly_connected_components(Graph<TEdges, TSpec> const& g_source,
 	// Dfs
 	depth_first_search(g_source, predMap, discoveryTimeMap, finishingTimeMap);
 
-	Graph<TEdges, TSpec> g;
+	Graph<TSpec> g;
 	transpose(g_source, g);
 
 	// Second Dfs
@@ -320,7 +320,7 @@ strongly_connected_components(Graph<TEdges, TSpec> const& g_source,
 	unsigned int time = 0;
 	unsigned int label = 0;
 	while(!q.empty()) {
-		typedef typename VertexDescriptor<Graph<TEdges, TSpec> >::Type TVertexDescriptor;
+		typedef typename VertexDescriptor<Graph<TSpec> >::Type TVertexDescriptor;
 		TVertexDescriptor u = q.top().second;
 		q.pop();
 		if (getProperty(tokenMap, u) == false) {
@@ -341,17 +341,17 @@ strongly_connected_components(Graph<TEdges, TSpec> const& g_source,
 //////////////////////////////////////////////////////////////////////////////
 // DAG Shortest Path
 //////////////////////////////////////////////////////////////////////////////
-template<typename TEdges, typename TSpec, typename TVertexDescriptor, typename TWeightMap, typename TPredecessorMap, typename TDistanceMap>
+template<typename TSpec, typename TVertexDescriptor, typename TWeightMap, typename TPredecessorMap, typename TDistanceMap>
 void
-dag_shortest_path(Graph<TEdges, TSpec> const& g,
+dag_shortest_path(Graph<TSpec> const& g,
 					TVertexDescriptor const source,
 					TWeightMap const& weight,
 					TPredecessorMap& predecessor, 
 					TDistanceMap& distance)
 {
 	// Initialization
-	typedef typename EdgeDescriptor<Graph<TEdges, TSpec> >::Type TEdgeDescriptor;
-	typedef typename Iterator<Graph<TEdges, TSpec>, EdgeIterator<> >::Type TEdgeIterator;
+	typedef typename EdgeDescriptor<Graph<TSpec> >::Type TEdgeDescriptor;
+	typedef typename Iterator<Graph<TSpec>, EdgeIterator<> >::Type TEdgeIterator;
 	initVertexMap(g,predecessor);
 	initVertexMap(g,distance);
 
@@ -365,7 +365,7 @@ dag_shortest_path(Graph<TEdges, TSpec> const& g,
 	typedef typename Iterator<String<TVertexDescriptor> >::Type TStringIterator;
 	TStringIterator it = begin(order);
 	while(!atEnd(it)) {
-		typedef typename Iterator<Graph<TEdges, TSpec>, OutEdgeIterator<> >::Type TOutEdgeIterator;
+		typedef typename Iterator<Graph<TSpec>, OutEdgeIterator<> >::Type TOutEdgeIterator;
 		TOutEdgeIterator itout(g, getValue(it));
 		for(;!atEnd(itout);++itout) {
 			_relax(g,weight,predecessor, distance, getValue(it), getValue(itout));
@@ -380,18 +380,18 @@ dag_shortest_path(Graph<TEdges, TSpec> const& g,
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
-template<typename TEdges, typename TSpec, typename TVertexDescriptor, typename TWeightMap, typename TPredecessorMap, typename TDistanceMap>
+template<typename TSpec, typename TVertexDescriptor, typename TWeightMap, typename TPredecessorMap, typename TDistanceMap>
 bool 
-bellman_ford_algorithm(Graph<TEdges, TSpec> const& g,
+bellman_ford_algorithm(Graph<TSpec> const& g,
 						TVertexDescriptor const source,
 						TWeightMap const& weight,
 						TPredecessorMap& predecessor, 
 						TDistanceMap& distance)
 {
 	// Initialization
-	typedef typename EdgeDescriptor<Graph<TEdges, TSpec> >::Type TEdgeDescriptor;
-	typedef typename Iterator<Graph<TEdges, TSpec>, VertexIterator<> >::Type TVertexIterator;
-	typedef typename Iterator<Graph<TEdges, TSpec>, OutEdgeIterator<> >::Type TOutEdgeIterator;
+	typedef typename EdgeDescriptor<Graph<TSpec> >::Type TEdgeDescriptor;
+	typedef typename Iterator<Graph<TSpec>, VertexIterator<> >::Type TVertexIterator;
+	typedef typename Iterator<Graph<TSpec>, OutEdgeIterator<> >::Type TOutEdgeIterator;
 	initVertexMap(g,predecessor);
 	initVertexMap(g,distance);
 	_initialize_single_source(g, source, weight, predecessor, distance);
@@ -428,9 +428,9 @@ bellman_ford_algorithm(Graph<TEdges, TSpec> const& g,
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
-template<typename TEdges, typename TSpec, typename TVertexDescriptor, typename TWeightMap, typename TPredecessorMap, typename TDistanceMap>
+template<typename TSpec, typename TVertexDescriptor, typename TWeightMap, typename TPredecessorMap, typename TDistanceMap>
 void 
-dijkstra(Graph<TEdges, TSpec> const& g,
+dijkstra(Graph<TSpec> const& g,
 			TVertexDescriptor const source,
 			TWeightMap const& weight,
 			TPredecessorMap& predecessor, 
@@ -438,8 +438,8 @@ dijkstra(Graph<TEdges, TSpec> const& g,
 {
 	// Initialization
 	typedef typename Value<TDistanceMap>::Type TDistVal;
-	typedef typename Iterator<Graph<TEdges, TSpec>, VertexIterator<> >::Type TVertexIterator;
-	typedef typename Iterator<Graph<TEdges, TSpec>, OutEdgeIterator<> >::Type TOutEdgeIterator;
+	typedef typename Iterator<Graph<TSpec>, VertexIterator<> >::Type TVertexIterator;
+	typedef typename Iterator<Graph<TSpec>, OutEdgeIterator<> >::Type TOutEdgeIterator;
 	initVertexMap(g,predecessor);
 	initVertexMap(g,distance);
 	_initialize_single_source(g, source, weight, predecessor, distance);
@@ -482,16 +482,16 @@ dijkstra(Graph<TEdges, TSpec> const& g,
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
-template<typename TEdges, typename TSpec, typename TWeightMap, typename TMatrix, typename TPredecessor>
+template<typename TSpec, typename TWeightMap, typename TMatrix, typename TPredecessor>
 void 
-_initialize_all_pairs(Graph<TEdges, TSpec> const& g,
+_initialize_all_pairs(Graph<TSpec> const& g,
 						TWeightMap const& weight,
 						TMatrix& matrix,
 						TPredecessor& predecessor)
 {
-	typedef typename VertexDescriptor<Graph<TEdges, TSpec> >::Type TVertexDescriptor;
-	typedef typename Iterator<Graph<TEdges, TSpec>, VertexIterator<> >::Type TVertexIterator;
-	typedef typename Iterator<Graph<TEdges, TSpec>, OutEdgeIterator<> >::Type TOutEdgeIterator;
+	typedef typename VertexDescriptor<Graph<TSpec> >::Type TVertexDescriptor;
+	typedef typename Iterator<Graph<TSpec>, VertexIterator<> >::Type TVertexIterator;
+	typedef typename Iterator<Graph<TSpec>, OutEdgeIterator<> >::Type TOutEdgeIterator;
 	typedef typename Size<TMatrix>::Type TSize;
 	typedef typename Value<TWeightMap>::Type TWeightVal;
 	typedef typename Value<TPredecessor>::Type TPredVal;
@@ -562,9 +562,9 @@ _extend_shortest_paths(TMatrix& local,
 	}
 }
 
-template<typename TEdges, typename TSpec, typename TWeightMap, typename TMatrix, typename TPredecessor>
+template<typename TSpec, typename TWeightMap, typename TMatrix, typename TPredecessor>
 void 
-all_pairs_shortest_path(Graph<TEdges, TSpec> const& g,
+all_pairs_shortest_path(Graph<TSpec> const& g,
 			TWeightMap const& weight,
 			TMatrix& distMatrix,
 			TPredecessor& predecessor)
@@ -589,9 +589,9 @@ all_pairs_shortest_path(Graph<TEdges, TSpec> const& g,
 // Floyd-Warshall
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TEdges, typename TSpec, typename TWeightMap, typename TMatrix, typename TPredecessor>
+template<typename TSpec, typename TWeightMap, typename TMatrix, typename TPredecessor>
 void 
-floyd_warshall(Graph<TEdges, TSpec> const& g,
+floyd_warshall(Graph<TSpec> const& g,
 				TWeightMap const& weight,
 				TMatrix& distMatrix,
 				TPredecessor& predecessor)
@@ -627,9 +627,9 @@ floyd_warshall(Graph<TEdges, TSpec> const& g,
 // Transitive Closure
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TEdges, typename TSpec, typename TMatrix>
+template<typename TSpec, typename TMatrix>
 void 
-transitive_closure(Graph<TEdges, TSpec> const& g,
+transitive_closure(Graph<TSpec> const& g,
 					TMatrix& closure)
 {
 	typedef typename Size<TMatrix>::Type TSize;

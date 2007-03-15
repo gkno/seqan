@@ -4,14 +4,14 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 
-template<typename TAlphabet, typename TCargo, typename TEdgeSpec, typename TSpec, typename TPropertyMap, typename TChar>
+template<typename TAlphabet, typename TCargo, typename TSpec, typename TPropertyMap, typename TChar>
 inline void
-addLetterToOracle(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec>& g,
+addLetterToOracle(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 				  TPropertyMap& supplyState,
 				  TChar const c)
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> TGraph;
+	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	typedef typename Size<TGraph>::Type TSize;
@@ -32,13 +32,13 @@ addLetterToOracle(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec>& g,
 	assignProperty(supplyState, newState, s);
 }
 
-template<typename TAlphabet, typename TCargo, typename TEdgeSpec, typename TSpec, typename TText>
+template<typename TAlphabet, typename TCargo, typename TSpec, typename TText>
 inline void
-createOracle(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec>& g,
+createOracle(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 			 TText const text)
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> TGraph;
+	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename Size<TText>::Type TSize;
 	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
@@ -52,13 +52,13 @@ createOracle(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec>& g,
 	}
 }
 
-template<typename TAlphabet, typename TCargo, typename TEdgeSpec, typename TSpec, typename TText>
+template<typename TAlphabet, typename TCargo, typename TSpec, typename TText>
 inline void
-createOracleOnReverse(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec>& g,
+createOracleOnReverse(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 			 TText const text)
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> TGraph;
+	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename Size<TText>::Type TSize;
 	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();

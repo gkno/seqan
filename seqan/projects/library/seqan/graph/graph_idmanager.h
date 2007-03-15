@@ -142,8 +142,6 @@ struct IdHandler {
 ..see:Function.releaseId
 */
 
-///.Function.obtainId.param.idm.type:Class.IdManager
-
 template<typename TIdType, typename TSpec>
 inline typename Value<IdManager<TIdType, TSpec> >::Type 
 obtainId(IdManager<TIdType, TSpec>& idm) 
@@ -177,8 +175,6 @@ obtainId(IdManager<TIdType, TSpec>& idm)
 ..see:Function.obtainId
 */
 
-///.Function.releaseId.param.idm.type:Class.IdManager
-
 template<typename TIdType, typename TSpec, typename TId>
 inline void 
 releaseId(IdManager<TIdType, TSpec>& idm, 
@@ -211,7 +207,6 @@ releaseId(IdManager<TIdType, TSpec>& idm,
 ..see:Function.releaseId
 */
 
-///.Function.releaseAll.param.idm.type:Class.IdManager
 
 template<typename TIdType, typename TSpec>
 inline void 
@@ -235,8 +230,6 @@ releaseAll(IdManager<TIdType, TSpec>& idm)
 ..see:Function.getIdLowerBound
 */
 
-///.Function.getIdUpperBound.param.idm.type:Class.IdManager
-
 template<typename TIdType, typename TSpec>
 inline typename Size<IdManager<TIdType, TSpec> >::Type 
 getIdUpperBound(IdManager<TIdType, TSpec> const& idm)
@@ -257,8 +250,6 @@ getIdUpperBound(IdManager<TIdType, TSpec> const& idm)
 ..returns:The smallest obtained id.
 ..see:Function.getIdUpperBound
 */
-
-///.Function.getIdLowerBound.param.idm.type:Class.IdManager
 
 template<typename TIdType, typename TSpec>
 inline typename Size<IdManager<TIdType, TSpec> >::Type 
@@ -285,8 +276,6 @@ getIdLowerBound(IdManager<TIdType, TSpec> const& idm)
 ..returns:Number of ids in use.
 */
 
-///.Function.idCount.param.idm.type:Class.IdManager
-
 template<typename TIdType, typename TSpec>
 inline typename Size<IdManager<TIdType, TSpec> >::Type 
 idCount(IdManager<TIdType, TSpec> const& idm)
@@ -308,8 +297,6 @@ idCount(IdManager<TIdType, TSpec> const& idm)
 ..param.id:The given id.
 ..returns:True if the id was distributed, false otherwise.
 */
-
-///.Function.idInUse.param.idm.type:Class.IdManager
 
 template<typename TIdType, typename TSpec, typename TId>
 inline bool 

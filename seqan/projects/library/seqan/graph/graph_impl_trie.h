@@ -4,15 +4,15 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 
-template<typename TAlphabet, typename TCargo, typename TEdgeSpec, typename TSpec, typename TTerminalStateMap, typename TKeyword, typename TPos>
+template<typename TAlphabet, typename TCargo, typename TSpec, typename TTerminalStateMap, typename TKeyword, typename TPos>
 inline void
-_addStringToTrie(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec>& g,
+_addStringToTrie(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 				 TTerminalStateMap& terminalStateMap,
 				 TKeyword const& str,
 				 TPos const& keywordIndex)
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> TGraph;
+	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	typedef typename Size<TKeyword>::Type TSize;
@@ -36,14 +36,14 @@ _addStringToTrie(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec>& g,
 	assignProperty(terminalStateMap,current,tmp);
 }
 
-template<typename TAlphabet, typename TCargo, typename TEdgeSpec, typename TSpec, typename TTerminalStateMap, typename TKeywords>
+template<typename TAlphabet, typename TCargo, typename TSpec, typename TTerminalStateMap, typename TKeywords>
 inline void
-createTrie(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec>& g,
+createTrie(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 		   TTerminalStateMap& terminalStateMap,
 		   TKeywords const& keywords)
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> TGraph;
+	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	typedef typename Position<TKeywords>::Type TPos;
@@ -57,14 +57,14 @@ createTrie(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec>& g,
 	}
 }
 
-template<typename TAlphabet, typename TCargo, typename TEdgeSpec, typename TSpec, typename TTerminalStateMap, typename TKeywords>
+template<typename TAlphabet, typename TCargo, typename TSpec, typename TTerminalStateMap, typename TKeywords>
 inline void
-createTrieOnReverse(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec>& g,
+createTrieOnReverse(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 					TTerminalStateMap& terminalStateMap,
 					TKeywords const& keywords)
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> TGraph;
+	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	typedef typename Position<TKeywords>::Type TPos;
@@ -85,14 +85,14 @@ createTrieOnReverse(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec>& g,
 	}
 }
 
-template<typename TAlphabet, typename TCargo, typename TEdgeSpec, typename TSpec, typename TNodeMap>
+template<typename TAlphabet, typename TCargo, typename TSpec, typename TNodeMap>
 inline void
-_createTrieNodeNames(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> const& g,
+_createTrieNodeNames(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
 					 String<String<unsigned int> > pos,
 					 TNodeMap& nodeMap)
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> TGraph;
+	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
 	initVertexMap(g, nodeMap);
 	typedef typename Iterator<TGraph, VertexIterator<> >::Type TConstIter;
 	TConstIter it(g);

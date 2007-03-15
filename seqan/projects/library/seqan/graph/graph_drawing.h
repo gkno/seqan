@@ -6,15 +6,15 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TFile, typename TEdges, typename TSpec, typename TNodeMap, typename TEdgeMap>
+template <typename TFile, typename TSpec, typename TNodeMap, typename TEdgeMap>
 void write(TFile & file, 
-	   Graph<TEdges, TSpec> const& g,
+	   Graph<TSpec> const& g,
 	   TNodeMap const& nodeMap,
 	   TEdgeMap const& edgeMap,
 	   DotDrawing) 
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<TEdges, TSpec> TGraph;
+	typedef Graph<TSpec> TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 
@@ -60,12 +60,12 @@ void write(TFile & file,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TEdges, typename TSpec, typename TNodeMap>
-void _createNodeNames(Graph<TEdges, TSpec> const& g,
+template<typename TSpec, typename TNodeMap>
+void _createNodeNames(Graph<TSpec> const& g,
 					  TNodeMap& nodeMap)
 {
 	SEQAN_CHECKPOINT
-    typedef Graph<TEdges, TSpec> TGraph;
+    typedef Graph<TSpec> TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	initVertexMap(g, nodeMap);
 	char strV[BitsPerValue<TVertexDescriptor>::VALUE];
@@ -80,12 +80,12 @@ void _createNodeNames(Graph<TEdges, TSpec> const& g,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TCargo, typename TEdgeSpec, typename TSpec, typename TEdgeMap>
-void _createEdgeNames(Graph<Directed<TCargo, TEdgeSpec>, TSpec> const& g,
+template <typename TCargo, typename TSpec, typename TEdgeMap>
+void _createEdgeNames(Graph<Directed<TCargo, TSpec> > const& g,
 		      TEdgeMap& edgeMap)
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<Directed<TCargo, TEdgeSpec>, TSpec> TGraph;
+	typedef Graph<Directed<TCargo, TSpec> > TGraph;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	initEdgeMap(g, edgeMap);
 	char strE[2*BitsPerValue<TEdgeDescriptor>::VALUE];
@@ -100,12 +100,12 @@ void _createEdgeNames(Graph<Directed<TCargo, TEdgeSpec>, TSpec> const& g,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TAlphabet, typename TCargo, typename TEdgeSpec, typename TSpec, typename TEdgeMap>
-void _createEdgeNames(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> const& g,
+template <typename TAlphabet, typename TCargo, typename TSpec, typename TEdgeMap>
+void _createEdgeNames(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
 		      TEdgeMap& edgeMap)
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> TGraph;
+	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
 	initEdgeMap(g, edgeMap);
 
 	typedef typename Iterator<TGraph, EdgeIterator<> >::Type TConstEdIter;
@@ -117,12 +117,12 @@ void _createEdgeNames(Graph<Automaton<TAlphabet, TCargo, TEdgeSpec>, TSpec> cons
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TAlphabet, typename TCargo, typename TSpec, typename TGraphSpec, typename TEdgeMap>
-void _createEdgeNames(Graph<Automaton<TAlphabet, TCargo, WordGraph<TSpec> >, TGraphSpec> const& g,
+template <typename TAlphabet, typename TCargo, typename TSpec, typename TEdgeMap>
+void _createEdgeNames(Graph<Automaton<TAlphabet, TCargo, WordGraph<TSpec> > > const& g,
 					  TEdgeMap& edgeMap)
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<Automaton<TAlphabet, TCargo, WordGraph<TSpec> >, TGraphSpec> TGraph;
+	typedef Graph<Automaton<TAlphabet, TCargo, WordGraph<TSpec> > > TGraph;
 	initEdgeMap(g, edgeMap);
 
 	typedef typename Iterator<TGraph, EdgeIterator<> >::Type TConstEdIter;
@@ -143,9 +143,9 @@ void _createEdgeNames(Graph<Automaton<TAlphabet, TCargo, WordGraph<TSpec> >, TGr
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TFile, typename TEdges, typename TSpec>
+template <typename TFile, typename TSpec>
 void write(TFile & file, 
-	   Graph<TEdges, TSpec> const& g, 
+	   Graph<TSpec> const& g, 
 	   DotDrawing) 
 {
 	SEQAN_CHECKPOINT

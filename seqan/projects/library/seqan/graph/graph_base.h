@@ -57,7 +57,7 @@ struct VertexDescriptor;
 .Metafunction.EdgeDescriptor:
 ..summary:Type of an object that represents an edge descriptor.
 ..signature:EdgeDescriptor<T>::Type
-..param.T:Type T must be a graph. All graphs currently use pointer to edge stumps as edge descriptors.
+..param.T:Type T must be a graph. All graphs use a pointer to an edge stump as an edge descriptor.
 ..returns.param.Type:EdgeDescriptor type.
 ..remarks.text:The edge descriptor is a unique handle to a given edge in a graph.
 It is used in various graph functions, e.g., to remove edges, to assign a cargo to an edge or to get the endpoints of an edge.
@@ -76,7 +76,7 @@ struct EdgeDescriptor;
 ..param.T:Edge type for which the cargo type is determined.
 ..returns.param.Type:Cargo type.
 ..remarks.text:The cargo type of an edge indicates the kind of information that is stored with the edge.
-..example.code:Cargo<EdgeStump<int, TSpec> >::Type c; //c has type int
+..example.code:Cargo<Graph<Directed<int> > >::Type c; //c has type int
 */
 template<typename T>
 struct Cargo;
@@ -121,6 +121,7 @@ struct Alphabet;
 .Tag.WithoutEdgeId
 ..summary:Indicates whether an edge stump has an edge id or not.
 ..value.WithoutEdgeId:No edge id is stored in the edge stump. 
+..example.code:Graph<Directed<void, WithoutEdgeId> > g; //g stores no edge ids
 */
 struct WithoutEdgeId_;
 typedef Tag<WithoutEdgeId_> const WithoutEdgeId;
