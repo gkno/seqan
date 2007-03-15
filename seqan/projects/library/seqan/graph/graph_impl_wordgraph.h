@@ -40,13 +40,13 @@ class Graph<Automaton<TAlphabet, String<TAlphabet>, WordGraph<TSpec> > >
 		String<AutomatonEdgeArray<TEdge, TAlphabet> > data_vertex;		// List of tables
 		IdManager<TIdType> data_id_managerV;
 		TEdgeIdManager data_id_managerE;
-		TVertexDescriptor root;
+		TVertexDescriptor data_root;
 
 
 //____________________________________________________________________________
 
 
-		Graph() : root(0) {
+		Graph() : data_root(0) {
 			SEQAN_CHECKPOINT
 		}
 

@@ -519,16 +519,6 @@ write(TFile & target,
 
 //////////////////////////////////////////////////////////////////////////////
 
-/**
-.Function.createRoot:
-..cat:Spec.Tree
-..summary:Creates the root in a tree.
-..signature:createRoot(g)
-..param.g:A tree.
-...type:Spec.Tree
-..returns:void
-*/
-
 template<typename TCargo, typename TSpec>
 inline void
 createRoot(Graph<Tree<TCargo, TSpec> >& g)

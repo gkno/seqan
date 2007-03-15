@@ -60,13 +60,13 @@ class Graph<Automaton<TAlphabet, TCargo, TSpec> >
 		String<AutomatonEdgeArray<TEdge, TAlphabet> > data_vertex;		// List of tables
 		IdManager<TIdType> data_id_managerV;
 		TEdgeIdManager data_id_managerE;
-		TVertexDescriptor root;
+		TVertexDescriptor data_root;
 	
 
 //____________________________________________________________________________
 
 
-		Graph() : root(0) {
+		Graph() : data_root(0) {
 			SEQAN_CHECKPOINT
 		}
 
@@ -112,7 +112,7 @@ _copyGraph(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& source,
 	
 	clear(dest);
 	resize(dest.data_vertex, length(source.data_vertex));
-	dest.root = source.root;
+	dest.data_root = source.data_root;
 	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
 	for(TIterConst it = begin(source.data_vertex);!atEnd(it);goNext(it)) {
 		TSize table_length = ValueSize<TAlphabet>::VALUE;
@@ -585,6 +585,32 @@ write(TFile & target,
 	}
 }
 
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.createRoot:
+..cat:Spec.Automaton
+..cat:Spec.Tree
+..summary:Creates the root in a tree or an automaton.
+..signature:createRoot(g)
+..param.g:A tree or an automaton.
+...type:Spec.Automaton
+...type:Spec.Tree
+..returns:void
+*/
+
+template<typename TAlphabet, typename TCargo, typename TSpec>
+inline void
+createRoot(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	TVertexDescriptor r = addVertex(g);
+	g.data_root = r;
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -605,10 +631,10 @@ write(TFile & target,
 template<typename TAlphabet, typename TCargo, typename TSpec, typename TVertexDescriptor>
 inline void
 assignRoot(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
-		TVertexDescriptor const vertex)
+		   TVertexDescriptor const vertex)
 {
 	SEQAN_CHECKPOINT
-	g.root = vertex;
+	g.data_root = vertex;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -634,7 +660,7 @@ inline typename VertexDescriptor<Graph<Automaton<TAlphabet, TCargo, TSpec> > >::
 root(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g)
 {
 	SEQAN_CHECKPOINT
-	return g.root;
+	return g.data_root;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -660,7 +686,7 @@ inline typename VertexDescriptor<Graph<Automaton<TAlphabet, TCargo, TSpec> > >::
 getRoot(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g)
 {
 	SEQAN_CHECKPOINT
-	return g.root;
+	return g.data_root;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -688,7 +714,7 @@ isRoot(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
 	   TVertexDescriptor v)
 {
 	SEQAN_CHECKPOINT
-	return ( (TVertexDescriptor) g.root == v);
+	return ( (TVertexDescriptor) g.data_root == v);
 }
 
 //////////////////////////////////////////////////////////////////////////////

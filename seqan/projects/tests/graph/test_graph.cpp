@@ -1175,7 +1175,8 @@ void Test_Automaton() {
 	SEQAN_TASSERT(empty(g) == true)
 
 	// Add vertex
-	TVertexDescriptor v0 = addVertex(g);
+	createRoot(g);
+	TVertexDescriptor v0 = getRoot(g);
 	SEQAN_TASSERT(v0 == 0)
 	SEQAN_TASSERT(outDegree(g, v0) == 0)	
 	SEQAN_TASSERT(inDegree(g, 0) == 0)

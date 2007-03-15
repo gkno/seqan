@@ -9,9 +9,10 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Class.ExternalMap:
+.Class.External Property Map:
 ..cat:Graph
-..summary:The external property map is assumed to be an instance of @Class.String@.
+..summary:An external property map.
+..remarks:The external property map is assumed to be an instance of @Class.String@.
 It is indexed via VertexDescriptors or EdgeDescriptors.
 ..signature:String<TValue, TSpec>
 ..param.TValue:The value type. That is the type of information stored in the property map.
@@ -34,19 +35,16 @@ It is indexed via VertexDescriptors or EdgeDescriptors.
 .Function.initVertexMap:
 ..cat:Graph
 ..summary:Initializes a vertex map. 
-..signature:initVertexMap(g, pm)
-..signature:initVertexMap(g, pm, prop)
+..signature:initVertexMap(g, pm [, prop])
 ..param.g:A Graph.
 ...type:Class.Graph
 ..param.pm:An External Property Map.
-...type:Class.String
+...type:Class.External Property Map
 ..param.prop:An optional array with properties that are to be assigned to the items in the property map.
 ...remarks:For every vertex descriptor there must be an entry in the array.
 ..returns:void
 ..see:Function.initEdgeMap
 */
-
-///.Function.initVertexMap.param.pm.type:Class.ExternalMap
 
 template<typename TSpec, typename TPropertyMap>
 inline void
@@ -63,19 +61,19 @@ initVertexMap(Graph<TSpec> const& g,
 .Function.initEdgeMap:
 ..cat:Graph
 ..summary:Initializes an edge map
-..signature:initEdgeMap(g, pm)
-..signature:initEdgeMap(g, pm, prop)
+..signature:initEdgeMap(g, pm [, prop])
 ..param.g:A Graph.
 ...type:Class.Graph
-..param.pm:An External Property Map.
-...type:Class.String
+..param.pm:An External or Internal Property Map.
+...type:Class.External Property Map
+...type:Class.InternalMap
+...type:Class.InternalPointerMap
+...type:Class.InternalRawMap
 ..param.prop:An optional array with properties that are to be assigned to the items in the property map.
 ...remarks:For every edge id there must be an entry in the array.
 ..returns:void
 ..see:Function.initVertexMap
 */
-
-///.Function.initEdgeMap.param.pm.type:Class.ExternalMap
 
 template<typename TSpec, typename TPropertyMap>
 inline void
@@ -115,18 +113,22 @@ initEdgeMap(Graph<Tree<TCargo, TSpec> >& g,
 ..cat:Graph
 ..summary:Assigns a property to an item in the property map.
 ..signature:assignProperty(pm, d, val)
-..param.pm:An External Property Map.
-...type:Class.String
+..param.pm:An External or Internal Property Map.
+...type:Class.External Property Map
+...type:Class.InternalMap
+...type:Class.InternalPointerMap
+...type:Class.InternalRawMap
 ..param.d:A vertex or edge descriptor.
 ...remarks:Identifies the item in the property map.
+...type:Metafunction.VertexDescriptor
+...type:Metafunction.EdgeDescriptor
 ..param.val:The new value.
 ...remarks:Type of the new value must match the value type of the property map.
+See @Metafunction.Value@.
 ..returns:void
 ..see:Function.getProperty
 ..see:Function.property
 */
-
-///.Function.assignProperty.param.pm.type:Class.ExternalMap
 
 template<typename TPropertyMap, typename TDescriptor, typename TValue>
 inline void
@@ -145,16 +147,19 @@ assignProperty(TPropertyMap& pm,
 ..cat:Graph
 ..summary:Accesses the property of an item in the property map.
 ..signature:assignProperty(pm, d)
-..param.pm:An External Property Map.
-...type:Class.String
+..param.pm:An External or Internal Property Map.
+...type:Class.External Property Map
+...type:Class.InternalMap
+...type:Class.InternalPointerMap
+...type:Class.InternalRawMap
 ..param.d:A vertex or edge descriptor.
 ...remarks:Identifies the item in the property map.
+...type:Metafunction.VertexDescriptor
+...type:Metafunction.EdgeDescriptor
 ..returns:Reference to the item in the property map.
 ..see:Function.getProperty
 ..see:Function.assignProperty
 */
-
-///.Function.property.param.pm.type:Class.ExternalMap
 
 template<typename TPropertyMap, typename TDescriptor>
 inline typename Reference<TPropertyMap>::Type
@@ -183,16 +188,19 @@ property(TPropertyMap const& pm,
 ..cat:Graph
 ..summary:Get method for an item's property.
 ..signature:getProperty(pm, d)
-..param.pm:An External Property Map.
-...type:Class.String
+..param.pm:An External or Internal Property Map.
+...type:Class.External Property Map
+...type:Class.InternalMap
+...type:Class.InternalPointerMap
+...type:Class.InternalRawMap
 ..param.d:A vertex or edge descriptor.
 ...remarks:Identifies the item in the property map.
+...type:Metafunction.VertexDescriptor
+...type:Metafunction.EdgeDescriptor
 ..returns:Value of the item in the property map.
 ..see:Function.property
 ..see:Function.assignProperty
 */
-
-///.Function.getProperty.param.pm.type:Class.ExternalMap
 
 template<typename TPropertyMap, typename TDescriptor>
 inline typename GetValue<TPropertyMap const>::Type
@@ -216,7 +224,7 @@ getProperty(TPropertyMap const& pm,
 .Class.InternalMap:
 ..cat:Graph
 ..summary:An internal property map using member ids.
-Internal property maps are used to access internal edge cargos.
+..remarks:Internal property maps are used to access internal edge cargos.
 ..signature:InternalMap<TContainer, MemberId>
 ..param.TContainer:The cargo type.
 ...metafunction:Metafunction.Cargo
@@ -288,23 +296,6 @@ struct Value<InternalMap<T, 0> > {
 
 //////////////////////////////////////////////////////////////////////////////
 
-/**
-.Function.initEdgeMap:
-..cat:Graph
-..summary:Initializes an edge map
-..signature:initEdgeMap(g, pm)
-..signature:initEdgeMap(g, pm, prop)
-..param.g:A Graph.
-...type:Class.Graph
-..param.pm:An Internal Property Map.
-...type:Class.InternalMap
-..param.prop:An optional array with properties that are to be assigned to the items in the property map.
-...remarks:For every edge id there must be an entry in the array.
-..returns:void
-*/
-
-///.Function.initEdgeMap.param.pm.type:Class.InternalMap
-
 template<typename TSpec, typename TContainer, unsigned int const MemberId>
 inline void
 initEdgeMap(Graph<TSpec> const& g,
@@ -321,23 +312,7 @@ initEdgeMap(Graph<TSpec>& g,
 {
 }
 
-/**
-.Function.assignProperty:
-..cat:Graph
-..summary:Assigns a property to an item in the property map.
-..signature:assignProperty(pm, e, val)
-..param.pm:An Internal Property Map.
-...type:Class.InternalMap
-..param.e:An edge descriptor.
-...remarks:Identifies the item in the property map.
-..param.val:The new value.
-...remarks:Type of the new value must match the value type of the property map.
-..returns:void
-..see:Function.getProperty
-..see:Function.property
-*/
-
-///.Function.assignProperty.param.pm.type:Class.InternalMap
+//////////////////////////////////////////////////////////////////////////////
 
 template<typename T1, typename T2, typename TEdgeDescriptor, typename TValue>
 inline void
@@ -374,22 +349,6 @@ assignProperty(InternalMap<T, 0>& pm,
 }
 
 //////////////////////////////////////////////////////////////////////////////
-
-/**
-.Function.property:
-..cat:Graph
-..summary:Accesses the property to an item in the property map.
-..signature:property(pm, e)
-..param.pm:An Internal Property Map.
-...type:Class.InternalMap
-..param.e:An edge descriptor.
-...remarks:Identifies the item in the property map.
-..returns:Reference to the property.
-..see:Function.getProperty
-..see:Function.assignProperty
-*/
-
-///.Function.property.param.pm.type:Class.InternalMap
 
 template<typename T1, typename T2, typename TEdgeDescriptor>
 inline typename Value<InternalMap<Pair<T1, T2>, 2> >::Type&
@@ -456,22 +415,6 @@ property(InternalMap<T, 0> const& pm,
 }
 
 //////////////////////////////////////////////////////////////////////////////
-
-/**
-.Function.getProperty:
-..cat:Graph
-..summary:Get method for an item's property.
-..signature:getProperty(pm, e)
-..param.pm:An Internal Property Map.
-...type:Class.InternalMap
-..param.e:An edge descriptor.
-...remarks:Identifies the item in the property map.
-..returns:The value of that item's property.
-..see:Function.property
-..see:Function.assignProperty
-*/
-
-///.Function.property.param.pm.type:Class.InternalMap
 
 template<typename T1, typename T2, typename TEdgeDescriptor>
 inline typename Value<InternalMap<Pair<T1, T2>, 1> const>::Type
@@ -546,7 +489,7 @@ getProperty(InternalMap<T, 0>& pm,
 .Class.InternalPointerMap:
 ..cat:Graph
 ..summary:An internal property map using pointer to members.
-Internal property maps are used to access internal edge cargos.
+..remarks:Internal property maps are used to access internal edge cargos.
 ..signature:InternalPointerMap<TPropmap, Instance>
 ..param.TPropmap:A pointer to member type.
 ..param.Instance:A pointer to a member of type TPropmap.
@@ -585,23 +528,6 @@ struct Value<InternalPointerMap<TValue TClass::*, TPMember> > {
 
 //////////////////////////////////////////////////////////////////////////////
 
-/**
-.Function.initEdgeMap:
-..cat:Graph
-..summary:Initializes an edge map
-..signature:initEdgeMap(g, pm)
-..signature:initEdgeMap(g, pm, prop)
-..param.g:A Graph.
-...type:Class.Graph
-..param.pm:An Internal Property Map.
-...type:Class.InternalPointerMap
-..param.prop:An optional array with properties that are to be assigned to the items in the property map.
-...remarks:For every edge id there must be an entry in the array.
-..returns:void
-*/
-
-///.Function.initEdgeMap.param.pm.type:Class.InternalPointerMap
-
 template<typename TSpec, typename TPropmap, TPropmap const Instance>
 inline void
 initEdgeMap(Graph<TSpec>& g,
@@ -621,24 +547,6 @@ initEdgeMap(Graph<TSpec> const& g,
 
 //////////////////////////////////////////////////////////////////////////////
 
-/**
-.Function.assignProperty:
-..cat:Graph
-..summary:Assigns a property to an item in the property map.
-..signature:assignProperty(pm, e, val)
-..param.pm:An Internal Property Map.
-...type:Class.InternalPointerMap
-..param.e:An edge descriptor.
-...remarks:Identifies the item in the property map.
-..param.val:The new value.
-...remarks:Type of the new value must match the value type of the property map.
-..returns:void
-..see:Function.getProperty
-..see:Function.property
-*/
-
-///.Function.assignProperty.param.pm.type:Class.InternalPointerMap
-
 template<typename TClass, typename TValue, TValue TClass:: * TPMember, typename TEdgeDescriptor>
 inline void
 assignProperty(InternalPointerMap<TValue TClass::*, TPMember>& pm,
@@ -650,22 +558,6 @@ assignProperty(InternalPointerMap<TValue TClass::*, TPMember>& pm,
 }
 
 //////////////////////////////////////////////////////////////////////////////
-
-/**
-.Function.property:
-..cat:Graph
-..summary:Accesses the property to an item in the property map.
-..signature:property(pm, e)
-..param.pm:An Internal Property Map.
-...type:Class.InternalPointerMap
-..param.e:An edge descriptor.
-...remarks:Identifies the item in the property map.
-..returns:Reference to the property.
-..see:Function.getProperty
-..see:Function.assignProperty
-*/
-
-///.Function.property.param.pm.type:Class.InternalPointerMap
 
 template<typename TClass, typename TValue, TValue TClass:: * TPMember, typename TEdgeDescriptor>
 inline typename Value<InternalPointerMap<TValue TClass::*, TPMember> >::Type&
@@ -688,22 +580,6 @@ property(InternalPointerMap<TValue TClass::*, TPMember> const& pm,
 }
 
 //////////////////////////////////////////////////////////////////////////////
-
-/**
-.Function.getProperty:
-..cat:Graph
-..summary:Get method for an item's property.
-..signature:getProperty(pm, e)
-..param.pm:An Internal Property Map.
-...type:Class.InternalPointerMap
-..param.e:An edge descriptor.
-...remarks:Identifies the item in the property map.
-..returns:The value of that item's property.
-..see:Function.property
-..see:Function.assignProperty
-*/
-
-///.Function.getProperty.param.pm.type:Class.InternalPointerMap
 
 template<typename TClass, typename TValue, TValue TClass:: * TPMember, typename TEdgeDescriptor>
 inline typename Value<InternalPointerMap<TValue TClass::*, TPMember> const>::Type
@@ -736,7 +612,7 @@ getProperty(InternalPointerMap<TValue TClass::*, TPMember>& pm,
 .Class.InternalRawMap:
 ..cat:Graph
 ..summary:An internal property map using raw pointer to members.
-Internal property maps are used to access internal edge cargos.
+..remarks:Internal property maps are used to access internal edge cargos.
 ..include:graph.h
 */
 
@@ -768,23 +644,6 @@ struct Value<TValue TClass:: * const> {
 
 //////////////////////////////////////////////////////////////////////////////
 
-/**
-.Function.initEdgeMap:
-..cat:Graph
-..summary:Initializes an edge map
-..signature:initEdgeMap(g, pm)
-..signature:initEdgeMap(g, pm, prop)
-..param.g:A Graph.
-...type:Class.Graph
-..param.pm:An Internal Property Map.
-...type:Class.InternalRawMap
-..param.prop:An optional array with properties that are to be assigned to the items in the property map.
-...remarks:For every edge id there must be an entry in the array.
-..returns:void
-*/
-
-///.Function.initEdgeMap.param.pm.type:Class.InternalRawMap
-
 template <typename TSpec, typename TClass, typename TValue> 
 inline void
 initEdgeMap(Graph<TSpec> const& g,
@@ -804,26 +663,6 @@ initEdgeMap(Graph<TSpec>& g,
 //////////////////////////////////////////////////////////////////////////////
 
 
-//////////////////////////////////////////////////////////////////////////////
-
-/**
-.Function.assignProperty:
-..cat:Graph
-..summary:Assigns a property to an item in the property map.
-..signature:assignProperty(pm, e, val)
-..param.pm:An Internal Property Map.
-...type:Class.InternalRawMap
-..param.e:An edge descriptor.
-...remarks:Identifies the item in the property map.
-..param.val:The new value.
-...remarks:Type of the new value must match the value type of the property map.
-..returns:void
-..see:Function.getProperty
-..see:Function.property
-*/
-
-///.Function.assignProperty.param.pm.type:Class.InternalRawMap
-
 template <typename TClass, typename TValue, typename TEdgeDescriptor> 
 inline void 
 assignProperty(TValue TClass:: * ptr_to_member, 
@@ -837,23 +676,6 @@ assignProperty(TValue TClass:: * ptr_to_member,
 
 //////////////////////////////////////////////////////////////////////////////
 
-/**
-.Function.property:
-..cat:Graph
-..summary:Accesses the property to an item in the property map.
-..signature:property(pm, e)
-..param.pm:An Internal Property Map.
-...type:Class.InternalRawMap
-..param.e:An edge descriptor.
-...remarks:Identifies the item in the property map.
-..returns:Reference to the property.
-..see:Function.getProperty
-..see:Function.assignProperty
-*/
-
-///.Function.property.param.pm.type:Class.InternalRawMap
-
-
 template <typename TClass, typename TValue, typename TEdgeDescriptor> 
 inline TValue& 
 property(TValue TClass:: * const ptr_to_member, 
@@ -864,22 +686,6 @@ property(TValue TClass:: * const ptr_to_member,
 }
 
 //////////////////////////////////////////////////////////////////////////////
-
-/**
-.Function.getProperty:
-..cat:Graph
-..summary:Get method for an item's property.
-..signature:getProperty(pm, e)
-..param.pm:An Internal Property Map.
-...type:Class.InternalRawMap
-..param.e:An edge descriptor.
-...remarks:Identifies the item in the property map.
-..returns:The value of that item's property.
-..see:Function.property
-..see:Function.assignProperty
-*/
-
-///.Function.getProperty.param.pm.type:Class.InternalRawMap
 
 template <typename TClass, typename TValue, typename TEdgeDescriptor> 
 inline TValue
