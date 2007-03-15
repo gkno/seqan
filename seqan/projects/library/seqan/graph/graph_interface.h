@@ -147,14 +147,14 @@ struct EdgeType<Graph<Directed<TCargo, WithoutEdgeId> > const> {
 
 template<typename TCargo, typename TSpec>
 struct EdgeType<Graph<Tree<TCargo, TSpec> > > {
-	typedef EdgeStump<TCargo, true, true, false, TSpec> Type;
+	typedef EdgeStump<TCargo, true, false, false, TSpec> Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TCargo, typename TSpec>
 struct EdgeType<Graph<Tree<TCargo, TSpec> > const> {
-	typedef EdgeStump<TCargo, true, true, false, TSpec> const Type;
+	typedef EdgeStump<TCargo, true, false, false, TSpec> const Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////

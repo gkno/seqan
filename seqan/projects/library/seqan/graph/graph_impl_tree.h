@@ -19,9 +19,6 @@ namespace SEQAN_NAMESPACE_MAIN
 ...metafunction:Metafunction.Cargo
 ...remarks:Use @Metafunction.Cargo@ to get the cargo type of the tree.
 ...default:$void$
-..param.TEdgeSpec:The specializing type for the edges.
-...metafunction:Metafunction.Spec
-...default:$Default$, see @Tag.Default@.
 ..param.TSpec:The specializing type for the graph.
 ...metafunction:Metafunction.Spec
 ...default:$Default$, see @Tag.Default@.
@@ -38,6 +35,7 @@ class Graph<Tree<TCargo, TSpec> >
 		
 		TVertexDescriptor data_root;
 		String<TEdgeStump*> data_vertex;			// Pointers to EdgeStumpT lists
+		String<TVertexDescriptor> data_parent;		// Map to the parents of each node
 		IdManager<TIdType> data_id_managerV;
 		TAllocator data_allocator;
 		
@@ -95,6 +93,7 @@ _copyGraph(Graph<Tree<TCargo, TSpec> > const& source,
 	typedef typename Iterator<String<TEdgeStump*> >::Type TIter;
 	clear(dest);
 	resize(dest.data_vertex, length(source.data_vertex));
+	resize(dest.data_parent, length(source.data_parent));
 	TIter itInit = begin(dest.data_vertex);
 	while(!atEnd(itInit)) {
 		*itInit = (TEdgeStump*) 0;
@@ -205,10 +204,11 @@ clearVertices(Graph<Tree<TCargo, TSpec> >& g)
 {
 	SEQAN_CHECKPOINT
 	if (!empty(g)) {
-		clearEdges(g);	// No need to release ids because clearEdges removes the children
+		clearEdges(g);	
 		releaseId(g.data_id_managerV, getRoot(g)); // Release root id
 	}
 	clear(g.data_vertex);
+	clear(g.data_parent);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -272,7 +272,8 @@ addVertex(Graph<Tree<TCargo, TSpec> >& g)
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
 	TVertexDescriptor vd = obtainId(g.data_id_managerV);
 	if (vd == length(g.data_vertex)) {
-		appendValue(g.data_vertex, (TEdgeStump*) 0); 
+		appendValue(g.data_vertex, (TEdgeStump*) 0);
+		fill(g.data_parent, vd + 1, getNil<TVertexDescriptor>(), Generous());
 	} else {
 		value(g.data_vertex, vd) = (TEdgeStump*) 0;
 	}
@@ -289,7 +290,7 @@ removeVertex(Graph<Tree<TCargo, TSpec> >& g,
 	// Should not be used on a tree
 	SEQAN_CHECKPOINT
 	SEQAN_ASSERT(idInUse(g.data_id_managerV, v) == true)
-	if (!isRoot(g,v)) removeChild(g, (TVertexDescriptor) _getSource(g, v),v);
+	if (!isRoot(g,v)) removeChild(g, getValue(g.data_parent, v), v);
 	else clear(g);
 }
 
@@ -312,8 +313,8 @@ addEdge(Graph<Tree<TCargo, TSpec> >& g,
 	TEdgeStump* edge_ptr;
 	allocate(g.data_allocator, edge_ptr, 1);
 	valueConstruct(edge_ptr);
-	assignSource(edge_ptr, parent);
 	assignTarget(edge_ptr, child);
+	assignValue(g.data_parent, child, parent);
 	assignNextT(edge_ptr, (TEdgeStump*) 0);
 	if (getValue(g.data_vertex, parent)!=0) {
 		assignNextT(edge_ptr, getValue(g.data_vertex, parent));
@@ -365,6 +366,7 @@ removeEdge(Graph<Tree<TCargo, TSpec> >& g,
 	
 	// Not found?
 	if (current == (TEdgeStump*) 0) return;
+	assignValue(g.data_parent, child, getNil<TVertexDescriptor>());
 	
 	// Relink the next pointer of predecessor
 	if (pred != (TEdgeStump*) 0) assignNextT(pred, getNextT(current));
@@ -411,7 +413,7 @@ removeInEdges(Graph<Tree<TCargo, TSpec> >& g,
 	SEQAN_CHECKPOINT
 	if (v != g.data_root) {
 		removeAllChildren(g,v);
-		removeChild(g, _getSource(g,v), v);
+		removeChild(g, getValue(g.data_parent, v), v);
 	}
 }
 
@@ -522,8 +524,8 @@ write(TFile & target,
 ..cat:Spec.Tree
 ..summary:Creates the root in a tree.
 ..signature:createRoot(g)
-..param.g:A graph.
-...type:Class.Graph
+..param.g:A tree.
+...type:Spec.Tree
 ..returns:void
 */
 
@@ -576,8 +578,8 @@ isRoot(Graph<Tree<TCargo, TSpec> > const& g,
 ..cat:Spec.Tree
 ..summary:Tests whether a given vertex is a leaf or not.
 ..signature:isLeaf(g, v)
-..param.g:A graph.
-...type:Class.Graph
+..param.g:A tree.
+...type:Spec.Tree
 ..param.v:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
 ..returns:True if vertex is a leaf.
@@ -608,39 +610,18 @@ findEdge(Graph<Tree<TCargo, TSpec> >& g,
 	
 	typedef Graph<Tree<TCargo, TSpec> > TGraph;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
-	TEdgeStump* current = getValue(g.data_vertex, v);
-	while((TEdgeStump*) current != 0) {
-		if (getTarget(current) == w) return current;
-		current = getNextT(current);
-	}
-	current = getValue(g.data_vertex, w);
-	while((TEdgeStump*) current != 0) {
-		if (getTarget(current) == v) return current;
-		current = getNextT(current);
-	}
-	// We should never reach this point
-	SEQAN_ASSERT(false)
-	return 0;
-}
 
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TCargo, typename TSpec, typename TVertexDescriptor>
-inline typename VertexDescriptor<Graph<Tree<TCargo, TSpec> > >::Type 
-_getSource(Graph<Tree<TCargo, TSpec> >& g,
-		   TVertexDescriptor const v)
-{
-	SEQAN_CHECKPOINT
-	SEQAN_ASSERT(idInUse(g.data_id_managerV, v) == true)
-		
-	typedef Graph<Tree<TCargo, TSpec> > TGraph;
-	typedef typename EdgeType<TGraph>::Type TEdgeStump;
-	typedef typename Iterator<String<TEdgeStump*> >::Type TIter;
-	for(TIter it = begin(g.data_vertex);!atEnd(it);goNext(it)) {
-		TEdgeStump* current = getValue(it);
-		while(current!=0) {
-			if ( getTarget(current) ==v) return getSource(current);
-			else current = getNextT(current);
+	if (getValue(g.data_parent, w) == v) {
+		TEdgeStump* current = getValue(g.data_vertex, v);
+		while((TEdgeStump*) current != 0) {
+			if (getTarget(current) == w) return current;
+			current = getNextT(current);
+		}
+	} else if (getValue(g.data_parent, v) == w) {
+		TEdgeStump* current = getValue(g.data_vertex, w);
+		while((TEdgeStump*) current != 0) {
+			if (getTarget(current) == v) return current;
+			current = getNextT(current);
 		}
 	}
 	// We should never reach this point
@@ -655,8 +636,8 @@ _getSource(Graph<Tree<TCargo, TSpec> >& g,
 ..cat:Spec.Tree
 ..summary:Number of children of a given tree vertex.
 ..signature:numChildren(g, v)
-..param.g:A graph.
-...type:Class.Graph
+..param.g:A tree.
+...type:Spec.Tree
 ..param.v:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
 ..returns:Number of children
@@ -689,10 +670,9 @@ numChildren(Graph<Tree<TCargo, TSpec> > const& g,
 ..cat:Spec.Tree
 ..summary:Adds a new child vertex to a parent vertex.
 Optionally a cargo can be attached to the parent-child edge.
-..signature:addChild(g, parent)
-..signature:addChild(g, parent, cargo)
-..param.g:A graph.
-...type:Class.Graph
+..signature:addChild(g, parent [, cargo])
+..param.g:A tree.
+...type:Spec.Tree
 ..param.parent:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
 ..param.cargo:A cargo object.
@@ -737,8 +717,8 @@ addChild(Graph<Tree<TCargo, TSpec> >& g,
 ..cat:Spec.Tree
 ..summary:Removes a child from the tree given a parent.
 ..signature:removeChild(g, parent, child)
-..param.g:A graph.
-...type:Class.Graph
+..param.g:A tree.
+...type:Spec.Tree
 ..param.parent:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
 ..param.child:A vertex descriptor.
@@ -757,6 +737,7 @@ removeChild(Graph<Tree<TCargo, TSpec> >& g,
 	SEQAN_CHECKPOINT
 	if (!isLeaf(g,child)) removeAllChildren(g,child);
 	removeEdge(g,parent, child);
+	assignValue(g.data_parent, child, getNil<TVertexDescriptor>());
 	releaseId(g.data_id_managerV, child); // Release id
 }
 
@@ -767,8 +748,8 @@ removeChild(Graph<Tree<TCargo, TSpec> >& g,
 ..cat:Spec.Tree
 ..summary:Removes all children from the tree given a parent.
 ..signature:removeChild(g, parent)
-..param.g:A graph.
-...type:Class.Graph
+..param.g:A tree.
+...type:Spec.Tree
 ..param.parent:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
 ..returns:void
@@ -790,6 +771,7 @@ removeAllChildren(Graph<Tree<TCargo, TSpec> >& g,
 		TVertexDescriptor child = childVertex(g,(getValue(g.data_vertex, parent)));
 		if (!isLeaf(g,child)) removeAllChildren(g,child);
 		removeEdge(g,parent, child);
+		assignValue(g.data_parent, child, getNil<TVertexDescriptor>());
 		releaseId(g.data_id_managerV, child); // Release id
 	}
 }
@@ -798,11 +780,11 @@ removeAllChildren(Graph<Tree<TCargo, TSpec> >& g,
 
 /**
 .Function.childVertex:
-..cat:Graph
+..cat:Spec.Tree
 ..summary:Returns the child vertex of an edge.
 ..signature:childVertex(g, e)
-..param.g:A graph.
-...type:Class.Graph
+..param.g:A tree.
+...type:Spec.Tree
 ..param.e:An edge descriptor.
 ...type:Metafunction.EdgeDescriptor
 ..returns:A vertex descriptor.
@@ -820,11 +802,11 @@ childVertex(Graph<Tree<TCargo, TSpec> > const& g,
 
 /**
 .Function.parentVertex:
-..cat:Graph
+..cat:Spec.Tree
 ..summary:Returns the parent vertex of an edge.
 ..signature:parentVertex(g, e)
-..param.g:A graph.
-...type:Class.Graph
+..param.g:A tree.
+...type:Spec.Tree
 ..param.e:An edge descriptor.
 ...type:Metafunction.EdgeDescriptor
 ..returns:A vertex descriptor.
@@ -837,7 +819,7 @@ parentVertex(Graph<Tree<TCargo, TSpec> > const& g,
 			 TEdgeDescriptor const edge) 
 {
 	SEQAN_CHECKPOINT
-	return getSource(edge);
+	return getValue(g.data_parent, getTarget(edge));
 }
 
 

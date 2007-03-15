@@ -474,7 +474,7 @@ removeVertex(Graph<Directed<TCargo, TSpec> >& g,
 .Function.addEdge:
 ..cat:Graph
 ..summary:Adds a new edge to the graph, either with or without cargo.
-For automatons a label is required.
+..remarks:For automatons a label is required.
 ..signature:addEdge(g, source, target [,cargo | ,label])
 ..signature:addEdge(g, source, target [,label ,cargo])
 ..param.g:A graph.
@@ -687,7 +687,7 @@ removeInEdges(Graph<Directed<TCargo, TSpec> >& g,
 .Function.targetVertex:
 ..cat:Graph
 ..summary:Returns the target vertex of an edge.
-In a tree the target vertex is always the child. 
+..remarks:In a tree the target vertex is always the child. 
 In an undirected graph the larger vertex descriptor of the two endpoints is the target.
 ..signature:targetVertex(g, e)
 ..param.g:A graph.
@@ -714,7 +714,7 @@ targetVertex(Graph<Directed<TCargo, TSpec> > const& g,
 .Function.sourceVertex:
 ..cat:Graph
 ..summary:Returns the source vertex of an edge.
-In a tree the source vertex is always the parent. 
+..remarks:In a tree the source vertex is always the parent. 
 In an undirected graph the smaller vertex descriptor is the source.
 Note: If source vertices are not stored in the EdgeStump this operation is expensive.
 Consider using sourceVertex directly on an edge iterator where this operation is fast!
