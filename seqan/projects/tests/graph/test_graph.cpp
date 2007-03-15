@@ -1688,7 +1688,15 @@ void Test_Tree() {
 	SEQAN_TASSERT(numEdges(g) == 8)
 	SEQAN_TASSERT(numVertices(g) == 9)
 	TEdgeDescriptor childC2C1C1e = findEdge(g, childC2C1C1, childC2C1);
+	
+	// Raw output
 	std::cout << g << std::endl;
+	// File output
+	fstream strm;
+	strm.open(TEST_PATH "my_tree.dot", ios_base::out | ios_base::trunc);
+	write(strm,g,DotDrawing());
+	strm.close();
+
 	SEQAN_TASSERT(childVertex(g, childC2C1C1e) == childC2C1C1)  
 	SEQAN_TASSERT(parentVertex(g, childC2C1C1e) == childC2C1)
 	removeChild(g, rootV, childC2);
@@ -3070,11 +3078,11 @@ int main()
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_adjacencyiterator.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_edgeiterator.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_property.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_bfsiterator.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_dfsiterator.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_drawing.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_oracle.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_trie.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_drawing.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_bfsiterator.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_dfsiterator.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_algorithm.h");
 
 	SEQAN_TREPORT("TEST END")
