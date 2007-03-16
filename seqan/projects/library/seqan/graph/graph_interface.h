@@ -301,6 +301,58 @@ SEQAN_CHECKPOINT
 	return getNil(_tag);
 }
 
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.getNilPredecessor:
+..cat:Graph
+..summary:Utility function for various graph algorithms.
+..remarks:A nil predecessor can be assigned to a vertex that has no predecessor, e.g., the root in a tree.
+..signature:getNilPredecessor(g)
+..param.g:A graph.
+...type:Class.Graph
+..returns:A nil vertex descriptor.
+...type:Metafunction.VertexDescriptor
+*/
+
+template<typename TSpec>
+inline typename VertexDescriptor<Graph<TSpec> >::Type
+getNilPredecessor(Graph<TSpec> const& g)
+{
+	return getNil<typename VertexDescriptor<Graph<TSpec> >::Type>();
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.getInfinityDistance:
+..cat:Graph
+..summary:Utility function for various graph algorithms.
+The infinity distance can be used to indicate not reachable, e.g., in shortest path problem.
+..signature:getInfinityDistance([distance_map])
+..param.distance_map:A property map.
+...remarks:Given the value type of a distance map an appropriate infinity value is returned.
+..returns:Infinity value.
+*/
+
+template<typename TWeightMap>
+inline typename Value<TWeightMap>::Type
+getInfinityDistance(TWeightMap const& weight)
+{
+	// We need to divide by 2 because of addition: infinity + something
+	return (getInfinity<typename Value<TWeightMap>::Type>()/2);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+inline unsigned int
+getInfinityDistance()
+{
+	// We need to divide by 2 because of addition: infinity + something
+	return (getInfinity<unsigned int>() / 2);
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 // Simple _getId function to get the id for a vertex descriptor which is the id!

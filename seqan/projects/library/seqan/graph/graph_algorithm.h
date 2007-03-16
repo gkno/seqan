@@ -10,125 +10,11 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////
-// Utility functions
-//////////////////////////////////////////////////////////////////////////////
-template<typename TSpec>
-inline typename VertexDescriptor<Graph<TSpec> >::Type
-getNilPredecessor(Graph<TSpec> const& g)
-{
-	return getNil<typename VertexDescriptor<Graph<TSpec> >::Type>();
-}
 
-template<typename TWeightMap>
-inline typename Value<TWeightMap>::Type
-getInfinityDistance(TWeightMap const& weight)
-{
-	// ToDo
-	// We need to divide by 2 because of addition: infinity + something
-	return (getInfinity<typename Value<TWeightMap>::Type>()/2);
-}
 
-inline unsigned int
-getInfinityDistance(EmptyMap)
-{
-	// ToDo
-	// We need to divide by 2 because of addition: infinity + something
-	return (getInfinity<unsigned int>() / 2);
-}
 
-inline unsigned int
-getInfinityDistance()
-{
-	// We need to divide by 2 because of addition: infinity + something
-	return (getInfinity<unsigned int>() / 2);
-}
 
-//////////////////////////////////////////////////////////////////////////////
-// INTERNAL FUNCTIONS
-//////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TSpec, typename TVertexDescriptor, typename TWeightMap, typename TPredecessorMap, typename TDistanceMap>
-inline void 
-_initialize_single_source(Graph<TSpec> const& g,
-							TVertexDescriptor const source,
-							TWeightMap const& weight,
-							TPredecessorMap& predecessor, 
-							TDistanceMap& distance)
-{
-	typedef typename Value<TPredecessorMap>::Type TPredVal;
-	typedef typename Value<TWeightMap>::Type TDistVal;
-	TPredVal nilPred = getNilPredecessor(g);
-	TDistVal infDist = getInfinityDistance(weight);
-	typedef typename Iterator<Graph<TSpec>, VertexIterator<> >::Type TVertexIterator;
-	TVertexIterator it(g);
-	while(!atEnd(it)) {
-		assignProperty(distance, getValue(it), infDist);
-		assignProperty(predecessor, getValue(it), nilPred);
-		goNext(it);
-	}
-	assignProperty(distance, source, 0);
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TSpec, typename TWeightMap, typename TPredecessorMap, typename TDistanceMap, typename TVertexDescriptor, typename TEdgeDescriptor>
-inline void 
-_relax(Graph<TSpec> const& g,
-	    TWeightMap const& weight,
-		TPredecessorMap& predecessor, 
-		TDistanceMap& distance,
-		TVertexDescriptor const u,
-		TEdgeDescriptor const e)
-{
-	TVertexDescriptor v = targetVertex(g,e);
-	if (getProperty(distance, v) > getProperty(distance,u) + getProperty(weight,e)) {
-		assignProperty(distance, v, getProperty(distance,u) + getProperty(weight,e));
-		assignProperty(predecessor, v, u);
-	}
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TSpec, typename TPredecessorMap, typename TVertexDescriptor>
-inline void
-_print_path(Graph<TSpec> const& g,
-		TPredecessorMap const& predecessor, 
-		TVertexDescriptor const source,
-		TVertexDescriptor const v)
-{
-	if (source == v) {
-		std::cout << source;
-	} else if (getProperty(predecessor, v) == getNilPredecessor(g)) {
-		std::cout << "No path from " << source << " to " << v << " exists.";
-	} else {
-		_print_path(g,predecessor, source, getProperty(predecessor, v));
-		std::cout << "," << v;
-	}
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TSpec, typename TPredecessor, typename TVertexDescriptor>
-inline void
-_print_all_pairs_shortest_path(Graph<TSpec> const& g,
-							    TPredecessor& predecessor, 
-								TVertexDescriptor const i,
-								TVertexDescriptor const j)
-{
-	typedef typename Size<TPredecessor>::Type TSize;
-	TSize len = getIdUpperBound(g.data_id_managerV);
-	if (i==j) {
-		std::cout << i;
-	} else if (getValue(predecessor, i*len+j) == getNilPredecessor(g)) {
-		std::cout << "No path from " << i << " to " << j << " exists.";
-	} else {
-		_print_all_pairs_shortest_path(g,predecessor, i, (TVertexDescriptor) getValue(predecessor, i*len+j));
-		std::cout << "," << j;
-	}
-}
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -141,6 +27,15 @@ _print_all_pairs_shortest_path(Graph<TSpec> const& g,
 
 //////////////////////////////////////////////////////////////////////////////
 
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+// Elementary graph algorithms
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -314,6 +209,22 @@ depth_first_search(Graph<TSpec> const& g,
 //////////////////////////////////////////////////////////////////////////////
 // Topological sort
 //////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.topological_sort:
+..cat:Graph
+..summary:Performs a topological sort on a directed acyclic graph (DAG).
+..remarks:A topological sort is a linear ordering of all its vertices such that if the graph contains an edge (u,v) then u appears before v in the ordering.
+..signature:topological_sort(g, topSort)
+..param.g:In-parameter:A directed acyclic graph.
+...type:Spec.Directed graph
+..param.topSort:Out-parameter:A linear ordering of the vertices.
+...type:Class.String
+..returns:void.
+*/
 template<typename TSpec, typename TVertexDescriptor>
 void
 topological_sort(Graph<TSpec> const& g,
@@ -328,7 +239,7 @@ topological_sort(Graph<TSpec> const& g,
 	depth_first_search(g, predMap, discoveryTimeMap, finishingTimeMap);
 
 	// Order vertices
-	typedef ::std::pair<unsigned int, unsigned int> TTimeVertexPair;
+	typedef ::std::pair<unsigned int, TVertexDescriptor> TTimeVertexPair;
 	std::priority_queue<TTimeVertexPair> q;
 	typedef typename Iterator<Graph<TSpec>, VertexIterator<> >::Type TVertexIterator;
 	TVertexIterator it(g);
@@ -349,12 +260,28 @@ topological_sort(Graph<TSpec> const& g,
 //////////////////////////////////////////////////////////////////////////////
 // Strongly connected components
 //////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.strongly_connected_components:
+..cat:Graph
+..summary:Decomposes a directed graph into its strongly connected components.
+..signature:strongly_connected_components(g, components)
+..param.g:In-parameter:A directed graph.
+...type:Spec.Directed graph
+..param.components:Out-parameter:A property map.
+...remarks:Each vertex is mapped to a component id. If two vertices share the same id they are in the same component.
+..returns:void.
+*/
+
 template<typename TSpec, typename TComponents>
 void
 strongly_connected_components(Graph<TSpec> const& g_source,
-				 				TComponents& components)
+							  TComponents& components)
 {
 	// Initialization
+	typedef typename VertexDescriptor<Graph<TSpec> >::Type TVertexDescriptor;
 	typedef typename Iterator<Graph<TSpec>, EdgeIterator<> >::Type TEdgeIterator;
 	typedef typename Iterator<Graph<TSpec>, VertexIterator<> >::Type TVertexIterator;
 	typedef typename Value<TComponents>::Type TCompVal;
@@ -387,19 +314,16 @@ strongly_connected_components(Graph<TSpec> const& g_source,
 	}
 
 	// Order vertices
-	typedef ::std::pair<unsigned int, unsigned int> TTimeVertexPair;
+	typedef ::std::pair<unsigned int, TVertexDescriptor> TTimeVertexPair;
 	std::priority_queue<TTimeVertexPair> q;
 	goBegin(it);
 	for(;!atEnd(it);++it) {
 		q.push(std::make_pair(getProperty(finishingTimeMap, getValue(it)), getValue(it)));
 	}
 
-
-
 	unsigned int time = 0;
 	unsigned int label = 0;
 	while(!q.empty()) {
-		typedef typename VertexDescriptor<Graph<TSpec> >::Type TVertexDescriptor;
 		TVertexDescriptor u = q.top().second;
 		q.pop();
 		if (getProperty(tokenMap, u) == false) {
@@ -417,20 +341,132 @@ strongly_connected_components(Graph<TSpec> const& g_source,
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+// Single-Source Shortest Paths
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////////
+// INTERNAL FUNCTIONS
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TSpec, typename TPredecessorMap, typename TVertexDescriptor>
+inline void
+_print_path(Graph<TSpec> const& g,
+			TPredecessorMap const& predecessor,
+			TVertexDescriptor const source,
+			TVertexDescriptor const v)
+{
+	if (source == v) {
+		std::cout << source;
+	} else if (getProperty(predecessor, v) == getNilPredecessor(g)) {
+		std::cout << "No path from " << source << " to " << v << " exists.";
+	} else {
+		_print_path(g,predecessor, source, getProperty(predecessor, v));
+		std::cout << "," << v;
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TSpec, typename TVertexDescriptor, typename TWeightMap, typename TPredecessorMap, typename TDistanceMap>
+inline void 
+_initialize_single_source(Graph<TSpec> const& g,
+						  TVertexDescriptor const source,
+						  TWeightMap const& weight,
+						  TPredecessorMap& predecessor, 
+						  TDistanceMap& distance)
+{
+	typedef typename Iterator<Graph<TSpec>, VertexIterator<> >::Type TVertexIterator;
+	typedef typename Value<TPredecessorMap>::Type TPredVal;
+	typedef typename Value<TWeightMap>::Type TDistVal;
+	TPredVal nilPred = getNilPredecessor(g);
+	TDistVal infDist = getInfinityDistance(weight);
+	
+	TVertexIterator it(g);
+	while(!atEnd(it)) {
+		assignProperty(distance, getValue(it), infDist);
+		assignProperty(predecessor, getValue(it), nilPred);
+		goNext(it);
+	}
+	assignProperty(distance, source, 0);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TSpec, typename TWeightMap, typename TPredecessorMap, typename TDistanceMap, typename TVertexDescriptor, typename TEdgeDescriptor>
+inline void 
+_relax(Graph<TSpec> const& g,
+	    TWeightMap const& weight,
+		TPredecessorMap& predecessor, 
+		TDistanceMap& distance,
+		TVertexDescriptor const u,
+		TEdgeDescriptor const e)
+{
+	TVertexDescriptor v = targetVertex(g,e);
+	if (getProperty(distance, v) > getProperty(distance,u) + getProperty(weight,e)) {
+		assignProperty(distance, v, getProperty(distance,u) + getProperty(weight,e));
+		assignProperty(predecessor, v, u);
+	}
+}
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 // DAG Shortest Path
 //////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.dag_shortest_path:
+..cat:Graph
+..summary:Computes shortest paths from a single source in a directed acyclic graph (DAG).
+..signature:dag_shortest_path(g, source, weight, predecessor, distance)
+..param.g:In-parameter:A directed acyclic graph.
+...type:Spec.Directed graph
+..param.source:In-parameter:A source vertex.
+...type:Metafunction.VertexDescriptor
+..param.weight:In-parameter:A weight map.
+...remarks:In a directed acyclic graph edge weights can be negative because no cycles do exist.
+..param.predecessor:Out-parameter:A property map.
+...remarks:A property map that represents predecessor relationships among vertices. It determines a shortest-paths tree.
+..param.distance:Out-parameter:A property map.
+...remarks:Indicates for each vertex the distance from the source.
+..returns:void.
+..see:Function.bellman_ford_algorithm
+..see:Function.dijkstra
+*/
 template<typename TSpec, typename TVertexDescriptor, typename TWeightMap, typename TPredecessorMap, typename TDistanceMap>
 void
 dag_shortest_path(Graph<TSpec> const& g,
-					TVertexDescriptor const source,
-					TWeightMap const& weight,
-					TPredecessorMap& predecessor, 
-					TDistanceMap& distance)
+				  TVertexDescriptor const source,
+				  TWeightMap const& weight,
+				  TPredecessorMap& predecessor,
+				  TDistanceMap& distance)
 {
-	// Initialization
 	typedef typename EdgeDescriptor<Graph<TSpec> >::Type TEdgeDescriptor;
 	typedef typename Iterator<Graph<TSpec>, EdgeIterator<> >::Type TEdgeIterator;
+	typedef typename Iterator<Graph<TSpec>, OutEdgeIterator<> >::Type TOutEdgeIterator;
+	typedef typename Iterator<String<TVertexDescriptor> >::Type TStringIterator;
+	
+	// Initialization
 	initVertexMap(g,predecessor);
 	initVertexMap(g,distance);
 
@@ -441,10 +477,8 @@ dag_shortest_path(Graph<TSpec> const& g,
 	_initialize_single_source(g, source, weight, predecessor, distance);
 
 	//DAG Shortest Paths
-	typedef typename Iterator<String<TVertexDescriptor> >::Type TStringIterator;
 	TStringIterator it = begin(order);
 	while(!atEnd(it)) {
-		typedef typename Iterator<Graph<TSpec>, OutEdgeIterator<> >::Type TOutEdgeIterator;
 		TOutEdgeIterator itout(g, getValue(it));
 		for(;!atEnd(itout);++itout) {
 			_relax(g,weight,predecessor, distance, getValue(it), getValue(itout));
@@ -459,13 +493,35 @@ dag_shortest_path(Graph<TSpec> const& g,
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.bellman_ford_algorithm:
+..cat:Graph
+..summary:Computes shortest paths from a single source in a graph.
+..remarks:Edge weights may be negative in the Bellman-Ford algorithm.
+The out parameters are only valid if the algorithm returns true.
+..signature:bellman_ford_algorithm(g, source, weight, predecessor, distance)
+..param.g:In-parameter:A graph.
+...type:Class.Graph
+..param.source:In-parameter:A source vertex.
+...type:Metafunction.VertexDescriptor
+..param.weight:In-parameter:A weight map.
+...remarks:A property map with edge weights. Edge weights may be negative.
+..param.predecessor:Out-parameter:A property map.
+...remarks:A property map that represents predecessor relationships among vertices. It determines a shortest-paths tree.
+..param.distance:Out-parameter:A property map.
+...remarks:Indicates for each vertex the distance from the source.
+..returns:True if the graph has no negative weight cycles, false otherwise.
+..see:Function.dag_shortest_path
+..see:Function.dijkstra
+*/
 template<typename TSpec, typename TVertexDescriptor, typename TWeightMap, typename TPredecessorMap, typename TDistanceMap>
 bool 
 bellman_ford_algorithm(Graph<TSpec> const& g,
-						TVertexDescriptor const source,
-						TWeightMap const& weight,
-						TPredecessorMap& predecessor, 
-						TDistanceMap& distance)
+					   TVertexDescriptor const source,
+					   TWeightMap const& weight,
+					   TPredecessorMap& predecessor, 
+					   TDistanceMap& distance)
 {
 	// Initialization
 	typedef typename EdgeDescriptor<Graph<TSpec> >::Type TEdgeDescriptor;
@@ -507,21 +563,45 @@ bellman_ford_algorithm(Graph<TSpec> const& g,
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.dijkstra:
+..cat:Graph
+..summary:Computes shortest paths from a single source in a graph.
+..remarks:Edge weights have to be nonnegative.
+..signature:dijkstra(g, source, weight, predecessor, distance)
+..param.g:In-parameter:A graph.
+...type:Class.Graph
+..param.source:In-parameter:A source vertex.
+...type:Metafunction.VertexDescriptor
+..param.weight:In-parameter:A weight map.
+...remarks:A property map with edge weights. Edge weights have to be nonnegative.
+..param.predecessor:Out-parameter:A property map.
+...remarks:A property map that represents predecessor relationships among vertices. It determines a shortest-paths tree.
+..param.distance:Out-parameter:A property map.
+...remarks:Indicates for each vertex the distance from the source.
+..returns:void
+..see:Function.dag_shortest_path
+..see:Function.bellman_ford_algorithm
+*/
 template<typename TSpec, typename TVertexDescriptor, typename TWeightMap, typename TPredecessorMap, typename TDistanceMap>
 void 
 dijkstra(Graph<TSpec> const& g,
-			TVertexDescriptor const source,
-			TWeightMap const& weight,
-			TPredecessorMap& predecessor, 
-			TDistanceMap& distance)
+		 TVertexDescriptor const source,
+		 TWeightMap const& weight,
+		 TPredecessorMap& predecessor, 
+		 TDistanceMap& distance)
 {
-	// Initialization
 	typedef typename Value<TDistanceMap>::Type TDistVal;
 	typedef typename Iterator<Graph<TSpec>, VertexIterator<> >::Type TVertexIterator;
 	typedef typename Iterator<Graph<TSpec>, OutEdgeIterator<> >::Type TOutEdgeIterator;
+	
+	// Initialization
 	initVertexMap(g,predecessor);
 	initVertexMap(g,distance);
+
 	_initialize_single_source(g, source, weight, predecessor, distance);
+	
 	String<bool> setS;
 	initVertexMap(g, setS);
 	TVertexIterator it(g);
@@ -556,11 +636,48 @@ dijkstra(Graph<TSpec> const& g,
 }
 
 
-//////////////////////////////////////////////////////////////////////////////
-// All-Pairs shortest path
-//////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
 
 //////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+// All-Pairs shortest paths
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////////
+// INTERNAL FUNCTIONS
+//////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TSpec, typename TPredecessor, typename TVertexDescriptor>
+inline void
+_print_all_pairs_shortest_path(Graph<TSpec> const& g,
+							   TPredecessor& predecessor, 
+							   TVertexDescriptor const i,
+							   TVertexDescriptor const j)
+{
+	typedef typename Size<TPredecessor>::Type TSize;
+	TSize len = getIdUpperBound(g.data_id_managerV);
+	if (i==j) {
+		std::cout << i;
+	} else if (getValue(predecessor, i*len+j) == getNilPredecessor(g)) {
+		std::cout << "No path from " << i << " to " << j << " exists.";
+	} else {
+		_print_all_pairs_shortest_path(g,predecessor, i, (TVertexDescriptor) getValue(predecessor, i*len+j));
+		std::cout << "," << j;
+	}
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
 template<typename TSpec, typename TWeightMap, typename TMatrix, typename TPredecessor>
 void 
 _initialize_all_pairs(Graph<TSpec> const& g,
@@ -608,6 +725,8 @@ _initialize_all_pairs(Graph<TSpec> const& g,
 	}
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
 template<typename TMatrix, typename TPredecessor, typename TInfDist>
 void 
 _extend_shortest_paths(TMatrix& local,
@@ -641,12 +760,36 @@ _extend_shortest_paths(TMatrix& local,
 	}
 }
 
+//////////////////////////////////////////////////////////////////////////////
+// All-Pairs shortest path
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+.Function.all_pairs_shortest_path:
+..cat:Graph
+..summary:Finds shortest paths between all pairs of vertices in a graph.
+..signature:all_pairs_shortest_path(g, weight, distance, predecessor)
+..param.g:In-parameter:A graph.
+...type:Class.Graph
+..param.weight:In-parameter:A weight map.
+...remarks:A property map with edge weights. Edge weights may be negative.
+..param.distance:Out-parameter:A matrix with distances.
+...type:Class.Matrix
+...remarks:Entry (i,j) in this matrix indicates the distance from vertex i to vertex j.
+..param.predecessor:Out-parameter:A matrix with predecessors.
+...type:Class.Matrix
+...remarks:Entry (i,j) in this matrix indicates the predecessor of j on a shortest path from vertex i to vertex j.
+You can use _print_all_pairs_shortest_path(g, predecessor, i, j) to print the shortest path from i to j.
+..returns:void
+..see:Function.floyd_warshall
+*/
 template<typename TSpec, typename TWeightMap, typename TMatrix, typename TPredecessor>
 void 
 all_pairs_shortest_path(Graph<TSpec> const& g,
-			TWeightMap const& weight,
-			TMatrix& distMatrix,
-			TPredecessor& predecessor)
+						TWeightMap const& weight,
+						TMatrix& distMatrix,
+						TPredecessor& predecessor)
 {
 	typedef typename Size<TMatrix>::Type TSize;
 	typedef typename Value<TWeightMap>::Type TWeightVal;
@@ -668,12 +811,33 @@ all_pairs_shortest_path(Graph<TSpec> const& g,
 // Floyd-Warshall
 //////////////////////////////////////////////////////////////////////////////
 
+//////////////////////////////////////////////////////////////////////////////
+/**
+.Function.floyd_warshall:
+..cat:Graph
+..summary:Finds shortest paths between all pairs of vertices in a graph.
+..signature:floyd_warshall(g, weight, distance, predecessor)
+..remarks:The graph must be free of negative-weight cycles.
+..param.g:In-parameter:A graph.
+...type:Class.Graph
+..param.weight:In-parameter:A weight map.
+...remarks:A property map with edge weights. Edge weights may be negative.
+..param.distance:Out-parameter:A matrix with distances.
+...type:Class.Matrix
+...remarks:Entry (i,j) in this matrix indicates the distance from vertex i to vertex j.
+..param.predecessor:Out-parameter:A matrix with predecessors.
+...type:Class.Matrix
+...remarks:Entry (i,j) in this matrix indicates the predecessor of j on a shortest path from vertex i to vertex j.
+You can use _print_all_pairs_shortest_path(g, predecessor, i, j) to print the shortest path from i to j.
+..returns:void
+..see:Function.all_pairs_shortest_path
+*/
 template<typename TSpec, typename TWeightMap, typename TMatrix, typename TPredecessor>
 void 
 floyd_warshall(Graph<TSpec> const& g,
-				TWeightMap const& weight,
-				TMatrix& distMatrix,
-				TPredecessor& predecessor)
+			   TWeightMap const& weight,
+			   TMatrix& distMatrix,
+			   TPredecessor& predecessor)
 {
 	typedef typename Size<TMatrix>::Type TSize;
 	typedef typename Value<TMatrix>::Type TMatrixVal;
@@ -706,10 +870,23 @@ floyd_warshall(Graph<TSpec> const& g,
 // Transitive Closure
 //////////////////////////////////////////////////////////////////////////////
 
+//////////////////////////////////////////////////////////////////////////////
+/**
+.Function.transitive_closure:
+..cat:Graph
+..summary:Determines whether there is a path between any two given vertices or not.
+..signature:transitive_closure(g, closure)
+..param.g:In-parameter:A graph.
+...type:Class.Graph
+..param.closure:Out-parameter:A matrix which indicates the closure.
+...type:Class.Matrix
+...remarks:Entry (i,j) in this matrix indicates whether there is a path from i to j in the graph or not.
+..returns:void
+*/
 template<typename TSpec, typename TMatrix>
 void 
 transitive_closure(Graph<TSpec> const& g,
-					TMatrix& closure)
+				   TMatrix& closure)
 {
 	typedef typename Size<TMatrix>::Type TSize;
 	typedef typename Value<TMatrix>::Type TMatrixVal;
