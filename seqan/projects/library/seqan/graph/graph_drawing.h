@@ -33,7 +33,7 @@ void _createNodeNames(Graph<TSpec> const& g,
 	initVertexMap(g, nodeMap);
 	char strV[BitsPerValue<TVertexDescriptor>::VALUE];
 
-	typedef typename Iterator<TGraph, VertexIterator<> >::Type TConstIter;
+	typedef typename Iterator<TGraph, VertexIterator>::Type TConstIter;
 	TConstIter it(g);
 	for(;!atEnd(it);++it) {
 		sprintf(strV, "\"%d\"", *it);
@@ -53,7 +53,7 @@ void _createEdgeNames(Graph<Directed<TCargo, TSpec> > const& g,
 	initEdgeMap(g, edgeMap);
 	char strE[20];
 
-	typedef typename Iterator<TGraph, EdgeIterator<> >::Type TConstEdIter;
+	typedef typename Iterator<TGraph, EdgeIterator>::Type TConstEdIter;
 	TConstEdIter itEd(g);
 	for(;!atEnd(itEd);++itEd) {
 		sprintf(strE, "(%d,%d)", sourceVertex(itEd), targetVertex(itEd));
@@ -73,7 +73,7 @@ void _createEdgeNames(Graph<Tree<TCargo, TSpec> > const& g,
 	initEdgeMap(g, edgeMap);
 	char strE[20];
 
-	typedef typename Iterator<TGraph, EdgeIterator<> >::Type TConstEdIter;
+	typedef typename Iterator<TGraph, EdgeIterator>::Type TConstEdIter;
 	TConstEdIter itEd(g);
 	for(;!atEnd(itEd);++itEd) {
 		sprintf(strE, "(%d,%d)", sourceVertex(itEd), targetVertex(itEd));
@@ -91,7 +91,7 @@ void _createEdgeNames(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
 	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
 	initEdgeMap(g, edgeMap);
 
-	typedef typename Iterator<TGraph, EdgeIterator<> >::Type TConstEdIter;
+	typedef typename Iterator<TGraph, EdgeIterator>::Type TConstEdIter;
 	TConstEdIter itEd(g);
 	for(;!atEnd(itEd);++itEd) {
 		assignProperty(edgeMap, *itEd, label(itEd));
@@ -108,7 +108,7 @@ void _createEdgeNames(Graph<Automaton<TAlphabet, TCargo, WordGraph<TSpec> > > co
 	typedef Graph<Automaton<TAlphabet, TCargo, WordGraph<TSpec> > > TGraph;
 	initEdgeMap(g, edgeMap);
 
-	typedef typename Iterator<TGraph, EdgeIterator<> >::Type TConstEdIter;
+	typedef typename Iterator<TGraph, EdgeIterator>::Type TConstEdIter;
 	TConstEdIter itEd(g);
 	for(;!atEnd(itEd);++itEd) {
 		String<TAlphabet> labelTmp = getCargo(*itEd);
@@ -157,7 +157,7 @@ void write(TFile & file,
 	_streamPut(file, '\n');
 
 	_streamWrite(file, "/* Nodes */\n");
-	typedef typename Iterator<TGraph, VertexIterator<> >::Type TConstIter;
+	typedef typename Iterator<TGraph, VertexIterator>::Type TConstIter;
 	TConstIter it(g);
 	for(;!atEnd(it);++it) {
 		_streamWrite(file, getProperty(nodeMap, *it));
@@ -167,7 +167,7 @@ void write(TFile & file,
 	_streamPut(file, '\n');
 
 	_streamWrite(file, "/* Edges */\n");
-	typedef typename Iterator<TGraph, EdgeIterator<> >::Type TConstEdIter;
+	typedef typename Iterator<TGraph, EdgeIterator>::Type TConstEdIter;
 	TConstEdIter itEd(g);
 	for(;!atEnd(itEd);++itEd) {
 		TVertexDescriptor sc = sourceVertex(itEd);

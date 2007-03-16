@@ -1,14 +1,14 @@
-#ifndef SEQAN_HEADER_GRAPH_DFSITERATOR_H
-#define SEQAN_HEADER_GRAPH_DFSITERATOR_H
+#ifndef SEQAN_HEADER_GRAPH_ITERATOR_DFS_H
+#define SEQAN_HEADER_GRAPH_ITERATOR_DFS_H
 
 namespace SEQAN_NAMESPACE_MAIN
 {
 
 //////////////////////////////////////////////////////////////////////////////
-// Graph DfsIterator
+// Graph InternalDfsIterator
 //////////////////////////////////////////////////////////////////////////////
 template<typename TGraph, typename TSpec>
-class Iter<TGraph, GraphIterator<DfsIterator<TSpec> > > 
+class Iter<TGraph, GraphIterator<InternalDfsIterator<TSpec> > > 
 {
 public:
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
@@ -70,71 +70,71 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////
-// Graph DfsIterator - Metafunctions
+// Graph InternalDfsIterator - Metafunctions
 //////////////////////////////////////////////////////////////////////////////
-template<typename TGraph, typename TIteratorSpec>
-struct Iterator<TGraph, DfsIterator<TIteratorSpec> >
+template<typename TGraph>
+struct Iterator<TGraph, DfsPostorder>
 {	
-	typedef Iter<TGraph, GraphIterator<DfsIterator<TIteratorSpec> > > Type;
+	typedef Iter<TGraph, GraphIterator<InternalDfsIterator<DfsPostorder> > > Type;
 };
 
-template<typename TGraph, typename TIteratorSpec>
-struct Iterator<TGraph const, DfsIterator<TIteratorSpec> >
+template<typename TGraph>
+struct Iterator<TGraph const, DfsPostorder>
 {	
-	typedef Iter<TGraph const, GraphIterator<DfsIterator<TIteratorSpec> > > Type;
+	typedef Iter<TGraph const, GraphIterator<InternalDfsIterator<DfsPostorder> > > Type;
 };
 
 template<typename TGraph, typename TIteratorSpec>
-struct Value<Iter<TGraph, GraphIterator<DfsIterator<TIteratorSpec> > > >
+struct Value<Iter<TGraph, GraphIterator<InternalDfsIterator<TIteratorSpec> > > >
 {
-	typedef typename Value<Iter<TGraph, GraphIterator<VertexIterator<TIteratorSpec> > > >::Type Type;
+	typedef typename Value<Iter<TGraph, GraphIterator<InternalVertexIterator<TIteratorSpec> > > >::Type Type;
 };
 
 template<typename TGraph, typename TIteratorSpec>
-struct Value<Iter<TGraph const, GraphIterator<DfsIterator<TIteratorSpec> > > >
+struct Value<Iter<TGraph const, GraphIterator<InternalDfsIterator<TIteratorSpec> > > >
 {
-	typedef typename Value<Iter<TGraph const, GraphIterator<VertexIterator<TIteratorSpec> > > >::Type Type;
+	typedef typename Value<Iter<TGraph const, GraphIterator<InternalVertexIterator<TIteratorSpec> > > >::Type Type;
 };
 
 template<typename TGraph, typename TIteratorSpec>
-struct Reference<Iter<TGraph, GraphIterator<DfsIterator<TIteratorSpec> > > >
+struct Reference<Iter<TGraph, GraphIterator<InternalDfsIterator<TIteratorSpec> > > >
 {
-	typedef typename Reference<Iter<TGraph, GraphIterator<VertexIterator<TIteratorSpec> > > >::Type Type;
+	typedef typename Reference<Iter<TGraph, GraphIterator<InternalVertexIterator<TIteratorSpec> > > >::Type Type;
 };
 
 template<typename TGraph, typename TIteratorSpec>
-struct Reference<Iter<TGraph const, GraphIterator<DfsIterator<TIteratorSpec> > > >
+struct Reference<Iter<TGraph const, GraphIterator<InternalDfsIterator<TIteratorSpec> > > >
 {
-	typedef typename Reference<Iter<TGraph const, GraphIterator<VertexIterator<TIteratorSpec> > > >::Type Type;
+	typedef typename Reference<Iter<TGraph const, GraphIterator<InternalVertexIterator<TIteratorSpec> > > >::Type Type;
 };
 
 template<typename TGraph, typename TIteratorSpec>
-struct GetValue<Iter<TGraph, GraphIterator<DfsIterator<TIteratorSpec> > > >
+struct GetValue<Iter<TGraph, GraphIterator<InternalDfsIterator<TIteratorSpec> > > >
 {
-	typedef typename GetValue<Iter<TGraph, GraphIterator<VertexIterator<TIteratorSpec> > > >::Type Type;
+	typedef typename GetValue<Iter<TGraph, GraphIterator<InternalVertexIterator<TIteratorSpec> > > >::Type Type;
 };
 
 template<typename TGraph, typename TIteratorSpec>
-struct GetValue<Iter<TGraph const, GraphIterator<DfsIterator<TIteratorSpec> > > >
+struct GetValue<Iter<TGraph const, GraphIterator<InternalDfsIterator<TIteratorSpec> > > >
 {
-	typedef typename GetValue<Iter<TGraph const, GraphIterator<VertexIterator<TIteratorSpec> > > >::Type Type;
+	typedef typename GetValue<Iter<TGraph const, GraphIterator<InternalVertexIterator<TIteratorSpec> > > >::Type Type;
 };
 
 
 //////////////////////////////////////////////////////////////////////////////
-// Graph BfsIterator - Functions
+// Graph InternalBfsIterator - Functions
 //////////////////////////////////////////////////////////////////////////////
 template<typename TGraph, typename TSpec>
-inline typename GetValue<Iter<TGraph, GraphIterator<DfsIterator<TSpec> > > >::Type
-getValue(Iter<TGraph, GraphIterator<DfsIterator<TSpec> > >& it)
+inline typename GetValue<Iter<TGraph, GraphIterator<InternalDfsIterator<TSpec> > > >::Type
+getValue(Iter<TGraph, GraphIterator<InternalDfsIterator<TSpec> > >& it)
 {
 	SEQAN_CHECKPOINT
 	return it.data_queue.front();
 }
 
 template<typename TGraph, typename TSpec>
-inline typename GetValue<Iter<TGraph, GraphIterator<DfsIterator<TSpec> > > >::Type
-value(Iter<TGraph, GraphIterator<DfsIterator<TSpec> > >& it)
+inline typename GetValue<Iter<TGraph, GraphIterator<InternalDfsIterator<TSpec> > > >::Type
+value(Iter<TGraph, GraphIterator<InternalDfsIterator<TSpec> > >& it)
 {
 	SEQAN_CHECKPOINT
 	// We don't want vertex ids to be changed
@@ -142,16 +142,16 @@ value(Iter<TGraph, GraphIterator<DfsIterator<TSpec> > >& it)
 }
 
 template<typename TGraph, typename TSpec>
-inline typename GetValue<Iter<TGraph, GraphIterator<DfsIterator<TSpec> > > >::Type
-operator * (Iter<TGraph, GraphIterator<DfsIterator<TSpec> > >& it)
+inline typename GetValue<Iter<TGraph, GraphIterator<InternalDfsIterator<TSpec> > > >::Type
+operator * (Iter<TGraph, GraphIterator<InternalDfsIterator<TSpec> > >& it)
 {
 	SEQAN_CHECKPOINT
 	return value(it);
 }
 
 template<typename TGraph, typename TSpec>
-inline typename Host<Iter<TGraph, GraphIterator<DfsIterator<TSpec> > > >::Type const&
-hostGraph(Iter<TGraph, GraphIterator<DfsIterator<TSpec> > >& it)
+inline typename Host<Iter<TGraph, GraphIterator<InternalDfsIterator<TSpec> > > >::Type const&
+hostGraph(Iter<TGraph, GraphIterator<InternalDfsIterator<TSpec> > >& it)
 {
 	SEQAN_CHECKPOINT
 	return *it.data_host;
@@ -159,7 +159,7 @@ hostGraph(Iter<TGraph, GraphIterator<DfsIterator<TSpec> > >& it)
 
 template<typename TGraph, typename TSpec>
 inline bool
-atBegin(Iter<TGraph, GraphIterator<DfsIterator<TSpec> > >& it)
+atBegin(Iter<TGraph, GraphIterator<InternalDfsIterator<TSpec> > >& it)
 {
 	SEQAN_CHECKPOINT
 	if (it.data_queue.empty()) return false;
@@ -168,7 +168,7 @@ atBegin(Iter<TGraph, GraphIterator<DfsIterator<TSpec> > >& it)
 
 template<typename TGraph, typename TSpec>
 inline void
-goBegin(Iter<TGraph, GraphIterator<DfsIterator<TSpec> > >& it)
+goBegin(Iter<TGraph, GraphIterator<InternalDfsIterator<TSpec> > >& it)
 {
 	SEQAN_CHECKPOINT
 	it._init();
@@ -176,7 +176,7 @@ goBegin(Iter<TGraph, GraphIterator<DfsIterator<TSpec> > >& it)
 
 template<typename TGraph, typename TSpec>
 inline bool
-atEnd(Iter<TGraph, GraphIterator<DfsIterator<TSpec> > >& it)
+atEnd(Iter<TGraph, GraphIterator<InternalDfsIterator<TSpec> > >& it)
 {
 	SEQAN_CHECKPOINT
 	return (it.data_queue.empty());
@@ -184,7 +184,7 @@ atEnd(Iter<TGraph, GraphIterator<DfsIterator<TSpec> > >& it)
 
 template<typename TGraph, typename TSpec>
 inline void
-goEnd(Iter<TGraph, GraphIterator<DfsIterator<TSpec> > >& it)
+goEnd(Iter<TGraph, GraphIterator<InternalDfsIterator<TSpec> > >& it)
 {
 	SEQAN_CHECKPOINT
 	it.data_queue.clear();
@@ -192,14 +192,14 @@ goEnd(Iter<TGraph, GraphIterator<DfsIterator<TSpec> > >& it)
 
 template<typename TGraph, typename TSpec>
 inline void
-goNext(Iter<TGraph, GraphIterator<DfsIterator<TSpec> > >& it)
+goNext(Iter<TGraph, GraphIterator<InternalDfsIterator<TSpec> > >& it)
 {
 	SEQAN_CHECKPOINT
 	if (it.data_queue.empty()) return;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	TVertexDescriptor u = it.data_queue.front();
 	it.data_queue.pop_front();
-	typedef Iterator<Graph<>, AdjacencyIterator<> >::Type TAdjacencyIterator;
+	typedef Iterator<Graph<>, AdjacencyIterator>::Type TAdjacencyIterator;
 	TAdjacencyIterator itad(*it.data_host,u);
 	for(;!atEnd(itad);goNext(itad)) {
 		TVertexDescriptor v = getValue(itad);
@@ -211,8 +211,8 @@ goNext(Iter<TGraph, GraphIterator<DfsIterator<TSpec> > >& it)
 }
 
 template<typename TGraph, typename TSpec>
-inline Iter<TGraph, GraphIterator<DfsIterator<TSpec> > >&
-operator ++(Iter<TGraph, GraphIterator<DfsIterator<TSpec> > >& it)
+inline Iter<TGraph, GraphIterator<InternalDfsIterator<TSpec> > >&
+operator ++(Iter<TGraph, GraphIterator<InternalDfsIterator<TSpec> > >& it)
 {
 SEQAN_CHECKPOINT
 	goNext(it);
@@ -220,19 +220,19 @@ SEQAN_CHECKPOINT
 }
 
 template<typename TGraph, typename TSpec>
-inline Iter<TGraph, GraphIterator<DfsIterator<TSpec> > >
-operator ++(Iter<TGraph, GraphIterator<DfsIterator<TSpec> > >& it, int)
+inline Iter<TGraph, GraphIterator<InternalDfsIterator<TSpec> > >
+operator ++(Iter<TGraph, GraphIterator<InternalDfsIterator<TSpec> > >& it, int)
 {
 	SEQAN_CHECKPOINT
-	Iter<TGraph, GraphIterator<DfsIterator<TSpec> > > ret = it;
+	Iter<TGraph, GraphIterator<InternalDfsIterator<TSpec> > > ret = it;
 	goNext(it);
 	return ret;
 }
 
 template<typename TGraph, typename TSpec>
 inline bool
-operator ==(Iter<TGraph, GraphIterator<DfsIterator<TSpec> > >& it1,
-			Iter<TGraph, GraphIterator<DfsIterator<TSpec> > >& it2)
+operator ==(Iter<TGraph, GraphIterator<InternalDfsIterator<TSpec> > >& it1,
+			Iter<TGraph, GraphIterator<InternalDfsIterator<TSpec> > >& it2)
 {
 	SEQAN_CHECKPOINT
 	return ((it1.data_source==it2.data_source) &&
@@ -242,8 +242,8 @@ operator ==(Iter<TGraph, GraphIterator<DfsIterator<TSpec> > >& it1,
 
 template<typename TGraph, typename TSpec>
 inline bool
-operator !=(Iter<TGraph, GraphIterator<DfsIterator<TSpec> > >& it1,
-			Iter<TGraph, GraphIterator<DfsIterator<TSpec> > >& it2)
+operator !=(Iter<TGraph, GraphIterator<InternalDfsIterator<TSpec> > >& it1,
+			Iter<TGraph, GraphIterator<InternalDfsIterator<TSpec> > >& it2)
 {
 	SEQAN_CHECKPOINT
 	return ((it1.data_source!=it2.data_source) ||

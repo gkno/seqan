@@ -33,10 +33,10 @@
 
 // Graph iterators
 #include <seqan/graph/graph_iterator.h>
-#include <seqan/graph/graph_vertexiterator.h>
-#include <seqan/graph/graph_outedgeiterator.h>
-#include <seqan/graph/graph_adjacencyiterator.h>
-#include <seqan/graph/graph_edgeiterator.h>
+#include <seqan/graph/graph_iterator_vertex.h>
+#include <seqan/graph/graph_iterator_outedge.h>
+#include <seqan/graph/graph_iterator_adjacency.h>
+#include <seqan/graph/graph_iterator_edge.h>
 
 // Graph property maps
 #include <seqan/graph/graph_property.h>
@@ -49,8 +49,8 @@
 #include <seqan/graph/graph_drawing.h>
 
 // Specialized iterators
-#include <seqan/graph/graph_bfsiterator.h>
-#include <seqan/graph/graph_dfsiterator.h>
+#include <seqan/graph/graph_iterator_bfs.h>
+#include <seqan/graph/graph_iterator_dfs.h>
 
 // Graph algorithms
 #include <seqan/graph/graph_algorithm.h>

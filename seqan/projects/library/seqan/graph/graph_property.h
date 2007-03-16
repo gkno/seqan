@@ -714,7 +714,7 @@ initVertexMap(Graph<TSpec> const& g,
 	SEQAN_CHECKPOINT
 	initVertexMap(g,pm);
 	typedef Graph<TSpec> TGraph;
-	typedef typename Iterator<TGraph, VertexIterator<> >::Type TVertexIterator;
+	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
 	TVertexIterator it(g);
 	for(;!atEnd(it);goNext(it)) {
 		assignProperty(pm,*it,prop[_getId(*it)]);
@@ -732,7 +732,7 @@ initEdgeMap(Graph<TSpec> const& g,
 	SEQAN_CHECKPOINT
 	initEdgeMap(g,pm);
 	typedef Graph<TSpec> TGraph;
-	typedef typename Iterator<TGraph, EdgeIterator<> >::Type TEdgeIterator;
+	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
 	TEdgeIterator it(g);
 	for(;!atEnd(it);goNext(it)) {
 		assignProperty(pm,*it,prop[_getId(*it)]);

@@ -1066,7 +1066,7 @@ void Test_Undirected() {
 	addEdge(gIter,3,6);
 	addEdge(gIter,4,6);
 
-	typedef Iterator<TGraphIter, OutEdgeIterator<> >::Type TOutEdgeIterator;
+	typedef Iterator<TGraphIter, OutEdgeIterator>::Type TOutEdgeIterator;
 	TOutEdgeIterator itOutEdge(gIter,3);
 	// Both ways are fast for undirected graphs
 	SEQAN_TASSERT(sourceVertex(gIter, getValue(itOutEdge))==3)
@@ -1110,7 +1110,7 @@ void Test_Undirected() {
 	SEQAN_TASSERT(&gIter == &hostGraph(itOutEdge))
 
 	
-	typedef Iterator<TGraphIter, EdgeIterator<> >::Type TEdgeIterator;
+	typedef Iterator<TGraphIter, EdgeIterator>::Type TEdgeIterator;
 	TEdgeIterator itEdge(gIter);
 	SEQAN_TASSERT(sourceVertex(gIter, getValue(itEdge))==2)
 	SEQAN_TASSERT(targetVertex(gIter, getValue(itEdge))==4)
@@ -1317,7 +1317,7 @@ void Test_Automaton() {
 	SEQAN_TASSERT(getValue(mat,0*len+2) == 0)
 
 	// Test iterators
-	typedef Iterator<StandardAutomaton, VertexIterator<> >::Type TVertexIterator;
+	typedef Iterator<StandardAutomaton, VertexIterator>::Type TVertexIterator;
 	TVertexIterator itVert(g);
 	SEQAN_TASSERT(getValue(itVert) == 1)
 	++itVert;
@@ -1328,7 +1328,7 @@ void Test_Automaton() {
 	SEQAN_TASSERT(atEnd(itVert) == true)
 
 	addEdge(g,1,2,'T');
-	typedef Iterator<StandardAutomaton, OutEdgeIterator<> >::Type TOutEdgeIterator;
+	typedef Iterator<StandardAutomaton, OutEdgeIterator>::Type TOutEdgeIterator;
 	TOutEdgeIterator itEdge(g,1);
 	// Slow
 	SEQAN_TASSERT(sourceVertex(g, getValue(itEdge))==1)
@@ -1371,7 +1371,7 @@ void Test_Automaton() {
 	SEQAN_TASSERT(atBegin(itEdge2)==true)
 	SEQAN_TASSERT(&g == &hostGraph(itEdge))
 
-	typedef Iterator<StandardAutomaton, EdgeIterator<> >::Type TEdgeIterator;
+	typedef Iterator<StandardAutomaton, EdgeIterator>::Type TEdgeIterator;
 	TEdgeIterator itEd(g);
 	SEQAN_TASSERT(sourceVertex(g, getValue(itEd))==1)
 	SEQAN_TASSERT(targetVertex(g, getValue(itEd))==4)
@@ -1417,7 +1417,7 @@ void Test_Automaton() {
 	SEQAN_TASSERT(itEd2 != itEd)
 	SEQAN_TASSERT(&hostGraph(itEd) == &g)
 
-	typedef Iterator<StandardAutomaton, AdjacencyIterator<> >::Type TAdjacencyIterator;
+	typedef Iterator<StandardAutomaton, AdjacencyIterator>::Type TAdjacencyIterator;
 	TAdjacencyIterator itAd(g,1);
 	SEQAN_TASSERT(getValue(itAd) == 4)
 	SEQAN_TASSERT(&hostGraph(itAd) == &g)
@@ -1816,9 +1816,9 @@ void Test_Tree() {
 
 //////////////////////////////////////////////////////////////////////////////
 template <typename TGraphType>
-void Test_GraphVertexIterator() {
+void Test_VertexIterator() {
 //____________________________________________________________________________
-// Graph VertexIterator
+// Graph InternalVertexIterator
 	typedef Graph<TGraphType> TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
@@ -1834,7 +1834,7 @@ void Test_GraphVertexIterator() {
 	//Tricky case -> id 0 is released
 	removeVertex(g,v0);
 	removeVertex(g,3);
-	typedef typename Iterator<TGraph, VertexIterator<> >::Type TVertexIterator;
+	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
 	TVertexIterator it(g);
 	SEQAN_TASSERT(atBegin(it)==true)
 	SEQAN_TASSERT(getValue(it)==1)
@@ -1879,9 +1879,9 @@ void Test_GraphVertexIterator() {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-void Test_GraphTreeVertexIterator() {
+void Test_TreeInternalVertexIterator() {
 //____________________________________________________________________________
-// Tree VertexIterator
+// Tree InternalVertexIterator
 	typedef Graph<Tree<void> > TTree;
 	typedef VertexDescriptor<TTree>::Type TVertexDescriptor;
 	typedef EdgeDescriptor<TTree>::Type TEdgeDescriptor;
@@ -1894,7 +1894,7 @@ void Test_GraphTreeVertexIterator() {
 	TVertexDescriptor edges[] = {0,8, 0,3, 0,2, 0,1, 2,4, 4,5, 5,7, 5,6};
 	addEdges(gV,edges, numEdges);
 
-	typedef Iterator<TTree, VertexIterator<> >::Type TVertexIterator;
+	typedef Iterator<TTree, VertexIterator>::Type TVertexIterator;
 	TVertexIterator itV(gV);
 	SEQAN_TASSERT(atBegin(itV)==true)
 	SEQAN_TASSERT(getValue(itV)==0)
@@ -1917,9 +1917,9 @@ void Test_GraphTreeVertexIterator() {
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TGraphType>
-void Test_GraphOutEdgeIterator() {
+void Test_OutEdgeIterator() {
 //____________________________________________________________________________
-// Graph OutEdgeIterator
+// Graph InternalOutEdgeIterator
 	typedef Graph<TGraphType> TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
@@ -1933,7 +1933,7 @@ void Test_GraphOutEdgeIterator() {
 	addVertex(g); //3
 	addVertex(g); //4
 
-	typedef typename Iterator<TGraph, OutEdgeIterator<> >::Type TOutEdgeIterator;
+	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
 	TOutEdgeIterator it(g, v0);
 	SEQAN_TASSERT(sourceVertex(g, getValue(it))==0)
 	SEQAN_TASSERT(targetVertex(g, getValue(it))==1)
@@ -1988,9 +1988,9 @@ void Test_GraphOutEdgeIterator() {
 
 	
 template <typename TGraphType>
-void Test_GraphEdgeIterator() {
+void Test_EdgeIterator() {
 //____________________________________________________________________________
-// Graph EdgeIterator
+// Graph InternalEdgeIterator
 	typedef Graph<TGraphType> TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
@@ -2008,7 +2008,7 @@ void Test_GraphEdgeIterator() {
 	addEdge(g,2,3,'a');
 	addEdge(g,4,5,'a');
 
-	typedef typename Iterator<TGraph, EdgeIterator<> >::Type TEdgeIterator;
+	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
 	TEdgeIterator it(g);
 	SEQAN_TASSERT(sourceVertex(g, getValue(it))==0)
 	SEQAN_TASSERT(targetVertex(g, getValue(it))==1)
@@ -2068,9 +2068,9 @@ void Test_GraphEdgeIterator() {
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TGraphType>
-void Test_GraphAdjacencyIterator() {
+void Test_AdjacencyIterator() {
 //____________________________________________________________________________
-// Graph AdjacencyIterator
+// Graph InternalAdjacencyIterator
 	typedef Graph<TGraphType> TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
@@ -2088,7 +2088,7 @@ void Test_GraphAdjacencyIterator() {
 	addEdge(g,3,4,'a');
 	addEdge(g,4,5,'t');
 
-	typedef typename Iterator<TGraph, AdjacencyIterator<> >::Type TAdjacencyIterator;
+	typedef typename Iterator<TGraph, AdjacencyIterator>::Type TAdjacencyIterator;
 	TAdjacencyIterator it(g,3);
 	SEQAN_TASSERT(getValue(it) == 4)
 	SEQAN_TASSERT(&hostGraph(it) == &g)
@@ -2134,7 +2134,7 @@ void Test_GraphAdjacencyIterator() {
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TGraphType>
-void Test_GraphExternalProperty() {
+void Test_ExternalProperty() {
 //____________________________________________________________________________
 // Graph external property maps
 	typedef Graph<TGraphType> TGraph;
@@ -2188,7 +2188,7 @@ void Test_GraphExternalProperty() {
 
 //////////////////////////////////////////////////////////////////////////////
 
-void Test_GraphInternalProperty() {
+void Test_Property() {
 //____________________________________________________________________________
 // Graph properties
 	typedef Pair<char, int> TPair;
@@ -2287,9 +2287,9 @@ void Test_GraphInternalProperty() {
 
 //////////////////////////////////////////////////////////////////////////////
 
-void Test_GraphBfsIterator() {
+void Test_BfsIterator() {
 //____________________________________________________________________________
-// Graph BfsIterator
+// Graph InternalBfsIterator
 	typedef VertexDescriptor<Graph<> >::Type TVertexDescriptor;
 	typedef EdgeDescriptor<Graph<> >::Type TEdgeDescriptor;
 	typedef Size<Graph<> >::Type TSize;
@@ -2309,7 +2309,7 @@ void Test_GraphBfsIterator() {
 	addEdge(g,6,7);
 	addEdge(g,3,7);
 
-	typedef Iterator<Graph<>, BfsIterator<> >::Type TBfsIterator;
+	typedef Iterator<Graph<>, BfsIterator>::Type TBfsIterator;
 	TBfsIterator it(g,1);
 	SEQAN_TASSERT(getValue(it) == 1)
 	SEQAN_TASSERT(&hostGraph(it) == &g)
@@ -2353,9 +2353,9 @@ void Test_GraphBfsIterator() {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-void Test_GraphDfsIterator() {
+void Test_DfsIterator() {
 //____________________________________________________________________________
-// Graph DfsIterator
+// Graph InternalDfsIterator
 	typedef VertexDescriptor<Graph<> >::Type TVertexDescriptor;
 	typedef EdgeDescriptor<Graph<> >::Type TEdgeDescriptor;
 	typedef Size<Graph<> >::Type TSize;
@@ -2375,8 +2375,8 @@ void Test_GraphDfsIterator() {
 	addEdge(g,6,7);
 	addEdge(g,3,7);
 
-	typedef Iterator<Graph<>, DfsIterator<> >::Type TDfsIterator;
-	TDfsIterator it(g,1);
+	typedef Iterator<Graph<>, DfsPostorder>::Type TDfsPostorder;
+	TDfsPostorder it(g,1);
 	SEQAN_TASSERT(getValue(it) == 1)
 	SEQAN_TASSERT(&hostGraph(it) == &g)
 	SEQAN_TASSERT(value(it) == 1)
@@ -2406,8 +2406,8 @@ void Test_GraphDfsIterator() {
 	goBegin(it);
 	SEQAN_TASSERT(atEnd(it)==false)
 	SEQAN_TASSERT(atBegin(it)==true)
-	TDfsIterator it2(g, 1);
-	TDfsIterator it3;
+	TDfsPostorder it2(g, 1);
+	TDfsPostorder it3;
 	it3 = it;
 	SEQAN_TASSERT(it == it2)
 	SEQAN_TASSERT(it2 == it3)
@@ -2980,7 +2980,7 @@ void Test_TransitiveClosure() {
 
 //////////////////////////////////////////////////////////////////////////////
 
-void Test_GraphAlgorithms() {
+void Test_Algorithms() {
 //____________________________________________________________________________
 // Graph Algorithms
 	// Elementary graph algorithms
@@ -3025,29 +3025,29 @@ int main()
 	Test_Tree();		// Trees
 
 	// Test iterators
-	Test_GraphVertexIterator<Directed<char> >();
-	Test_GraphVertexIterator<Undirected<char> >();
-	Test_GraphVertexIterator<Automaton<char> >();
-	Test_GraphTreeVertexIterator();
-	Test_GraphOutEdgeIterator<Directed<char> >();
-	Test_GraphOutEdgeIterator<Undirected<char> >();
-	Test_GraphOutEdgeIterator<Tree<char> >();
-	Test_GraphOutEdgeIterator<Automaton<char> >();
-	Test_GraphEdgeIterator<Directed<char> >();
-	Test_GraphEdgeIterator<Undirected<char> >();
-	Test_GraphEdgeIterator<Tree<char> >();
-	Test_GraphEdgeIterator<Automaton<char> >();
-	Test_GraphAdjacencyIterator<Directed<char> >();
-	Test_GraphAdjacencyIterator<Undirected<char> >();
-	Test_GraphAdjacencyIterator<Tree<char> >();
-	Test_GraphAdjacencyIterator<Automaton<char> >();
+	Test_VertexIterator<Directed<char> >();
+	Test_VertexIterator<Undirected<char> >();
+	Test_VertexIterator<Automaton<char> >();
+	Test_TreeInternalVertexIterator();
+	Test_OutEdgeIterator<Directed<char> >();
+	Test_OutEdgeIterator<Undirected<char> >();
+	Test_OutEdgeIterator<Tree<char> >();
+	Test_OutEdgeIterator<Automaton<char> >();
+	Test_EdgeIterator<Directed<char> >();
+	Test_EdgeIterator<Undirected<char> >();
+	Test_EdgeIterator<Tree<char> >();
+	Test_EdgeIterator<Automaton<char> >();
+	Test_AdjacencyIterator<Directed<char> >();
+	Test_AdjacencyIterator<Undirected<char> >();
+	Test_AdjacencyIterator<Tree<char> >();
+	Test_AdjacencyIterator<Automaton<char> >();
 
 	// Test property maps
-	Test_GraphExternalProperty<Directed<char> >();
-	Test_GraphExternalProperty<Undirected<char> >();
-	Test_GraphExternalProperty<Tree<char> >();
-	Test_GraphExternalProperty<Automaton<char> >();	
-	Test_GraphInternalProperty();
+	Test_ExternalProperty<Directed<char> >();
+	Test_ExternalProperty<Undirected<char> >();
+	Test_ExternalProperty<Tree<char> >();
+	Test_ExternalProperty<Automaton<char> >();	
+	Test_Property();
 
 
 	// Specialized automatons
@@ -3056,11 +3056,11 @@ int main()
 
 	// Test bfs iterator
 	// ToDo: For different graph types
-	Test_GraphBfsIterator();
-	Test_GraphDfsIterator();
+	Test_BfsIterator();
+	Test_DfsIterator();
 
 	// Graph algorithms
-	Test_GraphAlgorithms();
+	Test_Algorithms();
 
 //____________________________________________________________________________
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_base.h");
@@ -3073,16 +3073,16 @@ int main()
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_wordgraph.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_tree.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_iterator.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_vertexiterator.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_outedgeiterator.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_adjacencyiterator.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_edgeiterator.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_iterator_vertex.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_iterator_outedge.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_iterator_adjacency.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_iterator_edge.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_property.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_oracle.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_trie.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_drawing.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_bfsiterator.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_dfsiterator.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_iterator_bfs.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_iterator_dfs.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_algorithm.h");
 
 	SEQAN_TREPORT("TEST END")

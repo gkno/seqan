@@ -35,7 +35,7 @@ void BreadthFirstSearch() {
 	
 	// Output
 	std::cout << "Breadth-First search: " << ::std::endl;
-	typedef Iterator<TGraph, VertexIterator<> >::Type TVertexIterator;
+	typedef Iterator<TGraph, VertexIterator>::Type TVertexIterator;
 	TVertexIterator it(g);
 	while(!atEnd(it)) {
 		std::cout << "Vertex " << getProperty(nameMap, getValue(it)) << ": ";
@@ -89,7 +89,7 @@ void DepthFirstSearch() {
 
 	// Output
 	std::cout << "Depth-First search: " << ::std::endl;
-	typedef Iterator<Graph<>, VertexIterator<> >::Type TVertexIterator;
+	typedef Iterator<Graph<>, VertexIterator>::Type TVertexIterator;
 	TVertexIterator it(g);
 	while(!atEnd(it)) {
 		std::cout << "Vertex " << getProperty(nameMap, getValue(it)) << ": ";
@@ -179,7 +179,7 @@ void StronglyConnectedComponents() {
 
 	// Output
 	std::cout << "Strongly Connected Components: " << ::std::endl;
-	typedef Iterator<Graph<>, VertexIterator<> >::Type TVertexIterator;
+	typedef Iterator<Graph<>, VertexIterator>::Type TVertexIterator;
 	TVertexIterator it(g);
 	while(!atEnd(it)) {
 		std::cout << "Vertex " << getProperty(nameMap, getValue(it)) << ": ";
@@ -221,7 +221,7 @@ void DagShortestPath() {
 
 	// Output
 	std::cout << "Single-Source Shortest Paths in DAG: " << ::std::endl;
-	typedef Iterator<Graph<>, VertexIterator<> >::Type TVertexIterator;
+	typedef Iterator<Graph<>, VertexIterator>::Type TVertexIterator;
 	TVertexIterator it(g);
 	while(!atEnd(it)) {
 		std::cout << "Path from 1 to " << getValue(it) << ": ";
@@ -265,7 +265,7 @@ void BellmanFord() {
 	// Output
 	std::cout << "Single-Source Shortest Paths: " << ::std::endl;
 	std::cout << "Graph without negative cycles? " << noNegativeCycle << ::std::endl;
-	typedef Iterator<Graph<>, VertexIterator<> >::Type TVertexIterator;
+	typedef Iterator<Graph<>, VertexIterator>::Type TVertexIterator;
 	TVertexIterator it(g);
 	while(!atEnd(it)) {
 		std::cout << "Path from 0 to " << getValue(it) << ": ";
@@ -308,7 +308,7 @@ void Dijkstra() {
 
 	// Output
 	std::cout << "Single-Source Shortest Paths: " << ::std::endl;
-	typedef Iterator<Graph<>, VertexIterator<> >::Type TVertexIterator;
+	typedef Iterator<Graph<>, VertexIterator>::Type TVertexIterator;
 	TVertexIterator it(g);
 	while(!atEnd(it)) {
 		std::cout << "Path from 0 to " << getValue(it) << ": ";
@@ -361,7 +361,7 @@ void DijkstraInternalMap() {
 
 	// Output
 	std::cout << "Single-Source Shortest Paths: " << ::std::endl;
-	typedef Iterator<Graph<TEdges> , VertexIterator<> >::Type TVertexIterator;
+	typedef Iterator<Graph<TEdges> , VertexIterator>::Type TVertexIterator;
 	TVertexIterator it(g);
 	while(!atEnd(it)) {
 		std::cout << "Path from 0 to " << getValue(it) << ": ";
@@ -545,7 +545,7 @@ void AutomatonTest() {
 	// Property maps used after graph creation -> Much better :-)
 	String<std::string> nameMap;
 	initVertexMap(automaton, nameMap);
-	typedef Iterator<DnaAutomaton, VertexIterator<> >::Type TVertexIterator;
+	typedef Iterator<DnaAutomaton, VertexIterator>::Type TVertexIterator;
 	TVertexIterator it(automaton);
 	std::string str = "Hallo";
 	for(;!atEnd(it);goNext(it)) {

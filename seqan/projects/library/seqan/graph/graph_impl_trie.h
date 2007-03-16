@@ -84,7 +84,7 @@ _createTrieNodeNames(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
 	SEQAN_CHECKPOINT
 	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
 	initVertexMap(g, nodeMap);
-	typedef typename Iterator<TGraph, VertexIterator<> >::Type TConstIter;
+	typedef typename Iterator<TGraph, VertexIterator>::Type TConstIter;
 	TConstIter it(g);
 	for(;!atEnd(it);++it) {
 		std::stringstream s;

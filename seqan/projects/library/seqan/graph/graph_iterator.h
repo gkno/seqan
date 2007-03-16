@@ -15,27 +15,27 @@ struct GraphIterator;
 
 	// Vertex iterator
 	template <typename TSpec = Default>
-	struct VertexIterator;
+	struct InternalVertexIterator;
 
 	// Edge iterator
 	template <typename TSpec = Default>
-	struct EdgeIterator;
+	struct InternalEdgeIterator;
 
 	// OutEdge iterator
 	template <typename TSpec = Default>
-	struct OutEdgeIterator;
+	struct InternalOutEdgeIterator;
 
 	// Adjacency iterator
 	template <typename TSpec = Default>
-	struct AdjacencyIterator;
+	struct InternalAdjacencyIterator;
 
 	// Bfs iterator
 	template <typename TSpec = Default>
-	struct BfsIterator;
+	struct InternalBfsIterator;
 
 	// Dfs iterator
 	template <typename TSpec = Default>
-	struct DfsIterator;
+	struct InternalDfsIterator;
 
 //////////////////////////////////////////////////////////////////////////////
 // Graph Iterators - Metafunctions

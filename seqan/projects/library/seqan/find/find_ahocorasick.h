@@ -118,7 +118,7 @@ _createAcTrie(Pattern<TNeedle, AhoCorasick> & me)
 	for(unsigned int i = 0;i<length(parentMap);++i) {
 		assignProperty(parentMap, i, nilVal);
 	}
-	typedef typename Iterator<TGraph, EdgeIterator<> >::Type TEdgeIterator;
+	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
 	TEdgeIterator itEd(me.data_graph);
 	for(;!atEnd(itEd);goNext(itEd)) {
 		assignProperty(parentMap, targetVertex(itEd), sourceVertex(itEd));
@@ -131,7 +131,7 @@ _createAcTrie(Pattern<TNeedle, AhoCorasick> & me)
 	assignProperty(me.data_supplyMap, root, nilVal);
 
 	// Bfs Traversal
-	typedef typename Iterator<TGraph, BfsIterator<> >::Type TBfsIterator;
+	typedef typename Iterator<TGraph, BfsIterator>::Type TBfsIterator;
 	TBfsIterator it(me.data_graph,root);
 	for(;!atEnd(it);goNext(it)) {
 		if (atBegin(it)) continue;

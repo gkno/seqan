@@ -148,6 +148,66 @@ typedef Tag<TreeTag_> const TreeTag;
 struct TagDotDrawing_;
 typedef Tag<TagDotDrawing_> const DotDrawing;
 
+
+
+//////////////////////////////////////////////////////////////////////////////
+// Graph Iterator Tags
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+.Tag.VertexIterator
+..summary:Tag for a VertexIterator
+..value.VertexIterator:Specifies the kind of graph iterator, i.e., VertexIterator.
+*/
+struct VertexIterator_;
+typedef Tag<VertexIterator_> const VertexIterator;
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+.Tag.EdgeIterator
+..summary:Tag for an EdgeIterator
+..value.EdgeIterator:Specifies the kind of graph iterator, i.e., EdgeIterator.
+*/
+struct EdgeIterator_;
+typedef Tag<EdgeIterator_> const EdgeIterator;
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+.Tag.OutEdgeIterator
+..summary:Tag for an OutEdgeIterator
+..value.OutEdgeIterator:Specifies the kind of graph iterator, i.e., OutEdgeIterator.
+*/
+struct OutEdgeIterator_;
+typedef Tag<OutEdgeIterator_> const OutEdgeIterator;
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+.Tag.AdjacencyIterator
+..summary:Tag for an AdjacencyIterator
+..value.AdjacencyIterator:Specifies the kind of graph iterator, i.e., AdjacencyIterator.
+*/
+struct AdjacencyIterator_;
+typedef Tag<AdjacencyIterator_> const AdjacencyIterator;
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+.Tag.BfsIterator
+..summary:Tag for a breath-first search iterator.
+..value.BfsIterator:Specifies the kind of graph iterator, i.e., BfsIterator.
+*/
+struct BfsIterator_;
+typedef Tag<BfsIterator_> const BfsIterator;
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+.Tag.DfsPostorder
+..summary:Tag for a depth-first postorder search iterator.
+..value.DfsPostorder:Specifies the kind of graph iterator, i.e., DfsPostorder.
+*/
+struct DfsPostorder_;
+typedef Tag<DfsPostorder_> const DfsPostorder;
+
 //////////////////////////////////////////////////////////////////////////////
 // Graph - Default edge stump
 //////////////////////////////////////////////////////////////////////////////

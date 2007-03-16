@@ -587,7 +587,7 @@ getChildCharacter(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec >
 			   TVertexDescriptor &child)
 {
 	typedef Graph<Automaton<TAlphabet,TCargo,WordGraph< VLMM < TSpec > > >,TGraphSpec> TVlmm;
-	typedef typename Iterator<TVlmm, OutEdgeIterator<> >::Type TOutEdgeIterator;
+	typedef typename Iterator<TVlmm, OutEdgeIterator>::Type TOutEdgeIterator;
 
 	TOutEdgeIterator itout(vlmm,father);
 	while(!atEnd(itout)){
@@ -722,7 +722,7 @@ addSuffixLinks(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > 
 	typedef Graph<Automaton<TAlphabet,TCargo,WordGraph< VLMM < TSpec > > >,TGraphSpec> TVlmm;
 	typedef typename VertexDescriptor<TVlmm>::Type TVertexDescriptor;
 	typedef typename EdgeDescriptor<TVlmm>::Type TEdgeDescriptor;
-	typedef typename Iterator<TVlmm, OutEdgeIterator<> >::Type TOutEdgeIterator;
+	typedef typename Iterator<TVlmm, OutEdgeIterator>::Type TOutEdgeIterator;
 	typedef typename Size<TVlmm>::Type TSize;
 	
 	TVertexDescriptor root = getRoot(vlmm);
@@ -886,7 +886,7 @@ pruneTree(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > >,TGr
 	SEQAN_CHECKPOINT
 	typedef Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGraphSpec> TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	typedef typename Iterator<TGraph, VertexIterator<> >::Type TVertexIterator;
+	typedef typename Iterator<TGraph, InternalVertexIterator<> >::Type TVertexIterator;
 
 	TVertexDescriptor root = getRoot(vlmm);
 	
@@ -1163,7 +1163,7 @@ void write(TFile & file,
 	_streamPut(file, '\n');
 
 	_streamWrite(file, "/* Nodes */\n");
-	typedef typename Iterator<TGraph, VertexIterator<> >::Type TConstIter;
+	typedef typename Iterator<TGraph, InternalVertexIterator<> >::Type TConstIter;
 	TConstIter it(g);
 	for(;!atEnd(it);goNext(it)) {
 		_streamWrite(file, getProperty(nodeMap, *it));
@@ -1182,7 +1182,7 @@ void write(TFile & file,
 	_streamPut(file, '\n');
 
 	_streamWrite(file, "/* Edges */\n");
-	typedef typename Iterator<TGraph, EdgeIterator<> >::Type TConstEdIter;
+	typedef typename Iterator<TGraph, EdgeIterator>::Type TConstEdIter;
 	TConstEdIter itEd(g);
 	for(;!atEnd(itEd);++itEd) {
 		TVertexDescriptor sc = sourceVertex(itEd);
@@ -1262,7 +1262,7 @@ void writeAsVLMM(TFile & file,
 	_streamPut(file, '\n');
 
 	_streamWrite(file, "/* Nodes */\n");
-	typedef typename Iterator<TGraph, VertexIterator<> >::Type TConstIter;
+	typedef typename Iterator<TGraph, InternalVertexIterator<> >::Type TConstIter;
 	TConstIter it(g);
 	for(;!atEnd(it);++it) {
 		_streamWrite(file, getProperty(nodeMap, *it));
@@ -1272,7 +1272,7 @@ void writeAsVLMM(TFile & file,
 	_streamPut(file, '\n');
 
 	_streamWrite(file, "/* Edges */\n");
-	typedef typename Iterator<TGraph, EdgeIterator<> >::Type TConstEdIter;
+	typedef typename Iterator<TGraph, EdgeIterator>::Type TConstEdIter;
 	TConstEdIter itEd(g);
 		//NEW Reverse Suffix Links
 	goBegin(it);

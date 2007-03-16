@@ -70,8 +70,8 @@ breadth_first_search(Graph<TSpec> const& g,
 					 TPredecessorMap& predecessor, 
 					 TDistanceMap& distance)
 {
-	typedef typename Iterator<Graph<TSpec>, EdgeIterator<> >::Type TEdgeIterator;
-	typedef typename Iterator<Graph<TSpec>, VertexIterator<> >::Type TVertexIterator;
+	typedef typename Iterator<Graph<TSpec>, EdgeIterator>::Type TEdgeIterator;
+	typedef typename Iterator<Graph<TSpec>, VertexIterator>::Type TVertexIterator;
 	typedef typename Value<TPredecessorMap>::Type TPredVal;
 	typedef typename Value<TDistanceMap>::Type TDistVal;
 
@@ -99,7 +99,7 @@ breadth_first_search(Graph<TSpec> const& g,
 	while (!queue.empty()) {
 		TVertexDescriptor u = queue.front();
 		queue.pop_front();
-		typedef typename Iterator<Graph<TSpec>, OutEdgeIterator<> >::Type TOutEdgeIterator;
+		typedef typename Iterator<Graph<TSpec>, OutEdgeIterator>::Type TOutEdgeIterator;
 		TOutEdgeIterator itout(g,u);
 		for(;!atEnd(itout);goNext(itout)) {
 			TVertexDescriptor v = targetVertex(itout);
@@ -130,7 +130,7 @@ _dfs_visit(Graph<TSpec> const& g,
 		   TFinishingTimeMap& finish,
 		   TVal& time)
 {
-	typedef typename Iterator<Graph<TSpec>, AdjacencyIterator<> >::Type TAdjacencyIterator;
+	typedef typename Iterator<Graph<TSpec>, AdjacencyIterator>::Type TAdjacencyIterator;
 
 	assignProperty(tokenMap, u, true);
 	++time;
@@ -176,8 +176,8 @@ depth_first_search(Graph<TSpec> const& g,
 				   TDiscoveryTimeMap& disc,
 				   TFinishingTimeMap& finish)
 {
-	typedef typename Iterator<Graph<TSpec>, EdgeIterator<> >::Type TEdgeIterator;
-	typedef typename Iterator<Graph<TSpec>, VertexIterator<> >::Type TVertexIterator;
+	typedef typename Iterator<Graph<TSpec>, EdgeIterator>::Type TEdgeIterator;
+	typedef typename Iterator<Graph<TSpec>, VertexIterator>::Type TVertexIterator;
 	typedef typename VertexDescriptor<Graph<TSpec> >::Type TVertexDescriptor;
 	typedef typename Value<TPredecessorMap>::Type TPredVal;
 
@@ -241,7 +241,7 @@ topological_sort(Graph<TSpec> const& g,
 	// Order vertices
 	typedef ::std::pair<unsigned int, TVertexDescriptor> TTimeVertexPair;
 	std::priority_queue<TTimeVertexPair> q;
-	typedef typename Iterator<Graph<TSpec>, VertexIterator<> >::Type TVertexIterator;
+	typedef typename Iterator<Graph<TSpec>, VertexIterator>::Type TVertexIterator;
 	TVertexIterator it(g);
 	for(;!atEnd(it);++it) {
 		q.push(std::make_pair(getProperty(finishingTimeMap, getValue(it)), getValue(it)));
@@ -282,8 +282,8 @@ strongly_connected_components(Graph<TSpec> const& g_source,
 {
 	// Initialization
 	typedef typename VertexDescriptor<Graph<TSpec> >::Type TVertexDescriptor;
-	typedef typename Iterator<Graph<TSpec>, EdgeIterator<> >::Type TEdgeIterator;
-	typedef typename Iterator<Graph<TSpec>, VertexIterator<> >::Type TVertexIterator;
+	typedef typename Iterator<Graph<TSpec>, EdgeIterator>::Type TEdgeIterator;
+	typedef typename Iterator<Graph<TSpec>, VertexIterator>::Type TVertexIterator;
 	typedef typename Value<TComponents>::Type TCompVal;
 	initVertexMap(g_source,components);
 	String<unsigned int> predMap;
@@ -393,7 +393,7 @@ _initialize_single_source(Graph<TSpec> const& g,
 						  TPredecessorMap& predecessor, 
 						  TDistanceMap& distance)
 {
-	typedef typename Iterator<Graph<TSpec>, VertexIterator<> >::Type TVertexIterator;
+	typedef typename Iterator<Graph<TSpec>, VertexIterator>::Type TVertexIterator;
 	typedef typename Value<TPredecessorMap>::Type TPredVal;
 	typedef typename Value<TWeightMap>::Type TDistVal;
 	TPredVal nilPred = getNilPredecessor(g);
@@ -462,8 +462,8 @@ dag_shortest_path(Graph<TSpec> const& g,
 				  TDistanceMap& distance)
 {
 	typedef typename EdgeDescriptor<Graph<TSpec> >::Type TEdgeDescriptor;
-	typedef typename Iterator<Graph<TSpec>, EdgeIterator<> >::Type TEdgeIterator;
-	typedef typename Iterator<Graph<TSpec>, OutEdgeIterator<> >::Type TOutEdgeIterator;
+	typedef typename Iterator<Graph<TSpec>, EdgeIterator>::Type TEdgeIterator;
+	typedef typename Iterator<Graph<TSpec>, OutEdgeIterator>::Type TOutEdgeIterator;
 	typedef typename Iterator<String<TVertexDescriptor> >::Type TStringIterator;
 	
 	// Initialization
@@ -525,8 +525,8 @@ bellman_ford_algorithm(Graph<TSpec> const& g,
 {
 	// Initialization
 	typedef typename EdgeDescriptor<Graph<TSpec> >::Type TEdgeDescriptor;
-	typedef typename Iterator<Graph<TSpec>, VertexIterator<> >::Type TVertexIterator;
-	typedef typename Iterator<Graph<TSpec>, OutEdgeIterator<> >::Type TOutEdgeIterator;
+	typedef typename Iterator<Graph<TSpec>, VertexIterator>::Type TVertexIterator;
+	typedef typename Iterator<Graph<TSpec>, OutEdgeIterator>::Type TOutEdgeIterator;
 	initVertexMap(g,predecessor);
 	initVertexMap(g,distance);
 	_initialize_single_source(g, source, weight, predecessor, distance);
@@ -593,8 +593,8 @@ dijkstra(Graph<TSpec> const& g,
 		 TDistanceMap& distance)
 {
 	typedef typename Value<TDistanceMap>::Type TDistVal;
-	typedef typename Iterator<Graph<TSpec>, VertexIterator<> >::Type TVertexIterator;
-	typedef typename Iterator<Graph<TSpec>, OutEdgeIterator<> >::Type TOutEdgeIterator;
+	typedef typename Iterator<Graph<TSpec>, VertexIterator>::Type TVertexIterator;
+	typedef typename Iterator<Graph<TSpec>, OutEdgeIterator>::Type TOutEdgeIterator;
 	
 	// Initialization
 	initVertexMap(g,predecessor);
@@ -686,8 +686,8 @@ _initialize_all_pairs(Graph<TSpec> const& g,
 						TPredecessor& predecessor)
 {
 	typedef typename VertexDescriptor<Graph<TSpec> >::Type TVertexDescriptor;
-	typedef typename Iterator<Graph<TSpec>, VertexIterator<> >::Type TVertexIterator;
-	typedef typename Iterator<Graph<TSpec>, OutEdgeIterator<> >::Type TOutEdgeIterator;
+	typedef typename Iterator<Graph<TSpec>, VertexIterator>::Type TVertexIterator;
+	typedef typename Iterator<Graph<TSpec>, OutEdgeIterator>::Type TOutEdgeIterator;
 	typedef typename Size<TMatrix>::Type TSize;
 	typedef typename Value<TWeightMap>::Type TWeightVal;
 	typedef typename Value<TPredecessor>::Type TPredVal;
