@@ -5,7 +5,9 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 //////////////////////////////////////////////////////////////////////////////
-// Graph Algorithms
+// Graph - Algorithms
+//////////////////////////////////////////////////////////////////////////////
+
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -35,6 +37,19 @@ getInfinityDistance(EmptyMap)
 	return (getInfinity<unsigned int>() / 2);
 }
 
+inline unsigned int
+getInfinityDistance()
+{
+	// We need to divide by 2 because of addition: infinity + something
+	return (getInfinity<unsigned int>() / 2);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// INTERNAL FUNCTIONS
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+
 template<typename TSpec, typename TVertexDescriptor, typename TWeightMap, typename TPredecessorMap, typename TDistanceMap>
 inline void 
 _initialize_single_source(Graph<TSpec> const& g,
@@ -57,6 +72,8 @@ _initialize_single_source(Graph<TSpec> const& g,
 	assignProperty(distance, source, 0);
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
 template<typename TSpec, typename TWeightMap, typename TPredecessorMap, typename TDistanceMap, typename TVertexDescriptor, typename TEdgeDescriptor>
 inline void 
 _relax(Graph<TSpec> const& g,
@@ -72,6 +89,8 @@ _relax(Graph<TSpec> const& g,
 		assignProperty(predecessor, v, u);
 	}
 }
+
+//////////////////////////////////////////////////////////////////////////////
 
 template<typename TSpec, typename TPredecessorMap, typename TVertexDescriptor>
 inline void
@@ -89,6 +108,8 @@ _print_path(Graph<TSpec> const& g,
 		std::cout << "," << v;
 	}
 }
+
+//////////////////////////////////////////////////////////////////////////////
 
 template<typename TSpec, typename TPredecessor, typename TVertexDescriptor>
 inline void
@@ -110,8 +131,43 @@ _print_all_pairs_shortest_path(Graph<TSpec> const& g,
 }
 
 //////////////////////////////////////////////////////////////////////////////
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+// FUNCTIONS
+//////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+
+
+//////////////////////////////////////////////////////////////////////////////
 // Breadth-first search
 //////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.breadth_first_search:
+..cat:Graph
+..summary:Implements a breadth-first search on a graph.
+..remarks:Breadth-first search computes the distance from source to all reachable
+vertices. It also produces a breath-first tree where each node has a predecessor / parent.
+..signature:breadth_first_search(g, source, predecessor, distance)
+..param.g:In-parameter:A graph.
+...type:Class.Graph
+..param.source:In-parameter:A vertex descriptor.
+...type:Metafunction.VertexDescriptor
+...remarks:The breadth-first search is started from this vertex.
+..param.predecessor:Out-parameter:A property map.
+...remarks:The predecessor map stores implicitly the breadth-first tree.
+..param.distance:Out-parameter:A property map.
+...remarks:The distance map indicates at what depth a vertex was discovered.
+..returns:void.
+..see:Function.depth_first_search
+*/
 template<typename TSpec, typename TVertexDescriptor, typename TPredecessorMap, typename TDistanceMap>
 void
 breadth_first_search(Graph<TSpec> const& g,
@@ -122,13 +178,13 @@ breadth_first_search(Graph<TSpec> const& g,
 	typedef typename Iterator<Graph<TSpec>, EdgeIterator<> >::Type TEdgeIterator;
 	typedef typename Iterator<Graph<TSpec>, VertexIterator<> >::Type TVertexIterator;
 	typedef typename Value<TPredecessorMap>::Type TPredVal;
-	typedef typename Value<TDistanceMap>::Type TWeightVal;
+	typedef typename Value<TDistanceMap>::Type TDistVal;
 
 	// Initialization
 	initVertexMap(g,predecessor);
 	initVertexMap(g,distance);
 	TPredVal nilPred = getNilPredecessor(g);
-	TWeightVal infDist = getInfinityDistance(EmptyMap());
+	TDistVal infDist = getInfinityDistance(distance);
 	
 	String<bool> tokenMap;
 	initVertexMap(g, tokenMap);
@@ -151,9 +207,6 @@ breadth_first_search(Graph<TSpec> const& g,
 		typedef typename Iterator<Graph<TSpec>, OutEdgeIterator<> >::Type TOutEdgeIterator;
 		TOutEdgeIterator itout(g,u);
 		for(;!atEnd(itout);goNext(itout)) {
-			// Never use: targetVertex(g, getValue(itout))
-			// This would call targetVertex on an undirected edge descriptor. What is the target in an undirected edge?
-			// Definition makes sense only for an outedge iterator
 			TVertexDescriptor v = targetVertex(itout);
 			if (getProperty(tokenMap, v) == false) {
 				assignProperty(tokenMap, v, true);
@@ -165,9 +218,13 @@ breadth_first_search(Graph<TSpec> const& g,
 	}
 }
 
+
 //////////////////////////////////////////////////////////////////////////////
 // Depth-first search
 //////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+
 template<typename TSpec, typename TVertexDescriptor, typename TTokenMap, typename TPredecessorMap, typename TDiscoveryTimeMap, typename TFinishingTimeMap, typename TVal>
 void
 _dfs_visit(Graph<TSpec> const& g,
@@ -178,10 +235,11 @@ _dfs_visit(Graph<TSpec> const& g,
 		   TFinishingTimeMap& finish,
 		   TVal& time)
 {
+	typedef typename Iterator<Graph<TSpec>, AdjacencyIterator<> >::Type TAdjacencyIterator;
+
 	assignProperty(tokenMap, u, true);
 	++time;
 	assignProperty(disc, u, time);
-	typedef typename Iterator<Graph<TSpec>, AdjacencyIterator<> >::Type TAdjacencyIterator;
 	TAdjacencyIterator itad(g,u);
 	for(;!atEnd(itad);goNext(itad)) {
 		TVertexDescriptor v = getValue(itad);
@@ -195,15 +253,37 @@ _dfs_visit(Graph<TSpec> const& g,
 }
 
 
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.depth_first_search:
+..cat:Graph
+..summary:Implements a depth-first search on a graph.
+..remarks:In contrast to a breadth-first search the depth-first search is repeated from multiple sources if the graph is not connected.
+Hence, depth-first search produces a depth-first forest. To ensure each vertex ends up in exactly one tree we need not just a distance but a
+discovery and finishing time.
+..signature:depth_first_search(g, predecessor, discovery, finish)
+..param.g:In-parameter:A graph.
+...type:Class.Graph
+..param.predecessor:Out-parameter:A property map.
+...remarks:Predecessor subgraph produced by the depth-first search.
+..param.discovery:Out-parameter:A property map.
+...remarks:The discovery time of a vertex v.
+..param.finish:Out-parameter:A property map.
+...remarks:The time when v's adjacency list has been fully explored.
+..returns:void.
+..see:Function.breadth_first_search
+*/
 template<typename TSpec, typename TPredecessorMap, typename TDiscoveryTimeMap, typename TFinishingTimeMap>
 void
 depth_first_search(Graph<TSpec> const& g,
-					 TPredecessorMap& predecessor, 
-					 TDiscoveryTimeMap& disc,
-					 TFinishingTimeMap& finish)
+				   TPredecessorMap& predecessor,
+				   TDiscoveryTimeMap& disc,
+				   TFinishingTimeMap& finish)
 {
 	typedef typename Iterator<Graph<TSpec>, EdgeIterator<> >::Type TEdgeIterator;
 	typedef typename Iterator<Graph<TSpec>, VertexIterator<> >::Type TVertexIterator;
+	typedef typename VertexDescriptor<Graph<TSpec> >::Type TVertexDescriptor;
 	typedef typename Value<TPredecessorMap>::Type TPredVal;
 
 	// Initialization
@@ -224,7 +304,6 @@ depth_first_search(Graph<TSpec> const& g,
 
 	goBegin(it);
 	for(;!atEnd(it);goNext(it)) {
-		typedef typename VertexDescriptor<Graph<TSpec> >::Type TVertexDescriptor;
 		TVertexDescriptor u = getValue(it);
 		if (getProperty(tokenMap, u) == false) {
 			_dfs_visit(g, u, tokenMap, predecessor, disc, finish, time);
