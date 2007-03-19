@@ -190,6 +190,96 @@ void StronglyConnectedComponents() {
 
 //////////////////////////////////////////////////////////////////////////////
 
+void PrimsAlgorithm() {
+//____________________________________________________________________________
+// Prim's algorithm
+	typedef Graph<Undirected<> > TGraph;
+	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef Size<TGraph>::Type TSize;
+
+	// Number of edges
+	TSize numEdges = 14;
+	// Edges
+	TVertexDescriptor edges[] = {0,1, 0,6, 1,2, 1,6, 2,3, 2,4, 2,8, 3,5, 3,8, 4,6, 4,7, 5,8, 6,7, 7,8};
+	unsigned int weights[] =    {4,   8,   8,   11,  7,   2,   4,   9,   14,  7,   6,   10,  1,   2  };
+	// Vertex names
+	char names[] = {'a', 'b', 'c', 'd', 'i', 'e', 'h', 'g', 'f'};
+
+	//Create the graph
+	TGraph g;
+	addEdges(g,edges, numEdges);
+	String<int> weightMap;
+	initEdgeMap(g, weightMap, weights);
+	String<char> nameMap;
+	initVertexMap(g,nameMap, names);
+	std::cout << g << std::endl;
+
+	// Tree and predecessor map 
+	String<TVertexDescriptor> predMap;
+
+	prims_algorithm(g, 0, weightMap, predMap);
+
+	// Output
+	std::cout << "Minimum Spanning Tree (Prim's algorithm): " << ::std::endl;
+	typedef Iterator<TGraph, VertexIterator>::Type TVertexIterator;
+	TVertexIterator it(g);
+	while(!atEnd(it)) {
+		std::cout << "Path from " << getProperty(nameMap, 0) << " to " << getProperty(nameMap, getValue(it)) << ": ";
+		_print_path(g,predMap,(TVertexDescriptor) 0, getValue(it), nameMap);
+		std::cout << ::std::endl;
+		goNext(it);
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+void KruskalsAlgorithm() {
+//____________________________________________________________________________
+// Kruskal's algorithm
+	typedef Graph<Undirected<> > TGraph;
+	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef Size<TGraph>::Type TSize;
+
+	// Number of edges
+	TSize numEdges = 14;
+	// Edges
+	TVertexDescriptor edges[] = {0,1, 0,6, 1,2, 1,6, 2,3, 2,4, 2,8, 3,5, 3,8, 4,6, 4,7, 5,8, 6,7, 7,8};
+	unsigned int weights[] =    {4,   8,   8,   11,  7,   2,   4,   9,   14,  7,   6,   10,  1,   2  };
+	// Vertex names
+	char names[] = {'a', 'b', 'c', 'd', 'i', 'e', 'h', 'g', 'f'};
+
+	//Create the graph
+	TGraph g;
+	addEdges(g,edges, numEdges);
+	String<int> weightMap;
+	initEdgeMap(g, weightMap, weights);
+	String<char> nameMap;
+	initVertexMap(g,nameMap, names);
+	std::cout << g << std::endl;
+
+	// Tree edges
+	String<TVertexDescriptor> treeEdges;
+	kruskals_algorithm(g, 0, weightMap, treeEdges);
+
+	
+	// Output
+	std::cout << "Minimum Spanning Tree (Kruskal's algorithm): " << ::std::endl;
+	std::cout << "Tree Edges: ";
+	typedef Iterator<String<TVertexDescriptor> >::Type TStrIterator;
+	TStrIterator it = begin(treeEdges);
+	while(!atEnd(it)) {
+		std::cout << "(" << getProperty(nameMap,getValue(it)) << ",";
+		goNext(it);
+		std::cout << getProperty(nameMap,getValue(it)) << "), ";
+		goNext(it);
+	}
+	std::cout << std::endl;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 void DagShortestPath() {
 //____________________________________________________________________________
 // DAG-Shortest Paths
@@ -603,6 +693,15 @@ int main ()
 	std::cout << "===================================" << ::std::endl;
 	std::cout << "----Strongly-Connected-Components--" << ::std::endl;
 	StronglyConnectedComponents();
+
+	// Minimum Spanning Trees
+	std::cout << "===================================" << ::std::endl;
+	std::cout << "----Prim's algorithm---------------" << ::std::endl;
+	PrimsAlgorithm();
+	std::cout << "===================================" << ::std::endl;
+	std::cout << "----Kruskal's algorithm---------------" << ::std::endl;
+	KruskalsAlgorithm();
+
 
 	// Single-Source shortest paths
 	std::cout << "===================================" << ::std::endl;

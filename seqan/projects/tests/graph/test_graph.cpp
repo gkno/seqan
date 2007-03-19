@@ -2640,6 +2640,88 @@ void Test_StronglyConnectedComponents() {
 	SEQAN_TASSERT(getValue(component, 7) == 0)
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
+void Test_PrimsAlgorithm() {
+//____________________________________________________________________________
+// Prim's algorithm
+	typedef Graph<Undirected<> > TGraph;
+	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef Size<TGraph>::Type TSize;
+
+	//Number of edges
+	TSize numEdges = 14;
+	//Source, Target, Source, Target, Source, ...
+	TVertexDescriptor edges[] = {0,1, 0,6, 1,2, 1,6, 2,3, 2,4, 2,8, 3,5, 3,8, 4,6, 4,7, 5,8, 6,7, 7,8};
+	unsigned int weights[] =    {4,   8,   8,   11,  7,   2,   4,   9,   14,  7,   6,   10,  1,   2  };
+
+	//Create the graph
+	TGraph g;
+	addEdges(g,edges, numEdges);
+	String<int> weightMap;
+	initEdgeMap(g, weightMap, weights);
+
+	// Tree and predecessor map 
+	String<TVertexDescriptor> predMap;
+
+	prims_algorithm(g, 0, weightMap, predMap);
+
+	SEQAN_TASSERT(getProperty(predMap, 0) == getNilPredecessor(g))
+	SEQAN_TASSERT(getProperty(predMap, 1) == 0)
+	SEQAN_TASSERT(getProperty(predMap, 2) == 1)
+	SEQAN_TASSERT(getProperty(predMap, 3) == 2)
+	SEQAN_TASSERT(getProperty(predMap, 4) == 2)
+	SEQAN_TASSERT(getProperty(predMap, 5) == 3)
+	SEQAN_TASSERT(getProperty(predMap, 6) == 7)
+	SEQAN_TASSERT(getProperty(predMap, 7) == 8)
+	SEQAN_TASSERT(getProperty(predMap, 8) == 2)
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+void Test_KruskalsAlgorithm() {
+//____________________________________________________________________________
+// Kruskal's algorithm
+	typedef Graph<Undirected<> > TGraph;
+	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef Size<TGraph>::Type TSize;
+
+	//Number of edges
+	TSize numEdges = 14;
+	//Source, Target, Source, Target, Source, ...
+	TVertexDescriptor edges[] = {0,1, 0,6, 1,2, 1,6, 2,3, 2,4, 2,8, 3,5, 3,8, 4,6, 4,7, 5,8, 6,7, 7,8};
+	unsigned int weights[] =    {4,   8,   8,   11,  7,   2,   4,   9,   14,  7,   6,   10,  1,   2  };
+
+	//Create the graph
+	TGraph g;
+	addEdges(g,edges, numEdges);
+	String<int> weightMap;
+	initEdgeMap(g, weightMap, weights);
+
+	// Tree edges
+	String<TVertexDescriptor> treeEdges;
+	kruskals_algorithm(g, 0, weightMap, treeEdges);
+
+	SEQAN_TASSERT(getValue(treeEdges, 0) == 6)
+	SEQAN_TASSERT(getValue(treeEdges, 1) == 7)
+	SEQAN_TASSERT(getValue(treeEdges, 2) == 2)
+	SEQAN_TASSERT(getValue(treeEdges, 3) == 4)
+	SEQAN_TASSERT(getValue(treeEdges, 4) == 7)
+	SEQAN_TASSERT(getValue(treeEdges, 5) == 8)
+	SEQAN_TASSERT(getValue(treeEdges, 6) == 0)
+	SEQAN_TASSERT(getValue(treeEdges, 7) == 1)
+	SEQAN_TASSERT(getValue(treeEdges, 8) == 2)
+	SEQAN_TASSERT(getValue(treeEdges, 9) == 8)
+	SEQAN_TASSERT(getValue(treeEdges, 10) == 2)
+	SEQAN_TASSERT(getValue(treeEdges, 11) == 3)
+	SEQAN_TASSERT(getValue(treeEdges, 12) == 0)
+	SEQAN_TASSERT(getValue(treeEdges, 13) == 6)
+	SEQAN_TASSERT(getValue(treeEdges, 14) == 3)
+	SEQAN_TASSERT(getValue(treeEdges, 15) == 5)
+}
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -2989,6 +3071,10 @@ void Test_Algorithms() {
 	Test_TopologicalSort();
 	Test_StronglyConnectedComponents();
 
+	// Minimum Spanning Trees
+	Test_PrimsAlgorithm();
+	Test_KruskalsAlgorithm();
+
 	// Single-Source shortest paths
 	Test_DagShortestPath();
 	Test_BellmanFord();
@@ -3001,7 +3087,6 @@ void Test_Algorithms() {
 
 
 	//Todo
-	//Spanning Trees
 	//Maximum Flow
 	//Matching
 }

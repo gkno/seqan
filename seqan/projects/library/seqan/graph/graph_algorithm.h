@@ -70,6 +70,7 @@ breadth_first_search(Graph<TSpec> const& g,
 					 TPredecessorMap& predecessor, 
 					 TDistanceMap& distance)
 {
+	SEQAN_CHECKPOINT
 	typedef typename Iterator<Graph<TSpec>, EdgeIterator>::Type TEdgeIterator;
 	typedef typename Iterator<Graph<TSpec>, VertexIterator>::Type TVertexIterator;
 	typedef typename Value<TPredecessorMap>::Type TPredVal;
@@ -130,6 +131,8 @@ _dfs_visit(Graph<TSpec> const& g,
 		   TFinishingTimeMap& finish,
 		   TVal& time)
 {
+	SEQAN_CHECKPOINT
+
 	typedef typename Iterator<Graph<TSpec>, AdjacencyIterator>::Type TAdjacencyIterator;
 
 	assignProperty(tokenMap, u, true);
@@ -176,6 +179,8 @@ depth_first_search(Graph<TSpec> const& g,
 				   TDiscoveryTimeMap& disc,
 				   TFinishingTimeMap& finish)
 {
+	SEQAN_CHECKPOINT
+
 	typedef typename Iterator<Graph<TSpec>, EdgeIterator>::Type TEdgeIterator;
 	typedef typename Iterator<Graph<TSpec>, VertexIterator>::Type TVertexIterator;
 	typedef typename VertexDescriptor<Graph<TSpec> >::Type TVertexDescriptor;
@@ -230,6 +235,8 @@ void
 topological_sort(Graph<TSpec> const& g,
 				 String<TVertexDescriptor>& topSort)
 {
+	SEQAN_CHECKPOINT
+
 	// Initialization
 	String<unsigned int> predMap;
 	String<unsigned int> discoveryTimeMap;
@@ -280,6 +287,8 @@ void
 strongly_connected_components(Graph<TSpec> const& g_source,
 							  TComponents& components)
 {
+	SEQAN_CHECKPOINT
+
 	// Initialization
 	typedef typename VertexDescriptor<Graph<TSpec> >::Type TVertexDescriptor;
 	typedef typename Iterator<Graph<TSpec>, EdgeIterator>::Type TEdgeIterator;
@@ -341,13 +350,175 @@ strongly_connected_components(Graph<TSpec> const& g_source,
 }
 
 
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+// Minimum Spanning Trees
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 
 
+//////////////////////////////////////////////////////////////////////////////
+// Prim's algorithm
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.prims_algorithm:
+..cat:Graph
+..summary:Computes a minimum spanning tree on a graph.
+..signature:prims_algorithm(g, source, weight, predecessor)
+..param.g:In-parameter:A graph.
+...type:Class.Graph
+..param.source:In-parameter:A source vertex.
+...type:Metafunction.VertexDescriptor
+..param.weight:In-parameter:Edge weights.
+..param.predecessor:Out-parameter:A property map.
+...remarks:A property map that represents predecessor relationships among vertices. It determines a minimum spanning tree.
+..returns:void.
+..see:Function.kruskals_algorithm
+*/
+template<typename TSpec, typename TVertexDescriptor, typename TWeightMap, typename TPredecessorMap>
+void
+prims_algorithm(Graph<TSpec> const& g,
+				TVertexDescriptor const source,
+				TWeightMap const& weight,
+				TPredecessorMap& predecessor)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<TSpec> TGraph;
+	typedef typename Iterator<Graph<TSpec>, VertexIterator>::Type TVertexIterator;
+	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
+	typedef typename Value<TPredecessorMap>::Type TPred;
+	typedef typename Value<TWeightMap>::Type TWeight;
+
+	typedef ::std::pair<TWeight, TVertexDescriptor> TWeightVertexPair;
+	std::priority_queue<TWeightVertexPair, std::vector<TWeightVertexPair>, std::greater<TWeightVertexPair> > q;
+	
+	// Initialization
+	String<bool> tokenMap;
+	String<TWeight> key;
+	TPred nilPred = getNilPredecessor(g);
+	TWeight infWeight = getInfinityDistance(weight);
+	initVertexMap(g,predecessor);
+	initVertexMap(g,tokenMap);
+	initVertexMap(g,key);
+
+	TVertexIterator it(g);
+	while(!atEnd(it)) {
+		TVertexDescriptor u = getValue(it);
+		if (u == source) q.push(std::make_pair(0, u));
+		assignProperty(predecessor, u, nilPred);
+		assignProperty(key, u, infWeight);
+		assignProperty(tokenMap, u, false);
+		goNext(it);
+	}
+
+	assignProperty(key, source, 0);
+	while(!q.empty()) {
+		TVertexDescriptor u = q.top().second;
+		q.pop();
+		if (getProperty(tokenMap, u)) continue;
+		assignProperty(tokenMap, u, true);
+		TOutEdgeIterator itOut(g,u);
+		while(!atEnd(itOut)) {
+			TVertexDescriptor v = targetVertex(itOut);
+			TWeight w = getProperty(weight, getValue(itOut));
+			if ((!getProperty(tokenMap, v)) &&
+				(w < getProperty(key, v))) {
+					assignProperty(predecessor, v, u);
+					assignProperty(key, v, w);
+					q.push(std::make_pair(w, v));
+			}
+			goNext(itOut);
+		}
+	}
+}
 
 
+//////////////////////////////////////////////////////////////////////////////
+// Kruskal's algorithm
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.kruskals_algorithm:
+..cat:Graph
+..summary:Computes a minimum spanning tree on a graph.
+..signature:kruskals_algorithm(g, source, weight, edges)
+..param.g:In-parameter:A graph.
+...type:Class.Graph
+..param.source:In-parameter:A source vertex.
+...type:Metafunction.VertexDescriptor
+..param.weight:In-parameter:Edge weights.
+..param.edges:Out-parameter:Array of vertex descriptors.
+...remarks:Array or string where two consecutive entries are an edge.
+..returns:void.
+..see:Function.prims_algorithm
+*/
+template<typename TSpec, typename TVertexDescriptor, typename TWeightMap, typename TEdges>
+void
+kruskals_algorithm(Graph<TSpec> const& g,
+				   TVertexDescriptor const source,
+				   TWeightMap const& weight,
+				   TEdges& edges)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<TSpec> TGraph;
+	typedef typename Iterator<Graph<TSpec>, VertexIterator>::Type TVertexIterator;
+	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
+	typedef typename Value<TWeightMap>::Type TWeight;
+
+	typedef ::std::pair<TWeight, std::pair<TVertexDescriptor, TVertexDescriptor> > TWeightEdgePair;
+	std::priority_queue<TWeightEdgePair, std::vector<TWeightEdgePair>, std::greater<TWeightEdgePair> > q;
 
 
+	resize(edges, 2 * (numVertices(g) - 1));
+	String<String<TVertexDescriptor> > set;
+	String<TVertexDescriptor> id;
+	initVertexMap(g, set);
+	initVertexMap(g, id);
+	
+	// Make the sets
+	TVertexIterator it(g);
+	while(!atEnd(it)) {
+		TVertexDescriptor v = getValue(it);
+		appendValue(property(set, v), v);
+		assignProperty(id, v, v);
+		goNext(it);
+	}
 
+	// Sort the edges
+	TEdgeIterator itE(g);
+	while(!atEnd(itE)) {
+		TVertexDescriptor x = sourceVertex(itE);
+		TVertexDescriptor y = targetVertex(itE);
+		TWeight w = getProperty(weight, getValue(itE));
+		q.push(std::make_pair(w, std::make_pair(x,y)));
+		goNext(itE);
+	}
+
+	// Process each edge
+	unsigned int index = 0;
+	while(!q.empty()) {
+		TVertexDescriptor x = q.top().second.first;
+		TVertexDescriptor y = q.top().second.second;
+		q.pop();
+		if (getProperty(id, x) != getProperty(id,y)) {
+			assignValue(edges, index, x);
+			assignValue(edges, index+1, y);
+			index = index + 2;
+			typedef typename Iterator<String<TVertexDescriptor> >::Type TStrIterator;
+			TStrIterator strIt = begin(property(set,getProperty(id, y)));
+			for(;!atEnd(strIt);goNext(strIt)) {
+				TVertexDescriptor owner = getProperty(id, x);
+				TVertexDescriptor setMember = getValue(strIt);
+				appendValue(property(set, owner), setMember);
+				assignProperty(id, setMember, owner);
+			}
+		
+		}
+	}
+}
 
 
 
@@ -363,6 +534,26 @@ strongly_connected_components(Graph<TSpec> const& g_source,
 //////////////////////////////////////////////////////////////////////////////
 // INTERNAL FUNCTIONS
 //////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TSpec, typename TPredecessorMap, typename TVertexDescriptor, typename TNameMap>
+inline void
+_print_path(Graph<TSpec> const& g,
+			TPredecessorMap const& predecessor,
+			TVertexDescriptor const source,
+			TVertexDescriptor const v,
+			TNameMap const& nameMap)
+{
+	if (source == v) {
+		std::cout << getProperty(nameMap, source);
+	} else if (getProperty(predecessor, v) == getNilPredecessor(g)) {
+		std::cout << "No path from " << getProperty(nameMap, source) << " to " << getProperty(nameMap, v) << " exists.";
+	} else {
+		_print_path(g,predecessor, source, getProperty(predecessor, v), nameMap);
+		std::cout << "," << getProperty(nameMap, v);
+	}
+}
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -461,6 +652,7 @@ dag_shortest_path(Graph<TSpec> const& g,
 				  TPredecessorMap& predecessor,
 				  TDistanceMap& distance)
 {
+	SEQAN_CHECKPOINT
 	typedef typename EdgeDescriptor<Graph<TSpec> >::Type TEdgeDescriptor;
 	typedef typename Iterator<Graph<TSpec>, EdgeIterator>::Type TEdgeIterator;
 	typedef typename Iterator<Graph<TSpec>, OutEdgeIterator>::Type TOutEdgeIterator;
@@ -523,6 +715,7 @@ bellman_ford_algorithm(Graph<TSpec> const& g,
 					   TPredecessorMap& predecessor, 
 					   TDistanceMap& distance)
 {
+	SEQAN_CHECKPOINT
 	// Initialization
 	typedef typename EdgeDescriptor<Graph<TSpec> >::Type TEdgeDescriptor;
 	typedef typename Iterator<Graph<TSpec>, VertexIterator>::Type TVertexIterator;
@@ -592,6 +785,7 @@ dijkstra(Graph<TSpec> const& g,
 		 TPredecessorMap& predecessor, 
 		 TDistanceMap& distance)
 {
+	SEQAN_CHECKPOINT
 	typedef typename Value<TDistanceMap>::Type TDistVal;
 	typedef typename Iterator<Graph<TSpec>, VertexIterator>::Type TVertexIterator;
 	typedef typename Iterator<Graph<TSpec>, OutEdgeIterator>::Type TOutEdgeIterator;
@@ -791,6 +985,7 @@ all_pairs_shortest_path(Graph<TSpec> const& g,
 						TMatrix& distMatrix,
 						TPredecessor& predecessor)
 {
+	SEQAN_CHECKPOINT
 	typedef typename Size<TMatrix>::Type TSize;
 	typedef typename Value<TWeightMap>::Type TWeightVal;
 	TWeightVal infWeight = getInfinityDistance(weight);
@@ -839,6 +1034,7 @@ floyd_warshall(Graph<TSpec> const& g,
 			   TMatrix& distMatrix,
 			   TPredecessor& predecessor)
 {
+	SEQAN_CHECKPOINT
 	typedef typename Size<TMatrix>::Type TSize;
 	typedef typename Value<TMatrix>::Type TMatrixVal;
 
@@ -888,6 +1084,7 @@ void
 transitive_closure(Graph<TSpec> const& g,
 				   TMatrix& closure)
 {
+	SEQAN_CHECKPOINT
 	typedef typename Size<TMatrix>::Type TSize;
 	typedef typename Value<TMatrix>::Type TMatrixVal;
 
