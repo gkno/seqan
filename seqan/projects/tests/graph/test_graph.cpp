@@ -3192,6 +3192,7 @@ int main()
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_automaton.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_wordgraph.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_tree.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_align.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_iterator.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_iterator_vertex.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_iterator_outedge.h");
