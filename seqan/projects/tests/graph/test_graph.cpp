@@ -2659,7 +2659,7 @@ void Test_PrimsAlgorithm() {
 	//Create the graph
 	TGraph g;
 	addEdges(g,edges, numEdges);
-	String<int> weightMap;
+	String<unsigned int> weightMap;
 	initEdgeMap(g, weightMap, weights);
 
 	// Tree and predecessor map 
@@ -2698,7 +2698,7 @@ void Test_KruskalsAlgorithm() {
 	//Create the graph
 	TGraph g;
 	addEdges(g,edges, numEdges);
-	String<int> weightMap;
+	String<unsigned int> weightMap;
 	initEdgeMap(g, weightMap, weights);
 
 	// Tree edges
@@ -3032,7 +3032,7 @@ void Test_TransitiveClosure() {
 	TSize numEdges = 5;
 	//Source, Target, Source, Target, Source, ...
 	TVertexDescriptor edges[] = {3,0, 1,2, 2,1, 1,3, 3,2};
-	
+		
 	//Create the graph
 	Graph<> g;
 	addEdges(g,edges, numEdges);
@@ -3062,6 +3062,40 @@ void Test_TransitiveClosure() {
 
 //////////////////////////////////////////////////////////////////////////////
 
+void Test_FordFulkerson() {
+//____________________________________________________________________________
+// Ford-Fulkerson
+	typedef Graph<Directed<> > TGraph;
+	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
+	typedef Size<TGraph>::Type TSize;
+
+	//Number of edges
+	TSize numEdges = 10;
+	//Source, Target, Source, Target, Source, ...
+	TVertexDescriptor edges[] = {0,1, 0,4, 1,2, 1,4, 2,3, 2,4, 4,1, 4,5, 5,2, 5,3};
+	unsigned int capacity[] =    {16,  13,  12,  10,  20,  9,   4,   14,  7,   4};
+
+	//Create the graph
+	Graph<> g;
+	addEdges(g,edges, numEdges);
+	String<unsigned int> capMap;	
+	initEdgeMap(g,capMap, capacity);
+
+	// Out-parameter
+	String<unsigned int> flow;	
+	unsigned int valF = ford_fulkerson(g, 0, 3, capMap, flow);
+	
+	SEQAN_TASSERT(valF == 23)
+	TEdgeIterator itEdge(g);
+	for(;!atEnd(itEdge);goNext(itEdge)) {
+		SEQAN_TASSERT(getProperty(flow, getValue(itEdge)) <= getProperty(capMap, getValue(itEdge)))
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 void Test_Algorithms() {
 //____________________________________________________________________________
 // Graph Algorithms
@@ -3085,9 +3119,10 @@ void Test_Algorithms() {
 	Test_FloydWarshall();
 	Test_TransitiveClosure();
 
+	//Maximum Flow
+	Test_FordFulkerson();
 
 	//Todo
-	//Maximum Flow
 	//Matching
 }
 

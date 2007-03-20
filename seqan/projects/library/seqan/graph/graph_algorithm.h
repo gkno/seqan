@@ -1108,6 +1108,177 @@ transitive_closure(Graph<TSpec> const& g,
 	}
 }
 
+
+
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+// Maximum Flow
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////////
+// INTERNAL FUNCTIONS
+//////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////////
+template<typename TSpec, typename TCapMap, typename TFlowMap, typename TResidualGraph>
+void
+_build_residual_graph(Graph<TSpec> const& g,
+					  TCapMap const& capacity,
+					  TFlowMap const& flow,
+					  TResidualGraph& rG)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<TSpec> TGraph;
+	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
+	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
+	typedef typename Value<TFlowMap>::Type TFlow;
+	typedef typename Value<TCapMap>::Type TCap;
+
+	clear(rG);
+	TVertexIterator itV(g);
+	for(;!atEnd(itV);goNext(itV)) {
+		_createVertices(rG, getValue(itV));
+	}
+
+	TEdgeIterator itE(g);
+	for(;!atEnd(itE);goNext(itE)) {
+		typedef typename EdgeDescriptor<TResidualGraph>::Type TEdgeDescriptor;
+		TFlow f = getProperty(flow, getValue(itE));
+		TCap cap = getProperty(capacity, getValue(itE));
+		if (f > 0) {
+			TEdgeDescriptor e_rG = findEdge(rG, targetVertex(itE), sourceVertex(itE));
+			if (e_rG == 0) addEdge(rG, targetVertex(itE), sourceVertex(itE), f);
+			else cargo(e_rG) += f;
+		}
+		if (f < cap) {
+			TEdgeDescriptor e_rG = findEdge(rG, sourceVertex(itE), targetVertex(itE));
+			if (e_rG == 0) addEdge(rG, sourceVertex(itE), targetVertex(itE), cap - f);
+			else cargo(e_rG) += cap - f;			
+		}
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TSpec, typename TPredecessorMap, typename TVertexDescriptor>
+inline unsigned int
+_get_minimum_aug(Graph<TSpec> const& rG,
+				 TPredecessorMap& predecessor,
+				 TVertexDescriptor const source,
+				 TVertexDescriptor sink)
+{
+	typedef unsigned int TFlow;
+	typedef typename Iterator<String<TVertexDescriptor> >::Type TIterator;
+	
+	// Build secondary predecessor map just containing the path
+	TVertexDescriptor nilPred = getNilPredecessor(rG);
+	String<TVertexDescriptor> predMap;
+	initVertexMap(rG, predMap);
+	TIterator it = begin(predMap);
+	for(;!atEnd(it);goNext(it)) {
+		*it = nilPred;
+	}
+
+	// Find minimum flow
+	TVertexDescriptor pred = getProperty(predecessor, sink);
+	TFlow f = getCargo(findEdge(rG, pred,sink));
+	assignProperty(predMap, sink, pred);
+	while(pred != source) {
+		sink = pred;
+		pred = getProperty(predecessor, sink);
+		TFlow f2 = getCargo(findEdge(rG, pred,sink));
+		assignProperty(predMap, sink, pred);
+		if (f2 < f) f = f2;
+	}
+
+	// Just return the augmenting path
+	predecessor = predMap;
+	return f;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// Ford Fulkerson
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.ford_fulkerson:
+..cat:Graph
+..summary:Computes a maximum flow in a directed graph.
+..signature:ford_fulkerson(g, source, sink, capacity, flow)
+..param.g:In-parameter:A graph.
+...type:Spec.Directed graph
+..param.source:In-parameter:A source vertex.
+...type:Metafunction.VertexDescriptor
+..param.sink:In-parameter:A sink vertex.
+...type:Metafunction.VertexDescriptor
+..param.capacity:In-parameter:A property map of edge capacities.
+..param.flow:Out-parameter:A property map with the flow of each edge.
+..returns:The value of the flow.
+*/
+template<typename TSpec, typename TVertexDescriptor, typename TCapMap, typename TFlowMap>
+typename Value<TFlowMap>::Type
+ford_fulkerson(Graph<TSpec> const& g,
+			   TVertexDescriptor const source,
+			   TVertexDescriptor const sink,
+			   TCapMap const& capacity,
+			   TFlowMap& flow)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<TSpec> TGraph;
+	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
+	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
+	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
+	typedef typename Value<TFlowMap>::Type TFlow;
+
+	// Initialization
+	TVertexDescriptor nilPred = getNilPredecessor(g);
+	initEdgeMap(g,flow);
+	TEdgeIterator itE(g);
+	for(;!atEnd(itE);goNext(itE)) {
+		assignProperty(flow, getValue(itE), 0);
+	}
+
+	// Build the residual graph
+	Graph<Directed<TFlow> > rG;
+	_build_residual_graph(g,capacity, flow, rG);
+
+		
+	// Determine whether the sink is reachable
+	String<TVertexDescriptor> predMap;
+	String<TVertexDescriptor> distMap;
+	breadth_first_search(rG, source, predMap, distMap);
+	
+	while (getProperty(predMap, sink) != nilPred) {
+		TFlow inc = _get_minimum_aug(rG, predMap, source, sink);
+		TEdgeIterator itEdge(g);
+		for(;!atEnd(itEdge);goNext(itEdge)) {
+			TVertexDescriptor u = sourceVertex(itEdge);
+			TVertexDescriptor v = targetVertex(itEdge);
+			TEdgeDescriptor e = getValue(itEdge);
+			if (getProperty(predMap, v) == u) assignProperty(flow, e, getProperty(flow, e) + inc);
+			if (getProperty(predMap, u) == v) assignProperty(flow, e, getProperty(flow, e) - inc);
+		}
+		// Build the residual graph
+		_build_residual_graph(g,capacity, flow, rG);
+		// Determine whether the sink is reachable
+		clear(predMap);
+		clear(distMap);
+		breadth_first_search(rG, source, predMap, distMap);
+	}
+
+	TFlow valF = 0;
+	TOutEdgeIterator itOutEdge(g, source);
+	for(;!atEnd(itOutEdge);goNext(itOutEdge)) {
+		valF += getProperty(flow, getValue(itOutEdge));
+	}
+	return valF;
+}
+
 }// namespace SEQAN_NAMESPACE_MAIN
 
 #endif //#ifndef SEQAN_HEADER_...

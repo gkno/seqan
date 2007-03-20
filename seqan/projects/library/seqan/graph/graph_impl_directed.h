@@ -840,6 +840,29 @@ write(TFile & target,
 	}
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TCargo, typename TSpec, typename TVertexDescriptor>
+inline typename EdgeDescriptor<Graph<Directed<TCargo, TSpec> > >::Type 
+findEdge(Graph<Directed<TCargo, TSpec> > const& g,
+		 TVertexDescriptor const v,
+		 TVertexDescriptor const w)
+{
+	SEQAN_CHECKPOINT
+	SEQAN_ASSERT(idInUse(g.data_id_managerV, v) == true)
+	SEQAN_ASSERT(idInUse(g.data_id_managerV, w) == true)
+	
+	typedef Graph<Directed<TCargo, TSpec> > TGraph;
+	typedef typename EdgeType<TGraph>::Type TEdgeStump;
+	
+	TEdgeStump* current = getValue(g.data_vertex, v);
+	while(current != (TEdgeStump*) 0) {
+		if ( (TVertexDescriptor) getTarget(current) == w) return current;
+		current = getNextT(current);
+	}
+	return 0;
+}
+
 }// namespace SEQAN_NAMESPACE_MAIN
 
 #endif //#ifndef SEQAN_HEADER_...
