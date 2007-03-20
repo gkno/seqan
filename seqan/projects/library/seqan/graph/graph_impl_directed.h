@@ -795,6 +795,51 @@ getAdjacencyMatrix(Graph<Directed<TCargo, TSpec> > const& g,
 
 //////////////////////////////////////////////////////////////////////////////
 
+
+/**
+.Function.findEdge:
+..cat:Graph
+..summary:Finds an edge. 
+..remarks:In an automaton an edge is uniquely defined by a vertex and a label.
+In all other graphs two adjacent vertices uniquely define an edge.
+If there are multiple edges between two vertices the behaviour is undefined.
+..signature:findEdge(g, v, c)
+..signature:findEdge(g, v, w)
+..param.g:A graph.
+...type:Class.Graph
+..param.v:A vertex descriptor.
+...type:Metafunction.VertexDescriptor
+..param.c:An edge label.
+...type:Metafunction.Alphabet
+..param.w:A vertex descriptor.
+...type:Metafunction.VertexDescriptor
+..returns:An edge descriptor or 0 if edge is not present. 
+Note: In automatons there is always a valid edge descriptor but the target may be nil.
+...type:Metafunction.EdgeDescriptor
+*/
+template<typename TCargo, typename TSpec, typename TVertexDescriptor>
+inline typename EdgeDescriptor<Graph<Directed<TCargo, TSpec> > >::Type 
+findEdge(Graph<Directed<TCargo, TSpec> > const& g,
+		 TVertexDescriptor const v,
+		 TVertexDescriptor const w)
+{
+	SEQAN_CHECKPOINT
+	SEQAN_ASSERT(idInUse(g.data_id_managerV, v) == true)
+	SEQAN_ASSERT(idInUse(g.data_id_managerV, w) == true)
+	
+	typedef Graph<Directed<TCargo, TSpec> > TGraph;
+	typedef typename EdgeType<TGraph>::Type TEdgeStump;
+	
+	TEdgeStump* current = getValue(g.data_vertex, v);
+	while(current != (TEdgeStump*) 0) {
+		if ( (TVertexDescriptor) getTarget(current) == w) return current;
+		current = getNextT(current);
+	}
+	return 0;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 template <typename TFile, typename TCargo, typename TSpec, typename TIDString>
 inline void
 write(TFile & target,
@@ -838,29 +883,6 @@ write(TFile & target,
 			current=getNextT(current);
 		}
 	}
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TCargo, typename TSpec, typename TVertexDescriptor>
-inline typename EdgeDescriptor<Graph<Directed<TCargo, TSpec> > >::Type 
-findEdge(Graph<Directed<TCargo, TSpec> > const& g,
-		 TVertexDescriptor const v,
-		 TVertexDescriptor const w)
-{
-	SEQAN_CHECKPOINT
-	SEQAN_ASSERT(idInUse(g.data_id_managerV, v) == true)
-	SEQAN_ASSERT(idInUse(g.data_id_managerV, w) == true)
-	
-	typedef Graph<Directed<TCargo, TSpec> > TGraph;
-	typedef typename EdgeType<TGraph>::Type TEdgeStump;
-	
-	TEdgeStump* current = getValue(g.data_vertex, v);
-	while(current != (TEdgeStump*) 0) {
-		if ( (TVertexDescriptor) getTarget(current) == w) return current;
-		current = getNextT(current);
-	}
-	return 0;
 }
 
 }// namespace SEQAN_NAMESPACE_MAIN

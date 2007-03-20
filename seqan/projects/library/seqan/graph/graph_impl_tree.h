@@ -478,6 +478,37 @@ getAdjacencyMatrix(Graph<Tree<TCargo, TSpec> > const& g,
 
 //////////////////////////////////////////////////////////////////////////////
 
+template<typename TCargo, typename TSpec, typename TVertexDescriptor>
+inline typename EdgeDescriptor<Graph<Tree<TCargo, TSpec> > >::Type 
+findEdge(Graph<Tree<TCargo, TSpec> >& g,
+		 TVertexDescriptor const v,
+		 TVertexDescriptor const w)
+{
+	SEQAN_CHECKPOINT
+	SEQAN_ASSERT(idInUse(g.data_id_managerV, v) == true)
+	SEQAN_ASSERT(idInUse(g.data_id_managerV, w) == true)
+	
+	typedef Graph<Tree<TCargo, TSpec> > TGraph;
+	typedef typename EdgeType<TGraph>::Type TEdgeStump;
+
+	if (getValue(g.data_parent, w) == v) {
+		TEdgeStump* current = getValue(g.data_vertex, v);
+		while((TEdgeStump*) current != 0) {
+			if (getTarget(current) == w) return current;
+			current = getNextT(current);
+		}
+	} else if (getValue(g.data_parent, v) == w) {
+		TEdgeStump* current = getValue(g.data_vertex, w);
+		while((TEdgeStump*) current != 0) {
+			if (getTarget(current) == v) return current;
+			current = getNextT(current);
+		}
+	}
+	return 0;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 template <typename TFile, typename TCargo, typename TSpec, typename TIDString>
 inline void
 write(TFile & target,
@@ -590,39 +621,6 @@ isLeaf(Graph<Tree<TCargo, TSpec> > const& g,
 	typedef Graph<Tree<TCargo, TSpec> > TGraph;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
 	return (value(g.data_vertex, v) ==  (TEdgeStump*) 0);
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TCargo, typename TSpec, typename TVertexDescriptor>
-inline typename EdgeDescriptor<Graph<Tree<TCargo, TSpec> > >::Type 
-findEdge(Graph<Tree<TCargo, TSpec> >& g,
-		 TVertexDescriptor const v,
-		 TVertexDescriptor const w)
-{
-	SEQAN_CHECKPOINT
-	SEQAN_ASSERT(idInUse(g.data_id_managerV, v) == true)
-	SEQAN_ASSERT(idInUse(g.data_id_managerV, w) == true)
-	
-	typedef Graph<Tree<TCargo, TSpec> > TGraph;
-	typedef typename EdgeType<TGraph>::Type TEdgeStump;
-
-	if (getValue(g.data_parent, w) == v) {
-		TEdgeStump* current = getValue(g.data_vertex, v);
-		while((TEdgeStump*) current != 0) {
-			if (getTarget(current) == w) return current;
-			current = getNextT(current);
-		}
-	} else if (getValue(g.data_parent, v) == w) {
-		TEdgeStump* current = getValue(g.data_vertex, w);
-		while((TEdgeStump*) current != 0) {
-			if (getTarget(current) == v) return current;
-			current = getNextT(current);
-		}
-	}
-	// We should never reach this point
-	SEQAN_ASSERT(false)
-	return 0;
 }
 
 //////////////////////////////////////////////////////////////////////////////

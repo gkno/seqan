@@ -547,6 +547,40 @@ getAdjacencyMatrix(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
 
 //////////////////////////////////////////////////////////////////////////////
 
+template<typename TAlphabet, typename TCargo, typename TSpec, typename TVertexDescriptor, typename TLabel>
+inline typename EdgeDescriptor<Graph<Automaton<TAlphabet, TCargo, TSpec> > >::Type 
+findEdge(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
+		 TVertexDescriptor const v,
+		 TLabel const c)
+{
+	SEQAN_CHECKPOINT
+	SEQAN_ASSERT(idInUse(g.data_id_managerV, v) == true)
+	
+	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+
+	TAlphabet label(c);
+	return &g.data_vertex[v].data_edge[(TSize) label];
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TAlphabet, typename TCargo, typename TSpec, typename TVertexDescriptor, typename TLabel>
+inline typename EdgeDescriptor<Graph<Automaton<TAlphabet, TCargo, TSpec> > >::Type 
+findEdge(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
+		 TVertexDescriptor const v,
+		 TLabel const c)
+{
+	SEQAN_CHECKPOINT
+	SEQAN_ASSERT(idInUse(g.data_id_managerV, v) == true)
+	
+	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
+	TGraph* graph = const_cast<TGraph*>(&g);
+	return findEdge(*graph, v, c);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 template<typename TFile, typename TAlphabet, typename TCargo, typename TSpec, typename TIDString>
 inline void
 write(TFile & target,
@@ -715,62 +749,6 @@ isRoot(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
 {
 	SEQAN_CHECKPOINT
 	return ( (TVertexDescriptor) g.data_root == v);
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-/**
-.Function.findEdge:
-..cat:Spec.Automaton
-..cat:Spec.Tree
-..summary:Finds an edge. 
-In an automaton an edge is uniquely defined by a vertex and a label.
-In a tree two adjacent vertices uniquely define an edge.
-..signature:findEdge(g, v, c)
-..signature:findEdge(g, v, w)
-..param.g:An automaton or a tree.
-...type:Spec.Automaton
-...type:Spec.Tree
-..param.v:A vertex descriptor.
-...type:Metafunction.VertexDescriptor
-..param.c:An edge label.
-...type:Metafunction.Alphabet
-..param.w:A vertex descriptor.
-...type:Metafunction.VertexDescriptor
-..returns:An edge descriptor
-...type:Metafunction.EdgeDescriptor
-*/
-
-template<typename TAlphabet, typename TCargo, typename TSpec, typename TVertexDescriptor, typename TLabel>
-inline typename EdgeDescriptor<Graph<Automaton<TAlphabet, TCargo, TSpec> > >::Type 
-findEdge(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
-		 TVertexDescriptor const v,
-		 TLabel const c)
-{
-	SEQAN_CHECKPOINT
-	SEQAN_ASSERT(idInUse(g.data_id_managerV, v) == true)
-	
-	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
-	typedef typename Size<TGraph>::Type TSize;
-
-	TAlphabet label(c);
-	return &g.data_vertex[v].data_edge[(TSize) label];
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TAlphabet, typename TCargo, typename TSpec, typename TVertexDescriptor, typename TLabel>
-inline typename EdgeDescriptor<Graph<Automaton<TAlphabet, TCargo, TSpec> > >::Type 
-findEdge(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
-		 TVertexDescriptor const v,
-		 TLabel const c)
-{
-	SEQAN_CHECKPOINT
-	SEQAN_ASSERT(idInUse(g.data_id_managerV, v) == true)
-	
-	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
-	TGraph* graph = const_cast<TGraph*>(&g);
-	return findEdge(*graph, v, c);
 }
 
 
