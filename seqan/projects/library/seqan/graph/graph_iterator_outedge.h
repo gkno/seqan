@@ -4,26 +4,24 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 //////////////////////////////////////////////////////////////////////////////
-// Graph InternalOutEdgeIterator
+// Graph OutEdgeIterator
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
 
 /**
 .Spec.Out-Edge Iterator:
-..cat:Iterators
 ..cat:Graph
 ..summary:Out-edge iterator for @Class.Graph@.
-..signature:Iter<TGraph, GraphIterator<InternalOutEdgeIterator<TSpec> > >
+..signature:Iterator<TGraph, OutEdgeIterator>
 ..param.TGraph:A graph.
 ...type:Class.Graph
-..param.TSpec:The specializing type.
-...metafunction:Metafunction.Spec
-...default:$Default$, see @Tag.Default@.
 ..general:Class.Iter
 ..see:Spec.Vertex Iterator
 ..see:Spec.Edge Iterator
 ..see:Spec.Adjacency Iterator
+..see:Spec.Bfs Iterator
+..see:Spec.Dfs Preorder Iterator
 */
 
 
@@ -964,6 +962,19 @@ sourceVertex(Iter<Graph<Automaton<TAlphabet, TCargo, TGraphSpec> >, GraphIterato
 }
 
 //////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.label:
+..cat:Spec.Automaton
+..summary:Returns the label of the out-edge this iterator points to.
+..signature:label(it)
+..param.it:An out-edge iterator.
+...type:Spec.Out-Edge Iterator
+...type:Spec.Edge Iterator
+..returns:A label.
+...type:Metafunction.Alphabet.
+..remarks:The label function only works for out-edge iterators on automatons.
+*/
 
 template<typename TAlphabet, typename TCargo, typename TGraphSpec, typename TSpec>
 inline typename Alphabet<Graph<Automaton<TAlphabet, TCargo, TGraphSpec> > >::Type

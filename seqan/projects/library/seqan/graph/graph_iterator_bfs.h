@@ -1,14 +1,27 @@
 #ifndef SEQAN_HEADER_GRAPH_ITERATOR_BFS_H
 #define SEQAN_HEADER_GRAPH_ITERATOR_BFS_H
 
-#include <deque>
-
 namespace SEQAN_NAMESPACE_MAIN
 {
 
 //////////////////////////////////////////////////////////////////////////////
-// Graph InternalBfsIterator
+// Graph BfsIterator
 //////////////////////////////////////////////////////////////////////////////
+
+/**
+.Spec.Bfs Iterator:
+..cat:Graph
+..summary:Breath-first search iterator for @Class.Graph@.
+..signature:Iterator<TGraph, BfsIterator>
+..param.TGraph:A graph.
+...type:Class.Graph
+..general:Class.Iter
+..see:Spec.Vertex Iterator
+..see:Spec.Out-Edge Iterator
+..see:Spec.Edge Iterator
+..see:Spec.Adjacency Iterator
+..see:Spec.Dfs Preorder Iterator
+*/
 template<typename TGraph, typename TSpec>
 class Iter<TGraph, GraphIterator<InternalBfsIterator<TSpec> > > 
 {

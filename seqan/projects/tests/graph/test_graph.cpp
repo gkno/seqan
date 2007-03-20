@@ -2284,6 +2284,47 @@ void Test_Property() {
 	SEQAN_TASSERT(getProperty(pseudo_map, e1) == 'k')
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TGraphType>
+void Test_BfsIter() {
+//____________________________________________________________________________
+// Graph BfsIterator
+	typedef Graph<TGraphType> TGraph;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef typename Size<TGraph>::Type TSize;
+
+	//Create the graph
+	TGraph g;
+	addVertex(g);addVertex(g);addVertex(g);addVertex(g);
+	addEdge(g,0,2,'t');
+	addEdge(g,0,1,'a');
+	addEdge(g,1,3,'a');
+	
+	typedef typename Iterator<TGraph, BfsIterator>::Type TBfsIterator;
+	TBfsIterator it(g,0);
+	SEQAN_TASSERT(getValue(it) == 0)
+	SEQAN_TASSERT(&hostGraph(it) == &g)
+	SEQAN_TASSERT(value(it) == 0)
+	SEQAN_TASSERT(*it == 0)
+	SEQAN_TASSERT(atEnd(it)==false)
+	SEQAN_TASSERT(atBegin(it)==true)
+	goNext(it);
+	SEQAN_TASSERT(getValue(it)==1)
+	SEQAN_TASSERT(atEnd(it)==false)
+	SEQAN_TASSERT(atBegin(it)==false)
+	goNext(it);
+	SEQAN_TASSERT(getValue(it)==2)
+	goNext(it);
+	SEQAN_TASSERT(getValue(it)==3)
+	goNext(it);
+	SEQAN_TASSERT(atEnd(it)==true)
+	SEQAN_TASSERT(atBegin(it)==false)
+	goBegin(it);
+	SEQAN_TASSERT(atEnd(it)==false)
+	SEQAN_TASSERT(atBegin(it)==true)
+}
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -2308,7 +2349,6 @@ void Test_BfsIterator() {
 	addEdge(g,6,3);
 	addEdge(g,6,7);
 	addEdge(g,3,7);
-
 	typedef Iterator<Graph<>, BfsIterator>::Type TBfsIterator;
 	TBfsIterator it(g,1);
 	SEQAN_TASSERT(getValue(it) == 1)
@@ -2353,9 +2393,53 @@ void Test_BfsIterator() {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-void Test_DfsIterator() {
+
+
+template <typename TGraphType>
+void Test_DfsPreorderIter() {
 //____________________________________________________________________________
-// Graph InternalDfsIterator
+// Graph DfsIterator
+	typedef Graph<TGraphType> TGraph;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef typename Size<TGraph>::Type TSize;
+
+	//Create the graph
+	TGraph g;
+	addVertex(g);addVertex(g);addVertex(g);addVertex(g);
+	addEdge(g,0,1,'t');
+	addEdge(g,0,2,'a');
+	addEdge(g,1,3,'a');
+	
+	typedef typename Iterator<TGraph, DfsPreorder>::Type TDfsIterator;
+	TDfsIterator it(g,0);
+	SEQAN_TASSERT(getValue(it) == 0)
+	SEQAN_TASSERT(&hostGraph(it) == &g)
+	SEQAN_TASSERT(value(it) == 0)
+	SEQAN_TASSERT(*it == 0)
+	SEQAN_TASSERT(atEnd(it)==false)
+	SEQAN_TASSERT(atBegin(it)==true)
+	goNext(it);
+	SEQAN_TASSERT(getValue(it)==1)
+	SEQAN_TASSERT(atEnd(it)==false)
+	SEQAN_TASSERT(atBegin(it)==false)
+	goNext(it);
+	SEQAN_TASSERT(getValue(it)==3)
+	goNext(it);
+	SEQAN_TASSERT(getValue(it)==2)
+	goNext(it);
+	SEQAN_TASSERT(atEnd(it)==true)
+	SEQAN_TASSERT(atBegin(it)==false)
+	goBegin(it);
+	SEQAN_TASSERT(atEnd(it)==false)
+	SEQAN_TASSERT(atBegin(it)==true)
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+void Test_DfsPreorderIterator() {
+//____________________________________________________________________________
+// Graph DfsIterator
 	typedef VertexDescriptor<Graph<> >::Type TVertexDescriptor;
 	typedef EdgeDescriptor<Graph<> >::Type TEdgeDescriptor;
 	typedef Size<Graph<> >::Type TSize;
@@ -2375,8 +2459,8 @@ void Test_DfsIterator() {
 	addEdge(g,6,7);
 	addEdge(g,3,7);
 
-	typedef Iterator<Graph<>, DfsPostorder>::Type TDfsPostorder;
-	TDfsPostorder it(g,1);
+	typedef Iterator<Graph<>, DfsPreorder>::Type TDfsPreorder;
+	TDfsPreorder it(g,1);
 	SEQAN_TASSERT(getValue(it) == 1)
 	SEQAN_TASSERT(&hostGraph(it) == &g)
 	SEQAN_TASSERT(value(it) == 1)
@@ -2406,8 +2490,8 @@ void Test_DfsIterator() {
 	goBegin(it);
 	SEQAN_TASSERT(atEnd(it)==false)
 	SEQAN_TASSERT(atBegin(it)==true)
-	TDfsPostorder it2(g, 1);
-	TDfsPostorder it3;
+	TDfsPreorder it2(g, 1);
+	TDfsPreorder it3;
 	it3 = it;
 	SEQAN_TASSERT(it == it2)
 	SEQAN_TASSERT(it2 == it3)
@@ -3174,10 +3258,17 @@ int main()
 	Test_Oracle();
 	Test_Trie();
 
-	// Test bfs iterator
-	// ToDo: For different graph types
+	// Test bfs and dfs iterator
+	Test_BfsIter<Directed<char> >();
+	Test_BfsIter<Undirected<char> >();
+	Test_BfsIter<Tree<char> >();
+	Test_BfsIter<Automaton<char> >();
 	Test_BfsIterator();
-	Test_DfsIterator();
+	Test_DfsPreorderIter<Directed<char> >();
+	Test_DfsPreorderIter<Undirected<char> >();
+	Test_DfsPreorderIter<Tree<char> >();
+	Test_DfsPreorderIter<Automaton<char> >();
+	Test_DfsPreorderIterator();
 
 	// Graph algorithms
 	Test_Algorithms();

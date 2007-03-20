@@ -4,26 +4,23 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 //////////////////////////////////////////////////////////////////////////////
-// Graph InternalAdjacencyIterator
+// Graph AdjacencyIterator
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
 
 /**
 .Spec.Adjacency Iterator:
-..cat:Iterators
 ..cat:Graph
 ..summary:Adjacency iterator for @Class.Graph@.
-..signature:Iter<TGraph, GraphIterator<InternalAdjacencyIterator<TSpec> > >
+..signature:Iterator<TGraph, AdjacencyIterator>
 ..param.TGraph:A graph.
 ...type:Class.Graph
-..param.TSpec:The specializing type.
-...metafunction:Metafunction.Spec
-...default:$Default$, see @Tag.Default@.
 ..general:Class.Iter
 ..see:Spec.Vertex Iterator
 ..see:Spec.Out-Edge Iterator
 ..see:Spec.Edge Iterator
+..see:Spec.Bfs Iterator
 */
 template<typename TGraph, typename TSpec>
 class Iter<TGraph, GraphIterator<InternalAdjacencyIterator<TSpec> > > 

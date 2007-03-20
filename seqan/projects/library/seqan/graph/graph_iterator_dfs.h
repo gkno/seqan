@@ -5,8 +5,24 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 //////////////////////////////////////////////////////////////////////////////
-// Graph InternalDfsIterator
+// Graph DfsIterator
 //////////////////////////////////////////////////////////////////////////////
+
+/**
+.Spec.Dfs Preorder Iterator:
+..cat:Graph
+..summary:Depth-first search iterator for @Class.Graph@.
+..remarks:Preorder means that a vertex is enumerated before its adjacent vertices have been explored.
+..signature:Iterator<TGraph, DfsPreorder>
+..param.TGraph:A graph.
+...type:Class.Graph
+..general:Class.Iter
+..see:Spec.Vertex Iterator
+..see:Spec.Out-Edge Iterator
+..see:Spec.Edge Iterator
+..see:Spec.Adjacency Iterator
+..see:Spec.Bfs Iterator
+*/
 template<typename TGraph, typename TSpec>
 class Iter<TGraph, GraphIterator<InternalDfsIterator<TSpec> > > 
 {
@@ -15,8 +31,8 @@ public:
 	TGraph const* data_host;
 	TVertexDescriptor data_source;
 	String<bool> data_tokenMap;			// Which vertices have been visited
-	std::deque<TVertexDescriptor> data_queue;
-
+	String<TVertexDescriptor> data_stack;
+	
 	void _init() {
 		initVertexMap(*data_host,data_tokenMap);
 		typedef typename Iterator<String<bool> >::Type TIter;
@@ -25,8 +41,8 @@ public:
 			assignValue(it,false);
 		}
 		assignProperty(data_tokenMap, data_source, true);
-		data_queue.clear();
-		data_queue.push_back(data_source);
+		clear(data_stack);
+		appendValue(data_stack, data_source, Generous());
 	}
 
 	Iter()
@@ -47,7 +63,7 @@ public:
 		data_host(_iter.data_host),
 		data_source(_iter.data_source),
 		data_tokenMap(_iter.data_tokenMap),
-		data_queue(_iter.data_queue)
+		data_stack(_iter.data_stack)
 	{
 		SEQAN_CHECKPOINT
 	}
@@ -62,7 +78,7 @@ public:
 		data_host=_other.data_host;
 		data_source=_other.data_source;
 		data_tokenMap=_other.data_tokenMap;
-		data_queue=_other.data_queue;
+		data_stack=_other.data_stack;
 		return *this;
 	}
 //____________________________________________________________________________
@@ -73,15 +89,15 @@ public:
 // Graph InternalDfsIterator - Metafunctions
 //////////////////////////////////////////////////////////////////////////////
 template<typename TGraph>
-struct Iterator<TGraph, DfsPostorder>
+struct Iterator<TGraph, DfsPreorder>
 {	
-	typedef Iter<TGraph, GraphIterator<InternalDfsIterator<DfsPostorder> > > Type;
+	typedef Iter<TGraph, GraphIterator<InternalDfsIterator<DfsPreorder> > > Type;
 };
 
 template<typename TGraph>
-struct Iterator<TGraph const, DfsPostorder>
+struct Iterator<TGraph const, DfsPreorder>
 {	
-	typedef Iter<TGraph const, GraphIterator<InternalDfsIterator<DfsPostorder> > > Type;
+	typedef Iter<TGraph const, GraphIterator<InternalDfsIterator<DfsPreorder> > > Type;
 };
 
 template<typename TGraph, typename TIteratorSpec>
@@ -129,7 +145,7 @@ inline typename GetValue<Iter<TGraph, GraphIterator<InternalDfsIterator<TSpec> >
 getValue(Iter<TGraph, GraphIterator<InternalDfsIterator<TSpec> > >& it)
 {
 	SEQAN_CHECKPOINT
-	return it.data_queue.front();
+	return getValue(it.data_stack, length(it.data_stack) - 1);
 }
 
 template<typename TGraph, typename TSpec>
@@ -162,8 +178,8 @@ inline bool
 atBegin(Iter<TGraph, GraphIterator<InternalDfsIterator<TSpec> > >& it)
 {
 	SEQAN_CHECKPOINT
-	if (it.data_queue.empty()) return false;
-	else return (it.data_queue.front() == it.data_source);
+	if (empty(it.data_stack)) return false;
+	else return (getValue(it.data_stack, length(it.data_stack) - 1) == it.data_source);
 }
 
 template<typename TGraph, typename TSpec>
@@ -179,7 +195,7 @@ inline bool
 atEnd(Iter<TGraph, GraphIterator<InternalDfsIterator<TSpec> > >& it)
 {
 	SEQAN_CHECKPOINT
-	return (it.data_queue.empty());
+	return (empty(it.data_stack));
 }
 
 template<typename TGraph, typename TSpec>
@@ -187,7 +203,7 @@ inline void
 goEnd(Iter<TGraph, GraphIterator<InternalDfsIterator<TSpec> > >& it)
 {
 	SEQAN_CHECKPOINT
-	it.data_queue.clear();
+	clear(it.data_stack);
 }
 
 template<typename TGraph, typename TSpec>
@@ -195,17 +211,17 @@ inline void
 goNext(Iter<TGraph, GraphIterator<InternalDfsIterator<TSpec> > >& it)
 {
 	SEQAN_CHECKPOINT
-	if (it.data_queue.empty()) return;
+	if (empty(it.data_stack)) return;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	TVertexDescriptor u = it.data_queue.front();
-	it.data_queue.pop_front();
-	typedef Iterator<Graph<>, AdjacencyIterator>::Type TAdjacencyIterator;
+	TVertexDescriptor u = getValue(it.data_stack, length(it.data_stack) - 1);
+	resize(it.data_stack, length(it.data_stack) - 1);
+	typedef typename Iterator<TGraph, AdjacencyIterator>::Type TAdjacencyIterator;
 	TAdjacencyIterator itad(*it.data_host,u);
 	for(;!atEnd(itad);goNext(itad)) {
 		TVertexDescriptor v = getValue(itad);
 		if (getProperty(it.data_tokenMap, v) == false) {
 			assignProperty(it.data_tokenMap, v, true);
-			it.data_queue.push_front(v);
+			appendValue(it.data_stack, v, Generous());
 		}
 	}
 }
@@ -237,7 +253,7 @@ operator ==(Iter<TGraph, GraphIterator<InternalDfsIterator<TSpec> > >& it1,
 	SEQAN_CHECKPOINT
 	return ((it1.data_source==it2.data_source) &&
 			(it1.data_tokenMap==it2.data_tokenMap) &&
-			(it1.data_queue==it2.data_queue));
+			(it1.data_stack==it2.data_stack));
 }
 
 template<typename TGraph, typename TSpec>
@@ -248,7 +264,7 @@ operator !=(Iter<TGraph, GraphIterator<InternalDfsIterator<TSpec> > >& it1,
 	SEQAN_CHECKPOINT
 	return ((it1.data_source!=it2.data_source) ||
 			(it1.data_tokenMap!=it2.data_tokenMap) ||
-			(it1.data_queue!=it2.data_queue));
+			(it1.data_stack!=it2.data_stack));
 }
 
 }// namespace SEQAN_NAMESPACE_MAIN

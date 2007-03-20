@@ -689,11 +689,16 @@ removeInEdges(Graph<Directed<TCargo, TSpec> >& g,
 ..summary:Returns the target vertex of an edge.
 ..remarks:In a tree the target vertex is always the child. 
 In an undirected graph the larger vertex descriptor of the two endpoints is the target.
+For an out-edge iterator the target is always the vertex the out-edge iterator has not been initialized with.
 ..signature:targetVertex(g, e)
+..signature:targetVertex(it)
 ..param.g:A graph.
 ...type:Class.Graph
 ..param.e:An edge descriptor.
 ...type:Metafunction.EdgeDescriptor
+..param.it:An edge iterator.
+...type:Spec.Out-Edge Iterator
+...type:Spec.Edge Iterator
 ..returns:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
 ..see:Function.sourceVertex
@@ -719,10 +724,14 @@ In an undirected graph the smaller vertex descriptor is the source.
 Note: If source vertices are not stored in the EdgeStump this operation is expensive.
 Consider using sourceVertex directly on an edge iterator where this operation is fast!
 ..signature:sourceVertex(g, e)
+..signature:sourceVertex(it)
 ..param.g:A graph.
 ...type:Class.Graph
 ..param.e:An edge descriptor.
 ...type:Metafunction.EdgeDescriptor
+..param.it:An edge iterator.
+...type:Spec.Out-Edge Iterator
+...type:Spec.Edge Iterator
 ..returns:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
 ..see:Function.targetVertex

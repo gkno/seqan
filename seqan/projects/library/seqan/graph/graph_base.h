@@ -201,12 +201,12 @@ typedef Tag<BfsIterator_> const BfsIterator;
 
 //////////////////////////////////////////////////////////////////////////////
 /**
-.Tag.DfsPostorder
+.Tag.DfsPreorder
 ..summary:Tag for a depth-first postorder search iterator.
-..value.DfsPostorder:Specifies the kind of graph iterator, i.e., DfsPostorder.
+..value.DfsPreorder:Specifies the kind of graph iterator, i.e., DfsPreorder.
 */
-struct DfsPostorder_;
-typedef Tag<DfsPostorder_> const DfsPostorder;
+struct DfsPreorder_;
+typedef Tag<DfsPreorder_> const DfsPreorder;
 
 //////////////////////////////////////////////////////////////////////////////
 // Graph - Default edge stump
