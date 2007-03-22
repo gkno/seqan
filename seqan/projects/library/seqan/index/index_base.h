@@ -14,13 +14,14 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 
-	// index construction specs
+//////////////////////////////////////////////////////////////////////////////
+// needful forward declarations
+
+	// suffix array construction specs
 	struct Skew3;
 	struct Skew7;
 	struct ManberMyers;
-	struct QGram1;
-	struct QGram2;
-	struct QGram3;
+	struct QGram_Alg;
 
 	// lcp table construction algorithms
 	struct Kasai;
@@ -30,13 +31,11 @@ namespace SEQAN_NAMESPACE_MAIN
 	struct ChildTab;
 	struct BWT;
 
-	// Index/ExternalIndex specs
-	// different types of suffix array based indexes ordered by their complexity/size
-	struct Index_QGram;			// suffix array sorted by the first q chars
-
 	template <typename TSpec = void>
 	struct Index_ESA;
 
+
+//////////////////////////////////////////////////////////////////////////////
 /**
 .Metafunction.DefaultIndexSpec:
 ..cat:Index
@@ -51,6 +50,7 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef Index_ESA<> Type;
     };
 
+//////////////////////////////////////////////////////////////////////////////
 /**
 .Metafunction.DefaultIndexStringSpec:
 ..cat:Index
@@ -76,6 +76,7 @@ namespace SEQAN_NAMESPACE_MAIN
     };
 
 
+//////////////////////////////////////////////////////////////////////////////
 /**
 .Class.Index:
 ..summary:Contains preprocessing data of a fixed text. Allows fast dictionary look-up and advanced computations.
@@ -109,10 +110,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef TSpec Type;
 	};
 
-	template <typename T>
-	struct VertexDescriptor;
 
-
+//////////////////////////////////////////////////////////////////////////////
 /**
 .Metafunction.Fibre:
 ..summary:Type of a specific bundle member (fibre).
@@ -150,6 +149,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
 	};
 
+//////////////////////////////////////////////////////////////////////////////
 /**
 .Metafunction.DefaultIndexCreator:
 ..cat:Index
@@ -164,6 +164,7 @@ namespace SEQAN_NAMESPACE_MAIN
     struct DefaultIndexCreator;
 
 
+//////////////////////////////////////////////////////////////////////////////
 /**
 	.Class.Bundle:
 	..summary:General purpose container of various members.
@@ -216,102 +217,20 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 */
 
-	// various fibre specs for enhanced suffix arrays
+//////////////////////////////////////////////////////////////////////////////
+// various fibre specs for enhanced suffix arrays
 
-	struct _ESA_Text;		// Original text. Can be a String or a StringSet
-	struct _ESA_RawText;	// Concatenation of the strings above
-	struct _ESA_SA;			// suffix array (of raw text with virtual $-delimiters) with Pair entries
-	struct _ESA_RawSA;		// suffix array with integer entries
-	struct _ESA_SAE;		// suffix array reordered in a b-tree
-	struct _ESA_LCP;		// lcp table of raw text
-	struct _ESA_LCPE;		// lcp interval tree
-	struct _ESA_ChildTab;	// childtab (Kurtz et al.) of raw text
-	struct _ESA_BWT;		// burrows wheeler table of raw text
+	struct _Fibre_Text;		// Original text. Can be a String or a StringSet
+	struct _Fibre_RawText;	// Concatenation of the strings above
+	struct _Fibre_SA;		// suffix array (of raw text with virtual $-delimiters) with Pair entries
+	struct _Fibre_RawSA;	// suffix array with integer entries
+	struct _Fibre_SAE;		// suffix array reordered in a b-tree
+	struct _Fibre_LCP;		// lcp table of raw text
+	struct _Fibre_LCPE;		// lcp interval tree
+	struct _Fibre_ChildTab;	// childtab (Kurtz et al.) of raw text
+	struct _Fibre_BWT;		// burrows wheeler table of raw text
 
-/**
-.Tag.ESA_Text:
-..summary:The original text the index should be based on.
-..general:Metafunction.Fibre
-..cat:Index
-..signature:Fibre<TIndex, ESA_Text>::Type
-..param.TIndex:The ESA index type.
-...type:Spec.Index_ESA
-*/
-/**
-.Tag.ESA_RawText:
-..summary:The raw text the index is really based on.
-..general:Metafunction.Fibre
-..cat:Index
-..signature:Fibre<TIndex, ESA_RawText>::Type
-..param.TIndex:The ESA index type.
-...type:Spec.Index_ESA
-..remarks:@Tag.ESA_Text@ and @Tag.ESA_RawText@ fibres are equal by default. 
-They differ if the index text is a set of strings. Then, raw text is the concatenation of all strings in this set.
-*/
-/**
-.Tag.ESA_SA:
-..summary:The suffix array.
-..general:Metafunction.Fibre
-..cat:Index
-..signature:Fibre<TIndex, ESA_SA>::Type
-..param.TIndex:The ESA index type.
-...type:Spec.Index_ESA
-..remarks:The suffix array contains the indices of all suffices of @Tag.ESA_RawText@ in lexicographical order.
-..remarks:A @Class.String@ over the alphabet of a size type.
-*/
-/**
-.Tag.ESA_LCP:
-..summary:The lcp table.
-..general:Metafunction.Fibre
-..cat:Index
-..signature:Fibre<TIndex, ESA_LCP>::Type
-..param.TIndex:The ESA index type.
-...type:Spec.Index_ESA
-..remarks:The lcp table contains the lcp-value of two adjacent suffices in the suffix array @Tag.ESA_SA@.
-..returns:A @Class.String@ over the alphabet of a size type.
-*/
-/**
-.Tag.ESA_ChildTab:
-..summary:The child table.
-..general:Metafunction.Fibre
-..cat:Index
-..signature:Fibre<TIndex, ESA_ChildTab>::Type
-..param.TIndex:The ESA index type.
-...type:Spec.Index_ESA
-..remarks:The child table contains structural information of the suffix tree (see Abhouelda et al.).
-..returns:A @Class.String@ over the alphabet of a size type.
-*/
-/**
-.Tag.ESA_BWT:
-..summary:The Burrows-Wheeler table.
-..general:Metafunction.Fibre
-..cat:Index
-..signature:Fibre<TIndex, ESA_BWT>::Type
-..param.TIndex:The ESA index type.
-...type:Spec.Index_ESA
-..remarks:The Burrows-Wheeler table contains the Burrows-Wheeler transformation of @Tag.ESA_RawText@.
-..remarks:The entries are the characters left of the corresponding suffix in the suffix array @Tag.ESA_SA@.
-..returns:The type @Tag.ESA_RawText@ returns.
-*/
-
-///.Metafunction.Fibre.param.TSpec.type:Tag.ESA_Text
-///.Metafunction.Fibre.param.TSpec.type:Tag.ESA_RawText
-///.Metafunction.Fibre.param.TSpec.type:Tag.ESA_SA
-///.Metafunction.Fibre.param.TSpec.type:Tag.ESA_LCP
-///.Metafunction.Fibre.param.TSpec.type:Tag.ESA_LCPE
-///.Metafunction.Fibre.param.TSpec.type:Tag.ESA_ChildTab
-///.Metafunction.Fibre.param.TSpec.type:Tag.ESA_BWT
-
-
-	typedef Tag<_ESA_Text>		ESA_Text;
-	typedef Tag<_ESA_RawText>	ESA_RawText;
-	typedef Tag<_ESA_SA>		ESA_SA;
-	typedef Tag<_ESA_RawSA>		ESA_RawSA;
-	typedef Tag<_ESA_SAE>		ESA_SAE;
-	typedef Tag<_ESA_LCP>		ESA_LCP;
-	typedef Tag<_ESA_LCPE>		ESA_LCPE;
-	typedef Tag<_ESA_ChildTab>	ESA_ChildTab;
-	typedef Tag<_ESA_BWT>		ESA_BWT;
+//////////////////////////////////////////////////////////////////////////////
 
 	template <typename TObject>
 	struct SAValue {
@@ -339,43 +258,69 @@ They differ if the index text is a set of strings. Then, raw text is the concate
 		typedef typename SAValue<TText>::Type Type;
 	};
 
-
-
-	// specialization for ESA indices
-
 	template < typename TObject, typename TSpec >
     struct DefaultIndexStringSpec< Index<TObject, TSpec> > {
 		typedef typename DefaultIndexStringSpec<TObject>::Type Type;
     };
 
+//////////////////////////////////////////////////////////////////////////////
+// value and size type of an index
+
+	template < typename TText, typename TSpec >
+    struct Value< Index<TText, TSpec> > {
+		typedef typename Value<
+			typename Fibre< Index<TText, TSpec>, Tag<_Fibre_RawText> >::Type 
+		>::Type Type;
+    };
+
+	template < typename TText, typename TSpec >
+    struct Size< Index<TText, TSpec> > {
+		typedef typename Size<
+			typename Fibre< Index<TText, TSpec>, Tag<_Fibre_RawText> >::Type 
+		>::Type Type;
+    };
+
+//////////////////////////////////////////////////////////////////////////////
+// default table type
 
 	template < typename TObject, typename TSpec, typename TFibreSpec >
-	struct Fibre< Index<TObject, Index_ESA<TSpec> >, TFibreSpec > {
+	struct Fibre< Index<TObject, TSpec>, TFibreSpec > {
 		typedef String< 
-			typename Size< Index<TObject, Index_ESA<TSpec> > >::Type,
-			typename DefaultIndexStringSpec< Index<TObject, Index_ESA<> > >::Type 
+			typename Size< Index<TObject, TSpec> >::Type,
+			typename DefaultIndexStringSpec< Index<TObject, TSpec> >::Type 
 		> Type;
 	};
 
+//////////////////////////////////////////////////////////////////////////////
+// original text
+
 	template < typename TText, typename TSpec >
-	struct Fibre< Index<TText, Index_ESA<TSpec> >, ESA_Text > {
+	struct Fibre< Index<TText, TSpec>, Tag<_Fibre_Text> > {
 		typedef TText Type;
 	};
 
+//////////////////////////////////////////////////////////////////////////////
+// concatenated text
+
 	template < typename TText, typename TSpec >
-	struct Fibre< Index<TText, Index_ESA<TSpec> >, ESA_RawText > {
+	struct Fibre< Index<TText, TSpec>, Tag<_Fibre_RawText> > {
 		typedef typename Concatenator<TText>::Type Type;
 	};
 
+//////////////////////////////////////////////////////////////////////////////
+// suffix array type
+
 	template < typename TText, typename TSpec >
-	struct Fibre< Index<TText, Index_ESA<TSpec> >, ESA_SA > {
+	struct Fibre< Index<TText, TSpec>, Tag<_Fibre_SA> > {
 		typedef String<
-			typename SAValue< Index<TText, Index_ESA<TSpec> > >::Type,
-			typename DefaultIndexStringSpec< Index<TText, Index_ESA<> > >::Type 
+			typename SAValue< Index<TText, TSpec> >::Type,
+			typename DefaultIndexStringSpec< Index<TText, TSpec> >::Type 
 		> Type;
 	};
 
-	// globalize functor
+//////////////////////////////////////////////////////////////////////////////
+// globalize functor
+
 	template <typename InType, typename TLimitsString, typename Result = typename Value<TLimitsString>::Type>
 	struct FunctorGlobalize : public ::std::unary_function<InType,Result> {
 		TLimitsString const *limits;
@@ -388,160 +333,60 @@ They differ if the index text is a set of strings. Then, raw text is the concate
 		}
     };
 
-
+//////////////////////////////////////////////////////////////////////////////
+// raw suffix array contains integer offsets relative to raw text
 
 	template < typename TString, typename TSSetSpec, typename TSpec >
-	struct Fibre< Index<StringSet<TString, TSSetSpec>, Index_ESA<TSpec> >, ESA_RawSA > {
-		typedef Index< StringSet<TString, TSSetSpec>, Index_ESA<TSpec> > TIndex;
+	struct Fibre< Index<StringSet<TString, TSSetSpec>, TSpec>, Tag<_Fibre_RawSA> > 
+	{
+		typedef Index< StringSet<TString, TSSetSpec>, TSpec> TIndex;
 		typedef ModifiedString<
-			typename Fibre<TIndex, ESA_SA>::Type,
+			typename Fibre<TIndex, Tag<_Fibre_SA> >::Type,
 			ModView< FunctorGlobalize< 
-				typename Value< typename Fibre<TIndex, ESA_SA>::Type >::Type,
+				typename Value< typename Fibre<TIndex, Tag<_Fibre_SA> >::Type >::Type,
 				typename StringSetLimits<StringSet<TString, TSSetSpec> >::Type >
 			>
 		> Type;
 	};
-/*
-	template < typename TString, typename TSSetSpec, typename TSpec >
-	struct Fibre< Index<StringSet<TString, TSSetSpec>, Index_ESA<TSpec> > const, ESA_RawSA > {
-		typedef ModifiedString<
-			typename Fibre<Index<StringSet<TString, TSSetSpec>, Index_ESA<TSpec> > const, ESA_SA>::Type,
-			ModGlobalizer<typename StringSetLimits<StringSet<TString, TSSetSpec> const>::Type>
-		> Type;
-	};
-*/
+
+//////////////////////////////////////////////////////////////////////////////
+// default burrows-wheeler table
+
 	template < typename TText, typename TSpec >
-	struct Fibre< Index<TText, Index_ESA<TSpec> >, ESA_BWT > {
+	struct Fibre< Index<TText, TSpec>, Tag<_Fibre_BWT> > {
 		typedef String <
-			typename Value< Index<TText, Index_ESA<TSpec> > >::Type,
-			typename DefaultIndexStringSpec< Index<TText, Index_ESA<> > >::Type
+			typename Value< Index<TText, TSpec> >::Type,
+			typename DefaultIndexStringSpec< Index<TText, TSpec> >::Type
 		> Type;
 	};
 
 
-// compression speed hack
-/*	template < typename TValue, typename TConf >
-	struct Fibre< Bundle<Index_ESA< String<TValue, External<TConf> > > >, ESA_LCP > {
-		typedef String<unsigned char, External<TConf> > Type;
-	};
-*/	
-
-	
-	// ESA creators
+//////////////////////////////////////////////////////////////////////////////
+// default fibre creators
 
 	template < typename TText, typename TSpec >
-	struct DefaultIndexCreator<Index<TText, TSpec>, ESA_SA> {
+	struct DefaultIndexCreator<Index<TText, TSpec>, Tag<_Fibre_SA> > {
         typedef Skew7 Type;							// standard suffix array creator is skew7
     };
 
 	template < typename TText, typename TSpec >
-	struct DefaultIndexCreator<Index<TText, TSpec>, ESA_LCP> {
+	struct DefaultIndexCreator<Index<TText, TSpec>, Tag<_Fibre_LCP> > {
         typedef KasaiInPlace Type;
     };
 
 	template < typename TText, typename TSpec >
-	struct DefaultIndexCreator<Index<TText, TSpec>, ESA_BWT> {
+	struct DefaultIndexCreator<Index<TText, TSpec>, Tag<_Fibre_BWT> > {
         typedef BWT Type;
     };
 
 	template < typename TText, typename TSpec >
-	struct DefaultIndexCreator<Index<TText, TSpec>, ESA_ChildTab> {
+	struct DefaultIndexCreator<Index<TText, TSpec>, Tag<_Fibre_ChildTab> > {
         typedef ChildTab Type;
     };
 
 
-	// ESA index
-
-/**
-.Spec.Index_ESA:
-..summary:An index based on an enhanced suffix array.
-..cat:Index
-..general:Class.Index
-..signature:Index<TText, Index_ESA<> >
-..param.TText:The text type.
-...type:Class.String
-..remarks:The fibres (see @Class.Index@ and @Metafunction.Fibre@) of this index are a suffix array (see @Tag.ESA_SA@), a lcp table (see @Tag.ESA_LCP@), etc.
-..remarks:This index can be accessed as a Suffix Tree using the @Spec.VSTree Iterator@ classes.
-*/
-	template < typename TText, typename TSpec >
-	class Index<TText, Index_ESA<TSpec> > {
-	public:
-		Holder<typename Fibre<Index, ESA_Text>::Type>	text;
-		typename Fibre<Index, ESA_SA>::Type				sa;
-		typename Fibre<Index, ESA_LCP>::Type			lcp;
-		typename Fibre<Index, ESA_LCPE>::Type			lcpe;
-		typename Fibre<Index, ESA_ChildTab>::Type		childtab;
-		typename Fibre<Index, ESA_BWT>::Type			bwt;
-
-		Index() {}
-
-		template <typename _TText>
-		Index(_TText &_text):
-			text(_text) {}
-
-		template <typename _TText>
-		Index(_TText const &_text):
-			text(_text) {}
-	};
-
-    template < typename TText, typename TSpec >
-    struct Value< Index<TText, Index_ESA<TSpec> > > {
-		typedef typename Value< typename Fibre< Index<TText, Index_ESA<TSpec> >, ESA_RawText >::Type >::Type Type;
-    };
-
-	template < typename TText, typename TSpec >
-    struct Size< Index<TText, Index_ESA<TSpec> > > {
-		typedef typename Size< typename Fibre< Index<TText, Index_ESA<TSpec> >, ESA_RawText >::Type >::Type Type;
-    };
-
-	template < typename TText, typename TSpec >
-	struct VertexDescriptor< Index<TText, Index_ESA<TSpec> > > {
-		typedef Pair< typename Size< Index<TText, Index_ESA<TSpec> > >::Type > Type;
-	};
-	template < typename TText, typename TSpec >
-	struct VertexDescriptor< Index<TText, Index_ESA<TSpec> > const >:
-		public VertexDescriptor< Index<TText, Index_ESA<TSpec> > > {};
-
-
-
-	// ESA finders
-
-	struct _ESA_MLR;		// simple Suffix Array finder with mlr-heuristic
-	struct _ESA_LCPE;		// Suffix Array finder using an enhanced LCP-Table
-	struct _ESA_LCPH;	    // hybrid of Suffix Array and Enhanced LCP (to reduce random accesses)
-
-/**
-.Tag.ESA_MLR:
-..summary:Exact string matching using a suffix array binary search with the mlr-heuristic.
-..general:Class.Finder
-..cat:Index
-..signature:Finder<TIndex, ESA_MLR>
-..param.TIndex:The index type.
-...type:Spec.Index_ESA
-*/
-
-	typedef Tag<_ESA_MLR>	ESA_MLR;
-
-/**
-.Tag.ESA_LCPE:
-..summary:Exact string matching using a suffix array binary search and a lcp-interval tree.
-..general:Class.Finder
-..cat:Index
-..signature:Finder<TIndex, ESA_LCPE>
-..param.TIndex:The index type.
-...type:Spec.Index_ESA
-*/
-
-	typedef Tag<_ESA_LCPE>	ESA_LCPE;
-	typedef Tag<_ESA_LCPH>	ESA_LCPH;
-
-	template < typename TText, typename TSpec >
-	struct DefaultFinder<Index<TText, Index_ESA<TSpec> > > {
-        typedef ESA_MLR Type;	// standard suffix array finder is mlr-heuristic
-    };
-
-
-	// direct access to the enhanced suffix array tables
+//////////////////////////////////////////////////////////////////////////////
+// fibre interface to access the enhanced suffix array tables
 
 /**
 .Function.getFibre:
@@ -555,64 +400,80 @@ They differ if the index text is a set of strings. Then, raw text is the concate
 */
 
 	template <typename TText, typename TSpec>
-	inline Holder<TText> & _dataHost(Index<TText, Index_ESA<TSpec> > &index) {
+	inline Holder<TText> & _dataHost(Index<TText, TSpec> &index) {
 		return index.text;
 	}
 	template <typename TText, typename TSpec>
-	inline Holder<TText> const & _dataHost(Index<TText, Index_ESA<TSpec> > const &index) {
+	inline Holder<TText> const & _dataHost(Index<TText, TSpec> const &index) {
 		return index.text;
 	}
 
+//////////////////////////////////////////////////////////////////////////////
+
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, Index_ESA<TSpec> >, ESA_Text>::Type & getFibre(Index<TText, Index_ESA<TSpec> > &index, ESA_Text const) {
+	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_Text> >::Type & 
+	getFibre(Index<TText, TSpec> &index, Tag<_Fibre_Text> const) {
 		return value(index.text);
 	}
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, Index_ESA<TSpec> > const, ESA_Text>::Type & getFibre(Index<TText, Index_ESA<TSpec> > const &index, ESA_Text const) {
+	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_Text> >::Type & 
+	getFibre(Index<TText, TSpec> const &index, Tag<_Fibre_Text> const) {
 		return value(index.text);
 	}
 
+//////////////////////////////////////////////////////////////////////////////
+
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, Index_ESA<TSpec> >, ESA_RawText>::Type & getFibre(Index<TText, Index_ESA<TSpec> > &index, ESA_RawText const) {
+	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_RawText> >::Type & 
+	getFibre(Index<TText, TSpec> &index, Tag<_Fibre_RawText> const) {
 		return concat(value(index.text));
 	}
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, Index_ESA<TSpec> > const, ESA_RawText>::Type & getFibre(Index<TText, Index_ESA<TSpec> > const &index, ESA_RawText const) {
+	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_RawText> >::Type & 
+	getFibre(Index<TText, TSpec> const &index, Tag<_Fibre_RawText> const) {
 		return concat(value(index.text));
 	}
 
+//////////////////////////////////////////////////////////////////////////////
+
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, Index_ESA<TSpec> >, ESA_SA>::Type & getFibre(Index<TText, Index_ESA<TSpec> > &index, ESA_SA const) {
+	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_SA> >::Type & 
+	getFibre(Index<TText, TSpec> &index, Tag<_Fibre_SA>  const) {
 		return index.sa;
 	}
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, Index_ESA<TSpec> > const, ESA_SA>::Type & getFibre(Index<TText, Index_ESA<TSpec> > const &index, ESA_SA const) {
+	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_SA> >::Type & 
+	getFibre(Index<TText, TSpec> const &index, Tag<_Fibre_SA>  const) {
 		return index.sa;
 	}
 
+//////////////////////////////////////////////////////////////////////////////
+
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, Index_ESA<TSpec> > const, ESA_SA>::Type & getFibre(Index<TText, Index_ESA<TSpec> > &index, ESA_RawSA const) {
+	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_SA> >::Type & 
+	getFibre(Index<TText, TSpec> &index, Tag<_Fibre_RawSA>  const) {
 		return indexSA(index);
 	}
 /*
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, Index_ESA<TSpec> > const, ESA_SA>::Type & getFibre(Index<TText, Index_ESA<TSpec> > const &index, ESA_RawSA const) {
+	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_SA> >::Type & 
+	getFibre(Index<TText, TSpec> const &index, Tag<_Fibre_RawSA>  const) {
 		return indexSA(index);
 	}
 */
 	template <typename TString, typename TSSetSpec, typename TSpec>
-	inline typename Fibre<Index<StringSet<TString, TSSetSpec>, Index_ESA<TSpec> > , ESA_RawSA>::Type
-	getFibre(Index<StringSet<TString, TSSetSpec>, Index_ESA<TSpec> > &index, ESA_RawSA const) 
+	inline typename Fibre<Index<StringSet<TString, TSSetSpec>, TSpec>, Tag<_Fibre_RawSA> >::Type
+	getFibre(Index<StringSet<TString, TSSetSpec>, TSpec> &index, Tag<_Fibre_RawSA>  const) 
 	{
-		typedef Index< StringSet<TString, TSSetSpec>, Index_ESA<TSpec> > TIndex;
+		typedef Index< StringSet<TString, TSSetSpec>, TSpec> TIndex;
 		
 		typedef FunctorGlobalize<
-			typename Value< typename Fibre<TIndex, ESA_SA>::Type >::Type,
+			typename Value< typename Fibre<TIndex, Tag<_Fibre_SA> >::Type >::Type,
 			typename StringSetLimits<StringSet<TString, TSSetSpec> >::Type
 		> TFunctor;
 		
 		typedef ModifiedString<
-			typename Fibre<Index<StringSet<TString, TSSetSpec>, Index_ESA<TSpec> >, ESA_SA>::Type,
+			typename Fibre<Index<StringSet<TString, TSSetSpec>, TSpec>, Tag<_Fibre_SA> >::Type,
 			ModView< TFunctor >
 		> ModString;
 
@@ -620,110 +481,138 @@ They differ if the index text is a set of strings. Then, raw text is the concate
 	}
 /*
 	template <typename TString, typename TSSetSpec, typename TSpec>
-	inline typename Fibre<Index<StringSet<TString, TSSetSpec>, Index_ESA<TSpec> > const, ESA_RawSA>::Type
-	getFibre(Index<StringSet<TString, TSSetSpec>, Index_ESA<TSpec> > const &index, ESA_RawSA const) {
-		typedef Index< StringSet<TString, TSSetSpec>, Index_ESA<TSpec> > TIndex;
+	inline typename Fibre<Index<StringSet<TString, TSSetSpec>, TSpec> const, Tag<_Fibre_RawSA> >::Type
+	getFibre(Index<StringSet<TString, TSSetSpec>, TSpec> const &index, Tag<_Fibre_RawSA>  const) 
+	{
+		typedef Index< StringSet<TString, TSSetSpec>, TSpec> TIndex;
 		return ModifiedString<
-			typename Fibre<TIndex const, ESA_SA>::Type,
+			typename Fibre<TIndex const, Tag<_Fibre_SA> >::Type,
 			ModGlobalizer<typename StringSetLimits<StringSet<TString, TSSetSpec> const>::Type> 
 		> (indexSA(index), stringSetLimits(indexText(index)));
 	}
 */
+
+//////////////////////////////////////////////////////////////////////////////
+
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, Index_ESA<TSpec> >, ESA_LCP>::Type & getFibre(Index<TText, Index_ESA<TSpec> > &index, ESA_LCP const) {
+	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_LCP> >::Type & 
+	getFibre(Index<TText, TSpec> &index, Tag<_Fibre_LCP>  const) {
 		return index.lcp;
 	}
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, Index_ESA<TSpec> > const, ESA_LCP>::Type & getFibre(Index<TText, Index_ESA<TSpec> > const &index, ESA_LCP const) {
+	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_LCP> >::Type & 
+	getFibre(Index<TText, TSpec> const &index, Tag<_Fibre_LCP>  const) {
 		return index.lcp;
 	}
 
+//////////////////////////////////////////////////////////////////////////////
+
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, Index_ESA<TSpec> >, ESA_LCPE>::Type & getFibre(Index<TText, Index_ESA<TSpec> > &index, ESA_LCPE const) {
+	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_LCPE> >::Type & 
+	getFibre(Index<TText, TSpec> &index, Tag<_Fibre_LCPE>  const) {
 		return index.lcpe;
 	}
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, Index_ESA<TSpec> > const, ESA_LCPE>::Type & getFibre(Index<TText, Index_ESA<TSpec> > const &index, ESA_LCPE const) {
+	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_LCPE> >::Type & 
+	getFibre(Index<TText, TSpec> const &index, Tag<_Fibre_LCPE>  const) {
 		return index.lcpe;
 	}
 
+//////////////////////////////////////////////////////////////////////////////
+
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, Index_ESA<TSpec> >, ESA_ChildTab>::Type & getFibre(Index<TText, Index_ESA<TSpec> > &index, ESA_ChildTab const) {
+	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_ChildTab> >::Type & 
+	getFibre(Index<TText, TSpec> &index, Tag<_Fibre_ChildTab>  const) {
 		return index.childtab;
 	}
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, Index_ESA<TSpec> > const, ESA_ChildTab>::Type & getFibre(Index<TText, Index_ESA<TSpec> > const &index, ESA_ChildTab const) {
+	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_ChildTab> >::Type & 
+	getFibre(Index<TText, TSpec> const &index, Tag<_Fibre_ChildTab>  const) {
 		return index.childtab;
 	}
 
+//////////////////////////////////////////////////////////////////////////////
+
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, Index_ESA<TSpec> >, ESA_BWT>::Type & getFibre(Index<TText, Index_ESA<TSpec> > &index, ESA_BWT const) {
+	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_BWT> >::Type & 
+	getFibre(Index<TText, TSpec> &index, Tag<_Fibre_BWT>  const) {
 		return index.bwt;
 	}
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, Index_ESA<TSpec> > const, ESA_BWT>::Type & getFibre(Index<TText, Index_ESA<TSpec> > const &index, ESA_BWT const) {
+	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_BWT> >::Type & 
+	getFibre(Index<TText, TSpec> const &index, Tag<_Fibre_BWT>  const) {
 		return index.bwt;
 	}
 
-
-
+//////////////////////////////////////////////////////////////////////////////
 ///.Function.length.param.object.type:Class.Index
 
 	template <typename TText, typename TSpec>
-	inline typename Size<Index<TText, Index_ESA<TSpec> > >::Type length(Index<TText, Index_ESA<TSpec> > const &index) {
-		return length(getFibre(index, ESA_RawText()));
+	inline typename Size<Index<TText, TSpec> >::Type 
+	length(Index<TText, TSpec> const &index) {
+		return length(getFibre(index, Tag<_Fibre_RawText>()));
 	}
 
+//////////////////////////////////////////////////////////////////////////////
+
 	template <typename TText, typename TSpec>
-	inline typename Size<Index<TText, Index_ESA<TSpec> > >::Type 
-	countSequences(Index<TText, Index_ESA<TSpec> > const &index) {
+	inline typename Size<Index<TText, TSpec> >::Type 
+	countSequences(Index<TText, TSpec> const &index) {
 		return 1;
 	}
 	template <typename TString, typename TSSetSpec, typename TSpec>
-	inline typename Size<Index<StringSet<TString, TSSetSpec>, Index_ESA<TSpec> > >::Type 
-	countSequences(Index<StringSet<TString, TSSetSpec>, Index_ESA<TSpec> > const &index) {
+	inline typename Size<Index<StringSet<TString, TSSetSpec>, TSpec> >::Type 
+	countSequences(Index<StringSet<TString, TSSetSpec>, TSpec> const &index) {
 		return length(indexText(index));
 	}
 
+//////////////////////////////////////////////////////////////////////////////
+
 	template <typename TSeqNo, typename TText, typename TSpec>
-	inline typename Size<Index<TText, Index_ESA<TSpec> > >::Type 
-	sequenceLength(TSeqNo seqNo, Index<TText, Index_ESA<TSpec> > const &index) {
+	inline typename Size<Index<TText, TSpec> >::Type 
+	sequenceLength(TSeqNo seqNo, Index<TText, TSpec> const &index) {
 		return length(index);
 	}
 
 	template <typename TSeqNo, typename TString, typename TSSetSpec, typename TSpec>
-	inline typename Size<Index<StringSet<TString, TSSetSpec>, Index_ESA<TSpec> > >::Type 
-	sequenceLength(TSeqNo seqNo, Index<StringSet<TString, TSSetSpec>, Index_ESA<TSpec> > const &index) {
+	inline typename Size<Index<StringSet<TString, TSSetSpec>, TSpec> >::Type 
+	sequenceLength(TSeqNo seqNo, Index<StringSet<TString, TSSetSpec>, TSpec> const &index) {
 		return length(indexText(index)[seqNo]);
 	}
 
+//////////////////////////////////////////////////////////////////////////////
 
 	template <typename TPos, typename TText, typename TSpec>
-	inline typename Size<Index<TText, Index_ESA<TSpec> > >::Type 
-	suffixLength(TPos pos, Index<TText, Index_ESA<TSpec> > const &index) {
+	inline typename Size<Index<TText, TSpec> >::Type 
+	suffixLength(TPos pos, Index<TText, TSpec> const &index) {
 		return sequenceLength(getSeqNo(pos, stringSetLimits(index)), index) - getSeqOffset(pos, stringSetLimits(index));
 	}
 
 
+//////////////////////////////////////////////////////////////////////////////
+// unified textAt interface
+
 	template <typename TPos, typename TIndex>
-	inline typename Reference<typename Fibre<TIndex, ESA_RawText>::Type>::Type textAt(TPos i, TIndex &index) {
-		return value(getFibre(index, ESA_RawText()), i);
+	inline typename Reference<typename Fibre<TIndex, Tag<_Fibre_RawText> >::Type>::Type 
+	textAt(TPos i, TIndex &index) {
+		return value(getFibre(index, Tag<_Fibre_RawText> ()), i);
 	}
 	template <typename TPos, typename TString, typename TSSetSpec, typename TSpec>
-	inline typename Reference<typename Fibre< Index< StringSet<TString, TSSetSpec>, Index_ESA<TSpec> >, ESA_RawText>::Type>::Type 
-	textAt(TPos i, Index< StringSet<TString, TSSetSpec>, Index_ESA<TSpec> > &index) {
-		return value(getFibre(index, ESA_RawText()), posGlobalize(i, stringSetLimits(index)));
+	inline typename Reference<typename Fibre< Index< StringSet<TString, TSSetSpec>, TSpec>, Tag<_Fibre_RawText> >::Type>::Type 
+	textAt(TPos i, Index< StringSet<TString, TSSetSpec>, TSpec> &index) {
+		return value(getFibre(index, Tag<_Fibre_RawText> ()), posGlobalize(i, stringSetLimits(index)));
 	}
 	template <typename TPos, typename TString, typename TSSetSpec, typename TSpec>
-	inline typename Reference<typename Fibre< Index< StringSet<TString, ConcatVirtual<TSSetSpec> >, Index_ESA<TSpec> >, ESA_RawText>::Type>::Type 
-	textAt(TPos i, Index< StringSet<TString, ConcatVirtual<TSSetSpec> >, Index_ESA<TSpec> > &index) {
+	inline typename Reference<typename Fibre< Index< StringSet<TString, ConcatVirtual<TSSetSpec> >, TSpec>, Tag<_Fibre_RawText> >::Type>::Type 
+	textAt(TPos i, Index< StringSet<TString, ConcatVirtual<TSSetSpec> >, TSpec> &index) {
 		Pair <
 			typename Size< StringSet<TString, ConcatVirtual<TSSetSpec> > >::Type,
 			typename Size< TString >::Type > locPos;
 		posLocalize(locPos, i, stringSetLimits(index));
-		return value(value(getFibre(index, ESA_Text()), getValueI1(locPos)), getValueI2(locPos));
+		return value(value(getFibre(index, Tag<_Fibre_Text> ()), getValueI1(locPos)), getValueI2(locPos));
 	}
 
+//////////////////////////////////////////////////////////////////////////////
 /**
 .Function.rawtextAt:
 ..summary:Shortcut for $value(indexRawText(..), ..)$.
@@ -736,14 +625,15 @@ They differ if the index text is a set of strings. Then, raw text is the concate
 */
 
 	template <typename TPos, typename TIndex>
-	inline typename Reference<typename Fibre<TIndex, ESA_RawText>::Type>::Type rawtextAt(TPos i, TIndex &index) {
-		return value(getFibre(index, ESA_RawText()), i);
+	inline typename Reference<typename Fibre<TIndex, Tag<_Fibre_RawText> >::Type>::Type rawtextAt(TPos i, TIndex &index) {
+		return value(getFibre(index, Tag<_Fibre_RawText> ()), i);
 	}
 	template <typename TPos, typename TIndex>
-	inline typename Reference<typename Fibre<TIndex const, ESA_RawText>::Type>::Type rawtextAt(TPos i, TIndex const &index) {
-		return value(getFibre(index, ESA_RawText()), i);
+	inline typename Reference<typename Fibre<TIndex const, Tag<_Fibre_RawText> >::Type>::Type rawtextAt(TPos i, TIndex const &index) {
+		return value(getFibre(index, Tag<_Fibre_RawText> ()), i);
 	}
 
+//////////////////////////////////////////////////////////////////////////////
 /**
 .Function.saAt:
 ..summary:Shortcut for $value(indexSA(..), ..)$.
@@ -756,20 +646,21 @@ They differ if the index text is a set of strings. Then, raw text is the concate
 */
 
 	template <typename TPos, typename TIndex>
-	inline typename Reference<typename Fibre<TIndex, ESA_SA>::Type>::Type saAt(TPos i, TIndex &index) {
-		return value(getFibre(index, ESA_SA()), i);
+	inline typename Reference<typename Fibre<TIndex, Tag<_Fibre_SA> >::Type>::Type saAt(TPos i, TIndex &index) {
+		return value(getFibre(index, Tag<_Fibre_SA> ()), i);
 	}
 	template <typename TPos, typename TIndex>
-	inline typename Reference<typename Fibre<TIndex const, ESA_SA>::Type>::Type saAt(TPos i, TIndex const &index) {
-		return value(getFibre(index, ESA_SA()), i);
+	inline typename Reference<typename Fibre<TIndex const, Tag<_Fibre_SA> >::Type>::Type saAt(TPos i, TIndex const &index) {
+		return value(getFibre(index, Tag<_Fibre_SA> ()), i);
 	}
 
 	template <typename TPos, typename TIndex>
-	inline typename Value<typename Fibre<TIndex const, ESA_RawSA>::Type>::Type rawsaAt(TPos i, TIndex const &index) {
+	inline typename Value<typename Fibre<TIndex const, Tag<_Fibre_RawSA> >::Type>::Type rawsaAt(TPos i, TIndex const &index) {
 		return posGlobalize(saAt(i, index), stringSetLimits(indexText(index)));
 	}
 
 
+//////////////////////////////////////////////////////////////////////////////
 /**
 .Function.lcpAt:
 ..summary:Shortcut for $value(indexLCP(..), ..)$.
@@ -782,14 +673,15 @@ They differ if the index text is a set of strings. Then, raw text is the concate
 */
 
 	template <typename TPos, typename TIndex>
-	inline typename Reference<typename Fibre<TIndex, ESA_LCP>::Type>::Type lcpAt(TPos i, TIndex &index) {
-		return value(getFibre(index, ESA_LCP()), i);
+	inline typename Reference<typename Fibre<TIndex, Tag<_Fibre_LCP> >::Type>::Type lcpAt(TPos i, TIndex &index) {
+		return value(getFibre(index, Tag<_Fibre_LCP> ()), i);
 	}
 	template <typename TPos, typename TIndex>
-	inline typename Reference<typename Fibre<TIndex const, ESA_LCP>::Type>::Type lcpAt(TPos i, TIndex const &index) {
-		return value(getFibre(index, ESA_LCP()), i);
+	inline typename Reference<typename Fibre<TIndex const, Tag<_Fibre_LCP> >::Type>::Type lcpAt(TPos i, TIndex const &index) {
+		return value(getFibre(index, Tag<_Fibre_LCP> ()), i);
 	}
 
+//////////////////////////////////////////////////////////////////////////////
 /**
 .Function.lcpeAt:
 ..summary:Shortcut for $value(indexLCPE(..), ..)$.
@@ -802,14 +694,15 @@ They differ if the index text is a set of strings. Then, raw text is the concate
 */
 
 	template <typename TPos, typename TIndex>
-	inline typename Reference<typename Fibre<TIndex, ESA_LCPE>::Type>::Type lcpeAt(TPos i, TIndex &index) {
-		return value(getFibre(index, ESA_LCPE()), i);
+	inline typename Reference<typename Fibre<TIndex, Tag<_Fibre_LCPE> >::Type>::Type lcpeAt(TPos i, TIndex &index) {
+		return value(getFibre(index, Tag<_Fibre_LCPE> ()), i);
 	}
 	template <typename TPos, typename TIndex>
-	inline typename Reference<typename Fibre<TIndex const, ESA_LCPE>::Type>::Type lcpeAt(TPos i, TIndex const &index) {
-		return value(getFibre(index, ESA_LCPE()), i);
+	inline typename Reference<typename Fibre<TIndex const, Tag<_Fibre_LCPE> >::Type>::Type lcpeAt(TPos i, TIndex const &index) {
+		return value(getFibre(index, Tag<_Fibre_LCPE> ()), i);
 	}
 
+//////////////////////////////////////////////////////////////////////////////
 /**
 .Function.childAt:
 ..summary:Shortcut for $value(indexChildTab(..), ..)$.
@@ -822,14 +715,15 @@ They differ if the index text is a set of strings. Then, raw text is the concate
 */
 
 	template <typename TPos, typename TIndex>
-	inline typename Reference<typename Fibre<TIndex, ESA_ChildTab>::Type>::Type childAt(TPos i, TIndex &index) {
-		return value(getFibre(index, ESA_ChildTab()), i);
+	inline typename Reference<typename Fibre<TIndex, Tag<_Fibre_ChildTab> >::Type>::Type childAt(TPos i, TIndex &index) {
+		return value(getFibre(index, Tag<_Fibre_ChildTab> ()), i);
 	}
 	template <typename TPos, typename TIndex>
-	inline typename Reference<typename Fibre<TIndex const, ESA_ChildTab>::Type>::Type childAt(TPos i, TIndex const &index) {
-		return value(getFibre(index, ESA_ChildTab()), i);
+	inline typename Reference<typename Fibre<TIndex const, Tag<_Fibre_ChildTab> >::Type>::Type childAt(TPos i, TIndex const &index) {
+		return value(getFibre(index, Tag<_Fibre_ChildTab> ()), i);
 	}
 
+//////////////////////////////////////////////////////////////////////////////
 /**
 .Function.bwtAt:
 ..summary:Shortcut for $value(indexBWT(..), ..)$.
@@ -842,15 +736,16 @@ They differ if the index text is a set of strings. Then, raw text is the concate
 */
 
 	template <typename TPos, typename TIndex>
-	inline typename Reference<typename Fibre<TIndex, ESA_BWT>::Type>::Type bwtAt(TPos i, TIndex &index) {
-		return value(getFibre(index, ESA_BWT()), i);
+	inline typename Reference<typename Fibre<TIndex, Tag<_Fibre_BWT> >::Type>::Type bwtAt(TPos i, TIndex &index) {
+		return value(getFibre(index, Tag<_Fibre_BWT> ()), i);
 	}
 	template <typename TPos, typename TIndex>
-	inline typename Reference<typename Fibre<TIndex const, ESA_BWT>::Type>::Type bwtAt(TPos i, TIndex const &index) {
-		return value(getFibre(index, ESA_BWT()), i);
+	inline typename Reference<typename Fibre<TIndex const, Tag<_Fibre_BWT> >::Type>::Type bwtAt(TPos i, TIndex const &index) {
+		return value(getFibre(index, Tag<_Fibre_BWT> ()), i);
 	}
 
-///.Function.clear.param.object.type:Class.Index
+//////////////////////////////////////////////////////////////////////////////
+// interface for infinity/invalid values
 
 	template <typename TValue>
 	struct _SizeInval {
@@ -867,18 +762,7 @@ They differ if the index text is a set of strings. Then, raw text is the concate
 		return v == _SizeInval<TValue>::VALUE;
 	}
 
-	template <typename TText, typename TSpec>
-	inline void clear(Index<TText, Index_ESA<TSpec> > &index) {
-		clear(getFibre(index, ESA_SA()));
-		clear(getFibre(index, ESA_LCP()));
-		clear(getFibre(index, ESA_LCPE()));
-		clear(getFibre(index, ESA_ChildTab()));
-		clear(getFibre(index, ESA_BWT()));
-	}
-
-
 //////////////////////////////////////////////////////////////////////////////
-
 /**
 .Function.indexText:
 ..summary:Shortcut for $getFibre(.., ESA_Text)$.
@@ -890,22 +774,25 @@ They differ if the index text is a set of strings. Then, raw text is the concate
 */
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, Index_ESA<TSpec> >, ESA_Text>::Type & indexText(Index<TText, Index_ESA<TSpec> > &index) { return getFibre(index, ESA_Text()); }
+	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_Text> >::Type & indexText(Index<TText, TSpec> &index) { return getFibre(index, Tag<_Fibre_Text>()); }
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, Index_ESA<TSpec> > const, ESA_Text>::Type & indexText(Index<TText, Index_ESA<TSpec> > const &index) { return getFibre(index, ESA_Text()); }
+	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_Text> >::Type & indexText(Index<TText, TSpec> const &index) { return getFibre(index, Tag<_Fibre_Text> ()); }
+
+//////////////////////////////////////////////////////////////////////////////
 
 	template <typename TText, typename TSpec>
 	inline typename StringSetLimits<TText const>::Type
-	stringSetLimits(Index<TText, Index_ESA<TSpec> > const &index) { 
+	stringSetLimits(Index<TText, TSpec> const &index) { 
 		return Nothing(); 
 	}
 
 	template <typename TString, typename TSSetSpec, typename TSpec>
 	inline typename StringSetLimits< StringSet<TString, TSSetSpec> const >::Type & 
-	stringSetLimits(Index<StringSet<TString, TSSetSpec>, Index_ESA<TSpec> > const &index) {
+	stringSetLimits(Index<StringSet<TString, TSSetSpec>, TSpec> const &index) {
 		return stringSetLimits(indexText(index)); 
 	}
 
+//////////////////////////////////////////////////////////////////////////////
 /**
 .Function.indexRawText:
 ..summary:Shortcut for $getFibre(.., ESA_RawText)$.
@@ -917,10 +804,11 @@ They differ if the index text is a set of strings. Then, raw text is the concate
 */
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, Index_ESA<TSpec> >, ESA_RawText>::Type & indexRawText(Index<TText, Index_ESA<TSpec> > &index) { return getFibre(index, ESA_RawText()); }
+	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_RawText> >::Type & indexRawText(Index<TText, TSpec> &index) { return getFibre(index, Tag<_Fibre_RawText> ()); }
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, Index_ESA<TSpec> > const, ESA_RawText>::Type & indexRawText(Index<TText, Index_ESA<TSpec> > const &index) { return getFibre(index, ESA_RawText()); }
+	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_RawText> >::Type & indexRawText(Index<TText, TSpec> const &index) { return getFibre(index, Tag<_Fibre_RawText> ()); }
 
+//////////////////////////////////////////////////////////////////////////////
 /**
 .Function.indexSA:
 ..summary:Shortcut for $getFibre(.., ESA_SA)$.
@@ -932,25 +820,28 @@ They differ if the index text is a set of strings. Then, raw text is the concate
 */
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, Index_ESA<TSpec> >, ESA_SA>::Type & indexSA(Index<TText, Index_ESA<TSpec> > &index) { return getFibre(index, ESA_SA()); }
+	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_SA> >::Type & indexSA(Index<TText, TSpec> &index) { return getFibre(index, Tag<_Fibre_SA> ()); }
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, Index_ESA<TSpec> > const, ESA_SA>::Type & indexSA(Index<TText, Index_ESA<TSpec> > const &index) { return getFibre(index, ESA_SA()); }
+	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_SA> >::Type & indexSA(Index<TText, TSpec> const &index) { return getFibre(index, Tag<_Fibre_SA> ()); }
 
+//////////////////////////////////////////////////////////////////////////////
 /**
 .Function.indexRawSA:
 ..summary:Shortcut for $getFibre(.., ESA_RawSA)$.
 ..cat:Index
-..signature:indexSA(index)
+..signature:indexRawSA(index)
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.Index_ESA
-..returns:A reference to the @Tag.ESA_SA@ fibre (suffix array).
+..returns:A reference to the @Tag.ESA_RawSA@ fibre (suffix array).
 */
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, Index_ESA<TSpec> >, ESA_RawSA>::Type indexRawSA(Index<TText, Index_ESA<TSpec> > &index) { return getFibre(index, ESA_RawSA()); }
+	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_RawSA> >::Type indexRawSA(Index<TText, TSpec> &index) { return getFibre(index, Tag<_Fibre_RawSA> ()); }
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, Index_ESA<TSpec> > const, ESA_RawSA>::Type indexRawSA(Index<TText, Index_ESA<TSpec> > const &index) { return getFibre(index, ESA_RawSA()); }
+	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_RawSA> >::Type indexRawSA(Index<TText, TSpec> const &index) { return getFibre(index, Tag<_Fibre_RawSA> ()); }
 
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 /**
 .Function.indexLCP:
 ..summary:Shortcut for $getFibre(.., ESA_LCP)$.
@@ -962,10 +853,11 @@ They differ if the index text is a set of strings. Then, raw text is the concate
 */
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, Index_ESA<TSpec> >, ESA_LCP>::Type & indexLCP(Index<TText, Index_ESA<TSpec> > &index) { return getFibre(index, ESA_LCP()); }
+	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_LCP> >::Type & indexLCP(Index<TText, TSpec> &index) { return getFibre(index, Tag<_Fibre_LCP> ()); }
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, Index_ESA<TSpec> > const, ESA_LCP>::Type & indexLCP(Index<TText, Index_ESA<TSpec> > const &index) { return getFibre(index, ESA_LCP()); }
+	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_LCP> >::Type & indexLCP(Index<TText, TSpec> const &index) { return getFibre(index, Tag<_Fibre_LCP> ()); }
 
+//////////////////////////////////////////////////////////////////////////////
 /**
 .Function.indexLCPE:
 ..summary:Shortcut for $getFibre(.., ESA_LCPE)$.
@@ -977,10 +869,11 @@ They differ if the index text is a set of strings. Then, raw text is the concate
 */
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, Index_ESA<TSpec> >, ESA_LCPE>::Type & indexLCPE(Index<TText, Index_ESA<TSpec> > &index) { return getFibre(index, ESA_LCPE()); }
+	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_LCPE> >::Type & indexLCPE(Index<TText, TSpec> &index) { return getFibre(index, Tag<_Fibre_LCPE> ()); }
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, Index_ESA<TSpec> > const, ESA_LCPE>::Type & indexLCPE(Index<TText, Index_ESA<TSpec> > const &index) { return getFibre(index, ESA_LCPE()); }
+	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_LCPE> >::Type & indexLCPE(Index<TText, TSpec> const &index) { return getFibre(index, Tag<_Fibre_LCPE> ()); }
 
+//////////////////////////////////////////////////////////////////////////////
 /**
 .Function.indexBWT:
 ..summary:Shortcut for $getFibre(.., ESA_BWT)$.
@@ -992,10 +885,11 @@ They differ if the index text is a set of strings. Then, raw text is the concate
 */
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, Index_ESA<TSpec> >, ESA_BWT>::Type & indexBWT(Index<TText, Index_ESA<TSpec> > &index) { return getFibre(index, ESA_BWT()); }
+	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_BWT> >::Type & indexBWT(Index<TText, TSpec> &index) { return getFibre(index, Tag<_Fibre_BWT> ()); }
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, Index_ESA<TSpec> > const, ESA_BWT>::Type & indexBWT(Index<TText, Index_ESA<TSpec> > const &index) { return getFibre(index, ESA_BWT()); }
+	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_BWT> >::Type & indexBWT(Index<TText, TSpec> const &index) { return getFibre(index, Tag<_Fibre_BWT> ()); }
 
+//////////////////////////////////////////////////////////////////////////////
 /**
 .Function.indexChildTab:
 ..summary:Shortcut for $getFibre(.., ESA_ChildTab)$.
@@ -1007,9 +901,9 @@ They differ if the index text is a set of strings. Then, raw text is the concate
 */
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, Index_ESA<TSpec> >, ESA_ChildTab>::Type & indexChildTab(Index<TText, Index_ESA<TSpec> > &index) { return getFibre(index, ESA_ChildTab()); }
+	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_ChildTab> >::Type & indexChildTab(Index<TText, TSpec> &index) { return getFibre(index, Tag<_Fibre_ChildTab> ()); }
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, Index_ESA<TSpec> > const, ESA_ChildTab>::Type & indexChildTab(Index<TText, Index_ESA<TSpec> > const &index) { return getFibre(index, ESA_ChildTab()); }
+	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_ChildTab> >::Type & indexChildTab(Index<TText, TSpec> const &index) { return getFibre(index, Tag<_Fibre_ChildTab> ()); }
 
 }
 

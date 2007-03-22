@@ -4,9 +4,12 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 
-struct SimpleShape;
-struct GappedShape;
-
+	struct SimpleShape;
+	struct GappedShape;
+/*
+	typedef Tag<_SimpleShape>	SimpleShape;
+	typedef Tag<_GappedShape>	GappedShape;
+*/
 
 /**
 .Class.Shape:
@@ -28,14 +31,12 @@ inline int intPow(int a, int b)
 {
 SEQAN_CHECKPOINT
 	int ret = 1;
-	while(b!=0)
+	while (b != 0)
 	{
-		if(b & 1)
-			ret*=a;
-		a*=a;
+		if (b & 1) ret *= a;
+		a *= a;
 		b >>= 1;
 	}	
-	
 	return ret;
 }
 
@@ -148,7 +149,7 @@ SEQAN_CHECKPOINT
 	int span = shapeSpan(shape);
 	while(i < span)
 	{
-		pos = pos * ValueSize<Shape<TString, SimpleShape> >::VALUE + (int)*qgram_it;
+		pos = pos * ValueSize<Shape<TString, SimpleShape> >::VALUE + (unsigned)*qgram_it;
 		++qgram_it;
 		++i;
 	}
@@ -173,25 +174,24 @@ hash value is supposed to be determined for.
 */
 template <typename TSequenceIterator, typename TString>
 typename Size<Shape<TString, SimpleShape> >::Type
-hashNext(Shape<TString, SimpleShape> & shape, TSequenceIterator qgram_1_it, 
-		 TSequenceIterator qgram_2_it, 
-		 typename Size<Shape<TString, SimpleShape> >::Type & x)
+inline hashNext(
+	Shape<TString, SimpleShape> & shape, 
+	TSequenceIterator qgram_1_it, 
+	TSequenceIterator qgram_2_it, 
+	typename Size<Shape<TString, SimpleShape> >::Type x)
 {
 SEQAN_CHECKPOINT
-
-	typedef typename Size<Shape<TString, SimpleShape> >::Type TValue;
 	int span = shapeSpan(shape);
-	TValue y;
-    y = (x - (int)*qgram_1_it * shape.term) * ValueSize<Shape<TString, SimpleShape> >::VALUE + (int)*(qgram_2_it+span-1);
-	
-	return y;
+    return 
+		(x - (int)*qgram_1_it * shape.term) * ValueSize<Shape<TString, SimpleShape> >::VALUE
+		+ (int)*(qgram_2_it + span - 1);
 }
 
 
 
 template <typename TString>
 void
-stringToShape(Shape<TString,SimpleShape> & shape, String<char> & shape_string)
+stringToShape(Shape<TString,SimpleShape> & shape, String<char> const & shape_string)
 {
 	shape.span = length(shape_string);
 	shape.term = intPow(ValueSize<TString>::VALUE, length(shape_string)-1);

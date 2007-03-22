@@ -23,7 +23,7 @@
     #define SEQAN_PROENDMARK(m)
     #define SEQAN_PRORESET
     #define SEQAN_PROTIMESTART(a)
-    #define SEQAN_PROTIMEDIFF(a)
+    #define SEQAN_PROTIMEDIFF(a)	0
     #define SEQAN_PROMALLOC(s) 		malloc(s)
     #define SEQAN_PROFREE(p) 		free(p)
 
@@ -120,6 +120,7 @@
 	};
 
 	template <typename T> _proTStates	_proData<T>::_proValue = {};
+	template <typename T> _proTStates	_proData<T>::_proLastUpdate = {};
 	template <typename T> int			_proData<T>::_proExtraCount = 0;
 	template <typename T> clock_t		_proData<T>::_proCpuTimeLast = 0;
 	template <typename T> _proInt		_proData<T>::_proCpuTimeOffset = 0;

@@ -242,6 +242,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		TSetIter	ptr;
 		TObjIter	obj;
 
+		Iter() {}
+
 		Iter(TSetIter _ptr, TObjIter _obj):
 			ptr(_ptr), obj(_obj)
 		{
@@ -277,6 +279,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	public:
 		TSetIter	ptr;
 		TObjIter	obj;
+
+		Iter() {}
 
 		Iter(TSetIter _ptr, TObjIter _obj):
 			ptr(_ptr), obj(_obj)

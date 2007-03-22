@@ -71,8 +71,8 @@ namespace SEQAN_NAMESPACE_MAIN
 			SizeType bLeft = getValueI2(getValueI1(b));
 
 			if (aLeft >= 7 && bLeft >= 7) {
-				if (a.i2.i < b.i2.i) return -1;
-				if (a.i2.i > b.i2.i) return 1;
+				if (a.i2 < b.i2) return -1;
+				if (a.i2 > b.i2) return 1;
 				return 0;
 			}
 

@@ -15,14 +15,23 @@ namespace SEQAN_NAMESPACE_MAIN
 //namespace SEQAN_NAMESPACE_PIPELINING
 //{
 
-    struct FillWorker {
+    //////////////////////////////////////////////////////////////////////////////
+	// some metaprogramming to unrool fixed-size loops
+    struct _EchoerFillWorker {
         template <typename Arg>
         static inline void body(Arg &arg, int I) {
             arg.tmp.i2[I-1] = *(arg.in); ++(arg.in);
         }
     };
     
-    struct ShiftWorker {
+    struct _EchoerClearWorker {
+        template <typename Arg>
+        static inline void body(Arg &arg, int I) {
+            arg.i2[I] = 0;
+        }
+    };
+    
+    struct _EchoerShiftWorker {
         template <typename Arg>
         static inline void body(Arg &arg, int I) {
             arg.i2[I] = arg.i2[I-1];
@@ -74,7 +83,7 @@ namespace SEQAN_NAMESPACE_MAIN
         inline Pipe& operator++() {
 			++in;
             if (eof(in)) return *this;
-            LOOP_REVERSE<ShiftWorker, echoRepeats - 1>::run(this->tmp);
+            LOOP_REVERSE<_EchoerShiftWorker, echoRepeats - 1>::run(this->tmp);
 			++tmp.i1;
             tmp.i2[0] = *in;
             return *this;
@@ -88,7 +97,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline bool control(Pipe< TInput, Echoer< echoRepeats, omitFirst > > &me, ControlBeginRead const &command) {
         if (!control(me.in, command)) return false;
         me.tmp.i1 = 0;
-        memset<sizeof(me.tmp.i2), 0>(&(me.tmp.i2));
+        LOOP<_EchoerClearWorker, echoRepeats - 1>::run(me.tmp);
         if (!eof(me.in)) me.tmp.i2[0] = *me.in;
 		return true;
 	}
@@ -97,7 +106,7 @@ namespace SEQAN_NAMESPACE_MAIN
     inline bool control(Pipe< TInput, Echoer< echoRepeats, true > > &me, ControlBeginRead const &command) {
         if (!control(me.in, command) || size(me.in) < echoRepeats - 1) return false;
         me.tmp.i1 = 0;
-        LOOP_REVERSE<FillWorker, echoRepeats - 1>::run(me);
+        LOOP_REVERSE<_EchoerFillWorker, echoRepeats - 1>::run(me);
         if (!eof(me.in)) me.tmp.i2[0] = *me.in;
 		return true;
     }

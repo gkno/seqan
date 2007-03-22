@@ -59,7 +59,6 @@ void testMultiIndex()
 		//t[4] = "ill";
 		//t[5] = "wow";
 
-
 		t[0] = "caggctcgcgt";
 		t[1] = "caggaacg";
 		t[2] = "tcgttg";
@@ -67,17 +66,16 @@ void testMultiIndex()
 		t[4] = "agg";
 		t[5] = "ctg";
 
-		t[0] = "aaaaccccc";
-		t[1] = "aaaaaaccc";
-		t[2] = "aaccccccc";
-
         Index<TMulti> esa;
 		for(unsigned i=0; i<3; ++i)
 			appendValue(indexText(esa), t[i]);
 
 		Iter<Index<TMulti>, VSTree< BottomUp<> > > it(esa);
 		while (!atEnd(it)) {
-			std::cout << value(it) << " = " << representative(it) /*<< "    edge:" << parentEdgeLabel(it) */<< ::std::endl;
+			cout << countOccurences(it) << "\t";
+			cout << representative(it) << "\t";
+//			cout << "parentEdgeLabel:" << parentEdgeLabel(it);
+			cout << endl;
 			goNext(it);
 		}
 
@@ -125,6 +123,7 @@ void testSTreeIterators()
 //		String<char> text("AAAAAGGGGG");
 		TIndex index(text);
 		Iter<TIndex, VSTree< TopDown< ParentLinks<Preorder> > > > it(index);
+		Iter<TIndex, VSTree< TopDown<> > > itNoLinks(it);	// test conversion
 		//Iter<TIndex, VSTree< BottomUp<> > > it(index);
 
 		cout << "SA       = ";
@@ -144,14 +143,45 @@ void testSTreeIterators()
 
 //		while (goDown(it));
 		while (!atEnd(it)) {
-			std::cout << value(it) << " = " << representative(it) << "    edge:" << parentEdgeLabel(it) << ::std::endl;
+			cout << countOccurences(it) << "\t";
+			cout << representative(it) << "\t";
+			cout << "parentEdgeLabel: " << parentEdgeLabel(it);
+			cout << endl;
 			goNext(it);
 		}
 }
 
 
+void testMaxRepeats()
+{
+//		typedef String<char, External<> > TText;
+		typedef String<char> TText;
+
+        Index<TText> esa;
+//        open(esa, "corpus/NC_000117.txt");
+		indexText(esa) = "HALLOBALLOHALLEBALLO";
+
+		FILE* dotFile = fopen("stree.dot","w");
+		write(dotFile, esa, DotDrawing());
+		fclose(dotFile);
+
+        Iterator< Index<TText>, MaxRepeats >::Type it(esa, 3);
+		typedef MaxRepeat< Index<TText> > TRepeat;
+        while (!atEnd(it)) {
+			cout << representative(it) << ":";
+			Iterator<TRepeat>::Type mit(it);
+			while (!atEnd(mit)) {
+				cout << "\t" << *mit;
+				++mit;
+			}
+			cout << endl;
+            ++it;
+        }
+}
+
+
 template <typename TIteratorSpec>
-void testIteratorSpec()
+void testSuperMaxRepeats()
 {
 //		typedef String<char, External<> > TText;
 		typedef String<char> TText;
@@ -161,15 +191,50 @@ void testIteratorSpec()
 		indexText(esa) = "HALLOBALLOHALLEBALLO";
 
         typename Iterator< Index<TText>, TIteratorSpec >::Type it(esa);
-        unsigned counter = 0;
         while (!atEnd(it)) {
-				cout << representative(it) << "   " << value(it) << endl;
-                ++it;
-                ++counter;
+			cout << representative(it) << ":";
+			for(typename Size<Index<TText> >::Type i = 0; i < countOccurences(it); ++i)
+				cout << "\t" << getOccurences(it)[i];
+			cout << endl;
+            ++it;
         }
+}
 
-        ::std::cout << "supermaximal repeats: " << counter << ::std::endl;
 
+void testMUMs()
+{
+		typedef String<char> TText;
+		typedef StringSet< TText, ConcatDirect<> > TMulti;
+		typedef Index<TMulti, Index_ESA<> > TIndex;
+
+		String<char> t[3];
+
+		t[0] = "fefhalloballo";
+		t[1] = "halloballefser";
+		t[2] = "grballoballo";
+
+
+        TIndex esa;
+		for(int i = 0; i < 3; ++i)
+			appendValue(indexText(esa), t[i]);			// add sequences to multiple index
+
+		Iterator<TIndex, MUMs>::Type it(esa, 0);		// set minimum MUM length to 20
+		String< SAValue<TIndex>::Type > occs;			// temp. string storing the hit positions
+
+		cout << resetiosflags(ios::left);
+		while (!atEnd(it)) 
+		{
+			cout << representative(it) << ":";
+			occs = getOccurences(it);					// gives hit positions (seqNo,seqOfs)
+			orderOccurences(occs);						// order them by seqNo
+			
+			for(unsigned i = 0; i < length(occs); ++i)
+				cout << "\t" << getValueI2(occs[i]);
+			cout << endl;
+			cout << alignment(it) << endl;
+
+			++it;
+		}
 }
 
 
@@ -180,19 +245,25 @@ void simpleMUMmer()
 		typedef Index<TMulti, Index_ESA<> > TIndex;
 
 		String<char> t[3];
-		if (!open(t[0], "corpus/NC_000117.txt") ||
+/*		if (!open(t[0], "corpus/NC_000117.txt") ||
 		    !open(t[1], "corpus/NC_002620.txt") ||
 			!open(t[2], "corpus/NC_007429.txt")) 
 		{
 			cout << "Could not read in all datasets" << endl;
 			return;
 		}
+*/
+
+		t[0] = "fefhalloballo";
+		t[1] = "halloballefser";
+		t[2] = "grballoballo";
+
 
         TIndex esa;
-		for(int i = 0; i < 2; ++i)
+		for(int i = 0; i < 3; ++i)
 			appendValue(indexText(esa), t[i]);			// add sequences to multiple index
 
-		Iterator<TIndex, MUMs>::Type it(esa, 20);		// set minimum MUM length to 20
+		Iterator<TIndex, MUMs>::Type it(esa, 0);		// set minimum MUM length to 20
 		String< SAValue<TIndex>::Type > occs;			// temp. string storing the hit positions
 
 		cout << resetiosflags(ios::left);
@@ -209,6 +280,8 @@ void simpleMUMmer()
 			cout << setw(8) 
 				 << repLength(it)
 				 << endl;
+
+			cout << "== " << alignment(it) << endl;
 
 			++it;
 		}
@@ -264,19 +337,34 @@ int main()
 {
 	SEQAN_TREPORT("TEST BEGIN")
 
-//		testIndexCreation();
-//		Main_TestQGram();
+	std::cout << "===================================" << ::std::endl;
+	std::cout << "----Basic Suffix Tree iterators----" << ::std::endl;
+	testSTreeIterators();
+//	testIndexCreation();
+//	Main_TestQGram();
+//	testBuild();
 
-//		testSTreeIterators();
-//		testIteratorSpec<MaxRepeats>();
+	std::cout << "===================================" << ::std::endl;
+	std::cout << "----Suffix Array based Finder------" << ::std::endl;
+	testFind<ESA_FIND_MLR>();
+	std::cout << "===================================" << ::std::endl;
+	std::cout << "----Multiple Sequence Index--------" << ::std::endl;
+	testMultiIndex();
+	std::cout << "===================================" << ::std::endl;
+	std::cout << "----MUMs---------------------------" << ::std::endl;
+	testMUMs();
+	std::cout << "===================================" << ::std::endl;
+	std::cout << "----Maximal Repeats----------------" << ::std::endl;
+	testMaxRepeats();
+	std::cout << "===================================" << ::std::endl;
+	std::cout << "----Supermaximal Repeats-----------" << ::std::endl;
+	testSuperMaxRepeats<SuperMaxRepeats>();
+	std::cout << "===================================" << ::std::endl;
+	std::cout << "----Supermaximal Repeats---fast----" << ::std::endl;
+	testSuperMaxRepeats<SuperMaxRepeatsFast>();
+	std::cout << "===================================" << ::std::endl;
 
-		testFind<ESA_MLR>();
-//		testBuild();
-		testMultiIndex();
-		testIteratorSpec<SuperMaxRepeats>();
-		testIteratorSpec<SuperMaxRepeatsFast>();
 //		simpleMUMmer();	
-
 	SEQAN_TREPORT("TEST END")
 		return 0;
 }

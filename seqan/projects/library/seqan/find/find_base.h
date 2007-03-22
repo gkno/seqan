@@ -12,7 +12,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..summary:Default @Class.Finder@ specialization type.
 ..signature:DefaultFinder<THaystack>::Type
 ..param.THaystack:The given haystack type.
-..returns:Is $void$ by default and @Tag.ESA_MLR@ if $THaystack$ is an @Class.Index@.
+..returns:Is $void$ by default and @Tag.ESA_FIND_MLR@ if $THaystack$ is an @Class.Index@.
 */
 	template < typename TObject >
 	struct DefaultFinder {

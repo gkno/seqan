@@ -198,13 +198,7 @@ $Iterator<T>::Type$ is the type of the iterator for $object$-type $T$.
 	end(String<TValue, Block<SPACE> > &me, Tag<TSpec> const tag_)
 	{
 	SEQAN_CHECKPOINT
-		typedef Iter<String<TValue, Block<SPACE> >, PositionIterator> TIter;
-		typename Size< String<TValue, Block<SPACE> > >::Type len = length(me.blocks);
-
-		if (len) 
-			return TIter(me, (len - 1) * SPACE + (me.lastValue - me.blockFirst));
-		else
-			return TIter(me, 0);
+		return Iter<String<TValue, Block<SPACE> >, PositionIterator>(me, length(me));
 	}
 
 	template<typename TValue, unsigned int SPACE, typename TSpec>
@@ -212,13 +206,7 @@ $Iterator<T>::Type$ is the type of the iterator for $object$-type $T$.
 	end(String<TValue, Block<SPACE> > const &me, Tag<TSpec> const tag_)
 	{
 	SEQAN_CHECKPOINT
-		typedef Iter<String<TValue, Block<SPACE> > const, PositionIterator> TIter;
-		typename Size< String<TValue, Block<SPACE> > >::Type len = length(me.blocks);
-
-		if (len) 
-			return TIter(me, (len - 1) * SPACE + (me.lastValue - me.blockFirst));
-		else
-			return TIter(me, 0);
+		return Iter<String<TValue, Block<SPACE> > const, PositionIterator>(me, length(me));
 	}
 
 	template<typename TValue, unsigned int SPACE, typename TSource>
@@ -242,7 +230,7 @@ $Iterator<T>::Type$ is the type of the iterator for $object$-type $T$.
 		TPos const pos) 
 	{
 	SEQAN_CHECKPOINT
-		return value(*stack.blocks[pos / SPACE], pos % SPACE);
+		return value(*(stack.blocks[pos / SPACE]), pos % SPACE);
 	}
 
 	template<typename TValue, unsigned int SPACE, typename TPos>
@@ -252,7 +240,7 @@ $Iterator<T>::Type$ is the type of the iterator for $object$-type $T$.
 		TPos const pos) 
 	{
 	SEQAN_CHECKPOINT
-		return value(*stack.blocks[pos / SPACE], pos % SPACE);
+		return value(*(stack.blocks[pos / SPACE]), pos % SPACE);
 	}
 
 	template<typename TValue, unsigned int SPACE, typename TIteratorSpec>
@@ -371,6 +359,28 @@ $Iterator<T>::Type$ is the type of the iterator for $object$-type $T$.
 	}
 
 	template<typename TValue, unsigned int SPACE>
+	inline TValue &
+	topPrev(String<TValue, Block<SPACE> > & me) 
+	{
+	SEQAN_CHECKPOINT
+		if (me.lastValue != me.blockFirst)
+			return *(me.lastValue - 1);
+		else
+			return *(begin(*me.blocks[length(me.blocks) - 1]) + (SPACE - 1));
+	}
+
+	template<typename TValue, unsigned int SPACE>
+	inline TValue const &
+	topPrev(String<TValue, Block<SPACE> > const& me) 
+	{
+	SEQAN_CHECKPOINT
+		if (me.lastValue != me.blockFirst)
+			return *(me.lastValue - 1);
+		else
+			return *(begin(*me.blocks[length(me.blocks) - 1]) + (SPACE - 1));
+	}
+
+	template<typename TValue, unsigned int SPACE>
 	inline void 
 	pop(String<TValue, Block<SPACE> >& me) 
 	{
@@ -413,7 +423,7 @@ $Iterator<T>::Type$ is the type of the iterator for $object$-type $T$.
 	{
 	SEQAN_CHECKPOINT
 		if (length(me.blocks))
-			return (length(me.blocks) - 1) * SPACE + (me.lastValue - me.blockFirst);
+			return (length(me.blocks) - 1) * SPACE + (me.lastValue - me.blockFirst) + 1;
 		else
 			return 0;
 	}

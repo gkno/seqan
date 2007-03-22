@@ -712,7 +712,7 @@ namespace SEQAN_NAMESPACE_MAIN
 						freePage(memBuffer, *this);
                     else {
 						close(file);
-                        SEQAN_PROSUB(PROIOVOLUME, (TFSize)_size * (TFSize)sizeof(TValue));
+                        SEQAN_PROSUB(PROIOVOLUME, (_proFloat)((TFSize)_size * (TFSize)sizeof(TValue)));
                     }
 				}
 
@@ -721,7 +721,7 @@ namespace SEQAN_NAMESPACE_MAIN
 						allocPage(memBuffer, _newSize, *this);
                     else {
 						openTemp(file);
-                        SEQAN_PROADD(PROIOVOLUME, (TFSize)_newSize * (TFSize)sizeof(TValue));
+                        SEQAN_PROADD(PROIOVOLUME, (_proFloat)((TFSize)_newSize * (TFSize)sizeof(TValue)));
                     }
 				}
 			}

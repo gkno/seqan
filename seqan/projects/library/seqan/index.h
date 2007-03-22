@@ -12,7 +12,7 @@
 #include <string.h> // memset
 
 //____________________________________________________________________________
-// index creation
+// index construction algorithms
 
 #include <seqan/sequence.h>
 #include <seqan/sequence/sequence_multiple.h>
@@ -49,6 +49,9 @@
 #include <seqan/index/index_childtab.h>
 #include <seqan/index/index_bwt.h>
 
+//____________________________________________________________________________
+// q-gram index
+
 #include <seqan/index/shape_base.h>
 #include <seqan/index/shape_gapped.h>
 #include <seqan/index/index_qgram.h>
@@ -63,6 +66,7 @@
 #include <seqan/misc/misc_set.h>
 #include <seqan/index/index_esa_stree.h>
 #include <seqan/index/index_esa_algs.h>
+#include <seqan/index/index_esa_drawing.h>
 
 
 

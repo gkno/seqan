@@ -73,8 +73,8 @@ namespace SEQAN_NAMESPACE_MAIN
             const Pair<T1, Tuple<TValue, 7, Compressed>, Compressed > &a,
             const Pair<T1, Tuple<TValue, 7, Compressed>, Compressed > &b) const
         {
-            if (a.i2.i < b.i2.i) return -1;
-            if (a.i2.i > b.i2.i) return 1;
+            if (a.i2 < b.i2) return -1;
+            if (a.i2 > b.i2) return 1;
             if (a.i1 < 7 || b.i1 < 7) 
                 return (a.i1 < b.i1)? -1 : 1;
             return 0;
@@ -151,8 +151,8 @@ namespace SEQAN_NAMESPACE_MAIN
             const Triple<T1,T2,Tuple<T,_size,Compressed>,Compressed> &a,
             const Triple<T1,T2,Tuple<T,_size,Compressed>,Compressed> &b) const
         {
-            if (a.i3.i < b.i3.i) return -1;
-            if (a.i3.i > b.i3.i) return 1;
+            if (a.i3 < b.i3) return -1;
+            if (a.i3 > b.i3) return 1;
             return (a.i2[0] < b.i2[0])? -1 : 1;
         }
     };

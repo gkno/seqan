@@ -100,7 +100,7 @@ The m-tuples are substrings of the input stream beginning at positions $i$, with
         }
         
         inline void fill() {
-            int i;
+            unsigned i;
             for(i = 0; i < m && !eof(in); ++i, ++in)
                 tmpRef->i2.i[i] = *in;
             last = eof(in);
@@ -109,7 +109,7 @@ The m-tuples are substrings of the input stream beginning at positions $i$, with
             tmpRef->i1 = idx;
         }
         
-        inline void rotate(int r) {
+        inline void rotate(unsigned r) {
             for(unsigned i = 0; i < m; ++i, ++r) {
                 if (r == m) r = 0;
                 tmpRef->i2.i[i] = outRef->i2.i[r];
@@ -197,8 +197,8 @@ The m-tuples are substrings of the input stream beginning at positions $i$, with
         }
         
         inline void fill() {
-            int i;
-            tmp.i2.i = 0;
+            unsigned i;
+            clear(tmp.i2);
             for(i = 0; i < m && !eof(in); ++i, ++in) {
                 tmp.i2 <<= 1;
                 tmp.i2 |= *in;
@@ -422,7 +422,7 @@ The m-tuples are substrings of the input stream beginning at positions $i$, with
         }
         
         inline void fill() {
-            int i;
+            unsigned i;
             for(i = 0; i < m && !eof(in); ++i, ++in)
                 tmpRef->i2.i[i] = *in;
             last = eof(in);
@@ -431,7 +431,7 @@ The m-tuples are substrings of the input stream beginning at positions $i$, with
             tmpRef->i1 = localPos;
         }
         
-        inline void rotate(int r) {
+        inline void rotate(unsigned r) {
             for(unsigned i = 0; i < m; ++i, ++r) {
                 if (r == m) r = 0;
                 tmpRef->i2.i[i] = outRef->i2.i[r];
@@ -519,8 +519,8 @@ The m-tuples are substrings of the input stream beginning at positions $i$, with
         }
         
         inline void fill() {
-            int i;
-            tmp.i2.i = 0;
+            unsigned i;
+            clear(tmp.i2);
             for(i = 0; i < m && !eof(in); ++i, ++in) {
                 tmp.i2 <<= 1;
                 tmp.i2 |= *in;

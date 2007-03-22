@@ -36,24 +36,6 @@ struct Id<T const> {
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Metafunction.VertexDescriptor:
-..summary:Type of an object that represents a vertex descriptor.
-..signature:VertexDescriptor<T>::Type
-..param.T:Type T must be a graph. All graphs currently use ids as vertex descriptors.
-..returns.param.Type:VertexDescriptor type.
-..remarks.text:The vertex descriptor is a unique handle to a vertex in a graph.
-It is used in various graph functions, e.g., to add edges, to create OutEdge Iterators or to remove a vertex.
-It is also used to attach properties to vertices.
-..example.code:VertexDescriptor<Graph<> >::Type vD; //vD is a vertex descriptor
-*/
-template<typename T>
-struct VertexDescriptor;
-
-
-
-//////////////////////////////////////////////////////////////////////////////
-
-/**
 .Metafunction.EdgeDescriptor:
 ..summary:Type of an object that represents an edge descriptor.
 ..signature:EdgeDescriptor<T>::Type

@@ -285,6 +285,11 @@ namespace SEQAN_NAMESPACE_MAIN
             SEQAN_ASSERT(k >= 0 && k < size);
             return (i >> (size - 1 - k) * bitSize) & bitMask;
         }
+		template <int __size>
+		inline Tuple operator=(Tuple<_T, __size, Compressed> const &_right) {
+			i = _right.i;
+			return *this;
+		}
         inline CT operator<<=(int shift) {
             return i = (i << (shift * bitSize)) & mask;
         }
@@ -323,11 +328,17 @@ namespace SEQAN_NAMESPACE_MAIN
 #endif
 
 
+//////////////////////////////////////////////////////////////////////////////
+// length
+
     template <typename _T, int _size, typename TCompression>
 	inline int length(Tuple<_T, _size, TCompression> const &me) { return _size; }
 
+//////////////////////////////////////////////////////////////////////////////
+// assignValueAt
+
     template <typename _T, int _size, typename _S>
-    inline _S const assignAt(Tuple<_T, _size, void> &me, int k, _S const source) {
+    inline _S const assignValueAt(Tuple<_T, _size, void> &me, int k, _S const source) {
         return me.i[k] = source;
     }
 
@@ -347,7 +358,42 @@ namespace SEQAN_NAMESPACE_MAIN
         return source;
     }
 
-    template <typename _T, int _size, typename TCompression>
+//////////////////////////////////////////////////////////////////////////////
+// clear
+
+	template <typename _T, int _size, typename TCompression>
+	inline void clear(Tuple<_T, _size, TCompression> &me) {
+        memset<sizeof(me.i), 0>(&(me.i));
+	}
+    template <typename _T, int _size>
+	inline void clear(Tuple<_T, _size, Compressed> &me) {
+		me.i = 0; 
+	}
+
+//////////////////////////////////////////////////////////////////////////////
+// optimized compares
+
+	template <typename _T, int _sizeL, int _sizeR>
+	inline bool operator<(Tuple<_T, _sizeL, Compressed> const &_left, Tuple<_T, _sizeR, Compressed> const &_right) {
+		return _left.i < _right.i;
+	}
+	template <typename _T, int _sizeL, int _sizeR>
+	inline bool operator>(Tuple<_T, _sizeL, Compressed> const &_left, Tuple<_T, _sizeR, Compressed> const &_right) {
+		return _left.i > _right.i;
+	}
+	template <typename _T, int _sizeL, int _sizeR>
+	inline bool operator==(Tuple<_T, _sizeL, Compressed> const &_left, Tuple<_T, _sizeR, Compressed> const &_right) {
+		return _left.i == _right.i;
+	}
+	template <typename _T, int _sizeL, int _sizeR>
+	inline bool operator!=(Tuple<_T, _sizeL, Compressed> const &_left, Tuple<_T, _sizeR, Compressed> const &_right) {
+		return _left.i != _right.i;
+	}
+
+//////////////////////////////////////////////////////////////////////////////
+// standard output
+
+	template <typename _T, int _size, typename TCompression>
 	std::ostream& operator<<(std::ostream& out, Tuple<_T,_size,TCompression> const &a) {
 		out << "[";
 		if (a.size > 0)
@@ -358,6 +404,18 @@ namespace SEQAN_NAMESPACE_MAIN
 		return out;
 	}
 
+	template <typename _T, int _size, typename TCompression>
+	struct Value< Tuple<_T, _size, TCompression> > {
+		typedef _T Type;
+	};
+
+	template <typename _T, int _size, typename TCompression>
+	struct Spec< Tuple<_T, _size, TCompression> > {
+		typedef TCompression Type;
+	};
+
+//////////////////////////////////////////////////////////////////////////////
+// getValueIx
 
 	template <typename T1, typename T2, typename TCompression>
 	inline T1 getValueI1(Pair<T1, T2, TCompression> const &pair) {
@@ -368,18 +426,6 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline T2 getValueI2(Pair<T1, T2, TCompression> const &pair) {
 		return pair.i2;
 	}
-
-	template <typename T1, typename T2, typename TCompression, typename T>
-	inline void assignValueI1(Pair<T1, T2, TCompression> &pair, T const &_i) {
-		pair.i1 = _i;
-	}
-
-	template <typename T1, typename T2, typename TCompression, typename T>
-	inline void assignValueI2(Pair<T1, T2, TCompression> &pair, T const &_i) {
-		pair.i2 = _i;
-	}
-
-
 
 	template <typename T1, typename T2, typename T3, typename TCompression>
 	inline T1 getValueI1(Triple<T1, T2, T3, TCompression> const &triple) {
@@ -396,6 +442,19 @@ namespace SEQAN_NAMESPACE_MAIN
 		return triple.i3;
 	}
 
+//////////////////////////////////////////////////////////////////////////////
+// assignValueIx
+
+	template <typename T1, typename T2, typename TCompression, typename T>
+	inline void assignValueI1(Pair<T1, T2, TCompression> &pair, T const &_i) {
+		pair.i1 = _i;
+	}
+
+	template <typename T1, typename T2, typename TCompression, typename T>
+	inline void assignValueI2(Pair<T1, T2, TCompression> &pair, T const &_i) {
+		pair.i2 = _i;
+	}
+
 	template <typename T1, typename T2, typename T3, typename TCompression, typename T>
 	inline T const assignValueI1(Triple<T1, T2, T3, TCompression> &triple, T const &_i) {
 		return triple.i1 = _i;
@@ -410,8 +469,6 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline T const assignValueI3(Triple<T1, T2, T3, TCompression> &triple, T const &_i) {
 		return triple.i3 = _i;
 	}
-
-
 
 }// namespace SEQAN_NAMESPACE_MAIN
 

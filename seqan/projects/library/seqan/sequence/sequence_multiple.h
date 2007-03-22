@@ -21,7 +21,8 @@ namespace SEQAN_NAMESPACE_MAIN
     template < typename TStringSet >
     class StringSetIterator;
 
-	template < typename TString, typename TSpec = ConcatVirtual<> >
+//	template < typename TString, typename TSpec = ConcatVirtual<> >
+	template < typename TString, typename TSpec = ConcatDirect<> >
 	class StringSet;
 
     template <typename TObject>

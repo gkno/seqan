@@ -225,7 +225,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		{
 			typedef typename InType0::T3 CharTuple;
             memcpy(&dst.i.i2, &src.i2, sizeof(T2));
-            dst.i.i3.i = src.i3.i;
+            dst.i.i3 = src.i3;
             dst.i.i3 <<= CharTuple::size - _size;
         }
 
@@ -342,7 +342,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			typedef typename InType0::T3 CharTuple;
             memcpy(&dst.i.i1, &src.i1, sizeof(T1));
             memcpy(&dst.i.i2, &src.i2, sizeof(T2));
-            dst.i.i3.i = src.i3.i;
+            dst.i.i3 = src.i3;
             dst.i.i3 <<= CharTuple::size - _size;
         }
 

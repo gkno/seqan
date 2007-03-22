@@ -99,7 +99,7 @@ SEQAN_CHECKPOINT
 
 template <typename TString, typename TSequenceIterator>
 typename Size<Shape<TString, GappedShape> >::Type
-hash(Shape<TString, GappedShape> & shape, TSequenceIterator qgram_it)	
+inline hash(Shape<TString, GappedShape> & shape, TSequenceIterator qgram_it)	
 {
 SEQAN_CHECKPOINT
 
@@ -123,9 +123,11 @@ SEQAN_CHECKPOINT
 
 template <typename TSequenceIterator, typename TString>
 typename Size<Shape<TString, GappedShape> >::Type
-hashNext(Shape<TString, GappedShape> & shape, 
-		 TSequenceIterator & qgram_1, TSequenceIterator & qgram_2, 
-		 typename Size<Shape<TString, GappedShape> >::Type & x)
+inline hashNext(
+	Shape<TString, GappedShape> & shape,
+	TSequenceIterator qgram_1, 
+	TSequenceIterator qgram_2, 
+	typename Size<Shape<TString, GappedShape> >::Type x)
 {
 SEQAN_CHECKPOINT
 	return hash(shape, qgram_2);
@@ -145,12 +147,12 @@ SEQAN_CHECKPOINT
 */
 template <typename TString>
 void 
-stringToShape(Shape<TString,GappedShape> & shape,String<char> & shape_string)
+stringToShape(Shape<TString,GappedShape> & shape,String<char> const & shape_string)
 {
 SEQAN_CHECKPOINT
 	int count_gaps = 0;
 	int shape_len;
-	typename Iterator<String<char> >::Type string_it, string_it_last, string_end;
+	typename Iterator<String<char> const>::Type string_it, string_it_last, string_end;
 	string_it = begin(shape_string);
 	string_it_last = string_it;
 	++string_it;

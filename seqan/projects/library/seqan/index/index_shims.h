@@ -413,221 +413,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 */
 
-	// ESA finders
-
-	template < typename TText, typename TSpecESA, typename TSpecFinder >
-	class Finder< Index<TText, Index_ESA<TSpecESA> >, TSpecFinder >
-	{
-	public:
-		typedef Index<TText, Index_ESA<TSpecESA> > TIndex;
-		typedef typename Iterator< typename Fibre<TIndex, ESA_SA>::Type const >::Type TIterator;
-
-		Holder<TIndex>	index;
-		Pair<TIterator>	range;
-		TIterator		data_iterator;
-
-		Finder() 
-		{
-			clear(*this);
-		}
-		Finder(TIndex &_index): index(_index) 
-		{
-			clear(*this);
-		}
-		Finder(TIndex const &_index): index(_index)
-		{
-			clear(*this);
-		}
-
-
-//____________________________________________________________________________
-
-		friend inline typename _Parameter<TIndex>::Type 
-		host(Finder & me)
-		{
-SEQAN_CHECKPOINT
-			return value(me.index);
-		}
-
-		friend inline typename _Parameter<TIndex>::Type 
-		host(Finder const & me)
-		{
-SEQAN_CHECKPOINT
-			return value(me.index);
-		}
-
-		friend inline typename _Parameter<TIndex>::Type 
-		container(Finder & me)
-		{
-SEQAN_CHECKPOINT
-			return value(me.index);
-		}
-
-		friend inline typename _Parameter<TIndex>::Type 
-		container(Finder const & me)
-		{
-SEQAN_CHECKPOINT
-			return value(me.index);
-		}
-
-//____________________________________________________________________________
-
-		friend inline void
-		setHost(Finder & me, typename _Parameter<TIndex>::Type container_)
-		{
-SEQAN_CHECKPOINT
-			me.index = container;
-		}
-
-		friend inline void
-		setContainer(Finder & me, typename _Parameter<TIndex>::Type container_)
-		{
-SEQAN_CHECKPOINT
-			me.index = container;
-		}
-
-//____________________________________________________________________________
-
-		friend inline TIterator &
-		hostIterator(Finder & me)
-		{
-SEQAN_CHECKPOINT
-			return me.data_iterator;
-		}
-
-		friend inline TIterator const &
-		hostIterator(Finder const & me)
-		{
-SEQAN_CHECKPOINT
-			return me.data_iterator;
-		}
-
-
-//____________________________________________________________________________
-
-		friend inline bool
-		empty(Finder & me)
-		{
-SEQAN_CHECKPOINT
-			return me.range.i1 == me.range.i2;
-		}
-
-		friend inline void
-		clear(Finder & me)
-		{
-SEQAN_CHECKPOINT
-			me.range.i1 = me.range.i2 = TIterator();
-		}
-
-//____________________________________________________________________________
-
-		friend inline bool
-		atBegin(Finder & me)
-		{
-SEQAN_CHECKPOINT
-			return (empty(me) || hostIterator(me) == me.range.i1);
-		}
-
-		friend inline bool
-		atEnd(Finder & me)
-		{
-SEQAN_CHECKPOINT
-			return (empty(me) || hostIterator(me) == me.range.i2);
-		}
-
-//____________________________________________________________________________
-
-		friend inline void
-		goBegin(Finder & me)
-		{
-SEQAN_CHECKPOINT
-			hostIterator(me) = me.range.i1;
-		}
-
-		friend inline void
-		goEnd(Finder & me)
-		{
-SEQAN_CHECKPOINT
-			hostIterator(me) = me.range.i2;
-		}
-
-//____________________________________________________________________________
-/*
-		template <typename TPosition>
-		friend inline void 
-		setPosition(Finder & me, TPosition pos_)
-		{
-SEQAN_CHECKPOINT
-			hostIterator(me) = me.range.i1 + pos_;
-		}
-*/
-//____________________________________________________________________________
-
-		friend inline typename Position<Finder>::Type
-		position(Finder & me)
-		{
-SEQAN_CHECKPOINT
-			if (empty(me)) return 0;
-			return *me.data_iterator;
-		}
-
-		friend inline typename Position<Finder>::Type
-		position(Finder const & me)
-		{
-SEQAN_CHECKPOINT
-			if (empty(me)) return 0;
-			return hostIterator(me) - begin(container(me), Rooted());
-		}
-
-	};
-
-//____________________________________________________________________________
-
-	template < typename TFinder, typename TPattern >
-	inline void _findFirstESAIndex(
-		TFinder &finder,
-		TPattern const &pattern,
-		ESA_MLR const)
-	{
-		typename Haystack<TFinder>::Type &index = haystack(finder);
-		indexRequire(index, ESA_SA());
-		finder.range = equalRangeSA(indexRawText(index), indexSA(index), pattern);
-	}
-
-	template < typename TFinder, typename TPattern >
-	inline void _findFirstESAIndex(
-		TFinder &finder,
-		TPattern const &pattern,
-		ESA_LCPE const)
-	{
-		typename Haystack<TFinder>::Type &index = haystack(finder);
-		indexRequire(index, ESA_SA());
-		indexRequire(index, ESA_LCPE());
-		finder.range = equalRangeLCPE(indexRawText(index), indexSA(index), indexLCPE(index), pattern);
-	}
-
-	template < typename TText, typename TSpecESA, typename TSpecFinder, typename TPattern >
-	inline bool find(
-		Finder<Index<TText, Index_ESA<TSpecESA> >, TSpecFinder> &finder,
-		TPattern const &pattern)
-	{
-		if (empty(finder)) {
-			_findFirstESAIndex(finder, needle(pattern), TSpecFinder());
-			hostIterator(finder) = finder.range.i1;
-		} else
-			++hostIterator(finder);
-		return !atEnd(finder);
-	}
-
-	template < typename TText, typename TSpecESA, typename TSpecFinder >
-	inline bool find(Finder<Index<TText, Index_ESA<TSpecESA> >, TSpecFinder> &finder)
-	{
-		if (empty(finder)) return false;
-		++hostIterator(finder);
-		return !atEnd(finder);
-	}
-
-//____________________________________________________________________________
+//////////////////////////////////////////////////////////////////////////////
 
 	template <typename TOccValue>
 	struct _SAValueLess:
@@ -649,16 +435,20 @@ SEQAN_CHECKPOINT
 		::std::sort(begin(occString, Standard()), end(occString, Standard()), _SAValueLess<TValue>());
 	}
 
-	//////////////////////////////////////////////////////////////////////////////
-	// index creation
 
-    template <typename TObject>
+//////////////////////////////////////////////////////////////////////////////
+// deprecated (will be removed)
+
+	template <typename TObject>
     inline void setKeepFirst(TObject &obj, bool b) {}
 
 	template <typename TValue, typename TConfig>
     inline void setKeepFirst(String<TValue, External<TConfig> > &obj, bool b) { obj.keepFirst = b; }
 
 
+
+//////////////////////////////////////////////////////////////////////////////
+// table creators
 
 /**
 .Function.indexCreate:
@@ -674,24 +464,22 @@ SEQAN_CHECKPOINT
 ..remarks:$indexCreate$ calls the fibre corresponding $createXXX(..)$ function (e.g. @Function.createSuffixArray@).
 */
 
-	// table creators
-
 	template <typename TText, typename TSpec, typename TSpecAlg>
-	inline bool indexCreate(Index<TText, Index_ESA<TSpec> > &index, ESA_SA const, TSpecAlg const alg) {
+	inline bool indexCreate(Index<TText, TSpec> &index, Tag<_Fibre_SA> const, TSpecAlg const alg) {
 		resize(indexSA(index), length(indexRawText(index)), Exact());
 		createSuffixArray(indexSA(index), indexText(index), alg);
 		return true;
 	}
 
 	template <typename TText, typename TSpec, typename TSpecAlg>
-	inline bool indexCreate(Index<TText, Index_ESA<TSpec> > &index, ESA_LCP const, TSpecAlg const alg) {
+	inline bool indexCreate(Index<TText, TSpec> &index, Tag<_Fibre_LCP> const, TSpecAlg const alg) {
 		resize(indexLCP(index), length(indexRawText(index)), Exact());
 		createLCPTable(indexLCP(index), indexText(index), indexSA(index), alg);
 		return true;
 	}
 
 	template <typename TText, typename TSpec, typename TSpecAlg>
-	inline bool indexCreate(Index<TText, Index_ESA<TSpec> > &index, ESA_LCPE const, TSpecAlg const alg) {
+	inline bool indexCreate(Index<TText, TSpec> &index, Tag<_Fibre_LCPE> const, TSpecAlg const alg) {
 	//TODO: separate LCP from LCPE (for now LCPE = LCP + extra)
 //		resize(indexLCP(index), length(indexRawText(index)), Exact());
 //		createLCPETable(indexLCPE(index), indexRawText(index), indexSA(index), alg);
@@ -699,25 +487,26 @@ SEQAN_CHECKPOINT
 	}
 
 	template <typename TText, typename TSpec>
-	inline bool indexCreate(Index<TText, Index_ESA<TSpec> > &index, ESA_BWT const, BWT const) {
+	inline bool indexCreate(Index<TText, TSpec> &index, Tag<_Fibre_BWT> const, BWT const) {
 		resize(indexBWT(index), length(indexRawText(index)), Exact());
 		createBWTable(indexBWT(index), indexRawText(index), indexRawSA(index));
 		return true;
 	}
 
 	template <typename TText, typename TSpec>
-	inline bool indexCreate(Index<TText, Index_ESA<TSpec> > &index, ESA_ChildTab const, ChildTab const) {
+	inline bool indexCreate(Index<TText, TSpec> &index, Tag<_Fibre_ChildTab> const, ChildTab const) {
 		resize(indexChildTab(index), length(indexRawText(index)), Exact());
 		createChildTable(indexChildTab(index), indexLCP(index));
 		return true;
 	}
 
 	template <typename TText, typename TSpec, typename TFibre>
-	inline bool indexCreate(Index<TText, Index_ESA<TSpec> > &index, TFibre const fibre) {
-		return indexCreate(index, fibre, typename DefaultIndexCreator<Index<TText, Index_ESA<TSpec> >, TFibre>::Type());
+	inline bool indexCreate(Index<TText, TSpec> &index, TFibre const fibre) {
+		return indexCreate(index, fibre, typename DefaultIndexCreator<Index<TText, TSpec>, TFibre>::Type());
 	}
 
-	// automatic creation
+//////////////////////////////////////////////////////////////////////////////
+// automatic creation
 
 /**
 .Function.indexSupplied:
@@ -731,15 +520,12 @@ SEQAN_CHECKPOINT
 */
 
 	template <typename TText, typename TSpec, typename TFibre>
-	inline bool indexSupplied(Index<TText, Index_ESA<TSpec> > &index, TFibre const fibre) {
+	inline bool indexSupplied(Index<TText, TSpec> &index, TFibre const fibre) {
 		return !empty(getFibre(index, fibre));
 	}
 
-	template <typename TText, typename TSpec>
-	inline bool indexSupplied(Index<TText, Index_ESA<TSpec> > &index, ESA_BWT) {
-		return !empty(getFibre(index, ESA_BWT()));
-	}
 
+//////////////////////////////////////////////////////////////////////////////
 /**
 .Function.indexRequire:
 ..summary:On-demand creation of a specific @Metafunction.Fibre@.
@@ -754,40 +540,44 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 */
 
 	template <typename TText, typename TSpec, typename TFibre>
-	inline bool indexRequire(Index<TText, Index_ESA<TSpec> > &index, TFibre const fibre) {
+	inline bool indexRequire(Index<TText, TSpec> &index, TFibre const fibre) {
 		if (indexSupplied(index, fibre)) return true;				// if the table doesn't exist,
 		if (!indexSolveDependencies(index, fibre)) return false;	// fulfill requirements
 		return indexCreate(index, fibre);							// and create table
 	}
 
-	// dependencies
+
+//////////////////////////////////////////////////////////////////////////////
+// solve dependencies
 
 	template <typename TText, typename TSpec, typename TFibre>
-	inline bool indexSolveDependencies(Index<TText, Index_ESA<TSpec> > &index, TFibre const fibre) {
+	inline bool indexSolveDependencies(Index<TText, TSpec> &index, TFibre const fibre) {
 		return true;
 	}
 
 	template <typename TText, typename TSpec, typename TFibre>
-	inline bool indexSolveDependencies(Index<TText, Index_ESA<TSpec> > &index, ESA_LCP) {
-		return indexRequire(index, ESA_SA());
+	inline bool indexSolveDependencies(Index<TText, TSpec> &index, Tag<_Fibre_LCP>) {
+		return indexRequire(index, Tag<_Fibre_SA>());
 	}
 
 	template <typename TText, typename TSpec, typename TFibre>
-	inline bool indexSolveDependencies(Index<TText, Index_ESA<TSpec> > &index, ESA_LCPE) {
-		return indexRequire(index, ESA_LCP());
+	inline bool indexSolveDependencies(Index<TText, TSpec> &index, Tag<_Fibre_LCPE>) {
+		return indexRequire(index, Tag<_Fibre_LCP>());
 	}
 
 	template <typename TText, typename TSpec, typename TFibre>
-	inline bool indexSolveDependencies(Index<TText, Index_ESA<TSpec> > &index, ESA_ChildTab) {
-		return indexRequire(index, ESA_LCP());
+	inline bool indexSolveDependencies(Index<TText, TSpec> &index, Tag<_Fibre_ChildTab>) {
+		return indexRequire(index, Tag<_Fibre_LCP>());
 	}
 
 	template <typename TText, typename TSpec, typename TFibre>
-	inline bool indexSolveDependencies(Index<TText, Index_ESA<TSpec> > &index, ESA_BWT) {
-		return indexRequire(index, ESA_SA());
+	inline bool indexSolveDependencies(Index<TText, TSpec> &index, Tag<_Fibre_BWT>) {
+		return indexRequire(index, Tag<_Fibre_SA>());
 	}
 
-//____________________________________________________________________________
+
+//////////////////////////////////////////////////////////////////////////////
+// open
 
 	template < typename TValue, typename TSpec >
 	inline bool open(String<TValue, TSpec> &string, const char *fileName, int openMode) {
@@ -823,32 +613,9 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 		return open(multi, fileName, OPEN_RDONLY);
 	}
 
-	template < typename TObject, typename TSpec >
-	inline bool open(
-		Index< TObject, Index_ESA<TSpec> > &index, 
-		const char *fileName,
-		int openMode)
-	{
-		String<char> name;
-		name = fileName;	append(name, ".txt");	
-		if ((!open(getFibre(index, ESA_Text()), toCString(name), openMode)) && 
-			(!open(getFibre(index, ESA_Text()), fileName), openMode)) return false;
 
-		name = fileName;	append(name, ".sa");	open(getFibre(index, ESA_SA()), toCString(name), openMode);
-		name = fileName;	append(name, ".lcp");	open(getFibre(index, ESA_LCP()), toCString(name), openMode);
-		name = fileName;	append(name, ".child");	open(getFibre(index, ESA_ChildTab()), toCString(name), openMode);
-		name = fileName;	append(name, ".bwt");	open(getFibre(index, ESA_BWT()), toCString(name), openMode);
-		return true;
-	}
-	template < typename TObject, typename TSpec >
-	inline bool open(
-		Index< TObject, Index_ESA<TSpec> > &index, 
-		const char *fileName) 
-	{
-		return open(index, fileName, OPEN_RDONLY);
-	}
-
-//____________________________________________________________________________
+//////////////////////////////////////////////////////////////////////////////
+// save
 
 	template < typename TValue, typename TSpec >
 	inline bool save(String<TValue, TSpec> &string, const char *fileName, int openMode) {
@@ -885,31 +652,6 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 	template < typename TValue, typename TSpec, typename TSetSpec >
 	inline bool save(StringSet<String<TValue, TSpec>, TSetSpec > &multi, const char *fileName) {
 		return save(multi, fileName, OPEN_WRONLY | OPEN_CREATE);
-	}
-
-	template < typename TObject, typename TSpec >
-	inline bool save(
-		Index< TObject, Index_ESA<TSpec> > &index, 
-		const char *fileName,
-		int openMode)
-	{
-		String<char> name;
-		name = fileName;	append(name, ".txt");	
-		if ((!save(getFibre(index, ESA_Text()), toCString(name), openMode)) && 
-			(!save(getFibre(index, ESA_Text()), fileName), openMode)) return false;
-
-		name = fileName;	append(name, ".sa");	save(getFibre(index, ESA_SA()), toCString(name), openMode);
-		name = fileName;	append(name, ".lcp");	save(getFibre(index, ESA_LCP()), toCString(name), openMode);
-		name = fileName;	append(name, ".child");	save(getFibre(index, ESA_ChildTab()), toCString(name), openMode);
-		name = fileName;	append(name, ".bwt");	save(getFibre(index, ESA_BWT()), toCString(name), openMode);
-		return true;
-	}
-	template < typename TObject, typename TSpec >
-	inline bool save(
-		Index< TObject, Index_ESA<TSpec> > &index, 
-		const char *fileName)
-	{
-		return save(index, fileName, OPEN_WRONLY | OPEN_CREATE);
 	}
 
 }

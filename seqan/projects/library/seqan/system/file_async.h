@@ -90,11 +90,11 @@ namespace SEQAN_NAMESPACE_MAIN
                                 NULL);
 
             if (hFileAsync == INVALID_HANDLE_VALUE) {
-                printf("FATAL I/O Error %ld while opening file %s\n", GetLastError(), fileName);
+				::std::cerr << "Open failed on file " << fileName << ". (ErrNo=" << GetLastError() << ")" << ::std::endl;
                 return false;
             }
             #ifdef SEQAN_VERBOSE
-                printf("file opened asynchronously %s handle %x\n", fileName, hFileAsync);
+                ::std::cout << "file opened asynchronously " << fileName << " handle " << ::std::hex << hFileAsync << ::std::dec << ::std::endl;
             #endif
 
             if (noBuffering) {
@@ -106,11 +106,11 @@ namespace SEQAN_NAMESPACE_MAIN
                                 getExtraFlags(openMode & ~OPEN_ASYNC),
                                 NULL);
                 if (hFile == INVALID_HANDLE_VALUE) {
-                    printf("FATAL I/O Error %ld while opening secondary file %s\n", GetLastError(), fileName);
+                	::std::cerr << "Open failed on secondary file " << fileName << ". (ErrNo=" << GetLastError() << ")" << ::std::endl;
                     return false;
                 }
 	            #ifdef SEQAN_VERBOSE
-                    printf("async file opened %s handle %x\n", fileName, hFile);
+                	::std::cout << "async file opened  " << fileName << " handle " << ::std::hex << hFile << ::std::dec << ::std::endl;
                 #endif
             } else
                 hFile = hFileAsync;
@@ -125,12 +125,12 @@ namespace SEQAN_NAMESPACE_MAIN
 #else
             char szTempPath[MAX_PATH];
             if (!GetTempPath(MAX_PATH, szTempPath)) {
-                printf("FATAL I/O Error %ld while getting the temporary path name\n", GetLastError());
+				::std::cerr << "Couldn't get a temporary path name. (ErrNo=" << GetLastError() << ")" << ::std::endl;
                 return false;
             }
 #endif
             if (!GetTempFileName(szTempPath, "GNDX", 0, szTempName)) {
-                printf("FATAL I/O Error %ld while getting a temporary file name\n", GetLastError());
+				::std::cerr << "Couldn't get a temporary file name. (ErrNo=" << GetLastError() << ")" << ::std::endl;
                 return false;
             }
             return open(szTempName, openMode | OPEN_TEMPORARY);
@@ -139,7 +139,7 @@ namespace SEQAN_NAMESPACE_MAIN
         inline bool close() {
             BOOL result = true;
             #ifdef SEQAN_VERBOSE
-                printf("files closed handles %x and %x\n", hFileAsync, hFile);
+                ::std::cout << "files closed handles " << ::std::hex << hFileAsync << " and " << hFile << ::std::dec << ::std::endl;
             #endif
             if (hFile != hFileAsync)
                 result &= CloseHandle(hFileAsync);
@@ -186,7 +186,7 @@ namespace SEQAN_NAMESPACE_MAIN
             result.LowPart = GetFileSize(hFile, &high);
             result.HighPart = high;
             if (result.LowPart == INVALID_FILE_SIZE && (dwError = GetLastError()) != NO_ERROR) {
-                printf("FATAL I/O Error %ld while getting file size\n", dwError);
+				::std::cerr << "Couldn't get file size. (ErrNo=" << dwError << ")" << ::std::endl;
                 return 0;
             }
             return result.QuadPart;
@@ -306,7 +306,7 @@ namespace SEQAN_NAMESPACE_MAIN
     inline unsigned sectorSize(File<Async<TConfig> > const &me) {
         DWORD SpC, nofC, tnoC, aligning;
         if (GetDiskFreeSpace(NULL, &SpC, &aligning, &nofC, &tnoC) == 0)  {
-            printf("Error %ld while querying cluster size\n", GetLastError());
+            ::std::cerr << "Error " << GetLastError() << " while querying cluster size" << ::std::endl;
             return 4096;
         }
         return aligning;
@@ -338,7 +338,7 @@ namespace SEQAN_NAMESPACE_MAIN
         }
         if (me.error() == ERROR_NO_SYSTEM_RESOURCES) {  // read synchronoulsy instead
             #ifdef SEQAN_DEBUG_OR_TEST_
-                printf("falling back to sync. read :(\n");
+            	::std::cerr << "Warning: Falling back to sync. read. :( " << ::std::endl;
             #endif
 			signal(request.xmitDone);
             return readAt(me, memPtr, count, fileOfs);
@@ -371,7 +371,7 @@ namespace SEQAN_NAMESPACE_MAIN
         }
         if (me.error() == ERROR_NO_SYSTEM_RESOURCES) {  // write synchronoulsy instead
             #ifdef SEQAN_DEBUG_OR_TEST_
-                printf("falling back to sync. write :(\n");
+            	::std::cerr << "Warning: Falling back to sync. write. :( " << ::std::endl;
             #endif
 			signal(request.xmitDone);
             return writeAt(me, memPtr, count, fileOfs);
@@ -603,7 +603,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 		data = (TValue *) VirtualAlloc(NULL, count * sizeof(TValue), MEM_COMMIT, PAGE_READWRITE);
         if (!data)
-			printf("AlignAllocator: Could not allocate memory of size %x (%d)\n", count * sizeof(TValue), GetLastError());
+			::std::cerr << "AlignAllocator: Could not allocate memory of size " << ::std::hex << count * sizeof(TValue) << ::std::dec << ". (ErrNo=" << GetLastError() << ")" << ::std::endl;
         else
             SEQAN_PROADD(PROMEMORY, sizeof(TValue) * count);
 	}
@@ -649,7 +649,7 @@ namespace SEQAN_NAMESPACE_MAIN
         bool open(char const *fileName, int openMode = OPEN_RDWR + OPEN_CREATE | OPEN_APPEND) {
             handle = ::open(fileName, Base::getOFlag(openMode & ~OPEN_ASYNC), S_IREAD | S_IWRITE);
 			if (handle == -1) {
-				printf("Open failed on file %s: %s\n", fileName, strerror(errno));
+				::std::cerr << "Open failed on file " << fileName << ". (" << strerror(errno) << ")" << ::std::endl;
 				return false;
 			}
 
@@ -657,13 +657,13 @@ namespace SEQAN_NAMESPACE_MAIN
 				handleAsync = ::open(fileName, Base::getOFlag(openMode | OPEN_ASYNC & ~OPEN_CREATE & ~OPEN_APPEND), S_IREAD | S_IWRITE);
 				if (handleAsync == -1 || errno == EINVAL) {	// fall back to cached access
 					#ifdef SEQAN_DEBUG_OR_TEST_
-						printf("Warning: Direct access openening failed: %s.\n", fileName);
+						::std::cerr << "Warning: Direct access openening failed. (" << strerror(errno) << ")" << ::std::endl;
 					#endif
 					handleAsync = handle;
 				}
 				#ifdef SEQAN_DEBUG_OR_TEST_
 				    else
-					printf("Direct access successfully initiated\n");
+						::std::cerr << "Direct access successfully initiated" << ::std::endl;
 				#endif
 			} else
 				handleAsync = handle;
@@ -673,14 +673,19 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 
         bool openTemp(int openMode = OPEN_RDWR + OPEN_CREATE) {
-			char tmpFileName[] = "/GNDXXXXXXX";
+#ifdef SEQAN_DEFAULT_TMPDIR
+			char tmpFileName[] = SEQAN_DEFAULT_TMPDIR "/GNDXXXXXXX";
+#else
+			char tmpFileName[] = "/var/tmp/GNDXXXXXXX";
+#endif
 			if ((handle = handleAsync = ::mkstemp(tmpFileName)) == -1) {
-				printf("Cannot create temp. file %s\n", strerror(errno));
+				::std::cerr << "Couldn't create temporary file " << tmpFileName << ". (" << strerror(errno) << ")" << ::std::endl;
 				return false;
 			}
 			if (!(close() && open(tmpFileName, openMode))) return false;
             #ifdef SEQAN_DEBUG
-				if (::unlink(tmpFileName) == -1) printf("Cannot unlink temp. file: %s\n", strerror(errno));
+				if (::unlink(tmpFileName) == -1)
+					::std::cerr << "Couldn't unlink temporary file " << tmpFileName << ". (" << strerror(errno) << ")" << ::std::endl;
             #else
 				::unlink(tmpFileName);
 			#endif
@@ -729,11 +734,13 @@ namespace SEQAN_NAMESPACE_MAIN
 //    enum { _AsyncIOSignal = SIGIO };
 
 	inline void printRequest(aiocb &request) {
-		printf("fildes:\t%x\n", (unsigned int) request.aio_fildes);
-		printf("buffer:\t%x\n", (unsigned int) request.aio_buf);
-		printf("offset:\t%x\n", (unsigned int) request.aio_offset);
-		printf("nbytes:\t%x\n", (unsigned int) request.aio_nbytes);
-		printf("event:\t%x\n",  (unsigned int) request.aio_sigevent.sigev_notify);
+		::std::cout << ::std::hex;
+		::std::cout << "fildes:  " << (unsigned int) request.aio_fildes << ::std::endl;
+		::std::cout << "buffer:  " << (unsigned int) request.aio_buf << ::std::endl;
+		::std::cout << "offset:  " << (unsigned int) request.aio_offset<< ::std::endl;
+		::std::cout << "nbytes:  " << (unsigned int) request.aio_nbytes << ::std::endl;
+		::std::cout << "event:   " << (unsigned int) request.aio_sigevent.sigev_notify << ::std::endl;
+		::std::cout << ::std::dec;
 	}
 
     template < typename TConfig, typename TValue, typename TSize, typename TPos >
@@ -755,7 +762,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		int result = aio_read(&request);
         SEQAN_PROADD(PROIWAIT, SEQAN_PROTIMEDIFF(tw));
         #ifdef SEQAN_DEBUG
-			if (result)	printf("areadAt returned %d\n", result);
+			if (result) ::std::cerr << "areadAt returned " << result << ::std::endl;
 		#endif
 		return result == 0;
     }
@@ -779,7 +786,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		int result = aio_write(&request);
         SEQAN_PROADD(PROIWAIT, SEQAN_PROTIMEDIFF(tw));
         #ifdef SEQAN_DEBUG
-			if (result)	printf("awriteAt returned %d\n", result);
+			if (result) ::std::cerr << "awriteAt returned " << result << ::std::endl;
 		#endif
         return result == 0;
     }
@@ -801,7 +808,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			if (result) {
 	 			int eno = aio_error(&request);
 				if (eno != EINPROGRESS)
-					printf("waitFor: aio_error returned %s and errno is %s\n", strerror(eno), strerror(errno));
+					::std::cerr << "waitFor: aio_error returned " << strerror(eno) << " and errno is " << strerror(errno) << ::std::endl;
 			}
 		#endif
 		return result == 0;
@@ -819,7 +826,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			if (result) {
 	 			int eno = aio_error(&request);
 				if (eno != EINPROGRESS)
-					printf("waitFor: aio_error returned %s and errno is %s\n", strerror(eno), strerror(errno));
+					::std::cerr << "waitFor: aio_error returned " << strerror(eno) << " and errno is " << strerror(errno) << ::std::endl;
 			}
 		#endif
         return result == 0;
@@ -898,7 +905,9 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
         int error = posix_memalign(reinterpret_cast<void**>(&data), sysconf(_SC_PAGESIZE), count * sizeof(TValue));
         if (error) {
-			printf("AlignAllocator: Could not allocate memory of size %x with aligning %x (%d)\n", count * sizeof(TValue), (unsigned) sysconf(_SC_PAGESIZE), error);
+			::std::cerr << "AlignAllocator: Could not allocate memory of size " << ::std::hex << 
+				count * sizeof(TValue) << " and an alignment of " << 
+				(unsigned) sysconf(_SC_PAGESIZE) <<	::std::dec << ". (ErrNo=" << error << ")" << ::std::endl;
             data = NULL;
         } else
             SEQAN_PROADD(PROMEMORY, sizeof(TValue) * count);
