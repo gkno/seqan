@@ -1,0 +1,85 @@
+/*
+ *  index_esa_drawing.h
+ *  SeqAn
+ *
+ *  Created by David Weese on 17.07.05.
+ *
+ */
+
+#ifndef SEQAN_HEADER_INDEX_ESA_DRAWING_H
+#define SEQAN_HEADER_INDEX_ESA_DRAWING_H
+
+namespace SEQAN_NAMESPACE_MAIN
+{
+
+struct TagDotDrawing_;
+typedef Tag<TagDotDrawing_> const DotDrawing;
+
+template <typename TFile, typename TText, typename TESASpec>
+void write(TFile & file, 
+	   Index<TText, Index_ESA<TESASpec> > & stree,
+	   DotDrawing) 
+{
+	SEQAN_CHECKPOINT
+	typedef Index<TText, Index_ESA<TESASpec> > TIndex;
+	
+	_streamWrite(file, "digraph G {\n");
+	_streamPut(file, '\n');
+	_streamWrite(file, "/* Graph Attributes */\n");
+	_streamWrite(file, "graph [rankdir = LR];\n");
+	_streamPut(file, '\n');
+	_streamWrite(file, "/* Node Attributes */\n");
+	_streamWrite(file, "node [shape = ellipse, fillcolor = lightgrey, style = filled, fontname = \"Times-Italic\"];\n");
+	_streamPut(file, '\n');
+	_streamWrite(file, "/* Edge Attributes */\n");
+	_streamWrite(file, "edge [fontname = \"Times-Italic\", arrowsize = 0.75, fontsize = 16];\n");
+	_streamPut(file, '\n');
+
+	_streamWrite(file, "/* Edges */\n");
+	typedef typename Iterator<TIndex, TopDown<ParentLinks<Preorder> > >::Type TIterator;
+	typedef typename Iterator<TIndex, TopDown<> >::Type TIteratorSimple;
+	TIterator it(stree);
+
+	for(;!atEnd(it);++it) 
+	{
+		// dump node
+       		_streamWrite(file, "\"[");
+ 		_streamPutInt(file, value(it).i1.i1);
+		_streamPut(file, ':');
+		_streamPutInt(file, value(it).i1.i2);
+       		_streamWrite(file, ")\"");
+       		if (!isRightTerminal(it))
+			_streamWrite(file, " [style = dashed]");
+       		_streamWrite(file, ";\n");
+
+		// dump edge from parent (if not root)
+		if (!isRoot(it)) {
+			TIteratorSimple src(container(it), nodeUp(it));
+
+			_streamWrite(file, "\"[");
+			_streamPutInt(file, value(src).i1.i1);
+			_streamPut(file, ':');
+			_streamPutInt(file, value(src).i1.i2);
+			_streamWrite(file, ")\"");
+
+			_streamWrite(file, " -> ");
+
+			_streamWrite(file, "\"[");
+			_streamPutInt(file, value(it).i1.i1);
+			_streamPut(file, ':');
+			_streamPutInt(file, value(it).i1.i2);
+			_streamWrite(file, ")\"");
+
+			_streamWrite(file, " [label = \"");
+			_streamWrite(file, parentEdgeLabel(it));
+			_streamWrite(file, "\"];\n");
+		}
+	}
+	_streamPut(file, '\n');
+
+	_streamWrite(file, "}\n");
+}
+
+}// namespace SEQAN_NAMESPACE_MAIN
+
+#endif //#ifndef SEQAN_HEADER_...
