@@ -34,7 +34,7 @@ public:
 	String<TVertexDescriptor> data_stack;
 	
 	void _init() {
-		initVertexMap(*data_host,data_tokenMap);
+		resizeVertexMap(*data_host,data_tokenMap);
 		typedef typename Iterator<String<bool> >::Type TIter;
 		TIter it = begin(data_tokenMap);
 		for(;!atEnd(it);goNext(it)) {

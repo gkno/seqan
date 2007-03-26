@@ -77,13 +77,13 @@ breadth_first_search(Graph<TSpec> const& g,
 	typedef typename Value<TDistanceMap>::Type TDistVal;
 
 	// Initialization
-	initVertexMap(g,predecessor);
-	initVertexMap(g,distance);
+	resizeVertexMap(g,predecessor);
+	resizeVertexMap(g,distance);
 	TPredVal nilPred = getNilPredecessor(g);
 	TDistVal infDist = getInfinityDistance(distance);
 	
 	String<bool> tokenMap;
-	initVertexMap(g, tokenMap);
+	resizeVertexMap(g, tokenMap);
 	TVertexIterator it(g);
 	for(;!atEnd(it);goNext(it)) {
 		assignProperty(tokenMap, getValue(it), false);
@@ -187,13 +187,13 @@ depth_first_search(Graph<TSpec> const& g,
 	typedef typename Value<TPredecessorMap>::Type TPredVal;
 
 	// Initialization
-	initVertexMap(g,predecessor);
-	initVertexMap(g,disc);
-	initVertexMap(g,finish);
+	resizeVertexMap(g,predecessor);
+	resizeVertexMap(g,disc);
+	resizeVertexMap(g,finish);
 	TPredVal nilPred = getNilPredecessor(g);
 		
 	String<bool> tokenMap;
-	initVertexMap(g, tokenMap);
+	resizeVertexMap(g, tokenMap);
 	TVertexIterator it(g);
 	for(;!atEnd(it);goNext(it)) {
 		assignProperty(tokenMap, getValue(it), false);
@@ -294,7 +294,7 @@ strongly_connected_components(Graph<TSpec> const& g_source,
 	typedef typename Iterator<Graph<TSpec>, EdgeIterator>::Type TEdgeIterator;
 	typedef typename Iterator<Graph<TSpec>, VertexIterator>::Type TVertexIterator;
 	typedef typename Value<TComponents>::Type TCompVal;
-	initVertexMap(g_source,components);
+	resizeVertexMap(g_source,components);
 	String<unsigned int> predMap;
 	String<unsigned int> discoveryTimeMap;
 	String<unsigned int> finishingTimeMap;
@@ -309,12 +309,12 @@ strongly_connected_components(Graph<TSpec> const& g_source,
 	String<unsigned int> predecessor;
 	String<unsigned int> disc;
 	String<unsigned int> finish;
-	initVertexMap(g,predecessor);
-	initVertexMap(g,disc);
-	initVertexMap(g,finish);
+	resizeVertexMap(g,predecessor);
+	resizeVertexMap(g,disc);
+	resizeVertexMap(g,finish);
 	TCompVal nilPred = getNilPredecessor(g);
 	String<bool> tokenMap;
-	initVertexMap(g, tokenMap);
+	resizeVertexMap(g, tokenMap);
 	TVertexIterator it(g);
 	for(;!atEnd(it);goNext(it)) {
 		assignProperty(components, getValue(it), nilPred);
@@ -399,9 +399,9 @@ prims_algorithm(Graph<TSpec> const& g,
 	String<TWeight> key;
 	TPred nilPred = getNilPredecessor(g);
 	TWeight infWeight = getInfinityDistance(weight);
-	initVertexMap(g,predecessor);
-	initVertexMap(g,tokenMap);
-	initVertexMap(g,key);
+	resizeVertexMap(g,predecessor);
+	resizeVertexMap(g,tokenMap);
+	resizeVertexMap(g,key);
 
 	TVertexIterator it(g);
 	while(!atEnd(it)) {
@@ -475,8 +475,8 @@ kruskals_algorithm(Graph<TSpec> const& g,
 	resize(edges, 2 * (numVertices(g) - 1));
 	String<String<TVertexDescriptor> > set;
 	String<TVertexDescriptor> id;
-	initVertexMap(g, set);
-	initVertexMap(g, id);
+	resizeVertexMap(g, set);
+	resizeVertexMap(g, id);
 	
 	// Make the sets
 	TVertexIterator it(g);
@@ -659,8 +659,8 @@ dag_shortest_path(Graph<TSpec> const& g,
 	typedef typename Iterator<String<TVertexDescriptor> >::Type TStringIterator;
 	
 	// Initialization
-	initVertexMap(g,predecessor);
-	initVertexMap(g,distance);
+	resizeVertexMap(g,predecessor);
+	resizeVertexMap(g,distance);
 
 	// Topological sort
 	String<TVertexDescriptor> order;
@@ -720,8 +720,8 @@ bellman_ford_algorithm(Graph<TSpec> const& g,
 	typedef typename EdgeDescriptor<Graph<TSpec> >::Type TEdgeDescriptor;
 	typedef typename Iterator<Graph<TSpec>, VertexIterator>::Type TVertexIterator;
 	typedef typename Iterator<Graph<TSpec>, OutEdgeIterator>::Type TOutEdgeIterator;
-	initVertexMap(g,predecessor);
-	initVertexMap(g,distance);
+	resizeVertexMap(g,predecessor);
+	resizeVertexMap(g,distance);
 	_initialize_single_source(g, source, weight, predecessor, distance);
 
 	// Run Bellman-Ford
@@ -791,13 +791,13 @@ dijkstra(Graph<TSpec> const& g,
 	typedef typename Iterator<Graph<TSpec>, OutEdgeIterator>::Type TOutEdgeIterator;
 	
 	// Initialization
-	initVertexMap(g,predecessor);
-	initVertexMap(g,distance);
+	resizeVertexMap(g,predecessor);
+	resizeVertexMap(g,distance);
 
 	_initialize_single_source(g, source, weight, predecessor, distance);
 	
 	String<bool> setS;
-	initVertexMap(g, setS);
+	resizeVertexMap(g, setS);
 	TVertexIterator it(g);
 	for(;!atEnd(it);++it) {
 		assignProperty(setS, getValue(it), false);
@@ -1176,7 +1176,7 @@ _get_minimum_aug(Graph<TSpec> const& rG,
 	// Build secondary predecessor map just containing the path
 	TVertexDescriptor nilPred = getNilPredecessor(rG);
 	String<TVertexDescriptor> predMap;
-	initVertexMap(rG, predMap);
+	resizeVertexMap(rG, predMap);
 	TIterator it = begin(predMap);
 	for(;!atEnd(it);goNext(it)) {
 		*it = nilPred;
@@ -1237,7 +1237,7 @@ ford_fulkerson(Graph<TSpec> const& g,
 
 	// Initialization
 	TVertexDescriptor nilPred = getNilPredecessor(g);
-	initEdgeMap(g,flow);
+	resizeEdgeMap(g,flow);
 	TEdgeIterator itE(g);
 	for(;!atEnd(itE);goNext(itE)) {
 		assignProperty(flow, getValue(itE), 0);

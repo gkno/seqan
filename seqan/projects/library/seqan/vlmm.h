@@ -892,7 +892,7 @@ pruneTree(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > >,TGr
 	
 	String<bool> original;
 	// remember which nodes have been there
-	initVertexMap(vlmm, original);
+	resizeVertexMap(vlmm, original);
 	TVertexIterator it(vlmm);
 	for(;!atEnd(it);goNext(it)) {
 		TVertexDescriptor node =  getValue(it);

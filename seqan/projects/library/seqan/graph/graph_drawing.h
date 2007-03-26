@@ -30,7 +30,7 @@ void _createNodeNames(Graph<TSpec> const& g,
 	SEQAN_CHECKPOINT
     typedef Graph<TSpec> TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	initVertexMap(g, nodeMap);
+	resizeVertexMap(g, nodeMap);
 	char strV[BitsPerValue<TVertexDescriptor>::VALUE];
 
 	typedef typename Iterator<TGraph, VertexIterator>::Type TConstIter;
@@ -50,7 +50,7 @@ void _createEdgeNames(Graph<Directed<TCargo, TSpec> > const& g,
 	SEQAN_CHECKPOINT
 	typedef Graph<Directed<TCargo, TSpec> > TGraph;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
-	initEdgeMap(g, edgeMap);
+	resizeEdgeMap(g, edgeMap);
 	char strE[20];
 
 	typedef typename Iterator<TGraph, EdgeIterator>::Type TConstEdIter;
@@ -70,7 +70,7 @@ void _createEdgeNames(Graph<Tree<TCargo, TSpec> > const& g,
 	SEQAN_CHECKPOINT
 	typedef Graph<Tree<TCargo, TSpec> > TGraph;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
-	initEdgeMap(g, edgeMap);
+	resizeEdgeMap(g, edgeMap);
 	char strE[20];
 
 	typedef typename Iterator<TGraph, EdgeIterator>::Type TConstEdIter;
@@ -89,7 +89,7 @@ void _createEdgeNames(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
-	initEdgeMap(g, edgeMap);
+	resizeEdgeMap(g, edgeMap);
 
 	typedef typename Iterator<TGraph, EdgeIterator>::Type TConstEdIter;
 	TConstEdIter itEd(g);
@@ -106,7 +106,7 @@ void _createEdgeNames(Graph<Automaton<TAlphabet, TCargo, WordGraph<TSpec> > > co
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<Automaton<TAlphabet, TCargo, WordGraph<TSpec> > > TGraph;
-	initEdgeMap(g, edgeMap);
+	resizeEdgeMap(g, edgeMap);
 
 	typedef typename Iterator<TGraph, EdgeIterator>::Type TConstEdIter;
 	TConstEdIter itEd(g);

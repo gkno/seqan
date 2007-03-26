@@ -824,7 +824,7 @@ void Test_Directed() {
 	std::string nameEd[] = {"ar", "ae"};
 	addEdges(g, edges, numEdg);
 	String<std::string> edMap;
-	initEdgeMap(g, edMap, nameEd);
+	resizeEdgeMap(g, edMap, nameEd);
 	SEQAN_TASSERT(getProperty(edMap, 0) == "ar")
 	SEQAN_TASSERT(getProperty(edMap, 1) == "ae")
 }
@@ -1813,6 +1813,28 @@ void Test_Tree() {
 	SEQAN_TASSERT((getCargo(ed1)).i2 == 1)
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
+void Test_Alignment() {
+	typedef Graph<Alignment<Dna, unsigned int, WithoutEdgeId> > TGraph;
+	typedef Id<TGraph>::Type TId;
+	typedef Size<TGraph>::Type TSize;
+	typedef SegmentInfo<TId, TSize> TSegment;
+
+	/*
+	String<Dna> seq1 = "acagtactggtactccg";
+	String<Dna> seq2 = "acccgtaacagtactggtactccg";
+	String<Dna> seq3 = "acccgtaacagttttactggtactccg";
+
+	TGraph g;
+	TId id1 = addSequence(g, seq1);
+	TId id2 = addSequence(g, seq2);
+	TId id3 = addSequence(g, seq3);
+
+	addVertex(g, TSegment(id1,0,2));
+	*/
+}
+
 
 //////////////////////////////////////////////////////////////////////////////
 template <typename TGraphType>
@@ -2152,10 +2174,10 @@ void Test_ExternalProperty() {
 	
 	// Test external property maps
 	String<int> dMap;
-	initVertexMap(g,dMap);
+	resizeVertexMap(g,dMap);
 
 	String<char> eMap;
-	initEdgeMap(g,eMap);
+	resizeEdgeMap(g,eMap);
 
 	assignProperty(dMap, v0, 3);
 	assignProperty(dMap, v1, 1);
@@ -2180,7 +2202,7 @@ void Test_ExternalProperty() {
 
 	char names[] = {'r', 's','t'};
 	String<char> nameMap;
-	initVertexMap(g,nameMap, names);
+	resizeVertexMap(g,nameMap, names);
 	SEQAN_TASSERT(getProperty(nameMap, v0) == 'r')
 	SEQAN_TASSERT(getProperty(nameMap, v1) == 's')
 }
@@ -2208,8 +2230,8 @@ void Test_Property() {
 	// First Variant: Explicit internal map with member Ids
 	InternalMap<TPair, 1> eMap1; // This property map is used to access the first member
 	InternalMap<TPair, 2> eMap2; // This property map is used to access the second member
-	initEdgeMap(g,eMap1);
-	initEdgeMap(g,eMap2);
+	resizeEdgeMap(g,eMap1);
+	resizeEdgeMap(g,eMap2);
 	assignProperty(eMap1, e1, 'a');
 	assignProperty(eMap2, e1, 20);
 	assignProperty(eMap1, e2, 'b');
@@ -2244,7 +2266,7 @@ void Test_Property() {
 	TEdgeDescriptor2 edge1 =addEdge(g2,v0,v0);
 	addEdge(g2,0,1);
 	InternalMap<unsigned int> edgeMap;
-	initEdgeMap(g2,edgeMap);
+	resizeEdgeMap(g2,edgeMap);
 	assignProperty(edgeMap, edge1 ,3);
 	SEQAN_TASSERT(getProperty(edgeMap, edge1) == 3)
 	SEQAN_TASSERT(property(edgeMap, edge1) == 3)
@@ -2255,8 +2277,8 @@ void Test_Property() {
 	// Second Variant: Pointer to member using a class
 	InternalPointerMap<char TPair:: *, &TPair::i1> eMap4;
 	InternalPointerMap<int TPair:: *, &TPair::i2> eMap5;
-	initEdgeMap(g,eMap4);
-	initEdgeMap(g,eMap5);
+	resizeEdgeMap(g,eMap4);
+	resizeEdgeMap(g,eMap5);
 	assignProperty(eMap4, e1, 'c');
 	assignProperty(eMap5, e1, 10);
 	assignProperty(eMap4, e2, 'd');
@@ -2744,7 +2766,7 @@ void Test_PrimsAlgorithm() {
 	TGraph g;
 	addEdges(g,edges, numEdges);
 	String<unsigned int> weightMap;
-	initEdgeMap(g, weightMap, weights);
+	resizeEdgeMap(g, weightMap, weights);
 
 	// Tree and predecessor map 
 	String<TVertexDescriptor> predMap;
@@ -2783,7 +2805,7 @@ void Test_KruskalsAlgorithm() {
 	TGraph g;
 	addEdges(g,edges, numEdges);
 	String<unsigned int> weightMap;
-	initEdgeMap(g, weightMap, weights);
+	resizeEdgeMap(g, weightMap, weights);
 
 	// Tree edges
 	String<TVertexDescriptor> treeEdges;
@@ -2827,7 +2849,7 @@ void Test_DagShortestPath() {
 	addEdges(g,edges, numEdges);
 
 	String<int> weightMap;
-	initEdgeMap(g, weightMap, weights);
+	resizeEdgeMap(g, weightMap, weights);
 
 	// Predecessor map and distance map
 	String<unsigned int> predMap;
@@ -2871,7 +2893,7 @@ void Test_BellmanFord() {
 	addEdges(g,edges, numEdges);
 	
 	String<unsigned int> weightMap;
-	initEdgeMap(g,weightMap, weights);
+	resizeEdgeMap(g,weightMap, weights);
 
 	// Out parameters of Bellman-Ford: Predecessor map and distance map
 	String<unsigned int> predMap;
@@ -2914,7 +2936,7 @@ void Test_Dijkstra() {
 	addEdges(g,edges, numEdges);
 
 	String<unsigned int> weightMap;
-	initEdgeMap(g , weightMap, weights);
+	resizeEdgeMap(g , weightMap, weights);
 
 	// Out parameters of Dijkstra: Predecessor map and distance map
 	String<unsigned int> predMap;
@@ -2956,7 +2978,7 @@ void Test_AllPairsShortestPath() {
 	addEdges(g,edges, numEdges);
 	
 	String<int> weightMap;	
-	initEdgeMap(g,weightMap, weights);
+	resizeEdgeMap(g,weightMap, weights);
 
 	// Out parameter
 	Matrix<int> distMat;
@@ -3039,7 +3061,7 @@ void Test_FloydWarshall() {
 	addEdges(g,edges, numEdges);
 	
 	String<int> weightMap;	
-	initEdgeMap(g,weightMap, weights);
+	resizeEdgeMap(g,weightMap, weights);
 
 	// Out parameter
 	Matrix<int> distMat;
@@ -3165,7 +3187,7 @@ void Test_FordFulkerson() {
 	Graph<> g;
 	addEdges(g,edges, numEdges);
 	String<unsigned int> capMap;	
-	initEdgeMap(g,capMap, capacity);
+	resizeEdgeMap(g,capMap, capacity);
 
 	// Out-parameter
 	String<unsigned int> flow;	
@@ -3227,6 +3249,7 @@ int main()
 	Test_Automaton();	// Automatons
 	Test_WordGraph();	// Word Graph
 	Test_Tree();		// Trees
+	Test_Alignment();	// Alignment graph
 
 	// Test iterators
 	Test_VertexIterator<Directed<char> >();

@@ -15,6 +15,21 @@ public:
 	TId data_seq_id;
 	TSize data_begin;
 	TSize data_length;
+
+	SegmentInfo() :
+		data_seq_id(0),
+		data_begin(0),
+		data_length(0)
+	{
+	}
+
+	SegmentInfo(TId id, TSize beg, TSize len) :
+		data_seq_id(id),
+		data_begin(beg),
+		data_length(len)
+	{
+	}
+
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -28,7 +43,7 @@ class Graph<Alignment<TAlphabet, TCargo, TSpec> >
 		typedef String<TAlphabet> TSequence;
 
 		// Alignment graph
-		Graph<Undirected<TCargo, TSpec> >* align;
+		Graph<Undirected<TCargo, TSpec> > data_align;
 
 		// Sequences
 		IdManager<TIdType> data_id_managerS;
@@ -59,6 +74,41 @@ class Graph<Alignment<TAlphabet, TCargo, TSpec> >
 			return *this;
 		}
 };
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TAlphabet, typename TCargo, typename TSpec> 
+inline unsigned int
+addSequence(Graph<Alignment<TAlphabet, TCargo, TSpec> >& g,
+			String<TAlphabet>& str) 
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Alignment<TAlphabet, TCargo, TSpec> > TGraph;
+	typedef String<TAlphabet> TSequence;
+	typedef typename Id<TGraph>::Type TIdType;
+	TIdType sId = obtainId(g.data_id_managerS);
+	if (sId == length(g.data_seq)) {
+		appendValue(g.data_seq, (TSequence*) &str); 
+	} else {
+		value(g.data_seq, sId) = (TSequence*) &str;
+	}
+	return sId;
+}
+
+template<typename TAlphabet, typename TCargo, typename TSpec, typename TSegment> 
+inline typename VertexDescriptor<Graph<Alignment<TAlphabet, TCargo, TSpec> > >::Type 
+addVertex(Graph<Alignment<TAlphabet, TCargo, TSpec> >& g,
+		  TSegment& seg) 
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Undirected<TCargo, TSpec> > TGraph;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	TVertexDescriptor vd = addVertex(g.data_align);
+	if (length(g.data_nodeMap) <= vd) resize(g.data_nodeMap, vd + 1, Generous());
+	assignProperty(g.data_nodeMap, vd, seg);
+	return vd;
+}
+
 
 }// namespace SEQAN_NAMESPACE_MAIN
 

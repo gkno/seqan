@@ -32,10 +32,10 @@ It is indexed via VertexDescriptors or EdgeDescriptors.
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.initVertexMap:
+.Function.resizeVertexMap:
 ..cat:Graph
 ..summary:Initializes a vertex map. 
-..signature:initVertexMap(g, pm [, prop])
+..signature:resizeVertexMap(g, pm [, prop])
 ..param.g:A Graph.
 ...type:Class.Graph
 ..param.pm:An External Property Map.
@@ -43,25 +43,25 @@ It is indexed via VertexDescriptors or EdgeDescriptors.
 ..param.prop:An optional array with properties that are to be assigned to the items in the property map.
 ...remarks:For every vertex descriptor there must be an entry in the array.
 ..returns:void
-..see:Function.initEdgeMap
+..see:Function.resizeEdgeMap
 */
 
 template<typename TSpec, typename TPropertyMap>
 inline void
-initVertexMap(Graph<TSpec> const& g,
+resizeVertexMap(Graph<TSpec> const& g,
 			  TPropertyMap& pm)
 {
 	SEQAN_CHECKPOINT
-	resize(pm, getIdUpperBound(g.data_id_managerV));
+	resize(pm, getIdUpperBound(g.data_id_managerV), Generous());
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.initEdgeMap:
+.Function.resizeEdgeMap:
 ..cat:Graph
 ..summary:Initializes an edge map
-..signature:initEdgeMap(g, pm [, prop])
+..signature:resizeEdgeMap(g, pm [, prop])
 ..param.g:A Graph.
 ...type:Class.Graph
 ..param.pm:An External or Internal Property Map.
@@ -72,12 +72,12 @@ initVertexMap(Graph<TSpec> const& g,
 ..param.prop:An optional array with properties that are to be assigned to the items in the property map.
 ...remarks:For every edge id there must be an entry in the array.
 ..returns:void
-..see:Function.initVertexMap
+..see:Function.resizeVertexMap
 */
 
 template<typename TSpec, typename TPropertyMap>
 inline void
-initEdgeMap(Graph<TSpec> const& g,
+resizeEdgeMap(Graph<TSpec> const& g,
 			  TPropertyMap& pm)
 {
 	SEQAN_CHECKPOINT
@@ -88,7 +88,7 @@ initEdgeMap(Graph<TSpec> const& g,
 
 template<typename TCargo, typename TSpec, typename TPropertyMap>
 inline void
-initEdgeMap(Graph<Tree<TCargo, TSpec> > const& g,
+resizeEdgeMap(Graph<Tree<TCargo, TSpec> > const& g,
 			TPropertyMap& pm)
 {
 	SEQAN_CHECKPOINT
@@ -99,7 +99,7 @@ initEdgeMap(Graph<Tree<TCargo, TSpec> > const& g,
 
 template<typename TCargo, typename TSpec, typename TPropertyMap>
 inline void
-initEdgeMap(Graph<Tree<TCargo, TSpec> >& g,
+resizeEdgeMap(Graph<Tree<TCargo, TSpec> >& g,
 			TPropertyMap& pm)
 {
 	SEQAN_CHECKPOINT
@@ -298,7 +298,7 @@ struct Value<InternalMap<T, 0> > {
 
 template<typename TSpec, typename TContainer, unsigned int const MemberId>
 inline void
-initEdgeMap(Graph<TSpec> const& g,
+resizeEdgeMap(Graph<TSpec> const& g,
 			InternalMap<TContainer, MemberId>& pm)
 {
 }
@@ -307,7 +307,7 @@ initEdgeMap(Graph<TSpec> const& g,
 
 template<typename TSpec, typename TContainer, unsigned int const MemberId>
 inline void
-initEdgeMap(Graph<TSpec>& g,
+resizeEdgeMap(Graph<TSpec>& g,
 			InternalMap<TContainer, MemberId>& pm)
 {
 }
@@ -530,7 +530,7 @@ struct Value<InternalPointerMap<TValue TClass::*, TPMember> > {
 
 template<typename TSpec, typename TPropmap, TPropmap const Instance>
 inline void
-initEdgeMap(Graph<TSpec>& g,
+resizeEdgeMap(Graph<TSpec>& g,
 			InternalPointerMap<TPropmap, Instance>& pm)
 {
 	SEQAN_CHECKPOINT
@@ -540,7 +540,7 @@ initEdgeMap(Graph<TSpec>& g,
 
 template<typename TSpec, typename TPropmap, TPropmap const Instance>
 inline void
-initEdgeMap(Graph<TSpec> const& g,
+resizeEdgeMap(Graph<TSpec> const& g,
 			InternalPointerMap<TPropmap, Instance>& pm)
 {
 }
@@ -646,7 +646,7 @@ struct Value<TValue TClass:: * const> {
 
 template <typename TSpec, typename TClass, typename TValue> 
 inline void
-initEdgeMap(Graph<TSpec> const& g,
+resizeEdgeMap(Graph<TSpec> const& g,
 			 TValue TClass:: * ptr_to_member)
 {
 }
@@ -655,7 +655,7 @@ initEdgeMap(Graph<TSpec> const& g,
 
 template <typename TSpec, typename TClass, typename TValue> 
 inline void
-initEdgeMap(Graph<TSpec>& g,
+resizeEdgeMap(Graph<TSpec>& g,
 			 TValue TClass:: * ptr_to_member)
 {
 }
@@ -707,12 +707,12 @@ getProperty(TValue TClass:: * const ptr_to_member,
 
 template<typename TSpec, typename TPropertyMap, typename TProperties>
 inline void
-initVertexMap(Graph<TSpec> const& g,
+resizeVertexMap(Graph<TSpec> const& g,
 			  TPropertyMap& pm,
 			  TProperties const& prop)
 {
 	SEQAN_CHECKPOINT
-	initVertexMap(g,pm);
+	resizeVertexMap(g,pm);
 	typedef Graph<TSpec> TGraph;
 	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
 	TVertexIterator it(g);
@@ -725,12 +725,12 @@ initVertexMap(Graph<TSpec> const& g,
 
 template<typename TSpec, typename TPropertyMap, typename TProperties>
 inline void
-initEdgeMap(Graph<TSpec> const& g,
+resizeEdgeMap(Graph<TSpec> const& g,
 			TPropertyMap& pm,
 			TProperties const& prop)
 {
 	SEQAN_CHECKPOINT
-	initEdgeMap(g,pm);
+	resizeEdgeMap(g,pm);
 	typedef Graph<TSpec> TGraph;
 	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
 	TEdgeIterator it(g);

@@ -24,7 +24,7 @@ void BreadthFirstSearch() {
 	std::cout << g << ::std::endl;
 	
 	String<char> nameMap;
-	initVertexMap(g,nameMap, names);
+	resizeVertexMap(g,nameMap, names);
 
 	// Predecessor and distance map
 	String<unsigned int> predMap;
@@ -77,7 +77,7 @@ void DepthFirstSearch() {
 	addEdges(g, edges, numEdges);
 	std::cout << g << ::std::endl;
 	String<char> nameMap;
-	initVertexMap(g,nameMap, names);
+	resizeVertexMap(g,nameMap, names);
 
 	// Predecessor and distance map
 	String<unsigned int> predMap;
@@ -127,7 +127,7 @@ void TopologicalSort() {
 	addEdges(g, edges, numEdges);
 	std::cout << g << ::std::endl;
 	String<std::string> nameMap;
-	initVertexMap(g,nameMap, names);
+	resizeVertexMap(g,nameMap, names);
 
 	// Predecessor and distance map
 	String<TVertexDescriptor> order;
@@ -169,7 +169,7 @@ void StronglyConnectedComponents() {
 	addEdges(g, edges, numEdges);
 	std::cout << g << ::std::endl;
 	String<char> nameMap;
-	initVertexMap(g,nameMap, names);
+	resizeVertexMap(g,nameMap, names);
 
 	// Predecessor and distance map
 	String<unsigned int> component;
@@ -210,9 +210,9 @@ void PrimsAlgorithm() {
 	TGraph g;
 	addEdges(g,edges, numEdges);
 	String<int> weightMap;
-	initEdgeMap(g, weightMap, weights);
+	resizeEdgeMap(g, weightMap, weights);
 	String<char> nameMap;
-	initVertexMap(g,nameMap, names);
+	resizeVertexMap(g,nameMap, names);
 	std::cout << g << std::endl;
 
 	// Tree and predecessor map 
@@ -254,9 +254,9 @@ void KruskalsAlgorithm() {
 	TGraph g;
 	addEdges(g,edges, numEdges);
 	String<int> weightMap;
-	initEdgeMap(g, weightMap, weights);
+	resizeEdgeMap(g, weightMap, weights);
 	String<char> nameMap;
-	initVertexMap(g,nameMap, names);
+	resizeVertexMap(g,nameMap, names);
 	std::cout << g << std::endl;
 
 	// Tree edges
@@ -298,7 +298,7 @@ void DagShortestPath() {
 	TGraph g;
 	addEdges(g, edges, numEdges);
 	String<int> weightMap;
-	initEdgeMap(g,weightMap, weights);
+	resizeEdgeMap(g,weightMap, weights);
 	std::cout << g << ::std::endl;
 
 
@@ -342,7 +342,7 @@ void BellmanFord() {
 	TGraph g;
 	addEdges(g, edges, numEdges);
 	String<unsigned int> weightMap;
-	initEdgeMap(g,weightMap, weights);
+	resizeEdgeMap(g,weightMap, weights);
 	std::cout << g << ::std::endl;
 
 	// Out parameters of Bellman-Ford: Predecessor map and distance map
@@ -386,7 +386,7 @@ void Dijkstra() {
 	TGraph g;
 	addEdges(g, edges, numEdges);
 	String<unsigned int> weightMap;
-	initEdgeMap(g,weightMap, weights);
+	resizeEdgeMap(g,weightMap, weights);
 	std::cout << g << ::std::endl;
 
 	// Out parameters of Dijkstra: Predecessor map and distance map
@@ -439,7 +439,7 @@ void DijkstraInternalMap() {
 	//unsigned int TEdgeCargo:: * intMap = &TEdgeCargo::member;
 	TGraph g;
 	addEdges(g, edges, numEdges);
-	initEdgeMap(g,intMap, weights);
+	resizeEdgeMap(g,intMap, weights);
 	std::cout << g << ::std::endl;
 
 	// Out parameters of Dijkstra: Predecessor map and distance map
@@ -481,7 +481,7 @@ void AllPairsShortestPath() {
 	TGraph g;
 	addEdges(g, edges, numEdges);
 	String<int> weightMap;
-	initEdgeMap(g,weightMap, weights);
+	resizeEdgeMap(g,weightMap, weights);
 	std::cout << g << ::std::endl;
 
 	// Out parameter
@@ -523,7 +523,7 @@ void FloydWarshall() {
 	TGraph g;
 	addEdges(g,edges, numEdges);
 	String<int> weightMap;
-	initEdgeMap(g,weightMap, weights);
+	resizeEdgeMap(g,weightMap, weights);
 	std::cout << g << ::std::endl;
 
 	// Out parameter
@@ -598,7 +598,7 @@ void FordFulkerson() {
 	Graph<> g;
 	addEdges(g,edges, numEdges);
 	String<unsigned int> capMap;	
-	initEdgeMap(g,capMap, capacity);
+	resizeEdgeMap(g,capMap, capacity);
 	std::cout << g << ::std::endl;
 
 	// Out-parameter
@@ -671,7 +671,7 @@ void AutomatonTest() {
 
 	// Property maps used after graph creation -> Much better :-)
 	String<std::string> nameMap;
-	initVertexMap(automaton, nameMap);
+	resizeVertexMap(automaton, nameMap);
 	typedef Iterator<DnaAutomaton, VertexIterator>::Type TVertexIterator;
 	TVertexIterator it(automaton);
 	std::string str = "Hallo";
