@@ -899,7 +899,6 @@ class StringSet<TString, IdHolder<TightStorage<TSpec> > >
 		inline typename Reference<StringSet const>::Type 
 		operator [] (TPos pos) const
 		{
-	SEQAN_CHECKPOINT
 			return value(*this, pos);
 		}
 };
@@ -909,14 +908,22 @@ class StringSet<TString, IdHolder<GenerousStorage<TSpec> > >
 {
 	public:
         typedef String<TString*> TStrings;
+		typedef typename Size<StringSet>::Type TSize;
 		TStrings strings;
+		TSize counter;
+
+		StringSet() : counter(0)
+		{
+			SEQAN_CHECKPOINT
+		}
+
 //____________________________________________________________________________
 
 		template <typename TPos>
 		inline typename Reference<StringSet>::Type
 		operator [] (TPos pos)
 		{
-	SEQAN_CHECKPOINT
+			SEQAN_CHECKPOINT
 			return value(*this, pos);
 		}
 
@@ -924,7 +931,6 @@ class StringSet<TString, IdHolder<GenerousStorage<TSpec> > >
 		inline typename Reference<StringSet const>::Type 
 		operator [] (TPos pos) const
 		{
-	SEQAN_CHECKPOINT
 			return value(*this, pos);
 		}
 };
@@ -936,6 +942,7 @@ appendValue(StringSet<TString, IdHolder<GenerousStorage<TSpec> > >& me,
 {
 	SEQAN_CHECKPOINT
 	appendValue(me.strings, &obj);
+	++me.counter;
 }
 
 
@@ -960,15 +967,47 @@ addString(StringSet<TString, IdHolder<TSpec> >& me,
 	return length(me.strings) - 1;
 }
 
-//TODO: addString für String+ID
+template<typename TString, typename TSpec, typename TId>
+inline typename Id<StringSet<TString, IdHolder<GenerousStorage<TSpec> > > >::Type 
+addString(StringSet<TString, IdHolder<GenerousStorage<TSpec> > >& me, 
+		  TString& obj,
+		  TId id) 
+{
+	SEQAN_CHECKPOINT
+	if (id >= (TId) length(me.strings)) fill(me.strings, id+1, (TString*) 0);
+	if ((TString*) me.strings[id] == (TString*) 0) ++me.counter;
+	me.strings[id] = &obj;
+	return id;
+}
+
+template<typename TString, typename TSpec, typename TId>
+inline typename Id<StringSet<TString, IdHolder<TightStorage<TSpec> > > >::Type 
+addString(StringSet<TString, IdHolder<TightStorage<TSpec> > >& me, 
+		  TString& obj,
+		  TId id) 
+{
+	SEQAN_CHECKPOINT
+	for(unsigned int i=0;i<length(me.ids);++i) {
+		if ((TId) me.ids[i] == (TId) id) {
+			me.strings[i]=&obj;
+			return id;
+		}
+	}
+	appendValue(me.strings, &obj);
+	appendValue(me.ids, id);
+	return id;
+}
+
+
 template<typename TString, typename TSpec, typename TId>
 inline typename Id<StringSet<TString, IdHolder<GenerousStorage<TSpec> > > >::Type 
 addString(StringSet<TString, IdHolder<GenerousStorage<TSpec> > >& dest, 
 		  StringSet<TString, IdHolder<GenerousStorage<TSpec> > >& source,
-		  TId& id) 
+		  TId id) 
 {
 	SEQAN_CHECKPOINT
 	if (id >= length(dest.strings)) fill(dest.strings, id+1, (TString*) 0);
+	if (dest.strings[id] == (TString*) 0) ++dest.counter;
 	dest.strings[id] = source.strings[id];
 	return id;
 }
@@ -977,7 +1016,7 @@ template<typename TString, typename TSpec, typename TId>
 inline typename Id<StringSet<TString, IdHolder<TightStorage<TSpec> > > >::Type 
 addString(StringSet<TString, IdHolder<TightStorage<TSpec> > >& dest, 
 		  StringSet<TString, IdHolder<TightStorage<TSpec> > >& source,
-		  TId& id) 
+		  TId id) 
 {
 	SEQAN_CHECKPOINT
 	for(unsigned int i=0;i<length(source.ids);++i) {
@@ -993,7 +1032,7 @@ addString(StringSet<TString, IdHolder<TightStorage<TSpec> > >& dest,
 template<typename TString, typename TSpec, typename TId>
 inline typename Reference<StringSet<TString, IdHolder<GenerousStorage<TSpec> > > >::Type
 getString(StringSet<TString, IdHolder<GenerousStorage<TSpec> > >& me, 
-		  TId const& id) 
+		  TId const id) 
 {
 	SEQAN_CHECKPOINT
 	return value(me, id);
@@ -1002,11 +1041,11 @@ getString(StringSet<TString, IdHolder<GenerousStorage<TSpec> > >& me,
 template<typename TString, typename TSpec, typename TId>
 inline typename Reference<StringSet<TString, IdHolder<TightStorage<TSpec> > > >::Type
 getString(StringSet<TString, IdHolder<TightStorage<TSpec> > >&me, 
-		  TId const& id) 
+		  TId const id) 
 {
 	SEQAN_CHECKPOINT
 	for(unsigned int i=0;i<length(me.strings);++i) {
-		if (me.ids[i] == id) {
+		if ((TId) me.ids[i] == (TId) id) {
 			return value(me, i);
 		}
 	}
@@ -1017,9 +1056,10 @@ getString(StringSet<TString, IdHolder<TightStorage<TSpec> > >&me,
 template<typename TString, typename TSpec, typename TId>
 inline void
 removeString(StringSet<TString, IdHolder<GenerousStorage<TSpec> > >& me, 
-			 TId const& id) 
+			 TId const id) 
 {
 	SEQAN_CHECKPOINT
+	if (me.strings[id] != (TString*) 0) --me.counter;
 	me.strings[id] = 0;
 	while((!empty(me.strings)) &&
 		(me.strings[length(me.strings) - 1] == 0))
@@ -1031,7 +1071,7 @@ removeString(StringSet<TString, IdHolder<GenerousStorage<TSpec> > >& me,
 template<typename TString, typename TSpec, typename TId>
 inline void
 removeString(StringSet<TString, IdHolder<TightStorage<TSpec> > >& me, 
-			 TId const& id) 
+			 TId const id) 
 {
 	SEQAN_CHECKPOINT
 	for(unsigned int i=0;i<length(me.strings);++i) {
@@ -1052,11 +1092,12 @@ clear(StringSet< TString, IdHolder<GenerousStorage<TSpec> > > & me)
 {
 	SEQAN_CHECKPOINT
 	clear(me.strings);
+	me.counter = 0;
 }
 
 template<typename TString, typename TSpec>
 inline void
-clear(StringSet< TString, IdHolder<TightStorage<TSpec> > >& me) 
+clear(StringSet<TString, IdHolder<TightStorage<TSpec> > >& me) 
 {
 	SEQAN_CHECKPOINT
 	clear(me.strings);
@@ -1064,19 +1105,33 @@ clear(StringSet< TString, IdHolder<TightStorage<TSpec> > >& me)
 }
 
 template<typename TString, typename TSpec>
-inline typename Size<StringSet<TString, IdHolder<TSpec> > >::Type 
-length(StringSet<TString, IdHolder<TSpec> > const &me) 
+inline typename Size<StringSet<TString, IdHolder<TightStorage<TSpec> > > >::Type 
+length(StringSet<TString, IdHolder<TightStorage<TSpec> > > const &me) 
+{
+	return length(me.strings);
+}
+
+template<typename TString, typename TSpec>
+inline typename Size<StringSet<TString, IdHolder<TightStorage<TSpec> > > >::Type 
+length(StringSet<TString, IdHolder<TightStorage<TSpec> > > &me) 
 {
 	SEQAN_CHECKPOINT
 	return length(me.strings);
 }
-//TODO: counter für length
+
 template<typename TString, typename TSpec>
-inline typename Size<StringSet<TString, IdHolder<TSpec> > >::Type 
-length(StringSet<TString, IdHolder<TSpec> > &me) 
+inline typename Size<StringSet<TString, IdHolder<GenerousStorage<TSpec> > > >::Type 
+length(StringSet<TString, IdHolder<GenerousStorage<TSpec> > > const &me) 
+{
+	return me.counter;
+}
+
+template<typename TString, typename TSpec>
+inline typename Size<StringSet<TString, IdHolder<GenerousStorage<TSpec> > > >::Type 
+length(StringSet<TString, IdHolder<GenerousStorage<TSpec> > > &me) 
 {
 	SEQAN_CHECKPOINT
-	return length(me.strings);
+	return me.counter;
 }
 
 template<typename TString, typename TSpec, typename TPos>
@@ -1094,9 +1149,9 @@ value(StringSet< TString, IdHolder<TSpec> > & me,
 
 template < typename TString, typename TSpec, typename TPos >
 inline typename Reference< StringSet< TString, IdHolder<TSpec> > const >::Type
-value(StringSet< TString, IdHolder<TSpec> > const & me, TPos pos)
+value(StringSet< TString, IdHolder<TSpec> > const & me, 
+	  TPos pos)
 {
-	SEQAN_CHECKPOINT
 	if (me.strings[pos]!=0) return *me.strings[pos];
 	else {
 		static TString tmp = "";
@@ -1118,6 +1173,7 @@ subset(StringSet<TString, IdHolder<GenerousStorage<TSpec> > >& source,
 	typedef typename Id<TStringSet>::Type TId;
 
 	clear(dest);
+	dest.counter = len;
 	fill(dest.strings, length(source.strings), (TString*) 0);
 	for(unsigned int i=0;i<len;++i) dest.strings[ids[i]] = source.strings[ids[i]];
 }

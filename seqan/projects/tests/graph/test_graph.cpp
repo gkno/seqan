@@ -1823,38 +1823,45 @@ void Test_StringSet() {
 	String<char> bla("a");
 	TId id0 = addString(str, bla);
 	SEQAN_TASSERT(id0 == 0)
+	SEQAN_TASSERT(length(str) == 1)
 	SEQAN_TASSERT(str[0] == "a")
 	SEQAN_TASSERT(getString(str, id0) == "a")
 	String<char> bla1("b");
 	TId id1 = addString(str, bla1);
 	SEQAN_TASSERT(id1 == 1)
 	SEQAN_TASSERT(str[1] == "b")
+	SEQAN_TASSERT(length(str) == 2)
 	SEQAN_TASSERT(getString(str, id1) == "b")
 	String<char> bla2("c");
 	TId id2 = addString(str, bla2);
 	SEQAN_TASSERT(id2 == 2)
 	SEQAN_TASSERT(str[2] == "c")
+	SEQAN_TASSERT(length(str) == 3)
 	SEQAN_TASSERT(getString(str, id2) == "c")
 	String<char> bla3("d");
 	TId id3 = addString(str, bla3);
 	SEQAN_TASSERT(id3 == 3)
 	SEQAN_TASSERT(str[3] == "d")
+	SEQAN_TASSERT(length(str) == 4)
 	SEQAN_TASSERT(getString(str, id3) == "d")
 	removeString(str,id1);
 	SEQAN_TASSERT(getString(str, id0) == "a")
 	SEQAN_TASSERT(getString(str, id1) == "")
 	SEQAN_TASSERT(getString(str, id2) == "c")
 	SEQAN_TASSERT(getString(str, id3) == "d")
+	SEQAN_TASSERT(length(str) == 3)
 	removeString(str,id2);
 	SEQAN_TASSERT(getString(str, id0) == "a")
 	SEQAN_TASSERT(getString(str, id1) == "")
 	SEQAN_TASSERT(getString(str, id2) == "")
 	SEQAN_TASSERT(getString(str, id3) == "d")
+	SEQAN_TASSERT(length(str) == 2)
 	removeString(str,id3);
 	SEQAN_TASSERT(getString(str, id0) == "a")
 	SEQAN_TASSERT(getString(str, id1) == "")
 	SEQAN_TASSERT(getString(str, id2) == "")
 	SEQAN_TASSERT(getString(str, id3) == "")
+	SEQAN_TASSERT(length(str) == 1)
 	id1 = addString(str, bla1);
 	id2 = addString(str, bla2);
 	id3 = addString(str, bla3);	
@@ -1862,6 +1869,7 @@ void Test_StringSet() {
 	SEQAN_TASSERT(getString(str, id1) == "b")
 	SEQAN_TASSERT(getString(str, id2) == "c")
 	SEQAN_TASSERT(getString(str, id3) == "d")
+	SEQAN_TASSERT(length(str) == 4)
 	TStringSet subSet;
 	String<unsigned int> ids;
 	appendValue(ids, id1);
@@ -1871,6 +1879,7 @@ void Test_StringSet() {
 	SEQAN_TASSERT(getString(subSet, id1) == "b")
 	SEQAN_TASSERT(getString(subSet, id2) == "")
 	SEQAN_TASSERT(getString(subSet, id3) == "d")
+	SEQAN_TASSERT(length(subSet) == 2)
 	TStringSet subSet2;
 	String<unsigned int> ids2;
 	appendValue(ids2, id3);
@@ -1879,6 +1888,7 @@ void Test_StringSet() {
 	SEQAN_TASSERT(getString(subSet2, id1) == "")
 	SEQAN_TASSERT(getString(subSet2, id2) == "")
 	SEQAN_TASSERT(getString(subSet2, id3) == "d")
+	SEQAN_TASSERT(length(subSet2) == 1)
 	clear(subSet);
 	addString(subSet,subSet2, id3);
 	addString(subSet,str, id0);
@@ -1886,6 +1896,14 @@ void Test_StringSet() {
 	SEQAN_TASSERT(getString(subSet, id1) == "")
 	SEQAN_TASSERT(getString(subSet, id2) == "")
 	SEQAN_TASSERT(getString(subSet, id3) == "d")
+	SEQAN_TASSERT(length(subSet) == 2)
+	String<char> bla5("f");
+	addString(subSet, bla5, id3);
+	SEQAN_TASSERT(getString(subSet, id3) == "f")
+	SEQAN_TASSERT(length(subSet) == 2)
+	addString(subSet, bla3, 20);
+	SEQAN_TASSERT(getString(subSet, 20) == "d")
+	SEQAN_TASSERT(length(subSet) == 3)
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -3373,7 +3391,6 @@ int main()
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_idmanager.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_interface.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_edgestump.h");
-	debug::verifyCheckpoints("projects/library/seqan/sequence/sequence_multiple.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_directed.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_undirected.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_automaton.h");
