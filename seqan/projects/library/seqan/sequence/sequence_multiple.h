@@ -864,6 +864,12 @@ namespace SEQAN_NAMESPACE_MAIN
     };
 
 
+//////////////////////////////////////////////////////////////////////////////
+// Sequence - StringSet
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+
 template<typename TSpec = void>
 struct GenerousStorage;
 
@@ -873,6 +879,25 @@ struct TightStorage;
 // Default id holder string set
 template<typename TSpec = GenerousStorage<> >
 struct IdHolder;
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Class.StringSet:
+..cat:Sequences
+..summary:A container class for a set of strings.
+..signature:StringSet<TString, TSpec>
+..param.TString:The string type.
+...type:Class.String
+..param.TSpec:The specializing type for the StringSet.
+...metafunction:Metafunction.Spec
+...remarks:Possible values are IdHolder<TightStorage<> > or IdHolder<GenerousStorage<> >
+...remarks:TightStorage is very space efficient whereas GenerousStorage provides fast access to the strings in the container via ids.
+...default:$GenerousStorage$.
+..include:sequence.h
+*/
 
 template<typename TString, typename TSpec>
 class StringSet<TString, IdHolder<TightStorage<TSpec> > >
@@ -884,8 +909,6 @@ class StringSet<TString, IdHolder<TightStorage<TSpec> > >
 
 		TStrings strings;
 		TIds ids;
-
-//____________________________________________________________________________
 
 		template <typename TPos>
 		inline typename Reference<StringSet>::Type
@@ -902,6 +925,9 @@ class StringSet<TString, IdHolder<TightStorage<TSpec> > >
 			return value(*this, pos);
 		}
 };
+
+//////////////////////////////////////////////////////////////////////////////
+
 
 template<typename TString, typename TSpec>
 class StringSet<TString, IdHolder<GenerousStorage<TSpec> > >
@@ -917,8 +943,6 @@ class StringSet<TString, IdHolder<GenerousStorage<TSpec> > >
 			SEQAN_CHECKPOINT
 		}
 
-//____________________________________________________________________________
-
 		template <typename TPos>
 		inline typename Reference<StringSet>::Type
 		operator [] (TPos pos)
@@ -935,6 +959,16 @@ class StringSet<TString, IdHolder<GenerousStorage<TSpec> > >
 		}
 };
 
+
+//////////////////////////////////////////////////////////////////////////////
+// FUNCTIONS
+//////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+///.Function.appendValue.param.target.type:Class.StringSet
+
 template<typename TString, typename TSpec>
 inline void 
 appendValue(StringSet<TString, IdHolder<GenerousStorage<TSpec> > >& me, 
@@ -946,6 +980,8 @@ appendValue(StringSet<TString, IdHolder<GenerousStorage<TSpec> > >& me,
 }
 
 
+//////////////////////////////////////////////////////////////////////////////
+
 template<typename TString, typename TSpec>
 inline void 
 appendValue(StringSet<TString, IdHolder<TightStorage<TSpec> > >& me, 
@@ -956,6 +992,27 @@ appendValue(StringSet<TString, IdHolder<TightStorage<TSpec> > >& me,
 	appendValue(me.ids, length(me.strings) - 1);
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.addString:
+..cat:Sequences
+..summary:Adds a new string to the StringSet and retrieves an id.
+..signature:addString(dest, str [,id])
+..signature:addString(dest, source, id)
+..param.dest:A StringSet.
+...type:Class.StringSet
+..param.source:A StringSet.
+...type:Class.StringSet
+..param.str:A new string.
+...type:Metafunction.Value
+..param.id:An associated id.
+...type:Metafunction.Id
+..returns:A new id
+...type:Metafunction.Id
+..see:Function.appendValue
+..see:Function.getString
+*/
 
 template<typename TString, typename TSpec>
 inline typename Id<StringSet<TString, IdHolder<TSpec> > >::Type 
@@ -966,6 +1023,8 @@ addString(StringSet<TString, IdHolder<TSpec> >& me,
 	appendValue(me, obj);
 	return length(me.strings) - 1;
 }
+
+//////////////////////////////////////////////////////////////////////////////
 
 template<typename TString, typename TSpec, typename TId>
 inline typename Id<StringSet<TString, IdHolder<GenerousStorage<TSpec> > > >::Type 
@@ -979,6 +1038,8 @@ addString(StringSet<TString, IdHolder<GenerousStorage<TSpec> > >& me,
 	me.strings[id] = &obj;
 	return id;
 }
+
+//////////////////////////////////////////////////////////////////////////////
 
 template<typename TString, typename TSpec, typename TId>
 inline typename Id<StringSet<TString, IdHolder<TightStorage<TSpec> > > >::Type 
@@ -998,6 +1059,7 @@ addString(StringSet<TString, IdHolder<TightStorage<TSpec> > >& me,
 	return id;
 }
 
+//////////////////////////////////////////////////////////////////////////////
 
 template<typename TString, typename TSpec, typename TId>
 inline typename Id<StringSet<TString, IdHolder<GenerousStorage<TSpec> > > >::Type 
@@ -1011,6 +1073,8 @@ addString(StringSet<TString, IdHolder<GenerousStorage<TSpec> > >& dest,
 	dest.strings[id] = source.strings[id];
 	return id;
 }
+
+//////////////////////////////////////////////////////////////////////////////
 
 template<typename TString, typename TSpec, typename TId>
 inline typename Id<StringSet<TString, IdHolder<TightStorage<TSpec> > > >::Type 
@@ -1029,6 +1093,21 @@ addString(StringSet<TString, IdHolder<TightStorage<TSpec> > >& dest,
 	return 0;
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.getString:
+..cat:Sequences
+..summary:Retrieves a string from the StringSet given an id.
+..signature:getString(me, id)
+..param.me:A StringSet.
+...type:Class.StringSet
+..param.id:An id.
+...type:Metafunction.Id
+..returns:A reference to a string.
+..see:Function.addString
+*/
+
 template<typename TString, typename TSpec, typename TId>
 inline typename Reference<StringSet<TString, IdHolder<GenerousStorage<TSpec> > > >::Type
 getString(StringSet<TString, IdHolder<GenerousStorage<TSpec> > >& me, 
@@ -1037,6 +1116,8 @@ getString(StringSet<TString, IdHolder<GenerousStorage<TSpec> > >& me,
 	SEQAN_CHECKPOINT
 	return value(me, id);
 }
+
+//////////////////////////////////////////////////////////////////////////////
 
 template<typename TString, typename TSpec, typename TId>
 inline typename Reference<StringSet<TString, IdHolder<TightStorage<TSpec> > > >::Type
@@ -1053,6 +1134,22 @@ getString(StringSet<TString, IdHolder<TightStorage<TSpec> > >&me,
 	return tmp;
 }
 
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.removeString:
+..cat:Sequences
+..summary:Removes a string from the StringSet given an id.
+..signature:removeString(me, id)
+..param.me:A StringSet.
+...type:Class.StringSet
+..param.id:An id.
+...type:Metafunction.Id
+..returns:void
+..see:Function.addString
+*/
+
 template<typename TString, typename TSpec, typename TId>
 inline void
 removeString(StringSet<TString, IdHolder<GenerousStorage<TSpec> > >& me, 
@@ -1067,6 +1164,8 @@ removeString(StringSet<TString, IdHolder<GenerousStorage<TSpec> > >& me,
 		resize(me.strings, length(me.strings) - 1);
 	}
 }
+
+//////////////////////////////////////////////////////////////////////////////
 
 template<typename TString, typename TSpec, typename TId>
 inline void
@@ -1086,6 +1185,11 @@ removeString(StringSet<TString, IdHolder<TightStorage<TSpec> > >& me,
 	}
 }
 
+
+//////////////////////////////////////////////////////////////////////////////
+
+///.Function.clear.param.object.type:Class.StringSet
+
 template<typename TString, typename TSpec>
 inline void
 clear(StringSet< TString, IdHolder<GenerousStorage<TSpec> > > & me) 
@@ -1094,6 +1198,8 @@ clear(StringSet< TString, IdHolder<GenerousStorage<TSpec> > > & me)
 	clear(me.strings);
 	me.counter = 0;
 }
+
+//////////////////////////////////////////////////////////////////////////////
 
 template<typename TString, typename TSpec>
 inline void
@@ -1104,12 +1210,19 @@ clear(StringSet<TString, IdHolder<TightStorage<TSpec> > >& me)
 	clear(me.ids);
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
+///.Function.length.param.object.type:Class.StringSet
+
 template<typename TString, typename TSpec>
 inline typename Size<StringSet<TString, IdHolder<TightStorage<TSpec> > > >::Type 
 length(StringSet<TString, IdHolder<TightStorage<TSpec> > > const &me) 
 {
 	return length(me.strings);
 }
+
+//////////////////////////////////////////////////////////////////////////////
+
 
 template<typename TString, typename TSpec>
 inline typename Size<StringSet<TString, IdHolder<TightStorage<TSpec> > > >::Type 
@@ -1119,12 +1232,16 @@ length(StringSet<TString, IdHolder<TightStorage<TSpec> > > &me)
 	return length(me.strings);
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
 template<typename TString, typename TSpec>
 inline typename Size<StringSet<TString, IdHolder<GenerousStorage<TSpec> > > >::Type 
 length(StringSet<TString, IdHolder<GenerousStorage<TSpec> > > const &me) 
 {
 	return me.counter;
 }
+
+//////////////////////////////////////////////////////////////////////////////
 
 template<typename TString, typename TSpec>
 inline typename Size<StringSet<TString, IdHolder<GenerousStorage<TSpec> > > >::Type 
@@ -1133,6 +1250,10 @@ length(StringSet<TString, IdHolder<GenerousStorage<TSpec> > > &me)
 	SEQAN_CHECKPOINT
 	return me.counter;
 }
+
+//////////////////////////////////////////////////////////////////////////////
+
+///.Function.value.param.object.type:Class.StringSet
 
 template<typename TString, typename TSpec, typename TPos>
 inline typename Reference<StringSet< TString, IdHolder<TSpec> > >::Type
@@ -1147,6 +1268,8 @@ value(StringSet< TString, IdHolder<TSpec> > & me,
 	}
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
 template < typename TString, typename TSpec, typename TPos >
 inline typename Reference< StringSet< TString, IdHolder<TSpec> > const >::Type
 value(StringSet< TString, IdHolder<TSpec> > const & me, 
@@ -1159,7 +1282,22 @@ value(StringSet< TString, IdHolder<TSpec> > const & me,
 	}
 }
 
-//____________________________________________________________________________
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.subset:
+..cat:Sequences
+..summary:Creates a subset of a given StringSet.
+..signature:subset(source, dest, id_array [, len])
+..param.source:In-parameter:The source StringSet.
+...type:Class.StringSet
+..param.dest:Out-parameter:The destination StringSet (the subset).
+...type:Class.StringSet
+..param.id_array:In-parameter:An array of ids. Each id corresponds to a sequence that is supposed to be in the subset.
+..param.len:In-parameter:Optional length of the id array.
+...remarks:If len is not defined the length function must be valid for this array or string type.
+..returns:void
+*/
 
 template <typename TString, typename TSpec, typename TIds, typename TLength>
 inline void
@@ -1177,6 +1315,8 @@ subset(StringSet<TString, IdHolder<GenerousStorage<TSpec> > >& source,
 	fill(dest.strings, length(source.strings), (TString*) 0);
 	for(unsigned int i=0;i<len;++i) dest.strings[ids[i]] = source.strings[ids[i]];
 }
+
+//////////////////////////////////////////////////////////////////////////////
 
 template <typename TString, typename TSpec, typename TIds, typename TLength>
 inline void
@@ -1211,6 +1351,8 @@ subset(StringSet<TString, IdHolder<TightStorage<TSpec> > >& source,
 	}
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
 template <typename TString, typename TSpec, typename TIds>
 inline void
 subset(StringSet<TString, IdHolder<TSpec> >& source,
@@ -1220,6 +1362,8 @@ subset(StringSet<TString, IdHolder<TSpec> >& source,
 	SEQAN_CHECKPOINT
 	subset(source,dest,ids,length(ids));
 }
+
+//////////////////////////////////////////////////////////////////////////////
 
 
 }
