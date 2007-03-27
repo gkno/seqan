@@ -21,6 +21,7 @@ namespace SEQAN_NAMESPACE_MAIN
     template < typename TStringSet >
     class StringSetIterator;
 
+
 //	template < typename TString, typename TSpec = ConcatVirtual<> >
 	template < typename TString, typename TSpec = ConcatDirect<> >
 	class StringSet;
@@ -466,7 +467,6 @@ namespace SEQAN_NAMESPACE_MAIN
 		return me.strings[pos];
 	}
 
-
 	template < typename TString, typename TSpec, typename TPos >
 	inline typename Infix<TString>::Type
 	value(StringSet< TString, ConcatDirect<TSpec> > & me, TPos pos)
@@ -480,6 +480,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 		return infix(me.concat, me.limits[pos], me.limits[pos + 1]);
 	} 
+
 
 //____________________________________________________________________________
 
@@ -926,6 +927,311 @@ namespace SEQAN_NAMESPACE_MAIN
 			++it_source;
 		}
     }*/
+
+
+template<typename TSpec = void>
+struct GenerousStorage;
+
+template<typename TSpec = void>
+struct TightStorage;
+
+// Default id holder string set
+template<typename TSpec = GenerousStorage<> >
+struct IdHolder;
+
+template<typename TString, typename TSpec>
+class StringSet<TString, IdHolder<TightStorage<TSpec> > >
+{
+	public:
+		typedef typename Id<StringSet>::Type TIdType;
+        typedef String<TString*> TStrings;
+		typedef String<TIdType> TIds;
+
+		TStrings strings;
+		TIds ids;
+
+//____________________________________________________________________________
+
+		template <typename TPos>
+		inline typename Reference<StringSet>::Type
+		operator [] (TPos pos)
+		{
+	SEQAN_CHECKPOINT
+			return value(*this, pos);
+		}
+
+		template <typename TPos>
+		inline typename Reference<StringSet const>::Type 
+		operator [] (TPos pos) const
+		{
+	SEQAN_CHECKPOINT
+			return value(*this, pos);
+		}
+};
+
+template<typename TString, typename TSpec>
+class StringSet<TString, IdHolder<GenerousStorage<TSpec> > >
+{
+	public:
+        typedef String<TString*> TStrings;
+		TStrings strings;
+//____________________________________________________________________________
+
+		template <typename TPos>
+		inline typename Reference<StringSet>::Type
+		operator [] (TPos pos)
+		{
+	SEQAN_CHECKPOINT
+			return value(*this, pos);
+		}
+
+		template <typename TPos>
+		inline typename Reference<StringSet const>::Type 
+		operator [] (TPos pos) const
+		{
+	SEQAN_CHECKPOINT
+			return value(*this, pos);
+		}
+};
+
+template<typename TString, typename TSpec>
+inline void 
+appendValue(StringSet<TString, IdHolder<TSpec> >& me, 
+			TString& obj) 
+{
+	SEQAN_CHECKPOINT
+	appendValue(me.strings, &obj);
+}
+
+template<typename TString, typename TSpec>
+inline typename Id<StringSet<TString, IdHolder<GenerousStorage<TSpec> > > >::Type 
+addString(StringSet<TString, IdHolder<GenerousStorage<TSpec> > >& me, 
+		  TString& obj) 
+{
+	SEQAN_CHECKPOINT
+	typedef StringSet<TString, IdHolder<TSpec> > TStringSet;
+	typedef typename Id<TStringSet>::Type TIdType;
+	appendValue(me, obj);
+	return length(me.strings) - 1;
+}
+
+template<typename TString, typename TSpec>
+inline typename Id<StringSet<TString, IdHolder<TightStorage<TSpec> > > >::Type 
+addString(StringSet<TString, IdHolder<TightStorage<TSpec> > >& me, 
+		  TString& obj) 
+{
+	SEQAN_CHECKPOINT
+	typedef StringSet<TString, IdHolder<TSpec> > TStringSet;
+	typedef typename Id<TStringSet>::Type TIdType;
+	appendValue(me, obj);
+	appendValue(me.ids, length(me.strings) - 1);
+	return length(me.strings) - 1;
+}
+
+template<typename TString, typename TSpec, typename TId>
+inline typename Id<StringSet<TString, IdHolder<GenerousStorage<TSpec> > > >::Type 
+addString(StringSet<TString, IdHolder<GenerousStorage<TSpec> > >& dest, 
+		  StringSet<TString, IdHolder<GenerousStorage<TSpec> > >& source,
+		  TId& id) 
+{
+	SEQAN_CHECKPOINT
+	if (id >= length(dest.strings)) fill(dest.strings, id+1, (TString*) 0);
+	dest.strings[id] = source.strings[id];
+	return id;
+}
+
+template<typename TString, typename TSpec, typename TId>
+inline typename Id<StringSet<TString, IdHolder<TightStorage<TSpec> > > >::Type 
+addString(StringSet<TString, IdHolder<TightStorage<TSpec> > >& dest, 
+		  StringSet<TString, IdHolder<TightStorage<TSpec> > >& source,
+		  TId& id) 
+{
+	SEQAN_CHECKPOINT
+	for(unsigned int i=0;i<length(source.ids);++i) {
+		if (source.ids[i] == id) {
+			appendValue(dest.strings, source.strings[i]);
+			appendValue(dest.ids, source.ids[i]);
+			return id;
+		}
+	}
+	return 0;
+}
+
+template<typename TString, typename TSpec, typename TId>
+inline typename Reference<StringSet<TString, IdHolder<GenerousStorage<TSpec> > > >::Type
+getString(StringSet<TString, IdHolder<GenerousStorage<TSpec> > >& me, 
+		  TId const& id) 
+{
+	SEQAN_CHECKPOINT
+	return value(me, id);
+}
+
+template<typename TString, typename TSpec, typename TId>
+inline typename Reference<StringSet<TString, IdHolder<TightStorage<TSpec> > > >::Type
+getString(StringSet<TString, IdHolder<TightStorage<TSpec> > >&me, 
+		  TId const& id) 
+{
+	SEQAN_CHECKPOINT
+	for(unsigned int i=0;i<length(me.strings);++i) {
+		if (me.ids[i] == id) {
+			return value(me, i);
+		}
+	}
+	static TString tmp = "";
+	return tmp;
+}
+
+template<typename TString, typename TSpec, typename TId>
+inline void
+removeString(StringSet<TString, IdHolder<GenerousStorage<TSpec> > >& me, 
+			 TId const& id) 
+{
+	SEQAN_CHECKPOINT
+	me.strings[id] = 0;
+	while((!empty(me.strings)) &&
+		(me.strings[length(me.strings) - 1] == 0))
+	{
+		resize(me.strings, length(me.strings) - 1);
+	}
+}
+
+template<typename TString, typename TSpec, typename TId>
+inline void
+removeString(StringSet<TString, IdHolder<TightStorage<TSpec> > >& me, 
+			 TId const& id) 
+{
+	SEQAN_CHECKPOINT
+	for(unsigned int i=0;i<length(me.strings);++i) {
+		if (me.ids[i] == id) {
+			for(unsigned int j=i+1;j<length(me.strings);++j) {
+				me.strings[j-1] = me.strings[j];
+				me.ids[j-1] = me.ids[j];
+			}
+			resize(me.strings, length(me.strings)-1);
+			resize(me.ids, length(me.ids)-1);
+		}
+	}
+}
+
+template<typename TString, typename TSpec>
+inline void
+clear(StringSet< TString, IdHolder<GenerousStorage<TSpec> > > & me) 
+{
+	SEQAN_CHECKPOINT
+	clear(me.strings);
+}
+
+template<typename TString, typename TSpec>
+inline void
+clear(StringSet< TString, IdHolder<TightStorage<TSpec> > >& me) 
+{
+	SEQAN_CHECKPOINT
+	clear(me.strings);
+	clear(me.ids);
+}
+
+template<typename TString, typename TSpec>
+inline typename Size<StringSet<TString, IdHolder<TSpec> > >::Type 
+length(StringSet<TString, IdHolder<TSpec> > const &me) 
+{
+	SEQAN_CHECKPOINT
+	return length(me.strings);
+}
+
+template<typename TString, typename TSpec>
+inline typename Size<StringSet<TString, IdHolder<TSpec> > >::Type 
+length(StringSet<TString, IdHolder<TSpec> > &me) 
+{
+	SEQAN_CHECKPOINT
+	return length(me.strings);
+}
+
+template<typename TString, typename TSpec, typename TPos>
+inline typename Reference<StringSet< TString, IdHolder<TSpec> > >::Type
+value(StringSet< TString, IdHolder<TSpec> > & me, 
+	  TPos pos)
+{
+	SEQAN_CHECKPOINT
+	if (me.strings[pos]!=0) return *me.strings[pos];
+	else {
+		static TString tmp = "";
+		return tmp;
+	}
+}
+
+template < typename TString, typename TSpec, typename TPos >
+inline typename Reference< StringSet< TString, IdHolder<TSpec> > const >::Type
+value(StringSet< TString, IdHolder<TSpec> > const & me, TPos pos)
+{
+	SEQAN_CHECKPOINT
+	if (me.strings[pos]!=0) return *me.strings[pos];
+	else {
+		static TString tmp = "";
+		return tmp;
+	}
+}
+
+//____________________________________________________________________________
+
+template <typename TString, typename TSpec, typename TIds, typename TLength>
+inline void
+subset(StringSet<TString, IdHolder<GenerousStorage<TSpec> > >& source,
+	   StringSet<TString, IdHolder<GenerousStorage<TSpec> > >& dest,
+	   TIds ids,
+	   TLength len)
+{
+	SEQAN_CHECKPOINT
+	typedef StringSet<TString, IdHolder<GenerousStorage<TSpec> > > TStringSet;
+	typedef typename Id<TStringSet>::Type TId;
+
+	clear(dest);
+	fill(dest.strings, length(source.strings), (TString*) 0);
+	for(unsigned int i=0;i<len;++i) dest.strings[ids[i]] = source.strings[ids[i]];
+}
+
+template <typename TString, typename TSpec, typename TIds, typename TLength>
+inline void
+subset(StringSet<TString, IdHolder<TightStorage<TSpec> > >& source,
+	   StringSet<TString, IdHolder<TightStorage<TSpec> > >& dest,
+	   TIds ids,
+	   TLength len)
+{
+	SEQAN_CHECKPOINT
+	typedef StringSet<TString, IdHolder<TightStorage<TSpec> > > TStringSet;
+	typedef typename Id<TStringSet>::Type TId;
+
+	clear(dest);
+	TLength upperBound = length(source.ids);
+	for(unsigned int i=0;i<len;++i) {
+		TId id = ids[i];
+		if ((upperBound > id) &&
+			(source.ids[id] == id)) {
+				appendValue(dest.strings, source.strings[id]);
+				appendValue(dest.ids, id);
+		} else {
+			typedef String<TId> TIdString;
+			typedef typename Iterator<TIdString>::Type TIter;
+			TIter it = begin(source.ids);
+			for(;!atEnd(it);goNext(it)) {
+				if (*it == id) {
+					appendValue(dest.strings, source.strings[position(it)]);
+					appendValue(dest.ids, id);
+				}
+			}
+		}
+	}
+}
+
+template <typename TString, typename TSpec, typename TIds>
+inline void
+subset(StringSet<TString, IdHolder<TSpec> >& source,
+		StringSet<TString, IdHolder<TSpec> >& dest,
+		TIds ids)
+{
+	SEQAN_CHECKPOINT
+	subset(source,dest,ids,length(ids));
+}
+
 
 }
 

@@ -1815,12 +1815,82 @@ void Test_Tree() {
 
 //////////////////////////////////////////////////////////////////////////////
 
-void Test_Alignment() {
-	typedef Graph<Alignment<Dna, unsigned int, WithoutEdgeId> > TGraph;
-	typedef Id<TGraph>::Type TId;
-	typedef Size<TGraph>::Type TSize;
-	typedef SegmentInfo<TId, TSize> TSegment;
+template <typename TStringSet>
+void Test_StringSet() {
+	typedef	typename Id<TStringSet>::Type TId;
 
+	TStringSet str;
+	String<char> bla("a");
+	TId id0 = addString(str, bla);
+	SEQAN_TASSERT(id0 == 0)
+	SEQAN_TASSERT(str[0] == "a")
+	SEQAN_TASSERT(getString(str, id0) == "a")
+	String<char> bla1("b");
+	TId id1 = addString(str, bla1);
+	SEQAN_TASSERT(id1 == 1)
+	SEQAN_TASSERT(str[1] == "b")
+	SEQAN_TASSERT(getString(str, id1) == "b")
+	String<char> bla2("c");
+	TId id2 = addString(str, bla2);
+	SEQAN_TASSERT(id2 == 2)
+	SEQAN_TASSERT(str[2] == "c")
+	SEQAN_TASSERT(getString(str, id2) == "c")
+	String<char> bla3("d");
+	TId id3 = addString(str, bla3);
+	SEQAN_TASSERT(id3 == 3)
+	SEQAN_TASSERT(str[3] == "d")
+	SEQAN_TASSERT(getString(str, id3) == "d")
+	removeString(str,id1);
+	SEQAN_TASSERT(getString(str, id0) == "a")
+	SEQAN_TASSERT(getString(str, id1) == "")
+	SEQAN_TASSERT(getString(str, id2) == "c")
+	SEQAN_TASSERT(getString(str, id3) == "d")
+	removeString(str,id2);
+	SEQAN_TASSERT(getString(str, id0) == "a")
+	SEQAN_TASSERT(getString(str, id1) == "")
+	SEQAN_TASSERT(getString(str, id2) == "")
+	SEQAN_TASSERT(getString(str, id3) == "d")
+	removeString(str,id3);
+	SEQAN_TASSERT(getString(str, id0) == "a")
+	SEQAN_TASSERT(getString(str, id1) == "")
+	SEQAN_TASSERT(getString(str, id2) == "")
+	SEQAN_TASSERT(getString(str, id3) == "")
+	id1 = addString(str, bla1);
+	id2 = addString(str, bla2);
+	id3 = addString(str, bla3);	
+	SEQAN_TASSERT(getString(str, id0) == "a")
+	SEQAN_TASSERT(getString(str, id1) == "b")
+	SEQAN_TASSERT(getString(str, id2) == "c")
+	SEQAN_TASSERT(getString(str, id3) == "d")
+	TStringSet subSet;
+	String<unsigned int> ids;
+	appendValue(ids, id1);
+	appendValue(ids, id3);
+	subset(str, subSet, ids);
+	SEQAN_TASSERT(getString(subSet, id0) == "")
+	SEQAN_TASSERT(getString(subSet, id1) == "b")
+	SEQAN_TASSERT(getString(subSet, id2) == "")
+	SEQAN_TASSERT(getString(subSet, id3) == "d")
+	TStringSet subSet2;
+	String<unsigned int> ids2;
+	appendValue(ids2, id3);
+	subset(subSet, subSet2, ids2);
+	SEQAN_TASSERT(getString(subSet2, id0) == "")
+	SEQAN_TASSERT(getString(subSet2, id1) == "")
+	SEQAN_TASSERT(getString(subSet2, id2) == "")
+	SEQAN_TASSERT(getString(subSet2, id3) == "d")
+	clear(subSet);
+	addString(subSet,subSet2, id3);
+	addString(subSet,str, id0);
+	SEQAN_TASSERT(getString(subSet, id0) == "a")
+	SEQAN_TASSERT(getString(subSet, id1) == "")
+	SEQAN_TASSERT(getString(subSet, id2) == "")
+	SEQAN_TASSERT(getString(subSet, id3) == "d")
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+void Test_Alignment() {
 	/*
 	String<Dna> seq1 = "acagtactggtactccg";
 	String<Dna> seq2 = "acccgtaacagtactggtactccg";
@@ -3242,6 +3312,8 @@ int main()
 
 	Test_IdManager();	// Test Id Manager
 	Test_EdgeStump();	// Test EdgeStumps
+	Test_StringSet<StringSet<String<char>, IdHolder<GenerousStorage<> > > >();
+	Test_StringSet<StringSet<String<char>, IdHolder<TightStorage<> > > >();
 
 	// Test Graph types
 	Test_Directed();	// Directed graphs
@@ -3301,6 +3373,7 @@ int main()
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_idmanager.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_interface.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_edgestump.h");
+	debug::verifyCheckpoints("projects/library/seqan/sequence/sequence_multiple.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_directed.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_undirected.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_automaton.h");

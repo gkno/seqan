@@ -10,31 +10,6 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //////////////////////////////////////////////////////////////////////////////
 
-	
-/**
-.Metafunction.Id:
-..summary:Type of an object that represents an id.
-..signature:Id<T>::Type
-..param.T:Type for which a suitable id type is determined.
-..returns.param.Type:Id type.
-..remarks.text:The id type of a container is the type that is used to uniquely identify its elements.
-In most cases this type is unsigned int.
-..example.code:Id<Graph<> >::Type id; //id has type unsigned int
-*/
-template<typename T>
-struct Id {
-	typedef unsigned int Type;
-};
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename T>
-struct Id<T const> {
-	typedef unsigned int Type;
-};
-
-//////////////////////////////////////////////////////////////////////////////
-
 /**
 .Metafunction.EdgeDescriptor:
 ..summary:Type of an object that represents an edge descriptor.
