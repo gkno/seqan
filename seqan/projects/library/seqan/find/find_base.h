@@ -221,26 +221,26 @@ in which $hayNo$ is the haystack index and $pos$ the local position of the hit.
 
 	public:
 		TIterator data_iterator;
-		bool _empty;
+		bool _needReinit;					// if true, the Pattern needs to be reinitialized
 
 		Finder():
-			_empty(true) {}
+			_needReinit(true) {}
 
 		Finder(THaystack &haystack):
-			data_iterator(begin(haystack, Rooted() )),
-			_empty(true) {}
+			data_iterator(begin(haystack, Rooted())),
+			_needReinit(true) {}
 
 		Finder(TIterator &iter):
 			data_iterator(iter),
-			_empty(false) {}
+			_needReinit(true) {}
 
 		Finder(TIterator const &iter):
-		data_iterator(iter),
-			_empty(false) {}
+			data_iterator(iter),
+			_needReinit(true) {}
 
 		Finder(Finder const &orig):
 			data_iterator(orig.data_iterator),
-			_empty(orig._empty) {};
+			_needReinit(orig._needReinit) {};
 
 //____________________________________________________________________________
 
@@ -349,7 +349,7 @@ SEQAN_CHECKPOINT
 	empty(Finder<THaystack, TSpec> & me)
 	{
 SEQAN_CHECKPOINT
-		return me._empty;
+		return me._needReinit;
 	}
 
 	template <typename THaystack, typename TSpec>
@@ -357,20 +357,27 @@ SEQAN_CHECKPOINT
 	clear(Finder<THaystack, TSpec> & me)
 	{
 SEQAN_CHECKPOINT
-		me._empty = true;
+		me._needReinit = true;
 	}
-/*
-	template <typename THaystack, typename TSpec>
+
+//____________________________________________________________________________
+
+	template <typename T>
 	inline void
-	init(Finder<THaystack, TSpec> & me)
+	_finderSetNonEmpty(T & me)
 	{
 SEQAN_CHECKPOINT
-		if (me._empty) {
-			me._empty = false;
-			goBegin(hostIterator(me));
-		}
+		goBegin(me);
 	}
-*/
+
+
+	template <typename THaystack, typename TSpec>
+	inline void
+	_finderSetNonEmpty(Finder<THaystack, TSpec> & me)
+	{
+SEQAN_CHECKPOINT
+		me._needReinit = false;
+	}
 
 //____________________________________________________________________________
 
@@ -397,7 +404,7 @@ SEQAN_CHECKPOINT
 	goBegin(Finder<THaystack, TSpec> & me)
 	{
 SEQAN_CHECKPOINT
-		me._empty = false;
+		//_finderSetNonEmpty(me);
 		goBegin(hostIterator(me));
 	}
 
@@ -406,7 +413,7 @@ SEQAN_CHECKPOINT
 	goEnd(Finder<THaystack, TSpec> & me)
 	{
 SEQAN_CHECKPOINT
-		me._empty = false;
+		//_finderSetNonEmpty(me);
 		goEnd(hostIterator(me));
 	}
 

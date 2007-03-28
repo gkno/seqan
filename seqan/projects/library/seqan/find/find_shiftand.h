@@ -29,43 +29,25 @@ typedef Tag<_ShiftAnd> ShiftAnd;
 template <typename TNeedle>
 class Pattern<TNeedle, ShiftAnd> {
 //____________________________________________________________________________
-private:
-	Pattern(Pattern const& other);
-	Pattern const& operator=(Pattern const & other);
-
-//____________________________________________________________________________
 public:
 	typedef unsigned int TWord;
 
 	Holder<TNeedle> data_needle;
-	TWord* table;			// Look up table for each character in the alphabet (called B in "Navarro")
-	TWord* prefSufMatch;		// Set of all the prefixes of needle that match a suffix of haystack (called D in "Navarro")
-	TWord alphabetSize;		// e.g., char --> 256
-	TWord needleLength;		// e.g., needleLength=33 --> blockCount=2 (iff w=32 bits)
-	TWord blockCount;		// #unsigned ints required to store needle	
+	String<TWord> table;			// Look up table for each character in the alphabet (called B in "Navarro")
+	String<TWord> prefSufMatch;		// Set of all the prefixes of needle that match a suffix of haystack (called D in "Navarro")
+	TWord needleLength;				// e.g., needleLength=33 --> blockCount=2 (iff w=32 bits)
+	TWord blockCount;				// #unsigned ints required to store needle	
 
 //____________________________________________________________________________
 
-	Pattern() {
-		table = 0;
-		prefSufMatch=0;
-	}
+	Pattern() {}
 
 	template <typename TNeedle2>
 	Pattern(TNeedle2 const & ndl)
 	{
-		table = 0;
-		prefSufMatch=0;
 		setHost(*this, ndl);
 	}
 
-	~Pattern() {
-		SEQAN_CHECKPOINT
-		if (table != 0) {
-			deallocate(this, table, alphabetSize * blockCount);
-			deallocate(this, prefSufMatch, blockCount);
-		}
-	}		
 //____________________________________________________________________________
 };
 
@@ -94,22 +76,13 @@ void setHost (Pattern<TNeedle, ShiftAnd> & me, TNeedle2 const & needle) {
 	SEQAN_CHECKPOINT
 	typedef unsigned int TWord;
 	typedef typename Value<TNeedle>::Type TValue;
-	if (me.table != 0) {
-		deallocate(me, me.table, me.alphabetSize * me.blockCount);
-		deallocate(me, me.prefSufMatch, me.blockCount);
-	}
-
 	
 	me.needleLength = length(needle);
-	me.alphabetSize = ValueSize<TValue>::VALUE;
 	if (me.needleLength<1) me.blockCount=1;
 	else me.blockCount=((me.needleLength-1) / BitsPerValue<TWord>::VALUE)+1;
-			
-	allocate (me, me.table, me.blockCount * me.alphabetSize);
-	arrayFill (me.table, me.table + me.blockCount * me.alphabetSize, 0);
-
-	allocate (me, me.prefSufMatch, me.blockCount);
-	arrayFill (me.prefSufMatch, me.prefSufMatch + me.blockCount, 0);
+	
+	clear(me.table);
+	fill(me.table, me.blockCount * ValueSize<TValue>::VALUE, 0, Exact());
 
 	for (TWord j = 0; j < me.needleLength; ++j) {
 		// Determine character position in array table
@@ -121,11 +94,11 @@ void setHost (Pattern<TNeedle, ShiftAnd> & me, TNeedle2 const & needle) {
 
 	/*
 	// Debug code
-	std::cout << "Alphabet size: " << me.alphabetSize << ::std::endl;
+	std::cout << "Alphabet size: " << ValueSize<TValue>::VALUE << ::std::endl;
 	std::cout << "Needle length: " << me.needleLength << ::std::endl;
 	std::cout << "Block count: " << me.blockCount << ::std::endl;
 
-	for(unsigned int i=0;i<me.alphabetSize;++i) {
+	for(unsigned int i=0;i<ValueSize<TValue>::VALUE;++i) {
 		if ((i<97) || (i>122)) continue;
 		std::cout << static_cast<char>(i) << ": ";
 		for(int j=0;j<me.blockCount;++j) {
@@ -139,12 +112,24 @@ void setHost (Pattern<TNeedle, ShiftAnd> & me, TNeedle2 const & needle) {
 }
 
 template <typename TNeedle, typename TNeedle2>
-void setHost (Pattern<TNeedle, ShiftAnd> & me, TNeedle2 & needle)
+inline void setHost (Pattern<TNeedle, ShiftAnd> & me, TNeedle2 & needle)
 {
 	setHost(me, reinterpret_cast<TNeedle2 const &>(needle));
 }
 
 //____________________________________________________________________________
+
+
+template <typename TNeedle>
+inline void _finderInit (Pattern<TNeedle, ShiftAnd> & me) 
+{
+SEQAN_CHECKPOINT
+	clear(me.prefSufMatch);
+	fill(me.prefSufMatch, me.blockCount, 0, Exact());
+}
+
+//____________________________________________________________________________
+
 
 template <typename TNeedle>
 inline typename Host<Pattern<TNeedle, ShiftAnd>const>::Type & 
@@ -166,7 +151,7 @@ SEQAN_CHECKPOINT
 
 
 template <typename TFinder, typename TNeedle>
-bool _findShiftAnd_SmallNeedle(TFinder & finder, Pattern<TNeedle, ShiftAnd> & me) {
+inline bool _findShiftAnd_SmallNeedle(TFinder & finder, Pattern<TNeedle, ShiftAnd> & me) {
 	SEQAN_CHECKPOINT
 	typedef unsigned int TWord;
 	TWord compare = (1 << (me.needleLength-1));
@@ -183,7 +168,7 @@ bool _findShiftAnd_SmallNeedle(TFinder & finder, Pattern<TNeedle, ShiftAnd> & me
 }
 
 template <typename TFinder, typename TNeedle>
-bool _findShiftAnd_LargeNeedle(TFinder & finder, Pattern<TNeedle, ShiftAnd> & me) {
+inline bool _findShiftAnd_LargeNeedle(TFinder & finder, Pattern<TNeedle, ShiftAnd> & me) {
 	SEQAN_CHECKPOINT
 	typedef unsigned int TWord;
 	
@@ -222,9 +207,10 @@ template <typename TFinder, typename TNeedle>
 inline bool find(TFinder & finder, Pattern<TNeedle, ShiftAnd> & me) {
 	SEQAN_CHECKPOINT
 
-	if (empty(finder))
-		goBegin(finder);
-	else
+	if (empty(finder)) {
+		_finderInit(me);
+		_finderSetNonEmpty(finder);
+	} else
 		finder += me.needleLength;
 
 	// Fast algorithm for needles < machine word?
