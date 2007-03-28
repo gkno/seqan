@@ -367,7 +367,8 @@ inline bool find(TFinder & finder, Pattern<TNeedle, MultipleShiftAnd> & me) {
 	SEQAN_CHECKPOINT
 
 	// Check for left-over keywords
-	if (!me.data_keyword.empty()) {
+	if ((!empty(finder)) &&
+		(!me.data_keyword.empty())) {
 		finder += me.data_needleLength - 1;
 		me.data_keywordIndex = (me.data_keyword.front()).i1;
 		me.data_needleLength = (me.data_keyword.front()).i2;

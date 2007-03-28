@@ -201,7 +201,8 @@ inline bool find(TFinder & finder, Pattern<TNeedle, SetHorspool> & me) {
 	TVertexDescriptor current = getRoot(me.data_reverseTrie); 
 
 	// Process left-over hits
-	if (!empty(me.data_endPositions)) {
+	if ((!empty(finder)) &&
+		(!empty(me.data_endPositions))) {
 		finder += me.data_needleLength;
 		current = me.data_lastState;
 		me.data_keywordIndex = me.data_endPositions[length(me.data_endPositions)-1];

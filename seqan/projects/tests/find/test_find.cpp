@@ -83,6 +83,31 @@ void Test_OnlineAlg()
 	SEQAN_TASSERT(length(pos) == 7);
 
 //____________________________________________________________________________
+// Test3b - different alphabet, small needle, jumping finder
+
+	goBegin(finderDna); // That's a repositioning
+	clear(finderDna);	// That's why, clear state
+	clear(pos);
+
+	bool firstHit = true;
+	while (find(finderDna, pattern)) {
+		if (firstHit) {
+			firstHit = false;
+			finderDna += 2;
+			clear(finderDna);  // clear the state of the finder
+		} else {
+			append(pos,position(finderDna));
+		}
+	}
+
+	SEQAN_TASSERT(pos[0] == 2);
+	SEQAN_TASSERT(pos[1] == 3);
+	SEQAN_TASSERT(pos[2] == 4);
+	SEQAN_TASSERT(pos[3] == 5);
+	SEQAN_TASSERT(pos[4] == 8);
+	SEQAN_TASSERT(length(pos) == 5);
+
+//____________________________________________________________________________
 // Test4 - different alphabet, large needle
 	String<Dna> text = "taaaataaaataaaataaaataaaataaaataaaataaaataaaataaaataaaataaaataaaataaaat";
 	Finder<String<Dna> > finderText(text);
@@ -335,6 +360,39 @@ void Test_OnlineAlgMulti()
 	SEQAN_TASSERT(keywordIndex[8] == 0);
 	SEQAN_TASSERT(finderPos[9] == 5);
 	SEQAN_TASSERT(keywordIndex[9] == 1);
+
+//____________________________________________________________________________
+// Multiple duplicated keywords with overlapping matches, jumping finder
+	goBegin(my2_finder); // That's a repositioning
+	clear(my2_finder);	// That's why, clear state
+	clear(finderPos);
+	clear(keywordIndex);
+
+	unsigned int hits = 0;
+	while (find(my2_finder, my2_pattern)) {
+		if (hits == 2) break;
+		//std::cout << position(my2_finder) << ":" << position(my2_pattern) << ::std::endl;
+		append(finderPos,position(my2_finder));
+		append(keywordIndex,position(my2_pattern));
+		++hits;
+	}
+	goBegin(my2_finder);
+	my2_finder+=5;
+	clear(my2_finder);
+	clear(finderPos);
+	clear(keywordIndex);
+	while (find(my2_finder, my2_pattern)) {
+		//std::cout << position(my2_finder) << ":" << position(my2_pattern) << ::std::endl;
+		append(finderPos,position(my2_finder));
+		append(keywordIndex,position(my2_pattern));
+	}
+
+	SEQAN_TASSERT(finderPos[0] == 5);
+	SEQAN_TASSERT(keywordIndex[0] == 0);
+	SEQAN_TASSERT(finderPos[1] == 6);
+	SEQAN_TASSERT(keywordIndex[1] == 0);
+	SEQAN_TASSERT(finderPos[2] == 5);
+	SEQAN_TASSERT(keywordIndex[2] == 1);
 }
 
 
