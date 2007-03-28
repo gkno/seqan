@@ -79,7 +79,7 @@ void setHost (Pattern<TNeedle, ShiftOr> & me, TNeedle2 const & needle) {
 	me.needleLength = length(needle);
 	if (me.needleLength<1) me.blockCount=1;
 	else me.blockCount=((me.needleLength-1) / BitsPerValue<TWord>::VALUE)+1;
-			
+	
 	clear(me.table);
 	fill(me.table, me.blockCount * ValueSize<TValue>::VALUE, (TWord) ~0, Exact());
 

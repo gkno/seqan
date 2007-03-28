@@ -88,7 +88,6 @@ setHost (Pattern<TNeedle, BomAlgo> & me, TNeedle2 const& needle)
 {
 	SEQAN_CHECKPOINT
 	me.needleLength = length(needle);
-	me.step = 0;
 	clear(me.oracle);
 	createOracleOnReverse(me.oracle,needle);
 	assignRoot(me.oracle,0);
@@ -101,6 +100,17 @@ setHost (Pattern<TNeedle, BomAlgo> & me, TNeedle2 & needle)
 {
 	setHost(me, reinterpret_cast<TNeedle2 const &>(needle));
 }
+
+//____________________________________________________________________________
+
+
+template <typename TNeedle>
+inline void _finderInit (Pattern<TNeedle, BomAlgo> & me) 
+{
+SEQAN_CHECKPOINT
+	me.step = 0;
+}
+
 
 //____________________________________________________________________________
 
@@ -130,7 +140,8 @@ find(TFinder & finder, Pattern<TNeedle, BomAlgo> & me)
 	SEQAN_CHECKPOINT
 	
 	if (empty(finder)) {
-		goBegin(finder);
+		_finderInit(me);
+		_finderSetNonEmpty(finder);
 		me.haystackLength = length(container(finder));
 	} else
 		finder+=me.step;

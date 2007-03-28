@@ -108,7 +108,6 @@ void setHost (Pattern<TNeedle, MultipleShiftAnd> & me, TNeedle2 const & needle) 
 	typedef typename Value<TKeyword>::Type TAlphabet;
 	if (me.table != 0) {
 		deallocate(me, me.table, me.alphabetSize * me.blockCount);
-		deallocate(me, me.prefSufMatch, me.blockCount);
 		deallocate(me, me.di, me.blockCount);
 		deallocate(me, me.df, me.blockCount);
 	}
@@ -124,9 +123,6 @@ void setHost (Pattern<TNeedle, MultipleShiftAnd> & me, TNeedle2 const & needle) 
 			
 	allocate (me, me.table, me.blockCount * me.alphabetSize);
 	arrayFill (me.table, me.table + me.blockCount * me.alphabetSize, 0);
-
-	allocate (me, me.prefSufMatch, me.blockCount);
-	arrayFill (me.prefSufMatch, me.prefSufMatch + me.blockCount, 0);
 
 	allocate (me, me.di, me.blockCount);
 	arrayFill (me.di, me.di + me.blockCount, 0);
@@ -147,7 +143,6 @@ void setHost (Pattern<TNeedle, MultipleShiftAnd> & me, TNeedle2 const & needle) 
 		me.df[(j - 1) / BitsPerValue<TWord>::VALUE] |= (1<<((j-1)%BitsPerValue<TWord>::VALUE));
 	}
 	me.data_needle = needle;
-	me.data_keyword.clear();
 
 	/*
 	// Debug code
@@ -193,6 +188,24 @@ template <typename TNeedle, typename TNeedle2>
 void setHost (Pattern<TNeedle, MultipleShiftAnd> & me, TNeedle2 & needle)
 {
 	setHost(me, reinterpret_cast<TNeedle2 const &>(needle));
+}
+
+//____________________________________________________________________________
+
+
+template <typename TNeedle>
+inline void _finderInit (Pattern<TNeedle, MultipleShiftAnd> & me) 
+{
+SEQAN_CHECKPOINT
+	typedef unsigned int TWord;
+
+	if (me.prefSufMatch != 0) {
+		deallocate(me, me.prefSufMatch, me.blockCount);
+	}
+	allocate (me, me.prefSufMatch, me.blockCount);
+	arrayFill (me.prefSufMatch, me.prefSufMatch + me.blockCount, 0);
+	me.data_keyword.clear();
+	me.data_keywordIndex = 0;
 }
 
 //____________________________________________________________________________
@@ -364,9 +377,10 @@ inline bool find(TFinder & finder, Pattern<TNeedle, MultipleShiftAnd> & me) {
 	}
 
 
-	if (empty(finder))
-		goBegin(finder);
-	else
+	if (empty(finder)) {
+		_finderInit(me);
+		_finderSetNonEmpty(finder);
+	} else
 		finder += me.data_needleLength;
 
 	// Fast algorithm for needles < machine word?

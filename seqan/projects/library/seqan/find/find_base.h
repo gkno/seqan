@@ -314,6 +314,7 @@ SEQAN_CHECKPOINT
 	{
 SEQAN_CHECKPOINT
 		setContainer(hostIterator(me), container_);
+		goBegin(me);
 	}
 
 	template <typename THaystack, typename TSpec>
@@ -322,6 +323,7 @@ SEQAN_CHECKPOINT
 	{
 SEQAN_CHECKPOINT
 		setContainer(hostIterator(me), container_);
+		goBegin(me);
 	}
 
 //____________________________________________________________________________

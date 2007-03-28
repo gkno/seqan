@@ -68,6 +68,7 @@ public:
 			deallocate(this, activeFactors, blockCount);
 		}
 	}
+
 //____________________________________________________________________________
 };
 		
@@ -99,7 +100,6 @@ void setHost (Pattern<TNeedle, BndmAlgo> & me, TNeedle2 const& needle) {
 	typedef typename Value<TNeedle>::Type TValue;
 	if (me.table != 0) {
 		deallocate(me, me.table, me.alphabetSize * me.blockCount);
-		deallocate(me, me.activeFactors, me.blockCount);
 	}
 
 	me.needleLength = length(needle);
@@ -109,9 +109,6 @@ void setHost (Pattern<TNeedle, BndmAlgo> & me, TNeedle2 const& needle) {
 			
 	allocate (me, me.table, me.blockCount * me.alphabetSize);
 	arrayFill (me.table, me.table + me.blockCount * me.alphabetSize, 0);
-
-	allocate (me, me.activeFactors, me.blockCount);
-	arrayFill (me.activeFactors, me.activeFactors + me.blockCount, 0);
 
 	for (TWord j = 0; j < me.needleLength; ++j) {
 		// Determine character position in array table
@@ -143,6 +140,23 @@ template <typename TNeedle, typename TNeedle2>
 void setHost (Pattern<TNeedle, BndmAlgo> & me, TNeedle2 & needle)
 {
 	setHost(me, reinterpret_cast<TNeedle2 const &>(needle));
+}
+
+//____________________________________________________________________________
+
+
+template <typename TNeedle>
+inline void _finderInit (Pattern<TNeedle, BndmAlgo> & me) 
+{
+SEQAN_CHECKPOINT
+	typedef unsigned int TWord;
+
+	if (me.activeFactors != 0) {
+		deallocate(me, me.activeFactors, me.blockCount);
+	}
+	me.last = 0;
+	allocate (me, me.activeFactors, me.blockCount);
+	arrayFill (me.activeFactors, me.activeFactors + me.blockCount, 0);
 }
 
 //____________________________________________________________________________
@@ -240,7 +254,8 @@ bool find(TFinder & finder, Pattern<TNeedle, BndmAlgo> & me) {
 	SEQAN_CHECKPOINT
 
 	if (empty(finder)) {
-		goBegin(finder);
+		_finderInit(me);
+		_finderSetNonEmpty(finder);
 		me.haystackLength = length(container(finder));
 	} else
 		finder+=me.last;

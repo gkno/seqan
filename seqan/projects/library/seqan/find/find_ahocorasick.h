@@ -170,12 +170,11 @@ void setHost (Pattern<TNeedle, AhoCorasick> & me, TNeedle2 const & needle) {
 	me.data_needle = needle;
 	clear(me.data_graph);
 	clear(me.data_supplyMap);
-	clear(me.data_terminalStateMap);
 	clear(me.data_endPositions);
-	me.data_keywordIndex = 0;
+	clear(me.data_terminalStateMap);
 	_createAcTrie(me);
 	me.data_needleLength = 0;
-	me.data_lastState = getRoot(me.data_graph);
+
 
 	/*
 	fstream strm;
@@ -199,6 +198,19 @@ setHost (Pattern<TNeedle, AhoCorasick> & me, TNeedle2 & needle)
 {
 	setHost(me, reinterpret_cast<TNeedle2 const &>(needle));
 }
+
+//____________________________________________________________________________
+
+
+template <typename TNeedle>
+inline void _finderInit (Pattern<TNeedle, AhoCorasick> & me) 
+{
+SEQAN_CHECKPOINT
+	clear(me.data_endPositions);
+	me.data_keywordIndex = 0;
+	me.data_lastState = getRoot(me.data_graph);
+}
+
 
 //____________________________________________________________________________
 
@@ -238,9 +250,10 @@ inline bool find(TFinder & finder, Pattern<TNeedle, AhoCorasick> & me) {
 	typedef Graph<Automaton<TAlphabet> > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	
-	if (empty(finder))
-		goBegin(finder);
-	else {
+	if (empty(finder)) {
+		_finderInit(me);
+		_finderSetNonEmpty(finder);
+	} else {
 		finder += me.data_needleLength;
 		++finder; // Set forward the finder
 	}

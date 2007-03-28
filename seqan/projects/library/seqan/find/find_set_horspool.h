@@ -98,8 +98,8 @@ void setHost (Pattern<TNeedle, SetHorspool> & me, TNeedle2 const & needle) {
 	// clean-up
 	clear(me.data_reverseTrie);
 	clear(me.data_terminalStateMap);
-	clear(me.data_dMap);
 	clear(me.data_endPositions);
+	clear(me.data_dMap);
 	me.data_lmin=0;
 
 	// Create Trie
@@ -146,6 +146,19 @@ void setHost (Pattern<TNeedle, SetHorspool> & me, TNeedle2 & needle)
 {
 	setHost(me, reinterpret_cast<TNeedle2 const &>(needle));
 }
+
+//____________________________________________________________________________
+
+
+template <typename TNeedle>
+inline void _finderInit (Pattern<TNeedle, SetHorspool> & me) 
+{
+SEQAN_CHECKPOINT
+	clear(me.data_endPositions);
+	me.data_keywordIndex = 0;
+	me.data_lastState = getRoot(me.data_reverseTrie);
+}
+
 
 //____________________________________________________________________________
 
@@ -203,7 +216,8 @@ inline bool find(TFinder & finder, Pattern<TNeedle, SetHorspool> & me) {
 	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
 	TSize j = 0;
 	if (empty(finder)) {
-		goBegin(finder);
+		_finderInit(me);
+		_finderSetNonEmpty(finder);
 		finder += me.data_lmin - 1;
 	} else {
 		finder += me.data_needleLength;

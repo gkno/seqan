@@ -95,6 +95,15 @@ setHost(Pattern<TNeedle, Horspool> & horsp, TNeedle2 & ndl)
 {
 	setHost(horsp, reinterpret_cast<TNeedle2 const &>(ndl));
 }
+
+//____________________________________________________________________________
+
+
+template <typename TNeedle>
+inline void _finderInit (Pattern<TNeedle, Horspool> & me) 
+{
+}
+
 //____________________________________________________________________________
 
 template <typename TNeedle>
@@ -140,7 +149,8 @@ SEQAN_CHECKPOINT
 
 	if (empty(finder))
 	{
-		goBegin(finder);
+		_finderInit(me);
+		_finderSetNonEmpty(finder);
 		goto VALIDATE;
 	}
 
