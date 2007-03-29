@@ -121,9 +121,15 @@ namespace SEQAN_NAMESPACE_MAIN
 */
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, QGram_Dir>::Type & indexDir(Index<TText, TSpec> &index) { return getFibre(index, QGram_Dir()); }
+	inline typename Fibre<Index<TText, TSpec>, QGram_Dir>::Type & 
+	indexDir(Index<TText, TSpec> &index) { 
+		return getFibre(index, QGram_Dir()); 
+	}
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, QGram_Dir>::Type & indexDir(Index<TText, TSpec> const &index) { return getFibre(index, QGram_Dir()); }
+	inline typename Fibre<Index<TText, TSpec> const, QGram_Dir>::Type & 
+	indexDir(Index<TText, TSpec> const &index) { 
+		return getFibre(index, QGram_Dir()); 
+	}
 
 	template <typename TText, typename TShapeSpec>
 	inline Shape<typename Value<Index<TText, Index_QGram<TShapeSpec> > >::Type, TShapeSpec> &
@@ -191,32 +197,47 @@ SEQAN_CHECKPOINT
 	//cumulative sum
 	{
 		TDirIterator it = begin(dir, Standard()), itEnd = end(dir, Standard());
-		TSize diff, sum = 0;
-		while (it != itEnd)
-		{
+		TSize diff = 0, diff_prev = 0, sum = 0;
+		while (it != itEnd) {
+			sum += diff_prev;
+			diff_prev = diff;
 			diff = *it;
 			*it = sum;
-			sum += diff;
 			++it;
 		}
+		sum += diff_prev;
+		dir[0] = sum;
+
+		SEQAN_ASSERT(sum + diff == num_qgrams);
 	}
 	
 	//build sa
 	qgram_1_it = begin(text,Standard());
 	qgram_2_it = qgram_1_it + 1;
+	TValue lastBucketIndex = length(dir) - 1;
+
+	// first hash
 	x = hash(shape, qgram_1_it);
-	sa[dir[x]++] = 0;
+	if (x != lastBucketIndex)
+		sa[dir[x + 1]++] = 0;
+	else
+		sa[dir[0]++] = 0;
 	i = 1;
 	while(i < num_qgrams)
 	{
+		// next hash
 		y = hashNext(shape, qgram_1_it, qgram_2_it, x);
 		++qgram_1_it;
 		++qgram_2_it;
-		sa[dir[y]++] = i++;
+		if (y != lastBucketIndex)
+			sa[dir[y + 1]++] = i++;
+		else
+			sa[dir[0]++] = i++;
 
 		// für die nächste Runde
 		x = y;
 	}
+	dir[0] = 0;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -248,7 +269,7 @@ SEQAN_CHECKPOINT
     };
 
     // optimized for bitvectors
-    template <typename T1, typename TValue, int _size, typename Result>
+    template <typename T1, typename TValue, unsigned _size, typename Result>
     struct _qgram_comp< Pair<T1, Tuple<TValue, _size, Compressed>, Compressed >, Result > :
         public ::std::binary_function<
             Pair<T1, Tuple<TValue, _size, Compressed>, Compressed >,
@@ -273,8 +294,8 @@ SEQAN_CHECKPOINT
         {
 			typedef typename Value<TValue, 2>::Type	TQGram;
 			TResult hash = 0;
-			int len = length(a.i2);
-            for(int i = 0; i < len; ++i) {
+			unsigned len = length(a.i2);
+            for(unsigned i = 0; i < len; ++i) {
 				hash *= ValueSize< typename Value<TQGram>::Type >::VALUE;
 				hash += (TResult)a.i2[i];
             }
@@ -358,7 +379,7 @@ SEQAN_CHECKPOINT
 		typename Size<TSortTuples>::Type i = length(sorter);
 		hash = length(dir);
 		for(; old_hash < hash; ++old_hash, ++itDir)
-			*itDir = i;			
+			*itDir = i;
 
 		endRead(sorter);
 	}

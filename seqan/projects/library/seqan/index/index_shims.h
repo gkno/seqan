@@ -64,12 +64,12 @@ namespace SEQAN_NAMESPACE_MAIN
         // signed characters behave different than unsigned when compared
         // to get the same index with signed or unsigned chars we simply cast them to unsigned
         // before feeding them into the pipeline
-		typedef typename Concatenator<StringSet<TString, TSpec> >::Type TConcat;
-        typedef typename _MakeUnsigned< typename Value<TConcat>::Type >::Type TUValue;
+		typedef typename Concatenator<StringSet<TString, TSpec> >::Type			TConcat;
+        typedef typename _MakeUnsigned< typename Value<TConcat>::Type >::Type	TUValue;
 		typedef Multi<
 			ConstrSpec, 
 			typename Value<TSA>::Type, 
-			typename StringSetLimits<StringSet<TString, TSpec> >::Type > MultiConstrSpec;
+			typename StringSetLimits<StringSet<TString, TSpec> >::Type >		MultiConstrSpec;
 
         // specialization
 		typedef Pipe< TConcat, Source<> >				src_t;

@@ -224,18 +224,20 @@ namespace SEQAN_NAMESPACE_MAIN
 */
 
 	// standard storage 
-	template <typename _T, int _size, typename TCompression = void>
+	template <typename _T, unsigned _size, typename TCompression = void>
     struct Tuple {
         typedef _T T;
         enum { size = _size };
         _T i[_size];
 //		friend ::std::ostream& operator<<(std::ostream&, const Tuple&);
 
-        inline _T& operator[](const int k) {
+		template <typename TPos>
+        inline _T& operator[](TPos k) {
             SEQAN_ASSERT(k >= 0 && k < size);
             return i[k];
         }
-        inline const _T& operator[](const int k) const {
+		template <typename TPos>
+        inline const _T& operator[](TPos k) const {
             SEQAN_ASSERT(k >= 0 && k < size);
             return i[k];
         }
@@ -243,8 +245,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		inline const _T* operator&() const { return i; }
 
 		// has to be inline because elements (like this tuple) of packed structs can't be arguments
-		template <typename _S>
-		inline _S const assignValueAt(int k, _S const source) {
+		template <typename TPos, typename _S>
+		inline _S const assignValueAt(TPos k, _S const source) {
 			return i[k] = source;
 		}
     };
@@ -265,7 +267,7 @@ namespace SEQAN_NAMESPACE_MAIN
 #ifdef PLATFORM_WINDOWS
     #pragma pack(push,1)
 #endif
-    template <typename _T, int _size>
+    template <typename _T, unsigned _size>
     struct Tuple<_T, _size, Compressed> {
         typedef _T T;
         enum { size = _size };
@@ -281,22 +283,30 @@ namespace SEQAN_NAMESPACE_MAIN
 			SEQAN_ASSERT(bitSize * size <= sizeof(CT) * 8);
 		}
 */
-        inline const _T operator[](const int k) const {
+		template <typename TPos>
+        inline const _T operator[](TPos k) const {
             SEQAN_ASSERT(k >= 0 && k < size);
             return (i >> (size - 1 - k) * bitSize) & bitMask;
         }
-		template <int __size>
+		template <unsigned __size>
 		inline Tuple operator=(Tuple<_T, __size, Compressed> const &_right) {
 			i = _right.i;
 			return *this;
 		}
-        inline CT operator<<=(int shift) {
+		template <typename TShiftSize>
+        inline CT operator<<=(TShiftSize shift) {
             return i = (i << (shift * bitSize)) & mask;
         }
-        inline CT operator<<(int shift) const {
+		template <typename TShiftSize>
+        inline CT operator<<(TShiftSize shift) const {
             return (i << (shift * bitSize)) & mask;
         }
-        inline CT operator>>(int shift) const {
+		template <typename TShiftSize>
+        inline CT operator>>=(TShiftSize shift) {
+            return i = (i >> (shift * bitSize));
+        }
+		template <typename TShiftSize>
+        inline CT operator>>(TShiftSize shift) const {
             return i >> (shift * bitSize);
         }
         template <typename T>
@@ -311,8 +321,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		inline const CT* operator&() const { return &i; }
 
 		// has to be inline because elements (like this tuple) of packed structs can't be arguments
-		template <typename _S>
-		inline _S const assignValueAt(int k, _S const source) {
+		template <typename TPos, typename _S>
+		inline _S const assignValueAt(TPos k, _S const source) {
 			typedef Tuple<_T, _size, Compressed> Tup;
 			typename Tup::CT mask = Tup::bitMask << ((_size - 1 - k) * bitSize);
 			i = (i & ~mask) | ((CT)source << ((_size - 1 - k) * bitSize));
@@ -331,27 +341,34 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 // length
 
-    template <typename _T, int _size, typename TCompression>
-	inline int length(Tuple<_T, _size, TCompression> const &me) { return _size; }
+    template <typename _T, unsigned _size, typename TCompression>
+	inline unsigned length(Tuple<_T, _size, TCompression> const &me) { return _size; }
+
+	///.Metafunction.Length.param.T.type:Class.Tuple
+    template <typename _T, unsigned _size, typename TCompression>
+	struct Length< Tuple<_T, _size, TCompression> >
+	{
+		enum { VALUE = _size };
+	};
 
 //////////////////////////////////////////////////////////////////////////////
 // assignValueAt
 
-    template <typename _T, int _size, typename _S>
-    inline _S const assignValueAt(Tuple<_T, _size, void> &me, int k, _S const source) {
+    template <typename _T, unsigned _size, typename _S, typename TPos>
+    inline _S const assignValueAt(Tuple<_T, _size, void> &me, TPos k, _S const source) {
         return me.i[k] = source;
     }
 
-    template <typename _T, int _size, typename _S>
-    inline _S const assignValueAt(Tuple<_T, _size, Compressed> &me, int k, _S const source) {
+    template <typename _T, unsigned _size, typename _S, typename TPos>
+    inline _S const assignValueAt(Tuple<_T, _size, Compressed> &me, TPos k, _S const source) {
         typedef Tuple<_T, _size, Compressed> Tup;
         typename Tup::CT mask = Tup::bitMask << ((_size - 1 - k) * me.bitSize);
         me.i = (me.i & ~mask) | source << ((_size - 1 - k) * me.bitSize);
         return source;
     }
 
-    template <typename _T, typename _S, typename _Spec, int _size>
-    inline SimpleType<_S, _Spec> const & assignValueAt(Tuple<_T, _size, Compressed> &me, int k, SimpleType<_S, _Spec> const &source) {
+    template <typename _T, typename _S, typename _Spec, unsigned _size, typename TPos>
+    inline SimpleType<_S, _Spec> const & assignValueAt(Tuple<_T, _size, Compressed> &me, TPos k, SimpleType<_S, _Spec> const &source) {
         typedef Tuple<_T, _size, Compressed> Tup;
         typename Tup::CT mask = Tup::bitMask << ((_size - 1 - k) * me.bitSize);
         me.i = (me.i & ~mask) | source.value << ((_size - 1 - k) * me.bitSize);
@@ -361,11 +378,11 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 // clear
 
-	template <typename _T, int _size, typename TCompression>
+	template <typename _T, unsigned _size, typename TCompression>
 	inline void clear(Tuple<_T, _size, TCompression> &me) {
         memset<sizeof(me.i), 0>(&(me.i));
 	}
-    template <typename _T, int _size>
+    template <typename _T, unsigned _size>
 	inline void clear(Tuple<_T, _size, Compressed> &me) {
 		me.i = 0; 
 	}
@@ -373,43 +390,80 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 // optimized compares
 
-	template <typename _T, int _sizeL, int _sizeR>
+	template <typename _T, unsigned _sizeL, unsigned _sizeR>
 	inline bool operator<(Tuple<_T, _sizeL, Compressed> const &_left, Tuple<_T, _sizeR, Compressed> const &_right) {
 		return _left.i < _right.i;
 	}
-	template <typename _T, int _sizeL, int _sizeR>
+	template <typename _T, unsigned _sizeL, unsigned _sizeR>
 	inline bool operator>(Tuple<_T, _sizeL, Compressed> const &_left, Tuple<_T, _sizeR, Compressed> const &_right) {
 		return _left.i > _right.i;
 	}
-	template <typename _T, int _sizeL, int _sizeR>
+	template <typename _T, unsigned _sizeL, unsigned _sizeR>
 	inline bool operator==(Tuple<_T, _sizeL, Compressed> const &_left, Tuple<_T, _sizeR, Compressed> const &_right) {
 		return _left.i == _right.i;
 	}
-	template <typename _T, int _sizeL, int _sizeR>
+	template <typename _T, unsigned _sizeL, unsigned _sizeR>
 	inline bool operator!=(Tuple<_T, _sizeL, Compressed> const &_left, Tuple<_T, _sizeR, Compressed> const &_right) {
 		return _left.i != _right.i;
 	}
 
 //////////////////////////////////////////////////////////////////////////////
+// optimized shifts
+
+    struct _TupleShiftLeftWorker {
+        template <typename Arg>
+        static inline void body(Arg &arg, unsigned I) {
+            arg[I-1] = arg[I];
+        }
+    };
+
+    struct _TupleShiftRightWorker {
+        template <typename Arg>
+        static inline void body(Arg &arg, unsigned I) {
+            arg[I] = arg[I-1];
+        }
+    };
+
+	template <typename _T, unsigned _size, typename TCompression>
+	inline void shiftLeft(Tuple<_T, _size, TCompression> &me) {
+		LOOP<_TupleShiftLeftWorker, _size - 1>::run(me);
+	}
+
+	template <typename _T, unsigned _size, typename TCompression>
+	inline void shiftRight(Tuple<_T, _size, TCompression> &me) {
+		LOOP_REVERSE<_TupleShiftRightWorker, _size - 1>::run(me);
+	}
+
+	template <typename _T, unsigned _size>
+	inline void shiftLeft(Tuple<_T, _size, Compressed> &me) {
+		me<<=1;
+	}
+
+	template <typename _T, unsigned _size>
+	inline void shiftRight(Tuple<_T, _size, Compressed> &me) {
+		me>>=1;
+	}
+
+//////////////////////////////////////////////////////////////////////////////
 // standard output
 
-	template <typename _T, int _size, typename TCompression>
+	template <typename _T, unsigned _size, typename TCompression>
 	std::ostream& operator<<(std::ostream& out, Tuple<_T,_size,TCompression> const &a) {
 		out << "[";
 		if (a.size > 0)
 			out << a[0];
-		for(int j = 1; j < a.size; ++j)
+		for(unsigned j = 1; j < a.size; ++j)
 			out << " " << a[j];
 		out << "]";
 		return out;
 	}
 
-	template <typename _T, int _size, typename TCompression>
+	template <typename _T, unsigned _size, typename TCompression>
 	struct Value< Tuple<_T, _size, TCompression> > {
 		typedef _T Type;
 	};
 
-	template <typename _T, int _size, typename TCompression>
+	template <typename _T, unsigned _size, typename TCompression>
 	struct Spec< Tuple<_T, _size, TCompression> > {
 		typedef TCompression Type;
 	};

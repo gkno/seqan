@@ -20,10 +20,10 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //////////////////////////////////////////////////////////////////////////////
 
-	template < const unsigned m, typename TCompression = void >
+	template < unsigned m, typename TCompression = void >
 	struct Sampler;
 
-    template < typename TInput, const unsigned m, typename TCompression >
+    template < typename TInput, unsigned m, typename TCompression >
     struct Value< Pipe< TInput, Sampler<m, TCompression> > > {
         typedef Tuple<typename Value<TInput>::Type, m, TCompression>	mTuple;
         typedef Pair<typename Size<TInput>::Type, mTuple, Compressed>	Type;
@@ -31,7 +31,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //////////////////////////////////////////////////////////////////////////////
 
-    template < typename TInput, const unsigned m, typename TCompression, typename TPair, typename TLimitsString >
+    template < typename TInput, unsigned m, typename TCompression, typename TPair, typename TLimitsString >
     struct Value< Pipe< TInput, Multi<Sampler<m, TCompression>, TPair, TLimitsString> > > {
         typedef Tuple<typename Value<TInput>::Type, m, TCompression>	mTuple;
         typedef Pair<TPair, mTuple, Compressed>							Type;
@@ -62,7 +62,7 @@ The m-tuples are substrings of the input stream beginning at positions $i$, with
 
     //////////////////////////////////////////////////////////////////////////////
     // sampler class
-    template < typename TInput, const unsigned m, typename TCompression >
+    template < typename TInput, unsigned m, typename TCompression >
     struct Pipe< TInput, Sampler<m, TCompression> >
     {
         typedef typename Value<Pipe>::Type  OutType;
@@ -162,7 +162,7 @@ The m-tuples are substrings of the input stream beginning at positions $i$, with
 
     //////////////////////////////////////////////////////////////////////////////
     // sampler class (uses bit compression)
-    template < typename TInput, const unsigned m >
+    template < typename TInput, unsigned m >
     struct Pipe< TInput, Sampler<m, Compressed> >
     {
         typedef typename Value<Pipe>::Type  OutType;
@@ -245,19 +245,19 @@ The m-tuples are substrings of the input stream beginning at positions $i$, with
 
     //////////////////////////////////////////////////////////////////////////////
     // global pipe functions
-    template < typename TInput, const unsigned int m, typename TCompression >
+    template < typename TInput, unsigned m, typename TCompression >
 	inline bool control(Pipe< TInput, Sampler<m, TCompression> > &me, ControlBeginRead const &command) {
         if (!control(me.in, command)) return false;
         me.prepare();
 		return true;
     }
 
-    template < typename TInput, const unsigned int m, typename TCompression >
+    template < typename TInput, unsigned m, typename TCompression >
 	inline bool control(Pipe< TInput, Sampler<m, TCompression> > &me, ControlEof const &command) {
 		return me._rest == 0;
     }
 
-    template < typename TInput, const unsigned int m, typename TCompression >
+    template < typename TInput, unsigned m, typename TCompression >
     inline typename Size< Pipe< TInput, Sampler<m, TCompression> > >::Type
 	length(Pipe< TInput, Sampler<m, TCompression> > &me) {
         typename Size< Pipe< TInput, Sampler<m> > >::Type _size = 0, n = length(me.in);
@@ -275,7 +275,7 @@ The m-tuples are substrings of the input stream beginning at positions $i$, with
 //////////////////////////////////////////////////////////////////////////////
 
 
-	template <typename TPair, typename TLimits, const unsigned m = 0>
+	template <typename TPair, typename TLimits, unsigned m = 0>
 	struct _PairDecrementer {
 		typename Iterator<TLimits const>::Type						it, itEnd;
 		typename _RemoveConst<typename Value<TLimits>::Type>::Type	old;
@@ -314,7 +314,7 @@ The m-tuples are substrings of the input stream beginning at positions $i$, with
 		}
 	};
 
-	template <typename TPair, typename TLimits, const unsigned m, typename TLimits2>
+	template <typename TPair, typename TLimits, unsigned m, typename TLimits2>
 	void setHost(_PairDecrementer<TPair, TLimits, m> &me, TLimits2 const &limits) {
 		me.it = begin(limits);
 		me.itEnd = end(limits);
@@ -381,7 +381,7 @@ The m-tuples are substrings of the input stream beginning at positions $i$, with
 
     //////////////////////////////////////////////////////////////////////////////
     // sampler class
-    template < typename TInput, const unsigned m, typename TCompression, typename TPair, typename TLimitsString >
+    template < typename TInput, unsigned m, typename TCompression, typename TPair, typename TLimitsString >
     struct Pipe< TInput, Multi<Sampler<m, TCompression>, TPair, TLimitsString> >
     {
         typedef typename Value<Pipe>::Type  OutType;
@@ -481,7 +481,7 @@ The m-tuples are substrings of the input stream beginning at positions $i$, with
 
     //////////////////////////////////////////////////////////////////////////////
     // sampler class (uses bit compression)
-	template < typename TInput, const unsigned m, typename TPair, typename TLimitsString >
+	template < typename TInput, unsigned m, typename TPair, typename TLimitsString >
     struct Pipe< TInput, Multi<Sampler<m, Compressed>, TPair, TLimitsString> >
     {
         typedef typename Value<Pipe>::Type  OutType;
@@ -566,19 +566,19 @@ The m-tuples are substrings of the input stream beginning at positions $i$, with
 
     //////////////////////////////////////////////////////////////////////////////
     // global pipe functions
-	template < typename TInput, const unsigned m, typename TCompression, typename TPair, typename TLimitsString >
+	template < typename TInput, unsigned m, typename TCompression, typename TPair, typename TLimitsString >
 	inline bool control(Pipe< TInput, Multi<Sampler<m, TCompression>, TPair, TLimitsString> > &me, ControlBeginRead const &command) {
         if (!control(me.in, command)) return false;
         me.prepare();
 		return true;
     }
 
-	template < typename TInput, const unsigned m, typename TCompression, typename TPair, typename TLimitsString >
+	template < typename TInput, unsigned m, typename TCompression, typename TPair, typename TLimitsString >
 	inline bool control(Pipe< TInput, Multi<Sampler<m, TCompression>, TPair, TLimitsString> > &me, ControlEof const &command) {
 		return me._rest == 0;
     }
 
-	template < typename TInput, const unsigned m, typename TCompression, typename TPair, typename TLimitsString >
+	template < typename TInput, unsigned m, typename TCompression, typename TPair, typename TLimitsString >
     inline typename Size< Pipe< TInput, Multi<Sampler<m, TCompression>, TPair, TLimitsString> > >::Type
 	length(Pipe< TInput, Multi<Sampler<m, TCompression>, TPair, TLimitsString> > &me)
 	{

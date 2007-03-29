@@ -275,10 +275,12 @@ SEQAN_CHECKPOINT
 
 		if (_streamEOF(file)) return;
 
-		if (c == '\n')
+		if (c == '\n' || c == '\r')
 		{
-			c = _streamGet(file);
-			if (_streamEOF(file)) return;
+			do {
+				c = _streamGet(file);
+				if (_streamEOF(file)) return;
+			} while (c == '\n' || c == '\r');
 
 			if (c != '>')
 			{

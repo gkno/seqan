@@ -403,6 +403,39 @@ SEQAN_CHECKPOINT
 				control(me.in5, command);
     }
 
+///.Function.assign.param.source.type:Class.Pipe
+
+	//////////////////////////////////////////////////////////////////////////////
+    // pipe -> string
+    template < typename TValue,
+               typename TStringSpec,
+               typename TInput,
+               typename TSpec >
+    inline bool assign(String<TValue, TStringSpec> &dest, Pipe<TInput, TSpec> &src) {
+        typedef typename Iterator< String<TValue, TStringSpec> >::Type TIter;
+        typename Size< Pipe<TInput, TSpec> >::Type _size = length(src);
+        resize(dest, _size);
+        if (!beginRead(src)) return false;
+        TIter _cur = begin(dest), _end = end(dest);
+        while (_cur != _end) {
+            *_cur = *src;
+            ++_cur;
+            ++src;
+        }
+        endRead(src);
+        return true;
+    }
+
+    template < typename TValue,
+               typename TStringSpec,
+               typename TInput,
+               typename TSpec >
+    inline bool operator<<(String<TValue, TStringSpec> &dest, Pipe<TInput, TSpec> &src) {
+        return assign(dest, src);
+    }
+
+	//////////////////////////////////////////////////////////////////////////////
+    // pipe -> out_stream
     template < typename TInput, typename TSpec >
 	std::ostream& operator<<(std::ostream &out, Pipe<TInput, TSpec> &p) {
         beginRead(p);

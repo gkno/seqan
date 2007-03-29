@@ -64,10 +64,10 @@ namespace SEQAN_NAMESPACE_MAIN
     template <typename TValue>
 	std::ostream& operator<<(std::ostream &out, const SkewDCStream<TValue> &s) {
 		out << "< " << s.i.i1 << " , [ ";
-		for(int i = 0; i < 3; ++i)
+		for(unsigned i = 0; i < 3; ++i)
 			out << s.i.i2[i] << " ";
 		out << "] , [ ";
-		for(int i = 0; i < 6; ++i)
+		for(unsigned i = 0; i < 6; ++i)
 			out << s.i.i3[i] << " ";
 		out << "] , " << s.stream << " >";
 		return out;
@@ -119,7 +119,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 	// less-operator for two SkewDCStreams (optimized for bit-compressed character tuples)
-    template <typename T1, typename T2, typename T, const int _size>
+    template <typename T1, typename T2, typename T, unsigned _size>
     struct CompareSkewDCStream< Triple<T1,T2,Tuple<T,_size,Compressed>, Compressed> > :
         public ::std::binary_function < SkewDCStream<Triple<T1,T2,Tuple<T,_size,Compressed>,Compressed> >,
                                       SkewDCStream<Triple<T1,T2,Tuple<T,_size,Compressed>,Compressed> >,
@@ -220,7 +220,7 @@ namespace SEQAN_NAMESPACE_MAIN
             memcpy(&dst.i.i3, &src.i3, sizeof(T3));
         }
 
-        template <typename T1, typename T2, typename T, const int _size>
+        template <typename T1, typename T2, typename T, unsigned _size>
         inline static void _copy(SkewDCStream &dst, Triple<T1,T2,Tuple<T,_size,Compressed>,Compressed> const &src) 
 		{
 			typedef typename InType0::T3 CharTuple;
@@ -336,7 +336,7 @@ namespace SEQAN_NAMESPACE_MAIN
             memcpy(&dst.i.i3, &src.i3, sizeof(T3));
         }
 
-        template <typename T1, typename T2, typename T, const int _size>
+        template <typename T1, typename T2, typename T, unsigned _size>
         inline static void _copy(SkewDCStream &dst, Triple<T1,T2,Tuple<T,_size,Compressed>,Compressed> const &src) 
 		{
 			typedef typename InType0::T3 CharTuple;

@@ -137,7 +137,7 @@ value(String<TValue, TSpec> & me,
 	  TPos pos)
 {
 SEQAN_CHECKPOINT
-	return *(begin(me) + pos);
+	return *(begin(me, Standard()) + pos);
 }
 
 template <typename TValue, typename TSpec, typename TPos>
@@ -146,7 +146,7 @@ value(String<TValue, TSpec> const & me,
 	  TPos pos)
 {
 SEQAN_CHECKPOINT
-	return *(begin(me) + pos);
+	return *(begin(me, Standard()) + pos);
 }
 
 //////////////////////////////////////////////////////////////////////////////

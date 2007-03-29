@@ -197,9 +197,12 @@ namespace SEQAN_NAMESPACE_MAIN
 		TInput const &in;
 		typename Iterator<TInput const>::Type cur;
 
-		Pipe(TInput &_cont):
+		Pipe(typename _RemoveConst<TInput>::Type &_cont):
 			in(_cont) {}
-        
+
+		Pipe(TInput const &_cont):
+			in(_cont) {}
+
         inline typename Value<TInput>::Type const & operator*() const {
             return *cur;
         }
@@ -309,7 +312,6 @@ namespace SEQAN_NAMESPACE_MAIN
     template < typename TInput >
     inline typename Size< Pipe< TInput, Source<ContainerSpec> > >::Type
 	length(Pipe< TInput, Source<ContainerSpec> > &me) {
-//        return size(me.in);
         return length(me.in);
     }
 

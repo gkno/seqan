@@ -108,7 +108,7 @@ SEQAN_CHECKPOINT
 	}
 	template <typename THost2, typename TSpec2>
 	Segment(Segment<THost2, TSpec2> const & _other):
-		data_host(host(_other)),
+		data_host(_toPointer(host(_other))),
 		data_begin_position(beginPosition(_other)),
 		data_end_position(endPosition(_other))
 	{
@@ -599,7 +599,7 @@ value(Segment<THost, TSpec> & me,
 	  TPos pos)
 {
 SEQAN_CHECKPOINT
-	return *(begin(me) + pos);
+	return *(begin(me, Standard()) + pos);
 }
 
 template <typename THost, typename TSpec, typename TPos>
@@ -608,7 +608,7 @@ value(Segment<THost, TSpec> const & me,
 	  TPos pos)
 {
 SEQAN_CHECKPOINT
-	return *(begin(me) + pos);
+	return *(begin(me, Standard()) + pos);
 }
 
 //////////////////////////////////////////////////////////////////////////////

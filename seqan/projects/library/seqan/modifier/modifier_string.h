@@ -233,7 +233,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline typename Reference<ModifiedString<THost, TSpec> >::Type 
 	value(ModifiedString<THost, TSpec> & me, TPos pos)
 	{
-		return value(begin(me) + pos);
+		return value(begin(me, Standard()) + pos);
 	}
 
 	template <typename THost, typename TSpec, typename TPos>
@@ -241,7 +241,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	value(ModifiedString<THost, TSpec> const & me, TPos pos)
 	{
 	SEQAN_CHECKPOINT
-		return value(begin(me) + pos);
+		return value(begin(me, Standard()) + pos);
 	}
 
 	//////////////////////////////////////////////////////////////////////////////

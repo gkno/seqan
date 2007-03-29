@@ -22,6 +22,7 @@
 #include <seqan/pipe/pipe_caster.h>
 #include <seqan/pipe/pipe_counter.h>
 #include <seqan/pipe/pipe_echoer.h>
+#include <seqan/pipe/pipe_edit_environment.h>
 #include <seqan/pipe/pipe_filter.h>
 #include <seqan/pipe/pipe_iterator.h>
 #include <seqan/pipe/pipe_joiner.h>

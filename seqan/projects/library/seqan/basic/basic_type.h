@@ -418,6 +418,28 @@ SEQAN_CHECKPOINT
 	return _object;
 }
 
+//____________________________________________________________________________
+
+
+/**
+.Metafunction.Length:
+..summary:Number of elements in a fixed-size container.
+..signature:Length<T>::Type
+..param.T:Type for which the number of elements is determined.
+..returns.param.VALUE:Number of elements.
+..remarks.text:The default return value is 1 for dynamic-size containers.
+*/
+template <typename T>
+struct Length
+{
+	enum { VALUE = 1 };
+};
+template <typename T>
+struct Length<T const>:
+	Length<T>
+{
+};
+
 //////////////////////////////////////////////////////////////////////////////
 
 //Iterator: see basic_iterator.h

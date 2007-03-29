@@ -17,7 +17,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
     struct _ShiftLeftWorker {
         template <typename Arg>
-        static inline void body(Arg &arg, int I) {
+        static inline void body(Arg &arg, unsigned I) {
             arg.i2[I-1] = arg.i2[I];
         }
     };
@@ -32,6 +32,18 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef Pair<typename Size<TInput>::Type, TTuple, Compressed>		Type;
     };
 
+
+	// output only fully filled tuples
+	template < typename TTupler >
+	struct _TuplerLastTuples {
+		enum { VALUE = 1 };
+	};
+
+	// output tupleLen-1 half filled tuples at the end
+    template < typename TInput, unsigned tupleLen, typename TCompression >
+	struct _TuplerLastTuples< Pipe< TInput, Tupler<tupleLen, false, TCompression> > > {
+		enum { VALUE = tupleLen };
+	};
 
 /**
 .Spec.Tupler:
@@ -54,9 +66,12 @@ namespace SEQAN_NAMESPACE_MAIN
     template < typename TInput, unsigned tupleLen, bool omitLast, typename TCompression >
     struct Pipe< TInput, Tupler<tupleLen, omitLast, TCompression> >
     {
-        TInput                      &in;
+		typedef typename Value< typename Value<Pipe>::Type, 2 >::Type	TTuple;
+		typedef typename Value<TTuple>::Type							TValue;
+
+		TInput                      &in;
         typename Value<Pipe>::Type	tmp;
-		bool						last;
+		typename Size<TInput>::Type	lastTuples;
         
         Pipe(TInput& _in):
             in(_in) {}
@@ -66,11 +81,11 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 
         inline Pipe& operator++() {
-            last |= eof(in);
+            if (eof(in)) --lastTuples;
             LOOP<_ShiftLeftWorker, tupleLen - 1>::run(this->tmp);
 			++tmp.i1;
-			if (last)
-	            tmp.i2[tupleLen - 1] = 0;
+			if (lastTuples < _TuplerLastTuples<Pipe>::VALUE)
+	            tmp.i2[tupleLen - 1] = TValue();
 			else {
 				tmp.i2[tupleLen - 1] = *in;
 				++in;
@@ -82,9 +97,9 @@ namespace SEQAN_NAMESPACE_MAIN
             unsigned i;
             for(i = 0; i < tupleLen && !eof(in); ++i, ++in)
                 tmp.i2.i[i] = *in;
-            last = eof(in);
+			lastTuples = eof(in)? 0: _TuplerLastTuples<Pipe>::VALUE;
             for(; i < tupleLen; ++i)
-                tmp.i2.i[i] = 0;
+                tmp.i2.i[i] = TValue();
             tmp.i1 = 0;
         }
 	};
@@ -94,7 +109,7 @@ namespace SEQAN_NAMESPACE_MAIN
     {
         TInput                      &in;
         typename Value<Pipe>::Type	tmp;
-		bool						last;
+		typename Size<TInput>::Type	lastTuples;
         
         Pipe(TInput& _in):
             in(_in) {}
@@ -104,10 +119,10 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 
         inline Pipe& operator++() {
-            last |= eof(in);
+            if (eof(in)) --lastTuples;
 			tmp.i2 <<= 1;
 			++tmp.i1;
-			if (!last) {
+			if (lastTuples == _TuplerLastTuples<Pipe>::VALUE) {
 				tmp.i2 |= *in;
 				++in;
 			}
@@ -121,7 +136,7 @@ namespace SEQAN_NAMESPACE_MAIN
                 tmp.i2 <<= 1;
                 tmp.i2 |= *in;
 			}
-            last = eof(in);
+			lastTuples = eof(in)? 0: _TuplerLastTuples<Pipe>::VALUE;
             tmp.i2 <<= (tupleLen - i);
             tmp.i1 = 0;
         }
@@ -142,15 +157,23 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
     
     template < typename TInput, unsigned tupleLen, bool omitLast, typename TCompression >
-    inline typename Size< Pipe< TInput, Tupler< tupleLen, omitLast, TCompression > > >::Type
-    length(Pipe< TInput, Tupler< tupleLen, omitLast, TCompression > > const &me) {
-        return length(me.in);
+	inline bool 
+	control(
+		Pipe< TInput, Tupler< tupleLen, omitLast, TCompression > > &me, 
+		ControlEof const &command) 
+	{
+		return me.lastTuples == 0;
     }
 
-    template < typename TInput, unsigned tupleLen, typename TCompression >
-    inline typename Size< Pipe< TInput, Tupler< tupleLen, true, TCompression > > >::Type
-    length(Pipe< TInput, Tupler< tupleLen, true, TCompression > > const &me) {
-        return length(me.in) - (tupleLen - 1);
+    template < typename TInput, unsigned tupleLen, bool omitLast, typename TCompression >
+    inline typename Size< Pipe< TInput, Tupler< tupleLen, omitLast, TCompression > > >::Type
+    length(Pipe< TInput, Tupler< tupleLen, omitLast, TCompression > > const &me) {
+		typedef Pipe< TInput, Tupler< tupleLen, omitLast, TCompression > >	TPipe;
+		
+		if (length(me.in) >= (tupleLen - _TuplerLastTuples<TPipe>::VALUE))
+			return length(me.in) - (tupleLen - _TuplerLastTuples<TPipe>::VALUE);
+		else
+			return 0;
     }
 
 //}

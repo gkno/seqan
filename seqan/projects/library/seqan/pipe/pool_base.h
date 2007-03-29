@@ -1171,46 +1171,16 @@ SEQAN_CHECKPOINT
 
 
 
-///.Function.assign.param.source.type:Class.Pipe
-
-    // pipe -> string
-    template < typename TValue,
-               typename TStringSpec,
-               typename TInput,
-               typename TSpec >
-    inline bool assign(String<TValue, TStringSpec> &dest, Pipe<TInput, TSpec> &src) {
-        typedef typename Iterator< String<TValue, TStringSpec> >::Type TIter;
-        typename Size< Pipe<TInput, TSpec> >::Type _size = length(src);
-        resize(dest, _size);
-        if (!beginRead(src)) return false;
-        TIter _cur = begin(dest), _end = end(dest);
-        while (_cur != _end) {
-            *_cur = *src;
-            ++_cur;
-            ++src;
-        }
-        endRead(src);
-        return true;
-    }
-
-    template < typename TValue,
-               typename TStringSpec,
-               typename TInput,
-               typename TSpec >
-    inline bool operator<<(String<TValue, TStringSpec> &dest, Pipe<TInput, TSpec> &src) {
-        return assign(dest, src);
-    }
-
-
 ///.Function.assign.param.source.type:Class.Pool
 
     // pool -> string
-    template < typename TValue,
-               typename TStringSpec,
-               typename TSpec >
-    inline bool assign(String<TValue, TStringSpec> &dest, Pool<TValue, TSpec> &src) {
-        typedef typename Iterator< String<TValue, TStringSpec> >::Type TIter;
-        typename Size< String<TValue, TStringSpec> >::Type _size = length(src);
+    template < typename TValue1,
+			   typename TStringSpec,
+			   typename TValue2,
+			   typename TSpec >
+    inline bool assign(String<TValue1, TStringSpec> &dest, Pool<TValue2, TSpec> &src) {
+        typedef typename Iterator< String<TValue1, TStringSpec> >::Type TIter;
+        typename Size< String<TValue1, TStringSpec> >::Type _size = length(src);
         resize(dest, _size);
         if (!beginRead(src)) return false;
         TIter _cur = begin(dest), _end = end(dest);
@@ -1223,10 +1193,11 @@ SEQAN_CHECKPOINT
         return true;
     }
 
-    template < typename TValue,
-               typename TStringSpec,
-               typename TSpec >
-    inline bool operator<<(String<TValue, TStringSpec> &dest, Pool<TValue, TSpec> &src) {
+    template < typename TValue1,
+			   typename TStringSpec,
+			   typename TValue2,
+			   typename TSpec >
+    inline bool operator<<(String<TValue1, TStringSpec> &dest, Pool<TValue2, TSpec> &src) {
         return assign(dest, src);
     }
 

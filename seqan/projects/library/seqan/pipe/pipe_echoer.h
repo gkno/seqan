@@ -19,21 +19,21 @@ namespace SEQAN_NAMESPACE_MAIN
 	// some metaprogramming to unrool fixed-size loops
     struct _EchoerFillWorker {
         template <typename Arg>
-        static inline void body(Arg &arg, int I) {
+        static inline void body(Arg &arg, unsigned I) {
             arg.tmp.i2[I-1] = *(arg.in); ++(arg.in);
         }
     };
     
     struct _EchoerClearWorker {
         template <typename Arg>
-        static inline void body(Arg &arg, int I) {
+        static inline void body(Arg &arg, unsigned I) {
             arg.i2[I] = 0;
         }
     };
     
     struct _EchoerShiftWorker {
         template <typename Arg>
-        static inline void body(Arg &arg, int I) {
+        static inline void body(Arg &arg, unsigned I) {
             arg.i2[I] = arg.i2[I-1];
         }
     };

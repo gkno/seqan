@@ -203,7 +203,14 @@ struct IsContiguous< String<TValue, Array<ISize> > >
 
 //////////////////////////////////////////////////////////////////////////////
 
+///.Metafunction.Length.param.T.type:Spec.Array String
+template <typename TValue, unsigned int ISize>
+struct Length< String<TValue, Array<ISize> > >
+{
+	enum { VALUE = ISize };
+};
 
+//////////////////////////////////////////////////////////////////////////////
 
 } //namespace SEQAN_NAMESPACE_MAIN
 
