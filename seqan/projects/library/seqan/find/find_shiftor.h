@@ -50,21 +50,6 @@ public:
 //____________________________________________________________________________
 };
 
-//////////////////////////////////////////////////////////////////////////////
-// Host Metafunctions
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename TNeedle>
-struct Host< Pattern<TNeedle, ShiftOr> >
-{
-	typedef TNeedle Type;
-};
-
-template <typename TNeedle>
-struct Host< Pattern<TNeedle, ShiftOr> const>
-{
-	typedef TNeedle const Type;
-};
 
 //////////////////////////////////////////////////////////////////////////////
 // Functions
