@@ -7,5 +7,5 @@
 //#include "../../demos/string_1.cpp"
 //#include "../../demos/sufarray.cpp"
 //#include "../../demos/index.cpp"
-//#include "../../demos/graph.cpp"
-#include "../../demos/find.cpp"
+#include "../../demos/graph.cpp"
+//#include "../../demos/find.cpp"

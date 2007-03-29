@@ -21,11 +21,58 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //////////////////////////////////////////////////////////////////////////////
 
+
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TSpec, typename TNodeMap>
-void _createNodeNames(Graph<TSpec> const& g,
-					  TNodeMap& nodeMap)
+template <typename TAlphabet, typename TCargo, typename TSpec, typename TVertexDescriptor, typename TAttributes>
+void 
+_markRootVertex(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
+				TVertexDescriptor const& v,
+				TAttributes& str)
+{
+	if (isRoot(g,v)) {
+		append(str, ", shape = box");
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TCargo, typename TSpec, typename TVertexDescriptor, typename TAttributes>
+void 
+_markRootVertex(Graph<Directed<TCargo, TSpec> > const& g,
+				TVertexDescriptor const& v,
+				TAttributes& str)
+{
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TCargo, typename TSpec, typename TVertexDescriptor, typename TAttributes>
+void 
+_markRootVertex(Graph<Undirected<TCargo, TSpec> > const& g,
+				TVertexDescriptor const& v,
+				TAttributes& str)
+{
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TCargo, typename TSpec, typename TVertexDescriptor, typename TAttributes>
+void 
+_markRootVertex(Graph<Tree<TCargo, TSpec> > const& g,
+				TVertexDescriptor const& v,
+				TAttributes& str)
+{
+	if (isRoot(g,v)) {
+		append(str, ", shape = box");
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TSpec, typename TNodeAttributes>
+void _createNodeAttributes(Graph<TSpec> const& g,
+						   TNodeAttributes& nodeMap)
 {
 	SEQAN_CHECKPOINT
     typedef Graph<TSpec> TGraph;
@@ -36,56 +83,68 @@ void _createNodeNames(Graph<TSpec> const& g,
 	typedef typename Iterator<TGraph, VertexIterator>::Type TConstIter;
 	TConstIter it(g);
 	for(;!atEnd(it);++it) {
-		sprintf(strV, "\"%d\"", *it);
-		assignProperty(nodeMap, *it, String<char>(strV));
+		String<char> tmp("label = \"");
+		sprintf(strV, "%d", *it);
+		append(tmp, strV);
+		append(tmp, "\"");
+		_markRootVertex(g, *it, tmp);
+		assignProperty(nodeMap, *it, tmp);
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////////
 
-template <typename TCargo, typename TSpec, typename TEdgeMap>
-void _createEdgeNames(Graph<Directed<TCargo, TSpec> > const& g,
-					  TEdgeMap& edgeMap)
+//////////////////////////////////////////////////////////////////////////////
+template<typename TSpec, typename TEdgeAttributes>
+void _createEmptyEdgeAttributes(Graph<TSpec> const& g,
+								TEdgeAttributes& edgeMap)
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<Directed<TCargo, TSpec> > TGraph;
+	typedef Graph<TSpec> TGraph;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	resizeEdgeMap(g, edgeMap);
-	char strE[20];
 
 	typedef typename Iterator<TGraph, EdgeIterator>::Type TConstEdIter;
 	TConstEdIter itEd(g);
 	for(;!atEnd(itEd);++itEd) {
-		sprintf(strE, "(%d,%d)", sourceVertex(itEd), targetVertex(itEd));
-		assignProperty(edgeMap, *itEd, String<char>(strE));
+		assignProperty(edgeMap, *itEd, String<char>(""));
 	}
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TCargo, typename TSpec, typename TEdgeMap>
-void _createEdgeNames(Graph<Tree<TCargo, TSpec> > const& g,
-					  TEdgeMap& edgeMap)
+template <typename TCargo, typename TSpec, typename TEdgeAttributes>
+void _createEdgeAttributes(Graph<Directed<TCargo, TSpec> > const& g,
+						   TEdgeAttributes& edgeMap)
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<Tree<TCargo, TSpec> > TGraph;
-	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
-	resizeEdgeMap(g, edgeMap);
-	char strE[20];
-
-	typedef typename Iterator<TGraph, EdgeIterator>::Type TConstEdIter;
-	TConstEdIter itEd(g);
-	for(;!atEnd(itEd);++itEd) {
-		sprintf(strE, "(%d,%d)", sourceVertex(itEd), targetVertex(itEd));
-		assignProperty(edgeMap, *itEd, String<char>(strE));
-	}
+	_createEmptyEdgeAttributes(g,edgeMap);
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TAlphabet, typename TCargo, typename TSpec, typename TEdgeMap>
-void _createEdgeNames(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
-					  TEdgeMap& edgeMap)
+template <typename TCargo, typename TSpec, typename TEdgeAttributes>
+void _createEdgeAttributes(Graph<Undirected<TCargo, TSpec> > const& g,
+						   TEdgeAttributes& edgeMap)
+{
+	SEQAN_CHECKPOINT
+	_createEmptyEdgeAttributes(g,edgeMap);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TCargo, typename TSpec, typename TEdgeAttributes>
+void _createEdgeAttributes(Graph<Tree<TCargo, TSpec> > const& g,
+						   TEdgeAttributes& edgeMap)
+{
+	SEQAN_CHECKPOINT
+	_createEmptyEdgeAttributes(g,edgeMap);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TAlphabet, typename TCargo, typename TSpec, typename TEdgeAttributes>
+void _createEdgeAttributes(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
+						   TEdgeAttributes& edgeMap)
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
@@ -94,15 +153,18 @@ void _createEdgeNames(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
 	typedef typename Iterator<TGraph, EdgeIterator>::Type TConstEdIter;
 	TConstEdIter itEd(g);
 	for(;!atEnd(itEd);++itEd) {
-		assignProperty(edgeMap, *itEd, label(itEd));
+		String<char> tmp("label = \"");
+		append(tmp, label(itEd));
+		append(tmp, "\"");
+		assignProperty(edgeMap, *itEd, tmp);
 	}
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TAlphabet, typename TCargo, typename TSpec, typename TEdgeMap>
-void _createEdgeNames(Graph<Automaton<TAlphabet, TCargo, WordGraph<TSpec> > > const& g,
-					  TEdgeMap& edgeMap)
+template <typename TAlphabet, typename TCargo, typename TSpec, typename TEdgeAttributes>
+void _createEdgeAttributes(Graph<Automaton<TAlphabet, TCargo, WordGraph<TSpec> > > const& g,
+						   TEdgeAttributes& edgeMap)
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<Automaton<TAlphabet, TCargo, WordGraph<TSpec> > > TGraph;
@@ -120,10 +182,92 @@ void _createEdgeNames(Graph<Automaton<TAlphabet, TCargo, WordGraph<TSpec> > > co
 			char c = convert<char>(getValue(it));
 			value(str,position(it) + 1) = c;
 		}
-		assignProperty(edgeMap, *itEd, str);
+		String<char> tmp("label = \"");
+		append(tmp, str);
+		append(tmp, "\"");
+		assignProperty(edgeMap, *itEd, tmp);
 	}
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TFile, typename TAlphabet, typename TCargo, typename TSpec>
+void _writeGraphType(TFile & file,
+					 Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
+					 DotDrawing)
+{
+	_streamWrite(file, "digraph");
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TFile, typename TCargo, typename TSpec>
+void _writeGraphType(TFile & file,
+					 Graph<Directed<TCargo, TSpec> > const& g,
+					 DotDrawing)
+{
+	_streamWrite(file, "digraph");
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TFile, typename TCargo, typename TSpec>
+void _writeGraphType(TFile & file,
+					 Graph<Undirected<TCargo, TSpec> > const& g,
+					 DotDrawing)
+{
+	_streamWrite(file, "graph");
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TFile, typename TCargo, typename TSpec>
+void _writeGraphType(TFile & file,
+					 Graph<Tree<TCargo, TSpec> > const& g,
+					 DotDrawing)
+{
+	_streamWrite(file, "graph");
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TFile, typename TAlphabet, typename TCargo, typename TSpec>
+void _writeEdgeType(TFile & file,
+					Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
+					DotDrawing)
+{
+	_streamWrite(file, " -> ");
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TFile, typename TCargo, typename TSpec>
+void _writeEdgeType(TFile & file,
+					Graph<Directed<TCargo, TSpec> > const& g,
+					DotDrawing)
+{
+	_streamWrite(file, " -> ");
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TFile, typename TCargo, typename TSpec>
+void _writeEdgeType(TFile & file,
+					Graph<Undirected<TCargo, TSpec> > const& g,
+					DotDrawing)
+{
+	_streamWrite(file, " -- ");
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TFile, typename TCargo, typename TSpec>
+void _writeEdgeType(TFile & file,
+					Graph<Tree<TCargo, TSpec> > const& g,
+					DotDrawing)
+{
+	_streamWrite(file, " -- ");
+}
 
 //////////////////////////////////////////////////////////////////////////////
 // FUNCTIONS
@@ -132,19 +276,20 @@ void _createEdgeNames(Graph<Automaton<TAlphabet, TCargo, WordGraph<TSpec> > > co
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TFile, typename TSpec, typename TNodeMap, typename TEdgeMap>
+template <typename TFile, typename TSpec, typename TNodeAttributes, typename TEdgeAttributes>
 void write(TFile & file, 
-	   Graph<TSpec> const& g,
-	   TNodeMap const& nodeMap,
-	   TEdgeMap const& edgeMap,
-	   DotDrawing) 
+		   Graph<TSpec> const& g,
+		   TNodeAttributes const& nodeMap,
+		   TEdgeAttributes const& edgeMap,
+		   DotDrawing) 
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<TSpec> TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 
-	_streamWrite(file, "digraph G {\n");
+	_writeGraphType(file,g,DotDrawing());
+	_streamWrite(file, " G {\n");
 	_streamPut(file, '\n');
 	_streamWrite(file, "/* Graph Attributes */\n");
 	_streamWrite(file, "graph [rankdir = LR];\n");
@@ -160,9 +305,10 @@ void write(TFile & file,
 	typedef typename Iterator<TGraph, VertexIterator>::Type TConstIter;
 	TConstIter it(g);
 	for(;!atEnd(it);++it) {
+		_streamPutInt(file, *it);
+		_streamWrite(file, " [");
 		_streamWrite(file, getProperty(nodeMap, *it));
-		_streamPut(file, ';');
-		_streamPut(file, '\n');
+		_streamWrite(file, "];\n");
 	}
 	_streamPut(file, '\n');
 
@@ -172,12 +318,12 @@ void write(TFile & file,
 	for(;!atEnd(itEd);++itEd) {
 		TVertexDescriptor sc = sourceVertex(itEd);
 		TVertexDescriptor tr = targetVertex(itEd);
-		_streamWrite(file, getProperty(nodeMap, sc));
-		_streamWrite(file, " -> ");
-		_streamWrite(file, getProperty(nodeMap, tr));
-		_streamWrite(file, " [label = \"");
+		_streamPutInt(file, sc);
+		_writeEdgeType(file, g, DotDrawing());
+		_streamPutInt(file, tr);
+		_streamWrite(file, " [");
 		_streamWrite(file, getProperty(edgeMap, *itEd));
-		_streamWrite(file, "\"];\n");
+		_streamWrite(file, "];\n");
 	}
 	_streamPut(file, '\n');
 
@@ -188,15 +334,15 @@ void write(TFile & file,
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TFile, typename TSpec>
-void write(TFile & file, 
-	   Graph<TSpec> const& g, 
-	   DotDrawing) 
+void write(TFile & file,
+		   Graph<TSpec> const& g, 
+		   DotDrawing) 
 {
 	SEQAN_CHECKPOINT
 	String<String<char> > nodeMap;
-	_createNodeNames(g,nodeMap);
+	_createNodeAttributes(g,nodeMap);
 	String<String<char> > edgeMap;
-	_createEdgeNames(g,edgeMap);
+	_createEdgeAttributes(g,edgeMap);
 	write(file,g,nodeMap,edgeMap,DotDrawing());
 }
 

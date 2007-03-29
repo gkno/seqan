@@ -1612,6 +1612,7 @@ void Test_WordGraph() {
 	SEQAN_TASSERT(parseString(g, 0, "ggg") == 6)
 	SEQAN_TASSERT(parseString(g, 0, "gaggg") == 2)
 	SEQAN_TASSERT(parseString(g, 0, "gagggg") == 2)
+	assignRoot(g,0);
 
 	// Output
 	// Raw output
@@ -1622,6 +1623,7 @@ void Test_WordGraph() {
 	write(strm,g,DotDrawing());
 	strm.close();
 
+	assignRoot(g,2);
 	TWordGraph g_tmp(g);
 	SEQAN_TASSERT(numVertices(g_tmp) == 8)
 	SEQAN_TASSERT(parseString(g_tmp, 0, "agaggg") == 1)
@@ -2650,7 +2652,7 @@ void Test_Trie() {
 	String<String<char> > nodeMap;
 	_createTrieNodeNames(g, pos, nodeMap);
 	String<String<char> > edgeMap;
-	_createEdgeNames(g,edgeMap);
+	_createEdgeAttributes(g,edgeMap);
 	write(strm,g,nodeMap,edgeMap,DotDrawing());
 	strm.close();
 
@@ -2669,7 +2671,7 @@ void Test_Trie() {
 	clear(nodeMap);
 	_createTrieNodeNames(gDna, pos, nodeMap);
 	clear(edgeMap);
-	_createEdgeNames(gDna,edgeMap);
+	_createEdgeAttributes(gDna,edgeMap);
 	write(strm2,gDna,nodeMap,edgeMap,DotDrawing());
 	strm2.close();
 }
