@@ -3,6 +3,7 @@
 
 // External / STL
 #include <deque>
+#include <map>
 #include <set>
 #include <queue>
 #include <typeinfo>
@@ -48,6 +49,7 @@
 #include <seqan/graph/graph_impl_trie.h>		// Trie
 
 // Graph drawing
+#include <seqan/find.h>
 #include <seqan/graph/graph_drawing.h>
 
 // Specialized iterators
@@ -56,5 +58,7 @@
 
 // Graph algorithms
 #include <seqan/graph/graph_algorithm.h>
+
+
 
 #endif //#ifndef SEQAN_HEADER_...

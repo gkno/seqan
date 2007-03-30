@@ -640,12 +640,18 @@ void Test_Directed() {
 	removeEdge(g,0,0); // ToDo: Drawing of self edges
 	addEdge(g,4,3);
 	// Raw output
-	std::cout << g << ::std::endl;
+	// std::cout << g << ::std::endl;
 	// File output
 	fstream strm;
 	strm.open(TEST_PATH "my_graph.dot", ios_base::out | ios_base::trunc);
 	write(strm,g,DotDrawing());
 	strm.close();
+	// File read
+	StandardGraph gTmp;
+	strm.open(TEST_PATH "my_graph.dot", ios_base::in);
+	read(strm,gTmp,DotDrawing());
+	strm.close();
+
 	removeEdge(g,4,3);
 	addEdge(g,0,0);
 
@@ -884,12 +890,21 @@ void Test_Undirected() {
 	SEQAN_TASSERT(degree(g, v3) == 3)
 
 	// Graph drawing
-	// ToDo: Undirected edges required!
 	// Raw output
-	std::cout << g << std::endl;
+	// std::cout << g << ::std::endl;
+	// File output
+	fstream strm;
+	strm.open(TEST_PATH "my_undirected_graph.dot", ios_base::out | ios_base::trunc);
+	write(strm,g,DotDrawing());
+	strm.close();
+	// File read
+	StandardGraph gTmp;
+	strm.open(TEST_PATH "my_undirected_graph.dot", ios_base::in);
+	read(strm,gTmp,DotDrawing());
+	strm.close();
 
 	// Remove edges
-	removeEdge(g,my_edge);
+	removeEdge(g,3,1);
 	removeEdge(g,0,1);
 	SEQAN_TASSERT(numEdges(g) == 2)
 
@@ -1227,15 +1242,20 @@ void Test_Automaton() {
 
 	// Output
 	// Raw output
-	std::cout << g << ::std::endl;
+	// std::cout << g << ::std::endl;
 	// File output
 	fstream strm;
 	strm.open(TEST_PATH "my_automaton.dot", ios_base::out | ios_base::trunc);
 	write(strm,g,DotDrawing());
 	strm.close();
+	// File read
+	StandardAutomaton gTmp;
+	strm.open(TEST_PATH "my_automaton.dot", ios_base::in);
+	read(strm,gTmp,DotDrawing());
+	strm.close();
 
 	// Remove edges
-	removeEdge(g,my_edge);
+	removeEdge(g,3,1,'c');
 	removeEdge(g,0,1,'g');
 	SEQAN_TASSERT(numEdges(g) == 3)
 
@@ -1616,11 +1636,16 @@ void Test_WordGraph() {
 
 	// Output
 	// Raw output
-	std::cout << g << ::std::endl;
+	// std::cout << g << ::std::endl;
 	// File output
 	fstream strm;
 	strm.open(TEST_PATH "my_wordgraph.dot", ios_base::out | ios_base::trunc);
 	write(strm,g,DotDrawing());
+	strm.close();
+	// File read
+	TWordGraph gTmp;
+	strm.open(TEST_PATH "my_wordgraph.dot", ios_base::in);
+	read(strm,gTmp,DotDrawing());
 	strm.close();
 
 	assignRoot(g,2);
@@ -1692,11 +1717,16 @@ void Test_Tree() {
 	TEdgeDescriptor childC2C1C1e = findEdge(g, childC2C1C1, childC2C1);
 	
 	// Raw output
-	std::cout << g << std::endl;
+	// std::cout << g << std::endl;
 	// File output
 	fstream strm;
 	strm.open(TEST_PATH "my_tree.dot", ios_base::out | ios_base::trunc);
 	write(strm,g,DotDrawing());
+	strm.close();
+	// File read
+	TTree gTmp;
+	strm.open(TEST_PATH "my_tree.dot", ios_base::in);
+	read(strm,gTmp,DotDrawing());
 	strm.close();
 
 	SEQAN_TASSERT(childVertex(g, childC2C1C1e) == childC2C1C1)  
@@ -2650,7 +2680,7 @@ void Test_Trie() {
 	fstream strm;
 	strm.open(TEST_PATH "my_trie.dot", ios_base::out | ios_base::trunc);
 	String<String<char> > nodeMap;
-	_createTrieNodeNames(g, pos, nodeMap);
+	_createTrieNodeAttributes(g, pos, nodeMap);
 	String<String<char> > edgeMap;
 	_createEdgeAttributes(g,edgeMap);
 	write(strm,g,nodeMap,edgeMap,DotDrawing());
@@ -2669,7 +2699,7 @@ void Test_Trie() {
 	fstream strm2;
 	strm2.open(TEST_PATH "my_trie_dna.dot", ios_base::out | ios_base::trunc);
 	clear(nodeMap);
-	_createTrieNodeNames(gDna, pos, nodeMap);
+	_createTrieNodeAttributes(gDna, pos, nodeMap);
 	clear(edgeMap);
 	_createEdgeAttributes(gDna,edgeMap);
 	write(strm2,gDna,nodeMap,edgeMap,DotDrawing());

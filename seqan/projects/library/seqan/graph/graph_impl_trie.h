@@ -74,37 +74,6 @@ _addStringToTrie(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 }
 
 //////////////////////////////////////////////////////////////////////////////
-
-template<typename TAlphabet, typename TCargo, typename TSpec, typename TNodeMap>
-inline void
-_createTrieNodeNames(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
-					 String<String<unsigned int> > pos,
-					 TNodeMap& nodeMap)
-{
-	SEQAN_CHECKPOINT
-	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
-	resizeVertexMap(g, nodeMap);
-	typedef typename Iterator<TGraph, VertexIterator>::Type TConstIter;
-	TConstIter it(g);
-	for(;!atEnd(it);++it) {
-		std::stringstream s;
-		s << "\"" << *it << " {";
-		String<unsigned int> endPositions = getProperty(pos,*it);
-		if (!empty(endPositions)) {
-			typename Iterator<String<unsigned int> >::Type itP = begin(endPositions);
-			typename Iterator<String<unsigned int> >::Type beginP = itP;
-			for(;!atEnd(itP);goNext(itP)) {
-				if (beginP != itP) s << ", ";
-				s << *itP;
-			}
-		}
-		s << "}" << "\"";
-		assignProperty(nodeMap, *it, String<char>(s.str().c_str()));
-	}
-
-}
-
-//////////////////////////////////////////////////////////////////////////////
 // FUNCTIONS
 //////////////////////////////////////////////////////////////////////////////
 

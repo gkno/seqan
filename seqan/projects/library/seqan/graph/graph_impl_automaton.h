@@ -350,7 +350,8 @@ addEdge(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	
-	TEdgeDescriptor e = findEdge(g, source, label);
+	TAlphabet letter(label);
+	TEdgeDescriptor e = findEdge(g, source, letter);
 	_assignId(e, obtainId(g.data_id_managerE));
 	assignTarget(e, target);
 	return e;

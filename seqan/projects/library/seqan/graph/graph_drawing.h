@@ -11,7 +11,9 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 
 
-
+//////////////////////////////////////////////////////////////////////////////
+// WRITING
+//////////////////////////////////////////////////////////////////////////////
 
 
 
@@ -31,7 +33,7 @@ _markRootVertex(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
 				TAttributes& str)
 {
 	if (isRoot(g,v)) {
-		append(str, ", shape = box");
+		append(str, ", shape = doublecircle");
 	}
 }
 
@@ -64,7 +66,45 @@ _markRootVertex(Graph<Tree<TCargo, TSpec> > const& g,
 				TAttributes& str)
 {
 	if (isRoot(g,v)) {
-		append(str, ", shape = box");
+		append(str, ", shape = doublecircle");
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TAlphabet, typename TCargo, typename TSpec, typename TNodeMap>
+inline void
+_createTrieNodeAttributes(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
+						  String<String<unsigned int> > pos,
+						  TNodeMap& nodeMap)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
+	resizeVertexMap(g, nodeMap);
+	typedef typename Iterator<TGraph, VertexIterator>::Type TConstIter;
+	TConstIter it(g);
+	for(;!atEnd(it);++it) {
+		String<char> tmp;
+		std::stringstream s;
+		s << *it;
+		String<unsigned int> endPositions = getProperty(pos,*it);
+		if (!empty(endPositions)) {
+			s <<  " {";
+			append(tmp, "shape = box, ");
+			typename Iterator<String<unsigned int> >::Type itP = begin(endPositions);
+			typename Iterator<String<unsigned int> >::Type beginP = itP;
+			for(;!atEnd(itP);goNext(itP)) {
+				if (beginP != itP) s << ", ";
+				s << *itP;
+			}
+			s << "}";
+		}
+		
+		append(tmp, "label = \"");
+		append(tmp, s.str().c_str());
+		append(tmp, "\"");
+		_markRootVertex(g, *it, tmp);
+		assignProperty(nodeMap, *it, tmp);
 	}
 }
 
@@ -295,7 +335,7 @@ void write(TFile & file,
 	_streamWrite(file, "graph [rankdir = LR];\n");
 	_streamPut(file, '\n');
 	_streamWrite(file, "/* Node Attributes */\n");
-	_streamWrite(file, "node [shape = ellipse, fillcolor = lightgrey, style = filled, fontname = \"Times-Italic\"];\n");
+	_streamWrite(file, "node [shape = circle, fillcolor = white, style = filled, fontname = \"Times-Italic\"];\n");
 	_streamPut(file, '\n');
 	_streamWrite(file, "/* Edge Attributes */\n");
 	_streamWrite(file, "edge [fontname = \"Times-Italic\", arrowsize = 0.75, fontsize = 16];\n");
@@ -345,6 +385,371 @@ void write(TFile & file,
 	_createEdgeAttributes(g,edgeMap);
 	write(file,g,nodeMap,edgeMap,DotDrawing());
 }
+
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+// READING
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TSpec, typename TStatement, typename TNodeAttributes, typename TEdgeAttributes, typename TNodeIdMap>
+void _addNode(Graph<TSpec>& g,
+			  TStatement& node_id,
+			  TStatement& attr_list,
+			  TNodeAttributes& nodeMap,
+			  TEdgeAttributes& edgeMap,			  
+			  TNodeIdMap& nodeIdMap)
+{
+	typedef Graph<TSpec> TGraph;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+
+	if (nodeIdMap.find(node_id) == nodeIdMap.end()) {
+		TVertexDescriptor id = addVertex(g);
+		nodeIdMap.insert(std::make_pair(node_id, id));
+		resizeVertexMap(g, nodeMap);
+		assignProperty(nodeMap, id, attr_list);
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TCargo, typename TSpec, typename TVertexDescriptor, typename TNodeAttributes, typename TEdgeAttributes, typename TStatement>
+void _addEdge(Graph<Directed<TCargo, TSpec> >& g,
+			  TVertexDescriptor sourceV,
+			  TVertexDescriptor targetV,
+			  TNodeAttributes& nodeMap,
+			  TEdgeAttributes& edgeMap,
+			  TStatement& attr_list)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Directed<TCargo, TSpec> > TGraph;
+	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	TEdgeDescriptor e = addEdge(g, sourceV, targetV);
+	resizeEdgeMap(g, edgeMap);
+	assignProperty(edgeMap, e, attr_list);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TCargo, typename TSpec, typename TVertexDescriptor, typename TNodeAttributes, typename TEdgeAttributes, typename TStatement>
+void _addEdge(Graph<Undirected<TCargo, TSpec> >& g,
+			  TVertexDescriptor sourceV,
+			  TVertexDescriptor targetV,
+			  TNodeAttributes& nodeMap,
+			  TEdgeAttributes& edgeMap,
+			  TStatement& attr_list)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Undirected<TCargo, TSpec> > TGraph;
+	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	TEdgeDescriptor e = addEdge(g, sourceV, targetV);
+	resizeEdgeMap(g, edgeMap);
+	assignProperty(edgeMap, e, attr_list);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TCargo, typename TSpec, typename TVertexDescriptor, typename TNodeAttributes, typename TEdgeAttributes, typename TStatement>
+void _addEdge(Graph<Tree<TCargo, TSpec> >& g,
+			  TVertexDescriptor sourceV,
+			  TVertexDescriptor targetV,
+			  TNodeAttributes& nodeMap,
+			  TEdgeAttributes& edgeMap,
+			  TStatement& attr_list)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Tree<TCargo, TSpec> > TGraph;
+	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	TEdgeDescriptor e = addEdge(g, sourceV, targetV);
+	resizeEdgeMap(g, edgeMap);
+	assignProperty(edgeMap, e, attr_list);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TAlphabet, typename TCargo, typename TSpec, typename TString>
+typename Alphabet<Graph<Automaton<TAlphabet, TCargo, TSpec> > >::Type
+_getInternalLabel(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
+				  TString& str)
+{
+	return str[0];
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TAlphabet, typename TCargo, typename TSpec, typename TString>
+String<TAlphabet>
+_getInternalLabel(Graph<Automaton<TAlphabet, TCargo, WordGraph<TSpec> > >& g,
+				  TString& str)
+{
+	return str;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TAlphabet, typename TCargo, typename TSpec, typename TVertexDescriptor, typename TNodeAttributes, typename TEdgeAttributes, typename TStatement>
+void _addEdge(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
+			  TVertexDescriptor sourceV,
+			  TVertexDescriptor targetV,
+			  TNodeAttributes& nodeMap,
+			  TEdgeAttributes& edgeMap,
+			  TStatement& attr_list)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
+	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+
+	// We need the label
+	typedef typename Value<TStatement>::Type TValue;
+	typedef typename Iterator<TStatement>::Type TIter;
+	typedef typename Position<TIter>::Type TPos;
+	
+	String<TValue> label;
+	TIter it = begin(attr_list);
+	bool found = false;
+	for(;!atEnd(it);goNext(it)) {
+		TPos pos = position(it);
+		if (*it == ',') {
+			found = false;
+		} else if (found) {
+			append(label, *it);
+		} else if ((pos + 5 < length(attr_list)) &&
+			(infix(attr_list, it, it + 5) == "label")) 
+		{
+				found = true;
+				it += 5;
+		}
+	}
+	TEdgeDescriptor e = addEdge(g, sourceV, targetV, _getInternalLabel(g, label));
+	resizeEdgeMap(g, edgeMap);
+	assignProperty(edgeMap, e, attr_list);
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TSpec, typename TStatement, typename TNodeAttributes, typename TEdgeAttributes, typename TNodeIdMap>
+void _addEdge(Graph<TSpec>& g,
+			  TStatement& left_node_id,
+			  TStatement& right_node_id,
+			  TStatement& attr_list,
+			  TNodeAttributes& nodeMap,
+			  TEdgeAttributes& edgeMap,
+			  TNodeIdMap& nodeIdMap)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<TSpec> TGraph;
+	typedef typename Value<TStatement>::Type TValue;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef std::map<String<TValue>, TVertexDescriptor> TMap;
+
+	TVertexDescriptor sourceV;
+	TVertexDescriptor targetV;
+
+	typename TMap::iterator pos;
+	pos = nodeIdMap.find(left_node_id);
+	if (pos == nodeIdMap.end()) return;
+	else sourceV = pos->second;
+
+	pos = nodeIdMap.find(right_node_id);
+	if (pos == nodeIdMap.end()) return;
+	else targetV = pos->second;
+
+	_addEdge(g, sourceV, targetV, nodeMap, edgeMap, attr_list);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TSpec, typename TStatement, typename TNodeAttributes, typename TEdgeAttributes, typename TNodeIdMap>
+void _processNodeStatement(Graph<TSpec>& g,
+						   TStatement& stmt,
+						   TNodeAttributes& nodeMap,
+						   TEdgeAttributes& edgeMap,
+						   TNodeIdMap& nodeIdMap) 
+{
+	SEQAN_CHECKPOINT
+	typedef typename Value<TStatement>::Type TValue;
+	typedef typename Iterator<TStatement>::Type TIter;
+	
+	String<TValue> node_id;
+	String<TValue> attr_list;  // Multiple attribute lists are ignored
+	bool inAttr = false;
+	TIter it = begin(stmt);
+	for(;!atEnd(it);goNext(it)) {
+		if (*it == '[') {
+			inAttr = true;
+			continue;
+		} else if (*it == ']') {
+			// Finished
+			break;
+		} else if ((*it == ' ') ||
+			(*it == '"')) {
+			continue;
+		}
+		if (inAttr) {
+			append(attr_list, *it);
+		} else {
+			append(node_id, *it);
+		}
+	}
+	_addNode(g, node_id, attr_list, nodeMap, edgeMap, nodeIdMap);
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TSpec, typename TStatement, typename TNodeAttributes, typename TEdgeAttributes, typename TPosition, typename TNodeIdMap>
+void _processEdgeStatement(Graph<TSpec>& g,
+						   TStatement& stmt,
+						   TNodeAttributes& nodeMap,
+						   TEdgeAttributes& edgeMap,
+						   TPosition pos,
+						   TNodeIdMap& nodeIdMap) 
+{
+	SEQAN_CHECKPOINT
+	typedef typename Value<TStatement>::Type TValue;
+	typedef typename Iterator<TStatement>::Type TIter;
+	
+	String<TValue> left_node_id;
+	String<TValue> right_node_id;
+	String<TValue> attr_list;  // Multiple attribute lists are ignored
+	bool inAttr = false;
+	TIter it = begin(stmt);
+	for(;!atEnd(it);goNext(it)) {
+		if (*it == '[') {
+			inAttr = true;
+			continue;
+		} else if (*it == ']') {
+			// Finished
+			break;
+		} else if ((*it == ' ') ||
+			(*it == '"')) {
+			continue;
+		}
+		if (inAttr) {
+			append(attr_list, *it);
+		} else if (position(it) < pos) {
+			append(left_node_id, *it);
+		} else if (position(it) > pos+1) {
+			append(right_node_id, *it);
+		}
+	}
+	_addEdge(g, left_node_id, right_node_id, attr_list, nodeMap, edgeMap, nodeIdMap);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TSpec, typename TStatement, typename TNodeAttributes, typename TEdgeAttributes, typename TNodeIdMap>
+void _processStatement(Graph<TSpec>& g,
+					   TStatement& stmt,
+					   TNodeAttributes& nodeMap,
+					   TEdgeAttributes& edgeMap,
+					   TNodeIdMap& nodeIdMap) 
+{
+	SEQAN_CHECKPOINT
+	// Clear everything up to the last line
+	Finder<TStatement> finder(stmt);
+	TStatement needle("\n");
+	Pattern<TStatement, ShiftOr> pattern(needle);
+	String<unsigned int> pos;
+	while (find(finder, pattern))
+		append(pos,position(finder));
+	if (!empty(pos)) {
+		stmt = suffix(stmt, pos[length(pos) - 1] + 1);
+	}
+
+	// Ignore all statements about attributes or subgraphs
+	if ((prefix(stmt, 5) == "graph") ||
+		(prefix(stmt, 4) == "node") ||
+		(prefix(stmt, 4) == "edge") ||
+		(prefix(stmt, 8) == "subgraph") ||
+		(prefix(stmt, 1) == "\n") ||
+		(prefix(stmt, 1) == "\r")) return;
+
+	// Node or Edge statement ?
+	Finder<TStatement> finder2(stmt);
+	needle = "--";
+	setHost(pattern, needle);
+	clear(pos);
+	while (find(finder2, pattern))
+		append(pos,position(finder2));
+	if (!empty(pos)) {
+		// Undirected Edge
+		_processEdgeStatement(g, stmt, nodeMap, edgeMap, pos[0], nodeIdMap);
+	} else {
+		Finder<TStatement> finder3(stmt);
+		needle = "->";
+		setHost(pattern, needle);
+		clear(pos);
+		while (find(finder3, pattern))
+			append(pos,position(finder3));
+		if (!empty(pos)) {
+			// Directed edge
+			_processEdgeStatement(g, stmt, nodeMap, edgeMap, pos[0], nodeIdMap);
+		} else {
+			// process node statement
+			_processNodeStatement(g, stmt, nodeMap, edgeMap, nodeIdMap);
+		}
+	}	
+	clear(stmt);
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TFile, typename TSpec, typename TNodeAttributes, typename TEdgeAttributes>
+void read(TFile & file,
+		  Graph<TSpec>& g,
+		  TNodeAttributes& nodeMap,
+		  TEdgeAttributes& edgeMap,
+		  DotDrawing) 
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<TSpec> TGraph;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename Position<TFile>::Type TPosition;
+	typedef typename Value<TFile>::Type TValue;
+	typedef std::map<String<TValue>, TVertexDescriptor> TMap;
+	TMap nodeIdMap;
+
+	TValue c;
+	unsigned int graphCount = 0;
+	String<TValue> stmt;
+	while (!_streamEOF(file)) {
+		c = _streamGet(file);
+		
+		// Check if we enter a graph / subgraph
+		if (c == '{') {
+			clear(stmt);
+			++graphCount;
+		} else if (c== '}') {
+			if (graphCount == 1) _processStatement(g, stmt, nodeMap, edgeMap, nodeIdMap);
+			--graphCount;
+		} else if (graphCount == 1) {	// Ignore subgraphs
+			if (c == ';') _processStatement(g,stmt, nodeMap, edgeMap, nodeIdMap);
+			else append(stmt,c);
+		}
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TFile, typename TSpec>
+void read(TFile & file,
+		  Graph<TSpec>& g,
+		  DotDrawing) 
+{
+	SEQAN_CHECKPOINT
+	String<String<char> > nodeMap;
+	String<String<char> > edgeMap;
+	read(file,g,nodeMap,edgeMap,DotDrawing());
+}
+
+
 
 }// namespace SEQAN_NAMESPACE_MAIN
 
