@@ -156,92 +156,200 @@ namespace SEQAN_NAMESPACE_MAIN
 ..returns:Index contains the sorted list of qgrams. For each possible q-gram pos contains the first position in index that corresponds to this q-gram. 
 */
 
-template < typename TSA, 
-		   typename TDir,
-		   typename TText,
-		   typename TShape >
-void createQGramIndex(
-	TSA &sa,
-	TDir &dir,
-	TText const &text,
-	TShape &shape)
-{
-SEQAN_CHECKPOINT
-	typedef typename Position<TText>::Type					TPosition;
-	typedef typename Iterator<TText const, Standard>::Type	TIterator;
-	typedef typename Iterator<TDir, Standard>::Type			TDirIterator;
-	typedef typename Value<TShape>::Type					TValue;
-	typedef typename Size<TText>::Type						TSize;
-	
-	// clear counters
-	arrayFill(begin(dir, Standard()), end(dir, Standard()), 0);
-
-	//count q-grams
-	TIterator qgram_1_it = begin(text,Standard());
-	TIterator qgram_2_it = qgram_1_it + 1;
-	TValue x, y = 0;			// hashwert des q-Grams
-	x = hash(shape, qgram_1_it);
-	++dir[x];
-	TPosition i = 1;
-	TPosition num_qgrams = length(text) - shapeSpan(shape) + 1;
-	while( i < num_qgrams)
+	template < typename TSA, 
+			typename TDir,
+			typename TText,
+			typename TShape >
+	void createQGramIndex(
+		TSA &sa,
+		TDir &dir,
+		TText const &text,
+		TShape &shape)
 	{
-		y = hashNext(shape, qgram_1_it, qgram_2_it, x);
-		++qgram_1_it;
-		++qgram_2_it;
-		++dir[y];
-		x = y;
-		++i;
-	}
+	SEQAN_CHECKPOINT
+		typedef typename Iterator<TText const, Standard>::Type	TIterator;
+		typedef typename Iterator<TDir, Standard>::Type			TDirIterator;
+		typedef typename Value<TShape>::Type					TValue;
+		typedef typename Position<TText>::Type					TPosition;
+		typedef typename Size<TText>::Type						TSize;
+		
+		// clear counters
+		arrayFill(begin(dir, Standard()), end(dir, Standard()), 0);
 
-	//cumulative sum
-	{
-		TDirIterator it = begin(dir, Standard()), itEnd = end(dir, Standard());
-		TSize diff = 0, diff_prev = 0, sum = 0;
-		while (it != itEnd) {
-			sum += diff_prev;
-			diff_prev = diff;
-			diff = *it;
-			*it = sum;
-			++it;
+		//count q-grams
+		TIterator qgram_1_it = begin(text,Standard());
+		TIterator qgram_2_it = qgram_1_it + 1;
+		TValue x, y = 0;			// hashwert des q-Grams
+		x = hash(shape, qgram_1_it);
+		++dir[x];
+		TPosition i = 1;
+		TSize num_qgrams = length(text) - shapeSpan(shape) + 1;
+		while( i < num_qgrams)
+		{
+			y = hashNext(shape, qgram_1_it, qgram_2_it, x);
+			++qgram_1_it;
+			++qgram_2_it;
+			++dir[y];
+			x = y;
+			++i;
 		}
-		sum += diff_prev;
-		dir[0] = sum;
 
-		SEQAN_ASSERT(sum + diff == num_qgrams);
-	}
-	
-	//build sa
-	qgram_1_it = begin(text,Standard());
-	qgram_2_it = qgram_1_it + 1;
-	TValue lastBucketIndex = length(dir) - 1;
+		//cumulative sum
+		{
+			TDirIterator it = begin(dir, Standard()), itEnd = end(dir, Standard());
+			TSize diff = 0, diff_prev = 0, sum = 0;
+			while (it != itEnd) {
+				sum += diff_prev;
+				diff_prev = diff;
+				diff = *it;
+				*it = sum;
+				++it;
+			}
+			sum += diff_prev;
+			dir[0] = sum;
 
-	// first hash
-	x = hash(shape, qgram_1_it);
-	if (x != lastBucketIndex)
-		sa[dir[x + 1]++] = 0;
-	else
-		sa[dir[0]++] = 0;
-	i = 1;
-	while(i < num_qgrams)
-	{
-		// next hash
-		y = hashNext(shape, qgram_1_it, qgram_2_it, x);
-		++qgram_1_it;
-		++qgram_2_it;
-		if (y != lastBucketIndex)
-			sa[dir[y + 1]++] = i++;
+			SEQAN_ASSERT(sum + diff == num_qgrams);
+		}
+		
+		//build sa
+		qgram_1_it = begin(text,Standard());
+		qgram_2_it = qgram_1_it + 1;
+		TValue lastBucketIndex = length(dir) - 1;
+
+		// first hash
+		x = hash(shape, qgram_1_it);
+		if (x != lastBucketIndex)
+			sa[dir[x + 1]++] = 0;
 		else
-			sa[dir[0]++] = i++;
+			sa[dir[0]++] = 0;
+		i = 1;
+		while(i < num_qgrams)
+		{
+			// next hash
+			y = hashNext(shape, qgram_1_it, qgram_2_it, x);
+			++qgram_1_it;
+			++qgram_2_it;
+			if (y != lastBucketIndex)
+				sa[dir[y + 1]++] = i++;
+			else
+				sa[dir[0]++] = i++;
 
-		// für die nächste Runde
-		x = y;
+			// für die nächste Runde
+			x = y;
+		}
+		dir[0] = 0;
 	}
-	dir[0] = 0;
-}
+
+	template < 
+		typename TSA, 
+		typename TDir,
+		typename TString,
+		typename TSpec,
+		typename TShape,
+		typename TLimitsString >
+	void createQGramIndex(
+		TSA &sa,
+		TDir &dir,
+		StringSet<TString, TSpec> const &stringSet,
+		TShape &shape,
+		TLimitsString &limits)
+	{
+	SEQAN_CHECKPOINT
+		typedef typename Iterator<TString const, Standard>::Type	TIterator;
+		typedef typename Iterator<TDir, Standard>::Type				TDirIterator;
+		typedef typename Value<TShape>::Type						TValue;
+		typedef typename Size<TString>::Type						TSize;
+		
+		// 1. clear counters
+		arrayFill(begin(dir, Standard()), end(dir, Standard()), 0);
+
+		// 2. count q-grams
+		for(unsigned seqNo = 0; seqNo < length(stringSet); ++seqNo) 
+		{
+			TString const &sequence = value(stringSet, seqNo);
+
+			//count q-grams
+			TIterator it_l = begin(sequence, Standard());
+			TIterator it_r = it_l + 1;
+			TValue x, y = 0;			// hashwert des q-Grams
+			x = hash(shape, it_l);
+			++dir[x];
+			TSize	i = 1;
+			TSize	num_qgrams = length(sequence) - shapeSpan(shape) + 1;
+			while (i < num_qgrams)
+			{
+				y = hashNext(shape, it_l, it_r, x);
+				++it_l;
+				++it_r;
+				++dir[y];
+				x = y;
+				++i;
+			}
+		}
+
+		// 3. cumulative sum
+		{
+			TDirIterator it = begin(dir, Standard());
+			TDirIterator itEnd = end(dir, Standard());
+			TSize diff = 0, diff_prev = 0, sum = 0;
+			while (it != itEnd) {
+				sum += diff_prev;
+				diff_prev = diff;
+				diff = *it;
+				*it = sum;
+				++it;
+			}
+			sum += diff_prev;
+			dir[0] = sum;
+
+			SEQAN_ASSERT(sum + diff == length(sa));
+		}
+		
+		// 4. fill suffix array
+		for(unsigned seqNo = 0; seqNo < length(stringSet); ++seqNo) 
+		{
+			TString const &sequence = value(stringSet, seqNo);
+
+			TIterator it_l = begin(sequence, Standard());
+			TIterator it_r = it_l + 1;
+			TValue lastBucketIndex = length(dir) - 1;
+
+			typename Value<TSA>::Type localPos;
+			setValueI1(localPos, seqNo);
+			setValueI2(localPos, 0);
+
+			// first hash
+			TValue x = hash(shape, it_l), y = 0;
+			if (x != lastBucketIndex)
+				sa[dir[x + 1]++] = localPos;
+			else
+				sa[dir[0]++] = localPos;
+
+			TSize	i = 1;
+			TSize	num_qgrams = length(sequence) - shapeSpan(shape) + 1;
+
+			while (i < num_qgrams)
+			{
+				// next hash
+				y = hashNext(shape, it_l, it_r, x);
+				++it_l;
+				++it_r;
+				setValueI2(getValueI2(localPos) + 1);
+				if (y != lastBucketIndex)
+					sa[dir[y + 1]++] = localPos;
+				else
+					sa[dir[0]++] = localPos;
+
+				// für die nächste Runde
+				x = y;
+			}
+		}
+		dir[0] = 0;
+	}
+
 
 //////////////////////////////////////////////////////////////////////////////
-// create q-gram index in external memory 
+// create q-gram index of *one* sequence in external memory 
 
 	// *** COMPARATORS & MAPS ***
         
@@ -249,22 +357,16 @@ SEQAN_CHECKPOINT
     struct _qgram_comp : public ::std::binary_function<InType,InType,Result> {
         inline Result operator()(const InType &a, const InType &b) const
         {
-			typedef typename Value<InType, 1>::Type TSize;
 			typedef typename Value<InType, 2>::Type TQGram;
 			typename Value<TQGram>::Type const *sa = a.i2.i;
             typename Value<TQGram>::Type const *sb = b.i2.i;
+			typename Value<TQGram>::Type const *saEnd = sa + length(a.i2);
 
-            TSize n = TQGram::size;
-            if (a.i1 < n) n = a.i1;
-            if (b.i1 < n) n = b.i1;
-            for(TSize i = 0; i < n; i++, ++sa, ++sb) {
+            for(; sa != saEnd; ++sa, ++sb) {
                 if (*sa == *sb) continue;
                 return (*sa < *sb)? -1 : 1;
             }
-            if (n < TQGram::size) {
-                return (a.i1 < b.i1)? -1 : 1;
-            } else
-                return 0;
+			return posCompare(a.i1, b.i1);
         }
     };
 
@@ -281,9 +383,7 @@ SEQAN_CHECKPOINT
         {
             if (a.i2 < b.i2) return -1;
             if (a.i2 > b.i2) return 1;
-            if (a.i1 < _size || b.i1 < _size) 
-                return (a.i1 < b.i1)? -1 : 1;
-            return 0;
+			return posCompare(a.i1, b.i1);
         }
     };
 
@@ -384,6 +484,100 @@ SEQAN_CHECKPOINT
 		endRead(sorter);
 	}
 
+
+//////////////////////////////////////////////////////////////////////////////
+// create q-gram index of *multiple* sequences in external memory 
+
+	template < 
+		typename TSA, 
+		typename TDir,
+		typename TString,
+		typename TSpec,
+		typename TShape,
+		typename TLimitsString >
+	void createQGramIndexExt(
+		TSA &suffixArray,
+		TDir &dir,
+		StringSet<TString, TSpec> const &stringSet,
+		TShape &shape,
+		TLimitsString &limits)
+	{
+        // signed characters behave different than unsigned when compared
+        // to get the same index with signed or unsigned chars we simply cast them to unsigned
+        // before feeding them into the pipeline
+		typedef typename Concatenator<StringSet<TString, TSpec> >::Type			TConcat;
+        typedef typename _MakeUnsigned< typename Value<TConcat>::Type >::Type	TUValue;
+		typedef Multi<
+			Tupler<7, true, Compressed>, 
+			typename Value<TSA>::Type,
+			typename StringSetLimits< StringSet<TString, TSpec> >::Type >		TTuplerSpec;
+
+        // *** SPECIALIZATION ***
+
+		typedef Pipe< TConcat, Source<> >			TSource;
+        typedef Pipe< TSource, Caster<TUValue> >    TUnsigner;
+		typedef Pipe< TUnsigner, TTuplerSpec >	    TTupler;
+						                typedef _qgram_comp<_TypeOf(TTupler)> qcomp_t;
+        typedef Pool< 
+					_TypeOf(TTupler), 
+					SorterSpec< SorterConfigSize<qcomp_t, _TSizeOf(TTupler) > > 
+				> TSortTuples;
+										typedef _qgram_hash<_TypeOf(TTupler), typename Size<TDir>::Type> qhash_t;
+
+        // *** INSTANTIATION ***
+
+		TSource			src(concat(stringSet));
+        TUnsigner		unsigner(src);
+		TTupler			tupler(unsigner, limits);
+		TSortTuples		sorter;
+
+		// sort q-grams
+		sorter << tupler;
+
+		// fill sa and dir
+		if (!beginRead(sorter)) return;
+
+		typename Iterator<TSA>::Type itSA = begin(suffixArray);
+		typename Iterator<TDir>::Type itDir = begin(dir);
+
+		qcomp_t	qcomp;
+		qhash_t qhash;
+
+		typename Value<TSortTuples>::Type	old_qgram;
+		typename Size<TDir>::Type			hash, old_hash = 0;
+        typename Size<TSortTuples>::Type	leftToRead = length(sorter);
+		bool first = true;
+
+		while (leftToRead) {
+			// copy occurence position
+			*itSA = (*sorter).i1;
+			if (first || qcomp(old_qgram, *sorter) != 0) {
+				old_qgram = *sorter;
+				hash = qhash(old_qgram);
+
+				SEQAN_ASSERT(old_hash < hash);
+
+				// copy bucket begin
+				typename Size<TSortTuples>::Type i = length(sorter) - leftToRead;
+				for(; old_hash < hash; ++old_hash, ++itDir)
+					*itDir = i;
+				first = false;
+			}
+			++src;
+			--leftToRead;
+		}
+
+		// fill bucket table
+		typename Size<TSortTuples>::Type i = length(sorter);
+		hash = length(dir);
+		for(; old_hash < hash; ++old_hash, ++itDir)
+			*itDir = i;
+
+		endRead(sorter);
+	}
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 // interface for automatic index creation 
 
@@ -395,7 +589,14 @@ SEQAN_CHECKPOINT
 
 		TShape &shape = indexShape(index);
 		stringToShape(shape, "xxxxxxx");
-		resize(indexSA(index), length(indexRawText(index)), Exact());
+
+		// count all overlapping q-grams
+		typename Size<TIndex>::Type qgram_count = 0;
+		for(unsigned i = 0; i < countSequences(index); ++i)
+			if (sequenceLength(i, index) >= shapeSpan(shape))
+				qgram_count += sequenceLength(i, index) - (shapeSpan(shape) - 1);
+
+		resize(indexSA(index), qgram_count, Exact());
 		resize(indexDir(index), intPow(ValueSize<TShape>::VALUE, shapeSpan(shape) - shapeCountBlanks(shape)), Exact());
 		createQGramIndex(indexSA(index), indexDir(index), indexText(index), indexShape(index));
 		return true;

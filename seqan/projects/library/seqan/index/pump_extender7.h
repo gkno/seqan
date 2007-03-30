@@ -48,37 +48,6 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //////////////////////////////////////////////////////////////////////////////
 
-    template <typename TPair, typename TCompression = void>
-    struct Extender7Multi;
-
-    template <typename TTextInput, typename TNameInput, typename TPair, typename TCompression >
-    struct Pipe< Bundle2< TTextInput, TNameInput >, Extender7Multi<TPair, TCompression> >
-    {
-        typedef typename Size<Pipe>::Type           SizeType;
-        typedef typename Value<TTextInput>::Type    TextInType;
-        typedef typename Value<TNameInput>::Type    NameInType;
-
-        typedef Tuple<TextInType, 4, TCompression>  X4Tuple;
-        typedef Tuple<TextInType, 5, TCompression>  X5Tuple;
-        typedef Tuple<TextInType, 6, TCompression>  X6Tuple;
-        typedef Tuple<typename NameInType::T2, 3>   NTuple;
-        typedef Triple<TPair, NTuple, X6Tuple, Compressed>	OutType0;
-        typedef Triple<TPair, NTuple, X6Tuple, Compressed>	OutType3;
-        typedef Triple<TPair, NTuple, X4Tuple, Compressed>	OutType5;
-        typedef Triple<TPair, NTuple, X5Tuple, Compressed>	OutType6;
-        typedef Triple<TPair, NTuple, X6Tuple, Compressed>	OutType124;
-
-        // pipeline interfaces to ease specialization
-        typedef Pipe< void, AbstractSource< OutType0, SizeType > > Out0;
-        typedef Pipe< void, AbstractSource< OutType3, SizeType > > Out3;
-        typedef Pipe< void, AbstractSource< OutType5, SizeType > > Out5;
-        typedef Pipe< void, AbstractSource< OutType6, SizeType > > Out6;
-        typedef Pipe< void, AbstractSource< OutType124, SizeType > > Out124;
-    };
-
-
-//////////////////////////////////////////////////////////////////////////////
-
 
 	// little copy helper
 	// which is needed for bitpacked structs (no =sign possible)
@@ -244,50 +213,36 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //////////////////////////////////////////////////////////////////////////////
 
+    template <typename TPair, typename TCompression = void>
+    struct Extender7Multi;
 
-	template <typename TPair, typename TLimits>
-	struct _PairIncrementer {
-		typename Iterator<TLimits const>::Type						it, itEnd;
-		typename _RemoveConst<typename Value<TLimits>::Type>::Type	old, localEnd;
+    template <typename TTextInput, typename TNameInput, typename TPair, typename TCompression >
+    struct Pipe< Bundle2< TTextInput, TNameInput >, Extender7Multi<TPair, TCompression> >
+    {
+        typedef typename Size<Pipe>::Type           SizeType;
+        typedef typename Value<TTextInput>::Type    TextInType;
+        typedef typename Value<TNameInput>::Type    NameInType;
 
-		TPair pos;
-		inline operator TPair () const {
-			return pos;
-		}
+        typedef Tuple<TextInType, 4, TCompression>  X4Tuple;
+        typedef Tuple<TextInType, 5, TCompression>  X5Tuple;
+        typedef Tuple<TextInType, 6, TCompression>  X6Tuple;
+        typedef Tuple<typename NameInType::T2, 3>   NTuple;
+        typedef Triple<TPair, NTuple, X6Tuple, Compressed>	OutType0;
+        typedef Triple<TPair, NTuple, X6Tuple, Compressed>	OutType3;
+        typedef Triple<TPair, NTuple, X4Tuple, Compressed>	OutType5;
+        typedef Triple<TPair, NTuple, X5Tuple, Compressed>	OutType6;
+        typedef Triple<TPair, NTuple, X6Tuple, Compressed>	OutType124;
 
-		inline TPair const & operator++ () {
-			typename TPair::T2 i2 = getValueI2(pos) + 1;
-			if (i2 >= localEnd) {
-				i2 = 0;
-				localEnd = 0;
-				while (!localEnd && (it != itEnd))
-				{
-					assignValueI1(pos, getValueI1(pos) + 1);
-					localEnd = (*it - old);
-					old = *it;
-					++it;
-				} 
-			}
-			assignValueI2(pos, i2);
-			return pos;
-		}
-	};
+        // pipeline interfaces to ease specialization
+        typedef Pipe< void, AbstractSource< OutType0, SizeType > > Out0;
+        typedef Pipe< void, AbstractSource< OutType3, SizeType > > Out3;
+        typedef Pipe< void, AbstractSource< OutType5, SizeType > > Out5;
+        typedef Pipe< void, AbstractSource< OutType6, SizeType > > Out6;
+        typedef Pipe< void, AbstractSource< OutType124, SizeType > > Out124;
+    };
 
-	template <typename TPair, typename TLimits>
-	void setHost(_PairIncrementer<TPair, TLimits> &me, TLimits const &limits) {
-		me.it = begin(limits);
-		me.itEnd = end(limits);
-		me.old = 0;
-		me.localEnd = 0;
-		assignValueI1(me.pos, 0);
-		assignValueI2(me.pos, 0);
-		if (length(limits) > 1) {
-			++me.it;
-			++me;
-			assignValueI1(me.pos, getValueI1(me.pos) - 1);
-		}
-	}
 
+//////////////////////////////////////////////////////////////////////////////
 
 
     template < typename TTextInput, typename TLimitsString, typename TNameInput,

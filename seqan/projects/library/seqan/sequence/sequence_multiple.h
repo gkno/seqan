@@ -154,11 +154,13 @@ namespace SEQAN_NAMESPACE_MAIN
 	// local -> global position
 	//////////////////////////////////////////////////////////////////////////////
 
+	// any_position and no limits_string -> any_position
 	template <typename TPosition>
 	inline TPosition posGlobalize(TPosition const &pos, Nothing const &) {
 		return pos;
 	}
 
+	// local_position and limits_string -> global_position
 	template <typename TLimitsString, typename T1, typename T2, typename TCompression>
 	inline typename Value<TLimitsString>::Type 
 	posGlobalize(Pair<T1, T2, TCompression> const &pos, TLimitsString const &limits) {
@@ -169,11 +171,13 @@ namespace SEQAN_NAMESPACE_MAIN
 	// global -> local position
 	//////////////////////////////////////////////////////////////////////////////
 
+	// any_position and no limits_string -> any_position
 	template <typename TResult, typename TPosition>
 	inline void posLocalize(TResult &result, TPosition const &pos, Nothing const &) {
 		result = pos;
 	}
 
+	// global_position and limits_string -> local_position
 	template <typename TResult, typename TSize, typename TSpec, typename TPosition>
 	inline void posLocalize(TResult &result, TPosition const &pos, String<TSize, TSpec> const &limits) {
 		typedef typename Iterator<String<TSize> const, Standard>::Type TIter;
@@ -181,6 +185,12 @@ namespace SEQAN_NAMESPACE_MAIN
 		TIter _upper = ::std::upper_bound(_begin, end(limits, Standard()), pos) - 1;
         result.i1 = distance(_begin, _upper);
         result.i2 = pos - *_upper;
+	}
+
+	// local_position -> local_position
+	template <typename TResult, typename TSize, typename TSpec, typename T1, typename T2, typename TCompression>
+	inline void posLocalize(TResult &result, Pair<T1, T2, TCompression> const &pos, String<TSize, TSpec> const &limits) {
+		result = pos;
 	}
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -228,50 +238,57 @@ namespace SEQAN_NAMESPACE_MAIN
 		return Pair<T1, T2, TCompression>(getValueI1(pos), getValueI2(pos) + delta);
 	}
 
+	//////////////////////////////////////////////////////////////////////////////
+	// position relations
+	//////////////////////////////////////////////////////////////////////////////
+
+	template <typename TPos>
+	inline bool posLess(TPos const &a, TPos const &b) {
+		return a < b;
+	}
+
+	template <typename T1, typename T2, typename TCompression>
+	inline bool posLess(Pair<T1, T2, TCompression> const &a, Pair<T1, T2, TCompression> const &b) {
+		return 
+			 (getValueI1(a) <  getValueI1(b)) ||
+			((getValueI1(a) == getValueI1(b)) && (getValueI2(a) < getValueI2(b)));
+	}
+
+	template <typename TPos>
+	inline int posCompare(TPos const &a, TPos const &b) {
+		if (a < b) return -1;
+		if (a > b) return 1;
+		return 0;
+	}
+
+	template <typename T1, typename T2, typename TCompression>
+	inline int posCompare(Pair<T1, T2, TCompression> const &a, Pair<T1, T2, TCompression> const &b) {
+		if (getValueI1(a) < getValueI1(b)) return -1;
+		if (getValueI1(a) > getValueI1(b)) return 1;
+		return posCompare(getValueI2(a), getValueI2(b));
+	}
 
 	//////////////////////////////////////////////////////////////////////////////
     // StringSet Container
     //////////////////////////////////////////////////////////////////////////////
 
+	//////////////////////////////////////////////////////////////////////////////
+    // StringSet with individual sequences in a string of strings
     template < typename TString, typename TSpec >
     class StringSet< TString, ConcatVirtual<TSpec> >
     {
 	public:
 
-        typedef String<TString>										TStrings;
-		typedef typename StringSetLimits<StringSet>::Type			TLimits;
-		typedef typename Iterator<TLimits const, Standard>::Type	TLimitIterator;
+        typedef String<TString>								TStrings;
+		typedef typename StringSetLimits<StringSet>::Type	TLimits;
+		typedef typename Concatenator<StringSet>::Type		TConcatenator;
+//____________________________________________________________________________
 
-		typedef typename Value<TString>::Type			Type;
-        typedef typename Size<TString>::Type			TSize;
-
-		//////////////////////////////////////////////////////////////////////////////
-		// public iterator types
-
-        friend class StringSetIterator<StringSet>;
-
-		typedef StringSetIterator<StringSet>	StringSetConstIterator;
-		typedef StringSetIterator<StringSet>	StringSetIterator;
-
-		// used by Iter<.., ConcatVirtual<..> >
-		typedef StringSetIterator		iterator;
-		typedef StringSetConstIterator	const_iterator;
-        typedef Type					value_type;
-		typedef Type&					reference;
-		typedef Type const &			const_reference;
-		typedef Type*					pointer;
-		typedef Type const *			const_pointer;
-		typedef TSize				size_type;
-		typedef TSize				difference_type;
-
-        typedef typename Iterator<TString, Standard>::Type			obj_iterator;
-        typedef typename Iterator<TString const, Standard>::Type	const_obj_iterator;
-
-		TStrings	strings;
-        TLimits		limits;
-		bool		limitsValid;		// is true if limits contains the cumulative sum of the sequence lengths
-
-		typename Concatenator<StringSet>::Type	concat;
+		TStrings		strings;
+        TLimits			limits;
+		bool			limitsValid;		// is true if limits contains the cumulative sum of the sequence lengths
+		TConcatenator	concat;
+//____________________________________________________________________________
 
 		StringSet():
 			limitsValid(true)
@@ -285,7 +302,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		inline typename Reference<StringSet>::Type
 		operator [] (TPos pos)
 		{
-	SEQAN_CHECKPOINT
+		SEQAN_CHECKPOINT
 			return value(*this, pos);
 		}
 
@@ -293,54 +310,37 @@ namespace SEQAN_NAMESPACE_MAIN
 		inline typename Reference<StringSet const>::Type 
 		operator [] (TPos pos) const
 		{
-	SEQAN_CHECKPOINT
+		SEQAN_CHECKPOINT
 			return value(*this, pos);
 		}
 	};
 
+
+	//////////////////////////////////////////////////////////////////////////////
+    // StringSet with directly concatenated sequences
     template < typename TString, typename TLimiter >
     class StringSet< TString, ConcatDirect<TLimiter> >
     {
 	public:
-		typedef typename StringSetLimits<StringSet>::Type			TLimits;
-        typedef typename Iterator<TLimits const, Standard>::Type	TLimitIterator;
+		typedef typename StringSetLimits<StringSet>::Type	TLimits;
+		typedef typename Concatenator<StringSet>::Type		TConcatenator;
+//____________________________________________________________________________
 
-		typedef typename Value<TString>::Type			TValue;
-        typedef typename Size<TString>::Type			TSize;
+		TLimits			limits;
+		TConcatenator	concat;
 
-		//////////////////////////////////////////////////////////////////////////////
-		// public iterator types
-
-        friend class StringSetIterator<StringSet>;
-
-		typedef StringSetIterator<StringSet>	StringSetConstIterator;
-		typedef StringSetIterator<StringSet>	StringSetIterator;
-
-		// used by Iter<.., ConcatVirtual<..> >
-        typedef TValue					value_type;
-		typedef TValue&					reference;
-		typedef TValue*					pointer;
-		typedef TSize					size_type;
-
-		// used by Iter<.., ConcatVirtual<..> >
-        typedef typename Iterator<TString, Standard>::Type			obj_iterator;
-        typedef typename Iterator<TString const, Standard>::Type	const_obj_iterator;
-
-        TLimits		limits;
-
-		typename Concatenator<StringSet>::Type	concat;
+//____________________________________________________________________________
 
 		StringSet()	{
 			appendValue(limits, 0);
 		}
-
 //____________________________________________________________________________
 
 		template <typename TPos>
 		inline typename Reference<StringSet>::Type
 		operator [] (TPos pos)
 		{
-	SEQAN_CHECKPOINT
+		SEQAN_CHECKPOINT
 			return value(*this, pos);
 		}
 
@@ -348,7 +348,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		inline typename Reference<StringSet const>::Type 
 		operator [] (TPos pos) const
 		{
-	SEQAN_CHECKPOINT
+		SEQAN_CHECKPOINT
 			return value(*this, pos);
 		}
 	};
@@ -711,34 +711,42 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 	//////////////////////////////////////////////////////////////////////////////
-    // StringSet Iterator
+    // StringSet<.., ConcatVirtual<> > Iterator
+	// 
+	// This iterator sequentially iterates through the elements of TStringSet
+	// as if they were directly concatenated (compare StringSet<.., ConcatDirect<> >
     //////////////////////////////////////////////////////////////////////////////
 
     template < typename TStringSet, typename TSpec >
-    class Iter< TStringSet, ConcatVirtual<TSpec> > : public ::std::iterator <
-                                    ::std::bidirectional_iterator_tag,
-                                    typename TStringSet::value_type,
-                                    typename TStringSet::size_type,
-                                    typename TStringSet::pointer,
-                                    typename TStringSet::reference > {
+	class Iter< TStringSet, ConcatVirtual<TSpec> > 
+	{
 	public:
+		typedef typename Value<TStringSet>::Type		TString;
+		typedef typename Value<TString>::Type			TValue;
+        typedef typename Size<TString>::Type			TSize;
+//____________________________________________________________________________
 
-        typedef Iter iterator;
-		typedef typename TStringSet::obj_iterator obj_iterator;
+	public:
+        typedef typename Iterator<TString, Standard>::Type			obj_iterator;
+        typedef typename Iterator<TString const, Standard>::Type	const_obj_iterator;
 
-        //////////////////////////////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////////////////////////
 		// STL compatible public iterator interface
 
-		typedef ::std::bidirectional_iterator_tag		iterator_category;
-		typedef typename TStringSet::const_reference	const_reference;
-		typedef typename TStringSet::value_type		    value_type;
-		typedef typename TStringSet::difference_type	difference_type;
-		typedef typename TStringSet::pointer			pointer;
-		typedef typename TStringSet::reference		    reference;
-		
-        TStringSet *host;
-        unsigned objNo;
-        obj_iterator _begin, _cur, _end;
+		typedef ::std::bidirectional_iterator_tag	iterator_category;
+        typedef TValue								value_type;
+		typedef TValue &							reference;
+		typedef TValue const &						const_reference;
+		typedef TValue*								pointer;
+		typedef TSize								size_type;
+        typedef Iter								iterator;
+		typedef typename Difference<TString>::Type	difference_type;
+//____________________________________________________________________________
+
+		TStringSet		*host;
+        unsigned		objNo;
+        obj_iterator	_begin, _cur, _end;
+//____________________________________________________________________________
 
 		Iter() {}
 

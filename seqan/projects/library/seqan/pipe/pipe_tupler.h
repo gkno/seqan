@@ -15,13 +15,7 @@ namespace SEQAN_NAMESPACE_MAIN
 //namespace SEQAN_NAMESPACE_PIPELINING
 //{
 
-    struct _ShiftLeftWorker {
-        template <typename Arg>
-        static inline void body(Arg &arg, unsigned I) {
-            arg.i2[I-1] = arg.i2[I];
-        }
-    };
-
+//////////////////////////////////////////////////////////////////////////////
 
     template < unsigned tupleLen, bool omitLast = false, typename TCompression = void >
     struct Tupler;
@@ -31,6 +25,22 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef Tuple<typename Value<TInput>::Type, tupleLen, TCompression>	TTuple;
         typedef Pair<typename Size<TInput>::Type, TTuple, Compressed>		Type;
     };
+
+//////////////////////////////////////////////////////////////////////////////
+
+    template < 
+		typename TInput, 
+		unsigned tupleLen, 
+		bool omitLast, 
+		typename TCompression,
+		typename TPair, 
+		typename TLimitsString >
+    struct Value< Pipe< TInput, Multi< Tupler< tupleLen, omitLast, TCompression >, TPair, TLimitsString > > > {
+        typedef Tuple<typename Value<TInput>::Type, tupleLen, TCompression>	TTuple;
+        typedef Pair<TPair, TTuple, Compressed>								Type;
+    };
+
+//////////////////////////////////////////////////////////////////////////////
 
 
 	// output only fully filled tuples
@@ -44,6 +54,13 @@ namespace SEQAN_NAMESPACE_MAIN
 	struct _TuplerLastTuples< Pipe< TInput, Tupler<tupleLen, false, TCompression> > > {
 		enum { VALUE = tupleLen };
 	};
+
+    struct _ShiftLeftWorker {
+        template <typename Arg>
+        static inline void body(Arg &arg, unsigned I) {
+            arg.i2[I-1] = arg.i2[I];
+        }
+    };
 
 /**
 .Spec.Tupler:
@@ -62,7 +79,7 @@ namespace SEQAN_NAMESPACE_MAIN
 */
 
     //////////////////////////////////////////////////////////////////////////////
-    // echoer class
+    // tupler class
     template < typename TInput, unsigned tupleLen, bool omitLast, typename TCompression >
     struct Pipe< TInput, Tupler<tupleLen, omitLast, TCompression> >
     {
@@ -104,7 +121,10 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 	};
 
-    template < typename TInput, unsigned tupleLen, bool omitLast >
+//____________________________________________________________________________
+
+
+	template < typename TInput, unsigned tupleLen, bool omitLast >
     struct Pipe< TInput, Tupler<tupleLen, omitLast, Compressed> >
     {
         TInput                      &in;
@@ -144,6 +164,167 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
     //////////////////////////////////////////////////////////////////////////////
+    // tupler class for multiple sequences
+    template < 
+		typename TInput, 
+		unsigned tupleLen, 
+		bool omitLast, 
+		typename TCompression, 
+		typename TPair, 
+		typename TLimitsString >
+    struct Pipe< TInput, Multi<Tupler<tupleLen, omitLast, TCompression>, TPair, TLimitsString> >
+    {
+		typedef typename Value< typename Value<Pipe>::Type, 2 >::Type	TTuple;
+		typedef typename Value<TTuple>::Type							TValue;
+
+		typedef _PairIncrementer<TPair, TLimitsString>	Incrementer;
+
+		TInput                      &in;
+        Incrementer					localPos;
+        typename Value<Pipe>::Type	tmp;
+		typename Size<TInput>::Type	seqLength, lastTuples;
+
+		TLimitsString const &limits;
+        
+        Pipe(TInput& _in, TLimitsString const &_limits):
+            in(_in),
+			limits(_limits) {}
+
+        inline typename Value<Pipe>::Type const & operator*() const {
+            return tmp;
+        }
+
+        inline Pipe& operator++() {
+			// process next sequence
+			if (--lastTuples == 0) {
+				fill();
+				return *this;
+			}
+
+			// shift left 1 character
+            LOOP<_ShiftLeftWorker, tupleLen - 1>::run(this->tmp);
+			++localPos;
+			tmp.i1 = localPos;
+			if (lastTuples < _TuplerLastTuples<Pipe>::VALUE) {
+	            tmp.i2[tupleLen - 1] = TValue();
+			} else {
+				tmp.i2[tupleLen - 1] = *in;
+				++in;
+			}
+            return *this;
+        }
+
+        inline void fill() {
+			unsigned i = 0;
+			do {
+				while (i > 0)
+					++localPos;
+
+				for(; i < tupleLen && !eos(); ++i, ++in) {
+					tmp.i2.i[i] = *in;
+				}
+				lastTuples = _TuplerLastTuples<Pipe>::VALUE;
+
+				// fill up with null chars
+				for(; i < tupleLen; ++i)
+					tmp.i2.i[i] = TValue();
+				
+				// eventually, reduce the number of half-filled tuples
+				if (lastTuples <= tupleLen - i)
+					lastTuples = 0;
+				else
+					lastTuples -= tupleLen - i;
+			} while ((lastTuples == 0) && !eof(in));
+
+			tmp.i1 = localPos;
+        }
+
+		inline bool eos() {
+			return (getValueI1(localPos) > 0) && (getValueI2(localPos) == 0);
+		}
+	};
+
+//____________________________________________________________________________
+
+
+	template < 
+		typename TInput, 
+		unsigned tupleLen, 
+		bool omitLast, 
+		typename TPair, 
+		typename TLimitsString >
+    struct Pipe< TInput, Multi<Tupler<tupleLen, omitLast, Compressed>, TPair, TLimitsString> >
+    {
+		typedef typename Value< typename Value<Pipe>::Type, 2 >::Type	TTuple;
+		typedef typename Value<TTuple>::Type							TValue;
+
+		typedef _PairIncrementer<TPair, TLimitsString>	Incrementer;
+
+		TInput                      &in;
+        Incrementer					localPos;
+        typename Value<Pipe>::Type	tmp;
+		typename Size<TInput>::Type	seqLength, lastTuples;
+
+		TLimitsString const &limits;
+        
+        Pipe(TInput& _in, TLimitsString const &_limits):
+            in(_in),
+			limits(_limits) {}
+
+        inline typename Value<Pipe>::Type const & operator*() const {
+            return tmp;
+        }
+
+        inline Pipe& operator++() {
+			// process next sequence
+			if (--lastTuples == 0) {
+				fill();
+				return *this;
+			}
+
+			// shift left 1 character
+			tmp.i2 <<= 1;
+			++localPos;
+			tmp.i1 = localPos;
+			if (lastTuples == _TuplerLastTuples<Pipe>::VALUE) {
+				tmp.i2 |= *in;
+				++in;
+			}
+            return *this;
+        }
+
+        inline void fill() {
+			unsigned i = 0;
+			do {
+				while (i > 0)
+					++localPos;
+
+				for(; i < tupleLen && !eos(); ++i, ++in) {
+					tmp.i2 <<= 1;
+					tmp.i2 |= *in;
+				}
+				lastTuples = _TuplerLastTuples<Pipe>::VALUE;
+
+				// fill up with null chars
+	            tmp.i2 <<= (tupleLen - i);
+				
+				// eventually, reduce the number of half-filled tuples
+				if (lastTuples <= tupleLen - i)
+					lastTuples = 0;
+				else
+					lastTuples -= tupleLen - i;
+			} while ((lastTuples == 0) && !eof(in));
+
+			tmp.i1 = localPos;
+        }
+
+		inline bool eos() {
+			return (getValueI1(value(localPos)) > 0) && (getValueI2(value(localPos)) == 0);
+		}
+	};
+
+
+    //////////////////////////////////////////////////////////////////////////////
     // global pipe functions
     template < typename TInput, unsigned tupleLen, bool omitLast, typename TCompression >
 	inline bool 
@@ -152,6 +333,24 @@ namespace SEQAN_NAMESPACE_MAIN
 		ControlBeginRead const &command) 
 	{
         if (!control(me.in, command)) return false;
+		me.fill();
+		return true;
+	}
+    
+    template < 
+		typename TInput,
+		unsigned tupleLen,
+		bool omitLast,
+		typename TCompression,
+		typename TPair, 
+		typename TLimitsString >
+	inline bool 
+	control(
+		Pipe< TInput, Multi<Tupler< tupleLen, omitLast, TCompression >, TPair, TLimitsString> > &me, 
+		ControlBeginRead const &command) 
+	{
+        if (!control(me.in, command)) return false;
+		setHost(me.localPos, me.limits);
 		me.fill();
 		return true;
 	}

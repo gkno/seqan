@@ -550,6 +550,188 @@ SEQAN_CHECKPOINT
         typedef Handler< typename BufWriteHandler< TOutput > ::Type, AdapterSpec > Type;
     };
 
+
+	//////////////////////////////////////////////////////////////////////////////
+	// pair incrementer
+	//
+	// used by pipes processing multiples sequences 
+	// for generating pairs (seqNo, seqOffs)
+
+	template <typename TPair, typename TLimits>
+	struct _PairIncrementer {
+		typename Iterator<TLimits const>::Type						it, itEnd;
+		typename _RemoveConst<typename Value<TLimits>::Type>::Type	old, localEnd;
+
+		TPair pos;
+		inline operator TPair () const {
+			return pos;
+		}
+
+		inline TPair const & operator++ () {
+			typename TPair::T2 i2 = getValueI2(pos) + 1;
+			if (i2 >= localEnd) {
+				i2 = 0;
+				localEnd = 0;
+				while (!localEnd && (it != itEnd))
+				{
+					assignValueI1(pos, getValueI1(pos) + 1);
+					localEnd = (*it - old);
+					old = *it;
+					++it;
+				} 
+			}
+			assignValueI2(pos, i2);
+			return pos;
+		}
+	};
+
+	template <typename TPair, typename TLimits>
+	void setHost(_PairIncrementer<TPair, TLimits> &me, TLimits const &limits) {
+		me.it = begin(limits);
+		me.itEnd = end(limits);
+		me.old = 0;
+		me.localEnd = 0;
+		assignValueI1(me.pos, 0);
+		assignValueI2(me.pos, 0);
+		if (length(limits) > 1) {
+			++me.it;
+			++me;
+			assignValueI1(me.pos, getValueI1(me.pos) - 1);
+		}
+	}
+//____________________________________________________________________________
+
+	template <typename TPair, typename TLimits>
+	TPair const & value(_PairIncrementer<TPair, TLimits> const &me) {
+		return me.pos;
+	}
+
+	template <typename TPair, typename TLimits>
+	TPair & value(_PairIncrementer<TPair, TLimits> &me) {
+		return me.pos;
+	}
+
+
+	//////////////////////////////////////////////////////////////////////////////
+	// pair decrementer
+	//
+	// used by pipes processing multiples sequences 
+	// for generating pairs (seqNo, seqOffs)
+
+	template <typename TPair, typename TLimits, unsigned m = 0>
+	struct _PairDecrementer {
+		typename Iterator<TLimits const>::Type						it, itEnd;
+		typename _RemoveConst<typename Value<TLimits>::Type>::Type	old;
+
+		TPair		pos;
+		unsigned	residue;
+
+		_PairDecrementer() {}
+		_PairDecrementer(TLimits const &_limits) { setHost(*this, _limits); }
+
+		inline operator TPair () const {
+			return pos;
+		}
+
+		inline TPair const & operator-- () {
+			typename Value<TPair,2>::Type i2 = getValueI2(pos);
+			if (i2 > 1) {
+				--i2;
+				if (residue == 0) residue = m;
+				--residue;
+			} 
+			else
+			{
+				i2 = 0;
+				while (!i2 && (it != itEnd))
+				{
+					assignValueI1(pos, getValueI1(pos) + 1);
+					i2 = (*it - old);
+					old = *it;
+					++it;
+				} 
+				residue = i2 % m;
+			}
+			assignValueI2(pos, i2);
+			return pos;
+		}
+	};
+
+	template <typename TPair, typename TLimits, unsigned m, typename TLimits2>
+	void setHost(_PairDecrementer<TPair, TLimits, m> &me, TLimits2 const &limits) {
+		me.it = begin(limits);
+		me.itEnd = end(limits);
+		me.old = 0;
+		assignValueI1(me.pos, 0);
+		assignValueI2(me.pos, 0);
+		if (length(limits) > 1) {
+			++me.it;
+			--me;
+			assignValueI1(me.pos, getValueI1(me.pos) - 1);
+		} else
+			me.residue = 0;
+	}
+//____________________________________________________________________________
+
+	template <typename TPair, typename TLimits>
+	struct _PairDecrementer<TPair, TLimits, 0> {
+		typename Iterator<TLimits const>::Type						it, itEnd;
+		typename _RemoveConst<typename Value<TLimits>::Type>::Type	old;
+
+		TPair		pos;
+
+		_PairDecrementer() {}
+		_PairDecrementer(TLimits const &_limits) { setHost(*this, _limits); }
+
+		inline operator TPair () const {
+			return pos;
+		}
+
+		inline TPair const & operator-- () {
+			typename Value<TPair,2>::Type i2 = getValueI2(pos);
+			if (i2 > 1)
+				--i2;
+			else
+			{
+				i2 = 0;
+				while (!i2 && (it != itEnd))
+				{
+					assignValueI1(pos, getValueI1(pos) + 1);
+					i2 = (*it - old);
+					old = *it;
+					++it;
+				} 
+			}
+			assignValueI2(pos, i2);
+			return pos;
+		}
+	};
+
+	template <typename TPair, typename TLimits, typename TLimits2>
+	void setHost(_PairDecrementer<TPair, TLimits, 0> &me, TLimits2 const &limits) {
+		me.it = begin(limits);
+		me.itEnd = end(limits);
+		me.old = 0;
+		assignValueI1(me.pos, 0);
+		assignValueI2(me.pos, 0);
+		if (length(limits) > 1) {
+			++me.it;
+			--me;
+			assignValueI1(me.pos, getValueI1(me.pos) - 1);
+		}
+	}
+//____________________________________________________________________________
+
+	template <typename TPair, typename TLimits, unsigned m>
+	TPair const & value(_PairDecrementer<TPair, TLimits, m> const &me) {
+		return me.pos;
+	}
+
+	template <typename TPair, typename TLimits, unsigned m>
+	TPair & value(_PairDecrementer<TPair, TLimits, m> &me) {
+		return me.pos;
+	}
+
 }
 
 #endif
