@@ -314,10 +314,18 @@ SEQAN_CHECKPOINT
 
     //////////////////////////////////////////////////////////////////////////////
     // pipe flow control
-	struct ControlEof {};
-	struct ControlClear {};
-	struct ControlBeginRead {};
-	struct ControlEndRead {};
+
+	struct _ControlEof;			// end of stream
+	struct _ControlEos;			// end of sequence (for multiple sequences)
+	struct _ControlClear;		// clear previous pool
+	struct _ControlBeginRead;	// begin read process
+	struct _ControlEndRead;		// end read process
+
+	typedef Tag<_ControlEof>		ControlEof;
+	typedef Tag<_ControlEos>		ControlEos;
+	typedef Tag<_ControlClear>		ControlClear;
+	typedef Tag<_ControlBeginRead>	ControlBeginRead;
+	typedef Tag<_ControlEndRead>	ControlEndRead;
 
     template < typename TInput, typename TSpec, typename TCommand >
 	inline bool control(Pipe<TInput, TSpec> &me, TCommand const &command) {
@@ -329,6 +337,12 @@ SEQAN_CHECKPOINT
 	inline bool eof(Pipe<TInput, TSpec> &me) {
 SEQAN_CHECKPOINT
         return control(me, ControlEof());
+    }
+
+    template < typename TInput, typename TSpec >
+	inline bool eos(Pipe<TInput, TSpec> &me) {
+SEQAN_CHECKPOINT
+        return eof(me) || control(me, ControlEos());
     }
 
     template < typename TInput, typename TSpec >

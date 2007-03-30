@@ -218,7 +218,7 @@ void testMUMs()
 		for(int i = 0; i < 3; ++i)
 			appendValue(indexText(esa), t[i]);			// add sequences to multiple index
 
-		Iterator<TIndex, MUMs>::Type it(esa, 0);		// set minimum MUM length to 20
+		Iterator<TIndex, MUMs>::Type it(esa, 3);		// set minimum MUM length to 3
 		String< SAValue<TIndex>::Type > occs;			// temp. string storing the hit positions
 
 		cout << resetiosflags(ios::left);
@@ -263,7 +263,7 @@ void simpleMUMmer()
 		for(int i = 0; i < 3; ++i)
 			appendValue(indexText(esa), t[i]);			// add sequences to multiple index
 
-		Iterator<TIndex, MUMs>::Type it(esa, 0);		// set minimum MUM length to 20
+		Iterator<TIndex, MUMs>::Type it(esa, 20);		// set minimum MUM length to 20
 		String< SAValue<TIndex>::Type > occs;			// temp. string storing the hit positions
 
 		cout << resetiosflags(ios::left);
