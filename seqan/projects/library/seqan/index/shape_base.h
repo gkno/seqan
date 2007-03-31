@@ -54,7 +54,7 @@ class Shape<TString, SimpleShape>
 
 public:
 
-	int span;
+	unsigned span;
 	int /*const*/ term;
 	
 /**
@@ -74,7 +74,7 @@ public:
 SEQAN_CHECKPOINT
 	}
 
-	Shape( int span):
+	Shape( unsigned span):
 	span(span),
 	term(intPow( ValueSize<TString>::VALUE, span-1))
 	{
@@ -108,7 +108,7 @@ SEQAN_CHECKPOINT
 ..returns:Span of object.
 */
 template <typename TString, typename TSpec>
-inline int &
+inline unsigned &
 shapeSpan(Shape<TString, TSpec> & me)
 {
 SEQAN_CHECKPOINT
@@ -123,7 +123,7 @@ SEQAN_CHECKPOINT
 ..returns:Number of blanks in object.
 */
 template <typename TString>
-inline int 
+inline unsigned 
 shapeCountBlanks(Shape<TString, SimpleShape>  & me)
 {
 SEQAN_CHECKPOINT
@@ -145,8 +145,8 @@ hash(Shape<TString, SimpleShape> & shape, TSequenceIterator qgram_it)
 {
 SEQAN_CHECKPOINT
 	typename Size<Shape<TString, SimpleShape> >::Type pos = 0;		
-	int i = 0;
-	int span = shapeSpan(shape);
+	unsigned i = 0;
+	unsigned span = shapeSpan(shape);
 	while(i < span)
 	{
 		pos = pos * ValueSize<Shape<TString, SimpleShape> >::VALUE + (unsigned)*qgram_it;
@@ -181,7 +181,7 @@ inline hashNext(
 	typename Size<Shape<TString, SimpleShape> >::Type x)
 {
 SEQAN_CHECKPOINT
-	int span = shapeSpan(shape);
+	unsigned span = shapeSpan(shape);
     return 
 		(x - (int)*qgram_1_it * shape.term) * ValueSize<Shape<TString, SimpleShape> >::VALUE
 		+ (int)*(qgram_2_it + span - 1);
@@ -208,7 +208,7 @@ stringToShape(Shape<TString,SimpleShape> & shape, String<char> const & shape_str
 template <typename TString, typename TSpec>
 struct Size<Shape<TString,TSpec> >
 {
-	typedef int Type;
+	typedef unsigned Type;
 };
 
 ///.Metafunction.Value.param.T.type:Class.Shape

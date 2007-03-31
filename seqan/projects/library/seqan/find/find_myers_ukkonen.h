@@ -21,13 +21,19 @@ namespace SEQAN_NAMESPACE_MAIN
 
 ///.Class.Pattern.param.TSpec.type:Spec.MyersUkkonen
 
+struct AlignTextGlobal;
+struct AlignTextLocal;
+
+template <typename TSpec>
 struct _MyersUkkonen;
-typedef Tag<_MyersUkkonen> MyersUkkonen;
+
+typedef Tag<_MyersUkkonen<AlignTextLocal> >		MyersUkkonen;
+typedef Tag<_MyersUkkonen<AlignTextGlobal> >	MyersUkkonenGlobal;
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TNeedle>
-class Pattern<TNeedle, MyersUkkonen> {
+template <typename TNeedle, typename TSpec>
+class Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > > {
 //____________________________________________________________________________
 public:
 	typedef unsigned int TWord;
@@ -63,8 +69,8 @@ public:
 // Functions
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TNeedle, typename TNeedle2>
-void setHost(Pattern<TNeedle, MyersUkkonen> & me, TNeedle2 const & needle) 
+template <typename TNeedle, typename TSpec, typename TNeedle2>
+void setHost(Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > > & me, TNeedle2 const & needle) 
 {
 SEQAN_CHECKPOINT
 
@@ -82,8 +88,8 @@ SEQAN_CHECKPOINT
 		//me.bitMasks[me.blockCount * static_cast<unsigned int>((CompareType< Value< TNeedle >::Type, Value< Container< THaystack >::Type >::Type >::Type) needle[j]) + j/me.MACHINE_WORD_SIZE] = me.bitMasks[me.blockCount * static_cast<unsigned int>((CompareType< Value< TNeedle >::Type, Value< Container< THaystack >::Type >::Type >::Type) needle[j]) + j/MACHINE_WORD_SIZE] | 1 << (j%MACHINE_WORD_SIZE);
 }
 
-template <typename TNeedle, typename TNeedle2>
-void setHost(Pattern<TNeedle, MyersUkkonen> & me, TNeedle2 & needle)
+template <typename TNeedle, typename TSpec, typename TNeedle2>
+void setHost(Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > > & me, TNeedle2 & needle)
 {
 SEQAN_CHECKPOINT
 	setHost(me, reinterpret_cast<TNeedle2 const &>(needle));
@@ -92,8 +98,8 @@ SEQAN_CHECKPOINT
 //____________________________________________________________________________
 
 
-template <typename TNeedle>
-void _finderInit(Pattern<TNeedle, MyersUkkonen> & me)
+template <typename TNeedle, typename TSpec>
+void _finderInit(Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > > & me)
 {
 SEQAN_CHECKPOINT
 	clear(me.VP);
@@ -103,11 +109,28 @@ SEQAN_CHECKPOINT
 	fill(me.VN, me.blockCount, 0, Exact());
 }
 
+
+//____________________________________________________________________________
+// bit 0 of the HP bit-vector
+// 0 for local alignments of haystack
+// 1 for global alignments of haystack
+
+template <typename T>
+struct _MyersUkkonenHP0 {
+	enum { VALUE = 0 };
+};
+
+template <>
+struct _MyersUkkonenHP0<AlignTextGlobal> {
+	enum { VALUE = 1 };
+};
+
+
 //____________________________________________________________________________
 // version for needles longer than one machineword
 
-template <typename TFinder, typename TNeedle>
-inline bool _findMyersLargePatterns (TFinder & finder, Pattern<TNeedle, MyersUkkonen> & me) 
+template <typename TFinder, typename TNeedle, typename TSpec>
+inline bool _findMyersLargePatterns (TFinder & finder, Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > > & me) 
 {
 SEQAN_CHECKPOINT
 
@@ -115,7 +138,8 @@ SEQAN_CHECKPOINT
 	unsigned int carryD0, carryHP, carryHN;
 
 	while (!atEnd(finder)) {
-		carryD0 = carryHP = carryHN = 0;
+		carryD0 = carryHN = 0;
+		carryHP = _MyersUkkonenHP0<TSpec>::VALUE;
 
 		// if the active cell is the last of it's block, one additional block has to be calculated
 		limit = me.lastBlock + (me.scoreMask >> (me.MACHINE_WORD_SIZE - 1));
@@ -198,8 +222,8 @@ SEQAN_CHECKPOINT
 //____________________________________________________________________________
 // version for needles not longer than one machineword
 
-template <typename TFinder, typename TNeedle>
-inline bool _findMyersSmallPatterns (TFinder & finder, Pattern<TNeedle, MyersUkkonen> & me) 
+template <typename TFinder, typename TNeedle, typename TSpec>
+inline bool _findMyersSmallPatterns (TFinder & finder, Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > > & me) 
 {
 SEQAN_CHECKPOINT
 
@@ -212,7 +236,7 @@ SEQAN_CHECKPOINT
 		D0 = ((me.VP[0] + (X & me.VP[0])) ^ me.VP[0]) | X;
 		HN = me.VP[0] & D0;
 		HP = me.VN[0] | ~(me.VP[0] | D0);
-		X = HP << 1;
+		X = (HP << 1) | _MyersUkkonenHP0<TSpec>::VALUE;
 		me.VN[0] = X & D0;
 		me.VP[0] = (HN << 1) | ~(X | D0);
 
@@ -232,8 +256,8 @@ SEQAN_CHECKPOINT
 
 //____________________________________________________________________________
 
-template <typename TFinder, typename TNeedle>
-inline bool find (TFinder & finder, Pattern<TNeedle, MyersUkkonen> & me, int const k)
+template <typename TFinder, typename TNeedle, typename TSpec>
+inline bool find (TFinder & finder, Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > > & me, int const k)
 {
 SEQAN_CHECKPOINT
 

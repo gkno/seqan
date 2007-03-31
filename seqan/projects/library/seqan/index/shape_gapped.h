@@ -18,24 +18,24 @@ class Shape<TString,GappedShape>
 
 public:
 
-	int span;
-	int num_gaps;
-	int shape_len;
-	String<int> shape;
+	unsigned span;
+	unsigned num_gaps;
+	unsigned shape_len;
+	String<unsigned> shape;
 	
 	Shape()
 	{
 SEQAN_CHECKPOINT
 	}
 
-	Shape(int num_gaps, int span):
+	Shape(unsigned num_gaps, unsigned span):
 	span(span),
 	num_gaps(num_gaps),
 	shape_len(span - num_gaps)
 	{
 SEQAN_CHECKPOINT
 		resize(shape, span - num_gaps);
-		for(int i = 0; i < span - num_gaps; ++i)
+		for(unsigned i = 0; i < span - num_gaps; ++i)
 			shape[i] = 1;
 	}
 
@@ -49,7 +49,7 @@ SEQAN_CHECKPOINT
 	}	
 
 
-	int & operator[] (int offset)
+	unsigned & operator[] (unsigned offset)
 	{
 	SEQAN_CHECKPOINT
 		return shape[offset];
@@ -71,15 +71,15 @@ SEQAN_CHECKPOINT
 
 template <typename TString>
 void
-_setShape(Shape<TString,GappedShape> & me, int span, 
-		  int num_gaps, int shape_len)
+_setShape(Shape<TString,GappedShape> & me, unsigned span, 
+		  unsigned num_gaps, unsigned shape_len)
 {
 SEQAN_CHECKPOINT
 	me.num_gaps = num_gaps;
 	me.span = span;
 	me.shape_len = shape_len;
 	resize(me.shape, shape_len);
-	for (int i = 0; i < shape_len; ++i)
+	for (unsigned i = 0; i < shape_len; ++i)
 		me.shape[i] = 1;
 	me.shape[0] = 0;
 
@@ -88,7 +88,7 @@ SEQAN_CHECKPOINT
 
 
 template <typename TString>
-inline int &
+inline unsigned &
 shapeCountBlanks(Shape<TString, GappedShape>  & me)
 {
 SEQAN_CHECKPOINT
@@ -150,8 +150,8 @@ void
 stringToShape(Shape<TString,GappedShape> & shape,String<char> const & shape_string)
 {
 SEQAN_CHECKPOINT
-	int count_gaps = 0;
-	int shape_len;
+	unsigned count_gaps = 0;
+	unsigned shape_len;
 	typename Iterator<String<char> const>::Type string_it, string_it_last, string_end;
 	string_it = begin(shape_string);
 	string_it_last = string_it;
@@ -167,7 +167,7 @@ SEQAN_CHECKPOINT
 	shape_len = length(shape_string) - count_gaps;
 	_setShape(shape,length(shape_string),count_gaps,shape_len);
 	string_it = begin(shape_string);
-	int j = 0;
+	unsigned j = 0;
 	while(string_it < string_end && j < shape_len) 
 	{
 		if(*string_it != '_')

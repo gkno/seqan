@@ -246,6 +246,20 @@ namespace SEQAN_NAMESPACE_MAIN
     };
 
 
+	template < typename TInput, typename TSpec >
+    inline TInput const &
+    source(Pipe<TInput, TSpec> const &me) {
+SEQAN_CHECKPOINT
+        return me.in;
+    }
+
+	template < typename TInput, typename TSpec >
+    inline TInput &
+    source(Pipe<TInput, TSpec> &me) {
+SEQAN_CHECKPOINT
+        return me.in;
+    }
+
 
 ///.Function.length.param.object.type:Class.Pipe
 
@@ -253,7 +267,14 @@ namespace SEQAN_NAMESPACE_MAIN
     inline typename Size< Pipe<TInput, TSpec> >::Type
     length(Pipe<TInput, TSpec> const &me) {
 SEQAN_CHECKPOINT
-        return length(me.in);
+        return length(source(me));
+    }
+
+	template < typename TInput, typename TSpec >
+    inline typename Size< Pipe<TInput, TSpec> >::Type
+    countSequences(Pipe<TInput, TSpec> const &me) {
+SEQAN_CHECKPOINT
+        return countSequences(source(me));
     }
 
 /**
@@ -305,12 +326,6 @@ SEQAN_CHECKPOINT
 
 ///.Function.atEnd.param.iterator.type:Class.Pipe
 
-    template < typename TInput, typename TSpec >
-    inline bool eof(Pipe<TInput, TSpec> const &me) {
-SEQAN_CHECKPOINT
-        return eof(me.in);
-    }
-
 
     //////////////////////////////////////////////////////////////////////////////
     // pipe flow control
@@ -330,7 +345,7 @@ SEQAN_CHECKPOINT
     template < typename TInput, typename TSpec, typename TCommand >
 	inline bool control(Pipe<TInput, TSpec> &me, TCommand const &command) {
 SEQAN_CHECKPOINT
-        return control(me.in, command);
+        return control(source(me), command);
     }
 
     template < typename TInput, typename TSpec >

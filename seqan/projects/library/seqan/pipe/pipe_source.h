@@ -286,7 +286,6 @@ namespace SEQAN_NAMESPACE_MAIN
         return me.end - me.begin;
     }
 
-
     template < typename TInput, typename TCommand >
 	inline bool control(Pipe< TInput, Source<ContainerSpec> > &me, TCommand const &command) {
         return true;

@@ -196,33 +196,37 @@ namespace SEQAN_NAMESPACE_MAIN
 
         inline Pipe& operator++() {
 			// process next sequence
-			if (--lastTuples == 0) {
-				fill();
-				return *this;
-			}
+			if (eos())
+				if (--lastTuples == 0) {
+					assignValueI1(tmp.i1, getValueI1(tmp.i1) + 1);
+					fill();
+					return *this;
+				}
 
 			// shift left 1 character
             LOOP<_ShiftLeftWorker, tupleLen - 1>::run(this->tmp);
-			++localPos;
-			tmp.i1 = localPos;
+			assignValueI2(tmp.i1, getValueI2(tmp.i1) + 1);
+
 			if (lastTuples < _TuplerLastTuples<Pipe>::VALUE) {
 	            tmp.i2[tupleLen - 1] = TValue();
 			} else {
 				tmp.i2[tupleLen - 1] = *in;
+				++localPos;
 				++in;
 			}
             return *this;
         }
 
         inline void fill() {
-			unsigned i = 0;
 			do {
-				while (i > 0)
-					++localPos;
-
-				for(; i < tupleLen && !eos(); ++i, ++in) {
-					tmp.i2.i[i] = *in;
-				}
+				unsigned i = 0;
+				if (!eof(in))
+					do {
+						tmp.i2.i[i] = *in;
+						++in;
+						++i;
+						++localPos;
+					} while ((i < tupleLen) && !eos());
 				lastTuples = _TuplerLastTuples<Pipe>::VALUE;
 
 				// fill up with null chars
@@ -234,10 +238,14 @@ namespace SEQAN_NAMESPACE_MAIN
 					lastTuples = 0;
 				else
 					lastTuples -= tupleLen - i;
+
+				if (lastTuples == 0)
+					assignValueI1(tmp.i1, getValueI1(tmp.i1) + 1);
+
 			} while ((lastTuples == 0) && !eof(in));
 
-			tmp.i1 = localPos;
-        }
+			assignValueI2(tmp.i1, 0);
+		}
 
 		inline bool eos() {
 			return (getValueI1(localPos) > 0) && (getValueI2(localPos) == 0);
@@ -399,19 +407,56 @@ namespace SEQAN_NAMESPACE_MAIN
 		Pipe< TInput, Multi<Tupler< tupleLen, omitLast, TCompression >, TPair, TLimitsString> > &me, 
 		ControlEos const &command) 
 	{
-		return me.eos();
+		return (getValueI1(me.tmp.i1) > 0) && (getValueI2(me.tmp.i1) == 0);
 	}
 
     template < typename TInput, unsigned tupleLen, bool omitLast, typename TCompression >
     inline typename Size< Pipe< TInput, Tupler< tupleLen, omitLast, TCompression > > >::Type
-    length(Pipe< TInput, Tupler< tupleLen, omitLast, TCompression > > const &me) {
+    length(Pipe< TInput, Tupler< tupleLen, omitLast, TCompression > > const &me) 
+	{
 		typedef Pipe< TInput, Tupler< tupleLen, omitLast, TCompression > >	TPipe;
-		
 		if (length(me.in) >= (tupleLen - _TuplerLastTuples<TPipe>::VALUE))
 			return length(me.in) - (tupleLen - _TuplerLastTuples<TPipe>::VALUE);
 		else
 			return 0;
     }
+
+    template < 
+		typename TInput,
+		unsigned tupleLen,
+		bool omitLast,
+		typename TCompression,
+		typename TPair, 
+		typename TLimitsString >
+    inline typename Size< Pipe< TInput, Multi<Tupler< tupleLen, omitLast, TCompression >, TPair, TLimitsString> > >::Type
+    length(Pipe< TInput, Multi<Tupler< tupleLen, omitLast, TCompression >, TPair, TLimitsString> > const &me)
+	{
+		typedef Pipe< TInput, Tupler< tupleLen, omitLast, TCompression > >	TPipe;
+		unsigned seqs = countSequences(me);
+		
+		if (length(me.in) >= seqs * (tupleLen - _TuplerLastTuples<TPipe>::VALUE))
+			return length(me.in) - seqs * (tupleLen - _TuplerLastTuples<TPipe>::VALUE);
+		else
+			return 0;
+    }
+
+    template < typename TInput, unsigned tupleLen, bool omitLast, typename TCompression >
+    inline unsigned
+    countSequences(Pipe< TInput, Tupler< tupleLen, omitLast, TCompression > > const &me) {
+		return 1;
+	}
+
+    template < 
+		typename TInput,
+		unsigned tupleLen,
+		bool omitLast,
+		typename TCompression,
+		typename TPair, 
+		typename TLimitsString >
+    inline unsigned
+	countSequences(Pipe< TInput, Multi<Tupler< tupleLen, omitLast, TCompression >, TPair, TLimitsString> > const &me) {
+		return length(me.limits) - 1;
+	}
 
 //}
 
