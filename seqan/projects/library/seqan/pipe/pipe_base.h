@@ -267,14 +267,14 @@ SEQAN_CHECKPOINT
     inline typename Size< Pipe<TInput, TSpec> >::Type
     length(Pipe<TInput, TSpec> const &me) {
 SEQAN_CHECKPOINT
-        return length(source(me));
+        return length(me.in);
     }
 
 	template < typename TInput, typename TSpec >
     inline typename Size< Pipe<TInput, TSpec> >::Type
     countSequences(Pipe<TInput, TSpec> const &me) {
 SEQAN_CHECKPOINT
-        return countSequences(source(me));
+        return countSequences(me.in);
     }
 
 /**
@@ -345,7 +345,7 @@ SEQAN_CHECKPOINT
     template < typename TInput, typename TSpec, typename TCommand >
 	inline bool control(Pipe<TInput, TSpec> &me, TCommand const &command) {
 SEQAN_CHECKPOINT
-        return control(source(me), command);
+        return control(me.in, command);
     }
 
     template < typename TInput, typename TSpec >
