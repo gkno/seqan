@@ -77,6 +77,38 @@ class Graph<Directed<TCargo, TSpec> >
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TCargo, typename TSpec>
+inline String<typename EdgeType<Graph<Directed<TCargo, TSpec> > >::Type*> const&
+_getVertexString(Graph<Directed<TCargo, TSpec> > const& g) {
+	return g.data_vertex;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TCargo, typename TSpec>
+inline String<typename EdgeType<Graph<Directed<TCargo, TSpec> > >::Type*>&
+_getVertexString(Graph<Directed<TCargo, TSpec> >& g) {
+	return g.data_vertex;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+template<typename TCargo, typename TSpec>
+inline IdManager<typename Id<Graph<Directed<TCargo, TSpec> > >::Type, Default> const &
+_getVertexIdManager(Graph<Directed<TCargo, TSpec> > const& g) {
+	return g.data_id_managerV;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TCargo, typename TSpec>
+inline IdManager<typename Id<Graph<Directed<TCargo, TSpec> > >::Type, Default> &
+_getVertexIdManager(Graph<Directed<TCargo, TSpec> >& g) {
+	return g.data_id_managerV;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TCargo, typename TSpec>
 inline void
 _copyGraph(Graph<Directed<TCargo, TSpec> > const& source,
 		   Graph<Directed<TCargo, TSpec> >& dest,
@@ -90,7 +122,7 @@ _copyGraph(Graph<Directed<TCargo, TSpec> > const& source,
 	typedef typename Iterator<String<TEdgeStump*> const>::Type TIterConst;
 	typedef typename Iterator<String<TEdgeStump*> >::Type TIter;
 	clear(dest);
-	resize(dest.data_vertex, length(source.data_vertex));
+	resize(dest.data_vertex, length(_getVertexString(source)));
 	TIter itInit = begin(dest.data_vertex);
 	while(!atEnd(itInit)) {
 		*itInit = (TEdgeStump*) 0;

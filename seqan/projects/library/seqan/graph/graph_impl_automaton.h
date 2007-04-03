@@ -97,6 +97,39 @@ class Graph<Automaton<TAlphabet, TCargo, TSpec> >
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TAlphabet, typename TCargo, typename TSpec>
+inline String<AutomatonEdgeArray<typename EdgeType<Graph<Automaton<TAlphabet, TCargo, TSpec> > >::Type, TAlphabet> > const&
+_getVertexString(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g) {
+	return g.data_vertex;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TAlphabet, typename TCargo, typename TSpec>
+inline String<AutomatonEdgeArray<typename EdgeType<Graph<Automaton<TAlphabet, TCargo, TSpec> > >::Type, TAlphabet> >&
+_getVertexString(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g) {
+	return g.data_vertex;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+template<typename TAlphabet, typename TCargo, typename TSpec>
+inline IdManager<typename Id<Graph<Automaton<TAlphabet, TCargo, TSpec> > >::Type, Default> const &
+_getVertexIdManager(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g) {
+	return g.data_id_managerV;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TAlphabet, typename TCargo, typename TSpec>
+inline IdManager<typename Id<Graph<Automaton<TAlphabet, TCargo, TSpec> > >::Type, Default> &
+_getVertexIdManager(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g) {
+	return g.data_id_managerV;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+
+template<typename TAlphabet, typename TCargo, typename TSpec>
 inline void
 _copyGraph(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& source,
 		   Graph<Automaton<TAlphabet, TCargo, TSpec> >& dest,
@@ -111,7 +144,7 @@ _copyGraph(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& source,
 	typedef typename Iterator<String<AutomatonEdgeArray<TEdge, TAlphabet> > const>::Type TIterConst;
 	
 	clear(dest);
-	resize(dest.data_vertex, length(source.data_vertex));
+	resize(dest.data_vertex, length(_getVertexString(source)));
 	dest.data_root = source.data_root;
 	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
 	for(TIterConst it = begin(source.data_vertex);!atEnd(it);goNext(it)) {

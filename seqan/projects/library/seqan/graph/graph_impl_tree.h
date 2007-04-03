@@ -79,6 +79,38 @@ class Graph<Tree<TCargo, TSpec> >
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TCargo, typename TSpec>
+inline String<typename EdgeType<Graph<Tree<TCargo, TSpec> > >::Type*> const&
+_getVertexString(Graph<Tree<TCargo, TSpec> > const& g) {
+	return g.data_vertex;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TCargo, typename TSpec>
+inline String<typename EdgeType<Graph<Tree<TCargo, TSpec> > >::Type*>&
+_getVertexString(Graph<Tree<TCargo, TSpec> >& g) {
+	return g.data_vertex;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+template<typename TCargo, typename TSpec>
+inline IdManager<typename Id<Graph<Tree<TCargo, TSpec> > >::Type, Default> const &
+_getVertexIdManager(Graph<Tree<TCargo, TSpec> > const& g) {
+	return g.data_id_managerV;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TCargo, typename TSpec>
+inline IdManager<typename Id<Graph<Tree<TCargo, TSpec> > >::Type, Default> &
+_getVertexIdManager(Graph<Tree<TCargo, TSpec> >& g) {
+	return g.data_id_managerV;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TCargo, typename TSpec>
 inline void
 _copyGraph(Graph<Tree<TCargo, TSpec> > const& source,
 		   Graph<Tree<TCargo, TSpec> >& dest,

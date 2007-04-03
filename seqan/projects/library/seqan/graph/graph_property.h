@@ -52,7 +52,7 @@ resizeVertexMap(Graph<TSpec> const& g,
 			  TPropertyMap& pm)
 {
 	SEQAN_CHECKPOINT
-	resize(pm, getIdUpperBound(g.data_id_managerV), Generous());
+	resize(pm, getIdUpperBound(_getVertexIdManager(g)), Generous());
 }
 
 //////////////////////////////////////////////////////////////////////////////

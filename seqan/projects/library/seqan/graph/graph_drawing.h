@@ -57,6 +57,18 @@ _markRootVertex(Graph<Undirected<TCargo, TSpec> > const& g,
 {
 }
 
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TStringSet, typename TCargo, typename TSpec, typename TVertexDescriptor, typename TAttributes>
+void 
+_markRootVertex(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
+				TVertexDescriptor const& v,
+				TAttributes& str)
+{
+}
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TCargo, typename TSpec, typename TVertexDescriptor, typename TAttributes>
@@ -202,6 +214,26 @@ void _createEdgeAttributes(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
 
 //////////////////////////////////////////////////////////////////////////////
 
+template <typename TStringSet, typename TSpec, typename TEdgeAttributes>
+void _createEdgeAttributes(Graph<Alignment<TStringSet, void, TSpec> > const& g,
+						   TEdgeAttributes& edgeMap)
+{
+	SEQAN_CHECKPOINT
+	_createEmptyEdgeAttributes(g.data_align,edgeMap);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TStringSet, typename TCargo, typename TSpec, typename TEdgeAttributes>
+void _createEdgeAttributes(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
+						   TEdgeAttributes& edgeMap)
+{
+	SEQAN_CHECKPOINT
+	_createEmptyEdgeAttributes(g.data_align,edgeMap);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 template <typename TAlphabet, typename TCargo, typename TSpec, typename TEdgeAttributes>
 void _createEdgeAttributes(Graph<Automaton<TAlphabet, TCargo, WordGraph<TSpec> > > const& g,
 						   TEdgeAttributes& edgeMap)
@@ -261,6 +293,16 @@ void _writeGraphType(TFile & file,
 
 //////////////////////////////////////////////////////////////////////////////
 
+template <typename TFile, typename TStringSet, typename TCargo, typename TSpec>
+void _writeGraphType(TFile & file,
+					 Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
+					 DotDrawing)
+{
+	_streamWrite(file, "graph");
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 template <typename TFile, typename TCargo, typename TSpec>
 void _writeGraphType(TFile & file,
 					 Graph<Tree<TCargo, TSpec> > const& g,
@@ -294,6 +336,16 @@ void _writeEdgeType(TFile & file,
 template <typename TFile, typename TCargo, typename TSpec>
 void _writeEdgeType(TFile & file,
 					Graph<Undirected<TCargo, TSpec> > const& g,
+					DotDrawing)
+{
+	_streamWrite(file, " -- ");
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TFile, typename TStringSet, typename TCargo, typename TSpec>
+void _writeEdgeType(TFile & file,
+					Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 					DotDrawing)
 {
 	_streamWrite(file, " -- ");
@@ -445,6 +497,24 @@ void _addEdge(Graph<Undirected<TCargo, TSpec> >& g,
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<Undirected<TCargo, TSpec> > TGraph;
+	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	TEdgeDescriptor e = addEdge(g, sourceV, targetV);
+	resizeEdgeMap(g, edgeMap);
+	assignProperty(edgeMap, e, attr_list);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec, typename TVertexDescriptor, typename TNodeAttributes, typename TEdgeAttributes, typename TStatement>
+void _addEdge(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+			  TVertexDescriptor sourceV,
+			  TVertexDescriptor targetV,
+			  TNodeAttributes& nodeMap,
+			  TEdgeAttributes& edgeMap,
+			  TStatement& attr_list)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	TEdgeDescriptor e = addEdge(g, sourceV, targetV);
 	resizeEdgeMap(g, edgeMap);

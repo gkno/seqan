@@ -1847,6 +1847,286 @@ void Test_Tree() {
 
 //////////////////////////////////////////////////////////////////////////////
 
+void Test_Alignment() {
+	typedef String<Dna> TString;
+	typedef StringSet<TString, IdHolder<> > TStringSet;
+	typedef Graph<Alignment<TStringSet> > TGraph;
+	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef	Id<TStringSet>::Type TId;
+
+	
+	TStringSet str;
+	
+	TString str0("acaagtaacat");
+	TId id0 = addString(str, str0);
+
+	TString str1("cccaaagggttttt");
+	TId id1 = addString(str, str1);
+
+	TString str2("cacatgtaatcat");
+	TId id2 = addString(str, str2);
+
+
+	TGraph g(str);
+	SEQAN_TASSERT(numEdges(g) == 0)
+	SEQAN_TASSERT(numVertices(g) == 0)
+	SEQAN_TASSERT(empty(g) == true)
+
+	TVertexDescriptor v0 = addVertex(g, id1,0,2);
+	SEQAN_TASSERT(v0 == 0)
+	SEQAN_TASSERT(outDegree(g, v0) == 0)	
+	SEQAN_TASSERT(inDegree(g, 0) == 0)
+	SEQAN_TASSERT(degree(g, 0) == 0)
+	SEQAN_TASSERT(numVertices(g) == 1)
+	SEQAN_TASSERT(empty(g) == false)
+
+	TVertexDescriptor v1 = addVertex(g, id2, 0, 5);
+	TEdgeDescriptor e =addEdge(g,0,1);
+	SEQAN_TASSERT(v1 == 1)
+	SEQAN_TASSERT(numVertices(g) == 2)
+	SEQAN_TASSERT(targetVertex(g, e) == 1)
+	SEQAN_TASSERT(sourceVertex(g, e) == 0)
+	SEQAN_TASSERT(numEdges(g) == 1)
+	SEQAN_TASSERT(outDegree(g, v0) == 1)	
+	SEQAN_TASSERT(inDegree(g, 1) == 1)
+	SEQAN_TASSERT(inDegree(g, 0) == 1)	
+	SEQAN_TASSERT(degree(g, 0) == 1)
+
+	// Add more vertices and edges
+	addVertex(g, id1, 10, 20);  //2
+	TVertexDescriptor v3 = addVertex(g, id2, 10, 20);  //3
+	addVertex(g, id1, 5, 6);  //4
+	addEdge(g,3,4);
+	TEdgeDescriptor my_edge = addEdge(g,3,1);
+	addEdge(g,3,0);
+	SEQAN_TASSERT(v3 == 3)
+	SEQAN_TASSERT(numVertices(g) == 5)
+	SEQAN_TASSERT(targetVertex(g, my_edge) == 3)
+	SEQAN_TASSERT(sourceVertex(g, my_edge) == 1)
+	SEQAN_TASSERT(numEdges(g) == 4)
+	SEQAN_TASSERT(outDegree(g, v3) == 3)
+	SEQAN_TASSERT(inDegree(g, v3) == 3)
+	SEQAN_TASSERT(degree(g, v3) == 3)
+
+	// Graph drawing
+	// Raw output
+	// File output
+	fstream strm;
+	strm.open(TEST_PATH "my_alignment.dot", ios_base::out | ios_base::trunc);
+	write(strm,g,DotDrawing());
+	strm.close();
+
+	// Remove edges
+	removeEdge(g,3,1);
+	removeEdge(g,0,1);
+	SEQAN_TASSERT(numEdges(g) == 2)
+
+	
+	// Remove vertices 
+	addVertex(g, id2, 3, 6);  //5
+	addEdge(g,5,2);
+	addEdge(g,2,3);
+	addEdge(g,1,3);
+	addEdge(g,1,4);
+	SEQAN_TASSERT(outDegree(g, 3) == 4)
+	SEQAN_TASSERT(outDegree(g, 4) == 2)
+	removeVertex(g, v3);
+	SEQAN_TASSERT(outDegree(g, 4) == 1)
+	SEQAN_TASSERT(outDegree(g, 0) == 0)
+	SEQAN_TASSERT(numVertices(g) == 5)
+	SEQAN_TASSERT(numEdges(g) == 2)
+
+	// Clear graph
+	clearEdges(g);
+	SEQAN_TASSERT(numVertices(g) == 5)
+	SEQAN_TASSERT(numEdges(g) == 0)
+	addEdge(g,2,0);
+	addEdge(g,4,1);
+	clearVertices(g);
+	SEQAN_TASSERT(numVertices(g) == 0)
+	SEQAN_TASSERT(numEdges(g) == 0)
+	addVertex(g,id1,0,1);addVertex(g,id1,1,1);addVertex(g,id1,2,1);
+	addVertex(g,id1,3,1);addVertex(g,id1,4,1);
+	addEdge(g,2,0);
+	addEdge(g,4,1);
+	clear(g);
+	SEQAN_TASSERT(numVertices(g) == 0)
+	SEQAN_TASSERT(numEdges(g) == 0)
+	addVertex(g,id1,0,1);addVertex(g,id1,1,1);addVertex(g,id1,2,1);
+	addVertex(g,id1,3,1);addVertex(g,id1,4,1);
+	addEdge(g,2,0);
+	addEdge(g,4,1);
+	addEdge(g,4,2);
+	removeVertex(g,3);
+	SEQAN_TASSERT(numVertices(g) == 4)
+	SEQAN_TASSERT(numEdges(g) == 3)
+	SEQAN_TASSERT(outDegree(g, 4) == 2)
+	SEQAN_TASSERT(inDegree(g, 4) == 2)
+
+	// Transpose
+	transpose(g); 
+	SEQAN_TASSERT(numVertices(g) == 4)
+	SEQAN_TASSERT(numEdges(g) == 3)
+	SEQAN_TASSERT(outDegree(g, 4) == 2)
+	SEQAN_TASSERT(inDegree(g, 4) == 2)
+	TGraph g_copy(g);
+	SEQAN_TASSERT(numVertices(g_copy) == 4)
+	SEQAN_TASSERT(numEdges(g_copy) == 3)
+	SEQAN_TASSERT(outDegree(g_copy, 4) == 2)
+	SEQAN_TASSERT(inDegree(g_copy, 4) == 2)
+	addVertex(g_copy, id0, 0, 3);
+	addEdge(g_copy,3,0);
+	g_copy = g;
+	SEQAN_TASSERT(numVertices(g_copy) == 4)
+	SEQAN_TASSERT(numEdges(g_copy) == 3)
+	SEQAN_TASSERT(outDegree(g_copy, 4) == 2)
+	SEQAN_TASSERT(inDegree(g_copy, 4) == 2)
+	//Copies the graph and transposes just the copy
+	transpose(g,g_copy);  // g does not change!
+	SEQAN_TASSERT(numVertices(g_copy) == 4)
+	SEQAN_TASSERT(numEdges(g_copy) == 3)
+	SEQAN_TASSERT(outDegree(g_copy, 4) == 2)
+	SEQAN_TASSERT(inDegree(g_copy, 4) == 2)
+
+	// Adjacency matrix
+	Matrix<unsigned int> mat;
+	getAdjacencyMatrix(g, mat);
+	unsigned int len = getIdUpperBound(g.data_align.data_id_managerV);
+	SEQAN_TASSERT(getValue(mat,0*len+2) == 1)
+	SEQAN_TASSERT(getValue(mat,3*len+2) == 0)
+	SEQAN_TASSERT(getValue(mat,0*len+2) == getValue(mat,2*len+0))
+	SEQAN_TASSERT(getValue(mat,1*len+4) == getValue(mat,4*len+1))
+	SEQAN_TASSERT(getValue(mat,2*len+4) == getValue(mat,4*len+2))
+
+
+	// Vertex Iterator
+	typedef Iterator<TGraph, VertexIterator>::Type TVertexIterator;
+	TVertexIterator itV(g);
+	SEQAN_TASSERT(atBegin(itV)==true)
+	SEQAN_TASSERT(getValue(itV)==0)
+	SEQAN_TASSERT(value(itV)==0)
+	SEQAN_TASSERT(getValue(itV)==0)
+	goNext(itV);
+	SEQAN_TASSERT(atBegin(itV)==false)
+	SEQAN_TASSERT(getValue(itV)==1)
+	++itV;
+	SEQAN_TASSERT(getValue(itV)==2)
+	SEQAN_TASSERT(atEnd(itV)==false)
+	goPrevious(itV);
+	SEQAN_TASSERT((*itV)==1)
+	SEQAN_TASSERT(atEnd(itV)==false)
+	itV--;
+	SEQAN_TASSERT(getValue(itV)==0)
+	SEQAN_TASSERT(atBegin(itV)==true)
+
+	// OutEdge Iterator
+	typedef Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
+	TOutEdgeIterator it(g, v0);
+	SEQAN_TASSERT(sourceVertex(g, getValue(it))==0)
+	SEQAN_TASSERT(targetVertex(g, getValue(it))==2)
+	SEQAN_TASSERT(sourceVertex(g, value(it))==0)
+	SEQAN_TASSERT(targetVertex(g, *it)==2)
+	SEQAN_TASSERT(atEnd(it)==false)
+	SEQAN_TASSERT(atBegin(it)==true)
+	goNext(it);
+	SEQAN_TASSERT(atEnd(it)==true)
+	SEQAN_TASSERT(atBegin(it)==false)
+	goPrevious(it);
+	SEQAN_TASSERT(sourceVertex(g, getValue(it))==0)
+	SEQAN_TASSERT(targetVertex(g, getValue(it))==2)
+	--it;
+	it--;
+	SEQAN_TASSERT(atBegin(it)==true)
+	TOutEdgeIterator it2(g, v0);
+	TOutEdgeIterator it3;
+	it3 = it;
+	SEQAN_TASSERT(it == it2)
+	SEQAN_TASSERT(it2 == it3)
+	goEnd(it);
+	SEQAN_TASSERT(it2 != it)
+	goEnd(it2);
+	SEQAN_TASSERT(it2 == it)
+	goBegin(it2);
+	SEQAN_TASSERT(it2 != it)
+	SEQAN_TASSERT(&g == &hostGraph(it))
+
+	// EdgeIterator
+	typedef Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
+	TEdgeIterator itEdge(g);
+	SEQAN_TASSERT(sourceVertex(g, getValue(itEdge))==0)
+	SEQAN_TASSERT(targetVertex(g, getValue(itEdge))==2)
+	SEQAN_TASSERT(sourceVertex(g, value(itEdge))==0)
+	SEQAN_TASSERT(targetVertex(g, *itEdge)==2)
+	SEQAN_TASSERT(atEnd(itEdge)==false)
+	SEQAN_TASSERT(atBegin(itEdge)==true)
+	goNext(itEdge);
+	SEQAN_TASSERT(sourceVertex(g, value(itEdge))==1)
+	SEQAN_TASSERT(targetVertex(g, *itEdge)==4)
+	++itEdge;goNext(itEdge);
+	goPrevious(itEdge);--itEdge;
+	SEQAN_TASSERT(sourceVertex(g, value(itEdge))==1)
+	SEQAN_TASSERT(targetVertex(g, *itEdge)==4)
+	goEnd(itEdge);
+	SEQAN_TASSERT(atEnd(itEdge)==true)
+	SEQAN_TASSERT(atBegin(itEdge)==false)
+	goBegin(itEdge);
+	SEQAN_TASSERT(atEnd(itEdge)==false)
+	SEQAN_TASSERT(atBegin(itEdge)==true)
+
+	// Adjacency Iterator
+	typedef Iterator<TGraph, AdjacencyIterator>::Type TAdjacencyIterator;
+	TAdjacencyIterator itAdj(g,2);
+	SEQAN_TASSERT(getValue(itAdj) == 4)
+	SEQAN_TASSERT(&hostGraph(itAdj) == &g)
+	SEQAN_TASSERT(value(itAdj) == 4)
+	SEQAN_TASSERT(*itAdj == 4)
+	SEQAN_TASSERT(atEnd(itAdj)==false)
+	SEQAN_TASSERT(atBegin(itAdj)==true)
+	goNext(itAdj);
+	SEQAN_TASSERT(*itAdj == 0)
+	SEQAN_TASSERT(atEnd(itAdj)==false)
+	SEQAN_TASSERT(atBegin(itAdj)==false)
+	++itAdj;
+	SEQAN_TASSERT(atEnd(itAdj)==true)
+	SEQAN_TASSERT(atBegin(itAdj)==false)
+	goPrevious(itAdj);--itAdj;
+	SEQAN_TASSERT(*itAdj == 4)
+	goBegin(itAdj);
+	SEQAN_TASSERT(atBegin(itAdj)==true)
+	goEnd(itAdj);
+	SEQAN_TASSERT(atEnd(itAdj)==true)
+
+	// Bfs Iterator
+	typedef Iterator<TGraph, BfsIterator>::Type TBfsIterator;
+	TBfsIterator bfsIt(g,2);
+	SEQAN_TASSERT(atEnd(bfsIt)==false)
+	SEQAN_TASSERT(atBegin(bfsIt)==true)
+	++bfsIt;
+	SEQAN_TASSERT(getValue(bfsIt) == 4)
+	SEQAN_TASSERT(&hostGraph(bfsIt) == &g)
+	SEQAN_TASSERT(value(bfsIt) == 4)
+	SEQAN_TASSERT(*bfsIt == 4)
+	goNext(bfsIt);
+	SEQAN_TASSERT(value(bfsIt) == 0)
+
+	// Dfs Iterator
+	typedef Iterator<TGraph, DfsPreorder>::Type TDfsPreorder;
+	TDfsPreorder dfsIt(g,2);
+	SEQAN_TASSERT(atEnd(dfsIt)==false)
+	SEQAN_TASSERT(atBegin(dfsIt)==true)
+	SEQAN_TASSERT(*dfsIt == 2)
+	++dfsIt;
+	SEQAN_TASSERT(getValue(dfsIt) == 0)
+	SEQAN_TASSERT(&hostGraph(dfsIt) == &g)
+	SEQAN_TASSERT(value(dfsIt) == 0)
+	SEQAN_TASSERT(*dfsIt == 0)
+	goNext(dfsIt);
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
 template <typename TStringSet>
 void Test_StringSet() {
 	typedef	typename Id<TStringSet>::Type TId;
@@ -1939,24 +2219,6 @@ void Test_StringSet() {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-
-void Test_Alignment() {
-	/*
-	String<Dna> seq1 = "acagtactggtactccg";
-	String<Dna> seq2 = "acccgtaacagtactggtactccg";
-	String<Dna> seq3 = "acccgtaacagttttactggtactccg";
-
-	TGraph g;
-	TId id1 = addSequence(g, seq1);
-	TId id2 = addSequence(g, seq2);
-	TId id3 = addSequence(g, seq3);
-
-	addVertex(g, TSegment(id1,0,2));
-	*/
-}
-
-
-//////////////////////////////////////////////////////////////////////////////
 template <typename TGraphType>
 void Test_VertexIterator() {
 //____________________________________________________________________________
@@ -1994,7 +2256,7 @@ void Test_VertexIterator() {
 	SEQAN_TASSERT(atEnd(it)==true)
 	goPrevious(it);
 	// No assignment to vertex iterators
-	//*it = 3;
+	// *it = 3;
 	SEQAN_TASSERT((*it)==4)
 	SEQAN_TASSERT(atEnd(it)==false)
 	it--;
@@ -3352,6 +3614,12 @@ void Test_Algorithms() {
 	//Matching
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
+void Test_TCoffee() {
+//____________________________________________________________________________
+// Graph TCoffee
+}
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -3418,6 +3686,9 @@ int main()
 	// Graph algorithms
 	Test_Algorithms();
 
+	// T-Coffee
+	Test_TCoffee();
+
 //____________________________________________________________________________
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_base.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_idmanager.h");
@@ -3441,6 +3712,7 @@ int main()
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_iterator_bfs.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_iterator_dfs.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_algorithm.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_algorithm_tcoffee.h");
 
 	SEQAN_TREPORT("TEST END")
 

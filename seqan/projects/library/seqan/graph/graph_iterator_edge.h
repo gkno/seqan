@@ -43,7 +43,7 @@ public:
 	
 	Iter(TGraph const& _graph) : 
 		data_vertex_it(_graph),
-		data_edge_it(_graph, getIdLowerBound(_graph.data_id_managerV))  
+		data_edge_it(_graph, getIdLowerBound(_getVertexIdManager(_graph)))  
 	{
 		SEQAN_CHECKPOINT
 		while((!atEnd(data_vertex_it)) && 
@@ -257,7 +257,7 @@ _goNextInternal(Iter<TGraph, GraphIterator<InternalEdgeIterator<TSpec> > >& it)
 					(atEnd(it.data_edge_it))) {
 				++it.data_vertex_it;
 				if ((atEnd(it.data_vertex_it)) ||
-					(!idInUse(hostGraph(it).data_id_managerV, getValue(it.data_vertex_it)))) continue;
+					(!idInUse(_getVertexIdManager(hostGraph(it)), getValue(it.data_vertex_it)))) continue;
 				typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
 				it.data_edge_it = TOutEdgeIterator(hostGraph(it), getValue(it.data_vertex_it));			
 			}
