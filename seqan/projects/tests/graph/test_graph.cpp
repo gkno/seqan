@@ -18,7 +18,6 @@
 using namespace std;
 using namespace seqan;
 
-
 //////////////////////////////////////////////////////////////////////////////
 
 void Test_IdManager() {
@@ -1850,7 +1849,7 @@ void Test_Tree() {
 void Test_Alignment() {
 	typedef String<Dna> TString;
 	typedef StringSet<TString, IdHolder<> > TStringSet;
-	typedef Graph<Alignment<TStringSet> > TGraph;
+	typedef Graph<Alignment<TStringSet, void> > TGraph;
 	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	typedef	Id<TStringSet>::Type TId;
@@ -1858,13 +1857,13 @@ void Test_Alignment() {
 	
 	TStringSet str;
 	
-	TString str0("acaagtaacat");
+	TString str0("acaagtaacataaaaaaaaaaaaaaaacccccccccttttttttaaaaa");
 	TId id0 = addString(str, str0);
 
-	TString str1("cccaaagggttttt");
+	TString str1("cccaaagggtttttccccccccccccttttttttttaaaaaaagggggggg");
 	TId id1 = addString(str, str1);
 
-	TString str2("cacatgtaatcat");
+	TString str2("cacatgtaatcatgggggggggccccccttttaaaaaaaaaaatttt");
 	TId id2 = addString(str, str2);
 
 
@@ -1895,8 +1894,8 @@ void Test_Alignment() {
 
 	// Add more vertices and edges
 	addVertex(g, id1, 10, 20);  //2
-	TVertexDescriptor v3 = addVertex(g, id2, 10, 20);  //3
-	addVertex(g, id1, 5, 6);  //4
+	TVertexDescriptor v3 = addVertex(g, id2, 1, 2);  //3
+	addVertex(g, id1, 1, 3);  //4
 	addEdge(g,3,4);
 	TEdgeDescriptor my_edge = addEdge(g,3,1);
 	addEdge(g,3,0);
@@ -2063,8 +2062,8 @@ void Test_Alignment() {
 	goNext(itEdge);
 	SEQAN_TASSERT(sourceVertex(g, value(itEdge))==1)
 	SEQAN_TASSERT(targetVertex(g, *itEdge)==4)
-	++itEdge;goNext(itEdge);
-	goPrevious(itEdge);--itEdge;
+	++itEdge;
+	--itEdge;
 	SEQAN_TASSERT(sourceVertex(g, value(itEdge))==1)
 	SEQAN_TASSERT(targetVertex(g, *itEdge)==4)
 	goEnd(itEdge);
@@ -3614,11 +3613,37 @@ void Test_Algorithms() {
 	//Matching
 }
 
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 void Test_TCoffee() {
 //____________________________________________________________________________
 // Graph TCoffee
+	typedef StringSet<String<char>, IdHolder<> > TStringSet;
+	typedef Graph<Alignment<TStringSet, unsigned int, Default> > TGraph;
+
+	TStringSet strSet;
+	TGraph g(strSet);
+
+	// Use binary !!!
+	fstream strm;
+	strm.open(TEST_PATH "garfield.lib", ios_base::in | ios_base::binary);
+	read(strm,g,TCoffeeLib());
+	strm.close();
+
+	//std::cout << g << std::endl;
+
+	fstream strm2;
+	strm2.open(TEST_PATH "my_tcoffee.dot", ios_base::out | ios_base::trunc);
+	write(strm2,g,DotDrawing());
+	strm2.close();
+
+
+	for(unsigned int i=0; i<length(value(g.data_sequence)); ++i) {
+		delete &value(g.data_sequence)[i];
+	}
+
 }
 
 
@@ -3685,6 +3710,7 @@ int main()
 
 	// Graph algorithms
 	Test_Algorithms();
+
 
 	// T-Coffee
 	Test_TCoffee();

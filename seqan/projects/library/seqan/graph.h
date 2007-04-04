@@ -7,6 +7,7 @@
 #include <set>
 #include <queue>
 #include <typeinfo>
+#include <sstream> 
 
 // Seqan
 #include <seqan/basic.h>
@@ -58,6 +59,7 @@
 
 // Graph algorithms
 #include <seqan/graph/graph_algorithm.h>
+#include <seqan/graph/graph_algorithm_tcoffee.h>
 
 
 

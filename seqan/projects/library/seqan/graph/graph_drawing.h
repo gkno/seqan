@@ -130,18 +130,53 @@ void _createNodeAttributes(Graph<TSpec> const& g,
     typedef Graph<TSpec> TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	resizeVertexMap(g, nodeMap);
-	char strV[BitsPerValue<TVertexDescriptor>::VALUE];
 
 	typedef typename Iterator<TGraph, VertexIterator>::Type TConstIter;
 	TConstIter it(g);
 	for(;!atEnd(it);++it) {
-		String<char> tmp("label = \"");
-		sprintf(strV, "%d", *it);
-		append(tmp, strV);
-		append(tmp, "\"");
+		std::ostringstream outs; 
+		outs << "label = \"";
+		outs << *it;
+		outs << "\"";
+		String<char> tmp;
+		append(tmp, outs.str().c_str());
 		_markRootVertex(g, *it, tmp);
 		assignProperty(nodeMap, *it, tmp);
 	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TStringSet, typename TCargo, typename TSpec, typename TNodeAttributes>
+void _createNodeAttributes(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
+						   TNodeAttributes& nodeMap)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename Id<TGraph>::Type TIdType;
+	resizeVertexMap(g, nodeMap);
+
+	unsigned int scaling = 20 / length(value(g.data_sequence));
+	if (scaling == 0) scaling = 1;
+
+	typedef typename Iterator<TGraph, VertexIterator>::Type TConstIter;
+	TConstIter it(g);
+	for(;!atEnd(it);++it) {
+		TIdType id = sequenceId(g, *it);
+		std::ostringstream outs; 
+		outs << "label = \"";
+		outs << label(g, *it);
+		outs << "\", group = \"";
+		outs << id;
+		outs << "\", pos = \"";
+		outs << (id * scaling);
+		outs << ",";
+		outs << segmentBegin(g, *it);
+		outs << "!\"";
+		append(property(nodeMap, *it), outs.str().c_str());		
+		//std::cout << property(nodeMap, *it) << std::endl;
+	}
+
 }
 
 
@@ -229,7 +264,19 @@ void _createEdgeAttributes(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g
 						   TEdgeAttributes& edgeMap)
 {
 	SEQAN_CHECKPOINT
-	_createEmptyEdgeAttributes(g.data_align,edgeMap);
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	resizeEdgeMap(g, edgeMap);
+
+	typedef typename Iterator<TGraph, EdgeIterator>::Type TConstEdIter;
+	TConstEdIter itEd(g);
+	for(;!atEnd(itEd);++itEd) {
+		TCargo c = getCargo(*itEd);
+		std::ostringstream outs; 
+		outs << "label = \"";
+		outs << (TCargo) c;
+		outs << "\"";
+		append(property(edgeMap, *itEd), outs.str().c_str());
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////

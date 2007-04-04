@@ -109,6 +109,22 @@ _getVertexIdManager(Graph<Undirected<TCargo, TSpec> >& g) {
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TCargo, typename TSpec>
+inline typename IdHandler<typename EdgeType<Graph<Undirected<TCargo, TSpec> > const>::Type, typename Id<Graph<Undirected<TCargo, TSpec> > const>::Type>::Type const&
+_getEdgeIdManager(Graph<Undirected<TCargo, TSpec> > const& g) {
+	return g.data_id_managerE;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TCargo, typename TSpec>
+inline typename IdHandler<typename EdgeType<Graph<Undirected<TCargo, TSpec> > >::Type, typename Id<Graph<Undirected<TCargo, TSpec> > >::Type>::Type&
+_getEdgeIdManager(Graph<Undirected<TCargo, TSpec> >& g) {
+	return g.data_id_managerE;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TCargo, typename TSpec>
 inline void
 _copyGraph(Graph<Undirected<TCargo, TSpec> > const& source,
 		   Graph<Undirected<TCargo, TSpec> >& dest,

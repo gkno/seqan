@@ -108,6 +108,22 @@ _getVertexIdManager(Graph<Tree<TCargo, TSpec> >& g) {
 	return g.data_id_managerV;
 }
 
+/////////////////////////////////////////////////////////////////////////////
+
+template<typename TCargo, typename TSpec>
+inline IdManager<typename Id<Graph<Tree<TCargo, TSpec> > >::Type, Default> const &
+_getEdgeIdManager(Graph<Tree<TCargo, TSpec> > const& g) {
+	return g.data_id_managerV;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TCargo, typename TSpec>
+inline IdManager<typename Id<Graph<Tree<TCargo, TSpec> > >::Type, Default> &
+_getEdgeIdManager(Graph<Tree<TCargo, TSpec> >& g) {
+	return g.data_id_managerV;
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TCargo, typename TSpec>

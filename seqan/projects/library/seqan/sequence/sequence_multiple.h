@@ -359,6 +359,11 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef TString Type;
     };
 
+	template < typename TString, typename TSpec >
+    struct Value< StringSet< TString, TSpec > const> {
+        typedef TString Type;
+    };
+
     template < typename TString, typename TSpec >
     struct Size< StringSet< TString, TSpec > > {
 		typedef typename Size< typename StringSetLimits< StringSet<TString, TSpec> >::Type >::Type Type;
@@ -1022,10 +1027,10 @@ appendValue(StringSet<TString, IdHolder<TightStorage<TSpec> > >& me,
 ..see:Function.getString
 */
 
-template<typename TString, typename TSpec>
+template<typename TString, typename TSpec, typename TString2>
 inline typename Id<StringSet<TString, IdHolder<TSpec> > >::Type 
 addString(StringSet<TString, IdHolder<TSpec> >& me, 
-		  TString& obj) 
+		  TString2& obj) 
 {
 	SEQAN_CHECKPOINT
 	appendValue(me, obj);
@@ -1034,10 +1039,10 @@ addString(StringSet<TString, IdHolder<TSpec> >& me,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TString, typename TSpec, typename TId>
+template<typename TString, typename TSpec, typename TId, typename TString2>
 inline typename Id<StringSet<TString, IdHolder<GenerousStorage<TSpec> > > >::Type 
 addString(StringSet<TString, IdHolder<GenerousStorage<TSpec> > >& me, 
-		  TString& obj,
+		  TString2& obj,
 		  TId id) 
 {
 	SEQAN_CHECKPOINT
@@ -1049,10 +1054,10 @@ addString(StringSet<TString, IdHolder<GenerousStorage<TSpec> > >& me,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TString, typename TSpec, typename TId>
+template<typename TString, typename TSpec, typename TId, typename TString2>
 inline typename Id<StringSet<TString, IdHolder<TightStorage<TSpec> > > >::Type 
 addString(StringSet<TString, IdHolder<TightStorage<TSpec> > >& me, 
-		  TString& obj,
+		  TString2& obj,
 		  TId id) 
 {
 	SEQAN_CHECKPOINT

@@ -126,6 +126,22 @@ _getVertexIdManager(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g) {
 	return g.data_id_managerV;
 }
 
+/////////////////////////////////////////////////////////////////////////////
+
+template<typename TAlphabet, typename TCargo, typename TSpec>
+inline IdManager<typename Id<Graph<Automaton<TAlphabet, TCargo, TSpec> > >::Type, Default> const &
+_getEdgeIdManager(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g) {
+	return g.data_id_managerE;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TAlphabet, typename TCargo, typename TSpec>
+inline IdManager<typename Id<Graph<Automaton<TAlphabet, TCargo, TSpec> > >::Type, Default> &
+_getEdgeIdManager(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g) {
+	return g.data_id_managerE;
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 
@@ -170,6 +186,7 @@ _copyGraph(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& source,
 	dest.data_id_managerE = source.data_id_managerE;
 }
 
+//////////////////////////////////////////////////////////////////////////////
 
 template<typename TAlphabet, typename TCargo, typename TSpec>
 inline void

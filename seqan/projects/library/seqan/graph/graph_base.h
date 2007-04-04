@@ -105,6 +105,16 @@ typedef Tag<TreeTag_> const TreeTag;
 struct TagDotDrawing_;
 typedef Tag<TagDotDrawing_> const DotDrawing;
 
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Tag.TCoffeeLib
+..summary:Switch to trigger reading and writing in t-coffee lib format.
+..value.TCoffeeLib:Library in T-Coffee Format.
+*/
+
+struct TCoffeeLib_;
+typedef Tag<TCoffeeLib_> const TCoffeeLib;
 
 
 //////////////////////////////////////////////////////////////////////////////

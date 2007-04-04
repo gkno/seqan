@@ -21,7 +21,7 @@ template<typename TAlphabet = char, typename TCargo = void, typename TSpec = Def
 struct Automaton;
 
 // Default Alignment Graph
-template<typename TAlphabet = Dna, typename TCargo = unsigned int, typename TSpec = Default>
+template<typename TStringSet, typename TCargo = unsigned int, typename TSpec = Default>
 struct Alignment;
 
 
@@ -192,29 +192,29 @@ struct EdgeType<Graph<Undirected<TCargo, WithoutEdgeId> > const> {
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TAlphabet, typename TCargo, typename TSpec>
-struct EdgeType<Graph<Alignment<TAlphabet, TCargo, TSpec> > > {
+template<typename TStringSet, typename TCargo, typename TSpec>
+struct EdgeType<Graph<Alignment<TStringSet, TCargo, TSpec> > > {
 	typedef EdgeStump<TCargo, true, true, true, TSpec> Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TAlphabet, typename TCargo, typename TSpec>
-struct EdgeType<Graph<Alignment<TAlphabet, TCargo, TSpec> > const> {
+template<typename TStringSet, typename TCargo, typename TSpec>
+struct EdgeType<Graph<Alignment<TStringSet, TCargo, TSpec> > const> {
 	typedef EdgeStump<TCargo, true, true, true, TSpec> const Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TAlphabet, typename TCargo>
-struct EdgeType<Graph<Alignment<TAlphabet, TCargo, WithoutEdgeId> > > {
+template<typename TStringSet, typename TCargo>
+struct EdgeType<Graph<Alignment<TStringSet, TCargo, WithoutEdgeId> > > {
 	typedef EdgeStump<TCargo, true, true, false, WithoutEdgeId> Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TAlphabet, typename TCargo>
-struct EdgeType<Graph<Alignment<TAlphabet, TCargo, WithoutEdgeId> > const> {
+template<typename TStringSet, typename TCargo>
+struct EdgeType<Graph<Alignment<TStringSet, TCargo, WithoutEdgeId> > const> {
 	typedef EdgeStump<TCargo, true, true, false, WithoutEdgeId> const Type;
 };
 
@@ -281,19 +281,23 @@ struct Alphabet<Graph<Automaton<TAlphabet, TCargo, TSpec> > const> {
 	typedef TAlphabet Type;
 };
 
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename T>
+struct StringSetType;
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TAlphabet, typename TCargo, typename TSpec>
-struct Alphabet<Graph<Alignment<TAlphabet, TCargo, TSpec> > > {
-	typedef TAlphabet Type;
+template<typename TStringSet, typename TCargo, typename TSpec>
+struct StringSetType<Graph<Alignment<TStringSet, TCargo, TSpec> > > {
+	typedef TStringSet Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TAlphabet, typename TCargo, typename TSpec>
-struct Alphabet<Graph<Alignment<TAlphabet, TCargo, TSpec> > const> {
-	typedef TAlphabet Type;
+template<typename TStringSet, typename TCargo, typename TSpec>
+struct StringSetType<Graph<Alignment<TStringSet, TCargo, TSpec> > const> {
+	typedef TStringSet const Type;
 };
 
 

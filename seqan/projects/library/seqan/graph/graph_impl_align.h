@@ -9,7 +9,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TId, typename TSize>
+template<typename TId = unsigned int, typename TSize = unsigned int>
 class SegmentInfo {
 public:
 	TId data_seq_id;
@@ -34,6 +34,25 @@ public:
 
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Spec.Alignment Graph:
+..cat:Graph
+..general:Class.Graph
+..summary:An alignment graph.
+..signature:Graph<Alignment<TStringSet, TCargo, TSpec> > 
+..param.TStringSet:The type of the string set containing the sequence information.
+...default:$Class.StringSet$
+..param.TCargo:The cargo type that can be attached to the edges.
+...metafunction:Metafunction.Cargo
+...remarks:Use @Metafunction.Cargo@ to get the cargo type of an undirected graph.
+...default:$void$
+..param.TSpec:The specializing type for the graph.
+...metafunction:Metafunction.Spec
+...remarks:Use WithoutEdgeId here to omit edge ids.
+Note: If edges do not store ids external property maps do not work.
+...default:$Default$, see @Tag.Default@.
+..include:graph.h
+*/
 template<typename TStringSet, typename TCargo, typename TSpec>
 class Graph<Alignment<TStringSet, TCargo, TSpec> > 
 {
@@ -51,7 +70,6 @@ class Graph<Alignment<TStringSet, TCargo, TSpec> >
 		String<SegmentInfo<TIdType, TSize> > data_segment;
 
 //____________________________________________________________________________
-
 
 		Graph(TStringSet sSet) {
 			SEQAN_CHECKPOINT
@@ -83,8 +101,6 @@ private:
 			SEQAN_CHECKPOINT
 		}
 };
-
-
 
 //////////////////////////////////////////////////////////////////////////////
 // INTERNAL FUNCTIONS
@@ -120,6 +136,22 @@ template<typename TStringSet, typename TCargo, typename TSpec>
 inline IdManager<typename Id<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type, Default> &
 _getVertexIdManager(Graph<Alignment<TStringSet, TCargo, TSpec> >& g) {
 	return g.data_align.data_id_managerV;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec>
+inline IdManager<typename Id<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type, Default> const &
+_getEdgeIdManager(Graph<Alignment<TStringSet,TCargo, TSpec> > const& g) {
+	return g.data_align.data_id_managerE;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec>
+inline IdManager<typename Id<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type, Default> &
+_getEdgeIdManager(Graph<Alignment<TStringSet, TCargo, TSpec> >& g) {
+	return g.data_align.data_id_managerE;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -489,6 +521,80 @@ write(TFile & target,
 	}
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec, typename TStringSet2>
+inline void
+assignStringSet(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
+				TStringSet2& sStr)
+{
+	SEQAN_CHECKPOINT
+	clear(g);
+	g.data_sequence = (TStringSet) sStr;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec>
+inline typename StringSetType<Graph<Alignment<TStringSet, TCargo, TSpec> > const>::Type&
+stringSet(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g)
+{
+	SEQAN_CHECKPOINT
+	return value(g.data_sequence);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec>
+inline typename StringSetType<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type&
+stringSet(Graph<Alignment<TStringSet, TCargo, TSpec> >& g)
+{
+	SEQAN_CHECKPOINT
+	return value(g.data_sequence);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec, typename TVertexDescriptor>
+inline typename Value<typename StringSetType<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type>::Type
+label(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
+	  TVertexDescriptor const v)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename Id<TGraph>::Type TIdType;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef SegmentInfo<TIdType, TSize> TSegment;
+	TSegment seg = getProperty(g.data_segment, v);
+	//std::cout << seg.data_seq_id << ",";
+	//std::cout << seg.data_begin << ",";
+	//std::cout << seg.data_length << ",";
+	//std::cout << infix(getString(value(g.data_sequence), seg.data_seq_id), seg.data_begin, seg.data_begin + seg.data_length) << std::endl;
+	return infix(getString(value(g.data_sequence), seg.data_seq_id), seg.data_begin, seg.data_begin + seg.data_length);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec, typename TVertexDescriptor>
+inline typename Id<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type
+sequenceId(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
+		   TVertexDescriptor const v)
+{
+	SEQAN_CHECKPOINT
+	return g.data_segment[v].data_seq_id;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec, typename TVertexDescriptor>
+inline typename Position<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type
+segmentBegin(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
+			 TVertexDescriptor const v)
+{
+	SEQAN_CHECKPOINT
+	return g.data_segment[v].data_begin;
+}
 
 }// namespace SEQAN_NAMESPACE_MAIN
 

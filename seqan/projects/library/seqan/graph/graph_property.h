@@ -81,7 +81,7 @@ resizeEdgeMap(Graph<TSpec> const& g,
 			  TPropertyMap& pm)
 {
 	SEQAN_CHECKPOINT
-	resize(pm, getIdUpperBound(g.data_id_managerE), Generous());
+	resize(pm, getIdUpperBound(_getEdgeIdManager(g)), Generous());
 }
 
 //////////////////////////////////////////////////////////////////////////////
