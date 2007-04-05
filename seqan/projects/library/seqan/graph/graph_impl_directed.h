@@ -30,13 +30,13 @@ template<typename TCargo, typename TSpec>
 class Graph<Directed<TCargo, TSpec> > 
 {
 	public:
-		typedef typename Id<Graph>::Type TIdType;
+		typedef typename VertexIdHandler<Graph>::Type TVertexIdManager;
+		typedef typename EdgeIdHandler<Graph>::Type TEdgeIdManager;
 		typedef typename EdgeType<Graph>::Type TEdgeStump;	
-		typedef typename IdHandler<TEdgeStump, TIdType>::Type TEdgeIdManager;
 		typedef Allocator<SinglePool<sizeof(TEdgeStump)> > TAllocator;
 		
 		String<TEdgeStump*> data_vertex;			// Pointers to EdgeStump lists
-		IdManager<TIdType> data_id_managerV;
+		TVertexIdManager data_id_managerV;
 		TEdgeIdManager data_id_managerE;		
 		TAllocator data_allocator;
 
@@ -77,49 +77,34 @@ class Graph<Directed<TCargo, TSpec> >
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TCargo, typename TSpec>
-inline String<typename EdgeType<Graph<Directed<TCargo, TSpec> > >::Type*> const&
-_getVertexString(Graph<Directed<TCargo, TSpec> > const& g) {
-	return g.data_vertex;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TCargo, typename TSpec>
 inline String<typename EdgeType<Graph<Directed<TCargo, TSpec> > >::Type*>&
-_getVertexString(Graph<Directed<TCargo, TSpec> >& g) {
-	return g.data_vertex;
+_getVertexString(Graph<Directed<TCargo, TSpec> > const& g) {
+	SEQAN_CHECKPOINT
+	typedef Graph<Directed<TCargo, TSpec> > TGraph;
+	typedef typename EdgeType<TGraph>::Type TEdgeStump;
+	return const_cast<String<TEdgeStump*>&>(g.data_vertex);
 }
 
 /////////////////////////////////////////////////////////////////////////////
 
 template<typename TCargo, typename TSpec>
-inline IdManager<typename Id<Graph<Directed<TCargo, TSpec> > >::Type, Default> const &
+inline typename VertexIdHandler<Graph<Directed<TCargo, TSpec> > >::Type&
 _getVertexIdManager(Graph<Directed<TCargo, TSpec> > const& g) {
-	return g.data_id_managerV;
+	SEQAN_CHECKPOINT
+	typedef Graph<Directed<TCargo, TSpec> > TGraph;
+	typedef typename VertexIdHandler<TGraph>::Type TVertexIdManager;
+	return const_cast<TVertexIdManager&>(g.data_id_managerV);
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TCargo, typename TSpec>
-inline IdManager<typename Id<Graph<Directed<TCargo, TSpec> > >::Type, Default> &
-_getVertexIdManager(Graph<Directed<TCargo, TSpec> >& g) {
-	return g.data_id_managerV;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TCargo, typename TSpec>
-inline typename IdHandler<typename EdgeType<Graph<Directed<TCargo, TSpec> > const>::Type, typename Id<Graph<Directed<TCargo, TSpec> >  const>::Type>::Type const&
+inline typename EdgeIdHandler<Graph<Directed<TCargo, TSpec> > >::Type&
 _getEdgeIdManager(Graph<Directed<TCargo, TSpec> > const& g) {
-	return g.data_id_managerE;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TCargo, typename TSpec>
-inline typename IdHandler<typename EdgeType<Graph<Directed<TCargo, TSpec> > >::Type, typename Id<Graph<Directed<TCargo, TSpec> > >::Type>::Type&
-_getEdgeIdManager(Graph<Directed<TCargo, TSpec> >& g) {
-	return g.data_id_managerE;
+	SEQAN_CHECKPOINT
+	typedef Graph<Directed<TCargo, TSpec> > TGraph;
+	typedef typename EdgeIdHandler<TGraph>::Type TEdgeIdManager;
+	return const_cast<TEdgeIdManager&>(g.data_id_managerE);
 }
 
 

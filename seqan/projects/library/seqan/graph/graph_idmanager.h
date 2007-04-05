@@ -7,10 +7,6 @@ namespace SEQAN_NAMESPACE_MAIN
 // IdManager
 //////////////////////////////////////////////////////////////////////////////
 
-// Default Id Manager
-template<typename TIdType = unsigned int, typename TSpec = Default>
-class IdManager;
-
 /**
 .Class.IdManager:
 ..cat:Graph
@@ -100,29 +96,6 @@ struct Spec<IdManager<TIdType, TSpec> const>
 {
 	typedef TSpec Type;
 };
-
-//////////////////////////////////////////////////////////////////////////////
-// Graph - Metafunctions that require the Id Manager
-//////////////////////////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////////////////////////////////
-
-/**
-.Metafunction.IdHandler:
-..summary:Type of an object that represents an Id Manager.
-..signature:IdHandler<T, TIdType>::Type
-..param.T:Type T must be an edge stump. All graphs currently use pointer to edge stumps as edge descriptors.
-..returns.param.Type:IdManager type.
-..remarks.text:The exact IdManager type depends on the edge stump.
-If the edge stump is id-free the IdManager simply counts edge ids, 
-otherwise it manages a list of free and used ids.
-..example.code:IdHandler<EdgeStump<int, WithoutEdgeId>, int>::Type idm; //idm is an simple Id Manager that solely counts ids
-*/
-template<typename T, typename TIdType>
-struct IdHandler {
-	typedef IdManager<TIdType> Type;
-};
-
 
 //////////////////////////////////////////////////////////////////////////////
 // FUNCTIONS

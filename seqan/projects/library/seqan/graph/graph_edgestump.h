@@ -289,18 +289,6 @@ struct Spec<EdgeStump<TCargo, TList, TSource, TId, TSpec> const>
 };
 
 //////////////////////////////////////////////////////////////////////////////
-
-///.Metafunction.IdHandler.param.T.type:Class.EdgeStump
-
-
-template<typename TCargo, bool TList, bool TSource, typename TSpec, typename TIdType>
-struct IdHandler<EdgeStump<TCargo, TList, TSource, false, TSpec>, TIdType> {
-	// Dummy IdManager
-	typedef IdManager<void> Type;
-};
-
-
-//////////////////////////////////////////////////////////////////////////////
 // FUNCTIONS
 //////////////////////////////////////////////////////////////////////////////
 
@@ -940,7 +928,6 @@ void
 _assignId(EdgeStump<TCargo, TList, TSource, false, TSpec>* es, 
 		  TId2 const id) 
 {
-	SEQAN_CHECKPOINT
 	// No id -> does nothing
 }
 
@@ -951,7 +938,6 @@ void
 _assignId(EdgeStump<TCargo, TList, TSource, false, TreeTag>* es, 
 		  TId2 const id) 
 {
-	SEQAN_CHECKPOINT
 	// For a tree do nothing, child id = tree id
 }
 
@@ -981,7 +967,6 @@ template<typename TCargo, bool TList, bool TSource>
 inline typename Id<EdgeStump<TCargo, TList, TSource, false, TreeTag> const>::Type
 _getId(EdgeStump<TCargo, TList, TSource, false, TreeTag> const* es) 
 {
-	SEQAN_CHECKPOINT
 	// Child id = edge id in a tree
 	return es->data_target;
 }

@@ -18,6 +18,8 @@
 using namespace std;
 using namespace seqan;
 
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 void Test_IdManager() {
@@ -573,6 +575,7 @@ void Test_EdgeStump() {
 	SEQAN_TASSERT(target(&es_16_const) == 7)
 }
 
+
 //////////////////////////////////////////////////////////////////////////////
 
 void Test_Directed() {
@@ -599,6 +602,10 @@ void Test_Directed() {
 	
 	// Add edge
 	TEdgeDescriptor e1 =addEdge(g,v0,v0);
+	SEQAN_TASSERT(findEdge(g, v0, v0) == e1)
+	SEQAN_TASSERT(_getVertexString(g)[0] == e1)
+	SEQAN_TASSERT(getIdUpperBound(_getVertexIdManager(g)) == 1)
+	SEQAN_TASSERT(getIdUpperBound(_getEdgeIdManager(g)) == 1)
 	SEQAN_TASSERT(targetVertex(g, e1) == 0)
 	SEQAN_TASSERT(sourceVertex(g, e1) == 0)  //Expensive in standard graph!
 	SEQAN_TASSERT(numEdges(g) == 1)
@@ -862,6 +869,10 @@ void Test_Undirected() {
 	// TEdgeDescriptor e1 =addEdge(g,v0,v0);  // Self edges are not allowed in undirected graphs
 	TVertexDescriptor v1 = addVertex(g);
 	TEdgeDescriptor e =addEdge(g,0,1);
+	SEQAN_TASSERT(findEdge(g, 0, 1) == e)
+	SEQAN_TASSERT(_getVertexString(g)[0] == e)
+	SEQAN_TASSERT(getIdUpperBound(_getVertexIdManager(g)) == 2)
+	SEQAN_TASSERT(getIdUpperBound(_getEdgeIdManager(g)) == 1)
 	SEQAN_TASSERT(v1 == 1)
 	SEQAN_TASSERT(numVertices(g) == 2)
 	SEQAN_TASSERT(targetVertex(g, e) == 1)
@@ -903,7 +914,7 @@ void Test_Undirected() {
 	strm.close();
 
 	// Remove edges
-	removeEdge(g,3,1);
+	removeEdge(g,my_edge);
 	removeEdge(g,0,1);
 	SEQAN_TASSERT(numEdges(g) == 2)
 
@@ -1200,6 +1211,11 @@ void Test_Automaton() {
 
 	// Add edge
 	TEdgeDescriptor e1 =addEdge(g,v0,v0,'a');
+	SEQAN_TASSERT(findEdge(g, 0, 'a') == e1)
+	SEQAN_TASSERT(&_getVertexString(g)[0].data_edge[0] == e1)
+	SEQAN_TASSERT(getIdUpperBound(_getVertexIdManager(g)) == 1)
+	SEQAN_TASSERT(getIdUpperBound(_getEdgeIdManager(g)) == 1)
+	SEQAN_TASSERT(_getId(e1) == 0)
 	SEQAN_TASSERT(_getId(e1) == 0)
 	SEQAN_TASSERT(targetVertex(g, e1) == 0)
 	SEQAN_TASSERT(sourceVertex(g, e1) == 0) 
@@ -1592,6 +1608,7 @@ void Test_WordGraph() {
 
 	// Add edge
 	TEdgeDescriptor e1 =addEdge(g,v0,v3,"ag");
+	SEQAN_TASSERT(findEdge(g,v0,'a') == e1)
 	SEQAN_TASSERT(_getId(e1) == 0)
 	// First letter -> edge label, all other letters into the cargo
 	SEQAN_TASSERT(getCargo(e1) == "g")
@@ -1612,6 +1629,9 @@ void Test_WordGraph() {
 	SEQAN_TASSERT(targetVertex(g, e2) == 5)
 	SEQAN_TASSERT(sourceVertex(g, e2) == 0)
 	SEQAN_TASSERT(numEdges(g) == 2)
+	removeEdge(g,0,5,String<Dna>("g"));
+	SEQAN_TASSERT(numEdges(g) == 1)
+	e2 =addEdge(g,0,5,"g");
 	SEQAN_TASSERT(outDegree(g, v0) == 2)	
 	SEQAN_TASSERT(inDegree(g, 5) == 1)
 	SEQAN_TASSERT(degree(g, 0) == 2)
@@ -1691,6 +1711,9 @@ void Test_Tree() {
 	SEQAN_TASSERT(empty(g) == false)
 	TVertexDescriptor childC1 = addChild(g,rootV);
 	TEdgeDescriptor childC1e = findEdge(g, rootV, childC1);
+	SEQAN_TASSERT(_getVertexString(g)[0] == childC1e)
+	SEQAN_TASSERT(getIdUpperBound(_getVertexIdManager(g)) == 2)
+	SEQAN_TASSERT(getIdUpperBound(_getEdgeIdManager(g)) == 2)
 	SEQAN_TASSERT(targetVertex(g, childC1e) == childC1) // Target in a tree = child
 	SEQAN_TASSERT(sourceVertex(g, childC1e) == rootV)  // Source in a tree = parent
 	SEQAN_TASSERT(childVertex(g, childC1e) == childC1)  // Shortcuts
@@ -1847,6 +1870,8 @@ void Test_Tree() {
 //////////////////////////////////////////////////////////////////////////////
 
 void Test_Alignment() {
+//____________________________________________________________________________
+// Alignment without edge weights
 	typedef String<Dna> TString;
 	typedef StringSet<TString, IdHolder<> > TStringSet;
 	typedef Graph<Alignment<TStringSet, void> > TGraph;
@@ -1858,16 +1883,23 @@ void Test_Alignment() {
 	TStringSet str;
 	
 	TString str0("acaagtaacataaaaaaaaaaaaaaaacccccccccttttttttaaaaa");
-	TId id0 = addString(str, str0);
+	TId id0 = assignValueById(str, str0);
 
 	TString str1("cccaaagggtttttccccccccccccttttttttttaaaaaaagggggggg");
-	TId id1 = addString(str, str1);
+	TId id1 = assignValueById(str, str1);
 
 	TString str2("cacatgtaatcatgggggggggccccccttttaaaaaaaaaaatttt");
-	TId id2 = addString(str, str2);
+	TId id2 = assignValueById(str, str2);
 
 
 	TGraph g(str);
+	SEQAN_TASSERT(getStringSet(g)[0] == str0)
+	SEQAN_TASSERT(getStringSet(g)[1] == str1)
+	SEQAN_TASSERT(stringSet(g)[2] == str2)
+	assignStringSet(g, str);
+	SEQAN_TASSERT(getStringSet(g)[0] == str0)
+	SEQAN_TASSERT(getStringSet(g)[1] == str1)
+	SEQAN_TASSERT(stringSet(g)[2] == str2)
 	SEQAN_TASSERT(numEdges(g) == 0)
 	SEQAN_TASSERT(numVertices(g) == 0)
 	SEQAN_TASSERT(empty(g) == true)
@@ -1879,9 +1911,16 @@ void Test_Alignment() {
 	SEQAN_TASSERT(degree(g, 0) == 0)
 	SEQAN_TASSERT(numVertices(g) == 1)
 	SEQAN_TASSERT(empty(g) == false)
+	SEQAN_TASSERT(sequenceId(g, v0) == id1)
+	SEQAN_TASSERT(label(g, v0) == "cc")
+	SEQAN_TASSERT(segmentBegin(g, v0) == 0)
+	SEQAN_TASSERT(segmentLength(g, v0) == 2)
 
 	TVertexDescriptor v1 = addVertex(g, id2, 0, 5);
 	TEdgeDescriptor e =addEdge(g,0,1);
+	SEQAN_TASSERT(_getVertexString(g)[0] == e)
+	SEQAN_TASSERT(getIdUpperBound(_getVertexIdManager(g)) == 2)
+	SEQAN_TASSERT(getIdUpperBound(_getEdgeIdManager(g)) == 1)
 	SEQAN_TASSERT(v1 == 1)
 	SEQAN_TASSERT(numVertices(g) == 2)
 	SEQAN_TASSERT(targetVertex(g, e) == 1)
@@ -1997,6 +2036,38 @@ void Test_Alignment() {
 	SEQAN_TASSERT(getValue(mat,0*len+2) == getValue(mat,2*len+0))
 	SEQAN_TASSERT(getValue(mat,1*len+4) == getValue(mat,4*len+1))
 	SEQAN_TASSERT(getValue(mat,2*len+4) == getValue(mat,4*len+2))
+
+//____________________________________________________________________________
+// Alignments with edge weights
+	typedef Graph<Alignment<TStringSet> > TGraph2;
+	typedef VertexDescriptor<TGraph2>::Type TVertexDescriptor2;
+	typedef EdgeDescriptor<TGraph2>::Type TEdgeDescriptor2;
+
+
+	TGraph2 g2(str);
+	SEQAN_TASSERT(numEdges(g2) == 0)
+	SEQAN_TASSERT(numVertices(g2) == 0)
+	SEQAN_TASSERT(empty(g2) == true)
+
+	TVertexDescriptor2 v20 = addVertex(g2, id1,0, 2);
+	TVertexDescriptor2 v21 = addVertex(g2, id2, 0, 5);
+	SEQAN_TASSERT(v20 == 0)
+	SEQAN_TASSERT(v21 == 1)
+	TEdgeDescriptor2 e2 =addEdge(g2,0,1, 100);
+	SEQAN_TASSERT(getCargo(e2) == 100)
+	SEQAN_TASSERT(numEdges(g2) == 1)
+	removeEdge(g2,e2);
+	SEQAN_TASSERT(numEdges(g2) == 0)
+	e2 =addEdge(g2,0,1, 1005);
+	SEQAN_TASSERT(numEdges(g2) == 1)
+	removeOutEdges(g2,0);
+	SEQAN_TASSERT(numEdges(g2) == 0)
+	e2 =addEdge(g2,0,1, 1005);
+	SEQAN_TASSERT(findEdge(g2, 0, 1) == e2)
+	SEQAN_TASSERT(numEdges(g2) == 1)
+	removeInEdges(g2,0);
+	SEQAN_TASSERT(numEdges(g2) == 0)
+
 
 
 	// Vertex Iterator
@@ -2132,90 +2203,94 @@ void Test_StringSet() {
 
 	TStringSet str;
 	String<char> bla("a");
-	TId id0 = addString(str, bla);
+	TId id0 = assignValueById(str, bla);
 	SEQAN_TASSERT(id0 == 0)
 	SEQAN_TASSERT(length(str) == 1)
 	SEQAN_TASSERT(str[0] == "a")
-	SEQAN_TASSERT(getString(str, id0) == "a")
+	SEQAN_TASSERT(getValueById(str, id0) == "a")
 	String<char> bla1("b");
-	TId id1 = addString(str, bla1);
+	TId id1 = assignValueById(str, bla1);
 	SEQAN_TASSERT(id1 == 1)
 	SEQAN_TASSERT(str[1] == "b")
 	SEQAN_TASSERT(length(str) == 2)
-	SEQAN_TASSERT(getString(str, id1) == "b")
+	SEQAN_TASSERT(getValueById(str, id1) == "b")
 	String<char> bla2("c");
-	TId id2 = addString(str, bla2);
+	TId id2 = assignValueById(str, bla2);
 	SEQAN_TASSERT(id2 == 2)
 	SEQAN_TASSERT(str[2] == "c")
 	SEQAN_TASSERT(length(str) == 3)
-	SEQAN_TASSERT(getString(str, id2) == "c")
+	SEQAN_TASSERT(getValueById(str, id2) == "c")
 	String<char> bla3("d");
-	TId id3 = addString(str, bla3);
+	TId id3 = assignValueById(str, bla3);
 	SEQAN_TASSERT(id3 == 3)
 	SEQAN_TASSERT(str[3] == "d")
 	SEQAN_TASSERT(length(str) == 4)
-	SEQAN_TASSERT(getString(str, id3) == "d")
-	removeString(str,id1);
-	SEQAN_TASSERT(getString(str, id0) == "a")
-	SEQAN_TASSERT(getString(str, id1) == "")
-	SEQAN_TASSERT(getString(str, id2) == "c")
-	SEQAN_TASSERT(getString(str, id3) == "d")
+	SEQAN_TASSERT(getValueById(str, id3) == "d")
+	removeValueById(str,id1);
+	SEQAN_TASSERT(getValueById(str, id0) == "a")
+	SEQAN_TASSERT(getValueById(str, id1) == "")
+	SEQAN_TASSERT(getValueById(str, id2) == "c")
+	SEQAN_TASSERT(getValueById(str, id3) == "d")
 	SEQAN_TASSERT(length(str) == 3)
-	removeString(str,id2);
-	SEQAN_TASSERT(getString(str, id0) == "a")
-	SEQAN_TASSERT(getString(str, id1) == "")
-	SEQAN_TASSERT(getString(str, id2) == "")
-	SEQAN_TASSERT(getString(str, id3) == "d")
+	removeValueById(str,id2);
+	SEQAN_TASSERT(getValueById(str, id0) == "a")
+	SEQAN_TASSERT(getValueById(str, id1) == "")
+	SEQAN_TASSERT(getValueById(str, id2) == "")
+	SEQAN_TASSERT(getValueById(str, id3) == "d")
 	SEQAN_TASSERT(length(str) == 2)
-	removeString(str,id3);
-	SEQAN_TASSERT(getString(str, id0) == "a")
-	SEQAN_TASSERT(getString(str, id1) == "")
-	SEQAN_TASSERT(getString(str, id2) == "")
-	SEQAN_TASSERT(getString(str, id3) == "")
+	removeValueById(str,id3);
+	SEQAN_TASSERT(getValueById(str, id0) == "a")
+	SEQAN_TASSERT(getValueById(str, id1) == "")
+	SEQAN_TASSERT(getValueById(str, id2) == "")
+	SEQAN_TASSERT(getValueById(str, id3) == "")
 	SEQAN_TASSERT(length(str) == 1)
-	id1 = addString(str, bla1);
-	id2 = addString(str, bla2);
-	id3 = addString(str, bla3);	
-	SEQAN_TASSERT(getString(str, id0) == "a")
-	SEQAN_TASSERT(getString(str, id1) == "b")
-	SEQAN_TASSERT(getString(str, id2) == "c")
-	SEQAN_TASSERT(getString(str, id3) == "d")
+	id1 = assignValueById(str, bla1);
+	id2 = assignValueById(str, bla2);
+	id3 = assignValueById(str, bla3);	
+	SEQAN_TASSERT(getValueById(str, id0) == "a")
+	SEQAN_TASSERT(getValueById(str, id1) == "b")
+	SEQAN_TASSERT(getValueById(str, id2) == "c")
+	SEQAN_TASSERT(getValueById(str, id3) == "d")
 	SEQAN_TASSERT(length(str) == 4)
 	TStringSet subSet;
 	String<unsigned int> ids;
 	appendValue(ids, id1);
 	appendValue(ids, id3);
 	subset(str, subSet, ids);
-	SEQAN_TASSERT(getString(subSet, id0) == "")
-	SEQAN_TASSERT(getString(subSet, id1) == "b")
-	SEQAN_TASSERT(getString(subSet, id2) == "")
-	SEQAN_TASSERT(getString(subSet, id3) == "d")
+	SEQAN_TASSERT(getValueById(subSet, id0) == "")
+	SEQAN_TASSERT(getValueById(subSet, id1) == "b")
+	SEQAN_TASSERT(getValueById(subSet, id2) == "")
+	SEQAN_TASSERT(getValueById(subSet, id3) == "d")
+	SEQAN_TASSERT(subSet[0] == "b")
+	SEQAN_TASSERT(subSet[1] == "d")
 	SEQAN_TASSERT(length(subSet) == 2)
 	TStringSet subSet2;
 	String<unsigned int> ids2;
 	appendValue(ids2, id3);
 	subset(subSet, subSet2, ids2);
-	SEQAN_TASSERT(getString(subSet2, id0) == "")
-	SEQAN_TASSERT(getString(subSet2, id1) == "")
-	SEQAN_TASSERT(getString(subSet2, id2) == "")
-	SEQAN_TASSERT(getString(subSet2, id3) == "d")
+	SEQAN_TASSERT(getValueById(subSet2, id0) == "")
+	SEQAN_TASSERT(getValueById(subSet2, id1) == "")
+	SEQAN_TASSERT(getValueById(subSet2, id2) == "")
+	SEQAN_TASSERT(getValueById(subSet2, id3) == "d")
 	SEQAN_TASSERT(length(subSet2) == 1)
 	clear(subSet);
-	addString(subSet,subSet2, id3);
-	addString(subSet,str, id0);
-	SEQAN_TASSERT(getString(subSet, id0) == "a")
-	SEQAN_TASSERT(getString(subSet, id1) == "")
-	SEQAN_TASSERT(getString(subSet, id2) == "")
-	SEQAN_TASSERT(getString(subSet, id3) == "d")
+	assignValueById(subSet,subSet2, id3);
+	assignValueById(subSet,str, id0);
+	SEQAN_TASSERT(valueById(subSet, id0) == "a")
+	SEQAN_TASSERT(getValueById(subSet, id1) == "")
+	SEQAN_TASSERT(getValueById(subSet, id2) == "")
+	SEQAN_TASSERT(valueById(subSet, id3) == "d")
 	SEQAN_TASSERT(length(subSet) == 2)
 	String<char> bla5("f");
-	addString(subSet, bla5, id3);
-	SEQAN_TASSERT(getString(subSet, id3) == "f")
+	assignValueById(subSet, bla5, id3);
+	SEQAN_TASSERT(getValueById(subSet, id3) == "f")
 	SEQAN_TASSERT(length(subSet) == 2)
-	addString(subSet, bla3, 20);
-	SEQAN_TASSERT(getString(subSet, 20) == "d")
+	assignValueById(subSet, bla3, 20);
+	SEQAN_TASSERT(getValueById(subSet, 20) == "d")
 	SEQAN_TASSERT(length(subSet) == 3)
 }
+
+
 
 //////////////////////////////////////////////////////////////////////////////
 template <typename TGraphType>
@@ -3632,6 +3707,11 @@ void Test_TCoffee() {
 	read(strm,g,TCoffeeLib());
 	strm.close();
 
+	fstream strmW;
+	strmW.open(TEST_PATH "my_garfield.lib", ios_base::out | ios_base::trunc);
+	write(strmW,g,TCoffeeLib());
+	strmW.close();
+
 	//std::cout << g << std::endl;
 
 	fstream strm2;
@@ -3739,7 +3819,7 @@ int main()
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_iterator_dfs.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_algorithm.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_algorithm_tcoffee.h");
-
+	
 	SEQAN_TREPORT("TEST END")
 
 	return 0;

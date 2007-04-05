@@ -32,13 +32,13 @@ template<typename TAlphabet, typename TSpec>
 class Graph<Automaton<TAlphabet, String<TAlphabet>, WordGraph<TSpec> > > 
 {
 	public:
-		typedef typename Id<Graph>::Type TIdType;
-		typedef typename EdgeType<Graph>::Type TEdge;
+		typedef typename VertexIdHandler<Graph>::Type TVertexIdManager;
+		typedef typename EdgeIdHandler<Graph>::Type TEdgeIdManager;
 		typedef typename VertexDescriptor<Graph>::Type TVertexDescriptor;
-		typedef typename IdHandler<TEdge, TIdType>::Type TEdgeIdManager;
+		typedef typename EdgeType<Graph>::Type TEdge;	
 
 		String<AutomatonEdgeArray<TEdge, TAlphabet> > data_vertex;		// List of tables
-		IdManager<TIdType> data_id_managerV;
+		TVertexIdManager data_id_managerV;
 		TEdgeIdManager data_id_managerE;
 		TVertexDescriptor data_root;
 

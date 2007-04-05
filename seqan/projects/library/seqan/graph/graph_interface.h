@@ -42,7 +42,6 @@ struct Alignment;
 template<typename TSpec = Directed<> >
 class Graph;
 
-
 //////////////////////////////////////////////////////////////////////////////
 // General Graph Metafunction
 //////////////////////////////////////////////////////////////////////////////
@@ -193,31 +192,16 @@ struct EdgeType<Graph<Undirected<TCargo, WithoutEdgeId> > const> {
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TStringSet, typename TCargo, typename TSpec>
-struct EdgeType<Graph<Alignment<TStringSet, TCargo, TSpec> > > {
-	typedef EdgeStump<TCargo, true, true, true, TSpec> Type;
+struct EdgeType<Graph<Alignment<TStringSet, TCargo, TSpec> > const> {
+	typedef typename EdgeType<Graph<Undirected<TCargo, TSpec> > const>::Type Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TStringSet, typename TCargo, typename TSpec>
-struct EdgeType<Graph<Alignment<TStringSet, TCargo, TSpec> > const> {
-	typedef EdgeStump<TCargo, true, true, true, TSpec> const Type;
+struct EdgeType<Graph<Alignment<TStringSet, TCargo, TSpec> > > {
+	typedef typename EdgeType<Graph<Undirected<TCargo, TSpec> > >::Type Type;
 };
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TStringSet, typename TCargo>
-struct EdgeType<Graph<Alignment<TStringSet, TCargo, WithoutEdgeId> > > {
-	typedef EdgeStump<TCargo, true, true, false, WithoutEdgeId> Type;
-};
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TStringSet, typename TCargo>
-struct EdgeType<Graph<Alignment<TStringSet, TCargo, WithoutEdgeId> > const> {
-	typedef EdgeStump<TCargo, true, true, false, WithoutEdgeId> const Type;
-};
-
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -247,21 +231,39 @@ struct EdgeType<Graph<Automaton<TAlphabet, TCargo, WithoutEdgeId> > const> {
 	typedef EdgeStump<TCargo, false, false, false, WithoutEdgeId> const Type;
 };
 
-
 //////////////////////////////////////////////////////////////////////////////
 
 ///.Metafunction.Cargo.param.T.type:Class.Graph
 
 template<typename TSpec>
 struct Cargo<Graph<TSpec> > {
-	typedef typename Cargo<typename EdgeType<Graph<TSpec> >::Type>::Type TType;
+	typedef typename Cargo<typename EdgeType<Graph<TSpec> >::Type>::Type Type;
 };
 
 
 template<typename TSpec>
 struct Cargo<Graph<TSpec> const> {
-	typedef typename Cargo<typename EdgeType<Graph<TSpec> const>::Type>::Type TType;
+	typedef typename Cargo<typename EdgeType<Graph<TSpec> const>::Type>::Type Type;
 };
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+///.Metafunction.EdgeIdHandler.param.T.type:Class.Graph
+
+template<typename TSpec>
+struct EdgeIdHandler<Graph<TSpec> const> {
+	typedef typename EdgeIdHandler<typename EdgeType<Graph<TSpec> const>::Type>::Type Type;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TSpec>
+struct EdgeIdHandler<Graph<TSpec> > {
+	typedef typename EdgeIdHandler<typename EdgeType<Graph<TSpec> >::Type>::Type Type;
+};
+
 
 
 
@@ -283,20 +285,15 @@ struct Alphabet<Graph<Automaton<TAlphabet, TCargo, TSpec> > const> {
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename T>
-struct StringSetType;
-
-//////////////////////////////////////////////////////////////////////////////
-
 template<typename TStringSet, typename TCargo, typename TSpec>
-struct StringSetType<Graph<Alignment<TStringSet, TCargo, TSpec> > > {
+struct Host<Graph<Alignment<TStringSet, TCargo, TSpec> > > {
 	typedef TStringSet Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TStringSet, typename TCargo, typename TSpec>
-struct StringSetType<Graph<Alignment<TStringSet, TCargo, TSpec> > const> {
+struct Host<Graph<Alignment<TStringSet, TCargo, TSpec> > const> {
 	typedef TStringSet const Type;
 };
 
@@ -320,7 +317,6 @@ template <typename T>
 inline T const
 getInfinity()
 {
-SEQAN_CHECKPOINT
 	T * _tag = 0;
 	return supremumValueImpl(_tag);
 }

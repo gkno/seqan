@@ -15,8 +15,12 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 
-//////////////////////////////////////////////////////////////////////////////
 
+
+
+//////////////////////////////////////////////////////////////////////////////
+// T-Coffee Library Handling
+//////////////////////////////////////////////////////////////////////////////
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -160,7 +164,7 @@ _parse_readIdentifier(TFile & file)
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TFile, typename TStringSet, typename TCargo, typename TSpec>
-inline typename Value<typename StringSetType<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type>::Type&
+inline typename Value<TStringSet>::Type&
 _parse_readSequenceData(TFile & file,
 						Graph<Alignment<TStringSet, TCargo, TSpec> >& g)
 {
@@ -291,9 +295,9 @@ read(TFile & file,
 	for(unsigned int i=0; i<nSeq; ++i) {
 		std::cout << _parse_readIdentifier(file) << ", ";
 		std::cout << _parse_readNumber(file) << ", ";
-		TIdType id = addString(stringSet(g), _parse_readSequenceData(file,g));
+		TIdType id = assignValueById(stringSet(g), _parse_readSequenceData(file,g));
 		std::cout << id << ", ";
-		std::cout << getString(stringSet(g), id) << std::endl;
+		std::cout << getValueById(stringSet(g), id) << std::endl;
 		SEQAN_ASSERT(id < nSeq)
 		_parse_skipLine(file);
 	}
@@ -301,6 +305,53 @@ read(TFile & file,
 	_readLibrary(file,g);
 }
 
+template<typename TFile, typename TStringSet, typename TCargo, typename TSpec>
+void write(TFile & file, 
+		   Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
+		   TCoffeeLib) 
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;\
+	typedef typename Value<TStringSet>::Type TString;
+	typedef typename Size<TStringSet>::Type TSize;
+
+
+	_streamWrite(file, "! TC_LIB_FORMAT_01\n");
+	TSize len = length(getStringSet(g));
+	_streamPutInt(file, len);
+	_streamPut(file, '\n');
+	for(TSize i=0;i<len;++i) {
+		_streamWrite(file, "seq");
+		_streamPutInt(file, i);
+		_streamPut(file, ' ');
+		TString str = value(getStringSet(g), i);
+		_streamPutInt(file, length(str));
+		_streamPut(file, ' ');
+		_streamWrite(file, str);
+		_streamPut(file, '\n');
+	}
+
+	typedef typename Iterator<TGraph, EdgeIterator>::Type TIter;
+	TIter it(g);
+	for(;!atEnd(it);++it) {
+		TVertexDescriptor sV = sourceVertex(it);
+		TVertexDescriptor tV = targetVertex(it);
+		_streamPut(file, '#');
+		_streamPutInt(file, sequenceId(g,sV));
+		_streamPut(file, ' ');
+		_streamPutInt(file, sequenceId(g,tV));
+		_streamPut(file, '\n');		
+		_streamPutInt(file, segmentBegin(g,sV) + 1);
+		_streamPut(file, ' ');
+		_streamPutInt(file, segmentBegin(g,tV) + 1);
+		_streamPut(file, ' ');
+		_streamPutInt(file, getCargo(*it));
+		_streamPut(file, '\n');	
+	}
+	_streamWrite(file, "! SEQ_0_TO_N-1");
+}
 
 }// namespace SEQAN_NAMESPACE_MAIN
 

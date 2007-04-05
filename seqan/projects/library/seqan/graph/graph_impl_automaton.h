@@ -52,13 +52,13 @@ template<typename TAlphabet, typename TCargo, typename TSpec>
 class Graph<Automaton<TAlphabet, TCargo, TSpec> > 
 {
 	public:
-		typedef typename Id<Graph>::Type TIdType;
-		typedef typename EdgeType<Graph>::Type TEdge;
+		typedef typename VertexIdHandler<Graph>::Type TVertexIdManager;
+		typedef typename EdgeIdHandler<Graph>::Type TEdgeIdManager;
 		typedef typename VertexDescriptor<Graph>::Type TVertexDescriptor;
-		typedef typename IdHandler<TEdge, TIdType>::Type TEdgeIdManager;
+		typedef typename EdgeType<Graph>::Type TEdge;
 
 		String<AutomatonEdgeArray<TEdge, TAlphabet> > data_vertex;		// List of tables
-		IdManager<TIdType> data_id_managerV;
+		TVertexIdManager data_id_managerV;
 		TEdgeIdManager data_id_managerE;
 		TVertexDescriptor data_root;
 	
@@ -97,49 +97,34 @@ class Graph<Automaton<TAlphabet, TCargo, TSpec> >
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TAlphabet, typename TCargo, typename TSpec>
-inline String<AutomatonEdgeArray<typename EdgeType<Graph<Automaton<TAlphabet, TCargo, TSpec> > >::Type, TAlphabet> > const&
-_getVertexString(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g) {
-	return g.data_vertex;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TAlphabet, typename TCargo, typename TSpec>
 inline String<AutomatonEdgeArray<typename EdgeType<Graph<Automaton<TAlphabet, TCargo, TSpec> > >::Type, TAlphabet> >&
-_getVertexString(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g) {
-	return g.data_vertex;
+_getVertexString(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g) {
+	SEQAN_CHECKPOINT
+	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
+	typedef typename EdgeType<TGraph>::Type TEdge;
+	return const_cast<String<AutomatonEdgeArray<TEdge, TAlphabet> >&>(g.data_vertex);
 }
 
 /////////////////////////////////////////////////////////////////////////////
 
 template<typename TAlphabet, typename TCargo, typename TSpec>
-inline IdManager<typename Id<Graph<Automaton<TAlphabet, TCargo, TSpec> > >::Type, Default> const &
+inline typename VertexIdHandler<Graph<Automaton<TAlphabet, TCargo, TSpec> > >::Type&
 _getVertexIdManager(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g) {
-	return g.data_id_managerV;
+	SEQAN_CHECKPOINT
+	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
+	typedef typename VertexIdHandler<TGraph>::Type TVertexIdManager;
+	return const_cast<TVertexIdManager&>(g.data_id_managerV);
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TAlphabet, typename TCargo, typename TSpec>
-inline IdManager<typename Id<Graph<Automaton<TAlphabet, TCargo, TSpec> > >::Type, Default> &
-_getVertexIdManager(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g) {
-	return g.data_id_managerV;
-}
-
-/////////////////////////////////////////////////////////////////////////////
-
-template<typename TAlphabet, typename TCargo, typename TSpec>
-inline IdManager<typename Id<Graph<Automaton<TAlphabet, TCargo, TSpec> > >::Type, Default> const &
+inline typename EdgeIdHandler<Graph<Automaton<TAlphabet, TCargo, TSpec> > >::Type&
 _getEdgeIdManager(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g) {
-	return g.data_id_managerE;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TAlphabet, typename TCargo, typename TSpec>
-inline IdManager<typename Id<Graph<Automaton<TAlphabet, TCargo, TSpec> > >::Type, Default> &
-_getEdgeIdManager(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g) {
-	return g.data_id_managerE;
+	SEQAN_CHECKPOINT
+	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
+	typedef typename EdgeIdHandler<TGraph>::Type TEdgeIdManager;
+	return const_cast<TEdgeIdManager&>(g.data_id_managerE);
 }
 
 //////////////////////////////////////////////////////////////////////////////

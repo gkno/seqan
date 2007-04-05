@@ -960,7 +960,6 @@ class StringSet<TString, IdHolder<GenerousStorage<TSpec> > >
 		inline typename Reference<StringSet>::Type
 		operator [] (TPos pos)
 		{
-			SEQAN_CHECKPOINT
 			return value(*this, pos);
 		}
 
@@ -1008,11 +1007,83 @@ appendValue(StringSet<TString, IdHolder<TightStorage<TSpec> > >& me,
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.addString:
+.Function.getValueById:
 ..cat:Sequences
-..summary:Adds a new string to the StringSet and retrieves an id.
-..signature:addString(dest, str [,id])
-..signature:addString(dest, source, id)
+..summary:Retrieves a string from the StringSet given an id.
+..signature:getValueById(me, id)
+..param.me:A StringSet.
+...type:Class.StringSet
+..param.id:An id.
+...type:Metafunction.Id
+..returns:A reference to a string.
+..see:Function.assignValueById
+..see:Function.valueById
+*/
+
+template<typename TString, typename TSpec, typename TId>
+inline typename Reference<StringSet<TString, IdHolder<GenerousStorage<TSpec> > > >::Type
+getValueById(StringSet<TString, IdHolder<GenerousStorage<TSpec> > >& me, 
+			 TId const id) 
+{
+	SEQAN_CHECKPOINT
+	if (me.strings[id]!=0) return *me.strings[id];
+	else {
+		static TString tmp = "";
+		return tmp;
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TString, typename TSpec, typename TId>
+inline typename Reference<StringSet<TString, IdHolder<TightStorage<TSpec> > > >::Type
+getValueById(StringSet<TString, IdHolder<TightStorage<TSpec> > >&me, 
+			 TId const id) 
+{
+	SEQAN_CHECKPOINT
+	for(unsigned int i=0;i<length(me.strings);++i) {
+		if ((TId) me.ids[i] == (TId) id) {
+			return value(me, i);
+		}
+	}
+	static TString tmp = "";
+	return tmp;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.valueById:
+..cat:Sequences
+..summary:Retrieves a string from the StringSet given an id.
+..signature:valueById(me, id)
+..param.me:A StringSet.
+...type:Class.StringSet
+..param.id:An id.
+...type:Metafunction.Id
+..returns:A reference to a string.
+..see:Function.assignValueById
+..see:Function.getValueById
+*/
+
+template<typename TString, typename TSpec, typename TId>
+inline typename Reference<StringSet<TString, TSpec> >::Type
+valueById(StringSet<TString, TSpec>& me, 
+		  TId const id) 
+{
+	SEQAN_CHECKPOINT
+	return getValueById(me, id);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+
+/**
+.Function.assignValueById:
+..cat:Sequences
+..summary:Adds a new string to the StringSet and returns an id.
+..signature:assignValueById(dest, str, [id])
+..signature:assignValueById(dest, source, id)
 ..param.dest:A StringSet.
 ...type:Class.StringSet
 ..param.source:A StringSet.
@@ -1023,14 +1094,14 @@ appendValue(StringSet<TString, IdHolder<TightStorage<TSpec> > >& me,
 ...type:Metafunction.Id
 ..returns:A new id
 ...type:Metafunction.Id
-..see:Function.appendValue
-..see:Function.getString
+..see:Function.getValueById
+..see:Function.valueById
 */
 
 template<typename TString, typename TSpec, typename TString2>
 inline typename Id<StringSet<TString, IdHolder<TSpec> > >::Type 
-addString(StringSet<TString, IdHolder<TSpec> >& me, 
-		  TString2& obj) 
+assignValueById(StringSet<TString, IdHolder<TSpec> >& me,
+				TString2& obj) 
 {
 	SEQAN_CHECKPOINT
 	appendValue(me, obj);
@@ -1039,11 +1110,11 @@ addString(StringSet<TString, IdHolder<TSpec> >& me,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TString, typename TSpec, typename TId, typename TString2>
+template<typename TString, typename TSpec, typename TId>
 inline typename Id<StringSet<TString, IdHolder<GenerousStorage<TSpec> > > >::Type 
-addString(StringSet<TString, IdHolder<GenerousStorage<TSpec> > >& me, 
-		  TString2& obj,
-		  TId id) 
+assignValueById(StringSet<TString, IdHolder<GenerousStorage<TSpec> > >& me, 
+				TString& obj,
+				TId id) 
 {
 	SEQAN_CHECKPOINT
 	if (id >= (TId) length(me.strings)) fill(me.strings, id+1, (TString*) 0);
@@ -1054,14 +1125,17 @@ addString(StringSet<TString, IdHolder<GenerousStorage<TSpec> > >& me,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TString, typename TSpec, typename TId, typename TString2>
+template<typename TString, typename TSpec, typename TId>
 inline typename Id<StringSet<TString, IdHolder<TightStorage<TSpec> > > >::Type 
-addString(StringSet<TString, IdHolder<TightStorage<TSpec> > >& me, 
-		  TString2& obj,
-		  TId id) 
+assignValueById(StringSet<TString, IdHolder<TightStorage<TSpec> > >& me, 
+				TString& obj,
+				TId id) 
 {
 	SEQAN_CHECKPOINT
-	for(unsigned int i=0;i<length(me.ids);++i) {
+	typedef StringSet<TString, IdHolder<TightStorage<TSpec> > > TStringSet;
+	typedef typename Size<TStringSet>::Type TSize;
+	
+	for(TSize i=0;i<length(me.ids);++i) {
 		if ((TId) me.ids[i] == (TId) id) {
 			me.strings[i]=&obj;
 			return id;
@@ -1074,99 +1148,35 @@ addString(StringSet<TString, IdHolder<TightStorage<TSpec> > >& me,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TString, typename TSpec, typename TId>
-inline typename Id<StringSet<TString, IdHolder<GenerousStorage<TSpec> > > >::Type 
-addString(StringSet<TString, IdHolder<GenerousStorage<TSpec> > >& dest, 
-		  StringSet<TString, IdHolder<GenerousStorage<TSpec> > >& source,
-		  TId id) 
+template<typename TString, typename TSpec1, typename TSpec2, typename TId>
+inline typename Id<StringSet<TString, TSpec1> >::Type 
+assignValueById(StringSet<TString, TSpec1>& dest, 
+				StringSet<TString, TSpec2>& source,
+				TId id) 
 {
 	SEQAN_CHECKPOINT
-	if (id >= length(dest.strings)) fill(dest.strings, id+1, (TString*) 0);
-	if (dest.strings[id] == (TString*) 0) ++dest.counter;
-	dest.strings[id] = source.strings[id];
-	return id;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TString, typename TSpec, typename TId>
-inline typename Id<StringSet<TString, IdHolder<TightStorage<TSpec> > > >::Type 
-addString(StringSet<TString, IdHolder<TightStorage<TSpec> > >& dest, 
-		  StringSet<TString, IdHolder<TightStorage<TSpec> > >& source,
-		  TId id) 
-{
-	SEQAN_CHECKPOINT
-	for(unsigned int i=0;i<length(source.ids);++i) {
-		if (source.ids[i] == id) {
-			appendValue(dest.strings, source.strings[i]);
-			appendValue(dest.ids, source.ids[i]);
-			return id;
-		}
-	}
-	return 0;
+	return assignValueById(dest, getValueById(source, id), id);
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.getString:
-..cat:Sequences
-..summary:Retrieves a string from the StringSet given an id.
-..signature:getString(me, id)
-..param.me:A StringSet.
-...type:Class.StringSet
-..param.id:An id.
-...type:Metafunction.Id
-..returns:A reference to a string.
-..see:Function.addString
-*/
-
-template<typename TString, typename TSpec, typename TId>
-inline typename Reference<StringSet<TString, IdHolder<GenerousStorage<TSpec> > > >::Type
-getString(StringSet<TString, IdHolder<GenerousStorage<TSpec> > >& me, 
-		  TId const id) 
-{
-	SEQAN_CHECKPOINT
-	return value(me, id);
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TString, typename TSpec, typename TId>
-inline typename Reference<StringSet<TString, IdHolder<TightStorage<TSpec> > > >::Type
-getString(StringSet<TString, IdHolder<TightStorage<TSpec> > >&me, 
-		  TId const id) 
-{
-	SEQAN_CHECKPOINT
-	for(unsigned int i=0;i<length(me.strings);++i) {
-		if ((TId) me.ids[i] == (TId) id) {
-			return value(me, i);
-		}
-	}
-	static TString tmp = "";
-	return tmp;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////
-
-/**
-.Function.removeString:
+.Function.removeValueById:
 ..cat:Sequences
 ..summary:Removes a string from the StringSet given an id.
-..signature:removeString(me, id)
+..signature:removeValueById(me, id)
 ..param.me:A StringSet.
 ...type:Class.StringSet
 ..param.id:An id.
 ...type:Metafunction.Id
 ..returns:void
-..see:Function.addString
+..see:Function.assignValueById
 */
 
 template<typename TString, typename TSpec, typename TId>
 inline void
-removeString(StringSet<TString, IdHolder<GenerousStorage<TSpec> > >& me, 
-			 TId const id) 
+removeValueById(StringSet<TString, IdHolder<GenerousStorage<TSpec> > >& me,
+				TId const id) 
 {
 	SEQAN_CHECKPOINT
 	if (me.strings[id] != (TString*) 0) --me.counter;
@@ -1182,13 +1192,16 @@ removeString(StringSet<TString, IdHolder<GenerousStorage<TSpec> > >& me,
 
 template<typename TString, typename TSpec, typename TId>
 inline void
-removeString(StringSet<TString, IdHolder<TightStorage<TSpec> > >& me, 
-			 TId const id) 
+removeValueById(StringSet<TString, IdHolder<TightStorage<TSpec> > >& me, 
+				TId const id) 
 {
 	SEQAN_CHECKPOINT
-	for(unsigned int i=0;i<length(me.strings);++i) {
+	typedef StringSet<TString, IdHolder<TightStorage<TSpec> > > TStringSet;
+	typedef typename Size<TStringSet>::Type TSize;
+
+	for(TSize i=0;i<length(me.strings);++i) {
 		if (me.ids[i] == id) {
-			for(unsigned int j=i+1;j<length(me.strings);++j) {
+			for(TSize j=i+1;j<length(me.strings);++j) {
 				me.strings[j-1] = me.strings[j];
 				me.ids[j-1] = me.ids[j];
 			}
@@ -1269,8 +1282,8 @@ length(StringSet<TString, IdHolder<GenerousStorage<TSpec> > > &me)
 ///.Function.value.param.object.type:Class.StringSet
 
 template<typename TString, typename TSpec, typename TPos>
-inline typename Reference<StringSet< TString, IdHolder<TSpec> > >::Type
-value(StringSet< TString, IdHolder<TSpec> > & me, 
+inline typename Reference<StringSet< TString, IdHolder<TightStorage<TSpec> > > >::Type
+value(StringSet< TString, IdHolder<TightStorage<TSpec> > >& me, 
 	  TPos pos)
 {
 	SEQAN_CHECKPOINT
@@ -1284,8 +1297,8 @@ value(StringSet< TString, IdHolder<TSpec> > & me,
 //////////////////////////////////////////////////////////////////////////////
 
 template < typename TString, typename TSpec, typename TPos >
-inline typename Reference< StringSet< TString, IdHolder<TSpec> > const >::Type
-value(StringSet< TString, IdHolder<TSpec> > const & me, 
+inline typename Reference<StringSet< TString, IdHolder<TightStorage<TSpec> > > const >::Type
+value(StringSet< TString, IdHolder<TightStorage<TSpec> > >const & me, 
 	  TPos pos)
 {
 	if (me.strings[pos]!=0) return *me.strings[pos];
@@ -1293,6 +1306,45 @@ value(StringSet< TString, IdHolder<TSpec> > const & me,
 		static TString tmp = "";
 		return tmp;
 	}
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TString, typename TSpec, typename TPos>
+inline typename Reference<StringSet< TString, IdHolder<GenerousStorage<TSpec> > > >::Type
+value(StringSet< TString, IdHolder<GenerousStorage<TSpec> > >& me, 
+	  TPos pos)
+{
+	SEQAN_CHECKPOINT
+	TPos count = 0;
+	for(TPos i=0;i < (TPos) length(me.strings);++i) {
+		if (me.strings[i]!=0) {
+			if (count == pos) return *me.strings[i];
+			else ++count;
+		}
+	}
+	static TString tmp = "";
+	return tmp;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template < typename TString, typename TSpec, typename TPos >
+inline typename Reference< StringSet< TString, IdHolder<GenerousStorage<TSpec> > > const >::Type
+value(StringSet< TString, IdHolder<GenerousStorage<TSpec> > > const & me, 
+	  TPos pos)
+{
+	SEQAN_CHECKPOINT
+	TPos count = 0;
+	for(TPos i=0;i < (TPos) length(me.strings);++i) {
+		if (me.strings[i]!=0) {
+			if (count == pos) return *me.strings[i];
+			else ++count;
+		}
+	}
+	static TString tmp = "";
+	return tmp;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1322,11 +1374,12 @@ subset(StringSet<TString, IdHolder<GenerousStorage<TSpec> > >& source,
 	SEQAN_CHECKPOINT
 	typedef StringSet<TString, IdHolder<GenerousStorage<TSpec> > > TStringSet;
 	typedef typename Id<TStringSet>::Type TId;
+	typedef typename Size<TStringSet>::Type TSize;
 
 	clear(dest);
 	dest.counter = len;
 	fill(dest.strings, length(source.strings), (TString*) 0);
-	for(unsigned int i=0;i<len;++i) dest.strings[ids[i]] = source.strings[ids[i]];
+	for(TSize i=0;i<len;++i) dest.strings[ids[i]] = source.strings[ids[i]];
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1341,10 +1394,11 @@ subset(StringSet<TString, IdHolder<TightStorage<TSpec> > >& source,
 	SEQAN_CHECKPOINT
 	typedef StringSet<TString, IdHolder<TightStorage<TSpec> > > TStringSet;
 	typedef typename Id<TStringSet>::Type TId;
+	typedef typename Size<TStringSet>::Type TSize;
 
 	clear(dest);
 	TLength upperBound = length(source.ids);
-	for(unsigned int i=0;i<len;++i) {
+	for(TSize i=0;i<len;++i) {
 		TId id = ids[i];
 		if ((upperBound > id) &&
 			(source.ids[id] == id)) {
@@ -1369,8 +1423,8 @@ subset(StringSet<TString, IdHolder<TightStorage<TSpec> > >& source,
 template <typename TString, typename TSpec, typename TIds>
 inline void
 subset(StringSet<TString, IdHolder<TSpec> >& source,
-		StringSet<TString, IdHolder<TSpec> >& dest,
-		TIds ids)
+	   StringSet<TString, IdHolder<TSpec> >& dest,
+	   TIds ids)
 {
 	SEQAN_CHECKPOINT
 	subset(source,dest,ids,length(ids));

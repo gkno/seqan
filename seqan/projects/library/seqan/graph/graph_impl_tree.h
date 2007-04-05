@@ -28,15 +28,15 @@ template<typename TCargo, typename TSpec>
 class Graph<Tree<TCargo, TSpec> > 
 {
 	public:
-		typedef typename Id<Graph>::Type TIdType;
-		typedef typename EdgeType<Graph>::Type TEdgeStump;	
+		typedef typename VertexIdHandler<Graph>::Type TVertexIdManager;
 		typedef typename VertexDescriptor<Graph>::Type TVertexDescriptor;
+		typedef typename EdgeType<Graph>::Type TEdgeStump;	
 		typedef Allocator<SinglePool<sizeof(TEdgeStump)> > TAllocator;
 		
 		TVertexDescriptor data_root;
 		String<TEdgeStump*> data_vertex;			// Pointers to EdgeStumpT lists
 		String<TVertexDescriptor> data_parent;		// Map to the parents of each node
-		IdManager<TIdType> data_id_managerV;
+		TVertexIdManager data_id_managerV;
 		TAllocator data_allocator;
 		
 
@@ -76,20 +76,16 @@ class Graph<Tree<TCargo, TSpec> >
 // INTERNAL FUNCTIONS
 //////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TCargo, typename TSpec>
-inline String<typename EdgeType<Graph<Tree<TCargo, TSpec> > >::Type*> const&
-_getVertexString(Graph<Tree<TCargo, TSpec> > const& g) {
-	return g.data_vertex;
-}
 
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TCargo, typename TSpec>
 inline String<typename EdgeType<Graph<Tree<TCargo, TSpec> > >::Type*>&
-_getVertexString(Graph<Tree<TCargo, TSpec> >& g) {
-	return g.data_vertex;
+_getVertexString(Graph<Tree<TCargo, TSpec> > const& g) {
+	SEQAN_CHECKPOINT
+	typedef Graph<Tree<TCargo, TSpec> > TGraph;
+	typedef typename EdgeType<TGraph>::Type TEdgeStump;
+	return const_cast<String<TEdgeStump*>&>(g.data_vertex);
 }
 
 /////////////////////////////////////////////////////////////////////////////

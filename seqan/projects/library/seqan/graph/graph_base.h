@@ -69,6 +69,36 @@ struct Alphabet;
 
 
 //////////////////////////////////////////////////////////////////////////////
+
+/**
+.Metafunction.EdgeIdHandler:
+..summary:Type of an object that represents an Id Manager.
+..signature:EdgeIdHandler<T>::Type
+..param.T:A graph.
+...type:Class.Graph
+..returns.param.Type:IdManager type.
+..remarks.text:The exact IdManager type depends on the edge stump.
+If the edge stump is id-free the IdManager simply counts edge ids, 
+otherwise it manages a list of free and used ids.
+*/
+template<typename T>
+struct EdgeIdHandler;
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Metafunction.VertexIdHandler:
+..summary:Type of an object that represents an Id Manager.
+..signature:VertexIdHandler<T>::Type
+..param.T:A graph.
+..returns.param.Type:IdManager type.
+*/
+template<typename T>
+struct VertexIdHandler;
+
+
+//////////////////////////////////////////////////////////////////////////////
 // General Graph Tags
 //////////////////////////////////////////////////////////////////////////////
 
@@ -200,6 +230,39 @@ template<typename TCargo, bool TList, bool TSource, bool TId, typename TSpec>
 struct VertexDescriptor<EdgeStump<TCargo, TList, TSource, TId, TSpec> const> 
 {
 	typedef typename Id<EdgeStump<TCargo, TList, TSource, TId, TSpec> >::Type Type;
+};
+
+
+//////////////////////////////////////////////////////////////////////////////
+// Graph - Default Id Manager
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TIdType = unsigned int, typename TSpec = Default>
+class IdManager;
+
+//////////////////////////////////////////////////////////////////////////////
+
+///.Metafunction.EdgeIdHandler.param.T.type:Class.EdgeStump
+
+template<typename TCargo, bool TList, bool TSource, typename TSpec>
+struct EdgeIdHandler<EdgeStump<TCargo, TList, TSource, false, TSpec> > {
+	typedef IdManager<void> Type;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TCargo, bool TList, bool TSource, typename TSpec>
+struct EdgeIdHandler<EdgeStump<TCargo, TList, TSource, true, TSpec> > {
+	typedef IdManager<typename Id<EdgeStump<TCargo, TList, TSource, true, TSpec> >::Type> Type;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename T>
+struct VertexIdHandler {
+	typedef IdManager<> Type;
 };
 
 }// namespace SEQAN_NAMESPACE_MAIN
