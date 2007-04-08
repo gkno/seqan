@@ -72,7 +72,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			TCounterFilter				filter(inverter);
 			
             #ifdef SEQAN_DEBUG_INDEX
-                ::std::cout << "  invert suffix array\n";
+				::std::cerr << "  invert suffix array" << ::std::endl;
             #endif
 			inverter << sa;
 			SEQAN_PROMARK("Suffix-Array invertiert");
@@ -81,7 +81,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			TJoiner						joiner(bundle2(filter, shifter));
 			
             #ifdef SEQAN_DEBUG_INDEX
-                ::std::cout << "  de-invert suffix array\n";
+                ::std::cerr << "  de-invert suffix array" << ::std::endl;
             #endif
 			mapper << joiner;
 			SEQAN_PROMARK("Suffix-Array linearisiert");
@@ -229,7 +229,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			TCounterFilter				filter(inverter);
 			
             #ifdef SEQAN_DEBUG_INDEX
-                ::std::cout << "  invert suffix array\n";
+                ::std::cerr << "  invert suffix array" << ::std::endl;
             #endif
 			inverter << sa;
 			SEQAN_PROMARK("Suffix-Array invertiert");
@@ -238,7 +238,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			TJoiner						joiner(bundle2(filter, shifter));
 			
             #ifdef SEQAN_DEBUG_INDEX
-                ::std::cout << "  de-invert suffix array\n";
+                ::std::cerr << "  de-invert suffix array" << ::std::endl;
             #endif
 			mapper << joiner;
 			SEQAN_PROMARK("Suffix-Array linearisiert");
@@ -298,7 +298,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		#ifdef SEQAN_DEBUG_INDEX
 			if (sizeof(TSize) > 4)
-				::std::cout << "WARNING: TSize size is greater 4 (BWT)" << ::std::endl;
+				::std::cerr << "WARNING: TSize size is greater 4 (BWT)" << ::std::endl;
         #endif
 
 		TSize n = length(s);

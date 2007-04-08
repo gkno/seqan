@@ -1007,7 +1007,7 @@ SEQAN_CHECKPOINT
 	{
 		new_length = resizeSpace(host(me), 0, me_end_pos - (me_length - new_length), me_end_pos, tag);
 	}
-	setLength(me, new_length);
+	_setLength(me, new_length);
 	return new_length;
 }
 

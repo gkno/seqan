@@ -1065,7 +1065,7 @@ SEQAN_CHECKPOINT
 		typename Position<T>::Type me_length = length(me);
 		if (capacity(me) <= me_length)
 		{
-			TValue temp_copy = _value; //temp copy because resize could invalidate _value
+			typename Value<T>::Type temp_copy = _value; //temp copy because resize could invalidate _value
 			typename Size<T>::Type new_length = resize(me, me_length + 1, TExpand());
 			if (me_length < new_length)
 			{
@@ -1109,7 +1109,7 @@ struct _Insert_Value_2_String
 				TValue & _value)
 	{
 SEQAN_CHECKPOINT
-		TValue temp_copy = _value; //temp copy because resizeSpace could invalidate _value
+		typename Value<T>::Type temp_copy = _value; //temp copy because resizeSpace could invalidate _value
 		resizeSpace(me, 1, pos, pos, TExpand());
 		if ((typename Size<T>::Type) pos < length(me))
 		{

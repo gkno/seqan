@@ -332,15 +332,15 @@ namespace SEQAN_NAMESPACE_MAIN
 		allocate(me, tmp, pageSize(pf));
 		pf.begin = tmp;
 		#ifdef SEQAN_VVERBOSE
-			printf("allocPage: %x\n", (unsigned)tmp);
+			::std::cerr << "allocPage: " << ::std::hex << (unsigned)tmp << ::std::dec << ::std::endl;
 		#endif
 	}
 
 	template < typename TValue, typename TFile, typename TSpec, typename T > inline
 	void freePage(PageFrame<TValue, TFile, TSpec> &pf, T const & me) {
 		#ifdef SEQAN_VVERBOSE
-            if ((TValue*)pf.begin)
-			    printf("freePage:  %x\n", (unsigned)(TValue*)pf.begin);
+			if ((TValue*)pf.begin)
+				::std::cerr << "freePage:  " << ::std::hex << (unsigned)(TValue*)pf.begin << ::std::dec << ::std::endl;
 		#endif
         nukeCopies(pf.begin);
 		deallocate(me, (TValue*)pf.begin, pageSize(pf));
@@ -352,7 +352,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	bool readPage(int pageNo, PageFrame<TValue, TFile, TSpec> &pf, TFile &file) {
 		typedef typename Position<TFile>::Type pos_t;
 		#ifdef SEQAN_VVERBOSE
-			printf("readPage:  %x from page %d\n", (unsigned)(TValue*)pf.begin, pageNo);
+			::std::cerr << "readPage:  " << ::std::hex << (unsigned)(TValue*)pf.begin;
+			::std::cerr << " from page " << ::std::dec << pageNo << ::std::endl;
 		#endif
 		pf.dirty = false;
 		pf.status = pf.READING;
@@ -364,7 +365,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	bool writePage(PageFrame<TValue, TFile, TSpec> &pf, int pageNo, TFile &file) {
 		typedef typename Position<TFile>::Type pos_t;
 		#ifdef SEQAN_VVERBOSE
-			printf("writePage: %x from page %d\n", (unsigned)(TValue*)pf.begin, pageNo);
+			::std::cerr << "writePage: " << ::std::hex << (unsigned)(TValue*)pf.begin;
+			::std::cerr << " from page " << ::std::dec << pageNo << ::std::endl;
 		#endif
 		pf.status = pf.WRITING;
 //        resize(pf, pageSize(pf));
@@ -375,7 +377,8 @@ namespace SEQAN_NAMESPACE_MAIN
     bool readLastPage(int pageNo, PageFrame<TValue, TFile, TSpec> &pf, TFile &file, TSize size) {
 		typedef typename Position<TFile>::Type pos_t;
 		#ifdef SEQAN_VVERBOSE
-			printf("readPage:  %x from page %d size %d\n", (unsigned)(TValue*)pf.begin, pageNo, size);
+			::std::cerr << "readPage:  " << ::std::hex << (unsigned)(TValue*)pf.begin;
+			::std::cerr << " from page " << ::std::dec << pageNo << " size " << size << ::std::endl;
 		#endif
 		pf.dirty = false;
 		pf.status = pf.READY;
@@ -387,7 +390,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	bool writeLastPage(PageFrame<TValue, TFile, TSpec> &pf, int pageNo, TFile &file, TSize size) {
 		typedef typename Position<TFile>::Type pos_t;
 		#ifdef SEQAN_VVERBOSE
-			printf("writePage: %x from page %d size %d\n", (unsigned)(TValue*)pf.begin, pageNo, size);
+			::std::cerr << "writePage: " << ::std::hex << (unsigned)(TValue*)pf.begin;
+			::std::cerr << " from page " << ::std::dec << pageNo << " size " << size << ::std::endl;
 		#endif
 		pf.dirty = false;
 		pf.status = pf.READY;
@@ -449,7 +453,9 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Position<TFile>::Type pos_t;
         unsigned readSize = Min(dataSize - b.pageOfs, (unsigned)(b.end - b.begin));
 		#ifdef SEQAN_VVERBOSE
-			printf("readBucket:  %x from page %d at %d size %d\n", (unsigned)b.begin, pageNo, pageNo * pageSize + b.pageOfs, readSize);
+			::std::cerr << "readBucket:  " << ::std::hex << (unsigned)b.begin;
+			::std::cerr << " from page " << ::std::dec << pageNo << " at " << (pos_t)pageNo * (pos_t)pageSize + b.pageOfs;
+			::std::cerr << " size " << readSize << ::std::endl;
 		#endif
         if (readSize && readAt(file, b.begin, readSize, (pos_t)pageNo * (pos_t)pageSize + b.pageOfs)) {
             b.pageOfs += readSize;
@@ -464,7 +470,9 @@ namespace SEQAN_NAMESPACE_MAIN
 	bool writeBucket(PageBucket<TValue> &b, int pageNo, unsigned pageSize, TFile &file) {
 		typedef typename Position<TFile>::Type pos_t;
 		#ifdef SEQAN_VVERBOSE
-			printf("writeBucket:  %x from page %d at %d size %d\n", (unsigned)b.begin, pageNo, pageNo * pageSize + b.pageOfs, b.cur - b.begin);
+			::std::cerr << "writeBucket: " << ::std::hex << (unsigned)b.begin;
+			::std::cerr << " from page " << ::std::dec << pageNo << " at " << (pos_t)pageNo * (pos_t)pageSize + b.pageOfs;
+			::std::cerr << " size " << b.cur - b.begin << ::std::endl;
 		#endif
         if ((b.cur == b.begin) || writeAt(file, b.begin, b.cur - b.begin, (pos_t)pageNo * (pos_t)pageSize + b.pageOfs)) {
             b.pageOfs += b.cur - b.begin;
@@ -478,7 +486,9 @@ namespace SEQAN_NAMESPACE_MAIN
 	bool writeBucket(PageFrame<TValue, TFile, Dynamic<TSpec> > &pf, unsigned &pageOfs, TFile &file) {
 		typedef typename Position<TFile>::Type pos_t;
 		#ifdef SEQAN_VVERBOSE
-			printf("writeBucket:  %x from page %d at %d size %d\n", (unsigned)pf.begin, pf.pageNo, pf.pageNo * pageSize(pf) + pageOfs, size(pf));
+			::std::cerr << "writeBucket: " << ::std::hex << (unsigned)pf.begin;
+			::std::cerr << " from page " << ::std::dec << pf.pageNo << " at " << (pos_t)pf.pageNo * (pos_t)pageSize(pf) + pageOfs;
+			::std::cerr << " size " << size(pf) << ::std::endl;
 		#endif
         if (pf.end == pf.begin) return true;
         if (awriteAt(file, pf.begin, size(pf), (pos_t)pf.pageNo * (pos_t)pageSize(pf) + pageOfs, pf.request)) {
@@ -801,20 +811,20 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		inline void _dump() {
 			for(unsigned i = 0; i < _PriorityLevels; ++i) {
-                ::std::cout << "|";
+                ::std::cerr << "|";
                 PageLRUList::const_iterator I = lruList[i].end();
                 PageLRUList::const_iterator first = lruList[i].begin();
 				while (I != first) {
 					--I;
                     PageFrame &pf = (*this)[*I];
-                    ::std::cout << pf.pageNo;
-                    if (pf.dirty) ::std::cout << "*";
-                    else          ::std::cout << " ";
-                    if (pf.status == PageFrame::READY) ::std::cout << "  ";
-                    else                               ::std::cout << ". ";
+                    ::std::cerr << pf.pageNo;
+                    if (pf.dirty) ::std::cerr << "*";
+                    else          ::std::cerr << " ";
+                    if (pf.status == PageFrame::READY) ::std::cerr << "  ";
+                    else                               ::std::cerr << ". ";
 				};
             }
-            ::std::cout << ::std::endl;
+            ::std::cerr << ::std::endl;
 		}
 
         // Function is a functor which is called with a PageFrame object,
@@ -834,7 +844,7 @@ namespace SEQAN_NAMESPACE_MAIN
 				};
             }
 			#ifdef SEQAN_VVERBOSE
-				printf("ALL PAGES DIRTY OR IN USE (try to use const iterators) :-(\n");
+				::std::cerr << "ALL PAGES DIRTY OR IN USE (try to use const iterators) :-(" << ::std::endl;
 			#endif
 			return -1;
 		}
@@ -858,12 +868,12 @@ namespace SEQAN_NAMESPACE_MAIN
     {
         unsigned _pages         = enclosingBlocks(_size, (unsigned)_pageSize);
         if (!_pages) {
-            printf("equiDistantDistribution: _pages is null!\n");
+			::std::cerr << "equiDistantDistribution: _pages is null!" << ::std::endl;
             return false;
         }
 
         if (_bufferSize < _pages) {
-            printf("equiDistantDistribution: clusterBufferSize is too small -> raised to %d\n", _pages);
+			::std::cerr << "equiDistantDistribution: clusterBufferSize is too small -> raised to " << _pages << ::std::endl;
             _bufferSize = _pages;
         }
 
@@ -920,12 +930,12 @@ namespace SEQAN_NAMESPACE_MAIN
     {
         unsigned _pages         = enclosingBlocks(_size, (unsigned)_pageSize);
         if (!_pages) {
-            printf("equiDistantDistribution: _pages is null!\n");
+			::std::cerr << "equiDistantDistribution: _pages is null!" << ::std::endl;
             return 0;
         }
 
         if (_bufferSize < _pages) {
-            printf("equiDistantAlignedDistribution: clusterBufferSize is too small -> raised to %d\n", _pages);
+			::std::cerr << "equiDistantAlignedDistribution: clusterBufferSize is too small -> raised to " << _pages << ::std::endl;
             _bufferSize = _pages;
         }
 

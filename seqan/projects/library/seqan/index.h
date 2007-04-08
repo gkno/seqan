@@ -15,7 +15,6 @@
 // index construction algorithms
 
 #include <seqan/sequence.h>
-#include <seqan/sequence/sequence_multiple.h>
 #include <seqan/pipe.h>
 #include <seqan/modifier.h>
 

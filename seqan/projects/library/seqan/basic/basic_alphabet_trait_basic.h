@@ -662,6 +662,7 @@ SEQAN_CHECKPOINT
 	static long double const _value = - ::std::numeric_limits<long double>::infinity( );
 	return _value;
 }
+
 //////////////////////////////////////////////////////////////////////////////
 }// namespace SEQAN_NAMESPACE_MAIN
 

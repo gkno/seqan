@@ -9,6 +9,7 @@
 //#define SEQAN_DEBUG
 //#define SEQAN_TEST
 
+#include "test_index_creation.h"
 #include <seqan/index.h>
 
 

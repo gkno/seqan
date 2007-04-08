@@ -42,7 +42,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		stack_updown.push(TPair(0, 0));
 		stack_nextl.push(TPair(0, 0));
 
-		dest.undefinedValue = TPair(supremumValue<TSize>(), 0);		// undefined value for unused entries
+		dest.undefinedValue = TPair(SupremumValue<TSize>::VALUE, 0);		// undefined value for unused entries
 		resize(dest, length(lcpIn));
 		beginRead(lcpIn);
 		beginWrite(dest);
@@ -66,7 +66,7 @@ namespace SEQAN_NAMESPACE_MAIN
 				lastIndex_nextl = stack_nextl.top().i1;
 				push(dest, TPair(lastIndex_nextl, i + 1));					// childtab[top].nextl
 
-//				::std::cout << "nextl:\t\t\t" << TPair(lastIndex_nextl, i + 1) << ::std::endl;
+//				::std::cerr << "nextl:\t\t\t" << TPair(lastIndex_nextl, i + 1) << ::std::endl;
 				stack_nextl.pop();
 			}
 			stack_nextl.push(TPair(i + 1, lcp_i));
@@ -83,13 +83,13 @@ namespace SEQAN_NAMESPACE_MAIN
 				if (lcp_i <= top.i2 && top.i2 != lastIndex_updown.i2 && top.i1 != lastIndex_nextl) {
 					push(dest, TPair(top.i1, lastIndex_updown.i1));			// childtab[top].down
 
-//					::std::cout << "down:\t\t" << TPair(top.i1, lastIndex_updown.i1) << ::std::endl;			// childtab[top].down
+//					::std::cerr << "down:\t\t" << TPair(top.i1, lastIndex_updown.i1) << ::std::endl;			// childtab[top].down
 				}
 			}
 			if (lastIndex_updown.i1 != undef) {
 				push(dest, TPair(i, lastIndex_updown.i1));			// childtab[top].up goes to [top - 1]
 
-//				::std::cout << "up:\t" << TPair(i, lastIndex_updown.i1) << ::std::endl;
+//				::std::cerr << "up:\t" << TPair(i, lastIndex_updown.i1) << ::std::endl;
 				lastIndex_updown.i1 = undef;
 			}
 			stack_updown.push(TPair(i + 1, lcp_i));
@@ -238,7 +238,7 @@ namespace SEQAN_NAMESPACE_MAIN
 				lastIndex_nextl = stack_nextl.top().i1;
 				dest[i + 1] = lastIndex_nextl;						// childtab[top].nextl
 
-				::std::cout << "nextl:\t\t\t" << TPair(lastIndex_nextl, i + 1) << ::std::endl;
+				::std::cerr << "nextl:\t\t\t" << TPair(lastIndex_nextl, i + 1) << ::std::endl;
 				stack_nextl.pop();
 			}
 			stack_nextl.push(TPair(i + 1, lcp_i));
@@ -258,13 +258,13 @@ namespace SEQAN_NAMESPACE_MAIN
 				if (lcp_i <= top.i2 && top.i2 != lastIndex_updown.i2 /*&& top.i1 != lastIndex_nextl*/) {
 					dest[top.i1] = lastIndex_updown.i1;				// childtab[top].down
 
-//					::std::cout << "down:\t\t" << TPair(top.i1, lastIndex_updown.i1) << ::std::endl;			// childtab[top].down
+//					::std::cerr << "down:\t\t" << TPair(top.i1, lastIndex_updown.i1) << ::std::endl;			// childtab[top].down
 				}
 			}
 			if (lastIndex_updown.i1 != undef) {
 				dest[i] = lastIndex_updown.i1;						// childtab[top].up goes to [top - 1]
 
-//				::std::cout << "up:\t" << TPair(i, lastIndex_updown.i1) << ::std::endl;
+//				::std::cerr << "up:\t" << TPair(i, lastIndex_updown.i1) << ::std::endl;
 				lastIndex_updown.i1 = undef;
 			}
 			stack_updown.push(TPair(i + 1, lcp_i));
@@ -284,7 +284,7 @@ namespace SEQAN_NAMESPACE_MAIN
 				lastIndex_nextl = stack_nextl.top().i1;
 				dest[lastIndex_nextl] = i + 1;						// childtab[top].nextl
 
-//				::std::cout << "nextl:\t\t\t" << TPair(lastIndex_nextl, i + 1) << ::std::endl;
+//				::std::cerr << "nextl:\t\t\t" << TPair(lastIndex_nextl, i + 1) << ::std::endl;
 				stack_nextl.pop();
 			}
 			stack_nextl.push(TPair(i + 1, lcp_i));

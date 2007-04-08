@@ -73,7 +73,7 @@ namespace SEQAN_NAMESPACE_MAIN
     }
 
     inline bool open(FILE* &me, const char *fileName, int openMode) {
-		SEQAN_PROADD(PROOPENFILES, 1);
+		SEQAN_PROADD(SEQAN_PROOPENFILES, 1);
         return (me = fopen(fileName, _getCStyleOpenMode(openMode))) != NULL;
     }
 
@@ -82,12 +82,12 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
     inline bool openTemp(FILE* &me) {
-		SEQAN_PROSUB(PROOPENFILES, 1);
+		SEQAN_PROSUB(SEQAN_PROOPENFILES, 1);
         return (me = tmpfile()) != NULL;
     }
 
     inline bool close(FILE* me) {
-		SEQAN_PROSUB(PROOPENFILES, 1);
+		SEQAN_PROSUB(SEQAN_PROOPENFILES, 1);
         return fclose(me) == 0;
     }
 
@@ -111,19 +111,19 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template < typename TValue, typename TSize >
     inline bool read(FILE* me, TValue *memPtr, TSize const count) {
-        SEQAN_PROADD(PROIO, (sizeof(TValue) * count + PROPAGESIZE - 1) / PROPAGESIZE);
+        SEQAN_PROADD(SEQAN_PROIO, (sizeof(TValue) * count + SEQAN_PROPAGESIZE - 1) / SEQAN_PROPAGESIZE);
         SEQAN_PROTIMESTART(tw);
         bool result = fread(memPtr, sizeof(TValue), count, me) == count;
-        SEQAN_PROADD(PROCWAIT, SEQAN_PROTIMEDIFF(tw));
+        SEQAN_PROADD(SEQAN_PROCWAIT, SEQAN_PROTIMEDIFF(tw));
         return result;
     }
 
     template < typename TValue, typename TSize >
     inline bool write(FILE* me, TValue const *memPtr, TSize const count) {
-        SEQAN_PROADD(PROIO, (sizeof(TValue) * count + PROPAGESIZE - 1) / PROPAGESIZE);
+        SEQAN_PROADD(SEQAN_PROIO, (sizeof(TValue) * count + SEQAN_PROPAGESIZE - 1) / SEQAN_PROPAGESIZE);
         SEQAN_PROTIMESTART(tw);
         bool result = fwrite(memPtr, sizeof(TValue), count, me) == count;
-        SEQAN_PROADD(PROCWAIT, SEQAN_PROTIMEDIFF(tw));
+        SEQAN_PROADD(SEQAN_PROCWAIT, SEQAN_PROTIMEDIFF(tw));
         return result;
     }
 
@@ -131,10 +131,10 @@ namespace SEQAN_NAMESPACE_MAIN
     inline bool readAt(FILE* me, TValue *memPtr, TSize const count, TPos const fileOfs) {
 		typedef typename Position<FILE*>::Type pos_t;
 		seek(me, (pos_t)fileOfs * (pos_t)sizeof(TValue));
-        SEQAN_PROADD(PROIO, (sizeof(TValue) * count + PROPAGESIZE - 1) / PROPAGESIZE);
+        SEQAN_PROADD(SEQAN_PROIO, (sizeof(TValue) * count + SEQAN_PROPAGESIZE - 1) / SEQAN_PROPAGESIZE);
         SEQAN_PROTIMESTART(tw);
         bool result = fread(memPtr, sizeof(TValue), count, me) == count;
-        SEQAN_PROADD(PROCWAIT, SEQAN_PROTIMEDIFF(tw));
+        SEQAN_PROADD(SEQAN_PROCWAIT, SEQAN_PROTIMEDIFF(tw));
         return result;
     }
     
@@ -142,10 +142,10 @@ namespace SEQAN_NAMESPACE_MAIN
     inline bool writeAt(FILE* me, TValue const *memPtr, TSize const count, TPos const fileOfs) {
 		typedef typename Position<FILE*>::Type pos_t;
 		seek(me, (pos_t)fileOfs * (pos_t)sizeof(TValue));
-        SEQAN_PROADD(PROIO, (sizeof(TValue) * count + PROPAGESIZE - 1) / PROPAGESIZE);
+        SEQAN_PROADD(SEQAN_PROIO, (sizeof(TValue) * count + SEQAN_PROPAGESIZE - 1) / SEQAN_PROPAGESIZE);
         SEQAN_PROTIMESTART(tw);
         bool result = fwrite(memPtr, sizeof(TValue), count, me) == count;
-        SEQAN_PROADD(PROCWAIT, SEQAN_PROTIMEDIFF(tw));
+        SEQAN_PROADD(SEQAN_PROCWAIT, SEQAN_PROTIMEDIFF(tw));
         return result;
     }
 

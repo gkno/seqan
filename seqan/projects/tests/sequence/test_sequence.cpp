@@ -12,6 +12,7 @@ using namespace std;
 using namespace seqan;
 
 int mainTestString();
+int mainTestStringSet();
 int mainTestSegment();
 
 //////////////////////////////////////////////////////////////////////////////
@@ -21,6 +22,7 @@ int main()
 	SEQAN_TREPORT("TEST BEGIN")
 
 	mainTestString();
+	mainTestStringSet();
 	mainTestSegment();
 
 	SEQAN_TREPORT("TEST END")

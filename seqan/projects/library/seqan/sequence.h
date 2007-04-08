@@ -27,6 +27,7 @@
 
 #include <seqan/sequence/std_string.h>
 
+#include <seqan/sequence/sequence_multiple.h>
 #include <seqan/sequence/sequence_shortcuts.h>
 
 #endif //#ifndef SEQAN_HEADER_...

@@ -79,7 +79,7 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 
         bool open(char const *fileName, int openMode = OPEN_RDWR + OPEN_CREATE | OPEN_APPEND) {
-			SEQAN_PROADD(PROOPENFILES, 1);
+			SEQAN_PROADD(SEQAN_PROOPENFILES, 1);
             noBuffering = getExtraFlags(openMode | OPEN_ASYNC) & (FILE_FLAG_NO_BUFFERING | FILE_FLAG_OVERLAPPED);
             hFileAsync = CreateFile(fileName,
                                 getFileAccess(openMode | OPEN_ASYNC),
@@ -94,7 +94,7 @@ namespace SEQAN_NAMESPACE_MAIN
                 return false;
             }
             #ifdef SEQAN_VERBOSE
-                ::std::cout << "file opened asynchronously " << fileName << " handle " << ::std::hex << hFileAsync << ::std::dec << ::std::endl;
+                ::std::cerr << "file opened asynchronously " << fileName << " handle " << ::std::hex << hFileAsync << ::std::dec << ::std::endl;
             #endif
 
             if (noBuffering) {
@@ -110,7 +110,7 @@ namespace SEQAN_NAMESPACE_MAIN
                     return false;
                 }
 	            #ifdef SEQAN_VERBOSE
-                	::std::cout << "async file opened  " << fileName << " handle " << ::std::hex << hFile << ::std::dec << ::std::endl;
+                	::std::cerr << "async file opened  " << fileName << " handle " << ::std::hex << hFile << ::std::dec << ::std::endl;
                 #endif
             } else
                 hFile = hFileAsync;
@@ -139,30 +139,30 @@ namespace SEQAN_NAMESPACE_MAIN
         inline bool close() {
             BOOL result = true;
             #ifdef SEQAN_VERBOSE
-                ::std::cout << "files closed handles " << ::std::hex << hFileAsync << " and " << hFile << ::std::dec << ::std::endl;
+                ::std::cerr << "files closed handles " << ::std::hex << hFileAsync << " and " << hFile << ::std::dec << ::std::endl;
             #endif
             if (hFile != hFileAsync)
                 result &= CloseHandle(hFileAsync);
             result &= CloseHandle(hFile);
             hFileAsync = INVALID_HANDLE_VALUE;
             hFile = INVALID_HANDLE_VALUE;
-			SEQAN_PROSUB(PROOPENFILES, 1);
+			SEQAN_PROSUB(SEQAN_PROOPENFILES, 1);
             return result;
         }
 
         inline bool read(void *memPtr, _SizeType count) const {
-            SEQAN_PROADD(PROIO, (count + PROPAGESIZE - 1) / PROPAGESIZE);
+            SEQAN_PROADD(SEQAN_PROIO, (count + SEQAN_PROPAGESIZE - 1) / SEQAN_PROPAGESIZE);
             SEQAN_PROTIMESTART(tw);
 		    bool result = ReadFile(hFile, memPtr, count, &_transferedBytes, NULL);
-            SEQAN_PROADD(PROCWAIT, SEQAN_PROTIMEDIFF(tw));
+            SEQAN_PROADD(SEQAN_PROCWAIT, SEQAN_PROTIMEDIFF(tw));
             return result;
         }
 
         inline bool write(void const *memPtr, _SizeType count) const {
-            SEQAN_PROADD(PROIO, (count + PROPAGESIZE - 1) / PROPAGESIZE);
+            SEQAN_PROADD(SEQAN_PROIO, (count + SEQAN_PROPAGESIZE - 1) / SEQAN_PROPAGESIZE);
             SEQAN_PROTIMESTART(tw);
 		    bool result = WriteFile(hFile, memPtr, count, &_transferedBytes, NULL);
-            SEQAN_PROADD(PROCWAIT, SEQAN_PROTIMEDIFF(tw));
+            SEQAN_PROADD(SEQAN_PROCWAIT, SEQAN_PROTIMEDIFF(tw));
             return result;
         }
 
@@ -332,8 +332,8 @@ namespace SEQAN_NAMESPACE_MAIN
             &ofs.LowPart,
             &request.overlapped) || (me.error() == ERROR_IO_PENDING))
         {
-            SEQAN_PROADD(PROIO, (sizeof(TValue) * count + PROPAGESIZE - 1) / PROPAGESIZE);
-            SEQAN_PROADD(PROIWAIT, SEQAN_PROTIMEDIFF(tw));
+            SEQAN_PROADD(SEQAN_PROIO, (sizeof(TValue) * count + SEQAN_PROPAGESIZE - 1) / SEQAN_PROPAGESIZE);
+            SEQAN_PROADD(SEQAN_PROIWAIT, SEQAN_PROTIMEDIFF(tw));
             return true;
         }
         if (me.error() == ERROR_NO_SYSTEM_RESOURCES) {  // read synchronoulsy instead
@@ -365,8 +365,8 @@ namespace SEQAN_NAMESPACE_MAIN
             &ofs.LowPart,
             &request.overlapped) || (me.error() == ERROR_IO_PENDING))
         {
-            SEQAN_PROADD(PROIO, (sizeof(TValue) * count + PROPAGESIZE - 1) / PROPAGESIZE);
-            SEQAN_PROADD(PROIWAIT, SEQAN_PROTIMEDIFF(tw));
+            SEQAN_PROADD(SEQAN_PROIO, (sizeof(TValue) * count + SEQAN_PROPAGESIZE - 1) / SEQAN_PROPAGESIZE);
+            SEQAN_PROADD(SEQAN_PROIWAIT, SEQAN_PROTIMEDIFF(tw));
             return true;
         }
         if (me.error() == ERROR_NO_SYSTEM_RESOURCES) {  // write synchronoulsy instead
@@ -385,8 +385,8 @@ namespace SEQAN_NAMESPACE_MAIN
     inline bool waitFor(aiocb_win32 &request) {
         SEQAN_PROTIMESTART(tw);
 		if (!waitFor(request.xmitDone, 60000))
-            ::std::cout << "waitFor timeout\n";
-        SEQAN_PROADD(PROCWAIT, SEQAN_PROTIMEDIFF(tw));
+            ::std::cerr << "waitFor timeout" << ::std::endl;
+        SEQAN_PROADD(SEQAN_PROCWAIT, SEQAN_PROTIMEDIFF(tw));
         return true;
 	}
 
@@ -394,7 +394,7 @@ namespace SEQAN_NAMESPACE_MAIN
     inline bool waitFor(aiocb_win32 &request, TTime timeout_millis) {
         SEQAN_PROTIMESTART(tw);
 		bool result = waitFor(request.xmitDone, timeout_millis);
-        SEQAN_PROADD(PROCWAIT, SEQAN_PROTIMEDIFF(tw));
+        SEQAN_PROADD(SEQAN_PROCWAIT, SEQAN_PROTIMEDIFF(tw));
         return result;
 	}
 
@@ -406,7 +406,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
         SEQAN_PROTIMESTART(tw);
         DWORD result = WaitForMultipleObjects(count, &handles, false, timeout_millis);
-        SEQAN_PROADD(PROCWAIT, SEQAN_PROTIMEDIFF(tw));
+        SEQAN_PROADD(SEQAN_PROCWAIT, SEQAN_PROTIMEDIFF(tw));
         if (result >= WAIT_OBJECT_0 && result < WAIT_OBJECT_0 + count)
     		return result - WAIT_OBJECT_0;
         return count;
@@ -605,7 +605,7 @@ namespace SEQAN_NAMESPACE_MAIN
         if (!data)
 			::std::cerr << "AlignAllocator: Could not allocate memory of size " << ::std::hex << count * sizeof(TValue) << ::std::dec << ". (ErrNo=" << GetLastError() << ")" << ::std::endl;
         else
-            SEQAN_PROADD(PROMEMORY, sizeof(TValue) * count);
+            SEQAN_PROADD(SEQAN_PROMEMORY, sizeof(TValue) * count);
 	}
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -619,7 +619,7 @@ namespace SEQAN_NAMESPACE_MAIN
 				TagAllocateAligned const)
 	{
         if (data) {
-            SEQAN_PROSUB(PROMEMORY, sizeof(TValue) * count);
+            SEQAN_PROSUB(SEQAN_PROMEMORY, sizeof(TValue) * count);
 			VirtualFree(data, 0, MEM_RELEASE);
         }
 	}
@@ -649,7 +649,7 @@ namespace SEQAN_NAMESPACE_MAIN
         bool open(char const *fileName, int openMode = OPEN_RDWR + OPEN_CREATE | OPEN_APPEND) {
             handle = ::open(fileName, Base::getOFlag(openMode & ~OPEN_ASYNC), S_IREAD | S_IWRITE);
 			if (handle == -1) {
-				::std::cerr << "Open failed on file " << fileName << ". (" << strerror(errno) << ")" << ::std::endl;
+				::std::cerr << "Open failed on file " << fileName << ". (" << ::strerror(errno) << ")" << ::std::endl;
 				return false;
 			}
 
@@ -657,7 +657,7 @@ namespace SEQAN_NAMESPACE_MAIN
 				handleAsync = ::open(fileName, Base::getOFlag(openMode | OPEN_ASYNC & ~OPEN_CREATE & ~OPEN_APPEND), S_IREAD | S_IWRITE);
 				if (handleAsync == -1 || errno == EINVAL) {	// fall back to cached access
 					#ifdef SEQAN_DEBUG_OR_TEST_
-						::std::cerr << "Warning: Direct access openening failed. (" << strerror(errno) << ")" << ::std::endl;
+						::std::cerr << "Warning: Direct access openening failed. (" << ::strerror(errno) << ")" << ::std::endl;
 					#endif
 					handleAsync = handle;
 				}
@@ -668,7 +668,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			} else
 				handleAsync = handle;
 			
-			SEQAN_PROADD(PROOPENFILES, 1);
+			SEQAN_PROADD(SEQAN_PROOPENFILES, 1);
             return true;
         }
 
@@ -679,13 +679,13 @@ namespace SEQAN_NAMESPACE_MAIN
 			char tmpFileName[] = "/var/tmp/GNDXXXXXXX";
 #endif
 			if ((handle = handleAsync = ::mkstemp(tmpFileName)) == -1) {
-				::std::cerr << "Couldn't create temporary file " << tmpFileName << ". (" << strerror(errno) << ")" << ::std::endl;
+				::std::cerr << "Couldn't create temporary file " << tmpFileName << ". (" << ::strerror(errno) << ")" << ::std::endl;
 				return false;
 			}
 			if (!(close() && open(tmpFileName, openMode))) return false;
             #ifdef SEQAN_DEBUG
 				if (::unlink(tmpFileName) == -1)
-					::std::cerr << "Couldn't unlink temporary file " << tmpFileName << ". (" << strerror(errno) << ")" << ::std::endl;
+					::std::cerr << "Couldn't unlink temporary file " << tmpFileName << ". (" << ::strerror(errno) << ")" << ::std::endl;
             #else
 				::unlink(tmpFileName);
 			#endif
@@ -699,7 +699,7 @@ namespace SEQAN_NAMESPACE_MAIN
             result &= (::close(handle) == 0);
             handleAsync = -1;
             handle = -1;
-			SEQAN_PROSUB(PROOPENFILES, 1);
+			SEQAN_PROSUB(SEQAN_PROOPENFILES, 1);
             return result;
         }
     };
@@ -734,13 +734,13 @@ namespace SEQAN_NAMESPACE_MAIN
 //    enum { _AsyncIOSignal = SIGIO };
 
 	inline void printRequest(aiocb &request) {
-		::std::cout << ::std::hex;
-		::std::cout << "fildes:  " << (unsigned int) request.aio_fildes << ::std::endl;
-		::std::cout << "buffer:  " << (unsigned int) request.aio_buf << ::std::endl;
-		::std::cout << "offset:  " << (unsigned int) request.aio_offset<< ::std::endl;
-		::std::cout << "nbytes:  " << (unsigned int) request.aio_nbytes << ::std::endl;
-		::std::cout << "event:   " << (unsigned int) request.aio_sigevent.sigev_notify << ::std::endl;
-		::std::cout << ::std::dec;
+		::std::cerr << ::std::hex;
+		::std::cerr << "fildes:  " << (unsigned int) request.aio_fildes << ::std::endl;
+		::std::cerr << "buffer:  " << (unsigned int) request.aio_buf << ::std::endl;
+		::std::cerr << "offset:  " << (unsigned int) request.aio_offset<< ::std::endl;
+		::std::cerr << "nbytes:  " << (unsigned int) request.aio_nbytes << ::std::endl;
+		::std::cerr << "event:   " << (unsigned int) request.aio_sigevent.sigev_notify << ::std::endl;
+		::std::cerr << ::std::dec;
 	}
 
     template < typename TConfig, typename TValue, typename TSize, typename TPos >
@@ -758,9 +758,9 @@ namespace SEQAN_NAMESPACE_MAIN
 /*        request.aio_sigevent.sigev_notify = SIGEV_SIGNAL;
         request.aio_sigevent.sigev_signo = _AsyncIOSignal;
         request.aio_sigevent.sigev_value.sival_ptr = &request;*/
-        SEQAN_PROADD(PROIO, (request.aio_nbytes + PROPAGESIZE - 1) / PROPAGESIZE);
+        SEQAN_PROADD(SEQAN_PROIO, (request.aio_nbytes + SEQAN_PROPAGESIZE - 1) / SEQAN_PROPAGESIZE);
 		int result = aio_read(&request);
-        SEQAN_PROADD(PROIWAIT, SEQAN_PROTIMEDIFF(tw));
+        SEQAN_PROADD(SEQAN_PROIWAIT, SEQAN_PROTIMEDIFF(tw));
         #ifdef SEQAN_DEBUG
 			if (result) ::std::cerr << "areadAt returned " << result << ::std::endl;
 		#endif
@@ -782,9 +782,9 @@ namespace SEQAN_NAMESPACE_MAIN
 /*        request.aio_sigevent.sigev_notify = SIGEV_SIGNAL;
         request.aio_sigevent.sigev_signo = _AsyncIOSignal;
         request.aio_sigevent.sigev_value.sival_ptr = &request;*/
-        SEQAN_PROADD(PROIO, (request.aio_nbytes + PROPAGESIZE - 1) / PROPAGESIZE);
+        SEQAN_PROADD(SEQAN_PROIO, (request.aio_nbytes + SEQAN_PROPAGESIZE - 1) / SEQAN_PROPAGESIZE);
 		int result = aio_write(&request);
-        SEQAN_PROADD(PROIWAIT, SEQAN_PROTIMEDIFF(tw));
+        SEQAN_PROADD(SEQAN_PROIWAIT, SEQAN_PROTIMEDIFF(tw));
         #ifdef SEQAN_DEBUG
 			if (result) ::std::cerr << "awriteAt returned " << result << ::std::endl;
 		#endif
@@ -803,12 +803,12 @@ namespace SEQAN_NAMESPACE_MAIN
         aiocb * cblist = &request;
         SEQAN_PROTIMESTART(tw);
 		int result = aio_suspend(&cblist, 1, NULL);
-        SEQAN_PROADD(PROCWAIT, SEQAN_PROTIMEDIFF(tw));
+        SEQAN_PROADD(SEQAN_PROCWAIT, SEQAN_PROTIMEDIFF(tw));
         #ifdef SEQAN_DEBUG
 			if (result) {
 	 			int eno = aio_error(&request);
 				if (eno != EINPROGRESS)
-					::std::cerr << "waitFor: aio_error returned " << strerror(eno) << " and errno is " << strerror(errno) << ::std::endl;
+					::std::cerr << "waitFor: aio_error returned " << ::strerror(eno) << " and errno is " << ::strerror(errno) << ::std::endl;
 			}
 		#endif
 		return result == 0;
@@ -821,12 +821,12 @@ namespace SEQAN_NAMESPACE_MAIN
         ts.tv_nsec = (timeout_millis % 1000) * 1000;
         SEQAN_PROTIMESTART(tw);
 		int result = aio_suspend(&cblist, 1, &ts);
-        SEQAN_PROADD(PROCWAIT, SEQAN_PROTIMEDIFF(tw));
+        SEQAN_PROADD(SEQAN_PROCWAIT, SEQAN_PROTIMEDIFF(tw));
         #ifdef SEQAN_DEBUG
 			if (result) {
 	 			int eno = aio_error(&request);
 				if (eno != EINPROGRESS)
-					::std::cerr << "waitFor: aio_error returned " << strerror(eno) << " and errno is " << strerror(errno) << ::std::endl;
+					::std::cerr << "waitFor: aio_error returned " << ::strerror(eno) << " and errno is " << ::strerror(errno) << ::std::endl;
 			}
 		#endif
         return result == 0;
@@ -836,7 +836,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline TSize waitForAny(aiocb const * const contexts[], TSize count) {
         SEQAN_PROTIMESTART(tw);
 		bool result = aio_suspend(contexts, count, NULL);
-        SEQAN_PROADD(PROCWAIT, SEQAN_PROTIMEDIFF(tw));
+        SEQAN_PROADD(SEQAN_PROCWAIT, SEQAN_PROTIMEDIFF(tw));
         return result == 0;
 	}
 
@@ -847,7 +847,7 @@ namespace SEQAN_NAMESPACE_MAIN
         ts.tv_nsec = (timeout_millis % 1000) * 1000;
         SEQAN_PROTIMESTART(tw);
 		bool result = aio_suspend(contexts, count, &ts);
-        SEQAN_PROADD(PROCWAIT, SEQAN_PROTIMEDIFF(tw));
+        SEQAN_PROADD(SEQAN_PROCWAIT, SEQAN_PROTIMEDIFF(tw));
         return result == 0;
 	}
 
@@ -910,7 +910,7 @@ namespace SEQAN_NAMESPACE_MAIN
 				(unsigned) sysconf(_SC_PAGESIZE) <<	::std::dec << ". (ErrNo=" << error << ")" << ::std::endl;
             data = NULL;
         } else
-            SEQAN_PROADD(PROMEMORY, sizeof(TValue) * count);
+            SEQAN_PROADD(SEQAN_PROMEMORY, sizeof(TValue) * count);
 	}
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -924,7 +924,7 @@ namespace SEQAN_NAMESPACE_MAIN
 				TagAllocateAligned const)
 	{
         if (data) {
-        	SEQAN_PROSUB(PROMEMORY, sizeof(TValue) * count);
+        	SEQAN_PROSUB(SEQAN_PROMEMORY, sizeof(TValue) * count);
 			free(data);
 		}
 	}

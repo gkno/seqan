@@ -9,6 +9,10 @@
 #ifndef SEQAN_HEADER_TEST_INDEX_CREATION_H
 #define SEQAN_HEADER_TEST_INDEX_CREATION_H
 
+#include <functional>
+#include <seqan/sequence.h>
+#include <seqan/pipe.h>
+
 namespace SEQAN_NAMESPACE_MAIN
 {
 
@@ -122,10 +126,10 @@ namespace SEQAN_NAMESPACE_MAIN
         for(ST i = 0; i < n; i++, ++s1, ++s2) {
             if (lexLess(*s1,*s2)) return 1;
             if (lexLess(*s2,*s1)) {
-                ::std::cout<<(lexLess(*s2,*s1));
-                ::std::cout<<*s1;
-                ::std::cout<<*s2;
-                ::std::cout << "after " << i << " compares not " << (unsigned)*s1 << " leq " << (unsigned)*s2 << ::std::endl;
+                ::std::cerr<<(lexLess(*s2,*s1));
+                ::std::cerr<<*s1;
+                ::std::cerr<<*s2;
+                ::std::cerr << "after " << i << " compares not " << (unsigned)*s1 << " leq " << (unsigned)*s2 << ::std::endl;
                 return 0;
             }
         }
@@ -140,11 +144,11 @@ namespace SEQAN_NAMESPACE_MAIN
 	    for(TSize i = 1; i < n; ++i) {
 		    if (!__sleq(begin(s) + SA[i-1], begin(s) + SA[i], n-SA[i-1], n-SA[i])) {
 			    printf("isSorted: sort error s_%d(SA[%d]) >= s_%d(SA[%d])\n",SA[i-1],i-1,SA[i],i);
-
+/*
 			String<unsigned, External<> > safile;
 			if (!open(safile,"error.sa")) printf("could not open ERROR.SA\n");
 			safile = SA;
-			    return false;
+*/			    return false;
 		    }
 	    }
 	    return true;  
@@ -161,10 +165,10 @@ namespace SEQAN_NAMESPACE_MAIN
                 printf("isSorted: sort error s_%d(SA[%d]) >= s_%d(SA[%d])\n",prev,i-1,*SA,i);
 				endRead(SA);
 
-			String<unsigned, External<> > safile;
+/*			String<unsigned, External<> > safile;
 			if (!open(safile,"error.sa")) printf("could not open ERROR.SA\n");
 			safile << SA;
-
+*/
 			    return false;
 		    }
 		    prev = *SA;
@@ -181,7 +185,7 @@ namespace SEQAN_NAMESPACE_MAIN
         for(ST i = 0; i < n; i++, ++s1, ++s2) {
             if (lexLess(*s1,*s2)) return (i == lcp);
             if (lexLess(*s2,*s1)) {
-                ::std::cout << "after " << i << " compares not " << (unsigned)*s1 << " leq " << (unsigned)*s2 << ::std::endl;
+                ::std::cerr << "after " << i << " compares not " << (unsigned)*s1 << " leq " << (unsigned)*s2 << ::std::endl;
                 return false;
             }
         }
@@ -233,19 +237,19 @@ namespace SEQAN_NAMESPACE_MAIN
         }
         
         if (!isPermutation(SA)) {
-            ::std::cout<<"isSuffixArray: SA is not a permutation!\n";
+            ::std::cerr<<"isSuffixArray: SA is not a permutation!\n";
             return false;
         }
 
         if (!isSorted(SA, s)) {
-            ::std::cout<<"isSuffixArray: SA is not sorted!\n";
-			String<unsigned char, External<> > textfile;
+            ::std::cerr<<"isSuffixArray: SA is not sorted!\n";
+/*			String<unsigned char, External<> > textfile;
 			if (!open(textfile,"error.txt")) printf("could not open ERROR.TXT\n");
 			textfile=s;
-			return false;
+*/			return false;
         }
 
-//        ::std::cout<<"SATest OK! n="<<length(s)<<std::endl;
+//        ::std::cerr<<"SATest OK! n="<<length(s)<<std::endl;
         return true;
     }
 
@@ -262,16 +266,16 @@ namespace SEQAN_NAMESPACE_MAIN
         }
         
         if (!isPermutation(SA)) {
-            ::std::cout<<"isLCPTable: SA is not a permutation!\n";
+            ::std::cerr<<"isLCPTable: SA is not a permutation!\n";
             return false;
         }
 
         if (!isSortedLCP(LCP, SA, s)) {
-            ::std::cout<<"isLCPTable: SA is not sorted!\n";
+            ::std::cerr<<"isLCPTable: SA is not sorted!\n";
             return false;
         }
 
-//        ::std::cout<<"LCPTest OK! n="<<length(s)<<std::endl;
+//        ::std::cerr<<"LCPTest OK! n="<<length(s)<<std::endl;
         return true;
     }
 
@@ -284,14 +288,14 @@ namespace SEQAN_NAMESPACE_MAIN
         IB b = begin(_b);
         while (a!=e) {
             if (!(*a == *b)) {
-                ::std::cout << "isEqual: difference at " << (e-a) << " a=" << *a << "  b=" << *b << ::std::endl;
+                ::std::cerr << "isEqual: difference at " << (e-a) << " a=" << *a << "  b=" << *b << ::std::endl;
                 return false;
             }
             ++a;
             ++b;
         }
 
-//        ::std::cout<<"EQUALTest OK! n="<<length(_a)<<std::endl;
+//        ::std::cerr<<"EQUALTest OK! n="<<length(_a)<<std::endl;
         return true;
     }
 

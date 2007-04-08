@@ -416,7 +416,7 @@ namespace SEQAN_NAMESPACE_MAIN
  //   ::std::ostream& operator<<(::std::ostream &out, Sorter<TValue, TCompare, TFile> &p) {
  //       beginRead(p);
  //       while (!eof(p)) {
-	//	    out << p.front() << "\n";
+	//	    out << p.front() << ::std::endl;
  //           p.pop();
  //       }
  //       endRead(p);

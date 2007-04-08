@@ -14,7 +14,6 @@
 #include <seqan/sequence.h>
 #include <seqan/file.h>
 #include <seqan/align/matrix_base.h>
-#include <seqan/sequence/sequence_multiple.h>
 
 #ifdef SEQAN_SWITCH_USE_FORWARDS
 #include <seqan/graph/graph_generated_forwards.h>

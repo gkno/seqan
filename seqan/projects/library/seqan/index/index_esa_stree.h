@@ -209,8 +209,8 @@ This interval is the @Function.value@ of the iterator.
 	template < typename TIndex, typename TSpec >
 	inline void _dumpHistoryStack(Iter<TIndex, VSTree<TSpec> > &it) {
 		for(typename Size<TIndex>::Type i = 0; i < length(it.history); ++i)
-			::std::cout << it.history[i] << '\t';
-		::std::cout << value(it) << ::std::endl;
+			::std::cerr << it.history[i] << '\t';
+		::std::cerr << value(it) << ::std::endl;
 	}
 
 	template < typename TIndex, typename TSpec >
@@ -518,44 +518,44 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 ..remarks:The @Function.representative@ must uniquely occur in every sequence (e.g. in MUMs), 
 otherwise the seed returned is one many.
 */
-/*
+
 	template < typename TString, typename TSSetSpec, typename TIndexSpec, class TSpec >
-	inline typename Align<TString const, ArrayGaps>
-	alignment(Iter< Index< StringSet<TString, TSSetSpec>, TIndexSpec >, VSTree<TSpec> > const &it) 
+	inline Align<TString, ArrayGaps>
+	alignment(Iter< Index< StringSet<TString, TSSetSpec>, TIndexSpec >, VSTree<TSpec> > &it) 
 	{
 		typedef Index< StringSet<TString, TSSetSpec>, TIndexSpec > TIndex;
-		typename Infix< typename Fibre<TIndex, ESA_SA>::Type const >::Type TOccs;
-		typename Iterator<TOccs>::Type TIter;
+		typedef typename Infix< typename Fibre<TIndex, ESA_SA>::Type const >::Type TOccs;
+		typedef typename Iterator<TOccs, Standard>::Type TIter;
 
-		Align<TString const, ArrayGaps> align;
-		TIndex const &index = container(it);
+		Align<TString, ArrayGaps> align;
+		TIndex &index = container(it);
 		resize(rows(align), length(indexText(index)));	// resize alignment to number of sequences
 		TOccs occs = getOccurences(it);
 		typename Size<TIndex>::Type repLen = repLength(it);
-		TIter occ = begin(occs), occEnd = end(occs);
+		TIter occ = begin(occs, Standard()), occEnd = end(occs, Standard());
 		while (occ != occEnd) {
-			typename Size<TIndex>::Type seqNo = getSeqNo(*occ, stringSetLimits(index));
-			typename Size<TIndex>::Type seqOfs = getSeqOffset(*occ, stringSetLimits(index));
+			typename Size<TIndex>::Type seqNo = getSeqNo(*occ, stringSetLimits((TIndex const&)index));
+			typename Size<TIndex>::Type seqOfs = getSeqOffset(*occ, stringSetLimits((TIndex const&)index));
 			setSource(row(align, seqNo), value(indexText(index), seqNo), seqOfs, seqOfs + repLen);
 			++occ;
 		}
 		return align;
 	}
-
+/*
 	template < typename TString, typename TConcSpec, typename TIndexSpec, class TSpec >
 	inline typename Align<TString const, ArrayGaps>
 	alignment(Iter< Index< StringSet<TString, ConcatDirect<TConcSpec> >, TIndexSpec >, VSTree<TSpec> > const &it) 
 	{
 		typedef Index< StringSet<TString, ConcatDirect<TConcSpec> >, TIndexSpec > TIndex;
 		typedef typename Infix< typename Fibre<TIndex, ESA_SA>::Type const >::Type TOccs;
-		typedef typename Iterator<TOccs>::Type TIter;
+		typedef typename Iterator<TOccs, Standard>::Type TIter;
 
 		Align<TString const, ArrayGaps> align;
 		TIndex const &index = container(it);
 		resize(rows(align), length(indexText(index)));	// resize alignment to number of sequences
 		TOccs occs = getOccurences(it);
 		typename Size<TIndex>::Type repLen = repLength(it);
-		TIter occ = begin(occs), occEnd = end(occs);
+		TIter occ = begin(occs, Standard()), occEnd = end(occs, Standard());
 		while (occ != occEnd) {
 			typename Size<TIndex>::Type seqNo = getSeqNo(*occ, stringSetLimits(index));
 			typename Size<TIndex>::Type globOfs = posGlobalize(*occ, stringSetLimits(index));
@@ -571,14 +571,14 @@ otherwise the seed returned is one many.
 	{
 		typedef Index< StringSet<TString, ConcatDirect<TConcSpec> >, TIndexSpec > TIndex;
 		typedef typename Infix< typename Fibre<TIndex, ESA_SA>::Type const >::Type TOccs;
-		typedef typename Iterator<TOccs>::Type TIter;
+		typedef typename Iterator<TOccs, Standard>::Type TIter;
 
 		Align<TString, ArrayGaps> align;
 		TIndex &index = container(it);
 		resize(rows(align), length(indexText(index)));	// resize alignment to number of sequences
 		TOccs occs = getOccurences(it);
 		typename Size<TIndex>::Type repLen = repLength(it);
-		TIter occ = begin(occs), occEnd = end(occs);
+		TIter occ = begin(occs, Standard()), occEnd = end(occs, Standard());
 		while (occ != occEnd) {
 			typename Size<TIndex>::Type seqNo = getSeqNo(*occ, stringSetLimits((TIndex const&)index));
 			typename Size<TIndex>::Type globOfs = posGlobalize(*occ, stringSetLimits((TIndex const&)index));
@@ -817,10 +817,10 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 		typedef typename Infix< 
 					typename Fibre<Index<TText, Index_ESA<void> >, ESA_RawText>::Type const 
 				>::Type	TInfix;
-		typedef typename Iterator<TInfix>::Type				IText;
-		typedef typename Iterator<TString const>::Type		IPattern;
+		typedef typename Iterator<TInfix, Standard>::Type			IText;
+		typedef typename Iterator<TString const, Standard>::Type	IPattern;
 		
-		IPattern p_begin = begin(pattern), p_end = end(pattern);
+		IPattern p_begin = begin(pattern, Standard()), p_end = end(pattern, Standard());
 		IText t_begin, t_end;
 
 		if (p_begin == p_end) {
@@ -831,8 +831,8 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 		TSize c = 0;
 		while (goDown(node, *p_begin)) {
 			TInfix t = representative(node);
-			t_begin = begin(t) + c;
-			t_end = end(t);
+			t_begin = begin(t, Standard()) + c;
+			t_end = end(t, Standard());
 
 			while (t_begin != t_end && p_begin != p_end && *p_begin == *t_begin) {
 				++t_begin;
@@ -844,7 +844,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 			}
 			c = length(t);
 		}
-		lcp = p_begin - begin(pattern);
+		lcp = p_begin - begin(pattern, Standard());
 		return false;
 	}
 
@@ -1151,8 +1151,8 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 		typedef typename Infix< typename Fibre<TIndex, ESA_BWT>::Type const >::Type	TOccsBWT;
 		typedef typename Value< typename Fibre<TIndex, ESA_BWT>::Type const >::Type	TValue;
 
-		typedef typename Iterator<TOccs>::Type TIter;
-		typedef typename Iterator<TOccsBWT>::Type TIterBWT;
+		typedef typename Iterator<TOccs, Standard>::Type	TIter;
+		typedef typename Iterator<TOccsBWT, Standard>::Type TIterBWT;
 		
 		TIndex const &index = container(it);
 		typename StringSetLimits<typename Host<TIndex>::Type const>::Type &limits = stringSetLimits(index);
@@ -1160,8 +1160,8 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 		TOccs occs = getOccurences(it);
 		TOccsBWT bwts = getOccurencesBWT(it);
 
-		TIter oc = begin(occs), ocEnd = end(occs);
-		TIterBWT bw = begin(bwts);
+		TIter oc = begin(occs, Standard()), ocEnd = end(occs, Standard());
+		TIterBWT bw = begin(bwts, Standard());
 
 		if (oc == ocEnd) return true;
 		if (posAtFirstLocal(*oc, limits)) return true;
@@ -1199,8 +1199,8 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 		typedef typename Infix< typename Fibre<TIndex, ESA_BWT>::Type const >::Type	TOccsBWT;
 		typedef typename Value< typename Fibre<TIndex, ESA_BWT>::Type const >::Type	TValue;
 
-		typedef typename Iterator<TOccs>::Type TIter;
-		typedef typename Iterator<TOccsBWT>::Type TIterBWT;
+		typedef typename Iterator<TOccs, Standard>::Type	TIter;
+		typedef typename Iterator<TOccsBWT, Standard>::Type TIterBWT;
 		
 		TIndex const &index = container(it);
 		typename StringSetLimits<typename Host<TIndex>::Type const>::Type &limits = stringSetLimits(index);
@@ -1210,8 +1210,8 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 		TOccs occs = getOccurences(it);
 		TOccsBWT bwts = getOccurencesBWT(it);
 
-		TIter oc = begin(occs), ocEnd = end(occs);
-		TIterBWT bw = begin(bwts);
+		TIter oc = begin(occs, Standard()), ocEnd = end(occs, Standard());
+		TIterBWT bw = begin(bwts, Standard());
 
 		while (oc != ocEnd) {
 			if (!posAtFirstLocal(*oc, limits)) {
@@ -1248,7 +1248,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 	inline bool isUnique(Iter<TIndex, VSTree<TSpec> > const &it, TSet &set)
 	{
 		typedef typename Infix< typename Fibre<TIndex, ESA_SA>::Type const >::Type TOccs;
-		typedef typename Iterator<TOccs>::Type TIter;
+		typedef typename Iterator<TOccs, Standard>::Type TIter;
 		typedef typename Size<TIndex>::Type TSize;
 
 		TIndex const &index = container(it);
@@ -1256,7 +1256,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 		clear(set);
 
 		TOccs occs = getOccurences(it);
-		TIter oc = begin(occs), ocEnd = end(occs);
+		TIter oc = begin(occs, Standard()), ocEnd = end(occs, Standard());
 
 		while (oc != ocEnd) {
 			TSize seqNo = getSeqNo(*oc, stringSetLimits(index));

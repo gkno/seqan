@@ -22,18 +22,18 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef typename Value<LCPFwdIt>::Type  TValue;
         typedef typename Size<LCPFwdIt>::Type   TSize;
 
-        TSize size = distance(_First, _Last);
+        TSize size = difference(_First, _Last);
         if (size <= 1) return _Dest;
 		--size;
 
         // calculate the depth of the lcp tree
-		int treeLevels = 1;
+		unsigned treeLevels = 1;
 		TSize _xSize = 1;
 		for(; size > _xSize; _xSize *= 2, ++treeLevels);
 	
 		// get output iterators for every level in the flat tree
 		FlatOutIt *level = new FlatOutIt[treeLevels];
-		for(int i = treeLevels - 1; _xSize; --i, _xSize /= 2) {
+		for(unsigned i = treeLevels - 1; _xSize; --i, _xSize /= 2) {
 			level[i] = _Dest;
 			goFurther(_Dest, (size + _xSize - 1) / _xSize);
 		}
@@ -41,14 +41,14 @@ namespace SEQAN_NAMESPACE_MAIN
 		// fields to keep track of minimum elements and state
 		TValue *min = new TValue[treeLevels];
 		bool *half = new bool[treeLevels];
-		for(int i = 0; i < treeLevels; ++i)
+		for(unsigned i = 0; i < treeLevels; ++i)
 			half[i] = false;
 
 		// it works like a binary counter of half[n]...half[1]half[0]
 		for(TSize j = 0; j < size; ++j, ++_First) {
 			*(level[0]) = min[0] = *_First;
 			++(level[0]);
-			for(int i = 1; i < treeLevels; ++i) {
+			for(unsigned i = 1; i < treeLevels; ++i) {
 				if (half[i]) {
 					if (min[i-1] < min[i]) min[i] = min[i-1];
 					*(level[i]) = min[i];	// min[i] is the minimum of last 2 values in min[i-1]
@@ -64,7 +64,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		// complete half filled nodes
 		bool carry = false;
-		for(int i = 1; i < treeLevels; ++i)
+		for(unsigned i = 1; i < treeLevels; ++i)
 			if (half[i] || carry) {
 				if (half[i]) {
 					if (min[i-1] < min[i]) min[i] = min[i-1];
@@ -107,7 +107,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			Compressed >						TPair;
         typedef typename Size<LCPFwdIt>::Type   TSize;
 
-        TSize size = distance(_First, _Last);
+        TSize size = difference(_First, _Last);
         if (size <= 1) return _Dest;
 		--size;
 
@@ -122,13 +122,13 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 
         // calculate the depth of the lcp tree
-		int treeLevels = 1;
+		unsigned treeLevels = 1;
 		TSize _xSize = 1;
 		for(; size > _xSize; _xSize *= 2, ++treeLevels);
 		
 		// get output iterators for every level in the flat tree
 		FlatOutIt *level = new FlatOutIt[treeLevels];
-		for(int i = treeLevels - 1; _xSize; --i, _xSize /= 2) {
+		for(unsigned i = treeLevels - 1; _xSize; --i, _xSize /= 2) {
 			level[i] = _Dest;
             goFurther(_Dest, (size + _xSize - 1) / _xSize);
 		}
@@ -136,7 +136,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		// fields to keep track of minimum elements and state
 		TPair *out = new TPair[treeLevels];
 		bool *half = new bool[treeLevels];
-		for(int i = 0; i < treeLevels; ++i)
+		for(unsigned i = 0; i < treeLevels; ++i)
 			half[i] = false;
 
 		// it works like a binary counter of half[n]...half[1]half[0]
@@ -146,7 +146,7 @@ namespace SEQAN_NAMESPACE_MAIN
 				out[0].i2 = *_FirstSA; ++_FirstSA;
 				*(level[0]) = out[0];
 				++(level[0]);				
-				for(int i = 1; i < treeLevels; ++i) {
+				for(unsigned i = 1; i < treeLevels; ++i) {
 					if (half[i]) {
 						if (out[i].i1 > out[i-1].i1)
 							out[i].i1 = out[i-1].i1;
@@ -164,7 +164,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		// complete half filled nodes
 		bool carry = false;
-		for(int i = 1; i < treeLevels; ++i)
+		for(unsigned i = 1; i < treeLevels; ++i)
 			if (half[i] || carry) {
 				if (half[i]) {
 					if (out[i].i1 > out[i-1].i1)
@@ -212,7 +212,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typename TSize >
 	inline void sizeofLCPE(LCPFwdIt _First, LCPFwdIt _Last, TSize &_Size)
 	{
-		_Size = sizeofLCPE(distance(_First, _Last));
+		_Size = sizeofLCPE(difference(_First, _Last));
 	}
 
 	template <
@@ -248,7 +248,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template < typename TValue, typename TConfig, typename TLCP >
     inline void createLCPBinTree(String<TValue, External<TConfig> > &lcp_enhanced, TLCP &lcp) {
-        int writeHeads = _treeLevels(length(lcp)) + 1;   // plus 1 write back buffer
+        unsigned writeHeads = _treeLevels(length(lcp)) + 1;   // plus 1 write back buffer
         if (lcp_enhanced.cache.size() < writeHeads)
             lcp_enhanced.resizeCache(writeHeads);
         createLCPBinTree(begin(lcp), end(lcp), begin(lcp_enhanced));
@@ -256,7 +256,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template < typename TValue, typename TConfig, typename TLCP, typename TSA >
     inline void createHybridBinTree(String<TValue, External<TConfig> > &lcp_hybrid, TLCP &lcp, TSA &sa) {
-        int writeHeads = _treeLevels(length(lcp)) + 1;   // plus 1 write back buffer
+        unsigned writeHeads = _treeLevels(length(lcp)) + 1;   // plus 1 write back buffer
         if (lcp_hybrid.cache.size() < writeHeads)
             lcp_hybrid.resizeCache(writeHeads);
         createHybridBinTree(begin(lcp), end(lcp), begin(sa), begin(lcp_hybrid));

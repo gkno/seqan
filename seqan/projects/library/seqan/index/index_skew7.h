@@ -31,13 +31,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	const unsigned _SkewDC<7, T>::VALUE[] = { 3,   1, 2, 4 };
 
 
-#ifdef SEQAN_TEST_SKEW7
-	template <typename TSufArray, typename TText>
-    bool isSuffixArray(TSufArray &SA, TText const &s);	// forward declaration of a verification function
-#endif
-
-
-    // *** COMPARATORS & MAPS ***
+	// *** COMPARATORS & MAPS ***
         
     template <typename InType, typename Result = int>
     struct skew7_ncomp : public ::std::binary_function<InType,InType,Result> {
@@ -172,12 +166,12 @@ namespace SEQAN_NAMESPACE_MAIN
         // *** SPECIALIZATION ***
 
         // use compression if lessorequal 16 different values per char
-/*        typedef typename IF< 
+        typedef typename IF< 
             (BitsPerValue<_TypeOf(TInput)>::VALUE > 0) && 
             (BitsPerValue<_TypeOf(TInput)>::VALUE <= 4), 
             Compressed, 
-            void>::Type compress;*/
-        typedef void compress;
+            void>::Type compress;
+//        typedef void compress;
 
         // use skew7 for recursion (more I/O-efficient)
         typedef Skew7 recurseSpec;
@@ -241,11 +235,11 @@ namespace SEQAN_NAMESPACE_MAIN
 	    template < typename _TInput >
         bool process(_TInput &textIn, unsigned maxdepth = 0, unsigned depth = 1) {
 
-            SEQAN_PROSET(PRODEPTH, depth);
+            SEQAN_PROSET(SEQAN_PRODEPTH, depth);
             SEQAN_PROMARK("Rekursionsabstieg");
             #ifdef SEQAN_DEBUG_INDEX
-                ::std::cout << "enter level " << depth << " compression: ";
-                ::std::cout << TYPECMP<compress, Compressed>::VALUE << " "<<ValueSize<_TypeOf(TInput)>::VALUE<<"\n";
+                ::std::cerr << "enter level " << depth << " compression: ";
+				::std::cerr << TYPECMP<compress, Compressed>::VALUE << " " << BitsPerValue<_TypeOf(TInput)>::VALUE << ::std::endl;
             #endif
             {
 
@@ -256,7 +250,7 @@ namespace SEQAN_NAMESPACE_MAIN
             TSamplerDC7                 sampler(textIn);
             TSortTuples                 sorter;
             #ifdef SEQAN_DEBUG_INDEX
-                ::std::cout << "  sort names (" << length(sampler)<< ")\n";
+                ::std::cerr << "  sort names (" << length(sampler)<< ")" << ::std::endl;
             #endif
             sorter << sampler;
             SEQAN_PROMARK("Sorter (2) - 7-lets sortieren");
@@ -266,7 +260,7 @@ namespace SEQAN_NAMESPACE_MAIN
             nmap_linear_t               map_linear(length(namer));
             TNames_Sliced               names_sliced(map_sliced);
             #ifdef SEQAN_DEBUG_INDEX
-                ::std::cout << "  slice names\n";
+                ::std::cerr << "  slice names" << ::std::endl;
             #endif
             names_sliced << namer;
 
@@ -278,7 +272,7 @@ namespace SEQAN_NAMESPACE_MAIN
                 TNames_Linear_Unique        names_linear(map_linear);
 
                 #ifdef SEQAN_DEBUG_INDEX
-                    ::std::cout << "  make names linear\n";
+                    ::std::cerr << "  make names linear" << ::std::endl;
                 #endif
                 names_linear << names_sliced;
 				clear(names_sliced);
@@ -312,7 +306,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
                 TNames_Linear               names_linear(map_linear);
                 #ifdef SEQAN_DEBUG_INDEX
-                    ::std::cout << "  rename names\n";
+                    ::std::cerr << "  rename names" << ::std::endl;
                 #endif
                 names_linear << renamer;
 				clear(renamer);
@@ -320,7 +314,7 @@ namespace SEQAN_NAMESPACE_MAIN
                
                 // step 2
                 #ifdef SEQAN_DEBUG_INDEX
-                    ::std::cout << "  prepare merge\n";
+                    ::std::cerr << "  prepare merge" << ::std::endl;
                 #endif
                 skew7_extend(textIn, names_linear, sortedS0, sortedS3, sortedS5, sortedS6, sortedS124);
                 SEQAN_PROMARK("Mapper (12), Sorter (13-16) - SA124, SA3, SA5, SA6, SA0 verschmelzen");
@@ -330,10 +324,10 @@ namespace SEQAN_NAMESPACE_MAIN
             // ... is done on-demand by merger
             }
             #ifdef SEQAN_DEBUG_INDEX
-                ::std::cout << "left level " << depth << ::std::endl;
+                ::std::cerr << "left level " << depth << ::std::endl;
             #endif
             SEQAN_PROMARK("Rekursionsaufstieg");
-            SEQAN_PROSUB(PRODEPTH, 1);
+            SEQAN_PROSUB(SEQAN_PRODEPTH, 1);
 
             return true;
         }
@@ -448,7 +442,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		#ifdef SEQAN_DEBUG_INDEX
 			if (sizeof(TSize) > 4)
-				::std::cout << "WARNING: TSize is more than 32 bit long (Skew3). This is probably not what you want." << ::std::endl;
+				::std::cerr << "WARNING: TSize is more than 32 bit long (Skew3). This is probably not what you want." << ::std::endl;
         #endif
 
 		TSize n = length(s);
@@ -467,11 +461,11 @@ namespace SEQAN_NAMESPACE_MAIN
 		TSize _n24  = _n[2]+_n[4];
 		TSize _n124 = _n[1]+_n24;
 
-        SEQAN_PROSET(PRODEPTH, depth);
-        SEQAN_PROSET(PROEXTRA1, K);
+        SEQAN_PROSET(SEQAN_PRODEPTH, depth);
+        SEQAN_PROSET(SEQAN_PROEXTRA1, K);
         SEQAN_PROMARK("Rekursionsabstieg");
         #ifdef SEQAN_DEBUG_INDEX
-			::std::cout << "enter level " << depth << " (" << n << ")" << ::std::endl;
+			::std::cerr << "enter level " << depth << " (" << n << ")" << ::std::endl;
         #endif
 
         String<TSize, Alloc<> > s124;
@@ -745,10 +739,10 @@ namespace SEQAN_NAMESPACE_MAIN
         SEQAN_PROMARK("SA124, SA3, SA5, SA6, SA0 verschmolzen");
 
         #ifdef SEQAN_DEBUG_INDEX
-            ::std::cout << "left level " << depth << ::std::endl;
+            ::std::cerr << "left level " << depth << ::std::endl;
         #endif
         SEQAN_PROMARK("Rekursionsaufstieg");
-        SEQAN_PROSUB(PRODEPTH, 1);
+        SEQAN_PROSUB(SEQAN_PRODEPTH, 1);
 	}
 
     template < typename TSA,

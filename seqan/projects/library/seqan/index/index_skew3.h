@@ -31,12 +31,6 @@ namespace SEQAN_NAMESPACE_MAIN
 	const unsigned _SkewDC<3, T>::VALUE[] = { 2,   1, 2 };
 
 
-#ifdef SEQAN_TEST_SKEW3
-	template <typename TSufArray, typename TText>
-    bool isSuffixArray(TSufArray &SA, TText const &s);	// forward declaration of a verification function
-#endif
-
-
 	// *** COMPARATORS & MAPS ***
         
     template <typename InType, typename Result = int>
@@ -172,10 +166,10 @@ namespace SEQAN_NAMESPACE_MAIN
 	    template < typename _TInput >
         bool process(_TInput &textIn, unsigned maxdepth = 0, unsigned depth = 1) {
 
-            SEQAN_PROSET(PRODEPTH, depth);
+            SEQAN_PROSET(SEQAN_PRODEPTH, depth);
             SEQAN_PROMARK("Rekursionsabstieg");
             #ifdef SEQAN_DEBUG_INDEX
-                ::std::cout << "enter level " << depth << ::std::endl;
+                ::std::cerr << "enter level " << depth << ::std::endl;
             #endif
             {
 
@@ -186,7 +180,7 @@ namespace SEQAN_NAMESPACE_MAIN
             TSamplerDC3                 sampler(textIn);
             TSortTuples                 sorter;
             #ifdef SEQAN_DEBUG_INDEX
-                ::std::cout << "  sort names (" << length(sampler)<< ")\n";
+                ::std::cerr << "  sort names (" << length(sampler)<< ")" << ::std::endl;
             #endif
             sorter << sampler;
             SEQAN_PROMARK("Sorter (2) - Triplets sortieren");
@@ -196,7 +190,7 @@ namespace SEQAN_NAMESPACE_MAIN
             nmap_linear_t               map_linear(length(namer));
             TNames_Sliced               names_sliced(map_sliced);
             #ifdef SEQAN_DEBUG_INDEX
-                ::std::cout << "  slice names\n";
+                ::std::cerr << "  slice names" << ::std::endl;
             #endif
             names_sliced << namer;
 
@@ -208,7 +202,7 @@ namespace SEQAN_NAMESPACE_MAIN
                 TNames_Linear_Unique        names_linear(map_linear);
 
                 #ifdef SEQAN_DEBUG_INDEX
-                    ::std::cout << "  make names linear\n";
+                    ::std::cerr << "  make names linear" << ::std::endl;
                 #endif
                 names_linear << names_sliced;
 				clear(names_sliced);
@@ -242,7 +236,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
                 TNames_Linear               names_linear(map_linear);
                 #ifdef SEQAN_DEBUG_INDEX
-                    ::std::cout << "  rename names\n";
+                    ::std::cerr << "  rename names" << ::std::endl;
                 #endif
                 names_linear << renamer;
 				clear(renamer);
@@ -250,7 +244,7 @@ namespace SEQAN_NAMESPACE_MAIN
                
                 // step 2
                 #ifdef SEQAN_DEBUG_INDEX
-                    ::std::cout << "  prepare merge\n";
+                    ::std::cerr << "  prepare merge" << ::std::endl;
                 #endif
 				skew3_extend(textIn, names_linear, sortedS0, sortedS12);            
                 SEQAN_PROMARK("Mapper (12), Sorter (13) - SA12 und SA0 verschmelzen");
@@ -260,10 +254,10 @@ namespace SEQAN_NAMESPACE_MAIN
             // ... is done on-demand by merger
             }
             #ifdef SEQAN_DEBUG_INDEX
-                ::std::cout << "left level " << depth << ::std::endl;
+                ::std::cerr << "left level " << depth << ::std::endl;
             #endif
             SEQAN_PROMARK("Rekursionsaufstieg");
-            SEQAN_PROSUB(PRODEPTH, 1);
+            SEQAN_PROSUB(SEQAN_PRODEPTH, 1);
             return true;
         }
 
@@ -344,7 +338,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		#ifdef SEQAN_DEBUG_INDEX
 			if (sizeof(TSize) > 4)
-				::std::cout << "WARNING: TSize is more than 32 bit long (Skew3). This is probably not what you want." << ::std::endl;
+				::std::cerr << "WARNING: TSize is more than 32 bit long (Skew3). This is probably not what you want." << ::std::endl;
         #endif
 
 		TSize n = length(s);
@@ -353,11 +347,11 @@ namespace SEQAN_NAMESPACE_MAIN
         TSize n0=n/3, n1=(n+2)/3, n2=(n+1)/3, n12=n1+n2;
         TSize         o1=(n+2)%3, o2=(n+1)%3;
 
-        SEQAN_PROSET(PRODEPTH, depth);
-        SEQAN_PROSET(PROEXTRA1, K);
+        SEQAN_PROSET(SEQAN_PRODEPTH, depth);
+        SEQAN_PROSET(SEQAN_PROEXTRA1, K);
         SEQAN_PROMARK("Rekursionsabstieg");
         #ifdef SEQAN_DEBUG_INDEX
-			::std::cout << "enter level " << depth << " (" << n << ")" << ::std::endl;
+			::std::cerr << "enter level " << depth << " (" << n << ")" << ::std::endl;
         #endif
 
         String<TSize, Alloc<> > s12;
@@ -476,10 +470,10 @@ namespace SEQAN_NAMESPACE_MAIN
         SEQAN_PROMARK("SA12 und SA0 verschmolzen");
 
         #ifdef SEQAN_DEBUG_INDEX
-            ::std::cout << "left level " << depth << ::std::endl;
+            ::std::cerr << "left level " << depth << ::std::endl;
         #endif
         SEQAN_PROMARK("Rekursionsaufstieg");
-        SEQAN_PROSUB(PRODEPTH, 1);
+        SEQAN_PROSUB(SEQAN_PRODEPTH, 1);
     }
 
     template < typename TSA,

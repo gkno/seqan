@@ -13,8 +13,8 @@
 //#define SEQAN_TEST_SKEW3
 //#define SEQAN_TEST_SKEW7
 
-#include <seqan/index.h>
 #include "test_index_creation.h"
+#include <seqan/index.h>
 
 
 using namespace std;

@@ -100,7 +100,6 @@ namespace SEQAN_NAMESPACE_MAIN
         {
             typedef typename TValue::T2::T SizeType;
             int shft = _SkewShift<7>::VALUE[a.stream][b.stream];
-//			printf("%d,%d___%d___%d:%d\n",a.stream,b.stream,shft,_SkewNIndx<7>::VALUE[a.stream][shft],_SkewNIndx<7>::VALUE[b.stream][shft]);
             for(int i = 0; i < shft; ++i) {
                 if (a.i.i3[i] < b.i.i3[i]) return false;
                 if (a.i.i3[i] > b.i.i3[i]) return true;
@@ -127,7 +126,7 @@ namespace SEQAN_NAMESPACE_MAIN
     {
 		template <typename TSize>
 		inline static bool crossBoarderCompare(TSize const a, TSize const b) {
-			return a.i.i1 < b.i.i1;
+			return a < b;
 		}
 
 		template <typename _T1, typename _T2, typename _TCompression>

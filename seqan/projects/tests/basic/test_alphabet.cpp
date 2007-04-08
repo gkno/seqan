@@ -408,12 +408,24 @@ void TestExtremeValuesSigned()
 
 	long double maxVal = -minVal - 1;
 
+/*
 	::std::cout << ::std::endl << "Max/Min of " << typeid(T).name() << ::std::endl;
-	::std::cout << maxVal << " == " << SupremumValue<T>::VALUE << "(" << (T)SupremumValue<T>::VALUE << ")  " << supremumValue<T>() << ::std::endl;
-	::std::cout << minVal << " == " << InfimumValue<T>::VALUE << "(" << (T)InfimumValue<T>::VALUE << ")  " << infimumValue<T>() << ::std::endl;
+	::std::cout << maxVal << " == " << SupremumValue<T>::VALUE << "(" << (double)SupremumValue<T>::VALUE << ")  " << supremumValue<T>() << ::std::endl;
+	::std::cout << minVal << " == " << InfimumValue<T>::VALUE << "(" << (double)InfimumValue<T>::VALUE << ")  " << infimumValue<T>() << ::std::endl;
+*/
 
-/*	SEQAN_ASSERT(maxVal == SupremumValue<T>::VALUE);
-	SEQAN_ASSERT(minVal == InfimumValue<T>::VALUE);*/
+	bool isSigned = TYPECMP< typename _MakeSigned<T>::Type, T >::VALUE;
+	SEQAN_ASSERT(isSigned);
+
+	SEQAN_ASSERT(supremumValue<T>() == SupremumValue<T>::VALUE);
+	SEQAN_ASSERT(infimumValue<T>()  == InfimumValue<T>::VALUE);
+
+	long double maxDelta = maxVal - SupremumValue<T>::VALUE;
+	long double minDelta = minVal - (long double)InfimumValue<T>::VALUE;
+	SEQAN_ASSERT(maxDelta <= maxVal/1000);
+	SEQAN_ASSERT(-maxVal/1000 <= maxDelta);
+	SEQAN_ASSERT(minDelta <= maxVal/1000);
+	SEQAN_ASSERT(-maxVal/1000 <= minDelta);
 }
 
 template <typename T>
@@ -424,13 +436,22 @@ void TestExtremeValuesUnsigned()
 		maxVal = 2*maxVal;
 	maxVal = maxVal - 1;
 
-
-	::std::cout << ::std::endl << "Max/Min of " << typeid(T).name() << ::std::endl;
-	::std::cout << maxVal << " == " << SupremumValue<T>::VALUE << "(" << (T)SupremumValue<T>::VALUE << ")  " << supremumValue<T>() << ::std::endl;
-	::std::cout << 0 << " == " << InfimumValue<T>::VALUE << "(" << (T)InfimumValue<T>::VALUE << ")  " << infimumValue<T>() << ::std::endl;
 /*
-	SEQAN_ASSERT(maxVal == SupremumValue<T>::VALUE);
-	SEQAN_ASSERT(0 == InfimumValue<T>::VALUE);*/
+	::std::cout << ::std::endl << "Max/Min of " << typeid(T).name() << ::std::endl;
+	::std::cout << maxVal << " == " << SupremumValue<T>::VALUE << "(" << (double)SupremumValue<T>::VALUE << ")  " << supremumValue<T>() << ::std::endl;
+	::std::cout << 0 << " == " << InfimumValue<T>::VALUE << "(" << (double)InfimumValue<T>::VALUE << ")  " << infimumValue<T>() << ::std::endl;
+*/
+
+	bool isUnsigned = TYPECMP< typename _MakeUnsigned<T>::Type, T >::VALUE;
+	SEQAN_ASSERT(isUnsigned);
+
+	SEQAN_ASSERT(supremumValue<T>() == SupremumValue<T>::VALUE);
+	SEQAN_ASSERT(infimumValue<T>()  == InfimumValue<T>::VALUE);
+
+	long double maxDelta = maxVal - SupremumValue<T>::VALUE;
+	SEQAN_ASSERT(maxDelta <= maxVal/1000);
+	SEQAN_ASSERT(-maxVal/1000 <= maxDelta);
+	SEQAN_ASSERT(0 == InfimumValue<T>::VALUE);
 }
 
 void TestExtremeValues()
@@ -443,6 +464,7 @@ void TestExtremeValues()
 	TestExtremeValuesUnsigned<unsigned short>();
 	TestExtremeValuesUnsigned<unsigned int>();
 	TestExtremeValuesUnsigned<unsigned long>();
+	TestExtremeValuesSigned<__int64>();
 /*	TestExtremeValues<float>();
 	TestExtremeValues<double>();
 	TestExtremeValues<long double>();*/
@@ -464,7 +486,7 @@ void Main_Test_Alphabet()
 	TestSimpleType<Iupac>();
 	TestSimpleType<AminoAcid>();
 	TestSimpleTypeConversions();
-//	TestExtremeValues();
+	TestExtremeValues();
   
 	TestSimpleType<bool>();
 	TestArrayFunctions<char>(0xde, 0xad);

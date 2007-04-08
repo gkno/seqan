@@ -227,7 +227,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		    bool b = e.wait(timeout_millis);
             double end = sysTime();
             if (begin != end)
-                ::std::cout << "waitTime: " << end - begin << ::std::endl;
+                ::std::cerr << "waitTime: " << end - begin << ::std::endl;
             return b;
         #else
             return e.wait(timeout_millis);

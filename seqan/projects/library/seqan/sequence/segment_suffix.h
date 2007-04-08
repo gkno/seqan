@@ -86,14 +86,14 @@ SEQAN_CHECKPOINT
 	{
 SEQAN_CHECKPOINT
 	}
-
+/*
 	Segment(typename _Parameter<THost>::Type _host, typename Iterator<THost, Rooted>::Type _begin):
 		data_host(_toPointer(_host)),
 		data_begin_position(position(_begin))
 	{
 SEQAN_CHECKPOINT
 	}
-
+*/
 	Segment(typename _Parameter<THost>::Type _host, typename Iterator<THost, Standard>::Type _begin):
 		data_host(_toPointer(_host)),
 		data_begin_position(position(_begin, _host))
@@ -269,6 +269,15 @@ SEQAN_CHECKPOINT
 	{
 SEQAN_CHECKPOINT
 		return length(host(me));
+	}
+
+//____________________________________________________________________________
+
+	friend inline void 
+	_setLength(
+		Segment & me, 
+		typename Size<THost>::Type new_length)
+	{
 	}
 
 //____________________________________________________________________________

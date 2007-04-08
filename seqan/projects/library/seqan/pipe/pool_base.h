@@ -213,10 +213,10 @@ namespace SEQAN_NAMESPACE_MAIN
             chain(Min(_readAheadBuffers, _pool.pages(pageSize = alignSize(Min(_pool.size(), _requestedBufferSize), _pool.pageSize)))) 
         {
 			#ifdef SEQAN_HEADER_PIPE_DEBUG
-				::std::cout << "___BufferHandler___" << ::std::endl;
-				::std::cout << "pagesize: " << pageSize << ::std::endl;
-				::std::cout << "readaheadbuffers: " << chain.maxFrames << ::std::endl;
-				::std::cout << "pages: " << pool.pages(pageSize) << ::std::endl;
+				::std::cerr << "___BufferHandler___" << ::std::endl;
+				::std::cerr << "pagesize: " << pageSize << ::std::endl;
+				::std::cerr << "readaheadbuffers: " << chain.maxFrames << ::std::endl;
+				::std::cerr << "pages: " << pool.pages(pageSize) << ::std::endl;
 			#endif
         }
 
@@ -272,7 +272,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
     private:
 		bool _error() {
-//            ::std::cout << "Error in BufWriteFileHandler::_read " << pool.file.error() << ::std::endl;
+//            ::std::cerr << "Error in BufWriteFileHandler::_read " << pool.file.error() << ::std::endl;
             return true;
         }
 
@@ -394,7 +394,7 @@ namespace SEQAN_NAMESPACE_MAIN
     private:
 
         bool _error() {
-//            ::std::cout << "Error in BufWriteFileHandler::_write " << pool.file.error() << ::std::endl;
+//            ::std::cerr << "Error in BufWriteFileHandler::_write " << pool.file.error() << ::std::endl;
             return true;
         }
 
@@ -712,7 +712,7 @@ namespace SEQAN_NAMESPACE_MAIN
 						freePage(memBuffer, *this);
                     else {
 						close(file);
-                        SEQAN_PROSUB(PROIOVOLUME, (_proFloat)((TFSize)_size * (TFSize)sizeof(TValue)));
+                        SEQAN_PROSUB(SEQAN_PROIOVOLUME, (_proFloat)((TFSize)_size * (TFSize)sizeof(TValue)));
                     }
 				}
 
@@ -721,7 +721,7 @@ namespace SEQAN_NAMESPACE_MAIN
 						allocPage(memBuffer, _newSize, *this);
                     else {
 						openTemp(file);
-                        SEQAN_PROADD(PROIOVOLUME, (_proFloat)((TFSize)_newSize * (TFSize)sizeof(TValue)));
+                        SEQAN_PROADD(SEQAN_PROIOVOLUME, (_proFloat)((TFSize)_newSize * (TFSize)sizeof(TValue)));
                     }
 				}
 			}
@@ -1019,7 +1019,7 @@ SEQAN_CHECKPOINT
     ::std::ostream& operator<<(::std::ostream &out, Pool<TValue, TSpec> &p) {
         beginRead(p);
         while (!eof(p)) {
-		    out << front(p) << "\n";
+		    out << front(p) << ::std::endl;
             pop(p);
         }
         endRead(p);

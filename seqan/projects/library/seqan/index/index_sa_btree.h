@@ -21,7 +21,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
         typedef typename Value<SAFwdIt>::Type	TSize;
 
-        TSize size = distance(_First, _Last);
+        TSize size = difference(_First, _Last);
 		if (!size) return _Dest;
 
         // calculate the depth of the sa b-tree
@@ -76,7 +76,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typename TSize >
 	inline void sizeofSAB(SAFwdIt _First, SAFwdIt _Last, TSize &_Size, unsigned BlockSize)
 	{
-		_Size = sizeofSAB(distance(_First, _Last), BlockSize);
+		_Size = sizeofSAB(difference(_First, _Last), BlockSize);
 	}
 
 

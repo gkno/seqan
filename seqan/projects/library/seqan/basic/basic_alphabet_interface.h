@@ -820,27 +820,51 @@ struct ValueSize<TValue const>:
 	public ValueSize<TValue> {};
 
 
-template < typename T, bool _isSigned = TYPECMP< typename _MakeSigned<T>::Type, T >::VALUE >
-struct SupremumValue
-{
-	enum { VALUE = ( ((1 << (BitsPerValue<T>::VALUE - 2)) - 1) << 1) + 1 };		// signed supremum
-};
-template <typename T>
-struct SupremumValue< T, false >
-{
-	enum { VALUE = ((T)~0) };					// unsigned supremum
-};
+
+template < typename T >
+struct _SupremumValueUnsigned {	static const T VALUE; };
+template < typename T >
+struct _SupremumValueSigned {	static const T VALUE; };
+
+template < typename T >
+struct _InfimumValueUnsigned {	static const T VALUE; };
+template < typename T >
+struct _InfimumValueSigned {	static const T VALUE; };
 
 
-template < typename T, bool _isSigned = TYPECMP< typename _MakeSigned<T>::Type, T >::VALUE >
-struct InfimumValue
+
+template < typename T >
+const T _SupremumValueUnsigned<T>::VALUE = ~(T)0;
+template < typename T >
+const T _SupremumValueSigned<T>::VALUE = ( (((T)1 << (BitsPerValue<T>::VALUE - 2)) - 1) << 1) + 1;
+
+template < typename T >
+const T _InfimumValueUnsigned<T>::VALUE = 0;
+template < typename T >
+const T _InfimumValueSigned<T>::VALUE = ~(T)_SupremumValueSigned<T>::VALUE;
+
+
+
+template < 
+	typename T, 
+	typename TParent = typename IF<
+		TYPECMP< typename _MakeSigned<T>::Type, T >::VALUE,
+		_SupremumValueSigned<T>,
+		_SupremumValueUnsigned<T> >::Type >
+struct SupremumValue:
+	public TParent 
 {
-	enum { VALUE = (T)~SupremumValue<T>::VALUE };	// signed infimum
 };
-template <typename T>
-struct InfimumValue< T, false >
+
+template < 
+	typename T, 
+	typename TParent = typename IF<
+		TYPECMP< typename _MakeSigned<T>::Type, T >::VALUE,
+		_InfimumValueSigned<T>,
+		_InfimumValueUnsigned<T> >::Type >
+struct InfimumValue:
+	public TParent 
 {
-	enum { VALUE = 0 };					// unsigned supremum
 };
 
 //////////////////////////////////////////////////////////////////////////////

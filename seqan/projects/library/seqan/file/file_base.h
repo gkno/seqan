@@ -382,8 +382,9 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 		typedef typename Position< File<TSpec> >::Type TFilePos;
 		TFilePos newOfs = me.seek(fileOfs, origin);
         #ifdef SEQAN_DEBUG_OR_TEST_
-            if (origin == SEEK_BEGIN && newOfs != (TFilePos)fileOfs)
-				printf("generic seek failed returned %x instead of %x\n", (unsigned)newOfs, (unsigned)fileOfs);
+			if (origin == SEEK_BEGIN && newOfs != (TFilePos)fileOfs) {
+				::std::cerr << "seek returned " << ::std::hex << (unsigned)newOfs << " instead of " << (unsigned)fileOfs << ::std::dec << ::std::endl;
+			}
         #endif
         return newOfs;
     }

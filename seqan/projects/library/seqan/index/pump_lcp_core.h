@@ -46,7 +46,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Size<TTextInput>::Type				TSize;
 		typedef typename BufReadHandler<TTextInput>::Type	TBufReader;
 
-        SEQAN_PROSET(PRODEPTH, 0);
+        SEQAN_PROSET(SEQAN_PRODEPTH, 0);
 		TSize rest = length(textIn);
         if (rest < 2) {
             resize(dest, 0);
@@ -77,7 +77,7 @@ namespace SEQAN_NAMESPACE_MAIN
 //        typename Value<TBufReader>::Type buffer = reader.first();
 		while (length(buffer))
         {
-            SEQAN_PROADD(PRODEPTH, 1);
+            SEQAN_PROADD(SEQAN_PRODEPTH, 1);
             SEQAN_PROMARK("LCP-Durchlauf beginnen");
             beginRead(textIn);
 			beginRead(invertedSAIn);
@@ -87,7 +87,8 @@ namespace SEQAN_NAMESPACE_MAIN
 			TSize windowEnd = windowBegin + windowSize;
 			TSize newOverlap = windowEnd;
             #ifdef SEQAN_DEBUG_INDEX
-                printf("  read window[%x,%x) overlay %x rest %x\n", windowBegin, windowEnd, overlap, rest);
+				::std::cerr << ::std::hex << "  read window[" << windowBegin << "," << windowEnd;
+				::std::cerr << ") overlay " << overlap << " rest " << rest << ::std::dec << ::std::endl;
             #endif
             rest -= windowSize;
 
@@ -100,7 +101,7 @@ namespace SEQAN_NAMESPACE_MAIN
 					TSize left = (*invertedSAIn).i2[1] + out.i2;        // left == j + h
 
 					if (overlap <= (*invertedSAIn).i2[1] && left <= windowEnd) {
-	//                        printf("* ");
+	//                        ::std::cerr << "* ";
 						for(; left < windowBegin; ++left) {
 							++textIn;
 							++out.i2;
@@ -135,7 +136,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 					if (left >= windowEnd && (*invertedSAIn).i2[1] < newOverlap) {
 						#ifdef SEQAN_VERBOSE
-							printf("crossing border @ %d len %d\n", (*invertedSAIn).i2[1], out.i2);
+							::std::cerr << "crossing border @ " << (*invertedSAIn).i2[1] << " len " << out.i2 << ::std::endl;
 						#endif
 						newOverlap = (*invertedSAIn).i2[1];    //++_olaps;
 					}
@@ -154,29 +155,29 @@ namespace SEQAN_NAMESPACE_MAIN
 			overlap = newOverlap;
 			buffer = reader.next();                                 // read the following block
 
-			//printf("pops:%d pushes:%d overlaps:%d\n", _pops, _pushes, _olaps);
+			//::std::cerr << "pops:" << _pops << " pushes:" << _pushes << " overlaps:" << _olaps << ::std::endl;
 		}
 		// trailing zero
 		push(dest, Pair<TSize>(length(textIn) - 1, 0));
 
-		//printf("pushes:%d length:%d\n", _pushes, length(textIn));
+		//::std::cerr << "pushes:" << _pushes << " length:" << length(textIn) << ::std::endl;
         //SEQAN_ASSERT(_pushes == length(textIn));
         //for (unsigned i = 0; i < n; ++i)
         //    if (!seen[i])
-        //        printf("___%d______HUH?\n",i);
+        //        ::std::cerr << "___" << i << "______HUH?" << ::std::endl;
         //delete[] seenISA;
 
         #ifdef SEQAN_DEBUG_INDEX
-            ::std::cout << "  n: " << n;
-            ::std::cout << "  lcpMax: " << lcpMax;
-            ::std::cout << "  lcpAvrg: " << lcpAvrg + lcpNumer / (double)n;
-            ::std::cout << "  sigma: " << sigma << ::std::endl;
+            ::std::cerr << "  n: " << n;
+            ::std::cerr << "  lcpMax: " << lcpMax;
+            ::std::cerr << "  lcpAvrg: " << lcpAvrg + lcpNumer / (double)n;
+            ::std::cerr << "  sigma: " << sigma << ::std::endl;
         #endif
 
 //TODO: uncomment this line
 //		reader.end();
 		endWrite(dest);
-        SEQAN_PROSET(PRODEPTH, 0);
+        SEQAN_PROSET(SEQAN_PRODEPTH, 0);
     }
 
 	template < typename TTextInput, typename TInvertedSAInput, typename TDest >
@@ -200,7 +201,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		typedef typename Value<TInvertedSAInput>::Type::T2::T	TPair;
 
-        SEQAN_PROSET(PRODEPTH, 0);
+        SEQAN_PROSET(SEQAN_PRODEPTH, 0);
 		TSize rest = length(textIn);
         if (rest < 2) {
             resize(dest, 0);
@@ -232,7 +233,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		while (length(buffer))
         {
-            SEQAN_PROADD(PRODEPTH, 1);
+            SEQAN_PROADD(SEQAN_PRODEPTH, 1);
             SEQAN_PROMARK("LCP-Durchlauf beginnen");
 
             beginRead(textIn);
@@ -243,7 +244,8 @@ namespace SEQAN_NAMESPACE_MAIN
 			TSize windowEnd = windowBegin + windowSize;
 			TSize newOverlap = windowEnd;
             #ifdef SEQAN_DEBUG_INDEX
-                printf("  read window[%x,%x) overlay %x rest %x\n", windowBegin, windowEnd, overlap, rest);
+				::std::cerr << ::std::hex << "  read window[" << windowBegin << "," << windowEnd;
+				::std::cerr << ") overlay " << overlap << " rest " << rest << ::std::dec << ::std::endl;
             #endif
             rest -= windowSize;
 
@@ -259,7 +261,7 @@ namespace SEQAN_NAMESPACE_MAIN
 					left = leftOrig + out.i2;        // left == j + h
 
 					if (overlap <= leftOrig && left <= windowEnd) {
-	//                        printf("* ");
+	//                        ::std::cerr << "* ";
 						for(; left < windowBegin; ++left) {
 							++textIn;
 							++out.i2;
@@ -302,7 +304,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 					if (left >= windowEnd && leftOrig < newOverlap) {
 						#ifdef SEQAN_VERBOSE
-							printf("crossing border @ %d len %d\n", (*invertedSAIn).i2[1], out.i2);
+							::std::cerr << "crossing border @ " << (*invertedSAIn).i2[1] << " len " << out.i2 << ::std::endl;
 						#endif
 						newOverlap = leftOrig;    //++_olaps;
 					}
@@ -323,29 +325,29 @@ namespace SEQAN_NAMESPACE_MAIN
 			overlap = newOverlap;
 			buffer = reader.next();                                 // read the following block
 
-			//printf("pops:%d pushes:%d overlaps:%d\n", _pops, _pushes, _olaps);
+			//::std::cerr << "pops:" << _pops << " pushes:" << _pushes << " overlaps:" << _olaps << ::std::endl;
 		}
 		// trailing zero
 		push(dest, Pair<TSize>(length(textIn) - 1, 0));
 
-		//printf("pushes:%d length:%d\n", _pushes, length(textIn));
+		//::std::cerr << "pushes:" << _pushes << " length:" << length(textIn) << ::std::endl;
         //SEQAN_ASSERT(_pushes == length(textIn));
         //for (unsigned i = 0; i < n; ++i)
         //    if (!seen[i])
-        //        printf("___%d______HUH?\n",i);
+        //        ::std::cerr << "___" << i << "______HUH?" << ::std::endl;
         //delete[] seenISA;
 
         #ifdef SEQAN_DEBUG_INDEX
-            ::std::cout << "  n: " << n;
-            ::std::cout << "  lcpMax: " << lcpMax;
-            ::std::cout << "  lcpAvrg: " << lcpAvrg + lcpNumer / (double)n;
-            ::std::cout << "  sigma: " << sigma << ::std::endl;
+            ::std::cerr << "  n: " << n;
+            ::std::cerr << "  lcpMax: " << lcpMax;
+            ::std::cerr << "  lcpAvrg: " << lcpAvrg + lcpNumer / (double)n;
+            ::std::cerr << "  sigma: " << sigma << ::std::endl;
         #endif
 
 //TODO: uncomment this line
 //		reader.end();
 		endWrite(dest);
-        SEQAN_PROSET(PRODEPTH, 0);
+        SEQAN_PROSET(SEQAN_PRODEPTH, 0);
     }
 
 	template < typename TTextInput, typename TLimitsString, typename TInvertedSAInput, typename TDest >

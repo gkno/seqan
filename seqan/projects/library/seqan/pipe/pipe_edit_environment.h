@@ -145,7 +145,7 @@ namespace SEQAN_NAMESPACE_MAIN
 								if (length(tmp.i2) >= 4) {
 									errorPos = 2;
 									state = _DELETE;
-									//::std::cout << ::std::endl << "_DELETIONS____" << ::std::endl;
+									//::std::cerr << ::std::endl << "_DELETIONS____" << ::std::endl;
 									return *this;
 								}
 							} else {
@@ -156,7 +156,7 @@ namespace SEQAN_NAMESPACE_MAIN
 								character = 0;
 								errorPos = 1;
 								state = _INSERT_LAST;
-								//::std::cout << ::std::endl << "_INSERTS______" << ::std::endl;
+								//::std::cerr << ::std::endl << "_INSERTS______" << ::std::endl;
 								return *this;
 							}
 						}
@@ -174,7 +174,7 @@ namespace SEQAN_NAMESPACE_MAIN
 					character = 0;
 					errorPos = 1;
 					state = _INSERT;
-					//::std::cout << ::std::endl << "_INSERTS______" << ::std::endl;
+					//::std::cerr << ::std::endl << "_INSERTS______" << ::std::endl;
 				}
 				break;
 			case _INSERT:
@@ -190,7 +190,7 @@ namespace SEQAN_NAMESPACE_MAIN
 					if (++errorPos >= length(tmp.i2) - 1 && state == _INSERT) {
 						tmp = orig;
 						state = _SUBST;
-						//::std::cout << ::std::endl << "_REPLACEMENTS_" << ::std::endl;
+						//::std::cerr << ::std::endl << "_REPLACEMENTS_" << ::std::endl;
 						errorPos = 0;
 						assignValueAt(tmp.i2, 0, (TValue) 0);
 						break;
@@ -206,7 +206,7 @@ namespace SEQAN_NAMESPACE_MAIN
 							assignValueAt(tmp.i2, 1, (TValue) 0);
 							errorPos = 0;
 							state = _INSERT;
-							//::std::cout << ::std::endl << "_INSERTS______" << ::std::endl;
+							//::std::cerr << ::std::endl << "_INSERTS______" << ::std::endl;
 						}
 						break;
 					}
@@ -260,7 +260,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		me.character = 0;
 		me.errorPos = 0;
 		me.state = me._INSERT;
-		//::std::cout << ::std::endl << "_INSERTS______" << ::std::endl;
+		//::std::cerr << ::std::endl << "_INSERTS______" << ::std::endl;
 
 		return true;
 	}

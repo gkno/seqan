@@ -942,7 +942,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 			if (TempByDefault)
 				if (!openTemp())
-					::std::cout << "External String couldn't open temporary file" << ::std::endl;
+					::std::cerr << "External String couldn't open temporary file" << ::std::endl;
 
 			resize(__size);
             keepFirst = false;
@@ -1078,18 +1078,18 @@ namespace SEQAN_NAMESPACE_MAIN
         void _dumpCache() {
             for(int i = 0; i < cache.size(); ++i) {
                 PageFrameRef pf = cache[i];
-                ::std::cout << "[" << pf.pageNo << "]";
+                ::std::cerr << "[" << pf.pageNo << "]";
                 if (pf.dirty)
-                    ::std::cout << "*";
+                    ::std::cerr << "*";
                 else
-                    ::std::cout << " ";
+                    ::std::cerr << " ";
 
                 if (pf.status == PageFrame::READY)
-                    ::std::cout << "   ";
+                    ::std::cerr << "   ";
                 else
-                    ::std::cout << ".  ";
+                    ::std::cerr << ".  ";
             }
-            ::std::cout << ::std::endl;
+            ::std::cerr << ::std::endl;
         }
 
 
@@ -1251,7 +1251,7 @@ namespace SEQAN_NAMESPACE_MAIN
                     if (frameNo < 0 || frameNo == except) return;   // no lowlevel-page left for prefetching
 				    PageFrameRef pf = cache[frameNo];
                     #ifdef SEQAN_VERBOSE
-						::std::cout << "prefetch: page " << pageNo << ::std::endl;
+						::std::cerr << "prefetch: page " << pageNo << ::std::endl;
                     #endif
 
                     // *** frame is choosen ***
@@ -1301,7 +1301,7 @@ namespace SEQAN_NAMESPACE_MAIN
                     if (writeThrough) {
                         #ifdef SEQAN_VERBOSE
                             if (pf.dirty)
-								::std::cout << "writeThrough: page " << pageNo << ::std::endl;
+								::std::cerr << "writeThrough: page " << pageNo << ::std::endl;
                         #endif
 					    flush(pf);							        // write if dirty
                     }
@@ -1333,7 +1333,7 @@ namespace SEQAN_NAMESPACE_MAIN
                     pager[I->pageNo] = I->dataStatus;
 					I->pageNo = PageFrame::UNINITIALIZED;
 				}
-//                ::std::cout << *I << ::std::endl;
+//                ::std::cerr << *I << ::std::endl;
                 if (I->begin) freePage(*I, file);
             }
 		}
@@ -1385,7 +1385,7 @@ namespace SEQAN_NAMESPACE_MAIN
 				return true;
 		}
 
-        inline void rename(int frameNo) {
+        inline void rename(unsigned frameNo) {
 			PageFrameRef pf = cache[frameNo];
             cache.rename(frameNo);                                  // update lru entry
             if (pf.pageNo >= 0)
@@ -1398,7 +1398,7 @@ namespace SEQAN_NAMESPACE_MAIN
         inline void resizeCache(unsigned newFrames) {
             unsigned oldFrames = cache.size();
             if (_size)
-                newFrames = Min(newFrames, enclosingBlocks(_size, (unsigned)_PageSize));
+                newFrames = Min(newFrames, (unsigned) enclosingBlocks(_size, (unsigned)_PageSize));
             if (newFrames < oldFrames) {
                 flush();
                 for(unsigned i = newFrames; i < oldFrames; ++i) {
@@ -1415,7 +1415,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
                     cache.erase(frameNo);                       // erase page frame from cache
 
-                    for(int j = frameNo; j < cache.size(); ++j)
+                    for(unsigned j = frameNo; j < cache.size(); ++j)
                         rename(j);                              // update remaining pages
                 }
             } else if (oldFrames < newFrames) {
@@ -1550,6 +1550,18 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template < typename TValue, typename TConfig >
     struct Iterator< String<TValue, External<TConfig> >, Standard >
+    {
+        typedef typename String<TValue, External<TConfig> >::iterator Type;
+    };
+
+    template < typename TValue, typename TConfig >
+    struct Iterator< String<TValue, External<TConfig> > const, Rooted >
+    {
+        typedef typename String<TValue, External<TConfig> >::const_iterator Type;
+    };
+
+    template < typename TValue, typename TConfig >
+    struct Iterator< String<TValue, External<TConfig> >, Rooted >
     {
         typedef typename String<TValue, External<TConfig> >::iterator Type;
     };

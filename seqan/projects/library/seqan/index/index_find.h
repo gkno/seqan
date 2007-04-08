@@ -688,8 +688,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		LCPTreeIt _LCPTop,
 		SubTextFwdIt _SubTextFirst,
 		SubTextFwdIt _SubTextLast,
-		typename Difference<TextRndIt>::Type _lcpLower = 0,
-		typename Difference<TextRndIt>::Type _lcpUpper = 0)
+		typename Difference<TextRndIt>::Type _lcpLower,
+		typename Difference<TextRndIt>::Type _lcpUpper)
 	{	// find first element not before _Val, using operator<
 		typedef typename Difference<TextRndIt>::Type _Diff;
         _Diff _Delta = difference(_First, _Last) - 1;
@@ -801,7 +801,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
 
 		#ifdef SEQAN_PROFILE_LCPEFIND
-			SEQAN_PROADD(PROEXTRA3, skippedCompares);
+			SEQAN_PROADD(SEQAN_PROEXTRA3, skippedCompares);
 		#endif
 
         // binary search for intervals of 2 or less elements
@@ -850,7 +850,8 @@ namespace SEQAN_NAMESPACE_MAIN
 			_TextFirst, _TextLast,
 			_First, _Last,
 			_LCPTop,
-			_SubTextFirst, _SubTextLast);
+			_SubTextFirst, _SubTextLast,
+			0, 0);
 	}
 
 
@@ -870,8 +871,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		LCPTreeIt _LCPTop,
 		SubTextFwdIt _SubTextFirst,
 		SubTextFwdIt _SubTextLast,
-		typename Difference<TextRndIt>::Type _lcpLower = 0,
-		typename Difference<TextRndIt>::Type _lcpUpper = 0)
+		typename Difference<TextRndIt>::Type _lcpLower,
+		typename Difference<TextRndIt>::Type _lcpUpper)
 	{	// find first element not before _Val, using operator<
 		typedef typename Difference<TextRndIt>::Type _Diff;
         _Diff _Delta = difference(_First, _Last) - 1;
@@ -1006,7 +1007,8 @@ namespace SEQAN_NAMESPACE_MAIN
 			_TextFirst, _TextLast,
 			_First, _Last,
 			_LCPTop,
-			_SubTextFirst, _SubTextLast);
+			_SubTextFirst, _SubTextLast,
+			0, 0);
 	}
 
 
@@ -1194,8 +1196,8 @@ namespace SEQAN_NAMESPACE_MAIN
         typename Difference<TextRndIt>::Type _Delta,
 		SubTextFwdIt _SubTextFirst,
 		SubTextFwdIt _SubTextLast,
-		typename Difference<TextRndIt>::Type _lcpLower = 0,
-		typename Difference<TextRndIt>::Type _lcpUpper = 0)
+		typename Difference<TextRndIt>::Type _lcpLower,
+		typename Difference<TextRndIt>::Type _lcpUpper)
 	{	// find first element not before _Val, using operator<
 		typedef typename Difference<TextRndIt>::Type _Diff;
 		// binaray search with intervals >= 3 elements
@@ -1319,7 +1321,8 @@ namespace SEQAN_NAMESPACE_MAIN
 			_TextFirst, _TextLast,
 			_LCPTop,
             difference(_TextFirst, _TextLast) - 1,
-			_SubTextFirst, _SubTextLast);
+			_SubTextFirst, _SubTextLast,
+			0, 0);
 	}
 
 
@@ -1462,7 +1465,8 @@ namespace SEQAN_NAMESPACE_MAIN
 			_TextFirst, _TextLast,
 			_LCPTop,
             difference(_TextFirst, _TextLast) - 1,
-			_SubTextFirst, _SubTextLast);
+			_SubTextFirst, _SubTextLast,
+			0, 0);
 	}
 
 

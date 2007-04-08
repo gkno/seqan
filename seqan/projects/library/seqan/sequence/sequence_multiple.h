@@ -137,16 +137,18 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename TPos, typename TLimitsString>
 	inline TPos getSeqNo(TPos const &pos, TLimitsString const &limits) {
 		typedef typename Iterator<TLimitsString const, Standard>::Type TIter;
+		typedef typename Value<TLimitsString>::Type TSize;
         TIter _begin = begin(limits, Standard());
-        TIter _upper = ::std::upper_bound(_begin, end(limits, Standard()), pos) - 1;
-        return distance(_begin, _upper);
+        TIter _upper = ::std::upper_bound(_begin, end(limits, Standard()), (TSize)pos) - 1;
+        return difference(_begin, _upper);
 	}
 
 	template <typename TPos, typename TLimitsString>
 	inline TPos getSeqOffset(TPos const &pos, TLimitsString const &limits) {
 		typedef typename Iterator<TLimitsString const, Standard>::Type TIter;
+		typedef typename Value<TLimitsString>::Type TSize;
         TIter _begin = begin(limits, Standard());
-        TIter _upper = ::std::upper_bound(_begin, end(limits, Standard()), pos) - 1;
+        TIter _upper = ::std::upper_bound(_begin, end(limits, Standard()), (TSize)pos) - 1;
         return pos - *_upper;
 	}
 
@@ -182,8 +184,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline void posLocalize(TResult &result, TPosition const &pos, String<TSize, TSpec> const &limits) {
 		typedef typename Iterator<String<TSize> const, Standard>::Type TIter;
         TIter _begin = begin(limits, Standard());
-		TIter _upper = ::std::upper_bound(_begin, end(limits, Standard()), pos) - 1;
-        result.i1 = distance(_begin, _upper);
+		TIter _upper = ::std::upper_bound(_begin, end(limits, Standard()), (TSize)pos) - 1;
+        result.i1 = difference(_begin, _upper);
         result.i2 = pos - *_upper;
 	}
 
@@ -429,11 +431,14 @@ namespace SEQAN_NAMESPACE_MAIN
     }
 //____________________________________________________________________________
 
+	template < typename TString >
+    inline typename Size<TString>::Type lengthSum(TString const &me) {
+        return length(me);
+    }
+
 	template < typename TString, typename TSpec >
     inline typename Size<TString>::Type lengthSum(StringSet< TString, TSpec > const &me) {
-		if (!_validStringSetLimits(me))
-			_refreshStringSetLimits(const_cast< StringSet<TString, TSpec>& >(me));
-        return back(me.limits);
+        return back(stringSetLimits(me));
     }
 //____________________________________________________________________________
 
@@ -586,7 +591,30 @@ namespace SEQAN_NAMESPACE_MAIN
 		TStringSet *set;
 		ConcatenatorNto1 () {}
 		ConcatenatorNto1 (TStringSet &_set): set(&_set) {}
+
+//____________________________________________________________________________
+// WARNING: 
+// operator[] conducts a binary search and should be avoided
+// you better use StringSet<.., ConcatDirect<..> > for random access
+// or ConcatenatorNto1's iterators for sequential access
+
+		template <typename TPos>
+		inline typename Reference<ConcatenatorNto1>::Type
+		operator [] (TPos pos)
+		{
+	SEQAN_CHECKPOINT
+			return value(*this, pos);
+		}
+
+		template <typename TPos>
+		inline typename Reference<ConcatenatorNto1 const>::Type 
+		operator [] (TPos pos) const
+		{
+	SEQAN_CHECKPOINT
+			return value(*this, pos);
+		}
 	};
+//____________________________________________________________________________
 
     template <typename TStringSet>
 	struct Value< ConcatenatorNto1<TStringSet> > {
@@ -597,49 +625,89 @@ namespace SEQAN_NAMESPACE_MAIN
 	struct Value< ConcatenatorNto1<TStringSet> const > {
 		typedef typename Value< typename Value<TStringSet>::Type >::Type Type;
 	};
+//____________________________________________________________________________
 
     template <typename TStringSet>
     struct Size< ConcatenatorNto1<TStringSet> > {
 		typedef typename Size< typename Value<TStringSet>::Type >::Type Type;
     };
+//____________________________________________________________________________
 
     template <typename TString, typename TSpec >
-    struct Iterator< ConcatenatorNto1< StringSet<TString, TSpec> > > {
+    struct Iterator< ConcatenatorNto1< StringSet<TString, TSpec> >, Standard > {
         typedef Iter<StringSet<TString, TSpec>, TSpec> Type;
     };
 
     template <typename TString, typename TSpec >
-    struct Iterator< ConcatenatorNto1< StringSet<TString, TSpec> const > > {
+    struct Iterator< ConcatenatorNto1< StringSet<TString, TSpec> const >, Standard > {
         typedef Iter<StringSet<TString, TSpec> const, TSpec> Type;
     };
 
+    template <typename TString, typename TSpec >
+    struct Iterator< ConcatenatorNto1< StringSet<TString, TSpec> >, Rooted > {
+        typedef Iter<StringSet<TString, TSpec>, TSpec> Type;
+    };
+
+    template <typename TString, typename TSpec >
+    struct Iterator< ConcatenatorNto1< StringSet<TString, TSpec> const >, Rooted > {
+        typedef Iter<StringSet<TString, TSpec> const, TSpec> Type;
+    };
+//____________________________________________________________________________
+
+	template <typename TStringSet >
+    struct Iterator< ConcatenatorNto1<TStringSet> const, Standard > {
+		typedef typename Iterator< ConcatenatorNto1<TStringSet> >::Type Type;
+    };
+
     template <typename TStringSet >
-    struct Iterator< ConcatenatorNto1<TStringSet> const > {
+    struct Iterator< ConcatenatorNto1<TStringSet> const, Rooted > {
 		typedef typename Iterator< ConcatenatorNto1<TStringSet> >::Type Type;
     };
 
 //////////////////////////////////////////////////////////////////////////////
+// value
+
+	template < typename TStringSet, typename TPos >
+	inline typename Reference< ConcatenatorNto1<TStringSet> >::Type
+	value(ConcatenatorNto1<TStringSet> &me, TPos globalPos)
+	{
+		Pair<unsigned, typename Size< typename Value<TStringSet>::Type >::Type> localPos;
+		posLocalize(localPos, globalPos, stringSetLimits(*me.set));
+        return value(value(*me.set, getValueI1(localPos)), getValueI2(localPos));
+	}
+
+	template < typename TStringSet, typename TPos >
+	inline typename Reference< ConcatenatorNto1<TStringSet> const >::Type
+	value(ConcatenatorNto1<TStringSet> const &me, TPos globalPos)
+	{
+		typedef typename Value<TStringSet>::Type TString;
+		Pair<unsigned, typename Size<TString>::Type> localPos;
+		posLocalize(localPos, globalPos, stringSetLimits(*me.set));
+        return value(value(*(TStringSet const*)me.set, getValueI1(localPos)), getValueI2(localPos));
+	}
+
+//////////////////////////////////////////////////////////////////////////////
 // length
 
-	template < typename TString, typename TSpec >
-    inline typename Size< ConcatenatorNto1< StringSet<TString, ConcatVirtual<TSpec> > > >::Type 
-	length(ConcatenatorNto1< StringSet<TString, ConcatVirtual<TSpec> > > const &concat) {
-        return lengthSum(*concat.set);
+	template < typename TStringSet >
+    inline typename Size< ConcatenatorNto1<TStringSet> >::Type 
+	length(ConcatenatorNto1<TStringSet> const &me) {
+        return lengthSum(*me.set);
     }
 
 //////////////////////////////////////////////////////////////////////////////
 // begin
 
-	template < typename TString, typename TSpec >
+	template < typename TString, typename TSpec, typename TSpec2 >
 	inline typename Iterator< ConcatenatorNto1< StringSet<TString, ConcatVirtual<TSpec> > const> >::Type
-	begin(ConcatenatorNto1< StringSet<TString, ConcatVirtual<TSpec> > const> concat)
+	begin(ConcatenatorNto1< StringSet<TString, ConcatVirtual<TSpec> > const> concat, Tag<TSpec2> const)
 	{
 		return Iter< StringSet<TString, ConcatVirtual<TSpec> > const, ConcatVirtual<TSpec> > (*concat.set);
 	}
 
-	template < typename TString, typename TSpec >
+	template < typename TString, typename TSpec, typename TSpec2 >
 	inline typename Iterator< ConcatenatorNto1< StringSet<TString, ConcatVirtual<TSpec> > > >::Type
-	begin(ConcatenatorNto1< StringSet<TString, ConcatVirtual<TSpec> > > concat)
+	begin(ConcatenatorNto1< StringSet<TString, ConcatVirtual<TSpec> > > concat, Tag<TSpec2> const)
 	{
 		return Iter< StringSet<TString, ConcatVirtual<TSpec> >, ConcatVirtual<TSpec> > (*concat.set);
 	}
@@ -647,16 +715,18 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 // end
 
-	template < typename TString, typename TSpec >
+	template < typename TString, typename TSpec, typename TSpec2 >
 	inline typename Iterator< ConcatenatorNto1< StringSet<TString, ConcatVirtual<TSpec> > const> >::Type
-	end(ConcatenatorNto1< StringSet<TString, ConcatVirtual<TSpec> > const> concat) {
+	end(ConcatenatorNto1< StringSet<TString, ConcatVirtual<TSpec> > const> concat, Tag<TSpec2> const)
+	{
 		return Iter< StringSet<TString, ConcatVirtual<TSpec> > const, ConcatVirtual<TSpec> > 
 			(*concat.set, length(*concat.set), 0);
 	}
 
-	template < typename TString, typename TSpec >
+	template < typename TString, typename TSpec, typename TSpec2 >
 	inline typename Iterator< ConcatenatorNto1< StringSet<TString, ConcatVirtual<TSpec> > > >::Type
-	end(ConcatenatorNto1< StringSet<TString, ConcatVirtual<TSpec> > > concat) {
+	end(ConcatenatorNto1< StringSet<TString, ConcatVirtual<TSpec> > > concat, Tag<TSpec2> const)
+	{
 		return Iter< StringSet<TString, ConcatVirtual<TSpec> >, ConcatVirtual<TSpec> > 
 			(*concat.set, length(*concat.set), 0);
 	}
@@ -667,11 +737,6 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < typename TString, typename TSpec >
 	struct Concatenator< StringSet<TString, ConcatVirtual<TSpec> > > {
 		typedef ConcatenatorNto1< StringSet<TString, ConcatVirtual<TSpec> > > Type;
-	};
-
-	template < typename TString, typename TSpec >
-	struct Concatenator< StringSet<TString, ConcatVirtual<TSpec> > const > {
-		typedef ConcatenatorNto1< StringSet<TString, ConcatVirtual<TSpec> > const > Type;
 	};
 
 	template < typename TString, typename TSpec >
@@ -690,28 +755,15 @@ namespace SEQAN_NAMESPACE_MAIN
 //____________________________________________________________________________
 
 	template <typename TString, typename TSpec>
-	inline typename Concatenator< StringSet<TString, TSpec> >::Type
+	inline typename Concatenator< StringSet<TString, TSpec> >::Type &
 	concat(StringSet<TString, TSpec> &set) {
-		return typename Concatenator< StringSet<TString, TSpec> >::Type (set);
+		return set.concat;
 	}
 
 	template <typename TString, typename TSpec>
-	inline typename Concatenator< StringSet<TString, TSpec> const>::Type
+	inline typename Concatenator< StringSet<TString, TSpec> const>::Type &
 	concat(StringSet<TString, TSpec> const &set) {
-		return typename Concatenator< StringSet<TString, TSpec> const>::Type (set);
-	}
-//____________________________________________________________________________
-
-	template <typename TString, typename TSpec>
-	inline typename Concatenator< StringSet<TString, ConcatDirect<TSpec> > >::Type & 
-	concat(StringSet<TString, ConcatDirect<TSpec> > &set) {
-		return set.concat;
-	}
-
-	template <typename TString, typename TSpec>
-	inline typename Concatenator< StringSet<TString, ConcatDirect<TSpec> > const>::Type & 
-	concat(StringSet<TString, ConcatDirect<TSpec> > const &set) {
-		return set.concat;
+ 		return set.concat;
 	}
 
 
@@ -738,13 +790,13 @@ namespace SEQAN_NAMESPACE_MAIN
 		//////////////////////////////////////////////////////////////////////////////
 		// STL compatible public iterator interface
 
+        typedef Iter								iterator;
 		typedef ::std::bidirectional_iterator_tag	iterator_category;
         typedef TValue								value_type;
 		typedef TValue &							reference;
 		typedef TValue const &						const_reference;
 		typedef TValue*								pointer;
 		typedef TSize								size_type;
-        typedef Iter								iterator;
 		typedef typename Difference<TString>::Type	difference_type;
 //____________________________________________________________________________
 
@@ -753,18 +805,18 @@ namespace SEQAN_NAMESPACE_MAIN
         obj_iterator	_begin, _cur, _end;
 //____________________________________________________________________________
 
-		Iter() {}
+		inline Iter() {}
 
-        Iter(TStringSet &_host):
+        inline Iter(TStringSet &_host):
             host(&_host)
         {
             objNo = 0;
             _begin = _cur = begin(_host[objNo]);
             _end = end(_host[objNo]);
-            testEnd();
+            _testEnd();
         }
 
-        Iter(TStringSet &_host, unsigned _objNo, difference_type _offset):
+        inline Iter(TStringSet &_host, unsigned _objNo, difference_type _offset):
             host(&_host)
         {
             objNo = _objNo;
@@ -772,85 +824,19 @@ namespace SEQAN_NAMESPACE_MAIN
 				_begin = _cur = begin(_host[objNo]);
 				_end = end(_host[objNo]);
                 goFurther(_cur, _offset);
-                testEnd();
+                _testEnd();
             } else {
                 _begin = _cur = obj_iterator();
                 _end = obj_iterator();
             }
         }
 
-		//////////////////////////////////////////////////////////////////////////////
-		// iterator arithmetic
-   		difference_type operator- (const iterator &I) const {
-            return tell() - I.tell();
-        }
-
-        iterator operator- (difference_type delta) const {
-            Pair< unsigned, difference_type > pos;
-            host->convert(pos, tell() - delta);
-            return iterator(*host, pos.i1, pos.i2);
-        }
-
-        iterator operator+ (difference_type delta) const {
-            Pair< unsigned, difference_type > pos;
-            host->convert(pos, tell() + delta);
-            return iterator(*host, pos.i1, pos.i2);
-        }
-
-		inline iterator& operator++ () {
-            ++_cur;
-            testEnd();
-			return *this;
-        }
-
-		inline iterator operator++ (int) {
-			iterator before = *this;
-            ++*this;
-			return before;
-		}
-
-		inline iterator& operator-- () {
-            testBegin();
-            --_cur;
-			return *this;
-        }
-
-		inline iterator operator-- (int) {
-			iterator before = *this;
-            --*this;
-			return before;
-		}
-
-        inline reference operator* () {
-            return *_cur;
-        }
-
-        inline const_reference operator* () const {
-            return *_cur;
-        }
-
-		bool operator== (const iterator &I) const {
-			SEQAN_ASSERT(host == I.host);
-			return objNo == I.objNo && _cur == I._cur;
-		}
-
-		bool operator!= (const iterator &I) const {
-			SEQAN_ASSERT(host == I.host);
-			return objNo != I.objNo || _cur != I._cur;
-		}
-
-		bool operator< (const iterator &I) const {
-			SEQAN_ASSERT(host == I.host);
-			return objNo < I.objNo || (objNo == I.objNo && _cur < I._cur);
-		}
-
         inline operator obj_iterator() {
             return _cur;
         }
+//____________________________________________________________________________
 
-    protected:
-
-        inline void testBegin() {
+		inline void _testBegin() {
             while (_cur == _begin && objNo != 0) {
                 --objNo;
 				_begin = _cur = host->_begin(objNo);
@@ -858,7 +844,7 @@ namespace SEQAN_NAMESPACE_MAIN
             }
         }
 
-        inline void testEnd() {
+        inline void _testEnd() {
             if (_cur == _end && objNo != length(*host))
                 do {
                     if (++objNo == length(*host)) {
@@ -871,10 +857,199 @@ namespace SEQAN_NAMESPACE_MAIN
                 } while (_cur == _end);
         }
 
-        inline difference_type tell() {
-			return host->limits[objNo] + distance(_begin, _cur);
+        inline TSize _tell() const {
+			typedef Pair<unsigned, TSize> TPair;
+			return posGlobalize(TPair(objNo, difference(_begin, _cur)), stringSetLimits(*host));
         }
     };
+
+	//////////////////////////////////////////////////////////////////////////////
+	// meta functions
+	//////////////////////////////////////////////////////////////////////////////
+
+	template <typename TStringSet, typename TSpec>
+	struct Value< Iter<TStringSet, ConcatVirtual<TSpec> > >:
+		Value< typename Value<TStringSet>::Type > {};
+
+	template <typename TStringSet, typename TSpec>
+	struct Value< Iter<TStringSet, ConcatVirtual<TSpec> > const >:
+		Value< typename Value<TStringSet>::Type > {};
+
+	template <typename TStringSet, typename TSpec>
+	struct Size< Iter<TStringSet, ConcatVirtual<TSpec> > >:
+		Size< typename Value<TStringSet>::Type > {};
+
+	template <typename TStringSet, typename TSpec>
+	struct Reference< Iter<TStringSet, ConcatVirtual<TSpec> > >:
+		Reference< typename Value<TStringSet>::Type > {};
+
+	template <typename TStringSet, typename TSpec>
+	struct Reference< Iter<TStringSet, ConcatVirtual<TSpec> > const >:
+		Reference< typename Value<TStringSet>::Type > {};
+
+
+	//////////////////////////////////////////////////////////////////////////////
+	// operator *
+	//////////////////////////////////////////////////////////////////////////////
+
+	template <typename TStringSet, typename TSpec>
+	inline typename Reference<Iter<TStringSet, ConcatVirtual<TSpec> > const>::Type
+	value(Iter<TStringSet, ConcatVirtual<TSpec> > const & me) {
+        return *me._cur;
+    }
+
+	template <typename TStringSet, typename TSpec>
+	inline typename Reference<Iter<TStringSet, ConcatVirtual<TSpec> > >::Type
+	value(Iter<TStringSet, ConcatVirtual<TSpec> > & me) {
+        return *me._cur;
+    }
+
+	template <typename TStringSet, typename TSpec>
+	inline typename Reference<Iter<TStringSet, ConcatVirtual<TSpec> > const>::Type
+	operator * (Iter<TStringSet, ConcatVirtual<TSpec> > const & me) {
+        return *me._cur;
+    }
+
+	template <typename TStringSet, typename TSpec>
+	inline typename Reference<Iter<TStringSet, ConcatVirtual<TSpec> > >::Type
+	operator * (Iter<TStringSet, ConcatVirtual<TSpec> > & me) {
+        return *me._cur;
+    }
+
+	//////////////////////////////////////////////////////////////////////////////
+	// operator ++
+	//////////////////////////////////////////////////////////////////////////////
+
+	template <typename TStringSet, typename TSpec>
+	inline void
+	goNext(Iter<TStringSet, ConcatVirtual<TSpec> > & me) {
+        ++me._cur;
+        me._testEnd();
+    }
+
+	template <typename TStringSet, typename TSpec>
+	inline Iter<TStringSet, ConcatVirtual<TSpec> > const &
+	operator ++ (Iter<TStringSet, ConcatVirtual<TSpec> > & me) {
+        goNext(me);
+		return me;
+    }
+
+	template <typename TStringSet, typename TSpec>
+	inline Iter<TStringSet, ConcatVirtual<TSpec> > const &
+	operator ++ (Iter<TStringSet, ConcatVirtual<TSpec> > & me, int) {
+		Iter<TStringSet, ConcatVirtual<TSpec> > before = me;
+        goNext(me);
+		return before;
+	}
+
+	//////////////////////////////////////////////////////////////////////////////
+	// operator --
+	//////////////////////////////////////////////////////////////////////////////
+
+	template <typename TStringSet, typename TSpec>
+	inline void
+	goPrev(Iter<TStringSet, ConcatVirtual<TSpec> > & me) {
+        me._testBegin();
+        --me._cur;
+    }
+
+	template <typename TStringSet, typename TSpec>
+	inline Iter<TStringSet, ConcatVirtual<TSpec> > const &
+	operator -- (Iter<TStringSet, ConcatVirtual<TSpec> > & me) {
+        goPrev(me);
+		return me;
+    }
+
+	template <typename TStringSet, typename TSpec>
+	inline Iter<TStringSet, ConcatVirtual<TSpec> > const &
+	operator -- (Iter<TStringSet, ConcatVirtual<TSpec> > & me, int) {
+		Iter<TStringSet, ConcatVirtual<TSpec> > before = me;
+        goPrev(me);
+		return before;
+	}
+
+	//////////////////////////////////////////////////////////////////////////////
+	// operator +
+	//////////////////////////////////////////////////////////////////////////////
+
+	template <typename TStringSet, typename TSpec, typename TDelta>
+	inline Iter<TStringSet, ConcatVirtual<TSpec> >
+	operator + (Iter<TStringSet, ConcatVirtual<TSpec> > const & me, TDelta delta) {
+		Pair<unsigned, typename Size< typename Value<TStringSet>::Type >::Type> pos;
+		posLocalize(pos, me._tell() + delta, stringSetLimits(*me.host));
+        return Iter<TStringSet, ConcatVirtual<TSpec> > (*me.host, getValueI1(pos), getValueI2(pos));
+    }
+
+	//////////////////////////////////////////////////////////////////////////////
+	// operator -
+	//////////////////////////////////////////////////////////////////////////////
+
+	template <typename TSSetL, typename TSpecL, typename TSSetR, typename TSpecR>
+	typename Difference<Iter<TSSetL, ConcatVirtual<TSpecL> > >::Type 
+	operator - (
+		Iter<TSSetL, ConcatVirtual<TSpecL> > const &L, 
+		Iter<TSSetR, ConcatVirtual<TSpecR> > const &R)
+	{
+        return L._tell() - R._tell();
+    }
+
+	template <typename TStringSet, typename TSpec, typename TDelta>
+	inline Iter<TStringSet, ConcatVirtual<TSpec> >
+	operator - (Iter<TStringSet, ConcatVirtual<TSpec> > const & me, TDelta delta) {
+		Pair<unsigned, typename Size< typename Value<TStringSet>::Type >::Type> pos;
+		posLocalize(pos, me._tell() - delta, stringSetLimits(*me.host));
+        return Iter<TStringSet, ConcatVirtual<TSpec> > (*me.host, getValueI1(pos), getValueI2(pos));
+    }
+
+	//////////////////////////////////////////////////////////////////////////////
+	// operator ==
+	//////////////////////////////////////////////////////////////////////////////
+
+	template <typename TSSetL, typename TSpecL, typename TSSetR, typename TSpecR>
+	inline bool 
+	operator == (
+		Iter<TSSetL, ConcatVirtual<TSpecL> > const &L, 
+		Iter<TSSetR, ConcatVirtual<TSpecR> > const &R)
+	{
+		SEQAN_ASSERT(L.host == R.host);
+		return L.objNo == R.objNo && L._cur == R._cur;
+	}
+
+	template <typename TSSetL, typename TSpecL, typename TSSetR, typename TSpecR>
+	inline bool 
+	operator != (
+		Iter<TSSetL, ConcatVirtual<TSpecL> > const &L, 
+		Iter<TSSetR, ConcatVirtual<TSpecR> > const &R)
+	{
+		SEQAN_ASSERT(L.host == R.host);
+		return L.objNo != R.objNo || L._cur != R._cur;
+	}
+
+	//////////////////////////////////////////////////////////////////////////////
+	// operator <
+	//////////////////////////////////////////////////////////////////////////////
+
+	template <typename TSSetL, typename TSpecL, typename TSSetR, typename TSpecR>
+	inline bool 
+	operator < (
+		Iter<TSSetL, ConcatVirtual<TSpecL> > const &L, 
+		Iter<TSSetR, ConcatVirtual<TSpecR> > const &R)
+	{
+		SEQAN_ASSERT(L.host == R.host);
+		return L.objNo < R.objNo || (L.objNo == R.objNo && L._cur < R._cur);
+	}
+
+	template <typename TSSetL, typename TSpecL, typename TSSetR, typename TSpecR>
+	inline bool 
+	operator > (
+		Iter<TSSetL, ConcatVirtual<TSpecL> > const &L, 
+		Iter<TSSetR, ConcatVirtual<TSpecR> > const &R)
+	{
+		SEQAN_ASSERT(L.host == R.host);
+		return L.objNo > R.objNo || (L.objNo == R.objNo && L._cur > R._cur);
+	}
+
+
 
 
 //////////////////////////////////////////////////////////////////////////////

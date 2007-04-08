@@ -85,7 +85,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		creator << unsigner;
 		suffixArray << creator;
 		#ifdef SEQAN_TEST_INDEX
-			isSuffixArray(suffixArray, stringSet);
+			//isSuffixArray(suffixArray, stringSet);
 		#endif
 	}
 

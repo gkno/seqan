@@ -17,30 +17,33 @@
     #define SEQAN_PROSET(i,v)
     #define SEQAN_PROADD(i,v)
     #define SEQAN_PROSUB(i,v)
-	#define SEQAN_PROVAL(i)			0
+	#define SEQAN_PROVAL(i)				0
     #define SEQAN_PROEXTRAS(i)
     #define SEQAN_PROMARK(m)
     #define SEQAN_PROENDMARK(m)
     #define SEQAN_PRORESET
     #define SEQAN_PROTIMESTART(a)
-    #define SEQAN_PROTIMEDIFF(a)	0
-    #define SEQAN_PROMALLOC(s) 		malloc(s)
-    #define SEQAN_PROFREE(p) 		free(p)
+    #define SEQAN_PROTIMEDIFF(a)		0
+	// replace malloc and free in external tools
+	// with SEQAN_PROMALLOC and SEQAN_PROFREE to profile
+	// their memory usage
+    #define SEQAN_PROMALLOC(s) 			malloc(s)
+    #define SEQAN_PROFREE(p) 			free(p)
 
 #else
 
-    #define SEQAN_PROSET(i,v)		_proSet(i,v)
-    #define SEQAN_PROADD(i,v)		_proAdd(i,v)
-    #define SEQAN_PROSUB(i,v)		_proSub(i,v)
-	#define SEQAN_PROVAL(i)			(_proData<>::_proValue[i])
-    #define SEQAN_PROEXTRAS(i)		{_proData<>::_proExtraCount = i;}
-    #define SEQAN_PROMARK(m)		_proMark(m)
-    #define SEQAN_PROENDMARK(m)		_proEndMark(m)
-    #define SEQAN_PRORESET			_proReset()
-    #define SEQAN_PROTIMESTART(a)	_proFloat a = sysTime()
-    #define SEQAN_PROTIMEDIFF(a)	(sysTime() - a)
-    #define SEQAN_PROMALLOC(s)		_proMalloc(s)
-    #define SEQAN_PROFREE(p)		_proFree(p)
+    #define SEQAN_PROSET(i,v)			_proSet(i,v)
+    #define SEQAN_PROADD(i,v)			_proAdd(i,v)
+    #define SEQAN_PROSUB(i,v)			_proSub(i,v)
+	#define SEQAN_PROVAL(i)				(_proData<>::_proValue[i])
+    #define SEQAN_PROEXTRAS(i)			{_proData<>::_proExtraCount = i;}
+    #define SEQAN_PROMARK(m)			_proMark(m)
+    #define SEQAN_PROENDMARK(m)			_proEndMark(m)
+    #define SEQAN_PRORESET				_proReset()
+    #define SEQAN_PROTIMESTART(a)		_proFloat a = sysTime()
+    #define SEQAN_PROTIMEDIFF(a)		(sysTime() - a)
+    #define SEQAN_PROMALLOC(s)			_proMalloc(s)
+    #define SEQAN_PROFREE(p)			_proFree(p)
 
 #endif
 
@@ -56,50 +59,50 @@
     typedef _proFloat _proTValue;
 
     enum _proConsts {
-        PROPAGESIZE         = 4096, // B in byte
-        PROFLOAT            = 0,
-        PROINT              = 1,
-        PROTIME	            = 2,
-        PROTYPEMASK         = 3,
-        PROSTATE            = 4
+        SEQAN_PROPAGESIZE         = 4096, // B in byte
+        SEQAN_PROFLOAT            = 0,
+        SEQAN_PROINT              = 1,
+        SEQAN_PROTIME             = 2,
+        SEQAN_PROTYPEMASK         = 3,
+        SEQAN_PROSTATE            = 4
     };
 
     enum _proValueIndex {
-		PROSYSTIME			= 0,
-		PROCPUTIME			= 1,
-        PROMEMORY           = 2,    // current memory usage (state value)
-        PROIO               = 3,    // IOs done (measured in Blocks of size B)
-        PROIORANDOM         = 4,    // IOs calls done (read/write calls done)
-        PROIOVOLUME         = 5,    // current disk usage (state value)
-        PRODEPTH            = 6,    // algorithmic rec. depth or loop count
-		PROOPENFILES		= 7,	// currently opened files
-        PROIWAIT            = 8,    // waiting time (initiating)
-        PROCWAIT            = 9,    // waiting time (completing)
-		PROEXTRA1           = 10,
-		PROEXTRA2           = 11,
-		PROEXTRA3           = 12,
-		PROINDEXCOUNT       = 13,
-		PROEXTRACOUNT       = 3
+		SEQAN_PROSYSTIME		  = 0,
+		SEQAN_PROCPUTIME		  = 1,
+        SEQAN_PROMEMORY           = 2,    // current memory usage (state value)
+        SEQAN_PROIO               = 3,    // IOs done (measured in Blocks of size B)
+        SEQAN_PROIORANDOM         = 4,    // IOs calls done (read/write calls done)
+        SEQAN_PROIOVOLUME         = 5,    // current disk usage (state value)
+        SEQAN_PRODEPTH            = 6,    // algorithmic rec. depth or loop count
+		SEQAN_PROOPENFILES		  = 7,	  // currently opened files
+        SEQAN_PROIWAIT            = 8,    // waiting time (initiating)
+        SEQAN_PROCWAIT            = 9,    // waiting time (completing)
+		SEQAN_PROEXTRA1           = 10,
+		SEQAN_PROEXTRA2           = 11,
+		SEQAN_PROEXTRA3           = 12,
+		SEQAN_PROINDEXCOUNT       = 13,
+		SEQAN_PROEXTRACOUNT       = 3
     };
 
     const char _proValueType[] = {
-		PROTIME, 
-		PROTIME, 
-        PROINT + PROSTATE, 
-        PROINT,
-        PROINT,
-        PROINT + PROSTATE, 
-        PROINT + PROSTATE, 
-        PROINT + PROSTATE, 
-        PROFLOAT,
-        PROFLOAT,
-        PROFLOAT + PROSTATE,
-        PROFLOAT + PROSTATE,
-        PROFLOAT + PROSTATE
+		SEQAN_PROTIME, 
+		SEQAN_PROTIME, 
+        SEQAN_PROINT + SEQAN_PROSTATE, 
+        SEQAN_PROINT,
+        SEQAN_PROINT,
+        SEQAN_PROINT + SEQAN_PROSTATE, 
+        SEQAN_PROINT + SEQAN_PROSTATE, 
+        SEQAN_PROINT + SEQAN_PROSTATE, 
+        SEQAN_PROFLOAT,
+        SEQAN_PROFLOAT,
+        SEQAN_PROFLOAT + SEQAN_PROSTATE,
+        SEQAN_PROFLOAT + SEQAN_PROSTATE,
+        SEQAN_PROFLOAT + SEQAN_PROSTATE
     };
 
-    typedef _proTValue _proTStates[PROINDEXCOUNT];
-    typedef _proFloat  _proTTimes[PROINDEXCOUNT];
+    typedef _proTValue _proTStates[SEQAN_PROINDEXCOUNT];
+    typedef _proFloat  _proTTimes[SEQAN_PROINDEXCOUNT];
 
 
 
@@ -230,8 +233,8 @@
 		}
 
         inline void maximize(_proTStates &dst, _proTStates const &src) {
-            for(int i = 0; i < PROINDEXCOUNT; ++i)
-                if (((_proValueType[i] & PROSTATE) != 0))
+            for(int i = 0; i < SEQAN_PROINDEXCOUNT; ++i)
+                if (((_proValueType[i] & SEQAN_PROSTATE) != 0))
                     if (dst[i] < src[i])
                         dst[i] = src[i];
         }
@@ -269,25 +272,25 @@
 
         inline void dumpValue(_proTStates &stat, int valNum) {
 			_proFloat f = stat[valNum];
-            if ((_proValueType[valNum] & PROSTATE) == 0)
+            if ((_proValueType[valNum] & SEQAN_PROSTATE) == 0)
 				f = _proData<>::_proValue[valNum] - f;
 
-			switch (_proValueType[valNum] & PROTYPEMASK) {
-				case PROINT:   									// state value -> print last seen maximum
+			switch (_proValueType[valNum] & SEQAN_PROTYPEMASK) {
+				case SEQAN_PROINT:   									// state value -> print last seen maximum
 					fprintf(out, "%.0f", f);
 					break;
 
-				case PROFLOAT:
+				case SEQAN_PROFLOAT:
 					fprintf(out, "%f", f);
 					break;
 
-				case PROTIME:
+				case SEQAN_PROTIME:
 					dumpTimeEx(f);
 			}
         }
 
         inline void dumpSysValues(_proTStates &stat) {
-            for(int i = 0; i < PROINDEXCOUNT - PROEXTRACOUNT; ++i) {
+            for(int i = 0; i < SEQAN_PROINDEXCOUNT - SEQAN_PROEXTRACOUNT; ++i) {
                 dumpTab();
                 dumpValue(stat, i);
             }
@@ -296,7 +299,7 @@
         inline void dumpExtraValues(_proTStates &stat) {
             for(int i = 0; i < _proData<>::_proExtraCount; ++i) {
                 dumpTab();
-                dumpValue(stat, PROINDEXCOUNT - PROEXTRACOUNT + i);
+                dumpValue(stat, SEQAN_PROINDEXCOUNT - SEQAN_PROEXTRACOUNT + i);
             }
 	}
 	
@@ -386,7 +389,7 @@
     }
 
     inline void _proSignalNewMax(int valNum) {
-        if (((_proValueType[valNum] & PROSTATE) != 0)) {
+        if (((_proValueType[valNum] & SEQAN_PROSTATE) != 0)) {
             if (_proData<>::_proPFileStream) _proData<>::_proPFileStream->signalNewMax(valNum);
             if (_proData<>::_proPFile)       _proData<>::_proPFile->signalNewMax(valNum);
         }
@@ -425,7 +428,7 @@
         _proFloat now = sysTime();
         _proData<>::_proValue[valNum] += value;
         _proData<>::_proLastUpdate[valNum] = now;
-        if (valNum == PROIO) _proAdd(PROIORANDOM, 1);
+        if (valNum == SEQAN_PROIO) _proAdd(SEQAN_PROIORANDOM, 1);
         _proSignalNewMax(valNum);
         _proSignalDumpTest(now);
     }
@@ -441,7 +444,7 @@
     inline void *_proMalloc(size_t size) {
     	size_t *ptr = reinterpret_cast<size_t*>(malloc(size + sizeof(size_t)));
     	if (ptr) {
-    		_proAdd(PROMEMORY, *ptr = size);
+    		_proAdd(SEQAN_PROMEMORY, *ptr = size);
 //			printf("_proMalloc %x size %d\n", ptr, size);
     		++ptr;
     	}
@@ -453,7 +456,7 @@
     	if (ptr) {
     		--ptr;
 //			printf("_proFree   %x size %d\n", _ptr, *ptr);
-    		_proSub(PROMEMORY, *ptr);
+    		_proSub(SEQAN_PROMEMORY, *ptr);
     	}
     	free(ptr);
     }

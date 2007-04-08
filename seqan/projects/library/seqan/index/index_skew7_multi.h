@@ -246,11 +246,11 @@ namespace SEQAN_NAMESPACE_MAIN
 	    template < typename _TInput >
         bool process(_TInput &textIn, unsigned maxdepth = 0, unsigned depth = 1) {
 
-            SEQAN_PROSET(PRODEPTH, depth);
+            SEQAN_PROSET(SEQAN_PRODEPTH, depth);
             SEQAN_PROMARK("Rekursionsabstieg");
             #ifdef SEQAN_DEBUG_INDEX
-                ::std::cout << "enter level " << depth << " compression: ";
-                ::std::cout << TYPECMP<compress, Compressed>::VALUE << " "<<ValueSize<_TypeOf(TInput)>::VALUE<<"\n";
+                ::std::cerr << "enter level " << depth << " compression: ";
+                ::std::cerr << TYPECMP<compress, Compressed>::VALUE << " "<<ValueSize<_TypeOf(TInput)>::VALUE<<"" << ::std::endl;
             #endif
             {
 
@@ -259,26 +259,26 @@ namespace SEQAN_NAMESPACE_MAIN
 
             // step 1
             TSamplerDC7                 sampler(textIn, limits);
-//		::std::cout << sampler;
+//		::std::cerr << sampler;
             TSortTuples                 sorter;
             #ifdef SEQAN_DEBUG_INDEX
-                ::std::cout << "  sort names (" << length(sampler)<< ")\n";
+                ::std::cerr << "  sort names (" << length(sampler)<< ")" << ::std::endl;
             #endif
             sorter << sampler;
             SEQAN_PROMARK("Sorter (2) - 7-lets sortieren");
 
 			TNamer                      namer(sorter);
-//		::std::cout << namer;
+//		::std::cerr << namer;
             func_slice_t				func_slice(limits);
 
 			TSlicedPos					slicedPos(namer, func_slice);
             TNames_Sliced               names_sliced;
             #ifdef SEQAN_DEBUG_INDEX
-                ::std::cout << "  slice names\n";
+                ::std::cerr << "  slice names" << ::std::endl;
             #endif
 
             names_sliced << slicedPos;
-//		::std::cout << names_sliced;
+//		::std::cerr << names_sliced;
 
 			if (namer.unique() || empty(names_sliced)) {
                 // unique names
@@ -289,7 +289,7 @@ namespace SEQAN_NAMESPACE_MAIN
 				TNames_Linear               names_S1, names_S2, names_S4;
 
                 #ifdef SEQAN_DEBUG_INDEX
-                    ::std::cout << "  make names linear\n";
+                    ::std::cerr << "  make names linear" << ::std::endl;
                 #endif
 
 				skew7_separate_slices(
@@ -331,7 +331,7 @@ namespace SEQAN_NAMESPACE_MAIN
 				TNames_Linear               names_S1, names_S2, names_S4;
 
                 #ifdef SEQAN_DEBUG_INDEX
-                    ::std::cout << "  rename names\n";
+                    ::std::cerr << "  rename names" << ::std::endl;
                 #endif
 
 				skew7_separate_slices(
@@ -343,7 +343,7 @@ namespace SEQAN_NAMESPACE_MAIN
                
                 // step 2
                 #ifdef SEQAN_DEBUG_INDEX
-                    ::std::cout << "  prepare merge\n";
+                    ::std::cerr << "  prepare merge" << ::std::endl;
                 #endif
                 skew7_extend_multi(
 					textIn, limits, 
@@ -357,10 +357,10 @@ namespace SEQAN_NAMESPACE_MAIN
             // ... is done on-demand by merger
             }
             #ifdef SEQAN_DEBUG_INDEX
-                ::std::cout << "left level " << depth << ::std::endl;
+                ::std::cerr << "left level " << depth << ::std::endl;
             #endif
             SEQAN_PROMARK("Rekursionsaufstieg");
-            SEQAN_PROSUB(PRODEPTH, 1);
+            SEQAN_PROSUB(SEQAN_PRODEPTH, 1);
 
             return true;
         }

@@ -469,7 +469,7 @@ SEQAN_CHECKPOINT
 	std::ostream& operator<<(std::ostream &out, Pipe<TInput, TSpec> &p) {
         beginRead(p);
         while (!eof(p)) {
-		    out << *p << "\n";
+			out << *p << ::std::endl;
             ++p;
         }
         endRead(p);

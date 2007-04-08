@@ -368,25 +368,25 @@ namespace SEQAN_NAMESPACE_MAIN
 //____________________________________________________________________________
 
 		inline void _dump() const {
-			::std::cout << "SETSTACK of " << representative(*this) << ":" << ::std::endl;
+			::std::cerr << "SETSTACK of " << representative(*this) << ":" << ::std::endl;
 			typename Iterator<TSetStack const>::Type it = begin(setStack), itEnd = end(setStack);
 			while (it != itEnd) {
 				TSet const &set = (*it).set;
 				typename Iterator<TSet const>::Type sit = begin(set), sitEnd = end(set);
 
 				while (sit != sitEnd) {
-					::std::cout << keyOf(sit) << "::";
+					::std::cerr << keyOf(sit) << "::";
 					typename TFractionCompound::TFractionHeader head = objectOf(sit);
 					TSize i = head.begin;
 					while (!_isSizeInval(i)) {
-						::std::cout << i << "  ";
+						::std::cerr << i << "  ";
 						i = posList[i];
 					}
-					::std::cout << ::std::endl;
+					::std::cerr << ::std::endl;
 					++sit;
 				}
 
-				::std::cout << "_________________________" << ::std::endl;
+				::std::cerr << "_________________________" << ::std::endl;
 				++it;
 			}
 		}
@@ -455,7 +455,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		if (it.canMerge)
 			push(it.setStack);
 /*
-		::std::cout << "PUSH ";
+		::std::cerr << "PUSH ";
 		_dumpHistoryStack(it);
 		it._dump();
 */	}
@@ -485,7 +485,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		_setSizeInval(it.posList[index]);
 /*
-		::std::cout << "LEAF ";
+		::std::cerr << "LEAF ";
 		_dumpHistoryStack(it);
 		it._dump();
 */	}

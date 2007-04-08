@@ -81,17 +81,17 @@ namespace SEQAN_NAMESPACE_MAIN
         bool open(char const *fileName, int openMode = OPEN_RDWR + OPEN_CREATE | OPEN_APPEND) {
             handle = _open(fileName, getOFlag(openMode), _S_IREAD | _S_IWRITE);
 			if (handle == -1) {
-				printf("Open failed on file %s: %s\n", fileName, strerror(errno));
+				::std::cerr << "Open failed on file " << fileName << ". (" << ::strerror(errno) << ")" << ::std::endl;
 				return false;
 			}
-			SEQAN_PROADD(PROOPENFILES, 1);
+			SEQAN_PROADD(SEQAN_PROOPENFILES, 1);
             return true;
         }
 
         bool openTemp(int openMode = OPEN_RDWR + OPEN_CREATE) {
 			char *fileName = _tempnam(SEQAN_DEFAULT_TMPDIR, "GNDX");
 			if (!fileName) {
-				printf("Cannot create a unique temp. filename\n");
+				::std::cerr << "Cannot create a unique temporary filename" << ::std::endl;
 				return false;
 			}
             return open(fileName, openMode | OPEN_TEMPORARY);
@@ -101,23 +101,23 @@ namespace SEQAN_NAMESPACE_MAIN
             if (_close(handle) != 0)
                 return false;
             handle = -1;
-			SEQAN_PROSUB(PROOPENFILES, 1);
+			SEQAN_PROSUB(SEQAN_PROOPENFILES, 1);
             return true;
         }
 
 		inline int read(void *buffer, _SizeType count) const {
-            SEQAN_PROADD(PROIO, (count + PROPAGESIZE - 1) / PROPAGESIZE);
+            SEQAN_PROADD(SEQAN_PROIO, (count + SEQAN_PROPAGESIZE - 1) / SEQAN_PROPAGESIZE);
             SEQAN_PROTIMESTART(tw);
 		    int result = _read(handle, buffer, count);
-            SEQAN_PROADD(PROCWAIT, SEQAN_PROTIMEDIFF(tw));
+            SEQAN_PROADD(SEQAN_PROCWAIT, SEQAN_PROTIMEDIFF(tw));
             return result;
 		}
 
 		inline int write(void const *buffer, _SizeType count) const {
-            SEQAN_PROADD(PROIO, (count + PROPAGESIZE - 1) / PROPAGESIZE);
+            SEQAN_PROADD(SEQAN_PROIO, (count + SEQAN_PROPAGESIZE - 1) / SEQAN_PROPAGESIZE);
             SEQAN_PROTIMESTART(tw);
 		    int result = _write(handle, buffer, count);
-            SEQAN_PROADD(PROCWAIT, SEQAN_PROTIMEDIFF(tw));
+            SEQAN_PROADD(SEQAN_PROCWAIT, SEQAN_PROTIMEDIFF(tw));
             return result;
 		}
 
@@ -219,29 +219,30 @@ namespace SEQAN_NAMESPACE_MAIN
             handle = ::open(fileName, getOFlag(openMode), S_IREAD | S_IWRITE);
 			if (handle == -1 && errno == EINVAL) {	// fall back to cached access
 	            #ifdef SEQAN_DEBUG_OR_TEST_
-					printf("Warning: Direct access openening failed: %s.\n", fileName);
+					::std::cerr << "Warning: Direct access openening failed: " << fileName << "." << ::std::endl;
 				#endif			
           	    handle = ::open(fileName, getOFlag(openMode & ~OPEN_ASYNC), S_IREAD | S_IWRITE);
 			}
 			
 			if (handle == -1) {
-				printf("Open failed on file %s: %s\n", fileName, strerror(errno));
+				::std::cerr << "Open failed on file " << fileName << ". (" << ::strerror(errno) << ")" << ::std::endl;
 				return false;
 			}
-			SEQAN_PROADD(PROOPENFILES, 1);
+			SEQAN_PROADD(SEQAN_PROOPENFILES, 1);
             return true;
         }
 
         bool openTemp(int openMode = OPEN_RDWR + OPEN_CREATE) {
 			char tmpFileName[] = "/GNDXXXXXXX";
 			if ((handle = ::mkstemp(tmpFileName)) == -1) {
-				printf("Cannot create temp. file %s\n", strerror(errno));
+				::std::cerr << "Cannot create temporary file " << tmpFileName << ". (" << ::strerror(errno) << ")" << ::std::endl;
 				return false;
 			}
 			if (!(close() && open(tmpFileName, openMode))) return false;
 			int result = ::unlink(tmpFileName);
             #ifdef SEQAN_DEBUG
-				if (result == -1) printf("Cannot unlink temp. file: %s\n", strerror(errno));
+				if (result == -1)
+					::std::cerr << "Cannot unlink temporary file " << tmpFileName << ". (" << ::strerror(errno) << ")" << ::std::endl;
             #endif
 			return true;
         }
@@ -249,23 +250,23 @@ namespace SEQAN_NAMESPACE_MAIN
         inline bool close() {
             if (::close(handle) == -1) return false;
             handle = -1;
-			SEQAN_PROSUB(PROOPENFILES, 1);
+			SEQAN_PROSUB(SEQAN_PROOPENFILES, 1);
             return true;
         }
 
 		inline ssize_t read(void *buffer, _SizeType count) const {
-            SEQAN_PROADD(PROIO, (count + PROPAGESIZE - 1) / PROPAGESIZE);
+            SEQAN_PROADD(SEQAN_PROIO, (count + SEQAN_PROPAGESIZE - 1) / SEQAN_PROPAGESIZE);
             SEQAN_PROTIMESTART(tw);
 		    ssize_t result = ::read(handle, buffer, count);
-            SEQAN_PROADD(PROCWAIT, SEQAN_PROTIMEDIFF(tw));
+            SEQAN_PROADD(SEQAN_PROCWAIT, SEQAN_PROTIMEDIFF(tw));
             return result;
 		}
 
 		inline ssize_t write(void const *buffer, _SizeType count) const {
-            SEQAN_PROADD(PROIO, (count + PROPAGESIZE - 1) / PROPAGESIZE);
+            SEQAN_PROADD(SEQAN_PROIO, (count + SEQAN_PROPAGESIZE - 1) / SEQAN_PROPAGESIZE);
             SEQAN_PROTIMESTART(tw);
 		    ssize_t result = ::write(handle, buffer, count);
-            SEQAN_PROADD(PROCWAIT, SEQAN_PROTIMEDIFF(tw));
+            SEQAN_PROADD(SEQAN_PROCWAIT, SEQAN_PROTIMEDIFF(tw));
             return result;
 		}
 /*
@@ -280,7 +281,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		inline FilePtr seek(FilePtr pos, int origin = SEEK_SET) const {
             FilePtr result = ::lseek(handle, pos, origin);
 //			#ifdef SEQAN_DEBUG
-				if (result < 0) printf("seek returned %d %s\n", (int)result, strerror(errno));
+				if (result < 0)
+					::std::cerr << "lseek returned " << result << ". (" << ::strerror(errno) << ")" << ::std::endl;
 //			#endif
 			return result;
 		}
@@ -365,12 +367,12 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template < typename TConfig, typename TValue, typename TSize >
     inline bool read(File<Sync<TConfig> > & me, TValue *memPtr, TSize const count) {
-		return me.read(memPtr, count * sizeof(TValue)) == count * sizeof(TValue);
+		return (int) me.read(memPtr, count * sizeof(TValue)) == (int) (count * sizeof(TValue));
     }
     
     template < typename TConfig, typename TValue, typename TSize >
     inline bool write(File<Sync<TConfig> > & me, TValue const *memPtr, TSize const count) {
-		return me.write(memPtr, count * sizeof(TValue)) == count * sizeof(TValue);
+		return (int) me.write(memPtr, count * sizeof(TValue)) == (int) (count * sizeof(TValue));
     }
 
 }

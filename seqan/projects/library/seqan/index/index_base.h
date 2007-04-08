@@ -748,18 +748,13 @@ namespace SEQAN_NAMESPACE_MAIN
 // interface for infinity/invalid values
 
 	template <typename TValue>
-	struct _SizeInval {
-		enum	{ VALUE = ~(TValue)0 };
-	};
-
-	template <typename TValue>
 	inline void _setSizeInval(TValue &v) {
-		v = _SizeInval<TValue>::VALUE;
+		v = SupremumValue<TValue>::VALUE;
 	}
 
 	template <typename TValue>
 	inline bool _isSizeInval(TValue const &v) {
-		return v == _SizeInval<TValue>::VALUE;
+		return v == SupremumValue<TValue>::VALUE;
 	}
 
 //////////////////////////////////////////////////////////////////////////////

@@ -24,7 +24,7 @@ void testGappedShapes()
 	stringToShape(shape1, shape_string);
 	Shape<Dna,GappedShape> shape2 = Shape<Dna,GappedShape>(shape1);
 
-	for(int i = 0; i < shape1.shape_len; ++i)
+	for(unsigned i = 0; i < shape1.shape_len; ++i)
         SEQAN_ASSERT(shape1[i] == shape2[i]);
 	SEQAN_ASSERT(shape1.num_gaps == shape2.num_gaps);
 	SEQAN_ASSERT(shape1.span == shape2.span);

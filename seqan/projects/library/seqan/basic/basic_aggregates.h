@@ -271,7 +271,6 @@ namespace SEQAN_NAMESPACE_MAIN
     struct Tuple<_T, _size, Compressed> {
         typedef _T T;
         enum { size = _size };
-//        enum { bitSize = Log2<ValueSize<_T>::VALUE>::VALUE };
         enum { bitSize = BitsPerValue<_T>::VALUE };
         enum { bitMask = (1 << bitSize) - 1 };
         enum { mask = (1 << (size * bitSize)) - 1 };
