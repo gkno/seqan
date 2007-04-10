@@ -1011,7 +1011,6 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template < typename TValue, typename TSpec >
     inline void push(Pool<TValue, TSpec> &me, TValue const &_Val) {
-SEQAN_CHECKPOINT
         me.push(_Val);
     }
 

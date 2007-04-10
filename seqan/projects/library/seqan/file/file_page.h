@@ -260,38 +260,6 @@ namespace SEQAN_NAMESPACE_MAIN
     template < typename TValue, typename TFile, unsigned _PageSize, typename TSize >
     inline void resize(PageFrame<TValue, TFile, Fixed<_PageSize> > &me, TSize size) { }
 
-#ifndef qsort_r
-    
-    static void *qsort_context;
-
-    template < typename TValue, typename TCompare >
-    static int compQSort(const void *a, const void *b) {
-        TCompare &C = *reinterpret_cast<TCompare*>(qsort_context);
-        return C(*reinterpret_cast<const TValue*>(a), *reinterpret_cast<const TValue*>(b));
-    }
-    
-    template < typename TValue, typename TCompare >
-    static void quickSort(SimpleBuffer<TValue> &buf, TCompare &C) {
-        // poor windows qsort doesn't support contexts and thus no reentrance
-        qsort_context = &C;
-        qsort(buf.begin, size(buf), sizeof(TValue), compQSort<TValue, TCompare>);
-    }
-
-#else
-
-    template < typename TValue, typename TCompare >
-    static int compQSort_r(void *p, const void *a, const void *b) {
-        TCompare &C = *reinterpret_cast<TCompare*>(C);
-        return C(*reinterpret_cast<const TValue*>(a), *reinterpret_cast<const TValue*>(b));
-    }
-    
-    template < typename TValue, typename TCompare >
-    static void quickSort(SimpleBuffer<TValue> &buf, TCompare &C) {
-        qsort_r(buf.begin, size(buf), sizeof(TValue), &C, compQSort_r<TValue, TCompare>);
-    }
-
-#endif
-
 
 	//////////////////////////////////////////////////////////////////////////////
 	// various page frame methods
