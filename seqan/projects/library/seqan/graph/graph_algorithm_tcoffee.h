@@ -181,7 +181,8 @@ getScoringMatrix(StringSet<TString, TSpec> const& strSet, Matrix<TValue>& score)
 	TValue score0;
 	for (TMatrixSize row=0;row<nseq;++row) {
 		score0 = getValue(mat, row*nseq+row);
-		for(TMatrixSize col=0;col<nseq;++col) {			
+		for(TMatrixSize col=0;col<nseq;++col) {		
+			// T-Coffee Score Function: Why score0 * 3 * 10.0 + 0.5 ???
 			assignValue(score, row*nseq+col, (TValue) ((score0 - getValue(mat, min(row,col)*nseq+max(row,col))) / score0 * 3 * 10.0 + 0.5));
 		}
 	}
