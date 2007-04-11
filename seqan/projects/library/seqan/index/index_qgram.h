@@ -247,14 +247,12 @@ namespace SEQAN_NAMESPACE_MAIN
 		typename TDir,
 		typename TString,
 		typename TSpec,
-		typename TShape,
-		typename TLimitsString >
+		typename TShape >
 	void createQGramIndex(
 		TSA &sa,
 		TDir &dir,
 		StringSet<TString, TSpec> const &stringSet,
-		TShape &shape,
-		TLimitsString &limits)
+		TShape &shape)
 	{
 	SEQAN_CHECKPOINT
 		typedef typename Iterator<TString const, Standard>::Type	TIterator;
@@ -314,33 +312,25 @@ namespace SEQAN_NAMESPACE_MAIN
 
 			TIterator it_l = begin(sequence, Standard());
 			TIterator it_r = it_l + 1;
-			TValue lastBucketIndex = length(dir) - 1;
 
 			typename Value<TSA>::Type localPos;
-			setValueI1(localPos, seqNo);
-			setValueI2(localPos, 0);
+			assignValueI1(localPos, seqNo);
+			assignValueI2(localPos, 0);
 
 			// first hash
 			TValue x = hash(shape, it_l), y = 0;
-			if (x != lastBucketIndex)
-				sa[dir[x + 1]++] = localPos;
-			else
-				sa[dir[0]++] = localPos;
+			sa[dir[x + 1]++] = localPos;
 
-			TSize	i = 1;
 			TSize	num_qgrams = length(sequence) - shapeSpan(shape) + 1;
 
-			while (i < num_qgrams)
+			for(TSize i = 1; i < num_qgrams; ++i)
 			{
 				// next hash
 				y = hashNext(shape, it_l, it_r, x);
 				++it_l;
 				++it_r;
-				setValueI2(getValueI2(localPos) + 1);
-				if (y != lastBucketIndex)
-					sa[dir[y + 1]++] = localPos;
-				else
-					sa[dir[0]++] = localPos;
+				assignValueI2(localPos, getValueI2(localPos) + 1);
+				sa[dir[y + 1]++] = localPos;
 
 				// für die nächste Runde
 				x = y;
@@ -598,7 +588,7 @@ namespace SEQAN_NAMESPACE_MAIN
 				qgram_count += sequenceLength(i, index) - (shapeSpan(shape) - 1);
 
 		resize(indexSA(index), qgram_count, Exact());
-		resize(indexDir(index), intPow(ValueSize<TShape>::VALUE, shapeSpan(shape) - shapeCountBlanks(shape)), Exact());
+		resize(indexDir(index), intPow(ValueSize<TShape>::VALUE, shapeSpan(shape) - shapeCountBlanks(shape)) + 1, Exact());
 		createQGramIndex(indexSA(index), indexDir(index), indexText(index), indexShape(index));
 		return true;
 	}

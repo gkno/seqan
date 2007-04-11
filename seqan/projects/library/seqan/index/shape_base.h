@@ -214,7 +214,11 @@ stringToShape(Shape<TValue,SimpleShape> & shape, String<char> const & shape_stri
 	public:
 		unsigned long term;
 		
-		Shape() {}
+		Shape() 
+		{
+			term = intPow(ValueSize<TValue>::VALUE, q-1);
+		}
+
 		Shape(Shape const &other):
 			term(other.term) {}
 	};
