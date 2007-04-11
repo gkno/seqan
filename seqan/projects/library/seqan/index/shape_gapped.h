@@ -104,7 +104,6 @@ inline hash(Shape<TValue, GappedShape> & shape, TSequenceIterator qgram_it)
 SEQAN_CHECKPOINT
 
 	typedef typename Size<Shape<TValue,GappedShape> >::Type TSize;
-	typedef typename Value<Shape<TValue,GappedShape> >::Type TValue;
 	TValue pos = 0;			
 	TSize * pshape = begin(shape.shape);
 	TSize * pshape_end = end(shape.shape);//

@@ -13,6 +13,7 @@
 #define TEST_PATH "projects/tests/graph/"
 #define LIB_PATH "projects/library/seqan/graph/"
 
+#include <seqan/index.h>
 #include <seqan/graph.h>
 
 using namespace std;
@@ -3721,7 +3722,11 @@ void Test_TCoffee() {
 
 	// Calculate a distance matrix
 	Matrix<double> score;
-	getScoringMatrix(stringSet(g), score, 6);
+	getScoringMatrix(stringSet(g), score);
+	Matrix<unsigned int> sim;
+	scoreToSimilarityMatrix(score, sim);
+	Matrix<unsigned int> dist;
+	scoreToDistanceMatrix(score, dist);
 
 	// Delete sequences
 	for(unsigned int i=0; i<length(value(g.data_sequence)); ++i) {

@@ -4,17 +4,129 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 
+	
+//////////////////////////////////////////////////////////////////////////////
+// New alphabet for amino acid groups
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+
+
+template <typename T = void>
+struct _Translate_Table_AA_2_AAGroups
+{
+	static char const VALUE[24];
+};
+template <typename T>
+char const _Translate_Table_AA_2_AAGroups<T>::VALUE[24] = 
+{
+	0, // 0 Ala Alanine                 
+	3, // 1 Arg Arginine                
+	2, // 2 Asn Asparagine              
+	2, // 3 Asp Aspartic Acid           
+	5, // 4 Cys Cystine                 
+	2, // 5 Gln Glutamine               
+	2, // 6 Glu Glutamic Acid           
+	0, // 7 Gly Glycine                 
+	3, // 8 His Histidine               
+	1, // 9 Ile Isoleucine              
+	1, //10 Leu Leucine                 
+	3, //11 Lys Lysine                  
+	1, //12 Met Methionine              
+	4, //13 Phe Phenylalanine           
+	0, //14 Pro Proline                 
+	0, //15 Ser Serine                  
+	0, //16 Thr Threonine               
+	4, //17 Trp Tryptophan              
+	4, //18 Tyr Tyrosine                
+	1, //19 Val Valine                  
+	2, //20 Aspartic Acid, Asparagine   
+	2, //21 Glutamic Acid, Glutamine    
+	6, //22 Unknown                     
+	6  //23 Terminator                  
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Spec.AAGroups:
+..cat:Alphabets
+..summary:Alphabet for Amino Acid Groups.
+..general:Class.SimpleType
+..signature:AAGroups
+..remarks:
+...text:The @Metafunction.ValueSize@ of $AAGroups$ is 7. 
+The groups are defined in the following way: "agjopst"=0, "ilmv"=1, "bdenqz"=2, "hkr"=3, "fwy"=4, "c"=5, all others = 6
+...text:Objects of type $AAGroups$ cannot be converted into other types.
+...text:$AAGroups$ is typedef for $SimpleType<char,_AAGroups>$, while $_AAGroups$ is an auxilliary specialization tag class.
+..see:Metafunction.ValueSize
+*/
+struct _AAGroups {};
+typedef SimpleType<unsigned char,_AAGroups> AAGroups;
+
+template <> struct ValueSize< AAGroups > { enum { VALUE = 7 }; };
+template <> struct BitsPerValue< AAGroups > { enum { VALUE = 4 }; };
+
+//////////////////////////////////////////////////////////////////////////////
+//AAGroups assignment
+
+template <>
+struct CompareType<AAGroups, AminoAcid> { typedef AAGroups Type; };
+inline void assign(AAGroups & target, AminoAcid const c_source)
+{
+SEQAN_CHECKPOINT
+	target.value = _Translate_Table_AA_2_AAGroups<>::VALUE[(unsigned char) c_source];
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <>
+struct CompareType<AAGroups, Byte> { typedef AAGroups Type; };
+inline void assign(AAGroups & target, Byte const c_source)
+{
+SEQAN_CHECKPOINT
+	target.value = _Translate_Table_AA_2_AAGroups<>::VALUE[(unsigned char) _Translate_Table_Byte_2_AA<>::VALUE[c_source] ];
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <>
+struct CompareType<AAGroups, Ascii> { typedef AAGroups Type; };
+inline void assign(AAGroups & target, Ascii const c_source)
+{
+SEQAN_CHECKPOINT
+	target.value = _Translate_Table_AA_2_AAGroups<>::VALUE[(unsigned char) _Translate_Table_Ascii_2_AA<>::VALUE[(unsigned char) c_source] ];
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <>
+struct CompareType<AAGroups, Unicode> { typedef AAGroups Type; };
+inline void assign(AAGroups & target, Unicode const c_source)
+{
+SEQAN_CHECKPOINT
+	target.value = _Translate_Table_AA_2_AAGroups<>::VALUE[(unsigned char) _Translate_Table_Ascii_2_AA<>::VALUE[(unsigned char) c_source] ];
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 // Graph: T-Coffee
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TCodedString, typename TTupelString, typename TAlphabetSize>
+template<typename TString, typename TTupelString, typename TAlphabetSize>
 void
-_getTupelString(TCodedString const& code, TTupelString& tupelString, TAlphabetSize const alphabet_size, unsigned int const ktup) {
-	typedef typename Value<TCodedString>::Type TWord;
-	typedef typename Size<TCodedString>::Type TSize;
+_getTupelString(TString const& str, TTupelString& tupelString, TAlphabetSize const alphabet_size, unsigned int const ktup) {
+	typedef unsigned int TWord;
+	typedef typename Size<TString>::Type TSize;
+
+	// Recode the sequence in a reduced alphabet	
+	String<AAGroups> code = str;
 
 	// Assign a unique number to each k-tupel
 	String<TWord> prod;  // Scaling according to position in k-tupel
@@ -28,126 +140,83 @@ _getTupelString(TCodedString const& code, TTupelString& tupelString, TAlphabetSi
 	TSize endTupel = 0;
 	tupelString[tupelIndex] = 0;
 	for(;endTupel<ktup;++endTupel) {
-		tupelString[tupelIndex] += code[endTupel] * prod[endTupel];
+		tupelString[tupelIndex] += (unsigned int) code[endTupel] * prod[endTupel];
 	}
 	++tupelIndex;
 	for(;endTupel<len;++endTupel) {
 		tupelString[tupelIndex] = tupelString[tupelIndex - 1];
-		tupelString[tupelIndex] -= code[endTupel - ktup] * prod[0];
+		tupelString[tupelIndex] -= (unsigned int) code[endTupel - ktup] * prod[0];
 		tupelString[tupelIndex] *= alphabet_size;
-		tupelString[tupelIndex] += code[endTupel];
+		tupelString[tupelIndex] += (unsigned int) code[endTupel];
 		++tupelIndex;
 	}
 }
 
-
-template<typename TInputString, typename TCodedString>
-unsigned int 
-_recodeSequence(TInputString const& input, TCodedString& out) {
-	typedef typename Value<TCodedString>::Type TWord;
-	typedef String<TInputString> TGroup;
-	typedef typename Iterator<TInputString>::Type TStringIter;
-	typedef typename Iterator<TGroup>::Type TGroupIter;
-	
-	// Predefined groups
-	TGroup groups;
-	appendValue(groups, "agjopstAGJOPST");
-	appendValue(groups, "ilmvILMV");
-	appendValue(groups, "bdenqzBDENQZ");
-	appendValue(groups, "hkrHKR");
-	appendValue(groups, "fwyFWY");
-	appendValue(groups, "cC");
-
-	// Assign to each letter the corresponding group
-	String<TWord> lookupTable;
-	for(TGroupIter gIt = begin(groups);!atEnd(gIt);++gIt) {
-		for(TStringIter sIt = begin(*gIt);!atEnd(sIt);++sIt) {
-			if ((TWord) *sIt >= length(lookupTable)) resize(lookupTable, (TWord) *sIt + 1, Generous());
-			//std::cout << *sIt << "," << (TWord) *sIt << ":" << position(gIt) << std::endl;
-			lookupTable[(TWord) *sIt] = position(gIt);
-		}
-	}
-
-	// Recode the sequence
-	typedef typename Size<TInputString>::Type TSize;
-	TSize len = length(input);
-	clear(out);
-	resize(out, len, Exact());
-	for(TSize s =0;s<len;++s) {
-		out[s] = lookupTable[(TWord) input[s] ];
-	}
-	return length(groups);  // Return the new alphabet size
-}
-
 template<typename TString, typename TSpec, typename TValue>
 void
-getScoringMatrix(StringSet<TString, TSpec> const& strSet, Matrix<TValue>& score, unsigned int const ktup) {
+getScoringMatrix(StringSet<TString, TSpec> const& strSet, Matrix<TValue>& score) {
 	typedef unsigned int TWord;
+
 	typedef StringSet<TString, TSpec> TStringSet;
 	typedef typename Size<TStringSet>::Type TStringSetSize;
-	typedef String<TWord> TTupelString;
-	typedef typename Size<TTupelString>::Type TStringSize;
-	typedef String<TTupelString> TTupelStringSet;
-	typedef short TCountValue;
-	typedef Matrix<TCountValue> THitMatrix;
-	typedef typename Size<Matrix<short> >::Type TMatrixSize;
+	
+	typedef Matrix<TWord> THitMatrix;
+	typedef typename Size<THitMatrix>::Type TMatrixSize;
+
+	// Number of sequences
+	TStringSetSize nseq = length(strSet);
 
 	// Initialization
-	TStringSetSize nseq = length(strSet);
 	THitMatrix mat;   // Matrix for common k-tupels between sequence i and j
 	setDimension(mat, 2);setLength(mat, 0, nseq);setLength(mat, 1, nseq);
-	resize(mat);
+	fill(host(mat), nseq*nseq, 0);
+
+	// StringSet where each string is a sequence of amino acid groups identifiers
+	typedef StringSet<String<AAGroups>, ConcatVirtual<> > TStringSetAA;
+	// q-gram length = 6
+	typedef Index<TStringSetAA, Index_QGram<FixedShape<6> > > TIndex;
+	TIndex index;
+	resize(indexText(index), nseq);
+	
+	// Recode the strings into amino acid groups
+	for(TStringSetSize k=0;k<length(strSet);++k) indexText(index)[k] = strSet[k];
+
+	// Build index	
+	indexCreate(index, QGram_SA());
+
+	// Counter for each sequence
+	String<TWord> counter;
+	resize(counter, nseq);
+	
+	TWord nqgrams = length(indexDir(index)) - 1;
+	if (nqgrams > 0) {
+		TWord j1;
+		TWord j2 = indexDir(index)[0];
+		for(TWord i = 0; i < nqgrams; ++i) {  // Iterate over all q-grams
+			j1 = j2;
+			j2 = indexDir(index)[i+1];
+			if (j1 == j2) continue;   //Empty hit-list for this q-gram
+
+			// Clear the counters
+			arrayFill(begin(counter, Standard()), end(counter, Standard()), 0);
+			for(unsigned j = j1; j < j2; ++j) ++counter[getValueI1(indexSA(index)[j])];
+
+			// Add-up the values in the matrix
+			for(unsigned k = 0; k < nseq; ++k)
+				for(unsigned k2 = k; k2 < nseq; ++k2)
+					assignValue(mat, k*nseq+k2, getValue(mat, k*nseq+k2) + min(counter[k], counter[k2]));
+		}
+	}
+
+	// Get the score matrix
 	setDimension(score, 2);setLength(score, 0, nseq);setLength(score, 1, nseq);
-	resize(score);
-	for (TMatrixSize row=0;row<nseq;++row) {
-		for(TMatrixSize col=0;col<nseq;++col) {
-			assignValue(mat, row*nseq+col, 0);
-			assignValue(score, row*nseq+col, 0);
-		}
-	}
-
-	// Transform the StringSet into a set of strings of k-tupels
-	TWord alphabet_size;
-	TTupelStringSet tupSet;
-	resize(tupSet, length(strSet));
-	for(TStringSetSize k=0;k<length(strSet);++k) {
-		String<TWord> code;
-		// Recode the sequence in a reduced alphabet	
-		alphabet_size = _recodeSequence(strSet[k], code);
-		
-		// Break the sequence into k-tupels
-		_getTupelString(code, tupSet[k], alphabet_size, ktup);
-
-		//for(TStringSize i = 0;i<length(tupelString);++i) std::cout << tupelString[i] << ",";
-		//std::cout << std::endl;
-	}
-
-	// Build for each sequence the q-gram Index and count common hits
-	String<TCountValue> qIndex;
-	String<TCountValue> compareIndex;
-	for(TStringSetSize k=0;k<nseq;++k) {
-		clear(qIndex);
-		fill(qIndex, (unsigned int) pow((double)alphabet_size, (double)ktup), (TCountValue) 0, Exact());
-		for(TStringSize i = 0;i<length(tupSet[k]);++i) ++qIndex[ tupSet[k][i] ];
-		TWord value;
-	    for (TStringSetSize k2=k; k2<nseq; ++k2) {
-			clear(compareIndex);
-			fill(compareIndex, (unsigned int) pow((double)alphabet_size, (double)ktup), (TCountValue) 0, Exact());
-			value = 0;
-			for(TStringSize i = 0;i<length(tupSet[k2]);++i) {
-				//std::cout << tupSet[k2][i] << "," << compareIndex[ tupSet[k2][i] ] << "," << qIndex[ tupSet[k2][i] ]<< std::endl;
-				if (compareIndex[ tupSet[k2][i] ] < qIndex[ tupSet[k2][i] ]) ++value;
-				++compareIndex[ tupSet[k2][i] ];
-			}
-			assignValue(mat, k*nseq+k2, value);
-		}
-	}
+	fill(host(score), nseq*nseq, 0);
 
 	// Calculate the score
 	TValue score0;
 	for (TMatrixSize row=0;row<nseq;++row) {
 		score0 = getValue(mat, row*nseq+row);
-		for(TMatrixSize col=0;col<nseq;++col) {
+		for(TMatrixSize col=0;col<nseq;++col) {			
 			assignValue(score, row*nseq+col, (TValue) ((score0 - getValue(mat, min(row,col)*nseq+max(row,col))) / score0 * 3 * 10.0 + 0.5));
 		}
 	}
@@ -158,17 +227,72 @@ getScoringMatrix(StringSet<TString, TSpec> const& strSet, Matrix<TValue>& score,
 		}
 	}
 
-
-	for (TMatrixSize row=0;row<nseq;++row) {
-		for(TMatrixSize col=0;col<nseq;++col) {
+	/*
+	for (unsigned row=0;row<nseq;++row) {
+		for(unsigned col=0;col<nseq;++col) {
 			std::cout << getValue(score, row*nseq+col) << ",";
+		}
+		std::cout << std::endl;
+	}
+	*/
+}
+
+
+template<typename TScoreValue, typename TScoreSpec, typename TSimValue, typename TSimSpec>
+void
+scoreToSimilarityMatrix(Matrix<TScoreValue, TScoreSpec>& score, Matrix<TSimValue, TSimSpec>& sim) {
+	typedef Matrix<TScoreValue, TScoreSpec> TScoreMatrix;
+	typedef Matrix<TSimValue, TSimSpec> TSimMatrix;
+	typedef typename Size<TScoreMatrix>::Type TSize;
+	typedef typename Value<TSimMatrix>::Type TValue;
+	TValue maxSim = 100;
+
+	TSize nseq = length(score, 0);
+	setDimension(sim, 2);setLength(sim, 0, nseq);setLength(sim, 1, nseq);
+	fill(host(sim), nseq*nseq, 0);
+
+	for (TSize row=0;row<nseq;++row) {
+		for(TSize col=row;col<nseq;++col) {
+			if (row == col) assignValue(sim, row*nseq+col, maxSim);
+			else {
+				assignValue(sim, row*nseq+col, (TValue) getValue(score, row*nseq+col));
+				assignValue(sim, col*nseq+row, (TValue) getValue(score, row*nseq+col));
+			}
+		}
+	}
+		
+	for (TSize row=0;row<nseq;++row) {
+		for(TSize col=0;col<nseq;++col) {
+			std::cout << getValue(sim, row*nseq+col) << ",";
 		}
 		std::cout << std::endl;
 	}
 }
 
 
+template<typename TScoreValue, typename TScoreSpec, typename TDistValue, typename TDistSpec>
+void
+scoreToDistanceMatrix(Matrix<TScoreValue, TScoreSpec>& score, Matrix<TDistValue, TDistSpec>& dist) {
+	typedef Matrix<TScoreValue, TScoreSpec> TScoreMatrix;
+	typedef Matrix<TDistValue, TDistSpec> TDistMatrix;
+	typedef typename Size<TScoreMatrix>::Type TSize;
+	typedef typename Value<TDistMatrix>::Type TValue;
+	TValue maxDist = 100;
 
+	TSize nseq = length(score, 0);
+	setDimension(dist, 2);setLength(dist, 0, nseq);setLength(dist, 1, nseq);
+	fill(host(dist), nseq*nseq, 0);
+
+	for (TSize row=0;row<nseq;++row) {
+		for(TSize col=row;col<nseq;++col) {
+			if (row == col) assignValue(dist, row*nseq+col, 0);
+			else {
+				assignValue(dist, row*nseq+col, maxDist - (TValue) getValue(score, row*nseq+col));
+				assignValue(dist, col*nseq+row, maxDist - (TValue) getValue(score, row*nseq+col));
+			}
+		}
+	}
+}
 
 
 //////////////////////////////////////////////////////////////////////////////
