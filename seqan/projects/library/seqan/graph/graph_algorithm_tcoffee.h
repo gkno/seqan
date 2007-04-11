@@ -117,41 +117,6 @@ SEQAN_CHECKPOINT
 // Graph: T-Coffee
 //////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TString, typename TTupelString, typename TAlphabetSize>
-void
-_getTupelString(TString const& str, TTupelString& tupelString, TAlphabetSize const alphabet_size, unsigned int const ktup) {
-	typedef unsigned int TWord;
-	typedef typename Size<TString>::Type TSize;
-
-	// Recode the sequence in a reduced alphabet	
-	String<AAGroups> code = str;
-
-	// Assign a unique number to each k-tupel
-	String<TWord> prod;  // Scaling according to position in k-tupel
-	resize(prod,ktup);
-	for (TWord i=0; i<ktup;++i) prod[ktup-i-1]=(TWord)pow((double)alphabet_size,(double)i);
-
-	TSize len = length(code);
-	clear(tupelString);
-	resize(tupelString, len-(ktup - 1)); 
-	TSize tupelIndex = 0;
-	TSize endTupel = 0;
-	tupelString[tupelIndex] = 0;
-	for(;endTupel<ktup;++endTupel) {
-		tupelString[tupelIndex] += (unsigned int) code[endTupel] * prod[endTupel];
-	}
-	++tupelIndex;
-	for(;endTupel<len;++endTupel) {
-		tupelString[tupelIndex] = tupelString[tupelIndex - 1];
-		tupelString[tupelIndex] -= (unsigned int) code[endTupel - ktup] * prod[0];
-		tupelString[tupelIndex] *= alphabet_size;
-		tupelString[tupelIndex] += (unsigned int) code[endTupel];
-		++tupelIndex;
-	}
-}
-
 template<typename TString, typename TSpec, typename TValue>
 void
 getScoringMatrix(StringSet<TString, TSpec> const& strSet, Matrix<TValue>& score) {
