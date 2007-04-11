@@ -106,8 +106,8 @@ namespace SEQAN_NAMESPACE_MAIN
         for(TValue *cur = buf.begin; cur != buf.end; ++cur) {
             #ifdef SEQAN_DEBUG
                 if (!(M(*cur) >= offset && M(*cur) < offset + pageSize(buf))) {
-					::std::cerr << "Mapper assertion failed: " << ::std::hex << (unsigned)M(*cur);
-					::std::cerr << " not in [" << (unsigned)offset << "," << (unsigned)(offset + pageSize(buf)) << ") at " << (unsigned)(cur - buf.begin);
+					::std::cerr << "Mapper assertion failed: " << ::std::hex << M(*cur);
+					::std::cerr << " not in [" << offset << "," << (offset + pageSize(buf)) << ") at " << (cur - buf.begin);
                     ::std::cerr << " element is " << ::std::dec << *cur << ::std::endl;
                 }
             #endif
@@ -148,8 +148,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
 			#ifdef SEQAN_DEBUG
                 if (!(dstPos >= offset && dstPos < offset + (TSize)pageSize(buf))) {
-					::std::cerr << "Mapper assertion failed: " << ::std::hex << (unsigned)dstPos;
-					::std::cerr << " not in [" << (unsigned)offset << "," << (unsigned)(offset + pageSize(buf)) << ") at " << (unsigned)(cur - buf.begin);
+					::std::cerr << "Mapper assertion failed: " << ::std::hex << dstPos;
+					::std::cerr << " not in [" << offset << "," << (offset + pageSize(buf)) << ") at " << (cur - buf.begin);
                     ::std::cerr << " element is " << ::std::dec << *cur << ::std::endl;
                 }
 			#endif
@@ -172,8 +172,8 @@ namespace SEQAN_NAMESPACE_MAIN
 					{
 						#ifdef SEQAN_DEBUG
 							if (!(dstPos >= offset && dstPos < offset + (TSize)pageSize(buf))) {
-								::std::cerr << "Mapper assertion failed: " << ::std::hex << (unsigned)dstPos;
-								::std::cerr << " not in [" << (unsigned)offset << "," << (unsigned)(offset + pageSize(buf)) << ") at " << (unsigned)(refNext - buf.begin);
+								::std::cerr << "Mapper assertion failed: " << ::std::hex << dstPos;
+								::std::cerr << " not in [" << offset << "," << (offset + pageSize(buf)) << ") at " << (refNext - buf.begin);
 								::std::cerr << " element is " << ::std::dec << *refNext << ::std::endl;
 							}
 							TValue *oldI = I;
@@ -184,12 +184,12 @@ namespace SEQAN_NAMESPACE_MAIN
 
 						#ifdef SEQAN_DEBUG
 							if (!partiallyFilled && I < cur) {
-								::std::cerr << "Mapper assertion failed: I=" << ::std::hex << (unsigned)I;
-								::std::cerr << " < cur=" << (unsigned)cur << ::std::dec << ::std::endl;
+								::std::cerr << "Mapper assertion failed: I=" << ::std::hex << I;
+								::std::cerr << " < cur=" << cur << ::std::dec << ::std::endl;
 								break;
 							}
 							if (I == oldI) {
-								::std::cerr << "Mapper assertion failed: I=" << ::std::hex << (unsigned)I;
+								::std::cerr << "Mapper assertion failed: I=" << ::std::hex << I;
 								::std::cerr << " in endless loop" << ::std::dec << ::std::endl;
 								break;
 							}

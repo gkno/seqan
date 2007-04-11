@@ -129,12 +129,16 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef PageBucketExtended<Type>                PageBucket;
 
         typedef MergeStreamComparer<Type, Compare>      StreamComparer;
-        typedef ::std::priority_queue <
+/*        typedef ::std::priority_queue <
             PageBucket,
             ::std::vector<PageBucket>,
             MergeStreamComparer<Type, Compare> >	    PQueue;
+*/
+        typedef PriorityType<
+			PageBucket, 
+			MergeStreamComparer<Type, Compare> >	    PQueue;
 
-        TPool   &pool;
+		TPool   &pool;
         Buffer	bucketBuffer;
         PQueue  pqueue;
 
@@ -151,9 +155,9 @@ namespace SEQAN_NAMESPACE_MAIN
 			insertBucket(Handler &_me): me(_me) {}
 
 			inline void operator() (PageBucket &pb) const {
-                pb.pageNo = me.pqueue.size();
+                pb.pageNo = length(me.pqueue);
                 readBucket(pb, pb.pageNo, me.pool.pageSize, me.pool.dataSize(pb.pageNo), me.pool.file);
-                me.pqueue.push(pb);
+                push(me.pqueue, pb);
 			}
 		};
 
@@ -168,36 +172,34 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 
         inline Type const & front() const {
-            return *(pqueue.top().cur);
+			return *(top(pqueue).cur);
         }
 
         inline void pop(Type &_Ref) {
-            PageBucket pb = pqueue.top();
-            pqueue.pop();
+            PageBucket &pb = top(pqueue);
             _Ref = *pb.cur;
-            if (++pb.cur == pb.end) {
+            if (++pb.cur == pb.end)
                 // bucket is empty, we have to fetch the next bucket
-                if (readBucket(pb, pb.pageNo, pool.pageSize, pool.dataSize(pb.pageNo), pool.file)) {
-                    pqueue.push(pb);
-                }
-            } else
-                pqueue.push(pb);
+				if (!readBucket(pb, pb.pageNo, pool.pageSize, pool.dataSize(pb.pageNo), pool.file)) {
+					::seqan::pop(pqueue);
+					return;
+				}
+			adjustTop(pqueue);
         }
 
         inline void pop() {
-            PageBucket pb = pqueue.top();
-            pqueue.pop();
-            if (++pb.cur == pb.end) {
+            PageBucket &pb = top(pqueue);
+            if (++pb.cur == pb.end)
                 // bucket is empty, we have to fetch the next bucket
-                if (readBucket(pb, pb.pageNo, pool.pageSize, pool.dataSize(pb.pageNo), pool.file)) {
-                    pqueue.push(pb);
-                }
-            } else
-                pqueue.push(pb);
+				if (!readBucket(pb, pb.pageNo, pool.pageSize, pool.dataSize(pb.pageNo), pool.file)) {
+					::seqan::pop(pqueue);
+					return;
+				}
+			adjustTop(pqueue);
         }
 
 		inline bool eof() const {
-			return pqueue.size() == 0;
+			return empty(pqueue);
 		}
 
         inline void end() {
@@ -206,8 +208,7 @@ namespace SEQAN_NAMESPACE_MAIN
         
         void cancel()
         {
-            while (pqueue.size())
-                pqueue.pop();
+            clear(pqueue);
             freePage(bucketBuffer, *this);
         }
 
@@ -256,9 +257,9 @@ namespace SEQAN_NAMESPACE_MAIN
 			insertBucket(BufferHandler &_me): me(_me) {}
 
 			inline void operator() (PageBucket &pb) const {
-                pb.pageNo = pqueue.size();
+                pb.pageNo = length(pqueue);
                 readBucket(pb, pb.pageNo, me.pool.pageSize, me.pool.dataSize(pb.pageNo), pool.file);
-                pqueue.push(pb);
+                push(pqueue, pb);
 			}
 		};
 
@@ -283,8 +284,7 @@ namespace SEQAN_NAMESPACE_MAIN
         
         void cancel()
         {
-            while (pqueue.size())
-                pqueue.pop();
+            clear(pqueue);
 			freePage(mergeBuffer, *this);
             freePage(bucketBuffer, *this);
         }
@@ -297,7 +297,7 @@ namespace SEQAN_NAMESPACE_MAIN
         {
             // 2. merge streams into mergeBuffer
             
-			typename PQueue::size_type pqsize = pqueue.size();
+			typename PQueue::size_type pqsize = length(pqueue);
 			if (!pqsize) {
 				resize(tmpBuffer, 0);
 				return tmpBuffer;
@@ -314,7 +314,7 @@ namespace SEQAN_NAMESPACE_MAIN
 					tmpBuffer.end = pb.end;
 					pb.cur = pb.end;
 					if (pb.pageOfs == pool.dataSize(pb.pageNo))
-						pqueue.pop();
+						pop(pqueue);
 					return tmpBuffer;
 				}
 
@@ -324,19 +324,17 @@ namespace SEQAN_NAMESPACE_MAIN
 
 				resize(mergeBuffer, readBucket(pb, pb.pageNo, pool.pageSize, pool.dataSize(pb.pageNo)));
 				if (pb.pageOfs == pool.dataSize(pb.pageNo))
-					pqueue.pop();
+					pop(pqueue);
 			}
             else
             {
                 for(Type *cur = mergeBuffer.begin; cur != mergeBuffer.end; ++cur) {
-                    PageBucket pb = pqueue.top();
-                    pqueue.pop();
+                    PageBucket &pb = pqueue.top();
                     *cur = *pb.cur;
 					if (++pb.cur == pb.end) {
 						// bucket is empty, we have to fetch the next bucket
-						if (readBucket(pb, pb.pageNo, pool.pageSize, pool.dataSize(pb.pageNo), pool.file)) {
-							pqueue.push(pb);
-						} else {
+						if (!readBucket(pb, pb.pageNo, pool.pageSize, pool.dataSize(pb.pageNo), pool.file)) {
+							pop(pqueue);
 							// queue contains only one stream
 							// => we return what we have merged
 							if (--pqsize == 1) {
@@ -344,8 +342,8 @@ namespace SEQAN_NAMESPACE_MAIN
 								return mergeBuffer;
 							}
 						}
-					} else
-						pqueue.push(pb);
+					}
+					adjustTop(pqueue);
                 }
 				resize(mergeBuffer, pageSize(mergeBuffer));
             }
@@ -353,7 +351,6 @@ namespace SEQAN_NAMESPACE_MAIN
             return mergeBuffer;
         }
 	};
-
 
 	template < typename TValue,
 			   typename TConfig >
