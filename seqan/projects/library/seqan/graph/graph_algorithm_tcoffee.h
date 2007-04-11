@@ -10,9 +10,162 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //////////////////////////////////////////////////////////////////////////////
 
+template<typename TCodedString, typename TTupelString, typename TAlphabetSize>
+void
+_getTupelString(TCodedString const& code, TTupelString& tupelString, TAlphabetSize const alphabet_size, unsigned int const ktup) {
+	typedef typename Value<TCodedString>::Type TWord;
+	typedef typename Size<TCodedString>::Type TSize;
+
+	// Assign a unique number to each k-tupel
+	String<TWord> prod;  // Scaling according to position in k-tupel
+	resize(prod,ktup);
+	for (TWord i=0; i<ktup;++i) prod[ktup-i-1]=(TWord)pow((double)alphabet_size,(double)i);
+
+	TSize len = length(code);
+	clear(tupelString);
+	resize(tupelString, len-(ktup - 1)); 
+	TSize tupelIndex = 0;
+	TSize endTupel = 0;
+	tupelString[tupelIndex] = 0;
+	for(;endTupel<ktup;++endTupel) {
+		tupelString[tupelIndex] += code[endTupel] * prod[endTupel];
+	}
+	++tupelIndex;
+	for(;endTupel<len;++endTupel) {
+		tupelString[tupelIndex] = tupelString[tupelIndex - 1];
+		tupelString[tupelIndex] -= code[endTupel - ktup] * prod[0];
+		tupelString[tupelIndex] *= alphabet_size;
+		tupelString[tupelIndex] += code[endTupel];
+		++tupelIndex;
+	}
+}
 
 
+template<typename TInputString, typename TCodedString>
+unsigned int 
+_recodeSequence(TInputString const& input, TCodedString& out) {
+	typedef typename Value<TCodedString>::Type TWord;
+	typedef String<TInputString> TGroup;
+	typedef typename Iterator<TInputString>::Type TStringIter;
+	typedef typename Iterator<TGroup>::Type TGroupIter;
+	
+	// Predefined groups
+	TGroup groups;
+	appendValue(groups, "agjopstAGJOPST");
+	appendValue(groups, "ilmvILMV");
+	appendValue(groups, "bdenqzBDENQZ");
+	appendValue(groups, "hkrHKR");
+	appendValue(groups, "fwyFWY");
+	appendValue(groups, "cC");
 
+	// Assign to each letter the corresponding group
+	String<TWord> lookupTable;
+	for(TGroupIter gIt = begin(groups);!atEnd(gIt);++gIt) {
+		for(TStringIter sIt = begin(*gIt);!atEnd(sIt);++sIt) {
+			if ((TWord) *sIt >= length(lookupTable)) resize(lookupTable, (TWord) *sIt + 1, Generous());
+			//std::cout << *sIt << "," << (TWord) *sIt << ":" << position(gIt) << std::endl;
+			lookupTable[(TWord) *sIt] = position(gIt);
+		}
+	}
+
+	// Recode the sequence
+	typedef typename Size<TInputString>::Type TSize;
+	TSize len = length(input);
+	clear(out);
+	resize(out, len, Exact());
+	for(TSize s =0;s<len;++s) {
+		out[s] = lookupTable[(TWord) input[s] ];
+	}
+	return length(groups);  // Return the new alphabet size
+}
+
+template<typename TString, typename TSpec, typename TValue>
+void
+getScoringMatrix(StringSet<TString, TSpec> const& strSet, Matrix<TValue>& score, unsigned int const ktup) {
+	typedef unsigned int TWord;
+	typedef StringSet<TString, TSpec> TStringSet;
+	typedef typename Size<TStringSet>::Type TStringSetSize;
+	typedef String<TWord> TTupelString;
+	typedef typename Size<TTupelString>::Type TStringSize;
+	typedef String<TTupelString> TTupelStringSet;
+	typedef short TCountValue;
+	typedef Matrix<TCountValue> THitMatrix;
+	typedef typename Size<Matrix<short> >::Type TMatrixSize;
+
+	// Initialization
+	TStringSetSize nseq = length(strSet);
+	THitMatrix mat;   // Matrix for common k-tupels between sequence i and j
+	setDimension(mat, 2);setLength(mat, 0, nseq);setLength(mat, 1, nseq);
+	resize(mat);
+	setDimension(score, 2);setLength(score, 0, nseq);setLength(score, 1, nseq);
+	resize(score);
+	for (TMatrixSize row=0;row<nseq;++row) {
+		for(TMatrixSize col=0;col<nseq;++col) {
+			assignValue(mat, row*nseq+col, 0);
+			assignValue(score, row*nseq+col, 0);
+		}
+	}
+
+	// Transform the StringSet into a set of strings of k-tupels
+	TWord alphabet_size;
+	TTupelStringSet tupSet;
+	resize(tupSet, length(strSet));
+	for(TStringSetSize k=0;k<length(strSet);++k) {
+		String<TWord> code;
+		// Recode the sequence in a reduced alphabet	
+		alphabet_size = _recodeSequence(strSet[k], code);
+		
+		// Break the sequence into k-tupels
+		_getTupelString(code, tupSet[k], alphabet_size, ktup);
+
+		//for(TStringSize i = 0;i<length(tupelString);++i) std::cout << tupelString[i] << ",";
+		//std::cout << std::endl;
+	}
+
+	// Build for each sequence the q-gram Index and count common hits
+	String<TCountValue> qIndex;
+	String<TCountValue> compareIndex;
+	for(TStringSetSize k=0;k<nseq;++k) {
+		clear(qIndex);
+		fill(qIndex, (unsigned int) pow((double)alphabet_size, (double)ktup), (TCountValue) 0, Exact());
+		for(TStringSize i = 0;i<length(tupSet[k]);++i) ++qIndex[ tupSet[k][i] ];
+		TWord value;
+	    for (TStringSetSize k2=k; k2<nseq; ++k2) {
+			clear(compareIndex);
+			fill(compareIndex, (unsigned int) pow((double)alphabet_size, (double)ktup), (TCountValue) 0, Exact());
+			value = 0;
+			for(TStringSize i = 0;i<length(tupSet[k2]);++i) {
+				//std::cout << tupSet[k2][i] << "," << compareIndex[ tupSet[k2][i] ] << "," << qIndex[ tupSet[k2][i] ]<< std::endl;
+				if (compareIndex[ tupSet[k2][i] ] < qIndex[ tupSet[k2][i] ]) ++value;
+				++compareIndex[ tupSet[k2][i] ];
+			}
+			assignValue(mat, k*nseq+k2, value);
+		}
+	}
+
+	// Calculate the score
+	TValue score0;
+	for (TMatrixSize row=0;row<nseq;++row) {
+		score0 = getValue(mat, row*nseq+row);
+		for(TMatrixSize col=0;col<nseq;++col) {
+			assignValue(score, row*nseq+col, (TValue) ((score0 - getValue(mat, min(row,col)*nseq+max(row,col))) / score0 * 3 * 10.0 + 0.5));
+		}
+	}
+	for (TMatrixSize row=0;row<nseq;++row) {
+		for(TMatrixSize col=row+1;col<nseq;++col) {
+			assignValue(score, row*nseq+col, 100 - min(getValue(score,row*nseq+col), getValue(score, col*nseq+row)));
+			assignValue(score, col*nseq+row, getValue(score, row*nseq+col));
+		}
+	}
+
+
+	for (TMatrixSize row=0;row<nseq;++row) {
+		for(TMatrixSize col=0;col<nseq;++col) {
+			std::cout << getValue(score, row*nseq+col) << ",";
+		}
+		std::cout << std::endl;
+	}
+}
 
 
 
@@ -317,7 +470,6 @@ void write(TFile & file,
 	typedef typename Value<TStringSet>::Type TString;
 	typedef typename Size<TStringSet>::Type TSize;
 
-
 	_streamWrite(file, "! TC_LIB_FORMAT_01\n");
 	TSize len = length(getStringSet(g));
 	_streamPutInt(file, len);
@@ -333,24 +485,44 @@ void write(TFile & file,
 		_streamPut(file, '\n');
 	}
 
+
+	typedef std::pair<unsigned int, unsigned int> TSeq;
+	typedef Triple<unsigned int, unsigned int, unsigned int> TData;
+	typedef std::multimap<TSeq, TData> TMap;
+	TMap m;
+
 	typedef typename Iterator<TGraph, EdgeIterator>::Type TIter;
 	TIter it(g);
 	for(;!atEnd(it);++it) {
 		TVertexDescriptor sV = sourceVertex(it);
 		TVertexDescriptor tV = targetVertex(it);
-		_streamPut(file, '#');
-		_streamPutInt(file, sequenceId(g,sV));
+		if (sequenceId(g,sV) > sequenceId(g,tV)) {
+			TVertexDescriptor tmp = sV;
+			sV = tV;
+			tV = tmp;
+		}
+		m.insert(std::make_pair(TSeq(sequenceId(g,sV), sequenceId(g,tV)), 
+								TData(segmentBegin(g,sV) + 1, segmentBegin(g,tV) + 1, getCargo(*it))));
+	}
+	TSeq old;
+	for(TMap::iterator pos = m.begin();pos!=m.end();++pos) {
+		if (old != pos->first) {
+			old = pos->first; 
+			_streamPut(file, '#');
+			_streamPutInt(file, pos->first.first);
+			_streamPut(file, ' ');
+			_streamPutInt(file, pos->first.second);
+			_streamPut(file, '\n');		
+		}
+		_streamPutInt(file, pos->second.i1);
 		_streamPut(file, ' ');
-		_streamPutInt(file, sequenceId(g,tV));
-		_streamPut(file, '\n');		
-		_streamPutInt(file, segmentBegin(g,sV) + 1);
+		_streamPutInt(file, pos->second.i2);
 		_streamPut(file, ' ');
-		_streamPutInt(file, segmentBegin(g,tV) + 1);
-		_streamPut(file, ' ');
-		_streamPutInt(file, getCargo(*it));
+		_streamPutInt(file, pos->second.i3);
 		_streamPut(file, '\n');	
 	}
 	_streamWrite(file, "! SEQ_0_TO_N-1");
+	_streamPut(file, '\n');	
 }
 
 }// namespace SEQAN_NAMESPACE_MAIN

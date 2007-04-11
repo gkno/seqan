@@ -19,7 +19,7 @@ using namespace std;
 using namespace seqan;
 
 
-
+/*
 //////////////////////////////////////////////////////////////////////////////
 
 void Test_IdManager() {
@@ -3688,7 +3688,7 @@ void Test_Algorithms() {
 	//Matching
 }
 
-
+*/
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -3719,7 +3719,11 @@ void Test_TCoffee() {
 	write(strm2,g,DotDrawing());
 	strm2.close();
 
+	// Calculate a distance matrix
+	Matrix<double> score;
+	getScoringMatrix(stringSet(g), score, 6);
 
+	// Delete sequences
 	for(unsigned int i=0; i<length(value(g.data_sequence)); ++i) {
 		delete &value(g.data_sequence)[i];
 	}
@@ -3732,7 +3736,7 @@ void Test_TCoffee() {
 int main() 
 {
 	SEQAN_TREPORT("TEST BEGIN")
-
+/*
 	Test_IdManager();	// Test Id Manager
 	Test_EdgeStump();	// Test EdgeStumps
 	Test_StringSet<StringSet<String<char>, IdHolder<GenerousStorage<> > > >();
@@ -3791,10 +3795,10 @@ int main()
 	// Graph algorithms
 	Test_Algorithms();
 
-
+*/
 	// T-Coffee
 	Test_TCoffee();
-
+/*
 //____________________________________________________________________________
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_base.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_idmanager.h");
@@ -3819,7 +3823,7 @@ int main()
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_iterator_dfs.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_algorithm.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_algorithm_tcoffee.h");
-	
+*/	
 	SEQAN_TREPORT("TEST END")
 
 	return 0;
