@@ -344,19 +344,81 @@ void arrayClearSpace(TValue * array_begin,
 }
 
 
+
+//////////////////////////////////////////////////////////////////////////////
+// IsSimple specializations
+//////////////////////////////////////////////////////////////////////////////
+
+// standard types
+template <> struct _IsSimple< bool > { typedef True Type; };
+template <> struct _IsSimple< char > { typedef True Type; };
+
+template <> struct _IsSimple< unsigned char > { typedef True Type; };
+template <> struct _IsSimple< unsigned short > { typedef True Type; };
+template <> struct _IsSimple< unsigned int > { typedef True Type; };
+template <> struct _IsSimple< unsigned long > { typedef True Type; };
+
+template <> struct _IsSimple< signed char > { typedef True Type; };
+template <> struct _IsSimple< signed short > { typedef True Type; };
+template <> struct _IsSimple< signed int > { typedef True Type; };
+template <> struct _IsSimple< signed long > { typedef True Type; };
+
+template <> struct _IsSimple< float > { typedef True Type; };
+template <> struct _IsSimple< double > { typedef True Type; };
+template <> struct _IsSimple< long double > { typedef True Type; };
+
+// user defined types (re-specializations are allowed here)
+template <> struct IsSimple< wchar_t > { typedef True Type; };
+template <> struct IsSimple< __int64 > { typedef True Type; };
+
+//////////////////////////////////////////////////////////////////////////////
+// gapValue
+//////////////////////////////////////////////////////////////////////////////
+
+inline char const &
+gapValueImpl(char *)
+{
+SEQAN_CHECKPOINT
+	static char const _gap = '-';
+	return _gap;
+}
+inline char const &
+gapValueImpl(char const *)
+{
+SEQAN_CHECKPOINT
+	static char const _gap = '-';
+	return _gap;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// generic extreme values
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename T>
+inline T const &
+supremumValueImpl(T *)
+{
+SEQAN_CHECKPOINT
+	return SupremumValue<T>::VALUE;
+}
+template <typename T>
+inline T const &
+infimumValueImpl(T *)
+{
+SEQAN_CHECKPOINT
+	return InfimumValue<T>::VALUE;
+}
+
 //////////////////////////////////////////////////////////////////////////////
 // bool 
 //////////////////////////////////////////////////////////////////////////////
 
-template <> struct IsSimple< bool > { typedef True Type; };
 template <> struct BitsPerValue< bool > { enum { VALUE = 1 }; };
 
-
+/*
 //////////////////////////////////////////////////////////////////////////////
 // char 
 //////////////////////////////////////////////////////////////////////////////
-
-template <> struct IsSimple< char > { typedef True Type; };
 
 inline char const &
 supremumValueImpl(char *)
@@ -374,27 +436,8 @@ SEQAN_CHECKPOINT
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// gapValue
-inline char const &
-gapValueImpl(char *)
-{
-SEQAN_CHECKPOINT
-	static char const _gap = '-';
-	return _gap;
-}
-inline char const &
-gapValueImpl(char const *)
-{
-SEQAN_CHECKPOINT
-	static char const _gap = '-';
-	return _gap;
-}
-
-//////////////////////////////////////////////////////////////////////////////
 // signed char 
 //////////////////////////////////////////////////////////////////////////////
-
-template <> struct IsSimple< signed char > { typedef True Type; };
 
 inline signed char const &
 supremumValueImpl(signed char *)
@@ -415,8 +458,6 @@ SEQAN_CHECKPOINT
 // unsigned char 
 //////////////////////////////////////////////////////////////////////////////
 
-template <> struct IsSimple< unsigned char > { typedef True Type; };
-
 inline unsigned char const &
 supremumValueImpl(unsigned char *)
 {
@@ -435,8 +476,6 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 // wchar_t
 //////////////////////////////////////////////////////////////////////////////
-
-template <> struct IsSimple< wchar_t > { typedef True Type; };
 
 inline wchar_t const &
 supremumValueImpl(wchar_t *)
@@ -457,8 +496,6 @@ SEQAN_CHECKPOINT
 // signed short 
 //////////////////////////////////////////////////////////////////////////////
 
-template <> struct IsSimple< signed short > { typedef True Type; };
-
 inline signed short const &
 supremumValueImpl(signed short *)
 {
@@ -477,8 +514,6 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 // unsigned short 
 //////////////////////////////////////////////////////////////////////////////
-
-template <> struct IsSimple< unsigned short > { typedef True Type; };
 
 inline unsigned short const &
 supremumValueImpl(unsigned short *)
@@ -499,8 +534,6 @@ SEQAN_CHECKPOINT
 // signed int 
 //////////////////////////////////////////////////////////////////////////////
 
-template <> struct IsSimple< signed int > { typedef True Type; };
-
 inline signed int const &
 supremumValueImpl(signed int *)
 {
@@ -519,8 +552,6 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 // unsigned int 
 //////////////////////////////////////////////////////////////////////////////
-
-template <> struct IsSimple< unsigned int > { typedef True Type; };
 
 inline unsigned int const &
 supremumValueImpl(unsigned int *)
@@ -541,8 +572,6 @@ SEQAN_CHECKPOINT
 // signed long
 //////////////////////////////////////////////////////////////////////////////
 
-template <> struct IsSimple< signed long > { typedef True Type; };
-
 inline signed long const &
 supremumValueImpl(signed long *)
 {
@@ -561,8 +590,6 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 // unsigned long
 //////////////////////////////////////////////////////////////////////////////
-
-template <> struct IsSimple< unsigned long > { typedef True Type; };
 
 inline unsigned long const &
 supremumValueImpl(unsigned long *)
@@ -583,8 +610,6 @@ SEQAN_CHECKPOINT
 // signed 64bit int (cannot use long long <- no ISO C++)
 //////////////////////////////////////////////////////////////////////////////
 
-template <> struct IsSimple< __int64 > { typedef True Type; };
-
 inline __int64 const &
 supremumValueImpl(__int64 *)
 {
@@ -599,12 +624,11 @@ SEQAN_CHECKPOINT
 	static __int64 const _value = -supremumValueImpl(dummy) - 1;
 	return _value;
 }
+*/
 
 //////////////////////////////////////////////////////////////////////////////
 // float 
 //////////////////////////////////////////////////////////////////////////////
-
-template <> struct IsSimple< float > { typedef True Type; };
 
 inline float const &
 supremumValueImpl(float *)
@@ -625,8 +649,6 @@ SEQAN_CHECKPOINT
 // double 
 //////////////////////////////////////////////////////////////////////////////
 
-template <> struct IsSimple< double > { typedef True Type; };
-
 inline double const &
 supremumValueImpl(double *)
 {
@@ -645,8 +667,6 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 // long double 
 //////////////////////////////////////////////////////////////////////////////
-
-template <> struct IsSimple< long double > { typedef True Type; };
 
 inline long double const &
 supremumValueImpl(long double *)

@@ -12,8 +12,8 @@ Spec.GappedShape
 ..general:Class.Shape
 ..summary:For gapped q-grams.
 */
-template<typename TString>
-class Shape<TString,GappedShape>
+template<typename TValue>
+class Shape<TValue,GappedShape>
 {
 
 public:
@@ -69,9 +69,9 @@ SEQAN_CHECKPOINT
 
 
 
-template <typename TString>
+template <typename TValue>
 void
-_setShape(Shape<TString,GappedShape> & me, unsigned span, 
+_setShape(Shape<TValue,GappedShape> & me, unsigned span, 
 		  unsigned num_gaps, unsigned shape_len)
 {
 SEQAN_CHECKPOINT
@@ -87,9 +87,9 @@ SEQAN_CHECKPOINT
 
 
 
-template <typename TString>
+template <typename TValue>
 inline unsigned &
-shapeCountBlanks(Shape<TString, GappedShape>  & me)
+shapeCountBlanks(Shape<TValue, GappedShape> & me)
 {
 SEQAN_CHECKPOINT
 	return me.num_gaps;
@@ -97,14 +97,14 @@ SEQAN_CHECKPOINT
 
 
 
-template <typename TString, typename TSequenceIterator>
-typename Size<Shape<TString, GappedShape> >::Type
-inline hash(Shape<TString, GappedShape> & shape, TSequenceIterator qgram_it)	
+template <typename TValue, typename TSequenceIterator>
+typename Size<Shape<TValue, GappedShape> >::Type
+inline hash(Shape<TValue, GappedShape> & shape, TSequenceIterator qgram_it)	
 {
 SEQAN_CHECKPOINT
 
-	typedef typename Size<Shape<TString,GappedShape> >::Type TSize;
-	typedef typename Value<Shape<TString,GappedShape> >::Type TValue;
+	typedef typename Size<Shape<TValue,GappedShape> >::Type TSize;
+	typedef typename Value<Shape<TValue,GappedShape> >::Type TValue;
 	TValue pos = 0;			
 	TSize * pshape = begin(shape.shape);
 	TSize * pshape_end = end(shape.shape);//
@@ -112,7 +112,7 @@ SEQAN_CHECKPOINT
 	while(pshape < pshape_end)
 	{
 		qgram_it += *pshape;
-		pos = pos * ValueSize<Shape<TString, SimpleShape> >::VALUE + (int)*qgram_it;
+		pos = pos * ValueSize<Shape<TValue, SimpleShape> >::VALUE + (int)*qgram_it;
 		++pshape;
 	}
 
@@ -121,13 +121,13 @@ SEQAN_CHECKPOINT
 }
 
 
-template <typename TSequenceIterator, typename TString>
-typename Size<Shape<TString, GappedShape> >::Type
+template <typename TSequenceIterator, typename TValue>
+typename Size<Shape<TValue, GappedShape> >::Type
 inline hashNext(
-	Shape<TString, GappedShape> & shape,
+	Shape<TValue, GappedShape> & shape,
 	TSequenceIterator qgram_1, 
 	TSequenceIterator qgram_2, 
-	typename Size<Shape<TString, GappedShape> >::Type x)
+	typename Size<Shape<TValue, GappedShape> >::Type x)
 {
 SEQAN_CHECKPOINT
 	return hash(shape, qgram_2);
@@ -145,9 +145,9 @@ SEQAN_CHECKPOINT
 ..param.shape_string:A string of 'x' and '_' representing relevant and irrelevant positions (blanks) respectively.
 ...type:Class.String
 */
-template <typename TString>
+template <typename TValue>
 void 
-stringToShape(Shape<TString,GappedShape> & shape,String<char> const & shape_string)
+stringToShape(Shape<TValue,GappedShape> & shape,String<char> const & shape_string)
 {
 SEQAN_CHECKPOINT
 	unsigned count_gaps = 0;
@@ -159,8 +159,8 @@ SEQAN_CHECKPOINT
 	string_end = end(shape_string);
 	while(string_it < string_end) 
 	{
-		if(*string_it == '_')
-				++count_gaps;
+		if (*string_it == '_')
+			++count_gaps;
 		++string_it_last;
 		++string_it;
 	}
@@ -171,16 +171,11 @@ SEQAN_CHECKPOINT
 	while(string_it < string_end && j < shape_len) 
 	{
 		if(*string_it != '_')
-		{
 			++j;
-		}
 		else
-		{
 			++shape[j];
-		}
 		++string_it;
 	}
-
 }
 
 

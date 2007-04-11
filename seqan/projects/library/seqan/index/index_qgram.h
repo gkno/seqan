@@ -13,12 +13,14 @@ namespace SEQAN_NAMESPACE_MAIN
 // q-gram index fibres
 
 	struct _Fibre_Dir;			// directory/hash table, contains start indices of buckets
+	struct _Fibre_SADir;		// identifies algorithm to construct both SA and directory at once
 
 	typedef Tag<_Fibre_Text>		QGram_Text;
 	typedef Tag<_Fibre_RawText>		QGram_RawText;
 	typedef Tag<_Fibre_SA>			QGram_SA;
 	typedef Tag<_Fibre_RawSA>		QGram_RawSA;
 	typedef Tag<_Fibre_Dir>			QGram_Dir;
+	typedef Tag<_Fibre_SADir>		QGram_SADir;
 
 	struct QGram_Alg {};
 
@@ -584,11 +586,10 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename TText, typename TShapeSpec>
 	inline bool indexCreate(Index<TText, Index_QGram<TShapeSpec> > &index, Tag<_Fibre_SA> const, QGram_Alg const) 
 	{
-		typedef Index<TText, Index_QGram<TShapeSpec> >				TIndex;
-		typedef Shape<typename Value<TIndex>::Type, SimpleShape>	TShape;
+		typedef Index<TText, Index_QGram<TShapeSpec> >			TIndex;
+		typedef Shape<typename Value<TIndex>::Type, TShapeSpec>	TShape;
 
 		TShape &shape = indexShape(index);
-		stringToShape(shape, "xxxxxxx");
 
 		// count all overlapping q-grams
 		typename Size<TIndex>::Type qgram_count = 0;
@@ -603,11 +604,22 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	template <typename TText, typename TShapeSpec>
-	inline bool indexCreate(Index<TText, Index_QGram<TShapeSpec> > &index, QGram_Dir const, QGram_Alg const alg)
+	inline bool indexCreate(Index<TText, Index_QGram<TShapeSpec> > &index, QGram_SADir const, QGram_Alg const alg)
 	{
 		return indexCreate(index, QGram_SA(), alg);
 	}
+/*
+	template <typename TText, typename TShapeSpec>
+	inline bool indexCreate(Index<TText, Index_QGram<TShapeSpec> > &index, QGram_Dir const, QGram_Alg const alg)
+	{
+		typedef Index<TText, Index_QGram<TShapeSpec> >			TIndex;
+		typedef Shape<typename Value<TIndex>::Type, TShapeSpec>	TShape;
 
+		resize(indexDir(index), intPow(ValueSize<TShape>::VALUE, shapeSpan(shape) - shapeCountBlanks(shape)), Exact());
+		createQGramIndex(indexSA(index), indexDir(index), indexText(index), indexShape(index));
+		return true;
+	}
+*/
 //////////////////////////////////////////////////////////////////////////////
 // open
 

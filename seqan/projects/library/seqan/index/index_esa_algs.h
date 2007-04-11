@@ -69,7 +69,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		} while (!atEnd(it) && 
 			     !(	(countOccurences(it) == it.seqCount) && 
 					(repLength(it) >= it.minLength) &&
-					isUnique(it) && 
+					isUnique(it, it.seqSet) && 
 					isLeftMaximal(it)) );
 	}
 

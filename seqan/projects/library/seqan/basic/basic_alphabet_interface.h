@@ -24,10 +24,13 @@ non-POD types could be simple too, e.g. some specializations of @Class.SimpleTyp
 */
 
 template <typename T>
-struct IsSimple
-{
+struct _IsSimple {
 	typedef False Type;
 };
+
+template <typename T>
+struct IsSimple:
+	public _IsSimple<T> {};
 template <typename T>
 struct IsSimple<T const>:
 	public IsSimple<T> {};

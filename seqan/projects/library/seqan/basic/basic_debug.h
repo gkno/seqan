@@ -147,6 +147,7 @@ void Result(const char * file, int line, const char * comment="-")
 
 #ifdef SEQAN_TEST
 
+#include <set>
 #include <vector>
 #include <cstring>
 
@@ -160,13 +161,21 @@ struct Checkpoint
 	unsigned int line;
 };
 
+struct CheckpointLess : public ::std::binary_function <Checkpoint, Checkpoint, bool>
+{
+	inline bool operator() (Checkpoint const &a, Checkpoint const &b) const
+	{
+		return (a.file < b.file) || (a.file == b.file && a.line < b.line);
+	}
+};
+
 template <typename T = void>
 struct CheckpointStore
 {
-	static typename ::std::vector<Checkpoint> data;
+	static ::std::set<Checkpoint, CheckpointLess> data;
 };
 template <typename T>
-::std::vector<Checkpoint> CheckpointStore<T>::data;
+::std::set<Checkpoint, CheckpointLess> CheckpointStore<T>::data;
 
 
 inline bool 
@@ -179,7 +188,7 @@ checkpoint(unsigned int line, char * file)
 	else ++file_name;
 
 	Checkpoint cp = {file_name, line};
-	CheckpointStore<>::data.push_back(cp);
+	CheckpointStore<>::data.insert(cp);
 	return true;
 }
 #define SEQAN_CHECKPOINT \
@@ -189,13 +198,9 @@ checkpoint(unsigned int line, char * file)
 inline void 
 testCheckpoint(char * file, unsigned int line)
 {
-	typedef ::std::vector<Checkpoint>::iterator Iterator;
-	for (Iterator it = CheckpointStore<>::data.begin(); it != CheckpointStore<>::data.end(); ++it)
-	{
-		if (!strcmp(it->file, file) && (it->line == line)) return;
-	}
-
-	Message< Report >(file, line, "Checkpoint lost");
+	Checkpoint cp = {file, line};
+	if (CheckpointStore<>::data.lower_bound(cp) == CheckpointStore<>::data.end())
+		Message< Report >(file, line, "Checkpoint lost");
 }
 
 inline void 

@@ -735,11 +735,11 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	inline void printRequest(aiocb &request) {
 		::std::cerr << ::std::hex;
-		::std::cerr << "fildes:  " << (unsigned int) request.aio_fildes << ::std::endl;
-		::std::cerr << "buffer:  " << (unsigned int) request.aio_buf << ::std::endl;
-		::std::cerr << "offset:  " << (unsigned int) request.aio_offset<< ::std::endl;
-		::std::cerr << "nbytes:  " << (unsigned int) request.aio_nbytes << ::std::endl;
-		::std::cerr << "event:   " << (unsigned int) request.aio_sigevent.sigev_notify << ::std::endl;
+		::std::cerr << "fildes:  " << request.aio_fildes << ::std::endl;
+		::std::cerr << "buffer:  " << request.aio_buf << ::std::endl;
+		::std::cerr << "offset:  " << request.aio_offset<< ::std::endl;
+		::std::cerr << "nbytes:  " << request.aio_nbytes << ::std::endl;
+		::std::cerr << "event:   " << request.aio_sigevent.sigev_notify << ::std::endl;
 		::std::cerr << ::std::dec;
 	}
 
@@ -907,7 +907,7 @@ namespace SEQAN_NAMESPACE_MAIN
         if (error) {
 			::std::cerr << "AlignAllocator: Could not allocate memory of size " << ::std::hex << 
 				count * sizeof(TValue) << " and an alignment of " << 
-				(unsigned) sysconf(_SC_PAGESIZE) <<	::std::dec << ". (ErrNo=" << error << ")" << ::std::endl;
+				sysconf(_SC_PAGESIZE) << ::std::dec << ". (ErrNo=" << error << ")" << ::std::endl;
             data = NULL;
         } else
             SEQAN_PROADD(SEQAN_PROMEMORY, sizeof(TValue) * count);

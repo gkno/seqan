@@ -10,46 +10,45 @@ namespace SEQAN_NAMESPACE_MAIN
 ..cat:Miscellaneous
 ..general:Class.PriorityType
 ..summary:Stores the priority data on a heap.
-..signature:PriorityType<TValue, TComparator, PriorityHeap> >
+..signature:PriorityType<TValue, TLess, PriorityHeap> >
 */
-template < typename TValue, typename TComparator>
-class PriorityType<TValue,TComparator,PriorityHeap>
+template < typename TValue, typename TLess>
+class PriorityType<TValue,TLess,PriorityHeap>
 {
 public: 
-	
 	typedef String<TValue> THeap;
-	
-	TComparator cmp_;
-	THeap heap_;
+//____________________________________________________________________________
 
+	TLess less;
+	THeap heap;
+//____________________________________________________________________________
 
-	//--------------------------------------------------------------
-	PriorityType ()
-		: cmp_(),heap_()
+	inline PriorityType()
 	{
 SEQAN_CHECKPOINT
 	}
 
-	
-//	PriorityType (PriorityType const & other_)
-//		: cmp_(other_.cmp_),
-//			heap_(other_.heap_)
-//	{
-//	}
+	inline explicit PriorityType(TLess const & _less):
+		less(_less)
+	{
+SEQAN_CHECKPOINT
+	}
+
+	inline PriorityType(PriorityType const & _other):
+		less(_other.less),
+		heap(_other.heap)
+	{
+SEQAN_CHECKPOINT
+	}
 		
 //	inline PriorityType const &
 //	operator = (PriorityType const & other_)
 //	{
-//		cmp_ = other_.cmp_;
-//		heap = other_.heap_;
+//		less = other_.less;
+//		heap = other_.heap;
 //		return *this;
 //	}
 	
-	~PriorityType()
-	{
-SEQAN_CHECKPOINT
-	}
-
 }; // class PriorityType
 
 
@@ -57,29 +56,31 @@ SEQAN_CHECKPOINT
 
 // Empty the priority queue
 ///.Function.clear.param.object.type:Class.PriorityType
-template <typename TValue, typename TComparator>
-void clear (PriorityType<TValue,TComparator, PriorityHeap> & me)
+template <typename TValue, typename TLess>
+inline void 
+clear (PriorityType<TValue,TLess, PriorityHeap> & me)
 {
-	clear(me.heap_); 
+	clear(me.heap); 
 }
 
 // true if priority queue is empty 
 ///.Function.empty.param.object.type:Class.PriorityType
-template <typename TValue, typename TComparator>
-bool empty(PriorityType<TValue, TComparator, PriorityHeap> & me) 
+template <typename TValue, typename TLess>
+inline bool 
+empty(PriorityType<TValue, TLess, PriorityHeap> const & me) 
 {
 SEQAN_CHECKPOINT
-	return empty(me.heap_); 
+	return empty(me.heap); 
 }
 
 // Number of elements in the priority queue
 ///.Function.length.param.object.type:Class.PriorityType
-template <typename TValue, typename TComparator>
-typename Size<PriorityType<TValue, TComparator, PriorityHeap> >::Type
-length( PriorityType<TValue, TComparator, PriorityHeap> & me)
+template <typename TValue, typename TLess>
+inline typename Size<PriorityType<TValue, TLess, PriorityHeap> >::Type
+length( PriorityType<TValue, TLess, PriorityHeap> const & me)
 { 
 SEQAN_CHECKPOINT
-	return length(me.heap_);
+	return length(me.heap);
 }
 
 
@@ -99,29 +100,39 @@ SEQAN_CHECKPOINT
 ..see:Function.PriorityType#pop
 ..see:Function.PriorityType#push
 */
-template <typename TValue, typename TComparator>
-TValue & 
-top(PriorityType<TValue, TComparator, PriorityHeap> & me) 
+template <typename TValue, typename TLess>
+inline TValue & 
+top(PriorityType<TValue, TLess, PriorityHeap> & me)
 {
 SEQAN_CHECKPOINT
-	return value(me.heap_,beginPosition(me.heap_));
+	return value(me.heap, beginPosition(me.heap));
+}
+
+template <typename TValue, typename TLess>
+inline TValue const & 
+top(PriorityType<TValue, TLess, PriorityHeap> const & me)
+{
+SEQAN_CHECKPOINT
+	return value(me.heap, beginPosition(me.heap));
 }
 
 // Copy heap position i to heap position h.
-template <typename TValue, typename TComparator, typename TSize>
-void _copyHeapElement ( PriorityType<TValue, TComparator, PriorityHeap> & me, const TSize & i, TSize & h)
+template <typename TValue, typename TLess, typename TSize>
+inline void 
+_copyHeapElement (PriorityType<TValue, TLess, PriorityHeap> & me, TSize i, TSize & h)
 {
 SEQAN_CHECKPOINT
-	_copyHeapElement ( me, me.heap_[i], h );
+	me.heap[h] = me.heap[i];
 	h = i;
 }
 
 // Copy element to heap position h.
-template <typename TValue, typename TComparator, typename TSize>
-void _copyHeapElement (PriorityType<TValue, TComparator, PriorityHeap> & me, TValue element, TSize h)
+template <typename TValue, typename TLess, typename TSize>
+inline void 
+_copyHeapElement (PriorityType<TValue, TLess, PriorityHeap> & me, TValue const & element, TSize h)
 {
 SEQAN_CHECKPOINT
-	me.heap_[h] = element;
+	me.heap[h] = element;
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -133,12 +144,13 @@ SEQAN_CHECKPOINT
 ..param.object
 ...type:Class.PriorityType
 */
-template <typename TValue, typename TComparator>
-void adjustTop (PriorityType<TValue, TComparator, PriorityHeap> & me)	// so könnte man es dann auch nennen
+template <typename TValue, typename TLess>
+inline void 
+adjustTop (PriorityType<TValue, TLess, PriorityHeap> & me)	// so könnte man es dann auch nennen
 {
 SEQAN_CHECKPOINT
-	if(!empty(me.heap_))
-		_adjustHeapTowardLeaves(me,me.heap_[0],0,2);
+	if (!empty(me.heap))
+		_adjustHeapTowardLeaves (me, me.heap[0], 0, 2);
 }
 
 ////////////
@@ -160,39 +172,40 @@ SEQAN_CHECKPOINT
 ..see:Function.PriorityType#top
 ..see:Function.PriorityType#pop
 */
-template <typename TValue, typename TComparator>
-void push ( PriorityType<TValue, TComparator, PriorityHeap> & me, TValue element )
+template <typename TValue, typename TLess>
+inline void 
+push (PriorityType<TValue, TLess, PriorityHeap> & me, TValue const & element)
 {
 SEQAN_CHECKPOINT
 	// root index is zero
-	if ( empty(me.heap_) ) {
-		resize(me.heap_,1);
-		_copyHeapElement (me, element, 0 );
+	if (empty(me.heap)) {
+		resize(me.heap, 1, Generous());
+		_copyHeapElement (me, element, 0);
 		return;
 	}
-	typedef typename Size<PriorityType<TValue, TComparator, PriorityHeap> >::Type TSize;
-	TSize h = length(me); 
-	resize(me.heap_,h+1);
+	typedef typename Size<PriorityType<TValue, TLess, PriorityHeap> >::Type TSize;
+	TSize h = length(me.heap); 
+	resize(me.heap, h + 1, Generous());
 	_adjustHeapTowardRoot(me, element, h); 
 }
 
 //////////////////////////////////////////////////////////////////////////////////
 /// Priority got better.  Perform a cyclic shift along the tree edges toward root.
-template <typename TValue, typename TComparator, typename TSize>
-void _adjustHeapTowardRoot(PriorityType<TValue, TComparator, PriorityHeap> & me, TValue element, TSize h )
+template <typename TValue, typename TLess, typename TSize>
+inline void 
+_adjustHeapTowardRoot(
+	PriorityType<TValue, TLess, PriorityHeap> & me, 
+	TValue const & element, 
+	TSize h )
 {
 SEQAN_CHECKPOINT
 	// root index is zero
 	while ( h > 0) {
 		const TSize i = (h-1)/2; 
-		if ( me.cmp_ ( me.heap_[i], element ) )
-		{
+		if ( me.less ( me.heap[i], element ) )
 			_copyHeapElement ( me, i, h );
-		}
 		else
-		{
 			break;
-		}
 	}
 	_copyHeapElement ( me, element, h );
 }
@@ -210,16 +223,17 @@ SEQAN_CHECKPOINT
 ..see:Function.PriorityType#top
 ..see:Function.PriorityType#push
 */
-template <typename TValue, typename TComparator>
-void pop (PriorityType<TValue, TComparator, PriorityHeap> & me)
+template <typename TValue, typename TLess>
+inline void 
+pop (PriorityType<TValue, TLess, PriorityHeap> & me)
 {
 SEQAN_CHECKPOINT
 	// root index is zero
-	TValue element = getValue(me.heap_,endPosition(me.heap_)-1); 
-	typedef typename Size<PriorityType<TValue, TComparator, PriorityHeap> >::Type TSize;
-	TSize heap_size = length(me) - 1 ;
-	resize (me.heap_,heap_size);
-	if ( heap_size > 0 ) 
+	TValue element = getValue(me.heap,endPosition(me.heap)-1); 
+	typedef typename Size<PriorityType<TValue, TLess, PriorityHeap> >::Type TSize;
+	TSize heapsize = length(me.heap) - 1 ;
+	resize(me.heap, heapsize, Generous());
+	if ( heapsize > 0 ) 
 		_adjustHeapTowardLeaves(me, element, 0, 1 );
 
 }
@@ -227,40 +241,33 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////////
 /// Priority got worse. Perform a cyclic shift along the tree edges toward leaves.
-template <typename TValue, typename TComparator, typename TSize>
-void _adjustHeapTowardLeaves(PriorityType<TValue, TComparator, PriorityHeap> & me, TValue element, TSize h, TSize i ) //für mich: h=0, i=1
+template <typename TValue, typename TLess, typename TSize>
+inline void 
+_adjustHeapTowardLeaves(
+	PriorityType<TValue, TLess, PriorityHeap> & me, 
+	TValue element, 
+	TSize h, 
+	TSize i ) //für mich: h=0, i=1
 {
 SEQAN_CHECKPOINT
 	// root index is zero
-	const TSize heap_size = length(me);
-	TComparator compare_ = me.cmp_;
-	while ( i < heap_size )
+	const TSize heapsize = length(me.heap);
+	TLess less = me.less;
+	while ( i < heapsize )
 	{
-		if ( compare_ ( element, me.heap_[i] ) )
-		{
-			if ( compare_ ( me.heap_[i-1], me.heap_[i] ) )
-			{
+		if ( less ( element, me.heap[i] ) )
+			if ( less ( me.heap[i-1], me.heap[i] ) )
 				_copyHeapElement ( me, i, h );
-			}
 			else
-			{
 				_copyHeapElement ( me, i-1, h );
-			}
-		}
 		else
-		{
-			if ( compare_ ( element, me.heap_[i-1] ) )
-			{
+			if ( less ( element, me.heap[i-1] ) )
 				_copyHeapElement ( me, i-1, h );
-			}
 			else
-			{
 				break;
-			}
-		}
-		i = 2*h+2;
+		i = 2*(h+1);
 	}
-	if ( i == heap_size && compare_ ( element, me.heap_[i-1] ) )
+	if ( i == heapsize && less ( element, me.heap[i-1] ) )
 		_copyHeapElement ( me, i-1, h );
 	_copyHeapElement ( me, element, h );
 }
@@ -269,15 +276,15 @@ SEQAN_CHECKPOINT
 	//MetaFunctions
 
 ///.Metafunction.Size.param.T.type:Class.PriorityType
-template < typename TValue, typename TComparator>
-struct Size<PriorityType<TValue, TComparator, PriorityHeap> >
+template < typename TValue, typename TLess>
+struct Size<PriorityType<TValue, TLess, PriorityHeap> >
 {
-	typedef typename Size<typename PriorityType<TValue, TComparator, PriorityHeap>::THeap>::Type Type;
+	typedef typename Size<typename PriorityType<TValue, TLess, PriorityHeap>::THeap>::Type Type;
 };
 
 ///.Metafunction.Value.param.T.type:Class.PriorityType
-template < typename TValue, typename TComparator>
-struct Value<PriorityType<TValue, TComparator, PriorityHeap> >
+template < typename TValue, typename TLess>
+struct Value<PriorityType<TValue, TLess, PriorityHeap> >
 {
 	typedef TValue Type;
 };
@@ -287,13 +294,13 @@ struct Value<PriorityType<TValue, TComparator, PriorityHeap> >
 
 ////////////////////////
 // debug
-//template <typename TValue, typename THeap, typename TComparator>
-//void check(PriorityType<TValue, THeap, TComparator> & me) { // debug
-//	typedef typename Size<PriorityType<TValue, THeap, TComparator> >::Type TSize;
+//template <typename TValue, typename THeap, typename TLess>
+//void check(PriorityType<TValue, THeap, TLess> & me) { // debug
+//	typedef typename Size<PriorityType<TValue, THeap, TLess> >::Type TSize;
 //	bool okay = true;
-//	for ( TSize i = 1; i < length(me)-1; ++i )
-//		if ( me.cmp_ ( me.heap_[(i-1)/2], me.heap_[i] ) ) {
-//			cout << '\n' << (i-1)/2 << " < " << i << " : "<< (me.heap_[(i-1)/2]).value_ << " !< " << (me.heap_[i]).value_;
+//	for ( TSize i = 1; i < length(me.heap)-1; ++i )
+//		if ( me.less ( me.heap[(i-1)/2], me.heap[i] ) ) {
+//			cout << '\n' << (i-1)/2 << " < " << i << " : "<< (me.heap[(i-1)/2]).value_ << " !< " << (me.heap[i]).value_;
 //			okay = false;
 //		}
 //	if ( okay )

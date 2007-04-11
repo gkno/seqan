@@ -86,7 +86,7 @@ public:
 	typedef ScoreAndID<TScoreValue,TMatrixPosition> TPQEntry;
 
 	typedef Iter<TMatrix,PositionIterator> TMatrixIterator;
-	typedef PriorityType<TPQEntry,std::less<TPQEntry>, PriorityHeap > TPriorityQ;
+	typedef PriorityType<TPQEntry> TPriorityQ;
 	typedef String<bool> TBoolMatrix;	
 
 //____________________________________________________________________________

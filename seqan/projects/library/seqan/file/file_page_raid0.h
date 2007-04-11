@@ -27,7 +27,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 		typedef typename Position<TFile>::Type pos_t;
 		#ifdef SEQAN_VVERBOSE
-			::std::cerr << "readPage:  " << ::std::hex << (unsigned)(TValue*)pf.begin;
+			::std::cerr << "readPage:  " << ::std::hex << (TValue*)pf.begin;
 			::std::cerr << " from page " << ::std::dec << pageNo << ::std::endl;
 		#endif
 		pf.dirty = false;
@@ -48,7 +48,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 		typedef typename Position<TFile>::Type pos_t;
 		#ifdef SEQAN_VVERBOSE
-			::std::cerr << "writePage: " << ::std::hex << (unsigned)(TValue*)pf.begin;
+			::std::cerr << "writePage: " << ::std::hex << (TValue*)pf.begin;
 			::std::cerr << " from page " << ::std::dec << pageNo << ::std::endl;
 		#endif
 		pf.status = pf.WRITING;
@@ -69,7 +69,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 		typedef typename Position<TFile>::Type pos_t;
 		#ifdef SEQAN_VVERBOSE
-			::std::cerr << "readPage:  " << ::std::hex << (unsigned)(TValue*)pf.begin;
+			::std::cerr << "readPage:  " << ::std::hex << (TValue*)pf.begin;
 			::std::cerr << " from page " << ::std::dec << pageNo << " size " << size << ::std::endl;
 		#endif
 		pf.dirty = false;
@@ -90,7 +90,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 		typedef typename Position<TFile>::Type pos_t;
 		#ifdef SEQAN_VVERBOSE
-			::std::cerr << "writePage: " << ::std::hex << (unsigned)(TValue*)pf.begin;
+			::std::cerr << "writePage: " << ::std::hex << (TValue*)pf.begin;
 			::std::cerr << " from page " << ::std::dec << pageNo << " size " << size << ::std::endl;
 		#endif
 		pf.dirty = false;
@@ -118,7 +118,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Position<TFile>::Type pos_t;
         unsigned readSize = Min(dataSize - b.pageOfs, (unsigned)(b.end - b.begin));
 		#ifdef SEQAN_VVERBOSE
-			::std::cerr << "readBucket:  " << ::std::hex << (unsigned)b.begin;
+			::std::cerr << "readBucket:  " << ::std::hex << b.begin;
 			::std::cerr << " from page " << ::std::dec << pageNo << " at " << (pos_t)(pageNo / _FileCount) * (pos_t)pageSize + b.pageOfs;
 			::std::cerr << " size " << readSize << ::std::endl;
 		#endif
@@ -140,7 +140,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 		typedef typename Position<TFile>::Type pos_t;
 		#ifdef SEQAN_VVERBOSE
-			::std::cerr << "writeBucket: " << ::std::hex << (unsigned)b.begin;
+			::std::cerr << "writeBucket: " << ::std::hex << b.begin;
 			::std::cerr << " from page " << ::std::dec << pageNo << " at " << (pos_t)(pageNo / _FileCount) * (pos_t)pageSize + b.pageOfs;
 			::std::cerr << " size " << b.cur - b.begin << ::std::endl;
 		#endif
@@ -160,7 +160,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 		typedef typename Position<TFile>::Type pos_t;
 		#ifdef SEQAN_VVERBOSE
-			::std::cerr << "writeBucket: " << ::std::hex << (unsigned)pf.begin;
+			::std::cerr << "writeBucket: " << ::std::hex << pf.begin;
 			::std::cerr << " from page " << ::std::dec << pf.pageNo << " at " << (pos_t)(pf.pageNo / _FileCount) * (pos_t)pageSize(pf) + pageOfs;
 			::std::cerr << " size " << size(pf) << ::std::endl;
 		#endif

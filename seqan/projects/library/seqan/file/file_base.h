@@ -383,7 +383,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 		TFilePos newOfs = me.seek(fileOfs, origin);
         #ifdef SEQAN_DEBUG_OR_TEST_
 			if (origin == SEEK_BEGIN && newOfs != (TFilePos)fileOfs) {
-				::std::cerr << "seek returned " << ::std::hex << (unsigned)newOfs << " instead of " << (unsigned)fileOfs << ::std::dec << ::std::endl;
+				::std::cerr << "seek returned " << ::std::hex << newOfs << " instead of " << fileOfs << ::std::dec << ::std::endl;
 			}
         #endif
         return newOfs;

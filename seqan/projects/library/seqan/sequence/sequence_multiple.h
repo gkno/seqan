@@ -330,7 +330,6 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		TLimits			limits;
 		TConcatenator	concat;
-
 //____________________________________________________________________________
 
 		StringSet()	{
