@@ -562,34 +562,34 @@ label(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TStringSet, typename TCargo, typename TSpec, typename TVertexDescriptor>
-inline typename Id<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type
+inline typename Id<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type&
 sequenceId(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 		   TVertexDescriptor const v)
 {
 	SEQAN_CHECKPOINT
-	return g.data_segment[v].data_seq_id;
+	return const_cast<typename Id<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type&>(g.data_segment[v].data_seq_id);
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TStringSet, typename TCargo, typename TSpec, typename TVertexDescriptor>
-inline typename Position<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type
+inline typename Position<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type&
 segmentBegin(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 			 TVertexDescriptor const v)
 {
 	SEQAN_CHECKPOINT
-	return g.data_segment[v].data_begin;
+	return const_cast<typename Position<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type&>(g.data_segment[v].data_begin);
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TStringSet, typename TCargo, typename TSpec, typename TVertexDescriptor>
-inline typename Size<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type
+inline typename Size<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type&
 segmentLength(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 			  TVertexDescriptor const v)
 {
 	SEQAN_CHECKPOINT
-	return g.data_segment[v].data_length;
+	return const_cast<typename Size<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type&>(g.data_segment[v].data_length);
 }
 
 }// namespace SEQAN_NAMESPACE_MAIN

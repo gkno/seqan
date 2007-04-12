@@ -353,16 +353,32 @@ scoreToDistanceMatrix(Matrix<TScoreValue, TScoreSpec>& score, Matrix<TDistValue,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TFile>
+template<typename TFile, typename TChar>
 void 
-_parse_skipLine(TFile& file)
+_parse_skipLine(TFile& file, TChar& c)
 {
-	typedef typename Value<TFile>::Type TValue;
-	
-	TValue c;
+	SEQAN_CHECKPOINT
+		
+	if (c == '\n') return;
 	while (!_streamEOF(file)) {
 		c = _streamGet(file);
 		if (c == '\n') break;
+	}
+	c = _streamGet(file);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TFile, typename TChar>
+void 
+_parse_skipWhitespace(TFile& file, TChar& c)
+{
+	SEQAN_CHECKPOINT
+	
+	if ((c!=' ') && (c != '\t') && (c != '\n') && (c != '\r')) return;
+	while (!_streamEOF(file)) {
+		c = _streamGet(file);
+		if ((c!=' ') && (c != '\t') && (c != '\n') && (c != '\r')) break;
 	}
 }
 
@@ -370,18 +386,22 @@ _parse_skipLine(TFile& file)
 
 template<typename TChar>
 bool
-_parse_isDigit(TChar& c)
+_parse_isDigit(TChar const c)
 {
+	SEQAN_CHECKPOINT
+	//return (((unsigned) c >=  48) && ((unsigned) c <=  57));
 	return ((c == '0') || (c == '1') || (c == '2') || (c == '3') || (c == '4') || 
-			(c == '5') || (c == '6') || (c == '7') || (c == '8') || (c == '9'));
+		    (c == '5') || (c == '6') || (c == '7') || (c == '8') || (c == '9'));
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TChar>
 bool
-_parse_isLetter(TChar& c)
+_parse_isLetter(TChar const c)
 {
+	SEQAN_CHECKPOINT
+	//return ((((unsigned) c >=  97) && ((unsigned) c <=  122)) || (((unsigned) c >=  65) && ((unsigned) c <=  90)));
 	return ((c == 'a') || (c == 'b') || (c == 'c') || (c == 'd') || (c == 'e') || 
 			(c == 'f') || (c == 'g') || (c == 'h') || (c == 'i') || (c == 'j') ||
 			(c == 'k') || (c == 'l') || (c == 'm') || (c == 'n') || (c == 'o') || 
@@ -399,26 +419,19 @@ _parse_isLetter(TChar& c)
 
 template<typename TChar>
 bool
-_parse_isAlphanumericChar(TChar& c)
+_parse_isAlphanumericChar(TChar const c)
 {
+	SEQAN_CHECKPOINT
 	return ((_parse_isDigit(c)) || (_parse_isLetter(c)) || (c == '_'));
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TFile>
+template<typename TFile, typename TChar>
 int
-_parse_readNumber(TFile & file)
+_parse_readNumber(TFile & file, TChar& c)
 {
-	typedef typename Value<TFile>::Type TValue;
-
-	// Move to first digit
-	TValue c;
-	while (!_streamEOF(file)) {
-		c = _streamGet(file);
-		if (_parse_isDigit(c)) break;
-	}
-
+	SEQAN_CHECKPOINT
 	// Read number
 	String<char> str(c);
 	while (!_streamEOF(file)) {
@@ -426,54 +439,16 @@ _parse_readNumber(TFile & file)
 		if (!_parse_isDigit(c)) break;
 		append(str, c);
 	}
-	_streamSeek2G(file, -1);
-
  	return atoi(toCString(str));
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TFile>
+template<typename TFile, typename TChar>
 inline String<char>
-_parse_readWord(TFile & file)
+_parse_readIdentifier(TFile & file, TChar& c)
 {
-	typedef typename Value<TFile>::Type TValue;
-	typedef String<char> TString;
-
-	// Move to first letter
-	TValue c;
-	while (!_streamEOF(file)) {
-		c = _streamGet(file);
-		if (_parse_isLetter(c)) break;
-	}
-
-	// Read word
-	String<char> str(c);
-	while (!_streamEOF(file)) {
-		c = _streamGet(file);
-		if (!_parse_isLetter(c)) break;
-		append(str, c);
-	}
-	_streamSeek2G(file, -1);
-	return str;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TFile>
-inline String<char>
-_parse_readIdentifier(TFile & file)
-{
-	typedef typename Value<TFile>::Type TValue;
-	typedef String<char> TString;
-
-	// Move to first letter
-	TValue c;
-	while (!_streamEOF(file)) {
-		c = _streamGet(file);
-		if (_parse_isAlphanumericChar(c)) break;
-	}
-
+	SEQAN_CHECKPOINT
 	// Read word
 	String<char> str(c);
 	while (!_streamEOF(file)) {
@@ -481,27 +456,20 @@ _parse_readIdentifier(TFile & file)
 		if (!_parse_isAlphanumericChar(c)) break;
 		append(str, c);
 	}
-	_streamSeek2G(file, -1);
 	return str;
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TFile, typename TStringSet, typename TCargo, typename TSpec>
+template<typename TFile, typename TChar, typename TStringSet, typename TCargo, typename TSpec>
 inline typename Value<TStringSet>::Type&
 _parse_readSequenceData(TFile & file,
+						TChar & c,
 						Graph<Alignment<TStringSet, TCargo, TSpec> >& g)
 {
+	SEQAN_CHECKPOINT
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
-	typedef typename Value<TFile>::Type TValue;
     typedef typename Value<TStringSet>::Type TString;
-
-	// Move to first letter
-	TValue c;
-	while (!_streamEOF(file)) {
-		c = _streamGet(file);
-		if (_parse_isLetter(c)) break;
-	}
 
 	// Read word
 	TString* str = new TString(c);
@@ -510,8 +478,6 @@ _parse_readSequenceData(TFile & file,
 		if (!_parse_isLetter(c)) break;
 		append(*str, c);
 	}
-
-	_streamSeek2G(file, -1);
 	return *str;
 }
 
@@ -522,74 +488,87 @@ inline void
 _readLibrary(TFile & file,
 			 Graph<Alignment<TStringSet, TCargo, TSpec> >& g)
 {
-	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
-	typedef typename Id<TGraph>::Type TId;
+	SEQAN_CHECKPOINT
+	typedef unsigned int TWord;
 	typedef typename Value<TFile>::Type TValue;
-	typedef std::pair<unsigned int, unsigned int> TSeqRes;
-	typedef std::pair<TSeqRes, TSeqRes> TKey;
-	typedef std::map<TKey, unsigned int> TMap;
-	typedef std::map<TSeqRes, unsigned int> TNodeMap;
+	
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef typename Id<TGraph>::Type TId;
 
-	TMap my_map;
-	unsigned int seq1 = 0;
-	unsigned int seq2 = 0;
-	unsigned int seq1ToN = 0;
+	typedef std::pair<unsigned int, unsigned int> TSeqRes;
+	typedef std::map<TSeqRes, unsigned int> TNodeMap;
+	TNodeMap node_map;
+	TWord seq1 = 0;
+	TWord seq2 = 0;
+	bool seq1ToN = false;
 	TValue c;
+	if (_streamEOF(file)) return;
+	else c = _streamGet(file);
 	while (!_streamEOF(file)) {
-		c = _streamGet(file);
+		_parse_skipWhitespace(file,c);
+		if (_streamEOF(file)) break;
 		if (c == '#') {
-			seq1 = _parse_readNumber(file);
-			seq2 = _parse_readNumber(file);
-			_parse_skipLine(file);
+			c = _streamGet(file);
+			_parse_skipWhitespace(file,c);
+			seq1 = _parse_readNumber(file, c);
+			seq2 = _parse_readNumber(file, c);
 		} else if (c == '!') {
-			String<char> str = _parse_readIdentifier(file);
-			_parse_skipLine(file);
-			if (str == "SEQ_1_TO_N") seq1ToN = 1;
-		} else if (_parse_isDigit(c)) {
-			_streamSeek2G(file, -1);
-			unsigned int res1 = _parse_readNumber(file);
-			unsigned int res2 = _parse_readNumber(file);
-			unsigned int weight = _parse_readNumber(file);
-			TKey k = std::make_pair(std::make_pair(seq1, res1 - 1), std::make_pair(seq2,res2 - 1));
-			TMap::iterator pos = my_map.find(k);
-			if (pos == my_map.end()) {
-				my_map.insert(std::make_pair(k, weight));
+			c = _streamGet(file);
+			_parse_skipWhitespace(file,c);
+			String<char> str = _parse_readIdentifier(file, c);
+			_parse_skipLine(file, c);
+			if (str == "SEQ_1_TO_N") seq1ToN = true;
+		} else {
+			unsigned int res1 = _parse_readNumber(file, c);
+			_parse_skipWhitespace(file,c);
+			unsigned int res2 = _parse_readNumber(file, c);
+			_parse_skipWhitespace(file,c);
+			unsigned int weight = _parse_readNumber(file, c);
+			_parse_skipLine(file,c);
+		
+			// Insert new vertex if necessary
+			--res1;
+			--res2;
+			bool newEdge = false;
+			TSeqRes key = std::make_pair(seq1, res1);
+			TNodeMap::iterator nodePos = node_map.find(key);
+			TId id1;
+			if (nodePos == node_map.end()) {
+				id1 = addVertex(g, seq1, res1, 1); 
+				node_map.insert(std::make_pair(key, id1));
+				newEdge = true;
 			} else {
-				pos->second += weight;
+				id1 = nodePos->second;
 			}
-			_parse_skipLine(file);
+
+			key = std::make_pair(seq2, res2);
+			nodePos = node_map.find(key);
+			TId id2;
+			if (nodePos == node_map.end()) {
+				id2 = addVertex(g, seq2, res2, 1); 
+				node_map.insert(std::make_pair(key, id2));
+				newEdge = true;
+			} else {
+				id2 = nodePos->second;
+			}
+
+			// Insert a new edge or adapt the weight
+			if (newEdge) addEdge(g,id1,id2,weight);
+			else {
+				TEdgeDescriptor e = findEdge(g,id1,id2);
+				if( e == 0 ) addEdge(g,id1,id2,weight);
+				else cargo(e) += weight;
+			}
 		}
 	}
-	
-	// Create the graph
 
-	TNodeMap node_map;
-	for(TMap::iterator pos = my_map.begin(); pos!=my_map.end(); ++pos) {
-		// Get the key
-		TKey k = pos->first;
-		//std::cout << k.first.first << "," << k.first.second << " / ";
-		//std::cout << k.second.first << "," << k.second.second << ":" <<  pos->second << std::endl;
-
-		// Insert new node_map if necessary
-		TNodeMap::iterator nodePos = node_map.find(k.first);
-		TId id1;
-		if (nodePos == node_map.end()) {
-			id1 = addVertex(g, k.first.first - seq1ToN, k.first.second, 1); 
-			node_map.insert(std::make_pair(k.first, id1));
-		} else {
-			id1 = nodePos->second;
+	if (seq1ToN) {
+		typedef typename Iterator<TGraph, VertexIterator>::Type TConstIter;
+		TConstIter it(g);
+		for(;!atEnd(it);++it) {
+			sequenceId(g, *it) -= 1;
 		}
-		nodePos = node_map.find(k.second);
-		TId id2;
-		if (nodePos == node_map.end()) {
-			id2 = addVertex(g, k.second.first - seq1ToN, k.second.second, 1); 
-			node_map.insert(std::make_pair(k.second, id2));
-		} else {
-			id2 = nodePos->second;
-		}
-
-		// Insert a new edge
-		addEdge(g,id1,id2,pos->second);
 	}
 }
 
@@ -602,28 +581,35 @@ read(TFile & file,
 	 TCoffeeLib) 
 {
 	SEQAN_CHECKPOINT
+	typedef unsigned int TWord;
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename Position<TFile>::Type TPosition;
 	typedef typename Value<TFile>::Type TValue;
 	typedef typename Id<TGraph>::Type TIdType;
 
-	unsigned int nSeq = 0;
+	TValue c;
+	if (_streamEOF(file)) return;
+	else c = _streamGet(file);
 
 	// Ignore first line
-	_parse_skipLine(file);
+	_parse_skipLine(file, c);
+	_parse_skipWhitespace(file, c);
+	
 	// Read number of sequences
-	nSeq = (unsigned int) _parse_readNumber(file);
-	_parse_skipLine(file);
+	TWord nSeq = (TWord) _parse_readNumber(file, c);
+
 	// Read sequences
-	for(unsigned int i=0; i<nSeq; ++i) {
-		std::cout << _parse_readIdentifier(file) << ", ";
-		std::cout << _parse_readNumber(file) << ", ";
-		TIdType id = assignValueById(stringSet(g), _parse_readSequenceData(file,g));
+	for(TWord i=0; i<nSeq; ++i) {
+		_parse_skipWhitespace(file, c);
+		std::cout << _parse_readIdentifier(file, c) << ", ";
+		_parse_skipWhitespace(file, c);
+		std::cout << _parse_readNumber(file, c) << ", ";
+		_parse_skipWhitespace(file, c);
+		TIdType id = assignValueById(stringSet(g), _parse_readSequenceData(file,c,g));
 		std::cout << id << ", ";
 		std::cout << getValueById(stringSet(g), id) << std::endl;
-		SEQAN_ASSERT(id < nSeq)
-		_parse_skipLine(file);
+		SEQAN_ASSERT(id < nSeq)		
 	}
 	// Read library
 	_readLibrary(file,g);

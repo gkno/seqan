@@ -20,7 +20,6 @@ using namespace std;
 using namespace seqan;
 
 
-/*
 //////////////////////////////////////////////////////////////////////////////
 
 void Test_IdManager() {
@@ -3689,7 +3688,7 @@ void Test_Algorithms() {
 	//Matching
 }
 
-*/
+
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -3714,8 +3713,8 @@ void Test_TCoffee() {
 	TStringSet strSet;
 	TGraph g(strSet);
 
-	fstream strm; // Read the library: Use binary !!!
-	strm.open(TEST_PATH "garfield.lib", ios_base::in | ios_base::binary);
+	fstream strm; // Read the library
+	strm.open(TEST_PATH "garfield.lib", ios_base::in);
 	read(strm,g,TCoffeeLib());
 	strm.close();
 
@@ -3749,8 +3748,8 @@ void Test_TCoffee() {
 	TStringSetDna strSetDna;
 	TGraphDna gDna(strSetDna);
 
-	fstream strmDna; // Read the library: Use binary !!!
-	strmDna.open(TEST_PATH "dna_seq.lib", ios_base::in | ios_base::binary);
+	fstream strmDna; // Read the library
+	strmDna.open(TEST_PATH "dna_seq.lib", ios_base::in);
 	read(strmDna,gDna,TCoffeeLib());
 	strmDna.close();
 
@@ -3780,7 +3779,7 @@ void Test_TCoffee() {
 int main() 
 {
 	SEQAN_TREPORT("TEST BEGIN")
-/*
+
 	Test_IdManager();	// Test Id Manager
 	Test_EdgeStump();	// Test EdgeStumps
 	Test_StringSet<StringSet<String<char>, IdHolder<GenerousStorage<> > > >();
@@ -3839,11 +3838,11 @@ int main()
 	// Graph algorithms
 	Test_Algorithms();
 
-*/
+
 	// T-Coffee
 	Test_TCoffee();
 
-/*
+
 //____________________________________________________________________________
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_base.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_idmanager.h");
@@ -3868,7 +3867,7 @@ int main()
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_iterator_dfs.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_algorithm.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_algorithm_tcoffee.h");
-	*/
+
 
 	SEQAN_TREPORT("TEST END")
 
