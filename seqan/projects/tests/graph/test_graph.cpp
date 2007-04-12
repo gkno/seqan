@@ -3696,43 +3696,82 @@ void Test_Algorithms() {
 void Test_TCoffee() {
 //____________________________________________________________________________
 // Graph TCoffee
-	typedef StringSet<String<char>, IdHolder<> > TStringSet;
-	typedef Graph<Alignment<TStringSet, unsigned int, Default> > TGraph;
 
+	// Test aa groups
+	AAGroups gr;
+	gr = AminoAcid('T');
+	SEQAN_TASSERT(gr == 0)
+	gr = Byte(3);
+	SEQAN_TASSERT(gr == 2)
+	gr = char('c');
+	SEQAN_TASSERT(gr == 5)
+	gr = Unicode('j');
+	SEQAN_TASSERT(gr == 6)
+
+	// Read a t-coffee library: AminoAcid Alphabet
+	typedef StringSet<String<AminoAcid>, IdHolder<> > TStringSet;
+	typedef Graph<Alignment<TStringSet, unsigned int, Default> > TGraph;
 	TStringSet strSet;
 	TGraph g(strSet);
 
-	// Use binary !!!
-	fstream strm;
+	fstream strm; // Read the library: Use binary !!!
 	strm.open(TEST_PATH "garfield.lib", ios_base::in | ios_base::binary);
 	read(strm,g,TCoffeeLib());
 	strm.close();
 
-	fstream strmW;
+	fstream strmW; // Write the library
 	strmW.open(TEST_PATH "my_garfield.lib", ios_base::out | ios_base::trunc);
 	write(strmW,g,TCoffeeLib());
 	strmW.close();
 
 	//std::cout << g << std::endl;
 
-	fstream strm2;
+	fstream strm2; // Alignment graph as dot
 	strm2.open(TEST_PATH "my_tcoffee.dot", ios_base::out | ios_base::trunc);
 	write(strm2,g,DotDrawing());
 	strm2.close();
 
-	// Calculate a distance matrix
-	Matrix<double> score;
+	Matrix<double> score;  // Calculate a distance matrix on an amino acid string set
 	getScoringMatrix(stringSet(g), score);
 	Matrix<unsigned int> sim;
-	scoreToSimilarityMatrix(score, sim);
+	scoreToSimilarityMatrix(score, sim, 100);
 	Matrix<unsigned int> dist;
-	scoreToDistanceMatrix(score, dist);
+	scoreToDistanceMatrix(score, dist, 100);
 
-	// Delete sequences
-	for(unsigned int i=0; i<length(value(g.data_sequence)); ++i) {
+	// ToDo: Owner of strings!!!!!!!!!!!
+	for(unsigned int i=0; i<length(value(g.data_sequence)); ++i) {  	// Delete sequences
 		delete &value(g.data_sequence)[i];
 	}
 
+	// Read a t-coffee library: Dna Alphabet
+	typedef StringSet<String<Dna>, IdHolder<> > TStringSetDna;
+	typedef Graph<Alignment<TStringSetDna, unsigned int, Default> > TGraphDna;
+	TStringSetDna strSetDna;
+	TGraphDna gDna(strSetDna);
+
+	fstream strmDna; // Read the library: Use binary !!!
+	strmDna.open(TEST_PATH "dna_seq.lib", ios_base::in | ios_base::binary);
+	read(strmDna,gDna,TCoffeeLib());
+	strmDna.close();
+
+	fstream strmWDna; // Write the library
+	strmWDna.open(TEST_PATH "my_dna_seq.lib", ios_base::out | ios_base::trunc);
+	write(strmWDna,gDna,TCoffeeLib());
+	strmWDna.close();
+
+	//std::cout << g << std::endl;
+
+	Matrix<double> scoreDna;  // Calculate a distance matrix on an amino acid string set
+	getScoringMatrix(stringSet(gDna), scoreDna);
+	Matrix<unsigned int> simDna;
+	scoreToSimilarityMatrix(scoreDna, simDna, 100);
+	Matrix<unsigned int> distDna;
+	scoreToDistanceMatrix(scoreDna, distDna, 100);
+
+	// ToDo: Owner of strings!!!!!!!!!!!
+	for(unsigned int i=0; i<length(value(gDna.data_sequence)); ++i) {  	// Delete sequences
+		delete &value(gDna.data_sequence)[i];
+	}
 }
 
 
@@ -3803,6 +3842,7 @@ int main()
 */
 	// T-Coffee
 	Test_TCoffee();
+
 /*
 //____________________________________________________________________________
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_base.h");
@@ -3828,7 +3868,8 @@ int main()
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_iterator_dfs.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_algorithm.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_algorithm_tcoffee.h");
-*/	
+	*/
+
 	SEQAN_TREPORT("TEST END")
 
 	return 0;

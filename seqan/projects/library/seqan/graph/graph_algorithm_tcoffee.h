@@ -6,7 +6,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	
 //////////////////////////////////////////////////////////////////////////////
-// New alphabet for amino acid groups
+// Graph: T-Coffee - New alphabet for amino acid groups
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -114,17 +114,111 @@ SEQAN_CHECKPOINT
 
 
 //////////////////////////////////////////////////////////////////////////////
-// Graph: T-Coffee
+// Graph: T-Coffee - Distance Matrix
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+template<typename TValue1, typename TValue2, typename TSize>
+void
+_hitToScoreMatrix(Matrix<TValue1>& mat, Matrix<TValue2>& score, TSize const nseq) {
+	SEQAN_CHECKPOINT
+
+	typedef Matrix<TValue1> THitMatrix;
+	typedef typename Size<THitMatrix>::Type TMatrixSize;
+
+	// Initialize the score matrix
+	setDimension(score, 2);setLength(score, 0, nseq);setLength(score, 1, nseq);
+	fill(host(score), nseq*nseq, 0.0);
+
+	// Calculate the score
+	TValue2 score0;
+	for (TMatrixSize row=0;row<nseq;++row) {
+		score0 = getValue(mat, row*nseq+row);
+		for(TMatrixSize col=0;col<nseq;++col) {		
+			if (row == col) continue;
+			// T-Coffee Score Function: Why score0 * 3 * 10.0 + 0.5 ???
+			assignValue(score, row*nseq+col, (TValue2) ((score0 - getValue(mat, min(row,col)*nseq+max(row,col))) / score0 * 3 * 10.0 + 0.5));
+		}
+	}
+	for (TMatrixSize row=0;row<nseq;++row) {
+		for(TMatrixSize col=row+1;col<nseq;++col) {
+			assignValue(score, row*nseq+col, 100 - min(getValue(score,row*nseq+col), getValue(score, col*nseq+row)));
+			assignValue(score, col*nseq+row, getValue(score, row*nseq+col));
+		}
+	}
+
+	
+	//for (unsigned row=0;row<nseq;++row) {
+	//	for(unsigned col=0;col<nseq;++col) {
+	//		std::cout << getValue(score, row*nseq+col) << ",";
+	//	}
+	//	std::cout << std::endl;
+	//}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TSpec, typename TValue>
+void
+getScoringMatrix(StringSet<String<Dna>, TSpec> const& strSet, Matrix<TValue>& score) {
+	SEQAN_CHECKPOINT
+
+	typedef unsigned int TWord;
+	typedef StringSet<String<Dna>, TSpec> TStringSet;
+	typedef typename Size<TStringSet>::Type TStringSetSize;
+	typedef StringSet<String<Dna>, ConcatVirtual<> > TStringSetDna;
+	typedef Index<TStringSetDna, Index_QGram<FixedShape<6> > > TIndex; // q-gram length = 6
+	
+	// Number of sequences
+	TStringSetSize nseq = length(strSet);
+
+	// Initialization
+	Matrix<TWord> mat;   // Matrix for common k-tupels between sequence i and j
+	setDimension(mat, 2);setLength(mat, 0, nseq);setLength(mat, 1, nseq);
+	fill(host(mat), nseq*nseq, 0);
+
+	// Index
+	TIndex index;
+	resize(indexText(index), nseq);
+	for(TStringSetSize k=0;k<length(strSet);++k) indexText(index)[k] = strSet[k];
+	indexCreate(index, QGram_SA());
+
+	String<TWord> counter; // Counter for each sequence
+	resize(counter, nseq);
+	
+	TWord nqgrams = length(indexDir(index)) - 1;
+	if (nqgrams > 0) {
+		TWord j1;
+		TWord j2 = indexDir(index)[0];
+		for(TWord i = 0; i < nqgrams; ++i) {  // Iterate over all q-grams
+			j1 = j2;
+			j2 = indexDir(index)[i+1];
+			if (j1 == j2) continue;   //Empty hit-list for this q-gram
+
+			// Clear the counters
+			arrayFill(begin(counter, Standard()), end(counter, Standard()), 0);
+			for(TWord j = j1; j < j2; ++j) ++counter[getValueI1(indexSA(index)[j])];
+
+			// Add-up the values in the matrix
+			for(TWord k = 0; k < nseq; ++k)
+				for(TWord k2 = k; k2 < nseq; ++k2)
+					assignValue(mat, k*nseq+k2, getValue(mat, k*nseq+k2) + min(counter[k], counter[k2]));
+		}
+	}
+
+	// Transform the hit matrix into a score matrix
+	_hitToScoreMatrix(mat, score, nseq);
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TString, typename TSpec, typename TValue>
 void
 getScoringMatrix(StringSet<TString, TSpec> const& strSet, Matrix<TValue>& score) {
+	SEQAN_CHECKPOINT
 	typedef unsigned int TWord;
-
 	typedef StringSet<TString, TSpec> TStringSet;
 	typedef typename Size<TStringSet>::Type TStringSetSize;
-	
 	typedef Matrix<TWord> THitMatrix;
 	typedef typename Size<THitMatrix>::Type TMatrixSize;
 
@@ -164,54 +258,29 @@ getScoringMatrix(StringSet<TString, TSpec> const& strSet, Matrix<TValue>& score)
 
 			// Clear the counters
 			arrayFill(begin(counter, Standard()), end(counter, Standard()), 0);
-			for(unsigned j = j1; j < j2; ++j) ++counter[getValueI1(indexSA(index)[j])];
+			for(TWord j = j1; j < j2; ++j) ++counter[getValueI1(indexSA(index)[j])];
 
 			// Add-up the values in the matrix
-			for(unsigned k = 0; k < nseq; ++k)
-				for(unsigned k2 = k; k2 < nseq; ++k2)
+			for(TWord k = 0; k < nseq; ++k)
+				for(TWord k2 = k; k2 < nseq; ++k2)
 					assignValue(mat, k*nseq+k2, getValue(mat, k*nseq+k2) + min(counter[k], counter[k2]));
 		}
 	}
 
-	// Get the score matrix
-	setDimension(score, 2);setLength(score, 0, nseq);setLength(score, 1, nseq);
-	fill(host(score), nseq*nseq, 0);
-
-	// Calculate the score
-	TValue score0;
-	for (TMatrixSize row=0;row<nseq;++row) {
-		score0 = getValue(mat, row*nseq+row);
-		for(TMatrixSize col=0;col<nseq;++col) {		
-			// T-Coffee Score Function: Why score0 * 3 * 10.0 + 0.5 ???
-			assignValue(score, row*nseq+col, (TValue) ((score0 - getValue(mat, min(row,col)*nseq+max(row,col))) / score0 * 3 * 10.0 + 0.5));
-		}
-	}
-	for (TMatrixSize row=0;row<nseq;++row) {
-		for(TMatrixSize col=row+1;col<nseq;++col) {
-			assignValue(score, row*nseq+col, 100 - min(getValue(score,row*nseq+col), getValue(score, col*nseq+row)));
-			assignValue(score, col*nseq+row, getValue(score, row*nseq+col));
-		}
-	}
-
-	/*
-	for (unsigned row=0;row<nseq;++row) {
-		for(unsigned col=0;col<nseq;++col) {
-			std::cout << getValue(score, row*nseq+col) << ",";
-		}
-		std::cout << std::endl;
-	}
-	*/
+	// Transform the hit matrix into a score matrix
+	_hitToScoreMatrix(mat, score, nseq);
 }
 
 
-template<typename TScoreValue, typename TScoreSpec, typename TSimValue, typename TSimSpec>
+template<typename TScoreValue, typename TScoreSpec, typename TSimValue, typename TSimSpec, typename TVal>
 void
-scoreToSimilarityMatrix(Matrix<TScoreValue, TScoreSpec>& score, Matrix<TSimValue, TSimSpec>& sim) {
+scoreToSimilarityMatrix(Matrix<TScoreValue, TScoreSpec>& score, Matrix<TSimValue, TSimSpec>& sim, TVal maxSim) {
+	SEQAN_CHECKPOINT
+
 	typedef Matrix<TScoreValue, TScoreSpec> TScoreMatrix;
 	typedef Matrix<TSimValue, TSimSpec> TSimMatrix;
 	typedef typename Size<TScoreMatrix>::Type TSize;
 	typedef typename Value<TSimMatrix>::Type TValue;
-	TValue maxSim = 100;
 
 	TSize nseq = length(score, 0);
 	setDimension(sim, 2);setLength(sim, 0, nseq);setLength(sim, 1, nseq);
@@ -227,24 +296,25 @@ scoreToSimilarityMatrix(Matrix<TScoreValue, TScoreSpec>& score, Matrix<TSimValue
 		}
 	}
 		
-	for (TSize row=0;row<nseq;++row) {
-		for(TSize col=0;col<nseq;++col) {
-			std::cout << getValue(sim, row*nseq+col) << ",";
-		}
-		std::cout << std::endl;
-	}
+	//for (TSize row=0;row<nseq;++row) {
+	//	for(TSize col=0;col<nseq;++col) {
+	//		std::cout << getValue(sim, row*nseq+col) << ",";
+	//	}
+	//	std::cout << std::endl;
+	//}
 }
 
 
-template<typename TScoreValue, typename TScoreSpec, typename TDistValue, typename TDistSpec>
+template<typename TScoreValue, typename TScoreSpec, typename TDistValue, typename TDistSpec, typename TVal>
 void
-scoreToDistanceMatrix(Matrix<TScoreValue, TScoreSpec>& score, Matrix<TDistValue, TDistSpec>& dist) {
+scoreToDistanceMatrix(Matrix<TScoreValue, TScoreSpec>& score, Matrix<TDistValue, TDistSpec>& dist, TVal maxDist) {
+	SEQAN_CHECKPOINT
+
 	typedef Matrix<TScoreValue, TScoreSpec> TScoreMatrix;
 	typedef Matrix<TDistValue, TDistSpec> TDistMatrix;
 	typedef typename Size<TScoreMatrix>::Type TSize;
 	typedef typename Value<TDistMatrix>::Type TValue;
-	TValue maxDist = 100;
-
+	
 	TSize nseq = length(score, 0);
 	setDimension(dist, 2);setLength(dist, 0, nseq);setLength(dist, 1, nseq);
 	fill(host(dist), nseq*nseq, 0);
@@ -258,7 +328,18 @@ scoreToDistanceMatrix(Matrix<TScoreValue, TScoreSpec>& score, Matrix<TDistValue,
 			}
 		}
 	}
+	
+	//for (TSize row=0;row<nseq;++row) {
+	//	for(TSize col=0;col<nseq;++col) {
+	//		std::cout << getValue(dist, row*nseq+col) << ",";
+	//	}
+	//	std::cout << std::endl;
+	//}
 }
+
+
+
+
 
 
 //////////////////////////////////////////////////////////////////////////////
