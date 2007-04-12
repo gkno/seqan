@@ -10,6 +10,7 @@
 #include <sstream> 
 
 // Seqan
+#include <seqan/index.h>
 #include <seqan/basic.h>
 #include <seqan/sequence.h>
 #include <seqan/file.h>

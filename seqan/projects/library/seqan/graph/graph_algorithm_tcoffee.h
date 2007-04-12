@@ -201,8 +201,11 @@ getScoringMatrix(StringSet<String<Dna>, TSpec> const& strSet, Matrix<TValue>& sc
 
 			// Add-up the values in the matrix
 			for(TWord k = 0; k < nseq; ++k)
-				for(TWord k2 = k; k2 < nseq; ++k2)
-					assignValue(mat, k*nseq+k2, getValue(mat, k*nseq+k2) + min(counter[k], counter[k2]));
+				for(TWord k2 = k; k2 < nseq; ++k2) {
+					TWord minVal = counter[k];
+					if (counter[k2] < minVal) minVal = counter[k2];
+					assignValue(mat, k*nseq+k2, getValue(mat, k*nseq+k2) + minVal);
+				}
 		}
 	}
 
@@ -262,8 +265,11 @@ getScoringMatrix(StringSet<TString, TSpec> const& strSet, Matrix<TValue>& score)
 
 			// Add-up the values in the matrix
 			for(TWord k = 0; k < nseq; ++k)
-				for(TWord k2 = k; k2 < nseq; ++k2)
-					assignValue(mat, k*nseq+k2, getValue(mat, k*nseq+k2) + min(counter[k], counter[k2]));
+				for(TWord k2 = k; k2 < nseq; ++k2) {
+					TWord minVal = counter[k];
+					if (counter[k2] < minVal) minVal = counter[k2];
+					assignValue(mat, k*nseq+k2, getValue(mat, k*nseq+k2) + minVal);
+				}
 		}
 	}
 
