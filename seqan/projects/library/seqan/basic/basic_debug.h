@@ -199,7 +199,7 @@ inline void
 testCheckpoint(char * file, unsigned int line)
 {
 	Checkpoint cp = {file, line};
-	if (CheckpointStore<>::data.lower_bound(cp) == CheckpointStore<>::data.end())
+	if (CheckpointStore<>::data.find(cp) == CheckpointStore<>::data.end())
 		Message< Report >(file, line, "Checkpoint lost");
 }
 

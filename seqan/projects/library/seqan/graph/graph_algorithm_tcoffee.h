@@ -277,6 +277,7 @@ getScoringMatrix(StringSet<TString, TSpec> const& strSet, Matrix<TValue>& score)
 	_hitToScoreMatrix(mat, score, nseq);
 }
 
+//////////////////////////////////////////////////////////////////////////////
 
 template<typename TScoreValue, typename TScoreSpec, typename TSimValue, typename TSimSpec, typename TVal>
 void
@@ -310,6 +311,7 @@ scoreToSimilarityMatrix(Matrix<TScoreValue, TScoreSpec>& score, Matrix<TSimValue
 	//}
 }
 
+//////////////////////////////////////////////////////////////////////////////
 
 template<typename TScoreValue, typename TScoreSpec, typename TDistValue, typename TDistSpec, typename TVal>
 void
@@ -329,8 +331,8 @@ scoreToDistanceMatrix(Matrix<TScoreValue, TScoreSpec>& score, Matrix<TDistValue,
 		for(TSize col=row;col<nseq;++col) {
 			if (row == col) assignValue(dist, row*nseq+col, 0);
 			else {
-				assignValue(dist, row*nseq+col, maxDist - (TValue) getValue(score, row*nseq+col));
-				assignValue(dist, col*nseq+row, maxDist - (TValue) getValue(score, row*nseq+col));
+				assignValue(dist, row*nseq+col, (maxDist - (TValue) getValue(score, row*nseq+col)));
+				assignValue(dist, col*nseq+row, (maxDist - (TValue) getValue(score, row*nseq+col)));
 			}
 		}
 	}
@@ -343,9 +345,254 @@ scoreToDistanceMatrix(Matrix<TScoreValue, TScoreSpec>& score, Matrix<TDistValue,
 	//}
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TMatrix, typename TVal>
+void
+normalizeMatrix(TMatrix& mat, TVal const max, TVal const norm) {
+	SEQAN_CHECKPOINT
+	typedef typename Size<TMatrix>::Type TSize;
+	
+	TSize nseq = length(mat, 0);
+
+	for (TSize row=0; row<nseq; ++row)
+		for (TSize col=0; col<nseq; ++col)
+	       assignValue(mat, row*nseq+col, (getValue(mat,row*nseq+col) * norm ) / max);
+
+	//for (TSize row=0;row<nseq;++row) {
+	//	for(TSize col=0;col<nseq;++col) {
+	//		std::cout << getValue(mat, row*nseq+col) << ",";
+	//	}
+	//	std::cout << std::endl;
+	//}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TMatrix1, typename TMatrix2, typename TVal>
+void
+prepareGuideTreeMatrix(TMatrix1& mat, TMatrix2& guideMat, TVal const maxId) {
+	SEQAN_CHECKPOINT
+	typedef typename Size<TMatrix1>::Type TSize;
+	
+	TSize nseq = length(mat, 0);
+	setDimension(guideMat, 2);setLength(guideMat, 0, nseq+1);setLength(guideMat, 1, nseq+1);
+	fill(host(guideMat), (nseq+1)*(nseq+1), 0);
+
+	for (TSize row=0; row<nseq; ++row)
+		for (TSize col=0; col<nseq; ++col) {
+			if (row == col) assignValue(guideMat, (row+1)*(nseq+1)+(col+1), 0);
+			else assignValue(guideMat, (row+1)*(nseq+1)+(col+1), getValue(mat,row*nseq+col) / maxId);
+		}
+
+	//for (TSize row=0;row<nseq+1;++row) {
+	//	for(TSize col=0;col<nseq+1;++col) {
+	//		std::cout << getValue(guideMat, row*nseq+col) << ",";
+	//	}
+	//	std::cout << std::endl;
+	//}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TMatrix1, typename TMatrix2>
+void
+slowNjTree(TMatrix1& mat, TMatrix2& tree_description) {
+	SEQAN_CHECKPOINT
+	typedef typename Size<TMatrix1>::Type TSize;
+
+	TSize len = length(mat, 0);
+	TSize nseq = len - 1;
+
+	setDimension(tree_description, 2);setLength(tree_description, 0, nseq+1);setLength(tree_description, 1, nseq+1);
+	fill(host(tree_description), (nseq+1)*(nseq+1), 0);
+
+	// First initialization
+	String<int> tkill;
+	String<double> av;
+	String<double> left_branch;
+	String<double> right_branch;
+ 	fill(tkill, len,0);
+	fill(av,len,0);
+	fill(left_branch,len+1,0);
+	fill(right_branch,len+1,0);
+    for(TSize i=1;i<=nseq;++i) {
+		assignValue(mat, i*len+i, 0.0);
+		assignValue(av, i, 0.0);
+		assignValue(tkill, i, 0);
+	}
+
+	// Main cycle
+	double diq,djq,dij,d2r,dr,dio,djo,da;
+	double sumd = 0.0;
+	double tmin;
+    int mini = 0;
+	int minj = 0;
+    double fnseqs=(double) nseq;
+	double fnseqs2=0;
+    double total,dmin;
+	double bi,bj;
+	int typei,typej;
+    
+	for(TSize nc=1; nc<=(nseq-3); ++nc) {
+		sumd = 0.0;
+		// Copy upper triangle matrix to lower triangle
+		for(TSize j=2; j<=nseq; ++j) {
+			for(TSize i=1; i<j; ++i) {
+				assignValue(mat, j*len+i, getValue(mat, i*len+j));
+				sumd = sumd + getValue(mat, i*len+j);
+            }
+		}
+        tmin = 99999.0;
 
 
+		// Compute SMATij values and find the smallest one
+		for(TSize jj=2; jj<=nseq; ++jj)  {
+			if(getValue(tkill,jj) != 1) {
+				for(TSize ii=1; ii<jj; ++ii) {
+					if(getValue(tkill,ii) != 1) {
+                      diq = djq = 0.0;
+                      
+                      for(TSize i=1; i<=nseq; ++i) {
+                          diq = diq + getValue(mat, i*len+ii);
+                          djq = djq + getValue(mat, i*len+jj);
+                      }
+                      dij = getValue(mat, ii*len+jj);
+                      d2r = diq + djq - (2.0*dij);
+                      dr  = sumd - dij -d2r;
+                      fnseqs2 = fnseqs - 2.0;
+                      total= d2r+ fnseqs2*dij +dr*2.0;
+                      total= total / (2.0*fnseqs2);
+                      
+                      if(total < tmin) {
+                          tmin = total;
+                          mini = ii;
+                          minj = jj;
+					  }
+					}
+				}
+			}
+		}
 
+		// Compute branch lengths
+        dio = djo = 0.0;
+        for(TSize i=1; i<=nseq; ++i) {
+			dio = dio + getValue(mat, i*len + mini);
+            djo = djo + getValue(mat, i*len + minj);
+		}
+        dmin = getValue(mat, mini*len + minj);
+        dio = (dio - dmin) / fnseqs2;
+        djo = (djo - dmin) / fnseqs2;
+        bi = (dmin + dio - djo) * 0.5;
+        bj = dmin - bi;
+        bi = bi - av[mini];
+        bj = bj - av[minj];
+            
+        if( av[mini] > 0.0 ) typei = 0;
+        else typei = 1;
+		if( av[minj] > 0.0 ) typej = 0;
+        else typej = 1;   
+
+		// Set negative branch length to zero
+        if( fabs(bi) < 0.0001) bi = 0.0;
+        if( fabs(bj) < 0.0001) bj = 0.0;
+ 
+		left_branch[nc] = bi;
+        right_branch[nc] = bj;
+            
+        for(TSize i=1; i<=nseq; i++) assignValue(tree_description, nc*len+i,0);
+            
+        if(typei == 0) { 
+			for(TSize i=nc-1; i>=1; i--) {
+                if(getValue(tree_description, i*len+mini) == 1) {
+					for(TSize j=1; j<=nseq; j++)  {
+						if(getValue(tree_description, i*len+j) == 1) assignValue(tree_description, nc*len+j,1);
+					}
+					break;
+				}
+			}
+		}
+        else assignValue(tree_description, nc*len+mini,1);
+            
+        if(typej == 0) {
+			for(TSize i=nc-1; i>=1; i--) {
+				if(getValue(tree_description, i*len+minj) == 1) {
+					for(TSize j=1; j<=nseq; j++)  {
+						if(getValue(tree_description, i*len+j) == 1) assignValue(tree_description, nc*len+j,1);
+					}
+					break;
+				}
+			}
+		} else assignValue(tree_description, nc*len+minj,1);
+
+        if(dmin <= 0.0) dmin = 0.000001;
+        av[mini] = dmin * 0.5;
+
+		// Re-initialisation
+        fnseqs = fnseqs - 1.0;
+        tkill[minj] = 1;
+    
+		for(int j=1; j<=(int) nseq; ++j) {
+			if( getValue(tkill, j) != 1 ) {
+				da = ( getValue(mat, mini*len+j) + getValue(mat, minj*len+j)) * 0.5;
+                if( (mini - j) < 0 ) assignValue(mat, mini*len+j, da);
+                if( (mini - j) > 0) assignValue(mat, j*len+mini, da);
+			}
+		}
+		for(TSize j=1; j<=nseq; ++j) {
+			assignValue(mat, minj*len+j, 0.0);
+			assignValue(mat, j*len+minj, 0.0);
+		}
+	}
+
+	String<int> l;
+	fill(l,4,0);
+	int nude = 1;
+	String<double> branch;
+	resize(branch, 4);
+	double b1,b2,b3;
+       
+	for(TSize i=1; i<=nseq; ++i) {
+		if( tkill[i] != 1 ) {
+			l[nude] = i;
+			nude = nude + 1;
+        }
+	}
+    
+    b1 = (getValue(mat, l[1]*len+l[2]) + getValue(mat, l[1]*len+l[3]) - getValue(mat, l[2]*len+l[3])) * 0.5;
+    b2 =  getValue(mat, l[1]*len+l[2]) - b1;
+    b3 =  getValue(mat, l[1]*len+l[3]) - b1;
+    
+    branch[1] = b1 - av[l[1]];
+    branch[2] = b2 - av[l[2]];
+    branch[3] = b3 - av[l[3]];
+    
+	// Reset tiny negative and positive branch lengths to zero
+    if( fabs(branch[1]) < 0.0001) branch[1] = 0.0;
+    if( fabs(branch[2]) < 0.0001) branch[2] = 0.0;
+    if( fabs(branch[3]) < 0.0001) branch[3] = 0.0;
+    
+    left_branch[nseq-2] = branch[1];
+    left_branch[nseq-1] = branch[2];
+    left_branch[nseq]   = branch[3];
+    
+    for(TSize i=1; i<=nseq; i++) assignValue(tree_description, (nseq-2)*len+i, 0);
+
+    for(TSize i=1; i<=3; ++i) {
+		if( av[l[i]] > 0.0) {
+			for(TSize k=nseq-3; k>=1; k--) {
+				if(getValue(tree_description, k*len+l[i]) == 1) {
+					for(TSize j=1; j<=nseq; j++) {
+						if (getValue(tree_description, k*len+j) == 1) assignValue(tree_description, (nseq-2)*len+j, i);
+					}
+					break;
+				}
+			}
+		} else  {
+			assignValue(tree_description, (nseq-2)*len+l[i],i);
+		}
+	}
+}
 
 
 //////////////////////////////////////////////////////////////////////////////
