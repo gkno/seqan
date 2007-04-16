@@ -751,7 +751,7 @@ void NeighborJoining() {
 	// Print the tree
 	// std::cout << njTreeOut << std::endl;
 	// or:
-	std::fstream strm; // Alignment graph as dot
+	std::fstream strm; 
 	strm.open(TEST_PATH "my_nj_tree.dot", std::ios_base::out | std::ios_base::trunc);
 	write(strm,njTreeOut,DotDrawing());
 	strm.close();
