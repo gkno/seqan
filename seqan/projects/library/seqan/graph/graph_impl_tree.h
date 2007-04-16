@@ -251,6 +251,7 @@ clearVertices(Graph<Tree<TCargo, TSpec> >& g)
 		clearEdges(g);	
 		releaseId(g.data_id_managerV, getRoot(g)); // Release root id
 	}
+	releaseAll(g.data_id_managerV);
 	clear(g.data_vertex);
 	clear(g.data_parent);
 }
