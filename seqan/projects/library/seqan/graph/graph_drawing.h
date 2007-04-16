@@ -219,12 +219,34 @@ void _createEdgeAttributes(Graph<Undirected<TCargo, TSpec> > const& g,
 
 //////////////////////////////////////////////////////////////////////////////
 
+template <typename TSpec, typename TEdgeAttributes>
+void _createEdgeAttributes(Graph<Tree<void, TSpec> > const& g,
+						   TEdgeAttributes& edgeMap)
+{
+	SEQAN_CHECKPOINT
+	_createEmptyEdgeAttributes(g,edgeMap);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 template <typename TCargo, typename TSpec, typename TEdgeAttributes>
 void _createEdgeAttributes(Graph<Tree<TCargo, TSpec> > const& g,
 						   TEdgeAttributes& edgeMap)
 {
 	SEQAN_CHECKPOINT
-	_createEmptyEdgeAttributes(g,edgeMap);
+	typedef Graph<Tree<TCargo, TSpec> > TGraph;
+	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	resizeEdgeMap(g, edgeMap);
+
+	typedef typename Iterator<TGraph, EdgeIterator>::Type TConstEdIter;
+	TConstEdIter itEd(g);
+	for(;!atEnd(itEd);++itEd) {
+		std::ostringstream outs; 
+		outs << "label = \"";
+		outs << (TCargo) getCargo(*itEd);
+		outs << "\"";
+		append(property(edgeMap, *itEd), outs.str().c_str());		
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////

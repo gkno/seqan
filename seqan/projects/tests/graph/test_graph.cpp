@@ -18,7 +18,6 @@
 using namespace std;
 using namespace seqan;
 
-/*
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -3688,7 +3687,7 @@ void Test_Algorithms() {
 	//Matching
 }
 
-*/
+
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -3734,19 +3733,10 @@ void Test_TCoffee() {
 	getScoringMatrix(stringSet(g), score);
 	Matrix<double> distances;
 	scoreToDistanceMatrix(score, distances, 1000);
-	normalizeMatrix(distances, 1000, 100);
-	Matrix<double> guideMat;
-	prepareGuideTreeMatrix(distances, guideMat, 100);
-	Matrix<unsigned int> tree_description;
-	slowNjTree(guideMat, tree_description);
-	unsigned int len = length(tree_description, 0);
-	for (unsigned int row=0;row<len;++row) {
-		for(unsigned int col=0;col<len;++col) {
-			std::cout << getValue(tree_description, row*len+col) << ",";
-		}
-		std::cout << std::endl;
-	}
-	std::cout << std::endl;
+	normalizeMatrix(distances, 100000, 100);
+	Graph<Tree<double> > njTreeOut;
+	slowNjTree(distances, njTreeOut);
+	std::cout << njTreeOut << std::endl;
 
 	// ToDo: Owner of strings!!!!!!!!!!!
 	for(unsigned int i=0; i<length(value(g.data_sequence)); ++i) {  	// Delete sequences
@@ -3775,19 +3765,10 @@ void Test_TCoffee() {
 	getScoringMatrix(stringSet(gDna), scoreDna);
 	Matrix<double> distancesDna;
 	scoreToDistanceMatrix(scoreDna, distancesDna, 1000);
-	normalizeMatrix(distancesDna, 1000, 100);
-	Matrix<double> guideMatDna;
-	prepareGuideTreeMatrix(distancesDna, guideMatDna, 100);
-	Matrix<unsigned int> tree_descriptionDna;
-	slowNjTree(guideMatDna, tree_descriptionDna);
-	len = length(tree_descriptionDna, 0);
-	for (unsigned int row=0;row<len;++row) {
-		for(unsigned int col=0;col<len;++col) {
-			std::cout << getValue(tree_descriptionDna, row*len+col) << ",";
-		}
-		std::cout << std::endl;
-	}
-	std::cout << std::endl;
+	normalizeMatrix(distancesDna, 100000, 100);
+	Graph<Tree<double> > njTree;
+	slowNjTree(distancesDna, njTree);
+	std::cout << njTree << std::endl;
 
 	// ToDo: Owner of strings!!!!!!!!!!!
 	for(unsigned int i=0; i<length(value(gDna.data_sequence)); ++i) {  	// Delete sequences
@@ -3795,13 +3776,12 @@ void Test_TCoffee() {
 	}
 }
 
-
 //////////////////////////////////////////////////////////////////////////////
 
 int main() 
 {
 	SEQAN_TREPORT("TEST BEGIN")
-/*
+
 	Test_IdManager();	// Test Id Manager
 	Test_EdgeStump();	// Test EdgeStumps
 	Test_StringSet<StringSet<String<char>, IdHolder<GenerousStorage<> > > >();
@@ -3859,11 +3839,11 @@ int main()
 
 	// Graph algorithms
 	Test_Algorithms();
-*/
+
 
 	// T-Coffee
 	Test_TCoffee();
-/*
+
 
 //____________________________________________________________________________
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_base.h");
@@ -3890,7 +3870,6 @@ int main()
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_algorithm.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_algorithm_tcoffee.h");
 
-*/
 
 	SEQAN_TREPORT("TEST END")
 

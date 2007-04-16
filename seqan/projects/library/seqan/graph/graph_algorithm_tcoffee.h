@@ -369,229 +369,190 @@ normalizeMatrix(TMatrix& mat, TVal const max, TVal const norm) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TMatrix1, typename TMatrix2, typename TVal>
+template<typename TMatrixSpec, typename TCargo, typename TSpec>
 void
-prepareGuideTreeMatrix(TMatrix1& mat, TMatrix2& guideMat, TVal const maxId) {
+slowNjTree(Matrix<double, TMatrixSpec>& mat, Graph<Tree<TCargo, TSpec> >& g) {
 	SEQAN_CHECKPOINT
-	typedef typename Size<TMatrix1>::Type TSize;
+	
+	typedef typename Size<Matrix<double, TMatrixSpec> >::Type TSize;
+	typedef Graph<Tree<TCargo, TSpec> > TGraph;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
 	
 	TSize nseq = length(mat, 0);
-	setDimension(guideMat, 2);setLength(guideMat, 0, nseq+1);setLength(guideMat, 1, nseq+1);
-	fill(host(guideMat), (nseq+1)*(nseq+1), 0);
 
-	for (TSize row=0; row<nseq; ++row)
-		for (TSize col=0; col<nseq; ++col) {
-			if (row == col) assignValue(guideMat, (row+1)*(nseq+1)+(col+1), 0);
-			else assignValue(guideMat, (row+1)*(nseq+1)+(col+1), getValue(mat,row*nseq+col) / maxId);
-		}
-
-	//for (TSize row=0;row<nseq+1;++row) {
-	//	for(TSize col=0;col<nseq+1;++col) {
-	//		std::cout << getValue(guideMat, row*nseq+col) << ",";
+	//for(TSize i=0;i<nseq;++i) {
+	//	for(TSize j=0;j<nseq;++j) {
+	//		std::cout << getValue(mat, i*nseq+j) << ",";
 	//	}
 	//	std::cout << std::endl;
 	//}
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TMatrix1, typename TMatrix2>
-void
-slowNjTree(TMatrix1& mat, TMatrix2& tree_description) {
-	SEQAN_CHECKPOINT
-	typedef typename Size<TMatrix1>::Type TSize;
-
-	TSize len = length(mat, 0);
-	TSize nseq = len - 1;
-
-	setDimension(tree_description, 2);setLength(tree_description, 0, nseq+1);setLength(tree_description, 1, nseq+1);
-	fill(host(tree_description), (nseq+1)*(nseq+1), 0);
 
 	// First initialization
-	String<int> tkill;
-	String<double> av;
-	String<double> left_branch;
-	String<double> right_branch;
- 	fill(tkill, len,0);
-	fill(av,len,0);
-	fill(left_branch,len+1,0);
-	fill(right_branch,len+1,0);
-    for(TSize i=1;i<=nseq;++i) {
-		assignValue(mat, i*len+i, 0.0);
-		assignValue(av, i, 0.0);
-		assignValue(tkill, i, 0);
+	clear(g);
+	String<double> av;    // Average branch length to a combined node
+	fill(av,nseq,0.0);
+
+	String<TVertexDescriptor> connector;   // Nodes that need to be connected
+	resize(connector, nseq);
+
+	for(TSize i=0;i<nseq;++i) {
+		addVertex(g);  // Add all the nodes that correspond to sequences
+		assignValue(connector, i, i);
+		assignValue(mat, i*nseq+i, 0.0);
 	}
 
 	// Main cycle
-	double diq,djq,dij,d2r,dr,dio,djo,da;
-	double sumd = 0.0;
-	double tmin;
-    int mini = 0;
-	int minj = 0;
-    double fnseqs=(double) nseq;
-	double fnseqs2=0;
-    double total,dmin;
-	double bi,bj;
-	int typei,typej;
-    
-	for(TSize nc=1; nc<=(nseq-3); ++nc) {
-		sumd = 0.0;
+	double fnseqs=(double) nseq;
+	for(TSize nc=0; nc<(nseq-3); ++nc) {
+		double sumOfBranches = 0.0;
+
 		// Copy upper triangle matrix to lower triangle
-		for(TSize j=2; j<=nseq; ++j) {
-			for(TSize i=1; i<j; ++i) {
-				assignValue(mat, j*len+i, getValue(mat, i*len+j));
-				sumd = sumd + getValue(mat, i*len+j);
-            }
+		for(TSize col=1; col<nseq; ++col) {
+			for(TSize row=0; row<col; ++row) {
+				assignValue(mat, col*nseq+row, getValue(mat, row*nseq+col));
+				// Determine the sum of all branches
+				sumOfBranches = sumOfBranches + getValue(mat, row*nseq+col);
+			}
 		}
-        tmin = 99999.0;
 
+		// Compute the sum of branch lengths for all possible pairs
+		double tmin = 0.0;	
+		TSize mini = 0;  // Next pair of seq i and j to join
+		TSize minj = 0;
+		for(TSize col=1; col<nseq; ++col)  {
+			if (getValue(connector,col) != nilVertex) {
+				for(TSize row=0; row<col; ++row) {
+					if (getValue(connector,row) != nilVertex) {
+						double diToAllOthers = 0.0;
+						double djToAllOthers = 0.0;
+						
+						for(TSize i=0; i<nseq; ++i) {
+							diToAllOthers += getValue(mat, i*nseq+row);
+							djToAllOthers += getValue(mat, i*nseq+col);
+						}
 
-		// Compute SMATij values and find the smallest one
-		for(TSize jj=2; jj<=nseq; ++jj)  {
-			if(getValue(tkill,jj) != 1) {
-				for(TSize ii=1; ii<jj; ++ii) {
-					if(getValue(tkill,ii) != 1) {
-                      diq = djq = 0.0;
-                      
-                      for(TSize i=1; i<=nseq; ++i) {
-                          diq = diq + getValue(mat, i*len+ii);
-                          djq = djq + getValue(mat, i*len+jj);
-                      }
-                      dij = getValue(mat, ii*len+jj);
-                      d2r = diq + djq - (2.0*dij);
-                      dr  = sumd - dij -d2r;
-                      fnseqs2 = fnseqs - 2.0;
-                      total= d2r+ fnseqs2*dij +dr*2.0;
-                      total= total / (2.0*fnseqs2);
-                      
-                      if(total < tmin) {
-                          tmin = total;
-                          mini = ii;
-                          minj = jj;
-					  }
+						double dij = getValue(mat, row*nseq+col);
+						double total = diToAllOthers + djToAllOthers + (fnseqs - 2.0)*dij +2.0*(sumOfBranches - diToAllOthers - djToAllOthers);
+						total /= (2.0*(fnseqs - 2.0));
+
+						if ((tmin == 0) || (total < tmin)) {
+							tmin = total;
+							mini = row;
+							minj = col;
+						}
 					}
 				}
 			}
 		}
 
+		// Print nodes that are about to be joined
+		//std::cout << mini << std::endl;
+		//std::cout << minj << std::endl;
+		//std::cout << tmin << std::endl;
+		//std::cout << std::endl;
+		
 		// Compute branch lengths
-        dio = djo = 0.0;
-        for(TSize i=1; i<=nseq; ++i) {
-			dio = dio + getValue(mat, i*len + mini);
-            djo = djo + getValue(mat, i*len + minj);
+		double dMinIToOthers = 0.0;
+		double dMinJToOthers = 0.0;
+		for(TSize i=0; i<nseq; ++i) {
+			dMinIToOthers += getValue(mat, i*nseq + mini);
+			dMinJToOthers += getValue(mat, i*nseq + minj);
 		}
-        dmin = getValue(mat, mini*len + minj);
-        dio = (dio - dmin) / fnseqs2;
-        djo = (djo - dmin) / fnseqs2;
-        bi = (dmin + dio - djo) * 0.5;
-        bj = dmin - bi;
-        bi = bi - av[mini];
-        bj = bj - av[minj];
-            
-        if( av[mini] > 0.0 ) typei = 0;
-        else typei = 1;
-		if( av[minj] > 0.0 ) typej = 0;
-        else typej = 1;   
-
+		double dmin = getValue(mat, mini*nseq + minj);
+		dMinIToOthers = dMinIToOthers / (fnseqs - 2.0);
+		dMinJToOthers = dMinJToOthers / (fnseqs - 2.0);
+		double iBranch = (dmin + dMinIToOthers - dMinJToOthers) * 0.5;
+		double jBranch = dmin - iBranch;
+		iBranch -= av[mini];
+		jBranch -= av[minj];
+		
 		// Set negative branch length to zero
-        if( fabs(bi) < 0.0001) bi = 0.0;
-        if( fabs(bj) < 0.0001) bj = 0.0;
- 
-		left_branch[nc] = bi;
-        right_branch[nc] = bj;
-            
-        for(TSize i=1; i<=nseq; i++) assignValue(tree_description, nc*len+i,0);
-            
-        if(typei == 0) { 
-			for(TSize i=nc-1; i>=1; i--) {
-                if(getValue(tree_description, i*len+mini) == 1) {
-					for(TSize j=1; j<=nseq; j++)  {
-						if(getValue(tree_description, i*len+j) == 1) assignValue(tree_description, nc*len+j,1);
-					}
-					break;
-				}
-			}
-		}
-        else assignValue(tree_description, nc*len+mini,1);
-            
-        if(typej == 0) {
-			for(TSize i=nc-1; i>=1; i--) {
-				if(getValue(tree_description, i*len+minj) == 1) {
-					for(TSize j=1; j<=nseq; j++)  {
-						if(getValue(tree_description, i*len+j) == 1) assignValue(tree_description, nc*len+j,1);
-					}
-					break;
-				}
-			}
-		} else assignValue(tree_description, nc*len+minj,1);
+		if( fabs(iBranch) < 0.0001) iBranch = 0.0;
+		if( fabs(jBranch) < 0.0001) jBranch = 0.0;
+	
+		// Print branch lengths
+		//std::cout << iBranch << std::endl;
+		//std::cout << jBranch << std::endl;
+		//std::cout << std::endl;
+		
+		// Build tree
+		TVertexDescriptor internalVertex = addVertex(g);
+		addEdge(g, internalVertex, getValue(connector, mini), (TCargo) iBranch);
+		addEdge(g, internalVertex, getValue(connector, minj), (TCargo) jBranch);
 
-        if(dmin <= 0.0) dmin = 0.000001;
-        av[mini] = dmin * 0.5;
+		// Remember the average branch length for the new combined node
+		// Must be subtracted from all branches that include this node
+		if(dmin <= 0.0) dmin = 0.000001;
+		av[mini] = dmin * 0.5;
+
 
 		// Re-initialisation
-        fnseqs = fnseqs - 1.0;
-        tkill[minj] = 1;
-    
-		for(int j=1; j<=(int) nseq; ++j) {
-			if( getValue(tkill, j) != 1 ) {
-				da = ( getValue(mat, mini*len+j) + getValue(mat, minj*len+j)) * 0.5;
-                if( (mini - j) < 0 ) assignValue(mat, mini*len+j, da);
-                if( (mini - j) > 0) assignValue(mat, j*len+mini, da);
+		// mini becomes the new combined node, minj is killed
+		fnseqs = fnseqs - 1.0;
+		assignValue(connector, minj, nilVertex);
+		assignValue(connector, mini, internalVertex);
+
+		for(TSize j=0; j<nseq; ++j) {
+			if( getValue(connector, j) != nilVertex ) {
+				double minIminJToOther = ( getValue(mat, mini*nseq+j) + getValue(mat, minj*nseq+j)) * 0.5;
+				// Use upper triangle
+				if((TSize) mini < j) assignValue(mat, mini*nseq+j, minIminJToOther);
+				if((TSize) mini > j) assignValue(mat, j*nseq+mini, minIminJToOther);
 			}
 		}
-		for(TSize j=1; j<=nseq; ++j) {
-			assignValue(mat, minj*len+j, 0.0);
-			assignValue(mat, j*len+minj, 0.0);
+		for(TSize j=0; j<nseq; ++j) {
+			assignValue(mat, minj*nseq+j, 0.0);
+			assignValue(mat, j*nseq+minj, 0.0);
 		}
 	}
 
-	String<int> l;
-	fill(l,4,0);
-	int nude = 1;
-	String<double> branch;
-	resize(branch, 4);
-	double b1,b2,b3;
-       
-	for(TSize i=1; i<=nseq; ++i) {
-		if( tkill[i] != 1 ) {
-			l[nude] = i;
-			nude = nude + 1;
-        }
+	// Only three nodes left
+
+	// Find the remaining nodes
+	String<TSize> l;
+	fill(l,3,0);
+	TSize count = 0;
+	for(TSize i=0; i<nseq; ++i) {
+		if(getValue(connector, i) != nilVertex) {
+			l[count] = i;
+			++count;
+		}
 	}
+
+	// Remaining nodes
+	//std::cout << l[0] << std::endl;
+	//std::cout << l[1] << std::endl;
+	//std::cout << l[2] << std::endl;
+	//std::cout << std::endl;
+
+	String<double> branch;
+	resize(branch, 3);
+	branch[0] = (getValue(mat, l[0]*nseq+l[1]) + getValue(mat, l[0]*nseq+l[2]) - getValue(mat, l[1]*nseq+l[2])) * 0.5;
+	branch[1] = (getValue(mat, l[1]*nseq+l[2]) + getValue(mat, l[0]*nseq+l[1]) - getValue(mat, l[0]*nseq+l[2])) * 0.5;
+	branch[2] =  (getValue(mat, l[0]*nseq+l[2]) + getValue(mat, l[0]*nseq+l[1]) - getValue(mat, l[1]*nseq+l[2])) * 0.5;
     
-    b1 = (getValue(mat, l[1]*len+l[2]) + getValue(mat, l[1]*len+l[3]) - getValue(mat, l[2]*len+l[3])) * 0.5;
-    b2 =  getValue(mat, l[1]*len+l[2]) - b1;
-    b3 =  getValue(mat, l[1]*len+l[3]) - b1;
-    
-    branch[1] = b1 - av[l[1]];
-    branch[2] = b2 - av[l[2]];
-    branch[3] = b3 - av[l[3]];
+	branch[0] -= av[l[0]];
+	branch[1] -= av[l[1]];
+	branch[2] -= av[l[2]];
+
+	// Print branch lengths
+	//std::cout << branch[0] << std::endl;
+	//std::cout << branch[1] << std::endl;
+	//std::cout << branch[2] << std::endl;
+	//std::cout << std::endl;
     
 	// Reset tiny negative and positive branch lengths to zero
-    if( fabs(branch[1]) < 0.0001) branch[1] = 0.0;
-    if( fabs(branch[2]) < 0.0001) branch[2] = 0.0;
-    if( fabs(branch[3]) < 0.0001) branch[3] = 0.0;
+	if( fabs(branch[0]) < 0.0001) branch[0] = 0.0;
+	if( fabs(branch[1]) < 0.0001) branch[1] = 0.0;
+	if( fabs(branch[2]) < 0.0001) branch[2] = 0.0;
     
-    left_branch[nseq-2] = branch[1];
-    left_branch[nseq-1] = branch[2];
-    left_branch[nseq]   = branch[3];
-    
-    for(TSize i=1; i<=nseq; i++) assignValue(tree_description, (nseq-2)*len+i, 0);
-
-    for(TSize i=1; i<=3; ++i) {
-		if( av[l[i]] > 0.0) {
-			for(TSize k=nseq-3; k>=1; k--) {
-				if(getValue(tree_description, k*len+l[i]) == 1) {
-					for(TSize j=1; j<=nseq; j++) {
-						if (getValue(tree_description, k*len+j) == 1) assignValue(tree_description, (nseq-2)*len+j, i);
-					}
-					break;
-				}
-			}
-		} else  {
-			assignValue(tree_description, (nseq-2)*len+l[i],i);
-		}
-	}
+	// Build tree
+	TVertexDescriptor internalVertex = addVertex(g);
+	addEdge(g, internalVertex, getValue(connector, l[0]), (TCargo) branch[0]);
+	addEdge(g, internalVertex, getValue(connector, l[1]), (TCargo) branch[1]);
+	addEdge(g, internalVertex, getValue(connector, l[2]), (TCargo) branch[2]);
+	g.data_root = internalVertex;
 }
 
 
