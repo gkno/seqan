@@ -165,7 +165,8 @@ struct CheckpointLess : public ::std::binary_function <Checkpoint, Checkpoint, b
 {
 	inline bool operator() (Checkpoint const &a, Checkpoint const &b) const
 	{
-		return (a.file < b.file) || (a.file == b.file && a.line < b.line);
+		int c = strcmp(a.file, b.file);
+		return c < 0 || (c == 0 && a.line < b.line);
 	}
 };
 
