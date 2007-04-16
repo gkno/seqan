@@ -142,8 +142,10 @@ inline void goNext(Iter< Index<TText, TSpec>, VSTree< TopDown< ParentLinks<Const
 	// often than RelativeThreshold times by considering the actual context length
 	// and the text length. This is known as relative frequency or empirical probability.
 	// note: that we do not enforce that the tree is balanced
-	
-	if(countOccurences(it) >= floor(it.RelativeThreshold*(float)(length(container(it))-repLength(it)+1))) 
+	// countSequences(container(it));
+	//sequenceLength(SeqNr,index);
+	if(countOccurences(it) >= floor(it.RelativeThreshold*(float)(length(container(it))-
+	(repLength(it)-1)*countSequences(container(it)) ))) 
 		walk_down = 1;
 
 	it.Down = false;
@@ -174,7 +176,8 @@ inline void goNext(Iter< Index<TText, TSpec>, VSTree< TopDown< ParentLinks<Const
 			walk_down = 0;
 			continue;
 		}*/
-		if(!isLeaf(it) && (countOccurences(it) >= floor(it.RelativeThreshold*(float)(length(container(it))-repLength(it)+1))))
+		if( (isLeaf(it) && repLength(it)>1) || countOccurences(it) >= floor(it.RelativeThreshold*(float)(length(container(it))-
+	(repLength(it)-1)*countSequences(container(it)) )))
 			not_finished = 0;
 		else
 			walk_down = 0;
@@ -508,6 +511,20 @@ initProbabilityVector(Iter<TIndex, VSTree< TopDown< ParentLinks<ConstrainedTrave
 
 }
 
+//Graph<Automaton<TText, TCargo, WordGraph< VLMM < TSpec > > >, TGraphSpec> 
+// currently this function can only be called for index of
+// specialization: Index_ESA
+template<typename TIndex,typename TIterSpec,typename TSpec,typename TCargo,typename TAlphabet,typename TGraphSpec,typename TVertexDescriptor,typename TChar>
+inline void
+initProbabilityVectorForLeaf(Iter<TIndex, VSTree< TopDown< ParentLinks<ConstrainedTraversal<TIterSpec> > > > > &it,
+						 Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > >,TGraphSpec> &target,
+						 TVertexDescriptor & node,
+						 TChar & letter)
+{
+	//only one letter can be there, so set it to the number of counts found in the node
+	setProbability(target,node,letter,(float)countOccurences(it));
+	
+}
 
 //Graph<Automaton<TText, TCargo, WordGraph< VLMM < TSpec > > >, TGraphSpec> 
 // currently this function can only be called for index of
@@ -551,31 +568,21 @@ buildSuffixTreeFromIndex(Iter<TIndex, VSTree< TopDown< ParentLinks<ConstrainedTr
 		//std::cout <<"set Father\t";
 		// set child relation with edgelabel
 		//std::cout <<"ParentEdgeLAbel:"<<parentEdgeLabel(it)<<std::endl;
-		addEdge(target,father,child,parentEdgeLabel(it));
+		// only if not a leaf
+		if(!isLeaf(it)){
+			addEdge(target,father,child,parentEdgeLabel(it));
+			initProbabilityVector(it,target,child);
+		}
+		else{
+			//addEdge with one char less , da muss man auch nicht zählen
+			TAlphabet letter = value(parentEdgeLabel(it), repLength(it)-1 );
+			addEdge(target,father,child,prefix( parentEdgeLabel(it), repLength(it)-1 ) );
+			initProbabilityVectorForLeaf(it,target,child,letter);
+		}
 		//std::cout <<"set Edge\t";
-		initProbabilityVector(it,target,child);
-		//// provisional set prob-vector of nodes
-		//TIter childs(it);
-		//goDown(childs);
-		//unsigned fatherLength = 0;
-		//TAlphabet startCharacter;
-		//if(isRightTerminal(childs)){
-		//fatherLength = repLength(it);
-		//startCharacter = value(representative(childs),fatherLength);
-		//setProbability(target,child,startCharacter,(float)countOccurences(childs));
-		//}
-		//while(goRight(childs)){
-		//	if(isRightTerminal(childs)){
-		//	startCharacter = value(representative(childs),fatherLength);
-		//	setProbability(target,child,startCharacter,(float)countOccurences(childs));
-		//	}
-		//}
-		//std::cout << "added node:"<<child<<std::endl;
 		// go to next valid node and add it to the graph
 		goNext(it);
-
 	}
-
 	// All valid nodes are now part of the vlmm
 	return;
 }
@@ -587,7 +594,7 @@ getChildCharacter(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec >
 			   TVertexDescriptor &child)
 {
 	typedef Graph<Automaton<TAlphabet,TCargo,WordGraph< VLMM < TSpec > > >,TGraphSpec> TVlmm;
-	typedef typename Iterator<TVlmm, OutEdgeIterator>::Type TOutEdgeIterator;
+	typedef typename Iterator<TVlmm, OutEdgeIterator<> >::Type TOutEdgeIterator;
 
 	TOutEdgeIterator itout(vlmm,father);
 	while(!atEnd(itout)){
@@ -722,7 +729,7 @@ addSuffixLinks(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > 
 	typedef Graph<Automaton<TAlphabet,TCargo,WordGraph< VLMM < TSpec > > >,TGraphSpec> TVlmm;
 	typedef typename VertexDescriptor<TVlmm>::Type TVertexDescriptor;
 	typedef typename EdgeDescriptor<TVlmm>::Type TEdgeDescriptor;
-	typedef typename Iterator<TVlmm, OutEdgeIterator>::Type TOutEdgeIterator;
+	typedef typename Iterator<TVlmm, OutEdgeIterator<> >::Type TOutEdgeIterator;
 	typedef typename Size<TVlmm>::Type TSize;
 	
 	TVertexDescriptor root = getRoot(vlmm);
@@ -886,13 +893,13 @@ pruneTree(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > >,TGr
 	SEQAN_CHECKPOINT
 	typedef Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGraphSpec> TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	typedef typename Iterator<TGraph, InternalVertexIterator<> >::Type TVertexIterator;
+	typedef typename Iterator<TGraph, VertexIterator<> >::Type TVertexIterator;
 
 	TVertexDescriptor root = getRoot(vlmm);
 	
 	String<bool> original;
 	// remember which nodes have been there
-	resizeVertexMap(vlmm, original);
+	initVertexMap(vlmm, original);
 	TVertexIterator it(vlmm);
 	for(;!atEnd(it);goNext(it)) {
 		TVertexDescriptor node =  getValue(it);
@@ -957,7 +964,7 @@ pruneTreeRecursively(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpe
 	TVertexDescriptor father = getFather(vlmm,node);
 	String<TAlphabet> childLabel;
 	getChildLabel(vlmm,father,node,childLabel);
-	/*
+	
 	// check for possible extended 
 	if(length(childLabel) > 1){
 		// seek the node in the tree which could be the suffix link father of the new node
@@ -1012,7 +1019,7 @@ pruneTreeRecursively(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpe
 			
 		} // else case
 	} // Label > 1
-	*/
+	
 	//std::cout << "check keeping of node:" << node;
 	// all potential nodes are build
 	if( isMarked(vlmm,node) || (! pruneNode(vlmm,node,parameters)) ){
@@ -1058,8 +1065,8 @@ buildPST(Index<TIndexType, Index_ESA<> > & index,
 	PST parameters;
 	setParameters(parameters,threshold,minEmpiricalProbability,minConditionalProbability,alpha);
 
-	Iter< TIndex, VSTree< TopDown< ParentLinks<ConstrainedTraversal<Relative> > > > > it(index,parameters.minEmpiricalProbability);
-	//Iter< TIndex, VSTree< TopDown< ParentLinks<ConstrainedTraversal<Absolute> > > > > it(index,2);
+	//Iter< TIndex, VSTree< TopDown< ParentLinks<ConstrainedTraversal<Relative> > > > > it(index,parameters.minEmpiricalProbability);
+	Iter< TIndex, VSTree< TopDown< ParentLinks<ConstrainedTraversal<Absolute> > > > > it(index,2);
 
 	buildSuffixTreeFromIndex(it,vlmm);
 	std::cout << "constructed suffix tree core" <<std::endl;
@@ -1068,7 +1075,7 @@ buildPST(Index<TIndexType, Index_ESA<> > & index,
 	addSuffixLinks(vlmm);
 	//std::cout << "added suffix links and reverse suffix links" <<std::endl;
 	//std::cout <<vlmm;
-	pruneTree(vlmm,parameters);
+	//pruneTree(vlmm,parameters);
 	//std::cout << "pruned the PST" <<std::endl;
 	//std::cout << vlmm;
 	std::cout << "READY!" <<std::endl;
@@ -1163,7 +1170,7 @@ void write(TFile & file,
 	_streamPut(file, '\n');
 
 	_streamWrite(file, "/* Nodes */\n");
-	typedef typename Iterator<TGraph, InternalVertexIterator<> >::Type TConstIter;
+	typedef typename Iterator<TGraph, VertexIterator<> >::Type TConstIter;
 	TConstIter it(g);
 	for(;!atEnd(it);goNext(it)) {
 		_streamWrite(file, getProperty(nodeMap, *it));
@@ -1182,7 +1189,7 @@ void write(TFile & file,
 	_streamPut(file, '\n');
 
 	_streamWrite(file, "/* Edges */\n");
-	typedef typename Iterator<TGraph, EdgeIterator>::Type TConstEdIter;
+	typedef typename Iterator<TGraph, EdgeIterator<> >::Type TConstEdIter;
 	TConstEdIter itEd(g);
 	for(;!atEnd(itEd);++itEd) {
 		TVertexDescriptor sc = sourceVertex(itEd);
@@ -1262,7 +1269,7 @@ void writeAsVLMM(TFile & file,
 	_streamPut(file, '\n');
 
 	_streamWrite(file, "/* Nodes */\n");
-	typedef typename Iterator<TGraph, InternalVertexIterator<> >::Type TConstIter;
+	typedef typename Iterator<TGraph, VertexIterator<> >::Type TConstIter;
 	TConstIter it(g);
 	for(;!atEnd(it);++it) {
 		_streamWrite(file, getProperty(nodeMap, *it));
@@ -1272,7 +1279,7 @@ void writeAsVLMM(TFile & file,
 	_streamPut(file, '\n');
 
 	_streamWrite(file, "/* Edges */\n");
-	typedef typename Iterator<TGraph, EdgeIterator>::Type TConstEdIter;
+	typedef typename Iterator<TGraph, EdgeIterator<> >::Type TConstEdIter;
 	TConstEdIter itEd(g);
 		//NEW Reverse Suffix Links
 	goBegin(it);
@@ -1317,4 +1324,5 @@ void writeAsVLMM(TFile & file,
 } // End Namespace
 
 #endif
+
 
