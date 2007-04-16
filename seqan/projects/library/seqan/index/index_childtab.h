@@ -163,8 +163,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		TChildTable &childtab,
 		TLCPTable &lcp)
 	{
-		typedef Pipe< TLCPTable, Source<ContainerSpec> >	TSource;
-		typedef Pipe< TSource, ChildTab >					TESA;
+		typedef Pipe< TLCPTable, Source<> >	TSource;
+		typedef Pipe< TSource, ChildTab >	TESA;
 
 		TSource source(lcp);
 		TESA	esa(source);

@@ -1,8 +1,12 @@
 #ifndef SEQAN_HEADER_BASIC_H
 #define SEQAN_HEADER_BASIC_H
 
-//#include <cstring>
+//____________________________________________________________________________
+// prerequisites
 
+#include <seqan/platform.h>
+
+//#include <cstring>
 #include <limits>
 
 #include <cstddef> //size_t
@@ -14,7 +18,7 @@
 
 #define SEQAN_NAMESPACE_MAIN seqan 
 
-#include <seqan/platform.h>
+//____________________________________________________________________________
 
 #include <seqan/basic/basic_forwards.h>
 #ifdef SEQAN_SWITCH_USE_FORWARDS
@@ -26,6 +30,9 @@
 #include <seqan/basic/basic_definition.h>
 #include <seqan/basic/basic_type.h>
 #include <seqan/basic/basic_metaprogramming.h>
+
+//____________________________________________________________________________
+// allocators
 
 #include <seqan/basic/basic_allocator_interface.h>
 #include <seqan/basic/basic_allocator_to_std.h>
@@ -41,6 +48,9 @@
 #include <seqan/basic/basic_operator.h>
 
 #include <seqan/basic/basic_host.h>
+
+//____________________________________________________________________________
+// iterators
 
 #include <seqan/basic/basic_iterator.h>
 #include <seqan/basic/basic_iterator_base.h>

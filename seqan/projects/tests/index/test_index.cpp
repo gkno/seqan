@@ -1,10 +1,7 @@
+#include <seqan/platform.h>
+
 #include <iostream>
 #include <fstream>
-#include <typeinfo>
-#include <time.h>
-#include <cstdio>
-#include <vector>
-#include <time.h>
 
 //#define SEQAN_DEBUG
 //#define SEQAN_TEST
@@ -27,9 +24,9 @@ void testBuild()
 		typedef StringSet< TText, ConcatDirect<> > TMulti;
 
 		String<char> gen1, gen2, gen3;
-		std::cout << open(gen1, "corpus/NC_000117.txt");
-		std::cout << open(gen2, "corpus/NC_002620.txt");
-		std::cout << open(gen3, "corpus/NC_007429.txt");
+		cout << open(gen1, "corpus/NC_000117.txt");
+		cout << open(gen2, "corpus/NC_002620.txt");
+		cout << open(gen3, "corpus/NC_007429.txt");
 
         Index<TMulti> esa;
 		appendValue(indexText(esa), gen1);
@@ -239,57 +236,6 @@ void testMUMs()
 }
 
 
-void simpleMUMmer()
-{
-		typedef String<char> TText;
-		typedef StringSet< TText, ConcatDirect<> > TMulti;
-		typedef Index<TMulti, Index_ESA<> > TIndex;
-
-		String<char> t[3];
-/*		if (!open(t[0], "corpus/NC_000117.txt") ||
-		    !open(t[1], "corpus/NC_002620.txt") ||
-			!open(t[2], "corpus/NC_007429.txt")) 
-		{
-			cout << "Could not read in all datasets" << endl;
-			return;
-		}
-*/
-
-		t[0] = "fefhalloballo";
-		t[1] = "halloballefser";
-		t[2] = "grballoballo";
-
-
-        TIndex esa;
-		for(int i = 0; i < 3; ++i)
-			appendValue(indexText(esa), t[i]);			// add sequences to multiple index
-
-		Iterator<TIndex, MUMs>::Type it(esa, 20);		// set minimum MUM length to 20
-		String< SAValue<TIndex>::Type > occs;			// temp. string storing the hit positions
-
-		cout << resetiosflags(ios::left);
-		while (!atEnd(it)) 
-		{
-			occs = getOccurences(it);					// gives hit positions (seqNo,seqOfs)
-			orderOccurences(occs);						// order them by seqNo
-			
-			for(unsigned i = 0; i < length(occs); ++i)
-			   	cout << setw(8)
-				     << getValueI2(occs[i])	+ 1			// output them in MUMmer's output format
-					 << "  ";
-
-			cout << setw(8) 
-				 << repLength(it)
-				 << endl;
-
-			cout << "== " << alignment(it) << endl;
-
-			++it;
-		}
-		cout << setiosflags(ios::left) << endl;
-}
-
-
 template <typename TAlgorithmSpec>
 void testFind()
 {
@@ -338,34 +284,39 @@ int main()
 {
 	SEQAN_TREPORT("TEST BEGIN")
 
-	std::cout << "===================================" << ::std::endl;
-	std::cout << "----Basic Suffix Tree iterators----" << ::std::endl;
+	cout << "===================================" << endl;
+	cout << "----Basic Suffix Tree iterators----" << endl;
 	testSTreeIterators();
-//	testIndexCreation();
-//	Main_TestQGram();
+	cout << "===================================" << endl;
+	cout << "----Suffix Array based Finder------" << endl;
+	testFind<ESA_FIND_MLR>();
+	cout << "===================================" << endl;
+	cout << "----Multiple Sequence Index--------" << endl;
+	testMultiIndex();
+	cout << "===================================" << endl;
+	cout << "----MUMs---------------------------" << endl;
+	testMUMs();
+	cout << "===================================" << endl;
+	cout << "----Maximal Repeats----------------" << endl;
+	testMaxRepeats();
+	cout << "===================================" << endl;
+	cout << "----Supermaximal Repeats-----------" << endl;
+	testSuperMaxRepeats<SuperMaxRepeats>();
+	cout << "===================================" << endl;
+	cout << "----Supermaximal Repeats---fast----" << endl;
+	testSuperMaxRepeats<SuperMaxRepeatsFast>();
+	cout << "===================================" << endl;
+
+	cout << endl;
+	cout << "===================================" << endl;
+	cout << "----QGram Index--------------------" << endl;
+	Main_TestQGram();
+	cout << "===================================" << endl;
+	cout << "----SA, LCP, and ChildTab test-----" << endl;
+	testIndexCreation();
+	cout << "===================================" << endl;
 //	testBuild();
 
-	std::cout << "===================================" << ::std::endl;
-	std::cout << "----Suffix Array based Finder------" << ::std::endl;
-	testFind<ESA_FIND_MLR>();
-	std::cout << "===================================" << ::std::endl;
-	std::cout << "----Multiple Sequence Index--------" << ::std::endl;
-	testMultiIndex();
-	std::cout << "===================================" << ::std::endl;
-	std::cout << "----MUMs---------------------------" << ::std::endl;
-	testMUMs();
-	std::cout << "===================================" << ::std::endl;
-	std::cout << "----Maximal Repeats----------------" << ::std::endl;
-	testMaxRepeats();
-	std::cout << "===================================" << ::std::endl;
-	std::cout << "----Supermaximal Repeats-----------" << ::std::endl;
-	testSuperMaxRepeats<SuperMaxRepeats>();
-	std::cout << "===================================" << ::std::endl;
-	std::cout << "----Supermaximal Repeats---fast----" << ::std::endl;
-	testSuperMaxRepeats<SuperMaxRepeatsFast>();
-	std::cout << "===================================" << ::std::endl;
-
-//		simpleMUMmer();	
 	SEQAN_TREPORT("TEST END")
 		return 0;
 }

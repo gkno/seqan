@@ -16,14 +16,12 @@ namespace SEQAN_NAMESPACE_MAIN
     // size is uint32
     template < typename _TFile = File<>,            // default file type
                unsigned _PageSize = 4 * 1024 * 1024,// 1MTypes per default
-			   unsigned _Frames = 2,			    // simultanous frames
-			   bool		_TempByDefault = true >		// open temp. file in default c'tor
+			   unsigned _Frames = 2 >			    // simultanous frames
     struct ExternalConfig {
         typedef _TFile TFile;
         typedef unsigned SizeType;
         enum { PageSize = _PageSize };
         enum { Frames = _Frames };
-		enum { TempByDefault = _TempByDefault };
     };
 
     // the same as ExternalConfig
@@ -34,103 +32,29 @@ namespace SEQAN_NAMESPACE_MAIN
     // uint64 blows up your suffix arrays, lcp-tables, ...
     template < typename _TFile = File<>,            // default file type
                unsigned _PageSize = 1 * 1024 * 1024,// 1MTypes per default
-			   unsigned _Frames = 2,			    // simultanous frames
-			   bool		_TempByDefault = true >		// open temp. file in default c'tor
+			   unsigned _Frames = 2 >			    // simultanous frames
     struct ExternalConfigLarge {
         typedef _TFile TFile;
         typedef typename Size<_TFile>::Type SizeType;
         enum { PageSize = _PageSize };
         enum { Frames = _Frames };
-		enum { TempByDefault = _TempByDefault };
-    };
-
-    template < typename _TFile = File<>,            // default file type
-               unsigned _PageSize = 1 * 1024 * 1024,// 1MTypes per default
-			   unsigned _Frames = 2 >			    // simultanous frames
-    struct ExternalConfigManualOpen {
-        typedef _TFile TFile;
-        typedef typename Size<_TFile>::Type SizeType;
-        enum { PageSize = _PageSize };
-        enum { Frames = _Frames };
-		enum { TempByDefault = false };				// don't open temp. file in default c'tor
     };
 
     // custom size type
     template < typename TSize,
 		       typename _TFile = File<>,            // default file type
                unsigned _PageSize = 1 * 1024 * 1024,// 1MTypes per default
-			   unsigned _Frames = 2,			    // simultanous frames {
-			   bool		_TempByDefault = true >		// open temp. file in default c'tor
+			   unsigned _Frames = 2 >			    // simultanous frames {
     struct ExternalConfigSize {
 		typedef TSize SizeType;
         typedef _TFile TFile;
         enum { PageSize = _PageSize };
         enum { Frames = _Frames };
-		enum { TempByDefault = _TempByDefault };
     };
 
     template < typename TConfig = ExternalConfig<> >
     struct External;
 
-
-	// calculates the smallest power of 2 bigger than i
-	// and returns the exponent
-	template < typename ST >
-	ST ceilPower2(ST i) {
-		ST e = 0;
-		for(ST j = 1; j < i; j = j << 1)
-			++e;
-		return e;
-	}
-
-/*
-	//////////////////////////////////////////////////////////////////////////////
-	// simple vector based page table
-	template < typename T >
-	struct PageTable : public ::std::vector<T>
-	{
-		typedef ::std::vector<T> Base;
-
-		PageMapper(SizeType _maxPages, T _default = 0):
-			Base(_maxPages, _default) {}
-	};
-*/
-
-/*	//////////////////////////////////////////////////////////////////////////////
-	// dynamically growing page table
-	template < typename T,
-			   typename ST,
-			   unsigned _maxPagesBits = 32>
-	struct PageTableDynamic
-	{
-		typedef T	Type;
-		typedef T*	TypePtr;
-		typedef ST	SizeType;
-
-		TypePtr		pageTbl[_maxPagesBits];	// page tables indexed by the exponent (2^32 pages max)
-
-		PageMapper() {
-			memset(pageTbl, 0, sizeof(pageTbl));
-		}
-
-		~PageMapper() {
-			for(unsigned i = 0; i < _maxPageBits; ++i)
-				delete[] pageTbl[i];
-		}
-
-		Type operator[] (SizeType _pageNo) {
-			unsigned e = ceilPower2(_pageNo);
-			if (e < 10) e = 10;					// begin partitioning with entry 4096
-			TypePtr tbl = pageTbl[e];
-			if (!tbl) {
-				tbl = pageTbl[e] = new Type[1 << e];
-				memset(tbl, 0, sizeof(Type) * (1 << e));
-			}
-			if (e) _pageNo -= 1 << (e - 1);
-			return tbl[_pageNo];
-		}
-	};
-*/
 
     //////////////////////////////////////////////////////////////////////////////
 	// random vector iterator
@@ -199,14 +123,14 @@ namespace SEQAN_NAMESPACE_MAIN
 			return *this;
 		};
 		
-		inline reference operator* () {
+		inline reference operator* () const {
 			return (*vector)[offset];
 		}
     
-		inline const_reference operator* () const {
+/*		inline const_reference operator* () const {
 			return (*vector)[offset];
 		}
-    
+*/  
 		inline iterator& operator++ () {
 			++offset; return *this;
 		}
@@ -529,21 +453,21 @@ namespace SEQAN_NAMESPACE_MAIN
             }
 		}
 
-		inline reference operator* () {
+		inline reference operator* () const {
 			if (!begin) validate();
             // synchronize PageFrame dirty flag on dirty false->true change
             if (!dirty) {
-                dirty = true;
+                const_cast<iterator*>(this)->dirty = true;
     			vector->getPage(pageNo).dirty = true;
             }
-			return begin[pageOfs];
+			return const_cast<iterator*>(this)->begin[pageOfs];
 		}
-    
+/*    
 		inline const_reference operator* () const {
 			if (!begin) validate();
 			return begin[pageOfs];
 		}
-    
+*/    
 		inline iterator& operator++ () {
 			if (++pageOfs == _PageSize) {
 				invalidate(1);
@@ -883,8 +807,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	public:
         enum { _PageSize = TConfig::PageSize,
                _Frames   = TConfig::Frames,
-               PageSize  = TConfig::PageSize,
-			   TempByDefault = TConfig::TempByDefault };
+               PageSize  = TConfig::PageSize };
 
 		typedef TValue	                    Type;
         typedef typename TConfig::TFile     TFile;
@@ -903,7 +826,6 @@ namespace SEQAN_NAMESPACE_MAIN
 		SizeType			_size;
         int                 lastDiskPage;       // the last page on disk and in mem 
         unsigned            lastDiskPageSize;   // can be smaller than PageSize
-        bool keepFirst;                         // true .. try to keep the lowest page frames
 
     public:
 
@@ -940,25 +862,18 @@ namespace SEQAN_NAMESPACE_MAIN
             lastDiskPage = 0;       // actually, these values need not to be initialized
             lastDiskPageSize = 0;   // here, because of "write before read"
 
-			if (TempByDefault)
-				if (!openTemp())
-					::std::cerr << "External String couldn't open temporary file" << ::std::endl;
-
 			resize(__size);
-            keepFirst = false;
         }
 
 		String(TFile &_file)
         {
 			open(_file);
-            keepFirst = false;
         }
 
-		String(const char *fileName, int openMode = OPEN_RDWR + OPEN_CREATE | OPEN_APPEND):
+		String(const char *fileName, int openMode = DefaultOpenMode<TFile>::VALUE):
 			file(NULL)
         {
 			open(fileName, openMode);
-            keepFirst = false;
         }
 
 		~String() {
@@ -969,7 +884,6 @@ namespace SEQAN_NAMESPACE_MAIN
 		// vector interface
 
         inline void clear() {
-            keepFirst = false;
             pager.clear();
             resize(0);
         }
@@ -1075,6 +989,16 @@ namespace SEQAN_NAMESPACE_MAIN
 		//////////////////////////////////////////////////////////////////////////////
 		// swapping interface
 
+		// when a page has to be swapped out and file is not open, open a temporary file
+		inline void _ensureFileIsOpen() {
+			if (!file) {
+				_temporary = true;
+				if (!(_ownFile = ::seqan::openTemp(file)))
+					::std::cerr << "External String couldn't open temporary file" << ::std::endl;
+			}
+		}
+
+		// for debugging
         void _dumpCache() {
             for(int i = 0; i < cache.size(); ++i) {
                 PageFrameRef pf = cache[i];
@@ -1092,12 +1016,11 @@ namespace SEQAN_NAMESPACE_MAIN
             ::std::cerr << ::std::endl;
         }
 
-
         // return a priority for a page frame (the higher is more persistent)
         inline typename PageFrame::Priority getPriority(int pageNo) const {
-            if (keepFirst && pageNo < (int)(cache.size()) - 10) // save 1 for random access
+/*            if (keepFirst && pageNo < (int)(cache.size()) - 10) // save 1 for random access
                 return PageFrame::PERMANENT_LEVEL;
-            else
+            else*/
                 return PageFrame::NORMAL_LEVEL;
         }
 
@@ -1109,7 +1032,8 @@ namespace SEQAN_NAMESPACE_MAIN
                 if (pf.priority > PageFrame::NORMAL_LEVEL && pf.priority <= PageFrame::ITERATOR_LEVEL)
 					cache.upgrade(pf, PageFrame::PREFETCH_LEVEL);
 
-                if (pf.pageNo != (int)(_size / (SizeType)_PageSize))
+				_ensureFileIsOpen();
+				if (pf.pageNo != (int)(_size / (SizeType)_PageSize))
     				writePage(pf, pf.pageNo, file);
                 else {
                     lastDiskPage = _size / _PageSize;
@@ -1132,6 +1056,7 @@ namespace SEQAN_NAMESPACE_MAIN
             }
 
 			if (pf.dirty) {                                 // write if dirty
+				_ensureFileIsOpen();
                 if (pf.pageNo != (int)(_size / (SizeType)_PageSize)) {
     				writePage(pf, pf.pageNo, file);
                     if (pf.pageNo >= lastDiskPage)
@@ -1272,13 +1197,13 @@ namespace SEQAN_NAMESPACE_MAIN
             }
 		}
 		
-	    template < typename _TDefault >
-		inline static int _prefetchIffAsync(int prefetchPages, _TDefault const &) {
+	    template < typename T >
+		inline static int _prefetchIffAsync(int prefetchPages, T const &) {
 			return 0;
 		}
 		
-	    template < typename _TConfig >
-		inline static int _prefetchIffAsync(int prefetchPages, File<Async<_TConfig> > const &) {
+		template < typename TSpec >
+		inline static int _prefetchIffAsync(int prefetchPages, File<Async<TSpec> > const &) {
 			return prefetchPages;
 		}
 
@@ -1338,9 +1263,9 @@ namespace SEQAN_NAMESPACE_MAIN
             }
 		}
 
-		inline bool open(const char *fileName, int openMode = OPEN_RDWR + OPEN_CREATE | OPEN_APPEND) {
+		inline bool open(const char *fileName, int openMode = DefaultOpenMode<TFile>::VALUE) {
             _temporary = false;
-			if (_ownFile = SEQAN_NAMESPACE_MAIN::open(file, fileName, openMode))
+			if (_ownFile = ::seqan::open(file, fileName, openMode))
                 _size = size(file) / sizeof(TValue);
             else
                 _size = 0;
@@ -1369,7 +1294,7 @@ namespace SEQAN_NAMESPACE_MAIN
             lastDiskPage = 0;
             lastDiskPageSize = 0;
 			pager.clear();
-			return _ownFile = SEQAN_NAMESPACE_MAIN::openTemp(file);
+			return _ownFile = ::seqan::openTemp(file);
 		}
 
 		// close associated file
@@ -1380,7 +1305,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			pager.clear();
 			if (_ownFile) {
 				_ownFile = false;
-				return SEQAN_NAMESPACE_MAIN::close(file);
+				return ::seqan::close(file);
 			} else
 				return true;
 		}
@@ -1429,14 +1354,15 @@ namespace SEQAN_NAMESPACE_MAIN
     //////////////////////////////////////////////////////////////////////////////
 	// handler that manages a simple memory buffer
 /*    template < typename TValue,
-               typename TConfig >
-	struct BufferHandler< Pipe< String<TValue, External<TConfig> >, Source<ContainerSpec> > >
+               typename TConfig,
+			   typename TSpec >
+	struct BufferHandler< Pipe< String<TValue, External<TConfig> >, Source<TSpec> > >
     {
         typedef TValue                                                      Type;
         typedef typename Size< String<TValue, External<TConfig> > >::Type   SizeType;
         typedef SimpleBuffer<TValue, SizeType>                              SimpleBuffer;
 
-        typedef Pipe< String<TValue, External<TConfig> >, Source<ContainerSpec> > Pipe;
+        typedef Pipe< String<TValue, External<TConfig> >, Source<TSpec> > Pipe;
 
 		Pipe			&pipe;
         int             pageNo;
@@ -1458,14 +1384,15 @@ namespace SEQAN_NAMESPACE_MAIN
     };*/
 
 	template < typename TValue,
-               typename TConfig >
-	struct BufferHandler< Pipe< String<TValue, External<TConfig> >, Source<ContainerSpec> > >
+               typename TConfig,
+			   typename TSpec>
+	struct BufferHandler< Pipe< String<TValue, External<TConfig> >, Source<TSpec> > >
     {
         typedef TValue                                                      Type;
         typedef typename Size< String<TValue, External<TConfig> > >::Type   SizeType;
         typedef SimpleBuffer<TValue>										Buffer;
 
-        typedef Pipe< String<TValue, External<TConfig> >, Source<ContainerSpec> >   Pipe;
+        typedef Pipe< String<TValue, External<TConfig> >, Source<TSpec> >			Pipe;
         typedef typename String<TValue, External<TConfig> >::VectorFwdConstIterator ISource;
 		typedef typename Iterator<Buffer>::Type										ITarget;
 
@@ -1508,8 +1435,8 @@ namespace SEQAN_NAMESPACE_MAIN
         inline void cancel() { source = ISource(); freePage(buffer, *this); }
     };
 
-    template < typename TValue, typename TConfig >
-    struct Value< BufferHandler< Pipe< String<TValue, External<TConfig> >, Source<ContainerSpec> > > > {
+    template < typename TValue, typename TConfig, typename TSpec >
+    struct Value< BufferHandler< Pipe< String<TValue, External<TConfig> >, Source<TSpec> > > > {
         typedef SimpleBuffer< TValue > Type;
     };
 
@@ -1622,22 +1549,32 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < typename TVector >
     struct Difference< VectorFwdConstIterator<TVector> > { typedef typename Difference<TVector>::Type Type; };
 
+//____________________________________________________________________________
+
     template < typename TValue, typename TConfig >
     inline void 
     clear(String<TValue, External<TConfig> > &me) {
         me.clear();
     }
+//____________________________________________________________________________
 
     template < typename TValue, typename TConfig >
     inline void 
     flush(String<TValue, External<TConfig> > &me) {
         me.flush();
     }
+//____________________________________________________________________________
 
 	template < typename TValue, typename TConfig >
     inline bool 
-    open(String<TValue, External<TConfig> > &me, const char *fileName, int openMode = OPEN_RDWR + OPEN_CREATE | OPEN_APPEND) {
+    open(String<TValue, External<TConfig> > &me, const char *fileName, int openMode) {
 		return me.open(fileName, openMode);
+    }
+
+	template < typename TValue, typename TConfig >
+    inline bool 
+    open(String<TValue, External<TConfig> > &me, const char *fileName) {
+		return me.open(fileName);
     }
 
 	template < typename TValue, typename TConfig >
@@ -1649,12 +1586,13 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < typename TValue, typename TConfig >
     inline bool 
     openTemp(String<TValue, External<TConfig> > &me) {
-		return me.open();
+		return me.openTemp();
     }
+//____________________________________________________________________________
 
 	template < typename TValue, typename TConfig >
     inline bool 
-    save(String<TValue, External<TConfig> > &me, const char *fileName, int openMode = OPEN_RDWR + OPEN_CREATE | OPEN_APPEND) {
+    save(String<TValue, External<TConfig> > const &me, const char *fileName, int openMode) {
 		// External Strings are persistent, thus there is no need to save them
 		//ExtStringsDontNeedToBeSaved error;
 		return true;
@@ -1662,67 +1600,49 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < typename TValue, typename TConfig >
     inline bool 
-    save(String<TValue, External<TConfig> > &me, typename TConfig::TFile file) {
+    save(String<TValue, External<TConfig> > const &me, const char *fileName) {
 		// External Strings are persistent, thus there is no need to save them
 		//ExtStringsDontNeedToBeSaved error;
 		return true;
 	}
 
-    template < typename TValue, typename TConfig >
+	template < typename TValue, typename TConfig >
+    inline bool 
+    save(String<TValue, External<TConfig> > const &me, typename TConfig::TFile file) {
+		// External Strings are persistent, thus there is no need to save them
+		//ExtStringsDontNeedToBeSaved error;
+		return true;
+	}
+//____________________________________________________________________________
+
+	template < typename TValue, typename TConfig >
     inline bool 
     close(String<TValue, External<TConfig> > &me) {
 		return me.close();
     }
-
-
-
-    template < typename TValue, typename TConfig >
-    inline typename Size< String<TValue, External<TConfig> > >::Type
-    size(String<TValue, External<TConfig> > &me)
-    {
-        return me.length();
-    }
+//____________________________________________________________________________
 
     template < typename TValue, typename TConfig >
     inline typename Size< String<TValue, External<TConfig> > >::Type
-    length(String<TValue, External<TConfig> > &me)
+    length(String<TValue, External<TConfig> > const &me)
     {
         return me.length();
     }
-
-    template < typename TValue, typename TConfig, typename TSize >
-    inline typename Size< String<TValue, External<TConfig> > >::Type
-    resize(
-	    String<TValue, External<TConfig> > &me,
-	    TSize new_length)
-    {
-	    me.resize(new_length);
-        return me.length();
-    }
+//____________________________________________________________________________
 
     template < typename TValue, typename TConfig, typename TSize, typename TExpand >
     inline typename Size< String<TValue, External<TConfig> > >::Type
     resize(
 	    String<TValue, External<TConfig> > &me,
 		TSize new_length,
-		Tag<TExpand> const tag)
+		Tag<TExpand> const)
 	{
-		return resize(me, new_length);
+		me.resize(new_length);
+		return length(me);
 	}
+//____________________________________________________________________________
 
-/*
-    template < typename TValue, typename TConfig, typename TSize>
-    inline typename Size< String<TValue, External<TConfig> > >::Type
-    resize(
-	    String<TValue, External<TConfig> > &me,
-	    TSize new_length,
-		TagLimit)
-    {
-	    me.resize(new_length);
-        return me.length();
-    }
-*/
-    template < typename TValue, typename TConfig, typename TSpec >
+	template < typename TValue, typename TConfig, typename TSpec >
     inline typename Iterator<String<TValue, External<TConfig> >, Tag<TSpec> const>::Type
     begin(String<TValue, External<TConfig> > &me, Tag<TSpec> const) {
 		return me.begin();
@@ -1739,19 +1659,29 @@ namespace SEQAN_NAMESPACE_MAIN
     end(String<TValue, External<TConfig> > &me, Tag<TSpec> const) {
 		return me.end();
     }
+//____________________________________________________________________________
 
     template < typename TValue, typename TConfig, typename TSpec >
     inline typename Iterator<String<TValue, External<TConfig> > const, Tag<TSpec> const>::Type
     end(String<TValue, External<TConfig> > const &me, Tag<TSpec> const) {
 		return me.end();
     }
+//____________________________________________________________________________
 
     template < typename TValue, typename TConfig, typename TPos >
     inline typename Reference<String<TValue, External<TConfig> > >::Type 
-    at(String<TValue, External<TConfig> > &me, TPos pos)
+    value(String<TValue, External<TConfig> > &me, TPos pos)
     {
 	    return me[pos];
     }
+
+    template < typename TValue, typename TConfig, typename TPos >
+    inline typename Reference<String<TValue, External<TConfig> > const>::Type 
+    value(String<TValue, External<TConfig> > const &me, TPos pos)
+    {
+	    return me[pos];
+    }
+//____________________________________________________________________________
 
     template < typename TValue, typename TConfig >
     inline void
@@ -1782,12 +1712,18 @@ namespace SEQAN_NAMESPACE_MAIN
 		return out;
 	}
 */
-    // sequence -> external string
+//____________________________________________________________________________
+// sequence -> external string
+
     template < typename TValue,
                typename TConfig,
-               typename TSource >
-    inline void assign(String<TValue, External<TConfig> > &target, TSource const &source) {
-
+               typename TSource,
+			   typename TExpand >
+    inline void assign(
+		String<TValue, External<TConfig> > &target, 
+		TSource const &source, 
+		Tag<TExpand> const) 
+	{
         typedef typename Iterator<TSource const>::Type                          ISource;
         typedef typename String<TValue, External<TConfig> >::VectorFwdIterator  ITarget;
 
@@ -1803,8 +1739,9 @@ namespace SEQAN_NAMESPACE_MAIN
 			++it_source;
 		}
     }
+//____________________________________________________________________________
 
-    template < typename TValue, typename TConfig >
+	template < typename TValue, typename TConfig >
     inline void const * 
     id(String<TValue, External<TConfig> > const &me)
     {

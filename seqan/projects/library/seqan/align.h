@@ -1,8 +1,13 @@
 #ifndef SEQAN_HEADER_ALIGN_H
 #define SEQAN_HEADER_ALIGN_H
 
+//____________________________________________________________________________
+// prerequisites
+
 #include <seqan/sequence.h>
 #include <seqan/score.h>
+
+//____________________________________________________________________________
 
 #ifdef SEQAN_SWITCH_USE_FORWARDS
 #include <seqan/align/align_generated_forwards.h>

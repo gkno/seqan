@@ -24,62 +24,41 @@ namespace SEQAN_NAMESPACE_MAIN
 	//#define SEQAN_DIRECTIO
 
 
-	template <typename TSpec>
-    class File;
-
-/**
-.Spec.SimpleConfig:
-..cat:Files
-..general:Spec.Sync
-..summary:Configuration of Sync File.
-..signature:File< Sync< SimpleConfig<TValue> > >
-..param.TValue:Optional specification of the elements saved in the file.
-...default:$unsigned char$
-..remarks:In fact SeqAn files are typeless and need no $TValue$ specification. A $TValue$ is only needed when calling @Function.read@ or @Function.write@ and automatically determined by the call parameters, hence this configuration is actually needless.
-*/
-    template < typename T = unsigned char >
-    struct SimpleConfig;
-
 /**
 .Spec.Sync:
 ..cat:Files
 ..general:Class.File
 ..summary:File structure supporting synchronous input/output access.
-..signature:File<Sync<TConfig> >
-..param.TConfig:Optional configuration (unused).
-...default:$SimpleConfig<>$, see @Spec.SimpleConfig@.
+..signature:File<Sync<> >
 ..remarks:This class suports pseudo-asynchronous access methods, i.e. the methods to initiate a I/O request return after request completion.
 */
 
-    template < typename TConfig = SimpleConfig<> >
+	template <typename TSpec = void>
     struct Sync;
-
-/**
-.Spec.AsyncConfig:
-..cat:Files
-..general:Spec.Async
-..summary:Configuration of Async File.
-..signature:File<Async< AsyncConfig<TValue> > >
-..param.TValue:Optional specification of the elements saved in the file.
-...default:$unsigned char$
-..remarks:In fact SeqAn files are typeless and need no $TValue$ specification.
-A $TValue$ is only needed when calling @Function.read@ or @Function.write@ and automatically determined by the call parameters, hence this configuration is actually needless.
-*/
-    template < typename T = unsigned char >
-    struct AsyncConfig;
 
 /**
 .Spec.Async:
 ..cat:Files
 ..general:Class.File
 ..summary:File structure supporting synchronous and asynchronous input/output access.
-..signature:File<Async<TConfig> >
-..param.TConfig:Optional configuration (unused).
-...default:$AsyncConfig<>$, see @Spec.AsyncConfig@.
+..signature:File<Async<> >
 */
 
-    template < typename TConfig = AsyncConfig<> >
+	template <typename TSpec = void>
     struct Async;
+
+
+/**
+.Class.File:
+..cat:Input/Output
+..summary:Represents a file.
+..signature:File<TSpec>
+..param.TSpec:The specializing type.
+...default:$Async<>$, see @Spec.Async@.
+*/
+
+	template <typename TSpec = Async<> >
+    class File;
 
 /**
 .Spec.Chained:
@@ -90,14 +69,14 @@ A $TValue$ is only needed when calling @Function.read@ or @Function.write@ and a
 ..param.FileSize:The maximal split file size in byte.
 ...default:2^31-1 (~2GB)
 ..param.TFile:Underlying @Class.File@ type.
-...default:$File<Async<> >$, see @Spec.Async@.
+...default:$File<>$, see @Class.File@.
 ..remarks:This file type uses a chain of $TFile$ files, whose file sizes are at most $FileSize$ bytes.
 Chained Files should be used for file systems or $TFile$ types that don't support large files (e.g. FAT32, C-style FILE*).
 ..remarks:The chain can be used as if it were one contiguous file.
 */
 
 	// chained file's default filesize is 2gb-1byte (fat16 filesize limitation)
-	template < __int64 _FileSize = ~(__int64(1) << 63), typename TFile = File< Async<> > >
+	template < __int64 _FileSize = ~(__int64(1) << 63), typename TFile = File<> >
 	struct Chained;
 
 /**
@@ -109,25 +88,13 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 ..param.FileCount:The number of files used for striping.
 ...default:2
 ..param.TFile:Underlying @Class.File@ type.
-...default:$File<Async<> >$, see @Spec.Async@.
+...default:$File<>$, see @Class.File@.
 ..remarks:This file type uses a software striping without redundance (see RAID0) to accelerate I/O access when using more than one disks.
 ..remarks:Striped files should only be used in @Class.Pool@s or external Strings as they only support block operations and no random accesses.
 */
 
-	template < unsigned _FileCount = 2, typename TFile = File< Async<> > >
+	template < unsigned _FileCount = 2, typename TFile = File<> >
 	struct Striped;
-
-/**
-.Class.File:
-..cat:Input/Output
-..summary:Represents a file.
-..signature:File<TSpec>
-..param.TSpec:The specializing type.
-...default:$Async<>$, see @Spec.Async@.
-*/
-
-    template <typename TSpec = Async<> >
-    class File;
 
     enum FileOpenMode {
         OPEN_RDONLY     = 1,
@@ -139,6 +106,16 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
         OPEN_ASYNC      = 16,
 		OPEN_TEMPORARY	= 32
     };
+
+	template <typename T>
+	struct DefaultOpenMode {
+		enum { VALUE = OPEN_RDWR + OPEN_CREATE | OPEN_APPEND };
+	};
+
+	template <typename T>
+	struct DefaultOpenTempMode {
+		enum { VALUE = OPEN_RDWR + OPEN_CREATE };
+	};
 
     enum FileSeekMode {
         SEEK_BEGIN   = 0,
@@ -230,7 +207,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 
     template < typename TSpec >
     inline bool open(File<TSpec> &me, const char *fileName) {
-        return open(me, fileName, OPEN_RDWR + OPEN_CREATE | OPEN_APPEND);
+		return open(me, fileName, DefaultOpenMode<File<TSpec> >::VALUE);
     }
 
 /**

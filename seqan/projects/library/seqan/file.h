@@ -1,16 +1,19 @@
 #ifndef SEQAN_HEADER_FILE_H
 #define SEQAN_HEADER_FILE_H
 
-// should be set before anything else
-#define _FILE_OFFSET_BITS 64
+//____________________________________________________________________________
+// prerequisites
 
+#include <seqan/sequence.h>
+
+#include <iostream>
 #include <climits>
-
 #include <cstdio>
 #include <list>
 #include <vector>
 
-#include <seqan/sequence.h>
+//____________________________________________________________________________
+// file formats
 
 #include <seqan/file/file_forwards.h>
 
@@ -34,6 +37,8 @@
 
 #include <seqan/file/file_format_guess.h>
 
+//____________________________________________________________________________
+// files
 
 #include <seqan/file/file_base.h>
 #include <seqan/file/file_cstyle.h>
@@ -43,6 +48,9 @@
 
 #include <seqan/pipe/pipe_base.h>
 #include <seqan/pipe/pipe_source.h>
+
+//____________________________________________________________________________
+// external string
 
 #include <seqan/file/file_page.h>
 #include <seqan/file/file_page_raid0.h>

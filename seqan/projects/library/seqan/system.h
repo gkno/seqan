@@ -1,6 +1,11 @@
 #ifndef SEQAN_HEADER_SYSTEM_H
 #define SEQAN_HEADER_SYSTEM_H
 
+//____________________________________________________________________________
+// prerequisites
+
+#include <seqan/platform.h>
+
 #include <cstdio>
 #include <ctime>
 #include <string>
@@ -21,11 +26,17 @@
 #include <seqan/system/file_manual_forwards.h>
 #endif
 
+//____________________________________________________________________________
+// multi-threading
+
 #include <seqan/system/system_base.h>
 #include <seqan/system/system_mutex.h>
 #include <seqan/system/system_sema.h>
 #include <seqan/system/system_event.h>
 #include <seqan/system/system_thread.h>
+
+//____________________________________________________________________________
+// synchronous and asynchronous files
 
 #include <seqan/system/file_sync.h>
 #include <seqan/system/file_async.h>

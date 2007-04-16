@@ -222,6 +222,50 @@ SEQAN_CHECKPOINT
 }
 
 //////////////////////////////////////////////////////////////////////////////
+// operator < / >
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TContainer>
+inline bool 
+operator < (Iter<TContainer, PositionIterator> const & left,
+			Iter<TContainer, PositionIterator> const & right)
+{
+SEQAN_CHECKPOINT
+	return position(left) < position(right);
+}
+
+template <typename TContainer>
+inline bool 
+operator > (Iter<TContainer, PositionIterator> const & left,
+			Iter<TContainer, PositionIterator> const & right)
+{
+SEQAN_CHECKPOINT
+	return position(left) > position(right);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// operator <= / >=
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TContainer>
+inline bool 
+operator <= (Iter<TContainer, PositionIterator> const & left,
+			 Iter<TContainer, PositionIterator> const & right)
+{
+SEQAN_CHECKPOINT
+	return position(left) <= position(right);
+}
+
+template <typename TContainer>
+inline bool 
+operator >= (Iter<TContainer, PositionIterator> const & left,
+			 Iter<TContainer, PositionIterator> const & right)
+{
+SEQAN_CHECKPOINT
+	return position(left) >= position(right);
+}
+
+//////////////////////////////////////////////////////////////////////////////
 // goNext
 //////////////////////////////////////////////////////////////////////////////
 

@@ -27,7 +27,7 @@ namespace SEQAN_NAMESPACE_MAIN
     struct _EchoerClearWorker {
         template <typename Arg>
         static inline void body(Arg &arg, unsigned I) {
-            arg.i2[I] = 0;
+			arg.i2[I] = typename Value< typename Value<Arg, 2>::Type >::Type ();
         }
     };
     

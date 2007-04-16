@@ -216,7 +216,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template < typename TFileArray >
     inline bool _openTempFArray(TFileArray &me) {
-		return _openTempFArray(me, OPEN_RDWR + OPEN_CREATE);
+		return _openTempFArray(me, DefaultOpenTempMode<TFileArray>::VALUE);
 	}
 
     template < typename TFileArray >

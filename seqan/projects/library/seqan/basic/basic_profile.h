@@ -413,7 +413,7 @@
 
 
 
-    inline void _proSet(int valNum, _proFloat value) {
+    inline void _proSet(_proValueIndex valNum, _proFloat value) {
         _proFloat now = sysTime();
         _proData<>::_proLastUpdate[valNum] = now;
         if (_proData<>::_proValue[valNum] < value) {
@@ -424,7 +424,7 @@
         _proSignalDumpTest(now);
     }
 
-    inline void _proAdd(int valNum, _proFloat value) {
+    inline void _proAdd(_proValueIndex valNum, _proFloat value) {
         _proFloat now = sysTime();
         _proData<>::_proValue[valNum] += value;
         _proData<>::_proLastUpdate[valNum] = now;
@@ -433,7 +433,7 @@
         _proSignalDumpTest(now);
     }
 
-    inline void _proSub(int valNum, _proFloat value) {
+    inline void _proSub(_proValueIndex valNum, _proFloat value) {
         _proFloat now = sysTime();
         _proData<>::_proValue[valNum] -= value;
         _proData<>::_proLastUpdate[valNum] = now;

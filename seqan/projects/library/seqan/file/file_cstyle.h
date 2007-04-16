@@ -78,7 +78,7 @@ namespace SEQAN_NAMESPACE_MAIN
     }
 
     inline bool open(FILE* &me, const char *fileName) {
-		return open(me, fileName, OPEN_RDWR + OPEN_CREATE | OPEN_APPEND);
+		return open(me, fileName, DefaultOpenMode<FILE*>::VALUE);
 	}
 
     inline bool openTemp(FILE* &me) {

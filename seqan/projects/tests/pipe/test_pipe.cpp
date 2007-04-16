@@ -6,7 +6,7 @@
 #include <vector>
 
 #define SEQAN_DEBUG
-#define SEQAN_TEST
+//#define SEQAN_TEST
 
 #include <seqan/pipe.h>
 #include "test_pipe.h"
@@ -226,8 +226,8 @@ using namespace seqan;
 		bool result = true;
         time_t start, pool, mapperPart, mapper, sorter;
         time(&start);
-
 //____________________________________________________________________________
+
 		::std::cout << "Testing External Vector ... " << ::std::endl;
 		if (testExternalString(maxSize) || (result = false)) {
 			::std::cout << "OK.";
@@ -235,6 +235,7 @@ using namespace seqan;
 			::std::cout << "FAILED.";
 		::std::cout << ::std::endl;
 //____________________________________________________________________________
+
 		::std::cout << "Testing Simple Pool ... " << ::std::endl;
 		if (testPool(maxSize) || (result = false)) {
 			::std::cout << "OK.";
@@ -243,8 +244,8 @@ using namespace seqan;
 
 		time(&pool);
 		::std::cout << " " << (pool - start) << " seconds" << ::std::endl;
-
 //____________________________________________________________________________
+
 		::std::cout << "Testing Mapper ... " << ::std::endl;
 		if (testMapper(maxSize) || (result = false)) {
 			::std::cout << "OK.";
@@ -253,8 +254,8 @@ using namespace seqan;
 
 		time(&mapper);
 		::std::cout << " " << (mapper - pool) << " seconds" << ::std::endl;
-
 //____________________________________________________________________________
+
 		::std::cout << "Testing partially filled Mapper ... " << ::std::endl;
 		if (testPartiallyFilledMapper(maxSize) || (result = false)) {
 			::std::cout << "OK.";
@@ -263,8 +264,8 @@ using namespace seqan;
 
         time(&mapperPart);
 		::std::cout << " " << (mapperPart - mapper) << " seconds" << ::std::endl;
-
 //____________________________________________________________________________
+
 		::std::cout << "Testing Sorter ... " << ::std::endl;
 		if (testSorter(maxSize) || (result = false)) {
 			::std::cout << "OK.";
@@ -273,6 +274,7 @@ using namespace seqan;
 
         time(&sorter);
 		::std::cout << " " << (sorter - mapperPart) << " seconds" << ::std::endl;
+//____________________________________________________________________________
 
 		return result;
 	}
@@ -281,13 +283,13 @@ using namespace seqan;
 
 int main() 
 {
-	SEQAN_TREPORT("TEST BEGIN")
+//	SEQAN_TREPORT("TEST BEGIN")
 
 	testContainers();
 
-	debug::verifyCheckpoints("projects/library/seqan/pipe/pool_base.h");
+//	debug::verifyCheckpoints("projects/library/seqan/pipe/pool_base.h");
 
-	SEQAN_TREPORT("TEST END")
+//	SEQAN_TREPORT("TEST END")
 
 	return 0;
 }

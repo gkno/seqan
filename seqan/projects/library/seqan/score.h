@@ -6,7 +6,6 @@
 #endif
 
 #include <seqan/score/score_base.h>
-
 #include <seqan/score/score_simple.h>
 
 #endif //#ifndef SEQAN_HEADER_...

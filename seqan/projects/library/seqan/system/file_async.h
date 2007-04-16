@@ -14,13 +14,9 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 
-    //////////////////////////////////////////////////////////////////////////////
-    // interface for typed files - deprecated
-//     template < typename T = unsigned char >
-//     struct AsyncConfig;
-// 
-//     template < typename TConfig = AsyncConfig<> >
-//     struct Async;
+ 
+	template <typename TSpec /* = void */>
+	struct Async;
 
 
 #ifdef PLATFORM_WINDOWS
@@ -28,57 +24,23 @@ namespace SEQAN_NAMESPACE_MAIN
 
     static DWORD _transferedBytes;  // for reporting
 
-    template < typename TConfig >
-	class File<Async<TConfig> >
+	template <typename TSpec>
+	class File<Async<TSpec> >
     {
-
     public:
 
         typedef LONGLONG    FilePtr;
         typedef ULONGLONG   SizeType;
         typedef DWORD       _SizeType;
         typedef HANDLE      Handle;
-//        typedef IOQueue     Queue;
 
-//        CountedPtr<Queue>   queueHolder;
-//        Queue*              queue;
-        Handle              hFile, hFileAsync;
-//        FilePtr             position;
-//        DWORD               aligning;
+		Handle              hFile, hFileAsync;
         bool                noBuffering;
 
         File(void *dummy = NULL): // to be compatible with the FILE*(NULL) constructor
             hFile(INVALID_HANDLE_VALUE) {}
 
-/*        File(Queue *_queue, char const *fileName = NULL, int openMode = OPEN_RDWR + OPEN_CREATE | OPEN_APPEND):
-            queue(_queue),
-            hFile(INVALID_HANDLE_VALUE),
-            position(0)
-        {
-            if (fileName)
-                open(fileName, openMode);
-            else
-                openTemp();
-        }
-
-        File(char const *fileName = NULL, int openMode = OPEN_RDWR + OPEN_CREATE | OPEN_APPEND):
-//            queueHolder(new Queue),
-            hFile(INVALID_HANDLE_VALUE),
-            position(0)
-        {
-//            queue = queueHolder;
-            if (fileName)
-                open(fileName, openMode);
-            else
-                openTemp();
-        }
-*/
-
-        ~File() {
-//            close();
-        }
-
-        bool open(char const *fileName, int openMode = OPEN_RDWR + OPEN_CREATE | OPEN_APPEND) {
+        bool open(char const *fileName, int openMode = DefaultOpenMode<File>::VALUE) {
 			SEQAN_PROADD(SEQAN_PROOPENFILES, 1);
             noBuffering = getExtraFlags(openMode | OPEN_ASYNC) & (FILE_FLAG_NO_BUFFERING | FILE_FLAG_OVERLAPPED);
             hFileAsync = CreateFile(fileName,
@@ -118,10 +80,10 @@ namespace SEQAN_NAMESPACE_MAIN
             return true;
         }
 
-        bool openTemp(int openMode = OPEN_RDWR + OPEN_CREATE) {
+        bool openTemp(int openMode = DefaultOpenTempMode<File>::VALUE) {
             char szTempName[MAX_PATH];
 #ifdef SEQAN_DEFAULT_TMPDIR
-            char szTempPath[MAX_PATH] = SEQAN_DEFAULT_TMPDIR;
+            static const char szTempPath[MAX_PATH] = SEQAN_DEFAULT_TMPDIR;
 #else
             char szTempPath[MAX_PATH];
             if (!GetTempPath(MAX_PATH, szTempPath)) {
@@ -255,55 +217,50 @@ namespace SEQAN_NAMESPACE_MAIN
         Event       xmitDone;
     };
 
-    template < typename TConfig >
-    struct aRequest<File<Async<TConfig> > >
+	template <typename TSpec>
+    struct aRequest<File<Async<TSpec> > >
     {
         typedef aiocb_win32 Type;
     };
 /*
-    template < typename TConfig >
-    struct aEvent<File<Async<TConfig> > >
+	template <typename TSpec>
+    struct aEvent<File<Async<TSpec> > >
     {
         typedef Event Type;
     };
 
 
-    template < typename TConfig >
-    struct aQueue<File<Async<TConfig> > >
+	template <typename TSpec>
+    struct aQueue<File<Async<TSpec> > >
     {
         typedef IOQueue Type;
     };
 
-    template < typename TConfig >
-    struct aHint<File<Async<TConfig> > >
+	template <typename TSpec>
+    struct aHint<File<Async<TSpec> > >
     {
-        typedef typename aQueue<File<Async<TConfig> > >::Type::aHint Type;
+        typedef typename aQueue<File<Async<TSpec> > >::Type::aHint Type;
     };
 
-    template < typename TConfig >
-    struct aCallback<File<Async<TConfig> > >
+	template <typename TSpec>
+    struct aCallback<File<Async<TSpec> > >
     {
-        typedef typename aQueue<File<Async<TConfig> > >::Type::aCallback Type;
+        typedef typename aQueue<File<Async<TSpec> > >::Type::aCallback Type;
     };*/
 
 
-    template < typename TConfig >
-    inline typename Size<File<Async<TConfig> > >::Type size(File<Async<TConfig> > &me) {
+	template <typename TSpec>
+    inline typename Size<File<Async<TSpec> > >::Type size(File<Async<TSpec> > &me) {
         return me.size();
     }
 
-    template < typename TConfig >
-    inline bool setEOF(File<Async<TConfig> > &me) {
+	template <typename TSpec>
+    inline bool setEOF(File<Async<TSpec> > &me) {
         return me.setEOF();
     }
 
-    template < typename TConfig >
-    inline void reopen(File<Async<TConfig> > & me, int openMode) {
-        me.reopen(openMode);
-    }
-
-    template < typename TConfig >
-    inline unsigned sectorSize(File<Async<TConfig> > const &me) {
+	template <typename TSpec>
+    inline unsigned sectorSize(File<Async<TSpec> > const &me) {
         DWORD SpC, nofC, tnoC, aligning;
         if (GetDiskFreeSpace(NULL, &SpC, &aligning, &nofC, &tnoC) == 0)  {
             ::std::cerr << "Error " << GetLastError() << " while querying cluster size" << ::std::endl;
@@ -313,8 +270,8 @@ namespace SEQAN_NAMESPACE_MAIN
     }
 
 
-    template < typename TConfig, typename TValue, typename TSize, typename TPos >
-    inline bool areadAt(File<Async<TConfig> > & me, TValue *memPtr, TSize const count, TPos const fileOfs,
+    template < typename TSpec, typename TValue, typename TSize, typename TPos >
+    inline bool areadAt(File<Async<TSpec> > & me, TValue *memPtr, TSize const count, TPos const fileOfs,
         aiocb_win32 &request)
     {
         SEQAN_PROTIMESTART(tw);
@@ -346,8 +303,8 @@ namespace SEQAN_NAMESPACE_MAIN
         return false;
     }
     
-    template < typename TConfig, typename TValue, typename TSize, typename TPos >
-    inline bool awriteAt(File<Async<TConfig> > & me, TValue const *memPtr, TSize const count, TPos const fileOfs,
+    template < typename TSpec, typename TValue, typename TSize, typename TPos >
+    inline bool awriteAt(File<Async<TSpec> > & me, TValue const *memPtr, TSize const count, TPos const fileOfs,
         aiocb_win32 &request)
     {
         SEQAN_PROTIMESTART(tw);
@@ -412,35 +369,35 @@ namespace SEQAN_NAMESPACE_MAIN
         return count;
 	}
 
-    template < typename TConfig >
-    inline bool cancel(File<Async<TConfig> > & me, aiocb_win32 const &request) {
-        return CancelIo(me.handleAsync);
+	template <typename TSpec>
+    inline bool cancel(File<Async<TSpec> > & me, aiocb_win32 const &request) {
+        return CancelIo(me.hFileAsync);
     }
 
-    template < typename TConfig >
-    inline bool flush(File<Async<TConfig> > & me) {
+	template <typename TSpec>
+    inline bool flush(File<Async<TSpec> > & me) {
 		if (me.hFile != me.hFileAsync)	// in case of equality no direct access was done -> no flush needed
         	return FlushFileBuffers(me.hFile);
         else
             return true;
     }
 
-    template < typename TConfig, typename aRequest >
-    inline void release(File<Async<TConfig> > & me, aRequest & request) { }
+    template < typename TSpec, typename aRequest >
+    inline void release(File<Async<TSpec> > & me, aRequest & request) { }
 
 
 /*        
     //////////////////////////////////////////////////////////////////////
     // callback based read/write
 
-    template < typename TConfig, typename TValue, typename TSize,
+    template < typename TSpec, typename TValue, typename TSize,
                typename aCallback, typename aHint >
-    inline typename aRequest<File<Async<TConfig> > >::Type
-    aread(File<Async<TConfig> > & me, TValue *memPtr, TSize const count,
+    inline typename aRequest<File<Async<TSpec> > >::Type
+    aread(File<Async<TSpec> > & me, TValue *memPtr, TSize const count,
         aCallback* cb, aHint* hint)
     {
         DWORD bsize = (DWORD)(count * sizeof(TValue));
-        typename aRequest<File<Async<TConfig> > >::Type request = 
+        typename aRequest<File<Async<TSpec> > >::Type request = 
             me.queue->areadAt(
                 me.hFileAsync,
                 me.position,
@@ -452,14 +409,14 @@ namespace SEQAN_NAMESPACE_MAIN
         return request;
     }
     
-    template < typename TConfig, typename TValue, typename TSize,
+    template < typename TSpec, typename TValue, typename TSize,
                typename aCallback, typename aHint >
-    inline typename aRequest<File<Async<TConfig> > >::Type
-    awrite(File<Async<TConfig> > & me, TValue const *memPtr, TSize const count,
+    inline typename aRequest<File<Async<TSpec> > >::Type
+    awrite(File<Async<TSpec> > & me, TValue const *memPtr, TSize const count,
         aCallback* cb, aHint* hint)
     {
         DWORD bsize = (DWORD)(count * sizeof(TValue));
-        typename aRequest<File<Async<TConfig> > >::Type request = 
+        typename aRequest<File<Async<TSpec> > >::Type request = 
             me.queue->awriteAt(
                 memPtr,
                 me.hFileAsync,
@@ -471,10 +428,10 @@ namespace SEQAN_NAMESPACE_MAIN
         return request;
     }
 
-    template < typename TConfig, typename TValue, typename TSize, typename TPos,
+    template < typename TSpec, typename TValue, typename TSize, typename TPos,
                typename aCallback, typename aHint >
-    inline typename aRequest<File<Async<TConfig> > >::Type
-    areadAt(File<Async<TConfig> > & me, TValue *memPtr, TSize const count, TPos const fileOfs,
+    inline typename aRequest<File<Async<TSpec> > >::Type
+    areadAt(File<Async<TSpec> > & me, TValue *memPtr, TSize const count, TPos const fileOfs,
         aCallback* cb, aHint* hint)
     {
         DWORD bsize = (DWORD)(count * sizeof(TValue));
@@ -487,10 +444,10 @@ namespace SEQAN_NAMESPACE_MAIN
             hint);
     }
     
-    template < typename TConfig, typename TValue, typename TSize, typename TPos,
+    template < typename TSpec, typename TValue, typename TSize, typename TPos,
                typename aCallback, typename aHint >
-    inline typename aRequest<File<Async<TConfig> > >::Type
-    awriteAt(File<Async<TConfig> > & me, TValue *memPtr, TSize const count, TPos const fileOfs,
+    inline typename aRequest<File<Async<TSpec> > >::Type
+    awriteAt(File<Async<TSpec> > & me, TValue *memPtr, TSize const count, TPos const fileOfs,
         aCallback* cb, aHint* hint)
     {
         DWORD bsize = (DWORD)(count * sizeof(TValue));
@@ -507,14 +464,14 @@ namespace SEQAN_NAMESPACE_MAIN
     //////////////////////////////////////////////////////////////////////
     // event based read/write
 
-    template < typename TConfig, typename TValue, typename TSize,
+    template < typename TSpec, typename TValue, typename TSize,
                typename aEvent >
-    inline typename aRequest<File<Async<TConfig> > >::Type
-    aread(File<Async<TConfig> > & me, TValue *memPtr, TSize const count,
+    inline typename aRequest<File<Async<TSpec> > >::Type
+    aread(File<Async<TSpec> > & me, TValue *memPtr, TSize const count,
         aEvent &event)
     {
         DWORD bsize = (DWORD)(count * sizeof(TValue));
-        typename aRequest<File<Async<TConfig> > >::Type request = 
+        typename aRequest<File<Async<TSpec> > >::Type request = 
             me.queue->areadAt(
                 me.hFileAsync,
                 me.position,
@@ -525,14 +482,14 @@ namespace SEQAN_NAMESPACE_MAIN
         return request;
     }
     
-    template < typename TConfig, typename TValue, typename TSize,
+    template < typename TSpec, typename TValue, typename TSize,
                typename aEvent >
-    inline typename aRequest<File<Async<TConfig> > >::Type
-    awrite(File<Async<TConfig> > & me, TValue *memPtr, TSize const count,
+    inline typename aRequest<File<Async<TSpec> > >::Type
+    awrite(File<Async<TSpec> > & me, TValue *memPtr, TSize const count,
         aEvent &event)
     {
         DWORD bsize = (DWORD)(count * sizeof(TValue));
-        typename aRequest<File<Async<TConfig> > >::Type request =  
+        typename aRequest<File<Async<TSpec> > >::Type request =  
             me.queue->awriteAt(
                 memPtr,
                 me.hFileAsync,
@@ -543,10 +500,10 @@ namespace SEQAN_NAMESPACE_MAIN
         return request;
     }
 
-    template < typename TConfig, typename TValue, typename TSize, typename TPos,
+    template < typename TSpec, typename TValue, typename TSize, typename TPos,
                typename aEvent >
-    inline typename aRequest<File<Async<TConfig> > >::Type
-    areadAt(File<Async<TConfig> > & me, TValue *memPtr, TSize const count, TPos const fileOfs,
+    inline typename aRequest<File<Async<TSpec> > >::Type
+    areadAt(File<Async<TSpec> > & me, TValue *memPtr, TSize const count, TPos const fileOfs,
         aEvent &event)
     {
         DWORD bsize = (DWORD)(count * sizeof(TValue));
@@ -558,10 +515,10 @@ namespace SEQAN_NAMESPACE_MAIN
             event);
     }
     
-    template < typename TConfig, typename TValue, typename TSize, typename TPos,
+    template < typename TSpec, TValue, typename TSize, typename TPos,
                typename aEvent >
-    inline typename aRequest<File<Async<TConfig> > >::Type
-    awriteAt(File<Async<TConfig> > & me, TValue *memPtr, TSize const count, TPos const fileOfs,
+    inline typename aRequest<File<Async<TSpec> > >::Type
+    awriteAt(File<Async<TSpec> > & me, TValue *memPtr, TSize const count, TPos const fileOfs,
         aEvent &event)
     {
         DWORD bsize = (DWORD)(count * sizeof(TValue));
@@ -577,13 +534,13 @@ namespace SEQAN_NAMESPACE_MAIN
     //////////////////////////////////////////////////////////////////////
     // queue specific functions
 
-    template < typename TConfig >
-    inline void flush(File<Async<TConfig> > & me) {
+	template <typename TSpec>
+    inline void flush(File<Async<TSpec> > & me) {
         me.queue->flush();
     }
 
-    template < typename TConfig, typename aRequest >
-    inline void release(File<Async<TConfig> > & me, aRequest & request) {
+    template < typename TSpec, typename aRequest >
+    inline void release(File<Async<TSpec> > & me, aRequest & request) {
         me.queue->release(request);
     }
 */
@@ -627,13 +584,12 @@ namespace SEQAN_NAMESPACE_MAIN
 #else
 
     
-    template < typename TConfig >
-    class File<Async<TConfig> > : public File<Sync<TConfig> >
+	template <typename TSpec>
+    class File<Async<TSpec> > : public File<Sync<TSpec> >
     {
-
     public:
 
-        typedef File<Sync<TConfig> >  Base;
+        typedef File<Sync<TSpec> >  Base;
 
         typedef off_t			FilePtr;
 		typedef off_t           SizeType;   // type of file size
@@ -646,15 +602,15 @@ namespace SEQAN_NAMESPACE_MAIN
 		File(void *dummy = NULL): 	// to be compatible with the FILE*(NULL) constructor
 			handleAsync(-1) {}
 
-        bool open(char const *fileName, int openMode = OPEN_RDWR + OPEN_CREATE | OPEN_APPEND) {
-            handle = ::open(fileName, Base::getOFlag(openMode & ~OPEN_ASYNC), S_IREAD | S_IWRITE);
+        bool open(char const *fileName, int openMode = DefaultOpenMode<File>::VALUE) {
+            handle = ::open(fileName, Base::_getOFlag(openMode & ~OPEN_ASYNC), S_IREAD | S_IWRITE);
 			if (handle == -1) {
 				::std::cerr << "Open failed on file " << fileName << ". (" << ::strerror(errno) << ")" << ::std::endl;
 				return false;
 			}
 
-			if (Base::getOFlag(openMode | OPEN_ASYNC) & O_DIRECT) {
-				handleAsync = ::open(fileName, Base::getOFlag(openMode | OPEN_ASYNC & ~OPEN_CREATE & ~OPEN_APPEND), S_IREAD | S_IWRITE);
+			if (Base::_getOFlag(openMode | OPEN_ASYNC) & O_DIRECT) {
+				handleAsync = ::open(fileName, Base::_getOFlag(openMode | OPEN_ASYNC & ~OPEN_CREATE & ~OPEN_APPEND), S_IREAD | S_IWRITE);
 				if (handleAsync == -1 || errno == EINVAL) {	// fall back to cached access
 					#ifdef SEQAN_DEBUG_OR_TEST_
 						::std::cerr << "Warning: Direct access openening failed. (" << ::strerror(errno) << ")" << ::std::endl;
@@ -667,12 +623,20 @@ namespace SEQAN_NAMESPACE_MAIN
 				#endif
 			} else
 				handleAsync = handle;
-			
+
+			if (sizeof(FilePtr) < 8)
+				// To remove this warning, you have to options:
+				// 1. include the following line before including anything in your application
+				//    #define _FILE_OFFSET_BITS 64
+				// 2. include <seqan/platform.h> or <seqan/sequence.h> before any other include
+				::std::cerr << "WARNING: FilePtr is not 64bit wide" << ::std::endl;
+
+
 			SEQAN_PROADD(SEQAN_PROOPENFILES, 1);
             return true;
         }
 
-        bool openTemp(int openMode = OPEN_RDWR + OPEN_CREATE) {
+        bool openTemp(int openMode = DefaultOpenTempMode<File>::VALUE) {
 #ifdef SEQAN_DEFAULT_TMPDIR
 			char tmpFileName[] = SEQAN_DEFAULT_TMPDIR "/GNDXXXXXXX";
 #else
@@ -709,20 +673,20 @@ namespace SEQAN_NAMESPACE_MAIN
     // (SeqAn adaption)
     //////////////////////////////////////////////////////////////////////////////
 /*
-    template < typename TConfig >
-    struct aQueue<File<Async<TConfig> > >
+	template <typename TSpec>
+    struct aQueue<File<Async<TSpec> > >
     {
         typedef void* Type;
     };
 */
-    template < typename TConfig >
-    struct aRequest<File<Async<TConfig> > >
+	template <typename TSpec>
+    struct aRequest<File<Async<TSpec> > >
     {
         typedef aiocb Type;
     };
 /*
-    template < typename TConfig >
-    struct aEvent<File<Async<TConfig> > >
+	template <typename TSpec>
+    struct aEvent<File<Async<TSpec> > >
     {
         typedef aiocb Type;
     };
@@ -743,8 +707,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		::std::cerr << ::std::dec;
 	}
 
-    template < typename TConfig, typename TValue, typename TSize, typename TPos >
-    bool areadAt(File<Async<TConfig> > & me, TValue *memPtr, TSize const count, TPos const fileOfs,
+    template < typename TSpec, typename TValue, typename TSize, typename TPos >
+    bool areadAt(File<Async<TSpec> > & me, TValue *memPtr, TSize const count, TPos const fileOfs,
         aiocb &request)
     {
         SEQAN_PROTIMESTART(tw);
@@ -767,8 +731,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		return result == 0;
     }
     
-    template < typename TConfig, typename TValue, typename TSize, typename TPos >
-    bool awriteAt(File<Async<TConfig> > & me, const TValue *memPtr, TSize const count, TPos const fileOfs,
+    template < typename TSpec, typename TValue, typename TSize, typename TPos >
+    bool awriteAt(File<Async<TSpec> > & me, const TValue *memPtr, TSize const count, TPos const fileOfs,
         aiocb &request)
     {
         SEQAN_PROTIMESTART(tw);
@@ -791,8 +755,8 @@ namespace SEQAN_NAMESPACE_MAIN
         return result == 0;
     }
 
-    template < typename TConfig >
-    inline bool flush(File<Async<TConfig> > & me) {
+	template <typename TSpec>
+    inline bool flush(File<Async<TSpec> > & me) {
 		return me.handle == me.handleAsync || fdatasync(me.handle) == 0;
     }
 
@@ -851,8 +815,8 @@ namespace SEQAN_NAMESPACE_MAIN
         return result == 0;
 	}
 
-    template < typename TConfig >
-    inline bool cancel(File<Async<TConfig> > & me, aiocb &request) {
+	template <typename TSpec>
+    inline bool cancel(File<Async<TSpec> > & me, aiocb &request) {
         return aio_cancel(me.handleAsync, &request) == 0;
     }
 
@@ -864,9 +828,9 @@ namespace SEQAN_NAMESPACE_MAIN
         return aio_return(&request);
     }
 
-    template < typename TConfig, typename >
-    inline void release(File<Async<TConfig> > & me, aiocb const &request) {
-    }
+	template <typename TSpec>
+    inline void release(File<Async<TSpec> > & me, aiocb const &request) {}
+
 /*
     typedef void (*sighandler_t)(int);
     static unsigned _AsyncIOHandlerRefCount = 0;
@@ -934,44 +898,38 @@ namespace SEQAN_NAMESPACE_MAIN
     //////////////////////////////////////////////////////////////////////////////
     // global functions
 
-    template < typename TConfig >
-    struct Value< File< Async<TConfig> > >
+	template <typename TSpec>
+    struct Size< File<Async<TSpec> > >
     {
-            typedef typename TConfig::Type Type;
+        typedef typename File<Async<TSpec> >::SizeType Type;
     };
 
-    template < typename TConfig >
-    struct Size< File< Async<TConfig> > >
+	template <typename TSpec>
+    struct Position< File<Async<TSpec> > >
     {
-        typedef typename File< Async<TConfig> >::SizeType Type;
+        typedef typename File<Async<TSpec> >::FilePtr Type;
     };
 
-    template < typename TConfig >
-    struct Position< File< Async<TConfig> > >
+	template <typename TSpec>
+    struct Difference< File<Async<TSpec> > >
     {
-        typedef typename File< Async<TConfig> >::FilePtr Type;
-    };
-
-    template < typename TConfig >
-    struct Difference< File< Async<TConfig> > >
-    {
-        typedef typename File< Async<TConfig> >::FilePtr Type;
+        typedef typename File<Async<TSpec> >::FilePtr Type;
     };
 
 
 
-    template <typename TConfig, typename TValue, typename TSize>
+    template < typename TSpec, typename TValue, typename TSize>
 	inline void
-	allocate( File<Async<TConfig> > const & me,
+	allocate( File<Async<TSpec> > const & me,
 			  TValue * & data, 
 			  TSize count)
 	{
 		allocate(me, data, count, TagAllocateAligned());
 	}
 
-    template <typename TConfig, typename TValue, typename TSize>
+    template <typename TSpec, typename TValue, typename TSize>
 	inline void
-	deallocate( File<Async<TConfig> > const & me,
+	deallocate( File<Async<TSpec> > const & me,
 				TValue * data, 
 				TSize count)
 	{

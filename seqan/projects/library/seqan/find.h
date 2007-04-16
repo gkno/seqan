@@ -1,8 +1,14 @@
 #ifndef SEQAN_HEADER_FIND_H
 #define SEQAN_HEADER_FIND_H
 
+//____________________________________________________________________________
+// prerequisites
+
 #include <seqan/sequence.h>
 #include <seqan/score.h>
+
+//____________________________________________________________________________
+// exact pattern matching
 
 #ifdef SEQAN_SWITCH_USE_FORWARDS
 #include <seqan/find/find_generated_forwards.h>
@@ -14,6 +20,9 @@
 #include <seqan/find/find_shiftand.h>
 #include <seqan/find/find_shiftor.h>
 #include <seqan/find/find_bndm.h>
+
+//____________________________________________________________________________
+// approximate pattern matching
 
 #include <seqan/find/find_score.h>
 #include <seqan/find/find_myers_ukkonen.h>

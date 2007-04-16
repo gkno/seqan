@@ -16,7 +16,7 @@ namespace SEQAN_NAMESPACE_MAIN
 //{
 
 	struct Kasai {};
-	struct KasaiInPlace {};
+	struct KasaiOriginal {};	// original, but more space-consuming algorithm
 
 
     //////////////////////////////////////////////////////////////////////////////
@@ -221,40 +221,10 @@ namespace SEQAN_NAMESPACE_MAIN
  	    return me.process(bundleIn.in1, bundleIn.in2);
     }
 
-/**
-.Function.createLCPTable:
-..summary:Creates a lcp table from a given text and suffix array.
-..cat:Index
-..signature:createLCPTable(lcp, text, suffixArray[, algo_tag])
-..param.lcp:A reference to the resulting lcp table.
-..param.text:A given text.
-..param.suffixArray:The suffix array of $text$.
-..param.algo_tag:A tag that identifies the algorithm which is used for creation.
-..remarks:The size of $lcp$ must be at least $length(text)$ before calling this function.
-*/
 
-
-	template < 
-        typename TLCPTable,
-        typename TValue1,
-        typename TValue2,
-		typename TConfig1,
-		typename TConfig2,
-		typename TSpec,
-		typename TObject, 
-		typename ConstrSpec>
-	void createLCPTable(
-		TLCPTable &LCP,
-		StringSet< String<TValue1, External<TConfig1> >, TSpec > &s,
-		String< TValue2, External<TConfig2> > &SA,
-		Kasai const &spec)
-	{
-        createLCPTableExt(LCP, s, SA, spec);
-	}
-
-
-
-    //////////////////////////////////////////////////////////////////////////////
+	
+	
+	//////////////////////////////////////////////////////////////////////////////
     // internal Kasai algorithm
     //////////////////////////////////////////////////////////////////////////////
 
@@ -266,7 +236,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TLCPTable &LCP,
 		TText const &s,
 		TSA const &SA,
-		Kasai const &)
+		KasaiOriginal const)
 	{
 		typedef typename Value<TSA>::Type TSize;
 
@@ -328,7 +298,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TLCPTable &LCP,
 		TText const &s,
 		TSA const &SA,
-		KasaiInPlace const &)
+		Kasai const)
 	{
 		typedef typename Value<TSA>::Type TSize;
 
@@ -411,7 +381,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TLCPTable &LCP,
 		StringSet<TString, TSpec> const &sset,
 		TSA const &SA,
-		KasaiInPlace const &)
+		Kasai const)
 	{
 		typedef typename Concatenator<StringSet<TString, TSpec> const>::Type	TText;
 		typedef typename StringSetLimits<StringSet<TString, TSpec> const>::Type	TLimitsString;

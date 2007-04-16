@@ -21,14 +21,16 @@ namespace SEQAN_NAMESPACE_MAIN
 
 ///.Class.Pattern.param.TSpec.type:Spec.MyersUkkonen
 
-struct AlignTextGlobal;
 struct AlignTextLocal;
+struct AlignTextGlobal;
+struct AlignTextGlobalMinimum;
 
 template <typename TSpec>
 struct _MyersUkkonen;
 
-typedef Tag<_MyersUkkonen<AlignTextLocal> >		MyersUkkonen;
-typedef Tag<_MyersUkkonen<AlignTextGlobal> >	MyersUkkonenGlobal;
+typedef Tag<_MyersUkkonen<AlignTextLocal> >			MyersUkkonen;
+typedef Tag<_MyersUkkonen<AlignTextGlobal> >		MyersUkkonenGlobal;
+typedef Tag<_MyersUkkonen<AlignTextGlobalMinimum> >	MyersUkkonenGlobalMinimum;
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -122,6 +124,11 @@ struct _MyersUkkonenHP0 {
 
 template <>
 struct _MyersUkkonenHP0<AlignTextGlobal> {
+	enum { VALUE = 1 };
+};
+
+template <>
+struct _MyersUkkonenHP0<AlignTextGlobalMinimum> {
 	enum { VALUE = 1 };
 };
 
@@ -251,6 +258,145 @@ SEQAN_CHECKPOINT
 		goNext(finder);
 	}
 
+	return false;
+}
+
+//____________________________________________________________________________
+// find minimal edit distance
+// in fact, a Finder is not the best data structure for this problem
+// this algorithm should be moved
+
+template <typename TFinder, typename TNeedle, typename TSpec>
+inline bool _findMyersLargePatterns (TFinder & finder, Pattern<TNeedle, Tag<_MyersUkkonen<AlignTextGlobalMinimum> > > & me) 
+{
+SEQAN_CHECKPOINT
+
+	unsigned int X, D0, HN, HP, temp, shift, limit, currentBlock;
+	unsigned int carryD0, carryHP, carryHN;
+	unsigned int minScore = SupremumValue<unsigned int>::VALUE;
+	TFinder minPos = finder;
+
+	while (!atEnd(finder)) {
+		carryD0 = carryHN = 0;
+		carryHP = _MyersUkkonenHP0<TSpec>::VALUE;
+
+		// if the active cell is the last of it's block, one additional block has to be calculated
+		limit = me.lastBlock + (me.scoreMask >> (me.MACHINE_WORD_SIZE - 1));
+
+		if (limit == me.blockCount)
+			limit--;
+
+		shift = me.blockCount * static_cast<unsigned int>((typename Value< TNeedle >::Type) *finder);
+
+		// computing the necessary blocks, carries between blocks following one another are stored
+		for (currentBlock = 0; currentBlock <= limit; currentBlock++) {
+			X = me.bitMasks[shift + currentBlock] | me.VN[currentBlock];
+	
+			temp = me.VP[currentBlock] + (X & me.VP[currentBlock]) + carryD0;
+			if (carryD0)
+				carryD0 = temp <= me.VP[currentBlock];
+			else
+				carryD0 = temp < me.VP[currentBlock];
+			
+			D0 = (temp ^ me.VP[currentBlock]) | X;
+			HN = me.VP[currentBlock] & D0;
+			HP = me.VN[currentBlock] | ~(me.VP[currentBlock] | D0);
+			
+			X = (HP << 1) | carryHP;
+			carryHP = HP >> (me.MACHINE_WORD_SIZE-1);
+			
+			me.VN[currentBlock] = X & D0;
+
+			temp = (HN << 1) | carryHN;
+			carryHN = HN >> (me.MACHINE_WORD_SIZE - 1);
+								
+		 	me.VP[currentBlock] = temp | ~(X | D0);
+
+			//if the current block is the one containing the last active cell the new score is computed
+			if (currentBlock == me.lastBlock) {
+				if (HP & me.scoreMask)
+					me.score++;
+				else if (HN & me.scoreMask)
+					me.score--;
+			}
+		}
+
+		// updating the last active cell
+		while (me.score > me.k) {
+			if (me.VP[me.lastBlock] & me.scoreMask)
+				me.score--;
+			else if (me.VN[me.lastBlock] & me.scoreMask)
+				me.score++;
+
+			me.scoreMask >>= 1;
+			if (!me.scoreMask) {
+				me.scoreMask = 1 << (me.MACHINE_WORD_SIZE - 1);
+				me.lastBlock--;
+			}
+		}
+
+		if ((me.lastBlock == me.blockCount-1) && (me.scoreMask == me.finalScoreMask))
+			return true;
+		else {
+			me.scoreMask <<= 1;
+			if (!me.scoreMask) {
+				me.scoreMask = 1;
+				me.lastBlock++;
+			}
+			
+			if (me.VP[me.lastBlock] & me.scoreMask)
+				me.score++;
+			else if (me.VN[me.lastBlock] & me.scoreMask)
+				me.score--;
+		}
+
+		SEQAN_ASSERT (me.score >= 0);
+
+		goNext(finder);
+	}
+
+	return false;
+}
+//____________________________________________________________________________
+
+template <typename TFinder, typename TNeedle>
+inline bool _findMyersSmallPatterns (TFinder & finder, Pattern<TNeedle, Tag<_MyersUkkonen<AlignTextGlobalMinimum> > > & me) 
+{
+SEQAN_CHECKPOINT
+
+	unsigned int X, D0, HN, HP;
+	unsigned int minScore = SupremumValue<unsigned int>::VALUE;
+	TFinder minPos = finder;
+
+	// computing the blocks
+	while (!atEnd(finder)) {
+		X = me.bitMasks[static_cast<unsigned int>((typename Value<TNeedle>::Type) *finder)] | me.VN[0];
+		
+		D0 = ((me.VP[0] + (X & me.VP[0])) ^ me.VP[0]) | X;
+		HN = me.VP[0] & D0;
+		HP = me.VN[0] | ~(me.VP[0] | D0);
+		X = (HP << 1) | _MyersUkkonenHP0<AlignTextGlobalMinimum>::VALUE;
+		me.VN[0] = X & D0;
+		me.VP[0] = (HN << 1) | ~(X | D0);
+
+		if (HP & (1 << (me.needleSize-1)))
+			me.score++;
+		else if (HN & (1 << (me.needleSize-1)))
+			me.score--;
+
+		if (me.score <= minScore) {
+			minScore = me.score;
+			minPos = finder;
+		}
+		
+		goNext(finder);
+	}
+
+	if (minScore <= me.k) {
+		finder = minPos;
+		me.score = minScore;
+		return true;
+	}
 	return false;
 }
 

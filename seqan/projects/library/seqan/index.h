@@ -1,6 +1,15 @@
 #ifndef SEQAN_HEADER_INDEX_H
 #define SEQAN_HEADER_INDEX_H
 
+//____________________________________________________________________________
+// prerequisites
+
+#include <seqan/sequence.h>
+#include <seqan/pipe.h>
+#include <seqan/modifier.h>
+
+#include <seqan/find/find_base.h>
+
 #include <climits>
 #include <functional>
 #include <vector>
@@ -13,12 +22,6 @@
 
 //____________________________________________________________________________
 // index construction algorithms
-
-#include <seqan/sequence.h>
-#include <seqan/pipe.h>
-#include <seqan/modifier.h>
-
-#include <seqan/find/find_base.h>
 
 #ifdef SEQAN_SWITCH_USE_FORWARDS
 #include <seqan/index/index_generated_forwards.h>
@@ -52,7 +55,7 @@
 // q-gram index
 
 #include <seqan/index/shape_base.h>
-#include <seqan/index/shape_gapped.h>
+//#include <seqan/index/shape_gapped.h>
 #include <seqan/index/index_qgram.h>
 
 //____________________________________________________________________________

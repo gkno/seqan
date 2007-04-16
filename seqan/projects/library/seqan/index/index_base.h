@@ -25,7 +25,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	// lcp table construction algorithms
 	struct Kasai;
-	struct KasaiInPlace;
+	struct KasaiOriginal;	// original, but more space-consuming algorithm
 
 	// enhanced suffix array construction algorithms
 	struct ChildTab;
@@ -371,7 +371,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < typename TText, typename TSpec >
 	struct DefaultIndexCreator<Index<TText, TSpec>, Tag<_Fibre_LCP> > {
-        typedef KasaiInPlace Type;
+        typedef Kasai Type;
     };
 
 	template < typename TText, typename TSpec >

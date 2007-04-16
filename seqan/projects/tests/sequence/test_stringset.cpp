@@ -39,10 +39,10 @@ void Test_StringSet()
 	infix(set[0], 6, 9) = "du ";
 	SEQAN_TASSERT(isEqual(set[0], "Hallo du "))
 */
+}
 
 //____________________________________________________________________________
 
-}
 
 template <typename TSpec>
 void Test_StringSet_Concat()
@@ -65,15 +65,60 @@ void Test_StringSet_Concat()
 	SEQAN_TASSERT(isEqual(set[2], "Hamster!"))
 	SEQAN_TASSERT(isEqual(all, "Hallo schlauer Hamster!"))
 
+	SEQAN_TASSERT(stringSetLimits(set)[0] == 0)
+	SEQAN_TASSERT(stringSetLimits(set)[1] == 6)
+	SEQAN_TASSERT(stringSetLimits(set)[2] == 15)
+	SEQAN_TASSERT(stringSetLimits(set)[3] == 23)
+
 	StringSet<CharString, TSpec> const &cset = set;
 	
 	all = concat(cset);
 	SEQAN_TASSERT(concat(cset)[10] == 'a');
 	SEQAN_TASSERT(isEqual(all, "Hallo schlauer Hamster!"))
+}
 
 //____________________________________________________________________________
 
+
+template <typename TSpec>
+void Test_StringSet_IdHolder()
+{	
+	StringSet<CharString, ConcatVirtual<> > origin;
+	StringSet<CharString, TSpec> set;
+
+	resize(origin, 3);
+	origin[0] = "Hallo ";
+	origin[1] = "schlauer ";
+	origin[2] = "Hamster!";
+
+	appendValue(set, origin[0]);
+	appendValue(set, origin[1]);
+	appendValue(set, origin[2]);
+
+	SEQAN_TASSERT(length(set) == 3)
+
+	CharString all = concat(set);
+
+	SEQAN_TASSERT(concat(set)[10] == 'a');
+	SEQAN_TASSERT(isEqual(set[0], "Hallo "))
+	SEQAN_TASSERT(isEqual(set[1], "schlauer "))
+	SEQAN_TASSERT(isEqual(set[2], "Hamster!"))
+	SEQAN_TASSERT(isEqual(all, "Hallo schlauer Hamster!"))
+
+	SEQAN_TASSERT(stringSetLimits(set)[0] == 0)
+	SEQAN_TASSERT(stringSetLimits(set)[1] == 6)
+	SEQAN_TASSERT(stringSetLimits(set)[2] == 15)
+	SEQAN_TASSERT(stringSetLimits(set)[3] == 23)
+
+	StringSet<CharString, TSpec> const &cset = set;
+	
+	all = concat(cset);
+	SEQAN_TASSERT(concat(cset)[10] == 'a');
+	SEQAN_TASSERT(isEqual(all, "Hallo schlauer Hamster!"))
 }
+
+//____________________________________________________________________________
+
 
 int mainTestStringSet()
 {
@@ -82,6 +127,9 @@ int mainTestStringSet()
 	Test_StringSet< ConcatVirtual<> >();
 	Test_StringSet_Concat< ConcatVirtual<> >();
 	Test_StringSet_Concat< ConcatDirect<> >();
+
+	Test_StringSet_IdHolder< IdHolder<TightStorage<> > >();
+	Test_StringSet_IdHolder< IdHolder<GenerousStorage<> > >();
 
 	debug::verifyCheckpoints("projects/library/seqan/sequence/sequence_multiple.h");
 

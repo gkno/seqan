@@ -98,6 +98,11 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef QGram_Alg Type;
     };
 
+	template < typename TText, typename TShapeSpec >
+	struct DefaultIndexCreator<Index<TText, Index_QGram<TShapeSpec> >, QGram_SADir > {
+        typedef QGram_Alg Type;
+    };
+
 //////////////////////////////////////////////////////////////////////////////
 
 	template <typename TText, typename TSpec>
@@ -172,33 +177,26 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Iterator<TText const, Standard>::Type	TIterator;
 		typedef typename Iterator<TDir, Standard>::Type			TDirIterator;
 		typedef typename Value<TShape>::Type					TValue;
-		typedef typename Position<TText>::Type					TPosition;
 		typedef typename Size<TText>::Type						TSize;
 		
-		// clear counters
+		// 1. clear counters
 		arrayFill(begin(dir, Standard()), end(dir, Standard()), 0);
 
-		//count q-grams
-		TIterator qgram_1_it = begin(text,Standard());
-		TIterator qgram_2_it = qgram_1_it + 1;
-		TValue x, y = 0;			// hashwert des q-Grams
-		x = hash(shape, qgram_1_it);
-		++dir[x];
-		TPosition i = 1;
-		TSize num_qgrams = length(text) - shapeSpan(shape) + 1;
-		while( i < num_qgrams)
+		// 2. count q-grams
+		TSize num_qgrams = length(text) - length(shape) + 1;
+
+		TIterator itText = begin(text, Standard());
+		++dir[hash(shape, itText)];
+		for(TSize i = 1; i < num_qgrams; ++i)
 		{
-			y = hashNext(shape, qgram_1_it, qgram_2_it, x);
-			++qgram_1_it;
-			++qgram_2_it;
-			++dir[y];
-			x = y;
-			++i;
+			++itText;
+			++dir[hashNext(shape, itText)];
 		}
 
-		//cumulative sum
+		// 3. cumulative sum
 		{
-			TDirIterator it = begin(dir, Standard()), itEnd = end(dir, Standard());
+			TDirIterator it = begin(dir, Standard());
+			TDirIterator itEnd = end(dir, Standard());
 			TSize diff = 0, diff_prev = 0, sum = 0;
 			while (it != itEnd) {
 				sum += diff_prev;
@@ -207,39 +205,17 @@ namespace SEQAN_NAMESPACE_MAIN
 				*it = sum;
 				++it;
 			}
-			sum += diff_prev;
-			dir[0] = sum;
-
-			SEQAN_ASSERT(sum + diff == num_qgrams);
+			SEQAN_ASSERT(sum == num_qgrams);
 		}
 		
-		//build sa
-		qgram_1_it = begin(text,Standard());
-		qgram_2_it = qgram_1_it + 1;
-		TValue lastBucketIndex = length(dir) - 1;
-
-		// first hash
-		x = hash(shape, qgram_1_it);
-		if (x != lastBucketIndex)
-			sa[dir[x + 1]++] = 0;
-		else
-			sa[dir[0]++] = 0;
-		i = 1;
-		while(i < num_qgrams)
+		// 4. fill suffix array
+		itText = begin(text, Standard());
+		sa[dir[hash(shape, itText) + 1]++] = 0;				// first hash
+		for(TSize i = 1; i < num_qgrams; ++i)
 		{
-			// next hash
-			y = hashNext(shape, qgram_1_it, qgram_2_it, x);
-			++qgram_1_it;
-			++qgram_2_it;
-			if (y != lastBucketIndex)
-				sa[dir[y + 1]++] = i++;
-			else
-				sa[dir[0]++] = i++;
-
-			// für die nächste Runde
-			x = y;
+			++itText;
+			sa[dir[hashNext(shape, itText) + 1]++] = i;		// next hash
 		}
-		dir[0] = 0;
 	}
 
 	template < 
@@ -267,23 +243,14 @@ namespace SEQAN_NAMESPACE_MAIN
 		for(unsigned seqNo = 0; seqNo < length(stringSet); ++seqNo) 
 		{
 			TString const &sequence = value(stringSet, seqNo);
+			TSize num_qgrams = length(sequence) - length(shape) + 1;
 
-			//count q-grams
-			TIterator it_l = begin(sequence, Standard());
-			TIterator it_r = it_l + 1;
-			TValue x, y = 0;			// hashwert des q-Grams
-			x = hash(shape, it_l);
-			++dir[x];
-			TSize	i = 1;
-			TSize	num_qgrams = length(sequence) - shapeSpan(shape) + 1;
-			while (i < num_qgrams)
+			TIterator itText = begin(sequence, Standard());
+			++dir[hash(shape, itText)];
+			for(TSize i = 1; i < num_qgrams; ++i)
 			{
-				y = hashNext(shape, it_l, it_r, x);
-				++it_l;
-				++it_r;
-				++dir[y];
-				x = y;
-				++i;
+				++itText;
+				++dir[hashNext(shape, itText)];
 			}
 		}
 
@@ -299,44 +266,28 @@ namespace SEQAN_NAMESPACE_MAIN
 				*it = sum;
 				++it;
 			}
-			sum += diff_prev;
-			dir[0] = sum;
-
-			SEQAN_ASSERT(sum + diff == length(sa));
+			SEQAN_ASSERT(sum == length(sa));
 		}
 		
 		// 4. fill suffix array
 		for(unsigned seqNo = 0; seqNo < length(stringSet); ++seqNo) 
 		{
 			TString const &sequence = value(stringSet, seqNo);
-
-			TIterator it_l = begin(sequence, Standard());
-			TIterator it_r = it_l + 1;
+			TSize num_qgrams = length(sequence) - length(shape) + 1;
 
 			typename Value<TSA>::Type localPos;
 			assignValueI1(localPos, seqNo);
 			assignValueI2(localPos, 0);
 
-			// first hash
-			TValue x = hash(shape, it_l), y = 0;
-			sa[dir[x + 1]++] = localPos;
-
-			TSize	num_qgrams = length(sequence) - shapeSpan(shape) + 1;
-
+			TIterator itText = begin(sequence, Standard());
+			sa[dir[hash(shape, itText) + 1]++] = localPos;				// first hash
 			for(TSize i = 1; i < num_qgrams; ++i)
 			{
-				// next hash
-				y = hashNext(shape, it_l, it_r, x);
-				++it_l;
-				++it_r;
-				assignValueI2(localPos, getValueI2(localPos) + 1);
-				sa[dir[y + 1]++] = localPos;
-
-				// für die nächste Runde
-				x = y;
+				++itText;
+				assignValueI2(localPos, i);
+				sa[dir[hashNext(shape, itText) + 1]++] = localPos;		// next hash
 			}
 		}
-		dir[0] = 0;
 	}
 
 
@@ -584,11 +535,11 @@ namespace SEQAN_NAMESPACE_MAIN
 		// count all overlapping q-grams
 		typename Size<TIndex>::Type qgram_count = 0;
 		for(unsigned i = 0; i < countSequences(index); ++i)
-			if (sequenceLength(i, index) >= shapeSpan(shape))
-				qgram_count += sequenceLength(i, index) - (shapeSpan(shape) - 1);
+			if (sequenceLength(i, index) >= length(shape))
+				qgram_count += sequenceLength(i, index) - (length(shape) - 1);
 
 		resize(indexSA(index), qgram_count, Exact());
-		resize(indexDir(index), intPow(ValueSize<TShape>::VALUE, shapeSpan(shape) - shapeCountBlanks(shape)) + 1, Exact());
+		resize(indexDir(index), _intPow(ValueSize<TShape>::VALUE, length(shape) - shapeCountBlanks(shape)) + 1, Exact());
 		createQGramIndex(indexSA(index), indexDir(index), indexText(index), indexShape(index));
 		return true;
 	}
@@ -605,7 +556,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef Index<TText, Index_QGram<TShapeSpec> >			TIndex;
 		typedef Shape<typename Value<TIndex>::Type, TShapeSpec>	TShape;
 
-		resize(indexDir(index), intPow(ValueSize<TShape>::VALUE, shapeSpan(shape) - shapeCountBlanks(shape)), Exact());
+		resize(indexDir(index), _intPow(ValueSize<TShape>::VALUE, length(shape) - shapeCountBlanks(shape)) + 1, Exact());
 		createQGramIndex(indexSA(index), indexDir(index), indexText(index), indexShape(index));
 		return true;
 	}

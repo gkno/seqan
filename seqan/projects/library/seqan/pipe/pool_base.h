@@ -923,14 +923,12 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	// seqan namespace traits
     template < typename TValue, typename TSpec >
-    struct Value< Pool< TValue, TSpec > >
-    {
+    struct Value< Pool< TValue, TSpec > > {
         typedef TValue Type;
     };
 
     template < typename TValue, typename TSpec >
-    struct Size< Pool< TValue, TSpec > >
-    {
+    struct Size< Pool< TValue, TSpec > > {
         typedef typename Pool< TValue, TSpec >::SizeType Type;
     };
 

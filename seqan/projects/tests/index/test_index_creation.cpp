@@ -95,7 +95,7 @@ bool testIndexCreation()
 //___create_lcp_table_________________________________________________________
 
 			resize(lcp, size);
-			createLCPTable(lcp, text, sa, Kasai());
+			createLCPTable(lcp, text, sa, KasaiOriginal());
 			if (!isLCPTable(lcp, sa, text)) {
 				cout << "suffix array creation (internal Kasai) failed" << endl;
 				return false;
@@ -103,7 +103,7 @@ bool testIndexCreation()
 			cout << ".";
 
 			blank(lcp);
-			createLCPTable(lcp, text, sa, KasaiInPlace());
+			createLCPTable(lcp, text, sa, Kasai());
 			if (!isLCPTable(lcp, sa, text)) {
 				cout << "suffix array creation (internal in-place Kasai) failed" << endl;
 				return false;

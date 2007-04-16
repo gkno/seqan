@@ -13,7 +13,7 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 	//////////////////////////////////////////////////////////////////////////////
-	// explicit external creation (used as a wrapper-end by algorithms)
+	// Suffix Array creation wrappers
 	//////////////////////////////////////////////////////////////////////////////
 
 	// build suffix array with an external pipeling algorithm (skew3, skew7, ...)
@@ -23,7 +23,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typename ConstrSpec >
 	void createSuffixArrayExt(
 		TSA &suffixArray,
-		TObject &text,
+		TObject const &text,
 		ConstrSpec const &)
 	{
         // signed characters behave different than unsigned when compared
@@ -58,7 +58,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typename ConstrSpec >
 	void createSuffixArrayExt(
 		TSA &suffixArray,
-		StringSet<TString, TSpec> &stringSet,
+		StringSet<TString, TSpec> const &stringSet,
 		ConstrSpec const &)
 	{
         // signed characters behave different than unsigned when compared
@@ -144,7 +144,11 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //____________________________________________________________________________
 
-	// build lcp table with an external pipelining algorithm (ext kasai, ...)
+
+	//////////////////////////////////////////////////////////////////////////////
+	// LCP Table creation wrappers
+	//////////////////////////////////////////////////////////////////////////////
+
 	template < 
         typename TLCPTable,
 		typename TObject, 
@@ -152,8 +156,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		typename ConstrSpec >
 	void createLCPTableExt(
 		TLCPTable &LCP,
-		TObject &text,
-		TSA &suffixArray,
+		TObject const &text,
+		TSA const &suffixArray,
 		ConstrSpec const &)
 	{
 		// specialization
@@ -173,17 +177,6 @@ namespace SEQAN_NAMESPACE_MAIN
 			isLCPTable(LCP, suffixArray, text);
 		#endif
 	}
-	template < 
-        typename TLCPTable,
-		typename TObject, 
-        typename TSA >
-	inline void createLCPTableExt(
-		TLCPTable &LCP,
-		TObject &text,
-		TSA &suffixArray)
-	{
-		createLCPTableExt(LCP, text, suffixArray, Kasai());
-	}
 
 
 	// build lcp table (external) for mutliple sequences
@@ -195,8 +188,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		typename ConstrSpec >
 	void createLCPTableExt(
 		TLCPTable &LCP,
-		StringSet<TString, TSpec> &stringSet,
-		TSA &suffixArray,
+		StringSet<TString, TSpec> const &stringSet,
+		TSA const &suffixArray,
 		ConstrSpec const &)
 	{
 		typedef typename Concatenator<StringSet<TString, TSpec> >::Type TConcat;
@@ -222,19 +215,56 @@ namespace SEQAN_NAMESPACE_MAIN
 			isLCPTable(LCP, suffixArray, text);
 		#endif
 	}
+
+
+/**
+.Function.createLCPTable:
+..summary:Creates a lcp table from a given text and suffix array.
+..cat:Index
+..signature:createLCPTable(lcp, text, suffixArray[, algo_tag])
+..param.lcp:A reference to the resulting lcp table.
+..param.text:A given text.
+..param.suffixArray:The suffix array of $text$.
+..param.algo_tag:A tag that identifies the algorithm which is used for creation.
+..remarks:The size of $lcp$ must be at least $length(text)$ before calling this function.
+*/
+
 	template < 
         typename TLCPTable,
-		typename TString,
-		typename TSpec,
-        typename TSA>
-	inline void createLCPTableExt(
+        typename TValue,
+		typename TConfig,
+		typename TSA >
+	void createLCPTable(
 		TLCPTable &LCP,
-		StringSet<TString, TSpec> &stringSet,
-		TSA &suffixArray)
+		String< TValue, External<TConfig> > const &s,
+		TSA const &SA,
+		Kasai const)
 	{
-		createLCPTableExt(LCP, stringSet, suffixArray, Kasai());
+        createLCPTableExt(LCP, s, SA, Kasai());
 	}
 
+	template < 
+        typename TLCPTable,
+        typename TValue,
+		typename TConfig,
+		typename TSSetSpec,
+		typename TSA >
+	void createLCPTable(
+		TLCPTable &LCP,
+		StringSet< String<TValue, External<TConfig> >, TSSetSpec > const &s,
+		TSA const &SA,
+		Kasai const)
+	{
+        createLCPTableExt(LCP, s, SA, Kasai());
+	}
+
+
+//____________________________________________________________________________
+
+
+	//////////////////////////////////////////////////////////////////////////////
+	// Enhanced LCP Table creation wrappers
+	//////////////////////////////////////////////////////////////////////////////
 
     // build enhanced LCP table with an external pipelining algorithm (ext kasai, ...)
 	// and a dynamic programming tree construction alg
@@ -299,11 +329,6 @@ namespace SEQAN_NAMESPACE_MAIN
 		#endif
 		createHybridBinTree(LCPH, creator, suffixArray);
 	}
-
-
-	//////////////////////////////////////////////////////////////////////////////
-	// various enhanced table creators
-	//////////////////////////////////////////////////////////////////////////////
 
     // build enhanced LCP table with an lcp algorithm
 	// and a dynamic programming tree construction alg
@@ -434,17 +459,6 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 		::std::sort(begin(occString, Standard()), end(occString, Standard()), _SAValueLess<TValue>());
 	}
-
-
-//////////////////////////////////////////////////////////////////////////////
-// deprecated (will be removed)
-
-	template <typename TObject>
-    inline void setKeepFirst(TObject &obj, bool b) {}
-
-	template <typename TValue, typename TConfig>
-    inline void setKeepFirst(String<TValue, External<TConfig> > &obj, bool b) { obj.keepFirst = b; }
-
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -581,9 +595,9 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 
 	template < typename TValue, typename TSpec >
 	inline bool open(String<TValue, TSpec> &string, const char *fileName, int openMode) {
-		String<TValue, External< ExternalConfigManualOpen<> > > extString;
+		String<TValue, External< ExternalConfigLarge<> > > extString;
 		if (!open(extString, fileName, openMode)) return false;
-		string = extString;
+		assign(string, extString);
 		return true;
 	}
 	template < typename TValue, typename TSpec >
@@ -591,9 +605,20 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 		return open(string, fileName, OPEN_RDONLY);
 	}
 
-	template < typename TValue, typename TSpec >
-	inline bool open(StringSet<String<TValue, TSpec> > &multi, const char *fileName, int openMode) {
-		String<TValue, External< ExternalConfigManualOpen<> > > extString;
+	template < typename THost, typename TSpec >
+	inline bool open(Segment<THost, TSpec> &string, const char *fileName, int openMode) {
+		String<typename Value<THost>::Type, External< ExternalConfigLarge<> > > extString;
+		if (!open(extString, fileName, openMode)) return false;
+		assign(string, extString);
+		return true;
+	}
+	template < typename THost, typename TSpec >
+	inline bool open(Segment<THost, TSpec> &string, const char *fileName) {
+		return open(string, fileName, OPEN_RDONLY);
+	}
+
+	template < typename TValue, typename TSpec, typename TSSSpec >
+	inline bool open(StringSet<String<TValue, TSpec>, TSSSpec> &multi, const char *fileName, int openMode) {
 		bool more = true;
 		char id[11]; // 2^32 has 10 decimal digits + 1 (0x00)
 		unsigned i = 0;
@@ -601,15 +626,12 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 			sprintf(id, "%u", i);
 			String<char> name;
 			name = fileName;	append(name, id);
-			if (more = open(extString, toCString(name), openMode)) {
-				getValue(multi, i) = extString;
-				close(extString);
-			}
+			more = open(value(multi, i), toCString(name), openMode);
 		}
 		return i > 1;
 	}
-	template < typename TValue, typename TSpec >
-	inline bool open(StringSet<String<TValue, TSpec> > &multi, const char *fileName) {
+	template < typename TValue, typename TSpec, typename TSSSpec>
+	inline bool open(StringSet<String<TValue, TSpec>, TSSSpec> &multi, const char *fileName) {
 		return open(multi, fileName, OPEN_RDONLY);
 	}
 
@@ -618,11 +640,11 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 // save
 
 	template < typename TValue, typename TSpec >
-	inline bool save(String<TValue, TSpec> &string, const char *fileName, int openMode) {
+	inline bool save(String<TValue, TSpec> const &string, const char *fileName, int openMode) {
 		if (length(string) == 0) return true;
-		String<TValue, External< ExternalConfigManualOpen<> > > extString;
+		String<TValue, External< ExternalConfigLarge<> > > extString;
 		if (!open(extString, fileName, openMode)) return false;
-		extString = string;
+		assign(extString, string);
 		return true;
 	}
 	template < typename TValue, typename TSpec >
@@ -630,10 +652,22 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 		return save(string, fileName, OPEN_WRONLY | OPEN_CREATE);
 	}
 
-	template < typename TValue, typename TSpec, typename TSetSpec >
-	inline bool save(StringSet<String<TValue, TSpec>, TSetSpec > &multi, const char *fileName, int openMode) {
+	template < typename THost, typename TSpec >
+	inline bool save(Segment<THost, TSpec> const &string, const char *fileName, int openMode) {
+		if (length(string) == 0) return true;
+		String<typename Value<THost>::Type, External< ExternalConfigLarge<> > > extString;
+		if (!open(extString, fileName, openMode)) return false;
+		assign(extString, string);
+		return true;
+	}
+	template < typename THost, typename TSpec >
+	inline bool save(Segment<THost, TSpec> const &string, const char *fileName) {
+		return save(string, fileName, OPEN_WRONLY | OPEN_CREATE);
+	}
+
+	template < typename TValue, typename TSpec, typename TSSSpec>
+	inline bool save(StringSet<String<TValue, TSpec>, TSSSpec> const &multi, const char *fileName, int openMode) {
 		if (length(multi) == 0) return true;
-		String<TValue, External< ExternalConfigManualOpen<> > > extString;
 		bool result = true;
 		char id[12]; // 2^32 has 10 decimal digits + 2 ('.' and 0x00)
 		for(unsigned i = 0; i < length(multi); ++i) {
@@ -641,16 +675,13 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 			String<char> name;
 			name = fileName;	
 			append(name, &(id[0]));
-			if (open(extString, toCString(name), openMode)) {
-				extString = getValue(multi, i);
-				close(extString);
-			} else
+			if (!save(getValue(multi, i), toCString(name), openMode))
 				result = false;
 		}
 		return result;
 	}
-	template < typename TValue, typename TSpec, typename TSetSpec >
-	inline bool save(StringSet<String<TValue, TSpec>, TSetSpec > &multi, const char *fileName) {
+	template < typename TValue, typename TSpec, typename TSSSpec>
+	inline bool save(StringSet<String<TValue, TSpec>, TSSSpec> const &multi, const char *fileName) {
 		return save(multi, fileName, OPEN_WRONLY | OPEN_CREATE);
 	}
 

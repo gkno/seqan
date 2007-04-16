@@ -1,20 +1,30 @@
 #ifndef SEQAN_HEADER_SEQUENCE_H
 #define SEQAN_HEADER_SEQUENCE_H
 
+//____________________________________________________________________________
+// prerequisites
+
 #include <seqan/basic.h>
+
+//____________________________________________________________________________
 
 #ifdef SEQAN_SWITCH_USE_FORWARDS
 #include <seqan/sequence/sequence_generated_forwards.h>
 #endif
 
 #include <seqan/sequence/sequence_interface.h>
-
 #include <seqan/sequence/lexical.h>
+
+//____________________________________________________________________________
+// segments (suffix, ...)
 
 #include <seqan/sequence/segment_base.h>
 #include <seqan/sequence/segment_infix.h>
 #include <seqan/sequence/segment_suffix.h>
 #include <seqan/sequence/segment_prefix.h>
+
+//____________________________________________________________________________
+// strings
 
 #include <seqan/sequence/string_base.h>
 #include <seqan/sequence/string_pointer.h>
