@@ -912,7 +912,7 @@ pruneTree(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > >,TGr
 	setMarked(vlmm,root,true);
 	//assignProperty(marked,root,true);
 
-	pruneTreeRecursively(vlmm,root,original,parameters);
+	pruneTreeRecursivelyFast(vlmm,root,original,parameters,0);
 
 		/*for(unsigned i =0;i<numVertices(vlmm);++i){
 				std::cout << isMarked(vlmm,i)<< "  ";
@@ -1001,6 +1001,135 @@ pruneTreeRecursively(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpe
 				}
 						
 			}
+		} // if father == root check only for the first possible extension
+		  // extension longer than one are not checked, because it is already known that there is no 
+		  // node one context shorter elsewhere in the tree
+		else{
+				TVertexDescriptor root = getRoot(vlmm);
+				TAlphabet startChar = value(childLabel,0);
+				if(extendNode(vlmm,root,startChar,parameters))
+				{
+					std::cout <<"startChar" << startChar<<std::endl;
+					father = splitEdge(vlmm,father,startChar,0);
+					smoothNode(vlmm,father,parameters);
+					setSuffixLink(vlmm,father,root);
+					setReverseSuffixLink(vlmm,root,father,startChar);
+					setMarked(vlmm,father,true);
+				}
+			
+		} // else case
+	} // Label > 1
+	
+	//std::cout << "check keeping of node:" << node;
+	// all potential nodes are build
+	if( isMarked(vlmm,node) || (! pruneNode(vlmm,node,parameters)) ){
+		// node should be kept
+		//std::cout <<" keep it"<<std::endl;
+		setMarked(vlmm,node,true);
+		// bubble up and set all nodes on the way to the root true
+		TVertexDescriptor fatherSuffixLink = getSuffixLink(vlmm,node);
+		while( !isRoot(vlmm,fatherSuffixLink) ){
+			if(! isMarked(vlmm, fatherSuffixLink) ){
+				setMarked(vlmm,node,true);
+			}
+			else
+				break;
+			fatherSuffixLink = getSuffixLink(vlmm,fatherSuffixLink);
+		}
+		// smooth node
+		smoothNode(vlmm,node,parameters);
+	}
+	else
+	{
+	// delete node
+		//std::cout <<"  delete it"<<std::endl;
+		setMarked(vlmm,node,false);
+	//assignProperty(marked,node,false);
+	}
+
+	//std::cout <<"finished node:"<<node<<std::endl;
+ return;
+}
+
+
+// recursive walk over reverse suffix links
+template<typename TAlphabet,typename TCargo,typename TSpec,typename TGraphSpec,typename TVertexDescriptor,typename TMarked,typename TVLMMSpec,typename TChar>
+inline void
+pruneTreeRecursivelyFast(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > >,TGraphSpec> &vlmm,
+				TVertexDescriptor & node,
+				TMarked & original,
+			    TVLMMSpec & parameters,
+				TChar & letter) 
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGraphSpec> TGraph;
+	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef typename Size<TAlphabet>::Type TSize;
+	TSize table_length = ValueSize<TAlphabet>::VALUE;
+	TVertexDescriptor nilVal = _get_nil<TVertexDescriptor>();
+	
+
+	TVertexDescriptor next;
+	// check all outgoing reverse suffix links
+	for(unsigned int pos = 0;pos< table_length;++pos){
+		next = getReverseSuffixLink(vlmm,node,pos);
+		if(next != nilVal){
+			//std::cout <<" start Recursion from node:"<<node<<" char:"<<pos<<std::endl;
+			pruneTreeRecursivelyFast(vlmm,next,original,parameters,pos);
+		}
+		
+	}
+	// the root is excluded from further processing
+	if(isRoot(vlmm,node)){ 
+	
+		return ;
+			
+	}
+
+	TVertexDescriptor father = getFather(vlmm,node);
+	
+	String<TAlphabet> childLabel;
+	getChildLabel(vlmm,father,node,childLabel);
+	
+	// check for possible extended 
+	if(length(childLabel) > 1){
+	
+
+
+		// seek the node in the tree which could be the suffix link father of the new node
+		
+		if(! isRoot(vlmm,father) ){
+			TVertexDescriptor target = getSuffixLink(vlmm,father);
+			// we first check if there exist a node on the edge of SLfather->SLnode
+			// if not, nothing needs to be done
+			unsigned lastVertex = 0;
+			unsigned pos = 0;
+			std::cout <<"..check potential nodes above node:" <<node<<std::endl;
+			TVertexDescriptor potVertex = getSuccessor(vlmm,target,value(childLabel,0));
+			SEQAN_ASSERT(potVertex != nilVal)
+			while(! potVertex == getSuffixLink(vlmm,node) ){
+					// we have a node which may lead to a new node on the edge father->node
+					// how far done is this node ?
+					pos += lastVertex + lengthString<TAlphabet> edgeString = getProperty(vlmm.data_edge_label,TEdgeDescriptor(target,value(childLabel,lastVertex)));
+					
+					if( (potVertex < length(original)) && original[potVertex] && extendNode(vlmm,potVertex,value(childLabel,lastVertex+1),parameters) ){
+	
+
+
+						father = splitEdge(vlmm,father,value(childLabel,lastVertex),pos+1-lastVertex);
+						smoothNode(vlmm,father,parameters);
+						setSuffixLink(vlmm,father,potVertex);
+						setReverseSuffixLink(vlmm,potVertex,father,letter);
+						setMarked(vlmm,father,true);
+						
+					
+				}
+					lastVertex = pos +1;
+					// update the next vertex on edge SLfather->SLnode
+					potVertex = getSuccessor(vlmm,potVertex,value(childLabel,lastVertex+1));
+			}
+
+			
 		} // if father == root check only for the first possible extension
 		  // extension longer than one are not checked, because it is already known that there is no 
 		  // node one context shorter elsewhere in the tree
