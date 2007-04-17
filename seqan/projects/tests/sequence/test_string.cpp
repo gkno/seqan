@@ -246,7 +246,7 @@ void Test_String_Base()
 //note: the following tests destroy the same items several times
 //note: most of the tests only check syntax not semantic.
 //semantic should be tested via the calling assignment functions
-
+/*
 	str1 = "hello";
 	_clearSpace(str1, 200, Exact());
 	SEQAN_TASSERT(length(str1) == 200);
@@ -267,12 +267,11 @@ void Test_String_Base()
 	_clearSpace(str1, 300, 10, 20, Generous());
 	_clearSpace(str1, 100, 10, 200, Insist());
 
-/*
 	_clearSpace(str1, 300, begin(str1), end(str1), Exact());
 	_clearSpace(str1, 300, begin(str1), end(str1), Limit());
 	_clearSpace(str1, 300, begin(str1), end(str1), Generous());
 	_clearSpace(str1, 100, begin(str1), end(str1), Insist());
-*/
+
 	_clearSpace(str1, 300, 10, 20, 100, Exact());
 	_clearSpace(str1, 300, 10, 20, 100, Limit());
 	_clearSpace(str1, 300, 10, 20, 100, Generous());
@@ -282,6 +281,7 @@ void Test_String_Base()
 	_clearSpace(str1, 300, 10, 20, 20000, Limit());
 	_clearSpace(str1, 300, 10, 20, 20000, Generous());
 	_clearSpace(str1, 100, 10, 50, 20000, Insist());
+*/
 
 /*
 	_clearSpace(str1, 300, begin(str1), end(str1), 100, Exact());
@@ -295,6 +295,7 @@ void Test_String_Base()
 
 	Test_String_Base_Assignments<Exact>(str1);
 	Test_String_Base_Assignments<Generous>(str1);
+	reserve(str1, 10000);
 	Test_String_Base_Assignments<Insist>(str1);
 
 	str1 += str2;
