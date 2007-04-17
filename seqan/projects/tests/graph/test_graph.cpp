@@ -14,11 +14,11 @@
 #define LIB_PATH "projects/library/seqan/graph/"
 
 #include <seqan/graph.h>
-//#include "test_graph_basic.h"
-//#include "test_graph_types.h"
-//#include "test_graph_iterators.h"
-//#include "test_graph_properties.h"
-//#include "test_graph_derived.h"
+#include "test_graph_basic.h"
+#include "test_graph_types.h"
+#include "test_graph_iterators.h"
+#include "test_graph_properties.h"
+#include "test_graph_derived.h"
 #include "test_graph_algorithms.h"
 
 using namespace std;
@@ -32,60 +32,60 @@ int main()
 	SEQAN_TREPORT("TEST BEGIN")
 
 	// Test Graph Basic
-	//Test_IdManager();	// Test Id Manager
-	//Test_EdgeStump();	// Test EdgeStumps
+	Test_IdManager();	// Test Id Manager
+	Test_EdgeStump();	// Test EdgeStumps
 
 
-	//// Test Graph Types
-	//Test_Directed();	// Directed graphs
-	//Test_Undirected();	// Undirected graphs
-	//Test_Automaton();	// Automatons
-	//Test_WordGraph();	// Word Graph
-	//Test_Tree();		// Trees
-	//Test_Alignment();	// Alignment graph
+	// Test Graph Types
+	Test_Directed();	// Directed graphs
+	Test_Undirected();	// Undirected graphs
+	Test_Automaton();	// Automatons
+	Test_WordGraph();	// Word Graph
+	Test_Tree();		// Trees
+	Test_Alignment();	// Alignment graph
 
-	//// Test Graph Iterators
-	//Test_VertexIterator<Directed<char> >();
-	//Test_VertexIterator<Undirected<char> >();
-	//Test_VertexIterator<Automaton<char> >();
-	//Test_TreeInternalVertexIterator();
-	//Test_OutEdgeIterator<Directed<char> >();
-	//Test_OutEdgeIterator<Undirected<char> >();
-	//Test_OutEdgeIterator<Tree<char> >();
-	//Test_OutEdgeIterator<Automaton<char> >();
-	//Test_EdgeIterator<Directed<char> >();
-	//Test_EdgeIterator<Undirected<char> >();
-	//Test_EdgeIterator<Tree<char> >();
-	//Test_EdgeIterator<Automaton<char> >();
-	//Test_AdjacencyIterator<Directed<char> >();
-	//Test_AdjacencyIterator<Undirected<char> >();
-	//Test_AdjacencyIterator<Tree<char> >();
-	//Test_AdjacencyIterator<Automaton<char> >();
-	//// Test bfs and dfs iterator
-	//Test_BfsIter<Directed<char> >();
-	//Test_BfsIter<Undirected<char> >();
-	//Test_BfsIter<Tree<char> >();
-	//Test_BfsIter<Automaton<char> >();
-	//Test_BfsIterator();
-	//Test_DfsPreorderIter<Directed<char> >();
-	//Test_DfsPreorderIter<Undirected<char> >();
-	//Test_DfsPreorderIter<Tree<char> >();
-	//Test_DfsPreorderIter<Automaton<char> >();
-	//Test_DfsPreorderIterator();
+	// Test Graph Iterators
+	Test_VertexIterator<Directed<char> >();
+	Test_VertexIterator<Undirected<char> >();
+	Test_VertexIterator<Automaton<char> >();
+	Test_TreeInternalVertexIterator();
+	Test_OutEdgeIterator<Directed<char> >();
+	Test_OutEdgeIterator<Undirected<char> >();
+	Test_OutEdgeIterator<Tree<char> >();
+	Test_OutEdgeIterator<Automaton<char> >();
+	Test_EdgeIterator<Directed<char> >();
+	Test_EdgeIterator<Undirected<char> >();
+	Test_EdgeIterator<Tree<char> >();
+	Test_EdgeIterator<Automaton<char> >();
+	Test_AdjacencyIterator<Directed<char> >();
+	Test_AdjacencyIterator<Undirected<char> >();
+	Test_AdjacencyIterator<Tree<char> >();
+	Test_AdjacencyIterator<Automaton<char> >();
+	// Test bfs and dfs iterator
+	Test_BfsIter<Directed<char> >();
+	Test_BfsIter<Undirected<char> >();
+	Test_BfsIter<Tree<char> >();
+	Test_BfsIter<Automaton<char> >();
+	Test_BfsIterator();
+	Test_DfsPreorderIter<Directed<char> >();
+	Test_DfsPreorderIter<Undirected<char> >();
+	Test_DfsPreorderIter<Tree<char> >();
+	Test_DfsPreorderIter<Automaton<char> >();
+	Test_DfsPreorderIterator();
 
-	//// Test Graph Properties
-	//Test_ExternalProperty<Directed<char> >();
-	//Test_ExternalProperty<Undirected<char> >();
-	//Test_ExternalProperty<Tree<char> >();
-	//Test_ExternalProperty<Automaton<char> >();	
-	//Test_Property();
+	// Test Graph Properties
+	Test_ExternalProperty<Directed<char> >();
+	Test_ExternalProperty<Undirected<char> >();
+	Test_ExternalProperty<Tree<char> >();
+	Test_ExternalProperty<Automaton<char> >();	
+	Test_Property();
 
-	//// Test Graph Derived
-	//Test_Oracle();
-	//Test_Trie();
+	// Test Graph Derived
+	Test_Oracle();
+	Test_Trie();
 
-	//// Test Graph Algorithms
-	//Test_Algorithms();
+	// Test Graph Algorithms
+	Test_Algorithms();
 
 
 	// T-Coffee
