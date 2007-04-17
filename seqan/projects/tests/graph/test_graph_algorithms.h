@@ -1,6 +1,8 @@
 #ifndef SEQAN_HEADER_TEST_GRAPH_ALGORITHMS_H
 #define SEQAN_HEADER_TEST_GRAPH_ALGORITHMS_H
 
+using namespace std;
+using namespace seqan;
 
 namespace SEQAN_NAMESPACE_MAIN
 {

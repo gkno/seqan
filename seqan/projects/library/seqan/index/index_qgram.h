@@ -205,7 +205,7 @@ namespace SEQAN_NAMESPACE_MAIN
 				*it = sum;
 				++it;
 			}
-			SEQAN_ASSERT(sum == num_qgrams);
+			SEQAN_ASSERT(sum + diff_prev == length(sa));
 		}
 		
 		// 4. fill suffix array
@@ -266,7 +266,7 @@ namespace SEQAN_NAMESPACE_MAIN
 				*it = sum;
 				++it;
 			}
-			SEQAN_ASSERT(sum == length(sa));
+			SEQAN_ASSERT(sum + diff_prev == length(sa));
 		}
 		
 		// 4. fill suffix array

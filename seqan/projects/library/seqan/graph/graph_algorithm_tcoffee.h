@@ -180,6 +180,8 @@ getScoringMatrix(StringSet<String<Dna>, TSpec> const& strSet, Matrix<TValue>& sc
 	// Index
 	TIndex index;
 	resize(indexText(index), nseq);
+	std::cout << nseq << std::endl;
+	std::cout << length(strSet) << std::endl;
 	for(TStringSetSize k=0;k<length(strSet);++k) indexText(index)[k] = strSet[k];
 	indexCreate(index, QGram_SA());
 
