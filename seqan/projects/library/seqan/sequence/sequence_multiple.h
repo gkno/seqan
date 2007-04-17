@@ -553,7 +553,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typename Size<TStringSet>::Type	len = length(me);
 		typename Size<TStringSet>::Type	i = 0;
 
-		SEQAN_ASSERT(length(me.limits) == len + 1);
+//		SEQAN_ASSERT(length(me.limits) == len + 1);
 //		resize(me.limits, len + 1);
 		for(; i < len; ++i) {
 			me.limits[i] = sum;
@@ -937,6 +937,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 	SEQAN_CHECKPOINT
 		appendValue(me, obj);
+		SEQAN_ASSERT(length(me.limits) == length(me) + 1);
 		return length(me.strings) - 1;
 	}
 
@@ -947,11 +948,13 @@ namespace SEQAN_NAMESPACE_MAIN
 					TId id) 
 	{
 	SEQAN_CHECKPOINT
+		SEQAN_ASSERT(length(me.limits) == length(me) + 1);
 		if (id >= (TId) length(me.strings)) fill(me.strings, id+1, (TString*) 0);
 		if ((TString*) me.strings[id] == (TString*) 0)
 			resize(me.limits, length(me.limits) + 1);
 		me.strings[id] = &obj;
 		me.limitsValid = false;
+		SEQAN_ASSERT(length(me.limits) == length(me) + 1);
 		return id;
 	}
 
@@ -1026,6 +1029,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef StringSet<TString, IdHolder<TightStorage<TSpec> > > TStringSet;
 		typedef typename Size<TStringSet>::Type TSize;
 
+		SEQAN_ASSERT(length(me.limits) == length(me) + 1);
 		for(TSize i = 0; i < length(me.strings); ++i)
 			if (me.ids[i] == id) {
 				erase(me.strings, i);
@@ -1033,6 +1037,7 @@ namespace SEQAN_NAMESPACE_MAIN
 				resize(me.limits, length(me.limits) - 1);
 				me.limitsValid = empty(me);
 			}
+		SEQAN_ASSERT(length(me.limits) == length(me) + 1);
 	}
 
 

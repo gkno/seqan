@@ -175,7 +175,9 @@ _copyGraph(Graph<Tree<TCargo, TSpec> > const& source,
 			if (parentVertex > childVertex) _createVertices(dest,parentVertex);
 			else _createVertices(dest,childVertex);
 			// Add edge
-			TEdgeDescriptor e = addEdge(dest, parentVertex, childVertex);
+			TEdgeDescriptor e;
+			if (!transpose) e = addEdge(dest, parentVertex, childVertex);
+			else e = addEdge(dest, childVertex, parentVertex);
 			assignCargo(e, getCargo(current));
 			current = getNextT(current);
 		}
@@ -190,7 +192,6 @@ inline void
 _copyGraph(Graph<Tree<TCargo, TSpec> > const& source,
 		   Graph<Tree<TCargo, TSpec> >& dest) 
 {
-	// To transpose a tree doesn't make sense
 	_copyGraph(source, dest, false); 
 }
 
@@ -207,8 +208,7 @@ transpose(Graph<Tree<TCargo, TSpec> > const& source,
 		  Graph<Tree<TCargo, TSpec> >& dest)
 {
 	SEQAN_CHECKPOINT
-	// On a tree transpose makes no sense, just copy
-	_copyGraph(source, dest, false);
+	_copyGraph(source, dest, true);
 	
 }
 
@@ -216,9 +216,11 @@ transpose(Graph<Tree<TCargo, TSpec> > const& source,
 
 template<typename TCargo, typename TSpec>
 inline void
-transpose(Graph<Tree<TCargo, TSpec> > const& g)
+transpose(Graph<Tree<TCargo, TSpec> >& g)
 {
-	// Nothing to do
+	Graph<Tree<TCargo, TSpec> > dest;
+	_copyGraph(g, dest, true);
+	g = dest;
 }
 
 //////////////////////////////////////////////////////////////////////////////

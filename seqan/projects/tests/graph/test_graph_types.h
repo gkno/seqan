@@ -251,7 +251,7 @@ void Test_Directed() {
 	SEQAN_TASSERT(numVertices(g3) == 5)
 	SEQAN_TASSERT(numEdges(g3) == 1)
 	TEdgeDescriptor3 edge3 = addEdge(g3,0,4);
-	SEQAN_TASSERT(_getId(edge3) == 0);
+	//SEQAN_TASSERT(_getId(edge3) == 0);
 	SEQAN_TASSERT(getCargo(edge3) == (void*) 0);
 	addEdge(g3,0,2);
 	addEdge(g3,0,0);

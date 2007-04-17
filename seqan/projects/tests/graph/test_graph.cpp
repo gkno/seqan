@@ -34,8 +34,7 @@ int main()
 	// Test Graph Basic
 	Test_IdManager();	// Test Id Manager
 	Test_EdgeStump();	// Test EdgeStumps
-	//Test_StringSet<StringSet<String<char>, IdHolder<GenerousStorage<> > > >();
-	//Test_StringSet<StringSet<String<char>, IdHolder<TightStorage<> > > >();
+
 
 	// Test Graph Types
 	Test_Directed();	// Directed graphs
