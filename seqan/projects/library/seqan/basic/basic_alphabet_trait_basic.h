@@ -184,7 +184,7 @@ _arrayCopyForward_Pointer(TValue * source_begin,
 						  True)
 {
 SEQAN_CHECKPOINT
-	::std::memcpy(target_begin, source_begin, (source_end - source_begin) * sizeof(TValue));
+	::std::memmove(target_begin, source_begin, (source_end - source_begin) * sizeof(TValue));
 }
 template<typename TValue>
 inline void 
@@ -252,7 +252,7 @@ _arrayMoveForward_Pointer(TValue * source_begin,
 						  True)
 {
 SEQAN_CHECKPOINT
-	::std::memcpy(target_begin, source_begin, (source_end - source_begin) * sizeof(TValue));
+	::std::memmove(target_begin, source_begin, (source_end - source_begin) * sizeof(TValue));
 }
 template<typename TValue>
 inline void 
