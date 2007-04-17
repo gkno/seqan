@@ -686,6 +686,7 @@ createRoot(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g)
 /**
 .Function.assignRoot:
 ..cat:Spec.Automaton
+..cat:Spec.Tree
 ..summary:Assigns a new root vertex to the automaton.
 ..signature:assignRoot(g, vertex)
 ..param.g:A automaton.

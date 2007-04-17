@@ -787,8 +787,6 @@ sourceVertex(Graph<Directed<TCargo, TSpec> > const& g,
 			current=getNextT(current);
 		}
 	}
-	// We should never reach this point
-	SEQAN_ASSERT(false)
 	return 0;
 }
 
