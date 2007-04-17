@@ -16,10 +16,10 @@
 #include <seqan/graph.h>
 #include "test_graph_basic.h"
 #include "test_graph_types.h"
-//#include "test_graph_iterators.h"
-//#include "test_graph_properties.h"
-//#include "test_graph_derived.h"
-//#include "test_graph_algorithms.h"
+#include "test_graph_iterators.h"
+#include "test_graph_properties.h"
+#include "test_graph_derived.h"
+#include "test_graph_algorithms.h"
 
 using namespace std;
 using namespace seqan;
@@ -44,7 +44,6 @@ int main()
 	Test_Tree();		// Trees
 	Test_Alignment();	// Alignment graph
 
-	/*
 	// Test Graph Iterators
 	Test_VertexIterator<Directed<char> >();
 	Test_VertexIterator<Undirected<char> >();
@@ -90,7 +89,7 @@ int main()
 
 
 	// T-Coffee
-	//Test_TCoffee();
+	Test_TCoffee();
 
 
 //____________________________________________________________________________
@@ -118,7 +117,6 @@ int main()
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_algorithm.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_algorithm_tcoffee.h");
 
-*/
 	SEQAN_TREPORT("TEST END")
 
 	return 0;

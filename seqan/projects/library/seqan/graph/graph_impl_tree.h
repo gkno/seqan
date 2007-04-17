@@ -406,7 +406,6 @@ removeVertex(Graph<Tree<TCargo, TSpec> >& g,
 
 	typedef Graph<Tree<TCargo, TSpec> > TGraph;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
-	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
 	TEdgeStump* current = getValue(g.data_vertex, v);
 	while(current!=0) {
@@ -712,7 +711,6 @@ assignRoot(Graph<Tree<TCargo, TSpec> >& g,
 	SEQAN_ASSERT(idInUse(g.data_id_managerV, vertex) == true)
 
 	typedef Graph<Tree<TCargo, TSpec> > TGraph;
-	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	
 	g.data_root = vertex;
 	assignValue(g.data_parent, vertex, getNil<TVertexDescriptor>());
