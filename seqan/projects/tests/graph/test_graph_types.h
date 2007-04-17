@@ -1166,6 +1166,7 @@ void Test_Tree() {
 	SEQAN_TASSERT(degree(g, childC2C1) == 2)
 	SEQAN_TASSERT(numEdges(g) == 8)
 	SEQAN_TASSERT(numVertices(g) == 9)
+	SEQAN_TASSERT(numTreeEdges(g) == numVertices(g) - 1)
 	TEdgeDescriptor childC2C1C1e = findEdge(g, childC2C1C1, childC2C1);
 	
 	// Raw output
@@ -1181,9 +1182,37 @@ void Test_Tree() {
 	read(strm,gTmp,DotDrawing());
 	strm.close();
 
+	SEQAN_TASSERT(g.data_parent[0]==getNil<TVertexDescriptor>())
+	SEQAN_TASSERT(g.data_parent[1]==0)
+	SEQAN_TASSERT(g.data_parent[2]==0)
+	SEQAN_TASSERT(g.data_parent[3]==0)
+	SEQAN_TASSERT(g.data_parent[4]==2)
+	SEQAN_TASSERT(g.data_parent[5]==4)
+	SEQAN_TASSERT(g.data_parent[6]==5)
+	SEQAN_TASSERT(g.data_parent[7]==5)
+	SEQAN_TASSERT(g.data_parent[8]==0)
+	_rebuildParentMap(g);
+	SEQAN_TASSERT(g.data_parent[0]==getNil<TVertexDescriptor>())
+	SEQAN_TASSERT(g.data_parent[1]==0)
+	SEQAN_TASSERT(g.data_parent[2]==0)
+	SEQAN_TASSERT(g.data_parent[3]==0)
+	SEQAN_TASSERT(g.data_parent[4]==2)
+	SEQAN_TASSERT(g.data_parent[5]==4)
+	SEQAN_TASSERT(g.data_parent[6]==5)
+	SEQAN_TASSERT(g.data_parent[7]==5)
+	SEQAN_TASSERT(g.data_parent[8]==0)
 	SEQAN_TASSERT(childVertex(g, childC2C1C1e) == childC2C1C1)  
 	SEQAN_TASSERT(parentVertex(g, childC2C1C1e) == childC2C1)
 	removeChild(g, rootV, childC2);
+	SEQAN_TASSERT(g.data_parent[0]==getNil<TVertexDescriptor>())
+	SEQAN_TASSERT(g.data_parent[1]==0)
+	SEQAN_TASSERT(g.data_parent[2]==getNil<TVertexDescriptor>())
+	SEQAN_TASSERT(g.data_parent[3]==0)
+	SEQAN_TASSERT(g.data_parent[4]==getNil<TVertexDescriptor>())
+	SEQAN_TASSERT(g.data_parent[5]==getNil<TVertexDescriptor>())
+	SEQAN_TASSERT(g.data_parent[6]==getNil<TVertexDescriptor>())
+	SEQAN_TASSERT(g.data_parent[7]==getNil<TVertexDescriptor>())
+	SEQAN_TASSERT(g.data_parent[8]==0)
 	SEQAN_TASSERT(numEdges(g) == 3)
 	SEQAN_TASSERT(numVertices(g) == 4)
 	SEQAN_TASSERT(empty(g) == false)
@@ -1198,6 +1227,7 @@ void Test_Tree() {
 	removeAllChildren(g, rootV);
 	SEQAN_TASSERT(empty(g) == false)
 	SEQAN_TASSERT(numEdges(g) == 0)
+	SEQAN_TASSERT(numTreeEdges(g) == 0)
 	SEQAN_TASSERT(numVertices(g) == 1) // Just the root
 	SEQAN_TASSERT(inDegree(g, rootV) == 0) 
 	SEQAN_TASSERT(outDegree(g, rootV) == 0)
@@ -1206,6 +1236,7 @@ void Test_Tree() {
 	SEQAN_TASSERT(empty(g) == false)
 	SEQAN_TASSERT(numEdges(g) == 2)
 	clearEdges(g);
+	SEQAN_TASSERT(numEdges(g) == 0)
 	SEQAN_TASSERT(numVertices(g) == 3)
 	SEQAN_TASSERT(empty(g) == false)
 	addChild(g,rootV);addChild(g,rootV);
@@ -1245,16 +1276,57 @@ void Test_Tree() {
 	SEQAN_TASSERT(numEdges(g) == 8)
 	SEQAN_TASSERT(numVertices(g) == 9)
 	transpose(g,g_copy);  
+	g = g_copy;
+	_rebuildParentMap(g);
 	SEQAN_TASSERT(numEdges(g) == 8)
 	SEQAN_TASSERT(numVertices(g) == 9)
-	std::cout << g << std::endl;
+	SEQAN_TASSERT(g.data_parent[0]==getNil<TVertexDescriptor>())
+	SEQAN_TASSERT(g.data_parent[1]==0)
+	SEQAN_TASSERT(g.data_parent[2]==0)
+	SEQAN_TASSERT(g.data_parent[3]==0)
+	SEQAN_TASSERT(g.data_parent[4]==3)
+	SEQAN_TASSERT(g.data_parent[5]==4)
+	SEQAN_TASSERT(g.data_parent[6]==5)
+	SEQAN_TASSERT(g.data_parent[7]==5)
+	SEQAN_TASSERT(g.data_parent[8]==0)
 	removeOutEdges(g,childC2C1C1);
+	SEQAN_TASSERT(g.data_parent[0]==getNil<TVertexDescriptor>())
+	SEQAN_TASSERT(g.data_parent[1]==0)
+	SEQAN_TASSERT(g.data_parent[2]==0)
+	SEQAN_TASSERT(g.data_parent[3]==0)
+	SEQAN_TASSERT(g.data_parent[4]==3)
+	SEQAN_TASSERT(g.data_parent[5]==4)
+	SEQAN_TASSERT(g.data_parent[6]==getNil<TVertexDescriptor>())
+	SEQAN_TASSERT(g.data_parent[7]==getNil<TVertexDescriptor>())
+	SEQAN_TASSERT(g.data_parent[8]==0)
 	SEQAN_TASSERT(numVertices(g) == 9)
+	SEQAN_TASSERT(numEdges(g) == 6)
 	removeVertex(g,childC2C1);
+	SEQAN_TASSERT(g.data_parent[0]==getNil<TVertexDescriptor>())
+	SEQAN_TASSERT(g.data_parent[1]==0)
+	SEQAN_TASSERT(g.data_parent[2]==0)
+	SEQAN_TASSERT(g.data_parent[3]==0)
+	SEQAN_TASSERT(g.data_parent[5]==getNil<TVertexDescriptor>())
+	SEQAN_TASSERT(g.data_parent[6]==getNil<TVertexDescriptor>())
+	SEQAN_TASSERT(g.data_parent[7]==getNil<TVertexDescriptor>())
+	SEQAN_TASSERT(g.data_parent[8]==0)
+	SEQAN_TASSERT(numEdges(g) == 4)
+
 	SEQAN_TASSERT(numVertices(g) == 8)
 	removeInEdges(g,childC2);
+	SEQAN_TASSERT(numEdges(g) == 3)
 	SEQAN_TASSERT(numVertices(g) == 8)
 	removeOutEdges(g,rootV);
+	SEQAN_TASSERT(g.data_parent[0]==getNil<TVertexDescriptor>())
+	SEQAN_TASSERT(g.data_parent[1]==getNil<TVertexDescriptor>())
+	SEQAN_TASSERT(g.data_parent[2]==getNil<TVertexDescriptor>())
+	SEQAN_TASSERT(g.data_parent[3]==getNil<TVertexDescriptor>())
+	SEQAN_TASSERT(g.data_parent[5]==getNil<TVertexDescriptor>())
+	SEQAN_TASSERT(g.data_parent[6]==getNil<TVertexDescriptor>())
+	SEQAN_TASSERT(g.data_parent[7]==getNil<TVertexDescriptor>())
+	SEQAN_TASSERT(g.data_parent[8]==getNil<TVertexDescriptor>())
+	SEQAN_TASSERT(numVertices(g) == 8)
+	SEQAN_TASSERT(numEdges(g) == 0)
 	SEQAN_TASSERT(empty(g) == false) 
 	addVertex(g);
 	TEdgeDescriptor my_edge = addEdge(g,0,1);

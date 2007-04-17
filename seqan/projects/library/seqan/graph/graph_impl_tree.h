@@ -124,14 +124,14 @@ _getEdgeIdManager(Graph<Tree<TCargo, TSpec> >& g) {
 
 template<typename TCargo, typename TSpec> 
 inline void
-_rebuildParentMap(Graph<Tree<TCargo, TSpec> > const& g) 
+_rebuildParentMap(Graph<Tree<TCargo, TSpec> >& g) 
 {
 	SEQAN_CHECKPOINT
-	SEQAN_ASSERT(idInUse(g.data_id_managerV, vertex) == true)
 	
 	typedef Graph<Tree<TCargo, TSpec> > TGraph;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
-	typedef typename Iterator<String<TEdgeStump*> const>::Type TIterConst;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename Iterator<String<TEdgeStump*> >::Type TIterConst;
 	for(TIterConst it = begin(g.data_vertex);!atEnd(it);goNext(it)) {
 		TVertexDescriptor parent = position(it);
 		TEdgeStump* current = getValue(it);
@@ -668,9 +668,10 @@ write(TFile & target,
 	typedef typename Iterator<String<TEdgeStump*> const>::Type TIterConst;
 	_streamWrite(target,"Adjacency list:\n");
 	for(TIterConst it = begin(g.data_vertex);!atEnd(it);goNext(it)) {
+		if (!idInUse(_getVertexIdManager(g), position(it))) continue;
+		TEdgeStump* current = getValue(it);
 		_streamPutInt(target, position(it));
 		_streamWrite(target," -> ");
-		TEdgeStump* current = getValue(it);
 		while(current!=0) {
 			_streamPutInt(target, getTarget(current));
 			_streamPut(target, ',');

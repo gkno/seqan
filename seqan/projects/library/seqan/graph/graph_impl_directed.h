@@ -894,9 +894,10 @@ write(TFile & target,
 	typedef typename Iterator<String<TEdgeStump*> const>::Type TIterConst;
 	_streamWrite(target,"Adjacency list:\n");
 	for(TIterConst it = begin(g.data_vertex);!atEnd(it);goNext(it)) {
+		if (!idInUse(_getVertexIdManager(g), position(it))) continue;
+		TEdgeStump* current = getValue(it);
 		_streamPutInt(target, position(it));
 		_streamWrite(target," -> ");
-		TEdgeStump* current = getValue(it);
 		while(current!=0) {
 			_streamPutInt(target, getTarget(current));
 			_streamPut(target, ',');
