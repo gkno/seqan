@@ -114,6 +114,8 @@ int main()
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_drawing.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_iterator_bfs.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_iterator_dfs.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_utility_alphabets.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_utility_parsing.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_algorithm.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_algorithm_tcoffee.h");
 

@@ -57,6 +57,10 @@
 #include <seqan/graph/graph_iterator_bfs.h>
 #include <seqan/graph/graph_iterator_dfs.h>
 
+// Utilities
+#include <seqan/graph/graph_utility_alphabets.h>
+#include <seqan/graph/graph_utility_parsing.h>
+
 // Graph algorithms
 #include <seqan/graph/graph_algorithm.h>
 #include <seqan/graph/graph_algorithm_tcoffee.h>
