@@ -541,8 +541,12 @@ SEQAN_CHECKPOINT
 				_deallocateStorage(target, buf, old_target_capacity);
 			}
 		}
-		assign(begin(target, Standard()), source, Insist());
-		_setEnd(target, begin(target) + source_length);
+		if (length(source) > 0)
+		{
+			assignValue(begin(target, Standard()), 0); //set target length to 0
+			assign(begin(target, Standard()), source, Insist());
+			_setEnd(target, begin(target) + source_length);
+		}
 	}
 
 	template <typename TTarget, typename TSource, typename TLimit>

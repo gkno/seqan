@@ -1060,7 +1060,6 @@ void Test_Combinatoric()
 	Test_Assignments_Combinatoric(infix_2, str1, Generous());
 	Test_Assignments_Combinatoric(infix_2, str1, Limit());
 
-	SEQAN_TASSERT(lcpLength(end(infix_2, Standard()), " end") >= 4)
 	SEQAN_TASSERT(beginPosition(infix_2) == 6)
 	SEQAN_TASSERT(infix(str4, 0, 6) == "begin ")
 
