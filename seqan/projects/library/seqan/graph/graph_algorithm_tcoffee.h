@@ -125,7 +125,7 @@ getScoringMatrix(StringSet<TString, TSpec> const& strSet, Matrix<TValue>& score)
 	fill(host(mat), nseq*nseq, 0);
 
 	// StringSet where each string is a sequence of amino acid groups identifiers
-	typedef StringSet<String<AAGroups>, ConcatVirtual<> > TStringSetAA;
+	typedef StringSet<String<AAGroupsDayhoff>, ConcatVirtual<> > TStringSetAA;
 	// q-gram length = 6
 	typedef Index<TStringSetAA, Index_QGram<FixedShape<6> > > TIndex;
 	TIndex index;

@@ -89,6 +89,7 @@ int main()
 
 
 	// T-Coffee
+	Test_CompressedAlphabets();
 	Test_TCoffee();
 
 
