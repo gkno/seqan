@@ -1110,7 +1110,7 @@ pruneTreeRecursivelyFast(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < 
 			while(! potVertex == getSuffixLink(vlmm,node) ){
 					// we have a node which may lead to a new node on the edge father->node
 					// how far done is this node ?
-					pos += lastVertex + lengthString<TAlphabet> edgeString = getProperty(vlmm.data_edge_label,TEdgeDescriptor(target,value(childLabel,lastVertex)));
+					pos += lastVertex + length(getProperty(vlmm.data_edge_label,TEdgeDescriptor(target,value(childLabel,lastVertex))));
 					
 					if( (potVertex < length(original)) && original[potVertex] && extendNode(vlmm,potVertex,value(childLabel,lastVertex+1),parameters) ){
 	
