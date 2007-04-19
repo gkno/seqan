@@ -73,8 +73,7 @@ namespace SEQAN_NAMESPACE_MAIN
         resize(dest, rest);
 		beginWrite(dest);
 		// read the first block of textIn
-		typename TBufReader::Buffer	buffer = reader.first();
-//        typename Value<TBufReader>::Type buffer = reader.first();
+		typename Value<TBufReader>::Type buffer = reader.first();
 		while (length(buffer))
         {
             SEQAN_PROADD(SEQAN_PRODEPTH, 1);
@@ -228,9 +227,7 @@ namespace SEQAN_NAMESPACE_MAIN
         resize(dest, rest);
 		beginWrite(dest);
 		// read the first block of textIn
-		typename TBufReader::Buffer	buffer = reader.first();
-//        typename Value<TBufReader>::Type buffer = reader.first();
-
+		typename Value<TBufReader>::Type buffer = reader.first();
 		while (length(buffer))
         {
             SEQAN_PROADD(SEQAN_PRODEPTH, 1);

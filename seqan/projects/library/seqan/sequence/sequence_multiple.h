@@ -16,29 +16,28 @@ namespace SEQAN_NAMESPACE_MAIN
 	// StringSet specs
 	//////////////////////////////////////////////////////////////////////////////
 
-	template<typename TSpec = void>
-	struct GenerousStorage;
-
-	template<typename TSpec = void>
-	struct TightStorage;
+	//struct Generous;						// large string-string, large id-string
+	//struct Tight;							// small string-string, small id-string
+	//struct Optimal??						// small string-string, large id-string
 
 	// Default id holder string set
-	template<typename TSpec = GenerousStorage<> >
-	struct IdHolder;
+	template<typename TSpec = Generous >
+	struct Dependent;						// holds references of its elements
 
-	template < typename TSpec = void >
-	struct ConcatVirtual;
 
 	template < typename TLimiter = void >
-	struct ConcatDirect;
+	struct ConcatDirect;					// contains 1 string (the concatenation of n strings)
+	//struct Default;							// contains n strings in a string
+
+	template < typename TSpec = Default >
+	struct Owner;							// owns its elements
 
 
     //////////////////////////////////////////////////////////////////////////////
 	// Forwards
 	//////////////////////////////////////////////////////////////////////////////
 
-	template < typename TString, typename TSpec = ConcatVirtual<> >
-//	template < typename TString, typename TSpec = ConcatDirect<> >
+	template < typename TString, typename TSpec = Owner<> >
 	class StringSet;
 
     template <typename TObject>
@@ -298,16 +297,16 @@ namespace SEQAN_NAMESPACE_MAIN
 ...type:Class.String
 ..param.TSpec:The specializing type for the StringSet.
 ...metafunction:Metafunction.Spec
-...remarks:Possible values are IdHolder<TightStorage<> > or IdHolder<GenerousStorage<> >
-...remarks:TightStorage is very space efficient whereas GenerousStorage provides fast access to the strings in the container via ids.
-...default:$GenerousStorage$.
+...remarks:Possible values are Dependent<Tight> or Dependent<Generous>
+...remarks:Tight is very space efficient whereas Generous provides fast access to the strings in the container via ids.
+...default:$Generous$.
 ..include:sequence.h
 */
 
 	//////////////////////////////////////////////////////////////////////////////
     // StringSet with individual sequences in a tight string of string pointers and corr. IDs
-	template<typename TString, typename TSpec>
-	class StringSet<TString, IdHolder<TightStorage<TSpec> > >
+	template <typename TString>
+	class StringSet<TString, Dependent<Tight> >
 	{
 		public:
 			typedef String<TString*>							TStrings;
@@ -350,8 +349,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	//////////////////////////////////////////////////////////////////////////////
     // StringSet with individual sequences in a string of string pointers
-	template<typename TString, typename TSpec>
-	class StringSet<TString, IdHolder<GenerousStorage<TSpec> > >
+	template <typename TString>
+	class StringSet<TString, Dependent<Generous> >
 	{
 		public:
 			typedef String<TString*>							TStrings;
@@ -391,8 +390,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	//////////////////////////////////////////////////////////////////////////////
     // StringSet with individual sequences in a string of strings
-    template < typename TString, typename TSpec >
-    class StringSet< TString, ConcatVirtual<TSpec> >
+    template < typename TString >
+    class StringSet< TString, Owner<Default> >
     {
 	public:
 
@@ -436,7 +435,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	//////////////////////////////////////////////////////////////////////////////
     // StringSet with directly concatenated sequences
     template < typename TString, typename TLimiter >
-    class StringSet< TString, ConcatDirect<TLimiter> >
+    class StringSet< TString, Owner<ConcatDirect<TLimiter> > >
     {
 	public:
 		typedef typename StringSetLimits<StringSet>::Type	TLimits;
@@ -490,29 +489,34 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	// direct concatenation
 	template < typename TString, typename TSpec >
-    struct Value< StringSet< TString, ConcatDirect<TSpec> > > {
+    struct Value< StringSet< TString, Owner<ConcatDirect<TSpec> > > > {
 		typedef typename Infix<TString>::Type Type;
     };
 
     template < typename TString, typename TSpec >
-    struct GetValue< StringSet< TString, ConcatDirect<TSpec> > > {
+    struct GetValue< StringSet< TString, Owner<ConcatDirect<TSpec> > > > {
 		typedef typename Infix<TString>::Type Type;
     };
 
     template < typename TString, typename TSpec >
-    struct GetValue< StringSet< TString, ConcatDirect<TSpec> > const > {
+    struct GetValue< StringSet< TString, Owner<ConcatDirect<TSpec> > > const >{
 		typedef typename Infix<TString const>::Type Type;
     };
 
     template < typename TString, typename TSpec >
-    struct Reference< StringSet< TString, ConcatDirect<TSpec> > > {
+    struct Reference< StringSet< TString, Owner<ConcatDirect<TSpec> > > > {
 		typedef typename Infix<TString>::Type Type;
     };
 
     template < typename TString, typename TSpec >
-    struct Reference< StringSet< TString, ConcatDirect<TSpec> > const > {
+    struct Reference< StringSet< TString, Owner<ConcatDirect<TSpec> > > const > {
 		typedef typename Infix<TString const>::Type Type;
     };
+
+    template <typename TString, typename TSpec>
+	struct AllowsFastRandomAccess< StringSet< TString, TSpec > >:
+		AllowsFastRandomAccess<TString> {};
+
 
 //////////////////////////////////////////////////////////////////////////////
 // validStringSetLimits
@@ -528,7 +532,7 @@ namespace SEQAN_NAMESPACE_MAIN
     }
 
 	template < typename TString, typename TSpec >
-    inline bool _validStringSetLimits(StringSet< TString, ConcatDirect<TSpec> > const &me) {
+    inline bool _validStringSetLimits(StringSet< TString, Owner<ConcatDirect<TSpec> > > const &me) {
         return true;
     }
 
@@ -540,7 +544,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	template < typename TString, typename TSpec >
-    inline void _refreshStringSetLimits(StringSet< TString, ConcatDirect<TSpec> > &me) {
+    inline void _refreshStringSetLimits(StringSet< TString, Owner<ConcatDirect<TSpec> > > &me) {
 	}
 
 	template < typename TString, typename TSpec >
@@ -615,10 +619,10 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 // appendValue
 
-	// ConcatVirtual
-	template < typename TString, typename TSpec, typename TString2, typename TExpand >
+	// Default
+	template < typename TString, typename TString2, typename TExpand >
     inline void appendValue(
-		StringSet< TString, ConcatVirtual<TSpec> > &me, 
+		StringSet< TString, Owner<Default> > &me, 
 		TString2 const &obj,
 		Tag<TExpand> const) 
 	{
@@ -629,7 +633,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	// ConcatDirect
 	template < typename TString, typename TString2, typename TExpand >
     inline void appendValue(
-		StringSet< TString, ConcatDirect<void> > &me, 
+		StringSet< TString, Owner<ConcatDirect<void> > > &me, 
 		TString2 const &obj,
 		Tag<TExpand> const) 
 	{
@@ -639,7 +643,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template < typename TString, typename TLimiter, typename TString2, typename TExpand >
     inline void appendValue(
-		StringSet< TString, ConcatDirect<TLimiter> > &me, 
+		StringSet< TString, Owner<ConcatDirect<TLimiter> > > &me, 
 		TString2 const &obj,
 		Tag<TExpand> const) 
 	{
@@ -649,9 +653,9 @@ namespace SEQAN_NAMESPACE_MAIN
     }
 
 	// Generous
-	template < typename TString, typename TSpec, typename TExpand >
+	template < typename TString, typename TExpand >
 	inline void appendValue(
-		StringSet<TString, IdHolder<GenerousStorage<TSpec> > > &me,
+		StringSet<TString, Dependent<Generous> > &me,
 		TString const &obj, 
 		Tag<TExpand> const) 
 	{
@@ -661,9 +665,9 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	// Tight
-	template < typename TString, typename TSpec, typename TExpand >
+	template < typename TString, typename TExpand >
 	inline void appendValue(
-		StringSet<TString, IdHolder<TightStorage<TSpec> > > &me, 
+		StringSet<TString, Dependent<Tight> > &me, 
 		TString const &obj,
 		Tag<TExpand> const) 
 	{
@@ -684,8 +688,8 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 // clear
 
-	template < typename TString, typename TSpec >
-    inline void	clear(StringSet< TString, ConcatVirtual<TSpec> > &me) 
+	template < typename TString >
+    inline void	clear(StringSet< TString, Owner<Default> > &me) 
 	{
 	SEQAN_CHECKPOINT
 		clear(me.strings);
@@ -694,15 +698,15 @@ namespace SEQAN_NAMESPACE_MAIN
     }
 
     template < typename TString, typename TLimiter >
-    inline void	clear(StringSet< TString, ConcatDirect<TLimiter> > &me) 
+    inline void	clear(StringSet< TString, Owner<ConcatDirect<TLimiter> > > &me) 
 	{
 	SEQAN_CHECKPOINT
 		clear(me.concat_string);
 		resize(me.limits, 1);
     }
 
-    template < typename TString, typename TSpec >
-	inline void	clear(StringSet< TString, IdHolder<GenerousStorage<TSpec> > > & me) 
+    template < typename TString >
+	inline void	clear(StringSet< TString, Dependent<Generous> > & me) 
 	{
 	SEQAN_CHECKPOINT
 		clear(me.strings);
@@ -710,8 +714,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		me.limitsValid = true;
 	}
 
-    template < typename TString, typename TSpec >
-	inline void	clear(StringSet<TString, IdHolder<TightStorage<TSpec> > >& me) 
+    template < typename TString >
+	inline void	clear(StringSet<TString, Dependent<Tight> >& me) 
 	{
 	SEQAN_CHECKPOINT
 		clear(me.strings);
@@ -731,9 +735,9 @@ namespace SEQAN_NAMESPACE_MAIN
         return length(me.limits) - 1;
     }
 
-	template<typename TString, typename TSpec>
-	inline typename Size<StringSet<TString, IdHolder<TightStorage<TSpec> > > >::Type 
-	length(StringSet<TString, IdHolder<TightStorage<TSpec> > > const &me) 
+	template <typename TString>
+	inline typename Size<StringSet<TString, Dependent<Tight> > >::Type 
+	length(StringSet<TString, Dependent<Tight> > const &me) 
 	{
 		return length(me.strings);
 	}
@@ -751,8 +755,8 @@ namespace SEQAN_NAMESPACE_MAIN
     }
 
 	template < typename TString, typename TSpec, typename TSize >
-    inline typename Size< StringSet< TString, ConcatDirect<TSpec> > >::Type 
-	resize(StringSet< TString, ConcatDirect<TSpec> > &me, TSize new_size) {
+    inline typename Size< StringSet< TString, Owner<ConcatDirect<TSpec> > > >::Type 
+	resize(StringSet< TString, Owner<ConcatDirect<TSpec> > > &me, TSize new_size) {
 		return resize(me.limits, new_size + 1) - 1;
     }
 
@@ -760,17 +764,17 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 // value	
 
-	// ConcatVirtual
-	template < typename TString, typename TSpec, typename TPos >
-	inline typename Reference< StringSet< TString, ConcatVirtual<TSpec> > >::Type
-	value(StringSet< TString, ConcatVirtual<TSpec> > & me, TPos pos)
+	// Default
+	template < typename TString, typename TPos >
+	inline typename Reference< StringSet< TString, Owner<Default> > >::Type
+	value(StringSet< TString, Owner<Default> > & me, TPos pos)
 	{
 		return me.strings[pos];
 	}
 
-	template < typename TString, typename TSpec, typename TPos >
-	inline typename Reference< StringSet< TString, ConcatVirtual<TSpec> > const >::Type
-	value(StringSet< TString, ConcatVirtual<TSpec> > const & me, TPos pos)
+	template < typename TString, typename TPos >
+	inline typename Reference< StringSet< TString, Owner<Default> > const >::Type
+	value(StringSet< TString, Owner<Default> > const & me, TPos pos)
 	{
 		return me.strings[pos];
 	}
@@ -778,22 +782,22 @@ namespace SEQAN_NAMESPACE_MAIN
 	// ConcatDirect
 	template < typename TString, typename TSpec, typename TPos >
 	inline typename Infix<TString>::Type
-	value(StringSet< TString, ConcatDirect<TSpec> > & me, TPos pos)
+	value(StringSet< TString, Owner<ConcatDirect<TSpec> > > & me, TPos pos)
 	{
 		return infix(me.concat, me.limits[pos], me.limits[pos + 1]);
 	} 
 
 	template < typename TString, typename TSpec, typename TPos >
 	inline typename Infix<TString const>::Type
-	value(StringSet< TString, ConcatDirect<TSpec> > const & me, TPos pos)
+	value(StringSet< TString, Owner<ConcatDirect<TSpec> > > const & me, TPos pos)
 	{
 		return infix(me.concat, me.limits[pos], me.limits[pos + 1]);
 	} 
 
 	// Tight
-	template < typename TString, typename TSpec, typename TPos >
-	inline typename Reference<StringSet< TString, IdHolder<TightStorage<TSpec> > > >::Type
-	value(StringSet< TString, IdHolder<TightStorage<TSpec> > >& me, TPos pos)
+	template < typename TString, typename TPos >
+	inline typename Reference<StringSet< TString, Dependent<Tight> > >::Type
+	value(StringSet< TString, Dependent<Tight> >& me, TPos pos)
 	{
 	SEQAN_CHECKPOINT
 		if (me.strings[pos])
@@ -802,9 +806,9 @@ namespace SEQAN_NAMESPACE_MAIN
 		return tmp;
 	}
 
-	template < typename TString, typename TSpec, typename TPos >
-	inline typename Reference<StringSet< TString, IdHolder<TightStorage<TSpec> > > const >::Type
-	value(StringSet< TString, IdHolder<TightStorage<TSpec> > >const & me, TPos pos)
+	template < typename TString, typename TPos >
+	inline typename Reference<StringSet< TString, Dependent<Tight> > const >::Type
+	value(StringSet< TString, Dependent<Tight> >const & me, TPos pos)
 	{
 		if (me.strings[pos])
 			return *me.strings[pos];
@@ -813,9 +817,9 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	// Generous
-	template < typename TString, typename TSpec, typename TPos >
-	inline typename Reference<StringSet< TString, IdHolder<GenerousStorage<TSpec> > > >::Type
-	value(StringSet< TString, IdHolder<GenerousStorage<TSpec> > >& me, TPos pos)
+	template < typename TString, typename TPos >
+	inline typename Reference<StringSet< TString, Dependent<Generous> > >::Type
+	value(StringSet< TString, Dependent<Generous> >& me, TPos pos)
 	{
 	SEQAN_CHECKPOINT
 		unsigned i = _findIthNonZeroValue(me.strings, pos);
@@ -825,9 +829,9 @@ namespace SEQAN_NAMESPACE_MAIN
 		return tmp;
 	}
 
-	template < typename TString, typename TSpec, typename TPos >
-	inline typename Reference< StringSet< TString, IdHolder<GenerousStorage<TSpec> > > const >::Type
-	value(StringSet< TString, IdHolder<GenerousStorage<TSpec> > > const & me, TPos pos)
+	template < typename TString, typename TPos >
+	inline typename Reference< StringSet< TString, Dependent<Generous> > const >::Type
+	value(StringSet< TString, Dependent<Generous> > const & me, TPos pos)
 	{
 	SEQAN_CHECKPOINT
 		unsigned i = _findIthNonZeroValue(me.strings, pos);
@@ -854,9 +858,18 @@ namespace SEQAN_NAMESPACE_MAIN
 ..see:Function.valueById
 */
 
-	template<typename TString, typename TSpec, typename TId>
-	inline typename Reference<StringSet<TString, IdHolder<GenerousStorage<TSpec> > > >::Type
-	getValueById(StringSet<TString, IdHolder<GenerousStorage<TSpec> > >& me, 
+	template <typename TString, typename TSpec, typename TId>
+	inline typename Reference<StringSet<TString, Owner<TSpec> > >::Type
+	getValueById(StringSet<TString, Owner<TSpec> >& me, 
+				TId const id) 
+	{
+	SEQAN_CHECKPOINT
+		return value(me, id);
+	}
+
+	template <typename TString, typename TId>
+	inline typename Reference<StringSet<TString, Dependent<Generous> > >::Type
+	getValueById(StringSet<TString, Dependent<Generous> >& me, 
 				TId const id) 
 	{
 	SEQAN_CHECKPOINT
@@ -866,9 +879,9 @@ namespace SEQAN_NAMESPACE_MAIN
 		return tmp;
 	}
 
-	template<typename TString, typename TSpec, typename TId>
-	inline typename Reference<StringSet<TString, IdHolder<TightStorage<TSpec> > > >::Type
-	getValueById(StringSet<TString, IdHolder<TightStorage<TSpec> > >&me, 
+	template <typename TString, typename TId>
+	inline typename Reference<StringSet<TString, Dependent<Tight> > >::Type
+	getValueById(StringSet<TString, Dependent<Tight> >&me, 
 				TId const id) 
 	{
 	SEQAN_CHECKPOINT
@@ -931,8 +944,8 @@ namespace SEQAN_NAMESPACE_MAIN
 */
 
 	template<typename TString, typename TSpec, typename TString2>
-	inline typename Id<StringSet<TString, IdHolder<TSpec> > >::Type 
-	assignValueById(StringSet<TString, IdHolder<TSpec> >& me,
+	inline typename Id<StringSet<TString, TSpec> >::Type 
+	assignValueById(StringSet<TString, TSpec>& me,
 					TString2& obj) 
 	{
 	SEQAN_CHECKPOINT
@@ -941,9 +954,25 @@ namespace SEQAN_NAMESPACE_MAIN
 		return length(me.strings) - 1;
 	}
 
-	template<typename TString, typename TSpec, typename TId>
-	inline typename Id<StringSet<TString, IdHolder<GenerousStorage<TSpec> > > >::Type 
-	assignValueById(StringSet<TString, IdHolder<GenerousStorage<TSpec> > >& me, 
+	template <typename TString, typename TSpec, typename TId>
+	inline typename Id<StringSet<TString, Owner<TSpec> > >::Type 
+	assignValueById(StringSet<TString, Owner<TSpec> >& me, 
+					TString& obj,
+					TId id) 
+	{
+	SEQAN_CHECKPOINT
+		if (id >= (TId) length(me.strings)) {
+			fill(me.strings, id+1, TString());
+			resize(me.limits, length(me.limits) + 1);
+		}
+		assignValue(me, id, obj);
+		me.limitsValid = false;
+		return id;
+	}
+
+	template<typename TString, typename TId>
+	inline typename Id<StringSet<TString, Dependent<Generous> > >::Type 
+	assignValueById(StringSet<TString, Dependent<Generous> >& me, 
 					TString& obj,
 					TId id) 
 	{
@@ -960,14 +989,14 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	//////////////////////////////////////////////////////////////////////////////
 
-	template<typename TString, typename TSpec, typename TId>
-	inline typename Id<StringSet<TString, IdHolder<TightStorage<TSpec> > > >::Type 
-	assignValueById(StringSet<TString, IdHolder<TightStorage<TSpec> > >& me, 
+	template<typename TString, typename TId>
+	inline typename Id<StringSet<TString, Dependent<Tight> > >::Type 
+	assignValueById(StringSet<TString, Dependent<Tight> >& me, 
 					TString& obj,
 					TId id) 
 	{
 	SEQAN_CHECKPOINT
-		typedef StringSet<TString, IdHolder<TightStorage<TSpec> > > TStringSet;
+		typedef StringSet<TString, Dependent<Tight> > TStringSet;
 		typedef typename Size<TStringSet>::Type TSize;
 		
 		for(TSize i = 0; i < length(me.ids); ++i)
@@ -1009,7 +1038,18 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template<typename TString, typename TSpec, typename TId>
 	inline void
-	removeValueById(StringSet<TString, IdHolder<GenerousStorage<TSpec> > >& me,	TId const id) 
+	removeValueById(StringSet<TString, Owner<TSpec> >& me, TId const id) 
+	{
+	SEQAN_CHECKPOINT
+		erase(me.strings, id);
+		erase(me.ids, id);
+		resize(me.limits, length(me.limits) - 1);
+		me.limitsValid = empty(me);
+	}
+
+	template<typename TString, typename TId>
+	inline void
+	removeValueById(StringSet<TString, Dependent<Generous> >& me, TId const id) 
 	{
 	SEQAN_CHECKPOINT
 		if (me.strings[id] != (TString*) 0) {
@@ -1021,12 +1061,12 @@ namespace SEQAN_NAMESPACE_MAIN
 			resize(me.strings, length(me.strings) - 1);
 	}
 
-	template<typename TString, typename TSpec, typename TId>
+	template<typename TString, typename TId>
 	inline void
-	removeValueById(StringSet<TString, IdHolder<TightStorage<TSpec> > >& me, TId const id) 
+	removeValueById(StringSet<TString, Dependent<Tight> >& me, TId const id) 
 	{
 	SEQAN_CHECKPOINT
-		typedef StringSet<TString, IdHolder<TightStorage<TSpec> > > TStringSet;
+		typedef StringSet<TString, Dependent<Tight> > TStringSet;
 		typedef typename Size<TStringSet>::Type TSize;
 
 		SEQAN_ASSERT(length(me.limits) == length(me) + 1);
@@ -1059,15 +1099,25 @@ namespace SEQAN_NAMESPACE_MAIN
 ..returns:void
 */
 
-	template <typename TString, typename TSpec, typename TIds, typename TLength>
+	template <typename TString, typename TSpec, typename TDestSpec, typename TIds, typename TLength>
 	inline void
-	subset(StringSet<TString, IdHolder<GenerousStorage<TSpec> > >& source,
-		StringSet<TString, IdHolder<GenerousStorage<TSpec> > >& dest,
+	subset(StringSet<TString, Owner<TSpec> >& source,
+		StringSet<TString, TDestSpec>& dest,
 		TIds ids,
 		TLength len)
 	{
 	SEQAN_CHECKPOINT
-		typedef StringSet<TString, IdHolder<GenerousStorage<TSpec> > > TStringSet;
+	}
+
+	template <typename TString, typename TIds, typename TLength>
+	inline void
+	subset(StringSet<TString, Dependent<Generous> >& source,
+		StringSet<TString, Dependent<Generous> >& dest,
+		TIds ids,
+		TLength len)
+	{
+	SEQAN_CHECKPOINT
+		typedef StringSet<TString, Dependent<Generous> > TStringSet;
 		typedef typename Id<TStringSet>::Type TId;
 		typedef typename Size<TStringSet>::Type TSize;
 
@@ -1079,15 +1129,15 @@ namespace SEQAN_NAMESPACE_MAIN
 			dest.strings[ids[i]] = source.strings[ids[i]];
 	}
 
-	template <typename TString, typename TSpec, typename TIds, typename TLength>
+	template <typename TString, typename TIds, typename TLength>
 	inline void
-	subset(StringSet<TString, IdHolder<TightStorage<TSpec> > >& source,
-		StringSet<TString, IdHolder<TightStorage<TSpec> > >& dest,
+	subset(StringSet<TString, Dependent<Tight> >& source,
+		StringSet<TString, Dependent<Tight> >& dest,
 		TIds ids,
 		TLength len)
 	{
 	SEQAN_CHECKPOINT
-		typedef StringSet<TString, IdHolder<TightStorage<TSpec> > > TStringSet;
+		typedef StringSet<TString, Dependent<Tight> > TStringSet;
 		typedef typename Id<TStringSet>::Type TId;
 		typedef typename Size<TStringSet>::Type TSize;
 
@@ -1117,8 +1167,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <typename TString, typename TSpec, typename TIds>
 	inline void
-	subset(StringSet<TString, IdHolder<TSpec> >& source,
-		StringSet<TString, IdHolder<TSpec> >& dest,
+	subset(StringSet<TString, TSpec>& source,
+		StringSet<TString, TSpec>& dest,
 		TIds ids)
 	{
 	SEQAN_CHECKPOINT
@@ -1143,7 +1193,7 @@ namespace SEQAN_NAMESPACE_MAIN
 //____________________________________________________________________________
 // WARNING: 
 // operator[] conducts a binary search and should be avoided
-// you better use StringSet<.., ConcatDirect<..> > for random access
+// you better use StringSet<.., Owner<ConcatDirect<..> > > for random access
 // or ConcatenatorNto1's iterators for sequential access
 
 		template <typename TPos>
@@ -1180,60 +1230,13 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Size< typename Value<TStringSet>::Type >::Type Type;
     };
 //____________________________________________________________________________
-// default concatenator iterators
 
-    template <typename TString, typename TSpec >
-    struct Iterator< ConcatenatorNto1< StringSet<TString, TSpec> >, Standard > {
-        typedef Iter<StringSet<TString, TSpec>, ConcatVirtual<> > Type;
-    };
-
-    template <typename TString, typename TSpec >
-    struct Iterator< ConcatenatorNto1< StringSet<TString, TSpec> const >, Standard > {
-        typedef Iter<StringSet<TString, TSpec> const, ConcatVirtual<> > Type;
-    };
-
-    template <typename TString, typename TSpec >
-    struct Iterator< ConcatenatorNto1< StringSet<TString, TSpec> >, Rooted > {
-        typedef Iter<StringSet<TString, TSpec>, ConcatVirtual<> > Type;
-    };
-
-    template <typename TString, typename TSpec >
-    struct Iterator< ConcatenatorNto1< StringSet<TString, TSpec> const >, Rooted > {
-        typedef Iter<StringSet<TString, TSpec> const, ConcatVirtual<> > Type;
-    };
-//____________________________________________________________________________
-// specialized concatenator iterators of ConcatVirtual StringSet
-
-    template <typename TString, typename TSpec >
-    struct Iterator< ConcatenatorNto1< StringSet<TString, ConcatVirtual<TSpec> > >, Standard > {
-        typedef Iter<StringSet<TString, ConcatVirtual<TSpec> >, ConcatVirtual<TSpec> > Type;
-    };
-
-    template <typename TString, typename TSpec >
-    struct Iterator< ConcatenatorNto1< StringSet<TString, ConcatVirtual<TSpec> > const >, Standard > {
-        typedef Iter<StringSet<TString, ConcatVirtual<TSpec> > const, ConcatVirtual<TSpec> > Type;
-    };
-
-    template <typename TString, typename TSpec >
-    struct Iterator< ConcatenatorNto1< StringSet<TString, ConcatVirtual<TSpec> > >, Rooted > {
-        typedef Iter<StringSet<TString, ConcatVirtual<TSpec> >, ConcatVirtual<TSpec> > Type;
-    };
-
-    template <typename TString, typename TSpec >
-    struct Iterator< ConcatenatorNto1< StringSet<TString, ConcatVirtual<TSpec> > const >, Rooted > {
-        typedef Iter<StringSet<TString, ConcatVirtual<TSpec> > const, ConcatVirtual<TSpec> > Type;
-    };
-//____________________________________________________________________________
-
-	template <typename TStringSet >
-    struct Iterator< ConcatenatorNto1<TStringSet> const, Standard > {
-		typedef typename Iterator< ConcatenatorNto1<TStringSet> >::Type Type;
-    };
-
-    template <typename TStringSet >
-    struct Iterator< ConcatenatorNto1<TStringSet> const, Rooted > {
-		typedef typename Iterator< ConcatenatorNto1<TStringSet> >::Type Type;
-    };
+    template <typename TStringSet>
+	struct AllowsFastRandomAccess< ConcatenatorNto1<TStringSet> >
+	{
+		typedef False Type;
+		enum { VALUE = false };
+	};
 
 //////////////////////////////////////////////////////////////////////////////
 // value
@@ -1311,7 +1314,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	};
 
 	template < typename TString, typename TSpec >
-	struct Concatenator< StringSet<TString, ConcatDirect<TSpec> > > {
+	struct Concatenator< StringSet<TString, Owner<ConcatDirect<TSpec> > > > {
 		typedef TString Type;
 	};
 
@@ -1338,11 +1341,12 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 	//////////////////////////////////////////////////////////////////////////////
-    // StringSet<.., ConcatVirtual<> > Iterator
-	// 
 	// This iterator sequentially iterates through the elements of TStringSet
-	// as if they were directly concatenated (compare StringSet<.., ConcatDirect<> >
+	// as if they were directly concatenated (compare StringSet<.., Owner<ConcatDirect<> > >
     //////////////////////////////////////////////////////////////////////////////
+
+	template < typename TLimiter = void >
+	struct ConcatVirtual;
 
     template < typename TStringSet, typename TSpec >
 	class Iter< TStringSet, ConcatVirtual<TSpec> > 
@@ -1431,6 +1435,43 @@ namespace SEQAN_NAMESPACE_MAIN
 			typedef Pair<unsigned, TSize> TPair;
 			return posGlobalize(TPair(objNo, difference(_begin, _cur)), stringSetLimits(*host));
         }
+    };
+
+	//////////////////////////////////////////////////////////////////////////////
+	// ConcatenatorNto1 meta functions
+	//////////////////////////////////////////////////////////////////////////////
+//____________________________________________________________________________
+// default concatenator iterators
+
+    template <typename TString, typename TSpec >
+    struct Iterator< ConcatenatorNto1< StringSet<TString, TSpec> >, Standard > {
+        typedef Iter<StringSet<TString, TSpec>, ConcatVirtual<> > Type;
+    };
+
+    template <typename TString, typename TSpec >
+    struct Iterator< ConcatenatorNto1< StringSet<TString, TSpec> const >, Standard > {
+        typedef Iter<StringSet<TString, TSpec> const, ConcatVirtual<> > Type;
+    };
+
+    template <typename TString, typename TSpec >
+    struct Iterator< ConcatenatorNto1< StringSet<TString, TSpec> >, Rooted > {
+        typedef Iter<StringSet<TString, TSpec>, ConcatVirtual<> > Type;
+    };
+
+    template <typename TString, typename TSpec >
+    struct Iterator< ConcatenatorNto1< StringSet<TString, TSpec> const >, Rooted > {
+        typedef Iter<StringSet<TString, TSpec> const, ConcatVirtual<> > Type;
+    };
+//____________________________________________________________________________
+
+	template <typename TStringSet >
+    struct Iterator< ConcatenatorNto1<TStringSet> const, Standard > {
+		typedef typename Iterator< ConcatenatorNto1<TStringSet> >::Type Type;
+    };
+
+    template <typename TStringSet >
+    struct Iterator< ConcatenatorNto1<TStringSet> const, Rooted > {
+		typedef typename Iterator< ConcatenatorNto1<TStringSet> >::Type Type;
     };
 
 	//////////////////////////////////////////////////////////////////////////////

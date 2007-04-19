@@ -20,11 +20,11 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < 
 		typename TSA, 
 		typename TObject, 
-		typename ConstrSpec >
+		typename TAlgSpec >
 	void createSuffixArrayExt(
 		TSA &suffixArray,
 		TObject const &text,
-		ConstrSpec const &)
+		TAlgSpec const)
 	{
         // signed characters behave different than unsigned when compared
         // to get the same index with signed or unsigned chars we simply cast them to unsigned
@@ -34,7 +34,7 @@ namespace SEQAN_NAMESPACE_MAIN
         // specialization
 		typedef Pipe< TObject, Source<> >				src_t;
         typedef Pipe< src_t, Caster<TUValue> >          unsigner_t;
-		typedef Pipe< unsigner_t, ConstrSpec >	        creator_t;
+		typedef Pipe< unsigner_t, TAlgSpec >	        creator_t;
 
 		// instantiation
 		src_t		src(text);
@@ -55,11 +55,11 @@ namespace SEQAN_NAMESPACE_MAIN
 		typename TSA, 
 		typename TString, 
 		typename TSpec,
-		typename ConstrSpec >
+		typename TAlgSpec >
 	void createSuffixArrayExt(
 		TSA &suffixArray,
 		StringSet<TString, TSpec> const &stringSet,
-		ConstrSpec const &)
+		TAlgSpec const)
 	{
         // signed characters behave different than unsigned when compared
         // to get the same index with signed or unsigned chars we simply cast them to unsigned
@@ -67,7 +67,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Concatenator<StringSet<TString, TSpec> >::Type			TConcat;
         typedef typename _MakeUnsigned< typename Value<TConcat>::Type >::Type	TUValue;
 		typedef Multi<
-			ConstrSpec, 
+			TAlgSpec, 
 			typename Value<TSA>::Type, 
 			typename StringSetLimits<StringSet<TString, TSpec> >::Type >		MultiConstrSpec;
 
@@ -106,8 +106,8 @@ namespace SEQAN_NAMESPACE_MAIN
 			   typename TAlgSpec >
     inline void createSuffixArray(
 		TSA &SA,
-		TText &s,
-		TAlgSpec const &alg)
+		TText const &s,
+		TAlgSpec const alg)
 	{
 		// -> call internal memory algorithm with an extended interface (+ alphabet size, max_depth)
 		createSuffixArray(SA, s, alg, ValueSize< typename Value<TText>::Type >::VALUE, 0);
@@ -120,8 +120,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		typename TAlgSpec >
 	inline void createSuffixArray(
 		TSA &SA,
-		String< TValue, External<TConfig> > &s,
-		TAlgSpec const &alg)
+		String< TValue, External<TConfig> > const &s,
+		TAlgSpec const alg)
 	{
 		// -> explicitly create SA using external memory
         createSuffixArrayExt(SA, s, alg);
@@ -135,14 +135,15 @@ namespace SEQAN_NAMESPACE_MAIN
 		typename TAlgSpec >
 	inline void createSuffixArray(
 		TSA &SA,
-		StringSet< String<TValue, TSpec>, TSSetSpec > &s,
-		TAlgSpec const &)
+		StringSet< String<TValue, TSpec>, TSSetSpec > const &s,
+		TAlgSpec const)
 	{
         createSuffixArrayExt(SA, s, Skew7());
 	}
 
 
 //____________________________________________________________________________
+
 
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -153,17 +154,17 @@ namespace SEQAN_NAMESPACE_MAIN
         typename TLCPTable,
 		typename TObject, 
         typename TSA,
-		typename ConstrSpec >
+		typename TAlgSpec >
 	void createLCPTableExt(
 		TLCPTable &LCP,
 		TObject const &text,
 		TSA const &suffixArray,
-		ConstrSpec const &)
+		TAlgSpec const)
 	{
 		// specialization
 		typedef Pipe< TObject, Source<> >							srcText_t;
 		typedef Pipe< TSA, Source<> >   							srcSA_t;
-	    typedef Pipe< Bundle2< srcText_t, srcSA_t >, ConstrSpec >	creator_t;
+	    typedef Pipe< Bundle2< srcText_t, srcSA_t >, TAlgSpec >		creator_t;
 
 		// instantiation
 		srcText_t	srcText(text);
@@ -185,16 +186,16 @@ namespace SEQAN_NAMESPACE_MAIN
 		typename TString,
 		typename TSpec,
         typename TSA,
-		typename ConstrSpec >
+		typename TAlgSpec >
 	void createLCPTableExt(
 		TLCPTable &LCP,
 		StringSet<TString, TSpec> const &stringSet,
 		TSA const &suffixArray,
-		ConstrSpec const &)
+		TAlgSpec const)
 	{
 		typedef typename Concatenator<StringSet<TString, TSpec> >::Type TConcat;
 		typedef Multi<
-			ConstrSpec, 
+			TAlgSpec, 
 			typename Value<TSA>::Type, 
 			typename StringSetLimits<StringSet<TString, TSpec> >::Type > MultiConstrSpec;
 
@@ -262,31 +263,36 @@ namespace SEQAN_NAMESPACE_MAIN
 //____________________________________________________________________________
 
 
+
 	//////////////////////////////////////////////////////////////////////////////
 	// Enhanced LCP Table creation wrappers
 	//////////////////////////////////////////////////////////////////////////////
 
     // build enhanced LCP table with an external pipelining algorithm (ext kasai, ...)
 	// and a dynamic programming tree construction alg
+	// (in contrast to the LCP table the enhanced LCP table contains the lcp-values 
+	// of suffix intervals used in the binary search)
 	template < 
 		typename TValue, 
         typename TSpec,
 		typename TObject, 
         typename TSA,
-		typename ConstrSpec >
+		typename TAlgSpec >
 	void createLCPETableExt(
 		String< TValue, TSpec > &LCPE,
-		TObject &text,
-		TSA &suffixArray,
-		ConstrSpec const &)
+		TObject const &text,
+		TSA const &suffixArray,
+		TAlgSpec const)
 	{
+		typedef typename Concatenator<TObject>::Type				TConcat;
+
 		// specialization
-		typedef Pipe< TObject, Source<> >						    srcText_t;
+		typedef Pipe< TConcat, Source<> >						    srcText_t;
 		typedef Pipe< TSA, Source<> >					    	    srcSA_t;
-	    typedef Pipe< Bundle2< srcText_t, srcSA_t >, ConstrSpec >	creator_t;
+	    typedef Pipe< Bundle2< srcText_t, srcSA_t >, TAlgSpec >		creator_t;
 
 		// instantiation
-		srcText_t	srcText(text);
+		srcText_t	srcText(concat(text));
 		srcSA_t		srcSA(suffixArray);
 		creator_t	creator;
 
@@ -298,38 +304,6 @@ namespace SEQAN_NAMESPACE_MAIN
 		createLCPBinTree(LCPE, creator);
 	}
 
-	// build enhanced LCP+SuffixArray table with an external version of Kasai
-	// and a dynamic programming tree construction alg
-	template < 
-		typename TValue, 
-        typename TSpec,
-		typename TObject, 
-        typename TSA,
-		typename ConstrSpec >
-	void createLCPHTableExt(
-		String< TValue, TSpec > &LCPH,
-		TObject &text,
-		TSA &suffixArray,
-		ConstrSpec const &spec) 
-	{
-		// specialization
-		typedef Pipe< TObject, Source<> >					        srcText_t;
-		typedef Pipe< TSA, Source<> >								srcSA_t;
-	    typedef Pipe< Bundle2< srcText_t, srcSA_t >, ConstrSpec >	creator_t;
-
-		// instantiation
-		srcText_t	srcText(text);
-		srcSA_t		srcSA(suffixArray);
-		creator_t	creator;
-
-		// processing
-	    creator << bundle2(srcText, srcSA);
-		#ifdef SEQAN_TEST_INDEX
-			isLCPTable(creator, srcSA, text);
-		#endif
-		createHybridBinTree(LCPH, creator, suffixArray);
-	}
-
     // build enhanced LCP table with an lcp algorithm
 	// and a dynamic programming tree construction alg
     template <
@@ -337,19 +311,19 @@ namespace SEQAN_NAMESPACE_MAIN
         typename TSpec,
         typename TText,
         typename TSA,
-		typename ConstrSpec >
+		typename TAlgSpec >
     void createLCPETable(
 		String< TValue, TSpec > &LCPE,
-		TText &s,
-		TSA &SA,
-		ConstrSpec const &spec)
+		TText const &s,
+		TSA const &SA,
+		TAlgSpec const alg)
 	{
         //TSA LCP;
         //resize(LCP, length(s), Exact());
 		// we use LCPE[n-lcpSize..n-1] as a temporary buffer instead of allocating one
 		typename Suffix<String< TValue, TSpec > >::Type LCP = suffix(LCPE, length(LCPE) - length(s));
 
-		createLCPTable(LCP, s, SA, spec);
+		createLCPTable(LCP, s, SA, alg);
 		#ifdef SEQAN_TEST_INDEX
 			isLCPTable(LCP, SA, s);
 		#endif
@@ -361,14 +335,14 @@ namespace SEQAN_NAMESPACE_MAIN
         typename TConfig,
         typename TText,
         typename TSA,
-		typename ConstrSpec >
+		typename TAlgSpec >
     void createLCPETable(
 		String< TValue, External<TConfig> > &LCPE,
-		TText &s,
-		TSA &SA,
-		ConstrSpec const &spec)
+		TText const &s,
+		TSA const &SA,
+		TAlgSpec const alg)
 	{
-        createLCPETableExt(LCPE, s, SA, spec);
+        createLCPETableExt(LCPE, s, SA, alg);
     }
 
     template <
@@ -384,59 +358,75 @@ namespace SEQAN_NAMESPACE_MAIN
 		CreateLCPETable(LCPE, s, SA, Kasai());
     }
 
-/*
-	// build enhanced LCP+SuffixArray table with an lcp algorithm
-	// and a dynamic programming tree construction alg
 
-    template <
-        typename TValue,
-        typename TSpec,
-        typename TText,
-        typename TSA,
-		typename ConstrSpec >
-    void createLCPHTable(
-		String< TValue, TSpec > &LCPH,
-		TText &s,
-		TSA &SA,
-		ConstrSpec const &spec = Kasai())
-	{
-        TSA LCP;
-        resize(LCP, length(s), Exact());
-        createLCPTable(LCP, s, SA, spec);
-		#ifdef SEQAN_TEST_INDEX
-			isLCPTable(LCP, SA, s);
-		#endif
-        createHybridBinTree(LCPH, LCP, SA);
-    }
+//____________________________________________________________________________
 
-    template <
-        typename TValue,
-        typename TConfig,
-        typename TText,
-        typename TSA,
-		typename ConstrSpec >
-    void createLCPHTable(
-		String< TValue, External<TConfig> > &LCPH,
-		TText &s,
-		TSA &SA,
-		ConstrSpec const &spec)
-	{
-        createLCPHTableExt(LCPH, s, SA, spec);
-    }
 
-	template < 
-		typename TValue, 
-        typename TSpec,
-        typename TText,
-        typename TSA >
-	void createLCPHTable(
-		String< TValue, TSpec > &LCPH,
-		TText &s,
-		TSA &SA)
+
+	//////////////////////////////////////////////////////////////////////////////
+	// Burrows-Wheeler-Table creation wrappers
+	//////////////////////////////////////////////////////////////////////////////
+
+	template < typename TBWT,
+               typename TText,
+			   typename TSA >
+    void createBWTableExt(
+		TBWT &bwt,
+		TText const &s,
+		TSA const &SA)
 	{
-		createLCPHTable(LCPH, s, SA, Kasai());
+		// specialization
+		typedef Pipe< TText, Source<> >						srcText_t;
+		typedef Pipe< TSA, Source<> >   					srcSA_t;
+	    typedef Pipe< Bundle2< srcText_t, srcSA_t >, BWT >	creator_t;
+
+		// instantiation
+		srcText_t	srcText(s);
+		srcSA_t		srcSA(SA);
+		creator_t	creator;
+
+		// processing
+	    creator << bundle2(srcText, srcSA);
+		bwt << creator;
 	}
+
+/**
+.Function.createBWTable:
+..summary:Creates a Burrows-Wheeler table from a given text and suffix array.
+..cat:Index
+..signature:createBWTable(bwt, text, suffixArray[, algo_tag])
+..param.bwt:A reference to the resulting Burrows-Wheeler table.
+..param.text:A given text.
+..param.suffixArray:The suffix array of $text$.
+..param.algo_tag:A tag that identifies the algorithm which is used for creation.
+..remarks:The size of $bwt$ must be at least $length(text)$ before calling this function.
 */
+
+	// default
+	template < typename TBWT, typename TText, typename TSA, 
+			   typename TTextRandom >
+    inline void _createBWTableWrapper(
+		TBWT &bwt, TText const &s, TSA const &sa, 
+		TTextRandom const)
+	{
+		createBWTableExt(bwt, concat(s), sa);
+	}
+
+	// text supports fast random access
+	template < typename TBWT, typename TText, typename TSA >
+    inline void _createBWTableWrapper(
+		TBWT &bwt, TText const &s, TSA const &sa, 
+		True const)
+	{
+		createBWTableInt(bwt, concat(s), sa);
+	}
+
+	template < typename TBWT, typename TText, typename TSA >
+    inline void createBWTable(TBWT &bwt, TText const &s, TSA const &sa)
+	{
+		_createBWTableWrapper(bwt, s, sa, typename AllowsFastRandomAccess<TText>::Type());
+	}
+
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -503,7 +493,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename TText, typename TSpec>
 	inline bool indexCreate(Index<TText, TSpec> &index, Tag<_Fibre_BWT> const, BWT const) {
 		resize(indexBWT(index), length(indexRawText(index)), Exact());
-		createBWTable(indexBWT(index), indexRawText(index), indexRawSA(index));
+		createBWTable(indexBWT(index), indexText(index), indexRawSA(index));
 		return true;
 	}
 

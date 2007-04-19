@@ -544,9 +544,9 @@ otherwise the seed returned is one many.
 /*
 	template < typename TString, typename TConcSpec, typename TIndexSpec, class TSpec >
 	inline typename Align<TString const, ArrayGaps>
-	alignment(Iter< Index< StringSet<TString, ConcatDirect<TConcSpec> >, TIndexSpec >, VSTree<TSpec> > const &it) 
+	alignment(Iter< Index< StringSet<TString, Owner<ConcatDirect<TConcSpec> > >, TIndexSpec >, VSTree<TSpec> > const &it) 
 	{
-		typedef Index< StringSet<TString, ConcatDirect<TConcSpec> >, TIndexSpec > TIndex;
+		typedef Index< StringSet<TString, Owner<ConcatDirect<TConcSpec> > >, TIndexSpec > TIndex;
 		typedef typename Infix< typename Fibre<TIndex, ESA_SA>::Type const >::Type TOccs;
 		typedef typename Iterator<TOccs, Standard>::Type TIter;
 
@@ -567,9 +567,9 @@ otherwise the seed returned is one many.
 */
 	template < typename TString, typename TConcSpec, typename TIndexSpec, class TSpec >
 	inline Align<TString, ArrayGaps>
-	alignment(Iter< Index< StringSet<TString, ConcatDirect<TConcSpec> >, TIndexSpec >, VSTree<TSpec> > &it) 
+	alignment(Iter< Index< StringSet<TString, Owner<ConcatDirect<TConcSpec> > >, TIndexSpec >, VSTree<TSpec> > &it) 
 	{
-		typedef Index< StringSet<TString, ConcatDirect<TConcSpec> >, TIndexSpec > TIndex;
+		typedef Index< StringSet<TString, Owner<ConcatDirect<TConcSpec> > >, TIndexSpec > TIndex;
 		typedef typename Infix< typename Fibre<TIndex, ESA_SA>::Type const >::Type TOccs;
 		typedef typename Iterator<TOccs, Standard>::Type TIter;
 

@@ -217,7 +217,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	//////////////////////////////////////////////////////////////////////////////
-	// operator *
+	// value
 	//////////////////////////////////////////////////////////////////////////////
 
 	template <typename THost, typename TSpec>
@@ -230,7 +230,23 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <typename THost, typename TSpec>
 	inline typename Reference<ModifiedIterator<THost, TSpec> const>::Type 
+	value(ModifiedIterator<THost, TSpec> const & me)
+	{
+	SEQAN_CHECKPOINT
+		return value(host(me));
+	}
+
+	template <typename THost, typename TSpec>
+	inline typename Reference<ModifiedIterator<THost, TSpec> >::Type 
 	operator * (ModifiedIterator<THost, TSpec> & me)
+	{
+	SEQAN_CHECKPOINT
+		return value(me);
+	}
+
+	template <typename THost, typename TSpec>
+	inline typename Reference<ModifiedIterator<THost, TSpec> const>::Type 
+	operator * (ModifiedIterator<THost, TSpec> const & me)
 	{
 	SEQAN_CHECKPOINT
 		return value(me);

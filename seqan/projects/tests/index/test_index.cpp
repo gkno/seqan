@@ -21,7 +21,7 @@ using namespace seqan;
 void testBuild()
 {
 		typedef String<char> TText;
-		typedef StringSet< TText, ConcatDirect<> > TMulti;
+		typedef StringSet< TText, Owner<ConcatDirect<> > > TMulti;
 
 		String<char> gen1, gen2, gen3;
 		cout << open(gen1, "corpus/NC_000117.txt");
@@ -47,7 +47,7 @@ void testBuild()
 void testMultiIndex()
 {
 		typedef String<Dna5> TText;
-		typedef StringSet< TText, ConcatDirect<> > TMulti;
+		typedef StringSet< TText, Owner<ConcatDirect<> > > TMulti;
 
 		String<Dna5> t[6];
 		//t[0] = "caterpillar";
@@ -202,7 +202,7 @@ void testSuperMaxRepeats()
 void testMUMs()
 {
 		typedef String<char> TText;
-		typedef StringSet< TText, ConcatDirect<> > TMulti;
+		typedef StringSet< TText, Owner<ConcatDirect<> > > TMulti;
 		typedef Index<TMulti, Index_ESA<> > TIndex;
 
 		String<char> t[3];

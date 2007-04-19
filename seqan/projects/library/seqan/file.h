@@ -44,11 +44,11 @@
 #include <seqan/file/file_cstyle.h>
 #include <seqan/file/file_array.h>
 
-#include <seqan/system.h>	// (include will be removed soon)
-
-#include <seqan/pipe/pipe_base.h>
-#include <seqan/pipe/pipe_source.h>
-
+#include <seqan/system.h>	// async file (default file type of File<>)
+/*#include <seqan/system/file_sync.h>
+#include <seqan/system/system_event.h>
+#include <seqan/system/file_async.h>
+*/
 //____________________________________________________________________________
 // external string
 

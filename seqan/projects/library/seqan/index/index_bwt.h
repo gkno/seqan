@@ -108,54 +108,6 @@ namespace SEQAN_NAMESPACE_MAIN
     }
 
 
-	template < typename TBWT,
-               typename TText,
-			   typename TSA >
-    void createBWTableExt(
-		TBWT &bwt,
-		TText &s,
-		TSA &SA)
-	{
-		// specialization
-		typedef Pipe< TText, Source<> >						srcText_t;
-		typedef Pipe< TSA, Source<> >   					srcSA_t;
-	    typedef Pipe< Bundle2< srcText_t, srcSA_t >, BWT >	creator_t;
-
-		// instantiation
-		srcText_t	srcText(s);
-		srcSA_t		srcSA(SA);
-		creator_t	creator;
-
-		// processing
-	    creator << bundle2(srcText, srcSA);
-		bwt << creator;
-	}
-
-/**
-.Function.createBWTable:
-..summary:Creates a Burrows-Wheeler table from a given text and suffix array.
-..cat:Index
-..signature:createBWTable(bwt, text, suffixArray[, algo_tag])
-..param.bwt:A reference to the resulting Burrows-Wheeler table.
-..param.text:A given text.
-..param.suffixArray:The suffix array of $text$.
-..param.algo_tag:A tag that identifies the algorithm which is used for creation.
-..remarks:The size of $bwt$ must be at least $length(text)$ before calling this function.
-*/
-
-	template < typename TValue,
-			   typename TConfig,
-               typename TBWT,
-			   typename TSA >
-    inline void createBWTable(
-		TBWT &bwt,
-		String<TValue, External<TConfig> > &s,
-		TSA &sa)
-	{
-		createBWTableExt(bwt, s, sa);
-	}
-
-
 
     //////////////////////////////////////////////////////////////////////////////
     // external BWT algorithm (optimized for multiple sequences)
@@ -264,20 +216,6 @@ namespace SEQAN_NAMESPACE_MAIN
  	    return me.process(bundleIn.in1, bundleIn.in2);
     }
 
-	template < typename TValue,
-			   typename TConfig,
-			   typename TSpec,
-               typename TBWT,
-			   typename TSA >
-    inline void createBWTable(
-		TBWT &bwt,
-		StringSet< String<TValue, External<TConfig> >, TSpec > &s,
-		TSA &sa)
-	{
-		createBWTableExt(bwt, s, sa);
-	}
-
-
 
 
     //////////////////////////////////////////////////////////////////////////////
@@ -288,7 +226,7 @@ namespace SEQAN_NAMESPACE_MAIN
     template < typename TBWT,
                typename TText,
                typename TSA >
-    void createBWTable(
+    void createBWTableInt(
 		TBWT &bwt,
 		TText &s,
 		TSA const &SA)

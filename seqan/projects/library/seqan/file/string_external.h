@@ -1383,62 +1383,6 @@ namespace SEQAN_NAMESPACE_MAIN
         inline void cancel() {}
     };*/
 
-	template < typename TValue,
-               typename TConfig,
-			   typename TSpec>
-	struct BufferHandler< Pipe< String<TValue, External<TConfig> >, Source<TSpec> > >
-    {
-        typedef TValue                                                      Type;
-        typedef typename Size< String<TValue, External<TConfig> > >::Type   SizeType;
-        typedef SimpleBuffer<TValue>										Buffer;
-
-        typedef Pipe< String<TValue, External<TConfig> >, Source<TSpec> >			Pipe;
-        typedef typename String<TValue, External<TConfig> >::VectorFwdConstIterator ISource;
-		typedef typename Iterator<Buffer>::Type										ITarget;
-
-		Pipe		&pipe;
-		size_t		bufferSize;
-        SizeType    rest;
-        Buffer		buffer;
-		ISource		source;
-
-		BufferHandler(Pipe &_pipe, size_t requestedSize):
-			pipe(_pipe),
-			bufferSize(requestedSize),
-            rest(0) {}
-
-        inline Buffer& first() {
-            rest = length(pipe.in);
-			allocPage(buffer, Min(bufferSize, rest), *this);
-			source = begin(pipe.in);
-			for(ITarget target = buffer.begin; target != buffer.end; ++target) {
-				*target = *source;
-				++source;
-			}
-            if (!(rest -= size(buffer))) source = ISource();
-			return buffer;
-        }
-
-        inline Buffer& next() {
-			resize(buffer, Min(bufferSize, rest));
-			ITarget _end = buffer.begin + size(buffer);
-			for(ITarget target = buffer.begin; target != _end; ++target) {
-				*target = *source;
-				++source;
-			}
-            if (!(rest -= size(buffer))) source = ISource();
-			return buffer;
-        }
-
-        inline void process() {}
-        inline void end() { cancel(); }
-        inline void cancel() { source = ISource(); freePage(buffer, *this); }
-    };
-
-    template < typename TValue, typename TConfig, typename TSpec >
-    struct Value< BufferHandler< Pipe< String<TValue, External<TConfig> >, Source<TSpec> > > > {
-        typedef SimpleBuffer< TValue > Type;
-    };
 
 
     //////////////////////////////////////////////////////////////////////////////
@@ -1502,7 +1446,14 @@ namespace SEQAN_NAMESPACE_MAIN
 	struct DefaultIteratorSpec< String<TValue, External<TConfig> > const > {
 		typedef Standard Type;
 	};
-	
+
+    template < typename TValue, typename TConfig >
+	struct AllowsFastRandomAccess< String<TValue, External<TConfig> > >
+	{
+		typedef False Type;
+		enum { VALUE = false };
+	};
+
 
 	// iterator metafunctions
 	template < typename TVector >

@@ -118,7 +118,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
     //////////////////////////////////////////////////////////////////////////////
 	// cache bucket based synchronous multiway merge
-    struct ReadSorterSpec;
+    struct _ReadSorterSpec;
+	typedef Tag<_ReadSorterSpec> ReadSorterSpec;
 
     template < typename TPool >
     struct Handler< TPool, ReadSorterSpec >

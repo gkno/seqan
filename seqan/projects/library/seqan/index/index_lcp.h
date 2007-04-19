@@ -221,7 +221,6 @@ namespace SEQAN_NAMESPACE_MAIN
  	    return me.process(bundleIn.in1, bundleIn.in2);
     }
 
-
 	
 	
 	//////////////////////////////////////////////////////////////////////////////
@@ -473,7 +472,6 @@ namespace SEQAN_NAMESPACE_MAIN
             ::std::cerr << "  sigma: " << sigma << ::std::endl;
         #endif
 	}
-
 
 
 //}

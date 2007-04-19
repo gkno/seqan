@@ -244,7 +244,20 @@ namespace SEQAN_NAMESPACE_MAIN
     struct Difference< Pipe<TInput, TSpec> > {
 		typedef typename _MakeSigned<typename Size<Pipe<TInput, TSpec> >::Type>::Type Type;
     };
+/*
+    template < typename TInput, typename TSpec >
+	struct Iterator< Pipe<TInput, TSpec> >;
 
+    template < typename TInput, typename TSpec >
+	struct Iterator< Pipe<TInput, TSpec> const >:
+		Iterator< Pipe<TInput, TSpec> > {};
+*/
+
+	template <typename TInput, typename TSpec>
+	struct Source<Pipe<TInput, TSpec> >
+	{
+		typedef TInput Type;
+	};
 
 	template < typename TInput, typename TSpec >
     inline TInput const &
@@ -477,7 +490,7 @@ SEQAN_CHECKPOINT
 	}
 
 
-    template < typename TObject, typename TSpec = void >
+    template < typename TObject, typename TSpec >
     struct BufferHandler;
 
     template < typename TObject, typename TSpec >
@@ -489,15 +502,6 @@ SEQAN_CHECKPOINT
 
     template < typename TOutput >
     struct BufWriteHandler;
-
-
-    // for pipes we use the default BufferHandler spec.
-    template < typename TInput, typename TSpec >
-    struct BufReadHandler< Pipe< TInput, TSpec > > {
-        typedef BufferHandler< Pipe< TInput, TSpec > > Type;
-    };
-
-
 
 
 

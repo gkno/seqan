@@ -120,7 +120,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 	//////////////////////////////////////////////////////////////////////////////
-	// operator *
+	// value
 	//////////////////////////////////////////////////////////////////////////////
 
 	template <typename THost, typename TFunctor>
@@ -173,6 +173,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		Holder<THost>							data_host;
 		typename Cargo<ModifiedString>::Type	data_cargo;
 
+		mutable typename Value<ModifiedString>::Type	tmp_value;
+
 		ModifiedString() {}
 
 		explicit ModifiedString(TFunctor &_func) {
@@ -196,6 +198,10 @@ namespace SEQAN_NAMESPACE_MAIN
 		ModifiedString(ModifiedString const &_origin):
 			data_host(_origin.data_host),
 			data_cargo(_origin.data_cargo) {}
+
+		ModifiedString(THost &_origin) {
+			setHost(*this, _origin);
+		}
 
 		template <typename T>
 		ModifiedString(T & _origin) {
@@ -226,6 +232,28 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
 	};
 
+
+	//////////////////////////////////////////////////////////////////////////////
+	// value
+	//////////////////////////////////////////////////////////////////////////////
+
+	template <typename THost, typename TFunctor, typename TPos>
+	inline typename Reference<ModifiedString<THost, ModView<TFunctor> > >::Type 
+	value(ModifiedString<THost, ModView<TFunctor> > & me, TPos pos)
+	{
+	SEQAN_CHECKPOINT
+		me.tmp_value = cargo(me).func(value(host(me), pos));
+		return me.tmp_value;
+	}
+
+	template <typename THost, typename TFunctor, typename TPos>
+	inline typename Reference<ModifiedString<THost, ModView<TFunctor> > const>::Type 
+	value(ModifiedString<THost, ModView<TFunctor> > const & me, TPos pos)
+	{
+	SEQAN_CHECKPOINT
+		me.tmp_value = cargo(me).func(value(host(me), pos));
+		return me.tmp_value;
+	}
 
 	//////////////////////////////////////////////////////////////////////////////
 	// assignModViewFunctor

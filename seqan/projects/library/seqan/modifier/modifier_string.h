@@ -44,6 +44,10 @@ namespace SEQAN_NAMESPACE_MAIN
 			data_host(_origin.data_host),
 			data_cargo(_origin.data_cargo) {}
 
+		ModifiedString(THost &_origin) {
+			setHost(*this, _origin);
+		}
+
 		template <typename T>
 		ModifiedString(T & _origin) {
 			assign(*this, _origin);
@@ -154,6 +158,9 @@ namespace SEQAN_NAMESPACE_MAIN
 		enum { VALUE = true };
 	};
 
+	template < typename THost, typename TSpec >
+	struct AllowsFastRandomAccess< ModifiedString<THost, TSpec> >:
+		AllowsFastRandomAccess<THost> {};
 
 	//////////////////////////////////////////////////////////////////////////////
 	// host interface
@@ -242,6 +249,40 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 	SEQAN_CHECKPOINT
 		return value(begin(me, Standard()) + pos);
+	}
+
+	//////////////////////////////////////////////////////////////////////////////
+	// setValue
+	//////////////////////////////////////////////////////////////////////////////
+
+	template <typename THost, typename TSpec>
+	inline ModifiedString<THost, TSpec> const &
+	setValue(ModifiedString<THost, TSpec> & me, ModifiedString<THost, TSpec> const & _origin) {
+		setHost(me) = host(_origin);
+		cargo(me) = cargo(_origin);
+		return me;
+	}
+
+	template <typename THost, typename TSpec>
+	inline ModifiedString<THost, TSpec> const &
+	setValue(ModifiedString<THost, TSpec> & me, ModifiedString<THost, TSpec> & _origin) {
+		setHost(me) = host(_origin);
+		cargo(me) = cargo(_origin);
+		return me;
+	}
+
+	template <typename THost, typename TSpec>
+	inline ModifiedString<THost, TSpec> const &
+	setValue(ModifiedString<THost, TSpec> & me, THost const & _origin) {
+		setHost(me) = _origin;
+		return me;
+	}
+
+	template <typename THost, typename TSpec>
+	inline ModifiedString<THost, TSpec> const &
+	setValue(ModifiedString<THost, TSpec> & me, THost & _origin) {
+		setHost(me) = _origin;
+		return me;
 	}
 
 	//////////////////////////////////////////////////////////////////////////////

@@ -602,11 +602,11 @@ namespace SEQAN_NAMESPACE_MAIN
 	textAt(TPos i, Index< StringSet<TString, TSSetSpec>, TSpec> &index) {
 		return value(getFibre(index, Tag<_Fibre_RawText> ()), posGlobalize(i, stringSetLimits(index)));
 	}
-	template <typename TPos, typename TString, typename TSSetSpec, typename TSpec>
-	inline typename Reference<typename Fibre< Index< StringSet<TString, ConcatVirtual<TSSetSpec> >, TSpec>, Tag<_Fibre_RawText> >::Type>::Type 
-	textAt(TPos i, Index< StringSet<TString, ConcatVirtual<TSSetSpec> >, TSpec> &index) {
+	template <typename TPos, typename TString, typename TSpec>
+	inline typename Reference<typename Fibre< Index< StringSet<TString, Owner<Default> >, TSpec>, Tag<_Fibre_RawText> >::Type>::Type 
+	textAt(TPos i, Index< StringSet<TString, Owner<Default> >, TSpec> &index) {
 		Pair <
-			typename Size< StringSet<TString, ConcatVirtual<TSSetSpec> > >::Type,
+			typename Size< StringSet<TString, Owner<Default> > >::Type,
 			typename Size< TString >::Type > locPos;
 		posLocalize(locPos, i, stringSetLimits(index));
 		return value(value(getFibre(index, Tag<_Fibre_Text> ()), getValueI1(locPos)), getValueI2(locPos));
@@ -835,7 +835,6 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename TText, typename TSpec>
 	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_RawSA> >::Type indexRawSA(Index<TText, TSpec> const &index) { return getFibre(index, Tag<_Fibre_RawSA> ()); }
 
-//////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 /**
 .Function.indexLCP:

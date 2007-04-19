@@ -86,7 +86,8 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef typename TConfig::Map Type;
     };
 
-    struct ReadMapperSpec {};
+    struct _ReadMapperSpec;
+	typedef Tag<_ReadMapperSpec> ReadMapperSpec;
 
 /*
     // mapping phase 2

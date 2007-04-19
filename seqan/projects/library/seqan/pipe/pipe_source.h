@@ -20,6 +20,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef ptrdiff_t Type;
 	};
 */
+
 /**
 .Spec.Source:
 ..cat:Pipelining
@@ -29,57 +30,9 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TInput:The type of container or iterator this module reads from.
 */
 
-	//////////////////////////////////////////////////////////////////////////////
-	// simple class for fast random accessable containers buffers
-    template < typename TIterator >
-	struct IteratorBuffer 
-	{
-		TIterator           begin;
-        TIterator           end;
-
-        IteratorBuffer():
-            begin(TIterator()),
-            end(TIterator()) {}
-
-		IteratorBuffer(TIterator _begin, TIterator _end):
-            begin(_begin),
-            end(_end) {}
-
-		template <typename TSize>
-        IteratorBuffer(TIterator _begin, TSize _size):
-            begin(_begin),
-            end(_begin + _size) {}
-
-		template <typename TSize>
-		inline typename Reference<TIterator>::Type 
-		operator[] (TSize i) {
-			return *(begin + i);
-		}
-    };
-
-    template < typename TIterator >
-    struct Iterator< IteratorBuffer<TIterator> > {
-        typedef TIterator Type;
-    };
-
-    template < typename TIterator  >
-	struct Value< IteratorBuffer<TIterator> >:
-		Value<TIterator> {};
-
-    template < typename TIterator >
-	struct Size< IteratorBuffer<TIterator> >:
-		Size<TIterator> {};
-
-
-	template < typename TIterator >
-    inline typename Size< IteratorBuffer<TIterator> >::Type
-    length(IteratorBuffer<TIterator> const &me) {
-        return me.end - me.begin;
-    }
-
 
 	//////////////////////////////////////////////////////////////////////////////
-
+	// source class
 	template < typename TInput, typename TSpec >
 	struct Pipe< TInput, Source<TSpec> >
     {
@@ -102,30 +55,130 @@ namespace SEQAN_NAMESPACE_MAIN
         }
     };
 
+    template < typename TInput, typename TSpec >
+	struct Iterator< Pipe< TInput, Source<TSpec> > > {
+		typedef typename Iterator<TInput const>::Type Type;
+	};
+
+    template < typename TInput, typename TSpec >
+	inline typename Iterator< Pipe< TInput, Source<TSpec> > >::Type
+	begin(Pipe< TInput, Source<TSpec> > &pipe) {
+		return begin(pipe.in);
+	}
+
+    template < typename TInput, typename TSpec >
+	inline typename Iterator< Pipe< TInput, Source<TSpec> > >::Type
+	end(Pipe< TInput, Source<TSpec> > &pipe) {
+		return end(pipe.in);
+	}
+
+
+
+	//////////////////////////////////////////////////////////////////////////////
+	// simple buffer adaption for fast random accessable containers
+    template < typename TContainer >
+	struct ContainerBuffer 
+	{
+		TContainer *cont;
+
+        ContainerBuffer(): cont(NULL) {}
+		ContainerBuffer(TContainer &_cont): cont(&_cont) {}
+
+		template <typename TSize>
+		inline typename Reference<TContainer>::Type 
+		operator[] (TSize i) {
+			return (*cont)[i];
+		}
+    };
+
+    template < typename TContainer >
+	struct Iterator< ContainerBuffer<TContainer> >:
+		Iterator<TContainer> {};
+
+    template < typename TContainer  >
+	struct Value< ContainerBuffer<TContainer> >:
+		Value<TContainer> {};
+
+    template < typename TContainer >
+	struct Size< ContainerBuffer<TContainer> >:
+		Size<TContainer> {};
+
+
+	template < typename TContainer >
+    inline typename Size< ContainerBuffer<TContainer> >::Type
+    length(ContainerBuffer<TContainer> const &me) {
+		if (me.cont)
+			return length(*me.cont);
+		else
+			return 0;
+    }
+
+
+	//////////////////////////////////////////////////////////////////////////////
+	// simple buffer adaption for fast random accessable iterators
+    template < typename TIterator >
+	struct IteratorBuffer 
+	{
+		TIterator						begin;
+		typename Size<TIterator>::Type	size;
+
+        IteratorBuffer(): begin(NULL), size(0) {}
+		template <typename TSize>
+		IteratorBuffer(TIterator &_begin, TSize _size): begin(&_begin), size(_size) {}
+
+		template <typename TSize>
+		inline typename Reference<TIterator>::Type 
+		operator[] (TSize i) {
+			return *(begin + i);
+		}
+    };
+
+    template < typename TIterator >
+	struct Iterator< IteratorBuffer<TIterator> >:
+		Iterator<TIterator> {};
+
+    template < typename TIterator  >
+	struct Value< IteratorBuffer<TIterator> >:
+		Value<TIterator> {};
+
+    template < typename TIterator >
+	struct Size< IteratorBuffer<TIterator> >:
+		Size<TIterator> {};
+
+
+	template < typename TIterator >
+    inline typename Size< IteratorBuffer<TIterator> >::Type
+    length(IteratorBuffer<TIterator> const &me) {
+		return me.size;
+    }
+
+
     //////////////////////////////////////////////////////////////////////////////
-	// handler that manages a simple memory buffer
-	template < typename TInput, typename TSpec >
-	struct BufferHandler< Pipe< TInput, Source<TSpec> > >
+	// handler that emulates a buffer by using a container buffer
+    struct _SourceNonCachingSpec;
+	typedef Tag<_SourceNonCachingSpec> SourceNonCachingSpec;
+
+	template < typename TPipe >
+	struct BufferHandler< TPipe, SourceNonCachingSpec >
     {
-        typedef typename Iterator<TInput const>::Type	Iterator;
-        typedef IteratorBuffer<Iterator>				Buffer;
-        typedef Pipe< TInput, Source<TSpec> >			Pipe;
+        typedef typename Source<TPipe>::Type	TSource;
+        typedef ContainerBuffer<TSource const>	TBuffer;
 
-		Pipe	&pipe;
+		TPipe	&pipe;
 
-		BufferHandler(Pipe &_pipe):
+		BufferHandler(TPipe &_pipe):
 			pipe(_pipe) {}
 
 		template <typename TSize>
-		BufferHandler(Pipe &_pipe, TSize):
+		BufferHandler(TPipe &_pipe, TSize):
 			pipe(_pipe) {}
 
-        inline Buffer first() {
-            return Buffer(begin(pipe.in), length(pipe.in));
+        inline TBuffer first() {
+            return TBuffer(pipe.in);
         }
 
-        inline Buffer next() {
-            return Buffer();
+        inline TBuffer next() {
+            return TBuffer();
         }
 
         inline void process() {}
@@ -133,14 +186,87 @@ namespace SEQAN_NAMESPACE_MAIN
         inline void cancel() {}
     };
 
-	template < typename TInput, typename TSpec >
-    struct Value< BufferHandler< Pipe< TInput, Source<TSpec> > > > {
-        typedef IteratorBuffer<	typename Iterator< TInput const >::Type	> Type;
+	template < typename TPipe >
+    struct Value< BufferHandler< TPipe, SourceNonCachingSpec > > {
+        typedef ContainerBuffer< typename Source<TPipe>::Type const > Type;
     };
 
 
     //////////////////////////////////////////////////////////////////////////////
+	// caching buffer handler
+    struct _SourceCachingSpec;
+	typedef Tag<_SourceCachingSpec> SourceCachingSpec;
+
+	template < typename TPipe >
+	struct BufferHandler< TPipe, SourceCachingSpec >
+    {
+        typedef typename Value<TPipe>::Type			TValue;
+        typedef typename Size<TPipe>::Type			TSize;
+
+        typedef SimpleBuffer<TValue>				TBuffer;
+		typedef typename Iterator<TPipe>::Type		ISource;
+		typedef typename Iterator<TBuffer>::Type	ITarget;
+
+		TPipe		&pipe;
+		size_t		bufferSize;
+        TSize		rest;
+        TBuffer		buffer;
+		ISource		source;
+
+		BufferHandler(TPipe &_pipe, size_t requestedSize):
+			pipe(_pipe),
+			bufferSize(requestedSize),
+            rest(0) {}
+
+        inline TBuffer& first() {
+            rest = length(pipe);
+			allocPage(buffer, Min(bufferSize, rest), *this);
+			source = begin(pipe);
+			for(ITarget target = buffer.begin; target != buffer.end; ++target) {
+				*target = *source;
+				++source;
+			}
+            if (!(rest -= size(buffer))) source = ISource();
+			return buffer;
+        }
+
+        inline TBuffer& next() {
+			resize(buffer, Min(bufferSize, rest));
+			ITarget _end = buffer.begin + size(buffer);
+			for(ITarget target = buffer.begin; target != _end; ++target) {
+				*target = *source;
+				++source;
+			}
+            if (!(rest -= size(buffer))) source = ISource();
+			return buffer;
+        }
+
+        inline void process() {}
+        inline void end() { cancel(); }
+        inline void cancel() { source = ISource(); freePage(buffer, *this); }
+    };
+
+	template < typename TPipe >
+    struct Value< BufferHandler< TPipe, SourceCachingSpec > > {
+        typedef SimpleBuffer< typename Value<TPipe>::Type > Type;
+    };
+
+    //////////////////////////////////////////////////////////////////////////////
     // global functions
+
+    // choose the most efficient buffer handler
+    template < typename TInput, typename TSpec >
+    struct BufReadHandler< Pipe< TInput, TSpec > > {
+		typedef BufferHandler<
+			Pipe< TInput, TSpec >,
+			typename IF< 
+				AllowsFastRandomAccess<TInput>::VALUE, 
+				SourceNonCachingSpec, 
+//				SourceNonCachingSpec
+				SourceCachingSpec 
+			>::Type
+        > Type;
+    };
 
     template < typename TInput, typename TSpec, typename TCommand >
 	inline bool control(Pipe< TInput, Source<TSpec> > &me, TCommand const &command) {

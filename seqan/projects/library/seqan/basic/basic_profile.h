@@ -50,7 +50,7 @@
 #ifdef PLATFORM_WINDOWS
     typedef __int64   _proInt;
 #else
-    typedef __int64_t _proInt;
+    typedef int64_t _proInt;
 #endif
 
     typedef double    _proFloat;

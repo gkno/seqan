@@ -32,7 +32,7 @@ void Test_StringSet()
 	SEQAN_TASSERT(isEqual(set[1], "schlauer "))
 	SEQAN_TASSERT(isEqual(set[2], "Hamster!"))
 /*
-	// currently, this won't work for ConcatDirect<..> StringSets
+	// currently, this won't work for Owner<ConcatDirect<..> > StringSets
 	// to fix it, we need to introduce Modifiers for Segments
 	// which propagate their resize events to their StringSets
 	resize(set[0], 9);
@@ -179,7 +179,7 @@ void Test_StringSetIdHolder() {
 template <typename TSpec>
 void Test_StringSet_IdHolder()
 {	
-	StringSet<CharString, ConcatVirtual<> > origin;
+	StringSet<CharString, Owner<Default> > origin;
 	StringSet<CharString, TSpec> set;
 
 	resize(origin, 3);
@@ -222,12 +222,12 @@ int mainTestStringSet()
 {
 	SEQAN_TREPORT("TEST STRINGSET BEGIN")
 
-	Test_StringSet< ConcatVirtual<> >();
-	Test_StringSet_Concat< ConcatVirtual<> >();
-	Test_StringSet_Concat< ConcatDirect<> >();
+	Test_StringSet< Owner<Default> >();
+	Test_StringSet_Concat< Owner<Default> >();
+	Test_StringSet_Concat< Owner<ConcatDirect<> > >();
 
-	Test_StringSet_IdHolder< IdHolder<TightStorage<> > >();
-	Test_StringSet_IdHolder< IdHolder<GenerousStorage<> > >();
+	Test_StringSet_IdHolder< Dependent<Tight> >();
+	Test_StringSet_IdHolder< Dependent<Generous> >();
 
 	debug::verifyCheckpoints("projects/library/seqan/sequence/sequence_multiple.h");
 

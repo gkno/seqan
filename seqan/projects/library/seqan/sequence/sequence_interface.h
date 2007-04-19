@@ -35,6 +35,7 @@ or @Metafunction.DefaultOverflowExplicit@, depending on the kind of operation.
 */
 struct TagInsist_;
 typedef Tag<TagInsist_> const Insist;
+typedef Tag<TagInsist_> const Tight;
 //Insist INSIST;
 
 struct TagLimit_;
@@ -134,6 +135,27 @@ struct IsSequence
 template <typename T>
 struct IsSequence<T const>:
 	public IsSequence<T> {};
+
+//////////////////////////////////////////////////////////////////////////////
+// AllowsFastRandomAccess
+//////////////////////////////////////////////////////////////////////////////
+/**
+.Metafunction.AllowsFastRandomAccess:
+..summary:Determines whether a sequence efficiently supports random access.
+..signature:AllowsFastRandomAccess<T>::VALUE
+..param.T:Type that is tested for fast random access.
+..returns.param.VALUE:$true$ if $T$ supports fast random access, $false$ otherwise.
+..remarks:For example @Spec.Alloc String@, @Class.Segment@, and @Spec.Block String@ return $true$.
+*/
+template <typename T>
+struct AllowsFastRandomAccess
+{
+    typedef True Type;
+	enum { VALUE = true };
+};
+template <typename T>
+struct AllowsFastRandomAccess<T const>:
+	public AllowsFastRandomAccess<T> {};
 
 //////////////////////////////////////////////////////////////////////////////
 // identification
