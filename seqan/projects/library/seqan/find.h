@@ -20,6 +20,7 @@
 #include <seqan/find/find_shiftand.h>
 #include <seqan/find/find_shiftor.h>
 #include <seqan/find/find_bndm.h>
+#include <seqan/find/find_quasar.h>
 
 //____________________________________________________________________________
 // approximate pattern matching

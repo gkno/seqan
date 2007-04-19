@@ -469,6 +469,7 @@ int main()
 	debug::verifyCheckpoints("projects/library/seqan/find/find_shiftor.h");
 	debug::verifyCheckpoints("projects/library/seqan/find/find_bndm.h");
 	debug::verifyCheckpoints("projects/library/seqan/find/find_bom.h");
+	//debug::verifyCheckpoints("projects/library/seqan/find/find_quasar.h");
 	debug::verifyCheckpoints("projects/library/seqan/find/find_ahocorasick.h");
 	debug::verifyCheckpoints("projects/library/seqan/find/find_multiple_shiftand.h");
 	debug::verifyCheckpoints("projects/library/seqan/find/find_set_horspool.h");
