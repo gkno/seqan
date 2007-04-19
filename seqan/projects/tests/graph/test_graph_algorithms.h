@@ -783,8 +783,6 @@ void Test_TCoffee() {
 //____________________________________________________________________________
 // Graph TCoffee
 
-
-
 	// Read a t-coffee library: AminoAcid Alphabet
 	typedef StringSet<String<AminoAcid>, IdHolder<> > TStringSet;
 	typedef Graph<Alignment<TStringSet, unsigned int, Default> > TGraph;
@@ -808,14 +806,16 @@ void Test_TCoffee() {
 	write(strm2,g,DotDrawing());
 	strm2.close();
 
-	Matrix<double> score;  // Calculate a distance matrix on an amino acid string set
-	getScoringMatrix(stringSet(g), score);
-	Matrix<double> distances;
-	scoreToDistanceMatrix(score, distances, 1000);
-	normalizeMatrix(distances, 100000, 100);
+	// Calculate a distance matrix
+	Matrix<double> distanceMatrix; 
+	getCommonKmerMatrix(stringSet(g), distanceMatrix, 6, AAGroupsDayhoff() );
+	kmerToDistanceMatrix(distanceMatrix, FractionalDistance() );
+
+	// Create neighbor joining tree
 	Graph<Tree<double> > njTreeOut;
-	slowNjTree(distances, njTreeOut);
+	slowNjTree(distanceMatrix, njTreeOut);
 	std::cout << njTreeOut << std::endl;
+
 
 	// ToDo: Owner of strings!!!!!!!!!!!
 	for(unsigned int i=0; i<length(value(g.data_sequence)); ++i) {  	// Delete sequences
@@ -840,14 +840,16 @@ void Test_TCoffee() {
 
 	//std::cout << g << std::endl;
 
-	Matrix<double> scoreDna;  // Calculate a distance matrix on an amino acid string set
-	getScoringMatrix(stringSet(gDna), scoreDna);
-	Matrix<double> distancesDna;
-	scoreToDistanceMatrix(scoreDna, distancesDna, 1000);
-	normalizeMatrix(distancesDna, 100000, 100);
-	Graph<Tree<double> > njTree;
-	slowNjTree(distancesDna, njTree);
-	std::cout << njTree << std::endl;
+
+	// Calculate a distance matrix
+	Matrix<double> distanceMatrixDna; 
+	getCommonKmerMatrix(stringSet(gDna), distanceMatrixDna, 6);
+	kmerToDistanceMatrix(distanceMatrixDna, TCoffeeDistance() );
+
+	// Create neighbor joining tree
+	Graph<Tree<double> > njTreeOutDna;
+	slowNjTree(distanceMatrixDna, njTreeOutDna);
+	std::cout << njTreeOutDna << std::endl;
 
 	// ToDo: Owner of strings!!!!!!!!!!!
 	for(unsigned int i=0; i<length(value(gDna.data_sequence)); ++i) {  	// Delete sequences

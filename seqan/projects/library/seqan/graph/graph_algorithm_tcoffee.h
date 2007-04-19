@@ -4,44 +4,69 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 
+
+//////////////////////////////////////////////////////////////////////////////
+// Graph: T-Coffee - Tags
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Tag.TCoffeeDistance
+..summary:Tag to use the T-Coffee distance metric.
+..value.TCoffeeDistance:Use the TCoffee Distance.
+*/
+struct TCoffeeDistance_;
+typedef Tag<TCoffeeDistance_> const TCoffeeDistance;
+
+/**
+.Tag.FractionalDistance
+..summary:Tag to use the fractional distance metric.
+..value.FractionalDistance:Use the Fractional Distance.
+*/
+struct FractionalDistance_;
+typedef Tag<FractionalDistance_> const FractionalDistance;
+
+
 //////////////////////////////////////////////////////////////////////////////
 // Graph: T-Coffee - Distance Matrix
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
-template<typename TValue1, typename TValue2, typename TSize>
+template<typename TMatrix>
 void
-_hitToScoreMatrix(Matrix<TValue1>& mat, Matrix<TValue2>& score, TSize const nseq) {
+kmerToDistanceMatrix(TMatrix& mat, TCoffeeDistance) {
 	SEQAN_CHECKPOINT
-
-	typedef Matrix<TValue1> THitMatrix;
-	typedef typename Size<THitMatrix>::Type TMatrixSize;
-
-	// Initialize the score matrix
-	setDimension(score, 2);setLength(score, 0, nseq);setLength(score, 1, nseq);
-	fill(host(score), nseq*nseq, 0.0);
-
-	// Calculate the score
-	TValue2 score0;
-	for (TMatrixSize row=0;row<nseq;++row) {
-		score0 = getValue(mat, row*nseq+row);
-		for(TMatrixSize col=0;col<nseq;++col) {		
-			if (row == col) continue;
-			// T-Coffee Score Function: Why score0 * 3 * 10.0 + 0.5 ???
-			assignValue(score, row*nseq+col, (TValue2) ((score0 - getValue(mat, min(row,col)*nseq+max(row,col))) / score0 * 3 * 10.0 + 0.5));
-		}
-	}
-	for (TMatrixSize row=0;row<nseq;++row) {
-		for(TMatrixSize col=row+1;col<nseq;++col) {
-			assignValue(score, row*nseq+col, 100 - min(getValue(score,row*nseq+col), getValue(score, col*nseq+row)));
-			assignValue(score, col*nseq+row, getValue(score, row*nseq+col));
-		}
-	}
-
 	
-	//for (unsigned row=0;row<nseq;++row) {
-	//	for(unsigned col=0;col<nseq;++col) {
-	//		std::cout << getValue(score, row*nseq+col) << ",";
+	typedef typename Value<TMatrix>::Type TValue;
+	typedef typename Size<TMatrix>::Type TSize;
+
+	// Initialize the mat matrix
+	TSize nseq = length(mat, 0);
+
+	// Calculate the mat
+	for (TSize row=0;row<nseq;++row) {
+		for(TSize col=row+1;col<nseq;++col) {
+			TValue mat0 = min(getValue(mat, row*nseq+row),getValue(mat, col*nseq+col));
+			assignValue(mat, row*nseq+col, ((mat0 - getValue(mat, row*nseq+col)) / mat0 * 3 * 10.0 + 0.5) );
+			assignValue(mat, col*nseq+row, getValue(mat, row*nseq+col));
+		}
+		assignValue(mat, row*nseq+row, 0);
+	}
+
+	// Normalize matrix
+	double limit = 1000;
+	double max = 100000;
+	double norm = 100;
+	for (TSize row=0; row<nseq; ++row) {
+		for (TSize col=row+1; col<nseq; ++col) {
+			assignValue(mat, row*nseq+col, ((limit - (100 - getValue(mat,row*nseq+col))) * norm ) / max);
+			assignValue(mat, col*nseq+row, getValue(mat, row*nseq+col));
+		}
+	}
+
+
+	//for (TSize row=0;row<nseq;++row) {
+	//	for(TSize col=0;col<nseq;++col) {
+	//		std::cout << getValue(mat, row*nseq+col) << ",";
 	//	}
 	//	std::cout << std::endl;
 	//}
@@ -49,88 +74,76 @@ _hitToScoreMatrix(Matrix<TValue1>& mat, Matrix<TValue2>& score, TSize const nseq
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TSpec, typename TValue>
+template<typename TMatrix>
 void
-getScoringMatrix(StringSet<String<Dna>, TSpec> const& strSet, Matrix<TValue>& score) {
+kmerToDistanceMatrix(TMatrix& mat, FractionalDistance) {
 	SEQAN_CHECKPOINT
-
-	typedef unsigned int TWord;
-	typedef StringSet<String<Dna>, TSpec> TStringSet;
-	typedef typename Size<TStringSet>::Type TStringSetSize;
-	typedef StringSet<String<Dna>, ConcatVirtual<> > TStringSetDna;
-	typedef Index<TStringSetDna, Index_QGram<FixedShape<6> > > TIndex; // q-gram length = 6
 	
-	// Number of sequences
-	TStringSetSize nseq = length(strSet);
+	typedef typename Value<TMatrix>::Type TValue;
+	typedef typename Size<TMatrix>::Type TSize;
 
-	// Initialization
-	Matrix<TWord> mat;   // Matrix for common k-tupels between sequence i and j
-	setDimension(mat, 2);setLength(mat, 0, nseq);setLength(mat, 1, nseq);
-	fill(host(mat), nseq*nseq, 0);
+	// Initialize the mat matrix
+	TSize nseq = length(mat, 0);
 
-	// Index
-	TIndex index;
-	resize(indexText(index), nseq);
-	for(TStringSetSize k=0;k<length(strSet);++k) indexText(index)[k] = strSet[k];
-	indexCreate(index, QGram_SA());
+	// Calculate the mat
+	for (TSize row=0;row<nseq;++row) {
+		for(TSize col=row+1;col<nseq;++col) {
+			// First the fractional common kmer count
+			TValue val = getValue(mat, row*nseq+col);
+			val /= min(getValue(mat, row*nseq+row),getValue(mat, col*nseq+col));
+			
+			// The transformed measure
+			//val = log10(0.1 + val);
 
-	String<TWord> counter; // Counter for each sequence
-	resize(counter, nseq);
-	
-	TWord nqgrams = length(indexDir(index)) - 1;
-	if (nqgrams > 0) {
-		TWord j1;
-		TWord j2 = indexDir(index)[0];
-		for(TWord i = 0; i < nqgrams; ++i) {  // Iterate over all q-grams
-			j1 = j2;
-			j2 = indexDir(index)[i+1];
-			if (j1 == j2) continue;   //Empty hit-list for this q-gram
+			// Kimura correction
+			//TValue d_sq = 0.0;
+			//for(TSize i=0;i<nseq;++i) {
+			//	d_sq += (getValue(mat, row*nseq+i) * getValue(mat, i*nseq+col));
+			//}
+			//val = log(val - (1 - d_sq) / 5);
 
-			// Clear the counters
-			arrayFill(begin(counter, Standard()), end(counter, Standard()), 0);
-			for(TWord j = j1; j < j2; ++j) ++counter[getValueI1(indexSA(index)[j])];
-
-			// Add-up the values in the matrix
-			for(TWord k = 0; k < nseq; ++k)
-				for(TWord k2 = k; k2 < nseq; ++k2) {
-					TWord minVal = counter[k];
-					if (counter[k2] < minVal) minVal = counter[k2];
-					assignValue(mat, k*nseq+k2, getValue(mat, k*nseq+k2) + minVal);
-				}
+			// Assign the final value
+			assignValue(mat, row*nseq+col, 1 - val);
+			assignValue(mat, col*nseq+row, 1 - val);
 		}
+		assignValue(mat, row*nseq+row, 0);
 	}
 
-	// Transform the hit matrix into a score matrix
-	_hitToScoreMatrix(mat, score, nseq);
+	//for (TSize row=0;row<nseq;++row) {
+	//	for(TSize col=0;col<nseq;++col) {
+	//		std::cout << getValue(mat, row*nseq+col) << ",";
+	//	}
+	//	std::cout << std::endl;
+	//}
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TString, typename TSpec, typename TValue>
+template<typename TString, typename TSpec, typename THitMatrix, typename TSize, typename TAlphabet>
 void
-getScoringMatrix(StringSet<TString, TSpec> const& strSet, Matrix<TValue>& score) {
+getCommonKmerMatrix(StringSet<TString, TSpec> const& strSet, THitMatrix& mat, TSize ktup, TAlphabet) {
 	SEQAN_CHECKPOINT
 	typedef unsigned int TWord;
 	typedef StringSet<TString, TSpec> TStringSet;
 	typedef typename Size<TStringSet>::Type TStringSetSize;
-	typedef Matrix<TWord> THitMatrix;
 	typedef typename Size<THitMatrix>::Type TMatrixSize;
 
 	// Number of sequences
 	TStringSetSize nseq = length(strSet);
 
 	// Initialization
-	THitMatrix mat;   // Matrix for common k-tupels between sequence i and j
+	// Matrix for common k-tupels between sequence i and j
 	setDimension(mat, 2);setLength(mat, 0, nseq);setLength(mat, 1, nseq);
 	fill(host(mat), nseq*nseq, 0);
 
 	// StringSet where each string is a sequence of amino acid groups identifiers
-	typedef StringSet<String<AAGroupsDayhoff>, ConcatVirtual<> > TStringSetAA;
-	// q-gram length = 6
-	typedef Index<TStringSetAA, Index_QGram<FixedShape<6> > > TIndex;
+	typedef StringSet<String<TAlphabet>, ConcatVirtual<> > TStringSetAA;
+	// q-gram length = ktup
+	typedef Index<TStringSetAA, Index_QGram<SimpleShape> > TIndex;
 	TIndex index;
 	resize(indexText(index), nseq);
-	
+	resize(indexShape(index), (unsigned) ktup);
+
 	// Recode the strings into amino acid groups
 	for(TStringSetSize k=0;k<length(strSet);++k) indexText(index)[k] = strSet[k];
 
@@ -164,98 +177,42 @@ getScoringMatrix(StringSet<TString, TSpec> const& strSet, Matrix<TValue>& score)
 		}
 	}
 
-	// Transform the hit matrix into a score matrix
-	_hitToScoreMatrix(mat, score, nseq);
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TScoreValue, typename TScoreSpec, typename TSimValue, typename TSimSpec, typename TVal>
-void
-scoreToSimilarityMatrix(Matrix<TScoreValue, TScoreSpec>& score, Matrix<TSimValue, TSimSpec>& sim, TVal maxSim) {
-	SEQAN_CHECKPOINT
-
-	typedef Matrix<TScoreValue, TScoreSpec> TScoreMatrix;
-	typedef Matrix<TSimValue, TSimSpec> TSimMatrix;
-	typedef typename Size<TScoreMatrix>::Type TSize;
-	typedef typename Value<TSimMatrix>::Type TValue;
-
-	TSize nseq = length(score, 0);
-	setDimension(sim, 2);setLength(sim, 0, nseq);setLength(sim, 1, nseq);
-	fill(host(sim), nseq*nseq, 0);
-
-	for (TSize row=0;row<nseq;++row) {
-		for(TSize col=row;col<nseq;++col) {
-			if (row == col) assignValue(sim, row*nseq+col, maxSim);
-			else {
-				assignValue(sim, row*nseq+col, (TValue) getValue(score, row*nseq+col));
-				assignValue(sim, col*nseq+row, (TValue) getValue(score, row*nseq+col));
-			}
+	// Copy upper triangle to lower triangle
+	for(TWord k = 0; k < nseq; ++k) {
+		for(TWord k2 = k + 1; k2 < nseq; ++k2) {
+			assignValue(mat, k2*nseq+k, getValue(mat, k*nseq+k2));
 		}
 	}
-		
-	//for (TSize row=0;row<nseq;++row) {
-	//	for(TSize col=0;col<nseq;++col) {
-	//		std::cout << getValue(sim, row*nseq+col) << ",";
-	//	}
-	//	std::cout << std::endl;
-	//}
-}
 
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TScoreValue, typename TScoreSpec, typename TDistValue, typename TDistSpec, typename TVal>
-void
-scoreToDistanceMatrix(Matrix<TScoreValue, TScoreSpec>& score, Matrix<TDistValue, TDistSpec>& dist, TVal maxDist) {
-	SEQAN_CHECKPOINT
-
-	typedef Matrix<TScoreValue, TScoreSpec> TScoreMatrix;
-	typedef Matrix<TDistValue, TDistSpec> TDistMatrix;
-	typedef typename Size<TScoreMatrix>::Type TSize;
-	typedef typename Value<TDistMatrix>::Type TValue;
-	
-	TSize nseq = length(score, 0);
-	setDimension(dist, 2);setLength(dist, 0, nseq);setLength(dist, 1, nseq);
-	fill(host(dist), nseq*nseq, 0);
-
-	for (TSize row=0;row<nseq;++row) {
-		for(TSize col=row;col<nseq;++col) {
-			if (row == col) assignValue(dist, row*nseq+col, 0);
-			else {
-				assignValue(dist, row*nseq+col, (maxDist - (TValue) getValue(score, row*nseq+col)));
-				assignValue(dist, col*nseq+row, (maxDist - (TValue) getValue(score, row*nseq+col)));
-			}
-		}
-	}
-	
-	//for (TSize row=0;row<nseq;++row) {
-	//	for(TSize col=0;col<nseq;++col) {
-	//		std::cout << getValue(dist, row*nseq+col) << ",";
-	//	}
-	//	std::cout << std::endl;
-	//}
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TMatrix, typename TVal>
-void
-normalizeMatrix(TMatrix& mat, TVal const max, TVal const norm) {
-	SEQAN_CHECKPOINT
-	typedef typename Size<TMatrix>::Type TSize;
-	
-	TSize nseq = length(mat, 0);
-
-	for (TSize row=0; row<nseq; ++row)
-		for (TSize col=0; col<nseq; ++col)
-	       assignValue(mat, row*nseq+col, (getValue(mat,row*nseq+col) * norm ) / max);
-
-	//for (TSize row=0;row<nseq;++row) {
-	//	for(TSize col=0;col<nseq;++col) {
+	//for (TWord row=0;row<nseq;++row) {
+	//	for(TWord col=0;col<nseq;++col) {
 	//		std::cout << getValue(mat, row*nseq+col) << ",";
 	//	}
 	//	std::cout << std::endl;
 	//}
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TString, typename TSpec, typename THitMatrix>
+void
+getCommonKmerMatrix(StringSet<TString, TSpec> const& strSet, THitMatrix& mat) {
+	SEQAN_CHECKPOINT
+	getCommonKmerMatrix(strSet, mat, 3);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TString, typename TSpec, typename THitMatrix, typename TSize>
+void
+getCommonKmerMatrix(StringSet<TString, TSpec> const& strSet, THitMatrix& mat, TSize ktup) {
+	SEQAN_CHECKPOINT
+	
+	typedef typename Value<TString>::Type TAlphabet;
+
+	// Get the common q-grams / k-tupels
+	getCommonKmerMatrix(strSet, mat, ktup, TAlphabet());
 }
 
 //////////////////////////////////////////////////////////////////////////////
