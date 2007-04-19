@@ -88,12 +88,16 @@ void Test_StringSetIdHolder() {
 	String<char> bla("a");
 	TId id0 = assignValueById(str, bla);
 	SEQAN_TASSERT(id0 == 0)
+	SEQAN_TASSERT(idToPosition(str, id0) == 0)
+	SEQAN_TASSERT(positionToId(str, 0) == id0)
 	SEQAN_TASSERT(length(str) == 1)
 	SEQAN_TASSERT(str[0] == "a")
 	SEQAN_TASSERT(getValueById(str, id0) == "a")
 	String<char> bla1("b");
 	TId id1 = assignValueById(str, bla1);
 	SEQAN_TASSERT(id1 == 1)
+	SEQAN_TASSERT(idToPosition(str, id1) == 1)
+	SEQAN_TASSERT(positionToId(str, 1) == id1)
 	SEQAN_TASSERT(str[1] == "b")
 	SEQAN_TASSERT(length(str) == 2)
 	SEQAN_TASSERT(getValueById(str, id1) == "b")
@@ -158,6 +162,8 @@ void Test_StringSetIdHolder() {
 	SEQAN_TASSERT(length(subSet2) == 1)
 	clear(subSet);
 	assignValueById(subSet,subSet2, id3);
+	SEQAN_TASSERT(idToPosition(subSet, id3) == 0)
+	SEQAN_TASSERT(positionToId(subSet, 0) == id3)
 	assignValueById(subSet,str, id0);
 	SEQAN_TASSERT(valueById(subSet, id0) == "a")
 	SEQAN_TASSERT(getValueById(subSet, id1) == "")
@@ -177,7 +183,7 @@ void Test_StringSetIdHolder() {
 
 
 template <typename TSpec>
-void Test_StringSet_IdHolder()
+void Test_StringSet_Id()
 {	
 	StringSet<CharString, Owner<Default> > origin;
 	StringSet<CharString, TSpec> set;
@@ -226,8 +232,8 @@ int mainTestStringSet()
 	Test_StringSet_Concat< Owner<Default> >();
 	Test_StringSet_Concat< Owner<ConcatDirect<> > >();
 
-	Test_StringSet_IdHolder< Dependent<Tight> >();
-	Test_StringSet_IdHolder< Dependent<Generous> >();
+	Test_StringSet_Id< Dependent<Tight> >();
+	Test_StringSet_Id< Dependent<Generous> >();
 
 	debug::verifyCheckpoints("projects/library/seqan/sequence/sequence_multiple.h");
 

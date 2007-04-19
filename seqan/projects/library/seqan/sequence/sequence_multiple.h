@@ -864,7 +864,9 @@ namespace SEQAN_NAMESPACE_MAIN
 				TId const id) 
 	{
 	SEQAN_CHECKPOINT
-		return value(me, id);
+		if (id < length(me)) return value(me, id);
+		static TString tmp = "";
+		return tmp;
 	}
 
 	template <typename TString, typename TId>
@@ -1042,7 +1044,6 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 	SEQAN_CHECKPOINT
 		erase(me.strings, id);
-		erase(me.ids, id);
 		resize(me.limits, length(me.limits) - 1);
 		me.limitsValid = empty(me);
 	}
@@ -1079,6 +1080,97 @@ namespace SEQAN_NAMESPACE_MAIN
 			}
 		SEQAN_ASSERT(length(me.limits) == length(me) + 1);
 	}
+
+//////////////////////////////////////////////////////////////////////////////
+// 
+
+/**
+.Function.positionToId:
+..cat:Sequences
+..summary:Retrieves the id of a string in the StringSet given a position.
+..signature:positionToId(me, pos)
+..param.me:A StringSet.
+...type:Class.StringSet
+..param.id:An id.
+...type:Metafunction.Id
+..returns:A reference to a string.
+..see:Function.assignValueById
+..see:Function.valueById
+*/
+
+	template <typename TString, typename TSpec, typename TPos>
+	inline typename Id<StringSet<TString, Owner<TSpec> > >::Type
+	positionToId(StringSet<TString, Owner<TSpec> >& me, 
+				TPos const pos) 
+	{
+	SEQAN_CHECKPOINT
+		return pos;
+	}
+
+	template <typename TString, typename TPos>
+	inline typename Id<StringSet<TString, Dependent<Generous> > >::Type
+	positionToId(StringSet<TString, Dependent<Generous> >& me, 
+				TPos const pos) 
+	{
+	SEQAN_CHECKPOINT
+		return _findIthNonZeroValue(me.strings,pos);
+	}
+
+	template <typename TString, typename TPos>
+	inline typename Id<StringSet<TString, Dependent<Tight> > >::Type
+	positionToId(StringSet<TString, Dependent<Tight> >&me, 
+				TPos const pos) 
+	{
+	SEQAN_CHECKPOINT
+		return me.ids[pos];
+	}
+
+
+/**
+.Function.idToPosition:
+..cat:Sequences
+..summary:Retrieves the position of a string in the StringSet given an id.
+..signature:idToPosition(me, id)
+..param.me:A StringSet.
+...type:Class.StringSet
+..param.id:An id.
+...type:Metafunction.Id
+..returns:A reference to a string.
+..see:Function.assignValueById
+..see:Function.valueById
+*/
+
+	template <typename TString, typename TSpec, typename TId>
+	inline typename Id<StringSet<TString, Owner<TSpec> > >::Type
+	idToPosition(StringSet<TString, Owner<TSpec> >& me, 
+				TId const id) 
+	{
+	SEQAN_CHECKPOINT
+		return id;
+	}
+
+	template <typename TString, typename TId>
+	inline typename Id<StringSet<TString, Dependent<Generous> > >::Type
+	idToPosition(StringSet<TString, Dependent<Generous> >& me, 
+				TId const id) 
+	{
+	SEQAN_CHECKPOINT
+		return _countNonZeroValues(me.strings,id);
+	}
+
+	template <typename TString, typename TId>
+	inline typename Id<StringSet<TString, Dependent<Tight> > >::Type
+	idToPosition(StringSet<TString, Dependent<Tight> >&me, 
+				TId const id) 
+	{
+	SEQAN_CHECKPOINT
+		for(unsigned i = 0; i < length(me.ids); ++i)
+			if ((TId) me.ids[i] == id)
+				return i;
+		return 0;
+	}
+
+
 
 
 //////////////////////////////////////////////////////////////////////////////
