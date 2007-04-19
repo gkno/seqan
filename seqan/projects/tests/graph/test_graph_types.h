@@ -1375,7 +1375,7 @@ void Test_Alignment() {
 //____________________________________________________________________________
 // Alignment without edge weights
 	typedef String<Dna> TString;
-	typedef StringSet<TString, IdHolder<> > TStringSet;
+	typedef StringSet<TString, Dependent<> > TStringSet;
 	typedef Graph<Alignment<TStringSet, void> > TGraph;
 	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;

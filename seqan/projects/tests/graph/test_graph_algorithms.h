@@ -784,7 +784,7 @@ void Test_TCoffee() {
 // Graph TCoffee
 
 	// Read a t-coffee library: AminoAcid Alphabet
-	typedef StringSet<String<AminoAcid>, IdHolder<> > TStringSet;
+	typedef StringSet<String<AminoAcid>, Dependent<> > TStringSet;
 	typedef Graph<Alignment<TStringSet, unsigned int, Default> > TGraph;
 	TStringSet strSet;
 	TGraph g(strSet);
@@ -823,7 +823,7 @@ void Test_TCoffee() {
 	}
 
 	// Read a t-coffee library: Dna Alphabet
-	typedef StringSet<String<Dna>, IdHolder<> > TStringSetDna;
+	typedef StringSet<String<Dna>, Dependent<> > TStringSetDna;
 	typedef Graph<Alignment<TStringSetDna, unsigned int, Default> > TGraphDna;
 	TStringSetDna strSetDna;
 	TGraphDna gDna(strSetDna);
