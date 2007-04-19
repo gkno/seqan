@@ -137,7 +137,7 @@ getCommonKmerMatrix(StringSet<TString, TSpec> const& strSet, THitMatrix& mat, TS
 	fill(host(mat), nseq*nseq, 0);
 
 	// StringSet where each string is a sequence of amino acid groups identifiers
-	typedef StringSet<String<TAlphabet>, ConcatVirtual<> > TStringSetAA;
+	typedef StringSet<String<TAlphabet>, Owner<> > TStringSetAA;
 	// q-gram length = ktup
 	typedef Index<TStringSetAA, Index_QGram<SimpleShape> > TIndex;
 	TIndex index;
