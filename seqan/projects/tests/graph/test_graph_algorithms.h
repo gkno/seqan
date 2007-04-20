@@ -799,8 +799,6 @@ void Test_TCoffee() {
 	write(strmW,g,TCoffeeLib());
 	strmW.close();
 
-	//std::cout << g << std::endl;
-
 	fstream strm2; // Alignment graph as dot
 	strm2.open(TEST_PATH "my_tcoffee.dot", ios_base::out | ios_base::trunc);
 	write(strm2,g,DotDrawing());
@@ -815,6 +813,7 @@ void Test_TCoffee() {
 	Graph<Tree<double> > njTreeOut;
 	slowNjTree(distanceMatrix, njTreeOut);
 	std::cout << njTreeOut << std::endl;
+
 
 
 	// ToDo: Owner of strings!!!!!!!!!!!

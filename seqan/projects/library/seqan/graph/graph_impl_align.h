@@ -1,6 +1,8 @@
 #ifndef SEQAN_HEADER_GRAPH_IMPL_ALIGN_H
 #define SEQAN_HEADER_GRAPH_IMPL_ALIGN_H
 
+#include <map>
+
 namespace SEQAN_NAMESPACE_MAIN
 {
 //////////////////////////////////////////////////////////////////////////////
@@ -58,7 +60,10 @@ class Graph<Alignment<TStringSet, TCargo, TSpec> >
 {
 	public:
 		typedef typename Id<Graph>::Type TIdType;
+		typedef typename VertexDescriptor<Graph>::Type TVertexDescriptor;
 		typedef typename Size<Graph>::Type TSize;
+		typedef typename Size<TStringSet>::Type TStringSetSize;
+		typedef std::map<std::pair<TIdType, TIdType>, TVertexDescriptor> TPosToVertexMap;
 
 		// Alignment graph
 		Graph<Undirected<TCargo, TSpec> > data_align;
@@ -69,11 +74,23 @@ class Graph<Alignment<TStringSet, TCargo, TSpec> >
 		// Alignment specific members
 		String<SegmentInfo<TIdType, TSize> > data_segment;
 
+		// STL Map to retrieve a vertex given SeqId, Position
+		TPosToVertexMap data_pvMap;
+
+
 //____________________________________________________________________________
+
+		Graph() {
+		}
+
 
 		Graph(TStringSet sSet) {
 			SEQAN_CHECKPOINT
 			data_sequence = sSet;
+			TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
+			for(TStringSetSize k=0; k<length(sSet);++k) {
+				data_pvMap.insert(std::make_pair(std::make_pair(positionToId(sSet,k), length(sSet[k])), nilVertex));
+			}
 		}
 
 
@@ -94,10 +111,6 @@ class Graph<Alignment<TStringSet, TCargo, TSpec> >
 			clear(*this);
 			_copyGraph(_other, *this);
 			return *this;
-		}
-
-private:
-		Graph() {
 		}
 };
 
@@ -151,6 +164,7 @@ _copyGraph(Graph<Alignment<TStringSet, TCargo, TSpec> > const& source,
 	dest.data_align = source.data_align;
 	dest.data_sequence = source.data_sequence;
 	dest.data_segment = source.data_segment;
+	dest.data_pvMap = source.data_pvMap;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -160,7 +174,7 @@ inline void
 _copyGraph(Graph<Alignment<TStringSet, TCargo, TSpec> > const& source,
 		   Graph<Alignment<TStringSet, TCargo, TSpec> >& dest) 
 {
-	_copyGraph(source, dest, false); // Never transpose
+	_copyGraph(source, dest, false); // Never transpose, underlying graph is undirected
 }
 
 
@@ -238,8 +252,19 @@ inline void
 clearVertices(Graph<Alignment<TStringSet, TCargo, TSpec> >& g) 
 {
 	SEQAN_CHECKPOINT
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename Size<TStringSet>::Type TSize;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+
 	clearVertices(g.data_align);
 	clear(g.data_segment);
+	g.data_pvMap.clear();
+	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
+	if(!empty(value(g.data_sequence))) {
+		for(TSize k=0; k<length(stringSet(g));++k) {
+			g.data_pvMap.insert(std::make_pair(std::make_pair(positionToId(stringSet(g),k), length(stringSet(g)[0])), nilVertex));
+		}
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -295,26 +320,81 @@ addVertex(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 		  TLength len)
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<Undirected<TCargo, TSpec> > TGraph;
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename Id<TGraph>::Type TIdType;
 	typedef typename Size<TGraph>::Type TSize;
 	typedef SegmentInfo<TIdType, TSize> TSegmentInfo;
+	typedef std::map<std::pair<TIdType, TIdType>, TVertexDescriptor> TPosToVertexMap;
 
+	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
+
+	// Store the new segment
+	typename TPosToVertexMap::iterator interval = g.data_pvMap.lower_bound(std::make_pair(id, begin + len));
+	// Segment does not belong to Sequence anymore
+	SEQAN_TASSERT(interval != g.data_pvMap.end());
+	// Segment end must be assigned to nil so far
+	SEQAN_TASSERT(interval->second == nilVertex);
+	// Segment must belong to the whole old interval
+	SEQAN_TASSERT(interval == g.data_pvMap.upper_bound(std::make_pair(id, begin)));
+
+	// Insert new vertex
 	TVertexDescriptor vd = addVertex(g.data_align);
 	if (length(g.data_segment) <= vd) resize(g.data_segment, vd + 1, Generous());
 	assignProperty(g.data_segment, vd, TSegmentInfo(id, begin, len));
+
+	// Update position to vertex map
+	// Does the end of the new segment coincides with the end of the interval?
+	if ( (TSize) begin + len == (TSize) interval->first.second) {
+		// Does the beginning of the new segment coincides with the beginning of the interval?
+		if ((begin == 0) ||
+			(g.data_pvMap.find(std::make_pair(id, begin)) != g.data_pvMap.end())) {
+			// Replace interval
+			interval->second = vd;
+		} else {
+			// Split interval once
+			g.data_pvMap.insert(std::make_pair(std::make_pair(interval->first.first,begin), interval->second));
+			g.data_pvMap.erase(interval);
+			g.data_pvMap.insert(std::make_pair(std::make_pair(id,begin+len), vd));
+		}
+	} else {
+		// Does the beginning of the new segment coincides with the beginning of the interval?
+		if ((begin == 0) ||
+			(g.data_pvMap.find(std::make_pair(id, begin)) != g.data_pvMap.end())) {
+			// Split interval once
+			// Just insert here because we store interval ends
+			g.data_pvMap.insert(std::make_pair(std::make_pair(id,begin+len), vd));
+		} else {
+			// Split interval twice
+			TIdType tmp = interval->first.second;
+			g.data_pvMap.insert(std::make_pair(std::make_pair(interval->first.first,begin), interval->second));
+			g.data_pvMap.erase(interval);
+			g.data_pvMap.insert(std::make_pair(std::make_pair(id,begin+len), vd));
+			g.data_pvMap.insert(std::make_pair(std::make_pair(id,tmp), nilVertex));
+		}
+	}
 	return vd;
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TStringSet, typename TCargo, typename TSpec, typename TVertexDescriptor>
+template<typename TStringSet, typename TCargo, typename TSpec, typename TVD>
 inline void 
 removeVertex(Graph<Alignment<TStringSet, TCargo, TSpec> >& g, 
-			 TVertexDescriptor const v) 
+			 TVD const v) 
 {
 	SEQAN_CHECKPOINT
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename Id<TGraph>::Type TIdType;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef std::map<std::pair<TIdType, TIdType>, TVertexDescriptor> TPosToVertexMap;
+
+	// Clear the interval
+	typename TPosToVertexMap::iterator interval = g.data_pvMap.lower_bound(std::make_pair(sequenceId(g,v), segmentBegin(g,v) + segmentLength(g,v)));
+	SEQAN_TASSERT(interval != g.data_pvMap.end());
+	interval->second = getNil<TVertexDescriptor>();
+
+	// Remove the vertex
 	removeVertex(g.data_align,v);
 }
 
@@ -503,6 +583,19 @@ write(TFile & target,
 			}
 		}
 	}
+
+	Matrix<char> align;
+	if (convertAlignment(g, align)) {
+		_streamWrite(target,"Alignment matrix:\n");
+		TSize colLen = length(align, 0);
+		TSize nseq = length(align, 1);
+		for (TSize row=0;row<nseq;++row) {
+			for(TSize col=0;col<colLen;++col) {
+				_streamPut(target, getValue(align, row*colLen+col));
+			}
+			_streamPut(target, '\n');
+		}
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -513,8 +606,16 @@ assignStringSet(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 				TStringSet2& sStr)
 {
 	SEQAN_CHECKPOINT
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+
+	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
+
 	clear(g);
 	g.data_sequence = (TStringSet) sStr;
+	for(unsigned k=0; k<length(sStr);++k) {
+		g.data_pvMap.insert(std::make_pair(std::make_pair(positionToId(sStr,k), length(sStr[k])), nilVertex));
+	}
 }
 
 
@@ -590,6 +691,124 @@ segmentLength(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 {
 	SEQAN_CHECKPOINT
 	return const_cast<typename Size<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type&>(g.data_segment[v].data_length);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec, typename TSeqId, typename TPos> 
+inline typename VertexDescriptor<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type 
+findVertex(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+		   TSeqId id,
+		   TPos pos)
+{
+	SEQAN_CHECKPOINT
+	return g.data_pvMap.upper_bound(std::make_pair(id, pos))->second;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+template<typename TStringSet, typename TCargo, typename TSpec, typename TMatrix> 
+inline bool
+convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
+				 TMatrix& mat)
+{
+	SEQAN_CHECKPOINT
+	if (empty(g)) return false;
+
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename Value<TMatrix>::Type TValue;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename Id<TGraph>::Type TIdType;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef SegmentInfo<TIdType, TSize> TSegmentInfo;
+	typedef std::map<std::pair<TIdType, TIdType>, TVertexDescriptor> TPosToVertexMap;
+	typedef std::map<unsigned int, unsigned int> TComponentLength;
+
+	// Strongly Connected Components
+	String<unsigned int> component;
+	strongly_connected_components(g, component);
+
+	typedef std::list<unsigned int> TComps;
+	typedef std::set<unsigned int> TUniqueComps;
+	TComps comps;
+	TUniqueComps bag;
+	TComponentLength compLength;
+
+	// Walk through the first sequence
+	typename TPosToVertexMap::const_iterator it = g.data_pvMap.begin();
+	TIdType firstSeq = it->first.first;
+	for(; it != g.data_pvMap.end(); ++it) {
+		if (it->first.first != firstSeq) break;
+		unsigned int c = getProperty(component, it->second);
+		if (!bag.insert(c).second) return false;
+		compLength.insert(std::make_pair(c, segmentLength(g, it->second)));
+		comps.push_back(c);
+	}
+
+	// Walk through all other sequences
+	TComps::iterator pos = comps.begin();
+	TIdType currentSeq = it->first.first;
+	for(; it != g.data_pvMap.end(); ++it) {
+		if (it->first.first != currentSeq) {
+			pos = comps.begin();
+			currentSeq = it->first.first;
+		}
+		unsigned int c = getProperty(component, it->second);
+		// Have we seen this component before?
+		if (bag.find(c) != bag.end()) {
+			while ((pos != comps.end()) && (*pos != c)) ++ pos;
+			// Crossing components
+			if (pos == comps.end()) return false;
+		} else {
+			bag.insert(c);
+			compLength.insert(std::make_pair(c, segmentLength(g, it->second)));
+			pos = comps.insert(pos, c);
+		}
+		++pos;
+	}
+
+	// Create the matrix
+	TSize len = 0;
+	TSize nseq = length(stringSet(g));
+	for(TComponentLength::iterator cIt=compLength.begin(); cIt != compLength.end(); ++cIt) len+=cIt->second;
+	setDimension(mat, 2);setLength(mat, 0, len);setLength(mat, 1, nseq);
+	resize(mat);
+
+	// Fill the matrix
+	TSize row = 0;
+	TSize col = 0;
+	it = g.data_pvMap.begin();
+	pos = comps.begin();
+	currentSeq = it->first.first;
+	for(; it != g.data_pvMap.end(); ++it) {
+		if (it->first.first != currentSeq) {
+			SEQAN_TASSERT(col == len);
+			//std::cout << std::endl;
+			++row;col=0;
+			pos = comps.begin();
+			currentSeq = it->first.first;
+		}
+		unsigned int c = getProperty(component, it->second);
+		while ((pos != comps.end()) && (*pos != c)) {
+			for(TSize i=0;i<compLength[*pos];++i) {
+				//std::cout << '-';
+				assignValue(mat, row*len + col, '-');
+				++col;
+			}
+			++pos;
+		}
+		String<TValue> str = label(g,it->second);
+		//std::cout << str;
+		for(TSize i=0;i<length(str);++i) {
+			assignValue(mat, row*len + col, (TValue) getValue(str, i));
+			++col;
+		}
+
+		++pos;
+	}
+	SEQAN_TASSERT(row + 1 == nseq);
+	//std::cout << std::endl;
+
+	return true;
 }
 
 }// namespace SEQAN_NAMESPACE_MAIN

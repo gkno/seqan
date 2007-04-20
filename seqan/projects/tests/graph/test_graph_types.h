@@ -1380,6 +1380,7 @@ void Test_Alignment() {
 	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	typedef	Id<TStringSet>::Type TId;
+	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
 
 	
 	TStringSet str;
@@ -1417,6 +1418,9 @@ void Test_Alignment() {
 	SEQAN_TASSERT(label(g, v0) == "cc")
 	SEQAN_TASSERT(segmentBegin(g, v0) == 0)
 	SEQAN_TASSERT(segmentLength(g, v0) == 2)
+	SEQAN_TASSERT(findVertex(g, id1, 0) == v0)
+	SEQAN_TASSERT(findVertex(g, id1, 1) == v0)
+	SEQAN_TASSERT(findVertex(g, id1, 2) == nilVertex)
 
 	TVertexDescriptor v1 = addVertex(g, id2, 0, 5);
 	TEdgeDescriptor e =addEdge(g,0,1);
@@ -1432,11 +1436,21 @@ void Test_Alignment() {
 	SEQAN_TASSERT(inDegree(g, 1) == 1)
 	SEQAN_TASSERT(inDegree(g, 0) == 1)	
 	SEQAN_TASSERT(degree(g, 0) == 1)
+	SEQAN_TASSERT(findVertex(g, id2, 0) == v1)
+	SEQAN_TASSERT(findVertex(g, id2, 1) == v1)
+	SEQAN_TASSERT(findVertex(g, id2, 4) == v1)
+	SEQAN_TASSERT(findVertex(g, id2, 5) == nilVertex)
 
 	// Add more vertices and edges
 	addVertex(g, id1, 10, 20);  //2
-	TVertexDescriptor v3 = addVertex(g, id2, 1, 2);  //3
-	addVertex(g, id1, 1, 3);  //4
+	SEQAN_TASSERT(findVertex(g, id1, 0) == v0)
+	SEQAN_TASSERT(findVertex(g, id1, 1) == v0)
+	SEQAN_TASSERT(findVertex(g, id1, 2) == nilVertex)
+	SEQAN_TASSERT(findVertex(g, id1, 10) == 2)
+	SEQAN_TASSERT(findVertex(g, id1, 19) == 2)
+	SEQAN_TASSERT(findVertex(g, id1, 30) == nilVertex)
+	TVertexDescriptor v3 = addVertex(g, id2, 5, 2);  //3
+	addVertex(g, id1, 7, 3);  //4
 	addEdge(g,3,4);
 	TEdgeDescriptor my_edge = addEdge(g,3,1);
 	addEdge(g,3,0);
@@ -1449,22 +1463,15 @@ void Test_Alignment() {
 	SEQAN_TASSERT(inDegree(g, v3) == 3)
 	SEQAN_TASSERT(degree(g, v3) == 3)
 
-	// Graph drawing
-	// Raw output
-	// File output
-	fstream strm;
-	strm.open(TEST_PATH "my_alignment.dot", ios_base::out | ios_base::trunc);
-	write(strm,g,DotDrawing());
-	strm.close();
+	//std::cout << g << std::endl;
 
 	// Remove edges
 	removeEdge(g,3,1);
 	removeEdge(g,0,1);
 	SEQAN_TASSERT(numEdges(g) == 2)
-
 	
 	// Remove vertices 
-	addVertex(g, id2, 3, 6);  //5
+	addVertex(g, id2, 14, 4);  //5
 	addEdge(g,5,2);
 	addEdge(g,2,3);
 	addEdge(g,1,3);
@@ -1694,6 +1701,53 @@ void Test_Alignment() {
 	SEQAN_TASSERT(value(dfsIt) == 0)
 	SEQAN_TASSERT(*dfsIt == 0)
 	goNext(dfsIt);
+
+	// Alignments
+	typedef String<char> TAlignString;
+	typedef StringSet<TAlignString, Dependent<> > TAlignStringSet;
+	typedef Graph<Alignment<TAlignStringSet, void> > TAlignmentGraph;
+	typedef VertexDescriptor<TAlignmentGraph>::Type TVD;
+	typedef EdgeDescriptor<TAlignmentGraph>::Type TED;
+	
+	TAlignStringSet al;
+	TAlignString al0("Garfieldthelastfatcat");
+	TId i0 = assignValueById(al, al0);
+	TAlignString al1("Garfieldthefastcat");
+	TId i1 = assignValueById(al, al1);
+	TAlignString al2("Garfieldtheveryfastcat");
+	TId i2 = assignValueById(al, al2);
+	TAlignString al3("thefatcat");
+	TId i3 = assignValueById(al, al3);
+
+	TAlignmentGraph gAl(al);
+	TVD vH = addVertex(gAl, i1, 8, 3);TVD vT = addVertex(gAl, i1, 13, 1);TVD vS = addVertex(gAl, i3, 6, 3);
+	TVD vW = addVertex(gAl, i2, 18, 1);TVD vA = addVertex(gAl, i0, 0, 8);TVD vM = addVertex(gAl, i2, 11, 4);
+	TVD vK = addVertex(gAl, i2, 0, 8);TVD vC = addVertex(gAl, i0, 11, 4);TVD vD = addVertex(gAl, i0, 15, 2);
+	TVD vF = addVertex(gAl, i0, 18, 3);TVD vG = addVertex(gAl, i1, 0, 8);addEdge(gAl, vA, vG);
+	TVD vI = addVertex(gAl, i1, 11, 2);TVD vQ = addVertex(gAl, i3, 3, 2);TVD vB = addVertex(gAl, i0, 8, 3);
+	TVD vU = addVertex(gAl, i1, 14, 1);TVD vE = addVertex(gAl, i0, 17, 1);TVD vJ = addVertex(gAl, i1, 15, 3);
+	TVD vL = addVertex(gAl, i2, 8, 3);
+	addEdge(gAl, vH, vL);
+	TVD vN = addVertex(gAl, i2, 15, 2);TVD vV = addVertex(gAl, i2, 17, 1);
+	TVD vO = addVertex(gAl, i2, 19, 3);TVD vP = addVertex(gAl, i3, 0, 3);TVD vR = addVertex(gAl, i3, 5, 1);
+	addEdge(gAl, vA, vK);addEdge(gAl, vG, vK);addEdge(gAl, vB, vH);addEdge(gAl, vB, vL);
+	addEdge(gAl, vB, vP);addEdge(gAl, vH, vP);addEdge(gAl, vL, vP);addEdge(gAl, vC, vM);
+	addEdge(gAl, vD, vI);addEdge(gAl, vD, vQ);addEdge(gAl, vD, vN);addEdge(gAl, vI, vQ);
+	addEdge(gAl, vI, vN);addEdge(gAl, vQ, vN);addEdge(gAl, vT, vV);addEdge(gAl, vE, vU);
+	addEdge(gAl, vE, vW);addEdge(gAl, vE, vR);addEdge(gAl, vU, vW);addEdge(gAl, vU, vR);
+	addEdge(gAl, vW, vR);addEdge(gAl, vF, vJ);addEdge(gAl, vF, vO);addEdge(gAl, vF, vS);
+	addEdge(gAl, vJ, vO);addEdge(gAl, vJ, vS);addEdge(gAl, vO, vS);
+
+	//std::cout << gAl << std::endl;
+
+	// Graph drawing
+	// Raw output
+	// File output
+	fstream strm;
+	strm.open(TEST_PATH "my_alignment.dot", ios_base::out | ios_base::trunc);
+	write(strm,gAl,DotDrawing());
+	strm.close();
+
 }
 
 }

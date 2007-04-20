@@ -63,6 +63,7 @@
 
 // Graph algorithms
 #include <seqan/graph/graph_algorithm.h>
+#include <seqan/graph/graph_algorithm_alignment.h>
 #include <seqan/graph/graph_algorithm_tcoffee.h>
 
 

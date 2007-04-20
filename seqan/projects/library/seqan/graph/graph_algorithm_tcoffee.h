@@ -450,15 +450,16 @@ _readLibrary(TFile & file,
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	typedef typename Id<TGraph>::Type TId;
 
+	TValue c;
+	bool seq1ToN = false;
+	if (_streamEOF(file)) return;
+	else c = _streamGet(file);
+
 	typedef std::pair<unsigned int, unsigned int> TSeqRes;
 	typedef std::map<TSeqRes, unsigned int> TNodeMap;
 	TNodeMap node_map;
 	TWord seq1 = 0;
 	TWord seq2 = 0;
-	bool seq1ToN = false;
-	TValue c;
-	if (_streamEOF(file)) return;
-	else c = _streamGet(file);
 	while (!_streamEOF(file)) {
 		_parse_skipWhitespace(file,c);
 		if (_streamEOF(file)) break;
@@ -467,12 +468,14 @@ _readLibrary(TFile & file,
 			_parse_skipWhitespace(file,c);
 			seq1 = _parse_readNumber(file, c);
 			seq2 = _parse_readNumber(file, c);
+			if (empty(g))
+				if ((seq1 != 0) || (seq2 != 0)) seq1ToN = true;
+			if (seq1ToN) {
+				--seq1;
+				--seq2;
+			}
 		} else if (c == '!') {
-			c = _streamGet(file);
-			_parse_skipWhitespace(file,c);
-			String<char> str = _parse_readIdentifier(file, c);
 			_parse_skipLine(file, c);
-			if (str == "SEQ_1_TO_N") seq1ToN = true;
 		} else {
 			unsigned int res1 = _parse_readNumber(file, c);
 			_parse_skipWhitespace(file,c);
@@ -516,14 +519,6 @@ _readLibrary(TFile & file,
 			}
 		}
 	}
-
-	if (seq1ToN) {
-		typedef typename Iterator<TGraph, VertexIterator>::Type TConstIter;
-		TConstIter it(g);
-		for(;!atEnd(it);++it) {
-			sequenceId(g, *it) -= 1;
-		}
-	}
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -565,6 +560,9 @@ read(TFile & file,
 		std::cout << getValueById(stringSet(g), id) << std::endl;
 		SEQAN_ASSERT(id < nSeq)		
 	}
+	// Reinitialize the graph, because we changed the sequences
+	clear(g);
+
 	// Read library
 	_readLibrary(file,g);
 }

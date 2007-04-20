@@ -20,6 +20,7 @@
 #include "test_graph_properties.h"
 #include "test_graph_derived.h"
 #include "test_graph_algorithms.h"
+#include "test_graph_alignment.h"
 
 using namespace std;
 using namespace seqan;
@@ -87,6 +88,8 @@ int main()
 	// Test Graph Algorithms
 	Test_Algorithms();
 
+	// Alignment
+	Test_NeedlemanWunsch();
 
 	// T-Coffee
 	Test_CompressedAlphabets();
@@ -118,6 +121,7 @@ int main()
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_utility_alphabets.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_utility_parsing.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_algorithm.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_algorithm_alignment.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_algorithm_tcoffee.h");
 
 	SEQAN_TREPORT("TEST END")
