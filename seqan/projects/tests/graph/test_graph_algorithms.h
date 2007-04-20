@@ -784,7 +784,7 @@ void Test_TCoffee() {
 // Graph TCoffee
 
 	// Read a t-coffee library: AminoAcid Alphabet
-	typedef StringSet<String<AminoAcid>, Dependent<> > TStringSet;
+	typedef StringSet<String<AminoAcid>, Owner<> > TStringSet;
 	typedef Graph<Alignment<TStringSet, unsigned int, Default> > TGraph;
 	TStringSet strSet;
 	TGraph g(strSet);
@@ -815,14 +815,8 @@ void Test_TCoffee() {
 	std::cout << njTreeOut << std::endl;
 
 
-
-	// ToDo: Owner of strings!!!!!!!!!!!
-	for(unsigned int i=0; i<length(value(g.data_sequence)); ++i) {  	// Delete sequences
-		delete &value(g.data_sequence)[i];
-	}
-
 	// Read a t-coffee library: Dna Alphabet
-	typedef StringSet<String<Dna>, Dependent<> > TStringSetDna;
+	typedef StringSet<String<Dna>, Owner<> > TStringSetDna;
 	typedef Graph<Alignment<TStringSetDna, unsigned int, Default> > TGraphDna;
 	TStringSetDna strSetDna;
 	TGraphDna gDna(strSetDna);
@@ -850,10 +844,6 @@ void Test_TCoffee() {
 	slowNjTree(distanceMatrixDna, njTreeOutDna);
 	std::cout << njTreeOutDna << std::endl;
 
-	// ToDo: Owner of strings!!!!!!!!!!!
-	for(unsigned int i=0; i<length(value(gDna.data_sequence)); ++i) {  	// Delete sequences
-		delete &value(gDna.data_sequence)[i];
-	}
 }
 
 }

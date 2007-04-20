@@ -415,24 +415,23 @@ slowNjTree(Matrix<double, TMatrixSpec>& mat, Graph<Tree<TCargo, TSpec> >& g) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TFile, typename TChar, typename TStringSet, typename TCargo, typename TSpec>
-inline typename Value<TStringSet>::Type&
+template<typename TFile, typename TChar, typename TStringSet, typename TCargo, typename TSpec, typename TString>
+inline void
 _parse_readSequenceData(TFile & file,
 						TChar & c,
-						Graph<Alignment<TStringSet, TCargo, TSpec> >& g)
+						Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+						TString& str)
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
-    typedef typename Value<TStringSet>::Type TString;
+
+	append(str, c);
 
 	// Read word
-	TString* str = new TString(c);
 	while (!_streamEOF(file)) {
 		c = _streamGet(file);
 		if (!_parse_isLetter(c)) break;
-		append(*str, c);
+		append(str, c);
 	}
-	return *str;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -547,6 +546,7 @@ read(TFile & file,
 	
 	// Read number of sequences
 	TWord nSeq = (TWord) _parse_readNumber(file, c);
+	resize(stringSet(g), nSeq);
 
 	// Read sequences
 	for(TWord i=0; i<nSeq; ++i) {
@@ -555,10 +555,10 @@ read(TFile & file,
 		_parse_skipWhitespace(file, c);
 		std::cout << _parse_readNumber(file, c) << ", ";
 		_parse_skipWhitespace(file, c);
-		TIdType id = assignValueById(stringSet(g), _parse_readSequenceData(file,c,g));
-		std::cout << id << ", ";
-		std::cout << getValueById(stringSet(g), id) << std::endl;
-		SEQAN_ASSERT(id < nSeq)		
+		_parse_readSequenceData(file,c,g,stringSet(g)[i]);
+		//std::cout << id << ", ";
+		std::cout << getValueById(stringSet(g), i) << std::endl;
+		//SEQAN_ASSERT(id < nSeq)		
 	}
 	// Reinitialize the graph, because we changed the sequences
 	clear(g);
