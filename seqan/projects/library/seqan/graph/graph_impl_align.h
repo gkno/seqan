@@ -274,6 +274,7 @@ inline void
 clear(Graph<Alignment<TStringSet, TCargo, TSpec> >& g) 
 {
 	SEQAN_CHECKPOINT
+	clear(value(g.data_sequence));
 	clearVertices(g);
 }
 
@@ -327,6 +328,10 @@ addVertex(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	typedef SegmentInfo<TIdType, TSize> TSegmentInfo;
 	typedef std::map<std::pair<TIdType, TIdType>, TVertexDescriptor> TPosToVertexMap;
 
+	//for(TPosToVertexMap::const_iterator p = g.data_pvMap.begin(); p != g.data_pvMap.end(); ++p) {
+	//	std::cout << p->first.first << ',' << p->first.second << ':' << p->second << std::endl;
+	//}
+
 	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
 
 	// Store the new segment
@@ -336,7 +341,7 @@ addVertex(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	// Segment end must be assigned to nil so far
 	SEQAN_TASSERT(interval->second == nilVertex);
 	// Segment must belong to the whole old interval
-	SEQAN_TASSERT(interval == g.data_pvMap.upper_bound(std::make_pair(id, begin)));
+	SEQAN_TASSERT(*interval == *g.data_pvMap.upper_bound(std::make_pair(id, begin)));
 
 	// Insert new vertex
 	TVertexDescriptor vd = addVertex(g.data_align);
@@ -593,7 +598,7 @@ write(TFile & target,
 			for(TSize col=0;col<colLen;++col) {
 				_streamPut(target, getValue(align, row*colLen+col));
 			}
-			_streamPut(target, '\n');
+			if (row != nseq - 1) _streamPut(target, '\n');
 		}
 	}
 }
@@ -771,7 +776,7 @@ convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	TSize nseq = length(stringSet(g));
 	for(TComponentLength::iterator cIt=compLength.begin(); cIt != compLength.end(); ++cIt) len+=cIt->second;
 	setDimension(mat, 2);setLength(mat, 0, len);setLength(mat, 1, nseq);
-	resize(mat);
+	fill(host(mat), nseq * len, '-');
 
 	// Fill the matrix
 	TSize row = 0;
@@ -781,7 +786,7 @@ convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	currentSeq = it->first.first;
 	for(; it != g.data_pvMap.end(); ++it) {
 		if (it->first.first != currentSeq) {
-			SEQAN_TASSERT(col == len);
+			SEQAN_TASSERT(col <= len);
 			//std::cout << std::endl;
 			++row;col=0;
 			pos = comps.begin();

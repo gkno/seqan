@@ -1498,6 +1498,7 @@ void Test_Alignment() {
 	addEdge(g,2,0);
 	addEdge(g,4,1);
 	clear(g);
+	assignStringSet(g, str);
 	SEQAN_TASSERT(numVertices(g) == 0)
 	SEQAN_TASSERT(numEdges(g) == 0)
 	addVertex(g,id1,0,1);addVertex(g,id1,1,1);addVertex(g,id1,2,1);

@@ -237,7 +237,7 @@ slowNjTree(Matrix<double, TMatrixSpec>& mat, Graph<Tree<TCargo, TSpec> >& g) {
 	//}
 
 	// First initialization
-	clear(g);
+	clearVertices(g);
 	String<double> av;    // Average branch length to a combined node
 	fill(av,nseq,0.0);
 
@@ -561,7 +561,7 @@ read(TFile & file,
 		//SEQAN_ASSERT(id < nSeq)		
 	}
 	// Reinitialize the graph, because we changed the sequences
-	clear(g);
+	clearVertices(g);
 
 	// Read library
 	_readLibrary(file,g);
