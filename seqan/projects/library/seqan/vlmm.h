@@ -1,6 +1,63 @@
 #ifndef SEQAN_HEADER_VLMM_H
 #define SEQAN_HEADER_VLMM_H
 
+// for time stopping
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+void inittheclock(void);
+double gettheruntime(void);
+int gettheclockticks(void); 
+
+/*
+  This module implements function to measures the running time
+  of programs or program parts.
+*/
+
+/*
+  The following values store the the clockticks at start time 
+  and stop time of the clock.
+*/
+
+static clock_t startclock, 
+               stopclock;
+
+/*EE
+  The following function initializes the clock.
+*/
+
+void inittheclock(void)
+{ 
+  startclock = clock(); 
+}
+
+/*EE
+  The following function delivers the time since the 
+  clock was initialized. The time is reported in seconds
+  as a floating point value.
+*/
+
+double gettheruntime(void)
+{
+   stopclock = clock();
+   return (double) (stopclock-startclock) / (double) CLOCKS_PER_SEC;
+}
+
+/*EE
+  The following function delivers the clock ticks betwenn 
+  \texttt{startclock} to \texttt{stopclock}.
+*/
+
+int gettheclockticks(void)
+{
+   stopclock = clock();
+   return (int) (stopclock-startclock);
+}
+
+
+
 namespace SEQAN_NAMESPACE_MAIN
 {
 
@@ -911,8 +968,8 @@ pruneTree(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > >,TGr
 	// root cannot be pruned
 	setMarked(vlmm,root,true);
 	//assignProperty(marked,root,true);
-
-	pruneTreeRecursivelyFast(vlmm,root,original,parameters,0);
+	TVertexDescriptor dummy = 0;
+	pruneTreeRecursivelyFast(vlmm,root,original,parameters,dummy);
 
 		/*for(unsigned i =0;i<numVertices(vlmm);++i){
 				std::cout << isMarked(vlmm,i)<< "  ";
@@ -1105,11 +1162,12 @@ pruneTreeRecursivelyFast(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < 
 			unsigned lastVertex = 0;
 			unsigned pos = 0;
 			std::cout <<"..check potential nodes above node:" <<node<<std::endl;
-			TVertexDescriptor potVertex = getSuccessor(vlmm,target,value(childLabel,0));
+			TVertexDescriptor potVertex = vlmm.data_vertex[target].data_edge[(TSize) value(childLabel,0)].data_target;
+			//TVertexDescriptor potVertex = getSuccessor(vlmm,target,value(childLabel,0));
 			SEQAN_ASSERT(potVertex != nilVal)
 			while(! potVertex == getSuffixLink(vlmm,node) ){
 					// we have a node which may lead to a new node on the edge father->node
-					// how far done is this node ?
+					// how far down is this node ?
 					pos += lastVertex + length(getProperty(vlmm.data_edge_label,TEdgeDescriptor(target,value(childLabel,lastVertex))));
 					
 					if( (potVertex < length(original)) && original[potVertex] && extendNode(vlmm,potVertex,value(childLabel,lastVertex+1),parameters) ){
@@ -1126,7 +1184,8 @@ pruneTreeRecursivelyFast(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < 
 				}
 					lastVertex = pos +1;
 					// update the next vertex on edge SLfather->SLnode
-					potVertex = getSuccessor(vlmm,potVertex,value(childLabel,lastVertex+1));
+					potVertex = vlmm.data_vertex[potVertex].data_edge[(TSize) value(childLabel,lastVertex+1)].data_target;
+					//potVertex = getSuccessor(vlmm,potVertex,value(childLabel,lastVertex+1));
 			}
 
 			
@@ -1196,15 +1255,18 @@ buildPST(Index<TIndexType, Index_ESA<> > & index,
 
 	//Iter< TIndex, VSTree< TopDown< ParentLinks<ConstrainedTraversal<Relative> > > > > it(index,parameters.minEmpiricalProbability);
 	Iter< TIndex, VSTree< TopDown< ParentLinks<ConstrainedTraversal<Absolute> > > > > it(index,2);
-
+	
+	
+	double build = gettheruntime();
+	inittheclock();
 	buildSuffixTreeFromIndex(it,vlmm);
-	std::cout << "constructed suffix tree core" <<std::endl;
+	std::cout << "constructed suffix tree core:" <<build<<std::endl;
 	initMaps(vlmm);
 	//std::cout << "init all maps" <<std::endl;
 	addSuffixLinks(vlmm);
 	//std::cout << "added suffix links and reverse suffix links" <<std::endl;
 	//std::cout <<vlmm;
-	//pruneTree(vlmm,parameters);
+	pruneTree(vlmm,parameters);
 	//std::cout << "pruned the PST" <<std::endl;
 	//std::cout << vlmm;
 	std::cout << "READY!" <<std::endl;
