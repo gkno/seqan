@@ -57,7 +57,7 @@ int gettheclockticks(void)
 }
 
 
-
+using namespace std;
 namespace SEQAN_NAMESPACE_MAIN
 {
 
@@ -633,7 +633,8 @@ buildSuffixTreeFromIndex(Iter<TIndex, VSTree< TopDown< ParentLinks<ConstrainedTr
 		else{
 			//addEdge with one char less , da muss man auch nicht zählen
 			TAlphabet letter = value(parentEdgeLabel(it), repLength(it)-1 );
-			addEdge(target,father,child,prefix( parentEdgeLabel(it), repLength(it)-1 ) );
+			String<TAlphabet> EdgeLabel = parentEdgeLabel(it);
+			addEdge(target,father,child, prefix( EdgeLabel, repLength(it)-1 ) );
 			initProbabilityVectorForLeaf(it,target,child,letter);
 		}
 		//std::cout <<"set Edge\t";
@@ -1029,7 +1030,7 @@ pruneTreeRecursively(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpe
 		if(! isRoot(vlmm,father) ){
 				TVertexDescriptor target = getSuffixLink(vlmm,father);
 
-			std::cout <<"..check potential nodes above node:" <<node<<std::endl;
+			//std::cout <<"..check potential nodes above node:" <<node<<std::endl;
 			TVertexDescriptor potVertex;
 			unsigned lastVertex = 0;
 			for(unsigned pos = 1;pos < length(childLabel);++pos ){
@@ -1161,7 +1162,7 @@ pruneTreeRecursivelyFast(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < 
 			// if not, nothing needs to be done
 			unsigned lastVertex = 0;
 			unsigned pos = 0;
-			std::cout <<"..check potential nodes above node:" <<node<<std::endl;
+			//std::cout <<"..check potential nodes above node:" <<node<<std::endl;
 			TVertexDescriptor potVertex = vlmm.data_vertex[target].data_edge[(TSize) value(childLabel,0)].data_target;
 			//TVertexDescriptor potVertex = getSuccessor(vlmm,target,value(childLabel,0));
 			SEQAN_ASSERT(potVertex != nilVal)
@@ -1253,21 +1254,34 @@ buildPST(Index<TIndexType, Index_ESA<> > & index,
 	PST parameters;
 	setParameters(parameters,threshold,minEmpiricalProbability,minConditionalProbability,alpha);
 
-	//Iter< TIndex, VSTree< TopDown< ParentLinks<ConstrainedTraversal<Relative> > > > > it(index,parameters.minEmpiricalProbability);
-	Iter< TIndex, VSTree< TopDown< ParentLinks<ConstrainedTraversal<Absolute> > > > > it(index,2);
+	Iter< TIndex, VSTree< TopDown< ParentLinks<ConstrainedTraversal<Relative> > > > > it(index,parameters.minEmpiricalProbability);
+	//Iter< TIndex, VSTree< TopDown< ParentLinks<ConstrainedTraversal<Absolute> > > > > it(index,2);
 	
-	
-	double build = gettheruntime();
 	inittheclock();
+	
+	
+	indexRequire(index, ESA_SA());
+	double buildESA = gettheruntime();
+	indexRequire(index, ESA_LCP());
+	double buildLCP = gettheruntime()-buildESA;		
+	indexRequire(index, ESA_ChildTab());
+	double buildChildTab = gettheruntime()-buildESA-buildLCP;
+	std::cout << "ESA: " <<buildESA<< "  LCP: " << buildLCP << "  ChildTab: "<< buildChildTab<<std::endl;
+	double build = gettheruntime();
+	std::cout << "in buildSuffixTreeFromIndex:";
 	buildSuffixTreeFromIndex(it,vlmm);
-	std::cout << "constructed suffix tree core:" <<build<<std::endl;
+	std::cout << "constructed suffix tree core:" <<gettheruntime()-build<<std::endl;
+	build = gettheruntime();
+	std::cout << "in initMaps:";
 	initMaps(vlmm);
-	//std::cout << "init all maps" <<std::endl;
+	std::cout << "init all maps" <<gettheruntime()-build<<std::endl;
+	build = gettheruntime();
 	addSuffixLinks(vlmm);
-	//std::cout << "added suffix links and reverse suffix links" <<std::endl;
+	std::cout << "added suffix links and reverse suffix links" <<gettheruntime()-build<<std::endl;
+	build = gettheruntime();
 	//std::cout <<vlmm;
 	pruneTree(vlmm,parameters);
-	//std::cout << "pruned the PST" <<std::endl;
+	std::cout << "pruned the PST" <<gettheruntime()-build<<std::endl;
 	//std::cout << vlmm;
 	std::cout << "READY!" <<std::endl;
 }
