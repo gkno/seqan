@@ -648,7 +648,7 @@ stringSet(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g)
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TStringSet, typename TCargo, typename TSpec, typename TVertexDescriptor>
-inline typename Value<TStringSet>::Type
+inline typename Infix<typename Value<TStringSet>::Type>::Type
 label(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	  TVertexDescriptor const v)
 {

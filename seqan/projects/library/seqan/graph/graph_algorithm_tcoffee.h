@@ -404,8 +404,86 @@ slowNjTree(Matrix<double, TMatrixSpec>& mat, Graph<Tree<TCargo, TSpec> >& g) {
 }
 
 
+
 //////////////////////////////////////////////////////////////////////////////
-// T-Coffee Library Handling
+// T-Coffee: Primary Library Generation
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TAlignmentGraph, typename TAlphabet>
+double 
+_getSequenceSimilarity(TAlignmentGraph& g,
+					   TAlphabet)
+{
+	SEQAN_CHECKPOINT
+	typedef typename Size<TAlignmentGraph>::Type TSize;
+	typedef typename Id<TAlignmentGraph>::Type TId;
+	typedef typename VertexDescriptor<TAlignmentGraph>::Type TVertexDescriptor;
+	typedef typename Host<TAlignmentGraph>::Type TStringSet;
+	typedef typename Value<TStringSet>::Type TString;
+	typedef typename Infix<TString>::Type TInfix;
+
+	TSize len1 = length(stringSet(g)[0]);
+	TSize len2 = length(stringSet(g)[1]);
+
+	double sim = 0.0;
+	typedef typename Iterator<TAlignmentGraph, EdgeIterator>::Type TEdgeIterator;
+	TEdgeIterator it(g);
+	for(;!atEnd(it);++it) {
+		TVertexDescriptor sV = sourceVertex(it);
+		TVertexDescriptor tV = targetVertex(it);
+		typedef typename Iterator<TInfix>::Type TInfixIter;
+		TInfix inf1 = label(g,sV);
+		TInfix inf2 = label(g,tV);
+		TInfixIter sIt1 = begin(inf1);
+		TInfixIter sIt2 = begin(inf2);
+		while((!atEnd(sIt1)) || (!atEnd(sIt2))) {
+			if ( (TAlphabet) *sIt1  == (TAlphabet) *sIt2) ++sim;
+			goNext(sIt1); goNext(sIt2);
+		}
+	}
+	
+	if (len1 > len2) return sim / len2;
+	else return sim / len1;
+}
+
+template<typename TStringSet, typename TCargo, typename TSpec, typename TAlphabet>
+void 
+generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+					   TAlphabet)
+{
+	SEQAN_CHECKPOINT
+
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename Id<TGraph>::Type TId;
+
+	// Pairwise alignments for all pairs of sequences
+	Score<int> score_type = Score<int>(1,-1,-1,0);
+	TStringSet* str = &stringSet(g);	
+	TSize nseq = length(stringSet(g));
+	for(TSize i=0; i<nseq; ++i) {
+		for(TSize j=i+1; j<nseq; ++j) {
+			//TId id1 = positionToId(*str, i);
+			//TId id2 = positionToId(*str, j);
+	
+			// Pairwise alignment graph
+			TStringSet pairSet;
+			assignValueById(pairSet, getValue(*str, i));
+			assignValueById(pairSet, getValue(*str, j));
+			Graph<Alignment<TStringSet, void> > pGraph(pairSet);
+			globalAlignment(pGraph, score_type );
+
+			// Determine a sequence weight
+			int seqSim = (int) _getSequenceSimilarity(pGraph, TAlphabet() ) * 100;
+
+			std::cout << pGraph << std::endl;
+			std::cout << seqSim << std::endl;
+		}
+	}
+}
+   
+//////////////////////////////////////////////////////////////////////////////
+// T-Coffee Library Reading / Writing
 //////////////////////////////////////////////////////////////////////////////
 
 

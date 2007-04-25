@@ -90,10 +90,9 @@ int main()
 
 	// Alignment
 	Test_NeedlemanWunsch();
-
-	// T-Coffee
+	Test_Gotoh();	
 	Test_CompressedAlphabets();
-	Test_TCoffee();
+	Test_TCoffee(); // T-Coffee
 
 
 //____________________________________________________________________________
