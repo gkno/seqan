@@ -233,8 +233,11 @@ inline void goNext(Iter< Index<TText, TSpec>, VSTree< TopDown< ParentLinks<Const
 			walk_down = 0;
 			continue;
 		}*/
-		if( (isLeaf(it) && repLength(it)>1) || countOccurences(it) >= floor(it.RelativeThreshold*(float)(length(container(it))-
+		/*if( (isLeaf(it) && length(parentEdgeLabel(it))>1) || countOccurences(it) >= floor(it.RelativeThreshold*(float)(length(container(it))-
 	(repLength(it)-1)*countSequences(container(it)) )))
+*/
+	if( (countOccurences(it) >= floor(it.RelativeThreshold*(float)(length(container(it))-
+	(repLength(it)-1)*countSequences(container(it)) )) )  &&    ( !isLeaf(it) || length(parentEdgeLabel(it))>1 ))
 			not_finished = 0;
 		else
 			walk_down = 0;
@@ -621,22 +624,31 @@ buildSuffixTreeFromIndex(Iter<TIndex, VSTree< TopDown< ParentLinks<ConstrainedTr
 
 		child = addVertex(target);
 		//std::cout << "Node:"<<child<<"  "<<value(it) << " = " << repLength(it)<< " " << representative(it) << "  toFather:"<<parentEdgeLabel(it)<<"  hits: "<<length(getOccurences(it))<<std::endl;
+		
 		setFather(target,father,child);
 		//std::cout <<"set Father\t";
 		// set child relation with edgelabel
 		//std::cout <<"ParentEdgeLAbel:"<<parentEdgeLabel(it)<<std::endl;
 		// only if not a leaf
 		if(!isLeaf(it)){
+			//std::cout<<"case1\t"<<representative(it)<<" ";
 			addEdge(target,father,child,parentEdgeLabel(it));
 			initProbabilityVector(it,target,child);
 		}
 		else{
+			
+			//std::cout<<"case2\t"<<representative(it)<<" ";
 			//addEdge with one char less , da muss man auch nicht zählen
-			TAlphabet letter = value(parentEdgeLabel(it), repLength(it)-1 );
 			String<TAlphabet> EdgeLabel = parentEdgeLabel(it);
-			addEdge(target,father,child, prefix( EdgeLabel, repLength(it)-1 ) );
+			TAlphabet letter = value(EdgeLabel, length(EdgeLabel)-1 );
+			
+			//if(child == 13 || child ==4)std::cout<<"EdgeLabel: "<<EdgeLabel<<"RepLength: "<<repLength(it)<<"  prefix"<<prefix( EdgeLabel, length(EdgeLabel)-1 ) <<endl;
+			addEdge(target,father,child, prefix( EdgeLabel, length(EdgeLabel)-1 ) );
+			//if(child == 13 || child ==4)std::cout<<"addedEdge"<<"letter:"<<letter<<endl;
 			initProbabilityVectorForLeaf(it,target,child,letter);
+			//if(child == 13 || child ==4) std::cout<<"initVector"<<endl;
 		}
+		std::cout<<"created node:"<<child<<std::endl;
 		//std::cout <<"set Edge\t";
 		// go to next valid node and add it to the graph
 		goNext(it);
