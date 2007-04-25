@@ -270,16 +270,18 @@ gotoh_trace(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 		}
 	} while ((len1 != 0) && (len2 !=0));
 	// Process left-overs
-	switch(tvOld) {
-		case Diagonal: 
-			addEdge(g, addVertex(g, id1, len1, segLen), addVertex(g, id2, len2, segLen));
-			break;
-		case Left:
-			addVertex(g, id1, len1, segLen);
-			break;
-		case Top:
-			addVertex(g, id2, len2, segLen);
-			break;
+	if (segLen > 0) {
+		switch(tvOld) {
+			case Diagonal: 
+				addEdge(g, addVertex(g, id1, len1, segLen), addVertex(g, id2, len2, segLen));
+				break;
+			case Left:
+				addVertex(g, id1, len1, segLen);
+				break;
+			case Top:
+				addVertex(g, id2, len2, segLen);
+				break;
+		}
 	}
 	// Handle the remaining sequence
 	if (len1 != 0) {
