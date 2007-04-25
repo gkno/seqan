@@ -329,7 +329,7 @@ SEQAN_CHECKPOINT
 
 	TTraceValue tvMat, tvLeft, tvTop;
 	
-	TScoreValue inf = infimumValue<TScoreValue>();
+	TScoreValue inf = infimumValue<TScoreValue>() / 2;
 
 	// Classical DP
 	assignValue(mat, 0, 0);
@@ -394,47 +394,49 @@ SEQAN_CHECKPOINT
 	}
 
 
-	//for(unsigned int i= 0; i<=len2;++i) {
-	//	for(unsigned int j= 0; j<=len1;++j) {
-	//		std::cout << getValue(mat, i*(len1 + 1) + j) << ',';
-	//	}
-	//	std::cout << std::endl;
-	//}
+	/*
+	for(unsigned int i= 0; i<=len2;++i) {
+		for(unsigned int j= 0; j<=len1;++j) {
+			std::cout << getValue(mat, i*(len1 + 1) + j) << ',';
+		}
+		std::cout << std::endl;
+	}
 
-	//for(unsigned int i= 0; i<=len2;++i) {
-	//	for(unsigned int j= 0; j<=len1;++j) {
-	//		std::cout << getValue(left, i*(len1 + 1) + j) << ',';
-	//	}
-	//	std::cout << std::endl;
-	//}
+	for(unsigned int i= 0; i<=len2;++i) {
+		for(unsigned int j= 0; j<=len1;++j) {
+			std::cout << getValue(left, i*(len1 + 1) + j) << ',';
+		}
+		std::cout << std::endl;
+	}
 
-	//for(unsigned int i= 0; i<=len2;++i) {
-	//	for(unsigned int j= 0; j<=len1;++j) {
-	//		std::cout << getValue(top, i*(len1 + 1) + j) << ',';
-	//	}
-	//	std::cout << std::endl;
-	//}
-	//
-	//for(unsigned int i= 0; i<=len2;++i) {
-	//	for(unsigned int j= 0; j<=len1;++j) {
-	//		std::cout << (getValue(trace, i*(len1 + 1) + j) % 3) << ',';
-	//	}
-	//	std::cout << std::endl;
-	//}
+	for(unsigned int i= 0; i<=len2;++i) {
+		for(unsigned int j= 0; j<=len1;++j) {
+			std::cout << getValue(top, i*(len1 + 1) + j) << ',';
+		}
+		std::cout << std::endl;
+	}
+	
+	for(unsigned int i= 0; i<=len2;++i) {
+		for(unsigned int j= 0; j<=len1;++j) {
+			std::cout << (getValue(trace, i*(len1 + 1) + j) % 3) << ',';
+		}
+		std::cout << std::endl;
+	}
 
-	//for(unsigned int i= 0; i<=len2;++i) {
-	//	for(unsigned int j= 0; j<=len1;++j) {
-	//		std::cout << ((getValue(trace, i*(len1 + 1) + j) / 3) % 3) << ',';
-	//	}
-	//	std::cout << std::endl;
-	//}
+	for(unsigned int i= 0; i<=len2;++i) {
+		for(unsigned int j= 0; j<=len1;++j) {
+			std::cout << ((getValue(trace, i*(len1 + 1) + j) / 3) % 3) << ',';
+		}
+		std::cout << std::endl;
+	}
 
-	//for(unsigned int i= 0; i<=len2;++i) {
-	//	for(unsigned int j= 0; j<=len1;++j) {
-	//		std::cout << ((getValue(trace, i*(len1 + 1) + j) / 9) % 3) << ',';
-	//	}
-	//	std::cout << std::endl;
-	//}
+	for(unsigned int i= 0; i<=len2;++i) {
+		for(unsigned int j= 0; j<=len1;++j) {
+			std::cout << ((getValue(trace, i*(len1 + 1) + j) / 9) % 3) << ',';
+		}
+		std::cout << std::endl;
+	}
+	*/
 
 	return maxVal;
 }
