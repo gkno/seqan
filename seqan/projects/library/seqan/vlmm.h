@@ -648,7 +648,7 @@ buildSuffixTreeFromIndex(Iter<TIndex, VSTree< TopDown< ParentLinks<ConstrainedTr
 			initProbabilityVectorForLeaf(it,target,child,letter);
 			//if(child == 13 || child ==4) std::cout<<"initVector"<<endl;
 		}
-		std::cout<<"created node:"<<child<<std::endl;
+		//std::cout<<"created node:"<<child<<std::endl;
 		//std::cout <<"set Edge\t";
 		// go to next valid node and add it to the graph
 		goNext(it);
@@ -820,9 +820,12 @@ addSuffixLinks(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > 
 		else{
 				// getProperty(vlmm.data_edge_label, TEdgeDescriptor(root, letter) == edgelabel without first char
 				target = parseString2(vlmm,root,getProperty(vlmm.data_edge_label, TEdgeDescriptor(root, letter)));
-				SEQAN_ASSERT(target!=nilVal)
-				setSuffixLink(vlmm,v,target);
-				setReverseSuffixLink(vlmm,target,v,letter);
+				// it might occur that a suffix link target for n does not exist
+				// because n is leaf which edge has be pruned
+				if(target != nilVal){
+					setSuffixLink(vlmm,v,target);
+					setReverseSuffixLink(vlmm,target,v,letter);
+				}
 			}
 	}
 // Having set these trivial cases we can treat every node the same way
@@ -847,9 +850,12 @@ while(!atEnd(children)){
 			//std::cout << "go for SL of father:" << father<< " String:"<< walkDown<<std::endl;
 			TVertexDescriptor fatherSuffixLink = getSuffixLink(vlmm,father);
 			target = parseString2(vlmm,fatherSuffixLink,walkDown);
-			SEQAN_ASSERT(target!=nilVal)
-			setSuffixLink(vlmm,n,target);
-			setReverseSuffixLink(vlmm,target,n,childCharacter);
+			// it might occur that a suffix link target for n does not exist
+			// because n is leaf which edge has be pruned
+			if(target != nilVal){
+				setSuffixLink(vlmm,n,target);
+				setReverseSuffixLink(vlmm,target,n,childCharacter);
+			}
 		}
 
 		TOutEdgeIterator itout(vlmm,n);
@@ -899,7 +905,7 @@ extendNode(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < PST > > >,TGra
 {
 	
 		TAlphabet letter(childCharacter);
-
+		//std::cout<<"extendNode on node "<<node<<std::endl;
 		float gammaMin = (1 + parameters.alpha)*parameters.minConditionalProbability;
 		
 		if( 1 >= gammaMin){
@@ -982,6 +988,7 @@ pruneTree(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > >,TGr
 	setMarked(vlmm,root,true);
 	//assignProperty(marked,root,true);
 	TVertexDescriptor dummy = 0;
+	std::cout<<" start pruning from the root"<<std::endl;
 	pruneTreeRecursivelyFast(vlmm,root,original,parameters,dummy);
 
 		/*for(unsigned i =0;i<numVertices(vlmm);++i){
@@ -1042,11 +1049,11 @@ pruneTreeRecursively(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpe
 		if(! isRoot(vlmm,father) ){
 				TVertexDescriptor target = getSuffixLink(vlmm,father);
 
-			//std::cout <<"..check potential nodes above node:" <<node<<std::endl;
+			std::cout <<"..check potential nodes above node:" <<node<<std::endl;
 			TVertexDescriptor potVertex;
 			unsigned lastVertex = 0;
 			for(unsigned pos = 1;pos < length(childLabel);++pos ){
-				std::cout << "check string:" << prefix(childLabel,pos)<<" from node:"<< target<<std::endl;
+				//std::cout << "check string:" << prefix(childLabel,pos)<<" from node:"<< target<<std::endl;
 				// potVertex = potentialVertex is the potential SuffixLinkFather of the node to be created
 				String<TAlphabet> prefixChildLabel = prefix(childLabel,pos);
 				potVertex = parseString2(vlmm,target,prefixChildLabel);
@@ -1144,7 +1151,7 @@ pruneTreeRecursivelyFast(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < 
 	for(unsigned int pos = 0;pos< table_length;++pos){
 		next = getReverseSuffixLink(vlmm,node,pos);
 		if(next != nilVal){
-			//std::cout <<" start Recursion from node:"<<node<<" char:"<<pos<<std::endl;
+			std::cout <<" start Recursion from node:"<<node<<" char:"<<pos<<std::endl;
 			pruneTreeRecursivelyFast(vlmm,next,original,parameters,pos);
 		}
 		
@@ -1157,73 +1164,101 @@ pruneTreeRecursivelyFast(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < 
 	}
 
 	TVertexDescriptor father = getFather(vlmm,node);
-	
 	String<TAlphabet> childLabel;
+	TAlphabet childCharacter;
+	TVertexDescriptor target;
+
+	if(! isRoot(vlmm,father) ){
 	getChildLabel(vlmm,father,node,childLabel);
-	
+	childCharacter = value(childLabel,0);
+	target = getSuffixLink(vlmm,father);
+	}
+	else{
+	  // if father == root check only for the first possible extension
+		  // extension longer than one are not checked, because it is already known that there is no 
+		  // node one context shorter elsewhere in the tree
+		  getChildLabel(vlmm,father,node,childLabel);
+		  if(length(childLabel)>1){
+					TVertexDescriptor root = getRoot(vlmm);
+					
+					TAlphabet startChar = value(childLabel,0);
+					if(extendNode(vlmm,root,startChar,parameters))
+					{
+						std::cout <<"startChar" << startChar<<std::endl;
+						father = splitEdge(vlmm,father,startChar,0);
+						smoothNode(vlmm,father,parameters);
+						setSuffixLink(vlmm,father,root);
+						setReverseSuffixLink(vlmm,root,father,startChar);
+						setMarked(vlmm,father,true);
+						if(father < length(original))
+									original[father] = false;
+
+					}
+					//supply with childLabel
+					
+					childLabel = suffix(childLabel,1);
+					childCharacter = value(childLabel,0);
+					target = father;
+		  }
+		} // else case for root
 	// check for possible extended 
 	if(length(childLabel) > 1){
 	
 
-
-		// seek the node in the tree which could be the suffix link father of the new node
 		
-		if(! isRoot(vlmm,father) ){
-			TVertexDescriptor target = getSuffixLink(vlmm,father);
+		// seek the node in the tree which could be the suffix link father of the potential new node
+		
+		//if(! isRoot(vlmm,father) ){
+			
+		
 			// we first check if there exist a node on the edge of SLfather->SLnode
 			// if not, nothing needs to be done
 			unsigned lastVertex = 0;
-			unsigned pos = 0;
-			//std::cout <<"..check potential nodes above node:" <<node<<std::endl;
+			unsigned pos;
+			unsigned labelLength = length(childLabel);
+			//std::cout <<"..check potential nodes above node:" <<node<<" chidLAbel"<<childLabel<<std::endl;
 			TVertexDescriptor potVertex = vlmm.data_vertex[target].data_edge[(TSize) value(childLabel,0)].data_target;
-			//TVertexDescriptor potVertex = getSuccessor(vlmm,target,value(childLabel,0));
 			SEQAN_ASSERT(potVertex != nilVal)
-			while(! potVertex == getSuffixLink(vlmm,node) ){
-					// we have a node which may lead to a new node on the edge father->node
-					// how far down is this node ?
-					pos += lastVertex + length(getProperty(vlmm.data_edge_label,TEdgeDescriptor(target,value(childLabel,lastVertex))));
+			// we have a node which may lead to a new node on the edge father->node
+			// how far down is this node ?
+			pos = 1 + length(getProperty(vlmm.data_edge_label,TEdgeDescriptor(target,value(childLabel,lastVertex))));
+			//while(! potVertex == getSuffixLink(vlmm,node) ){
+			SEQAN_ASSERT(pos<=labelLength)
+			while(pos != labelLength){
 					
 					if( (potVertex < length(original)) && original[potVertex] && extendNode(vlmm,potVertex,value(childLabel,lastVertex+1),parameters) ){
 	
-
-
-						father = splitEdge(vlmm,father,value(childLabel,lastVertex),pos+1-lastVertex);
+						father = splitEdge(vlmm,father,childCharacter,pos-1-lastVertex);
 						smoothNode(vlmm,father,parameters);
 						setSuffixLink(vlmm,father,potVertex);
 						setReverseSuffixLink(vlmm,potVertex,father,letter);
 						setMarked(vlmm,father,true);
-						
+						//std::cout <<"created node: "<<father<<" by checking above node:"<<node<<std::endl;
+						if(father < length(original))
+								original[father] = false;
+
+						// we created a new node so have to retain the starting character for node
+						// from the new father
+						childCharacter = value(childLabel,pos);
 					
-				}
-					lastVertex = pos +1;
+				 }
+					lastVertex = pos;
 					// update the next vertex on edge SLfather->SLnode
-					potVertex = vlmm.data_vertex[potVertex].data_edge[(TSize) value(childLabel,lastVertex+1)].data_target;
-					//potVertex = getSuccessor(vlmm,potVertex,value(childLabel,lastVertex+1));
+					//std::cout << " childLabel:" << childLabel<<std::endl;
+					target = potVertex;
+					potVertex = vlmm.data_vertex[target].data_edge[(TSize) value(childLabel,lastVertex)].data_target;
+					// we have a node which may lead to a new node on the edge father->node
+					// how far down is this node ?
+					pos += 1 + length(getProperty(vlmm.data_edge_label,TEdgeDescriptor(target,value(childLabel,lastVertex))));
 			}
 
 			
-		} // if father == root check only for the first possible extension
-		  // extension longer than one are not checked, because it is already known that there is no 
-		  // node one context shorter elsewhere in the tree
-		else{
-				TVertexDescriptor root = getRoot(vlmm);
-				TAlphabet startChar = value(childLabel,0);
-				if(extendNode(vlmm,root,startChar,parameters))
-				{
-					std::cout <<"startChar" << startChar<<std::endl;
-					father = splitEdge(vlmm,father,startChar,0);
-					smoothNode(vlmm,father,parameters);
-					setSuffixLink(vlmm,father,root);
-					setReverseSuffixLink(vlmm,root,father,startChar);
-					setMarked(vlmm,father,true);
-				}
-			
-		} // else case
+		//}
 	} // Label > 1
 	
 	//std::cout << "check keeping of node:" << node;
 	// all potential nodes are build
-	if( isMarked(vlmm,node) || (! pruneNode(vlmm,node,parameters)) ){
+	if( (getSuffixLink(vlmm,node) != nilVal) && (isMarked(vlmm,node) || (! pruneNode(vlmm,node,parameters))) ){
 		// node should be kept
 		//std::cout <<" keep it"<<std::endl;
 		setMarked(vlmm,node,true);
@@ -1237,8 +1272,8 @@ pruneTreeRecursivelyFast(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < 
 				break;
 			fatherSuffixLink = getSuffixLink(vlmm,fatherSuffixLink);
 		}
-		// smooth node
-		smoothNode(vlmm,node,parameters);
+		// smooth node during deletion of nodes
+		//smoothNode(vlmm,node,parameters);
 	}
 	else
 	{
@@ -1248,7 +1283,7 @@ pruneTreeRecursivelyFast(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < 
 	//assignProperty(marked,node,false);
 	}
 
-	//std::cout <<"finished node:"<<node<<std::endl;
+	std::cout <<"finished node:"<<node<<std::endl;
  return;
 }
 
@@ -1290,8 +1325,9 @@ buildPST(Index<TIndexType, Index_ESA<> > & index,
 	build = gettheruntime();
 	addSuffixLinks(vlmm);
 	std::cout << "added suffix links and reverse suffix links" <<gettheruntime()-build<<std::endl;
+	std::cout <<vlmm;
 	build = gettheruntime();
-	//std::cout <<vlmm;
+	std::cout <<"in Prune Tree";
 	pruneTree(vlmm,parameters);
 	std::cout << "pruned the PST" <<gettheruntime()-build<<std::endl;
 	//std::cout << vlmm;
@@ -1325,6 +1361,8 @@ write(TFile & target,
 			_streamPut(target, ' ');
 			_streamWrite(target, "SLink: ");
 			std::cout << g.data_suffix_link[sourceVertex];
+			_streamWrite(target, " Father: ");
+			std::cout << g.data_father[sourceVertex];
 			_streamWrite(target,"  (");
 
 			// wollte Wahrscheinlichleiten ausgeben
