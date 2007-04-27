@@ -380,9 +380,8 @@ addAdditionalVertex(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >
 	// a new entry has been created/appended in addAutomatonVertex
 
 if (vd == length(g.data_vertex)-1) {
-	String<String<TAlphabet> > edgeLabel;
-	resize(g.data_edge_label, (length(g.data_edge_label)+1) * table_length, Generous());
-	//appendValue(g.data_edge_label, edgeLabel);
+	unsigned int Length = length(g.data_vertex);
+	resize(g.data_edge_label, Length * table_length, Generous());
 	//resize(g.data_father,length(g.data_vertex));
 	//g.data_father[vd] = nilVal;
 	appendValue(g.data_father, nilVal);
@@ -391,7 +390,7 @@ if (vd == length(g.data_vertex)-1) {
 	appendValue(g.data_marked,false);
 	appendValue(g.data_suffix_link,nilVal);
 	appendValue(g.data_reverse_suffix_link, AutomatonEdgeArray<TEdge, TAlphabet>());
-	unsigned int Length = length(g.data_vertex);
+	
 	resize(g.data_probability_vector,Length,Generous());
 	//append Alphabetsize many 0s
 	for (unsigned int i = 0;i<table_length;++i)	
@@ -734,8 +733,15 @@ splitEdge(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGraphSp
 	TAlphabet letter(childCharacter);
 	TVertexDescriptor child = vlmm.data_vertex[father].data_edge[(TSize) letter].data_target;
 	String<TAlphabet> edgeString = getProperty(vlmm.data_edge_label, TEdgeDescriptor(father, letter));
+	std::cout<<"before new node created, NumVertc:"<<numVertices(vlmm)<<std::endl;
 	TVertexDescriptor newNode = addAdditionalVertex(vlmm);
+	std::cout<<"after node created, NumVertc:"<<numVertices(vlmm)<<std::endl;
 	String<TAlphabet> newEdgeString = childCharacter;
+	if(splitPosition >= length(edgeString)){
+		std::cout<<"splitPosition >= edgeString"<<std::endl;
+		exit(1);
+	
+	}
 	append(newEdgeString,prefix(edgeString,splitPosition),Exact());
 	addEdge(vlmm,father,newNode,newEdgeString );
 
@@ -1156,6 +1162,7 @@ pruneTreeRecursivelyFast(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < 
 		}
 		
 	}
+
 	// the root is excluded from further processing
 	if(isRoot(vlmm,node)){ 
 	
@@ -1213,10 +1220,10 @@ pruneTreeRecursivelyFast(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < 
 		
 			// we first check if there exist a node on the edge of SLfather->SLnode
 			// if not, nothing needs to be done
-			unsigned lastVertex = 0;
+			unsigned lastVertex = 0,lastSplit=0;
 			unsigned pos;
 			unsigned labelLength = length(childLabel);
-			//std::cout <<"..check potential nodes above node:" <<node<<" chidLAbel"<<childLabel<<std::endl;
+			std::cout <<"..check potential nodes above node:" <<node<<" chidLAbel"<<childLabel<<std::endl;
 			TVertexDescriptor potVertex = vlmm.data_vertex[target].data_edge[(TSize) value(childLabel,0)].data_target;
 			SEQAN_ASSERT(potVertex != nilVal)
 			// we have a node which may lead to a new node on the edge father->node
@@ -1225,15 +1232,17 @@ pruneTreeRecursivelyFast(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < 
 			//while(! potVertex == getSuffixLink(vlmm,node) ){
 			SEQAN_ASSERT(pos<=labelLength)
 			while(pos != labelLength){
-					
-					if( (potVertex < length(original)) && original[potVertex] && extendNode(vlmm,potVertex,value(childLabel,lastVertex+1),parameters) ){
-	
-						father = splitEdge(vlmm,father,childCharacter,pos-1-lastVertex);
+					std::cout <<"another run on the edge"<<std::endl;
+					if( (potVertex < length(original)) && original[potVertex] && extendNode(vlmm,potVertex,value(childLabel,pos),parameters) ){
+						std::cout <<"split edge at node: "<<node<<std::endl;
+						father = splitEdge(vlmm,father,childCharacter,pos-1-lastSplit);
+						//remember where the last node has been split
+						lastSplit=pos;
 						smoothNode(vlmm,father,parameters);
 						setSuffixLink(vlmm,father,potVertex);
 						setReverseSuffixLink(vlmm,potVertex,father,letter);
 						setMarked(vlmm,father,true);
-						//std::cout <<"created node: "<<father<<" by checking above node:"<<node<<std::endl;
+						std::cout <<"created node: "<<father<<" by checking above node:"<<node<<std::endl;
 						if(father < length(original))
 								original[father] = false;
 
@@ -1256,7 +1265,7 @@ pruneTreeRecursivelyFast(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < 
 		//}
 	} // Label > 1
 	
-	//std::cout << "check keeping of node:" << node;
+	std::cout << "check keeping of node:" << node;
 	// all potential nodes are build
 	if( (getSuffixLink(vlmm,node) != nilVal) && (isMarked(vlmm,node) || (! pruneNode(vlmm,node,parameters))) ){
 		// node should be kept
@@ -1321,6 +1330,7 @@ buildPST(Index<TIndexType, Index_ESA<> > & index,
 	build = gettheruntime();
 	std::cout << "in initMaps:";
 	initMaps(vlmm);
+	std::cout << " Size of vlmm after suffix core:"<<numVertices(vlmm)<<std::endl;
 	std::cout << "init all maps" <<gettheruntime()-build<<std::endl;
 	build = gettheruntime();
 	addSuffixLinks(vlmm);
@@ -1329,6 +1339,7 @@ buildPST(Index<TIndexType, Index_ESA<> > & index,
 	build = gettheruntime();
 	std::cout <<"in Prune Tree";
 	pruneTree(vlmm,parameters);
+	std::cout << " Size of vlmm after prune Tree:"<<numVertices(vlmm)<<std::endl;
 	std::cout << "pruned the PST" <<gettheruntime()-build<<std::endl;
 	//std::cout << vlmm;
 	std::cout << "READY!" <<std::endl;
