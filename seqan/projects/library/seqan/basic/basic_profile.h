@@ -22,6 +22,7 @@
     #define SEQAN_PROMARK(m)
     #define SEQAN_PROENDMARK(m)
     #define SEQAN_PRORESET
+	#define SEQAN_PROGETTIME			0
     #define SEQAN_PROTIMESTART(a)
     #define SEQAN_PROTIMEDIFF(a)		0
 	// replace malloc and free in external tools
@@ -40,6 +41,7 @@
     #define SEQAN_PROMARK(m)			_proMark(m)
     #define SEQAN_PROENDMARK(m)			_proEndMark(m)
     #define SEQAN_PRORESET				_proReset()
+	#define SEQAN_PROGETTIME			sysTime()
     #define SEQAN_PROTIMESTART(a)		_proFloat a = sysTime()
     #define SEQAN_PROTIMEDIFF(a)		(sysTime() - a)
     #define SEQAN_PROMALLOC(s)			_proMalloc(s)

@@ -9,6 +9,14 @@ namespace SEQAN_NAMESPACE_MAIN
     struct _Compressed;
 	typedef Tag<_Compressed> Compressed;
 
+	// for Pairs with small i1-values
+	// store i1 and i2 in one word of type i2
+	// use the upper bits for i1 and the lower bits for i2
+	template <unsigned valueSizeI1 = 16>
+	struct CutCompressed {
+		enum { bitSizeI1 = Log2<valueSizeI1>::VALUE };
+	};
+
 /**
 .Class.Pair:
 ..cat:Aggregates
@@ -51,6 +59,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		inline Pair(Pair<__T1, __T2, __TCompression> const &_p): i1(getValueI1(_p)), i2(getValueI2(_p)) {}
     };
 
+
+
 	// unaligned and unpadded storage (space efficient)
 #ifdef PLATFORM_WINDOWS
     #pragma pack(push,1)
@@ -76,9 +86,44 @@ namespace SEQAN_NAMESPACE_MAIN
     #pragma pack(pop)
 #endif
 
+
+
+#ifdef PLATFORM_WINDOWS
+    #pragma pack(push,1)
+#endif
+    template <typename _T1, typename _T2, unsigned valueSizeI1>
+    struct Pair<_T1, _T2, CutCompressed<valueSizeI1> > {
+        typedef _T1 T1;
+        typedef _T2 T2;
+
+		typedef _T2 T12;
+
+        T12 i12;
+
+		enum { bitSizeI1 = CutCompressed<valueSizeI1>::bitSizeI1 };
+        enum { bitShiftI1 = BitsPerValue<T12>::VALUE - bitSizeI1 };
+
+		inline Pair() {}
+		inline Pair(Pair const &_p): i12(_p.i12) {}
+		inline Pair(_T1 const &_i1, _T2 const &_i2): i12((T12)_i1 << bitShiftI1 + (T12)_i2) {}
+
+		template <typename __T1, typename __T2, typename __TCompression>
+		inline Pair(Pair<__T1, __T2, __TCompression> const &_p):
+			i12((T12)getValueI1(_p) << bitShiftI1 + (T12)getValueI2(_p)) {}
+	}
+#ifdef PLATFORM_GCC
+	__attribute__((packed))
+#endif
+	;
+#ifdef PLATFORM_WINDOWS
+    #pragma pack(pop)
+#endif
+
+
+
     template <typename _T1, typename _T2, typename TCompression>
 	std::ostream& operator<<(std::ostream &out, Pair<_T1,_T2,TCompression> const &p) {
-		out << "< " << p.i1 << " , " << p.i2 << " >";
+		out << "< " << getValueI1(p) << " , " << getValueI2(p) << " >";
 		return out;
 	}
 
@@ -180,7 +225,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <typename _T1, typename _T2, typename _T3, typename TCompression>
 	std::ostream& operator<<(std::ostream &out, Triple<_T1,_T2,_T3,TCompression> const &t) {
-		out << "< " << t.i1 << " , " << t.i2 << " , " << t.i3 << " >";
+		out << "< " << getValueI1(t) << " , " << getValueI2(t) << " , " << getValueI3(t) << " >";
 		return out;
 	}
 
@@ -229,7 +274,6 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef _T T;
         enum { size = _size };
         _T i[_size];
-//		friend ::std::ostream& operator<<(std::ostream&, const Tuple&);
 
 		template <typename TPos>
         inline _T& operator[](TPos k) {
@@ -480,6 +524,19 @@ namespace SEQAN_NAMESPACE_MAIN
 		return pair.i2;
 	}
 
+	template <typename T1, typename T2, unsigned valueSizeI1>
+	inline T1 getValueI1(Pair<T1, T2, CutCompressed<valueSizeI1> > const &pair) {
+		typedef Pair<T1, T2, CutCompressed<valueSizeI1> > TPair;
+		return pair.i12 >> TPair::bitShiftI1;
+	}
+
+	template <typename T1, typename T2, unsigned valueSizeI1>
+	inline T2 getValueI2(Pair<T1, T2, CutCompressed<valueSizeI1> > const &pair) {
+		typedef Pair<T1, T2, CutCompressed<valueSizeI1> > TPair;		 
+		return pair.i12 & (((typename TPair::T12)1 << TPair::bitShiftI1) - 1);
+	}
+//____________________________________________________________________________
+
 	template <typename T1, typename T2, typename T3, typename TCompression>
 	inline T1 getValueI1(Triple<T1, T2, T3, TCompression> const &triple) {
 		return triple.i1;
@@ -507,6 +564,21 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline void assignValueI2(Pair<T1, T2, TCompression> &pair, T const &_i) {
 		pair.i2 = _i;
 	}
+
+	template <typename T1, typename T2, unsigned valueSizeI1, typename T>
+	inline void assignValueI1(Pair<T1, T2, CutCompressed<valueSizeI1> > &pair, T const &_i) 
+	{
+		typedef Pair<T1, T2, CutCompressed<valueSizeI1> > TPair;
+		pair.i12 = ((typename TPair::T12)_i << TPair::bitShiftI1) |
+		           (pair.i12 & (((typename TPair::T12)1 << TPair::bitShiftI1) - 1));
+	}
+
+	template <typename T1, typename T2, unsigned valueSizeI1, typename T>
+	inline void assignValueI2(Pair<T1, T2, CutCompressed<valueSizeI1> > &pair, T const &_i) {
+		typedef Pair<T1, T2, CutCompressed<valueSizeI1> > TPair;
+		pair.i12 = (pair.i12 & ~(((typename TPair::T12)1 << TPair::bitShiftI1) - 1)) | _i;
+	}
+//____________________________________________________________________________
 
 	template <typename T1, typename T2, typename T3, typename TCompression, typename T>
 	inline T const assignValueI1(Triple<T1, T2, T3, TCompression> &triple, T const &_i) {
