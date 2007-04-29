@@ -126,6 +126,8 @@ allocate(T const & me,
 		 Tag<TUsage> const)
 {
 	data = (TValue *) operator new(count * sizeof(TValue));
+	if (data)
+	    SEQAN_PROADD(SEQAN_PROMEMORY, count * sizeof(TValue));
 }
 template <typename T, typename TValue, typename TSize, typename TUsage>
 inline void
@@ -135,6 +137,8 @@ allocate(T & me,
 		 Tag<TUsage> const)
 {
 	data = (TValue *) operator new(count * sizeof(TValue));
+	if (data)
+	    SEQAN_PROADD(SEQAN_PROMEMORY, count * sizeof(TValue));
 }
 
 
@@ -190,6 +194,8 @@ deallocate(T const & me,
 		   TSize count,
 		   Tag<TUsage> const)
 {
+	if (data)
+	    SEQAN_PROSUB(SEQAN_PROMEMORY, count * sizeof(TValue));
 	operator delete ((void *) data);
 }
 template <typename T, typename TValue, typename TSize, typename TUsage>
@@ -199,6 +205,8 @@ deallocate(T & me,
 		   TSize count,
 		   Tag<TUsage> const)
 {
+	if (data)
+	    SEQAN_PROSUB(SEQAN_PROMEMORY, count * sizeof(TValue));
 	operator delete ((void *) data);
 }
 //////////////////////////////////////////////////////////////////////////////
