@@ -22,6 +22,8 @@
 
 #include <seqan/modifier/modifier_functors.h>
 #include <seqan/modifier/modifier_view.h>
+#include <seqan/modifier/modifier_reverse.h>
+#include <seqan/modifier/modifier_shortcuts.h>
 
 
 #endif //#ifndef SEQAN_HEADER_...
