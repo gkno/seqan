@@ -202,11 +202,28 @@ namespace SEQAN_NAMESPACE_MAIN
 	// assign
 	//////////////////////////////////////////////////////////////////////////////
 
+	template <typename TDest, typename TSource>
+	inline void _copyCargoImpl(TDest & me, TSource & _origin, False const) {
+	}
+    
+	template <typename TDest, typename TSource>
+	inline void _copyCargoImpl(TDest & me, TSource & _origin, True const) {
+		cargo(me) = cargo(_origin);
+	}
+    
+	template <typename TDest, typename TSource>
+	inline void _copyCargo(TDest & me, TSource & _origin) {
+		_copyCargoImpl(me, _origin, typename _IsSameType<
+				typename Cargo<TDest>::Type, 
+				typename Cargo<TSource>::Type >::Type());
+	}
+    
+    
 	template <typename THost, typename TSpec, typename THost2>
 	inline ModifiedString<THost, TSpec> const &
 	assign(ModifiedString<THost, TSpec> & me, ModifiedString<THost2, TSpec> & _origin) {
 		host(me) = host(_origin);
-		cargo(me) = cargo(_origin);
+		_copyCargo(me, _origin);
 		return me;
 	}
 
@@ -214,7 +231,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline ModifiedString<THost, TSpec> const &
 	assign(ModifiedString<THost, TSpec> & me, ModifiedString<THost2, TSpec> const & _origin) {
 		host(me) = host(_origin);
-		cargo(me) = cargo(_origin);
+		_copyCargo(me, _origin);
 		return me;
 	}
 
@@ -259,7 +276,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline ModifiedString<THost, TSpec> const &
 	setValue(ModifiedString<THost, TSpec> & me, ModifiedString<THost, TSpec> const & _origin) {
 		setHost(me) = host(_origin);
-		cargo(me) = cargo(_origin);
+		_copyCargo(me, _origin);
 		return me;
 	}
 
@@ -267,7 +284,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline ModifiedString<THost, TSpec> const &
 	setValue(ModifiedString<THost, TSpec> & me, ModifiedString<THost, TSpec> & _origin) {
 		setHost(me) = host(_origin);
-		cargo(me) = cargo(_origin);
+		_copyCargo(me, _origin);
 		return me;
 	}
 
@@ -303,7 +320,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline typename Iterator< ModifiedString<THost, TSpec> const >::Type 
 	begin(ModifiedString<THost, TSpec> const & me) {
 		typename Iterator< ModifiedString<THost, TSpec> const >::Type temp_(begin(host(me)));
-		cargo(temp_) = cargo(me);
+		_copyCargo(temp_, me);
 		return temp_;
 	}
 
@@ -311,23 +328,29 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline typename Iterator< ModifiedString<THost, TSpec> >::Type 
 	begin(ModifiedString<THost, TSpec> & me) {
 		typename Iterator< ModifiedString<THost, TSpec> >::Type temp_(begin(host(me)));
-		cargo(temp_) = cargo(me);
+		_copyCargo(temp_, me);
 		return temp_;
 	}
 
 	template < typename THost, typename TSpec, typename TTagSpec >
 	inline typename Iterator< ModifiedString<THost, TSpec> const, Tag<TTagSpec> const >::Type 
 	begin(ModifiedString<THost, TSpec> const & me, Tag<TTagSpec> const tag_) {
-		typename Iterator< ModifiedString<THost, TSpec> const, Tag<TTagSpec> const >::Type temp_(begin(host(me), tag_));
-		cargo(temp_) = cargo(me);
+		typename Iterator< 
+			ModifiedString<THost, TSpec> const, 
+			Tag<TTagSpec> const 
+		>::Type temp_(begin(host(me), tag_));
+		_copyCargo(temp_, me);
 		return temp_;
 	}
 
 	template < typename THost, typename TSpec, typename TTagSpec >
 	inline typename Iterator< ModifiedString<THost, TSpec>, Tag<TTagSpec> const >::Type 
 	begin(ModifiedString<THost, TSpec> & me, Tag<TTagSpec> const tag_) {
-		typename Iterator< ModifiedString<THost, TSpec>, Tag<TTagSpec> const >::Type temp_(begin(host(me), tag_));
-		cargo(temp_) = cargo(me);
+		typename Iterator< 
+			ModifiedString<THost, TSpec>, 
+			Tag<TTagSpec> const 
+		>::Type temp_(begin(host(me), tag_));
+		_copyCargo(temp_, me);
 		return temp_;
 	}
 
@@ -339,7 +362,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline typename Iterator< ModifiedString<THost, TSpec> const >::Type 
 	end(ModifiedString<THost, TSpec> const & me) {
 		typename Iterator< ModifiedString<THost, TSpec> const >::Type temp_(end(host(me)));
-		cargo(temp_) = cargo(me);
+		_copyCargo(temp_, me);
 		return temp_;
 	}
 
@@ -347,7 +370,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline typename Iterator< ModifiedString<THost, TSpec> >::Type 
 	end(ModifiedString<THost, TSpec> & me) {
 		typename Iterator< ModifiedString<THost, TSpec> >::Type temp_(end(host(me)));
-		cargo(temp_) = cargo(me);
+		_copyCargo(temp_, me);
 		return temp_;
 	}
 
@@ -355,7 +378,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline typename Iterator< ModifiedString<THost, TSpec> const, Tag<TTagSpec> const >::Type 
 	end(ModifiedString<THost, TSpec> const & me, Tag<TTagSpec> const tag_) {
 		typename Iterator< ModifiedString<THost, TSpec> const, Tag<TTagSpec> const >::Type temp_(end(host(me), tag_));
-		cargo(temp_) = cargo(me);
+		_copyCargo(temp_, me);
 		return temp_;
 	}
 
@@ -363,7 +386,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline typename Iterator< ModifiedString<THost, TSpec>, Tag<TTagSpec> const >::Type 
 	end(ModifiedString<THost, TSpec> & me, Tag<TTagSpec> const tag_) {
 		typename Iterator< ModifiedString<THost, TSpec>, Tag<TTagSpec> const >::Type temp_(end(host(me), tag_));
-		cargo(temp_) = cargo(me);
+		_copyCargo(temp_, me);
 		return temp_;
 	}
 

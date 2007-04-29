@@ -51,6 +51,42 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
     };
 
+	//////////////////////////////////////////////////////////////////////////////
+	// DNA complement
+	//////////////////////////////////////////////////////////////////////////////
+
+    template <typename TValue>
+    struct FunctorComplement;
+	
+//____________________________________________________________________________
+
+	template <typename T = void>
+	struct _Translate_Table_Dna5_2_Dna5Complement
+	{
+		static char const VALUE[5];
+	};
+	template <typename T>
+	char const _Translate_Table_Dna5_2_Dna5Complement<T>::VALUE[5] = {'T', 'G', 'C', 'A', 'N'};
+
+//____________________________________________________________________________
+
+
+    template <>
+    struct FunctorComplement<Dna> : public ::std::unary_function<Dna,Dna> 
+	{
+        inline Dna operator()(Dna x) const {
+			return _Translate_Table_Dna5_2_Dna5Complement<>::VALUE[x.value]; 
+		}
+    };
+
+    template <>
+    struct FunctorComplement<Dna5> : public ::std::unary_function<Dna5,Dna5> 
+	{
+        inline Dna operator()(Dna5 x) const {
+			return _Translate_Table_Dna5_2_Dna5Complement<>::VALUE[x.value]; 
+		}
+    };
+
 
 }
 
