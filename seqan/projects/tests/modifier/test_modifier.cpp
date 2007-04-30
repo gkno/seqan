@@ -42,7 +42,7 @@ using namespace seqan;
 
 
 
-void testIterators()
+void testViewIterator()
 {
 		String<char> origin = "Vjku ku qwt qtkikpcn uvtkpi";
 
@@ -87,7 +87,7 @@ void testIterators()
 	}
 }
 
-void testStrings()
+void testViewString()
 {
 		String<char> origin = "This is our original string";
 
@@ -166,12 +166,59 @@ void testStrings()
 
 }
 
+void testReverseString()
+{
+		String<char> origin = "A man, a plan, a canal-Panama";
+
+	//____________________________________________________________________________
+	// Test1 - reverse string
+
+		typedef ModifiedString< String<char>, ModReverse> TModString;
+
+		TModString reverse(origin);
+
+		cout << "*** Test1: Reverse String ***" << endl;
+		cout << "origin:  " << origin << endl;
+		cout << "reverse: " << reverse << endl << endl;
+
+	//____________________________________________________________________________
+	// Test2 - complement string
+
+		DnaString dna = "attacgg";
+
+		cout << "*** Test2: DNA symmetry ***" << endl;
+		cout << "origin:             " << dna << endl;
+		cout << "reverse:            " << DnaStringReverse(dna) << endl;
+		cout << "complement:         " << DnaStringComplement(dna) << endl;
+		cout << "reverse complement: " << DnaStringReverseComplement(dna) << endl << endl;
+
+	//____________________________________________________________________________
+	// Test3 - in-place conversions
+
+		DnaString dna2 = dna;
+		cout << "*** Test3: in-place conversions ***" << endl;
+		cout << "origin:             " << dna2 << endl;
+
+		reverseInPlace(dna2);
+		cout << "reverse:            " << dna2 << endl;
+
+		dna2 = dna; 
+		complementInPlace(dna2);
+		cout << "complement:         " << dna2 << endl;
+
+		dna2 = dna; 
+		reverseComplementInPlace(dna2);
+		cout << "reverse complement: " << dna2 << endl << endl;
+
+}
+
 int main()
 {
 	SEQAN_TREPORT("TEST BEGIN")
 
-		testStrings();
-		testIterators();
+		testViewString();
+		testViewIterator();
+		testReverseString();
 
 	SEQAN_TREPORT("TEST END")
 		return 0;
