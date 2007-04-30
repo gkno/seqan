@@ -27,8 +27,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ...type:Concept.Iterator
 */
 
-	struct _ModReverse {};
-	typedef Tag<_ModReverse> ModReverse;
+	struct ModReverse {};
 
 //////////////////////////////////////////////////////////////////////////////
 

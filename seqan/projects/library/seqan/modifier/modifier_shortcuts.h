@@ -14,26 +14,34 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //////////////////////////////////////////////////////////////////////////////
 
-typedef ModView< FunctorComplement<Dna> >						ModComplementDna;
-typedef ModView< FunctorComplement<Dna5> >						ModComplementDna5;
+typedef ModView< FunctorComplement<Dna> >	ModComplementDna;
+typedef ModView< FunctorComplement<Dna5> >	ModComplementDna5;
 
 //////////////////////////////////////////////////////////////////////////////
 
-typedef ModifiedString<DnaString, ModComplementDna>				DnaStringComplement;
-typedef ModifiedString<Dna5String, ModComplementDna5>			Dna5StringComplement;
+typedef ModifiedString<DnaString, ModView< FunctorComplement<Dna> > >		DnaStringComplement;
+typedef ModifiedString<Dna5String, ModView< FunctorComplement<Dna5> > >		Dna5StringComplement;
 
 //////////////////////////////////////////////////////////////////////////////
 
-typedef ModifiedString<DnaString, ModReverse>					DnaStringReverse;
-typedef ModifiedString<Dna5String, ModReverse>					Dna5StringReverse;
+typedef ModifiedString<DnaString, ModReverse>		DnaStringReverse;
+typedef ModifiedString<Dna5String, ModReverse>		Dna5StringReverse;
 
 //////////////////////////////////////////////////////////////////////////////
 /*
 typedef ModifiedString<DnaStringReverse, ModComplementDna>		DnaStringReverseComplement;
 typedef ModifiedString<Dna5StringReverse, ModComplementDna5>	Dna5StringReverseComplement;
 */
-typedef ModifiedString<DnaStringComplement, ModReverse>			DnaStringReverseComplement;
-typedef ModifiedString<Dna5StringComplement, ModReverse>		Dna5StringReverseComplement;
+
+typedef ModifiedString<
+			ModifiedString<DnaString, ModView< FunctorComplement<Dna> > >, 
+			ModReverse
+		>	DnaStringReverseComplement;
+
+typedef ModifiedString<
+			ModifiedString<	Dna5String, ModView< FunctorComplement<Dna5> > >, 
+			ModReverse
+		>	Dna5StringReverseComplement;
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
