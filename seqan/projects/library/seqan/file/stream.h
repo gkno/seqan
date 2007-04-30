@@ -238,6 +238,45 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 /**
+.Internal._streamPeek:
+..summary:Return the next character to be read from stream.
+..cat:Streams
+..signature:_streamPeek(stream)
+..param.stream:An input stream.
+...type:Adaption."std::iostream"
+..returns:The character to be read.
+*/
+
+template <typename TValue, typename TTraits>
+inline TValue 
+_streamPeek(::std::basic_istream<TValue, TTraits> & source)
+{
+SEQAN_CHECKPOINT
+	return source.peek();
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Internal._streamUnget:
+..summary:Put the last read character back into stream.
+..cat:Streams
+..signature:_streamUnget(stream)
+..param.stream:An input stream.
+...type:Adaption."std::iostream"
+*/
+
+template <typename TValue, typename TTraits>
+inline void
+_streamUnget(::std::basic_istream<TValue, TTraits> & source)
+{
+SEQAN_CHECKPOINT
+	source.unget();
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
 .Internal._streamPut:
 ..summary:Writes one character to stream.
 ..cat:Streams

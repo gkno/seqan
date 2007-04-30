@@ -262,7 +262,7 @@ clearVertices(Graph<Alignment<TStringSet, TCargo, TSpec> >& g)
 	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
 	if(!empty(value(g.data_sequence))) {
 		for(TSize k=0; k<length(stringSet(g));++k) {
-			g.data_pvMap.insert(std::make_pair(std::make_pair(positionToId(stringSet(g),k), length(stringSet(g)[0])), nilVertex));
+			g.data_pvMap.insert(std::make_pair(std::make_pair(positionToId(stringSet(g),k), length(stringSet(g)[k])), nilVertex));
 		}
 	}
 }
@@ -589,17 +589,62 @@ write(TFile & target,
 		}
 	}
 
+
 	Matrix<char> align;
 	if (convertAlignment(g, align)) {
-		_streamWrite(target,"Alignment matrix:\n");
 		TSize colLen = length(align, 0);
 		TSize nseq = length(align, 1);
-		for (TSize row=0;row<nseq;++row) {
-			for(TSize col=0;col<colLen;++col) {
-				_streamPut(target, getValue(align, row*colLen+col));
+
+		TSize baseCount=0;
+		TSize leftSpace=6;
+		TSize xPos = 0;
+		_streamWrite(target,"Alignment matrix:\n");
+		while (xPos < colLen) {
+			TSize windowSize = 50;
+			if ((xPos + windowSize)>colLen) windowSize = colLen - xPos;
+			
+			// Print header line
+			TSize offset=0;
+			// Larger numbers need to be further left
+			if (baseCount != 0) offset = (unsigned int) floor(log((double)baseCount) / log((double)10));
+			for(unsigned int j = 0;j<leftSpace-offset;++j) {
+				_streamPut(target, ' ');
 			}
-			if (row != nseq - 1) _streamPut(target, '\n');
+			_streamPutInt(target, baseCount);
+			baseCount+=windowSize;
+			_streamPut(target, ' ');
+			for(TSize col = 1;col<=windowSize;++col) {
+				if ((col % 10)==0) _streamPut(target, ':');
+				else if ((col % 5)==0) _streamPut(target, '.');
+				else _streamPut(target, ' ');
+			}
+			_streamPut(target, ' ');
+			_streamPut(target, '\n');
+
+			// Print sequences
+			for(TSize row=0;row<2*nseq-1;++row) {
+				for(TSize col = 0;col<leftSpace+2;++col) _streamPut(target, ' ');
+				if ((row % 2)==0) {
+					for(TSize col = xPos;col<xPos+windowSize;++col) {
+						_streamPut(target, getValue(align, (row/2)*colLen+col));
+					}
+				} else {
+					for(TSize col = xPos;col<xPos+windowSize;++col) {
+						if ((getValue(align,((row-1)/2)*colLen + col) != gapValue<char>()) &&
+							(getValue(align,((row+1)/2)*colLen + col) != gapValue<char>()) &&
+							(getValue(align,((row-1)/2)*colLen + col) == getValue(align,((row+1)/2)*colLen + col))) {
+								_streamPut(target, '|');
+						} else {
+							_streamPut(target, ' ');
+						}
+					}
+				}
+				_streamPut(target, '\n');
+			}
+			_streamPut(target, '\n');
+			xPos+=windowSize;
 		}
+		_streamPut(target, '\n');
 	}
 }
 
@@ -776,7 +821,7 @@ convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	TSize nseq = length(stringSet(g));
 	for(TComponentLength::iterator cIt=compLength.begin(); cIt != compLength.end(); ++cIt) len+=cIt->second;
 	setDimension(mat, 2);setLength(mat, 0, len);setLength(mat, 1, nseq);
-	fill(host(mat), nseq * len, '-');
+	fill(host(mat), nseq * len, gapValue<char>());
 
 	// Fill the matrix
 	TSize row = 0;
@@ -795,8 +840,8 @@ convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 		unsigned int c = getProperty(component, it->second);
 		while ((pos != comps.end()) && (*pos != c)) {
 			for(TSize i=0;i<compLength[*pos];++i) {
-				//std::cout << '-';
-				assignValue(mat, row*len + col, '-');
+				//std::cout << gapValue<char>();
+				assignValue(mat, row*len + col, gapValue<char>() );
 				++col;
 			}
 			++pos;

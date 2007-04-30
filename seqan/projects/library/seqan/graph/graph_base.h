@@ -146,6 +146,17 @@ typedef Tag<TagDotDrawing_> const DotDrawing;
 struct TCoffeeLib_;
 typedef Tag<TCoffeeLib_> const TCoffeeLib;
 
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Tag.AtacMatches
+..summary:Switch to trigger reading of matches in atac format.
+..value.AtacMatches:File in Atac format.
+*/
+
+struct AtacMatches_;
+typedef Tag<AtacMatches_> const AtacMatches;
+
 
 //////////////////////////////////////////////////////////////////////////////
 // Graph Iterator Tags

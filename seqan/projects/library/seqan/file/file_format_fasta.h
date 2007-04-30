@@ -288,7 +288,7 @@ SEQAN_CHECKPOINT
 			}
 			else if (found_data)
 			{
-				_streamSeek2G(file, -1);
+				_streamUnget(file);
 				return;
 			}
 		}

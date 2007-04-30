@@ -6,7 +6,6 @@ using namespace seqan;
 
 namespace SEQAN_NAMESPACE_MAIN
 {
-
 //////////////////////////////////////////////////////////////////////////////
 
 void  Test_NeedlemanWunsch() {
@@ -21,8 +20,8 @@ void  Test_NeedlemanWunsch() {
 	TString str0("annual");	assignValueById(str, str0);
 	TString str1("annealing"); assignValueById(str, str1);
 	TGraph g(str);
-	Score<int> score_type = Score<int>(1,-1,-1,0);
-	int score = globalAlignment(g, score_type );
+	Score<int> score_type = Score<int>(0,-1,-1,0);
+	int score = globalAlignment(g, score_type, NeedlemanWunsch() );
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "annual")
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "anneal")
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 7)) == "ing")
@@ -32,18 +31,17 @@ void  Test_NeedlemanWunsch() {
 	str[0] = "annealing";
 	str[1] = "annual";
 	assignStringSet(g, str);
-	score = globalAlignment(g, score_type );
+	score = globalAlignment(g, score_type, NeedlemanWunsch() );
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "annual")
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "anneal")
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 7)) == "ing")
 	SEQAN_TASSERT(numEdges(g) == 1)
 	SEQAN_TASSERT(numVertices(g) == 3)
 
-
 	str[0] = "ThisisGarfieldthecat";
 	str[1] = "Garfield";
 	assignStringSet(g, str);
-	score = globalAlignment(g, score_type );
+	score = globalAlignment(g, score_type, NeedlemanWunsch() );
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "Thisis")
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 9)) == "Garfield")
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 3)) == "Garfield")
@@ -54,7 +52,7 @@ void  Test_NeedlemanWunsch() {
 	str[0] = "Garfield";
 	str[1] = "ThisisGarfieldthecat";
 	assignStringSet(g, str);
-	score = globalAlignment(g, score_type );
+	score = globalAlignment(g, score_type, NeedlemanWunsch() );
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "Thisis")
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 9)) == "Garfield")
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 3)) == "Garfield")
@@ -65,7 +63,7 @@ void  Test_NeedlemanWunsch() {
 	str[0] = "cat";
 	str[1] = "ThisisGarfieldthecat";
 	assignStringSet(g, str);
-	score = globalAlignment(g, score_type );
+	score = globalAlignment(g, score_type, NeedlemanWunsch());
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "ThisisGarfieldthe")
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 18)) == "cat")
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "cat")
@@ -75,7 +73,7 @@ void  Test_NeedlemanWunsch() {
 	str[0] = "ThisisGarfieldthecat";
 	str[1] = "cat";
 	assignStringSet(g, str);
-	score = globalAlignment(g, score_type );
+	score = globalAlignment(g, score_type, NeedlemanWunsch());
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "ThisisGarfieldthe")
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 18)) == "cat")
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "cat")
@@ -98,7 +96,7 @@ void  Test_Gotoh() {
 	TString str1("ttgt"); assignValueById(str, str1);
 	TGraph g(str);
 	Score<double> score_type = Score<double>(1,-1,-1,-2);
-	double score = globalAlignment(g, score_type );
+	double score = globalAlignment(g, score_type, Gotoh());
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "tt")
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "tt")
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 2)) == "a")
@@ -110,7 +108,7 @@ void  Test_Gotoh() {
 	str[0] = "ttgt";
 	str[1] = "ttagt";
 	assignStringSet(g, str);
-	score = globalAlignment(g, score_type );
+	score = globalAlignment(g, score_type, Gotoh());
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "tt")
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "tt")
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 2)) == "a")
@@ -122,7 +120,7 @@ void  Test_Gotoh() {
 	str[0] = "tagt";
 	str[1] = "ttagt";
 	assignStringSet(g, str);
-	score = globalAlignment(g, score_type );
+	score = globalAlignment(g, score_type, Gotoh());
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "tagt")
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 1)) == "tagt")
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "t")
@@ -132,7 +130,7 @@ void  Test_Gotoh() {
 	str[0] = "ttagt";
 	str[1] = "tagt";
 	assignStringSet(g, str);
-	score = globalAlignment(g, score_type );
+	score = globalAlignment(g, score_type, Gotoh());
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "tagt")
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 1)) == "tagt")
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "t")
@@ -142,7 +140,7 @@ void  Test_Gotoh() {
 	str[0] = "ttagt";
 	str[1] = "ttag";
 	assignStringSet(g, str);
-	score = globalAlignment(g, score_type );
+	score = globalAlignment(g, score_type, Gotoh());
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "ttag")
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "ttag")
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 4)) == "t")
@@ -152,7 +150,7 @@ void  Test_Gotoh() {
 	str[0] = "ttag";
 	str[1] = "ttagt";
 	assignStringSet(g, str);
-	score = globalAlignment(g, score_type );
+	score = globalAlignment(g, score_type, Gotoh());
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "ttag")
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "ttag")
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 4)) == "t")
@@ -162,7 +160,7 @@ void  Test_Gotoh() {
 	str[0] = "cttagt";
 	str[1] = "ttag";
 	assignStringSet(g, str);
-	score = globalAlignment(g, score_type );
+	score = globalAlignment(g, score_type, Gotoh());
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 1)) == "ttag")
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "c")
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 5)) == "t")
@@ -173,7 +171,7 @@ void  Test_Gotoh() {
 	str[0] = "ttag";
 	str[1] = "cttagt";
 	assignStringSet(g, str);
-	score = globalAlignment(g, score_type );
+	score = globalAlignment(g, score_type, Gotoh());
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 1)) == "ttag")
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "c")
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 5)) == "t")
@@ -184,7 +182,7 @@ void  Test_Gotoh() {
 	str[0] = "cttccagt";
 	str[1] = "ttag";
 	assignStringSet(g, str);
-	score = globalAlignment(g, score_type );
+	score = globalAlignment(g, score_type, Gotoh());
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "c")
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 1)) == "tt")
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 3)) == "cc")
@@ -198,7 +196,7 @@ void  Test_Gotoh() {
 	str[0] = "ttag";
 	str[1] = "cttccagt";
 	assignStringSet(g, str);
-	score = globalAlignment(g, score_type );
+	score = globalAlignment(g, score_type, Gotoh());
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "c")
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 1)) == "tt")
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 3)) == "cc")
@@ -210,9 +208,65 @@ void  Test_Gotoh() {
 	SEQAN_TASSERT(numVertices(g) == 7)
 }
 
+//////////////////////////////////////////////////////////////////////////////
 
+void  Test_MyersBitVector() {
+	typedef String<char> TString;
+	typedef StringSet<TString, Dependent<> > TStringSet;
+	typedef Graph<Alignment<TStringSet, void> > TGraph;
+	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef	Id<TStringSet>::Type TId;
+	
+	TStringSet str;
+	TString str0("annealing");	assignValueById(str, str0);
+	TString str1("annual"); assignValueById(str, str1);
+	TGraph g(str);
+	int score1 = globalAlignment(g, MyersBitVector() );
+	Score<int> score_type = Score<int>(0,-1,-1,0);
+	int score2 = globalAlignment(g, score_type, NeedlemanWunsch() );
+	Score<int> score_type2 = Score<int>(0,-1,-1,-1);
+	int score3 = globalAlignment(g, score_type2, Gotoh() );
+	SEQAN_TASSERT((-1) * score1 == score2)
+	SEQAN_TASSERT(score2 == score3)
 
-/*
+	str[0] = "annual";
+	str[1] = "annealing";
+	assignStringSet(g, str);
+	score1 = globalAlignment(g, MyersBitVector() );
+	score2 = globalAlignment(g, score_type, NeedlemanWunsch() );
+	score3 = globalAlignment(g, score_type2, Gotoh() );
+	SEQAN_TASSERT((-1) * score1 == score2)
+	SEQAN_TASSERT(score2 == score3)
+
+	str[0] = "cttagt";
+	str[1] = "ttag";
+	assignStringSet(g, str);
+	score1 = globalAlignment(g, MyersBitVector() );
+	score2 = globalAlignment(g, score_type, NeedlemanWunsch() );
+	score3 = globalAlignment(g, score_type2, Gotoh() );
+	SEQAN_TASSERT((-1) * score1 == score2)
+	SEQAN_TASSERT(score2 == score3)
+
+	str[0] = "ttag";
+	str[1] = "cttccagt";
+	assignStringSet(g, str);
+	score1 = globalAlignment(g, MyersBitVector() );
+	score2 = globalAlignment(g, score_type, NeedlemanWunsch() );
+	score3 = globalAlignment(g, score_type2, Gotoh() );
+	SEQAN_TASSERT((-1) * score1 == score2)
+	SEQAN_TASSERT(score2 == score3)
+	 
+	str[0] = "ttagttagttagttagttagttagttagttagttagttagttagttagttagttagttag";
+	str[1] = "cttccagtcttccagtcttccagtcttccagtcttccagtcttccagtcttccagtcttccagt";
+	assignStringSet(g, str);
+	score1 = globalAlignment(g, MyersBitVector() );
+	score2 = globalAlignment(g, score_type, NeedlemanWunsch() );
+	score3 = globalAlignment(g, score_type2, Gotoh() );
+	SEQAN_TASSERT((-1) * score1 == score2)
+	SEQAN_TASSERT(score2 == score3)
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 void  Test_Runtime() {
@@ -223,8 +277,8 @@ void  Test_Runtime() {
 	typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	typedef	Id<TStringSet>::Type TId;
 	
-	Score<double> score_type = Score<double>(5,-4,-0.5,0);
-	Score<double> score_type2 = Score<double>(5,-4,-0.5,0);
+	Score<double> score_type = Score<double>(5,-4,-0.5,-10);
+	Score<double> score_type2 = Score<double>(5,-4,-0.5,-9.5);
 	double score;
 	TStringSet str;
 	clock_t startTime;
@@ -249,7 +303,7 @@ void  Test_Runtime() {
 
 	TGraph g(str);
 	startTime = clock();
-	score = globalAlignment(g, score_type );
+	score = globalAlignment(g, score_type, Gotoh() );
 	duration = clock() - startTime;
 	std::cout << g << std::endl;
 	std::cout << "Score: " << score << " (Runtime: " << duration << ")" << std::endl;
@@ -267,7 +321,164 @@ void  Test_Runtime() {
 	std::cout << std::endl;
 }
 
-*/
+
+//////////////////////////////////////////////////////////////////////////////
+
+int Test_ConvertSequences(String<char> const in_path, String<char> const in_file, String<char> const path, String<char> const file_prefix) {
+	typedef String<Dna5, External<ExternalConfig<File<>, 64*1024> > > TString;
+	
+	// count sequences
+	unsigned seqCount = 0;
+
+	ifstream file;
+	std::stringstream input;
+	input << in_path << in_file;
+	file.open(input.str().c_str(), ios_base::in | ios_base::binary);
+	if (!file.is_open()) return 0;
+	while (!_streamEOF(file)) {
+		String<char> id;
+		readID(file, id, Fasta());
+		std::cout << id << std::endl;
+		goNext(file, Fasta());
+		++seqCount;
+	}
+	std::cout << "Number of sequences: " << seqCount << std::endl;
+
+	// import sequences
+	file.clear();
+	file.seekg(0, ios_base::beg);
+	for(unsigned i = 0; (i < seqCount) && !_streamEOF(file); ++i) 
+	{
+		TString str;
+		//String<TraceBack, External<> > trace;
+		//open(trace, "D:\\seqan.dat");
+		std::stringstream s;
+		s << path << file_prefix << i;
+		open(str, s.str().c_str());
+		read(file, str, Fasta());
+	}
+    file.close();
+
+	return seqCount;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TVal1, typename TVal2>
+inline bool 
+Test_ReadSequences(String<char> const path, String<char> const file_prefix, TStringSet& str, TVal1 const start, TVal2 const nseq) {
+	for(unsigned i = start; i < start + nseq; ++i) {
+		std::stringstream s;
+		s << path << file_prefix << i - start;
+		bool f = open(str[i], s.str().c_str());
+		if (!f) return false;
+	}
+	return true;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+void Test_MatchRefinement() {
+	typedef String<Dna5, External<ExternalConfig<File<>, 64*1024> > > TString;
+	typedef StringSet<TString, Owner<> > TStringSet;
+	typedef Id<TStringSet>::Type TId;
+	typedef Size<TStringSet>::Type TSize;
+	
+	// Windows
+#ifdef PLATFORM_WINDOWS
+	String<char> in_path("Z:\\matches\\");
+	String<char> out_path("Z:\\matches\\out\\");
+#else
+	// Linux
+	String<char> in_path("/home/takifugu/rausch/matches/");
+	String<char> out_path("/home/takifugu/rausch/matches/out/");
+#endif
+	
+
+	TSize hSeq = 24;
+	TSize wSeq = 24;
+	TSize bSeq = 24;
+	TSize tmp = 0;
+
+	// Convert all sequences only once
+	tmp = Test_ConvertSequences(in_path, "HUREF6CHROM.fasta",out_path,"H.chr.");
+	if (tmp != hSeq) {
+		std::cerr << "Did not read all HUREF sequences." << std::endl;
+		exit(1);
+	}
+	tmp = Test_ConvertSequences(in_path, "WGSACHROM.fasta",out_path,"W.chr.");
+	if (tmp != wSeq) {
+		std::cerr << "Did not read all WGSA sequences." << std::endl;
+		exit(1);
+	}
+	tmp = Test_ConvertSequences(in_path, "B36LCCHROM.fasta",out_path,"B.chr.");
+	if (tmp != bSeq) {
+		std::cerr << "Did not read all B36LC sequences." << std::endl;
+		exit(1);
+	}
+
+	// Read all the sequences
+	TStringSet str;
+	resize(str, hSeq + wSeq + bSeq);
+	bool f = Test_ReadSequences(out_path,"H.chr.", str, 0, hSeq);
+	if (!f) {
+		std::cerr << "Error importing HUREF sequences." << std::endl;
+		exit(1);
+	}
+	f = Test_ReadSequences(out_path,"W.chr.", str, hSeq, wSeq);
+	if (!f) {
+		std::cerr << "Error importing WGSA sequences." << std::endl;
+		exit(1);
+	}
+	f = Test_ReadSequences(out_path,"B.chr.", str, hSeq + wSeq, bSeq);
+	if (!f) {
+		std::cerr << "Error importing B36LC sequences." << std::endl;
+		exit(1);
+	}
+
+	// Build a map:
+	// SeqId -> Identifier
+	typedef std::map<TId, String<char> > TIdToNameMap;
+	TIdToNameMap idToName;
+	for(TId i = 0; i < length(str); ++i) {
+		TSize index = 0;
+		std::stringstream s;
+		if (i < 24) {
+			s << "H";
+			index = i;
+		}
+		else if (i < 48) {
+			s << "W";
+			index = i - hSeq;
+		}
+		else {
+			s << "B";
+			index = i - (hSeq + wSeq);
+		}
+		s << ":" << i;
+		idToName.insert(std::make_pair(i, s.str().c_str()));
+	}
+
+	// Just to check that everything worked
+
+	std::cout << "Number of sequences: " << length(str) << std::endl;
+	for(TIdToNameMap::const_iterator pos =  idToName.begin(); pos != idToName.end(); ++pos) {
+		std::cout << pos->second << ") ";
+		for(TSize i=0; i<10;++i) {
+			std::cout << str[pos->first][i];
+		}
+		std::cout << std::endl;
+	}
+
+	// Read the matches
+	//fstream strm; 
+	//std::stringstream s;
+	//s << in_path << "TvsT.atac";
+	//strm.open(s.str().c_str(), ios_base::in);
+	//read(strm, AtacMatches());
+	//strm.close();
+}
+
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -411,6 +622,7 @@ void Test_TCoffee() {
 	read(strm,g,TCoffeeLib());
 	strm.close();
 
+	/*
 	fstream strmW; // Write the library
 	strmW.open(TEST_PATH "my_garfield.lib", ios_base::out | ios_base::trunc);
 	write(strmW,g,TCoffeeLib());
@@ -420,6 +632,7 @@ void Test_TCoffee() {
 	strm2.open(TEST_PATH "my_tcoffee.dot", ios_base::out | ios_base::trunc);
 	write(strm2,g,DotDrawing());
 	strm2.close();
+	*/
 
 	// Generate additional primary libraries
 	// Just slow-pair at the moment

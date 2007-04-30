@@ -3,6 +3,341 @@
 
 namespace SEQAN_NAMESPACE_MAIN
 {
+//////////////////////////////////////////////////////////////////////////////
+// Alignment: Tags
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Tag.NeedlemanWunsch
+..summary:Switch to trigger Needleman Wunsch Alignments
+..value.NeedlemanWunsch:Needleman Wunsch alignment
+*/
+
+struct NeedlemanWunsch_;
+typedef Tag<NeedlemanWunsch_> const NeedlemanWunsch;
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Tag.Gotoh
+..summary:Switch to trigger Gotoh Alignments with affine gap costs
+..value.Gotoh:Gotoh alignment
+*/
+
+struct Gotoh_;
+typedef Tag<Gotoh_> const Gotoh;
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Tag.Gotoh
+..summary:Switch to trigger Gotoh Alignments with affine gap costs
+..value.Gotoh:Gotoh alignment
+*/
+
+struct MyersBitVector_;
+typedef Tag<MyersBitVector_> const MyersBitVector;
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+// Alignment: Traceback Alphabet for Needleman Wunsch
+//////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename T = void>
+struct _Translate_Table_Byte_2_TraceBack
+{
+	static char const VALUE[256];
+};
+template <typename T>
+char const _Translate_Table_Byte_2_TraceBack<T>::VALUE[256] = 
+{
+	0,   1,   2,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //0
+	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //1
+	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //2
+	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //3
+	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //4
+	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //5
+	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //6
+	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //7
+	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //8
+	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //9
+	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //10
+	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //11
+	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //12
+	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //13
+	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //14
+	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0  //15
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Spec.TraceBack:
+..cat:Alphabets
+..summary: Trace back values.
+..general:Class.SimpleType
+..signature:TraceBack
+..remarks:
+...text:The @Metafunction.ValueSize@ of $TraceBack$ is 3. 
+The values are defined in the following way: 0=Diagonal Move, 1=Horizontal Move, 2=Vertical Move
+..see:Metafunction.ValueSize
+*/
+struct _TraceBack {};
+typedef SimpleType<unsigned char, _TraceBack> TraceBack;
+
+template <> struct ValueSize< TraceBack > { enum { VALUE = 3 }; };
+template <> struct BitsPerValue< TraceBack > { enum { VALUE = 2 }; };
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <>
+struct CompareType<TraceBack, Byte> { typedef TraceBack Type; };
+inline void assign(TraceBack & target, Byte const c_source)
+{
+SEQAN_CHECKPOINT
+	target.value = _Translate_Table_Byte_2_TraceBack<>::VALUE[c_source];
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+// Alignment: Traceback Alphabet for Gotoh
+//////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+
+template <typename T = void>
+struct _Translate_Table_Byte_2_TraceBackGotoh
+{
+	static char const VALUE[256];
+};
+template <typename T>
+char const _Translate_Table_Byte_2_TraceBackGotoh<T>::VALUE[256] = 
+{
+	0,   1,   2,   3,   4,   5,   6,   7,   8,   9,   10,   11,   0,   0,   0,   0, //0
+	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //1
+	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //2
+	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //3
+	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //4
+	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //5
+	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //6
+	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //7
+	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //8
+	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //9
+	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //10
+	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //11
+	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //12
+	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //13
+	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //14
+	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0  //15
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Spec.TraceBackGotoh:
+..cat:Alphabets
+..summary: Trace back values for gotoh.
+..general:Class.SimpleType
+..signature:TraceBackGotoh
+..remarks:
+...text:The @Metafunction.ValueSize@ of $TraceBackGotoh$ is 12. 
+The values are defined in the following way: Move in Diagonal Matrix, Move in Horizontal Matrix, Move in Vertical Matrix
+The values are: 
+0=Diag, Diag, Diag; 1=Diag, Diag, Vert; 2=Diag, Hori, Diag; 3=Diag, Hori, Vert; 
+4=Hori, Diag, Diag; 5=Hori, Diag, Vert; 6=Hori, Hori, Diag; 7=Hori, Hori, Vert; 
+8=Vert, Diag, Diag; 9=Vert, Diag, Vert; 10=Vert, Hori, Diag; 11=Vert, Hori, Vert; 
+..see:Metafunction.ValueSize
+*/
+struct _TraceBackGotoh {};
+typedef SimpleType<unsigned char, _TraceBackGotoh> TraceBackGotoh;
+
+template <> struct ValueSize< TraceBackGotoh > { enum { VALUE = 12 }; };
+template <> struct BitsPerValue< TraceBackGotoh > { enum { VALUE = 4 }; };
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <>
+struct CompareType<TraceBackGotoh, Byte> { typedef TraceBackGotoh Type; };
+inline void assign(TraceBackGotoh & target, Byte const c_source)
+{
+SEQAN_CHECKPOINT
+	target.value = _Translate_Table_Byte_2_TraceBackGotoh<>::VALUE[c_source];
+}
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+// Alignment: Meyer's Bit Vector algorithm
+//////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TValue, typename TSpec, typename TString>
+unsigned int
+_align_myers_bit_vector(String<TValue, TSpec>& trace,
+				 TString const & str1,
+		       TString const & str2)
+{
+	SEQAN_CHECKPOINT
+	typedef unsigned int TWord;
+	typedef typename Value<TString>::Type TAlphabet;
+	typedef typename Size<TString>::Type TSize;
+	typedef String<TWord> BitVector;
+	typedef String<BitVector> TLookupTable;
+	TSize alphLen = ValueSize<TAlphabet>::VALUE;
+
+	// Preprocessing
+	TLookupTable lT;
+	resize(lT, alphLen);
+
+	TSize len1 = length(str1);
+	TSize len2 = length(str2);
+	TSize blockCount;
+	if (len2<1) blockCount=1;
+	else blockCount=((len2-1) / BitsPerValue<TWord>::VALUE)+1;
+	for(TSize i = 0; i < alphLen; ++i) {
+		fill(lT[i],blockCount, 0, Exact());
+	}
+	for(TSize j = 0; j < len2; ++j) {
+		TSize pos = convert<TWord>(getValue(str2,j));
+		TSize block = j / BitsPerValue<TWord>::VALUE;
+		(lT[pos])[block] |= (1<<(j%BitsPerValue<TWord>::VALUE));
+	}
+	BitVector VP;
+	BitVector VN;
+	fill(VP, blockCount, ~0, Exact() );
+	fill(VN, blockCount, 0, Exact() );
+	TWord err = len2;
+	
+	/*
+	// Debug code
+	std::cout << "Alphabet size: " << alphLen << ::std::endl;
+	std::cout << "Block count: " << blockCount << ::std::endl;
+	for(unsigned int i=0;i<alphLen;++i) {
+		if ((i<97) || (i>122)) continue;
+		std::cout << static_cast<char>(i) << ": ";
+		for(int j=0;j<(int)blockCount;++j) {
+			for(int bit_pos=0;bit_pos<BitsPerValue<TWord>::VALUE;++bit_pos) {
+			  std::cout << ((lT[i][j] & (1<<(bit_pos % BitsPerValue<unsigned int>::VALUE))) !=0);
+			}
+		}
+		std::cout << ::std::endl;
+	}
+	*/
+
+	BitVector X;	
+	BitVector D0;
+	BitVector HN;	
+	BitVector HP;
+	BitVector HNcopy;	
+	BitVector HPcopy;
+	resize(X, blockCount);
+	resize(D0, blockCount);
+	resize(HN, blockCount);
+	resize(HP, blockCount);
+	resize(HNcopy, blockCount);
+	resize(HPcopy, blockCount);
+
+	for(TSize col = 0; col<len1; ++col) {
+		TWord pos = convert<TWord>(getValue(str1,col));	  
+		// Addition might produce a carry
+		bool carry = 0;
+		bool newCarry;
+		bool HPcarry = 1;  // We want edit distance!!!
+		bool HPnewCarry;
+		bool HNcarry = 0;
+		bool HNnewCarry;
+		for(TWord block=0;block<blockCount;++block) {
+			X[block] = lT[pos][block] | VN[block];
+			D0[block] = X[block] & VP[block];
+			if (( (unsigned int) D0[block] + VP[block] < (unsigned int) D0[block] ) ||
+				( (unsigned int) D0[block] + VP[block] < (unsigned int) VP[block] )) newCarry = 1;
+			else newCarry = 0;
+			D0[block] += VP[block];
+			if ((carry) && ( (unsigned int) D0[block] == (unsigned int) ~0)) {
+				if (newCarry) {
+					std::cerr << "Two carries. Error !!!";
+					exit(-1);
+				} else {
+					newCarry = 1;
+				}
+			}
+			D0[block] += carry;
+			carry = newCarry;
+			D0[block] ^= VP[block];
+			D0[block] |= X[block];
+			HN[block] = VP[block] & D0[block];
+			HP[block] = VN[block] | ~(VP[block] | D0[block]);
+			HPcopy[block] = HP[block];
+			HNcopy[block] = HN[block];
+			HPnewCarry = ((HPcopy[block] & (1<< (BitsPerValue<TWord>::VALUE - 1)))!=0); 
+			HPcopy[block] <<= 1;
+			HPcopy[block] += HPcarry;
+			HPcarry = HPnewCarry;
+			X[block] = HPcopy[block];
+			VN[block] = X[block] & D0[block];
+			HNnewCarry = ((HNcopy[block] & (1<< (BitsPerValue<TWord>::VALUE - 1)))!=0); 
+			HNcopy[block] <<= 1;
+			HNcopy[block] += HNcarry;
+			HNcarry = HNnewCarry;
+			VP[block] = HNcopy[block] | ~(X[block] | D0[block]);
+		}
+		TSize finalBlock = (len2-1) / BitsPerValue<TWord>::VALUE;
+		if ((HP[finalBlock] & (1<<((len2-1)%BitsPerValue<TWord>::VALUE))) != 0) ++err;
+		else if ((HN[finalBlock] & (1<<((len2-1)%BitsPerValue<TWord>::VALUE))) != 0) --err;
+
+		/*
+		std::cout << err << std::endl;
+		for(int block=0;block<(int)blockCount;++block) {
+			for(int bit_pos=0;bit_pos<BitsPerValue<TWord>::VALUE;++bit_pos) {
+				std::cout << ((D0[block] & (1<<(bit_pos % BitsPerValue<unsigned int>::VALUE))) !=0);
+			}
+		}
+		std::cout << ::std::endl;
+		for(int block=0;block<(int)blockCount;++block) {
+			for(int bit_pos=0;bit_pos<BitsPerValue<TWord>::VALUE;++bit_pos) {
+				std::cout << ((HN[block] & (1<<(bit_pos % BitsPerValue<unsigned int>::VALUE))) !=0);
+			}
+		}
+		std::cout << ::std::endl;
+		for(int block=0;block<(int)blockCount;++block) {
+			for(int bit_pos=0;bit_pos<BitsPerValue<TWord>::VALUE;++bit_pos) {
+				std::cout << ((HP[block] & (1<<(bit_pos % BitsPerValue<unsigned int>::VALUE))) !=0);
+			}
+		}
+		std::cout << ::std::endl;
+		for(int block=0;block<(int)blockCount;++block) {
+			for(int bit_pos=0;bit_pos<BitsPerValue<TWord>::VALUE;++bit_pos) {
+				std::cout << ((VN[block] & (1<<(bit_pos % BitsPerValue<unsigned int>::VALUE))) !=0);
+			}
+		}
+		std::cout << ::std::endl;
+		for(int block=0;block<(int)blockCount;++block) {
+			for(int bit_pos=0;bit_pos<BitsPerValue<TWord>::VALUE;++bit_pos) {
+				std::cout << ((VP[block] & (1<<(bit_pos % BitsPerValue<unsigned int>::VALUE))) !=0);
+			}
+		}
+		std::cout << ::std::endl;
+		std::cout << ::std::endl;
+		*/
+
+	}
+	return err;
+}
+
+
+
 
 //////////////////////////////////////////////////////////////////////////////
 // Alignment: Needleman-Wunsch Alignment, constant gap cost
@@ -14,106 +349,75 @@ namespace SEQAN_NAMESPACE_MAIN
 
 template <typename TStringSet, typename TCargo, typename TSpec, typename TTrace>
 void
-needleman_wunsch_trace(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+_align_needleman_wunsch_trace(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 					   TTrace const& trace)
 {
 	SEQAN_CHECKPOINT
-	enum {Diagonal = 0, Left = 1, Top=2};
-	
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename Size<TGraph>::Type TSize;
 	typedef typename Value<TTrace>::Type TTraceValue;
 	typedef typename Id<TStringSet>::Type TId;
-	 
-	TStringSet* str = &stringSet(g);
-	TId id1 = positionToId(*str, 0);
-	TId id2 = positionToId(*str, 1);
-	TSize len1 = length(((*str)[0]));
-	TSize cols = len1 + 1;
-	TSize len2 = length(((*str)[1]));
 
+	// TraceBack values
+	enum {Diagonal = 0, Horizontal = 1, Vertical = 2};
+	
+	// Initialization
+	TStringSet& str = stringSet(g);
+	TId id1 = positionToId(str, 0);
+	TId id2 = positionToId(str, 1);
+	TSize len1 = length(str[0]);
+	TSize len2 = length(str[1]);
+	TSize numRows = len2;
+		
 	// Initialize everything
-	TTraceValue tv = getValue(trace, len2*cols + len1);
+	TTraceValue tv = getValue(trace, (len1-1)*numRows + (len2-1));
 	TTraceValue tvOld = tv;  // We need to know when the direction of the trace changes
 
 	TSize segLen = 1;
-	switch(tv) {
-		case Diagonal:
-			//std::cout << '(' << ((*str)[0])[len1 - 1] << ',' << ((*str)[1])[len2-1] << ')' << std::endl;
-			--len1; --len2;
-			break;
-		case Left:
-			//std::cout << '(' << ((*str)[0])[len1 - 1] << ',' << '-' << ')' << std::endl;
-			--len1;
-			break;
-		case Top:
-			//std::cout << '(' << '-' << ',' << ((*str)[1])[len2-1] << ')' << std::endl;
-			--len2;
-			break;
+	if (tv == (Byte) Diagonal) {
+		//std::cout << '(' << ((*str)[0])[len1 - 1] << ',' << ((*str)[1])[len2-1] << ')' << std::endl;
+		--len1; --len2;
+	} else if (tv == (Byte) Horizontal) {
+		//std::cout << '(' << ((*str)[0])[len1 - 1] << ',' << '-' << ')' << std::endl;
+		--len1;
+	} else if (tv == (Byte) Vertical) {
+		//std::cout << '(' << '-' << ',' << ((*str)[1])[len2-1] << ')' << std::endl;
+		--len2;
 	}
+
 	// Now follow the trace
 	do {
-		tv = getValue(trace, len2*cols + len1);
-		switch(tv) {
-			case Diagonal: 
-				//std::cout << '(' << ((*str)[0])[len1 - 1] << ',' << ((*str)[1])[len2-1] << ')' << std::endl;
-				if (tv != tvOld) {
-					switch(tvOld) {
-						case Left:	
-							addVertex(g, id1, len1, segLen);
-							break;
-						case Top:
-							addVertex(g, id2, len2, segLen);
-							break;
-					}
-					tvOld = tv; segLen = 1;
-				} else ++segLen;
-				--len1; --len2;
-				break;
-			case Left:
-				//std::cout << '(' << ((*str)[0])[len1 - 1] << ',' << '-' << ')' << std::endl;
-				if (tv != tvOld) {
-					switch(tvOld) {
-						case Diagonal: 
-							addEdge(g, addVertex(g, id1, len1, segLen), addVertex(g, id2, len2, segLen));	
-							break;
-						case Top:	
-							addVertex(g, id2, len2, segLen);
-							break;
-					}
-					tvOld = tv; segLen = 1;
-				} else ++segLen;
-				--len1;
-				break;
-			case Top:
-				//std::cout << '(' << '-' << ',' << ((*str)[1])[len2-1] << ')' << std::endl;
-				if (tv != tvOld) {
-					switch(tvOld) {
-						case Diagonal: 
-							addEdge(g, addVertex(g, id1, len1, segLen), addVertex(g, id2, len2, segLen));
-							break;
-						case Left:
-							addVertex(g, id1, len1, segLen);
-							break;
-					}
-					tvOld = tv; segLen = 1;
-				} else ++segLen;
-				--len2;
-				break;
+		tv = getValue(trace, (len1-1)*numRows + (len2-1));
+		if (tv == (Byte) Diagonal) {
+			//std::cout << '(' << ((*str)[0])[len1 - 1] << ',' << ((*str)[1])[len2-1] << ')' << std::endl;
+			if (tv != tvOld) {
+				if (tvOld == (Byte) Horizontal) addVertex(g, id1, len1, segLen);
+				else if (tvOld == (Byte) Vertical) addVertex(g, id2, len2, segLen);
+				tvOld = tv; segLen = 1;
+			} else ++segLen;
+			--len1; --len2;
+		} else if (tv == (Byte) Horizontal) {
+			//std::cout << '(' << ((*str)[0])[len1 - 1] << ',' << '-' << ')' << std::endl;
+			if (tv != tvOld) {
+				if (tvOld == (Byte) Diagonal) addEdge(g, addVertex(g, id1, len1, segLen), addVertex(g, id2, len2, segLen));
+				else if (tvOld == (Byte) Vertical) addVertex(g, id2, len2, segLen);
+				tvOld = tv; segLen = 1;
+			} else ++segLen;
+			--len1;
+		} else if (tv == (Byte) Vertical) {
+			//std::cout << '(' << '-' << ',' << ((*str)[1])[len2-1] << ')' << std::endl;
+			if (tv != tvOld) {
+				if (tvOld == (Byte) Diagonal) addEdge(g, addVertex(g, id1, len1, segLen), addVertex(g, id2, len2, segLen));
+				else if (tvOld == (Byte) Horizontal) addVertex(g, id1, len1, segLen);
+				tvOld = tv; segLen = 1;
+			} else ++segLen;
+			--len2;
 		}
 	} while ((len1 != 0) && (len2 !=0));
 	// Process left-overs
-	switch(tvOld) {
-		case Diagonal: 
-			addEdge(g, addVertex(g, id1, len1, segLen), addVertex(g, id2, len2, segLen));
-			break;
-		case Left:
-			addVertex(g, id1, len1, segLen);
-			break;
-		case Top:
-			addVertex(g, id2, len2, segLen);
-			break;
-	}
+	if (tvOld == (Byte) Diagonal) addEdge(g, addVertex(g, id1, len1, segLen), addVertex(g, id2, len2, segLen));
+	else if (tvOld == (Byte) Horizontal) addVertex(g, id1, len1, segLen);
+	else if (tvOld == (Byte) Vertical) addVertex(g, id2, len2, segLen);
 	// Handle the remaining sequence
 	if (len1 != 0) {
 		addVertex(g, id1, 0, len1);
@@ -126,54 +430,69 @@ needleman_wunsch_trace(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 
 template <typename TScoreValue, typename TValue, typename TSpec, typename TString>
 TScoreValue
-needleman_wunsch(String<TValue, TSpec>& trace,
+_align_needleman_wunsch(String<TValue, TSpec>& trace,
 				 TString const & str1,
 				 TString const & str2,
 				 Score<TScoreValue, Simple> const& sc) 
 {
 	SEQAN_CHECKPOINT
-
-	// For the DP Matrix: Where did we come from?
-	enum {Diagonal = 0, Left = 1, Top=2};
 	typedef String<TValue, TSpec> TTrace;
 	typedef typename Value<TTrace>::Type TTraceValue;
-	typedef typename Size<String<TScoreValue> >::Type TSize;
+	typedef typename Iterator<TTrace, Standard>::Type TTraceIter;
+	typedef String<TScoreValue> TColumn;
+	typedef typename Size<TColumn>::Type TSize;
 
-	// The DP Matrix: A simple string
-	String<TScoreValue> mat;
+
+	// TraceBack values
+	enum {Diagonal = 0, Horizontal = 1, Vertical = 2};
+
+	// One DP Matrix column
+	TColumn column;
 		
+	// Initialization
 	TSize len1 = length(str1);
-	TSize cols = len1 + 1;
 	TSize len2 = length(str2);
 	TScoreValue gap = scoreGapExtend(sc);
-	TScoreValue maxVal = 0;
-	TScoreValue tmp = 0;
-	resize(mat, (len1+1)*(len2+1));   // One additional row and column
-	resize(trace, (len1+1)*(len2+1));
+	resize(column, len2 + 1);  
+	resize(trace, len1*len2);
+	for(TSize row = 0; row <= len2; ++row) assignValue(column, row, row * gap);
 
 	// Classical DP
+	TTraceIter it = begin(trace, Standard() );
 	TTraceValue tv;
-	for(TSize col = 0; col <= len1; ++col) assignValue(mat, col, col * gap);
-	for(TSize row = 0; row < len2; ++row) {
-		assignValue(mat, (row + 1) * cols, (row+1) * gap);
-		for(TSize col = 0; col < len1; ++col) {
+	TScoreValue maxVal = 0;
+	TScoreValue tmp = 0;
+	for(TSize col = 1; col <= len1; ++col) {
+		TScoreValue diagVal = getValue(column, 0);
+		assignValue(column, 0, col * gap);
+		for(TSize row = 1; row <= len2; ++row) {
 			// Get the new maximum	
-			maxVal = getValue(mat, row*cols+col) + score(const_cast<Score<TScoreValue, Simple>&>(sc), str1[col], str2[row]);
-			tv = Diagonal;
-			if ((tmp = getValue(mat, row * cols + (col + 1)) + gap) > maxVal) {
+			maxVal = diagVal + score(const_cast<Score<TScoreValue, Simple>&>(sc), str1[col-1], str2[row-1]);
+			tv = (Byte) Diagonal;
+			if ((tmp = getValue(column, row) + gap) > maxVal) {
 				maxVal = tmp;
-				tv = Top;
+				tv = (Byte) Horizontal;
 			}
-			if ((tmp = getValue(mat, (row + 1) * cols + col) + gap) > maxVal) {
+			if ((tmp = getValue(column, (row - 1)) + gap) > maxVal) {
 				maxVal = tmp;
-				tv = Left;
+				tv = (Byte) Vertical;
 			}
+			diagVal = getValue(column, row);
 			// Assign the new value
-			assignValue(mat, (row+1) * cols + (col+1), maxVal);
-			assignValue(trace, (row+1) * cols + (col+1), tv);
+			assignValue(column, row, maxVal);
+			assignValue(it, tv);
+			goNext(it);
 		}
 	}
-	return getValue(mat, len2*cols + len1);
+
+	//for(unsigned int i= 0; i<len2;++i) {
+	//	for(unsigned int j= 0; j<len1;++j) {
+	//		std::cout << (unsigned int) getValue(trace, j*len2 + i) << ',';
+	//	}
+	//	std::cout << std::endl;
+	//}
+
+	return getValue(column, len2);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -187,45 +506,50 @@ needleman_wunsch(String<TValue, TSpec>& trace,
 
 template <typename TStringSet, typename TCargo, typename TSpec, typename TTrace, typename TVal>
 void
-gotoh_trace(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+_align_gotoh_trace(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 			TTrace const& trace,
 			TVal const initialDir)
 {
 	SEQAN_CHECKPOINT
-	enum {Diagonal = 0, Left = 1, Top=2};
 	
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename Size<TGraph>::Type TSize;
 	typedef typename Value<TTrace>::Type TTraceValue;
 	typedef typename Id<TStringSet>::Type TId;
-	 
-	TStringSet* str = &stringSet(g);
-	TId id1 = positionToId(*str, 0);
-	TId id2 = positionToId(*str, 1);
-	TSize len1 = length(((*str)[0]));
-	TSize cols = len1 + 1;
-	TSize len2 = length(((*str)[1]));
 
-	// Initialize everything
-	
-	TTraceValue tv = 0;
+	// TraceBack values for Gotoh
+	enum {Diagonal = 0, Horizontal = 1, Vertical = 2};
+	 
+	TStringSet& str = stringSet(g);
+	TId id1 = positionToId(str, 0);
+	TId id2 = positionToId(str, 1);
+	TSize len1 = length(str[0]);
+	TSize len2 = length(str[1]);
+	TSize numRows = len2;
+
+	// Initialize everything	
+	TTraceValue tv = getValue(trace, (len1 - 1)*numRows + (len2 - 1));
 	TTraceValue tvOld = initialDir;
-	switch(initialDir) {
+	switch( (Byte) initialDir) {
 		case Diagonal:
-			tv = ((getValue(trace, len2*cols + len1) / 9) % 3);
+			if ((Byte) tv / (Byte) 4 == 0) tv = (Byte) Diagonal;
+			else if ((Byte) tv / (Byte) 4 == 1) tv = (Byte) Horizontal;
+			else tv = (Byte) Vertical;
 			break;
-		case Left:
-			tv = ((getValue(trace, len2*cols + len1) / 3) % 3);
+		case Horizontal:
+			if (((Byte) tv / (Byte) 2) % 2 == 0) tv = (Byte) Diagonal;
+			else tv = (Byte) Horizontal;
 			break;
-		case Top:
-			tv = (getValue(trace, len2*cols + len1) % 3);
+		case Vertical:
+			if ( (Byte) tv % 2 == 0) tv = (Byte) Diagonal;
+			else tv = (Byte) Vertical;
 			break;
 	}
 	TSize segLen = 0;
 
 	// Now follow the trace
 	do {
-		switch(tvOld) {
+		switch( (Byte) tvOld) {
 			case Diagonal: 
 				//std::cout << '(' << ((*str)[0])[len1 - 1] << ',' << ((*str)[1])[len2-1] << ')' << std::endl;
 				--len1; --len2;
@@ -236,7 +560,7 @@ gotoh_trace(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 					segLen = 0;
 				}
 				break;
-			case Left:
+			case Horizontal:
 				//std::cout << '(' << ((*str)[0])[len1 - 1] << ',' << '-' << ')' << std::endl;
 				--len1;
 				++segLen;
@@ -246,7 +570,7 @@ gotoh_trace(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 					segLen = 0;
 				}
 				break;
-			case Top:
+			case Vertical:
 				//std::cout << '(' << '-' << ',' << ((*str)[1])[len2-1] << ')' << std::endl;
 				--len2;
 				++segLen;
@@ -257,28 +581,35 @@ gotoh_trace(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 				}
 				break;
 		}
-		switch(tv) {
-			case Diagonal:
-				tv = ((getValue(trace, len2*cols + len1) / 9) % 3);
-				break;
-			case Left:
-				tv = ((getValue(trace, len2*cols + len1) / 3) % 3);
-				break;
-			case Top:
-				tv = (getValue(trace, len2*cols + len1) % 3);
-				break;
+		if ((len1 != 0) && (len2 !=0)) {
+			TTraceValue nextTraceValue = getValue(trace, (len1 - 1)*numRows + (len2 - 1));
+			switch( (Byte) tv) {
+				case Diagonal:
+					if ( (Byte) nextTraceValue / (Byte) 4 == 0) tv = (Byte) Diagonal;
+					else if ((Byte) nextTraceValue / (Byte) 4 == 1) tv = (Byte) Horizontal;
+					else tv = (Byte) Vertical;
+					break;
+				case Horizontal:
+					if (((Byte) nextTraceValue / (Byte) 2) % 2 == 0) tv = (Byte) Diagonal;
+					else tv = (Byte) Horizontal;
+					break;
+				case Vertical:
+					if ( (Byte) nextTraceValue % (Byte) 2 == 0) tv = (Byte) Diagonal;
+					else tv = (Byte) Vertical;
+					break;
+			}
 		}
 	} while ((len1 != 0) && (len2 !=0));
 	// Process left-overs
 	if (segLen > 0) {
-		switch(tvOld) {
+		switch( (Byte) tvOld) {
 			case Diagonal: 
 				addEdge(g, addVertex(g, id1, len1, segLen), addVertex(g, id2, len2, segLen));
 				break;
-			case Left:
+			case Horizontal:
 				addVertex(g, id1, len1, segLen);
 				break;
-			case Top:
+			case Vertical:
 				addVertex(g, id2, len2, segLen);
 				break;
 		}
@@ -295,144 +626,148 @@ gotoh_trace(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 
 template <typename TScoreValue, typename TValue, typename TSpec, typename TString>
 TScoreValue
-gotoh(String<TValue, TSpec>& trace,
+_align_gotoh(String<TValue, TSpec>& trace,
 	  TString const & str1,
 	  TString const & str2,
 	  Score<TScoreValue, Simple> const & sc,
 	  TValue& initialDir)
 {
 SEQAN_CHECKPOINT
-	// DiagLeftTop means diagonal in mat matrix, left in left matrix and left in top matrix
-	enum {Diagonal = 0, Left = 1, Top=2};
 	typedef String<TValue, TSpec> TTrace;
 	typedef typename Value<TTrace>::Type TTraceValue;
-	typedef typename Size<String<TScoreValue> >::Type TSize;
+	typedef typename Iterator<TTrace, Standard>::Type TTraceIter;
+	typedef String<TScoreValue> TColumn;
+	typedef typename Size<TColumn>::Type TSize;
+
+	// TraceBack values for Gotoh
+	enum {Diagonal = 0, Horizontal = 1, Vertical = 2};
 
 	// The DP Matrix for diagonal walks
-	String<TScoreValue> mat;
+	TColumn mat;
 	// The DP Matrix for gaps from the left
-	String<TScoreValue> left;
+	TColumn horizontal;
 	// The DP Matrix for gaps from the top
-	String<TScoreValue> top;
+	TColumn vertical;
 		
 	TSize len1 = length(str1);
-	TSize cols = len1 + 1;
 	TSize len2 = length(str2);
 	TScoreValue gap = scoreGapExtend(sc);
 	TScoreValue gapOpen = scoreGapOpen(sc);
 	TScoreValue maxVal = 0;
 	TScoreValue tmp = 0;
-	resize(mat, (len1+1)*(len2+1));   // One additional row and column
-	resize(left, (len1+1)*(len2+1));   // One additional row and column
-	resize(top, (len1+1)*(len2+1));   // One additional row and column
-	resize(trace, (len1+1)*(len2+1));
+	resize(mat, (len2+1));   // One column for the diagonal matrix
+	resize(horizontal, (len2+1));   // One column for the horizontal matrix
+	resize(vertical, (len2+1));   // One column for the vertical matrix
+	resize(trace, len1*len2);
 
-	TTraceValue tvMat, tvLeft, tvTop;
+	TTraceValue tvMat, tvHorizontal, tvVertical;
 	
 	TScoreValue inf = infimumValue<TScoreValue>() / 2;
 
 	// Classical DP
+	TTraceIter it = begin(trace, Standard() );
 	assignValue(mat, 0, 0);
-	assignValue(left, 0, inf);
-	assignValue(top, 0, inf);
-	for(TSize col = 0; col < len1; ++col) {
-		assignValue(mat, (col + 1), gapOpen + col * gap);
-		assignValue(top, (col + 1), gapOpen + col * gap);
-		assignValue(left, (col + 1), inf);
+	assignValue(horizontal, 0, inf);
+	assignValue(vertical, 0, inf);
+	for(TSize row = 1; row <= len2; ++row) {
+		assignValue(mat, row, gapOpen + (row - 1) * gap);
+		assignValue(horizontal, row, inf);
+		assignValue(vertical, row, gapOpen + (row - 1) * gap);
 	}
-	for(TSize row = 0; row < len2; ++row) {
-		assignValue(mat, (row + 1) * cols, gapOpen + row * gap);
-		assignValue(left, (row + 1) * cols, gapOpen + row * gap);
-		assignValue(top, (row + 1) * cols, inf);
-		for(TSize col = 0; col < len1; ++col) {
-			// Get the new maximum for top
-			maxVal = getValue(mat, row * cols + (col + 1)) + gapOpen;
-			tvTop = Diagonal;
-			if ((tmp = getValue(top, row * cols + (col + 1)) + gap) > maxVal) {
+	for(TSize col = 1; col <= len1; ++col) {
+		TScoreValue diagValMat = getValue(mat, 0);
+		TScoreValue diagValHori = getValue(horizontal, 0);
+		TScoreValue diagValVert = getValue(vertical, 0);
+		TScoreValue diagValVertTmp;
+		TScoreValue diagValHoriTmp;
+		assignValue(mat, 0, gapOpen + (col - 1) * gap);
+		assignValue(horizontal, 0, gapOpen + (col - 1) * gap);
+		assignValue(vertical, 0, inf);
+		for(TSize row = 1; row <= len2; ++row) {
+			// Get the new maximum for vertical
+			maxVal = getValue(mat, row - 1) + gapOpen;
+			tvVertical = (Byte) Diagonal;
+			if ((tmp = getValue(vertical, row - 1) + gap) > maxVal) {
 				maxVal = tmp;
-				tvTop = Top;
+				tvVertical = (Byte) Vertical;
 			}
-			assignValue(top, (row+1) * cols + (col+1), maxVal);
+			diagValVertTmp = getValue(vertical, row);
+			assignValue(vertical, row, maxVal);
 
 			// Get the new maximum for left
-			maxVal = getValue(mat, (row + 1) * cols + col) + gapOpen;
-			tvLeft = Diagonal;
-			if ((tmp = getValue(left, (row + 1) * cols + col) + gap) > maxVal) {
+			maxVal = getValue(mat, row) + gapOpen;
+			tvHorizontal = (Byte) Diagonal;
+			if ((tmp = getValue(horizontal, row) + gap) > maxVal) {
 				maxVal = tmp;
-				tvLeft = Left;
+				tvHorizontal = (Byte) Horizontal;
 			}
-			assignValue(left, (row+1) * cols + (col+1), maxVal);
+			diagValHoriTmp = getValue(horizontal, row);
+			assignValue(horizontal, row, maxVal);
 
 			// Get the new maximum for mat
-			TScoreValue sc_ = score(const_cast<Score<TScoreValue, Simple>&>(sc), str1[col], str2[row]);
-			maxVal = getValue(mat, row*cols+col) + sc_;
-			tvMat = Diagonal;
-			if ((tmp = getValue(top, row * cols + col) + sc_) > maxVal) {
+			TScoreValue sc_ = score(const_cast<Score<TScoreValue, Simple>&>(sc), str1[col-1], str2[row-1]);
+			maxVal = diagValMat + sc_;
+			tvMat = (Byte) Diagonal;
+			if ((tmp = diagValVert + sc_) > maxVal) {
 				maxVal = tmp;
-				tvMat = Top;
+				tvMat = (Byte) Vertical;
 			}
-			if ((tmp = getValue(left, row * cols + col) + sc_) > maxVal) {
+			if ((tmp = diagValHori + sc_) > maxVal) {
 				maxVal = tmp;
-				tvMat = Left;
+				tvMat = (Byte) Horizontal;
 			}
-			// Assign the new value
-			assignValue(mat, (row+1) * cols + (col+1), maxVal);
-			assignValue(trace, (row+1) * cols + (col+1), tvMat * 3 * 3 + tvLeft * 3 + tvTop);
+
+			// Assign the new diagonal values
+			diagValMat = getValue(mat, row);
+			diagValHori = diagValHoriTmp;
+			diagValVert = diagValVertTmp;
+			assignValue(mat, row, maxVal);
+
+			// Assign the right trace value
+			if (tvMat == (Byte) Diagonal) {
+				if (tvHorizontal == (Byte) Diagonal) {
+					if (tvVertical == (Byte) Diagonal) assignValue(it, 0);
+					else assignValue(it, 1);
+				} else if (tvHorizontal == (Byte) Horizontal) {
+					if (tvVertical == (Byte) Diagonal) assignValue(it, 2);
+					else assignValue(it, 3);
+				}
+			} else if (tvMat == (Byte) Horizontal) {
+				if (tvHorizontal == (Byte) Diagonal) {
+					if (tvVertical == (Byte) Diagonal) assignValue(it, 4);
+					else assignValue(it, 5);
+				} else if (tvHorizontal == (Byte) Horizontal) {
+					if (tvVertical == (Byte) Diagonal) assignValue(it, 6);
+					else assignValue(it, 7);
+				}
+			} else if (tvMat == (Byte) Vertical) {
+				if (tvHorizontal == (Byte) Diagonal) {
+					if (tvVertical == (Byte) Diagonal) assignValue(it, 8);
+					else assignValue(it, 9);
+				} else if (tvHorizontal == (Byte) Horizontal) {
+					if (tvVertical == (Byte) Diagonal) assignValue(it, 10);
+					else assignValue(it, 11);
+				}
+			}
+			goNext(it);
 		}
-
 	}
 
-	maxVal = getValue(mat, len2*cols + len1);
-	initialDir = Diagonal;
-	if ((tmp = getValue(left, len2 * cols + len1)) > maxVal) {
+	maxVal = getValue(mat, len2);
+	initialDir = (Byte) Diagonal;
+	if ((tmp = getValue(horizontal, len2)) > maxVal) {
 		maxVal = tmp;
-		initialDir = Left;
+		initialDir = (Byte) Horizontal;
 	}
-	if ((tmp = getValue(top, len2 * cols + len1)) > maxVal) {
+	if ((tmp = getValue(vertical, len2)) > maxVal) {
 		maxVal = tmp;
-		initialDir = Top;
+		initialDir = (Byte) Vertical;
 	}
-
 
 	/*
-	for(unsigned int i= 0; i<=len2;++i) {
-		for(unsigned int j= 0; j<=len1;++j) {
-			std::cout << getValue(mat, i*(len1 + 1) + j) << ',';
-		}
-		std::cout << std::endl;
-	}
-
-	for(unsigned int i= 0; i<=len2;++i) {
-		for(unsigned int j= 0; j<=len1;++j) {
-			std::cout << getValue(left, i*(len1 + 1) + j) << ',';
-		}
-		std::cout << std::endl;
-	}
-
-	for(unsigned int i= 0; i<=len2;++i) {
-		for(unsigned int j= 0; j<=len1;++j) {
-			std::cout << getValue(top, i*(len1 + 1) + j) << ',';
-		}
-		std::cout << std::endl;
-	}
-	
-	for(unsigned int i= 0; i<=len2;++i) {
-		for(unsigned int j= 0; j<=len1;++j) {
-			std::cout << (getValue(trace, i*(len1 + 1) + j) % 3) << ',';
-		}
-		std::cout << std::endl;
-	}
-
-	for(unsigned int i= 0; i<=len2;++i) {
-		for(unsigned int j= 0; j<=len1;++j) {
-			std::cout << ((getValue(trace, i*(len1 + 1) + j) / 3) % 3) << ',';
-		}
-		std::cout << std::endl;
-	}
-
-	for(unsigned int i= 0; i<=len2;++i) {
-		for(unsigned int j= 0; j<=len1;++j) {
-			std::cout << ((getValue(trace, i*(len1 + 1) + j) / 9) % 3) << ',';
+	for(unsigned int i= 0; i<len2;++i) {
+		for(unsigned int j= 0; j<len1;++j) {
+			std::cout << (unsigned int) getValue(trace, j*len2 + i) << ',';
 		}
 		std::cout << std::endl;
 	}
@@ -440,43 +775,125 @@ SEQAN_CHECKPOINT
 
 	return maxVal;
 }
- 
+
+//////////////////////////////////////////////////////////////////////////////
+
 /**
 .Function.globalAlignment:
 ..summary:Computes the best global alignment of the two sequences given in the StringSet of graph g.
 ..cat:Alignments
-..signature:globalAlignment(g, score)
+..signature:globalAlignment(g, score, tag)
 ..param.g:The alignment graph having 2 sequences.
 ...type:Class.Graph Alignment
 ..param.score:The score values to be used for computing the alignment.
 ...type:Class.Score
+..param.tag:A tag indicating the alignment algorithm to use
+...remarks:Either NeedlemanWunsch or Gotoh.
 ..returns:The score value of the best scoring global alignment.
 */
 template<typename TStringSet, typename TCargo, typename TSpec, typename TScoreValue>
 TScoreValue
 globalAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-				Score<TScoreValue, Simple> const& sc)
+				Score<TScoreValue, Simple> const& sc,
+				NeedlemanWunsch)
 {
 	SEQAN_CHECKPOINT
-	// So far only simple gap score
+	// Gap extension score is taken as the constant gap score!!!
+	SEQAN_TASSERT(scoreGapOpen(sc) == 0)
+	typedef typename Size<TStringSet>::Type TSize;
+	  
+	clearVertices(g);
 	TScoreValue maxScore;
-	if(scoreGapOpen(sc)==0) {	
-		// Needleman wunsch	
-		String<short> trace;
-		maxScore = needleman_wunsch(trace, stringSet(g)[0], stringSet(g)[1], sc);	
-	
+	TSize maxLen = length(stringSet(g)[0]);
+	TSize tmp;
+	if ((tmp = length(stringSet(g)[1])) > maxLen) maxLen = tmp;
+
+	if (maxLen > 10000) {
+		String<TraceBack, External<> > trace;
+		//open(trace, "/media/sda5/seqan/version7/seqan.dat");
+
+		// Create the trace
+		maxScore = _align_needleman_wunsch(trace, stringSet(g)[0], stringSet(g)[1], sc);	
 		// Follow the trace and create the graph
-		needleman_wunsch_trace(g, trace);	
+		_align_needleman_wunsch_trace(g, trace);	
 	} else {
-		// Gotoh
-		String<short> trace;
-		short initialDir;
-		maxScore = gotoh(trace, stringSet(g)[0], stringSet(g)[1], sc, initialDir);	
+		String<TraceBack> trace;
+
+		// Create the trace
+		maxScore = _align_needleman_wunsch(trace, stringSet(g)[0], stringSet(g)[1], sc);	
+		// Follow the trace and create the graph
+		_align_needleman_wunsch_trace(g, trace);	
+	}
+	return maxScore;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec, typename TScoreValue>
+TScoreValue
+globalAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+				Score<TScoreValue, Simple> const& sc,
+				Gotoh)
+{
+	SEQAN_CHECKPOINT
+	typedef typename Size<TStringSet>::Type TSize;
+	  
+	clearVertices(g);	
+	TScoreValue maxScore;
+	TSize maxLen = length(stringSet(g)[0]);
+	TSize tmp;
+	if ((tmp = length(stringSet(g)[1])) > maxLen) maxLen = tmp;
+
+	if (maxLen > 10000) {
+		// Trace
+		String<TraceBackGotoh, External<> > trace;
+		TraceBackGotoh initialDir;
+
+		// Create the trace
+		maxScore = _align_gotoh(trace, stringSet(g)[0], stringSet(g)[1], sc, initialDir);	
+		// Follow the trace and create the graph
+		_align_gotoh_trace(g, trace, initialDir);
+	} else {
+		// Trace
+		String<TraceBackGotoh> trace;
+		TraceBackGotoh initialDir;
+
+		// Create the trace
+		maxScore = _align_gotoh(trace, stringSet(g)[0], stringSet(g)[1], sc, initialDir);	
+		// Follow the trace and create the graph
+		_align_gotoh_trace(g, trace, initialDir);
+	}
+	return maxScore;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec>
+unsigned int
+globalAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+				MyersBitVector)
+{
+	SEQAN_CHECKPOINT
+	typedef typename Size<TStringSet>::Type TSize;
+	  
+	clearVertices(g);	
+	unsigned int maxScore = 0;
+	TSize maxLen = length(stringSet(g)[0]);
+	TSize tmp;
+	if ((tmp = length(stringSet(g)[1])) > maxLen) maxLen = tmp;
+
+	if (maxLen > 10000) {
+	} else {
+		// Trace
+		String<TraceBack> trace;
+
+		// Create the trace
+		maxScore = _align_myers_bit_vector(trace, stringSet(g)[0], stringSet(g)[1]);	
 
 		// Follow the trace and create the graph
-		gotoh_trace(g, trace, initialDir);
+		//_align_needleman_wunsch_trace(g, trace);	
 	}
-
 	return maxScore;
 }
 

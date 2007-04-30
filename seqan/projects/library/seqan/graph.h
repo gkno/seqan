@@ -1,6 +1,13 @@
 #ifndef SEQAN_HEADER_GRAPH_H
 #define SEQAN_HEADER_GRAPH_H
 
+// Seqan
+#include <seqan/index.h>
+#include <seqan/basic.h>
+#include <seqan/sequence.h>
+#include <seqan/file.h>
+#include <seqan/align/matrix_base.h>
+
 // External / STL
 #include <deque>
 #include <map>
@@ -9,12 +16,6 @@
 #include <typeinfo>
 #include <sstream> 
 
-// Seqan
-#include <seqan/index.h>
-#include <seqan/basic.h>
-#include <seqan/sequence.h>
-#include <seqan/file.h>
-#include <seqan/align/matrix_base.h>
 
 #ifdef SEQAN_SWITCH_USE_FORWARDS
 #include <seqan/graph/graph_generated_forwards.h>
@@ -60,6 +61,7 @@
 // Utilities
 #include <seqan/graph/graph_utility_alphabets.h>
 #include <seqan/graph/graph_utility_parsing.h>
+#include <seqan/graph/graph_utility_match_parsing.h>
 
 // Graph algorithms
 #include <seqan/graph/graph_algorithm.h>

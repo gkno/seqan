@@ -119,6 +119,23 @@ _parse_readIdentifier(TFile & file, TChar& c)
 	return str;
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TFile, typename TChar>
+inline String<char>
+_parse_readWord(TFile & file, TChar& c)
+{
+	SEQAN_CHECKPOINT
+	// Read word
+	String<char> str(c);
+	while (!_streamEOF(file)) {
+		c = _streamGet(file);
+		if (!_parse_isLetter(c)) break;
+		append(str, c);
+	}
+	return str;
+}
+
 }// namespace SEQAN_NAMESPACE_MAIN
 
 #endif //#ifndef SEQAN_HEADER_...

@@ -1,3 +1,12 @@
+#define SEQAN_DEBUG
+#define SEQAN_TEST
+
+#define TEST_PATH "projects/tests/graph/"
+#define LIB_PATH "projects/library/seqan/graph/"
+
+#include <seqan/graph.h>
+
+
 #include <iostream>
 #include <fstream>
 #include <typeinfo>
@@ -7,13 +16,7 @@
 #include <time.h>
 #include <string>
 
-#define SEQAN_DEBUG
-#define SEQAN_TEST
 
-#define TEST_PATH "projects/tests/graph/"
-#define LIB_PATH "projects/library/seqan/graph/"
-
-#include <seqan/graph.h>
 #include "test_graph_basic.h"
 #include "test_graph_types.h"
 #include "test_graph_iterators.h"
@@ -21,6 +24,7 @@
 #include "test_graph_derived.h"
 #include "test_graph_algorithms.h"
 #include "test_graph_alignment.h"
+
 
 using namespace std;
 using namespace seqan;
@@ -91,9 +95,14 @@ int main()
 	// Alignment
 	Test_NeedlemanWunsch();
 	Test_Gotoh();	
+	Test_MyersBitVector();
+//	Test_Runtime();
 	Test_CompressedAlphabets();
 	Test_TCoffee(); // T-Coffee
 
+
+	// Match Refinement
+//	Test_MatchRefinement();
 
 //____________________________________________________________________________
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_base.h");

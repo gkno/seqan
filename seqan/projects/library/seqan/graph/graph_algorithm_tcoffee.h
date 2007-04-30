@@ -458,7 +458,7 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	typedef typename Id<TGraph>::Type TId;
 
 	// Pairwise alignments for all pairs of sequences
-	Score<int> score_type = Score<int>(1,-1,-1,0);
+	Score<int> score_type = Score<int>(1,-1,-1,-14);
 	TStringSet* str = &stringSet(g);	
 	TSize nseq = length(stringSet(g));
 	for(TSize i=0; i<nseq; ++i) {
@@ -470,11 +470,13 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 			TStringSet pairSet;
 			assignValueById(pairSet, getValue(*str, i));
 			assignValueById(pairSet, getValue(*str, j));
+			std::cout << (*str)[i] << std::endl;
+			std::cout << (*str)[j] << std::endl;
 			Graph<Alignment<TStringSet, void> > pGraph(pairSet);
-			globalAlignment(pGraph, score_type );
+			globalAlignment(pGraph, score_type, Gotoh() );
 
 			// Determine a sequence weight
-			int seqSim = (int) _getSequenceSimilarity(pGraph, TAlphabet() ) * 100;
+			int seqSim = (int) (_getSequenceSimilarity(pGraph, TAlphabet() ) * 100);
 
 			std::cout << pGraph << std::endl;
 			std::cout << seqSim << std::endl;
