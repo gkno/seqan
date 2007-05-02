@@ -3,6 +3,7 @@
 
 namespace SEQAN_NAMESPACE_MAIN
 {
+
 //////////////////////////////////////////////////////////////////////////////
 // Alignment: Tags
 //////////////////////////////////////////////////////////////////////////////
@@ -43,7 +44,7 @@ typedef Tag<MyersBitVector_> const MyersBitVector;
 
 
 //////////////////////////////////////////////////////////////////////////////
-// Alignment: Traceback Alphabet for Needleman Wunsch
+// Alignment: Simple Traceback Alphabet
 //////////////////////////////////////////////////////////////////////////////
 
 
@@ -106,7 +107,7 @@ SEQAN_CHECKPOINT
 
 
 //////////////////////////////////////////////////////////////////////////////
-// Alignment: Traceback Alphabet for Gotoh
+// Alignment: Extended Traceback Alphabet (Gotoh)
 //////////////////////////////////////////////////////////////////////////////
 
 
@@ -183,11 +184,10 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TValue, typename TSpec, typename TString>
+template<typename TString>
 unsigned int
-_align_myers_bit_vector(String<TValue, TSpec>& trace,
-				 TString const & str1,
-		       TString const & str2)
+_align_myers_bit_vector(TString const & str1,
+						TString const & str2)
 {
 	SEQAN_CHECKPOINT
 	typedef unsigned int TWord;
@@ -337,34 +337,112 @@ _align_myers_bit_vector(String<TValue, TSpec>& trace,
 }
 
 
+//////////////////////////////////////////////////////////////////////////////
+// Alignment: Trace-back, internal functions
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TFile, typename TStringSet, typename TId, typename TPos, typename TTraceValue>
+inline void
+_align_trace_print(TFile& file,
+				   TStringSet const& str,
+				   TId const id1,
+				   TPos const pos1,
+				   TId const id2,
+				   TPos const pos2,
+				   TPos const segLen,
+				   TTraceValue const tv)
+{
+	SEQAN_CHECKPOINT
+
+	// TraceBack values
+	enum {Diagonal = 0, Horizontal = 1, Vertical = 2};
+
+	if (tv == (Byte) Horizontal) {
+		for (int i = pos1 + segLen - 1; i>= (int) pos1;--i) {
+			_streamPut(file, '(');
+			_streamPut(file, (str[0])[i]);
+			_streamPut(file, ',');
+			_streamPut(file, gapValue<char>());
+			_streamPut(file, ')');
+			_streamPut(file, '\n');
+		}
+	}
+	else if (tv == (Byte) Vertical) {
+		for (int i = pos2 + segLen - 1; i>= (int) pos2;--i) {
+			_streamPut(file, '(');
+			_streamPut(file, gapValue<char>());
+			_streamPut(file, ',');
+			_streamPut(file, (str[1])[i]);
+			_streamPut(file, ')');
+			_streamPut(file, '\n');
+		}
+	}
+	else if (tv == (Byte) Diagonal) {
+		int j = pos2 + segLen - 1;
+		for (int i = pos1 + segLen - 1; i>= (int) pos1;--i) {
+			_streamPut(file, '(');
+			_streamPut(file, (str[0])[i]);
+			_streamPut(file, ',');
+			_streamPut(file, (str[1])[j]);
+			_streamPut(file, ')');
+			_streamPut(file, '\n');
+			--j;
+		}
+	}
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TStringSet, typename TCargo, typename TSpec, typename TStringSet2, typename TId, typename TPos, typename TTraceValue>
+inline void
+_align_trace_print(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+				   TStringSet2 const& str,
+				   TId const id1,
+				   TPos const pos1,
+				   TId const id2,
+				   TPos const pos2,
+				   TPos const segLen,
+				   TTraceValue const tv)
+{
+	SEQAN_CHECKPOINT
+
+	// TraceBack values
+	enum {Diagonal = 0, Horizontal = 1, Vertical = 2};
+
+	if (tv == (Byte) Horizontal) addVertex(g, id1, pos1, segLen);
+	else if (tv == (Byte) Vertical) addVertex(g, id2, pos2, segLen);
+	else if (tv == (Byte) Diagonal) addEdge(g, addVertex(g, id1, pos1, segLen), addVertex(g, id2, pos2, segLen));
+}
 
 
 //////////////////////////////////////////////////////////////////////////////
 // Alignment: Needleman-Wunsch Alignment, constant gap cost
 //////////////////////////////////////////////////////////////////////////////
 
-
 //////////////////////////////////////////////////////////////////////////////
 
 
-template <typename TStringSet, typename TCargo, typename TSpec, typename TTrace>
+template <typename TAlign, typename TStringSet, typename TTrace>
 void
-_align_needleman_wunsch_trace(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-					   TTrace const& trace)
+_align_needleman_wunsch_trace(TAlign& align,
+							  TStringSet const& str,
+							  TTrace const& trace)
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
-	typedef typename Size<TGraph>::Type TSize;
-	typedef typename Value<TTrace>::Type TTraceValue;
+	typedef typename Size<TStringSet>::Type TSize;
 	typedef typename Id<TStringSet>::Type TId;
+	typedef typename Value<TTrace>::Type TTraceValue;
+
 
 	// TraceBack values
 	enum {Diagonal = 0, Horizontal = 1, Vertical = 2};
 	
 	// Initialization
-	TStringSet& str = stringSet(g);
-	TId id1 = positionToId(str, 0);
-	TId id2 = positionToId(str, 1);
+	TId id1 = positionToId(const_cast<TStringSet&>(str), 0);
+	TId id2 = positionToId(const_cast<TStringSet&>(str), 1);
 	TSize len1 = length(str[0]);
 	TSize len2 = length(str[1]);
 	TSize numRows = len2;
@@ -375,65 +453,51 @@ _align_needleman_wunsch_trace(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 
 	TSize segLen = 1;
 	if (tv == (Byte) Diagonal) {
-		//std::cout << '(' << ((*str)[0])[len1 - 1] << ',' << ((*str)[1])[len2-1] << ')' << std::endl;
 		--len1; --len2;
-	} else if (tv == (Byte) Horizontal) {
-		//std::cout << '(' << ((*str)[0])[len1 - 1] << ',' << '-' << ')' << std::endl;
-		--len1;
-	} else if (tv == (Byte) Vertical) {
-		//std::cout << '(' << '-' << ',' << ((*str)[1])[len2-1] << ')' << std::endl;
-		--len2;
 	}
+	else if (tv == (Byte) Horizontal) --len1;
+	else if (tv == (Byte) Vertical) --len2;
 
 	// Now follow the trace
 	do {
 		tv = getValue(trace, (len1-1)*numRows + (len2-1));
 		if (tv == (Byte) Diagonal) {
-			//std::cout << '(' << ((*str)[0])[len1 - 1] << ',' << ((*str)[1])[len2-1] << ')' << std::endl;
 			if (tv != tvOld) {
-				if (tvOld == (Byte) Horizontal) addVertex(g, id1, len1, segLen);
-				else if (tvOld == (Byte) Vertical) addVertex(g, id2, len2, segLen);
+				_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
 				tvOld = tv; segLen = 1;
 			} else ++segLen;
 			--len1; --len2;
 		} else if (tv == (Byte) Horizontal) {
 			//std::cout << '(' << ((*str)[0])[len1 - 1] << ',' << '-' << ')' << std::endl;
 			if (tv != tvOld) {
-				if (tvOld == (Byte) Diagonal) addEdge(g, addVertex(g, id1, len1, segLen), addVertex(g, id2, len2, segLen));
-				else if (tvOld == (Byte) Vertical) addVertex(g, id2, len2, segLen);
+				_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
 				tvOld = tv; segLen = 1;
 			} else ++segLen;
 			--len1;
 		} else if (tv == (Byte) Vertical) {
 			//std::cout << '(' << '-' << ',' << ((*str)[1])[len2-1] << ')' << std::endl;
 			if (tv != tvOld) {
-				if (tvOld == (Byte) Diagonal) addEdge(g, addVertex(g, id1, len1, segLen), addVertex(g, id2, len2, segLen));
-				else if (tvOld == (Byte) Horizontal) addVertex(g, id1, len1, segLen);
+				_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
 				tvOld = tv; segLen = 1;
 			} else ++segLen;
 			--len2;
 		}
 	} while ((len1 != 0) && (len2 !=0));
 	// Process left-overs
-	if (tvOld == (Byte) Diagonal) addEdge(g, addVertex(g, id1, len1, segLen), addVertex(g, id2, len2, segLen));
-	else if (tvOld == (Byte) Horizontal) addVertex(g, id1, len1, segLen);
-	else if (tvOld == (Byte) Vertical) addVertex(g, id2, len2, segLen);
+	_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
+
 	// Handle the remaining sequence
-	if (len1 != 0) {
-		addVertex(g, id1, 0, len1);
-	} else if (len2 != 0) {
-		addVertex(g, id2, 0, len2);
-	} 
+	if (len1 != 0) _align_trace_print(align, str, (TId) id1, (TSize) 0, (TId) 0, (TSize) 0, (TSize) len1, (Byte) Horizontal);
+	else if (len2 != 0) _align_trace_print(align, str, (TId) 0, (TSize) 0, (TId) id2, (TSize) 0, (TSize) len2, (Byte) Vertical);
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TScoreValue, typename TValue, typename TSpec, typename TString>
+template <typename TValue, typename TSpec, typename TStringSet, typename TScoreValue>
 TScoreValue
 _align_needleman_wunsch(String<TValue, TSpec>& trace,
-				 TString const & str1,
-				 TString const & str2,
-				 Score<TScoreValue, Simple> const& sc) 
+						TStringSet const& str,
+						Score<TScoreValue, Simple> const& sc) 
 {
 	SEQAN_CHECKPOINT
 	typedef String<TValue, TSpec> TTrace;
@@ -441,7 +505,7 @@ _align_needleman_wunsch(String<TValue, TSpec>& trace,
 	typedef typename Iterator<TTrace, Standard>::Type TTraceIter;
 	typedef String<TScoreValue> TColumn;
 	typedef typename Size<TColumn>::Type TSize;
-
+	typedef typename Value<TStringSet>::Type TString;
 
 	// TraceBack values
 	enum {Diagonal = 0, Horizontal = 1, Vertical = 2};
@@ -450,6 +514,8 @@ _align_needleman_wunsch(String<TValue, TSpec>& trace,
 	TColumn column;
 		
 	// Initialization
+	TString const& str1 = str[0];
+	TString const& str2 = str[1];
 	TSize len1 = length(str1);
 	TSize len2 = length(str2);
 	TScoreValue gap = scoreGapExtend(sc);
@@ -504,25 +570,24 @@ _align_needleman_wunsch(String<TValue, TSpec>& trace,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TStringSet, typename TCargo, typename TSpec, typename TTrace, typename TVal>
+template <typename TAlign, typename TStringSet, typename TTrace, typename TVal>
 void
-_align_gotoh_trace(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-			TTrace const& trace,
-			TVal const initialDir)
+_align_gotoh_trace(TAlign& align,		 
+				   TStringSet const& str,
+				   TTrace const& trace,
+				   TVal const initialDir)
 {
 	SEQAN_CHECKPOINT
 	
-	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
-	typedef typename Size<TGraph>::Type TSize;
+	typedef typename Size<TStringSet>::Type TSize;
 	typedef typename Value<TTrace>::Type TTraceValue;
 	typedef typename Id<TStringSet>::Type TId;
 
 	// TraceBack values for Gotoh
 	enum {Diagonal = 0, Horizontal = 1, Vertical = 2};
-	 
-	TStringSet& str = stringSet(g);
-	TId id1 = positionToId(str, 0);
-	TId id2 = positionToId(str, 1);
+
+	TId id1 = positionToId(const_cast<TStringSet&>(str), 0);
+	TId id2 = positionToId(const_cast<TStringSet&>(str), 1);	 
 	TSize len1 = length(str[0]);
 	TSize len2 = length(str[1]);
 	TSize numRows = len2;
@@ -555,7 +620,7 @@ _align_gotoh_trace(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 				--len1; --len2;
 				++segLen;
 				if (tv != tvOld) {
-					addEdge(g, addVertex(g, id1, len1, segLen), addVertex(g, id2, len2, segLen));
+					_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
 					tvOld = tv; 
 					segLen = 0;
 				}
@@ -565,7 +630,7 @@ _align_gotoh_trace(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 				--len1;
 				++segLen;
 				if (tv != tvOld) {
-					addVertex(g, id1, len1, segLen);
+					_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
 					tvOld = tv;
 					segLen = 0;
 				}
@@ -575,7 +640,7 @@ _align_gotoh_trace(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 				--len2;
 				++segLen;
 				if (tv != tvOld) {
-					addVertex(g, id2, len2, segLen);
+					_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
 					tvOld = tv; 
 					segLen = 0;
 				}
@@ -601,43 +666,29 @@ _align_gotoh_trace(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 		}
 	} while ((len1 != 0) && (len2 !=0));
 	// Process left-overs
-	if (segLen > 0) {
-		switch( (Byte) tvOld) {
-			case Diagonal: 
-				addEdge(g, addVertex(g, id1, len1, segLen), addVertex(g, id2, len2, segLen));
-				break;
-			case Horizontal:
-				addVertex(g, id1, len1, segLen);
-				break;
-			case Vertical:
-				addVertex(g, id2, len2, segLen);
-				break;
-		}
-	}
+	if (segLen > 0) _align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
+
 	// Handle the remaining sequence
-	if (len1 != 0) {
-		addVertex(g, id1, 0, len1);
-	} else if (len2 != 0) {
-		addVertex(g, id2, 0, len2);
-	} 
+	if (len1 != 0) _align_trace_print(align, str, (TId) id1, (TSize) 0, (TId) 0, (TSize) 0, (TSize) len1, (Byte) Horizontal);
+	else if (len2 != 0) _align_trace_print(align, str, (TId) 0, (TSize) 0, (TId) id2, (TSize) 0, (TSize) len2, (Byte) Vertical);
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TScoreValue, typename TValue, typename TSpec, typename TString>
+template <typename TValue, typename TSpec, typename TStringSet, typename TScoreValue>
 TScoreValue
 _align_gotoh(String<TValue, TSpec>& trace,
-	  TString const & str1,
-	  TString const & str2,
-	  Score<TScoreValue, Simple> const & sc,
-	  TValue& initialDir)
+			 TStringSet const& str,
+			 Score<TScoreValue, Simple> const & sc,
+			 TValue& initialDir)
 {
-SEQAN_CHECKPOINT
+	SEQAN_CHECKPOINT
 	typedef String<TValue, TSpec> TTrace;
 	typedef typename Value<TTrace>::Type TTraceValue;
 	typedef typename Iterator<TTrace, Standard>::Type TTraceIter;
 	typedef String<TScoreValue> TColumn;
 	typedef typename Size<TColumn>::Type TSize;
+	typedef typename Value<TStringSet>::Type TString;
 
 	// TraceBack values for Gotoh
 	enum {Diagonal = 0, Horizontal = 1, Vertical = 2};
@@ -648,7 +699,10 @@ SEQAN_CHECKPOINT
 	TColumn horizontal;
 	// The DP Matrix for gaps from the top
 	TColumn vertical;
-		
+
+	// Initialization
+	TString const& str1 = str[0];
+	TString const& str2 = str[1];		
 	TSize len1 = length(str1);
 	TSize len2 = length(str2);
 	TScoreValue gap = scoreGapExtend(sc);
@@ -778,51 +832,41 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 
-/**
-.Function.globalAlignment:
-..summary:Computes the best global alignment of the two sequences given in the StringSet of graph g.
-..cat:Alignments
-..signature:globalAlignment(g, score, tag)
-..param.g:The alignment graph having 2 sequences.
-...type:Class.Graph Alignment
-..param.score:The score values to be used for computing the alignment.
-...type:Class.Score
-..param.tag:A tag indicating the alignment algorithm to use
-...remarks:Either NeedlemanWunsch or Gotoh.
-..returns:The score value of the best scoring global alignment.
-*/
-template<typename TStringSet, typename TCargo, typename TSpec, typename TScoreValue>
+template<typename TAlign, typename TStringSet, typename TScoreValue>
 TScoreValue
-globalAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-				Score<TScoreValue, Simple> const& sc,
-				NeedlemanWunsch)
+_globalAlignment(TAlign& align,
+				 TStringSet const& str,
+				 Score<TScoreValue, Simple> const& sc,
+				 NeedlemanWunsch)
 {
 	SEQAN_CHECKPOINT
 	// Gap extension score is taken as the constant gap score!!!
 	SEQAN_TASSERT(scoreGapOpen(sc) == 0)
+
 	typedef typename Size<TStringSet>::Type TSize;
 	  
-	clearVertices(g);
 	TScoreValue maxScore;
-	TSize maxLen = length(stringSet(g)[0]);
+	TSize maxLen = length(str[0]);
 	TSize tmp;
-	if ((tmp = length(stringSet(g)[1])) > maxLen) maxLen = tmp;
+	if ((tmp = length(str[1])) > maxLen) maxLen = tmp;
 
 	if (maxLen > 10000) {
 		String<TraceBack, External<> > trace;
 		//open(trace, "/media/sda5/seqan/version7/seqan.dat");
 
 		// Create the trace
-		maxScore = _align_needleman_wunsch(trace, stringSet(g)[0], stringSet(g)[1], sc);	
+		maxScore = _align_needleman_wunsch(trace, str, sc);	
+
 		// Follow the trace and create the graph
-		_align_needleman_wunsch_trace(g, trace);	
+		_align_needleman_wunsch_trace(align, str, trace);	
 	} else {
 		String<TraceBack> trace;
 
 		// Create the trace
-		maxScore = _align_needleman_wunsch(trace, stringSet(g)[0], stringSet(g)[1], sc);	
+		maxScore = _align_needleman_wunsch(trace, str, sc);	
+
 		// Follow the trace and create the graph
-		_align_needleman_wunsch_trace(g, trace);	
+		_align_needleman_wunsch_trace(align, str, trace);	
 	}
 	return maxScore;
 }
@@ -830,20 +874,20 @@ globalAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TStringSet, typename TCargo, typename TSpec, typename TScoreValue>
+template<typename TAlign, typename TStringSet, typename TScoreValue>
 TScoreValue
-globalAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-				Score<TScoreValue, Simple> const& sc,
-				Gotoh)
+_globalAlignment(TAlign& align,
+				 TStringSet const& str,
+				 Score<TScoreValue, Simple> const& sc,
+				 Gotoh)
 {
 	SEQAN_CHECKPOINT
 	typedef typename Size<TStringSet>::Type TSize;
 	  
-	clearVertices(g);	
 	TScoreValue maxScore;
-	TSize maxLen = length(stringSet(g)[0]);
+	TSize maxLen = length(str[0]);
 	TSize tmp;
-	if ((tmp = length(stringSet(g)[1])) > maxLen) maxLen = tmp;
+	if ((tmp = length(str[1])) > maxLen) maxLen = tmp;
 
 	if (maxLen > 10000) {
 		// Trace
@@ -851,52 +895,85 @@ globalAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 		TraceBackGotoh initialDir;
 
 		// Create the trace
-		maxScore = _align_gotoh(trace, stringSet(g)[0], stringSet(g)[1], sc, initialDir);	
+		maxScore = _align_gotoh(trace, str, sc, initialDir);	
 		// Follow the trace and create the graph
-		_align_gotoh_trace(g, trace, initialDir);
+		_align_gotoh_trace(align, str, trace, initialDir);
 	} else {
 		// Trace
 		String<TraceBackGotoh> trace;
 		TraceBackGotoh initialDir;
 
 		// Create the trace
-		maxScore = _align_gotoh(trace, stringSet(g)[0], stringSet(g)[1], sc, initialDir);	
+		maxScore = _align_gotoh(trace, str, sc, initialDir);	
 		// Follow the trace and create the graph
-		_align_gotoh_trace(g, trace, initialDir);
+		_align_gotoh_trace(align, str, trace, initialDir);
 	}
 	return maxScore;
 }
 
+
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TStringSet, typename TCargo, typename TSpec>
-unsigned int
+/**
+.Function.globalAlignment:
+..summary:Computes the best global alignment of the two sequences.
+..cat:Alignments
+..signature:
+globalAlignment(g, score, tag)
+globalAlignment(file, str, score, tag)
+..param.g:The alignment graph having 2 sequences.
+...type:Class.Graph Alignment
+..param.str:A string set with 2 sequences.
+...type:Class.StringSet
+..param.score:The score values to be used for computing the alignment.
+...type:Class.Score
+..param.tag:A tag indicating the alignment algorithm to use
+...remarks:Either NeedlemanWunsch or Gotoh.
+..returns:The score value of the best scoring global alignment.
+*/
+template<typename TFile, typename TStringSet, typename TScoreValue, typename TTag>
+TScoreValue
+globalAlignment(TFile& file,
+				TStringSet const& str,
+				Score<TScoreValue, Simple> const& sc,
+				TTag)
+{
+	SEQAN_CHECKPOINT
+	return _globalAlignment(file,str,sc,TTag());
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec, typename TScoreValue, typename TTag>
+TScoreValue
 globalAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+				Score<TScoreValue, Simple> const& sc,
+				TTag)
+{
+	SEQAN_CHECKPOINT
+	clearVertices(g);
+	return _globalAlignment(g,stringSet(g),sc,TTag());
+}
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet>
+unsigned int
+globalAlignment(TStringSet const& str,
 				MyersBitVector)
 {
 	SEQAN_CHECKPOINT
 	typedef typename Size<TStringSet>::Type TSize;
 	  
-	clearVertices(g);	
-	unsigned int maxScore = 0;
-	TSize maxLen = length(stringSet(g)[0]);
+	TSize maxLen = length(str[0]);
 	TSize tmp;
-	if ((tmp = length(stringSet(g)[1])) > maxLen) maxLen = tmp;
+	if ((tmp = length(str[1])) > maxLen) maxLen = tmp;
 
-	if (maxLen > 10000) {
-	} else {
-		// Trace
-		String<TraceBack> trace;
-
-		// Create the trace
-		maxScore = _align_myers_bit_vector(trace, stringSet(g)[0], stringSet(g)[1]);	
-
-		// Follow the trace and create the graph
-		//_align_needleman_wunsch_trace(g, trace);	
-	}
-	return maxScore;
+	return _align_myers_bit_vector(str[0], str[1]);	
 }
-
 
 }// namespace SEQAN_NAMESPACE_MAIN
 

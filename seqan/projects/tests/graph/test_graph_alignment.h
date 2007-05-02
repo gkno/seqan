@@ -27,6 +27,9 @@ void  Test_NeedlemanWunsch() {
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 7)) == "ing")
 	SEQAN_TASSERT(numEdges(g) == 1)
 	SEQAN_TASSERT(numVertices(g) == 3)
+	//std::cout << g << std::endl;
+	//int score2 = globalAlignment(std::cout, str, score_type, NeedlemanWunsch() );
+	//SEQAN_TASSERT(score == score2)
 
 	str[0] = "annealing";
 	str[1] = "annual";
@@ -37,6 +40,9 @@ void  Test_NeedlemanWunsch() {
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 7)) == "ing")
 	SEQAN_TASSERT(numEdges(g) == 1)
 	SEQAN_TASSERT(numVertices(g) == 3)
+	//std::cout << g << std::endl;
+	//score2 = globalAlignment(std::cout, str, score_type, NeedlemanWunsch() );
+	//SEQAN_TASSERT(score == score2)
 
 	str[0] = "ThisisGarfieldthecat";
 	str[1] = "Garfield";
@@ -48,6 +54,9 @@ void  Test_NeedlemanWunsch() {
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 17)) == "thecat")
 	SEQAN_TASSERT(numEdges(g) == 1)
 	SEQAN_TASSERT(numVertices(g) == 4)
+	//std::cout << g << std::endl;
+	//score2 = globalAlignment(std::cout, str, score_type, NeedlemanWunsch() );
+	//SEQAN_TASSERT(score == score2)
 
 	str[0] = "Garfield";
 	str[1] = "ThisisGarfieldthecat";
@@ -59,6 +68,9 @@ void  Test_NeedlemanWunsch() {
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 17)) == "thecat")
 	SEQAN_TASSERT(numEdges(g) == 1)
 	SEQAN_TASSERT(numVertices(g) == 4)
+	//std::cout << g << std::endl;
+	//score2 = globalAlignment(std::cout, str, score_type, NeedlemanWunsch() );
+	//SEQAN_TASSERT(score == score2)
 
 	str[0] = "cat";
 	str[1] = "ThisisGarfieldthecat";
@@ -69,6 +81,9 @@ void  Test_NeedlemanWunsch() {
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "cat")
 	SEQAN_TASSERT(numEdges(g) == 1)
 	SEQAN_TASSERT(numVertices(g) == 3)
+	//std::cout << g << std::endl;
+	//score2 = globalAlignment(std::cout, str, score_type, NeedlemanWunsch() );
+	//SEQAN_TASSERT(score == score2)
 
 	str[0] = "ThisisGarfieldthecat";
 	str[1] = "cat";
@@ -79,6 +94,9 @@ void  Test_NeedlemanWunsch() {
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "cat")
 	SEQAN_TASSERT(numEdges(g) == 1)
 	SEQAN_TASSERT(numVertices(g) == 3)
+	//std::cout << g << std::endl;
+	//score2 = globalAlignment(std::cout, str, score_type, NeedlemanWunsch() );
+	//SEQAN_TASSERT(score == score2)
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -104,6 +122,9 @@ void  Test_Gotoh() {
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 2)) == "gt")
 	SEQAN_TASSERT(numEdges(g) == 2)
 	SEQAN_TASSERT(numVertices(g) == 5)
+	//std::cout << g << std::endl;
+	//double score2 = globalAlignment(std::cout, str, score_type, Gotoh() );
+	//SEQAN_TASSERT(score == score2)
 
 	str[0] = "ttgt";
 	str[1] = "ttagt";
@@ -116,6 +137,9 @@ void  Test_Gotoh() {
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 2)) == "gt")
 	SEQAN_TASSERT(numEdges(g) == 2)
 	SEQAN_TASSERT(numVertices(g) == 5)
+	//std::cout << g << std::endl;
+	//score2 = globalAlignment(std::cout, str, score_type, Gotoh() );
+	//SEQAN_TASSERT(score == score2)
 
 	str[0] = "tagt";
 	str[1] = "ttagt";
@@ -126,6 +150,9 @@ void  Test_Gotoh() {
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "t")
 	SEQAN_TASSERT(numEdges(g) == 1)
 	SEQAN_TASSERT(numVertices(g) == 3)
+	//std::cout << g << std::endl;
+	//score2 = globalAlignment(std::cout, str, score_type, Gotoh() );
+	//SEQAN_TASSERT(score == score2)
 
 	str[0] = "ttagt";
 	str[1] = "tagt";
@@ -136,6 +163,9 @@ void  Test_Gotoh() {
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "t")
 	SEQAN_TASSERT(numEdges(g) == 1)
 	SEQAN_TASSERT(numVertices(g) == 3)
+	//std::cout << g << std::endl;
+	//score2 = globalAlignment(std::cout, str, score_type, Gotoh() );
+	//SEQAN_TASSERT(score == score2)
 
 	str[0] = "ttagt";
 	str[1] = "ttag";
@@ -146,6 +176,9 @@ void  Test_Gotoh() {
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 4)) == "t")
 	SEQAN_TASSERT(numEdges(g) == 1)
 	SEQAN_TASSERT(numVertices(g) == 3)
+	//std::cout << g << std::endl;
+	//score2 = globalAlignment(std::cout, str, score_type, Gotoh() );
+	//SEQAN_TASSERT(score == score2)
 
 	str[0] = "ttag";
 	str[1] = "ttagt";
@@ -156,6 +189,9 @@ void  Test_Gotoh() {
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 4)) == "t")
 	SEQAN_TASSERT(numEdges(g) == 1)
 	SEQAN_TASSERT(numVertices(g) == 3)
+	//std::cout << g << std::endl;
+	//score2 = globalAlignment(std::cout, str, score_type, Gotoh() );
+	//SEQAN_TASSERT(score == score2)
 
 	str[0] = "cttagt";
 	str[1] = "ttag";
@@ -167,6 +203,9 @@ void  Test_Gotoh() {
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "ttag")
 	SEQAN_TASSERT(numEdges(g) == 1)
 	SEQAN_TASSERT(numVertices(g) == 4)
+	//std::cout << g << std::endl;
+	//score2 = globalAlignment(std::cout, str, score_type, Gotoh() );
+	//SEQAN_TASSERT(score == score2)
 
 	str[0] = "ttag";
 	str[1] = "cttagt";
@@ -178,6 +217,9 @@ void  Test_Gotoh() {
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "ttag")
 	SEQAN_TASSERT(numEdges(g) == 1)
 	SEQAN_TASSERT(numVertices(g) == 4)
+	//std::cout << g << std::endl;
+	//score2 = globalAlignment(std::cout, str, score_type, Gotoh() );
+	//SEQAN_TASSERT(score == score2)
 
 	str[0] = "cttccagt";
 	str[1] = "ttag";
@@ -192,6 +234,9 @@ void  Test_Gotoh() {
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 2)) == "ag")
 	SEQAN_TASSERT(numEdges(g) == 2)
 	SEQAN_TASSERT(numVertices(g) == 7)
+	//std::cout << g << std::endl;
+	//score2 = globalAlignment(std::cout, str, score_type, Gotoh() );
+	//SEQAN_TASSERT(score == score2)
 
 	str[0] = "ttag";
 	str[1] = "cttccagt";
@@ -206,6 +251,9 @@ void  Test_Gotoh() {
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 2)) == "ag")
 	SEQAN_TASSERT(numEdges(g) == 2)
 	SEQAN_TASSERT(numVertices(g) == 7)
+	//std::cout << g << std::endl;
+	//score2 = globalAlignment(std::cout, str, score_type, Gotoh() );
+	//SEQAN_TASSERT(score == score2)
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -222,7 +270,7 @@ void  Test_MyersBitVector() {
 	TString str0("annealing");	assignValueById(str, str0);
 	TString str1("annual"); assignValueById(str, str1);
 	TGraph g(str);
-	int score1 = globalAlignment(g, MyersBitVector() );
+	int score1 = globalAlignment(stringSet(g), MyersBitVector() );
 	Score<int> score_type = Score<int>(0,-1,-1,0);
 	int score2 = globalAlignment(g, score_type, NeedlemanWunsch() );
 	Score<int> score_type2 = Score<int>(0,-1,-1,-1);
@@ -233,7 +281,7 @@ void  Test_MyersBitVector() {
 	str[0] = "annual";
 	str[1] = "annealing";
 	assignStringSet(g, str);
-	score1 = globalAlignment(g, MyersBitVector() );
+	score1 = globalAlignment(stringSet(g), MyersBitVector() );
 	score2 = globalAlignment(g, score_type, NeedlemanWunsch() );
 	score3 = globalAlignment(g, score_type2, Gotoh() );
 	SEQAN_TASSERT((-1) * score1 == score2)
@@ -242,7 +290,7 @@ void  Test_MyersBitVector() {
 	str[0] = "cttagt";
 	str[1] = "ttag";
 	assignStringSet(g, str);
-	score1 = globalAlignment(g, MyersBitVector() );
+	score1 = globalAlignment(stringSet(g), MyersBitVector() );
 	score2 = globalAlignment(g, score_type, NeedlemanWunsch() );
 	score3 = globalAlignment(g, score_type2, Gotoh() );
 	SEQAN_TASSERT((-1) * score1 == score2)
@@ -251,7 +299,7 @@ void  Test_MyersBitVector() {
 	str[0] = "ttag";
 	str[1] = "cttccagt";
 	assignStringSet(g, str);
-	score1 = globalAlignment(g, MyersBitVector() );
+	score1 = globalAlignment(stringSet(g), MyersBitVector() );
 	score2 = globalAlignment(g, score_type, NeedlemanWunsch() );
 	score3 = globalAlignment(g, score_type2, Gotoh() );
 	SEQAN_TASSERT((-1) * score1 == score2)
@@ -260,7 +308,7 @@ void  Test_MyersBitVector() {
 	str[0] = "ttagttagttagttagttagttagttagttagttagttagttagttagttagttagttag";
 	str[1] = "cttccagtcttccagtcttccagtcttccagtcttccagtcttccagtcttccagtcttccagt";
 	assignStringSet(g, str);
-	score1 = globalAlignment(g, MyersBitVector() );
+	score1 = globalAlignment(stringSet(g), MyersBitVector() );
 	score2 = globalAlignment(g, score_type, NeedlemanWunsch() );
 	score3 = globalAlignment(g, score_type2, Gotoh() );
 	SEQAN_TASSERT((-1) * score1 == score2)
@@ -398,24 +446,25 @@ void Test_MatchRefinement() {
 	TSize hSeq = 24;
 	TSize wSeq = 24;
 	TSize bSeq = 24;
-	TSize tmp = 0;
+	
 
 	// Convert all sequences only once
-	tmp = Test_ConvertSequences(in_path, "HUREF6CHROM.fasta",out_path,"H.chr.");
-	if (tmp != hSeq) {
-		std::cerr << "Did not read all HUREF sequences." << std::endl;
-		exit(1);
-	}
-	tmp = Test_ConvertSequences(in_path, "WGSACHROM.fasta",out_path,"W.chr.");
-	if (tmp != wSeq) {
-		std::cerr << "Did not read all WGSA sequences." << std::endl;
-		exit(1);
-	}
-	tmp = Test_ConvertSequences(in_path, "B36LCCHROM.fasta",out_path,"B.chr.");
-	if (tmp != bSeq) {
-		std::cerr << "Did not read all B36LC sequences." << std::endl;
-		exit(1);
-	}
+	//TSize tmp = 0;
+	//tmp = Test_ConvertSequences(in_path, "HUREF6CHROM.fasta",out_path,"H.chr.");
+	//if (tmp != hSeq) {
+	//	std::cerr << "Did not read all HUREF sequences." << std::endl;
+	//	exit(1);
+	//}
+	//tmp = Test_ConvertSequences(in_path, "WGSACHROM.fasta",out_path,"W.chr.");
+	//if (tmp != wSeq) {
+	//	std::cerr << "Did not read all WGSA sequences." << std::endl;
+	//	exit(1);
+	//}
+	//tmp = Test_ConvertSequences(in_path, "B36LCCHROM.fasta",out_path,"B.chr.");
+	//if (tmp != bSeq) {
+	//	std::cerr << "Did not read all B36LC sequences." << std::endl;
+	//	exit(1);
+	//}
 
 	// Read all the sequences
 	TStringSet str;
