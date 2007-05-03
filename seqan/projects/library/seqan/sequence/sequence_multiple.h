@@ -864,7 +864,7 @@ namespace SEQAN_NAMESPACE_MAIN
 				TId const id) 
 	{
 	SEQAN_CHECKPOINT
-		if (id < length(me)) return value(me, id);
+		if (id < (TId) length(me)) return value(me, id);
 		static TString tmp = "";
 		return tmp;
 	}

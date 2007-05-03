@@ -317,6 +317,46 @@ void  Test_MyersBitVector() {
 
 //////////////////////////////////////////////////////////////////////////////
 
+void  Test_LargeAlignment() {
+	typedef String<Dna> TString;
+	typedef StringSet<TString, Dependent<> > TStringSet;
+	typedef Graph<Alignment<TStringSet, void> > TGraph;
+	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef	Id<TStringSet>::Type TId;
+	
+	Score<double> score_type = Score<double>(5,-4,-0.5,-10);
+	double score;
+	TStringSet str;
+	clock_t startTime;
+	clock_t duration;
+
+	TString str0;
+	fstream strm_in;
+	strm_in.open(TEST_PATH "a.fasta", ios_base::in | ios_base::binary);
+	read(strm_in, str0, Fasta());
+	strm_in.close();
+	assignValueById(str, str0);
+
+	TString str1;
+	fstream strm_in1;
+	strm_in1.open(TEST_PATH "b.fasta", ios_base::in | ios_base::binary);
+	read(strm_in1, str1, Fasta());
+	strm_in1.close();
+	assignValueById(str, str1);
+
+	std::cout << "Length Seq0: " << length(str0) << std::endl;
+	std::cout << "Length Seq1: " << length(str1) << std::endl;
+	startTime = clock();
+	score = globalAlignment(std::cout, str, score_type, Gotoh() );
+	duration = clock() - startTime;
+	std::cout << "Score: " << score << " (Runtime: " << duration << ")" << std::endl;
+	std::cout << std::endl;
+}
+
+/*
+//////////////////////////////////////////////////////////////////////////////
+
 void  Test_Runtime() {
 	typedef String<Dna> TString;
 	typedef StringSet<TString, Dependent<> > TStringSet;
@@ -368,7 +408,7 @@ void  Test_Runtime() {
 	std::cout << "Score: " << score << " (Runtime: " << duration << ")" << std::endl;
 	std::cout << std::endl;
 }
-
+*/
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -504,12 +544,11 @@ void Test_MatchRefinement() {
 			s << "B";
 			index = i - (hSeq + wSeq);
 		}
-		s << ":" << i;
+		s << ":" << index;
 		idToName.insert(std::make_pair(i, s.str().c_str()));
 	}
 
 	// Just to check that everything worked
-
 	std::cout << "Number of sequences: " << length(str) << std::endl;
 	for(TIdToNameMap::const_iterator pos =  idToName.begin(); pos != idToName.end(); ++pos) {
 		std::cout << pos->second << ") ";
@@ -520,12 +559,39 @@ void Test_MatchRefinement() {
 	}
 
 	// Read the matches
-	//fstream strm; 
-	//std::stringstream s;
-	//s << in_path << "TvsT.atac";
-	//strm.open(s.str().c_str(), ios_base::in);
-	//read(strm, AtacMatches());
-	//strm.close();
+	typedef StringSet<TString, Dependent<> > TMatchStringSet;
+	String<Graph<Alignment<TMatchStringSet, void, Default()> > > matches;
+	for(TSize i = 0; i<1; ++i) {
+		fstream strm; 
+		std::stringstream s;
+		if (i==0 ) s << in_path << "TvsT.atac";
+		else if (i==1 ) s << in_path << "BvsH.atac";
+		else if (i==2 ) s << in_path << "BvsW.atac";
+		else if (i==3 ) s << in_path << "WvsH.atac";
+		strm.open(s.str().c_str(), ios_base::in);
+		read(strm, matches, str, 0, AtacMatches());
+		strm.close();
+	}
+
+	// Print all matches
+	std::cout << "Number of matches: " << length(matches) << std::endl;
+	typedef Infix<TString>::Type TInfix;
+	for(TSize i = 0; i < length(matches); ++i) {
+		TIdToNameMap::const_iterator pos1 =  idToName.find(sequenceId(matches[i],0));
+		TIdToNameMap::const_iterator pos2 =  idToName.find(sequenceId(matches[i],1));
+		std::cout << matches[i];
+		std::cout << pos1->second << ") ";
+		for(TSize pos=segmentBegin(matches[i], 0); pos<segmentBegin(matches[i], 0) + segmentLength(matches[i],0);++pos) {
+			std::cout << str[sequenceId(matches[i],0)][pos];
+		}
+		std::cout << std::endl;
+		std::cout << pos2->second << ") ";
+		for(TSize pos=segmentBegin(matches[i], 1); pos<segmentBegin(matches[i], 1) + segmentLength(matches[i],1);++pos) {
+			std::cout << str[sequenceId(matches[i],1)][pos];
+		}
+		std::cout << std::endl;
+		std::cout << std::endl;
+	}
 }
 
 

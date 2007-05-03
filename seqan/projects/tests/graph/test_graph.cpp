@@ -96,13 +96,13 @@ int main()
 	Test_NeedlemanWunsch();
 	Test_Gotoh();	
 	Test_MyersBitVector();
-//	Test_Runtime();
+	//Test_LargeAlignment();
 	Test_CompressedAlphabets();
 	Test_TCoffee(); // T-Coffee
 
 
-	// Match Refinement
-//	Test_MatchRefinement();
+	//// Match Refinement
+	Test_MatchRefinement();
 
 //____________________________________________________________________________
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_base.h");

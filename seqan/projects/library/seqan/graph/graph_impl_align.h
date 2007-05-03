@@ -408,8 +408,8 @@ removeVertex(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 template<typename TStringSet, typename TCargo, typename TSpec, typename TVertexDescriptor> 
 inline typename EdgeDescriptor<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type 
 addEdge(Graph<Alignment<TStringSet, TCargo, TSpec> >& g, 
-		TVertexDescriptor source, 
-		TVertexDescriptor target) 
+		TVertexDescriptor const source, 
+		TVertexDescriptor const target) 
 {
 	SEQAN_CHECKPOINT
 	return addEdge(g.data_align, source, target);

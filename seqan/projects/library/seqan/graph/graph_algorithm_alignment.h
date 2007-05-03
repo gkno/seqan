@@ -852,7 +852,7 @@ _globalAlignment(TAlign& align,
 
 	if (maxLen > 10000) {
 		String<TraceBack, External<> > trace;
-		//open(trace, "/media/sda5/seqan/version7/seqan.dat");
+		//open(trace, "D:\\seqan.dat");
 
 		// Create the trace
 		maxScore = _align_needleman_wunsch(trace, str, sc);	
@@ -892,6 +892,7 @@ _globalAlignment(TAlign& align,
 	if (maxLen > 10000) {
 		// Trace
 		String<TraceBackGotoh, External<> > trace;
+		//open(trace, "D:\\seqan.dat");
 		TraceBackGotoh initialDir;
 
 		// Create the trace
