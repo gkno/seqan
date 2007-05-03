@@ -1390,19 +1390,7 @@ namespace SEQAN_NAMESPACE_MAIN
     //////////////////////////////////////////////////////////////////////////////
 
     template < typename TValue, typename TConfig >
-    struct Value< String<TValue, External<TConfig> > >
-    {
-	    typedef typename String<TValue, External<TConfig> >::Type Type;
-    };
-
-    template < typename TValue, typename TConfig >
     struct Size< String<TValue, External<TConfig> > >
-    {
-        typedef typename String<TValue, External<TConfig> >::SizeType Type;
-    };
-
-    template < typename TValue, typename TConfig >
-    struct Position< String<TValue, External<TConfig> > >
     {
         typedef typename String<TValue, External<TConfig> >::SizeType Type;
     };
@@ -1456,6 +1444,15 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 	// iterator metafunctions
+	template < typename TString >
+    struct Container< VectorIterator<TString> >			{ typedef typename TString Type; };
+	template < typename TString >
+    struct Container< VectorConstIterator<TString> >	{ typedef typename TString Type; };
+	template < typename TString >
+    struct Container< VectorFwdIterator<TString> >		{ typedef typename TString Type; };
+	template < typename TString >
+    struct Container< VectorFwdConstIterator<TString> > { typedef typename TString Type; };
+
 	template < typename TVector >
     struct Value< VectorIterator<TVector> >			{ typedef typename Value<TVector>::Type Type; };
 	template < typename TVector >
@@ -1467,11 +1464,11 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < typename TVector >
 	struct Reference< VectorConstIterator<TVector> >:
-		public Reference< typename Value<TVector>::Type const > {};
+		public Reference<TVector const> {};
 
 	template < typename TVector >
 	struct Reference< VectorFwdConstIterator<TVector> >:
-		public Reference< typename Value<TVector>::Type const > {};
+		public Reference<TVector const> {};
 
 	template < typename TVector >
     struct Size< VectorIterator<TVector> >			{ typedef typename Size<TVector>::Type Type; };
