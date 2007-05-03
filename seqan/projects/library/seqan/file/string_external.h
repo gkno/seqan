@@ -1445,13 +1445,13 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	// iterator metafunctions
 	template < typename TString >
-    struct Container< VectorIterator<TString> >			{ typedef typename TString Type; };
+    struct Container< VectorIterator<TString> >			{ typedef TString Type; };
 	template < typename TString >
-    struct Container< VectorConstIterator<TString> >	{ typedef typename TString Type; };
+    struct Container< VectorConstIterator<TString> >	{ typedef TString Type; };
 	template < typename TString >
-    struct Container< VectorFwdIterator<TString> >		{ typedef typename TString Type; };
+    struct Container< VectorFwdIterator<TString> >		{ typedef TString Type; };
 	template < typename TString >
-    struct Container< VectorFwdConstIterator<TString> > { typedef typename TString Type; };
+    struct Container< VectorFwdConstIterator<TString> > { typedef TString Type; };
 
 	template < typename TVector >
     struct Value< VectorIterator<TVector> >			{ typedef typename Value<TVector>::Type Type; };
