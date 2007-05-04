@@ -56,7 +56,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
         RadixMap<TValue> map(K);
 		TSize i, sum = 0, n = length(a);						// for (i = 0;  i < K;  i++) c[i] = 0;
-		::std::memset(begin(c), 0, sizeof(TSize) * K);			// reset counters
+		arrayFill(begin(c, Standard()), begin(c, Standard()) + K, 0);	// reset counters
 		for (i = 0;  i < n;  i++)								// count occurences
 			c[map(r[a[i]])]++;
 		for (i = 0;  i < K;  i++) {								// exclusive prefix sums
@@ -87,7 +87,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
         RadixMap<TValue> map(K);
 		TSize i, sum = 0, n = length(a), sn = length(r);
-		::std::memset(begin(c), 0, sizeof(TSize) * K);			// reset counters
+		arrayFill(begin(c, Standard()), begin(c, Standard()) + K, 0);	// reset counters
 		for (i = 0;  i < n;  i++) {
 			TSize j = a[i] + shift;								// count occurences
 			if (j < sn) c[map(r[j])]++;
@@ -120,9 +120,9 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Value<TText>::Type			TValue;
 
         RadixMap<TValue> map(K);
-		const TValue *rp = begin(r) - 1;
+		const TValue *rp = begin(r, Standard()) - 1;
 		TSize i, sum = 0, n = length(a);						// for (i = 0;  i < K;  i++) c[i] = 0;
-		::std::memset(begin(c), 0, sizeof(TSize) * K);			// reset counters
+		arrayFill(begin(c, Standard()), begin(c, Standard()) + K, 0);	// reset counters
 		for (i = 0;  i < n;  i++)								// count occurences
 			c[map(rp[a[i]])]++;
 		for (i = 0;  i < K;  i++) {								// exclusive prefix sums
@@ -151,9 +151,9 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Value<TText>::Type			TValue;
 
         RadixMap<TValue> map(K);
-		const TValue *rp = begin(r) - 1;
+		const TValue *rp = begin(r, Standard()) - 1;
         TSize i, sum = 0, n = length(a);						// for (i = 0;  i < K;  i++) c[i] = 0;
-		::std::memset(begin(c), 0, sizeof(TSize) * K);			// reset counters
+		arrayFill(begin(c, Standard()), begin(c, Standard()) + K, 0);	// reset counters
 		for (i = 0;  i < n;  i++) {								// count occurences
 	        TSize j = a[i];
 			if (j > 0) c[map(rp[j])]++;
