@@ -1,5 +1,5 @@
 /*
- *  lcp_tree.h
+ *  index_lcp_tree.h
  *  SeqAn
  *
  *  Created by David Weese on 17.07.05.

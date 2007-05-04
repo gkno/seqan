@@ -1,5 +1,5 @@
 /*
- *  sa_btree.h
+ *  index_sa_btree.h
  *  SeqAn
  *
  *  Created by David Weese on 17.07.05.

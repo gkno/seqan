@@ -1,5 +1,5 @@
 /*
- *  find.h
+ *  index_find.h
  *  SeqAn
  *
  *  Created by David Weese on 17.07.05.
