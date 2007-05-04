@@ -59,20 +59,27 @@ bool _MersenneBuffer<T>::is_initialized = false;
 // Can also be called several times since it is protected against multiple initalizations. 
 
 inline void 
-mtRandInit()
+mtRandInit(bool _doSRand)
 {
 	// test whether mtRandInit was already initialized
 	// return immediately if this is the case
 	if (_MersenneBuffer<>::is_initialized) return;
 	_MersenneBuffer<>::is_initialized = true;
 
-	::std::srand((unsigned) ::std::time(0));
+	if (_doSRand)
+		::std::srand((unsigned) ::std::time(0));
 
 	int i;
 	for (i = 0; i < SEQAN_MERSENNE_MT_LEN; i++)
 		_MersenneBuffer<>::buffer[i] = ::std::rand();
 
 	mtRand(); //pop the first number, since it is not as "random" as we like it
+}
+
+inline void 
+mtRandInit()
+{
+	mtRandInit(true);
 }
 
 //////////////////////////////////////////////////////////////////////////////

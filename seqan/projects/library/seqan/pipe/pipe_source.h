@@ -204,7 +204,7 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef typename Size<TPipe>::Type			TSize;
 
         typedef SimpleBuffer<TValue>				TBuffer;
-		typedef typename Iterator<TPipe>::Type		ISource;
+		typedef IPipeIterator<TPipe>				ISource;
 		typedef typename Iterator<TBuffer>::Type	ITarget;
 
 		TPipe		&pipe;
@@ -221,7 +221,7 @@ namespace SEQAN_NAMESPACE_MAIN
         inline TBuffer& first() {
             rest = length(pipe);
 			allocPage(buffer, Min(bufferSize, rest), *this);
-			source = begin(pipe);
+			source = ISource(pipe);
 			for(ITarget target = buffer.begin; target != buffer.end; ++target) {
 				*target = *source;
 				++source;
@@ -252,23 +252,99 @@ namespace SEQAN_NAMESPACE_MAIN
     };
 
     //////////////////////////////////////////////////////////////////////////////
+	// buffer handler optimized for external string sources
+    struct _ExtStringSourceCachingSpec;
+	typedef Tag<_ExtStringSourceCachingSpec> ExtStringSourceCachingSpec;
+
+	template < typename TSequence, typename TSpec >
+	struct BufferHandler< Pipe<TSequence, TSpec>, ExtStringSourceCachingSpec >
+    {
+		typedef typename Value<TSequence>::Type		TValue;
+        typedef typename Size<TSequence>::Type		TSize;
+        typedef SimpleBuffer<TValue>				TBuffer;
+        typedef Pipe<TSequence, TSpec>				TPipe;
+
+		typedef typename Iterator<TSequence const>::Type	ISource;
+		typedef typename Iterator<TBuffer>::Type			ITarget;
+
+		TPipe		&pipe;
+		unsigned	bufferSize;
+        TSize		rest;
+        TBuffer		buffer;
+		ISource		source;
+
+		BufferHandler(TPipe &_pipe, unsigned requestedSize):
+			pipe(_pipe),
+			bufferSize(requestedSize),
+            rest(0) {}
+
+        inline TBuffer& first() {
+            rest = length(pipe.in);
+			allocPage(buffer, Min(bufferSize, rest), *this);
+			source = begin(pipe.in);
+			for(ITarget target = buffer.begin; target != buffer.end; ++target) {
+				*target = *source;
+				++source;
+			}
+            if (!(rest -= size(buffer))) source = ISource();
+			return buffer;
+        }
+
+        inline TBuffer& next() {
+			resize(buffer, Min(bufferSize, rest));
+			ITarget _end = buffer.begin + size(buffer);
+			for(ITarget target = buffer.begin; target != _end; ++target) {
+				*target = *source;
+				++source;
+			}
+            if (!(rest -= size(buffer))) source = ISource();
+			return buffer;
+        }
+
+        inline void process() {}
+        inline void end() { cancel(); }
+        inline void cancel() { source = ISource(); freePage(buffer, *this); }
+    };
+
+	template < typename TSequence, typename TSpec >
+    struct Value< BufferHandler< Pipe<TSequence, TSpec>, ExtStringSourceCachingSpec > > {
+		typedef SimpleBuffer< typename Value<TSequence>::Type > Type;
+    };
+
+    //////////////////////////////////////////////////////////////////////////////
     // global functions
 
     // choose the most efficient buffer handler
     template < typename TInput, typename TSpec >
-    struct BufReadHandler< Pipe< TInput, TSpec > > {
-		typedef BufferHandler<
-			Pipe< TInput, TSpec >,
+    struct BufReadHandler< Pipe<TInput, TSpec> > {
+		typedef			
 			typename IF< 
-				AllowsFastRandomAccess<TInput>::VALUE, 
-				SourceNonCachingSpec, 
-//				SourceNonCachingSpec
-				SourceCachingSpec 
-			>::Type
-        > Type;
+				AllowsFastRandomAccess<TInput>::VALUE,
+				BufferHandler< Pipe<TInput, TSpec>, SourceNonCachingSpec>,
+//				BufferHandler< Pipe<TInput, TSpec>, SourceCachingSpec>
+				BufferHandler< Pipe<TInput, TSpec>, ExtStringSourceCachingSpec>
+			>::Type Type;
     };
 
-    template < typename TInput, typename TSpec, typename TCommand >
+
+    template < typename TValue, typename TConfig, typename TSpec >
+    struct BufReadHandler< Pipe< String<TValue, External<TConfig> >, TSpec > > {
+		typedef BufferHandler< 
+			Pipe< String<TValue, External<TConfig> > const, TSpec >, 
+			ExtStringSourceCachingSpec 
+		> Type;
+    };
+
+    template < typename TValue, typename TConfig, typename TSpec >
+    struct BufReadHandler< Pipe< String<TValue, External<TConfig> > const, TSpec > > {
+		typedef BufferHandler< 
+			Pipe< String<TValue, External<TConfig> > const, TSpec >, 
+			ExtStringSourceCachingSpec 
+		> Type;
+    };
+
+
+	template < typename TInput, typename TSpec, typename TCommand >
 	inline bool control(Pipe< TInput, Source<TSpec> > &me, TCommand const &command) {
         return true;
     }

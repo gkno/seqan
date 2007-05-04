@@ -283,6 +283,30 @@ SEQAN_CHECKPOINT
         return length(me.in);
     }
 
+    template < typename TInput1, typename TInput2 >
+    inline typename Size< Bundle2<TInput1, TInput2> >::Type
+    length(Bundle2<TInput1, TInput2> const &me) {
+SEQAN_CHECKPOINT
+        return length(me.in1);
+    }
+
+    template < typename TInput1, typename TInput2, typename TInput3 >
+    inline typename Size< Bundle3<TInput1, TInput2, TInput3> >::Type
+    length(Bundle3<TInput1, TInput2, TInput3> const &me) {
+SEQAN_CHECKPOINT
+        return length(me.in1);
+    }
+
+    template < typename TIn1, typename TIn2, typename TIn3, typename TIn4, typename TIn5 >
+    inline typename Size< Bundle5<TIn1, TIn2, TIn3, TIn4, TIn5> >::Type
+    length(Bundle5<TIn1, TIn2, TIn3, TIn4, TIn5> const &me) {
+SEQAN_CHECKPOINT
+        return length(me.in1);
+    }
+
+//////////////////////////////////////////////////////////////////////////////
+
+
 	template < typename TInput, typename TSpec >
     inline typename Size< Pipe<TInput, TSpec> >::Type
     countSequences(Pipe<TInput, TSpec> const &me) {
@@ -290,6 +314,26 @@ SEQAN_CHECKPOINT
         return countSequences(me.in);
     }
 
+    template < typename TInput1, typename TInput2 >
+    inline typename Size< Bundle2<TInput1, TInput2> >::Type
+    countSequences(Bundle2<TInput1, TInput2> const &me) {
+SEQAN_CHECKPOINT
+        return countSequences(me.in1);
+    }
+
+    template < typename TInput1, typename TInput2, typename TInput3 >
+    inline typename Size< Bundle3<TInput1, TInput2, TInput3> >::Type
+    countSequences(Bundle3<TInput1, TInput2, TInput3> const &me) {
+SEQAN_CHECKPOINT
+        return countSequences(me.in1);
+    }
+
+    template < typename TIn1, typename TIn2, typename TIn3, typename TIn4, typename TIn5 >
+    inline typename Size< Bundle5<TIn1, TIn2, TIn3, TIn4, TIn5> >::Type
+    countSequences(Bundle5<TIn1, TIn2, TIn3, TIn4, TIn5> const &me) {
+SEQAN_CHECKPOINT
+        return countSequences(me.in1);
+    }
 /**
 .Function.Pipelining#front:
 ..cat:Pipelining

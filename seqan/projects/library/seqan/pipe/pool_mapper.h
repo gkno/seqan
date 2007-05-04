@@ -483,8 +483,8 @@ namespace SEQAN_NAMESPACE_MAIN
 							_writeBucket(*cb, pageNo);
 					}
 					pool._partiallyFilled = true;
-				}
-				_writeBucket(*cb, pageNo);
+				} else
+					_writeBucket(*cb, pageNo);
 			}
             chain.waitForAll();
 			flush(pool.file);
