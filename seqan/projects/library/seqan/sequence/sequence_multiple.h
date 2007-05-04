@@ -129,6 +129,17 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline TPosition getSeqOffset(TPosition const &pos, Nothing const &) {
 		return pos;
 	}
+//____________________________________________________________________________
+
+	template <typename TPosition>
+	inline TPosition getSeqNo(TPosition const &pos) {
+		return 0;
+	}
+
+	template <typename TPosition>
+	inline TPosition getSeqOffset(TPosition const &pos) {
+		return pos;
+	}
 
 	//////////////////////////////////////////////////////////////////////////////
 	// n sequences (position type is Pair)
@@ -139,8 +150,19 @@ namespace SEQAN_NAMESPACE_MAIN
 		return getValueI1(pos);
 	}
 
+	template <typename T1, typename T2, typename TCompression>
+	inline T1 getSeqNo(Pair<T1, T2, TCompression> const &pos) {
+		return getValueI1(pos);
+	}
+//____________________________________________________________________________
+
 	template <typename T1, typename T2, typename TCompression, typename TLimitsString>
 	inline T2 getSeqOffset(Pair<T1, T2, TCompression> const &pos, TLimitsString const &) {
+		return getValueI2(pos);
+	}
+
+	template <typename T1, typename T2, typename TCompression>
+	inline T1 getSeqOffset(Pair<T1, T2, TCompression> const &pos) {
 		return getValueI2(pos);
 	}
 
@@ -1485,15 +1507,15 @@ namespace SEQAN_NAMESPACE_MAIN
         inline Iter(TStringSet &_host, unsigned _objNo, difference_type _offset):
             host(&_host)
         {
-            objNo = _objNo;
-            if (objNo < length(_host)) {
+            if (_objNo < length(_host)) {
+	            objNo = _objNo;
 				_begin = _cur = begin(_host[objNo]);
 				_end = end(_host[objNo]);
                 goFurther(_cur, _offset);
                 _testEnd();
             } else {
-                _begin = _cur = obj_iterator();
-                _end = obj_iterator();
+				objNo = length(_host) - 1;
+				_begin = _cur = _end = end(_host[objNo]);
             }
         }
 
@@ -1503,24 +1525,19 @@ namespace SEQAN_NAMESPACE_MAIN
 //____________________________________________________________________________
 
 		inline void _testBegin() {
-            while (_cur == _begin && objNo != 0) {
+            while (_cur == _begin && objNo > 0) {
                 --objNo;
-				_begin = _cur = host->_begin(objNo);
-				_end = host->_end(objNo);
+				_begin = host->_begin(objNo);
+				_end = _cur = host->_end(objNo);
             }
         }
 
         inline void _testEnd() {
-            if (_cur == _end && objNo != length(*host))
-                do {
-                    if (++objNo == length(*host)) {
-                        _begin = _cur = obj_iterator();
-                        _end = obj_iterator();
-                        break;
-                    }
-					_begin = _cur = begin((*host)[objNo]);
-					_end = end((*host)[objNo]);
-                } while (_cur == _end);
+			while (_cur == _end && objNo < (length(*host) - 1)) {
+				++objNo;
+				_begin = _cur = begin((*host)[objNo]);
+				_end = end((*host)[objNo]);
+            };
         }
 
         inline TSize _tell() const {
@@ -1651,7 +1668,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <typename TStringSet, typename TSpec>
 	inline void
-	goPrev(Iter<TStringSet, ConcatVirtual<TSpec> > & me) {
+	goPrevious(Iter<TStringSet, ConcatVirtual<TSpec> > & me) {
         me._testBegin();
         --me._cur;
     }
@@ -1659,7 +1676,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename TStringSet, typename TSpec>
 	inline Iter<TStringSet, ConcatVirtual<TSpec> > const &
 	operator -- (Iter<TStringSet, ConcatVirtual<TSpec> > & me) {
-        goPrev(me);
+        goPrevious(me);
 		return me;
     }
 
@@ -1667,7 +1684,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline Iter<TStringSet, ConcatVirtual<TSpec> > const &
 	operator -- (Iter<TStringSet, ConcatVirtual<TSpec> > & me, int) {
 		Iter<TStringSet, ConcatVirtual<TSpec> > before = me;
-        goPrev(me);
+        goPrevious(me);
 		return before;
 	}
 
