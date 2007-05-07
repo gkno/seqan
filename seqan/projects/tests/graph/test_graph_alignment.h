@@ -261,98 +261,77 @@ void  Test_Gotoh() {
 void  Test_MyersBitVector() {
 	typedef String<char> TString;
 	typedef StringSet<TString, Dependent<> > TStringSet;
-	typedef Graph<Alignment<TStringSet, void> > TGraph;
-	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	typedef	Id<TStringSet>::Type TId;
 	
 	TStringSet str;
 	TString str0("annealing");	assignValueById(str, str0);
 	TString str1("annual"); assignValueById(str, str1);
-	TGraph g(str);
-	int score1 = globalAlignment(stringSet(g), MyersBitVector() );
+	int score1 = globalAlignment(str, MyersBitVector() );
 	Score<int> score_type = Score<int>(0,-1,-1,0);
-	int score2 = globalAlignment(g, score_type, NeedlemanWunsch() );
+	int score2 = globalAlignment(str, score_type, NeedlemanWunsch() );
 	Score<int> score_type2 = Score<int>(0,-1,-1,-1);
-	int score3 = globalAlignment(g, score_type2, Gotoh() );
+	int score3 = globalAlignment(str, score_type2, Gotoh() );
 	SEQAN_TASSERT((-1) * score1 == score2)
 	SEQAN_TASSERT(score2 == score3)
 
 	str[0] = "annual";
 	str[1] = "annealing";
-	assignStringSet(g, str);
-	score1 = globalAlignment(stringSet(g), MyersBitVector() );
-	score2 = globalAlignment(g, score_type, NeedlemanWunsch() );
-	score3 = globalAlignment(g, score_type2, Gotoh() );
+	score1 = globalAlignment(str, MyersBitVector() );
+	score2 = globalAlignment(str, score_type, NeedlemanWunsch() );
+	score3 = globalAlignment(str, score_type2, Gotoh() );
 	SEQAN_TASSERT((-1) * score1 == score2)
 	SEQAN_TASSERT(score2 == score3)
 
 	str[0] = "cttagt";
 	str[1] = "ttag";
-	assignStringSet(g, str);
-	score1 = globalAlignment(stringSet(g), MyersBitVector() );
-	score2 = globalAlignment(g, score_type, NeedlemanWunsch() );
-	score3 = globalAlignment(g, score_type2, Gotoh() );
+	score1 = globalAlignment(str, MyersBitVector() );
+	score2 = globalAlignment(str, score_type, NeedlemanWunsch() );
+	score3 = globalAlignment(str, score_type2, Gotoh() );
 	SEQAN_TASSERT((-1) * score1 == score2)
 	SEQAN_TASSERT(score2 == score3)
 
 	str[0] = "ttag";
 	str[1] = "cttccagt";
-	assignStringSet(g, str);
-	score1 = globalAlignment(stringSet(g), MyersBitVector() );
-	score2 = globalAlignment(g, score_type, NeedlemanWunsch() );
-	score3 = globalAlignment(g, score_type2, Gotoh() );
+	score1 = globalAlignment(str, MyersBitVector() );
+	score2 = globalAlignment(str, score_type, NeedlemanWunsch() );
+	score3 = globalAlignment(str, score_type2, Gotoh() );
 	SEQAN_TASSERT((-1) * score1 == score2)
 	SEQAN_TASSERT(score2 == score3)
 	 
 	str[0] = "ttagttagttagttagttagttagttagttagttagttagttagttagttagttagttag";
 	str[1] = "cttccagtcttccagtcttccagtcttccagtcttccagtcttccagtcttccagtcttccagt";
-	assignStringSet(g, str);
-	score1 = globalAlignment(stringSet(g), MyersBitVector() );
-	score2 = globalAlignment(g, score_type, NeedlemanWunsch() );
-	score3 = globalAlignment(g, score_type2, Gotoh() );
+	score1 = globalAlignment(str, MyersBitVector() );
+	score2 = globalAlignment(str, score_type, NeedlemanWunsch() );
+	score3 = globalAlignment(str, score_type2, Gotoh() );
 	SEQAN_TASSERT((-1) * score1 == score2)
 	SEQAN_TASSERT(score2 == score3)
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
-void  Test_LargeAlignment() {
-	typedef String<Dna> TString;
+void Test_Hirschberg() {
+	// ToDo!!!
+	typedef String<char> TString;
 	typedef StringSet<TString, Dependent<> > TStringSet;
 	typedef Graph<Alignment<TStringSet, void> > TGraph;
 	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	typedef	Id<TStringSet>::Type TId;
 	
-	Score<double> score_type = Score<double>(5,-4,-0.5,-10);
-	double score;
 	TStringSet str;
-	clock_t startTime;
-	clock_t duration;
-
-	TString str0;
-	fstream strm_in;
-	strm_in.open(TEST_PATH "a.fasta", ios_base::in | ios_base::binary);
-	read(strm_in, str0, Fasta());
-	strm_in.close();
-	assignValueById(str, str0);
-
-	TString str1;
-	fstream strm_in1;
-	strm_in1.open(TEST_PATH "b.fasta", ios_base::in | ios_base::binary);
-	read(strm_in1, str1, Fasta());
-	strm_in1.close();
-	assignValueById(str, str1);
-
-	std::cout << "Length Seq0: " << length(str0) << std::endl;
-	std::cout << "Length Seq1: " << length(str1) << std::endl;
-	startTime = clock();
-	score = globalAlignment(std::cout, str, score_type, Gotoh() );
-	duration = clock() - startTime;
-	std::cout << "Score: " << score << " (Runtime: " << duration << ")" << std::endl;
-	std::cout << std::endl;
+	TString str0("annual");	assignValueById(str, str0);
+	TString str1("annealing"); assignValueById(str, str1);
+	//TGraph g(str);
+	//Score<int> score_type = Score<int>(0,-1,-1,0);
+	//int score1 = globalAlignment(g, Hirschberg_MyersBitVector() );
+	//int score2 = globalAlignment(g, score_type, Hirschberg_NeedlemanWunsch() );
+	//Score<int> score_type2 = Score<int>(0,-1,-1,-1);
+	//int score3 = globalAlignment(g, score_type2, Hirschberg_Gotoh() );
+	//SEQAN_TASSERT((-1) * score1 == score2)
+	//SEQAN_TASSERT(score2 == score3)
 }
+
+
 
 /*
 //////////////////////////////////////////////////////////////////////////////
@@ -405,6 +384,45 @@ void  Test_Runtime() {
 	score = needlemanWunsch(ali,score_type2);
 	duration = clock() - startTime;
 	std::cout << ali << std::endl;
+	std::cout << "Score: " << score << " (Runtime: " << duration << ")" << std::endl;
+	std::cout << std::endl;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+void  Test_LargeAlignment() {
+	typedef String<Dna> TString;
+	typedef StringSet<TString, Dependent<> > TStringSet;
+	typedef Graph<Alignment<TStringSet, void> > TGraph;
+	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef	Id<TStringSet>::Type TId;
+	
+	Score<double> score_type = Score<double>(5,-4,-0.5,-10);
+	double score;
+	TStringSet str;
+	clock_t startTime;
+	clock_t duration;
+
+	TString str0;
+	fstream strm_in;
+	strm_in.open(TEST_PATH "a.fasta", ios_base::in | ios_base::binary);
+	read(strm_in, str0, Fasta());
+	strm_in.close();
+	assignValueById(str, str0);
+
+	TString str1;
+	fstream strm_in1;
+	strm_in1.open(TEST_PATH "b.fasta", ios_base::in | ios_base::binary);
+	read(strm_in1, str1, Fasta());
+	strm_in1.close();
+	assignValueById(str, str1);
+
+	std::cout << "Length Seq0: " << length(str0) << std::endl;
+	std::cout << "Length Seq1: " << length(str1) << std::endl;
+	startTime = clock();
+	score = globalAlignment(std::cout, str, score_type, Gotoh() );
+	duration = clock() - startTime;
 	std::cout << "Score: " << score << " (Runtime: " << duration << ")" << std::endl;
 	std::cout << std::endl;
 }
@@ -581,19 +599,103 @@ void Test_MatchRefinement() {
 		TIdToNameMap::const_iterator pos2 =  idToName.find(sequenceId(matches[i],1));
 		std::cout << matches[i];
 		std::cout << pos1->second << ") ";
-		for(TSize pos=segmentBegin(matches[i], 0); pos<segmentBegin(matches[i], 0) + segmentLength(matches[i],0);++pos) {
-			std::cout << str[sequenceId(matches[i],0)][pos];
-		}
-		std::cout << std::endl;
+		TInfix infix1 = label(matches[i],0);
+		std::cout << infix1 << std::endl;
 		std::cout << pos2->second << ") ";
-		for(TSize pos=segmentBegin(matches[i], 1); pos<segmentBegin(matches[i], 1) + segmentLength(matches[i],1);++pos) {
-			std::cout << str[sequenceId(matches[i],1)][pos];
-		}
-		std::cout << std::endl;
+		TInfix infix2 = label(matches[i],1);
+		std::cout << infix2 << std::endl;
 		std::cout << std::endl;
 	}
+	/*
+	Score<int> score_type = Score<int>(1,-1,-2,0) ;
+	typedef Graph<Alignment<TStringSet> > TAliGraph;
+	
+	TAliGraph ali_graph(str);
+
+	matchRefinement(matches,str,score_type,ali_graph);//,StoreEdges());
+	std::cout << "\nnumEdges: "<<numEdges(ali_graph)<<"\n";
+	std::cout << "\nnumVertices: "<<numVertices(ali_graph)<<"\n";
+	*/
 }
 
+
+//////////////////////////////////////////////////////////////////////////////
+
+void Test_Fragment() {
+	// Test Fragment
+	typedef String<char> TString;
+	typedef StringSet<TString, Dependent<> > TStringSet;
+	typedef Graph<Alignment<TStringSet, void> > TGraph;
+	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef	Id<TStringSet>::Type TId;
+	
+	TStringSet str;
+	TString str0("annual");	assignValueById(str, str0);
+	TString str1("anneal"); assignValueById(str, str1);
+
+	// Fragment: SeqId1, Begin1, SeqId2, Begin2, Length of Fragment
+	Fragment<> f(0,4,1,4,2);
+	SEQAN_TASSERT(f.seqId1 == 0)
+	SEQAN_TASSERT(f.begin1 == 4)
+	SEQAN_TASSERT(f.seqId2 == 1)
+	SEQAN_TASSERT(f.begin2 == 4)
+	SEQAN_TASSERT(f.len == 2)
+	SEQAN_TASSERT(fragmentBegin(f, 0) == 4)
+	SEQAN_TASSERT(fragmentBegin(f, 1) == 4)
+	SEQAN_TASSERT(fragmentLength(f, 0) == 2)
+	SEQAN_TASSERT(fragmentLength(f, 1) == 2)
+	SEQAN_TASSERT(sequenceId(f, 0) == 0)
+	SEQAN_TASSERT(sequenceId(f, 1) == 1)
+	SEQAN_TASSERT(label(f, str, 0) == "al")
+	SEQAN_TASSERT(label(f, str, 1) == "al")
+	SEQAN_TASSERT(getProjectedPosition(f, 0, 5) == 5)
+	SEQAN_TASSERT(getProjectedPosition(f, 1, 5) == 5)
+
+	// Fragment: SeqId1, Begin1, SeqId2, Begin2, Length of Fragment
+	Fragment<> f2(0,0,1,4,1);
+	SEQAN_TASSERT(f2.seqId1 == 0)
+	SEQAN_TASSERT(f2.begin1 == 0)
+	SEQAN_TASSERT(f2.seqId2 == 1)
+	SEQAN_TASSERT(f2.begin2 == 4)
+	SEQAN_TASSERT(f2.len == 1)
+	SEQAN_TASSERT(fragmentBegin(f2, 0) == 0)
+	SEQAN_TASSERT(fragmentBegin(f2, 1) == 4)
+	SEQAN_TASSERT(fragmentLength(f2, 0) == 1)
+	SEQAN_TASSERT(fragmentLength(f2, 1) == 1)
+	SEQAN_TASSERT(label(f2, str, 0) == "a")
+	SEQAN_TASSERT(label(f2, str, 1) == "a")
+	SEQAN_TASSERT(getProjectedPosition(f2, 0, 0) == 4)
+	SEQAN_TASSERT(getProjectedPosition(f2, 1, 4) == 0)
+
+	// The same stuff on an alignment graph
+	TGraph g(str);
+	TVertexDescriptor vert1 = addVertex(g,0,4,2);
+	TVertexDescriptor vert2 = addVertex(g,1,4,2);
+	addEdge(g, vert1, vert2);
+	SEQAN_TASSERT(fragmentBegin(g, vert1) == 4)
+	SEQAN_TASSERT(fragmentBegin(g, vert2) == 4)
+	SEQAN_TASSERT(fragmentLength(g, vert1) == 2)
+	SEQAN_TASSERT(fragmentLength(g, vert2) == 2)
+	SEQAN_TASSERT(sequenceId(f, vert1) == 0)
+	SEQAN_TASSERT(sequenceId(f, vert2) == 1)
+	SEQAN_TASSERT(label(g, vert1) == "al")
+	SEQAN_TASSERT(label(g, vert2) == "al")
+	SEQAN_TASSERT(getProjectedPosition(g, 0, 5) == 5)
+	SEQAN_TASSERT(getProjectedPosition(g, 1, 5) == 5)
+
+	TGraph g2(str);
+	TVertexDescriptor v1 = addVertex(g2,0,0,1);
+	TVertexDescriptor v2 = addVertex(g2,1,4,1);
+	addEdge(g2, v1, v2);
+	SEQAN_TASSERT(fragmentBegin(g2, v1) == 0)
+	SEQAN_TASSERT(fragmentBegin(g2, v2) == 4)
+	SEQAN_TASSERT(fragmentLength(g2, v1) == 1)
+	SEQAN_TASSERT(fragmentLength(g2, v2) == 1)
+	SEQAN_TASSERT(label(g2, v1) == "a")
+	SEQAN_TASSERT(label(g2, v2) == "a")
+	SEQAN_TASSERT(getProjectedPosition(g2, 0, 0) == 4)
+	SEQAN_TASSERT(getProjectedPosition(g2, 1, 4) == 0)
+}
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -799,6 +901,12 @@ void Test_TCoffee() {
 }
 
 
+void Test_GraphAlignment() {
+	Test_NeedlemanWunsch();
+	Test_Gotoh();	
+	Test_MyersBitVector();
+	Test_Hirschberg();
+}
 
 }
 

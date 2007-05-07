@@ -93,18 +93,17 @@ int main()
 	Test_Algorithms();
 
 	// Alignment
-	Test_NeedlemanWunsch();
-	Test_Gotoh();	
-	Test_MyersBitVector();
-	//Test_LargeAlignment();
+	Test_GraphAlignment();
+
+	// T-Coffee
 	Test_CompressedAlphabets();
-	Test_TCoffee(); // T-Coffee
+	Test_Fragment();
+	Test_TCoffee(); 
 
+	// Match Refinement
+	// Test_MatchRefinement();
 
-	//// Match Refinement
-	Test_MatchRefinement();
-
-//____________________________________________________________________________
+	//____________________________________________________________________________
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_base.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_idmanager.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_interface.h");
@@ -129,8 +128,14 @@ int main()
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_utility_alphabets.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_utility_parsing.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_algorithm.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_algorithm_alignment.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_algorithm_tcoffee.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_base.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_gotoh.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_hirschberg.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_interface.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_myers.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_needleman_wunsch.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee.h");
+
 
 	SEQAN_TREPORT("TEST END")
 

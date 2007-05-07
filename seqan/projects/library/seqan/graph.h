@@ -46,9 +46,10 @@
 // Graph property maps
 #include <seqan/graph/graph_property.h>
 
-// Special automatons: Just create functions
+// Specializations
 #include <seqan/graph/graph_impl_oracle.h>		// Oracle
 #include <seqan/graph/graph_impl_trie.h>		// Trie
+#include <seqan/graph/graph_impl_fragment.h>
 
 // Graph drawing
 #include <seqan/find.h>
@@ -58,6 +59,16 @@
 #include <seqan/graph/graph_iterator_bfs.h>
 #include <seqan/graph/graph_iterator_dfs.h>
 
+
+// Alignment
+#include <seqan/graph/graph_align_base.h>
+#include <seqan/graph/graph_align_needleman_wunsch.h>
+#include <seqan/graph/graph_align_gotoh.h>
+#include <seqan/graph/graph_align_myers.h>
+#include <seqan/graph/graph_align_hirschberg.h>
+#include <seqan/graph/graph_align_tcoffee.h>
+#include <seqan/graph/graph_align_interface.h>
+
 // Utilities
 #include <seqan/graph/graph_utility_alphabets.h>
 #include <seqan/graph/graph_utility_parsing.h>
@@ -65,9 +76,13 @@
 
 // Graph algorithms
 #include <seqan/graph/graph_algorithm.h>
-#include <seqan/graph/graph_algorithm_alignment.h>
-#include <seqan/graph/graph_algorithm_tcoffee.h>
 
 
 
+/*
+// Refinement
+#include <seqan/graph/interval_tree_types.h>
+#include <seqan/graph/interval_tree.h>
+#include <seqan/graph/temp_refine.h>
+*/
 #endif //#ifndef SEQAN_HEADER_...

@@ -12,20 +12,20 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TId = unsigned int, typename TSize = unsigned int>
-class SegmentInfo {
+class FragmentInfo {
 public:
 	TId data_seq_id;
 	TSize data_begin;
 	TSize data_length;
 
-	SegmentInfo() :
+	FragmentInfo() :
 		data_seq_id(0),
 		data_begin(0),
 		data_length(0)
 	{
 	}
 
-	SegmentInfo(TId id, TSize beg, TSize len) :
+	FragmentInfo(TId id, TSize beg, TSize len) :
 		data_seq_id(id),
 		data_begin(beg),
 		data_length(len)
@@ -72,7 +72,7 @@ class Graph<Alignment<TStringSet, TCargo, TSpec> >
 		Holder<TStringSet> data_sequence;
 		
 		// Alignment specific members
-		String<SegmentInfo<TIdType, TSize> > data_segment;
+		String<FragmentInfo<TIdType, TSize> > data_fragment;
 
 		// STL Map to retrieve a vertex given SeqId, Position
 		TPosToVertexMap data_pvMap;
@@ -163,7 +163,7 @@ _copyGraph(Graph<Alignment<TStringSet, TCargo, TSpec> > const& source,
 	clear(dest);
 	dest.data_align = source.data_align;
 	dest.data_sequence = source.data_sequence;
-	dest.data_segment = source.data_segment;
+	dest.data_fragment = source.data_fragment;
 	dest.data_pvMap = source.data_pvMap;
 }
 
@@ -257,7 +257,7 @@ clearVertices(Graph<Alignment<TStringSet, TCargo, TSpec> >& g)
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 
 	clearVertices(g.data_align);
-	clear(g.data_segment);
+	clear(g.data_fragment);
 	g.data_pvMap.clear();
 	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
 	if(!empty(value(g.data_sequence))) {
@@ -325,7 +325,7 @@ addVertex(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename Id<TGraph>::Type TIdType;
 	typedef typename Size<TGraph>::Type TSize;
-	typedef SegmentInfo<TIdType, TSize> TSegmentInfo;
+	typedef FragmentInfo<TIdType, TSize> TFragmentInfo;
 	typedef std::map<std::pair<TIdType, TIdType>, TVertexDescriptor> TPosToVertexMap;
 
 	//for(TPosToVertexMap::const_iterator p = g.data_pvMap.begin(); p != g.data_pvMap.end(); ++p) {
@@ -334,7 +334,7 @@ addVertex(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 
 	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
 
-	// Store the new segment
+	// Store the new fragment
 	typename TPosToVertexMap::iterator interval = g.data_pvMap.lower_bound(std::make_pair(id, begin + len));
 	// Segment does not belong to Sequence anymore
 	SEQAN_TASSERT(interval != g.data_pvMap.end());
@@ -345,13 +345,13 @@ addVertex(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 
 	// Insert new vertex
 	TVertexDescriptor vd = addVertex(g.data_align);
-	if (length(g.data_segment) <= vd) resize(g.data_segment, vd + 1, Generous());
-	assignProperty(g.data_segment, vd, TSegmentInfo(id, begin, len));
+	if (length(g.data_fragment) <= vd) resize(g.data_fragment, vd + 1, Generous());
+	assignProperty(g.data_fragment, vd, TFragmentInfo(id, begin, len));
 
 	// Update position to vertex map
-	// Does the end of the new segment coincides with the end of the interval?
+	// Does the end of the new fragment coincides with the end of the interval?
 	if ( (TSize) begin + len == (TSize) interval->first.second) {
-		// Does the beginning of the new segment coincides with the beginning of the interval?
+		// Does the beginning of the new fragment coincides with the beginning of the interval?
 		if ((begin == 0) ||
 			(g.data_pvMap.find(std::make_pair(id, begin)) != g.data_pvMap.end())) {
 			// Replace interval
@@ -363,7 +363,7 @@ addVertex(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 			g.data_pvMap.insert(std::make_pair(std::make_pair(id,begin+len), vd));
 		}
 	} else {
-		// Does the beginning of the new segment coincides with the beginning of the interval?
+		// Does the beginning of the new fragment coincides with the beginning of the interval?
 		if ((begin == 0) ||
 			(g.data_pvMap.find(std::make_pair(id, begin)) != g.data_pvMap.end())) {
 			// Split interval once
@@ -395,7 +395,7 @@ removeVertex(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	typedef std::map<std::pair<TIdType, TIdType>, TVertexDescriptor> TPosToVertexMap;
 
 	// Clear the interval
-	typename TPosToVertexMap::iterator interval = g.data_pvMap.lower_bound(std::make_pair(sequenceId(g,v), segmentBegin(g,v) + segmentLength(g,v)));
+	typename TPosToVertexMap::iterator interval = g.data_pvMap.lower_bound(std::make_pair(sequenceId(g,v), fragmentBegin(g,v) + fragmentLength(g,v)));
 	SEQAN_TASSERT(interval != g.data_pvMap.end());
 	interval->second = getNil<TVertexDescriptor>();
 
@@ -530,7 +530,7 @@ write(TFile & target,
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename Id<TGraph>::Type TIdType;
 	typedef typename Size<TGraph>::Type TSize;
-	typedef SegmentInfo<TIdType, TSize> TSegment;
+	typedef FragmentInfo<TIdType, TSize> TSegment;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
 	typedef typename Iterator<String<TEdgeStump*> const>::Type TIterConst;
@@ -538,7 +538,7 @@ write(TFile & target,
 	for(TIterConst it = begin(g.data_align.data_vertex);!atEnd(it);goNext(it)) {
 		TVertexDescriptor sourceV = position(it);
 		_streamPutInt(target, sourceV);
-		TSegment seg = getProperty(g.data_segment, sourceV);
+		TSegment seg = getProperty(g.data_fragment, sourceV);
 		_streamWrite(target," (SeqId:");
 		_streamPutInt(target, seg.data_seq_id);
 		_streamWrite(target," ,Begin:");
@@ -701,8 +701,8 @@ label(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename Id<TGraph>::Type TIdType;
 	typedef typename Size<TGraph>::Type TSize;
-	typedef SegmentInfo<TIdType, TSize> TSegment;
-	TSegment seg = getProperty(g.data_segment, v);
+	typedef FragmentInfo<TIdType, TSize> TSegment;
+	TSegment seg = getProperty(g.data_fragment, v);
 	//std::cout << seg.data_seq_id << ",";
 	//std::cout << seg.data_begin << ",";
 	//std::cout << seg.data_length << ",";
@@ -718,29 +718,29 @@ sequenceId(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 		   TVertexDescriptor const v)
 {
 	SEQAN_CHECKPOINT
-	return const_cast<typename Id<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type&>(g.data_segment[v].data_seq_id);
+	return const_cast<typename Id<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type&>(g.data_fragment[v].data_seq_id);
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TStringSet, typename TCargo, typename TSpec, typename TVertexDescriptor>
 inline typename Position<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type&
-segmentBegin(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
-			 TVertexDescriptor const v)
+fragmentBegin(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
+			  TVertexDescriptor const v)
 {
 	SEQAN_CHECKPOINT
-	return const_cast<typename Position<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type&>(g.data_segment[v].data_begin);
+	return const_cast<typename Position<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type&>(g.data_fragment[v].data_begin);
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TStringSet, typename TCargo, typename TSpec, typename TVertexDescriptor>
 inline typename Size<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type&
-segmentLength(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
-			  TVertexDescriptor const v)
+fragmentLength(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
+			   TVertexDescriptor const v)
 {
 	SEQAN_CHECKPOINT
-	return const_cast<typename Size<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type&>(g.data_segment[v].data_length);
+	return const_cast<typename Size<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type&>(g.data_fragment[v].data_length);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -756,6 +756,33 @@ findVertex(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 }
 
 //////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec, typename TSeqId, typename TPosition> 
+inline typename Position<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type 
+getProjectedPosition(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+					 TSeqId id,
+					 TPosition pos)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename EdgeType<TGraph>::Type TEdgeStump;
+	
+	
+	TVertexDescriptor sV = findVertex(g, id, pos);
+
+	// Take the first Edge!!!
+	TEdgeStump* current = getValue(g.data_align.data_vertex, sV);
+	if(current != (TEdgeStump*) 0) {
+		TVertexDescriptor tV = target(current);
+		if (tV == sV) tV = source(current);
+		return (fragmentBegin(g,tV) + (pos - fragmentBegin(g, sV)));
+	}
+	return 0;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 template<typename TStringSet, typename TCargo, typename TSpec, typename TMatrix> 
 inline bool
 convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
@@ -769,7 +796,7 @@ convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename Id<TGraph>::Type TIdType;
 	typedef typename Size<TGraph>::Type TSize;
-	typedef SegmentInfo<TIdType, TSize> TSegmentInfo;
+	typedef FragmentInfo<TIdType, TSize> TFragmentInfo;
 	typedef std::map<std::pair<TIdType, TIdType>, TVertexDescriptor> TPosToVertexMap;
 	typedef std::map<unsigned int, unsigned int> TComponentLength;
 
@@ -790,7 +817,7 @@ convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 		if (it->first.first != firstSeq) break;
 		unsigned int c = getProperty(component, it->second);
 		if (!bag.insert(c).second) return false;
-		compLength.insert(std::make_pair(c, segmentLength(g, it->second)));
+		compLength.insert(std::make_pair(c, fragmentLength(g, it->second)));
 		comps.push_back(c);
 	}
 
@@ -810,7 +837,7 @@ convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 			if (pos == comps.end()) return false;
 		} else {
 			bag.insert(c);
-			compLength.insert(std::make_pair(c, segmentLength(g, it->second)));
+			compLength.insert(std::make_pair(c, fragmentLength(g, it->second)));
 			pos = comps.insert(pos, c);
 		}
 		++pos;

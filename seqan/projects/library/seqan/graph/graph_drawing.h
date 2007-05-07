@@ -27,7 +27,7 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TAlphabet, typename TCargo, typename TSpec, typename TVertexDescriptor, typename TAttributes>
-void 
+inline void 
 _markRootVertex(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
 				TVertexDescriptor const& v,
 				TAttributes& str)
@@ -40,7 +40,7 @@ _markRootVertex(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TCargo, typename TSpec, typename TVertexDescriptor, typename TAttributes>
-void 
+inline void 
 _markRootVertex(Graph<Directed<TCargo, TSpec> > const& g,
 				TVertexDescriptor const& v,
 				TAttributes& str)
@@ -50,7 +50,7 @@ _markRootVertex(Graph<Directed<TCargo, TSpec> > const& g,
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TCargo, typename TSpec, typename TVertexDescriptor, typename TAttributes>
-void 
+inline void 
 _markRootVertex(Graph<Undirected<TCargo, TSpec> > const& g,
 				TVertexDescriptor const& v,
 				TAttributes& str)
@@ -61,7 +61,7 @@ _markRootVertex(Graph<Undirected<TCargo, TSpec> > const& g,
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TStringSet, typename TCargo, typename TSpec, typename TVertexDescriptor, typename TAttributes>
-void 
+inline void 
 _markRootVertex(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 				TVertexDescriptor const& v,
 				TAttributes& str)
@@ -72,7 +72,7 @@ _markRootVertex(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TCargo, typename TSpec, typename TVertexDescriptor, typename TAttributes>
-void 
+inline void 
 _markRootVertex(Graph<Tree<TCargo, TSpec> > const& g,
 				TVertexDescriptor const& v,
 				TAttributes& str)
@@ -123,8 +123,9 @@ _createTrieNodeAttributes(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TSpec, typename TNodeAttributes>
-void _createNodeAttributes(Graph<TSpec> const& g,
-						   TNodeAttributes& nodeMap)
+inline void
+_createNodeAttributes(Graph<TSpec> const& g,
+					  TNodeAttributes& nodeMap)
 {
 	SEQAN_CHECKPOINT
     typedef Graph<TSpec> TGraph;
@@ -148,8 +149,9 @@ void _createNodeAttributes(Graph<TSpec> const& g,
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TStringSet, typename TCargo, typename TSpec, typename TNodeAttributes>
-void _createNodeAttributes(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
-						   TNodeAttributes& nodeMap)
+inline void
+_createNodeAttributes(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
+					  TNodeAttributes& nodeMap)
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
@@ -171,7 +173,7 @@ void _createNodeAttributes(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g
 		outs << "\", pos = \"";
 		outs << (id * scaling);
 		outs << ",";
-		outs << segmentBegin(g, *it);
+		outs << fragmentBegin(g, *it);
 		outs << "!\"";
 		append(property(nodeMap, *it), outs.str().c_str());		
 		//std::cout << property(nodeMap, *it) << std::endl;
@@ -182,8 +184,9 @@ void _createNodeAttributes(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g
 
 //////////////////////////////////////////////////////////////////////////////
 template<typename TSpec, typename TEdgeAttributes>
-void _createEmptyEdgeAttributes(Graph<TSpec> const& g,
-								TEdgeAttributes& edgeMap)
+inline void
+_createEmptyEdgeAttributes(Graph<TSpec> const& g,
+						   TEdgeAttributes& edgeMap)
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<TSpec> TGraph;
@@ -200,8 +203,9 @@ void _createEmptyEdgeAttributes(Graph<TSpec> const& g,
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TCargo, typename TSpec, typename TEdgeAttributes>
-void _createEdgeAttributes(Graph<Directed<TCargo, TSpec> > const& g,
-						   TEdgeAttributes& edgeMap)
+inline void
+_createEdgeAttributes(Graph<Directed<TCargo, TSpec> > const& g,
+					  TEdgeAttributes& edgeMap)
 {
 	SEQAN_CHECKPOINT
 	_createEmptyEdgeAttributes(g,edgeMap);
@@ -210,8 +214,9 @@ void _createEdgeAttributes(Graph<Directed<TCargo, TSpec> > const& g,
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TCargo, typename TSpec, typename TEdgeAttributes>
-void _createEdgeAttributes(Graph<Undirected<TCargo, TSpec> > const& g,
-						   TEdgeAttributes& edgeMap)
+inline void
+_createEdgeAttributes(Graph<Undirected<TCargo, TSpec> > const& g,
+					  TEdgeAttributes& edgeMap)
 {
 	SEQAN_CHECKPOINT
 	_createEmptyEdgeAttributes(g,edgeMap);
@@ -220,8 +225,9 @@ void _createEdgeAttributes(Graph<Undirected<TCargo, TSpec> > const& g,
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TSpec, typename TEdgeAttributes>
-void _createEdgeAttributes(Graph<Tree<void, TSpec> > const& g,
-						   TEdgeAttributes& edgeMap)
+inline void
+_createEdgeAttributes(Graph<Tree<void, TSpec> > const& g,
+					  TEdgeAttributes& edgeMap)
 {
 	SEQAN_CHECKPOINT
 	_createEmptyEdgeAttributes(g,edgeMap);
@@ -230,8 +236,9 @@ void _createEdgeAttributes(Graph<Tree<void, TSpec> > const& g,
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TCargo, typename TSpec, typename TEdgeAttributes>
-void _createEdgeAttributes(Graph<Tree<TCargo, TSpec> > const& g,
-						   TEdgeAttributes& edgeMap)
+inline void 
+_createEdgeAttributes(Graph<Tree<TCargo, TSpec> > const& g,
+					  TEdgeAttributes& edgeMap)
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<Tree<TCargo, TSpec> > TGraph;
@@ -252,8 +259,9 @@ void _createEdgeAttributes(Graph<Tree<TCargo, TSpec> > const& g,
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TAlphabet, typename TCargo, typename TSpec, typename TEdgeAttributes>
-void _createEdgeAttributes(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
-						   TEdgeAttributes& edgeMap)
+inline void
+_createEdgeAttributes(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
+					  TEdgeAttributes& edgeMap)
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
@@ -272,8 +280,9 @@ void _createEdgeAttributes(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TStringSet, typename TSpec, typename TEdgeAttributes>
-void _createEdgeAttributes(Graph<Alignment<TStringSet, void, TSpec> > const& g,
-						   TEdgeAttributes& edgeMap)
+inline void
+_createEdgeAttributes(Graph<Alignment<TStringSet, void, TSpec> > const& g,
+					  TEdgeAttributes& edgeMap)
 {
 	SEQAN_CHECKPOINT
 	_createEmptyEdgeAttributes(g.data_align,edgeMap);
@@ -282,8 +291,9 @@ void _createEdgeAttributes(Graph<Alignment<TStringSet, void, TSpec> > const& g,
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TStringSet, typename TCargo, typename TSpec, typename TEdgeAttributes>
-void _createEdgeAttributes(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
-						   TEdgeAttributes& edgeMap)
+inline void
+_createEdgeAttributes(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
+					  TEdgeAttributes& edgeMap)
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
@@ -304,8 +314,9 @@ void _createEdgeAttributes(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TAlphabet, typename TCargo, typename TSpec, typename TEdgeAttributes>
-void _createEdgeAttributes(Graph<Automaton<TAlphabet, TCargo, WordGraph<TSpec> > > const& g,
-						   TEdgeAttributes& edgeMap)
+inline void
+_createEdgeAttributes(Graph<Automaton<TAlphabet, TCargo, WordGraph<TSpec> > > const& g,
+					  TEdgeAttributes& edgeMap)
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<Automaton<TAlphabet, TCargo, WordGraph<TSpec> > > TGraph;
@@ -333,9 +344,10 @@ void _createEdgeAttributes(Graph<Automaton<TAlphabet, TCargo, WordGraph<TSpec> >
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TFile, typename TAlphabet, typename TCargo, typename TSpec>
-void _writeGraphType(TFile & file,
-					 Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
-					 DotDrawing)
+inline void
+_writeGraphType(TFile & file,
+				Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
+				DotDrawing)
 {
 	_streamWrite(file, "digraph");
 }
@@ -343,9 +355,10 @@ void _writeGraphType(TFile & file,
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TFile, typename TCargo, typename TSpec>
-void _writeGraphType(TFile & file,
-					 Graph<Directed<TCargo, TSpec> > const& g,
-					 DotDrawing)
+inline void
+_writeGraphType(TFile & file,
+				Graph<Directed<TCargo, TSpec> > const& g,
+				DotDrawing)
 {
 	_streamWrite(file, "digraph");
 }
@@ -353,9 +366,10 @@ void _writeGraphType(TFile & file,
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TFile, typename TCargo, typename TSpec>
-void _writeGraphType(TFile & file,
-					 Graph<Undirected<TCargo, TSpec> > const& g,
-					 DotDrawing)
+inline void
+_writeGraphType(TFile & file,
+				Graph<Undirected<TCargo, TSpec> > const& g,
+				DotDrawing)
 {
 	_streamWrite(file, "graph");
 }
@@ -363,9 +377,10 @@ void _writeGraphType(TFile & file,
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TFile, typename TStringSet, typename TCargo, typename TSpec>
-void _writeGraphType(TFile & file,
-					 Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
-					 DotDrawing)
+inline void
+_writeGraphType(TFile & file,
+				Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
+				DotDrawing)
 {
 	_streamWrite(file, "graph");
 }
@@ -373,9 +388,10 @@ void _writeGraphType(TFile & file,
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TFile, typename TCargo, typename TSpec>
-void _writeGraphType(TFile & file,
-					 Graph<Tree<TCargo, TSpec> > const& g,
-					 DotDrawing)
+inline void
+_writeGraphType(TFile & file,
+				Graph<Tree<TCargo, TSpec> > const& g,
+				DotDrawing)
 {
 	_streamWrite(file, "graph");
 }
@@ -383,9 +399,10 @@ void _writeGraphType(TFile & file,
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TFile, typename TAlphabet, typename TCargo, typename TSpec>
-void _writeEdgeType(TFile & file,
-					Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
-					DotDrawing)
+inline void
+_writeEdgeType(TFile & file,
+			   Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
+			   DotDrawing)
 {
 	_streamWrite(file, " -> ");
 }
@@ -393,9 +410,10 @@ void _writeEdgeType(TFile & file,
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TFile, typename TCargo, typename TSpec>
-void _writeEdgeType(TFile & file,
-					Graph<Directed<TCargo, TSpec> > const& g,
-					DotDrawing)
+inline void
+_writeEdgeType(TFile & file,
+			   Graph<Directed<TCargo, TSpec> > const& g,
+			   DotDrawing)
 {
 	_streamWrite(file, " -> ");
 }
@@ -403,9 +421,10 @@ void _writeEdgeType(TFile & file,
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TFile, typename TCargo, typename TSpec>
-void _writeEdgeType(TFile & file,
-					Graph<Undirected<TCargo, TSpec> > const& g,
-					DotDrawing)
+inline void
+_writeEdgeType(TFile & file,
+			   Graph<Undirected<TCargo, TSpec> > const& g,
+			   DotDrawing)
 {
 	_streamWrite(file, " -- ");
 }
@@ -413,9 +432,10 @@ void _writeEdgeType(TFile & file,
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TFile, typename TStringSet, typename TCargo, typename TSpec>
-void _writeEdgeType(TFile & file,
-					Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
-					DotDrawing)
+inline void
+_writeEdgeType(TFile & file,
+			   Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
+			   DotDrawing)
 {
 	_streamWrite(file, " -- ");
 }
@@ -423,9 +443,10 @@ void _writeEdgeType(TFile & file,
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TFile, typename TCargo, typename TSpec>
-void _writeEdgeType(TFile & file,
-					Graph<Tree<TCargo, TSpec> > const& g,
-					DotDrawing)
+inline void
+_writeEdgeType(TFile & file,
+			   Graph<Tree<TCargo, TSpec> > const& g,
+			   DotDrawing)
 {
 	_streamWrite(file, " -- ");
 }
@@ -438,11 +459,12 @@ void _writeEdgeType(TFile & file,
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TFile, typename TSpec, typename TNodeAttributes, typename TEdgeAttributes>
-void write(TFile & file, 
-		   Graph<TSpec> const& g,
-		   TNodeAttributes const& nodeMap,
-		   TEdgeAttributes const& edgeMap,
-		   DotDrawing) 
+void 
+write(TFile & file, 
+	  Graph<TSpec> const& g,
+	  TNodeAttributes const& nodeMap,
+	  TEdgeAttributes const& edgeMap,
+	  DotDrawing) 
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<TSpec> TGraph;
@@ -495,9 +517,10 @@ void write(TFile & file,
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TFile, typename TSpec>
-void write(TFile & file,
-		   Graph<TSpec> const& g, 
-		   DotDrawing) 
+inline void
+write(TFile & file,
+	  Graph<TSpec> const& g, 
+	  DotDrawing) 
 {
 	SEQAN_CHECKPOINT
 	String<String<char> > nodeMap;
@@ -518,12 +541,13 @@ void write(TFile & file,
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TSpec, typename TStatement, typename TNodeAttributes, typename TEdgeAttributes, typename TNodeIdMap>
-void _addNode(Graph<TSpec>& g,
-			  TStatement& node_id,
-			  TStatement& attr_list,
-			  TNodeAttributes& nodeMap,
-			  TEdgeAttributes& edgeMap,			  
-			  TNodeIdMap& nodeIdMap)
+inline void
+_addNode(Graph<TSpec>& g,
+		 TStatement& node_id,
+		 TStatement& attr_list,
+		 TNodeAttributes& nodeMap,
+		 TEdgeAttributes& edgeMap,			  
+		 TNodeIdMap& nodeIdMap)
 {
 	typedef Graph<TSpec> TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
@@ -539,12 +563,13 @@ void _addNode(Graph<TSpec>& g,
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TCargo, typename TSpec, typename TVertexDescriptor, typename TNodeAttributes, typename TEdgeAttributes, typename TStatement>
-void _addEdge(Graph<Directed<TCargo, TSpec> >& g,
-			  TVertexDescriptor sourceV,
-			  TVertexDescriptor targetV,
-			  TNodeAttributes& nodeMap,
-			  TEdgeAttributes& edgeMap,
-			  TStatement& attr_list)
+inline void
+_addEdge(Graph<Directed<TCargo, TSpec> >& g,
+		 TVertexDescriptor sourceV,
+		 TVertexDescriptor targetV,
+		 TNodeAttributes& nodeMap,
+		 TEdgeAttributes& edgeMap,
+		 TStatement& attr_list)
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<Directed<TCargo, TSpec> > TGraph;
@@ -557,12 +582,13 @@ void _addEdge(Graph<Directed<TCargo, TSpec> >& g,
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TCargo, typename TSpec, typename TVertexDescriptor, typename TNodeAttributes, typename TEdgeAttributes, typename TStatement>
-void _addEdge(Graph<Undirected<TCargo, TSpec> >& g,
-			  TVertexDescriptor sourceV,
-			  TVertexDescriptor targetV,
-			  TNodeAttributes& nodeMap,
-			  TEdgeAttributes& edgeMap,
-			  TStatement& attr_list)
+inline void
+_addEdge(Graph<Undirected<TCargo, TSpec> >& g,
+		 TVertexDescriptor sourceV,
+		 TVertexDescriptor targetV,
+		 TNodeAttributes& nodeMap,
+		 TEdgeAttributes& edgeMap,
+		 TStatement& attr_list)
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<Undirected<TCargo, TSpec> > TGraph;
@@ -575,12 +601,13 @@ void _addEdge(Graph<Undirected<TCargo, TSpec> >& g,
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TStringSet, typename TCargo, typename TSpec, typename TVertexDescriptor, typename TNodeAttributes, typename TEdgeAttributes, typename TStatement>
-void _addEdge(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-			  TVertexDescriptor sourceV,
-			  TVertexDescriptor targetV,
-			  TNodeAttributes& nodeMap,
-			  TEdgeAttributes& edgeMap,
-			  TStatement& attr_list)
+inline void
+_addEdge(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+		 TVertexDescriptor sourceV,
+		 TVertexDescriptor targetV,
+		 TNodeAttributes& nodeMap,
+		 TEdgeAttributes& edgeMap,
+		 TStatement& attr_list)
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
@@ -593,12 +620,13 @@ void _addEdge(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TCargo, typename TSpec, typename TVertexDescriptor, typename TNodeAttributes, typename TEdgeAttributes, typename TStatement>
-void _addEdge(Graph<Tree<TCargo, TSpec> >& g,
-			  TVertexDescriptor sourceV,
-			  TVertexDescriptor targetV,
-			  TNodeAttributes& nodeMap,
-			  TEdgeAttributes& edgeMap,
-			  TStatement& attr_list)
+inline void
+_addEdge(Graph<Tree<TCargo, TSpec> >& g,
+		 TVertexDescriptor sourceV,
+		 TVertexDescriptor targetV,
+		 TNodeAttributes& nodeMap,
+		 TEdgeAttributes& edgeMap,
+		 TStatement& attr_list)
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<Tree<TCargo, TSpec> > TGraph;
@@ -611,7 +639,7 @@ void _addEdge(Graph<Tree<TCargo, TSpec> >& g,
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TAlphabet, typename TCargo, typename TSpec, typename TString>
-typename Alphabet<Graph<Automaton<TAlphabet, TCargo, TSpec> > >::Type
+inline typename Alphabet<Graph<Automaton<TAlphabet, TCargo, TSpec> > >::Type
 _getInternalLabel(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 				  TString& str)
 {
@@ -621,7 +649,7 @@ _getInternalLabel(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TAlphabet, typename TCargo, typename TSpec, typename TString>
-String<TAlphabet>
+inline String<TAlphabet>
 _getInternalLabel(Graph<Automaton<TAlphabet, TCargo, WordGraph<TSpec> > >& g,
 				  TString& str)
 {
@@ -631,12 +659,13 @@ _getInternalLabel(Graph<Automaton<TAlphabet, TCargo, WordGraph<TSpec> > >& g,
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TAlphabet, typename TCargo, typename TSpec, typename TVertexDescriptor, typename TNodeAttributes, typename TEdgeAttributes, typename TStatement>
-void _addEdge(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
-			  TVertexDescriptor sourceV,
-			  TVertexDescriptor targetV,
-			  TNodeAttributes& nodeMap,
-			  TEdgeAttributes& edgeMap,
-			  TStatement& attr_list)
+inline void
+_addEdge(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
+		 TVertexDescriptor sourceV,
+		 TVertexDescriptor targetV,
+		 TNodeAttributes& nodeMap,
+		 TEdgeAttributes& edgeMap,
+		 TStatement& attr_list)
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
@@ -672,13 +701,14 @@ void _addEdge(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TSpec, typename TStatement, typename TNodeAttributes, typename TEdgeAttributes, typename TNodeIdMap>
-void _addEdge(Graph<TSpec>& g,
-			  TStatement& left_node_id,
-			  TStatement& right_node_id,
-			  TStatement& attr_list,
-			  TNodeAttributes& nodeMap,
-			  TEdgeAttributes& edgeMap,
-			  TNodeIdMap& nodeIdMap)
+inline void
+_addEdge(Graph<TSpec>& g,
+		 TStatement& left_node_id,
+		 TStatement& right_node_id,
+		 TStatement& attr_list,
+		 TNodeAttributes& nodeMap,
+		 TEdgeAttributes& edgeMap,
+		 TNodeIdMap& nodeIdMap)
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<TSpec> TGraph;
@@ -704,11 +734,12 @@ void _addEdge(Graph<TSpec>& g,
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TSpec, typename TStatement, typename TNodeAttributes, typename TEdgeAttributes, typename TNodeIdMap>
-void _processNodeStatement(Graph<TSpec>& g,
-						   TStatement& stmt,
-						   TNodeAttributes& nodeMap,
-						   TEdgeAttributes& edgeMap,
-						   TNodeIdMap& nodeIdMap) 
+inline void
+_processNodeStatement(Graph<TSpec>& g,
+					  TStatement& stmt,
+					  TNodeAttributes& nodeMap,
+					  TEdgeAttributes& edgeMap,
+					  TNodeIdMap& nodeIdMap) 
 {
 	SEQAN_CHECKPOINT
 	typedef typename Value<TStatement>::Type TValue;
@@ -742,12 +773,13 @@ void _processNodeStatement(Graph<TSpec>& g,
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TSpec, typename TStatement, typename TNodeAttributes, typename TEdgeAttributes, typename TPosition, typename TNodeIdMap>
-void _processEdgeStatement(Graph<TSpec>& g,
-						   TStatement& stmt,
-						   TNodeAttributes& nodeMap,
-						   TEdgeAttributes& edgeMap,
-						   TPosition pos,
-						   TNodeIdMap& nodeIdMap) 
+inline void
+_processEdgeStatement(Graph<TSpec>& g,
+					  TStatement& stmt,
+					  TNodeAttributes& nodeMap,
+					  TEdgeAttributes& edgeMap,
+					  TPosition pos,
+					  TNodeIdMap& nodeIdMap) 
 {
 	SEQAN_CHECKPOINT
 	typedef typename Value<TStatement>::Type TValue;
@@ -783,11 +815,12 @@ void _processEdgeStatement(Graph<TSpec>& g,
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TSpec, typename TStatement, typename TNodeAttributes, typename TEdgeAttributes, typename TNodeIdMap>
-void _processStatement(Graph<TSpec>& g,
-					   TStatement& stmt,
-					   TNodeAttributes& nodeMap,
-					   TEdgeAttributes& edgeMap,
-					   TNodeIdMap& nodeIdMap) 
+inline void
+_processStatement(Graph<TSpec>& g,
+				  TStatement& stmt,
+				  TNodeAttributes& nodeMap,
+				  TEdgeAttributes& edgeMap,
+				  TNodeIdMap& nodeIdMap) 
 {
 	SEQAN_CHECKPOINT
 	// Clear everything up to the last line
