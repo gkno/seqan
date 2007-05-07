@@ -610,7 +610,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			}
 
 			if (Base::_getOFlag(openMode | OPEN_ASYNC) & O_DIRECT) {
-				handleAsync = ::open(fileName, Base::_getOFlag(openMode | OPEN_ASYNC & ~OPEN_CREATE & ~OPEN_APPEND), S_IREAD | S_IWRITE);
+				handleAsync = ::open(fileName, Base::_getOFlag(openMode | OPEN_ASYNC & ~OPEN_CREATE), S_IREAD | S_IWRITE);
 				if (handleAsync == -1 || errno == EINVAL) {	// fall back to cached access
 					#ifdef SEQAN_DEBUG_OR_TEST_
 						::std::cerr << "Warning: Direct access openening failed. (" << ::strerror(errno) << ")" << ::std::endl;
@@ -697,13 +697,16 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //    enum { _AsyncIOSignal = SIGIO };
 
-	inline void printRequest(aiocb &request) {
+	inline void printRequest(aiocb &request, const char *_hint = NULL) {
 		::std::cerr << ::std::hex;
+		if (_hint)
+			::std::cerr << _hint << ::std::endl;
 		::std::cerr << "fildes:  " << request.aio_fildes << ::std::endl;
-		::std::cerr << "buffer:  " << request.aio_buf << ::std::endl;
+		::std::cerr << "buffer:  " << (unsigned)request.aio_buf << ::std::endl;
 		::std::cerr << "offset:  " << request.aio_offset<< ::std::endl;
 		::std::cerr << "nbytes:  " << request.aio_nbytes << ::std::endl;
 		::std::cerr << "event:   " << request.aio_sigevent.sigev_notify << ::std::endl;
+		::std::cerr << "Raddr:   " << &request << ::std::endl;
 		::std::cerr << ::std::dec;
 	}
 
@@ -719,14 +722,17 @@ namespace SEQAN_NAMESPACE_MAIN
         request.aio_offset *= sizeof(TValue);
         request.aio_nbytes = count * sizeof(TValue);
         request.aio_sigevent.sigev_notify = SIGEV_NONE;
-/*        request.aio_sigevent.sigev_notify = SIGEV_SIGNAL;
+/*      request.aio_sigevent.sigev_notify = SIGEV_SIGNAL;
         request.aio_sigevent.sigev_signo = _AsyncIOSignal;
-        request.aio_sigevent.sigev_value.sival_ptr = &request;*/
-        SEQAN_PROADD(SEQAN_PROIO, (request.aio_nbytes + SEQAN_PROPAGESIZE - 1) / SEQAN_PROPAGESIZE);
+        request.aio_sigevent.sigev_value.sival_ptr = &request;
+		#ifdef SEQAN_VVERBOSE
+			printRequest(request, "aio_read():");
+		#endif
+*/      SEQAN_PROADD(SEQAN_PROIO, (request.aio_nbytes + SEQAN_PROPAGESIZE - 1) / SEQAN_PROPAGESIZE);
 		int result = aio_read(&request);
         SEQAN_PROADD(SEQAN_PROIWAIT, SEQAN_PROTIMEDIFF(tw));
         #ifdef SEQAN_DEBUG
-			if (result) ::std::cerr << "areadAt returned " << result << ::std::endl;
+			if (result) ::std::cerr << "areadAt returned " << result << " and errno is " << ::strerror(errno) << ::std::endl;
 		#endif
 		return result == 0;
     }
@@ -743,14 +749,17 @@ namespace SEQAN_NAMESPACE_MAIN
         request.aio_offset *= sizeof(TValue);
         request.aio_nbytes = count * sizeof(TValue);
         request.aio_sigevent.sigev_notify = SIGEV_NONE;
-/*        request.aio_sigevent.sigev_notify = SIGEV_SIGNAL;
+/*      request.aio_sigevent.sigev_notify = SIGEV_SIGNAL;
         request.aio_sigevent.sigev_signo = _AsyncIOSignal;
-        request.aio_sigevent.sigev_value.sival_ptr = &request;*/
-        SEQAN_PROADD(SEQAN_PROIO, (request.aio_nbytes + SEQAN_PROPAGESIZE - 1) / SEQAN_PROPAGESIZE);
+        request.aio_sigevent.sigev_value.sival_ptr = &request;
+		#ifdef SEQAN_VVERBOSE
+			printRequest(request, "aio_write():");
+		#endif
+*/      SEQAN_PROADD(SEQAN_PROIO, (request.aio_nbytes + SEQAN_PROPAGESIZE - 1) / SEQAN_PROPAGESIZE);
 		int result = aio_write(&request);
         SEQAN_PROADD(SEQAN_PROIWAIT, SEQAN_PROTIMEDIFF(tw));
         #ifdef SEQAN_DEBUG
-			if (result) ::std::cerr << "awriteAt returned " << result << ::std::endl;
+			if (result) ::std::cerr << "awriteAt returned " << result << " and errno is " << ::strerror(errno) << ::std::endl;
 		#endif
         return result == 0;
     }
@@ -764,7 +773,11 @@ namespace SEQAN_NAMESPACE_MAIN
     // queue specific functions
 
 	inline bool waitFor(aiocb &request) {
-        aiocb * cblist = &request;
+/*		#ifdef SEQAN_VVERBOSE
+			printRequest(request, "aio_suspend():");
+		#endif
+*/
+		aiocb * cblist = &request;
         SEQAN_PROTIMESTART(tw);
 		int result = aio_suspend(&cblist, 1, NULL);
         SEQAN_PROADD(SEQAN_PROCWAIT, SEQAN_PROTIMEDIFF(tw));
@@ -779,13 +792,23 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	inline bool waitFor(aiocb &request, long timeout_millis) {
-        aiocb * cblist = &request;
-        timespec ts;
-        ts.tv_sec = timeout_millis / 1000;
-        ts.tv_nsec = (timeout_millis % 1000) * 1000;
-        SEQAN_PROTIMESTART(tw);
-		int result = aio_suspend(&cblist, 1, &ts);
-        SEQAN_PROADD(SEQAN_PROCWAIT, SEQAN_PROTIMEDIFF(tw));
+/*		#ifdef SEQAN_VVERBOSE
+			printRequest(request, "aio_suspend_timeout():");
+		#endif
+*/
+		int result;
+		if (timeout_millis == 0)
+			result = aio_error(&request);
+		else {
+			aiocb * cblist = &request;
+			timespec ts;
+			ts.tv_sec = timeout_millis / 1000;
+			ts.tv_nsec = (timeout_millis % 1000) * 1000;
+			SEQAN_PROTIMESTART(tw);
+			result = aio_suspend(&cblist, 1, &ts);
+			SEQAN_PROADD(SEQAN_PROCWAIT, SEQAN_PROTIMEDIFF(tw));
+		}
+
         #ifdef SEQAN_DEBUG
 			if (result) {
 	 			int eno = aio_error(&request);
@@ -817,7 +840,10 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <typename TSpec>
     inline bool cancel(File<Async<TSpec> > & me, aiocb &request) {
-        return aio_cancel(me.handleAsync, &request) == 0;
+/*		#ifdef SEQAN_VVERBOSE
+			printRequest(request, "aio_cancel():");
+		#endif
+*/      return aio_cancel(me.handleAsync, &request) == 0;
     }
 
     inline int error(aiocb const &request) {

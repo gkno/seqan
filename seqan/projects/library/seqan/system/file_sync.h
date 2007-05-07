@@ -69,7 +69,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			}
 
 			if (openMode & OPEN_CREATE)     result |= _O_CREAT;
-			if (openMode & OPEN_APPEND)     result |= _O_APPEND;
+			if (!(openMode & OPEN_APPEND))	result |= _O_TRUNC;
             if (openMode & OPEN_TEMPORARY)  result |= _O_TEMPORARY;
 			return result | _O_BINARY;
         }
@@ -184,7 +184,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			}
 
 			if (openMode & OPEN_CREATE)     result |= O_CREAT;
-			if (openMode & OPEN_APPEND)     result |= O_APPEND;
+			if (!(openMode & OPEN_APPEND))	result |= O_TRUNC;
 //			if (openMode & OPEN_TEMPORARY)  result |= O_TEMPORARY;
         #ifdef SEQAN_DIRECTIO
     		if (openMode & OPEN_ASYNC)		result |= O_DIRECT;
