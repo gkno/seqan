@@ -6,19 +6,16 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TFile, typename TStringSet, typename TCargo, typename TSpec, typename TStringSet2, typename TSize2>
+template<typename TFile, typename TFragment, typename TSpec, typename TSize>
 void 
 read(TFile & file,
-	 String<Graph<Alignment<TStringSet, TCargo, TSpec> > >& matches,
-	 TStringSet2& initialSet,
-	 TSize2 const minMatchSize,
+	 String<TFragment, TSpec>& matches,
+	 TSize const minMatchSize,
 	 AtacMatches) 
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename Position<TFile>::Type TPosition;
 	typedef typename Value<TFile>::Type TValue;
-	typedef typename Size<TFile>::Type TSize;
 
 	TValue c;
 	if (_streamEOF(file)) return;
@@ -45,14 +42,17 @@ read(TFile & file,
 			char identifier1 = c;
 			// Ignore the colon
 			c = _streamGet(file);
+			c = _streamGet(file);
 			int seqId1 = _parse_readNumber(file, c);
 			_parse_skipWhitespace(file,c);
 			int pos1 = _parse_readNumber(file, c);
 			int len1 = _parse_readNumber(file, c);
 			_parse_skipWhitespace(file,c);
+			// Ignore reverse matches
 			if (c == '-') {
 				_parse_skipLine(file, c);
-				exit(-1);
+				continue;
+				//exit(-1);
 			}
 			if (len1 < minMatchSize) {
 				_parse_skipLine(file, c);
@@ -64,25 +64,31 @@ read(TFile & file,
 			char identifier2 = c;
 			// Ignore the colon
 			c = _streamGet(file);
+			c = _streamGet(file);
 			int seqId2 = _parse_readNumber(file, c);
 			_parse_skipWhitespace(file,c);
 			int pos2 = _parse_readNumber(file, c);
 			int len2 = _parse_readNumber(file, c);
+			SEQAN_ASSERT(len1 == len2)
+			// Ignore reverse matches
+			_parse_skipWhitespace(file,c);
+			if (c == '-') {
+				_parse_skipLine(file, c);
+				continue;
+				//exit(-1);
+			}
 			_parse_skipLine(file, c);
+			std::cout << identifier1 << ":" << seqId1 << "," << pos1 << "," << len1 << "," << identifier2 << ":" << seqId2 << "," << pos2 << "," << len2 << std::endl;
 			if (identifier1 == 'W') seqId1 += 24;
 			else if (identifier1 == 'B') seqId1 += 48;
 			if (identifier2 == 'W') seqId2 += 24;
 			else if (identifier2 == 'B') seqId2 += 48;
-			TStringSet strSet;
-			resize(matches, count + 1, Generous());
-			assignValueById(strSet, initialSet, seqId1);
-			assignValueById(strSet, initialSet, seqId2);
-			assignStringSet(matches[count], strSet);
-			addEdge(matches[count], addVertex(matches[count], seqId1, pos1, len1), addVertex(matches[count], seqId2, pos2, len2));
-			std::cout << count << ',';
-			//std::cout << identifier1 << ":" << seqId1 << ",";
-			//std::cout << identifier2 << ":" << seqId2 << ",";
-			//std::cout << ":" << pos1 << "," << pos2 << "," << len1 << std::endl;
+			push_back(matches, TFragment(seqId1,pos1,seqId2,pos2,len1));
+			//TStringSet strSet;
+			//assignValueById(strSet, initialSet, seqId1);
+			//assignValueById(strSet, initialSet, seqId2);
+			//assignStringSet(matches[count], strSet);
+			//addEdge(matches[count], addVertex(matches[count], seqId1, pos1, len1), addVertex(matches[count], seqId2, pos2, len2));
 			++count;
 			SEQAN_TASSERT(len1 == len2)
 		}

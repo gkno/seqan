@@ -1751,6 +1751,85 @@ void Test_Alignment() {
 
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
+void Test_Fragment() {
+	// Test Fragment
+	typedef String<char> TString;
+	typedef StringSet<TString, Dependent<> > TStringSet;
+	typedef Graph<Alignment<TStringSet, void> > TGraph;
+	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef	Id<TStringSet>::Type TId;
+	
+	TStringSet str;
+	TString str0("annual");	assignValueById(str, str0);
+	TString str1("anneal"); assignValueById(str, str1);
+
+	// Fragment: SeqId1, Begin1, SeqId2, Begin2, Length of Fragment
+	Fragment<> f(0,4,1,4,2);
+	SEQAN_TASSERT(f.seqId1 == 0)
+	SEQAN_TASSERT(f.begin1 == 4)
+	SEQAN_TASSERT(f.seqId2 == 1)
+	SEQAN_TASSERT(f.begin2 == 4)
+	SEQAN_TASSERT(f.len == 2)
+	SEQAN_TASSERT(fragmentBegin(f, 0) == 4)
+	SEQAN_TASSERT(fragmentBegin(f, 1) == 4)
+	SEQAN_TASSERT(fragmentLength(f, 0) == 2)
+	SEQAN_TASSERT(fragmentLength(f, 1) == 2)
+	SEQAN_TASSERT(sequenceId(f, 0) == 0)
+	SEQAN_TASSERT(sequenceId(f, 1) == 1)
+	SEQAN_TASSERT(label(f, str, 0) == "al")
+	SEQAN_TASSERT(label(f, str, 1) == "al")
+	SEQAN_TASSERT(getProjectedPosition(f, 0, 5) == 5)
+	SEQAN_TASSERT(getProjectedPosition(f, 1, 5) == 5)
+
+	// Fragment: SeqId1, Begin1, SeqId2, Begin2, Length of Fragment
+	Fragment<> f2(0,0,1,4,1);
+	SEQAN_TASSERT(f2.seqId1 == 0)
+	SEQAN_TASSERT(f2.begin1 == 0)
+	SEQAN_TASSERT(f2.seqId2 == 1)
+	SEQAN_TASSERT(f2.begin2 == 4)
+	SEQAN_TASSERT(f2.len == 1)
+	SEQAN_TASSERT(fragmentBegin(f2, 0) == 0)
+	SEQAN_TASSERT(fragmentBegin(f2, 1) == 4)
+	SEQAN_TASSERT(fragmentLength(f2, 0) == 1)
+	SEQAN_TASSERT(fragmentLength(f2, 1) == 1)
+	SEQAN_TASSERT(label(f2, str, 0) == "a")
+	SEQAN_TASSERT(label(f2, str, 1) == "a")
+	SEQAN_TASSERT(getProjectedPosition(f2, 0, 0) == 4)
+	SEQAN_TASSERT(getProjectedPosition(f2, 1, 4) == 0)
+
+	// The same stuff on an alignment graph
+	TGraph g(str);
+	TVertexDescriptor vert1 = addVertex(g,0,4,2);
+	TVertexDescriptor vert2 = addVertex(g,1,4,2);
+	addEdge(g, vert1, vert2);
+	SEQAN_TASSERT(fragmentBegin(g, vert1) == 4)
+	SEQAN_TASSERT(fragmentBegin(g, vert2) == 4)
+	SEQAN_TASSERT(fragmentLength(g, vert1) == 2)
+	SEQAN_TASSERT(fragmentLength(g, vert2) == 2)
+	SEQAN_TASSERT(sequenceId(f, vert1) == 0)
+	SEQAN_TASSERT(sequenceId(f, vert2) == 1)
+	SEQAN_TASSERT(label(g, vert1) == "al")
+	SEQAN_TASSERT(label(g, vert2) == "al")
+	SEQAN_TASSERT(getProjectedPosition(g, 0, 5) == 5)
+	SEQAN_TASSERT(getProjectedPosition(g, 1, 5) == 5)
+
+	TGraph g2(str);
+	TVertexDescriptor v1 = addVertex(g2,0,0,1);
+	TVertexDescriptor v2 = addVertex(g2,1,4,1);
+	addEdge(g2, v1, v2);
+	SEQAN_TASSERT(fragmentBegin(g2, v1) == 0)
+	SEQAN_TASSERT(fragmentBegin(g2, v2) == 4)
+	SEQAN_TASSERT(fragmentLength(g2, v1) == 1)
+	SEQAN_TASSERT(fragmentLength(g2, v2) == 1)
+	SEQAN_TASSERT(label(g2, v1) == "a")
+	SEQAN_TASSERT(label(g2, v2) == "a")
+	SEQAN_TASSERT(getProjectedPosition(g2, 0, 0) == 4)
+	SEQAN_TASSERT(getProjectedPosition(g2, 1, 4) == 0)
+}
+
+
 }
 
 #endif

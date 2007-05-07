@@ -35,9 +35,9 @@ label(Fragment<TId, TPos, TSize, TSpec> const& f,
 	typedef Fragment<TId, TPos, TSize, TSpec> TFragment;
 
 	if ((TId) seqId == f.seqId1) {
-	  return infix(getValueById(str, (TId) seqId), f.begin1, f.begin1 + f.len);
+		return infix(getValueById(str, (TId) seqId), f.begin1, f.begin1 + f.len);
 	} else {
-	  return infix(getValueById(str, (TId) seqId), f.begin2, f.begin2 + f.len);
+		return infix(getValueById(str, (TId) seqId), f.begin2, f.begin2 + f.len);
 	}
 }
 
@@ -49,7 +49,11 @@ sequenceId(Fragment<TId, TPos, TSize, TSpec> const& f,
 	   TVal const seqId)
 {
 	SEQAN_CHECKPOINT
-	return seqId;
+	if ((TId) seqId == 0) {
+		return f.seqId1;
+	} else {
+		return f.seqId2;
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -72,7 +76,7 @@ fragmentBegin(Fragment<TId, TPos, TSize, TSpec> const& f,
 template<typename TId, typename TPos, typename TSize, typename TSpec, typename TVal>
 inline typename Size<Fragment<TId, TPos, TSize, TSpec> >::Type&
 fragmentLength(Fragment<TId, TPos, TSize, TSpec> const& f,
-	      TVal const seqId)
+			   TVal const seqId)
 {
 	SEQAN_CHECKPOINT
 	return const_cast<typename Size<Fragment<TId, TPos, TSize, TSpec> >::Type&>(f.len);

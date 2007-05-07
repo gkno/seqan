@@ -24,6 +24,7 @@
 #include "test_graph_derived.h"
 #include "test_graph_algorithms.h"
 #include "test_graph_alignment.h"
+#include "test_graph_match_refinement.h"
 
 
 using namespace std;
@@ -101,9 +102,9 @@ int main()
 	Test_TCoffee(); 
 
 	// Match Refinement
-	// Test_MatchRefinement();
+	Test_MatchRefinement();
 
-	//____________________________________________________________________________
+	
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_base.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_idmanager.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_interface.h");
