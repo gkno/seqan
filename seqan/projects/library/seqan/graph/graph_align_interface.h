@@ -81,7 +81,7 @@ globalAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 {
 	SEQAN_CHECKPOINT
 	clearVertices(g);
-	return _globalAlignment(g,stringSet(g),Score<unsigned int>(0,1,1,0),Hirschberg_MyersBitVector());
+	return _globalAlignment(g,stringSet(g),Score<unsigned int>(0,1,1,0),Hirschberg());
 }
 
 }// namespace SEQAN_NAMESPACE_MAIN

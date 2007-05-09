@@ -1,5 +1,6 @@
 #define SEQAN_DEBUG
 #define SEQAN_TEST
+//#define SEQAN_VVERBOSE
 
 #define TEST_PATH "projects/tests/graph/"
 #define LIB_PATH "projects/library/seqan/graph/"
@@ -25,7 +26,6 @@
 #include "test_graph_algorithms.h"
 #include "test_graph_alignment.h"
 #include "test_graph_match_refinement.h"
-
 
 using namespace std;
 using namespace seqan;
@@ -102,7 +102,7 @@ int main()
 	Test_TCoffee(); 
 
 	// Match Refinement
-	Test_MatchRefinement();
+	//Test_MatchRefinement();
 
 	
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_base.h");

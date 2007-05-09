@@ -71,8 +71,9 @@ void Test_MatchRefinement() {
 	typedef Size<TStringSet>::Type TSize;
 
 	// Matches
-	typedef String<Fragment<>, External<> > TFragmentString;
-	
+	typedef String<Fragment<>, External<ExternalConfig<File<>, 64*1024> > > TFragmentString;
+	//typedef String<Fragment<>, External<> > TFragmentString;
+
 	// Windows
 #ifdef PLATFORM_WINDOWS
 	String<char> in_path("Z:\\matches\\");
@@ -153,7 +154,7 @@ void Test_MatchRefinement() {
 	std::cout << "Number of sequences: " << length(str) << std::endl;
 	for(TIdToNameMap::const_iterator pos =  idToName.begin(); pos != idToName.end(); ++pos) {
 		std::cout << pos->second << ") ";
-		for(TSize i=0; i<10;++i) {
+		for(TSize i=0; ((i<10) && (i <length(str[pos->first])));++i) {
 			std::cout << str[pos->first][i];
 		}
 		std::cout << std::endl;
@@ -162,9 +163,11 @@ void Test_MatchRefinement() {
 	// Access the matches
 	TFragmentString matches;
 	std::stringstream strstream;
-	strstream << out_path << "matchesTest.dat"; // 10 Matches
-	//strstream << out_path << "matches10000.dat"; // 10 Matches
+	//strstream << out_path << "matchesTest.dat"; // 10 Matches
+	//strstream << out_path << "matches1000.dat"; // 2001948 Matches
+	strstream << out_path << "matches10000.dat"; // 2111 Matches
 	open(matches, strstream.str().c_str());
+
 
 	// Convert the matches to an external string
 	//for(TSize i = 1; i<4; ++i) {
@@ -175,14 +178,15 @@ void Test_MatchRefinement() {
 	//	else if (i==2 ) s << in_path << "BvsW.atac";
 	//	else if (i==3 ) s << in_path << "WvsH.atac";
 	//	strm.open(s.str().c_str(), ios_base::in);
-	//	read(strm, matches, 10000, AtacMatches());
+	//	read(strm, matches, 1000, AtacMatches());
 	//	strm.close();
 	//}
 
 	// Print all matches
 	std::cout << "Number of matches: " << length(matches) << std::endl;
+	/*
 	typedef Infix<TString>::Type TInfix;
-	for(TSize i = 0; i < length(matches); ++i) {
+	for(TSize i = 0; ((i < length(matches)) && (i < 10)); ++i) {
 		TId seqId1 = sequenceId(matches[i],0);
 		TId seqId2 = sequenceId(matches[i],1);
 		TSize seqBegin1 = fragmentBegin(matches[i], seqId1);
@@ -198,17 +202,27 @@ void Test_MatchRefinement() {
 		std::cout << infix2 << std::endl;
 		std::cout << std::endl;
 	}
-
-	/*
-	Score<int> score_type = Score<int>(1,-1,-2,0) ;
-	typedef Graph<Alignment<TStringSet> > TAliGraph;
+	*/
 	
-	TAliGraph ali_graph(str);
 
+	typedef String<Dna5> TAlignmentString;
+	typedef StringSet<TString, Dependent<> > TAlignmentStringSet;
+	typedef Graph<Alignment<TAlignmentStringSet> > TAliGraph;
+	TAlignmentStringSet aliStr;
+	for(TSize i = 0; i<length(str); ++i) {
+		assignValueById(aliStr, str, i);
+	}
+	Score<int> score_type = Score<int>(1,-1,-2,0) ;
+	TAliGraph ali_graph(aliStr);
 	matchRefinement(matches,str,score_type,ali_graph);//,StoreEdges());
 	std::cout << "\nnumEdges: "<<numEdges(ali_graph)<<"\n";
 	std::cout << "\nnumVertices: "<<numVertices(ali_graph)<<"\n";
-	*/
+	//std::cout << ali_graph <<"\n";
+
+	for(TIdToNameMap::const_iterator pos =  idToName.begin(); pos != idToName.end(); ++pos) {
+		close(str[pos->first]);
+	}
+	close(matches);
 }
 
 }

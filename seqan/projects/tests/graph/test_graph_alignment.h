@@ -321,11 +321,10 @@ void Test_Hirschberg() {
 	TStringSet str;
 	TString str0("annual");	assignValueById(str, str0);
 	TString str1("annealing"); assignValueById(str, str1);
-	//TGraph g(str);
-	//Score<int> score_type = Score<int>(0,-1,-1,0);
-	//int score1 = globalAlignment(g, Hirschberg_MyersBitVector() );
-	//int score2 = globalAlignment(g, score_type, Hirschberg_NeedlemanWunsch() );
-	//Score<int> score_type2 = Score<int>(0,-1,-1,-1);
+	TGraph g(str);
+	Score<int> score_type = Score<int>(0,-1,-1,-1);
+	int score = globalAlignment(g, score_type, Hirschberg() );
+	
 	//int score3 = globalAlignment(g, score_type2, Hirschberg_Gotoh() );
 	//SEQAN_TASSERT((-1) * score1 == score2)
 	//SEQAN_TASSERT(score2 == score3)

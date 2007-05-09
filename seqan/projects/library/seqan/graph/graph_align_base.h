@@ -44,35 +44,13 @@ typedef Tag<MyersBitVector_> const MyersBitVector;
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Tag.Hirschberg_Gotoh
+.Tag.Hirschberg
 ..summary:Switch to trigger a Hirschberg algorithm that uses Gotoh
-..value.Hirschberg_Gotoh:Hirschberg_Gotoh alignment
+..value.Hirschberg:Hirschberg alignment
 */
 
-struct Hirschberg_Gotoh_;
-typedef Tag<Hirschberg_Gotoh_> const Hirschberg_Gotoh;
-
-//////////////////////////////////////////////////////////////////////////////
-
-/**
-.Tag.Hirschberg_NeedlemanWunsch
-..summary:Switch to trigger a Hirschberg algorithm that uses NeedlemanWunsch
-..value.Hirschberg_NeedlemanWunsch:Hirschberg_NeedlemanWunsch alignment
-*/
-
-struct Hirschberg_NeedlemanWunsch_;
-typedef Tag<Hirschberg_NeedlemanWunsch_> const Hirschberg_NeedlemanWunsch;
-
-//////////////////////////////////////////////////////////////////////////////
-
-/**
-.Tag.Hirschberg_MyersBitVector
-..summary:Switch to trigger a Hirschberg algorithm that uses MyersBitVector
-..value.Hirschberg_MyersBitVector:Hirschberg_MyersBitVector alignment
-*/
-
-struct Hirschberg_MyersBitVector_;
-typedef Tag<Hirschberg_MyersBitVector_> const Hirschberg_MyersBitVector;
+struct Hirschberg_;
+typedef Tag<Hirschberg_> const Hirschberg;
 
 //////////////////////////////////////////////////////////////////////////////
 // Alignment: Simple Traceback Alphabet

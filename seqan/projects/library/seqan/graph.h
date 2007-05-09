@@ -77,12 +77,9 @@
 // Graph algorithms
 #include <seqan/graph/graph_algorithm.h>
 
-
-
-/*
 // Refinement
-#include <seqan/graph/interval_tree_types.h>
-#include <seqan/graph/interval_tree.h>
-#include <seqan/graph/temp_refine.h>
-*/
+#include <seqan/graph/graph_impl_interval_types.h>
+#include <seqan/graph/graph_impl_interval_tree.h>
+#include <seqan/graph/graph_algorithm_refine.h>
+
 #endif //#ifndef SEQAN_HEADER_...
