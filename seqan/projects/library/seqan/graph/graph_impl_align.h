@@ -799,6 +799,7 @@ convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	typedef FragmentInfo<TIdType, TSize> TFragmentInfo;
 	typedef std::map<std::pair<TIdType, TIdType>, TVertexDescriptor> TPosToVertexMap;
 	typedef std::map<unsigned int, unsigned int> TComponentLength;
+	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
 
 	// Strongly Connected Components
 	String<unsigned int> component;
@@ -815,6 +816,7 @@ convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	TIdType firstSeq = it->first.first;
 	for(; it != g.data_pvMap.end(); ++it) {
 		if (it->first.first != firstSeq) break;
+		if (it->second == nilVertex) return false;
 		unsigned int c = getProperty(component, it->second);
 		if (!bag.insert(c).second) return false;
 		compLength.insert(std::make_pair(c, fragmentLength(g, it->second)));
