@@ -890,6 +890,16 @@ convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	return true;
 }
 
+template<typename TStringSet, typename TCargo, typename TSpec, typename TCargo2, typename TSpec2> 
+inline void
+extendGraph(Graph<Alignment<TStringSet, TCargo, TSpec> >& extendedGraph,
+			Graph<Alignment<TStringSet, TCargo2, TSpec2> >& sourceGraph)
+{
+	SEQAN_CHECKPOINT
+		std::cout << 'h' << std::endl;
+}
+
+
 }// namespace SEQAN_NAMESPACE_MAIN
 
 #endif //#ifndef SEQAN_HEADER_...
