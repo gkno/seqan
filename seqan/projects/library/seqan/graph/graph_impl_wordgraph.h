@@ -145,10 +145,10 @@ removeEdge(Graph<Automaton<TAlphabet, String<TAlphabet>, WordGraph<TSpec> > >& g
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TFile, typename TAlphabet, typename TSpec, typename TIDString>
+template<typename TFile, typename TAlphabet, typename TCargo, typename TSpec, typename TIDString>
 inline void
 write(TFile & target,
-	  Graph<Automaton<TAlphabet, String<TAlphabet>, WordGraph<TSpec> > > const& g,
+	  Graph<Automaton<TAlphabet, TCargo, WordGraph<TSpec> > > const& g,
 	  TIDString const &,
 	  Raw)
 {

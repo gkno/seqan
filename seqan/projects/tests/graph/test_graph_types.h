@@ -1739,15 +1739,41 @@ void Test_Alignment() {
 	addEdge(gAl, vW, vR);addEdge(gAl, vF, vJ);addEdge(gAl, vF, vO);addEdge(gAl, vF, vS);
 	addEdge(gAl, vJ, vO);addEdge(gAl, vJ, vS);addEdge(gAl, vO, vS);
 
+	//// Graph drawing
+	//// Raw output
 	//std::cout << gAl << std::endl;
+	//// File output
+	//fstream strm;
+	//strm.open(TEST_PATH "my_alignment.dot", ios_base::out | ios_base::trunc);
+	//write(strm,gAl,DotDrawing());
+	//strm.close();
 
-	// Graph drawing
-	// Raw output
-	// File output
-	fstream strm;
-	strm.open(TEST_PATH "my_alignment.dot", ios_base::out | ios_base::trunc);
-	write(strm,gAl,DotDrawing());
-	strm.close();
+
+	typedef String<char> TAlignString;
+	typedef StringSet<TAlignString, Dependent<> > TAlignStringSet;
+	typedef Graph<Alignment<TAlignStringSet, unsigned int> > TAlignGraph;
+	
+	TAlignStringSet align_str;
+	TAlignString align_str0("annual");	assignValueById(align_str, align_str0);
+	TAlignString align_str1("annealing"); assignValueById(align_str, align_str1);
+	TAlignGraph g_align(align_str);
+	addEdge(g_align, addVertex(g_align, 0, 0, 6), addVertex(g_align, 1, 0, 6), 1);
+	addVertex(g_align, 1, 6, 3);
+
+	std::cout << g_align << std::endl;
+
+	TAlignGraph g_align_b(align_str);
+	addEdge(g_align_b, addVertex(g_align_b, 0, 0, 6), addVertex(g_align_b, 1, 0, 6), 1);
+	addVertex(g_align_b, 1, 6, 3);
+
+	std::cout << g_align_b << std::endl;
+
+	extendGraph(g_align, g_align_b);
+
+	std::cout << g_align << std::endl;
+
+
+
 
 }
 
