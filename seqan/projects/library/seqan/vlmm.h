@@ -80,8 +80,10 @@ template < typename TIndex,typename TSpec>
 class Iter< TIndex, VSTree< TopDown< ParentLinks<ConstrainedTraversal<TSpec> > > > >:
 	public Iter< TIndex, VSTree< TopDown< ParentLinks<> > > >
 {
-	typedef Iter< TIndex, VSTree< TopDown< ParentLinks<> > > > Base;
-
+	typedef Iter< TIndex, VSTree< TopDown< ParentLinks<> > > >TBase;
+	typedef	Pair<typename Size<TIndex>::Type>	TStackEntry, TRange;
+		typedef String<TStackEntry, Block<> >		TStack;
+		typedef Iter								iterator;
 public:
 	// although both variables are hold by the iterator
 	// actually either one of them is used during traversal
@@ -93,21 +95,30 @@ public:
 	unsigned Up;
 
 	Iter(TIndex &__index):
-		Base(__index){}
+		TBase(__index){}
 
 	// use constructor for an absolute threshold
 	Iter(TIndex &__index,int threshold):
-		Base(__index),AbsoluteThreshold(threshold),RelativeThreshold(0.0),Down(false),Up(0){}
+		TBase(__index),AbsoluteThreshold(threshold),RelativeThreshold(0.0),Down(false),Up(0){}
 
 	// use constructor for a relative threshold
 	Iter(TIndex &__index,float threshold):
-		Base(__index),AbsoluteThreshold(0),RelativeThreshold(threshold),Down(false),Up(0){}
+		TBase(__index),AbsoluteThreshold(0),RelativeThreshold(threshold),Down(false),Up(0){}
 
-	Iter(Iter const &_origin):
-		Base(_origin) {}
+		// brauch man die überhaupt
+		Iter(Iter const &_origin):
+			TBase((TBase const &)_origin),
+			history(_origin.history) {}
 
-	Iter(Iter const &_origin, typename Base::TPair const &_childRange):
-		Base(_origin, _childRange) {}
+ 		Iter(Iter const &_origin, TRange const &_childRange):
+			TBase((TBase const &)_origin, _childRange),
+			history(_origin.history)
+		{
+			push(history, value(_origin.i1));
+		}
+
+
+
 
 };
 
@@ -117,12 +128,13 @@ public:
 template < typename TIndex, class TSpec >
 inline bool goDown(Iter< TIndex, VSTree< TopDown<ParentLinks<ConstrainedTraversal<TSpec > > > > > &it) {
 	if (isLeaf(it)) return false;
-	_historyPush(it, value(it));
-		typename Size<TIndex>::Type i = _getUp(value(it).i2, container(it));
-	if (value(it).i1 < i && i < value(it).i2)
-		value(it).i2 = i;
+	_historyPush(it, value(it).i1);
+
+		typename Size<TIndex>::Type i = _getUp(value(it).i1.i2, container(it));
+	if (value(it).i1.i1 < i && i < value(it).i1.i2)
+		value(it).i1.i2 = i;
 	else
-		value(it).i2 = _getDown(value(it).i1, container(it));
+		value(it).i1.i2 = _getDown(value(it).i1.i1, container(it));
 
 	// set the the flag for going down
 	it.Down = true;
@@ -132,7 +144,7 @@ inline bool goDown(Iter< TIndex, VSTree< TopDown<ParentLinks<ConstrainedTraversa
 // go up one edge (returns false if in root node) and changes it.Down
 template < typename TIndex, class TSpec >
 inline bool goUp(Iter< TIndex, VSTree< TopDown< ParentLinks<ConstrainedTraversal<TSpec> > > > > &it) {
-	if (!isRoot(it)) {
+	/*if (!isRoot(it)) {
 		value(it) = top(it.history);
 		pop(it.history);
 
@@ -146,7 +158,17 @@ inline bool goUp(Iter< TIndex, VSTree< TopDown< ParentLinks<ConstrainedTraversal
 				
 		return true;
 	}
-	return false;
+	return false;*/
+
+
+	if (!empty(it.history)) {
+			value(it).i1 = top(it.history);
+			pop(it.history);
+			if (!empty(it.history))
+				value(it).i2 = top(it.history).i2;	// copy right boundary of parent's range
+			return true;
+		}
+		return false;
 }
 
 
@@ -287,21 +309,21 @@ struct VLMM;
 // VLMM
 ////////////////
 
-template<typename TAlphabet, typename TCargo, typename TSpec, typename TGraphSpec>
-class Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGraphSpec> 
+template<typename TAlphabet,  typename TSpec>
+class Graph<Automaton<TAlphabet, String<TAlphabet>, WordGraph<VLMM<TSpec> > > > 
 
 {
 	public:
-		typedef typename Id<Graph>::Type TIdType;
+		typedef typename VertexIdHandler<Graph>::Type TVertexIdManager;
+		typedef typename EdgeIdHandler<Graph>::Type TEdgeIdManager;
+		typedef typename VertexDescriptor<Graph>::Type TVertexDescriptor;
 		typedef typename EdgeType<Graph>::Type TEdge;
-		typedef Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec > > >, TGraphSpec> TGraph;
-		typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 
 
 		String<AutomatonEdgeArray<TEdge, TAlphabet> > data_vertex;		// List of tables
-		IdManager<TIdType> data_id_managerV;
-		TVertexDescriptor root;
-		String<String<TAlphabet> > data_edge_label;
+		TVertexIdManager data_id_managerV;
+		TEdgeIdManager data_id_managerE;
+		TVertexDescriptor data_root;
 		String<TVertexDescriptor>  data_suffix_link;
 		// oder besser automaton edgearray
 		String<AutomatonEdgeArray<TEdge, TAlphabet> > data_reverse_suffix_link;
@@ -338,18 +360,18 @@ class Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGraphSpec>
 };
 
 // new addVertex Specialization which enlarges data_edge_label,data_count,data_father at once
-template<typename TAlphabet, typename TCargo, typename TSpec, typename TGraphSpec>
-inline typename VertexDescriptor<Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM< TSpec> > >, TGraphSpec> >::Type 
-addVertex(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGraphSpec>& g) 
+template<typename TAlphabet, typename TCargo, typename TSpec>
+inline typename VertexDescriptor<Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM< TSpec> > > > >::Type 
+addIncompleteVertex(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > > >& g) 
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGraphSpec> TGraph;
+	typedef Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > > > TGraph;
 	typedef typename Size<TGraph>::Type TSize;
 	TSize table_length = ValueSize<TAlphabet>::VALUE;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	TVertexDescriptor nilVal = _get_nil<TVertexDescriptor>();
+	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
 	unsigned num = numVertices(g)+1;
-	resize(g.data_edge_label, (num) * table_length,Generous());
+	//resize(g.data_edge_label, (num) * table_length,Generous());
 	appendValue(g.data_father, nilVal);
 	appendValue(g.data_marked, false);
 	resize(g.data_probability_vector,num,Generous());
@@ -358,30 +380,30 @@ addVertex(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGraphSp
 		append(g.data_probability_vector[num-1],0);
 		
 
-	return _addAutomatonVertex(g);
+	return addVertex(g);
 }
 
 // new addVertex Specialization which enlarges data_edge_label,data_count,data_father at once
-template<typename TAlphabet, typename TCargo, typename TSpec, typename TGraphSpec>
-inline typename VertexDescriptor<Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM< TSpec> > >, TGraphSpec> >::Type 
-addAdditionalVertex(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGraphSpec>& g) 
+template<typename TAlphabet, typename TCargo, typename TSpec>
+inline typename VertexDescriptor<Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM< TSpec> > > > >::Type 
+addAdditionalVertex(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > > >& g) 
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGraphSpec> TGraph;
+	typedef Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > > > TGraph;
 	typedef typename Size<TGraph>::Type TSize;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename EdgeType<TGraph >::Type TEdge;
 	typedef typename Size<TAlphabet>::Type TAlphabetSize;
-	TVertexDescriptor nilVal = _get_nil<TVertexDescriptor>();
+	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
 	TSize table_length = ValueSize<TAlphabet>::VALUE;
 
-	TVertexDescriptor vd = _addAutomatonVertex(g);
+	TVertexDescriptor vd = addVertex(g);
 	// if new vertex vd is at the end,i.e. points to the last cell
 	// a new entry has been created/appended in addAutomatonVertex
 
 if (vd == length(g.data_vertex)-1) {
 	unsigned int Length = length(g.data_vertex);
-	resize(g.data_edge_label, Length * table_length, Generous());
+	//resize(g.data_edge_label, Length * table_length, Generous());
 	//resize(g.data_father,length(g.data_vertex));
 	//g.data_father[vd] = nilVal;
 	appendValue(g.data_father, nilVal);
@@ -403,12 +425,12 @@ return vd;
 }
 
 // init tables suffix_link  and reverse_suffix_link
-template<typename TAlphabet, typename TCargo, typename TSpec, typename TGraphSpec>
+template<typename TAlphabet, typename TCargo, typename TSpec>
 inline void
-initMaps(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGraphSpec>& g) 
+initMaps(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > > >& g) 
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGraphSpec> TGraph;
+	typedef Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > > > TGraph;
 	typedef typename Size<TGraph>::Type TSize;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename EdgeType<TGraph >::Type TEdge;
@@ -418,7 +440,7 @@ initMaps(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGraphSpe
 	//resize(g.data_auxiliary_link, num);
 
 	// init table data_suffix_link with NIL value
-	TVertexDescriptor nilVal = _get_nil<TVertexDescriptor>();
+	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
 	for(unsigned int i = 0;i<num;++i){
 			g.data_suffix_link[i] = nilVal;
 			value(g.data_reverse_suffix_link, i) =  AutomatonEdgeArray<TEdge, TAlphabet>();
@@ -428,53 +450,53 @@ initMaps(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGraphSpe
 	return;
 }
 
-template<typename TAlphabet, typename TCargo, typename TSpec, typename TGraphSpec,typename TVertexDescriptor>
+template<typename TAlphabet, typename TCargo, typename TSpec,typename TVertexDescriptor>
 inline  void
-setFather(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGraphSpec>& wg,
+setFather(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > > >& wg,
 		  TVertexDescriptor& father,
 		  TVertexDescriptor& child) 
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGraphSpec> TGraph;
+	typedef Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > > > TGraph;
 
 	wg.data_father[child] = father;
 	return;
 }
 
-template<typename TAlphabet, typename TCargo, typename TSpec, typename TGraphSpec,typename TVertexDescriptor>
-inline typename VertexDescriptor<Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGraphSpec> >::Type 
-getFather(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGraphSpec>& wg,
+template<typename TAlphabet, typename TCargo, typename TSpec,typename TVertexDescriptor>
+inline typename VertexDescriptor<Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > > > >::Type 
+getFather(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > > >& wg,
 		  TVertexDescriptor & child) 
 {
 	return wg.data_father[child] ;
 }
 
 
-template<typename TAlphabet, typename TCargo, typename TSpec, typename TGraphSpec,typename TVertexDescriptor>
+template<typename TAlphabet, typename TCargo, typename TSpec,typename TVertexDescriptor>
 inline  void
-setMarked(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGraphSpec>& wg,
+setMarked(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > > >& wg,
 		  TVertexDescriptor& vertex,
 		  bool state) 
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGraphSpec> TGraph;
+	typedef Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > > > TGraph;
 
 	wg.data_marked[vertex] = state;
 	return;
 }
 
-template<typename TAlphabet, typename TCargo, typename TSpec, typename TGraphSpec,typename TVertexDescriptor>
+template<typename TAlphabet, typename TCargo, typename TSpec ,typename TVertexDescriptor>
 inline bool
-isMarked(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGraphSpec>& wg,
+isMarked(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > > >& wg,
 		  TVertexDescriptor & vertex) 
 {
 
 	return wg.data_marked[vertex] ;
 }
 
-template<typename TAlphabet, typename TCargo, typename TSpec, typename TGraphSpec,typename TVertexDescriptor>
+template<typename TAlphabet, typename TCargo, typename TSpec ,typename TVertexDescriptor>
 inline bool
-isMarked(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGraphSpec>const& wg,
+isMarked(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > > >const& wg,
 		  TVertexDescriptor & vertex) 
 {
 
@@ -482,22 +504,22 @@ isMarked(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGraphSpe
 }
 
 
-template<typename TAlphabet, typename TCargo, typename TSpec, typename TGraphSpec,typename TVertexDescriptor>
+template<typename TAlphabet, typename TCargo, typename TSpec ,typename TVertexDescriptor>
 inline  void
-setSuffixLink(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGraphSpec>& wg,
+setSuffixLink(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > > >& wg,
 		  TVertexDescriptor& source,
 		  TVertexDescriptor& target) 
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGraphSpec> TGraph;
+	typedef Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > > > TGraph;
 
 	wg.data_suffix_link[source] = target;
 	return;
 }
 
-template<typename TAlphabet, typename TCargo, typename TSpec, typename TGraphSpec,typename TVertexDescriptor>
-inline typename VertexDescriptor<Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGraphSpec> >::Type 
-getSuffixLink(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGraphSpec>& wg,
+template<typename TAlphabet, typename TCargo, typename TSpec ,typename TVertexDescriptor>
+inline typename VertexDescriptor<Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > > > >::Type 
+getSuffixLink(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > > >& wg,
 		  TVertexDescriptor & source) 
 {
 
@@ -505,24 +527,24 @@ getSuffixLink(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGra
 }
 
 
-template<typename TAlphabet, typename TCargo,typename TSpec,typename TGraphSpec, typename TVertexDescriptor, typename TChar>
-inline typename VertexDescriptor<Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGraphSpec> >::Type 
-getReverseSuffixLink(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGraphSpec>& g,
+template<typename TAlphabet, typename TCargo,typename TSpec , typename TVertexDescriptor, typename TChar>
+inline typename VertexDescriptor<Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > > > >::Type 
+getReverseSuffixLink(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > > >& g,
 			 TVertexDescriptor & vertex,
 			 TChar const c) 
 {
 	SEQAN_CHECKPOINT
 	SEQAN_ASSERT(idInUse(g.data_id_managerV, vertex) == true)
-	typedef Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGraphSpec> TGraph;
+	typedef Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > > > TGraph;
 	typedef typename Size<TAlphabet>::Type TSize;
 	TAlphabet letter(c);
 	return g.data_reverse_suffix_link[vertex].data_edge[(TSize) letter].data_target;
 }
 
 
-template<typename TAlphabet, typename TCargo, typename TSpec,typename TGraphSpec,  typename TVertexDescriptor, typename TChar>
-inline typename VertexDescriptor<Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGraphSpec> >::Type 
-setReverseSuffixLink(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGraphSpec>& g,
+template<typename TAlphabet, typename TCargo, typename TSpec ,  typename TVertexDescriptor, typename TChar>
+inline typename VertexDescriptor<Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > > > >::Type 
+setReverseSuffixLink(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > > >& g,
 			 TVertexDescriptor source,
 			 TVertexDescriptor target,
 			 TChar const c) 
@@ -539,10 +561,10 @@ setReverseSuffixLink(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > 
 //Graph<Automaton<TText, TCargo, WordGraph< VLMM < TSpec > > >, TGraphSpec> 
 // currently this function can only be called for index of
 // specialization: Index_ESA
-template<typename TIndex,typename TIterSpec,typename TSpec,typename TCargo,typename TAlphabet,typename TGraphSpec,typename TVertexDescriptor>
+template<typename TIndex,typename TIterSpec,typename TSpec,typename TCargo,typename TAlphabet ,typename TVertexDescriptor>
 inline void
 initProbabilityVector(Iter<TIndex, VSTree< TopDown< ParentLinks<ConstrainedTraversal<TIterSpec> > > > > &it,
-						 Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > >,TGraphSpec> &target,
+						 Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > > > &target,
 						 TVertexDescriptor & node)
 {
 	//typedef Graph<Automaton<TAlphabet,TCargo,WordGraph< VLMM < TSpec > > >,TGraphSpec> TVlmm;
@@ -573,10 +595,10 @@ initProbabilityVector(Iter<TIndex, VSTree< TopDown< ParentLinks<ConstrainedTrave
 //Graph<Automaton<TText, TCargo, WordGraph< VLMM < TSpec > > >, TGraphSpec> 
 // currently this function can only be called for index of
 // specialization: Index_ESA
-template<typename TIndex,typename TIterSpec,typename TSpec,typename TCargo,typename TAlphabet,typename TGraphSpec,typename TVertexDescriptor,typename TChar>
+template<typename TIndex,typename TIterSpec,typename TSpec,typename TCargo,typename TAlphabet ,typename TVertexDescriptor,typename TChar>
 inline void
 initProbabilityVectorForLeaf(Iter<TIndex, VSTree< TopDown< ParentLinks<ConstrainedTraversal<TIterSpec> > > > > &it,
-						 Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > >,TGraphSpec> &target,
+						 Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > > > &target,
 						 TVertexDescriptor & node,
 						 TChar & letter)
 {
@@ -588,17 +610,17 @@ initProbabilityVectorForLeaf(Iter<TIndex, VSTree< TopDown< ParentLinks<Constrain
 //Graph<Automaton<TText, TCargo, WordGraph< VLMM < TSpec > > >, TGraphSpec> 
 // currently this function can only be called for index of
 // specialization: Index_ESA
-template<typename TIndex,typename TIterSpec,typename TSpec,typename TCargo,typename TAlphabet,typename TGraphSpec>
+template<typename TIndex,typename TIterSpec,typename TSpec,typename TCargo,typename TAlphabet>
 inline void 
 buildSuffixTreeFromIndex(Iter<TIndex, VSTree< TopDown< ParentLinks<ConstrainedTraversal<TIterSpec> > > > > &it,
-						 Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > >,TGraphSpec> &target)
+						 Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > > > &target)
 {
-	typedef Graph<Automaton<TAlphabet,TCargo,WordGraph< VLMM < TSpec > > >,TGraphSpec> TVlmm;
+	typedef Graph<Automaton<TAlphabet,TCargo,WordGraph< VLMM < TSpec > > > > TVlmm;
 	typedef typename VertexDescriptor<TVlmm>::Type TVertexDescriptor;
 	typedef Iter<TIndex, VSTree< TopDown< > > >  TIter;
 	typedef Iter<TIndex, VSTree< TopDown< ParentLinks<ConstrainedTraversal<TIterSpec> > > > >  TIter2;
 	
-	TVertexDescriptor root = addVertex(target);
+	TVertexDescriptor root = addIncompleteVertex(target);
 	TVertexDescriptor child,father;
 	child = root;
 
@@ -621,7 +643,7 @@ buildSuffixTreeFromIndex(Iter<TIndex, VSTree< TopDown< ParentLinks<ConstrainedTr
 			--it.Up;
 		}
 
-		child = addVertex(target);
+		child = addIncompleteVertex(target);
 		//std::cout << "Node:"<<child<<"  "<<value(it) << " = " << repLength(it)<< " " << representative(it) << "  toFather:"<<parentEdgeLabel(it)<<"  hits: "<<length(getOccurences(it))<<std::endl;
 		
 		setFather(target,father,child);
@@ -631,7 +653,8 @@ buildSuffixTreeFromIndex(Iter<TIndex, VSTree< TopDown< ParentLinks<ConstrainedTr
 		// only if not a leaf
 		if(!isLeaf(it)){
 			//std::cout<<"case1\t"<<representative(it)<<" ";
-			addEdge(target,father,child,parentEdgeLabel(it));
+			String<TAlphabet> EdgeLabel = parentEdgeLabel(it);
+			addEdge(target,father,child,EdgeLabel);
 			initProbabilityVector(it,target,child);
 		}
 		else{
@@ -642,7 +665,8 @@ buildSuffixTreeFromIndex(Iter<TIndex, VSTree< TopDown< ParentLinks<ConstrainedTr
 			TAlphabet letter = value(EdgeLabel, length(EdgeLabel)-1 );
 			
 			//if(child == 13 || child ==4)std::cout<<"EdgeLabel: "<<EdgeLabel<<"RepLength: "<<repLength(it)<<"  prefix"<<prefix( EdgeLabel, length(EdgeLabel)-1 ) <<endl;
-			addEdge(target,father,child, prefix( EdgeLabel, length(EdgeLabel)-1 ) );
+			String<TAlphabet> pref = prefix( EdgeLabel, length(EdgeLabel)-1 );
+			addEdge(target,father,child,  pref);
 			//if(child == 13 || child ==4)std::cout<<"addedEdge"<<"letter:"<<letter<<endl;
 			initProbabilityVectorForLeaf(it,target,child,letter);
 			//if(child == 13 || child ==4) std::cout<<"initVector"<<endl;
@@ -656,19 +680,20 @@ buildSuffixTreeFromIndex(Iter<TIndex, VSTree< TopDown< ParentLinks<ConstrainedTr
 	return;
 }
 
-template<typename TSpec,typename TCargo,typename TAlphabet,typename TGraphSpec,typename TVertexDescriptor>
+template<typename TSpec,typename TCargo,typename TAlphabet ,typename TVertexDescriptor>
 inline TAlphabet 
-getChildCharacter(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > >,TGraphSpec> &vlmm,
+getChildCharacter(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > > > &vlmm,
 			   TVertexDescriptor &father,
 			   TVertexDescriptor &child)
 {
-	typedef Graph<Automaton<TAlphabet,TCargo,WordGraph< VLMM < TSpec > > >,TGraphSpec> TVlmm;
-	typedef typename Iterator<TVlmm, OutEdgeIterator<> >::Type TOutEdgeIterator;
+	typedef Graph<Automaton<TAlphabet,TCargo,WordGraph< VLMM < TSpec > > > > TVlmm;
+	typedef typename Iterator<TVlmm, OutEdgeIterator>::Type TOutEdgeIterator;
 
 	TOutEdgeIterator itout(vlmm,father);
 	while(!atEnd(itout)){
 		if(targetVertex(vlmm, getValue(itout)) == child)
 			break;
+	// *(TOutEdgeIterator) 
 
 	goNext(itout);
 	}
@@ -677,28 +702,89 @@ getChildCharacter(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec >
 
 }
 
-
-template<typename TSpec,typename TCargo,typename TAlphabet,typename TGraphSpec,typename TVertexDescriptor>
+template<typename TSpec,typename TCargo,typename TAlphabet ,typename TVertexDescriptor>
 inline void 
-getChildLabel(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > >,TGraphSpec> &vlmm,
+getSuffixChildLabel(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > > > &vlmm,
 			   TVertexDescriptor &father,
 			   TVertexDescriptor &child,
 			   String<TAlphabet> &Label)
 {
-	typedef Graph<Automaton<TAlphabet,TCargo,WordGraph< VLMM < TSpec > > >,TGraphSpec> TVlmm;
-	typedef typename EdgeDescriptor<TVlmm>::Type TEdgeDescriptor;
+	typedef Graph<Automaton<TAlphabet,TCargo,WordGraph< VLMM < TSpec > > > > TVlmm;
+	//typedef typename EdgeDescriptor<TVlmm>::Type TEdgeDescriptor;
+typedef typename Iterator<TVlmm, OutEdgeIterator >::Type TOutEdgeIterator;
 
-	TAlphabet childPosition = getChildCharacter(vlmm,father,child);
+	TOutEdgeIterator itout(vlmm,father);
+	while(!atEnd(itout)){
+		if(targetVertex(vlmm, getValue(itout)) == child)
+			break;
 
-	append(Label,childPosition);
-	append(Label,getProperty(vlmm.data_edge_label, TEdgeDescriptor(father, childPosition)));
+	goNext(itout);
+	}
+
+	append(Label,getCargo(*(itout)));
+	//append(Label,getProperty(vlmm.data_edge_label,*(itout)));
+	//append(Label,getProperty(vlmm.data_edge_label, TEdgeDescriptor(father, childPosition)));
 
 	return;
 }
 
-template<typename TSpec,typename TCargo,typename TAlphabet,typename TChar,typename TGraphSpec,typename TVertexDescriptor>
+template<typename TSpec,typename TCargo,typename TAlphabet ,typename TVertexDescriptor>
+inline void 
+getSuffixChildLabel(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > > > const &vlmm,
+			   TVertexDescriptor &father,
+			   TVertexDescriptor &child,
+			   String<TAlphabet> &Label)
+{
+	typedef Graph<Automaton<TAlphabet,TCargo,WordGraph< VLMM < TSpec > > > > TVlmm;
+	//typedef typename EdgeDescriptor<TVlmm>::Type TEdgeDescriptor;
+typedef typename Iterator<TVlmm, OutEdgeIterator >::Type TOutEdgeIterator;
+
+	TOutEdgeIterator itout(vlmm,father);
+	while(!atEnd(itout)){
+		if(targetVertex(vlmm, getValue(itout)) == child)
+			break;
+
+	goNext(itout);
+	}
+	
+	append(Label,getCargo(*(itout)));
+	
+	//append(Label,getProperty(vlmm.data_edge_label, TEdgeDescriptor(father, childPosition)));
+
+	return;
+}
+
+template<typename TSpec,typename TCargo,typename TAlphabet ,typename TVertexDescriptor>
+inline void 
+getChildLabel(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > > > &vlmm,
+			   TVertexDescriptor &father,
+			   TVertexDescriptor &child,
+			   String<TAlphabet> &Label)
+{
+	typedef Graph<Automaton<TAlphabet,TCargo,WordGraph< VLMM < TSpec > > > > TVlmm;
+	//typedef typename EdgeDescriptor<TVlmm>::Type TEdgeDescriptor;
+typedef typename Iterator<TVlmm, OutEdgeIterator >::Type TOutEdgeIterator;
+
+	TOutEdgeIterator itout(vlmm,father);
+	while(!atEnd(itout)){
+		if(targetVertex(vlmm, getValue(itout)) == child)
+			break;
+
+	goNext(itout);
+	}
+
+	//TAlphabet letter = itout.data_pos;
+	//position(it) = = itout.data_pos??
+	append(Label,itout.data_pos);
+	append(Label,getCargo(*(itout)));
+	//append(Label,getProperty(vlmm.data_edge_label, TEdgeDescriptor(father, childPosition)));
+
+	return;
+}
+
+template<typename TSpec,typename TCargo,typename TAlphabet,typename TChar ,typename TVertexDescriptor>
 inline float
-getProbability(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > >,TGraphSpec> &vlmm,
+getProbability(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > > > &vlmm,
 			   TVertexDescriptor &father,
 			   TChar pos)
 {
@@ -706,9 +792,9 @@ getProbability(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > 
 	return value(vlmm.data_probability_vector[father],(int)letter);
 }
 
-template<typename TSpec,typename TCargo,typename TAlphabet,typename TChar,typename TGraphSpec,typename TVertexDescriptor>
+template<typename TSpec,typename TCargo,typename TAlphabet,typename TChar, typename TVertexDescriptor>
 inline void
-setProbability(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > >,TGraphSpec> &vlmm,
+setProbability(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > > > &vlmm,
 			   TVertexDescriptor &father,
 			   TChar pos,
 			   float prob)
@@ -720,19 +806,22 @@ setProbability(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > 
 
 // splitPosition is the position in the array string edgelabel
 // e.g. edgelabel = ACGT , the new edge should be GT than splitPosition is 2
-template<typename TAlphabet, typename TCargo, typename TSpec, typename TGraphSpec, typename TVertexDescriptor, typename TChar,typename TPos>
-inline typename VertexDescriptor<Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGraphSpec> >::Type 
-splitEdge(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGraphSpec> & vlmm,
+template<typename TAlphabet, typename TCargo, typename TSpec , typename TVertexDescriptor, typename TChar,typename TPos>
+inline typename VertexDescriptor<Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > > > >::Type 
+splitEdge(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > > > & vlmm,
 			TVertexDescriptor & father,
 			TChar  childCharacter,
 			TPos  splitPosition)
 {
-	typedef Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM <TSpec> > >, TGraphSpec> TGraph;
+	typedef Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM <TSpec> > > > TGraph;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	typedef typename Size<TGraph>::Type TSize;
 	TAlphabet letter(childCharacter);
 	TVertexDescriptor child = vlmm.data_vertex[father].data_edge[(TSize) letter].data_target;
-	String<TAlphabet> edgeString = getProperty(vlmm.data_edge_label, TEdgeDescriptor(father, letter));
+	
+	String<TAlphabet> edgeString;
+	getSuffixChildLabel(vlmm,father,child,edgeString);
+	//String<TAlphabet> edgeString = getProperty(vlmm.data_edge_label, TEdgeDescriptor(father, letter));
 	std::cout<<"before new node created, NumVertc:"<<numVertices(vlmm)<<std::endl;
 	TVertexDescriptor newNode = addAdditionalVertex(vlmm);
 	std::cout<<"after node created, NumVertc:"<<numVertices(vlmm)<<std::endl;
@@ -747,24 +836,25 @@ splitEdge(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGraphSp
 
 	setFather(vlmm,father,newNode);
 	setProbability(vlmm,newNode,value(edgeString,splitPosition),1);
-	addEdge(vlmm,newNode,child,suffix(edgeString,splitPosition));
+	String<TAlphabet> EdgeLabel = suffix(edgeString,splitPosition);
+	addEdge(vlmm,newNode,child,EdgeLabel);
 	setFather(vlmm,newNode,child);
 
 	return newNode;
 }
 
-template<typename TAlphabet, typename TCargo, typename TSpec, typename TGraphSpec, typename TVertexDescriptor, typename TLabel>
-inline typename VertexDescriptor<Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGraphSpec> >::Type 
-parseString2(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGraphSpec> & g,
+template<typename TAlphabet, typename TCargo, typename TSpec , typename TVertexDescriptor, typename TLabel>
+inline typename VertexDescriptor<Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > > > >::Type 
+parseString2(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > > > & g,
 			TVertexDescriptor & vertex,
 			TLabel & label)
 {
 	SEQAN_CHECKPOINT
 	SEQAN_ASSERT(idInUse(g.data_id_managerV, vertex) == true)
-	typedef Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM <TSpec> > >, TGraphSpec> TGraph;
+	typedef Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM <TSpec> > > > TGraph;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	typedef typename Size<TGraph>::Type TSize;
-	TVertexDescriptor nilVal = _get_nil<TVertexDescriptor>();
+	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
 	TVertexDescriptor succ = vertex;
 	TSize pos = 0;
 	//std::cout <<"start parseString at node:"<< succ<<std::endl;
@@ -772,7 +862,12 @@ parseString2(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGrap
 	TVertexDescriptor tmp = g.data_vertex[succ].data_edge[(TSize) letter].data_target;
 	++pos;
 	while (tmp != nilVal) {
-		String<TAlphabet> edgeString = getProperty(g.data_edge_label, TEdgeDescriptor(succ, letter));
+		// can be substituted by using getChildLabel
+		//edgeString = getProperty(g.data_edge_label, Edge);
+		String<TAlphabet> edgeString;
+		getSuffixChildLabel(g,succ,tmp,edgeString);
+		
+		
 		if( (pos == length(label)) && (length(edgeString) == 0))
 				return tmp;
 
@@ -798,19 +893,19 @@ parseString2(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGrap
 
 
 
-template<typename TSpec,typename TCargo,typename TAlphabet,typename TGraphSpec>
+template<typename TSpec,typename TCargo,typename TAlphabet>
 inline void 
-addSuffixLinks(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > >,TGraphSpec> &vlmm)
+addSuffixLinks(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > > > &vlmm)
 {
-	typedef Graph<Automaton<TAlphabet,TCargo,WordGraph< VLMM < TSpec > > >,TGraphSpec> TVlmm;
+	typedef Graph<Automaton<TAlphabet,TCargo,WordGraph< VLMM < TSpec > > > > TVlmm;
 	typedef typename VertexDescriptor<TVlmm>::Type TVertexDescriptor;
 	typedef typename EdgeDescriptor<TVlmm>::Type TEdgeDescriptor;
-	typedef typename Iterator<TVlmm, OutEdgeIterator<> >::Type TOutEdgeIterator;
+	typedef typename Iterator<TVlmm, OutEdgeIterator >::Type TOutEdgeIterator;
 	typedef typename Size<TVlmm>::Type TSize;
 	
 	TVertexDescriptor root = getRoot(vlmm);
 	TVertexDescriptor father,target;
-	TVertexDescriptor nilVal = _get_nil<TVertexDescriptor>();
+	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
 	TOutEdgeIterator itout(vlmm,root);
 	setSuffixLink(vlmm,root,root);
 	TAlphabet letter;
@@ -818,14 +913,16 @@ addSuffixLinks(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > 
 		TVertexDescriptor v = targetVertex(vlmm, getValue(itout));
 		letter = itout.data_pos;
 		// means the suffix link must point to the root
-		if(length(getProperty(vlmm.data_edge_label, TEdgeDescriptor(root, letter))) == 0){
+		String<TAlphabet> edgeString;
+		getSuffixChildLabel(vlmm,root,v,edgeString);
+		if(length(edgeString) == 0){
 				setSuffixLink(vlmm,v,root);
 				setReverseSuffixLink(vlmm,root,v,letter);
 				
 			}
 		else{
 				// getProperty(vlmm.data_edge_label, TEdgeDescriptor(root, letter) == edgelabel without first char
-				target = parseString2(vlmm,root,getProperty(vlmm.data_edge_label, TEdgeDescriptor(root, letter)));
+				target = parseString2(vlmm,root,edgeString);
 				// it might occur that a suffix link target for n does not exist
 				// because n is leaf which edge has be pruned
 				if(target != nilVal){
@@ -886,9 +983,9 @@ template <typename TSpec = Default>
 struct DifferenceOperator
 ;
 
-template<typename TCargo,typename TAlphabet,typename TSpec,typename TGraphSpec,typename TVertexDescriptor>
+template<typename TCargo,typename TAlphabet,typename TSpec ,typename TVertexDescriptor>
 inline void
-turnNodeCountsIntoProbability(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > >,TGraphSpec> &vlmm,
+turnNodeCountsIntoProbability(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > > > &vlmm,
 			   TVertexDescriptor & node) 
 {
 	unsigned size = ValueSize<TAlphabet>::VALUE;
@@ -902,9 +999,9 @@ turnNodeCountsIntoProbability(Graph<Automaton<TAlphabet, TCargo , WordGraph < VL
 
 
 
-template<typename TCargo,typename TAlphabet,typename TGraphSpec,typename TChar,typename TVertexDescriptor>
+template<typename TCargo,typename TAlphabet,typename TChar,typename TVertexDescriptor>
 inline bool
-extendNode(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < PST > > >,TGraphSpec> &vlmm,
+extendNode(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < PST > > > > &vlmm,
 			   TVertexDescriptor & node,
 			   TChar childCharacter,
 			   PST & parameters) 
@@ -926,9 +1023,9 @@ extendNode(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < PST > > >,TGra
 
 }
 
-template<typename TCargo,typename TAlphabet,typename TGraphSpec,typename TVertexDescriptor>
+template<typename TCargo,typename TAlphabet ,typename TVertexDescriptor>
 inline bool
-pruneNode(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < PST > > >,TGraphSpec> &vlmm,
+pruneNode(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < PST > > > > &vlmm,
 			   TVertexDescriptor &son,
 			   PST & parameters) 
 {
@@ -951,9 +1048,9 @@ pruneNode(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < PST > > >,TGrap
  return true;
 }
 
-template<typename TCargo,typename TAlphabet,typename TGraphSpec,typename TVertexDescriptor>
+template<typename TCargo,typename TAlphabet ,typename TVertexDescriptor>
 inline void
-smoothNode(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < PST > > >,TGraphSpec> &vlmm,
+smoothNode(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < PST > > > > &vlmm,
 			   TVertexDescriptor & node,
 			   PST & parameters) 
 {
@@ -967,21 +1064,21 @@ smoothNode(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < PST > > >,TGra
 		setProbability(vlmm,node,pos, ( getProbability(vlmm,node,pos)*(gammaFactor)  + parameters.minConditionalProbability ) );
 }
 
-template<typename TAlphabet,typename TCargo,typename TSpec,typename TGraphSpec,typename TVLMMSPec>
+template<typename TAlphabet,typename TCargo,typename TSpec ,typename TVLMMSPec>
 inline void
-pruneTree(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > >,TGraphSpec> &vlmm,
+pruneTree(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > > > &vlmm,
 			   TVLMMSPec & parameters) 
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGraphSpec> TGraph;
+	typedef Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > > > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	typedef typename Iterator<TGraph, VertexIterator<> >::Type TVertexIterator;
+	typedef typename Iterator<TGraph, VertexIterator >::Type TVertexIterator;
 
 	TVertexDescriptor root = getRoot(vlmm);
 	
 	String<bool> original;
 	// remember which nodes have been there
-	initVertexMap(vlmm, original);
+	resizeVertexMap(vlmm, original);
 	TVertexIterator it(vlmm);
 	for(;!atEnd(it);goNext(it)) {
 		TVertexDescriptor node =  getValue(it);
@@ -1012,19 +1109,19 @@ std::cout << "ready with the function\n";*/
 }
 
 // recursive walk over reverse suffix links
-template<typename TAlphabet,typename TCargo,typename TSpec,typename TGraphSpec,typename TVertexDescriptor,typename TMarked,typename TVLMMSpec>
+template<typename TAlphabet,typename TCargo,typename TSpec ,typename TVertexDescriptor,typename TMarked,typename TVLMMSpec>
 inline void
-pruneTreeRecursively(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > >,TGraphSpec> &vlmm,
+pruneTreeRecursively(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > > > &vlmm,
 				TVertexDescriptor & node,
 				TMarked & original,
 			    TVLMMSpec & parameters) 
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGraphSpec> TGraph;
+	typedef Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > > > TGraph;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	typedef typename Size<TAlphabet>::Type TSize;
 	TSize table_length = ValueSize<TAlphabet>::VALUE;
-	TVertexDescriptor nilVal = _get_nil<TVertexDescriptor>();
+	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
 	
 
 	TVertexDescriptor next;
@@ -1136,20 +1233,20 @@ pruneTreeRecursively(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpe
 
 
 // recursive walk over reverse suffix links
-template<typename TAlphabet,typename TCargo,typename TSpec,typename TGraphSpec,typename TVertexDescriptor,typename TMarked,typename TVLMMSpec,typename TChar>
+template<typename TAlphabet,typename TCargo,typename TSpec ,typename TVertexDescriptor,typename TMarked,typename TVLMMSpec,typename TChar>
 inline void
-pruneTreeRecursivelyFast(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > >,TGraphSpec> &vlmm,
+pruneTreeRecursivelyFast(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > > > &vlmm,
 				TVertexDescriptor & node,
 				TMarked & original,
 			    TVLMMSpec & parameters,
 				TChar & letter) 
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGraphSpec> TGraph;
+	typedef Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > > > TGraph;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	typedef typename Size<TAlphabet>::Type TSize;
 	TSize table_length = ValueSize<TAlphabet>::VALUE;
-	TVertexDescriptor nilVal = _get_nil<TVertexDescriptor>();
+	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
 	
 
 	TVertexDescriptor next;
@@ -1228,7 +1325,11 @@ pruneTreeRecursivelyFast(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < 
 			SEQAN_ASSERT(potVertex != nilVal)
 			// we have a node which may lead to a new node on the edge father->node
 			// how far down is this node ?
-			pos = 1 + length(getProperty(vlmm.data_edge_label,TEdgeDescriptor(target,value(childLabel,lastVertex))));
+			String<TAlphabet> edgeString;
+			getSuffixChildLabel(vlmm,target,potVertex,edgeString);
+			pos = 1 + length(edgeString);
+			//pos = 1 + length(getProperty(vlmm.data_edge_label,TEdgeDescriptor(target,value(childLabel,lastVertex))));
+
 			//while(! potVertex == getSuffixLink(vlmm,node) ){
 			SEQAN_ASSERT(pos<=labelLength)
 			while(pos != labelLength){
@@ -1258,7 +1359,10 @@ pruneTreeRecursivelyFast(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < 
 					potVertex = vlmm.data_vertex[target].data_edge[(TSize) value(childLabel,lastVertex)].data_target;
 					// we have a node which may lead to a new node on the edge father->node
 					// how far down is this node ?
-					pos += 1 + length(getProperty(vlmm.data_edge_label,TEdgeDescriptor(target,value(childLabel,lastVertex))));
+					String<TAlphabet> edgeString2;
+					getSuffixChildLabel(vlmm,target,potVertex,edgeString2);
+					pos = 1 + length(edgeString2);
+					//pos += 1 + length(getProperty(vlmm.data_edge_label,TEdgeDescriptor(target,value(childLabel,lastVertex))));
 			}
 
 			
@@ -1297,10 +1401,10 @@ pruneTreeRecursivelyFast(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < 
 }
 
 				// recursive walk over reverse suffix links
-template<typename TIndexType,typename TAlphabet,typename TCargo,typename TGraphSpec>
+template<typename TIndexType,typename TAlphabet,typename TCargo >
 inline void
 buildPST(Index<TIndexType, Index_ESA<> > & index,
-		 Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < PST > > >,TGraphSpec> &vlmm,
+		 Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < PST > > > > &vlmm,
 			    float threshold,
 				float minEmpiricalProbability,
 				float minConditionalProbability,
@@ -1346,21 +1450,21 @@ buildPST(Index<TIndexType, Index_ESA<> > & index,
 }
 
 //write the vlmm to a file in Easy-readable format,also used by the  << Operator
-template<typename TFile, typename TAlphabet, typename TCargo, typename TSpec, typename TGraphSpec, typename TIDString>
+template<typename TFile, typename TAlphabet, typename TCargo, typename TSpec , typename TIDString>
 inline void
 write(TFile & target,
-	  Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGraphSpec>const & g,
+	  Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > > >const & g,
 	  TIDString const &,
 	  Raw)
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGraphSpec> TGraph;
+	typedef Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > > > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	typedef typename EdgeType<TGraph>::Type TEdge;
 	typedef typename Size<TAlphabet>::Type TSize;
 	TSize table_length = ValueSize<TAlphabet>::VALUE;
-	TVertexDescriptor nilVal = _get_nil<TVertexDescriptor>();
+	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
 
 	typedef typename Iterator<String<AutomatonEdgeArray<TEdge, TAlphabet> > const>::Type TIterConst;
 	_streamWrite(target,"VLMM - Probability Vector of each node:\n");
@@ -1403,7 +1507,12 @@ write(TFile & target,
 			_streamPut(target, ' ');
 			_streamWrite(target, "Label: ");
 			_streamPut(target, TAlphabet(i));
-			_streamWrite(target, getProperty(g.data_edge_label, TEdgeDescriptor(sourceVertex, TAlphabet(i))));
+			
+			String<TAlphabet> edgeString;
+			TVertexDescriptor child = g.data_vertex[sourceVertex].data_edge[i].data_target;
+			getSuffixChildLabel(g,sourceVertex,child,edgeString);
+			_streamWrite(target, edgeString);
+			//_streamWrite(target, getProperty(g.data_edge_label, TEdgeDescriptor(sourceVertex, TAlphabet(i))));
 		
 			_streamPut(target, '\n');
 		}
@@ -1411,15 +1520,15 @@ write(TFile & target,
 }
 
 //write the vlmm to a file in Dot-Format
-template <typename TFile,typename TAlphabet,typename TCargo,typename TGraphSpec, typename TSpec, typename TNodeMap, typename TEdgeMap>
+template <typename TFile,typename TAlphabet,typename TCargo , typename TSpec, typename TNodeMap, typename TEdgeMap>
 void write(TFile & file, 
-	   Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > >,TGraphSpec> const& g,
+	   Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > > > const& g,
 	   TNodeMap const& nodeMap,
 	   TEdgeMap const& edgeMap,
 	   DotDrawing) 
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > >,TGraphSpec> TGraph;
+	typedef Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > > > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 
@@ -1436,7 +1545,7 @@ void write(TFile & file,
 	_streamPut(file, '\n');
 
 	_streamWrite(file, "/* Nodes */\n");
-	typedef typename Iterator<TGraph, VertexIterator<> >::Type TConstIter;
+	typedef typename Iterator<TGraph, VertexIterator >::Type TConstIter;
 	TConstIter it(g);
 	for(;!atEnd(it);goNext(it)) {
 		_streamWrite(file, getProperty(nodeMap, *it));
@@ -1455,7 +1564,7 @@ void write(TFile & file,
 	_streamPut(file, '\n');
 
 	_streamWrite(file, "/* Edges */\n");
-	typedef typename Iterator<TGraph, EdgeIterator<> >::Type TConstEdIter;
+	typedef typename Iterator<TGraph, EdgeIterator >::Type TConstEdIter;
 	TConstEdIter itEd(g);
 	for(;!atEnd(itEd);++itEd) {
 		TVertexDescriptor sc = sourceVertex(itEd);
@@ -1472,7 +1581,7 @@ void write(TFile & file,
 	goBegin(it);
 	for(;!atEnd(it);++it) {
 
-		TVertexDescriptor nilVal = _get_nil<TVertexDescriptor>();
+		TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
 		typedef typename Size<TAlphabet>::Type TSize;
 		TSize table_length = ValueSize<TAlphabet>::VALUE;
 		TSize pos = 0;
@@ -1496,29 +1605,29 @@ void write(TFile & file,
 	_streamWrite(file, "}\n");
 }
 
-template <typename TFile,typename TAlphabet,typename TCargo,typename TGraphSpec, typename TSpec>
+template <typename TFile,typename TAlphabet,typename TCargo, typename TSpec>
 void write(TFile & file, 
-	   Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > >,TGraphSpec> const& g, 
+	   Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > > > const& g, 
 	   DotDrawing) 
 {
 	SEQAN_CHECKPOINT
 	String<String<char> > nodeMap;
-	_createNodeNames(g,nodeMap);
+	_createNodeAttributes(g,nodeMap);
 	String<String<char> > edgeMap;
-	_createEdgeNames(g,edgeMap);
+	_createEdgeAttributes(g,edgeMap);
 	write(file,g,nodeMap,edgeMap,DotDrawing());
 }
 
 //write the vlmm not as a suffix tree but reveersed edge labels to a file in Dot-Format
-template <typename TFile,typename TAlphabet,typename TCargo,typename TGraphSpec, typename TSpec, typename TNodeMap, typename TEdgeMap>
+template <typename TFile,typename TAlphabet,typename TCargo, typename TSpec, typename TNodeMap, typename TEdgeMap>
 void writeAsVLMM(TFile & file, 
-	   Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > >,TGraphSpec> const& g,
+	   Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > > > const& g,
 	   TNodeMap const& nodeMap,
 	   TEdgeMap const& edgeMap,
 	   DotDrawing) 
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > >,TGraphSpec> TGraph;
+	typedef Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > > > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 
@@ -1535,7 +1644,7 @@ void writeAsVLMM(TFile & file,
 	_streamPut(file, '\n');
 
 	_streamWrite(file, "/* Nodes */\n");
-	typedef typename Iterator<TGraph, VertexIterator<> >::Type TConstIter;
+	typedef typename Iterator<TGraph, VertexIterator >::Type TConstIter;
 	TConstIter it(g);
 	for(;!atEnd(it);++it) {
 		_streamWrite(file, getProperty(nodeMap, *it));
@@ -1545,13 +1654,13 @@ void writeAsVLMM(TFile & file,
 	_streamPut(file, '\n');
 
 	_streamWrite(file, "/* Edges */\n");
-	typedef typename Iterator<TGraph, EdgeIterator<> >::Type TConstEdIter;
+	typedef typename Iterator<TGraph, EdgeIterator >::Type TConstEdIter;
 	TConstEdIter itEd(g);
 		//NEW Reverse Suffix Links
 	goBegin(it);
 	for(;!atEnd(it);++it) {
 
-		TVertexDescriptor nilVal = _get_nil<TVertexDescriptor>();
+		TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
 		typedef typename Size<TAlphabet>::Type TSize;
 		TSize table_length = ValueSize<TAlphabet>::VALUE;
 		TSize pos = 0;
@@ -1574,9 +1683,9 @@ void writeAsVLMM(TFile & file,
 	_streamWrite(file, "}\n");
 }
 
-template <typename TFile,typename TAlphabet,typename TCargo,typename TGraphSpec, typename TSpec>
+template <typename TFile,typename TAlphabet,typename TCargo, typename TSpec>
 void writeAsVLMM(TFile & file, 
-	   Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > >,TGraphSpec> const& g, 
+	   Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > > > const& g, 
 	   DotDrawing) 
 {
 	SEQAN_CHECKPOINT
