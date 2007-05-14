@@ -177,6 +177,8 @@ _align_hirschberg(TTrace& trace,
 			verticalPointer = 0;
 			assignValue(horizontalPointer, 0, 0);
 			assignValue(diagonalPointer, 0, 0);
+			bool wasHorizontal = false;
+			if (tvMat == (Byte) Horizontal) wasHorizontal = true;
 			for(TSize row = 1; row <= inf_len2; ++row) {
 				if (tvMat == (Byte) Vertical) {
 					assignValue(mat, row, upperLeft + gap + (row - 1) * gap);
@@ -193,7 +195,7 @@ _align_hirschberg(TTrace& trace,
 				assignValue(diagonalPointer, 0, getValue(horizontalPointer,0));
 				verticalPointer = getValue(horizontalPointer,0);
 				TScoreValue diagValMat = getValue(mat, 0);
-				if (tvMat == (Byte) Horizontal) {
+				if (wasHorizontal) {
 					assignValue(mat, 0, upperLeft + gap + (col - 1) * gap);
 					vert = getValue(mat, 0);
 				} else {			    
