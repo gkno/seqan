@@ -64,6 +64,7 @@
 #include <seqan/graph/graph_align_base.h>
 #include <seqan/graph/graph_align_needleman_wunsch.h>
 #include <seqan/graph/graph_align_gotoh.h>
+#include <seqan/graph/graph_align_gotoh3.h>
 #include <seqan/graph/graph_align_myers.h>
 #include <seqan/graph/graph_align_hirschberg.h>
 #include <seqan/graph/graph_align_tcoffee.h>

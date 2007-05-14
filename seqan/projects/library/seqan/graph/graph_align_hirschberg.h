@@ -5,15 +5,16 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 //////////////////////////////////////////////////////////////////////////////
-// Alignment: Hirschberg Alignment - TODO!!!
+// Alignment: Hirschberg Alignment
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TAlign, typename TStringSet, typename TTrace>
+template <typename TAlign, typename TStringSet, typename TScoreValue, typename TTrace>
 void
 _align_hirschberg_trace(TAlign& align,		 
 						TStringSet const& str,
+						Score<TScoreValue, Simple> const& sc,
 						TTrace& trace)
 {
 	SEQAN_CHECKPOINT
@@ -25,14 +26,14 @@ _align_hirschberg_trace(TAlign& align,
 	TTraceIter traceIter = begin(trace, Standard() );
 	TTraceIter traceIterEnd = end(trace, Standard() );
 
-	/*	
-	// Debug
-	unsigned int count = 0;
-	for(;traceIter != traceIterEnd;goNext(traceIter)) {
-	  std::cout << count << ',' << getValue(traceIter) << std::endl;
-	  ++count;
-	}
-	*/
+	
+	//// Debug
+	//unsigned int count = 0;
+	//for(;traceIter != traceIterEnd;goNext(traceIter)) {
+	//  std::cout << count << ',' << getValue(traceIter) << std::endl;
+	//  ++count;
+	//}
+
 
 	// TraceBack values
 	enum {Diagonal = 0, Horizontal = 1, Vertical = 2};
@@ -65,9 +66,20 @@ _align_hirschberg_trace(TAlign& align,
 			_align_trace_print(align, str, id1, len1, id2, (TSize) 0, segLen, (Byte) Horizontal);
 			//std::cout << "Horizontal " << segLen << std::endl;
 		} else {
-			_align_trace_print(align, str, id1, (TSize) 0, id2, (TSize) movePointer + 1, (TSize) currentPointer - (movePointer + 1), (Byte) Vertical);
-			//std::cout << "Vertical " << currentPointer - (movePointer + 1)  << std::endl;
-			currentPointer = movePointer + 1;
+			// Horizontal vs. vertical gap
+			if ((len1 - 2 > 0) && 
+				(movePointer - getValue(trace, len1 - 2) == 0) &&
+				(scoreGapExtend(sc) + scoreGapOpen(sc) > score(const_cast<Score<TScoreValue, Simple>&>(sc), str[0][len1-1], str[1][movePointer]))) {
+					_align_trace_print(align, str, id1, (TSize) 0, id2, (TSize) movePointer, (TSize) currentPointer - movePointer, (Byte) Vertical);
+					currentPointer = movePointer;
+			} else if ((scoreGapOpen(sc) + scoreGapOpen(sc) > score(const_cast<Score<TScoreValue, Simple>&>(sc), str[0][len1-1], str[1][movePointer]))) {
+					_align_trace_print(align, str, id1, (TSize) 0, id2, (TSize) movePointer, (TSize) currentPointer - movePointer, (Byte) Vertical);
+					currentPointer = movePointer;
+			} else {
+				_align_trace_print(align, str, id1, (TSize) 0, id2, (TSize) movePointer + 1, (TSize) currentPointer - (movePointer + 1), (Byte) Vertical);
+				//std::cout << "Vertical " << currentPointer - (movePointer + 1)  << std::endl;
+				currentPointer = movePointer + 1;
+			}
 		}
 	} while (len1 != 0);
 	if (getValue(trace, 0) != 0) {
@@ -98,6 +110,7 @@ _align_hirschberg(TTrace& trace,
 	TScoreValue gap = scoreGapExtend(sc);
 	TScoreValue gapOpen = scoreGapOpen(sc);
 	TScoreValue upperLeft = 0;
+	TScoreValue maxVal = 0;
 
 	TSize len1 = length(str[0]);
 	TSize len2 = length(str[1]);
@@ -265,6 +278,7 @@ _align_hirschberg(TTrace& trace,
 			}
 			TSize cut = y1 + tmpPointer;
 			upperLeft = tmp;
+			if (midpoints.empty()) maxVal = tmp;
 
 			/*
 			// Debug code
@@ -293,7 +307,7 @@ _align_hirschberg(TTrace& trace,
 	}
 	assignValue(traceIter, len2); // End point of the trace
 	
-	return upperLeft;
+	return maxVal;
 }
 
 
@@ -311,7 +325,7 @@ _globalAlignment(TAlign& align,
 	TScoreValue maxScore = _align_hirschberg(trace, str, sc, Hirschberg());
 
 	// Follow the trace and create the graph
-	_align_hirschberg_trace(align, str, trace);
+	_align_hirschberg_trace(align, str, sc, trace);
 
 	return maxScore;
 }

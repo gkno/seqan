@@ -254,6 +254,17 @@ void  Test_Gotoh() {
 	//std::cout << g << std::endl;
 	//score2 = globalAlignment(std::cout, str, score_type, Gotoh() );
 	//SEQAN_TASSERT(score == score2)
+
+	// Note: Depending on the used recursion formula, the gotoh algorithms can differ !!!
+	// Gotoh: Vertical gap and subsequent horizontal gap allowed
+	// Gotoh3: Vertical gap and subsequent horizontal gap is not allowed
+	//Score<double> score_scheme = Score<double>(5,-4,-0.5,-2);
+	//str[0] = "tttggttt";
+	//str[1] = "tttccttt";
+	//assignStringSet(g, str);
+	//score = globalAlignment(std::cout, str, score_scheme, Gotoh());
+	//std::cout << std::endl;
+	//score = globalAlignment(std::cout, str, score_scheme, Gotoh3());
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -476,7 +487,6 @@ void Test_Hirschberg() {
 
 
 
-/*
 //////////////////////////////////////////////////////////////////////////////
 
 void  Test_Runtime() {
@@ -488,7 +498,6 @@ void  Test_Runtime() {
 	typedef	Id<TStringSet>::Type TId;
 	
 	Score<double> score_type = Score<double>(5,-4,-0.5,-10);
-	Score<double> score_type2 = Score<double>(5,-4,-0.5,-9.5);
 	double score;
 	TStringSet str;
 	clock_t startTime;
@@ -510,8 +519,8 @@ void  Test_Runtime() {
 
 	std::cout << "Length Seq0: " << length(str0) << std::endl;
 	std::cout << "Length Seq1: " << length(str1) << std::endl;
-
 	TGraph g(str);
+
 	startTime = clock();
 	score = globalAlignment(g, score_type, Gotoh() );
 	duration = clock() - startTime;
@@ -519,57 +528,13 @@ void  Test_Runtime() {
 	std::cout << "Score: " << score << " (Runtime: " << duration << ")" << std::endl;
 	std::cout << std::endl;
 
-	Align< String<Dna>, ArrayGaps> ali;
-	resize(rows(ali), 2);
-	assignSource(row(ali, 0), str[0]);
-	assignSource(row(ali, 1), str[1]);
 	startTime = clock();
-	score = needlemanWunsch(ali,score_type2);
+	score = globalAlignment(g, score_type, Hirschberg() );
 	duration = clock() - startTime;
-	std::cout << ali << std::endl;
+	std::cout << g << std::endl;
 	std::cout << "Score: " << score << " (Runtime: " << duration << ")" << std::endl;
 	std::cout << std::endl;
 }
-
-//////////////////////////////////////////////////////////////////////////////
-
-void  Test_LargeAlignment() {
-	typedef String<Dna> TString;
-	typedef StringSet<TString, Dependent<> > TStringSet;
-	typedef Graph<Alignment<TStringSet, void> > TGraph;
-	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
-	typedef	Id<TStringSet>::Type TId;
-	
-	Score<double> score_type = Score<double>(5,-4,-0.5,-10);
-	double score;
-	TStringSet str;
-	clock_t startTime;
-	clock_t duration;
-
-	TString str0;
-	fstream strm_in;
-	strm_in.open(TEST_PATH "a.fasta", ios_base::in | ios_base::binary);
-	read(strm_in, str0, Fasta());
-	strm_in.close();
-	assignValueById(str, str0);
-
-	TString str1;
-	fstream strm_in1;
-	strm_in1.open(TEST_PATH "b.fasta", ios_base::in | ios_base::binary);
-	read(strm_in1, str1, Fasta());
-	strm_in1.close();
-	assignValueById(str, str1);
-
-	std::cout << "Length Seq0: " << length(str0) << std::endl;
-	std::cout << "Length Seq1: " << length(str1) << std::endl;
-	startTime = clock();
-	score = globalAlignment(std::cout, str, score_type, Gotoh() );
-	duration = clock() - startTime;
-	std::cout << "Score: " << score << " (Runtime: " << duration << ")" << std::endl;
-	std::cout << std::endl;
-}
-*/
 
 
 //////////////////////////////////////////////////////////////////////////////

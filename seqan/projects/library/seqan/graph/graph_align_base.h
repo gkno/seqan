@@ -33,6 +33,17 @@ typedef Tag<Gotoh_> const Gotoh;
 //////////////////////////////////////////////////////////////////////////////
 
 /**
+.Tag.Gotoh3
+..summary:Switch to trigger Gotoh Alignments with affine gap costs
+..value.Gotoh3:Gotoh alignment
+*/
+
+struct Gotoh3_;
+typedef Tag<Gotoh3_> const Gotoh3;
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
 .Tag.MyersBitVector
 ..summary:Switch to trigger a Myers bit vector alignment
 ..value.MyersBitVector:MyersBitVector alignment
@@ -206,6 +217,8 @@ _align_trace_print(TFile& file,
 	// TraceBack values
 	enum {Diagonal = 0, Horizontal = 1, Vertical = 2};
 
+	if (segLen == 0) return;
+
 	if (tv == (Byte) Horizontal) {
 		for (int i = pos1 + segLen - 1; i>= (int) pos1;--i) {
 			_streamPut(file, '(');
@@ -258,6 +271,8 @@ _align_trace_print(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 
 	// TraceBack values
 	enum {Diagonal = 0, Horizontal = 1, Vertical = 2};
+
+	if (segLen == 0) return;
 
 	if (tv == (Byte) Horizontal) addVertex(g, id1, pos1, segLen);
 	else if (tv == (Byte) Vertical) addVertex(g, id2, pos2, segLen);

@@ -1,5 +1,5 @@
-#ifndef SEQAN_HEADER_GRAPH_ALIGN_GOTOH_H
-#define SEQAN_HEADER_GRAPH_ALIGN_GOTOH_H
+#ifndef SEQAN_HEADER_GRAPH_ALIGN_GOTOH3_H
+#define SEQAN_HEADER_GRAPH_ALIGN_GOTOH3_H
 
 namespace SEQAN_NAMESPACE_MAIN
 {
@@ -12,7 +12,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 template <typename TAlign, typename TStringSet, typename TTrace, typename TVal>
 void
-_align_gotoh_trace(TAlign& align,		 
+_align_gotoh3_trace(TAlign& align,		 
 				   TStringSet const& str,
 				   TTrace const& trace,
 				   TVal const initialDir)
@@ -33,96 +33,80 @@ _align_gotoh_trace(TAlign& align,
 	TSize numRows = len2;
 
 	// Initialize everything	
-	TTraceValue nextTraceValue = getValue(trace, (len1 - 1)*numRows + (len2 - 1));
-	TTraceValue tv = 0;
+	TTraceValue tv = getValue(trace, (len1 - 1)*numRows + (len2 - 1));
+	TTraceValue tvOld = initialDir;
 	switch( (Byte) initialDir) {
 		case Diagonal:
-			if ((Byte) nextTraceValue / (Byte) 4 == 0) tv = (Byte) Diagonal;
-			else if ((Byte) nextTraceValue / (Byte) 4 == 1) tv = (Byte) Horizontal;
+			if ((Byte) tv / (Byte) 4 == 0) tv = (Byte) Diagonal;
+			else if ((Byte) tv / (Byte) 4 == 1) tv = (Byte) Horizontal;
 			else tv = (Byte) Vertical;
 			break;
 		case Horizontal:
-			if (((Byte) nextTraceValue / (Byte) 2) % 2 == 0) {
-			  _align_trace_print(align, str, id1, --len1, id2, len2, (TSize) 1, (Byte) Horizontal);
-			  tv = (Byte) Diagonal;
-			}
+			if (((Byte) tv / (Byte) 2) % 2 == 0) tv = (Byte) Diagonal;
 			else tv = (Byte) Horizontal;
 			break;
 		case Vertical:
-			if ( (Byte) nextTraceValue % 2 == 0) {
-			  _align_trace_print(align, str, id1, len1, id2, --len2, (TSize) 1, (Byte) Vertical);
-			  tv = (Byte) Diagonal;
-			}
+			if ( (Byte) tv % 2 == 0) tv = (Byte) Diagonal;
 			else tv = (Byte) Vertical;
 			break;
 	}
 	TSize segLen = 0;
-	TTraceValue tvOld = tv;
 
 	// Now follow the trace
 	do {
-	  nextTraceValue = getValue(trace, (len1 - 1)*numRows + (len2 - 1));
-	  switch( (Byte) tv) {
-	  case Diagonal:
-	    if ( (Byte) nextTraceValue / (Byte) 4 == 0) tv = (Byte) Diagonal;
-	    else if ((Byte) nextTraceValue / (Byte) 4 == 1) tv = (Byte) Horizontal;
-	    else tv = (Byte) Vertical;
-	    break;
-	  case Horizontal:
-	    if (((Byte) nextTraceValue / (Byte) 2) % 2 == 0) tv = (Byte) Diagonal;
-	    else tv = (Byte) Horizontal;
-	    break;
-	  case Vertical:
-	    if ( (Byte) nextTraceValue % (Byte) 2 == 0) tv = (Byte) Diagonal;
-	    else tv = (Byte) Vertical;
-	    break;
-	  }
-		switch( (Byte) tv) {
-		case Diagonal: 
-		  if (tv != tvOld) {
-		    if (tvOld == (Byte) Vertical) --len2;
-		    else --len1;
-		    _align_trace_print(align, str, id1, len1, id2, len2, ++segLen, tvOld);
-		    tvOld = tv; segLen = 0;
-		  } else {
-		    ++segLen;
-		    --len1; --len2;
-		  }
-		  break;
-		case Horizontal:
-		  if (tv != tvOld) {
-		    _align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
-		    if (((Byte) nextTraceValue / (Byte) 2) % 2 == 0) {
-		      _align_trace_print(align, str, id1, --len1, id2, len2, (TSize) 1, (Byte) Horizontal);
-		      tv = (Byte) Diagonal; segLen = 0;
-		    } else {
-		      tvOld = tv; segLen = 1;
-		      --len1;
-		    }
-		  } else {
-		    ++segLen;
-		    --len1;
-		  }
-		  break;
-		case Vertical:
-		  if (tv != tvOld) {
-		    _align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
-		    if ( (Byte) nextTraceValue % (Byte) 2 == 0) {
-		      _align_trace_print(align, str, id1, len1, id2, --len2, (TSize) 1, (Byte) Vertical);
-		      tv = (Byte) Diagonal; segLen = 0;
-		    } else {
-		      tvOld = tv; segLen = 1;
-		      --len2;
-		    }
-		  } else {
-		    ++segLen;
-		    --len2;
-		  }
-		  break;
+		switch( (Byte) tvOld) {
+			case Diagonal: 
+				//std::cout << '(' << ((*str)[0])[len1 - 1] << ',' << ((*str)[1])[len2-1] << ')' << std::endl;
+				--len1; --len2;
+				++segLen;
+				if (tv != tvOld) {
+					_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
+					tvOld = tv; 
+					segLen = 0;
+				}
+				break;
+			case Horizontal:
+				//std::cout << '(' << ((*str)[0])[len1 - 1] << ',' << '-' << ')' << std::endl;
+				--len1;
+				++segLen;
+				if (tv != tvOld) {
+					_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
+					tvOld = tv;
+					segLen = 0;
+				}
+				break;
+			case Vertical:
+				//std::cout << '(' << '-' << ',' << ((*str)[1])[len2-1] << ')' << std::endl;
+				--len2;
+				++segLen;
+				if (tv != tvOld) {
+					_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
+					tvOld = tv; 
+					segLen = 0;
+				}
+				break;
+		}
+		if ((len1 != 0) && (len2 !=0)) {
+			TTraceValue nextTraceValue = getValue(trace, (len1 - 1)*numRows + (len2 - 1));
+			switch( (Byte) tv) {
+				case Diagonal:
+					if ( (Byte) nextTraceValue / (Byte) 4 == 0) tv = (Byte) Diagonal;
+					else if ((Byte) nextTraceValue / (Byte) 4 == 1) tv = (Byte) Horizontal;
+					else tv = (Byte) Vertical;
+					break;
+				case Horizontal:
+					if (((Byte) nextTraceValue / (Byte) 2) % 2 == 0) tv = (Byte) Diagonal;
+					else tv = (Byte) Horizontal;
+					break;
+				case Vertical:
+					if ( (Byte) nextTraceValue % (Byte) 2 == 0) tv = (Byte) Diagonal;
+					else tv = (Byte) Vertical;
+					break;
+			}
 		}
 	} while ((len1 != 0) && (len2 !=0));
 	// Process left-overs
-	if (segLen) _align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
+	if (segLen > 0) _align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
 
 	// Handle the remaining sequence
 	if (len1 != 0) _align_trace_print(align, str, (TId) id1, (TSize) 0, (TId) 0, (TSize) 0, (TSize) len1, (Byte) Horizontal);
@@ -133,13 +117,13 @@ _align_gotoh_trace(TAlign& align,
 
 template <typename TTrace, typename TStringSet, typename TScoreValue>
 TScoreValue
-_align_gotoh(TTrace& trace,
+_align_gotoh3(TTrace& trace,
 	     TStringSet const& str,
 	     Score<TScoreValue, Simple> const & sc,
 	     typename Value<TTrace>::Type& initialDir,
 	     bool createTrace)
-{	
-  SEQAN_CHECKPOINT
+{
+	SEQAN_CHECKPOINT
 	typedef typename Value<TTrace>::Type TTraceValue;
 	typedef typename Iterator<TTrace, Standard>::Type TTraceIter;
 	typedef String<TScoreValue> TColumn;
@@ -154,7 +138,7 @@ _align_gotoh(TTrace& trace,
 	// The DP Matrix for gaps from the left
 	TColumn horizontal;
 	// The DP Matrix for gaps from the top
-	TScoreValue vert;
+	TColumn vertical;
 
 	// Initialization
 	TString const& str1 = str[0];
@@ -163,58 +147,75 @@ _align_gotoh(TTrace& trace,
 	TSize len2 = length(str2);
 	TScoreValue gap = scoreGapExtend(sc);
 	TScoreValue gapOpen = scoreGapOpen(sc);
+	TScoreValue maxVal = 0;
 	TScoreValue tmp = 0;
 	resize(mat, (len2+1));   // One column for the diagonal matrix
 	resize(horizontal, (len2+1));   // One column for the horizontal matrix
+	resize(vertical, (len2+1));   // One column for the vertical matrix
 	if (createTrace) resize(trace, len1*len2);
+
 	TTraceValue tvMat, tvHorizontal, tvVertical;
 	
+	TScoreValue inf = infimumValue<TScoreValue>() / 2;
+
 	// Classical DP
 	TTraceIter it = begin(trace, Standard() );
 	assignValue(mat, 0, 0);
+	assignValue(horizontal, 0, inf);
+	assignValue(vertical, 0, inf);
 	for(TSize row = 1; row <= len2; ++row) {
 		assignValue(mat, row, gapOpen + (row - 1) * gap);
-		assignValue(horizontal, row, getValue(mat, row) + gapOpen - gap);
+		assignValue(horizontal, row, inf);
+		assignValue(vertical, row, gapOpen + (row - 1) * gap);
 	}
 	for(TSize col = 1; col <= len1; ++col) {
 		TScoreValue diagValMat = getValue(mat, 0);
+		TScoreValue diagValHori = getValue(horizontal, 0);
+		TScoreValue diagValVert = getValue(vertical, 0);
+		TScoreValue diagValVertTmp;
+		TScoreValue diagValHoriTmp;
 		assignValue(mat, 0, gapOpen + (col - 1) * gap);
-		vert = getValue(mat, 0) + gapOpen - gap;
+		assignValue(horizontal, 0, gapOpen + (col - 1) * gap);
+		assignValue(vertical, 0, inf);
 		for(TSize row = 1; row <= len2; ++row) {
 			// Get the new maximum for vertical
-			if ((tmp = getValue(mat, row - 1) + gapOpen) > vert + gap) {
-				vert = tmp;
-				tvVertical = (Byte) Diagonal;
-			} else {
-				vert = vert + gap;
+			maxVal = getValue(mat, row - 1) + gapOpen;
+			tvVertical = (Byte) Diagonal;
+			if ((tmp = getValue(vertical, row - 1) + gap) > maxVal) {
+				maxVal = tmp;
 				tvVertical = (Byte) Vertical;
 			}
+			diagValVertTmp = getValue(vertical, row);
+			assignValue(vertical, row, maxVal);
 
 			// Get the new maximum for left
-			if ((tmp = getValue(mat, row) + gapOpen) > getValue(horizontal, row) + gap) {
-				assignValue(horizontal, row, tmp);
-				tvHorizontal = (Byte) Diagonal;
-			} else {
-				assignValue(horizontal, row, getValue(horizontal, row) + gap);
+			maxVal = getValue(mat, row) + gapOpen;
+			tvHorizontal = (Byte) Diagonal;
+			if ((tmp = getValue(horizontal, row) + gap) > maxVal) {
+				maxVal = tmp;
 				tvHorizontal = (Byte) Horizontal;
 			}
+			diagValHoriTmp = getValue(horizontal, row);
+			assignValue(horizontal, row, maxVal);
 
 			// Get the new maximum for mat
 			TScoreValue sc_ = score(const_cast<Score<TScoreValue, Simple>&>(sc), str1[col-1], str2[row-1]);
-			tmp = diagValMat + sc_;
+			maxVal = diagValMat + sc_;
 			tvMat = (Byte) Diagonal;
-			if (vert > tmp) {
-				tmp = vert;
+			if ((tmp = diagValVert + sc_) > maxVal) {
+				maxVal = tmp;
 				tvMat = (Byte) Vertical;
 			}
-			if (getValue(horizontal, row) > tmp) {
-				tmp = getValue(horizontal,row);
+			if ((tmp = diagValHori + sc_) > maxVal) {
+				maxVal = tmp;
 				tvMat = (Byte) Horizontal;
 			}
 
 			// Assign the new diagonal values
 			diagValMat = getValue(mat, row);
-			assignValue(mat, row, tmp);
+			diagValHori = diagValHoriTmp;
+			diagValVert = diagValVertTmp;
+			assignValue(mat, row, maxVal);
 
 			// Assign the right trace value
 			if (createTrace) {
@@ -248,12 +249,14 @@ _align_gotoh(TTrace& trace,
 		}
 	}
 
-	tmp = getValue(mat, len2);
+	maxVal = getValue(mat, len2);
 	initialDir = (Byte) Diagonal;
-	if (getValue(horizontal, len2) ==  tmp) {
+	if ((tmp = getValue(horizontal, len2)) > maxVal) {
+		maxVal = tmp;
 		initialDir = (Byte) Horizontal;
 	}
-	else if (vert == tmp) {
+	if ((tmp = getValue(vertical, len2)) > maxVal) {
+		maxVal = tmp;
 		initialDir = (Byte) Vertical;
 	}
 
@@ -264,23 +267,22 @@ _align_gotoh(TTrace& trace,
 		}
 		std::cout << std::endl;
 	}
-	std::cout << (unsigned int) initialDir << std::endl;
 	*/
 
-	return tmp;
+	return maxVal;
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TTrace, typename TStringSet, typename TScoreValue>
 TScoreValue
-_align_gotoh(TTrace& trace,
+_align_gotoh3(TTrace& trace,
 	     TStringSet const& str,
 	     Score<TScoreValue, Simple> const & sc,
 	     typename Value<TTrace>::Type& initialDir)
 {
 	SEQAN_CHECKPOINT
-	return _align_gotoh(trace, str, sc, initialDir, true);
+	return _align_gotoh3(trace, str, sc, initialDir, true);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -290,7 +292,7 @@ TScoreValue
 _globalAlignment(TAlign& align,
 				 TStringSet const& str,
 				 Score<TScoreValue, Simple> const& sc,
-				 Gotoh)
+				 Gotoh3)
 {
 	SEQAN_CHECKPOINT
 	typedef typename Size<TStringSet>::Type TSize;
@@ -307,18 +309,18 @@ _globalAlignment(TAlign& align,
 		TraceBackGotoh initialDir;
 
 		// Create the trace
-		maxScore = _align_gotoh(trace, str, sc, initialDir);	
+		maxScore = _align_gotoh3(trace, str, sc, initialDir);	
 		// Follow the trace and create the graph
-		_align_gotoh_trace(align, str, trace, initialDir);
+		_align_gotoh3_trace(align, str, trace, initialDir);
 	} else {
 		// Trace
 		String<TraceBackGotoh> trace;
 		TraceBackGotoh initialDir;
 
 		// Create the trace
-		maxScore = _align_gotoh(trace, str, sc, initialDir);	
+		maxScore = _align_gotoh3(trace, str, sc, initialDir);	
 		// Follow the trace and create the graph
-		_align_gotoh_trace(align, str, trace, initialDir);
+		_align_gotoh3_trace(align, str, trace, initialDir);
 	}
 	return maxScore;
 }
@@ -329,7 +331,7 @@ template<typename TStringSet, typename TScoreValue>
 TScoreValue
 _globalAlignment(TStringSet const& str,
 		 Score<TScoreValue, Simple> const& sc,
-		 Gotoh)
+		 Gotoh3)
 {
 	SEQAN_CHECKPOINT
 	TraceBackGotoh initialDir;
