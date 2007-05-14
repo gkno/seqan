@@ -1,7 +1,6 @@
 #ifndef SEQAN_HEADER_TEST_GRAPH_TYPES_H
 #define SEQAN_HEADER_TEST_GRAPH_TYPES_H
 
-
 using namespace std;
 using namespace seqan;
 
@@ -82,11 +81,11 @@ void Test_Directed() {
 	strm.open(TEST_PATH "my_graph.dot", ios_base::out | ios_base::trunc);
 	write(strm,g,DotDrawing());
 	strm.close();
-	// File read
-	StandardGraph gTmp;
-	strm.open(TEST_PATH "my_graph.dot", ios_base::in);
-	read(strm,gTmp,DotDrawing());
-	strm.close();
+	//// File read
+	//StandardGraph gTmp;
+	//strm.open(TEST_PATH "my_graph.dot", ios_base::in);
+	//read(strm,gTmp,DotDrawing());
+	//strm.close();
 
 	removeEdge(g,4,3);
 	addEdge(g,0,0);
@@ -1366,6 +1365,26 @@ void Test_Tree() {
 	cargo(ed1) = TPair('c',1);
 	SEQAN_TASSERT((getCargo(ed1)).i1 == 'c')
 	SEQAN_TASSERT((getCargo(ed1)).i2 == 1)
+
+
+
+	//// File read
+	//fstream strmKnut;
+	//TTree gKnut;
+	//strmKnut.open(TEST_PATH "my_tree2.dot", ios_base::in);
+	//String<String<char> > nodeMap;
+	//String<String<char> > edgeMap;
+	//read(strmKnut, gKnut, nodeMap, edgeMap, DotDrawing());
+	//strmKnut.close();
+
+	//assignRoot(gKnut, 26);
+	//typedef Iterator<TTree, DfsPreorder>::Type TDfsPreorder;
+	//TDfsPreorder dfsIt(gKnut, 26);
+	//for(;!atEnd(dfsIt);++dfsIt) {
+	//	std::cout << *dfsIt << ": ";
+	//	std::cout << getProperty(nodeMap, *dfsIt) << std::endl;
+	//}
+	//std::cout << gKnut << std::endl;
 }
 
 
