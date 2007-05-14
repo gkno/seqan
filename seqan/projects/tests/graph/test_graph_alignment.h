@@ -271,47 +271,56 @@ void  Test_MyersBitVector() {
 	int score2 = globalAlignment(str, score_type, NeedlemanWunsch() );
 	Score<int> score_type2 = Score<int>(0,-1,-1,-1);
 	int score3 = globalAlignment(str, score_type2, Gotoh() );
+	int score4 = globalAlignment(str, score_type2, Hirschberg() );
 	SEQAN_TASSERT((-1) * score1 == score2)
 	SEQAN_TASSERT(score2 == score3)
+	SEQAN_TASSERT(score3 == score4)
 
 	str[0] = "annual";
 	str[1] = "annealing";
 	score1 = globalAlignment(str, MyersBitVector() );
 	score2 = globalAlignment(str, score_type, NeedlemanWunsch() );
 	score3 = globalAlignment(str, score_type2, Gotoh() );
+	score4 = globalAlignment(str, score_type2, Hirschberg() );
 	SEQAN_TASSERT((-1) * score1 == score2)
 	SEQAN_TASSERT(score2 == score3)
+	SEQAN_TASSERT(score3 == score4)
 
 	str[0] = "cttagt";
 	str[1] = "ttag";
 	score1 = globalAlignment(str, MyersBitVector() );
 	score2 = globalAlignment(str, score_type, NeedlemanWunsch() );
 	score3 = globalAlignment(str, score_type2, Gotoh() );
+	score4 = globalAlignment(str, score_type2, Hirschberg() );
 	SEQAN_TASSERT((-1) * score1 == score2)
 	SEQAN_TASSERT(score2 == score3)
+	SEQAN_TASSERT(score3 == score4)
 
 	str[0] = "ttag";
 	str[1] = "cttccagt";
 	score1 = globalAlignment(str, MyersBitVector() );
 	score2 = globalAlignment(str, score_type, NeedlemanWunsch() );
 	score3 = globalAlignment(str, score_type2, Gotoh() );
+	score4 = globalAlignment(str, score_type2, Hirschberg() );
 	SEQAN_TASSERT((-1) * score1 == score2)
 	SEQAN_TASSERT(score2 == score3)
+	SEQAN_TASSERT(score3 == score4)
 	 
 	str[0] = "ttagttagttagttagttagttagttagttagttagttagttagttagttagttagttag";
 	str[1] = "cttccagtcttccagtcttccagtcttccagtcttccagtcttccagtcttccagtcttccagt";
 	score1 = globalAlignment(str, MyersBitVector() );
 	score2 = globalAlignment(str, score_type, NeedlemanWunsch() );
 	score3 = globalAlignment(str, score_type2, Gotoh() );
+	score4 = globalAlignment(str, score_type2, Hirschberg() );
 	SEQAN_TASSERT((-1) * score1 == score2)
 	SEQAN_TASSERT(score2 == score3)
+	SEQAN_TASSERT(score3 == score4)
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 void Test_Hirschberg() {
-	// ToDo!!!
-	typedef String<char> TString;
+	typedef String<Dna> TString;
 	typedef StringSet<TString, Dependent<> > TStringSet;
 	typedef Graph<Alignment<TStringSet, void> > TGraph;
 	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
@@ -319,15 +328,150 @@ void Test_Hirschberg() {
 	typedef	Id<TStringSet>::Type TId;
 	
 	TStringSet str;
-	TString str0("annual");	assignValueById(str, str0);
-	TString str1("annealing"); assignValueById(str, str1);
+	TString str0("ttagt");	assignValueById(str, str0);
+	TString str1("ttgt"); assignValueById(str, str1);
 	TGraph g(str);
-	Score<int> score_type = Score<int>(0,-1,-1,-1);
-	int score = globalAlignment(g, score_type, Hirschberg() );
-	
-	//int score3 = globalAlignment(g, score_type2, Hirschberg_Gotoh() );
-	//SEQAN_TASSERT((-1) * score1 == score2)
-	//SEQAN_TASSERT(score2 == score3)
+	Score<double> score_type = Score<double>(1,-1,-1,-2);
+	double score = globalAlignment(g, score_type, Hirschberg());
+	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "tt")
+	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "tt")
+	SEQAN_TASSERT(label(g, findVertex(g, 0, 2)) == "a")
+	SEQAN_TASSERT(label(g, findVertex(g, 0, 3)) == "gt")
+	SEQAN_TASSERT(label(g, findVertex(g, 1, 2)) == "gt")
+	SEQAN_TASSERT(numEdges(g) == 2)
+	SEQAN_TASSERT(numVertices(g) == 5)
+	//std::cout << g << std::endl;
+	//double score2 = globalAlignment(std::cout, str, score_type, Hirschberg() );
+	//SEQAN_TASSERT(score == score2)
+
+	str[0] = "ttgt";
+	str[1] = "ttagt";
+	assignStringSet(g, str);
+	score = globalAlignment(g, score_type, Hirschberg());
+	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "tt")
+	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "tt")
+	SEQAN_TASSERT(label(g, findVertex(g, 1, 2)) == "a")
+	SEQAN_TASSERT(label(g, findVertex(g, 1, 3)) == "gt")
+	SEQAN_TASSERT(label(g, findVertex(g, 0, 2)) == "gt")
+	SEQAN_TASSERT(numEdges(g) == 2)
+	SEQAN_TASSERT(numVertices(g) == 5)
+	//std::cout << g << std::endl;
+	//score2 = globalAlignment(std::cout, str, score_type, Hirschberg() );
+	//SEQAN_TASSERT(score == score2)
+
+	str[0] = "tagt";
+	str[1] = "attagt";
+	assignStringSet(g, str);
+	score = globalAlignment(g, score_type, Hirschberg());
+	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "tagt")
+	SEQAN_TASSERT(label(g, findVertex(g, 1, 2)) == "tagt")
+	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "at")
+	SEQAN_TASSERT(numEdges(g) == 1)
+	SEQAN_TASSERT(numVertices(g) == 3)
+	//std::cout << g << std::endl;
+	//score2 = globalAlignment(std::cout, str, score_type, Hirschberg() );
+	//SEQAN_TASSERT(score == score2)
+
+	str[0] = "attagt";
+	str[1] = "tagt";
+	assignStringSet(g, str);
+	score = globalAlignment(g, score_type, Hirschberg());
+	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "tagt")
+	SEQAN_TASSERT(label(g, findVertex(g, 0, 2)) == "tagt")
+	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "at")
+	SEQAN_TASSERT(numEdges(g) == 1)
+	SEQAN_TASSERT(numVertices(g) == 3)
+	//std::cout << g << std::endl;
+	//score2 = globalAlignment(std::cout, str, score_type, Hirschberg() );
+	//SEQAN_TASSERT(score == score2)
+
+	str[0] = "ttagt";
+	str[1] = "ttag";
+	assignStringSet(g, str);
+	score = globalAlignment(g, score_type, Hirschberg());
+	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "ttag")
+	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "ttag")
+	SEQAN_TASSERT(label(g, findVertex(g, 0, 4)) == "t")
+	SEQAN_TASSERT(numEdges(g) == 1)
+	SEQAN_TASSERT(numVertices(g) == 3)
+	//std::cout << g << std::endl;
+	//score2 = globalAlignment(std::cout, str, score_type, Hirschberg() );
+	//SEQAN_TASSERT(score == score2)
+
+	str[0] = "ttag";
+	str[1] = "ttagt";
+	assignStringSet(g, str);
+	score = globalAlignment(g, score_type, Hirschberg());
+	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "ttag")
+	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "ttag")
+	SEQAN_TASSERT(label(g, findVertex(g, 1, 4)) == "t")
+	SEQAN_TASSERT(numEdges(g) == 1)
+	SEQAN_TASSERT(numVertices(g) == 3)
+	//std::cout << g << std::endl;
+	//score2 = globalAlignment(std::cout, str, score_type, Hirschberg() );
+	//SEQAN_TASSERT(score == score2)
+
+	str[0] = "cttagt";
+	str[1] = "ttag";
+	assignStringSet(g, str);
+	score = globalAlignment(g, score_type, Hirschberg());
+	SEQAN_TASSERT(label(g, findVertex(g, 0, 1)) == "ttag")
+	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "c")
+	SEQAN_TASSERT(label(g, findVertex(g, 0, 5)) == "t")
+	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "ttag")
+	SEQAN_TASSERT(numEdges(g) == 1)
+	SEQAN_TASSERT(numVertices(g) == 4)
+	//std::cout << g << std::endl;
+	//score2 = globalAlignment(std::cout, str, score_type, Hirschberg() );
+	//SEQAN_TASSERT(score == score2)
+
+	str[0] = "ttag";
+	str[1] = "cttagt";
+	assignStringSet(g, str);
+	score = globalAlignment(g, score_type, Hirschberg());
+	SEQAN_TASSERT(label(g, findVertex(g, 1, 1)) == "ttag")
+	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "c")
+	SEQAN_TASSERT(label(g, findVertex(g, 1, 5)) == "t")
+	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "ttag")
+	SEQAN_TASSERT(numEdges(g) == 1)
+	SEQAN_TASSERT(numVertices(g) == 4)
+	//std::cout << g << std::endl;
+	//score2 = globalAlignment(std::cout, str, score_type, Hirschberg() );
+	//SEQAN_TASSERT(score == score2)
+
+	str[0] = "cttccagt";
+	str[1] = "ttag";
+	assignStringSet(g, str);
+	score = globalAlignment(g, score_type, Hirschberg());
+	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "c")
+	SEQAN_TASSERT(label(g, findVertex(g, 0, 1)) == "tt")
+	SEQAN_TASSERT(label(g, findVertex(g, 0, 3)) == "cc")
+	SEQAN_TASSERT(label(g, findVertex(g, 0, 5)) == "ag")
+	SEQAN_TASSERT(label(g, findVertex(g, 0, 7)) == "t")
+	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "tt")
+	SEQAN_TASSERT(label(g, findVertex(g, 1, 2)) == "ag")
+	SEQAN_TASSERT(numEdges(g) == 2)
+	SEQAN_TASSERT(numVertices(g) == 7)
+	//std::cout << g << std::endl;
+	//score2 = globalAlignment(std::cout, str, score_type, Hirschberg() );
+	//SEQAN_TASSERT(score == score2)
+
+	str[0] = "ttag";
+	str[1] = "cttccagt";
+	assignStringSet(g, str);
+	score = globalAlignment(g, score_type, Hirschberg());
+	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "c")
+	SEQAN_TASSERT(label(g, findVertex(g, 1, 1)) == "tt")
+	SEQAN_TASSERT(label(g, findVertex(g, 1, 3)) == "cc")
+	SEQAN_TASSERT(label(g, findVertex(g, 1, 5)) == "ag")
+	SEQAN_TASSERT(label(g, findVertex(g, 1, 7)) == "t")
+	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "tt")
+	SEQAN_TASSERT(label(g, findVertex(g, 0, 2)) == "ag")
+	SEQAN_TASSERT(numEdges(g) == 2)
+	SEQAN_TASSERT(numVertices(g) == 7)
+	//std::cout << g << std::endl;
+	//score2 = globalAlignment(std::cout, str, score_type, Hirschberg() );
+	//SEQAN_TASSERT(score == score2)
 }
 
 

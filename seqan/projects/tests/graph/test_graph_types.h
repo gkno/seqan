@@ -1758,19 +1758,19 @@ void Test_Alignment() {
 	TAlignString align_str1("annealing"); assignValueById(align_str, align_str1);
 	TAlignGraph g_align(align_str);
 	addEdge(g_align, addVertex(g_align, 0, 0, 6), addVertex(g_align, 1, 0, 6), 1);
-	addVertex(g_align, 1, 6, 3);
+	//addVertex(g_align, 1, 6, 3);
 
-	std::cout << g_align << std::endl;
+	//std::cout << g_align << std::endl;
 
 	TAlignGraph g_align_b(align_str);
-	addEdge(g_align_b, addVertex(g_align_b, 0, 0, 6), addVertex(g_align_b, 1, 0, 6), 1);
-	addVertex(g_align_b, 1, 6, 3);
+	addEdge(g_align_b, addVertex(g_align_b, 0, 0, 6), addVertex(g_align_b, 1, 3, 6), 1);
+	//addVertex(g_align_b, 1, 6, 3);
 
-	std::cout << g_align_b << std::endl;
+	//std::cout << g_align_b << std::endl;
 
-	extendGraph(g_align, g_align_b);
+	//extendGraph(g_align, g_align_b);
 
-	std::cout << g_align << std::endl;
+	//std::cout << g_align << std::endl;
 
 
 

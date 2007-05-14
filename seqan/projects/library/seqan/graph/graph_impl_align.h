@@ -831,6 +831,7 @@ convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 			pos = comps.begin();
 			currentSeq = it->first.first;
 		}
+		if (it->second == nilVertex) return false;
 		unsigned int c = getProperty(component, it->second);
 		// Have we seen this component before?
 		if (bag.find(c) != bag.end()) {
@@ -893,10 +894,57 @@ convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 template<typename TStringSet, typename TCargo, typename TSpec, typename TCargo2, typename TSpec2> 
 inline void
 extendGraph(Graph<Alignment<TStringSet, TCargo, TSpec> >& extendedGraph,
-			Graph<Alignment<TStringSet, TCargo2, TSpec2> >& sourceGraph)
+			Graph<Alignment<TStringSet, TCargo2, TSpec2> >& addOnGraph)
 {
 	SEQAN_CHECKPOINT
-		std::cout << 'h' << std::endl;
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph1;
+	typedef typename VertexDescriptor<TGraph1>::Type TVertexDescriptor;
+	typedef typename Id<TGraph1>::Type TIdType;
+	typedef typename Size<TGraph1>::Type TSize;
+	typedef std::map<std::pair<TIdType, TIdType>, TVertexDescriptor> TPosToVertexMap;
+	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
+	
+	// Walk through the first sequence
+	typename TPosToVertexMap::const_iterator it_graph1 = extendedGraph.data_pvMap.begin();
+	typename TPosToVertexMap::const_iterator it_graph2 = addOnGraph.data_pvMap.begin();
+	for(; it_graph1 != extendedGraph.data_pvMap.end(); ++it_graph1) {
+		TIdType seqId1 = it_graph1->first.first;
+		TIdType seqId2;
+		TSize fragCut1 = it_graph1->first.second;
+		TSize fragCut2;
+		TVertexDescriptor frag1 = it_graph1->second;
+		TVertexDescriptor frag2;
+
+		std::cout << "Graph1: " << seqId1 << ',' << fragCut1 << ',' << frag1 << std::endl;
+		while((it_graph2 != addOnGraph.data_pvMap.end()) &&
+				(seqId1  == (seqId2 = it_graph2->first.first)) &&
+				(fragCut1 <= (fragCut2 = it_graph2->first.second))) {
+					if ((frag2  = it_graph2->second )!= nilVertex) {
+						// Case 1: No vertex there
+						if (frag1 == nilVertex) {
+							addVertex(extendedGraph, seqId1, fragmentBegin(addOnGraph, frag2), fragmentLength(addOnGraph, frag2));
+						}
+						// Case 2: Both vertices represent the same segment
+						else if ((fragCut1 == fragCut2) &&
+								(fragmentBegin(extendedGraph, frag1) == fragmentBegin(addOnGraph, frag2))) {
+							// Do nothing
+						}
+						// Case 3: Segments overlap
+						else {
+							TSize fragBegin1 = fragmentBegin(extendedGraph, frag1);
+							TSize fragBegin2 = fragmentBegin(addOnGraph, frag2);
+							// We need to pass twice
+							/*
+							if ((int) fragBegin2 - (int) fragBegin1 != 0) {
+								fragmentLength(extendedGraph, frag1) = fragBegin2 - fragBegin1;
+							}
+							*/
+						}
+					}
+					std::cout << "Graph2: " << it_graph2->first.first << ',' << it_graph2->first.second << ',' << it_graph2->second << std::endl;
+					if (it_graph2 != addOnGraph.data_pvMap.end()) ++it_graph2;
+		}
+	}
 }
 
 
