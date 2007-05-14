@@ -840,7 +840,10 @@ _processStatement(Graph<TSpec>& g,
 		(prefix(stmt, 4) == "edge") ||
 		(prefix(stmt, 8) == "subgraph") ||
 		(prefix(stmt, 1) == "\n") ||
-		(prefix(stmt, 1) == "\r")) return;
+		(prefix(stmt, 1) == "\r")) {
+			clear(stmt);
+			return;
+	}
 
 	// Node or Edge statement ?
 	Finder<TStatement> finder2(stmt);
@@ -889,22 +892,16 @@ void read(TFile & file,
 	TMap nodeIdMap;
 
 	TValue c;
-	unsigned int graphCount = 0;
 	String<TValue> stmt;
 	while (!_streamEOF(file)) {
 		c = _streamGet(file);
 		
-		// Check if we enter a graph / subgraph
-		if (c == '{') {
-			clear(stmt);
-			++graphCount;
-		} else if (c== '}') {
-			if (graphCount == 1) _processStatement(g, stmt, nodeMap, edgeMap, nodeIdMap);
-			--graphCount;
-		} else if (graphCount == 1) {	// Ignore subgraphs
-			if (c == ';') _processStatement(g,stmt, nodeMap, edgeMap, nodeIdMap);
-			else append(stmt,c);
+		if (c == ';') _processStatement(g,stmt, nodeMap, edgeMap, nodeIdMap);
+		else if ((c == '\n') ||
+				(c == '\r')) {
+					clear(stmt);
 		}
+		else append(stmt,c);
 	}
 }
 
