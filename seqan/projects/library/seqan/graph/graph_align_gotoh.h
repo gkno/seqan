@@ -154,7 +154,7 @@ _align_gotoh(TTrace& trace,
 	// The DP Matrix for gaps from the left
 	TColumn horizontal;
 	// The DP Matrix for gaps from the top
-	TScoreValue vert;
+	TScoreValue vert = 0;
 
 	// Initialization
 	TString const& str1 = str[0];

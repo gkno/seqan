@@ -27,7 +27,7 @@ _align_hirschberg_trace(TAlign& align,
 	TTraceIter traceIterEnd = end(trace, Standard() );
 
 	
-	//// Debug
+	// Debug
 	//unsigned int count = 0;
 	//for(;traceIter != traceIterEnd;goNext(traceIter)) {
 	//  std::cout << count << ',' << getValue(traceIter) << std::endl;
@@ -44,9 +44,11 @@ _align_hirschberg_trace(TAlign& align,
 	TSize currentPointer = getValue(trace, len1);
 	TSize movePointer = getValue(trace, len1 - 1);
 	do {
-		if ((currentPointer - movePointer) == 1) {
+		if (((currentPointer - movePointer) == 1)  &&
+			(scoreGapOpen(sc) + scoreGapOpen(sc) <= score(const_cast<Score<TScoreValue, Simple>&>(sc), str[0][len1-1], str[1][movePointer]))) {
 			TSize segLen = 0;
-			while ((currentPointer - movePointer) == 1) {
+			while (((currentPointer - movePointer) == 1)   &&
+					(scoreGapOpen(sc) + scoreGapOpen(sc) <= score(const_cast<Score<TScoreValue, Simple>&>(sc), str[0][len1-1], str[1][movePointer]))) {
 				++segLen;
 				--len1;
 				--currentPointer;
@@ -55,6 +57,11 @@ _align_hirschberg_trace(TAlign& align,
 			}
 			_align_trace_print(align, str, id1, len1, id2, currentPointer, segLen, (Byte) Diagonal);
 			//std::cout << "Diagonal " << segLen << std::endl;
+		} else if (((currentPointer - movePointer) == 1)  &&
+			(scoreGapOpen(sc) + scoreGapOpen(sc) > score(const_cast<Score<TScoreValue, Simple>&>(sc), str[0][len1-1], str[1][movePointer]))) {
+				_align_trace_print(align, str, id1, (TSize) 0, id2, --currentPointer, (TSize) 1, (Byte) Vertical);
+				_align_trace_print(align, str, id1, --len1, id2,(TSize) 0, (TSize) 1, (Byte) Horizontal);
+				if (len1>0) movePointer = getValue(trace, len1 - 1);
 		} else if ((currentPointer - movePointer) == 0) {
 			TSize segLen = 0;
 			while ((currentPointer - movePointer) == 0) {
@@ -67,9 +74,9 @@ _align_hirschberg_trace(TAlign& align,
 			//std::cout << "Horizontal " << segLen << std::endl;
 		} else {
 			// Horizontal vs. vertical gap
-			if ((len1 - 2 > 0) && 
+			if ((len1 > 2) && 
 				(movePointer - getValue(trace, len1 - 2) == 0) &&
-				(scoreGapExtend(sc) + scoreGapOpen(sc) > score(const_cast<Score<TScoreValue, Simple>&>(sc), str[0][len1-1], str[1][movePointer]))) {
+				(scoreGapExtend(sc) + scoreGapExtend(sc) > score(const_cast<Score<TScoreValue, Simple>&>(sc), str[0][len1-1], str[1][movePointer]))) {
 					_align_trace_print(align, str, id1, (TSize) 0, id2, (TSize) movePointer, (TSize) currentPointer - movePointer, (Byte) Vertical);
 					currentPointer = movePointer;
 			} else if ((scoreGapOpen(sc) + scoreGapOpen(sc) > score(const_cast<Score<TScoreValue, Simple>&>(sc), str[0][len1-1], str[1][movePointer]))) {
@@ -98,7 +105,7 @@ _align_hirschberg(TTrace& trace,
 {
 	SEQAN_CHECKPOINT
 	typedef String<TScoreValue> TColumn;
-	typedef typename Value<TTrace>::Type TTraceValue;
+	typedef Byte TTraceValue;
 	typedef typename Iterator<TTrace, Standard>::Type TTraceIter;
 	typedef typename Value<TStringSet const>::Type TString;
 	typedef typename Infix<TString const>::Type TInfix;
@@ -116,23 +123,33 @@ _align_hirschberg(TTrace& trace,
 	TSize len2 = length(str[1]);
 	resize(trace, len1+1);
 	typedef std::pair<TSize, TSize> TPoint;
-	typedef std::list<TPoint> TMidPointQueue;
+	typedef std::pair<TPoint, TTraceValue> TListElement;
+	typedef std::list<TListElement> TMidPointQueue;
 	TMidPointQueue midpoints;
-	TSize x1 = 0;
-	TSize x2 = 0;
-	TSize y1 = 0;
-	TSize y2 = 0;
-	bool firstRun = true;
-	TTraceValue tvMat, tvHorizontal, tvVertical;
+	
+	// Walk multiple time through the whole DP Matrix
+	TTraceValue oldWay;
 	do {
 		// Initialization
+		TSize x1 = 0;
+		TSize x2 = 0;
+		TSize y1 = 0;
+		TSize y2 = 0;
+		bool firstRun = true;
+		bool wasHorizontal = false;
+		bool wasVertical = false;
 		upperLeft = 0;
-		tvMat = (Byte) Diagonal;
+		oldWay = (Byte) Diagonal;
+		
+		
 	  
 		// Iterator until the number of midpoints equals the sequence length
-		firstRun = true;
 		typename TMidPointQueue::iterator it = midpoints.begin();
 		do {
+			TTraceValue tvMat, tvHorizontal, tvVertical;
+			if (oldWay == (Byte) Horizontal) wasHorizontal = true;
+			if (oldWay == (Byte) Vertical) wasVertical = true;
+
 			// Step1: Get the alignment window
 			if (firstRun) {
 				x1 = 0;
@@ -148,9 +165,10 @@ _align_hirschberg(TTrace& trace,
 				x2 = len1;
 				y2 = len2;
 			} else {
-				TPoint p = *it;
-				x2 = p.first;
-				y2 = p.second;
+				TListElement p = *it;
+				x2 = p.first.first;
+				y2 = p.first.second;
+				oldWay = p.second;
 			}
 
 			// Step2: Do the alignment
@@ -168,11 +186,12 @@ _align_hirschberg(TTrace& trace,
 			TScoreValue vert;
 
 			// The pointers
-			unsigned int verticalPointer;
-			String<unsigned int> horizontalPointer;
-			String<unsigned int> diagonalPointer;
-			unsigned int diagonalPointerOld;
-			unsigned int tmpPointer;
+			typedef std::pair<unsigned int, TTraceValue> TBackPointer;
+			String<TBackPointer> verticalPointer;
+			String<TBackPointer> horizontalPointer;
+			String<TBackPointer> diagonalPointer;
+			TBackPointer diagonalPointerOld;
+			TBackPointer tmpPointer;
 
 			// Initialization
 			TSize inf_len1 = x2-x1;
@@ -183,40 +202,59 @@ _align_hirschberg(TTrace& trace,
 			vert = inf;
 			fill(horizontal, (inf_len2+1), inf);  
 			resize(horizontalPointer, (inf_len2+1));  
-			resize(diagonalPointer, (inf_len2+1));  
+			resize(verticalPointer, (inf_len2+1));  
+			resize(diagonalPointer, (inf_len2+1)); 
 				
 			// Classical DP
 			assignValue(mat, 0, upperLeft);
-			verticalPointer = 0;
-			assignValue(horizontalPointer, 0, 0);
-			assignValue(diagonalPointer, 0, 0);
-			bool wasHorizontal = false;
-			if (tvMat == (Byte) Horizontal) wasHorizontal = true;
+			//assignValue(horizontal, 0, upperLeft);
+			//vert = upperLeft;
+			//verticalPointer = std::make_pair(0, (Byte) Horizontal);
+			if ((wasHorizontal) || (inf_len2 == 0)) {
+				assignValue(horizontalPointer, 0, std::make_pair(0, (Byte) Horizontal));
+				assignValue(verticalPointer, 0, std::make_pair(0, (Byte) Horizontal));
+				assignValue(diagonalPointer, 0, std::make_pair(0, (Byte) Horizontal));
+			} else if (wasVertical) {
+				assignValue(horizontalPointer, 0, std::make_pair(0, (Byte) Vertical));
+				assignValue(verticalPointer, 0, std::make_pair(0, (Byte) Vertical));
+				assignValue(diagonalPointer, 0, std::make_pair(0, (Byte) Vertical));
+			} else {
+				assignValue(horizontalPointer, 0, std::make_pair(0, (Byte) Horizontal));
+				assignValue(verticalPointer, 0, std::make_pair(0, (Byte) Vertical));
+				assignValue(diagonalPointer, 0, std::make_pair(0, (Byte) Diagonal));
+			}
 			for(TSize row = 1; row <= inf_len2; ++row) {
-				if (tvMat == (Byte) Vertical) {
+				if (wasVertical) {
 					assignValue(mat, row, upperLeft + gap + (row - 1) * gap);
-					assignValue(horizontal, row, getValue(mat, row));
+					assignValue(horizontal, row, getValue(mat, row) + gapOpen - gap);
 				} else {
 					assignValue(mat, row, upperLeft + gapOpen + (row - 1) * gap);
 					assignValue(horizontal, row, getValue(mat, row) + gapOpen - gap);
 				}
-				assignValue(horizontalPointer, row, row);
-				assignValue(diagonalPointer, row, row);
+				assignValue(verticalPointer, row, std::make_pair(0, (Byte) Vertical));
+				assignValue(horizontalPointer, row, std::make_pair(0, (Byte) Vertical));
+				assignValue(diagonalPointer, row, std::make_pair(0, (Byte) Vertical));
 			}
 			for(TSize col = 1; col <= inf_len1; ++col) {
 				diagonalPointerOld = getValue(diagonalPointer,0);
-				assignValue(diagonalPointer, 0, getValue(horizontalPointer,0));
-				verticalPointer = getValue(horizontalPointer,0);
+				assignValue(horizontalPointer, 0, std::make_pair(0, (Byte) Horizontal));
+				assignValue(diagonalPointer, 0, std::make_pair(0, (Byte) Horizontal));
+				assignValue(verticalPointer, 0, std::make_pair(0, (Byte) Horizontal));
+				//verticalPointer = getValue(horizontalPointer,0);
 				TScoreValue diagValMat = getValue(mat, 0);
 				if (wasHorizontal) {
 					assignValue(mat, 0, upperLeft + gap + (col - 1) * gap);
-					vert = getValue(mat, 0);
+					vert = getValue(mat, 0) + gapOpen - gap;
 				} else {			    
 					assignValue(mat, 0, upperLeft + gapOpen + (col - 1) * gap);
 					vert = getValue(mat, 0) + gapOpen - gap;
 				}
 				// If there are no rows we step horizontally !!!
-				tvMat = (Byte) Horizontal;
+				if (inf_len2 < 1) {
+					tvHorizontal = (Byte) Horizontal;
+					tvMat = (Byte) Horizontal;
+					assignValue(horizontal,0,getValue(mat,0));
+				}
 				for(TSize row = 1; row <= inf_len2; ++row) {
 					// Get the new maximum for vertical
 					if ((tmp = getValue(mat, row - 1) + gapOpen) > vert + gap) {
@@ -252,57 +290,118 @@ _align_hirschberg(TTrace& trace,
 					// Assign the new diagonal values
 					diagValMat = getValue(mat, row);
 					assignValue(mat, row, tmp);
+
+					// Debug
+					//std::cout << "Diagonal: " << row << ',' << col << ':' << getValue(mat, row) << ';';
+					//std::cout << "Horizontal: " << row << ',' << col << ':' << getValue(horizontal, row) << ';';
+					//std::cout << "Vertical: " << row << ',' << col << ':' << vert << std::endl;
 					
+					if (col == inf_middle) {
+						assignValue(diagonalPointer, row, std::make_pair(row, (Byte) tvMat));
+						assignValue(verticalPointer, row, std::make_pair(row, (Byte) tvMat));
+						if ((tvMat == Vertical) && 
+							(getValue(mat, row) == getValue(horizontal, row))) {
+							assignValue(horizontalPointer, row, std::make_pair(row, (Byte) Horizontal));
+						} else assignValue(horizontalPointer, row, std::make_pair(row, (Byte) tvMat));
+						
+						
+						// Fix the vertical pointer
+						if ((tvVertical== (Byte) Vertical) && 
+							((getValue(verticalPointer, row-1)).second == (Byte) Diagonal)) {
+							value(verticalPointer, row-1).second = (Byte) Vertical;
+						}
+						if ((tvVertical== (Byte) Vertical) && 
+							((getValue(verticalPointer, row-1)).second == (Byte) Horizontal)) {
+							value(verticalPointer, row-1).second = (Byte) Vertical;
+						}
+
+						//for(unsigned int i = row;i>0;--i) {
+						//	if (getValue(verticalPointer, i) == (Byte) Vertical) value(verticalPointer, i).first = row
+						//	else break;
+						//}
+					}
+
+					// Fix the horizontal pointer
+					if (col == inf_middle + 1) {
+						if ((tvHorizontal == (Byte) Horizontal) && 
+							((getValue(horizontalPointer, row)).second == (Byte) Diagonal)) {
+							value(horizontalPointer, row).second = (Byte) Horizontal;
+						}
+						if ((tvHorizontal == (Byte) Horizontal) && 
+							((getValue(horizontalPointer, row)).second == (Byte) Vertical)) {
+							value(horizontalPointer, row).second = (Byte) Horizontal;
+						}
+					}
+
 					// Take care of the pointers
 					if (col > inf_middle) {
 						if (tvVertical == (Byte) Diagonal) assignValue(verticalPointer, row, getValue(diagonalPointer, row - 1));
+						else assignValue(verticalPointer, row, getValue(verticalPointer, row-1));
 						if (tvHorizontal == (Byte) Diagonal) assignValue(horizontalPointer, row, getValue(diagonalPointer, row));
 						
 						tmpPointer = getValue(diagonalPointer, row);
 						if (tvMat == (Byte) Diagonal) assignValue(diagonalPointer, row, diagonalPointerOld);
 						else if (tvMat == (Byte) Horizontal) assignValue(diagonalPointer, row, getValue(horizontalPointer, row));
-						else if (tvMat == (Byte) Vertical) assignValue(diagonalPointer, row, verticalPointer);
+						else if (tvMat == (Byte) Vertical) assignValue(diagonalPointer, row, getValue(verticalPointer, row));
 						diagonalPointerOld = tmpPointer;
 					}
-					//std::cout << getValue(diagonalPointer,row) << ',' << getValue(horizontalPointer, row) << ',' << verticalPointer << ';';
 				}
-				//std::cout << std::endl;
 			}
-			tmp = getValue(mat, inf_len2);
-			tmpPointer = getValue(diagonalPointer, inf_len2);
-			if (getValue(horizontal, inf_len2) ==  tmp) {
-				tmpPointer = getValue(horizontalPointer, inf_len2);
+			if (it == midpoints.end()) {
+				maxVal = getValue(mat, inf_len2);
+				tmpPointer = getValue(diagonalPointer, inf_len2);
+				if (getValue(horizontal, inf_len2) ==  maxVal) {
+					tmpPointer = getValue(horizontalPointer, inf_len2);
+				}
+				if (vert == maxVal) {
+					tmpPointer = getValue(verticalPointer, inf_len2);
+				}
+			} else {
+				if (oldWay == (Byte) Diagonal) {
+					maxVal = getValue(mat, inf_len2);
+					tmpPointer = getValue(diagonalPointer, inf_len2);
+					wasVertical = false;
+					wasHorizontal = false;
+				} else if (oldWay == (Byte) Horizontal) {
+					maxVal = getValue(horizontal,inf_len2);
+					tmpPointer = getValue(horizontalPointer, inf_len2);
+					wasHorizontal = true;
+					wasVertical = false;
+				} else {
+					maxVal = vert;
+					tmpPointer = getValue(verticalPointer, inf_len2);;
+					wasHorizontal = false;
+					wasVertical = true;
+				}
 			}
-			else if (vert == tmp) {
-				tmpPointer = verticalPointer;
-			}
-			TSize cut = y1 + tmpPointer;
-			upperLeft = tmp;
-			if (midpoints.empty()) maxVal = tmp;
 
-			/*
-			// Debug code
-			std::cout << infix1 << std::endl;
-			std::cout << infix2 << std::endl;
-			std::cout << "Trace-Point" << middle << ',' << cut << std::endl;
-			std::cout << "Max-Score" << tmp << std::endl;
-			std::cout << "--" << std::endl;
-			*/
+
+
+			TSize cut = y1 + tmpPointer.first;
+			upperLeft = maxVal;
+
+			////Debug code
+			//std::cout << infix1 << std::endl;
+			//std::cout << infix2 << std::endl;
+			//std::cout << "Trace-Point " << middle << ',' << cut << std::endl;
+			//std::cout << "Max-Score " << maxVal << std::endl;
+			//std::cout << "Direction " << (unsigned int) tmpPointer.second << std::endl;
+			//std::cout << "--" << std::endl;
 
 			// Step3: Insert the new midpoint
 			if ((x2 - x1) > 1) {
-				it = midpoints.insert(it, std::make_pair(middle,cut));
+				it = midpoints.insert(it, std::make_pair(std::make_pair(middle,cut), tmpPointer.second));
 				++it;
 			}
 		} while (it != midpoints.end());
 	} while ((midpoints.size() < len1 - 1));
 	TTraceIter traceIter = begin(trace, Standard() );
 	typename TMidPointQueue::iterator it = midpoints.begin();
-	if (it->second > 0) assignValue(traceIter, it->second - 1); // Start point of the trace
+	if ((!midpoints.empty()) && (it->second == (Byte) Diagonal)) assignValue(traceIter, it->first.second - 1); // Start point of the trace
 	else assignValue(traceIter, 0); 
 	goNext(traceIter);
 	for(;it!=midpoints.end();++it) {
-		assignValue(traceIter, (it->second));
+		assignValue(traceIter, (it->first.second));
 		goNext(traceIter);
 	}
 	assignValue(traceIter, len2); // End point of the trace

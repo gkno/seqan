@@ -163,10 +163,11 @@ void Test_MatchRefinement() {
 	// Access the matches
 	TFragmentString matches;
 	std::stringstream strstream;
-	strstream << out_path << "matchesTest.dat"; // 10 Matches
+	//strstream << out_path << "matchesTest.dat"; // 10 Matches
 	//strstream << out_path << "matches1000.dat"; // 2001948 Matches
 	//strstream << out_path << "matches10000.dat"; // 2111 Matches
 	//strstream << out_path << "matches2000.dat"; // 653095 Matches
+	strstream << out_path << "matches500.dat"; // 3999176 
 	open(matches, strstream.str().c_str());
 
 
@@ -179,53 +180,44 @@ void Test_MatchRefinement() {
 	//	else if (i==2 ) s << in_path << "BvsW.atac";
 	//	else if (i==3 ) s << in_path << "WvsH.atac";
 	//	strm.open(s.str().c_str(), ios_base::in);
-	//	read(strm, matches, 1000, AtacMatches());
+	//	read(strm, matches, 500, AtacMatches());
 	//	strm.close();
 	//}
 
 	// Print number of matches
 	std::cout << "Number of matches: " << length(matches) << std::endl;
 	
-	// Refinement
-	typedef Infix<TString>::Type TInfix;
-	typedef StringSet<TString, Dependent<> > TAlignmentStringSet;
-	typedef Graph<Alignment<TAlignmentStringSet> > TAliGraph;
-	typedef VertexDescriptor<TAliGraph>::Type TVD;
-	TAlignmentStringSet aliStr;
-	for(TSize i = 0; i<length(str); ++i) {
-		assignValueById(aliStr, str, i);
-	}
-	Score<int> score_type = Score<int>(1,-1,-2,0) ;
-	TAliGraph ali_graph(aliStr);
-	matchRefinement(matches,str,score_type,ali_graph);//,StoreEdges());
-	std::cout << "\nnumEdges: "<<numEdges(ali_graph)<<"\n";
-	std::cout << "\nnumVertices: "<<numVertices(ali_graph)<<"\n";
-	//std::cout << ali_graph <<"\n";
+	//// Refinement
+	//typedef Infix<TString>::Type TInfix;
+	//typedef StringSet<TString, Dependent<> > TAlignmentStringSet;
+	//typedef Graph<Alignment<TAlignmentStringSet> > TAliGraph;
+	//typedef VertexDescriptor<TAliGraph>::Type TVD;
+	//TAlignmentStringSet aliStr;
+	//for(TSize i = 0; i<length(str); ++i) {
+	//	assignValueById(aliStr, str, i);
+	//}
+	//Score<int> score_type = Score<int>(1,-1,-2,0) ;
+	//TAliGraph ali_graph(aliStr);
+	//matchRefinement(matches,str,score_type,ali_graph);//,StoreEdges());
+	//std::cout << "\nnumEdges: "<<numEdges(ali_graph)<<"\n";
+	//std::cout << "\nnumVertices: "<<numVertices(ali_graph)<<"\n";
+	////std::cout << ali_graph <<"\n";
 
-	// Print all the matches
-	typedef Iterator<TAliGraph, EdgeIterator>::Type TEdgeIterator;
-	TEdgeIterator it(ali_graph);
-	for(;!atEnd(it);goNext(it)) {
-		TVD sV = sourceVertex(it);
-		TVD tV = targetVertex(it);
-		TId seqId1 = sequenceId(ali_graph,sV);
-		TId seqId2 = sequenceId(ali_graph,tV);
-		TSize seqBegin1 = fragmentBegin(ali_graph, sV);
-		TSize seqBegin2 = fragmentBegin(ali_graph, tV);
-		TSize len = fragmentLength(ali_graph, sV);
-		TIdToNameMap::const_iterator pos1 =  idToName.find(seqId1);
-		TIdToNameMap::const_iterator pos2 =  idToName.find(seqId2);
-		std::cout << pos1->second << "," << seqBegin1  << "," << len << "," << pos2->second << "," << seqBegin2 << "," << len << std::endl;
-		/*
-		std::cout << pos1->second << ") ";
-		TInfix infix1 = infix(str[seqId1], seqBegin1, seqBegin1+len);
-		std::cout << infix1 << std::endl;
-		std::cout << pos2->second << ") ";
-		TInfix infix2 = infix(str[seqId2], seqBegin2, seqBegin2+len);
-		std::cout << infix2 << std::endl;
-		std::cout << std::endl;
-		*/
-	}
+	//// Print all the matches
+	//typedef Iterator<TAliGraph, EdgeIterator>::Type TEdgeIterator;
+	//TEdgeIterator it(ali_graph);
+	//for(;!atEnd(it);goNext(it)) {
+	//	TVD sV = sourceVertex(it);
+	//	TVD tV = targetVertex(it);
+	//	TId seqId1 = sequenceId(ali_graph,sV);
+	//	TId seqId2 = sequenceId(ali_graph,tV);
+	//	TSize seqBegin1 = fragmentBegin(ali_graph, sV);
+	//	TSize seqBegin2 = fragmentBegin(ali_graph, tV);
+	//	TSize len = fragmentLength(ali_graph, sV);
+	//	TIdToNameMap::const_iterator pos1 =  idToName.find(seqId1);
+	//	TIdToNameMap::const_iterator pos2 =  idToName.find(seqId2);
+	//	std::cout << pos1->second << "," << seqBegin1  << "," << len << "," << pos2->second << "," << seqBegin2 << "," << len << std::endl;
+	//}
 
 	for(TIdToNameMap::const_iterator pos =  idToName.begin(); pos != idToName.end(); ++pos) {
 		close(str[pos->first]);
