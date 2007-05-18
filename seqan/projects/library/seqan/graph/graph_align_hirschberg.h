@@ -10,40 +10,42 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //////////////////////////////////////////////////////////////////////////////
 
+
+// Note: The hirschberg trace is different from all the other traces because it simply contains the trace points!!!
 template <typename TAlign, typename TStringSet, typename TScoreValue, typename TTrace>
 void
-_align_hirschberg_trace(TAlign& align,		 
+_align_hirschberg_trace(TAlign& align,
 						TStringSet const& str,
 						Score<TScoreValue, Simple> const& sc,
 						TTrace& trace)
 {
 	SEQAN_CHECKPOINT
-	typedef typename Value<TTrace>::Type TTraceValue;
-	typedef typename Iterator<TTrace>::Type TTraceIter;
-	typedef typename Size<TStringSet>::Type TSize;
-	typedef typename Id<TStringSet>::Type TId;
 
-	TTraceIter traceIter = begin(trace, Standard() );
-	TTraceIter traceIterEnd = end(trace, Standard() );
-
-	
-	// Debug
+	//// Debug
+	//typedef typename Iterator<TTrace>::Type TTraceIter;
+	//TTraceIter traceIter = begin(trace, Standard() );
+	//TTraceIter traceIterEnd = end(trace, Standard() );
 	//unsigned int count = 0;
 	//for(;traceIter != traceIterEnd;goNext(traceIter)) {
 	//  std::cout << count << ',' << getValue(traceIter) << std::endl;
 	//  ++count;
 	//}
-
-
+		
+	typedef typename Size<TStringSet>::Type TSize;
+	typedef typename Id<TStringSet>::Type TId;
+	
 	// TraceBack values
 	enum {Diagonal = 0, Horizontal = 1, Vertical = 2};
 	
 	TId id1 = positionToId(const_cast<TStringSet&>(str), 0);
 	TId id2 = positionToId(const_cast<TStringSet&>(str), 1);	 
 	TSize len1 = length(str[0]);
+	// Current trace point (currentPointer,len1)
 	TSize currentPointer = getValue(trace, len1);
+	// Next trace point (movePointer, len1 - 1);
 	TSize movePointer = getValue(trace, len1 - 1);
 	do {
+		// Diagonal walk
 		if (((currentPointer - movePointer) == 1)  &&
 			(scoreGapOpen(sc) + scoreGapOpen(sc) <= score(const_cast<Score<TScoreValue, Simple>&>(sc), str[0][len1-1], str[1][movePointer]))) {
 			TSize segLen = 0;
@@ -56,13 +58,15 @@ _align_hirschberg_trace(TAlign& align,
 				else break;
 			}
 			_align_trace_print(align, str, id1, len1, id2, currentPointer, segLen, (Byte) Diagonal);
-			//std::cout << "Diagonal " << segLen << std::endl;
-		} else if (((currentPointer - movePointer) == 1)  &&
+		} // Diagonal walk, but gapOpen and gapOpen yields a higher score
+		// Note: The case gapExtension + gapOpen cannot occur because then we would have gotten a different trace point!!!
+		else if (((currentPointer - movePointer) == 1)  &&
 			(scoreGapOpen(sc) + scoreGapOpen(sc) > score(const_cast<Score<TScoreValue, Simple>&>(sc), str[0][len1-1], str[1][movePointer]))) {
 				_align_trace_print(align, str, id1, (TSize) 0, id2, --currentPointer, (TSize) 1, (Byte) Vertical);
 				_align_trace_print(align, str, id1, --len1, id2,(TSize) 0, (TSize) 1, (Byte) Horizontal);
 				if (len1>0) movePointer = getValue(trace, len1 - 1);
-		} else if ((currentPointer - movePointer) == 0) {
+		} // Horizontal walk 
+		else if ((currentPointer - movePointer) == 0) {
 			TSize segLen = 0;
 			while ((currentPointer - movePointer) == 0) {
 				++segLen;
@@ -71,28 +75,31 @@ _align_hirschberg_trace(TAlign& align,
 				else break;
 			}
 			_align_trace_print(align, str, id1, len1, id2, (TSize) 0, segLen, (Byte) Horizontal);
-			//std::cout << "Horizontal " << segLen << std::endl;
-		} else {
-			// Horizontal vs. vertical gap
+		} // Vertical walk 
+		else {
+			// Vertical walk finishes with a horizontal vs. vertical gap
 			if ((len1 > 2) && 
 				(movePointer - getValue(trace, len1 - 2) == 0) &&
 				(scoreGapExtend(sc) + scoreGapExtend(sc) > score(const_cast<Score<TScoreValue, Simple>&>(sc), str[0][len1-1], str[1][movePointer]))) {
 					_align_trace_print(align, str, id1, (TSize) 0, id2, (TSize) movePointer, (TSize) currentPointer - movePointer, (Byte) Vertical);
 					currentPointer = movePointer;
-			} else if ((scoreGapOpen(sc) + scoreGapOpen(sc) > score(const_cast<Score<TScoreValue, Simple>&>(sc), str[0][len1-1], str[1][movePointer]))) {
+			} // Vertical walk that finishes with a diagonal, but gapOpen + gapOpen is better
+			else if ((scoreGapOpen(sc) + scoreGapOpen(sc) > score(const_cast<Score<TScoreValue, Simple>&>(sc), str[0][len1-1], str[1][movePointer]))) {
 					_align_trace_print(align, str, id1, (TSize) 0, id2, (TSize) movePointer, (TSize) currentPointer - movePointer, (Byte) Vertical);
 					currentPointer = movePointer;
-			} else {
+			} // Normal vertical walk that continues with a diagonal walk
+			else {
 				_align_trace_print(align, str, id1, (TSize) 0, id2, (TSize) movePointer + 1, (TSize) currentPointer - (movePointer + 1), (Byte) Vertical);
-				//std::cout << "Vertical " << currentPointer - (movePointer + 1)  << std::endl;
 				currentPointer = movePointer + 1;
 			}
 		}
 	} while (len1 != 0);
+	// Maybe we have to align the last vertical piece
 	if (getValue(trace, 0) != 0) {
 		_align_trace_print(align, str, id1, (TSize) 0, id2, (TSize) 0, (TSize) getValue(trace, 0), (Byte) Vertical);
 	}
 }
+
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -105,50 +112,45 @@ _align_hirschberg(TTrace& trace,
 {
 	SEQAN_CHECKPOINT
 	typedef String<TScoreValue> TColumn;
-	typedef Byte TTraceValue;
 	typedef typename Iterator<TTrace, Standard>::Type TTraceIter;
 	typedef typename Value<TStringSet const>::Type TString;
-	typedef typename Infix<TString const>::Type TInfix;
 	typedef typename Size<TString>::Type TSize;
-	
+	typedef Byte TTraceValue;   //Do not use Value<TTrace>::Type because these are positions, e.g., unsigned int
+
 	// TraceBack values
 	enum {Diagonal = 0, Horizontal = 1, Vertical = 2};
 
 	TScoreValue gap = scoreGapExtend(sc);
 	TScoreValue gapOpen = scoreGapOpen(sc);
-	TScoreValue upperLeft = 0;
-	TScoreValue maxVal = 0;
+	TScoreValue maxVal = 0; // The final score
 
 	TSize len1 = length(str[0]);
 	TSize len2 = length(str[1]);
-	resize(trace, len1+1);
-	typedef std::pair<TSize, TSize> TPoint;
-	typedef std::pair<TPoint, TTraceValue> TListElement;
-	typedef std::list<TListElement> TMidPointQueue;
+	resize(trace, len1+1);  // The set of trace positions
+	typedef std::pair<TSize, TSize> TPoint;   // Trace Point...
+	typedef std::pair<TPoint, TTraceValue> TListElement;  // ... and how we traversed it
+	typedef std::list<TListElement> TMidPointQueue;  // List of tracepoints -> Iterative, not recursive
 	TMidPointQueue midpoints;
 	
 	// Walk multiple time through the whole DP Matrix
-	TTraceValue oldWay;
 	do {
 		// Initialization
-		TSize x1 = 0;
+		TSize x1 = 0;	// Current alignment window
 		TSize x2 = 0;
 		TSize y1 = 0;
 		TSize y2 = 0;
-		bool firstRun = true;
-		bool wasHorizontal = false;
+		bool firstRun = true;		
+		bool wasHorizontal = false;		// How we entered the alignment window
 		bool wasVertical = false;
-		upperLeft = 0;
-		oldWay = (Byte) Diagonal;
+		TScoreValue upperLeft = 0;		// The old score for the upper left initialization of the DP matrix
+		TTraceValue oldWay = (Byte) Diagonal;
 		
 		
 	  
-		// Iterator until the number of midpoints equals the sequence length
+		// Now iterate through all tracepoints found so far
 		typename TMidPointQueue::iterator it = midpoints.begin();
 		do {
-			TTraceValue tvMat, tvHorizontal, tvVertical;
-			if (oldWay == (Byte) Horizontal) wasHorizontal = true;
-			if (oldWay == (Byte) Vertical) wasVertical = true;
+			TTraceValue tvMat, tvHorizontal, tvVertical;  // Where did the maximum for the diagonal, horizontal, and vertical matrix came from
 
 			// Step1: Get the alignment window
 			if (firstRun) {
@@ -164,28 +166,31 @@ _align_hirschberg(TTrace& trace,
 			if (it == midpoints.end()) {
 				x2 = len1;
 				y2 = len2;
+				// In this case we don't care how we aligned len1, len2 before
 			} else {
 				TListElement p = *it;
 				x2 = p.first.first;
 				y2 = p.first.second;
-				oldWay = p.second;
+				oldWay = p.second;  // Old alignment direction is important, we have to restore it!!!
 			}
 
 			// Step2: Do the alignment
-			TSize middle = x1 + ((x2-x1)/2);
-			TInfix infix1 = infix(str[0], x1, x2);
-			TInfix infix2 = infix(str[1], y1, y2);
-			TSize inf_middle = (TSize) ((x2-x1)/2);
+			TSize middle = x1 + ((x2-x1)/2);		// New cut-point in global coordinates
+			TSize inf_middle = (TSize) ((x2-x1)/2);   // New cut-point in "infix" coordinates
 		
 
 			// The DP Matrix for diagonal walks
 			TColumn mat;
 			// The DP Matrix for gaps from the left
 			TColumn horizontal;
-			// The DP Matrix for gaps from the top
+			// The DP Matrix for gaps from the top, a single value is enough
 			TScoreValue vert;
 
 			// The pointers
+			// Every back pointer stores the row it came from, so (middle, row) determines the trace point
+			// Additionally, every pointer has to remember how its trace point was traversed
+			// We do need diagonal, vertical, and horizontal pointers!!!
+			// The vertical and horizontal once are sometimes fixed depending on the way how we leave the trace point!!!
 			typedef std::pair<unsigned int, TTraceValue> TBackPointer;
 			String<TBackPointer> verticalPointer;
 			String<TBackPointer> horizontalPointer;
@@ -207,9 +212,7 @@ _align_hirschberg(TTrace& trace,
 				
 			// Classical DP
 			assignValue(mat, 0, upperLeft);
-			//assignValue(horizontal, 0, upperLeft);
-			//vert = upperLeft;
-			//verticalPointer = std::make_pair(0, (Byte) Horizontal);
+			// Handle the base cases
 			if ((wasHorizontal) || (inf_len2 == 0)) {
 				assignValue(horizontalPointer, 0, std::make_pair(0, (Byte) Horizontal));
 				assignValue(verticalPointer, 0, std::make_pair(0, (Byte) Horizontal));
@@ -223,6 +226,7 @@ _align_hirschberg(TTrace& trace,
 				assignValue(verticalPointer, 0, std::make_pair(0, (Byte) Vertical));
 				assignValue(diagonalPointer, 0, std::make_pair(0, (Byte) Diagonal));
 			}
+			// Initialize the first column vector
 			for(TSize row = 1; row <= inf_len2; ++row) {
 				if (wasVertical) {
 					assignValue(mat, row, upperLeft + gap + (row - 1) * gap);
@@ -231,17 +235,20 @@ _align_hirschberg(TTrace& trace,
 					assignValue(mat, row, upperLeft + gapOpen + (row - 1) * gap);
 					assignValue(horizontal, row, getValue(mat, row) + gapOpen - gap);
 				}
+				// All pointers in the first column point back to 0,0
 				assignValue(verticalPointer, row, std::make_pair(0, (Byte) Vertical));
 				assignValue(horizontalPointer, row, std::make_pair(0, (Byte) Vertical));
 				assignValue(diagonalPointer, row, std::make_pair(0, (Byte) Vertical));
 			}
+			// Now traverse all columns
 			for(TSize col = 1; col <= inf_len1; ++col) {
-				diagonalPointerOld = getValue(diagonalPointer,0);
+				diagonalPointerOld = getValue(diagonalPointer,0);  // Remember the old diagonal pointer
+				// All points in the first row point back to 0,0
 				assignValue(horizontalPointer, 0, std::make_pair(0, (Byte) Horizontal));
 				assignValue(diagonalPointer, 0, std::make_pair(0, (Byte) Horizontal));
 				assignValue(verticalPointer, 0, std::make_pair(0, (Byte) Horizontal));
-				//verticalPointer = getValue(horizontalPointer,0);
 				TScoreValue diagValMat = getValue(mat, 0);
+				// Initialize the first row (just the first element of each column vector)
 				if (wasHorizontal) {
 					assignValue(mat, 0, upperLeft + gap + (col - 1) * gap);
 					vert = getValue(mat, 0) + gapOpen - gap;
@@ -265,7 +272,7 @@ _align_hirschberg(TTrace& trace,
 						tvVertical = (Byte) Vertical;
 					}
 					
-					// Get the new maximum for left
+					// Get the new maximum for horizontal
 					if ((tmp = getValue(mat, row) + gapOpen) > getValue(horizontal, row) + gap) {
 						assignValue(horizontal, row, tmp);
 						tvHorizontal = (Byte) Diagonal;
@@ -274,8 +281,8 @@ _align_hirschberg(TTrace& trace,
 						tvHorizontal = (Byte) Horizontal;
 					}
 					
-					// Get the new maximum for mat
-					TScoreValue sc_ = score(const_cast<Score<TScoreValue, Simple>&>(sc), infix1[col-1], infix2[row-1]);
+					// Get the new maximum for diagonal
+					TScoreValue sc_ = score(const_cast<Score<TScoreValue, Simple>&>(sc), getValue(str[0],x1+col-1), getValue(str[1],y1+row-1));
 					tmp = diagValMat + sc_;
 					tvMat = (Byte) Diagonal;
 					if (vert > tmp) {
@@ -287,18 +294,20 @@ _align_hirschberg(TTrace& trace,
 						tvMat = (Byte) Horizontal;
 					}
 					
-					// Assign the new diagonal values
+					// Assign the new diagonal value
 					diagValMat = getValue(mat, row);
 					assignValue(mat, row, tmp);
 
-					// Debug
+					// //Debug
 					//std::cout << "Diagonal: " << row << ',' << col << ':' << getValue(mat, row) << ';';
 					//std::cout << "Horizontal: " << row << ',' << col << ':' << getValue(horizontal, row) << ';';
 					//std::cout << "Vertical: " << row << ',' << col << ':' << vert << std::endl;
 					
+					// If we are at the middle, initialize the pointers
 					if (col == inf_middle) {
 						assignValue(diagonalPointer, row, std::make_pair(row, (Byte) tvMat));
 						assignValue(verticalPointer, row, std::make_pair(row, (Byte) tvMat));
+						// If the horizontal value is as good as the vertical one, take horizontal because a gap extension is cheaper then a gap opening
 						if ((tvMat == Vertical) && 
 							(getValue(mat, row) == getValue(horizontal, row))) {
 							assignValue(horizontalPointer, row, std::make_pair(row, (Byte) Horizontal));
@@ -306,34 +315,29 @@ _align_hirschberg(TTrace& trace,
 						
 						
 						// Fix the vertical pointer
-						if ((tvVertical== (Byte) Vertical) && 
-							((getValue(verticalPointer, row-1)).second == (Byte) Diagonal)) {
-							value(verticalPointer, row-1).second = (Byte) Vertical;
+						if (tvVertical==(Byte) Vertical) {
+							// Overwrite the diagonal value
+							// If it is needed it is still in the diagonal pointer
+							if ((getValue(verticalPointer, row-1)).second == (Byte) Diagonal) value(verticalPointer, row-1).second = (Byte) Vertical;
+							
+							// If I have to pay a gapOpen anyway, I better pay it right away because more gap extensions might follow
+							else if ((getValue(verticalPointer, row-1)).second == (Byte) Horizontal) value(verticalPointer, row-1).second = (Byte) Vertical;
 						}
-						if ((tvVertical== (Byte) Vertical) && 
-							((getValue(verticalPointer, row-1)).second == (Byte) Horizontal)) {
-							value(verticalPointer, row-1).second = (Byte) Vertical;
-						}
-
-						//for(unsigned int i = row;i>0;--i) {
-						//	if (getValue(verticalPointer, i) == (Byte) Vertical) value(verticalPointer, i).first = row
-						//	else break;
-						//}
 					}
 
 					// Fix the horizontal pointer
 					if (col == inf_middle + 1) {
-						if ((tvHorizontal == (Byte) Horizontal) && 
-							((getValue(horizontalPointer, row)).second == (Byte) Diagonal)) {
-							value(horizontalPointer, row).second = (Byte) Horizontal;
-						}
-						if ((tvHorizontal == (Byte) Horizontal) && 
-							((getValue(horizontalPointer, row)).second == (Byte) Vertical)) {
-							value(horizontalPointer, row).second = (Byte) Horizontal;
+						if (tvHorizontal == (Byte) Horizontal) {
+							// Overwrite the diagonal value
+							// If it is needed it is still in the diagonal pointer
+							if ((getValue(horizontalPointer, row)).second == (Byte) Diagonal) value(horizontalPointer, row).second = (Byte) Horizontal;
+
+							// If I have to pay a gapOpen anyway, I better pay it right away because more gap extensions might follow
+							else if ((getValue(horizontalPointer, row)).second == (Byte) Vertical) value(horizontalPointer, row).second = (Byte) Horizontal;
 						}
 					}
 
-					// Take care of the pointers
+					// If we passed the middle we need to take care of the pointers
 					if (col > inf_middle) {
 						if (tvVertical == (Byte) Diagonal) assignValue(verticalPointer, row, getValue(diagonalPointer, row - 1));
 						else assignValue(verticalPointer, row, getValue(verticalPointer, row-1));
@@ -347,6 +351,8 @@ _align_hirschberg(TTrace& trace,
 					}
 				}
 			}
+			// Alignment is done, what is the best trace point?
+			// If this is the first alignment iteration...
 			if (it == midpoints.end()) {
 				maxVal = getValue(mat, inf_len2);
 				tmpPointer = getValue(diagonalPointer, inf_len2);
@@ -356,7 +362,8 @@ _align_hirschberg(TTrace& trace,
 				if (vert == maxVal) {
 					tmpPointer = getValue(verticalPointer, inf_len2);
 				}
-			} else {
+			} // ... and if it is not
+			else {
 				if (oldWay == (Byte) Diagonal) {
 					maxVal = getValue(mat, inf_len2);
 					tmpPointer = getValue(diagonalPointer, inf_len2);
@@ -380,7 +387,17 @@ _align_hirschberg(TTrace& trace,
 			TSize cut = y1 + tmpPointer.first;
 			upperLeft = maxVal;
 
+			// Step3: Insert the new midpoint
+			if ((x2 - x1) > 1) {
+				it = midpoints.insert(it, std::make_pair(std::make_pair(middle,cut), tmpPointer.second));
+				++it;
+			}
+
+
 			////Debug code
+			//typedef typename Infix<TString const>::Type TInfix;
+			//TInfix infix1 = infix(str[0], x1, x2);
+			//TInfix infix2 = infix(str[1], y1, y2);
 			//std::cout << infix1 << std::endl;
 			//std::cout << infix2 << std::endl;
 			//std::cout << "Trace-Point " << middle << ',' << cut << std::endl;
@@ -388,13 +405,15 @@ _align_hirschberg(TTrace& trace,
 			//std::cout << "Direction " << (unsigned int) tmpPointer.second << std::endl;
 			//std::cout << "--" << std::endl;
 
-			// Step3: Insert the new midpoint
-			if ((x2 - x1) > 1) {
-				it = midpoints.insert(it, std::make_pair(std::make_pair(middle,cut), tmpPointer.second));
-				++it;
-			}
+			
 		} while (it != midpoints.end());
+
+		//std::cout << midpoints.size() << ',';
+		// Exit if all positions have a trace point
 	} while ((midpoints.size() < len1 - 1));
+	//std::cout << std::endl;
+
+	// Transform the midpoints into simple trace positions
 	TTraceIter traceIter = begin(trace, Standard() );
 	typename TMidPointQueue::iterator it = midpoints.begin();
 	if ((!midpoints.empty()) && (it->second == (Byte) Diagonal)) assignValue(traceIter, it->first.second - 1); // Start point of the trace
@@ -420,6 +439,7 @@ _globalAlignment(TAlign& align,
 				 Hirschberg)
 {
 	SEQAN_CHECKPOINT
+	// Trace points, always external because the alignment graph might get large
 	String<unsigned int, External<> > trace;
 	TScoreValue maxScore = _align_hirschberg(trace, str, sc, Hirschberg());
 

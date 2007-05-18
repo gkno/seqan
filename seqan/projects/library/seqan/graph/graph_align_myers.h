@@ -47,21 +47,19 @@ _align_myers_bit_vector(TString const & str1,
 	fill(VN, blockCount, 0, Exact() );
 	TWord err = len2;
 	
-	/*
-	// Debug code
-	std::cout << "Alphabet size: " << alphLen << ::std::endl;
-	std::cout << "Block count: " << blockCount << ::std::endl;
-	for(unsigned int i=0;i<alphLen;++i) {
-		if ((i<97) || (i>122)) continue;
-		std::cout << static_cast<char>(i) << ": ";
-		for(int j=0;j<(int)blockCount;++j) {
-			for(int bit_pos=0;bit_pos<BitsPerValue<TWord>::VALUE;++bit_pos) {
-			  std::cout << ((lT[i][j] & (1<<(bit_pos % BitsPerValue<unsigned int>::VALUE))) !=0);
-			}
-		}
-		std::cout << ::std::endl;
-	}
-	*/
+	//// Debug code
+	//std::cout << "Alphabet size: " << alphLen << ::std::endl;
+	//std::cout << "Block count: " << blockCount << ::std::endl;
+	//for(unsigned int i=0;i<alphLen;++i) {
+	//	if ((i<97) || (i>122)) continue;
+	//	std::cout << static_cast<char>(i) << ": ";
+	//	for(int j=0;j<(int)blockCount;++j) {
+	//		for(int bit_pos=0;bit_pos<BitsPerValue<TWord>::VALUE;++bit_pos) {
+	//		  std::cout << ((lT[i][j] & (1<<(bit_pos % BitsPerValue<unsigned int>::VALUE))) !=0);
+	//		}
+	//	}
+	//	std::cout << ::std::endl;
+	//}
 
 	BitVector X;	
 	BitVector D0;

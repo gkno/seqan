@@ -34,8 +34,8 @@ typedef Tag<Gotoh_> const Gotoh;
 
 /**
 .Tag.Gotoh3
-..summary:Switch to trigger Gotoh Alignments with affine gap costs
-..value.Gotoh3:Gotoh alignment
+..summary:Switch to trigger Gotoh Alignments with affine gap costs where vertical gaps directly followed by horizontal gaps are not allowed and vice versa.
+..value.Gotoh3:Gotoh alignment without gap-gap states
 */
 
 struct Gotoh3_;

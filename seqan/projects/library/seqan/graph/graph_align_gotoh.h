@@ -257,15 +257,14 @@ _align_gotoh(TTrace& trace,
 		initialDir = (Byte) Vertical;
 	}
 
-	/*
-	for(unsigned int i= 0; i<len2;++i) {
-		for(unsigned int j= 0; j<len1;++j) {
-			std::cout << (unsigned int) getValue(trace, j*len2 + i) << ',';
-		}
-		std::cout << std::endl;
-	}
-	std::cout << (unsigned int) initialDir << std::endl;
-	*/
+	//// Debug code
+	//for(unsigned int i= 0; i<len2;++i) {
+	//	for(unsigned int j= 0; j<len1;++j) {
+	//		std::cout << (unsigned int) getValue(trace, j*len2 + i) << ',';
+	//	}
+	//	std::cout << std::endl;
+	//}
+	//std::cout << (unsigned int) initialDir << std::endl;
 
 	return tmp;
 }

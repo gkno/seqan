@@ -5,17 +5,18 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 //////////////////////////////////////////////////////////////////////////////
-// Alignment: Gotoh Alignment, affine gap cost
+// Alignment: Gotoh Alignment, affine gap cost with 3 Matrices
+// Vertical gaps followed by horizontal gaps are not possible
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TAlign, typename TStringSet, typename TTrace, typename TVal>
 void
-_align_gotoh3_trace(TAlign& align,		 
-				   TStringSet const& str,
-				   TTrace const& trace,
-				   TVal const initialDir)
+_align_gotoh3_trace(TAlign& align,	
+					TStringSet const& str,
+					TTrace const& trace,
+					TVal const initialDir)
 {
 	SEQAN_CHECKPOINT
 	
@@ -118,10 +119,10 @@ _align_gotoh3_trace(TAlign& align,
 template <typename TTrace, typename TStringSet, typename TScoreValue>
 TScoreValue
 _align_gotoh3(TTrace& trace,
-	     TStringSet const& str,
-	     Score<TScoreValue, Simple> const & sc,
-	     typename Value<TTrace>::Type& initialDir,
-	     bool createTrace)
+			  TStringSet const& str,
+			  Score<TScoreValue, Simple> const & sc,
+			  typename Value<TTrace>::Type& initialDir,
+			  bool createTrace)
 {
 	SEQAN_CHECKPOINT
 	typedef typename Value<TTrace>::Type TTraceValue;
@@ -260,14 +261,13 @@ _align_gotoh3(TTrace& trace,
 		initialDir = (Byte) Vertical;
 	}
 
-	/*
-	for(unsigned int i= 0; i<len2;++i) {
-		for(unsigned int j= 0; j<len1;++j) {
-			std::cout << (unsigned int) getValue(trace, j*len2 + i) << ',';
-		}
-		std::cout << std::endl;
-	}
-	*/
+	//// Debug code
+	//for(unsigned int i= 0; i<len2;++i) {
+	//	for(unsigned int j= 0; j<len1;++j) {
+	//		std::cout << (unsigned int) getValue(trace, j*len2 + i) << ',';
+	//	}
+	//	std::cout << std::endl;
+	//}
 
 	return maxVal;
 }

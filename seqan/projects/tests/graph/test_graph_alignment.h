@@ -490,50 +490,124 @@ void Test_Hirschberg() {
 //////////////////////////////////////////////////////////////////////////////
 
 void  Test_Runtime() {
-	typedef String<Dna> TString;
+	typedef String<Dna5, External<> > TString;
 	typedef StringSet<TString, Dependent<> > TStringSet;
 	typedef Graph<Alignment<TStringSet, void> > TGraph;
 	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
-	typedef	Id<TStringSet>::Type TId;
-	
+	typedef Id<TStringSet>::Type TId;
+
+	// Windows
+#ifdef PLATFORM_WINDOWS
+	String<char> in_path("Z:\\matches\\");
+	String<char> out_path("Z:\\matches\\out\\");
+#else
+	// Linux
+	String<char> in_path("/home/takifugu/rausch/matches/");
+	String<char> out_path("/home/takifugu/rausch/matches/out/");
+#endif
+
 	Score<double> score_type = Score<double>(5,-4,-0.5,-10);
-	double score;
 	TStringSet str;
 	clock_t startTime;
 	clock_t duration;
-
 	TString str0;
-	fstream strm_in;
-	strm_in.open(TEST_PATH "a.fasta", ios_base::in | ios_base::binary);
-	read(strm_in, str0, Fasta());
-	strm_in.close();
-	assignValueById(str, str0);
-
 	TString str1;
-	fstream strm_in1;
-	strm_in1.open(TEST_PATH "b.fasta", ios_base::in | ios_base::binary);
-	read(strm_in1, str1, Fasta());
-	strm_in1.close();
-	assignValueById(str, str1);
 
+	unsigned int chrom = 20;
+	std::stringstream s1;
+	s1 << out_path << "H.chr." << chrom - 1;
+	bool f = open(str0, s1.str().c_str());
+	if (!f) {
+		exit(-1);
+	}
+	std::stringstream s2;
+	s2 << out_path << "W.chr." << chrom - 1;
+	f = open(str1, s2.str().c_str());
+	if (!f) {
+		exit(-1);
+	}
+	
+	//fstream strm_in;
+	//strm_in.open(TEST_PATH "a.fasta", ios_base::in | ios_base::binary);
+	//read(strm_in, str0, Fasta());
+	//strm_in.close();
+	//fstream strm_in1;
+	//strm_in1.open(TEST_PATH "b.fasta", ios_base::in | ios_base::binary);
+	//read(strm_in1, str1, Fasta());
+	//strm_in1.close();
+		
+	assignValueById(str, str0);
+	assignValueById(str, str1);
 	std::cout << "Length Seq0: " << length(str0) << std::endl;
 	std::cout << "Length Seq1: " << length(str1) << std::endl;
 	TGraph g(str);
 
 	startTime = clock();
-	score = globalAlignment(g, score_type, Gotoh() );
+	double score1 = globalAlignment(g, score_type, Hirschberg() );
 	duration = clock() - startTime;
 	std::cout << g << std::endl;
-	std::cout << "Score: " << score << " (Runtime: " << duration << ")" << std::endl;
+	std::cout << "Score: " << score1 << " (Runtime: " << duration << ")" << std::endl;
 	std::cout << std::endl;
+}
 
-	startTime = clock();
-	score = globalAlignment(g, score_type, Hirschberg() );
-	duration = clock() - startTime;
-	std::cout << g << std::endl;
-	std::cout << "Score: " << score << " (Runtime: " << duration << ")" << std::endl;
-	std::cout << std::endl;
+
+//////////////////////////////////////////////////////////////////////////////
+
+void  Test_Runtime2() {
+	typedef String<Dna5> TString;
+	typedef StringSet<TString, Dependent<> > TStringSet;
+	typedef Graph<Alignment<TStringSet, void> > TGraph;
+	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef Id<TStringSet>::Type TId;
+
+	Score<double> score_type = Score<double>(5,-4,-0.5,-10);
+	TStringSet str;
+	clock_t startTime;
+	clock_t duration;
+	TString str0;
+	TString str1;
+
+	mtRandInit();
+	while(true) {
+		clear(str);
+		clear(str0);
+		clear(str1);
+
+		for (unsigned int i=0; i<20; ++i) {
+			append(str0, (Byte) mtRand() % 5 );
+		}
+
+		for (unsigned int i=0; i<15; ++i) {
+			append(str1,  (Byte) mtRand() % 5);
+		}
+		std::cout << str0 << std::endl;
+		std::cout << str1 << std::endl;
+
+
+		assignValueById(str, str0);
+		assignValueById(str, str1);
+		std::cout << "Length Seq0: " << length(str0) << std::endl;
+		std::cout << "Length Seq1: " << length(str1) << std::endl;
+		TGraph g(str);
+
+		startTime = clock();
+		double score = globalAlignment(g, score_type, Gotoh() );
+		duration = clock() - startTime;
+		std::cout << g << std::endl;
+		std::cout << "Score: " << score << " (Runtime: " << duration << ")" << std::endl;
+		std::cout << std::endl;
+
+		startTime = clock();
+		double score1 = globalAlignment(g, score_type, Hirschberg() );
+		duration = clock() - startTime;
+		std::cout << g << std::endl;
+		std::cout << "Score: " << score1 << " (Runtime: " << duration << ")" << std::endl;
+		std::cout << std::endl;
+
+		SEQAN_TASSERT(score == score1)
+	}
 }
 
 

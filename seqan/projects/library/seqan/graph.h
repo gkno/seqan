@@ -7,6 +7,7 @@
 #include <seqan/sequence.h>
 #include <seqan/file.h>
 #include <seqan/align/matrix_base.h>
+#include <seqan/misc/misc_random.h>
 
 // External / STL
 #include <deque>

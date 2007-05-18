@@ -11,17 +11,21 @@ namespace SEQAN_NAMESPACE_MAIN
 ..summary:Computes the best global alignment of the two sequences.
 ..cat:Alignments
 ..signature:
-globalAlignment(g, score, tag)
-globalAlignment(file, str, score, tag)
-..param.g:The alignment graph having 2 sequences.
-...type:Class.Graph Alignment
-..param.str:A string set with 2 sequences.
+globalAlignment(strSet, score, tag)
+globalAlignment(graph, score, tag)
+globalAlignment(file, strSet, score, tag)
+..param.strSet:A string set with 2 sequences.
 ...type:Class.StringSet
+...remarks: If an alignment graph is used that graph must contain a string set with two sequences
+..param.graph:The alignment graph having 2 sequences.
+...type:Class.Graph Alignment
+..param.file:A file stream or std::cout to write a textual alignment
 ..param.score:The score values to be used for computing the alignment.
 ...type:Class.Score
 ..param.tag:A tag indicating the alignment algorithm to use
-...remarks:Either NeedlemanWunsch or Gotoh.
-..returns:The score value of the best scoring global alignment.
+...remarks:NeedlemanWunsch, Gotoh, Hirschberg, or MyersBitVector.
+...remarks:If MyersBitVector is used leave out score because the scoring is fixed in this algorithm.
+..returns:The maximum score of the best global alignment.
 */
 template<typename TFile, typename TStringSet, typename TScoreValue, typename TTag>
 TScoreValue
@@ -64,7 +68,7 @@ globalAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 template<typename TStringSet>
 unsigned int
 globalAlignment(TStringSet const& str,
-		MyersBitVector)
+				MyersBitVector)
 {
 	SEQAN_CHECKPOINT
 	return _globalAlignment(str,Score<unsigned int>(0,1,1,0),MyersBitVector());
@@ -77,7 +81,7 @@ globalAlignment(TStringSet const& str,
 template<typename TStringSet, typename TCargo, typename TSpec, typename TTag>
 unsigned int
 globalAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-		TTag)
+				TTag)
 {
 	SEQAN_CHECKPOINT
 	clearVertices(g);

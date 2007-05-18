@@ -93,15 +93,16 @@ int main()
 	// Test Graph Algorithms
 	Test_Algorithms();
 
-	// Alignment
+	//// Alignment
 	Test_GraphAlignment();
+	
 
 	// T-Coffee
 	Test_CompressedAlphabets();
 	Test_Fragment();
 	Test_TCoffee(); 
 
-	// Match Refinement
+	//// Match Refinement
 	Test_MatchRefinement();
 
 	
