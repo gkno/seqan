@@ -121,6 +121,7 @@ SEQAN_CHECKPOINT
 	{
 SEQAN_CHECKPOINT
 		me.data_score = score;
+		clear(me.data_tab);
 	}
 
 //____________________________________________________________________________
@@ -147,13 +148,6 @@ SEQAN_CHECKPOINT
 		return value(me.data_needle);
 	}
 
-	friend inline String<TTabValue> & 
-	_dataTab(Pattern & me)
-	{
-SEQAN_CHECKPOINT
-		return me.data_tab;
-	}
-
 //____________________________________________________________________________
 };
 
@@ -178,19 +172,43 @@ struct Host< Pattern<TNeedle, Score<TScoreValue, TScoreSpec> > const>
 
 template <typename TNeedle, typename TNeedle2, typename TScoreValue>
 void 
+setHost(Pattern<TNeedle, Score<TScoreValue, Simple> > & me, TNeedle2 & ndl)
+{
+	me.data_needle = ndl;
+	clear(me.data_tab);
+}
+template <typename TNeedle, typename TNeedle2, typename TScoreValue>
+void 
 setHost(Pattern<TNeedle, Score<TScoreValue, Simple> > & me, TNeedle2 const & ndl)
 {
+	me.data_needle = ndl;
+	clear(me.data_tab);
+}
+
+//____________________________________________________________________________
+
+
+template <typename TNeedle, typename TScoreValue>
+inline void _finderInit (Pattern<TNeedle, Score<TScoreValue, Simple> > & me) 
+{
+	typedef Pattern<TNeedle, Score<TScoreValue, Simple> > TPattern;
+	typedef typename Size<TPattern>::Type TSize;
+
 	typedef String<TScoreValue> TTab;
 	typedef typename Iterator<TTab, Standard>::Type TIterator;
 
 	TScoreValue score_gap = scoreGapExtend(scoring(me));
 
-	TTab & string_tab = _dataTab(me);
+	TTab & string_tab = me.data_tab;
 
 	//allocate enough memory for one column of DP matrix
-	/*size_t got_length =*/ resize(string_tab, length(ndl));
+	TSize need_length = length(_dataNeedle(me));
+	SEQAN_ASSERT(need_length);
 
-//	if (length(ndle) < got_length) throw(0); //???TODO: Throw "not enough memory" exception
+	TSize got_length = resize(string_tab, need_length);
+	SEQAN_ASSERT(got_length >= need_length);
+
+//	if (length(_dataNeedle(me)) < got_length) throw(0); //???TODO: Throw "not enough memory" exception
 
 	//init matrix
 	//note: The column is stored in reverse order
@@ -205,15 +223,6 @@ setHost(Pattern<TNeedle, Score<TScoreValue, Simple> > & me, TNeedle2 const & ndl
 		*tab = x;
 		x += score_gap;
 	}
-
-	_dataNeedle(me) = ndl;
-}
-
-template <typename TNeedle, typename TNeedle2, typename TScoreValue>
-void 
-setHost(Pattern<TNeedle, Score<TScoreValue, Simple> > & me, TNeedle2 & ndl)
-{
-	setHost(me, reinterpret_cast<TNeedle const &>(ndl));
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -223,7 +232,7 @@ template <typename TNeedle, typename TScoreValue>
 inline TScoreValue
 getScore(Pattern<TNeedle, Score<TScoreValue, Simple> > & me)
 {
-	return front(me.data_tab);
+	return front(getValue(me.data_tab));
 }
 
 
@@ -244,7 +253,7 @@ _find_score_simple_proportional(TFinder & finder, Pattern<TNeedle, Score<TScoreV
 	typedef typename Iterator<TNeedle const, Standard>::Type TNeedleIterator;
 	typedef typename Value<typename Haystack<TFinder>::Type>::Type THaystackValue;
 
-	String<TScoreValue> & string_tab = _dataTab(me);
+	String<TScoreValue> & string_tab = me.data_tab;
 
 	TScoreValue score_gap = scoreGapExtend(scoring(me));
 	TScoreValue score_match = scoreMatch(scoring(me));
@@ -253,10 +262,19 @@ _find_score_simple_proportional(TFinder & finder, Pattern<TNeedle, Score<TScoreV
 	//init table
 
 	if (empty(finder))
-		goBegin(finder);
+	{
+		clear(me.data_tab);
+		_finderSetNonEmpty(finder);
+	}
 	else
+	{
 		goNext(finder);
+	}
 
+	if (! length(me.data_tab))
+	{
+		_finderInit(me);
+	}
 	//start searching
 
 	TTabIterator tab_begin = end(string_tab, Standard());

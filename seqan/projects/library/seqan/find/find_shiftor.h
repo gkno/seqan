@@ -135,7 +135,7 @@ SEQAN_CHECKPOINT
 
 //____________________________________________________________________________
 
-
+/*
 template <typename TFinder, typename TNeedle>
 bool _findShiftOr_SmallNeedle(TFinder & finder, Pattern<TNeedle, ShiftOr> & me) {
 	SEQAN_CHECKPOINT
@@ -149,6 +149,41 @@ bool _findShiftOr_SmallNeedle(TFinder & finder, Pattern<TNeedle, ShiftOr> & me) 
 			return true; 
 		}
 		goNext(finder);
+	}
+	return false;
+}
+*/
+template <typename TFinder, typename TNeedle>
+bool _findShiftOr_SmallNeedle(TFinder & finder, Pattern<TNeedle, ShiftOr> & me) 
+{
+SEQAN_CHECKPOINT
+	typedef typename Haystack<TFinder>::Type THaystack;
+	THaystack & hstk = haystack(finder);
+
+	typedef typename Iterator<THaystack, Standard>::Type THaystackIterator;
+	THaystackIterator hayit = iter(hstk, position(finder));
+	THaystackIterator hayit_end = end(hstk, Standard());
+
+	typedef unsigned int TWord;
+	TWord mask = (1 << (me.needleLength-1));
+	TWord pref_suf_match = me.prefSufMatch[0];
+
+	for (;hayit < hayit_end; ++hayit)
+	{
+		unsigned int pos = *hayit; //conversion alphabet to unsigned int
+		pref_suf_match <<= 1;				//shift...
+		pref_suf_match |= me.table[pos];	//...or
+		if (pref_suf_match & mask) 
+		{
+			continue;
+		}
+
+		//found a hit!
+		//set finder to start position
+		setPosition(finder, (hayit - begin(hstk, Standard())) - me.needleLength + 1); 
+		//save machine state
+		me.prefSufMatch[0] = pref_suf_match; 
+		return true;
 	}
 	return false;
 }

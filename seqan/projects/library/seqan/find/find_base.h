@@ -143,13 +143,15 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < typename TNeedle, typename TSpec >
 	inline typename Needle< Pattern<TNeedle, TSpec> >::Type &
-	needle(Pattern<TNeedle, TSpec> &obj) {
+	needle(Pattern<TNeedle, TSpec> & obj) 
+	{
 		return host(obj);
 	}
 
 	template < typename TNeedle, typename TSpec >
 	inline typename Needle< Pattern<TNeedle, TSpec> const>::Type &
-	needle(Pattern<TNeedle, TSpec> const &obj) {
+	needle(Pattern<TNeedle, TSpec> const & obj) 
+	{
 		return host(obj);
 	}
 
