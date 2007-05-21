@@ -576,7 +576,7 @@ SEQAN_CHECKPOINT
 	{
 		if (top_score > cutoff)
 		{
-			((sw.pq_).heap_[0]).value_ = top_score;
+			((sw.pq_).heap[0]).value_ = top_score;
 			adjustTop(sw.pq_); 
 		}
 		else
