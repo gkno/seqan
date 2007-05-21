@@ -274,7 +274,7 @@ struct _PackedConsts
 //////////////////////////////////////////////////////////////////////////////
 // Temporary Copy
 //////////////////////////////////////////////////////////////////////////////
-//note: this works only, if the copy assignment is done without usind _TempCopy
+//note: this works only, if the copy assignment is done without using _TempCopy
 
 template <typename TValue, typename THostspec>
 struct _TempCopy<String<TValue, Packed<THostspec> > >
@@ -674,6 +674,55 @@ _clearSpace(String<TValue, Packed<THostspec> > & me,
 SEQAN_CHECKPOINT
 	return _ClearSpace_String_Packed_<Tag<TExpand> const>::_clearSpace_(me, size, pos_begin, pos_end, limit);
 }
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+
+///.Function.reserve.param.object.type:Spec.Packed String
+
+template <typename TValue, typename TSpec, typename _TSize, typename TExpand>
+inline typename Size< String<TValue, Packed<TSpec> > >::Type
+reserve(
+	String<TValue, Packed<TSpec> > & seq, 
+	_TSize new_capacity,
+	Tag<TExpand> const tag)
+{
+SEQAN_CHECKPOINT
+
+	typedef String<TValue, Packed<TSpec> > TString;
+
+	return reserve(host(seq), _PackedConsts<TString>::toHostLength(new_capacity), tag) * _PackedConsts<TString>::VALUES_PER_WORD;
+}
+
+template <typename TValue, typename TSpec, typename _TSize>
+inline typename Size< String<TValue, Alloc<TSpec> > >::Type
+reserve(
+	String<TValue, Packed<TSpec> > & me, 
+	_TSize new_capacity,
+	Limit)
+{
+SEQAN_CHECKPOINT
+	typedef typename Size< String<TValue, Alloc<TSpec> > >::Type TSize;
+
+	TSize me_capacity = capacity(me);
+	if (me_capacity < (TSize)new_capacity) return me_capacity;
+	return new_capacity;
+}
+
+template <typename TValue, typename TSpec, typename _TSize>
+inline typename Size< String<TValue, Alloc<TSpec> > >::Type
+reserve(
+	String<TValue, Packed<TSpec> > & me, 
+	_TSize new_capacity,
+	Insist)
+{
+SEQAN_CHECKPOINT
+	typedef typename Size< String<TValue, Alloc<TSpec> > >::Type TSize;
+
+	return new_capacity;
+}
+
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////

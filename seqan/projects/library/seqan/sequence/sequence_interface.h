@@ -666,11 +666,13 @@ SEQAN_CHECKPOINT
 .Function.iter:
 ..cat:Containers
 ..summary:Iterator to item at given position. 
-..signature:Iterator iter(object, pos)
+..signature:Iterator iter(object, pos [, tag])
 ..param.object:A container.
 ...type:Class.String
 ..param.pos:The position of an item in $object$.
 ...metafunction:Metafunction.Position
+..param.tag:An @Tag.Iterator Spec.iterator spec@ tag that specifies the kind of the iterator returned. (optional)
+...default:Given by @Metafunction.DefaultIteratorSpec@.
 ..returns:An iterator to the item at position $pos$ in $object$.
 ...metafunction:Metafunction.Iterator
 ..remarks:

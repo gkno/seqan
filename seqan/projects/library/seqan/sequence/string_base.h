@@ -165,17 +165,18 @@ SEQAN_CHECKPOINT
 
 /**
 .Function.clear:
-..cat:Containers
-..summary:Removes all items from container.
+..cat:Container
+..summary:Resets an object.
 ..signature:clear(object)
-..param.object:The container that will lost it's items.
-..remarks:After this operation, $object$ will have length zero.
-A capacity can be changed, depending on the implementation.
+..param.object:The object that will be resetted.
+...type:Class.String
+..remarks:$object$ is set to a state that is equivalent to a default constructed object of the same type.
+..remarks:If $object$ is a container, then all elements are removed from this container. 
+The length is set to 0.
+The capacity can be changed, depending on the implementation.
 ..see:Function.resize
 ..see:Function.length
 */
-
-///.Function.clear.param.object.type:Class.String
 
 template <typename TValue, typename TSpec>
 inline void 
@@ -1381,7 +1382,8 @@ struct _Resize_String
 		T & me,
 		typename Size<T>::Type new_length)
 	{
-		typename Size<T>::Type me_length = length(me);
+		typedef typename Size<T>::Type TSize;
+		TSize me_length = length(me);
 		if (new_length < me_length)
 		{
 SEQAN_CHECKPOINT
@@ -1393,7 +1395,11 @@ SEQAN_CHECKPOINT
 			if (new_length > me_capacity)
 			{
 SEQAN_CHECKPOINT
-				new_length = reserve(me, new_length, TExpand());
+				TSize new_capacity = reserve(me, new_length, TExpand());
+				if (new_capacity < new_length)
+				{
+					new_length = new_capacity;
+				}
 			}
 			if (new_length > me_length)
 			{

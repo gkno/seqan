@@ -354,7 +354,7 @@ inline bool
 empty(TValue * me)
 {
 SEQAN_CHECKPOINT
-	return *me == TValue();
+	return !me || (*me == TValue());
 }
 
 //////////////////////////////////////////////////////////////////////////////

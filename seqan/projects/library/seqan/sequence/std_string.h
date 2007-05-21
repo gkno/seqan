@@ -232,6 +232,53 @@ SEQAN_CHECKPOINT
 template <typename TChar, typename TCharTraits, typename TAlloc, typename TSource>
 inline void 
 assign(::std::basic_string<TChar, TCharTraits, TAlloc> & target, 
+	   TSource & source)
+{
+SEQAN_CHECKPOINT
+	assign(target, source, Generous());
+}
+template <typename TChar, typename TCharTraits, typename TAlloc, typename TSource>
+inline void 
+assign(::std::basic_string<TChar, TCharTraits, TAlloc> & target, 
+	   TSource const & source)
+{
+SEQAN_CHECKPOINT
+	assign(target, source, Generous());
+}
+
+template <typename TChar, typename TCharTraits, typename TAlloc, typename TSource, typename TSize>
+inline void 
+assign(::std::basic_string<TChar, TCharTraits, TAlloc> & target, 
+	   TSource & source,
+	   TSize limit)
+{
+SEQAN_CHECKPOINT
+	assign(target, source, limit, Generous());
+}
+template <typename TChar, typename TCharTraits, typename TAlloc, typename TSource, typename TSize>
+inline void 
+assign(::std::basic_string<TChar, TCharTraits, TAlloc> & target, 
+	   TSource const & source,
+	   TSize limit)
+{
+SEQAN_CHECKPOINT
+	assign(target, source, limit, Generous());
+}
+
+//____________________________________________________________________________
+
+template <typename TChar, typename TCharTraits, typename TAlloc, typename TSource>
+inline void 
+assign(::std::basic_string<TChar, TCharTraits, TAlloc> & target, 
+	   TSource & source,
+	   Generous)
+{
+SEQAN_CHECKPOINT
+	target.assign(begin(source, Standard()), end(source, Standard()));
+}
+template <typename TChar, typename TCharTraits, typename TAlloc, typename TSource>
+inline void 
+assign(::std::basic_string<TChar, TCharTraits, TAlloc> & target, 
 	   TSource const & source,
 	   Generous)
 {
@@ -239,12 +286,12 @@ SEQAN_CHECKPOINT
 	target.assign(begin(source, Standard()), end(source, Standard()));
 }
 
+
 template <typename TChar, typename TCharTraits, typename TAlloc, typename TSource>
 inline void 
-assign(::std::basic_string<TChar, TCharTraits, TAlloc> & target, 
-	   TSource const & source,
-	   typename Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type limit,
-	   Generous)
+assign_std_string_Generous_impl(::std::basic_string<TChar, TCharTraits, TAlloc> & target, 
+								TSource & source,
+								typename Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type limit)
 {
 SEQAN_CHECKPOINT
 	typename Iterator<TSource const, Standard>::Type source_begin = begin(source, Standard());
@@ -255,9 +302,38 @@ SEQAN_CHECKPOINT
 	}
 	target.assign(source_begin, source_begin + source_length);
 }
+template <typename TChar, typename TCharTraits, typename TAlloc, typename TSource>
+inline void 
+assign(::std::basic_string<TChar, TCharTraits, TAlloc> & target, 
+	   TSource & source,
+	   typename Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type limit,
+	   Generous)
+{
+SEQAN_CHECKPOINT
+	assign_std_string_Generous_impl(target, source, limit);
+}
+template <typename TChar, typename TCharTraits, typename TAlloc, typename TSource>
+inline void 
+assign(::std::basic_string<TChar, TCharTraits, TAlloc> & target, 
+	   TSource const & source,
+	   typename Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type limit,
+	   Generous)
+{
+SEQAN_CHECKPOINT
+	assign_std_string_Generous_impl(target, source, limit);
+}
 
 //____________________________________________________________________________
 
+template <typename TChar, typename TCharTraits, typename TAlloc, typename TSource>
+inline void 
+assign(::std::basic_string<TChar, TCharTraits, TAlloc> & target, 
+	   TSource & source,
+	   Limit)
+{
+SEQAN_CHECKPOINT
+	assign(target, source, target.capacity(), Generous());
+}
 template <typename TChar, typename TCharTraits, typename TAlloc, typename TSource>
 inline void 
 assign(::std::basic_string<TChar, TCharTraits, TAlloc> & target, 
@@ -268,6 +344,21 @@ SEQAN_CHECKPOINT
 	assign(target, source, target.capacity(), Generous());
 }
 
+template <typename TChar, typename TCharTraits, typename TAlloc, typename TSource>
+inline void 
+assign(::std::basic_string<TChar, TCharTraits, TAlloc> & target, 
+	   TSource & source,
+	   typename Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type limit,
+	   Limit)
+{
+SEQAN_CHECKPOINT
+	if (limit > target.capacity()) 
+	{
+		limit = target.capacity();
+	}
+
+	assign(target, source, limit, Generous());
+}
 template <typename TChar, typename TCharTraits, typename TAlloc, typename TSource>
 inline void 
 assign(::std::basic_string<TChar, TCharTraits, TAlloc> & target, 
@@ -283,7 +374,6 @@ SEQAN_CHECKPOINT
 
 	assign(target, source, limit, Generous());
 }
-
 
 //////////////////////////////////////////////////////////////////////////////
 //append to ::std::basic_string
