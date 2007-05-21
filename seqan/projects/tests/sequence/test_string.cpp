@@ -407,13 +407,30 @@ void TestStringBasics()
 	SEQAN_TASSERT(length(str3) == 0);
 }
 
- 
+//////////////////////////////////////////////////////////////////////////////
+//test some basic string features for strings that can change length
+//note: capacity of TMe strings must be >= 200
+
+template <typename TMe>
+void TestStringResize()
+{
+	TMe str1;
+	resize(str1, 50);
+	SEQAN_TASSERT(length(str1) == 50);
+
+	fill(str1, 100, 3);
+	SEQAN_TASSERT(length(str1) == 100);
+	SEQAN_TASSERT(getValue(str1, 51) == 3);
+	SEQAN_TASSERT(getValue(str1, 99) == 3);
+
+}
 
 //////////////////////////////////////////////////////////////////////////////
 
 void Test_String_Alloc()
 {
 	TestStringBasics<String<char> >();
+	TestStringResize<String<char> >();
 
 	String<char, Alloc<> > str1 = "hello";
 	SEQAN_TASSERT(str1[1] == 'e');
@@ -426,6 +443,8 @@ void Test_String_Alloc()
 	move(str3, str1);
 	SEQAN_TASSERT(str3 == "hello");
 	SEQAN_TASSERT(length(str1) == 0);
+
+
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -448,6 +467,8 @@ void Test_String_Packed()
 {
 	TestStringBasics<String<char, Packed<> > >();
 	TestStringBasics<String<Dna, Packed<> > >();
+
+	TestStringResize<String<char, Packed<> > >();
 
 }
 

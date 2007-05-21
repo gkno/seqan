@@ -96,6 +96,7 @@ void Test_OnlineAlg()
 			finderDna += 2;
 			clear(finderDna);  // clear the state of the finder
 		} else {
+			unsigned int p = position(finderDna);
 			append(pos,position(finderDna));
 		}
 	}
@@ -399,42 +400,14 @@ void Test_OnlineAlgMulti()
 
 void Test_Various()
 {
-	//Horspool
 	String<char> haystk("Dies ist ein Haystack. Ja, das ist wirklich einer!");
-	String<char> ndl("ist");
+	String<char> ndl("des");
 
-//	Pattern<String<char>, Horspool> horsp(ndl);
-	Iterator<String<char>, Rooted>::Type it = begin(haystk);
-/*
-	while (find(it, horsp))
-		printf("%i\n", position(it));
+	Finder<String<char> > fnd(haystk);
+	Pattern<String<char>, SimpleScore> pat(ndl, -1);
 
-
-	//Multi
-*/
-	String<String<char> > ndl_2;
-	resize(ndl_2, 2);
-	ndl_2[0] = "ist";
-	ndl_2[1] = "ein";
-
-/*
-	Finder<String<char>, MultipatternFinder> finder;
-	it = begin(haystk, Rooted());
-
-	while (find(finder, it, ndl_2))
-		printf("%i at position %i\n", needle(finder), position(it));
-*/
-	
-	//Score
-
-	String<char> ndl_3("des");
-
-	Pattern<String<char>, SimpleScore> fnd(-1);
-	setHost(fnd, ndl_3);
-	it = begin(haystk, Rooted());
-
-	while (find(it, fnd))
-		printf("position %i\n", position(it));
+	while (find(fnd, pat))
+		printf("-- position %i\n", position(fnd));
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -453,6 +426,7 @@ int main()
 	Test_OnlineAlgMulti<AhoCorasick>();
 	Test_OnlineAlgMulti<MultipleShiftAnd>();
 	Test_OnlineAlgMulti<SetHorspool>();
+//	Test_OnlineAlgMulti<WuManber>();
 
 	Test_Various();
 
@@ -473,6 +447,7 @@ int main()
 	debug::verifyCheckpoints("projects/library/seqan/find/find_ahocorasick.h");
 	debug::verifyCheckpoints("projects/library/seqan/find/find_multiple_shiftand.h");
 	debug::verifyCheckpoints("projects/library/seqan/find/find_set_horspool.h");
+	debug::verifyCheckpoints("projects/library/seqan/find/find_wumanber.h");
 
 
 	SEQAN_TREPORT("TEST END")

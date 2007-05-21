@@ -21,7 +21,7 @@ int main()
 {
 	SEQAN_TREPORT("TEST BEGIN")
 
-	//mainTestString();
+	mainTestString();
 	mainTestStringSet();
 	mainTestSegment();
 
