@@ -323,16 +323,12 @@ clearVertices(Graph<Directed<TCargo, TSpec> >& g)
 
 //////////////////////////////////////////////////////////////////////////////
 
+
 /**
 .Function.clear:
 ..cat:Graph
-..summary:Removes all vertices and edges in a graph.
-..signature:clear(g)
-..param.g:A graph.
-...type:Class.Graph
-..returns:void
-..see:Function.clearEdges
-..see:Function.clearVertices
+..param.object.type:Class.Graph
+..remarks:If $object$ is a @Class.Graph.graph@, then all vertices and all edges are removed.
 */
 
 template<typename TCargo, typename TSpec>

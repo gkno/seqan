@@ -611,22 +611,74 @@ typename Difference<TIterator>::Type difference(
 	TIterator const & begin, 
 	TIterator const & end)
 {	// return distance type from arbitrary argument
+SEQAN_CHECKPOINT
     return end - begin;
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// clear
+// goNil
 //////////////////////////////////////////////////////////////////////////////
 
-///.Function.clear.param.object.type:Class.Iter
+
+/**
+.Function.goNil:
+..cat:Iteration
+..summary:Moves iterator to nil position.
+..signature:goNil(iterator)
+..param.iterator:The iterator that will be moved.
+...type:Class.String
+..remarks:$iterator$ is set to an invalid position, e.g. $NULL$ for pointer types.
+..see:Function.clear
+*/
 
 template <typename TIterator>
 inline void
-clear(TIterator & me)
+goNil(TIterator & me)
 {
+SEQAN_CHECKPOINT
+	me = TIterator();
+}
+
+template <typename TIterator>
+inline void
+goNil(TIterator * & me)
+{
+SEQAN_CHECKPOINT
 	me = 0;
 }
 
+//////////////////////////////////////////////////////////////////////////////
+// atNil
+//////////////////////////////////////////////////////////////////////////////
+
+
+/**
+.Function.atNil:
+..cat:Iteration
+..summary:Tests whether iterator is at nil position.
+..signature:bool atNil(iterator)
+..param.iterator:An iterator.
+...type:Class.String
+..returns:$true$ if $iterator$ points to an ivalid position, e.g. $iterator$ is a $NULL$ pointer.
+$false$ otherwise.
+..see:Function.goNil
+*/
+
+template <typename TIterator>
+inline bool
+atNil(TIterator & me)
+{
+SEQAN_CHECKPOINT
+	return me == TIterator();
+}
+
+template <typename TIterator>
+inline bool
+atNil(TIterator * me)
+{
+SEQAN_CHECKPOINT
+	me = 0;
+}
 
 //////////////////////////////////////////////////////////////////////////////
 

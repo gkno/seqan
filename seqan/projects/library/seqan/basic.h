@@ -43,6 +43,8 @@
 #include <seqan/basic/basic_allocator_singlepool.h>
 #include <seqan/basic/basic_allocator_multipool.h>
 
+//____________________________________________________________________________
+
 #include <seqan/basic/basic_converter.h>
 #include <seqan/basic/basic_compare.h>
 #include <seqan/basic/basic_operator.h>
@@ -67,9 +69,8 @@
 
 #include <seqan/basic/basic_pointer.h>
 
-#include <seqan/basic/basic_alterator.h>
-#include <seqan/basic/basic_alterator_iterator.h>
-#include <seqan/basic/basic_alterator_iterator_converter.h>
+//____________________________________________________________________________
+// alphabets
 
 #include <seqan/basic/basic_alphabet_interface.h>
 #include <seqan/basic/basic_alphabet_trait_basic.h>
@@ -78,6 +79,8 @@
 
 #include <seqan/basic/basic_alphabet_simple_tabs.h>
 #include <seqan/basic/basic_alphabet_simple.h>
+
+//____________________________________________________________________________
 
 //#include <seqan/basic/basic_counted_ptr>
 #include <seqan/basic/basic_volatile_ptr.h>

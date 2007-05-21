@@ -31,7 +31,35 @@ guessFileFormat(TFile & file,
 				TData & data)
 {
 SEQAN_CHECKPOINT
-	return FileFormat<TFile, TData, TMeta, Fasta>(); //??? TODO
+	typename Position<TFile>::Type old_pos = _streamTellG(file);
+	typename Value<TFile>::Type c;
+
+	_streamSeekG(file, 0); /// move to beginning of file
+	c = _streamGet(file);
+		
+	if (c=='>') 
+	{
+		_streamSeekG(file, old_pos);
+		return getFileFormatInstance<TFile, TData, Fasta, TMeta>();
+	}
+	
+	if (c=='L')
+	{
+		_streamSeekG(file, old_pos);
+		return getFileFormatInstance<TFile, TData, Genbank, TMeta>();
+	}
+
+	if (c=='I')
+	{
+		_streamSeekG(file, old_pos);
+		return getFileFormatInstance<TFile, TData, Embl, TMeta>();
+	}
+
+	else
+	{
+		_streamSeekG(file, old_pos);
+		return getFileFormatInstance<TFile, TData, Raw, TMeta>();
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////

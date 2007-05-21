@@ -447,20 +447,6 @@ void Test_Transport()
 
 //////////////////////////////////////////////////////////////////////////////
 
-void Test_Alterator_Iterator_Converter()
-{
-	String<char> str1 = "acg";
-	String<char> str2 = "ACG";
-	Iterator<String<char>, Convert<Dna, Standard> >::Type it1 = begin(str1, Standard());
-	
-	SEQAN_TASSERT(*it1 == 'A');
-
-	++it1;
-	SEQAN_TASSERT(*it1 == 'c');
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
 void Main_Test_Common();
 void Main_Test_Allocator();
 void Main_Test_Alphabet();
@@ -494,10 +480,6 @@ int main()
 	debug::verifyCheckpoints("projects/library/seqan/basic/basic_iterator_base.h");
 	debug::verifyCheckpoints("projects/library/seqan/basic/basic_iterator_adaptor.h");
 	debug::verifyCheckpoints("projects/library/seqan/basic/basic_iterator_position.h");
-
-	debug::verifyCheckpoints("projects/library/seqan/basic/basic_alterator.h");
-	debug::verifyCheckpoints("projects/library/seqan/basic/basic_alterator_iterator.h");
-	debug::verifyCheckpoints("projects/library/seqan/basic/basic_alterator_iterator_converter.h");
 
 	SEQAN_TREPORT("TEST END")
 
