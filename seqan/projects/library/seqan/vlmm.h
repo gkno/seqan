@@ -90,7 +90,7 @@ public:
 	// indicated by the specialization Absolute or Relative
 	unsigned AbsoluteThreshold;
 	float    RelativeThreshold;
-
+	unsigned MaxDepth;
 	bool	 Down;
 	unsigned Up;
 
@@ -98,12 +98,12 @@ public:
 		TBase(__index){}
 
 	// use constructor for an absolute threshold
-	Iter(TIndex &__index,int threshold):
-		TBase(__index),AbsoluteThreshold(threshold),RelativeThreshold(0.0),Down(false),Up(0){}
+	Iter(TIndex &__index,unsigned threshold,unsigned maxdepth):
+		TBase(__index),AbsoluteThreshold(threshold),RelativeThreshold(0.0),Down(false),Up(0),MaxDepth(maxdepth){}
 
 	// use constructor for a relative threshold
-	Iter(TIndex &__index,float threshold):
-		TBase(__index),AbsoluteThreshold(0),RelativeThreshold(threshold),Down(false),Up(0){}
+	Iter(TIndex &__index,float threshold,unsigned maxdepth):
+		TBase(__index),AbsoluteThreshold(0),RelativeThreshold(threshold),Down(false),Up(0),MaxDepth(maxdepth){}
 
 		// brauch man die überhaupt
 		Iter(Iter const &_origin):
@@ -127,7 +127,7 @@ public:
 // go down the leftmost edge
 template < typename TIndex, class TSpec >
 inline bool goDown(Iter< TIndex, VSTree< TopDown<ParentLinks<ConstrainedTraversal<TSpec > > > > > &it) {
-	if (isLeaf(it)) return false;
+	if (isLeaf(it) || (length(representative(it)) >= it.MaxDepth) ) return false;
 	_historyPush(it, value(it).i1);
 
 		typename Size<TIndex>::Type i = _getUp(value(it).i1.i2, container(it));
@@ -144,26 +144,18 @@ inline bool goDown(Iter< TIndex, VSTree< TopDown<ParentLinks<ConstrainedTraversa
 // go up one edge (returns false if in root node) and changes it.Down
 template < typename TIndex, class TSpec >
 inline bool goUp(Iter< TIndex, VSTree< TopDown< ParentLinks<ConstrainedTraversal<TSpec> > > > > &it) {
-	/*if (!isRoot(it)) {
-		value(it) = top(it.history);
-		pop(it.history);
-
-		// whenever we go up it is necessary to set it.Down to false
-		// and if we did not go down before we increase it.Up by one that we know
-		// how far we went up(this can then be used to go up in the new automata)
-		if(it.Down)
-				it.Down = false;
-		else
-				++it.Up;
-				
-		return true;
-	}
-	return false;*/
-
 
 	if (!empty(it.history)) {
 			value(it).i1 = top(it.history);
 			pop(it.history);
+			// whenever we go up it is necessary to set it.Down to false
+			// and if we did not go down before we increase it.Up by one that we know
+			// how far we went up(this can then be used to go up in the new automata)
+			if(it.Down)
+					it.Down = false;
+			else
+					++it.Up;
+
 			if (!empty(it.history))
 				value(it).i2 = top(it.history).i2;	// copy right boundary of parent's range
 			return true;
@@ -281,6 +273,7 @@ inline void goNext(Iter< Index<TText, TSpec>, VSTree< TopDown< ParentLinks<Const
 
 struct ContextTree{
 	float threshold ;	
+	unsigned MaxDepth;
 	
 };
 	struct PST{
@@ -288,17 +281,20 @@ struct ContextTree{
 		float minEmpiricalProbability ;    // P min
 		float minConditionalProbability ;  // y min
 		float alpha ;					   // alpha :-)
+		unsigned MaxDepth;				   // d
 		
 	};
 
-void setParameters(PST & params,float t,float minE,float minC,float alpha){
+void setParameters(PST & params,float t,float minE,float minC,float alpha,unsigned d ){
 	params.threshold = t;
 	params.minEmpiricalProbability = minE;
 	params.minConditionalProbability = minC;
 	params.alpha = alpha;
+	params.MaxDepth = d;
 }
-void setParameters(ContextTree & params,float t){
+void setParameters(ContextTree & params,float t, unsigned d){
 	params.threshold = t;
+	params.MaxDepth = d;
 }
 
 template<typename TSpec = ContextTree>
@@ -383,7 +379,8 @@ addIncompleteVertex(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >
 	return addVertex(g);
 }
 
-// new addVertex Specialization which enlarges data_edge_label,data_count,data_father at once
+// new addVertex Specialization which should be called if the vlmm is set up
+// it enlarges all tables at once
 template<typename TAlphabet, typename TCargo, typename TSpec>
 inline typename VertexDescriptor<Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM< TSpec> > > > >::Type 
 addAdditionalVertex(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > > >& g) 
@@ -662,7 +659,7 @@ buildSuffixTreeFromIndex(Iter<TIndex, VSTree< TopDown< ParentLinks<ConstrainedTr
 			//std::cout<<"case2\t"<<representative(it)<<" ";
 			//addEdge with one char less , da muss man auch nicht zählen
 			String<TAlphabet> EdgeLabel = parentEdgeLabel(it);
-			TAlphabet letter = value(EdgeLabel, length(EdgeLabel)-1 );
+			TAlphabet letter = value(EdgeLabel, 0 );
 			
 			//if(child == 13 || child ==4)std::cout<<"EdgeLabel: "<<EdgeLabel<<"RepLength: "<<repLength(it)<<"  prefix"<<prefix( EdgeLabel, length(EdgeLabel)-1 ) <<endl;
 			String<TAlphabet> pref = prefix( EdgeLabel, length(EdgeLabel)-1 );
@@ -702,6 +699,34 @@ getChildCharacter(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec >
 
 }
 
+template<typename TSpec,typename TCargo,typename TAlphabet ,typename TVertexDescriptor,typename TChar>
+inline void 
+getSuffixChildLabel(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > > > &vlmm,
+			   TVertexDescriptor &father,
+			   TChar  Letter,
+			   String<TAlphabet> &Label)
+{
+	typedef Graph<Automaton<TAlphabet,TCargo,WordGraph< VLMM < TSpec > > > > TVlmm;
+	typedef typename EdgeType<TVlmm>::Type TEdgeStump;
+	
+//typedef typename Iterator<TVlmm, OutEdgeIterator >::Type TOutEdgeIterator;
+	TEdgeStump* ed = findEdge(vlmm,father, Letter);
+	append(Label,getCargo(ed),Exact());
+/*	TOutEdgeIterator itout(vlmm,father);
+	while(!atEnd(itout)){
+		if(targetVertex(vlmm, getValue(itout)) == child)
+			break;
+
+	goNext(itout);
+	}
+    SEQAN_ASSERT(targetVertex(vlmm, getValue(itout)) == child)
+	append(Label,getCargo(*(itout)));
+	//append(Label,getProperty(vlmm.data_edge_label,*(itout)));
+	//append(Label,getProperty(vlmm.data_edge_label, TEdgeDescriptor(father, childPosition)));
+*/
+	return;
+}
+
 template<typename TSpec,typename TCargo,typename TAlphabet ,typename TVertexDescriptor>
 inline void 
 getSuffixChildLabel(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > > > &vlmm,
@@ -720,7 +745,7 @@ typedef typename Iterator<TVlmm, OutEdgeIterator >::Type TOutEdgeIterator;
 
 	goNext(itout);
 	}
-
+    SEQAN_ASSERT(targetVertex(vlmm, getValue(itout)) == child)
 	append(Label,getCargo(*(itout)));
 	//append(Label,getProperty(vlmm.data_edge_label,*(itout)));
 	//append(Label,getProperty(vlmm.data_edge_label, TEdgeDescriptor(father, childPosition)));
@@ -746,7 +771,7 @@ typedef typename Iterator<TVlmm, OutEdgeIterator >::Type TOutEdgeIterator;
 
 	goNext(itout);
 	}
-	
+	SEQAN_ASSERT(targetVertex(vlmm, getValue(itout)) == child)
 	append(Label,getCargo(*(itout)));
 	
 	//append(Label,getProperty(vlmm.data_edge_label, TEdgeDescriptor(father, childPosition)));
@@ -772,7 +797,7 @@ typedef typename Iterator<TVlmm, OutEdgeIterator >::Type TOutEdgeIterator;
 
 	goNext(itout);
 	}
-
+    SEQAN_ASSERT(targetVertex(vlmm, getValue(itout)) == child)
 	//TAlphabet letter = itout.data_pos;
 	//position(it) = = itout.data_pos??
 	append(Label,itout.data_pos);
@@ -820,12 +845,13 @@ splitEdge(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > > > & vlmm,
 	TVertexDescriptor child = vlmm.data_vertex[father].data_edge[(TSize) letter].data_target;
 	
 	String<TAlphabet> edgeString;
-	getSuffixChildLabel(vlmm,father,child,edgeString);
+	getSuffixChildLabel(vlmm,father,letter,edgeString);
 	//String<TAlphabet> edgeString = getProperty(vlmm.data_edge_label, TEdgeDescriptor(father, letter));
-	std::cout<<"before new node created, NumVertc:"<<numVertices(vlmm)<<std::endl;
+	//std::cout<<"before new node created, NumVertc:"<<numVertices(vlmm)<<std::endl;
 	TVertexDescriptor newNode = addAdditionalVertex(vlmm);
-	std::cout<<"after node created, NumVertc:"<<numVertices(vlmm)<<std::endl;
+	//std::cout<<"after node created, NumVertc:"<<numVertices(vlmm)<<std::endl;
 	String<TAlphabet> newEdgeString = childCharacter;
+	SEQAN_ASSERT(splitPosition < length(edgeString))
 	if(splitPosition >= length(edgeString)){
 		std::cout<<"splitPosition >= edgeString"<<std::endl;
 		exit(1);
@@ -865,7 +891,7 @@ parseString2(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > > > & g,
 		// can be substituted by using getChildLabel
 		//edgeString = getProperty(g.data_edge_label, Edge);
 		String<TAlphabet> edgeString;
-		getSuffixChildLabel(g,succ,tmp,edgeString);
+		getSuffixChildLabel(g,succ,letter,edgeString);
 		
 		
 		if( (pos == length(label)) && (length(edgeString) == 0))
@@ -914,7 +940,7 @@ addSuffixLinks(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > 
 		letter = itout.data_pos;
 		// means the suffix link must point to the root
 		String<TAlphabet> edgeString;
-		getSuffixChildLabel(vlmm,root,v,edgeString);
+		getSuffixChildLabel(vlmm,root,letter,edgeString);
 		if(length(edgeString) == 0){
 				setSuffixLink(vlmm,v,root);
 				setReverseSuffixLink(vlmm,root,v,letter);
@@ -1152,7 +1178,7 @@ pruneTreeRecursively(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpe
 		if(! isRoot(vlmm,father) ){
 				TVertexDescriptor target = getSuffixLink(vlmm,father);
 
-			std::cout <<"..check potential nodes above node:" <<node<<std::endl;
+			//std::cout <<"..check potential nodes above node:" <<node<<std::endl;
 			TVertexDescriptor potVertex;
 			unsigned lastVertex = 0;
 			for(unsigned pos = 1;pos < length(childLabel);++pos ){
@@ -1254,7 +1280,7 @@ pruneTreeRecursivelyFast(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < 
 	for(unsigned int pos = 0;pos< table_length;++pos){
 		next = getReverseSuffixLink(vlmm,node,pos);
 		if(next != nilVal){
-			std::cout <<" start Recursion from node:"<<node<<" char:"<<pos<<std::endl;
+			//std::cout <<" start Recursion from node:"<<node<<" char:"<<pos<<std::endl;
 			pruneTreeRecursivelyFast(vlmm,next,original,parameters,pos);
 		}
 		
@@ -1288,7 +1314,7 @@ pruneTreeRecursivelyFast(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < 
 					TAlphabet startChar = value(childLabel,0);
 					if(extendNode(vlmm,root,startChar,parameters))
 					{
-						std::cout <<"startChar" << startChar<<std::endl;
+						//std::cout <<"startChar" << startChar<<std::endl;
 						father = splitEdge(vlmm,father,startChar,0);
 						smoothNode(vlmm,father,parameters);
 						setSuffixLink(vlmm,father,root);
@@ -1320,7 +1346,7 @@ pruneTreeRecursivelyFast(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < 
 			unsigned lastVertex = 0,lastSplit=0;
 			unsigned pos;
 			unsigned labelLength = length(childLabel);
-			std::cout <<"..check potential nodes above node:" <<node<<" chidLAbel"<<childLabel<<std::endl;
+			//std::cout <<"..check potential nodes above node:" <<node<<" chidLAbel"<<childLabel<<std::endl;
 			TVertexDescriptor potVertex = vlmm.data_vertex[target].data_edge[(TSize) value(childLabel,0)].data_target;
 			SEQAN_ASSERT(potVertex != nilVal)
 			// we have a node which may lead to a new node on the edge father->node
@@ -1333,9 +1359,9 @@ pruneTreeRecursivelyFast(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < 
 			//while(! potVertex == getSuffixLink(vlmm,node) ){
 			SEQAN_ASSERT(pos<=labelLength)
 			while(pos != labelLength){
-					std::cout <<"another run on the edge"<<std::endl;
+					//std::cout <<"another run on the edge"<<std::endl;
 					if( (potVertex < length(original)) && original[potVertex] && extendNode(vlmm,potVertex,value(childLabel,pos),parameters) ){
-						std::cout <<"split edge at node: "<<node<<std::endl;
+						//std::cout <<"split edge at node: "<<node<<std::endl;
 						father = splitEdge(vlmm,father,childCharacter,pos-1-lastSplit);
 						//remember where the last node has been split
 						lastSplit=pos;
@@ -1343,7 +1369,7 @@ pruneTreeRecursivelyFast(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < 
 						setSuffixLink(vlmm,father,potVertex);
 						setReverseSuffixLink(vlmm,potVertex,father,letter);
 						setMarked(vlmm,father,true);
-						std::cout <<"created node: "<<father<<" by checking above node:"<<node<<std::endl;
+						//std::cout <<"created node: "<<father<<" by checking above node:"<<node<<std::endl;
 						if(father < length(original))
 								original[father] = false;
 
@@ -1361,7 +1387,7 @@ pruneTreeRecursivelyFast(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < 
 					// how far down is this node ?
 					String<TAlphabet> edgeString2;
 					getSuffixChildLabel(vlmm,target,potVertex,edgeString2);
-					pos = 1 + length(edgeString2);
+					pos += 1 + length(edgeString2);
 					//pos += 1 + length(getProperty(vlmm.data_edge_label,TEdgeDescriptor(target,value(childLabel,lastVertex))));
 			}
 
@@ -1369,7 +1395,7 @@ pruneTreeRecursivelyFast(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < 
 		//}
 	} // Label > 1
 	
-	std::cout << "check keeping of node:" << node;
+	//std::cout << "check keeping of node:" << node;
 	// all potential nodes are build
 	if( (getSuffixLink(vlmm,node) != nilVal) && (isMarked(vlmm,node) || (! pruneNode(vlmm,node,parameters))) ){
 		// node should be kept
@@ -1396,7 +1422,7 @@ pruneTreeRecursivelyFast(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < 
 	//assignProperty(marked,node,false);
 	}
 
-	std::cout <<"finished node:"<<node<<std::endl;
+	//std::cout <<"finished node:"<<node<<std::endl;
  return;
 }
 
@@ -1408,24 +1434,28 @@ buildPST(Index<TIndexType, Index_ESA<> > & index,
 			    float threshold,
 				float minEmpiricalProbability,
 				float minConditionalProbability,
-				float alpha) 
+				float alpha,
+				unsigned d) 
 {
 	typedef Index<TIndexType, Index_ESA<> > TIndex;
 	PST parameters;
-	setParameters(parameters,threshold,minEmpiricalProbability,minConditionalProbability,alpha);
+	setParameters(parameters,threshold,minEmpiricalProbability,minConditionalProbability,alpha,d);
 
-	Iter< TIndex, VSTree< TopDown< ParentLinks<ConstrainedTraversal<Relative> > > > > it(index,parameters.minEmpiricalProbability);
-	//Iter< TIndex, VSTree< TopDown< ParentLinks<ConstrainedTraversal<Absolute> > > > > it(index,2);
+	Iter< TIndex, VSTree< TopDown< ParentLinks<ConstrainedTraversal<Relative> > > > > it(index,parameters.minEmpiricalProbability,d);
+	//Iter< TIndex, VSTree< TopDown< ParentLinks<ConstrainedTraversal<Absolute> > > > > it(index,2,d);
 	
 	inittheclock();
 	
 	
 	indexRequire(index, ESA_SA());
 	double buildESA = gettheruntime();
+	
 	indexRequire(index, ESA_LCP());
 	double buildLCP = gettheruntime()-buildESA;		
+	
 	indexRequire(index, ESA_ChildTab());
 	double buildChildTab = gettheruntime()-buildESA-buildLCP;
+	
 	std::cout << "ESA: " <<buildESA<< "  LCP: " << buildLCP << "  ChildTab: "<< buildChildTab<<std::endl;
 	double build = gettheruntime();
 	std::cout << "in buildSuffixTreeFromIndex:";
@@ -1439,7 +1469,7 @@ buildPST(Index<TIndexType, Index_ESA<> > & index,
 	build = gettheruntime();
 	addSuffixLinks(vlmm);
 	std::cout << "added suffix links and reverse suffix links" <<gettheruntime()-build<<std::endl;
-	std::cout <<vlmm;
+	//std::cout <<vlmm;
 	build = gettheruntime();
 	std::cout <<"in Prune Tree";
 	pruneTree(vlmm,parameters);
