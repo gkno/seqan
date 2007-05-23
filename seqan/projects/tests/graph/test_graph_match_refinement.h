@@ -163,11 +163,11 @@ void Test_MatchRefinement() {
 	// Access the matches
 	TFragmentString matches;
 	std::stringstream strstream;
-	//strstream << out_path << "matchesTest.dat"; // 10 Matches
+	strstream << out_path << "matchesTest.dat"; // 10 Matches
 	//strstream << out_path << "matches1000.dat"; // 2001948 Matches
 	//strstream << out_path << "matches10000.dat"; // 2111 Matches
 	//strstream << out_path << "matches2000.dat"; // 653095 Matches
-	strstream << out_path << "matches500.dat"; // 3999176 
+	//strstream << out_path << "matches500.dat"; // 3999176 
 	open(matches, strstream.str().c_str());
 
 
@@ -187,23 +187,23 @@ void Test_MatchRefinement() {
 	// Print number of matches
 	std::cout << "Number of matches: " << length(matches) << std::endl;
 	
-	//// Refinement
-	//typedef Infix<TString>::Type TInfix;
-	//typedef StringSet<TString, Dependent<> > TAlignmentStringSet;
-	//typedef Graph<Alignment<TAlignmentStringSet> > TAliGraph;
-	//typedef VertexDescriptor<TAliGraph>::Type TVD;
-	//TAlignmentStringSet aliStr;
-	//for(TSize i = 0; i<length(str); ++i) {
-	//	assignValueById(aliStr, str, i);
-	//}
-	//Score<int> score_type = Score<int>(1,-1,-2,0) ;
-	//TAliGraph ali_graph(aliStr);
-	//matchRefinement(matches,str,score_type,ali_graph);//,StoreEdges());
-	//std::cout << "\nnumEdges: "<<numEdges(ali_graph)<<"\n";
-	//std::cout << "\nnumVertices: "<<numVertices(ali_graph)<<"\n";
-	////std::cout << ali_graph <<"\n";
+	// Refinement
+	typedef Infix<TString>::Type TInfix;
+	typedef StringSet<TString, Dependent<> > TAlignmentStringSet;
+	typedef Graph<Alignment<TAlignmentStringSet> > TAliGraph;
+	typedef VertexDescriptor<TAliGraph>::Type TVD;
+	TAlignmentStringSet aliStr;
+	for(TSize i = 0; i<length(str); ++i) {
+		assignValueById(aliStr, str, i);
+	}
+	Score<int> score_type = Score<int>(1,-1,-2,0) ;
+	TAliGraph ali_graph(aliStr);
+	matchRefinement(matches,str,score_type,ali_graph);//,StoreEdges());
+	std::cout << "\nnumEdges: "<<numEdges(ali_graph)<<"\n";
+	std::cout << "\nnumVertices: "<<numVertices(ali_graph)<<"\n";
+	//std::cout << ali_graph <<"\n";
 
-	//// Print all the matches
+	// Print all the matches
 	//typedef Iterator<TAliGraph, EdgeIterator>::Type TEdgeIterator;
 	//TEdgeIterator it(ali_graph);
 	//for(;!atEnd(it);goNext(it)) {

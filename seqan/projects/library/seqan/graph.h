@@ -70,6 +70,7 @@
 #include <seqan/graph/graph_align_hirschberg.h>
 #include <seqan/graph/graph_align_tcoffee.h>
 #include <seqan/graph/graph_align_interface.h>
+#include <seqan/graph/graph_align_nussinov.h>
 
 // Utilities
 #include <seqan/graph/graph_utility_alphabets.h>

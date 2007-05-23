@@ -148,6 +148,33 @@ _createNodeAttributes(Graph<TSpec> const& g,
 
 //////////////////////////////////////////////////////////////////////////////
 
+template<typename TSpec, typename TNodeAttributes, typename TNameMap>
+inline void
+_createNodeAttributes(Graph<TSpec> const& g,
+					  TNodeAttributes& nodeMap,
+					  TNameMap const& nameMap)
+{
+	SEQAN_CHECKPOINT
+    typedef Graph<TSpec> TGraph;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	resizeVertexMap(g, nodeMap);
+
+	typedef typename Iterator<TGraph, VertexIterator>::Type TConstIter;
+	TConstIter it(g);
+	for(;!atEnd(it);++it) {
+		std::ostringstream outs; 
+		outs << "label = \"";
+		outs << getProperty(nameMap,*it);
+		outs << "\"";
+		String<char> tmp;
+		append(tmp, outs.str().c_str());
+		_markRootVertex(g, *it, tmp);
+		assignProperty(nodeMap, *it, tmp);
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 template <typename TStringSet, typename TCargo, typename TSpec, typename TNodeAttributes>
 inline void
 _createNodeAttributes(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,

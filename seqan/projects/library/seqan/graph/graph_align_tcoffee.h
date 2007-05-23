@@ -458,30 +458,55 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	typedef typename Id<TGraph>::Type TId;
 
 	// Pairwise alignments for all pairs of sequences
-	Score<int> score_type = Score<int>(1,-1,-1,-14);
-	TStringSet* str = &stringSet(g);	
+	Score<int> score_type = Score<int>(5,-4,-0.5,-10);
+	TStringSet& str = stringSet(g);	
 	TSize nseq = length(stringSet(g));
+
+	// String of fragments to combine all pairwise alignments into a multiple alignment
+	typedef Fragment<> TFragment;
+	typedef String<TFragment, External<> > TFragmentString;
+	TFragmentString matches;
+
 	for(TSize i=0; i<nseq; ++i) {
 		for(TSize j=i+1; j<nseq; ++j) {
-			//TId id1 = positionToId(*str, i);
-			//TId id2 = positionToId(*str, j);
-	
 			// Pairwise alignment graph
 			TStringSet pairSet;
-			assignValueById(pairSet, getValue(*str, i));
-			assignValueById(pairSet, getValue(*str, j));
-			std::cout << (*str)[i] << std::endl;
-			std::cout << (*str)[j] << std::endl;
+			assignValueById(pairSet, str, positionToId(str, i));
+			assignValueById(pairSet, str, positionToId(str, j));
+			//std::cout << pairSet[0] << std::endl;
+			//std::cout << pairSet[1] << std::endl;
 			Graph<Alignment<TStringSet, void> > pGraph(pairSet);
-			globalAlignment(pGraph, score_type, Gotoh() );
+			typedef typename VertexDescriptor<Graph<Alignment<TStringSet, void> > >::Type TVertexDescriptor;
+			typedef typename Iterator<Graph<Alignment<TStringSet, void> >, EdgeIterator>::Type TEdgeIterator;
+			globalAlignment(pGraph, score_type, Hirschberg() );
 
 			// Determine a sequence weight
 			int seqSim = (int) (_getSequenceSimilarity(pGraph, TAlphabet() ) * 100);
+			//std::cout << pGraph << std::endl;
+			//std::cout << seqSim << std::endl;
 
-			std::cout << pGraph << std::endl;
-			std::cout << seqSim << std::endl;
+			TEdgeIterator it(pGraph);
+			for(;!atEnd(it);++it) {
+				TVertexDescriptor sV = sourceVertex(it);
+				TVertexDescriptor tV = targetVertex(it);
+				push_back(matches, TFragment( (unsigned int) sequenceId(pGraph, sV), (unsigned int) fragmentBegin(pGraph,sV), (unsigned int) sequenceId(pGraph, tV),  (unsigned int)  fragmentBegin(pGraph,tV),  (unsigned int)  fragmentLength(pGraph,tV)));
+			}
 		}
 	}
+
+	// Print all the matches
+	std::cout << "The four sequences:" << std::endl;
+	for(TSize i = 0;i<length(str);++i) {
+		std::cout << positionToId(str,i) << ':' << str[i] << std::endl;
+	}
+	std::cout << "The matches:" << std::endl;
+	for(TSize i = 0;i<length(matches);++i) {
+		std::cout << sequenceId(matches[i],0) << ',' << fragmentBegin(matches[i],0) << ',' << fragmentLength(matches[i],0) << ',' << sequenceId(matches[i],1) << ',' << fragmentBegin(matches[i],1) << ',' << fragmentLength(matches[i],1) << std::endl;
+	}
+
+	// Refine all matches and create multiple alignment
+	matchRefinement(matches,str,score_type,g);
+	std::cout << g << std::endl;
 }
    
 //////////////////////////////////////////////////////////////////////////////

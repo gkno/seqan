@@ -337,7 +337,7 @@ void Test_Hirschberg() {
 	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	typedef	Id<TStringSet>::Type TId;
-	
+
 	TStringSet str;
 	TString str0("ttagt");	assignValueById(str, str0);
 	TString str1("ttgt"); assignValueById(str, str1);
@@ -485,6 +485,60 @@ void Test_Hirschberg() {
 	//SEQAN_TASSERT(score == score2)
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
+void Test_Nussinov() {
+	typedef String<char> TString;
+	typedef Size<TString>::Type TSize;
+	typedef Value<TString>::Type TCharacter;
+	typedef Graph<Undirected<> > TGraph;
+	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	
+	typedef std::map<std::pair<TCharacter, TCharacter>, unsigned int> TBasePairMap;
+	TBasePairMap pairMap;
+	pairMap.insert(std::make_pair(std::make_pair('a','u'),1));
+	pairMap.insert(std::make_pair(std::make_pair('u','a'),1));
+	pairMap.insert(std::make_pair(std::make_pair('c','g'),1));
+	pairMap.insert(std::make_pair(std::make_pair('g','c'),1));
+	Score<TBasePairMap, ScoreNussinov> sc = Score<TBasePairMap, ScoreNussinov>(pairMap);
+	TString str("gggaaaucc");
+	TGraph g;
+	unsigned int score = rnaFolding(g, str, sc, Nussinov() );
+	SEQAN_TASSERT(numEdges(g) == 11)
+	SEQAN_TASSERT(numVertices(g) == length(str))
+	SEQAN_TASSERT(score == 3)
+
+	pairMap.clear();
+	pairMap.insert(std::make_pair(std::make_pair('g','u'),1));
+	pairMap.insert(std::make_pair(std::make_pair('u','g'),1));
+	pairMap.insert(std::make_pair(std::make_pair('a','u'),2));
+	pairMap.insert(std::make_pair(std::make_pair('u','a'),2));
+	pairMap.insert(std::make_pair(std::make_pair('c','g'),3));
+	pairMap.insert(std::make_pair(std::make_pair('g','c'),3));
+	sc = Score<TBasePairMap, ScoreNussinov>(pairMap);
+	str = "gcagcacccaaagggaauaugggauacgcgua";
+	clear(g);
+	score = rnaFolding(g, str, sc, 3, Nussinov() );
+	SEQAN_TASSERT(numEdges(g) == 41)
+	SEQAN_TASSERT(numVertices(g) == length(str))
+	SEQAN_TASSERT(score == 25)
+	
+	//String<char> names;
+	//resize(names, length(str));
+	//for(TSize i=0;i<length(str);++i) {
+	//	assignValue(names,i,str[i]);
+	//}
+	//String<String<char> > nodeMap;
+	//_createNodeAttributes(g,nodeMap,names);
+	//String<String<char> > edgeMap;
+	//_createEdgeAttributes(g,edgeMap);
+	//fstream strm;
+	//strm.open(TEST_PATH "my_rna_graph.dot", ios_base::out | ios_base::trunc);
+	//write(strm,g,nodeMap,edgeMap,DotDrawing());
+	//strm.close();
+}
+
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -514,28 +568,34 @@ void  Test_Runtime() {
 	TString str0;
 	TString str1;
 
-	unsigned int chrom = 20;
+	//unsigned int chrom = 24;
 	std::stringstream s1;
-	s1 << out_path << "H.chr." << chrom - 1;
+	//s1 << out_path << "H.chr." << chrom - 1;
+	s1 << out_path << "a.fasta";
 	bool f = open(str0, s1.str().c_str());
 	if (!f) {
 		exit(-1);
 	}
 	std::stringstream s2;
-	s2 << out_path << "W.chr." << chrom - 1;
+	//s2 << out_path << "W.chr." << chrom - 1;
+	s2 << out_path << "b.fasta";
 	f = open(str1, s2.str().c_str());
 	if (!f) {
 		exit(-1);
 	}
 	
-	//fstream strm_in;
-	//strm_in.open(TEST_PATH "a.fasta", ios_base::in | ios_base::binary);
-	//read(strm_in, str0, Fasta());
-	//strm_in.close();
-	//fstream strm_in1;
-	//strm_in1.open(TEST_PATH "b.fasta", ios_base::in | ios_base::binary);
-	//read(strm_in1, str1, Fasta());
-	//strm_in1.close();
+	//ifstream file;
+	//std::stringstream input;
+	//input << in_path << "a.fasta";
+	//file.open(input.str().c_str(), ios_base::in | ios_base::binary);
+	//std::stringstream output;
+	//output << out_path << "a.fasta";
+	//open(str0, output.str().c_str());
+	//read(file, str0, Fasta());
+	//close(str0);
+	//file.close();
+	//exit(0);
+
 		
 	assignValueById(str, str0);
 	assignValueById(str, str1);
@@ -575,11 +635,12 @@ void  Test_Runtime2() {
 		clear(str0);
 		clear(str1);
 
-		for (unsigned int i=0; i<20; ++i) {
+		unsigned int stop = (unsigned int) mtRand() % 500 + 1;
+		for (unsigned int i=0; i<stop ; ++i) {
 			append(str0, (Byte) mtRand() % 5 );
 		}
-
-		for (unsigned int i=0; i<15; ++i) {
+		stop = (unsigned int) mtRand() % 500 + 1;
+		for (unsigned int i=0; i<stop; ++i) {
 			append(str1,  (Byte) mtRand() % 5);
 		}
 		std::cout << str0 << std::endl;
@@ -763,11 +824,19 @@ void Test_TCoffee() {
 	strm2.open(TEST_PATH "my_tcoffee.dot", ios_base::out | ios_base::trunc);
 	write(strm2,g,DotDrawing());
 	strm2.close();
-	*/
+	*/	
 
 	// Generate additional primary libraries
 	// Just slow-pair at the moment
-	TGraph gAux(stringSet(g));
+	typedef StringSet<String<AminoAcid>, Dependent<> > TDependentStringSet;
+	typedef Graph<Alignment<TDependentStringSet, unsigned int, Default> > TDependentGraph;
+	//typedef Graph<Alignment<TDependentStringSet> > TDependentGraph;
+	TStringSet& ownerStrSet = stringSet(g);
+	TDependentStringSet depStrSet;
+	for(unsigned int i = 0; i<length(ownerStrSet); ++i) {
+		assignValueById(depStrSet, ownerStrSet, positionToId(ownerStrSet, i));
+	}
+	TDependentGraph gAux(depStrSet);
 	generatePrimaryLibrary(gAux, AAGroupsDayhoff() );
 
 	// Calculate a distance matrix
@@ -821,6 +890,7 @@ void Test_GraphAlignment() {
 	Test_Gotoh();	
 	Test_MyersBitVector();
 	Test_Hirschberg();
+	Test_Nussinov();
 }
 
 }
