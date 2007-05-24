@@ -27,11 +27,11 @@ globalAlignment(file, strSet, score, tag)
 ...remarks:If MyersBitVector is used leave out score because the scoring is fixed in this algorithm.
 ..returns:The maximum score of the best global alignment.
 */
-template<typename TFile, typename TStringSet, typename TScoreValue, typename TTag>
+template<typename TFile, typename TStringSet, typename TScoreValue, typename TSpec, typename TTag>
 TScoreValue
 globalAlignment(TFile& file,
 				TStringSet const& str,
-				Score<TScoreValue, Simple> const& sc,
+				Score<TScoreValue, TSpec> const& sc,
 				TTag)
 {
 	SEQAN_CHECKPOINT
@@ -40,10 +40,10 @@ globalAlignment(TFile& file,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TStringSet, typename TScoreValue, typename TTag>
+template<typename TStringSet, typename TScoreValue, typename TSpec, typename TTag>
 TScoreValue
 globalAlignment(TStringSet const& str,
-				Score<TScoreValue, Simple> const& sc,
+				Score<TScoreValue, TSpec> const& sc,
 				TTag)
 {
 	SEQAN_CHECKPOINT
@@ -52,10 +52,10 @@ globalAlignment(TStringSet const& str,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TStringSet, typename TCargo, typename TSpec, typename TScoreValue, typename TTag>
+template<typename TStringSet, typename TCargo, typename TSpec, typename TScoreValue, typename TSpec2, typename TTag>
 TScoreValue
 globalAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-				Score<TScoreValue, Simple> const& sc,
+				Score<TScoreValue, TSpec2> const& sc,
 				TTag)
 {
 	SEQAN_CHECKPOINT

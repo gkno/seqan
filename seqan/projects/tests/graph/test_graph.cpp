@@ -95,7 +95,7 @@ int main()
 
 	//// Alignment
 	Test_GraphAlignment();
-	
+	//Test_Runtime2();
 
 	// T-Coffee
 	Test_CompressedAlphabets();

@@ -12,11 +12,11 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 // Note: The hirschberg trace is different from all the other traces because it simply contains the trace points!!!
-template <typename TAlign, typename TStringSet, typename TScoreValue, typename TTrace>
+template <typename TAlign, typename TStringSet, typename TScoreValue, typename TSpec, typename TTrace>
 void
 _align_hirschberg_trace(TAlign& align,
 						TStringSet const& str,
-						Score<TScoreValue, Simple> const& sc,
+						Score<TScoreValue, TSpec> const& sc,
 						TTrace& trace)
 {
 	SEQAN_CHECKPOINT
@@ -47,10 +47,10 @@ _align_hirschberg_trace(TAlign& align,
 	do {
 		// Diagonal walk
 		if (((currentPointer - movePointer) == 1)  &&
-			(scoreGapOpen(sc) + scoreGapOpen(sc) <= score(const_cast<Score<TScoreValue, Simple>&>(sc), str[0][len1-1], str[1][movePointer]))) {
+			(scoreGapOpen(sc) + scoreGapOpen(sc) <= score(const_cast<Score<TScoreValue, TSpec>&>(sc), str[0][len1-1], str[1][movePointer]))) {
 			TSize segLen = 0;
 			while (((currentPointer - movePointer) == 1)   &&
-					(scoreGapOpen(sc) + scoreGapOpen(sc) <= score(const_cast<Score<TScoreValue, Simple>&>(sc), str[0][len1-1], str[1][movePointer]))) {
+					(scoreGapOpen(sc) + scoreGapOpen(sc) <= score(const_cast<Score<TScoreValue, TSpec>&>(sc), str[0][len1-1], str[1][movePointer]))) {
 				++segLen;
 				--len1;
 				--currentPointer;
@@ -61,7 +61,7 @@ _align_hirschberg_trace(TAlign& align,
 		} // Diagonal walk, but gapOpen and gapOpen yields a higher score
 		// Note: The case gapExtension + gapOpen cannot occur because then we would have gotten a different trace point!!!
 		else if (((currentPointer - movePointer) == 1)  &&
-			(scoreGapOpen(sc) + scoreGapOpen(sc) > score(const_cast<Score<TScoreValue, Simple>&>(sc), str[0][len1-1], str[1][movePointer]))) {
+			(scoreGapOpen(sc) + scoreGapOpen(sc) > score(const_cast<Score<TScoreValue, TSpec>&>(sc), str[0][len1-1], str[1][movePointer]))) {
 				_align_trace_print(align, str, id1, (TSize) 0, id2, --currentPointer, (TSize) 1, (Byte) Vertical);
 				_align_trace_print(align, str, id1, --len1, id2,(TSize) 0, (TSize) 1, (Byte) Horizontal);
 				if (len1>0) movePointer = getValue(trace, len1 - 1);
@@ -80,11 +80,11 @@ _align_hirschberg_trace(TAlign& align,
 			// Vertical walk finishes with a horizontal vs. vertical gap
 			if ((len1 > 2) && 
 				(movePointer - getValue(trace, len1 - 2) == 0) &&
-				(scoreGapExtend(sc) + scoreGapExtend(sc) > score(const_cast<Score<TScoreValue, Simple>&>(sc), str[0][len1-1], str[1][movePointer]))) {
+				(scoreGapExtend(sc) + scoreGapExtend(sc) > score(const_cast<Score<TScoreValue, TSpec>&>(sc), str[0][len1-1], str[1][movePointer]))) {
 					_align_trace_print(align, str, id1, (TSize) 0, id2, (TSize) movePointer, (TSize) currentPointer - movePointer, (Byte) Vertical);
 					currentPointer = movePointer;
 			} // Vertical walk that finishes with a diagonal, but gapOpen + gapOpen is better
-			else if ((scoreGapOpen(sc) + scoreGapOpen(sc) > score(const_cast<Score<TScoreValue, Simple>&>(sc), str[0][len1-1], str[1][movePointer]))) {
+			else if ((scoreGapOpen(sc) + scoreGapOpen(sc) > score(const_cast<Score<TScoreValue, TSpec>&>(sc), str[0][len1-1], str[1][movePointer]))) {
 					_align_trace_print(align, str, id1, (TSize) 0, id2, (TSize) movePointer, (TSize) currentPointer - movePointer, (Byte) Vertical);
 					currentPointer = movePointer;
 			} // Normal vertical walk that continues with a diagonal walk
@@ -103,11 +103,11 @@ _align_hirschberg_trace(TAlign& align,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TTrace, typename TStringSet, typename TScoreValue>
+template <typename TTrace, typename TStringSet, typename TScoreValue, typename TSpec>
 TScoreValue
 _align_hirschberg(TTrace& trace,
 				  TStringSet const& str,
-				  Score<TScoreValue, Simple> const& sc,
+				  Score<TScoreValue, TSpec> const& sc,
 				  Hirschberg) 
 {
 	SEQAN_CHECKPOINT
@@ -300,7 +300,7 @@ _align_hirschberg(TTrace& trace,
 					// Get the new maximum for diagonal
 					//TScoreValue sc_ = score(const_cast<Score<TScoreValue, Simple>&>(sc), charTop, getValue(str[1],y1+row-1));
 					//tmp = diagValMat + sc_;
-					tmp = diagValMat + score(const_cast<Score<TScoreValue, Simple>&>(sc), charTop, getValue(strIter1));
+					tmp = diagValMat + score(const_cast<Score<TScoreValue, TSpec>&>(sc), charTop, getValue(strIter1));
 					goNext(strIter1);
 					tvMat = (Byte) Diagonal;
 					if (vert > tmp) {
@@ -434,8 +434,24 @@ _align_hirschberg(TTrace& trace,
 	// Transform the midpoints into simple trace positions
 	TTraceIter traceIter = begin(trace, Standard() );
 	typename TMidPointQueue::iterator it = midpoints.begin();
-	if ((!midpoints.empty()) && (it->second == (Byte) Diagonal)) assignValue(traceIter, it->first.second - 1); // Start point of the trace
-	else assignValue(traceIter, 0); 
+	if ((!midpoints.empty()) && (it->second == (Byte) Diagonal)) assignValue(traceIter, it->first.second - 1); 
+	else if ((!midpoints.empty()) && (it->second == (Byte) Horizontal)) assignValue(traceIter, it->first.second); 
+	else if ((!midpoints.empty()) && (it->second == (Byte) Vertical)) {
+		// Where is the best exit
+		TScoreValue best = score(const_cast<Score<TScoreValue, TSpec>&>(sc), str[0][0], str[1][0]);
+		unsigned int index = 0;
+		if (it->first.second > 1) best += gapOpen;
+		if (it->first.second > 2) best += gap * (it->first.second - 2);
+		for(TSize row = 2; row < it->first.second;++row) {
+			TScoreValue newBest = gapOpen + score(const_cast<Score<TScoreValue, TSpec>&>(sc), str[0][0], str[1][row-1]) + gapOpen;
+			newBest += gap * (it->first.second - 3);
+			if (newBest > best) {
+				best = newBest;
+				index = row-1;
+			}
+		}
+		assignValue(traceIter, index); 
+	} else assignValue(traceIter, 0); 
 	goNext(traceIter);
 	for(;it!=midpoints.end();++it) {
 		assignValue(traceIter, (it->first.second));
@@ -449,11 +465,11 @@ _align_hirschberg(TTrace& trace,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TAlign, typename TStringSet, typename TScoreValue>
+template<typename TAlign, typename TStringSet, typename TScoreValue, typename TSpec>
 TScoreValue
 _globalAlignment(TAlign& align,
 				 TStringSet const& str,
-				 Score<TScoreValue, Simple> const& sc,
+				 Score<TScoreValue, TSpec> const& sc,
 				 Hirschberg)
 {
 	SEQAN_CHECKPOINT
@@ -469,10 +485,10 @@ _globalAlignment(TAlign& align,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TStringSet, typename TScoreValue>
+template<typename TStringSet, typename TScoreValue, typename TSpec>
 TScoreValue
 _globalAlignment(TStringSet const& str,
-				 Score<TScoreValue, Simple> const& sc,
+				 Score<TScoreValue, TSpec> const& sc,
 				 Hirschberg)
 {
 	SEQAN_CHECKPOINT

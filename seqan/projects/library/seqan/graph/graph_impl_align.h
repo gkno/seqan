@@ -752,7 +752,11 @@ findVertex(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 		   TPos pos)
 {
 	SEQAN_CHECKPOINT
-	return g.data_pvMap.upper_bound(std::make_pair(id, pos))->second;
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	
+	if (pos >= (TPos) length(getValueById(stringSet(g),id))) return getNil<TVertexDescriptor>();
+	else return g.data_pvMap.upper_bound(std::make_pair(id, pos))->second;
 }
 
 //////////////////////////////////////////////////////////////////////////////

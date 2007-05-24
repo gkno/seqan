@@ -291,6 +291,65 @@ _align_trace_print(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 }
 
 
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TVertexDescriptor, typename TSpec, typename TStringSet, typename TId, typename TPos, typename TTraceValue>
+inline void
+_align_trace_print(String<String<TVertexDescriptor, TSpec> >& nodeString,
+				   TStringSet const& str,
+				   TId const id1,
+				   TPos const pos1,
+				   TId const id2,
+				   TPos const pos2,
+				   TPos const segLen,
+				   TTraceValue const tv)
+{
+	SEQAN_CHECKPOINT
+	typedef String<TVertexDescriptor, TSpec> TVertexDescriptorString;
+	typedef typename Size<TStringSet>::Type TSize;
+	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
+
+	// TraceBack values
+	enum {Diagonal = 0, Horizontal = 1, Vertical = 2};
+
+	if (segLen == 0) return;
+	TSize len1 = length((getValueById(const_cast<TStringSet&>(str),id1))[0]);
+	TSize len2 = length((getValueById(const_cast<TStringSet&>(str),id2))[0]);
+
+	if (tv == (Byte) Horizontal) {
+		for (int i = pos1 + segLen - 1; i>= (int) pos1;--i) {
+			TVertexDescriptorString input = (str[0])[i];
+			for(TPos all = 0;all<len2;++all) {
+				appendValue(input, nilVertex);
+			}
+			appendValue(nodeString, input);
+		}
+	}
+	else if (tv == (Byte) Vertical) {
+		for (int i = pos2 + segLen - 1; i>= (int) pos2;--i) {
+			TVertexDescriptorString input;
+			for(TPos all = 0;all<len1;++all) {
+				appendValue(input, nilVertex);
+			}
+			for(TPos all = 0;all<length((str[1])[i]);++all) {
+				appendValue(input, getValue((str[1])[i], all));
+			}
+			appendValue(nodeString, input);
+		}
+	}
+	else if (tv == (Byte) Diagonal) {
+		int j = pos2 + segLen - 1;
+		for (int i = pos1 + segLen - 1; i>= (int) pos1;--i) {
+			TVertexDescriptorString input = (str[0])[i];
+			for(TPos all = 0;all<length((str[1])[j]);++all) {
+				appendValue(input, getValue((str[1])[j], all));
+			}
+			appendValue(nodeString, input);
+			--j;
+		}
+	}
+}
+
 
 
 }// namespace SEQAN_NAMESPACE_MAIN

@@ -80,11 +80,11 @@ _align_needleman_wunsch_trace(TAlign& align,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TTrace, typename TStringSet, typename TScoreValue>
+template <typename TTrace, typename TStringSet, typename TScoreValue, typename TSpec>
 TScoreValue
 _align_needleman_wunsch(TTrace& trace,
 			TStringSet const& str,
-			Score<TScoreValue, Simple> const& sc,
+			Score<TScoreValue, TSpec> const& sc,
 			bool createTrace) 
 {
 	SEQAN_CHECKPOINT
@@ -120,7 +120,7 @@ _align_needleman_wunsch(TTrace& trace,
 		assignValue(column, 0, col * gap);
 		for(TSize row = 1; row <= len2; ++row) {
 			// Get the new maximum	
-			maxVal = diagVal + score(const_cast<Score<TScoreValue, Simple>&>(sc), str1[col-1], str2[row-1]);
+			maxVal = diagVal + score(const_cast<Score<TScoreValue, TSpec>&>(sc), str1[col-1], str2[row-1]);
 			tv = (Byte) Diagonal;
 			if ((tmp = getValue(column, row) + gap) > maxVal) {
 				maxVal = tmp;
@@ -152,11 +152,11 @@ _align_needleman_wunsch(TTrace& trace,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TTrace, typename TStringSet, typename TScoreValue>
+template <typename TTrace, typename TStringSet, typename TScoreValue, typename TSpec>
 TScoreValue
 _align_needleman_wunsch(TTrace& trace,
 			TStringSet const& str,
-			Score<TScoreValue, Simple> const& sc) 
+			Score<TScoreValue, TSpec> const& sc) 
 {
 	SEQAN_CHECKPOINT
 	return _align_needleman_wunsch(trace,str,sc,true);
@@ -165,11 +165,11 @@ _align_needleman_wunsch(TTrace& trace,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TAlign, typename TStringSet, typename TScoreValue>
+template<typename TAlign, typename TStringSet, typename TScoreValue, typename TSpec>
 TScoreValue
 _globalAlignment(TAlign& align,
 				 TStringSet const& str,
-				 Score<TScoreValue, Simple> const& sc,
+				 Score<TScoreValue, TSpec> const& sc,
 				 NeedlemanWunsch)
 				 
 {
@@ -207,10 +207,10 @@ _globalAlignment(TAlign& align,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TStringSet, typename TScoreValue>
+template<typename TStringSet, typename TScoreValue, typename TSpec>
 TScoreValue
 _globalAlignment(TStringSet const& str,
-				 Score<TScoreValue, Simple> const& sc,
+				 Score<TScoreValue, TSpec> const& sc,
 				 NeedlemanWunsch)
 {
 	SEQAN_CHECKPOINT

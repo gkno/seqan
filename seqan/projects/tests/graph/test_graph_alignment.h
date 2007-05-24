@@ -255,6 +255,39 @@ void  Test_Gotoh() {
 	//score2 = globalAlignment(std::cout, str, score_type, Gotoh() );
 	//SEQAN_TASSERT(score == score2)
 
+	str[0] = "ttattaa";
+	str[1] = "aaa";
+	assignStringSet(g, str);
+	Score<double> score_type2 = Score<double>(10,-1,-1,-2);
+	score = globalAlignment(g, score_type2, Gotoh());
+	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "tt")
+	SEQAN_TASSERT(label(g, findVertex(g, 0, 2)) == "a")
+	SEQAN_TASSERT(label(g, findVertex(g, 0, 3)) == "tt")
+	SEQAN_TASSERT(label(g, findVertex(g, 0, 5)) == "aa")
+	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "a")
+	SEQAN_TASSERT(label(g, findVertex(g, 1, 1)) == "aa")
+	SEQAN_TASSERT(numEdges(g) == 2)
+	SEQAN_TASSERT(numVertices(g) == 6)
+	//std::cout << g << std::endl;
+	//score2 = globalAlignment(std::cout, str, score_type2, Gotoh() );
+	//SEQAN_TASSERT(score == score2)
+
+	str[0] = "aaa";
+	str[1] = "ttattaa";
+	assignStringSet(g, str);
+	score = globalAlignment(g, score_type2, Gotoh());
+	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "tt")
+	SEQAN_TASSERT(label(g, findVertex(g, 1, 2)) == "a")
+	SEQAN_TASSERT(label(g, findVertex(g, 1, 3)) == "tt")
+	SEQAN_TASSERT(label(g, findVertex(g, 1, 5)) == "aa")
+	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "a")
+	SEQAN_TASSERT(label(g, findVertex(g, 0, 1)) == "aa")
+	SEQAN_TASSERT(numEdges(g) == 2)
+	SEQAN_TASSERT(numVertices(g) == 6)
+	//std::cout << g << std::endl;
+	//score2 = globalAlignment(std::cout, str, score_type2, Gotoh() );
+	//SEQAN_TASSERT(score == score2)
+
 	// Note: Depending on the used recursion formula, the gotoh algorithms can differ !!!
 	// Gotoh: Vertical gap and subsequent horizontal gap allowed
 	// Gotoh3: Vertical gap and subsequent horizontal gap is not allowed
@@ -483,6 +516,39 @@ void Test_Hirschberg() {
 	//std::cout << g << std::endl;
 	//score2 = globalAlignment(std::cout, str, score_type, Hirschberg() );
 	//SEQAN_TASSERT(score == score2)
+
+	str[0] = "ttattaa";
+	str[1] = "aaa";
+	assignStringSet(g, str);
+	Score<double> score_type2 = Score<double>(10,-1,-1,-2);
+	score = globalAlignment(g, score_type2, Hirschberg());
+	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "tt")
+	SEQAN_TASSERT(label(g, findVertex(g, 0, 2)) == "a")
+	SEQAN_TASSERT(label(g, findVertex(g, 0, 3)) == "tt")
+	SEQAN_TASSERT(label(g, findVertex(g, 0, 5)) == "aa")
+	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "a")
+	SEQAN_TASSERT(label(g, findVertex(g, 1, 1)) == "aa")
+	SEQAN_TASSERT(numEdges(g) == 2)
+	SEQAN_TASSERT(numVertices(g) == 6)
+	//std::cout << g << std::endl;
+	//score2 = globalAlignment(std::cout, str, score_type2, Hirschberg() );
+	//SEQAN_TASSERT(score == score2)
+
+	str[0] = "aaa";
+	str[1] = "ttattaa";
+	assignStringSet(g, str);
+	score = globalAlignment(g, score_type2, Hirschberg());
+	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "tt")
+	SEQAN_TASSERT(label(g, findVertex(g, 1, 2)) == "a")
+	SEQAN_TASSERT(label(g, findVertex(g, 1, 3)) == "tt")
+	SEQAN_TASSERT(label(g, findVertex(g, 1, 5)) == "aa")
+	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "a")
+	SEQAN_TASSERT(label(g, findVertex(g, 0, 1)) == "aa")
+	SEQAN_TASSERT(numEdges(g) == 2)
+	SEQAN_TASSERT(numVertices(g) == 6)
+	//std::cout << g << std::endl;
+	//score2 = globalAlignment(std::cout, str, score_type2, Hirschberg() );
+	//SEQAN_TASSERT(score == score2)
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -605,7 +671,7 @@ void  Test_Runtime() {
 
 	startTime = clock();
 	double score1 = globalAlignment(g, score_type, Hirschberg() );
-	duration = clock() - startTime;
+	duration = (clock() - startTime) / CLOCKS_PER_SEC;
 	std::cout << g << std::endl;
 	std::cout << "Score: " << score1 << " (Runtime: " << duration << ")" << std::endl;
 	std::cout << std::endl;
@@ -826,11 +892,9 @@ void Test_TCoffee() {
 	strm2.close();
 	*/	
 
-	// Generate additional primary libraries
-	// Just slow-pair at the moment
+	// Generate additional primary libraries, e.g., all pairwise alignments
 	typedef StringSet<String<AminoAcid>, Dependent<> > TDependentStringSet;
 	typedef Graph<Alignment<TDependentStringSet, unsigned int, Default> > TDependentGraph;
-	//typedef Graph<Alignment<TDependentStringSet> > TDependentGraph;
 	TStringSet& ownerStrSet = stringSet(g);
 	TDependentStringSet depStrSet;
 	for(unsigned int i = 0; i<length(ownerStrSet); ++i) {
@@ -838,16 +902,40 @@ void Test_TCoffee() {
 	}
 	TDependentGraph gAux(depStrSet);
 	generatePrimaryLibrary(gAux, AAGroupsDayhoff() );
+	tripletLibraryExtension(gAux);
+
+	// Debug code
+	// Print all library matches
+	// Note: We do not break it down to the base level
+	typedef Iterator<TDependentGraph, EdgeIterator>::Type TEdgeIterator;
+	typedef VertexDescriptor<TDependentGraph>::Type TVertexDescriptor;
+	typedef Infix<Value<TDependentStringSet>::Type>::Type TInfix;
+	TEdgeIterator itEdge(gAux);
+	for(;!atEnd(itEdge);++itEdge) {
+		TVertexDescriptor sourceV = sourceVertex(itEdge);
+		TVertexDescriptor targetV = targetVertex(itEdge);
+		TInfix inf1 = infix(getValueById(stringSet(gAux), sequenceId(gAux, sourceV)),fragmentBegin(gAux, sourceV), fragmentBegin(gAux, sourceV) + fragmentLength(gAux, sourceV));
+		TInfix inf2 = infix(getValueById(stringSet(gAux), sequenceId(gAux, targetV)),fragmentBegin(gAux, targetV), fragmentBegin(gAux, targetV) + fragmentLength(gAux, targetV));
+		std::cout << "SeqId " << sequenceId(gAux, sourceV) << ':' << inf1 << " (VertexId: " << sourceV << ')' << std::endl;
+		std::cout << "SeqId " << sequenceId(gAux, targetV) << ':' << inf2 << " (VertexId: " << targetV << ')' << std::endl;
+		std::cout << "Weight " << ':' << getCargo(*itEdge) << std::endl;
+		std::cout << std::endl;
+	}
+
 
 	// Calculate a distance matrix
 	Matrix<double> distanceMatrix; 
-	getCommonKmerMatrix(stringSet(g), distanceMatrix, 6, AAGroupsDayhoff() );
+	getCommonKmerMatrix(stringSet(gAux), distanceMatrix, 6, AAGroupsDayhoff() );
 	kmerToDistanceMatrix(distanceMatrix, FractionalDistance() );
 
 	// Create neighbor joining tree
 	Graph<Tree<double> > njTreeOut;
 	slowNjTree(distanceMatrix, njTreeOut);
-	std::cout << njTreeOut << std::endl;
+
+	// Perform a progressive alignment
+	TDependentGraph gOut(depStrSet);
+	progressiveAlignment(gAux, njTreeOut, gOut, Hirschberg() );
+	std::cout << gOut << std::endl;
 
 
 	/*

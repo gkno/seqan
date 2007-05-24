@@ -775,6 +775,67 @@ void NeighborJoining() {
 
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
+void TCoffee() {
+//____________________________________________________________________________
+// T-Coffee
+	typedef String<AminoAcid> TString;
+	typedef StringSet<TString, Dependent<> > TStringSet;
+	typedef Graph<Alignment<TStringSet, unsigned int, Default> > TGraph;
+	TString str1 = "GARFIELDTHELASTFATCAT";
+	TString str2 = "GARFIELDTHEFASTCAT";
+	TString str3 = "GARFIELDTHEVERYFASTCAT";
+	TString str4 = "THEFATCAT";
+	TStringSet strSet;
+	assignValueById(strSet, str1);
+	assignValueById(strSet, str2);
+	assignValueById(strSet, str3);
+	assignValueById(strSet, str4);
+	TGraph g(strSet);
+
+	// Generate a primary library, i.e., all pairwise alignments
+	generatePrimaryLibrary(g, AAGroupsDayhoff() );
+
+	// ToDo: Combine this library with others
+
+	// Triplet library extension
+	tripletLibraryExtension(g);
+
+	//// Debug code
+	//// Print all possible library matches, i.e., our scoring system
+	//typedef Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
+	//typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	//typedef Infix<Value<TStringSet>::Type>::Type TInfix;
+	//TEdgeIterator itEdge(g);
+	//for(;!atEnd(itEdge);++itEdge) {
+	//	TVertexDescriptor sourceV = sourceVertex(itEdge);
+	//	TVertexDescriptor targetV = targetVertex(itEdge);
+	//	TInfix inf1 = infix(getValueById(stringSet(g), sequenceId(g, sourceV)),fragmentBegin(g, sourceV), fragmentBegin(g, sourceV) + fragmentLength(g, sourceV));
+	//	TInfix inf2 = infix(getValueById(stringSet(g), sequenceId(g, targetV)),fragmentBegin(g, targetV), fragmentBegin(g, targetV) + fragmentLength(g, targetV));
+	//	std::cout << "SeqId " << sequenceId(g, sourceV) << ':' << inf1 << " (VertexId: " << sourceV << ')' << std::endl;
+	//	std::cout << "SeqId " << sequenceId(g, targetV) << ':' << inf2 << " (VertexId: " << targetV << ')' << std::endl;
+	//	std::cout << "Weight " << ':' << getCargo(*itEdge) << std::endl;
+	//	std::cout << std::endl;
+	//}
+
+
+	// Calculate a distance matrix using a compressed alphabet or not
+	Matrix<double> distanceMatrix; 
+	getCommonKmerMatrix(stringSet(g), distanceMatrix, 6, AAGroupsDayhoff() );
+	kmerToDistanceMatrix(distanceMatrix, FractionalDistance() );
+
+	// Build the neighbor joining tree
+	Graph<Tree<double> > njTreeOut;
+	slowNjTree(distanceMatrix, njTreeOut);
+
+	// Perform a progressive alignment
+	Graph<Alignment<TStringSet> > gOut(strSet);
+	progressiveAlignment(g, njTreeOut, gOut, Hirschberg() );
+
+	// Print the alignment
+	std::cout << gOut << std::endl;
+}
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -840,10 +901,15 @@ int main ()
 	std::cout << "----Automaton----------------------" << ::std::endl;
 	AutomatonTest();
 
-	// TCoffee
+	// Neighbor Joining
 	std::cout << "===================================" << ::std::endl;
 	std::cout << "----Neighbor Joining---------------" << ::std::endl;
 	NeighborJoining();
+
+	// T-Coffee
+	std::cout << "===================================" << ::std::endl;
+	std::cout << "----T-Coffee-----------------------" << ::std::endl;
+	TCoffee();
 
 	return 0;
 }

@@ -131,11 +131,11 @@ _align_gotoh_trace(TAlign& align,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TTrace, typename TStringSet, typename TScoreValue>
+template <typename TTrace, typename TStringSet, typename TScoreValue, typename TSpec>
 TScoreValue
 _align_gotoh(TTrace& trace,
 	     TStringSet const& str,
-	     Score<TScoreValue, Simple> const & sc,
+	     Score<TScoreValue, TSpec> const & sc,
 	     typename Value<TTrace>::Type& initialDir,
 	     bool createTrace)
 {	
@@ -200,7 +200,7 @@ _align_gotoh(TTrace& trace,
 			}
 
 			// Get the new maximum for mat
-			TScoreValue sc_ = score(const_cast<Score<TScoreValue, Simple>&>(sc), str1[col-1], str2[row-1]);
+			TScoreValue sc_ = score(const_cast<Score<TScoreValue, TSpec>&>(sc), str1[col-1], str2[row-1]);
 			tmp = diagValMat + sc_;
 			tvMat = (Byte) Diagonal;
 			if (vert > tmp) {
@@ -271,11 +271,11 @@ _align_gotoh(TTrace& trace,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TTrace, typename TStringSet, typename TScoreValue>
+template <typename TTrace, typename TStringSet, typename TScoreValue, typename TSpec>
 TScoreValue
 _align_gotoh(TTrace& trace,
 	     TStringSet const& str,
-	     Score<TScoreValue, Simple> const & sc,
+	     Score<TScoreValue, TSpec> const & sc,
 	     typename Value<TTrace>::Type& initialDir)
 {
 	SEQAN_CHECKPOINT
@@ -284,11 +284,11 @@ _align_gotoh(TTrace& trace,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TAlign, typename TStringSet, typename TScoreValue>
+template<typename TAlign, typename TStringSet, typename TScoreValue, typename TSpec>
 TScoreValue
 _globalAlignment(TAlign& align,
 				 TStringSet const& str,
-				 Score<TScoreValue, Simple> const& sc,
+				 Score<TScoreValue, TSpec> const& sc,
 				 Gotoh)
 {
 	SEQAN_CHECKPOINT
@@ -324,10 +324,10 @@ _globalAlignment(TAlign& align,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TStringSet, typename TScoreValue>
+template<typename TStringSet, typename TScoreValue, typename TSpec>
 TScoreValue
 _globalAlignment(TStringSet const& str,
-		 Score<TScoreValue, Simple> const& sc,
+		 Score<TScoreValue, TSpec> const& sc,
 		 Gotoh)
 {
 	SEQAN_CHECKPOINT

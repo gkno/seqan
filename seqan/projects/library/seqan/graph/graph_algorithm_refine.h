@@ -737,7 +737,7 @@ SEQAN_CHECKPOINT
 			//if exact cut exists 
 			if(fragmentBegin(ali_g,vd)==pos_j)
 			{
-				TValue score = getScore(score_type,seqs,*ali_it,i_am_first,act_pos,pos_j,fragmentLength(ali_g,act_knot));//,fragmentLength(ali_g,vd));
+				TValue score = (TValue) getScore(score_type,seqs,*ali_it,i_am_first,act_pos,pos_j,fragmentLength(ali_g,act_knot));//,fragmentLength(ali_g,vd));
 				addEdge(ali_g,act_knot,vd,score);
 			}
 			else //if the refinement was stopped here

@@ -116,11 +116,11 @@ _align_gotoh3_trace(TAlign& align,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TTrace, typename TStringSet, typename TScoreValue>
+template <typename TTrace, typename TStringSet, typename TScoreValue, typename TSpec>
 TScoreValue
 _align_gotoh3(TTrace& trace,
 			  TStringSet const& str,
-			  Score<TScoreValue, Simple> const & sc,
+			  Score<TScoreValue, TSpec> const & sc,
 			  typename Value<TTrace>::Type& initialDir,
 			  bool createTrace)
 {
@@ -274,11 +274,11 @@ _align_gotoh3(TTrace& trace,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TTrace, typename TStringSet, typename TScoreValue>
+template <typename TTrace, typename TStringSet, typename TScoreValue, typename TSpec>
 TScoreValue
 _align_gotoh3(TTrace& trace,
 	     TStringSet const& str,
-	     Score<TScoreValue, Simple> const & sc,
+	     Score<TScoreValue, TSpec> const & sc,
 	     typename Value<TTrace>::Type& initialDir)
 {
 	SEQAN_CHECKPOINT
@@ -287,11 +287,11 @@ _align_gotoh3(TTrace& trace,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TAlign, typename TStringSet, typename TScoreValue>
+template<typename TAlign, typename TStringSet, typename TScoreValue, typename TSpec>
 TScoreValue
 _globalAlignment(TAlign& align,
 				 TStringSet const& str,
-				 Score<TScoreValue, Simple> const& sc,
+				 Score<TScoreValue, TSpec> const& sc,
 				 Gotoh3)
 {
 	SEQAN_CHECKPOINT
@@ -327,10 +327,10 @@ _globalAlignment(TAlign& align,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TStringSet, typename TScoreValue>
+template<typename TStringSet, typename TScoreValue, typename TSpec>
 TScoreValue
 _globalAlignment(TStringSet const& str,
-		 Score<TScoreValue, Simple> const& sc,
+		 Score<TScoreValue, TSpec> const& sc,
 		 Gotoh3)
 {
 	SEQAN_CHECKPOINT

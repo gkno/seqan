@@ -4,7 +4,6 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 
-
 //////////////////////////////////////////////////////////////////////////////
 // Graph: T-Coffee - Tags
 //////////////////////////////////////////////////////////////////////////////
@@ -24,6 +23,98 @@ typedef Tag<TCoffeeDistance_> const TCoffeeDistance;
 */
 struct FractionalDistance_;
 typedef Tag<FractionalDistance_> const FractionalDistance;
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+// Graph: T-Coffee - Scoring Schema
+//////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TGraphType>
+struct ScoreAlignmentGraph;
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TValue, typename TGraphType>
+class Score<TValue, ScoreAlignmentGraph<TGraphType> >
+{
+public:
+	Holder<TGraphType> data_graph;
+
+public:
+	Score(TGraphType _graph) {
+		data_graph = _graph;
+	}
+
+	Score(Score const & other) {
+		data_graph = other.data_graph;
+	}
+
+	Score & operator = (Score const & other) {
+		data_graph = other.data_graph;
+		return *this;
+	}
+};
+
+template <typename TValue, typename TGraphType>
+inline TValue
+scoreGapExtend(Score<TValue, ScoreAlignmentGraph<TGraphType> > & me)
+{
+	return 0;
+}
+
+
+template <typename TValue, typename TGraphType>
+inline TValue const
+scoreGapExtend(Score<TValue, ScoreAlignmentGraph<TGraphType> > const & me)
+{
+	return 0;
+}
+
+template <typename TValue, typename TGraphType>
+inline TValue
+scoreGapOpen(Score<TValue, ScoreAlignmentGraph<TGraphType> > & me)
+{
+	return 0;
+}
+template <typename TValue, typename TGraphType>
+inline TValue const
+scoreGapOpen(Score<TValue, ScoreAlignmentGraph<TGraphType> > const & me)
+{
+	return 0;
+}
+
+template <typename TValue, typename TGraphType, typename T>
+inline TValue
+score(Score<TValue, ScoreAlignmentGraph<TGraphType> > & me,
+	  T const & left,
+	  T const & right)
+{
+	typedef typename Size<T>::Type TSize;
+	typedef typename VertexDescriptor<TGraphType>::Type TVertexDescriptor;
+	typedef typename EdgeDescriptor<TGraphType>::Type TEdgeDescriptor;
+	TSize len1 = length(left);
+	TSize len2 = length(right);
+	TSize divider = len1 * len2;
+	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
+	TValue sum = 0;
+	for(TSize i = 0;i<len1;++i) {
+		for(TSize j = 0;j<len2;++j) {
+			if ((left[i] != nilVertex) && (right[j] != nilVertex)) {
+				TEdgeDescriptor e = findEdge(value(me.data_graph), left[i], right[j]);
+				if (e != 0) sum += getCargo(e);
+			}
+		}
+	}
+	return sum / divider;
+}
+
+
+
+
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -90,7 +181,10 @@ kmerToDistanceMatrix(TMatrix& mat, FractionalDistance) {
 		for(TSize col=row+1;col<nseq;++col) {
 			// First the fractional common kmer count
 			TValue val = getValue(mat, row*nseq+col);
-			val /= min(getValue(mat, row*nseq+row),getValue(mat, col*nseq+col));
+			TValue minVal = getValue(mat, row*nseq+row);
+			TValue tmpVal;
+			if ((tmpVal = getValue(mat, col*nseq+col)) < minVal) minVal = tmpVal;
+			val /= minVal;
 			
 			// The transformed measure
 			//val = log10(0.1 + val);
@@ -456,11 +550,15 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename Size<TGraph>::Type TSize;
 	typedef typename Id<TGraph>::Type TId;
+	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
+	typedef std::map<std::pair<TId,TId>, TCargo> TSeqSimilarity;
 
+	
 	// Pairwise alignments for all pairs of sequences
-	Score<int> score_type = Score<int>(5,-4,-0.5,-10);
+	Score<double> score_type = Score<double>(5,-4,-0.5,-10);
 	TStringSet& str = stringSet(g);	
 	TSize nseq = length(stringSet(g));
+	TSeqSimilarity seqSimMap;
 
 	// String of fragments to combine all pairwise alignments into a multiple alignment
 	typedef Fragment<> TFragment;
@@ -469,44 +567,280 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 
 	for(TSize i=0; i<nseq; ++i) {
 		for(TSize j=i+1; j<nseq; ++j) {
+			TId id1 = positionToId(str, i);
+			TId id2 = positionToId(str, j);
 			// Pairwise alignment graph
 			TStringSet pairSet;
-			assignValueById(pairSet, str, positionToId(str, i));
-			assignValueById(pairSet, str, positionToId(str, j));
-			//std::cout << pairSet[0] << std::endl;
-			//std::cout << pairSet[1] << std::endl;
-			Graph<Alignment<TStringSet, void> > pGraph(pairSet);
-			typedef typename VertexDescriptor<Graph<Alignment<TStringSet, void> > >::Type TVertexDescriptor;
-			typedef typename Iterator<Graph<Alignment<TStringSet, void> >, EdgeIterator>::Type TEdgeIterator;
+			assignValueById(pairSet, str, id1);
+			assignValueById(pairSet, str, id2);
+			typedef Graph<Alignment<TStringSet, void> > TPairGraph;
+			typedef typename VertexDescriptor<TPairGraph>::Type TVD;
+			typedef typename Iterator<TPairGraph, EdgeIterator>::Type TEI;
+			TPairGraph pGraph(pairSet);
 			globalAlignment(pGraph, score_type, Hirschberg() );
 
 			// Determine a sequence weight
-			int seqSim = (int) (_getSequenceSimilarity(pGraph, TAlphabet() ) * 100);
+			TCargo seqSim = (TCargo) (_getSequenceSimilarity(pGraph, TAlphabet() ) * 100);
+			if (id1 < id2) seqSimMap.insert(std::make_pair(std::make_pair(id1,id2),seqSim));
+			else seqSimMap.insert(std::make_pair(std::make_pair(id2,id1),seqSim));
+			//std::cout << pairSet[0] << std::endl;
+			//std::cout << pairSet[1] << std::endl;
 			//std::cout << pGraph << std::endl;
 			//std::cout << seqSim << std::endl;
 
-			TEdgeIterator it(pGraph);
+			TEI it(pGraph);
 			for(;!atEnd(it);++it) {
-				TVertexDescriptor sV = sourceVertex(it);
-				TVertexDescriptor tV = targetVertex(it);
+				TVD sV = sourceVertex(it);
+				TVD tV = targetVertex(it);
 				push_back(matches, TFragment( (unsigned int) sequenceId(pGraph, sV), (unsigned int) fragmentBegin(pGraph,sV), (unsigned int) sequenceId(pGraph, tV),  (unsigned int)  fragmentBegin(pGraph,tV),  (unsigned int)  fragmentLength(pGraph,tV)));
 			}
 		}
 	}
 
-	// Print all the matches
-	std::cout << "The four sequences:" << std::endl;
-	for(TSize i = 0;i<length(str);++i) {
-		std::cout << positionToId(str,i) << ':' << str[i] << std::endl;
-	}
-	std::cout << "The matches:" << std::endl;
-	for(TSize i = 0;i<length(matches);++i) {
-		std::cout << sequenceId(matches[i],0) << ',' << fragmentBegin(matches[i],0) << ',' << fragmentLength(matches[i],0) << ',' << sequenceId(matches[i],1) << ',' << fragmentBegin(matches[i],1) << ',' << fragmentLength(matches[i],1) << std::endl;
-	}
+	//// Debug Code
+	//// Print all the matches
+	//std::cout << "The four sequences:" << std::endl;
+	//for(TSize i = 0;i<length(str);++i) {
+	//	std::cout << positionToId(str,i) << ':' << str[i] << std::endl;
+	//}
+	//std::cout << "The matches:" << std::endl;
+	//for(TSize i = 0;i<length(matches);++i) {
+	//	std::cout << sequenceId(matches[i],0) << ',' << fragmentBegin(matches[i],0) << ',' << fragmentLength(matches[i],0) << ',' << sequenceId(matches[i],1) << ',' << fragmentBegin(matches[i],1) << ',' << fragmentLength(matches[i],1) << std::endl;
+	//}
 
 	// Refine all matches and create multiple alignment
 	matchRefinement(matches,str,score_type,g);
-	std::cout << g << std::endl;
+	TEdgeIterator it(g);
+	for(;!atEnd(it);++it) {
+		TId id1 = sequenceId(g,sourceVertex(it));
+		TId id2 = sequenceId(g,targetVertex(it));
+		if (id1<id2) cargo(*it) = (seqSimMap.find(std::make_pair(id1,id2)))->second;
+		else cargo(*it) = (seqSimMap.find(std::make_pair(id2,id1)))->second;
+	}
+}
+
+
+template<typename TStringSet, typename TCargo, typename TSpec>
+void 
+tripletLibraryExtension(Graph<Alignment<TStringSet, TCargo, TSpec> >& g)
+{
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename Id<TGraph>::Type TId;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
+	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
+	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
+	typedef std::map<TVertexDescriptor, TCargo> TIdToWeightMap;
+	TIdToWeightMap idToWeightMap;
+
+	// First add edges for the case that a and c is aligned, b and c is aligned, but a and b are not
+	// Give these edges a weight of 0 because extension follows
+	String<TVertexDescriptor> edges;
+	TVertexIterator itVertex(g);
+	for(;!atEnd(itVertex);++itVertex) {
+		TOutEdgeIterator outIt1(g, *itVertex);
+		if (atEnd(outIt1)) continue;
+		TOutEdgeIterator outIt2(g, *itVertex);
+		goNext(outIt2);
+		while (!atEnd(outIt2)) {
+			TVertexDescriptor tV1 = targetVertex(outIt1);
+			TVertexDescriptor tV2 = targetVertex(outIt2);
+			if ((sequenceId(g, tV1) != sequenceId(g,tV2)) && 
+				(findEdge(g, tV1, tV2) == 0)) {
+				appendValue(edges, tV1);
+				appendValue(edges, tV2);
+			}
+			goNext(outIt1);
+			goNext(outIt2);
+		}
+	}
+	for(TSize i=0; i<length(edges);i+=2) addEdge(g, edges[i], edges[i+1], 0);
+	
+	// Now augment all existing edges
+	String<TCargo> newCargoMap;
+	resizeEdgeMap(g, newCargoMap);
+	TEdgeIterator it(g);
+	for(;!atEnd(it);++it) {
+		assignProperty(newCargoMap, *it, cargo(*it));
+		TVertexDescriptor sourceV = sourceVertex(it);
+		TVertexDescriptor targetV = targetVertex(it);
+		TOutEdgeIterator outIt1(g, sourceV);
+		for(;!atEnd(outIt1);++outIt1) {
+			if (targetV == targetVertex(outIt1)) continue;
+			idToWeightMap.insert(std::make_pair(targetVertex(outIt1), getCargo(*outIt1)));
+		}
+		TOutEdgeIterator outIt2(g, targetV);
+		for(;!atEnd(outIt2);++outIt2) {
+			if (sourceV == targetVertex(outIt2)) continue;
+			typename TIdToWeightMap::const_iterator pos = idToWeightMap.find(targetVertex(outIt2));
+			if (pos != idToWeightMap.end()) {
+				// Add the minimum of the two alignment values
+				if (getCargo(*outIt2) > pos->second) property(newCargoMap, *it) += pos->second;
+				else property(newCargoMap, *it) += getCargo(*outIt2);
+			}
+		}
+		idToWeightMap.clear();
+	}
+	// Assign the new weights
+	goBegin(it);
+	for(;!atEnd(it);++it) cargo(*it) = getProperty(newCargoMap, *it);
+}
+
+
+template<typename TStringSet, typename TCargo, typename TSpec, typename TGuideTree, typename TVertexDescriptor, typename TSequence, typename TTag>
+void 
+_recursiveProgressiveAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+							   TGuideTree& tree,
+							   TVertexDescriptor const root,
+							   TSequence& alignSeq,
+							   TTag tag)
+{
+	SEQAN_CHECKPOINT
+
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename Id<TGraph>::Type TId;
+	typedef typename Iterator<TGuideTree, AdjacencyIterator>::Type TAdjacencyIterator;
+	typedef typename Iterator<TGuideTree, DfsPreorder>::Type TDfsPreorderIterator;
+
+	TStringSet& str = stringSet(g);
+
+	if(isLeaf(tree, root)) {
+		TId seqId = positionToId(str, root);
+		TVertexDescriptor previousVertex = getNil<TVertexDescriptor>();
+		for(TSize i = 0;i<length(str[root]);++i) {
+			TVertexDescriptor nextVertex = findVertex(g, seqId, i);
+			if (nextVertex!=previousVertex) {
+				appendValue(alignSeq, String<TVertexDescriptor>(nextVertex));
+				//std::cout << nextVertex << ',';
+				previousVertex = nextVertex;
+			}
+		}
+		//std::cout << std::endl;
+	} else {
+		// Align the two children
+		TAdjacencyIterator adjIt(tree, root);
+		typedef String<String<TVertexDescriptor> > TSegmentString;
+		typedef StringSet<TSegmentString, Dependent<> > TSegmentStringSet;
+		TSegmentString seq1;
+		TSegmentString seq2;
+		TSegmentStringSet strSet;
+		bool first = true;
+		for(;!atEnd(adjIt);goNext(adjIt)) {
+			if (first) {
+				_recursiveProgressiveAlignment(g,tree, *adjIt, seq1, TTag());
+				assignValueById(strSet, seq1);
+				first = false;
+			} else {
+				_recursiveProgressiveAlignment(g,tree, *adjIt, seq2, TTag());
+				assignValueById(strSet, seq2);
+			}
+		}
+		Score<typename Cargo<TGraph>::Type, ScoreAlignmentGraph<TGraph> > score_type = Score<typename Cargo<TGraph>::Type, ScoreAlignmentGraph<TGraph> >(g);
+		TSequence tmp;
+		globalAlignment(tmp, strSet, score_type, TTag());
+		TSize len = length(tmp);
+		resize(alignSeq, len);
+		for(TSize i = len; i>0;--i) alignSeq[len-i] = tmp[i-1];
+
+		//// Debug Code
+		//for(unsigned int i = 0; i<length(alignSeq);++i) {
+		//	std::cout << '(';
+		//	for(unsigned int j=0; j<length(alignSeq[i]);++j) {
+		//		std::cout << getValue(alignSeq[i], j) << ',';
+		//	}
+		//	std::cout << ')' << ',';
+		//}
+		//std::cout << std::endl;
+	}
+}
+
+
+
+template<typename TStringSet, typename TCargo, typename TSpec, typename TGuideTree, typename TOutGraph, typename TTag>
+void 
+progressiveAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+					 TGuideTree& tree,
+					 TOutGraph& gOut,
+					 TTag)
+{
+	SEQAN_CHECKPOINT
+
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename Id<TGraph>::Type TId;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename Iterator<TGuideTree, AdjacencyIterator>::Type TAdjacencyIterator;
+	typedef typename Iterator<TGuideTree, DfsPreorder>::Type TDfsPreorderIterator;
+
+	// Align all three subtrees
+	TAdjacencyIterator adjIt(tree, getRoot(tree));
+	typedef String<String<TVertexDescriptor> > TSegmentString;
+	typedef StringSet<TSegmentString, Dependent<> > TSegmentStringSet;
+	TSegmentString seq1;
+	TSegmentString seq2;
+	TSegmentString alignSeq;
+	TSegmentString seq3;
+	TSegmentStringSet strSet;
+	unsigned int count = 0;
+	for(;!atEnd(adjIt);goNext(adjIt)) {
+		if (count == 0) {
+			_recursiveProgressiveAlignment(g,tree, *adjIt, seq1, TTag());
+			assignValueById(strSet, seq1);
+			++count;
+		} else if (count == 1) {
+			_recursiveProgressiveAlignment(g,tree, *adjIt, seq2, TTag());
+			assignValueById(strSet, seq2);
+			Score<typename Cargo<TGraph>::Type, ScoreAlignmentGraph<TGraph> > score_type = Score<typename Cargo<TGraph>::Type, ScoreAlignmentGraph<TGraph> >(g);
+			TSegmentString tmp;
+			globalAlignment(tmp, strSet, score_type, TTag());
+			TSize len = length(tmp);
+			resize(alignSeq, len);
+			for(TSize i = len; i>0;--i) alignSeq[len-i] = tmp[i-1];\
+			clear(strSet);
+			assignValueById(strSet, alignSeq);
+			++count;
+		} else {
+			_recursiveProgressiveAlignment(g,tree, *adjIt, seq3, TTag());
+			assignValueById(strSet, seq3);
+		}
+	}
+
+	Score<typename Cargo<TGraph>::Type, ScoreAlignmentGraph<TGraph> > score_type = Score<typename Cargo<TGraph>::Type, ScoreAlignmentGraph<TGraph> >(g);
+	TSegmentString tmp;
+	globalAlignment(tmp, strSet, score_type, TTag());
+	TSize len = length(tmp);
+	clear(alignSeq);
+	resize(alignSeq, len);
+	for(TSize i = len; i>0;--i) alignSeq[len-i] = tmp[i-1];
+
+	//// Debug Code
+	//for(unsigned int i = 0; i<length(alignSeq);++i) {
+	//	std::cout << '(';
+	//	for(unsigned int j=0; j<length(alignSeq[i]);++j) {
+	//		std::cout << getValue(alignSeq[i], j) << ',';
+	//	}
+	//	std::cout << ')' << ',';
+	//}
+	//std::cout << std::endl;
+
+	// Create the alignment graph
+	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
+	for(TSize i = 0; i<length(alignSeq);++i) {
+		for(TSize j=0; j<length(alignSeq[i]);++j) {
+			TVertexDescriptor v = getValue(alignSeq[i], j);
+			if (v == nilVertex) continue;
+			TVertexDescriptor l = addVertex(gOut, sequenceId(g, v), fragmentBegin(g,v), fragmentLength(g,v));
+			TSize count = 1;
+			for(TSize k = j; k>0; --k) {
+				if (getValue(alignSeq[i], k - 1) != nilVertex) {
+					addEdge(gOut, l - count, l);
+					++count;
+				}
+			}
+		}
+	}
 }
    
 //////////////////////////////////////////////////////////////////////////////
