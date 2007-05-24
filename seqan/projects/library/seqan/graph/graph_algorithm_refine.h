@@ -213,6 +213,8 @@ SEQAN_CHECKPOINT
 
 }
 
+
+
 template<typename TValue>
 inline bool
 cutIsOk(String<std::set<TValue> > & all_nodes,
@@ -242,6 +244,8 @@ SEQAN_CHECKPOINT
 	return true;
 
 }
+
+/*
 ///////////////////////////////////////////////////////////////////////////////////////////////////////	
 //Recursive Refinement
 //refine position node_i on sequence seq_i
@@ -273,7 +277,7 @@ SEQAN_CHECKPOINT
 
 		//get the sequence that node_i needs to be projected onto (seq_j)
 		//and get the projected position (pos_j)
-		TValue seq_j, node_j;
+		TValue seq_j, node_j, pos_i;
 		_getOtherSequenceAndProject(alis[*segment_it],seq_map,seq_i,node_i,seq_j,node_j);
 
 		typename std::set<TValue>::iterator iter;
@@ -295,6 +299,7 @@ SEQAN_CHECKPOINT
 
 
 }
+*/
 	
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////	
@@ -889,7 +894,7 @@ SEQAN_CHECKPOINT
 
 
 
-
+/*
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //build refined alignment graph
@@ -958,8 +963,8 @@ SEQAN_CHECKPOINT
 		TVertexDescriptor act_knot = findVertex(ali_g,seq,begin_pos);
 		if(begin_pos == fragmentBegin(ali_g,act_knot))
 
-
-		TValue act_pos = begin_pos;
+		TValue act_pos;
+		act_pos = begin_pos;
 	
 		//for each interval that lies within the current segment/fragement/alignment
 		while(act_pos < end_pos)
@@ -998,7 +1003,7 @@ SEQAN_CHECKPOINT
 }
 
 
-
+*/
 
 
 template<typename TAlignmentString, typename TOutGraph, typename TSequence, typename TSetSpec, typename TScore>
