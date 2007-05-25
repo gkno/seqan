@@ -792,33 +792,20 @@ void TCoffee() {
 	assignValueById(strSet, str2);
 	assignValueById(strSet, str3);
 	assignValueById(strSet, str4);
+	TGraph lib1(strSet);
+	TGraph lib2(strSet);
 	TGraph g(strSet);
 
-	// Generate a primary library, i.e., all pairwise alignments
-	generatePrimaryLibrary(g, AAGroupsDayhoff() );
+	// Generate a 1st primary library, i.e., all pairwise alignments
+	generatePrimaryLibrary(lib1, AAGroupsDayhoff(), GlobalPairwise_Library() );
+	// Generate a 2nd primary library, i.e., all MUMs
+	generatePrimaryLibrary(lib2, 2, MUM_Library() );
 
-	// ToDo: Combine this library with others
+	// Weighting of libraries (Signal addition)
+	combineGraphs(g, lib1, lib2);
 
 	// Triplet library extension
 	tripletLibraryExtension(g);
-
-	//// Debug code
-	//// Print all possible library matches, i.e., our scoring system
-	//typedef Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
-	//typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	//typedef Infix<Value<TStringSet>::Type>::Type TInfix;
-	//TEdgeIterator itEdge(g);
-	//for(;!atEnd(itEdge);++itEdge) {
-	//	TVertexDescriptor sourceV = sourceVertex(itEdge);
-	//	TVertexDescriptor targetV = targetVertex(itEdge);
-	//	TInfix inf1 = infix(getValueById(stringSet(g), sequenceId(g, sourceV)),fragmentBegin(g, sourceV), fragmentBegin(g, sourceV) + fragmentLength(g, sourceV));
-	//	TInfix inf2 = infix(getValueById(stringSet(g), sequenceId(g, targetV)),fragmentBegin(g, targetV), fragmentBegin(g, targetV) + fragmentLength(g, targetV));
-	//	std::cout << "SeqId " << sequenceId(g, sourceV) << ':' << inf1 << " (VertexId: " << sourceV << ')' << std::endl;
-	//	std::cout << "SeqId " << sequenceId(g, targetV) << ':' << inf2 << " (VertexId: " << targetV << ')' << std::endl;
-	//	std::cout << "Weight " << ':' << getCargo(*itEdge) << std::endl;
-	//	std::cout << std::endl;
-	//}
-
 
 	// Calculate a distance matrix using a compressed alphabet or not
 	Matrix<double> distanceMatrix; 
@@ -830,7 +817,7 @@ void TCoffee() {
 	slowNjTree(distanceMatrix, njTreeOut);
 
 	// Perform a progressive alignment
-	Graph<Alignment<TStringSet> > gOut(strSet);
+	Graph<Alignment<TStringSet, void> > gOut(strSet);
 	progressiveAlignment(g, njTreeOut, gOut, Hirschberg() );
 
 	// Print the alignment

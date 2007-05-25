@@ -100,7 +100,8 @@ int main()
 	// T-Coffee
 	Test_CompressedAlphabets();
 	Test_Fragment();
-	Test_TCoffee(); 
+	Test_TCoffee();
+	//Test_TCoffeeFromLibrary(); 
 
 	//// Match Refinement
 	Test_MatchRefinement();

@@ -35,6 +35,7 @@
 #include <seqan/graph/graph_impl_automaton.h>	// Automaton
 #include <seqan/graph/graph_impl_wordgraph.h>	// Specialized automaton: Word graph
 #include <seqan/graph/graph_impl_tree.h>		// Tree
+#include <seqan/graph/graph_impl_fragment.h>    // Fragment
 #include <seqan/graph/graph_impl_align.h>		// Alignment Graph
 
 // Graph iterators
@@ -50,7 +51,6 @@
 // Specializations
 #include <seqan/graph/graph_impl_oracle.h>		// Oracle
 #include <seqan/graph/graph_impl_trie.h>		// Trie
-#include <seqan/graph/graph_impl_fragment.h>
 
 // Graph drawing
 #include <seqan/find.h>

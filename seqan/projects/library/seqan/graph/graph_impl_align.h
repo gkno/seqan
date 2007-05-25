@@ -895,59 +895,76 @@ convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	return true;
 }
 
-template<typename TStringSet, typename TCargo, typename TSpec, typename TCargo2, typename TSpec2> 
+template<typename TStringSet, typename TCargo, typename TSpec> 
 inline void
-extendGraph(Graph<Alignment<TStringSet, TCargo, TSpec> >& extendedGraph,
-			Graph<Alignment<TStringSet, TCargo2, TSpec2> >& addOnGraph)
+combineGraphs(Graph<Alignment<TStringSet, TCargo, TSpec> >& outGraph,
+			  Graph<Alignment<TStringSet, TCargo, TSpec> >& lib1,
+			  Graph<Alignment<TStringSet, TCargo, TSpec> >& lib2)
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph1;
-	typedef typename VertexDescriptor<TGraph1>::Type TVertexDescriptor;
-	typedef typename Id<TGraph1>::Type TIdType;
-	typedef typename Size<TGraph1>::Type TSize;
-	typedef std::map<std::pair<TIdType, TIdType>, TVertexDescriptor> TPosToVertexMap;
-	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
-	
-	// Walk through the first sequence
-	typename TPosToVertexMap::const_iterator it_graph1 = extendedGraph.data_pvMap.begin();
-	typename TPosToVertexMap::const_iterator it_graph2 = addOnGraph.data_pvMap.begin();
-	for(; it_graph1 != extendedGraph.data_pvMap.end(); ++it_graph1) {
-		TIdType seqId1 = it_graph1->first.first;
-		TIdType seqId2;
-		TSize fragCut1 = it_graph1->first.second;
-		TSize fragCut2;
-		TVertexDescriptor frag1 = it_graph1->second;
-		TVertexDescriptor frag2;
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef typename Id<TGraph>::Type TId;
+	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
 
-		std::cout << "Graph1: " << seqId1 << ',' << fragCut1 << ',' << frag1 << std::endl;
-		while((it_graph2 != addOnGraph.data_pvMap.end()) &&
-				(seqId1  == (seqId2 = it_graph2->first.first)) &&
-				(fragCut1 <= (fragCut2 = it_graph2->first.second))) {
-					if ((frag2  = it_graph2->second )!= nilVertex) {
-						// Case 1: No vertex there
-						if (frag1 == nilVertex) {
-							addVertex(extendedGraph, seqId1, fragmentBegin(addOnGraph, frag2), fragmentLength(addOnGraph, frag2));
-						}
-						// Case 2: Both vertices represent the same segment
-						else if ((fragCut1 == fragCut2) &&
-								(fragmentBegin(extendedGraph, frag1) == fragmentBegin(addOnGraph, frag2))) {
-							// Do nothing
-						}
-						// Case 3: Segments overlap
-						else {
-							TSize fragBegin1 = fragmentBegin(extendedGraph, frag1);
-							TSize fragBegin2 = fragmentBegin(addOnGraph, frag2);
-							// We need to pass twice
-							/*
-							if ((int) fragBegin2 - (int) fragBegin1 != 0) {
-								fragmentLength(extendedGraph, frag1) = fragBegin2 - fragBegin1;
-							}
-							*/
-						}
-					}
-					std::cout << "Graph2: " << it_graph2->first.first << ',' << it_graph2->first.second << ',' << it_graph2->second << std::endl;
-					if (it_graph2 != addOnGraph.data_pvMap.end()) ++it_graph2;
-		}
+	clearVertices(outGraph);
+
+	// String of fragments to combine all pairwise alignments into a multiple alignment
+	typedef Fragment<> TFragment;
+	typedef String<TFragment, External<> > TFragmentString;
+	TFragmentString matches;
+
+	// Get all the matches
+	TCargo maxCargoLib1 = 0;
+	TCargo maxCargoLib2 = 0;
+	TEdgeIterator it1(lib1);
+	for(;!atEnd(it1);++it1) {
+		if (getCargo(*it1) > maxCargoLib1) maxCargoLib1 = getCargo(*it1);
+		TVertexDescriptor sV = sourceVertex(it1);
+		TVertexDescriptor tV = targetVertex(it1);
+		push_back(matches, TFragment( (unsigned int) sequenceId(lib1, sV), (unsigned int) fragmentBegin(lib1,sV), (unsigned int) sequenceId(lib1, tV),  (unsigned int)  fragmentBegin(lib1,tV),  (unsigned int)  fragmentLength(lib1,tV)));
+	}
+	TEdgeIterator it2(lib2);
+	for(;!atEnd(it2);++it2) {
+		if (getCargo(*it2) > maxCargoLib2) maxCargoLib2 = getCargo(*it2);
+		TVertexDescriptor sV = sourceVertex(it2);
+		TVertexDescriptor tV = targetVertex(it2);
+		push_back(matches, TFragment( (unsigned int) sequenceId(lib2, sV), (unsigned int) fragmentBegin(lib2,sV), (unsigned int) sequenceId(lib2, tV),  (unsigned int)  fragmentBegin(lib2,tV),  (unsigned int)  fragmentLength(lib2,tV)));
+	}
+	double scalingLib1 = (double) 100 / (double) maxCargoLib1;
+	double scalingLib2 = (double) 100 / (double) maxCargoLib2;
+
+	// Match refinement
+	Score<double> score_type = Score<double>(5,-4,-0.5,-10);
+	TStringSet& str = stringSet(outGraph);	
+	matchRefinement(matches,str,score_type,outGraph);
+
+	// Traverse all the matches and adapt the weights
+	// Stacking of library weights
+	TEdgeIterator it(outGraph);
+	for(;!atEnd(it);++it) {
+		TVertexDescriptor sV = sourceVertex(it);
+		TVertexDescriptor tV = targetVertex(it);
+		TId id1 = sequenceId(outGraph,sV);
+		TId id2 = sequenceId(outGraph,tV);
+		TSize pos1 = fragmentBegin(outGraph,sV);
+		TSize pos2 = fragmentBegin(outGraph, tV);
+		
+		TCargo newVal = 0;
+		TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
+		TVertexDescriptor p1 = findVertex(lib1, id1, pos1);
+		TVertexDescriptor p2 = findVertex(lib1, id2, pos2);
+		TEdgeDescriptor e = 0;
+		if ((p1 != nilVertex) && (p2 != nilVertex)) e = findEdge(lib1, p1, p2);
+		if (e != 0) newVal += (TCargo) ((double) getCargo(e) * scalingLib1);
+		p1 = findVertex(lib2, id1, pos1);
+		p2 = findVertex(lib2, id2, pos2);
+		e = 0;
+		if ((p1 != nilVertex) && (p2 != nilVertex)) e = findEdge(lib2, p1, p2);
+		if (e != 0) newVal += (TCargo) ((double) getCargo(e) * scalingLib2);
+		cargo(*it) = newVal;
 	}
 }
 

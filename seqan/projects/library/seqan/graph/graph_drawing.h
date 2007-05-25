@@ -197,15 +197,10 @@ _createNodeAttributes(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 		outs << label(g, *it);
 		outs << "\", group = \"";
 		outs << id;
-		outs << "\", pos = \"";
-		outs << (id * scaling);
-		outs << ",";
-		outs << fragmentBegin(g, *it);
-		outs << "!\"";
+		outs << "\"";
 		append(property(nodeMap, *it), outs.str().c_str());		
 		//std::cout << property(nodeMap, *it) << std::endl;
 	}
-
 }
 
 
@@ -366,6 +361,84 @@ _createEdgeAttributes(Graph<Automaton<TAlphabet, TCargo, WordGraph<TSpec> > > co
 		append(tmp, "\"");
 		assignProperty(edgeMap, *itEd, tmp);
 	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TFile, typename TCargo, typename TSpec>
+inline void
+_writeGraphFooter(TFile & file,
+				  Graph<Directed<TCargo, TSpec> > const& g,
+				  DotDrawing)
+{
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TFile, typename TCargo, typename TSpec>
+inline void
+_writeGraphFooter(TFile & file,
+				  Graph<Undirected<TCargo, TSpec> > const& g,
+				  DotDrawing)
+{
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TFile, typename TStringSet, typename TCargo, typename TSpec>
+inline void
+_writeGraphFooter(TFile & file,
+				  Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
+				  DotDrawing)
+{
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename Id<TGraph>::Type TId;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+
+	TStringSet& str = stringSet(g);
+	TSize len = length(str);
+	for(TSize i = 0; i<len; ++i) {
+		TId seqId = positionToId(str, i);
+		TSize j = 0;
+		TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();	
+		TVertexDescriptor previousVertex = nilVertex;
+		while(j<length(str[i])) {
+			TVertexDescriptor nextVertex = findVertex(const_cast<TGraph&>(g), seqId, j);
+			if (previousVertex != nilVertex) {
+				_streamPutInt(file, previousVertex);
+				_streamWrite(file, " -- ");
+				_streamPutInt(file, nextVertex);
+				_streamWrite(file, " [");
+				_streamWrite(file, "weight=100.0, len=4.0, arrowhead=vee");
+				_streamWrite(file, "];\n");
+			}
+			previousVertex = nextVertex;
+			j += fragmentLength(g, nextVertex);
+		}
+	}
+	_streamPut(file, '\n');
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TFile, typename TCargo, typename TSpec>
+inline void
+_writeGraphFooter(TFile & file,
+				  Graph<Tree<TCargo, TSpec> > const& g,
+				  DotDrawing)
+{
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TFile, typename TAlphabet, typename TCargo, typename TSpec>
+inline void
+_writeGraphFooter(TFile & file,
+				  Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
+				  DotDrawing)
+{
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -536,6 +609,8 @@ write(TFile & file,
 		_streamWrite(file, "];\n");
 	}
 	_streamPut(file, '\n');
+
+	_writeGraphFooter(file,g,DotDrawing());
 
 	_streamWrite(file, "}\n");
 }

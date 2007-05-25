@@ -24,6 +24,21 @@ typedef Tag<TCoffeeDistance_> const TCoffeeDistance;
 struct FractionalDistance_;
 typedef Tag<FractionalDistance_> const FractionalDistance;
 
+/**
+.Tag.GlobalPairwise_Library
+..summary:Tag to specify the type of the library.
+..value.GlobalPairwise_Library:Use of a pairwise global library.
+*/
+struct GlobalPairwise_Library_;
+typedef Tag<GlobalPairwise_Library_> const GlobalPairwise_Library;
+
+/**
+.Tag.MUM_Library
+..summary:Tag to specify the type of the library.
+..value.MUM_Library:Use of a maximal unique match library.
+*/
+struct MUM_Library_;
+typedef Tag<MUM_Library_> const MUM_Library;
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -540,10 +555,58 @@ _getSequenceSimilarity(TAlignmentGraph& g,
 	else return sim / len1;
 }
 
+template<typename TStringSet, typename TCargo, typename TSpec, typename TSize>
+void 
+generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+					   TSize minLen,
+					   MUM_Library)
+{
+	SEQAN_CHECKPOINT
+
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename Id<TGraph>::Type TId;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename Value<TStringSet>::Type TString;
+	typedef Index<StringSet<TString, Owner<> >, Index_ESA<> > TIndex;
+	
+	clearVertices(g);
+
+	TStringSet& str = stringSet(g);	
+	TSize nseq = length(str);
+	TIndex index;
+	resize(indexText(index), nseq);
+	for(TSize i = 0;i<nseq;++i) indexText(index)[i] = str[i];
+	indexRequire(index, ESA_SA());
+	indexRequire(index, ESA_LCP());
+	indexRequire(index, ESA_BWT());
+
+	typename Iterator<TIndex, MUMs>::Type it(index, minLen);	// set minimum MUM length
+	String< typename SAValue<TIndex>::Type > occs;			// temp. string storing the hit positions
+
+	while (!atEnd(it)) 
+	{
+		occs = getOccurences(it);							// gives hit positions (seqNo,seqOfs)
+		orderOccurences(occs);								// order them by seqNo
+			
+		TSize matchLen = repLength(it);
+		for(TSize i = 0; i < (TSize) length(occs); ++i) {
+			//std::cout << positionToId(str, i) << ',' << getValueI2(occs[i]) << ',' << matchLen << std::endl;
+			TVertexDescriptor v = addVertex(g, positionToId(str, i), getValueI2(occs[i]), matchLen);
+			if (i > 0) {
+				for(TSize k = i; k>0;--k) {
+					addEdge(g,v,v-k,matchLen);
+				}
+			}
+		}
+		++it;
+	}
+}
+
 template<typename TStringSet, typename TCargo, typename TSpec, typename TAlphabet>
 void 
 generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-					   TAlphabet)
+					   TAlphabet,
+					   GlobalPairwise_Library)
 {
 	SEQAN_CHECKPOINT
 
@@ -553,7 +616,8 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
 	typedef std::map<std::pair<TId,TId>, TCargo> TSeqSimilarity;
 
-	
+	clearVertices(g);
+
 	// Pairwise alignments for all pairs of sequences
 	Score<double> score_type = Score<double>(5,-4,-0.5,-10);
 	TStringSet& str = stringSet(g);	
@@ -688,6 +752,26 @@ tripletLibraryExtension(Graph<Alignment<TStringSet, TCargo, TSpec> >& g)
 }
 
 
+template<typename TStringSet, typename TCargo, typename TSpec, typename TStringSet2, typename TSequence, typename TTag>
+inline void 
+_alignStringSetAccordingToGraph(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+								TStringSet2& strSet,
+								TSequence& alignSeq,
+								TTag)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	
+	Score<typename Cargo<TGraph>::Type, ScoreAlignmentGraph<TGraph> > score_type = Score<typename Cargo<TGraph>::Type, ScoreAlignmentGraph<TGraph> >(g);
+	TSequence tmp;
+	globalAlignment(tmp, strSet, score_type, TTag());
+	TSize len = length(tmp);
+	clear(alignSeq);
+	resize(alignSeq, len);
+	for(TSize i = len; i>0;--i) alignSeq[len-i] = tmp[i-1];
+}
+
 template<typename TStringSet, typename TCargo, typename TSpec, typename TGuideTree, typename TVertexDescriptor, typename TSequence, typename TTag>
 void 
 _recursiveProgressiveAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
@@ -708,14 +792,11 @@ _recursiveProgressiveAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 
 	if(isLeaf(tree, root)) {
 		TId seqId = positionToId(str, root);
-		TVertexDescriptor previousVertex = getNil<TVertexDescriptor>();
-		for(TSize i = 0;i<length(str[root]);++i) {
+		TSize i = 0;
+		while(i<length(str[root])) {
 			TVertexDescriptor nextVertex = findVertex(g, seqId, i);
-			if (nextVertex!=previousVertex) {
-				appendValue(alignSeq, String<TVertexDescriptor>(nextVertex));
-				//std::cout << nextVertex << ',';
-				previousVertex = nextVertex;
-			}
+			appendValue(alignSeq, String<TVertexDescriptor>(nextVertex));
+			i += fragmentLength(g, nextVertex);
 		}
 		//std::cout << std::endl;
 	} else {
@@ -735,14 +816,9 @@ _recursiveProgressiveAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 			} else {
 				_recursiveProgressiveAlignment(g,tree, *adjIt, seq2, TTag());
 				assignValueById(strSet, seq2);
+				_alignStringSetAccordingToGraph(g,strSet,alignSeq, TTag());
 			}
 		}
-		Score<typename Cargo<TGraph>::Type, ScoreAlignmentGraph<TGraph> > score_type = Score<typename Cargo<TGraph>::Type, ScoreAlignmentGraph<TGraph> >(g);
-		TSequence tmp;
-		globalAlignment(tmp, strSet, score_type, TTag());
-		TSize len = length(tmp);
-		resize(alignSeq, len);
-		for(TSize i = len; i>0;--i) alignSeq[len-i] = tmp[i-1];
 
 		//// Debug Code
 		//for(unsigned int i = 0; i<length(alignSeq);++i) {
@@ -792,38 +868,16 @@ progressiveAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 		} else if (count == 1) {
 			_recursiveProgressiveAlignment(g,tree, *adjIt, seq2, TTag());
 			assignValueById(strSet, seq2);
-			Score<typename Cargo<TGraph>::Type, ScoreAlignmentGraph<TGraph> > score_type = Score<typename Cargo<TGraph>::Type, ScoreAlignmentGraph<TGraph> >(g);
-			TSegmentString tmp;
-			globalAlignment(tmp, strSet, score_type, TTag());
-			TSize len = length(tmp);
-			resize(alignSeq, len);
-			for(TSize i = len; i>0;--i) alignSeq[len-i] = tmp[i-1];\
+			_alignStringSetAccordingToGraph(g,strSet,alignSeq, TTag());
 			clear(strSet);
 			assignValueById(strSet, alignSeq);
 			++count;
 		} else {
 			_recursiveProgressiveAlignment(g,tree, *adjIt, seq3, TTag());
 			assignValueById(strSet, seq3);
+			_alignStringSetAccordingToGraph(g,strSet,alignSeq, TTag());
 		}
 	}
-
-	Score<typename Cargo<TGraph>::Type, ScoreAlignmentGraph<TGraph> > score_type = Score<typename Cargo<TGraph>::Type, ScoreAlignmentGraph<TGraph> >(g);
-	TSegmentString tmp;
-	globalAlignment(tmp, strSet, score_type, TTag());
-	TSize len = length(tmp);
-	clear(alignSeq);
-	resize(alignSeq, len);
-	for(TSize i = len; i>0;--i) alignSeq[len-i] = tmp[i-1];
-
-	//// Debug Code
-	//for(unsigned int i = 0; i<length(alignSeq);++i) {
-	//	std::cout << '(';
-	//	for(unsigned int j=0; j<length(alignSeq[i]);++j) {
-	//		std::cout << getValue(alignSeq[i], j) << ',';
-	//	}
-	//	std::cout << ')' << ',';
-	//}
-	//std::cout << std::endl;
 
 	// Create the alignment graph
 	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();

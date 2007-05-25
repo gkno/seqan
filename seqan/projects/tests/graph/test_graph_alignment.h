@@ -688,7 +688,7 @@ void  Test_Runtime2() {
 	typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	typedef Id<TStringSet>::Type TId;
 
-	Score<double> score_type = Score<double>(5,-4,-0.5,-10);
+	Score<double> score_type = Score<double>(10,-1,-0.5,-2);
 	TStringSet str;
 	clock_t startTime;
 	clock_t duration;
@@ -867,6 +867,77 @@ void  Test_CompressedAlphabets() {
 
 void Test_TCoffee() {
 //____________________________________________________________________________
+// T-Coffee
+	typedef String<AminoAcid> TString;
+	typedef StringSet<TString, Dependent<> > TStringSet;
+	typedef Graph<Alignment<TStringSet, unsigned int, Default> > TGraph;
+	TString str1 = "GARFIELDTHELASTFATCAT";
+	TString str2 = "GARFIELDTHEFASTCAT";
+	TString str3 = "GARFIELDTHEVERYFASTCAT";
+	TString str4 = "THEFATCAT";
+	TStringSet strSet;
+	assignValueById(strSet, str1);
+	assignValueById(strSet, str2);
+	assignValueById(strSet, str3);
+	assignValueById(strSet, str4);
+	TGraph lib1(strSet);
+	TGraph lib2(strSet);
+	TGraph g(strSet);
+
+	// Generate a primary library, i.e., all pairwise alignments
+	generatePrimaryLibrary(lib1, AAGroupsDayhoff(), GlobalPairwise_Library() );
+	generatePrimaryLibrary(lib2, 2, MUM_Library() );
+
+	// Weighting of libraries (Signal addition)
+	combineGraphs(g, lib1, lib2);
+
+	// Triplet library extension
+	tripletLibraryExtension(g);
+
+	//// Debug code
+	//// Print all possible library matches, i.e., our scoring system
+	//typedef Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
+	//typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	//typedef Infix<Value<TStringSet>::Type>::Type TInfix;
+	//TEdgeIterator itEdge(g);
+	//for(;!atEnd(itEdge);++itEdge) {
+	//	TVertexDescriptor sourceV = sourceVertex(itEdge);
+	//	TVertexDescriptor targetV = targetVertex(itEdge);
+	//	TInfix inf1 = infix(getValueById(stringSet(g), sequenceId(g, sourceV)),fragmentBegin(g, sourceV), fragmentBegin(g, sourceV) + fragmentLength(g, sourceV));
+	//	TInfix inf2 = infix(getValueById(stringSet(g), sequenceId(g, targetV)),fragmentBegin(g, targetV), fragmentBegin(g, targetV) + fragmentLength(g, targetV));
+	//	std::cout << "SeqId " << sequenceId(g, sourceV) << ':' << inf1 << " (VertexId: " << sourceV << ')' << std::endl;
+	//	std::cout << "SeqId " << sequenceId(g, targetV) << ':' << inf2 << " (VertexId: " << targetV << ')' << std::endl;
+	//	std::cout << "Weight " << ':' << getCargo(*itEdge) << std::endl;
+	//	std::cout << std::endl;
+	//}
+
+
+	// Calculate a distance matrix using a compressed alphabet or not
+	Matrix<double> distanceMatrix; 
+	getCommonKmerMatrix(stringSet(g), distanceMatrix, 6, AAGroupsDayhoff() );
+	kmerToDistanceMatrix(distanceMatrix, FractionalDistance() );
+
+	// Build the neighbor joining tree
+	Graph<Tree<double> > njTreeOut;
+	slowNjTree(distanceMatrix, njTreeOut);
+
+	// Perform a progressive alignment
+	Graph<Alignment<TStringSet, void> > gOut(strSet);
+	progressiveAlignment(g, njTreeOut, gOut, Hirschberg() );
+
+	// Print the alignment
+	std::cout << gOut << std::endl;
+
+	//fstream strm2; // Alignment graph as dot
+	//strm2.open(TEST_PATH "my_tcoffee.dot", ios_base::out | ios_base::trunc);
+	//write(strm2,g,DotDrawing());
+	//strm2.close();
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+void Test_TCoffeeFromLibrary() {
+//____________________________________________________________________________
 // Graph TCoffee
 
 	// Read a t-coffee library: AminoAcid Alphabet
@@ -901,7 +972,7 @@ void Test_TCoffee() {
 		assignValueById(depStrSet, ownerStrSet, positionToId(ownerStrSet, i));
 	}
 	TDependentGraph gAux(depStrSet);
-	generatePrimaryLibrary(gAux, AAGroupsDayhoff() );
+	generatePrimaryLibrary(gAux, AAGroupsDayhoff(), GlobalPairwise_Library() );
 	tripletLibraryExtension(gAux);
 
 	// Debug code
@@ -932,11 +1003,20 @@ void Test_TCoffee() {
 	Graph<Tree<double> > njTreeOut;
 	slowNjTree(distanceMatrix, njTreeOut);
 
-	// Perform a progressive alignment
-	TDependentGraph gOut(depStrSet);
-	progressiveAlignment(gAux, njTreeOut, gOut, Hirschberg() );
-	std::cout << gOut << std::endl;
 
+	fstream strm2; // Alignment graph as dot
+	strm2.open(TEST_PATH "my_tcoffee.dot", ios_base::out | ios_base::trunc);
+	write(strm2,gAux,DotDrawing());
+	strm2.close();
+
+	// Perform a progressive alignment
+	Graph<Alignment<TDependentStringSet, void> > gOut(depStrSet);
+	progressiveAlignment(gAux, njTreeOut, gOut, Hirschberg() );
+
+	//fstream strm2; // Alignment graph as dot
+	//strm2.open(TEST_PATH "my_tcoffee.dot", ios_base::out | ios_base::trunc);
+	//write(strm2,gOut,DotDrawing());
+	//strm2.close();
 
 	/*
 	// Read a t-coffee library: Dna Alphabet
@@ -970,6 +1050,7 @@ void Test_TCoffee() {
 	*/
 
 }
+
 
 //////////////////////////////////////////////////////////////////////////////
 
