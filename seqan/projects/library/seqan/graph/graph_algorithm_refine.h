@@ -1,5 +1,5 @@
-#ifndef SEQAN_HEADER_GRAPH_TEMP_REFINENEW_H
-#define SEQAN_HEADER_GRAPH_TEMP_REFINENEW_H
+#ifndef SEQAN_HEADER_GRAPH_TEMP_REFINE_H
+#define SEQAN_HEADER_GRAPH_TEMP_REFINE_H
 
 namespace SEQAN_NAMESPACE_MAIN
 {
@@ -213,8 +213,6 @@ SEQAN_CHECKPOINT
 
 }
 
-
-
 template<typename TValue>
 inline bool
 cutIsOk(String<std::set<TValue> > & all_nodes,
@@ -225,12 +223,13 @@ cutIsOk(String<std::set<TValue> > & all_nodes,
 {
 SEQAN_CHECKPOINT
 	
+	//cut already exists
 	if(iter != all_nodes[seq_i].end())
 		return false;
 //	if(min_len == 0)
 //		return true;
 
-	typename std::set<TValue>::iterator tmp_iter = all_nodes[seq_i].upperBound(pos_i);
+	typename std::set<TValue>::iterator tmp_iter = all_nodes[seq_i].upper_bound(pos_i);
 	if(tmp_iter != all_nodes[seq_i].end())
 		if((*tmp_iter - pos_i) < min_len)
 			return false;
@@ -244,8 +243,6 @@ SEQAN_CHECKPOINT
 	return true;
 
 }
-
-/*
 ///////////////////////////////////////////////////////////////////////////////////////////////////////	
 //Recursive Refinement
 //refine position node_i on sequence seq_i
@@ -277,14 +274,14 @@ SEQAN_CHECKPOINT
 
 		//get the sequence that node_i needs to be projected onto (seq_j)
 		//and get the projected position (pos_j)
-		TValue seq_j, node_j, pos_i;
+		TValue seq_j, node_j;
 		_getOtherSequenceAndProject(alis[*segment_it],seq_map,seq_i,node_i,seq_j,node_j);
 
 		typename std::set<TValue>::iterator iter;
 		iter = all_nodes[seq_j].find(node_j);
 		
 		//if node does not exist yet ---> insert and continue cutting
-		if(cutIsOk(all_nodes,seq_j,pos_i,iter,min_len))
+		if(cutIsOk(all_nodes,seq_j,node_j,iter,min_len))
 		{
 			all_nodes[seq_j].insert(node_j);
 			_refine(node_j,seq_j,seq_map,alis,gs,pms,all_nodes,min_len);
@@ -299,7 +296,6 @@ SEQAN_CHECKPOINT
 
 
 }
-*/
 	
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////	
@@ -660,6 +656,82 @@ SEQAN_CHECKPOINT
 }				
 
 
+struct FakeScore;
+
+template<typename TValue>
+class Score<TValue,FakeScore>
+{
+public:
+	Score() {
+	}
+
+	Score(Score const & other) {
+	}
+
+	Score & operator = (Score const & other) {
+		return *this;
+	}
+};
+
+template <typename TValue>
+inline TValue
+scoreGapExtend(Score<TValue,FakeScore> & me)
+{
+	return 0;
+}
+
+
+template <typename TValue>
+inline TValue const
+scoreGapExtend(Score<TValue,FakeScore> const & me)
+{
+	return 0;
+}
+
+template <typename TValue>
+inline TValue
+scoreGapOpen(Score<TValue,FakeScore> & me)
+{
+	return 0;
+}
+template <typename TValue>
+inline TValue const
+scoreGapOpen(Score<TValue,FakeScore> const & me)
+{
+	return 0;
+}
+
+template <typename TValue, typename T>
+inline TValue
+score(Score<TValue,FakeScore> & me,
+	  T const & left,
+	  T const & right)
+{
+	return 0;
+}
+
+template <typename TValue>
+struct Value< Score<TValue, FakeScore> >
+{
+	typedef TValue Type;
+};
+
+
+//fake score function 
+template<typename TScoreValue,typename TStringSet,typename TFragId,typename TFragPos,typename TFragSize, typename TFragSpec>
+TScoreValue
+getScore(Score<TScoreValue,FakeScore> & score_type,
+		 TStringSet & seqs,
+		 Fragment<TFragId,TFragPos,TFragSize,TFragSpec> & segment,
+		 bool i_am_first, 
+		 TFragPos pos_i,
+		 TFragPos pos_j,
+		 TFragSize len)
+{
+SEQAN_CHECKPOINT
+	return 0;
+}				
+
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //build refined alignment graph
@@ -690,6 +762,8 @@ SEQAN_CHECKPOINT
 	double duration;
 	start = clock();
 
+	int count_zweier = 0;
+
 	//make nodes
 	//for each sequence
 	for(int seq_i = 0; seq_i < (int) length(seqs); ++seq_i)
@@ -705,12 +779,17 @@ SEQAN_CHECKPOINT
 		{
 			TValue pos_i = *it;
 			addVertex(ali_g, seq_i, pos_i, *next_it - pos_i);
+			if(*next_it - pos_i == 2)
+				++count_zweier;
 			++it;
 			++next_it;
 		}
 
 		all_nodes[seq_i].clear();
 	}
+
+
+	std::cout <<"number of segments of length 2: " <<count_zweier <<"\n";
 
 	//make edges
 	TAliIterator ali_it = begin(alis);
@@ -739,17 +818,10 @@ SEQAN_CHECKPOINT
 			//find node that contains the projected position (pos_j)
 			TVertexDescriptor vd = findVertex(ali_g,seq_j,pos_j);
 			
-			//if exact cut exists 
-			if(fragmentBegin(ali_g,vd)==pos_j)
-			{
-				TValue score = (TValue) getScore(score_type,seqs,*ali_it,i_am_first,act_pos,pos_j,fragmentLength(ali_g,act_knot));//,fragmentLength(ali_g,vd));
-				addEdge(ali_g,act_knot,vd,score);
-			}
-			else //if the refinement was stopped here
-			{
-				std::cout << "probleme...\n";
-			}
-
+			SEQAN_TASSERT(fragmentBegin(ali_g,vd)==pos_j)
+			typename Value<TScore>::Type score = getScore(score_type,seqs,*ali_it,i_am_first,act_pos,pos_j,fragmentLength(ali_g,act_knot));//,fragmentLength(ali_g,vd));
+	//		if(score > 0)
+			addEdge(ali_g,act_knot,vd,score);
 			//prepare for next interval
 			act_pos += fragmentLength(ali_g,act_knot);
 			act_knot = findVertex(ali_g,seq,act_pos);
@@ -758,6 +830,7 @@ SEQAN_CHECKPOINT
 		++ali_it;
 	}
 
+	std::cout << "check\n";
 	finish1 = clock();
 	duration = (double)(finish1 - start) / CLOCKS_PER_SEC;
 	std::cout << "\ntook " << duration << " seconds.\n";
@@ -884,6 +957,19 @@ SEQAN_CHECKPOINT
 
 
 
+template<typename TAlignmentString, typename TOutGraph, typename TSequence, typename TSetSpec>
+void
+matchRefinement(TAlignmentString & alis,
+				StringSet<TSequence, TSetSpec> & seq, 
+				TOutGraph & ali_graph)
+{
+SEQAN_CHECKPOINT
+
+	Score<typename Cargo<typename EdgeType<TOutGraph>::Type>::Type,FakeScore > score_type;
+	matchRefinement(alis,seq,score_type,ali_graph);
+
+}
+
 
 
 
@@ -892,233 +978,374 @@ SEQAN_CHECKPOINT
 ///////////////////////////// UNFINISHED PART //////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////
 
-
-
-/*
-
-////////////////////////////////////////////////////////////////////////////////////////
-//build refined alignment graph
-////////////////////////////////////////////////////////////////////////////////////////
-//nodes are numbered ascendingly:
-//seq1   0  1  2  3  4 
-//seq2   5  6  7  8  9 10
-//seq3  11 12 13 14 15 
-template<typename TValue,typename TAlignmentString,typename TScore,typename TSequence, typename TSetSpec,typename TIntervalTreeGraph,typename TPropertyMap, typename TAliGraph,typename TSeqMap>
-void
-_makeAlignmentGraphFromRefinedSegmentsUnclean(String<std::set<TValue> > & all_nodes,
-				   TAlignmentString & alis,
-				   TScore & score_type,
-				   StringSet<TSequence, TSetSpec> & seqs,
-				   TSeqMap & seq_map,
-				   String<TIntervalTreeGraph> & gs, 
-				   String<TPropertyMap> & pms, 
-				   TAliGraph & ali_g)
-{
-SEQAN_CHECKPOINT
-	typedef typename Value<TAlignmentString>::Type TAlign;
-	typedef typename Iterator<TAlignmentString>::Type TAliIterator;
-	typedef typename VertexDescriptor<TAliGraph>::Type TVertexDescriptor;
-	typedef typename std::set<TValue>::iterator TSetIterator;
-
-	std::cout << "making refined alignment graph...";
-	clock_t start, finish1;
-	double duration;
-	start = clock();
-
-	//make nodes
-	//for each sequence
-	for(int seq_i = 0; seq_i < (int) length(seqs); ++seq_i)
-	{
-		TSetIterator it = all_nodes[seq_i].begin();
-		TSetIterator end_it = all_nodes[seq_i].end();
-		TSetIterator next_it = it;
-		if(next_it != end_it)
-			++next_it;
-		
-		//a new node for each interval
-		while(next_it != end_it)
-		{
-			TValue pos_i = *it;
-			addVertex(ali_g, seq_i, pos_i, *next_it - pos_i);
-			++it;
-			++next_it;
-		}
-
-		all_nodes[seq_i].clear();
-	}
-
-	//make edges
-	TAliIterator ali_it = begin(alis);
-	TAliIterator ali_end = end(alis);
-
-
-	//for each segment/fragement/alignment
-	while(ali_it != ali_end)
-	{
-		//get sequence, begin position and end position
-		TValue seq,begin_pos,end_pos;
-		getSeqBeginAndEnd(*ali_it,seq_map,seq,begin_pos,end_pos,0);
-		
-		//get the node that represents the current interval (begin_pos until next_cut_pos or end_pos)
-		TVertexDescriptor act_knot = findVertex(ali_g,seq,begin_pos);
-		if(begin_pos == fragmentBegin(ali_g,act_knot))
-
-		TValue act_pos;
-		act_pos = begin_pos;
-	
-		//for each interval that lies within the current segment/fragement/alignment
-		while(act_pos < end_pos)
-		{
-			//get other sequence and projected position
-			TValue seq_j,pos_j;
-			bool i_am_first = _getOtherSequenceAndProject(*ali_it,seq_map,seq,act_pos,seq_j,pos_j);
-			
-			//find node that contains the projected position (pos_j)
-			TVertexDescriptor vd = findVertex(ali_g,seq_j,pos_j);
-			
-			//if exact cut exists 
-			if(fragmentBegin(ali_g,vd)==pos_j)
-			{
-				TValue score = getScore(score_type,seqs,*ali_it,i_am_first,act_pos,pos_j,fragmentLength(ali_g,act_knot));//,fragmentLength(ali_g,vd));
-				addEdge(ali_g,act_knot,vd,score);
-			}
-			else //if the refinement was stopped here
-			{
-				std::cout << "probleme...\n";
-			}
-
-			//prepare for next interval
-			act_pos += fragmentLength(ali_g,act_knot);
-			act_knot = findVertex(ali_g,seq,act_pos);
-		
-		}
-		++ali_it;
-	}
-
-	finish1 = clock();
-	duration = (double)(finish1 - start) / CLOCKS_PER_SEC;
-	std::cout << "\ntook " << duration << " seconds.\n";
-
-
-}
-
-
-*/
-
-
-template<typename TAlignmentString, typename TOutGraph, typename TSequence, typename TSetSpec, typename TScore>
-void
-matchRefinement(TAlignmentString & alis,
-				StringSet<TSequence, TSetSpec> & seq, 
-				TScore & score_type,
-				TOutGraph & ali_graph,
-				unsigned int min_fragment_len)
-{
-SEQAN_CHECKPOINT
-
-	////////////////////////////////////////////////////////////////
-	//typedefs
-
-	typedef typename Value<TAlignmentString>::Type TAlign;
-	typedef typename Iterator<TAlignmentString>::Type TAliIterator;
-	typedef typename Size<TAlign>::Type TValue;
-//	typedef TAlign* TCargo;
-	typedef TValue TCargo;
-	typedef IntervalAndCargo<int,TCargo> TInterval;
-	typedef Graph<Directed<void,WithoutEdgeId> > TGraph;
-	typedef IntervalTreeNode<TInterval> TNode;
-	typedef String<TNode> TPropertyMap;
-	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	typedef String<TCargo> TList;
-	typedef typename std::set<TValue>::iterator TSetIterator;
-
-	////////////////////////////////////////////////////////////////
-
-	TValue numSequences = length(seq);
-	//weird ID --> good ID map
-	std::map<const void * ,int> seq_map;
-	for(int i = 0; i < (int) numSequences; ++i)
-		seq_map[id(seq[i])] = i;
-
-
-	////////////////////////////////////////////////////////////////
-	//build interval trees
-	String<TGraph> gs;
-	String<TPropertyMap> pms;
-
-	createTreesForAllSequences(gs, pms, alis, seq, seq_map, numSequences, ComputeCenter());
-
-
-	////////////////////////////////////////////////////////////////
-	//do refinement
-	std::cout <<"refining..."<<std::flush;
-	clock_t start, finish1;
-	double duration;
-	start = clock();
-	
-	//all_nodes = set of all cut positions
-	String<std::set<TValue> > all_nodes;
-	resize(all_nodes,numSequences);
-
-	//call function _refine for each startknoten
-	TAliIterator ali_it = begin(alis);
-	TAliIterator ali_end = end(alis);
-
-	//for each segment/fragement/alignment
-	while(ali_it != ali_end)
-	{
-		//for each of the two sequences
-		for(TValue i = 0; i < 2; ++i)
-		{
-			TValue seq_i,begin_i,end_i;
-			getSeqBeginAndEnd(*ali_it,seq_map,seq_i,begin_i,end_i,i);
-	
-			//refine begin
-			TSetIterator iter = all_nodes[seq_i].find(begin_i);		
-			if(cutIsOk(all_nodes,seq_i,begin_i,iter,min_fragment_len))
-			{
-				all_nodes[seq_i].insert(begin_i);
-				_refine(begin_i, seq_i, seq_map, alis, gs, pms, all_nodes, min_fragment_len);//TStop());
-			}
-			//and end position
-			iter = all_nodes[seq_i].find(end_i);		
-			if(cutIsOk(all_nodes,seq_i,end_i,iter,min_fragment_len))
-			{
-				all_nodes[seq_i].insert(end_i);
-				_refine(end_i, seq_i, seq_map, alis, gs, pms, all_nodes, min_fragment_len);//TStop());
-			}
-		}	
-		++ali_it;
-	}
-
-	finish1 = clock();
-	duration = (double)(finish1 - start) / CLOCKS_PER_SEC;
-	std::cout << "\ntook " << duration << " seconds.\n";
-
-
-
-	//for(int seq_i = 0; seq_i < length(seq); ++seq_i)
-	//{
-	//	std::set<TValue>::iterator it = all_nodes[seq_i].begin();
-	//	std::set<TValue>::iterator end_it = all_nodes[seq_i].end();
-	//
-	//	while(it != end_it)
-	//	{
-	//		std::cout << *it << ",";
-	//		++it;
-	//	}
-	//	std::cout << "\n";
-	//}
-
-
-	////////////////////////////////////////////////////////////////
-	//build refined alignment graph
-	_makeAlignmentGraphFromRefinedSegmentsUnclean(all_nodes,alis,score_type,seq,seq_map,gs,pms,ali_graph);
-
-
-
-
-}
+//template<typename TAliGraph, typename TVertexDescriptor,typename TValue>
+//TValue  
+//_getClosestRefinedNeighbor(TAliGraph & ali_g,
+//						   TVertexDescriptor & vd,
+//						   TValue seq,
+//						   TValue pos)
+//{
+//SEQAN_CHECKPOINT
+//
+//	if(pos-fragmentBegin(ali_g,vd) < fragmentBegin(ali_g,vd)+fragmentLength(ali_g,vd)-pos)
+//		return fragmentBegin(ali_g,vd);
+//	else
+//		return fragmentBegin(ali_g,vd) + fragmentLength(ali_g,vd);
+//
+//}
+//
+//template<typename TAliGraph,typename TValue>
+//void
+//_getCutEndPos(TAliGraph & ali_g, 
+//			  typename VertexDescriptor<TAliGraph>::Type & end_knot,
+//			  TValue seq,
+//			  TValue end_pos,
+//			  TValue & cut_end_pos)
+//{
+//SEQAN_CHECKPOINT
+//
+//	end_knot = findVertex(ali_g,seq,end_pos-1);//end_pos1 is the first position of the next node
+//	if(end_pos == fragmentBegin(ali_g,end_knot) + fragmentBegin(ali_g,end_knot))
+//		cut_end_pos = end_pos;
+//	else
+//	{
+//		cut_end_pos = _getClosestRefinedNeighbor(ali_g,end_knot,seq,end_pos);
+//		end_knot =  findVertex(ali_g,seq,cut_end_pos-1);
+//		SEQAN_TASSERT(cut_end_pos == fragmentBegin(ali_g,end_knot)+fragmentLength(ali_g,end_knot))
+//	}
+//		
+//
+//}
+//
+//template<typename TAliGraph,typename TValue>
+//void
+//_getCutBeginPos(TAliGraph & ali_g, 
+//			  typename VertexDescriptor<TAliGraph>::Type & act_knot,
+//			  TValue seq,
+//			  TValue act_pos,
+//			  TValue & cut_act_pos)
+//{
+//SEQAN_CHECKPOINT
+//	
+//	act_knot = findVertex(ali_g,seq,act_pos);
+//	//if completely refined
+//	if(act_pos == fragmentBegin(ali_g,act_knot))
+//		cut_act_pos = act_pos;
+//	else //if incompletely refined
+//	{
+//		cut_act_pos = _getClosestRefinedNeighbor(ali_g,act_knot,seq,act_pos);
+//		act_knot =  findVertex(ali_g,seq,cut_act_pos);
+//		SEQAN_TASSERT(cut_act_pos == fragmentBegin(ali_g,act_knot))
+//	}
+//
+//
+//}
+//
+//
+////template<typename TScore, typename TStringSet, typename TValue>
+////typename Value<TScore>::Type 
+////_getLeftRestScore(TScore & score_type,
+////						  TStringSet & seqs,
+////						  TValue seq1,
+////						  TValue seq2,
+////						  TValue act_pos1,
+////						  TValue cut_act_pos1,
+////						  TValue act_pos2,
+////						  TValue cut_act_pos2)
+////{
+////SEQAN_CHECKPOINT
+////					  
+////	typedef typename Iterator<typename Value<TStringSet>::Type>::Type TStringIterator;
+////
+////	if(cut_act_pos1 == act_pos1 && cut_act_pos2 == act_pos2)
+////		return 0;
+////	
+////	typename Value<TScore>::Type retscore = 0;
+////
+////	if(cut_act_pos1 <= act_pos1 && cut_act_pos2 <= act_pos2)
+////	{
+////		TStringIterator it1 = seqs[seq1][--act_pos1];
+////		TStringIterator end_it1 = seqs[seq1][cut_act_pos1];
+////		TStringIterator it2 = seqs[seq2][--act_pos2];
+////		TStringIterator end_it2 = seqs[seq2][cut_act_pos2];
+////
+////		while(it1>=end_it1 && it2>=end_it2)
+////			retscore += score(score_type,*it1--,*it2--);
+////		retscore += (it1-end_it1)*scoreGapExtend(score_type);
+////		retscore += (it2-end_it2)*scoreGapExtend(score_type);
+////
+////	}
+////}
+//
+//////////////////////////////////////////////////////////////////////////////////////////
+////build refined alignment graph
+//////////////////////////////////////////////////////////////////////////////////////////
+////nodes are numbered ascendingly:
+////seq1   0  1  2  3  4 
+////seq2   5  6  7  8  9 10
+////seq3  11 12 13 14 15 
+//template<typename TValue,typename TAlignmentString,typename TScore,typename TSequence, typename TSetSpec,typename TIntervalTreeGraph,typename TPropertyMap, typename TAliGraph,typename TSeqMap>
+//void
+//_makeAlignmentGraphFromRefinedSegmentsUnclean(String<std::set<TValue> > & all_nodes,
+//				   TAlignmentString & alis,
+//				   TScore & score_type,
+//				   StringSet<TSequence, TSetSpec> & seqs,
+//				   TSeqMap & seq_map,
+//				   String<TIntervalTreeGraph> & gs, 
+//				   String<TPropertyMap> & pms, 
+//				   TAliGraph & ali_g)
+//{
+//SEQAN_CHECKPOINT
+//	typedef typename Value<TAlignmentString>::Type TAlign;
+//	typedef typename Iterator<TAlignmentString>::Type TAliIterator;
+//	typedef typename VertexDescriptor<TAliGraph>::Type TVertexDescriptor;
+//	typedef typename std::set<TValue>::iterator TSetIterator;
+//
+//	std::cout << "making refined alignment graph...";
+//	clock_t start, finish1;
+//	double duration;
+//	start = clock();
+//
+//	//make nodes
+//	//for each sequence
+//	for(int seq_i = 0; seq_i < (int) length(seqs); ++seq_i)
+//	{
+//		TSetIterator it = all_nodes[seq_i].begin();
+//		TSetIterator end_it = all_nodes[seq_i].end();
+//		TSetIterator next_it = it;
+//		if(next_it != end_it)
+//			++next_it;
+//		
+//		//a new node for each interval
+//		while(next_it != end_it)
+//		{
+//			TValue pos_i = *it;
+//			addVertex(ali_g, seq_i, pos_i, *next_it - pos_i);
+//			++it;
+//			++next_it;
+//		}
+//
+//		all_nodes[seq_i].clear();
+//	}
+//
+//	//make edges
+//	TAliIterator ali_it = begin(alis);
+//	TAliIterator ali_end = end(alis);
+//
+//
+//	//for each segment/fragment/alignment
+//	while(ali_it != ali_end)
+//	{
+//		//get first sequence that takes part in the alignment + boundaries of the ali
+//		TValue seq1,begin_pos1,end_pos1;
+//		getSeqBeginAndEnd(*ali_it,seq_map,seq1,begin_pos1,end_pos1,(TValue)0);
+//
+//		//get the last node that is within the current ali
+//		TVertexDescriptor end_knot1;
+//		TValue cut_end_pos1;
+//		_getCutEndPos(ali_g,end_knot1,seq1,end_pos1,cut_end_pos1);
+//	
+//		//get the node that represents the current interval (begin_pos until next_cut_pos or end_pos)
+//		TVertexDescriptor act_knot1;
+//		TValue cut_act_pos1,act_pos1;
+//		act_pos1 = begin_pos1;
+//		_getCutBeginPos(ali_g,act_knot1,seq1,act_pos1,cut_act_pos1);
+//
+//		TValue act_end_pos1 = cut_act_pos1 + fragmentLength(ali_g,act_knot1);
+//
+//		//walk through cuts on the first sequence
+////		while (act_end_pos1 <= cut_end_pos1)
+//		while (true)
+//		{
+//			//get other sequence and projected position
+//			TValue seq2,act_pos2;
+//			_getOtherSequenceAndProject(*ali_it,seq_map,seq1,act_pos1,seq2,act_pos2);
+//		
+//			//get node that corresponds to that position
+//			TVertexDescriptor act_knot2;
+//			TValue cut_act_pos2;
+//			_getCutBeginPos(ali_g,act_knot2,seq2,act_pos2,cut_act_pos2);
+//
+//			//corresponding end on seq2 (there might be more than one node on seq2 that corresponds
+//			//to the same interval (=node) on seq1)
+//			TValue act_end_pos2;
+//			_getOtherSequenceAndProject(*ali_it,seq_map,seq1,act_end_pos1-1,seq2,act_end_pos2);
+//			++act_end_pos2;
+//			TVertexDescriptor act_end_knot2;
+//			TValue cut_act_end_pos2;
+//			_getCutEndPos(ali_g,act_end_knot2,seq2,act_end_pos2,cut_act_end_pos2);
+//			
+//			if(cut_act_pos2 == cut_act_end_pos2)
+//				break;
+//			while(true)
+//			{
+//				//should at the moment return score for:
+//				//
+//				//seq1 = ....cr...rc....
+//				//            ||||||
+//				//seq2 = ...c.r...rc....
+//				//bzw
+//				//seq1 = ..cr.....x....   man will aber nur    ..cr......x....
+//				//          |||||||-							 ---||||||  
+//				//seq2 = ...r.c...rc... 					   ...r.c...rc....
+//				typename Value<TScore>::Type score = 0;
+//				score = getScore(score_type,seqs,*ali_it,i_am_first,act_pos1,act_pos2,act_end_pos1-act_pos1,cut_act_end_pos2);
+//				//add score for
+//				//
+//				//seq1 = ...-cr....x....
+//				//          ||
+//				//seq2 = ...c.r...rc....
+////					score += getLeftRestScore(score_type,seqs,seq1,seq2,act_pos1,cut_act_pos1,act_pos2,cut_act_pos2);
+//
+//				if(score > 0)
+//					if(findEdge(ali_g,act_knot1,act_knot2)==0)
+//						addEdge(ali_g,act_knot1,act_knot2,score);
+//				
+//				if(act_knot2==act_end_knot2)
+//					break;
+//
+//				act_pos2 = cut_act_pos2 + fragmentLength(ali_g,act_knot2);
+//				_getCutBeginPos(ali_g,act_knot2,seq2,act_pos2,cut_act_pos2);
+//			}
+//
+//			if(act_knot1 == end_knot1)
+//				break;
+//
+//			act_pos1 = act_end_pos1;
+//			act_knot1 = findVertex(ali_g,seq1,act_pos1);
+//			cut_act_pos1 = act_pos1;
+//			act_end_pos1 = cut_act_pos1 + fragmentLength(ali_g,act_knot1);
+//		}
+//		++ali_it;
+//	}
+//
+//	finish1 = clock();
+//	duration = (double)(finish1 - start) / CLOCKS_PER_SEC;
+//	std::cout << "\ntook " << duration << " seconds.\n";
+//
+//
+//}
+//
+//
+//
+//
+//
+//template<typename TAlignmentString, typename TOutGraph, typename TSequence, typename TSetSpec, typename TScore>
+//void
+//matchRefinement(TAlignmentString & alis,
+//				StringSet<TSequence, TSetSpec> & seq, 
+//				TScore & score_type,
+//				TOutGraph & ali_graph,
+//				unsigned int min_fragment_len)
+//{
+//SEQAN_CHECKPOINT
+//
+//	////////////////////////////////////////////////////////////////
+//	//typedefs
+//
+//	typedef typename Value<TAlignmentString>::Type TAlign;
+//	typedef typename Iterator<TAlignmentString>::Type TAliIterator;
+//	typedef typename Size<TAlign>::Type TValue;
+////	typedef TAlign* TCargo;
+//	typedef TValue TCargo;
+//	typedef IntervalAndCargo<int,TCargo> TInterval;
+//	typedef Graph<Directed<void,WithoutEdgeId> > TGraph;
+//	typedef IntervalTreeNode<TInterval> TNode;
+//	typedef String<TNode> TPropertyMap;
+//	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
+//	typedef String<TCargo> TList;
+//	typedef typename std::set<TValue>::iterator TSetIterator;
+//
+//	////////////////////////////////////////////////////////////////
+//
+//	TValue numSequences = length(seq);
+//	//weird ID --> good ID map
+//	std::map<const void * ,int> seq_map;
+//	for(int i = 0; i < (int) numSequences; ++i)
+//		seq_map[id(seq[i])] = i;
+//
+//
+//	////////////////////////////////////////////////////////////////
+//	//build interval trees
+//	String<TGraph> gs;
+//	String<TPropertyMap> pms;
+//
+//	createTreesForAllSequences(gs, pms, alis, seq, seq_map, numSequences, ComputeCenter());
+//
+//
+//	////////////////////////////////////////////////////////////////
+//	//do refinement
+//	std::cout <<"refining..."<<std::flush;
+//	clock_t start, finish1;
+//	double duration;
+//	start = clock();
+//	
+//	//all_nodes = set of all cut positions
+//	String<std::set<TValue> > all_nodes;
+//	resize(all_nodes,numSequences);
+//
+//	//call function _refine for each startknoten
+//	TAliIterator ali_it = begin(alis);
+//	TAliIterator ali_end = end(alis);
+//
+//	//for each segment/fragement/alignment
+//	while(ali_it != ali_end)
+//	{
+//		//for each of the two sequences
+//		for(TValue i = 0; i < 2; ++i)
+//		{
+//			TValue seq_i,begin_i,end_i;
+//			getSeqBeginAndEnd(*ali_it,seq_map,seq_i,begin_i,end_i,i);
+//	
+//			//refine begin
+//			TSetIterator iter = all_nodes[seq_i].find(begin_i);		
+//			if(cutIsOk(all_nodes,seq_i,begin_i,iter,min_fragment_len))
+//			{
+//				all_nodes[seq_i].insert(begin_i);
+//				_refine(begin_i, seq_i, seq_map, alis, gs, pms, all_nodes, min_fragment_len);//TStop());
+//			}
+//			//and end position
+//			iter = all_nodes[seq_i].find(end_i);		
+//			if(cutIsOk(all_nodes,seq_i,end_i,iter,min_fragment_len))
+//			{
+//				all_nodes[seq_i].insert(end_i);
+//				_refine(end_i, seq_i, seq_map, alis, gs, pms, all_nodes, min_fragment_len);//TStop());
+//			}
+//		}	
+//		++ali_it;
+//	}
+//
+//	finish1 = clock();
+//	duration = (double)(finish1 - start) / CLOCKS_PER_SEC;
+//	std::cout << "\ntook " << duration << " seconds.\n";
+//	
+//	int insgesamt = 0;
+//	for(TValue ii = 0; ii < length(seq); ++ii)
+//		insgesamt += all_nodes[ii].size();
+//	std::cout << "Number of cuts: " << insgesamt << "\n";
+//
+//	//for(int seq_i = 0; seq_i < length(seq); ++seq_i)
+//	//{
+//	//	typename std::set<TValue>::iterator it = all_nodes[seq_i].begin();
+//	//	typename std::set<TValue>::iterator end_it = all_nodes[seq_i].end();
+//	//
+//	//	while(it != end_it)
+//	//	{
+//	//		std::cout << *it << ",";
+//	//		++it;
+//	//	}
+//	//	std::cout << "\n";
+//	//}
+//
+//
+//	////////////////////////////////////////////////////////////////
+//	//build refined alignment graph
+//	_makeAlignmentGraphFromRefinedSegmentsUnclean(all_nodes,alis,score_type,seq,seq_map,gs,pms,ali_graph);
+//
+//
+//
+//
+//}
 	
 
 
