@@ -9,10 +9,15 @@ namespace SEQAN_NAMESPACE_MAIN
 ///////////////////////////////////////////////////////////////////////////////////////////////////////	
 //Functions for Align<TSource,TSpec>
 //project onto other sequence 
-template<typename TSource,typename TSpec,typename TValue,typename TMap>
+template<typename TSource,typename TSpec,typename TStringSet,typename TValue,typename TMap>
 bool
 _getOtherSequenceAndProject(Align<TSource,TSpec> & segment, 
-						   TMap & seq_map, TValue seq_i, TValue node_i, TValue & seq_j, TValue & node_j)
+						    TStringSet & seqs,
+							TMap & seq_map, 
+						   TValue seq_i, 
+						   TValue node_i, 
+						   TValue & seq_j, 
+						   TValue & node_j)
 {
 SEQAN_CHECKPOINT
 	TValue ali_seq_0 = seq_map[id(source(row(segment,0)))];
@@ -68,9 +73,15 @@ getSeqBeginAndEnd(Align<TAliSource,TAliSpec> & segment,
 ///////////////////////////////////////////////////////////////////////////////////////////////////////	
 //Functios for Align Graphs
 //project onto other sequence for Graph<Alignment>
-template<typename TAlignment,typename TValue, typename TMap>
+template<typename TAlignment,typename TStringSet,typename TValue, typename TMap>
 bool
-_getOtherSequenceAndProject(Graph<TAlignment> & segment, TMap & seq_map, TValue seq_i, TValue pos_i, TValue & seq_j, TValue & pos_j)
+_getOtherSequenceAndProject(Graph<TAlignment> & segment, 
+							TStringSet & seqs,
+                            TMap & seq_map, 
+							TValue seq_i, 
+							TValue pos_i, 
+							TValue & seq_j, 
+							TValue & pos_j)
 {
 SEQAN_CHECKPOINT
 
@@ -94,9 +105,10 @@ SEQAN_CHECKPOINT
 ///////////////////////////////////////////////////////////////////////////////////////////////////////	
 //Functions for Fragments
 //project onto other sequence for Graph<Alignment>
-template<typename TFragId,typename TFragPos,typename TFragSize, typename TFragSpec,typename TValue, typename TMap>
+template<typename TStringSet,typename TFragId,typename TFragPos,typename TFragSize, typename TFragSpec,typename TValue, typename TMap>
 bool
 _getOtherSequenceAndProject(Fragment<TFragId,TFragPos,TFragSize,TFragSpec> & segment,
+							TStringSet & seqs,
 						   TMap & seq_map,
 						   TValue seq_i,
 						   TValue pos_i,
@@ -104,17 +116,19 @@ _getOtherSequenceAndProject(Fragment<TFragId,TFragPos,TFragSize,TFragSpec> & seg
 						   TValue & pos_j)
 {
 SEQAN_CHECKPOINT
-
+	seq_i = positionToId(seqs,seq_i);
 	pos_j = getProjectedPosition(segment,seq_i, pos_i);
-
+	
 	if(seq_i == sequenceId(segment,0))
 	{
 		seq_j = sequenceId(segment,1);
+		seq_j = idToPosition(seqs, seq_j);
 		return true;
 	}
 	else
 	{
 		seq_j = sequenceId(segment,0);
+		seq_j = idToPosition(seqs, seq_j);
 		return false;
 	}
 
@@ -162,10 +176,11 @@ SEQAN_CHECKPOINT
 ///////////////////////////////////////////////////////////////////////////////////////////////////////	
 //Recursive Refinement
 //refine position node_i on sequence seq_i
-template<typename TValue, typename TAlignmentString, typename TGraph, typename TPropertyMap,typename TSeqMap>
+template<typename TValue, typename TAlignmentString, typename TStringSet, typename TGraph, typename TPropertyMap,typename TSeqMap>
 void
 _refine(TValue node_i, 
 	 TValue seq_i, 
+	 TStringSet & seqs,
 	 TSeqMap & seq_map,
 	 TAlignmentString & alis, 
 	 String<TGraph> & gs, 
@@ -190,8 +205,8 @@ SEQAN_CHECKPOINT
 		//get the sequence that node_i needs to be projected onto (seq_j)
 		//and get the projected position (pos_j)
 		TValue seq_j, node_j;
-		_getOtherSequenceAndProject(alis[*segment_it],seq_map,seq_i,node_i,seq_j,node_j);
-
+		_getOtherSequenceAndProject(alis[*segment_it],seqs,seq_map,seq_i,node_i,seq_j,node_j);
+		
 		typename std::set<TValue>::iterator iter;
 		iter = all_nodes[seq_j].find(node_j);
 		
@@ -200,7 +215,7 @@ SEQAN_CHECKPOINT
 		{
 			//TODO Abbruch: if(!stop(all_nodes,seq_check,node_j,seq_j,TStop()))
 			all_nodes[seq_j].insert(node_j);
-			_refine(node_j,seq_j,seq_map,alis,gs,pms,all_nodes);
+			_refine(node_j,seq_j,seqs,seq_map,alis,gs,pms,all_nodes);
 			//TODO: else //verschmelzen, abschneiden und übergehen, erst später... 	
 			//do nothing or resolve problems  
 		}
@@ -246,10 +261,11 @@ SEQAN_CHECKPOINT
 ///////////////////////////////////////////////////////////////////////////////////////////////////////	
 //Recursive Refinement
 //refine position node_i on sequence seq_i
-template<typename TValue, typename TAlignmentString, typename TGraph, typename TPropertyMap,typename TSeqMap>
+template<typename TValue, typename TAlignmentString, typename TStringSet,typename TGraph, typename TPropertyMap,typename TSeqMap>
 void
 _refine(TValue node_i, 
 	 TValue seq_i, 
+	 TStringSet & seqs,
 	 TSeqMap & seq_map,
 	 TAlignmentString & alis, 
 	 String<TGraph> & gs, 
@@ -275,8 +291,8 @@ SEQAN_CHECKPOINT
 		//get the sequence that node_i needs to be projected onto (seq_j)
 		//and get the projected position (pos_j)
 		TValue seq_j, node_j;
-		_getOtherSequenceAndProject(alis[*segment_it],seq_map,seq_i,node_i,seq_j,node_j);
-
+		_getOtherSequenceAndProject(alis[*segment_it],seqs,seq_map,seq_i,node_i,seq_j,node_j);
+		
 		typename std::set<TValue>::iterator iter;
 		iter = all_nodes[seq_j].find(node_j);
 		
@@ -284,7 +300,7 @@ SEQAN_CHECKPOINT
 		if(cutIsOk(all_nodes,seq_j,node_j,iter,min_len))
 		{
 			all_nodes[seq_j].insert(node_j);
-			_refine(node_j,seq_j,seq_map,alis,gs,pms,all_nodes,min_len);
+			_refine(node_j,seq_j,seqs,seq_map,alis,gs,pms,all_nodes,min_len);
 			//TODO: else //verschmelzen, abschneiden und übergehen, erst später... 	
 			//do nothing or resolve problems  
 		}
@@ -304,10 +320,11 @@ SEQAN_CHECKPOINT
 
 
 //construct intervals from allignments for each sequence (other Alignment types)
-template<typename TInterval, typename TAlignmentString, typename TSeqMap>
+template<typename TInterval, typename TStringSet, typename TAlignmentString, typename TSeqMap>
 void
 _buildIntervalsForAllSequences(TAlignmentString & alis, 
 							   String<String<TInterval> > & intervals, 
+	   						   TStringSet & seqs,
 							   TSeqMap & seq_map)
 
 {
@@ -328,11 +345,14 @@ SEQAN_CHECKPOINT
 	
 		//get the first sequence (and its begin and end) that takes part in the alignment (seq_i)
 		getSeqBeginAndEnd(*ali_it,seq_map,seq_i,begin_,end_,0);
+		seq_i = idToPosition(seqs, seq_i);
+
 		//and append the interval (ali_begin, ali_end) with cargo ali* to the list of intervals of seq_i
 		appendValue(intervals[seq_i],IntervalAndCargo<TValue,TCargo>(begin_,end_,ali_counter)); 
 	
 		//get the second sequence (and its begin and end) that takes part in the alignment (seq_i)
 		getSeqBeginAndEnd(*ali_it,seq_map,seq_i,begin_,end_,1);
+		seq_i = idToPosition(seqs, seq_i);
 		//and again append the interval (ali_begin, ali_end) with cargo ali* to the list of intervals of seq_i
 		appendValue(intervals[seq_i],IntervalAndCargo<TValue,TCargo>(begin_,end_,ali_counter)); 
 	
@@ -376,7 +396,7 @@ SEQAN_CHECKPOINT
 	resize(intervals,numSequences);
 
 	//fill intervals
-	_buildIntervalsForAllSequences(alis,intervals,seq_map);
+	_buildIntervalsForAllSequences(alis,intervals,seqs,seq_map);
 	
 	TValue i = 0;
 	
@@ -733,6 +753,9 @@ SEQAN_CHECKPOINT
 }				
 
 
+
+
+
 ////////////////////////////////////////////////////////////////////////////////////////
 //build refined alignment graph
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -762,35 +785,41 @@ SEQAN_CHECKPOINT
 	double duration;
 	start = clock();
 
-	int count_zweier = 0;
-
+	
 	//make nodes
 	//for each sequence
 	for(int seq_i = 0; seq_i < (int) length(seqs); ++seq_i)
 	{
+		TValue seq_id = positionToId(stringSet(ali_g), seq_i);
 		TSetIterator it = all_nodes[seq_i].begin();
 		TSetIterator end_it = all_nodes[seq_i].end();
 		TSetIterator next_it = it;
 		if(next_it != end_it)
 			++next_it;
 		
+		//first unaligned node
+		if(it != end_it && *it != 0)
+			addVertex(ali_g, seq_id, 0, *it);
+
 		//a new node for each interval
 		while(next_it != end_it)
 		{
 			TValue pos_i = *it;
-			addVertex(ali_g, positionToId(stringSet(ali_g), seq_i), pos_i, *next_it - pos_i);
-			if(*next_it - pos_i == 2)
-				++count_zweier;
+			addVertex(ali_g, seq_id, pos_i, *next_it - pos_i); 
 			++it;
 			++next_it;
 		}
+
+		//last unaligned node
+		if(it !=end_it && *it<length(seqs[seq_i])-1)
+			addVertex(ali_g, seq_id, *it, (length(seqs[seq_i])-1) - *it);
+
 
 		all_nodes[seq_i].clear();
 	}
 
 
-	std::cout <<"number of segments of length 2: " <<count_zweier <<"\n";
-
+	
 	//make edges
 	TAliIterator ali_it = begin(alis);
 	TAliIterator ali_end = end(alis);
@@ -813,7 +842,7 @@ SEQAN_CHECKPOINT
 
 			//get other sequence and projected position
 			TValue seq_j,pos_j;
-			bool i_am_first = _getOtherSequenceAndProject(*ali_it,seq_map,seq,act_pos,seq_j,pos_j);
+			bool i_am_first = _getOtherSequenceAndProject(*ali_it,seqs,seq_map,seq,act_pos,seq_j,pos_j);
 			
 			//find node that contains the projected position (pos_j)
 			TVertexDescriptor vd = findVertex(ali_g,seq_j,pos_j);
@@ -909,18 +938,19 @@ SEQAN_CHECKPOINT
 		{
 			TValue seq_i,begin_i,end_i;
 			getSeqBeginAndEnd(*ali_it,seq_map,seq_i,begin_i,end_i,i);
-	
+			seq_i = idToPosition(seq,seq_i);
+			
 			//refine begin
 			if(all_nodes[seq_i].find(begin_i) == all_nodes[seq_i].end())
 			{
 				all_nodes[seq_i].insert(begin_i);
-				_refine(begin_i, seq_i, seq_map, alis, gs,pms,all_nodes);//TStop());
+				_refine(begin_i, seq_i, seq, seq_map, alis, gs,pms,all_nodes);//TStop());
 			}
 			//and end position
 			if(all_nodes[seq_i].find(end_i) == all_nodes[seq_i].end())
 			{
 				all_nodes[seq_i].insert(end_i);
-				_refine(end_i, seq_i, seq_map, alis, gs,pms,all_nodes);//TStop());
+				_refine(end_i, seq_i, seq, seq_map, alis, gs,pms,all_nodes);//TStop());
 			}
 		}	
 		++ali_it;
@@ -1296,20 +1326,21 @@ SEQAN_CHECKPOINT
 //		{
 //			TValue seq_i,begin_i,end_i;
 //			getSeqBeginAndEnd(*ali_it,seq_map,seq_i,begin_i,end_i,i);
-//	
+//			seq_i = idToPosition(seq,seq_i);
+//
 //			//refine begin
 //			TSetIterator iter = all_nodes[seq_i].find(begin_i);		
 //			if(cutIsOk(all_nodes,seq_i,begin_i,iter,min_fragment_len))
 //			{
 //				all_nodes[seq_i].insert(begin_i);
-//				_refine(begin_i, seq_i, seq_map, alis, gs, pms, all_nodes, min_fragment_len);//TStop());
+//				_refine(begin_i, seq_i, seq, seq_map, alis, gs, pms, all_nodes, min_fragment_len);//TStop());
 //			}
 //			//and end position
 //			iter = all_nodes[seq_i].find(end_i);		
 //			if(cutIsOk(all_nodes,seq_i,end_i,iter,min_fragment_len))
 //			{
 //				all_nodes[seq_i].insert(end_i);
-//				_refine(end_i, seq_i, seq_map, alis, gs, pms, all_nodes, min_fragment_len);//TStop());
+//				_refine(end_i, seq_i, seq, seq_map, alis, gs, pms, all_nodes, min_fragment_len);//TStop());
 //			}
 //		}	
 //		++ali_it;
