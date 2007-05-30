@@ -946,9 +946,8 @@ combineGraphs(Graph<Alignment<TStringSet, TCargo, TSpec> >& outGraph,
 	double scalingLib2 = (double) 100 / (double) maxCargoLib2;
 
 	// Match refinement
-	Score<double> score_type = Score<double>(5,-4,-0.5,-10);
 	TStringSet& str = stringSet(outGraph);	
-	matchRefinement(matches,str,score_type,outGraph);
+	matchRefinement(matches,str,outGraph);
 
 	// Traverse all the matches and adapt the weights
 	// Stacking of library weights
