@@ -619,7 +619,7 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	clearVertices(g);
 
 	// Pairwise alignments for all pairs of sequences
-	Score<double> score_type = Score<double>(5,-4,-0.5,-10);
+	Score<double> score_type = Score<double>(2,-1,-0.5,-2);
 	TStringSet& str = stringSet(g);	
 	TSize nseq = length(stringSet(g));
 	TSeqSimilarity seqSimMap;
@@ -651,7 +651,7 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 			//std::cout << pairSet[1] << std::endl;
 			//std::cout << pGraph << std::endl;
 			//std::cout << seqSim << std::endl;
-
+			
 			TEI it(pGraph);
 			for(;!atEnd(it);++it) {
 				TVD sV = sourceVertex(it);
@@ -669,11 +669,38 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	//}
 	//std::cout << "The matches:" << std::endl;
 	//for(TSize i = 0;i<length(matches);++i) {
-	//	std::cout << sequenceId(matches[i],0) << ',' << fragmentBegin(matches[i],0) << ',' << fragmentLength(matches[i],0) << ',' << sequenceId(matches[i],1) << ',' << fragmentBegin(matches[i],1) << ',' << fragmentLength(matches[i],1) << std::endl;
+	//	for(TSize i = 0;i<length(matches);++i) {
+	//		TId tmp_id1 = sequenceId(matches[i],0);
+	//		std::cout << tmp_id1 << ',' << fragmentBegin(matches[i],tmp_id1) << ',';
+	//		for(TSize j = fragmentBegin(matches[i],tmp_id1); j < fragmentBegin(matches[i],tmp_id1) + fragmentLength(matches[i],tmp_id1); ++j) {
+	//			std::cout << str[idToPosition(str, tmp_id1)][j];
+	//		}
+	//		TId tmp_id2 = sequenceId(matches[i],1);
+	//		std::cout << ',' <<	tmp_id2 << ',' << fragmentBegin(matches[i],tmp_id2) << ',';
+	//		for(TSize j = fragmentBegin(matches[i],tmp_id2); j < fragmentBegin(matches[i],tmp_id2) + fragmentLength(matches[i],tmp_id2); ++j) {
+	//			std::cout << str[idToPosition(str, tmp_id2)][j];
+	//		}
+	//		std::cout << std::endl;
+	//	}
 	//}
 
 	// Refine all matches and create multiple alignment
-	matchRefinement(matches,str,score_type,g);
+	matchRefinement(matches,stringSet(g),g);
+
+	//// Debug Code
+	//std::cout << "Refined matches" << std::endl;
+	//TEdgeIterator it_tmp(g);
+	//for(;!atEnd(it_tmp);++it_tmp) {
+	//	TId id1 = sequenceId(g,sourceVertex(it_tmp));
+	//	TId id2 = sequenceId(g,targetVertex(it_tmp));
+	//	std::cout << id1 << ',' << fragmentBegin(g,sourceVertex(it_tmp)) << ',';
+	//	std::cout << label(g,sourceVertex(it_tmp));
+	//	std::cout << ',' <<	id2 << ',' << fragmentBegin(g,targetVertex(it_tmp)) << ',';
+	//	std::cout << label(g,targetVertex(it_tmp));
+	//	std::cout << std::endl;	
+	//}
+
+	// Adapt edge weights
 	TEdgeIterator it(g);
 	for(;!atEnd(it);++it) {
 		TId id1 = sequenceId(g,sourceVertex(it));
@@ -789,16 +816,21 @@ _recursiveProgressiveAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	typedef typename Iterator<TGuideTree, DfsPreorder>::Type TDfsPreorderIterator;
 
 	TStringSet& str = stringSet(g);
+	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
 
 	if(isLeaf(tree, root)) {
 		TId seqId = positionToId(str, root);
 		TSize i = 0;
 		while(i<length(str[root])) {
 			TVertexDescriptor nextVertex = findVertex(g, seqId, i);
+			if (nextVertex == nilVertex) {
+				TSize j = i + 1;
+				while ((j < length(str[root])) && (findVertex(g, seqId, j) == nilVertex)) ++j;
+				nextVertex = addVertex(g, seqId, i, j-i);
+			}
 			appendValue(alignSeq, String<TVertexDescriptor>(nextVertex));
 			i += fragmentLength(g, nextVertex);
 		}
-		//std::cout << std::endl;
 	} else {
 		// Align the two children
 		TAdjacencyIterator adjIt(tree, root);

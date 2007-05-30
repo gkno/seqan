@@ -911,6 +911,15 @@ combineGraphs(Graph<Alignment<TStringSet, TCargo, TSpec> >& outGraph,
 
 	clearVertices(outGraph);
 
+	// Check for empty libraries
+	if (empty(lib1)) {
+		outGraph = lib2;
+		return;
+	} else if (empty(lib2)) {
+		outGraph = lib1;
+		return;
+	}
+
 	// String of fragments to combine all pairwise alignments into a multiple alignment
 	typedef Fragment<> TFragment;
 	typedef String<TFragment, External<> > TFragmentString;

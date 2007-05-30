@@ -778,7 +778,7 @@ SEQAN_CHECKPOINT
 		while(next_it != end_it)
 		{
 			TValue pos_i = *it;
-			addVertex(ali_g, seq_i, pos_i, *next_it - pos_i);
+			addVertex(ali_g, positionToId(stringSet(ali_g), seq_i), pos_i, *next_it - pos_i);
 			if(*next_it - pos_i == 2)
 				++count_zweier;
 			++it;
