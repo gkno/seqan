@@ -8,13 +8,53 @@ namespace SEQAN_NAMESPACE_MAIN
 // File Formats - Fasta
 //////////////////////////////////////////////////////////////////////////////
 
-
 /**
 .Tag.File Format.value.Fasta:
 	FASTA file format for sequences.
 */
 struct TagFasta_;
 typedef Tag<TagFasta_> const Fasta;
+
+//////////////////////////////////////////////////////////////////////////////
+
+// File Reader Iterator
+
+template <typename TFormat>
+struct FileReader;
+
+
+template <typename TFile>
+class Iter<TFile, FileReader<Fasta> >
+{
+public:
+	typedef typename Position<TFile>::Type TFilePosition;
+
+	TFile * data_host;
+	TFilePosition data_begin_pos;
+
+	Iter(TFile & file_):
+		data_host(& file_)
+	{
+	}
+	Iter(Iter const & other_):
+		data_host(other_.data_host)
+	{
+	}
+	~Iter() 
+	{
+	}
+
+	Iter const &
+	operator = (Iter const & other_)
+	{
+		data_host = other_.data_host;
+		return *this;
+	}
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
+
 
 /////////////////////////////////////////////////////////////////////////
 //count_valid: zaehlt die nicht-Zeilenumbrueche (input/output)
@@ -252,7 +292,7 @@ readMeta(TFile & file,
 		 Fasta)
 {
 SEQAN_CHECKPOINT
-	clear(meta);
+//	clear(meta);
 }
 
 
@@ -300,8 +340,6 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 // write
 //////////////////////////////////////////////////////////////////////////////
-
-
 
 
 template <typename TFile, typename TString, typename TData>

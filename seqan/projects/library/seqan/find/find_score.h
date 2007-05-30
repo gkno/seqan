@@ -232,7 +232,7 @@ template <typename TNeedle, typename TScoreValue>
 inline TScoreValue
 getScore(Pattern<TNeedle, Score<TScoreValue, Simple> > & me)
 {
-	return front(getValue(me.data_tab));
+	return front(me.data_tab);
 }
 
 

@@ -36,12 +36,15 @@ namespace SEQAN_NAMESPACE_MAIN
 	    typedef size_t Type;
     };
 */
+/*
+NOTE: gibts schon in seqan/cstream.h, und zwar anders!
+
     template <>
     struct Position< FILE* >
     {
 	    typedef long Type;
     };
-
+*/
     template <>
     struct Difference< FILE* >
     {

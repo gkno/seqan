@@ -13,9 +13,6 @@ namespace SEQAN_NAMESPACE_MAIN
 template <typename TSource, typename TSpec>
 class Align;
 
-//////////////////////////////////////////////////////////////////////////////
-//definition from file_format_embl.h
-//typedef std::multimap < String<char>, String<char> > MetaMultiMap;	// multimap type for meta data 
 
 //////////////////////////////////////////////////////////////////////////////
 

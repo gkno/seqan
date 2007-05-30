@@ -253,7 +253,7 @@ void TestArrayFunctions(_T const _val1, _T const _val2)
 		SEQAN_TASSERT(a_buf2[i] == val2)
 	}
 	
-	for (int i=0; i < 100; ++i) a_buf1[i] = i;
+	for (int i=0; i < 100; ++i) a_buf1[i] = (T) i;
 
 	arrayCopy(a_buf1, a_buf1 + 50, a_buf1 + 20); 
 	for (int i=0; i < 50; ++i)
@@ -267,7 +267,7 @@ void TestArrayFunctions(_T const _val1, _T const _val2)
 		SEQAN_TASSERT(a_buf1[i-5] == (T)i)
 	}
 
-	for (int i=0; i < 100; ++i) a_buf1[i] = i;
+	for (int i=0; i < 100; ++i) a_buf1[i] = (T) i;
 
 	arrayClearSpace(a_buf1, 100, 50, 70); 
 	for (int i=50; i < 100; ++i)

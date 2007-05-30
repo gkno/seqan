@@ -16,45 +16,7 @@ namespace SEQAN_NAMESPACE_MAIN
 // Metafunctions
 //////////////////////////////////////////////////////////////////////////////
 
-/**
-.Metafunction.Meta:
-..summary:Metadata storage class.
-..signature:Meta<Value, Format>::Type
-..param.Value:The value type of the file.
-..param.Format:A file format tag.
-...value:Tag.File Format
-..returns.param.Type:Datastructure for storing the metadata of a record in files of format $Format$.
-..see:Tag.File Format
-..see:Class.FileFormat
-..see:Class.Metadata
-*/
-
-template <typename TValue, typename TFormat>
-struct Meta
-{
-	typedef Metadata<TValue, TFormat> Type;
-};
-
 //////////////////////////////////////////////////////////////////////////////
-
-/**
-.Metafunction.RecordID:
-..summary:ID type of file records.
-..signature:RecordID<Value, Format>::Type
-..param.Value:The value type of the file.
-..param.Format:A file format tag.
-...value:Tag.File Format
-..returns.param.Type:Datastructure for storing the ID of record in files of format $Format$.
-..see:Tag.File Format
-..see:Class.FileFormat
-*/
-
-template <typename TValue, typename TFormat>
-struct RecordID
-{
-	typedef String<TValue> Type;
-};
-
 
 //////////////////////////////////////////////////////////////////////////////
 //Base Class for all FileFormat classes
@@ -64,22 +26,20 @@ struct RecordID
 .Class.FileFormat:
 ..cat:Input/Output
 ..summary:Object that stores a file format.
-..signature:FileFormat<File, Data [, Format]>
+..signature:FileFormat<File, Data [, Format [, Meta] ]>
 ..see:Tag.File Format
 */
 
 template <
 	typename TFile, 
-	typename TData = String<typename Value<TFile>::Type>,
-	typename TFormat = void,
-	typename TMeta = Metadata<typename Value<TFile>::Type> >
+	typename TData,
+	typename TMeta,
+	typename TFormat = void >
 struct FileFormat:
-	public FileFormat<TFile, TData, void>
+	public FileFormat<TFile, TData, TMeta, void>
 {
 public:
-	typedef String<typename Value<TFile>::Type> TString;
 	typedef typename Size<TData>::Type TSize;
-//	typedef typename Meta<TFile, TFormat>::Type TMeta;
 
 	FileFormat() {}
 	FileFormat(FileFormat const &) {}
@@ -105,12 +65,11 @@ SEQAN_CHECKPOINT
 SEQAN_CHECKPOINT
 		read(file, data, limit, TFormat());
 	}
-
 	virtual void
-	readID_(TFile & file, TString & id) const
+	read_(TFile & file, TData & data, TMeta & meta) const
 	{
 SEQAN_CHECKPOINT
-		readID(file, id, TFormat());
+		read(file, data, meta, TFormat());
 	}
 
 	virtual void
@@ -127,17 +86,24 @@ SEQAN_CHECKPOINT
 		goNext(file, TFormat());
 	}
 
-	virtual void
-	write_(TFile & file, TData & data, TString & id) const
+	virtual TSize
+	length_(TFile & file) const
 	{
 SEQAN_CHECKPOINT
-		write(file, data, id, TFormat());
+		length(file, TFormat());
+	}
+
+	virtual void
+	write_(TFile & file, TData & data) const
+	{
+SEQAN_CHECKPOINT
+		write(file, data, TFormat());
 	}
 	virtual void
-	write_(TFile & file, TData & data, TString & id, TMeta & meta) const
+	write_(TFile & file, TData & data, TMeta & meta) const
 	{
 SEQAN_CHECKPOINT
-		write(file, data, id, meta, TFormat());
+		write(file, data, meta, TFormat());
 	}
 };
 
@@ -146,10 +112,9 @@ SEQAN_CHECKPOINT
 //base class for all file format classes 
 
 template <typename TFile, typename TData, typename TMeta>
-struct FileFormat<TFile, TData, void, TMeta>
+struct FileFormat<TFile, TData, TMeta, void>
 {
 public:
-	typedef String<typename Value<TFile>::Type> TString;
 	typedef typename Size<TData>::Type TSize;
 
 	FileFormat() {}
@@ -164,9 +129,8 @@ public:
 	read_(TFile & file, TData & data) const = 0;
 	virtual void
 	read_(TFile & file, TData & data, TSize limit) const = 0;
-
 	virtual void
-	readID_(TFile & file, TString & id) const = 0;
+	read_(TFile & file, TData & data, TMeta & meta) const = 0;
 
 	virtual void
 	readMeta_(TFile & file, TMeta & meta) const = 0;
@@ -174,10 +138,13 @@ public:
 	virtual void
 	goNext_(TFile & file) const = 0;
 
+	virtual TSize
+	length_(TFile & file) const = 0;
+
 	virtual void
-	write_(TFile & file, TData & data, TString & id) const = 0;
+	write_(TFile & file, TData & data) const = 0;
 	virtual void
-	write_(TFile & file, TData & data, TString & id, TMeta & meta) const = 0;
+	write_(TFile & file, TData & data, TMeta & meta) const = 0;
 
 };
 
@@ -186,9 +153,9 @@ public:
 //////////////////////////////////////////////////////////////////////////////
 
 
-template <typename TFile, typename TData, typename TFormat, typename TMeta>
+template <typename TFile, typename TData, typename TMeta, typename TFormat>
 inline void *
-formatID(FileFormat<TFile, TData, TFormat, TMeta> const & file_format)
+formatID(FileFormat<TFile, TData, TMeta, TFormat> const & file_format)
 {
 SEQAN_CHECKPOINT
 	return file_format.formatID_();
@@ -213,56 +180,37 @@ SEQAN_CHECKPOINT
 ..remarks:The function leaves $file$ at the position for reading the next record.
 ..see:Function.assign
 */
-template <typename TFile, typename TData, typename TFormat, typename TMeta>
+template <typename TFile, typename TData, typename TMeta, typename TFormat>
 inline void
 read(TFile & file,
 	 TData & data,
-	 FileFormat<TFile, TData, TFormat, TMeta> const & file_format)
+	 FileFormat<TFile, TData, TMeta, TFormat> const & file_format)
 {
 SEQAN_CHECKPOINT
 	file_format.read_(file, data);
 }
 
-template <typename TFile, typename TData, typename TFormat, typename TMeta, typename TSize>
+template <typename TFile, typename TData, typename TMeta, typename TFormat, typename TSize>
 inline void
 read(TFile & file,
 	 TData & data,
 	 TSize limit,
-	 FileFormat<TFile, TData, TFormat, TMeta> const & file_format)
+	 FileFormat<TFile, TData, TMeta, TFormat> const & file_format)
 {
 SEQAN_CHECKPOINT
 	file_format.read_(file, data, limit);
 }
 
-//////////////////////////////////////////////////////////////////////////////
-
-/**
-.Function.readID:
-..cat:Input/Output
-*/
-
-template <typename TFile, typename TData, typename TFormat, typename TMeta, typename TString>
+template <typename TFile, typename TData, typename TMeta, typename TFormat, typename TSize>
 inline void
-readID(TFile & file,
-	   TString & id,
-	   FileFormat<TFile, TData, TFormat, TMeta> const & file_format)
+read(TFile & file,
+	 TData & data,
+	 TMeta & meta,
+	 FileFormat<TFile, TData, TMeta, TFormat> const & file_format)
 {
 SEQAN_CHECKPOINT
-	String<typename Value<TFile>::Type> str;
-	file_format.readID_(file, str);
-	assign(id, str);
+	file_format.read_(file, data, meta);
 }
-
-template <typename TFile, typename TData, typename TFormat, typename TMeta>
-inline void
-readID(TFile & file,
-	   String<typename Value<TFile>::Type> & id,
-	   FileFormat<TFile, TData, TFormat, TMeta> const & file_format)
-{
-SEQAN_CHECKPOINT
-	file_format.readID_(file, id);
-}
-
 //////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -270,11 +218,11 @@ SEQAN_CHECKPOINT
 ..cat:Input/Output
 */
 
-template <typename TFile, typename TData, typename TFormat, typename TMeta>
+template <typename TFile, typename TData, typename TMeta, typename TFormat>
 inline void
 readMeta(TFile & file,
 		 TMeta & meta,
-		 FileFormat<TFile, TData, TFormat, TMeta> const & file_format)
+		 FileFormat<TFile, TData, TMeta, TFormat> const & file_format)
 {
 SEQAN_CHECKPOINT
 	file_format.readMeta_(file, meta);
@@ -287,13 +235,29 @@ SEQAN_CHECKPOINT
 ..cat:Input/Output
 */
 
-template <typename TFile, typename TData, typename TFormat, typename TMeta>
+template <typename TFile, typename TData, typename TMeta, typename TFormat>
 inline void
 goNext(TFile & file,
-	   FileFormat<TFile, TData, TFormat, TMeta> const & file_format)
+	   FileFormat<TFile, TData, TMeta, TFormat> const & file_format)
 {
 SEQAN_CHECKPOINT
 	file_format.goNext_(file);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.length:
+..cat:Input/Output
+*/
+
+template <typename TFile, typename TData, typename TMeta, typename TFormat>
+inline void
+length(TFile & file,
+	   FileFormat<TFile, TData, TMeta, TFormat> const & file_format)
+{
+SEQAN_CHECKPOINT
+	file_format.length_(file);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -303,41 +267,24 @@ SEQAN_CHECKPOINT
 ..cat:Input/Output
 */
 
-template <typename TFile, typename TData, typename TFormat, typename TMeta>
+template <typename TFile, typename TData, typename TMeta, typename TFormat>
 inline void
 write(TFile & file,
 	  TData & data,
-	  FileFormat<TFile, TData, TFormat, TMeta> const & file_format)
+	  FileFormat<TFile, TData, TMeta, TFormat> const & file_format)
 {
 SEQAN_CHECKPOINT
-	typedef String<typename Value<TFile>::Type> TString_2;
-	TString_2 id_2;
-	file_format.write_(file, data, id_2);
+	file_format.write_(file, data);
 }
-template <typename TFile, typename TData, typename TFormat, typename TMeta, typename TString>
+template <typename TFile, typename TData, typename TMeta, typename TFormat>
 inline void
 write(TFile & file,
 	  TData & data,
-	  TString & id,
-	  FileFormat<TFile, TData, TFormat, TMeta> const & file_format)
-{
-SEQAN_CHECKPOINT
-	typedef String<typename Value<TFile>::Type> TString_2;
-	TString_2 id_2(id);
-	file_format.write_(file, data, id_2);
-}
-template <typename TFile, typename TData, typename TFormat, typename TMeta, typename TString>
-inline void
-write(TFile & file,
-	  TData & data,
-	  TString & id,
 	  TMeta & meta,
-	  FileFormat<TFile, TData, TFormat, TMeta> const & file_format)
+	  FileFormat<TFile, TData, TMeta, TFormat> const & file_format)
 {
 SEQAN_CHECKPOINT
-	typedef String<typename Value<TFile>::Type> TString_2;
-	TString_2 id_2(id);
-	file_format.write_(file, data, id_2, meta);
+	file_format.write_(file, data, meta);
 }
 
 
@@ -347,28 +294,28 @@ SEQAN_CHECKPOINT
 // Comparison of two FileFormat objects
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TFileLeft, typename TDataLeft, typename TMetaLeft, typename TFormatLeft, typename TFileRight, typename TDataRight, typename TFormatRight, typename TMetaRight>
+template <typename TFileLeft, typename TDataLeft, typename TMetaLeft, typename TFormatLeft, typename TFileRight, typename TDataRight, typename TMetaRight, typename TFormatRight>
 inline bool
-operator == (FileFormat<TFileLeft, TDataLeft, TFormatLeft, TMetaLeft> const & left, 
-			 FileFormat<TFileRight, TDataRight, TFormatRight, TMetaRight> const & right)
+operator == (FileFormat<TFileLeft, TDataLeft, TMetaLeft, TFormatLeft> const & left, 
+			 FileFormat<TFileRight, TDataRight, TMetaRight, TFormatRight> const & right)
 {
 SEQAN_CHECKPOINT
 	return formatID(left) == formatID(right);
 }
 
-template <typename TFile, typename TData, typename TFormat, typename TMeta, typename TFormat2>
+template <typename TFile, typename TData, typename TMeta, typename TFormat, typename TFormat2>
 inline bool
-operator == (FileFormat<TFile, TData, TFormat, TMeta> const & left, 
+operator == (FileFormat<TFile, TData, TMeta, TFormat> const & left, 
 			 Tag<TFormat2> const)
 {
 SEQAN_CHECKPOINT
 	return formatID(left) == _ClassIdentifier<Tag<TFormat2> const>::getID();
 }
 
-template <typename TFile, typename TData, typename TFormat, typename TMeta, typename TFormat2>
+template <typename TFile, typename TData, typename TMeta, typename TFormat, typename TFormat2>
 inline bool
 operator == (Tag<TFormat2> const,
-			 FileFormat<TFile, TData, TFormat, TMeta> const & right)
+			 FileFormat<TFile, TData, TMeta, TFormat> const & right)
 {
 SEQAN_CHECKPOINT
 	return _ClassIdentifier<Tag<TFormat2> const>::getID() == formatID(right);
@@ -376,28 +323,28 @@ SEQAN_CHECKPOINT
 
 //____________________________________________________________________________
 
-template <typename TFileLeft, typename TDataLeft, typename TMetaLeft, typename TFormatLeft, typename TFileRight, typename TDataRight, typename TFormatRight, typename TMetaRight>
+template <typename TFileLeft, typename TDataLeft, typename TMetaLeft, typename TFormatLeft, typename TFileRight, typename TDataRight, typename TMetaRight, typename TFormatRight>
 inline bool
-operator != (FileFormat<TFileLeft, TDataLeft, TFormatLeft, TMetaLeft> const & left, 
-			 FileFormat<TFileRight, TDataRight, TFormatRight, TMetaRight> const & right)
+operator != (FileFormat<TFileLeft, TDataLeft, TMetaLeft, TFormatLeft> const & left, 
+			 FileFormat<TFileRight, TDataRight, TMetaRight, TFormatRight> const & right)
 {
 SEQAN_CHECKPOINT
 	return formatID(left) != formatID(right);
 }
 
-template <typename TFile, typename TData, typename TFormat, typename TMeta, typename TFormat2>
+template <typename TFile, typename TData, typename TMeta, typename TFormat, typename TFormat2>
 inline bool
-operator != (FileFormat<TFile, TData, TFormat, TMeta> const & left, 
+operator != (FileFormat<TFile, TData, TMeta, TFormat> const & left, 
 			 Tag<TFormat2> const)
 {
 SEQAN_CHECKPOINT
 	return formatID(left) != _ClassIdentifier<Tag<TFormat2> const>::getID();
 }
 
-template <typename TFile, typename TData, typename TFormat, typename TMeta, typename TFormat2>
+template <typename TFile, typename TData, typename TMeta, typename TFormat, typename TFormat2>
 inline bool
 operator != (Tag<TFormat2> const,
-			 FileFormat<TFile, TData, TFormat, TMeta> const & right)
+			 FileFormat<TFile, TData, TMeta, TFormat> const & right)
 {
 SEQAN_CHECKPOINT
 	return _ClassIdentifier<Tag<TFormat2> const>::getID() != formatID(right);
@@ -408,7 +355,7 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 //TODO??? Das muss in eine extra Datei
 
-/**
+/*DISABLED
 .Function.write:
 ..summary:Writes to stream.
 ..cat:Input/Output
@@ -468,6 +415,77 @@ write(TStream & target,
 }
 
 */
+//////////////////////////////////////////////////////////////////////////////
+
+// Helper function for scanning a stream
+// c = next character, pass it to the next call of the function
+
+template <typename TFile, typename TString, typename TChar>
+inline void
+_stream_appendLine(TFile & file,
+				   TString & str,
+				   TChar & c)
+{
+	while (true)
+	{
+		if (_streamEOF(file)) break;
+
+		if (c == '\n')
+		{
+			c = _streamGet(file);
+			if (c == '\r') 
+			{
+				c = _streamGet(file);
+			}
+			break;
+		}
+		if (c == '\r')
+		{
+			c = _streamGet(file);
+			break;
+		}
+
+		appendValue(str, c);
+
+		c = _streamGet(file);
+	}
+}
+//____________________________________________________________________________
+
+template <typename TFile, typename TChar>
+inline typename Size<TFile>::Type
+_stream_countLine(TFile & file,
+				  TChar & c)
+
+{
+	typename Size<TFile>::Type count = 0;
+	while (true)
+	{
+		if (_streamEOF(file)) break;
+
+		if (c == '\n')
+		{
+			c = _streamGet(file);
+			if (c == '\r') 
+			{
+				c = _streamGet(file);
+			}
+			break;
+		}
+		if (c == '\r')
+		{
+			c = _streamGet(file);
+			break;
+		}
+
+		++count;
+
+		c = _streamGet(file);
+	}
+
+	return count;
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 } //namespace SEQAN_NAMESPACE_MAIN

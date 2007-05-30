@@ -18,7 +18,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ...note:The multi pool allocator only supports @Function.clear@ if this function is also implemented for $ParentAllocator$.
 ..remarks:A pool allocator allocates several memory blocks at once. 
 Freed blocks are not immediately deallocated but recycled in subsequential allocations.
-This way, the number of calls to the heap allocator is reduced and that speeds up memory management.
+This way, the number of calls to the heap manager is reduced, and that speeds up memory management.
 ...text:Note that memory blocks larger than $Allocator<MultiPool< > >::BLOCKING_LIMIT$ are not pooled 
 but immediately allocated and deallocated using $ParentAllocator$.
 */
@@ -55,6 +55,16 @@ SEQAN_CHECKPOINT
 		::std::memset(data_current_free, 0, sizeof(data_current_free));
 	}
 
+	Allocator(TParentAllocator & parent_alloc)
+	{
+SEQAN_CHECKPOINT
+		::std::memset(data_recycled_blocks, 0, sizeof(data_recycled_blocks));
+		::std::memset(data_current_begin, 0, sizeof(data_current_begin));
+		::std::memset(data_current_free, 0, sizeof(data_current_free));
+
+		setValue(data_parent_allocator, parent_alloc);
+	}
+
 	//Dummy copy
 	Allocator(Allocator const &)
 	{
@@ -81,17 +91,8 @@ template <typename TParentAllocator>
 inline TParentAllocator &
 parentAllocator(Allocator<MultiPool<TParentAllocator> > & me)
 {
+SEQAN_CHECKPOINT
 	return value(me.data_parent_allocator);
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename TParentAllocator>
-inline void
-setParentAllocator(Allocator<MultiPool<TParentAllocator> > & me,
-				   TParentAllocator & alloc_)
-{
-	setValue(me.data_parent_allocator, alloc_);
 }
 
 //////////////////////////////////////////////////////////////////////////////

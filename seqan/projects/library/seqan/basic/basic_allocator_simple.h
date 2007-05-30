@@ -49,6 +49,13 @@ struct Allocator<SimpleAlloc<TParentAllocator> >
 SEQAN_CHECKPOINT
 	}
 
+	Allocator(TParentAllocator & parent_alloc):
+		data_storages(0)
+	{
+SEQAN_CHECKPOINT
+		setValue(data_parent_allocator, parent_alloc);
+	}
+
 	//Dummy copy
 	Allocator(Allocator const &):
 		data_storages(0)
@@ -74,17 +81,8 @@ template <typename TParentAllocator>
 inline TParentAllocator &
 parentAllocator(Allocator<SimpleAlloc<TParentAllocator> > & me)
 {
+SEQAN_CHECKPOINT
 	return value(me.data_parent_allocator);
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename TParentAllocator>
-inline void
-setParentAllocator(Allocator<SimpleAlloc<TParentAllocator> > & me,
-				   TParentAllocator & alloc_)
-{
-	setValue(me.data_parent_allocator, alloc_);
 }
 
 //////////////////////////////////////////////////////////////////////////////

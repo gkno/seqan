@@ -584,8 +584,8 @@ void Test_Fasta_Write()
 	SEQAN_TASSERT(str_4a == str_3);
 
 //____________________________________________________________________________
-// Test virtual file format object
-
+// Test virtual file format object //outdated!!
+/*
 	FileFormat<FILE *, String<Dna>, Fasta> fasta_format;
 	FileFormat<FILE *, String<Dna> > & ff = fasta_format;
 
@@ -635,6 +635,7 @@ void Test_Fasta_Write()
 	SEQAN_TASSERT(!(ff != fasta_format));
 	SEQAN_TASSERT(ff != Raw());
 	SEQAN_TASSERT(Raw() != ff);
+*/
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -740,7 +741,7 @@ void Test_FastaAlign() {
 
 
 //____________________________________________________________________________
-// Test virtual file format object
+// Test virtual file format object //outdated!!
 	/*
 	FileFormat<FILE *, String<char>, FastaAlign> fasta_format;
 	FileFormat<FILE *, String<char> > & ff = fasta_format;
@@ -806,6 +807,54 @@ void Test_CGViz() {
 
 //////////////////////////////////////////////////////////////////////////////
 
+void Test_EmblGenbank()
+{
+	fstream strm;
+
+	String<char> id;
+	String<char> data;
+	
+	//String<char> meta;
+	Metadata<char>::Type meta;
+	//MetaMultiMap meta;
+
+/*
+	//prepare stream
+	strm.clear();
+	strm.open(TEST_PATH "genbank_crlf.txt", ios_base::in | ios_base::binary);
+	
+	// read ID, meta-data & sequence
+	readID(strm, id, guessFileFormat(strm, data, meta));
+	readMeta(strm, meta, guessFileFormat(strm, data, meta) );
+	read(strm, data, guessFileFormat(strm, data, meta));
+	strm.close();	
+	
+	// write an embl() sequence object
+	strm.open(TEST_PATH "genbank_out_test.txt", ios_base::out | ios_base::binary);
+	write(strm,  data, id, meta, Genbank());
+	strm.close();
+	
+	clear(id);
+	clear(meta);
+	clear(data);
+*/
+	strm.clear();
+	strm.open(TEST_PATH "embl_crlf.txt", ios_base::in | ios_base::binary);
+	
+	// read ID, meta-data & sequence
+	readID(strm, id, Embl());
+	readMeta(strm, meta, Embl());
+//	read(strm, data, Embl());
+	strm.close();	
+	
+	// write an embl() sequence object
+	strm.open(TEST_PATH "embl_out_test.txt", ios_base::out | ios_base::binary);
+	write(strm, data, id, meta, Embl());
+	strm.close();
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 int main() 
 {
 	SEQAN_TREPORT("TEST BEGIN")
@@ -822,6 +871,8 @@ int main()
 
 	Test_FastaAlign();
 	Test_CGViz();
+
+	Test_EmblGenbank();
 
 //____________________________________________________________________________
 

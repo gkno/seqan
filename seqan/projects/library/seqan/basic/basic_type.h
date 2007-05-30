@@ -246,6 +246,29 @@ struct Id<T const> {
 	typedef unsigned int Type;
 };
 
+//____________________________________________________________________________
+
+/**
+.Metafunction.Key:
+..summary:Key type of a key to object mapping.
+..signature:Key<T>::Type
+..param.T:Type for which a key type is determined.
+..returns.param.Type:Key type.
+*/
+template<typename T>
+struct Key; 
+
+//____________________________________________________________________________
+
+/**
+.Metafunction.Object:
+..summary:Object type of a key to object mapping.
+..signature:Object<T>::Type
+..param.T:Type for which a object type is determined.
+..returns.param.Type:Object type.
+*/
+template<typename T>
+struct Object; 
 
 //____________________________________________________________________________
 

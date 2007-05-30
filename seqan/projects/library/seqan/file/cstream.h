@@ -30,6 +30,14 @@ struct Value<FILE *>
 
 //////////////////////////////////////////////////////////////////////////////
 
+template <>
+struct Position<FILE *>
+{
+	typedef ::std::fpos_t Type;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
 template <typename T>
 struct _IsTellSeekStream;
 
@@ -79,7 +87,6 @@ SEQAN_CHECKPOINT
 
 ///.Internal._streamPut.param.stream.type:Adaption."std::FILE *"
 
-
 inline void
 _streamPut(::std::FILE * target,
 		   char character)
@@ -97,22 +104,26 @@ SEQAN_CHECKPOINT
 
 ///.Internal._streamTellG.param.stream.type:Adaption."std::FILE *"
 
-inline long
+inline Position<FILE *>::Type
 _streamTellG(FILE * me)
 {
 SEQAN_CHECKPOINT
-	return ::std::ftell(me);
+	Position<FILE *>::Type pos;
+	::std::fgetpos(me, &pos);
+	return pos;
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 ///.Internal._streamTellP.param.stream.type:Adaption."std::FILE *"
 
-inline long
+inline Position<FILE *>::Type
 _streamTellP(FILE * me)
 {
 SEQAN_CHECKPOINT
-	return ::std::ftell(me);
+	Position<FILE *>::Type pos;
+	::std::fgetpos(me, &pos);
+	return pos;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -121,10 +132,10 @@ SEQAN_CHECKPOINT
 
 inline void
 _streamSeekG(FILE * me,
-	 long pos)
+			 Position<FILE *>::Type pos)
 {
 SEQAN_CHECKPOINT
-	::std::fseek(me, pos, SEEK_SET);
+	::std::fsetpos(me, &pos);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -133,10 +144,10 @@ SEQAN_CHECKPOINT
 
 inline void
 _streamSeekP(FILE * me,
-	 long pos)
+			 Position<FILE *>::Type pos)
 {
 SEQAN_CHECKPOINT
-	::std::fseek(me, pos, SEEK_SET);
+	::std::fsetpos(me, &pos);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -149,6 +160,17 @@ _streamSeek2G(FILE * me,
 {
 SEQAN_CHECKPOINT
 	::std::fseek(me, off, SEEK_CUR);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+///.Internal._streamUnget.param.stream.type:Adaption."std::FILE *"
+
+inline void
+_streamUnget(::std::FILE * stream)
+{
+SEQAN_CHECKPOINT
+	_streamSeek2G(stream, -1);
 }
 
 //////////////////////////////////////////////////////////////////////////////

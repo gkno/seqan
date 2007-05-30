@@ -42,6 +42,7 @@
 #include <seqan/basic/basic_allocator_simple.h>
 #include <seqan/basic/basic_allocator_singlepool.h>
 #include <seqan/basic/basic_allocator_multipool.h>
+#include <seqan/basic/basic_allocator_chunkpool.h>
 
 //____________________________________________________________________________
 

@@ -11,6 +11,7 @@
 #include <cstdio>
 #include <list>
 #include <vector>
+#include <map>
 
 //____________________________________________________________________________
 // file formats
@@ -33,16 +34,14 @@
 //file formats for sequences
 #include <seqan/file/file_format_raw.h>
 #include <seqan/file/file_format_fasta.h>
-//#include <seqan/file/file_format_embl.h>
-//#include <seqan/file/file_format_genbank.h>
+#include <seqan/file/file_format_embl.h>
+#include <seqan/file/file_format_genbank.h>
 
 //file formats for alignments
 #include <seqan/file/file_format_fasta_align.h>
 
 //others
 #include <seqan/file/file_format_cgviz.h>
-
-//#include <seqan/file/file_format_guess.h>
 
 //____________________________________________________________________________
 // files
