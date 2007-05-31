@@ -405,6 +405,10 @@ _writeGraphFooter(TFile & file,
 		TVertexDescriptor previousVertex = nilVertex;
 		while(j<length(str[i])) {
 			TVertexDescriptor nextVertex = findVertex(const_cast<TGraph&>(g), seqId, j);
+			if (nextVertex == nilVertex) {
+				++j;
+				continue;
+			}
 			if (previousVertex != nilVertex) {
 				_streamPutInt(file, previousVertex);
 				_streamWrite(file, " -- ");

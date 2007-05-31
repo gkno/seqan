@@ -101,6 +101,7 @@ int main()
 	Test_CompressedAlphabets();
 	Test_Fragment();
 	Test_TCoffee();
+	//Test_TCoffeeFromFile();
 	//Test_TCoffeeFromLibrary(); 
 
 	//// Match Refinement

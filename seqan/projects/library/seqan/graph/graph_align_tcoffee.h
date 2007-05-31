@@ -251,11 +251,15 @@ getCommonKmerMatrix(StringSet<TString, TSpec> const& strSet, THitMatrix& mat, TS
 	typedef Index<TStringSetAA, Index_QGram<SimpleShape> > TIndex;
 	TIndex index;
 	resize(indexText(index), nseq);
-	resize(indexShape(index), (unsigned) ktup);
+	
 
 	// Recode the strings into amino acid groups
-	for(TStringSetSize k=0;k<length(strSet);++k) indexText(index)[k] = strSet[k];
-
+	for(TStringSetSize k=0;k<length(strSet);++k) {
+		indexText(index)[k] = strSet[k];
+		if ( (TSize) length(strSet[k]) < ktup) ktup = length(strSet[k]) - 1;
+	}
+	resize(indexShape(index), (unsigned) ktup);
+	
 	// Build index	
 	indexCreate(index, QGram_SA());
 
@@ -663,25 +667,23 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 
 	//// Debug Code
 	//// Print all the matches
-	//std::cout << "The four sequences:" << std::endl;
+	//std::cout << "The sequences:" << std::endl;
 	//for(TSize i = 0;i<length(str);++i) {
 	//	std::cout << positionToId(str,i) << ':' << str[i] << std::endl;
 	//}
 	//std::cout << "The matches:" << std::endl;
 	//for(TSize i = 0;i<length(matches);++i) {
-	//	for(TSize i = 0;i<length(matches);++i) {
-	//		TId tmp_id1 = sequenceId(matches[i],0);
-	//		std::cout << tmp_id1 << ',' << fragmentBegin(matches[i],tmp_id1) << ',';
-	//		for(TSize j = fragmentBegin(matches[i],tmp_id1); j < fragmentBegin(matches[i],tmp_id1) + fragmentLength(matches[i],tmp_id1); ++j) {
-	//			std::cout << str[idToPosition(str, tmp_id1)][j];
-	//		}
-	//		TId tmp_id2 = sequenceId(matches[i],1);
-	//		std::cout << ',' <<	tmp_id2 << ',' << fragmentBegin(matches[i],tmp_id2) << ',';
-	//		for(TSize j = fragmentBegin(matches[i],tmp_id2); j < fragmentBegin(matches[i],tmp_id2) + fragmentLength(matches[i],tmp_id2); ++j) {
-	//			std::cout << str[idToPosition(str, tmp_id2)][j];
-	//		}
-	//		std::cout << std::endl;
+	//	TId tmp_id1 = sequenceId(matches[i],0);
+	//	std::cout << tmp_id1 << ',' << fragmentBegin(matches[i],tmp_id1) << ',';
+	//	for(TSize j = fragmentBegin(matches[i],tmp_id1); j < fragmentBegin(matches[i],tmp_id1) + fragmentLength(matches[i],tmp_id1); ++j) {
+	//		std::cout << str[idToPosition(str, tmp_id1)][j];
 	//	}
+	//	TId tmp_id2 = sequenceId(matches[i],1);
+	//	std::cout << ',' <<	tmp_id2 << ',' << fragmentBegin(matches[i],tmp_id2) << ',';
+	//	for(TSize j = fragmentBegin(matches[i],tmp_id2); j < fragmentBegin(matches[i],tmp_id2) + fragmentLength(matches[i],tmp_id2); ++j) {
+	//		std::cout << str[idToPosition(str, tmp_id2)][j];
+	//	}
+	//	std::cout << std::endl;
 	//}
 
 	// Refine all matches and create multiple alignment

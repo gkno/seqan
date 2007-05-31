@@ -936,6 +936,117 @@ void Test_TCoffee() {
 
 //////////////////////////////////////////////////////////////////////////////
 
+void Test_TCoffeeFromFile() {
+//____________________________________________________________________________
+// T-Coffee
+
+	// Sequences
+	typedef String<AminoAcid> TString;
+	StringSet<String<AminoAcid>, Owner<> > origStrSet;
+
+	// Count sequences
+	unsigned seqCount = 0;
+	ifstream file;
+	std::stringstream input;
+	input << TEST_PATH << "3d_sample2.fasta";
+	//input << TEST_PATH << "sproteases_small.fasta";
+	file.open(input.str().c_str(), ios_base::in | ios_base::binary);
+	if (!file.is_open()) return;
+	while (!_streamEOF(file)) {
+		String<char> id;
+		readID(file, id, Fasta());
+		//std::cout << id << std::endl;
+		goNext(file, Fasta());
+		++seqCount;
+	}
+	//std::cout << "Number of sequences: " << seqCount << std::endl;
+
+	// Import sequences
+	file.clear();
+	file.seekg(0, ios_base::beg);
+	resize(origStrSet, seqCount);
+	for(unsigned i = 0; (i < seqCount) && !_streamEOF(file); ++i) 	{
+		read(file, origStrSet[i], Fasta());
+	}
+    file.close();
+	std::cout << "Import sequences done" << std::endl;
+
+	// Generate additional primary libraries, e.g., all pairwise alignments
+	typedef StringSet<TString, Dependent<> > TStringSet;
+	typedef Graph<Alignment<TStringSet, unsigned int, Default> > TGraph;
+	TStringSet strSet;
+	for(unsigned int i = 0; i<length(origStrSet); ++i) {
+		//assignValueById(strSet, origStrSet, positionToId(origStrSet, i));
+		appendValue(strSet, origStrSet[i]);
+	}
+	TGraph g(strSet);
+
+	// Generate primary libraries
+	TGraph lib1(strSet);
+	TGraph lib2(strSet);
+	generatePrimaryLibrary(lib1, AAGroupsDayhoff(), GlobalPairwise_Library() );
+	std::cout << "Pairwise alignments done" << std::endl;
+
+	fstream strm01; // Alignment graph as dot
+	strm01.open(TEST_PATH "my_tcoffee01.dot", ios_base::out | ios_base::trunc);
+	write(strm01,lib1,DotDrawing());
+	strm01.close();
+
+	generatePrimaryLibrary(lib2, 2, MUM_Library() );
+	std::cout << "MUMs done" << std::endl;
+
+	fstream strm02; // Alignment graph as dot
+	strm02.open(TEST_PATH "my_tcoffee02.dot", ios_base::out | ios_base::trunc);
+	write(strm02,lib2,DotDrawing());
+	strm02.close();
+
+	// Weighting of libraries (Signal addition)
+	combineGraphs(g, lib1, lib2);
+	std::cout << "Combining graphs done" << std::endl;
+
+	fstream strm1; // Alignment graph as dot
+	strm1.open(TEST_PATH "my_tcoffee1.dot", ios_base::out | ios_base::trunc);
+	write(strm1,g,DotDrawing());
+	strm1.close();
+
+	// Triplet library extension
+	tripletLibraryExtension(g);
+	std::cout << "Triplet done" << std::endl;
+
+	fstream strm2; // Alignment graph as dot
+	strm2.open(TEST_PATH "my_tcoffee2.dot", ios_base::out | ios_base::trunc);
+	write(strm2,g,DotDrawing());
+	strm2.close();
+
+
+	// Calculate a distance matrix using a compressed alphabet or not
+	Matrix<double> distanceMatrix; 
+	getCommonKmerMatrix(stringSet(g), distanceMatrix, 6, AAGroupsDayhoff() );
+	std::cout << "Kmer done" << std::endl;
+	kmerToDistanceMatrix(distanceMatrix, FractionalDistance() );
+	std::cout << "Distance done" << std::endl;
+
+	// Build the neighbor joining tree
+	Graph<Tree<double> > njTreeOut;
+	slowNjTree(distanceMatrix, njTreeOut);
+	std::cout << "NjTree done" << std::endl;
+
+	// Perform a progressive alignment
+	Graph<Alignment<TStringSet, void> > gOut(strSet);
+	progressiveAlignment(g, njTreeOut, gOut, NeedlemanWunsch() );
+	std::cout << "Alignment done" << std::endl;
+
+	// Print the alignment
+	std::cout << gOut << std::endl;
+	
+	fstream strm3; // Alignment graph as dot
+	strm3.open(TEST_PATH "my_tcoffee3.dot", ios_base::out | ios_base::trunc);
+	write(strm3,gOut,DotDrawing());
+	strm3.close();
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 void Test_TCoffeeFromLibrary() {
 //____________________________________________________________________________
 // Graph TCoffee

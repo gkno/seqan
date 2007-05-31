@@ -347,10 +347,11 @@ public:
 	
 	Iter(TGraph const& _graph, TVertexDescriptor const v) : 
 		data_host(&_graph),
-		data_source(v),
-		data_edge(getValue(_graph.data_align.data_vertex,v))
+		data_source(v)
 	{
 		SEQAN_CHECKPOINT
+		if (empty(_graph)) data_edge = 0;
+		else data_edge = getValue(_graph.data_align.data_vertex,v);
 	}
 	
 	Iter(Iter const& _iter) : 
