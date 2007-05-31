@@ -115,16 +115,22 @@ score(Score<TValue, ScoreAlignmentGraph<TGraphType> > & me,
 	TSize len2 = length(right);
 	TSize divider = len1 * len2;
 	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
+	TValue inf = infimumValue<TValue>();
 	TValue sum = 0;
+	bool foundEdge = false;
 	for(TSize i = 0;i<len1;++i) {
 		for(TSize j = 0;j<len2;++j) {
 			if ((left[i] != nilVertex) && (right[j] != nilVertex)) {
 				TEdgeDescriptor e = findEdge(value(me.data_graph), left[i], right[j]);
-				if (e != 0) sum += getCargo(e);
+				if (e != 0) {
+					foundEdge = true;
+					sum += getCargo(e);
+				}
 			}
 		}
 	}
-	return sum / divider;
+	if (foundEdge) return sum / divider;
+	else return inf;
 }
 
 
@@ -559,6 +565,7 @@ _getSequenceSimilarity(TAlignmentGraph& g,
 	else return sim / len1;
 }
 
+
 template<typename TStringSet, typename TCargo, typename TSpec, typename TSize>
 void 
 generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
@@ -566,11 +573,11 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 					   MUM_Library)
 {
 	SEQAN_CHECKPOINT
-
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename Id<TGraph>::Type TId;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename Value<TStringSet>::Type TString;
+	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
 	typedef Index<StringSet<TString, Owner<> >, Index_ESA<> > TIndex;
 	
 	clearVertices(g);
@@ -587,6 +594,9 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	typename Iterator<TIndex, MUMs>::Type it(index, minLen);	// set minimum MUM length
 	String< typename SAValue<TIndex>::Type > occs;			// temp. string storing the hit positions
 
+	typedef Fragment<> TFragment;
+	typedef String<TFragment, External<> > TFragmentString;
+	TFragmentString matches;
 	while (!atEnd(it)) 
 	{
 		occs = getOccurences(it);							// gives hit positions (seqNo,seqOfs)
@@ -595,14 +605,21 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 		TSize matchLen = repLength(it);
 		for(TSize i = 0; i < (TSize) length(occs); ++i) {
 			//std::cout << positionToId(str, i) << ',' << getValueI2(occs[i]) << ',' << matchLen << std::endl;
-			TVertexDescriptor v = addVertex(g, positionToId(str, i), getValueI2(occs[i]), matchLen);
 			if (i > 0) {
 				for(TSize k = i; k>0;--k) {
-					addEdge(g,v,v-k,matchLen);
+					push_back(matches, TFragment( (unsigned int) positionToId(str, i), (unsigned int) getValueI2(occs[i]), (unsigned int) positionToId(str, i - k),  (unsigned int)  getValueI2(occs[i-k]),  (unsigned int)  matchLen));
 				}
 			}
 		}
 		++it;
+	}
+
+	// Refine all matches and create multiple alignment
+	matchRefinement(matches,stringSet(g),g);
+
+	// Adapt edge weights
+	for(TEdgeIterator it(g);!atEnd(it);++it) {
+		cargo(*it) = fragmentLength(g, sourceVertex(it));
 	}
 }
 
@@ -735,17 +752,20 @@ tripletLibraryExtension(Graph<Alignment<TStringSet, TCargo, TSpec> >& g)
 		TOutEdgeIterator outIt1(g, *itVertex);
 		if (atEnd(outIt1)) continue;
 		TOutEdgeIterator outIt2(g, *itVertex);
-		goNext(outIt2);
-		while (!atEnd(outIt2)) {
-			TVertexDescriptor tV1 = targetVertex(outIt1);
-			TVertexDescriptor tV2 = targetVertex(outIt2);
-			if ((sequenceId(g, tV1) != sequenceId(g,tV2)) && 
-				(findEdge(g, tV1, tV2) == 0)) {
-				appendValue(edges, tV1);
-				appendValue(edges, tV2);
+		while (!atEnd(outIt1)) {
+			outIt2 = outIt1;
+			goNext(outIt2);
+			while (!atEnd(outIt2)) {
+				TVertexDescriptor tV1 = targetVertex(outIt1);
+				TVertexDescriptor tV2 = targetVertex(outIt2);
+				if ((sequenceId(g, tV1) != sequenceId(g,tV2)) && 
+					(findEdge(g, tV1, tV2) == 0)) {
+					appendValue(edges, tV1);
+					appendValue(edges, tV2);
+				}
+				goNext(outIt2);
 			}
 			goNext(outIt1);
-			goNext(outIt2);
 		}
 	}
 	for(TSize i=0; i<length(edges);i+=2) addEdge(g, edges[i], edges[i+1], 0);
@@ -792,12 +812,15 @@ _alignStringSetAccordingToGraph(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename Size<TGraph>::Type TSize;
 	
-	Score<typename Cargo<TGraph>::Type, ScoreAlignmentGraph<TGraph> > score_type = Score<typename Cargo<TGraph>::Type, ScoreAlignmentGraph<TGraph> >(g);
+	//Score<typename Cargo<TGraph>::Type, ScoreAlignmentGraph<TGraph> > score_type = Score<typename Cargo<TGraph>::Type, ScoreAlignmentGraph<TGraph> >(g);
+	Score<int, ScoreAlignmentGraph<TGraph> > score_type = Score<int, ScoreAlignmentGraph<TGraph> >(g);
 	TSequence tmp;
 	globalAlignment(tmp, strSet, score_type, TTag());
 	TSize len = length(tmp);
 	clear(alignSeq);
 	resize(alignSeq, len);
+
+	// Traceback is backwards, so reverse everything
 	for(TSize i = len; i>0;--i) alignSeq[len-i] = tmp[i-1];
 }
 

@@ -865,16 +865,21 @@ void  Test_CompressedAlphabets() {
 
 //////////////////////////////////////////////////////////////////////////////
 
-void Test_TCoffee() {
+void Test_TCoffeeTmp() {
 //____________________________________________________________________________
 // T-Coffee
 	typedef String<AminoAcid> TString;
 	typedef StringSet<TString, Dependent<> > TStringSet;
 	typedef Graph<Alignment<TStringSet, unsigned int, Default> > TGraph;
-	TString str1 = "GARFIELDTHELASTFATCAT";
-	TString str2 = "GARFIELDTHEFASTCAT";
-	TString str3 = "GARFIELDTHEVERYFASTCAT";
-	TString str4 = "THEFATCAT";
+	
+	TString str1 = "DDGGG";
+	TString str2 = "NAE";
+	TString str3 = "AANGEE";
+	TString str4 = "NCCA";
+	//TString str1 = "GARFIELDTHELASTFATCAT";
+	//TString str2 = "GARFIELDTHEFASTCAT";
+	//TString str3 = "GARFIELDTHEVERYFASTCAT";
+	//TString str4 = "THEFATCAT";
 	TStringSet strSet;
 	assignValueById(strSet, str1);
 	assignValueById(strSet, str2);
@@ -928,12 +933,164 @@ void Test_TCoffee() {
 	// Print the alignment
 	std::cout << gOut << std::endl;
 
-	//fstream strm2; // Alignment graph as dot
-	//strm2.open(TEST_PATH "my_tcoffee.dot", ios_base::out | ios_base::trunc);
-	//write(strm2,g,DotDrawing());
-	//strm2.close();
 }
 
+
+//////////////////////////////////////////////////////////////////////////////
+
+void Test_TCoffeeGarfield() {
+//____________________________________________________________________________
+// T-Coffee
+	typedef String<AminoAcid> TString;
+	typedef StringSet<TString, Dependent<> > TStringSet;
+	typedef Graph<Alignment<TStringSet, unsigned int, Default> > TGraph;
+	
+	TString str1 = "GARFIELDTHELASTFATCAT";
+	TString str2 = "GARFIELDTHEFASTCAT";
+	TString str3 = "GARFIELDTHEVERYFASTCAT";
+	TString str4 = "THEFATCAT";
+	TStringSet strSet;
+	assignValueById(strSet, str1);
+	assignValueById(strSet, str2);
+	assignValueById(strSet, str3);
+	assignValueById(strSet, str4);
+	TGraph lib1(strSet);
+	TGraph lib2(strSet);
+	TGraph g(strSet);
+
+	// Generate a primary library, i.e., all pairwise alignments
+	generatePrimaryLibrary(lib1, AAGroupsDayhoff(), GlobalPairwise_Library() );
+
+	fstream strm01; // Alignment graph as dot
+	strm01.open(TEST_PATH "my_tcoffee01.dot", ios_base::out | ios_base::trunc);
+	write(strm01,lib1,DotDrawing());
+	strm01.close();
+
+	generatePrimaryLibrary(lib2, 2, MUM_Library() );
+
+	fstream strm02; // Alignment graph as dot
+	strm02.open(TEST_PATH "my_tcoffee02.dot", ios_base::out | ios_base::trunc);
+	write(strm02,lib2,DotDrawing());
+	strm02.close();
+
+	// Weighting of libraries (Signal addition)
+	combineGraphs(g, lib1, lib2);
+
+	fstream strm1; // Alignment graph as dot
+	strm1.open(TEST_PATH "my_tcoffee1.dot", ios_base::out | ios_base::trunc);
+	write(strm1,g,DotDrawing());
+	strm1.close();
+
+	// Triplet library extension
+	tripletLibraryExtension(g);
+
+	fstream strm2; // Alignment graph as dot
+	strm2.open(TEST_PATH "my_tcoffee2.dot", ios_base::out | ios_base::trunc);
+	write(strm2,g,DotDrawing());
+	strm2.close();
+
+	// Calculate a distance matrix using a compressed alphabet or not
+	Matrix<double> distanceMatrix; 
+	getCommonKmerMatrix(stringSet(g), distanceMatrix, 6, AAGroupsDayhoff() );
+	kmerToDistanceMatrix(distanceMatrix, FractionalDistance() );
+
+	// Build the neighbor joining tree
+	Graph<Tree<double> > njTreeOut;
+	slowNjTree(distanceMatrix, njTreeOut);
+
+	// Perform a progressive alignment
+	Graph<Alignment<TStringSet, void> > gOut(strSet);
+	progressiveAlignment(g, njTreeOut, gOut, Hirschberg() );
+
+	// Print the alignment
+	std::cout << gOut << std::endl;
+
+	fstream strm3; // Alignment graph as dot
+	strm3.open(TEST_PATH "my_tcoffee3.dot", ios_base::out | ios_base::trunc);
+	write(strm3,gOut,DotDrawing());
+	strm3.close();
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+void Test_TCoffeeFromRandomSeq() {
+//____________________________________________________________________________
+// T-Coffee
+
+	while (true) {
+	
+		// Sequences
+		typedef String<AminoAcid> TString;
+		StringSet<String<AminoAcid>, Owner<> > origStrSet;
+
+		// Count sequences
+		mtRandInit();
+		unsigned int seqCount = ((Byte) mtRand() % 10) + 3;
+		for(unsigned int i=0;i<seqCount;++i) {
+			TString str;
+
+			unsigned int stop = (unsigned int) mtRand() % 20 + 2;
+			for (unsigned int i=0; i<stop ; ++i) {
+				append(str, (Byte) mtRand() % 10 );
+			}	
+			assignValueById(origStrSet, str);
+		}
+		
+		// Generate additional primary libraries, e.g., all pairwise alignments
+		typedef StringSet<TString, Dependent<> > TStringSet;
+		typedef Graph<Alignment<TStringSet, unsigned int, Default> > TGraph;
+		TStringSet strSet;
+		for(unsigned int i = 0; i<length(origStrSet); ++i) {
+			std::cout << i << ':' << origStrSet[i] << std::endl;
+			appendValue(strSet, origStrSet[i]);
+		}
+		TGraph g(strSet);
+
+		// Generate primary libraries
+		TGraph lib1(strSet);
+		TGraph lib2(strSet);
+		generatePrimaryLibrary(lib1, AAGroupsDayhoff(), GlobalPairwise_Library() );
+		//std::cout << "Pairwise alignments done" << std::endl;
+
+		generatePrimaryLibrary(lib2, 2, MUM_Library() );
+		//std::cout << "MUMs done" << std::endl;
+
+		// Weighting of libraries (Signal addition)
+		combineGraphs(g, lib1, lib2);
+		//std::cout << "Combining graphs done" << std::endl;
+
+		// Triplet library extension
+		tripletLibraryExtension(g);
+		//std::cout << "Triplet done" << std::endl;
+
+		// Calculate a distance matrix using a compressed alphabet or not
+		Matrix<double> distanceMatrix; 
+		getCommonKmerMatrix(stringSet(g), distanceMatrix, 6, AAGroupsDayhoff() );
+		//std::cout << "Kmer done" << std::endl;
+		kmerToDistanceMatrix(distanceMatrix, FractionalDistance() );
+		//std::cout << "Distance done" << std::endl;
+
+
+		// Build the neighbor joining tree
+		Graph<Tree<double> > njTreeOut;
+		slowNjTree(distanceMatrix, njTreeOut);
+		//std::cout << "NjTree done" << std::endl;
+		
+		// Perform a progressive alignment
+		Graph<Alignment<TStringSet, void> > gOut(strSet);
+		progressiveAlignment(g, njTreeOut, gOut, NeedlemanWunsch() );
+		//std::cout << "Alignment done" << std::endl;
+
+		
+		// Print the alignment
+		std::cout << gOut << std::endl;
+
+		String<char> align;
+		bool convAl = convertAlignment(gOut, align);
+		SEQAN_TASSERT(convAl);
+	}
+}
 //////////////////////////////////////////////////////////////////////////////
 
 void Test_TCoffeeFromFile() {
@@ -1172,6 +1329,17 @@ void Test_GraphAlignment() {
 	Test_Hirschberg();
 	Test_Nussinov();
 }
+
+//////////////////////////////////////////////////////////////////////////////
+
+void Test_TCoffee() {
+	//Test_TCoffeeTmp();
+	Test_TCoffeeGarfield();
+	//Test_TCoffeeFromRandomSeq();
+	//Test_TCoffeeFromLibrary(); 
+
+}
+
 
 }
 

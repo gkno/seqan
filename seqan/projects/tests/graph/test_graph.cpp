@@ -93,7 +93,7 @@ int main()
 	// Test Graph Algorithms
 	Test_Algorithms();
 
-	//// Alignment
+	// Alignment
 	Test_GraphAlignment();
 	//Test_Runtime2();
 
@@ -101,10 +101,9 @@ int main()
 	Test_CompressedAlphabets();
 	Test_Fragment();
 	Test_TCoffee();
-	//Test_TCoffeeFromFile();
-	//Test_TCoffeeFromLibrary(); 
 
-	//// Match Refinement
+
+	// Match Refinement
 	Test_MatchRefinement();
 
 	

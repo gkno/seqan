@@ -382,7 +382,7 @@ SEQAN_CHECKPOINT
 	typedef IntervalAndCargo<int,TCargo> TInterval;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	
-	std::cout <<"create interval trees...";
+	//std::cout <<"create interval trees...";
 	clock_t start, finish1;
 	double duration;
 	start = clock();
@@ -402,7 +402,7 @@ SEQAN_CHECKPOINT
 	
 	while(i < numSequences)
 	{
-		std::cout << (numSequences-i) <<" more ("<<length(intervals[i])<<" intervals)... ";
+		//std::cout << (numSequences-i) <<" more ("<<length(intervals[i])<<" intervals)... ";
 		//vllt zum speicher sparen: numSequences mal alle alis durchgehen
 		//und jedes mal nur buildIntervalsForJustOneSequence(); 
 		TValue center = length(seqs[i])/2; // center raus, hat hier nix zu suchen
@@ -417,7 +417,7 @@ SEQAN_CHECKPOINT
 
 	finish1 = clock();
 	duration = (double)(finish1 - start) / CLOCKS_PER_SEC;
-	std::cout << "\ntook " << duration << " seconds.\n";
+	//std::cout << "\ntook " << duration << " seconds.\n";
 
 
 
@@ -780,7 +780,7 @@ SEQAN_CHECKPOINT
 	typedef typename VertexDescriptor<TAliGraph>::Type TVertexDescriptor;
 	typedef typename std::set<TValue>::iterator TSetIterator;
 
-	std::cout << "making refined alignment graph...";
+	//std::cout << "making refined alignment graph...";
 	clock_t start, finish1;
 	double duration;
 	start = clock();
@@ -850,7 +850,10 @@ SEQAN_CHECKPOINT
 			SEQAN_TASSERT(fragmentBegin(ali_g,vd)==pos_j)
 			typename Value<TScore>::Type score = getScore(score_type,seqs,*ali_it,i_am_first,act_pos,pos_j,fragmentLength(ali_g,act_knot));//,fragmentLength(ali_g,vd));
 	//		if(score > 0)
-			addEdge(ali_g,act_knot,vd,score);
+			if (findEdge(ali_g, act_knot, vd) == 0) addEdge(ali_g,act_knot,vd,score);
+			else {
+				// ToDo: Adapt score of the edge
+			}
 			//prepare for next interval
 			act_pos += fragmentLength(ali_g,act_knot);
 			act_knot = findVertex(ali_g,seq,act_pos);
@@ -859,10 +862,10 @@ SEQAN_CHECKPOINT
 		++ali_it;
 	}
 
-	std::cout << "check\n";
+	//std::cout << "check\n";
 	finish1 = clock();
 	duration = (double)(finish1 - start) / CLOCKS_PER_SEC;
-	std::cout << "\ntook " << duration << " seconds.\n";
+	//std::cout << "\ntook " << duration << " seconds.\n";
 
 
 }
@@ -917,7 +920,7 @@ SEQAN_CHECKPOINT
 
 	////////////////////////////////////////////////////////////////
 	//do refinement
-	std::cout <<"refining..."<<std::flush;
+	//std::cout <<"refining..."<<std::flush;
 	clock_t start, finish1;
 	double duration;
 	start = clock();
@@ -958,7 +961,7 @@ SEQAN_CHECKPOINT
 
 	finish1 = clock();
 	duration = (double)(finish1 - start) / CLOCKS_PER_SEC;
-	std::cout << "\ntook " << duration << " seconds.\n";
+	//std::cout << "\ntook " << duration << " seconds.\n";
 
 
 

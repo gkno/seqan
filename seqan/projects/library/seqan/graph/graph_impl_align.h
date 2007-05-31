@@ -590,11 +590,11 @@ write(TFile & target,
 	}
 
 
-	Matrix<char> align;
-	if (convertAlignment(g, align)) {
-		TSize colLen = length(align, 0);
-		TSize nseq = length(align, 1);
-
+	String<char> align;
+	if (convertAlignment(g, align)) {	
+		TSize nseq = length(stringSet(g));
+		TSize colLen = length(align) / nseq;
+		
 		TSize baseCount=0;
 		TSize leftSpace=6;
 		TSize xPos = 0;
@@ -809,76 +809,87 @@ convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	String<unsigned int> component;
 	strongly_connected_components(g, component);
 
-	typedef std::list<unsigned int> TComps;
-	typedef std::set<unsigned int> TUniqueComps;
-	TComps comps;
-	TUniqueComps bag;
-	TComponentLength compLength;
+	// Make a directed graph to represent the ordering of the components
+	Graph<Directed<> > componentGraph;
+	for(TSize i = 0; i<length(component);++i) addVertex(componentGraph);
 
-	// Walk through the first sequence
-	typename TPosToVertexMap::const_iterator it = g.data_pvMap.begin();
-	TIdType firstSeq = it->first.first;
-	for(; it != g.data_pvMap.end(); ++it) {
-		if (it->first.first != firstSeq) break;
-		if (it->second == nilVertex) return false;
-		unsigned int c = getProperty(component, it->second);
-		if (!bag.insert(c).second) return false;
-		compLength.insert(std::make_pair(c, fragmentLength(g, it->second)));
-		comps.push_back(c);
+	// Walk through all sequences and add edges
+	typename TPosToVertexMap::const_iterator it1 = g.data_pvMap.begin();
+	while (it1!=g.data_pvMap.end()) {
+		// If sections are not assigned to a vertex -> no alignment
+		if (it1->second == nilVertex) return false;
+		typename TPosToVertexMap::const_iterator it2 = it1;
+		++it2;
+		TIdType currentSeq = it1->first.first;
+		while ((it2!=g.data_pvMap.end()) && 
+			(it2->first.first == currentSeq)) {
+			unsigned int c1 = getProperty(component, it1->second);
+			unsigned int c2 = getProperty(component, it2->second);
+			// If two components appear twice in the same sequence -> no alignment
+			if (c1 == c2) return false;
+			else {
+				if (findEdge(componentGraph, c1, c2) == 0) addEdge(componentGraph, c1, c2);
+			}
+			++it2;
+		}
+		++it1;
 	}
 
-	// Walk through all other sequences
-	TComps::iterator pos = comps.begin();
+	// Make a topological sort of the component graph
+	String<unsigned int> order;
+	topological_sort(componentGraph, order);
+
+	// Walk through all sequences and check the component order
+	// Also store the length of each component
+	TComponentLength compLength;
+	unsigned int compIndex = 0;
+	unsigned int compIndexLen = length(order);
+	typename TPosToVertexMap::const_iterator it = g.data_pvMap.begin();
 	TIdType currentSeq = it->first.first;
 	for(; it != g.data_pvMap.end(); ++it) {
 		if (it->first.first != currentSeq) {
-			pos = comps.begin();
+			compIndex = 0;
 			currentSeq = it->first.first;
 		}
-		if (it->second == nilVertex) return false;
 		unsigned int c = getProperty(component, it->second);
-		// Have we seen this component before?
-		if (bag.find(c) != bag.end()) {
-			while ((pos != comps.end()) && (*pos != c)) ++ pos;
-			// Crossing components
-			if (pos == comps.end()) return false;
-		} else {
-			bag.insert(c);
-			compLength.insert(std::make_pair(c, fragmentLength(g, it->second)));
-			pos = comps.insert(pos, c);
-		}
-		++pos;
+		compLength.insert(std::make_pair(c, fragmentLength(g, it->second)));
+		while ((compIndex < compIndexLen) && (order[compIndex] != c)) ++compIndex;
+		// Crossing components -> no alignment
+		if (compIndex >= compIndexLen) return false;
+		// Next component
+		++compIndex;
 	}
 
+	
 	// Create the matrix
 	TSize len = 0;
 	TSize nseq = length(stringSet(g));
 	for(TComponentLength::iterator cIt=compLength.begin(); cIt != compLength.end(); ++cIt) len+=cIt->second;
-	setDimension(mat, 2);setLength(mat, 0, len);setLength(mat, 1, nseq);
-	fill(host(mat), nseq * len, gapValue<char>());
+	char gapChar = gapValue<char>();
+	fill(mat, len * nseq, gapChar);
 
 	// Fill the matrix
 	TSize row = 0;
 	TSize col = 0;
 	it = g.data_pvMap.begin();
-	pos = comps.begin();
+	compIndex = 0;
 	currentSeq = it->first.first;
 	for(; it != g.data_pvMap.end(); ++it) {
 		if (it->first.first != currentSeq) {
 			SEQAN_TASSERT(col <= len);
 			//std::cout << std::endl;
 			++row;col=0;
-			pos = comps.begin();
+			compIndex = 0;
 			currentSeq = it->first.first;
 		}
 		unsigned int c = getProperty(component, it->second);
-		while ((pos != comps.end()) && (*pos != c)) {
-			for(TSize i=0;i<compLength[*pos];++i) {
+		while ((compIndex < compIndexLen) && (order[compIndex] != c)) {
+			for(TSize i=0;i<compLength[order[compIndex]];++i) {
 				//std::cout << gapValue<char>();
 				assignValue(mat, row*len + col, gapValue<char>() );
 				++col;
 			}
-			++pos;
+			++compIndex;
 		}
 		String<TValue> str = label(g,it->second);
 		//std::cout << str;
@@ -886,8 +897,7 @@ convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 			assignValue(mat, row*len + col, (TValue) getValue(str, i));
 			++col;
 		}
-
-		++pos;
+		++compIndex;
 	}
 	SEQAN_TASSERT(row + 1 == nseq);
 	//std::cout << std::endl;
