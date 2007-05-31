@@ -453,9 +453,40 @@ _stream_appendLine(TFile & file,
 //____________________________________________________________________________
 
 template <typename TFile, typename TChar>
-inline typename Size<TFile>::Type
+inline void
 _stream_countLine(TFile & file,
 				  TChar & c)
+
+{
+	while (true)
+	{
+		if (_streamEOF(file)) break;
+
+		if (c == '\n')
+		{
+			c = _streamGet(file);
+			if (c == '\r') 
+			{
+				c = _streamGet(file);
+			}
+			break;
+		}
+		if (c == '\r')
+		{
+			c = _streamGet(file);
+			break;
+		}
+
+		c = _streamGet(file);
+	}
+}
+
+//____________________________________________________________________________
+
+template <typename TFile, typename TChar>
+inline typename Size<TFile>::Type
+_stream_skipLine(TFile & file,
+				 TChar & c)
 
 {
 	typename Size<TFile>::Type count = 0;

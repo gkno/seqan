@@ -27,17 +27,22 @@ template <typename TFile>
 class Iter<TFile, FileReader<Fasta> >
 {
 public:
-	typedef typename Position<TFile>::Type TFilePosition;
+	typedef typename Value<TFile>::Type TValue;
 
 	TFile * data_host;
-	TFilePosition data_begin_pos;
+	TValue data_char;
+//	TFilePosition data_begin_pos;
 
 	Iter(TFile & file_):
-		data_host(& file_)
+		data_host(& file_),
+		data_char(0)
 	{
+		if (_streamEOF(data_host)) return;
+		_stream_skipLine(data_host, data_char);
 	}
 	Iter(Iter const & other_):
-		data_host(other_.data_host)
+		data_host(other_.data_host),
+		data_char(other_.data_char)
 	{
 	}
 	~Iter() 
@@ -48,10 +53,67 @@ public:
 	operator = (Iter const & other_)
 	{
 		data_host = other_.data_host;
+		data_char = other_.data_char;
 		return *this;
 	}
 };
 
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TFile>
+struct Value< Iter<TFile, FileReader<Fasta> > >:
+	Value<TFile>
+{
+};
+
+template <typename TFile>
+struct GetValue< Iter<TFile, FileReader<Fasta> > >
+{
+	typedef typename Value< Iter<TFile, FileReader<Fasta> > >::Type Type;
+};
+
+template <typename TFile>
+struct Reference< Iter<TFile, FileReader<Fasta> > >
+{
+	typedef typename Value< Iter<TFile, FileReader<Fasta> > >::Type & Type;
+};
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TFile>
+inline typename Reference<Iter<TFile, FileReader<Fasta> > >::Type
+value(Iter<TFile, FileReader<Fasta> > & it)
+{
+	return it.data_char;
+}
+
+template <typename TFile>
+inline typename GetValue<Iter<TFile, FileReader<Fasta> > >::Type
+getValue(Iter<TFile, FileReader<Fasta> > & it)
+{
+	return it.data_char;
+}
+
+template <typename TFile>
+inline void
+goNext(Iter<TFile, FileReader<Fasta> > & it)
+{
+	do
+	{
+		if (_streamEOF(it.data_file)) return;
+		it.data_char = _streamGet(it.data_file);
+	} while ((it.data_char == '\n') || (it.data_char == '\r'));
+}
+
+template <typename TFile>
+inline bool
+atEnd(Iter<TFile, FileReader<Fasta> > & it)
+{
+	return _streamEOF(it.data_file) || (it.data_char == '>');
+}
+
+//////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
 

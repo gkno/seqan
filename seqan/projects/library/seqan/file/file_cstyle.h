@@ -37,7 +37,6 @@ namespace SEQAN_NAMESPACE_MAIN
     };
 */
 /*
-NOTE: gibts schon in seqan/cstream.h, und zwar anders!
 
     template <>
     struct Position< FILE* >

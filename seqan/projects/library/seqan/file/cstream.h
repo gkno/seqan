@@ -29,12 +29,13 @@ struct Value<FILE *>
 };
 
 //////////////////////////////////////////////////////////////////////////////
-
+/*
 template <>
 struct Position<FILE *>
 {
 	typedef ::std::fpos_t Type;
 };
+*/
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -108,9 +109,7 @@ inline Position<FILE *>::Type
 _streamTellG(FILE * me)
 {
 SEQAN_CHECKPOINT
-	Position<FILE *>::Type pos;
-	::std::fgetpos(me, &pos);
-	return pos;
+	return ::std::ftell(me);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -121,9 +120,7 @@ inline Position<FILE *>::Type
 _streamTellP(FILE * me)
 {
 SEQAN_CHECKPOINT
-	Position<FILE *>::Type pos;
-	::std::fgetpos(me, &pos);
-	return pos;
+	return ::std::ftell(me);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -135,7 +132,7 @@ _streamSeekG(FILE * me,
 			 Position<FILE *>::Type pos)
 {
 SEQAN_CHECKPOINT
-	::std::fsetpos(me, &pos);
+	::std::fseek(me, pos, SEEK_SET);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -147,7 +144,7 @@ _streamSeekP(FILE * me,
 			 Position<FILE *>::Type pos)
 {
 SEQAN_CHECKPOINT
-	::std::fsetpos(me, &pos);
+	::std::fseek(me, pos, SEEK_SET);
 }
 
 //////////////////////////////////////////////////////////////////////////////
