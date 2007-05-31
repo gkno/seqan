@@ -672,12 +672,13 @@ SEQAN_CHECKPOINT
 	return me == TIterator();
 }
 
+
 template <typename TIterator>
 inline bool
 atNil(TIterator * me)
 {
 SEQAN_CHECKPOINT
-	me = 0;
+	return me == 0;
 }
 
 //////////////////////////////////////////////////////////////////////////////

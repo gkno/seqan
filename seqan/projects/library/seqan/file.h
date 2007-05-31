@@ -4,8 +4,6 @@
 //____________________________________________________________________________
 // prerequisites
 
-#include <seqan/sequence.h>
-
 #include <iostream>
 #include <climits>
 #include <cstdio>
@@ -13,35 +11,42 @@
 #include <vector>
 #include <map>
 
+#include <seqan/sequence.h>
+
+
 //____________________________________________________________________________
 // file formats
-
 #include <seqan/file/file_forwards.h>
 
 #ifdef SEQAN_SWITCH_USE_FORWARDS
 #include <seqan/file/file_generated_forwards.h>
 #endif
 
+#include <seqan/file/cstream.h>
+#include <seqan/file/stream.h>
+
+
 #include <seqan/file/chunk_collector.h>
 #include <seqan/file/meta.h>
 
 #include <seqan/file/file_format.h>
 
-#include <seqan/file/stream.h>
-#include <seqan/file/cstream.h>
 #include <seqan/file/stream_algorithms.h>
 
 //file formats for sequences
 #include <seqan/file/file_format_raw.h>
 #include <seqan/file/file_format_fasta.h>
-#include <seqan/file/file_format_embl.h>
-#include <seqan/file/file_format_genbank.h>
+//#include <seqan/file/file_format_embl.h>
+//#include <seqan/file/file_format_genbank.h>
 
 //file formats for alignments
 #include <seqan/file/file_format_fasta_align.h>
 
 //others
 #include <seqan/file/file_format_cgviz.h>
+
+
+//#include <seqan/file/file_format_guess.h>
 
 //____________________________________________________________________________
 // files

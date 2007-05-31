@@ -809,16 +809,16 @@ void Test_CGViz() {
 
 void Test_EmblGenbank()
 {
+/*
 	fstream strm;
 
 	String<char> id;
 	String<char> data;
 	
 	//String<char> meta;
-	Metadata<char>::Type meta;
+//	Metadata<char>::Type meta;
 	//MetaMultiMap meta;
 
-/*
 	//prepare stream
 	strm.clear();
 	strm.open(TEST_PATH "genbank_crlf.txt", ios_base::in | ios_base::binary);
@@ -837,7 +837,7 @@ void Test_EmblGenbank()
 	clear(id);
 	clear(meta);
 	clear(data);
-*/
+
 	strm.clear();
 	strm.open(TEST_PATH "embl_crlf.txt", ios_base::in | ios_base::binary);
 	
@@ -851,6 +851,7 @@ void Test_EmblGenbank()
 	strm.open(TEST_PATH "embl_out_test.txt", ios_base::out | ios_base::binary);
 	write(strm, data, id, meta, Embl());
 	strm.close();
+*/
 }
 
 //////////////////////////////////////////////////////////////////////////////
