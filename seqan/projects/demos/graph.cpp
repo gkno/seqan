@@ -645,7 +645,6 @@ void PathGrowingAlgorithm() {
 
 	// Path growing algorithm
 	String<bool> edgeMap;	
-	resizeEdgeMap(g, edgeMap);
 
 	// EdgeMap indicates whether an edge is selected or not
 	unsigned int weight = path_growing_algorithm(g, weightMap, edgeMap);

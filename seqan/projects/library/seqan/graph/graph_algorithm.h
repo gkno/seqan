@@ -1314,7 +1314,7 @@ path_growing_algorithm(Graph<TSpec>& g,
 	TGraph mutant(g);
 
 	// Initialy not a single edge is selected
-	fill(edgeMap1, getIdUpperBound(_getEdgeIdManager(mutant)), false);
+	fill(edgeMap1, getIdUpperBound(_getEdgeIdManager(g)), false);
 	TEdgeMap edgeMap2 = edgeMap1;
 	TValue edgeMap1Sum = 0;
 	TValue edgeMap2Sum = 0;
