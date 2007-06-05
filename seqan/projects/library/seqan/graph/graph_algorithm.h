@@ -1279,6 +1279,92 @@ ford_fulkerson(Graph<TSpec> const& g,
 	return valF;
 }
 
+
+//////////////////////////////////////////////////////////////////////////////
+// Matching
+//////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////////
+// Path Growing Algorithm
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.path_growing_algorithm:
+*/
+
+template<typename TSpec, typename TWeightMap, typename TEdgeMap>
+typename Value<TWeightMap>::Type
+path_growing_algorithm(Graph<TSpec>& g,
+					   TWeightMap const& weightMap,
+					   TEdgeMap& edgeMap1)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<TSpec> TGraph;
+	typedef typename Value<TWeightMap>::Type TValue;
+	typedef typename Size<Graph<TSpec> >::Type TSize;
+	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
+	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
+
+	// Make a copy of the graph
+	TGraph mutant(g);
+
+	// Initialy not a single edge is selected
+	fill(edgeMap1, getIdUpperBound(_getEdgeIdManager(g)), false);
+	TEdgeMap edgeMap2 = edgeMap1;
+	TValue edgeMap1Sum = 0;
+	TValue edgeMap2Sum = 0;
+	
+	// Run the algorithm
+	TSize i = 1;
+	while (numEdges(mutant) > 0) {
+		TVertexIterator itVert(mutant);
+		while (outDegree(mutant, *itVert) < 1) goNext(itVert);
+		TVertexDescriptor x = *itVert;
+		TVertexDescriptor y;
+		while (outDegree(mutant, x) >= 1) {
+			TOutEdgeIterator itOut(mutant, x);
+			TEdgeDescriptor e = *itOut;
+			TValue max = getProperty(weightMap, e);
+			y = targetVertex(itOut);
+			goNext(itOut);
+			for(;!atEnd(itOut);++itOut) {
+				if (getProperty(weightMap, *itOut) > max) {
+					e = *itOut;
+					max = getProperty(weightMap, e);
+					y = targetVertex(itOut);
+				}
+			}
+			if (i == 1) {
+				// Mark the edge for m1
+				assignProperty(edgeMap1, e, true);
+				edgeMap1Sum += max;
+			} else {
+				// Mark the edge for m2
+				assignProperty(edgeMap2, e, true);
+				edgeMap2Sum += max;
+			}
+			i = 3 - i;
+			removeVertex(mutant, x);
+			x = y;
+		}
+	}
+	
+
+	// Check whether we have to swap bool arrays
+	if (edgeMap2Sum > edgeMap1Sum) {
+		edgeMap1Sum = edgeMap2Sum;
+		edgeMap1 = edgeMap2;
+	}
+
+	return edgeMap1Sum;
+}
+
+
 }// namespace SEQAN_NAMESPACE_MAIN
 
 #endif //#ifndef SEQAN_HEADER_...
