@@ -152,7 +152,6 @@ write(TFile & target,
 	  TIDString const &,
 	  Raw)
 {
-	SEQAN_CHECKPOINT
 	typedef Graph<Automaton<TAlphabet, String<TAlphabet>, WordGraph<TSpec> > > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;

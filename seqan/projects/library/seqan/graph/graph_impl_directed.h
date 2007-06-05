@@ -884,7 +884,6 @@ write(TFile & target,
 	  TIDString const &,
 	  Raw)
 {
-	SEQAN_CHECKPOINT
 	typedef Graph<Directed<TCargo, TSpec> > TGraph;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
 	typedef typename Iterator<String<TEdgeStump*> const>::Type TIterConst;

@@ -136,6 +136,7 @@ _copyGraph(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& source,
 		   Graph<Automaton<TAlphabet, TCargo, TSpec> >& dest,
 		   bool transpose)
 {
+	SEQAN_CHECKPOINT
 	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
@@ -457,6 +458,7 @@ inline void
 removeOutEdges(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 			   TVertexDescriptor const vertex)
 {
+	SEQAN_CHECKPOINT
 	SEQAN_ASSERT(idInUse(g.data_id_managerV, vertex) == true)
 
 	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
@@ -480,6 +482,7 @@ inline void
 removeInEdges(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 			  TVertexDescriptor const vertex)
 {
+	SEQAN_CHECKPOINT
 	SEQAN_ASSERT(idInUse(g.data_id_managerV, vertex) == true)
 
 	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
@@ -624,7 +627,6 @@ write(TFile & target,
 	  TIDString const &,
 	  Raw)
 {
-	SEQAN_CHECKPOINT
 	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename EdgeType<TGraph>::Type TEdge;
