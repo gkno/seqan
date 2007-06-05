@@ -559,7 +559,12 @@ void Test_EdgeStump() {
 }
 
 
+//////////////////////////////////////////////////////////////////////////////
 
+void Test_GraphBasics() {
+	Test_IdManager();	// Test Id Manager
+	Test_EdgeStump();	// Test EdgeStumps
+}
 
 
 }

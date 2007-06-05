@@ -176,20 +176,18 @@ void setHost (Pattern<TNeedle, AhoCorasick> & me, TNeedle2 const & needle) {
 	me.data_needleLength = 0;
 
 
-	/*
-	fstream strm;
-	strm.open(TEST_PATH "my_trie.dot", ios_base::out | ios_base::trunc);
-	String<String<char> > nodeMap;
-	_createTrieNodeNames(me.data_graph, me.data_terminalStateMap, nodeMap);
-	String<String<char> > edgeMap;
-	_createEdgeNames(me.data_graph,edgeMap);
-	write(strm,me.data_graph,nodeMap,edgeMap,DotDrawing());
-	strm.close();
+	//fstream strm;
+	//strm.open(TEST_PATH "my_trie.dot", ios_base::out | ios_base::trunc);
+	//String<String<char> > nodeMap;
+	//_createTrieNodeAttributes(me.data_graph, me.data_terminalStateMap, nodeMap);
+	//String<String<char> > edgeMap;
+	//_createEdgeAttributes(me.data_graph,edgeMap);
+	//write(strm,me.data_graph,nodeMap,edgeMap,DotDrawing());
+	//strm.close();
 	// Supply links
-	for(unsigned int i=0;i<length(me.data_supplyMap);++i) {
-		std::cout << i << "->" << getProperty(me.data_supplyMap,i) << ::std::endl;
-	}
-	*/
+	//for(unsigned int i=0;i<length(me.data_supplyMap);++i) {
+	//	std::cout << i << "->" << getProperty(me.data_supplyMap,i) << ::std::endl;
+	//}
 }
 
 template <typename TNeedle, typename TNeedle2>

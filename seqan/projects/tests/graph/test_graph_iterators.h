@@ -475,6 +475,7 @@ void Test_DfsPreorderIter() {
 
 
 //////////////////////////////////////////////////////////////////////////////
+
 void Test_DfsPreorderIterator() {
 //____________________________________________________________________________
 // Graph DfsIterator
@@ -542,6 +543,43 @@ void Test_DfsPreorderIterator() {
 }
 
 
+//////////////////////////////////////////////////////////////////////////////
+
+void Test_GraphIterators() {
+	Test_VertexIterator<Directed<char> >();
+	Test_VertexIterator<Undirected<char> >();
+	Test_VertexIterator<Automaton<char> >();
+	Test_TreeInternalVertexIterator();
+	
+	Test_OutEdgeIterator<Directed<char> >();
+	Test_OutEdgeIterator<Undirected<char> >();
+	Test_OutEdgeIterator<Tree<char> >();
+	Test_OutEdgeIterator<Automaton<char> >();
+	
+	Test_EdgeIterator<Directed<char> >();
+	Test_EdgeIterator<Undirected<char> >();
+	Test_EdgeIterator<Tree<char> >();
+	Test_EdgeIterator<Automaton<char> >();
+	
+	Test_AdjacencyIterator<Directed<char> >();
+	Test_AdjacencyIterator<Undirected<char> >();
+	Test_AdjacencyIterator<Tree<char> >();
+	Test_AdjacencyIterator<Automaton<char> >();
+	
+	// Test bfs and dfs iterator
+	Test_BfsIter<Directed<char> >();
+	Test_BfsIter<Undirected<char> >();
+	Test_BfsIter<Tree<char> >();
+	Test_BfsIter<Automaton<char> >();
+	Test_BfsIterator();
+	
+	Test_DfsPreorderIter<Directed<char> >();
+	Test_DfsPreorderIter<Undirected<char> >();
+	Test_DfsPreorderIter<Tree<char> >();
+	Test_DfsPreorderIter<Automaton<char> >();
+	Test_DfsPreorderIterator();
+
+}
 
 
 }

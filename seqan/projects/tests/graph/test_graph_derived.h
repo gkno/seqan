@@ -34,6 +34,15 @@ void Test_Trie() {
 	appendValue(keywords, String<char>("annually"));
 	createTrie(g,pos,keywords);
 
+	SEQAN_TASSERT(parseString(g, 0, "a") == 1)
+	SEQAN_TASSERT(parseString(g, 0, "an") == 2)
+	SEQAN_TASSERT(parseString(g, 0, "ann") == 3)
+	SEQAN_TASSERT(parseString(g, 0, "anno") == 4)
+	SEQAN_TASSERT(parseString(g, 0, "annu") == 9)
+	SEQAN_TASSERT(getProperty(pos, 11) == 1) // In vertex 11 keyword 1 ends
+	SEQAN_TASSERT(getProperty(pos, 13) == 2)
+	SEQAN_TASSERT(getProperty(pos, 8) == 0)
+
 	// Output
 	// File output
 	fstream strm;
@@ -45,6 +54,18 @@ void Test_Trie() {
 	write(strm,g,nodeMap,edgeMap,DotDrawing());
 	strm.close();
 
+	clear(g);
+	clear(pos);
+	createTrieOnReverse(g,pos,keywords);
+
+	SEQAN_TASSERT(parseString(g, 0, "e") == 1)
+	SEQAN_TASSERT(parseString(g, 0, "l") == 9)
+	SEQAN_TASSERT(parseString(g, 0, "y") == 15)
+	SEQAN_TASSERT(parseString(g, 0, "ec") == 2)
+	SEQAN_TASSERT(getProperty(pos, 8) == 0) // In vertex 8 keyword 0 ends
+	SEQAN_TASSERT(getProperty(pos, 14) == 1)
+	SEQAN_TASSERT(getProperty(pos, 22) == 2)
+
 	Graph<Automaton<Dna> > gDna;
 	clear(pos);
 	String<String<Dna> > keyw;
@@ -52,6 +73,14 @@ void Test_Trie() {
 	appendValue(keyw, String<Dna>("TATAT"));
 	appendValue(keyw, String<Dna>("ACGATAT"));
 	createTrie(gDna,pos,keyw);
+
+	SEQAN_TASSERT(parseString(gDna, 0, "A") == 1)
+	SEQAN_TASSERT(parseString(gDna, 0, "T") == 8)
+	SEQAN_TASSERT(parseString(gDna, 0, "AT") == 2)
+	SEQAN_TASSERT(parseString(gDna, 0, "AC") == 13)
+	SEQAN_TASSERT(getProperty(pos, 7) == 0) // In vertex 7 keyword 0 ends
+	SEQAN_TASSERT(getProperty(pos, 18) == 2)
+	SEQAN_TASSERT(getProperty(pos, 12) == 1)
 
 	// Output
 	// File output
@@ -63,6 +92,13 @@ void Test_Trie() {
 	_createEdgeAttributes(gDna,edgeMap);
 	write(strm2,gDna,nodeMap,edgeMap,DotDrawing());
 	strm2.close();
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+void Test_GraphDerivedTypes() {
+	Test_Oracle();
+	Test_Trie();
 }
 
 }

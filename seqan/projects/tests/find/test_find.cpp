@@ -320,7 +320,7 @@ void Test_OnlineAlgMulti()
 
 
 //____________________________________________________________________________
-// Multiple duplicated keywords with overlapping matches
+// Multiple keywords with overlapping matches
 	String<Dna> my2_haystack("aaaacaaa");
 	Finder<String<Dna> > my2_finder(my2_haystack);
 

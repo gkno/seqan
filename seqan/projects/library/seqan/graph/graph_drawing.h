@@ -32,6 +32,7 @@ _markRootVertex(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
 				TVertexDescriptor const& v,
 				TAttributes& str)
 {
+	SEQAN_CHECKPOINT
 	if (isRoot(g,v)) {
 		append(str, ", shape = doublecircle");
 	}
@@ -45,6 +46,7 @@ _markRootVertex(Graph<Directed<TCargo, TSpec> > const& g,
 				TVertexDescriptor const& v,
 				TAttributes& str)
 {
+	SEQAN_CHECKPOINT
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -55,17 +57,7 @@ _markRootVertex(Graph<Undirected<TCargo, TSpec> > const& g,
 				TVertexDescriptor const& v,
 				TAttributes& str)
 {
-}
-
-
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename TStringSet, typename TCargo, typename TSpec, typename TVertexDescriptor, typename TAttributes>
-inline void 
-_markRootVertex(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
-				TVertexDescriptor const& v,
-				TAttributes& str)
-{
+	SEQAN_CHECKPOINT
 }
 
 
@@ -77,6 +69,7 @@ _markRootVertex(Graph<Tree<TCargo, TSpec> > const& g,
 				TVertexDescriptor const& v,
 				TAttributes& str)
 {
+	SEQAN_CHECKPOINT
 	if (isRoot(g,v)) {
 		append(str, ", shape = doublecircle");
 	}
@@ -154,7 +147,6 @@ _createNodeAttributes(Graph<TSpec> const& g,
 					  TNodeAttributes& nodeMap,
 					  TNameMap const& nameMap)
 {
-	SEQAN_CHECKPOINT
     typedef Graph<TSpec> TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	resizeVertexMap(g, nodeMap);
@@ -262,7 +254,6 @@ inline void
 _createEdgeAttributes(Graph<Tree<TCargo, TSpec> > const& g,
 					  TEdgeAttributes& edgeMap)
 {
-	SEQAN_CHECKPOINT
 	typedef Graph<Tree<TCargo, TSpec> > TGraph;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	resizeEdgeMap(g, edgeMap);
@@ -715,7 +706,6 @@ _addEdge(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 		 TEdgeAttributes& edgeMap,
 		 TStatement& attr_list)
 {
-	SEQAN_CHECKPOINT
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	TEdgeDescriptor e = addEdge(g, sourceV, targetV);

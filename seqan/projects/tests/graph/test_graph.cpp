@@ -26,6 +26,7 @@
 #include "test_graph_derived.h"
 #include "test_graph_algorithms.h"
 #include "test_graph_alignment.h"
+#include "test_graph_tcoffee.h"
 #include "test_graph_match_refinement.h"
 
 using namespace std;
@@ -38,74 +39,15 @@ int main()
 {
 	SEQAN_TREPORT("TEST BEGIN")
 
-	// Test Graph Basic
-	Test_IdManager();	// Test Id Manager
-	Test_EdgeStump();	// Test EdgeStumps
-
-
-	// Test Graph Types
-	Test_Directed();	// Directed graphs
-	Test_Undirected();	// Undirected graphs
-	Test_Automaton();	// Automatons
-	Test_WordGraph();	// Word Graph
-	Test_Tree();		// Trees
-	Test_Alignment();	// Alignment graph
-
-	// Test Graph Iterators
-	Test_VertexIterator<Directed<char> >();
-	Test_VertexIterator<Undirected<char> >();
-	Test_VertexIterator<Automaton<char> >();
-	Test_TreeInternalVertexIterator();
-	Test_OutEdgeIterator<Directed<char> >();
-	Test_OutEdgeIterator<Undirected<char> >();
-	Test_OutEdgeIterator<Tree<char> >();
-	Test_OutEdgeIterator<Automaton<char> >();
-	Test_EdgeIterator<Directed<char> >();
-	Test_EdgeIterator<Undirected<char> >();
-	Test_EdgeIterator<Tree<char> >();
-	Test_EdgeIterator<Automaton<char> >();
-	Test_AdjacencyIterator<Directed<char> >();
-	Test_AdjacencyIterator<Undirected<char> >();
-	Test_AdjacencyIterator<Tree<char> >();
-	Test_AdjacencyIterator<Automaton<char> >();
-	// Test bfs and dfs iterator
-	Test_BfsIter<Directed<char> >();
-	Test_BfsIter<Undirected<char> >();
-	Test_BfsIter<Tree<char> >();
-	Test_BfsIter<Automaton<char> >();
-	Test_BfsIterator();
-	Test_DfsPreorderIter<Directed<char> >();
-	Test_DfsPreorderIter<Undirected<char> >();
-	Test_DfsPreorderIter<Tree<char> >();
-	Test_DfsPreorderIter<Automaton<char> >();
-	Test_DfsPreorderIterator();
-
-	// Test Graph Properties
-	Test_ExternalProperty<Directed<char> >();
-	Test_ExternalProperty<Undirected<char> >();
-	Test_ExternalProperty<Tree<char> >();
-	Test_ExternalProperty<Automaton<char> >();	
-	Test_Property();
-
-	// Test Graph Derived
-	Test_Oracle();
-	Test_Trie();
-
-	// Test Graph Algorithms
-	Test_Algorithms();
-
-	// Alignment
-	Test_GraphAlignment();
-	//Test_Runtime2();
-
-	// T-Coffee
-	Test_CompressedAlphabets();
-	Test_Fragment();
-	Test_TCoffee();
-
-
-	// Match Refinement
-	Test_MatchRefinement();
+	Test_GraphBasics();			// Test Graph Basic
+	Test_GraphTypes();			// Test Graph Types
+	Test_GraphIterators();		// Test Graph Iterators
+	Test_GraphProperties();		// Test internal and external property maps
+	Test_GraphDerivedTypes();	// Test Additional graph types, e.g., oracle, trie,...
+	Test_GraphAlgorithms();		// Test Graph Algorithms
+	Test_GraphAlignment();		// Test Graph Alignment
+	Test_GraphTCoffee();		// Test T-Coffee
+	Test_GraphMatchRefinement();// Test Match Refinement
 
 	
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_base.h");

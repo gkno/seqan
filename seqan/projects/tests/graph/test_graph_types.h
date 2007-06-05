@@ -82,10 +82,10 @@ void Test_Directed() {
 	write(strm,g,DotDrawing());
 	strm.close();
 	//// File read
-	//StandardGraph gTmp;
-	//strm.open(TEST_PATH "my_graph.dot", ios_base::in);
-	//read(strm,gTmp,DotDrawing());
-	//strm.close();
+	StandardGraph gTmp;
+	strm.open(TEST_PATH "my_graph.dot", ios_base::in);
+	read(strm,gTmp,DotDrawing());
+	strm.close();
 
 	removeEdge(g,4,3);
 	addEdge(g,0,0);
@@ -1766,11 +1766,10 @@ void Test_Alignment() {
 	//// Raw output
 	//std::cout << gAl << std::endl;
 	//// File output
-	//fstream strm;
-	//strm.open(TEST_PATH "my_alignment.dot", ios_base::out | ios_base::trunc);
-	//write(strm,gAl,DotDrawing());
-	//strm.close();
-
+	fstream strm;
+	strm.open(TEST_PATH "my_alignment.dot", ios_base::out | ios_base::trunc);
+	write(strm,gAl,DotDrawing());
+	strm.close();
 
 	typedef String<char> TAlignString;
 	typedef StringSet<TAlignString, Dependent<> > TAlignStringSet;
@@ -1795,10 +1794,8 @@ void Test_Alignment() {
 
 	//std::cout << g_align << std::endl;
 
-
-
-
 }
+
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -1876,6 +1873,19 @@ void Test_Fragment() {
 	SEQAN_TASSERT(label(g2, v2) == "a")
 	SEQAN_TASSERT(getProjectedPosition(g2, 0, 0) == 4)
 	SEQAN_TASSERT(getProjectedPosition(g2, 1, 4) == 0)
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+void Test_GraphTypes() {
+	Test_Directed();	// Directed graphs
+	Test_Undirected();	// Undirected graphs
+	Test_Automaton();	// Automatons
+	Test_WordGraph();	// Word Graph
+	Test_Tree();		// Trees
+	Test_Alignment();	// Alignment graph
+	Test_Fragment();	// Fragment
 }
 
 

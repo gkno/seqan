@@ -158,6 +158,17 @@ void Test_Property() {
 	SEQAN_TASSERT(getProperty(pseudo_map, e1) == 'k')
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
+void Test_GraphProperties() {
+	Test_ExternalProperty<Directed<char> >();
+	Test_ExternalProperty<Undirected<char> >();
+	Test_ExternalProperty<Tree<char> >();
+	Test_ExternalProperty<Automaton<char> >();	
+	Test_Property();
+}
+
+
 }
 
 #endif

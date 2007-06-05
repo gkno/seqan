@@ -622,7 +622,7 @@ void Test_FordFulkerson() {
 
 //////////////////////////////////////////////////////////////////////////////
 
-void Test_Algorithms() {
+void Test_GraphAlgorithms() {
 //____________________________________________________________________________
 // Graph Algorithms
 	// Elementary graph algorithms

@@ -63,7 +63,7 @@ Test_ReadSequences(String<char> const path, String<char> const file_prefix, TStr
 
 //////////////////////////////////////////////////////////////////////////////
 
-void Test_MatchRefinement() {
+void Test_GraphMatchRefinement() {
 	// Sequences
 	typedef String<Dna5, External<ExternalConfig<File<>, 64*1024> > > TString;
 	typedef StringSet<TString, Owner<> > TStringSet;
