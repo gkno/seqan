@@ -1345,6 +1345,7 @@ void Test_Tree() {
 	SEQAN_TASSERT(numVertices(g2) == 1)
 	SEQAN_TASSERT(numEdges(g2) == 0)
 	TVertexDescriptor2 ver1 = addChild(g2, getRoot(g2), TPair('a',3));
+	SEQAN_TASSERT(numChildren(g2, getRoot(g2)) == 1);
 	SEQAN_TASSERT(ver1 == 1)
 	SEQAN_TASSERT(numVertices(g2) == 2)
 	TVertexDescriptor2 ver2 = addChild(g2, getRoot(g2));
@@ -1365,6 +1366,9 @@ void Test_Tree() {
 	cargo(ed1) = TPair('c',1);
 	SEQAN_TASSERT((getCargo(ed1)).i1 == 'c')
 	SEQAN_TASSERT((getCargo(ed1)).i2 == 1)
+	assignRoot(g2,1);
+	SEQAN_TASSERT(getRoot(g2) == 1)
+
 
 
 

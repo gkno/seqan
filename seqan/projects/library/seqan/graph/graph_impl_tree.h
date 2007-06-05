@@ -218,6 +218,7 @@ template<typename TCargo, typename TSpec>
 inline void
 transpose(Graph<Tree<TCargo, TSpec> >& g)
 {
+	SEQAN_CHECKPOINT
 	Graph<Tree<TCargo, TSpec> > dest;
 	_copyGraph(g, dest, true);
 	g = dest;
@@ -272,7 +273,7 @@ inline void
 clearEdges(Graph<Tree<TCargo, TSpec> >& g) 
 {
 	SEQAN_CHECKPOINT
-	//removeAllChildren(g, getRoot(g));
+
 	typedef Graph<Tree<TCargo, TSpec> > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
@@ -364,6 +365,7 @@ inline typename Size<Graph<Tree<TCargo, TSpec> > >::Type
 degree(Graph<Tree<TCargo, TSpec> > const& g,
 	   TVertexDescriptor const vertex) 
 {
+	SEQAN_CHECKPOINT
 	return (inDegree(g,vertex)+outDegree(g,vertex));
 }
 
@@ -402,6 +404,7 @@ inline void
 removeVertex(Graph<Tree<TCargo, TSpec> >& g, 
 			 TVertexDescriptor const v) 
 {
+	SEQAN_CHECKPOINT
 	SEQAN_ASSERT(idInUse(g.data_id_managerV, v) == true)
 
 	typedef Graph<Tree<TCargo, TSpec> > TGraph;
@@ -661,7 +664,6 @@ write(TFile & target,
 	  TIDString const &,
 	  Raw)
 {
-	SEQAN_CHECKPOINT
 	typedef Graph<Tree<TCargo, TSpec> > TGraph;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
 	typedef typename Iterator<String<TEdgeStump*> const>::Type TIterConst;
