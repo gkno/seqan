@@ -75,7 +75,7 @@ public:
 	}
 
 	Score & operator = (Score const & other) {
-		if (this == &_other) return *this;
+		if (this == &other) return *this;
 		data_graph = other.data_graph;
 		data_inf = other.data_inf;
 		data_nilVertex = other.data_nilVertex;
