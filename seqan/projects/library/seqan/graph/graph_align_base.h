@@ -223,8 +223,6 @@ _align_trace_print(TFile& file,
 				   TPos const segLen,
 				   TTraceValue const tv)
 {
-	SEQAN_CHECKPOINT
-
 	// TraceBack values
 	enum {Diagonal = 0, Horizontal = 1, Vertical = 2};
 

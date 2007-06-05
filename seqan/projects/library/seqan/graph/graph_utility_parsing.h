@@ -14,11 +14,9 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TFile, typename TChar>
-void 
+inline void 
 _parse_skipLine(TFile& file, TChar& c)
 {
-	SEQAN_CHECKPOINT
-		
 	if (c == '\n') return;
 	while (!_streamEOF(file)) {
 		c = _streamGet(file);
@@ -30,11 +28,9 @@ _parse_skipLine(TFile& file, TChar& c)
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TFile, typename TChar>
-void 
+inline void 
 _parse_skipWhitespace(TFile& file, TChar& c)
 {
-	SEQAN_CHECKPOINT
-	
 	if ((c!=' ') && (c != '\t') && (c != '\n') && (c != '\r')) return;
 	while (!_streamEOF(file)) {
 		c = _streamGet(file);
@@ -45,10 +41,9 @@ _parse_skipWhitespace(TFile& file, TChar& c)
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TChar>
-bool
+inline bool
 _parse_isDigit(TChar const c)
 {
-	SEQAN_CHECKPOINT
 	//return (((unsigned) c >=  48) && ((unsigned) c <=  57));
 	return ((c == '0') || (c == '1') || (c == '2') || (c == '3') || (c == '4') || 
 		    (c == '5') || (c == '6') || (c == '7') || (c == '8') || (c == '9'));
@@ -57,10 +52,9 @@ _parse_isDigit(TChar const c)
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TChar>
-bool
+inline bool
 _parse_isLetter(TChar const c)
 {
-	SEQAN_CHECKPOINT
 	//return ((((unsigned) c >=  97) && ((unsigned) c <=  122)) || (((unsigned) c >=  65) && ((unsigned) c <=  90)));
 	return ((c == 'a') || (c == 'b') || (c == 'c') || (c == 'd') || (c == 'e') || 
 			(c == 'f') || (c == 'g') || (c == 'h') || (c == 'i') || (c == 'j') ||
@@ -78,20 +72,18 @@ _parse_isLetter(TChar const c)
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TChar>
-bool
+inline bool
 _parse_isAlphanumericChar(TChar const c)
 {
-	SEQAN_CHECKPOINT
 	return ((_parse_isDigit(c)) || (_parse_isLetter(c)) || (c == '_'));
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TFile, typename TChar>
-int
+inline int
 _parse_readNumber(TFile & file, TChar& c)
 {
-	SEQAN_CHECKPOINT
 	// Read number
 	String<char> str(c);
 	while (!_streamEOF(file)) {
@@ -108,8 +100,7 @@ template<typename TFile, typename TChar>
 inline String<char>
 _parse_readIdentifier(TFile & file, TChar& c)
 {
-	SEQAN_CHECKPOINT
-	// Read word
+	// Read identifier
 	String<char> str(c);
 	while (!_streamEOF(file)) {
 		c = _streamGet(file);
@@ -125,7 +116,6 @@ template<typename TFile, typename TChar>
 inline String<char>
 _parse_readWord(TFile & file, TChar& c)
 {
-	SEQAN_CHECKPOINT
 	// Read word
 	String<char> str(c);
 	while (!_streamEOF(file)) {

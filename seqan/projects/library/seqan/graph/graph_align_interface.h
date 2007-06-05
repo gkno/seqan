@@ -76,17 +76,16 @@ globalAlignment(TStringSet const& str,
 
 
 
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TStringSet, typename TCargo, typename TSpec, typename TTag>
-unsigned int
-globalAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-				TTag)
-{
-	SEQAN_CHECKPOINT
-	clearVertices(g);
-	return _globalAlignment(g,stringSet(g),Score<unsigned int>(0,1,1,0),Hirschberg());
-}
+////////////////////////////////////////////////////////////////////////////////
+//
+//template<typename TStringSet, typename TCargo, typename TSpec, typename TTag>
+//unsigned int
+//globalAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+//				TTag)
+//{
+//	clearVertices(g);
+//	return _globalAlignment(g,stringSet(g),Score<unsigned int>(0,1,1,0),Hirschberg());
+//}
 
 }// namespace SEQAN_NAMESPACE_MAIN
 
