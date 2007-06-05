@@ -96,7 +96,7 @@ void Test_OnlineAlg()
 			finderDna += 2;
 			clear(finderDna);  // clear the state of the finder
 		} else {
-			unsigned int p = position(finderDna);
+			//unsigned int p = position(finderDna);
 			append(pos,position(finderDna));
 		}
 	}

@@ -57,19 +57,28 @@ template <typename TValue, typename TGraphType>
 class Score<TValue, ScoreAlignmentGraph<TGraphType> >
 {
 public:
-	Holder<TGraphType> data_graph;
+	TGraphType const* data_graph;
+	TValue data_inf;
+	typename VertexDescriptor<TGraphType>::Type data_nilVertex;
 
 public:
-	Score(TGraphType _graph) {
-		data_graph = _graph;
+	Score(TGraphType const& _graph) {
+		data_graph = &_graph;
+		data_inf = infimumValue<TValue>();
+		data_nilVertex = getNil<typename VertexDescriptor<TGraphType>::Type>();
 	}
 
 	Score(Score const & other) {
 		data_graph = other.data_graph;
+		data_inf = other.data_inf;
+		data_nilVertex = other.data_nilVertex;
 	}
 
 	Score & operator = (Score const & other) {
+		if (this == &_other) return *this;
 		data_graph = other.data_graph;
+		data_inf = other.data_inf;
+		data_nilVertex = other.data_nilVertex;
 		return *this;
 	}
 };
@@ -108,29 +117,29 @@ score(Score<TValue, ScoreAlignmentGraph<TGraphType> > & me,
 	  T const & left,
 	  T const & right)
 {
-	typedef typename Size<T>::Type TSize;
-	typedef typename VertexDescriptor<TGraphType>::Type TVertexDescriptor;
 	typedef typename EdgeDescriptor<TGraphType>::Type TEdgeDescriptor;
-	TSize len1 = length(left);
-	TSize len2 = length(right);
-	TSize divider = len1 * len2;
-	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
-	TValue inf = infimumValue<TValue>();
+	typedef typename VertexDescriptor<TGraphType>::Type TVertexDescriptor;
+	typedef typename Cargo<TGraphType>::Type TCargo;
+	typedef typename Iterator<TGraphType, OutEdgeIterator>::Type TOutEdgeIterator;
+	typedef typename Iterator<T const>::Type TStringIter;
+
 	TValue sum = 0;
-	bool foundEdge = false;
-	for(TSize i = 0;i<len1;++i) {
-		for(TSize j = 0;j<len2;++j) {
-			if ((left[i] != nilVertex) && (right[j] != nilVertex)) {
-				TEdgeDescriptor e = findEdge(value(me.data_graph), left[i], right[j]);
-				if (e != 0) {
-					foundEdge = true;
-					sum += getCargo(e);
+	TStringIter itLeftEnd = end(left);
+	TStringIter itRightEnd = end(right);
+	for(TStringIter itLeft = begin(left);itLeft != itLeftEnd;++itLeft) {
+		if (*itLeft != me.data_nilVertex) {
+			for(TStringIter itRight = begin(right);itRight != itRightEnd;++itRight) {
+				if (*itRight != me.data_nilVertex) {
+					TEdgeDescriptor e = findEdge(*me.data_graph, *itLeft, *itRight);
+					if (e != 0) sum += getCargo(e);
 				}
 			}
 		}
 	}
-	if (foundEdge) return sum / divider;
-	else return inf;
+
+	// Did we found at least one edge?
+	if (sum > 0) return sum / ((TValue) length(left) * (TValue) length(right));
+	else return me.data_inf;
 }
 
 
@@ -738,66 +747,95 @@ tripletLibraryExtension(Graph<Alignment<TStringSet, TCargo, TSpec> >& g)
 	typedef typename Size<TGraph>::Type TSize;
 	typedef typename Id<TGraph>::Type TId;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
 	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
 	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
-	typedef std::map<TVertexDescriptor, TCargo> TIdToWeightMap;
-	TIdToWeightMap idToWeightMap;
 
-	// First add edges for the case that a and c is aligned, b and c is aligned, but a and b are not
-	// Give these edges a weight of 0 because extension follows
-	String<TVertexDescriptor> edges;
+	// Two tasks:
+	// 1) Add edges for the case that a and c is aligned, b and c is aligned, but a and b are not, give these edges the appropriate weight
+	// 2) Augment all existing edges
+	String<TCargo> newCargoMap;
+	resize(newCargoMap, getIdUpperBound(_getEdgeIdManager(g)), Exact());
+	TEdgeIterator it(g);
+	for(;!atEnd(it);++it) assignProperty(newCargoMap, *it, cargo(*it));
+	typedef std::map<std::pair<TVertexDescriptor, TVertexDescriptor>, TCargo> TNewEdgeMap;
+	TNewEdgeMap edges;
 	TVertexIterator itVertex(g);
 	for(;!atEnd(itVertex);++itVertex) {
 		TOutEdgeIterator outIt1(g, *itVertex);
-		if (atEnd(outIt1)) continue;
-		TOutEdgeIterator outIt2(g, *itVertex);
 		while (!atEnd(outIt1)) {
-			outIt2 = outIt1;
+			TOutEdgeIterator outIt2 = outIt1;
 			goNext(outIt2);
 			while (!atEnd(outIt2)) {
 				TVertexDescriptor tV1 = targetVertex(outIt1);
 				TVertexDescriptor tV2 = targetVertex(outIt2);
-				if ((sequenceId(g, tV1) != sequenceId(g,tV2)) && 
-					(findEdge(g, tV1, tV2) == 0)) {
-					appendValue(edges, tV1);
-					appendValue(edges, tV2);
+				if (sequenceId(g, tV1) != sequenceId(g,tV2)) {
+					TEdgeDescriptor e = findEdge(g, tV1, tV2);
+					if (e == 0) {
+						// New edge
+						TCargo val = cargo(*outIt1);
+						if (val > cargo(*outIt2)) val = cargo(*outIt2);
+						if (tV1 < tV2) {
+							typename TNewEdgeMap::iterator pos = edges.find(std::make_pair(tV1, tV2));
+							if (pos == edges.end()) {
+								edges.insert(std::make_pair(std::make_pair(tV1, tV2), val));
+							} else {
+								pos->second += val;
+							}
+						} else {
+							typename TNewEdgeMap::iterator pos = edges.find(std::make_pair(tV2, tV1));
+							if (pos == edges.end()) {
+								edges.insert(std::make_pair(std::make_pair(tV2, tV1), val));
+							} else {
+								pos->second += val;
+							}
+						}
+					} else {
+						if (getCargo(*outIt2) > getCargo(*outIt1)) property(newCargoMap, e) += getCargo(*outIt1);
+						else property(newCargoMap, e) += getCargo(*outIt2);	
+					}
 				}
 				goNext(outIt2);
 			}
 			goNext(outIt1);
 		}
 	}
-	for(TSize i=0; i<length(edges);i+=2) addEdge(g, edges[i], edges[i+1], 0);
-	
-	// Now augment all existing edges
-	String<TCargo> newCargoMap;
-	resizeEdgeMap(g, newCargoMap);
-	TEdgeIterator it(g);
-	for(;!atEnd(it);++it) {
-		assignProperty(newCargoMap, *it, cargo(*it));
-		TVertexDescriptor sourceV = sourceVertex(it);
-		TVertexDescriptor targetV = targetVertex(it);
-		TOutEdgeIterator outIt1(g, sourceV);
-		for(;!atEnd(outIt1);++outIt1) {
-			if (targetV == targetVertex(outIt1)) continue;
-			idToWeightMap.insert(std::make_pair(targetVertex(outIt1), getCargo(*outIt1)));
-		}
-		TOutEdgeIterator outIt2(g, targetV);
-		for(;!atEnd(outIt2);++outIt2) {
-			if (sourceV == targetVertex(outIt2)) continue;
-			typename TIdToWeightMap::const_iterator pos = idToWeightMap.find(targetVertex(outIt2));
-			if (pos != idToWeightMap.end()) {
-				// Add the minimum of the two alignment values
-				if (getCargo(*outIt2) > pos->second) property(newCargoMap, *it) += pos->second;
-				else property(newCargoMap, *it) += getCargo(*outIt2);
-			}
-		}
-		idToWeightMap.clear();
-	}
-	// Assign the new weights
+	// Assign the new weights and clean-up the cargo map
 	goBegin(it);
 	for(;!atEnd(it);++it) cargo(*it) = getProperty(newCargoMap, *it);
+	clear(newCargoMap);
+
+	// Finally add the new edges created by the triplet approach
+	// If there are very many edges we have to thin the graph
+	if (numEdges(g) < 1000000) {
+		for(typename TNewEdgeMap::const_iterator pos = edges.begin();pos!=edges.end();++pos) {
+			addEdge(g, pos->first.first, pos->first.second, pos->second);
+		}
+	} else {
+		for(typename TNewEdgeMap::const_iterator pos = edges.begin();pos!=edges.end();++pos) {
+			TVertexDescriptor tV1 = pos->first.first;
+			TVertexDescriptor tV2 = pos->first.second;
+			TId localSeqId = sequenceId(g, tV2);
+			TCargo cargoSum = 0;
+			unsigned int count = 0;
+			TOutEdgeIterator outIt(g, tV1);
+			for(;!atEnd(outIt);++outIt) {
+				if (sequenceId(g, targetVertex(outIt)) == localSeqId) {
+					cargoSum+=cargo(*outIt);
+					++count;
+				}
+			}
+			// If new edge weight is above average add it, otherwise discard
+			if ((count == 0) ||
+				(pos->second > (cargoSum / count) ) ) {
+				addEdge(g, pos->first.first, pos->first.second, pos->second);
+			}
+		}
+	}
+	
+	// Clean-up the edge map
+	edges.clear();
 }
 
 
@@ -876,6 +914,7 @@ _recursiveProgressiveAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 				_alignStringSetAccordingToGraph(g,strSet,alignSeq, TTag());
 			}
 		}
+		clear(strSet);clear(seq1);clear(seq2);
 
 		//// Debug Code
 		//for(unsigned int i = 0; i<length(alignSeq);++i) {
@@ -920,19 +959,23 @@ progressiveAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	for(;!atEnd(adjIt);goNext(adjIt)) {
 		if (count == 0) {
 			_recursiveProgressiveAlignment(g,tree, *adjIt, seq1, TTag());
+			//std::cout << "First subtree aligned" << std::endl;
 			assignValueById(strSet, seq1);
 			++count;
 		} else if (count == 1) {
 			_recursiveProgressiveAlignment(g,tree, *adjIt, seq2, TTag());
 			assignValueById(strSet, seq2);
 			_alignStringSetAccordingToGraph(g,strSet,alignSeq, TTag());
-			clear(strSet);
+			//std::cout << "Second subtree aligned" << std::endl;
+			clear(strSet);clear(seq1);clear(seq2);
 			assignValueById(strSet, alignSeq);
 			++count;
 		} else {
 			_recursiveProgressiveAlignment(g,tree, *adjIt, seq3, TTag());
+			//std::cout << "Third subtree aligned" << std::endl;
 			assignValueById(strSet, seq3);
 			_alignStringSetAccordingToGraph(g,strSet,alignSeq, TTag());
+			clear(strSet);clear(seq3);
 		}
 	}
 

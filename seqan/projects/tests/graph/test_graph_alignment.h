@@ -1087,8 +1087,7 @@ void Test_TCoffeeFromRandomSeq() {
 		std::cout << gOut << std::endl;
 
 		String<char> align;
-		bool convAl = convertAlignment(gOut, align);
-		SEQAN_TASSERT(convAl);
+		SEQAN_TASSERT(convertAlignment(gOut, align));
 	}
 }
 //////////////////////////////////////////////////////////////////////////////
@@ -1096,6 +1095,9 @@ void Test_TCoffeeFromRandomSeq() {
 void Test_TCoffeeFromFile() {
 //____________________________________________________________________________
 // T-Coffee
+
+	// Timing
+	clock_t start = clock();
 
 	// Sequences
 	typedef String<AminoAcid> TString;
@@ -1105,8 +1107,9 @@ void Test_TCoffeeFromFile() {
 	unsigned seqCount = 0;
 	ifstream file;
 	std::stringstream input;
-	input << TEST_PATH << "3d_sample2.fasta";
-	//input << TEST_PATH << "sproteases_small.fasta";
+	//input << TEST_PATH << "3d_sample3.fasta";
+	input << TEST_PATH << "sproteases_small.fasta";
+	//input << TEST_PATH << "sproteases_large.fasta";
 	file.open(input.str().c_str(), ios_base::in | ios_base::binary);
 	if (!file.is_open()) return;
 	while (!_streamEOF(file)) {
@@ -1122,10 +1125,14 @@ void Test_TCoffeeFromFile() {
 	file.clear();
 	file.seekg(0, ios_base::beg);
 	resize(origStrSet, seqCount);
+	unsigned int count = 0;
 	for(unsigned i = 0; (i < seqCount) && !_streamEOF(file); ++i) 	{
 		read(file, origStrSet[i], Fasta());
+		count += length(origStrSet[i]);
+		std::cout << i << ':' << length(origStrSet[i]) << ',';
 	}
     file.close();
+	std::cout << std::endl << "Total number of bp: " << count << std::endl;
 	std::cout << "Import sequences done" << std::endl;
 
 	// Generate additional primary libraries, e.g., all pairwise alignments
@@ -1144,37 +1151,18 @@ void Test_TCoffeeFromFile() {
 	generatePrimaryLibrary(lib1, AAGroupsDayhoff(), GlobalPairwise_Library() );
 	std::cout << "Pairwise alignments done" << std::endl;
 
-	fstream strm01; // Alignment graph as dot
-	strm01.open(TEST_PATH "my_tcoffee01.dot", ios_base::out | ios_base::trunc);
-	write(strm01,lib1,DotDrawing());
-	strm01.close();
-
 	generatePrimaryLibrary(lib2, 2, MUM_Library() );
 	std::cout << "MUMs done" << std::endl;
-
-	fstream strm02; // Alignment graph as dot
-	strm02.open(TEST_PATH "my_tcoffee02.dot", ios_base::out | ios_base::trunc);
-	write(strm02,lib2,DotDrawing());
-	strm02.close();
 
 	// Weighting of libraries (Signal addition)
 	combineGraphs(g, lib1, lib2);
 	std::cout << "Combining graphs done" << std::endl;
-
-	fstream strm1; // Alignment graph as dot
-	strm1.open(TEST_PATH "my_tcoffee1.dot", ios_base::out | ios_base::trunc);
-	write(strm1,g,DotDrawing());
-	strm1.close();
+	clear(lib1);
+	clear(lib2);
 
 	// Triplet library extension
 	tripletLibraryExtension(g);
 	std::cout << "Triplet done" << std::endl;
-
-	fstream strm2; // Alignment graph as dot
-	strm2.open(TEST_PATH "my_tcoffee2.dot", ios_base::out | ios_base::trunc);
-	write(strm2,g,DotDrawing());
-	strm2.close();
-
 
 	// Calculate a distance matrix using a compressed alphabet or not
 	Matrix<double> distanceMatrix; 
@@ -1195,11 +1183,10 @@ void Test_TCoffeeFromFile() {
 
 	// Print the alignment
 	std::cout << gOut << std::endl;
-	
-	fstream strm3; // Alignment graph as dot
-	strm3.open(TEST_PATH "my_tcoffee3.dot", ios_base::out | ios_base::trunc);
-	write(strm3,gOut,DotDrawing());
-	strm3.close();
+
+	clock_t end = clock();
+	double time_elapsed = double(end - start)/CLOCKS_PER_SEC;
+	std::cout << "Time: " << time_elapsed << " sec" << std::endl;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1336,6 +1323,7 @@ void Test_TCoffee() {
 	//Test_TCoffeeTmp();
 	Test_TCoffeeGarfield();
 	//Test_TCoffeeFromRandomSeq();
+	//Test_TCoffeeFromFile();
 	//Test_TCoffeeFromLibrary(); 
 
 }

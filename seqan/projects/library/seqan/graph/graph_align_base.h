@@ -307,44 +307,59 @@ _align_trace_print(String<String<TVertexDescriptor, TSpec> >& nodeString,
 	SEQAN_CHECKPOINT
 	typedef String<TVertexDescriptor, TSpec> TVertexDescriptorString;
 	typedef typename Size<TStringSet>::Type TSize;
+	typedef typename Iterator<TVertexDescriptorString>::Type TStringIter;
 	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
 
 	// TraceBack values
 	enum {Diagonal = 0, Horizontal = 1, Vertical = 2};
 
 	if (segLen == 0) return;
-	TSize len1 = length((getValueById(const_cast<TStringSet&>(str),id1))[0]);
-	TSize len2 = length((getValueById(const_cast<TStringSet&>(str),id2))[0]);
+	// Number of vertex descriptors in the first string at any position (e.g., group of 5 sequences = group of 5 vertex descriptors)
+	TSize len1 = length(getValue(getValue(str,0), 0));
+	// Number of vertex descriptors in the second string at any position (e.g., group of 5 sequences = group of 5 vertex descriptors)
+	TSize len2 = length(getValue(getValue(str,1), 0));
+
+	// Resize the node string
+	TSize index = length(nodeString);
+	resize(nodeString, index + segLen);
 
 	if (tv == (Byte) Horizontal) {
 		for (int i = pos1 + segLen - 1; i>= (int) pos1;--i) {
-			TVertexDescriptorString input = (str[0])[i];
-			for(TPos all = 0;all<len2;++all) {
-				appendValue(input, nilVertex);
+			fill(value(nodeString, index), len1 + len2, nilVertex);
+			TStringIter it = begin(value(nodeString, index));
+			for(TPos all = 0;all<len1;++all) {
+				*it = getValue(getValue(getValue(str,0),i), all);
+				goNext(it);
 			}
-			appendValue(nodeString, input);
+			++index;
 		}
 	}
 	else if (tv == (Byte) Vertical) {
 		for (int i = pos2 + segLen - 1; i>= (int) pos2;--i) {
-			TVertexDescriptorString input;
-			for(TPos all = 0;all<len1;++all) {
-				appendValue(input, nilVertex);
+			fill(value(nodeString, index), len1 + len2, nilVertex);
+			TStringIter it = begin(value(nodeString, index));
+			it+=len1;
+			for(TPos all = 0;all<len2;++all) {
+				*it = getValue(getValue(getValue(str,1),i), all);
+				goNext(it);
 			}
-			for(TPos all = 0;all<length((str[1])[i]);++all) {
-				appendValue(input, getValue((str[1])[i], all));
-			}
-			appendValue(nodeString, input);
+			++index;
 		}
 	}
 	else if (tv == (Byte) Diagonal) {
 		int j = pos2 + segLen - 1;
 		for (int i = pos1 + segLen - 1; i>= (int) pos1;--i) {
-			TVertexDescriptorString input = (str[0])[i];
-			for(TPos all = 0;all<length((str[1])[j]);++all) {
-				appendValue(input, getValue((str[1])[j], all));
+			resize(value(nodeString, index), len1 + len2);
+			TStringIter it = begin(value(nodeString, index));
+			for(TPos all = 0;all<len1;++all) {
+				*it = getValue(getValue(getValue(str,0),i), all);
+				goNext(it);
 			}
-			appendValue(nodeString, input);
+			for(TPos all = 0;all<len2;++all) {
+				*it = getValue(getValue(getValue(str,1),j), all);
+				goNext(it);
+			}
+			++index;
 			--j;
 		}
 	}

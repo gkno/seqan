@@ -16,6 +16,7 @@
 #include <vector>
 #include <time.h>
 #include <string>
+#include <ctime>
 
 
 #include "test_graph_basic.h"
