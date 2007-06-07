@@ -856,6 +856,46 @@ void Test_EmblGenbank()
 
 //////////////////////////////////////////////////////////////////////////////
 
+void Test_FileReader()
+{
+	FILE * file_fasta = fopen(TEST_PATH "fasta_crlf.txt", "rb");
+	SEQAN_TASSERT(file_fasta);
+
+	Iter<FILE *, FileReader<Fasta> > it_fasta(file_fasta);
+
+	//read the first record "ACGT" from file
+	SEQAN_TASSERT(!atEnd(it_fasta))
+	SEQAN_TASSERT(value(it_fasta) == 'A');
+	goNext(it_fasta);
+	SEQAN_TASSERT(!atEnd(it_fasta))
+	SEQAN_TASSERT(value(it_fasta) == 'C');
+	goNext(it_fasta);
+	SEQAN_TASSERT(!atEnd(it_fasta))
+	SEQAN_TASSERT(value(it_fasta) == 'G');
+	goNext(it_fasta);
+	SEQAN_TASSERT(!atEnd(it_fasta))
+	SEQAN_TASSERT(value(it_fasta) == 'T');
+	goNext(it_fasta);
+	SEQAN_TASSERT(atEnd(it_fasta))
+
+	//scan second record = 1065 characters
+	goBegin(it_fasta);
+	SEQAN_TASSERT(!atEnd(it_fasta))
+
+	unsigned int i = 0;
+	while (!atEnd(it_fasta))
+	{
+		++i;
+		goNext(it_fasta);
+	}
+	SEQAN_TASSERT(i == 1065)
+
+
+	fclose(file_fasta);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 int main() 
 {
 	SEQAN_TREPORT("TEST BEGIN")
@@ -874,6 +914,8 @@ int main()
 	Test_CGViz();
 
 	Test_EmblGenbank();
+
+	Test_FileReader();
 
 //____________________________________________________________________________
 
