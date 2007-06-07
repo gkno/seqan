@@ -15,7 +15,7 @@
 
 
 //____________________________________________________________________________
-// file formats
+
 #include <seqan/file/file_forwards.h>
 
 #ifdef SEQAN_SWITCH_USE_FORWARDS
@@ -25,9 +25,13 @@
 #include <seqan/file/cstream.h>
 #include <seqan/file/stream.h>
 
+#include <seqan/file/file_filereader.h>
 
 #include <seqan/file/chunk_collector.h>
 #include <seqan/file/meta.h>
+
+//____________________________________________________________________________
+// file formats
 
 #include <seqan/file/file_format.h>
 
@@ -45,8 +49,9 @@
 //others
 #include <seqan/file/file_format_cgviz.h>
 
+//____________________________________________________________________________
 
-//#include <seqan/file/file_format_guess.h>
+#include <seqan/file/file_format_guess.h>
 
 //____________________________________________________________________________
 // files

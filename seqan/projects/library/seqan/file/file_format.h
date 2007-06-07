@@ -494,16 +494,16 @@ _stream_skipLine(TFile & file,
 	{
 		if (_streamEOF(file)) break;
 
-		if (c == '\n')
+		if (c == '\r')
 		{
 			c = _streamGet(file);
-			if (c == '\r') 
+			if (c == '\n') 
 			{
 				c = _streamGet(file);
 			}
 			break;
 		}
-		if (c == '\r')
+		if (c == '\n')
 		{
 			c = _streamGet(file);
 			break;

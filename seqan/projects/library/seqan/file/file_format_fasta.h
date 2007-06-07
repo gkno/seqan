@@ -23,97 +23,81 @@ template <typename TFormat>
 struct FileReader;
 
 
-template <typename TFile>
-class Iter<TFile, FileReader<Fasta> >
-{
-public:
-	typedef typename Value<TFile>::Type TValue;
-
-	TFile * data_host;
-	TValue data_char;
-//	TFilePosition data_begin_pos;
-
-	Iter(TFile & file_):
-		data_host(& file_),
-		data_char(0)
-	{
-		if (_streamEOF(data_host)) return;
-		_stream_skipLine(data_host, data_char);
-	}
-	Iter(Iter const & other_):
-		data_host(other_.data_host),
-		data_char(other_.data_char)
-	{
-	}
-	~Iter() 
-	{
-	}
-
-	Iter const &
-	operator = (Iter const & other_)
-	{
-		data_host = other_.data_host;
-		data_char = other_.data_char;
-		return *this;
-	}
-};
-
+//////////////////////////////////////////////////////////////////////////////
+// Filereader
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TFile>
-struct Value< Iter<TFile, FileReader<Fasta> > >:
-	Value<TFile>
-{
-};
+//goBegin skips to the next line, 
+//assuming that the file is in the first record line
 
 template <typename TFile>
-struct GetValue< Iter<TFile, FileReader<Fasta> > >
+inline void
+goBegin(Iter<TFile, FileReader<Fasta> > & it)
 {
-	typedef typename Value< Iter<TFile, FileReader<Fasta> > >::Type Type;
-};
+	if (_streamEOF(host(it)))
+	{
+		it.data_eof = true;
+		return;
+	}
 
-template <typename TFile>
-struct Reference< Iter<TFile, FileReader<Fasta> > >
-{
-	typedef typename Value< Iter<TFile, FileReader<Fasta> > >::Type & Type;
-};
+	//skip meta line
+	_stream_skipLine(host(it), it.data_char);
 
+	//eliminate linebreaks
+	while ((it.data_char == '\n') || (it.data_char == '\r'))
+	{
+		if (_streamEOF(host(it)))
+		{
+			it.data_eof = true;
+			return;
+		}
+		it.data_char = _streamGet(host(it));
+	}
 
-//////////////////////////////////////////////////////////////////////////////
+	if (it.data_char == '>')
+	{//end of record
+		it.data_eof = true;
+		_streamUnget(host(it));
+		return;
+	}
 
-template <typename TFile>
-inline typename Reference<Iter<TFile, FileReader<Fasta> > >::Type
-value(Iter<TFile, FileReader<Fasta> > & it)
-{
-	return it.data_char;
+	it.data_eof = _streamEOF(host(it));
 }
 
-template <typename TFile>
-inline typename GetValue<Iter<TFile, FileReader<Fasta> > >::Type
-getValue(Iter<TFile, FileReader<Fasta> > & it)
-{
-	return it.data_char;
-}
 
 template <typename TFile>
 inline void
 goNext(Iter<TFile, FileReader<Fasta> > & it)
 {
-	do
+	if (_streamEOF(host(it)))
 	{
-		if (_streamEOF(it.data_file)) return;
-		it.data_char = _streamGet(it.data_file);
-	} while ((it.data_char == '\n') || (it.data_char == '\r'));
-}
+		it.data_eof = true;
+		return;
+	}
+	it.data_char = _streamGet(host(it));
 
-template <typename TFile>
-inline bool
-atEnd(Iter<TFile, FileReader<Fasta> > & it)
-{
-	return _streamEOF(it.data_file) || (it.data_char == '>');
+	if ((it.data_char == '\n') || (it.data_char == '\r'))
+	{//linebreak detected: find begin of next line
+		do
+		{
+			if (_streamEOF(host(it)))
+			{
+				it.data_eof = true;
+				return;
+			}
+			it.data_char = _streamGet(host(it));
+		} while ((it.data_char == '\n') || (it.data_char == '\r'));
+
+		if (it.data_char == '>')
+		{//end of record
+			_streamUnget(host(it));
+			it.data_eof = true;
+		}
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////
+// FileFormat Interface
 //////////////////////////////////////////////////////////////////////////////
 
 
