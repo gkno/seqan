@@ -1,157 +1,103 @@
-#include <time.h>
-#include <map>
+
 #include <vector>
-#include <algorithm>
-#include <iostream>
-#include <fstream>
-#include <cmath>
-#include <list>
-#include <memory>
 
-//#define SEQAN_SL_DEBUG_PRINTOUT
-
-//#define DEMOZEIT
-//#define DEMOLAUF
-
-#define SEQAN_DEBUG
-#define SEQAN_TEST
-
-//////////////////////////////////////////////////////////////////////////////
-
-//todo: das muss man anders loesen
-
-typedef int TKey;
-typedef char TVal;
-
-//////////////////////////////////////////////////////////////////////////////
-
-#include <seqan/basic.h>
-#include <seqan/sequence.h>
+//#define SEQAN_DEBUG
+//#define _SEQAN_CHAIN_DEBUG
+//
+#define CHAINGG0
 
 #include <seqan/chaining.h>
 
+#include "file_chainer.h"
+#include <iostream>
+#include <fstream>
+#include "chaining_test_data.h"
+#include "test_chain.h"
+#include "test_ao.h"
 
-//////////////////////////////////////////////////////////////////////////////
+#include "clock.h"
+#include <time.h>
 
-#include "skip_list_test.h"
+#include "chain_benchmark.h"
 
-//#include "rt_entry.h"
-//#include "rt_test_data.h"
-//#include "range_tree_test.h"
-
-//
-//#include "range_max_tree_test.h"
-//
-//#include "rt_entry_test.h"
-
-//////////////////////////////////////////////////////////////////////////////
+#include <seqan/sequence.h>
 
 
 using namespace seqan;
-using namespace std;
 
-//////////////////////////////////////////////////////////////////////////////
-//todo: ausgliedern
 
-template <typename TKey, typename TVal, typename TVal2>
-inline TVal & 
-setValue( std::pair< TKey, TVal > & p, TVal2 const & val_ )
+int main(int argc, char * argv[])
 {
-	return p.second = val_;
-}
+	//int numFrags = 1000;
+	//int maxCoord = 2 * numFrags;
 
+	//String< Fragment< int > > frag_set;
+	//_generateRandomFrags( frag_set, numFrags, 1, maxCoord, 2, 5, 3 );
 
-//////////////////////////////////////////////////////////////////////////////
+	srand( time( 0 ) );
 
-template <typename TModus, typename TSpec, typename TStructuring>
-void 
-testSkiplist()
-{
-	typedef Pair<int, char> TObject;
-	typedef SkipList<TObject, TModus, TSpec, TStructuring> TSkipList;
-	typedef typename Iterator<TSkipList>::Type TSkipListIterator;
-	typedef String<TObject> TObjects;
+	//std::fstream frag_file2;
+	//frag_file2.open( "fragmentfile.mat", std::ios::in );
+	//read( frag_file2, frag_set, FragFile() );
 
-	TObjects objs1;
-	resize(objs1, 27);
-	for (int i = 0; i < 26; ++i)
-	{
-		assignKey(value(objs1, i), rand());
-		value(objs1, i).i2 = 'A' + i;
-	}
-	assignKey(value(objs1, 26), 10000);
-	value(objs1, 26).i2 = '!';
+	//std::cout << "compute chain g0" << std::endl;
 
-	TSkipList sk1(begin(objs1), end(objs1));
-	
-	TSkipListIterator it1 = searchElement(sk1, 10000);
-	cout << value(it1).i2;
-}
+	//String< Fragment< int > > chain;
+	//reserve( chain, length( frag_set ) );
+	//compute_chain( frag_set, chain, Score< int, Zero >(), Chainer(), Complete() );
 
-//////////////////////////////////////////////////////////////////////////////
+	//std::fstream gnu_file;
+	//gnu_file.open( "g0.data", std::ios::out );
+	//writeFragments( gnu_file, frag_set, FragGnuplot() );
+	//gnu_file.close();
 
-int main(int argc, char** argv)
-{
-	SEQAN_TREPORT("TEST BEGIN")
+	//std::fstream chain_file;
+	//chain_file.open( "g0.data.cha.dbf", std::ios::out );
+	//writeFragments( chain_file, chain, ChainStatistics() );
+	//chain_file.close();
 
-	testSkiplist<Dynamic, Default, Complete>();
+	//std::cout << "compute chain g1" << std::endl;
 
+	//String< Fragment< int > > chain_1;
+	//reserve( chain_1, length( frag_set ) );
+	//compute_chain( frag_set, chain_1, Score< int, Manhattan >(), Chainer(), Complete() );
 
-	//testInsertsSkipList();
-	//testEraseSkipList();
-	//testInsertsErasesSkipList();
-	//testSkipListInterface();
-	//testSkipIterator< Static, Complete >();
-	//testSkipIterator< Static, Deferred >();
-	//testSkipIterator< Dynamic, Complete >();
-	//testSkipIterator< Dynamic, Deferred >();
-	//testRangeTree();
+	//std::fstream gnu_file_1;
+	//gnu_file_1.open( "g1.data", std::ios::out );
+	//writeFragments( gnu_file_1, frag_set, FragGnuplot() );
+	//gnu_file_1.close();
 
+	//std::fstream chain_file_1;
+	//chain_file_1.open( "g1.data.cha.dbf", std::ios::out );
+	//writeFragments( chain_file_1, chain_1, ChainStatistics() );
+	//chain_file_1.close();
 
-	//TODO: weitere Dateien
-	debug::verifyCheckpoints("projects/library/seqan/chaining/skip_base_element.h");
-	debug::verifyCheckpoints("projects/library/seqan/chaining/skip_element.h");
-	debug::verifyCheckpoints("projects/library/seqan/chaining/skip_list_base.h");
-	debug::verifyCheckpoints("projects/library/seqan/chaining/skip_list_dynamic.h");
-	debug::verifyCheckpoints("projects/library/seqan/chaining/skip_list_impl.h");
-	debug::verifyCheckpoints("projects/library/seqan/chaining/skip_list_iterator.h");
-	debug::verifyCheckpoints("projects/library/seqan/chaining/skip_list_type.h");
+	//std::cout << "compute chain gSoP" << std::endl;
 
-	SEQAN_TREPORT("TEST END")
-	
+	//String< Fragment< int > > chain_sop;
+	//reserve( chain_sop, length( frag_set ) );
+	//compute_chain( frag_set, chain_sop, Score< int, ChainSoP >(), Chainer(), Complete() );
 
-	//srand( time(0) );
-	
-/*
-	//std::cout << "Hallo Welt" << std::endl;
-	testDynamicSkipList();
+	//std::fstream gnu_file_sop;
+	//gnu_file_sop.open( "gSoP.data", std::ios::out );
+	//writeFragments( gnu_file_sop, frag_set, FragGnuplot() );
+	//gnu_file_sop.close();
 
-	#ifdef DEMOLAUF
-	for( int i = 0; i < 10; ++i )
-	{
-		std::cout << "Legende: " << std::endl;
-		std::cout << "Schlüssel im Turm:       theKey" << std::endl;
-		std::cout << "                         theKey" << std::endl;
-		std::cout << "                        -------- "<< std::endl;
-		std::cout << "Schlüssel des Elementes: theKey" << std::endl;
-		std::cout << "Sortierung(x=ja/o=nein):  x " << std::endl;
-		std::cout << "Höhe des Turmes:          2 " << std::endl;
-		std::cout << "****************************** Dynamisch Deferrred: ***************************" << std::endl;
-		testElementsDynamicDeferred();
-		std::cout << "****************************** Dynamisch Complete: ***************************" << std::endl;
-		testElementsDynamicComplete();
-		std::cout << "****************************** Statisch Complete: ***************************" << std::endl;
-		testElementsStaticComplete();
-		std::cout << "****************************** Statisch Deferrred: ***************************" << std::endl;
-		testElementsStaticDeferred();
-		
-	}
-	#endif
-	#ifdef DEMOZEIT
-		timetest();
-	#endif
+	//std::fstream chain_file_sop;
+	//chain_file_sop.open( "gSoP.data.cha.dbf", std::ios::out );
+	//writeFragments( chain_file_sop, chain_sop, ChainStatistics() );
+	//chain_file_sop.close();
 
-*/
+	//testChainerG0( frag_set, numFrags );
+
+	//testChainerG1( frag_set, numFrags );
+	//testChainerGSoP( frag_set, numFrags );
+	//std::cout<< std::endl;
+
+	timetest_chaining();
+
+	//testGusfield();
+
 	return 0;
 }
 
