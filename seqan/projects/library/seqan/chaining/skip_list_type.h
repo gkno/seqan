@@ -109,6 +109,68 @@ assignKey(Pair<TKey, TVal, _TCompression> & me,
 	assignValueI1(me, _key);
 }
 
+//////////////////////////////////////////////////////////////////////////////
+// std::pair: first argument is key
+
+//____________________________________________________________________________
+
+template <typename TKey, typename TVal>
+struct Key<std::pair<TKey, TVal> >
+{
+	typedef TKey Type;
+};
+template <typename TKey, typename TVal>
+struct Key<std::pair<TKey, TVal> const >
+{
+	typedef TKey Type;
+};
+
+//____________________________________________________________________________
+
+template <typename TKey, typename TVal> 
+inline TKey &
+key(std::pair<TKey, TVal> & me)
+{
+	return me.first;
+}
+template <typename TKey, typename TVal> 
+inline TKey &
+key(std::pair<TKey, TVal> const & me)
+{
+	return me.first;
+}
+
+//____________________________________________________________________________
+
+template <typename TKey, typename TVal> 
+inline TKey
+getKey(std::pair<TKey, TVal> & me)
+{
+	return me.first;
+}
+template <typename TKey, typename TVal> 
+inline TKey
+getKey(std::pair<TKey, TVal> const & me)
+{
+	return me.first;
+}
+
+//____________________________________________________________________________
+
+template <typename TKey, typename TVal, typename TKey2> 
+inline void
+assignKey(std::pair<TKey, TVal> & me,
+		  TKey2 & _key)
+{
+	me.first = _key;
+}
+template <typename TKey, typename TVal, typename TKey2> 
+inline void
+assignKey(std::pair<TKey, TVal> & me,
+		  TKey2 const & _key)
+{
+	me.first = _key;
+}
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
@@ -135,7 +197,7 @@ template< typename TObject, typename TModus = Dynamic, typename TSpec = Default,
 struct SkipBaseElement;
 
 template< typename TObject, typename TModus = Dynamic, typename TSpec = Default, typename TStructuring = Complete >
-struct SkipList;
+class SkipList;
 
 
 //////////////////////////////////////////////////////////////////////////////

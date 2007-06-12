@@ -178,10 +178,11 @@ struct SkipBaseElement
 		// pointer to tower in the upper layers
 	SkipElement< TObject, TModus, TSpec, TStructuring > * _up;
 
-		// saved key/value pair
-	TObject * _obj;
 		// the actual key
 	typename Key< TObject >::Type _key;
+
+		// saved key/value pair
+	TObject * _obj;
 		
 
 	typename Cargo< SkipBaseElement< TObject, TModus, TSpec, TStructuring > >::Type _cargo;
@@ -747,7 +748,6 @@ key( SkipBaseElement< TObject, TModus, TSpec, TStructuring > & me )
 SEQAN_CHECKPOINT
 	return me._key;
 }
-
 
 template< typename TObject, typename TModus, typename TSpec, typename TStructuring, typename TParam > inline 
 typename Key< TObject >::Type 

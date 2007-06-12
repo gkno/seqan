@@ -26,25 +26,25 @@ struct Iterator<SkipList<TObject, TModus, TSpec, TStructuring>, TIteratorSpec>
 // Value of iterator is value of SkipBaseElement
 
 template <typename TObject, typename TModus, typename TSpec, typename TStructuring>
-struct Value<SkipBaseElement<TObject, TModus, TSpec, TStructuring> *>
+struct Value<SkipBaseElement<TObject, TModus, TSpec, TStructuring> *>:
+	Value<TObject>
 {
-	typedef TObject Type;
 };
 
 //____________________________________________________________________________
 
 template <typename TObject, typename TModus, typename TSpec, typename TStructuring>
-struct GetValue<SkipBaseElement<TObject, TModus, TSpec, TStructuring> *>
+struct GetValue<SkipBaseElement<TObject, TModus, TSpec, TStructuring> *>:
+	GetValue<TObject>
 {
-	typedef TObject & Type;
 };
 
 //____________________________________________________________________________
 
 template <typename TObject, typename TModus, typename TSpec, typename TStructuring>
-struct Reference<SkipBaseElement< TObject, TModus, TSpec, TStructuring> *>
+struct Reference<SkipBaseElement< TObject, TModus, TSpec, TStructuring> *>:
+	Reference<TObject>
 {
-	typedef TObject & Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -181,6 +181,28 @@ SEQAN_CHECKPOINT
 	it->~SkipBaseElement< TObject, TModus, TSpec, TStructuring >();
 }
 */
+
+//____________________________________________________________________________
+//key
+
+template< typename TObject, typename TModus, typename TSpec, typename TStructuring, typename TKey > inline 
+void 
+assignKey(SkipBaseElement< TObject, TModus, TSpec, TStructuring > * me,
+		  TKey theKey)
+{
+SEQAN_CHECKPOINT
+	me->_key= theKey;
+}
+
+
+template< typename TObject, typename TModus, typename TSpec, typename TStructuring > inline 
+typename Key< TObject >::Type 
+key(SkipBaseElement< TObject, TModus, TSpec, TStructuring > * me )
+{
+SEQAN_CHECKPOINT
+	return me->_key;
+}
+
 //____________________________________________________________________________
 
 //////////////////////////////////////////////////////////////////////////////
