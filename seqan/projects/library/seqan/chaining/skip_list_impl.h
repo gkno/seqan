@@ -1,12 +1,12 @@
 /*	Copyright (c) 2006 Hendrik Woehrle
 *	All rights reserved.
 *
-*	Contains class SkipList< TObject, TModus, TSpec, TStructuring > implementation
+*	Contains struct SkipList< TObject, TModus, TSpec, TStructuring > implementation
 *
 */
 
-#ifndef SEQAN_HEADER_SKIP_LIST_IMPL_H
-#define SEQAN_HEADER_SKIP_LIST_IMPL_H
+#ifndef SEQAN_HEADER_SKIP_LIST_STATIC_H
+#define SEQAN_HEADER_SKIP_LIST_STATIC_H
 
 namespace seqan
 {
@@ -25,304 +25,15 @@ compared to a static SkipList. Default is Dynamic.
 ..param.TStructuring:Parameter to specify whether the SkipList uses Deferred Data Structuring or not.
 ..remarks:The object given to the SkipList should offer the following functions:
 ..remarks:$key( obj )$: returns the key of the object.
-..remarks:$assignKey( obj, k )$: set the key of the object to k.
+..remarks:$setKey( obj, k )$: set the key of the object to k.
 ..remarks:In contrast to STL-like containers, the objects are not cloned by the SkipList. It only supports searching operations on a set of objects. This set must be handled by the user.
 */
-
-
-///////////////////////////////////////////////////////////////////////////////
-//
-//								 class SkipList
-//
-///////////////////////////////////////////////////////////////////////////////
-
-
-template< typename TObject, typename TModus, typename TSpec, typename TStructuring >
-class SkipList
-{	
-public:
-	typedef SkipElement< TObject, TModus, TSpec, TStructuring > TSkipElement;
-	typedef SkipBaseElement< TObject, TModus, TSpec, TStructuring > TSkipBaseElement;
-
-
-		// container for elements in the lowest layer
-	SkipBaseElement< TObject, TModus, TSpec, TStructuring > * _baseStore;
-
-		// container for elements on the left side
-		// search operations start from this bording elements
-	SkipElement< TObject, TModus, TSpec, TStructuring > * _leftSideStore;
-
-		// number of elements in the list
-	typename Size< SkipList< TObject, TModus, TSpec, TStructuring > >::Type _numOfElements;
-
-		// pool allocators
-	Allocator< SinglePool2< TSkipBaseElement > > _baseAlloc;
-	Allocator< ChunkPool2< TSkipElement > > _elementAlloc;
-		
-		// search path
-	_SearchPath< TObject, TModus, TSpec, TStructuring > _sp;
-		
-		// border element for the right side
-	SkipBaseElement< TObject, TModus, TSpec, TStructuring > * _rightBorder;
-
-		// border objects
-	TObject l_border_obj;
-	TObject r_border_obj;
-
-		// 
-	bool _initialState;
-	
-//*************************************** internal help functions: ************************************************
-
-
-private:
-
-	SkipList & operator=( const SkipList & old )
-	{}
-
-	SkipList( const SkipList & old )
-		: _numOfElements( length( old ) ) // bording elements are not included in Entries array => numOfElements + 2 elements in base layer	
-		, _baseAlloc( _numOfElements + 2 )	// guessing needed space: a basic layer must be possible
-		, _elementAlloc( _numOfElements )
-		, _sp( _getMaximalSLTowerHeight( _numOfElements ) )
-		, _initialState( true )
-	{
-			// construct bording elements
-		assignKey( l_border_obj, infimumValue< typename Key< TObject >::Type >() );
-		assignKey( r_border_obj, supremumValue< typename Key< TObject >::Type >() );
-
-		SkipBaseElement< TObject, TModus, TSpec, TStructuring > * base_right;
-		
-		_initBases( *this, _baseStore, base_right, begin( old ), end( old ), _numOfElements ); 
-
-		_initSL( *this, _baseStore, base_right, _numOfElements );
-		_rightBorder = base_right;
-	}
-
-public:
-				
-	SkipList(void)
-		: _numOfElements( 0 ) // bording elements are not included in Entries array => numOfElements + 2 elements in base layer	
-		, _baseAlloc( 100  )	// guessing needed space: a basic layer must be possible
-		, _elementAlloc( 100 )
-		, _sp( 10 )
-		, _initialState( true )
-	{
-			// construct bording elements
-		assignKey( l_border_obj, infimumValue< typename Key< TObject >::Type >() );
-		assignKey( r_border_obj, supremumValue< typename Key< TObject >::Type >() );
-			
-	}
-
-	template< typename TContainer >
-	SkipList( TContainer & cont )
-		: _numOfElements( length( cont ) ) // bording elements are not included in Entries array => numOfElements + 2 elements in base layer	
-		, _baseAlloc( _numOfElements + 2 )	// guessing needed space: a basic layer must be possible
-		, _elementAlloc( _numOfElements )
-		, _sp( _getMaximalSLTowerHeight( _numOfElements ) )
-		, _initialState( true )
-	{
-			// construct bording elements
-		assignKey( l_border_obj, infimumValue< typename Key< TObject >::Type >() );
-		assignKey( r_border_obj, supremumValue< typename Key< TObject >::Type >() );
-
-		SkipBaseElement< TObject, TModus, TSpec, TStructuring > * base_right;
-		
-		_initBases( *this, _baseStore, base_right, begin( cont ), end( cont ), _numOfElements ); 
-
-		_initSL( *this, _baseStore, base_right, _numOfElements );
-		_rightBorder = base_right;
-	}
-
-		// Constructor
-		// Needs a range, defined by to iterators
-
-		// TODO: für allgmeinen iterator verfügbar machen
-	template< typename TIterator >
-	SkipList( TIterator beg, TIterator end )
-		: _numOfElements( end - beg ) // bording elements are not included in Entries array => numOfElements + 2 elements in base layer	
-		, _baseAlloc( _numOfElements + 2 )	// guessing needed space: a basic layer must be possible
-		, _elementAlloc( _numOfElements )
-		, _sp( _getMaximalSLTowerHeight( _numOfElements ) )
-		, _initialState( true )
-	{			
-		assignKey( l_border_obj, infimumValue< typename Key< TObject >::Type >() );
-		assignKey( r_border_obj, supremumValue< typename Key< TObject >::Type >() );
-
-			// construct bording elements
-		SkipBaseElement< TObject, TModus, TSpec, TStructuring > * base_right;
-
-		_initBases( *this, _baseStore, base_right, beg, end, _numOfElements ); 
-
-		_initSL( *this, _baseStore, base_right, _numOfElements );
-		_rightBorder = base_right;
-	}
-	
-
-	~SkipList(void)
-	{
-		_clearSearchPath( this->_sp, _getMaximalSLTowerHeight( _numOfElements ) );
-	}
-
-	// Debug print methods
-private:
-/*
-	template< typename TSize1, typename TSize2 > friend
-	void 
-	printLayer(	SkipList< TObject, TModus, TSpec, TStructuring > & me,
-				TSize1 layer,
-				TSize2 column )
-	{
-		if( layer == 0 )
-		{
-			for( typename seqan::Size< SkipList< TObject, TModus, TSpec, TStructuring > >::Type j = 0; j < 11; ++j )
-			{
-				std::cout<< "______";
-			}
-			std::cout<<std::endl;
-			typename Iterator< SkipList< TObject, TModus, TSpec, TStructuring > >::Type temp = begin( me );
-			goPrevious( temp );
-			goFurther( temp, column );
-			typename Iterator< SkipList< TObject, TModus, TSpec, TStructuring > >::Type tempEnd = temp;
-			goFurther( tempEnd, 11 );
-			while( temp != end( me ) && temp != tempEnd )
-			{
-				std::cout.width(7);
-				if( key( temp ) == infimumValue< typename Key< TObject >::Type >( ) )
-					std::cout << std::left << "L";
-				else
-					std::cout << std::left << key( temp );
-				goNext( temp );
-			}
-			//std::cout<<std::endl;
-			//printCounts( me );
-			//std::cout<<std::endl;
-			//printSorting( me );
-			//std::cout<<std::endl;
-			//printHeights( me );
-			//std::cout<<std::endl;
-			//printValues( me );
-		}
-		else if( layer <= _getCurrentLayer( me ) && !_getInitialState( me ) )
-		{
-			typename Iterator< SkipList< TObject, TModus, TSpec, TStructuring > >::Type temp = begin( me );
-			goPrevious( temp );
-			goFurther( temp, column );
-			typename Iterator< SkipList< TObject, TModus, TSpec, TStructuring > >::Type tempEnd = temp;
-			goFurther( tempEnd, 11 );
-			while( temp != end( me ) && temp != tempEnd )
-			{
-				if( _getHeight( *hostIterator( temp ) ) >= layer )
-				{
-					if( _getRight( *( &_getUp( *hostIterator( temp ) ) + layer - 1) ) )
-					{
-						std::stringstream s;
-						if( key( temp ) == infimumValue< typename Key< TObject >::Type >( ) )
-							s << std::left << "L";
-						else
-							s << key( temp );
-						s << ">";
-						std::cout.width(7);
-						std::cout << std::left << s.str();
-					}
-					else
-						dump( *( &_getUp( *hostIterator( temp ) ) + layer - 1 ) );
-				}
-				else 
-				{
-					std::cout.width(7);
-					std::cout << " ";
-				}
-				goNext( temp );
-			} 
-		}
-		std::cout<<std::endl;
-	}
-
-	friend
-	void 
-	dump( SkipList< TObject, TModus, TSpec, TStructuring > & me )
-	{
-		int column = 0;
-
-		while( column < length( me ) )
-		{
-			typename seqan::Size< SkipList< TObject, TModus, TSpec, TStructuring > >::Type j = _getMaximalSLTowerHeight( me._numOfElements );
-			while( j > 0 ){
-				printLayer( me, --j, column );
-			}
-			std::cout<< std::endl;
-			column += 14;
-		}
-	}
-
-	friend
-	void 
-	printCounts( SkipList< TObject, TModus, TSpec, TStructuring > & me )
-	{
-		SkipBaseElement< TObject, TModus, TSpec, TStructuring > * temp = &me._baseStore[0];
-		for( typename seqan::Size< SkipList< TObject, TModus, TSpec, TStructuring > >::Type i = 0; i < me._numOfElements + 1; ++i ){
-			std::cout.width(5);
-			std::cout << std::left << _getCount( *temp );
-			goNext( temp );
-		}
-	}
-
-	friend
-	void 
-	printSorting( SkipList< TObject, TModus, TSpec, TStructuring > & me )
-	{
-		SkipBaseElement< TObject, TModus, TSpec, TStructuring >* temp = &me._baseStore[0];
-		for( typename seqan::Size< SkipList< TObject, TModus, TSpec, TStructuring > >::Type i = 0; i < me._numOfElements + 1; ++i ){
-			std::cout.width(5);
-			if( _getRight( *temp ) != NULL )
-				std::cout << std::left << "x";
-			else
-				std::cout << std::left << "o";
-			goNext( temp );
-		}
-	}
-
-	friend
-	void
-	printHeights( SkipList< TObject, TModus, TSpec, TStructuring > & me )
-	{
-		SkipBaseElement< TObject, TModus, TSpec, TStructuring >* temp = &me._baseStore[0];
-		for( typename seqan::Size< SkipList< TObject, TModus, TSpec, TStructuring > >::Type i = 0; i < me._numOfElements + 1; ++i ){
-			std::cout.width(5);
-			std::cout << std::left << _getHeight( *temp );
-			goNext( temp );
-		}
-	}
-
-	friend
-	void
-	printValues( SkipList< TObject, TModus, TSpec, TStructuring > & me )
-	{
-		//SkipBaseElement< TObject, TModus, TSpec, TStructuring >* temp = &me._baseStore[0];
-		//for( typename seqan::Size< SkipList< TObject, TModus, TSpec, TStructuring > >::Type i = 0; i < me._numOfElements + 1; ++i ){
-		//	std::cout.width(5);
-		//	std::cout << std::left << getValue( getObject( *temp ) );
-		//	temp = _getSucc( *temp );
-		//}
-	}
-*/	
-
-}; // class SkipList
-
-
-
-/////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////
-
-
-
 	
 		// no append operations on skip lists
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring, typename TParam > inline 
 	void
-	append(SkipList< TObject, TModus, TSpec, TStructuring > & me,
-		TParam & param)
+	append( SkipList< TObject, TModus, TSpec, TStructuring > & me ,
+			TParam & param)
 	{
 		// do nothing
 	}
@@ -573,11 +284,9 @@ private:
 		return _getLeftSideStore( me )+ _getCurrentLayer( me ) - 1;
 	}
 
-//____________________________________________________________________________
-
 		// get the element allocator of a skiplist
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring > inline 
-	Allocator< ChunkPool2< SkipElement<TObject, TModus, TSpec, TStructuring> > > & 
+	Allocator< ClassPool< SkipElement< TObject, TModus, TSpec, TStructuring >, Limited > > & 
 	_getElementAlloc( SkipList< TObject, TModus, TSpec, TStructuring > & me )
 	{
 		SEQAN_CHECKPOINT
@@ -587,7 +296,7 @@ private:
 
 		// get the base element allocator of skiplist
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring > inline 
-	Allocator< SinglePool2< SkipBaseElement<TObject, TModus, TSpec, TStructuring> > > & 
+	Allocator< ClassPool< SkipBaseElement< TObject, TModus, TSpec, TStructuring >, Unlimited > > & 
 	_getBaseAlloc( SkipList< TObject, TModus, TSpec, TStructuring > & me )
 	{
 		SEQAN_CHECKPOINT
@@ -595,7 +304,16 @@ private:
 		return me._baseAlloc;
 	}
 
-//____________________________________________________________________________
+		
+	template< typename TObject, typename TModus, typename TSpec, typename TStructuring > inline 
+	void 
+	_setNext(	SkipList< TObject, TModus, TSpec, TStructuring > & me, 
+				SkipList< TObject, TModus, TSpec, TStructuring > * next )
+	{
+	SEQAN_CHECKPOINT
+		me._next = next;
+	}
+
 
 		//get the right bording element
 		//i.e. the lement with theKey== + infinity
@@ -636,7 +354,6 @@ private:
 		return _getSearchPath( me._sp );
 	}
 
-//____________________________________________________________________________
 
 	
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring > inline
@@ -657,7 +374,285 @@ private:
 		SEQAN_CHECK2( layer > _getCurrentLayer( me ), "Setting smaller value for _currentLayer" )
 		_setHeight( *me._baseStore, layer );
 	}
-/////////////////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////////
+//
+//								 struct SkipList
+//
+/////////////////////////////////////////////////////////////////////////////////
+
+
+template< typename TObject, typename TModus, typename TSpec, typename TStructuring >
+struct SkipList
+{	
+	// private members:
+		// container for elements in the lowest layer
+	union{
+		SkipBaseElement< TObject, TModus, TSpec, TStructuring > * _baseStore;
+		SkipList< TObject, TModus, TSpec, TStructuring > * _next;
+	};
+		// container for elements on the left side
+		// search operations start from this bording elements
+	SkipElement< TObject, TModus, TSpec, TStructuring > * _leftSideStore;
+
+		// number of elements in the list
+	typename Size< SkipList< TObject, TModus, TSpec, TStructuring > >::Type _numOfElements;
+
+		// pool allocators
+	Allocator< ClassPool< SkipElement< TObject, TModus, TSpec, TStructuring >, Limited > > _elementAlloc;	
+	Allocator< ClassPool< SkipBaseElement< TObject, TModus, TSpec, TStructuring >, Unlimited > > _baseAlloc;
+	
+		// search path
+	_SearchPath< TObject, TModus, TSpec, TStructuring > _sp;
+		
+		// border element for the right side
+	SkipBaseElement< TObject, TModus, TSpec, TStructuring > * _rightBorder;
+
+		// border objects
+	TObject l_border_obj;
+	TObject r_border_obj;
+
+		// 
+	bool _initialState;
+	
+//*************************************** internal help functions: ************************************************
+
+
+private:
+
+	SkipList & operator=( const SkipList & old )
+	{}
+
+	SkipList( const SkipList & old )
+		: _numOfElements( length( old ) ) // bording elements are not included in Entries array => numOfElements + 2 elements in base layer	
+		, _baseAlloc( _numOfElements + 2 )	// guessing needed space: a basic layer must be possible
+		, _elementAlloc( _numOfElements )
+		, _sp( _getMaximalSLTowerHeight( _numOfElements ) )
+		, _initialState( true )
+	{
+			// construct bording elements
+		setKey( l_border_obj, infimumValue< typename Key< TObject >::Type >() );
+		setKey( r_border_obj, supremumValue< typename Key< TObject >::Type >() );
+
+		SkipBaseElement< TObject, TModus, TSpec, TStructuring > * base_right;
+		
+		_initBases( *this, _baseStore, base_right, begin( old ), end( old ), _numOfElements ); 
+
+		_initSL( *this, _baseStore, base_right, _numOfElements );
+		_rightBorder = base_right;
+	}
+
+public:
+				
+	SkipList(void)
+		: _numOfElements( 0 ) // bording elements are not included in Entries array => numOfElements + 2 elements in base layer	
+		, _baseAlloc( 100  )	// guessing needed space: a basic layer must be possible
+		, _elementAlloc( 100 )
+		, _sp( 10 )
+		, _initialState( true )
+	{
+			// construct bording elements
+		setKey( l_border_obj, infimumValue< typename Key< TObject >::Type >() );
+		setKey( r_border_obj, supremumValue< typename Key< TObject >::Type >() );
+			
+	}
+
+	template< typename TContainer >
+	SkipList( TContainer & cont )
+		: _numOfElements( length( cont ) ) // bording elements are not included in Entries array => numOfElements + 2 elements in base layer	
+		, _baseAlloc( _numOfElements + 2 )	// guessing needed space: a basic layer must be possible
+		, _elementAlloc( _numOfElements )
+		, _sp( _getMaximalSLTowerHeight( _numOfElements ) )
+		, _initialState( true )
+	{
+			// construct bording elements
+		setKey( l_border_obj, infimumValue< typename Key< TObject >::Type >() );
+		setKey( r_border_obj, supremumValue< typename Key< TObject >::Type >() );
+
+		SkipBaseElement< TObject, TModus, TSpec, TStructuring > * base_right;
+		
+		_initBases( *this, _baseStore, base_right, begin( cont ), end( cont ), _numOfElements ); 
+
+		_initSL( *this, _baseStore, base_right, _numOfElements );
+		_rightBorder = base_right;
+	}
+
+		// Constructor
+		// Needs a range, defined by to iterators
+
+		// TODO: für allgmeinen iterator verfügbar machen
+	template< typename TIterator >
+	SkipList( TIterator beg, TIterator end )
+		: _numOfElements( end - beg ) // bording elements are not included in Entries array => numOfElements + 2 elements in base layer	
+		, _baseAlloc( _numOfElements + 2 )	// guessing needed space: a basic layer must be possible
+		, _elementAlloc( _numOfElements )
+		, _sp( _getMaximalSLTowerHeight( _numOfElements ) )
+		, _initialState( true )
+	{			
+		setKey( l_border_obj, infimumValue< typename Key< TObject >::Type >() );
+		setKey( r_border_obj, supremumValue< typename Key< TObject >::Type >() );
+
+			// construct bording elements
+		SkipBaseElement< TObject, TModus, TSpec, TStructuring > * base_right;
+
+		_initBases( *this, _baseStore, base_right, beg, end, _numOfElements ); 
+
+		_initSL( *this, _baseStore, base_right, _numOfElements );
+		_rightBorder = base_right;
+	}
+	
+
+	~SkipList(void)
+	{
+		_clearSearchPath( this->_sp, _getMaximalSLTowerHeight( _numOfElements ) );
+	}
+
+	// Debug print methods
+private:
+
+	template< typename TSize1, typename TSize2 > friend
+	void 
+	printLayer(	SkipList< TObject, TModus, TSpec, TStructuring > & me,
+				TSize1 layer,
+				TSize2 column )
+	{
+		if( layer == 0 )
+		{
+			for( typename seqan::Size< SkipList< TObject, TModus, TSpec, TStructuring > >::Type j = 0; j < 11; ++j )
+			{
+				std::cout<< "______";
+			}
+			std::cout<<std::endl;
+			typename Iterator< SkipList< TObject, TModus, TSpec, TStructuring > >::Type temp = begin( me );
+			goPrevious( temp );
+			goFurther( temp, column );
+			typename Iterator< SkipList< TObject, TModus, TSpec, TStructuring > >::Type tempEnd = temp;
+			goFurther( tempEnd, 11 );
+			while( temp != end( me ) && temp != tempEnd )
+			{
+				std::cout.width(7);
+				if( key( temp ) == infimumValue< typename Key< TObject >::Type >( ) )
+					std::cout << std::left << "L";
+				else
+					std::cout << std::left << key( temp );
+				goNext( temp );
+			}
+			//std::cout<<std::endl;
+			//printCounts( me );
+			//std::cout<<std::endl;
+			//printSorting( me );
+			//std::cout<<std::endl;
+			//printHeights( me );
+			//std::cout<<std::endl;
+			//printValues( me );
+		}
+		else if( layer <= _getCurrentLayer( me ) && !_getInitialState( me ) )
+		{
+			typename Iterator< SkipList< TObject, TModus, TSpec, TStructuring > >::Type temp = begin( me );
+			goPrevious( temp );
+			goFurther( temp, column );
+			typename Iterator< SkipList< TObject, TModus, TSpec, TStructuring > >::Type tempEnd = temp;
+			goFurther( tempEnd, 11 );
+			while( temp != end( me ) && temp != tempEnd )
+			{
+				if( _getHeight( *hostIterator( temp ) ) >= layer )
+				{
+					if( _getRight( *( &_getUp( *hostIterator( temp ) ) + layer - 1) ) )
+					{
+						std::stringstream s;
+						if( key( temp ) == infimumValue< typename Key< TObject >::Type >( ) )
+							s << std::left << "L";
+						else
+							s << key( temp );
+						s << ">";
+						std::cout.width(7);
+						std::cout << std::left << s.str();
+					}
+					else
+						dump( *( &_getUp( *hostIterator( temp ) ) + layer - 1 ) );
+				}
+				else 
+				{
+					std::cout.width(7);
+					std::cout << " ";
+				}
+				goNext( temp );
+			} 
+		}
+		std::cout<<std::endl;
+	}
+
+	friend
+	void 
+	dump( SkipList< TObject, TModus, TSpec, TStructuring > & me )
+	{
+		int column = 0;
+
+		while( column < length( me ) )
+		{
+			typename seqan::Size< SkipList< TObject, TModus, TSpec, TStructuring > >::Type j = _getMaximalSLTowerHeight( me._numOfElements );
+			while( j > 0 ){
+				printLayer( me, --j, column );
+			}
+			std::cout<< std::endl;
+			column += 14;
+		}
+	}
+
+	friend
+	void 
+	printCounts( SkipList< TObject, TModus, TSpec, TStructuring > & me )
+	{
+		SkipBaseElement< TObject, TModus, TSpec, TStructuring > * temp = &me._baseStore[0];
+		for( typename seqan::Size< SkipList< TObject, TModus, TSpec, TStructuring > >::Type i = 0; i < me._numOfElements + 1; ++i ){
+			std::cout.width(5);
+			std::cout << std::left << _getCount( *temp );
+			goNext( temp );
+		}
+	}
+
+	friend
+	void 
+	printSorting( SkipList< TObject, TModus, TSpec, TStructuring > & me )
+	{
+		SkipBaseElement< TObject, TModus, TSpec, TStructuring >* temp = &me._baseStore[0];
+		for( typename seqan::Size< SkipList< TObject, TModus, TSpec, TStructuring > >::Type i = 0; i < me._numOfElements + 1; ++i ){
+			std::cout.width(5);
+			if( _getRight( *temp ) != NULL )
+				std::cout << std::left << "x";
+			else
+				std::cout << std::left << "o";
+			goNext( temp );
+		}
+	}
+
+	friend
+	void
+	printHeights( SkipList< TObject, TModus, TSpec, TStructuring > & me )
+	{
+		SkipBaseElement< TObject, TModus, TSpec, TStructuring >* temp = &me._baseStore[0];
+		for( typename seqan::Size< SkipList< TObject, TModus, TSpec, TStructuring > >::Type i = 0; i < me._numOfElements + 1; ++i ){
+			std::cout.width(5);
+			std::cout << std::left << _getHeight( *temp );
+			goNext( temp );
+		}
+	}
+
+	friend
+	void
+	printValues( SkipList< TObject, TModus, TSpec, TStructuring > & me )
+	{
+		//SkipBaseElement< TObject, TModus, TSpec, TStructuring >* temp = &me._baseStore[0];
+		//for( typename seqan::Size< SkipList< TObject, TModus, TSpec, TStructuring > >::Type i = 0; i < me._numOfElements + 1; ++i ){
+		//	std::cout.width(5);
+		//	std::cout << std::left << getValue( getObject( *temp ) );
+		//	temp = _getSucc( *temp );
+		//}
+	}
+	
+
+}; // struct SkipList
 
 } // namespace seqan
 #endif //_SKIP_LIST_STATIC_H

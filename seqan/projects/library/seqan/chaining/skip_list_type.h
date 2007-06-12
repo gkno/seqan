@@ -1,178 +1,106 @@
-#ifndef SEQAN_HEADER_SKIP_LIST_TYPE_H
-#define SEQAN_HEADER_SKIP_LIST_TYPE_H
+#ifndef SEQAN_HEADER_SKIPLIST_TYPE_H
+#define SEQAN_HEADER_SKIPLIST_TYPE_H
 
 namespace SEQAN_NAMESPACE_MAIN
 {
 
-//////////////////////////////////////////////////////////////////////////////
-// Keys
-//////////////////////////////////////////////////////////////////////////////
-
 /**
 .Metafunction.Key:
-..summary:Type of the key attribute of an object. 
+..summary:Type of the theKeyattribute of an object. 
 ..signature:Key<T>::Type
 ..param.T:Type for which the key type is determined.
 ..returns.param.Type:Key type of $T$.
-..remarks.text:The the key type of an object is used for sorting and searching.
+..remarks.text:The theKeytype of an object is used for sorting and searching.
 */
 
-template <typename T>
-struct Key
-{
-	typedef T Type;
-};
+	template< typename T >
+	struct Key
+	{
+		typedef int Type;
+	};
 
-//////////////////////////////////////////////////////////////////////////////
-// Pair: first argument is key
+		// default for Pair
+	template < typename _T1, typename _T2, typename Compressed >
+    struct Pair;
 
-template < typename _T1, typename _T2, typename _TCompression>
-struct Pair;
+	// auxiliary functions for Objects that are plugged into the 
+		// SkipList
+		// Specialized for std::pair
+	template< typename TKey, typename TVal > inline
+	TKey key( Pair<TKey, TVal> & p )
+	{
+		return p.i1;
+	}
 
-//____________________________________________________________________________
+	template< typename TKey, typename TVal >
+	TVal getValue( Pair<TKey, TVal> & p )
+	{
+		return p.i2;
+	}
 
-template <typename TKey, typename TVal, typename _TCompression>
-struct Key<Pair<TKey, TVal, _TCompression> >
-{
-	typedef TKey Type;
-};
-template <typename TKey, typename TVal, typename _TCompression>
-struct Key<Pair<TKey, TVal, _TCompression> const>
-{
-	typedef TKey Type;
-};
+	template< typename TKey2, typename TVal >
+	void setKey( Pair<TKey2, TVal> & p, TKey2 theKey)
+	{
+		p.i1 = theKey;
+	}
 
-//____________________________________________________________________________
+	template< typename TKey, typename TVal >
+	struct Value< Pair< TKey, TVal> >
+	{
+		typedef TVal Type;
+	};
 
-/**
-.Function.key:
-..summary:Get the the key of the element.
-..cat:SkipList
-..signature:key(element)
-..param.element:The desired object.
-..returns:The the key of the element. Type is @Metafunction.Key.$Key< "element-type" >::Type$@.
+	template< typename TKey, typename TVal >
+	struct Key< Pair< TKey, TVal > >
+	{
+		typedef TKey Type;
+	};
+
+		// specialization for std::pair
+	template< typename TKey, typename TVal > inline
+	TKey key( std::pair< TKey, TVal > & p )
+	{
+		return p.first;
+	}
+
+	template< typename TKey, typename TVal >
+	void setKey( std::pair<TKey, TVal> & p, TKey theKey )
+	{
+		p.first = theKey;
+	}
+
+	template< typename TKey, typename TVal >
+	struct Value< std::pair< TKey, TVal> >
+	{
+		typedef TVal Type;
+	};
+
+	template< typename TKey, typename TVal >
+	struct Key< std::pair< TKey, TVal > >
+	{
+		typedef TKey Type;
+	};
+
+	
+	/**
+	.Metafunction.Cargo:
+	..summary:An additional cargo member of an object. 
+	..signature:Cargo<T>::Type
+	..param.T:Type for which the cargo type is determined.
+	..returns.param.Type:Cargo type of $T$.
+	..remarks.text:The cargo type is used for additional cargo information.
+	*/
+
+	struct _Empty
+	{};
+/*
+	template< typename T >
+	struct Cargo
+	{
+		typedef _Empty Type;
+	};
 */
 
-template <typename TKey, typename TVal, typename _TCompression> 
-inline TKey &
-key(Pair<TKey, TVal, _TCompression> & me)
-{
-	return me.i1;
-}
-template <typename TKey, typename TVal, typename _TCompression> 
-inline TKey &
-key(Pair<TKey, TVal, _TCompression> const & me)
-{
-	return me.i1;
-}
-
-//____________________________________________________________________________
-
-template <typename TKey, typename TVal, typename _TCompression> 
-inline TKey
-getKey(Pair<TKey, TVal, _TCompression> & me)
-{
-	return getValueI1(me);
-}
-template <typename TKey, typename TVal, typename _TCompression> 
-inline TKey
-getKey(Pair<TKey, TVal, _TCompression> const & me)
-{
-	return getValueI1(me);
-}
-
-//____________________________________________________________________________
-
-/**
-.Function.assignKey:
-..summary:Set the theKeyattribute of the element.
-..cat:SkipList
-..signature:assignKey(element, theKey)
-..param.element:The desired object.
-...type:Class.SkipElement
-..param.key:The desired object.
-...type:Metafunction.Key.$Key< "element-type" >::Type
-*/
-
-template <typename TKey, typename TVal, typename _TCompression, typename TKey2> 
-inline void
-assignKey(Pair<TKey, TVal, _TCompression> & me,
-		  TKey2 & _key)
-{
-	assignValueI1(me, _key);
-}
-template <typename TKey, typename TVal, typename _TCompression, typename TKey2> 
-inline void
-assignKey(Pair<TKey, TVal, _TCompression> & me,
-		  TKey2 const & _key)
-{
-	assignValueI1(me, _key);
-}
-
-//////////////////////////////////////////////////////////////////////////////
-// std::pair: first argument is key
-
-//____________________________________________________________________________
-
-template <typename TKey, typename TVal>
-struct Key<std::pair<TKey, TVal> >
-{
-	typedef TKey Type;
-};
-template <typename TKey, typename TVal>
-struct Key<std::pair<TKey, TVal> const >
-{
-	typedef TKey Type;
-};
-
-//____________________________________________________________________________
-
-template <typename TKey, typename TVal> 
-inline TKey &
-key(std::pair<TKey, TVal> & me)
-{
-	return me.first;
-}
-template <typename TKey, typename TVal> 
-inline TKey &
-key(std::pair<TKey, TVal> const & me)
-{
-	return me.first;
-}
-
-//____________________________________________________________________________
-
-template <typename TKey, typename TVal> 
-inline TKey
-getKey(std::pair<TKey, TVal> & me)
-{
-	return me.first;
-}
-template <typename TKey, typename TVal> 
-inline TKey
-getKey(std::pair<TKey, TVal> const & me)
-{
-	return me.first;
-}
-
-//____________________________________________________________________________
-
-template <typename TKey, typename TVal, typename TKey2> 
-inline void
-assignKey(std::pair<TKey, TVal> & me,
-		  TKey2 & _key)
-{
-	me.first = _key;
-}
-template <typename TKey, typename TVal, typename TKey2> 
-inline void
-assignKey(std::pair<TKey, TVal> & me,
-		  TKey2 const & _key)
-{
-	me.first = _key;
-}
-
-//////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 // Tags
 //////////////////////////////////////////////////////////////////////////////
@@ -193,11 +121,11 @@ struct Deferred;
 template< typename TObject, typename TModus = Dynamic, typename TSpec = Default, typename TStructuring = Complete >
 struct SkipElement;
 
-template< typename TObject, typename TModus = Dynamic, typename TSpec = Default, typename TStructuring = Complete >
+template< typename TObject, typename TModus = Dynamic, typename TSpec = Default, typename TStructuring  = Complete >
 struct SkipBaseElement;
 
-template< typename TObject, typename TModus = Dynamic, typename TSpec = Default, typename TStructuring = Complete >
-class SkipList;
+template< typename TObject, typename TModus = Dynamic, typename TSpec = Default, typename TStructuring  = Complete >
+struct SkipList;
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -244,7 +172,10 @@ struct Size< SkipBaseElement< TObject, TModus, TSpec, TStructuring > const >
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
+//
 //		Position Type
+//
+///////////////////////////////////////////////////////////////////////////////////////////////
 
 
 template< typename TObject, typename TModus, typename TSpec, typename TStructuring >
@@ -255,7 +186,10 @@ struct Position< SkipList< TObject, TModus, TSpec, TStructuring > >
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
+//
 //		GetValue Type
+//
+///////////////////////////////////////////////////////////////////////////////////////////////
 
 
 template< typename TObject, typename TModus, typename TSpec, typename TStructuring >
@@ -287,8 +221,19 @@ struct GetValue< SkipBaseElement< TObject, TModus, TSpec, TStructuring > const >
 	typedef typename GetValue< SkipList< TObject, TModus, TSpec, TStructuring > >::Type const Type;
 };
 
+
+template< typename TObject, typename TModus, typename TSpec, typename TStructuring >
+struct GetValue< SkipBaseElement< TObject, TModus, TSpec, TStructuring > * >
+{
+	typedef SkipBaseElement< TObject, TModus, TSpec, TStructuring > Type;
+};
+
+
 ///////////////////////////////////////////////////////////////////////////////////////////////
+//
 //		Value Type
+//
+///////////////////////////////////////////////////////////////////////////////////////////////
 
 
 template< typename TObject, typename TModus, typename TSpec, typename TStructuring >
@@ -327,7 +272,10 @@ struct Value< SkipBaseElement< TObject, TModus, TSpec, TStructuring > const >
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
+//
 //		Key Type
+//
+///////////////////////////////////////////////////////////////////////////////////////////////
 
 
 template< typename TObject, typename TModus, typename TSpec, typename TStructuring >
@@ -368,13 +316,16 @@ struct Key< SkipBaseElement< TObject, TModus, TSpec, TStructuring > const >
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
+//
 //		Cargo Type
+//
+///////////////////////////////////////////////////////////////////////////////////////////////
 
 
 template< typename TObject, typename TModus, typename TSpec, typename TStructuring >
 struct Cargo< SkipList< TObject, TModus, TSpec, TStructuring > >
 {
-	typedef Nothing Type;	// default: no cargo
+	typedef _Empty Type;	// default: no cargo
 };
 
 template< typename TObject, typename TModus, typename TSpec, typename TStructuring >
@@ -393,7 +344,7 @@ struct Cargo< SkipBaseElement< TObject, TModus, TSpec, TStructuring > >
 template< typename TTag, typename TCargo > inline
 void
 _initCargo( TTag * tag, TCargo & _cargo )
-{}
+{};
 
 
 }

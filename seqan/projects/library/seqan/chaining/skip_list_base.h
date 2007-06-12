@@ -174,7 +174,7 @@ namespace seqan
 				THeight max_height)
 	{
 		SEQAN_CHECKPOINT
-		typename Size< SkipList< TObject, TModus, TSpec> >::Type height = geomRand< typename Size< SkipList< TObject, TModus, TSpec, TStructuring > >::Type >();
+		typename Size< SkipList< TObject, TModus, TSpec> >::Type height = _geomRand< typename Size< SkipList< TObject, TModus, TSpec, TStructuring > >::Type >();
 		//if( height < 4 )
 		//	height = 4;
 		//height -= 4;
@@ -201,8 +201,8 @@ namespace seqan
 		SEQAN_CHECKPOINT
 		SEQAN_CHECK2( &first != NULL && &second != NULL, "An SkipBaseElements's object is corrupted")
 		typename Key< TObject >::Type buffer_key= key( first );
-		assignKey( first, key( second ) );
-		assignKey( second, buffer_key );
+		setKey( first, key( second ) );
+		setKey( second, buffer_key );
 		TObject * bufferObject = getObject( &first );
 		_setObject( first, getObject( &second ) );
 		_setObject( second, bufferObject );
@@ -220,7 +220,7 @@ namespace seqan
 	{
 		SEQAN_CHECKPOINT
 		SEQAN_CHECK( &base != NULL )
-		typename Size< SkipList< TObject, Dynamic, TSpec, TStructuring > >::Type offset = mtRand() % _getCount( base ) + 1;
+		typename Size< SkipList< TObject, Dynamic, TSpec, TStructuring > >::Type offset = mt_random() % _getCount( base ) + 1;
 		SkipBaseElement< TObject, Dynamic, TSpec, TStructuring > * pivot = &base;
 		while( offset > 0 )
 		{
@@ -239,7 +239,7 @@ namespace seqan
 		SEQAN_CHECKPOINT
 		SEQAN_CHECK( &base != NULL )
 		SEQAN_CHECK2( _getCount( base ) != 0, "Tried to sort element that is already sorted" )
-		return  ( &base + ( mtRand() % _getCount( base ) + 1 ) );
+		return  ( &base + ( mt_random() % _getCount( base ) + 1 ) );
 	}
 
 
@@ -645,7 +645,7 @@ namespace seqan
 			_noInitialState( list );
 		}
 			// starting in the root, search to the right and downwards
-		return typename Iterator< SkipList< TObject, TModus, TSpec, TStructuring > >::Type(_specialSearch( list, _getRoot( list ), theKey ) );
+		return typename Iterator< SkipList< TObject, TModus, TSpec, TStructuring > >::Type( list, _specialSearch( list, _getRoot( list ), theKey ) );
 	}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -955,7 +955,7 @@ namespace seqan
 		_setDown( *_rightBorder, &list._baseStore[ numEntries + 1 ] );
 		_setHeight( list._baseStore[ numEntries + 1 ], 1 );
 		_setRight( * _rightBorder, _rightBorder );
-		assignKey( *_rightBorder, supremumValue< typename Key< TObject >::Type >() );
+		setKey( *_rightBorder, supremumValue< typename Key< TObject >::Type >() );
 		_setUp( list._baseStore[ numEntries + 1 ], *_rightBorder );
 		
 				// ... left side
