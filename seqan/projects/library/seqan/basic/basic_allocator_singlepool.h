@@ -197,6 +197,82 @@ SEQAN_CHECKPOINT
 }
 
 //////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+// alternative Interface that takes a Type instead of a SIZE
+//////////////////////////////////////////////////////////////////////////////
+
+
+template <typename TValue, typename TParentAllocator = SimpleAllocator>
+struct SinglePool2;
+
+template <typename TValue, typename TParentAllocator>
+struct Allocator<SinglePool2<TValue, TParentAllocator> >
+{
+	Allocator<SinglePool<sizeof(TValue), TParentAllocator> > data_alloc;
+
+
+	Allocator(size_t reserve_item_count)
+		: data_alloc(reserve_item_count)
+	{
+	}
+
+	Allocator(TParentAllocator & parent_alloc)
+		: data_alloc(parent_alloc)
+	{
+	}
+
+	Allocator(size_t reserve_item_count, TParentAllocator & parent_alloc)
+		: data_alloc(reserve_item_count, parent_alloc)
+
+	{
+	}
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TValue, typename TParentAllocator>
+inline TParentAllocator &
+parentAllocator(Allocator<SinglePool2<TValue, TParentAllocator> > & me)
+{
+SEQAN_CHECKPOINT
+	return parentAllocator(me.data_alloc);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TValue, typename TParentAllocator>
+void
+clear(Allocator<SinglePool2<TValue, TParentAllocator> > & me)
+{
+SEQAN_CHECKPOINT
+	clear(me.data_alloc);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TValue, typename TParentAllocator, typename TValue2, typename TSize, typename TUsage>
+inline void
+allocate(Allocator<SinglePool2<TValue, TParentAllocator> > & me, 
+		 TValue2 * & data,
+		 TSize count,
+		 Tag<TUsage> const tag_)
+{
+SEQAN_CHECKPOINT
+	allocate(me.data_alloc, data, count, tag_);
+}
+
+template <typename TValue, typename TParentAllocator, typename TValue2, typename TSize, typename TUsage>
+inline void 
+deallocate(Allocator<SinglePool2<TValue, TParentAllocator> > & me,
+		   TValue2 * data, 
+		   TSize count,
+		   Tag<TUsage> const tag_)
+{
+SEQAN_CHECKPOINT
+	deallocate(me.data_alloc, data, count, tag_);
+}
+
+//////////////////////////////////////////////////////////////////////////////
 
 } //namespace SEQAN_NAMESPACE_MAIN
 

@@ -42,7 +42,7 @@ struct Allocator<ChunkPool<SIZE, MAX_COUNT, TParentAllocator> >
 {
 	enum
 	{
-		STORAGE_SIZE_1 = 0x1000,
+		STORAGE_SIZE_1 = 0x1000UL,
 		STORAGE_SIZE_2 = SIZE * MAX_COUNT * 8,
 		STORAGE_SIZE_UPPER = (STORAGE_SIZE_1 > STORAGE_SIZE_2) ? STORAGE_SIZE_1 : STORAGE_SIZE_2,
 		ITEMS_PER_STORAGE = STORAGE_SIZE_UPPER / SIZE,
@@ -158,7 +158,7 @@ SEQAN_ASSERT(count > 0)
 
 	char * ptr;
 
-	if ((sizeof(TValue) != SIZE) || (count > MAX_COUNT))
+	if ((sizeof(TValue) != SIZE) || ((size_t) count > MAX_COUNT))
 	{//no blocking
 		return allocate(parentAllocator(me), data, count, tag_);
 	}
@@ -213,6 +213,86 @@ SEQAN_ASSERT(count > 0)
 	//link in recycling list
 	*reinterpret_cast<char **>(data) = me.data_recycled_blocks[count - 1];
 	me.data_recycled_blocks[count - 1] = reinterpret_cast<char *>(data);
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+// alternative Interface that takes a Type instead of a SIZE
+//////////////////////////////////////////////////////////////////////////////
+
+template <
+	typename TValue, 
+	size_t MAX_COUNT = 26, 
+	typename TParentAllocator = Allocator<SimpleAlloc<Default> > >
+struct ChunkPool2;
+
+
+template <typename TValue, size_t MAX_COUNT, typename TParentAllocator>
+struct Allocator<ChunkPool2<TValue, MAX_COUNT, TParentAllocator> >
+{
+	Allocator<ChunkPool<sizeof(TValue), MAX_COUNT, TParentAllocator> > data_alloc;
+
+
+	Allocator(size_t reserve_item_count)
+		: data_alloc(reserve_item_count)
+	{
+	}
+
+	Allocator(TParentAllocator & parent_alloc)
+		: data_alloc(parent_alloc)
+	{
+	}
+
+	Allocator(size_t reserve_item_count, TParentAllocator & parent_alloc)
+		: data_alloc(reserve_item_count, parent_alloc)
+
+	{
+	}
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TValue, size_t MAX_COUNT, typename TParentAllocator>
+inline TParentAllocator &
+parentAllocator(Allocator<ChunkPool2<TValue, MAX_COUNT, TParentAllocator> > & me)
+{
+SEQAN_CHECKPOINT
+	return parentAllocator(me.data_alloc);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TValue, size_t MAX_COUNT, typename TParentAllocator>
+void
+clear(Allocator<ChunkPool2<TValue, MAX_COUNT, TParentAllocator> > & me)
+{
+SEQAN_CHECKPOINT
+	clear(me.data_alloc);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TValue, size_t MAX_COUNT, typename TParentAllocator, typename TValue2, typename TSize, typename TUsage>
+inline void
+allocate(Allocator<ChunkPool2<TValue, MAX_COUNT, TParentAllocator> > & me, 
+		 TValue2 * & data,
+		 TSize count,
+		 Tag<TUsage> const tag_)
+{
+SEQAN_CHECKPOINT
+	allocate(me.data_alloc, data, count, tag_);
+}
+
+template <typename TValue, size_t MAX_COUNT, typename TParentAllocator, typename TValue2, typename TSize, typename TUsage>
+inline void 
+deallocate(Allocator<ChunkPool2<TValue, MAX_COUNT, TParentAllocator> > & me,
+		   TValue2 * data, 
+		   TSize count,
+		   Tag<TUsage> const tag_)
+{
+SEQAN_CHECKPOINT
+	deallocate(me.data_alloc, data, count, tag_);
 }
 
 //////////////////////////////////////////////////////////////////////////////
