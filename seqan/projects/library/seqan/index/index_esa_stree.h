@@ -1275,6 +1275,50 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 	}
 
 /**
+.Function.getFrequency:
+..summary:Returns the number of sequences, which contain the @Function.representative@ as a substring.
+..cat:Index
+..signature:int getFrequency(iterator)
+..param.iterator:An iterator of a Suffix Tree.
+...type:Spec.VSTree Iterator
+..returns:The number of different sequences containing the @Function.representative@.
+..see:@Function.getOccurences@
+*/
+
+	template < typename TIndex, class TSpec, typename TSet >
+	inline int getFrequency(Iter<TIndex, VSTree<TSpec> > const &it, TSet &set)
+	{
+		typedef typename Infix< typename Fibre<TIndex, ESA_SA>::Type const >::Type TOccs;
+		typedef typename Iterator<TOccs, Standard>::Type TIter;
+		typedef typename Size<TIndex>::Type TSize;
+
+		TIndex const &index = container(it);
+
+		clear(set);
+
+		TOccs occs = getOccurences(it);
+		TIter oc = begin(occs, Standard()), ocEnd = end(occs, Standard());
+
+		int counter = 0;
+		while (oc != ocEnd) {
+			TSize seqNo = getSeqNo(*oc, stringSetLimits(index));
+			if (!in(seqNo, set)) {
+				++counter;
+				insert(seqNo, set);
+			}
+			++oc;
+		}
+
+		return counter;
+	}
+
+	template < typename TIndex, class TSpec >
+	inline int getFrequency(Iter<TIndex, VSTree<TSpec> > const &it) {
+		VectorSet<typename Size<TIndex>::Type, Alloc<> > set(countSequences(container(it)));
+		return getFrequency(it, set);
+	}
+
+/**
 .Function.childrenAreLeaves:
 ..summary:Test whether iterator points to a node with only leaf-children.
 ..cat:Index
