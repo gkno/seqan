@@ -785,7 +785,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			if (result) {
 	 			int eno = aio_error(&request);
 				if (eno != EINPROGRESS)
-					::std::cerr << "waitFor: aio_error returned " << ::strerror(eno) << " and errno is " << ::strerror(errno) << ::std::endl;
+					::std::cerr << "waitFor: aio_error returned " << ::strerror(eno) << " and errno=" << errno << " " << ::strerror(errno) << ::std::endl;
 			}
 		#endif
 		return result == 0;
@@ -813,7 +813,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			if (result) {
 	 			int eno = aio_error(&request);
 				if (eno != EINPROGRESS)
-					::std::cerr << "waitFor: aio_error returned " << ::strerror(eno) << " and errno is " << ::strerror(errno) << ::std::endl;
+					::std::cerr << "waitFor(timeOut=" << timeout_millis << "): aio_error returned " << ::strerror(eno) << " and errno=" << errno << " " << ::strerror(errno) << ::std::endl;
 			}
 		#endif
         return result == 0;
