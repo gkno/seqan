@@ -637,7 +637,8 @@ SEQAN_CHECKPOINT
 	template <typename TPair, typename TLimits>
 	struct _PairIncrementer {
 		typename Iterator<TLimits const>::Type						it, itEnd;
-		typename _RemoveConst<typename Value<TLimits>::Type>::Type	old, localEnd;
+		typename _RemoveConst<typename Value<TLimits>::Type>::Type	old;
+		typename Value<TPair, 2>::Type								localEnd;
 
 		TPair pos;
 		inline operator TPair () const {
@@ -655,7 +656,9 @@ SEQAN_CHECKPOINT
 					localEnd = (*it - old);
 					old = *it;
 					++it;
-				} 
+				}
+				if (!localEnd && it == itEnd)
+					assignValueI1(pos, getValueI1(pos) + 1);	// set pos behind the last sequence
 			}
 			assignValueI2(pos, i2);
 			return pos;
