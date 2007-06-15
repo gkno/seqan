@@ -105,11 +105,11 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		inline Pair() {}
 		inline Pair(Pair const &_p): i12(_p.i12) {}
-		inline Pair(_T1 const &_i1, _T2 const &_i2): i12((T12)_i1 << bitShiftI1 + (T12)_i2) {}
+		inline Pair(_T1 const &_i1, _T2 const &_i2): i12(((T12)_i1 << bitShiftI1) + (T12)_i2) {}
 
 		template <typename __T1, typename __T2, typename __TCompression>
 		inline Pair(Pair<__T1, __T2, __TCompression> const &_p):
-			i12((T12)getValueI1(_p) << bitShiftI1 + (T12)getValueI2(_p)) {}
+			i12(((T12)getValueI1(_p) << bitShiftI1) + (T12)getValueI2(_p)) {}
 	}
 #ifdef PLATFORM_GCC
 	__attribute__((packed))
