@@ -16,23 +16,12 @@ struct TagFasta_;
 typedef Tag<TagFasta_> const Fasta;
 
 //////////////////////////////////////////////////////////////////////////////
-
-// File Reader Iterator
-
-template <typename TFormat>
-struct FileReader;
-
-
-//////////////////////////////////////////////////////////////////////////////
 // Filereader
 //////////////////////////////////////////////////////////////////////////////
 
-//goBegin skips to the next line, 
-//assuming that the file is in the first record line
-
-template <typename TFile>
+template <typename TFile, typename TFile2, typename TSpec>
 inline void
-goBegin(Iter<TFile, FileReader<Fasta> > & it)
+goBegin(Iter<TFile, FileReader<Fasta, TFile2, TSpec> > & it)
 {
 	if (_streamEOF(host(it)))
 	{
@@ -40,8 +29,11 @@ goBegin(Iter<TFile, FileReader<Fasta> > & it)
 		return;
 	}
 
-	//skip meta line
-	_stream_skipLine(host(it), it.data_char);
+	if (it.data_char == '>')
+	{
+		//skip meta line
+		_stream_skipLine(host(it), it.data_char);
+	}
 
 	//eliminate linebreaks
 	while ((it.data_char == '\n') || (it.data_char == '\r'))
@@ -61,31 +53,42 @@ goBegin(Iter<TFile, FileReader<Fasta> > & it)
 		return;
 	}
 
+	it.data_file_pos = _streamTellG(host(it)) - 1;
 	it.data_eof = _streamEOF(host(it));
 }
 
 
-template <typename TFile>
+template <typename TFile, typename TFile2, typename TSpec>
 inline void
-goNext(Iter<TFile, FileReader<Fasta> > & it)
+goNext(Iter<TFile, FileReader<Fasta, TFile2, TSpec> > & it)
 {
+/*
 	if (_streamEOF(host(it)))
 	{
 		it.data_eof = true;
 		return;
 	}
+*/
 	it.data_char = _streamGet(host(it));
+	++it.data_file_pos;
+
+	if (_streamEOF(host(it)))
+	{
+		it.data_eof = true;
+		return;
+	}
 
 	if ((it.data_char == '\n') || (it.data_char == '\r'))
 	{//linebreak detected: find begin of next line
 		do
 		{
+			it.data_char = _streamGet(host(it));
 			if (_streamEOF(host(it)))
 			{
 				it.data_eof = true;
 				return;
 			}
-			it.data_char = _streamGet(host(it));
+			++it.data_file_pos;
 		} while ((it.data_char == '\n') || (it.data_char == '\r'));
 
 		if (it.data_char == '>')

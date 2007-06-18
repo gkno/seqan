@@ -50,6 +50,36 @@ struct _IsTellSeekStream<FILE *>
 
 //////////////////////////////////////////////////////////////////////////////
 
+inline void 
+_streamOpen(::std::FILE * & me, String<char> path, bool for_read = true)
+{
+SEQAN_CHECKPOINT
+	if (for_read)
+	{
+		me = fopen(toCString(path), "rb");
+	}
+	else
+	{
+		me = fopen(toCString(path), "wb");
+	}
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+inline void 
+_streamClose(::std::FILE * & me)
+{
+SEQAN_CHECKPOINT
+	if (me)
+	{
+		fclose(me);
+		me = 0;
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 ///.Internal._streamEOF.param.stream.type:Adaption."std::FILE *"
 
 inline bool 

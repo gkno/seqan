@@ -11,7 +11,7 @@ namespace SEQAN_NAMESPACE_MAIN
 .Internal._streamPutInt:
 ..summary:Converts an integer to a character and writes it to stream.
 ..cat:Streams
-..signature:_streamPutInt(stream, integer)
+..signature:_streamPutInt(stream, integer [, format_string])
 ..param.target:An output stream.
 ...type:Adaption."std::iostream"
 ..param.number:A number that is written to $stream$.
@@ -19,14 +19,22 @@ namespace SEQAN_NAMESPACE_MAIN
 template <typename TStream>
 inline void
 _streamPutInt(TStream & target,
-			  int number)
+			  int number, 
+			  char const * format_string)
 {
 SEQAN_CHECKPOINT
 	char str[BitsPerValue<int>::VALUE];
-	sprintf(str, "%d", number);
+	sprintf(str, format_string, number);
 	_streamWrite(target, str);
 }
-
+template <typename TStream>
+inline void
+_streamPutInt(TStream & target,
+			  int number)
+{
+SEQAN_CHECKPOINT
+	_streamPutInt(target, number, "%d");
+}
 
 //////////////////////////////////////////////////////////////////////////////
 

@@ -65,12 +65,6 @@ SEQAN_CHECKPOINT
 SEQAN_CHECKPOINT
 		read(file, data, limit, TFormat());
 	}
-	virtual void
-	read_(TFile & file, TData & data, TMeta & meta) const
-	{
-SEQAN_CHECKPOINT
-		read(file, data, meta, TFormat());
-	}
 
 	virtual void
 	readMeta_(TFile & file, TMeta & meta) const
@@ -129,8 +123,6 @@ public:
 	read_(TFile & file, TData & data) const = 0;
 	virtual void
 	read_(TFile & file, TData & data, TSize limit) const = 0;
-	virtual void
-	read_(TFile & file, TData & data, TMeta & meta) const = 0;
 
 	virtual void
 	readMeta_(TFile & file, TMeta & meta) const = 0;
@@ -201,16 +193,6 @@ SEQAN_CHECKPOINT
 	file_format.read_(file, data, limit);
 }
 
-template <typename TFile, typename TData, typename TMeta, typename TFormat, typename TSize>
-inline void
-read(TFile & file,
-	 TData & data,
-	 TMeta & meta,
-	 FileFormat<TFile, TData, TMeta, TFormat> const & file_format)
-{
-SEQAN_CHECKPOINT
-	file_format.read_(file, data, meta);
-}
 //////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -430,16 +412,16 @@ _stream_appendLine(TFile & file,
 	{
 		if (_streamEOF(file)) break;
 
-		if (c == '\n')
+		if (c == '\r')
 		{
 			c = _streamGet(file);
-			if (c == '\r') 
+			if (c == '\n') 
 			{
 				c = _streamGet(file);
 			}
 			break;
 		}
-		if (c == '\r')
+		if (c == '\n')
 		{
 			c = _streamGet(file);
 			break;
@@ -462,16 +444,16 @@ _stream_countLine(TFile & file,
 	{
 		if (_streamEOF(file)) break;
 
-		if (c == '\n')
+		if (c == '\r')
 		{
 			c = _streamGet(file);
-			if (c == '\r') 
+			if (c == '\n') 
 			{
 				c = _streamGet(file);
 			}
 			break;
 		}
-		if (c == '\r')
+		if (c == '\n')
 		{
 			c = _streamGet(file);
 			break;
