@@ -204,7 +204,7 @@ length(String<TValue, FileReader<TFormat, TFile, TSpec> > & me)
 // Iterator for FileReader String
 // (note: do not confuse with FileReader Iterator, see file_filereaderiterator.h)
 //////////////////////////////////////////////////////////////////////////////
-
+/*
 struct FileReaderIterator;
 
 template <typename TContainer>
@@ -217,10 +217,10 @@ public:
 	typedef typename Position<TBuf>::Type TBufPosition;
 	typedef typename Size<TBuf>::Type TBufSize;
 
-	struct TContainer * data_container;
-	struct TABLPosition data_abl_pos;	//number of block
-	struct TBufPosition data_buf_pos;	//number of char in block
-	struct TBufSize data_buf_len;		//length of block
+	TContainer * data_container;
+	TABLPosition data_abl_pos;	//number of block
+	TBufPosition data_buf_pos;	//number of char in block
+	TBufSize data_buf_len;		//length of block
 	bool data_atEnd;					//true if iterator is atEnd
 };
 
@@ -255,7 +255,7 @@ goNext(Iter<TContainer, FileReaderIterator> & it)
 		}
 	}
 }
-
+*/
 //////////////////////////////////////////////////////////////////////////////
 
 } //namespace SEQAN_NAMESPACE_MAIN
