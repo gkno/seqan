@@ -741,6 +741,371 @@ SEQAN_CHECKPOINT
 
 
 //////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+// New Tristate Holder that works also on pointers
+//////////////////////////////////////////////////////////////////////////////
+
+struct Tristate2;
+
+template <typename TValue>
+struct Holder<TValue, Tristate2>
+{
+public:
+	enum EHolderState
+	{
+		EMPTY = 0,
+		OWNER = 1,
+		DEPENDENT = ~0
+	};
+
+	TValue * data_value;
+	EHolderState data_state;
+
+//____________________________________________________________________________
+
+	Holder():
+		data_state(EMPTY)
+	{
+SEQAN_CHECKPOINT
+	}
+	Holder(Holder const & source_):
+		data_state(EMPTY)
+	{
+SEQAN_CHECKPOINT
+		assign(*this, source_);
+	}
+	Holder(TValue & value_):
+		data_state(EMPTY)
+	{
+SEQAN_CHECKPOINT
+		setValue(*this, value_);
+	}
+	Holder(TValue const & value_):
+		data_state(EMPTY)
+	{
+SEQAN_CHECKPOINT
+		assignValue(*this, value_);
+	}
+
+	~Holder()
+	{
+SEQAN_CHECKPOINT
+		clear(*this);
+	}
+
+//____________________________________________________________________________
+
+	Holder const &
+	operator = (Holder const & source_)
+	{
+SEQAN_CHECKPOINT
+		assign(*this, source_);
+		return *this;
+	}
+
+	Holder const &
+	operator = (TValue const & value_)
+	{
+SEQAN_CHECKPOINT
+		assignValue(*this, value_);
+		return *this;
+	}
+
+	operator TValue &()
+	{
+SEQAN_CHECKPOINT
+		return *data_value;
+	}
+//____________________________________________________________________________
+
+};
+
+//////////////////////////////////////////////////////////////////////////////
+// FUNCTIONS
+//////////////////////////////////////////////////////////////////////////////
+
+///.Function.empty.param.object.type:Class.Holder
+
+template <typename TValue>
+inline bool
+empty(Holder<TValue, Tristate2> const & me)
+{
+SEQAN_CHECKPOINT
+	return (me.data_state == Holder<TValue, Tristate2>::EMPTY);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+///.Function.dependent.param.object.type:Class.Holder
+
+template <typename TValue>
+inline bool
+dependent(Holder<TValue, Tristate2> const & me)
+{
+SEQAN_CHECKPOINT
+	return (me.data_state == Holder<TValue, Tristate2>::DEPENDENT);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+///.Function.clear.param.object.type:Class.Holder
+///.Function.clear.remarks.text:If $clear$ is applied on a @Class.Holder@ object,
+///the state of this object is set to 'empty'.
+
+template <typename TValue>
+inline void
+clear(Holder<TValue, Tristate2> & me)
+{
+	switch (me.data_state)
+	{
+	case Holder<TValue, Tristate2>::EMPTY:
+		break;
+
+	case Holder<TValue, Tristate2>::DEPENDENT:
+		{
+SEQAN_CHECKPOINT
+		releaseRef(*(me.data_value));
+		me.data_state = Holder<TValue, Tristate2>::EMPTY;
+		}
+		break;
+
+	default: /*Holder<TValue, TSpec>::OWNER*/
+		{
+SEQAN_CHECKPOINT
+		valueDestruct(me.data_value);
+		deallocate(me, me.data_value, 1);
+		me.data_state = Holder<TValue, Tristate2>::EMPTY;
+		}
+		break;
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+.Function.create:
+..summary:Makes an object to owner of its content.
+..cat:Dependent Objects
+..signature:create(holder [, object])
+..param.holder:A holder object.
+...type:Class.Holder
+..param.object:Object from which a copy is made and stored in $holder$. (optional)
+...type:Metafunction.Value.Value<Holder>::Type
+..remarks.text:After this operation, $holder$ will be in state 'owner'.
+If $object$ is specified, $holder$ will hold a copy of $object$ at the end of this function.
+If $object$ is not specified, the action depends on the former state of $holder$:
+..remarks.text:- If the state of $holder$ was 'empty', a new object is default constructed and stored into $holder$.
+..remarks.text:- If the state of $holder$ was 'dependent', a copy of the former object is made and stored into $holder$. 
+..remarks.text:- If the state of $holder$ was already 'owner', nothing happens.
+..see:Class.Holder
+*/
+
+template <typename TValue>
+inline void
+create(Holder<TValue, Tristate2> & me)
+{
+	typedef Holder<TValue, Tristate2> THolder;
+
+	switch (me.data_state)
+	{
+	case Holder<TValue, Tristate2>::EMPTY:
+		{
+SEQAN_CHECKPOINT
+		allocate(me, me.data_value, 1);
+		valueConstruct(me.data_value);
+		me.data_state = THolder::OWNER;
+		}
+		break;
+
+	case THolder::DEPENDENT:
+		{
+SEQAN_CHECKPOINT
+		TValue & old_value = value(me);
+		allocate(me, me.data_value, 1);
+		valueConstruct(me.data_value, old_value);
+		me.data_state = THolder::OWNER;
+		releaseRef(old_value);
+		}
+		break;
+	default:;
+	}
+}
+
+//____________________________________________________________________________
+
+template <typename TValue>
+inline void
+create(Holder<TValue, Tristate2> & me,
+	   TValue const & value_)
+{
+SEQAN_CHECKPOINT
+
+	if (me.data_state == Holder<TValue, Tristate2>::OWNER)
+	{
+		assign(*(me.data_value), value_);
+		return;
+	}
+
+	clear(me);
+	allocate(me, me.data_value, 1);
+	valueConstruct(me.data_value, value_);
+	me.data_state = Holder<TValue, Tristate2>::OWNER;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+.Function.detach:
+..summary:Makes an object independent from other objects.
+..cat:Dependent Objects
+..signature:detach(object)
+..param.object:An object.
+...type:Class.Holder
+..remarks.text:After calling this function, @Function.dependent.dependent(object)@ returns $false$.
+..see:Function.create
+*/
+
+template <typename TValue>
+inline void
+detach(Holder<TValue, Tristate2> & me)
+{
+SEQAN_CHECKPOINT
+	create(me);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+.Function.setValue:
+..cat:Content Manipulation
+..summary:Makes holder dependent.
+..signature:setValue(holder, object)
+..param.holder:A holder object.
+...type:Class.Holder
+..param.object:Object from which $holder$ will be dependent.
+...type:Metafunction.Value.Value<Holder>::Type
+..remarks.text:After this operation, $holder$ will be dependent in state 'dependent'.
+..see:Class.Holder
+*/
+
+template <typename TValue>
+inline void
+setValue(Holder<TValue, Tristate2> & me,
+		 TValue & value_)
+{
+SEQAN_CHECKPOINT
+	typedef typename Value<Holder<TValue, Tristate2> >::Type THolderType;
+
+	clear(me);
+	me.data_value = & value_;
+	me.data_state = Holder<TValue, Tristate2>::DEPENDENT;
+	addRef(value_);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+///.Function.value.param.object.type:Class.Holder
+
+template <typename TValue>
+inline typename Reference<Holder<TValue, Tristate2> >::Type
+value(Holder<TValue, Tristate2> & me)
+{
+SEQAN_CHECKPOINT
+	if (empty(me))
+	{
+		create(me);
+	}
+
+	typedef typename Value<Holder<TValue, Tristate2> >::Type THolderType;
+	return *(me.data_value);
+}
+template <typename TValue>
+inline typename Reference<Holder<TValue, Tristate2> const>::Type
+value(Holder<TValue, Tristate2> const & me)
+{
+SEQAN_CHECKPOINT
+	SEQAN_ASSERT(!empty(me));
+
+	return *(me.data_value);
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+///.Function.assignValue.param.object.type:Class.Holder
+
+template <typename TValue, typename TSource>
+inline void
+assignValue(Holder<TValue, Tristate2> & me,
+			TSource const & value_)
+{
+SEQAN_CHECKPOINT
+	typedef typename Value<Holder<TValue, Tristate2> >::Type THostValue;
+	if (empty(me))
+	{
+		create(me, value_);
+	}
+	else
+	{
+		assign(*(me.data_value), value_);
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+///.Function.moveValue.param.object.type:Class.Holder
+
+template <typename TValue, typename TSource>
+inline void
+moveValue(Holder<TValue, Tristate2> & me,
+		  TSource const & value_)
+{
+SEQAN_CHECKPOINT
+	if (empty(me))
+	{
+		create(me, value_);
+	}
+	else
+	{
+		move(value(me), value_);
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+///.Function.assign.param.target.type:Class.Holder
+///.Function.assign.param.source.type:Class.Holder
+
+template <typename TValue>
+inline void
+assign(Holder<TValue, Tristate2> & target_,
+	   Holder<TValue, Tristate2> const & source_)
+{
+SEQAN_CHECKPOINT
+	switch(source_.data_state)
+	{
+	case Holder<TValue, Tristate2>::EMPTY:
+		{
+		clear(target_);
+		}
+		break;
+
+	case Holder<TValue, Tristate2>::OWNER:
+		{
+		assignValue(target_, value(source_));
+		}
+		break;
+
+	default: /*case Holder<TValue, Tristate2>::DEPENDENT*/
+		{
+		setValue(target_, value(source_));
+		}
+		break;
+	}
+}
+//////////////////////////////////////////////////////////////////////////////
 
 } //namespace SEQAN_NAMESPACE_MAIN
 

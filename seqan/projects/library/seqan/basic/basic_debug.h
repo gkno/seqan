@@ -87,8 +87,122 @@
 #define SEQAN_TREPORT(_comment) {}
 
 #endif //#ifdef SEQAN_TEST
+//____________________________________________________________________________
 
 #ifdef SEQAN_DEBUG_OR_TEST_
+
+//Test Helper Functions
+
+// compare two files, do not translate linebreaks
+bool _compareBinaryFiles(char * file1, char * file2)
+{
+	bool ret = false;
+
+	FILE * fl1 = fopen(file1, "rb");
+	if (!fl1) return ret;
+
+	FILE * fl2 = fopen(file2, "rb");
+	if (!fl2)
+	{
+		fclose(fl1);
+		return ret;
+	}
+
+	while (!feof(fl1) && !feof(fl2))
+	{
+		if (fgetc(fl1) != fgetc(fl2)) goto End;
+	}
+
+	ret = feof(fl1) && feof(fl2);
+
+End:
+	fclose(fl2);
+	fclose(fl1);
+
+	return ret;
+
+}
+//____________________________________________________________________________
+
+//one line break is either \r, \n, or \r\n.
+void _compareTextFiles_readChar(FILE * fl, char & c, bool & is_lb, bool & is_eof)
+{
+	is_lb = false;
+	is_eof = false;
+
+	c = fgetc(fl);
+	if (c == '\r')
+	{
+		is_lb = true;
+		char c_help = fgetc(fl);
+		if (feof(fl)) is_eof = true;
+		else
+		{
+			if (c_help == '\n')
+			{
+				c = fgetc(fl);
+				if (feof(fl)) is_eof = true;
+			}
+			else c = c_help;
+		}
+	}
+	if (c == '\n')
+	{
+		is_lb = true;
+		c = fgetc(fl);
+		if (feof(fl)) is_eof = true;
+	}
+}
+
+// compare two files, translate linebreaks
+bool _compareTextFiles(char * file1, char * file2)
+{
+	FILE * fl1 = fopen(file1, "rb");
+	if (!fl1) return false;
+
+	FILE * fl2 = fopen(file2, "rb");
+	if (!fl2)
+	{
+		fclose(fl1);
+		return false;
+	}
+
+	bool ret = false;
+
+	bool is_lb1, is_lb2, is_eof1, is_eof2;
+	char c1, c2;
+
+	while (!feof(fl1) && !feof(fl2))
+	{
+		_compareTextFiles_readChar(fl1, c1, is_lb1, is_eof1);
+		_compareTextFiles_readChar(fl2, c2, is_lb2, is_eof2);
+
+		if (is_lb1 ^ is_lb2)
+		{
+			goto End;
+		}
+		if (is_eof1 ^ is_eof2)
+		{
+			goto End;
+		}
+		if (c1 != c2)
+		{
+			goto End;
+		}
+	}
+
+	ret = feof(fl1) && feof(fl2);
+
+End:
+	fclose(fl2);
+	fclose(fl1);
+
+	return ret;
+
+}
+
+
+//____________________________________________________________________________
 
 namespace SEQAN_NAMESPACE_MAIN
 {
