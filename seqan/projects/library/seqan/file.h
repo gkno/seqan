@@ -25,6 +25,7 @@
 #include <seqan/file/cstream.h>
 #include <seqan/file/stream.h>
 
+#include <seqan/file/file_filereaderiterator.h>
 #include <seqan/file/file_filereader.h>
 
 #include <seqan/file/chunk_collector.h>
@@ -40,8 +41,8 @@
 //file formats for sequences
 #include <seqan/file/file_format_raw.h>
 #include <seqan/file/file_format_fasta.h>
-//#include <seqan/file/file_format_embl.h>
-//#include <seqan/file/file_format_genbank.h>
+#include <seqan/file/file_format_embl.h>
+#include <seqan/file/file_format_genbank.h>
 
 //file formats for alignments
 #include <seqan/file/file_format_fasta_align.h>
@@ -51,7 +52,7 @@
 
 //____________________________________________________________________________
 
-#include <seqan/file/file_format_guess.h>
+//#include <seqan/file/file_format_guess.h>
 
 //____________________________________________________________________________
 // files
