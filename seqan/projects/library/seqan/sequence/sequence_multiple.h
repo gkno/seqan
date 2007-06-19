@@ -90,13 +90,13 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template <typename TStringSet>
 	inline typename StringSetLimits<TStringSet>::Type
-	stringSetLimits(TStringSet &stringSet) {
+	stringSetLimits(TStringSet &) {
 		return Nothing();
 	}
 
     template <typename TStringSet>
 	inline typename StringSetLimits<TStringSet const>::Type
-	stringSetLimits(TStringSet const &stringSet) {
+	stringSetLimits(TStringSet const &) {
 		return Nothing();
 	}
 
@@ -121,7 +121,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	//////////////////////////////////////////////////////////////////////////////
 
 	template <typename TPosition>
-	inline TPosition getSeqNo(TPosition const &pos, Nothing const &) {
+	inline TPosition getSeqNo(TPosition const &, Nothing const &) {
 		return 0;
 	}
 
@@ -132,7 +132,7 @@ namespace SEQAN_NAMESPACE_MAIN
 //____________________________________________________________________________
 
 	template <typename TPosition>
-	inline TPosition getSeqNo(TPosition const &pos) {
+	inline TPosition getSeqNo(TPosition const &) {
 		return 0;
 	}
 
