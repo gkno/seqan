@@ -1003,7 +1003,7 @@ template<typename TTargetValue, typename TTargetSpec, typename TSource, typename
 inline void 
 append(String<TTargetValue, TTargetSpec> & target,
 	   TSource const & source,
-	   Tag<TExpand> const tag)
+	   Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	typedef String<TTargetValue, TTargetSpec> TTarget;
@@ -1015,7 +1015,7 @@ inline void
 append(String<TTargetValue, TTargetSpec> & target,
 	   TSource const & source,
 	   typename Size< String<TTargetValue, TTargetSpec> >::Type limit,
-	   Tag<TExpand> const tag)
+	   Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	typedef String<TTargetValue, TTargetSpec> TTarget;
@@ -1029,7 +1029,7 @@ template<typename TTargetValue, typename TTargetSpec, typename TSourceValue, typ
 inline void 
 append(String<TTargetValue, TTargetSpec> & target,
 	   TSourceValue * source,
-	   Tag<TExpand> const tag)
+	   Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	typedef String<TTargetValue, TTargetSpec> TTarget;
@@ -1041,7 +1041,7 @@ inline void
 append(String<TTargetValue, TTargetSpec> & target,
 	   TSourceValue * source,
 	   typename Size< String<TTargetValue, TTargetSpec> >::Type limit,
-	   Tag<TExpand> const tag)
+	   Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	typedef String<TTargetValue, TTargetSpec> TTarget;
