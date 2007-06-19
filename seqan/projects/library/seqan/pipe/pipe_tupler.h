@@ -390,7 +390,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline bool 
 	control(
 		Pipe< TInput, Multi<Tupler< tupleLen, omitLast, TCompression >, TPair, TLimitsString> > &me, 
-		ControlEof const &command) 
+		ControlEof const &) 
 	{
 		return me.lastTuples == 0;
 	}
@@ -405,7 +405,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline bool 
 	control(
 		Pipe< TInput, Multi<Tupler< tupleLen, omitLast, TCompression >, TPair, TLimitsString> > &me, 
-		ControlEos const &command) 
+		ControlEos const &) 
 	{
 		return (getValueI1(me.tmp.i1) > 0) && (getValueI2(me.tmp.i1) == 0);
 	}

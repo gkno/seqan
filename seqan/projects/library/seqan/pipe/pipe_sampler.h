@@ -259,7 +259,7 @@ The m-tuples are substrings of the input stream beginning at positions $i$, with
 
     template < typename TInput, unsigned m, typename TCompression >
     inline typename Size< Pipe< TInput, Sampler<m, TCompression> > >::Type
-	length(Pipe< TInput, Sampler<m, TCompression> > &me) {
+	length(Pipe< TInput, Sampler<m, TCompression> > const &me) {
         typename Size< Pipe< TInput, Sampler<m> > >::Type _size = 0, n = length(me.in);
         for(unsigned i = 1; i <= _SkewDC<m>::VALUE[0]; i++)
             if (_SkewDC<m>::VALUE[i])
@@ -475,7 +475,7 @@ The m-tuples are substrings of the input stream beginning at positions $i$, with
 
 	template < typename TInput, unsigned m, typename TCompression, typename TPair, typename TLimitsString >
     inline typename Size< Pipe< TInput, Multi<Sampler<m, TCompression>, TPair, TLimitsString> > >::Type
-	length(Pipe< TInput, Multi<Sampler<m, TCompression>, TPair, TLimitsString> > &me)
+	length(Pipe< TInput, Multi<Sampler<m, TCompression>, TPair, TLimitsString> > const &me)
 	{
 		typedef typename Size< Pipe< TInput, Multi<Sampler<m, TCompression>, TPair, TLimitsString> > >::Type TSize;
 		typename Iterator<TLimitsString const>::Type it = begin(me.limits), itEnd = end(me.limits);

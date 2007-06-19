@@ -345,30 +345,30 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 	template < typename TInput, typename TSpec, typename TCommand >
-	inline bool control(Pipe< TInput, Source<TSpec> > &me, TCommand const &command) {
+	inline bool control(Pipe< TInput, Source<TSpec> > &me, TCommand const &) {
         return true;
     }
 
 	template < typename TInput, typename TSpec >
-	inline bool control(Pipe< TInput, Source<TSpec> > &me, ControlBeginRead const &command) {
+	inline bool control(Pipe< TInput, Source<TSpec> > &me, ControlBeginRead const &) {
 		me.cur = begin(me.in);
 		return true;
 	}
 	
 	template < typename TInput, typename TSpec >
-	inline bool control(Pipe< TInput, Source<TSpec> > &me, ControlEndRead const &command) {
+	inline bool control(Pipe< TInput, Source<TSpec> > &me, ControlEndRead const &) {
         me.cur = typename Iterator<TInput const>::Type();
 		return true;
 	}
 	
 	template < typename TInput, typename TSpec >
-	inline bool control(Pipe< TInput, Source<TSpec> > &me, ControlEof const &command) {
+	inline bool control(Pipe< TInput, Source<TSpec> > &me, ControlEof const &) {
 		return me.cur == end(me.in);
 	}
 
     template < typename TInput, typename TSpec >
     inline typename Size< Pipe< TInput, Source<TSpec> > >::Type
-	length(Pipe< TInput, Source<TSpec> > &me) {
+	length(Pipe< TInput, Source<TSpec> > const &me) {
         return length(me.in);
     }
 
