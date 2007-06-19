@@ -178,7 +178,7 @@ $Iterator<T>::Type$ is the type of the iterator for $object$-type $T$.
 */
 	template<typename TValue, unsigned int SPACE, typename TSpec>
 	inline typename Iterator<String<TValue, Block<SPACE> > >::Type 
-	begin(String<TValue, Block<SPACE> > &me, Tag<TSpec> const tag_) 
+	begin(String<TValue, Block<SPACE> > &me, Tag<TSpec> const)
 	{
 	SEQAN_CHECKPOINT
 		return Iter<String<TValue, Block<SPACE> >, PositionIterator>(me, 0);
@@ -186,7 +186,7 @@ $Iterator<T>::Type$ is the type of the iterator for $object$-type $T$.
 
 	template<typename TValue, unsigned int SPACE, typename TSpec>
 	inline typename Iterator<String<TValue, Block<SPACE> > const>::Type 
-	begin(String<TValue, Block<SPACE> > const &me, Tag<TSpec> const tag_) 
+	begin(String<TValue, Block<SPACE> > const &me, Tag<TSpec> const)
 	{
 	SEQAN_CHECKPOINT
 		return Iter<String<TValue, Block<SPACE> > const, PositionIterator>(me, 0);
@@ -195,7 +195,7 @@ $Iterator<T>::Type$ is the type of the iterator for $object$-type $T$.
 
 	template<typename TValue, unsigned int SPACE, typename TSpec>
 	inline typename Iterator<String<TValue, Block<SPACE> > >::Type 
-	end(String<TValue, Block<SPACE> > &me, Tag<TSpec> const tag_)
+	end(String<TValue, Block<SPACE> > &me, Tag<TSpec> const)
 	{
 	SEQAN_CHECKPOINT
 		return Iter<String<TValue, Block<SPACE> >, PositionIterator>(me, length(me));
@@ -203,7 +203,7 @@ $Iterator<T>::Type$ is the type of the iterator for $object$-type $T$.
 
 	template<typename TValue, unsigned int SPACE, typename TSpec>
 	inline typename Iterator<String<TValue, Block<SPACE> > const>::Type 
-	end(String<TValue, Block<SPACE> > const &me, Tag<TSpec> const tag_)
+	end(String<TValue, Block<SPACE> > const &me, Tag<TSpec> const)
 	{
 	SEQAN_CHECKPOINT
 		return Iter<String<TValue, Block<SPACE> > const, PositionIterator>(me, length(me));

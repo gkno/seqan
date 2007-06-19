@@ -201,13 +201,13 @@ SEQAN_CHECKPOINT
 //____________________________________________________________________________
 
 	friend inline typename Position<Segment const>::Type 
-	beginPosition(Segment const & me)
+	beginPosition(Segment const & /*me*/)
 	{
 SEQAN_CHECKPOINT
 		return 0;
 	}
 	friend inline typename Position<Segment>::Type 
-	beginPosition(Segment & me)
+	beginPosition(Segment & /*me*/)
 	{
 SEQAN_CHECKPOINT
 		return 0;

@@ -133,14 +133,14 @@ SEQAN_CHECKPOINT
 //____________________________________________________________________________
 
 	friend inline size_t
-	capacity(String & me) 
+	capacity(String &)
 	{
 SEQAN_CHECKPOINT
 		return ISize;
 	}
 
 	friend inline size_t
-	capacity(String const & me) 
+	capacity(String const &)
 	{
 SEQAN_CHECKPOINT
 		return ISize;

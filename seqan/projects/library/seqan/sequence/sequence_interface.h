@@ -373,14 +373,14 @@ SEQAN_CHECKPOINT
 */
 template <typename T>
 inline typename Position<T>::Type 
-beginPosition(T & me)
+beginPosition(T &)
 {
 SEQAN_CHECKPOINT
 	return 0;
 }
 template <typename T>
 inline typename Position<T>::Type 
-beginPosition(T const & me)
+beginPosition(T const &)
 {
 SEQAN_CHECKPOINT
 	return 0;
@@ -794,7 +794,7 @@ SEQAN_CHECKPOINT
 //* ???Anti Default Sequences
 template <typename T> 
 inline typename Size<T const>::Type
-length(T const & me)
+length(T const & /*me*/)
 {
 SEQAN_CHECKPOINT
 	return 1;
@@ -864,7 +864,7 @@ SEQAN_CHECKPOINT
 
 template <typename T, typename TSize>
 inline TSize 
-_computeSize4Capacity(T const & me, 
+_computeSize4Capacity(T const & /*me*/, 
 					  TSize capacity)
 {
 SEQAN_CHECKPOINT
@@ -891,7 +891,7 @@ when it is expanded using the @Tag.Overflow Strategy."Generous" overflow strateg
 */
 template <typename T, typename TSize>
 inline TSize 
-computeGenerousCapacity(T const & me, 
+computeGenerousCapacity(T const & /*me*/, 
 						 TSize capacity)
 {
 SEQAN_CHECKPOINT

@@ -786,7 +786,7 @@ template<typename TTargetValue, typename TTargetSpec, typename TSource, typename
 inline void
 assign(String<TTargetValue, TTargetSpec> & target,
 	   TSource const & source,
-	   Tag<TExpand> const tag)
+	   Tag<TExpand> const)
 {
 	typedef String<TTargetValue, TTargetSpec> TTarget;
 	_Assign_String<Tag<TExpand> const>::assign_(target, source);
@@ -796,7 +796,7 @@ inline void
 assign(String<TTargetValue, TTargetSpec> & target,
 	   TSource const & source,
 	   TSize limit,
-	   Tag<TExpand> const tag)
+	   Tag<TExpand> const)
 {
 	typedef String<TTargetValue, TTargetSpec> TTarget;
 	_Assign_String<Tag<TExpand> const>::assign_(target, source, limit);
@@ -809,7 +809,7 @@ template<typename TTargetValue, typename TTargetSpec, typename TSourceValue, typ
 inline void
 assign(String<TTargetValue, TTargetSpec> & target,
 	   TSourceValue const * source,
-	   Tag<TExpand> const tag)
+	   Tag<TExpand> const)
 {
 	typedef String<TTargetValue, TTargetSpec> TTarget;
 	_Assign_String<Tag<TExpand> const>::assign_(target, source);
@@ -819,7 +819,7 @@ inline void
 assign(String<TTargetValue, TTargetSpec> & target,
 	   TSourceValue const * source,
 	   TSize limit,
-	   Tag<TExpand> const tag)
+	   Tag<TExpand> const)
 {
 	typedef String<TTargetValue, TTargetSpec> TTarget;
 	_Assign_String<Tag<TExpand> const>::assign_(target, source, limit);
@@ -1087,7 +1087,7 @@ template <typename TTargetValue, typename TTargetSpec, typename TValue, typename
 inline void
 appendValue(String<TTargetValue, TTargetSpec> & me, 
 			TValue const & _value,
-			Tag<TExpand> const tag)
+			Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	_Append_Value_2_String<Tag<TExpand> const>::appendValue_(me, _value);
@@ -1418,7 +1418,7 @@ inline typename Size< String<TValue, TSpec> >::Type
 resize(
 	String<TValue, TSpec> & me,
 	TSize new_length,
-	Tag<TExpand> const tag)
+	Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	return _Resize_String<Tag<TExpand> const>::resize_(me, new_length);
@@ -1469,7 +1469,7 @@ inline TSize
 fill(String<TValue, TSpec> & me,
 	 TSize new_length,
 	 TValue2 const & val,
-	 Tag<TExpand> const tag)
+	 Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	return _Fill_String<Tag<TExpand> const>::fill_(me, new_length, val);

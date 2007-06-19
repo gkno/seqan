@@ -227,7 +227,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	// local_position -> local_position
 	template <typename TResult, typename TSize, typename TSpec, typename T1, typename T2, typename TCompression>
-	inline void posLocalize(TResult &result, Pair<T1, T2, TCompression> const &pos, String<TSize, TSpec> const &limits) {
+	inline void posLocalize(TResult &result, Pair<T1, T2, TCompression> const &pos, String<TSize, TSpec> const &/*limits*/) {
 		result = pos;
 	}
 
