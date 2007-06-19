@@ -194,7 +194,7 @@ deallocate(T const & /*me*/,
 		   TSize count,
 		   Tag<TUsage> const)
 {
-	if (data)
+	if (data && count)	// .. to use count if SEQAN_PROFILE is not defined
 	    SEQAN_PROSUB(SEQAN_PROMEMORY, count * sizeof(TValue));
 	operator delete ((void *) data);
 }
@@ -205,7 +205,7 @@ deallocate(T & /*me*/,
 		   TSize count,
 		   Tag<TUsage> const)
 {
-	if (data)
+	if (data && count)	// .. to use count if SEQAN_PROFILE is not defined
 	    SEQAN_PROSUB(SEQAN_PROMEMORY, count * sizeof(TValue));
 	operator delete ((void *) data);
 }
