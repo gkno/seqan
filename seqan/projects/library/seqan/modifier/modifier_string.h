@@ -203,8 +203,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	//////////////////////////////////////////////////////////////////////////////
 
 	template <typename TDest, typename TSource>
-	inline void _copyCargoImpl(TDest & me, TSource & _origin, False const) {
-	}
+	inline void _copyCargoImpl(TDest &, TSource &, False const) {}
     
 	template <typename TDest, typename TSource>
 	inline void _copyCargoImpl(TDest & me, TSource & _origin, True const) {
