@@ -531,7 +531,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <typename TSTree>
 	inline typename Size< MaxRepeat<TSTree> >::Type 
-	length(MaxRepeat<TSTree> &repeat) {
+	length(MaxRepeat<TSTree> const &repeat) {
 		return repeat.it.countRepeats();
 	}
 /*

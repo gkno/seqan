@@ -89,7 +89,7 @@ SEQAN_CHECKPOINT
 
 template <typename TValue>
 inline unsigned &
-shapeCountBlanks(Shape<TValue, GappedShape> & me)
+shapeCountBlanks(Shape<TValue, GappedShape> const & me)
 {
 SEQAN_CHECKPOINT
 	return me.num_gaps;
@@ -111,7 +111,7 @@ SEQAN_CHECKPOINT
 	while(pshape < pshape_end)
 	{
 		qgram_it += *pshape;
-		pos = pos * ValueSize<Shape<TValue, SimpleShape> >::VALUE + (int)*qgram_it;
+		pos = pos * ValueSize<TValue>::VALUE + (int)*qgram_it;
 		++pshape;
 	}
 

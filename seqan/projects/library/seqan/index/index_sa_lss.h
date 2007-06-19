@@ -418,7 +418,7 @@ struct _Context_LSS
 	
     template < typename TInput >
     inline typename Size< Pipe< TInput, LarssonSadakane > >::Type
-	length(Pipe< TInput, LarssonSadakane > &me) {
+	length(Pipe< TInput, LarssonSadakane > const &me) {
         return length(me.in) - 1;
     }
 

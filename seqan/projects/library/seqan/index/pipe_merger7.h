@@ -468,7 +468,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
     
     template < typename TInput >
-	inline bool control(Pipe< TInput, Merger7 > &me, ControlEof const &command) {
+	inline bool control(Pipe< TInput, Merger7 > &me, ControlEof const &) {
 		return me.first == 5;
     }
 
@@ -493,7 +493,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
     
     template < typename TInput, typename TLimitsString >
-	inline bool control(Pipe< TInput, Merger7Multi<TLimitsString> > &me, ControlEof const &command) {
+	inline bool control(Pipe< TInput, Merger7Multi<TLimitsString> > &me, ControlEof const &) {
 		return me.first == 5;
     }
 
