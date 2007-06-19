@@ -913,7 +913,7 @@ namespace SEQAN_NAMESPACE_MAIN
 				TSize count,
 				TagAllocateAligned const)
 	{
-        if (data) {
+        if (data && count) {	// .. to use count if SEQAN_PROFILE is not defined
         	SEQAN_PROSUB(SEQAN_PROMEMORY, sizeof(TValue) * count);
 			free(data);
 		}
