@@ -55,7 +55,7 @@ setDimension(AlignTrace<TSize, TSpec> & me,
 
 template <typename TSize, typename TSpec>
 inline TSize
-length(AlignTrace<TSize, TSpec> & me,
+length(AlignTrace<TSize, TSpec> const & me,
 	   TSize _dim)
 {
 	return me.data_lengths[_dim];

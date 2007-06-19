@@ -259,13 +259,6 @@ SEQAN_CHECKPOINT
 
 template <typename TSource, typename TSpec>
 inline typename Size<Gaps<TSource, TSpec> >::Type
-length(Gaps<TSource, TSpec> & me)
-{
-SEQAN_CHECKPOINT
-	return endPosition(me) - beginPosition(me);
-}
-template <typename TSource, typename TSpec>
-inline typename Size<Gaps<TSource, TSpec> const>::Type
 length(Gaps<TSource, TSpec> const & me)
 {
 SEQAN_CHECKPOINT

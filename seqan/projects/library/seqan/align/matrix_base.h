@@ -158,7 +158,7 @@ setDimension(Matrix<TValue, TSpec> & me,
 
 template <typename TValue, typename TSpec>
 inline typename Size<Matrix<TValue, TSpec> >::Type
-length(Matrix<TValue, TSpec> & me,
+length(Matrix<TValue, TSpec> const & me,
 	   unsigned int dim_)
 {
 	return _dataLengths(me)[dim_];
@@ -166,7 +166,7 @@ length(Matrix<TValue, TSpec> & me,
 
 template <typename TValue, typename TSpec>
 inline typename Size<Matrix <TValue, TSpec> >::Type
-length(Matrix<TValue, TSpec> & me)
+length(Matrix<TValue, TSpec> const & me)
 {
 	return length(host(me));
 }
