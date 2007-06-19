@@ -120,7 +120,7 @@ allocate(T & me,
 
 template <typename T, typename TValue, typename TSize, typename TUsage>
 inline void
-allocate(T const & me, 
+allocate(T const &, 
 		 TValue * & data,
 		 TSize count,
 		 Tag<TUsage> const)
@@ -131,7 +131,7 @@ allocate(T const & me,
 }
 template <typename T, typename TValue, typename TSize, typename TUsage>
 inline void
-allocate(T & me, 
+allocate(T &, 
 		 TValue * & data,
 		 TSize count,
 		 Tag<TUsage> const)
@@ -189,7 +189,7 @@ deallocate(T & me,
 
 template <typename T, typename TValue, typename TSize, typename TUsage>
 inline void 
-deallocate(T const & me,
+deallocate(T const & /*me*/,
 		   TValue * data, 
 		   TSize count,
 		   Tag<TUsage> const)
@@ -200,7 +200,7 @@ deallocate(T const & me,
 }
 template <typename T, typename TValue, typename TSize, typename TUsage>
 inline void 
-deallocate(T & me,
+deallocate(T & /*me*/,
 		   TValue * data, 
 		   TSize count,
 		   Tag<TUsage> const)

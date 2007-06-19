@@ -10,8 +10,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
 template<typename TIterator>
 inline void 
-_arrayConstruct_Pointer(TIterator begin_, 
-						TIterator end_,
+_arrayConstruct_Pointer(TIterator, 
+						TIterator,
 						True)
 {
 SEQAN_CHECKPOINT
@@ -141,8 +141,8 @@ SEQAN_CHECKPOINT
 
 template<typename TValue>
 inline void 
-_arrayDestruct_Pointer(TValue * begin_, 
-					   TValue * end_,
+_arrayDestruct_Pointer(TValue * /*begin_*/, 
+					   TValue * /*end_*/,
 					   True)
 {
 SEQAN_CHECKPOINT

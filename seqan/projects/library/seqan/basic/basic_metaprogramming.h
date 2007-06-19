@@ -119,7 +119,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	public:
 		// end of loop
 		template <typename Arg>
-		static inline void run(Arg &arg) {}
+		static inline void run(Arg &) {}
 	};
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -142,7 +142,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	public:
 		// end of loop
 		template <typename Arg>
-		static inline void run(Arg &arg) {}
+		static inline void run(Arg &) {}
 	};
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -203,7 +203,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <>
 	struct MemsetWorker<0, true> {
-		finline static void run(unsigned char* ptr, unsigned char c) {}
+		finline static void run(unsigned char*, unsigned char) {}
 	};
 
 	template <>

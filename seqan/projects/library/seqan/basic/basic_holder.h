@@ -21,13 +21,13 @@ dependent on $host$.
 
 template <typename T>
 inline void 
-addRef(T & me)
+addRef(T & /*me*/)
 {// general: do nothing
 SEQAN_CHECKPOINT
 }
 template <typename T>
 inline void 
-addRef(T const & me)
+addRef(T const & /*me*/)
 {// general: do nothing
 SEQAN_CHECKPOINT
 }
@@ -49,13 +49,13 @@ ceases to be dependent on $host$.
 */
 template <typename T>
 inline void 
-releaseRef(T & me)
+releaseRef(T & /*me*/)
 {// general: do nothing
 SEQAN_CHECKPOINT
 }
 template <typename T>
 inline void 
-releaseRef(T const & me)
+releaseRef(T const & /*me*/)
 {// general: do nothing
 SEQAN_CHECKPOINT
 }

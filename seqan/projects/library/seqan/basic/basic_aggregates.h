@@ -385,7 +385,7 @@ namespace SEQAN_NAMESPACE_MAIN
 // length
 
     template <typename _T, unsigned _size, typename TCompression>
-	inline unsigned length(Tuple<_T, _size, TCompression> const &me) { return _size; }
+	inline unsigned length(Tuple<_T, _size, TCompression> const &) { return _size; }
 
 	///.Metafunction.Length.param.T.type:Class.Tuple
     template <typename _T, unsigned _size, typename TCompression>

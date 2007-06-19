@@ -122,7 +122,7 @@ inline void
 allocate(Allocator<SimpleAlloc<TParentAllocator> > & me, 
 		 TValue * & data,
 		 TSize count,
-		 Tag<TUsage> const tag_)
+		 Tag<TUsage> const)
 {
 SEQAN_CHECKPOINT
 	typedef Allocator<SimpleAlloc<TParentAllocator> > TAllocator;
@@ -156,8 +156,8 @@ template <typename TParentAllocator, typename TValue, typename TSize, typename T
 inline void 
 deallocate(Allocator<SimpleAlloc<TParentAllocator> > & me,
 		   TValue * data, 
-		   TSize count,
-		   Tag<TUsage> const tag_)
+		   TSize,
+		   Tag<TUsage> const)
 {
 SEQAN_CHECKPOINT
 	typedef Allocator<SimpleAlloc<TParentAllocator> > TAllocator;
