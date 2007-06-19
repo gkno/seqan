@@ -544,7 +544,7 @@ namespace SEQAN_NAMESPACE_MAIN
 // validStringSetLimits
 
 	template < typename T >
-    inline bool _validStringSetLimits(T const &me) {
+    inline bool _validStringSetLimits(T const &) {
         return true;
     }
 
@@ -554,7 +554,7 @@ namespace SEQAN_NAMESPACE_MAIN
     }
 
 	template < typename TString, typename TSpec >
-    inline bool _validStringSetLimits(StringSet< TString, Owner<ConcatDirect<TSpec> > > const &me) {
+    inline bool _validStringSetLimits(StringSet< TString, Owner<ConcatDirect<TSpec> > > const &) {
         return true;
     }
 
