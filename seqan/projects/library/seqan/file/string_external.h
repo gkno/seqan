@@ -1017,7 +1017,7 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 
         // return a priority for a page frame (the higher is more persistent)
-        inline typename PageFrame::Priority getPriority(int pageNo) const {
+        inline typename PageFrame::Priority getPriority(int /*pageNo*/) const {
 /*            if (keepFirst && pageNo < (int)(cache.size()) - 10) // save 1 for random access
                 return PageFrame::PERMANENT_LEVEL;
             else*/

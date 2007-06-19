@@ -93,7 +93,7 @@ namespace SEQAN_NAMESPACE_MAIN
         return fclose(me) == 0;
     }
 
-    inline unsigned sectorSize(FILE* const &me) {
+    inline unsigned sectorSize(FILE* const &) {
         return 4096;
     }
 
@@ -167,10 +167,10 @@ namespace SEQAN_NAMESPACE_MAIN
         seek(me, old_pos, SEEK_BEGIN);
     }
 
-	inline bool flush(FILE* me) { return true; }
+	inline bool flush(FILE*) { return true; }
 
     template < typename aRequest >
-    inline void release(FILE* me, aRequest & request) { }
+    inline void release(FILE*, aRequest &) { }
 
 }
 

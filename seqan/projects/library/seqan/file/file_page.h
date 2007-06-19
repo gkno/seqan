@@ -241,24 +241,24 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template < typename TValue, typename TFile, unsigned _PageSize >
     inline typename Size<PageFrame<TValue, TFile, Fixed<_PageSize> > >::Type
-    size(PageFrame<TValue, TFile, Fixed<_PageSize> > &me) {
+    size(PageFrame<TValue, TFile, Fixed<_PageSize> > &/*me*/) {
         return _PageSize;
     }
 
     template < typename TValue, typename TFile, unsigned _PageSize >
     inline typename Size<PageFrame<TValue, TFile, Fixed<_PageSize> > >::Type
-    length(PageFrame<TValue, TFile, Fixed<_PageSize> > &me) {
+    length(PageFrame<TValue, TFile, Fixed<_PageSize> > const &/*me*/) {
         return _PageSize;
     }
 
     template < typename TValue, typename TFile, unsigned _PageSize >
     inline typename Size<PageFrame<TValue, TFile, Fixed<_PageSize> > >::Type
-    pageSize(PageFrame<TValue, TFile, Fixed<_PageSize> > &me) {
+    pageSize(PageFrame<TValue, TFile, Fixed<_PageSize> > &/*me*/) {
         return _PageSize;
     }
 
     template < typename TValue, typename TFile, unsigned _PageSize, typename TSize >
-    inline void resize(PageFrame<TValue, TFile, Fixed<_PageSize> > &me, TSize size) { }
+    inline void resize(PageFrame<TValue, TFile, Fixed<_PageSize> > &/*me*/, TSize /*size*/) {}
 
 
 	//////////////////////////////////////////////////////////////////////////////
