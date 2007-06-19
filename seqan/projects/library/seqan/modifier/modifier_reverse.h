@@ -315,7 +315,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < typename THost, typename TTagSpec >
 	inline typename Iterator< ModifiedString<THost, ModReverse> const, Tag<TTagSpec> const >::Type 
-	begin(ModifiedString<THost, ModReverse> const & me, Tag<TTagSpec> const tag_) {
+	begin(ModifiedString<THost, ModReverse> const & me, Tag<TTagSpec> const) {
 		typename Iterator< ModifiedString<THost, ModReverse> const, Tag<TTagSpec> const >::Type temp_(end(host(me), Rooted()));
 		_copyCargo(temp_, me);
 		goNext(temp_);
@@ -324,7 +324,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < typename THost, typename TTagSpec >
 	inline typename Iterator< ModifiedString<THost, ModReverse>, Tag<TTagSpec> const >::Type 
-	begin(ModifiedString<THost, ModReverse> & me, Tag<TTagSpec> const tag_) {
+	begin(ModifiedString<THost, ModReverse> & me, Tag<TTagSpec> const) {
 		typename Iterator< ModifiedString<THost, ModReverse>, Tag<TTagSpec> const >::Type temp_(end(host(me), Rooted()));
 		_copyCargo(temp_, me);
 		goNext(temp_);
@@ -355,7 +355,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < typename THost, typename TTagSpec >
 	inline typename Iterator< ModifiedString<THost, ModReverse> const, Tag<TTagSpec> const >::Type 
-	end(ModifiedString<THost, ModReverse> const & me, Tag<TTagSpec> const tag_) {
+	end(ModifiedString<THost, ModReverse> const & me, Tag<TTagSpec> const) {
 		typename Iterator< ModifiedString<THost, ModReverse> const, Tag<TTagSpec> const >::Type temp_(begin(host(me), Rooted()));
 		_copyCargo(temp_, me);
 		goNext(temp_);
@@ -364,7 +364,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < typename THost, typename TTagSpec >
 	inline typename Iterator< ModifiedString<THost, ModReverse>, Tag<TTagSpec> const >::Type 
-	end(ModifiedString<THost, ModReverse> & me, Tag<TTagSpec> const tag_) {
+	end(ModifiedString<THost, ModReverse> & me, Tag<TTagSpec> const) {
 		typename Iterator< ModifiedString<THost, ModReverse>, Tag<TTagSpec> const >::Type temp_(begin(host(me), Rooted()));
 		_copyCargo(temp_, me);
 		goNext(temp_);
