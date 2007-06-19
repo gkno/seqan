@@ -496,7 +496,7 @@ template <typename TValue, typename TSourceSpec, typename TExpand>
 inline void
 assign(String<TValue, CStyle> & target,
 	String<TValue, TSourceSpec> & source,
-	Tag<TExpand> const tag)
+	Tag<TExpand> const)
 {
 	typedef String<TValue, TSourceSpec> TSource;
 	_Assign_String_2_StringArray<Tag<TExpand> const, IsContiguous<TSource>::VALUE>::assign_(target, source);
