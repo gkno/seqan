@@ -562,12 +562,10 @@ namespace SEQAN_NAMESPACE_MAIN
 // _refreshStringSetLimits
 
 	template < typename T >
-    inline void _refreshStringSetLimits(T &me) {
-	}
+	inline void _refreshStringSetLimits(T &) {}
 
 	template < typename TString, typename TSpec >
-    inline void _refreshStringSetLimits(StringSet< TString, Owner<ConcatDirect<TSpec> > > &me) {
-	}
+    inline void _refreshStringSetLimits(StringSet< TString, Owner<ConcatDirect<TSpec> > > &) {}
 
 	template < typename TString, typename TSpec >
     inline void _refreshStringSetLimits(StringSet< TString, TSpec > &me) 
