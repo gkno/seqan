@@ -86,7 +86,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
     struct PoolParameters
     {
-        enum { DefaultMemBufferSize     = 128 * 1024*1024,
+        enum { DefaultMemBufferSize     = 384 * 1024*1024,
                DefaultPageSize          = 32 * 1024*1024,
                DefaultBucketBufferSize  = 64 * 1024*1024,
                DefaultReadAheadBuffers  = 2,
@@ -657,7 +657,7 @@ namespace SEQAN_NAMESPACE_MAIN
         }
         
         template < typename TInput, typename TPipeSpec >
-		Pool(Pipe<TInput, TPipeSpec> &src, HandlerArgs const &args, PoolParameters const &_conf = PoolParameters()):
+		Pool(Pipe<TInput, TPipeSpec> &, HandlerArgs const &args, PoolParameters const &_conf = PoolParameters()):
             file(NULL),
 			handlerArgs(args)
         {
@@ -1044,23 +1044,23 @@ namespace SEQAN_NAMESPACE_MAIN
 		//};
 
 		template < typename TValue, typename TSpec >
-	    inline bool control(Pool< TValue, TSpec > &me, ControlEof const &command) {
+	    inline bool control(Pool< TValue, TSpec > &me, ControlEof const &) {
 		    return me.eof();
 	    }
     	
 		template < typename TValue, typename TSpec >
-	    inline bool control(Pool< TValue, TSpec > &me, ControlClear const &command) {
+	    inline bool control(Pool< TValue, TSpec > &me, ControlClear const &) {
 		    me.clear();
 		    return true;
 	    }
     	
 		template < typename TValue, typename TSpec >
-	    inline bool control(Pool< TValue, TSpec > &me, ControlBeginRead const &command) {
+	    inline bool control(Pool< TValue, TSpec > &me, ControlBeginRead const &) {
 		    return me.beginRead();
 	    }
     	
 		template < typename TValue, typename TSpec >
-	    inline bool control(Pool< TValue, TSpec > &me, ControlEndRead const &command) {
+	    inline bool control(Pool< TValue, TSpec > &me, ControlEndRead const &) {
 		    return me.endRead();
 	    }
     	
@@ -1143,8 +1143,9 @@ SEQAN_CHECKPOINT
                typename TSpec,
                typename TStringSpec >
     inline bool append(Pool<TValue, TSpec> &dest, String<TValue, TStringSpec> &src) {
-        typedef typename Iterator< String<TValue, TStringSpec> const >::Type TIter;
-        TIter _cur = begin(src), _end = end(src);
+        typedef typename Iterator< String<TValue, TStringSpec> const, Standard >::Type TIter;
+        TIter _cur = begin(src, Standard());
+		TIter _end = end(src, Standard());
         while (_cur != _end) {
             push(dest, *_cur);
             ++_cur;
@@ -1180,11 +1181,12 @@ SEQAN_CHECKPOINT
 			   typename TValue2,
 			   typename TSpec >
     inline bool assign(String<TValue1, TStringSpec> &dest, Pool<TValue2, TSpec> &src) {
-        typedef typename Iterator< String<TValue1, TStringSpec> >::Type TIter;
+        typedef typename Iterator< String<TValue1, TStringSpec>, Standard >::Type TIter;
         typename Size< String<TValue1, TStringSpec> >::Type _size = length(src);
         resize(dest, _size);
         if (!beginRead(src)) return false;
-        TIter _cur = begin(dest), _end = end(dest);
+        TIter _cur = begin(dest, Standard());
+		TIter _end = end(dest, Standard());
         while (_cur != _end) {
             *_cur = *src;
             ++_cur;
