@@ -29,7 +29,7 @@ using namespace seqan;
 			resize(buf, i);
 			randomize(buf);
 
-			Pipe<unsigned*,Source<IteratorSpec> > src(buf.begin, buf.end);
+			Pipe<SimpleBuffer<unsigned>, Source<> > src(buf);
 			vector << src;
 
 			TIter I = vector.begin();
@@ -59,7 +59,7 @@ using namespace seqan;
 			resize(buf, i);
 			randomize(buf);
 
-			Pipe<unsigned*,Source<IteratorSpec> > src(buf.begin, buf.end);
+			Pipe<SimpleBuffer<unsigned>, Source<> > src(buf);
 			pool << src;
 
 			if (pool.memBuffer.begin)
@@ -97,7 +97,7 @@ using namespace seqan;
 			resize(buf, i);
 			permute(buf);
 
-			Pipe<unsigned*,Source<IteratorSpec> > src(buf.begin, buf.end);
+			Pipe<SimpleBuffer<unsigned>, Source<> > src(buf);
 			mapper << src;
 
 			if (mapper.memBuffer.begin)
@@ -139,7 +139,7 @@ using namespace seqan;
 			mapper.undefinedValue = i;	// select i as an undefined value (all defined values are less than i)
 			resize(mapper, i);
 			resize(buf, i - i/3);
-			Pipe<unsigned*,Source<IteratorSpec> > src(buf.begin, buf.end);
+			Pipe<SimpleBuffer<unsigned>, Source<> > src(buf);
 			beginWrite(mapper) && append(mapper, src) && endWrite(mapper);
 
 			if (mapper.memBuffer.begin)
@@ -194,7 +194,7 @@ using namespace seqan;
 			resize(buf, i);
 			permute(buf);
 
-			Pipe<unsigned*,Source<IteratorSpec> > src(buf.begin, buf.end);
+			Pipe<SimpleBuffer<unsigned>, Source<> > src(buf);
 			sorter << src;
 
 			if (sorter.memBuffer.begin)
