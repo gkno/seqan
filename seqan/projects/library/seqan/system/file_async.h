@@ -599,7 +599,7 @@ namespace SEQAN_NAMESPACE_MAIN
         Handle handleAsync;
 		using Base::handle;
 
-		File(void *dummy = NULL): 	// to be compatible with the FILE*(NULL) constructor
+		File(void * = NULL): 	// to be compatible with the FILE*(NULL) constructor
 			handleAsync(-1) {}
 
         bool open(char const *fileName, int openMode = DefaultOpenMode<File>::VALUE) {
@@ -846,16 +846,16 @@ namespace SEQAN_NAMESPACE_MAIN
 */      return aio_cancel(me.handleAsync, &request) == 0;
     }
 
-    inline int error(aiocb const &request) {
+    inline int error(aiocb const & request) {
         return aio_error(&request);
     }
 
-    inline int return_value(aiocb &request) {
+    inline int return_value(aiocb & request) {
         return aio_return(&request);
     }
 
 	template <typename TSpec>
-    inline void release(File<Async<TSpec> > & me, aiocb const &request) {}
+    inline void release(File<Async<TSpec> > & /*me*/, aiocb const & /*request*/) {}
 
 /*
     typedef void (*sighandler_t)(int);
@@ -888,7 +888,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <typename T, typename TValue, typename TSize>
 	inline void
-	allocate(T const & me, 
+	allocate(T const & /*me*/, 
 			 TValue * & data,
 			 TSize count,
 			 TagAllocateAligned const)
@@ -908,7 +908,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <typename T, typename TValue, typename TSize>
 	inline void 
-	deallocate( T const & me,
+	deallocate( T const & /*me*/,
 				TValue * data, 
 				TSize count,
 				TagAllocateAligned const)

@@ -165,7 +165,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
         Handle handle;
 
-        File(void *dummy = NULL): // to be compatible with the FILE*(NULL) constructor
+        File(void */*dummy*/ = NULL): // to be compatible with the FILE*(NULL) constructor
             handle(-1) {}
 
         inline int _getOFlag(int openMode) const {

@@ -72,7 +72,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
     private:
 
-        Thread(Thread const & origin) {
+        Thread(Thread const &) {
             // resource copying is not yet supported (performance reason)
             // it needs a reference counting technique
         }
@@ -140,7 +140,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
     private:
 
-        Thread(Thread const & origin) {
+        Thread(Thread const &) {
             // resource copying is not yet supported (performance reason)
             // it needs a reference counting technique
         }

@@ -136,7 +136,9 @@ namespace SEQAN_NAMESPACE_MAIN
                 SEQAN_DO_SYS(close());
         }
 
-        Event(Event const &origin) {
+		Event(Event const &origin):
+			Mutex()
+		{
             // resource sharing is not yet supported (performance reason)
             // it needs a reference counting technique
             if (origin) {
