@@ -55,6 +55,47 @@ public:
 		}
 	}
 };
+
+//////////////////////////////////////////////////////////////////////////////
+
+//template <typename TValue, typename TFormat, typename TFile, typename TSpec, typename TIteratorSpec>
+//struct Iterator<String<TValue, FileReader<TFormat, TFile, TSpec> >, TIteratorSpec>;
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TValue, typename TFormat, typename TFile, typename TSpec>
+struct Value<String<TValue, FileReader<TFormat, TFile, TSpec> > >
+{
+	typedef TValue Type;
+};
+
+template <typename TValue, typename TFormat, typename TFile, typename TSpec>
+struct GetValue<String<TValue, FileReader<TFormat, TFile, TSpec> > >
+{
+	typedef TValue const Type;
+};
+template <typename TValue, typename TFormat, typename TFile, typename TSpec>
+struct Reference<String<TValue, FileReader<TFormat, TFile, TSpec> > >
+{
+	typedef TValue const Type;
+};
+
+template <typename TValue, typename TFormat, typename TFile, typename TSpec>
+struct Size<String<TValue, FileReader<TFormat, TFile, TSpec> > >:
+	Size<TFile>
+{
+};
+template <typename TValue, typename TFormat, typename TFile, typename TSpec>
+struct Difference<String<TValue, FileReader<TFormat, TFile, TSpec> > >:
+	Difference<TFile>
+{
+};
+template <typename TValue, typename TFormat, typename TFile, typename TSpec>
+struct Position<String<TValue, FileReader<TFormat, TFile, TSpec> > >:
+	Position<TFile>
+{
+};
+
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TValue, typename TFormat, typename TFile, typename TSpec>
@@ -74,18 +115,30 @@ _FileReaderString_loadblock(String<TValue, FileReader<TFormat, TFile, TSpec> > &
 {
 	typedef String<TValue, FileReader<TFormat, TFile, TSpec> > TString;
 
-	if (blocknum > length(me.data_abl))
+	typedef typename Size<TFile>::Type TFileSize;
+	typedef String<TFileSize> TABL;
+	typedef typename Position<TABL>::Type TABLPosition;
+	TABLPosition blocknum2 = blocknum;
+
+	if (blocknum2 > length(me.data_abl))
 	{
-		for (TPosition bp = length(me.data_abl); !me.data_scanned && (bp <= blocknum); ++bp)
+		if (me.data_scanned)
 		{
-			_FileReaderString_loadblock(me, bp);
+			_FileReaderString_loadblock(me, length(me.data_abl) - 1);
+		}
+		else
+		{
+			for (TABLPosition bp = length(me.data_abl); !me.data_scanned && (bp <= blocknum2); ++bp)
+			{
+				_FileReaderString_loadblock(me, bp);
+			}
 		}
 	}
 	else
 	{
 		typedef Iter<TFile, FileReader<TFormat> > TFileReaderIt;
-		_streamSeekG(_dataFile(me), me.data_file_begin + blocknum * TString::BLOCK_SIZE);
-		TPosition end_filepos = me.data_file_begin + (blocknum + 1) * TString::BLOCK_SIZE;
+		_streamSeekG(_dataFile(me), me.data_file_begin + blocknum2 * TString::BLOCK_SIZE);
+		TABLPosition end_filepos = me.data_file_begin + (blocknum2 + 1) * TString::BLOCK_SIZE;
 		TFileReaderIt fit(_dataFile(me), false);
 
 		clear(me.data_buf);
@@ -95,11 +148,11 @@ _FileReaderString_loadblock(String<TValue, FileReader<TFormat, TFile, TSpec> > &
 			appendValue(me.data_buf, value(fit));
 		}
 
-		if (blocknum == length(me.data_abl))
+		if (blocknum2 == length(me.data_abl))
 		{
-			if (blocknum > 0)
+			if (blocknum2 > 0)
 			{
-				appendValue(me.data_abl, me.data_abl[blocknum-1] + length(me.data_buf));
+				appendValue(me.data_abl, me.data_abl[blocknum2-1] + length(me.data_buf));
 			}
 			else
 			{
@@ -112,9 +165,9 @@ _FileReaderString_loadblock(String<TValue, FileReader<TFormat, TFile, TSpec> > &
 			}
 		}
 
-		me.data_active_block = blocknum;
-		me.data_active_block_begin = (blocknum) ? me.data_abl[blocknum - 1] : 0;
-		me.data_active_block_end = me.data_abl[blocknum];
+		me.data_active_block = blocknum2;
+		me.data_active_block_begin = (blocknum2) ? me.data_abl[blocknum2 - 1] : 0;
+		me.data_active_block_end = me.data_abl[blocknum2];
 	}
 }
 
@@ -172,16 +225,32 @@ _FileReaderString_isValidBlock(String<TValue, FileReader<TFormat, TFile, TSpec> 
 
 //////////////////////////////////////////////////////////////////////////////
 
+template <typename TValue, typename TFormat, typename TFile, typename TSpec>
+inline void
+_FileReaderString_loadComplete(String<TValue, FileReader<TFormat, TFile, TSpec> > & me)
+{
+	if (!me.data_scanned)
+	{//scan the whole sequence
+		typedef typename Position<TFile>::Type TPosition;
+		_FileReaderString_loadblock(me, supremumValue<TPosition>());
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 template <typename TValue, typename TFormat, typename TFile, typename TSpec, typename TPos>
 inline TValue
 value(String<TValue, FileReader<TFormat, TFile, TSpec> > & me,
 	  TPos pos)
 {
-	if ((me.data_active_block_begin > pos) || (me.data_active_block_end <= pos))
+	typedef typename Size<TFile>::Type TFileSize;
+	TFileSize pos2 = pos;
+
+	if ((me.data_active_block_begin > pos2) || (me.data_active_block_end <= pos2))
 	{//change block
-		_FileReaderString_loadblock(me, _FileReaderString_findblock(me, pos));
+		_FileReaderString_loadblock(me, _FileReaderString_findblock(me, pos2));
 	}
-	return me.data_buf[pos - me.data_active_block_begin];
+	return me.data_buf[pos2 - me.data_active_block_begin];
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -190,13 +259,31 @@ template <typename TValue, typename TFormat, typename TFile, typename TSpec>
 inline typename Size< String<TValue, FileReader<TFormat, TFile, TSpec> > >::Type
 length(String<TValue, FileReader<TFormat, TFile, TSpec> > & me)
 {
-	if (!me.data_scanned)
-	{//scan the whole sequence
-		typedef typename Position<TFile>::Type TPosition;
-		_FileReaderString_loadblock(me, supremumValue<TPosition>());
-	}
+	_FileReaderString_loadComplete(me);
 
 	return me.data_abl[length(me.data_abl) - 1];
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TValue, typename TFormat, typename TFile, typename TSpec, typename TIteratorSpec>
+inline typename Iterator< String<TValue, FileReader<TFormat, TFile, TSpec> >, TIteratorSpec >::Type
+begin(String<TValue, FileReader<TFormat, TFile, TSpec> > & me,
+	  Tag<TIteratorSpec> const)
+{
+	typedef typename Iterator< String<TValue, FileReader<TFormat, TFile, TSpec> >, TIteratorSpec >::Type TIterator;
+	return TIterator(me);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TValue, typename TFormat, typename TFile, typename TSpec, typename TIteratorSpec>
+inline typename Iterator< String<TValue, FileReader<TFormat, TFile, TSpec> >, TIteratorSpec >::Type
+end(String<TValue, FileReader<TFormat, TFile, TSpec> > & me,
+	Tag<TIteratorSpec> const)
+{
+	typedef typename Iterator< String<TValue, FileReader<TFormat, TFile, TSpec> >, TIteratorSpec >::Type TIterator;
+	return TIterator(me, GoEnd());
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -204,13 +291,15 @@ length(String<TValue, FileReader<TFormat, TFile, TSpec> > & me)
 // Iterator for FileReader String
 // (note: do not confuse with FileReader Iterator, see file_filereaderiterator.h)
 //////////////////////////////////////////////////////////////////////////////
-/*
+
 struct FileReaderIterator;
 
-template <typename TContainer>
-class Iter<TContainer, FileReaderIterator>
+template <typename TValue, typename TFormat, typename TFile, typename TSpec>
+class Iter<String<TValue, FileReader<TFormat, TFile, TSpec> >, FileReaderIterator>
 {
 public:
+	typedef String<TValue, FileReader<TFormat, TFile, TSpec> > TContainer;
+
 	typedef typename TContainer::TABLPosition TABLPosition;
 
 	typedef typename TContainer::TBuf TBuf;
@@ -218,11 +307,205 @@ public:
 	typedef typename Size<TBuf>::Type TBufSize;
 
 	TContainer * data_container;
-	TABLPosition data_abl_pos;	//number of block
-	TBufPosition data_buf_pos;	//number of char in block
-	TBufSize data_buf_len;		//length of block
-	bool data_atEnd;					//true if iterator is atEnd
+	TABLPosition data_abl_pos;		//number of block
+	TBufPosition data_buf_pos;		//number of char in block
+	TBufSize data_buf_len;			//length of block
+	bool data_atEnd;				//true if iterator is atEnd
+
+	Iter(TContainer & cont_)
+		: data_container(& cont_)
+	{
+		goBegin(*this);
+	}
+
+	Iter(TContainer & cont_, GoEnd)
+		: data_container(& cont_)
+	{
+		goEnd(*this);
+	}
+
+	template <typename TPos>
+	Iter(TContainer & cont_, TPos pos_)
+		: data_container(& cont_)
+	{
+		setPosition(pos_);
+	}
+
+	Iter(Iter const & other_)
+		: data_container(other_.data_container)
+		, data_abl_pos(other_.data_abl_pos)
+		, data_buf_pos(other_.data_buf_pos)
+		, data_buf_len(other_.data_buf_len)
+		, data_atEnd(other_.data_atEnd)
+	{
+	}
+
+	Iter &
+	operator = (Iter const & other_)
+	{
+		data_container = other_.data_container;
+		data_abl_pos = other_.data_abl_pos;
+		data_buf_pos = other_.data_buf_pos;
+		data_buf_len = other_.data_buf_len;
+		data_atEnd = other_.data_atEnd;
+
+		return *this;
+	}
 };
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TValue, typename TFormat, typename TFile, typename TSpec, typename TIteratorSpec>
+struct Iterator<String<TValue, FileReader<TFormat, TFile, TSpec> >, TIteratorSpec>
+{
+	typedef Iter<String<TValue, FileReader<TFormat, TFile, TSpec> >, FileReaderIterator> Type;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TContainer>
+struct Value<Iter<TContainer, FileReaderIterator> >:
+	Value<TContainer>
+{
+};
+template <typename TContainer>
+struct GetValue<Iter<TContainer, FileReaderIterator> >:
+	Value<TContainer>
+{
+};
+template <typename TContainer>
+struct Reference<Iter<TContainer, FileReaderIterator> >:
+	Value<TContainer>
+{
+};
+
+template <typename TContainer>
+struct Size<Iter<TContainer, FileReaderIterator> >:
+	Size<TContainer>
+{
+};
+template <typename TContainer>
+struct Difference<Iter<TContainer, FileReaderIterator> >:
+	Difference<TContainer>
+{
+};
+template <typename TContainer>
+struct Position<Iter<TContainer, FileReaderIterator> >:
+	Position<TContainer>
+{
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TContainer>
+inline typename GetValue<Iter<TContainer, FileReaderIterator> >::Type
+getValue(Iter<TContainer, FileReaderIterator> & it)
+{
+	TContainer & cont = *(it.data_container);
+	if (cont.data_active_block != it.data_abl_pos)
+	{
+		_FileReaderString_loadblock(cont, it.data_abl_pos);
+	}
+	return cont.data_buf[it.data_buf_pos];
+}
+template <typename TContainer>
+inline typename GetValue<Iter<TContainer, FileReaderIterator> >::Type
+getValue(Iter<TContainer, FileReaderIterator> const & it)
+{
+	TContainer & cont = *(it.data_container);
+	if (cont.data_active_block != it.data_abl_pos)
+	{
+		_FileReaderString_loadblock(cont, it.data_abl_pos);
+	}
+	return cont.data_buf[it.data_buf_pos];
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TContainer>
+inline typename Reference<Iter<TContainer, FileReaderIterator> >::Type
+value(Iter<TContainer, FileReaderIterator> & it)
+{
+	return getValue(it);
+}
+template <typename TContainer>
+inline typename Reference<Iter<TContainer, FileReaderIterator> >::Type
+value(Iter<TContainer, FileReaderIterator> const & it)
+{
+	return getValue(it);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TContainer>
+inline TContainer &
+container(Iter<TContainer, FileReaderIterator> & it)
+{
+	return *(it.data_container);
+}
+template <typename TContainer>
+inline TContainer &
+container(Iter<TContainer, FileReaderIterator> const & it)
+{
+	return *(it.data_container);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TContainer>
+inline typename Position<Iter<TContainer, FileReaderIterator> >::Type
+position(Iter<TContainer, FileReaderIterator> const & it)
+{
+	TContainer & cont = *(it.data_container);
+	if (it.data_atEnd)
+	{
+		return length(cont);
+	}
+	else
+	{
+		if (it.data_abl_pos)
+		{
+			return cont.data_abl[it.data_abl_pos-1] + it.data_buf_pos;
+		}
+		else
+		{
+			return it.data_buf_pos;
+		}
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TContainer, typename TPos>
+inline void
+setPosition(Iter<TContainer, FileReaderIterator> & it,
+			TPos pos)
+{
+	TContainer & cont = *(it.data_container);
+	it.data_abl_pos = _FileReaderString_findblock(cont, pos);
+	it.data_atEnd = (cont.data_scanned && (pos >= length(cont)));
+	if (it.data_atEnd)
+	{
+		it.data_buf_pos = 0;
+		it.data_buf_len = 0;
+	}
+	else
+	{
+		if (it.data_abl_pos == 0)
+		{
+			it.data_buf_pos = pos;
+		}
+		else
+		{
+			it.data_buf_pos = pos - cont.data_abl[it.data_abl_pos - 1];
+		}
+		if (cont.data_active_block != it.data_abl_pos)
+		{
+			_FileReaderString_loadblock(cont, it.data_abl_pos);
+		}
+		it.data_buf_len = length(it.data_buf);
+	}
+}
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -239,10 +522,10 @@ goNext(Iter<TContainer, FileReaderIterator> & it)
 			++it.data_abl_pos;
 
 			TContainer & cont = *(it.data_container);
-			it.data_atEnd = _FileReaderString_isValidBlock(cont, it.data_abl_pos);
+			it.data_atEnd = !_FileReaderString_isValidBlock(cont, it.data_abl_pos);
 			if (it.data_atEnd)
 			{//at end
-				it.data_buf_len = 0
+				it.data_buf_len = 0;
 			}
 			else
 			{//not at end
@@ -250,12 +533,253 @@ goNext(Iter<TContainer, FileReaderIterator> & it)
 				{
 					_FileReaderString_loadblock(cont, it.data_abl_pos);
 				}
-				it.data_buf_len = length(it.data_buf);
+				it.data_buf_len = length(cont.data_buf);
 			}
 		}
 	}
 }
-*/
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TContainer>
+inline void
+goPrevious(Iter<TContainer, FileReaderIterator> & it)
+{
+	if (it.data_buf_pos > 0)
+	{
+		--it.data_buf_pos;
+	}
+	else
+	{
+		TContainer & cont = *(it.data_container);
+		if (it.data_atEnd)
+		{
+			//_FileReaderString_loadComplete(cont);// length(cont) will do it
+			it.data_atEnd = (length(cont) == 0);
+			it.data_abl_pos = length(cont.data_abl) - 1;
+		}
+		else if (it.data_abl_pos)
+		{
+			--it.data_abl_pos;
+		}
+		else return; //already in begin pos
+
+		if (cont.data_active_block != it.data_abl_pos)
+		{
+			_FileReaderString_loadblock(cont, it.data_abl_pos);
+		}
+		it.data_buf_len = length(cont.data_buf);
+		it.data_buf_pos = it.data_buf_len - 1;
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TContainer>
+inline void
+goBegin(Iter<TContainer, FileReaderIterator> & it)
+{
+	it.data_abl_pos = 0;
+	it.data_buf_pos = 0;
+
+	TContainer & cont = *(it.data_container);
+	if (_FileReaderString_isValidBlock(cont, 0))
+	{
+		it.data_buf_len = cont.data_abl[0];
+		it.data_atEnd = false;
+	}
+	else
+	{
+		it.data_buf_len = 0;
+		it.data_atEnd = true;
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TContainer>
+inline void
+goEnd(Iter<TContainer, FileReaderIterator> & it)
+{
+	it.data_abl_pos = 0;
+	it.data_buf_pos = 0;
+	it.data_buf_len = 0;
+	it.data_atEnd = true;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TContainer>
+inline bool
+atEnd(Iter<TContainer, FileReaderIterator> & it)
+{
+	return it.data_atEnd;
+}
+template <typename TContainer>
+inline bool
+atEnd(Iter<TContainer, FileReaderIterator> const & it)
+{
+	return it.data_atEnd;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TContainer>
+inline bool
+atBegin(Iter<TContainer, FileReaderIterator> & it)
+{
+	return (it.data_abl_pos == 0) && (it.data_buf_pos == 0);
+}
+template <typename TContainer>
+inline bool
+atBegin(Iter<TContainer, FileReaderIterator> const & it)
+{
+	return (it.data_abl_pos == 0) && (it.data_buf_pos == 0);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// operator ==
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TContainer>
+inline bool 
+operator == (Iter<TContainer, FileReaderIterator> const & left,
+			 Iter<TContainer, FileReaderIterator> const & right)
+{
+SEQAN_CHECKPOINT
+	return (atEnd(left) == atEnd(right)) && ((atEnd(left) && atEnd(right)) || position(left) == position(right));
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// operator !=
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TContainer>
+inline bool 
+operator != (Iter<TContainer, FileReaderIterator> const & left,
+			 Iter<TContainer, FileReaderIterator> const & right)
+{
+SEQAN_CHECKPOINT
+	return (atEnd(left) != atEnd(right)) || (position(left) != position(right));
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// operator < / >
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TContainer>
+inline bool 
+operator < (Iter<TContainer, FileReaderIterator> const & left,
+			Iter<TContainer, FileReaderIterator> const & right)
+{
+SEQAN_CHECKPOINT
+	return (atEnd(right) && !atEnd(left)) || (position(left) < position(right));
+}
+
+template <typename TContainer>
+inline bool 
+operator > (Iter<TContainer, FileReaderIterator> const & left,
+			Iter<TContainer, FileReaderIterator> const & right)
+{
+SEQAN_CHECKPOINT
+	return (atEnd(left) && !atEnd(right)) || (position(left) > position(right));
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// operator <= / >=
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TContainer>
+inline bool 
+operator <= (Iter<TContainer, FileReaderIterator> const & left,
+			 Iter<TContainer, FileReaderIterator> const & right)
+{
+SEQAN_CHECKPOINT
+	return atEnd(right) || (position(left) <= position(right));
+}
+
+template <typename TContainer>
+inline bool 
+operator >= (Iter<TContainer, FileReaderIterator> const & left,
+			 Iter<TContainer, FileReaderIterator> const & right)
+{
+SEQAN_CHECKPOINT
+	return atEnd(left) || (position(left) >= position(right));
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// operator +
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TContainer, typename TIntegral>
+inline Iter<TContainer, FileReaderIterator>  
+operator + (Iter<TContainer, FileReaderIterator> const & left,
+			TIntegral right)
+{
+SEQAN_CHECKPOINT
+	return Iter<TContainer, FileReaderIterator>(container(left), position(left) + right);
+}
+template <typename TContainer, typename TIntegral>
+inline Iter<TContainer, FileReaderIterator>  
+operator + (TIntegral left,
+			Iter<TContainer, FileReaderIterator> const & right)
+{
+SEQAN_CHECKPOINT
+	return Iter<TContainer, FileReaderIterator>(container(right), position(right) + left);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// operator +=
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TContainer, typename TIntegral>
+inline Iter<TContainer, FileReaderIterator> &
+operator += (Iter<TContainer, FileReaderIterator> & left,
+			 TIntegral right)
+{
+SEQAN_CHECKPOINT
+	setPosition(left, position(left) + right);
+	return left;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// operator -
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TContainer, typename TIntegral>
+inline Iter<TContainer, FileReaderIterator>  
+operator - (Iter<TContainer, FileReaderIterator> const & left,
+			TIntegral right)
+{
+SEQAN_CHECKPOINT
+	return Iter<TContainer, FileReaderIterator>(container(left), position(left) - right);
+}
+
+//____________________________________________________________________________
+
+template <typename TContainer>
+inline typename Difference<Iter<TContainer, FileReaderIterator> >::Type  
+operator - (Iter<TContainer, FileReaderIterator> const & left,
+			Iter<TContainer, FileReaderIterator> const & right)
+{
+SEQAN_CHECKPOINT
+	return position(left) - position(right);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// operator -=
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TContainer, typename TIntegral>
+inline Iter<TContainer, FileReaderIterator> &
+operator -= (Iter<TContainer, FileReaderIterator> & left,
+			TIntegral right)
+{
+SEQAN_CHECKPOINT
+	setPosition(left, position(left) - right);
+	return left;
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 } //namespace SEQAN_NAMESPACE_MAIN
