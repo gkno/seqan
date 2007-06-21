@@ -172,9 +172,10 @@ inline void goNext(Iter< Index<TText, TSpec>, VSTree< TopDown< ParentLinks<Const
 	// only takes nodes that occur at least AbsoluteThreshold times
 	// note: that we do not enforce that the tree is balanced
 
-	if((countOccurences(it)) >= it.AbsoluteThreshold) 
-		walk_down = 1;
-	
+	if(repLength(it) < it.MaxDepth){
+		if((countOccurences(it)) >= it.AbsoluteThreshold) 
+			walk_down = 1;
+	}
 
 	it.Down = false;
 	it.Up = 0;
@@ -182,15 +183,60 @@ inline void goNext(Iter< Index<TText, TSpec>, VSTree< TopDown< ParentLinks<Const
 	{
 		// if threshold is reached walk down else go always right or up
 		if(walk_down){
-			if(!goDown(it) && !goRight(it))
-				while (goUp(it) && !goRight(it));
+			// for avoiding the implicit $-edges
+			
+			if(!isLeaf(it) && isRightTerminal(it)){
+				// this must be possible
+				
+				goDown(it);
+				goRight(it);
+				while( (repLength(container(it), nodeUp(it)) == repLength(it)) && goRight(it))
+					
+				// if the current node remains to be right terminal
+				// than we have found a node where multiple strings end
+				// goDown was wrong and we have to go up again
+				if(isLeaf(it) && (repLength(container(it), nodeUp(it)) == repLength(it))){
+					goUp(it);
+					//cout << value(it) << " = " << length(representative(it)) << " " << representative(it) << "  toFather:"<<parentEdgeLabel(it)<<"  hits: "<<length(getOccurences(it))<<endl;	
+					if (!goRight(it))
+						while (goUp(it) && !goRight(it));
+					}
+			}
+			else
+				if(!goDown(it) && !goRight(it))
+					while (goUp(it) && !goRight(it));
 		}
 		else
 			if (!goRight(it))
 				while (goUp(it) && !goRight(it));
 		
-		if( countOccurences(it) >= it.AbsoluteThreshold)
+		if( countOccurences(it) >= it.AbsoluteThreshold){
 			not_finished = 0;
+			// we have to check if the current node can be extended with at least one letter if the following
+			// condition is true:
+			if(repLength(it) == it.MaxDepth && length(parentEdgeLabel(it)) == 1){
+				//cout << "In Abs Clausel  "<<value(it) << " = " << length(representative(it)) << " " << representative(it) << "  toFather:"<<parentEdgeLabel(it)<<"  hits: "<<length(getOccurences(it))<<endl;
+				if(isLeaf(it)){
+						walk_down=0;
+						not_finished =1;
+				}
+				else
+					if(isRightTerminal(it)){ // check if node can be extended
+						
+						Iter<Index<TText, TSpec>, VSTree< TopDown< > > >   childs(it);
+						goDown(childs);
+						goRight(childs);
+						// move to rightest sibling, if this has counts its fine
+						while(goRight(childs));
+
+						if( repLength(childs) == repLength(it)){
+							not_finished=1;
+							walk_down=0;
+						}
+					}
+					
+				}
+			}
 		else
 			walk_down = 0;
 
@@ -248,6 +294,8 @@ inline void goNext(Iter< Index<TText, TSpec>, VSTree< TopDown< ParentLinks<Const
 				while (goUp(it) && !goRight(it));
 
 			}
+			skippe alle kinder mit leerem parentedgelabel
+			repLength(container(it), nodeUp(it)) == repLength(it))
 			*/
 			if(!isLeaf(it) && isRightTerminal(it)){
 				// this must be possible
@@ -256,7 +304,7 @@ inline void goNext(Iter< Index<TText, TSpec>, VSTree< TopDown< ParentLinks<Const
 				cout << value(it) << " = " << length(representative(it)) << " " << representative(it) << "  toFather:"<<parentEdgeLabel(it)<<"  hits: "<<length(getOccurences(it))<<endl;
 				goRight(it);
 				cout << value(it) << " = " << length(representative(it)) << " " << representative(it) << "  toFather:"<<parentEdgeLabel(it)<<"  hits: "<<length(getOccurences(it))<<endl;
-				while(isRightTerminal(it) && goRight(it)){
+				while( (repLength(container(it), nodeUp(it)) == repLength(it)) && goRight(it)){
 					
 				cout << value(it) << " = " << length(representative(it)) << " " << representative(it) << "  toFather:"<<parentEdgeLabel(it)<<"  hits: "<<length(getOccurences(it))<<endl;	
 				}
@@ -264,7 +312,7 @@ inline void goNext(Iter< Index<TText, TSpec>, VSTree< TopDown< ParentLinks<Const
 				// if the current node remains to be right terminal
 				// than we have found a node where multiple strings end
 				// goDown was wrong and we have to go up again
-				if(isLeaf(it) && isRightTerminal(it)){
+				if(isLeaf(it) && (repLength(container(it), nodeUp(it)) == repLength(it))){
 					goUp(it);
 					cout << value(it) << " = " << length(representative(it)) << " " << representative(it) << "  toFather:"<<parentEdgeLabel(it)<<"  hits: "<<length(getOccurences(it))<<endl;	
 					if (!goRight(it))
@@ -308,7 +356,8 @@ inline void goNext(Iter< Index<TText, TSpec>, VSTree< TopDown< ParentLinks<Const
 // Definition of the Graph Specialization for the VLMM
 
 struct ContextTree{
-	float threshold ;	
+	unsigned threshold;	
+	float K;    //the name originates from the paper of Bühlmann (1999) 
 	unsigned MaxDepth;
 	
 };
@@ -328,8 +377,9 @@ void setParameters(PST & params,float t,float minE,float minC,float alpha,unsign
 	params.alpha = alpha;
 	params.MaxDepth = d;
 }
-void setParameters(ContextTree & params,float t, unsigned d){
+void setParameters(ContextTree & params,unsigned t,float K, unsigned d){
 	params.threshold = t;
+	params.K = K;
 	params.MaxDepth = d;
 }
 
@@ -513,7 +563,7 @@ setMarked(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > > >& wg,
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > > > TGraph;
-
+	cout << "set node:"<< vertex<< " " <<state<<endl;
 	wg.data_marked[vertex] = state;
 	return;
 }
@@ -646,6 +696,23 @@ initProbabilityVectorForLeaf(Iter<TIndex, VSTree< TopDown< ParentLinks<Constrain
 	
 }
 
+// this function cuts the EdgeLabel of the node pointed to by the iterator.
+// It is used in 2 ways, for leafs the parameter diff == 1, and for inner nodes diff is length(EdgeLabel-it.MaxDepth)
+template<typename TIndex,typename TIterSpec,typename TSpec,typename TCargo,typename TAlphabet ,typename TVertexDescriptor,typename TDiff>
+inline void
+cutEdgeForLeaf(Iter<TIndex, VSTree< TopDown< ParentLinks<ConstrainedTraversal<TIterSpec> > > > > &it,
+						 Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > > > &target,
+						 TVertexDescriptor & father,
+						 TVertexDescriptor & child,
+						 TDiff & diff)
+{
+					String<TAlphabet> EdgeLabel = parentEdgeLabel(it);
+					TAlphabet letter = value(EdgeLabel,length(EdgeLabel)-diff );
+					String<TAlphabet> pref = prefix( EdgeLabel, length(EdgeLabel)-diff );
+					addEdge(target,father,child,  pref);
+					initProbabilityVectorForLeaf(it,target,child,letter);
+}
+
 //Graph<Automaton<TText, TCargo, WordGraph< VLMM < TSpec > > >, TGraphSpec> 
 // currently this function can only be called for index of
 // specialization: Index_ESA
@@ -681,11 +748,15 @@ buildSuffixTreeFromIndex(Iter<TIndex, VSTree< TopDown< ParentLinks<ConstrainedTr
 			father = getFather(target,father);
 			--it.Up;
 		}
+		
 
+		
 		child = addIncompleteVertex(target);
+		// check if iterator
 		std::cout << "Node:"<<child<<"  "<<value(it) << " = " << repLength(it)<< " " << representative(it) << "  toFather:"<<parentEdgeLabel(it)<<"  hits: "<<length(getOccurences(it))<<std::endl;
 		
 		setFather(target,father,child);
+		unsigned diff = 1;
 		//std::cout <<"set Father\t";
 		// set child relation with edgelabel
 		//std::cout <<"ParentEdgeLAbel:"<<parentEdgeLabel(it)<<std::endl;
@@ -700,41 +771,44 @@ buildSuffixTreeFromIndex(Iter<TIndex, VSTree< TopDown< ParentLinks<ConstrainedTr
 				}
 				else{// this is actually a leaf in the sense that no further extension
 					 // of the edgelabel is possible, still this sequence occurs more than once
-					String<TAlphabet> EdgeLabel = parentEdgeLabel(it);
+					/*String<TAlphabet> EdgeLabel = parentEdgeLabel(it);
 					TAlphabet letter = value(EdgeLabel,length(EdgeLabel)-1 );
 					String<TAlphabet> pref = prefix( EdgeLabel, length(EdgeLabel)-1 );
 					addEdge(target,father,child,  pref);
-					initProbabilityVectorForLeaf(it,target,child,letter);
+					initProbabilityVectorForLeaf(it,target,child,letter);*/
+					cutEdgeForLeaf(it,target,father,child,diff); // diff is 1 by default
 				}
 			}
 			else{
-				unsigned diff = length(representative(it)) - it.MaxDepth;
+				diff = length(representative(it)) - it.MaxDepth;
 				//std::cout<<"case2\t"<<representative(it)<<" ";
 				//addEdge with one char less , da muss man auch nicht zählen
-				String<TAlphabet> EdgeLabel = parentEdgeLabel(it);
-				//TAlphabet letter = value(EdgeLabel,length(EdgeLabel)-1 );
-				// for the non leaf case 
-				TAlphabet letter = value(EdgeLabel,length(EdgeLabel)-diff );
-				//if(child == 13 || child ==4)std::cout<<"EdgeLabel: "<<EdgeLabel<<"RepLength: "<<repLength(it)<<"  prefix"<<prefix( EdgeLabel, length(EdgeLabel)-1 ) <<endl;
-				String<TAlphabet> pref = prefix( EdgeLabel, length(EdgeLabel)-diff );
-				addEdge(target,father,child,  pref);
-				//if(child == 13 || child ==4)std::cout<<"addedEdge"<<"letter:"<<letter<<endl;
-				initProbabilityVectorForLeaf(it,target,child,letter);
-				//if(child == 13 || child ==4) std::cout<<"initVector"<<endl;
+				//String<TAlphabet> EdgeLabel = parentEdgeLabel(it);
+				////TAlphabet letter = value(EdgeLabel,length(EdgeLabel)-1 );
+				//// for the non leaf case 
+				//TAlphabet letter = value(EdgeLabel,length(EdgeLabel)-diff );
+				////if(child == 13 || child ==4)std::cout<<"EdgeLabel: "<<EdgeLabel<<"RepLength: "<<repLength(it)<<"  prefix"<<prefix( EdgeLabel, length(EdgeLabel)-1 ) <<endl;
+				//String<TAlphabet> pref = prefix( EdgeLabel, length(EdgeLabel)-diff );
+				//addEdge(target,father,child,  pref);
+				////if(child == 13 || child ==4)std::cout<<"addedEdge"<<"letter:"<<letter<<endl;
+				//initProbabilityVectorForLeaf(it,target,child,letter);
+				////if(child == 13 || child ==4) std::cout<<"initVector"<<endl;
+				cutEdgeForLeaf(it,target,father,child,diff); 
 			}
 		}
 		else{
-			//std::cout<<"case3\t"<<representative(it)<<" ";
-			//addEdge with one char less , da muss man auch nicht zählen
-			String<TAlphabet> EdgeLabel = parentEdgeLabel(it);
-			TAlphabet letter = value(EdgeLabel,length(EdgeLabel)-1 );
-			// for the non leaf case 
-			//if(child == 13 || child ==4)std::cout<<"EdgeLabel: "<<EdgeLabel<<"RepLength: "<<repLength(it)<<"  prefix"<<prefix( EdgeLabel, length(EdgeLabel)-1 ) <<endl;
-			String<TAlphabet> pref = prefix( EdgeLabel, length(EdgeLabel)-1 );
-			addEdge(target,father,child,  pref);
-			//if(child == 13 || child ==4)std::cout<<"addedEdge"<<"letter:"<<letter<<endl;
-			initProbabilityVectorForLeaf(it,target,child,letter);
-			//if(child == 13 || child ==4) std::cout<<"initVector"<<endl;
+			////std::cout<<"case3\t"<<representative(it)<<" ";
+			////addEdge with one char less , da muss man auch nicht zählen
+			//String<TAlphabet> EdgeLabel = parentEdgeLabel(it);
+			//TAlphabet letter = value(EdgeLabel,length(EdgeLabel)-1 );
+			//// for the non leaf case 
+			////if(child == 13 || child ==4)std::cout<<"EdgeLabel: "<<EdgeLabel<<"RepLength: "<<repLength(it)<<"  prefix"<<prefix( EdgeLabel, length(EdgeLabel)-1 ) <<endl;
+			//String<TAlphabet> pref = prefix( EdgeLabel, length(EdgeLabel)-1 );
+			//addEdge(target,father,child,  pref);
+			////if(child == 13 || child ==4)std::cout<<"addedEdge"<<"letter:"<<letter<<endl;
+			//initProbabilityVectorForLeaf(it,target,child,letter);
+			////if(child == 13 || child ==4) std::cout<<"initVector"<<endl;
+			cutEdgeForLeaf(it,target,father,child,diff); // diff is 1 by default
 		}
 		//std::cout<<"created node:"<<child<<std::endl;
 		//std::cout <<"set Edge\t";
@@ -1098,6 +1172,7 @@ inline bool
 extendNode(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < PST > > > > &vlmm,
 			   TVertexDescriptor & node,
 			   TChar childCharacter,
+			   float countChar,
 			   PST & parameters) 
 {
 	
@@ -1115,6 +1190,68 @@ extendNode(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < PST > > > > &v
 		}
 	return false;
 
+}
+
+// check if we should create the new node
+template<typename TCargo,typename TAlphabet,typename TChar,typename TVertexDescriptor>
+inline bool
+extendNode(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < ContextTree> > > > &vlmm,
+			   TVertexDescriptor & father,
+			   TChar childCharacter,
+			   float countChar,
+			   ContextTree & parameters) 
+{
+	
+		TAlphabet letter(childCharacter);
+		unsigned size = ValueSize<TAlphabet>::VALUE;
+	// the pruning criterion mentioned by Bühlmann & Mächler, taken from Rissanen 1983
+		float fathersum = 0;
+    
+	for(unsigned int pos = 0;pos< size ;++pos){
+		fathersum = fathersum + getProbability(vlmm,father,pos);
+	}
+	SEQAN_ASSERT(fathersum != 0)
+	//std::cout<<"extendNode on node "<<node<<std::endl;
+		if ( (countChar * log(1/(getProbability(vlmm,father,childCharacter)/fathersum)))   < parameters.K );
+			return false;
+
+	return true;
+}
+
+/* 
+	In general this function can only be called for nodes which still contain the pattern counts and
+	have not be converted into probabilities yet.
+*/
+template<typename TCargo,typename TAlphabet ,typename TVertexDescriptor>
+inline bool
+pruneNode(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < ContextTree > > > > &vlmm,
+			   TVertexDescriptor &son,
+			   ContextTree & parameters) 
+{
+    unsigned size = ValueSize<TAlphabet>::VALUE;
+	// the pruning criterion mentioned by Bühlmann, taken from Rissanen 1983
+	float fathersum = 0,sonsum = 0, difference = 0;
+    
+	SEQAN_ASSERT(getSuffixLink(vlmm,son) != getNil<TVertexDescriptor>())
+	TVertexDescriptor father = getSuffixLink(vlmm,son);
+
+	for(unsigned int pos = 0;pos< size ;++pos){
+		sonsum = sonsum + getProbability(vlmm,son,pos);
+		fathersum = fathersum + getProbability(vlmm,father,pos);
+	}
+	SEQAN_ASSERT(sonsum != 0)
+	SEQAN_ASSERT(fathersum != 0)
+
+	for(int pos = 0;pos< ValueSize<TAlphabet>::VALUE;++pos){
+		if(getProbability(vlmm,father,pos) > 0 && getProbability(vlmm,son,pos) > 0)
+			difference += getProbability(vlmm,son,pos) * (getProbability(vlmm,son,pos)/sonsum)*
+						  log((getProbability(vlmm,son,pos)/sonsum)/(getProbability(vlmm,father,pos)/fathersum));
+		
+	}
+	if(difference <= parameters.K)
+		return true;
+
+ return false;
 }
 
 template<typename TCargo,typename TAlphabet ,typename TVertexDescriptor>
@@ -1179,7 +1316,7 @@ pruneTree(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > > > &
 		assignProperty(original, node, true);
 		// change counts of all nodes into probabilities
 		//cout<<" at node:"<<node<<endl;
-		turnNodeCountsIntoProbability(vlmm,node);
+		//turnNodeCountsIntoProbability(vlmm,node);
 	}
 	
 	// root cannot be pruned
@@ -1366,28 +1503,30 @@ pruneTreeRecursivelyFast(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < 
 	String<TAlphabet> childLabel;
 	TAlphabet childCharacter;
 	TVertexDescriptor target;
-
-	if(! isRoot(vlmm,father) ){
 	getChildLabel(vlmm,father,node,childLabel);
 	childCharacter = value(childLabel,0);
+	float countChar = getProbability(vlmm,father,childCharacter);
+	if(! isRoot(vlmm,father) ){
+	
+	//NOTE we don´t check if the suffixlink is valid, because we assume that up to here 
+	// all inner nodes are consistent, i.e. all nodes which do not have a valid suffixlink taget
+	//have been deleted before
 	target = getSuffixLink(vlmm,father);
 	}
 	else{
 	  // if father == root check only for the first possible extension
 		  // extension longer than one are not checked, because it is already known that there is no 
 		  // node one context shorter elsewhere in the tree
-		  getChildLabel(vlmm,father,node,childLabel);
+
 		  if(length(childLabel)>1){
 					TVertexDescriptor root = getRoot(vlmm);
-					
-					TAlphabet startChar = value(childLabel,0);
-					if(extendNode(vlmm,root,startChar,parameters))
+					if(extendNode(vlmm,root,childCharacter,countChar,parameters))
 					{
 						//std::cout <<"startChar" << startChar<<std::endl;
-						father = splitEdge(vlmm,father,startChar,0);
-						smoothNode(vlmm,father,parameters);
+						father = splitEdge(vlmm,father,childCharacter,0);
+						//smoothNode(vlmm,father,parameters);
 						setSuffixLink(vlmm,father,root);
-						setReverseSuffixLink(vlmm,root,father,startChar);
+						setReverseSuffixLink(vlmm,root,father,childCharacter);
 						setMarked(vlmm,father,true);
 						if(father < length(original))
 									original[father] = false;
@@ -1397,9 +1536,9 @@ pruneTreeRecursivelyFast(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < 
 					
 					childLabel = suffix(childLabel,1);
 					childCharacter = value(childLabel,0);
-					target = father;
+					target = root;
 		  }
-		} // else case for root
+	} // else case for root
 	// check for possible extended 
 	if(length(childLabel) > 1){
 	
@@ -1415,7 +1554,7 @@ pruneTreeRecursivelyFast(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < 
 			unsigned lastVertex = 0,lastSplit=0;
 			unsigned pos;
 			unsigned labelLength = length(childLabel);
-			//std::cout <<"..check potential nodes above node:" <<node<<" chidLAbel"<<childLabel<<std::endl;
+			std::cout <<"..check potential nodes above node:" <<node<<" chidLAbel"<<childLabel<<std::endl;
 			TVertexDescriptor potVertex = vlmm.data_vertex[target].data_edge[(TSize) value(childLabel,0)].data_target;
 			SEQAN_ASSERT(potVertex != nilVal)
 			// we have a node which may lead to a new node on the edge father->node
@@ -1429,16 +1568,16 @@ pruneTreeRecursivelyFast(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < 
 			SEQAN_ASSERT(pos<=labelLength)
 			while(pos != labelLength){
 					//std::cout <<"another run on the edge"<<std::endl;
-					if( (potVertex < length(original)) && original[potVertex] && extendNode(vlmm,potVertex,value(childLabel,pos),parameters) ){
+					if( (potVertex < length(original)) && original[potVertex] && extendNode(vlmm,potVertex,value(childLabel,pos),countChar,parameters) ){
 						//std::cout <<"split edge at node: "<<node<<std::endl;
 						father = splitEdge(vlmm,father,childCharacter,pos-1-lastSplit);
 						//remember where the last node has been split
 						lastSplit=pos;
-						smoothNode(vlmm,father,parameters);
+						//smoothNode(vlmm,father,parameters);
 						setSuffixLink(vlmm,father,potVertex);
 						setReverseSuffixLink(vlmm,potVertex,father,letter);
 						setMarked(vlmm,father,true);
-						//std::cout <<"created node: "<<father<<" by checking above node:"<<node<<std::endl;
+						std::cout <<"created node: "<<father<<" by checking above node:"<<node<<std::endl;
 						if(father < length(original))
 								original[father] = false;
 
@@ -1463,7 +1602,11 @@ pruneTreeRecursivelyFast(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < 
 			
 		//}
 	} // Label > 1
-	
+	if(node == 4 )
+		if(isMarked(vlmm,node) == true)
+				cout<<"is true!!!!!!"<<endl;
+		else
+				cout<<"is not true!!!!!!"<<endl;
 	//std::cout << "check keeping of node:" << node;
 	// all potential nodes are build
 	if( (getSuffixLink(vlmm,node) != nilVal) && (isMarked(vlmm,node) || (! pruneNode(vlmm,node,parameters))) ){
@@ -1474,7 +1617,7 @@ pruneTreeRecursivelyFast(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < 
 		TVertexDescriptor fatherSuffixLink = getSuffixLink(vlmm,node);
 		while( !isRoot(vlmm,fatherSuffixLink) ){
 			if(! isMarked(vlmm, fatherSuffixLink) ){
-				setMarked(vlmm,node,true);
+				setMarked(vlmm,fatherSuffixLink,true);
 			}
 			else
 				break;
@@ -1494,8 +1637,42 @@ pruneTreeRecursivelyFast(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < 
 	//std::cout <<"finished node:"<<node<<std::endl;
  return;
 }
+template<typename TAlphabet,typename TCargo,typename TVLMMSpec >
+inline void
+deleteRedundantodes( Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TVLMMSpec > > > > &vlmm)
+{
+//top down traversal to figure out which nodes can be deleted
 
-				// recursive walk over reverse suffix links
+
+}
+
+template<typename TIndexType,typename TAlphabet,typename TCargo >
+inline void
+buildContextTree(Index<TIndexType, Index_ESA<> > & index,
+		 Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < ContextTree > > > > &vlmm,
+			    unsigned threshold,
+				float K,
+				unsigned d) 
+{
+	typedef Index<TIndexType, Index_ESA<> > TIndex;
+	ContextTree parameters;
+	setParameters(parameters,threshold,K,d);
+	Iter< TIndex, VSTree< TopDown< ParentLinks<ConstrainedTraversal<Absolute> > > > > it(index,threshold,d);
+	buildSuffixTreeFromIndex(it,vlmm);
+
+	std::cout << "in initMaps:";
+	initMaps(vlmm);
+	std::cout << " Size of vlmm after suffix core:"<<numVertices(vlmm)<<std::endl;
+    addSuffixLinks(vlmm);
+	std::cout << "added suffix links and reverse suffix links" <<std::endl;
+	std::cout <<vlmm;
+	pruneTree(vlmm,parameters);
+	std::cout << " Size of vlmm after prune Tree:"<<numVertices(vlmm)<<std::endl;
+	std::cout << "pruned the ContextTree" <<std::endl;
+	std::cout << vlmm;
+	std::cout << "READY!" <<std::endl;
+}
+
 template<typename TIndexType,typename TAlphabet,typename TCargo >
 inline void
 buildPST(Index<TIndexType, Index_ESA<> > & index,
