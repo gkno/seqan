@@ -143,6 +143,17 @@ void Test_Sequence_Interface()
 	append(str3, str);
 	SEQAN_TASSERT(isEqual(str3, str));
 	SEQAN_TASSERT(isEqual(str, str3));
+
+	const char *str4 = "test const char*";
+	clear(str3);
+	append(str3, str4);
+	SEQAN_TASSERT(isEqual(str4, str3));
+	SEQAN_TASSERT(isEqual(str3, str4));
+
+	clear(str3);
+	append(str3, "test");
+	SEQAN_TASSERT(isEqual("test", str3));
+	SEQAN_TASSERT(isEqual(str3, "test"));
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -449,7 +460,7 @@ void Test_String_Alloc()
 
 //////////////////////////////////////////////////////////////////////////////
 
-void Test_String_Stack()
+void Test_String_Array()
 {
 	TestStringBasics<String<char, Array<100> > >();
 
@@ -459,6 +470,22 @@ void Test_String_Stack()
 	String<char, Array<100> > const str2 = "hello";
 	SEQAN_TASSERT(str2[4] == 'o');
 	SEQAN_TASSERT(capacity(str2) >= length(str2));
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+void Test_String_Stack()
+{
+	TestStringBasics<String<char, Block<3> > >();
+
+	String<char, Block<3> > str1 = "hello";
+	SEQAN_TASSERT(str1[1] == 'e');
+
+	String<char, Block<3> > const str2 = "hello";
+	SEQAN_TASSERT(str2[4] == 'o');
+	SEQAN_TASSERT(capacity(str2) >= length(str2));
+
+//	resize(str1, 30);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1125,6 +1152,7 @@ int mainTestString()
 	Test_Sequence_Interface();
 	Test_String_Base();
 	Test_String_Alloc();
+	Test_String_Array();
 	Test_String_Stack();
 	Test_String_Pointer();
 	Test_String_CStyle();
