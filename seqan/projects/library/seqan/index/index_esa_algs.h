@@ -84,7 +84,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	//////////////////////////////////////////////////////////////////////////////
 
 	template < typename TSTree >
-	struct GetVSTreeIteratorTraits< Iter< TSTree, VSTree< BottomUp<SuperMaxRepeats> > > > > {
+	struct GetVSTreeIteratorTraits< Iter< TSTree, VSTree< BottomUp<SuperMaxRepeats> > > > {
 		typedef PostorderEmptyEdges	Type;
 	};
 
