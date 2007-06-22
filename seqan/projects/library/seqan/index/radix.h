@@ -55,15 +55,15 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Value<TText>::Type			TValue;
 
         RadixMap<TValue> map(K);
-		TSize i, sum = 0, n = length(a);						// for (i = 0;  i < K;  i++) c[i] = 0;
+		TSize i, sum = 0, n = length(a);								// for (i = 0;  i < K;  i++) c[i] = 0;
 		arrayFill(begin(c, Standard()), begin(c, Standard()) + K, 0);	// reset counters
-		for (i = 0;  i < n;  i++)								// count occurences
+		for (i = 0;  i < n;  i++)										// count occurences
 			c[map(r[a[i]])]++;
-		for (i = 0;  i < K;  i++) {								// exclusive prefix sums
+		for (i = 0;  i < K;  i++) {										// exclusive prefix sums
 			TSize t = c[i];  c[i] = sum;  sum += t;
 		}
 		for (i = 0;  i < n;  i++) {
-			TSize j = a[i];										// sort
+			TSize j = a[i];												// sort
 			b[c[map(r[j])]++] = j;
 		}
 	}
@@ -89,14 +89,14 @@ namespace SEQAN_NAMESPACE_MAIN
 		TSize i, sum = 0, n = length(a), sn = length(r);
 		arrayFill(begin(c, Standard()), begin(c, Standard()) + K, 0);	// reset counters
 		for (i = 0;  i < n;  i++) {
-			TSize j = a[i] + shift;								// count occurences
+			TSize j = a[i] + shift;										// count occurences
 			if (j < sn) c[map(r[j])]++;
 			else        sum++;
 		}
-		for (i = 0;  i < K;  i++) {                             // exclusive prefix sums
+		for (i = 0;  i < K;  i++) {										// exclusive prefix sums
 			TSize t = c[i];  c[i] = sum;  sum += t;
 		}
-		for (i = 0, sum = 0;  i < n;  i++) {                    // sort
+		for (i = 0, sum = 0;  i < n;  i++) {							// sort
 			TSize j = a[i] + shift;
 			if (j < sn) b[c[map(r[j])]++] = a[i];	// On Exception: Make sure, you have resized your sufarray
 			else        b[sum++    ] = a[i];		// before calling createSuffixArray(..) to length(text)?
@@ -121,15 +121,15 @@ namespace SEQAN_NAMESPACE_MAIN
 
         RadixMap<TValue> map(K);
 		const TValue *rp = begin(r, Standard()) - 1;
-		TSize i, sum = 0, n = length(a);						// for (i = 0;  i < K;  i++) c[i] = 0;
+		TSize i, sum = 0, n = length(a);								// for (i = 0;  i < K;  i++) c[i] = 0;
 		arrayFill(begin(c, Standard()), begin(c, Standard()) + K, 0);	// reset counters
-		for (i = 0;  i < n;  i++)								// count occurences
+		for (i = 0;  i < n;  i++)										// count occurences
 			c[map(rp[a[i]])]++;
-		for (i = 0;  i < K;  i++) {								// exclusive prefix sums
+		for (i = 0;  i < K;  i++) {										// exclusive prefix sums
 			TSize t = c[i];  c[i] = sum;  sum += t;
 		}
 		for (i = 0;  i < n;  i++) {
-			TSize j = a[i];										// sort
+			TSize j = a[i];												// sort
 			b[c[map(rp[j])]++] = j - 1;
 		}
 	}
@@ -152,17 +152,17 @@ namespace SEQAN_NAMESPACE_MAIN
 
         RadixMap<TValue> map(K);
 		const TValue *rp = begin(r, Standard()) - 1;
-        TSize i, sum = 0, n = length(a);						// for (i = 0;  i < K;  i++) c[i] = 0;
+        TSize i, sum = 0, n = length(a);								// for (i = 0;  i < K;  i++) c[i] = 0;
 		arrayFill(begin(c, Standard()), begin(c, Standard()) + K, 0);	// reset counters
-		for (i = 0;  i < n;  i++) {								// count occurences
+		for (i = 0;  i < n;  i++) {										// count occurences
 	        TSize j = a[i];
 			if (j > 0) c[map(rp[j])]++;
 		}
-		for (i = 0;  i < K;  i++) {								// exclusive prefix sums
+		for (i = 0;  i < K;  i++) {										// exclusive prefix sums
 			TSize t = c[i];  c[i] = sum;  sum += t;
 		}
 		for (i = 0;  i < n;  i++) {
-			TSize j = a[i];										// sort
+			TSize j = a[i];												// sort
 			if (j > 0) b[c[map(rp[j])]++] = j - 1;
 		}
 	}

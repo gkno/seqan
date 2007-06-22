@@ -67,7 +67,7 @@ bool testIndexCreation()
 			cout << "*** RUN " << i << " ***";
 			
 			int size = rand() % maxSize;
-			TI = 0
+			TI = 0;
 
 //___randomize_text___________________________________________________________
 
