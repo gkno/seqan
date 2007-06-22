@@ -509,7 +509,7 @@ removeInEdges(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 
 template<typename TAlphabet, typename TCargo, typename TSpec, typename TEdgeDescriptor>
 inline typename VertexDescriptor<Graph<Automaton<TAlphabet, TCargo, TSpec> > >::Type 
-targetVertex(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
+targetVertex(Graph<Automaton<TAlphabet, TCargo, TSpec> > const&,
 			 TEdgeDescriptor const edge) 
 {
 	SEQAN_CHECKPOINT
