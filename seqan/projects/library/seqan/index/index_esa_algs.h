@@ -21,8 +21,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	// MUMs - generalized suffix tree version
 	//////////////////////////////////////////////////////////////////////////////
 
-	template <>
-	struct _GetVSTreeIteratorTraits< VSTree<BottomUp<MUMs> > > {
+	template < typename TSTree >
+	struct GetVSTreeIteratorTraits< Iter< TSTree, VSTree< BottomUp<MUMs> > > > {
 		typedef PostorderEmptyEdges	Type;
 	};
 
@@ -83,8 +83,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	// super-maximal repeats - suffix tree version
 	//////////////////////////////////////////////////////////////////////////////
 
-	template <>
-	struct _GetVSTreeIteratorTraits< VSTree<BottomUp<SuperMaxRepeats> > > {
+	template < typename TSTree >
+	struct _GetVSTreeIteratorTraits< Iter< TSTree, VSTree< BottomUp<SuperMaxRepeats> > > > {
 		typedef PostorderEmptyEdges	Type;
 	};
 
@@ -140,8 +140,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	// supermaximal repeats - specialized for Enhanced Suffix Arrays
 	//////////////////////////////////////////////////////////////////////////////
 
-	template <>
-	struct _GetVSTreeIteratorTraits< VSTree<BottomUp<SuperMaxRepeatsFast> > > {
+	template < typename TSTree >
+	struct _GetVSTreeIteratorTraits< Iter< TSTree, VSTree< BottomUp<SuperMaxRepeatsFast> > > > {
 		typedef PostorderEmptyEdges	Type;
 	};
 
@@ -265,8 +265,8 @@ namespace SEQAN_NAMESPACE_MAIN
 			leftmost(0,0,0) {}
 	};
 
-	template <>
-	struct _GetVSTreeIteratorTraits< VSTree<BottomUp<MaxRepeats> > > {
+	template < typename TSTree >
+	struct _GetVSTreeIteratorTraits< Iter< TSTree, VSTree< BottomUp<MaxRepeats> > > > {
 		typedef PostorderEmptyEdges	Type;
 	};
 
