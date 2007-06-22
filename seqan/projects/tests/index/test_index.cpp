@@ -347,8 +347,6 @@ void Main_TestQGram();
 int main()
 {
 	SEQAN_TREPORT("TEST BEGIN")
-//	testIndexCreation();
-//	return 0;
 
 	cout << "===================================" << endl;
 	cout << "----Basic Suffix Tree iterators----" << endl;

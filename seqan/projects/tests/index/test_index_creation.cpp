@@ -226,7 +226,7 @@ bool testIndexCreation()
 			cout << " OK!" << endl;
 
 		}
-		cout << "*** TIME RESULTS (sec/MB) ***";
+		cout << "*** TIME RESULTS (sec/MB) ***" << endl;
 		for(int i=0; i<TI; ++i)
 			cout << algNames[i] << " " << 1024.0*1024.0 * timeSum[i] / textSum << endl;
 
