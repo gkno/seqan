@@ -119,8 +119,8 @@ This interval is the @Function.value@ of the iterator.
 ..param.TSpec:The specialization type.
 */
 
-	template < typename TIndex, class TOrder >
-	class Iter< TIndex, VSTree< TopDown< ParentLinks<TOrder> > > >:
+	template < typename TIndex, class TSpec >
+	class Iter< TIndex, VSTree< TopDown< ParentLinks<TSpec> > > >:
 		public Iter< TIndex, VSTree< TopDown<> > >
 	{
 	public:
@@ -189,7 +189,7 @@ This interval is the @Function.value@ of the iterator.
 			if (!empty(indexSA(_index))) 
 			{
 				_dfsOnPush(*this, TStackEntry(0,0));
-				goNextImpl(*this, Postorder());
+				goNextImpl(*this, typename GetVSTreeIteratorTraits< Iter >::Type());
 			}
 		}
 
@@ -237,8 +237,12 @@ This interval is the @Function.value@ of the iterator.
 	}
 
 
-	template < typename TIndex, typename TSpec >
-	inline void goNextImpl(Iter<TIndex, VSTree< BottomUp<TSpec> > > &it, Postorder const) {
+	// postorder bottom up iterator (dfs)
+	template < typename TIndex, typename TSpec, typename THideEmptyEdges >
+	inline void goNextImpl(
+		Iter<TIndex, VSTree< BottomUp<TSpec> > > &it, 
+		VSTreeIteratorTraits<_Postorder, THideEmptyEdges> const) 
+	{
 		TIndex const &index = container(it);
 		do {
 			// postorder dfs via lcp-table
@@ -280,10 +284,12 @@ This interval is the @Function.value@ of the iterator.
 				_dfsOnPop(it, 0);
 				_dfsRange(it).i2 = _dfsRange(it).i1;
 			} else {
-				// skip $ leafs
-/*				if (suffixLength(saAt(_dfsRange(it).i1, index), index) == lcpAt(_dfsRange(it).i1, index))
+				// skip $ leafs (empty edges)
+				if (THideEmptyEdges::VALUE &&
+					suffixLength(saAt(_dfsRange(it).i1, index), index) == lcpAt(_dfsRange(it).i1, index))
 					continue;
-*/				_dfsOnLeaf(it);
+
+				_dfsOnLeaf(it);
 	// Blatt:
 	// wenn danach kein Pop, aber Push -> Vater wird erst noch gepusht
 	// wenn danach Pop				   -> Vater ist Top des Stack
@@ -735,12 +741,12 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 
 	template < typename TIndex, typename TSpec >
 	inline void goNext(Iter<TIndex, VSTree<TSpec> > &it) {
-		goNext(it, typename DefaultDFSOrder< Iter<TIndex, VSTree<TSpec> > >::Type());
+		goNext(it, typename GetVSTreeIteratorTraits< Iter<TIndex, VSTree<TSpec> > >::Type());
 	}
 
-	template < typename TIndex, typename TSpec, typename TSpecTag >
-	inline void goNext(Iter<TIndex, VSTree<TSpec> > &it, Tag<TSpecTag> const tagOrder) {
-		goNextImpl(it, tagOrder);
+	template < typename TIndex, typename TSpec, typename TTraits >
+	inline void goNext(Iter<TIndex, VSTree<TSpec> > &it, TTraits const traits) {
+		goNextImpl(it, traits);
 	}
 
 
@@ -784,11 +790,29 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 		if (isLeaf(it)) return false;
 		_historyPush(it, value(it).i1);
 
-		typename Size<TIndex>::Type i = _getUp(value(it).i1.i2, container(it));
-		if (value(it).i1.i1 < i && i < value(it).i1.i2)
-			value(it).i1.i2 = i;
-		else
-			value(it).i1.i2 = _getDown(value(it).i1.i1, container(it));
+		TIndex const &index = container(it);
+
+		typename Size<TIndex>::Type lval = _getUp(value(it).i1.i2, index);
+		if (!(value(it).i1.i1 < lval && lval < value(it).i1.i2))
+			lval = _getDown(value(it).i1.i1, index);
+		value(it).i1.i2 = lval;
+
+		typedef Iter< TIndex, VSTree< TopDown<TSpec> > >		TIter;
+		typedef typename GetVSTreeIteratorTraits<TIter>::Type	TTraits;
+		typedef typename TTraits::HideEmptyEdges				THideEmptyEdges;
+
+		if (THideEmptyEdges::VALUE) {
+			typename Size<TIndex>::Type lcp = lcpAt(lval - 1, index);
+			//typename typename StringSetLimits<TIndex const>::Type &limits = stringSetLimits(index);
+
+			while (isLeaf(it)) {
+				typename SAValue<TIndex>::Type pos = getOccurence(it);
+				if (getSeqOffset(pos, stringSetLimits(index)) + lcp == sequenceLength(getSeqNo(pos, stringSetLimits(index)), index))
+					goRight(it);
+				else
+					break;
+			}
+		}
 		return true;
 	}
 
@@ -1020,8 +1044,10 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
     //////////////////////////////////////////////////////////////////////////////
 	// dfs traversal for ParentLink iterators
 
-	template < typename TIndex, typename TSpec >
-	inline void goNextImpl(Iter< TIndex, VSTree< TopDown< ParentLinks<TSpec> > > > &it, Preorder const) 
+	template < typename TIndex, typename TSpec, typename THideEmptyEdges >
+	inline void goNextImpl(
+		Iter< TIndex, VSTree< TopDown< ParentLinks<TSpec> > > > &it, 
+		VSTreeIteratorTraits<_Preorder, THideEmptyEdges> const)
 	{
 		// preorder dfs
 		if (!goDown(it) && !goRight(it))
@@ -1029,8 +1055,10 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 		if (isRoot(it)) clear(it);
 	}
 
-	template < typename TIndex, typename TSpec >
-	inline void goNextImpl(Iter< TIndex, VSTree< TopDown< ParentLinks<TSpec> > > > &it, Postorder const) 
+	template < typename TIndex, typename TSpec, typename THideEmptyEdges >
+	inline void goNextImpl(
+		Iter< TIndex, VSTree< TopDown< ParentLinks<TSpec> > > > &it, 
+		VSTreeIteratorTraits<_Postorder, THideEmptyEdges> const)
 	{
 		// postorder dfs
 		if (goRight(it))

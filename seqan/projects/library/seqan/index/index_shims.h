@@ -36,13 +36,11 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef Pipe< src_t, Caster<TUValue> >          unsigner_t;
 		typedef Pipe< unsigner_t, TAlgSpec >	        creator_t;
 
-		// instantiation
+		// instantiation and processing
 		src_t		src(text);
         unsigner_t  unsigner(src);
-		creator_t	creator;
+		creator_t	creator(unsigner);
 
-		// processing
-		creator << unsigner;
 		suffixArray << creator;
 		#ifdef SEQAN_TEST_INDEX
 			isSuffixArray(suffixArray, text);
@@ -76,13 +74,11 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef Pipe< src_t, Caster<TUValue> >          unsigner_t;
 		typedef Pipe< unsigner_t, MultiConstrSpec >	    creator_t;
 
-		// instantiation
+		// instantiation and processing
 		src_t		src(concat(stringSet));
         unsigner_t  unsigner(src);
-		creator_t	creator(stringSetLimits(stringSet));
+		creator_t	creator(unsigner, stringSetLimits(stringSet));
 
-		// processing
-		creator << unsigner;
 		suffixArray << creator;
 		#ifdef SEQAN_TEST_INDEX
 			//isSuffixArray(suffixArray, stringSet);
@@ -110,7 +106,10 @@ namespace SEQAN_NAMESPACE_MAIN
 		TAlgSpec const alg)
 	{
 		// -> call internal memory algorithm with an extended interface (+ alphabet size, max_depth)
-		createSuffixArray(SA, s, alg, ValueSize< typename Value<TText>::Type >::VALUE, 0);
+		if (BitsPerValue< typename Value<TText>::Type >::VALUE > 16)
+			createSuffixArray(SA, s, alg, length(s), 0);
+		else
+			createSuffixArray(SA, s, alg, ValueSize< typename Value<TText>::Type >::VALUE, 0);
 	}
 
 	template < 
@@ -166,13 +165,11 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef Pipe< TSA, Source<> >   							srcSA_t;
 	    typedef Pipe< Bundle2< srcText_t, srcSA_t >, TAlgSpec >		creator_t;
 
-		// instantiation
+		// instantiation and processing
 		srcText_t	srcText(text);
 		srcSA_t		srcSA(suffixArray);
-		creator_t	creator;
+		creator_t	creator(bundle2(srcText, srcSA));
 
-		// processing
-	    creator << bundle2(srcText, srcSA);
 		LCP << creator;
 		#ifdef SEQAN_TEST_INDEX
 			isLCPTable(LCP, suffixArray, text);
@@ -204,13 +201,11 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef Pipe< TSA, Source<> >   								srcSA_t;
 	    typedef Pipe< Bundle2< srcText_t, srcSA_t >, MultiConstrSpec >	creator_t;
 
-		// instantiation
+		// instantiation and processing
 		srcText_t	srcText(concat(stringSet));
 		srcSA_t		srcSA(suffixArray);
-		creator_t	creator(stringSetLimits(stringSet));
+		creator_t	creator(bundle2(srcText, srcSA), stringSetLimits(stringSet));
 
-		// processing
-	    creator << bundle2(srcText, srcSA);
 		LCP << creator;
 		#ifdef SEQAN_TEST_INDEX
 			isLCPTable(LCP, suffixArray, text);
@@ -291,13 +286,11 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef Pipe< TSA, Source<> >					    	    srcSA_t;
 	    typedef Pipe< Bundle2< srcText_t, srcSA_t >, TAlgSpec >		creator_t;
 
-		// instantiation
+		// instantiation and processing
 		srcText_t	srcText(concat(text));
 		srcSA_t		srcSA(suffixArray);
-		creator_t	creator;
+		creator_t	creator(bundle2(srcText, srcSA));
 
-		// processing
-	    creator << bundle2(srcText, srcSA);
 		#ifdef SEQAN_TEST_INDEX
 			isLCPTable(creator, suffixArray, text);
 		#endif
@@ -380,13 +373,11 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef Pipe< TSA, Source<> >   					srcSA_t;
 	    typedef Pipe< Bundle2< srcText_t, srcSA_t >, BWT >	creator_t;
 
-		// instantiation
+		// instantiation and processing
 		srcText_t	srcText(s);
 		srcSA_t		srcSA(SA);
-		creator_t	creator;
+		creator_t	creator(bundle2(srcText, srcSA));
 
-		// processing
-	    creator << bundle2(srcText, srcSA);
 		bwt << creator;
 	}
 
@@ -403,20 +394,15 @@ namespace SEQAN_NAMESPACE_MAIN
 */
 
 	// default
-	template < typename TBWT, typename TText, typename TSA, 
-			   typename TTextRandom >
-    inline void _createBWTableWrapper(
-		TBWT &bwt, TText const &s, TSA const &sa, 
-		TTextRandom const)
+	template < typename TBWT, typename TText, typename TSA, typename _TTextRandom >
+    inline void _createBWTableWrapper(TBWT &bwt, TText const &s, TSA const &sa,		_TTextRandom const)
 	{
 		createBWTableExt(bwt, concat(s), sa);
 	}
 
 	// text supports fast random access
 	template < typename TBWT, typename TText, typename TSA >
-    inline void _createBWTableWrapper(
-		TBWT &bwt, TText const &s, TSA const &sa, 
-		True const)
+    inline void _createBWTableWrapper(TBWT &bwt, TText const &s, TSA const &sa,		True const)
 	{
 		createBWTableInt(bwt, concat(s), sa);
 	}
@@ -555,7 +541,7 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 // solve dependencies
 
 	template <typename TText, typename TSpec, typename TFibre>
-	inline bool indexSolveDependencies(Index<TText, TSpec> &index, TFibre const fibre) {
+	inline bool indexSolveDependencies(Index<TText, TSpec> &, TFibre const) {
 		return true;
 	}
 

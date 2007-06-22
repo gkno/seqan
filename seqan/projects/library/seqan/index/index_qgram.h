@@ -14,6 +14,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	struct _Fibre_Dir;			// directory/hash table, contains start indices of buckets
 	struct _Fibre_SADir;		// identifies algorithm to construct both SA and directory at once
+	struct _Fibre_Shape;		// underlying shape
 
 	typedef Tag<_Fibre_Text>		QGram_Text;
 	typedef Tag<_Fibre_RawText>		QGram_RawText;
@@ -21,8 +22,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	typedef Tag<_Fibre_RawSA>		QGram_RawSA;
 	typedef Tag<_Fibre_Dir>			QGram_Dir;
 	typedef Tag<_Fibre_SADir>		QGram_SADir;
-
-	struct QGram_Alg {};
+	typedef Tag<_Fibre_Shape>		QGram_Shape;
 
 //////////////////////////////////////////////////////////////////////////////
 // q-gram index
@@ -42,16 +42,24 @@ namespace SEQAN_NAMESPACE_MAIN
 	struct Index_QGram;
 
 
-	template < typename TText, typename TShapeSpec >
-	class Index<TText, Index_QGram<TShapeSpec> > {
+	template < typename TObject, typename TShapeSpec >
+	struct Fibre< Index<TObject, Index_QGram<TShapeSpec> >, Tag<_Fibre_Shape> > {
+		typedef Index< TObject, Index_QGram<TShapeSpec> >			TIndex;
+		typedef Shape< typename Value<TIndex>::Type, TShapeSpec >	Type;
+	};
+
+	template < typename TObject, typename TShapeSpec >
+	class Index<TObject, Index_QGram<TShapeSpec> > {
 	public:
-		Holder<typename Fibre<Index, QGram_Text>::Type>	text;
-		typename Fibre<Index, QGram_SA>::Type			sa;		// suffix array sorted by the first q chars
-		typename Fibre<Index, QGram_Dir>::Type			dir;	// bucket directory
+		typedef typename Fibre<Index, QGram_Text>::Type		TText;
+		typedef typename Fibre<Index, QGram_SA>::Type		TSA;
+		typedef typename Fibre<Index, QGram_Dir>::Type		TDir;
+		typedef typename Fibre<Index, QGram_Shape>::Type	TShape;
 
-		typedef Shape<typename Value<Index>::Type, TShapeSpec>	TShape;
-
-		TShape shape;
+		Holder<TText>	text;	// underlying text
+		TSA				sa;		// suffix array sorted by the first q chars
+		TDir			dir;	// bucket directory
+		TShape			shape;	// underlying shape
 
 		Index() {}
 
@@ -88,32 +96,33 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 // default fibre creators
 
-	template < typename TText, typename TShapeSpec >
-	struct DefaultIndexCreator<Index<TText, Index_QGram<TShapeSpec> >, Tag<_Fibre_SA> > {
-        typedef QGram_Alg Type;
-    };
-
-	template < typename TText, typename TShapeSpec >
-	struct DefaultIndexCreator<Index<TText, Index_QGram<TShapeSpec> >, QGram_Dir > {
-        typedef QGram_Alg Type;
-    };
-
-	template < typename TText, typename TShapeSpec >
-	struct DefaultIndexCreator<Index<TText, Index_QGram<TShapeSpec> >, QGram_SADir > {
-        typedef QGram_Alg Type;
+	template < typename TText, typename TSpec >
+	struct DefaultIndexCreator<Index<TText, Index_QGram<TSpec> >, Tag<_Fibre_SA> > {
+        typedef Default Type;
     };
 
 //////////////////////////////////////////////////////////////////////////////
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, QGram_Dir>::Type & 
-	getFibre(Index<TText, TSpec> &index, QGram_Dir const) {
+	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_Dir> >::Type & 
+	getFibre(Index<TText, TSpec> &index, Tag<_Fibre_Dir> const) {
 		return index.dir;
 	}
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, QGram_Dir>::Type & 
-	getFibre(Index<TText, TSpec> const &index, QGram_Dir const) {
+	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_Dir> >::Type & 
+	getFibre(Index<TText, TSpec> const &index, Tag<_Fibre_Dir> const) {
 		return index.dir;
+	}
+
+	template <typename TText, typename TSpec>
+	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_Shape> >::Type & 
+	getFibre(Index<TText, TSpec> &index, Tag<_Fibre_Shape> const) {
+		return index.shape;
+	}
+	template <typename TText, typename TSpec>
+	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_Shape> >::Type & 
+	getFibre(Index<TText, TSpec> const &index, Tag<_Fibre_Shape> const) {
+		return index.shape;
 	}
 
 //////////////////////////////////////////////////////////////////////////////
@@ -128,25 +137,35 @@ namespace SEQAN_NAMESPACE_MAIN
 */
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, QGram_Dir>::Type & 
+	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_Dir> >::Type & 
 	indexDir(Index<TText, TSpec> &index) { 
-		return getFibre(index, QGram_Dir()); 
+		return getFibre(index, Tag<_Fibre_Dir>()); 
 	}
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, QGram_Dir>::Type & 
+	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_Dir> >::Type & 
 	indexDir(Index<TText, TSpec> const &index) { 
-		return getFibre(index, QGram_Dir()); 
+		return getFibre(index, Tag<_Fibre_Dir>()); 
 	}
 
-	template <typename TText, typename TShapeSpec>
-	inline Shape<typename Value<Index<TText, Index_QGram<TShapeSpec> > >::Type, TShapeSpec> &
-	indexShape(Index<TText, Index_QGram<TShapeSpec> > &index) {
-		return index.shape; 
+	template <typename TText, typename TSpec>
+	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_Shape> >::Type & 
+	indexShape(Index<TText, TSpec> &index) { 
+		return getFibre(index, Tag<_Fibre_Shape>()); 
 	}
-	template <typename TText, typename TShapeSpec>
-	inline Shape<typename Value<Index<TText, Index_QGram<TShapeSpec> > >::Type, TShapeSpec> const &
-	indexShape(Index<TText, Index_QGram<TShapeSpec> > const &index) {
-		return index.shape; 
+	template <typename TText, typename TSpec>
+	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_Shape> >::Type & 
+	indexShape(Index<TText, TSpec> const &index) { 
+		return getFibre(index, Tag<_Fibre_Shape>()); 
+	}
+
+	template <typename TIndex>
+	inline int _fullDirLength(TIndex const &index) 
+	{
+		typedef typename Fibre<TIndex, Tag<_Fibre_Shape> >::Type	TShape;
+		typedef typename Value<TIndex>::Type						TValue;
+		return _intPow(
+			ValueSize<TValue>::VALUE, 
+			length(indexShape(index)) - shapeCountBlanks(indexShape(index))) + 1;
 	}
 
 //////////////////////////////////////////////////////////////////////////////
@@ -183,6 +202,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		arrayFill(begin(dir, Standard()), end(dir, Standard()), 0);
 
 		// 2. count q-grams
+		if (length(text) < length(shape)) return;
 		TSize num_qgrams = length(text) - length(shape) + 1;
 
 		TIterator itText = begin(text, Standard());
@@ -243,6 +263,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		for(unsigned seqNo = 0; seqNo < length(stringSet); ++seqNo) 
 		{
 			TString const &sequence = value(stringSet, seqNo);
+			if (length(sequence) < length(shape)) continue;
 			TSize num_qgrams = length(sequence) - length(shape) + 1;
 
 			TIterator itText = begin(sequence, Standard());
@@ -273,6 +294,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		for(unsigned seqNo = 0; seqNo < length(stringSet); ++seqNo) 
 		{
 			TString const &sequence = value(stringSet, seqNo);
+			if (length(sequence) < length(shape)) continue;
 			TSize num_qgrams = length(sequence) - length(shape) + 1;
 
 			typename Value<TSA>::Type localPos;
@@ -525,7 +547,7 @@ namespace SEQAN_NAMESPACE_MAIN
 // interface for automatic index creation 
 
 	template <typename TText, typename TShapeSpec>
-	inline bool indexCreate(Index<TText, Index_QGram<TShapeSpec> > &index, Tag<_Fibre_SA> const, QGram_Alg const) 
+	inline bool indexCreate(Index<TText, Index_QGram<TShapeSpec> > &index, Tag<_Fibre_SA> const, Default const) 
 	{
 		typedef Index<TText, Index_QGram<TShapeSpec> >			TIndex;
 		typedef Shape<typename Value<TIndex>::Type, TShapeSpec>	TShape;
@@ -539,24 +561,24 @@ namespace SEQAN_NAMESPACE_MAIN
 				qgram_count += sequenceLength(i, index) - (length(shape) - 1);
 
 		resize(indexSA(index), qgram_count, Exact());
-		resize(indexDir(index), _intPow(ValueSize<TShape>::VALUE, length(shape) - shapeCountBlanks(shape)) + 1, Exact());
+		resize(indexDir(index), _fullDirLength(index) + 1, Exact());
 		createQGramIndex(indexSA(index), indexDir(index), indexText(index), indexShape(index));
 		return true;
 	}
 
 	template <typename TText, typename TShapeSpec>
-	inline bool indexCreate(Index<TText, Index_QGram<TShapeSpec> > &index, QGram_SADir const, QGram_Alg const alg)
+	inline bool indexCreate(Index<TText, Index_QGram<TShapeSpec> > &index, QGram_SADir const, Default const alg)
 	{
 		return indexCreate(index, QGram_SA(), alg);
 	}
 /*
 	template <typename TText, typename TShapeSpec>
-	inline bool indexCreate(Index<TText, Index_QGram<TShapeSpec> > &index, QGram_Dir const, QGram_Alg const alg)
+	inline bool indexCreate(Index<TText, Index_QGram<TShapeSpec> > &index, QGram_Dir const, Default const alg)
 	{
 		typedef Index<TText, Index_QGram<TShapeSpec> >			TIndex;
 		typedef Shape<typename Value<TIndex>::Type, TShapeSpec>	TShape;
 
-		resize(indexDir(index), _intPow(ValueSize<TShape>::VALUE, length(shape) - shapeCountBlanks(shape)) + 1, Exact());
+		resize(indexDir(index), _fullDirLength(index) + 1, Exact());
 		createQGramIndex(indexSA(index), indexDir(index), indexText(index), indexShape(index));
 		return true;
 	}

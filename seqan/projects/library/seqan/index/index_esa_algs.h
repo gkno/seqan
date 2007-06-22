@@ -21,6 +21,11 @@ namespace SEQAN_NAMESPACE_MAIN
 	// MUMs - generalized suffix tree version
 	//////////////////////////////////////////////////////////////////////////////
 
+	template <>
+	struct _GetVSTreeIteratorTraits< VSTree<BottomUp<MUMs> > > {
+		typedef PostorderEmptyEdges	Type;
+	};
+
 	template < typename TSTree >
 	class Iter< TSTree, VSTree< BottomUp<MUMs> > >:
 		public Iter< TSTree, VSTree< BottomUp<> > > 
@@ -65,7 +70,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < typename TSTree >
 	inline void goNext(Iter< TSTree, VSTree< BottomUp<MUMs> > > &it) {
 		do {
-			goNext(it, Postorder());
+			goNext(it, PostorderEmptyEdges());
 		} while (!atEnd(it) && 
 			     !(	(countOccurences(it) == it.seqCount) && 
 					(repLength(it) >= it.minLength) &&
@@ -77,6 +82,11 @@ namespace SEQAN_NAMESPACE_MAIN
 	//////////////////////////////////////////////////////////////////////////////
 	// super-maximal repeats - suffix tree version
 	//////////////////////////////////////////////////////////////////////////////
+
+	template <>
+	struct _GetVSTreeIteratorTraits< VSTree<BottomUp<SuperMaxRepeats> > > {
+		typedef PostorderEmptyEdges	Type;
+	};
 
 	template < typename TSTree >
 	class Iter< TSTree, VSTree< BottomUp<SuperMaxRepeats> > >:
@@ -118,7 +128,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < typename TSTree >
 	inline void goNext(Iter< TSTree, VSTree< BottomUp<SuperMaxRepeats> > > &it) {
 		do {
-			goNext(it, Postorder());
+			goNext(it, PostorderEmptyEdges());
 		} while (!atEnd(it) && 
 			     !(	childrenAreLeaves(it) && 
 					(repLength(it) >= it.minLength) &&
@@ -129,6 +139,11 @@ namespace SEQAN_NAMESPACE_MAIN
 	//////////////////////////////////////////////////////////////////////////////
 	// supermaximal repeats - specialized for Enhanced Suffix Arrays
 	//////////////////////////////////////////////////////////////////////////////
+
+	template <>
+	struct _GetVSTreeIteratorTraits< VSTree<BottomUp<SuperMaxRepeatsFast> > > {
+		typedef PostorderEmptyEdges	Type;
+	};
 
 	template < typename TText, typename TSpec >
 	class Iter< Index<TText, Index_ESA<TSpec> >, VSTree< BottomUp<SuperMaxRepeatsFast> > >:
@@ -248,6 +263,11 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		_FractionCompound():
 			leftmost(0,0,0) {}
+	};
+
+	template <>
+	struct _GetVSTreeIteratorTraits< VSTree<BottomUp<MaxRepeats> > > {
+		typedef PostorderEmptyEdges	Type;
 	};
 
 	template < typename TSTree >
@@ -497,7 +517,7 @@ namespace SEQAN_NAMESPACE_MAIN
 				maxRepeatMerge(it, topPrev(it.setStack), top(it.setStack));
 				pop(it.setStack);
 			}
-			goNext(it, Postorder());
+			goNext(it, PostorderEmptyEdges());
 			if (empty(it.history))
 				it.canMerge = false;
 			else

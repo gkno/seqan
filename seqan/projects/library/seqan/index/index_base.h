@@ -20,7 +20,9 @@ namespace SEQAN_NAMESPACE_MAIN
 	// suffix array construction specs
 	struct Skew3;
 	struct Skew7;
+	struct LarssonSadakane;
 	struct ManberMyers;
+	struct SAQSort;
 	struct QGram_Alg;
 
 	// lcp table construction algorithms
@@ -161,7 +163,9 @@ namespace SEQAN_NAMESPACE_MAIN
 */
     // standard algorithm for indices creation
     template < typename TIndex, typename TFibre >
-    struct DefaultIndexCreator;
+	struct DefaultIndexCreator {
+		typedef Default Type;
+	};
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -253,6 +257,16 @@ namespace SEQAN_NAMESPACE_MAIN
 		> Type;
 	};
 
+/*
+	template < typename TString, typename TSpec >
+	struct SAValue< StringSet<TString, TSpec> > {
+		typedef Pair<
+			typename Size< StringSet<TString, TSpec> >::Type,
+			typename SAValue<TString>::Type,
+			CutCompressed<4>						// max. 4 sequences 
+		> Type;										// max. 2^30 characters each
+	};
+*/
 	template < typename TText, typename TSpec >
 	struct SAValue< Index<TText, TSpec> > {
 		typedef typename SAValue<TText>::Type Type;
@@ -479,18 +493,6 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		return ModString(indexSA(index), TFunctor(stringSetLimits(indexText(index))));
 	}
-/*
-	template <typename TString, typename TSSetSpec, typename TSpec>
-	inline typename Fibre<Index<StringSet<TString, TSSetSpec>, TSpec> const, Tag<_Fibre_RawSA> >::Type
-	getFibre(Index<StringSet<TString, TSSetSpec>, TSpec> const &index, Tag<_Fibre_RawSA>  const) 
-	{
-		typedef Index< StringSet<TString, TSSetSpec>, TSpec> TIndex;
-		return ModifiedString<
-			typename Fibre<TIndex const, Tag<_Fibre_SA> >::Type,
-			ModGlobalizer<typename StringSetLimits<StringSet<TString, TSSetSpec> const>::Type> 
-		> (indexSA(index), stringSetLimits(indexText(index)));
-	}
-*/
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -557,7 +559,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <typename TText, typename TSpec>
 	inline typename Size<Index<TText, TSpec> >::Type 
-	countSequences(Index<TText, TSpec> const &index) {
+	countSequences(Index<TText, TSpec> const & /*index*/) {
 		return 1;
 	}
 	template <typename TString, typename TSSetSpec, typename TSpec>
@@ -570,7 +572,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <typename TSeqNo, typename TText, typename TSpec>
 	inline typename Size<Index<TText, TSpec> >::Type 
-	sequenceLength(TSeqNo seqNo, Index<TText, TSpec> const &index) {
+	sequenceLength(TSeqNo /*seqNo*/, Index<TText, TSpec> const &index) {
 		return length(index);
 	}
 
@@ -777,8 +779,20 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <typename TText, typename TSpec>
 	inline typename StringSetLimits<TText const>::Type
-	stringSetLimits(Index<TText, TSpec> const &index) { 
+	stringSetLimits(Index<TText, TSpec> &) { 
 		return Nothing(); 
+	}
+
+	template <typename TText, typename TSpec>
+	inline typename StringSetLimits<TText const>::Type
+	stringSetLimits(Index<TText, TSpec> const &) { 
+		return Nothing(); 
+	}
+
+	template <typename TString, typename TSSetSpec, typename TSpec>
+	inline typename StringSetLimits< StringSet<TString, TSSetSpec> const >::Type & 
+	stringSetLimits(Index<StringSet<TString, TSSetSpec>, TSpec> &index) {
+		return stringSetLimits(indexText(index)); 
 	}
 
 	template <typename TString, typename TSSetSpec, typename TSpec>
