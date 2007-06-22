@@ -1,5 +1,5 @@
 /*
- *  lcp.h
+ *  index_lcp.h
  *  SeqAn
  *
  *  Created by David Weese on 17.07.05.
@@ -66,13 +66,19 @@ namespace SEQAN_NAMESPACE_MAIN
         Pipe(Bundle2< TTextInput, TSuffixArrayInput > const &_bundleIn):
             textIn(&_bundleIn.in1),
 			suffixArrayIn(&_bundleIn.in2),
-            in(mapper) {}
+            in(mapper)
+		{
+			process();
+		}
 
         Pipe(Bundle2< TTextInput, TSuffixArrayInput > const &_bundleIn, const LcpConfig &_conf):
             textIn(&_bundleIn.in1),
 			suffixArrayIn(&_bundleIn.in2),
             in(mapper),
-			conf(_conf) {}
+			conf(_conf)
+		{
+			process();
+		}
         
         inline void process() {
             process(*textIn, *suffixArrayIn);
@@ -151,8 +157,6 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef Pool< TCoreType, MapperSpec< MapperConfigSize< filterI1<TCoreType>, TSize > > > TLinearMapper;
         typedef Pipe< TLinearMapper, Filter< filterI2<TCoreType> > > TFilter;
 
-		TTextInput				*textIn;
-        TSuffixArrayInput		*suffixArrayIn;
         TLinearMapper           mapper;
 		TFilter					in;
 		TLimitsString const		&limits;
@@ -168,22 +172,20 @@ namespace SEQAN_NAMESPACE_MAIN
 			conf(_conf) {}
 
         Pipe(Bundle2< TTextInput, TSuffixArrayInput > const &_bundleIn, TLimitsString const &_limits):
-            textIn(&_bundleIn.in1),
-			suffixArrayIn(&_bundleIn.in2),
             in(mapper),
-			limits(_limits) {}
+			limits(_limits)
+		{
+			process(_bundleIn.in1, _bundleIn.in2);
+		}
 
         Pipe(Bundle2< TTextInput, TSuffixArrayInput > const &_bundleIn, TLimitsString const &_limits, const LcpConfig &_conf):
-            textIn(&_bundleIn.in1),
-			suffixArrayIn(&_bundleIn.in2),
             in(mapper),
 			limits(_limits),
-			conf(_conf) {}
+			conf(_conf)
+		{
+			process(_bundleIn.in1, _bundleIn.in2);
+		}
         
-        inline void process() {
-            process(*textIn, *suffixArrayIn);
-        }
-
 		template < typename _TTextInput, typename _TSuffixArrayInput >
         bool process(_TTextInput &textIn, _TSuffixArrayInput &suffixArrayIn) {
 

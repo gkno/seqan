@@ -146,30 +146,26 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef Pool< _TypeOf(typename TExtender::Out12), MapperSpec< MapperConfigSize< nmap_extended_t, _TSizeOf(typename TExtender::Out12) > > > TSorterS12;
         typedef Pipe< Bundle2< TSorterS0, TSorterS12 >, Merger3 > TMerger;
         
-        TInput      *textIn;
         TSorterS0   sortedS0;
         TSorterS12  sortedS12;
         TMerger     in;
             
         Pipe() :
-            textIn(NULL),
 			in(bundle2(sortedS0, sortedS12)) {}
 
         Pipe(TInput& _textIn) :
-            textIn(&_textIn),
-			in(bundle2(sortedS0, sortedS12)) {}
+			in(bundle2(sortedS0, sortedS12)) 
+		{
+			process(_textIn);
+		}
         
-        inline void process(unsigned maxdepth = 0, unsigned depth = 1) {
-            process(*textIn, maxdepth, depth);
-        }
-
 	    template < typename _TInput >
-        bool process(_TInput &textIn, unsigned maxdepth = 0, unsigned depth = 1) {
+        bool process(_TInput &textIn) {
 
-            SEQAN_PROSET(SEQAN_PRODEPTH, depth);
+            SEQAN_PROADD(SEQAN_PRODEPTH, 1);
             SEQAN_PROMARK("Rekursionsabstieg");
             #ifdef SEQAN_DEBUG_INDEX
-                ::std::cerr << "enter level " << depth << ::std::endl;
+                ::std::cerr << "enter level " << SEQAN_PROVAL(SEQAN_PRODEPTH) << ::std::endl;
             #endif
             {
 
@@ -219,7 +215,6 @@ namespace SEQAN_NAMESPACE_MAIN
 
                 TFilter                     filter(names_sliced);
                 TRecurse                    recurse(filter);
-                recurse.process(maxdepth, depth + 1);					// recursion
 
                 #ifdef SEQAN_TEST_SKEW3
                 {
@@ -254,7 +249,7 @@ namespace SEQAN_NAMESPACE_MAIN
             // ... is done on-demand by merger
             }
             #ifdef SEQAN_DEBUG_INDEX
-                ::std::cerr << "left level " << depth << ::std::endl;
+                ::std::cerr << "left level " << SEQAN_PROVAL(SEQAN_PRODEPTH) << ::std::endl;
             #endif
             SEQAN_PROMARK("Rekursionsaufstieg");
             SEQAN_PROSUB(SEQAN_PRODEPTH, 1);
@@ -290,7 +285,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		unsigned K,
         unsigned maxdepth)
 	{
-        createSuffixArrayExt(SA, s, spec, K, maxdepth);
+        createSuffixArrayExt(SA, s, spec);
 	}
 
 

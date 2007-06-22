@@ -188,12 +188,20 @@ namespace SEQAN_NAMESPACE_MAIN
         // unique names - shortcut
         typedef Pool< _TypeOf(TNames_Sliced), MapperSpec< MapperConfigSize< nmap_linear_t, _TSizeOf(TNames_Sliced) > > > TNames_Linear_Unique;
 
-        // non-unique names - recursion
+        // non-unique names
         typedef Pipe< TNames_Sliced, Filter< filterI2<_TypeOf(TNames_Sliced)> > > TFilter;
-        typedef Pipe< TFilter, recurseSpec > TRecurse;
-                                        typedef skew7_unslicer_func<_TypeOf(TRecurse)> unslicer_func_t;
-        typedef Pipe< TRecurse, Filter<unslicer_func_t> > TUnslicer;
-        typedef Pipe< TUnslicer, Counter > TRenamer;
+
+			// recursion
+			typedef Pipe< TFilter, recurseSpec > TRecurse;
+										typedef skew7_unslicer_func<_TypeOf(TRecurse)> unslicer_func_t;
+			typedef Pipe< TRecurse, Filter<unslicer_func_t> > TUnslicer;
+			typedef Pipe< TUnslicer, Counter > TRenamer;
+
+			// no recursion inMemory shortcut
+			typedef Pipe< TFilter, LarssonSadakane > TInMem;
+			typedef Pipe< TInMem, Filter<unslicer_func_t> > TUnslicerInMem;
+			typedef Pipe< TUnslicerInMem, Counter > TRenamerInMem;
+
         typedef Pool< _TypeOf(TRenamer), MapperSpec< MapperConfigSize< nmap_linear_t, _TSizeOf(TRenamer) > > > TNames_Linear;
         
         // step 2
@@ -212,7 +220,6 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef Pool< _TypeOf(typename TExtender::Out124), MapperSpec< MapperConfigSize< nmap_extended_t, _TSizeOf(typename TExtender::Out124) > > > TSorterS124;
         typedef Pipe< Bundle5< TSorterS0, TSorterS3, TSorterS5, TSorterS6, TSorterS124 >, Merger7 > TMerger;
 
-        TInput      *textIn;
         TSorterS0   sortedS0;
         TSorterS3   sortedS3;
         TSorterS5   sortedS5;
@@ -220,25 +227,22 @@ namespace SEQAN_NAMESPACE_MAIN
         TSorterS124 sortedS124;
         TMerger     in;
             
-        Pipe() :
-            textIn(NULL),
+        Pipe():
 			in(bundle5(sortedS0, sortedS3, sortedS5, sortedS6, sortedS124)) {}
 
-		Pipe(TInput& _textIn/*, typename Size<TInput>::Type = */) :
-            textIn(&_textIn),
-			in(bundle5(sortedS0, sortedS3, sortedS5, sortedS6, sortedS124)) {}
+		Pipe(TInput& _textIn):
+			in(bundle5(sortedS0, sortedS3, sortedS5, sortedS6, sortedS124))
+		{
+			process(_textIn);
+		}
         
-        inline void process(unsigned maxdepth = 0, unsigned depth = 1) {
-            process(*textIn, maxdepth, depth);
-        }
-
 	    template < typename _TInput >
-        bool process(_TInput &textIn, unsigned maxdepth = 0, unsigned depth = 1) {
+        bool process(_TInput &textIn) {
 
-            SEQAN_PROSET(SEQAN_PRODEPTH, depth);
+            SEQAN_PROADD(SEQAN_PRODEPTH, 1);
             SEQAN_PROMARK("Rekursionsabstieg");
             #ifdef SEQAN_DEBUG_INDEX
-                ::std::cerr << "enter level " << depth << " compression: ";
+                ::std::cerr << "enter level " << SEQAN_PROVAL(SEQAN_PRODEPTH) << " compression: ";
 				::std::cerr << TYPECMP<compress, Compressed>::VALUE << " " << BitsPerValue<_TypeOf(TInput)>::VALUE << ::std::endl;
             #endif
             {
@@ -288,28 +292,48 @@ namespace SEQAN_NAMESPACE_MAIN
                 SEQAN_PROMARK("Mapper (4) - s124 konstruieren");
 
                 TFilter                     filter(names_sliced);
-				TRecurse                    recurse(filter);
-                recurse.process(maxdepth, depth + 1);					// recursion
+				TNames_Linear               names_linear(map_linear);
 
-                #ifdef SEQAN_TEST_SKEW7
-                {
-                    String<typename Value<TFilter>::Type, Alloc<> > _text;
-                    _text << filter;
-                    SEQAN_DO(isSuffixArray(recurse, _text));
-                }
-                #endif
+				if (length(filter) > 128*1024*1024) 
+				{
+					// recursion
+					TRecurse                    recurse(filter);
 
-				clear(filter);
-				unslicer_func_t             func(length(textIn));
-                TUnslicer                   unslicer(recurse, func);
-                TRenamer                    renamer(unslicer);
+					#ifdef SEQAN_TEST_SKEW7
+					{
+						String<typename Value<TFilter>::Type, Alloc<> > _text;
+						_text << filter;
+						SEQAN_DO(isSuffixArray(recurse, _text));
+					}
+					#endif
 
-                TNames_Linear               names_linear(map_linear);
-                #ifdef SEQAN_DEBUG_INDEX
-                    ::std::cerr << "  rename names" << ::std::endl;
-                #endif
-                names_linear << renamer;
-				clear(renamer);
+					clear(filter);
+					unslicer_func_t             func(length(textIn));
+					TUnslicer                   unslicer(recurse, func);
+					TRenamer                    renamer(unslicer);
+
+					#ifdef SEQAN_DEBUG_INDEX
+						::std::cerr << "  rename names" << ::std::endl;
+					#endif
+
+					names_linear << renamer;
+				}
+				else
+				{
+					TInMem						inMem(filter);
+
+					clear(filter);
+					unslicer_func_t				func(length(textIn));
+					TUnslicerInMem              unslicer(inMem, func);
+					TRenamerInMem               renamer(unslicer);
+
+					#ifdef SEQAN_DEBUG_INDEX
+						::std::cerr << "  rename names" << ::std::endl;
+					#endif
+
+					names_linear << renamer;
+				} 
+
                 SEQAN_PROMARK("Mapper (10) - ISA124 konstruieren");
                
                 // step 2
@@ -324,7 +348,7 @@ namespace SEQAN_NAMESPACE_MAIN
             // ... is done on-demand by merger
             }
             #ifdef SEQAN_DEBUG_INDEX
-                ::std::cerr << "left level " << depth << ::std::endl;
+                ::std::cerr << "left level " << SEQAN_PROVAL(SEQAN_PRODEPTH) << ::std::endl;
             #endif
             SEQAN_PROMARK("Rekursionsaufstieg");
             SEQAN_PROSUB(SEQAN_PRODEPTH, 1);

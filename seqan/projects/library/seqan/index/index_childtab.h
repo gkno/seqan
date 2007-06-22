@@ -115,7 +115,6 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef Pool< TCoreType, MapperSpec< MapperConfigSize< filterI1<TCoreType>, TSize > > > TLinearMapper;
         typedef Pipe< TLinearMapper, Filter< filterI2<TCoreType> > > TFilter;
 
-		TLCPInput		*lcpIn;
         TLinearMapper   mapper;
 		TFilter			in;
         
@@ -123,12 +122,10 @@ namespace SEQAN_NAMESPACE_MAIN
             in(mapper) {}
 
         Pipe(TLCPInput &_in):
-            lcpIn(&_in),
-            in(mapper) {}
-
-        inline void process() {
-            process(*lcpIn);
-        }
+            in(mapper)
+		{
+			process(_in);
+		}
 
 		template < typename _TLCPInput >
         inline bool process(_TLCPInput &_lcpIn) {
@@ -149,9 +146,6 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 	};
 
-    // not sure which interface is more intuitive, we support both
-    // you can call "skew << pipe" or "skew_t skew(pipe); skew.process()"
-    // for the first we would need no _in member
 	template < typename TInput, typename _TLCPInput >
     inline bool operator<<(Pipe< TInput, ChildTab > &me, _TLCPInput const &in) {
  	    return me.process(in);
@@ -168,8 +162,6 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		TSource source(lcp);
 		TESA	esa(source);
-
-		esa.process();
 
 		childtab << esa;
 	}

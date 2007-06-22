@@ -1,5 +1,5 @@
 /*
- *  bwt.h
+ *  index_bwt.h
  *  SeqAn
  *
  *  Created by David Weese on 17.07.05.
@@ -45,8 +45,6 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef Pool< _TypeOf(TJoiner), MapperSpec< MapperConfigSize< filterI1<_TypeOf(TJoiner)>, TSize> > > TLinearMapper;
         typedef Pipe< TLinearMapper, Filter< filterI2<_TypeOf(TLinearMapper)> > > TFilter;
 
-		TTextInput			*textIn;
-		TSuffixArrayInput	*suffixArrayIn;
         TLinearMapper		mapper;
 		TFilter				in;
         
@@ -54,19 +52,16 @@ namespace SEQAN_NAMESPACE_MAIN
             in(mapper) {}
 
         Pipe(Bundle2< TTextInput, TSuffixArrayInput > const &_bundleIn):
-            textIn(&_bundleIn.in1),
-			suffixArrayIn(&_bundleIn.in2),
-            in(mapper) {}
-
-        inline void process() {
-            process(*textIn, *suffixArrayIn);
-        }
+            in(mapper)
+		{
+			process(_bundleIn.in1, _bundleIn.in2);
+		}
 
 		template < typename _TTextInput, typename _TSuffixArrayInput >
         bool process(_TTextInput &textIn, _TSuffixArrayInput &suffixArrayIn) {
 
             // *** INSTANTIATION ***
-			
+
 			TSA							sa(suffixArrayIn);
 			TInverter					inverter;
 			TCounterFilter				filter(inverter);
@@ -164,7 +159,10 @@ namespace SEQAN_NAMESPACE_MAIN
             textIn(&_bundleIn.in1),
 			suffixArrayIn(&_bundleIn.in2),
             in(mapper),
-			limits(_limits)	{}
+			limits(_limits)
+		{
+			process();
+		}
 
         inline void process() {
             process(*textIn, *suffixArrayIn);
@@ -174,6 +172,10 @@ namespace SEQAN_NAMESPACE_MAIN
         bool process(_TTextInput &textIn, _TSuffixArrayInput &suffixArrayIn) {
 
             // *** INSTANTIATION ***
+
+			for(int i=0;i<length(limits);++i)
+				::std::cout << limits[i]<<"  ";
+			::std::cout<<::std::endl;
 			
 			TGlobalizer					globalizer(suffixArrayIn, limits);
 			TSA							sa(globalizer);
@@ -228,7 +230,7 @@ namespace SEQAN_NAMESPACE_MAIN
                typename TSA >
     void createBWTableInt(
 		TBWT &bwt,
-		TText &s,
+		TText const &s,
 		TSA const &SA)
 	{
 		typedef typename Value<TSA>::Type	TValue;
@@ -247,6 +249,38 @@ namespace SEQAN_NAMESPACE_MAIN
 				bwt[i] = s[sa - 1];
 			else
 				bwt[i] = TSize();
+		}
+	}
+
+    template < typename TBWT,
+               typename TString,
+			   typename TSpec,
+               typename TSA >
+    void createBWTableInt(
+		TBWT &bwt,
+		StringSet<TString, TSpec> const &s,
+		TSA const &SA)
+	{
+		typedef typename Value<TSA>::Type	TValue;
+		typedef typename Size<TSA>::Type	TSize;
+
+		#ifdef SEQAN_DEBUG_INDEX
+			if (sizeof(TSize) > 4)
+				::std::cerr << "WARNING: TSize size is greater 4 (BWT)" << ::std::endl;
+        #endif
+
+		TSize n = length(s);
+		Pair<unsigned, typename Size<TString>::Type> loc;
+
+		for(TSize i = 0; i < n; ++i) {
+			posLocalize(loc, SA[i], stringSetLimits(s));
+			if (loc.i2 != 0)
+				bwt[i] = s[loc.i1][loc.i2 - 1];
+			else
+				if (loc.i1 != 0)
+					bwt[i] = s[loc.i1 - 1][length(s[loc.i1 - 1]) - 1];
+				else
+					bwt[i] = TSize();
 		}
 	}
 
