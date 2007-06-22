@@ -94,7 +94,8 @@
 //Test Helper Functions
 
 // compare two files, do not translate linebreaks
-bool _compareBinaryFiles(char * file1, char * file2)
+inline bool 
+_compareBinaryFiles(char * file1, char * file2)
 {
 	bool ret = false;
 
@@ -125,7 +126,8 @@ End:
 //____________________________________________________________________________
 
 //one line break is either \r, \n, or \r\n.
-void _compareTextFiles_readChar(FILE * fl, char & c, bool & is_lb, bool & is_eof)
+inline void 
+_compareTextFiles_readChar(FILE * fl, char & c, bool & is_lb, bool & is_eof)
 {
 	is_lb = false;
 	is_eof = false;
@@ -155,7 +157,8 @@ void _compareTextFiles_readChar(FILE * fl, char & c, bool & is_lb, bool & is_eof
 }
 
 // compare two files, translate linebreaks
-bool _compareTextFiles(char * file1, char * file2)
+inline bool 
+_compareTextFiles(char * file1, char * file2)
 {
 	FILE * fl1 = fopen(file1, "rb");
 	if (!fl1) return false;
