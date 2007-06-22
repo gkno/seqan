@@ -44,7 +44,6 @@ bool testIndexCreation()
 		_proFloat timeSum[12];
 		for(int i = 0; i < 10; ++i)
 			timeSum[i] = 0;
-		int TI = 0;
 		__int64 textSum = 0;
 
 		static const char* algNames[] = {
@@ -62,11 +61,13 @@ bool testIndexCreation()
 			"ChildTabExt  "
 		};
 
-		for(int i = 0; i < runs; ++i, TI = 0) {
+		int TI;
+		for(int i = 0; i < runs; ++i) {
 
 			cout << "*** RUN " << i << " ***";
 			
 			int size = rand() % maxSize;
+			TI = 0
 
 //___randomize_text___________________________________________________________
 
