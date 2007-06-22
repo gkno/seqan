@@ -84,7 +84,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	//////////////////////////////////////////////////////////////////////////////
 
 	template < typename TSTree >
-	struct _GetVSTreeIteratorTraits< Iter< TSTree, VSTree< BottomUp<SuperMaxRepeats> > > > > {
+	struct GetVSTreeIteratorTraits< Iter< TSTree, VSTree< BottomUp<SuperMaxRepeats> > > > > {
 		typedef PostorderEmptyEdges	Type;
 	};
 
@@ -141,7 +141,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	//////////////////////////////////////////////////////////////////////////////
 
 	template < typename TSTree >
-	struct _GetVSTreeIteratorTraits< Iter< TSTree, VSTree< BottomUp<SuperMaxRepeatsFast> > > > {
+	struct GetVSTreeIteratorTraits< Iter< TSTree, VSTree< BottomUp<SuperMaxRepeatsFast> > > > {
 		typedef PostorderEmptyEdges	Type;
 	};
 
@@ -266,7 +266,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	};
 
 	template < typename TSTree >
-	struct _GetVSTreeIteratorTraits< Iter< TSTree, VSTree< BottomUp<MaxRepeats> > > > {
+	struct GetVSTreeIteratorTraits< Iter< TSTree, VSTree< BottomUp<MaxRepeats> > > > {
 		typedef PostorderEmptyEdges	Type;
 	};
 
