@@ -28,9 +28,9 @@ namespace SEQAN_NAMESPACE_MAIN {
 	template<typename TValue, unsigned int SPACE>
 	class String<TValue, Block<SPACE> > 
 	{
-		typedef String<TValue, Array<SPACE> >		TBlock;
-		typedef TBlock*								PBlock;
-		typedef Allocator<SimpleAlloc<> >			TAllocator;
+		typedef String<TValue, Array<SPACE> >				TBlock;
+		typedef TBlock*										PBlock;
+		typedef Allocator< SinglePool<sizeof(TBlock)> >		TAllocator;
 
 	public:
 		typedef typename Iterator<TBlock, Standard>::Type	TBlockIter;
