@@ -6,6 +6,7 @@
 #include <vector>
 #include <time.h>
 
+#define SEQAN_PROFILE
 //#define SEQAN_DEBUG
 //#define SEQAN_DEBUG_INDEX
 
@@ -37,10 +38,33 @@ bool testIndexCreation()
 
 		const int runs = 10;					// conduct 10 test runs 
 		const int maxSize = 20 * 1024 * 1024;	// max text size is 20 megabyte
+		bool result = true;
+
+		_proFloat timeDelta[12];
+		_proFloat timeSum[12];
+		for(int i = 0; i < 10; ++i)
+			timeSum[i] = 0;
+		int TI = 0;
+		__int64 textSum = 0;
+
+		static const char* algNames[] = {
+			"Skew3        ", 
+			"Skew7        ", 
+			"ManberMyers  ", 
+			"LarssonSadake", 
+			"SAQSort      ", 
+			"Skew3Ext     ", 
+			"Skew7Ext     ",
+			"Kasai        ",
+			"KasaiInPlace ",
+			"KasaiExt     ",
+			"ChildTab     ",
+			"ChildTabExt  "
+		};
 
 		for(int i = 0; i < runs; ++i) {
 
-			cout << "*** RUN " << i << " ***" << endl;
+			cout << "*** RUN " << i << " ***";
 			
 			int size = rand() % maxSize;
 
@@ -55,76 +79,125 @@ bool testIndexCreation()
 			open(errorText,"error.txt");
 			text = errorText;
 */
+/*			text = "MISSISSIPPI";
 			size = length(text);
 			cout << "text created (n=" << size << ")" << endl;
+*/
+			cout << "   textSize: " << length(text) << endl;
 
 //___create_suffix_array______________________________________________________
 
 			resize(sa, size);
+			timeDelta[TI] = -SEQAN_PROGETTIME;
 			createSuffixArray(sa, text, Skew3());
+			timeDelta[TI++] += SEQAN_PROGETTIME;
 			if (!isSuffixArray(sa, text)) {
 				cout << "suffix array creation (internal Skew3) failed" << endl;
-				return false;
+				result = false;
 			}
-			cout << ".";
+			cout << "."; cout.flush();
 
 			blank(sa);
+			timeDelta[TI] = -SEQAN_PROGETTIME;
 			createSuffixArray(sa, text, Skew7());
+			timeDelta[TI++] += SEQAN_PROGETTIME;
 			if (!isSuffixArray(sa, text)) {
 				cout << "suffix array creation (internal Skew7) failed" << endl;
-				return false;
+				result = false;
 			}
-			cout << ".";
+			cout << "."; cout.flush();
 
 			blank(sa);
+			timeDelta[TI] = -SEQAN_PROGETTIME;
+			createSuffixArray(sa, text, ManberMyers());
+			timeDelta[TI++] += SEQAN_PROGETTIME;
+			if (!isSuffixArray(sa, text)) {
+				cout << "suffix array creation (internal ManberMyers) failed" << endl;
+				result = false;
+			}
+			cout << "."; cout.flush();
+
+			blank(sa);
+			timeDelta[TI] = -SEQAN_PROGETTIME;
+			createSuffixArrayExt(sa, text, LarssonSadakane());
+			timeDelta[TI++] += SEQAN_PROGETTIME;
+			if (!isSuffixArray(sa, text)) {
+				cout << "suffix array creation (external LarssonSadakane) failed" << endl;
+				result = false;
+			}
+			cout << "."; cout.flush();
+
+			blank(sa);
+			timeDelta[TI] = -SEQAN_PROGETTIME;
+			createSuffixArray(sa, text, SAQSort());
+			timeDelta[TI++] += SEQAN_PROGETTIME;
+			if (!isSuffixArray(sa, text)) {
+				cout << "suffix array creation (internal SAQSort) failed" << endl;
+				result = false;
+			}
+			cout << "."; cout.flush();
+
+			blank(sa);
+			timeDelta[TI] = -SEQAN_PROGETTIME;
 			createSuffixArrayExt(sa, text, Skew3());
+			timeDelta[TI++] += SEQAN_PROGETTIME;
 			if (!isSuffixArray(sa, text)) {
 				cout << "suffix array creation (external Skew3) failed" << endl;
-				return false;
+				result = false;
 			}
-			cout << ".";
+			cout << "."; cout.flush();
 
 			blank(sa);
+			timeDelta[TI] = -SEQAN_PROGETTIME;
 			createSuffixArrayExt(sa, text, Skew7());
+			timeDelta[TI++] += SEQAN_PROGETTIME;
 			if (!isSuffixArray(sa, text)) {
 				cout << "suffix array creation (external Skew7) failed" << endl;
-				return false;
+				result = false;
 			}
-			cout << ".";
+			cout << "."; cout.flush();
 
 //___create_lcp_table_________________________________________________________
 
 			resize(lcp, size);
+			timeDelta[TI] = -SEQAN_PROGETTIME;
 			createLCPTable(lcp, text, sa, KasaiOriginal());
+			timeDelta[TI++] += SEQAN_PROGETTIME;
 			if (!isLCPTable(lcp, sa, text)) {
 				cout << "suffix array creation (internal Kasai) failed" << endl;
-				return false;
+				result = false;
 			}
-			cout << ".";
+			cout << "."; cout.flush();
 
 			blank(lcp);
+			timeDelta[TI] = -SEQAN_PROGETTIME;
 			createLCPTable(lcp, text, sa, Kasai());
+			timeDelta[TI++] += SEQAN_PROGETTIME;
 			if (!isLCPTable(lcp, sa, text)) {
 				cout << "suffix array creation (internal in-place Kasai) failed" << endl;
-				return false;
+				result = false;
 			}
-			cout << ".";
+			cout << "."; cout.flush();
 
 			blank(lcp);
+			timeDelta[TI] = -SEQAN_PROGETTIME;
 			createLCPTableExt(lcp, text, sa, Kasai());
+			timeDelta[TI++] += SEQAN_PROGETTIME;
 			if (!isLCPTable(lcp, sa, text)) {
 				cout << "suffix array creation (external Kasai) failed" << endl;
-				return false;
+				result = false;
 			}
-			cout << ".";
+			cout << "."; cout.flush();
 
 //___create_child_table_______________________________________________________
 
 			resize(child, size);
 			for(int i=0; i<size; ++i)
 				child[i] = supremumValue<unsigned>();
+			timeDelta[TI] = -SEQAN_PROGETTIME;
 			createChildTable(child, lcp);
-			cout << ".";
+			timeDelta[TI++] += SEQAN_PROGETTIME;
+			cout << "."; cout.flush();
 
 			unsigned undefs=0;
 			for(int i=0; i<size; ++i)
@@ -132,18 +205,31 @@ bool testIndexCreation()
 			if (undefs) ::std::cout << undefs << " undefined values";
 
 			resize(childExt, size);
+			timeDelta[TI] = -SEQAN_PROGETTIME;
 			createChildTableExt(childExt, lcp);
-			cout << ".";
+			timeDelta[TI++] += SEQAN_PROGETTIME;
+			cout << "."; cout.flush();
 
 			if (!isEqual(child, childExt)) {
 				cout << "child table creation failed" << endl;
-				return false;
+				result = false;
+			}
+
+//___update_performance_table_________________________________________________
+
+			for(int i=0; i<TI; ++i) {
+				timeSum[i] += timeDelta[i];
+				textSum += length(text);
 			}
 
 			cout << " OK!" << endl;
 
 		}
-		return true;
+		cout << "*** TIME RESULTS (sec/MB) ***";
+		for(int i=0; i<TI; ++i)
+			cout << algNames[i] << " " << 1024.0*1024.0 * timeSum[i] / textSum << endl;
+
+		return result;
 }
 
 /*

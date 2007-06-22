@@ -12,6 +12,7 @@
 #include <functional>
 #include <seqan/sequence.h>
 #include <seqan/pipe.h>
+#include <seqan/misc/misc_random.h>
 
 namespace SEQAN_NAMESPACE_MAIN
 {
@@ -44,16 +45,18 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < typename TBuffer >
 	void randomize(TBuffer &buf) {
+		mtRandInit(false);
 		typename Size<TBuffer>::Type i, s = length(buf);
 		for(i = 0; i < s; i++)
-            buf[i] = rand() % s;
+            buf[i] = mtRand() % s;
 	}
 
 	template < typename TBuffer >
 	void textRandomize(TBuffer &buf) {
+		mtRandInit(false);
 		typename Size<TBuffer>::Type i, s = length(buf);
 		for(i = 0; i < s; i++)
-			buf[i] = '@' + rand() % 2;//('z'-'@');
+			buf[i] = '@' + mtRand() % 2;//('z'-'@');
 	}
 
 	template < typename TValue >
@@ -71,25 +74,39 @@ namespace SEQAN_NAMESPACE_MAIN
 	};
 	
     template <typename TSequence>
+    void printArray(TSequence const &SA) {
+		typedef typename Iterator<TSequence const>::Type TIter;
+		TIter it = begin(SA);
+		TIter itEnd = end(SA);
+		for(; it != itEnd; ++it)
+			::std::cout << *it << "  ";
+		::std::cout << ::std::endl;
+	}
+
+    template <typename TSequence>
     bool isPermutation(TSequence const &SA) {
-        typedef typename Value<TSequence>::Type TSize;
+        typedef typename Value<TSequence>::Type		TSize;
+		typedef typename _MakeSigned<TSize>::Type	TSigned;
         TSize n = length(SA);
         bool *seen = new bool[n];
         TSize i;
         for (i = 0;  i < n;  i++) seen[i] = 0;
         for (i = 0;  i < n;  i++)
-            if (SA[i] >= 0 && SA[i] < n)
-                seen[SA[i]] = 1;
-            else
+			if ((TSigned)SA[i] >= 0 && SA[i] < n) {
+                if (seen[SA[i]])
+                    printf("isPermutation: not unique %d->%d\n", i, SA[i]);
+                seen[SA[i]] = true;
+            } else
                 printf("isPermutation: SA index out of range (n=%d) SA[%d]=%d\n", n, i, SA[i]);
 
         for (i = 0;  i < n;  i++)
             if (!seen[i]) {
+                printf("isPermutation: not surjective %d empty\n", i);
                 delete[] seen;
-                return 0;
+                return false;
             }
         delete[] seen;
-        return 1;
+        return true;
     }
 
     template <typename TInput, typename TSpec>
@@ -111,6 +128,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
         for (i = 0;  i < n;  i++)
             if (!seen[i]) {
+                printf("isPermutation: not surjective %d empty\n", i);
                 delete[] seen;
                 return false;
             }
@@ -118,6 +136,10 @@ namespace SEQAN_NAMESPACE_MAIN
         return true;
     }
 
+    template <typename TInput, typename TSpec>
+    bool isPermutation(Pipe<TInput, TSpec> const &SA) {
+		return isPermutation(const_cast<Pipe<TInput, TSpec> &>(SA));
+	}
 
 
     template <typename TIt, typename ST>
@@ -138,7 +160,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
     // is SA a sorted suffix array for s?
     template <typename TSequence, typename TText>
-    bool isSorted(TSequence &SA, TText const &s) {
+    bool isSorted(TSequence const &SA, TText const &s) {
         typedef typename Value<TSequence>::Type TSize;
         TSize n = length(s);
 	    for(TSize i = 1; i < n; ++i) {
@@ -177,6 +199,10 @@ namespace SEQAN_NAMESPACE_MAIN
 	    return true;  
     }
 
+    template <typename TInput, typename TSpec, typename TText>
+    bool isSorted(Pipe<TInput, TSpec> const &SA, TText const &s) {
+		return isSorted(const_cast<Pipe<TInput, TSpec> &>(SA), s);
+	}
 
 
     template <typename TIt, typename ST>

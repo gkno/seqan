@@ -34,7 +34,6 @@ void testBuild()
 		appendValue(indexText(esa), gen3);
 
 
-
 		indexRequire(esa, ESA_SA());
 		indexRequire(esa, ESA_LCP());
 		indexRequire(esa, ESA_BWT());
@@ -43,6 +42,14 @@ void testBuild()
         save(esa, "corpus/chlamydia");
 }
 
+template <typename TIter>
+inline void _printNode(TIter const it) 
+{
+		cout << countOccurences(it) << "\t";
+		cout << representative(it) << "\t";
+//		cout << "parentEdgeLabel:" << parentEdgeLabel(it);
+		cout << endl;
+}
 
 void testMultiIndex()
 {
@@ -64,17 +71,74 @@ void testMultiIndex()
 		t[4] = "agg";
 		t[5] = "ctg";
 
+		t[0] = "aa";
+		t[1] = "aa";
+		t[2] = "aatt";
+
         Index<TMulti> esa;
 		for(unsigned i=0; i<3; ++i)
 			appendValue(indexText(esa), t[i]);
 
-		Iter<Index<TMulti>, VSTree< BottomUp<> > > it(esa);
-		while (!atEnd(it)) {
-			cout << countOccurences(it) << "\t";
-			cout << representative(it) << "\t";
-//			cout << "parentEdgeLabel:" << parentEdgeLabel(it);
-			cout << endl;
-			goNext(it);
+		// efficient dfs iterator (hiding edges with empty labels)
+		{
+			cout << "BottomUp without empty edges" << endl;
+			Iter<Index<TMulti>, VSTree< BottomUp<> > > it(esa);
+			while (!atEnd(it)) {
+				_printNode(it);
+				goNext(it);
+			}
+		}
+
+		// efficient dfs iterator
+		{
+			cout << endl << "BottomUp with empty edges" << endl;
+			Iter<Index<TMulti>, VSTree< BottomUp<PostorderEmptyEdges> > > it(esa);
+			while (!atEnd(it)) {
+				_printNode(it);
+				goNext(it);
+			}
+		}
+
+		// topdown dfs iterator (hiding edges with empty labels)
+		{
+			cout << endl << "TopDown postorder without empty edges" << endl;
+			Iter<Index<TMulti>, VSTree< TopDown<ParentLinks<Postorder> > > > it(esa);
+			while (goDown(it));
+			while (!atEnd(it)) {
+				_printNode(it);
+				goNext(it);
+			}
+		}
+
+		// topdown dfs iterator
+		{
+			cout << endl << "TopDown postorder with empty edges" << endl;
+			Iter<Index<TMulti>, VSTree< TopDown<ParentLinks<PostorderEmptyEdges> > > > it(esa);
+			while (goDown(it));
+			while (!atEnd(it)) {
+				_printNode(it);
+				goNext(it);
+			}
+		}
+
+		// topdown dfs iterator (hiding edges with empty labels)
+		{
+			cout << endl << "TopDown preorder without empty edges" << endl;
+			Iter<Index<TMulti>, VSTree< TopDown<ParentLinks<Preorder> > > > it(esa);
+			while (!atEnd(it)) {
+				_printNode(it);
+				goNext(it);
+			}
+		}
+
+		// topdown dfs iterator
+		{
+			cout << endl << "TopDown preorder with empty edges" << endl;
+			Iter<Index<TMulti>, VSTree< TopDown<ParentLinks<PreorderEmptyEdges> > > > it(esa);
+			while (!atEnd(it)) {
+				_printNode(it);
+				goNext(it);
+			}
 		}
 
 /*
@@ -283,6 +347,8 @@ void Main_TestQGram();
 int main()
 {
 	SEQAN_TREPORT("TEST BEGIN")
+//	testIndexCreation();
+//	return 0;
 
 	cout << "===================================" << endl;
 	cout << "----Basic Suffix Tree iterators----" << endl;
@@ -318,5 +384,5 @@ int main()
 //	testBuild();
 
 	SEQAN_TREPORT("TEST END")
-		return 0;
+	return 0;
 }
