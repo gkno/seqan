@@ -62,7 +62,7 @@ bool testIndexCreation()
 			"ChildTabExt  "
 		};
 
-		for(int i = 0; i < runs; ++i) {
+		for(int i = 0; i < runs; ++i; TI = 0) {
 
 			cout << "*** RUN " << i << " ***";
 			
