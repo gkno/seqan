@@ -100,9 +100,7 @@ setHost(Pattern<TNeedle, Horspool> & horsp, TNeedle2 & ndl)
 
 
 template <typename TNeedle>
-inline void _finderInit (Pattern<TNeedle, Horspool> & me) 
-{
-}
+inline void _finderInit (Pattern<TNeedle, Horspool> &) {}
 
 //____________________________________________________________________________
 

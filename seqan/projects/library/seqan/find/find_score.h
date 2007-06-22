@@ -324,7 +324,7 @@ _find_score_simple_proportional(TFinder & finder, Pattern<TNeedle, Score<TScoreV
 
 template <typename TFinder, typename TNeedle, typename TScoreValue>
 bool 
-_find_score_simple_affine(TFinder & finder, Pattern<TNeedle, Score<TScoreValue, Simple> > & me)
+_find_score_simple_affine(TFinder &, Pattern<TNeedle, Score<TScoreValue, Simple> > &)
 {
 //???TODO 
 	return false;
