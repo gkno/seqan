@@ -172,11 +172,88 @@ struct Host
 ..returns.param.Type:Spec of $T$.
 ..remarks:The spec of a SeqAn type is the class that is used in template subclassing 
  to specify the specialization. 
- For example, spec of $String<char, Alloc<> >$ is $Alloc<>$.
+ For example, the spec of $String<char, Alloc<> >$ is $Alloc<>$.
 */
 
+// default case
 template <typename T>
-struct Spec;
+struct Spec {
+	typedef void Type;
+};
+
+// one argument case
+template <template <typename> class T, typename TSpec>
+struct Spec< T<TSpec> > {
+	typedef TSpec Type;
+};
+
+template <typename T>
+struct Spec<T const>:
+	public Spec<T> {};
+
+//____________________________________________________________________________
+
+/**
+.Metafunction.DeepestSpec:
+..summary:The deepest spec of a class with nested template arguments.
+..signature:DeepestSpec<T>::Type
+..param.T:Type for which the deepest spec is determined.
+..returns.param.Type:Deepest spec of $T$.
+..remarks:The spec of a SeqAn type is the innermost class that is used in nested subclassing.
+ to specify the specialization. 
+ For example, the deepest spec of $Iter<..., VSTree<BottomUp<MUMs> > >$ is $MUMs$.
+*/
+
+// default case
+template <typename T>
+struct DeepestSpec {
+	typedef T Type;
+};
+
+// recursion for 1 argument
+template <
+	template <typename> class T, 
+	typename T1 >
+struct DeepestSpec< T<T1> > {
+	typedef typename 
+		IF<
+			TYPECMP<T1, void>::VALUE,										// is T1 void?
+			T<T1>,															// yes, end of recursion
+			typename DeepestSpec< typename Spec< T<T1> >::Type >::Type		// no,  recurse
+		>::Type Type;
+};
+
+// recursion for 2 arguments
+template <
+	template <typename, typename> class T, 
+	typename T1, typename T2 >
+struct DeepestSpec< T<T1,T2> >:
+	DeepestSpec< typename Spec< T<T1,T2> >::Type > {};
+
+// recursion for 3 arguments
+template <
+	template <typename, typename, typename> class T, 
+	typename T1, typename T2, typename T3 >
+struct DeepestSpec< T<T1,T2,T3> >:
+	DeepestSpec< typename Spec< T<T1,T2,T3> >::Type > {};
+
+// recursion for 4 arguments
+template <
+	template <typename, typename, typename, typename> class T, 
+	typename T1, typename T2, typename T3, typename T4 >
+struct DeepestSpec< T<T1,T2,T3,T4> >:
+	DeepestSpec< typename Spec< T<T1,T2,T3,T4> >::Type > {};
+
+// recursion for 5 arguments
+template <
+	template <typename, typename, typename, typename, typename> class T, 
+	typename T1, typename T2, typename T3, typename T4, typename T5 >
+struct DeepestSpec< T<T1,T2,T3,T4,T5> >:
+	DeepestSpec< typename Spec< T<T1,T2,T3,T4,T5> >::Type > {};
+
+template <typename T>
+struct DeepestSpec<T const>:
+	public DeepestSpec<T> {};
 
 //____________________________________________________________________________
 

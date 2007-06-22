@@ -763,6 +763,8 @@ public:
 		DEPENDENT = ~0
 	};
 
+	typedef typename Value<Holder>::Type THostValue;
+
 	TValue * data_value;
 	EHolderState data_state;
 
@@ -779,19 +781,18 @@ SEQAN_CHECKPOINT
 SEQAN_CHECKPOINT
 		assign(*this, source_);
 	}
-	Holder(TValue & value_):
+	Holder(typename _Parameter<THostValue>::Type value_):
 		data_state(EMPTY)
 	{
 SEQAN_CHECKPOINT
 		setValue(*this, value_);
 	}
-	Holder(TValue const & value_):
+	Holder(typename _ConstParameter<THostValue>::Type value_):
 		data_state(EMPTY)
 	{
 SEQAN_CHECKPOINT
 		assignValue(*this, value_);
 	}
-
 	~Holder()
 	{
 SEQAN_CHECKPOINT

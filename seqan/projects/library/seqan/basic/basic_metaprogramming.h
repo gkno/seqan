@@ -21,13 +21,13 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <bool Flag,class Type1, class Type2>
 	struct IF
 	{
-	typedef Type1 Type;
+		typedef Type1 Type;
 	};
 
 	template <class Type1, class Type2>
 	struct IF<false,Type1,Type2>
 	{
-	typedef Type2 Type;
+		typedef Type2 Type;
 	};
 
 
@@ -62,33 +62,34 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <int tag_,class Type_,class Next_ = NilCase>
 	struct CASE
 	{
-	enum { tag = tag_ };
-	typedef Type_ Type;
-	typedef Next_ Next;
+		enum { tag = tag_ };
+		typedef Type_ Type;
+		typedef Next_ Next;
 	};
 
 	template <int tag,class Case>
 	class SWITCH
 	{
-	typedef typename Case::Next NextCase;
-	enum
-	{
-		caseTag = Case::tag,
-		found   = (caseTag == tag || caseTag == DEFAULT)
-	};
+		typedef typename Case::Next NextCase;
+		enum
+		{
+			caseTag = Case::tag,
+			found   = (caseTag == tag || caseTag == DEFAULT)
+		};
 	public:
-	typedef typename IF<found,
-			typename Case::Type,
-			typename SWITCH<tag,NextCase>::Type
+		typedef typename 
+			IF<
+				found,
+				typename Case::Type,
+				typename SWITCH<tag,NextCase>::Type
 			>::Type Type;
-	  
 	};
 
 	template <int tag>
 	class SWITCH<tag,NilCase>
 	{
 	public:
-	typedef NilCase Type;
+		typedef NilCase Type;
 	};
 
 
