@@ -28,8 +28,8 @@
 #include <seqan/basic/basic_debug.h>
 #include <seqan/basic/basic_profile.h>
 #include <seqan/basic/basic_definition.h>
-#include <seqan/basic/basic_type.h>
 #include <seqan/basic/basic_metaprogramming.h>
+#include <seqan/basic/basic_type.h>
 
 //____________________________________________________________________________
 // allocators
