@@ -148,7 +148,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
         
     template < typename TBuffer, typename THandler >
-    inline TBuffer& processBuffer(TBuffer &h, THandler &me) {
+    inline TBuffer& processBuffer(TBuffer &h, THandler &) {
         return h;
     }
 
@@ -662,7 +662,7 @@ namespace SEQAN_NAMESPACE_MAIN
         }
         
         template < typename TInput, typename TPipeSpec >
-        Pool(Pipe<TInput, TPipeSpec> &src, const PoolParameters &_conf = PoolParameters()):
+        Pool(Pipe<TInput, TPipeSpec> &, const PoolParameters &_conf = PoolParameters()):
             file(NULL)
         {
 			_init(_conf);
