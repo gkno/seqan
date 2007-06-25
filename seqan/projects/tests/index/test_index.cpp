@@ -71,12 +71,12 @@ void testMultiIndex()
 		t[4] = "agg";
 		t[5] = "ctg";
 
-		t[0] = "aa";
-		t[1] = "aa";
-		t[2] = "aatt";
+		t[0] = "ac";
+		t[1] = "ac";
+//		t[2] = "aatt";
 
         Index<TMulti> esa;
-		for(unsigned i=0; i<3; ++i)
+		for(unsigned i=0; i<2; ++i)
 			appendValue(indexText(esa), t[i]);
 
 		// efficient dfs iterator (hiding edges with empty labels)

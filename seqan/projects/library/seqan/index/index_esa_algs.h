@@ -264,7 +264,22 @@ namespace SEQAN_NAMESPACE_MAIN
 		_FractionCompound():
 			leftmost(0,0,0) {}
 	};
+/*
+	// contains a set of fractions (one for each [bwt value,seqNo]) 
+	// and a fraction for the [undefined bwt value,seqNo] (for the virtual character at position -1)
+	template <typename TValue, typename TSize>
+	struct _FractionCompoundMultiMEM {
+		typedef _FractionHeader<TSize>			TFractionHeader;
+		typedef Pair<TValue, TFractionHeader>	TFraction;	// TFraction = (c,(begin,end))	c..char, begin/end indices in posList
+		typedef typename Set<TFraction>::Type	TSet;
 
+		TSet			set;
+		TFractionHeader	leftmost;
+
+		_FractionCompound():
+			leftmost(0,0,0) {}
+	};
+*/
 	template < typename TSTree >
 	struct GetVSTreeIteratorTraits< Iter< TSTree, VSTree< BottomUp<MaxRepeats> > > > {
 		typedef PostorderEmptyEdges	Type;

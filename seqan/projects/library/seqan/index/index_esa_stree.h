@@ -807,9 +807,12 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 
 			while (isLeaf(it)) {
 				typename SAValue<TIndex>::Type pos = getOccurence(it);
-				if (getSeqOffset(pos, stringSetLimits(index)) + lcp == sequenceLength(getSeqNo(pos, stringSetLimits(index)), index))
-					goRight(it);
-				else
+				if (getSeqOffset(pos, stringSetLimits(index)) + lcp == sequenceLength(getSeqNo(pos, stringSetLimits(index)), index)) {
+					if (!goRight(it)) {
+						goUp(it);
+						return false;
+					}
+				} else
 					break;
 			}
 		}
