@@ -77,7 +77,7 @@ struct ConstrainedTraversal;
 
   template < typename TSTree, typename T >
     struct GetVSTreeIteratorTraits< Iter< TSTree, VSTree< TopDown<
-ParentLinks< ConstrainedTraversal<T> > > > > {
+ParentLinks< ConstrainedTraversal<T> > > > > >{
         typedef Preorder Type;
     };
 
@@ -134,7 +134,7 @@ public:
 // go down the leftmost edge
 template < typename TIndex, class TSpec >
 inline bool goDown(Iter< TIndex, VSTree< TopDown<ParentLinks<ConstrainedTraversal<TSpec > > > > > &it) {
-	if (isLeaf(it) || (length(representative(it)) >= it.MaxDepth) ) return false;
+	if (isLeaf(it) || (length(representative(it)) > it.MaxDepth) ) return false;
 	_historyPush(it, value(it).i1);
 
 		typename Size<TIndex>::Type i = _getUp(value(it).i1.i2, container(it));
@@ -204,6 +204,7 @@ inline void goNext(Iter< Index<TText, TSpec>, VSTree< TopDown< ParentLinks<Const
 				// goDown was wrong and we have to go up again
 				if(isLeaf(it) && (repLength(container(it), nodeUp(it)) == repLength(it))){
 					goUp(it);
+					it.Up += -1;
 					//cout << value(it) << " = " << length(representative(it)) << " " << representative(it) << "  toFather:"<<parentEdgeLabel(it)<<"  hits: "<<length(getOccurences(it))<<endl;	
 					if (!goRight(it))
 						while (goUp(it) && !goRight(it));
@@ -229,16 +230,26 @@ inline void goNext(Iter< Index<TText, TSpec>, VSTree< TopDown< ParentLinks<Const
 				}
 				else
 					if(isRightTerminal(it)){ // check if node can be extended
-						
-						Iter<Index<TText, TSpec>, VSTree< TopDown< > > >   childs(it);
-						goDown(childs);
-						goRight(childs);
-						// move to rightest sibling, if this has counts its fine
-						while(goRight(childs));
-
-						if( repLength(childs) == repLength(it)){
+						// create dummy values for the case thatv we go down with the Constrained Traversal Iterator
+						// and need to go up afterwards, because we actually found a valid child
+						// Only then we need to set the values back
+						unsigned fatherRepLength = repLength(it);
+						bool DOWN = it.Down;
+						unsigned UP = it.Up;
+						goDown(it);
+						goRight(it);
+						// move to rightest sibling, if this has counts (is a leaf or node) it´s fine
+						while(fatherRepLength == repLength(it) && goRight(it));
+						goUp(it);
+						if( fatherRepLength == repLength(it)){
+							it.Up += -1;
 							not_finished=1;
 							walk_down=0;
+						}
+						else{ //set the remembered values in
+							 it.Down = DOWN;
+							 it.Up = UP;
+							 not_finished = 0;
 						}
 					}
 					
@@ -638,8 +649,6 @@ setReverseSuffixLink(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > 
 			 TChar const c) 
 {
 	SEQAN_CHECKPOINT
-	SEQAN_ASSERT(idInUse(g.data_id_managerV, source) == true)
-	SEQAN_ASSERT(idInUse(g.data_id_managerV, target) == true)
 
 	//typedef Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > >, TGraphSpec> TGraph;
 	typedef typename Size<TAlphabet>::Type TSize;
@@ -1684,23 +1693,67 @@ removeVertex( Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TVLMMSpec >
 	typedef typename Size<TAlphabet>::Type TSize;
 	SEQAN_ASSERT(idInUse(vlmm.data_id_managerV, trashNode) == true)
 	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
+	if(trashNode < length(vlmm.data_vertex)-1)
+	{
+		removeOutEdges(vlmm,trashNode); // Remove all outgoing edges
+		TVertexDescriptor dummy = getFather(vlmm,trashNode);
+		TAlphabet letter = getChildCharacter(vlmm,dummy,trashNode);
+		vlmm.data_vertex[dummy].data_edge[(TSize) letter].data_target = nilVal;
+		setFather(vlmm,trashNode,nilVal);
+		dummy = getSuffixLink(vlmm,trashNode);
+		if(dummy != nilVal){
+		letter = getReverseSuffixLinkCharacter(vlmm,dummy,trashNode);
+		setReverseSuffixLink(vlmm,dummy,nilVal,letter);
+		setSuffixLink(vlmm,trashNode,nilVal);
+		}
+		setMarked(vlmm,trashNode,false);
+		deleteProbabilityVector(vlmm,trashNode);
+		}
+	else{//delete entries in the tables
+		unsigned int Length = length(vlmm.data_vertex)-1;
+		TVertexDescriptor dummy = getFather(vlmm,trashNode);
+		TAlphabet letter = getChildCharacter(vlmm,dummy,trashNode);
+		vlmm.data_vertex[dummy].data_edge[(TSize) letter].data_target = nilVal;
+		dummy = getSuffixLink(vlmm,trashNode);
+		if(dummy != nilVal){
+		letter = getReverseSuffixLinkCharacter(vlmm,dummy,trashNode);
+		setReverseSuffixLink(vlmm,dummy,nilVal,letter);
+		}
+	/*	resize(vlmm.data_vertex,Length,Generous());
+		resize(vlmm.data_father,Length,Generous());
+		resize(vlmm.data_marked,Length,Generous());
+		resize(vlmm.data_suffix_link,Length,Generous());
+		resize(vlmm.data_reverse_suffix_link,Length,Generous());
+		resize(vlmm.data_probability_vector,Length,Generous());*/
+	}
 
-	removeOutEdges(vlmm,trashNode); // Remove all outgoing edges
-	TVertexDescriptor dummy = getFather(vlmm,trashNode);
-	TAlphabet letter = getChildCharacter(vlmm,dummy,trashNode);
-	vlmm.data_vertex[dummy].data_edge[(TSize) letter].data_target = nilVal;
-	setFather(vlmm,trashNode,nilVal);
-	dummy = getSuffixLink(vlmm,trashNode);
-	letter = getReverseSuffixLinkCharacter(vlmm,dummy,trashNode);
-	setReverseSuffixLink(vlmm,dummy,nilVal,letter);
-	setSuffixLink(vlmm,trashNode,nilVal);
-	setMarked(vlmm,trashNode,false);
-	deleteProbabilityVector(vlmm,trashNode);
 	releaseId(vlmm.data_id_managerV, trashNode); // Release id
 
 }
 
+template<typename TAlphabet,typename TCargo,typename TVLMMSpec,typename TVertexDescriptor >
+inline void
+removeSubtree( Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TVLMMSpec > > > > &vlmm,
+			  TVertexDescriptor &head)
+{
+	// recursive removal of all nodes in the subtree starting at the head node
+typedef Graph<Automaton<TAlphabet,TCargo,WordGraph< VLMM < TVLMMSpec > > > > TVlmm;
+	typedef typename Iterator<TVlmm, OutEdgeIterator>::Type TOutEdgeIterator;
+	TOutEdgeIterator itout(vlmm,head);
+	TVertexDescriptor dummy;
+	while(!atEnd(itout)){
+		if(targetVertex(vlmm, getValue(itout)) != getNil<TVertexDescriptor>())
+		{
+			dummy = targetVertex(vlmm, getValue(itout));
+			removeSubtree(vlmm,dummy);
+		}
+	// *(TOutEdgeIterator) 
 
+	goNext(itout);
+	}
+	removeVertex(vlmm,head);
+
+}
 template<typename TAlphabet,typename TCargo,typename TVLMMSpec >
 inline void
 removeRedundantNodes( Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TVLMMSpec > > > > &vlmm)
@@ -1710,7 +1763,20 @@ typedef Graph<Automaton<TAlphabet,TCargo,WordGraph< VLMM < TSpec > > > > TVlmm;
 	typedef typename Iterator<TVlmm, OutEdgeIterator>::Type TOutEdgeIterator;
 
 
+	TOutEdgeIterator itout(vlmm,father);
+	while(!atEnd(itout)){
+		if(targetVertex(vlmm, getValue(itout)) == child)
+			break;
+	// *(TOutEdgeIterator) 
+
+	goNext(itout);
+	}
+	return(itout.data_pos);
+
 }
+
+
+
 
 template<typename TIndexType,typename TAlphabet,typename TCargo >
 inline void
@@ -1791,6 +1857,57 @@ buildPST(Index<TIndexType, Index_ESA<> > & index,
 	std::cout << "READY!" <<std::endl;
 }
 
+/**
+*  Likelihood Estimation : works such that the reverse suffix links are walked starting from the root
+*  whenever a node is not marked(or a leaf the walking down is finished and the deepest possible 
+*  context for the estimation is identified
+*/
+
+
+
+template<typename TAlphabet,typename TCargo,typename TVLMMSpec>
+inline float
+estimateLikelihood( Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TVLMMSpec > > > > &vlmm,
+					String<TAlphabet> &text )
+{
+	float result = 0;
+	Iter<String<TAlphabet>, PositionIterator> it(text);
+	while(!atEnd(it))
+	{
+		result += log(getProbabilityForLongestContext(vlmm,it));
+		goNext(it);
+	}
+	return result;
+}
+
+template<typename TAlphabet,typename TCargo,typename TVLMMSpec,typename TSpec>
+inline float
+getProbabilityForLongestContext( Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TVLMMSpec > > > > &vlmm,
+					Iter<String<TAlphabet>,TSpec> &it )
+{
+	typedef Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TVLMMSpec> > > > TGraph;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	Iter<String<TAlphabet>, TSpec> copy(it);
+	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
+	TVertexDescriptor node = getRoot(vlmm);
+
+
+	while(!atBegin(copy) ){
+		goPrevious(copy);
+		if(getReverseSuffixLink(vlmm,node,value(copy)) != nilVal)
+		{
+				node = getReverseSuffixLink(vlmm,node,value(copy));
+				if(!isMarked(vlmm,node)){
+						node = getSuffixLink(vlmm,node);
+						break;
+				}
+		}
+		else
+			break;
+		
+	}
+	return getProbability(vlmm,node,value(it));
+}
 //write the vlmm to a file in Easy-readable format,also used by the  << Operator
 template<typename TFile, typename TAlphabet, typename TCargo, typename TSpec , typename TIDString>
 inline void
