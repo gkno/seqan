@@ -85,20 +85,37 @@ _getOtherSequenceAndProject(Graph<TAlignment> & segment,
 {
 SEQAN_CHECKPOINT
 
-	typedef Graph<TAlignment> TGraph;
-	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TEdgeIterator;
-	typedef typename VertexDescriptor<TGraph>::Type TVertex;
+	seq_i = positionToId(seqs, seq_i);
+	pos_j = getProjectedPosition(segment,seq_i, pos_i);
 	
-	TVertex vd1 = findVertex(segment,seq_i,pos_i);
-	TEdgeIterator it(segment,vd1);
-	TVertex vd2 = targetVertex(it);
-	seq_j = sequenceId(segment,vd2);
-	pos_j = fragmentBegin(segment,vd2) + (pos_i - fragmentBegin(segment,vd1));
-
-	if(vd1 == 0)
+	if(seq_i == sequenceId(segment,0))
+	{
+		seq_j = sequenceId(segment,1);
+		seq_j = idToPosition(seqs, seq_j);
 		return true;
+	}
 	else
+	{
+		seq_j = sequenceId(segment,0);
+		seq_j = idToPosition(seqs, seq_j);
 		return false;
+	}
+
+	//typedef Graph<TAlignment> TGraph;
+	//typedef typename Iterator<TGraph, OutEdgeIterator>::Type TEdgeIterator;
+	//typedef typename VertexDescriptor<TGraph>::Type TVertex;
+	//
+	//seq_i = sequenceId(segment,seq_i);
+	//TVertex vd1 = findVertex(segment,seq_i,pos_i);
+	//TEdgeIterator it(segment,vd1);
+	//TVertex vd2 = targetVertex(it);
+	//seq_j = sequenceId(segment,vd2);
+	//pos_j = fragmentBegin(segment,vd2) + (pos_i - fragmentBegin(segment,vd1));
+
+	//if(vd1 == 0)
+	//	return true;
+	//else
+	//	return false;
 }
 
 
@@ -552,8 +569,10 @@ getScore(TScore & score_type,
 {
 SEQAN_CHECKPOINT
 
-	typename Infix<typename Value<TStringSet>::Type>::Type label0 = label(segment,0);
-	typename Infix<typename Value<TStringSet>::Type>::Type label1 = label(segment,1);
+	typename Infix<typename Value<TStringSet>::Type>::Type label0 = label(segment,stringSet(segment)[0]);
+	typename Infix<typename Value<TStringSet>::Type>::Type label1 = label(segment,stringSet(segment)[1]);
+	//typename Infix<typename Value<TStringSet>::Type>::Type label0 = label(segment,0);
+	//typename Infix<typename Value<TStringSet>::Type>::Type label1 = label(segment,1);
 
 	int i = 0;
 	typename Value<TScore>::Type ret_score = 0;
@@ -665,29 +684,26 @@ getScore(Score<TScoreValue, Simple> & score_type,
 		 TFragSize len)
 {
 SEQAN_CHECKPOINT
-	typename Infix<typename Value<TStringSet>::Type>::Type label0 = label(segment,seqs, sequenceId(segment, 0));
-	typename Infix<typename Value<TStringSet>::Type>::Type label1 = label(segment,seqs, sequenceId(segment, 1));
+	typedef typename Infix<typename Value<TStringSet>::Type>::Type TSegmentLabel;
+	TSegmentLabel label0 = label(segment,seqs, sequenceId(segment, 0));
+	TSegmentLabel label1 = label(segment,seqs, sequenceId(segment, 1));
+
+	typename Iterator<TSegmentLabel>::Type label_it0 = begin(label0) + (pos_i - fragmentBegin(segment,sequenceId(segment,0)));
+	typename Iterator<TSegmentLabel>::Type label_it1 = begin(label1) + (pos_j - fragmentBegin(segment,sequenceId(segment,1)));
 
 	int i = 0;
 	TScoreValue ret_score = 0;
 
 	while(i < (int) len)
 	{
-		ret_score += score(score_type,label0[i],label1[i]);
+		ret_score += score(score_type,*label_it0,*label_it1);
+		++label_it0;
+		++label_it1;
 		++i;
 	}
-	//ret_score = scoreMatch(score_type);
-	//ret_score *= len;
 
 	return ret_score;
 
-
-	//TScoreValue ret_score = 0;
-
-	//ret_score = scoreMatch(score_type);
-	//ret_score *= len;
-
-	//return ret_score;
 }				
 
 
@@ -793,6 +809,7 @@ SEQAN_CHECKPOINT
 	typedef typename Value<TAlignmentString>::Type TAlign;
 	typedef typename Iterator<TAlignmentString>::Type TAliIterator;
 	typedef typename VertexDescriptor<TAliGraph>::Type TVertexDescriptor;
+	typedef typename EdgeDescriptor<TAliGraph>::Type TEdgeDescriptor;
 	typedef typename std::set<TValue>::iterator TSetIterator;
 
 	//std::cout << "making refined alignment graph...";
@@ -866,10 +883,16 @@ SEQAN_CHECKPOINT
 			
 			SEQAN_TASSERT(fragmentBegin(ali_g,vd)==pos_j)
 			typename Value<TScore>::Type score = getScore(score_type,seqs,*ali_it,i_am_first,act_pos,pos_j,fragmentLength(ali_g,act_knot));//,fragmentLength(ali_g,vd));
-	//		if(score > 0)
-			if (findEdge(ali_g, act_knot, vd) == 0) addEdge(ali_g,act_knot,vd,score);
-			else {
-				// ToDo: Adapt score of the edge
+			//this needs to be generalized (makes sense for positive scores only)
+			if(score >= 0)
+			{
+				if (findEdge(ali_g, act_knot, vd) == 0) addEdge(ali_g,act_knot,vd,score);
+				else {
+					TEdgeDescriptor ed = findEdge(ali_g, act_knot, vd);
+					if(score > getCargo(ed))
+						assignCargo(ed, score);
+					// ToDo: Adapt score of the edge
+				}
 			}
 			//prepare for next interval
 			act_pos += fragmentLength(ali_g,act_knot);
