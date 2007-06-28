@@ -57,6 +57,11 @@ public:
 	{
 		return me.data_lengths;
 	}
+	friend inline TSizeArr const &
+	_dataLengths(Matrix const & me)
+	{
+		return me.data_lengths;
+	}
 
 	friend inline TSizeArr &
 	_dataFactors(Matrix & me)
