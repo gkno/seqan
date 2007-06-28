@@ -116,7 +116,7 @@ _getOtherSequenceAndProject(Fragment<TFragId,TFragPos,TFragSize,TFragSpec> & seg
 						   TValue & pos_j)
 {
 SEQAN_CHECKPOINT
-	seq_i = positionToId(seqs,seq_i);
+	seq_i = positionToId(seqs, seq_i);
 	pos_j = getProjectedPosition(segment,seq_i, pos_i);
 	
 	if(seq_i == sequenceId(segment,0))
@@ -552,20 +552,19 @@ getScore(TScore & score_type,
 {
 SEQAN_CHECKPOINT
 
-	//typename Infix<typename Value<TStringSet>::Type>::Type label0 = label(segment,0);
-	//typename Infix<typename Value<TStringSet>::Type>::Type label1 = label(segment,1);
+	typename Infix<typename Value<TStringSet>::Type>::Type label0 = label(segment,0);
+	typename Infix<typename Value<TStringSet>::Type>::Type label1 = label(segment,1);
 
 	int i = 0;
 	typename Value<TScore>::Type ret_score = 0;
 
-//	while(i < len)
-//	{
-//		ret_score += score(score_type,label0[i],label1[i]);
-////		ret_score += score(score_type,label0[i],label1[i]);
-//		++i;
-//	}
-	ret_score = scoreMatch(score_type);
-	ret_score *= len;
+	while(i < len)
+	{
+		ret_score += score(score_type,label0[i],label1[i]);
+		++i;
+	}
+	//ret_score = scoreMatch(score_type);
+	//ret_score *= len;
 
 	return ret_score;
 }				
@@ -666,13 +665,29 @@ getScore(Score<TScoreValue, Simple> & score_type,
 		 TFragSize len)
 {
 SEQAN_CHECKPOINT
+	typename Infix<typename Value<TStringSet>::Type>::Type label0 = label(segment,seqs, sequenceId(segment, 0));
+	typename Infix<typename Value<TStringSet>::Type>::Type label1 = label(segment,seqs, sequenceId(segment, 1));
 
+	int i = 0;
 	TScoreValue ret_score = 0;
 
-	ret_score = scoreMatch(score_type);
-	ret_score *= len;
+	while(i < (int) len)
+	{
+		ret_score += score(score_type,label0[i],label1[i]);
+		++i;
+	}
+	//ret_score = scoreMatch(score_type);
+	//ret_score *= len;
 
 	return ret_score;
+
+
+	//TScoreValue ret_score = 0;
+
+	//ret_score = scoreMatch(score_type);
+	//ret_score *= len;
+
+	//return ret_score;
 }				
 
 
@@ -834,6 +849,8 @@ SEQAN_CHECKPOINT
 		
 		//get the node represents the current interval (begin_pos until next_cut_pos or end_pos)
 		TVertexDescriptor act_knot = findVertex(ali_g,seq,begin_pos);
+		seq = idToPosition(seqs,seq);		
+
 		TValue act_pos = begin_pos;
 	
 		//for each interval that lies within the current segment/fragement/alignment
@@ -843,9 +860,9 @@ SEQAN_CHECKPOINT
 			//get other sequence and projected position
 			TValue seq_j,pos_j;
 			bool i_am_first = _getOtherSequenceAndProject(*ali_it,seqs,seq_map,seq,act_pos,seq_j,pos_j);
-			
+			seq_j = positionToId(seqs, seq_j);
 			//find node that contains the projected position (pos_j)
-			TVertexDescriptor vd = findVertex(ali_g,seq_j,pos_j);
+			TVertexDescriptor vd = findVertex(ali_g, seq_j, pos_j);
 			
 			SEQAN_TASSERT(fragmentBegin(ali_g,vd)==pos_j)
 			typename Value<TScore>::Type score = getScore(score_type,seqs,*ali_it,i_am_first,act_pos,pos_j,fragmentLength(ali_g,act_knot));//,fragmentLength(ali_g,vd));
@@ -856,7 +873,7 @@ SEQAN_CHECKPOINT
 			}
 			//prepare for next interval
 			act_pos += fragmentLength(ali_g,act_knot);
-			act_knot = findVertex(ali_g,seq,act_pos);
+			act_knot = findVertex(ali_g,positionToId(seqs, seq),act_pos);
 		
 		}
 		++ali_it;

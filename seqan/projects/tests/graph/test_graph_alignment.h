@@ -553,6 +553,58 @@ void Test_Hirschberg() {
 
 //////////////////////////////////////////////////////////////////////////////
 
+void Test_SmithWaterman() {
+	typedef String<Dna> TString;
+	typedef StringSet<TString, Dependent<> > TStringSet;
+	typedef Graph<Alignment<TStringSet, unsigned int> > TGraph;
+	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef	Id<TStringSet>::Type TId;
+
+	TStringSet str;
+	TString str0("gctctgcgaata"); assignValueById(str, str0);
+	TString str1("cgttgagatact"); assignValueById(str, str1);
+	TGraph g(str);
+	Score<double> score_type = Score<double>(2,-1,-2,-2);
+	double score = localAlignment(g, score_type, SmithWaterman());
+	SEQAN_TASSERT(label(g, findVertex(g, 0, 4)) == "tgcg")
+	SEQAN_TASSERT(label(g, findVertex(g, 0, 8)) == "a")
+	SEQAN_TASSERT(label(g, findVertex(g, 0, 9)) == "ata")
+	SEQAN_TASSERT(label(g, findVertex(g, 1, 3)) == "tgag")
+	SEQAN_TASSERT(label(g, findVertex(g, 1, 7)) == "ata")
+	SEQAN_TASSERT(numEdges(g) == 2)
+	SEQAN_TASSERT(numVertices(g) == 5)
+	//std::cout << g << std::endl;
+	//double score2 = localAlignment(std::cout, str, score_type, SmithWaterman() );
+	//SEQAN_TASSERT(score == score2)
+	
+	str[0] = "gctctgcgaata";
+	str[1] = "cgttgagatact";
+	assignStringSet(g, str);
+	score = localAlignment(g, score_type, SmithWatermanClump());
+	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "cgt")
+	SEQAN_TASSERT(label(g, findVertex(g, 1, 3)) == "t")
+	SEQAN_TASSERT(label(g, findVertex(g, 1, 4)) == "ga")
+	SEQAN_TASSERT(label(g, findVertex(g, 1, 6)) == "g")
+	SEQAN_TASSERT(label(g, findVertex(g, 1, 7)) == "at")
+	SEQAN_TASSERT(label(g, findVertex(g, 1, 9)) == "a")
+	SEQAN_TASSERT(label(g, findVertex(g, 1, 10)) == "c")
+	SEQAN_TASSERT(label(g, findVertex(g, 1, 11)) == "t")
+	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "g")
+	SEQAN_TASSERT(label(g, findVertex(g, 0, 1)) == "ct")
+	SEQAN_TASSERT(label(g, findVertex(g, 0, 3)) == "c")
+	SEQAN_TASSERT(label(g, findVertex(g, 0, 4)) == "t")
+	SEQAN_TASSERT(label(g, findVertex(g, 0, 5)) == "gc")
+	SEQAN_TASSERT(label(g, findVertex(g, 0, 7)) == "g")
+	SEQAN_TASSERT(label(g, findVertex(g, 0, 8)) == "a")
+	SEQAN_TASSERT(label(g, findVertex(g, 0, 9)) == "at")
+	SEQAN_TASSERT(label(g, findVertex(g, 0, 11)) == "a")
+	SEQAN_TASSERT(numEdges(g) == 9)
+	SEQAN_TASSERT(numVertices(g) == 17)
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 void Test_Nussinov() {
 	typedef String<char> TString;
 	typedef Size<TString>::Type TSize;
@@ -741,10 +793,14 @@ void  Test_Runtime2() {
 //////////////////////////////////////////////////////////////////////////////
 
 void Test_GraphAlignment() {
+	// Global alignments
 	Test_NeedlemanWunsch();
 	Test_Gotoh();	
 	Test_MyersBitVector();
 	Test_Hirschberg();
+
+	// Local alignments
+	Test_SmithWaterman();
 
 	// This shouldn't be here
 	Test_Nussinov();

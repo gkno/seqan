@@ -429,7 +429,7 @@ assignCargo(EdgeStump<TCargo, TList, TSource, TId, TSpec>* es,
 			TCargo2 const& t) 
 {
 	SEQAN_CHECKPOINT
-	es->data_cargo = t;
+	es->data_cargo =  (TCargo) t;
 }
 
 //////////////////////////////////////////////////////////////////////////////

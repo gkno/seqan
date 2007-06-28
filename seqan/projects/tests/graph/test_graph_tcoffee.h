@@ -160,7 +160,7 @@ void Test_TCoffeeTmp() {
 
 	// Generate a primary library, i.e., all pairwise alignments
 	generatePrimaryLibrary(lib1, AAGroupsDayhoff(), GlobalPairwise_Library() );
-	generatePrimaryLibrary(lib2, 2, MUM_Library() );
+	generatePrimaryLibrary(lib2, LocalPairwise_Library() );
 
 	// Weighting of libraries (Signal addition)
 	combineGraphs(g, lib1, lib2);
@@ -235,7 +235,7 @@ void Test_TCoffeeGarfield() {
 	write(strm01,lib1,DotDrawing());
 	strm01.close();
 
-	generatePrimaryLibrary(lib2, 2, MUM_Library() );
+	generatePrimaryLibrary(lib2, LocalPairwise_Library() );
 
 	fstream strm02; // Alignment graph as dot
 	strm02.open(TEST_PATH "my_tcoffee02.dot", ios_base::out | ios_base::trunc);
@@ -320,10 +320,10 @@ void Test_TCoffeeFromRandomSeq() {
 		TGraph lib1(strSet);
 		TGraph lib2(strSet);
 		generatePrimaryLibrary(lib1, AAGroupsDayhoff(), GlobalPairwise_Library() );
-		//std::cout << "Pairwise alignments done" << std::endl;
+		//std::cout << "Global Pairwise alignments done" << std::endl;
 
-		generatePrimaryLibrary(lib2, 2, MUM_Library() );
-		//std::cout << "MUMs done" << std::endl;
+		generatePrimaryLibrary(lib2, LocalPairwise_Library());
+		//std::cout << "Local Pairwise alignments done" << std::endl;
 
 		// Weighting of libraries (Signal addition)
 		combineGraphs(g, lib1, lib2);
@@ -418,10 +418,10 @@ void Test_TCoffeeFromFile() {
 	TGraph lib1(strSet);
 	TGraph lib2(strSet);
 	generatePrimaryLibrary(lib1, AAGroupsDayhoff(), GlobalPairwise_Library() );
-	std::cout << "Pairwise alignments done" << std::endl;
+	std::cout << "Global Pairwise alignments done" << std::endl;
 
-	generatePrimaryLibrary(lib2, 2, MUM_Library() );
-	std::cout << "MUMs done" << std::endl;
+	generatePrimaryLibrary(lib2, LocalPairwise_Library());
+	std::cout << "Local Pairwise alignments done" << std::endl;
 
 	// Weighting of libraries (Signal addition)
 	combineGraphs(g, lib1, lib2);

@@ -836,10 +836,10 @@ void TCoffee() {
 	TGraph lib2(strSet);
 	TGraph g(strSet);
 
-	// Generate a 1st primary library, i.e., all pairwise alignments
+	// Generate a 1st primary library, i.e., all global pairwise alignments
 	generatePrimaryLibrary(lib1, AAGroupsDayhoff(), GlobalPairwise_Library() );
-	// Generate a 2nd primary library, i.e., all MUMs
-	generatePrimaryLibrary(lib2, 2, MUM_Library() );
+	// Generate a 2nd primary library, i.e., all local pairwise alignments
+	generatePrimaryLibrary(lib2, LocalPairwise_Library() );
 
 	// Weighting of libraries (Signal addition)
 	combineGraphs(g, lib1, lib2);

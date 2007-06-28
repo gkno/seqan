@@ -68,6 +68,8 @@
 #include <seqan/graph/graph_align_gotoh3.h>
 #include <seqan/graph/graph_align_myers.h>
 #include <seqan/graph/graph_align_hirschberg.h>
+#include <seqan/graph/graph_align_smith_waterman.h>
+#include <seqan/graph/graph_align_smith_waterman_clump.h>
 #include <seqan/graph/graph_align_tcoffee.h>
 #include <seqan/graph/graph_align_interface.h>
 #include <seqan/graph/graph_align_nussinov.h>

@@ -1771,29 +1771,54 @@ void Test_Alignment() {
 	write(strm,gAl,DotDrawing());
 	strm.close();
 
-	typedef String<char> TAlignString;
-	typedef StringSet<TAlignString, Dependent<> > TAlignStringSet;
-	typedef Graph<Alignment<TAlignStringSet, unsigned int> > TAlignGraph;
-	
-	TAlignStringSet align_str;
-	TAlignString align_str0("annual");	assignValueById(align_str, align_str0);
-	TAlignString align_str1("annealing"); assignValueById(align_str, align_str1);
-	TAlignGraph g_align(align_str);
-	addEdge(g_align, addVertex(g_align, 0, 0, 6), addVertex(g_align, 1, 0, 6), 1);
-	//addVertex(g_align, 1, 6, 3);
+}
 
-	//std::cout << g_align << std::endl;
+void Test_RnaAlignment() {
+//____________________________________________________________________________
+// Rna stuff
 
-	TAlignGraph g_align_b(align_str);
-	addEdge(g_align_b, addVertex(g_align_b, 0, 0, 6), addVertex(g_align_b, 1, 3, 6), 1);
-	//addVertex(g_align_b, 1, 6, 3);
+	// Mutual information content
+	typedef String<Dna> TString;
+	typedef StringSet<TString, Dependent<> > TStringSet;
+	typedef Graph<Alignment<TStringSet, void> > TGraph;
+	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef	Id<TStringSet>::Type TId;
+	typedef	Size<TStringSet>::Type TSize;
 
-	//std::cout << g_align_b << std::endl;
+	// Create an alignment
+	TStringSet str;
+	TString str0("cgcgataa");
+	assignValueById(str, str0);
+	TString str1("cggccgcc");
+	assignValueById(str, str1);
+	TString str2("cgcggcgg");
+	assignValueById(str, str2);
+	TString str3("cggctatt");
+	assignValueById(str, str3);
 
-	//extendGraph(g_align, g_align_b);
+	TGraph g(str);
+	TSize pos = 0;
+	while(pos < length(getValue(str,0))) {
+		TSize seq = 1;
+		TVertexDescriptor v1 = addVertex(g, 0, pos, 1);
+		while (seq < length(str)) {
+			TVertexDescriptor v2 = addVertex(g, seq, pos, 1);
+			for(TSize i = seq; i>0;--i) {
+				addEdge(g, v2 - i, v2);
+			}
+			++seq;
+		}
+		++pos;
+	}
 
-	//std::cout << g_align << std::endl;
+	String<double> mat;
+	mutualInformationContent(g, mat);
+	TSize matrix_size = (TSize) sqrt((double) length(mat));
 
+	SEQAN_TASSERT(getValue(mat, 0 * matrix_size + 1) == 0)
+	SEQAN_TASSERT(getValue(mat, 2 * matrix_size + 3) == 1)
+	SEQAN_TASSERT(getValue(mat, 4 * matrix_size + 5) == 2)
+	SEQAN_TASSERT(getValue(mat, 6 * matrix_size + 7) == 2)
 }
 
 
@@ -1885,6 +1910,7 @@ void Test_GraphTypes() {
 	Test_WordGraph();	// Word Graph
 	Test_Tree();		// Trees
 	Test_Alignment();	// Alignment graph
+	Test_RnaAlignment();// Use of alignment graph for Rna stuff
 	Test_Fragment();	// Fragment
 }
 

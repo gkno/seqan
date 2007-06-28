@@ -66,6 +66,28 @@ typedef Tag<Hirschberg_> const Hirschberg;
 //////////////////////////////////////////////////////////////////////////////
 
 /**
+.Tag.SmithWaterman
+..summary:Switch to trigger a Smith Waterman algorithm that uses affine gap costs
+..value.SmithWaterman:SmithWaterman alignment
+*/
+
+struct SmithWaterman_;
+typedef Tag<SmithWaterman_> const SmithWaterman;
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Tag.SmithWatermanClump
+..summary:Switch to trigger a Smith SmithWatermanClump algorithm that uses affine gap costs
+..value.SmithWatermanClump:SmithWatermanClump alignment
+*/
+
+struct SmithWatermanClump_;
+typedef Tag<SmithWatermanClump_> const SmithWatermanClump;
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
 .Tag.Nussinov
 ..summary:Switch to trigger a Nussinov rna folding algorithm.
 ..value.Nussinov:Nussinov rna folding
@@ -153,7 +175,7 @@ struct _Translate_Table_Byte_2_TraceBackGotoh
 template <typename T>
 char const _Translate_Table_Byte_2_TraceBackGotoh<T>::VALUE[256] = 
 {
-	0,   1,   2,   3,   4,   5,   6,   7,   8,   9,   10,   11,   0,   0,   0,   0, //0
+	0,   1,   2,   3,   4,   5,   6,   7,   8,   9,   10,   11,   12,   0,   0,   0, //0
 	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //1
 	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //2
 	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //3
@@ -186,6 +208,7 @@ The values are:
 0=Diag, Diag, Diag; 1=Diag, Diag, Vert; 2=Diag, Hori, Diag; 3=Diag, Hori, Vert; 
 4=Hori, Diag, Diag; 5=Hori, Diag, Vert; 6=Hori, Hori, Diag; 7=Hori, Hori, Vert; 
 8=Vert, Diag, Diag; 9=Vert, Diag, Vert; 10=Vert, Hori, Diag; 11=Vert, Hori, Vert; 
+12 = Stop (For SmithWaterman Traceback)
 ..see:Metafunction.ValueSize
 */
 struct _TraceBackGotoh {};
