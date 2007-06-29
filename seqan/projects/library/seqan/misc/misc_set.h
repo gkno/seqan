@@ -578,23 +578,23 @@ namespace SEQAN_NAMESPACE_MAIN
 	//////////////////////////////////////////////////////////////////////////////
 
 	template <typename TElement>
-	inline typename Key<::std::set<TElement> >::Type &
+	inline typename Key< ::std::set<TElement> >::Type &
 	keyOf(typename ::std::set<TElement>::iterator const &it) {
 		return keyOf(*it);
 	}
 	template <typename TElement>
-	inline typename Key<::std::set<TElement> >::Type const &
+	inline typename Key< ::std::set<TElement> >::Type const &
 	keyOf(typename ::std::set<TElement>::const_iterator const &it) {
 		return keyOf(*it);
 	}
 
 	template <typename TElement>
-	inline typename Object<::std::set<TElement> >::Type &
+	inline typename Object< ::std::set<TElement> >::Type &
 	objectOf(typename ::std::set<TElement>::iterator const &it) {
 		return objectOf(*it);
 	}
 	template <typename TElement>
-	inline typename Object<::std::set<TElement> >::Type const &
+	inline typename Object< ::std::set<TElement> >::Type const &
 	objectOf(typename ::std::set<TElement>::const_iterator const &it) {
 		return objectOf(*it);
 	}
