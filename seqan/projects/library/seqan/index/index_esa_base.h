@@ -45,6 +45,10 @@ namespace SEQAN_NAMESPACE_MAIN
 	struct Postorder:			VSTreeIteratorTraits<_Postorder, True> {};
 	struct PreorderEmptyEdges:	VSTreeIteratorTraits<_Preorder, False> {};	// also iterate over
 	struct PostorderEmptyEdges:	VSTreeIteratorTraits<_Postorder, False> {};	// empty edges (with $-label)
+
+	// traits for TopDown iterators (w/o ParentLinks) for which postorder/preorder is ignored
+	struct HideEmptyEdges:		VSTreeIteratorTraits<_Postorder, True> {};
+	struct EmptyEdges:			VSTreeIteratorTraits<_Postorder, False> {};	// empty edges (with $-label)
 	
 
 	// virtual suffix tree iterators
@@ -53,22 +57,24 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		// top down traversal iterators
 		template <typename TSpec = Preorder>
-		struct TopDown;
+		struct TopDown;						// starts in the suffix tree root and can go down and go right
 
 			// allows an top-down iterator to go up
 			template < typename TSpec = Preorder >
-			struct ParentLinks {};
+			struct ParentLinks {};			// .. can also go up
 
 		// bottom up traversal iterators
 		template <typename TSpec = Postorder>
-		struct BottomUp;
+		struct BottomUp;					// starts in the first node of a depth-first-search and can go next
 
 			// bottom up repeat search iterators
-			struct SuperMaxRepeats;
+			struct SuperMaxRepeats;			// maximal repeat and not part of a longer repeat
 			struct SuperMaxRepeatsFast;
-			struct MaxRepeats;
-			struct MUMs;
+			struct MUMs;					// maximal unique match (unique in every sequence)
+			struct MaxRepeats;				// maximal repeat
 			struct MaxRepeatOccurences;
+			struct MultiMEMs;				// maximal repeat over different sequences
+			struct MultiMEMOccurences;
 
 
 /**

@@ -10,9 +10,31 @@
 #define SEQAN_HEADER_MISC_MAP_H
 
 #include <algorithm>
+#include "misc_base.h"
 
 namespace SEQAN_NAMESPACE_MAIN
 {
+
+	//////////////////////////////////////////////////////////////////////////////
+	//
+
+	template <typename TPair>
+	inline typename TPair::T1 & keyOf(TPair &pair) {
+		return getValueI1(pair);
+	}
+	template <typename TPair>
+	inline typename TPair::T1 const & keyOf(TPair const &pair) {
+		return getValueI1(pair);
+	}
+	template <typename TPair>
+	inline typename TPair::T2 & objectOf(TPair &pair) {
+		return getValueI2(pair);
+	}
+	template <typename TPair>
+	inline typename TPair::T2 const & objectOf(TPair const &pair) {
+		return getValueI2(pair);
+	}
+
 
 	//////////////////////////////////////////////////////////////////////////////
 	//
@@ -154,27 +176,6 @@ namespace SEQAN_NAMESPACE_MAIN
 		TIter iter = find(pair.i1, map);
 		delete iter;
 	}
-
-	//////////////////////////////////////////////////////////////////////////////
-	//
-
-	template <typename TPair>
-	inline typename TPair::T1 & keyOf(TPair &pair) {
-		return pair.i1;
-	}
-	template <typename TPair>
-	inline typename TPair::T1 const & keyOf(TPair const &pair) {
-		return pair.i1;
-	}
-	template <typename TPair>
-	inline typename TPair::T2 & objectOf(TPair &pair) {
-		return pair.i2;
-	}
-	template <typename TPair>
-	inline typename TPair::T2 const & objectOf(TPair const &pair) {
-		return pair.i2;
-	}
-
 
 }
 

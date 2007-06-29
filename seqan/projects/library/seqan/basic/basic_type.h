@@ -335,6 +335,10 @@ struct Id<T const> {
 template<typename T>
 struct Key; 
 
+template <typename T>
+struct Key<T const>:
+	Key<T> {};
+
 //____________________________________________________________________________
 
 /**
@@ -346,6 +350,10 @@ struct Key;
 */
 template<typename T>
 struct Object; 
+
+template <typename T>
+struct Object<T const>:
+	Object<T> {};
 
 //____________________________________________________________________________
 

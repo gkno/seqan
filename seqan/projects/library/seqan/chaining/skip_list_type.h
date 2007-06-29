@@ -16,7 +16,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template< typename T >
 	struct Key
 	{
-		typedef int Type;
+		typedef T Type;
 	};
 
 		// default for Pair

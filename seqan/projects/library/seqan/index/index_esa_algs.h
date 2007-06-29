@@ -31,13 +31,14 @@ namespace SEQAN_NAMESPACE_MAIN
 		public Iter< TSTree, VSTree< BottomUp<> > > 
 	{
 	public:
-		typedef Iter< TSTree, VSTree< BottomUp<> > >	TBase;
-		typedef typename Size<TSTree>::Type				TSize;
+		typedef Iter< TSTree, VSTree< BottomUp<> > >			TBase;
+		typedef typename Size<TSTree>::Type						TSize;
+		typedef VectorSet<TSize, SetFunctors<TSize>, Alloc<> >	TSeqSet;
 //____________________________________________________________________________
 
-		TSize						minLength;
-		TSize						seqCount;
-		VectorSet<TSize, Alloc<> >	seqSet;
+		TSize		minLength;
+		TSize		seqCount;
+		TSeqSet		seqSet;
 //____________________________________________________________________________
 
 		Iter(TSTree &_tree):

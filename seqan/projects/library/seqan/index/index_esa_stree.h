@@ -470,7 +470,8 @@ This interval is the @Function.value@ of the iterator.
 */
 
 	template < typename TIndex, class TSpec >
-	inline typename SAValue<TIndex>::Type getOccurence(Iter< TIndex, VSTree<TSpec> > const &it) {
+	inline typename SAValue<TIndex>::Type 
+	getOccurence(Iter< TIndex, VSTree<TSpec> > const &it) {
 		return saAt(value(it).i1.i1, container(it));
 	}
 
@@ -487,7 +488,8 @@ If $iterator$'s container type is $TIndex$ the return type is $Size<TIndex>::Typ
 */
 
 	template < typename TIndex, class TSpec >
-	inline typename Size<TIndex>::Type countOccurences(Iter< TIndex, VSTree<TSpec> > const &it) {
+	inline typename Size<TIndex>::Type 
+	countOccurences(Iter< TIndex, VSTree<TSpec> > const &it) {
 		if (_isSizeInval(value(it).i1.i2))
 			return length(indexSA(container(it))) - value(it).i1.i1;
 		else
@@ -506,7 +508,8 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 */
 
 	template < typename TIndex, class TSpec >
-	inline typename Infix< typename Fibre<TIndex, ESA_SA>::Type const >::Type getOccurences(Iter< TIndex, VSTree<TSpec> > const &it) {
+	inline typename Infix< typename Fibre<TIndex, ESA_SA>::Type const >::Type 
+	getOccurences(Iter< TIndex, VSTree<TSpec> > const &it) {
 		if (_isSizeInval(value(it).i1.i2))
 			return infix(indexSA(container(it)), value(it).i1.i1, length(indexSA(container(it))));
 		else
@@ -606,7 +609,8 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 */
 
 	template < typename TIndex, class TSpec >
-	inline typename Infix< typename Fibre<TIndex, ESA_BWT>::Type const >::Type getOccurencesBWT(Iter< TIndex, VSTree<TSpec> > const &it) {
+	inline typename Infix< typename Fibre<TIndex, ESA_BWT>::Type const >::Type 
+	getOccurencesBWT(Iter< TIndex, VSTree<TSpec> > const &it) {
 		if (_isSizeInval(value(it).i1.i2))
 			return infix(indexBWT(container(it)), value(it).i1.i1, length(indexSA(container(it))));
 		else
@@ -638,7 +642,8 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 	// generic find method
 	// tests functor F on every child interval and aborts if one call returns true (= found)
 	template < typename TIndex, class TSpec, class TFunctor >
-	inline bool _processChildren(Iter< TIndex, VSTree< TopDown<TSpec> > > const &it, TFunctor &F)
+	inline bool 
+	_processChildren(Iter< TIndex, VSTree< TopDown<TSpec> > > const &it, TFunctor &F)
 	{
 		if (isLeaf(it)) return false;
 
@@ -675,7 +680,8 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 */
 
 	template < typename TIndex, class TSpec >
-	inline typename Size<TIndex>::Type countChildren(Iter< TIndex, VSTree<TSpec> > const &it) {
+	inline typename Size<TIndex>::Type 
+	countChildren(Iter< TIndex, VSTree<TSpec> > const &it) {
 		if (isLeaf(it)) return 0;
 
 		typedef typename Size<TIndex>::Type TSize;
@@ -783,9 +789,69 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 	}
 
 
-	// go down the leftmost edge
-	template < typename TIndex, class TSpec >
-	inline bool goDown(Iter< TIndex, VSTree< TopDown<TSpec> > > &it) 
+    //////////////////////////////////////////////////////////////////////////////
+	// goDown
+
+	// go down the leftmost edge (including empty $-edges)
+	template < typename TIndex, class TSpec, typename TDFSOrder >
+	inline bool _goDown(
+		Iter< TIndex, VSTree< TopDown<TSpec> > > &it,
+		VSTreeIteratorTraits<TDFSOrder, False> const)
+	{
+		if (isLeaf(it)) return false;
+		_historyPush(it, value(it).i1);
+
+		TIndex const &index = container(it);
+
+		typename Size<TIndex>::Type lval = _getUp(value(it).i1.i2, index);
+		if (!(value(it).i1.i1 < lval && lval < value(it).i1.i2))
+			lval = _getDown(value(it).i1.i1, index);
+		value(it).i1.i2 = lval;
+		return true;
+	}
+
+	// go down the leftmost edge (skip empty $-edges) 
+	// without calling goUp(..)
+	template < typename TIndex, class TSpec, typename TDFSOrder >
+	inline bool _goDown(
+		Iter< TIndex, VSTree< TopDown<TSpec> > > &it,
+		VSTreeIteratorTraits<TDFSOrder, True> const)
+	{
+		typedef Iter<TIndex, VSTree< TopDown<TSpec> > >	TIter;
+		typedef typename Value<TIter>::Type				TDesc;
+
+		if (isLeaf(it)) return false;
+
+		TDesc desc = value(it);			// save descriptor of the current node
+		_historyPush(it, desc.i1);
+
+		TIndex const &index = container(it);
+
+		typename Size<TIndex>::Type lval = _getUp(value(it).i1.i2, index);
+		if (!(value(it).i1.i1 < lval && lval < value(it).i1.i2))
+			lval = _getDown(value(it).i1.i1, index);
+		value(it).i1.i2 = lval;
+
+		typename Size<TIndex>::Type lcp = lcpAt(lval - 1, index);
+		//typename typename StringSetLimits<TIndex const>::Type &limits = stringSetLimits(index);
+		while (isLeaf(it)) {
+			typename SAValue<TIndex>::Type pos = getOccurence(it);
+			if (getSeqOffset(pos, stringSetLimits(index)) + lcp == sequenceLength(getSeqNo(pos, stringSetLimits(index)), index)) {
+				if (!goRight(it)) {
+					value(it) = desc;	// restore descriptor
+					return false;
+				}
+			} else
+				break;
+		}
+		return true;
+	}
+
+	// go down the leftmost edge (skip empty $-edges)
+	template < typename TIndex, class TSpec, typename TDFSOrder >
+	inline bool _goDown(
+		Iter< TIndex, VSTree< TopDown< ParentLinks<TSpec> > > > &it,
+		VSTreeIteratorTraits<TDFSOrder, True> const)
 	{
 		if (isLeaf(it)) return false;
 		_historyPush(it, value(it).i1);
@@ -797,27 +863,30 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 			lval = _getDown(value(it).i1.i1, index);
 		value(it).i1.i2 = lval;
 
-		typedef Iter< TIndex, VSTree< TopDown<TSpec> > >		TIter;
-		typedef typename GetVSTreeIteratorTraits<TIter>::Type	TTraits;
-		typedef typename TTraits::HideEmptyEdges				THideEmptyEdges;
-
-		if (THideEmptyEdges::VALUE) {
-			typename Size<TIndex>::Type lcp = lcpAt(lval - 1, index);
-			//typename typename StringSetLimits<TIndex const>::Type &limits = stringSetLimits(index);
-
-			while (isLeaf(it)) {
-				typename SAValue<TIndex>::Type pos = getOccurence(it);
-				if (getSeqOffset(pos, stringSetLimits(index)) + lcp == sequenceLength(getSeqNo(pos, stringSetLimits(index)), index)) {
-					if (!goRight(it)) {
-						goUp(it);
-						return false;
-					}
-				} else
-					break;
-			}
+		typename Size<TIndex>::Type lcp = lcpAt(lval - 1, index);
+		//typename typename StringSetLimits<TIndex const>::Type &limits = stringSetLimits(index);
+		while (isLeaf(it)) {
+			typename SAValue<TIndex>::Type pos = getOccurence(it);
+			if (getSeqOffset(pos, stringSetLimits(index)) + lcp == sequenceLength(getSeqNo(pos, stringSetLimits(index)), index)) {
+				if (!goRight(it)) {
+					goUp(it);
+					return false;
+				}
+			} else
+				break;
 		}
 		return true;
 	}
+
+	// go down the leftmost edge
+	template < typename TIndex, class TSpec >
+	inline bool goDown(Iter< TIndex, VSTree< TopDown<TSpec> > > &it) {
+		return _goDown(it, typename GetVSTreeIteratorTraits< Iter<TIndex, VSTree< TopDown<TSpec> > > >::Type());
+	}
+
+
+    //////////////////////////////////////////////////////////////////////////////
+	// goDown a specific edge (chosen by the first character)
 
 	// go down the edge beginning with c (returns false iff this edge doesn't exists)
 	template < typename TIndex, class TSpec, typename TValue >
@@ -1301,7 +1370,11 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 
 	template < typename TIndex, class TSpec >
 	inline bool isUnique(Iter<TIndex, VSTree<TSpec> > const &it) {
-		VectorSet<typename Size<TIndex>::Type, Alloc<> > set(countSequences(container(it)));
+		VectorSet<
+			typename Size<TIndex>::Type,
+			SetFunctors< typename Size<TIndex>::Type >,
+			Alloc<> 
+		> set(countSequences(container(it)));
 		return isUnique(it, set);
 	}
 
@@ -1345,7 +1418,11 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 
 	template < typename TIndex, class TSpec >
 	inline int getFrequency(Iter<TIndex, VSTree<TSpec> > const &it) {
-		VectorSet<typename Size<TIndex>::Type, Alloc<> > set(countSequences(container(it)));
+		VectorSet<
+			typename Size<TIndex>::Type,
+			SetFunctors< typename Size<TIndex>::Type >,
+			Alloc<> 
+		> set(countSequences(container(it)));
 		return getFrequency(it, set);
 	}
 

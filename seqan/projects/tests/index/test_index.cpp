@@ -141,6 +141,23 @@ void testMultiIndex()
 			}
 		}
 
+		// topdown iterator w/o parent links (hiding edges with empty labels)
+		{
+			cout << endl << "TopDown with empty edges" << endl;
+			Iter<Index<TMulti>, VSTree< TopDown<HideEmptyEdges> > > it(esa);
+			_printNode(it);
+			while (goDown(it))
+				_printNode(it);
+		}
+
+		// topdown iterator w/o parent links
+		{
+			cout << endl << "TopDown with empty edges" << endl;
+			Iter<Index<TMulti>, VSTree< TopDown<EmptyEdges> > > it(esa);
+			_printNode(it);
+			while (goDown(it))
+				_printNode(it);
+		}
 /*
 		indexRequire(esa, ESA_SA());
 		indexRequire(esa, ESA_BWT());
