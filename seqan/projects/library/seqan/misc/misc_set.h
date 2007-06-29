@@ -403,14 +403,23 @@ namespace SEQAN_NAMESPACE_MAIN
 	//////////////////////////////////////////////////////////////////////////////
 	//
 
-	template <typename TObject>
-	struct Value< ::std::set<TObject> > {
-		typedef TObject Type;
+	template <typename TElement>
+	struct Value< ::std::set<TElement> > {
+		typedef TElement Type;
 	};
-	template <typename TObject>
-	struct Size< ::std::set<TObject> > {
-		typedef typename ::std::set<TObject>::size_type Type;
+	template <typename TElement>
+	struct Size< ::std::set<TElement> > {
+		typedef typename ::std::set<TElement>::size_type Type;
 	};
+
+	template <typename TElement>
+	struct Key< ::std::set<TElement> > :
+		Key<TElement> {};
+
+	template <typename TElement>
+	struct Object< ::std::set<TElement> > :
+		Object<TElement> {};
+
 
 
 	template <typename TKey>
