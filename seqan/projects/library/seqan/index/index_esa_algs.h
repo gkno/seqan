@@ -464,7 +464,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		for(TSetIterator i = begin(child.set); i != _end; ++i) {
 			if (in(keyOf(i), parent.set)) {	// append child fraction to parent's fraction
 				TFractionHeader &parent_header = objectOf(find(keyOf(i), parent.set));
-				TFractionHeader &child_header = objectOf(i);
+				TFractionHeader const &child_header = objectOf(i);
 				it.posList[parent_header.end] = child_header.begin;
 				parent_header.end = child_header.end;
 				parent_header.size += child_header.size;

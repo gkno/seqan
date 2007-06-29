@@ -778,7 +778,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 	// unified history stack access for goDown(..)
        
 	template < typename TIndex, class TSpec, typename TStackEntry >
-	inline void _historyPush(Iter< TIndex, VSTree<TSpec> > &it, TStackEntry range) {
+	inline void _historyPush(Iter< TIndex, VSTree<TSpec> > &it, TStackEntry) {
 		value(it).i2 = value(it).i1.i2;
 	}
 
