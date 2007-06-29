@@ -76,7 +76,7 @@ fragmentBegin(Fragment<TId, TPos, TSize, TSpec> const& f,
 template<typename TId, typename TPos, typename TSize, typename TSpec, typename TVal>
 inline typename Size<Fragment<TId, TPos, TSize, TSpec> >::Type&
 fragmentLength(Fragment<TId, TPos, TSize, TSpec> const& f,
-			   TVal const seqId)
+			   TVal const)
 {
 	SEQAN_CHECKPOINT
 	return const_cast<typename Size<Fragment<TId, TPos, TSize, TSpec> >::Type&>(f.len);

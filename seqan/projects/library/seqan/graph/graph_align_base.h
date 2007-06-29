@@ -291,7 +291,7 @@ _align_trace_print(TFile& file,
 template <typename TStringSet, typename TCargo, typename TSpec, typename TStringSet2, typename TId, typename TPos, typename TTraceValue>
 inline void
 _align_trace_print(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-				   TStringSet2 const& str,
+				   TStringSet2 const&,
 				   TId const id1,
 				   TPos const pos1,
 				   TId const id2,
@@ -318,9 +318,9 @@ template <typename TVertexDescriptor, typename TSpec, typename TStringSet, typen
 inline void
 _align_trace_print(String<String<TVertexDescriptor, TSpec> >& nodeString,
 				   TStringSet const& str,
-				   TId const id1,
+				   TId const,
 				   TPos const pos1,
-				   TId const id2,
+				   TId const,
 				   TPos const pos2,
 				   TPos const segLen,
 				   TTraceValue const tv)

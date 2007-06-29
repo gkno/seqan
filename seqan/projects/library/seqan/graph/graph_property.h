@@ -298,8 +298,8 @@ struct Value<InternalMap<T, 0> > {
 
 template<typename TSpec, typename TContainer, unsigned int const MemberId>
 inline void
-resizeEdgeMap(Graph<TSpec> const& g,
-			InternalMap<TContainer, MemberId>& pm)
+resizeEdgeMap(Graph<TSpec> const&,
+			  InternalMap<TContainer, MemberId>&)
 {
 }
 
@@ -307,8 +307,8 @@ resizeEdgeMap(Graph<TSpec> const& g,
 
 template<typename TSpec, typename TContainer, unsigned int const MemberId>
 inline void
-resizeEdgeMap(Graph<TSpec>& g,
-			InternalMap<TContainer, MemberId>& pm)
+resizeEdgeMap(Graph<TSpec>&,
+			  InternalMap<TContainer, MemberId>&)
 {
 }
 
@@ -316,9 +316,9 @@ resizeEdgeMap(Graph<TSpec>& g,
 
 template<typename T1, typename T2, typename TEdgeDescriptor, typename TValue>
 inline void
-assignProperty(InternalMap<Pair<T1, T2>, 1>& pm,
-			TEdgeDescriptor const e,
-			TValue const val)
+assignProperty(InternalMap<Pair<T1, T2>, 1>&,
+			   TEdgeDescriptor const e,
+			   TValue const val)
 {
 	SEQAN_CHECKPOINT
 	(cargo(e)).i1 = val;
@@ -328,9 +328,9 @@ assignProperty(InternalMap<Pair<T1, T2>, 1>& pm,
 
 template<typename T1, typename T2, typename TEdgeDescriptor, typename TValue>
 inline void
-assignProperty(InternalMap<Pair<T1, T2>, 2>& pm,
-			TEdgeDescriptor const e,
-			TValue const val)
+assignProperty(InternalMap<Pair<T1, T2>, 2>&,
+			   TEdgeDescriptor const e,
+			   TValue const val)
 {
 	SEQAN_CHECKPOINT
 	(cargo(e)).i2 = val;
@@ -340,9 +340,9 @@ assignProperty(InternalMap<Pair<T1, T2>, 2>& pm,
 
 template<typename T, typename TEdgeDescriptor, typename TValue>
 inline void
-assignProperty(InternalMap<T, 0>& pm,
-			TEdgeDescriptor const e,
-			TValue const val)
+assignProperty(InternalMap<T, 0>&,
+			   TEdgeDescriptor const e,
+			   TValue const val)
 {
 	SEQAN_CHECKPOINT
 	assignCargo(e, val);
@@ -352,8 +352,8 @@ assignProperty(InternalMap<T, 0>& pm,
 
 template<typename T1, typename T2, typename TEdgeDescriptor>
 inline typename Value<InternalMap<Pair<T1, T2>, 2> >::Type&
-property(InternalMap<Pair<T1, T2>, 2>& pm,
-		TEdgeDescriptor e)
+property(InternalMap<Pair<T1, T2>, 2>&,
+		 TEdgeDescriptor e)
 {
 	SEQAN_CHECKPOINT
 	return (cargo(e)).i2;
@@ -363,8 +363,8 @@ property(InternalMap<Pair<T1, T2>, 2>& pm,
 
 template<typename T1, typename T2, typename TEdgeDescriptor>
 inline typename Value<InternalMap<Pair<T1, T2>, 2> const>::Type&
-property(InternalMap<Pair<T1, T2>, 2> const& pm,
-		TEdgeDescriptor e)
+property(InternalMap<Pair<T1, T2>, 2> const&,
+		 TEdgeDescriptor e)
 {
 	SEQAN_CHECKPOINT
 	return (cargo(e)).i2;
@@ -374,8 +374,8 @@ property(InternalMap<Pair<T1, T2>, 2> const& pm,
 
 template<typename T1, typename T2, typename TEdgeDescriptor>
 inline typename Value<InternalMap<Pair<T1, T2>, 1> >::Type&
-property(InternalMap<Pair<T1, T2>, 1>& pm,
-		TEdgeDescriptor e)
+property(InternalMap<Pair<T1, T2>, 1>&,
+		 TEdgeDescriptor e)
 {
 	SEQAN_CHECKPOINT
 	return (cargo(e)).i1;
@@ -385,8 +385,8 @@ property(InternalMap<Pair<T1, T2>, 1>& pm,
 
 template<typename T1, typename T2, typename TEdgeDescriptor>
 inline typename Value<InternalMap<Pair<T1, T2>, 1> const>::Type&
-property(InternalMap<Pair<T1, T2>, 1> const& pm,
-		TEdgeDescriptor e)
+property(InternalMap<Pair<T1, T2>, 1> const&,
+		 TEdgeDescriptor e)
 {
 	SEQAN_CHECKPOINT
 	return (cargo(e)).i1;
@@ -396,7 +396,7 @@ property(InternalMap<Pair<T1, T2>, 1> const& pm,
 
 template<typename T, typename TEdgeDescriptor>
 inline typename Value<InternalMap<T, 0> >::Type&
-property(InternalMap<T, 0>& pm,
+property(InternalMap<T, 0>&,
 		 TEdgeDescriptor e)
 {
 	SEQAN_CHECKPOINT
@@ -407,7 +407,7 @@ property(InternalMap<T, 0>& pm,
 
 template<typename T, typename TEdgeDescriptor>
 inline typename Value<InternalMap<T, 0> const>::Type&
-property(InternalMap<T, 0> const& pm,
+property(InternalMap<T, 0> const&,
 		 TEdgeDescriptor e)
 {
 	SEQAN_CHECKPOINT
@@ -418,7 +418,7 @@ property(InternalMap<T, 0> const& pm,
 
 template<typename T1, typename T2, typename TEdgeDescriptor>
 inline typename Value<InternalMap<Pair<T1, T2>, 1> const>::Type
-getProperty(InternalMap<Pair<T1, T2>, 1> const& pm,
+getProperty(InternalMap<Pair<T1, T2>, 1> const&,
 			TEdgeDescriptor e)
 {
 	SEQAN_CHECKPOINT
@@ -429,7 +429,7 @@ getProperty(InternalMap<Pair<T1, T2>, 1> const& pm,
 
 template<typename T1, typename T2, typename TEdgeDescriptor>
 inline typename Value<InternalMap<Pair<T1, T2>, 1> >::Type
-getProperty(InternalMap<Pair<T1, T2>, 1>& pm,
+getProperty(InternalMap<Pair<T1, T2>, 1>&,
 			TEdgeDescriptor e)
 {
 	SEQAN_CHECKPOINT
@@ -440,7 +440,7 @@ getProperty(InternalMap<Pair<T1, T2>, 1>& pm,
 
 template<typename T1, typename T2, typename TEdgeDescriptor>
 inline typename Value<InternalMap<Pair<T1, T2>, 2> const>::Type
-getProperty(InternalMap<Pair<T1, T2>, 2> const& pm,
+getProperty(InternalMap<Pair<T1, T2>, 2> const&,
 			TEdgeDescriptor e)
 {
 	SEQAN_CHECKPOINT
@@ -451,7 +451,7 @@ getProperty(InternalMap<Pair<T1, T2>, 2> const& pm,
 
 template<typename T1, typename T2, typename TEdgeDescriptor>
 inline typename Value<InternalMap<Pair<T1, T2>, 2> >::Type
-getProperty(InternalMap<Pair<T1, T2>, 2>& pm,
+getProperty(InternalMap<Pair<T1, T2>, 2>&,
 			TEdgeDescriptor e)
 {
 	SEQAN_CHECKPOINT
@@ -462,8 +462,8 @@ getProperty(InternalMap<Pair<T1, T2>, 2>& pm,
 
 template<typename T, typename TEdgeDescriptor>
 inline typename Value<InternalMap<T, 0> const>::Type
-getProperty(InternalMap<T, 0> const& pm,
-		 TEdgeDescriptor e)
+getProperty(InternalMap<T, 0> const&,
+			TEdgeDescriptor e)
 {
 	SEQAN_CHECKPOINT
 	return getCargo(e);
@@ -473,8 +473,8 @@ getProperty(InternalMap<T, 0> const& pm,
 
 template<typename T, typename TEdgeDescriptor>
 inline typename Value<InternalMap<T, 0> >::Type
-getProperty(InternalMap<T, 0>& pm,
-		 TEdgeDescriptor e)
+getProperty(InternalMap<T, 0>&,
+			TEdgeDescriptor e)
 {
 	SEQAN_CHECKPOINT
 	return getCargo(e);
@@ -530,8 +530,8 @@ struct Value<InternalPointerMap<TValue TClass::*, TPMember> > {
 
 template<typename TSpec, typename TPropmap, TPropmap const Instance>
 inline void
-resizeEdgeMap(Graph<TSpec>& g,
-			InternalPointerMap<TPropmap, Instance>& pm)
+resizeEdgeMap(Graph<TSpec>&,
+			  InternalPointerMap<TPropmap, Instance>&)
 {
 	SEQAN_CHECKPOINT
 }
@@ -540,8 +540,8 @@ resizeEdgeMap(Graph<TSpec>& g,
 
 template<typename TSpec, typename TPropmap, TPropmap const Instance>
 inline void
-resizeEdgeMap(Graph<TSpec> const& g,
-			InternalPointerMap<TPropmap, Instance>& pm)
+resizeEdgeMap(Graph<TSpec> const&,
+			  InternalPointerMap<TPropmap, Instance>&)
 {
 }
 
@@ -549,7 +549,7 @@ resizeEdgeMap(Graph<TSpec> const& g,
 
 template<typename TClass, typename TValue, TValue TClass:: * TPMember, typename TEdgeDescriptor>
 inline void
-assignProperty(InternalPointerMap<TValue TClass::*, TPMember>& pm,
+assignProperty(InternalPointerMap<TValue TClass::*, TPMember>&,
 			TEdgeDescriptor const e,
 			TValue const val)
 {
@@ -561,8 +561,8 @@ assignProperty(InternalPointerMap<TValue TClass::*, TPMember>& pm,
 
 template<typename TClass, typename TValue, TValue TClass:: * TPMember, typename TEdgeDescriptor>
 inline typename Value<InternalPointerMap<TValue TClass::*, TPMember> >::Type&
-property(InternalPointerMap<TValue TClass::*, TPMember>& pm,
-		TEdgeDescriptor const e)
+property(InternalPointerMap<TValue TClass::*, TPMember>&,
+		 TEdgeDescriptor const e)
 {
 	SEQAN_CHECKPOINT
 	return (cargo(e)).*TPMember;
@@ -572,8 +572,8 @@ property(InternalPointerMap<TValue TClass::*, TPMember>& pm,
 
 template<typename TClass, typename TValue, TValue TClass:: * TPMember, typename TEdgeDescriptor>
 inline typename Value<InternalPointerMap<TValue TClass::*, TPMember> const>::Type&
-property(InternalPointerMap<TValue TClass::*, TPMember> const& pm,
-		TEdgeDescriptor const e)
+property(InternalPointerMap<TValue TClass::*, TPMember> const&,
+		 TEdgeDescriptor const e)
 {
 	SEQAN_CHECKPOINT
 	return (cargo(e)).*TPMember;
@@ -583,7 +583,7 @@ property(InternalPointerMap<TValue TClass::*, TPMember> const& pm,
 
 template<typename TClass, typename TValue, TValue TClass:: * TPMember, typename TEdgeDescriptor>
 inline typename Value<InternalPointerMap<TValue TClass::*, TPMember> const>::Type
-getProperty(InternalPointerMap<TValue TClass::*, TPMember> const& pm,
+getProperty(InternalPointerMap<TValue TClass::*, TPMember> const&,
 			TEdgeDescriptor const e)
 {
 	SEQAN_CHECKPOINT
@@ -595,7 +595,7 @@ getProperty(InternalPointerMap<TValue TClass::*, TPMember> const& pm,
 
 template<typename TClass, typename TValue, TValue TClass:: * TPMember, typename TEdgeDescriptor>
 inline typename Value<InternalPointerMap<TValue TClass::*, TPMember> >::Type
-getProperty(InternalPointerMap<TValue TClass::*, TPMember>& pm,
+getProperty(InternalPointerMap<TValue TClass::*, TPMember>&,
 			TEdgeDescriptor const e)
 {
 	SEQAN_CHECKPOINT
@@ -646,8 +646,8 @@ struct Value<TValue TClass:: * const> {
 
 template <typename TSpec, typename TClass, typename TValue> 
 inline void
-resizeEdgeMap(Graph<TSpec> const& g,
-			 TValue TClass:: * ptr_to_member)
+resizeEdgeMap(Graph<TSpec> const&,
+			  TValue TClass:: *)
 {
 }
 
@@ -655,8 +655,8 @@ resizeEdgeMap(Graph<TSpec> const& g,
 
 template <typename TSpec, typename TClass, typename TValue> 
 inline void
-resizeEdgeMap(Graph<TSpec>& g,
-			 TValue TClass:: * ptr_to_member)
+resizeEdgeMap(Graph<TSpec>&,
+			  TValue TClass:: *)
 {
 }
 
@@ -679,7 +679,7 @@ assignProperty(TValue TClass:: * ptr_to_member,
 template <typename TClass, typename TValue, typename TEdgeDescriptor> 
 inline TValue& 
 property(TValue TClass:: * const ptr_to_member, 
-			TEdgeDescriptor const e) 
+		 TEdgeDescriptor const e) 
 {
 	SEQAN_CHECKPOINT
 	return (cargo(e)).*ptr_to_member; 

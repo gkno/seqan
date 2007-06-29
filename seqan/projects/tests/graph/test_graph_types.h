@@ -1744,8 +1744,16 @@ void Test_Alignment() {
 	TId i3 = assignValueById(al, al3);
 
 	TAlignmentGraph gAl(al);
-	TVD vH = addVertex(gAl, i1, 8, 3);TVD vT = addVertex(gAl, i1, 13, 1);TVD vS = addVertex(gAl, i3, 6, 3);
-	TVD vW = addVertex(gAl, i2, 18, 1);TVD vA = addVertex(gAl, i0, 0, 8);TVD vM = addVertex(gAl, i2, 11, 4);
+	TVD vH = addVertex(gAl, i1, 8, 3);
+	SEQAN_TASSERT(getFirstCoveredPosition(gAl, i3) == 9)  // Not found, length of the sequence
+	SEQAN_TASSERT(getLastCoveredPosition(gAl, i3) == 0)  // Not found, length of the sequence
+	SEQAN_TASSERT(getFirstCoveredPosition(gAl, i1) == 8)
+	SEQAN_TASSERT(getLastCoveredPosition(gAl, i1) == 11)
+	TVD vT = addVertex(gAl, i1, 13, 1);TVD vS = addVertex(gAl, i3, 6, 3);
+	TVD vW = addVertex(gAl, i2, 18, 1);TVD vA = addVertex(gAl, i0, 0, 8);
+	SEQAN_TASSERT(getFirstCoveredPosition(gAl, i0) == 0)
+	SEQAN_TASSERT(getLastCoveredPosition(gAl, i0) == 8)
+	TVD vM = addVertex(gAl, i2, 11, 4);
 	TVD vK = addVertex(gAl, i2, 0, 8);TVD vC = addVertex(gAl, i0, 11, 4);TVD vD = addVertex(gAl, i0, 15, 2);
 	TVD vF = addVertex(gAl, i0, 18, 3);TVD vG = addVertex(gAl, i1, 0, 8);addEdge(gAl, vA, vG);
 	TVD vI = addVertex(gAl, i1, 11, 2);TVD vQ = addVertex(gAl, i3, 3, 2);TVD vB = addVertex(gAl, i0, 8, 3);
@@ -1761,6 +1769,8 @@ void Test_Alignment() {
 	addEdge(gAl, vE, vW);addEdge(gAl, vE, vR);addEdge(gAl, vU, vW);addEdge(gAl, vU, vR);
 	addEdge(gAl, vW, vR);addEdge(gAl, vF, vJ);addEdge(gAl, vF, vO);addEdge(gAl, vF, vS);
 	addEdge(gAl, vJ, vO);addEdge(gAl, vJ, vS);addEdge(gAl, vO, vS);
+	SEQAN_TASSERT(getFirstCoveredPosition(gAl, i3) == 0)
+	SEQAN_TASSERT(getLastCoveredPosition(gAl, i3) == 9) 
 
 	//// Graph drawing
 	//// Raw output
@@ -1800,7 +1810,7 @@ void Test_RnaAlignment() {
 	TSize pos = 0;
 	while(pos < length(getValue(str,0))) {
 		TSize seq = 1;
-		TVertexDescriptor v1 = addVertex(g, 0, pos, 1);
+		addVertex(g, 0, pos, 1);
 		while (seq < length(str)) {
 			TVertexDescriptor v2 = addVertex(g, seq, pos, 1);
 			for(TSize i = seq; i>0;--i) {

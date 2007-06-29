@@ -2,7 +2,6 @@
 #define SEQAN_HEADER_GRAPH_H
 
 // Seqan
-#include <seqan/index.h>
 #include <seqan/basic.h>
 #include <seqan/sequence.h>
 #include <seqan/file.h>

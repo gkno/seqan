@@ -126,7 +126,7 @@ template<typename TStringSet,typename TFragId,typename TFragPos,typename TFragSi
 bool
 _getOtherSequenceAndProject(Fragment<TFragId,TFragPos,TFragSize,TFragSpec> & segment,
 							TStringSet & seqs,
-						   TMap & seq_map,
+						   TMap &,
 						   TValue seq_i,
 						   TValue pos_i,
 						   TValue & seq_j,
@@ -171,7 +171,7 @@ SEQAN_CHECKPOINT
 template<typename TValue,typename TAlign>
 void
 getSeqBeginAndEnd(TAlign & segment,
-				  std::map<const void * ,int> & seq_map, 
+				  std::map<const void * ,int> &, 
 				  TValue & seq_i, 
 				  TValue & begin_i, 
 				  TValue & end_i,
@@ -678,7 +678,7 @@ TScoreValue
 getScore(Score<TScoreValue, Simple> & score_type,
 		 TStringSet & seqs,
 		 Fragment<TFragId,TFragPos,TFragSize,TFragSpec> & segment,
-		 bool i_am_first, 
+		 bool, 
 		 TFragPos pos_i,
 		 TFragPos pos_j,
 		 TFragSize len)
@@ -728,7 +728,7 @@ template <typename TValue>
 inline TValue
 scoreGapExtend(Score<TValue,FakeScore> & me)
 {
-	return 0;
+	return 1;
 }
 
 
@@ -736,20 +736,20 @@ template <typename TValue>
 inline TValue const
 scoreGapExtend(Score<TValue,FakeScore> const & me)
 {
-	return 0;
+	return 1;
 }
 
 template <typename TValue>
 inline TValue
 scoreGapOpen(Score<TValue,FakeScore> & me)
 {
-	return 0;
+	return 1;
 }
 template <typename TValue>
 inline TValue const
 scoreGapOpen(Score<TValue,FakeScore> const & me)
 {
-	return 0;
+	return 1;
 }
 
 template <typename TValue, typename T>
@@ -758,7 +758,7 @@ score(Score<TValue,FakeScore> & me,
 	  T const & left,
 	  T const & right)
 {
-	return 0;
+	return 1;
 }
 
 template <typename TValue>
@@ -771,16 +771,16 @@ struct Value< Score<TValue, FakeScore> >
 //fake score function 
 template<typename TScoreValue,typename TStringSet,typename TFragId,typename TFragPos,typename TFragSize, typename TFragSpec>
 TScoreValue
-getScore(Score<TScoreValue,FakeScore> & score_type,
-		 TStringSet & seqs,
-		 Fragment<TFragId,TFragPos,TFragSize,TFragSpec> & segment,
-		 bool i_am_first, 
-		 TFragPos pos_i,
-		 TFragPos pos_j,
-		 TFragSize len)
+getScore(Score<TScoreValue,FakeScore> &,
+		 TStringSet &,
+		 Fragment<TFragId,TFragPos,TFragSize,TFragSpec> &,
+		 bool, 
+		 TFragPos,
+		 TFragPos,
+		 TFragSize)
 {
 SEQAN_CHECKPOINT
-	return 0;
+	return 1;
 }				
 
 
@@ -801,8 +801,8 @@ _makeAlignmentGraphFromRefinedSegmentsSimple(String<std::set<TValue> > & all_nod
 				   TScore & score_type,
 				   StringSet<TSequence, TSetSpec> & seqs,
 				   TSeqMap & seq_map,
-				   String<TIntervalTreeGraph> & gs, 
-				   String<TPropertyMap> & pms, 
+				   String<TIntervalTreeGraph> &, 
+				   String<TPropertyMap> &, 
 				   TAliGraph & ali_g)
 {
 SEQAN_CHECKPOINT
@@ -811,6 +811,7 @@ SEQAN_CHECKPOINT
 	typedef typename VertexDescriptor<TAliGraph>::Type TVertexDescriptor;
 	typedef typename EdgeDescriptor<TAliGraph>::Type TEdgeDescriptor;
 	typedef typename std::set<TValue>::iterator TSetIterator;
+	typedef typename Cargo<TAliGraph>::Type TCargo;
 
 	//std::cout << "making refined alignment graph...";
 	clock_t start, finish1;
@@ -884,12 +885,12 @@ SEQAN_CHECKPOINT
 			SEQAN_TASSERT(fragmentBegin(ali_g,vd)==pos_j)
 			typename Value<TScore>::Type score = getScore(score_type,seqs,*ali_it,i_am_first,act_pos,pos_j,fragmentLength(ali_g,act_knot));//,fragmentLength(ali_g,vd));
 			//this needs to be generalized (makes sense for positive scores only)
-			if(score >= 0)
+			if(score > 0)
 			{
 				if (findEdge(ali_g, act_knot, vd) == 0) addEdge(ali_g,act_knot,vd,score);
 				else {
 					TEdgeDescriptor ed = findEdge(ali_g, act_knot, vd);
-					if(score > getCargo(ed))
+					if((TCargo) score > getCargo(ed))
 						assignCargo(ed, score);
 					// ToDo: Adapt score of the edge
 				}
@@ -1038,7 +1039,7 @@ matchRefinement(TAlignmentString & alis,
 {
 SEQAN_CHECKPOINT
 
-	Score<typename Cargo<typename EdgeType<TOutGraph>::Type>::Type,FakeScore > score_type;
+	Score<int,FakeScore > score_type;
 	matchRefinement(alis,seq,score_type,ali_graph);
 
 }

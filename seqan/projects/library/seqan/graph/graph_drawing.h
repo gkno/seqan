@@ -42,9 +42,9 @@ _markRootVertex(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
 
 template <typename TCargo, typename TSpec, typename TVertexDescriptor, typename TAttributes>
 inline void 
-_markRootVertex(Graph<Directed<TCargo, TSpec> > const& g,
-				TVertexDescriptor const& v,
-				TAttributes& str)
+_markRootVertex(Graph<Directed<TCargo, TSpec> > const&,
+				TVertexDescriptor const&,
+				TAttributes&)
 {
 	SEQAN_CHECKPOINT
 }
@@ -53,9 +53,9 @@ _markRootVertex(Graph<Directed<TCargo, TSpec> > const& g,
 
 template <typename TCargo, typename TSpec, typename TVertexDescriptor, typename TAttributes>
 inline void 
-_markRootVertex(Graph<Undirected<TCargo, TSpec> > const& g,
-				TVertexDescriptor const& v,
-				TAttributes& str)
+_markRootVertex(Graph<Undirected<TCargo, TSpec> > const&,
+				TVertexDescriptor const&,
+				TAttributes&)
 {
 	SEQAN_CHECKPOINT
 }
@@ -358,8 +358,8 @@ _createEdgeAttributes(Graph<Automaton<TAlphabet, TCargo, WordGraph<TSpec> > > co
 
 template <typename TFile, typename TCargo, typename TSpec>
 inline void
-_writeGraphFooter(TFile & file,
-				  Graph<Directed<TCargo, TSpec> > const& g,
+_writeGraphFooter(TFile &,
+				  Graph<Directed<TCargo, TSpec> > const&,
 				  DotDrawing)
 {
 }
@@ -368,8 +368,8 @@ _writeGraphFooter(TFile & file,
 
 template <typename TFile, typename TCargo, typename TSpec>
 inline void
-_writeGraphFooter(TFile & file,
-				  Graph<Undirected<TCargo, TSpec> > const& g,
+_writeGraphFooter(TFile &,
+				  Graph<Undirected<TCargo, TSpec> > const&,
 				  DotDrawing)
 {
 }
@@ -419,8 +419,8 @@ _writeGraphFooter(TFile & file,
 
 template <typename TFile, typename TCargo, typename TSpec>
 inline void
-_writeGraphFooter(TFile & file,
-				  Graph<Tree<TCargo, TSpec> > const& g,
+_writeGraphFooter(TFile &,
+				  Graph<Tree<TCargo, TSpec> > const&,
 				  DotDrawing)
 {
 }
@@ -430,8 +430,8 @@ _writeGraphFooter(TFile & file,
 
 template <typename TFile, typename TAlphabet, typename TCargo, typename TSpec>
 inline void
-_writeGraphFooter(TFile & file,
-				  Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
+_writeGraphFooter(TFile &,
+				  Graph<Automaton<TAlphabet, TCargo, TSpec> > const&,
 				  DotDrawing)
 {
 }
@@ -441,7 +441,7 @@ _writeGraphFooter(TFile & file,
 template <typename TFile, typename TAlphabet, typename TCargo, typename TSpec>
 inline void
 _writeGraphType(TFile & file,
-				Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
+				Graph<Automaton<TAlphabet, TCargo, TSpec> > const&,
 				DotDrawing)
 {
 	_streamWrite(file, "digraph");
@@ -452,7 +452,7 @@ _writeGraphType(TFile & file,
 template <typename TFile, typename TCargo, typename TSpec>
 inline void
 _writeGraphType(TFile & file,
-				Graph<Directed<TCargo, TSpec> > const& g,
+				Graph<Directed<TCargo, TSpec> > const&,
 				DotDrawing)
 {
 	_streamWrite(file, "digraph");
@@ -463,7 +463,7 @@ _writeGraphType(TFile & file,
 template <typename TFile, typename TCargo, typename TSpec>
 inline void
 _writeGraphType(TFile & file,
-				Graph<Undirected<TCargo, TSpec> > const& g,
+				Graph<Undirected<TCargo, TSpec> > const&,
 				DotDrawing)
 {
 	_streamWrite(file, "graph");
@@ -474,7 +474,7 @@ _writeGraphType(TFile & file,
 template <typename TFile, typename TStringSet, typename TCargo, typename TSpec>
 inline void
 _writeGraphType(TFile & file,
-				Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
+				Graph<Alignment<TStringSet, TCargo, TSpec> > const&,
 				DotDrawing)
 {
 	_streamWrite(file, "graph");
@@ -485,7 +485,7 @@ _writeGraphType(TFile & file,
 template <typename TFile, typename TCargo, typename TSpec>
 inline void
 _writeGraphType(TFile & file,
-				Graph<Tree<TCargo, TSpec> > const& g,
+				Graph<Tree<TCargo, TSpec> > const&,
 				DotDrawing)
 {
 	_streamWrite(file, "graph");
@@ -496,7 +496,7 @@ _writeGraphType(TFile & file,
 template <typename TFile, typename TAlphabet, typename TCargo, typename TSpec>
 inline void
 _writeEdgeType(TFile & file,
-			   Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
+			   Graph<Automaton<TAlphabet, TCargo, TSpec> > const&,
 			   DotDrawing)
 {
 	_streamWrite(file, " -> ");
@@ -507,7 +507,7 @@ _writeEdgeType(TFile & file,
 template <typename TFile, typename TCargo, typename TSpec>
 inline void
 _writeEdgeType(TFile & file,
-			   Graph<Directed<TCargo, TSpec> > const& g,
+			   Graph<Directed<TCargo, TSpec> > const&,
 			   DotDrawing)
 {
 	_streamWrite(file, " -> ");
@@ -518,7 +518,7 @@ _writeEdgeType(TFile & file,
 template <typename TFile, typename TCargo, typename TSpec>
 inline void
 _writeEdgeType(TFile & file,
-			   Graph<Undirected<TCargo, TSpec> > const& g,
+			   Graph<Undirected<TCargo, TSpec> > const&,
 			   DotDrawing)
 {
 	_streamWrite(file, " -- ");
@@ -529,7 +529,7 @@ _writeEdgeType(TFile & file,
 template <typename TFile, typename TStringSet, typename TCargo, typename TSpec>
 inline void
 _writeEdgeType(TFile & file,
-			   Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
+			   Graph<Alignment<TStringSet, TCargo, TSpec> > const&,
 			   DotDrawing)
 {
 	_streamWrite(file, " -- ");
@@ -540,7 +540,7 @@ _writeEdgeType(TFile & file,
 template <typename TFile, typename TCargo, typename TSpec>
 inline void
 _writeEdgeType(TFile & file,
-			   Graph<Tree<TCargo, TSpec> > const& g,
+			   Graph<Tree<TCargo, TSpec> > const&,
 			   DotDrawing)
 {
 	_streamWrite(file, " -- ");
@@ -643,7 +643,7 @@ _addNode(Graph<TSpec>& g,
 		 TStatement& node_id,
 		 TStatement& attr_list,
 		 TNodeAttributes& nodeMap,
-		 TEdgeAttributes& edgeMap,			  
+		 TEdgeAttributes&,			  
 		 TNodeIdMap& nodeIdMap)
 {
 	typedef Graph<TSpec> TGraph;
@@ -664,7 +664,7 @@ inline void
 _addEdge(Graph<Directed<TCargo, TSpec> >& g,
 		 TVertexDescriptor sourceV,
 		 TVertexDescriptor targetV,
-		 TNodeAttributes& nodeMap,
+		 TNodeAttributes&,
 		 TEdgeAttributes& edgeMap,
 		 TStatement& attr_list)
 {
@@ -683,7 +683,7 @@ inline void
 _addEdge(Graph<Undirected<TCargo, TSpec> >& g,
 		 TVertexDescriptor sourceV,
 		 TVertexDescriptor targetV,
-		 TNodeAttributes& nodeMap,
+		 TNodeAttributes&,
 		 TEdgeAttributes& edgeMap,
 		 TStatement& attr_list)
 {
@@ -702,7 +702,7 @@ inline void
 _addEdge(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 		 TVertexDescriptor sourceV,
 		 TVertexDescriptor targetV,
-		 TNodeAttributes& nodeMap,
+		 TNodeAttributes&,
 		 TEdgeAttributes& edgeMap,
 		 TStatement& attr_list)
 {
@@ -720,7 +720,7 @@ inline void
 _addEdge(Graph<Tree<TCargo, TSpec> >& g,
 		 TVertexDescriptor sourceV,
 		 TVertexDescriptor targetV,
-		 TNodeAttributes& nodeMap,
+		 TNodeAttributes&,
 		 TEdgeAttributes& edgeMap,
 		 TStatement& attr_list)
 {
@@ -736,7 +736,7 @@ _addEdge(Graph<Tree<TCargo, TSpec> >& g,
 
 template<typename TAlphabet, typename TCargo, typename TSpec, typename TString>
 inline typename Alphabet<Graph<Automaton<TAlphabet, TCargo, TSpec> > >::Type
-_getInternalLabel(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
+_getInternalLabel(Graph<Automaton<TAlphabet, TCargo, TSpec> >&,
 				  TString& str)
 {
 	return str[0];
@@ -746,7 +746,7 @@ _getInternalLabel(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 
 template<typename TAlphabet, typename TCargo, typename TSpec, typename TString>
 inline String<TAlphabet>
-_getInternalLabel(Graph<Automaton<TAlphabet, TCargo, WordGraph<TSpec> > >& g,
+_getInternalLabel(Graph<Automaton<TAlphabet, TCargo, WordGraph<TSpec> > >&,
 				  TString& str)
 {
 	return str;
@@ -759,7 +759,7 @@ inline void
 _addEdge(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 		 TVertexDescriptor sourceV,
 		 TVertexDescriptor targetV,
-		 TNodeAttributes& nodeMap,
+		 TNodeAttributes&,
 		 TEdgeAttributes& edgeMap,
 		 TStatement& attr_list)
 {

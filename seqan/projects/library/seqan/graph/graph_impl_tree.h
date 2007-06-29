@@ -565,7 +565,7 @@ removeInEdges(Graph<Tree<TCargo, TSpec> >& g,
 
 template<typename TCargo, typename TSpec, typename TEdgeDescriptor>
 inline typename VertexDescriptor<Graph<Tree<TCargo, TSpec> > >::Type 
-targetVertex(Graph<Tree<TCargo, TSpec> > const& g,
+targetVertex(Graph<Tree<TCargo, TSpec> > const&,
 			 TEdgeDescriptor const edge) 
 {
 	SEQAN_CHECKPOINT
@@ -962,7 +962,7 @@ removeAllChildren(Graph<Tree<TCargo, TSpec> >& g,
 */
 template<typename TCargo, typename TSpec, typename TEdgeDescriptor>
 inline typename VertexDescriptor<Graph<Tree<TCargo, TSpec> > >::Type 
-childVertex(Graph<Tree<TCargo, TSpec> > const& g,
+childVertex(Graph<Tree<TCargo, TSpec> > const&,
 			TEdgeDescriptor const edge) 
 {
 	SEQAN_CHECKPOINT

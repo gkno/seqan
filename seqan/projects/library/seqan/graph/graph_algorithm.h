@@ -458,7 +458,7 @@ prims_algorithm(Graph<TSpec> const& g,
 template<typename TSpec, typename TVertexDescriptor, typename TWeightMap, typename TEdges>
 void
 kruskals_algorithm(Graph<TSpec> const& g,
-				   TVertexDescriptor const source,
+				   TVertexDescriptor const,
 				   TWeightMap const& weight,
 				   TEdges& edges)
 {

@@ -295,7 +295,8 @@ void
 _createIntervalTree(TGraph & g, TPropertyMap & pm, 
 				   String<TIntervalPointer*> & intervals,
 				   typename VertexDescriptor<TGraph>::Type & knot, 
-				   TValue last_center, TValue center, 
+				   TValue, 
+				   TValue center, 
 				   typename VertexDescriptor<TGraph>::Type len,
 				   Tag<TagComputeCenter_> const tag)
 {

@@ -113,7 +113,7 @@ template<typename TCargo, typename TSpec>
 inline void
 _copyGraph(Graph<Undirected<TCargo, TSpec> > const& source,
 		   Graph<Undirected<TCargo, TSpec> >& dest,
-		   bool transpose) 
+		   bool) 
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<Undirected<TCargo, TSpec> > TGraph;
@@ -186,7 +186,7 @@ transpose(Graph<Undirected<TCargo, TSpec> > const& source,
 
 template<typename TCargo, typename TSpec>
 inline void
-transpose(Graph<Undirected<TCargo, TSpec> > const& g)
+transpose(Graph<Undirected<TCargo, TSpec> > const&)
 {
 	// Nothing to do
 }
@@ -534,7 +534,7 @@ removeInEdges(Graph<Undirected<TCargo, TSpec> >& g,
 
 template<typename TCargo, typename TSpec, typename TEdgeDescriptor>
 inline typename VertexDescriptor<Graph<Undirected<TCargo, TSpec> > >::Type 
-targetVertex(Graph<Undirected<TCargo, TSpec> > const& g,
+targetVertex(Graph<Undirected<TCargo, TSpec> > const&,
 			 TEdgeDescriptor const edge) 
 {
 	SEQAN_CHECKPOINT
@@ -545,7 +545,7 @@ targetVertex(Graph<Undirected<TCargo, TSpec> > const& g,
 
 template<typename TCargo, typename TSpec, typename TEdgeDescriptor>
 inline typename VertexDescriptor<Graph<Undirected<TCargo, TSpec> > >::Type 
-sourceVertex(Graph<Undirected<TCargo, TSpec> > const& g,
+sourceVertex(Graph<Undirected<TCargo, TSpec> > const&,
 			 TEdgeDescriptor const edge) 
 {
 	SEQAN_CHECKPOINT

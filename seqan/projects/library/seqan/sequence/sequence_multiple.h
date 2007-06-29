@@ -1114,7 +1114,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <typename TString, typename TSpec, typename TPos>
 	inline typename Id<StringSet<TString, Owner<TSpec> > >::Type
-	positionToId(StringSet<TString, Owner<TSpec> >& me, 
+	positionToId(StringSet<TString, Owner<TSpec> >&, 
 				TPos const pos) 
 	{
 	SEQAN_CHECKPOINT
@@ -1124,7 +1124,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename TString, typename TPos>
 	inline typename Id<StringSet<TString, Dependent<Generous> > >::Type
 	positionToId(StringSet<TString, Dependent<Generous> >& me, 
-				TPos const pos) 
+			TPos const pos) 
 	{
 	SEQAN_CHECKPOINT
 		return _findIthNonZeroValue(me.strings,pos);
@@ -1156,7 +1156,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <typename TString, typename TSpec, typename TId>
 	inline typename Id<StringSet<TString, Owner<TSpec> > >::Type
-	idToPosition(StringSet<TString, Owner<TSpec> >& me, 
+	idToPosition(StringSet<TString, Owner<TSpec> >&, 
 				TId const id) 
 	{
 	SEQAN_CHECKPOINT

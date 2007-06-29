@@ -157,7 +157,7 @@ template<typename TStringSet, typename TCargo, typename TSpec>
 inline void
 _copyGraph(Graph<Alignment<TStringSet, TCargo, TSpec> > const& source,
 		   Graph<Alignment<TStringSet, TCargo, TSpec> >& dest,
-		   bool transpose) 
+		   bool) 
 {
 	SEQAN_CHECKPOINT
 	clear(dest);
@@ -199,7 +199,7 @@ transpose(Graph<Alignment<TStringSet, TCargo, TSpec> > const& source,
 
 template<typename TStringSet, typename TCargo, typename TSpec>
 inline void 
-transpose(Graph<Alignment<TStringSet, TCargo, TSpec> >& g)
+transpose(Graph<Alignment<TStringSet, TCargo, TSpec> >&)
 {
 	SEQAN_CHECKPOINT
 	// Nothing to do in an alignment graph
@@ -787,6 +787,59 @@ getProjectedPosition(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 
 //////////////////////////////////////////////////////////////////////////////
 
+template<typename TStringSet, typename TCargo, typename TSpec, typename TSeqId> 
+inline typename Position<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type 
+getFirstCoveredPosition(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+						TSeqId id)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename Id<TGraph>::Type TIdType;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename EdgeType<TGraph>::Type TEdgeStump;
+	typedef std::map<std::pair<TIdType, TIdType>, TVertexDescriptor> TPosToVertexMap;
+
+	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
+	typename TPosToVertexMap::const_iterator it = g.data_pvMap.upper_bound(std::make_pair(id, 0));
+
+	if (it == g.data_pvMap.end()) return length(getValueById(stringSet(g), id));
+	if (it->second == nilVertex) {
+		++it;
+		if (it == g.data_pvMap.end()) return length(getValueById(stringSet(g), id));
+	}
+	if (it->first.first != id) return length(getValueById(stringSet(g), id));
+	else return fragmentBegin(g, it->second);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec, typename TSeqId> 
+inline typename Position<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type 
+getLastCoveredPosition(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+					   TSeqId id)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename Id<TGraph>::Type TIdType;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename EdgeType<TGraph>::Type TEdgeStump;
+	typedef std::map<std::pair<TIdType, TIdType>, TVertexDescriptor> TPosToVertexMap;
+
+	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
+	typename TPosToVertexMap::const_iterator it = g.data_pvMap.lower_bound(std::make_pair(id, length(getValueById(stringSet(g), id))));
+
+	if ((it == g.data_pvMap.begin()) && (it->second == nilVertex)) return 0;
+	if (it->second == nilVertex) {
+		--it;
+	}
+	if (it->first.first != id) return 0;
+	return fragmentBegin(g, it->second) + fragmentLength(g, it->second);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 template<typename TStringSet, typename TCargo, typename TSpec, typename TMatrix> 
 inline bool
 convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
@@ -823,6 +876,7 @@ convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 		TIdType currentSeq = it1->first.first;
 		while ((it2!=g.data_pvMap.end()) && 
 			(it2->first.first == currentSeq)) {
+			if (it2->second == nilVertex) return false;
 			unsigned int c1 = getProperty(component, it1->second);
 			unsigned int c2 = getProperty(component, it2->second);
 			// If two components appear twice in the same sequence -> no alignment
@@ -908,11 +962,10 @@ convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TStringSet, typename TCargo, typename TSpec> 
+template<typename TStringSet, typename TCargo, typename TSpec, typename TLibraries> 
 inline void
 combineGraphs(Graph<Alignment<TStringSet, TCargo, TSpec> >& outGraph,
-			  Graph<Alignment<TStringSet, TCargo, TSpec> >& lib1,
-			  Graph<Alignment<TStringSet, TCargo, TSpec> >& lib2)
+			  TLibraries& libs)
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
@@ -922,70 +975,73 @@ combineGraphs(Graph<Alignment<TStringSet, TCargo, TSpec> >& outGraph,
 	typedef typename Id<TGraph>::Type TId;
 	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
 
+	// Clear out library
 	clearVertices(outGraph);
+	TSize numLibs = length(libs);
 
-	// Check for empty libraries
-	if (empty(lib1)) {
-		outGraph = lib2;
-		return;
-	} else if (empty(lib2)) {
-		outGraph = lib1;
-		return;
-	}
-
-	// String of fragments to combine all pairwise alignments into a multiple alignment
+	// All the matches with score values
 	typedef Fragment<> TFragment;
-	typedef String<TFragment, External<> > TFragmentString;
+	typedef String<TFragment, Block<> > TFragmentString;
+	typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
 	TFragmentString matches;
+	String<TCargo, Block<> > score_values;
 
-	// Get all the matches
-	TCargo maxCargoLib1 = 0;
-	TCargo maxCargoLib2 = 0;
-	TEdgeIterator it1(lib1);
-	for(;!atEnd(it1);++it1) {
-		if (getCargo(*it1) > maxCargoLib1) maxCargoLib1 = getCargo(*it1);
-		TVertexDescriptor sV = sourceVertex(it1);
-		TVertexDescriptor tV = targetVertex(it1);
-		push_back(matches, TFragment( (unsigned int) sequenceId(lib1, sV), (unsigned int) fragmentBegin(lib1,sV), (unsigned int) sequenceId(lib1, tV),  (unsigned int)  fragmentBegin(lib1,tV),  (unsigned int)  fragmentLength(lib1,tV)));
+	// Max score and index start position for every library
+	String<TCargo> max_scores;
+	String<TCargo> index_start;
+	resize(max_scores, numLibs);
+	resize(index_start, numLibs);
+
+	// Get all matches
+	TSize count = 0;
+	for(TSize i = 0; i<numLibs; ++i) {
+		assignValue(index_start, i, count);
+		TCargo maxCargoLib = 0;
+		TGraph* lib = getValue(libs, i);
+		TEdgeIterator it(*lib);
+		for(;!atEnd(it);++it) {
+			if (getCargo(*it) > maxCargoLib) maxCargoLib = getCargo(*it);
+			TVertexDescriptor sV = sourceVertex(it);
+			TVertexDescriptor tV = targetVertex(it);
+			push_back(matches, TFragment( (unsigned int) sequenceId(*lib, sV), (unsigned int) fragmentBegin(*lib,sV), (unsigned int) sequenceId(*lib, tV),  (unsigned int)  fragmentBegin(*lib,tV),  (unsigned int)  fragmentLength(*lib,tV)));
+			push_back(score_values, cargo(*it));
+			++count;
+		}
+		assignValue(max_scores, i, maxCargoLib);
 	}
-	TEdgeIterator it2(lib2);
-	for(;!atEnd(it2);++it2) {
-		if (getCargo(*it2) > maxCargoLib2) maxCargoLib2 = getCargo(*it2);
-		TVertexDescriptor sV = sourceVertex(it2);
-		TVertexDescriptor tV = targetVertex(it2);
-		push_back(matches, TFragment( (unsigned int) sequenceId(lib2, sV), (unsigned int) fragmentBegin(lib2,sV), (unsigned int) sequenceId(lib2, tV),  (unsigned int)  fragmentBegin(lib2,tV),  (unsigned int)  fragmentLength(lib2,tV)));
-	}
-	double scalingLib1 = (double) 100 / (double) maxCargoLib1;
-	double scalingLib2 = (double) 100 / (double) maxCargoLib2;
 
 	// Match refinement
 	TStringSet& str = stringSet(outGraph);	
 	matchRefinement(matches,str,outGraph);
 
-	// Traverse all the matches and adapt the weights
-	// Stacking of library weights
-	TEdgeIterator it(outGraph);
-	for(;!atEnd(it);++it) {
-		TVertexDescriptor sV = sourceVertex(it);
-		TVertexDescriptor tV = targetVertex(it);
-		TId id1 = sequenceId(outGraph,sV);
-		TId id2 = sequenceId(outGraph,tV);
-		TSize pos1 = fragmentBegin(outGraph,sV);
-		TSize pos2 = fragmentBegin(outGraph, tV);
-		
-		TCargo newVal = 0;
-		TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
-		TVertexDescriptor p1 = findVertex(lib1, id1, pos1);
-		TVertexDescriptor p2 = findVertex(lib1, id2, pos2);
-		TEdgeDescriptor e = 0;
-		if ((p1 != nilVertex) && (p2 != nilVertex)) e = findEdge(lib1, p1, p2);
-		if (e != 0) newVal += (TCargo) ((double) getCargo(e) * scalingLib1);
-		p1 = findVertex(lib2, id1, pos1);
-		p2 = findVertex(lib2, id2, pos2);
-		e = 0;
-		if ((p1 != nilVertex) && (p2 != nilVertex)) e = findEdge(lib2, p1, p2);
-		if (e != 0) newVal += (TCargo) ((double) getCargo(e) * scalingLib2);
-		cargo(*it) = newVal;
+	// Adapt edge weights
+	count = 0;
+	TSize currentLib = 0;
+	TFragmentStringIter endIt = end(matches);
+	for(TFragmentStringIter it = begin(matches); it != endIt; ++it) {
+		if ((currentLib < numLibs - 1) && (count >= (TSize) getValue(index_start, currentLib+1))) ++currentLib;
+		double scaling = (double) 100 / (double) getValue(max_scores, currentLib);
+		TId id1 = sequenceId(*it,0);
+		TId id2 = sequenceId(*it,1);
+		TSize pos1 = fragmentBegin(*it, id1);
+		TSize pos2 = fragmentBegin(*it, id2);
+		TSize end1 = pos1 + fragmentLength(*it, id1);
+		while(pos1 < end1) {
+			SEQAN_TASSERT(pos2 < pos2 + fragmentLength(*it, id2))
+			TVertexDescriptor p1 = findVertex(outGraph, id1, pos1);
+			TVertexDescriptor p2 = findVertex(outGraph, id2, pos2);
+			TEdgeDescriptor e = findEdge(outGraph, p1, p2);
+			TSize fragLen = fragmentLength(outGraph, p1); 
+			double newVal = (double) fragLen / (double) (end1 - pos1);
+			newVal *= scaling;
+			newVal *= (double) getValue(score_values, position(it));
+			if (e != 0) cargo(e) += (TCargo) newVal;
+			else addEdge(outGraph, p1, p2, (TCargo) newVal);
+			SEQAN_TASSERT(fragLen == fragmentLength(outGraph, p2))
+			pos1 += fragLen;
+			pos2 += fragLen;
+		}
+		++count;
 	}
 }
 

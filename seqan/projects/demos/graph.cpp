@@ -832,17 +832,25 @@ void TCoffee() {
 	assignValueById(strSet, str2);
 	assignValueById(strSet, str3);
 	assignValueById(strSet, str4);
-	TGraph lib1(strSet);
-	TGraph lib2(strSet);
-	TGraph g(strSet);
 
-	// Generate a 1st primary library, i.e., all global pairwise alignments
-	generatePrimaryLibrary(lib1, AAGroupsDayhoff(), GlobalPairwise_Library() );
-	// Generate a 2nd primary library, i.e., all local pairwise alignments
-	generatePrimaryLibrary(lib2, LocalPairwise_Library() );
+	// Score object
+	Score<double> score_type_global = Score<double>(2,-1,-0.5,-2);
+	Score<double> score_type_local = Score<double>(2,-1,-0.5,-2);
+
+	// Generate a primary library, i.e., all global pairwise alignments
+	TGraph lib1(strSet);
+	generatePrimaryLibrary(lib1, score_type_global, GlobalPairwise_Library() );
+
+	// Generate a primary library, i.e., all local pairwise alignments
+	TGraph lib2(strSet);
+	generatePrimaryLibrary(lib2, score_type_local, LocalPairwise_Library() );
 
 	// Weighting of libraries (Signal addition)
-	combineGraphs(g, lib1, lib2);
+	TGraph g(strSet);
+	String<TGraph*> libs;
+	appendValue(libs, &lib1);
+	appendValue(libs, &lib2);
+	combineGraphs(g, libs);
 
 	// Triplet library extension
 	tripletLibraryExtension(g);

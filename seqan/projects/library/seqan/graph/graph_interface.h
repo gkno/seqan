@@ -367,7 +367,7 @@ SEQAN_CHECKPOINT
 
 template<typename TSpec>
 inline typename VertexDescriptor<Graph<TSpec> >::Type
-getNilPredecessor(Graph<TSpec> const& g)
+getNilPredecessor(Graph<TSpec> const&)
 {
 	return getNil<typename VertexDescriptor<Graph<TSpec> >::Type>();
 }
@@ -387,7 +387,7 @@ The infinity distance can be used to indicate not reachable, e.g., in shortest p
 
 template<typename TWeightMap>
 inline typename Value<TWeightMap>::Type
-getInfinityDistance(TWeightMap const& weight)
+getInfinityDistance(TWeightMap const&)
 {
 	// We need to divide by 2 because of addition: infinity + something
 	return (getInfinity<typename Value<TWeightMap>::Type>()/2);

@@ -736,7 +736,7 @@ For an out-edge iterator the target is always the vertex the out-edge iterator h
 
 template<typename TCargo, typename TSpec, typename TEdgeDescriptor>
 inline typename VertexDescriptor<Graph<Directed<TCargo, TSpec> > >::Type 
-targetVertex(Graph<Directed<TCargo, TSpec> > const& g,
+targetVertex(Graph<Directed<TCargo, TSpec> > const&,
 			 TEdgeDescriptor const edge) 
 {
 	SEQAN_CHECKPOINT

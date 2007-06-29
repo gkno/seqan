@@ -373,7 +373,7 @@ obtainId(IdManager<void, TSpec>& idm)
 template <typename TSpec, typename TId>
 inline void 
 releaseId(IdManager<void, TSpec>& idm, 
-		  TId const id) 
+		  TId const) 
 {
 	SEQAN_CHECKPOINT
 	if (idm.data_idCount > 0) --idm.data_idCount;
@@ -405,7 +405,7 @@ getIdUpperBound(IdManager<void, TSpec> const& idm)
 
 template<typename TSpec>
 inline typename Size<IdManager<void, TSpec> >::Type 
-getIdLowerBound(IdManager<void, TSpec> const& idm)
+getIdLowerBound(IdManager<void, TSpec> const&)
 {
 	SEQAN_CHECKPOINT
 	return 0;
@@ -427,8 +427,8 @@ idCount(IdManager<void, TSpec> const& idm)
 
 template <typename TSpec, typename TId>
 inline bool 
-idInUse(IdManager<void, TSpec> const& idm, 
-		TId const id) 
+idInUse(IdManager<void, TSpec> const&, 
+		TId const) 
 {
 	SEQAN_CHECKPOINT
 	return false;

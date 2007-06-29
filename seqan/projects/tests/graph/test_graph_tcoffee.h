@@ -158,12 +158,18 @@ void Test_TCoffeeTmp() {
 	TGraph lib2(strSet);
 	TGraph g(strSet);
 
+	// Score object
+	Score<double> score_type = Score<double>(4,-1,-0.5,-10);
+
 	// Generate a primary library, i.e., all pairwise alignments
-	generatePrimaryLibrary(lib1, AAGroupsDayhoff(), GlobalPairwise_Library() );
-	generatePrimaryLibrary(lib2, LocalPairwise_Library() );
+	generatePrimaryLibrary(lib1, score_type, GlobalPairwise_Library() );
+	generatePrimaryLibrary(lib2, score_type, LocalPairwise_Library() );
 
 	// Weighting of libraries (Signal addition)
-	combineGraphs(g, lib1, lib2);
+	String<TGraph*> libs;
+	appendValue(libs, &lib1);
+	appendValue(libs, &lib2);
+	combineGraphs(g, libs);
 
 	// Triplet library extension
 	tripletLibraryExtension(g);
@@ -212,7 +218,7 @@ void Test_TCoffeeGarfield() {
 // T-Coffee
 	typedef String<AminoAcid> TString;
 	typedef StringSet<TString, Dependent<> > TStringSet;
-	typedef Graph<Alignment<TStringSet, unsigned int, Default> > TGraph;
+	typedef Graph<Alignment<TStringSet, int, Default> > TGraph;
 	
 	TString str1 = "GARFIELDTHELASTFATCAT";
 	TString str2 = "GARFIELDTHEFASTCAT";
@@ -223,19 +229,23 @@ void Test_TCoffeeGarfield() {
 	assignValueById(strSet, str2);
 	assignValueById(strSet, str3);
 	assignValueById(strSet, str4);
-	TGraph lib1(strSet);
-	TGraph lib2(strSet);
-	TGraph g(strSet);
 
-	// Generate a primary library, i.e., all pairwise alignments
-	generatePrimaryLibrary(lib1, AAGroupsDayhoff(), GlobalPairwise_Library() );
+	// Score object
+	Score<double> score_type_global = Score<double>(2,-1,-0.5,-2);
+	Score<double> score_type_local = Score<double>(2,-1,-0.5,-2);
+
+	// Generate a primary library, i.e., all global pairwise alignments
+	TGraph lib1(strSet);
+	generatePrimaryLibrary(lib1, score_type_global, GlobalPairwise_Library() );
 
 	fstream strm01; // Alignment graph as dot
 	strm01.open(TEST_PATH "my_tcoffee01.dot", ios_base::out | ios_base::trunc);
 	write(strm01,lib1,DotDrawing());
 	strm01.close();
 
-	generatePrimaryLibrary(lib2, LocalPairwise_Library() );
+	// Generate a primary library, i.e., all local pairwise alignments
+	TGraph lib2(strSet);
+	generatePrimaryLibrary(lib2, score_type_local, LocalPairwise_Library() );
 
 	fstream strm02; // Alignment graph as dot
 	strm02.open(TEST_PATH "my_tcoffee02.dot", ios_base::out | ios_base::trunc);
@@ -243,7 +253,15 @@ void Test_TCoffeeGarfield() {
 	strm02.close();
 
 	// Weighting of libraries (Signal addition)
-	combineGraphs(g, lib1, lib2);
+	TGraph g(strSet);
+	String<TGraph*> libs;
+	appendValue(libs, &lib1);
+	appendValue(libs, &lib2);
+	combineGraphs(g, libs);
+
+	// Clear the old libraries
+	clear(lib1);
+	clear(lib2);
 
 	fstream strm1; // Alignment graph as dot
 	strm1.open(TEST_PATH "my_tcoffee1.dot", ios_base::out | ios_base::trunc);
@@ -316,17 +334,23 @@ void Test_TCoffeeFromRandomSeq() {
 		}
 		TGraph g(strSet);
 
+		// Score object
+		Score<double> score_type = Score<double>(4,-1,-0.5,-10);
+
 		// Generate primary libraries
 		TGraph lib1(strSet);
 		TGraph lib2(strSet);
-		generatePrimaryLibrary(lib1, AAGroupsDayhoff(), GlobalPairwise_Library() );
+		generatePrimaryLibrary(lib1, score_type, GlobalPairwise_Library() );
 		//std::cout << "Global Pairwise alignments done" << std::endl;
 
-		generatePrimaryLibrary(lib2, LocalPairwise_Library());
+		generatePrimaryLibrary(lib2, score_type, LocalPairwise_Library());
 		//std::cout << "Local Pairwise alignments done" << std::endl;
 
 		// Weighting of libraries (Signal addition)
-		combineGraphs(g, lib1, lib2);
+		String<TGraph*> libs;
+		appendValue(libs, &lib1);
+		appendValue(libs, &lib2);
+		combineGraphs(g, libs);
 		//std::cout << "Combining graphs done" << std::endl;
 
 		// Triplet library extension
@@ -414,17 +438,23 @@ void Test_TCoffeeFromFile() {
 	}
 	TGraph g(strSet);
 
+	// Score object
+	Score<double> score_type = Score<double>(4,-1,-0.5,-10);
+
 	// Generate primary libraries
 	TGraph lib1(strSet);
 	TGraph lib2(strSet);
-	generatePrimaryLibrary(lib1, AAGroupsDayhoff(), GlobalPairwise_Library() );
+	generatePrimaryLibrary(lib1, score_type, GlobalPairwise_Library() );
 	std::cout << "Global Pairwise alignments done" << std::endl;
 
-	generatePrimaryLibrary(lib2, LocalPairwise_Library());
+	generatePrimaryLibrary(lib2, score_type, LocalPairwise_Library());
 	std::cout << "Local Pairwise alignments done" << std::endl;
 
 	// Weighting of libraries (Signal addition)
-	combineGraphs(g, lib1, lib2);
+	String<TGraph*> libs;
+	appendValue(libs, &lib1);
+	appendValue(libs, &lib2);
+	combineGraphs(g, libs);
 	std::cout << "Combining graphs done" << std::endl;
 	clear(lib1);
 	clear(lib2);
@@ -496,7 +526,11 @@ void Test_TCoffeeFromLibrary() {
 		assignValueById(depStrSet, ownerStrSet, positionToId(ownerStrSet, i));
 	}
 	TDependentGraph gAux(depStrSet);
-	generatePrimaryLibrary(gAux, AAGroupsDayhoff(), GlobalPairwise_Library() );
+
+	// Score object
+	Score<double> score_type = Score<double>(4,-1,-0.5,-10);
+
+	generatePrimaryLibrary(gAux, score_type, GlobalPairwise_Library() );
 	tripletLibraryExtension(gAux);
 
 	// Debug code
