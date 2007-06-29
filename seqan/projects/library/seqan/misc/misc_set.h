@@ -545,12 +545,12 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	template <typename TSet>
-	inline typename Object<TSet>::Type
+	inline typename Object<TSet>::Type &
 	objectOf(Iter<TSet, VectorSetIterator> &it) {
 		return *it.obj;
 	}
 	template <typename TSet>
-	inline typename Object<TSet>::Type
+	inline typename Object<TSet>::Type &
 	objectOf(Iter<TSet, VectorSetIterator> const &it) {
 		return *it.obj;
 	}
