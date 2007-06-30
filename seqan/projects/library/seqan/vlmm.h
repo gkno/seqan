@@ -70,6 +70,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	// specializations for the ConstrainedTraversal iterator
 	struct Absolute;
 	struct Relative;
+	struct Support;
 
 template <typename TSpec = Absolute>
 struct ConstrainedTraversal;
@@ -236,26 +237,87 @@ inline void goNext(Iter< Index<TText, TSpec>, VSTree< TopDown< ParentLinks<Const
 							not_finished=1;
 							walk_down=0;
 						}
+					}
+					
+				}
+			}
+		else
+			walk_down = 0;
+
+		// stop if we reach the root
+		if (isRoot(it)) {
+			clear(it);
+			break;
+		}
+
+	}
+
+}
+
+template < typename TText, typename TSpec >
+inline void goNext(Iter< Index<TText, TSpec>, VSTree< TopDown< ParentLinks<ConstrainedTraversal<Support> > > > > &it) {
+	unsigned walk_down=0,not_finished = 1;
+	// this iterator pecializations is needed for the assessment of nodes that are
+	// only takes nodes that occur at least AbsoluteThreshold times
+	// note: that we do not enforce that the tree is balanced
+
+	if(repLength(it) < it.MaxDepth){
+		if((getFrequency(it)) >= it.AbsoluteThreshold) 
+			walk_down = 1;
+	}
+
+	it.Down = false;
+	it.Up = 0;
+	while(not_finished)
+	{
+		// if threshold is reached walk down else go always right or up
+		if(walk_down){
+			// for avoiding the implicit $-edges
 			
-						////topDown<Index,indec(it),value(it) Index VertexDesriptor
-						//unsigned fatherRepLength = repLength(it);
-						//bool DOWN = it.Down;
-						//unsigned UP = it.Up;
-						//goDown(it);
-						//goRight(it);
-						//// move to rightest sibling, if this has counts (is a leaf or node) it´s fine
-						//while(fatherRepLength == repLength(it) && goRight(it));
-						//goUp(it);
-						//if( fatherRepLength == repLength(it)){
-						//	it.Up += -1;
-						//	not_finished=1;
-						//	walk_down=0;
-						//}
-						//else{ //set the remembered values in
-						//	 it.Down = DOWN;
-						//	 it.Up = UP;
-						//	 not_finished = 0;
-						//}
+			if(!isLeaf(it) && isRightTerminal(it)){
+				// this must be possible
+				
+				goDown(it);
+				goRight(it);
+				while( (repLength(container(it), nodeUp(it)) == repLength(it)) && goRight(it))
+					
+				// if the current node remains to be right terminal
+				// than we have found a node where multiple strings end
+				// goDown was wrong and we have to go up again
+				if(isLeaf(it) && (repLength(container(it), nodeUp(it)) == repLength(it))){
+					goUp(it);
+					it.Up += -1;
+					//cout << value(it) << " = " << length(representative(it)) << " " << representative(it) << "  toFather:"<<parentEdgeLabel(it)<<"  hits: "<<length(getOccurences(it))<<endl;	
+					if (!goRight(it))
+						while (goUp(it) && !goRight(it));
+					}
+			}
+			else
+				if(!goDown(it) && !goRight(it))
+					while (goUp(it) && !goRight(it));
+		}
+		else
+			if (!goRight(it))
+				while (goUp(it) && !goRight(it));
+		
+		if( getFrequency(it) >= it.AbsoluteThreshold){
+			not_finished = 0;
+			// we have to check if the current node can be extended with at least one letter if the following
+			// condition is true:
+			if(repLength(it) == it.MaxDepth && length(parentEdgeLabel(it)) == 1){
+				//cout << "In Abs Clausel  "<<value(it) << " = " << length(representative(it)) << " " << representative(it) << "  toFather:"<<parentEdgeLabel(it)<<"  hits: "<<length(getOccurences(it))<<endl;
+				if(isLeaf(it)){
+						walk_down=0;
+						not_finished =1;
+				}
+				else
+					if(isRightTerminal(it)){ // check if node can be extended
+						// test with the topdown iterator (without considering $-Edges) if non-$-Leaf
+						Iter<Index<TText, TSpec>, VSTree< TopDown< > > >  copy(container(it),value(it));
+						if( !goDown(copy)){
+							not_finished=1;
+							walk_down=0;
+						}
 					}
 					
 				}
@@ -382,16 +444,26 @@ struct ContextTree{
 	unsigned threshold;	
 	float K;    //the name originates from the paper of Bühlmann (1999) 
 	unsigned MaxDepth;
+	float alpha;	// pseudocount for smoothing
 	
 };
-	struct PST{
-		float threshold ;				   // r
-		float minEmpiricalProbability ;    // P min
-		float minConditionalProbability ;  // y min
-		float alpha ;					   // alpha :-)
-		unsigned MaxDepth;				   // d
+
+struct BioPST{
+	unsigned threshold;	 // minimum support
+	float K;    //the name originates from the paper of Bühlmann (1999) 
+	unsigned MaxDepth;
+	float alpha;	// pseudocount for smoothing
+	
+};
+
+struct PST{
+	float threshold ;				   // r
+	float minEmpiricalProbability ;    // P min
+	float minConditionalProbability ;  // y min
+	float alpha ;					   // alpha :-)
+	unsigned MaxDepth;				   // d
 		
-	};
+};
 
 void setParameters(PST & params,float t,float minE,float minC,float alpha,unsigned d ){
 	params.threshold = t;
@@ -400,12 +472,19 @@ void setParameters(PST & params,float t,float minE,float minC,float alpha,unsign
 	params.alpha = alpha;
 	params.MaxDepth = d;
 }
-void setParameters(ContextTree & params,unsigned t,float K, unsigned d){
+void setParameters(ContextTree & params,unsigned t,float K, unsigned d, float alpha){
 	params.threshold = t;
 	params.K = K;
 	params.MaxDepth = d;
+	params.alpha = alpha;
 }
 
+void setParameters(BioPST & params,unsigned t,float K, unsigned d, float alpha){
+	params.threshold = t;
+	params.K = K;
+	params.MaxDepth = d;
+	params.alpha = alpha;
+}
 template<typename TSpec = ContextTree>
 struct VLMM;
 
@@ -1274,7 +1353,7 @@ extendNode(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < ContextTree> >
 	}
 	SEQAN_ASSERT(fathersum != 0)
 	//std::cout<<"extendNode on node "<<node<<std::endl;
-	cout << " diff= "<<countChar * log(1/(getProbability(vlmm,father,childCharacter)/fathersum))<<endl;
+	//cout << " diff= "<<countChar * log(1/(getProbability(vlmm,father,childCharacter)/fathersum))<<endl;
 		if ( (countChar * log(1/(getProbability(vlmm,father,childCharacter)/fathersum)))   <= parameters.K )
 			return false;
 
@@ -1356,6 +1435,25 @@ smoothNode(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < PST > > > > &v
 
 	for(int pos = 0;pos< ValueSize<TAlphabet>::VALUE;++pos)
 		setProbability(vlmm,node,pos, ( getProbability(vlmm,node,pos)*(gammaFactor)  + parameters.minConditionalProbability ) );
+}
+
+
+template<typename TCargo,typename TAlphabet ,typename TVertexDescriptor, typename TVLMMSpec>
+inline void
+smoothNode(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TVLMMSpec > > > > &vlmm,
+			   TVertexDescriptor & node,
+			   TVLMMSpec & parameters) 
+{
+	// simple pseudocounts scalable with alpha
+	unsigned alphaSize = ValueSize<TAlphabet>::VALUE;
+	float sum = 0;
+	for(unsigned int pos = 0;pos< alphaSize ;++pos)
+		sum = sum + getProbability(vlmm,node,pos);
+	SEQAN_ASSERT(sum != 0);
+	// add the pseudocounts
+	sum += parameters.alpha * (float)alphaSize; 
+	for(unsigned int pos = 0;pos< alphaSize;++pos)
+		setProbability(vlmm,node,pos, ( (getProbability(vlmm,node,pos)+parameters.alpha)/sum) );
 }
 
 template<typename TAlphabet,typename TCargo,typename TSpec ,typename TVLMMSPec>
@@ -1618,7 +1716,7 @@ pruneTreeRecursivelyFast(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < 
 			unsigned lastVertex = 0,lastSplit=0;
 			unsigned pos;
 			unsigned labelLength = length(childLabel);
-			std::cout <<"..check potential nodes above node:" <<node<<" chidLAbel"<<childLabel<<std::endl;
+			//std::cout <<"..check potential nodes above node:" <<node<<" chidLAbel"<<childLabel<<std::endl;
 			TVertexDescriptor potVertex = vlmm.data_vertex[target].data_edge[(TSize) childCharacter].data_target;
 			SEQAN_ASSERT(potVertex != nilVal)
 			// we have a node which may lead to a new node on the edge father->node
@@ -1634,7 +1732,7 @@ pruneTreeRecursivelyFast(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < 
 			
 					//std::cout <<"another run on the edge"<<std::endl;
 					if( (potVertex < length(original)) && original[potVertex] && extendNode(vlmm,potVertex,value(childLabel,pos),countChar,parameters) ){
-						std::cout <<"split edge at node: "<<node<<std::endl;
+						//std::cout <<"split edge at node: "<<node<<std::endl;
 						father = splitEdge(vlmm,father,childCharacter,pos-1-lastSplit);
 						//remember where the last node has been split
 						lastSplit=pos;
@@ -1642,7 +1740,7 @@ pruneTreeRecursivelyFast(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < 
 						setSuffixLink(vlmm,father,potVertex);
 						setReverseSuffixLink(vlmm,potVertex,father,letter);
 						setMarked(vlmm,father,true);
-						std::cout <<"created node: "<<father<<" by checking above node:"<<node<<std::endl;
+						//std::cout <<"created node: "<<father<<" by checking above node:"<<node<<std::endl;
 						if(father < length(original))
 								original[father] = false;
 
@@ -1653,7 +1751,7 @@ pruneTreeRecursivelyFast(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < 
 				 }
 					lastVertex = pos;
 					// update the next vertex on edge SLfather->SLnode
-					std::cout << " childLabel:" << childLabel<<std::endl;
+					//std::cout << " childLabel:" << childLabel<<std::endl;
 					target = potVertex;
 					potVertex = vlmm.data_vertex[target].data_edge[(TSize) value(childLabel,lastVertex)].data_target;
 					// we have a node which may lead to a new node on the edge father->node
@@ -1737,7 +1835,6 @@ removeVertex( Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TVLMMSpec >
 		TEdgeDescriptor ed = &vlmm.data_vertex[dummy].data_edge[(TSize)letter];
 		assignTarget(ed, nilVal);
 		releaseId(vlmm.data_id_managerE, _getId(ed));
-		//vlmm.data_vertex[dummy].data_edge[(TSize) letter].data_target = nilVal;
 		setFather(vlmm,nilVal,trashNode);
 		dummy = getSuffixLink(vlmm,trashNode);
 		if(dummy != nilVal){
@@ -1801,7 +1898,8 @@ removeSubtree( Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TVLMMSpec 
 template<typename TAlphabet,typename TCargo,typename TVLMMSpec, typename TVertexDescriptor >
 inline int
 removeRedundantNodes( Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TVLMMSpec > > > > &vlmm,
-					 TVertexDescriptor &start)
+					 TVertexDescriptor &start,
+					 TVLMMSpec &parameters)
 {
 //top down traversal to figure out which nodes can be deleted
 typedef Graph<Automaton<TAlphabet,TCargo,WordGraph< VLMM < TVLMMSpec > > > > TVlmm;
@@ -1814,18 +1912,18 @@ typedef Graph<Automaton<TAlphabet,TCargo,WordGraph< VLMM < TVLMMSpec > > > > TVl
 	while(!atEnd(itout)){
 		dummy = targetVertex(vlmm, getValue(itout));
 		if(dummy != nilVal){
-			cout << " remove from node: "<<dummy<<endl;
-			sum += removeRedundantNodes(vlmm,dummy);
+			sum += removeRedundantNodes(vlmm,dummy,parameters);
 
 		}
 		goNext(itout);
 	}
 	if(!isMarked(vlmm,start) && sum == 0)
 	{
-		cout <<"want to delete node: " <<start;
 		removeVertex(vlmm,start);
 		return 0;
 	}
+	if(isMarked(vlmm,start))
+		smoothNode(vlmm,start,parameters);
 
 	return 1;
 }
@@ -1839,13 +1937,14 @@ buildContextTree(Index<TIndexType, Index_ESA<> > & index,
 		 Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < ContextTree > > > > &vlmm,
 			    unsigned threshold,
 				float K,
-				unsigned d) 
+				unsigned d,
+				float alpha) 
 {
 	typedef Index<TIndexType, Index_ESA<> > TIndex;
 	typedef Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < ContextTree > > > > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	ContextTree parameters;
-	setParameters(parameters,threshold,K,d);
+	setParameters(parameters,threshold,K,d,alpha);
 	Iter< TIndex, VSTree< TopDown< ParentLinks<ConstrainedTraversal<Absolute> > > > > it(index,threshold,d);
 	cout << "create the core Suffix Tree from the suffix array"<<endl;
 	buildSuffixTreeFromIndex(it,vlmm);
@@ -1860,7 +1959,39 @@ buildContextTree(Index<TIndexType, Index_ESA<> > & index,
 	std::cout << " Size of vlmm after prune Tree:"<<numVertices(vlmm)<<std::endl;
 	std::cout << "pruned the ContextTree" <<std::endl;
 	TVertexDescriptor root = getRoot(vlmm);
-	removeRedundantNodes(vlmm,root);
+	removeRedundantNodes(vlmm,root,parameters);
+	std::cout <<" remove redundant nodes: "<<endl<< vlmm;
+	std::cout << "READY!" <<std::endl;
+}
+
+template<typename TIndexType,typename TAlphabet,typename TCargo >
+inline void
+buildBioPST(Index<TIndexType, Index_ESA<> > & index,
+		 Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < BioPST > > > > &vlmm,
+			    unsigned threshold,
+				float K,
+				unsigned d,
+				float alpha) 
+{
+	typedef Index<TIndexType, Index_ESA<> > TIndex;
+	typedef Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < BioPST > > > > TGraph;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	BioPST parameters;
+	setParameters(parameters,threshold,K,d,alpha);
+	Iter< TIndex, VSTree< TopDown< ParentLinks<ConstrainedTraversal<Support> > > > > it(index,threshold,d);
+	cout << "create the core Suffix Tree from the suffix array"<<endl;
+	buildSuffixTreeFromIndex(it,vlmm);
+	std::cout << "in initMaps:";
+	initMaps(vlmm);
+	std::cout << " Size of vlmm after suffix core:"<<numVertices(vlmm)<<std::endl;
+    addSuffixLinks(vlmm);
+	std::cout << "added suffix links and reverse suffix links" <<std::endl;
+	std::cout <<vlmm;
+	pruneTree(vlmm,parameters);
+	std::cout << " Size of vlmm after prune Tree:"<<numVertices(vlmm)<<std::endl;
+	std::cout << "pruned the BioPST" <<std::endl;
+	TVertexDescriptor root = getRoot(vlmm);
+	removeRedundantNodes(vlmm,root,parameters);
 	std::cout <<" remove redundant nodes: "<<endl<< vlmm;
 	std::cout << "READY!" <<std::endl;
 }
@@ -1941,6 +2072,36 @@ estimateLikelihood( Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TVLMM
 	}
 	return result;
 }
+
+// estimates the highest scoring window of size windowSize
+template<typename TAlphabet,typename TCargo,typename TVLMMSpec>
+inline float
+estimateLikelihoodWindow( Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TVLMMSpec > > > > &vlmm,
+					String<TAlphabet> &text,
+					unsigned windowSize)
+{
+	if(length(text)<windowSize)
+		return (float)0;
+	float best,result = 0;
+	Iterator<String<TAlphabet> >::Type windowEnd = begin(text),windowStart = begin(text);
+	goBegin(windowEnd);
+	goBegin(windowStart);
+	
+	for(int i = 0;i<windowSize;++i,goNext(windowEnd))
+			result += log(getProbabilityForLongestContext(vlmm,windowEnd));
+	goNext(windowEnd);
+	best = result;
+	for(;!atEnd(windowEnd);goNext(windowEnd),goNext(windowStart))
+	{
+		result += -log(getProbabilityForLongestContext(vlmm,windowStart));
+		result += log(getProbabilityForLongestContext(vlmm,windowEnd));
+		//cout <<" prob for letter: "<<value(it)<< " is: "<<getProbabilityForLongestContext(vlmm,it)<<endl;
+		if(result > best)
+			best = result;
+	}
+	return best;
+}
+
 
 template<typename TAlphabet,typename TCargo,typename TVLMMSpec,typename TIter>
 inline float
