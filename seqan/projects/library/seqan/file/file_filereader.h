@@ -43,12 +43,27 @@ public:
 	String(TFile & fl_)
 		: data_scanned(false)
 	{
+		reserve(data_buf, (size_t) BLOCK_SIZE, Exact());
+
 		setValue(data_file, fl_);
+		_FileReaderString_construct(*this);
+	}
+	template <typename TString>
+	String(TString const & str_)
+		: data_scanned(false)
+	{
+		reserve(data_buf, (size_t) BLOCK_SIZE, Exact());
+
+		create(data_file);
+		if (!_streamOpen(value(data_file), str_))
+		{
+			clear(data_file);
+		}
 		_FileReaderString_construct(*this);
 	}
 	~String()
 	{
-		if (!dependent(data_file))
+		if (!dependent(data_file) && !empty(data_file))
 		{
 			_streamClose(value(data_file));
 			clear(data_file);
@@ -141,12 +156,13 @@ _FileReaderString_loadblock(String<TValue, FileReader<TFormat, TFile, TSpec> > &
 		TABLPosition end_filepos = me.data_file_begin + (blocknum2 + 1) * TString::BLOCK_SIZE;
 		TFileReaderIt fit(_dataFile(me), false);
 
-		clear(me.data_buf);
-
-		for (; !atEnd(fit) && (fit.data_file_pos < end_filepos); goNext(fit))
+		unsigned int len;
+		for (len = 0; !atEnd(fit) && (fit.data_file_pos < end_filepos); goNext(fit))
 		{
-			appendValue(me.data_buf, value(fit));
+			me.data_buf[len] = value(fit);
+			++len;
 		}
+		resize(me.data_buf, len);
 
 		if (blocknum2 == length(me.data_abl))
 		{
@@ -185,7 +201,10 @@ _FileReaderString_findblock(String<TValue, FileReader<TFormat, TFile, TSpec> > &
 		_FileReaderString_loadblock(me, length(me.data_abl));
 	}
 
-	SEQAN_ASSERT2(me.data_abl[length(me.data_abl) - 1] > pos, "range error")
+	if (pos >= me.data_abl[length(me.data_abl) - 1])
+	{//pos greater than file length
+		return length(me.data_abl);
+	}
 
 	return ::std::lower_bound(begin(me.data_abl, Standard()), end(me.data_abl, Standard()), (TFileSize) pos) - begin(me.data_abl, Standard());
 }
@@ -214,12 +233,13 @@ _FileReaderString_isValidBlock(String<TValue, FileReader<TFormat, TFile, TSpec> 
 							   TUint block_number)
 {
 	typedef typename Size<TFile>::Type TFileSize;
+	TFileSize block_number2 = block_number;
 
-	while (!me.data_scanned && (length(me.data_abl) <= block_number))
+	while (!me.data_scanned && (length(me.data_abl) <= block_number2))
 	{
 		_FileReaderString_loadblock(me, length(me.data_abl));
 	}
-	return (length(me.data_abl) > block_number);
+	return (length(me.data_abl) > block_number2);
 
 }
 
@@ -274,6 +294,15 @@ begin(String<TValue, FileReader<TFormat, TFile, TSpec> > & me,
 	typedef typename Iterator< String<TValue, FileReader<TFormat, TFile, TSpec> >, TIteratorSpec >::Type TIterator;
 	return TIterator(me);
 }
+template <typename TValue, typename TFormat, typename TFile, typename TSpec, typename TIteratorSpec>
+inline typename Iterator< String<TValue, FileReader<TFormat, TFile, TSpec> > const, TIteratorSpec >::Type
+begin(String<TValue, FileReader<TFormat, TFile, TSpec> > const & me,
+	  Tag<TIteratorSpec> const)
+{
+	typedef String<TValue, FileReader<TFormat, TFile, TSpec> > TString;
+	typedef typename Iterator< TString const, TIteratorSpec >::Type TIterator;
+	return TIterator(const_cast<TString &>(me));
+}
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -285,6 +314,37 @@ end(String<TValue, FileReader<TFormat, TFile, TSpec> > & me,
 	typedef typename Iterator< String<TValue, FileReader<TFormat, TFile, TSpec> >, TIteratorSpec >::Type TIterator;
 	return TIterator(me, GoEnd());
 }
+template <typename TValue, typename TFormat, typename TFile, typename TSpec, typename TIteratorSpec>
+inline typename Iterator< String<TValue, FileReader<TFormat, TFile, TSpec> > const, TIteratorSpec >::Type
+end(String<TValue, FileReader<TFormat, TFile, TSpec> > const & me,
+	Tag<TIteratorSpec> const)
+{
+	typedef String<TValue, FileReader<TFormat, TFile, TSpec> > TString;
+	typedef typename Iterator< TString const, TIteratorSpec >::Type TIterator;
+	return TIterator(const_cast<TString &>(me), GoEnd());
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TValue, typename TFormat, typename TFile, typename TSpec, typename TPosition, typename TIteratorSpec>
+inline typename Iterator< String<TValue, FileReader<TFormat, TFile, TSpec> >, TIteratorSpec >::Type
+iterator(String<TValue, FileReader<TFormat, TFile, TSpec> > & me,
+		 TPosition pos,
+		 Tag<TIteratorSpec> const)
+{
+	typedef typename Iterator< String<TValue, FileReader<TFormat, TFile, TSpec> >, TIteratorSpec >::Type TIterator;
+	return TIterator(me, pos);
+}
+template <typename TValue, typename TFormat, typename TFile, typename TSpec, typename TPosition, typename TIteratorSpec>
+inline typename Iterator< String<TValue, FileReader<TFormat, TFile, TSpec> > const, TIteratorSpec >::Type
+iterator(String<TValue, FileReader<TFormat, TFile, TSpec> > const & me,
+		 TPosition pos,
+		 Tag<TIteratorSpec> const)
+{
+	typedef String<TValue, FileReader<TFormat, TFile, TSpec> > TString;
+	typedef typename Iterator< TString const, TIteratorSpec >::Type TIterator;
+	return TIterator(const_cast<TString &>(me), pos);
+}
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
@@ -294,15 +354,33 @@ end(String<TValue, FileReader<TFormat, TFile, TSpec> > & me,
 
 struct FileReaderIterator;
 
+//helper meta function for storing types associated with file reader string.
+//Due to a bug in VC++, _FileReader_Types is instantiated for arbitrary TContainer types
+//when instantiating Iter<TContainer, FileReaderIterator>
+//"ABL" = "active buffer lengths" table
+template <typename T>
+struct _FileReader_Types
+{// dummy implementation to make VC++ happy
+	typedef int TABLPosition;
+	typedef int TBuf;
+};
 template <typename TValue, typename TFormat, typename TFile, typename TSpec>
-class Iter<String<TValue, FileReader<TFormat, TFile, TSpec> >, FileReaderIterator>
+struct _FileReader_Types<String<TValue, FileReader<TFormat, TFile, TSpec> > >
+{
+	typedef typename Size<TFile>::Type TFileSize;
+	typedef String<TFileSize> TABL;
+	typedef typename Position<TABL>::Type TABLPosition;
+	typedef String<TValue> TBuf;
+};
+
+
+template <typename TContainer>
+class Iter<TContainer, FileReaderIterator>
 {
 public:
-	typedef String<TValue, FileReader<TFormat, TFile, TSpec> > TContainer;
+	typedef typename _FileReader_Types<TContainer>::TABLPosition TABLPosition;
+	typedef typename _FileReader_Types<TContainer>::TBuf TBuf;
 
-	typedef typename TContainer::TABLPosition TABLPosition;
-
-	typedef typename TContainer::TBuf TBuf;
 	typedef typename Position<TBuf>::Type TBufPosition;
 	typedef typename Size<TBuf>::Type TBufSize;
 
@@ -328,7 +406,7 @@ public:
 	Iter(TContainer & cont_, TPos pos_)
 		: data_container(& cont_)
 	{
-		setPosition(pos_);
+		setPosition(*this, pos_);
 	}
 
 	Iter(Iter const & other_)
@@ -357,6 +435,11 @@ public:
 
 template <typename TValue, typename TFormat, typename TFile, typename TSpec, typename TIteratorSpec>
 struct Iterator<String<TValue, FileReader<TFormat, TFile, TSpec> >, TIteratorSpec>
+{
+	typedef Iter<String<TValue, FileReader<TFormat, TFile, TSpec> >, FileReaderIterator> Type;
+};
+template <typename TValue, typename TFormat, typename TFile, typename TSpec, typename TIteratorSpec>
+struct Iterator<String<TValue, FileReader<TFormat, TFile, TSpec> > const, TIteratorSpec>
 {
 	typedef Iter<String<TValue, FileReader<TFormat, TFile, TSpec> >, FileReaderIterator> Type;
 };
@@ -503,7 +586,7 @@ setPosition(Iter<TContainer, FileReaderIterator> & it,
 		{
 			_FileReaderString_loadblock(cont, it.data_abl_pos);
 		}
-		it.data_buf_len = length(it.data_buf);
+		it.data_buf_len = length(cont.data_buf);
 	}
 }
 
@@ -738,7 +821,11 @@ operator += (Iter<TContainer, FileReaderIterator> & left,
 			 TIntegral right)
 {
 SEQAN_CHECKPOINT
-	setPosition(left, position(left) + right);
+	left.data_buf_pos += right;
+	if (left.data_buf_pos >= left.data_buf_len)
+	{
+		setPosition(left, position(left) + right);
+	}
 	return left;
 }
 
@@ -776,7 +863,14 @@ operator -= (Iter<TContainer, FileReaderIterator> & left,
 			TIntegral right)
 {
 SEQAN_CHECKPOINT
-	setPosition(left, position(left) - right);
+	if (left.data_buf_pos < right)
+	{
+		setPosition(left, position(left) - right);
+	}
+	else
+	{
+		left.data_buf_pos -= right;
+	}
 	return left;
 }
 

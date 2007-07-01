@@ -136,7 +136,8 @@ SEQAN_CHECKPOINT
 	typedef typename Needle<TPattern>::Type TNeedle;
 	TNeedle & ndl = needle(me);
 
-	typename Size<TNeedle>::Type ndl_size = length(ndl);
+	typedef typename Size<TNeedle>::Type TNeedleSize;
+	TNeedleSize ndl_size = length(ndl);
 
 	typedef typename Iterator<THaystack, Standard>::Type THaystackIterator;
 	THaystackIterator haystack_end = end(hayst, Standard());
@@ -183,6 +184,73 @@ VALIDATE:
 	return true;
 }
 
+//____________________________________________________________________________
+//spec for file reader haystacks
+
+template <typename TFormat, typename TFile, typename TSpec>
+struct FileReader;
+
+template <typename TValue, typename TFormat, typename TFile, typename TSpec, typename TNeedle2>
+bool
+find_horspool(Finder<String<TValue, FileReader<TFormat, TFile, TSpec> > > & finder, 
+			  Pattern<TNeedle2, Horspool> & me,
+			  bool find_first)
+{
+SEQAN_CHECKPOINT
+	typedef Finder<String<TValue, FileReader<TFormat, TFile, TSpec> > > TFinder;
+	typedef typename Haystack<TFinder>::Type THaystack;
+	THaystack & hayst = haystack(finder);
+
+	typedef Pattern<TNeedle2, Horspool> TPattern;
+	typedef typename Needle<TPattern>::Type TNeedle;
+	TNeedle & ndl = needle(me);
+
+	typedef typename Size<TNeedle>::Type TNeedleSize;
+	TNeedleSize ndl_size = length(ndl);
+
+	typedef typename Iterator<THaystack, Standard>::Type THaystackIterator;
+	THaystackIterator it(hayst, position(finder) + ndl_size - 1); //it points to the last character
+
+	typedef typename Iterator<TNeedle, Standard>::Type TNeedleIterator;
+	TNeedleIterator nit; //needle iterator
+	TNeedleIterator nit_begin = begin(ndl, Standard());
+	TNeedleIterator nit_end = end(ndl, Standard()) - 1; //here the verification begins
+
+	unsigned int char_i;
+
+	if (find_first)
+	{
+		goto VALIDATE;
+	}
+
+MOVE_FURTHER:
+	//move to next position
+	char_i = *it; //conversion to unsigned integer
+	it += me.data_map[char_i];
+	if (atEnd(it))
+	{//found nothing
+		return false;
+	}
+
+VALIDATE:
+	//validate current position
+	for (nit = nit_end; nit >= nit_begin; --nit)
+	{
+		if (*nit != *it)
+		{//invalid!
+			it += (nit_end - nit);
+			goto MOVE_FURTHER;
+		}
+		--it;
+	}
+
+	//valid! return hit
+	setPosition(finder, it - begin(hayst, Standard()) + 1);
+	return true;
+
+}
+
+//____________________________________________________________________________
 /* groepl variante
 
 template <typename TFinder, typename TNeedle2>

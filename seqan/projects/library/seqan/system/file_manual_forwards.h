@@ -13,7 +13,7 @@ namespace SEQAN_NAMESPACE_MAIN {
 // TagAllocateAligned_
 
 struct TagAllocateAligned_;       	// "projects/library/seqan/file/file_async.h"(283)
-
+//struct aiocb;
 
 //////////////////////////////////////////////////////////////////////////////
 // TYPEDEFS

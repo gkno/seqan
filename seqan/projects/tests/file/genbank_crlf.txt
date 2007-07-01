@@ -163,3 +163,7 @@ ORIGIN
      4921 ttttcagtgt tagattgctc taattctttg agctgttctc tcagctcctc atatttttct
      4981 tgccatgact cagattctaa ttttaagcta ttcaatttct ctttgatc
 //
+LOCUS       test record 2
+ORIGIN
+        1 ACGT
+//

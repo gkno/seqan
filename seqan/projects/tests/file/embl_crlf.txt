@@ -54,3 +54,10 @@ SQ   Sequence 2593 BP; 736 A; 533 C; 547 G; 777 T; 0 other;
      gatccattat tccaatgtta caaacatgtt tttgtatcat tgatgctcgt aagaaagatg       240
      actcaagctg ccgaagactt cctcgagagt tttgggggag a                           281
 //
+ID   test record 2
+XX
+AC   ac of test record 2
+XX
+SQ   sq of test record 2
+     ACGT                                                                      4
+//

@@ -7,6 +7,7 @@
 #define SEQAN_TEST
 
 #include <seqan/sequence.h>
+#include <seqan/find.h>
 #include <seqan/file.h>
 #include <seqan/align.h>
 
@@ -565,14 +566,14 @@ void Test_Fasta_Write()
 //____________________________________________________________________________
 // FASTA to C stream
 
-	FILE * file_3 = fopen(TEST_PATH "my_fasta.txt", "w");
+	FILE * file_3 = fopen(TEST_PATH "my_fasta.txt", "wb");
 	String<Dna> str_3("acgtufacgtufacgtufacgtufacgtufacgtufacgtufacgtufaaaaaaaaaauuuuuuuuucccccccccccggggg"); 
 	write(file_3, str_3, "Identifier1", Fasta());
 	write(file_3, str_3, "Identifier2", Fasta());
 	fclose(file_3);
 
 	//test it
-	FILE * file_4 = fopen(TEST_PATH "my_fasta.txt", "r");
+	FILE * file_4 = fopen(TEST_PATH "my_fasta.txt", "rb");
 	SEQAN_TASSERT(file_4);
 
 	String<char> str_4;
@@ -807,56 +808,88 @@ void Test_CGViz() {
 
 //////////////////////////////////////////////////////////////////////////////
 
-void Test_EmblGenbank()
+void Test_Embl(char * fl_path, char *fl_out_path)
 {
-/*
-	fstream strm;
+	FILE * fl = fopen(fl_path, "rb");
+	SEQAN_TASSERT(fl);
 
-	String<char> id;
+	FILE *fl_out = fopen(fl_out_path, "wb");
+	SEQAN_TASSERT(fl_out);
+
 	String<char> data;
-	
-	//String<char> meta;
-//	Metadata<char>::Type meta;
-	//MetaMultiMap meta;
+	String<char> meta;
 
-	//prepare stream
-	strm.clear();
-	strm.open(TEST_PATH "genbank_crlf.txt", ios_base::in | ios_base::binary);
-	
-	// read ID, meta-data & sequence
-	readID(strm, id, guessFileFormat(strm, data, meta));
-	readMeta(strm, meta, guessFileFormat(strm, data, meta) );
-	read(strm, data, guessFileFormat(strm, data, meta));
-	strm.close();	
-	
-	// write an embl() sequence object
-	strm.open(TEST_PATH "genbank_out_test.txt", ios_base::out | ios_base::binary);
-	write(strm,  data, id, meta, Genbank());
-	strm.close();
-	
-	clear(id);
-	clear(meta);
-	clear(data);
+	readMeta(fl, meta, Embl());
+	read(fl, data, Embl());
 
-	strm.clear();
-	strm.open(TEST_PATH "embl_crlf.txt", ios_base::in | ios_base::binary);
-	
-	// read ID, meta-data & sequence
-	readID(strm, id, Embl());
-	readMeta(strm, meta, Embl());
-//	read(strm, data, Embl());
-	strm.close();	
-	
-	// write an embl() sequence object
-	strm.open(TEST_PATH "embl_out_test.txt", ios_base::out | ios_base::binary);
-	write(strm, data, id, meta, Embl());
-	strm.close();
-*/
+	SEQAN_TASSERT(length(meta) == 1652)
+	SEQAN_TASSERT(length(data) == 281)
+
+	write(fl_out, data, meta, Embl());
+
+	readMeta(fl, meta, Embl());
+	read(fl, data, Embl());
+
+	SEQAN_TASSERT(data == "ACGT")
+
+	write(fl_out, data, meta, Embl());
+
+	fclose(fl_out);
+	fclose(fl);
+
+	SEQAN_TASSERT(_compareTextFiles(fl_path, fl_out_path))
+
+//____________________________________________________________________________
+// test reading data without reading meta before
+
+	fl = fopen(fl_path, "rb");
+	SEQAN_TASSERT(fl);
+
+	read(fl, data, Embl());
+
+	SEQAN_TASSERT(length(data) == 281)
+	fclose(fl);
+
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
-void Test_FileReader()
+void Test_Genbank(char * fl_path, char * fl_out_path)
+{
+	FILE * fl = fopen(fl_path, "rb");
+	SEQAN_TASSERT(fl);
+
+	FILE *fl_out = fopen(fl_out_path, "wb");
+	SEQAN_TASSERT(fl_out);
+
+	String<char> data;
+	String<char> meta;
+
+	readMeta(fl, meta, Genbank());
+	read(fl, data, Genbank());
+
+	write(fl_out, data, meta, Genbank());
+
+	SEQAN_TASSERT(length(meta) == 4167)
+	SEQAN_TASSERT(length(data) == 5028)
+
+	readMeta(fl, meta, Embl());
+	read(fl, data, Genbank());
+	write(fl_out, data, meta, Genbank());
+
+	SEQAN_TASSERT(data == "ACGT")
+
+	fclose(fl_out);
+	fclose(fl);
+
+	SEQAN_TASSERT(_compareTextFiles(fl_path, fl_out_path))
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+//____________________________________________________________________________
+//test FileReader iterator
+void Test_FileReader_Iterator()
 {
 	FILE * file_fasta = fopen(TEST_PATH "fasta_crlf.txt", "rb");
 	SEQAN_TASSERT(file_fasta);
@@ -894,6 +927,186 @@ void Test_FileReader()
 	fclose(file_fasta);
 }
 
+//____________________________________________________________________________
+//test FileReader string
+
+void Test_FileReader_String()
+{
+	FILE * file_fasta = fopen(TEST_PATH "fasta_crlf.txt", "rb");
+	SEQAN_TASSERT(file_fasta)
+	goNext(file_fasta, Fasta());
+
+	String<AminoAcid, FileReader<Fasta> > str(file_fasta);
+
+	SEQAN_TASSERT(length(str) == 1065)
+	SEQAN_TASSERT(value(str, 1064) == 'G')
+
+	Iterator<String<AminoAcid, FileReader<Fasta> > >::Type it = begin(str);
+	SEQAN_TASSERT(*it == value(str, 0))
+
+	goEnd(it);
+	SEQAN_TASSERT(atEnd(it))
+
+	unsigned int pos = length(str);
+	do
+	{
+		--it;
+		--pos;
+		SEQAN_TASSERT(position(it) == pos)
+		SEQAN_TASSERT(*it == value(str, pos))
+	} while (!atBegin(it));
+
+	SEQAN_TASSERT(pos == 0);
+
+	while (it < end(str))
+	{
+		SEQAN_TASSERT(position(it) == pos)
+		SEQAN_TASSERT(*it == value(str, pos))
+		++pos;
+		++it;
+	}
+	SEQAN_TASSERT(pos == length(str))
+	SEQAN_TASSERT(atEnd(it))
+
+	fclose(file_fasta);
+}
+
+//____________________________________________________________________________
+
+void Create_Long_Testfile(Fasta)
+{
+	cout << "create fasta testfile";
+
+	FILE * fl = fopen(TEST_PATH "testfile.txt", "wb");
+	fprintf(fl, ">testfile\n"); 
+	for (unsigned int i = 0; i < 20; ++i)
+	{
+		cout << ".";
+		for (unsigned int j = 0; j < 500; ++j)
+		{
+			fprintf(fl, "A.........B.........C.........D.........E.........F.........G.........H.........I.........J.........\n");
+		}
+		fprintf(fl, "A.........B.........CHERE_IS_THE_PATTERNE.........F.........G.........H.........I.........J.........\n");
+		for (unsigned int j = 501; j < 1000; ++j)
+		{
+			fprintf(fl, "A.........B.........C.........D.........E.........F.........G.........H.........I.........J.........\n");
+		}
+	}
+	fclose(fl);
+	cout << "created.\n";
+}
+
+void Create_Long_Testfile(Embl)
+{
+	cout << "create embl testfile";
+
+	FILE * fl = fopen(TEST_PATH "testfile.txt", "wb");
+	fprintf(fl, "ID\nSQ\n"); 
+	for (unsigned int i = 0; i < 20; ++i)
+	{
+		cout << ".";
+		for (unsigned int j = 0; j < 500; ++j)
+		{
+			fprintf(fl, "  A.........B.........C.........D.........E.........F.........G.........H.........I.........J.........\n");
+		}
+		fprintf(fl, "  A.........B.........CHERE_IS_THE_PATTERNE.........F.........G.........H.........I.........J.........\n");
+		for (unsigned int j = 501; j < 1000; ++j)
+		{
+			fprintf(fl, "  A.........B.........C.........D.........E.........F.........G.........H.........I.........J.........\n");
+		}
+	}
+	fclose(fl);
+	cout << "created.\n";
+}
+
+void Create_Long_Testfile(Genbank)
+{
+	cout << "create genbank testfile";
+
+	FILE * fl = fopen(TEST_PATH "testfile.txt", "wb");
+	fprintf(fl, "LOCUS\nORIGIN\n"); 
+	for (unsigned int i = 0; i < 20; ++i)
+	{
+		cout << ".";
+		for (unsigned int j = 0; j < 500; ++j)
+		{
+			fprintf(fl, "  A.........B.........C.........D.........E.........F.........G.........H.........I.........J.........\n");
+		}
+		fprintf(fl, "  A.........B.........CHERE_IS_THE_PATTERNE.........F.........G.........H.........I.........J.........\n");
+		for (unsigned int j = 501; j < 1000; ++j)
+		{
+			fprintf(fl, "  A.........B.........C.........D.........E.........F.........G.........H.........I.........J.........\n");
+		}
+	}
+	fclose(fl);
+	cout << "created.\n";
+}
+//____________________________________________________________________________
+
+//test filereader string on long files
+template <typename TFormat>
+void Test_FileReader_String2()
+{
+	Create_Long_Testfile(TFormat());
+
+//____________________________________________________________________________
+// scan the file using file reader string
+
+	String<char, FileReader<TFormat> > fr(TEST_PATH "testfile.txt");
+	Finder<String<char, FileReader<TFormat> > > fnd(fr);
+	String<char> ndl = "HERE_IS_THE_PATTERN";
+	Pattern<String<char>, Horspool> pat(ndl);
+
+	cout << "find patterns";
+
+	for (unsigned int i = 0; i < 20; ++i)
+	{
+		bool found = find(fnd, pat);
+
+	cout << ".";
+		SEQAN_TASSERT(found);
+		SEQAN_TASSERT(!fr.data_scanned);
+		SEQAN_TASSERT(position(fnd) == (50021 + i * 100000));
+	}
+
+	SEQAN_TASSERT(!find(fnd, pat));
+	SEQAN_TASSERT(fr.data_scanned);
+
+	cout << "\n";
+
+//____________________________________________________________________________
+// scan the file the old way: read the complete file into memory
+
+	String<char> hay;
+	FILE * fl = fopen(TEST_PATH "testfile.txt", "rb");
+	read(fl, hay, TFormat());
+	fclose(fl);
+
+	Finder<String<char> > fnd2(hay);
+	for (unsigned int i = 0; i < 20; ++i)
+	{
+		bool found = find(fnd2, pat);
+
+	cout << ".";
+		SEQAN_TASSERT(found);
+		SEQAN_TASSERT(position(fnd2) == (50021 + i * 100000));
+	}
+
+}
+
+//____________________________________________________________________________
+
+void Test_FileReader()
+{
+	Test_FileReader_Iterator();
+	Test_FileReader_String();
+
+	Test_FileReader_String2<Fasta>();
+	Test_FileReader_String2<Embl>();
+	Test_FileReader_String2<Genbank>();
+	
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 int main() 
@@ -913,7 +1126,8 @@ int main()
 	Test_FastaAlign();
 	Test_CGViz();
 
-	Test_EmblGenbank();
+	Test_Embl(TEST_PATH "embl_crlf.txt", TEST_PATH "test_output.embl.txt");
+	Test_Genbank(TEST_PATH "genbank_crlf.txt", TEST_PATH "test_output.genbank.txt");
 
 	Test_FileReader();
 

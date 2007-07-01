@@ -1,6 +1,3 @@
-//Suche nach AAV binding sites
-//Projekt mit Virologie Charite
-
 #include <iostream>
 #include <fstream>
 #include <seqan/sequence.h>

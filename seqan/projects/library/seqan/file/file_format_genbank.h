@@ -22,7 +22,7 @@ typedef Tag<TagGenbank_> const Genbank;
 
 template <typename TFile, typename TFile2, typename TSpec>
 inline void
-goBegin(Iter<TFile, FileReader<Genbank, TFile2, TSpec> > & it)
+goBegin(Iter<TFile, FileReader<Genbank, TFile2, TSpec> > & it, bool skip_meta = true)
 {
 SEQAN_CHECKPOINT
 	String<char> line;
@@ -33,7 +33,7 @@ SEQAN_CHECKPOINT
 		return;
 	}
 
-	if (it.data_char != ' ')
+	if (skip_meta && (it.data_char != ' '))
 	{//skip metadata block
 		while (true)
 		{

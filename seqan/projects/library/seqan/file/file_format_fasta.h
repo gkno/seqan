@@ -21,7 +21,7 @@ typedef Tag<TagFasta_> const Fasta;
 
 template <typename TFile, typename TFile2, typename TSpec>
 inline void
-goBegin(Iter<TFile, FileReader<Fasta, TFile2, TSpec> > & it)
+goBegin(Iter<TFile, FileReader<Fasta, TFile2, TSpec> > & it, bool skip_meta = true)
 {
 	if (_streamEOF(host(it)))
 	{
@@ -29,7 +29,7 @@ goBegin(Iter<TFile, FileReader<Fasta, TFile2, TSpec> > & it)
 		return;
 	}
 
-	if (it.data_char == '>')
+	if (skip_meta && (it.data_char == '>'))
 	{
 		//skip meta line
 		_stream_skipLine(host(it), it.data_char);
@@ -341,7 +341,7 @@ readMeta(TFile & file,
 		 Fasta)
 {
 SEQAN_CHECKPOINT
-//	clear(meta);
+	readID(file, meta, Fasta());
 }
 
 

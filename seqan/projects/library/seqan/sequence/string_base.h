@@ -1075,7 +1075,7 @@ SEQAN_CHECKPOINT
 		}
 		else
 		{
-			valueConstruct(begin(me) + me_length, _value);
+			valueConstruct(begin(me, Standard()) + me_length, _value);
 			_setLength(me, me_length + 1);
 		}
 	}

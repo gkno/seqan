@@ -22,28 +22,31 @@ typedef Tag<TagEmbl_> const Embl;
 
 template <typename TFile, typename TFile2, typename TSpec>
 inline void
-goBegin(Iter<TFile, FileReader<Embl, TFile2, TSpec> > & it)
+goBegin(Iter<TFile, FileReader<Embl, TFile2, TSpec> > & it, bool skip_meta = true)
 {
 SEQAN_CHECKPOINT
-	while (true)
+	if (skip_meta)
 	{
-		if (_streamEOF(host(it)))
+		while (true)
 		{
-			it.data_eof = true;
-			return;
-		}
-		if (it.data_char == '/')
-		{//end of record
+			if (_streamEOF(host(it)))
+			{
+				it.data_eof = true;
+				return;
+			}
+			if (it.data_char == '/')
+			{//end of record
+				_stream_skipLine(host(it), it.data_char);
+				it.data_eof = true;
+				return;
+			}
+			if (it.data_char == ' ')
+			{
+				break;
+			}
+			//skip meta line
 			_stream_skipLine(host(it), it.data_char);
-			it.data_eof = true;
-			return;
 		}
-		if (it.data_char == ' ')
-		{
-			break;
-		}
-		//skip meta line
-		_stream_skipLine(host(it), it.data_char);
 	}
 
 	//find first character

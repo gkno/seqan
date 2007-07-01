@@ -16,7 +16,7 @@ class Matrix<TValue, void>
 {
 //____________________________________________________________________________
 
-private:
+public:
 	typedef typename Size<Matrix>::Type TSize;
 	typedef String<TSize> TSizeArr;
 	typedef String<TValue> THost;
@@ -166,7 +166,7 @@ inline typename Size<Matrix<TValue, TSpec> >::Type
 length(Matrix<TValue, TSpec> const & me,
 	   unsigned int dim_)
 {
-	return _dataLengths(me)[dim_];
+	return me.data_lengths[dim_];
 }
 
 template <typename TValue, typename TSpec>

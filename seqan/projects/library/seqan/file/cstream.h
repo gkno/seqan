@@ -50,7 +50,7 @@ struct _IsTellSeekStream<FILE *>
 
 //////////////////////////////////////////////////////////////////////////////
 
-inline void 
+inline bool 
 _streamOpen(::std::FILE * & me, String<char> path, bool for_read = true)
 {
 SEQAN_CHECKPOINT
@@ -62,6 +62,7 @@ SEQAN_CHECKPOINT
 	{
 		me = fopen(toCString(path), "wb");
 	}
+	return (me != 0);
 }
 
 

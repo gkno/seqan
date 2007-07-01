@@ -27,21 +27,13 @@ public:
 	bool data_eof;			//true if reached end of record
 //	TFilePosition data_begin_pos;
 
-	Iter(TFile & file_, bool search_begin = true):
+	Iter(TFile & file_, bool skip_meta = true):
 		data_file_pos(0),
 		data_host(& file_),
 		data_eof(false)
 	{
 		data_char = _streamGet(file_);
-		if (search_begin)
-		{
-			goBegin(*this);
-		}
-		else
-		{
-			data_file_pos = _streamTellG(file_) - 1;
-			data_eof = _streamEOF(file_);
-		}
+		goBegin(*this, skip_meta);
 	}
 	Iter(Iter const & other_):
 		data_file_pos(other_.data_file_pos),

@@ -291,6 +291,15 @@ SEQAN_CHECKPOINT
 }
 //____________________________________________________________________________
 
+//folgende forward Deklaration wurde wegen Phaenomene bei VC++ 2003 hinzugenommen
+//implemented in string_pointer.h
+template <typename TValue>
+inline typename Iterator<TValue const *, Standard>::Type  
+begin(TValue const * me, 
+	  Standard);
+
+//____________________________________________________________________________
+
 template <typename T, typename TSpec>
 inline typename Iterator<T, Tag<TSpec> const>::Type 
 begin(T & me,
