@@ -85,3 +85,11 @@
 .
 
 
+.Demo.File Format I/O:
+..summary:Accessing sequence data in files.
+..file:../projects/demos/file_format.cpp
+..demofor:Function.write
+..demofor:Function.read
+..demofor:Function.readMeta
+..demofor:Spec.FileReader
+.
