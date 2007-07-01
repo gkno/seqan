@@ -8,4 +8,7 @@
 #include <seqan/score/score_base.h>
 #include <seqan/score/score_simple.h>
 
+#include <seqan/score/score_pam_matrix.h>
+#include <seqan/score/score_pam.h>
+
 #endif //#ifndef SEQAN_HEADER_...
