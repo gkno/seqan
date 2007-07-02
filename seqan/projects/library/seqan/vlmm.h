@@ -2152,7 +2152,7 @@ _streamPutFloat(TStream & target,
 			  char const * format_string)
 {
 SEQAN_CHECKPOINT
-	char str[8];
+	char str[32];
 	sprintf(str, format_string, number);
 	_streamWrite(target, str);
 }
@@ -2162,7 +2162,7 @@ _streamPutFloat(TStream & target,
 			  float number)
 {
 SEQAN_CHECKPOINT
-	_streamPutInt(target, number, "%f");
+	_streamPutFloat(target, number, "%f");
 }
 
 
@@ -2182,21 +2182,21 @@ exportNode(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TVLMMSpec > > 
 	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
 
 	typedef typename Iterator<String<AutomatonEdgeArray<TEdge, TAlphabet> > const>::Type TIterConst;
-	_streamPutInt(target, node);
+	_streamPutInt(target, (unsigned)node);
 	_streamPut(target, '\t');
-	_streamPutInt(target, getFather(vlmm,node));
+	_streamPutInt(target, (unsigned)getFather(vlmm,node));
 	_streamPut(target, '\t');
-	_streamPutInt(target, getSuffixLink(vlmm,node));
+	_streamPutInt(target, (unsigned)getSuffixLink(vlmm,node));
 	_streamPut(target, '\t');
-	_streamPutInt(target, (int)isMarked(vlmm,node));
+	_streamPutInt(target, (unsigned)isMarked(vlmm,node));
 	_streamPut(target, '\t');
 //Childrens with label
 	
 	for(int i = 0;i<ValueSize<TAlphabet>::VALUE;++i) {
 			TVertexDescriptor child = vlmm.data_vertex[node].data_edge[i].data_target;
-			_streamWrite(target,child);
+			_streamPutInt(target,(unsigned )child);
 			_streamPut(target, '\t');
-			if(child != nilVal && node != getRoot(vlmm))
+			if(child != nilVal )
 			{
 				String<TAlphabet> edgeString;
 				getChildLabel(vlmm,node,child,edgeString);
@@ -2217,6 +2217,7 @@ exportNode(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TVLMMSpec > > 
 				_streamPutInt(target,getReverseSuffixLink(vlmm,node,i));
 				_streamPut(target,'\t');
 		}
+		_streamPut(target,'\n');
 }
 
 
@@ -2255,6 +2256,7 @@ SEQAN_CHECKPOINT
 		if (!idInUse(vlmm.data_id_managerV, position(it))) continue;
 		TVertexDescriptor dummy = position(it); 
 		exportNode(vlmm,dummy,target);
+		cout << "eported node: " <<dummy<<endl;
 	}
 
 
