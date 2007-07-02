@@ -69,6 +69,7 @@
 //#include <seqan/index/shape_gapped.h>
 #include <seqan/index/index_qgram.h>
 #include <seqan/index/index_qgram_nested.h>
+#include <seqan/index/index_qgram_find.h>
 
 
 //////////////////////////////////////////////////////////////////////////////
