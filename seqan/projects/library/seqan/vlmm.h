@@ -2131,24 +2131,115 @@ getProbabilityForLongestContext( Graph<Automaton<TAlphabet, TCargo , WordGraph <
 	}
 	return getProbability(vlmm,node,value(it));
 }
+
+
+
+
+
+template<typename TFile, typename TAlphabet, typename TCargo >
+inline void
+writeHead(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < ContextTree > > > > &vlmm,
+	   TFile & target)
+{	
+		_streamWrite(target,"VLMM\tContextTree\tAlphabet\t\n");
+		
+}
+
+template <typename TStream>
+inline void
+_streamPutFloat(TStream & target,
+			  float number, 
+			  char const * format_string)
+{
+SEQAN_CHECKPOINT
+	char str[8];
+	sprintf(str, format_string, number);
+	_streamWrite(target, str);
+}
+template <typename TStream>
+inline void
+_streamPutFloat(TStream & target,
+			  float number)
+{
+SEQAN_CHECKPOINT
+	_streamPutInt(target, number, "%f");
+}
+
+
+//save/export the vlmm in a file for reading it again using the import funcion
+template<typename TFile, typename TAlphabet, typename TCargo, typename TVLMMSpec ,typename TVertexDescriptor>
+inline void
+exportNode(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TVLMMSpec > > > > &vlmm,
+		   TVertexDescriptor &node,
+			TFile & target)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TVLMMSpec> > > > TGraph;
+	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef typename EdgeType<TGraph>::Type TEdge;
+	typedef typename Size<TAlphabet>::Type TSize;
+	TSize table_length = ValueSize<TAlphabet>::VALUE;
+	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
+
+	typedef typename Iterator<String<AutomatonEdgeArray<TEdge, TAlphabet> > const>::Type TIterConst;
+	_streamPutInt(target, node);
+	_streamPut(target, '\t');
+	_streamPutInt(target, getFather(vlmm,node));
+	_streamPut(target, '\t');
+	_streamPutInt(target, getSuffixLink(vlmm,node));
+	_streamPut(target, '\t');
+	_streamPutInt(target, (int)isMarked(vlmm,node));
+	_streamPut(target, '\t');
+//Childrens with label
+	
+	for(int i = 0;i<ValueSize<TAlphabet>::VALUE;++i) {
+			TVertexDescriptor child = vlmm.data_vertex[node].data_edge[i].data_target;
+			_streamWrite(target,child);
+			_streamPut(target, '\t');
+			if(child != nilVal && node != getRoot(vlmm))
+			{
+				String<TAlphabet> edgeString;
+				getChildLabel(vlmm,node,child,edgeString);
+				_streamWrite(target, edgeString);
+				_streamPut(target, '\t');
+			}
+	
+	}
+	// Probability vector
+		for(int i = 0;i<ValueSize<TAlphabet>::VALUE;++i){
+				_streamPutFloat(target,getProbability(vlmm,node,i));
+				_streamPut(target,'\t');
+		}
+
+//ReverseSuffixLinks
+	
+		for(int i = 0;i<ValueSize<TAlphabet>::VALUE;++i){
+				_streamPutInt(target,getReverseSuffixLink(vlmm,node,i));
+				_streamPut(target,'\t');
+		}
+}
+
+
 /* Export plain file format for
 VLMM\t	Type[ContextTree,PST]\t	Alphabet[Dna,Dna5,AminoAcids]\t	Params[gamma:threshold:pMin ... etc]
-Node\t	Father\t	Children[1 .. N]\t	ChildLabel[1 .. N]\t	SuffixLink\t	ProbabilityVector[1 .. N]\t	ReverseSuffixLink[1 .. N]	
+Node\t	Father\t	SuffixLink\t	Marked\t	Children[1 .. N]\t	ChildLabel[1 .. N]\t		ProbabilityVector[1 .. N]\t	ReverseSuffixLink[1 .. N]	
+
+	
 
 
 
-
-
-
+//save/export the vlmm in a file for reading it again using the import funcion
 
 */
-//save/export the vlmm in a file for reading it again using the import funcion
-template<typename TFile, typename TAlphabet, typename TCargo, typename TVLMMSpec , typename TIDString>
+
+
+template<typename TFile, typename TAlphabet, typename TCargo, typename TVLMMSpec>
 inline void
 exportVLMM(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TVLMMSpec > > > > &vlmm,
 	   TFile & target)
 {
-	SEQAN_CHECKPOINT
+
+SEQAN_CHECKPOINT
 	typedef Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TVLMMSpec> > > > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
@@ -2156,7 +2247,15 @@ exportVLMM(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TVLMMSpec > > 
 	typedef typename Size<TAlphabet>::Type TSize;
 	TSize table_length = ValueSize<TAlphabet>::VALUE;
 	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
-	typedef typename Iterator<String<AutomatonEdgeArray<TEdge, TAlphabet> > const>::Type TIterConst;
+
+	typedef typename Iterator<String<AutomatonEdgeArray<TEdge, TAlphabet> > >::Type TIterConst;
+
+	writeHead(vlmm,target);
+	for(TIterConst it = begin(vlmm.data_vertex);!atEnd(it);goNext(it)) {
+		if (!idInUse(vlmm.data_id_managerV, position(it))) continue;
+		TVertexDescriptor dummy = position(it); 
+		exportNode(vlmm,dummy,target);
+	}
 
 
 
