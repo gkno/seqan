@@ -634,6 +634,42 @@ initMaps(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > > >& g)
 	return;
 }
 
+// init tables suffix_link  and reverse_suffix_link
+template<typename TAlphabet, typename TCargo, typename TSpec,typename TSize>
+inline void
+initGraph(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > > >& vlmm,
+		 TSize &size) 
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > > > TGraph;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename EdgeType<TGraph >::Type TEdge;
+	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
+	TSize table_length = ValueSize<TAlphabet>::VALUE;
+	vlmm.data_root = 0;
+	resize(vlmm.data_father,size,Exact());
+	resize(vlmm.data_suffix_link,size,Exact());
+	resize(vlmm.data_marked,size,Exact());
+	resize(vlmm.data_id_managerV.data_in_use,size,Exact());
+	resize(vlmm.data_probability_vector,size,Exact());
+	for(int i = 0;i<size;++i){
+		TVertexDescriptor dummy = i;
+		assignValue(vlmm.data_id_managerV.data_in_use, dummy, false);
+		setFather(vlmm,nilVal,dummy);
+		assignValue(vlmm.data_suffix_link,dummy, nilVal);
+		setMarked(vlmm,dummy,false);
+		appendValue(vlmm.data_vertex, AutomatonEdgeArray<TEdge, TAlphabet>());
+		appendValue(vlmm.data_reverse_suffix_link, AutomatonEdgeArray<TEdge, TAlphabet>());
+		
+	
+		//append Alphabetsize many 0s
+		for (unsigned int j = 0;j<table_length;++j)	
+			append(vlmm.data_probability_vector[dummy],0);
+
+	}
+	return;
+}
+
 template<typename TAlphabet, typename TCargo, typename TSpec,typename TVertexDescriptor>
 inline  void
 setFather(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > > >& wg,
@@ -2134,16 +2170,21 @@ getProbabilityForLongestContext( Graph<Automaton<TAlphabet, TCargo , WordGraph <
 
 
 
+/*************
 
+save the graph
+**************/
 
 template<typename TFile, typename TAlphabet, typename TCargo >
 inline void
 writeHead(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < ContextTree > > > > &vlmm,
 	   TFile & target)
 {	
-		_streamWrite(target,"VLMM\tContextTree\tAlphabet\t\n");
+		_streamWrite(target,"VLMM\tContextTree\tDna\t6");
 		
 }
+
+
 
 template <typename TStream>
 inline void
@@ -2169,7 +2210,7 @@ SEQAN_CHECKPOINT
 //save/export the vlmm in a file for reading it again using the import funcion
 template<typename TFile, typename TAlphabet, typename TCargo, typename TVLMMSpec ,typename TVertexDescriptor>
 inline void
-exportNode(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TVLMMSpec > > > > &vlmm,
+saveNode(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TVLMMSpec > > > > &vlmm,
 		   TVertexDescriptor &node,
 			TFile & target)
 {
@@ -2180,8 +2221,8 @@ exportNode(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TVLMMSpec > > 
 	typedef typename Size<TAlphabet>::Type TSize;
 	TSize table_length = ValueSize<TAlphabet>::VALUE;
 	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
-
-	typedef typename Iterator<String<AutomatonEdgeArray<TEdge, TAlphabet> > const>::Type TIterConst;
+	// get to the next line in the file
+	_streamPut(target,'\n');
 	_streamPutInt(target, (unsigned)node);
 	_streamPut(target, '\t');
 	_streamPutInt(target, (unsigned)getFather(vlmm,node));
@@ -2213,11 +2254,13 @@ exportNode(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TVLMMSpec > > 
 
 //ReverseSuffixLinks
 	
-		for(int i = 0;i<ValueSize<TAlphabet>::VALUE;++i){
+		for(int i = 0;i< (ValueSize<TAlphabet>::VALUE-1) ;++i){
 				_streamPutInt(target,getReverseSuffixLink(vlmm,node,i));
 				_streamPut(target,'\t');
 		}
-		_streamPut(target,'\n');
+		// last entry should not end with a '\t' instead with a  '\n'
+		_streamPutInt(target,getReverseSuffixLink(vlmm,node,ValueSize<TAlphabet>::VALUE-1));
+		
 }
 
 
@@ -2234,9 +2277,10 @@ Node\t	Father\t	SuffixLink\t	Marked\t	Children[1 .. N]\t	ChildLabel[1 .. N]\t		P
 */
 
 
+
 template<typename TFile, typename TAlphabet, typename TCargo, typename TVLMMSpec>
 inline void
-exportVLMM(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TVLMMSpec > > > > &vlmm,
+save(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TVLMMSpec > > > > &vlmm,
 	   TFile & target)
 {
 
@@ -2255,14 +2299,217 @@ SEQAN_CHECKPOINT
 	for(TIterConst it = begin(vlmm.data_vertex);!atEnd(it);goNext(it)) {
 		if (!idInUse(vlmm.data_id_managerV, position(it))) continue;
 		TVertexDescriptor dummy = position(it); 
-		exportNode(vlmm,dummy,target);
-		cout << "eported node: " <<dummy<<endl;
+		saveNode(vlmm,dummy,target);
 	}
 
 
 
 }
+/*************
 
+read the graph
+**************/
+
+/* this function can be called to scan every entry of
+	the vlmm output file
+*/
+template <typename TFile,typename TAlphabet>
+inline bool
+_scanNextEntry(TFile & file,
+			   String<TAlphabet> &entry)
+{
+SEQAN_CHECKPOINT
+	resize(entry,0);
+	//SEQAN_ASSERT(!_streamEOF(file))
+	if(_streamEOF(file))
+		return false;
+	
+	while (true)
+	{
+		typename Value<TFile>::Type c = _streamGet(file);
+
+		if (_streamEOF(file))
+		{
+			if(length(entry) == 0)
+				return false;
+			return true;
+		}
+
+		if ((c == '\t') || (c == '\n') || (c == '\r'))
+		{
+			if(length(entry) == 0)
+				return false;
+			return true;
+		}
+
+		
+			appendValue(entry,c,Generous());
+	}
+}
+
+
+template <typename TFile>
+inline bool
+_removeTailingNewlines(TFile & file)
+{
+SEQAN_CHECKPOINT
+	
+	if(_streamEOF(file))
+		return false;
+	bool anotherRound = true;
+	while (anotherRound)
+	{
+		typename Value<TFile>::Type c = _streamGet(file);
+
+		if (_streamEOF(file))
+		{
+			return false;
+		}
+		bool anotherRound = false;
+		if (c == '\n')
+		{
+			anotherRound = true;
+		}
+		
+
+	}
+}
+
+template <typename TFile>
+inline int
+_scanNextIntEntry(TFile & file)
+{
+	String<char> entry;
+	reserve(entry,40);
+	_scanNextEntry(file,entry);
+
+	return atoi((char*)toCString(entry));
+
+}
+
+template <typename TFile>
+inline float
+_scanNextFloatEntry(TFile & file)
+{
+	String<char> entry;
+	reserve(entry,40);
+	_scanNextEntry(file,entry);
+	return atof((char*)toCString(entry));
+
+}
+
+
+template<typename TFile, typename TAlphabet, typename TCargo>
+inline void
+readGraph(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < ContextTree > > > >&vlmm,
+	   TFile & file)
+{
+	typedef Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<ContextTree> > > > TGraph;
+	typedef typename Size<TAlphabet>::Type TSize;
+	TSize table_length = ValueSize<TAlphabet>::VALUE;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+		typedef typename EdgeType<TGraph>::Type TEdge;
+	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
+	typedef typename Iterator<String<AutomatonEdgeArray<TEdge, TAlphabet> > >::Type TIterConst;
+
+	unsigned size = _scanNextIntEntry(file);
+	cout <<"size= "<<size<<endl;
+	//init the vlmm
+	initGraph(vlmm,size);
+	size = _scanNextIntEntry(file);  // remove the tailing newline character
+	//_removeTailingNewlines(file);
+	// go for every node
+	do{
+		TVertexDescriptor node = _scanNextIntEntry(file);
+		assignValue(vlmm.data_id_managerV.data_in_use, node, true);
+		TVertexDescriptor father = _scanNextIntEntry(file);
+		if(node != getRoot(vlmm))
+				setFather(vlmm,father,node);
+		TVertexDescriptor suffixLink = _scanNextIntEntry(file);
+		if(suffixLink != nilVal)
+				setSuffixLink(vlmm,node,suffixLink);
+		int yes = _scanNextIntEntry(file);
+		if(yes)
+			setMarked(vlmm,node,true);
+		cout <<"node:" << node<< " father:  "<< father<< " suffixLinkTarget: "<<suffixLink<< " Marked?: "<<yes<<endl;
+
+		for(int i =0;i<table_length;++i)
+		{
+			TVertexDescriptor child = _scanNextIntEntry(file);
+			if( child  != nilVal)
+			{	
+				//set child true for function adEdge
+				assignValue(vlmm.data_id_managerV.data_in_use, child, true);
+				String<TAlphabet> edgeString;
+				_scanNextEntry(file,edgeString);
+				cout << "edge string to node:"<<child<< " is:" <<edgeString<<endl;
+				addEdge(vlmm,node,child,edgeString);
+			}
+
+
+		}
+		
+		for(int i =0;i<table_length;++i)
+		{
+			float set = _scanNextFloatEntry(file);
+			cout << "float: "<<set;
+			setProbability(vlmm,node,i,set);
+		}
+		cout <<endl;
+		for(int i =0;i<table_length;++i)
+		{
+			TVertexDescriptor target = _scanNextIntEntry(file);
+			if( target  != nilVal)
+			{	
+				//set child true for function addEdge
+				setReverseSuffixLink(vlmm,node,target,i);
+				cout << "reverseSL to node:"<<target<< " is:" <<(TAlphabet)i<<endl;
+			}
+		}
+		int dummy = _scanNextIntEntry(file);
+	} while(!_streamEOF(file));
+    
+	for(TIterConst it = begin(vlmm.data_vertex);!atEnd(it);goNext(it)) {
+		if (!idInUse(vlmm.data_id_managerV, position(it))){
+			cout << "id:" <<position(it)<<" is not used\n";
+			appendValue(vlmm.data_id_managerV.data_freeIds, position(it));
+		}
+		else
+			cout << "id:" <<position(it)<<" is used\n";
+
+	}
+	cout<<"laenge: "<<length(vlmm.data_id_managerV.data_freeIds);
+
+}
+
+
+
+template<typename TFile>
+inline void
+read( TFile & file)
+{
+	Graph<Automaton<Dna, String<Dna> , WordGraph < VLMM < ContextTree > > > > vlmmDna;
+	Graph<Automaton<AminoAcid, String<AminoAcid> , WordGraph < VLMM < ContextTree > > > > vlmmProtein;
+	String<char> entry;
+	_scanNextEntry(file,entry);
+	_scanNextEntry(file,entry);
+	_scanNextEntry(file,entry);
+	if(entry == "Dna"){
+		//typedef Dna TAlphabet;
+		readGraph(vlmmDna,file);
+		cout<< vlmmDna;
+	}
+	if(entry == "AminoAcid"){
+		//typedef AminoAcid TAlphabet;
+		readGraph(vlmmProtein,file);
+	}
+	
+	
+	//typedef Graph<Automaton<TAlphabet, String<TAlphabet> , WordGraph < VLMM < ContextTree > > > TVLMM;
+	//TVLMM vlmm;
+	//readGraph(vlmm,file);
+
+}
 //write the vlmm to a file in Easy-readable format,also used by the  << Operator
 template<typename TFile, typename TAlphabet, typename TCargo, typename TSpec , typename TIDString>
 inline void
