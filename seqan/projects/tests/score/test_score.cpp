@@ -33,7 +33,7 @@ void testScorePAM()
 		for (unsigned int j = 0; j < 24; ++j)
 		{
 			AminoAcid b = j;
-			printf("%2i ", scorePair(pam, a, b));
+			printf("%2i ", score(pam, a, b));
 		}
 		cout << "\n";
 	}

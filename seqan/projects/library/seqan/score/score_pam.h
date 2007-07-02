@@ -28,7 +28,7 @@ computation of the odds scores and the construction of the symmetric and scaled 
 If integer scores are produced, each value is rounded separately.
 .
 .Function.buildPam.param._score.type:Class.Score
-.Function.scorePair.param._score.type:Class.Score
+.Function.score.param._score.type:Class.Score
 .Function.scoreGapExtend.param._score.type:Class.Score
 .Function.scoreGapOpen.param._score.type:Class.Score
 .Function.getScale.param._score.type:Class.Score
@@ -167,7 +167,7 @@ public:
 */
 
 	friend inline TValue &
-		scorePair(Score & _score, int as_1, int as_2)
+		score(Score & _score, int as_1, int as_2)
 	{
 		TValue * data_pam = _getDataPam(_score);
 		TValue & pairscore = *(data_pam+(as_1*dim)+as_2);
@@ -175,7 +175,7 @@ public:
 
 	}
 	friend inline TValue const &
-		scorePair(Score const & _score, int as_1, int as_2)
+		score(Score const & _score, int as_1, int as_2)
 	{
 		const TValue * data_pam = _getDataPam(_score);
 		//return _score.data_pam[as_1][as_2];
@@ -184,17 +184,16 @@ public:
 	}
 
 	
-	/**
-.Function.scorePair:
+/**
+.Function.score:
 ..class:Class.Score
-..summary:Access function returning score for each pair of symbols under comparison.
-..signature:scorePair(& _score, as_1, as_2)
-..signature:scorePair(const & _score, as_1, as_2)
-..param._score:Score class instance containing scoring matrix as a member.
-..param.as_1: first identifier of pair under comparison.
-..param.as_2: second identifier of pair under comparison.
-..returns:Pam score of pair under comparison.
-...type:TValue
+..summary:The score for aligning two values according to a scoring scheme.
+..signature:score(score, as_1, as_2)
+..param.score:A scoring scheme.
+...type:Class.Score
+..param.value1:first value.
+..param.value2:second value.
+..returns:The score for comparing the two values.
 */
 
 	friend inline TValue &
