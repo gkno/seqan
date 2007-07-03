@@ -629,7 +629,7 @@ write(TFile & file,
 
 
 
-
+/*
 
 //////////////////////////////////////////////////////////////////////////////
 // READING
@@ -1014,7 +1014,7 @@ void read(TFile & file,
 	read(file,g,nodeMap,edgeMap,DotDrawing());
 }
 
-
+*/
 
 }// namespace SEQAN_NAMESPACE_MAIN
 

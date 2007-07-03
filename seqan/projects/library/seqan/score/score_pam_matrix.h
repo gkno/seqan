@@ -61,7 +61,7 @@ void _starting_data_pam(_TempMembersPam<TValue, TSequenceValue> & _member, Score
 }
 
 template <typename TValue>
-void _starting_data_pam(_TempMembersPam<TValue, AminoAcid> & _member, Score <TValue, Pam<AminoAcid, Pam_Data_Dayhoff_MDM78> > & _score){
+void _starting_data_pam(_TempMembersPam<TValue, AminoAcid> & _member, Score <TValue, Pam<AminoAcid, Pam_Data_Dayhoff_MDM78> > &){
 	const int dim = ValueSize<AminoAcid>::VALUE;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -372,4 +372,6 @@ void _starting_data_pam(_TempMembersPam<TValue, AminoAcid> & _member, Score <TVa
 
 }// namespace SEQAN_NAMESPACE_MAIN
 
+
 #endif //#ifndef SEQAN_HEADER_...
+

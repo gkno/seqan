@@ -650,6 +650,66 @@ write(TFile & target,
 
 //////////////////////////////////////////////////////////////////////////////
 
+template <typename TFile, typename TSpec, typename TNames>
+inline void
+write(TFile & file,
+	  Graph<TSpec> const& g,
+	  TNames const& names,
+	  MsfFormat) 
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<TSpec> TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+
+	String<char> align;
+	if (convertAlignment(g, align)) {	
+		TSize nseq = length(stringSet(g));
+		TSize colLen = length(align) / nseq;
+		
+		_streamWrite(file,"PileUp\n");
+		_streamPut(file, '\n');
+		_streamWrite(file," MSF: \n");
+		_streamPut(file, '\n');
+		TSize offset = 0;
+		for(TSize i = 0; i<nseq; ++i) {
+			_streamWrite(file," Name: ");
+			_streamWrite(file,names[i]);
+			_streamWrite(file," oo  Len:  ");
+			TSize len = length(names[i]);
+			if (len > offset) offset = len;
+			_streamPutInt(file, length((stringSet(g))[i]));
+			_streamPut(file, '\n');
+		}
+		offset += 5;
+		_streamPut(file, '\n');
+		_streamWrite(file,"//\n");
+		_streamPut(file, '\n');
+		_streamPut(file, '\n');
+		TSize col = 0;
+		while(col < colLen) {
+			TSize max = 0;
+			for(TSize i = 0; i<nseq; ++i) {
+				if ((colLen - col) < 50) max = colLen - col;
+				else max = 50;
+				_streamWrite(file,names[i]);
+				for(TSize j = 0; j<offset - length(names[i]); ++j) {
+					_streamPut(file, ' ');
+				}
+				for(TSize finger = col; finger<col+max; ++finger) {
+					if ((finger - col) % 10 == 0) _streamPut(file, ' ');
+					_streamPut(file, getValue(align, i*colLen + finger));
+				}
+				_streamPut(file, '\n');
+			}
+			col += max;
+			_streamPut(file, '\n');
+			_streamPut(file, '\n');
+		}
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 template<typename TStringSet, typename TCargo, typename TSpec, typename TStringSet2>
 inline void
 assignStringSet(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,

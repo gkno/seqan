@@ -119,21 +119,6 @@ public:
 		// to do: data_pam kopieren!
 	}
 
-
-
- 
-	Score & operator = (Score const & other)
-	{
-		dist(other.dist),
-		scaling_factor(other.scaling_factor),
-		entropy (other.entropy),
-		data_gap_extend(other.data_gap_extend),
-		data_gap_open(other.data_gap_open),
-		data_pam(other.data_pam),
-		return *this;
-	}
-	
-
 		~Score()
 	{
 	}
@@ -465,7 +450,6 @@ void buildPam(Score<TValue, Pam<TSequenceValue, TSource> > & _score, int _givenD
 	_computeLogOddsPam(my_members);
 	_finishPam(_score, my_members);
 	_computeEntropyPam(_score, my_members);
-	TValue * adr_data_pam = _getDataPam(_score); 
 //____________________________________________________________________________
 
 }
@@ -555,7 +539,7 @@ void _extrapolatePam (_TempMembersPam<TValue, TSequenceValue> & _member, Score<T
 
 
 template <typename TValue, typename TSource>
-void _extendAlphabetPam(Score<TValue, Pam<AminoAcid, TSource> > & _score, _TempMembersPam<TValue,AminoAcid> & _member){
+void _extendAlphabetPam(Score<TValue, Pam<AminoAcid, TSource> > &, _TempMembersPam<TValue,AminoAcid> & _member){
 // extension of amino acid alphabet: known location for B and Z 
 	
 /**
@@ -889,7 +873,7 @@ TValue roundConvert(TSource to_round, Score<TValue, TSequenceValue> _roundType){
 }
 
 template <typename TSource, typename TSequenceValue>
-int roundConvert(TSource to_round, Score<int, TSequenceValue> _roundType){
+int roundConvert(TSource to_round, Score<int, TSequenceValue>){
 	return int(floor(to_round + 0.5));
 }
 

@@ -132,8 +132,19 @@ typedef Tag<TreeTag_> const TreeTag;
 ..value.DotDrawing:Graphs in dot format.
 */
 
-struct TagDotDrawing_;
-typedef Tag<TagDotDrawing_> const DotDrawing;
+struct DotDrawing_;
+typedef Tag<DotDrawing_> const DotDrawing;
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Tag.MsfFormat
+..summary:Switch to trigger alignment output in msf format
+..value.MsfFormat:Alignment graph in msf format
+*/
+
+struct MsfFormat_;
+typedef Tag<MsfFormat_> const MsfFormat;
 
 //////////////////////////////////////////////////////////////////////////////
 

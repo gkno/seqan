@@ -52,7 +52,7 @@
 #include <seqan/graph/graph_impl_trie.h>		// Trie
 
 // Graph drawing
-#include <seqan/find.h>
+// #include <seqan/find.h>
 #include <seqan/graph/graph_drawing.h>
 
 // Specialized iterators
@@ -77,6 +77,7 @@
 #include <seqan/graph/graph_utility_alphabets.h>
 #include <seqan/graph/graph_utility_parsing.h>
 #include <seqan/graph/graph_utility_match_parsing.h>
+#include <seqan/graph/graph_utility_sorted_sequence.h>
 
 // Graph algorithms
 #include <seqan/graph/graph_algorithm.h>

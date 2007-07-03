@@ -727,6 +727,11 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 			typedef typename Iterator<TPairGraph, EdgeIterator>::Type TEI;
 			TPairGraph pGraph(pairSet);
 			localAlignment(pGraph, score_type, SmithWatermanClump() );
+			
+			//fstream strm02; // Alignment graph as dot
+			//strm02.open(TEST_PATH "my_test.dot", ios_base::out | ios_base::trunc);
+			//write(strm02,pGraph,DotDrawing());
+			//strm02.close();
 
 			TEI it(pGraph);
 			for(;!atEnd(it);++it) {
@@ -803,6 +808,7 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 			TStringSet pairSet;
 			assignValueById(pairSet, str, id1);
 			assignValueById(pairSet, str, id2);
+			
 			typedef Graph<Alignment<TStringSet, void> > TPairGraph;
 			typedef typename VertexDescriptor<TPairGraph>::Type TVD;
 			typedef typename Iterator<TPairGraph, EdgeIterator>::Type TEI;

@@ -132,6 +132,32 @@ void  Test_CompressedAlphabets() {
 	SEQAN_TASSERT(gr10 == 14)
 }
 
+
+//////////////////////////////////////////////////////////////////////////////
+
+void Test_LongestIncreasingSubsequence() {
+	String<char> seq1("zeitgeist");
+	String<unsigned int> pos1;
+	longestIncreasingSubsequence(seq1,pos1);
+	for(int i = length(pos1)-1; i>=0; --i) {
+		std::cout << seq1[pos1[i]] <<  ',';
+	}
+	std::cout << std::endl;
+
+	String<unsigned int> seq;
+	appendValue(seq, 5); appendValue(seq, 3); appendValue(seq, 4);
+	appendValue(seq, 9); appendValue(seq, 6); appendValue(seq, 2);
+	appendValue(seq, 1); appendValue(seq, 8); appendValue(seq, 7);
+	appendValue(seq, 10);
+	String<unsigned int> pos;
+	longestIncreasingSubsequence(seq,pos);
+	for(int i = length(pos)-1; i>=0; --i) {
+		std::cout << seq[pos[i]] <<  ',';
+	}
+	std::cout << std::endl;
+}
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 void Test_TCoffeeTmp() {
@@ -231,8 +257,8 @@ void Test_TCoffeeGarfield() {
 	assignValueById(strSet, str4);
 
 	// Score object
-	Score<double> score_type_global = Score<double>(2,-1,-0.5,-2);
-	Score<double> score_type_local = Score<double>(2,-1,-0.5,-2);
+	Score<int, Pam<> > score_type_global(250, -1, -2);
+	Score<int, Pam<> > score_type_local(250, -1, -2);
 
 	// Generate a primary library, i.e., all global pairwise alignments
 	TGraph lib1(strSet);
@@ -296,6 +322,148 @@ void Test_TCoffeeGarfield() {
 	strm3.open(TEST_PATH "my_tcoffee3.dot", ios_base::out | ios_base::trunc);
 	write(strm3,gOut,DotDrawing());
 	strm3.close();
+
+	String<String<char> > names;
+	appendValue(names, "seq1");	appendValue(names, "seq2");
+	appendValue(names, "seq3");	appendValue(names, "seq4");
+	fstream strm4; // Alignment graph as msf
+	strm4.open(TEST_PATH "my_alignment.msf", ios_base::out | ios_base::trunc);
+	write(strm4,gOut,names, MsfFormat());
+	strm4.close();
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+void Test_TCoffeeFromFile(String<char> const in_path, String<char> const file_prefix, String<char> const file_suffix) {
+//____________________________________________________________________________
+// T-Coffee
+	// Sequences
+	typedef String<AminoAcid> TString;
+	StringSet<String<AminoAcid>, Owner<> > origStrSet;
+
+	// Count sequences and read names
+	String<String<char> > names;
+	unsigned seqCount = 0;
+	ifstream file;
+	std::stringstream input;
+	input << in_path << file_prefix << '.' << file_suffix;
+	file.open(input.str().c_str(), ios_base::in | ios_base::binary);
+	if (!file.is_open()) return;
+	while (!_streamEOF(file)) {
+		String<char> id;
+		readID(file, id, Fasta());
+		appendValue(names, id);
+		//std::cout << id << std::endl;
+		goNext(file, Fasta());
+		++seqCount;
+	}
+	std::cout << "Number of sequences: " << seqCount << std::endl;
+
+	// Import sequences
+	file.clear();
+	file.seekg(0, ios_base::beg);
+	resize(origStrSet, seqCount);
+	unsigned int count = 0;
+	for(unsigned i = 0; (i < seqCount) && !_streamEOF(file); ++i) 	{
+		read(file, origStrSet[i], Fasta());
+		count += length(origStrSet[i]);
+		std::cout << i << ':' << length(origStrSet[i]) << ',';
+	}
+    file.close();
+	std::cout << std::endl << "Total number of bp: " << count << std::endl;
+	std::cout << "Import sequences done" << std::endl;
+
+	// Make dependent string set
+	typedef StringSet<TString, Dependent<> > TStringSet;
+	typedef Graph<Alignment<TStringSet, unsigned int, Default> > TGraph;
+	TStringSet strSet;
+	for(unsigned int i = 0; i<length(origStrSet); ++i) {
+		appendValue(strSet, origStrSet[i]);
+	}
+
+	// Score object
+	//Score<int, Pam<AminoAcid, Pam_Data_Dayhoff_MDM78> > score_type_global(250, -1, -4);
+	//Score<int, Pam<AminoAcid, Pam_Data_Dayhoff_MDM78> > score_type_local(250, -1, -4);
+	Score<int, Pam<> > score_type_global(250, -2, -20);
+	Score<int, Pam<> > score_type_local(250, -2, -20);
+
+	// Generate a primary library, i.e., all global pairwise alignments
+	TGraph lib1(strSet);
+	generatePrimaryLibrary(lib1, score_type_global, GlobalPairwise_Library() );
+
+	//fstream strm01; // Alignment graph as dot
+	//strm01.open(TEST_PATH "my_tcoffee01.dot", ios_base::out | ios_base::trunc);
+	//write(strm01,lib1,DotDrawing());
+	//strm01.close();
+	//std::cout << "Global Pairwise alignments done" << std::endl;
+
+	// Generate a primary library, i.e., all local pairwise alignments
+	TGraph lib2(strSet);
+	generatePrimaryLibrary(lib2, score_type_local, LocalPairwise_Library() );
+
+	//fstream strm02; // Alignment graph as dot
+	//strm02.open(TEST_PATH "my_tcoffee02.dot", ios_base::out | ios_base::trunc);
+	//write(strm02,lib2,DotDrawing());
+	//strm02.close();
+	//std::cout << "Local Pairwise alignments done" << std::endl;
+	
+		// Weighting of libraries (Signal addition)
+	TGraph g(strSet);
+	String<TGraph*> libs;
+	appendValue(libs, &lib1);
+	appendValue(libs, &lib2);
+	combineGraphs(g, libs);
+	//std::cout << "Combining graphs done" << std::endl;
+
+	// Clear the old libraries
+	clear(lib1);
+	clear(lib2);
+
+	//fstream strm1; // Alignment graph as dot
+	//strm1.open(TEST_PATH "my_tcoffee1.dot", ios_base::out | ios_base::trunc);
+	//write(strm1,g,DotDrawing());
+	//strm1.close();
+
+	// Triplet library extension
+	tripletLibraryExtension(g);
+	//std::cout << "Triplet done" << std::endl;
+
+	//fstream strm2; // Alignment graph as dot
+	//strm2.open(TEST_PATH "my_tcoffee2.dot", ios_base::out | ios_base::trunc);
+	//write(strm2,g,DotDrawing());
+	//strm2.close();
+
+	// Calculate a distance matrix using a compressed alphabet or not
+	Matrix<double> distanceMatrix; 
+	getCommonKmerMatrix(stringSet(g), distanceMatrix, 6, AAGroupsDayhoff() );
+	//std::cout << "Kmer done" << std::endl;
+	kmerToDistanceMatrix(distanceMatrix, FractionalDistance() );
+	//std::cout << "Distance done" << std::endl;
+
+	// Build the neighbor joining tree
+	Graph<Tree<double> > njTreeOut;
+	slowNjTree(distanceMatrix, njTreeOut);
+	//std::cout << "NjTree done" << std::endl;
+
+	// Perform a progressive alignment
+	Graph<Alignment<TStringSet, void> > gOut(strSet);
+	progressiveAlignment(g, njTreeOut, gOut, Hirschberg() );
+	//std::cout << "Alignment done" << std::endl;
+
+	// Print the alignment
+	// std::cout << gOut << std::endl;
+
+	//fstream strm3; // Alignment graph as dot
+	//strm3.open(TEST_PATH "my_tcoffee3.dot", ios_base::out | ios_base::trunc);
+	//write(strm3,gOut,DotDrawing());
+	//strm3.close();
+
+	std::stringstream output;
+	output << in_path << "my_" << file_prefix << ".msf";
+	fstream strm4; // Alignment graph as msf
+	strm4.open(output.str().c_str(), ios_base::out | ios_base::trunc);
+	write(strm4,gOut,names, MsfFormat());
+	strm4.close();
 }
 
 
@@ -383,110 +551,7 @@ void Test_TCoffeeFromRandomSeq() {
 		SEQAN_TASSERT(convertAlignment(gOut, align));
 	}
 }
-//////////////////////////////////////////////////////////////////////////////
 
-void Test_TCoffeeFromFile() {
-//____________________________________________________________________________
-// T-Coffee
-
-	// Timing
-	clock_t start = clock();
-
-	// Sequences
-	typedef String<AminoAcid> TString;
-	StringSet<String<AminoAcid>, Owner<> > origStrSet;
-
-	// Count sequences
-	unsigned seqCount = 0;
-	ifstream file;
-	std::stringstream input;
-	//input << TEST_PATH << "3d_sample3.fasta";
-	input << TEST_PATH << "sproteases_small.fasta";
-	//input << TEST_PATH << "sproteases_large.fasta";
-	file.open(input.str().c_str(), ios_base::in | ios_base::binary);
-	if (!file.is_open()) return;
-	while (!_streamEOF(file)) {
-		String<char> id;
-		readID(file, id, Fasta());
-		//std::cout << id << std::endl;
-		goNext(file, Fasta());
-		++seqCount;
-	}
-	//std::cout << "Number of sequences: " << seqCount << std::endl;
-
-	// Import sequences
-	file.clear();
-	file.seekg(0, ios_base::beg);
-	resize(origStrSet, seqCount);
-	unsigned int count = 0;
-	for(unsigned i = 0; (i < seqCount) && !_streamEOF(file); ++i) 	{
-		read(file, origStrSet[i], Fasta());
-		count += length(origStrSet[i]);
-		std::cout << i << ':' << length(origStrSet[i]) << ',';
-	}
-    file.close();
-	std::cout << std::endl << "Total number of bp: " << count << std::endl;
-	std::cout << "Import sequences done" << std::endl;
-
-	// Generate additional primary libraries, e.g., all pairwise alignments
-	typedef StringSet<TString, Dependent<> > TStringSet;
-	typedef Graph<Alignment<TStringSet, unsigned int, Default> > TGraph;
-	TStringSet strSet;
-	for(unsigned int i = 0; i<length(origStrSet); ++i) {
-		//assignValueById(strSet, origStrSet, positionToId(origStrSet, i));
-		appendValue(strSet, origStrSet[i]);
-	}
-	TGraph g(strSet);
-
-	// Score object
-	Score<double> score_type = Score<double>(4,-1,-0.5,-10);
-
-	// Generate primary libraries
-	TGraph lib1(strSet);
-	TGraph lib2(strSet);
-	generatePrimaryLibrary(lib1, score_type, GlobalPairwise_Library() );
-	std::cout << "Global Pairwise alignments done" << std::endl;
-
-	generatePrimaryLibrary(lib2, score_type, LocalPairwise_Library());
-	std::cout << "Local Pairwise alignments done" << std::endl;
-
-	// Weighting of libraries (Signal addition)
-	String<TGraph*> libs;
-	appendValue(libs, &lib1);
-	appendValue(libs, &lib2);
-	combineGraphs(g, libs);
-	std::cout << "Combining graphs done" << std::endl;
-	clear(lib1);
-	clear(lib2);
-
-	// Triplet library extension
-	tripletLibraryExtension(g);
-	std::cout << "Triplet done" << std::endl;
-
-	// Calculate a distance matrix using a compressed alphabet or not
-	Matrix<double> distanceMatrix; 
-	getCommonKmerMatrix(stringSet(g), distanceMatrix, 6, AAGroupsDayhoff() );
-	std::cout << "Kmer done" << std::endl;
-	kmerToDistanceMatrix(distanceMatrix, FractionalDistance() );
-	std::cout << "Distance done" << std::endl;
-
-	// Build the neighbor joining tree
-	Graph<Tree<double> > njTreeOut;
-	slowNjTree(distanceMatrix, njTreeOut);
-	std::cout << "NjTree done" << std::endl;
-
-	// Perform a progressive alignment
-	Graph<Alignment<TStringSet, void> > gOut(strSet);
-	progressiveAlignment(g, njTreeOut, gOut, NeedlemanWunsch() );
-	std::cout << "Alignment done" << std::endl;
-
-	// Print the alignment
-	std::cout << gOut << std::endl;
-
-	clock_t end = clock();
-	double time_elapsed = double(end - start)/CLOCKS_PER_SEC;
-	std::cout << "Time: " << time_elapsed << " sec" << std::endl;
-}
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -612,12 +677,13 @@ void Test_TCoffeeFromLibrary() {
 //////////////////////////////////////////////////////////////////////////////
 
 void Test_GraphTCoffee() {
-	Test_CompressedAlphabets();
+	//Test_CompressedAlphabets();
+	Test_LongestIncreasingSubsequence();
 
 	//Test_TCoffeeTmp();
-	Test_TCoffeeGarfield();
+	//Test_TCoffeeGarfield();
 	//Test_TCoffeeFromRandomSeq();
-	//Test_TCoffeeFromFile();
+	//Test_TCoffeeFromFile("Z:\\Balibase\\bb3_release\\RV20\\", "BB20001", "tfa");
 	//Test_TCoffeeFromLibrary(); 
 
 }
