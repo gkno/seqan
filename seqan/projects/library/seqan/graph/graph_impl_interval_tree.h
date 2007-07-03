@@ -462,7 +462,7 @@ SEQAN_CHECKPOINT
 //for the left child node (during interval tree construction)
 template<typename TIntervals, typename TValue>
 TValue
-_calcIntervalTreeNodeCenterLeft(TIntervals & intervals, TValue & last_center, TValue & center, Tag<TagRandomCenter_> const tag)
+_calcIntervalTreeNodeCenterLeft(TIntervals & intervals, TValue &, TValue &, Tag<TagRandomCenter_> const)
 {
 SEQAN_CHECKPOINT
 	TValue rand_index = rand()%length(intervals);  
@@ -474,7 +474,7 @@ SEQAN_CHECKPOINT
 //for the right child node (during interval tree construction)
 template<typename TIntervals, typename TValue>
 TValue
-_calcIntervalTreeNodeCenterRight(TIntervals & intervals, TValue & last_center, TValue & center, Tag<TagRandomCenter_> const tag)
+_calcIntervalTreeNodeCenterRight(TIntervals & intervals, TValue &, TValue &, Tag<TagRandomCenter_> const)
 {
 SEQAN_CHECKPOINT
 	TValue rand_index = rand()%length(intervals);  
@@ -485,7 +485,7 @@ SEQAN_CHECKPOINT
 //simply take the middle 
 template<typename TIntervals, typename TValue>
 TValue
-_calcIntervalTreeNodeCenterLeft(TIntervals & intervals, TValue & last_center, TValue & center, Tag<TagMidCenter_> const tag)
+_calcIntervalTreeNodeCenterLeft(TIntervals &, TValue & last_center, TValue & center, Tag<TagMidCenter_> const)
 {
 SEQAN_CHECKPOINT
 	return (center - (abs(center-last_center)/(TValue)2.0));
@@ -496,7 +496,7 @@ SEQAN_CHECKPOINT
 //for the right child node (during interval tree construction)
 template<typename TIntervals, typename TValue>
 TValue
-_calcIntervalTreeNodeCenterRight(TIntervals & intervals, TValue & last_center, TValue & center, Tag<TagMidCenter_> const tag)
+_calcIntervalTreeNodeCenterRight(TIntervals &, TValue & last_center, TValue & center, Tag<TagMidCenter_> const)
 {
 SEQAN_CHECKPOINT
 	return (center + (abs(center-last_center)/(TValue)2.0));
@@ -827,7 +827,7 @@ SEQAN_CHECKPOINT
 		act_prop = property(pm,act_knot);
 		if(act_prop.center < query)
 		{
-			int i = 0;
+			unsigned int i = 0;
 			while(i < length(act_prop.list2) && rightBoundary(value(act_prop.list2,i)) > query)
 			{
 				appendValue(result,cargo(value(act_prop.list2,i)));
@@ -847,7 +847,7 @@ SEQAN_CHECKPOINT
 		else{
 			if(query < act_prop.center)
 			{
-				int i = 0;
+				unsigned int i = 0;
 				while(i < length(act_prop.list1) && leftBoundary(value(act_prop.list1,i)) <= query)
 				{
 					appendValue(result,cargo(value(act_prop.list1,i)));
@@ -866,7 +866,7 @@ SEQAN_CHECKPOINT
 				act_knot = targetVertex(it);
 			}
 			else{
-				for(int i = 0; i < length(act_prop.list1); ++i)
+				for(unsigned int i = 0; i < length(act_prop.list1); ++i)
                     appendValue(result, cargo(value(act_prop.list1,i)));
 				break;
 			}

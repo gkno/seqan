@@ -4,8 +4,11 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 
+
+	
 template<typename TId = unsigned int, typename TPos = unsigned int, typename TSize = unsigned int, typename TSpec = Default()>
 class Fragment;
+
 
 
 template<typename TId, typename TPos, typename TSize, typename TSpec>

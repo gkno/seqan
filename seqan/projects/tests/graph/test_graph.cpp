@@ -28,6 +28,7 @@
 #include "test_graph_alignment.h"
 #include "test_graph_tcoffee.h"
 #include "test_graph_match_refinement.h"
+#include "test_graph_interval_tree.h"
 
 using namespace std;
 using namespace seqan;
@@ -48,6 +49,7 @@ int main()
 	Test_GraphAlignment();		// Test Graph Alignment
 	Test_GraphTCoffee();		// Test T-Coffee
 	Test_GraphMatchRefinement();// Test Match Refinement
+	Test_GraphIntervalTree();	// Test Interval Tree
 
 
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_base.h");

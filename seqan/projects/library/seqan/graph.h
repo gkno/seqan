@@ -85,6 +85,11 @@
 // Refinement
 #include <seqan/graph/graph_impl_interval_types.h>
 #include <seqan/graph/graph_impl_interval_tree.h>
-#include <seqan/graph/graph_algorithm_refine.h>
+#include <seqan/graph/graph_algorithm_refine_scoring.h>
+#include <seqan/graph/graph_algorithm_refine_fragment.h>
+//#include <seqan/graph/graph_algorithm_refine_aligngraph.h>
+#include <seqan/graph/graph_algorithm_refine_align.h>
+#include <seqan/graph/graph_algorithm_refine_exact.h>
+#include <seqan/graph/graph_algorithm_refine_inexact.h>
 
 #endif //#ifndef SEQAN_HEADER_...

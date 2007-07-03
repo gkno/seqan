@@ -63,7 +63,7 @@ Test_ReadSequences(String<char> const path, String<char> const file_prefix, TStr
 
 //////////////////////////////////////////////////////////////////////////////
 
-void Test_GraphMatchRefinement() {
+void Test_GraphMatchRefine() {
 	// Sequences
 	typedef String<Dna5, External<ExternalConfig<File<>, 64*1024> > > TString;
 	typedef StringSet<TString, Owner<> > TStringSet;
@@ -71,17 +71,17 @@ void Test_GraphMatchRefinement() {
 	typedef Size<TStringSet>::Type TSize;
 
 	// Matches
-	typedef String<Fragment<>, External<ExternalConfig<File<>, 64*1024> > > TFragmentString;
+	typedef String<Fragment<unsigned int,unsigned int,unsigned int,ExactFragment>, External<ExternalConfig<File<>, 64*1024> > > TFragmentString;
 	//typedef String<Fragment<>, External<> > TFragmentString;
 
 	// Windows
 #ifdef PLATFORM_WINDOWS
-	String<char> in_path("Z:\\matches\\");
-	String<char> out_path("Z:\\matches\\out\\");
+	String<char> in_path("D:\\matches\\");
+	String<char> out_path("D:\\matches\\out\\");
 #else
 	// Linux
-	String<char> in_path("/home/takifugu/rausch/matches/");
-	String<char> out_path("/home/takifugu/rausch/matches/out/");
+	String<char> in_path("/home/takifugu2/data/SeqAn/binary/");
+	String<char> out_path("/home/takifugu2/data/SeqAn/binary/");
 #endif
 	
 
@@ -163,9 +163,9 @@ void Test_GraphMatchRefinement() {
 	// Access the matches
 	TFragmentString matches;
 	std::stringstream strstream;
-	strstream << out_path << "matchesTest.dat"; // 10 Matches
+	//strstream << out_path << "matchesTest.dat"; // 10 Matches
 	//strstream << out_path << "matches1000.dat"; // 2001948 Matches
-	//strstream << out_path << "matches10000.dat"; // 2111 Matches
+	strstream << out_path << "matches10000.dat"; // 2111 Matches
 	//strstream << out_path << "matches2000.dat"; // 653095 Matches
 	//strstream << out_path << "matches500.dat"; // 3999176 
 	open(matches, strstream.str().c_str());
@@ -223,6 +223,474 @@ void Test_GraphMatchRefinement() {
 		close(str[pos->first]);
 	}
 	close(matches);
+}
+
+
+//produce pairwise alignments (Align object)
+template<typename TAlign, typename TSequence, typename TScore>
+void 
+getAlignments(String<TAlign> & alis, StringSet<TSequence> & seq, TScore & score_type, int & numAlignments, int cutoff)
+{
+
+	unsigned int gesamt = 0;
+
+	for(unsigned int i = 0; i < length(seq); ++i)
+	{
+		for(unsigned int j = i+1; j < length(seq); ++j)
+		{
+			TAlign ali;
+			resize(rows(ali), 2);
+			setSource(row(ali, 0), seq[i]);
+			setSource(row(ali, 1), seq[j]);
+
+			LocalAlignmentFinder<int> sw_finder = LocalAlignmentFinder<int>(ali);
+			
+			int score = smithWaterman(ali,sw_finder,score_type,cutoff);
+				if(score==0) continue;
+			//cout <<"Seq "<<i<<" - Seq "<<j<<"\n"<<score<< ali;
+			//cout << sourceBeginPosition(row(ali,0)) <<"   ";
+			//cout << sourceBeginPosition(row(ali,1)) <<"\n";
+			appendValue(alis,ali);
+			++gesamt;
+			int k = 1;
+			while(k<numAlignments)
+			{
+				score = smithWatermanGetNext(ali,sw_finder,score_type,cutoff);
+				if(score==0) break;
+				//cout <<score<< ali;
+				//cout << sourceBeginPosition(row(ali,0)) <<"   ";
+				//cout << sourceBeginPosition(row(ali,1)) <<"\n";
+				appendValue(alis,ali);
+				++gesamt;
+				++k;
+			}
+		}	
+	}
+
+	numAlignments = gesamt;
+	resize(alis,numAlignments);
+
+
+}
+
+
+void 
+Test_RefineAlign(){
+
+	typedef String<char> TString;
+	typedef StringSet<TString> TStringSet;
+	typedef Align<TString, ArrayGaps> TAlign;
+
+	int numSequences = 4;
+
+	TStringSet seq_set;
+
+
+	TString str = "GARFIELDTHELASTFATCAT";
+	appendValue(seq_set,str);
+
+	str = "GARFIELDTHEFASTCAT";
+	appendValue(seq_set,str);
+	
+	str = "GARFIELDTHEVERYFASTCAT";
+	appendValue(seq_set,str);
+	
+	str = "THEFATCAT";
+	appendValue(seq_set,str);
+
+
+
+
+	int numAlignments = 1;
+	int numSequencePairs = 0;
+	int cutoff = 3;
+	for(int i = 1 ; i < numSequences; ++i) 
+		numSequencePairs += i;
+	String<TAlign> alis;
+	reserve(alis,numSequencePairs*numAlignments);
+	Score<int> score_type = Score<int>(1,-1,-2,0) ;
+
+	getAlignments(alis,seq_set,score_type,numAlignments,cutoff);
+
+	typedef Graph<Alignment<TStringSet> > TAliGraph;
+	TAliGraph ali_graph(seq_set);
+
+//	std::cout <<"Number of Segments: "<<length(alis)<<"\n";
+	matchRefinement(alis,seq_set,score_type,ali_graph);
+
+	//std::cout << "\nnumEdges: "<<numEdges(ali_graph)<<"\n";
+	//std::cout << "\nnumVertices: "<<numVertices(ali_graph)<<"\n";
+	//std::cout << ali_graph << "\n\n";
+
+	//fstream strmW; // Write the library
+	//strmW.open(TEST_PATH "my_testlib1.lib", ios_base::out | ios_base::trunc);
+	//write(strmW,ali_graph,TCoffeeLib());
+	//strmW.close();
+
+	VertexDescriptor<TAliGraph>::Type vd;
+
+	vd = findVertex(ali_graph,0,0);
+	SEQAN_TASSERT(vd == 0)
+	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 8)
+	vd = findVertex(ali_graph,0,8);
+	SEQAN_TASSERT(vd == 1)
+	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 3)
+	vd = findVertex(ali_graph,0,11);
+	SEQAN_TASSERT(vd == 2)
+	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 3)
+	vd = findVertex(ali_graph,0,14);
+	SEQAN_TASSERT(vd == 3)
+	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 1)
+	vd = findVertex(ali_graph,0,15);
+	SEQAN_TASSERT(vd == 4)
+	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 2)
+	vd = findVertex(ali_graph,0,17);
+	SEQAN_TASSERT(vd == 5)
+	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 1)
+	vd = findVertex(ali_graph,0,18);
+	SEQAN_TASSERT(vd == 6)
+	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 2)
+	vd = findVertex(ali_graph,0,20);
+	SEQAN_TASSERT(vd == 7)
+	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 1)
+
+	vd = findVertex(ali_graph,1,0);
+	SEQAN_TASSERT(vd == 8)
+	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 0)
+	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 8)
+	vd = findVertex(ali_graph,1,8);
+	SEQAN_TASSERT(vd == 9)
+	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 8)
+	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 3)
+	vd = findVertex(ali_graph,1,11);
+	SEQAN_TASSERT(vd == 10)
+	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 11)
+	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 3)
+	vd = findVertex(ali_graph,1,14);
+	SEQAN_TASSERT(vd == 11)
+	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 14)
+	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 1)
+	vd = findVertex(ali_graph,1,15);
+	SEQAN_TASSERT(vd == 12)
+	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 15)
+	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 2)
+	vd = findVertex(ali_graph,1,17);
+	SEQAN_TASSERT(vd == 13)
+	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 17)
+	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 1)
+
+	vd = findVertex(ali_graph,2,0);
+	SEQAN_TASSERT(vd == 14)
+	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 0)
+	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 8)
+	vd = findVertex(ali_graph,2,8);
+	SEQAN_TASSERT(vd == 15)
+	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 8)
+	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 3)
+	vd = findVertex(ali_graph,2,11);
+	SEQAN_TASSERT(vd == 16)
+	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 11)
+	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 7)
+	vd = findVertex(ali_graph,2,18);
+	SEQAN_TASSERT(vd == 17)
+	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 18)
+	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 1)
+	vd = findVertex(ali_graph,2,19);
+	SEQAN_TASSERT(vd == 18)
+	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 19)
+	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 2)
+	vd = findVertex(ali_graph,2,21);
+	SEQAN_TASSERT(vd == 19)
+	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 21)
+	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 1)
+
+	vd = findVertex(ali_graph,3,0);
+	SEQAN_TASSERT(vd == 20)
+	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 0)
+	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 3)
+	vd = findVertex(ali_graph,3,3);
+	SEQAN_TASSERT(vd == 21)
+	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 3)
+	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 2)
+	vd = findVertex(ali_graph,3,5);
+	SEQAN_TASSERT(vd == 22)
+	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 5)
+	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 1)
+	vd = findVertex(ali_graph,3,6);
+	SEQAN_TASSERT(vd == 23)
+	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 6)
+	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 2)
+	vd = findVertex(ali_graph,3,8);
+	SEQAN_TASSERT(vd == 24)
+	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 8)
+	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 1)
+	
+	SEQAN_TASSERT(findEdge(ali_graph,0,14)!=0)
+	SEQAN_TASSERT(findEdge(ali_graph,0,8)!=0)
+	SEQAN_TASSERT(findEdge(ali_graph,1,15)!=0)
+	SEQAN_TASSERT(findEdge(ali_graph,1,9)!=0)
+	SEQAN_TASSERT(findEdge(ali_graph,2,10)!=0)
+	SEQAN_TASSERT(findEdge(ali_graph,3,11)!=0)
+//	SEQAN_TASSERT(findEdge(ali_graph,4,12)!=0)  //doesnt exist if edges with score <= 0 are kicked out
+	SEQAN_TASSERT(findEdge(ali_graph,4,21)!=0)
+	SEQAN_TASSERT(findEdge(ali_graph,5,22)!=0)
+	SEQAN_TASSERT(findEdge(ali_graph,5,13)!=0)
+	SEQAN_TASSERT(findEdge(ali_graph,6,23)!=0)
+	SEQAN_TASSERT(findEdge(ali_graph,7,24)!=0)
+	SEQAN_TASSERT(findEdge(ali_graph,8,14)!=0)
+	SEQAN_TASSERT(findEdge(ali_graph,9,20)!=0)
+	SEQAN_TASSERT(findEdge(ali_graph,9,15)!=0)
+	SEQAN_TASSERT(findEdge(ali_graph,10,21)!=0)
+	SEQAN_TASSERT(findEdge(ali_graph,11,22)!=0)
+	SEQAN_TASSERT(findEdge(ali_graph,12,23)!=0)
+	SEQAN_TASSERT(findEdge(ali_graph,13,24)!=0)
+	SEQAN_TASSERT(findEdge(ali_graph,17,22)!=0)
+	SEQAN_TASSERT(findEdge(ali_graph,18,23)!=0)
+	SEQAN_TASSERT(findEdge(ali_graph,19,24)!=0)
+
+
+	//clear(ali_graph);
+	//assignStringSet(ali_graph,seq_set);
+
+	//matchRefinement(alis,seq_set,score_type,ali_graph,StoreEdges());
+	//std::cout << "\nnumEdges: "<<numEdges(ali_graph)<<"\n";
+	//std::cout << "\nnumVertices: "<<numVertices(ali_graph)<<"\n";
+	//std::cout << ali_graph << "\n\n";
+
+
+	//fstream strmW1; // Write the library
+	//strmW1.open(TEST_PATH "my_testlib2alledges.lib", ios_base::out | ios_base::trunc);
+	//write(strmW1,ali_graph,TCoffeeLib());
+	//strmW1.close();
+
+
+}
+
+
+////produce pairwise alignments (Graph<Alignment>)
+//template<typename TAlign, typename TStringSet, typename TScore>
+//void 
+//getGraphAlignments(String<TAlign> & alis, TStringSet & seq, TScore & score_type, int & numAlignments, int cutoff)
+//{
+//
+//	int gesamt = 0;
+//
+//	for(int i = 0; i < length(seq); ++i)
+//	{
+//		for(int j = i+1; j < length(seq); ++j)
+//		{
+//			TStringSet str;
+//			assignValueById(str, seq[i]);
+//			assignValueById(str, seq[j]);
+//			TAlign ali_g(str);
+//
+//			Value<TScore>::Type score = localAlignment(ali_g, score_type, SmithWaterman());
+//			if(score==0)
+//				continue;
+//			appendValue(alis,ali_g);
+//			++gesamt;
+//			int k = 1;
+//			while(k<numAlignments)
+//			{
+//				score = localAlignment(ali_g, score_type, SmithWatermanClump());
+//				if(score==0) break;
+//				appendValue(alis,ali_g);
+//				++gesamt;
+//				++k;
+//			}
+//		}	
+//	}
+//
+//	numAlignments = gesamt;
+//	resize(alis,numAlignments);
+//
+//
+//}
+//
+//
+//
+//
+//void 
+//Test_RefineAlignGraph(){
+//
+//	typedef String<char> TString;
+//	typedef StringSet<TString> TStringSet;
+//	//typedef Align<typename Reference<TStringSet>::Type, ArrayGaps> TAlign;
+//	typedef Graph<Alignment<TStringSet, unsigned int> > TAlign;
+//
+//	int numSequences = 4;
+//
+//	TStringSet seq_set;
+//
+//
+//	TString str = "GARFIELDTHELASTFATCAT";
+//	appendValue(seq_set,str);
+//
+//	str = "GARFIELDTHEFASTCAT";
+//	appendValue(seq_set,str);
+//	
+//	str = "GARFIELDTHEVERYFASTCAT";
+//	appendValue(seq_set,str);
+//	
+//	str = "THEFATCAT";
+//	appendValue(seq_set,str);
+//
+//
+//	int numAlignments = 1;
+//	int numSequencePairs = 0;
+//	int cutoff = 3;
+//	for(int i = 1 ; i < numSequences; ++i) 
+//		numSequencePairs += i;
+//	String<TAlign> alis;
+//	reserve(alis,numSequencePairs*numAlignments);
+//	Score<int> score_type = Score<int>(1,-1,-2,0) ;
+//
+//	getGraphAlignments(alis,seq_set,score_type,numAlignments,cutoff);
+//
+//	typedef Graph<Alignment<TStringSet> > TAliGraph;
+//	//TAliGraph ali_graph;
+//	TAliGraph ali_graph(seq_set);
+//
+//	matchRefinement(alis,seq_set,score_type,ali_graph);
+//
+//	VertexDescriptor<TAliGraph>::Type vd;
+//
+//	vd = findVertex(ali_graph,0,0);
+//	SEQAN_TASSERT(vd == 0)
+//	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 8)
+//	vd = findVertex(ali_graph,0,8);
+//	SEQAN_TASSERT(vd == 1)
+//	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 3)
+//	vd = findVertex(ali_graph,0,11);
+//	SEQAN_TASSERT(vd == 2)
+//	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 3)
+//	vd = findVertex(ali_graph,0,14);
+//	SEQAN_TASSERT(vd == 3)
+//	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 1)
+//	vd = findVertex(ali_graph,0,15);
+//	SEQAN_TASSERT(vd == 4)
+//	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 2)
+//	vd = findVertex(ali_graph,0,17);
+//	SEQAN_TASSERT(vd == 5)
+//	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 1)
+//	vd = findVertex(ali_graph,0,18);
+//	SEQAN_TASSERT(vd == 6)
+//	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 2)
+//	vd = findVertex(ali_graph,0,20);
+//	SEQAN_TASSERT(vd == 7)
+//	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 1)
+//
+//	vd = findVertex(ali_graph,1,0);
+//	SEQAN_TASSERT(vd == 8)
+//	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 0)
+//	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 8)
+//	vd = findVertex(ali_graph,1,8);
+//	SEQAN_TASSERT(vd == 9)
+//	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 8)
+//	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 3)
+//	vd = findVertex(ali_graph,1,11);
+//	SEQAN_TASSERT(vd == 10)
+//	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 11)
+//	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 3)
+//	vd = findVertex(ali_graph,1,14);
+//	SEQAN_TASSERT(vd == 11)
+//	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 14)
+//	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 1)
+//	vd = findVertex(ali_graph,1,15);
+//	SEQAN_TASSERT(vd == 12)
+//	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 15)
+//	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 2)
+//	vd = findVertex(ali_graph,1,17);
+//	SEQAN_TASSERT(vd == 13)
+//	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 17)
+//	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 1)
+//
+//	vd = findVertex(ali_graph,2,0);
+//	SEQAN_TASSERT(vd == 14)
+//	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 0)
+//	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 8)
+//	vd = findVertex(ali_graph,2,8);
+//	SEQAN_TASSERT(vd == 15)
+//	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 8)
+//	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 3)
+//	vd = findVertex(ali_graph,2,11);
+//	SEQAN_TASSERT(vd == 16)
+//	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 11)
+//	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 7)
+//	vd = findVertex(ali_graph,2,18);
+//	SEQAN_TASSERT(vd == 17)
+//	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 18)
+//	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 1)
+//	vd = findVertex(ali_graph,2,19);
+//	SEQAN_TASSERT(vd == 18)
+//	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 19)
+//	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 2)
+//	vd = findVertex(ali_graph,2,21);
+//	SEQAN_TASSERT(vd == 19)
+//	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 21)
+//	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 1)
+//
+//	vd = findVertex(ali_graph,3,0);
+//	SEQAN_TASSERT(vd == 20)
+//	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 0)
+//	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 3)
+//	vd = findVertex(ali_graph,3,3);
+//	SEQAN_TASSERT(vd == 21)
+//	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 3)
+//	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 2)
+//	vd = findVertex(ali_graph,3,5);
+//	SEQAN_TASSERT(vd == 22)
+//	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 5)
+//	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 1)
+//	vd = findVertex(ali_graph,3,6);
+//	SEQAN_TASSERT(vd == 23)
+//	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 6)
+//	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 2)
+//	vd = findVertex(ali_graph,3,8);
+//	SEQAN_TASSERT(vd == 24)
+//	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 8)
+//	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 1)
+//	
+//	SEQAN_TASSERT(findEdge(ali_graph,0,14)!=0)
+//	SEQAN_TASSERT(findEdge(ali_graph,0,8)!=0)
+//	SEQAN_TASSERT(findEdge(ali_graph,1,15)!=0)
+//	SEQAN_TASSERT(findEdge(ali_graph,1,9)!=0)
+//	SEQAN_TASSERT(findEdge(ali_graph,2,10)!=0)
+//	SEQAN_TASSERT(findEdge(ali_graph,3,11)!=0)
+////	SEQAN_TASSERT(findEdge(ali_graph,4,12)!=0)  //doesnt exist if edges with score <= 0 are kicked out
+//	SEQAN_TASSERT(findEdge(ali_graph,4,21)!=0)
+//	SEQAN_TASSERT(findEdge(ali_graph,5,22)!=0)
+//	SEQAN_TASSERT(findEdge(ali_graph,5,13)!=0)
+//	SEQAN_TASSERT(findEdge(ali_graph,6,23)!=0)
+//	SEQAN_TASSERT(findEdge(ali_graph,7,24)!=0)
+//	SEQAN_TASSERT(findEdge(ali_graph,8,14)!=0)
+//	SEQAN_TASSERT(findEdge(ali_graph,9,20)!=0)
+//	SEQAN_TASSERT(findEdge(ali_graph,9,15)!=0)
+//	SEQAN_TASSERT(findEdge(ali_graph,10,21)!=0)
+//	SEQAN_TASSERT(findEdge(ali_graph,11,22)!=0)
+//	SEQAN_TASSERT(findEdge(ali_graph,12,23)!=0)
+//	SEQAN_TASSERT(findEdge(ali_graph,13,24)!=0)
+//	SEQAN_TASSERT(findEdge(ali_graph,17,22)!=0)
+//	SEQAN_TASSERT(findEdge(ali_graph,18,23)!=0)
+//	SEQAN_TASSERT(findEdge(ali_graph,19,24)!=0)
+//
+//
+//}
+
+
+
+
+
+void Test_GraphMatchRefinement() 
+{
+	//test for refinement on Align<TSource,TSpec>
+	Test_RefineAlign();
+	
+	//test for refinement on Graph<Alignment<> >
+	//Test_RefineAlignGraph();
+
+	//test for refinement on Fragment<>
+	Test_GraphMatchRefine();
 }
 
 }
