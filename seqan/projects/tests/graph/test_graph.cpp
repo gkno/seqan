@@ -49,7 +49,7 @@ int main()
 	Test_GraphTCoffee();		// Test T-Coffee
 	Test_GraphMatchRefinement();// Test Match Refinement
 
-	
+
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_base.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_idmanager.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_interface.h");
@@ -74,6 +74,7 @@ int main()
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_utility_alphabets.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_utility_parsing.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_algorithm.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_algorithm_lis_his.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_base.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_gotoh.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_hirschberg.h");

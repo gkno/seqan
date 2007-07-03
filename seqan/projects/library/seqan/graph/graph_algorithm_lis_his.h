@@ -90,7 +90,7 @@ longestIncreasingSubsequence(TString const& str, TPositions& pos) {
 }
 
 template<typename TString, typename TWeightMap, typename TPositions>
-inline void
+inline typename Value<TWeightMap>::Type
 heaviestIncreasingSubsequence(TString const& str, TWeightMap const& weights, TPositions& pos) {
 	SEQAN_CHECKPOINT
 	typedef typename Size<TString>::Type TSize;
@@ -140,17 +140,20 @@ heaviestIncreasingSubsequence(TString const& str, TWeightMap const& weights, TPo
 	}
 
 	// Trace-back
-	if (list.rbegin() == list.rend()) return;
+	TWeight w = 0;
+	if (list.rbegin() == list.rend()) return 0;
 	else {
 		bool finished = false;
 		TVertexDescriptor v = list.rbegin()->second.second;
 		while (!finished) {
 			TOutEdgeIterator it(g, v);
 			appendValue(pos, v);
+			w+=getProperty(weights, v);
 			if (atEnd(it)) finished = true;
 			else v = targetVertex(it);
 		}
 	}
+	return w;
 }
 
 }// namespace SEQAN_NAMESPACE_MAIN
