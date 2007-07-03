@@ -77,10 +77,10 @@
 #include <seqan/graph/graph_utility_alphabets.h>
 #include <seqan/graph/graph_utility_parsing.h>
 #include <seqan/graph/graph_utility_match_parsing.h>
-//#include <seqan/graph/graph_utility_sorted_sequence.h>
 
 // Graph algorithms
 #include <seqan/graph/graph_algorithm.h>
+#include <seqan/graph/graph_algorithm_lis_his.h>
 
 // Refinement
 #include <seqan/graph/graph_impl_interval_types.h>
