@@ -134,7 +134,7 @@ _getOtherSequenceAndProject(Fragment<TFragId,TFragPos,TFragSize,TFragSpec> & seg
 {
 SEQAN_CHECKPOINT
 	seq_i = positionToId(seqs, seq_i);
-	pos_j = getProjectedPosition(segment,seq_i, pos_i);
+	getProjectedPosition(segment,seq_i, pos_i, seq_j, pos_j);
 	
 	if(seq_i == sequenceId(segment,0))
 	{

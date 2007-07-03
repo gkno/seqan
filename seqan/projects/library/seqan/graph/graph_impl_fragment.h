@@ -84,21 +84,27 @@ fragmentLength(Fragment<TId, TPos, TSize, TSpec> const& f,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TId, typename TPos, typename TSize, typename TSpec, typename TVal, typename TPosition>
-inline typename Position<Fragment<TId, TPos, TSize, TSpec> >::Type
+template<typename TId, typename TPos, typename TSize, typename TSpec, typename TId1, typename TPosition1, typename TId2, typename TPosition2>
+inline void
 getProjectedPosition(Fragment<TId, TPos, TSize, TSpec> const& f,
-					 TVal const seqId,
-					 TPosition const pos)
+					 TId1 const seqId,
+					 TPosition1 const pos,
+					 TId2& seqId2,
+					 TPosition2& pos2)
 {
 	SEQAN_CHECKPOINT
 	if ((TId) seqId == f.seqId1) {
-		SEQAN_TASSERT((TPosition)f.begin1<=pos)
+		SEQAN_TASSERT((TPosition1)f.begin1<=pos)
 		SEQAN_TASSERT(pos - f.begin1 < f.len)	
-		return f.begin2 + (pos - f.begin1);
+		pos2 = f.begin2 + (pos - f.begin1);
+		seqId2 = f.seqId2;
+		return;
 	} else {
-		SEQAN_TASSERT((TPosition)f.begin2<=pos)
+		SEQAN_TASSERT((TPosition1)f.begin2<=pos)
 		SEQAN_TASSERT(pos - f.begin2 < f.len)
-		return f.begin1 + (pos - f.begin2);
+		pos2 = f.begin1 + (pos - f.begin2);
+		seqId2 = f.seqId1;
+		return;
 	}
 }
 

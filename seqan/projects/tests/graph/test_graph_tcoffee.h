@@ -681,7 +681,7 @@ void Test_GraphTCoffee() {
 	Test_LongestIncreasingSubsequence();
 
 	//Test_TCoffeeTmp();
-	//Test_TCoffeeGarfield();
+	Test_TCoffeeGarfield();
 	//Test_TCoffeeFromRandomSeq();
 	//Test_TCoffeeFromFile("Z:\\Balibase\\bb3_release\\RV20\\", "BB20001", "tfa");
 	//Test_TCoffeeFromLibrary(); 

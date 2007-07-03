@@ -821,28 +821,46 @@ findVertex(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TStringSet, typename TCargo, typename TSpec, typename TSeqId, typename TPosition> 
-inline typename Position<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type 
+template<typename TStringSet, typename TCargo, typename TSpec, typename TSeqId, typename TPosition, typename TSeqId2, typename TPosition2> 
+inline void
 getProjectedPosition(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-					 TSeqId id,
-					 TPosition pos)
+					 TSeqId const id1,
+					 TPosition const pos1,
+					 TSeqId2& id2,
+					 TPosition2& pos2)
 {
 	SEQAN_CHECKPOINT
+	SEQAN_TASSERT(length(stringSet(g)) == 2);
+
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
 	
-	
-	TVertexDescriptor sV = findVertex(g, id, pos);
+	TStringSet& str = stringSet(g);
+	TVertexDescriptor sV = findVertex(g, id1, pos1);
+	if (sV == getNil<TVertexDescriptor>()) {
+		if ( (TSeqId) positionToId(str, 0) == id1) id2 = (TSeqId2) positionToId(str,1);
+		else id2 = (TSeqId2) positionToId(str,0);
+		pos2 = 0;
+		return;
+	}
 
-	// Take the first Edge!!!
 	TEdgeStump* current = getValue(g.data_align.data_vertex, sV);
 	if(current != (TEdgeStump*) 0) {
 		TVertexDescriptor tV = target(current);
 		if (tV == sV) tV = source(current);
-		return (fragmentBegin(g,tV) + (pos - fragmentBegin(g, sV)));
+		pos2 = (TPosition2) (fragmentBegin(g,tV) + (pos1 - fragmentBegin(g, sV)));
+		id2 = (TSeqId2) sequenceId(g, tV);
+		return;
+	} else {
+		if (fragmentBegin(g, sV) == 0) {
+			getProjectedPosition(g, id1, fragmentBegin(g,sV) + fragmentLength(g, sV), id2, pos2);
+			return;
+		} else {
+			getProjectedPosition(g, id1, fragmentBegin(g,sV) - 1, id2, pos2);
+			return;
+		}
 	}
-	return 0;
 }
 
 //////////////////////////////////////////////////////////////////////////////

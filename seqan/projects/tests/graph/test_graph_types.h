@@ -82,10 +82,10 @@ void Test_Directed() {
 	write(strm,g,DotDrawing());
 	strm.close();
 	//// File read
-	StandardGraph gTmp;
-	strm.open(TEST_PATH "my_graph.dot", ios_base::in);
-	read(strm,gTmp,DotDrawing());
-	strm.close();
+	//StandardGraph gTmp;
+	//strm.open(TEST_PATH "my_graph.dot", ios_base::in);
+	//read(strm,gTmp,DotDrawing());
+	//strm.close();
 
 	removeEdge(g,4,3);
 	addEdge(g,0,0);
@@ -336,11 +336,11 @@ void Test_Undirected() {
 	strm.open(TEST_PATH "my_undirected_graph.dot", ios_base::out | ios_base::trunc);
 	write(strm,g,DotDrawing());
 	strm.close();
-	// File read
-	StandardGraph gTmp;
-	strm.open(TEST_PATH "my_undirected_graph.dot", ios_base::in);
-	read(strm,gTmp,DotDrawing());
-	strm.close();
+	//// File read
+	//StandardGraph gTmp;
+	//strm.open(TEST_PATH "my_undirected_graph.dot", ios_base::in);
+	//read(strm,gTmp,DotDrawing());
+	//strm.close();
 
 	// Remove edges
 	removeEdge(g,my_edge);
@@ -692,11 +692,11 @@ void Test_Automaton() {
 	strm.open(TEST_PATH "my_automaton.dot", ios_base::out | ios_base::trunc);
 	write(strm,g,DotDrawing());
 	strm.close();
-	// File read
-	StandardAutomaton gTmp;
-	strm.open(TEST_PATH "my_automaton.dot", ios_base::in);
-	read(strm,gTmp,DotDrawing());
-	strm.close();
+	//// File read
+	//StandardAutomaton gTmp;
+	//strm.open(TEST_PATH "my_automaton.dot", ios_base::in);
+	//read(strm,gTmp,DotDrawing());
+	//strm.close();
 
 	// Remove edges
 	removeEdge(g,3,1,'c');
@@ -1090,11 +1090,11 @@ void Test_WordGraph() {
 	strm.open(TEST_PATH "my_wordgraph.dot", ios_base::out | ios_base::trunc);
 	write(strm,g,DotDrawing());
 	strm.close();
-	// File read
-	TWordGraph gTmp;
-	strm.open(TEST_PATH "my_wordgraph.dot", ios_base::in);
-	read(strm,gTmp,DotDrawing());
-	strm.close();
+	//// File read
+	//TWordGraph gTmp;
+	//strm.open(TEST_PATH "my_wordgraph.dot", ios_base::in);
+	//read(strm,gTmp,DotDrawing());
+	//strm.close();
 
 	assignRoot(g,2);
 	TWordGraph g_tmp(g);
@@ -1175,11 +1175,11 @@ void Test_Tree() {
 	strm.open(TEST_PATH "my_tree.dot", ios_base::out | ios_base::trunc);
 	write(strm,g,DotDrawing());
 	strm.close();
-	// File read
-	TTree gTmp;
-	strm.open(TEST_PATH "my_tree.dot", ios_base::in);
-	read(strm,gTmp,DotDrawing());
-	strm.close();
+	//// File read
+	//TTree gTmp;
+	//strm.open(TEST_PATH "my_tree.dot", ios_base::in);
+	//read(strm,gTmp,DotDrawing());
+	//strm.close();
 
 	SEQAN_TASSERT(g.data_parent[0]==getNil<TVertexDescriptor>())
 	SEQAN_TASSERT(g.data_parent[1]==0)
@@ -1841,6 +1841,7 @@ void Test_Fragment() {
 	typedef Graph<Alignment<TStringSet, void> > TGraph;
 	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef	Id<TStringSet>::Type TId;
+	typedef	Size<TStringSet>::Type TSize;
 	
 	TStringSet str;
 	TString str0("annual");	assignValueById(str, str0);
@@ -1861,8 +1862,14 @@ void Test_Fragment() {
 	SEQAN_TASSERT(sequenceId(f, 1) == 1)
 	SEQAN_TASSERT(label(f, str, 0) == "al")
 	SEQAN_TASSERT(label(f, str, 1) == "al")
-	SEQAN_TASSERT(getProjectedPosition(f, 0, 5) == 5)
-	SEQAN_TASSERT(getProjectedPosition(f, 1, 5) == 5)
+	TId id2;
+	TSize pos2;
+	getProjectedPosition(f, 0, 5, id2, pos2);
+	SEQAN_TASSERT(pos2 == 5)
+	SEQAN_TASSERT(id2 == 1)
+	getProjectedPosition(f, 1, 5, id2, pos2);
+	SEQAN_TASSERT(pos2 == 5)
+	SEQAN_TASSERT(id2 == 0)
 
 	// Fragment: SeqId1, Begin1, SeqId2, Begin2, Length of Fragment
 	Fragment<> f2(0,0,1,4,1);
@@ -1877,13 +1884,18 @@ void Test_Fragment() {
 	SEQAN_TASSERT(fragmentLength(f2, 1) == 1)
 	SEQAN_TASSERT(label(f2, str, 0) == "a")
 	SEQAN_TASSERT(label(f2, str, 1) == "a")
-	SEQAN_TASSERT(getProjectedPosition(f2, 0, 0) == 4)
-	SEQAN_TASSERT(getProjectedPosition(f2, 1, 4) == 0)
+	getProjectedPosition(f2, 0, 0, id2, pos2);
+	SEQAN_TASSERT(pos2 == 4)
+	SEQAN_TASSERT(id2 == 1)
+	getProjectedPosition(f2, 1, 4, id2, pos2);
+	SEQAN_TASSERT(pos2 == 0)
+	SEQAN_TASSERT(id2 == 0)
 
 	// The same stuff on an alignment graph
 	TGraph g(str);
 	TVertexDescriptor vert1 = addVertex(g,0,4,2);
 	TVertexDescriptor vert2 = addVertex(g,1,4,2);
+	addVertex(g,0,0,4);
 	addEdge(g, vert1, vert2);
 	SEQAN_TASSERT(fragmentBegin(g, vert1) == 4)
 	SEQAN_TASSERT(fragmentBegin(g, vert2) == 4)
@@ -1893,21 +1905,44 @@ void Test_Fragment() {
 	SEQAN_TASSERT(sequenceId(f, vert2) == 1)
 	SEQAN_TASSERT(label(g, vert1) == "al")
 	SEQAN_TASSERT(label(g, vert2) == "al")
-	SEQAN_TASSERT(getProjectedPosition(g, 0, 5) == 5)
-	SEQAN_TASSERT(getProjectedPosition(g, 1, 5) == 5)
+	getProjectedPosition(g, 0, 5, id2, pos2);
+	SEQAN_TASSERT(pos2 == 5)
+	SEQAN_TASSERT(id2 == 1)
+	getProjectedPosition(g, 1, 5, id2, pos2);
+	SEQAN_TASSERT(pos2 == 5)
+	SEQAN_TASSERT(id2 == 0)
+	getProjectedPosition(g, 0, 3, id2, pos2);
+	SEQAN_TASSERT(pos2 == 4)
+	SEQAN_TASSERT(id2 == 1)
+	getProjectedPosition(g, 1, 3, id2, pos2);
+	SEQAN_TASSERT(pos2 == 0)
+	SEQAN_TASSERT(id2 == 0)
 
 	TGraph g2(str);
 	TVertexDescriptor v1 = addVertex(g2,0,0,1);
 	TVertexDescriptor v2 = addVertex(g2,1,4,1);
+	SEQAN_TASSERT(findVertex(g2, 0, 0) == 0)
+	TVertexDescriptor v3 = addVertex(g2,0,5,1);
+	TVertexDescriptor v4 = addVertex(g2,1,5,1);
 	addEdge(g2, v1, v2);
+	addEdge(g2, v3, v4);
+	addVertex(g2,0,1,4);
+	SEQAN_TASSERT(findVertex(g2, 0, 0) == 0)
 	SEQAN_TASSERT(fragmentBegin(g2, v1) == 0)
 	SEQAN_TASSERT(fragmentBegin(g2, v2) == 4)
 	SEQAN_TASSERT(fragmentLength(g2, v1) == 1)
 	SEQAN_TASSERT(fragmentLength(g2, v2) == 1)
 	SEQAN_TASSERT(label(g2, v1) == "a")
 	SEQAN_TASSERT(label(g2, v2) == "a")
-	SEQAN_TASSERT(getProjectedPosition(g2, 0, 0) == 4)
-	SEQAN_TASSERT(getProjectedPosition(g2, 1, 4) == 0)
+	getProjectedPosition(g2, 0, 0, id2, pos2);
+	SEQAN_TASSERT(pos2 == 4)
+	SEQAN_TASSERT(id2 == 1)
+	getProjectedPosition(g2, 1, 4, id2, pos2);
+	SEQAN_TASSERT(pos2 == 0)
+	SEQAN_TASSERT(id2 == 0)
+	getProjectedPosition(g2, 0, 3, id2, pos2);
+	SEQAN_TASSERT(pos2 == 4)
+	SEQAN_TASSERT(id2 == 1)
 }
 
 
