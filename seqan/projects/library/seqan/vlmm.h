@@ -93,6 +93,7 @@ class Iter< TIndex, VSTree< TopDown< ParentLinks<ConstrainedTraversal<TSpec> > >
 		typedef String<TStackEntry, Block<> >		TStack;
 		typedef Iter								iterator;
 public:
+	TStack			history;	// contains all previously visited intervals (allows to go up)
 	// although both variables are hold by the iterator
 	// actually either one of them is used during traversal
 	// indicated by the specialization Absolute or Relative
@@ -102,16 +103,17 @@ public:
 	bool	 Down;
 	unsigned Up;
 
+	
 	Iter(TIndex &__index):
 		TBase(__index){}
 
 	// use constructor for an absolute threshold
 	Iter(TIndex &__index,unsigned threshold,unsigned maxdepth):
-		TBase(__index),AbsoluteThreshold(threshold),RelativeThreshold(0.0),Down(false),Up(0),MaxDepth(maxdepth){}
+		TBase(__index),AbsoluteThreshold(threshold),RelativeThreshold(0.0),MaxDepth(maxdepth),Down(false),Up(0){}
 
 	// use constructor for a relative threshold
 	Iter(TIndex &__index,float threshold,unsigned maxdepth):
-		TBase(__index),AbsoluteThreshold(0),RelativeThreshold(threshold),Down(false),Up(0),MaxDepth(maxdepth){}
+		TBase(__index),AbsoluteThreshold(0),RelativeThreshold(threshold),MaxDepth(maxdepth),Down(false),Up(0){}
 
 		// brauch man die überhaupt
 		Iter(Iter const &_origin):
@@ -124,8 +126,6 @@ public:
 		{
 			push(history, value(_origin.i1));
 		}
-
-
 
 
 };
@@ -262,7 +262,7 @@ inline void goNext(Iter< Index<TText, TSpec>, VSTree< TopDown< ParentLinks<Const
 	// note: that we do not enforce that the tree is balanced
 
 	if(repLength(it) < it.MaxDepth){
-		if((getFrequency(it)) >= it.AbsoluteThreshold) 
+		if((unsigned)(getFrequency(it)) >= it.AbsoluteThreshold) 
 			walk_down = 1;
 	}
 
@@ -300,7 +300,7 @@ inline void goNext(Iter< Index<TText, TSpec>, VSTree< TopDown< ParentLinks<Const
 			if (!goRight(it))
 				while (goUp(it) && !goRight(it));
 		
-		if( getFrequency(it) >= it.AbsoluteThreshold){
+		if( (unsigned)getFrequency(it) >= it.AbsoluteThreshold){
 			not_finished = 0;
 			// we have to check if the current node can be extended with at least one letter if the following
 			// condition is true:
@@ -652,7 +652,7 @@ initGraph(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > > >& vlmm,
 	resize(vlmm.data_marked,size,Exact());
 	resize(vlmm.data_id_managerV.data_in_use,size,Exact());
 	resize(vlmm.data_probability_vector,size,Exact());
-	for(int i = 0;i<size;++i){
+	for(TSize i = 0;i<size;++i){
 		TVertexDescriptor dummy = i;
 		assignValue(vlmm.data_id_managerV.data_in_use, dummy, false);
 		setFather(vlmm,nilVal,dummy);
@@ -783,7 +783,7 @@ getReverseSuffixLinkCharacter(Graph<Automaton<TAlphabet, TCargo , WordGraph < VL
 {
 	typedef typename Size<TAlphabet>::Type TSize;
 	TSize table_length = ValueSize<TAlphabet>::VALUE;
-	int i;
+	TSize i;
 	for(i=0;i<table_length;++i){
 		if(getReverseSuffixLink(vlmm,SLfather,i) == SLchild)
 			return((TAlphabet)i);
@@ -1171,8 +1171,8 @@ splitEdge(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > > > & vlmm,
 	//std::cout<<"after node created, NumVertc:"<<numVertices(vlmm)<<std::endl;
 	String<TAlphabet> newEdgeString = childCharacter;
 		//cout << "eedestring:"<<edgeString<<" length: "<<length(edgeString)<<endl;
-	SEQAN_ASSERT(splitPosition < length(edgeString))
-	if(splitPosition >= length(edgeString)){
+	SEQAN_ASSERT(splitPosition < (TPos)length(edgeString))
+	if(splitPosition >= (TPos)length(edgeString)){
 		std::cout<<"splitPosition >= edgeString"<<std::endl;
 		exit(1);
 	
@@ -1845,7 +1845,7 @@ deleteProbabilityVector( Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < 
 {
 	typedef typename Size<TAlphabet>::Type TSize;
 	TSize table_length = ValueSize<TAlphabet>::VALUE;
-	for(int i=0;i<table_length;i++)
+	for(TSize i=0;i<table_length;i++)
 	{
 		setProbability(vlmm,trashNode,i,0);
 	}
@@ -2098,7 +2098,8 @@ estimateLikelihood( Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TVLMM
 					String<TAlphabet> &text )
 {
 	float result = 0;
-	Iterator<String<TAlphabet> >::Type it = begin(text);
+	typedef typename Iterator<String<TAlphabet> >::Type TIter;
+	TIter it = begin(text);
 
 	for(goBegin(it);!atEnd(it);goNext(it))
 	{
@@ -2119,11 +2120,12 @@ estimateLikelihoodWindow( Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM <
 	if(length(text)<windowSize)
 		return (float)0;
 	float best,result = 0;
-	Iterator<String<TAlphabet> >::Type windowEnd = begin(text),windowStart = begin(text);
+	typedef typename Iterator<String<TAlphabet> >::Type TIter;
+	TIter windowEnd = begin(text),windowStart = begin(text);
 	goBegin(windowEnd);
 	goBegin(windowStart);
 	
-	for(int i = 0;i<windowSize;++i,goNext(windowEnd))
+	for(unsigned i = 0;i<windowSize;++i,goNext(windowEnd))
 			result += log(getProbabilityForLongestContext(vlmm,windowEnd));
 	goNext(windowEnd);
 	best = result;
@@ -2233,7 +2235,7 @@ saveNode(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TVLMMSpec > > > 
 	_streamPut(target, '\t');
 //Childrens with label
 	
-	for(int i = 0;i<ValueSize<TAlphabet>::VALUE;++i) {
+	for(TSize i = 0;i<table_length;++i) {
 			TVertexDescriptor child = vlmm.data_vertex[node].data_edge[i].data_target;
 			_streamPutInt(target,(unsigned )child);
 			_streamPut(target, '\t');
@@ -2247,19 +2249,19 @@ saveNode(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TVLMMSpec > > > 
 	
 	}
 	// Probability vector
-		for(int i = 0;i<ValueSize<TAlphabet>::VALUE;++i){
+		for(TSize i = 0;i<table_length;++i){
 				_streamPutFloat(target,getProbability(vlmm,node,i));
 				_streamPut(target,'\t');
 		}
 
 //ReverseSuffixLinks
 	
-		for(int i = 0;i< (ValueSize<TAlphabet>::VALUE-1) ;++i){
+		for(TSize i = 0;i< (table_length-1) ;++i){
 				_streamPutInt(target,getReverseSuffixLink(vlmm,node,i));
 				_streamPut(target,'\t');
 		}
 		// last entry should not end with a '\t' instead with a  '\n'
-		_streamPutInt(target,getReverseSuffixLink(vlmm,node,ValueSize<TAlphabet>::VALUE-1));
+		_streamPutInt(target,getReverseSuffixLink(vlmm,node,table_length-1));
 		
 }
 
@@ -2289,10 +2291,6 @@ SEQAN_CHECKPOINT
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	typedef typename EdgeType<TGraph>::Type TEdge;
-	typedef typename Size<TAlphabet>::Type TSize;
-	TSize table_length = ValueSize<TAlphabet>::VALUE;
-	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
-
 	typedef typename Iterator<String<AutomatonEdgeArray<TEdge, TAlphabet> > >::Type TIterConst;
 
 	writeHead(vlmm,target);
@@ -2412,7 +2410,7 @@ readGraph(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < ContextTree > >
 	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
 	typedef typename Iterator<String<AutomatonEdgeArray<TEdge, TAlphabet> > >::Type TIterConst;
 
-	unsigned size = _scanNextIntEntry(file);
+	unsigned size = (unsigned)_scanNextIntEntry(file);
 	cout <<"size= "<<size<<endl;
 	//init the vlmm
 	initGraph(vlmm,size);
@@ -2420,12 +2418,12 @@ readGraph(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < ContextTree > >
 	//_removeTailingNewlines(file);
 	// go for every node
 	do{
-		TVertexDescriptor node = _scanNextIntEntry(file);
+		TVertexDescriptor node = (unsigned)_scanNextIntEntry(file);
 		assignValue(vlmm.data_id_managerV.data_in_use, node, true);
-		TVertexDescriptor father = _scanNextIntEntry(file);
+		TVertexDescriptor father = (unsigned)_scanNextIntEntry(file);
 		if(node != getRoot(vlmm))
 				setFather(vlmm,father,node);
-		TVertexDescriptor suffixLink = _scanNextIntEntry(file);
+		TVertexDescriptor suffixLink = (unsigned)_scanNextIntEntry(file);
 		if(suffixLink != nilVal)
 				setSuffixLink(vlmm,node,suffixLink);
 		int yes = _scanNextIntEntry(file);
@@ -2433,9 +2431,9 @@ readGraph(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < ContextTree > >
 			setMarked(vlmm,node,true);
 		cout <<"node:" << node<< " father:  "<< father<< " suffixLinkTarget: "<<suffixLink<< " Marked?: "<<yes<<endl;
 
-		for(int i =0;i<table_length;++i)
+		for(TSize i =0;i<table_length;++i)
 		{
-			TVertexDescriptor child = _scanNextIntEntry(file);
+			TVertexDescriptor child = (unsigned)_scanNextIntEntry(file);
 			if( child  != nilVal)
 			{	
 				//set child true for function adEdge
@@ -2449,16 +2447,16 @@ readGraph(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < ContextTree > >
 
 		}
 		
-		for(int i =0;i<table_length;++i)
+		for(TSize i =0;i<table_length;++i)
 		{
 			float set = _scanNextFloatEntry(file);
 			cout << "float: "<<set;
 			setProbability(vlmm,node,i,set);
 		}
 		cout <<endl;
-		for(int i =0;i<table_length;++i)
+		for(TSize i =0;i<table_length;++i)
 		{
-			TVertexDescriptor target = _scanNextIntEntry(file);
+			TVertexDescriptor target = (unsigned)_scanNextIntEntry(file);
 			if( target  != nilVal)
 			{	
 				//set child true for function addEdge
@@ -2466,7 +2464,7 @@ readGraph(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < ContextTree > >
 				cout << "reverseSL to node:"<<target<< " is:" <<(TAlphabet)i<<endl;
 			}
 		}
-		int dummy = _scanNextIntEntry(file);
+		_scanNextIntEntry(file);
 	} while(!_streamEOF(file));
     
 	for(TIterConst it = begin(vlmm.data_vertex);!atEnd(it);goNext(it)) {
