@@ -18,8 +18,8 @@ using namespace seqan;
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TScore1, typename TScore2>
-void testCompareAAMatrices(TScore1 & mat1, 
-						   TScore2 & mat2)
+void testCompareAAMatrices(TScore1 const & mat1, 
+						   TScore2 const & mat2)
 {
 	AminoAcid a, b;
 	for (a = 'A'; a <= '*'; ++a)
@@ -36,8 +36,6 @@ void testMatrixScore()
 	Score<int, ScoreMatrix<> > sc;
 	String<char> meta;
 	loadScoreMatrix(sc, TEST_PATH "BLOSUM62", meta);
-
-//	write(cout, Blosum62()); //does it work with a temporary?
 
 	//compare the matrix loaded from file with the build-in matrix
 	Blosum62 blosum62;
