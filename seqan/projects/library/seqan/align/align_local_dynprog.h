@@ -522,7 +522,7 @@ SEQAN_CHECKPOINT
 			TScoreValue h = *it_;
 
 			gv = (v >= h) | (d >= h);
-			gh = (h >= v) | (d >= v);
+			gh = (h >  v) | (d >= v);
 		}
 
 		if (gv)
