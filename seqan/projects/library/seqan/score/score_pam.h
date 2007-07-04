@@ -15,27 +15,28 @@ namespace SEQAN_NAMESPACE_MAIN
 .Spec.Pam:
 ..summary:Pam scoring matrices.
 ..general:Class.Score
-..signature:Score<TValue, Pam<TSequenceValue, TSource> >
+..signature:Score<TValue, Pam<TSequenceValue, TSpec> >
 ..param.TValue:Type of the score values.
 ...default:$int$
 ..param.TSequenceValue:Type of alphabet underlying the matrix.
 ...default:$AminoAcid$
-..param.TSource:Origin of starting data underlying the pam matrix computation. The starting data are the mutation probability matrix and the frequencies of occurence of each identifier.
+..param.TSpec:Origin of starting data underlying the pam matrix computation. The starting data are the mutation probability matrix and the frequencies of occurence of each identifier.
 ...default:$Pam_Data_Dayhoff_MDM78$
 ...value:$Pam_Data_Dayhoff_MDM78$, $Pam_Data_Jones_PRI29$, $Pam_Data_Jones_PET91_SWISS15$, $Pam_Data_Jones_PET91_SWISS22$, $Pam_Data_Jones_All_Membrane$, $Pam_Data_Jones_Single_Membrane$, $Pam_Data_Jones_Multi_Membrane$
 ..remarks.text:This class computes pam matrices for arbitrary alphabets and starting values. The computation precedure includes extrapolation of the MDM (Mutation Probability Matrix) to the desired evolutionary distance in units of 1 PAM, 
 computation of the odds scores and the construction of the symmetric and scaled logarithms of odds matrix.	The odds scores thereby represent the chance of a relationship between the observed amino acids at each position versus the chance of coincidental pairing.
 If integer scores are produced, each value is rounded separately.
 .
-.Function.buildPam.param._score.type:Class.Score
-.Function.score.param._score.type:Class.Score
-.Function.scoreGapExtend.param._score.type:Class.Score
-.Function.scoreGapOpen.param._score.type:Class.Score
-.Function.getScale.param._score.type:Class.Score
-.Function.getDist.param._score.type:Class.Score
-.Function.getEntropy.param._score.type:Class.Score
-.Function.getPamProperties.param._score.type:Class.Score
-.Function.showPamMatrix.param._score.type:Class.Score
+.Function.buildPam.param._score.type:Spec.Pam
+.Function.score.param._score.type:Spec.Pam
+.Function.scoreGapExtend.param._score.type:Spec.Pam
+.Function.scoreGapOpen.param._score.type:Spec.Pam
+.Function.getScale.param._score.type:Spec.Pam
+.Function.getDist.param._score.type:Spec.Pam
+.Function.getEntropy.param._score.type:Spec.Pam
+.Function.write.param.data.type:Spec.Pam
+.Internal.getPamProperties.param._score.type:Class.Score
+.Internal.showPamMatrix.param._score.type:Class.Score
 .Internal._setDist.param._score.type:Class.Score
 .Internal._setScale.param._score.type:Class.Score
 .Internal._getDataPam.param._score.type:Class.Score
@@ -62,7 +63,7 @@ template <typename TValue, typename TSequenceValue, typename TSource>
 
  {										
 
-private:
+public:
 	int dist;					// desired PAM distance
 	double scaling_factor;		// scale of logarithm of odds matrix
 	double entropy;				// information content of final PAM matrix
@@ -339,6 +340,10 @@ public:
 ..param.H:Is assigned to the member attribute $entropy$.
 ...type:double
 */
+
+
+
+/*
 	friend inline void
 		getPamProperties(Score & _score){
 			 int dist = getDist(_score);
@@ -357,15 +362,16 @@ public:
 
 		}
 
-
-/**
+*/
+/*DISABLED
 .Function.getPamProperties:
 ..class:Class.Score
 ..summary:Prints out the properties of the scoring matrix currently contained in "_score". These properties are distance, scaling factor and entropy.
 ..signature:getPamProperties(& _score)
 ..signature:getPamProperties(const & _score)
 ..param._score:Score class instance containing scoring matrix as a member.
-*/ 	 
+*/ 
+/*
 	friend inline void
 		 showPamMatrix(Score & _score){
 			 TValue * adr = _getDataPam(_score);
@@ -377,11 +383,6 @@ public:
 			 }
 		}
 
-
-
-
-
-
  	 friend inline void
 		 showPamMatrix(Score const & _score){
 			 TValue * adr = _getDataPam(_score);
@@ -392,8 +393,9 @@ public:
 				 cout << "\n";
 			 }
 		}
+*/
 
-/**
+/*DISABLED, use write(.) instead
 .Function.showPamMatrix:
 ..class:Class.Score
 ..summary:Prints out PAM matrix on display.
@@ -472,7 +474,10 @@ void _extrapolatePam (_TempMembersPam<TValue, TSequenceValue> & _member, Score<T
 	
 	SEQAN_CHECKPOINT
 	// extrapolate matrix to distance between 2 and 512
-	const int dim = _member.dim;
+	enum 
+	{
+		dim = ValueSize<TSequenceValue>::VALUE
+	};
 	int _dist = getDist(_score);
 	 SEQAN_TASSERT2( (_dist>2) && (_dist < 512), "Distance must be between 2 and 512 for protein comparisons!")
 	
@@ -604,8 +609,8 @@ void _computeLogOddsPam(_TempMembersPam<TValue, TSequenceValue> & _member){
 	double log_numerator = 1.; double log_denominator = 1.;
 	for (int i=0; i<dim-2 ; i++){
 			for (int j=0; j<dim-2 ; j++){
-				log_numerator = log(_member.trans_prob[i][j]); 
-				log_denominator = log(_member.single_prob[i]);
+				log_numerator = std::log(_member.trans_prob[i][j]); 
+				log_denominator = std::log(_member.single_prob[i]);
 				_member.log_prob[i][j] = (log_numerator - log_denominator);
 			}
 		}
@@ -791,7 +796,7 @@ void _computeEntropyPam(Score<TValue, Pam<TSequenceValue, TSource> > & _score , 
 			H += _member.single_prob[i]* _member.trans_prob[i][j] * _member.log_prob[i][j];		}
 	}
 	// Divide entropy by log(2) to give information in units of bits:
-	_setEntropy(_score, H/log(2.));
+	_setEntropy(_score, H/std::log(2.));
 	//____________________________________________________________________________
 
 }
@@ -826,7 +831,7 @@ void _computeEntropyPam(Score<TValue, Pam<AminoAcid, TSource> > & _score , _Temp
 		}
 	}
 	// Divide entropy by log(2) to give information in units of bits:
-	_setEntropy(_score, H/log(2.));	
+	_setEntropy(_score, H/std::log(2.));	
 
 	//____________________________________________________________________________
 
@@ -853,7 +858,7 @@ void _computePamScale(Score<TValue, Pam<TSequenceValue, TSource> > & _score) {
 	else if (dist >= 262) {numerator = 4.;}
 	else if (dist >= 170) {numerator = 3.;}
 	else if (dist >= 1) {numerator = 2.;}
-	_setScale(_score, numerator/log(2.));
+	_setScale(_score, numerator/std::log(2.));
 
 	//____________________________________________________________________________
 
@@ -880,10 +885,31 @@ int roundConvert(TSource to_round, Score<int, TSequenceValue>){
 
 
 
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 
 
 
+template <typename TFile, typename TValue, typename TSequenceValue, typename TSpec, typename TMeta>
+void
+write(TFile & fl,
+	  Score<TValue, Pam<TSequenceValue, TSpec> > & sc,
+	  TMeta & meta)
+{
+	_writeScoringMatrix<TSequenceValue>(fl, _getDataPam(sc), meta);
+}
 
+template <typename TFile, typename TValue, typename TSequenceValue, typename TSpec>
+void
+write(TFile & fl,
+	  Score<TValue, Pam<TSequenceValue, TSpec> > & sc)
+{
+	char meta[100];
+	sprintf(meta, " PAM %i substitution matrix\n\n Scaling: %f\n Entropy: %f\n\n", getDist(sc), getScale(sc), getEntropy(sc));
+	write(fl, sc, meta);
+}
+
+//////////////////////////////////////////////////////////////////////////////
 
 
 }// namespace SEQAN_NAMESPACE_MAIN

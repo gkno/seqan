@@ -10,6 +10,7 @@
 #include <list>
 #include <vector>
 #include <map>
+#include <cmath>
 
 #include <seqan/sequence.h>
 

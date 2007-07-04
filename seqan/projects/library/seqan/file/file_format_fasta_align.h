@@ -1,8 +1,6 @@
 #ifndef SEQAN_HEADER_FILE_FASTA_ALIGN_H
 #define SEQAN_HEADER_FILE_FASTA_ALIGN_H
 
-#include <seqan/align.h>
-
 namespace SEQAN_NAMESPACE_MAIN
 {
 
@@ -10,6 +8,14 @@ namespace SEQAN_NAMESPACE_MAIN
 // File Formats - Fasta alignment format
 //////////////////////////////////////////////////////////////////////////////
 
+//forward declarations
+template <typename T>
+struct Row;
+
+template <typename T>
+struct Rows;
+
+//////////////////////////////////////////////////////////////////////////////
 
 /**
 .Tag.File Format.value.Fasta alignment:
@@ -38,7 +44,6 @@ void _fasta_align_scan_line(TFile & file, TSize & count) {
 		}
 	}
 }
-
 
 //////////////////////////////////////////////////////////////////////////////
 // read

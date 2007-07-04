@@ -756,6 +756,54 @@ SEQAN_CHECKPOINT
 	return convert<TValue>(left_) >= convert<TValue>(right_);
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename _T, typename TSpec> 
+inline
+bool lexLess(SimpleType<_T, TSpec> const &_Left, SimpleType<_T, TSpec> const &_Right)
+{	// return lexicographical _Left < _Right
+    return 
+        reinterpret_cast<typename _MakeUnsigned<_T>::Type const&>(_Left) <
+        reinterpret_cast<typename _MakeUnsigned<_T>::Type const&>(_Right);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TValue, typename TSpec>
+inline SimpleType<TValue, TSpec> &
+operator ++ (SimpleType<TValue, TSpec> & me)
+{
+	++me.value;
+	return me;
+}
+template <typename TValue, typename TSpec>
+inline SimpleType<TValue, TSpec> &
+operator ++ (SimpleType<TValue, TSpec> & me,
+			 int)
+{
+	SimpleType<TValue, TSpec> dummy = me;
+	++me.value;
+	return dummy;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TValue, typename TSpec>
+inline SimpleType<TValue, TSpec> &
+operator -- (SimpleType<TValue, TSpec> & me)
+{
+	--me.value;
+	return me;
+}
+template <typename TValue, typename TSpec>
+inline SimpleType<TValue, TSpec> &
+operator -- (SimpleType<TValue, TSpec> & me,
+			 int)
+{
+	SimpleType<TValue, TSpec> dummy = me;
+	--me.value;
+	return dummy;
+}
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
@@ -1057,15 +1105,7 @@ SEQAN_CHECKPOINT
 }
 
 //////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
 
-template<typename _T, typename TSpec> inline
-bool lexLess(SimpleType<_T, TSpec> const &_Left, SimpleType<_T, TSpec> const &_Right)
-{	// return lexicographical _Left < _Right
-    return 
-        reinterpret_cast<typename _MakeUnsigned<_T>::Type const&>(_Left) <
-        reinterpret_cast<typename _MakeUnsigned<_T>::Type const&>(_Right);
-}
 
 //////////////////////////////////////////////////////////////////////////////
 }// namespace SEQAN_NAMESPACE_MAIN
