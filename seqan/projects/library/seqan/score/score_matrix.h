@@ -7,15 +7,7 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TValue, typename TSequenceValue, typename TSpec>
-struct _ScoringMatrixData
-{
-	enum
-	{
-		VALUE_SIZE = ValueSize<TSequenceValue>::VALUE,
-		TAB_SIZE = VALUE_SIZE * VALUE_SIZE
-	};
-    static TValue DATA[TAB_SIZE];
-};
+struct _ScoringMatrixData;
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -111,7 +103,7 @@ setDefaultScoreMatrix(Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > & sc,
 					  TTag)
 {
 	typedef Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > TScore;
-	TValue * tab = _ScoringMatrixData<TValue, TSequenceValue, TTag>::DATA;
+	TValue const * tab = _ScoringMatrixData<TValue, TSequenceValue, TTag>::getData();
 	arrayCopy(tab, tab + TScore::TAB_SIZE, sc.data_tab);
 }
 template <typename TValue, typename TSequenceValue, typename TSpec>
