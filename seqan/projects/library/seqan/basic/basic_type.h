@@ -200,7 +200,6 @@ struct Spec<T const>:
 ..param.T:Type for which the deepest spec is determined.
 ..returns.param.Type:Deepest spec of $T$.
 ..remarks:The spec of a SeqAn type is the innermost class that is used in nested subclassing.
- to specify the specialization. 
  For example, the deepest spec of $Iter<..., VSTree<BottomUp<MUMs> > >$ is $MUMs$.
 */
 
