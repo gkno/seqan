@@ -929,7 +929,8 @@ buildSuffixTreeFromIndex(Iter<TIndex, VSTree< TopDown< ParentLinks<ConstrainedTr
 		
 		child = addIncompleteVertex(target);
 		// check if iterator
-		std::cout << "Node:"<<child<<"  "<<value(it) << " = " << repLength(it)<< " " << representative(it) << "  toFather:"<<parentEdgeLabel(it)<<"  hits: "<<length(getOccurences(it))<<std::endl;
+		//cout << "Node:"<<child<<"  "<<value(it) << " = " << repLength(it)<< " " << representative(it) << "  toFather:"<<parentEdgeLabel(it)<<"  hits: "<<length(getOccurences(it))<<std::endl;
+		//DAVIDDEBUGcout <<  " " << representative(it) <<endl;  
 		
 		setFather(target,father,child);
 		unsigned diff = 1;
@@ -1431,6 +1432,9 @@ pruneNode(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < ContextTree > >
 
  return false;
 }
+
+
+
 
 template<typename TCargo,typename TAlphabet ,typename TVertexDescriptor>
 inline bool
@@ -2084,6 +2088,12 @@ buildPST(Index<TIndexType, Index_ESA<> > & index,
 	std::cout << "READY!" <<std::endl;
 }
 
+/*******
+
+Training
+
+********/
+
 /**
 *  Likelihood Estimation : works such that the reverse suffix links are walked starting from the root
 *  whenever a node is not marked(or a leaf) is reached the walking down is finished and the deepest possible 
@@ -2129,10 +2139,12 @@ estimateLikelihoodWindow( Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM <
 			result += log(getProbabilityForLongestContext(vlmm,windowEnd));
 	goNext(windowEnd);
 	best = result;
+	cout <<"window score:" <<result<<endl;
 	for(;!atEnd(windowEnd);goNext(windowEnd),goNext(windowStart))
 	{
 		result += -log(getProbabilityForLongestContext(vlmm,windowStart));
 		result += log(getProbabilityForLongestContext(vlmm,windowEnd));
+		cout <<"window score:" <<result<<endl;
 		//cout <<" prob for letter: "<<value(it)<< " is: "<<getProbabilityForLongestContext(vlmm,it)<<endl;
 		if(result > best)
 			best = result;
@@ -2177,16 +2189,42 @@ getProbabilityForLongestContext( Graph<Automaton<TAlphabet, TCargo , WordGraph <
 save the graph
 **************/
 
-template<typename TFile, typename TAlphabet, typename TCargo >
+template<typename TFile, typename TCargo >
 inline void
-writeHead(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < ContextTree > > > > &vlmm,
+writeHead(Graph<Automaton<AminoAcid, TCargo , WordGraph < VLMM < ContextTree > > > > &vlmm,
 	   TFile & target)
 {	
-		_streamWrite(target,"VLMM\tContextTree\tDna\t6");
-		
+		_streamWrite(target,"VLMM\tContextTree\tAminoAcid\t");
+		_streamPutInt(target,numVertices(vlmm));
 }
 
+template<typename TFile, typename TCargo >
+inline void
+writeHead(Graph<Automaton<Dna, TCargo , WordGraph < VLMM < ContextTree > > > > &vlmm,
+	   TFile & target)
+{	
+		_streamWrite(target,"VLMM\tContextTree\tDna\t");
+		_streamPutInt(target,numVertices(vlmm));
+}
 
+template<typename TFile,  typename TCargo >
+inline void
+writeHead(Graph<Automaton<AminoAcid, TCargo , WordGraph < VLMM < BioPST > > > > &vlmm,
+	   TFile & target)
+{	
+	_streamWrite(target,"VLMM\tBio-PST\tAminoAcid\t");
+	_streamPutInt(target,numVertices(vlmm));
+}
+
+template<typename TFile,  typename TCargo >
+inline void
+writeHead(Graph<Automaton<Dna, TCargo , WordGraph < VLMM < BioPST > > > > &vlmm,
+	   TFile & target)
+{	
+	_streamWrite(target,"VLMM\tBio-PST\tDna\t");
+	_streamPutInt(target,numVertices(vlmm));
+		
+}
 
 template <typename TStream>
 inline void
@@ -2279,7 +2317,7 @@ Node\t	Father\t	SuffixLink\t	Marked\t	Children[1 .. N]\t	ChildLabel[1 .. N]\t		P
 */
 
 
-
+// save function where a filehandle has to be created before 
 template<typename TFile, typename TAlphabet, typename TCargo, typename TVLMMSpec>
 inline void
 save(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TVLMMSpec > > > > &vlmm,
@@ -2301,6 +2339,34 @@ SEQAN_CHECKPOINT
 	}
 
 
+
+}
+// save function where a filehandle is created for the filename
+template<typename TFile, typename TAlphabet, typename TCargo, typename TVLMMSpec>
+inline void
+save(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TVLMMSpec > > > > &vlmm,
+	   String<char> & filename)
+{
+
+SEQAN_CHECKPOINT
+	typedef Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TVLMMSpec> > > > TGraph;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef typename EdgeType<TGraph>::Type TEdge;
+	typedef typename Iterator<String<AutomatonEdgeArray<TEdge, TAlphabet> > >::Type TIterConst;
+	fstream target;
+	target.open(toCString(filename), ios_base::out | ios_base::trunc);
+	if (!target.is_open()) {
+			cerr << "Import of sequence " << filename << " failed." << endl;
+			exit(1);
+	}
+	writeHead(vlmm,target);
+	for(TIterConst it = begin(vlmm.data_vertex);!atEnd(it);goNext(it)) {
+		if (!idInUse(vlmm.data_id_managerV, position(it))) continue;
+		TVertexDescriptor dummy = position(it); 
+		saveNode(vlmm,dummy,target);
+	}
+	target.close();
 
 }
 /*************
