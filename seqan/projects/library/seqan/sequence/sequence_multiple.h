@@ -187,8 +187,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	//////////////////////////////////////////////////////////////////////////////
 
 	// any_position and no limits_string -> any_position
-	template <typename TPosition>
-	inline TPosition posGlobalize(TPosition const &pos, Nothing const &) {
+	template <typename TLimitsString, typename TPosition>
+	inline TPosition posGlobalize(TPosition const &pos, TLimitsString const &) {
 		return pos;
 	}
 
@@ -234,6 +234,11 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline bool posAtFirstLocal(TPos pos, TLimitsString const &limits) {
 		return getSeqOffset(pos, limits) == 0;
 	}
+	template <typename TPos>
+	inline bool posAtFirstLocal(TPos pos) {
+		return getSeqOffset(pos) == 0;
+	}
+
 
 	// posPrev
 	template <typename TPos>
@@ -1326,9 +1331,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	};
 
     template <typename TStringSet>
-	struct Value< ConcatenatorNto1<TStringSet> const > {
-		typedef typename Value< typename Value<TStringSet>::Type >::Type Type;
-	};
+	struct Value< ConcatenatorNto1<TStringSet> const >:
+		Value< ConcatenatorNto1<TStringSet> > {};
 //____________________________________________________________________________
 
     template <typename TStringSet>
@@ -1586,6 +1590,14 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename TStringSet, typename TSpec>
 	struct Value< Iter< TStringSet, ConcatVirtual<TSpec> > const >:
 		Value< typename Value<TStringSet>::Type > {};
+
+	template <typename TStringSet, typename TSpec>
+	struct GetValue< Iter< TStringSet, ConcatVirtual<TSpec> > >:
+		GetValue< typename Value<TStringSet>::Type > {};
+
+	template <typename TStringSet, typename TSpec>
+	struct GetValue< Iter< TStringSet, ConcatVirtual<TSpec> > const >:
+		GetValue< typename Value<TStringSet>::Type > {};
 
 	template <typename TStringSet, typename TSpec>
 	struct Size< Iter< TStringSet, ConcatVirtual<TSpec> > >:
