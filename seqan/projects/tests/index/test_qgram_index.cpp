@@ -219,6 +219,28 @@ void testUngappedQGramIndex()
 	SEQAN_ASSERT(index[14] == 1);
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
+void testQGramFind()
+{
+	typedef Index<String<char>, Index_QGram<FixedShape<2> > > TQGramIndex;
+	TQGramIndex idx("to be or not to be");
+	Finder<TQGramIndex> finder(idx);
+
+	SEQAN_TASSERT(find(finder, "be"))
+	SEQAN_TASSERT(position(finder) == 3);
+	SEQAN_TASSERT(find(finder, "be"))
+	SEQAN_TASSERT(position(finder) == 16);
+	SEQAN_TASSERT(!find(finder, "be"))
+/*
+	while (find(finder, "be"))
+	{
+		cout << position(finder) << "\n";
+	}
+*/
+}
+
+//////////////////////////////////////////////////////////////////////////////
 
 void Main_TestQGram()
 {
@@ -230,9 +252,13 @@ void Main_TestQGram()
 //	testGappedShapes();
 	testUngappedShapes();
 
+	testQGramFind();
+
 	debug::verifyCheckpoints("projects/library/seqan/index/index_qgram.h");
 	debug::verifyCheckpoints("projects/library/seqan/index/shape_base.h");
 	debug::verifyCheckpoints("projects/library/seqan/index/shape_gapped.h");
+
+	debug::verifyCheckpoints("projects/library/seqan/index/index_qgram_find.h");
 
 
 	SEQAN_TREPORT("TEST QGRAM END")

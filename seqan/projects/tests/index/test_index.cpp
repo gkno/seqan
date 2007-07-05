@@ -387,11 +387,12 @@ int main()
 	cout << "----Supermaximal Repeats---fast----" << endl;
 	testSuperMaxRepeats<SuperMaxRepeatsFast>();
 	cout << "===================================" << endl;
-
 	cout << endl;
+
 	cout << "===================================" << endl;
 	cout << "----QGram Index--------------------" << endl;
 	Main_TestQGram();
+
 	cout << "===================================" << endl;
 	cout << "----SA, LCP, and ChildTab test-----" << endl;
 	testIndexCreation();
