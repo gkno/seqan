@@ -154,6 +154,8 @@ public:
 	inline bool goDown(Iter< TIndex, VSTree< TopDown<ParentLinks<ConstrainedTraversal<TSpec > > > > > &it)
 	{
 		if (isLeaf(it) || (length(representative(it)) > it.MaxDepth) ) return false;
+		//set to to true, if you go up again it will be changed in goUp(it)
+		it.Down = true;
 		_historyPush(it, value(it).i1);
 
 		TIndex const &index = container(it);
@@ -175,7 +177,7 @@ public:
 			} else
 				break;
 		}
-		it.Down = true;
+		
 		return true;
 	}
 
@@ -252,24 +254,27 @@ inline void goNext(Iter< Index<TText, TSpec>, VSTree< TopDown< ParentLinks<Const
 			not_finished = 0;
 			// we have to check if the current node can be extended with at least one letter if the following
 			// condition is true:
-			if(repLength(it) == it.MaxDepth && length(parentEdgeLabel(it)) == 1){
+			if(isRightTerminal(it) && length(parentEdgeLabel(it)) == 1){
 				//cout << "In Abs Clausel  "<<value(it) << " = " << length(representative(it)) << " " << representative(it) << "  toFather:"<<parentEdgeLabel(it)<<"  hits: "<<length(getOccurences(it))<<endl;
 				if(isLeaf(it)){
 						walk_down=0;
 						not_finished =1;
 				}
 				else
-					if(isRightTerminal(it)){ // check if node can be extended
+				{
 						// test with the topdown iterator (without considering $-Edges) if non-$-Leaf
 						Iter<Index<TText, TSpec>, VSTree< TopDown< > > >  copy(container(it),value(it));
 						if( !goDown(copy)){
+						//if(!goDown(it)){
 							not_finished=1;
 							walk_down=0;
 						}
-					}
-					
+						//else
+						//	goUp(it); // go back up to the node
 				}
+					
 			}
+		}
 		else
 			walk_down = 0;
 
@@ -858,7 +863,8 @@ initProbabilityVector(Iter<TIndex, VSTree< TopDown< ParentLinks<ConstrainedTrave
 	typedef Iter<TIndex, VSTree< TopDown< > > >  TIter;
 
 	TIter childs(it);
-	goDown(childs);
+	if(!goDown(childs))
+		return false;
 	TAlphabet startCharacter;
 	unsigned fatherLength = repLength(it);
 	unsigned count = 0;
@@ -912,7 +918,7 @@ cutEdgeForLeaf(Iter<TIndex, VSTree< TopDown< ParentLinks<ConstrainedTraversal<TI
 					String<TAlphabet> EdgeLabel = parentEdgeLabel(it);
 					TAlphabet letter = value(EdgeLabel,length(EdgeLabel)-diff );
 					String<TAlphabet> pref = prefix( EdgeLabel, length(EdgeLabel)-diff );
-					cout << "prefix of edgelabel "<<pref<<endl;
+					//cout << "prefix of edgelabel "<<pref<<endl;
 					addEdge(target,father,child,  pref);
 					initProbabilityVectorForLeaf(it,target,child,letter);
 					SEQAN_ASSERT(parseString2(target,father,pref)==child)
@@ -945,7 +951,7 @@ buildSuffixTreeFromIndex(Iter<TIndex, VSTree< TopDown< ParentLinks<ConstrainedTr
 		// it.Down == true: the previous child becomes the new father
 		// neither it.Down == true nor it.Up > 0: the father remains the same
 		// it.Up == x: the new father is x levels up in the target
-
+		//cout << "Before father: "<< father<< "  child:" <<child;
 		if(it.Down){
 			father = child;
 		}
@@ -953,12 +959,12 @@ buildSuffixTreeFromIndex(Iter<TIndex, VSTree< TopDown< ParentLinks<ConstrainedTr
 			father = getFather(target,father);
 			--it.Up;
 		}
-		
+		//cout << "After father: "<< father<< "  child:" <<child<<endl;;
 
 		
 		child = addIncompleteVertex(target);
 		// check if iterator
-		cout << "Node:"<<child<<"  "<<value(it) << " = " << repLength(it)<< " " << representative(it) << "  toFather:"<<parentEdgeLabel(it)<<"  hits: "<<length(getOccurences(it))<<std::endl;
+		//cout << "Node:"<<child<<"  "<<value(it) << " = " << repLength(it)<< " " << representative(it) << "  toFather:"<<parentEdgeLabel(it)<<"  hits: "<<length(getOccurences(it))<<std::endl;
 		//DAVIDDEBUGcout <<  " " << representative(it) <<endl;  
 		
 		setFather(target,father,child);
@@ -1191,7 +1197,7 @@ splitEdge(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > > > & vlmm,
 	typedef typename Size<TGraph>::Type TSize;
 	TAlphabet letter(childCharacter);
 	TVertexDescriptor child = vlmm.data_vertex[father].data_edge[(TSize) letter].data_target;
-	cout << "split edge at pos:"<< splitPosition<<" character:" <<(int)childCharacter<<" father" <<father<<endl;
+	//cout << "split edge at pos:"<< splitPosition<<" character:" <<(int)childCharacter<<" father" <<father<<endl;
 	String<TAlphabet> edgeString;
 	float number = getProbability(vlmm,father,childCharacter);
 	getSuffixChildLabel(vlmm,father,letter,edgeString);
@@ -1325,7 +1331,7 @@ while(!atEnd(children)){
 			father = getFather(vlmm,n);
 			String<TAlphabet> walkDown;
 			getChildLabel(vlmm,father,n,walkDown);
-			std::cout << "go for SL of father:" << father<< " String:"<< walkDown<<std::endl;
+			//std::cout << "go for SL of father:" << father<< " String:"<< walkDown<<std::endl;
 			TVertexDescriptor fatherSuffixLink = getSuffixLink(vlmm,father);
 			target = parseString2(vlmm,fatherSuffixLink,walkDown);
 			// it might occur that a suffix link target for n does not exist
@@ -1553,7 +1559,7 @@ pruneTree(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > > > &
 	setMarked(vlmm,root,true);
 	//assignProperty(marked,root,true);
 	TVertexDescriptor dummy = 0;
-	std::cout<<" start pruning from the root"<<std::endl;
+	//std::cout<<" start pruning from the root"<<std::endl;
 	pruneTreeRecursivelyFast(vlmm,root,original,parameters,dummy);
 
 		/*for(unsigned i =0;i<numVertices(vlmm);++i){
@@ -2016,20 +2022,23 @@ buildContextTree(Index<TIndexType, Index_ESA<> > & index,
 	setParameters(parameters,threshold,K,d,alpha);
 	Iter< TIndex, VSTree< TopDown< ParentLinks<ConstrainedTraversal<Absolute> > > > > it(index,threshold,d);
 	cout << "create the core Suffix Tree from the suffix array"<<endl;
+	SEQAN_PROTIMESTART(create_sa_time);
 	buildSuffixTreeFromIndex(it,vlmm);
+    cout << "suffix array creation + sufix tree building took " << SEQAN_PROTIMEDIFF(create_sa_time) << " seconds" << endl;
 
 	std::cout << "in initMaps:";
 	initMaps(vlmm);
 	std::cout << " Size of vlmm after suffix core:"<<numVertices(vlmm)<<std::endl;
+	SEQAN_PROTIMESTART(addSuffixLinks);
     addSuffixLinks(vlmm);
-	std::cout << "added suffix links and reverse suffix links" <<std::endl;
-	std::cout <<vlmm;
+	std::cout << "added suffix links and reverse suffix links: " <<SEQAN_PROTIMEDIFF(addSuffixLinks)<<" seconds<<std::endl;
+	//std::cout <<vlmm;
+	SEQAN_PROTIMESTART(pruneTree);
 	pruneTree(vlmm,parameters);
-	std::cout << " Size of vlmm after prune Tree:"<<numVertices(vlmm)<<std::endl;
+	std::cout << " Size of vlmm after prune Tree:"<<numVertices(vlmm)<< "Time: "<<SEQAN_PROTIMEDIFF(pruneTree)<<std::endl;
 	std::cout << "pruned the ContextTree" <<std::endl;
 	TVertexDescriptor root = getRoot(vlmm);
 	removeRedundantNodes(vlmm,root,parameters);
-	std::cout <<" remove redundant nodes: "<<endl<< vlmm;
 	std::cout << "READY!" <<std::endl;
 }
 
