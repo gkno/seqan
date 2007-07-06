@@ -43,6 +43,9 @@
 
 #include <seqan/pipe/pool_base.h>
 #include <seqan/pipe/pool_mapper.h>
+
+#include <seqan/misc/priority_type_base.h>
+#include <seqan/misc/priority_type_heap.h>
 #include <seqan/pipe/pool_sorter.h>
 
 #endif //#ifndef SEQAN_HEADER_...

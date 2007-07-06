@@ -8,6 +8,9 @@
 #include <seqan/align/matrix_base.h>
 #include <seqan/misc/misc_random.h>
 
+#include <seqan/score.h>
+#include <seqan/align.h>
+
 // External / STL
 #include <deque>
 #include <map>

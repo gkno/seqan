@@ -253,6 +253,9 @@ namespace SEQAN_NAMESPACE_MAIN
 		Iterator< Pipe<TInput, TSpec> > {};
 */
 
+	template <typename T>
+	struct Source;
+
 	template <typename TInput, typename TSpec>
 	struct Source<Pipe<TInput, TSpec> >
 	{
