@@ -7,6 +7,7 @@
 //#define SEQAN_TEST
 
 #include "test_index_creation.h"
+#include <seqan/align.h>
 #include <seqan/index.h>
 
 
