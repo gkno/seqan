@@ -131,23 +131,53 @@ public:
 };
 
 
+//
+//// go down the leftmost edge
+//template < typename TIndex, class TSpec >
+//inline bool goDown(Iter< TIndex, VSTree< TopDown<ParentLinks<ConstrainedTraversal<TSpec > > > > > &it) {
+//	if (isLeaf(it) || (length(representative(it)) > it.MaxDepth) ) return false;
+//	_historyPush(it, value(it).i1);
+//
+//		typename Size<TIndex>::Type i = _getUp(value(it).i1.i2, container(it));
+//	if (value(it).i1.i1 < i && i < value(it).i1.i2)
+//		value(it).i1.i2 = i;
+//	else
+//		value(it).i1.i2 = _getDown(value(it).i1.i1, container(it));
+//
+//	// set the the flag for going down
+//	it.Down = true;
+//	return true;
+//}
 
-// go down the leftmost edge
-template < typename TIndex, class TSpec >
-inline bool goDown(Iter< TIndex, VSTree< TopDown<ParentLinks<ConstrainedTraversal<TSpec > > > > > &it) {
-	if (isLeaf(it) || (length(representative(it)) > it.MaxDepth) ) return false;
-	_historyPush(it, value(it).i1);
+// go down the leftmost edge (skip empty $-edges)
+	template < typename TIndex, class TSpec >
+	inline bool goDown(Iter< TIndex, VSTree< TopDown<ParentLinks<ConstrainedTraversal<TSpec > > > > > &it)
+	{
+		if (isLeaf(it) || (length(representative(it)) > it.MaxDepth) ) return false;
+		_historyPush(it, value(it).i1);
 
-		typename Size<TIndex>::Type i = _getUp(value(it).i1.i2, container(it));
-	if (value(it).i1.i1 < i && i < value(it).i1.i2)
-		value(it).i1.i2 = i;
-	else
-		value(it).i1.i2 = _getDown(value(it).i1.i1, container(it));
+		TIndex const &index = container(it);
 
-	// set the the flag for going down
-	it.Down = true;
-	return true;
-}
+		typename Size<TIndex>::Type lval = _getUp(value(it).i1.i2, index);
+		if (!(value(it).i1.i1 < lval && lval < value(it).i1.i2))
+			lval = _getDown(value(it).i1.i1, index);
+		value(it).i1.i2 = lval;
+
+		typename Size<TIndex>::Type lcp = lcpAt(lval - 1, index);
+		//typename typename StringSetLimits<TIndex const>::Type &limits = stringSetLimits(index);
+		while (isLeaf(it)) {
+			typename SAValue<TIndex>::Type pos = getOccurence(it);
+			if (getSeqOffset(pos, stringSetLimits(index)) + lcp == sequenceLength(getSeqNo(pos, stringSetLimits(index)), index)) {
+				if (!goRight(it)) {
+					goUp(it);
+					return false;
+				}
+			} else
+				break;
+		}
+		it.Down = true;
+		return true;
+	}
 
 // go up one edge (returns false if in root node) and changes it.Down
 template < typename TIndex, class TSpec >
@@ -193,25 +223,24 @@ inline void goNext(Iter< Index<TText, TSpec>, VSTree< TopDown< ParentLinks<Const
 		if(walk_down){
 			// for avoiding the implicit $-edges
 			
-			if(!isLeaf(it) && isRightTerminal(it)){
-				// this must be possible
-				
-				goDown(it);
-				goRight(it);
-				while( (repLength(container(it), nodeUp(it)) == repLength(it)) && goRight(it))
-					
-				// if the current node remains to be right terminal
-				// than we have found a node where multiple strings end
-				// goDown was wrong and we have to go up again
-				if(isLeaf(it) && (repLength(container(it), nodeUp(it)) == repLength(it))){
-					goUp(it);
-					it.Up += -1;
-					//cout << value(it) << " = " << length(representative(it)) << " " << representative(it) << "  toFather:"<<parentEdgeLabel(it)<<"  hits: "<<length(getOccurences(it))<<endl;	
-					if (!goRight(it))
-						while (goUp(it) && !goRight(it));
-					}
-			}
-			else
+			//if(!isLeaf(it) && isRightTerminal(it)){
+			//	// this must be possible
+			//	
+			//	goDown(it);
+			//	goRight(it);
+			//	while( (repLength(container(it), nodeUp(it)) == repLength(it)) && goRight(it))
+			//		
+			//	// if the current node remains to be right terminal
+			//	// than we have found a node where multiple strings end
+			//	// goDown was wrong and we have to go up again
+			//	if(isLeaf(it) && (repLength(container(it), nodeUp(it)) == repLength(it))){
+			//		goUp(it);
+			//		//cout << value(it) << " = " << length(representative(it)) << " " << representative(it) << "  toFather:"<<parentEdgeLabel(it)<<"  hits: "<<length(getOccurences(it))<<endl;	
+			//		if (!goRight(it))
+			//			while (goUp(it) && !goRight(it));
+			//		}
+			//}
+			//else
 				if(!goDown(it) && !goRight(it))
 					while (goUp(it) && !goRight(it));
 		}
@@ -929,7 +958,7 @@ buildSuffixTreeFromIndex(Iter<TIndex, VSTree< TopDown< ParentLinks<ConstrainedTr
 		
 		child = addIncompleteVertex(target);
 		// check if iterator
-		//cout << "Node:"<<child<<"  "<<value(it) << " = " << repLength(it)<< " " << representative(it) << "  toFather:"<<parentEdgeLabel(it)<<"  hits: "<<length(getOccurences(it))<<std::endl;
+		cout << "Node:"<<child<<"  "<<value(it) << " = " << repLength(it)<< " " << representative(it) << "  toFather:"<<parentEdgeLabel(it)<<"  hits: "<<length(getOccurences(it))<<std::endl;
 		//DAVIDDEBUGcout <<  " " << representative(it) <<endl;  
 		
 		setFather(target,father,child);
