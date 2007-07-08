@@ -31,9 +31,9 @@ SERVERS = [
 # [plaform, name, compiler]
 COMPILERS = [
     ['gcc',     'g++-3.0',   'g++-3.0'], 
-#    ['gcc',     'g++-3.2',   'g++-3.2'], 
-    ['gcc',     'g++-3.3.5',   'g++-3.3'], 
-#    ['gcc',     'g++-3.4',   'g++-3.4'], 
+    ['gcc',     'g++-3.2',   'g++-3.2'], 
+    ['gcc',     'g++-3.3',   'g++-3.3'], 
+    ['gcc',     'g++-3.4',   'g++-3.4'], 
     ['gcc',     'g++-4.1.1',  '/import/testing/bin/g++'],
 #    ['windows', 'vc++-2003', 'cl']
 ]
@@ -167,8 +167,10 @@ def createPage():
         s += '</table>\n'
     
     s += '<div class=mode>Server loads</div>\n'
-    for server in SERVER:
-        s += '<div class=server>' + server['server'] + ': active=' + server['load'] + ' finished=' + server['count'] + '</div>'
+    s += '<table cellspacing=0 cellpadding=0 border=0>\n'
+    for server in SERVERS:
+        s += '<tr><td class=server>' + server['server'] + '</td><td>active=' + str(server['load']) + '</td><td>finished=' + str(server['count']) + '</td></tr>'
+    s += '</table>'
     
     f = open(PATH_OUTPUT + FILE_OUTPUT)
     t = f.read()
