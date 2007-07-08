@@ -489,12 +489,12 @@ void setParameters(ContextTree & params,unsigned t,float K, unsigned d, float al
 }
 
 
-void setParameters(BioPST & params,unsigned t, unsigned minSupport,float y,unsigned d){
+void setParameters(BioPST & params,float t, unsigned minSupport,float y,unsigned d){
 	
 	params.threshold = t;		
 	params.minSupport = minSupport;	
 	params.minConditionalProbability = y; 
-	params.MaxDepth;		
+	params.MaxDepth = d;		
 }
 template<typename TSpec = ContextTree>
 struct VLMM;
@@ -1512,7 +1512,7 @@ pruneNode(Graph<Automaton<AminoAcid, TCargo , WordGraph < VLMM < BioPST > > > > 
 	SEQAN_ASSERT(fathersum != 0)
 
 	
-	for(int pos = 0;pos< alphaSize;++pos){
+	for(unsigned pos = 0;pos< alphaSize;++pos){
 		
 		if(getProbability(vlmm,son,pos) >= parameters.minConditionalProbability){
 			if(getProbability(vlmm,father,pos) == 0)
