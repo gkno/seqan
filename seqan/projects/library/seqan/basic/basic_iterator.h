@@ -447,6 +447,7 @@ goBegin(TIterator & it,
 SEQAN_CHECKPOINT
 	it = begin(container);
 }
+/*
 template <typename TIterator, typename TContainer>
 inline void
 goBegin(TIterator & it,
@@ -455,6 +456,7 @@ goBegin(TIterator & it,
 SEQAN_CHECKPOINT
 	it = begin(container);
 }
+*/
 
 template <typename TIterator>
 inline void

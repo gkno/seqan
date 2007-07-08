@@ -190,14 +190,14 @@ VALIDATE:
 template <typename TFormat, typename TFile, typename TSpec>
 struct FileReader;
 
-template <typename TValue, typename TFormat, typename TFile, typename TSpec, typename TNeedle2>
+template <typename TValue, typename TFormat, typename TFile, typename FileReaderTSpec, typename TFinderSpec, typename TNeedle2>
 bool
-find_horspool(Finder<String<TValue, FileReader<TFormat, TFile, TSpec> > > & finder, 
+find_horspool(Finder<String<TValue, FileReader<TFormat, TFile, FileReaderTSpec> >, TFinderSpec > & finder, 
 			  Pattern<TNeedle2, Horspool> & me,
 			  bool find_first)
 {
 SEQAN_CHECKPOINT
-	typedef Finder<String<TValue, FileReader<TFormat, TFile, TSpec> > > TFinder;
+	typedef Finder<String<TValue, FileReader<TFormat, TFile, FileReaderTSpec> >, TFinderSpec > TFinder;
 	typedef typename Haystack<TFinder>::Type THaystack;
 	THaystack & hayst = haystack(finder);
 

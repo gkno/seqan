@@ -188,6 +188,17 @@ SEQAN_CHECKPOINT
 };
 
 //////////////////////////////////////////////////////////////////////////////
+// METAFUNCTIONS
+//////////////////////////////////////////////////////////////////////////////
+/*
+template <typename TContainer, typename TIterator, typename TSpec>
+struct Reference<Iter<TContainer, AdaptorIterator<TIterator, TSpec> > const>:
+	Reference<TIterator const>
+{
+};
+*/
+
+//////////////////////////////////////////////////////////////////////////////
 // FUNCTIONS
 //////////////////////////////////////////////////////////////////////////////
 
@@ -239,7 +250,7 @@ SEQAN_CHECKPOINT
 	return value(hostIterator(me));
 }
 template <typename TContainer, typename TIterator, typename TSpec>
-inline typename Reference<Iter<TContainer, AdaptorIterator<TIterator, TSpec> > >::Type 
+inline typename Reference<Iter<TContainer, AdaptorIterator<TIterator, TSpec> > const>::Type 
 value(Iter<TContainer, AdaptorIterator<TIterator, TSpec> > const & me)
 {
 SEQAN_CHECKPOINT

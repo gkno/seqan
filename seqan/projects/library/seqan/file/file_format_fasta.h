@@ -21,7 +21,7 @@ typedef Tag<TagFasta_> const Fasta;
 
 template <typename TFile, typename TFile2, typename TSpec>
 inline void
-goBegin(Iter<TFile, FileReader<Fasta, TFile2, TSpec> > & it, bool skip_meta = true)
+goBegin(Iter<TFile, FileReader<Fasta, TFile2, TSpec> > & it, bool skip_meta)
 {
 	if (_streamEOF(host(it)))
 	{
@@ -55,6 +55,12 @@ goBegin(Iter<TFile, FileReader<Fasta, TFile2, TSpec> > & it, bool skip_meta = tr
 
 	it.data_file_pos = _streamTellG(host(it)) - 1;
 	it.data_eof = _streamEOF(host(it));
+}
+template <typename TFile, typename TFile2, typename TSpec>
+inline void
+goBegin(Iter<TFile, FileReader<Fasta, TFile2, TSpec> > & it)
+{
+	goBegin(it, true);
 }
 
 
