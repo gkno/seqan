@@ -1,6 +1,6 @@
 #ifndef SEQAN_HEADER_VLMM_H
 #define SEQAN_HEADER_VLMM_H
-
+#define SEQAN_PROFILE 
 // for time stopping
 
 #include <stdio.h>
@@ -265,12 +265,9 @@ inline void goNext(Iter< Index<TText, TSpec>, VSTree< TopDown< ParentLinks<Const
 						// test with the topdown iterator (without considering $-Edges) if non-$-Leaf
 						Iter<Index<TText, TSpec>, VSTree< TopDown< > > >  copy(container(it),value(it));
 						if( !goDown(copy)){
-						//if(!goDown(it)){
 							not_finished=1;
 							walk_down=0;
 						}
-						//else
-						//	goUp(it); // go back up to the node
 				}
 					
 			}
@@ -306,56 +303,35 @@ inline void goNext(Iter< Index<TText, TSpec>, VSTree< TopDown< ParentLinks<Const
 	{
 		// if threshold is reached walk down else go always right or up
 		if(walk_down){
-			// for avoiding the implicit $-edges
-			
-			if(!isLeaf(it) && isRightTerminal(it)){
-				// this must be possible
-				
-				goDown(it);
-				goRight(it);
-				while( (repLength(container(it), nodeUp(it)) == repLength(it)) && goRight(it))
-					
-				// if the current node remains to be right terminal
-				// than we have found a node where multiple strings end
-				// goDown was wrong and we have to go up again
-				if(isLeaf(it) && (repLength(container(it), nodeUp(it)) == repLength(it))){
-					goUp(it);
-					it.Up += -1;
-					//cout << value(it) << " = " << length(representative(it)) << " " << representative(it) << "  toFather:"<<parentEdgeLabel(it)<<"  hits: "<<length(getOccurences(it))<<endl;	
-					if (!goRight(it))
-						while (goUp(it) && !goRight(it));
-					}
-			}
-			else
-				if(!goDown(it) && !goRight(it))
-					while (goUp(it) && !goRight(it));
+			if(!goDown(it) && !goRight(it))
+				while (goUp(it) && !goRight(it));
 		}
-		else
+		else{
 			if (!goRight(it))
 				while (goUp(it) && !goRight(it));
-		
+		}
 		if( (unsigned)getFrequency(it) >= it.AbsoluteThreshold){
 			not_finished = 0;
 			// we have to check if the current node can be extended with at least one letter if the following
 			// condition is true:
-			if(repLength(it) == it.MaxDepth && length(parentEdgeLabel(it)) == 1){
+			if(isRightTerminal(it) && length(parentEdgeLabel(it)) == 1){
 				//cout << "In Abs Clausel  "<<value(it) << " = " << length(representative(it)) << " " << representative(it) << "  toFather:"<<parentEdgeLabel(it)<<"  hits: "<<length(getOccurences(it))<<endl;
 				if(isLeaf(it)){
 						walk_down=0;
 						not_finished =1;
 				}
 				else
-					if(isRightTerminal(it)){ // check if node can be extended
+				{
 						// test with the topdown iterator (without considering $-Edges) if non-$-Leaf
 						Iter<Index<TText, TSpec>, VSTree< TopDown< > > >  copy(container(it),value(it));
 						if( !goDown(copy)){
 							not_finished=1;
 							walk_down=0;
 						}
-					}
-					
 				}
+					
 			}
+		}
 		else
 			walk_down = 0;
 
@@ -483,11 +459,10 @@ struct ContextTree{
 };
 
 struct BioPST{
-	unsigned threshold;	 // minimum support
-	float K;    //the name originates from the paper of Bühlmann (1999) 
-	unsigned MaxDepth;
-	float alpha;	// pseudocount for smoothing
-	
+	float threshold;		// r
+	unsigned minSupport;	// N min
+	float minConditionalProbability ;  // y
+	unsigned MaxDepth;		// L
 };
 
 struct PST{
@@ -495,7 +470,7 @@ struct PST{
 	float minEmpiricalProbability ;    // P min
 	float minConditionalProbability ;  // y min
 	float alpha ;					   // alpha :-)
-	unsigned MaxDepth;				   // d
+	unsigned MaxDepth;				   // L
 		
 };
 
@@ -513,11 +488,13 @@ void setParameters(ContextTree & params,unsigned t,float K, unsigned d, float al
 	params.alpha = alpha;
 }
 
-void setParameters(BioPST & params,unsigned t,float K, unsigned d, float alpha){
-	params.threshold = t;
-	params.K = K;
-	params.MaxDepth = d;
-	params.alpha = alpha;
+
+void setParameters(BioPST & params,unsigned t, unsigned minSupport,float y,unsigned d){
+	
+	params.threshold = t;		
+	params.minSupport = minSupport;	
+	params.minConditionalProbability = y; 
+	params.MaxDepth;		
 }
 template<typename TSpec = ContextTree>
 struct VLMM;
@@ -1378,7 +1355,7 @@ turnNodeCountsIntoProbability(Graph<Automaton<TAlphabet, TCargo , WordGraph < VL
 		setProbability(vlmm,node,pos, (getProbability(vlmm,node,pos)/sum) );
 }
 
-
+ 
 
 template<typename TCargo,typename TAlphabet,typename TChar,typename TVertexDescriptor>
 inline bool
@@ -1412,25 +1389,68 @@ extendNode(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < ContextTree> >
 			   TVertexDescriptor & father,
 			   TChar childCharacter,
 			   float countChar,
-			   ContextTree & parameters) 
+			   ContextTree & param) 
 {
 	
 		TAlphabet letter(childCharacter);
 		unsigned size = ValueSize<TAlphabet>::VALUE;
 	// the pruning criterion mentioned by Bühlmann & Mächler, taken from Rissanen 1983
-		float fathersum = 0;
+		float fathersum = 0,sonsum=0,difference=0;
     
 	for(unsigned int pos = 0;pos< size ;++pos){
 		fathersum = fathersum + getProbability(vlmm,father,pos);
 	}
 	SEQAN_ASSERT(fathersum != 0)
+	float pseudocounts = param.alpha * (float)size;
+	fathersum += pseudocounts; 
+	sonsum += pseudocounts + countChar;
 	//std::cout<<"extendNode on node "<<node<<std::endl;
 	//cout << " diff= "<<countChar * log(1/(getProbability(vlmm,father,childCharacter)/fathersum))<<endl;
-		if ( (countChar * log(1/(getProbability(vlmm,father,childCharacter)/fathersum)))   <= parameters.K )
+	for(unsigned pos=0;pos<size;++pos){
+		if(pos == (unsigned)letter)
+				difference += countChar*((countChar+param.alpha)/sonsum) * log( ((countChar+param.alpha)/sonsum)/((getProbability(vlmm,father,letter)+param.alpha)/fathersum));
+		else
+				difference += param.alpha * (param.alpha/sonsum)*
+						  log( (param.alpha/sonsum)/( (getProbability(vlmm,father,pos)+param.alpha)/fathersum));
+
+	}
+	if ( difference  <= param.K )
 			return false;
 
 	return true;
 }
+
+
+template<typename TCargo,typename TChar,typename TVertexDescriptor>
+inline bool
+extendNode(Graph<Automaton<AminoAcid, TCargo , WordGraph < VLMM < BioPST > > > > &vlmm,
+			   TVertexDescriptor & father,
+			   TChar childCharacter,
+			   float countChar,
+			   BioPST & parameters) 
+{
+	
+	AminoAcid letter(childCharacter);
+	//std::cout<<"extendNode(BioPST) on node "<<node<<std::endl;
+	unsigned alphaSize = ValueSize<AminoAcid>::VALUE;
+	float fathersum = 0;
+    
+	for(unsigned int pos = 0;pos< alphaSize ;++pos){
+		fathersum = fathersum + getProbability(vlmm,father,pos);
+	}
+	SEQAN_ASSERT(fathersum != 0)
+		
+	SEQAN_ASSERT(getProbability(vlmm,father,letter) != 0);
+			
+	float ratio = 1/getProbability(vlmm,father,letter)/fathersum;
+
+	if(ratio >= parameters.threshold  || ratio <= 1/parameters.threshold )
+		return true;
+		
+	return false;
+
+}
+
 
 /* 
 	In general this function can only be called for nodes which still contain the pattern counts and
@@ -1440,7 +1460,7 @@ template<typename TCargo,typename TAlphabet ,typename TVertexDescriptor>
 inline bool
 pruneNode(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < ContextTree > > > > &vlmm,
 			   TVertexDescriptor &son,
-			   ContextTree & parameters) 
+			   ContextTree & param) 
 {
     unsigned size = ValueSize<TAlphabet>::VALUE;
 	// the pruning criterion mentioned by Bühlmann, taken from Rissanen 1983
@@ -1455,21 +1475,57 @@ pruneNode(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < ContextTree > >
 	}
 	SEQAN_ASSERT(sonsum != 0)
 	SEQAN_ASSERT(fathersum != 0)
-
+	//add the pseudocounts to avoid zero counts
+	fathersum += param.alpha * (float)size; 
+	sonsum += param.alpha * (float)size; 
 	for(int pos = 0;pos< ValueSize<TAlphabet>::VALUE;++pos){
-		if(getProbability(vlmm,father,pos) > 0 && getProbability(vlmm,son,pos) > 0)
-			difference += getProbability(vlmm,son,pos) * (getProbability(vlmm,son,pos)/sonsum)*
-						  log((getProbability(vlmm,son,pos)/sonsum)/(getProbability(vlmm,father,pos)/fathersum));
+		//if(getProbability(vlmm,father,pos) > 0 && getProbability(vlmm,son,pos) > 0) it is checked in trainvlmm that alpha >0
+			difference += (getProbability(vlmm,son,pos)+param.alpha) * ((getProbability(vlmm,son,pos)+param.alpha)/sonsum)*
+						  log(( (getProbability(vlmm,son,pos)+param.alpha)/sonsum)/( (getProbability(vlmm,father,pos)+param.alpha)/fathersum));
 		
 	}
-	if(difference <= parameters.K)
+	if(difference <= param.K)
 		return true;
 
  return false;
 }
 
 
+template<typename TCargo,typename TVertexDescriptor>
+inline bool
+pruneNode(Graph<Automaton<AminoAcid, TCargo , WordGraph < VLMM < BioPST > > > > &vlmm,
+			   TVertexDescriptor &son,
+			   BioPST & parameters) 
+{
+	// the pruning criteria defined by Bejeran & Yona 2001 for BioPST
+	unsigned alphaSize = ValueSize<AminoAcid>::VALUE;
+	float fathersum = 0,sonsum = 0,ratio = 0;
+    
+	SEQAN_ASSERT(getSuffixLink(vlmm,son) != getNil<TVertexDescriptor>())
+	TVertexDescriptor father = getSuffixLink(vlmm,son);
 
+	for(unsigned int pos = 0;pos< alphaSize ;++pos){
+		sonsum = sonsum + getProbability(vlmm,son,pos);
+		fathersum = fathersum + getProbability(vlmm,father,pos);
+	}
+	SEQAN_ASSERT(sonsum != 0)
+	SEQAN_ASSERT(fathersum != 0)
+
+	
+	for(int pos = 0;pos< alphaSize;++pos){
+		
+		if(getProbability(vlmm,son,pos) >= parameters.minConditionalProbability){
+			if(getProbability(vlmm,father,pos) == 0)
+				ratio = 0;
+			else
+				ratio = (getProbability(vlmm,son,pos)/sonsum)/(getProbability(vlmm,father,pos)/fathersum);
+
+			if(ratio >= parameters.threshold  || ratio <= 1/parameters.threshold )
+				return false;
+		}
+	}
+ return true;
+}
 
 template<typename TCargo,typename TAlphabet ,typename TVertexDescriptor>
 inline bool
@@ -1529,6 +1585,69 @@ smoothNode(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TVLMMSpec > > 
 	sum += parameters.alpha * (float)alphaSize; 
 	for(unsigned int pos = 0;pos< alphaSize;++pos)
 		setProbability(vlmm,node,pos, ( (getProbability(vlmm,node,pos)+parameters.alpha)/sum) );
+}
+
+float Q[24][24]=  // Dayhoff substitution matrix
+{
+{0.986693	, 0.000109553	, 0.000398041	, 0.00056237	, 0.000120508	, 0.000339613	, 0.000971367	, 0.00211437	, 7.66868e-005	, 0.000241016	, 0.000346917	, 0.00020815	, 0.000105901	, 7.30351e-005	, 0.00125986	, 0.00281915	, 0.00215454	, 0.			, 7.30351e-005	, 0.00133289	,0., 0., 0., 0.},
+{0.000233351, 0.99135		, 0.000132232	, 0.			, 7.77837e-005	, 0.000933404	, 0				,7.77837e-005	, 0.000801172	, 0.000233351	, 0.000132232	, 0.00371028	, 0.000132232	, 5.44486e-005	, 0.000521151	, 0.00106564	, 0.000155567	, 0.000210016	, 2.33351e-005	, 0.000155567	,0., 0., 0., 0.},
+{0.000857731, 0.000133775	, 0.982169		, 0.00418636	, 0.			, 0.000393455	, 0.000739695	, 0.00122758	, 0.00177842	, 0.000283287	, 0.000291157	, 0.00253385	, 0.			, 5.50837e-005	, 0.000212466	, 0.00339945	, 0.00132988	, 2.36073e-005	, 0.000283287	, 0.000102298	,0., 0., 0., 0.},
+{0.00104535	, 0.0			, 0.0036112		, 0.985895		, 0.			, 0.000515886	, 0.00564081	, 0.00109965	, 0.000291883	, 8.82437e-005	, 0.			, 0.000576978	, 0.			, 0				, 6.78798e-005	, 0.000665222	, 0.000386915	, 0.			, 0.			, 0.000115396	,0., 0., 0., 0.},
+{0.000313665, 9.50499e-005	, 0.			, 0.			, 0.997339		,		0.		, 0.			, 9.50499e-005	, 9.50499e-005	, 0.000161585	, 0.			, 0.			, 0.			, 0.			, 9.50499e-005	, 0.00111208	, 9.50499e-005	, 0.			, 0.00028515	, 0.000313665	,0., 0., 0., 0.},
+{0.000773469, 0.000998024	, 0.000415844	, 0.000632082	, 0.			, 0.987624		, 0.00350972	, 0.000249506	, 0.002021		, 6.6535e-005	, 0.000623765	, 0.00122258	, 0.000166337	, 0.			, 0.000773469	, 0.000390893	, 0.000307724	, 0.			, 0.			, 0.000224555	,0., 0., 0., 0.},
+{0.00170869	, 0.0			, 0.000603821	, 0.00533804	, 0.			, 0.00271077	, 0.986427		, 0.000719447	, 0.000147744	, 0.000224827	, 9.63545e-005	, 0.000668058	, 4.49654e-005	, 0.			, 0.000256945	, 0.000552432	, 0.000199133	, 0.			, 6.42363e-005	, 0.000237674	,0., 0., 0., 0.},
+{0.00207892	, 3.59054e-005	, 0.000560125	, 0.000581668	, 3.59054e-005	, 0.000107716	, 0.000402141	, 0.99348		, 3.59054e-005	, 0.			, 6.10392e-005	, 0.000215433	, 2.51338e-005	, 6.10392e-005	, 0.000175937	, 0.00161574	, 0.000179527	, 0.			, 0.			, 0.000348283	,0., 0., 0., 0.},
+{0.000198745, 0.000974795	, 0.00213887	, 0.000406953	, 9.46402e-005	, 0.00229976	, 0.000217673	, 9.46402e-005	, 0.991217		, 2.83921e-005	, 0.000378561	, 0.000217673	, 0.			, 0.00018928	, 0.000473201	, 0.000246065	, 0.000132496	, 2.83921e-005	, 0.000378561	, 0.000283921	,0., 0., 0., 0.},
+{0.000569298, 0.000258772	, 0.000310526	, 0.000112135	, 0.000146637	, 6.90059e-005	, 0.000301901	, 0.			, 2.58772e-005	, 0.987225		, 0.00218231	, 0.000370907	, 0.000491667	, 0.000776316	, 6.03801e-005	, 0.000172515	, 0.00111272	, 0.			, 0.000112135	, 0.00570161	,0., 0., 0., 0.},
+{0.000354108, 6.33666e-005	, 0.000137916	, 0.			, 0.			, 0.000279559	, 5.59117e-005	, 6.33666e-005	, 0.000149098	, 0.000943045	, 0.994677		, 0.000145371	, 0.000771582	, 0.000622484	, 0.00016028	, 0.000119278	, 0.000193827	, 4.84568e-005	, 8.57313e-005	, 0.00112942	,0., 0., 0., 0.},
+{0.000225336, 0.00188571	, 0.00127295	, 0.000336028	, 0.			, 0.000581131	, 0.00041114	, 0.000237196	, 9.09252e-005	, 0.000169991	, 0.000154178	, 0.992548		, 0.000355794	, 0.			, 0.000169991	, 0.00066415	, 0.000790654	, 0.			, 3.95327e-005	, 7.72056e-005	,0., 0., 0., 0.},
+{0.000625429, 0.000366631	, 0.			, 0.			, 0.			, 0.00043133	, 0.000150966	, 0.000150966	, 0.			, 0.00122929	, 0.00446427	, 0.00194099	, 0.987491		, 0.000366631	, 8.6266e-005	, 0.00043133	, 0.000603862	, 0.			, 0.			, 0.00166062	,0., 0., 0., 0.},
+{0.000159996, 5.59986e-005	, 5.59986e-005	, 0.			, 0.			, 0.			, 0.			, 0.000135997	, 0.000159996	, 0.000719982	, 0.00133597	, 0.			, 0.000135997	, 0.994544		, 5.59986e-005	, 0.000319992	, 7.9998e-005	, 7.9998e-005	, 0.00207995	, 7.9998e-005	,0., 0., 0., 0.},
+{0.00216589	, 0.000420622	, 0.000169504	, 6.27794e-005	, 6.27794e-005	, 0.000583849	, 0.000251118	, 0.000307619	, 0.000313897	, 4.39456e-005	, 0.000269951	, 0.000269951	, 2.51118e-005	, 4.39456e-005	, 0.992548		, 0.00168877	, 0.00045829	, 0.			, 0.			, 0.000313897	,0., 0., 0., 0.},
+{0.00353024	, 0.00062648	, 0.00197547	, 0.000448139	, 0.000535023	, 0.000214924	, 0.000393265	, 0.00205778	, 0.000118894	, 9.1457e-005	, 0.000146331	, 0.000768239	, 9.1457e-005	, 0.000182914	, 0.0012301		, 0.984032		, 0.0031827		, 7.77384e-005	, 0.000100603	, 0.000196633	,0., 0., 0., 0.},
+{0.00320656	, 0.000108697	, 0.000918491	, 0.000309787	, 5.43486e-005	, 0.00020109	, 0.000168481	, 0.000271743	, 7.6088e-005	, 0.000701096	, 0.000282613	, 0.00108697	, 0.000152176	, 5.43486e-005	, 0.000396744	, 0.00378266	, 0.987092		, 0.			, 0.000125002	, 0.00101088	,0., 0., 0., 0.},
+{0.			, 0.000818633	, 9.09592e-005	, 0.			, 0.			, 0.			, 0.			, 0.			, 9.09592e-005	, 0.			, 0.000394156	, 0.			, 0.			, 0.000303197	, 0.			, 0.000515435	, 0.			, 0.997605		, 0.000181918	, 0				,0., 0., 0., 0.},
+{0.000212704, 3.19057e-005	, 0.000382868	, 0.			, 0.000319057	, 0.			, 0.000106352	, 0.			, 0.000425409	, 0.000138258	, 0.00024461	, 0.000106352	, 0.			, 0.00276516	, 0.			, 0.000233975	, 0.00024461	, 6.38113e-005	, 0.994544		, 0.000180799	,0., 0., 0., 0.},
+{0.00179442	, 9.83243e-005	, 6.39108e-005	, 8.35756e-005	, 0.000162235	, 0.000132738	, 0.0001819		, 0.000476873	, 0.000147486	, 0.00324962	, 0.00148961	, 8.35756e-005	, 0.000378548	, 4.91621e-005	, 0.000245811	, 0.000211397	, 0.000914416	, 0.			, 8.35756e-005	, 0.990153		,0., 0., 0., 0.},
+{0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000},
+{0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000},
+{0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000},
+{0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000}
+};
+
+// this is the position/node specific acdlculation of pseudocounts depending on amino acid
+// substitution probabilities
+template<typename TCargo,typename TVertexDescriptor>
+inline void
+smoothNode(Graph<Automaton<AminoAcid, TCargo , WordGraph < VLMM <BioPST > > > > &vlmm,
+			   TVertexDescriptor & node,
+			   BioPST & parameters) 
+{
+
+	unsigned alphaSize = 20,pos=0;
+	float Bs =5; // == m taken from Henikoff & Henikoff 1996 or == mü in Bejerano and Yona 2001
+	float Rs =0;//will count how many aminoacids have a non-zero entry at node
+	float ba[20];  // these are the relative pseudocounts for every amino acid
+	float sum = 0;
+	for(;pos< alphaSize ;++pos){
+		sum = sum + getProbability(vlmm,node,pos);
+		if(getProbability(vlmm,node,pos) >0)
+			++Rs;
+	}
+	SEQAN_ASSERT(sum != 0);
+	Bs = Bs * Rs;     //Bs = mü * Rs
+	//calculate the ba`s,i.e. the proportion of pseudocounts/Bs for every amino acid
+	for(unsigned aminoacid = 0;aminoacid< alphaSize;++aminoacid){
+		ba[aminoacid] *= Bs;
+		for(pos = 0;pos< alphaSize;++pos){
+			ba[aminoacid] = getProbability(vlmm,node,pos)/sum*Q[aminoacid][pos];
+		}
+		
+	}
+	
+	sum += Bs;  // add the overall pseudocounts to the node
+	for(pos = 0;pos< alphaSize;++pos)
+		setProbability(vlmm,node,pos, ( (getProbability(vlmm,node,pos)+ba[pos])/sum) );
 }
 
 template<typename TAlphabet,typename TCargo,typename TSpec ,typename TVLMMSPec>
@@ -2028,17 +2147,19 @@ buildContextTree(Index<TIndexType, Index_ESA<> > & index,
 
 	std::cout << "in initMaps:";
 	initMaps(vlmm);
-	std::cout << " Size of vlmm after suffix core:"<<numVertices(vlmm)<<std::endl;
+	std::cout << "Size of vlmm after suffix core:"<<numVertices(vlmm)<<std::endl;
 	SEQAN_PROTIMESTART(addSuffixLinks);
     addSuffixLinks(vlmm);
-	std::cout << "added suffix links and reverse suffix links: " <<SEQAN_PROTIMEDIFF(addSuffixLinks)<<" seconds<<std::endl;
+	std::cout << "added suffix links and reverse suffix links: " <<SEQAN_PROTIMEDIFF(addSuffixLinks)<<" seconds"<<std::endl;
 	//std::cout <<vlmm;
 	SEQAN_PROTIMESTART(pruneTree);
 	pruneTree(vlmm,parameters);
-	std::cout << " Size of vlmm after prune Tree:"<<numVertices(vlmm)<< "Time: "<<SEQAN_PROTIMEDIFF(pruneTree)<<std::endl;
+	std::cout << "Size of vlmm after prune Tree:"<<numVertices(vlmm)<< " Time: "<<SEQAN_PROTIMEDIFF(pruneTree)<<std::endl;
 	std::cout << "pruned the ContextTree" <<std::endl;
 	TVertexDescriptor root = getRoot(vlmm);
+	SEQAN_PROTIMESTART(removeNodes);
 	removeRedundantNodes(vlmm,root,parameters);
+	cout << "Time removal nodes: "<<SEQAN_PROTIMEDIFF(removeNodes)<< " Number of nodes left:" <<numVertices(vlmm)<<endl;
 	std::cout << "READY!" <<std::endl;
 }
 
@@ -2046,31 +2167,38 @@ template<typename TIndexType,typename TAlphabet,typename TCargo >
 inline void
 buildBioPST(Index<TIndexType, Index_ESA<> > & index,
 		 Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < BioPST > > > > &vlmm,
-			    unsigned threshold,
-				float K,
-				unsigned d,
-				float alpha) 
+			    float threshold,
+				unsigned minSupport,
+				float minCondProb,
+				unsigned d
+				) 
 {
 	typedef Index<TIndexType, Index_ESA<> > TIndex;
 	typedef Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < BioPST > > > > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	if(minCondProb > 1/(float)ValueSize<TAlphabet>::VALUE){
+		cerr<<" minimum conditional probability is too large. It is not possible\n to distribute "<<minCondProb<<
+			" over "<<ValueSize<TAlphabet>::VALUE<< " entries"<<endl;
+		cout<<" Can be at most:" <<1/ValueSize<TAlphabet>::VALUE<<endl;
+		exit(1);
+	}
 	BioPST parameters;
-	setParameters(parameters,threshold,K,d,alpha);
-	Iter< TIndex, VSTree< TopDown< ParentLinks<ConstrainedTraversal<Support> > > > > it(index,threshold,d);
+	setParameters(parameters,threshold,minSupport,minCondProb,d);
+	Iter< TIndex, VSTree< TopDown< ParentLinks<ConstrainedTraversal<Support> > > > > it(index,minSupport,d);
 	cout << "create the core Suffix Tree from the suffix array"<<endl;
 	buildSuffixTreeFromIndex(it,vlmm);
 	std::cout << "in initMaps:";
 	initMaps(vlmm);
-	std::cout << " Size of vlmm after suffix core:"<<numVertices(vlmm)<<std::endl;
+	std::cout << "Size of vlmm after suffix core:"<<numVertices(vlmm)<<std::endl;
     addSuffixLinks(vlmm);
 	std::cout << "added suffix links and reverse suffix links" <<std::endl;
-	std::cout <<vlmm;
+	//std::cout <<vlmm;
 	pruneTree(vlmm,parameters);
-	std::cout << " Size of vlmm after prune Tree:"<<numVertices(vlmm)<<std::endl;
+	std::cout << "Size of vlmm after prune Tree:"<<numVertices(vlmm)<<std::endl;
 	std::cout << "pruned the BioPST" <<std::endl;
 	TVertexDescriptor root = getRoot(vlmm);
 	removeRedundantNodes(vlmm,root,parameters);
-	std::cout <<" remove redundant nodes: "<<endl<< vlmm;
+	std::cout <<"after remove redundant nodes: "<<numVertices(vlmm)<<" remain in the tree"<<endl;
 	std::cout << "READY!" <<std::endl;
 }
 
@@ -2085,14 +2213,19 @@ buildPST(Index<TIndexType, Index_ESA<> > & index,
 				unsigned d) 
 {
 	typedef Index<TIndexType, Index_ESA<> > TIndex;
+	typedef Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < PST > > > > TGraph;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	if(minConditionalProbability > 1/(float)ValueSize<TAlphabet>::VALUE){
+		cerr<<" minimum conditional probability is too large. It is not possible\n to distribute "<<minConditionalProbability<<
+			" over "<<ValueSize<TAlphabet>::VALUE<< " entries "<<endl;
+		cout<<" Can be at most:" <<1/ValueSize<TAlphabet>::VALUE<<endl;
+		exit(1);
+	}
 	PST parameters;
 	setParameters(parameters,threshold,minEmpiricalProbability,minConditionalProbability,alpha,d);
 
 	Iter< TIndex, VSTree< TopDown< ParentLinks<ConstrainedTraversal<Relative> > > > > it(index,parameters.minEmpiricalProbability,d);
-	//Iter< TIndex, VSTree< TopDown< ParentLinks<ConstrainedTraversal<Absolute> > > > > it(index,2,d);
-	
 	inittheclock();
-	
 	
 	indexRequire(index, ESA_SA());
 	double buildESA = gettheruntime();
@@ -2122,7 +2255,9 @@ buildPST(Index<TIndexType, Index_ESA<> > & index,
 	pruneTree(vlmm,parameters);
 	std::cout << " Size of vlmm after prune Tree:"<<numVertices(vlmm)<<std::endl;
 	std::cout << "pruned the PST" <<gettheruntime()-build<<std::endl;
-	//std::cout << vlmm;
+	TVertexDescriptor root = getRoot(vlmm);
+	removeRedundantNodes(vlmm,root,parameters);
+	std::cout <<"after remove redundant nodes: "<<numVertices(vlmm)<<" remain in the tree"<<endl;
 	std::cout << "READY!" <<std::endl;
 }
 
@@ -2233,7 +2368,7 @@ writeHead(Graph<Automaton<AminoAcid, TCargo , WordGraph < VLMM < ContextTree > >
 	   TFile & target)
 {	
 		_streamWrite(target,"VLMM\tContextTree\tAminoAcid\t");
-		_streamPutInt(target,numVertices(vlmm));
+		_streamPutInt(target,length(vlmm.data_marked));
 }
 
 template<typename TFile, typename TCargo >
@@ -2368,7 +2503,7 @@ SEQAN_CHECKPOINT
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	typedef typename EdgeType<TGraph>::Type TEdge;
 	typedef typename Iterator<String<AutomatonEdgeArray<TEdge, TAlphabet> > >::Type TIterConst;
-
+	cout<<"Save final vlmm"<<endl;
 	writeHead(vlmm,target);
 	for(TIterConst it = begin(vlmm.data_vertex);!atEnd(it);goNext(it)) {
 		if (!idInUse(vlmm.data_id_managerV, position(it))) continue;
