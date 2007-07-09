@@ -76,8 +76,8 @@ void Test_GraphMatchRefine() {
 
 	// Windows
 #ifdef PLATFORM_WINDOWS
-	String<char> in_path("D:\\matches\\");
-	String<char> out_path("D:\\matches\\out\\");
+	String<char> in_path("Z:\\matches\\");
+	String<char> out_path("Z:\\matches\\out\\");
 #else
 	// Linux
 	String<char> in_path("/home/takifugu2/data/SeqAn/binary/");
@@ -690,7 +690,7 @@ void Test_GraphMatchRefinement()
 	//Test_RefineAlignGraph();
 
 	//test for refinement on Fragment<>
-	Test_GraphMatchRefine();
+	//Test_GraphMatchRefine();
 }
 
 }

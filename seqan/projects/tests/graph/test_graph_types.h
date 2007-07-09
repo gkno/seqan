@@ -368,6 +368,7 @@ void Test_Undirected() {
 	SEQAN_TASSERT(numEdges(g) == 0)
 	addEdge(g,2,0);
 	addEdge(g,4,1);
+	std::cout << g << std::endl;
 	clearVertices(g);
 	SEQAN_TASSERT(numVertices(g) == 0)
 	SEQAN_TASSERT(numEdges(g) == 0)
@@ -1957,6 +1958,14 @@ void Test_GraphTypes() {
 	Test_Alignment();	// Alignment graph
 	Test_RnaAlignment();// Use of alignment graph for Rna stuff
 	Test_Fragment();	// Fragment
+
+
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_directed.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_undirected.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_automaton.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_wordgraph.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_tree.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_align.h");
 }
 
 

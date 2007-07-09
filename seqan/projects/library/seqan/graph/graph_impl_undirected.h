@@ -229,11 +229,40 @@ clearEdges(Graph<Undirected<TCargo, TSpec> >& g)
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<Undirected<TCargo, TSpec> > TGraph;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
 	typedef typename Iterator<String<TEdgeStump*> >::Type TIter;
-	for(TIter it = begin(g.data_vertex);!atEnd(it);goNext(it)) {
-		removeOutEdges(g,position(it)); // Remove all outgoing edges
+
+	// Collect all edges
+	String<TEdgeDescriptor> edges;
+	TIter it = begin(g.data_vertex);
+	while(!atEnd(it)) {
+		TEdgeStump* current = getValue(it);
+		TVertexDescriptor sourceVertex = position(it);
+		while(current != (TEdgeStump*) 0) {
+			if (getTarget(current) != sourceVertex) {
+				appendValue(edges, current);
+				current = getNextS(current);
+			}
+			else {
+				// Do nothing here because we don't want to create edges twice!!!
+				current = getNextT(current);
+			}
+		}
+		value(it) = (TEdgeStump*) 0;
+		goNext(it);
 	}
+	SEQAN_TASSERT(numEdges(g) == length(edges))
+
+	// Release all edges
+	typedef typename Iterator<String<TEdgeDescriptor> >::Type TStringIter;
+	TStringIter edgeEndIt = end(edges);
+	for(TStringIter edgeIt = begin(edges); edgeIt != edgeEndIt;++edgeIt) {
+		valueDestruct(*edgeIt);
+		deallocate(g.data_allocator, *edgeIt, 1);	
+	}
+	releaseAll(g.data_id_managerE);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -512,9 +541,7 @@ removeOutEdges(Graph<Undirected<TCargo, TSpec> >& g,
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	TEdgeDescriptor eD = getValue(g.data_vertex, v);
 	while(eD != (TEdgeStump*) 0) {
-		TVertexDescriptor target = (TVertexDescriptor) getTarget(eD);
-		if (v == target) target = (TVertexDescriptor) getSource(eD);
-		removeEdge(g,v,target);
+		removeEdge(g,eD);
 		eD = getValue(g.data_vertex, v);
 	}
 }

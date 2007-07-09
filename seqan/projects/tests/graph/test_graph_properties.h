@@ -166,6 +166,9 @@ void Test_GraphProperties() {
 	Test_ExternalProperty<Tree<char> >();
 	Test_ExternalProperty<Automaton<char> >();	
 	Test_Property();
+
+
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_property.h");
 }
 
 

@@ -135,82 +135,6 @@ void  Test_CompressedAlphabets() {
 
 //////////////////////////////////////////////////////////////////////////////
 
-void Test_LongestIncreasingSubsequence() {
-	String<char> seq1("zeitgeist");
-	String<unsigned int> pos1;
-	longestIncreasingSubsequence(seq1,pos1);
-	// Trace is backwards
-	SEQAN_TASSERT(seq1[pos1[4]] == 'e')
-	SEQAN_TASSERT(seq1[pos1[3]] == 'g')
-	SEQAN_TASSERT(seq1[pos1[2]] == 'i')
-	SEQAN_TASSERT(seq1[pos1[1]] == 's')
-	SEQAN_TASSERT(seq1[pos1[0]] == 't')
-	//// Output
-	//for(int i = length(pos1)-1; i>=0; --i) {
-	//	std::cout << seq1[pos1[i]] <<  ',';
-	//}
-	//std::cout << std::endl;
-
-	String<unsigned int> seq;
-	appendValue(seq, 5); appendValue(seq, 3); appendValue(seq, 4);
-	appendValue(seq, 9); appendValue(seq, 6); appendValue(seq, 2);
-	appendValue(seq, 1); appendValue(seq, 8); appendValue(seq, 7);
-	appendValue(seq, 10);
-	String<unsigned int> pos;
-	longestIncreasingSubsequence(seq,pos);
-	SEQAN_TASSERT(seq[pos[4]] == 3)
-	SEQAN_TASSERT(seq[pos[3]] == 4)
-	SEQAN_TASSERT(seq[pos[2]] == 6)
-	SEQAN_TASSERT(seq[pos[1]] == 7)
-	SEQAN_TASSERT(seq[pos[0]] == 10)
-	//// Output
-	//for(int i = length(pos)-1; i>=0; --i) {
-	//	std::cout << seq[pos[i]] <<  ',';
-	//}
-	//std::cout << std::endl;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////
-
-void Test_HeaviestIncreasingSubsequence() {
-	String<char> seq1("zeitgeist");
-	String<unsigned int> weights1;
-	String<unsigned int> pos1;
-	fill(weights1, length(seq1), 1);
-	unsigned int w = heaviestIncreasingSubsequence(seq1, weights1, pos1);
-	// Trace is backwards
-	SEQAN_TASSERT(w == 5)
-	SEQAN_TASSERT(seq1[pos1[4]] == 'e')
-	SEQAN_TASSERT(seq1[pos1[3]] == 'g')
-	SEQAN_TASSERT(seq1[pos1[2]] == 'i')
-	SEQAN_TASSERT(seq1[pos1[1]] == 's')
-	SEQAN_TASSERT(seq1[pos1[0]] == 't')
-	//// Output
-	//for(int i = length(pos1)-1; i>=0; --i) {
-	//	std::cout << seq1[pos1[i]] <<  ',';
-	//}
-	//std::cout << std::endl;
-
-	// Alter weights
-	clear(pos1);
-	assignProperty(weights1, 2, 10);
-	w = heaviestIncreasingSubsequence(seq1, weights1, pos1);
-	SEQAN_TASSERT(w == 13)
-	SEQAN_TASSERT(seq1[pos1[3]] == 'e')
-	SEQAN_TASSERT(seq1[pos1[2]] == 'i')
-	SEQAN_TASSERT(seq1[pos1[1]] == 's')
-	SEQAN_TASSERT(seq1[pos1[0]] == 't')
-	//// Output
-	//for(int i = length(pos1)-1; i>=0; --i) {
-	//	std::cout << seq1[pos1[i]] <<  ',';
-	//}
-	//std::cout << std::endl;
-
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
 void Test_TCoffeeTmp() {
 //____________________________________________________________________________
 // T-Coffee
@@ -270,9 +194,9 @@ void Test_TCoffeeTmp() {
 
 
 	// Calculate a distance matrix using a compressed alphabet or not
-	Matrix<double> distanceMatrix; 
-	getCommonKmerMatrix(stringSet(g), distanceMatrix, 6, AAGroupsDayhoff() );
-	kmerToDistanceMatrix(distanceMatrix, FractionalDistance() );
+	String<double> distanceMatrix; 
+	getKmerSimilarityMatrix(stringSet(g), distanceMatrix, 6, AAGroupsDayhoff() );
+	similarityToDistanceMatrix(distanceMatrix, KimuraDistance() );
 
 	// Build the neighbor joining tree
 	Graph<Tree<double> > njTreeOut;
@@ -354,9 +278,9 @@ void Test_TCoffeeGarfield() {
 	strm2.close();
 
 	// Calculate a distance matrix using a compressed alphabet or not
-	Matrix<double> distanceMatrix; 
-	getCommonKmerMatrix(stringSet(g), distanceMatrix, 6, AAGroupsDayhoff() );
-	kmerToDistanceMatrix(distanceMatrix, FractionalDistance() );
+	String<double> distanceMatrix; 
+	getKmerSimilarityMatrix(stringSet(g), distanceMatrix, 6, AAGroupsDayhoff() );
+	similarityToDistanceMatrix(distanceMatrix, KimuraDistance() );
 
 	// Build the neighbor joining tree
 	Graph<Tree<double> > njTreeOut;
@@ -388,16 +312,22 @@ void Test_TCoffeeGarfield() {
 void Test_TCoffeeFromFile(String<char> const in_path, String<char> const file_prefix, String<char> const file_suffix) {
 //____________________________________________________________________________
 // T-Coffee
+	clock_t bigbang, startTime,endTime;
+	double time;
+
 	// Sequences
 	typedef String<AminoAcid> TString;
 	StringSet<String<AminoAcid>, Owner<> > origStrSet;
 
 	// Count sequences and read names
+	startTime = clock();
+	bigbang = startTime;
 	String<String<char> > names;
 	unsigned seqCount = 0;
 	ifstream file;
 	std::stringstream input;
 	input << in_path << file_prefix << '.' << file_suffix;
+	std::cout << input.str().c_str() << std::endl;
 	file.open(input.str().c_str(), ios_base::in | ios_base::binary);
 	if (!file.is_open()) return;
 	while (!_streamEOF(file)) {
@@ -418,11 +348,15 @@ void Test_TCoffeeFromFile(String<char> const in_path, String<char> const file_pr
 	for(unsigned i = 0; (i < seqCount) && !_streamEOF(file); ++i) 	{
 		read(file, origStrSet[i], Fasta());
 		count += length(origStrSet[i]);
-		std::cout << i << ':' << length(origStrSet[i]) << ',';
+		std::cout << "Length of Sequence " << i << ": " << length(origStrSet[i]);
+		if (i<seqCount-1) std::cout << std::endl;
 	}
     file.close();
 	std::cout << std::endl << "Total number of bp: " << count << std::endl;
-	std::cout << "Import sequences done" << std::endl;
+	endTime=clock();
+	time=((float)(endTime-startTime)/CLOCKS_PER_SEC);
+	startTime = endTime;
+	std::cout << "Import sequences done: " << time << " sec" << std::endl;
 
 	// Make dependent string set
 	typedef StringSet<TString, Dependent<> > TStringSet;
@@ -432,89 +366,147 @@ void Test_TCoffeeFromFile(String<char> const in_path, String<char> const file_pr
 		appendValue(strSet, origStrSet[i]);
 	}
 
-	// Score object
-	//Score<int, Pam<AminoAcid, Pam_Data_Dayhoff_MDM78> > score_type_global(250, -1, -4);
-	//Score<int, Pam<AminoAcid, Pam_Data_Dayhoff_MDM78> > score_type_local(250, -1, -4);
-	Score<int, Pam<> > score_type_global(250, -2, -20);
-	Score<int, Pam<> > score_type_local(250, -2, -20);
+	// Score objects
+	Score<int, Pam<> > score_type_global(250, -1, -17);
+	Score<int, Pam<> > score_type_local(250, -2, -13);
 
 	// Generate a primary library, i.e., all global pairwise alignments
 	TGraph lib1(strSet);
 	generatePrimaryLibrary(lib1, score_type_global, GlobalPairwise_Library() );
-
-	//fstream strm01; // Alignment graph as dot
-	//strm01.open(TEST_PATH "my_tcoffee01.dot", ios_base::out | ios_base::trunc);
-	//write(strm01,lib1,DotDrawing());
-	//strm01.close();
-	//std::cout << "Global Pairwise alignments done" << std::endl;
+	endTime=clock();
+	time=((float)(endTime-startTime)/CLOCKS_PER_SEC);
+	startTime = endTime;
+	std::cout << "Stage 1)" << std::endl;
+	std::cout << "Global Pairwise alignments done: " << time << " sec" << std::endl;
+	std::cout << "Library size: " << numVertices(lib1) << " Vertices, " << numEdges(lib1) << " Edges" << std::endl;
 
 	// Generate a primary library, i.e., all local pairwise alignments
 	TGraph lib2(strSet);
-	generatePrimaryLibrary(lib2, score_type_local, LocalPairwise_Library() );
+	if (numEdges(lib1) < 1000000) {
+		generatePrimaryLibrary(lib2, score_type_local, LocalPairwise_Library() );
+		endTime=clock();
+		time=((float)(endTime-startTime)/CLOCKS_PER_SEC);
+		startTime = endTime;
+		std::cout << "Local Pairwise alignments done: " << time << " sec" << std::endl;
+		std::cout << "Library size: " << numVertices(lib2) << " Vertices, " << numEdges(lib2) << " Edges" << std::endl;
+	}
 
-	//fstream strm02; // Alignment graph as dot
-	//strm02.open(TEST_PATH "my_tcoffee02.dot", ios_base::out | ios_base::trunc);
-	//write(strm02,lib2,DotDrawing());
-	//strm02.close();
-	//std::cout << "Local Pairwise alignments done" << std::endl;
-	
-		// Weighting of libraries (Signal addition)
+	// Weighting of libraries (Signal addition)
 	TGraph g(strSet);
 	String<TGraph*> libs;
 	appendValue(libs, &lib1);
 	appendValue(libs, &lib2);
 	combineGraphs(g, libs);
-	//std::cout << "Combining graphs done" << std::endl;
+	endTime=clock();
+	time=((float)(endTime-startTime)/CLOCKS_PER_SEC);
+	startTime = endTime;
+	std::cout << "Combining graphs / libraries done: " << time << " sec" << std::endl;
+	std::cout << "Library size: " << numVertices(g) << " Vertices, " << numEdges(g) << " Edges" << std::endl;
 
+	//String<double> sim;
+	//getSequenceSimilarity(
+	
 	// Clear the old libraries
 	clear(lib1);
 	clear(lib2);
 
-	//fstream strm1; // Alignment graph as dot
-	//strm1.open(TEST_PATH "my_tcoffee1.dot", ios_base::out | ios_base::trunc);
-	//write(strm1,g,DotDrawing());
-	//strm1.close();
-
 	// Triplet library extension
 	tripletLibraryExtension(g);
-	//std::cout << "Triplet done" << std::endl;
-
-	//fstream strm2; // Alignment graph as dot
-	//strm2.open(TEST_PATH "my_tcoffee2.dot", ios_base::out | ios_base::trunc);
-	//write(strm2,g,DotDrawing());
-	//strm2.close();
+	endTime=clock();
+	time=((float)(endTime-startTime)/CLOCKS_PER_SEC);
+	startTime = endTime;
+	std::cout << "Triplet done: " << time << " sec" << std::endl;
+	std::cout << "Library size: " << numVertices(g) << " Vertices, " << numEdges(g) << " Edges" << std::endl;
 
 	// Calculate a distance matrix using a compressed alphabet or not
-	Matrix<double> distanceMatrix; 
-	getCommonKmerMatrix(stringSet(g), distanceMatrix, 6, AAGroupsDayhoff() );
-	//std::cout << "Kmer done" << std::endl;
-	kmerToDistanceMatrix(distanceMatrix, FractionalDistance() );
-	//std::cout << "Distance done" << std::endl;
+	String<double> distanceMatrix; 
+	getKmerSimilarityMatrix(stringSet(g), distanceMatrix, 4, AAGroupsDayhoff() );
+	similarityToDistanceMatrix(distanceMatrix, KimuraDistance() );
+	endTime=clock();
+	time=((float)(endTime-startTime)/CLOCKS_PER_SEC);
+	startTime = endTime;
+	std::cout << "Kmer done: " << time << " sec" << std::endl;
 
 	// Build the neighbor joining tree
 	Graph<Tree<double> > njTreeOut;
 	slowNjTree(distanceMatrix, njTreeOut);
-	//std::cout << "NjTree done" << std::endl;
+	endTime=clock();
+	time=((float)(endTime-startTime)/CLOCKS_PER_SEC);
+	startTime = endTime;
+	std::cout << "NjTree done: " << time << " sec" << std::endl;
 
 	// Perform a progressive alignment
 	Graph<Alignment<TStringSet, void> > gOut(strSet);
 	progressiveAlignment(g, njTreeOut, gOut, Hirschberg() );
-	//std::cout << "Alignment done" << std::endl;
+	endTime=clock();
+	time=((float)(endTime-startTime)/CLOCKS_PER_SEC);
+	startTime = endTime;
+	std::cout << "Progressive alignment done: " << time << " sec" << std::endl;
+
+	//std::stringstream output3;
+	//output3 << in_path << "my_" << file_prefix << ".msf_middle";
+	//fstream strm9; // Alignment graph as msf
+	//strm9.open(output3.str().c_str(), ios_base::out | ios_base::trunc);
+	//write(strm9,gOut,names, MsfFormat());
+	//strm9.close();
+
+	// Calculate a distance matrix using a compressed alphabet or not
+	clear(distanceMatrix);
+	getSequenceSimilarity(gOut, distanceMatrix, AminoAcid() );
+	for(unsigned int row = 0; row<seqCount; ++row) {
+		for(unsigned int col = row + 1; col<seqCount; ++col) {
+			double val = getValue(distanceMatrix, row * seqCount + col);
+			if (length((stringSet(g))[row]) > length((stringSet(g))[col])) val /= length((stringSet(g))[col]);
+			else val /= length((stringSet(g))[row]);
+			assignValue(distanceMatrix, row * seqCount + col, val);
+			assignValue(distanceMatrix, col * seqCount + row, val);
+		}
+	}
+	similarityToDistanceMatrix(distanceMatrix, KimuraDistance() );
+	endTime=clock();
+	time=((float)(endTime-startTime)/CLOCKS_PER_SEC);
+	startTime = endTime;
+	std::cout << "Stage 2)" << std::endl;
+	std::cout << "Kmer done: " << time << " sec" << std::endl;
+
+	// Build the neighbor joining tree
+	clearVertices(njTreeOut);
+	slowNjTree(distanceMatrix, njTreeOut);
+	endTime=clock();
+	time=((float)(endTime-startTime)/CLOCKS_PER_SEC);
+	startTime = endTime;
+	std::cout << "NjTree done: " << time << " sec" << std::endl;
+
+	// Perform a progressive alignment
+	clearVertices(gOut);
+	progressiveAlignment(g, njTreeOut, gOut, Hirschberg() );
+	endTime=clock();
+	time=((float)(endTime-startTime)/CLOCKS_PER_SEC);
+	startTime = endTime;
+	std::cout << "Progressive alignment done: " << time << " sec" << std::endl;
 
 	// Print the alignment
 	// std::cout << gOut << std::endl;
 
-	//fstream strm3; // Alignment graph as dot
-	//strm3.open(TEST_PATH "my_tcoffee3.dot", ios_base::out | ios_base::trunc);
-	//write(strm3,gOut,DotDrawing());
-	//strm3.close();
+	std::stringstream output2;
+	output2 << in_path << file_prefix << ".tfa_my";
+	fstream strm5; // Alignment graph as msf
+	strm5.open(output2.str().c_str(), ios_base::out | ios_base::trunc);
+	write(strm5,gOut,names, MsfFormat());
+	strm5.close();
 
-	std::stringstream output;
-	output << in_path << "my_" << file_prefix << ".msf";
-	fstream strm4; // Alignment graph as msf
-	strm4.open(output.str().c_str(), ios_base::out | ios_base::trunc);
-	write(strm4,gOut,names, MsfFormat());
-	strm4.close();
+	// Clean-up
+	clear(g);
+	clear(gOut);
+	endTime=clock();
+	time=((float)(endTime-startTime)/CLOCKS_PER_SEC);
+	startTime = endTime;
+	std::cout << "Clean-up done: " << time << " sec" << std::endl;
+
+	endTime=clock();
+	time=((float)(endTime-bigbang)/CLOCKS_PER_SEC);
+	std::cout << "Total time: " << time << " sec" << std::endl;
+	std::cout << "==============================" << std::endl;
 }
 
 
@@ -577,10 +569,10 @@ void Test_TCoffeeFromRandomSeq() {
 		//std::cout << "Triplet done" << std::endl;
 
 		// Calculate a distance matrix using a compressed alphabet or not
-		Matrix<double> distanceMatrix; 
-		getCommonKmerMatrix(stringSet(g), distanceMatrix, 6, AAGroupsDayhoff() );
+		String<double> distanceMatrix; 
+		getKmerSimilarityMatrix(stringSet(g), distanceMatrix, 6, AAGroupsDayhoff() );
 		//std::cout << "Kmer done" << std::endl;
-		kmerToDistanceMatrix(distanceMatrix, FractionalDistance() );
+		similarityToDistanceMatrix(distanceMatrix, KimuraDistance() );
 		//std::cout << "Distance done" << std::endl;
 
 
@@ -669,9 +661,9 @@ void Test_TCoffeeFromLibrary() {
 
 
 	// Calculate a distance matrix
-	Matrix<double> distanceMatrix; 
-	getCommonKmerMatrix(stringSet(gAux), distanceMatrix, 6, AAGroupsDayhoff() );
-	kmerToDistanceMatrix(distanceMatrix, FractionalDistance() );
+	String<double> distanceMatrix; 
+	getKmerSimilarityMatrix(stringSet(gAux), distanceMatrix, 6, AAGroupsDayhoff() );
+	similarityToDistanceMatrix(distanceMatrix, KimuraDistance() );
 
 	// Create neighbor joining tree
 	Graph<Tree<double> > njTreeOut;
@@ -727,16 +719,38 @@ void Test_TCoffeeFromLibrary() {
 
 //////////////////////////////////////////////////////////////////////////////
 
+void Test_BaliBaseRef20() {
+	
+	// Windows
+#ifdef PLATFORM_WINDOWS
+	String<char> in_path("Z:\\Balibase\\bb3_release\\RV20\\");
+#else
+	// Linux
+	String<char> in_path("/home/takifugu/rausch/Balibase/bb3_release/RV20/");
+#endif
+
+	for(int i = 1; i<42; ++i) {
+		std::stringstream s;
+		s << "BBS200";
+		if (i < 10) s << '0';
+		s << i;
+		Test_TCoffeeFromFile(in_path,s.str().c_str(), "tfa");
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 void Test_GraphTCoffee() {
 	Test_CompressedAlphabets();
-	Test_LongestIncreasingSubsequence();
-	Test_HeaviestIncreasingSubsequence();
+
 
 	//Test_TCoffeeTmp();
 	Test_TCoffeeGarfield();
 	//Test_TCoffeeFromRandomSeq();
-	//Test_TCoffeeFromFile("Z:\\Balibase\\bb3_release\\RV20\\", "BB20001", "tfa");
+	//Test_BaliBaseRef20();
 	//Test_TCoffeeFromLibrary(); 
+
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee.h");
 
 }
 

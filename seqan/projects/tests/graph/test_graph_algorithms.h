@@ -660,6 +660,137 @@ void Test_PathGrowingAlgorithm() {
 	}
 }
 
+
+//////////////////////////////////////////////////////////////////////////////
+
+void Test_LongestIncreasingSubsequence() {
+	String<char> seq1("zeitgeist");
+	String<unsigned int> pos1;
+	longestIncreasingSubsequence(seq1,pos1);
+	// Trace is backwards
+	SEQAN_TASSERT(seq1[pos1[4]] == 'e')
+	SEQAN_TASSERT(seq1[pos1[3]] == 'g')
+	SEQAN_TASSERT(seq1[pos1[2]] == 'i')
+	SEQAN_TASSERT(seq1[pos1[1]] == 's')
+	SEQAN_TASSERT(seq1[pos1[0]] == 't')
+	//// Output
+	//for(int i = length(pos1)-1; i>=0; --i) {
+	//	std::cout << seq1[pos1[i]] <<  ',';
+	//}
+	//std::cout << std::endl;
+
+	String<unsigned int> seq;
+	appendValue(seq, 5); appendValue(seq, 3); appendValue(seq, 4);
+	appendValue(seq, 9); appendValue(seq, 6); appendValue(seq, 2);
+	appendValue(seq, 1); appendValue(seq, 8); appendValue(seq, 7);
+	appendValue(seq, 10);
+	String<unsigned int> pos;
+	longestIncreasingSubsequence(seq,pos);
+	SEQAN_TASSERT(seq[pos[4]] == 3)
+	SEQAN_TASSERT(seq[pos[3]] == 4)
+	SEQAN_TASSERT(seq[pos[2]] == 6)
+	SEQAN_TASSERT(seq[pos[1]] == 7)
+	SEQAN_TASSERT(seq[pos[0]] == 10)
+	//// Output
+	//for(int i = length(pos)-1; i>=0; --i) {
+	//	std::cout << seq[pos[i]] <<  ',';
+	//}
+	//std::cout << std::endl;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+void Test_HeaviestIncreasingSubsequence() {
+	String<char> seq1("zeitgeist");
+	String<unsigned int> weights1;
+	String<unsigned int> pos1;
+	fill(weights1, length(seq1), 1);
+	unsigned int w = heaviestIncreasingSubsequence(seq1, weights1, pos1);
+	// Trace is backwards
+	SEQAN_TASSERT(w == 5)
+	SEQAN_TASSERT(seq1[pos1[4]] == 'e')
+	SEQAN_TASSERT(seq1[pos1[3]] == 'g')
+	SEQAN_TASSERT(seq1[pos1[2]] == 'i')
+	SEQAN_TASSERT(seq1[pos1[1]] == 's')
+	SEQAN_TASSERT(seq1[pos1[0]] == 't')
+	//// Output
+	//for(int i = length(pos1)-1; i>=0; --i) {
+	//	std::cout << seq1[pos1[i]] <<  ',';
+	//}
+	//std::cout << std::endl;
+
+	// Alter weights
+	clear(pos1);
+	assignProperty(weights1, 2, 10);
+	w = heaviestIncreasingSubsequence(seq1, weights1, pos1);
+	SEQAN_TASSERT(w == 13)
+	SEQAN_TASSERT(seq1[pos1[3]] == 'e')
+	SEQAN_TASSERT(seq1[pos1[2]] == 'i')
+	SEQAN_TASSERT(seq1[pos1[1]] == 's')
+	SEQAN_TASSERT(seq1[pos1[0]] == 't')
+	//// Output
+	//for(int i = length(pos1)-1; i>=0; --i) {
+	//	std::cout << seq1[pos1[i]] <<  ',';
+	//}
+	//std::cout << std::endl;
+
+	String<unsigned int> seq;
+	appendValue(seq, 1); appendValue(seq, 0);
+	appendValue(seq, 1); appendValue(seq, 0);
+	appendValue(seq, 1); appendValue(seq, 0);
+	String<unsigned int> weights;
+	appendValue(weights, 15); appendValue(weights, 10);
+	appendValue(weights, 10); appendValue(weights, 10);
+	appendValue(weights, 10); appendValue(weights, 15);
+	String<unsigned int> pos;
+	w = heaviestIncreasingSubsequence(seq, weights, pos);
+	SEQAN_TASSERT(w == 20)
+	SEQAN_TASSERT(seq[pos[1]] == 0)
+	SEQAN_TASSERT(seq[pos[0]] == 1)
+	//// Output
+	//for(int i = length(pos)-1; i>=0; --i) {
+	//	std::cout << seq[pos[i]] <<  ',';
+	//}
+	//std::cout << std::endl;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+void Test_HeaviestCommonSubsequence() {
+	typedef String<AminoAcid> TString;
+	typedef StringSet<TString, Dependent<> > TStringSet;
+	typedef Graph<Alignment<TStringSet, int> > TGraph;
+	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	
+	TString s1 = "aaa";
+	TString s2 = "aa";
+	TStringSet strSet;
+	assignValueById(strSet, s1);
+	assignValueById(strSet, s2);
+	TGraph g(strSet);
+	addVertex(g, 0, 0, 1);
+	addVertex(g, 0, 1, 1);
+	addVertex(g, 0, 2, 1);
+	addVertex(g, 1, 0, 1);
+	addVertex(g, 1, 1, 1);
+	std::cout << g << std::endl;
+	addEdge(g, 0, 3, 10); addEdge(g, 0, 4, 15);
+	addEdge(g, 1, 3, 10); addEdge(g, 1, 4, 10);
+	addEdge(g, 2, 3, 15); addEdge(g, 2, 4, 10);
+	String<String<TVertexDescriptor> > str1;
+	String<String<TVertexDescriptor> > str2;
+	String<String<TVertexDescriptor> > align;
+	String<TVertexDescriptor> tmp;
+	clear(tmp); appendValue(tmp, 0); appendValue(str1, tmp);
+	clear(tmp); appendValue(tmp, 1); appendValue(str1, tmp);
+	clear(tmp); appendValue(tmp, 2); appendValue(str1, tmp);
+	clear(tmp); appendValue(tmp, 3); appendValue(str2, tmp);
+	clear(tmp); appendValue(tmp, 4); appendValue(str2, tmp);
+	heaviestCommonSubsequence(g, str1, str2, align);
+}
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 void Test_GraphAlgorithms() {
@@ -690,6 +821,16 @@ void Test_GraphAlgorithms() {
 
 	//Matching
 	Test_PathGrowingAlgorithm();
+
+	// Longest Increasing Subsequence
+	Test_LongestIncreasingSubsequence();
+
+	// Heaviest Increasing Subsequence
+	Test_HeaviestIncreasingSubsequence();
+	Test_HeaviestCommonSubsequence();
+
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_algorithm.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_algorithm_lis_his.h");
 }
 
 

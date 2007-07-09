@@ -668,7 +668,11 @@ write(TFile & file,
 		
 		_streamWrite(file,"PileUp\n");
 		_streamPut(file, '\n');
-		_streamWrite(file," MSF: \n");
+		_streamWrite(file," MSF: ");
+		_streamPutInt(file, colLen);
+		_streamWrite(file," Type: P");
+		_streamWrite(file," Check: 0 ..");
+		_streamPut(file, '\n');
 		_streamPut(file, '\n');
 		TSize offset = 0;
 		for(TSize i = 0; i<nseq; ++i) {
@@ -677,7 +681,9 @@ write(TFile & file,
 			_streamWrite(file," oo  Len:  ");
 			TSize len = length(names[i]);
 			if (len > offset) offset = len;
-			_streamPutInt(file, length((stringSet(g))[i]));
+			_streamPutInt(file, colLen);
+			_streamWrite(file," Check: 0");
+			_streamWrite(file," Weight: 1.00");
 			_streamPut(file, '\n');
 		}
 		offset += 5;
@@ -697,7 +703,8 @@ write(TFile & file,
 				}
 				for(TSize finger = col; finger<col+max; ++finger) {
 					if ((finger - col) % 10 == 0) _streamPut(file, ' ');
-					_streamPut(file, getValue(align, i*colLen + finger));
+					if (getValue(align, i*colLen + finger) == '-') _streamPut(file, '.');
+					else _streamPut(file, getValue(align, i*colLen + finger));
 				}
 				_streamPut(file, '\n');
 			}

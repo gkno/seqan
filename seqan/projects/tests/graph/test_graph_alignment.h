@@ -810,6 +810,13 @@ void Test_GraphAlignment() {
 
 	// To test the runtime
 	//Test_Runtime2();
+
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_base.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_gotoh.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_hirschberg.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_interface.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_myers.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_needleman_wunsch.h");
 }
 
 }

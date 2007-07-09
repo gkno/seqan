@@ -564,6 +564,11 @@ void Test_EdgeStump() {
 void Test_GraphBasics() {
 	Test_IdManager();	// Test Id Manager
 	Test_EdgeStump();	// Test EdgeStumps
+
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_base.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_idmanager.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_interface.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_edgestump.h");
 }
 
 

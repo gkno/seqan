@@ -579,8 +579,15 @@ void Test_GraphIterators() {
 	Test_DfsPreorderIter<Automaton<char> >();
 	Test_DfsPreorderIterator();
 
-}
 
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_iterator.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_iterator_vertex.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_iterator_outedge.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_iterator_adjacency.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_iterator_edge.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_iterator_bfs.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_iterator_dfs.h");
+}
 
 }
 

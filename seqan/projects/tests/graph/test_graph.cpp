@@ -52,38 +52,9 @@ int main()
 	Test_GraphIntervalTree();	// Test Interval Tree
 
 
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_base.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_idmanager.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_interface.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_edgestump.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_directed.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_undirected.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_automaton.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_wordgraph.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_tree.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_align.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_iterator.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_iterator_vertex.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_iterator_outedge.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_iterator_adjacency.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_iterator_edge.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_property.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_oracle.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_trie.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_drawing.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_iterator_bfs.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_iterator_dfs.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_utility_alphabets.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_utility_parsing.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_algorithm.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_algorithm_lis_his.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_base.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_gotoh.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_hirschberg.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_interface.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_myers.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_needleman_wunsch.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee.h");
 
 
 	SEQAN_TREPORT("TEST END")

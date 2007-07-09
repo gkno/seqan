@@ -51,6 +51,7 @@ _localAlignment(TAlign& align,
 
 	// Stop looking for local alignments, if there are to short
 	TSize local_len;
+	TSize count = 0;
 	do {
 		local_len = 0;
 		typedef Graph<Alignment<TStringSet, void> > TPairGraph;
@@ -92,7 +93,8 @@ _localAlignment(TAlign& align,
 		//	std::cout << std::endl;
 		//}
 		//std::cout << std::endl;
-	} while (local_len > minLen);
+		++count;
+	} while ((local_len > minLen) && (count < 10));
 
 	//// Debug Code
 	//// Print all the matches

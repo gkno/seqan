@@ -99,6 +99,9 @@ void Test_Trie() {
 void Test_GraphDerivedTypes() {
 	Test_Oracle();
 	Test_Trie();
+
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_oracle.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_trie.h");
 }
 
 }
