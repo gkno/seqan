@@ -764,9 +764,8 @@ void NeighborJoining() {
 // Neighbor Joining
 
 	// Create a distance matrix
-	Matrix<double> mat;
-	setDimension(mat, 2);setLength(mat, 0, 8);setLength(mat, 1, 8);
-	fill(host(mat), 8*8, 0);
+	String<double> mat;
+	fill(mat, 8*8, 0);
 	assignValue(mat, 0*8+0, 0);assignValue(mat, 0*8+1, 7);assignValue(mat, 0*8+2, 8);assignValue(mat, 0*8+3, 11);
 	assignValue(mat, 0*8+4, 13);assignValue(mat, 0*8+5, 16);assignValue(mat, 0*8+6, 13);assignValue(mat, 0*8+7, 17);
 	assignValue(mat, 1*8+0, 7);assignValue(mat, 1*8+1, 0);assignValue(mat, 1*8+2, 5);assignValue(mat, 1*8+3, 8);
@@ -856,9 +855,9 @@ void TCoffee() {
 	tripletLibraryExtension(g);
 
 	// Calculate a distance matrix using a compressed alphabet or not
-	Matrix<double> distanceMatrix; 
-	getCommonKmerMatrix(stringSet(g), distanceMatrix, 6, AAGroupsDayhoff() );
-	kmerToDistanceMatrix(distanceMatrix, FractionalDistance() );
+	String<double> distanceMatrix; 
+	getKmerSimilarityMatrix(stringSet(g), distanceMatrix, 6, AAGroupsDayhoff() );
+	similarityToDistanceMatrix(distanceMatrix, KimuraDistance() );
 
 	// Build the neighbor joining tree
 	Graph<Tree<double> > njTreeOut;
