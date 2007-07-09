@@ -2151,7 +2151,7 @@ buildContextTree(Index<TIndexType, Index_ESA<> > & index,
 	SEQAN_PROTIMESTART(addSuffixLinks);
     addSuffixLinks(vlmm);
 	std::cout << "added suffix links and reverse suffix links: " <<SEQAN_PROTIMEDIFF(addSuffixLinks)<<" seconds"<<std::endl;
-	//std::cout <<vlmm;
+	std::cout <<vlmm;
 	SEQAN_PROTIMESTART(pruneTree);
 	pruneTree(vlmm,parameters);
 	std::cout << "Size of vlmm after prune Tree:"<<numVertices(vlmm)<< " Time: "<<SEQAN_PROTIMEDIFF(pruneTree)<<std::endl;
@@ -2310,21 +2310,82 @@ estimateLikelihoodWindow( Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM <
 	
 	for(unsigned i = 0;i<windowSize;++i,goNext(windowEnd))
 			result += log(getProbabilityForLongestContext(vlmm,windowEnd));
-	goNext(windowEnd);
+			
 	best = result;
 	cout <<"window score:" <<result<<endl;
 	for(;!atEnd(windowEnd);goNext(windowEnd),goNext(windowStart))
 	{
 		result += -log(getProbabilityForLongestContext(vlmm,windowStart));
 		result += log(getProbabilityForLongestContext(vlmm,windowEnd));
-		cout <<"window score:" <<result<<endl;
-		//cout <<" prob for letter: "<<value(it)<< " is: "<<getProbabilityForLongestContext(vlmm,it)<<endl;
+		//cout <<"window score:" <<result<<endl;
 		if(result > best)
 			best = result;
 	}
 	return best;
 }
 
+
+// estimates the highest scoring window of size windowSize and the likelihood on the whole sequence
+template<typename TAlphabet,typename TCargo,typename TVLMMSpec>
+inline float
+estimateLikelihoodWindowAndWhole( Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TVLMMSpec > > > > &vlmm,
+					String<TAlphabet> &text,
+					unsigned windowSize,
+					float &bestWindow)
+{
+	if(length(text)<windowSize)
+		return (float)0;
+	float wholeSequenceScore=0,result = 0;
+	typedef typename Iterator<String<TAlphabet> >::Type TIter;
+	TIter windowEnd = begin(text),windowStart = begin(text);
+	goBegin(windowEnd);
+	goBegin(windowStart);
+	float dummy;
+	for(unsigned i = 0;i<windowSize;++i,goNext(windowEnd)){
+			dummy = log(getProbabilityForLongestContext(vlmm,windowEnd));
+			result += dummy;
+			wholeSequenceScore += dummy;
+	}
+			
+	bestWindow = result;
+	
+	for(;!atEnd(windowEnd);goNext(windowEnd),goNext(windowStart))
+	{
+		dummy = log(getProbabilityForLongestContext(vlmm,windowEnd));
+		result += -log(getProbabilityForLongestContext(vlmm,windowStart));
+		result += dummy;
+		wholeSequenceScore += dummy;
+		if(result > bestWindow)
+			bestWindow = result;
+	}
+	return wholeSequenceScore;
+}
+
+// estimates the likelihood for every sequences in the input file and save it in the outout file
+template<typename TAlphabet,typename TCargo,typename TVLMMSpec, typename TFile>
+inline void estimateLikelihoodOnFile(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TVLMMSpec > > > > &vlmm,
+									 String<char> &sequenceFile,
+									 TFile &outFile,
+									 unsigned windowSize)
+{
+		String<String<char> > ids;
+		String<String<TAlphabet> > sequences;
+		createInputString(sequenceFile,sequences,ids);
+		typedef typename Iterator<String<String<TAlphabet> > >::Type TIter;
+		typedef typename Iterator<String<String<char> > >::Type TIterChar;
+		TIter it = begin(sequences);
+		TIterChar id = begin(ids);
+		//put first line for file
+		_streamWrite(outFile,"Id\tSequenceLength\tLikelihood(Sequence)\tLikelihood(BestWindow of size ");
+		_streamPutInt(outFile,windowSize);
+		_streamWrite(outFile,")\n");
+		for(goBegin(it);!atEnd(it);goNext(it),goNext(id))
+		{
+			float bestWindow=0,wholeSequenceScore=0;
+			wholeSequenceScore =estimateLikelihoodWindowAndWhole(vlmm,value(it),windowSize,bestWindow);
+			saveSequenceLikelihood(outFile,windowSize,length(value(it)),value(id),wholeSequenceScore,bestWindow);
+		}
+}
 
 template<typename TAlphabet,typename TCargo,typename TVLMMSpec,typename TIter>
 inline float
@@ -2377,7 +2438,7 @@ writeHead(Graph<Automaton<Dna, TCargo , WordGraph < VLMM < ContextTree > > > > &
 	   TFile & target)
 {	
 		_streamWrite(target,"VLMM\tContextTree\tDna\t");
-		_streamPutInt(target,numVertices(vlmm));
+		_streamPutInt(target,length(vlmm.data_marked));
 }
 
 template<typename TFile,  typename TCargo >
@@ -2386,7 +2447,7 @@ writeHead(Graph<Automaton<AminoAcid, TCargo , WordGraph < VLMM < BioPST > > > > 
 	   TFile & target)
 {	
 	_streamWrite(target,"VLMM\tBio-PST\tAminoAcid\t");
-	_streamPutInt(target,numVertices(vlmm));
+	_streamPutInt(target,length(vlmm.data_marked));
 }
 
 template<typename TFile,  typename TCargo >
@@ -2395,7 +2456,7 @@ writeHead(Graph<Automaton<Dna, TCargo , WordGraph < VLMM < BioPST > > > > &vlmm,
 	   TFile & target)
 {	
 	_streamWrite(target,"VLMM\tBio-PST\tDna\t");
-	_streamPutInt(target,numVertices(vlmm));
+	_streamPutInt(target,length(vlmm.data_marked));
 		
 }
 
@@ -2542,6 +2603,32 @@ SEQAN_CHECKPOINT
 	target.close();
 
 }
+
+
+// save function where a filehandle is created for the filename
+template<typename TFile>
+inline void saveSequenceLikelihood(TFile &outFile,
+					   unsigned windowSize,
+					   unsigned SequenceLength,
+					   String<char> & id,
+					   float wholeSequenceScore,
+					   float bestWindow)
+{
+SEQAN_CHECKPOINT
+	_streamWrite(outFile,id);
+	_streamPut(outFile,'\t');
+	_streamPutInt(outFile,SequenceLength);
+	_streamPut(outFile,'\t');
+	_streamPutFloat(outFile,wholeSequenceScore);
+	_streamPut(outFile,'\t');
+	_streamPutFloat(outFile,bestWindow);
+	_streamPut(outFile,'\n');
+
+
+
+}
+
+
 /*************
 
 read the graph
@@ -2668,7 +2755,7 @@ readGraph(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < ContextTree > >
 		int yes = _scanNextIntEntry(file);
 		if(yes)
 			setMarked(vlmm,node,true);
-		cout <<"node:" << node<< " father:  "<< father<< " suffixLinkTarget: "<<suffixLink<< " Marked?: "<<yes<<endl;
+		//cout <<"node:" << node<< " father:  "<< father<< " suffixLinkTarget: "<<suffixLink<< " Marked?: "<<yes<<endl;
 
 		for(TSize i =0;i<table_length;++i)
 		{
@@ -2679,7 +2766,7 @@ readGraph(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < ContextTree > >
 				assignValue(vlmm.data_id_managerV.data_in_use, child, true);
 				String<TAlphabet> edgeString;
 				_scanNextEntry(file,edgeString);
-				cout << "edge string to node:"<<child<< " is:" <<edgeString<<endl;
+				//cout << "edge string to node:"<<child<< " is:" <<edgeString<<endl;
 				addEdge(vlmm,node,child,edgeString);
 			}
 
@@ -2689,7 +2776,7 @@ readGraph(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < ContextTree > >
 		for(TSize i =0;i<table_length;++i)
 		{
 			float set = _scanNextFloatEntry(file);
-			cout << "float: "<<set;
+			//cout << "float: "<<set;
 			setProbability(vlmm,node,i,set);
 		}
 		cout <<endl;
@@ -2700,7 +2787,7 @@ readGraph(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < ContextTree > >
 			{	
 				//set child true for function addEdge
 				setReverseSuffixLink(vlmm,node,target,i);
-				cout << "reverseSL to node:"<<target<< " is:" <<(TAlphabet)i<<endl;
+				//cout << "reverseSL to node:"<<target<< " is:" <<(TAlphabet)i<<endl;
 			}
 		}
 		_scanNextIntEntry(file);
@@ -2708,7 +2795,7 @@ readGraph(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < ContextTree > >
     
 	for(TIterConst it = begin(vlmm.data_vertex);!atEnd(it);goNext(it)) {
 		if (!idInUse(vlmm.data_id_managerV, position(it))){
-			cout << "id:" <<position(it)<<" is not used\n";
+			//cout << "id:" <<position(it)<<" is not used\n";
 			appendValue(vlmm.data_id_managerV.data_freeIds, position(it));
 		}
 		else
@@ -2719,34 +2806,105 @@ readGraph(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < ContextTree > >
 
 }
 
+template<typename TAlphabet>
+void createInputString(String<char>  &filename,
+					   String<String<TAlphabet> > &sequences,
+					   String<String<char> > &ids){
 
+	//Read in sequences
+
+	ifstream file2,file;
+	file2.open(toCString(filename), ios_base::in | ios_base::binary );
+	if (!file2.is_open()) {
+				cerr << "Import of sequence " << filename << " failed." << endl;
+				exit(1);
+		}
+	int count = 0;
+	while(!_streamEOF(file2))
+	{
+		goNext(file2,Fasta());
+		++count;
+	}
+	file2.close();
+	cout<<"There are "<<count<<" seqs in the file "<<filename<<endl;
+	file.open(toCString(filename), ios_base::in | ios_base::binary );
+	resize(ids,count);
+	resize(sequences,count);
+	for(int i = 0;i<count;++i){
+		read(file, ids[i], Raw());
+		read(file, sequences[i],  Fasta());
+
+
+	}
+	
+}
 
 template<typename TFile>
 inline void
 read( TFile & file)
 {
-	Graph<Automaton<Dna, String<Dna> , WordGraph < VLMM < ContextTree > > > > vlmmDna;
-	Graph<Automaton<AminoAcid, String<AminoAcid> , WordGraph < VLMM < ContextTree > > > > vlmmProtein;
+	
+	
 	String<char> entry;
 	_scanNextEntry(file,entry);
 	_scanNextEntry(file,entry);
 	_scanNextEntry(file,entry);
 	if(entry == "Dna"){
-		//typedef Dna TAlphabet;
+		Graph<Automaton<Dna, String<Dna> , WordGraph < VLMM < ContextTree > > > > vlmmDna;
 		readGraph(vlmmDna,file);
 		cout<< vlmmDna;
 	}
 	if(entry == "AminoAcid"){
-		//typedef AminoAcid TAlphabet;
+		Graph<Automaton<AminoAcid, String<AminoAcid> , WordGraph < VLMM < ContextTree > > > > vlmmProtein;
 		readGraph(vlmmProtein,file);
+
 	}
-	
+	else{
+		cerr<<"Alphabet in file "<<file<<" not supported for vlmm.Maybe incorrect input file format.\n";
+		exit(1);
+	}
 	
 	//typedef Graph<Automaton<TAlphabet, String<TAlphabet> , WordGraph < VLMM < ContextTree > > > TVLMM;
 	//TVLMM vlmm;
 	//readGraph(vlmm,file);
 
 }
+
+template<typename TFile>
+inline void
+readForLikelihoodEstimate(TFile			& file,
+						  String<char>	& sequenceFile,
+						  TFile			& outFile,
+						  unsigned		windowSize)
+{
+	
+	
+	String<char> entry;
+	_scanNextEntry(file,entry);
+	_scanNextEntry(file,entry);
+	_scanNextEntry(file,entry);
+	if(entry == "Dna"){
+		Graph<Automaton<Dna, String<Dna> , WordGraph < VLMM < ContextTree > > > > vlmmDna;
+		readGraph(vlmmDna,file);
+		estimateLikelihoodOnFile(vlmmDna,sequenceFile,outFile,windowSize);
+
+	}
+	if(entry == "AminoAcid"){
+		Graph<Automaton<AminoAcid, String<AminoAcid> , WordGraph < VLMM < ContextTree > > > > vlmmProtein;
+		readGraph(vlmmProtein,file);
+		estimateLikelihoodOnFile(vlmmProtein,sequenceFile,outFile,windowSize);
+	}
+	else{
+		cerr<<"Alphabet in file "<<file<<" not supported for vlmm.Maybe incorrect input file format.\n";
+		exit(1);
+	}
+
+
+}
+
+
+
+
 //write the vlmm to a file in Easy-readable format,also used by the  << Operator
 template<typename TFile, typename TAlphabet, typename TCargo, typename TSpec , typename TIDString>
 inline void
