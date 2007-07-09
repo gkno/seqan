@@ -14,17 +14,49 @@ FILE_OUTPUT = 'data.js'
 FILE_OUTPUT_OLD = 'data_old.js'
 PATH_RESULTFILES = 'results/'
 
-LOAD_MAX = 2
+LOAD_MAX = 1
+SERVER_FAILURE_LIMIT = 3
 
 # [plaform, server]
 SERVERS = [
-    ['gcc', 'mouse'], 
-    ['gcc', 'frosch'], 
+#    ['gcc', 'mouse'], 
+#    ['gcc', 'frosch'], 
     ['gcc', 'kiefer'], 
-    ['gcc', 'fichte'], 
-    ['gcc', 'aplysia'], 
-#    ['gcc', 'nawab'], 
-#    ['gcc', 'bauch'], 
+#    ['gcc', 'fichte'], 
+#    ['gcc', 'aplysia'], 
+    ['gcc', 'nawab'], 
+
+    ['gcc', 'duesseldorf'], 
+    ['gcc', 'hamm'], 
+    ['gcc', 'koeln'], 
+    ['gcc', 'bielefeld'], 
+    ['gcc', 'duisburg'], 
+    ['gcc', 'muenster'], 
+    ['gcc', 'aachen'], 
+    ['gcc', 'dortmund'], 
+    ['gcc', 'essen'], 
+    ['gcc', 'hagen'], 
+
+    ['gcc', 'guangzhou'], 
+    ['gcc', 'harbin'], 
+    ['gcc', 'chongqing'], 
+    ['gcc', 'shenyang'], 
+    ['gcc', 'wuhan'], 
+    ['gcc', 'chengdu'], 
+    ['gcc', 'tianjin'], 
+    ['gcc', 'xian'], 
+    ['gcc', 'peking'], 
+
+    ['gcc', 'leningrad'], 
+    ['gcc', 'jekatarinburg'], 
+    ['gcc', 'irkutsk'], 
+    ['gcc', 'wladiwostok'], 
+    ['gcc', 'kaliningrad'], 
+    ['gcc', 'wolgograd'], 
+    ['gcc', 'omsk'], 
+    ['gcc', 'nowosibirsk'], 
+    ['gcc', 'moskau'], 
+
     ['windows', 'localhost']
 ]
     
@@ -37,9 +69,10 @@ COMPILERS = [
     ['gcc',     'g++-4.1.1',  '/import/testing/bin/g++'],
 #    ['windows', 'vc++-2003', 'cl']
 ]
-    
-MODES = ['release build']
-#MODES = ['release build', 'release runonly']
+ 
+MODES = ['Simple justcompile']    
+#MODES = ['Simple justcompile', 'Simple justrun']
+#MODES = ['Release build', 'Release runonly']
 
 ################################################################################
 
@@ -113,7 +146,8 @@ def init():
             'server': servername,
             'load': 0,
             'loadmax': LOAD_MAX,
-            'count': 0
+            'count': 0,
+            'failures': 0
         }
         i += 1
         servers.append(server)
@@ -168,8 +202,11 @@ def createPage():
     
     s += '<div class=mode>Server loads</div>\n'
     s += '<table cellspacing=0 cellpadding=0 border=0>\n'
+    s += '<tr><td>&nbsp;</td><th>active</th><th>finished</th><th>failures</th></tr>\n'
     for server in SERVERS:
-        s += '<tr><td class=server>' + server['server'] + '</td><td>active=' + str(server['load']) + '</td><td>finished=' + str(server['count']) + '</td></tr>'
+        if server['failures'] >= SERVER_FAILURE_LIMIT: cls = 'class=failed'
+        else: cls = ''
+        s += '<tr><th ' + cls + '>' + server['server'] + '</td><td align=middle ' + cls + '>' + str(server['load']) + '</td><td align=middle ' + cls + '>' + str(server['count']) + '</td><td align=middle ' + cls + '>' + str(server['failures']) + '</td></tr>'
     s += '</table>'
     
     f = open(PATH_OUTPUT + FILE_OUTPUT)
@@ -203,10 +240,10 @@ def finishedAll():
 ################################################################################
 
 def scheduleTasks():
-    global TASKS, SERVERS
+    global TASKS, SERVERS, SERVER_FAILURE_LIMIT
     
     for server in SERVERS:
-        if (server['load'] < server['loadmax']):
+        if (server['load'] < server['loadmax']) and (server['failures'] < SERVER_FAILURE_LIMIT):
             startTaskForServer(server)
         
 ################################################################################
@@ -233,11 +270,28 @@ def pollTasks():
 
 
 def onTaskStopped(task):
+    global ALL_STATES
+    ALL_STATES = ''
+    
+    server = task['server']
+    server['load'] -= 1
+
     proc = task['proc']
     out = proc.stdout.read()
     err = proc.stderr.read()
     
     is_error = (proc.poll() != 0)
+    
+    if is_error:
+        if out.find('compile') == -1:
+            #reschedule
+            server['failures'] += 1
+            task['state'] = 'pending'
+            task['proc'] = None
+            print server['server'] + ' failed'
+            return
+            
+    server['count'] += 1
     
     if is_error: task['state'] = 'error'
     else: task['state'] = 'ok'
@@ -261,10 +315,6 @@ def onTaskStopped(task):
         f.write(err)
         f.write('\n')
     f.close()
-    
-    server = task['server']
-    server['load'] -= 1
-    server['count'] += 1
     
     print task['filename'] + ":",
     if is_error: print "ERROR"
@@ -309,7 +359,7 @@ def startTaskGCC(task, server):
                     "BuildFolder=" + task['platform'] + "/" + task['compilername']
          ]
 #    print c;
-    return subprocess.Popen(c, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    return subprocess.Popen(c, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         
 
 def startTaskWindows(task, server):
