@@ -2151,7 +2151,7 @@ buildContextTree(Index<TIndexType, Index_ESA<> > & index,
 	SEQAN_PROTIMESTART(addSuffixLinks);
     addSuffixLinks(vlmm);
 	std::cout << "added suffix links and reverse suffix links: " <<SEQAN_PROTIMEDIFF(addSuffixLinks)<<" seconds"<<std::endl;
-	std::cout <<vlmm;
+	//std::cout <<vlmm;
 	SEQAN_PROTIMESTART(pruneTree);
 	pruneTree(vlmm,parameters);
 	std::cout << "Size of vlmm after prune Tree:"<<numVertices(vlmm)<< " Time: "<<SEQAN_PROTIMEDIFF(pruneTree)<<std::endl;
@@ -2383,6 +2383,7 @@ inline void estimateLikelihoodOnFile(Graph<Automaton<TAlphabet, TCargo , WordGra
 		{
 			float bestWindow=0,wholeSequenceScore=0;
 			wholeSequenceScore =estimateLikelihoodWindowAndWhole(vlmm,value(it),windowSize,bestWindow);
+			cout <<"wSS" << wholeSequenceScore<<" bestWindow "<<bestWindow<<endl;
 			saveSequenceLikelihood(outFile,windowSize,length(value(it)),value(id),wholeSequenceScore,bestWindow);
 		}
 }
@@ -2779,7 +2780,7 @@ readGraph(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < ContextTree > >
 			//cout << "float: "<<set;
 			setProbability(vlmm,node,i,set);
 		}
-		cout <<endl;
+		//cout <<endl;
 		for(TSize i =0;i<table_length;++i)
 		{
 			TVertexDescriptor target = (unsigned)_scanNextIntEntry(file);
@@ -2798,11 +2799,12 @@ readGraph(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < ContextTree > >
 			//cout << "id:" <<position(it)<<" is not used\n";
 			appendValue(vlmm.data_id_managerV.data_freeIds, position(it));
 		}
-		else
-			cout << "id:" <<position(it)<<" is used\n";
+		else{
+			//cout << "id:" <<position(it)<<" is used\n";
+		}
 
 	}
-	cout<<"laenge: "<<length(vlmm.data_id_managerV.data_freeIds);
+	//cout<<"laenge: "<<length(vlmm.data_id_managerV.data_freeIds);
 
 }
 
@@ -2831,12 +2833,12 @@ void createInputString(String<char>  &filename,
 	resize(ids,count);
 	resize(sequences,count);
 	for(int i = 0;i<count;++i){
-		read(file, ids[i], Raw());
+		//read(file, ids[i], Raw());
 		read(file, sequences[i],  Fasta());
 
 
 	}
-	
+	file.close();
 }
 
 template<typename TFile>
@@ -2870,9 +2872,9 @@ read( TFile & file)
 
 }
 
-template<typename TFile>
+template<typename TInputFile,typename TFile>
 inline void
-readForLikelihoodEstimate(TFile			& file,
+readForLikelihoodEstimate(TInputFile			& file,
 						  String<char>	& sequenceFile,
 						  TFile			& outFile,
 						  unsigned		windowSize)
