@@ -250,7 +250,7 @@ SEQAN_CHECKPOINT
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename Value<TIntervals>::Type TInterval;
 	typedef typename Value<typename Value<TIntervals>::Type>::Type TValue;
-
+	
 	reserve(g.data_vertex,length(intervals));
 	reserve(pm,length(intervals));
 	
@@ -266,6 +266,9 @@ SEQAN_CHECKPOINT
 	resize(interval_pointers,length(intervals));
 
 	_makePointerInterval(intervals,interval_pointers);
+
+	if(length(intervals)==1)
+		center = (rightBoundary(intervals[0])-leftBoundary(intervals[0]))/(TValue)2.0;
 
 	_createIntervalTree(g,pm,interval_pointers,root,(TValue)0.0,center,length(intervals),tag);
 		
