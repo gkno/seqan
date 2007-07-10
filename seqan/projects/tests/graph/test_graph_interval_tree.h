@@ -6,6 +6,7 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 	
+	
 template<typename TValue, typename TConstructSpec, typename TStoreSpec>
 void IntervalTreeTest() {
 //____________________________________________________________________________
@@ -31,7 +32,7 @@ void IntervalTreeTest() {
 	intervals[4].i2 = (TValue)23.0;
 	intervals[5].i1 = (TValue)21.0;
 	intervals[5].i2 = (TValue)25.0;
-	intervals[6].i1 = (TValue)29.0;
+    intervals[6].i1 = (TValue)29.0;
 	intervals[6].i2 = (TValue)42.0;
 	intervals[7].i1 = (TValue)20.0;
 	intervals[7].i2 = (TValue)36.0;
@@ -126,9 +127,24 @@ void IntervalTreeRestTest() {
 	SEQAN_TASSERT(leftBoundary(pm[1].list1[1])==(TValue)3.0);
 	SEQAN_TASSERT(rightBoundary(pm[1].list2[0])==(TValue)10.0);
 	SEQAN_TASSERT(rightBoundary(pm[1].list2[1])==(TValue)8.0);
+	SEQAN_TASSERT(cargo(pm[1].list1[0])==2);
+	SEQAN_TASSERT(cargo(pm[1].list2[0])==2);
+	SEQAN_TASSERT(cargo(pm[1].list1[1])==1);
+	SEQAN_TASSERT(cargo(pm[1].list2[1])==1);
+
+	SEQAN_TASSERT(getLeftBoundary(pm[1].list1[0])==(TValue)2.0);
+	SEQAN_TASSERT(getLeftBoundary(pm[1].list1[1])==(TValue)3.0);
+	SEQAN_TASSERT(getRightBoundary(pm[1].list2[0])==(TValue)10.0);
+	SEQAN_TASSERT(getRightBoundary(pm[1].list2[1])==(TValue)8.0);
+	SEQAN_TASSERT(getCargo(pm[1].list1[0])==2);
+	SEQAN_TASSERT(getCargo(pm[1].list2[0])==2);
+	SEQAN_TASSERT(getCargo(pm[1].list1[1])==1);
+	SEQAN_TASSERT(getCargo(pm[1].list2[1])==1);
 
 	SEQAN_TASSERT(leftBoundary(pm[2].list1[0])==(TValue)1.0);
 	SEQAN_TASSERT(rightBoundary(pm[2].list2[0])==(TValue)5.0);
+	SEQAN_TASSERT(cargo(pm[2].list1[0])==0);
+	SEQAN_TASSERT(getCargo(pm[2].list2[0])==0);
 
 	SEQAN_TASSERT(leftBoundary(pm[3].list1[0])==(TValue)22.0);
 	SEQAN_TASSERT(leftBoundary(pm[3].list1[1])==(TValue)25.0);
@@ -143,13 +159,21 @@ void IntervalTreeRestTest() {
 	SEQAN_TASSERT(leftBoundary(pm[5].list1[0])==(TValue)21.0);
 	SEQAN_TASSERT(rightBoundary(pm[5].list2[0])==(TValue)23.0);
 
-	//suche nach allen intervallen den query punkt enthalten
+	//suche nach allen intervallen die query enthalten 
 	TValue query = (TValue)13.0;
 	String<TCargo> result;
 	findIntervals(g, pm, query, result);
 
 	SEQAN_TASSERT(length(result)==0);
 
+	//suche nach allen intervallen die query enthalten
+	query = (TValue)23.0;
+	findIntervalsExcludeTouching(g, pm, query, result);
+	SEQAN_TASSERT(length(result)==1);
+	SEQAN_TASSERT(result[0]==4);
+
+
+	
 
 }
 
@@ -158,6 +182,8 @@ template<typename TValue>
 void
 testEasyIntervalTree()
 {
+	typedef IntervalAndCargo<TValue,int> TInterval;
+	typedef IntervalTree<TValue,int> TIntervalTree;
 	String<TValue> begins;
 	String<TValue> ends;
 	resize(begins,5);
@@ -173,11 +199,12 @@ testEasyIntervalTree()
 	ends[3] = 10;
 	ends[4] = 5;
 
-	IntervalTree<TValue> itree(begin(begins),begin(ends),length(begins));
+	TIntervalTree itree(begin(begins),begin(ends),length(begins));
 
 	TValue query = 7;
-	//Default cargo int
-	String<int> result;
+
+	typedef typename Cargo<TIntervalTree>::Type TCargo;
+	String<TCargo > result;
 	findIntervals(itree, query, result);
 	
 	SEQAN_TASSERT(length(result)==2);
@@ -185,7 +212,6 @@ testEasyIntervalTree()
 	SEQAN_TASSERT(result[1]==3);
 	
 
-	typedef IntervalAndCargo<TValue,int> TInterval;
 	String<TInterval> intervals;
 	resize(intervals,length(begins));
 	typename Iterator<String<TValue> >::Type interval_begins = begin(begins);
@@ -197,77 +223,74 @@ testEasyIntervalTree()
 		++interval_begins;
 		intervals[i].i2 = value(interval_ends);
 		++interval_ends;
-		intervals[i].cargo = i;
+		intervals[i].cargo = (TCargo) i;
 		++i;
 	}
 
-	IntervalTree<TValue,int> itree2(intervals);
+	TIntervalTree itree2(intervals);
 	findIntervals(itree2, query, result);
 	SEQAN_TASSERT(length(result)==2);
 	SEQAN_TASSERT(result[0]==1);
 	SEQAN_TASSERT(result[1]==3);
 	//SEQAN_TASSERT(itree == itree2);
 	
-
-	//std::cout << "\n\n\n";
-
-	//cout << itree.g;
-	//for(int i = 0; i < length(itree.pm); ++i)
-	//	std::cout << (itree.pm[i]).center << " ";
-
-	//std::cout << "\n\n\n";
-
-	addInterval(itree,16,20,5);
-	addInterval(itree,8,18);
-	SEQAN_TASSERT(itree.interval_counter==7);
+	String<TCargo> cargos;
+	resize(cargos,5);
+	cargos[0] = 2;
+	cargos[1] = 7;
+	cargos[2] = 1;
+	cargos[3] = 5;
+	cargos[4] = 8;
+	TIntervalTree itree3(begin(begins),begin(ends),begin(cargos),4);
+	findIntervals(itree3, 1, result);
+	SEQAN_TASSERT(length(result)==0);
+	findIntervals(itree3, 4, result);
+	SEQAN_TASSERT(length(result)==2);
+	SEQAN_TASSERT((result[0]==2 && result[1]==1) || (result[0]==1 && result[1]==2));
 	
 
-	//addInterval(itree,-10,15,7);
-	//addInterval(itree,20,100,8);
-	//addInterval(itree,17,18,9);
-	//addInterval(itree,0,25,10);
-	//addInterval(itree,77,88,11);
-	//addInterval(itree,-1,10,12);
+	TIntervalTree itree4(itree3);
+	findIntervals(itree4, 1, result);
+	SEQAN_TASSERT(length(result)==0);
+	findIntervals(itree4, 4, result);
+	SEQAN_TASSERT(length(result)==2);
+	SEQAN_TASSERT((result[0]==2 && result[1]==1) || (result[0]==1 && result[1]==2));
+	
+	itree2 = itree3;
+	findIntervals(itree2, 1, result);
+	SEQAN_TASSERT(length(result)==0);
+	findIntervals(itree2, 4, result);
+	SEQAN_TASSERT(length(result)==2);
+	SEQAN_TASSERT((result[0]==2 && result[1]==1) || (result[0]==1 && result[1]==2));
+	addInterval(itree2,intervals[4]);
+	SEQAN_TASSERT(itree2.interval_counter==5);
+	
+	TInterval iv; 
+	iv.i1 = 100;
+	iv.i2 = 100;
+	iv.cargo = 100;
+	addInterval(itree2,iv);
+	SEQAN_TASSERT(itree2.interval_counter==6);
+	findIntervals(itree2, 100, result);
+	SEQAN_TASSERT(length(result)==1);
+	SEQAN_TASSERT(result[0]==100);
+	findIntervalsExcludeTouching(itree2,100,result);
+	SEQAN_TASSERT(length(result)==0);
 
-	//cout << itree.g;
-	//for(int i = 0; i < length(itree.pm); ++i)
-	//{
-	//	std::cout << "\n"<< (itree.pm[i]).center << "\n";
-	//	for(int j = 0; j < length((itree.pm[i]).list1); ++j)
-	//		std::cout << leftBoundary((itree.pm[i]).list1[j])<<" ";
-	//}
-	//std::cout << "\n\n\n";
+	addInterval(itree2, 44, 88, 100);
+	SEQAN_TASSERT(itree2.interval_counter==7);
+	findIntervals(itree2, 77, result);
+	SEQAN_TASSERT(length(result)==1);
+	SEQAN_TASSERT(result[0]==100);
 
-	//bool chec = removeInterval(itree,-10,15,7);
-	//if(chec) std::cout << "gefunden und gelöscht\n";
-	//else  std::cout << "interval gibt es nicht\n";
-	//chec = removeInterval(itree,20,100,8);
-	//if(chec) std::cout << "gefunden und gelöscht\n";
-	//else  std::cout << "interval gibt es nicht\n";
-	//chec = removeInterval(itree,17,18,9);
-	//if(chec) std::cout << "gefunden und gelöscht\n";
-	//else  std::cout << "interval gibt es nicht\n";
-	//chec = removeInterval(itree,0,25,10);
-	//if(chec) std::cout << "gefunden und gelöscht\n";
-	//else  std::cout << "interval gibt es nicht\n";
-	//chec = removeInterval(itree,77,88,11);
-	//if(chec) std::cout << "gefunden und gelöscht\n";
-	//else  std::cout << "interval gibt es nicht\n";
-	//chec = removeInterval(itree,-1,10,12);
-	//if(chec) std::cout << "gefunden und gelöscht\n";
-	//else  std::cout << "interval gibt es nicht\n";
-	//
-	//std::cout << "\n\njetzt müsste es wieder der alte baum sein:\n";
 
-	//cout << itree.g;
-	//for(int i = 0; i < length(itree.pm); ++i)
-	//{
-	//	std::cout << "\n"<< (itree.pm[i]).center << "\n";
-	//	for(int j = 0; j < length((itree.pm[i]).list1); ++j)
-	//		std::cout << leftBoundary((itree.pm[i]).list1[j])<<" ";
-	//}
-	//std::cout << "\n\n\n";
+	addInterval(itree2, 30,50);
+	SEQAN_TASSERT(itree2.interval_counter==8);
+	findIntervals(itree2, 48, result);
+	SEQAN_TASSERT(length(result)==2);
+	SEQAN_TASSERT((result[0]==100 && result[1]==7)||(result[1]==100 && result[0]==7));
 
+		
 }
 
 
@@ -289,11 +312,14 @@ void Test_GraphIntervalTree()
 //	std::cout << "\nRest ";
 	IntervalTreeRestTest<int>();
 
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_interval_tree.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_interval_types.h");
+	//debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_interval_tree.h");
+	//debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_interval_types.h");
 
 
 }
+
+
+
 
 }
 
