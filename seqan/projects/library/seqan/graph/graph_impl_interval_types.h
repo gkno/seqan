@@ -214,7 +214,7 @@ SEQAN_CHECKPOINT
 
 template<typename TValue, typename TCargo>
 TCargo
-getId(PointAndCargo<TValue,TCargo> & point)
+getCargo(PointAndCargo<TValue,TCargo> & point)
 {
 SEQAN_CHECKPOINT
 	return point.cargo;

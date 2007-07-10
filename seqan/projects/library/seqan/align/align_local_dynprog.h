@@ -457,7 +457,7 @@ typename Iterator<Matrix<TScoreValue, TSourceSpec> >::Type
 smith_waterman_trace(Align<TTargetSource, TTargetSpec> & target_,
 					 typename LocalAlignmentFinder<TScoreValue>::TBoolMatrix & fb_matrix, 
 					   Iter< Matrix<TScoreValue, TSourceSpec>, PositionIterator > source_,
-					   Score<TScoreValue, Simple> const & score_)
+					   Score<TScoreValue, Simple> const &)
 {
 SEQAN_CHECKPOINT
 

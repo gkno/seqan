@@ -1208,7 +1208,7 @@ replace(String<TTargetValue, TTargetSpec> & target,
 		 typename Size< String<TTargetValue, TTargetSpec> >::Type pos_begin,
 		 typename Size< String<TTargetValue, TTargetSpec> >::Type pos_end,
 		 TSource const & source,
-		 Tag<TExpand> const tag)
+		 Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	typedef String<TTargetValue, TTargetSpec> TTarget;
@@ -1238,7 +1238,7 @@ replace(String<TTargetValue, TTargetSpec> & target,
 		typename Size< String<TTargetValue, TTargetSpec> >::Type pos_begin,
 		typename Size< String<TTargetValue, TTargetSpec> >::Type pos_end,
 		TSourceValue const * source,
-		Tag<TExpand> const tag)
+		Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	typedef String<TTargetValue, TTargetSpec> TTarget;

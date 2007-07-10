@@ -81,23 +81,26 @@ getScore(Score<TScoreValue,TScoreSpec> & score_type,
 		 TValue len,
 		 TValue)
 {
-SEQAN_CHECKPOINT
+SEQAN_CHECKPOINT     
 	typedef Align<TAliSource,TAliSpec> TAlign;
 	typedef typename Row<TAlign>::Type TRow;
-	typedef typename Iterator<TRow>::Type TIterator;	
+//	typedef typename Iterator<TRow,GapsIterator<ArrayGaps> >::Type TIterator;	
+	typedef typename Iterator<TRow>::Type TIterator;
 	TIterator row0_it, row1_it;
-//	TValue len1;
 	row0_it = iter(row(segment,0),toViewPosition(row(segment,0),pos_i));
 	row1_it = iter(row(segment,1),toViewPosition(row(segment,1),pos_j));
 	len = toViewPosition(row(segment,0),pos_i + len) - toViewPosition(row(segment,0),pos_i);
 	TValue i = 0;
 	TScoreValue ret_score = 0;
-	
+	cout << segment << "\n";
 	while(i < len)
 	{
-		ret_score += score(score_type,getValue(row0_it),getValue(row1_it));
+		if(isGap(row1_it)||isGap(row0_it))
+			ret_score += scoreGapExtend(score_type);
+		else
+			ret_score += score(score_type,getValue(row0_it),getValue(row1_it));
 		++i;
-		++row0_it;
+		++row0_it; 
 		++row1_it; 
 	}
 	return ret_score;

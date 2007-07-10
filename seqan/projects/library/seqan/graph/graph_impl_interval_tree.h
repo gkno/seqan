@@ -18,7 +18,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ...default:int
 ...remarks:If the intervals are not associated with cargos/IDs, they will be numbered consecutively.
 */
-template<typename TValue, typename TCargo = int>
+template<typename TValue = int, typename TCargo = unsigned int>
 class IntervalTree
 {
 public:
@@ -536,135 +536,6 @@ SEQAN_CHECKPOINT
 
 
 
-//template<typename TGraph, typename TPropertyMap, typename TInterval>
-//bool
-//removeInterval(TGraph & g, TPropertyMap & pm, TInterval interval)
-//{
-//SEQAN_CHECKPOINT
-//
-//	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
-//	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-//	typedef typename Value<TPropertyMap>::Type TProperty;
-//	typedef typename Value<TInterval>::Type TValue;
-//	typedef typename ListType<TProperty>::Type TList;
-//
-//	bool found_and_erased = false;
-//	// start at root
-//	TVertexDescriptor act_knot = 0;
-//	TProperty act_prop = property(pm,act_knot);
-//	TProperty next_prop;
-//		
-//	while(true)
-//	{
-//		TOutEdgeIterator it(g, act_knot);
-//		act_prop = property(pm,act_knot);
-//		if(act_prop.center < leftBoundary(interval))
-//		{
-//			if(atEnd(it)){
-//				break;
-//			}
-//			else{
-//				next_prop = property(pm,targetVertex(it));
-//				if(next_prop.center <= act_prop.center)
-//				{
-//					goNext(it);
-//					if(atEnd(it)){
-//						break;
-//					}
-//				}
-//			}
-//			act_knot = targetVertex(it);
-//		}
-//		else{
-//			if(rightBoundary(interval) <= act_prop.center)
-//			{
-//				if(atEnd(it)){
-//					break;
-//				}
-//				else
-//				{
-//					next_prop = property(pm,targetVertex(it));
-//					if(next_prop.center >= act_prop.center)
-//					{
-//						goNext(it);
-//						if(atEnd(it)){
-//							break;
-//						}
-//					}
-//				}
-//				act_knot = targetVertex(it);
-//			}
-//			else{
-//				for(int i = 0; i < length(act_prop.list1); ++i)
-//				{
-//					if(cargo(value(act_prop.list1,i))==cargo(interval) && leftBoundary(value(act_prop.list1,i))==leftBoundary(interval))
-//					{
-//						found_and_erased = true;
-//						break;
-//					}
-//				}
-//				if(found_and_erased)
-//				{
-//					found_and_erased = false;
-//					for(int i2 = 0; i2 < length(act_prop.list2); ++i2)
-//					{
-//						if(cargo(value(act_prop.list2,i2))==cargo(interval)&& rightBoundary(value(act_prop.list2,i2))==rightBoundary(interval))
-//						{
-//							found_and_erased = true;
-//							break;
-//						}
-//					}
-//					if(found_and_erased )
-//					{
-//						if(length(property(pm,act_knot).list1)==1 && atEnd(it)){
-//							removeVertex(g,act_knot);
-//							resizeVertexMap(g,pm);
-//							break;
-//						}
-//						TList new_list;
-//						resize(new_list,length(act_prop.list1)-1);
-//						arrayCopy(begin(act_prop.list1),iter(act_prop.list1,i),begin(new_list));
-//						arrayCopy(iter(act_prop.list1,i+1),end(act_prop.list1),iter(new_list,i));
-//						property(pm,act_knot).list1 = new_list;
-//						resize(new_list,length(act_prop.list2)-1);
-//						arrayCopy(begin(act_prop.list2),iter(act_prop.list2,i2),begin(new_list));
-//						arrayCopy(iter(act_prop.list2,i2+1),end(act_prop.list2),iter(new_list,i2));
-//						property(pm,act_knot).list2 = new_list;
-//					}
-//				}
-//				break;
-//			}
-//		}
-//	}
-//
-//	return found_and_erased;
-//
-//}
-//
-//
-//template<typename TValue, typename TCargo, typename TInterval>
-//bool
-//removeInterval(IntervalTree<TValue,TCargo> & itree, TInterval interval)
-//{
-//
-//	return removeInterval(itree.g,itree.pm,interval);
-//
-//}
-//
-//template<typename TValue, typename TCargo>
-//bool
-//removeInterval(IntervalTree<TValue,TCargo> & itree, TValue begin, TValue end, TCargo cargo)
-//{
-//
-//	IntervalAndCargo<TValue,TCargo> interval;
-//	interval.i1 = begin;
-//	interval.i2 = end;
-//	interval.cargo = cargo;
-//	return removeInterval(itree.g,itree.pm,interval);
-//
-//}
-
-
 
 template<typename TGraph, typename TPropertyMap, typename TInterval>
 void
@@ -1052,6 +923,18 @@ SEQAN_CHECKPOINT
 
 
 
+/////////////////// Metafunctions ///////////////////////
+template<typename TValue, typename TCargo>
+struct Value<IntervalTree<TValue,TCargo> >
+{
+	typedef TValue Type;
+};
+
+template<typename TValue, typename TCargo>
+struct Cargo<IntervalTree<TValue,TCargo> >
+{
+	typedef TCargo Type;
+};
 
 
 

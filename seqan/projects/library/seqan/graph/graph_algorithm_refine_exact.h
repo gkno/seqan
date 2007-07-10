@@ -121,15 +121,14 @@ SEQAN_CHECKPOINT
 
 
 //get all intervals from the alignments and construct an interval tree for each sequence
-template<typename TGraph, typename TPropertyMap, typename TAlignmentString, typename TSpec, typename TSequence, typename TSetSpec, typename TValue, typename TSeqMap>
+template<typename TGraph, typename TPropertyMap, typename TAlignmentString, typename TSequence, typename TSetSpec, typename TValue, typename TSeqMap>
 void
 createTreesForAllSequences(String<TGraph> & gs, 
 						   String<TPropertyMap> & pms, 
 						   TAlignmentString & alis, 
 						   StringSet<TSequence,TSetSpec> & seqs,
                            TSeqMap & seq_map,
-						   TValue numSequences,
-						   Tag<TSpec> const tag)
+						   TValue numSequences)
 {
 SEQAN_CHECKPOINT
 	typedef typename Value<TAlignmentString>::Type TAlignment;
@@ -161,7 +160,7 @@ SEQAN_CHECKPOINT
 		//und jedes mal nur buildIntervalsForJustOneSequence(); 
 		TValue center = length(seqs[i])/2; // center raus, hat hier nix zu suchen
 		//create interval tree!
-		createIntervalTree(gs[i],pms[i],intervals[i],center,tag);
+		createIntervalTree(gs[i],pms[i],intervals[i],center);
 		
 		//intervals for sequence i are not needed anymore
 		clear(intervals[i]);
@@ -253,7 +252,7 @@ SEQAN_CHECKPOINT
 			TVertexDescriptor vd = findVertex(ali_g, seq_j_id, pos_j);
 			
 			SEQAN_TASSERT(fragmentBegin(ali_g,vd)==pos_j)
-				typename Value<TScore>::Type score = getScore(score_type,seqs,*ali_it,act_pos,pos_j,fragmentLength(ali_g,act_knot),fragmentLength(ali_g,vd));//,fragmentLength(ali_g,vd));
+			typename Value<TScore>::Type score = getScore(score_type,seqs,*ali_it,act_pos,pos_j,fragmentLength(ali_g,act_knot),fragmentLength(ali_g,vd));//,fragmentLength(ali_g,vd));
 			//this needs to be generalized (makes sense for positive scores only)
 			if(score > 0)
 			{
@@ -273,6 +272,9 @@ SEQAN_CHECKPOINT
 		++ali_it;
 	}
 }
+
+
+
 
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -348,7 +350,7 @@ SEQAN_CHECKPOINT
 	//build interval trees
 	String<TGraph> gs;
 	String<TPropertyMap> pms;
-	createTreesForAllSequences(gs, pms, alis, seq, seq_map, numSequences, ComputeCenter());
+	createTreesForAllSequences(gs, pms, alis, seq, seq_map, numSequences);
 	
 	////////////////////////////////////////////////////////////////
 	//do refinement
