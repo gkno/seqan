@@ -7,17 +7,29 @@ from stat import *
 
 ################################################################################
 
-PATH_MODULES = '../../projects/tests'
-PATH_OUTPUT = ''
-FILE_VIEWER = 'index.html'
-FILE_OUTPUT = 'data.js'
-FILE_OUTPUT_OLD = 'data_old.js'
-PATH_RESULTFILES = 'results/'
+PATH_SEQAN_GCC = '~/MyDocuments/VELOP/seqan2/'
+PATH_SEQAN_WINDOWS = '../../'
 
-LOAD_MAX = 1
-SERVER_FAILURE_LIMIT = 3
 
-# [plaform, server]
+################################################################################
+### MODES = ['<mode> <target>', ...]
+MODES = ['Simple justcompile']    
+#MODES = ['Simple justcompile', 'Simple justrun']
+#MODES = ['Release build', 'Release runonly']
+
+
+### COMPILERS = [['<plaform>', '<name>', '<cmdline options>'], ...]
+COMPILERS = [
+    ['gcc',     'g++-3.0',   ['Compiler=g++-3.0']], 
+    ['gcc',     'g++-3.2',   ['Compiler=g++-3.2']], 
+    ['gcc',     'g++-3.3',   ['Compiler=g++-3.3']], 
+    ['gcc',     'g++-3.4',   ['Compiler=g++-3.4']], 
+    ['gcc',     'g++-4.1.1', ['Compiler=/import/testing/bin/g++']],
+    ['windows', 'vc++-2003', ['Version=7']],
+    ['windows', 'vc++-2005', ['Version=8', 'VSInstallDir=D:\\Program Files\\Microsoft Visual Studio 8\\']]
+]
+
+### SERVERS = [['<plaform>', '<server>'], ...]
 SERVERS = [
 #    ['gcc', 'mouse'], 
 #    ['gcc', 'frosch'], 
@@ -60,21 +72,17 @@ SERVERS = [
     ['windows', 'localhost']
 ]
     
-# [plaform, name, compiler]
-COMPILERS = [
-    ['gcc',     'g++-3.0',   'g++-3.0'], 
-    ['gcc',     'g++-3.2',   'g++-3.2'], 
-    ['gcc',     'g++-3.3',   'g++-3.3'], 
-    ['gcc',     'g++-3.4',   'g++-3.4'], 
-    ['gcc',     'g++-4.1.1',  '/import/testing/bin/g++'],
-#    ['windows', 'vc++-2003', 'cl']
-]
+LOAD_MAX = 1
+SERVER_FAILURE_LIMIT = 3
  
-MODES = ['Simple justcompile']    
-#MODES = ['Simple justcompile', 'Simple justrun']
-#MODES = ['Release build', 'Release runonly']
-
 ################################################################################
+
+PATH_MODULES = '../../projects/tests'
+PATH_OUTPUT = ''
+FILE_VIEWER = 'index.html'
+FILE_OUTPUT = 'data.js'
+FILE_OUTPUT_OLD = 'data_old.js'
+PATH_RESULTFILES = 'results/'
 
 ################################################################################
 
@@ -271,7 +279,7 @@ def pollTasks():
 
 def onTaskStopped(task):
     global ALL_STATES
-    ALL_STATES = ''
+    ALL_STATES = ''     # rebuild page
     
     server = task['server']
     server['load'] -= 1
@@ -283,8 +291,8 @@ def onTaskStopped(task):
     is_error = (proc.poll() != 0)
     
     if is_error:
-        if out.find('compile') == -1:
-            #reschedule
+        if (server['server'] != 'localhost') and (out.find('compile') == -1):
+            #reschedule task
             server['failures'] += 1
             task['state'] = 'pending'
             task['proc'] = None
@@ -299,7 +307,8 @@ def onTaskStopped(task):
     f = open(PATH_OUTPUT + PATH_RESULTFILES + task['filename'] + '.txt', "wb")
     f.write('module:   ' + task['module'] + '\n')
     f.write('platform: ' + task['platform'] + '\n')
-    f.write('compiler: ' + task['compiler'] + '\n')
+    f.write('compiler: ' + task['compilername'] + '\n')
+    f.write('options:  ' + str(task['compiler']) + '\n')
     f.write('mode:     ' + task['mode'] + '\n')
     f.write('server:   ' + task['server']['server'] + '\n')
     f.write('result:   ' + task['state'] + '\n')
@@ -323,14 +332,15 @@ def onTaskStopped(task):
 ################################################################################
 
 def startTaskForServer(server):
-    global TASKS
+    global TASKS, ALL_STATES
     
     for task in TASKS:
         if (task['state'] == 'pending') and (task['platform'] == server['platform']):
             task['proc'] = startTask(task, server)
             server['load'] += 1
             task['state'] = 'started'
-            task['server'] = server #server['i']
+            task['server'] = server
+            ALL_STATES = '' #rebuild page
             return
             
     #no more tasks for that platform
@@ -345,26 +355,34 @@ def startTask(task, server):
 ################################################################################
 
 def startTaskGCC(task, server):
-    global USERNAME, PASSWORD
+    global USERNAME, PASSWORD, PATH_SEQAN_GCC
     
     c = ["plink.exe", "-batch", 
             "-ssh", "-l", USERNAME, "-pw", PASSWORD, server['server'], 
                 "make", 
                     "-s", 
-                    "-C\"~/MyDocuments/VELOP/seqan2/\"", 
+                    "-C\"" + PATH_SEQAN_GCC + "\"", 
                     "Platform=" + task['platform'],
                     "Project=" + task['module'],
                     "Mode=" + task['mode'],
-                    "Compiler=" + task['compiler'],
                     "BuildFolder=" + task['platform'] + "/" + task['compilername']
-         ]
+         ] + task['compiler']
 #    print c;
     return subprocess.Popen(c, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         
 
 def startTaskWindows(task, server):
-    c = ["dir"]
-    return subprocess.Popen(c, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    global PATH_SEQAN_WINDOWS
+    
+    c = ["visual_studio\\make", 
+            "-s", 
+            "Platform=" + task['platform'],
+            "Project=" + task['module'],
+            "Mode=" + task['mode'],
+            "BuildFolder=" + task['platform'] + "/" + task['compilername']
+         ] + task['compiler']
+#    print c;  
+    return subprocess.Popen(c, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=PATH_SEQAN_WINDOWS)
 
 ################################################################################
 
