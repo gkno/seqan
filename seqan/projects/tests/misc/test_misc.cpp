@@ -31,7 +31,7 @@ void testRandom()
 
 	for (unsigned int i=0; i<100; ++i)
 	{
-		cout << geomRand() << ", ";
+		cout << geomRand<int>() << ", ";
 	}
 
 }
