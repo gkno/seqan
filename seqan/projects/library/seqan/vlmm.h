@@ -2300,8 +2300,10 @@ estimateLikelihoodWindow( Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM <
 					String<TAlphabet> &text,
 					unsigned windowSize)
 {
-	if(length(text)<windowSize)
+	if(length(text)<windowSize){
+		cerr << "Text smaller than window size. In estimateLikelihoodWindow\n";
 		return (float)0;
+	}
 	float best,result = 0;
 	typedef typename Iterator<String<TAlphabet> >::Type TIter;
 	TIter windowEnd = begin(text),windowStart = begin(text);
@@ -2326,6 +2328,8 @@ estimateLikelihoodWindow( Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM <
 
 
 // estimates the highest scoring window of size windowSize and the likelihood on the whole sequence
+//NOTE if the window size is greater than the sequence length than the bestWindow scorwe is the same as the score
+//of the whole sequence
 template<typename TAlphabet,typename TCargo,typename TVLMMSpec>
 inline float
 estimateLikelihoodWindowAndWhole( Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TVLMMSpec > > > > &vlmm,
@@ -2333,20 +2337,18 @@ estimateLikelihoodWindowAndWhole( Graph<Automaton<TAlphabet, TCargo , WordGraph 
 					unsigned windowSize,
 					float &bestWindow)
 {
-	if(length(text)<windowSize)
-		return (float)0;
+
 	float wholeSequenceScore=0,result = 0;
 	typedef typename Iterator<String<TAlphabet> >::Type TIter;
 	TIter windowEnd = begin(text),windowStart = begin(text);
 	goBegin(windowEnd);
 	goBegin(windowStart);
 	float dummy;
-	for(unsigned i = 0;i<windowSize;++i,goNext(windowEnd)){
-			dummy = log(getProbabilityForLongestContext(vlmm,windowEnd));
-			result += dummy;
-			wholeSequenceScore += dummy;
-	}
-			
+	for(unsigned i = 0;i<windowSize && !atEnd(windowEnd);++i,goNext(windowEnd)){
+			wholeSequenceScore += log(getProbabilityForLongestContext(vlmm,windowEnd));
+		}
+
+	result = wholeSequenceScore;
 	bestWindow = result;
 	
 	for(;!atEnd(windowEnd);goNext(windowEnd),goNext(windowStart))
@@ -2358,6 +2360,7 @@ estimateLikelihoodWindowAndWhole( Graph<Automaton<TAlphabet, TCargo , WordGraph 
 		if(result > bestWindow)
 			bestWindow = result;
 	}
+	cout <<" about to return, wholeSequenceScore: "<<wholeSequenceScore<<" and bestWindow: "<<bestWindow<<endl;
 	return wholeSequenceScore;
 }
 
@@ -2371,15 +2374,19 @@ inline void estimateLikelihoodOnFile(Graph<Automaton<TAlphabet, TCargo , WordGra
 		String<String<char> > ids;
 		String<String<TAlphabet> > sequences;
 		createInputString(sequenceFile,sequences,ids);
+		//for(unsigned i=0;i<length(sequences);++i)
+			cout <<" first sequence:"<<sequences[0]<< " and the id: "<<ids[0]<<endl;
+			cout <<" second sequence:"<<sequences[1]<< " and the id: "<<ids[1]<<endl;
 		typedef typename Iterator<String<String<TAlphabet> > >::Type TIter;
 		typedef typename Iterator<String<String<char> > >::Type TIterChar;
 		TIter it = begin(sequences);
 		TIterChar id = begin(ids);
 		//put first line for file
-		_streamWrite(outFile,"Id\tSequenceLength\tLikelihood(Sequence)\tLikelihood(BestWindow of size ");
+		_streamWrite(outFile,"Id\tSequenceLength\tLikelihood(Sequence)\tNormalizedLikelihood\tLikelihood of BestWindow of size ");
 		_streamPutInt(outFile,windowSize);
 		_streamWrite(outFile,")\n");
-		for(goBegin(it);!atEnd(it);goNext(it),goNext(id))
+		cout <<" value(it): "<<value(it)<<endl;
+		for(;!atEnd(it);goNext(it),goNext(id))
 		{
 			float bestWindow=0,wholeSequenceScore=0;
 			wholeSequenceScore =estimateLikelihoodWindowAndWhole(vlmm,value(it),windowSize,bestWindow);
@@ -2622,6 +2629,8 @@ SEQAN_CHECKPOINT
 	_streamPut(outFile,'\t');
 	_streamPutFloat(outFile,wholeSequenceScore);
 	_streamPut(outFile,'\t');
+	_streamPutFloat(outFile,(wholeSequenceScore/(float)SequenceLength));
+	_streamPut(outFile,'\t');
 	_streamPutFloat(outFile,bestWindow);
 	_streamPut(outFile,'\n');
 
@@ -2833,7 +2842,7 @@ void createInputString(String<char>  &filename,
 	resize(ids,count);
 	resize(sequences,count);
 	for(int i = 0;i<count;++i){
-		//read(file, ids[i], Raw());
+		readID(file, ids[i], Fasta());
 		read(file, sequences[i],  Fasta());
 
 
