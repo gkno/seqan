@@ -2498,7 +2498,7 @@ saveNode(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TVLMMSpec > > > 
 	TSize table_length = ValueSize<TAlphabet>::VALUE;
 	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
 	// get to the next line in the file
-	_streamPut(target,'\n');
+	_streamPut(target,'\r');
 	_streamPutInt(target, (unsigned)node);
 	_streamPut(target, '\t');
 	_streamPutInt(target, (unsigned)getFather(vlmm,node));
@@ -2663,7 +2663,7 @@ SEQAN_CHECKPOINT
 			return true;
 		}
 
-		if ((c == '\t') || (c == '\n') || (c == '\r'))
+		if ((c == '\t') || (c =='\0xA') || (c == '\n') || (c == '\r'))
 		{
 			if(length(entry) == 0)
 				return false;
@@ -2736,7 +2736,7 @@ readGraph(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < ContextTree > >
 	typedef typename Size<TAlphabet>::Type TSize;
 	TSize table_length = ValueSize<TAlphabet>::VALUE;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-		typedef typename EdgeType<TGraph>::Type TEdge;
+	typedef typename EdgeType<TGraph>::Type TEdge;
 	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
 	typedef typename Iterator<String<AutomatonEdgeArray<TEdge, TAlphabet> > >::Type TIterConst;
 
@@ -2744,12 +2744,12 @@ readGraph(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < ContextTree > >
 	std::cout <<"size= "<<size<<endl;
 	//init the vlmm
 	initGraph(vlmm,size);
-	size = _scanNextIntEntry(file);  // remove the tailing newline character
+	//size = _scanNextIntEntry(file);  // remove the tailing newline character
 	//_removeTailingNewlines(file);
 	// go for every node
 	
 	do{
-		std::cout <<"go for next node:"<<endl;
+		//std::cout <<"go for next node:"<<endl;
 		TVertexDescriptor node = (unsigned)_scanNextIntEntry(file);
 		assignValue(vlmm.data_id_managerV.data_in_use, node, true);
 		TVertexDescriptor father = (unsigned)_scanNextIntEntry(file);
