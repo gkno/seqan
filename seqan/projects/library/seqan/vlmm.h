@@ -396,12 +396,12 @@ inline void goNext(Iter< Index<TText, TSpec>, VSTree< TopDown< ParentLinks<Const
 				// this must be possible
 				
 				goDown(it);
-				cout << value(it) << " = " << length(representative(it)) << " " << representative(it) << "  toFather:"<<parentEdgeLabel(it)<<"  hits: "<<length(getOccurences(it))<<endl;
+				std::cout << value(it) << " = " << length(representative(it)) << " " << representative(it) << "  toFather:"<<parentEdgeLabel(it)<<"  hits: "<<length(getOccurences(it))<<endl;
 				goRight(it);
-				cout << value(it) << " = " << length(representative(it)) << " " << representative(it) << "  toFather:"<<parentEdgeLabel(it)<<"  hits: "<<length(getOccurences(it))<<endl;
+				std::cout << value(it) << " = " << length(representative(it)) << " " << representative(it) << "  toFather:"<<parentEdgeLabel(it)<<"  hits: "<<length(getOccurences(it))<<endl;
 				while( (repLength(container(it), nodeUp(it)) == repLength(it)) && goRight(it)){
 					
-				cout << value(it) << " = " << length(representative(it)) << " " << representative(it) << "  toFather:"<<parentEdgeLabel(it)<<"  hits: "<<length(getOccurences(it))<<endl;	
+				std::cout << value(it) << " = " << length(representative(it)) << " " << representative(it) << "  toFather:"<<parentEdgeLabel(it)<<"  hits: "<<length(getOccurences(it))<<endl;	
 				}
 					
 				// if the current node remains to be right terminal
@@ -409,7 +409,7 @@ inline void goNext(Iter< Index<TText, TSpec>, VSTree< TopDown< ParentLinks<Const
 				// goDown was wrong and we have to go up again
 				if(isLeaf(it) && (repLength(container(it), nodeUp(it)) == repLength(it))){
 					goUp(it);
-					cout << value(it) << " = " << length(representative(it)) << " " << representative(it) << "  toFather:"<<parentEdgeLabel(it)<<"  hits: "<<length(getOccurences(it))<<endl;	
+					std::cout << value(it) << " = " << length(representative(it)) << " " << representative(it) << "  toFather:"<<parentEdgeLabel(it)<<"  hits: "<<length(getOccurences(it))<<endl;	
 					if (!goRight(it))
 						while (goUp(it) && !goRight(it));
 					}
@@ -1174,7 +1174,7 @@ splitEdge(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > > > & vlmm,
 	typedef typename Size<TGraph>::Type TSize;
 	TAlphabet letter(childCharacter);
 	TVertexDescriptor child = vlmm.data_vertex[father].data_edge[(TSize) letter].data_target;
-	//cout << "split edge at pos:"<< splitPosition<<" character:" <<(int)childCharacter<<" father" <<father<<endl;
+	//std::cout << "split edge at pos:"<< splitPosition<<" character:" <<(int)childCharacter<<" father" <<father<<endl;
 	String<TAlphabet> edgeString;
 	float number = getProbability(vlmm,father,childCharacter);
 	getSuffixChildLabel(vlmm,father,letter,edgeString);
@@ -1183,7 +1183,7 @@ splitEdge(Graph<Automaton<TAlphabet, TCargo, WordGraph<VLMM<TSpec> > > > & vlmm,
 	TVertexDescriptor newNode = addAdditionalVertex(vlmm);
 	//std::cout<<"after node created, NumVertc:"<<numVertices(vlmm)<<std::endl;
 	String<TAlphabet> newEdgeString = childCharacter;
-		//cout << "eedestring:"<<edgeString<<" length: "<<length(edgeString)<<endl;
+		//std::cout << "eedestring:"<<edgeString<<" length: "<<length(edgeString)<<endl;
 	SEQAN_ASSERT(splitPosition < (TPos)length(edgeString))
 	if(splitPosition >= (TPos)length(edgeString)){
 		std::cout<<"splitPosition >= edgeString"<<std::endl;
@@ -1405,7 +1405,7 @@ extendNode(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < ContextTree> >
 	fathersum += pseudocounts; 
 	sonsum += pseudocounts + countChar;
 	//std::cout<<"extendNode on node "<<node<<std::endl;
-	//cout << " diff= "<<countChar * log(1/(getProbability(vlmm,father,childCharacter)/fathersum))<<endl;
+	//std::cout << " diff= "<<countChar * log(1/(getProbability(vlmm,father,childCharacter)/fathersum))<<endl;
 	for(unsigned pos=0;pos<size;++pos){
 		if(pos == (unsigned)letter)
 				difference += countChar*((countChar+param.alpha)/sonsum) * log( ((countChar+param.alpha)/sonsum)/((getProbability(vlmm,father,letter)+param.alpha)/fathersum));
@@ -1670,7 +1670,7 @@ pruneTree(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TSpec > > > > &
 		TVertexDescriptor node =  getValue(it);
 		assignProperty(original, node, true);
 		// change counts of all nodes into probabilities
-		//cout<<" at node:"<<node<<endl;
+		//std::cout<<" at node:"<<node<<endl;
 		//turnNodeCountsIntoProbability(vlmm,node);
 	}
 	
@@ -2140,10 +2140,10 @@ buildContextTree(Index<TIndexType, Index_ESA<> > & index,
 	ContextTree parameters;
 	setParameters(parameters,threshold,K,d,alpha);
 	Iter< TIndex, VSTree< TopDown< ParentLinks<ConstrainedTraversal<Absolute> > > > > it(index,threshold,d);
-	cout << "create the core Suffix Tree from the suffix array"<<endl;
+	std::cout << "create the core Suffix Tree from the suffix array"<<endl;
 	SEQAN_PROTIMESTART(create_sa_time);
 	buildSuffixTreeFromIndex(it,vlmm);
-    cout << "suffix array creation + sufix tree building took " << SEQAN_PROTIMEDIFF(create_sa_time) << " seconds" << endl;
+    std::cout << "suffix array creation + sufix tree building took " << SEQAN_PROTIMEDIFF(create_sa_time) << " seconds" << endl;
 
 	std::cout << "in initMaps:";
 	initMaps(vlmm);
@@ -2159,7 +2159,7 @@ buildContextTree(Index<TIndexType, Index_ESA<> > & index,
 	TVertexDescriptor root = getRoot(vlmm);
 	SEQAN_PROTIMESTART(removeNodes);
 	removeRedundantNodes(vlmm,root,parameters);
-	cout << "Time removal nodes: "<<SEQAN_PROTIMEDIFF(removeNodes)<< " Number of nodes left:" <<numVertices(vlmm)<<endl;
+	std::cout << "Time removal nodes: "<<SEQAN_PROTIMEDIFF(removeNodes)<< " Number of nodes left:" <<numVertices(vlmm)<<endl;
 	std::cout << "READY!" <<std::endl;
 }
 
@@ -2176,16 +2176,10 @@ buildBioPST(Index<TIndexType, Index_ESA<> > & index,
 	typedef Index<TIndexType, Index_ESA<> > TIndex;
 	typedef Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < BioPST > > > > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	if(minCondProb > 1/(float)ValueSize<TAlphabet>::VALUE){
-		cerr<<" minimum conditional probability is too large. It is not possible\n to distribute "<<minCondProb<<
-			" over "<<ValueSize<TAlphabet>::VALUE<< " entries"<<endl;
-		cout<<" Can be at most:" <<1/ValueSize<TAlphabet>::VALUE<<endl;
-		exit(1);
-	}
 	BioPST parameters;
 	setParameters(parameters,threshold,minSupport,minCondProb,d);
 	Iter< TIndex, VSTree< TopDown< ParentLinks<ConstrainedTraversal<Support> > > > > it(index,minSupport,d);
-	cout << "create the core Suffix Tree from the suffix array"<<endl;
+	std::cout << "create the core Suffix Tree from the suffix array"<<endl;
 	buildSuffixTreeFromIndex(it,vlmm);
 	std::cout << "in initMaps:";
 	initMaps(vlmm);
@@ -2218,7 +2212,7 @@ buildPST(Index<TIndexType, Index_ESA<> > & index,
 	if(minConditionalProbability > 1/(float)ValueSize<TAlphabet>::VALUE){
 		cerr<<" minimum conditional probability is too large. It is not possible\n to distribute "<<minConditionalProbability<<
 			" over "<<ValueSize<TAlphabet>::VALUE<< " entries "<<endl;
-		cout<<" Can be at most:" <<1/ValueSize<TAlphabet>::VALUE<<endl;
+		std::cout<<" Can be at most:" <<1/ValueSize<TAlphabet>::VALUE<<endl;
 		exit(1);
 	}
 	PST parameters;
@@ -2288,7 +2282,7 @@ estimateLikelihood( Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < TVLMM
 	{
 		
 		result += log(getProbabilityForLongestContext(vlmm,it));
-		//cout <<" prob for letter: "<<value(it)<< " is: "<<getProbabilityForLongestContext(vlmm,it)<<endl;
+		//std::cout <<" prob for letter: "<<value(it)<< " is: "<<getProbabilityForLongestContext(vlmm,it)<<endl;
 	}
 	return result;
 }
@@ -2314,12 +2308,12 @@ estimateLikelihoodWindow( Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM <
 			result += log(getProbabilityForLongestContext(vlmm,windowEnd));
 			
 	best = result;
-	cout <<"window score:" <<result<<endl;
+	std::cout <<"window score:" <<result<<endl;
 	for(;!atEnd(windowEnd);goNext(windowEnd),goNext(windowStart))
 	{
 		result += -log(getProbabilityForLongestContext(vlmm,windowStart));
 		result += log(getProbabilityForLongestContext(vlmm,windowEnd));
-		//cout <<"window score:" <<result<<endl;
+		//std::cout <<"window score:" <<result<<endl;
 		if(result > best)
 			best = result;
 	}
@@ -2360,7 +2354,7 @@ estimateLikelihoodWindowAndWhole( Graph<Automaton<TAlphabet, TCargo , WordGraph 
 		if(result > bestWindow)
 			bestWindow = result;
 	}
-	cout <<" about to return, wholeSequenceScore: "<<wholeSequenceScore<<" and bestWindow: "<<bestWindow<<endl;
+	std::cout <<" about to return, wholeSequenceScore: "<<wholeSequenceScore<<" and bestWindow: "<<bestWindow<<endl;
 	return wholeSequenceScore;
 }
 
@@ -2375,8 +2369,8 @@ inline void estimateLikelihoodOnFile(Graph<Automaton<TAlphabet, TCargo , WordGra
 		String<String<TAlphabet> > sequences;
 		createInputString(sequenceFile,sequences,ids);
 		//for(unsigned i=0;i<length(sequences);++i)
-			cout <<" first sequence:"<<sequences[0]<< " and the id: "<<ids[0]<<endl;
-			cout <<" second sequence:"<<sequences[1]<< " and the id: "<<ids[1]<<endl;
+			std::cout <<" first sequence:"<<sequences[0]<< " and the id: "<<ids[0]<<endl;
+			std::cout <<" second sequence:"<<sequences[1]<< " and the id: "<<ids[1]<<endl;
 		typedef typename Iterator<String<String<TAlphabet> > >::Type TIter;
 		typedef typename Iterator<String<String<char> > >::Type TIterChar;
 		TIter it = begin(sequences);
@@ -2385,12 +2379,12 @@ inline void estimateLikelihoodOnFile(Graph<Automaton<TAlphabet, TCargo , WordGra
 		_streamWrite(outFile,"Id\tSequenceLength\tLikelihood(Sequence)\tNormalizedLikelihood\tLikelihood of BestWindow of size ");
 		_streamPutInt(outFile,windowSize);
 		_streamWrite(outFile,")\n");
-		cout <<" value(it): "<<value(it)<<endl;
+		std::cout <<" value(it): "<<value(it)<<endl;
 		for(;!atEnd(it);goNext(it),goNext(id))
 		{
 			float bestWindow=0,wholeSequenceScore=0;
 			wholeSequenceScore =estimateLikelihoodWindowAndWhole(vlmm,value(it),windowSize,bestWindow);
-			cout <<"wSS" << wholeSequenceScore<<" bestWindow "<<bestWindow<<endl;
+			std::cout <<"wSS" << wholeSequenceScore<<" bestWindow "<<bestWindow<<endl;
 			saveSequenceLikelihood(outFile,windowSize,length(value(it)),value(id),wholeSequenceScore,bestWindow);
 		}
 }
@@ -2572,7 +2566,7 @@ SEQAN_CHECKPOINT
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	typedef typename EdgeType<TGraph>::Type TEdge;
 	typedef typename Iterator<String<AutomatonEdgeArray<TEdge, TAlphabet> > >::Type TIterConst;
-	cout<<"Save final vlmm"<<endl;
+	std::cout<<"Save final vlmm"<<endl;
 	writeHead(vlmm,target);
 	for(TIterConst it = begin(vlmm.data_vertex);!atEnd(it);goNext(it)) {
 		if (!idInUse(vlmm.data_id_managerV, position(it))) continue;
@@ -2747,13 +2741,15 @@ readGraph(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < ContextTree > >
 	typedef typename Iterator<String<AutomatonEdgeArray<TEdge, TAlphabet> > >::Type TIterConst;
 
 	unsigned size = (unsigned)_scanNextIntEntry(file);
-	cout <<"size= "<<size<<endl;
+	std::cout <<"size= "<<size<<endl;
 	//init the vlmm
 	initGraph(vlmm,size);
 	size = _scanNextIntEntry(file);  // remove the tailing newline character
 	//_removeTailingNewlines(file);
 	// go for every node
+	
 	do{
+		std::cout <<"go for next node:"<<endl;
 		TVertexDescriptor node = (unsigned)_scanNextIntEntry(file);
 		assignValue(vlmm.data_id_managerV.data_in_use, node, true);
 		TVertexDescriptor father = (unsigned)_scanNextIntEntry(file);
@@ -2765,7 +2761,7 @@ readGraph(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < ContextTree > >
 		int yes = _scanNextIntEntry(file);
 		if(yes)
 			setMarked(vlmm,node,true);
-		//cout <<"node:" << node<< " father:  "<< father<< " suffixLinkTarget: "<<suffixLink<< " Marked?: "<<yes<<endl;
+		//std::cout <<"node:" << node<< " father:  "<< father<< " suffixLinkTarget: "<<suffixLink<< " Marked?: "<<yes<<endl;
 
 		for(TSize i =0;i<table_length;++i)
 		{
@@ -2776,7 +2772,7 @@ readGraph(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < ContextTree > >
 				assignValue(vlmm.data_id_managerV.data_in_use, child, true);
 				String<TAlphabet> edgeString;
 				_scanNextEntry(file,edgeString);
-				//cout << "edge string to node:"<<child<< " is:" <<edgeString<<endl;
+				//std::cout << "edge string to node:"<<child<< " is:" <<edgeString<<endl;
 				addEdge(vlmm,node,child,edgeString);
 			}
 
@@ -2786,7 +2782,7 @@ readGraph(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < ContextTree > >
 		for(TSize i =0;i<table_length;++i)
 		{
 			float set = _scanNextFloatEntry(file);
-			//cout << "float: "<<set;
+			//std::cout << "float: "<<set;
 			setProbability(vlmm,node,i,set);
 		}
 		//cout <<endl;
@@ -2800,20 +2796,20 @@ readGraph(Graph<Automaton<TAlphabet, TCargo , WordGraph < VLMM < ContextTree > >
 				//cout << "reverseSL to node:"<<target<< " is:" <<(TAlphabet)i<<endl;
 			}
 		}
-		_scanNextIntEntry(file);
+		//_scanNextIntEntry(file);
 	} while(!_streamEOF(file));
     
 	for(TIterConst it = begin(vlmm.data_vertex);!atEnd(it);goNext(it)) {
 		if (!idInUse(vlmm.data_id_managerV, position(it))){
-			//cout << "id:" <<position(it)<<" is not used\n";
+			//std::cout << "id:" <<position(it)<<" is not used\n";
 			appendValue(vlmm.data_id_managerV.data_freeIds, position(it));
 		}
 		else{
-			//cout << "id:" <<position(it)<<" is used\n";
+			//std::cout << "id:" <<position(it)<<" is used\n";
 		}
 
 	}
-	//cout<<"laenge: "<<length(vlmm.data_id_managerV.data_freeIds);
+	//std::cout<<"laenge: "<<length(vlmm.data_id_managerV.data_freeIds);
 
 }
 
@@ -2837,7 +2833,7 @@ void createInputString(String<char>  &filename,
 		++count;
 	}
 	file2.close();
-	cout<<"There are "<<count<<" seqs in the file "<<filename<<endl;
+	std::cout<<"There are "<<count<<" seqs in the file "<<filename<<endl;
 	file.open(toCString(filename), ios_base::in | ios_base::binary );
 	resize(ids,count);
 	resize(sequences,count);
@@ -2863,7 +2859,7 @@ read( TFile & file)
 	if(entry == "Dna"){
 		Graph<Automaton<Dna, String<Dna> , WordGraph < VLMM < ContextTree > > > > vlmmDna;
 		readGraph(vlmmDna,file);
-		cout<< vlmmDna;
+		std::cout<< vlmmDna;
 	}
 	if(entry == "AminoAcid"){
 		Graph<Automaton<AminoAcid, String<AminoAcid> , WordGraph < VLMM < ContextTree > > > > vlmmProtein;
