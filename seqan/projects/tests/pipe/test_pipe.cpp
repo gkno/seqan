@@ -206,7 +206,7 @@ using namespace seqan;
 			beginRead(sorter);
             unsigned j = *sorter, pos = 0;
 			while (!eof(sorter)) {
-				if (*sorter < j || *sorter < 0 || *sorter >= i) {
+				if (*sorter < j || /* *sorter < 0 || */ *sorter >= i) {
 					freePage(buf, buf);
                     ::std::cout << ::std::endl << "testSorter failed at position " << pos << " ";
 					return false;

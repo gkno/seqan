@@ -56,9 +56,13 @@ namespace SEQAN_NAMESPACE_MAIN
 	};
 
     template < typename TValue >
-    struct Iterator< SimpleBuffer<TValue> >
-    {
+    struct Iterator< SimpleBuffer<TValue>, Standard > {
         typedef TValue* Type;
+    };
+
+    template < typename TValue >
+    struct Iterator< SimpleBuffer<TValue> const, Standard > {
+        typedef TValue const * Type;
     };
 
     template < typename TValue >
@@ -114,6 +118,26 @@ namespace SEQAN_NAMESPACE_MAIN
 		pf.begin = NULL;
         resize(pf, 0);
         setPageSize(pf, 0);
+	}
+
+	template < typename TValue >
+	inline TValue* begin(SimpleBuffer<TValue> &pf, Standard) {
+		return pf.begin;
+	}
+
+	template < typename TValue >
+	inline TValue const * begin(SimpleBuffer<TValue> const &pf, Standard) {
+		return pf.begin;
+	}
+
+	template < typename TValue >
+	inline TValue * end(SimpleBuffer<TValue> &pf, Standard) {
+		return pf.end;
+	}
+
+	template < typename TValue >
+	inline TValue const * end(SimpleBuffer<TValue> const &pf, Standard) {
+		return pf.end;
 	}
 
 

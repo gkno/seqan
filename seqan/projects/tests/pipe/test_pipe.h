@@ -21,7 +21,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		for(i = 0; i < s; i++) {
             if (i > 0) {
 			    j = i - (rand() % i) - 1;
-                assert(0 <= j && j < s);
+                assert(/*0 <= j && */j < s);
             } else
                 j = 0;
 			unsigned tmp = buf[i];
