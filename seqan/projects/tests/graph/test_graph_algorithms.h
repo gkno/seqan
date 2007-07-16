@@ -649,15 +649,11 @@ void Test_PathGrowingAlgorithm() {
 	// EdgeMap indicates whether an edge is selected or not
 	unsigned int weight = path_growing_algorithm(g, weightMap, edgeMap);
 
-	// Iterate over all the edges and output the ones that are selected
-	std::cout << "Found matching of weight: " << weight << std::endl;
-	std::cout << "Selected edges are: " << std::endl;
-	TEdgeIterator it(g);
-	for(;!atEnd(it);++it) {
-		if (getProperty(edgeMap, *it) == true) {
-			std::cout << '{' << sourceVertex(it) << ',' << targetVertex(it) << '}' << " - Weight: " << getProperty(weightMap, *it) << std::endl;
-		}
-	}
+	SEQAN_TASSERT(weight == 49)
+	SEQAN_TASSERT(getProperty(edgeMap, findEdge(g, 0, 7)) == true)
+	SEQAN_TASSERT(getProperty(edgeMap, findEdge(g, 1, 6)) == true)
+	SEQAN_TASSERT(getProperty(edgeMap, findEdge(g, 2, 8)) == true)
+	SEQAN_TASSERT(getProperty(edgeMap, findEdge(g, 4, 5)) == true)
 }
 
 
@@ -665,7 +661,7 @@ void Test_PathGrowingAlgorithm() {
 
 void Test_LongestIncreasingSubsequence() {
 	String<char> seq1("zeitgeist");
-	String<unsigned int> pos1;
+	String<unsigned int, Block<> > pos1;
 	longestIncreasingSubsequence(seq1,pos1);
 	// Trace is backwards
 	SEQAN_TASSERT(seq1[pos1[4]] == 'e')
@@ -673,29 +669,34 @@ void Test_LongestIncreasingSubsequence() {
 	SEQAN_TASSERT(seq1[pos1[2]] == 'i')
 	SEQAN_TASSERT(seq1[pos1[1]] == 's')
 	SEQAN_TASSERT(seq1[pos1[0]] == 't')
-	//// Output
-	//for(int i = length(pos1)-1; i>=0; --i) {
-	//	std::cout << seq1[pos1[i]] <<  ',';
-	//}
-	//std::cout << std::endl;
 
 	String<unsigned int> seq;
 	appendValue(seq, 5); appendValue(seq, 3); appendValue(seq, 4);
 	appendValue(seq, 9); appendValue(seq, 6); appendValue(seq, 2);
 	appendValue(seq, 1); appendValue(seq, 8); appendValue(seq, 7);
 	appendValue(seq, 10);
-	String<unsigned int> pos;
+	String<unsigned int, Block<> > pos;
 	longestIncreasingSubsequence(seq,pos);
 	SEQAN_TASSERT(seq[pos[4]] == 3)
 	SEQAN_TASSERT(seq[pos[3]] == 4)
 	SEQAN_TASSERT(seq[pos[2]] == 6)
 	SEQAN_TASSERT(seq[pos[1]] == 7)
 	SEQAN_TASSERT(seq[pos[0]] == 10)
-	//// Output
-	//for(int i = length(pos)-1; i>=0; --i) {
-	//	std::cout << seq[pos[i]] <<  ',';
-	//}
-	//std::cout << std::endl;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+void Test_LongestCommonSubsequence() {
+	String<char> seq1("abacx");
+	String<char> seq2("baabca");
+	String<std::pair<unsigned int, unsigned int>, Block<> > pos;
+	longestCommonSubsequence(seq1, seq2, pos);
+	SEQAN_TASSERT(seq1[pos[2].first] == 'b')
+	SEQAN_TASSERT(seq2[pos[2].second] == 'b')
+	SEQAN_TASSERT(seq1[pos[1].first] == 'a')
+	SEQAN_TASSERT(seq2[pos[1].second] == 'a')
+	SEQAN_TASSERT(seq1[pos[0].first] == 'c')
+	SEQAN_TASSERT(seq2[pos[0].second] == 'c')
 }
 
 
@@ -774,7 +775,6 @@ void Test_HeaviestCommonSubsequence() {
 	addVertex(g, 0, 2, 1);
 	addVertex(g, 1, 0, 1);
 	addVertex(g, 1, 1, 1);
-	std::cout << g << std::endl;
 	addEdge(g, 0, 3, 10); addEdge(g, 0, 4, 15);
 	addEdge(g, 1, 3, 10); addEdge(g, 1, 4, 10);
 	addEdge(g, 2, 3, 15); addEdge(g, 2, 4, 10);
@@ -788,6 +788,30 @@ void Test_HeaviestCommonSubsequence() {
 	clear(tmp); appendValue(tmp, 3); appendValue(str2, tmp);
 	clear(tmp); appendValue(tmp, 4); appendValue(str2, tmp);
 	heaviestCommonSubsequence(g, str1, str2, align);
+
+
+	s1 = "aaaaa";
+	s2 = "aaa";
+	clear(strSet);
+	assignValueById(strSet, s1);
+	assignValueById(strSet, s2);
+	assignStringSet(g, strSet);
+	addVertex(g, 0, 0, 2);
+	addVertex(g, 0, 2, 1);
+	addVertex(g, 0, 3, 2);
+	addVertex(g, 1, 0, 1);
+	addVertex(g, 1, 1, 2);
+	addEdge(g, 0, 4, 10); addEdge(g, 1, 3, 20);
+	clear(align);
+	clear(str1);
+	clear(str2);
+	clear(tmp); appendValue(tmp, 0); appendValue(str1, tmp);
+	clear(tmp); appendValue(tmp, 1); appendValue(str1, tmp);
+	clear(tmp); appendValue(tmp, 2); appendValue(str1, tmp);
+	clear(tmp); appendValue(tmp, 3); appendValue(str2, tmp);
+	clear(tmp); appendValue(tmp, 4); appendValue(str2, tmp);
+	heaviestCommonSubsequence(g, str1, str2, align);
+
 }
 
 
@@ -822,10 +846,9 @@ void Test_GraphAlgorithms() {
 	//Matching
 	Test_PathGrowingAlgorithm();
 
-	// Longest Increasing Subsequence
+	// Lis, lcs, his, hcs
 	Test_LongestIncreasingSubsequence();
-
-	// Heaviest Increasing Subsequence
+	Test_LongestCommonSubsequence();
 	Test_HeaviestIncreasingSubsequence();
 	Test_HeaviestCommonSubsequence();
 

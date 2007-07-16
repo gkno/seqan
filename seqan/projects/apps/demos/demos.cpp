@@ -6,7 +6,7 @@
 //#include "../../demos/rooted_iterator.cpp"
 //#include "../../demos/string_1.cpp"
 //#include "../../demos/sufarray.cpp"
-#include "../../demos/index.cpp"
+//#include "../../demos/index.cpp"
 #include "../../demos/graph.cpp"
 //#include "../../demos/find.cpp"
 //#include "../../demos/file_format.cpp"

@@ -526,7 +526,6 @@ write(TFile & target,
 	  TIDString const &,
 	  Raw)
 {
-	SEQAN_CHECKPOINT
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename Id<TGraph>::Type TIdType;
 	typedef typename Size<TGraph>::Type TSize;
@@ -534,64 +533,66 @@ write(TFile & target,
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
 	typedef typename Iterator<String<TEdgeStump*> const>::Type TIterConst;
-	_streamWrite(target,"Adjacency list:\n");
-	for(TIterConst it = begin(g.data_align.data_vertex);!atEnd(it);goNext(it)) {
-		TVertexDescriptor sourceV = position(it);
-		_streamPutInt(target, sourceV);
-		TSegment seg = getProperty(g.data_fragment, sourceV);
-		_streamWrite(target," (SeqId:");
-		_streamPutInt(target, seg.data_seq_id);
-		_streamWrite(target," ,Begin:");
-		_streamPutInt(target, seg.data_begin);
-		_streamWrite(target," ,Length:");
-		_streamPutInt(target, seg.data_length);
-		_streamWrite(target,") -> ");
-		TEdgeStump* current = getValue(it);
-		while(current!=0) {
-			TVertexDescriptor adjV = getTarget(current);
-			if (adjV != sourceV) {
-				_streamPutInt(target, adjV);
-				_streamPut(target, ',');
-				current=getNextS(current);
-			} else {
-				adjV = getSource(current);
-				_streamPutInt(target, adjV);
-				_streamPut(target, ',');
-				current=getNextT(current);
-			}
-		}
-		_streamPut(target, '\n');
-	}
-	_streamWrite(target,"Edge list:\n");
-	for(TIterConst it = begin(g.data_align.data_vertex);!atEnd(it);goNext(it)) {
-		TVertexDescriptor sourceV = position(it);
-		TEdgeStump* current = getValue(it);
-		while(current!=0) {
-			TVertexDescriptor targetV = getTarget(current);
-			if (sourceV != targetV) {
-				_streamWrite(target,"Source: ");
-				_streamPutInt(target, sourceV);		
-				_streamPut(target, ',');
-				_streamWrite(target,"Target: ");
-				_streamPutInt(target, targetV);
-				_streamPut(target, ' ');
-				_streamWrite(target,"(Id: ");
-				_streamPutInt(target, _getId(current));
-				_streamPut(target, ',');
-				_streamWrite(target," Cargo-Type: ");
-				_streamWrite(target, typeid(getCargo(current)).name());
-				_streamPut(target, ')');
-				_streamPut(target, '\n');
-				current=getNextS(current);
-			} else {
-				current=getNextT(current);
-			}
-		}
-	}
 
 
+	
 	String<char> align;
-	if (convertAlignment(g, align)) {	
+	if (!convertAlignment(g, align)) {
+		_streamWrite(target,"Adjacency list:\n");
+		for(TIterConst it = begin(g.data_align.data_vertex);!atEnd(it);goNext(it)) {
+			TVertexDescriptor sourceV = position(it);
+			_streamPutInt(target, sourceV);
+			TSegment seg = getProperty(g.data_fragment, sourceV);
+			_streamWrite(target," (SeqId:");
+			_streamPutInt(target, seg.data_seq_id);
+			_streamWrite(target," ,Begin:");
+			_streamPutInt(target, seg.data_begin);
+			_streamWrite(target," ,Length:");
+			_streamPutInt(target, seg.data_length);
+			_streamWrite(target,") -> ");
+			TEdgeStump* current = getValue(it);
+			while(current!=0) {
+				TVertexDescriptor adjV = getTarget(current);
+				if (adjV != sourceV) {
+					_streamPutInt(target, adjV);
+					_streamPut(target, ',');
+					current=getNextS(current);
+				} else {
+					adjV = getSource(current);
+					_streamPutInt(target, adjV);
+					_streamPut(target, ',');
+					current=getNextT(current);
+				}
+			}
+			_streamPut(target, '\n');
+		}
+		_streamWrite(target,"Edge list:\n");
+		for(TIterConst it = begin(g.data_align.data_vertex);!atEnd(it);goNext(it)) {
+			TVertexDescriptor sourceV = position(it);
+			TEdgeStump* current = getValue(it);
+			while(current!=0) {
+				TVertexDescriptor targetV = getTarget(current);
+				if (sourceV != targetV) {
+					_streamWrite(target,"Source: ");
+					_streamPutInt(target, sourceV);		
+					_streamPut(target, ',');
+					_streamWrite(target,"Target: ");
+					_streamPutInt(target, targetV);
+					_streamPut(target, ' ');
+					_streamWrite(target,"(Id: ");
+					_streamPutInt(target, _getId(current));
+					_streamPut(target, ',');
+					_streamWrite(target," Cargo-Type: ");
+					_streamWrite(target, typeid(getCargo(current)).name());
+					_streamPut(target, ')');
+					_streamPut(target, '\n');
+					current=getNextS(current);
+				} else {
+					current=getNextT(current);
+				}
+			}
+		}
+	} else {
 		TSize nseq = length(stringSet(g));
 		TSize colLen = length(align) / nseq;
 		
@@ -657,7 +658,6 @@ write(TFile & file,
 	  TNames const& names,
 	  MsfFormat) 
 {
-	SEQAN_CHECKPOINT
 	typedef Graph<TSpec> TGraph;
 	typedef typename Size<TGraph>::Type TSize;
 
@@ -1052,7 +1052,6 @@ inline void
 combineGraphs(Graph<Alignment<TStringSet, TCargo, TSpec> >& outGraph,
 			  TLibraries& libs)
 {
-	SEQAN_CHECKPOINT
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename Size<TGraph>::Type TSize;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;

@@ -27,8 +27,26 @@ void  Test_NeedlemanWunsch() {
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 7)) == "ing")
 	SEQAN_TASSERT(numEdges(g) == 1)
 	SEQAN_TASSERT(numVertices(g) == 3)
+	int score2 = globalAlignment(stringSet(g), score_type, AlignConfig<true,false,false,false>(), NeedlemanWunsch() );
+	SEQAN_TASSERT(score == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,true,false,false>(), NeedlemanWunsch() );
+	SEQAN_TASSERT(score == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,false>(), NeedlemanWunsch() );
+	SEQAN_TASSERT(score + 3 == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,false,true>(), NeedlemanWunsch() );
+	SEQAN_TASSERT(score == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,true>(), NeedlemanWunsch() );
+	SEQAN_TASSERT(score + 3 == score2)
+	typedef Fragment<> TFragment;
+	typedef String<TFragment, Block<> > TFragmentString;
+	TFragmentString matches;
+	int score3 = globalAlignment(matches, stringSet(g), score_type, NeedlemanWunsch() );
+	SEQAN_TASSERT(length(matches) == 1)
+	SEQAN_TASSERT(label(matches[0], stringSet(g), 0) == "annual")
+	SEQAN_TASSERT(label(matches[0], stringSet(g), 1) == "anneal")
+	SEQAN_TASSERT(score3 == score)
 	//std::cout << g << std::endl;
-	//int score2 = globalAlignment(std::cout, str, score_type, NeedlemanWunsch() );
+	//score2 = globalAlignment(std::cout, str, score_type, NeedlemanWunsch() );
 	//SEQAN_TASSERT(score == score2)
 
 	str[0] = "annealing";
@@ -40,6 +58,16 @@ void  Test_NeedlemanWunsch() {
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 7)) == "ing")
 	SEQAN_TASSERT(numEdges(g) == 1)
 	SEQAN_TASSERT(numVertices(g) == 3)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<true,false,false,false>(), NeedlemanWunsch() );
+	SEQAN_TASSERT(score == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,true,false,false>(), NeedlemanWunsch() );
+	SEQAN_TASSERT(score == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,false>(), NeedlemanWunsch() );
+	SEQAN_TASSERT(score == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,false,true>(), NeedlemanWunsch() );
+	SEQAN_TASSERT(score + 3 == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,true>(), NeedlemanWunsch() );
+	SEQAN_TASSERT(score + 3 == score2)
 	//std::cout << g << std::endl;
 	//score2 = globalAlignment(std::cout, str, score_type, NeedlemanWunsch() );
 	//SEQAN_TASSERT(score == score2)
@@ -54,6 +82,18 @@ void  Test_NeedlemanWunsch() {
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 17)) == "thecat")
 	SEQAN_TASSERT(numEdges(g) == 1)
 	SEQAN_TASSERT(numVertices(g) == 4)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<true,false,false,false>(), NeedlemanWunsch() );
+	SEQAN_TASSERT(score + 6  == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,true,false,false>(), NeedlemanWunsch() );
+	SEQAN_TASSERT(score == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,false>(), NeedlemanWunsch() );
+	SEQAN_TASSERT(score == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,false,true>(), NeedlemanWunsch() );
+	SEQAN_TASSERT(score + 6 == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,true>(), NeedlemanWunsch() );
+	SEQAN_TASSERT(score + 6 == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<true,false,false,true>(), NeedlemanWunsch() );
+	SEQAN_TASSERT(score + 12 == score2)
 	//std::cout << g << std::endl;
 	//score2 = globalAlignment(std::cout, str, score_type, NeedlemanWunsch() );
 	//SEQAN_TASSERT(score == score2)
@@ -68,6 +108,20 @@ void  Test_NeedlemanWunsch() {
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 17)) == "thecat")
 	SEQAN_TASSERT(numEdges(g) == 1)
 	SEQAN_TASSERT(numVertices(g) == 4)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<true,false,false,false>(), NeedlemanWunsch() );
+	SEQAN_TASSERT(score  == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,true,false,false>(), NeedlemanWunsch() );
+	SEQAN_TASSERT(score + 6 == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,false>(), NeedlemanWunsch() );
+	SEQAN_TASSERT(score + 6 == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,false,true>(), NeedlemanWunsch() );
+	SEQAN_TASSERT(score == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,true>(), NeedlemanWunsch() );
+	SEQAN_TASSERT(score + 6 == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<true,false,false,true>(), NeedlemanWunsch() );
+	SEQAN_TASSERT(score == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,true,true,false>(), NeedlemanWunsch() );
+	SEQAN_TASSERT(score + 12 == score2)
 	//std::cout << g << std::endl;
 	//score2 = globalAlignment(std::cout, str, score_type, NeedlemanWunsch() );
 	//SEQAN_TASSERT(score == score2)
@@ -101,7 +155,7 @@ void  Test_NeedlemanWunsch() {
 
 //////////////////////////////////////////////////////////////////////////////
 
-void  Test_Gotoh() {
+void Test_Gotoh() {
 	typedef String<Dna> TString;
 	typedef StringSet<TString, Dependent<> > TStringSet;
 	typedef Graph<Alignment<TStringSet, void> > TGraph;
@@ -113,8 +167,8 @@ void  Test_Gotoh() {
 	TString str0("ttagt");	assignValueById(str, str0);
 	TString str1("ttgt"); assignValueById(str, str1);
 	TGraph g(str);
-	Score<double> score_type = Score<double>(1,-1,-1,-2);
-	double score = globalAlignment(g, score_type, Gotoh());
+	Score<int> score_type = Score<int>(1,-1,-1,-2);
+	int score = globalAlignment(g, score_type, Gotoh());
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "tt")
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "tt")
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 2)) == "a")
@@ -122,6 +176,16 @@ void  Test_Gotoh() {
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 2)) == "gt")
 	SEQAN_TASSERT(numEdges(g) == 2)
 	SEQAN_TASSERT(numVertices(g) == 5)
+	int score2 = globalAlignment(stringSet(g), score_type, AlignConfig<true,false,false,false>(), Gotoh() );
+	SEQAN_TASSERT(score == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,true,false,false>(), Gotoh() );
+	SEQAN_TASSERT(score == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,false>(), Gotoh() );
+	SEQAN_TASSERT(score == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,false,true>(), Gotoh() );
+	SEQAN_TASSERT(score == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,true>(), Gotoh() );
+	SEQAN_TASSERT(score == score2)
 	//std::cout << g << std::endl;
 	//double score2 = globalAlignment(std::cout, str, score_type, Gotoh() );
 	//SEQAN_TASSERT(score == score2)
@@ -137,6 +201,16 @@ void  Test_Gotoh() {
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 2)) == "gt")
 	SEQAN_TASSERT(numEdges(g) == 2)
 	SEQAN_TASSERT(numVertices(g) == 5)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<true,false,false,false>(), Gotoh() );
+	SEQAN_TASSERT(score == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,true,false,false>(), Gotoh() );
+	SEQAN_TASSERT(score == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,false>(), Gotoh() );
+	SEQAN_TASSERT(score == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,false,true>(), Gotoh() );
+	SEQAN_TASSERT(score == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,true>(), Gotoh() );
+	SEQAN_TASSERT(score == score2)
 	//std::cout << g << std::endl;
 	//score2 = globalAlignment(std::cout, str, score_type, Gotoh() );
 	//SEQAN_TASSERT(score == score2)
@@ -150,6 +224,16 @@ void  Test_Gotoh() {
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "t")
 	SEQAN_TASSERT(numEdges(g) == 1)
 	SEQAN_TASSERT(numVertices(g) == 3)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<true,false,false,false>(), Gotoh() );
+	SEQAN_TASSERT(score == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,true,false,false>(), Gotoh() );
+	SEQAN_TASSERT(score + 2 == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,false>(), Gotoh() );
+	SEQAN_TASSERT(score == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,false,true>(), Gotoh() );
+	SEQAN_TASSERT(score == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,true>(), Gotoh() );
+	SEQAN_TASSERT(score == score2)
 	//std::cout << g << std::endl;
 	//score2 = globalAlignment(std::cout, str, score_type, Gotoh() );
 	//SEQAN_TASSERT(score == score2)
@@ -163,6 +247,16 @@ void  Test_Gotoh() {
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "t")
 	SEQAN_TASSERT(numEdges(g) == 1)
 	SEQAN_TASSERT(numVertices(g) == 3)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<true,false,false,false>(), Gotoh() );
+	SEQAN_TASSERT(score + 2 == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,true,false,false>(), Gotoh() );
+	SEQAN_TASSERT(score == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,false>(), Gotoh() );
+	SEQAN_TASSERT(score == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,false,true>(), Gotoh() );
+	SEQAN_TASSERT(score == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,true>(), Gotoh() );
+	SEQAN_TASSERT(score == score2)
 	//std::cout << g << std::endl;
 	//score2 = globalAlignment(std::cout, str, score_type, Gotoh() );
 	//SEQAN_TASSERT(score == score2)
@@ -176,6 +270,16 @@ void  Test_Gotoh() {
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 4)) == "t")
 	SEQAN_TASSERT(numEdges(g) == 1)
 	SEQAN_TASSERT(numVertices(g) == 3)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<true,false,false,false>(), Gotoh() );
+	SEQAN_TASSERT(score == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,true,false,false>(), Gotoh() );
+	SEQAN_TASSERT(score == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,false>(), Gotoh() );
+	SEQAN_TASSERT(score == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,false,true>(), Gotoh() );
+	SEQAN_TASSERT(score + 2 == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,true>(), Gotoh() );
+	SEQAN_TASSERT(score + 2 == score2)
 	//std::cout << g << std::endl;
 	//score2 = globalAlignment(std::cout, str, score_type, Gotoh() );
 	//SEQAN_TASSERT(score == score2)
@@ -189,6 +293,16 @@ void  Test_Gotoh() {
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 4)) == "t")
 	SEQAN_TASSERT(numEdges(g) == 1)
 	SEQAN_TASSERT(numVertices(g) == 3)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<true,false,false,false>(), Gotoh() );
+	SEQAN_TASSERT(score == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,true,false,false>(), Gotoh() );
+	SEQAN_TASSERT(score == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,false>(), Gotoh() );
+	SEQAN_TASSERT(score + 2 == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,false,true>(), Gotoh() );
+	SEQAN_TASSERT(score == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,true>(), Gotoh() );
+	SEQAN_TASSERT(score + 2 == score2)
 	//std::cout << g << std::endl;
 	//score2 = globalAlignment(std::cout, str, score_type, Gotoh() );
 	//SEQAN_TASSERT(score == score2)
@@ -203,6 +317,16 @@ void  Test_Gotoh() {
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "ttag")
 	SEQAN_TASSERT(numEdges(g) == 1)
 	SEQAN_TASSERT(numVertices(g) == 4)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<true,false,false,false>(), Gotoh() );
+	SEQAN_TASSERT(score + 2 == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,true,false,false>(), Gotoh() );
+	SEQAN_TASSERT(score == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,false>(), Gotoh() );
+	SEQAN_TASSERT(score == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,false,true>(), Gotoh() );
+	SEQAN_TASSERT(score + 2 == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<true,false,true,true>(), Gotoh() );
+	SEQAN_TASSERT(score + 4 == score2)
 	//std::cout << g << std::endl;
 	//score2 = globalAlignment(std::cout, str, score_type, Gotoh() );
 	//SEQAN_TASSERT(score == score2)
@@ -217,6 +341,16 @@ void  Test_Gotoh() {
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "ttag")
 	SEQAN_TASSERT(numEdges(g) == 1)
 	SEQAN_TASSERT(numVertices(g) == 4)
+	score2 = globalAlignment(g, score_type, AlignConfig<true,false,false,false>(), Gotoh() );
+	SEQAN_TASSERT(score == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,true,false,false>(), Gotoh() );
+	SEQAN_TASSERT(score + 2 == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,false>(), Gotoh() );
+	SEQAN_TASSERT(score + 2 == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,false,true>(), Gotoh() );
+	SEQAN_TASSERT(score == score2)
+	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,true,true,false>(), Gotoh() );
+	SEQAN_TASSERT(score + 4 == score2)
 	//std::cout << g << std::endl;
 	//score2 = globalAlignment(std::cout, str, score_type, Gotoh() );
 	//SEQAN_TASSERT(score == score2)
@@ -258,7 +392,7 @@ void  Test_Gotoh() {
 	str[0] = "ttattaa";
 	str[1] = "aaa";
 	assignStringSet(g, str);
-	Score<double> score_type2 = Score<double>(10,-1,-1,-2);
+	Score<int> score_type2 = Score<int>(10,-1,-1,-2);
 	score = globalAlignment(g, score_type2, Gotoh());
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "tt")
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 2)) == "a")
@@ -268,6 +402,10 @@ void  Test_Gotoh() {
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 1)) == "aa")
 	SEQAN_TASSERT(numEdges(g) == 2)
 	SEQAN_TASSERT(numVertices(g) == 6)
+	score2 = globalAlignment(stringSet(g), score_type2, AlignConfig<true,false,false,false>(), Gotoh() );
+	SEQAN_TASSERT(score + 3 == score2)
+	score2 = globalAlignment(stringSet(g), score_type2, AlignConfig<false,true,false,false>(), Gotoh() );
+	SEQAN_TASSERT(score == score2)
 	//std::cout << g << std::endl;
 	//score2 = globalAlignment(std::cout, str, score_type2, Gotoh() );
 	//SEQAN_TASSERT(score == score2)
@@ -361,6 +499,7 @@ void  Test_MyersBitVector() {
 	SEQAN_TASSERT(score3 == score4)
 }
 
+
 //////////////////////////////////////////////////////////////////////////////
 
 void Test_Hirschberg() {
@@ -375,8 +514,8 @@ void Test_Hirschberg() {
 	TString str0("ttagt");	assignValueById(str, str0);
 	TString str1("ttgt"); assignValueById(str, str1);
 	TGraph g(str);
-	Score<double> score_type = Score<double>(1,-1,-1,-2);
-	double score = globalAlignment(g, score_type, Hirschberg());
+	Score<int> score_type = Score<int>(1,-1,-1,-2);
+	int score = globalAlignment(g, score_type, Hirschberg());
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "tt")
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "tt")
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 2)) == "a")
@@ -384,6 +523,8 @@ void Test_Hirschberg() {
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 2)) == "gt")
 	SEQAN_TASSERT(numEdges(g) == 2)
 	SEQAN_TASSERT(numVertices(g) == 5)
+	int score2 = globalAlignment(stringSet(g), score_type, Hirschberg() );
+	SEQAN_TASSERT(score == score2)
 	//std::cout << g << std::endl;
 	//double score2 = globalAlignment(std::cout, str, score_type, Hirschberg() );
 	//SEQAN_TASSERT(score == score2)
@@ -520,7 +661,7 @@ void Test_Hirschberg() {
 	str[0] = "ttattaa";
 	str[1] = "aaa";
 	assignStringSet(g, str);
-	Score<double> score_type2 = Score<double>(10,-1,-1,-2);
+	Score<int> score_type2 = Score<int>(10,-1,-1,-2);
 	score = globalAlignment(g, score_type2, Hirschberg());
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "tt")
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 2)) == "a")
@@ -565,8 +706,8 @@ void Test_SmithWaterman() {
 	TString str0("gctctgcgaata"); assignValueById(str, str0);
 	TString str1("cgttgagatact"); assignValueById(str, str1);
 	TGraph g(str);
-	Score<double> score_type = Score<double>(2,-1,-2,-2);
-	double score = localAlignment(g, score_type, SmithWaterman());
+	Score<int> score_type = Score<int>(2,-1,-2,-2);
+	int score = localAlignment(g, score_type, SmithWaterman());
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 4)) == "tgcg")
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 8)) == "a")
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 9)) == "ata")
@@ -574,93 +715,69 @@ void Test_SmithWaterman() {
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 7)) == "ata")
 	SEQAN_TASSERT(numEdges(g) == 2)
 	SEQAN_TASSERT(numVertices(g) == 5)
+	int score2 = localAlignment(stringSet(g), score_type, SmithWaterman());
+	SEQAN_TASSERT(score == score2)
 	//std::cout << g << std::endl;
-	//double score2 = localAlignment(std::cout, str, score_type, SmithWaterman() );
+	//score2 = localAlignment(std::cout, str, score_type, SmithWaterman() );
 	//SEQAN_TASSERT(score == score2)
 	
-	str[0] = "gctctgcgaata";
-	str[1] = "cgttgagatact";
+	str[0] = "TTGACACCCTCCCAATTGTA";
+	str[1] = "ACCCCAGGCTTTACACAT";
 	assignStringSet(g, str);
-	score = localAlignment(g, score_type, SmithWatermanClump());
-	/*
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "cgt")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 3)) == "t")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 4)) == "ga")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 6)) == "g")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 7)) == "at")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 9)) == "a")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 10)) == "c")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 11)) == "t")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "g")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 1)) == "ct")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 3)) == "c")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 4)) == "t")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 5)) == "gc")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 7)) == "g")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 8)) == "a")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 9)) == "at")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 11)) == "a")
-
-	SEQAN_TASSERT(numEdges(g) == 9)
-	SEQAN_TASSERT(numVertices(g) == 17)
-		*/
+	score = localAlignment(g, score_type, SmithWaterman());
+	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "TTGACAC")
+	SEQAN_TASSERT(label(g, findVertex(g, 1, 9)) == "TTTACAC")
+	SEQAN_TASSERT(numEdges(g) == 1)
+	SEQAN_TASSERT(numVertices(g) == 2)
+	score2 = localAlignment(stringSet(g), score_type, SmithWaterman());
+	SEQAN_TASSERT(score == score2)
+	//std::cout << g << std::endl;
+	//score2 = localAlignment(std::cout, str, score_type, SmithWaterman() );
+	//SEQAN_TASSERT(score == score2)
 }
+	
 
 //////////////////////////////////////////////////////////////////////////////
 
-void Test_Nussinov() {
-	typedef String<char> TString;
-	typedef Size<TString>::Type TSize;
-	typedef Value<TString>::Type TCharacter;
-	typedef Graph<Undirected<> > TGraph;
+void Test_SmithWatermanClump() {
+	typedef String<Dna> TString;
+	typedef StringSet<TString, Dependent<> > TStringSet;
+	typedef Graph<Alignment<TStringSet, unsigned int> > TGraph;
 	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
-	
-	typedef std::map<std::pair<TCharacter, TCharacter>, unsigned int> TBasePairMap;
-	TBasePairMap pairMap;
-	pairMap.insert(std::make_pair(std::make_pair('a','u'),1));
-	pairMap.insert(std::make_pair(std::make_pair('u','a'),1));
-	pairMap.insert(std::make_pair(std::make_pair('c','g'),1));
-	pairMap.insert(std::make_pair(std::make_pair('g','c'),1));
-	Score<TBasePairMap, ScoreNussinov> sc = Score<TBasePairMap, ScoreNussinov>(pairMap);
-	TString str("gggaaaucc");
-	TGraph g;
-	unsigned int score = rnaFolding(g, str, sc, Nussinov() );
-	SEQAN_TASSERT(numEdges(g) == 11)
-	SEQAN_TASSERT(numVertices(g) == length(str))
-	SEQAN_TASSERT(score == 3)
+	typedef	Id<TStringSet>::Type TId;
 
-	pairMap.clear();
-	pairMap.insert(std::make_pair(std::make_pair('g','u'),1));
-	pairMap.insert(std::make_pair(std::make_pair('u','g'),1));
-	pairMap.insert(std::make_pair(std::make_pair('a','u'),2));
-	pairMap.insert(std::make_pair(std::make_pair('u','a'),2));
-	pairMap.insert(std::make_pair(std::make_pair('c','g'),3));
-	pairMap.insert(std::make_pair(std::make_pair('g','c'),3));
-	sc = Score<TBasePairMap, ScoreNussinov>(pairMap);
-	str = "gcagcacccaaagggaauaugggauacgcgua";
-	clear(g);
-	score = rnaFolding(g, str, sc, 3, Nussinov() );
-	SEQAN_TASSERT(numEdges(g) == 41)
-	SEQAN_TASSERT(numVertices(g) == length(str))
-	SEQAN_TASSERT(score == 25)
+	TStringSet str;
+	TString str0("gctctgcgaata"); assignValueById(str, str0);
+	TString str1("cgttgagatact"); assignValueById(str, str1);
+	TGraph g(str);
+	Score<int> score_type = Score<int>(2,-1,-2,-2);
+	localAlignment(g, score_type, SmithWatermanClump());
 	
-	//String<char> names;
-	//resize(names, length(str));
-	//for(TSize i=0;i<length(str);++i) {
-	//	assignValue(names,i,str[i]);
-	//}
-	//String<String<char> > nodeMap;
-	//_createNodeAttributes(g,nodeMap,names);
-	//String<String<char> > edgeMap;
-	//_createEdgeAttributes(g,edgeMap);
-	//fstream strm;
-	//strm.open(TEST_PATH "my_rna_graph.dot", ios_base::out | ios_base::trunc);
-	//write(strm,g,nodeMap,edgeMap,DotDrawing());
-	//strm.close();
+	//SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "cgt")
+	//SEQAN_TASSERT(label(g, findVertex(g, 1, 3)) == "t")
+	//SEQAN_TASSERT(label(g, findVertex(g, 1, 4)) == "ga")
+	//SEQAN_TASSERT(label(g, findVertex(g, 1, 6)) == "g")
+	//SEQAN_TASSERT(label(g, findVertex(g, 1, 7)) == "at")
+	//SEQAN_TASSERT(label(g, findVertex(g, 1, 9)) == "a")
+	//SEQAN_TASSERT(label(g, findVertex(g, 1, 10)) == "c")
+	//SEQAN_TASSERT(label(g, findVertex(g, 1, 11)) == "t")
+	//SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "g")
+	//SEQAN_TASSERT(label(g, findVertex(g, 0, 1)) == "ct")
+	//SEQAN_TASSERT(label(g, findVertex(g, 0, 3)) == "c")
+	//SEQAN_TASSERT(label(g, findVertex(g, 0, 4)) == "t")
+	//SEQAN_TASSERT(label(g, findVertex(g, 0, 5)) == "gc")
+	//SEQAN_TASSERT(label(g, findVertex(g, 0, 7)) == "g")
+	//SEQAN_TASSERT(label(g, findVertex(g, 0, 8)) == "a")
+	//SEQAN_TASSERT(label(g, findVertex(g, 0, 9)) == "at")
+	//SEQAN_TASSERT(label(g, findVertex(g, 0, 11)) == "a")
+
+	//SEQAN_TASSERT(numEdges(g) == 9)
+	//SEQAN_TASSERT(numVertices(g) == 17)
+		
 }
 
-
+/*
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -792,7 +909,7 @@ void  Test_Runtime2() {
 	}
 }
 
-
+*/
 //////////////////////////////////////////////////////////////////////////////
 
 void Test_GraphAlignment() {
@@ -804,19 +921,20 @@ void Test_GraphAlignment() {
 
 	// Local alignments
 	Test_SmithWaterman();
-
-	// This shouldn't be here
-	Test_Nussinov();
+	Test_SmithWatermanClump();
 
 	// To test the runtime
 	//Test_Runtime2();
 
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_base.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_gotoh.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_hirschberg.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_interface.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_myers.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_config.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_needleman_wunsch.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_gotoh.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_myers.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_hirschberg.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_smith_waterman.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_smith_waterman_clump.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_interface.h");
 }
 
 }

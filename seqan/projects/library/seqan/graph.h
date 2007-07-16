@@ -65,16 +65,18 @@
 
 // Alignment
 #include <seqan/graph/graph_align_base.h>
+#include <seqan/graph/graph_align_config.h>
 #include <seqan/graph/graph_align_needleman_wunsch.h>
 #include <seqan/graph/graph_align_gotoh.h>
-#include <seqan/graph/graph_align_gotoh3.h>
 #include <seqan/graph/graph_align_myers.h>
 #include <seqan/graph/graph_align_hirschberg.h>
 #include <seqan/graph/graph_align_smith_waterman.h>
 #include <seqan/graph/graph_align_smith_waterman_clump.h>
 #include <seqan/graph/graph_align_tcoffee.h>
 #include <seqan/graph/graph_align_interface.h>
-#include <seqan/graph/graph_align_nussinov.h>
+
+// Folding
+#include <seqan/graph/graph_fold_nussinov.h>
 
 // Utilities
 #include <seqan/graph/graph_utility_alphabets.h>

@@ -11,62 +11,107 @@ namespace SEQAN_NAMESPACE_MAIN
 ..summary:Computes the best global alignment of the two sequences.
 ..cat:Alignments
 ..signature:
-globalAlignment(strSet, score, tag)
-globalAlignment(graph, score, tag)
-globalAlignment(file, strSet, score, tag)
+ globalAlignment(g, score_type, Gotoh());
+globalAlignment( [strSet | graph | align, strSet], score [, align_config], tag)
 ..param.strSet:A string set with 2 sequences.
 ...type:Class.StringSet
-...remarks: If an alignment graph is used that graph must contain a string set with two sequences
-..param.graph:The alignment graph having 2 sequences.
+..param.graph:An alignment graph containing 2 sequences.
 ...type:Class.Graph Alignment
-..param.file:A file stream or std::cout to write a textual alignment
+..param.align:Different alignment data structures, e.g., a file stream or std::cout for a textual alignment or a FragmentString for all the matches.
 ..param.score:The score values to be used for computing the alignment.
 ...type:Class.Score
+..param.align_config:Alignment configuration options.
+...type:Class.AlignConfig
+...remarks:The class AlignConfig has four boolean parameters, i.e., TTop, TLeft, TRight, and TBottom.
+If TTop is true the first row of the DP Matrix is initialized with 0's. If TLeft is true the first
+column is initialized with 0's. If TRight is true, the maximum is search in the last column. If TBottom
+is true, the maximum is searched in the last row. All options can be combined in all possible ways.
+The Hirschberg algorithm currently doesn't support this kind of configuration.
 ..param.tag:A tag indicating the alignment algorithm to use
-...remarks:NeedlemanWunsch, Gotoh, Hirschberg, or MyersBitVector.
-...remarks:If MyersBitVector is used leave out score because the scoring is fixed in this algorithm.
+...remarks:NeedlemanWunsch, Gotoh, or Hirschberg.
 ..returns:The maximum score of the best global alignment.
 */
-template<typename TFile, typename TStringSet, typename TScoreValue, typename TSpec, typename TTag>
-TScoreValue
-globalAlignment(TFile& file,
+template<typename TAlign, typename TStringSet, typename TScoreValue, typename TSpec, typename TTag>
+inline TScoreValue
+globalAlignment(TAlign& file,
 				TStringSet const& str,
 				Score<TScoreValue, TSpec> const& sc,
 				TTag)
 {
 	SEQAN_CHECKPOINT
-	return _globalAlignment(file,str,sc,TTag());
+	return globalAlignment(file,str,sc, AlignConfig<>(), TTag());
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TAlign, typename TStringSet, typename TScoreValue, typename TSpec, typename TAlignConfig, typename TTag>
+inline TScoreValue
+globalAlignment(TAlign& file,
+				TStringSet const& str,
+				Score<TScoreValue, TSpec> const& sc,
+				TAlignConfig const,
+				TTag)
+{
+	SEQAN_CHECKPOINT
+	return _globalAlignment(file,str,sc, TAlignConfig(), TTag());
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TStringSet, typename TScoreValue, typename TSpec, typename TTag>
-TScoreValue
+inline TScoreValue
 globalAlignment(TStringSet const& str,
 				Score<TScoreValue, TSpec> const& sc,
 				TTag)
 {
 	SEQAN_CHECKPOINT
-	return _globalAlignment(str,sc,TTag());
+	return globalAlignment(str,sc,AlignConfig<>(), TTag());
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TScoreValue, typename TSpec, typename TAlignConfig, typename TTag>
+inline TScoreValue
+globalAlignment(TStringSet const& str,
+				Score<TScoreValue, TSpec> const& sc,
+				TAlignConfig const,
+				TTag)
+{
+	SEQAN_CHECKPOINT
+	return _globalAlignment(str,sc, TAlignConfig(), TTag());
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TStringSet, typename TCargo, typename TSpec, typename TScoreValue, typename TSpec2, typename TTag>
-TScoreValue
+inline TScoreValue
 globalAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 				Score<TScoreValue, TSpec2> const& sc,
 				TTag)
 {
 	SEQAN_CHECKPOINT
 	clearVertices(g);
-	return _globalAlignment(g,stringSet(g),sc,TTag());
+	return globalAlignment(g,stringSet(g),sc, AlignConfig<>(), TTag());
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec, typename TScoreValue, typename TSpec2, typename TAlignConfig, typename TTag>
+inline TScoreValue
+globalAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+				Score<TScoreValue, TSpec2> const& sc,
+				TAlignConfig const,
+				TTag)
+{
+	SEQAN_CHECKPOINT
+	clearVertices(g);
+	return _globalAlignment(g,stringSet(g),sc, TAlignConfig(), TTag());
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TStringSet>
-unsigned int
+inline unsigned int
 globalAlignment(TStringSet const& str,
 				MyersBitVector)
 {
@@ -97,21 +142,20 @@ localAlignment(file, strSet, score, tag)
 ...remarks:SmithWaterman
 ..returns:The maximum score of the best local alignment.
 */
-template<typename TFile, typename TStringSet, typename TScoreValue, typename TSpec, typename TTag>
-TScoreValue
-localAlignment(TFile& file,
+template<typename TAlign, typename TStringSet, typename TScoreValue, typename TSpec, typename TTag>
+inline TScoreValue
+localAlignment(TAlign& file,
 			   TStringSet const& str,
 			   Score<TScoreValue, TSpec> const& sc,
 			   TTag)
 {
-	SEQAN_CHECKPOINT
 	return _localAlignment(file,str,sc,TTag());
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TStringSet, typename TScoreValue, typename TSpec, typename TTag>
-TScoreValue
+inline TScoreValue
 localAlignment(TStringSet const& str,
 			   Score<TScoreValue, TSpec> const& sc,
 			   TTag)
@@ -123,7 +167,7 @@ localAlignment(TStringSet const& str,
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TStringSet, typename TCargo, typename TSpec, typename TScoreValue, typename TSpec2, typename TTag>
-TScoreValue
+inline TScoreValue
 localAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 			   Score<TScoreValue, TSpec2> const& sc,
 			   TTag)
@@ -132,6 +176,7 @@ localAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	clearVertices(g);
 	return _localAlignment(g,stringSet(g),sc,TTag());
 }
+
 
 }// namespace SEQAN_NAMESPACE_MAIN
 

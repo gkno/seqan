@@ -4,6 +4,76 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 
+
+
+
+template<typename TStringSet, typename TMatches>
+void
+_debugMatches(TStringSet& str, 
+			  TMatches& matches)
+{
+	typedef typename Id<TStringSet>::Type TId;
+	typedef typename Size<TStringSet>::Type TSize;
+
+	// Print all the matches
+	std::cout << "The sequences:" << std::endl;
+	for(TSize i = 0;i<length(str);++i) {
+		std::cout << positionToId(str,i) << ':' << str[i] << std::endl;
+	}
+	std::cout << "The matches:" << std::endl;
+	for(TSize i = 0;i<length(matches);++i) {
+		TId tmp_id1 = sequenceId(matches[i],0);
+		std::cout << tmp_id1 << ',' << fragmentBegin(matches[i],tmp_id1) << ',';
+		for(TSize j = fragmentBegin(matches[i],tmp_id1); j < fragmentBegin(matches[i],tmp_id1) + fragmentLength(matches[i],tmp_id1); ++j) {
+			std::cout << str[idToPosition(str, tmp_id1)][j];
+		}
+		TId tmp_id2 = sequenceId(matches[i],1);
+		std::cout << ',' <<	tmp_id2 << ',' << fragmentBegin(matches[i],tmp_id2) << ',';
+		for(TSize j = fragmentBegin(matches[i],tmp_id2); j < fragmentBegin(matches[i],tmp_id2) + fragmentLength(matches[i],tmp_id2); ++j) {
+			std::cout << str[idToPosition(str, tmp_id2)][j];
+		}
+		std::cout << std::endl;
+
+		SEQAN_TASSERT(sequenceId(matches[i],0) != sequenceId(matches[i],1))
+		SEQAN_TASSERT(fragmentBegin(matches[i],tmp_id1) < length(str[idToPosition(str, tmp_id1)]))
+		SEQAN_TASSERT(fragmentBegin(matches[i],tmp_id1) + fragmentLength(matches[i],tmp_id1) <= length(str[idToPosition(str, tmp_id1)]))
+		SEQAN_TASSERT(fragmentBegin(matches[i],tmp_id2) < length(str[idToPosition(str, tmp_id2)]))
+		SEQAN_TASSERT(fragmentBegin(matches[i],tmp_id2) + fragmentLength(matches[i],tmp_id2) <= length(str[idToPosition(str, tmp_id2)]))
+		SEQAN_TASSERT(fragmentLength(matches[i],tmp_id2) == fragmentLength(matches[i],tmp_id1))
+	}
+}
+
+
+template<typename TGraph>
+void
+_debugRefinedMatches(TGraph& g)
+{
+	typedef typename Id<TGraph>::Type TId;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
+	
+	std::cout << "Refined matches" << std::endl;
+	TEdgeIterator it_tmp(g);
+	for(;!atEnd(it_tmp);++it_tmp) {
+		TId id1 = sequenceId(g,sourceVertex(it_tmp));
+		TId id2 = sequenceId(g,targetVertex(it_tmp));
+		std::cout << id1 << ',' << fragmentBegin(g,sourceVertex(it_tmp)) << ',';
+		std::cout << label(g,sourceVertex(it_tmp));
+		std::cout << ',' <<	id2 << ',' << fragmentBegin(g,targetVertex(it_tmp)) << ',';
+		std::cout << label(g,targetVertex(it_tmp));
+		std::cout << std::endl;	
+
+		SEQAN_TASSERT(sequenceId(g,sourceVertex(it_tmp)) != sequenceId(g,targetVertex(it_tmp)))
+		SEQAN_TASSERT(fragmentBegin(g,sourceVertex(it_tmp)) < length((stringSet(g))[idToPosition((stringSet(g)), id1)]))
+		SEQAN_TASSERT(fragmentBegin(g,sourceVertex(it_tmp)) + fragmentLength(g,sourceVertex(it_tmp)) <= length((stringSet(g))[idToPosition((stringSet(g)), id1)]))
+		SEQAN_TASSERT(fragmentBegin(g,targetVertex(it_tmp)) < length((stringSet(g))[idToPosition((stringSet(g)), id2)]))
+		SEQAN_TASSERT(fragmentBegin(g,targetVertex(it_tmp)) + fragmentLength(g,targetVertex(it_tmp)) <= length((stringSet(g))[idToPosition((stringSet(g)), id2)]))
+		SEQAN_TASSERT(fragmentLength(g,sourceVertex(it_tmp)) == fragmentLength(g,targetVertex(it_tmp)))
+
+	}
+}
+
+
 //////////////////////////////////////////////////////////////////////////////
 // Graph: T-Coffee - Tags
 //////////////////////////////////////////////////////////////////////////////
@@ -726,6 +796,121 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	typedef String<TFragment, Block<> > TFragmentString;
 	typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
 	TFragmentString matches;
+
+	mtRandInit();
+	for(TSize i=0; i<nseq; ++i) {
+		for(TSize j=i+1; j<nseq; ++j) {
+			TFragmentString local_matches;
+			TSize k = ((Byte) mtRand() % (nseq - 2));
+			if (k>=i) ++k;
+			if (k>=j) ++k;
+
+			//First pair
+			TId id1 = positionToId(str, i);
+			TId id2 = positionToId(str, j);
+			TStringSet pairSet;
+			assignValueById(pairSet, str, id1);
+			assignValueById(pairSet, str, id2);
+			typedef Graph<Alignment<TStringSet, unsigned int> > TPairGraph;
+			typedef typename VertexDescriptor<TPairGraph>::Type TVD;
+			typedef typename Iterator<TPairGraph, EdgeIterator>::Type TEI;
+			TPairGraph pGraph(pairSet);
+			localAlignment(pGraph, score_type, SmithWatermanClump() );
+			TEI it(pGraph);
+			for(;!atEnd(it);++it) {
+				TVD sV = sourceVertex(it);
+				TVD tV = targetVertex(it);
+				push_back(local_matches, TFragment( (unsigned int) sequenceId(pGraph, sV), (unsigned int) fragmentBegin(pGraph,sV), (unsigned int) sequenceId(pGraph, tV),  (unsigned int)  fragmentBegin(pGraph,tV),  (unsigned int)  fragmentLength(pGraph,tV)));
+			}
+			
+			// Second pair
+			id1 = positionToId(str, i);
+			id2 = positionToId(str, k);
+			clear(pairSet);
+			assignValueById(pairSet, str, id1);
+			assignValueById(pairSet, str, id2);
+			clear(pGraph);
+			assignStringSet(pGraph,pairSet);
+			localAlignment(pGraph, score_type, SmithWatermanClump() );
+			it = pGraph;
+			for(;!atEnd(it);++it) {
+				TVD sV = sourceVertex(it);
+				TVD tV = targetVertex(it);
+				push_back(local_matches, TFragment( (unsigned int) sequenceId(pGraph, sV), (unsigned int) fragmentBegin(pGraph,sV), (unsigned int) sequenceId(pGraph, tV),  (unsigned int)  fragmentBegin(pGraph,tV),  (unsigned int)  fragmentLength(pGraph,tV)));
+			}
+			
+			// Third pair
+			id1 = positionToId(str, j);
+			id2 = positionToId(str, k);
+			clear(pairSet);
+			assignValueById(pairSet, str, id1);
+			assignValueById(pairSet, str, id2);
+			clear(pGraph);
+			assignStringSet(pGraph,pairSet);
+			localAlignment(pGraph, score_type, SmithWatermanClump() );
+			it = pGraph;
+			for(;!atEnd(it);++it) {
+				TVD sV = sourceVertex(it);
+				TVD tV = targetVertex(it);
+				push_back(local_matches, TFragment( (unsigned int) sequenceId(pGraph, sV), (unsigned int) fragmentBegin(pGraph,sV), (unsigned int) sequenceId(pGraph, tV),  (unsigned int)  fragmentBegin(pGraph,tV),  (unsigned int)  fragmentLength(pGraph,tV)));
+			}
+
+			// Refine matches
+			clearVertices(g);
+		
+			// Refine all matches and create multiple alignment
+			matchRefinement(local_matches,str,g);
+
+			// Get significant local matches
+			TEdgeIterator edgeIt(g);
+			for(;!atEnd(edgeIt);++edgeIt) {
+				TVertexDescriptor p1 = sourceVertex(edgeIt);
+				TVertexDescriptor p2 = targetVertex(edgeIt);
+				//std::cout << sequenceId(g, p1) << ',' << fragmentBegin(g,p1) << ',' << sequenceId(g, p2) << ',' << fragmentBegin(g,p2) << ',' << fragmentLength(g,p2) << std::endl;
+				if ((outDegree(g, p1) > 1) && 
+					(outDegree(g, p2)>1) &&
+					(fragmentLength(g, p1) > 1)) {
+						push_back(matches, TFragment(sequenceId(g,p1),fragmentBegin(g,p1),sequenceId(g,p2),fragmentBegin(g,p2),fragmentLength(g,p1)));
+				}
+			}
+		}
+	}
+
+	// Clear graph
+	clearVertices(g);
+
+	// Refine all matches and create multiple alignment
+	matchRefinement(matches,str,const_cast< TScore&>(score_type),g);
+}
+
+/*
+template<typename TStringSet, typename TCargo, typename TSpec, typename TScore>
+void 
+generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+					   TScore const& score_type,
+					   LocalPairwise_Library)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename Id<TGraph>::Type TId;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
+	typedef typename Value<TScore>::Type TScoreValue;
+
+	// Clear graph
+	clearVertices(g);
+
+	// Pairwise alignments for all pairs of sequences
+	TStringSet& str = stringSet(g);	
+	TSize nseq = length(str);
+
+	// String of fragments to combine all pairwise alignments into a multiple alignment
+	typedef Fragment<> TFragment;
+	typedef String<TFragment, Block<> > TFragmentString;
+	typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
+	TFragmentString matches;
 	String<TScoreValue, Block<> > score_values;
 
 	for(TSize i=0; i<nseq; ++i) {
@@ -781,7 +966,7 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 		}
 	}
 }
-
+*/
 
 template<typename TStringSet, typename TCargo, typename TSpec, typename TScore>
 void 
@@ -818,77 +1003,25 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 			TId id1 = positionToId(str, i);
 			TId id2 = positionToId(str, j);
 
-			// Pairwise alignment graph
+			// Pairwise alignment, get the matches
 			TStringSet pairSet;
 			assignValueById(pairSet, str, id1);
 			assignValueById(pairSet, str, id2);
+			int seqSim = globalAlignment(matches, pairSet, score_type, Gotoh() );
 			
-			typedef Graph<Alignment<TStringSet, void> > TPairGraph;
-			typedef typename VertexDescriptor<TPairGraph>::Type TVD;
-			typedef typename Iterator<TPairGraph, EdgeIterator>::Type TEI;
-			TPairGraph pGraph(pairSet);
-			globalAlignment(pGraph, score_type, Gotoh() );
-			
-			// Determine a sequence weight
-			String<double> sim;
-			getSequenceSimilarity(pGraph, sim, typename Value<TStringSet>::Type() );
-			TCargo seqSim = (TCargo) (getValue(sim, 1) * 100);
-
-			//TCargo seqSim = (TCargo) (_getSequenceSimilarity(pGraph, typename Value<TStringSet>::Type() ) * 100);
-
-			//// Debug code
-			//std::cout << pairSet[0] << std::endl;
-			//std::cout << pairSet[1] << std::endl;
-			//std::cout << pGraph << std::endl;
-			//std::cout << seqSim << std::endl;
-			
-			// Extract the matches		
-			TEI it(pGraph);
-			for(;!atEnd(it);++it) {
-				TVD sV = sourceVertex(it);
-				TVD tV = targetVertex(it);
-				push_back(matches, TFragment( (unsigned int) sequenceId(pGraph, sV), (unsigned int) fragmentBegin(pGraph,sV), (unsigned int) sequenceId(pGraph, tV),  (unsigned int)  fragmentBegin(pGraph,tV),  (unsigned int)  fragmentLength(pGraph,tV)));
-				push_back(score_values, seqSim);
-			}
+			// Remember the confidence in these matches (Score value)
+			TSize diff = length(matches) - length(score_values);
+			for(TSize k = 0; k<diff; ++k) push_back(score_values, seqSim);
 		}
 	}
 
-	//// Debug Code
-	//// Print all the matches
-	//std::cout << "The sequences:" << std::endl;
-	//for(TSize i = 0;i<length(str);++i) {
-	//	std::cout << positionToId(str,i) << ':' << str[i] << std::endl;
-	//}
-	//std::cout << "The matches:" << std::endl;
-	//for(TSize i = 0;i<length(matches);++i) {
-	//	TId tmp_id1 = sequenceId(matches[i],0);
-	//	std::cout << tmp_id1 << ',' << fragmentBegin(matches[i],tmp_id1) << ',';
-	//	for(TSize j = fragmentBegin(matches[i],tmp_id1); j < fragmentBegin(matches[i],tmp_id1) + fragmentLength(matches[i],tmp_id1); ++j) {
-	//		std::cout << str[idToPosition(str, tmp_id1)][j];
-	//	}
-	//	TId tmp_id2 = sequenceId(matches[i],1);
-	//	std::cout << ',' <<	tmp_id2 << ',' << fragmentBegin(matches[i],tmp_id2) << ',';
-	//	for(TSize j = fragmentBegin(matches[i],tmp_id2); j < fragmentBegin(matches[i],tmp_id2) + fragmentLength(matches[i],tmp_id2); ++j) {
-	//		std::cout << str[idToPosition(str, tmp_id2)][j];
-	//	}
-	//	std::cout << std::endl;
-	//}
+	//_debugMatches(stringSet(g), matches);
 
 	// Refine all matches and create multiple alignment
 	matchRefinement(matches,stringSet(g),const_cast<TScore&>(score_type),g);
 
-	//// Debug Code
-	//std::cout << "Refined matches" << std::endl;
-	//TEdgeIterator it_tmp(g);
-	//for(;!atEnd(it_tmp);++it_tmp) {
-	//	TId id1 = sequenceId(g,sourceVertex(it_tmp));
-	//	TId id2 = sequenceId(g,targetVertex(it_tmp));
-	//	std::cout << id1 << ',' << fragmentBegin(g,sourceVertex(it_tmp)) << ',';
-	//	std::cout << label(g,sourceVertex(it_tmp));
-	//	std::cout << ',' <<	id2 << ',' << fragmentBegin(g,targetVertex(it_tmp)) << ',';
-	//	std::cout << label(g,targetVertex(it_tmp));
-	//	std::cout << std::endl;	
-	//}
+
+	//_debugRefinedMatches(g);
 
 	// Adapt edge weights
 	TFragmentStringIter endIt = end(matches);
@@ -928,6 +1061,9 @@ _cleanEdges(Graph<Alignment<TStringSet, TCargo, TSpec> >& g)
 	typedef std::map<TId, TCargo> TIdToWeightMap;
 	typedef typename TIdToWeightMap::iterator TIter;
 
+	
+	TStringSet& str = stringSet(g);
+	TSize nseq = length(str);
 
 	std::cout << "Pruning edges" << std::endl;
 	double numE = numEdges(g);
@@ -937,26 +1073,24 @@ _cleanEdges(Graph<Alignment<TStringSet, TCargo, TSpec> >& g)
 	TVertexIterator it(g);
 	for(;!atEnd(it);++it) {
 		TOutEdgeIterator itOut(g, *it);
-		TIdToWeightMap minMap;
-		TEdgeDescriptor del_edge = 0;
-		String<TEdgeDescriptor> edges;
+		String<TEdgeDescriptor> edge;
+		String<TEdgeDescriptor, Block<> > del_edges;
+		fill(edge, nseq, (TEdgeDescriptor) 0);
 		for(;!atEnd(itOut);++itOut) {
-			TId id = sequenceId(g, targetVertex(itOut));
-			std::pair<TId, TCargo> el = std::make_pair(id, cargo(*itOut));
-			if (minMap.insert(el).second == false) {
-				TIter minMapPos = minMap.find(id);
-				if (cargo(*itOut) < minMapPos->second) del_edge = *itOut;
-				else {
-					minMapPos->second = cargo(*itOut);
-				}	
-				appendValue(edges, del_edge);
-			} else {
-				del_edge = *itOut;
+			TSize pos = positionToId(str, sequenceId(g, targetVertex(itOut)));
+			if (edge[pos] == 0) edge[pos] = *itOut;
+			else {
+				if (cargo(*itOut) < (cargo(edge[pos]))) {
+					push_back(del_edges, *itOut);
+				} else {
+					push_back(del_edges, edge[pos]);
+					edge[pos] = *itOut;
+				}
 			}
 		}
-		typedef typename Iterator<String<TEdgeDescriptor> >::Type TEI;
-		TEI endItE = end(edges);
-		for(TEI itE = begin(edges);itE!=endItE;++itE) removeEdge(g, *itE);
+		typedef typename Iterator<String<TEdgeDescriptor, Block<> > >::Type TEI;
+		TEI endItE = end(del_edges);
+		for(TEI itE = begin(del_edges);itE!=endItE;++itE) removeEdge(g, *itE);
 	}
 
 	std::cout << numEdges(g) << std::endl;
@@ -976,6 +1110,10 @@ tripletLibraryExtension(Graph<Alignment<TStringSet, TCargo, TSpec> >& g)
 	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
 
 	if (numEdges(g) > 1000000) _cleanEdges(g);
+	if (numEdges(g) > 3000000) {
+		// Too many edges, no triplet, just return;
+		return;
+	}
 
 	// Two tasks:
 	// 1) Add edges for the case that a and c is aligned, b and c is aligned, but a and b are not, give these edges the appropriate weight
@@ -1032,31 +1170,8 @@ tripletLibraryExtension(Graph<Alignment<TStringSet, TCargo, TSpec> >& g)
 	clear(newCargoMap);
 
 	// Finally add the new edges created by the triplet approach
-	// If there are very many edges we have to thin the graph
-	if (numEdges(g) < 1000000) {
-		for(typename TNewEdgeMap::const_iterator pos = edges.begin();pos!=edges.end();++pos) {
-			addEdge(g, pos->first.first, pos->first.second, pos->second);
-		}
-	} else {
-		for(typename TNewEdgeMap::const_iterator pos = edges.begin();pos!=edges.end();++pos) {
-			TVertexDescriptor tV1 = pos->first.first;
-			TVertexDescriptor tV2 = pos->first.second;
-			TId localSeqId = sequenceId(g, tV2);
-			TCargo cargoSum = 0;
-			unsigned int count = 0;
-			TOutEdgeIterator outIt(g, tV1);
-			for(;!atEnd(outIt);++outIt) {
-				if (sequenceId(g, targetVertex(outIt)) == localSeqId) {
-					cargoSum+=cargo(*outIt);
-					++count;
-				}
-			}
-			// If new edge weight is above average add it, otherwise discard
-			if ((count == (unsigned int) 0) ||
-				((TCargo)pos->second > (TCargo) (cargoSum / count) ) ) {
-				addEdge(g, pos->first.first, pos->first.second, pos->second);
-			}
-		}
+	for(typename TNewEdgeMap::const_iterator pos = edges.begin();pos!=edges.end();++pos) {
+		addEdge(g, pos->first.first, pos->first.second, pos->second);
 	}
 
 	// Clean-up the edge map
@@ -1098,7 +1213,10 @@ _alignStringSetAccordingToGraph(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 								TTag)
 {
 	SEQAN_CHECKPOINT
-
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	
 	// Clear output parameter
 	clear(alignSeq);
 
@@ -1106,14 +1224,23 @@ _alignStringSetAccordingToGraph(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	heaviestCommonSubsequence(g, strSet[0], strSet[1], alignSeq);
 
 	//// Debug Code
+	//std::cout << "The sequences:" << std::endl;
+	//for(unsigned int i = 0;i<length(stringSet(g));++i) {
+	//	std::cout << positionToId(stringSet(g),i) << ':' << (stringSet(g))[i] << std::endl;
+	//}
 	//for(unsigned int i = 0; i<length(alignSeq);++i) {
 	//	std::cout << '(';
 	//	for(unsigned int j=0; j<length(alignSeq[i]);++j) {
-	//		std::cout << getValue(alignSeq[i], j) << ',';
+	//		TVertexDescriptor v = getValue(alignSeq[i], j);
+	//		std::cout << v << ',';
+	//		if (v != getNil<TVertexDescriptor>()) {
+	//			std::cout << label(g, getValue(alignSeq[i], j)) << ',';
+	//		}
 	//	}
 	//	std::cout << ')' << ',';
 	//}
 	//std::cout << std::endl;
+
 }
 
 
@@ -1242,16 +1369,23 @@ progressiveAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 		for(TSize j=0; j<length(alignSeq2[i]);++j) {
 			TVertexDescriptor v = getValue(alignSeq2[i], j);
 			if (v == nilVertex) continue;
+			SEQAN_TASSERT(fragmentBegin(g,v) < length(getValueById(stringSet(g), sequenceId(g,v))))
+			SEQAN_TASSERT(fragmentLength(g,v) > 0)
+			SEQAN_TASSERT(fragmentBegin(g,v) + fragmentLength(g,v) <= length(getValueById(stringSet(g), sequenceId(g,v))))
 			TVertexDescriptor l = addVertex(gOut, sequenceId(g, v), fragmentBegin(g,v), fragmentLength(g,v));
+			//std::cout << l << label(gOut, l) << ',';
 			TSize count = 1;
 			for(TSize k = j; k>0; --k) {
 				if (getValue(alignSeq2[i], k - 1) != nilVertex) {
+					SEQAN_TASSERT(fragmentLength(gOut,l) == fragmentLength(gOut,l - count))
 					addEdge(gOut, l - count, l);
 					++count;
 				}
 			}
 		}
+		//std::cout << std::endl;
 	}
+
 }
    
 //////////////////////////////////////////////////////////////////////////////

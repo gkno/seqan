@@ -662,6 +662,190 @@ void PathGrowingAlgorithm() {
 
 //////////////////////////////////////////////////////////////////////////////
 
+void LongestIncreasingSubsequence() {
+//____________________________________________________________________________
+// Longest Increasing Subsequence
+	
+	// The sequence of numbers (Gusfield example)
+	String<unsigned int> seq;
+	appendValue(seq, 5); appendValue(seq, 3); appendValue(seq, 4);
+	appendValue(seq, 9); appendValue(seq, 6); appendValue(seq, 2);
+	appendValue(seq, 1); appendValue(seq, 8); appendValue(seq, 7);
+	appendValue(seq, 10);
+
+	// The string of positions belonging to the lis
+	String<unsigned int, Block<> > pos;
+	longestIncreasingSubsequence(seq,pos);
+
+	// Output the lis
+	for(int i = 0; i<(int) length(seq); ++i) {
+		std::cout << seq[i] << ',';
+	}
+	std::cout << std::endl;
+	std::cout << "Lis: " << std::endl;
+	for(int i = length(pos)-1; i>=0; --i) {
+		std::cout << seq[pos[i]] <<  ',';
+	}
+	std::cout << std::endl;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+void LongestCommonSubsequence() {
+//____________________________________________________________________________
+// Longest Common Subsequence
+
+	String<char> seq1("abacx");
+	String<char> seq2("baabca");
+	String<std::pair<unsigned int, unsigned int>, Block<> > pos;
+	longestCommonSubsequence(seq1, seq2, pos);
+
+	std::cout << seq1 << std::endl;
+	std::cout << seq2 << std::endl;
+	std::cout << "Lcs:" << std::endl;
+
+	// Output the lcs
+	for(int i = length(pos)-1; i>=0; --i) {
+		std::cout << seq1[pos[i].first] <<  ',';
+	}
+	std::cout << std::endl;
+	for(int i = length(pos)-1; i>=0; --i) {
+		std::cout << seq2[pos[i].second] <<  ',';
+	}
+	std::cout << std::endl;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+void HeaviestIncreasingSubsequence() {
+//____________________________________________________________________________
+// Heaviest Increasing Subsequence
+	String<char> seq("zeitgeist");
+	String<unsigned int> weights;
+	String<unsigned int> pos;
+	fill(weights, length(seq), 1);
+	assignProperty(weights, 2, 10);
+	unsigned int w = heaviestIncreasingSubsequence(seq, weights, pos);
+
+	// Output
+	for(int i = 0; i< (int) length(seq); ++i) {
+		std::cout << seq[i] << "(Weight=" << getProperty(weights, i) << "),";
+	}
+	std::cout << std::endl;
+	std::cout << "His: " << std::endl;
+	for(int i = length(pos)-1; i>=0; --i) {
+		std::cout << seq[pos[i]] <<  ',';
+	}
+	std::cout << "(Weight=" << w << ')' << std::endl;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+void NeedlemanWunschDemo() {
+	typedef String<char> TString;
+	typedef StringSet<TString, Dependent<> > TStringSet;
+	typedef Graph<Alignment<TStringSet, void> > TGraph;
+
+	// Ordinary DP alignment
+	TStringSet str;
+	TString str0("Myannealing");appendValue(str, str0);
+	TString str1("annual"); appendValue(str, str1);
+	TGraph g(str);
+	Score<int> score_type = Score<int>(0,-1,-1,0);
+	int score = globalAlignment(g, score_type, NeedlemanWunsch() );
+	std::cout << "Scoring schema: Match=0, Mismatch=-1, Gap=-1" << std::endl;
+	std::cout << g << std::endl;
+	std::cout << "Score: " << score << std::endl;
+
+	// Ends free-space alignment
+	// AlignConfig<TTop, TLeft, TRight, TBottom>
+	AlignConfig<true,false,false,true> ac;	// Gaps are free at the top and maximum is also searched for in the last row
+	int score2 = globalAlignment(stringSet(g), score_type, ac, NeedlemanWunsch() );
+	std::cout << "Score with ends free-space alignment: " << score2 << std::endl;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+void GotohDemo() {
+	typedef String<char> TString;
+	typedef StringSet<TString, Dependent<> > TStringSet;
+	typedef Graph<Alignment<TStringSet, void> > TGraph;
+	
+	// Ordinary DP alignment
+	TStringSet str;
+	TString str0("TarfieldandGarfieldarestupid.");appendValue(str, str0);
+	TString str1("Garfield");appendValue(str, str1);
+	TGraph g(str);
+	Score<int> score_type = Score<int>(2,-1,-1,-4);
+	int score = globalAlignment(g, score_type, Gotoh());
+	std::cout << "Scoring schema: Match=2, Mismatch=-1, Gap-extension=-1, Gap-opening=-4" << std::endl;
+	std::cout << g << std::endl;
+	std::cout << "Score: " << score << std::endl;
+
+	// Ends free-space alignment
+	// AlignConfig<TTop, TLeft, TRight, TBottom>
+	AlignConfig<true,false,false,true> ac;	// Gaps are free at the top and maximum is also searched for in the last row
+	int score2 = globalAlignment(g, score_type, ac, Gotoh() );
+	std::cout << g << std::endl;
+	std::cout << "Score with ends free-space alignment: " << score2 << std::endl;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+void HirschbergDemo() {
+	typedef String<char> TString;
+	typedef StringSet<TString, Dependent<> > TStringSet;
+	typedef Graph<Alignment<TStringSet, void> > TGraph;
+	
+	// Ordinary DP alignment
+	TStringSet str;
+	TString str0("TarfieldandGarfieldarestupid.");appendValue(str, str0);
+	TString str1("Garfield");appendValue(str, str1);
+	TGraph g(str);
+	Score<int> score_type = Score<int>(2,-1,-1,-4);
+	int score = globalAlignment(g, score_type, Hirschberg());
+	std::cout << "Scoring schema: Match=2, Mismatch=-1, Gap-extension=-1, Gap-opening=-4" << std::endl;
+	std::cout << g << std::endl;
+	std::cout << "Score: " << score << std::endl;
+
+	// Hirschberg: Currently no ends free-space alignments possible
+	// Always AlignConfig<false, false, false, false>
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+void SmithWatermanDemo() {
+	typedef String<Dna> TString;
+	typedef StringSet<TString, Dependent<> > TStringSet;
+	typedef Graph<Alignment<TStringSet, Dna> > TGraph;
+
+	
+	TStringSet str;
+	TString str0("TTGACACCCTCCCAATTGTA"); appendValue(str, str0);
+	TString str1("ACCCCAGGCTTTACACAT"); appendValue(str, str1);
+
+	// Well, as usual, we can use a graph, a file, or like now a fragment string
+	typedef Fragment<> TFragment;
+	typedef String<TFragment, Block<> > TFragmentString;
+	TFragmentString matches;
+	Score<int> score_type = Score<int>(2,-1,-1,-2);
+	int score = localAlignment(matches, str, score_type, SmithWaterman() );
+
+	std::cout << "Scoring schema: Match=2, Mismatch=-1, Gap-extension=-1, Gap-opening=-2" << std::endl;
+	std::cout << str0 << std::endl;
+	std::cout << str1 << std::endl;
+	std::cout << "Local match: " << std::endl;
+	std::cout << label(matches[0], str, 0) << std::endl;
+	std::cout << label(matches[0], str, 1) << std::endl;
+	std::cout << "Score: " << score << std::endl;
+
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
 void AutomatonTest() {
 //____________________________________________________________________________
 // Automaton
@@ -814,6 +998,7 @@ void NeighborJoining() {
 
 }
 
+
 //////////////////////////////////////////////////////////////////////////////
 
 void TCoffee() {
@@ -833,8 +1018,8 @@ void TCoffee() {
 	assignValueById(strSet, str4);
 
 	// Score object
-	Score<double> score_type_global = Score<double>(2,-1,-0.5,-2);
-	Score<double> score_type_local = Score<double>(2,-1,-0.5,-2);
+	Score<int> score_type_global = Score<int>(2,-1,-1,-2);
+	Score<int> score_type_local = Score<int>(2,-1,-1,-2);
 
 	// Generate a primary library, i.e., all global pairwise alignments
 	TGraph lib1(strSet);
@@ -865,11 +1050,12 @@ void TCoffee() {
 
 	// Perform a progressive alignment
 	Graph<Alignment<TStringSet, void> > gOut(strSet);
-	progressiveAlignment(g, njTreeOut, gOut, Hirschberg() );
+	progressiveAlignment(g, njTreeOut, gOut, Gotoh() );
 
 	// Print the alignment
 	std::cout << gOut << std::endl;
 }
+
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -934,6 +1120,34 @@ int main ()
 	std::cout << "===================================" << ::std::endl;
 	std::cout << "----Path growing algorithm---------" << ::std::endl;
 	PathGrowingAlgorithm();
+
+	// Lis, lcs, his
+	std::cout << "===================================" << ::std::endl;
+	std::cout << "--Longest Increasing Subsequence---" << ::std::endl;
+	LongestIncreasingSubsequence();
+	std::cout << "===================================" << ::std::endl;
+	std::cout << "----Longest Common Subsequence-----" << ::std::endl;
+	LongestCommonSubsequence();
+	std::cout << "===================================" << ::std::endl;
+	std::cout << "--Heaviest Increasing Subsequence--" << ::std::endl;
+	HeaviestIncreasingSubsequence();
+
+	// Global Alignments
+	std::cout << "===================================" << ::std::endl;
+	std::cout << "--------Needleman Wunsch-----------" << ::std::endl;
+	NeedlemanWunschDemo();
+	std::cout << "===================================" << ::std::endl;
+	std::cout << "-------------Gotoh-----------------" << ::std::endl;
+	GotohDemo();
+	std::cout << "===================================" << ::std::endl;
+	std::cout << "----------Hirschberg---------------" << ::std::endl;
+	HirschbergDemo();
+
+	// Local Alignments
+	std::cout << "===================================" << ::std::endl;
+	std::cout << "--------Smith Waterman-------------" << ::std::endl;
+	SmithWatermanDemo();
+
 
 	// Automaton
 	std::cout << "===================================" << ::std::endl;

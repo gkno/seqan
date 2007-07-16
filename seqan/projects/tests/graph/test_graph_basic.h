@@ -65,6 +65,10 @@ void Test_IdManager() {
 	SEQAN_TASSERT(getIdUpperBound(idm2) == 0)
 	SEQAN_TASSERT(getIdLowerBound(idm2) == 0)
 
+	// Check assignment
+	idm2 = idm;
+	SEQAN_TASSERT(idCount(idm2) == 3)
+
 
 //____________________________________________________________________________
 // Dummy IdManager
@@ -556,6 +560,13 @@ void Test_EdgeStump() {
 	SEQAN_TASSERT(cargo(&es_16_const) == 15)
 	SEQAN_TASSERT(getTarget(&es_16_const) == 7)
 	SEQAN_TASSERT(target(&es_16_const) == 7)
+
+	// Special tree edge stump, in a tree the target is the child id
+	EdgeStump<unsigned int, true, true, false, TreeTag> es17;
+	assignTarget(&es17, 5);
+	SEQAN_TASSERT(_getId(&es17) == 5)
+	EdgeStump<unsigned int, true, true, false, TreeTag> const es17_const(es17);
+	SEQAN_TASSERT(_getId(&es17_const) == 5)
 }
 
 
@@ -567,7 +578,6 @@ void Test_GraphBasics() {
 
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_base.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_idmanager.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_interface.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_edgestump.h");
 }
 

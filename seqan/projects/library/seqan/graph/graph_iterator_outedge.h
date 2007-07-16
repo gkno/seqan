@@ -359,11 +359,9 @@ public:
 		data_source(_iter.data_source),
 		data_edge(_iter.data_edge)
 	{
-		SEQAN_CHECKPOINT
 	}
 
 	~Iter() {
-		SEQAN_CHECKPOINT
 	}
 
 	Iter const&	operator = (Iter const & _other) {
@@ -1140,7 +1138,6 @@ template<typename TAlphabet, typename TCargo, typename TGraphSpec, typename TSpe
 inline typename Alphabet<Graph<Automaton<TAlphabet, TCargo, TGraphSpec> > >::Type
 label(Iter<Graph<Automaton<TAlphabet, TCargo, TGraphSpec> >, GraphIterator<InternalOutEdgeIterator<TSpec> > >& it)
 {
-	SEQAN_CHECKPOINT
 	return TAlphabet(it.data_pos);
 }
 

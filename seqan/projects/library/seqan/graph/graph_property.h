@@ -86,28 +86,6 @@ resizeEdgeMap(Graph<TSpec> const& g,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TCargo, typename TSpec, typename TPropertyMap>
-inline void
-resizeEdgeMap(Graph<Tree<TCargo, TSpec> > const& g,
-			TPropertyMap& pm)
-{
-	SEQAN_CHECKPOINT
-	resize(pm, getIdUpperBound(g.data_id_managerV), Generous());
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TCargo, typename TSpec, typename TPropertyMap>
-inline void
-resizeEdgeMap(Graph<Tree<TCargo, TSpec> >& g,
-			TPropertyMap& pm)
-{
-	SEQAN_CHECKPOINT
-	resize(pm, getIdUpperBound(g.data_id_managerV), Generous());
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
 /**
 .Function.assignProperty:
 ..cat:Graph
@@ -726,8 +704,8 @@ resizeVertexMap(Graph<TSpec> const& g,
 template<typename TSpec, typename TPropertyMap, typename TProperties>
 inline void
 resizeEdgeMap(Graph<TSpec> const& g,
-			TPropertyMap& pm,
-			TProperties const& prop)
+			  TPropertyMap& pm,
+			  TProperties const& prop)
 {
 	SEQAN_CHECKPOINT
 	resizeEdgeMap(g,pm);

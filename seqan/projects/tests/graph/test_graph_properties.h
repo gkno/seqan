@@ -156,6 +156,17 @@ void Test_Property() {
 	SEQAN_TASSERT(getProperty(pseudo_map, e2) == 'w')
 	property(pseudo_map,e1)='k';
 	SEQAN_TASSERT(getProperty(pseudo_map, e1) == 'k')
+
+
+	// Test shortcuts
+	unsigned int weights[] = {4,8};
+	Graph<Directed<void> > g10;
+	addVertex(g10);addVertex(g10);addVertex(g10);
+	addEdge(g10,0,1);addEdge(g10,0,2);
+	String<int> weightMap;
+	resizeEdgeMap(g10, weightMap, weights);
+	SEQAN_TASSERT(getProperty(weightMap, findEdge(g10, 0, 1)) == 4)
+	SEQAN_TASSERT(getProperty(weightMap, findEdge(g10, 0, 2)) == 8)
 }
 
 //////////////////////////////////////////////////////////////////////////////

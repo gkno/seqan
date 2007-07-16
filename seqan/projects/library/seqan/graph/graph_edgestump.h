@@ -967,6 +967,7 @@ template<typename TCargo, bool TList, bool TSource>
 inline typename Id<EdgeStump<TCargo, TList, TSource, false, TreeTag> const>::Type
 _getId(EdgeStump<TCargo, TList, TSource, false, TreeTag> const* es) 
 {
+	SEQAN_CHECKPOINT
 	// Child id = edge id in a tree
 	return es->data_target;
 }

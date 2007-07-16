@@ -11,7 +11,7 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TAlign, typename TStringSet, typename TTrace, typename TVal, typename TSize, typename TForbidden>
-void
+inline void
 _align_smith_waterman_trace(TAlign& align,
 							TStringSet const& str,
 							TTrace const& trace,
@@ -132,27 +132,23 @@ _align_smith_waterman_trace(TAlign& align,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TTrace, typename TStringSet, typename TScoreValue, typename TSpec, typename TSize, typename TForbidden>
-TScoreValue
+template <typename TTrace, typename TStringSet, typename TScore, typename TSize, typename TForbidden>
+inline typename Value<TScore>::Type
 _align_smith_waterman(TTrace& trace,
 					  TStringSet const& str,
-					  Score<TScoreValue, TSpec> const & sc,
+					  TScore const & sc,
 					  typename Value<TTrace>::Type& initialDir,
 					  TSize& best_row,
 					  TSize& best_col,
-					  TForbidden& forbidden,
-					  bool createTrace)
+					  TForbidden& forbidden)
 {
 	SEQAN_CHECKPOINT
-	typedef typename Value<TTrace>::Type TTraceValue;
-	typedef typename Iterator<TTrace, Standard>::Type TTraceIter;
-	typedef String<TScoreValue> TColumn;
-	typedef typename Value<TStringSet>::Type TString;
-
 	// TraceBack values for Smith Waterman
 	enum {Diagonal = 0, Horizontal = 1, Vertical = 2, Stop = 12};
 
 	// The DP Matrix for diagonal walks
+	typedef typename Value<TScore>::Type TScoreValue;
+	typedef String<TScoreValue> TColumn;
 	TColumn mat;
 	// The DP Matrix for gaps from the left
 	TColumn horizontal;
@@ -160,6 +156,7 @@ _align_smith_waterman(TTrace& trace,
 	TScoreValue vert = 0;
 
 	// Initialization
+	typedef typename Value<TStringSet>::Type TString;
 	TString const& str1 = str[0];
 	TString const& str2 = str[1];		
 	TSize len1 = length(str1);
@@ -169,7 +166,8 @@ _align_smith_waterman(TTrace& trace,
 	TScoreValue tmp = 0;
 	resize(mat, (len2+1));   // One column for the diagonal matrix
 	resize(horizontal, (len2+1));   // One column for the horizontal matrix
-	if (createTrace) resize(trace, len1*len2);
+	resize(trace, len1*len2);
+	typedef typename Value<TTrace>::Type TTraceValue;
 	TTraceValue tvMat, tvHorizontal, tvVertical;
 
 	// Record the max score
@@ -181,6 +179,7 @@ _align_smith_waterman(TTrace& trace,
 
 	
 	// Classical DP
+	typedef typename Iterator<TTrace, Standard>::Type TTraceIter;
 	TTraceIter it = begin(trace, Standard() );
 	assignValue(mat, 0, 0);
 	for(TSize row = 1; row <= len2; ++row) {
@@ -217,7 +216,7 @@ _align_smith_waterman(TTrace& trace,
 				}
 	
 				// Get the new maximum for mat
-				TScoreValue sc_ = score(const_cast<Score<TScoreValue, TSpec>&>(sc), str1[col-1], str2[row-1]);
+				TScoreValue sc_ = score(const_cast<TScore&>(sc), str1[col-1], str2[row-1]);
 				tmp = diagValMat + sc_;
 				tvMat = (Byte) Diagonal;
 				if (vert > tmp) {
@@ -253,36 +252,34 @@ _align_smith_waterman(TTrace& trace,
 			}
 
 			// Assign the right trace value
-			if (createTrace) {
-				if (tvMat == (Byte) Stop) {
-					assignValue(it, 12);
-				} else if (tvMat == (Byte) Diagonal) {
-					if (tvHorizontal == (Byte) Diagonal) {
-						if (tvVertical == (Byte) Diagonal) assignValue(it, 0);
-						else assignValue(it, 1);
-					} else if (tvHorizontal == (Byte) Horizontal) {
-						if (tvVertical == (Byte) Diagonal) assignValue(it, 2);
-						else assignValue(it, 3);
-					}
-				} else if (tvMat == (Byte) Horizontal) {
-					if (tvHorizontal == (Byte) Diagonal) {
-						if (tvVertical == (Byte) Diagonal) assignValue(it, 4);
-						else assignValue(it, 5);
-					} else if (tvHorizontal == (Byte) Horizontal) {
-						if (tvVertical == (Byte) Diagonal) assignValue(it, 6);
-						else assignValue(it, 7);
-					}
-				} else if (tvMat == (Byte) Vertical) {
-					if (tvHorizontal == (Byte) Diagonal) {
-						if (tvVertical == (Byte) Diagonal) assignValue(it, 8);
-						else assignValue(it, 9);
-					} else if (tvHorizontal == (Byte) Horizontal) {
-						if (tvVertical == (Byte) Diagonal) assignValue(it, 10);
-						else assignValue(it, 11);
-					}
+			if (tvMat == (Byte) Stop) {
+				assignValue(it, 12);
+			} else if (tvMat == (Byte) Diagonal) {
+				if (tvHorizontal == (Byte) Diagonal) {
+					if (tvVertical == (Byte) Diagonal) assignValue(it, 0);
+					else assignValue(it, 1);
+				} else if (tvHorizontal == (Byte) Horizontal) {
+					if (tvVertical == (Byte) Diagonal) assignValue(it, 2);
+					else assignValue(it, 3);
 				}
-				goNext(it);
+			} else if (tvMat == (Byte) Horizontal) {
+				if (tvHorizontal == (Byte) Diagonal) {
+					if (tvVertical == (Byte) Diagonal) assignValue(it, 4);
+					else assignValue(it, 5);
+				} else if (tvHorizontal == (Byte) Horizontal) {
+					if (tvVertical == (Byte) Diagonal) assignValue(it, 6);
+					else assignValue(it, 7);
+				}
+			} else if (tvMat == (Byte) Vertical) {
+				if (tvHorizontal == (Byte) Diagonal) {
+					if (tvVertical == (Byte) Diagonal) assignValue(it, 8);
+					else assignValue(it, 9);
+				} else if (tvHorizontal == (Byte) Horizontal) {
+					if (tvVertical == (Byte) Diagonal) assignValue(it, 10);
+					else assignValue(it, 11);
+				}
 			}
+			goNext(it);
 		}
 	}
 
@@ -300,68 +297,40 @@ _align_smith_waterman(TTrace& trace,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TTrace, typename TStringSet, typename TScoreValue, typename TSpec, typename TSize, typename TForbidden>
-TScoreValue
-_align_smith_waterman(TTrace& trace,
-					  TStringSet const& str,
-					  Score<TScoreValue, TSpec> const & sc,
-					  typename Value<TTrace>::Type& initialDir,
-					  TSize& best_row,
-					  TSize& best_col,
-					  TForbidden& forbidden)
-{
-	SEQAN_CHECKPOINT
-	return _align_smith_waterman(trace, str, sc, initialDir, best_row, best_col, forbidden, true);
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TAlign, typename TStringSet, typename TScoreValue, typename TSpec>
-TScoreValue
+template<typename TAlign, typename TStringSet, typename TScore>
+inline typename Value<TScore>::Type
 _localAlignment(TAlign& align,
 				TStringSet const& str,
-				Score<TScoreValue, TSpec> const& sc,
+				TScore const& sc,
 				SmithWaterman)
 {
 	SEQAN_CHECKPOINT
+	typedef typename Value<TScore>::Type TScoreValue;
 	typedef typename Size<TStringSet>::Type TSize;
 	  
 	TScoreValue maxScore;
-	TSize maxLen = length(str[0]);
 	TSize best_row = 0;
 	TSize best_col = 0;
 	String<bool> forbidden;
-	TSize tmp;
-	if ((tmp = length(str[1])) > maxLen) maxLen = tmp;
 
-	if (maxLen > 100000) {
-		// Trace
-		String<TraceBackGotoh, External<> > trace;
-		TraceBackGotoh initialDir;
+	// Trace
+	String<TraceBackGotoh> trace;
+	TraceBackGotoh initialDir;
 
-		// Create the trace
-		maxScore = _align_smith_waterman(trace, str, sc, initialDir, best_row, best_col, forbidden);	
-		// Follow the trace and create the graph
-		_align_smith_waterman_trace(align, str, trace, initialDir, best_row, best_col, forbidden);
-	} else {
-		// Trace
-		String<TraceBackGotoh> trace;
-		TraceBackGotoh initialDir;
-
-		// Create the trace
-		maxScore = _align_smith_waterman(trace, str, sc, initialDir, best_row, best_col, forbidden);	
-		// Follow the trace and create the graph
-		_align_smith_waterman_trace(align, str, trace, initialDir, best_row, best_col, forbidden);
-	}
+	// Create the trace
+	maxScore = _align_smith_waterman(trace, str, sc, initialDir, best_row, best_col, forbidden);	
+	// Follow the trace and create the graph
+	_align_smith_waterman_trace(align, str, trace, initialDir, best_row, best_col, forbidden);
+	
 	return maxScore;
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TStringSet, typename TScoreValue, typename TSpec>
-TScoreValue
+template<typename TStringSet, typename TScore>
+inline typename Value<TScore>::Type
 _localAlignment(TStringSet const& str,
-				Score<TScoreValue, TSpec> const& sc,
+				TScore const& sc,
 				SmithWaterman)
 {
 	SEQAN_CHECKPOINT
@@ -371,7 +340,7 @@ _localAlignment(TStringSet const& str,
 	TSize best_col = 0;
 	String<bool> forbidden;
 	String<TraceBackGotoh> trace;
-	return _align_smith_waterman(trace, str, sc, initialDir, best_row, best_col, forbidden, false);	
+	return _align_smith_waterman(trace, str, sc, initialDir, best_row, best_col, forbidden);	
 }
 
 

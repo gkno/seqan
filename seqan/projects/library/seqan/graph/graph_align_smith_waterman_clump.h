@@ -94,7 +94,7 @@ _localAlignment(TAlign& align,
 		//}
 		//std::cout << std::endl;
 		++count;
-	} while ((local_len > minLen) && (count < 10));
+	} while ((local_len > minLen) && (count < 4));
 
 	//// Debug Code
 	//// Print all the matches
@@ -117,9 +117,11 @@ _localAlignment(TAlign& align,
 	//	std::cout << std::endl;
 	//}
 	//std::cout << "=====" << std::endl;
-	
+
 	// Refine all matches and create multiple alignment
 	matchRefinement(matches,str,align);
+	//std::cout << "Finished" << std::endl;
+	//std::cout << align << std::endl;
 
 	// Adapt edge weights
 	TFragmentStringIter endIt = end(matches);

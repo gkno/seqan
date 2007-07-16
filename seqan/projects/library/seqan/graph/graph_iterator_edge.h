@@ -455,7 +455,6 @@ template<typename TAlphabet, typename TCargo, typename TGraphSpec, typename TSpe
 inline typename Alphabet<Graph<Automaton<TAlphabet, TCargo, TGraphSpec> > >::Type
 label(Iter<Graph<Automaton<TAlphabet, TCargo, TGraphSpec> >, GraphIterator<InternalEdgeIterator<TSpec> > >& it)
 {
-	SEQAN_CHECKPOINT
 	return label(it.data_edge_it);
 }
 

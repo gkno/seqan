@@ -465,16 +465,20 @@ _align_hirschberg(TTrace& trace,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TAlign, typename TStringSet, typename TScoreValue, typename TSpec>
-TScoreValue
+template<typename TAlign, typename TStringSet, typename TScore, typename TSpec>
+inline typename Value<TScore>::Type
 _globalAlignment(TAlign& align,
 				 TStringSet const& str,
-				 Score<TScoreValue, TSpec> const& sc,
+				 TScore const& sc,
+				 AlignConfig<false, false, false, false, TSpec> const,
 				 Hirschberg)
 {
 	SEQAN_CHECKPOINT
-	// Trace points, always external because the alignment graph might get large
-	String<unsigned int, External<> > trace;
+	typedef typename Value<TScore>::Type TScoreValue;
+	typedef typename Size<TStringSet>::Type TSize;
+	
+	// Trace
+	String<unsigned int> trace;
 	TScoreValue maxScore = _align_hirschberg(trace, str, sc, Hirschberg());
 
 	// Follow the trace and create the graph
@@ -485,10 +489,11 @@ _globalAlignment(TAlign& align,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TStringSet, typename TScoreValue, typename TSpec>
-TScoreValue
+template<typename TStringSet, typename TScore, typename TSpec>
+inline typename Value<TScore>::Type
 _globalAlignment(TStringSet const& str,
-				 Score<TScoreValue, TSpec> const& sc,
+				 TScore const& sc,
+				 AlignConfig<false, false, false, false, TSpec> const,
 				 Hirschberg)
 {
 	SEQAN_CHECKPOINT

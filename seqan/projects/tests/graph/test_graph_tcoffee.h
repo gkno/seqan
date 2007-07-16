@@ -160,7 +160,7 @@ void Test_TCoffeeTmp() {
 	TGraph g(strSet);
 
 	// Score object
-	Score<double> score_type = Score<double>(4,-1,-0.5,-10);
+	Score<int> score_type = Score<int>(4,-1,-1,-10);
 
 	// Generate a primary library, i.e., all pairwise alignments
 	generatePrimaryLibrary(lib1, score_type, GlobalPairwise_Library() );
@@ -358,6 +358,7 @@ void Test_TCoffeeFromFile(String<char> const in_path, String<char> const file_pr
 	startTime = endTime;
 	std::cout << "Import sequences done: " << time << " sec" << std::endl;
 
+
 	// Make dependent string set
 	typedef StringSet<TString, Dependent<> > TStringSet;
 	typedef Graph<Alignment<TStringSet, unsigned int, Default> > TGraph;
@@ -382,14 +383,12 @@ void Test_TCoffeeFromFile(String<char> const in_path, String<char> const file_pr
 
 	// Generate a primary library, i.e., all local pairwise alignments
 	TGraph lib2(strSet);
-	if (numEdges(lib1) < 1000000) {
-		generatePrimaryLibrary(lib2, score_type_local, LocalPairwise_Library() );
-		endTime=clock();
-		time=((float)(endTime-startTime)/CLOCKS_PER_SEC);
-		startTime = endTime;
-		std::cout << "Local Pairwise alignments done: " << time << " sec" << std::endl;
-		std::cout << "Library size: " << numVertices(lib2) << " Vertices, " << numEdges(lib2) << " Edges" << std::endl;
-	}
+	generatePrimaryLibrary(lib2, score_type_local, LocalPairwise_Library() );
+	endTime=clock();
+	time=((float)(endTime-startTime)/CLOCKS_PER_SEC);
+	startTime = endTime;
+	std::cout << "Local Pairwise alignments done: " << time << " sec" << std::endl;
+	std::cout << "Library size: " << numVertices(lib2) << " Vertices, " << numEdges(lib2) << " Edges" << std::endl;
 
 	// Weighting of libraries (Signal addition)
 	TGraph g(strSet);
@@ -403,9 +402,7 @@ void Test_TCoffeeFromFile(String<char> const in_path, String<char> const file_pr
 	std::cout << "Combining graphs / libraries done: " << time << " sec" << std::endl;
 	std::cout << "Library size: " << numVertices(g) << " Vertices, " << numEdges(g) << " Edges" << std::endl;
 
-	//String<double> sim;
-	//getSequenceSimilarity(
-	
+
 	// Clear the old libraries
 	clear(lib1);
 	clear(lib2);
@@ -438,10 +435,16 @@ void Test_TCoffeeFromFile(String<char> const in_path, String<char> const file_pr
 	// Perform a progressive alignment
 	Graph<Alignment<TStringSet, void> > gOut(strSet);
 	progressiveAlignment(g, njTreeOut, gOut, Hirschberg() );
+	//std::cout << gOut << std::endl;
 	endTime=clock();
 	time=((float)(endTime-startTime)/CLOCKS_PER_SEC);
 	startTime = endTime;
 	std::cout << "Progressive alignment done: " << time << " sec" << std::endl;
+	
+	//fstream strm3; // Alignment graph as dot
+	//strm3.open(TEST_PATH "my_tcoffee3.dot", ios_base::out | ios_base::trunc);
+	//write(strm3,gOut,DotDrawing());
+	//strm3.close();
 
 	//std::stringstream output3;
 	//output3 << in_path << "my_" << file_prefix << ".msf_middle";
@@ -524,11 +527,11 @@ void Test_TCoffeeFromRandomSeq() {
 
 		// Count sequences
 		mtRandInit();
-		unsigned int seqCount = ((Byte) mtRand() % 10) + 3;
+		unsigned int seqCount = ((Byte) mtRand() % 5) + 3;
 		for(unsigned int i=0;i<seqCount;++i) {
 			TString str;
 
-			unsigned int stop = (unsigned int) mtRand() % 20 + 2;
+			unsigned int stop = ((unsigned int) mtRand() % 200) + 6;
 			for (unsigned int i=0; i<stop ; ++i) {
 				append(str, (Byte) mtRand() % 10 );
 			}	
@@ -546,45 +549,45 @@ void Test_TCoffeeFromRandomSeq() {
 		TGraph g(strSet);
 
 		// Score object
-		Score<double> score_type = Score<double>(4,-1,-0.5,-10);
+		Score<int> score_type = Score<int>(4,-1,-1,-10);
 
 		// Generate primary libraries
 		TGraph lib1(strSet);
 		TGraph lib2(strSet);
 		generatePrimaryLibrary(lib1, score_type, GlobalPairwise_Library() );
-		//std::cout << "Global Pairwise alignments done" << std::endl;
+		std::cout << "Global Pairwise alignments done" << std::endl;
 
 		generatePrimaryLibrary(lib2, score_type, LocalPairwise_Library());
-		//std::cout << "Local Pairwise alignments done" << std::endl;
+		std::cout << "Local Pairwise alignments done" << std::endl;
 
 		// Weighting of libraries (Signal addition)
 		String<TGraph*> libs;
 		appendValue(libs, &lib1);
 		appendValue(libs, &lib2);
 		combineGraphs(g, libs);
-		//std::cout << "Combining graphs done" << std::endl;
+		std::cout << "Combining graphs done" << std::endl;
 
 		// Triplet library extension
 		tripletLibraryExtension(g);
-		//std::cout << "Triplet done" << std::endl;
+		std::cout << "Triplet done" << std::endl;
 
 		// Calculate a distance matrix using a compressed alphabet or not
 		String<double> distanceMatrix; 
 		getKmerSimilarityMatrix(stringSet(g), distanceMatrix, 6, AAGroupsDayhoff() );
-		//std::cout << "Kmer done" << std::endl;
+		std::cout << "Kmer done" << std::endl;
 		similarityToDistanceMatrix(distanceMatrix, KimuraDistance() );
-		//std::cout << "Distance done" << std::endl;
+		std::cout << "Distance done" << std::endl;
 
 
 		// Build the neighbor joining tree
 		Graph<Tree<double> > njTreeOut;
 		slowNjTree(distanceMatrix, njTreeOut);
-		//std::cout << "NjTree done" << std::endl;
+		std::cout << "NjTree done" << std::endl;
 		
 		// Perform a progressive alignment
 		Graph<Alignment<TStringSet, void> > gOut(strSet);
 		progressiveAlignment(g, njTreeOut, gOut, NeedlemanWunsch() );
-		//std::cout << "Alignment done" << std::endl;
+		std::cout << "Alignment done" << std::endl;
 
 		
 		// Print the alignment
@@ -636,7 +639,7 @@ void Test_TCoffeeFromLibrary() {
 	TDependentGraph gAux(depStrSet);
 
 	// Score object
-	Score<double> score_type = Score<double>(4,-1,-0.5,-10);
+	Score<int> score_type = Score<int>(4,-1,-1,-10);
 
 	generatePrimaryLibrary(gAux, score_type, GlobalPairwise_Library() );
 	tripletLibraryExtension(gAux);
@@ -719,6 +722,49 @@ void Test_TCoffeeFromLibrary() {
 
 //////////////////////////////////////////////////////////////////////////////
 
+void Test_BaliBaseRef11() {
+	
+	// Windows
+#ifdef PLATFORM_WINDOWS
+	String<char> in_path("Z:\\Balibase\\bb3_release\\RV11\\");
+#else
+	// Linux
+	String<char> in_path("/home/takifugu/rausch/Balibase/bb3_release/RV11/");
+#endif
+
+	for(int i = 1; i<39; ++i) {
+		std::stringstream s;
+		s << "BBS110";
+		if (i < 10) s << '0';
+		s << i;
+		Test_TCoffeeFromFile(in_path,s.str().c_str(), "tfa");
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+void Test_BaliBaseRef12() {
+	
+	// Windows
+#ifdef PLATFORM_WINDOWS
+	String<char> in_path("Z:\\Balibase\\bb3_release\\RV12\\");
+#else
+	// Linux
+	String<char> in_path("/home/takifugu/rausch/Balibase/bb3_release/RV12/");
+#endif
+
+	for(int i = 1; i<45; ++i) {
+		std::stringstream s;
+		s << "BBS120";
+		if (i < 10) s << '0';
+		s << i;
+		Test_TCoffeeFromFile(in_path,s.str().c_str(), "tfa");
+	}
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
 void Test_BaliBaseRef20() {
 	
 	// Windows
@@ -740,6 +786,71 @@ void Test_BaliBaseRef20() {
 
 //////////////////////////////////////////////////////////////////////////////
 
+void Test_BaliBaseRef30() {
+	
+	// Windows
+#ifdef PLATFORM_WINDOWS
+	String<char> in_path("Z:\\Balibase\\bb3_release\\RV30\\");
+#else
+	// Linux
+	String<char> in_path("/home/takifugu/rausch/Balibase/bb3_release/RV30/");
+#endif
+
+	for(int i = 1; i<31; ++i) {
+		std::stringstream s;
+		s << "BBS300";
+		if (i < 10) s << '0';
+		s << i;
+		Test_TCoffeeFromFile(in_path,s.str().c_str(), "tfa");
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+void Test_BaliBaseRef40() {
+	
+	// Windows
+#ifdef PLATFORM_WINDOWS
+	String<char> in_path("Z:\\Balibase\\bb3_release\\RV40\\");
+#else
+	// Linux
+	String<char> in_path("/home/takifugu/rausch/Balibase/bb3_release/RV40/");
+#endif
+
+	for(int i = 1; i<50; ++i) {
+		std::stringstream s;
+		s << "BB400";
+		if (i < 10) s << '0';
+		s << i;
+		Test_TCoffeeFromFile(in_path,s.str().c_str(), "tfa");
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+void Test_BaliBaseRef50() {
+	
+	// Windows
+#ifdef PLATFORM_WINDOWS
+	String<char> in_path("Z:\\Balibase\\bb3_release\\RV50\\");
+#else
+	// Linux
+	String<char> in_path("/home/takifugu/rausch/Balibase/bb3_release/RV50/");
+#endif
+
+	for(int i = 1; i<17; ++i) {
+		std::stringstream s;
+		s << "BBS500";
+		if (i < 10) s << '0';
+		s << i;
+		Test_TCoffeeFromFile(in_path,s.str().c_str(), "tfa");
+	}
+}
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+
 void Test_GraphTCoffee() {
 	Test_CompressedAlphabets();
 
@@ -747,7 +858,13 @@ void Test_GraphTCoffee() {
 	//Test_TCoffeeTmp();
 	Test_TCoffeeGarfield();
 	//Test_TCoffeeFromRandomSeq();
+	//Test_BaliBaseRef11();
+	//Test_BaliBaseRef12();
 	//Test_BaliBaseRef20();
+	//Test_BaliBaseRef30();
+	//Test_BaliBaseRef40();
+	//Test_BaliBaseRef50();
+	
 	//Test_TCoffeeFromLibrary(); 
 
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee.h");

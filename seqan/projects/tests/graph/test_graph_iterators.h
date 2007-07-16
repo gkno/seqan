@@ -177,6 +177,67 @@ void Test_OutEdgeIterator() {
 
 //////////////////////////////////////////////////////////////////////////////
 
+void Test_OutEdgeIteratorAlignment() {
+//____________________________________________________________________________
+// Graph AlignmentOutEdgeIterator
+	typedef String<Dna> TString;
+	typedef StringSet<TString, Dependent<> > TStringSet;
+	typedef Graph<Alignment<TStringSet> > TGraph;
+	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+
+	TString str1 = "aa";
+	TString str2 = "ac";
+	TStringSet strSet;
+	appendValue(strSet, str1);
+	appendValue(strSet, str2);
+	TGraph g(strSet);
+	TVertexDescriptor v0 = addVertex(g,0,0,1);
+	addVertex(g,0,1,1);
+	addVertex(g,1,0,1);
+	addEdge(g,0,2,10);
+	addVertex(g,1,1,1);
+	
+	typedef Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
+	TOutEdgeIterator it(g, v0);
+	SEQAN_TASSERT(sourceVertex(g, getValue(it))==0)
+	SEQAN_TASSERT(targetVertex(g, getValue(it))==2)
+	SEQAN_TASSERT(sourceVertex(g, value(it))==0)
+	SEQAN_TASSERT(targetVertex(g, *it)==2)
+	SEQAN_TASSERT(atEnd(it)==false)
+	SEQAN_TASSERT(atBegin(it)==true)
+	// Slow
+	SEQAN_TASSERT(sourceVertex(g, getValue(it))==0)
+	SEQAN_TASSERT(targetVertex(g, getValue(it))==2)
+	// Fast
+	SEQAN_TASSERT(sourceVertex(it)==0)
+	SEQAN_TASSERT(targetVertex(it)==2)
+	SEQAN_TASSERT(atEnd(it)==false)
+	SEQAN_TASSERT(atBegin(it)==true)
+	++it;
+	SEQAN_TASSERT(atEnd(it)==true)
+	SEQAN_TASSERT(atBegin(it)==false)
+	goPrevious(it);
+	SEQAN_TASSERT(sourceVertex(g, getValue(it))==0)
+	SEQAN_TASSERT(targetVertex(g, getValue(it))==2)
+	goNext(it);
+	--it;
+	TOutEdgeIterator it2(g, v0);
+	TOutEdgeIterator it3;
+	it3 = it;
+	SEQAN_TASSERT(it == it2)
+	SEQAN_TASSERT(it2 == it3)
+	goEnd(it);
+	SEQAN_TASSERT(it2 != it)
+	goEnd(it2);
+	SEQAN_TASSERT(it2 == it)
+	goBegin(it2);
+	SEQAN_TASSERT(it2 != it)
+	SEQAN_TASSERT(&g == &hostGraph(it))
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 	
 template <typename TGraphType>
 void Test_EdgeIterator() {
@@ -555,6 +616,7 @@ void Test_GraphIterators() {
 	Test_OutEdgeIterator<Undirected<char> >();
 	Test_OutEdgeIterator<Tree<char> >();
 	Test_OutEdgeIterator<Automaton<char> >();
+	Test_OutEdgeIteratorAlignment();
 	
 	Test_EdgeIterator<Directed<char> >();
 	Test_EdgeIterator<Undirected<char> >();
