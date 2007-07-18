@@ -12,30 +12,18 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 
-    // map alphabets to unsigned ints
+    // map alphabet to unsigned ints
     // signed alphabet needs a function to map char to [0..n) not to [-128..128) like char does
 
-    template < typename TValue >
-    struct RadixMap: public ::std::unary_function<TValue, unsigned> {
-        RadixMap(unsigned) {}
-        inline TValue const & operator() (TValue const &x) const { return x; }
-    };
+	template <typename TValue>
+	inline unsigned _ord(TValue const &c) {
+		return (typename _MakeUnsigned<TValue>::Type const &)c;
+	}
 
-    template <>
-    struct RadixMap<char>: public ::std::unary_function<char, unsigned> {
-        RadixMap(unsigned) {}
-        inline unsigned char const & operator() (char const & x) const {
-            return reinterpret_cast<unsigned char const &>(x); 
-        }
-    };
-
-    template <typename TSpec>
-    struct RadixMap<SimpleType<char,TSpec> >: public ::std::unary_function<SimpleType<char,TSpec>, unsigned> {
-        RadixMap(unsigned) {}
-        inline unsigned operator() (SimpleType<char,TSpec> const & x) const {
-            return (unsigned)x;
-        }
-    };
+	template <typename TValue, typename TSpec>
+	inline unsigned _ord(SimpleType<TValue,TSpec> const &c) {
+		return c;
+	}
 
 
     // stably sort a[0..n-1] to b[0..n-1] with keys in 0..K-1 from r
@@ -54,17 +42,16 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Value<TCountArray>::Type	TSize;
 		typedef typename Value<TText>::Type			TValue;
 
-        RadixMap<TValue> map(K);
 		TSize i, sum = 0, n = length(a);								// for (i = 0;  i < K;  i++) c[i] = 0;
 		arrayFill(begin(c, Standard()), begin(c, Standard()) + K, 0);	// reset counters
 		for (i = 0;  i < n;  i++)										// count occurences
-			c[map(r[a[i]])]++;
+			c[_ord(r[a[i]])]++;
 		for (i = 0;  i < K;  i++) {										// exclusive prefix sums
 			TSize t = c[i];  c[i] = sum;  sum += t;
 		}
 		for (i = 0;  i < n;  i++) {
 			TSize j = a[i];												// sort
-			b[c[map(r[j])]++] = j;
+			b[c[_ord(r[j])]++] = j;
 		}
 	}
 
@@ -85,12 +72,11 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Value<TCountArray>::Type	TSize;
 		typedef typename Value<TText>::Type			TValue;
 
-        RadixMap<TValue> map(K);
 		TSize i, sum = 0, n = length(a), sn = length(r);
 		arrayFill(begin(c, Standard()), begin(c, Standard()) + K, 0);	// reset counters
 		for (i = 0;  i < n;  i++) {
 			TSize j = a[i] + shift;										// count occurences
-			if (j < sn) c[map(r[j])]++;
+			if (j < sn) c[_ord(r[j])]++;
 			else        sum++;
 		}
 		for (i = 0;  i < K;  i++) {										// exclusive prefix sums
@@ -98,7 +84,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
 		for (i = 0, sum = 0;  i < n;  i++) {							// sort
 			TSize j = a[i] + shift;
-			if (j < sn) b[c[map(r[j])]++] = a[i];	// On Exception: Make sure, you have resized your sufarray
+			if (j < sn) b[c[_ord(r[j])]++] = a[i];	// On Exception: Make sure, you have resized your sufarray
 			else        b[sum++    ] = a[i];		// before calling createSuffixArray(..) to length(text)?
 		}
 	}
@@ -119,18 +105,17 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Value<TCountArray>::Type	TSize;
 		typedef typename Value<TText>::Type			TValue;
 
-        RadixMap<TValue> map(K);
 		const TValue *rp = begin(r, Standard()) - 1;
 		TSize i, sum = 0, n = length(a);								// for (i = 0;  i < K;  i++) c[i] = 0;
 		arrayFill(begin(c, Standard()), begin(c, Standard()) + K, 0);	// reset counters
 		for (i = 0;  i < n;  i++)										// count occurences
-			c[map(rp[a[i]])]++;
+			c[_ord(rp[a[i]])]++;
 		for (i = 0;  i < K;  i++) {										// exclusive prefix sums
 			TSize t = c[i];  c[i] = sum;  sum += t;
 		}
 		for (i = 0;  i < n;  i++) {
 			TSize j = a[i];												// sort
-			b[c[map(rp[j])]++] = j - 1;
+			b[c[_ord(rp[j])]++] = j - 1;
 		}
 	}
 
@@ -150,20 +135,19 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Value<TCountArray>::Type	TSize;
 		typedef typename Value<TText>::Type			TValue;
 
-        RadixMap<TValue> map(K);
 		const TValue *rp = begin(r, Standard()) - 1;
         TSize i, sum = 0, n = length(a);								// for (i = 0;  i < K;  i++) c[i] = 0;
 		arrayFill(begin(c, Standard()), begin(c, Standard()) + K, 0);	// reset counters
 		for (i = 0;  i < n;  i++) {										// count occurences
 	        TSize j = a[i];
-			if (j > 0) c[map(rp[j])]++;
+			if (j > 0) c[_ord(rp[j])]++;
 		}
 		for (i = 0;  i < K;  i++) {										// exclusive prefix sums
 			TSize t = c[i];  c[i] = sum;  sum += t;
 		}
 		for (i = 0;  i < n;  i++) {
 			TSize j = a[i];												// sort
-			if (j > 0) b[c[map(rp[j])]++] = j - 1;
+			if (j > 0) b[c[_ord(rp[j])]++] = j - 1;
 		}
 	}
 
