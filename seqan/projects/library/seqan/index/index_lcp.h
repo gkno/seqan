@@ -261,7 +261,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		
 		SEQAN_PROMARK("Suffix-Array invertiert");
 
-		typename Iterator<TText const>::Type Ibegin = begin(s), Iend = end(s);
+		typename Iterator<TText const>::Type Ibegin = begin(s);
         typename Iterator<TText const>::Type I = Ibegin, J;
         for(TSize i = 0, h = 0, j, isa; i < n; ++i) {
 			if ((isa = ISA[i])) {
@@ -326,7 +326,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			::std::cerr << "Suffix-Array invertiert" << ::std::endl;
 		#endif
 
-		typename Iterator<TText const>::Type Ibegin = begin(s), Iend = end(s);
+		typename Iterator<TText const>::Type Ibegin = begin(s);
         typename Iterator<TText const>::Type I = Ibegin, J;
         for(TSize i = 0, h = 0, j, isa; i < n; ++i) {
 			if ((isa = LCP[i] + 1) < n) {
@@ -418,7 +418,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			::std::cerr << "Suffix-Array invertiert" << ::std::endl;
 		#endif
 
-		typename Iterator<TText const>::Type Ibegin = begin(s), Iend = end(s);
+		typename Iterator<TText const>::Type Ibegin = begin(s);
         typename Iterator<TText const>::Type I = Ibegin, J;
 
 		TDecrementer dec(limits);
