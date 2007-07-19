@@ -152,23 +152,23 @@ void Test_KmerCountingAndDistance() {
 
 	// Calculate a distance matrix using a compressed alphabet or not
 	String<double> distanceMatrix; 
-	getKmerSimilarityMatrix(strSet, distanceMatrix, 6, AminoAcid() );
+	getKmerSimilarityMatrix(strSet, distanceMatrix, 4, AminoAcid() );
 
 	// (i,i) value indicates the number of kmers in this string
-	SEQAN_TASSERT(getValue(distanceMatrix, 0*4 + 0) == 16)
-	SEQAN_TASSERT(getValue(distanceMatrix, 1*4 + 1) == 13)
-	SEQAN_TASSERT(getValue(distanceMatrix, 2*4 + 2) == 17)
-	SEQAN_TASSERT(getValue(distanceMatrix, 3*4 + 3) == 4)
+	SEQAN_TASSERT(getValue(distanceMatrix, 0*4 + 0) == 18)
+	SEQAN_TASSERT(getValue(distanceMatrix, 1*4 + 1) == 15)
+	SEQAN_TASSERT(getValue(distanceMatrix, 2*4 + 2) == 19)
+	SEQAN_TASSERT(getValue(distanceMatrix, 3*4 + 3) == 6)
 	// (i,j) value indicates the number of shared k-mers / maximal number of shared k-mers
-	SEQAN_TASSERT(getValue(distanceMatrix, 0*4 + 3) == 0.25)
-	SEQAN_TASSERT(getValue(distanceMatrix, 3*4 + 0) == 0.25)
-	SEQAN_TASSERT(getValue(distanceMatrix, 0*4 + 2) == 0.375)
-	SEQAN_TASSERT(getValue(distanceMatrix, 2*4 + 0) == 0.375)
+	SEQAN_TASSERT(getValue(distanceMatrix, 0*4 + 3) == 0.5)
+	SEQAN_TASSERT(getValue(distanceMatrix, 3*4 + 0) == 0.5)
+	SEQAN_TASSERT(getValue(distanceMatrix, 0*4 + 1) == 0.6)
+	SEQAN_TASSERT(getValue(distanceMatrix, 1*4 + 0) == 0.6)
 
 	// Kimura distance correction
 	similarityToDistanceMatrix(distanceMatrix, KimuraDistance() );
-	SEQAN_TASSERT(getValue(distanceMatrix, 0*4 + 2) > getValue(distanceMatrix, 0*4 + 3))
-	SEQAN_TASSERT(getValue(distanceMatrix, 2*4 + 0) > getValue(distanceMatrix, 0*4 + 3))
+	SEQAN_TASSERT(getValue(distanceMatrix, 0*4 + 1) > getValue(distanceMatrix, 0*4 + 3))
+	SEQAN_TASSERT(getValue(distanceMatrix, 1*4 + 0) > getValue(distanceMatrix, 0*4 + 3))
 
 	// Sequence similarity
 	typedef Graph<Alignment<TStringSet, void> > TGraph;
