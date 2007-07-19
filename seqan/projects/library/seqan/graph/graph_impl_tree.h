@@ -639,16 +639,16 @@ findEdge(Graph<Tree<TCargo, TSpec> >& g,
 	typedef Graph<Tree<TCargo, TSpec> > TGraph;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
 
-	if (getValue(g.data_parent, w) == v) {
+	if ((TVertexDescriptor) getValue(g.data_parent, w) == v) {
 		TEdgeStump* current = getValue(g.data_vertex, v);
 		while((TEdgeStump*) current != 0) {
-			if (getTarget(current) == w) return current;
+			if ((TVertexDescriptor) getTarget(current) == w) return current;
 			current = getNextT(current);
 		}
-	} else if (getValue(g.data_parent, v) == w) {
+	} else if ((TVertexDescriptor) getValue(g.data_parent, v) == w) {
 		TEdgeStump* current = getValue(g.data_vertex, w);
 		while((TEdgeStump*) current != 0) {
-			if (getTarget(current) == v) return current;
+			if ((TVertexDescriptor) getTarget(current) == v) return current;
 			current = getNextT(current);
 		}
 	}

@@ -292,8 +292,12 @@ heaviestIncreasingSubsequence(TString const& str,
 		// Last vertex is end of heaviest increasing subsequence
 		TVertexDescriptor v = list.rbegin()->second.second;
 		while (!finished) {
-			appendValue(pos, v);
-			w+=getProperty(weights, v);
+			// Exclude edges with weight 0 !!!
+			// Note: Very important, do not delete this check!!!
+			if (getProperty(weights, v) > 0) {
+				appendValue(pos, v);
+				w+=getProperty(weights, v);
+			}
 			TOutEdgeIterator it(g, v);
 			if (atEnd(it)) finished = true;
 			else v = targetVertex(it);

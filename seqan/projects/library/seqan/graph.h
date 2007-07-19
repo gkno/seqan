@@ -72,8 +72,15 @@
 #include <seqan/graph/graph_align_hirschberg.h>
 #include <seqan/graph/graph_align_smith_waterman.h>
 #include <seqan/graph/graph_align_smith_waterman_clump.h>
-#include <seqan/graph/graph_align_tcoffee.h>
 #include <seqan/graph/graph_align_interface.h>
+
+// T-Coffee
+#include <seqan/graph/graph_align_tcoffee_base.h>
+#include <seqan/graph/graph_align_tcoffee_kmer.h>
+#include <seqan/graph/graph_align_tcoffee_distance.h>
+#include <seqan/graph/graph_align_tcoffee_guidetree.h>
+#include <seqan/graph/graph_align_tcoffee_library.h>
+#include <seqan/graph/graph_align_tcoffee_progressive.h>
 
 // Folding
 #include <seqan/graph/graph_fold_nussinov.h>

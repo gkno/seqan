@@ -1052,6 +1052,7 @@ inline void
 combineGraphs(Graph<Alignment<TStringSet, TCargo, TSpec> >& outGraph,
 			  TLibraries& libs)
 {
+	SEQAN_CHECKPOINT
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename Size<TGraph>::Type TSize;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
@@ -1128,6 +1129,88 @@ combineGraphs(Graph<Alignment<TStringSet, TCargo, TSpec> >& outGraph,
 		++count;
 	}
 }
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec>
+inline void 
+tripletLibraryExtension(Graph<Alignment<TStringSet, TCargo, TSpec> >& g)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename Id<TGraph>::Type TId;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
+	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
+	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
+
+	if (numEdges(g) > 3000000) return; // Too many edges, no triplet extension, just return
+
+	// Two tasks:
+	// 1) Add edges for the case that a and c is aligned, b and c is aligned, but a and b are not, give these edges the appropriate weight
+	// 2) Augment all existing edges
+	String<TCargo> newCargoMap;
+	resize(newCargoMap, getIdUpperBound(_getEdgeIdManager(g)), Exact());
+	TEdgeIterator it(g);
+	for(TEdgeIterator it(g);!atEnd(it);++it) assignProperty(newCargoMap, *it, cargo(*it));
+	typedef std::map<std::pair<TVertexDescriptor, TVertexDescriptor>, TCargo> TNewEdgeMap;
+	TNewEdgeMap edges;
+	for(TVertexIterator itVertex(g);!atEnd(itVertex);++itVertex) {
+		TOutEdgeIterator outIt1(g, *itVertex);
+		while (!atEnd(outIt1)) {
+			TOutEdgeIterator outIt2 = outIt1;
+			goNext(outIt2);
+			while (!atEnd(outIt2)) {
+				TVertexDescriptor tV1 = targetVertex(outIt1);
+				TVertexDescriptor tV2 = targetVertex(outIt2);
+				if (sequenceId(g, tV1) != sequenceId(g,tV2)) {
+					TEdgeDescriptor e = findEdge(g, tV1, tV2);
+					if (e == 0) {
+						// New edge
+						TCargo val = cargo(*outIt1);
+						if (val > cargo(*outIt2)) val = cargo(*outIt2);
+						if (tV1 < tV2) {
+							typename TNewEdgeMap::iterator pos = edges.find(std::make_pair(tV1, tV2));
+							if (pos == edges.end()) {
+								edges.insert(std::make_pair(std::make_pair(tV1, tV2), val));
+							} else {
+								pos->second += val;
+							}
+						} else {
+							typename TNewEdgeMap::iterator pos = edges.find(std::make_pair(tV2, tV1));
+							if (pos == edges.end()) {
+								edges.insert(std::make_pair(std::make_pair(tV2, tV1), val));
+							} else {
+								pos->second += val;
+							}
+						}
+					} else {
+						if (getCargo(*outIt2) > getCargo(*outIt1)) property(newCargoMap, e) += getCargo(*outIt1);
+						else property(newCargoMap, e) += getCargo(*outIt2);	
+					}
+				}
+				goNext(outIt2);
+			}
+			goNext(outIt1);
+		}
+	}
+	// Assign the new weights and clean-up the cargo map
+	goBegin(it);
+	for(;!atEnd(it);++it) cargo(*it) = getProperty(newCargoMap, *it);
+	clear(newCargoMap);
+
+	// Finally add the new edges created by the triplet approach
+	for(typename TNewEdgeMap::const_iterator pos = edges.begin();pos!=edges.end();++pos) {
+		addEdge(g, pos->first.first, pos->first.second, pos->second);
+	}
+
+	// Clean-up the edge map
+	edges.clear();
+}
+
 
 //////////////////////////////////////////////////////////////////////////////
 

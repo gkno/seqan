@@ -132,85 +132,158 @@ void  Test_CompressedAlphabets() {
 	SEQAN_TASSERT(gr10 == 14)
 }
 
-
 //////////////////////////////////////////////////////////////////////////////
 
-void Test_TCoffeeTmp() {
+void Test_KmerCountingAndDistance() {
 //____________________________________________________________________________
-// T-Coffee
+// K-mer Counting
 	typedef String<AminoAcid> TString;
 	typedef StringSet<TString, Dependent<> > TStringSet;
-	typedef Graph<Alignment<TStringSet, unsigned int, Default> > TGraph;
 	
-	TString str1 = "DDGGG";
-	TString str2 = "NAE";
-	TString str3 = "AANGEE";
-	TString str4 = "NCCA";
-	//TString str1 = "GARFIELDTHELASTFATCAT";
-	//TString str2 = "GARFIELDTHEFASTCAT";
-	//TString str3 = "GARFIELDTHEVERYFASTCAT";
-	//TString str4 = "THEFATCAT";
+	TString str1 = "GARFIELDTHELASTFATCAT";
+	TString str2 = "GARFIELDTHEFASTCAT";
+	TString str3 = "GARFIELDTHEVERYFASTCAT";
+	TString str4 = "THEFATCAT";
 	TStringSet strSet;
-	assignValueById(strSet, str1);
-	assignValueById(strSet, str2);
-	assignValueById(strSet, str3);
-	assignValueById(strSet, str4);
-	TGraph lib1(strSet);
-	TGraph lib2(strSet);
-	TGraph g(strSet);
-
-	// Score object
-	Score<int> score_type = Score<int>(4,-1,-1,-10);
-
-	// Generate a primary library, i.e., all pairwise alignments
-	generatePrimaryLibrary(lib1, score_type, GlobalPairwise_Library() );
-	generatePrimaryLibrary(lib2, score_type, LocalPairwise_Library() );
-
-	// Weighting of libraries (Signal addition)
-	String<TGraph*> libs;
-	appendValue(libs, &lib1);
-	appendValue(libs, &lib2);
-	combineGraphs(g, libs);
-
-	// Triplet library extension
-	tripletLibraryExtension(g);
-
-	//// Debug code
-	//// Print all possible library matches, i.e., our scoring system
-	//typedef Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
-	//typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	//typedef Infix<Value<TStringSet>::Type>::Type TInfix;
-	//TEdgeIterator itEdge(g);
-	//for(;!atEnd(itEdge);++itEdge) {
-	//	TVertexDescriptor sourceV = sourceVertex(itEdge);
-	//	TVertexDescriptor targetV = targetVertex(itEdge);
-	//	TInfix inf1 = infix(getValueById(stringSet(g), sequenceId(g, sourceV)),fragmentBegin(g, sourceV), fragmentBegin(g, sourceV) + fragmentLength(g, sourceV));
-	//	TInfix inf2 = infix(getValueById(stringSet(g), sequenceId(g, targetV)),fragmentBegin(g, targetV), fragmentBegin(g, targetV) + fragmentLength(g, targetV));
-	//	std::cout << "SeqId " << sequenceId(g, sourceV) << ':' << inf1 << " (VertexId: " << sourceV << ')' << std::endl;
-	//	std::cout << "SeqId " << sequenceId(g, targetV) << ':' << inf2 << " (VertexId: " << targetV << ')' << std::endl;
-	//	std::cout << "Weight " << ':' << getCargo(*itEdge) << std::endl;
-	//	std::cout << std::endl;
-	//}
-
+	appendValue(strSet, str1);
+	appendValue(strSet, str2);
+	appendValue(strSet, str3);
+	appendValue(strSet, str4);
 
 	// Calculate a distance matrix using a compressed alphabet or not
 	String<double> distanceMatrix; 
-	getKmerSimilarityMatrix(stringSet(g), distanceMatrix, 6, AAGroupsDayhoff() );
+	getKmerSimilarityMatrix(strSet, distanceMatrix, 6, AminoAcid() );
+
+	// (i,i) value indicates the number of kmers in this string
+	SEQAN_TASSERT(getValue(distanceMatrix, 0*4 + 0) == 16)
+	SEQAN_TASSERT(getValue(distanceMatrix, 1*4 + 1) == 13)
+	SEQAN_TASSERT(getValue(distanceMatrix, 2*4 + 2) == 17)
+	SEQAN_TASSERT(getValue(distanceMatrix, 3*4 + 3) == 4)
+	// (i,j) value indicates the number of shared k-mers / maximal number of shared k-mers
+	SEQAN_TASSERT(getValue(distanceMatrix, 0*4 + 3) == 0.25)
+	SEQAN_TASSERT(getValue(distanceMatrix, 3*4 + 0) == 0.25)
+	SEQAN_TASSERT(getValue(distanceMatrix, 0*4 + 2) == 0.375)
+	SEQAN_TASSERT(getValue(distanceMatrix, 2*4 + 0) == 0.375)
+
+	// Kimura distance correction
 	similarityToDistanceMatrix(distanceMatrix, KimuraDistance() );
+	SEQAN_TASSERT(getValue(distanceMatrix, 0*4 + 2) > getValue(distanceMatrix, 0*4 + 3))
+	SEQAN_TASSERT(getValue(distanceMatrix, 2*4 + 0) > getValue(distanceMatrix, 0*4 + 3))
 
-	// Build the neighbor joining tree
-	Graph<Tree<double> > njTreeOut;
-	slowNjTree(distanceMatrix, njTreeOut);
-
-	// Perform a progressive alignment
-	Graph<Alignment<TStringSet, void> > gOut(strSet);
-	progressiveAlignment(g, njTreeOut, gOut, Hirschberg() );
-
-	// Print the alignment
-	std::cout << gOut << std::endl;
-
+	// Sequence similarity
+	typedef Graph<Alignment<TStringSet, void> > TGraph;
+	TStringSet str;
+	TString st0("Myannealing");appendValue(str, st0);
+	TString st1("annual"); appendValue(str, st1);
+	TGraph g(str);
+	Score<int> score_type = Score<int>(0,-1,-1,0);
+	globalAlignment(g, score_type, NeedlemanWunsch() );
+	typedef Fragment<> TFragment;
+	typedef String<TFragment, Block<> > TFragmentString;
+	TFragmentString matches;
+	globalAlignment(matches, stringSet(g), score_type, NeedlemanWunsch() );
+	//MYANNEALING
+    //  ||| ||
+    //--ANNXAL---
+	String<double> sim;
+	getSequenceSimilarity(g, sim, Value<TString>::Type());	
+	SEQAN_TASSERT((unsigned int) getSequenceSimilarity(g, Value<TString>::Type()) * 100 == (unsigned int) 5/6 * 100)
+	SEQAN_TASSERT((unsigned int) getValue(sim, 1) * 100 == (unsigned int) 5/6 * 100)
+	SEQAN_TASSERT((unsigned int) getSequenceSimilarity(matches,stringSet(g),0,length(matches),Value<TString>::Type()) * 100 == (unsigned int) 5/6 * 100)
 }
 
+
+//////////////////////////////////////////////////////////////////////////////
+
+void Test_GuideTree() {
+//____________________________________________________________________________
+// Neighbor Joining
+
+	// Create a distance matrix
+	String<double> mat;
+	fill(mat, 8*8, 0);
+	assignValue(mat, 0*8+0, 0);assignValue(mat, 0*8+1, 7);assignValue(mat, 0*8+2, 8);assignValue(mat, 0*8+3, 11);
+	assignValue(mat, 0*8+4, 13);assignValue(mat, 0*8+5, 16);assignValue(mat, 0*8+6, 13);assignValue(mat, 0*8+7, 17);
+	assignValue(mat, 1*8+0, 7);assignValue(mat, 1*8+1, 0);assignValue(mat, 1*8+2, 5);assignValue(mat, 1*8+3, 8);
+	assignValue(mat, 1*8+4, 10);assignValue(mat, 1*8+5, 13);assignValue(mat, 1*8+6, 10);assignValue(mat, 1*8+7, 14);
+	assignValue(mat, 2*8+0, 8);assignValue(mat, 2*8+1, 5);assignValue(mat, 2*8+2, 0);assignValue(mat, 2*8+3, 5);
+	assignValue(mat, 2*8+4, 7);assignValue(mat, 2*8+5, 10);assignValue(mat, 2*8+6, 7);assignValue(mat, 2*8+7, 11);
+	assignValue(mat, 3*8+0, 11);assignValue(mat, 3*8+1, 8);assignValue(mat, 3*8+2, 5);assignValue(mat, 3*8+3, 0);
+	assignValue(mat, 3*8+4, 8);assignValue(mat, 3*8+5, 11);assignValue(mat, 3*8+6, 8);assignValue(mat, 3*8+7, 12);
+	assignValue(mat, 4*8+0, 13);assignValue(mat, 4*8+1, 10);assignValue(mat, 4*8+2, 7);assignValue(mat, 4*8+3, 8);
+	assignValue(mat, 4*8+4, 0);assignValue(mat, 4*8+5, 5);assignValue(mat, 4*8+6, 6);assignValue(mat, 4*8+7, 10);
+	assignValue(mat, 5*8+0, 16);assignValue(mat, 5*8+1, 13);assignValue(mat, 5*8+2, 10);assignValue(mat, 5*8+3, 11);
+	assignValue(mat, 5*8+4, 5);assignValue(mat, 5*8+5, 0);assignValue(mat, 5*8+6, 9);assignValue(mat, 5*8+7, 13);
+	assignValue(mat, 6*8+0, 13);assignValue(mat, 6*8+1, 10);assignValue(mat, 6*8+2, 7);assignValue(mat, 6*8+3, 8);
+	assignValue(mat, 6*8+4, 6);assignValue(mat, 6*8+5, 9);assignValue(mat, 6*8+6, 0);assignValue(mat, 6*8+7, 8);
+	assignValue(mat, 7*8+0, 17);assignValue(mat, 7*8+1, 14);assignValue(mat, 7*8+2, 11);assignValue(mat, 7*8+3, 12);
+	assignValue(mat, 7*8+4, 10);assignValue(mat, 7*8+5, 13);assignValue(mat, 7*8+6, 8);assignValue(mat, 7*8+7, 0);
+
+	typedef Graph<Tree<double> > TGraph;
+	TGraph njTreeOut;
+	slowNjTree(mat, njTreeOut);
+	//std::cout << njTreeOut << std::endl;
+
+	SEQAN_TASSERT(numVertices(njTreeOut) == 15)
+	SEQAN_TASSERT(findEdge(njTreeOut, 8, 1) != 0)
+	SEQAN_TASSERT(findEdge(njTreeOut, 8, 0) != 0)
+	SEQAN_TASSERT(findEdge(njTreeOut, 9, 5) != 0)
+	SEQAN_TASSERT(findEdge(njTreeOut, 9, 4) != 0)
+	SEQAN_TASSERT(findEdge(njTreeOut, 10, 2) != 0)
+	SEQAN_TASSERT(findEdge(njTreeOut, 10, 8) != 0)
+	SEQAN_TASSERT(findEdge(njTreeOut, 10, 2) != 0)
+	SEQAN_TASSERT(findEdge(njTreeOut, 10, 8) != 0)
+	SEQAN_TASSERT(findEdge(njTreeOut, 11, 3) != 0)
+	SEQAN_TASSERT(findEdge(njTreeOut, 11, 10) != 0)
+	SEQAN_TASSERT(findEdge(njTreeOut, 12, 9) != 0)
+	SEQAN_TASSERT(findEdge(njTreeOut, 12, 11) != 0)
+	SEQAN_TASSERT(findEdge(njTreeOut, 13, 12) != 0)
+	SEQAN_TASSERT(findEdge(njTreeOut, 13, 6) != 0)
+	SEQAN_TASSERT(findEdge(njTreeOut, 14, 13) != 0)
+	SEQAN_TASSERT(findEdge(njTreeOut, 14, 7) != 0)
+	SEQAN_TASSERT(getRoot(njTreeOut) == 14)
+
+//____________________________________________________________________________
+// UPGMA
+	clear(mat);
+	fill(mat, 8*8, 0);
+	assignValue(mat, 0*8+0, 0);assignValue(mat, 0*8+1, 32);assignValue(mat, 0*8+2, 48);assignValue(mat, 0*8+3, 51);
+	assignValue(mat, 0*8+4, 50);assignValue(mat, 0*8+5, 48);assignValue(mat, 0*8+6, 98);assignValue(mat, 0*8+7, 148);
+	assignValue(mat, 1*8+0, 32);assignValue(mat, 1*8+1, 0);assignValue(mat, 1*8+2, 26);assignValue(mat, 1*8+3, 34);
+	assignValue(mat, 1*8+4, 29);assignValue(mat, 1*8+5, 33);assignValue(mat, 1*8+6, 84);assignValue(mat, 1*8+7, 136);
+	assignValue(mat, 2*8+0, 48);assignValue(mat, 2*8+1, 26);assignValue(mat, 2*8+2, 0);assignValue(mat, 2*8+3, 42);
+	assignValue(mat, 2*8+4, 44);assignValue(mat, 2*8+5, 44);assignValue(mat, 2*8+6, 92);assignValue(mat, 2*8+7, 152);
+	assignValue(mat, 3*8+0, 51);assignValue(mat, 3*8+1, 34);assignValue(mat, 3*8+2, 42);assignValue(mat, 3*8+3, 0);
+	assignValue(mat, 3*8+4, 44);assignValue(mat, 3*8+5, 38);assignValue(mat, 3*8+6, 86);assignValue(mat, 3*8+7, 142);
+	assignValue(mat, 4*8+0, 50);assignValue(mat, 4*8+1, 29);assignValue(mat, 4*8+2, 44);assignValue(mat, 4*8+3, 44);
+	assignValue(mat, 4*8+4, 0);assignValue(mat, 4*8+5, 24);assignValue(mat, 4*8+6, 89);assignValue(mat, 4*8+7, 142);
+	assignValue(mat, 5*8+0, 48);assignValue(mat, 5*8+1, 33);assignValue(mat, 5*8+2, 44);assignValue(mat, 5*8+3, 38);
+	assignValue(mat, 5*8+4, 24);assignValue(mat, 5*8+5, 0);assignValue(mat, 5*8+6, 90);assignValue(mat, 5*8+7, 142);
+	assignValue(mat, 6*8+0, 98);assignValue(mat, 6*8+1, 84);assignValue(mat, 6*8+2, 92);assignValue(mat, 6*8+3, 86);
+	assignValue(mat, 6*8+4, 89);assignValue(mat, 6*8+5, 90);assignValue(mat, 6*8+6, 0);assignValue(mat, 6*8+7, 148);
+	assignValue(mat, 7*8+0, 148);assignValue(mat, 7*8+1, 136);assignValue(mat, 7*8+2, 152);assignValue(mat, 7*8+3, 142);
+	assignValue(mat, 7*8+4, 142);assignValue(mat, 7*8+5, 142);assignValue(mat, 7*8+6, 148);assignValue(mat, 7*8+7, 0);
+
+	clear(njTreeOut);
+	upgmaTree(mat, njTreeOut);
+	//std::cout << njTreeOut << std::endl;
+	SEQAN_TASSERT(numVertices(njTreeOut) == 15)
+	SEQAN_TASSERT(findEdge(njTreeOut, 8, 4) != 0)
+	SEQAN_TASSERT(findEdge(njTreeOut, 8, 5) != 0)
+	SEQAN_TASSERT(findEdge(njTreeOut, 9, 1) != 0)
+	SEQAN_TASSERT(findEdge(njTreeOut, 9, 2) != 0)
+	SEQAN_TASSERT(findEdge(njTreeOut, 10, 8) != 0)
+	SEQAN_TASSERT(findEdge(njTreeOut, 10, 9) != 0)
+	SEQAN_TASSERT(findEdge(njTreeOut, 11, 3) != 0)
+	SEQAN_TASSERT(findEdge(njTreeOut, 11, 10) != 0)
+	SEQAN_TASSERT(findEdge(njTreeOut, 12, 11) != 0)
+	SEQAN_TASSERT(findEdge(njTreeOut, 12, 0) != 0)
+	SEQAN_TASSERT(findEdge(njTreeOut, 13, 6) != 0)
+	SEQAN_TASSERT(findEdge(njTreeOut, 13, 12) != 0)
+	SEQAN_TASSERT(findEdge(njTreeOut, 14, 7) != 0)
+	SEQAN_TASSERT(findEdge(njTreeOut, 14, 13) != 0)
+	SEQAN_TASSERT(getRoot(njTreeOut) == 14)
+}
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -440,7 +513,7 @@ void Test_TCoffeeFromFile(String<char> const in_path, String<char> const file_pr
 	time=((float)(endTime-startTime)/CLOCKS_PER_SEC);
 	startTime = endTime;
 	std::cout << "Progressive alignment done: " << time << " sec" << std::endl;
-	
+	//std::cout << gOut << std::endl;
 	//fstream strm3; // Alignment graph as dot
 	//strm3.open(TEST_PATH "my_tcoffee3.dot", ios_base::out | ios_base::trunc);
 	//write(strm3,gOut,DotDrawing());
@@ -497,6 +570,10 @@ void Test_TCoffeeFromFile(String<char> const in_path, String<char> const file_pr
 	strm5.open(output2.str().c_str(), ios_base::out | ios_base::trunc);
 	write(strm5,gOut,names, MsfFormat());
 	strm5.close();
+	endTime=clock();
+	time=((float)(endTime-startTime)/CLOCKS_PER_SEC);
+	startTime = endTime;
+	std::cout << "Alignment output done: " << time << " sec" << std::endl;
 
 	// Clean-up
 	clear(g);
@@ -853,7 +930,8 @@ void Test_BaliBaseRef50() {
 
 void Test_GraphTCoffee() {
 	Test_CompressedAlphabets();
-
+	Test_KmerCountingAndDistance();
+	Test_GuideTree();
 
 	//Test_TCoffeeTmp();
 	Test_TCoffeeGarfield();
@@ -867,7 +945,13 @@ void Test_GraphTCoffee() {
 	
 	//Test_TCoffeeFromLibrary(); 
 
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_base.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_kmer.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_distance.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_guidetree.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_library.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_progressive.h");
+	
 
 }
 

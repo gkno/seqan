@@ -11,14 +11,57 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TAlign, typename TStringSet, typename TScoreValue, typename TSpec>
-TScoreValue
+template<typename TAlign, typename TStringSet, typename TForbidden, typename TScore>
+inline typename Value<TScore>::Type
 _localAlignment(TAlign& align,
 				TStringSet& str,
-				Score<TScoreValue, TSpec> const& sc,
+				TForbidden& forbidden,
+				TScore const& sc,
 				SmithWatermanClump)
 {
 	SEQAN_CHECKPOINT
+	typedef typename Value<TScore>::Type TScoreValue;
+	typedef typename Size<TStringSet>::Type TSize;
+	  
+	TScoreValue maxScore;
+	TSize best_row = 0;
+	TSize best_col = 0;
+	
+	// Trace
+	String<TraceBackGotoh> trace;
+	TraceBackGotoh initialDir;
+
+	// Create the trace
+	maxScore = _align_smith_waterman(trace, str, sc, initialDir, best_row, best_col, forbidden);	
+
+	//// Debug code
+	//for(unsigned int i= 0; i<length(str[1]);++i) {
+	//	for(unsigned int j= 0; j<length(str[0]);++j) {
+	//		std::cout << (unsigned int) getValue(forbidden, j*length(str[1]) + i) << ',';
+	//	}
+	//	std::cout << std::endl;
+	//}
+	//std::cout << std::endl;
+	
+	// Follow the trace and create the alignment
+	_align_smith_waterman_trace(align, str, trace, initialDir, best_row, best_col, forbidden);
+	
+	return maxScore;
+}
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TAlign, typename TStringSet, typename TScore>
+inline typename Value<TScore>::Type
+_localAlignment(TAlign& align,
+				TStringSet& str,
+				TScore const& sc,
+				SmithWatermanClump)
+{
+	SEQAN_CHECKPOINT
+	typedef typename Value<TScore>::Type TScoreValue;
 	typedef typename Size<TStringSet>::Type TSize;
 	typedef typename VertexDescriptor<TAlign>::Type TVertexDescriptor;
 	typedef typename EdgeDescriptor<TAlign>::Type TEdgeDescriptor;
@@ -35,93 +78,30 @@ _localAlignment(TAlign& align,
 	String<bool> forbidden;
 	fill(forbidden, len0 * len1, false);
 
-	// Get the length of the shortest string
-	TSize minLen = len0;
-	if (len1  < minLen) minLen = len1;
-	minLen = (TSize) 0.1 * minLen;
-	// Local matches must be at least 20 characters long
-	if (minLen < 20) minLen = 20;
-
-	// String of fragments to combine all found local alignments into one alignment graph
+	// String of fragments
 	typedef Fragment<> TFragment;
 	typedef String<TFragment, Block<> > TFragmentString;
 	typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
 	TFragmentString matches;
 	String<TScoreValue, Block<> > score_values;
 
-	// Stop looking for local alignments, if there are to short
-	TSize local_len;
+	// Stop looking for local alignments, if there score is too low
+	TScoreValue local_score = 0;
 	TSize count = 0;
 	do {
-		local_len = 0;
-		typedef Graph<Alignment<TStringSet, void> > TPairGraph;
-		typedef typename VertexDescriptor<TPairGraph>::Type TVD;
-		typedef typename Iterator<TPairGraph, EdgeIterator>::Type TEI;
-		
-		// Trace
-		String<TraceBackGotoh> trace;	// Trace-back path
-		TraceBackGotoh initialDir;		// First direction on the path
-		TSize best_row = 0;				// Where to start
-		TSize best_col = 0;
-
-		// The local alignment graph
-		TPairGraph pGraph(str);
-
 		// Create the local alignment
-		TScoreValue tmpScore = _align_smith_waterman(trace, str, sc, initialDir, best_row, best_col, forbidden);
-		if (tmpScore > maxScore) maxScore = tmpScore;
-		
-		// Follow the trace and create the graph
-		_align_smith_waterman_trace(pGraph, str, trace, initialDir, best_row, best_col, forbidden);
-		//std::cout << pGraph << std::endl;
+		local_score = _localAlignment(matches, str, forbidden, sc, SmithWatermanClump());
+		if (local_score > maxScore) maxScore = local_score;
 
-		// Extract the matches
-		TEI it(pGraph);
-		for(;!atEnd(it);++it) {
-			TVD sV = sourceVertex(it);
-			TVD tV = targetVertex(it);
-			push_back(matches, TFragment( (unsigned int) sequenceId(pGraph, sV), (unsigned int) fragmentBegin(pGraph,sV), (unsigned int) sequenceId(pGraph, tV),  (unsigned int)  fragmentBegin(pGraph,tV),  (unsigned int)  fragmentLength(pGraph,tV)));
-			push_back(score_values, tmpScore);
-			local_len += fragmentLength(pGraph,tV);
-		}
+		// Remember the confidence in these matches (Score value)
+		TSize diff = length(matches) - length(score_values);
+		for(TSize k = 0; k<diff; ++k) push_back(score_values, local_score);
 
-		//// Debug code
-		//for(unsigned int i= 0; i<length(str[1]);++i) {
-		//	for(unsigned int j= 0; j<length(str[0]);++j) {
-		//		std::cout << (unsigned int) getValue(forbidden, j*length(str[1]) + i) << ',';
-		//	}
-		//	std::cout << std::endl;
-		//}
-		//std::cout << std::endl;
 		++count;
-	} while ((local_len > minLen) && (count < 4));
-
-	//// Debug Code
-	//// Print all the matches
-	//std::cout << "The sequences:" << std::endl;
-	//for(TSize i = 0;i<length(str);++i) {
-	//	std::cout << positionToId(str,i) << ':' << str[i] << std::endl;
-	//}
-	//std::cout << "The matches:" << std::endl;
-	//for(TSize i = 0;i<length(matches);++i) {
-	//	TId tmp_id1 = sequenceId(matches[i],0);
-	//	std::cout << tmp_id1 << ',' << fragmentBegin(matches[i],tmp_id1) << ',';
-	//	for(TSize j = fragmentBegin(matches[i],tmp_id1); j < fragmentBegin(matches[i],tmp_id1) + fragmentLength(matches[i],tmp_id1); ++j) {
-	//		std::cout << str[idToPosition(str, tmp_id1)][j];
-	//	}
-	//	TId tmp_id2 = sequenceId(matches[i],1);
-	//	std::cout << ',' <<	tmp_id2 << ',' << fragmentBegin(matches[i],tmp_id2) << ',';
-	//	for(TSize j = fragmentBegin(matches[i],tmp_id2); j < fragmentBegin(matches[i],tmp_id2) + fragmentLength(matches[i],tmp_id2); ++j) {
-	//		std::cout << str[idToPosition(str, tmp_id2)][j];
-	//	}
-	//	std::cout << std::endl;
-	//}
-	//std::cout << "=====" << std::endl;
+	} while ((local_score > 0.5 * maxScore) && (count < 4));
 
 	// Refine all matches and create multiple alignment
 	matchRefinement(matches,str,align);
-	//std::cout << "Finished" << std::endl;
-	//std::cout << align << std::endl;
 
 	// Adapt edge weights
 	TFragmentStringIter endIt = end(matches);

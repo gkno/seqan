@@ -49,7 +49,7 @@ label(Fragment<TId, TPos, TSize, TSpec> const& f,
 template<typename TId, typename TPos, typename TSize, typename TSpec, typename TVal>
 inline TId
 sequenceId(Fragment<TId, TPos, TSize, TSpec> const& f,
-	   TVal const seqId)
+		   TVal const seqId)
 {
 	SEQAN_CHECKPOINT
 	if ((TId) seqId == 0) {
@@ -64,7 +64,7 @@ sequenceId(Fragment<TId, TPos, TSize, TSpec> const& f,
 template<typename TId, typename TPos, typename TSize, typename TSpec, typename TVal>
 inline typename Position<Fragment<TId, TPos, TSize, TSpec> >::Type&
 fragmentBegin(Fragment<TId, TPos, TSize, TSpec> const& f,
-	      TVal const seqId)
+			  TVal const seqId)
 {
 	SEQAN_CHECKPOINT
 	if ((TId) seqId == f.seqId1) {

@@ -27,7 +27,7 @@
 #include "test_graph_algorithms.h"
 #include "test_graph_alignment.h"
 #include "test_graph_tcoffee.h"
-//#include "test_graph_match_refinement.h"
+#include "test_graph_match_refinement.h"
 #include "test_graph_interval_tree.h"
 #include "test_graph_folding.h"
 
