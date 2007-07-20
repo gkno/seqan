@@ -312,8 +312,8 @@ void Test_GraphIntervalTree()
 //	std::cout << "\nRest ";
 	IntervalTreeRestTest<int>();
 
-	//debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_interval_tree.h");
-	//debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_interval_types.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_interval_tree.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_interval_types.h");
 
 
 }

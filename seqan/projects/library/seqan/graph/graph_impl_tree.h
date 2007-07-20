@@ -470,7 +470,7 @@ addEdge(Graph<Tree<TCargo, TSpec> >& g,
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TCargo, typename TSpec, typename TVertexDescriptor>
-void 
+inline void 
 removeEdge(Graph<Tree<TCargo, TSpec> >& g,
 		   TVertexDescriptor const parent,
 		   TVertexDescriptor const child) 
@@ -507,7 +507,7 @@ removeEdge(Graph<Tree<TCargo, TSpec> >& g,
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TCargo, typename TSpec, typename TEdgeDescriptor>
-void 
+inline void 
 removeEdge(Graph<Tree<TCargo, TSpec> >& g,
 		   TEdgeDescriptor const edge)
 {

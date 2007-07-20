@@ -1781,56 +1781,10 @@ void Test_Alignment() {
 	write(strm,gAl,DotDrawing());
 	strm.close();
 
+	TAlignString align;
+	convertAlignment(gAl, align);
+	SEQAN_TASSERT(length(align) > 0) 
 }
-
-void Test_MutualInformation() {
-//____________________________________________________________________________
-// Rna stuff
-
-	// Mutual information content
-	typedef String<Dna> TString;
-	typedef StringSet<TString, Dependent<> > TStringSet;
-	typedef Graph<Alignment<TStringSet, void> > TGraph;
-	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	typedef	Id<TStringSet>::Type TId;
-	typedef	Size<TStringSet>::Type TSize;
-
-	// Create an alignment
-	TStringSet str;
-	TString str0("cgcgataa");
-	assignValueById(str, str0);
-	TString str1("cggccgcc");
-	assignValueById(str, str1);
-	TString str2("cgcggcgg");
-	assignValueById(str, str2);
-	TString str3("cggctatt");
-	assignValueById(str, str3);
-
-	TGraph g(str);
-	TSize pos = 0;
-	while(pos < length(getValue(str,0))) {
-		TSize seq = 1;
-		addVertex(g, 0, pos, 1);
-		while (seq < length(str)) {
-			TVertexDescriptor v2 = addVertex(g, seq, pos, 1);
-			for(TSize i = seq; i>0;--i) {
-				addEdge(g, v2 - i, v2);
-			}
-			++seq;
-		}
-		++pos;
-	}
-
-	String<double> mat;
-	mutualInformationContent(g, mat);
-	TSize matrix_size = (TSize) sqrt((double) length(mat));
-
-	SEQAN_TASSERT(getValue(mat, 0 * matrix_size + 1) == 0)
-	SEQAN_TASSERT(getValue(mat, 2 * matrix_size + 3) == 1)
-	SEQAN_TASSERT(getValue(mat, 4 * matrix_size + 5) == 2)
-	SEQAN_TASSERT(getValue(mat, 6 * matrix_size + 7) == 2)
-}
-
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -1956,8 +1910,6 @@ void Test_GraphTypes() {
 	Test_Tree();		// Trees
 	Test_Alignment();	// Alignment graph
 	Test_Fragment();	// Fragment
-
-	Test_MutualInformation();// Use of alignment graph for Rna stuff
 
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_directed.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_undirected.h");

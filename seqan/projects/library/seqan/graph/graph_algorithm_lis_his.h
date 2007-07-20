@@ -164,7 +164,7 @@ longestCommonSubsequence(TString1 const& str1,
 	typedef typename Iterator<TString2 const>::Type TStringIter;
 	TStringIter endIt = end(str2);
 	for(TStringIter it = begin(str2); it != endIt; ++it) {
-		push_back(value(occ, *it), position(it));
+		push_back(value(occ, (unsigned int) *it), position(it));
 	}
 
 	// Build the combined string
@@ -172,9 +172,9 @@ longestCommonSubsequence(TString1 const& str1,
 	String<TPos, Block<> > mapping;
 	TStringIter endIt1 = end(str1);
 	for(TStringIter it = begin(str1); it != endIt1; ++it) {
-		for(int i = length(occ[*it])-1; i>=0; --i) {
+		for(int i = length(occ[(unsigned int) *it])-1; i>=0; --i) {
 			TPos source = position(it);
-			push_back(finalSeq, (occ[*it])[i]);
+			push_back(finalSeq, (occ[(unsigned int) *it])[i]);
 			push_back(mapping, source);
 		}
 	}

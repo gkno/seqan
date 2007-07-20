@@ -62,6 +62,9 @@
 #include <seqan/graph/graph_iterator_bfs.h>
 #include <seqan/graph/graph_iterator_dfs.h>
 
+// Graph algorithms
+#include <seqan/graph/graph_algorithm_lis_his.h>
+#include <seqan/graph/graph_algorithm.h>
 
 // Alignment
 #include <seqan/graph/graph_align_base.h>
@@ -89,11 +92,6 @@
 #include <seqan/graph/graph_utility_alphabets.h>
 #include <seqan/graph/graph_utility_parsing.h>
 #include <seqan/graph/graph_utility_match_parsing.h>
-
-// Graph algorithms
-#include <seqan/graph/graph_algorithm_lis_his.h>
-#include <seqan/graph/graph_algorithm.h>
-
 
 // Refinement
 #include <seqan/graph/graph_impl_interval_types.h>

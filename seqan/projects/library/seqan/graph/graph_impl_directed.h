@@ -594,7 +594,7 @@ addEdge(Graph<Directed<TCargo, TSpec> >& g,
 */
 
 template<typename TCargo, typename TSpec, typename TVertexDescriptor>
-void 
+inline void 
 removeEdge(Graph<Directed<TCargo, TSpec> >& g, 
 		   TVertexDescriptor const source, 
 		   TVertexDescriptor const target) 
@@ -631,7 +631,7 @@ removeEdge(Graph<Directed<TCargo, TSpec> >& g,
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TCargo, typename TSpec, typename TEdgeDescriptor>
-void 
+inline void 
 removeEdge(Graph<Directed<TCargo, TSpec> >& g,
 		   TEdgeDescriptor const edge)
 {

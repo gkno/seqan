@@ -15,6 +15,119 @@ template<typename TStringSet, typename TCargo, typename TSpec, typename TScore>
 inline void 
 generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 					   TScore const& score_type,
+					   Lcs_Library)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename Id<TGraph>::Type TId;
+	//typedef typename Value<TStringSet>::Type TString;
+	typedef String<AAGroupsDayhoff> TString;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
+	typedef typename Value<TScore>::Type TScoreValue;
+
+	// Clear graph
+	clearVertices(g);
+
+	// Pairwise alignments for all pairs of sequences
+	TStringSet& str = stringSet(g);	
+	TSize nseq = length(str);
+
+	// String of fragments to combine all pairwise alignments into a multiple alignment
+	typedef Fragment<> TFragment;
+	typedef String<TFragment, Block<> > TFragmentString;
+	typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
+	TFragmentString matches;
+
+	for(TSize i=0; i<nseq-2; ++i) {
+		for(TSize j=i+1; j<nseq-1; ++j) {
+			for(TSize k=j+1; k<nseq; ++k) {
+
+				TString str1 = str[i];
+				TString str2 = str[j];
+				TString str3 = str[k];
+
+				// Lcs between first and second string
+				String<std::pair<unsigned int, unsigned int>, Block<> > pos1;
+				longestCommonSubsequence(str1, str2, pos1);
+
+				// Add the third string
+				TString intermediateStr;
+				TSize lastPos1 = length(pos1) - 1;
+				reserve(intermediateStr, lastPos1 + 1);
+				for(int z = lastPos1; z>=0; --z) {
+					appendValue(intermediateStr, (str1)[pos1[z].first]);
+				}
+				String<std::pair<unsigned int, unsigned int>, Block<> > pos2;
+				longestCommonSubsequence(intermediateStr, str3, pos2);
+
+				// Get the significant matches in all 3 sequences
+				bool firstRun = true;
+				TSize lenMatch = 0;TSize kBegin = 0;
+				TSize iBegin = 0;TSize jBegin = 0;
+				for(int z = length(pos2)-1; z>=0; --z) {
+					if (firstRun) {
+						// Where do the matches start in each sequence?
+						firstRun = false;
+						lenMatch = 1;
+						kBegin = pos2[z].second;
+						iBegin = pos1[lastPos1 - (pos2[z].first)].first;
+						jBegin = pos1[lastPos1 - (pos2[z].first)].second;
+					} else {
+						//Is it a consecutive run of characters in all 3 sequences?
+						if ((pos2[z+1].second + 1 == pos2[z].second) &&
+							(pos1[lastPos1 - (pos2[z+1].first)].first + 1 == pos1[lastPos1 - (pos2[z].first)].first) &&
+							(pos1[lastPos1 - (pos2[z+1].first)].second + 1 == pos1[lastPos1 - (pos2[z].first)].second)) {
+								++lenMatch;
+						} else {
+							// A new match started, what about the old one?
+							if (lenMatch > 1) {
+								//// Debug code
+								//typedef typename Infix<TString>::Type TInfix;
+								//TInfix inf1 = infix(str1,iBegin, iBegin + lenMatch);
+								//TInfix inf2 = infix(str2,jBegin, jBegin + lenMatch);
+								//TInfix inf3 = infix(str3,kBegin, kBegin + lenMatch);
+								//std::cout << inf1 << std::endl;
+								//std::cout << inf2 << std::endl;
+								//std::cout << inf3 << std::endl;
+
+								push_back(matches, TFragment(positionToId(str, i),iBegin,positionToId(str, j),jBegin,lenMatch));
+								push_back(matches, TFragment(positionToId(str, j),jBegin,positionToId(str, k),kBegin,lenMatch));
+								push_back(matches, TFragment(positionToId(str, i),iBegin,positionToId(str, k),kBegin,lenMatch));
+							}
+							lenMatch = 1;
+							kBegin = pos2[z].second;
+							iBegin = pos1[lastPos1 - (pos2[z].first)].first;
+							jBegin = pos1[lastPos1 - (pos2[z].first)].second;
+						}
+					}
+				}
+				// Process last match
+				if (lenMatch > 1) {
+					push_back(matches, TFragment(positionToId(str, i),iBegin,positionToId(str, j),jBegin,lenMatch));
+					push_back(matches, TFragment(positionToId(str, j),jBegin,positionToId(str, k),kBegin,lenMatch));
+					push_back(matches, TFragment(positionToId(str, i),iBegin,positionToId(str, k),kBegin,lenMatch));
+				}
+			}
+		}
+	}
+
+	// Clear graph
+	clearVertices(g);
+
+	// Refine all matches and create multiple alignment
+	matchRefinement(matches,str,const_cast<TScore&>(score_type),g);
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+	
+template<typename TStringSet, typename TCargo, typename TSpec, typename TScore>
+inline void 
+generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+					   TScore const& score_type,
 					   LocalPairwise_Library)
 {
 	SEQAN_CHECKPOINT
@@ -39,14 +152,8 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
 	TFragmentString matches;
 
-	// mtRandInit();
 	for(TSize i=0; i<nseq-2; ++i) {
 		for(TSize j=i+1; j<nseq-1; ++j) {
-
-			//TSize k = ((Byte) mtRand() % (nseq - 2));
-			//if (k>=i) ++k;
-			//if (k>=j) ++k;
-
 			TSize iterations = 1;
 			if (nseq < 50) iterations = 50 - nseq;
 			for(TSize k=j+1; (k - (j+1) < iterations) && (k<nseq);++k) {

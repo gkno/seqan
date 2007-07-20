@@ -434,7 +434,7 @@ void Test_TCoffeeFromFile(String<char> const in_path, String<char> const file_pr
 
 	// Make dependent string set
 	typedef StringSet<TString, Dependent<> > TStringSet;
-	typedef Graph<Alignment<TStringSet, unsigned int, Default> > TGraph;
+	typedef Graph<Alignment<TStringSet, unsigned int, WithoutEdgeId> > TGraph;
 	TStringSet strSet;
 	for(unsigned int i = 0; i<length(origStrSet); ++i) {
 		appendValue(strSet, origStrSet[i]);
@@ -498,7 +498,7 @@ void Test_TCoffeeFromFile(String<char> const in_path, String<char> const file_pr
 	std::cout << "Kmer done: " << time << " sec" << std::endl;
 
 	// Build the neighbor joining tree
-	Graph<Tree<double> > njTreeOut;
+	Graph<Tree<double, WithoutEdgeId> > njTreeOut;
 	slowNjTree(distanceMatrix, njTreeOut);
 	endTime=clock();
 	time=((float)(endTime-startTime)/CLOCKS_PER_SEC);
@@ -506,7 +506,7 @@ void Test_TCoffeeFromFile(String<char> const in_path, String<char> const file_pr
 	std::cout << "NjTree done: " << time << " sec" << std::endl;
 
 	// Perform a progressive alignment
-	Graph<Alignment<TStringSet, void> > gOut(strSet);
+	Graph<Alignment<TStringSet, void, WithoutEdgeId> > gOut(strSet);
 	progressiveAlignment(g, njTreeOut, gOut, Hirschberg() );
 	//std::cout << gOut << std::endl;
 	endTime=clock();
