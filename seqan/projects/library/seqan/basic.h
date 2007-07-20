@@ -30,6 +30,7 @@
 #include <seqan/basic/basic_definition.h>
 #include <seqan/basic/basic_metaprogramming.h>
 #include <seqan/basic/basic_type.h>
+#include <seqan/basic/basic_tag.h>
 
 //____________________________________________________________________________
 // allocators
