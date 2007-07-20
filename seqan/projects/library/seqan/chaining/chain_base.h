@@ -135,19 +135,8 @@ namespace seqan
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/**
-.Function.compute_chain:
-..summary:Computes the chain on a set of fragments.
-..cat:Chaining
-..signature:compute_chain(source, dest, score, algorithm, structuring )
-..param.source:The set of fragments
-..param.dest:A destination conainer.
-..param.score:The penalties for gaps between fragments.
-...remarks:Values should be positive integers.
-..param.algorithm:A tag that identifies the algorithm which is used for chaining.
-..param.structuring:Which type of RMT should be used.
-*/
 
+/*
 	template< typename TSource, typename TDest, typename TScoreValue, typename TScoreType, typename TStructuring, typename TAlgorithm >
 	TScoreValue
 	compute_chain( TSource & source, TDest & dest, Score< TScoreValue, TScoreType > const & score_, TAlgorithm tag, TStructuring structuring );
@@ -156,7 +145,7 @@ namespace seqan
 	TScoreValue
 	_compute_chain( TSource & source, TDest & dest, TCostModel type, Score< TScoreValue, TScoreType > const & score_, TAlgorithm tag, TStructuring structuring, TSpec spec );
 
-
+*/
 	template< typename TSource, typename TDest, typename TScoreValue, typename TScoreType, typename TStructuring >
 	TScoreValue
 	compute_chain( TSource & source, TDest & dest, Score< TScoreValue, TScoreType > const & score_, Chainer tag, TStructuring structuring )
@@ -169,7 +158,9 @@ namespace seqan
 			case 1: SEQAN_REPORT("One dimensional chaining not supported")
 					return 0;
 			case 2: if( scoreMismatch( score_ ) == 0 && scoreGapExtend( score_ ) == 0 )
-					return _compute_chain( source, dest, G_0_Cost(), score_, tag, structuring, _ChainSpecType< Array< 1 > >() );
+					{
+						return _compute_chain( source, dest, G_0_Cost(), score_, tag, structuring, _ChainSpecType< Array< 1 > >() );
+					}
 					else if( scoreMismatch( score_ ) > 0 && scoreGapExtend( score_ ) > 0 )
 					{
 						if( scoreMismatch( score_ ) == scoreGapExtend( score_ ) )
@@ -226,7 +217,44 @@ namespace seqan
 		}
 		return infimumValue< TScoreValue >();
 	}
-	
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/*TODO
+_chain_woehrle(TSource & source,
+			   TDest & dest,
+			   TScoring const & scoring)
+{
+}
+*/
+
+/**
+.Function.chain:
+..summary:Computes the chain on a set of fragments.
+..cat:Chaining
+..signature:chain(source, dest, score, algorithm)
+..param.source:The set of fragments
+..param.dest:A destination conainer.
+..param.score:The penalties for gaps between fragments.
+...remarks:Values should be positive integers.
+..param.algorithm:A tag that identifies the algorithm which is used for chaining.
+*/
+
+
+//spec for Chainer
+template< typename TSource, typename TDest, typename TScoring>
+inline typename Value<TScoring>::Type
+chain(TSource & source, 
+	  TDest & dest, 
+	  TScoring const & scoring, 
+	  Chainer)
+{
+	return compute_chain(source, dest, scoring, Chainer(), SemiDeferred()); //Deferred(), Complete()
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+
 }
 
 #endif	// SEQAN_HEADER_CHAIN_BASE_H

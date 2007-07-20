@@ -105,9 +105,9 @@ namespace SEQAN_NAMESPACE_MAIN
 // Tags
 //////////////////////////////////////////////////////////////////////////////
 
-struct Dynamic;
+struct SkipListDynamic;
 
-struct Static;
+struct SkipListStatic;
 
 struct Complete;
 
@@ -118,13 +118,13 @@ struct Deferred;
 //////////////////////////////////////////////////////////////////////////////
 
 
-template< typename TObject, typename TModus = Dynamic, typename TSpec = Default, typename TStructuring = Complete >
+template< typename TObject, typename TModus = SkipListDynamic, typename TSpec = Default, typename TStructuring = Complete >
 struct SkipElement;
 
-template< typename TObject, typename TModus = Dynamic, typename TSpec = Default, typename TStructuring  = Complete >
+template< typename TObject, typename TModus = SkipListDynamic, typename TSpec = Default, typename TStructuring  = Complete >
 struct SkipBaseElement;
 
-template< typename TObject, typename TModus = Dynamic, typename TSpec = Default, typename TStructuring  = Complete >
+template< typename TObject, typename TModus = SkipListDynamic, typename TSpec = Default, typename TStructuring  = Complete >
 struct SkipList;
 
 

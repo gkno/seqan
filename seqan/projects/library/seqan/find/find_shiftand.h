@@ -71,7 +71,7 @@ void setHost (Pattern<TNeedle, ShiftAnd> & me, TNeedle2 const & needle) {
 
 	for (TWord j = 0; j < me.needleLength; ++j) {
 		// Determine character position in array table
-		TWord pos = convert<TWord>(getValue(needle,j));
+		TWord pos = convert<TWord>(convert<TValue>(getValue(needle,j)));
 		me.table[me.blockCount*pos + j / BitsPerValue<TWord>::VALUE] |= (1<<(j%BitsPerValue<TWord>::VALUE));
 	}
 

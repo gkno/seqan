@@ -3,6 +3,7 @@ import sys
 import string
 import os
 import getpass
+import time
 from stat import *
 
 ################################################################################
@@ -45,29 +46,29 @@ SERVERS = [
     ['gcc', 'duisburg'], 
     ['gcc', 'muenster'], 
     ['gcc', 'aachen'], 
-    ['gcc', 'dortmund'], 
-    ['gcc', 'essen'], 
-    ['gcc', 'hagen'], 
+#    ['gcc', 'dortmund'], 
+#    ['gcc', 'essen'], 
+#    ['gcc', 'hagen'], 
 
-    ['gcc', 'guangzhou'], 
-    ['gcc', 'harbin'], 
-    ['gcc', 'chongqing'], 
-    ['gcc', 'shenyang'], 
-    ['gcc', 'wuhan'], 
-    ['gcc', 'chengdu'], 
-    ['gcc', 'tianjin'], 
-    ['gcc', 'xian'], 
-    ['gcc', 'peking'], 
+#    ['gcc', 'guangzhou'], 
+#    ['gcc', 'harbin'], 
+#    ['gcc', 'chongqing'], 
+#    ['gcc', 'shenyang'], 
+#    ['gcc', 'wuhan'], 
+#    ['gcc', 'chengdu'], 
+#    ['gcc', 'tianjin'], 
+#    ['gcc', 'xian'], 
+#    ['gcc', 'peking'], 
 
-    ['gcc', 'leningrad'], 
-    ['gcc', 'jekatarinburg'], 
-    ['gcc', 'irkutsk'], 
-    ['gcc', 'wladiwostok'], 
-    ['gcc', 'kaliningrad'], 
-    ['gcc', 'wolgograd'], 
-    ['gcc', 'omsk'], 
-    ['gcc', 'nowosibirsk'], 
-    ['gcc', 'moskau'], 
+#    ['gcc', 'leningrad'], 
+#    ['gcc', 'jekatarinburg'], 
+#    ['gcc', 'irkutsk'], 
+#    ['gcc', 'wladiwostok'], 
+#    ['gcc', 'kaliningrad'], 
+#    ['gcc', 'wolgograd'], 
+#    ['gcc', 'omsk'], 
+#    ['gcc', 'nowosibirsk'], 
+#    ['gcc', 'moskau'], 
 
     ['windows', 'localhost']
 ]
@@ -100,6 +101,7 @@ def main():
     while not finishedAll():
         scheduleTasks()
         if pollTasks(): createPage()
+        time.sleep(0.5)
     pollTasks()
     createPage()
 
@@ -261,7 +263,8 @@ def pollTasks():
     global ALL_STATES
     
     old_all_states = ALL_STATES
-    ALL_STATES = ''
+    ALL_STATES = 'S'
+    refresh = False
 
     for task in TASKS:
         ALL_STATES += task['state']
@@ -273,9 +276,11 @@ def pollTasks():
         
         if (p.poll() != None): 
             onTaskStopped(task)
+            refresh = True
         
-    return (ALL_STATES == old_all_states)
+    return refresh or (ALL_STATES != old_all_states)
 
+################################################################################
 
 def onTaskStopped(task):
     global ALL_STATES

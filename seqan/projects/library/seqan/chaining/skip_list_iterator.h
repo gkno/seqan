@@ -111,12 +111,12 @@ namespace seqan
 
 
 	template <typename TObject, typename TSLSpec, typename TStructuring, typename TIterator, typename TSpec>
-	inline typename Position<Iter<SkipList< TObject, Dynamic, TSLSpec, TStructuring >, AdaptorIterator<TIterator, TSpec> > const>::Type 
-	position(Iter<SkipList< TObject, Dynamic, TSLSpec, TStructuring >, AdaptorIterator<TIterator, TSpec> > const & me)
+	inline typename Position<Iter<SkipList< TObject, SkipListDynamic, TSLSpec, TStructuring >, AdaptorIterator<TIterator, TSpec> > const>::Type 
+	position(Iter<SkipList< TObject, SkipListDynamic, TSLSpec, TStructuring >, AdaptorIterator<TIterator, TSpec> > const & me)
 	{
 	SEQAN_CHECKPOINT
-		typename Position<Iter<SkipList< TObject, Dynamic, TSLSpec, TStructuring >, AdaptorIterator<TIterator, TSpec> > const>::Type pos = 0;
-		Iter<SkipList< TObject, Dynamic, TSLSpec, TStructuring >, AdaptorIterator<TIterator, TSpec> > it = begin( container(me) );
+		typename Position<Iter<SkipList< TObject, SkipListDynamic, TSLSpec, TStructuring >, AdaptorIterator<TIterator, TSpec> > const>::Type pos = 0;
+		Iter<SkipList< TObject, SkipListDynamic, TSLSpec, TStructuring >, AdaptorIterator<TIterator, TSpec> > it = begin( container(me) );
 		while( it != me )
 		{
 			goNext( it );
@@ -128,8 +128,8 @@ namespace seqan
 	//____________________________________________________________________________
 
 	template <typename TObject, typename TSLSpec, typename TStructuring, typename TIterator, typename TSpec, typename TContainer2>
-	inline typename Position<Iter<SkipList< TObject, Dynamic, TSLSpec, TStructuring >, AdaptorIterator<TIterator, TSpec> > const>::Type 
-	position(Iter<SkipList< TObject, Dynamic, TSLSpec, TStructuring >, AdaptorIterator<TIterator, TSpec> > const & me,
+	inline typename Position<Iter<SkipList< TObject, SkipListDynamic, TSLSpec, TStructuring >, AdaptorIterator<TIterator, TSpec> > const>::Type 
+	position(Iter<SkipList< TObject, SkipListDynamic, TSLSpec, TStructuring >, AdaptorIterator<TIterator, TSpec> > const & me,
 			 TContainer2 const &)
 	{
 	SEQAN_CHECKPOINT
@@ -141,12 +141,12 @@ namespace seqan
 	//////////////////////////////////////////////////////////////////////////////
 
 	template < typename TObject, typename TSLSpec, typename TStructuring, typename TIterator, typename TSpec, typename TIntegral>
-	inline Iter< SkipList< TObject, Dynamic, TSLSpec, TStructuring >, AdaptorIterator<TIterator, TSpec> >  
-	operator + (Iter< SkipList< TObject, Dynamic, TSLSpec, TStructuring >, AdaptorIterator<TIterator, TSpec> > const & left,
+	inline Iter< SkipList< TObject, SkipListDynamic, TSLSpec, TStructuring >, AdaptorIterator<TIterator, TSpec> >  
+	operator + (Iter< SkipList< TObject, SkipListDynamic, TSLSpec, TStructuring >, AdaptorIterator<TIterator, TSpec> > const & left,
 				TIntegral right)
 	{
 	SEQAN_CHECKPOINT
-		Iter< SkipList< TObject, Dynamic, TSLSpec, TStructuring >, AdaptorIterator<TIterator, TSpec> > buffer(container(left), hostIterator(left) );
+		Iter< SkipList< TObject, SkipListDynamic, TSLSpec, TStructuring >, AdaptorIterator<TIterator, TSpec> > buffer(container(left), hostIterator(left) );
 		while( right > 0 )
 		{
 			goNext( buffer );
@@ -155,12 +155,12 @@ namespace seqan
 		return buffer;
 	}
 	template < typename TObject, typename TSLSpec, typename TStructuring, typename TIterator, typename TSpec, typename TIntegral>
-	inline Iter<SkipList< TObject, Dynamic, TSLSpec, TStructuring >, AdaptorIterator<TIterator, TSpec> >  
+	inline Iter<SkipList< TObject, SkipListDynamic, TSLSpec, TStructuring >, AdaptorIterator<TIterator, TSpec> >  
 	operator + (TIntegral left,
-				Iter<SkipList< TObject, Dynamic, TSLSpec, TStructuring >, AdaptorIterator<TIterator, TSpec> > const & right)
+				Iter<SkipList< TObject, SkipListDynamic, TSLSpec, TStructuring >, AdaptorIterator<TIterator, TSpec> > const & right)
 	{
 	SEQAN_CHECKPOINT
-		Iter< SkipList< TObject, Dynamic, TSLSpec, TStructuring >, AdaptorIterator<TIterator, TSpec> > buffer(container(left), hostIterator(left) );
+		Iter< SkipList< TObject, SkipListDynamic, TSLSpec, TStructuring >, AdaptorIterator<TIterator, TSpec> > buffer(container(left), hostIterator(left) );
 		while( right > 0 )
 		{
 			goNext( buffer );
@@ -174,8 +174,8 @@ namespace seqan
 	//////////////////////////////////////////////////////////////////////////////
 
 	template < typename TObject, typename TSLSpec, typename TStructuring, typename TIterator, typename TSpec, typename TIntegral>
-	inline Iter<SkipList< TObject, Dynamic, TSLSpec, TStructuring >, AdaptorIterator<TIterator, TSpec> > &
-	operator += (Iter<SkipList< TObject, Dynamic, TSLSpec, TStructuring >, AdaptorIterator<TIterator, TSpec> > & left,
+	inline Iter<SkipList< TObject, SkipListDynamic, TSLSpec, TStructuring >, AdaptorIterator<TIterator, TSpec> > &
+	operator += (Iter<SkipList< TObject, SkipListDynamic, TSLSpec, TStructuring >, AdaptorIterator<TIterator, TSpec> > & left,
 				 TIntegral right)
 	{
 	SEQAN_CHECKPOINT
@@ -192,12 +192,12 @@ namespace seqan
 	//////////////////////////////////////////////////////////////////////////////
 
 	template < typename TObject, typename TSLSpec, typename TStructuring, typename TIterator, typename TSpec, typename TIntegral>
-	inline Iter<SkipList< TObject, Dynamic, TSLSpec, TStructuring >, AdaptorIterator<TIterator, TSpec> >  
-	operator - (Iter<SkipList< TObject, Dynamic, TSLSpec, TStructuring >, AdaptorIterator<TIterator, TSpec> > const & left,
+	inline Iter<SkipList< TObject, SkipListDynamic, TSLSpec, TStructuring >, AdaptorIterator<TIterator, TSpec> >  
+	operator - (Iter<SkipList< TObject, SkipListDynamic, TSLSpec, TStructuring >, AdaptorIterator<TIterator, TSpec> > const & left,
 				TIntegral right)
 	{
 	SEQAN_CHECKPOINT
-		Iter< SkipList< TObject, Dynamic, TSpec, TStructuring >, AdaptorIterator<TIterator, TSpec> > buffer(container(left), hostIterator(left) );
+		Iter< SkipList< TObject, SkipListDynamic, TSpec, TStructuring >, AdaptorIterator<TIterator, TSpec> > buffer(container(left), hostIterator(left) );
 		while( right > 0 )
 		{
 			goPrevious( buffer );
@@ -209,10 +209,10 @@ namespace seqan
 	//____________________________________________________________________________
 
 	// ???
-	//template < typename TObject, typename Dynamic, typename TSpec, typename TStructuring, typename TIterator, typename TSpec>
+	//template < typename TObject, typename SkipListDynamic, typename TSpec, typename TStructuring, typename TIterator, typename TSpec>
 	//inline typename Position<Iter<TContainer, AdaptorIterator<TIterator, TSpec> > >::Type  
-	//operator - (Iter<SkipList< TObject, Dynamic, TSpec, TStructuring >, AdaptorIterator<TIterator, TSpec> > const & left,
-	//			Iter<SkipList< TObject, Dynamic, TSpec, TStructuring >, AdaptorIterator<TIterator, TSpec> > const & right)
+	//operator - (Iter<SkipList< TObject, SkipListDynamic, TSpec, TStructuring >, AdaptorIterator<TIterator, TSpec> > const & left,
+	//			Iter<SkipList< TObject, SkipListDynamic, TSpec, TStructuring >, AdaptorIterator<TIterator, TSpec> > const & right)
 	//{
 	//SEQAN_CHECKPOINT
 	//	return hostIterator(left) - hostIterator(right);
@@ -223,8 +223,8 @@ namespace seqan
 	//////////////////////////////////////////////////////////////////////////////
 
 	template < typename TObject, typename TSLSpec, typename TStructuring, typename TIterator, typename TSpec, typename TIntegral>
-	inline Iter<SkipList< TObject, Dynamic, TSLSpec, TStructuring >, AdaptorIterator<TIterator, TSpec> > &
-	operator -= (Iter<SkipList< TObject, Dynamic, TSLSpec, TStructuring >, AdaptorIterator<TIterator, TSpec> > & left,
+	inline Iter<SkipList< TObject, SkipListDynamic, TSLSpec, TStructuring >, AdaptorIterator<TIterator, TSpec> > &
+	operator -= (Iter<SkipList< TObject, SkipListDynamic, TSLSpec, TStructuring >, AdaptorIterator<TIterator, TSpec> > & left,
 				 TIntegral right)
 	{
 	SEQAN_CHECKPOINT

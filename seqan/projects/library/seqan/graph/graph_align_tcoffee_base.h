@@ -165,7 +165,7 @@ tripletLibraryExtension(Graph<Alignment<TStringSet, TCargo, TSpec> >& g)
 	String<TCargo> newCargoMap;
 	resize(newCargoMap, getIdUpperBound(_getEdgeIdManager(g)), Exact());
 	TEdgeIterator it(g);
-	for(TEdgeIterator it(g);!atEnd(it);++it) assignProperty(newCargoMap, *it, cargo(*it));
+	for(;!atEnd(it);++it) assignProperty(newCargoMap, *it, cargo(*it));
 	typedef std::map<std::pair<TVertexDescriptor, TVertexDescriptor>, TCargo> TNewEdgeMap;
 	TNewEdgeMap edges;
 	for(TVertexIterator itVertex(g);!atEnd(itVertex);++itVertex) {

@@ -103,8 +103,8 @@ namespace seqan
 		SEQAN_CHECKPOINT
 		if( _hasBigAssocStruct( me ) )
 		{
-			SkipList< TObject, Static, RT< TSpec >, TStructuring > * list = _getAssocStruct( me );
-			Allocator< ClassPool< SkipList< TObject, Static, RT< TSpec >, TStructuring >, Unlimited > > * _listAlloc = &_getListAlloc( *list );
+			SkipList< TObject, SkipListStatic, RT< TSpec >, TStructuring > * list = _getAssocStruct( me );
+			Allocator< ClassPool< SkipList< TObject, SkipListStatic, RT< TSpec >, TStructuring >, Unlimited > > * _listAlloc = &_getListAlloc( *list );
 			valueDestruct( list );
 			deallocate( *_listAlloc, list, 1 );
 			_setAssocStruct< TObject, TModus, TSpec, TStructuring >( me, NULL );

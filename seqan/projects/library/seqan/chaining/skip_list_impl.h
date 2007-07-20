@@ -19,8 +19,8 @@ objects. Saved objects are sorted with respect to their "key"-attribute.
 ..signature:SkipList< TObject, [ TModus, TSpec, TStructuring] >
 ..param.TObject:Type of stored objects.
 ..param.TModus:Modus of operation of a SkipList. A SkipList can either be dynamic or static. 
-Dynamic Skip Lists admit insertion and deletion operations of elements, but the construction time is higher 
-compared to a static SkipList. Default is Dynamic.
+SkipListDynamic Skip Lists admit insertion and deletion operations of elements, but the construction time is higher 
+compared to a static SkipList. Default is SkipListDynamic.
 ..param.TSpec:Specialization of the SkipList.
 ..param.TStructuring:Parameter to specify whether the SkipList uses Deferred Data Structuring or not.
 ..remarks:The object given to the SkipList should offer the following functions:
@@ -133,11 +133,11 @@ compared to a static SkipList. Default is Dynamic.
 
 		// dynamic case: the list can hold an infinite number of objevts
 	template< typename TObject, typename TSpec, typename TStructuring > inline 
-	typename Size< SkipList< TObject, Dynamic, TSpec, TStructuring > >::Type
-	capacity( SkipList< TObject, Dynamic, TSpec, TStructuring > & me)
+	typename Size< SkipList< TObject, SkipListDynamic, TSpec, TStructuring > >::Type
+	capacity( SkipList< TObject, SkipListDynamic, TSpec, TStructuring > & me)
 	{
 	SEQAN_CHECKPOINT
-		return supremumValue< typename Size< SkipList< TObject, Dynamic, TSpec, TStructuring > >::Type >();
+		return supremumValue< typename Size< SkipList< TObject, SkipListDynamic, TSpec, TStructuring > >::Type >();
 	}
 
 
@@ -258,8 +258,8 @@ compared to a static SkipList. Default is Dynamic.
 
 
 	template< typename TObject, typename TSpec, typename TStructuring, typename TPos>
-	inline typename Reference< SkipList< TObject, Static, TSpec, TStructuring > >::Type
-	value( SkipList< TObject, Static, TSpec, TStructuring > & me, 
+	inline typename Reference< SkipList< TObject, SkipListStatic, TSpec, TStructuring > >::Type
+	value( SkipList< TObject, SkipListStatic, TSpec, TStructuring > & me, 
 			TPos pos)
 	{
 	SEQAN_CHECKPOINT
@@ -286,7 +286,7 @@ compared to a static SkipList. Default is Dynamic.
 
 		// get the element allocator of a skiplist
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring > inline 
-	Allocator< ClassPool< SkipElement< TObject, TModus, TSpec, TStructuring >, Limited > > & 
+	Allocator< ClassPool< SkipElement< TObject, TModus, TSpec, TStructuring >, Limited, SimpleAllocator > > & 
 	_getElementAlloc( SkipList< TObject, TModus, TSpec, TStructuring > & me )
 	{
 		SEQAN_CHECKPOINT
@@ -296,7 +296,7 @@ compared to a static SkipList. Default is Dynamic.
 
 		// get the base element allocator of skiplist
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring > inline 
-	Allocator< ClassPool< SkipBaseElement< TObject, TModus, TSpec, TStructuring >, Unlimited > > & 
+	Allocator< ClassPool< SkipBaseElement< TObject, TModus, TSpec, TStructuring >, Unlimited, SimpleAllocator> > & 
 	_getBaseAlloc( SkipList< TObject, TModus, TSpec, TStructuring > & me )
 	{
 		SEQAN_CHECKPOINT
@@ -400,8 +400,8 @@ struct SkipList
 	typename Size< SkipList< TObject, TModus, TSpec, TStructuring > >::Type _numOfElements;
 
 		// pool allocators
-	Allocator< ClassPool< SkipElement< TObject, TModus, TSpec, TStructuring >, Limited > > _elementAlloc;	
 	Allocator< ClassPool< SkipBaseElement< TObject, TModus, TSpec, TStructuring >, Unlimited > > _baseAlloc;
+	Allocator< ClassPool< SkipElement< TObject, TModus, TSpec, TStructuring >, Limited > > _elementAlloc;	
 	
 		// search path
 	_SearchPath< TObject, TModus, TSpec, TStructuring > _sp;
@@ -452,6 +452,8 @@ public:
 		, _sp( 10 )
 		, _initialState( true )
 	{
+		mtRandInit();
+
 			// construct bording elements
 		setKey( l_border_obj, infimumValue< typename Key< TObject >::Type >() );
 		setKey( r_border_obj, supremumValue< typename Key< TObject >::Type >() );
@@ -466,6 +468,8 @@ public:
 		, _sp( _getMaximalSLTowerHeight( _numOfElements ) )
 		, _initialState( true )
 	{
+		mtRandInit();
+
 			// construct bording elements
 		setKey( l_border_obj, infimumValue< typename Key< TObject >::Type >() );
 		setKey( r_border_obj, supremumValue< typename Key< TObject >::Type >() );
@@ -490,6 +494,8 @@ public:
 		, _sp( _getMaximalSLTowerHeight( _numOfElements ) )
 		, _initialState( true )
 	{			
+		mtRandInit();
+
 		setKey( l_border_obj, infimumValue< typename Key< TObject >::Type >() );
 		setKey( r_border_obj, supremumValue< typename Key< TObject >::Type >() );
 

@@ -57,7 +57,9 @@ public:
 
 		// **********************  Constructors ***************************
 	SkipList()
-	{};
+	{
+		mtRandInit();
+	};
 
 
 	~SkipList()

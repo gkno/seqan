@@ -23,8 +23,8 @@ namespace seqan{
 	
 		// specialization for static case
 	template< typename TObject, typename TSpec, typename TStructuring > inline
-	SkipElement< TObject, Static, RT< TSpec >, TStructuring > * 
-	_getRightBorder( SkipList< TObject, Static, RT< TSpec >, TStructuring > & me )
+	SkipElement< TObject, SkipListStatic, RT< TSpec >, TStructuring > * 
+	_getRightBorder( SkipList< TObject, SkipListStatic, RT< TSpec >, TStructuring > & me )
 	{
 		SEQAN_CHECKPOINT
 		return &_getUp( me._baseStore[ me._numOfElements + 1 ] );
@@ -32,11 +32,11 @@ namespace seqan{
 
 		// specialization for dynamic case
 	//template< typename TObject, typename TSpec, typename TStructuring > inline
-	//SkipElement< TObject, Dynamic, RT< TSpec >, TStructuring > * 
-	//_getRightBorder( SkipList< TObject, Dynamic, RT< TSpec >, TStructuring > & me )
+	//SkipElement< TObject, SkipListDynamic, RT< TSpec >, TStructuring > * 
+	//_getRightBorder( SkipList< TObject, SkipListDynamic, RT< TSpec >, TStructuring > & me )
 	//{
 	//	SEQAN_CHECKPOINT
-	//	SkipElement< TObject, Dynamic, RT< TSpec >, TStructuring > * border = _getRoot( me );
+	//	SkipElement< TObject, SkipListDynamic, RT< TSpec >, TStructuring > * border = _getRoot( me );
 	//	while( key( *border ) < supremumValue< typename Key< TObject >::Type >() )
 	//		border = _getRight( *border );
 	//	return border;
@@ -44,7 +44,7 @@ namespace seqan{
 
 		// get the element allocator of a skip list
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring > inline
-	Allocator< ClassPool< SkipElement< TObject, TModus, RT< TSpec >, TStructuring >, Limited > > &
+	Allocator< ClassPool< SkipElement< TObject, TModus, RT< TSpec >, TStructuring >, Limited, SimpleAllocator > > &
 	_getElementAlloc( SkipList< TObject, TModus, RT< TSpec >, TStructuring > & me )
 	{
 		SEQAN_CHECKPOINT
@@ -53,7 +53,7 @@ namespace seqan{
 
 		// get the list allocator of a skip list
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring > inline
-	Allocator< ClassPool< SkipList< TObject, TModus, RT< TSpec >, TStructuring >, Unlimited > > &
+	Allocator< ClassPool< SkipList< TObject, TModus, RT< TSpec >, TStructuring >, Unlimited, SimpleAllocator > > &
 	_getListAlloc( SkipList< TObject, TModus, RT< TSpec >, TStructuring > & me )
 	{
 		SEQAN_CHECKPOINT
@@ -128,9 +128,9 @@ namespace seqan{
 
 	template< typename TObject, typename TSpec, typename TStructuring, typename TIter, typename TSize > inline
 	void
-	_initBases( SkipList< TObject, Static, RT< TSpec >, TStructuring > & list, 
-				SkipBaseElement< TObject, Static, RT< TSpec >, TStructuring > * firstBase,
-				SkipBaseElement< TObject, Static, RT< TSpec >, TStructuring > *& lastBase,
+	_initBases( SkipList< TObject, SkipListStatic, RT< TSpec >, TStructuring > & list, 
+				SkipBaseElement< TObject, SkipListStatic, RT< TSpec >, TStructuring > * firstBase,
+				SkipBaseElement< TObject, SkipListStatic, RT< TSpec >, TStructuring > *& lastBase,
 				TIter & firstData,
 				TIter & lastData,
 				TSize numEntries,

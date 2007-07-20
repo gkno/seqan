@@ -59,11 +59,11 @@ namespace seqan{
 
 	template< typename TObject, typename TSpec, typename TStructuring >
 	struct
-	_RTreeAllocators< TObject, Static, TSpec, TStructuring >
+	_RTreeAllocators< TObject, SkipListStatic, TSpec, TStructuring >
 	{
 		
-		Allocator< ClassPool< SkipElement< TObject, Static, TSpec, TStructuring >, Limited > > _elementAlloc;
-		Allocator< ClassPool< SkipList< TObject, Static, TSpec, TStructuring >, Unlimited > > _listAlloc;
+		Allocator< ClassPool< SkipElement< TObject, SkipListStatic, TSpec, TStructuring >, Limited > > _elementAlloc;
+		Allocator< ClassPool< SkipList< TObject, SkipListStatic, TSpec, TStructuring >, Unlimited > > _listAlloc;
 		Allocator< SimpleAlloc<> > _baseAlloc;
 
 		_RTreeAllocators()
@@ -98,8 +98,8 @@ namespace seqan{
 		
 	template< typename TObject, typename TSpec, typename TStructuring > inline
 	bool
-	_checkAssocThresh( SkipBaseElement< TObject, Static, TSpec, TStructuring > * first,
-						SkipBaseElement< TObject, Static, TSpec, TStructuring > * second )
+	_checkAssocThresh( SkipBaseElement< TObject, SkipListStatic, TSpec, TStructuring > * first,
+						SkipBaseElement< TObject, SkipListStatic, TSpec, TStructuring > * second )
 	{
 		SEQAN_CHECKPOINT
 		return ( ( second - first ) > _rt_thresh );
@@ -157,7 +157,7 @@ namespace seqan{
 	
 
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring > inline 
-	Allocator< ClassPool< SkipElement< TObject, TModus, RT< TSpec >, TStructuring >, Limited > > & 
+	Allocator< ClassPool< SkipElement< TObject, TModus, RT< TSpec >, TStructuring >, Limited, SimpleAllocator > > & 
 	_getElementAlloc( RangeTree< TObject, TModus, RT< TSpec >, TStructuring > & me )
 	{
 		SEQAN_CHECKPOINT
@@ -165,7 +165,7 @@ namespace seqan{
 	}
 
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring > inline 
-	Allocator< ClassPool< SkipList< TObject, TModus, RT< TSpec >, TStructuring >, Unlimited > > & 
+	Allocator< ClassPool< SkipList< TObject, TModus, RT< TSpec >, TStructuring >, Unlimited, SimpleAllocator > > & 
 	_getListAlloc( RangeTree< TObject, TModus, RT< TSpec >, TStructuring > & me )
 	{
 		SEQAN_CHECKPOINT
@@ -301,7 +301,7 @@ namespace seqan{
 
 	template< typename TObject, typename TSpec, typename TStructuring, typename TSize >
 	void 
-	printLayerScores(	SkipList< TObject, Static, RT< TSpec >, TStructuring > * list,
+	printLayerScores(	SkipList< TObject, SkipListStatic, RT< TSpec >, TStructuring > * list,
 						TSize layer,
 						TSize _dim )
 	{}

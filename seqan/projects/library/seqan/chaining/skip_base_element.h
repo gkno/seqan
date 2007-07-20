@@ -8,8 +8,8 @@
 *	Specializations:
 *
 *	TModus:
-*		* Dynamic: contains predecessor/successor pointers to have the properties of an double linked list in the base layer
-*		* Static: comes without these pointers to reduce size
+*		* SkipListDynamic: contains predecessor/successor pointers to have the properties of an double linked list in the base layer
+*		* SkipListStatic: comes without these pointers to reduce size
 *
 *	TSpec:
 *		* Complete: Not using Deferred Data Structuring
@@ -34,7 +34,7 @@ namespace seqan
 
 /////////////////////////////////////////////////////////////////
 //
-//	Dynamic <-> Static and Complete <-> Deferred member wrapper structs
+//	SkipListDynamic <-> SkipListStatic and Complete <-> Deferred member wrapper structs
 //
 //	depending on this specializations, the elements contain different members
 //
@@ -49,20 +49,20 @@ namespace seqan
 
 	template< typename TObject, typename TSpec, typename TStructuring >
 	struct
-	_DynamicStruct< TObject, Dynamic, TSpec, TStructuring >
+	_DynamicStruct< TObject, SkipListDynamic, TSpec, TStructuring >
 	{
 			// predecessing element in the skip list
-		SkipBaseElement< TObject, Dynamic, TSpec, TStructuring > * _pred;
+		SkipBaseElement< TObject, SkipListDynamic, TSpec, TStructuring > * _pred;
 			// succeeding element
-		SkipBaseElement< TObject, Dynamic, TSpec, TStructuring > * _succ;
+		SkipBaseElement< TObject, SkipListDynamic, TSpec, TStructuring > * _succ;
 
 		_DynamicStruct()
 			: _pred( NULL )
 			, _succ( NULL )
 		{}
 
-		_DynamicStruct( SkipBaseElement< TObject, Dynamic, TSpec, TStructuring > * goPrevious, 
-						SkipBaseElement< TObject, Dynamic, TSpec, TStructuring > * succ )
+		_DynamicStruct( SkipBaseElement< TObject, SkipListDynamic, TSpec, TStructuring > * goPrevious, 
+						SkipBaseElement< TObject, SkipListDynamic, TSpec, TStructuring > * succ )
 			: _pred( goPrevious )
 			, _succ( succ )
 		{}
@@ -92,16 +92,16 @@ namespace seqan
 	
 	template< typename TObject, typename TSpec >
 	struct
-	_DeferredStruct< TObject, Dynamic, TSpec, Deferred >
+	_DeferredStruct< TObject, SkipListDynamic, TSpec, Deferred >
 	{
 			// next sorted element on the left side
-		SkipBaseElement< TObject, Dynamic, TSpec, Deferred > * _left;
+		SkipBaseElement< TObject, SkipListDynamic, TSpec, Deferred > * _left;
 			// next sorted element on the right side
-		SkipBaseElement< TObject, Dynamic, TSpec, Deferred > * _right;
+		SkipBaseElement< TObject, SkipListDynamic, TSpec, Deferred > * _right;
 			// number of unsorted elements to the right of this
-		typename Size< SkipBaseElement< TObject, Dynamic, TSpec, Deferred > >::Type _count;
+		typename Size< SkipBaseElement< TObject, SkipListDynamic, TSpec, Deferred > >::Type _count;
 			// height of related tower
-		typename Size< SkipBaseElement< TObject, Dynamic, TSpec, Deferred > >::Type _height;
+		typename Size< SkipBaseElement< TObject, SkipListDynamic, TSpec, Deferred > >::Type _height;
 
 		_DeferredStruct()
 			: _left( NULL )
@@ -110,8 +110,8 @@ namespace seqan
 			, _height( 0 )
 		{}
 
-		_DeferredStruct( SkipBaseElement< TObject, Dynamic, TSpec, Deferred > * left, 
-							SkipBaseElement< TObject, Dynamic, TSpec, Deferred > * right )
+		_DeferredStruct( SkipBaseElement< TObject, SkipListDynamic, TSpec, Deferred > * left, 
+							SkipBaseElement< TObject, SkipListDynamic, TSpec, Deferred > * right )
 			: _left( left )
 			, _right( right )
 			, _count( 0 )
@@ -119,8 +119,8 @@ namespace seqan
 		{}
 
 		template< typename TSize >
-		_DeferredStruct( SkipBaseElement< TObject, Dynamic, TSpec, Deferred > * left, 
-							SkipBaseElement< TObject, Dynamic, TSpec, Deferred > * right,
+		_DeferredStruct( SkipBaseElement< TObject, SkipListDynamic, TSpec, Deferred > * left, 
+							SkipBaseElement< TObject, SkipListDynamic, TSpec, Deferred > * right,
 							TSize _count,
 							TSize _height )
 			: _left( left )
@@ -133,14 +133,14 @@ namespace seqan
 
 	template< typename TObject, typename TSpec >
 	struct
-	_DeferredStruct< TObject, Static, TSpec, Deferred >
+	_DeferredStruct< TObject, SkipListStatic, TSpec, Deferred >
 	{
 		//	// next sorted element on the left side
-		//SkipBaseElement< TObject, Static, TSpec, Deferred > * _left;
+		//SkipBaseElement< TObject, SkipListStatic, TSpec, Deferred > * _left;
 			// number of unsorted elements to the right of this
-		typename Size< SkipBaseElement< TObject, Static, TSpec, Deferred > >::Type _count;
+		typename Size< SkipBaseElement< TObject, SkipListStatic, TSpec, Deferred > >::Type _count;
 			// height of related tower
-		typename Size< SkipBaseElement< TObject, Static, TSpec, Deferred > >::Type _height;
+		typename Size< SkipBaseElement< TObject, SkipListStatic, TSpec, Deferred > >::Type _height;
 
 		_DeferredStruct()
 			: _count( 0 )
@@ -348,8 +348,8 @@ namespace seqan
 	}
 
 	template< typename TObject, typename TSpec, typename TStructuring > inline
-	SkipBaseElement< TObject, Dynamic, TSpec, TStructuring > *
-	_getSucc( SkipBaseElement< TObject, Dynamic, TSpec, TStructuring > & me )
+	SkipBaseElement< TObject, SkipListDynamic, TSpec, TStructuring > *
+	_getSucc( SkipBaseElement< TObject, SkipListDynamic, TSpec, TStructuring > & me )
 	{
 		SEQAN_CHECKPOINT
 		return me._dynStruct._succ;
@@ -365,7 +365,7 @@ namespace seqan
 
 	template< typename TObject, typename TSpec, typename TStructuring > inline
 	void
-	goNext( SkipBaseElement< TObject, Dynamic, TSpec, TStructuring > *& me )
+	goNext( SkipBaseElement< TObject, SkipListDynamic, TSpec, TStructuring > *& me )
 	{
 		SEQAN_CHECKPOINT
 		me = _getSucc( *me );
@@ -393,8 +393,8 @@ namespace seqan
 
 	template< typename TObject, typename TSpec, typename TStructuring > inline
 	void 
-	_setSucc( SkipBaseElement< TObject, Dynamic, TSpec, TStructuring > & me, 
-				SkipBaseElement< TObject, Dynamic, TSpec, TStructuring > * succ )
+	_setSucc( SkipBaseElement< TObject, SkipListDynamic, TSpec, TStructuring > & me, 
+				SkipBaseElement< TObject, SkipListDynamic, TSpec, TStructuring > * succ )
 	{
 		SEQAN_CHECKPOINT
 		me._dynStruct._succ = succ;
@@ -417,16 +417,16 @@ namespace seqan
 	_getPred( SkipBaseElement< TObject, TModus, TSpec, TStructuring > & me );
 
 	template< typename TObject, typename TSpec, typename TStructuring > inline
-	SkipBaseElement< TObject, Static, TSpec, TStructuring > * 
-	_getPred( SkipBaseElement< TObject, Static, TSpec, TStructuring > & me )
+	SkipBaseElement< TObject, SkipListStatic, TSpec, TStructuring > * 
+	_getPred( SkipBaseElement< TObject, SkipListStatic, TSpec, TStructuring > & me )
 	{
 		SEQAN_CHECKPOINT
 		return ( &me - 1 );
 	}
 
 	template< typename TObject, typename TSpec, typename TStructuring > inline
-	SkipBaseElement< TObject, Dynamic, TSpec, TStructuring > * 
-	_getPred( SkipBaseElement< TObject, Dynamic, TSpec, TStructuring > & me )
+	SkipBaseElement< TObject, SkipListDynamic, TSpec, TStructuring > * 
+	_getPred( SkipBaseElement< TObject, SkipListDynamic, TSpec, TStructuring > & me )
 	{
 		SEQAN_CHECKPOINT
 		return me._dynStruct._pred;
@@ -434,7 +434,7 @@ namespace seqan
 
 	template< typename TObject, typename TSpec, typename TStructuring > inline
 	void
-	goPrevious( SkipBaseElement< TObject, Static, TSpec, TStructuring > *& me )
+	goPrevious( SkipBaseElement< TObject, SkipListStatic, TSpec, TStructuring > *& me )
 	{
 		SEQAN_CHECKPOINT
 		--me;
@@ -442,7 +442,7 @@ namespace seqan
 
 	template< typename TObject, typename TSpec, typename TStructuring > inline
 	void
-	goPrevious( SkipBaseElement< TObject, Dynamic, TSpec, TStructuring > *& me )
+	goPrevious( SkipBaseElement< TObject, SkipListDynamic, TSpec, TStructuring > *& me )
 	{
 		SEQAN_CHECKPOINT
 		me = _getPred( *me );
@@ -469,8 +469,8 @@ namespace seqan
 
 	template< typename TObject, typename TSpec, typename TStructuring > inline
 	void 
-	_setPred(	SkipBaseElement< TObject, Dynamic, TSpec, TStructuring > & me, 
-				SkipBaseElement< TObject, Dynamic, TSpec, TStructuring > * goPrevious )
+	_setPred(	SkipBaseElement< TObject, SkipListDynamic, TSpec, TStructuring > & me, 
+				SkipBaseElement< TObject, SkipListDynamic, TSpec, TStructuring > * goPrevious )
 	{
 		SEQAN_CHECKPOINT
 		me._dynStruct._pred = goPrevious;
@@ -552,16 +552,16 @@ namespace seqan
 
 
 	template< typename TObject, typename TSpec > inline 
-	SkipBaseElement< TObject, Dynamic, TSpec, Deferred > * 
-	_getRight( SkipBaseElement< TObject, Dynamic, TSpec, Deferred > & me )
+	SkipBaseElement< TObject, SkipListDynamic, TSpec, Deferred > * 
+	_getRight( SkipBaseElement< TObject, SkipListDynamic, TSpec, Deferred > & me )
 	{
 		SEQAN_CHECKPOINT
 		return me._defStruct._right;
 	}
 
 	template< typename TObject, typename TSpec > inline 
-	SkipBaseElement< TObject, Static, TSpec, Deferred > * 
-	_getRight( SkipBaseElement< TObject, Static, TSpec, Deferred > & me )
+	SkipBaseElement< TObject, SkipListStatic, TSpec, Deferred > * 
+	_getRight( SkipBaseElement< TObject, SkipListStatic, TSpec, Deferred > & me )
 	{
 		SEQAN_CHECKPOINT
 		return &me +( _getCount( me ) + 1 );
@@ -570,7 +570,7 @@ namespace seqan
 
 	template< typename TObject, typename TSpec, typename TStructuring > inline
 	void
-	right( SkipBaseElement< TObject, Static, TSpec, TStructuring > *& me )
+	right( SkipBaseElement< TObject, SkipListStatic, TSpec, TStructuring > *& me )
 	{
 		SEQAN_CHECKPOINT
 		me += ( _getCount( *me ) + 1 );
@@ -578,7 +578,7 @@ namespace seqan
 
 	template< typename TObject, typename TSpec, typename TStructuring > inline
 	void
-	right( SkipBaseElement< TObject, Dynamic, TSpec, TStructuring > *& me )
+	right( SkipBaseElement< TObject, SkipListDynamic, TSpec, TStructuring > *& me )
 	{
 		SEQAN_CHECKPOINT
 		me = _getRight( *me );
@@ -604,16 +604,16 @@ namespace seqan
 
 	template< typename TObject, typename TSpec > inline 
 	void 
-	_setRight( SkipBaseElement< TObject, Static, TSpec, Deferred > & me,
-				SkipBaseElement< TObject, Static, TSpec, Deferred > * right )
+	_setRight( SkipBaseElement< TObject, SkipListStatic, TSpec, Deferred > & me,
+				SkipBaseElement< TObject, SkipListStatic, TSpec, Deferred > * right )
 	{
 		// do nothing
 	}
 
 	template< typename TObject, typename TSpec > inline 
 	void 
-	_setRight( SkipBaseElement< TObject, Dynamic, TSpec, Deferred > & me,
-				SkipBaseElement< TObject, Dynamic, TSpec, Deferred > * right )
+	_setRight( SkipBaseElement< TObject, SkipListDynamic, TSpec, Deferred > & me,
+				SkipBaseElement< TObject, SkipListDynamic, TSpec, Deferred > * right )
 	{
 		SEQAN_CHECKPOINT
 		me._defStruct._right = right;

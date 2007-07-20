@@ -27,7 +27,7 @@ namespace SEQAN_NAMESPACE_MAIN
 //forward declaration
 
 inline unsigned long mtRand(); 
-inline void mtInit();
+inline void mtRandInit();
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -66,8 +66,10 @@ mtRandInit(bool _doSRand)
 	if (_MersenneBuffer<>::is_initialized) return;
 	_MersenneBuffer<>::is_initialized = true;
 
+#ifndef SEQAN_NOSRAN
 	if (_doSRand)
 		::std::srand((unsigned) ::std::time(0));
+#endif
 
 	int i;
 	for (i = 0; i < SEQAN_MERSENNE_MT_LEN; i++)

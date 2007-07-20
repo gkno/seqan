@@ -1,102 +1,149 @@
-
 #include <vector>
-
-//#define SEQAN_DEBUG
-//#define _SEQAN_CHAIN_DEBUG
-//
-#define CHAINGG0
-
-#include <seqan/chaining.h>
-
-#include "file_chainer.h"
 #include <iostream>
 #include <fstream>
-#include "chaining_test_data.h"
-#include "test_chain.h"
-#include "test_ao.h"
+#include <cstdlib>
+#include <cstdio>
+#include <ctime>
+#include <cmath>
 
-#include "clock.h"
-#include <time.h>
-
-#include "chain_benchmark.h"
+//#define SEQAN_DEBUG
+#define SEQAN_TEST
+#define SEQAN_NOSRAN //suppress srand
 
 #include <seqan/sequence.h>
-
+#include <seqan/chaining.h>
 
 using namespace seqan;
+using namespace std;
 
+//////////////////////////////////////////////////////////////////////////////
 
-int main(int argc, char * argv[])
+template< typename TContainer >
+void
+_generateRandomFrags(TContainer & dest,
+					 int num,
+					 int min,
+					 int max,
+					 int minwidth,
+					 int maxwidth,
+					 int dim )
 {
-	//int numFrags = 1000;
-	//int maxCoord = 2 * numFrags;
+	typedef typename Value< TContainer >::Type FragType;
+	typename Key< FragType >::Type * left_pos;
+	typename Key< FragType >::Type * right_pos;
+	reserve( dest, num );
+	double d_dim = static_cast< double >( dim );
+	for( int i = 0; i < num; ++i )
+	{
+		
+		double width_sum = 0;
+		left_pos = new typename Key< FragType >::Type[ dim ];
+		right_pos = new typename Key< FragType >::Type[ dim ];
+		for( int d = 0; d < dim; ++d )
+		{
+			left_pos[ d ] = ( rand() % ( max - min ) ) + min;
+			int width = ( rand() % ( maxwidth - minwidth ) )+ minwidth;
+			width_sum += width;
+			right_pos[ d ] = left_pos[ d ] + width;			
+			
+		}
+		FragType frag( left_pos, right_pos, dim, static_cast< typename Weight< FragType >::Type >(exp(log(width_sum)/d_dim)) * 100 );
 
-	//String< Fragment< int > > frag_set;
-	//_generateRandomFrags( frag_set, numFrags, 1, maxCoord, 2, 5, 3 );
+		delete[] left_pos;
+		delete[] right_pos;
 
-	srand( time( 0 ) );
+		appendValue( dest, frag );
+	}
+}
 
-	//std::fstream frag_file2;
-	//frag_file2.open( "fragmentfile.mat", std::ios::in );
-	//read( frag_file2, frag_set, FragFile() );
+//////////////////////////////////////////////////////////////////////////////
 
-	//std::cout << "compute chain g0" << std::endl;
+template <typename TScoring>
+void testChainer(int count, 
+				 int dim,
+				 TScoring scoring)
+{
+	String< Fragment<int> > fragments;
+	reserve(fragments, count);
+	
+	_generateRandomFrags(fragments, count, 1, 3 * count, 10, 20, dim);
 
-	//String< Fragment< int > > chain;
-	//reserve( chain, length( frag_set ) );
-	//compute_chain( frag_set, chain, Score< int, Zero >(), Chainer(), Complete() );
+for (unsigned int i = 0; i < length(fragments); ++i)
+{
+	for (unsigned int j = 0; j < dim; ++j)
+		_setLeftPosition(fragments[i], j, leftPosition(fragments[i], j) + 1);
+}
 
-	//std::fstream gnu_file;
-	//gnu_file.open( "g0.data", std::ios::out );
-	//writeFragments( gnu_file, frag_set, FragGnuplot() );
-	//gnu_file.close();
+	String< Fragment<int> > ch;
+	reserve(ch, count);
 
-	//std::fstream chain_file;
-	//chain_file.open( "g0.data.cha.dbf", std::ios::out );
-	//writeFragments( chain_file, chain, ChainStatistics() );
-	//chain_file.close();
 
-	//std::cout << "compute chain g1" << std::endl;
+	//build chainer chain
+	int chain_score = chain(fragments, ch, scoring, Chainer());
+	std::cout << chain_score << ", " << length(ch) << "\n";
 
-	//String< Fragment< int > > chain_1;
-	//reserve( chain_1, length( frag_set ) );
-	//compute_chain( frag_set, chain_1, Score< int, Manhattan >(), Chainer(), Complete() );
+for (unsigned int i = 0; i < length(fragments); ++i)
+{
+	for (unsigned int j = 0; j < dim; ++j)
+		_setLeftPosition(fragments[i], j, leftPosition(fragments[i], j) - 1);
+}
+for (unsigned int i = 1; i < length(ch); ++i)
+{
+	for (unsigned int j = 0; j < dim; ++j)
+		_setLeftPosition(ch[i], j, leftPosition(ch[i], j) - 1);
+}
 
-	//std::fstream gnu_file_1;
-	//gnu_file_1.open( "g1.data", std::ios::out );
-	//writeFragments( gnu_file_1, frag_set, FragGnuplot() );
-	//gnu_file_1.close();
+	//verify validity of chainer chain
+	SEQAN_TASSERT(length(ch) > 0)
+	int sum = weight(ch[0]);
+	for (unsigned int i = 1; i < length(ch); ++i)
+	{
+		SEQAN_TASSERT(_chain_generic_chainable(ch[i-1], ch[i]))
+		sum += scoreChainGap(scoring, ch[i-1], ch[i]) + weight(ch[i]);
+	}
 
-	//std::fstream chain_file_1;
-	//chain_file_1.open( "g1.data.cha.dbf", std::ios::out );
-	//writeFragments( chain_file_1, chain_1, ChainStatistics() );
-	//chain_file_1.close();
+	//verify score of chainer chain
+	std::cout << sum << "\n";
+	SEQAN_TASSERT(sum == chain_score)
 
-	//std::cout << "compute chain gSoP" << std::endl;
+	//build generic chain
+	int chain_score2 = chain(fragments, ch, scoring, GenericChaining());
+	std::cout << chain_score2 << "\n";
 
-	//String< Fragment< int > > chain_sop;
-	//reserve( chain_sop, length( frag_set ) );
-	//compute_chain( frag_set, chain_sop, Score< int, ChainSoP >(), Chainer(), Complete() );
+	//verify validity of generic chain
+	SEQAN_TASSERT(length(ch) > 0)
+	sum = weight(ch[0]);
+	for (unsigned int i = 1; i < length(ch); ++i)
+	{
+		SEQAN_TASSERT(_chain_generic_chainable(ch[i-1], ch[i]))
+		sum += scoreChainGap(scoring, ch[i-1], ch[i]) + weight(ch[i]);
+	}
 
-	//std::fstream gnu_file_sop;
-	//gnu_file_sop.open( "gSoP.data", std::ios::out );
-	//writeFragments( gnu_file_sop, frag_set, FragGnuplot() );
-	//gnu_file_sop.close();
+	//verify score of generic chain
+	std::cout << sum << "\n";
+	SEQAN_TASSERT(sum == chain_score2)
 
-	//std::fstream chain_file_sop;
-	//chain_file_sop.open( "gSoP.data.cha.dbf", std::ios::out );
-	//writeFragments( chain_file_sop, chain_sop, ChainStatistics() );
-	//chain_file_sop.close();
+	//compare it with generic chaining
+	SEQAN_TASSERT(chain_score2 == chain_score)
 
-	//testChainerG0( frag_set, numFrags );
+/*
+	clear(ch);
+	chain_score = chain(fragments, ch, Score<int, Manhattan>(), Chainer());
+	std::cout << chain_score << "\n";
 
-	//testChainerG1( frag_set, numFrags );
-	//testChainerGSoP( frag_set, numFrags );
-	//std::cout<< std::endl;
+	clear(ch);
+	chain_score = chain(fragments, ch, Score<int, ChainSoP>(), Chainer());
+	std::cout << chain_score << "\n";
+*/
+}
 
-	timetest_chaining();
+//////////////////////////////////////////////////////////////////////////////
 
-	//testGusfield();
+
+int main()
+{
+//	testChainer(1000, 2, Score<int, Zero>());
+	testChainer(1000, 2, Score<int, Manhattan>());
 
 	return 0;
 }

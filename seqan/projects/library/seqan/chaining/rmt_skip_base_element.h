@@ -8,7 +8,7 @@ namespace seqan
 		// get the score value of the related object
 	template< typename TObject, typename TSpec, typename TStructuring > inline
 	typename Weight< TObject >::Type
-	weight( SkipBaseElement< TObject, Static, RT< MaxTree< TSpec > >, TStructuring > * me )
+	weight( SkipBaseElement< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > * me )
 	{
 		return weight( *getObject( me ) );
 	}
@@ -16,7 +16,7 @@ namespace seqan
 		// get the chain score value of the related object
 	template< typename TObject, typename TSpec, typename TStructuring > inline
 	typename Weight< TObject >::Type
-	priority( SkipBaseElement< TObject, Static, RT< MaxTree< TSpec > >, TStructuring > * me )
+	priority( SkipBaseElement< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > * me )
 	{
 		return priority( *getObject( me ) );
 	}

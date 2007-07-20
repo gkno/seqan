@@ -22,7 +22,21 @@ public:
 	TValue data_gap_open;
 
 public:
-	Score(TValue _match = 0, TValue _mismatch = -1, TValue _gap_extend = -1, TValue _gap_open = 0):
+	Score():
+		data_match(0),
+		data_mismatch(-1),
+		data_gap_extend(-1),
+		data_gap_open(-1)
+	{
+	}
+	Score(TValue _match, TValue _mismatch, TValue _gap):
+		data_match(_match),
+		data_mismatch(_mismatch),
+		data_gap_extend(_gap),
+		data_gap_open(_gap)
+	{
+	}
+	Score(TValue _match, TValue _mismatch, TValue _gap_extend, TValue _gap_open):
 		data_match(_match),
 		data_mismatch(_mismatch),
 		data_gap_extend(_gap_extend),
@@ -35,14 +49,23 @@ public:
 ..summary:Constructor
 ..signature:Score<TValue, Simple> ()
 ..signature:Score<TValue, Simple> (score)
-..signature:Score<TValue, Simple> (match, mismatch,gap_extend,gap_open)
+..signature:Score<TValue, Simple> (match, mismatch, gap [, gap_open])
 ..param.score:Other Score object. (copy constructor)
 ..param.match:TValue object.
+...default:0
 ..param.mismatch:TValue object.
-..param.gap_extend:TValue object.
+...default:-1
+..param.gap:TValue object.
+...remarks:The score for a single blank in a gap (linear gap costs).
+...default:-1
 ..param.gap_open:TValue object.
-...remarks:gap_open is the extra score for opening gaps, so whenever a new gap is openend, the score for the first gap will be gap_open + gap_extend.
-*/	Score(Score const & other):
+...remarks:The score for the first blank in a gap (affine gap costs).
+...default:$gap$
+..remarks:
+...text:If both gap and gap_open are specified, the total score of a length $n$ gap is $gap_open + (n-1)*gap$.
+...note:Usually $mismatch$, $gap$, and $gap_open$ are negative values.
+*/
+	Score(Score const & other):
 		data_match(other.data_match),
 		data_mismatch(other.data_mismatch),
 		data_gap_extend(other.data_gap_extend),
@@ -104,6 +127,7 @@ scoreMatch(Score<TValue, Simple> const & me)
 ..signature:scoreMismatch(object)
 ..param.object.type:Spec.Simple
 ..returns:Mismatch score.
+...note:Usually, mismatches have negative scores.
 ..see:Function.scoreMatch
 ..see:Function.scoreGapExtend
 ..see:Function.scoreGapOpen
@@ -120,6 +144,7 @@ scoreMismatch(Score<TValue, Simple> const & me)
 {
 	return me.data_mismatch;
 }
+
 /**.Function.scoreGapExtend:
 ..class:Class.Score
 ..cat:Alignments
@@ -127,6 +152,7 @@ scoreMismatch(Score<TValue, Simple> const & me)
 ..signature:scoreGapExtend(object)
 ..param.object.type:Spec.Simple
 ..returns:Score for extending gaps.
+...note:Usually, gaps have negative scores.
 ..see:Function.scoreMismatch
 ..see:Function.scoreMatch
 ..see:Function.scoreGapOpen
@@ -150,6 +176,7 @@ scoreGapExtend(Score<TValue, Simple> const & me)
 ..signature:scoreGapOpen(object)
 ..param.object.type:Spec.Simple
 ..returns:Score for opening a gap.
+...note:Usually, gaps have negative scores.
 ..see:Function.scoreMismatch
 ..see:Function.scoreGapExtend
 ..see:Function.scoreMatch
@@ -167,9 +194,45 @@ scoreGapOpen(Score<TValue, Simple> const & me)
 	return me.data_gap_open;
 }
 
+/**.Function.scoreGap:
+..class:Class.Score
+..cat:Alignments
+..summary:Score for gaps.
+..signature:scoreGapExtend(object)
+..param.object.type:Spec.Simple
+..returns:Score for extending gaps.
+...note:Usually, gaps have negative scores.
+..remarks:This score is used for linear gap costs. For affine gap costs use @Function.scoreGapExtend@ and @Function.scoreGapOpen@ instead.
+..see:Function.scoreMismatch
+..see:Function.scoreMatch
+..see:Function.scoreGapOpen
+..see:Function.scoreGapExtend
+*/
+template <typename TValue>
+inline TValue &
+scoreGap(Score<TValue, Simple> & me)
+{
+	return scoreGapExtend(me);
+}
+template <typename TValue>
+inline TValue const &
+scoreGap(Score<TValue, Simple> const & me)
+{
+	return scoreGapExtend(me);
+}
 //////////////////////////////////////////////////////////////////////////////
-
-// compute score of aligning two characters
+	
+/**
+.Function.score:
+..class:Class.Score
+..summary:The score for aligning two values according to a scoring scheme.
+..signature:score(score, as_1, as_2)
+..param.score:A scoring scheme.
+...type:Class.Score
+..param.value1:first value.
+..param.value2:second value.
+..returns:The score for comparing the two values.
+*/
 
 template <typename TValue, typename T>
 inline TValue

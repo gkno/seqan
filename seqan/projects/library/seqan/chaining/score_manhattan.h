@@ -112,7 +112,7 @@ public:
 
 template <typename TValue, typename T>
 inline TValue
-score(Score<TValue, Manhattan> & me,
+score(Score<TValue, Manhattan> const & me,
 	  T const & left,
 	  T const & right)
 {
@@ -120,6 +120,28 @@ score(Score<TValue, Manhattan> & me,
 	else return scoreMismatch(me);
 }
 
+//////////////////////////////////////////////////////////////////////////////
+//compute score for chaining two fragments 
+//return value this is only valid for f1 < f2, 
+//that is f2 can be appended to f1
+
+template <typename TValue, typename TFragment>
+inline TValue
+scoreChainGap(Score<TValue, Manhattan> const & me,
+			  TFragment & f1,
+			  TFragment & f2)
+{
+	SEQAN_ASSERT(dimension(f1) == dimension(f2))
+
+	unsigned int dim = dimension(f1);
+	TValue score = 0;
+	TValue score_gap = scoreGapExtend(me);
+	for (unsigned int i = 0; i < dim; ++i)
+	{
+		score -= score_gap * (leftPosition(f2, i) - rightPosition(f1, i));
+	}
+	return score;
+}
 
 //////////////////////////////////////////////////////////////////////////////
 

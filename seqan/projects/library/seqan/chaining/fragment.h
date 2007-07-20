@@ -107,6 +107,52 @@ SEQAN_ASSERT( me._left->size() == me._right->size() )
 	}
 
 
+//set a fragment to "top" position, that is the starting fragment of a global chain
+template <typename TFragment> 
+inline void 
+makeTopFragment(TFragment & me)
+{
+	unsigned int dim = dimension(me);
+	for (unsigned int i = 0; i < dim; ++i)
+	{
+		_setLeftPosition(me, i, 0);		//probably dont need left positions for top fragment
+		_setRightPosition(me, i, 0);
+	}
+}
+
+//set a fragment to "bottom" position in respect to a fragment set
+template <typename TFragment, typename TFragments> 
+inline void 
+makeBottomFragment(TFragment & me,
+				   TFragments & fragments)
+{
+	typedef typename Size<TFragment>::Type TSize;
+
+	unsigned int dim = dimension(me);
+	String<TSize> maxes;
+	resize(maxes, dim);
+	arrayFill(begin(maxes, Standard()), end(maxes, Standard()), 0);
+
+	typedef typename Iterator<TFragments, Standard>::Type TIterator;
+	for (TIterator it = begin(fragments, Standard()); it < end(fragments, Standard()); ++it)
+	{
+		for (unsigned int i = 0; i < dim; ++i)
+		{
+			TSize rpos = rightPosition(*it, i);
+			if (rpos > maxes[i])
+			{
+				maxes[i] = rpos;
+			}
+		}
+	}
+	for (unsigned int i = 0; i < dim; ++i)
+	{
+		_setLeftPosition(me, i, maxes[i] );	
+		_setRightPosition(me, i, maxes[i] );		//probably dont need right positions for bottom fragments
+	}
+}
+
+
 	template< typename TBorder, typename TSpec >
 	struct Fragment
 	{
@@ -115,6 +161,7 @@ SEQAN_ASSERT( me._left->size() == me._right->size() )
 		typename Size< Fragment< TBorder, TSpec > >::Type _dim;
 		typename Weight< Fragment< TBorder, TSpec > >::Type _weight;
 
+/*
 	#ifdef _SEQAN_CHAIN_DEBUG // some debugging variables to identify fragments while debugging
 		char _id;
 
@@ -134,9 +181,11 @@ SEQAN_ASSERT( me._left->size() == me._right->size() )
 
 	#endif // _SEQAN_CHAIN_DEBUG
 
+
 	#ifdef _SEQAN_CHAIN_DEBUG
 		static int _frag_counter;
 	#endif // _SEQAN_CHAIN_DEBUG
+*/
 
 		Fragment( )
 			: _left( NULL )

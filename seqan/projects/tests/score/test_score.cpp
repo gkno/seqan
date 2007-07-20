@@ -78,7 +78,7 @@ void testScorePAM()
 
 	SEQAN_TASSERT(getDist(pam) == 250);
 	SEQAN_TASSERT(scoreGapExtend(pam) == -1);
-	SEQAN_TASSERT(scoreGapOpen(pam) == 0);
+	SEQAN_TASSERT(scoreGapOpen(pam) == scoreGapExtend(pam));
 
 	//store and load again build-in matrix
 	FILE * fl = fopen(TEST_PATH "testfile.txt", "wb");

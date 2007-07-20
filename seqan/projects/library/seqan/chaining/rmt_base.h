@@ -169,8 +169,8 @@ namespace seqan{
 		
 	template< typename TObject, typename TSpec, typename TStructuring > inline
 	bool
-	_checkAssocThresh( SkipBaseElement< TObject, Static, RT< MaxTree< TSpec > >, TStructuring > * first,
-						SkipBaseElement< TObject, Static, RT< MaxTree< TSpec > >, TStructuring > * second )
+	_checkAssocThresh( SkipBaseElement< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > * first,
+						SkipBaseElement< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > * second )
 	{
 		SEQAN_CHECKPOINT
 		return ( ( second - first ) > _rt_max_thresh );
@@ -179,17 +179,17 @@ namespace seqan{
 		// dump of the lowest layer of a RMT
 	template< typename TObject, typename TSpec, typename TStructuring, typename TSize1, typename TSize2 >
 	void 
-	printLayerScores(	SkipList< TObject, Static, RT< MaxTree< TSpec > >, TStructuring > * list,
+	printLayerScores(	SkipList< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > * list,
 						TSize1 layer,
 						TSize2 _dim )
 	{
 		if( layer == 0 ){
-			for( typename Size< SkipList< TObject, Static, RT< MaxTree< TSpec > >, TStructuring > >::Type j = 0; j < length( *list ) + 1; ++j ){
+			for( typename Size< SkipList< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > >::Type j = 0; j < length( *list ) + 1; ++j ){
 				std::cout.width(3);
 				std::cout<< "___";
 			}
 			std::cout<<std::endl;
-			typename Iterator< SkipList< TObject, Static, RT< MaxTree< TSpec > >, TStructuring > >::Type temp;
+			typename Iterator< SkipList< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > >::Type temp;
 			for( typename Size< TObject >::Type dim = 0; dim < dimension( *_getMainTree( *list ) ); ++dim )
 			{
 				temp = begin( *list );
@@ -210,7 +210,7 @@ namespace seqan{
 			printScores( *list );
 		}
 		else {
-			SkipBaseElement< TObject, Static, RT< MaxTree< TSpec > >, TStructuring > * temp = _getBaseStore( *list );
+			SkipBaseElement< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > * temp = _getBaseStore( *list );
 			while( temp != NULL && temp != end( *list ) ){
 				if( _getHeight( *temp ) >= layer ){
 					if( _getRight( *( &_getUp( *temp ) + layer - 1) ) ){
@@ -249,10 +249,10 @@ namespace seqan{
 
 	template< typename TObject, typename TSpec, typename TStructuring >
 	void
-	printScores( SkipList< TObject, Static, RT< MaxTree< TSpec > >, TStructuring > & list )
+	printScores( SkipList< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > & list )
 	{
-		SkipBaseElement< TObject, Static, RT< MaxTree< TSpec > >, TStructuring >* temp = _getBaseStore( list );
-		for( typename seqan::Size< SkipList< TObject, Static, RT< MaxTree< TSpec > >, TStructuring > >::Type i = 0; i < length( list ) + 1; ++i ){
+		SkipBaseElement< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring >* temp = _getBaseStore( list );
+		for( typename seqan::Size< SkipList< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > >::Type i = 0; i < length( list ) + 1; ++i ){
 			std::cout.width(3);
 			if( temp == _getBaseStore( list ) )
 				std::cout << std::left << "L";
@@ -262,7 +262,7 @@ namespace seqan{
 		}
 		std::cout << std::endl;
 		temp = _getBaseStore( list );
-		for( typename Size< SkipList< TObject, Static, RT< MaxTree< TSpec > >, TStructuring > >::Type i = 0; i < length( list ) + 1; ++i ){
+		for( typename Size< SkipList< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > >::Type i = 0; i < length( list ) + 1; ++i ){
 			std::cout.width(3);
 			if( priority( temp ) == infimumValue< typename Weight< TObject >::Type >() )
 				std::cout << std::left << "L";

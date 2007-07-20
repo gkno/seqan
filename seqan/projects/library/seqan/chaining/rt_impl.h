@@ -28,8 +28,6 @@ class RangeTree< TObject, TModus, RT< TSpec >, TStructuring >
 {
 	SkipList< TObject, TModus, RT< TSpec >, TStructuring > * _list;
 
-	_RTreeAllocators< TObject, TModus, RT< TSpec >, TStructuring > _allocs;
-	
 	TObject _RBorderObj;
 	TObject _LBorderObj;
 
@@ -37,8 +35,8 @@ class RangeTree< TObject, TModus, RT< TSpec >, TStructuring >
 	typename Size< SkipList< TObject, TModus, RT< TSpec >, TStructuring > >::Type _numOfElems;
 
 	_SearchPath< TObject, TModus, RT< TSpec >, TStructuring > _sp;
-
-
+	_RTreeAllocators< TObject, TModus, RT< TSpec >, TStructuring > _allocs;
+	
 	friend inline
 	typename Size< SkipList< TObject, TModus, RT< TSpec >, TStructuring > >::Type 
 	length( RangeTree< TObject, TModus, RT< TSpec >, TStructuring > & me )

@@ -113,7 +113,7 @@ public:
 
 template <typename TValue, typename T>
 inline TValue
-score( Score<TValue, ChainSoP> & me,
+score( Score<TValue, ChainSoP> const & me,
 	  T const & left,
 	  T const & right)
 {
@@ -121,6 +121,16 @@ score( Score<TValue, ChainSoP> & me,
 	else return scoreMismatch(me);
 }
 
+//////////////////////////////////////////////////////////////////////////////
+//compute score for chaining two fragments 
+//return value this is only valid for f1 < f2, 
+//that is f2 can be appended to f1
+
+template <typename TValue, typename TFragment>
+inline TValue
+scoreChainGap(Score<TValue, ChainSoP> const & me,
+			  TFragment & f1,
+			  TFragment & f2); //TODO
 
 //////////////////////////////////////////////////////////////////////////////
 

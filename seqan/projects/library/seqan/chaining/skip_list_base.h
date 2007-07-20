@@ -21,13 +21,13 @@ namespace seqan
 
 		
 	template< typename TObject, typename TSpec, typename TStructuring >
-	struct IsContiguous< SkipList< TObject, Static, TSpec, TStructuring > >
+	struct IsContiguous< SkipList< TObject, SkipListStatic, TSpec, TStructuring > >
 	{
 		enum { VALUE = true };
 	};
 
 	template< typename TObject, typename TSpec, typename TStructuring >
-	struct IsContiguous< SkipList< TObject, Dynamic, TSpec, TStructuring > >
+	struct IsContiguous< SkipList< TObject, SkipListDynamic, TSpec, TStructuring > >
 	{
 		enum { VALUE = false };
 	};
@@ -215,13 +215,13 @@ namespace seqan
 
 		// dynamic: base layer is a list
 	template< typename TObject, typename TSpec, typename TStructuring > inline
-	SkipBaseElement< TObject, Dynamic, TSpec, TStructuring > *
-	_calcPivot(	SkipBaseElement< TObject, Dynamic, TSpec, TStructuring > & base )
+	SkipBaseElement< TObject, SkipListDynamic, TSpec, TStructuring > *
+	_calcPivot(	SkipBaseElement< TObject, SkipListDynamic, TSpec, TStructuring > & base )
 	{
 		SEQAN_CHECKPOINT
 		SEQAN_CHECK( &base != NULL )
-		typename Size< SkipList< TObject, Dynamic, TSpec, TStructuring > >::Type offset = mt_random() % _getCount( base ) + 1;
-		SkipBaseElement< TObject, Dynamic, TSpec, TStructuring > * pivot = &base;
+		typename Size< SkipList< TObject, SkipListDynamic, TSpec, TStructuring > >::Type offset = mtRand() % _getCount( base ) + 1;
+		SkipBaseElement< TObject, SkipListDynamic, TSpec, TStructuring > * pivot = &base;
 		while( offset > 0 )
 		{
 			SEQAN_CHECK( _getSucc( *pivot ) != NULL )
@@ -233,13 +233,13 @@ namespace seqan
 
 		// static: base layer is an array
 	template< typename TObject, typename TSpec, typename TStructuring > inline
-	SkipBaseElement< TObject, Static, TSpec, TStructuring > *
-	_calcPivot(	SkipBaseElement< TObject, Static, TSpec, TStructuring > & base )
+	SkipBaseElement< TObject, SkipListStatic, TSpec, TStructuring > *
+	_calcPivot(	SkipBaseElement< TObject, SkipListStatic, TSpec, TStructuring > & base )
 	{
 		SEQAN_CHECKPOINT
 		SEQAN_CHECK( &base != NULL )
 		SEQAN_CHECK2( _getCount( base ) != 0, "Tried to sort element that is already sorted" )
-		return  ( &base + ( mt_random() % _getCount( base ) + 1 ) );
+		return  ( &base + ( mtRand() % _getCount( base ) + 1 ) );
 	}
 
 
@@ -383,8 +383,8 @@ namespace seqan
 
 	template< typename TObject, typename TSpec, typename TSize > inline
 	void
-	_renewDynConnects( SkipBaseElement< TObject, Dynamic, TSpec, Deferred > & elem,
-						SkipBaseElement< TObject, Dynamic, TSpec, Deferred > & pivot,
+	_renewDynConnects( SkipBaseElement< TObject, SkipListDynamic, TSpec, Deferred > & elem,
+						SkipBaseElement< TObject, SkipListDynamic, TSpec, Deferred > & pivot,
 						TSize elem_count,
 						TSize i_count )
 	{
@@ -413,8 +413,8 @@ namespace seqan
 
 	template< typename TObject, typename TSpec, typename TSize > inline
 	void
-	_renewConnects( SkipBaseElement< TObject, Dynamic, TSpec, Deferred > & elem,
-					SkipBaseElement< TObject, Dynamic, TSpec, Deferred > & pivot,
+	_renewConnects( SkipBaseElement< TObject, SkipListDynamic, TSpec, Deferred > & elem,
+					SkipBaseElement< TObject, SkipListDynamic, TSpec, Deferred > & pivot,
 					TSize elem_count,
 					TSize i_count )
 	{
@@ -834,8 +834,8 @@ namespace seqan
 			// dynamic case
 	template< typename TObject, typename TSpec, typename TStructuring > inline
 	void
-	_setDynConnects( SkipBaseElement< TObject, Dynamic, TSpec, TStructuring > * pred,
-						SkipBaseElement< TObject, Dynamic, TSpec, TStructuring > * succ )
+	_setDynConnects( SkipBaseElement< TObject, SkipListDynamic, TSpec, TStructuring > * pred,
+						SkipBaseElement< TObject, SkipListDynamic, TSpec, TStructuring > * succ )
 	{
 		SEQAN_CHECKPOINT
 		_setSucc( *pred, succ );
@@ -854,8 +854,8 @@ namespace seqan
 
 	template< typename TObject, typename TSpec > inline
 	void
-	_setDefConnects( SkipBaseElement< TObject, Dynamic, TSpec, Deferred > * left,
-						SkipBaseElement< TObject, Dynamic, TSpec, Deferred > * right )
+	_setDefConnects( SkipBaseElement< TObject, SkipListDynamic, TSpec, Deferred > * left,
+						SkipBaseElement< TObject, SkipListDynamic, TSpec, Deferred > * right )
 	{
 		SEQAN_CHECKPOINT
 		_setRight( *left, right );
@@ -874,9 +874,9 @@ namespace seqan
 
 	template< typename TObject, typename TSpec, typename TStructuring, typename TIter, typename TSize > inline
 	void
-	_initBases( SkipList< TObject, Static, TSpec, TStructuring > & list, 
-				SkipBaseElement< TObject, Static, TSpec, TStructuring > * firstBase,
-				SkipBaseElement< TObject, Static, TSpec, TStructuring > *& lastBase,
+	_initBases( SkipList< TObject, SkipListStatic, TSpec, TStructuring > & list, 
+				SkipBaseElement< TObject, SkipListStatic, TSpec, TStructuring > * firstBase,
+				SkipBaseElement< TObject, SkipListStatic, TSpec, TStructuring > *& lastBase,
 				TIter & firstData,
 				TIter & lastData,
 				TSize numEntries )
@@ -904,9 +904,9 @@ namespace seqan
 
 	template< typename TObject, typename TSpec, typename TStructuring, typename TIter, typename TSize > inline
 	void
-	_initBases( SkipList< TObject, Dynamic, TSpec, TStructuring > & list, 
-				SkipBaseElement< TObject, Dynamic, TSpec, TStructuring > * firstBase,
-				SkipBaseElement< TObject, Dynamic, TSpec, TStructuring > *& lastBase,
+	_initBases( SkipList< TObject, SkipListDynamic, TSpec, TStructuring > & list, 
+				SkipBaseElement< TObject, SkipListDynamic, TSpec, TStructuring > * firstBase,
+				SkipBaseElement< TObject, SkipListDynamic, TSpec, TStructuring > *& lastBase,
 				TIter & firstData,
 				TIter & lastData,
 				TSize numEntries )
@@ -916,7 +916,7 @@ namespace seqan
 		list._baseStore = firstBase;
 
 		valueConstruct( firstBase, &list.l_border_obj, infimumValue< typename Key< TObject >::Type >() );
-		SkipBaseElement< TObject, Dynamic, TSpec, TStructuring > * previous = firstBase;
+		SkipBaseElement< TObject, SkipListDynamic, TSpec, TStructuring > * previous = firstBase;
 		++firstBase;
 
 		while( firstData != lastData )

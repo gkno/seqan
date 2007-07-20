@@ -975,13 +975,13 @@ void Test_FileReader_String()
 
 void Create_Long_Testfile(Fasta)
 {
-	cout << "create fasta testfile";
+	::std::cout << "create fasta testfile";
 
 	FILE * fl = fopen(TEST_PATH "testfile.txt", "wb");
 	fprintf(fl, ">testfile\n"); 
 	for (unsigned int i = 0; i < 20; ++i)
 	{
-		cout << ".";
+		::std::cout << ".";
 		for (unsigned int j = 0; j < 500; ++j)
 		{
 			fprintf(fl, "A.........B.........C.........D.........E.........F.........G.........H.........I.........J.........\n");
@@ -993,18 +993,18 @@ void Create_Long_Testfile(Fasta)
 		}
 	}
 	fclose(fl);
-	cout << "created.\n";
+	::std::cout << "created.\n";
 }
 
 void Create_Long_Testfile(Embl)
 {
-	cout << "create embl testfile";
+	::std::cout << "create embl testfile";
 
 	FILE * fl = fopen(TEST_PATH "testfile.txt", "wb");
 	fprintf(fl, "ID\nSQ\n"); 
 	for (unsigned int i = 0; i < 20; ++i)
 	{
-		cout << ".";
+		::std::cout << ".";
 		for (unsigned int j = 0; j < 500; ++j)
 		{
 			fprintf(fl, "  A.........B.........C.........D.........E.........F.........G.........H.........I.........J.........\n");
@@ -1016,18 +1016,18 @@ void Create_Long_Testfile(Embl)
 		}
 	}
 	fclose(fl);
-	cout << "created.\n";
+	::std::cout << "created.\n";
 }
 
 void Create_Long_Testfile(Genbank)
 {
-	cout << "create genbank testfile";
+	::std::cout << "create genbank testfile";
 
 	FILE * fl = fopen(TEST_PATH "testfile.txt", "wb");
 	fprintf(fl, "LOCUS\nORIGIN\n"); 
 	for (unsigned int i = 0; i < 20; ++i)
 	{
-		cout << ".";
+		::std::cout << ".";
 		for (unsigned int j = 0; j < 500; ++j)
 		{
 			fprintf(fl, "  A.........B.........C.........D.........E.........F.........G.........H.........I.........J.........\n");
@@ -1039,7 +1039,7 @@ void Create_Long_Testfile(Genbank)
 		}
 	}
 	fclose(fl);
-	cout << "created.\n";
+	::std::cout << "created.\n";
 }
 //____________________________________________________________________________
 
@@ -1057,13 +1057,13 @@ void Test_FileReader_String2()
 	String<char> ndl = "HERE_IS_THE_PATTERN";
 	Pattern<String<char>, Horspool> pat(ndl);
 
-	cout << "find patterns";
+	::std::cout << "find patterns";
 
 	for (unsigned int i = 0; i < 20; ++i)
 	{
 		bool found = find(fnd, pat);
 
-	cout << ".";
+	::std::cout << ".";
 		SEQAN_TASSERT(found);
 		SEQAN_TASSERT(!fr.data_scanned);
 		SEQAN_TASSERT(position(fnd) == (50021 + i * 100000));
@@ -1072,7 +1072,7 @@ void Test_FileReader_String2()
 	SEQAN_TASSERT(!find(fnd, pat));
 	SEQAN_TASSERT(fr.data_scanned);
 
-	cout << "\n";
+	::std::cout << "\n";
 
 //____________________________________________________________________________
 // scan the file the old way: read the complete file into memory
@@ -1087,7 +1087,7 @@ void Test_FileReader_String2()
 	{
 		bool found = find(fnd2, pat);
 
-	cout << ".";
+	::std::cout << ".";
 		SEQAN_TASSERT(found);
 		SEQAN_TASSERT(position(fnd2) == (50021 + i * 100000));
 	}

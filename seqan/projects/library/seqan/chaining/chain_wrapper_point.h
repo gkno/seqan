@@ -155,39 +155,39 @@ namespace seqan{
 	#endif // _SEQAN_CHAIN_DEBUG
 
 		_WrapperPoint( )
-			: _end( false )
+			: _frag( NULL )
 			, _key( 0 )
-			, _frag( NULL )
 			, _meta( NULL )
+			, _end( false )
 		{
 		}
 
 
 		_WrapperPoint( const _WrapperPoint & old )
-			: _end( old._end )
+			: _frag( old._frag )
 			, _key( old._key )
-			, _frag( old._frag )
 			, _meta( old._meta )
+			, _end( old._end )
 		{
 		}
 
 
 		_WrapperPoint( _MetaFragment< TFragType > & meta, 
 						bool end )
-			: _end( end )
+			: _frag( &_getFrag( meta ) )
 			, _key( end ? rightPosition( _getFrag( meta ), dimension( _getFrag( meta ) ) - 1 ) : leftPosition( _getFrag( meta ), dimension( _getFrag( meta ) ) - 1 ) )
-			, _frag( &_getFrag( meta ) )
 			, _meta( & meta )
+			, _end( end )
 		{}
 
 		template< typename TKey >
 		_WrapperPoint( _MetaFragment< TFragType > & meta,
 						TKey key,
 						bool end )
-			: _end( end )
+			: _frag( &_getFrag( meta ) )
 			, _key( key )
-			, _frag( &_getFrag( meta ) )
 			, _meta( & meta )
+			, _end( end )
 		{}
 
 

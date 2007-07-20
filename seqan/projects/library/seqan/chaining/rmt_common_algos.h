@@ -34,7 +34,7 @@ namespace seqan{
 
 	template< typename TObject, typename TSpec, typename TStructuring, typename TBorder >
 	TObject *
-	rangeMaxQuery( RangeTree< TObject, Static, RT< MaxTree< TSpec > >, TStructuring > & tree,
+	rangeMaxQuery( RangeTree< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > & tree,
 					TBorder & border_obj )
 	{
 		SEQAN_CHECK( dimension( border_obj ) >= dimension( tree ) )
@@ -47,7 +47,7 @@ namespace seqan{
 		// in a RMQ
 	template< typename TObject, typename TSpec, typename TStructuring, typename TBorder > inline
 	void
-	_processRMQ(	SkipList< TObject, Static, RT< MaxTree< TSpec > >, TStructuring > * list,
+	_processRMQ(	SkipList< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > * list,
 					typename Size< TObject >::Type dim,
 					TBorder & borderObj,
 					TObject *& maxObject )
@@ -74,7 +74,7 @@ namespace seqan{
 */
 	template< typename TObject, typename TSpec, typename TStructuring > inline
 	void
-	activate( RangeTree< TObject, Static, RT< MaxTree< TSpec > >, TStructuring > & tree,
+	activate( RangeTree< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > & tree,
 			   TObject & obj )
 	{
 		_activate( _getList( tree ), &obj, dimension( tree ) - 1 );
@@ -82,7 +82,7 @@ namespace seqan{
 
 	template< typename TObject, typename TSpec, typename TStructuring, typename TWeight > inline
 	void
-	activate( RangeTree< TObject, Static, RT< MaxTree< TSpec > >, TStructuring > & tree,
+	activate( RangeTree< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > & tree,
 			   TObject & obj,
 			   TWeight prio )
 	{
@@ -96,13 +96,13 @@ namespace seqan{
 		// -> searches lower layers that contain the object whose priority should be increased
 	template< typename TObject, typename TSpec, typename TStructuring, typename TSize >
 	void
-	_activateHigherLayer(	SkipList< TObject, Static, RT< MaxTree< TSpec > >, TStructuring > * list,
+	_activateHigherLayer(	SkipList< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > * list,
 							TObject * obj,
 							TSize dim )
 	{
-		typename Size< SkipList< TObject, Static, RT< MaxTree< TSpec > >, TStructuring > >::Type height = _getCurrentLayer( *list );
-		SkipElement< TObject, Static, RT< MaxTree< TSpec > >, TStructuring > * layer_element = _getRoot( *list );
-		SkipElement< TObject, Static, RT< MaxTree< TSpec > >, TStructuring > * right_buffer = _getRight( *layer_element );
+		typename Size< SkipList< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > >::Type height = _getCurrentLayer( *list );
+		SkipElement< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > * layer_element = _getRoot( *list );
+		SkipElement< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > * right_buffer = _getRight( *layer_element );
 
 		typename Key< TObject >::Type searchKey = key( *obj, dim );
 		while( height > 0 )
@@ -126,7 +126,7 @@ namespace seqan{
 		// updates the max-pointers
 	template< typename TObject, typename TSpec, typename TStructuring, typename TSize >
 	void
-	_activate(  SkipList< TObject, Static, RT< MaxTree< TSpec > >, TStructuring > * list,
+	_activate(  SkipList< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > * list,
 				TObject * obj,
 				TSize dim )
 	{
@@ -134,9 +134,9 @@ namespace seqan{
 			_activateHigherLayer( list, obj, dim );
 		}
 		else {
-			typename Size< SkipList< TObject, Static, RT< MaxTree< TSpec > >, TStructuring > >::Type height = _getCurrentLayer( *list );
-			SkipElement< TObject, Static, RT< MaxTree< TSpec > >, TStructuring > ** sp = _getSearchPath( *_getMainTree( *list ), dim ) + height - 1;
-			SkipElement< TObject, Static, RT< MaxTree< TSpec > >, TStructuring > * layer_element = _getRoot( *list );
+			typename Size< SkipList< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > >::Type height = _getCurrentLayer( *list );
+			SkipElement< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > ** sp = _getSearchPath( *_getMainTree( *list ), dim ) + height - 1;
+			SkipElement< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > * layer_element = _getRoot( *list );
 			typename Key< TObject >::Type search_key = key( *obj, dim );
 			while( height > 0 )
 			{
@@ -153,7 +153,7 @@ namespace seqan{
 			++layer_element;
 			++height;
 			typename Weight< TObject >::Type new_score = priority( *obj );
-			typename Size< SkipList< TObject, Static, RT< MaxTree< TSpec > >, TStructuring > >::Type max_height = _getCurrentLayer( *list ) + 1;
+			typename Size< SkipList< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > >::Type max_height = _getCurrentLayer( *list ) + 1;
 			while( height < max_height ){
 				if( priority( *sp ) <= new_score )
 					_setMaxObject( *sp, obj );
@@ -191,18 +191,18 @@ namespace seqan{
 	
 	template< typename TObject, typename TSpec, typename TStructuring, typename TSize, typename TKey >
 	void
-	_connect_actualize_max(	SkipList< TObject, Static, RT< MaxTree< TSpec > >, TStructuring > & list,
-							SkipBaseElement< TObject, Static, RT< MaxTree< TSpec > >, TStructuring > * base, 
+	_connect_actualize_max(	SkipList< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > & list,
+							SkipBaseElement< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > * base, 
 							TSize height,
 							TKey searchKey,
-							SkipElement< TObject, Static, RT< MaxTree< TSpec > >, TStructuring > ** search_path,
+							SkipElement< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > ** search_path,
 							TObject * max_obj )
 	{
-		SkipElement< TObject, Static, RT< MaxTree< TSpec > >, TStructuring > * buffer = &_getUp( *base );
-		SkipElement< TObject, Static, RT< MaxTree< TSpec > >, TStructuring > * tower_top = buffer + height;
+		SkipElement< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > * buffer = &_getUp( *base );
+		SkipElement< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > * tower_top = buffer + height;
 		
 		while( buffer != tower_top ){
-			new( buffer ) SkipElement< TObject, Static, RT< MaxTree< TSpec > >, TStructuring >( _getRight( **search_path ), base, searchKey );
+			new( buffer ) SkipElement< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring >( _getRight( **search_path ), base, searchKey );
 			_setRight( **search_path, buffer );
 			_setMaxObject( buffer, max_obj );
 			*search_path = buffer;
@@ -225,16 +225,16 @@ namespace seqan{
 			// build towers with maximum pointers in the lowest layer of the rmt
 	template< typename TObject, typename TSpec, typename TStructuring >
 	void
-	_buildMaxTowers( SkipList< TObject, Static, RT< MaxTree< TSpec > >, TStructuring > & list )
+	_buildMaxTowers( SkipList< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > & list )
 	{
-		SkipBaseElement< TObject, Static, RT< MaxTree< TSpec > >, TStructuring > * buffer = _getBaseStore( list );
-		SkipBaseElement< TObject, Static, RT< MaxTree< TSpec > >, TStructuring > * end = buffer + length( list ) + 1;
-		typename Size< SkipList< TObject, Static, RT< MaxTree< TSpec > >, TStructuring > >::Type max_height = _getMaximalSLTowerHeight( list );
-		SkipElement< TObject, Static, RT< MaxTree< TSpec > >, TStructuring > ** search_path = new SkipElement< TObject, Static, RT< MaxTree< TSpec > >, TStructuring >*[ max_height ];
-		SkipElement< TObject, Static, RT< MaxTree< TSpec > >, TStructuring > * elem_buffer = &_getUp( *buffer );
+		SkipBaseElement< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > * buffer = _getBaseStore( list );
+		SkipBaseElement< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > * end = buffer + length( list ) + 1;
+		typename Size< SkipList< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > >::Type max_height = _getMaximalSLTowerHeight( list );
+		SkipElement< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > ** search_path = new SkipElement< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring >*[ max_height ];
+		SkipElement< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > * elem_buffer = &_getUp( *buffer );
 		TObject * border_obj = getObject( buffer );
 		
-		typename Size< SkipList< TObject, Static, RT< MaxTree< TSpec > >, TStructuring > >::Type height = 0;
+		typename Size< SkipList< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > >::Type height = 0;
 		
 		typename Key< TObject >::Type buffer_key = key( *buffer );
 
@@ -254,7 +254,7 @@ namespace seqan{
 			act_key = key( *buffer );
 			if( act_key != buffer_key )
 			{
-				height = _throwCoin< TObject, Static, RT< MaxTree< TSpec > >, TStructuring >( list, max_height );
+				height = _throwCoin< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring >( list, max_height );
 				if( height > 0 ){
 					_add_max( list, buffer, height, search_path );
 					_connect_actualize_max( list, buffer, height, act_key, search_path, getObject( buffer ) );
@@ -275,17 +275,17 @@ namespace seqan{
 		// adjusts the max pointers
 	template< typename TObject, typename TSpec, typename TStructuring, typename THeight > inline
 	void 
-	_add_max(	SkipList< TObject, Static, RT< MaxTree< TSpec > >, TStructuring >  & list,
-				SkipBaseElement< TObject, Static, RT< MaxTree< TSpec > >, TStructuring > * base,
+	_add_max(	SkipList< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring >  & list,
+				SkipBaseElement< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > * base,
 				THeight height,
-				SkipElement< TObject, Static, RT< MaxTree< TSpec > >, TStructuring > ** search_path )
+				SkipElement< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > ** search_path )
 	{			
 			// adding additional layers, if necessary 
 		SEQAN_CHECK2( &_getUp( *base ) == NULL, "tried to build tower on bas element with tower" )
 		if( height > _getCurrentLayer( list ) ){
 			_setCurrentLayer( list, height );
 		}
-		SkipElement< TObject, Static, RT< MaxTree< TSpec > >, TStructuring > * tower;
+		SkipElement< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > * tower;
 		allocate( _getElementAlloc( list ), tower, height );
 		_setUp( *base, *tower );
 		_setHeight( *base, height );

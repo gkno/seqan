@@ -27,13 +27,13 @@ namespace SEQAN_NAMESPACE_MAIN
 computation of the odds scores and the construction of the symmetric and scaled logarithms of odds matrix.	The odds scores thereby represent the chance of a relationship between the observed amino acids at each position versus the chance of coincidental pairing.
 If integer scores are produced, each value is rounded separately.
 .
-.Function.buildPam.param._score.type:Spec.Pam
-.Function.score.param._score.type:Spec.Pam
-.Function.scoreGapExtend.param._score.type:Spec.Pam
-.Function.scoreGapOpen.param._score.type:Spec.Pam
-.Function.getScale.param._score.type:Spec.Pam
-.Function.getDist.param._score.type:Spec.Pam
-.Function.getEntropy.param._score.type:Spec.Pam
+.Function.buildPam.param.score.type:Spec.Pam
+.Function.score.param.score.type:Spec.Pam
+.Function.scoreGapExtend.param.score.type:Spec.Pam
+.Function.scoreGapOpen.param.score.type:Spec.Pam
+.Function.getScale.param.score.type:Spec.Pam
+.Function.getDist.param.score.type:Spec.Pam
+.Function.getEntropy.param.score.type:Spec.Pam
 .Function.write.param.data.type:Spec.Pam
 .Internal.getPamProperties.param._score.type:Class.Score
 .Internal.showPamMatrix.param._score.type:Class.Score
@@ -80,12 +80,17 @@ public:
 	// Initialization: either default values or user defined by distance, gap penaltys or scaling factor
 	//////////////////////////////////////////////////////////////////////////////
 
-	Score(int _distance = 250, TValue _gap_extend = -1, TValue _gap_open = 0 ):
+	Score(int _distance = 250, TValue _gap_extend = -1 ):
+		data_gap_extend(_gap_extend),
+		data_gap_open(_gap_extend)
+	{
+		buildPam(* this, _distance);
+	}
+	Score(int _distance, TValue _gap_extend, TValue _gap_open ):
 		data_gap_extend(_gap_extend),
 		data_gap_open(_gap_open)
 	{
 		buildPam(* this, _distance);
-
 	}
 
 	/**	
@@ -93,17 +98,19 @@ public:
 ..class:Class.Score
 ..summary:Constructor
 ..signature:Score(const & other)
-..signature:Score(_distance, _gap_extend, _gap_open)
-..param._distance: desired evolutionary distance
+..signature:Score(distance, gap [, gap_open])
+..param.distance: desired evolutionary distance
 ...default:250
 ...type:int
-..param._gap_extend: desired penalty for gap extension
+..param.gap: desired penalty for gap (extension).
 ...default:-1
 ...type: TValue
-..param._gap_open: desired penalty for gap opening
-...default:0
+..param.gap_open: desired penalty for gap opening.
+...default:$gap$
 ...type: TValue
 ..param.other:Score to be copied
+...text:If both gap and gap_open are specified, the total score of a length $n$ gap is $gap_open + (n-1)*gap$.
+...note:Usually $gap$, $gap_extend$, and $gap_open$ are negative values.
 */	
 		
 	Score(Score const & other):
@@ -169,18 +176,6 @@ public:
 		return pairscore;
 	}
 
-	
-/**
-.Function.score:
-..class:Class.Score
-..summary:The score for aligning two values according to a scoring scheme.
-..signature:score(score, as_1, as_2)
-..param.score:A scoring scheme.
-...type:Class.Score
-..param.value1:first value.
-..param.value2:second value.
-..returns:The score for comparing the two values.
-*/
 
 	friend inline TValue &
 		scoreGapExtend(Score & _score)

@@ -4,7 +4,7 @@
 namespace seqan
 {
 
-// Modifications of the struct SkipElement for use in a Static< True, RT< MaxTag > >
+// Modifications of the struct SkipElement for use in a SkipListStatic< True, RT< MaxTag > >
 
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring >
 	struct _RangeMaxCargo
@@ -40,14 +40,14 @@ namespace seqan
 
 	template< typename TObject, typename TSpec, typename TStructuring > inline
 	TObject *
-	_getMaxObject( _RangeMaxCargo< TObject, Static, TSpec, TStructuring > & me )
+	_getMaxObject( _RangeMaxCargo< TObject, SkipListStatic, TSpec, TStructuring > & me )
 	{
 		return me._maxObj;
 	}
 
 	template< typename TObject, typename TSpec, typename TStructuring > inline
 	void
-	_setMaxObject( _RangeMaxCargo< TObject, Static, TSpec, TStructuring > & me,
+	_setMaxObject( _RangeMaxCargo< TObject, SkipListStatic, TSpec, TStructuring > & me,
 				TObject * obj )
 	{
 		me._maxObj = obj;
@@ -55,14 +55,14 @@ namespace seqan
 
 	template< typename TObject,typename TSpec, typename TStructuring > inline
 	TObject *
-	_getMaxObject( SkipElement< TObject, Static, RT< MaxTree< TSpec > >, TStructuring > * me )
+	_getMaxObject( SkipElement< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > * me )
 	{
 		return me->_cargo._maxObj;
 	}
 
 	template< typename TObject, typename TSpec, typename TStructuring > inline
 	void
-	_setMaxObject( SkipElement< TObject, Static, RT< MaxTree< TSpec > >, TStructuring > * me,
+	_setMaxObject( SkipElement< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > * me,
 					TObject * maxObj )
 	{
 		me->_cargo._maxObj = maxObj;
@@ -77,7 +77,7 @@ namespace seqan
 		// get the score value of the related object
 	template< typename TObject, typename TSpec, typename TStructuring > inline
 	typename Weight< TObject >::Type
-	weight( SkipElement< TObject, Static, RT< MaxTree< TSpec > >, TStructuring > * me )
+	weight( SkipElement< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > * me )
 	{
 		return weight( *me->_cargo._maxObj );
 	}
@@ -85,7 +85,7 @@ namespace seqan
 		// get the chain score value of the related object
 	template< typename TObject, typename TSpec, typename TStructuring > inline
 	typename Weight< TObject >::Type
-	priority( SkipElement< TObject, Static, RT< MaxTree< TSpec > >, TStructuring > * me )
+	priority( SkipElement< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > * me )
 	{
 		return priority( *me->_cargo._maxObj );
 	}

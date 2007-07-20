@@ -13,8 +13,8 @@ namespace seqan{
 					TDest & dest, 
 					TCostModell cost, 
 					Score< TScoreValue, TScoreType > const & score_, 
-					Chainer tag,
-					TStructuring structuring,
+					Chainer,
+					TStructuring,
 					TSpec spec )
 	{
 		SEQAN_CHECK( !empty( source ) )
@@ -57,7 +57,7 @@ namespace seqan{
 		std::sort( points.begin(), points.end(), _ChainSorter< _WrapperPoint< FragType > >( ) );
 	
 			// build the RMT
-		RangeTree< _ChainPoint< FragType, SpecType >, Static, RT< MaxTree< > >, TStructuring > tree( end_points, dim-1 );
+		RangeTree< _ChainPoint< FragType, SpecType >, SkipListStatic, RT< MaxTree< > >, TStructuring > tree( end_points, dim-1 );
 
 			// algorithm main loop
 			// traverse wrapper points

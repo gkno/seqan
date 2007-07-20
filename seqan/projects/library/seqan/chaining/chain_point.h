@@ -157,10 +157,10 @@ SEQAN_ASSERT( me._meta != NULL )
 	struct _ChainPoint
 	{
 		
+		_MetaFragment< TFragType > * _meta;
 		typename Key< TFragType >::Type * _coords;
 		typename Size< TFragType >::Type _dim;
 		typename Weight< TFragType >::Type _prio;
-		_MetaFragment< TFragType > * _meta;
 
 	public:
 
@@ -212,8 +212,8 @@ SEQAN_ASSERT( me._meta != NULL )
 						bool begin = false )
 		: _meta( &meta )
 		, _coords( NULL )
-		, _prio( infimumValue< typename Weight< TFragType >::Type >() )
 		, _dim( dim )
+		, _prio( infimumValue< typename Weight< TFragType >::Type >() )
 		{
 			TFragType * frag = &_getFrag( meta );
 			allocate( *this, _coords, _dim );
@@ -325,8 +325,8 @@ SEQAN_ASSERT( me._meta != NULL )
 	{
 		
 		typename Key< TFragType >::Type _coords[ISize];
-		typename Weight< TFragType >::Type _prio;
 		_MetaFragment< TFragType > * _meta;
+		typename Weight< TFragType >::Type _prio;
 
 	public:
 

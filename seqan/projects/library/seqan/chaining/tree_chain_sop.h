@@ -11,10 +11,10 @@ namespace seqan
 	TScoreValue
 	_compute_chain( TSource & source, 
 					TDest & dest, 
-					G_SoP_Cost cost, 
+					G_SoP_Cost, 
 					Score< TScoreValue, TScoreType > const & score_, 
-					Chainer tag,
-					TStructuring structuring,
+					Chainer,
+					TStructuring,
 					TSpec spec )
 	{
 		SEQAN_CHECK( !empty( source ) )
@@ -69,7 +69,7 @@ namespace seqan
 		std::sort( points.begin(), points.end(), _ChainSorter< _WrapperPoint< FragType > >( ) );
 
 			// build the RMT's for all points
-		String< RangeTree< _ChainPoint< FragType, SpecType >, Static, RT< MaxTree< > >, TStructuring > * > trees;
+		String< RangeTree< _ChainPoint< FragType, SpecType >, SkipListStatic, RT< MaxTree< > >, TStructuring > * > trees;
 		resize( trees, facValue );
 		_resetPerm( permutation );
 		_build_chain_trees( trees, trans_points, dim, facValue );
@@ -86,7 +86,7 @@ namespace seqan
 		while( pointIt != points.end() )
 		{
 			_MetaFragment< FragType > & meta = _meta( *pointIt );
-			typename Iterator< String< RangeTree< _ChainPoint< FragType, SpecType >, Static, RT< MaxTree< > >, TStructuring > * > >::Type treeIt = begin( trees );
+			typename Iterator< String< RangeTree< _ChainPoint< FragType, SpecType >, SkipListStatic, RT< MaxTree< > >, TStructuring > * > >::Type treeIt = begin( trees );
 	
 				// actual point is the beginning of a frag
 				// => search for preceding fragment

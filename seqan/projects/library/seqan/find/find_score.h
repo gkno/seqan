@@ -243,6 +243,7 @@ getScore(Pattern<TNeedle, Score<TScoreValue, Simple> > & me)
 //proportional gap cost: Needleman-Wunsch 
 
 //???TODO: Ukkonen trick?
+//???TODO: Finder for affine gap costs?
 
 template <typename TFinder, typename TNeedle, typename TScoreValue>
 bool 
@@ -320,31 +321,14 @@ _find_score_simple_proportional(TFinder & finder, Pattern<TNeedle, Score<TScoreV
 	return false;
 }
 
-//____________________________________________________________________________
-
-template <typename TFinder, typename TNeedle, typename TScoreValue>
-bool 
-_find_score_simple_affine(TFinder &, Pattern<TNeedle, Score<TScoreValue, Simple> > &)
-{
-//???TODO 
-	return false;
-}
-
-
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TFinder, typename TNeedle, typename TScoreValue>
 inline bool 
 find(TFinder & finder, Pattern<TNeedle, Score<TScoreValue, Simple> > & me)
 {
-	if (scoreGapOpen(scoring(me)))
-	{
-		return _find_score_simple_affine(finder, me);
-	}
-	else
-	{
-		return _find_score_simple_proportional(finder, me);
-	}
+	SEQAN_ASSERT(scoreGapOpen(scoring(me)) == scoreGapExtend(scoring(me))) //this finder is only defined for linear gap costs
+	return _find_score_simple_proportional(finder, me);
 }
 
 

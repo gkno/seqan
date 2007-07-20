@@ -93,13 +93,24 @@ public:
 
 template <typename TValue, typename T>
 inline TValue
-score(Score<TValue, Zero> & me,
+score(Score<TValue, Zero> const & me,
 	  T const & left,
 	  T const & right)
 {
 	return 0;
 }
 
+//////////////////////////////////////////////////////////////////////////////
+//compute score for chaining two fragments
+
+template <typename TValue, typename TFragment>
+inline TValue
+scoreChainGap(Score<TValue, Zero> const &,
+			  TFragment &,
+			  TFragment &)
+{
+	return 0;
+}
 
 //////////////////////////////////////////////////////////////////////////////
 

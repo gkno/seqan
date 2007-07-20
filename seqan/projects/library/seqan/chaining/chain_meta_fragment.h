@@ -127,9 +127,9 @@ namespace seqan{
 	{
 		TFragType * _frag;
 			// preceding element in a chain
-		_MetaFragment< TFragType > * _pred;
 		typename Weight< TFragType >::Type _priority;
 		typename Weight< TFragType >::Type _score;
+		_MetaFragment< TFragType > * _pred;
 
 		_MetaFragment()		
 			: _frag( NULL )

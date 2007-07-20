@@ -20,7 +20,7 @@
 #include <seqan/basic.h>
 #include <seqan/sequence.h>
 
-#include "mersenne_twister.h"
+//#include "mersenne_twister.h"
 #include "geom_distribution.h"
 #include "skip_pool_alloc.h"
 #include "skip_list_type.h"

@@ -147,12 +147,12 @@ namespace seqan{
 
 	template< typename FragType, typename SpecType, typename TScore, typename TSize > inline
 	typename Weight< FragType >::Type
-	_maxPriority( _MetaFragment< FragType > & last_meta,
+	_maxPriority( _MetaFragment< FragType > & ,
 					_MetaFragment< FragType > & current_meta,
 					_ChainPoint< FragType, SpecType > & point,
-					G_0_Cost cost, 
-					TScore const & score_,
-					TSize dim )
+					G_0_Cost, 
+					TScore const &,
+					TSize )
 	{
 		return weight( current_meta ) + priority( point );
 	}
@@ -161,10 +161,10 @@ namespace seqan{
 		// calculate the maximum priority
 	template< typename FragType, typename SpecType, typename TScore, typename TSize > inline
 	typename Weight< FragType >::Type
-	_maxPriority( _MetaFragment< FragType > & last_meta,
+	_maxPriority( _MetaFragment< FragType > &,
 					_MetaFragment< FragType > & current_meta,
 					_ChainPoint< FragType, SpecType > & point,
-					G_1_Cost cost, 
+					G_1_Cost, 
 					TScore const & score_,
 					TSize dim )
 	{
@@ -187,11 +187,11 @@ namespace seqan{
 
 	template< typename FragType, typename SpecType, typename TScore, typename TSize > inline
 	typename Weight< FragType >::Type
-	_activatePriority( _MetaFragment< FragType > & last_meta,
-						_ChainPoint< FragType, SpecType > & point,
-						G_0_Cost cost, 
-						TScore const & score_,
-						TSize dim )
+	_activatePriority( _MetaFragment< FragType > &,
+						_ChainPoint< FragType, SpecType > &,
+						G_0_Cost, 
+						TScore const &,
+						TSize )
 	{
 		return 0;
 	}
@@ -201,7 +201,7 @@ namespace seqan{
 	typename Weight< FragType >::Type
 	_activatePriority( _MetaFragment< FragType > & last_meta,
 						_ChainPoint< FragType, SpecType > & point,
-						G_1_Cost cost, 
+						G_1_Cost, 
 						TScore const & score_,
 						TSize dim )
 	{
@@ -220,7 +220,9 @@ namespace seqan{
 		typename Weight< FragType >::Type weight = 0;
 		for( typename Size< FragType >::Type i = 0; i < dim; ++i )
 		{
-			weight += ( scoreGapExtend( score ) * ( leftPosition( _getFrag( upper ), i ) - rightPosition( _getFrag( lower ), i ) ) );
+//!!!Change dist semantics
+//			weight += ( scoreGapExtend( score ) * ( leftPosition( _getFrag( upper ), i ) - rightPosition( _getFrag( lower ), i ) ) );
+			weight += ( scoreGapExtend( score ) * ( leftPosition( _getFrag( upper ), i ) - rightPosition( _getFrag( lower ), i ) - 1) );
 		}
 		return weight;
 	}
@@ -232,7 +234,7 @@ namespace seqan{
 				_MetaFragment< FragType > & lower,
 				Score< TScoreValue, TScoreType > const & score,
 				TItPerm permBeg,
-				TItPerm permEnd,
+				TItPerm,
 				TSize dim )
 	{
 		typename Weight< FragType >::Type weight = 0;
@@ -263,7 +265,7 @@ namespace seqan{
 	struct
 	_ChainSorter
 	{
-		bool inline
+		inline bool
 		operator()( T & first, T & second  )
 		{
 			if ( key( first ) < key( second ) )
@@ -272,7 +274,7 @@ namespace seqan{
 				return true;
 			return false;
 		}
-		bool inline
+		inline bool 
 		operator()( const T & first, const T & second  )
 		{
 			if ( key( first ) < key( second ) )
@@ -351,7 +353,7 @@ namespace seqan{
 								TCPoints & cPoints,
 								FragType & startingFrag,
 								FragType & endFrag,
-								TSpec & spec )
+								TSpec )
 	{
 		typedef typename Key< FragType >::Type KeyType;
 		typedef typename Size< FragType >::Type SizeType;
@@ -418,7 +420,7 @@ namespace seqan{
 								FragType & endFrag,
 								TPerm & perm,
 								typename Size< FragType >::Type fac,
-								TSpec & spec)
+								TSpec &)
 	{
 		typedef typename Key< FragType >::Type KeyType;
 		typedef typename Size< FragType >::Type SizeType;
@@ -459,7 +461,7 @@ namespace seqan{
 		dim_counter = 0;
 		while( dim_counter != dim )
 		{
-			_setLeftPosition( endFrag, dim_counter, maxCoords[ dim_counter ] + 1 );
+			_setLeftPosition( endFrag, dim_counter, maxCoords[ dim_counter ] + 1);
 			_setRightPosition( endFrag, dim_counter, maxCoords[ dim_counter ] + 1 );
 			++dim_counter;
 		}

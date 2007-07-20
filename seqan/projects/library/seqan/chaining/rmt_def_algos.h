@@ -14,7 +14,7 @@ namespace seqan{
 		// -> the deferred RMT comletely builds the list of the lowest layer
 	template< typename TObject, typename TSpec > inline
 	void
-	_completeBuild( SkipList< TObject, Static, RT< MaxTree< TSpec > >, Deferred > & list,
+	_completeBuild( SkipList< TObject, SkipListStatic, RT< MaxTree< TSpec > >, Deferred > & list,
 					typename Size< TObject >::Type dim )
 	{
 		if( dim == 0 )
@@ -37,15 +37,15 @@ namespace seqan{
 		// the second one is equivalent to _performRMQ of the common case
 	template< typename TObject, typename TSpec, typename TBorder, typename TSize, typename TKey >
 	void
-	_performRMQ(	SkipList< TObject, Static, RT< MaxTree< TSpec > >, Deferred > * list,
+	_performRMQ(	SkipList< TObject, SkipListStatic, RT< MaxTree< TSpec > >, Deferred > * list,
 					TBorder & borderObj,
 					TSize dim,
 					TKey searchKey,
 					TObject *& maxObject )
 	{
-		SkipElement< TObject, Static, RT< MaxTree< TSpec > >, Deferred > * layer_element = _getRoot( *list );
-		typename Size< SkipList< TObject, Static, RT< MaxTree< TSpec > >, Deferred > >::Type height = _getCurrentLayer( *list );
-		SkipElement< TObject, Static, RT< MaxTree< TSpec > >, Deferred > ** search_path = _getSearchPath( *_getMainTree( *list ), 0 ) + height - 1;
+		SkipElement< TObject, SkipListStatic, RT< MaxTree< TSpec > >, Deferred > * layer_element = _getRoot( *list );
+		typename Size< SkipList< TObject, SkipListStatic, RT< MaxTree< TSpec > >, Deferred > >::Type height = _getCurrentLayer( *list );
+		SkipElement< TObject, SkipListStatic, RT< MaxTree< TSpec > >, Deferred > ** search_path = _getSearchPath( *_getMainTree( *list ), 0 ) + height - 1;
 				// first search operation
 		_searchFrom( *list, layer_element, searchKey, search_path, dim );
 				// search again
@@ -67,8 +67,8 @@ namespace seqan{
 			--height;
 		}
 		++layer_element;
-		SkipBaseElement< TObject, Static, RT< MaxTree< TSpec > >, Deferred > * base_element = _getDown( *layer_element );
-		SkipBaseElement< TObject, Static, RT< MaxTree< TSpec > >, Deferred > * base_buffer = base_element;
+		SkipBaseElement< TObject, SkipListStatic, RT< MaxTree< TSpec > >, Deferred > * base_element = _getDown( *layer_element );
+		SkipBaseElement< TObject, SkipListStatic, RT< MaxTree< TSpec > >, Deferred > * base_buffer = base_element;
 		while( key( *base_buffer, dim ) < searchKey )
 		{
 			base_buffer = _getRight( *base_buffer );

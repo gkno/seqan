@@ -230,7 +230,7 @@ SEQAN_CHECKPOINT
 
 	TScoreValue score_match = scoreMatch(score_);
 	TScoreValue score_mismatch = scoreMismatch(score_);
-	TScoreValue score_gap_open = scoreGapOpen(score_) + scoreGapExtend(score_);
+	TScoreValue score_gap_open = scoreGapOpen(score_);
 	TScoreValue score_gap_extend = scoreGapExtend(score_);
 
 	TScoreValue border_ = score_gap_open;
@@ -367,7 +367,6 @@ SEQAN_CHECKPOINT
 	
 	TScoreValue score_gap_open = scoreGapOpen(score_);
 	TScoreValue score_gap_diff = score_gap_open;
-	score_gap_open += scoreGapExtend(score_);
 	//TScoreValue score_gap_extend = scoreGapExtend(score_);
 	
 	TMatrixIterator diag_source_ = begin(diag_matrix_);
@@ -484,14 +483,14 @@ needlemanWunsch(Align<TSource, TSpec> & align_,
 {
 SEQAN_CHECKPOINT
 	TScoreValue ret;
-	if(scoreGapOpen(score_)==0)
-	{
+	if(scoreGapOpen(score_)==scoreGapExtend(score_))
+	{//linear gap costs
 		Matrix<TScoreValue> matr;
 	    ret = needleman_wunsch(matr, sourceSegment(row(align_, 0)), sourceSegment(row(align_, 1)), score_);
 		needleman_wunsch_trace(align_, begin(matr), score_);
 	}
 	else
-	{
+	{//affine gap costs
 		Matrix<TScoreValue> d_matr;
 		Matrix<TScoreValue> v_matr;
 		Matrix<TScoreValue> h_matr;

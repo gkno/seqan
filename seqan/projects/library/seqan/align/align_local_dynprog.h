@@ -621,9 +621,9 @@ SEQAN_CHECKPOINT
 template <typename TSource, typename TSpec, typename TScoreValue>
 TScoreValue
 smithWaterman(Align<TSource, TSpec> & align_,
-			   LocalAlignmentFinder<TScoreValue> & sw_finder ,
-				 Score<TScoreValue, Simple> const & score_, 
-				 TScoreValue & cutoff)
+			  LocalAlignmentFinder<TScoreValue> & sw_finder ,
+			  Score<TScoreValue, Simple> const & score_, 
+			  TScoreValue & cutoff)
 {
 SEQAN_CHECKPOINT
 

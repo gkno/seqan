@@ -22,7 +22,7 @@ namespace seqan {
 	T
 	_geomRand( )
 	{
-		static unsigned long seed = mt_random();
+		static unsigned long seed = rand();
 		T value = 0;
 		while( true )
 		{
