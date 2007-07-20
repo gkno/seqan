@@ -12,9 +12,6 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 
-struct TagDotDrawing_;
-typedef Tag<TagDotDrawing_> const DotDrawing;
-
 template <typename TFile, typename TText, typename TESASpec>
 void write(TFile & file, 
 	   Index<TText, Index_ESA<TESASpec> > & stree,
