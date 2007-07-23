@@ -5,8 +5,8 @@ using namespace seqan;
 
 int main ()
 {
-	String<unsigned char> text = "hello world!";
-	String<unsigned char> pattern = "l";
+	String<char> text = "hello world!";
+	String<char> pattern = "l";
 	String<unsigned> sa;
 
 	resize(sa, length(text));

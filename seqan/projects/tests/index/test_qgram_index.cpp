@@ -97,7 +97,7 @@ void testQGramIndexSchnell()
 	resize(index, length(text) - q + 2);	
 	
 	String<TPosition> pos;	
-	int pos_size = _intPow(ValueSize<Dna>::VALUE, q - shapeCountBlanks(shape));
+	int pos_size = _intPow((unsigned)ValueSize<Dna>::VALUE, q - shapeCountBlanks(shape));
 	pos_size += 1;	
 	resize(pos, pos_size);
 
@@ -124,7 +124,7 @@ void testGappedQGramIndex()
 	resize(index, length(text) - q + 2);
 	
 	String<TPosition> pos;
-    int pos_size = _intPow(ValueSize<Dna>::VALUE, q - shapeCountBlanks(shape));
+    int pos_size = _intPow((unsigned)ValueSize<Dna>::VALUE, q - shapeCountBlanks(shape));
 	pos_size += 1;	
 	resize(pos, pos_size);
 
@@ -178,7 +178,7 @@ void testUngappedQGramIndex()
 	resize(index, length(text) - q + 1);
 	
 	String<TPosition> pos;
-    int pos_size = _intPow(ValueSize<Dna>::VALUE, q - shapeCountBlanks(shape));
+    int pos_size = _intPow((unsigned)ValueSize<Dna>::VALUE, q - shapeCountBlanks(shape));
 	pos_size += 1;	
 	resize(pos, pos_size);
 
