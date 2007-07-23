@@ -151,7 +151,7 @@ SEQAN_CHECKPOINT
 template <typename TValue, typename TSpec>
 inline typename Iterator<TValue *, Tag<TSpec> const>::Type  
 begin(TValue * me, 
-	  Tag<TSpec> const tag_)
+	  Tag<TSpec> const)
 {
 SEQAN_CHECKPOINT
 	typedef typename Iterator<TValue *, Tag<TSpec> const>::Type TIterator;
@@ -161,7 +161,7 @@ SEQAN_CHECKPOINT
 template <typename TValue, typename TSpec>
 inline typename Iterator<TValue const *, Tag<TSpec> const>::Type  
 begin(TValue const * me, 
-	  Tag<TSpec> const tag_)
+	  Tag<TSpec> const)
 {
 SEQAN_CHECKPOINT
 	typedef typename Iterator<TValue const *, Tag<TSpec> const>::Type TIterator;

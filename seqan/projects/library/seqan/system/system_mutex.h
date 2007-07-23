@@ -41,7 +41,7 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 
         inline bool open(BOOL initial = false) {
-            return hMutex = CreateMutex(&MutexDefaultAttributes, initial, NULL);
+            return (hMutex = CreateMutex(&MutexDefaultAttributes, initial, NULL)) != NULL;
         }
 
         inline bool close() {
@@ -53,7 +53,7 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 
         inline bool unlock() {
-            return ReleaseMutex(hMutex);
+            return ReleaseMutex(hMutex) != 0;
         }
 
         inline operator bool() const {

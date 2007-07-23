@@ -41,15 +41,21 @@ namespace SEQAN_NAMESPACE_MAIN
 */
 
 	// predefined iterator traits
-	struct Preorder:			VSTreeIteratorTraits<_Preorder, True> {};
+	struct Preorder:			VSTreeIteratorTraits<_Preorder,  True> {};
 	struct Postorder:			VSTreeIteratorTraits<_Postorder, True> {};
-	struct PreorderEmptyEdges:	VSTreeIteratorTraits<_Preorder, False> {};	// also iterate over
+	struct PreorderEmptyEdges:	VSTreeIteratorTraits<_Preorder,  False> {};	// also iterate over
 	struct PostorderEmptyEdges:	VSTreeIteratorTraits<_Postorder, False> {};	// empty edges (with $-label)
 
 	// traits for TopDown iterators (w/o ParentLinks) for which postorder/preorder is ignored
 	struct HideEmptyEdges:		VSTreeIteratorTraits<_Postorder, True> {};
 	struct EmptyEdges:			VSTreeIteratorTraits<_Postorder, False> {};	// empty edges (with $-label)
 	
+	// MultiMEMs are more specialized MaxRepeats
+	template <typename TSpec = void>
+	struct _MaxRepeats;	// base class
+	struct _MultiMEMs;	// subclass tag
+
+
 
 	// virtual suffix tree iterators
 	template <typename TSpec = void>
@@ -67,14 +73,14 @@ namespace SEQAN_NAMESPACE_MAIN
 		template <typename TSpec = Postorder>
 		struct BottomUp;					// starts in the first node of a depth-first-search and can go next
 
-			// bottom up repeat search iterators
-			struct SuperMaxRepeats;			// maximal repeat and not part of a longer repeat
-			struct SuperMaxRepeatsFast;
-			struct MUMs;					// maximal unique match (unique in every sequence)
-			struct MaxRepeats;				// maximal repeat
-			struct MaxRepeatOccurences;
-			struct MultiMEMs;				// maximal repeat over different sequences
-			struct MultiMEMOccurences;
+			struct	SuperMaxRepeats;					// maximal repeat and not part of a longer repeat
+			struct	SuperMaxRepeatsFast;
+			struct	MUMs;								// Maximal Unique Match (unique in every sequence)
+
+			typedef _MaxRepeats<void>		MaxRepeats;	// maximal repeat
+			struct	MaxRepeatOccurences;
+			typedef _MaxRepeats<_MultiMEMs> MultiMEMs;	// Multiple Maximal Exact Match
+			struct	MultiMEMOccurences;					// i.e. maximal match over different sequences
 
 
 /**

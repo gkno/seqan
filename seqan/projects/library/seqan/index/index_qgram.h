@@ -164,8 +164,19 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Fibre<TIndex, Tag<_Fibre_Shape> >::Type	TShape;
 		typedef typename Value<TIndex>::Type						TValue;
 		return _intPow(
-			ValueSize<TValue>::VALUE, 
+			(unsigned)ValueSize<TValue>::VALUE, 
 			length(indexShape(index)) - shapeCountBlanks(indexShape(index))) + 1;
+	}
+
+	template <typename TIndex>
+	inline int _fullDir2Length(TIndex const &index) 
+	{
+		typedef typename Fibre<TIndex, Tag<_Fibre_Shape> >::Type	TShape;
+		typedef typename Value<TIndex>::Type						TValue;
+		return (_intPow(
+					(unsigned)ValueSize<TValue>::VALUE,
+					length(indexShape(index)) - shapeCountBlanks(indexShape(index)) + 1) - 1)
+				/ ((unsigned)ValueSize<TValue>::VALUE - 1) + 1;
 	}
 
 //////////////////////////////////////////////////////////////////////////////

@@ -13,10 +13,11 @@ namespace SEQAN_NAMESPACE_MAIN
 	struct FixedGappedShape;
 
 
-	inline int _intPow(int a, int b)
+	template <typename TValue, typename TExponent>
+	inline TValue _intPow(TValue a, TExponent b)
 	{
 	SEQAN_CHECKPOINT
-		int ret = 1;
+		TValue ret = 1;
 		while (b != 0)
 		{
 			if (b & 1) ret *= a;
@@ -97,7 +98,9 @@ Spec.SimpleShape
 
 		unsigned					span;
 		typename Value<Shape>::Type	hValue;
+		typename Value<Shape>::Type	XValue;
 		typename Value<Shape>::Type	leftFactor;
+		typename Value<Shape>::Type	leftFactor2;
 		TValue						leftChar;
 //____________________________________________________________________________
 		
@@ -123,7 +126,9 @@ Spec.SimpleShape
 		Shape(Shape const &other):
 			span(other.span),
 			hValue(other.hValue),
+			XValue(other.XValue),
 			leftFactor(other.leftFactor),
+			leftFactor2(other.leftFactor2),
 			leftChar(other.leftChar) {}
 	};
 
@@ -137,10 +142,14 @@ Spec.SimpleShape
 	public:
 //____________________________________________________________________________
 
-		enum					  { span = q };
-		typename Value<Shape>::Type	hValue;
-		enum					  { leftFactor = Power<ValueSize<TValue>::VALUE, q - 1>::VALUE };
-		TValue						leftChar;
+		enum { span = q };
+		enum { leftFactor = Power<ValueSize<TValue>::VALUE, q - 1>::VALUE };
+		enum { leftFactor2 = (Power<ValueSize<TValue>::VALUE, q>::VALUE - 1) / (ValueSize<TValue>::VALUE - 1) };
+		// Sigma^(q-1) + Sigma^(q-2) + ... + Sigma + 1
+
+		typename Value<Shape>::Type	hValue;		// current hash value
+		typename Value<Shape>::Type	XValue;		// Sum_{i=0..q-1} (x_i + 1)
+		TValue						leftChar;	// left-most character
 //____________________________________________________________________________
 		
 		Shape() {}
@@ -201,7 +210,8 @@ Spec.SimpleShape
 	resize(Shape<TValue, SimpleShape> & me, TSize new_length)
 	{
 	SEQAN_CHECKPOINT
-		me.leftFactor = _intPow(ValueSize<TValue>::VALUE, new_length - 1);
+		me.leftFactor = _intPow((unsigned)ValueSize<TValue>::VALUE, new_length - 1);
+		me.leftFactor2 = (_intPow((unsigned)ValueSize<TValue>::VALUE, new_length) - 1) / (ValueSize<TValue>::VALUE - 1);
 		return me.span = new_length;
 	}
 
@@ -233,10 +243,10 @@ Spec.SimpleShape
 		typedef typename Value< Shape<TValue, TSpec> >::Type	THValue;
 		typedef typename Size< Shape<TValue, TSpec> >::Type		TSize;
 
-		me.hValue = (THValue)(me.leftChar = *it);
+		me.hValue = _ord(me.leftChar = *it);
 		for(TSize i = 1; i < me.span; ++i) {
 			++it;
-			me.hValue = me.hValue * ValueSize<TValue>::VALUE + (THValue)*it;
+			me.hValue = me.hValue * ValueSize<TValue>::VALUE + _ord(*it);
 		}
 		return me.hValue;
 	}
@@ -261,20 +271,20 @@ Spec.SimpleShape
 	{
 	SEQAN_CHECKPOINT
 		// remove first, shift left, and add next character
-		typedef typename Value< Shape<TValue, TSpec> >::Type THValue;
+		typedef typename Value< Shape<TValue, TSpec> >::Type	THValue;
 		me.hValue = 
-			(me.hValue - (THValue)me.leftChar * me.leftFactor) * ValueSize<TValue>::VALUE
-			+ (THValue)*(it + me.span - 1);
+			(me.hValue - _ord(me.leftChar) * me.leftFactor) * ValueSize<TValue>::VALUE
+			+ _ord(*(it + me.span - 1));
 		me.leftChar = *it;
 		return me.hValue;
 	}
 
 //____________________________________________________________________________
 
-/**.Function.hashCrossBorder:
+/**.Function.hash2:
 ..cat:Index
-..summary:Computes a hash value for a q-gram.
-..signature:hashCrossBorder(shape, it, charsLeft)
+..summary:Computes a hash value for a q-gram, even if it is shorter than q.
+..signature:hash2(shape, it, charsLeft)
 ..param.shape:Shape to be used for hashing the q-gram.
 ...type:Class.Shape
 ..param.it:Sequence iterator pointing to the first character of the q-gram.
@@ -284,7 +294,7 @@ Spec.SimpleShape
 
 	template <typename TValue, typename TSpec, typename TIter, typename TSize>
 	inline typename Value< Shape<TValue, TSpec> >::Type
-	hashCrossBorder(Shape<TValue, TSpec> &me, TIter it, TSize charsLeft)
+	hash2(Shape<TValue, TSpec> &me, TIter it, TSize charsLeft)
 	{
 	SEQAN_CHECKPOINT
 		typedef typename Value< Shape<TValue, TSpec> >::Type	THValue;
@@ -294,15 +304,95 @@ Spec.SimpleShape
 
 		TSize i = 0;
 		if (iEnd > 0) {
-			me.hValue = (THValue)(me.leftChar = *it);
+			me.hValue = me.XValue = _ord(me.leftChar = *it);
 			for(i = 1; i < iEnd; ++i) {
 				++it;
-				me.hValue = me.hValue * ValueSize<TValue>::VALUE + (THValue)*it;
+				// update sum of x_i
+				me.XValue += _ord(*it);
+				// shift hash
+				me.hValue = me.hValue * ValueSize<TValue>::VALUE + me.XValue;
 			}
-		}
+		} else
+			me.hValue = me.XValue = 0;
+
 		// fill shape with zeros
 		for(; i < (TSize)me.span; ++i)
-			me.hValue *= ValueSize<TValue>::VALUE;
+			me.hValue = me.hValue * ValueSize<TValue>::VALUE + me.XValue;
+		return me.hValue += iEnd;
+	}
+
+	template <typename TValue, typename TSpec, typename TIter, typename TSize>
+	inline typename Value< Shape<TValue, TSpec> >::Type
+	hash2Upper(Shape<TValue, TSpec> &me, TIter it, TSize charsLeft)
+	{
+	SEQAN_CHECKPOINT
+		typedef typename Value< Shape<TValue, TSpec> >::Type	THValue;
+
+		TSize iEnd = me.span;
+		if (iEnd > charsLeft) iEnd = charsLeft;
+
+		THValue hValue, XValue;
+		TSize i = 0;
+		if (iEnd > 0) {
+			hValue = XValue = _ord(*it);
+			for(i = 1; i < iEnd; ++i) {
+				++it;
+				// update sum of x_i
+				XValue += _ord(*it);
+				// shift hash
+				hValue = hValue * ValueSize<TValue>::VALUE + XValue;
+			}
+		} else
+			hValue = XValue = 0;
+
+		if (charsLeft <= me.span) {
+			++XValue;
+			++hValue;
+		}
+
+		// fill shape with zeros
+		for(; i < (TSize)me.span; ++i)
+			hValue = hValue * ValueSize<TValue>::VALUE + XValue;
+		return hValue += iEnd;
+	}
+
+//____________________________________________________________________________
+
+/**
+.Function.hash2Next:
+..cat:Index
+..summary:Computes the hash value for the next q-gram, even if it is shorter than q.
+..signature:hash2Next(shape, it)
+..param.shape:Shape to be used for hashing the q-gram.
+...type:Class.Shape
+..param.it:Sequence iterator pointing to the first character of the next q-gram.
+..returns:Hash value of the q-gram.
+..remarks:@Function.hash@ has to be called before with $shape$ on the left adjacent q-gram.
+*/
+
+	template <typename TValue, typename TSpec, typename TIter, typename TSize>
+	inline typename Value< Shape<TValue, TSpec> >::Type
+	hash2Next(Shape<TValue, TSpec> &me, TIter &it, TSize charsLeft)
+	{
+	SEQAN_CHECKPOINT
+		// remove first, shift left, and add next character
+		typedef typename Value< Shape<TValue, TSpec> >::Type	THValue;
+
+		if (charsLeft >= me.span) {
+			// update sum of x_i
+			me.XValue = me.XValue + _ord(*(it + me.span - 1)) - _ord(me.leftChar);
+			// shift hash
+			me.hValue = (me.hValue - _ord(me.leftChar) * me.leftFactor2) * ValueSize<TValue>::VALUE + me.XValue
+						- me.span * (ValueSize<TValue>::VALUE - 1);
+		} else {
+			// update sum of x_i
+			me.XValue -= _ord(me.leftChar);
+			// shift hash
+			me.hValue = (me.hValue - _ord(me.leftChar) * me.leftFactor2) * ValueSize<TValue>::VALUE + me.XValue
+				        - charsLeft * (ValueSize<TValue>::VALUE - 1) - ValueSize<TValue>::VALUE;
+		}
+
+		me.leftChar = *it;
 		return me.hValue;
 	}
 

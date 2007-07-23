@@ -18,13 +18,13 @@ namespace SEQAN_NAMESPACE_MAIN
 	struct _SuffixLess : 
 		public ::std::binary_function < TSAValue, TSAValue, bool >
     {
-		typedef typename Iterator<TText>::Type TIter;
+		typedef typename Iterator<TText, Standard>::Type TIter;
 		TIter _begin, _end;
 
 		_SuffixLess() {}
 		_SuffixLess(TText &text): 
-			_begin(begin(text)),
-			_end(end(text)) {}
+			_begin(begin(text, Standard())),
+			_end(end(text, Standard())) {}
 
 		inline bool operator() (TSAValue const a, TSAValue const b) const 
 		{
@@ -46,13 +46,66 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
 	};
 
-    template < typename TSA,
+    template < typename TSAValue, typename TText >
+	struct _SuffixLessOffset : 
+		public ::std::binary_function < TSAValue, TSAValue, bool >
+    {
+		typedef typename Iterator<TText, Standard>::Type	TIter;
+		typedef typename Size<TText>::Type					TSize;
+
+		TIter _begin, _end;
+
+		_SuffixLessOffset() {}
+		template <typename TSize>
+		_SuffixLessOffset(TText &text, TSize lcp): 
+			_begin(begin(text, Standard()) + lcp),
+			_end(end(text, Standard())) {}
+
+		inline bool operator() (TSAValue const a, TSAValue const b) const 
+		{
+			TIter itA = _begin + a;
+			TIter itB = _begin + b;
+			if (a <= b) {
+				for(; itB != _end; ++itB, ++itA) {
+					if (lexLess(*itA, *itB)) return true;
+					if (lexLess(*itB, *itA)) return false;
+				}
+				return false;
+			} else {
+				for(; itA != _end; ++itA, ++itB) {
+					if (lexLess(*itA, *itB)) return true;
+					if (lexLess(*itB, *itA)) return false;
+				}
+				return true;
+			}
+		}
+	};
+
+
+	template < typename TSA, 
+			typename TText,
+			typename TSize>
+	void _sortBucketQuickSort(
+		TSA &sa,
+		TText &text,
+		TSize lcp)
+	{
+	SEQAN_CHECKPOINT
+		// sort bucket with quicksort
+		sort(
+			begin(sa, Standard()), 
+			end(sa, Standard()), 
+			_SuffixLessOffset<typename Value<TSA>::Type, TText>(text, lcp));
+	}
+
+	template < typename TSA,
                typename TText >
     inline void createSuffixArray(
 		TSA &SA,
 		TText &s,
 		SAQSort const &)
 	{
+	SEQAN_CHECKPOINT
 		typedef typename Size<TSA>::Type TSize;
 		typedef typename Iterator<TSA, Standard>::Type TIter;
 

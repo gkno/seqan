@@ -31,11 +31,11 @@ namespace SEQAN_NAMESPACE_MAIN
         Handle hSemaphore;
 
         Semaphore(Type init = 0, Type max = MAX_VALUE) {
-            SEQAN_DO_SYS2(hSemaphore = CreateSemaphore(&SemaphoreDefaultAttributes, init, max, NULL), "Could not create Semaphore")
+            SEQAN_DO_SYS2((hSemaphore = CreateSemaphore(&SemaphoreDefaultAttributes, init, max, NULL)) != NULL, "Could not create Semaphore")
         }
 
         ~Semaphore() {
-            SEQAN_DO_SYS2(CloseHandle(hSemaphore), "Could not destroy Semaphore")
+            SEQAN_DO_SYS2(CloseHandle(hSemaphore) != NULL, "Could not destroy Semaphore")
         }
 
         bool lock(DWORD timeout_millis = INFINITE) {
@@ -43,7 +43,7 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 
         void unlock() {
-            SEQAN_DO_SYS2(ReleaseSemaphore(hSemaphore, 1, NULL), "Could not unlock Semaphore")
+            SEQAN_DO_SYS2(ReleaseSemaphore(hSemaphore, 1, NULL) != NULL, "Could not unlock Semaphore")
         }
 
     private:

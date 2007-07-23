@@ -63,7 +63,7 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 
         inline bool open(BOOL initial = FALSE) {
-            return hEvent = CreateEvent(&EventDefaultAttributes, TRUE, initial, NULL);
+            return (hEvent = CreateEvent(&EventDefaultAttributes, TRUE, initial, NULL)) != NULL;
         }
 
         inline bool close() {
@@ -76,11 +76,11 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 
         inline bool signal() {
-            return SetEvent(hEvent);
+            return SetEvent(hEvent) != 0;
         }
 
         inline bool reset() {
-            return ResetEvent(hEvent);
+            return ResetEvent(hEvent) != 0;
         }
 
         inline operator bool() const {

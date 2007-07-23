@@ -206,6 +206,23 @@ This interval is the @Function.value@ of the iterator.
 	};
 
 
+	//////////////////////////////////////////////////////////////////////////////
+	// Iterator wrappers
+	//////////////////////////////////////////////////////////////////////////////
+
+	template <typename TObject, typename TSpec>
+	struct Iterator< TObject, BottomUp<TSpec> > {
+		typedef Iter< TObject, VSTree< BottomUp<TSpec> > > Type;
+	};
+
+	template <typename TObject, typename TSpec>
+	struct Iterator< TObject, TopDown<TSpec> > {
+		typedef Iter< TObject, VSTree< TopDown<TSpec> > > Type;
+	};
+
+
+
+
 	template < typename TIndex, typename TSpec >
 	inline void _dumpHistoryStack(Iter<TIndex, VSTree<TSpec> > &it) {
 		for(typename Size<TIndex>::Type i = 0; i < length(it.history); ++i)
@@ -1372,7 +1389,6 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 	inline bool isUnique(Iter<TIndex, VSTree<TSpec> > const &it) {
 		VectorSet<
 			typename Size<TIndex>::Type,
-			SetFunctors< typename Size<TIndex>::Type >,
 			Alloc<> 
 		> set(countSequences(container(it)));
 		return isUnique(it, set);
@@ -1420,7 +1436,6 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 	inline int getFrequency(Iter<TIndex, VSTree<TSpec> > const &it) {
 		VectorSet<
 			typename Size<TIndex>::Type,
-			SetFunctors< typename Size<TIndex>::Type >,
 			Alloc<> 
 		> set(countSequences(container(it)));
 		return getFrequency(it, set);

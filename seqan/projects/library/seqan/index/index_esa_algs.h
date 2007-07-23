@@ -13,71 +13,9 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 	
 	//////////////////////////////////////////////////////////////////////////////
-	// more sophisticated algorithms on suffix trees / enhanced suffix arrays
+	// more sophisticated algorithms on enhanced suffix arrays of 1 sequence
+	// (also called virtual suffix trees)
 	//////////////////////////////////////////////////////////////////////////////
-
-
-	//////////////////////////////////////////////////////////////////////////////
-	// MUMs - generalized suffix tree version
-	//////////////////////////////////////////////////////////////////////////////
-
-	template < typename TSTree >
-	struct GetVSTreeIteratorTraits< Iter< TSTree, VSTree< BottomUp<MUMs> > > > {
-		typedef PostorderEmptyEdges	Type;
-	};
-
-	template < typename TSTree >
-	class Iter< TSTree, VSTree< BottomUp<MUMs> > >:
-		public Iter< TSTree, VSTree< BottomUp<> > > 
-	{
-	public:
-		typedef Iter< TSTree, VSTree< BottomUp<> > >			TBase;
-		typedef typename Size<TSTree>::Type						TSize;
-		typedef VectorSet<TSize, SetFunctors<TSize>, Alloc<> >	TSeqSet;
-//____________________________________________________________________________
-
-		TSize		minLength;
-		TSize		seqCount;
-		TSeqSet		seqSet;
-//____________________________________________________________________________
-
-		Iter(TSTree &_tree):
-			TBase(_tree),
-			minLength(1),
-			seqCount(countSequences(_tree)),
-			seqSet(countSequences(_tree))
-		{
-			indexRequire(_tree, ESA_BWT());
-			goNext(*this);	// the iterator starts in a suffix, i.e. not a MUM node (length(occ)<2<=seqCount)
-		}
-
-		Iter(TSTree &_tree, TSize _minLength):
-			TBase(_tree),
-			minLength(_minLength),
-			seqCount(countSequences(_tree)),
-			seqSet(countSequences(_tree))
-		{
-			indexRequire(_tree, ESA_BWT());
-			goNext(*this);	// the iterator starts in a suffix, i.e. not a MUM node (length(occ)<2<=seqCount)
-		}
-
-		Iter(Iter const &_origin):
-			TBase((TBase const &)_origin),
-			minLength(_origin.minLength),
-			seqCount(countSequences(container(_origin))),
-			seqSet(countSequences(container(_origin))) {}
-	};
-
-	template < typename TSTree >
-	inline void goNext(Iter< TSTree, VSTree< BottomUp<MUMs> > > &it) {
-		do {
-			goNext(it, PostorderEmptyEdges());
-		} while (!atEnd(it) && 
-			     !(	(countOccurences(it) == it.seqCount) && 
-					(repLength(it) >= it.minLength) &&
-					isUnique(it, it.seqSet) && 
-					isLeftMaximal(it)) );
-	}
 
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -256,8 +194,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename TValue, typename TSize>
 	struct _FractionCompound {
 		typedef _FractionHeader<TSize>			TFractionHeader;
-		typedef Pair<TValue, TFractionHeader>	TFraction;	// TFraction = (c,(begin,end))	c..char, begin/end indices in posList
-		typedef typename Set<TFraction>::Type	TSet;
+		typedef Pair<TValue, TFractionHeader>	TFraction;	// TFraction = (c,(begin,end))
+		typedef typename Set<TFraction>::Type	TSet;		// c..char, begin/end indices in posList
 
 		TSet			set;
 		TFractionHeader	leftmost;
@@ -265,44 +203,75 @@ namespace SEQAN_NAMESPACE_MAIN
 		_FractionCompound():
 			leftmost(0,0,0) {}
 	};
-/*
-	// contains a set of fractions (one for each [bwt value,seqNo]) 
-	// and a fraction for the [undefined bwt value,seqNo] (for the virtual character at position -1)
+
+	// tests existence of left maximal repeats
+	// right maximality is implicitly given
 	template <typename TValue, typename TSize>
-	struct _FractionCompoundMultiMEM {
-		typedef _FractionHeader<TSize>			TFractionHeader;
-		typedef Pair<TValue, TFractionHeader>	TFraction;	// TFraction = (c,(begin,end))	c..char, begin/end indices in posList
-		typedef typename Set<TFraction>::Type	TSet;
+	int _haveMaximalRepeats(
+		_FractionCompound<TValue, TSize> const &a,
+		_FractionCompound<TValue, TSize> const &b)
+	{
+		TSize cs = length(a.set), ps = length(b.set);
 
-		TSet			set;
-		TFractionHeader	leftmost;
+		if (a.leftmost.size > 0) ++cs;
+		if (b.leftmost.size > 0) ++ps;
 
-		_FractionCompound():
-			leftmost(0,0,0) {}
-	};
-*/
-	template < typename TSTree >
-	struct GetVSTreeIteratorTraits< Iter< TSTree, VSTree< BottomUp<MaxRepeats> > > > {
+		if (cs == 0 || ps == 0) return false;
+		if (cs  > 1 || ps  > 1) return true;
+
+		if (a.leftmost.size > 0 || b.leftmost.size > 0)
+			return true;
+
+		return (keyOf(begin(a.set)) != keyOf(begin(b.set)));
+	}
+
+
+	template <typename TValue, typename TSize>
+	int _haveMaximalRepeats(
+		_FractionCompound<TValue, TSize> const &a,
+		_FractionCompound<TValue, TSize> const &b,
+		TValue &equalKey)
+	{
+		TSize cs = length(a.set), ps = length(b.set);
+
+		if (a.leftmost.size > 0) ++cs;
+		if (b.leftmost.size > 0) ++ps;
+
+		if (cs == 0 || ps == 0) return 0;
+		if (cs  > 1 || ps  > 1) return 2;	// more than 2
+
+		if (a.leftmost.size > 0 || b.leftmost.size > 0)
+			return 2;
+
+		if ((equalKey = keyOf(begin(a.set))) != keyOf(begin(b.set)))
+			return 2;
+		else
+			return 1;
+	}
+
+
+	template < typename TSTree, typename TSpec >
+	struct GetVSTreeIteratorTraits< Iter< TSTree, VSTree< BottomUp<_MaxRepeats<TSpec> > > > > {
 		typedef PostorderEmptyEdges	Type;
 	};
 
-	template < typename TSTree >
-	class Iter< TSTree, VSTree< BottomUp<MaxRepeats> > >:
+	template < typename TSTree, typename TSpec >
+	class Iter< TSTree, VSTree< BottomUp<_MaxRepeats<TSpec> > > >:
 		public Iter< TSTree, VSTree< BottomUp<> > > 
 	{
 	public:
 		typedef Iter< TSTree, VSTree< BottomUp<> > >	TBase;
-		typedef typename Size<TSTree>::Type				TSize;
 		typedef typename Value<TSTree>::Type			TValue;
+		typedef typename Size<TSTree>::Type				TSize;
 
-		typedef _FractionCompound<TValue, TSize>	TFractionCompound;
-		typedef String<TFractionCompound, Block<> >	TSetStack;
-		typedef String<TSize>						TPositionList;
+		typedef _FractionCompound<TValue, TSize>		TFractionCompound;
+		typedef String<TFractionCompound, Block<> >		TSetStack;
+		typedef String<TSize>							TPositionList;
 		
-		typedef typename TFractionCompound::TSet	TSet;
-		typedef typename Iterator<TSet>::Type		TSetIterator;
+		typedef typename TFractionCompound::TSet		TSet;
+		typedef typename Iterator<TSet>::Type			TSetIterator;
 
-		typedef typename TBase::TStackEntry			TStackEntry;
+		typedef typename TBase::TStackEntry				TStackEntry;
 
 //____________________________________________________________________________
 
@@ -358,22 +327,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		inline bool hasRepeats() 
 		{
 			if (length(setStack) < 2) return false;
-
-			TFractionCompound &child  = top(setStack);
-			TFractionCompound &parent = topPrev(setStack);
-
-			TSize cs = length(child.set), ps = length(parent.set);
-
-			if (child.leftmost.size  > 0) ++cs;
-			if (parent.leftmost.size > 0) ++ps;
-
-			if (cs == 0 || ps == 0) return false;
-			if (cs  > 1 || ps  > 1) return true;
-
-			if (child.leftmost.size > 0 || parent.leftmost.size > 0)
-				return true;
-
-			return keyOf(begin(child.set)) != keyOf(begin(parent.set));
+			return _haveMaximalRepeats(top(setStack), topPrev(setStack)) > 0;
 		}
 
 		inline TSize countRepeats() 
@@ -383,20 +337,20 @@ namespace SEQAN_NAMESPACE_MAIN
 			TFractionCompound &child  = top(setStack);
 			TFractionCompound &parent = topPrev(setStack);
 
-			TSetIterator child_fraction		= begin(child.set);
-			TSetIterator child_end			= end(child.set);
-			TSetIterator parent_fraction	= begin(parent.set);
-			TSetIterator parent_end			= end(parent.set);
+			TSetIterator childFraction	= begin(child.set);
+			TSetIterator childEnd		= end(child.set);
+			TSetIterator parentFraction	= begin(parent.set);
+			TSetIterator parentEnd		= end(parent.set);
 
 			TSize sum = 0;
-			for(; child_fraction != child_end; ++child_fraction) {
-				for(; parent_fraction != parent_end; ++parent_fraction) {
-					if (keyOf(child_fraction) != keyOf(parent_fraction))
-						sum += (*child_fraction).size * (*parent_fraction).size;
+			for(; childFraction != childEnd; ++childFraction) {
+				for(; parentFraction != parentEnd; ++parentFraction) {
+					if (keyOf(childFraction) != keyOf(parentFraction))
+						sum += (*childFraction).size * (*parentFraction).size;
 
-					sum += child.leftmost.size * (*parent_fraction).size;
+					sum += child.leftmost.size * (*parentFraction).size;
 				}
-				sum += (*child_fraction).size * parent.leftmost.size;
+				sum += (*childFraction).size * parent.leftmost.size;
 			}
 			sum += child.leftmost.size * parent.leftmost.size;
 			return sum;
@@ -428,9 +382,9 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
 	};
 
-	template < typename TSTree >
+	template < typename TSTree, typename TSpec >
 	inline typename VertexDescriptor<TSTree>::Type 
-	value(Iter< TSTree, VSTree< BottomUp<MaxRepeats> > > const &it) 
+	value(Iter< TSTree, VSTree< BottomUp<_MaxRepeats<TSpec> > > > const &it) 
 	{
 		if (empty(it.history))
 			return it.vDesc;
@@ -439,26 +393,25 @@ namespace SEQAN_NAMESPACE_MAIN
 		return TDesc(TRange(top(it.history).i1, it.vDesc.i1.i2), 0);
 	}
 
-	template < typename TSTree >
+	template < typename TSTree, typename TSpec >
 	inline typename Size<TSTree>::Type 
-	repLength(Iter< TSTree, VSTree< BottomUp<MaxRepeats> > > const &it) 
+	repLength(Iter< TSTree, VSTree< BottomUp<_MaxRepeats<TSpec> > > > const &it) 
 	{
 		return top(it.history).i2;
 	}
 
 	// add bwt partitions of child to parent node
-	template < typename TSTree, typename TFractionCompound >
-	inline void maxRepeatMerge(
-		Iter<TSTree, VSTree< BottomUp<MaxRepeats> > > &it, 
-		TFractionCompound &parent,
-		TFractionCompound &child)
+	template < typename TSTree, typename TSpec, typename TValue, typename TSize >
+	inline void _fractionMerge(
+		Iter<TSTree, VSTree< BottomUp<TSpec> > > &it, 
+		_FractionCompound<TValue, TSize> &parent,
+		_FractionCompound<TValue, TSize> &child)
 	{
-		typedef typename Value<TSTree>::Type	TValue;
-		typedef typename Size<TSTree>::Type		TSize;
-		typedef _FractionHeader<TSize>			TFractionHeader;
-		typedef Pair<TValue, TFractionHeader>	TFraction;
-		typedef typename Set<TFraction>::Type	TSet;
-		typedef typename Iterator<TSet>::Type	TSetIterator;
+		typedef _FractionCompound<TValue, TSize>	TCompound;
+		typedef typename TCompound::TFraction		TFraction;
+		typedef typename TCompound::TFractionHeader	TFractionHeader;
+		typedef typename TCompound::TSet			TSet;
+		typedef typename Iterator<TSet>::Type		TSetIterator;
 
 		TSetIterator _end = end(child.set);
 		for(TSetIterator i = begin(child.set); i != _end; ++i) {
@@ -482,8 +435,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	// maximal repeat push/leaf handlers of lcp-dfs-traversal
-	template < typename TSTree, typename TElement >
-	inline void _dfsOnPush(Iter<TSTree, VSTree< BottomUp<MaxRepeats> > > &it, TElement const &e) 
+	template < typename TSTree, typename TElement, typename TSpec >
+	inline void _dfsOnPush(Iter<TSTree, VSTree< BottomUp<_MaxRepeats<TSpec> > > > &it, TElement const &e) 
 	{
 		typedef Iter<TSTree, VSTree< BottomUp<> > > TBase;
 		_dfsOnPush((TBase&)it, e);
@@ -496,41 +449,47 @@ namespace SEQAN_NAMESPACE_MAIN
 		it._dump();
 */	}
 
-	template < typename TSTree >
-	inline void _dfsOnLeaf(Iter<TSTree, VSTree< BottomUp<MaxRepeats> > > &it) 
+	template < typename TSTree, typename TSpec >
+	inline void _dfsOnLeaf(Iter<TSTree, VSTree< BottomUp<_MaxRepeats<TSpec> > > > &it) 
 	{
 		typedef Iter<TSTree, VSTree< BottomUp<> > > TBase;
 		_dfsOnLeaf((TBase&)it);
 
 		typedef typename Value<TSTree>::Type	TValue;
 		typedef typename Size<TSTree>::Type		TSize;
+		typedef typename SAValue<TSTree>::Type	TSAValue;
 		typedef _FractionHeader<TSize>			TFractionHeader;
 		typedef Pair<TValue, TFractionHeader>	TFraction;
 
 		push(it.setStack);
 
-		TSize index = _dfsRange(it).i1;
-		if (!posAtFirstLocal(saAt(index, container(it)), stringSetLimits(it))) 
+		TSTree &index = container(it);
+
+		TSize		gPos = posGlobalize(_dfsRange(it).i1, stringSetLimits(index));
+		TSAValue	lPos;
+		posLocalize(lPos, _dfsRange(it).i1, stringSetLimits(index));
+
+		if (!posAtFirstLocal(lPos))
 			insert(
 				TFraction(
-					bwtAt(index, container(it)),
-					TFractionHeader(index, index, 1)), 
+					bwtAt(gPos, container(it)),
+					TFractionHeader(gPos, gPos, 1)), 
 				top(it.setStack).set);
 		else
-			top(it.setStack).leftmost = TFractionHeader(index, index, 1);
+			top(it.setStack).leftmost = TFractionHeader(gPos, gPos, 1);
 
-		_setSizeInval(it.posList[index]);
+		_setSizeInval(it.posList[gPos]);
 /*
 		::std::cerr << "LEAF ";
 		_dumpHistoryStack(it);
 		it._dump();
 */	}
 
-	template < typename TSTree >
-	inline void goNext(Iter< TSTree, VSTree< BottomUp<MaxRepeats> > > &it) {
+	template < typename TSTree, typename TSpec >
+	inline void goNext(Iter< TSTree, VSTree< BottomUp<_MaxRepeats<TSpec> > > > &it) {
 		do {
 			if (it.canMerge && length(it.setStack) >= 2) {
-				maxRepeatMerge(it, topPrev(it.setStack), top(it.setStack));
+				_fractionMerge(it, topPrev(it.setStack), top(it.setStack));
 				pop(it.setStack);
 			}
 			goNext(it, PostorderEmptyEdges());
@@ -597,12 +556,12 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename TFractionCompound::TSet	TSet;
 		typedef typename Iterator<TSet const>::Type	TSetIterator;
 
-		TSize			child_ptr, parent_ptr;
-		TSetIterator	child_fraction, child_end;
-		TSetIterator	parent_fraction, parent_end;
+		TSize			childPtr, parentPtr;
+		TSetIterator	childFraction, childEnd;
+		TSetIterator	parentFraction, parentEnd;
 		bool			_atEnd;
 		TPair			tmp;
-		bool			leftmost_child, leftmost_parent;
+		bool			leftmostChild, leftmostParent;
 		
 		Iter<TSTree, VSTree<BottomUp<MaxRepeats> > > const *maxIt;
 
@@ -613,9 +572,9 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
 		
 		inline bool _innerStep() {
-			if (_isSizeInval(child_ptr = maxIt->posList[child_ptr])) {
-				if (_isSizeInval(parent_ptr = maxIt->posList[parent_ptr])) return false;
-				child_ptr = objectOf(child_fraction).begin;
+			if (_isSizeInval(childPtr = maxIt->posList[childPtr])) {
+				if (_isSizeInval(parentPtr = maxIt->posList[parentPtr])) return false;
+				childPtr = objectOf(childFraction).begin;
 			}
 			return true;
 		}
@@ -623,61 +582,61 @@ namespace SEQAN_NAMESPACE_MAIN
 		inline void _firstParentFraction() {
 			TFractionCompound const &parent = topPrev(maxIt->setStack);
 
-			parent_fraction	= begin(parent.set);
-			parent_end		= end(parent.set);
+			parentFraction	= begin(parent.set);
+			parentEnd		= end(parent.set);
 
-			if (parent_fraction != parent_end) {
-				leftmost_parent = false;
-				parent_ptr = objectOf(parent_fraction).begin;
+			if (parentFraction != parentEnd) {
+				leftmostParent = false;
+				parentPtr = objectOf(parentFraction).begin;
 			} else {
-				leftmost_parent = true;
-				parent_ptr = parent.leftmost.begin;
+				leftmostParent = true;
+				parentPtr = parent.leftmost.begin;
 			}
 		}
 
 		inline void _firstChildFraction() {
 			TFractionCompound const &child = top(maxIt->setStack);
 
-			child_fraction	= begin(child.set);
-			child_end		= end(child.set);
+			childFraction	= begin(child.set);
+			childEnd		= end(child.set);
 
-			if (child_fraction != child_end) {
-				leftmost_child = false;
-				child_ptr = objectOf(child_fraction).begin;
+			if (childFraction != childEnd) {
+				leftmostChild = false;
+				childPtr = objectOf(childFraction).begin;
 			} else {
-				leftmost_child = true;
-				child_ptr = child.leftmost.begin;
+				leftmostChild = true;
+				childPtr = child.leftmost.begin;
 			}
 		}
 
 		inline bool _nextParentFraction() {
-			if (leftmost_parent)
+			if (leftmostParent)
 				return false;
 
-			if (++parent_fraction == parent_end) {
+			if (++parentFraction == parentEnd) {
 				if (topPrev(maxIt->setStack).leftmost.size > 0) {
-					leftmost_parent = true;
-					parent_ptr = topPrev(maxIt->setStack).leftmost.begin;
+					leftmostParent = true;
+					parentPtr = topPrev(maxIt->setStack).leftmost.begin;
 				} else
 					return false;
 			} else
-				parent_ptr = objectOf(parent_fraction).begin;
+				parentPtr = objectOf(parentFraction).begin;
 
 			return true;
 		}
 
 		inline bool _nextChildFraction() {
-			if (leftmost_child)
+			if (leftmostChild)
 				return false;
 
-			if (++child_fraction == child_end) {
+			if (++childFraction == childEnd) {
 				if (top(maxIt->setStack).leftmost.size > 0) {
-					leftmost_child = true;
-					child_ptr = top(maxIt->setStack).leftmost.begin;
+					leftmostChild = true;
+					childPtr = top(maxIt->setStack).leftmost.begin;
 				} else
 					return false;
 			} else
-				child_ptr = objectOf(child_fraction).begin;
+				childPtr = objectOf(childFraction).begin;
 
 			return true;
 		}
@@ -691,8 +650,8 @@ namespace SEQAN_NAMESPACE_MAIN
 						return false;
 					}
 				}
-				if (leftmost_child || leftmost_parent) break;
-			} while (keyOf(child_fraction) == keyOf(parent_fraction));		// ignore occurences with equal bwt entries
+				if (leftmostChild || leftmostParent) break;
+			} while (keyOf(childFraction) == keyOf(parentFraction));		// ignore occurences with equal bwt entries
 			return true;
 		}
 
@@ -706,15 +665,15 @@ namespace SEQAN_NAMESPACE_MAIN
 			_firstChildFraction();
 			_firstParentFraction();
 
-			if (!leftmost_child && !leftmost_parent &&
-				(keyOf(child_fraction) == keyOf(parent_fraction)))
+			if (!leftmostChild && !leftmostParent &&
+				(keyOf(childFraction) == keyOf(parentFraction)))
 				_atEnd = !_outerStep();
 			else
 				_atEnd = false;
 
 			if (!_atEnd) {
-				tmp.i1 = saAt(parent_ptr, container(*maxIt));
-				tmp.i2 = saAt(child_ptr, container(*maxIt));
+				tmp.i1 = saAt(parentPtr, container(*maxIt));
+				tmp.i2 = saAt(childPtr, container(*maxIt));
 			}
 		}
 	};
@@ -736,13 +695,13 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline Iter<TRepeat, MaxRepeatOccurences> &
 	goNext(Iter<TRepeat, MaxRepeatOccurences> &it)  {
 		if (it._innerStep()) {
-			it.tmp.i1 = saAt(it.parent_ptr, container(*it.maxIt));
-			it.tmp.i2 = saAt(it.child_ptr, container(*it.maxIt));
+			it.tmp.i1 = saAt(it.parentPtr, container(*it.maxIt));
+			it.tmp.i2 = saAt(it.childPtr, container(*it.maxIt));
 			return it;
 		}
 		if (it._outerStep()) {
-			it.tmp.i1 = saAt(it.parent_ptr, container(*it.maxIt));
-			it.tmp.i2 = saAt(it.child_ptr, container(*it.maxIt));
+			it.tmp.i1 = saAt(it.parentPtr, container(*it.maxIt));
+			it.tmp.i2 = saAt(it.childPtr, container(*it.maxIt));
 		}
 		return it;
 	}
@@ -759,13 +718,13 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 /*
-	template <typename TSTree>
-	struct ItValue< Iter<TSTree, VSTree< BottomUp<MaxRepeats> > > > {
+	template <typename TSTree, typename TSpec>
+	struct ItValue< Iter<TSTree, VSTree< BottomUp<_MaxRepeats<TSpec> > > > > {
 		typedef MaxRepeat<TSTree> Type;
 	};
 */
-	template <typename TSTree>
-	struct Size< Iter<TSTree, VSTree< BottomUp<MaxRepeats> > > > {
+	template <typename TSTree, typename TSpec>
+	struct Size< Iter<TSTree, VSTree< BottomUp<_MaxRepeats<TSpec> > > > > {
 		typedef typename Size<TSTree>::Type Type;
 	};
 
@@ -786,21 +745,6 @@ namespace SEQAN_NAMESPACE_MAIN
 	// Iterator wrappers
 	//////////////////////////////////////////////////////////////////////////////
 
-	template <typename TObject, typename TSpec>
-	struct Iterator< TObject, BottomUp<TSpec> > {
-		typedef Iter< TObject, VSTree< BottomUp<TSpec> > > Type;
-	};
-
-	template <typename TObject, typename TSpec>
-	struct Iterator< TObject, TopDown<TSpec> > {
-		typedef Iter< TObject, VSTree< TopDown<TSpec> > > Type;
-	};
-
-	template <typename TObject>
-	struct Iterator< TObject, MaxRepeats > {
-		typedef Iter< TObject, VSTree< BottomUp<MaxRepeats> > > Type;
-	};
-
 	template <typename TObject>
 	struct Iterator< TObject, SuperMaxRepeats > {
 		typedef Iter< TObject, VSTree< BottomUp<SuperMaxRepeats> > > Type;
@@ -811,12 +755,10 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef Iter< TObject, VSTree< BottomUp<SuperMaxRepeatsFast> > > Type;
 	};
 
-	template <typename TObject>
-	struct Iterator< TObject, MUMs > {
-		typedef Iter< TObject, VSTree< BottomUp<MUMs> > > Type;
+	template <typename TObject, typename TSpec>
+	struct Iterator< TObject, _MaxRepeats<TSpec> > {
+		typedef Iter< TObject, VSTree< BottomUp<_MaxRepeats<TSpec> > > > Type;
 	};
-
-
 
 //}
 
