@@ -154,6 +154,7 @@
 		inline _proFloat sysTime() { return ( (_proFloat) clock() ) / CLOCKS_PER_SEC; }
     #else
 
+		#include <unistd.h>
 		#ifndef _POSIX_MONOTONIC_CLOCK
 		/* some systems e.g. darwin have no clock_gettime */
 
