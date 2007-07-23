@@ -219,10 +219,13 @@ def createPage():
         s += '<tr><th ' + cls + '>' + server['server'] + '</td><td align=middle ' + cls + '>' + str(server['load']) + '</td><td align=middle ' + cls + '>' + str(server['count']) + '</td><td align=middle ' + cls + '>' + str(server['failures']) + '</td></tr>'
     s += '</table>'
     
-    f = open(PATH_OUTPUT + FILE_OUTPUT)
-    t = f.read()
-    f.close()
-    
+    if os.access(PATH_OUTPUT + FILE_OUTPUT, os.F_OK):
+	    f = open(PATH_OUTPUT + FILE_OUTPUT)
+	    t = f.read()
+	    f.close()
+    else:
+    	t = ''
+    	
     f = open(PATH_OUTPUT + FILE_OUTPUT_OLD, "wb")
     f.write(t)
     f.close()
