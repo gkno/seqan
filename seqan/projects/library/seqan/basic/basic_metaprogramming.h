@@ -197,7 +197,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <unsigned  SIZE>
 	struct MemsetWorker<SIZE, true> {
 		finline static void run(unsigned char* ptr, unsigned char c) {
-			*((unsigned*)ptr) = (unsigned)c << 24 + (unsigned)c << 16 + (unsigned)c << 8 + (unsigned)c;
+			*((unsigned*)ptr) = ((unsigned)c << 24) + ((unsigned)c << 16) + ((unsigned)c << 8) + (unsigned)c;
 			MemsetWorker<SIZE - 4, true>::run(ptr + 4, c);
 		}
 	};
@@ -214,7 +214,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <>
 	struct MemsetWorker<2, true> {
-		finline static void run(unsigned char* ptr, unsigned char c) { *(unsigned short *)ptr = (unsigned short)c << 8 + (unsigned short)c; }
+		finline static void run(unsigned char* ptr, unsigned char c) { *(unsigned short *)ptr = ((unsigned short)c << 8) + (unsigned short)c; }
 	};
 
 	template <>
@@ -243,7 +243,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <unsigned  SIZE, unsigned char c>
 	struct MemsetConstValueWorker<SIZE, true, c> {
 		finline static void run(unsigned char* ptr) {
-			*((unsigned*)ptr) = (unsigned)c << 24 + (unsigned)c << 16 + (unsigned)c << 8 + (unsigned)c;
+			*((unsigned*)ptr) = ((unsigned)c << 24) + ((unsigned)c << 16) + ((unsigned)c << 8) + (unsigned)c;
 			MemsetConstValueWorker<SIZE - 4, true, c>::run(ptr + 4);
 		}
 	};
@@ -260,7 +260,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <unsigned char c>
 	struct MemsetConstValueWorker<2, true, c> {
-		finline static void run(unsigned char* ptr) { *(unsigned short *)ptr = (unsigned short)c << 8 + (unsigned short)c; }
+		finline static void run(unsigned char* ptr) { *(unsigned short *)ptr = ((unsigned short)c << 8) + (unsigned short)c; }
 	};
 
 	template <unsigned char c>

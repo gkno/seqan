@@ -78,7 +78,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		template <typename __T1, typename __T2, typename __TCompression>
 		inline Pair(Pair<__T1, __T2, __TCompression> const &_p): i1(getValueI1(_p)), i2(getValueI2(_p)) {}
 	}
-#ifdef PLATFORM_GCC
+#ifndef PLATFORM_WINDOWS
 	__attribute__((packed))
 #endif
 	;
@@ -111,7 +111,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		inline Pair(Pair<__T1, __T2, __TCompression> const &_p):
 			i12(((T12)getValueI1(_p) << bitShiftI1) + (T12)getValueI2(_p)) {}
 	}
-#ifdef PLATFORM_GCC
+#ifndef PLATFORM_WINDOWS
 	__attribute__((packed))
 #endif
 	;
@@ -215,7 +215,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		inline Triple(Triple<__T1, __T2, __T3, __TCompression> const &_p):
 			i1(getValueI1(_p)), i2(getValueI2(_p)), i3(getValueI3(_p)) {}
 	}
-#ifdef PLATFORM_GCC
+#ifndef PLATFORM_WINDOWS
 	__attribute__((packed))
 #endif
 	;
@@ -372,7 +372,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			return source;
 		}
     }
-#ifdef PLATFORM_GCC
+#ifndef PLATFORM_WINDOWS
 	__attribute__((packed))
 #endif
 	;

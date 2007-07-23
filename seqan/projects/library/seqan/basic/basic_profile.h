@@ -153,11 +153,26 @@
 //        inline _proFloat sysTime() { return GetTickCount() * 1e-3; }
 		inline _proFloat sysTime() { return ( (_proFloat) clock() ) / CLOCKS_PER_SEC; }
     #else
-        inline _proFloat sysTime() {
-	        struct timespec tp;
-	        clock_gettime(CLOCK_MONOTONIC, &tp);
-	        return tp.tv_sec + tp.tv_nsec * 1e-9;
-        }
+
+		#ifndef _POSIX_MONOTONIC_CLOCK
+		/* some systems e.g. darwin have no clock_gettime */
+
+			inline _proFloat sysTime() {
+				struct timeval tp;
+				gettimeofday(&tp, NULL);
+				return tp.tv_sec + tp.tv_usec * 1e-6;
+			}
+
+		#else
+
+			inline _proFloat sysTime() {
+				struct timespec tp;
+				clock_gettime(CLOCK_MONOTONIC, &tp);
+				return tp.tv_sec + tp.tv_nsec * 1e-9;
+			}
+
+	    #endif
+
     #endif
 
     

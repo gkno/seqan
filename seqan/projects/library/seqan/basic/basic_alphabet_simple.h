@@ -762,9 +762,8 @@ template<typename _T, typename TSpec>
 inline
 bool lexLess(SimpleType<_T, TSpec> const &_Left, SimpleType<_T, TSpec> const &_Right)
 {	// return lexicographical _Left < _Right
-    return 
-        reinterpret_cast<typename _MakeUnsigned<_T>::Type const&>(_Left) <
-        reinterpret_cast<typename _MakeUnsigned<_T>::Type const&>(_Right);
+	typedef typename _MakeUnsigned<_T>::Type TUnsigned;
+    return (TUnsigned)(_Left.value) < (TUnsigned)(_Right.value);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -777,7 +776,7 @@ operator ++ (SimpleType<TValue, TSpec> & me)
 	return me;
 }
 template <typename TValue, typename TSpec>
-inline SimpleType<TValue, TSpec> &
+inline SimpleType<TValue, TSpec>
 operator ++ (SimpleType<TValue, TSpec> & me,
 			 int)
 {
@@ -796,7 +795,7 @@ operator -- (SimpleType<TValue, TSpec> & me)
 	return me;
 }
 template <typename TValue, typename TSpec>
-inline SimpleType<TValue, TSpec> &
+inline SimpleType<TValue, TSpec>
 operator -- (SimpleType<TValue, TSpec> & me,
 			 int)
 {
