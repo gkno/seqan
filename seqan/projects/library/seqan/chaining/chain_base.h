@@ -264,6 +264,14 @@ chain(TSource & source,
 		}
 	}
 
+	//adjust right positions of the end fragment
+	TDestIterator it2 = end(dest, Standard());
+	--it2;
+	for (unsigned int i = 0; i < dim; ++i)
+	{
+		_setRightPosition(*it2, i, rightPosition(*it2, i) - 1);
+	}
+
 	//return score
 	return ret_value;
 }
@@ -334,7 +342,7 @@ chain(TSource & source,
 	  TDest & dest, 
 	  TScoring const & scoring)
 {
-	return compute_chain(source, dest, scoring, Default());
+	return chain(source, dest, scoring, Default());
 }
 
 

@@ -132,7 +132,7 @@ SEQAN_ASSERT( me._meta != NULL )
 
 	template< typename TFragType, unsigned int ISize > inline
 	typename Size< TFragType >::Type
-	dimension( _ChainPoint< TFragType, Array< ISize > > & me )
+	dimension( _ChainPoint< TFragType, Array< ISize > > &)
 	{
 		return ISize;
 	}

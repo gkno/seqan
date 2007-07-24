@@ -164,16 +164,13 @@ namespace seqan{
 	}
 
 
-	const size_t _rt_max_thresh = 16;
-
-		
 	template< typename TObject, typename TSpec, typename TStructuring > inline
 	bool
 	_checkAssocThresh( SkipBaseElement< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > * first,
 						SkipBaseElement< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > * second )
 	{
 		SEQAN_CHECKPOINT
-		return ( ( second - first ) > _rt_max_thresh );
+		return ( ( second - first ) > 16 );
 	}
 
 		// dump of the lowest layer of a RMT

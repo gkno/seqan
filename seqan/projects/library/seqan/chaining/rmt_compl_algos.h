@@ -128,7 +128,7 @@ namespace seqan{
 		}
 		++layer_element;
 		SkipBaseElement< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > * base_element = _getDown( *layer_element );
-		typename Weight< TObject >::Type max_score = priority( *maxObject );
+//		typename Weight< TObject >::Type max_score = priority( *maxObject );
 			// in the lowest layer, searching to the right
 		while( key( *base_element, dim ) < searchKey )
 		{
@@ -184,7 +184,7 @@ namespace seqan{
 	template< typename TObject, typename TSpec, typename TStructuring, typename TBorder >
 	void
 	_performRMQ(	SkipList< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > * list,
-					TBorder & obj,
+					TBorder & /*obj*/,
 					typename Key< TObject >::Type searchKey,
 					TObject *& maxObject )
 	{

@@ -709,7 +709,7 @@ namespace seqan
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring, typename TParam > inline 
 	typename Key< TObject >::Type 
 	key( SkipBaseElement< TObject, TModus, TSpec, TStructuring > & me,
-				TParam & p )
+				TParam & /*p*/ )
 	{
 		SEQAN_CHECKPOINT
 		return me._key;
@@ -787,10 +787,10 @@ struct SkipBaseElement
 		SkipElement< TObject, TModus, TSpec, TStructuring > * _up;
 		SkipBaseElement< TObject, TModus, TSpec, TStructuring > * _next;	// pointer needed for memory pool allocator, points to next free memory block 
 	};
-		// saved key/value pair
-	TObject * _obj;
 		// the actual key
 	typename Key< TObject >::Type _key;
+		// saved key/value pair
+	TObject * _obj;
 		
 
 	typename Cargo< SkipBaseElement< TObject, TModus, TSpec, TStructuring > >::Type _cargo;

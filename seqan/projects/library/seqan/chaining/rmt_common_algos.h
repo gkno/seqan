@@ -278,7 +278,7 @@ namespace seqan{
 	_add_max(	SkipList< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring >  & list,
 				SkipBaseElement< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > * base,
 				THeight height,
-				SkipElement< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > ** search_path )
+				SkipElement< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > ** /*search_path*/ )
 	{			
 			// adding additional layers, if necessary 
 		SEQAN_CHECK2( &_getUp( *base ) == NULL, "tried to build tower on bas element with tower" )

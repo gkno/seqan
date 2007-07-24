@@ -72,7 +72,7 @@ _getNextBlock( Allocator< ClassPool< TClass, TSpec, TParentAlloc > > & me,
 
 template< typename TClass, typename TSpec, typename TParentAlloc > inline
 void 
-_setNextBlock( Allocator< ClassPool< TClass, TSpec, TParentAlloc > > & me,
+_setNextBlock( Allocator< ClassPool< TClass, TSpec, TParentAlloc > > & /*me*/,
 				TClass & dest,
 				TClass * block )
 {

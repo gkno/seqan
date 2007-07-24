@@ -160,9 +160,9 @@ namespace seqan{
 	void
 	_initSL(	SkipList< TObject, TModus, RT< TSpec >, TStructuring > & list,
 				SkipBaseElement< TObject, TModus, RT< TSpec >, TStructuring > * first_base,
-				SkipBaseElement< TObject, TModus, RT< TSpec >, TStructuring > * last_base,
+				SkipBaseElement< TObject, TModus, RT< TSpec >, TStructuring > * /*last_base*/,
 				TSize numEntries,
-				TSize dim )
+				TSize /*dim*/ )
 	{
 		SEQAN_CHECKPOINT
 			// allocate space for bording elements
@@ -248,7 +248,7 @@ namespace seqan{
 
 	template< typename TObject, typename TModus, typename TSpec, typename TSize > inline
 	void 
-	_connect_actualize(	SkipList< TObject, TModus, RT< TSpec >, SemiDeferred > & list,
+	_connect_actualize(	SkipList< TObject, TModus, RT< TSpec >, SemiDeferred > & /*list*/,
 						SkipBaseElement< TObject, TModus, RT< TSpec >, SemiDeferred > * base,
 						TSize height,
 						SkipElement< TObject, TModus, RT< TSpec >, SemiDeferred > ** search_path,

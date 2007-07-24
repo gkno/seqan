@@ -34,12 +34,12 @@ public:
 //____________________________________________________________________________
 
 	friend inline TValue 
-	scoreMatch(Score & me)
+	scoreMatch(Score &)
 	{
 		return 0;
 	}
 	friend inline TValue const 
-	scoreMatch(Score const & me)
+	scoreMatch(Score const &)
 	{
 		return 0;
 	}
@@ -50,30 +50,30 @@ public:
 		return 0;
 	}
 	friend inline TValue const 
-	scoreMismatch(Score const & me)
+	scoreMismatch(Score const &)
 	{
 		return 0;
 	}
 
 	friend inline TValue 
-	scoreGapExtend(Score & me)
+	scoreGapExtend(Score &)
 	{
 		return 0;
 	}
 	friend inline TValue const 
-	scoreGapExtend(Score const & me)
+	scoreGapExtend(Score const &)
 	{
 		return 0;
 	}
 
 	template <typename T>
 	friend inline T 
-	scoreGapOpen(Score<T, Zero> & me)
+	scoreGapOpen(Score<T, Zero> &)
 	{
 		return 0;
 	}
 	friend inline TValue const 
-	scoreGapOpen(Score<TValue, Zero> const & me)
+	scoreGapOpen(Score<TValue, Zero> const &)
 	{
 		return 0;
 	}

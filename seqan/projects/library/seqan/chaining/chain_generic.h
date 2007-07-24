@@ -63,7 +63,7 @@ _chain_generic_initFrags(TSource & source,
 
 	//create top fragment
 	TFragment top(dimension(source[0]));
-	makeTopFragment(top);
+	makeBeginFragment(top);
 
 	//create entry in frags for each item in source
 	resize(frags, length(source));
@@ -155,7 +155,7 @@ _chain_generic_Backtrace(TSource & source,
 
 	//chain will start with top fragment
 	TFragment top(dimension(bottom));
-	makeTopFragment(top);
+	makeBeginFragment(top);
 	appendValue(dest, top);
 
 	//reverse chain
@@ -193,7 +193,7 @@ chain(TSource & source,
 	//create bottom fragment
 	unsigned int dim = dimension(source[0]);
 	TFragment bottom(dim);
-	makeBottomFragment(bottom, source);
+	makeEndFragment(bottom, source);
 
 	//iterate all fragments
 	for (TFragsIterator it = it_begin; it < it_end; ++it)

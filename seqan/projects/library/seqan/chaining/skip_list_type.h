@@ -343,7 +343,8 @@ struct Cargo< SkipBaseElement< TObject, TModus, TSpec, TStructuring > >
 
 template< typename TTag, typename TCargo > inline
 void
-_initCargo( TTag * tag, TCargo & _cargo )
+_initCargo( TTag * /*tag*/, 
+		   TCargo & /*_cargo*/ )
 {};
 
 

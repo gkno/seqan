@@ -110,7 +110,7 @@ SEQAN_ASSERT( me._left->size() == me._right->size() )
 //set a fragment to "top" position, that is the starting fragment of a global chain
 template <typename TFragment> 
 inline void 
-makeTopFragment(TFragment & me)
+makeBeginFragment(TFragment & me)
 {
 	unsigned int dim = dimension(me);
 	for (unsigned int i = 0; i < dim; ++i)
@@ -123,8 +123,8 @@ makeTopFragment(TFragment & me)
 //set a fragment to "bottom" position in respect to a fragment set
 template <typename TFragment, typename TFragments> 
 inline void 
-makeBottomFragment(TFragment & me,
-				   TFragments & fragments)
+makeEndFragment(TFragment & me,
+				TFragments & fragments)
 {
 	typedef typename Size<TFragment>::Type TSize;
 

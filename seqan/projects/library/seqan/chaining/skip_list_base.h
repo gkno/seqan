@@ -170,7 +170,7 @@ namespace seqan
 		// generates height with geometric distribution of a fair coin
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring, typename THeight > inline 
 	typename seqan::Size< SkipList< TObject, TModus, TSpec, TStructuring > >::Type 
-	_throwCoin( SkipList< TObject, TModus, TSpec, TStructuring > & list,
+	_throwCoin( SkipList< TObject, TModus, TSpec, TStructuring > & /*list*/,
 				THeight max_height)
 	{
 		SEQAN_CHECKPOINT
@@ -267,7 +267,7 @@ namespace seqan
 		// complete (=default) case
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring, typename TExtraParam > 
 	SkipBaseElement< TObject, TModus, TSpec, TStructuring > * 
-	_sort(	SkipList< TObject, TModus, TSpec, TStructuring > & list,
+	_sort(	SkipList< TObject, TModus, TSpec, TStructuring > & /*list*/,
 			SkipBaseElement< TObject, TModus, TSpec, TStructuring > * elem,
 			SkipBaseElement< TObject, TModus, TSpec, TStructuring > * right_border,
 			TExtraParam & param )
