@@ -68,32 +68,15 @@ void testChainer(int count,
 	
 	_generateRandomFrags(fragments, count, 1, 3 * count, 10, 20, dim);
 
-for (unsigned int i = 0; i < length(fragments); ++i)
-{
-	for (unsigned int j = 0; j < dim; ++j)
-		_setLeftPosition(fragments[i], j, leftPosition(fragments[i], j) + 1);
-}
-
 	String< Fragment<int> > ch;
 	reserve(ch, count);
 
 
-	//build chainer chain
-	int chain_score = chain(fragments, ch, scoring, Chainer());
+	//build chain
+	int chain_score = chain(fragments, ch, scoring);
 	std::cout << chain_score << ", " << length(ch) << "\n";
 
-for (unsigned int i = 0; i < length(fragments); ++i)
-{
-	for (unsigned int j = 0; j < dim; ++j)
-		_setLeftPosition(fragments[i], j, leftPosition(fragments[i], j) - 1);
-}
-for (unsigned int i = 1; i < length(ch); ++i)
-{
-	for (unsigned int j = 0; j < dim; ++j)
-		_setLeftPosition(ch[i], j, leftPosition(ch[i], j) - 1);
-}
-
-	//verify validity of chainer chain
+	//verify validity of chain
 	SEQAN_TASSERT(length(ch) > 0)
 	int sum = weight(ch[0]);
 	for (unsigned int i = 1; i < length(ch); ++i)
@@ -142,7 +125,7 @@ for (unsigned int i = 1; i < length(ch); ++i)
 
 int main()
 {
-//	testChainer(1000, 2, Score<int, Zero>());
+	testChainer(1000, 2, Score<int, Zero>());
 	testChainer(1000, 2, Score<int, Manhattan>());
 
 	return 0;
