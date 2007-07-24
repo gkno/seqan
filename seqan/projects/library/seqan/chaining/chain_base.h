@@ -41,9 +41,12 @@ namespace seqan
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 		
-	struct Chainer
-	{};
-	//typedef Tag<Chainer_> const Chainer;
+	struct _GenericChaining;
+	typedef Tag<_GenericChaining> const GenericChaining;
+
+	struct _RangetreeChaining;
+	typedef Tag<_RangetreeChaining> const RangetreeChaining;
+
 
 	struct G_0_Cost
 	{};
@@ -148,69 +151,69 @@ namespace seqan
 */
 	template< typename TSource, typename TDest, typename TScoreValue, typename TScoreType, typename TStructuring >
 	TScoreValue
-	compute_chain( TSource & source, TDest & dest, Score< TScoreValue, TScoreType > const & score_, Chainer tag, TStructuring structuring )
+	compute_chain( TSource & source, TDest & dest, Score< TScoreValue, TScoreType > const & score_, TStructuring structuring )
 	{
 
-		SEQAN_CHECK2( scoreGapOpen( score_ ) == scoreGapExtend( score_ ), "Chaining only supports linear gap costs" )
-		SEQAN_CHECK2( scoreGapOpen( score_ ) >= 0 && scoreGapExtend( score_ ) >= 0 && scoreMismatch( score_ ) >= 0, "Scores should be positive" )
+//		SEQAN_CHECK2( scoreGapOpen( score_ ) == scoreGapExtend( score_ ), "Chaining only supports linear gap costs" )
+//		SEQAN_CHECK2( scoreGapOpen( score_ ) >= 0 && scoreGapExtend( score_ ) >= 0 && scoreMismatch( score_ ) >= 0, "Scores should be positive" )
 		switch( dimension( value( begin( source ) ) ) )
 		{
 			case 1: SEQAN_REPORT("One dimensional chaining not supported")
 					return 0;
 			case 2: if( scoreMismatch( score_ ) == 0 && scoreGapExtend( score_ ) == 0 )
 					{
-						return _compute_chain( source, dest, G_0_Cost(), score_, tag, structuring, _ChainSpecType< Array< 1 > >() );
+						return _compute_chain( source, dest, G_0_Cost(), score_, structuring, _ChainSpecType< Array< 1 > >() );
 					}
 					else if( scoreMismatch( score_ ) > 0 && scoreGapExtend( score_ ) > 0 )
 					{
 						if( scoreMismatch( score_ ) == scoreGapExtend( score_ ) )
-							return _compute_chain( source, dest, G_1_Cost(), score_, tag, structuring, _ChainSpecType< Array< 1 > >() );
+							return _compute_chain( source, dest, G_1_Cost(), score_, structuring, _ChainSpecType< Array< 1 > >() );
 						else //if( scoreMismatch( score_ ) > 2 * scoreGapExtend( score_ ) )
-							return _compute_chain( source, dest, G_SoP_Cost(), score_, tag, structuring,_ChainSpecType< Array< 2 > >() );
+							return _compute_chain( source, dest, G_SoP_Cost(), score_, structuring,_ChainSpecType< Array< 2 > >() );
 					}
 					SEQAN_ASSERT2( false, "Gap/mismatch model not supported" );
 					break;
 			case 3: if( scoreMismatch( score_ ) == 0 && scoreGapExtend( score_ ) == 0 )
-					return _compute_chain( source, dest, G_0_Cost(), score_, tag, structuring, _ChainSpecType< Array< 2 > >() );
+					return _compute_chain( source, dest, G_0_Cost(), score_, structuring, _ChainSpecType< Array< 2 > >() );
 					else if( scoreMismatch( score_ ) > 0 && scoreGapExtend( score_ ) > 0 )
 					{
 						if( scoreMismatch( score_ ) == scoreGapExtend( score_ ) )
-							return _compute_chain( source, dest, G_1_Cost(), score_, tag, structuring, _ChainSpecType< Array< 2 > >() );
+							return _compute_chain( source, dest, G_1_Cost(), score_, structuring, _ChainSpecType< Array< 2 > >() );
 						else //if( scoreMismatch( score_ ) > 2 * scoreGapExtend( score_ ) )
-							return _compute_chain( source, dest, G_SoP_Cost(), score_, tag, structuring,_ChainSpecType< Array< 3 > >() );
+							return _compute_chain( source, dest, G_SoP_Cost(), score_, structuring,_ChainSpecType< Array< 3 > >() );
 					}
 					SEQAN_ASSERT2( false, "Gap/mismatch model not supported" );
 					break;
 			case 4:	if( scoreMismatch( score_ ) == 0 && scoreGapExtend( score_ ) == 0 )
-					return _compute_chain( source, dest, G_0_Cost(), score_, tag, structuring, _ChainSpecType< Array< 3 > >() );
+					return _compute_chain( source, dest, G_0_Cost(), score_, structuring, _ChainSpecType< Array< 3 > >() );
 					else if( scoreMismatch( score_ ) > 0 && scoreGapExtend( score_ ) > 0 )
 					{
 						if( scoreMismatch( score_ ) == scoreGapExtend( score_ ) )
-							return _compute_chain( source, dest, G_1_Cost(), score_, tag, structuring, _ChainSpecType< Array< 3 > >() );
+							return _compute_chain( source, dest, G_1_Cost(), score_, structuring, _ChainSpecType< Array< 3 > >() );
 						else //if( scoreMismatch( score_ ) > 2 * scoreGapExtend( score_ ) )
-							return _compute_chain( source, dest, G_SoP_Cost(), score_, tag, structuring,_ChainSpecType< Array< 4 > >() );
+							return _compute_chain( source, dest, G_SoP_Cost(), score_, structuring,_ChainSpecType< Array< 4 > >() );
 					}
 					SEQAN_ASSERT2( false, "Gap/mismatch model not supported" );
 					break;
 			case 5:	if( scoreMismatch( score_ ) == 0 && scoreGapExtend( score_ ) == 0 )
-					return _compute_chain( source, dest, G_0_Cost(), score_, tag, structuring, _ChainSpecType< Array< 4 > >() );
+					return _compute_chain( source, dest, G_0_Cost(), score_, structuring, _ChainSpecType< Array< 4 > >() );
 					else if( scoreMismatch( score_ ) > 0 && scoreGapExtend( score_ ) > 0 )
 					{
 						if( scoreMismatch( score_ ) == scoreGapExtend( score_ ) )
-							return _compute_chain( source, dest, G_1_Cost(), score_, tag, structuring, _ChainSpecType< Array< 4 > >() );
+							return _compute_chain( source, dest, G_1_Cost(), score_, structuring, _ChainSpecType< Array< 4 > >() );
 						else //if( scoreMismatch( score_ ) > 2 * scoreGapExtend( score_ ) )
-							return _compute_chain( source, dest, G_SoP_Cost(), score_, tag, structuring,_ChainSpecType< Array< 5 > >() );
+							return _compute_chain( source, dest, G_SoP_Cost(), score_, structuring,_ChainSpecType< Array< 5 > >() );
 					}
 					SEQAN_ASSERT2( false, "Gap/mismatch model not supported" );
 					break;
 			default:if( scoreMismatch( score_ ) == 0 && scoreGapExtend( score_ ) == 0 )
-					return _compute_chain( source, dest, G_0_Cost(), score_, tag, structuring, _ChainSpecType< Default >() );
+					return _compute_chain( source, dest, G_0_Cost(), score_, structuring, _ChainSpecType< Default >() );
 					else if( scoreMismatch( score_ ) > 0 && scoreGapExtend( score_ ) > 0 )
 					{
 						if( scoreMismatch( score_ ) == scoreGapExtend( score_ ) )
-							return _compute_chain( source, dest, G_1_Cost(), score_, tag, structuring, _ChainSpecType< Default >() );
+							return _compute_chain( source, dest, G_1_Cost(), score_, structuring, _ChainSpecType< Default >() );
 						else //if( scoreMismatch( score_ ) > 2 * scoreGapExtend( score_ ) )
-							return _compute_chain( source, dest, G_SoP_Cost(), score_, tag, structuring, _ChainSpecType< Default >() );
+							return _compute_chain( source, dest, G_SoP_Cost(), score_, structuring, _ChainSpecType< Default >() );
 					}
 					SEQAN_ASSERT2( false, "Gap/mismatch model not supported" );
 
@@ -220,36 +223,118 @@ namespace seqan
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/*TODO
-_chain_woehrle(TSource & source,
-			   TDest & dest,
-			   TScoring const & scoring)
+template< typename TSource, typename TDest, typename TScoring>
+inline typename Value<TScoring>::Type
+chain(TSource & source,
+	  TDest & dest,
+	  TScoring const & scoring,
+	  RangetreeChaining)
 {
+	typedef typename Iterator<TSource, Standard>::Type TSourceIterator;
+	typedef typename Iterator<TDest, Standard>::Type TDestIterator;
+
+	SEQAN_ASSERT(length(source))
+
+	//transform coordinates to old style ("end is last item")
+	unsigned int dim = dimension(source[0]);
+	for (TSourceIterator it = begin(source, Standard()); it < end(source, Standard()); ++it)
+	{
+		for (unsigned int i = 0; i < dim; ++i)
+		{
+			_setLeftPosition(*it, i, leftPosition(*it, i) + 1);
+		}
+	}
+
+	//compute chain
+	typename Value<TScoring>::Type ret_value = compute_chain(source, dest, scoring, SemiDeferred()); //Deferred(), Complete()
+
+	//retransform coordinates to new style ("end is behind last item")
+	for (TSourceIterator it = begin(source, Standard()); it < end(source, Standard()); ++it)
+	{
+		for (unsigned int i = 0; i < dim; ++i)
+		{
+			_setLeftPosition(*it, i, leftPosition(*it, i) - 1);
+		}
+	}
+	for (TDestIterator it = begin(dest, Standard()) + 1; it < end(dest, Standard()); ++it)
+	{
+		for (unsigned int i = 0; i < dim; ++i)
+		{
+			_setLeftPosition(*it, i, leftPosition(*it, i) - 1);
+		}
+	}
+
+	//return score
+	return ret_value;
 }
-*/
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
 .Function.chain:
 ..summary:Computes the chain on a set of fragments.
 ..cat:Chaining
-..signature:chain(source, dest, score, algorithm)
+..signature:chain(source, dest, score [, algorithm])
 ..param.source:The set of fragments
-..param.dest:A destination conainer.
+..param.dest:A destination container.
 ..param.score:The penalties for gaps between fragments.
 ...remarks:Values should be positive integers.
 ..param.algorithm:A tag that identifies the algorithm which is used for chaining.
+...default:$Default$
+...value:$Default$: Compiler selects best algorithm.
+...value:$GenericChaining$: A simple generic chaining algorithm.
+...value:$RangetreeChaining$: An elaborated chaining algorithm for @Spec.Score Zero@, @Spec.Score Manhattan@, and @Score ChainSoP@ scoring schemes.
 */
 
 
-//spec for Chainer
+
+//implementation for Default
 template< typename TSource, typename TDest, typename TScoring>
 inline typename Value<TScoring>::Type
 chain(TSource & source, 
 	  TDest & dest, 
-	  TScoring const & scoring, 
-	  Chainer)
+	  TScoring const & scoring,
+	  Default)
 {
-	return compute_chain(source, dest, scoring, Chainer(), SemiDeferred()); //Deferred(), Complete()
+	return chain(source, dest, scoring, GenericChaining()); //default is GenericChaining
+}
+template< typename TSource, typename TDest, typename TValue>
+inline TValue
+chain(TSource & source, 
+	  TDest & dest, 
+	  Score<TValue, Zero> const & scoring,
+	  Default)
+{
+	return chain(source, dest, scoring, RangetreeChaining());
+}
+template< typename TSource, typename TDest, typename TValue>
+inline TValue
+chain(TSource & source, 
+	  TDest & dest, 
+	  Score<TValue, Manhattan> const & scoring,
+	  Default)
+{
+	return chain(source, dest, scoring, RangetreeChaining());
+}
+template< typename TSource, typename TDest, typename TValue>
+inline TValue
+chain(TSource & source, 
+	  TDest & dest, 
+	  Score<TValue, ChainSoP> const & scoring,
+	  Default)
+{
+	return chain(source, dest, scoring, RangetreeChaining());
+}
+
+
+//chain(3) => chain(4)
+template< typename TSource, typename TDest, typename TScoring>
+inline typename Value<TScoring>::Type
+chain(TSource & source, 
+	  TDest & dest, 
+	  TScoring const & scoring)
+{
+	return compute_chain(source, dest, scoring, Default());
 }
 
 

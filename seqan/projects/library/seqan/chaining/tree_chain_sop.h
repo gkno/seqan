@@ -12,8 +12,7 @@ namespace seqan
 	_compute_chain( TSource & source, 
 					TDest & dest, 
 					G_SoP_Cost, 
-					Score< TScoreValue, TScoreType > const & score_, 
-					Chainer,
+					Score< TScoreValue, TScoreType > const & score_,
 					TStructuring,
 					TSpec spec )
 	{
