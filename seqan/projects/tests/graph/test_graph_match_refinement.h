@@ -187,7 +187,7 @@ void Test_GraphMatchRefine() {
 	// Print number of matches
 	std::cout << "Number of matches: " << length(matches) << std::endl;
 	
-	// Refinement
+	// Re7finement
 	typedef Infix<TString>::Type TInfix;
 	typedef StringSet<TString, Dependent<> > TAlignmentStringSet;
 	typedef Graph<Alignment<TAlignmentStringSet> > TAliGraph;
@@ -246,7 +246,8 @@ getAlignments(String<TAlign> & alis, StringSet<TSequence> & seq, TScore & score_
 			LocalAlignmentFinder<int> sw_finder = LocalAlignmentFinder<int>(ali);
 			
 			int score = smithWaterman(ali,sw_finder,score_type,cutoff);
-				if(score==0) continue;
+			if(score==0) continue;
+			//cout << ali<<"\n";
 			//cout <<"Seq "<<i<<" - Seq "<<j<<"\n"<<score<< ali;
 			//cout << sourceBeginPosition(row(ali,0)) <<"   ";
 			//cout << sourceBeginPosition(row(ali,1)) <<"\n";
@@ -308,7 +309,7 @@ Test_RefineAlign(){
 		numSequencePairs += i;
 	String<TAlign> alis;
 	reserve(alis,numSequencePairs*numAlignments);
-	Score<int> score_type = Score<int>(1,-1,-2,0) ;
+	Score<int> score_type = Score<int>(1,-1,-2,-2) ;
 
 	getAlignments(alis,seq_set,score_type,numAlignments,cutoff);
 
@@ -440,7 +441,6 @@ Test_RefineAlign(){
 	SEQAN_TASSERT(findEdge(ali_graph,8,14)!=0)
 	SEQAN_TASSERT(findEdge(ali_graph,9,20)!=0)
 	SEQAN_TASSERT(findEdge(ali_graph,9,15)!=0)
-	SEQAN_TASSERT(findEdge(ali_graph,10,21)!=0)
 	SEQAN_TASSERT(findEdge(ali_graph,11,22)!=0)
 	SEQAN_TASSERT(findEdge(ali_graph,12,23)!=0)
 	SEQAN_TASSERT(findEdge(ali_graph,13,24)!=0)
@@ -467,11 +467,12 @@ Test_RefineAlign(){
 }
 
 
-////produce pairwise alignments (Graph<Alignment>)
+//produce pairwise alignments (Graph<Alignment>)
 //template<typename TAlign, typename TStringSet, typename TScore>
 //void 
 //getGraphAlignments(String<TAlign> & alis, TStringSet & seq, TScore & score_type, int & numAlignments, int cutoff)
 //{
+//	typedef StringSet<typename Value<TStringSet>::Type, Dependent<> > TAliStringSet;
 //
 //	int gesamt = 0;
 //
@@ -479,25 +480,23 @@ Test_RefineAlign(){
 //	{
 //		for(int j = i+1; j < length(seq); ++j)
 //		{
-//			TStringSet str;
-//			assignValueById(str, seq[i]);
-//			assignValueById(str, seq[j]);
+//			TAliStringSet str;
+//			assignValueById(str, seq[i],positionToId(seq, i));
+//			assignValueById(str, seq[j],positionToId(seq, j));
 //			TAlign ali_g(str);
-//
-//			Value<TScore>::Type score = localAlignment(ali_g, score_type, SmithWaterman());
+//			Value<TScore>::Type score = localAlignment(ali_g, score_type, SmithWatermanClump());
 //			if(score==0)
 //				continue;
-//			appendValue(alis,ali_g);
-//			++gesamt;
-//			int k = 1;
+// 			int k = 1;
 //			while(k<numAlignments)
 //			{
 //				score = localAlignment(ali_g, score_type, SmithWatermanClump());
-//				if(score==0) break;
-//				appendValue(alis,ali_g);
-//				++gesamt;
-//				++k;
+//				if(score==0) k = numAlignments;
+//				else ++k;
 //			}
+//			appendValue(alis,ali_g);
+//			cout << ali_g <<"\n";
+//			++gesamt;
 //		}	
 //	}
 //
@@ -516,34 +515,40 @@ Test_RefineAlign(){
 //	typedef String<char> TString;
 //	typedef StringSet<TString> TStringSet;
 //	//typedef Align<typename Reference<TStringSet>::Type, ArrayGaps> TAlign;
-//	typedef Graph<Alignment<TStringSet, unsigned int> > TAlign;
+//	//typedef Graph<Alignment<TStringSet, unsigned int> > TAlign;
+//	typedef Graph<Alignment<StringSet<TString,Dependent<> >, unsigned int> > TAlign;
 //
-//	int numSequences = 4;
 //
 //	TStringSet seq_set;
 //
 //
 //	TString str = "GARFIELDTHELASTFATCAT";
-//	appendValue(seq_set,str);
+//	//appendValue(seq_set,str);
+//	assignValueById(seq_set,str);
 //
 //	str = "GARFIELDTHEFASTCAT";
-//	appendValue(seq_set,str);
-//	
+//	//appendValue(seq_set,str);
+//	assignValueById(seq_set,str);
+//
 //	str = "GARFIELDTHEVERYFASTCAT";
-//	appendValue(seq_set,str);
+//	//appendValue(seq_set,str);
+//	assignValueById(seq_set,str);
 //	
 //	str = "THEFATCAT";
-//	appendValue(seq_set,str);
+//	//appendValue(seq_set,str);
+//	assignValueById(seq_set,str);
+//
+//	int numSequences = length(seq_set);
 //
 //
-//	int numAlignments = 1;
+//	int numAlignments = 2;
 //	int numSequencePairs = 0;
 //	int cutoff = 3;
 //	for(int i = 1 ; i < numSequences; ++i) 
 //		numSequencePairs += i;
 //	String<TAlign> alis;
 //	reserve(alis,numSequencePairs*numAlignments);
-//	Score<int> score_type = Score<int>(1,-1,-2,0) ;
+//	Score<int> score_type = Score<int>(1,-1,-2,-2) ;
 //
 //	getGraphAlignments(alis,seq_set,score_type,numAlignments,cutoff);
 //
@@ -553,6 +558,7 @@ Test_RefineAlign(){
 //
 //	matchRefinement(alis,seq_set,score_type,ali_graph);
 //
+//	cout << ali_graph << "\n";
 //	VertexDescriptor<TAliGraph>::Type vd;
 //
 //	vd = findVertex(ali_graph,0,0);
@@ -666,7 +672,6 @@ Test_RefineAlign(){
 //	SEQAN_TASSERT(findEdge(ali_graph,8,14)!=0)
 //	SEQAN_TASSERT(findEdge(ali_graph,9,20)!=0)
 //	SEQAN_TASSERT(findEdge(ali_graph,9,15)!=0)
-//	SEQAN_TASSERT(findEdge(ali_graph,10,21)!=0)
 //	SEQAN_TASSERT(findEdge(ali_graph,11,22)!=0)
 //	SEQAN_TASSERT(findEdge(ali_graph,12,23)!=0)
 //	SEQAN_TASSERT(findEdge(ali_graph,13,24)!=0)
@@ -678,19 +683,67 @@ Test_RefineAlign(){
 //}
 
 
+void Test_Problem() 
+{
+	typedef String<char> TString;
+	typedef StringSet<TString> TStringSet;
+	//typedef StringSet<TString, Dependent<> > TAlignmentStringSet;
+	typedef Graph<Alignment<TStringSet> > TAlign;
+	typedef Fragment<> TFragment;
+	typedef String<TFragment> TFragString;
 
+
+	TString str1 = "RKNLVQFGVGEKNGSVRWVMNALGVKDDWLLVPSHAYKFEKDYEMMEFYFNRGGTYYSISAGNVVIQSLDVGFQDVVLMKVPTIPKFRDITQHFIKKGDVPRALNRLATLVTTVNGTPMLISEGPLKMEEKATYVHKKNDGTTVDLTVDQAWRGKGEGLPGMCGGALVSSNQSIQNAILGIHVAGGNSILVAKLVTQE";
+	TString str2 = "";
+	TString str3 = "";
+	TString str4 = "IAGGEAITTGGSRCSLGFNVVAHALTAGHCTNISAWSIGTRTGTSFNNDYGIIRHSNPAAADGRVYLYQDITTAGNAFVGQAVQRSGSTTGLRSGSVTGLNATVNYGSSGIVYGMIQTNVCAGDSGGSLFAGSTALGLTSGGSGNCRTGGTTFYQPVT";
+	TString str5 = "";
+
+	TStringSet strSet;
+	assignValueById(strSet,str1,0);
+	assignValueById(strSet,str2,1);
+	assignValueById(strSet,str3,2);
+	assignValueById(strSet,str4,3);
+	assignValueById(strSet,str5,4);
+	//cout << length(strSet)<<"\n";
+	//cout << idToPosition(strSet,0) <<"\n";
+	//cout << idToPosition(strSet,3) <<"\n";
+	//cout << strSet[0] <<"\n";
+	//cout << strSet[1] <<"\n";
+	//cout << strSet[2] <<"\n";
+	//cout << strSet[3] <<"\n";
+	//cout << positionToId(strSet,0) <<"\n";
+	//cout << positionToId(strSet,1) <<"\n";
+
+
+	TFragment frag(0,28,3,35,18);
+
+//	typedef String<Fragment<unsigned int,unsigned int,unsigned int,ExactFragment>, External<ExternalConfig<File<>, 64*1024> > > TFragString;
+
+	TFragString alis;
+	//resize(alis,1);
+	//alis[0] = frag;
+	appendValue(alis,frag);
+
+	TAlign outGraph(strSet);
+	matchRefinement(alis,strSet,outGraph);
+
+}
 
 
 void Test_GraphMatchRefinement() 
 {
+
+//	Test_Problem();
+
 	//test for refinement on Align<TSource,TSpec>
 	Test_RefineAlign();
 	
 	//test for refinement on Graph<Alignment<> >
-	//Test_RefineAlignGraph();
+//	Test_RefineAlignGraph();
 
 	//test for refinement on Fragment<>
-	//Test_GraphMatchRefine();
+	Test_GraphMatchRefine();
 }
 
 }

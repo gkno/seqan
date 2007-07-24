@@ -190,6 +190,8 @@ SEQAN_CHECKPOINT
 		TSetIterator next_it = it;
 		if(next_it != end_it)
 			++next_it;
+		else
+			addVertex(ali_g, seq_i_id, 0, length(seqs[seq_i_pos]));
 		
 		//first unaligned node
 		if(it != end_it && *it != 0)
