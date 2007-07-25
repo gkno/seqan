@@ -266,7 +266,7 @@ struct _Log2_Impl<1>
 {
 	template <typename T>
 	static inline unsigned int
-	log2(T val, unsigned int offset)
+	log2(T /*val*/, unsigned int offset)
 	{
 		return offset;
 	}

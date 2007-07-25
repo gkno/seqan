@@ -542,7 +542,7 @@ SEQAN_CHECKPOINT
 template <typename T, typename TPos>
 inline typename Reference<T>::Type
 value(T & me, 
-	  TPos pos)
+	  TPos /*pos*/)
 {
 SEQAN_CHECKPOINT
 	return me;
@@ -550,7 +550,7 @@ SEQAN_CHECKPOINT
 template <typename T, typename TPos>
 inline typename Reference<T const>::Type
 value(T const & me, 
-	  TPos pos)
+	  TPos /*pos*/)
 {
 SEQAN_CHECKPOINT
 	return me;
@@ -587,7 +587,7 @@ getValue(T & me,
 		 TPos pos)
 {
 SEQAN_CHECKPOINT
-	return value(me, pos);
+	return (typename GetValue<T>::Type) value(me, pos);
 } 
 template <typename T, typename TPos>
 inline typename GetValue<T const>::Type
@@ -1263,7 +1263,7 @@ the operation need not to change the capacity at all.
 template <typename T, typename TSize>
 inline typename Size<T>::Type 
 reserve(
-	T & me, 
+	T & /*me*/, 
 	TSize new_capacity,
 	Insist)
 {

@@ -59,7 +59,11 @@ bool _MersenneBuffer<T>::is_initialized = false;
 // Can also be called several times since it is protected against multiple initalizations. 
 
 inline void 
-mtRandInit(bool _doSRand)
+mtRandInit(bool 
+#ifndef SEQAN_NOSRAN
+		   _doSRand
+#endif
+		   )
 {
 	// test whether mtRandInit was already initialized
 	// return immediately if this is the case

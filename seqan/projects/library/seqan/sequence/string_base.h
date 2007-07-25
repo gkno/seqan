@@ -1126,7 +1126,7 @@ inline void
 insertValue(String<TTargetValue, TTargetSpec> & me,
 			TPosition pos,
 			TValue const & _value,
-			Tag<TExpand> const tag)
+			Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	_Insert_Value_2_String<Tag<TExpand> const>::insertValue_(me, pos, _value);
@@ -1222,7 +1222,7 @@ replace(String<TTargetValue, TTargetSpec> & target,
 		 typename Size< String<TTargetValue, TTargetSpec> >::Type pos_end,
 		 TSource const & source,
 		 typename Size< String<TTargetValue, TTargetSpec> >::Type limit,
-		 Tag<TExpand> const tag)
+		 Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	typedef String<TTargetValue, TTargetSpec> TTarget;
@@ -1252,7 +1252,7 @@ replace(String<TTargetValue, TTargetSpec> & target,
 		typename Size< String<TTargetValue, TTargetSpec> >::Type pos_end,
 		TSourceValue const * source,
 		typename Size< String<TTargetValue, TTargetSpec> >::Type limit,
-		Tag<TExpand> const tag)
+		Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	typedef String<TTargetValue, TTargetSpec> TTarget;

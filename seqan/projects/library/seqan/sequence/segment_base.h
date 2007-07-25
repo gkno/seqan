@@ -367,7 +367,7 @@ template <typename THost, typename TSpec, typename TSource, typename TExpand>
 inline void 
 assign(Segment<THost, TSpec> & target, 
 	   TSource & source, 
-	   Tag<TExpand> const tag)
+	   Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	_Assign_Segment<Tag<TExpand> const>::assign_(target, source);
@@ -376,7 +376,7 @@ template <typename THost, typename TSpec, typename TSource, typename TExpand>
 inline void 
 assign(Segment<THost, TSpec> & target, 
 	   TSource const & source, 
-	   Tag<TExpand> const tag)
+	   Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	_Assign_Segment<Tag<TExpand> const>::assign_(target, source);
@@ -387,7 +387,7 @@ inline void
 assign(Segment<THost, TSpec> & target, 
 	   TSource & source, 
 	   typename Size< Segment<THost, TSpec> >::Type limit, 
-	   Tag<TExpand> const tag)
+	   Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	_Assign_Segment<Tag<TExpand> const>::assign_(target, source, limit);
@@ -397,7 +397,7 @@ inline void
 assign(Segment<THost, TSpec> & target, 
 	   TSource const & source, 
 	   typename Size< Segment<THost, TSpec> >::Type limit, 
-	   Tag<TExpand> const tag)
+	   Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	_Assign_Segment<Tag<TExpand> const>::assign_(target, source, limit);
@@ -409,7 +409,7 @@ template <typename THost, typename TSpec, typename TSource, typename TExpand>
 inline void 
 assign(Segment<THost, TSpec> const & target, 
 	   TSource & source, 
-	   Tag<TExpand> const tag)
+	   Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	_Assign_Segment<Tag<TExpand> const>::assign_(target, source);
@@ -418,7 +418,7 @@ template <typename THost, typename TSpec, typename TSource, typename TExpand>
 inline void 
 assign(Segment<THost, TSpec> const & target, 
 	   TSource const & source, 
-	   Tag<TExpand> const tag)
+	   Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	_Assign_Segment<Tag<TExpand> const>::assign_(target, source);
@@ -429,7 +429,7 @@ inline void
 assign(Segment<THost, TSpec> const & target, 
 	   TSource & source, 
 	   typename Size< Segment<THost, TSpec> >::Type limit, 
-	   Tag<TExpand> const tag)
+	   Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	_Assign_Segment<Tag<TExpand> const>::assign_(target, source, limit);
@@ -439,7 +439,7 @@ inline void
 assign(Segment<THost, TSpec> const & target, 
 	   TSource const & source, 
 	   typename Size< Segment<THost, TSpec> >::Type limit, 
-	   Tag<TExpand> const tag)
+	   Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	_Assign_Segment<Tag<TExpand> const>::assign_(target, source, limit);
@@ -573,7 +573,7 @@ inline void
 append(
 	Segment<THost, TSpec> & target, 
 	TSource & source, 
-	Tag<TExpand> const tag)
+	Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	_Append_Sequence_2_Segment<Tag<TExpand> const>::append_(target, source);
@@ -583,7 +583,7 @@ inline void
 append(
 	Segment<THost, TSpec> & target, 
 	TSource const & source, 
-	Tag<TExpand> const tag)
+	Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	_Append_Sequence_2_Segment<Tag<TExpand> const>::append_(target, source);
@@ -595,7 +595,7 @@ append(
 	Segment<THost, TSpec> & target, 
 	TSource & source, 
 	typename Size< Segment<THost, TSpec> >::Type limit, 
-	Tag<TExpand> const tag)
+	Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	_Append_Sequence_2_Segment<Tag<TExpand> const>::append_(target, source, limit);
@@ -606,7 +606,7 @@ append(
 	Segment<THost, TSpec> & target, 
 	TSource const & source, 
 	typename Size< Segment<THost, TSpec> >::Type limit, 
-	Tag<TExpand> const tag)
+	Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	_Append_Sequence_2_Segment<Tag<TExpand> const>::append_(target, source, limit);
@@ -617,7 +617,7 @@ inline void
 append(
 	Segment<THost, TSpec> const & target, 
 	TSource & source, 
-	Tag<TExpand> const tag)
+	Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	_Append_Sequence_2_Segment<Tag<TExpand> const>::append_(target, source);
@@ -627,7 +627,7 @@ inline void
 append(
 	Segment<THost, TSpec> const & target, 
 	TSource const & source, 
-	Tag<TExpand> const tag)
+	Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	_Append_Sequence_2_Segment<Tag<TExpand> const>::append_(target, source);
@@ -639,7 +639,7 @@ append(
 	Segment<THost, TSpec> const & target, 
 	TSource & source, 
 	typename Size< Segment<THost, TSpec> >::Type limit, 
-	Tag<TExpand> const tag)
+	Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	_Append_Sequence_2_Segment<Tag<TExpand> const>::append_(target, source, limit);
@@ -650,7 +650,7 @@ append(
 	Segment<THost, TSpec> const & target, 
 	TSource const & source, 
 	typename Size< Segment<THost, TSpec> >::Type limit, 
-	Tag<TExpand> const tag)
+	Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	_Append_Sequence_2_Segment<Tag<TExpand> const>::append_(target, source, limit);
@@ -683,7 +683,7 @@ template <typename THost, typename TSpec, typename TValue, typename TExpand>
 inline void
 appendValue(Segment<THost, TSpec> & me, 
 			TValue const & _value,
-			Tag<TExpand> const tag)
+			Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	_Append_Value_2_Segment<Tag<TExpand> const>::appendValue_(me, _value);
@@ -692,7 +692,7 @@ template <typename THost, typename TSpec, typename TValue, typename TExpand>
 inline void
 appendValue(Segment<THost, TSpec> const & me, 
 			TValue const & _value,
-			Tag<TExpand> const tag)
+			Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	_Append_Value_2_Segment<Tag<TExpand> const>::appendValue_(me, _value);
@@ -727,7 +727,7 @@ inline void
 insertValue(Segment<THost, TSpec> & me, 
 			TPosition pos,
 			TValue const & _value,
-			Tag<TExpand> const tag)
+			Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	_Insert_Value_2_Segment<Tag<TExpand> const>::insertValue_(me, pos, _value);
@@ -737,7 +737,7 @@ inline void
 insertValue(Segment<THost, TSpec> const & me, 
 			TPosition pos,
 			TValue const & _value,
-			Tag<TExpand> const tag)
+			Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	_Insert_Value_2_Segment<Tag<TExpand> const>::insertValue_(me, pos, _value);
@@ -833,7 +833,7 @@ replace(
 	typename Position< Segment<THost, TSpec> >::Type pos_begin,
 	typename Position< Segment<THost, TSpec> >::Type pos_end,
 	TSource & source, 
-	Tag<TExpand> const tag)
+	Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	_Replace_Sequence_2_Segment<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source);
@@ -845,7 +845,7 @@ replace(
 	typename Position< Segment<THost, TSpec> >::Type pos_begin,
 	typename Position< Segment<THost, TSpec> >::Type pos_end,
 	TSource const & source, 
-	Tag<TExpand> const tag)
+	Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	_Replace_Sequence_2_Segment<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source);
@@ -859,7 +859,7 @@ replace(
 	typename Position< Segment<THost, TSpec> >::Type pos_end,
 	TSource & source, 
 	typename Size< Segment<THost, TSpec> >::Type limit, 
-	Tag<TExpand> const tag)
+	Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	_Replace_Sequence_2_Segment<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source, limit);
@@ -872,7 +872,7 @@ replace(
 	typename Position< Segment<THost, TSpec> >::Type pos_end,
 	TSource const & source, 
 	typename Size< Segment<THost, TSpec> >::Type limit, 
-	Tag<TExpand> const tag)
+	Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	_Replace_Sequence_2_Segment<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source, limit);
@@ -885,7 +885,7 @@ replace(
 	typename Position< Segment<THost, TSpec> const>::Type pos_begin,
 	typename Position< Segment<THost, TSpec> const>::Type pos_end,
 	TSource & source, 
-	Tag<TExpand> const tag)
+	Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	_Replace_Sequence_2_Segment<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source);
@@ -897,7 +897,7 @@ replace(
 	typename Position< Segment<THost, TSpec> const>::Type pos_begin,
 	typename Position< Segment<THost, TSpec> const>::Type pos_end,
 	TSource const & source, 
-	Tag<TExpand> const tag)
+	Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	_Replace_Sequence_2_Segment<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source);
@@ -911,7 +911,7 @@ replace(
 	typename Position< Segment<THost, TSpec> const>::Type pos_end,
 	TSource & source, 
 	typename Size< Segment<THost, TSpec> >::Type limit, 
-	Tag<TExpand> const tag)
+	Tag<TExpand> const )
 {
 SEQAN_CHECKPOINT
 	_Replace_Sequence_2_Segment<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source, limit);
@@ -924,7 +924,7 @@ replace(
 	typename Position< Segment<THost, TSpec> const>::Type pos_end,
 	TSource const & source, 
 	typename Size< Segment<THost, TSpec> >::Type limit, 
-	Tag<TExpand> const tag)
+	Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	_Replace_Sequence_2_Segment<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source, limit);
@@ -993,7 +993,7 @@ inline typename Size< Segment<THost, TSpec> >::Type
 resize(
 	Segment<THost, TSpec> & me,
 	typename Size< Segment<THost, TSpec> >::Type new_length,
-	Tag<TExpand> const tag)
+	Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 

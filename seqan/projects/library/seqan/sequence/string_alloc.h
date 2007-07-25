@@ -389,7 +389,7 @@ SEQAN_CHECKPOINT
 template <typename TValue, typename TSpec, typename _TSize>
 inline typename Size< String<TValue, Alloc<TSpec> > >::Type
 reserve(
-	String<TValue, Alloc<TSpec> > & me, 
+	String<TValue, Alloc<TSpec> > & /*me*/, 
 	_TSize new_capacity,
 	Insist)
 {

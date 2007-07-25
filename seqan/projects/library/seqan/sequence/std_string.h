@@ -568,7 +568,7 @@ inline typename Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type
 reserve(
 	::std::basic_string<TChar, TCharTraits, TAlloc> & seq, 
 	typename Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type new_capacity,
-	Tag<TExpand> const & tag)
+	Tag<TExpand> const &)
 {
 SEQAN_CHECKPOINT
     seq.reserve(new_capacity);
@@ -588,7 +588,7 @@ inline typename Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type
 resize(
 	::std::basic_string<TChar, TCharTraits, TAlloc> & me,
 	TSize new_length,
-	Tag<TExpand> const & tag)
+	Tag<TExpand> const &)
 {
 SEQAN_CHECKPOINT
     me.resize(new_length);
@@ -605,7 +605,7 @@ fill(
 	::std::basic_string<TChar, TCharTraits, TAlloc> & me,
 	TSize new_length,
 	TChar const & val,
-	Tag<TExpand> const & tag)
+	Tag<TExpand> const &)
 {
 SEQAN_CHECKPOINT
     me.resize(new_length, val);

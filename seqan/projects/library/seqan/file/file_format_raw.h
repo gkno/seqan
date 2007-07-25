@@ -193,7 +193,7 @@ SEQAN_CHECKPOINT
 
 template <typename TFile, typename TString>
 void
-readID(TFile & file,
+readID(TFile & /*file*/,
 	   TString & id,
 	   Raw)
 {

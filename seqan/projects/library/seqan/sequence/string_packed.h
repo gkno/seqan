@@ -990,7 +990,7 @@ SEQAN_CHECKPOINT
 
 template <typename TContainer, typename THostspec>
 inline void
-valueConstruct(Iter<TContainer, Packed<THostspec> > const & it)
+valueConstruct(Iter<TContainer, Packed<THostspec> > const & /*it*/)
 {
 }
 template <typename TContainer, typename THostspec, typename TParam>
@@ -1015,7 +1015,7 @@ valueConstruct(Iter<TContainer, Packed<THostspec> > const & it,
 
 template <typename TContainer, typename THostspec>
 inline void
-valueDestruct(Iter<TContainer, Packed<THostspec> > const & it)
+valueDestruct(Iter<TContainer, Packed<THostspec> > const & /*it*/)
 {
 }
 

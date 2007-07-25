@@ -317,15 +317,16 @@ struct _Append_ChunkCollector_2_String
 		TTarget & target, 
 		TSource & source)
 	{
-		typename Size<TTarget>::Type target_length_old = length(target);
-		typename Size<TTarget>::Type part_length = _clearSpace(target, length(source), target_length_old, target_length_old, TExpand());
+		typedef typename Size<TTarget>::Type TSize;
+		TSize target_length_old = length(target);
+		TSize part_length = _clearSpace(target, length(source), target_length_old, target_length_old, TExpand());
 
 		int i_end = chunkCount(source);
 		typename Value<TTarget>::Type * pos = begin(target) + target_length_old; //begin(target) was possibly changed by _clearSpace
 		for (int i = 0; i < i_end; ++i)
 		{
 			bool is_last_chunk = ( part_length <= ChunkLength<TSource>::VALUE);
-			typename Size<TTarget>::Type chunk_length = (is_last_chunk) ? part_length : ChunkLength<TSource>::VALUE;
+			typename Size<TTarget>::Type chunk_length = (is_last_chunk) ? part_length : (TSize) ChunkLength<TSource>::VALUE;
 			typename Value<TSource>::Type * chunk = getChunk(source, i);
 			
 			arrayConstructCopy(chunk, chunk + chunk_length, pos);
@@ -340,15 +341,16 @@ struct _Append_ChunkCollector_2_String
 		TSource & source,
 		typename Size<TTarget>::Type limit)
 	{
-		typename Size<TTarget>::Type target_length_old = length(target);
-		typename Size<TTarget>::Type part_length = _clearSpace(target, length(source), target_length_old, target_length_old, limit, TExpand());
+		typedef typename Size<TTarget>::Type TSize;
+		TSize target_length_old = length(target);
+		TSize part_length = _clearSpace(target, length(source), target_length_old, target_length_old, limit, TExpand());
 
 		int i_end = chunkCount(source);
 		typename Value<TTarget>::Type * pos = begin(target) + target_length_old; //begin(target) was possibly changed by _clearSpace
 		for (int i = 0; i < i_end; ++i)
 		{
 			bool is_last_chunk = ( part_length <= ChunkLength<TSource>::VALUE);
-			typename Size<TTarget>::Type chunk_length = (is_last_chunk) ? part_length : ChunkLength<TSource>::VALUE;
+			typename Size<TTarget>::Type chunk_length = (is_last_chunk) ? part_length : (TSize) ChunkLength<TSource>::VALUE;
 			typename Value<TSource>::Type * chunk = getChunk(source, i);
 			
 			arrayConstructCopy(chunk, chunk + chunk_length, pos);
@@ -364,7 +366,7 @@ template <typename TTargetValue, typename TTargetSpec, typename TSourceHost, typ
 inline void 
 append(String<TTargetValue, TTargetSpec> & target,
 	   _ChunkCollector<TSourceHost> const & source,
-	   Tag<TExpand> const tag)
+	   Tag<TExpand> const )
 {
 	_Append_ChunkCollector_2_String<Tag<TExpand> const>::append_(target, source);
 }
@@ -373,7 +375,7 @@ inline void
 append(String<TTargetValue, TTargetSpec> & target,
 	   _ChunkCollector<TSourceHost> const & source,
 	   typename Size< String<TTargetValue, TTargetSpec> >::Type limit,
-	   Tag<TExpand> const tag)
+	   Tag<TExpand> const )
 {
 	_Append_ChunkCollector_2_String<Tag<TExpand> const>::append_(target, source, limit);
 }

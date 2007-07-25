@@ -57,6 +57,44 @@ _generateRandomFrags(TContainer & dest,
 }
 
 //////////////////////////////////////////////////////////////////////////////
+//helper function
+
+template <typename TChain, typename TScoring>
+void _showChain(TChain & ch,
+				TScoring scoring)
+{
+	typedef typename Iterator<TChain>::Type TIterator;
+	typedef typename Value<TChain>::Type TFragment;
+
+	TIterator it = begin(ch);
+	TIterator it_end = end(ch);
+	unsigned int dim = dimension(*it); //chain must not be empty!
+	while (it < it_end)
+	{
+		TFragment & frag = *it;
+		printf("%4i: ", weight(frag));
+		cout << "(";
+		for (unsigned int i = 0; i < dim; ++i)
+		{
+			printf("%2i", leftPosition(frag, i));
+			if (i < (dim-1)) cout << ", ";
+		}
+		cout << ")(";
+		for (unsigned int i = 0; i < dim; ++i)
+		{
+			printf("%2i", rightPosition(frag, i));
+			if (i < (dim-1)) cout << ", ";
+		}
+		cout << ")\n";
+
+		++it;
+		if (it == it_end) break;
+
+		printf("%4i\n", scoreChainGap(scoring, frag, *it));
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
 
 template <typename TScoring>
 void testChainer(int count, 
@@ -67,14 +105,16 @@ void testChainer(int count,
 	reserve(fragments, count);
 	
 	_generateRandomFrags(fragments, count, 1, 3 * count, 10, 20, dim);
+//_showChain(fragments, scoring);
 
 	String< Fragment<int> > ch;
-	reserve(ch, count);
+	reserve(ch, count+2);
 
 
 	//build chain
 	int chain_score = chain(fragments, ch, scoring);
-	std::cout << chain_score << ", " << length(ch) << "\n";
+std::cout << chain_score << "\n";
+//_showChain(ch, scoring);
 
 	//verify validity of chain
 	SEQAN_TASSERT(length(ch) > 0)
@@ -84,14 +124,13 @@ void testChainer(int count,
 		SEQAN_TASSERT(_chain_generic_chainable(ch[i-1], ch[i]))
 		sum += scoreChainGap(scoring, ch[i-1], ch[i]) + weight(ch[i]);
 	}
-
-	//verify score of chainer chain
-	std::cout << sum << "\n";
+	//verify score of chain
 	SEQAN_TASSERT(sum == chain_score)
 
 	//build generic chain
 	int chain_score2 = chain(fragments, ch, scoring, GenericChaining());
-	std::cout << chain_score2 << "\n";
+std::cout << chain_score2 << "\n";
+//_showChain(ch, scoring);
 
 	//verify validity of generic chain
 	SEQAN_TASSERT(length(ch) > 0)
@@ -101,32 +140,113 @@ void testChainer(int count,
 		SEQAN_TASSERT(_chain_generic_chainable(ch[i-1], ch[i]))
 		sum += scoreChainGap(scoring, ch[i-1], ch[i]) + weight(ch[i]);
 	}
-
 	//verify score of generic chain
-	std::cout << sum << "\n";
 	SEQAN_TASSERT(sum == chain_score2)
 
-	//compare it with generic chaining
+	//compare results of two chaining algorithms
 	SEQAN_TASSERT(chain_score2 == chain_score)
-
-/*
-	clear(ch);
-	chain_score = chain(fragments, ch, Score<int, Manhattan>(), Chainer());
-	std::cout << chain_score << "\n";
-
-	clear(ch);
-	chain_score = chain(fragments, ch, Score<int, ChainSoP>(), Chainer());
-	std::cout << chain_score << "\n";
-*/
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
+void createTest()
+{//Problembeispiel mit neuer Fragmentsemantik
+	Score<int, ChainSoP> scoring;
+
+	String< Fragment<int> > frags;
+
+	Fragment<int> f(2);
+
+	setWeight(f, 100);
+
+	_setLeftPosition(f, 0, 28);
+	_setLeftPosition(f, 1, 18);
+	_setRightPosition(f, 0, 29);
+	_setRightPosition(f, 1, 23);
+	appendValue(frags, f); //+
+
+	_setLeftPosition(f, 0, 6);
+	_setLeftPosition(f, 1, 4);
+	_setRightPosition(f, 0, 19);
+	_setRightPosition(f, 1, 17);
+	appendValue(frags, f); //!
+
+	_setLeftPosition(f, 0, 12);
+	_setLeftPosition(f, 1, 4);
+	_setRightPosition(f, 0, 26);
+	_setRightPosition(f, 1, 17);
+	appendValue(frags, f); //!
+
+
+	String< Fragment<int> > ch;
+	reserve(ch, 5);
+	int chain_score = chain(frags, ch, scoring);
+	std::cout << chain_score << ", " << length(ch) << "\n";
+	_showChain(ch, scoring);
+
+	chain_score = chain(frags, ch, scoring, GenericChaining());
+	std::cout << chain_score << ", " << length(ch) << "\n";
+	_showChain(ch, scoring);
+}
+
+void createTest2()
+{//Problembeispiel mit alter Fragmentsemantik
+	Score<int, ChainSoP> scoring;
+	String< Fragment<int> > frags;
+
+	Fragment<int> f(2);
+
+	setWeight(f, 100);
+
+	_setLeftPosition(f, 0, 7);
+	_setLeftPosition(f, 1, 5);
+	_setRightPosition(f, 0, 19);
+	_setRightPosition(f, 1, 17);
+	appendValue(frags, f); //fragment 1
+
+	_setLeftPosition(f, 0, 13);
+	_setLeftPosition(f, 1, 5);
+	_setRightPosition(f, 0, 26);
+	_setRightPosition(f, 1, 17);
+	appendValue(frags, f); //fragment 2
+
+	_setLeftPosition(f, 0, 29);
+	_setLeftPosition(f, 1, 19);
+	_setRightPosition(f, 0, 29);
+	_setRightPosition(f, 1, 23);
+	appendValue(frags, f); //fragment 3
+
+
+	String< Fragment<int> > ch;
+	reserve(ch, 5);
+	int chain_score = compute_chain(frags, ch, scoring, SemiDeferred());
+	std::cout << chain_score << "\n";
+	_showChain(ch, scoring);
+}
+
+//////////////////////////////////////////////////////////////////////////////
 
 int main()
 {
+/*
+	createTest2();
+	return 0;
+
+	srand(787);
+	testChainer(10, 2, Score<int, ChainSoP>());
+
+	for (int i = 0; i < 1000000; ++i)
+	{
+		cout << i << "\n";
+		srand(i);
+//	testChainer(1000, 2, Score<int, Zero>());
+//	testChainer(1000, 2, Score<int, Manhattan>());
+		testChainer(10, 2, Score<int, ChainSoP>());
+	}
+*/
 	testChainer(1000, 2, Score<int, Zero>());
 	testChainer(1000, 2, Score<int, Manhattan>());
+	testChainer(1000, 2, Score<int, ChainSoP>());
 
 	return 0;
 }

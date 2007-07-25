@@ -364,7 +364,7 @@ template<typename TValue, typename TExpand>
 inline size_t 
 _clearSpace(TValue * me, 
 		   size_t size, 
-		   Tag<TExpand> const tag)
+		   Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	return _ClearSpace_String_Base_<Tag<TExpand> const>::_clearSpace_(me, size);
@@ -375,7 +375,7 @@ inline size_t
 _clearSpace(TValue * me, 
 		   size_t size, 
 		   size_t limit, 
-		   Tag<TExpand> const tag)
+		   Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	return _ClearSpace_String_Base_<Tag<TExpand> const>::_clearSpace_(me, size, limit);
@@ -387,7 +387,7 @@ _clearSpace(TValue * me,
 		   size_t size, 
 		   TPosition pos_begin, 
 		   TPosition pos_end, 
-		   Tag<TExpand> const tag)
+		   Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	return _ClearSpace_String_Base_<Tag<TExpand> const>::_clearSpace_(me, size, pos_begin, pos_end);
@@ -400,7 +400,7 @@ _clearSpace(TValue * me,
 		   TPosition pos_begin, 
 		   TPosition pos_end, 
 		   size_t limit, 
-		   Tag<TExpand> const tag)
+		   Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	return _ClearSpace_String_Base_<Tag<TExpand> const>::_clearSpace_(me, size, pos_begin, pos_end, limit);
@@ -440,7 +440,7 @@ template<typename TTargetValue, typename TSource, typename TExpand>
 inline void 
 assign(TTargetValue * target,
 	   TSource const & source,
-	   Tag<TExpand> const tag)
+	   Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	_Assign_String<Tag<TExpand> const>::assign_(target, source);
@@ -451,7 +451,7 @@ inline void
 assign(TTargetValue * target, 
 	   TSource const & source, 
 	   size_t limit,
-	   Tag<TExpand> const tag)
+	   Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	_Assign_String<Tag<TExpand> const>::assign_(target, source, limit);
@@ -464,7 +464,7 @@ template<typename TTargetValue, typename TSourceValue, typename TExpand>
 inline void 
 assign(TTargetValue * target,
 	   TSourceValue const * source,
-	   Tag<TExpand> const tag)
+	   Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	_Assign_String<Tag<TExpand> const>::assign_(target, source);
@@ -475,7 +475,7 @@ inline void
 assign(TTargetValue * target, 
 	   TSourceValue const * source, 
 	   size_t limit,
-	   Tag<TExpand> const tag)
+	   Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	_Assign_String<Tag<TExpand> const>::assign_(target, source, limit);
@@ -518,7 +518,7 @@ template<typename TTargetValue, typename TSource, typename TExpand>
 inline void 
 append(TTargetValue * target,
 	   TSource const & source,
-	   Tag<TExpand> const tag)
+	   Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	_Append_String<Tag<TExpand> const>::append_(target, source);
@@ -529,7 +529,7 @@ inline void
 append(TTargetValue * target, 
 	   TSource const & source, 
 	   size_t limit,
-	   Tag<TExpand> const tag)
+	   Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	_Append_String<Tag<TExpand> const>::append_(target, source, limit);
@@ -542,7 +542,7 @@ template<typename TTargetValue, typename TSourceValue, typename TExpand>
 inline void 
 append(TTargetValue * target,
 	   TSourceValue const * source,
-	   Tag<TExpand> const tag)
+	   Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	_Append_String<Tag<TExpand> const>::append_(target, source);
@@ -553,7 +553,7 @@ inline void
 append(TTargetValue * target, 
 	   TSourceValue const * source, 
 	   size_t limit,
-	   Tag<TExpand> const tag)
+	   Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	_Append_String<Tag<TExpand> const>::append_(target, source, limit);
@@ -572,7 +572,7 @@ replace(TTargetValue * target,
 		size_t pos_begin, 
 		size_t pos_end, 
 		TSource const & source,
-		Tag<TExpand> const tag)
+		Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	_Replace_String<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source);
@@ -585,7 +585,7 @@ replace(TTargetValue * target,
 		size_t pos_end, 
 		TSource const & source, 
 		size_t limit,
-		Tag<TExpand> const tag)
+		Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	_Replace_String<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source, limit);
@@ -599,7 +599,7 @@ replace(TTargetValue * target,
 		size_t pos_begin, 
 		size_t pos_end, 
 		TSourceValue const * source,
-		Tag<TExpand> const tag)
+		Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	_Replace_String<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source);
@@ -612,7 +612,7 @@ replace(TTargetValue * target,
 		size_t pos_end, 
 		TSourceValue const * source, 
 		size_t limit,
-		Tag<TExpand> const tag)
+		Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	_Replace_String<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source, limit);
@@ -651,7 +651,7 @@ inline size_t
 resize(
 	TValue * me,
 	size_t new_length,
-	Tag<TExpand> const & tag)
+	Tag<TExpand> const &)
 {
 SEQAN_CHECKPOINT
 	return _Resize_String<Tag<TExpand> const>::resize_(me, new_length);
@@ -666,7 +666,7 @@ fill(
 	TValue * me,
 	size_t new_length,
 	TValue const & val,
-	Tag<TExpand> const & tag)
+	Tag<TExpand> const &)
 {
 SEQAN_CHECKPOINT
 	return _Fill_String<Tag<TExpand> const>::fill_(me, new_length, val);
