@@ -76,7 +76,7 @@ namespace seqan{
 		}		
 	}
 
-		// get the differences of coordinates of to fragments
+		// get the differences of coordinates of two fragments
 	template< typename TData, typename TSize, typename FragType >
 	void
 	_getPermDifference( TData * values,
@@ -222,7 +222,7 @@ namespace seqan{
 		{
 //!!!Change dist semantics
 //			weight += ( scoreGapExtend( score ) * ( leftPosition( _getFrag( upper ), i ) - rightPosition( _getFrag( lower ), i ) ) );
-			weight += ( scoreGapExtend( score ) * ( leftPosition( _getFrag( upper ), i ) - rightPosition( _getFrag( lower ), i ) - 1) );
+			weight += ( scoreGap( score ) * ( leftPosition( _getFrag( upper ), i ) - rightPosition( _getFrag( lower ), i ) - 1) );
 		}
 		return weight;
 	}
@@ -243,11 +243,13 @@ namespace seqan{
 		typename Size< FragType >::Type dim_factor = dim - 1;
 		for( typename Size< FragType >::Type i = 0; i < dim; ++i )
 		{
-			delta = static_cast< typename Weight< FragType >::Type >( leftPosition( _getFrag( upper ), value( permBeg ) ) - rightPosition( _getFrag( lower ), value( permBeg ) ) );
-			weight_buffer = ( scoreGapExtend( score ) * delta );
+//!!!Change dist semantics
+//			delta = static_cast< typename Weight< FragType >::Type >( leftPosition( _getFrag( upper ), value( permBeg ) ) - rightPosition( _getFrag( lower ), value( permBeg ) ) );
+			delta = static_cast< typename Weight< FragType >::Type >( leftPosition( _getFrag( upper ), value( permBeg ) ) - rightPosition( _getFrag( lower ), value( permBeg ) ) -1);
+			weight_buffer = ( scoreGap( score ) * delta );
 			weight_buffer *= static_cast< typename Weight< FragType >::Type >( ( dim_factor - i ) );
 			weight += weight_buffer;
-			weight_buffer = ( delta * ( scoreMismatch( score ) - scoreGapExtend( score ) ) );
+			weight_buffer = ( delta * ( scoreMismatch( score ) - scoreGap( score ) ) );
 			weight_buffer *= static_cast< typename Weight< FragType >::Type >( i );
 			weight += weight_buffer;
 			goNext( permBeg );

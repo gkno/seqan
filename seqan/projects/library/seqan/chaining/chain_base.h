@@ -160,57 +160,57 @@ namespace seqan
 		{
 			case 1: SEQAN_REPORT("One dimensional chaining not supported")
 					return 0;
-			case 2: if( scoreMismatch( score_ ) == 0 && scoreGapExtend( score_ ) == 0 )
+			case 2: if( scoreMismatch( score_ ) == 0 && scoreGap( score_ ) == 0 )
 					{
 						return _compute_chain( source, dest, G_0_Cost(), score_, structuring, _ChainSpecType< Array< 1 > >() );
 					}
-					else if( scoreMismatch( score_ ) > 0 && scoreGapExtend( score_ ) > 0 )
+					else if( scoreMismatch( score_ ) > 0 && scoreGap( score_ ) > 0 )
 					{
-						if( scoreMismatch( score_ ) == scoreGapExtend( score_ ) )
+						if( scoreMismatch( score_ ) == scoreGap( score_ ) )
 							return _compute_chain( source, dest, G_1_Cost(), score_, structuring, _ChainSpecType< Array< 1 > >() );
 						else //if( scoreMismatch( score_ ) > 2 * scoreGapExtend( score_ ) )
 							return _compute_chain( source, dest, G_SoP_Cost(), score_, structuring,_ChainSpecType< Array< 2 > >() );
 					}
 					SEQAN_ASSERT2( false, "Gap/mismatch model not supported" );
 					break;
-			case 3: if( scoreMismatch( score_ ) == 0 && scoreGapExtend( score_ ) == 0 )
+			case 3: if( scoreMismatch( score_ ) == 0 && scoreGap( score_ ) == 0 )
 					return _compute_chain( source, dest, G_0_Cost(), score_, structuring, _ChainSpecType< Array< 2 > >() );
-					else if( scoreMismatch( score_ ) > 0 && scoreGapExtend( score_ ) > 0 )
+					else if( scoreMismatch( score_ ) > 0 && scoreGap( score_ ) > 0 )
 					{
-						if( scoreMismatch( score_ ) == scoreGapExtend( score_ ) )
+						if( scoreMismatch( score_ ) == scoreGap( score_ ) )
 							return _compute_chain( source, dest, G_1_Cost(), score_, structuring, _ChainSpecType< Array< 2 > >() );
 						else //if( scoreMismatch( score_ ) > 2 * scoreGapExtend( score_ ) )
 							return _compute_chain( source, dest, G_SoP_Cost(), score_, structuring,_ChainSpecType< Array< 3 > >() );
 					}
 					SEQAN_ASSERT2( false, "Gap/mismatch model not supported" );
 					break;
-			case 4:	if( scoreMismatch( score_ ) == 0 && scoreGapExtend( score_ ) == 0 )
+			case 4:	if( scoreMismatch( score_ ) == 0 && scoreGap( score_ ) == 0 )
 					return _compute_chain( source, dest, G_0_Cost(), score_, structuring, _ChainSpecType< Array< 3 > >() );
-					else if( scoreMismatch( score_ ) > 0 && scoreGapExtend( score_ ) > 0 )
+					else if( scoreMismatch( score_ ) > 0 && scoreGap( score_ ) > 0 )
 					{
-						if( scoreMismatch( score_ ) == scoreGapExtend( score_ ) )
+						if( scoreMismatch( score_ ) == scoreGap( score_ ) )
 							return _compute_chain( source, dest, G_1_Cost(), score_, structuring, _ChainSpecType< Array< 3 > >() );
 						else //if( scoreMismatch( score_ ) > 2 * scoreGapExtend( score_ ) )
 							return _compute_chain( source, dest, G_SoP_Cost(), score_, structuring,_ChainSpecType< Array< 4 > >() );
 					}
 					SEQAN_ASSERT2( false, "Gap/mismatch model not supported" );
 					break;
-			case 5:	if( scoreMismatch( score_ ) == 0 && scoreGapExtend( score_ ) == 0 )
+			case 5:	if( scoreMismatch( score_ ) == 0 && scoreGap( score_ ) == 0 )
 					return _compute_chain( source, dest, G_0_Cost(), score_, structuring, _ChainSpecType< Array< 4 > >() );
-					else if( scoreMismatch( score_ ) > 0 && scoreGapExtend( score_ ) > 0 )
+					else if( scoreMismatch( score_ ) > 0 && scoreGap( score_ ) > 0 )
 					{
-						if( scoreMismatch( score_ ) == scoreGapExtend( score_ ) )
+						if( scoreMismatch( score_ ) == scoreGap( score_ ) )
 							return _compute_chain( source, dest, G_1_Cost(), score_, structuring, _ChainSpecType< Array< 4 > >() );
 						else //if( scoreMismatch( score_ ) > 2 * scoreGapExtend( score_ ) )
 							return _compute_chain( source, dest, G_SoP_Cost(), score_, structuring,_ChainSpecType< Array< 5 > >() );
 					}
 					SEQAN_ASSERT2( false, "Gap/mismatch model not supported" );
 					break;
-			default:if( scoreMismatch( score_ ) == 0 && scoreGapExtend( score_ ) == 0 )
+			default:if( scoreMismatch( score_ ) == 0 && scoreGap( score_ ) == 0 )
 					return _compute_chain( source, dest, G_0_Cost(), score_, structuring, _ChainSpecType< Default >() );
-					else if( scoreMismatch( score_ ) > 0 && scoreGapExtend( score_ ) > 0 )
+					else if( scoreMismatch( score_ ) > 0 && scoreGap( score_ ) > 0 )
 					{
-						if( scoreMismatch( score_ ) == scoreGapExtend( score_ ) )
+						if( scoreMismatch( score_ ) == scoreGap( score_ ) )
 							return _compute_chain( source, dest, G_1_Cost(), score_, structuring, _ChainSpecType< Default >() );
 						else //if( scoreMismatch( score_ ) > 2 * scoreGapExtend( score_ ) )
 							return _compute_chain( source, dest, G_SoP_Cost(), score_, structuring, _ChainSpecType< Default >() );

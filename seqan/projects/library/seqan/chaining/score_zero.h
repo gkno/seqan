@@ -56,24 +56,12 @@ public:
 	}
 
 	friend inline TValue 
-	scoreGapExtend(Score &)
+	scoreGap(Score &)
 	{
 		return 0;
 	}
 	friend inline TValue const 
-	scoreGapExtend(Score const &)
-	{
-		return 0;
-	}
-
-	template <typename T>
-	friend inline T 
-	scoreGapOpen(Score<T, Zero> &)
-	{
-		return 0;
-	}
-	friend inline TValue const 
-	scoreGapOpen(Score<TValue, Zero> const &)
+	scoreGap(Score const &)
 	{
 		return 0;
 	}

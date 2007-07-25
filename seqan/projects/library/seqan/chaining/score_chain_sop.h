@@ -74,17 +74,17 @@ public:
 	}
 
 	friend inline TValue &
-	scoreGapExtend(Score & me)
+	scoreGap(Score & me)
 	{
 		return me.data_gap;
 	}
 
 	friend inline TValue const &
-	scoreGapExtend(Score const & me)
+	scoreGap(Score const & me)
 	{
 		return me.data_gap;
 	}
-
+/*
 	friend inline TValue &
 	scoreGapOpen(Score<TValue, ChainSoP> & me)
 	{
@@ -96,7 +96,7 @@ public:
 	{
 		return me.data_gap;
 	}
-
+*/
 //____________________________________________________________________________
 };
 //////////////////////////////////////////////////////////////////////////////
@@ -130,7 +130,33 @@ template <typename TValue, typename TFragment>
 inline TValue
 scoreChainGap(Score<TValue, ChainSoP> const & me,
 			  TFragment & f1,
-			  TFragment & f2); //TODO
+			  TFragment & f2)
+{
+	SEQAN_ASSERT(dimension(f1) == dimension(f2))
+
+	TValue score_gap = scoreGap(me);
+	TValue score_miss = scoreMismatch(me);
+
+	TValue sc = 0;
+	unsigned int dim = dimension(f1);
+	for (unsigned int d1 = 0; d1 < dim-1; ++d1)
+	{
+		TValue delta1 = (TValue) (leftPosition(f2, d1) - rightPosition(f1, d1));
+		for (unsigned int d2 = d1+1; d2 < dim; ++d2)
+		{
+			TValue delta2 = (TValue) (leftPosition(f2, d2) - rightPosition(f1, d2));
+			if (delta1 > delta2)
+			{
+				sc -= (score_miss*delta2 + score_gap*(delta1 - delta2));
+			}
+			else
+			{
+				sc -= (score_miss*delta1 + score_gap*(delta2 - delta1));
+			}
+		}
+	}
+	return sc;
+}
 
 //////////////////////////////////////////////////////////////////////////////
 

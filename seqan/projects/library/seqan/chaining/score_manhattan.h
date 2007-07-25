@@ -74,24 +74,12 @@ public:
 	}
 
 	friend inline TValue 
-	scoreGapExtend(Score & me)
+	scoreGap(Score & me)
 	{
 		return me.data_gap;
 	}
 	friend inline TValue const &
-	scoreGapExtend(Score const & me)
-	{
-		return me.data_gap;
-	}
-
-	template <typename T>
-	friend inline T &
-	scoreGapOpen(Score & me)
-	{
-		return me.data_gap;
-	}
-	friend inline TValue const &
-	scoreGapOpen(Score const & me)
+	scoreGap(Score const & me)
 	{
 		return me.data_gap;
 	}
@@ -135,7 +123,7 @@ scoreChainGap(Score<TValue, Manhattan> const & me,
 
 	unsigned int dim = dimension(f1);
 	TValue score = 0;
-	TValue score_gap = scoreGapExtend(me);
+	TValue score_gap = scoreGap(me);
 	for (unsigned int i = 0; i < dim; ++i)
 	{
 		score -= score_gap * (leftPosition(f2, i) - rightPosition(f1, i));
