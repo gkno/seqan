@@ -51,14 +51,27 @@ public:
 	TValue data_gap_open;
 
 public:
-	Score(TValue _gap_extend = -1, TValue _gap_open = 0):
+	Score(TValue _gap_extend = -1):
+		data_gap_extend(_gap_extend),
+		data_gap_open(_gap_extend)
+	{
+		setDefaultScoreMatrix(*this, TSpec());
+	}
+	Score(TValue _gap_extend, TValue _gap_open):
 		data_gap_extend(_gap_extend),
 		data_gap_open(_gap_open)
 	{
 		setDefaultScoreMatrix(*this, TSpec());
 	}
 	template <typename TString>
-	Score(TString const & filename, TValue _gap_extend = -1, TValue _gap_open = 0):
+	Score(TString const & filename, TValue _gap_extend = -1):
+		data_gap_extend(_gap_extend),
+		data_gap_open(_gap_extend)
+	{
+		loadScoreMatrix(*this, filename);
+	}
+	template <typename TString>
+	Score(TString const & filename, TValue _gap_extend, TValue _gap_open):
 		data_gap_extend(_gap_extend),
 		data_gap_open(_gap_open)
 	{

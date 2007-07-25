@@ -107,15 +107,15 @@ typedef Score<int, Simple> SimpleScore;
 ..see:Function.scoreGapExtend
 ..see:Function.scoreGapOpen
 */
-template <typename TValue>
+template <typename TValue, typename TSpec>
 inline TValue &
-scoreMatch(Score<TValue, Simple> & me)
+scoreMatch(Score<TValue, TSpec> & me)
 {
 	return me.data_match;
 }
-template <typename TValue>
+template <typename TValue, typename TSpec>
 inline TValue const &
-scoreMatch(Score<TValue, Simple> const & me)
+scoreMatch(Score<TValue, TSpec> const & me)
 {
 	return me.data_match;
 }
@@ -132,15 +132,15 @@ scoreMatch(Score<TValue, Simple> const & me)
 ..see:Function.scoreGapExtend
 ..see:Function.scoreGapOpen
 */
-template <typename TValue>
+template <typename TValue, typename TSpec>
 inline TValue &
-scoreMismatch(Score<TValue, Simple> & me)
+scoreMismatch(Score<TValue, TSpec> & me)
 {
 	return me.data_mismatch;
 }
-template <typename TValue>
+template <typename TValue, typename TSpec>
 inline TValue const &
-scoreMismatch(Score<TValue, Simple> const & me)
+scoreMismatch(Score<TValue, TSpec> const & me)
 {
 	return me.data_mismatch;
 }
@@ -157,15 +157,15 @@ scoreMismatch(Score<TValue, Simple> const & me)
 ..see:Function.scoreMatch
 ..see:Function.scoreGapOpen
 */
-template <typename TValue>
+template <typename TValue, typename TSpec>
 inline TValue &
-scoreGapExtend(Score<TValue, Simple> & me)
+scoreGapExtend(Score<TValue, TSpec> & me)
 {
 	return me.data_gap_extend;
 }
-template <typename TValue>
+template <typename TValue, typename TSpec>
 inline TValue const &
-scoreGapExtend(Score<TValue, Simple> const & me)
+scoreGapExtend(Score<TValue, TSpec> const & me)
 {
 	return me.data_gap_extend;
 }
@@ -181,15 +181,15 @@ scoreGapExtend(Score<TValue, Simple> const & me)
 ..see:Function.scoreGapExtend
 ..see:Function.scoreMatch
 */
-template <typename TValue>
+template <typename TValue, typename TSpec>
 inline TValue &
-scoreGapOpen(Score<TValue, Simple> & me)
+scoreGapOpen(Score<TValue, TSpec> & me)
 {
 	return me.data_gap_open;
 }
-template <typename TValue>
+template <typename TValue, typename TSpec>
 inline TValue const &
-scoreGapOpen(Score<TValue, Simple> const & me)
+scoreGapOpen(Score<TValue, TSpec> const & me)
 {
 	return me.data_gap_open;
 }
@@ -208,15 +208,15 @@ scoreGapOpen(Score<TValue, Simple> const & me)
 ..see:Function.scoreGapOpen
 ..see:Function.scoreGapExtend
 */
-template <typename TValue>
+template <typename TValue, typename TSpec>
 inline TValue &
-scoreGap(Score<TValue, Simple> & me)
+scoreGap(Score<TValue, TSpec> & me)
 {
 	return scoreGapExtend(me);
 }
-template <typename TValue>
+template <typename TValue, typename TSpec>
 inline TValue const &
-scoreGap(Score<TValue, Simple> const & me)
+scoreGap(Score<TValue, TSpec> const & me)
 {
 	return scoreGapExtend(me);
 }

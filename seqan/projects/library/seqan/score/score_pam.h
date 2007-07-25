@@ -176,7 +176,7 @@ public:
 		return pairscore;
 	}
 
-
+/*
 	friend inline TValue &
 		scoreGapExtend(Score & _score)
 	{
@@ -187,16 +187,7 @@ public:
 	{
 		return _score.data_gap_extend;
 	}
-	/**
-.Function.scoreGapExtend:
-..class:Class.Score
-..summary:Access function returning penalty for gap extension.
-..signature:scoreGapExtend(& _score)
-..signature:scoreGapExtend(const & _score)
-..param._score:Score class instance containing scoring matrix as a member.
-..returns:Gap extension penalty.
-...type:TValue
- */
+
 	
 	friend inline TValue
 		scoreGapOpen(Score & _score)
@@ -209,21 +200,7 @@ public:
 		return _score.data_gap_open;
 	}
 
-
-
-
-	
-	/**
-.Function.scoreGapOpen:
-..class:Class.Score
-..summary:Access function returning penalty for gap opening
-..signature:scoreGapOpen(& _score)
-..signature:scoreGapOpen(const & _score)
-..param._score:Score class instance containing scoring matrix as a member.
-..returns:Gap opening penalty.
-...type:TValue
 */
-
 	friend inline double
 		getScale(Score & _score) {
 			return _score.scaling_factor;
@@ -239,9 +216,8 @@ public:
 .Function.getScale:
 ..class:Class.Score
 ..summary:Access function returning the distance dependent $scaling factor$ used for PAM matrix computation
-..signature:getScale(& _score)
-..signature:getScale(const & _score)
-..param._score:Score class instance containing scoring matrix as a member.
+..signature:getScale(score)
+..param.score:Score class instance containing scoring matrix as a member.
 ..returns:Scaling factor used for current PAM matrix computation.
 ...type:double
 */	

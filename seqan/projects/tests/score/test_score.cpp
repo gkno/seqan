@@ -41,6 +41,10 @@ void testMatrixScore()
 	Blosum62 blosum62;
 	testCompareAAMatrices(blosum62, sc);
 
+	SEQAN_TASSERT(scoreGapExtend(blosum62) == -1);
+	SEQAN_TASSERT(scoreGapOpen(blosum62) == scoreGapExtend(blosum62));
+	SEQAN_TASSERT(scoreGap(blosum62) == scoreGapExtend(blosum62));
+
 	//store and load again
 	FILE * fl = fopen(TEST_PATH "testfile.txt", "wb");
 	write(fl, sc, meta);
@@ -79,6 +83,7 @@ void testScorePAM()
 	SEQAN_TASSERT(getDist(pam) == 250);
 	SEQAN_TASSERT(scoreGapExtend(pam) == -1);
 	SEQAN_TASSERT(scoreGapOpen(pam) == scoreGapExtend(pam));
+	SEQAN_TASSERT(scoreGap(pam) == scoreGapExtend(pam));
 
 	//store and load again build-in matrix
 	FILE * fl = fopen(TEST_PATH "testfile.txt", "wb");
