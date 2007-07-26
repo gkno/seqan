@@ -247,7 +247,7 @@ void testGotohAlign()
 	assignSource(row(ali, 0), str0);
 	assignSource(row(ali, 1), str1);
 
-	Score<int> score_type = Score<int>(1,-1,-1,0);
+	Score<int> score_type = Score<int>(1,-1,-1,-1);
 	int score = needlemanWunsch(ali,score_type);
 
 	SEQAN_TASSERT(score == 2);
@@ -256,7 +256,7 @@ void testGotohAlign()
 	clearGaps(row(ali,0));
 	clearGaps(row(ali,1));
 
-	Score<int> score_type1 = Score<int>(1,-1,-1,-2) ;
+	Score<int> score_type1 = Score<int>(1,-1,-1,-3) ;
 	score = needlemanWunsch(ali,score_type1);
 
 	SEQAN_TASSERT(score == -2);

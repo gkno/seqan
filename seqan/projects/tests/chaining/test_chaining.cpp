@@ -8,7 +8,7 @@
 
 //#define SEQAN_DEBUG
 #define SEQAN_TEST
-#define SEQAN_NOSRAN //suppress srand
+//#define SEQAN_NOSRAN //suppress srand
 
 #include <seqan/sequence.h>
 #include <seqan/chaining.h>
@@ -149,101 +149,9 @@ std::cout << chain_score2 << "\n";
 
 //////////////////////////////////////////////////////////////////////////////
 
-void createTest()
-{//Problembeispiel mit neuer Fragmentsemantik
-	Score<int, ChainSoP> scoring;
-
-	String< Fragment<int> > frags;
-
-	Fragment<int> f(2);
-
-	setWeight(f, 100);
-
-	_setLeftPosition(f, 0, 28);
-	_setLeftPosition(f, 1, 18);
-	_setRightPosition(f, 0, 29);
-	_setRightPosition(f, 1, 23);
-	appendValue(frags, f); //+
-
-	_setLeftPosition(f, 0, 6);
-	_setLeftPosition(f, 1, 4);
-	_setRightPosition(f, 0, 19);
-	_setRightPosition(f, 1, 17);
-	appendValue(frags, f); //!
-
-	_setLeftPosition(f, 0, 12);
-	_setLeftPosition(f, 1, 4);
-	_setRightPosition(f, 0, 26);
-	_setRightPosition(f, 1, 17);
-	appendValue(frags, f); //!
-
-
-	String< Fragment<int> > ch;
-	reserve(ch, 5);
-	int chain_score = chain(frags, ch, scoring);
-	std::cout << chain_score << ", " << length(ch) << "\n";
-	_showChain(ch, scoring);
-
-	chain_score = chain(frags, ch, scoring, GenericChaining());
-	std::cout << chain_score << ", " << length(ch) << "\n";
-	_showChain(ch, scoring);
-}
-
-void createTest2()
-{//Problembeispiel mit alter Fragmentsemantik
-	Score<int, ChainSoP> scoring;
-	String< Fragment<int> > frags;
-
-	Fragment<int> f(2);
-
-	setWeight(f, 100);
-
-	_setLeftPosition(f, 0, 7);
-	_setLeftPosition(f, 1, 5);
-	_setRightPosition(f, 0, 19);
-	_setRightPosition(f, 1, 17);
-	appendValue(frags, f); //fragment 1
-
-	_setLeftPosition(f, 0, 13);
-	_setLeftPosition(f, 1, 5);
-	_setRightPosition(f, 0, 26);
-	_setRightPosition(f, 1, 17);
-	appendValue(frags, f); //fragment 2
-
-	_setLeftPosition(f, 0, 29);
-	_setLeftPosition(f, 1, 19);
-	_setRightPosition(f, 0, 29);
-	_setRightPosition(f, 1, 23);
-	appendValue(frags, f); //fragment 3
-
-
-	String< Fragment<int> > ch;
-	reserve(ch, 5);
-	int chain_score = compute_chain(frags, ch, scoring, SemiDeferred());
-	std::cout << chain_score << "\n";
-	_showChain(ch, scoring);
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
 int main()
 {
-/*
-	createTest2();
-	return 0;
 
-	srand(787);
-	testChainer(10, 2, Score<int, ChainSoP>());
-
-	for (int i = 0; i < 1000000; ++i)
-	{
-		cout << i << "\n";
-		srand(i);
-//	testChainer(1000, 2, Score<int, Zero>());
-//	testChainer(1000, 2, Score<int, Manhattan>());
-		testChainer(10, 2, Score<int, ChainSoP>());
-	}
-*/
 	testChainer(1000, 2, Score<int, Zero>());
 	testChainer(1000, 2, Score<int, Manhattan>());
 	testChainer(1000, 2, Score<int, ChainSoP>());
