@@ -110,7 +110,9 @@ namespace seqan
 						// if one exists for the current permutation
 					if( key( *result, 0 ) != infimumValue< typename Key< _ChainPoint< FragType, SpecType > >::Type >() )
 					{
-						tempWeight = score( _meta( *result ) ) - _costGSoP( meta, _meta( *result ), score_, begin( permutation ), end( permutation ), dim );
+						tempWeight = score( _meta( *result ) );
+						typename Weight< FragType >::Type cost_for_rest = _costGSoP( meta, _meta( *result ), score_, begin( permutation ), end( permutation ), dim );
+						tempWeight -= cost_for_rest;
 					}
 					else
 					{		// no active point in hyper corner
@@ -131,22 +133,26 @@ namespace seqan
 				setScore( meta, maxWeight + weight( meta ) );
 			}
 			else{
-
 					// activate point with geometric costs
 				size_t offset = &meta - &firstMeta;
 				_getPermDifference( weights, dim, _getFrag( value( lastMeta ) ), _getFrag( meta ) );
                 _getPerm( weights, begin( bufferPermutation ), dim );
 				setPriority( meta, score( meta ) - _costGSoP( value( lastMeta ), meta, score_, begin( bufferPermutation ), end( bufferPermutation ), dim ) );
 				transIt = begin( trans_points );
-				
+
+				_resetPerm( bufferPermutation );
+
 				while( treeIt!= end( trees ) )
 				{
 						// activate in all trees
 					_ChainPoint< FragType, SpecType > & point = value( transIt )[ offset ];
-					setPriority( point, priority( meta ) );
+
+					typename Weight< FragType >::Type new_prio = score( meta ) - _costGSoP( value( lastMeta ), meta, score_, begin( bufferPermutation ), end( bufferPermutation ), dim );
+					setPriority( point, new_prio );
 					activate( *value( treeIt ), point );
 					goNext( transIt );
 					goNext( treeIt );
+					std::next_permutation( begin( bufferPermutation ), end( bufferPermutation ) );
 				}
 			}
 			goNext( pointIt );

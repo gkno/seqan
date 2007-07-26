@@ -993,7 +993,7 @@ inline typename Size< Segment<THost, TSpec> >::Type
 resize(
 	Segment<THost, TSpec> & me,
 	typename Size< Segment<THost, TSpec> >::Type new_length,
-	Tag<TExpand> const)
+	Tag<TExpand> const tag)
 {
 SEQAN_CHECKPOINT
 
