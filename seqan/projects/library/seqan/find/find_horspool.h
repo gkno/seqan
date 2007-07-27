@@ -1,3 +1,23 @@
+ /*==========================================================================
+                SeqAn - The Library for Sequence Analysis
+                          http://www.seqan.de 
+ ============================================================================
+  Copyright (C) 2007
+
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 3 of the License, or (at your option) any later version.
+
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+  Lesser General Public License for more details.
+
+ ============================================================================
+  $Id$
+ ==========================================================================*/
+
 #ifndef SEQAN_HEADER_FIND_HORSPOOL_H
 #define SEQAN_HEADER_FIND_HORSPOOL_H
 
@@ -31,8 +51,10 @@ class Pattern<TNeedle, Horspool>
 //____________________________________________________________________________
 
 public:
-	Holder<TNeedle>							data_needle;
-	String<typename Size<TNeedle>::Type>	data_map;
+	typedef typename Size<TNeedle>::Type TSize;
+
+	Holder<TNeedle>		data_needle;
+	String<TSize>		data_map;
 
 //____________________________________________________________________________
 
@@ -63,18 +85,18 @@ void
 setHost(Pattern<TNeedle, Horspool> & me, TNeedle2 const & ndl)
 {
 	typedef typename Value<TNeedle>::Type TValue;
+	typedef typename Size<TNeedle>::Type TSize;
 
 	SEQAN_ASSERT(!empty(ndl));
 
-	typename Size<TNeedle>::Type value_size = ValueSize<TValue>::VALUE;
+	TSize value_size = ValueSize<TValue>::VALUE;
 
 	//make room for map
 	resize(me.data_map, value_size);
 
 	//fill map
-	typename Size<TNeedle>::Type jump_width = length(ndl);
-
-	arrayFill(begin(me.data_map), begin(me.data_map) + value_size, jump_width);
+	typename Value<String<TSize> >::Type jump_width = length(ndl); //das ist so umstaendlich wegen VC++ 2003
+	arrayFill(begin(me.data_map, Standard()), begin(me.data_map, Standard()) + value_size, jump_width);
 
 	typename Iterator<TNeedle2 const, Standard>::Type it;
 	it = begin(ndl, Standard());
