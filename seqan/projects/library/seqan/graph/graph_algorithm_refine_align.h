@@ -92,7 +92,6 @@ SEQAN_CHECKPOINT
 	len = toViewPosition(row(segment,0),pos_i + len) - toViewPosition(row(segment,0),pos_i);
 	TValue i = 0;
 	TScoreValue ret_score = 0;
-	::std::cout << segment << "\n";
 	while(i < len)
 	{
 		if(isGap(row1_it)||isGap(row0_it))

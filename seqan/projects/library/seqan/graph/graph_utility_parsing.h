@@ -17,15 +17,15 @@ template<typename TFile, typename TChar>
 inline void 
 _parse_skipLine(TFile& file, TChar& c)
 {
-	if (c == '\n') return;
+	if (c == '\n' || (c == '\r' && _streamPeek(file) != '\n')) return;
 	while (!_streamEOF(file)) {
 		c = _streamGet(file);
-		if (c == '\n') break;
+		if (c == '\n' || (c == '\r' && _streamPeek(file) != '\n')) break;
 	}
 	c = _streamGet(file);
 }
-
 //////////////////////////////////////////////////////////////////////////////
+
 
 template<typename TFile, typename TChar>
 inline void 
