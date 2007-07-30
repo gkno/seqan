@@ -412,6 +412,315 @@ void Test_Various()
 
 //////////////////////////////////////////////////////////////////////////////
 
+template <typename TAlgorithmSpec>
+void Test_OnlineAlgWildcards()
+{
+	String<unsigned int> pos;
+
+//____________________________________________________________________________
+// Test1 - simple find wo wildcards
+	String<char> haystack("Dies ist ein Haystack. Ja, das ist wirklich einer!");
+	Finder<String<char> > finder(haystack);
+
+	String<char> needle("ist");
+	Pattern<String<char>, TAlgorithmSpec> pattern(needle);
+	clear(pos);
+	while (find(finder, pattern))
+		append(pos,position(finder));
+
+	SEQAN_TASSERT(pos[0] == 7);
+	SEQAN_TASSERT(pos[1] == 33);
+	SEQAN_TASSERT(host(pattern) == needle);
+	SEQAN_TASSERT(host(reinterpret_cast<Pattern<String<char>, TAlgorithmSpec> const &>(pattern)) == needle);
+
+//____________________________________________________________________________
+// Test - validation of patterns
+	needle = "ist";
+	setHost(pattern, needle);
+	SEQAN_TASSERT(valid(pattern) == true);
+
+	needle = "i[a-z]s{3,4}t?a*a+c..\\a";
+	setHost(pattern, needle);
+	SEQAN_TASSERT(valid(pattern) == true);
+
+	needle = "i[st";
+	setHost(pattern, needle);
+	SEQAN_TASSERT(valid(pattern) == false);
+
+	needle = "ist\\";
+	setHost(pattern, needle);
+	SEQAN_TASSERT(valid(pattern) == false);
+
+	needle = "ist?*";
+	setHost(pattern, needle);
+	SEQAN_TASSERT(valid(pattern) == false);
+
+	needle = "ist{5,4}";
+	setHost(pattern, needle);
+	SEQAN_TASSERT(valid(pattern) == false);
+
+	needle = "ist{5,a}";
+	setHost(pattern, needle);
+	SEQAN_TASSERT(valid(pattern) == false);
+
+	needle = "ist{5,";
+	setHost(pattern, needle);
+	SEQAN_TASSERT(valid(pattern) == false);
+
+//____________________________________________________________________________
+// Test - searching with invalid needles
+	haystack = "Dies i[st ein Haystack. Ja, das i[st wirklich einer!";
+	setHost(finder, haystack);
+	clear(finder);
+
+	needle = "i[st";
+	setHost(pattern, needle);
+
+	clear(pos);
+	while (find(finder, pattern))
+		append(pos,position(finder));
+	
+	SEQAN_TASSERT(length(pos) == 0);
+
+//____________________________________________________________________________
+// Test - handle needles with wildcards
+	// to produce two \ in the pattern you need to escape both of them
+	needle = "aa+c*[a-z]xx?aa\\\\";
+	SEQAN_TASSERT(_length_wo_wild(needle) == 9);
+	
+//____________________________________________________________________________
+// Test - optional characters (?)
+	haystack = "abc__ac";
+	setHost(finder, haystack);
+	clear(finder);
+
+	needle = "ab?c";
+	setHost(pattern, needle);
+
+	clear(pos);
+	while (find(finder, pattern))
+		append(pos,position(finder));
+	
+	SEQAN_TASSERT(pos[0] == 2);
+	SEQAN_TASSERT(pos[1] == 6);
+	SEQAN_TASSERT(length(pos) == 2);
+
+//____________________________________________________________________________
+// Test - repeatable characters (+)
+	haystack = "abc__abbbbbc_ac";
+	setHost(finder, haystack);
+	clear(finder);
+
+	needle = "ab+c";
+	setHost(pattern, needle);
+
+	clear(pos);
+	while (find(finder, pattern))
+		append(pos,position(finder));
+	
+	SEQAN_TASSERT(pos[0] == 2);
+	SEQAN_TASSERT(pos[1] == 11);
+	SEQAN_TASSERT(length(pos) == 2);
+
+//____________________________________________________________________________
+// Test - repeatable characters (*)
+	haystack = "abc__abbbbbc_ac";
+	setHost(finder, haystack);
+	clear(finder);
+
+	needle = "ab*c";
+	setHost(pattern, needle);
+
+	clear(pos);
+	while (find(finder, pattern))
+		append(pos,position(finder));
+	
+	SEQAN_TASSERT(pos[0] == 2);
+	SEQAN_TASSERT(pos[1] == 11);
+	SEQAN_TASSERT(pos[2] == 14);
+	
+	SEQAN_TASSERT(length(pos) == 3);
+
+//____________________________________________________________________________
+// Test - wildcard matching
+	haystack = "acccdfabdeeef";
+	setHost(finder, haystack);
+	clear(finder);
+
+	needle = "ab?c*de+f";
+	setHost(pattern, needle);
+
+	clear(pos);
+	while (find(finder, pattern))
+		append(pos,position(finder));
+	
+	SEQAN_TASSERT(pos[0] == 12);
+	SEQAN_TASSERT(length(pos) == 1);
+
+//____________________________________________________________________________
+// Test - wildcard matching (hard case)
+	haystack = "aacccdfacccdeeef";
+	setHost(finder, haystack);
+	clear(finder);
+
+	needle = "a*c*de+f";
+	setHost(pattern, needle);
+
+	clear(pos);
+	while (find(finder, pattern))
+		append(pos,position(finder));
+	
+	SEQAN_TASSERT(pos[0] == 15);
+	SEQAN_TASSERT(length(pos) == 1);
+
+
+//____________________________________________________________________________
+// Test - character classes matching
+	haystack = "annual_Annual_znnual_Znnual";
+	setHost(finder, haystack);
+	clear(finder);
+
+	needle = "[a-zA]nnual";	
+	setHost(pattern, needle);
+
+	clear(pos);
+	while (find(finder, pattern))
+		append(pos,position(finder));
+	
+	SEQAN_TASSERT(pos[0] == 5);
+	SEQAN_TASSERT(pos[1] == 12);
+	SEQAN_TASSERT(pos[2] == 19);
+	SEQAN_TASSERT(length(pos) == 3);
+
+//____________________________________________________________________________
+// Test - long needles
+	haystack = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefgaabcdef";
+	setHost(finder, haystack);
+	clear(finder);
+
+	needle = "abcdefghijklmnopqrstuvwxyzabcdefg";	
+	setHost(pattern, needle);
+
+	clear(pos);
+	while (find(finder, pattern))
+		append(pos,position(finder));
+
+	SEQAN_TASSERT(pos[0] == 32);
+	SEQAN_TASSERT(pos[1] == 58);
+	SEQAN_TASSERT(length(pos) == 2);
+
+//____________________________________________________________________________
+// Test - long needles with character classes
+	//	        abcdefghijklmnopqrstuvwxyzabcdefghijkl
+	//	                                  abcdefghijklmnopqrstuvwxyzabcdefghijkl
+	haystack = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuzwxyzabcdefghzjklaabcdefhijkl";
+	setHost(finder, haystack);
+	clear(finder);
+
+	needle = "abcdefghijklmnopqrstu[vz]wxyzabcdefgh[iz]jkl";	
+	setHost(pattern, needle);
+
+	clear(pos);
+	while (find(finder, pattern))
+		append(pos,position(finder));
+
+	SEQAN_TASSERT(pos[0] == 37);
+	SEQAN_TASSERT(pos[1] == 63);
+	SEQAN_TASSERT(length(pos) == 2);
+
+
+//____________________________________________________________________________
+// Test - long needles with repeating characters
+	//	        abcdefghijklmnopqrstuvwxyzabcdefghijkl
+	//													  abcdefghijklmnopqrstuvwxyzabcdefghijkl
+	haystack = "abcdefghijklmnopqrstuvwxyzabcdefghiiiiijkl____aaaaabcdefghijklmnopqrstuvwxyzabcdeghijkl__aaaaabcdefghijklmnopqrstuvwxyzabcdefghjkl";
+	setHost(finder, haystack);
+	clear(finder);
+
+	needle = "aa*bcdefghijklmnopqrstuvwxyzabcdef?g?hi+jkl";	
+	setHost(pattern, needle);
+
+	clear(pos);
+	while (find(finder, pattern))
+		append(pos,position(finder));
+
+	SEQAN_TASSERT(pos[0] == 41);
+	SEQAN_TASSERT(pos[1] == 86);
+	SEQAN_TASSERT(length(pos) == 2);
+
+//____________________________________________________________________________
+// Test - handle .
+	haystack = "annual_Annual_znnual";
+	setHost(finder, haystack);
+	clear(finder);
+
+	needle = ".nnual";	
+	setHost(pattern, needle);
+	clear(pos);
+	while (find(finder, pattern)){
+		append(pos,position(finder));
+	}
+	SEQAN_TASSERT(pos[0] == 5);
+	SEQAN_TASSERT(pos[1] == 12);
+	SEQAN_TASSERT(pos[2] == 19);
+	SEQAN_TASSERT(length(pos) == 3);
+
+//____________________________________________________________________________
+// Test - handle \ 
+	haystack = "annual_Annual_.nnual";
+	setHost(finder, haystack);
+	clear(finder);
+
+	needle = "\\.nnual";	
+	setHost(pattern, needle);
+	clear(pos);
+	while (find(finder, pattern)){
+		append(pos,position(finder));
+	}
+	SEQAN_TASSERT(pos[0] == 19);
+	SEQAN_TASSERT(length(pos) == 1);
+
+
+
+//____________________________________________________________________________
+// Test - handle bounded length repeats {n,m}
+	haystack = "aannual_aaaannual_annual";
+	setHost(finder, haystack);
+	clear(finder);
+
+	needle = "a{2,5}n{2}ual";	
+	
+	SEQAN_TASSERT(_length_wo_wild(needle) == 10);
+	
+	setHost(pattern, needle);
+	clear(pos);
+	while (find(finder, pattern)){
+		append(pos,position(finder));
+	}
+	SEQAN_TASSERT(pos[0] == 6);
+	SEQAN_TASSERT(pos[1] == 16);
+	SEQAN_TASSERT(length(pos) == 2);
+
+
+//____________________________________________________________________________
+// Test - handle different types of Pattern and Needle
+	String<Dna> dna_haystack("AAACCTATGGGTTTAAAACCCTGAAACCCC");
+	Finder<String<Dna> > dna_finder(dna_haystack);
+
+	String<char> char_needle("a{3}c+t[ag].");
+	Pattern<String<Dna>, TAlgorithmSpec> dna_pattern(char_needle);
+	clear(pos);
+
+	while (find(dna_finder, dna_pattern))
+		append(pos,position(dna_finder));
+
+	SEQAN_TASSERT(pos[0] == 7);
+	SEQAN_TASSERT(pos[1] == 23);
+	SEQAN_TASSERT(length(pos) == 2);
+
+}
+//////////////////////////////////////////////////////////////////////////////
+
 int main() 
 {
 	SEQAN_TREPORT("TEST BEGIN")
@@ -421,7 +730,8 @@ int main()
 	Test_OnlineAlg<ShiftOr>();
 	Test_OnlineAlg<BndmAlgo>();
 	Test_OnlineAlg<BomAlgo>();
-
+	
+	Test_OnlineAlgWildcards<WildShiftAnd>();
 
 	Test_OnlineAlgMulti<AhoCorasick>();
 	Test_OnlineAlgMulti<MultipleShiftAnd>();
@@ -436,7 +746,8 @@ int main()
 
 	
 //	debug::verifyCheckpoints("projects/library/seqan/find/find_myers_ukkonen.h");
-
+	
+	debug::verifyCheckpoints("projects/library/seqan/find/find_wild_shiftand.h");
 	debug::verifyCheckpoints("projects/library/seqan/find/find_horspool.h");
 	debug::verifyCheckpoints("projects/library/seqan/find/find_base.h");
 	debug::verifyCheckpoints("projects/library/seqan/find/find_shiftand.h");

@@ -45,6 +45,10 @@
 #include <seqan/find/find_quasar.h>
 
 //____________________________________________________________________________
+// exact pattern matching
+#include <seqan/find/find_wild_shiftand.h>
+
+//____________________________________________________________________________
 // approximate pattern matching
 
 #include <seqan/find/find_score.h>
