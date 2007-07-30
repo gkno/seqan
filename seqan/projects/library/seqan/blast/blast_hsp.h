@@ -871,6 +871,32 @@ SEQAN_CHECKPOINT
 	
 }
 
+/**
+.Function.getAlignment
+..cat:Blast
+..summary:Turns a HSP from a Blast search into an Alignment object.
+..signature:getAlignment(hsp,alignment)
+..param.hsp:A Blast HSP.
+...type:Class.BlastHsp
+..param.alignment:An Alignment object to be filled.
+...type:Class.Align
+...type:Class.Graph
+*/
+template<typename TBlastHsp, typename TSpec, typename TSource>
+inline void
+getAlignment(TBlastHsp & hsp,
+			 Align<TSource,TSpec> & ali)
+{
+SEQAN_CHECKPOINT
+
+	if(length(rows(ali))>1)
+        if(!emptySource(rows(ali,0)) && !!emptySource(rows(ali,1)))
+			getAlignment(hsp,ali,KnownSource());
+	
+	getAlignment(hsp,ali,UnknownSource());
+
+}
+
 
 
 /////////////////////////////////////////////////////////////
@@ -934,6 +960,18 @@ SEQAN_CHECKPOINT
 
 
 
+
+/**
+.Function.getAlignment
+..cat:Blast
+..signature:getAlignment(hsp,alignment,id0,id1)
+..param.hsp:A Blast HSP.
+...type:Class.BlastHsp
+..param.alignment:An Alignment object to be filled.
+...type:Class.Graph
+..param.id0:The Id of the query sequence in the StringSet of the Alignment Graph.
+..param.id1:The Id of the hit sequence in the StringSet of the Alignment Graph.
+*/
 /////////////////////////////////////////////////////////////
 // get Alignment for Graph<TAlign>
 template<typename TBlastHsp, typename TAlign, typename TId>

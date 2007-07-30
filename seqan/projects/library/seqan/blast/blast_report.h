@@ -15,7 +15,7 @@ class BlastReport;
 ..cat:Blast
 ..summary:Object for storing Blast report information. 
 ..signature:BlastReport<TBlastHsp, TSpec>  
-..param.TBlastHsp:The type of HSPs that are to be stored
+..param.TBlastHsp:The type of HSPs that are to be stored.
 ...remarks:see @Class.BlastHsp@.
 ...metafunction:Metafunction.Hsp
 ...metafunction:Metafunction.Hit

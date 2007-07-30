@@ -8,6 +8,17 @@ template<typename TBlastHsp, typename TStoreSpec>
 class BlastHit;
 
 
+/**
+.Class.BlastHit:
+..cat:Blast
+..summary:Object for storing Blast hits. 
+..signature:BlastHit<TBlastHsp, TSpec>  
+..param.TBlastHsp:The type of HSPs that are stored.
+..param.TSpec:The specializing type.
+...type:Spec.StreamReport
+...type:Spec.StoreReport
+..remarks:Use Metafunction.Hit to get the BlastHit type used in a BlastReport object.
+*/
 template<typename TBlastHsp, typename TSpec>
 class BlastHit<TBlastHsp, StoreReport<TSpec> > 
 {
