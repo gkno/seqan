@@ -76,7 +76,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		inline Pair(_T1 const &_i1, _T2 const &_i2): i1(_i1), i2(_i2) {}
 
 		template <typename __T1, typename __T2, typename __TCompression>
-		inline Pair(Pair<__T1, __T2, __TCompression> const &_p): i1(getValueI1(_p)), i2(getValueI2(_p)) {}
+		inline Pair(Pair<__T1, __T2, __TCompression> const &_p):
+			i1(getValueI1(_p)), i2(getValueI2(_p)) {}
     };
 
 
@@ -96,7 +97,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		inline Pair(_T1 const &_i1, _T2 const &_i2): i1(_i1), i2(_i2) {}
 
 		template <typename __T1, typename __T2, typename __TCompression>
-		inline Pair(Pair<__T1, __T2, __TCompression> const &_p): i1(getValueI1(_p)), i2(getValueI2(_p)) {}
+		inline Pair(Pair<__T1, __T2, __TCompression> const &_p):
+			i1(getValueI1(_p)), i2(getValueI2(_p)) {}
 	}
 #ifndef PLATFORM_WINDOWS
 	__attribute__((packed))
@@ -125,7 +127,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		inline Pair() {}
 		inline Pair(Pair const &_p): i12(_p.i12) {}
-		inline Pair(_T1 const &_i1, _T2 const &_i2): i12(((T12)_i1 << bitShiftI1) + (T12)_i2) {}
+		inline Pair(_T1 const &_i1, _T2 const &_i2):
+			i12(((T12)_i1 << bitShiftI1) + (T12)_i2) {}
 
 		template <typename __T1, typename __T2, typename __TCompression>
 		inline Pair(Pair<__T1, __T2, __TCompression> const &_p):
@@ -207,8 +210,10 @@ namespace SEQAN_NAMESPACE_MAIN
         _T2 i2;
         _T3 i3;
 		inline Triple() {}
-		inline Triple(Triple const &_p): i1(_p.i1), i2(_p.i2), i3(_p.i3) {}
-		inline Triple(_T1 const &_i1, _T2 const &_i2, _T3 const &_i3): i1(_i1), i2(_i2), i3(_i3) {}
+		inline Triple(Triple const &_p):
+			i1(_p.i1), i2(_p.i2), i3(_p.i3) {}
+		inline Triple(_T1 const &_i1, _T2 const &_i2, _T3 const &_i3):
+			i1(_i1), i2(_i2), i3(_i3) {}
 
 		template <typename __T1, typename __T2, typename __T3, typename __TCompression>
 		inline Triple(Triple<__T1, __T2, __T3, __TCompression> const &_p):
@@ -228,8 +233,10 @@ namespace SEQAN_NAMESPACE_MAIN
         _T2 i2;
         _T3 i3;
 		inline Triple() {}
-		inline Triple(Triple const &_p): i1(_p.i1), i2(_p.i2), i3(_p.i3) {}
-		inline Triple(_T1 const &_i1, _T2 const &_i2, _T3 const &_i3): i1(_i1), i2(_i2), i3(_i3) {}
+		inline Triple(Triple const &_p):
+			i1(_p.i1), i2(_p.i2), i3(_p.i3) {}
+		inline Triple(_T1 const &_i1, _T2 const &_i2, _T3 const &_i3):
+			i1(_i1), i2(_i2), i3(_i3) {}
 
 		template <typename __T1, typename __T2, typename __T3, typename __TCompression>
 		inline Triple(Triple<__T1, __T2, __T3, __TCompression> const &_p):
