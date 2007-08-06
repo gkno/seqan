@@ -18,10 +18,10 @@
   $Id$
  ==========================================================================*/
 
+// THIS FILE IS CURRENTLY NOT USED IN SEQAN
+
 #ifndef SEQAN_HEADER_BASIC_COUNTED_PTR_H
 #define SEQAN_HEADER_BASIC_COUNTED_PTR_H
-
-// THIS FILE IS CURRENTLY NOT USED
 
 namespace SEQAN_NAMESPACE_MAIN
 {
