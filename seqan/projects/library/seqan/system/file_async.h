@@ -571,10 +571,10 @@ namespace SEQAN_NAMESPACE_MAIN
 			 TagAllocateAligned const)
 	{
 		data = (TValue *) VirtualAlloc(NULL, count * sizeof(TValue), MEM_COMMIT, PAGE_READWRITE);
-        if (!data)
-			::std::cerr << "AlignAllocator: Could not allocate memory of size " << ::std::hex << count * sizeof(TValue) << ::std::dec << ". (ErrNo=" << GetLastError() << ")" << ::std::endl;
+        if (data)
+            SEQAN_PROADD(SEQAN_PROMEMORY, count * sizeof(TValue));
         else
-            SEQAN_PROADD(SEQAN_PROMEMORY, sizeof(TValue) * count);
+			::std::cerr << "AlignAllocator: Could not allocate memory of size " << ::std::hex << count * sizeof(TValue) << ::std::dec << ". (ErrNo=" << GetLastError() << ")" << ::std::endl;
 	}
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -588,7 +588,7 @@ namespace SEQAN_NAMESPACE_MAIN
 				TagAllocateAligned const)
 	{
         if (data) {
-            SEQAN_PROSUB(SEQAN_PROMEMORY, sizeof(TValue) * count);
+            SEQAN_PROSUB(SEQAN_PROMEMORY, count * sizeof(TValue));
 			VirtualFree(data, 0, MEM_RELEASE);
         }
 	}
@@ -778,7 +778,11 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <typename TSpec>
     inline bool flush(File<Async<TSpec> > & me) {
-		return me.handle == me.handleAsync || fdatasync(me.handle) == 0;
+		#if _POSIX_SYNCHRONIZED_IO > 0
+			return me.handle == me.handleAsync || fdatasync(me.handle) == 0;
+		#else
+			return me.handle == me.handleAsync || fsync(me.handle) == 0;
+		#endif
     }
 
     //////////////////////////////////////////////////////////////////////
@@ -905,14 +909,13 @@ namespace SEQAN_NAMESPACE_MAIN
 			 TSize count,
 			 TagAllocateAligned const)
 	{
-        int error = posix_memalign(reinterpret_cast<void**>(&data), sysconf(_SC_PAGESIZE), count * sizeof(TValue));
-        if (error) {
+		data = (TValue *) valloc(count * sizeof(TValue));
+        if (data)
+			SEQAN_PROADD(SEQAN_PROMEMORY, count * sizeof(TValue));
+		else
 			::std::cerr << "AlignAllocator: Could not allocate memory of size " << ::std::hex << 
-				count * sizeof(TValue) << " and an alignment of " << 
-				sysconf(_SC_PAGESIZE) << ::std::dec << ". (ErrNo=" << error << ")" << ::std::endl;
-            data = NULL;
-        } else
-            SEQAN_PROADD(SEQAN_PROMEMORY, sizeof(TValue) * count);
+				count * sizeof(TValue) << " with page alignment. (ErrNo=" << ::std::dec <<
+				errno << ")" << ::std::endl;
 	}
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -925,10 +928,9 @@ namespace SEQAN_NAMESPACE_MAIN
 				TSize count,
 				TagAllocateAligned const)
 	{
-        if (data && count) {	// .. to use count if SEQAN_PROFILE is not defined
-        	SEQAN_PROSUB(SEQAN_PROMEMORY, sizeof(TValue) * count);
-			free(data);
-		}
+        if (data && count)	// .. to use count if SEQAN_PROFILE is not defined
+			SEQAN_PROSUB(SEQAN_PROMEMORY, count * sizeof(TValue));
+		free(data);
 	}
 
 #endif
