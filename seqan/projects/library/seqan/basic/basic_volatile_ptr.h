@@ -154,7 +154,6 @@ namespace SEQAN_NAMESPACE_MAIN
     template <typename TValue>
     inline void nukeCopies(VolatilePtr<TValue> &ptr) { ptr.nukeCopies(); }
 
-
 }
 
 #endif
