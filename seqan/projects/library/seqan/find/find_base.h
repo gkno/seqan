@@ -21,6 +21,9 @@
 #ifndef SEQAN_HEADER_FIND_BASE_H
 #define SEQAN_HEADER_FIND_BASE_H
 
+
+//////////////////////////////////////////////////////////////////////////////
+
 namespace SEQAN_NAMESPACE_MAIN
 {
 
