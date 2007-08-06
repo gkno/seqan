@@ -28,12 +28,10 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 
-//////////////////////////////////////////////////////////////////////////////
-
-
 	//////////////////////////////////////////////////////////////////////////////
 	// base class for memory buffers
-    template < typename TValue >
+
+	template < typename TValue >
 	struct SimpleBuffer {
         typedef TValue      Type;
         typedef size_t		SizeType;
@@ -156,7 +154,8 @@ namespace SEQAN_NAMESPACE_MAIN
     //////////////////////////////////////////////////////////////////////////////
 	// a bucket is a structure to represent a small window of a page
     // used by algorithms which need a global view of all pages (merge sort, mapper)
-    template < typename TValue >
+
+	template < typename TValue >
     struct PageBucket {
         unsigned    pageOfs;                // begin of bucket window with relation to page begin
         TValue  	*begin, *cur, *end;     // begin/end of buckets memory buffer and a pointer
@@ -177,6 +176,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template < typename TValue, typename TFile, typename TSpec >
     struct PageFrame {};    
+
 
 	//////////////////////////////////////////////////////////////////////////////
 	// page frame of dynamic size

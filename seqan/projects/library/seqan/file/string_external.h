@@ -21,8 +21,12 @@
 #ifndef SEQAN_HEADER_STRING_EXTERNAL_H
 #define SEQAN_HEADER_STRING_EXTERNAL_H
 
+
+//////////////////////////////////////////////////////////////////////////////
+
 namespace SEQAN_NAMESPACE_MAIN
 {
+
 
     // standard external string
     // size is uint32

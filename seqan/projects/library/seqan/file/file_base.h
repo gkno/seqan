@@ -245,7 +245,8 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
     }
 
     template < typename File >
-    inline void reopen(File &, int) {}
+    inline void reopen(File &, int) {
+	}
     
 /**
 .Function.close:
@@ -457,7 +458,9 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 */
 
     template < typename TSpec >
-    inline bool setEOF(File<TSpec> &/*me*/) { return true; }
+    inline bool setEOF(File<TSpec> &/*me*/) { 
+		return true; 
+	}
 
 
     //////////////////////////////////////////////////////////////////////
@@ -626,7 +629,8 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 */
 
     template < typename TSpec >
-    inline void flush(File<TSpec> &) {}
+    inline void flush(File<TSpec> &) {
+	}
 
 /**
 .Function.waitFor:
@@ -642,14 +646,19 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 ..remarks:$waitFor$ suspends the calling process until $request$ is completed or after $timeout_millis$ milliseconds.
 */
 
-    inline bool waitFor(aDummyRequest &) { return true; }
+    inline bool waitFor(aDummyRequest &) { 
+		return true; 
+	}
 
 	template < typename TTime >
-    inline bool waitFor(aDummyRequest &, TTime) { return true; }
+    inline bool waitFor(aDummyRequest &, TTime) { 
+		return true; 
+	}
 
 	// deprecated
 	template < typename TSpec, typename aRequest >
-    inline void release(File<TSpec> &, aRequest &) {}
+    inline void release(File<TSpec> &, aRequest &) {
+	}
 
 /**
 .Function.cancel:
@@ -664,7 +673,9 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 */
 
     template < typename TSpec, typename aRequest >
-    inline bool cancel(File<TSpec> & me, aRequest & request) { return true; }
+    inline bool cancel(File<TSpec> & me, aRequest & request) {
+		return true; 
+	}
 
 
 	// little helpers

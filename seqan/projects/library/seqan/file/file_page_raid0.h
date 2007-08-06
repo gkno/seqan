@@ -31,8 +31,9 @@ namespace SEQAN_NAMESPACE_MAIN
     //////////////////////////////////////////////////////////////////////////////
     // page based read/write for striped files
 
-	template < typename TValue, unsigned _FileCount, typename TFile, typename TSpec > inline
-	bool readPage(
+	template < typename TValue, unsigned _FileCount, typename TFile, typename TSpec >
+	inline bool 
+	readPage(
 		int pageNo, 
 		PageFrame<TValue, File< Striped<_FileCount, TFile> >, TSpec> &pf, 
 		File< Striped<_FileCount, TFile> > &file)
@@ -52,8 +53,9 @@ namespace SEQAN_NAMESPACE_MAIN
 			pf.request);
 	}
 
-	template < typename TValue, unsigned _FileCount, typename TFile, typename TSpec > inline
-	bool writePage(
+	template < typename TValue, unsigned _FileCount, typename TFile, typename TSpec >
+	inline bool 
+	writePage(
 		PageFrame<TValue, File< Striped<_FileCount, TFile> >, TSpec> &pf, 
 		int pageNo, 
 		File< Striped<_FileCount, TFile> > &file)
@@ -72,8 +74,9 @@ namespace SEQAN_NAMESPACE_MAIN
 			pf.request);
 	}
 
-	template < typename TValue, unsigned _FileCount, typename TFile, typename TSpec, typename TSize > inline
-    bool readLastPage(
+	template < typename TValue, unsigned _FileCount, typename TFile, typename TSpec, typename TSize >
+	inline bool 
+	readLastPage(
 		int pageNo, 
 		PageFrame<TValue, File< Striped<_FileCount, TFile> >, TSpec> &pf, 
 		File< Striped<_FileCount, TFile> > &file,
@@ -93,8 +96,9 @@ namespace SEQAN_NAMESPACE_MAIN
 			(pos_t)(pageNo / _FileCount) * (pos_t)pageSize(pf));
 	}
 
-	template < typename TValue, unsigned _FileCount, typename TFile, typename TSpec, typename TSize > inline
-	bool writeLastPage(
+	template < typename TValue, unsigned _FileCount, typename TFile, typename TSpec, typename TSize >
+	inline bool 
+	writeLastPage(
 		PageFrame<TValue, File< Striped<_FileCount, TFile> >, TSpec> &pf, 
 		int pageNo, 
 		File< Striped<_FileCount, TFile> > &file,
@@ -119,8 +123,9 @@ namespace SEQAN_NAMESPACE_MAIN
 	//////////////////////////////////////////////////////////////////////////////
 	// bucket based read/write methods for striped files
 
-	template < typename TValue, unsigned _FileCount, typename TFile > inline
-	unsigned readBucket(
+	template < typename TValue, unsigned _FileCount, typename TFile >
+	inline unsigned 
+	readBucket(
 		PageBucket<TValue> &b, 
 		int pageNo, 
 		unsigned pageSize, 
@@ -143,8 +148,9 @@ namespace SEQAN_NAMESPACE_MAIN
             return 0;
 	}
 
-	template < typename TValue, unsigned _FileCount, typename TFile > inline
-	bool writeBucket(
+	template < typename TValue, unsigned _FileCount, typename TFile >
+	inline bool 
+	writeBucket(
 		PageBucket<TValue> &b,
 		int pageNo, 
 		unsigned pageSize, 
@@ -164,8 +170,9 @@ namespace SEQAN_NAMESPACE_MAIN
             return false;
 	}
 
-	template < typename TValue, unsigned _FileCount, typename TFile, typename TSpec > inline
-	bool writeBucket(
+	template < typename TValue, unsigned _FileCount, typename TFile, typename TSpec >
+	inline bool 
+	writeBucket(
 		PageFrame<TValue, File< Striped<_FileCount, TFile> >, Dynamic<TSpec> > &pf, 
 		unsigned &pageOfs, 
 		File< Striped<_FileCount, TFile> > &file) 

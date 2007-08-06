@@ -179,10 +179,13 @@ namespace SEQAN_NAMESPACE_MAIN
         seek(me, old_pos, SEEK_BEGIN);
     }
 
-	inline bool flush(FILE*) { return true; }
+	inline bool flush(FILE*) {
+		return true; 
+	}
 
     template < typename aRequest >
-    inline void release(FILE*, aRequest &) { }
+	inline void release(FILE*, aRequest &) {
+	}
 
 }
 
