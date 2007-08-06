@@ -27,8 +27,6 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 
-//////////////////////////////////////////////////////////////////////////////
-
 	// To override the system's default temporary directory use the following:
 	//#define SEQAN_DEFAULT_TMPDIR "/var/tmp"
 
