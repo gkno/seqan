@@ -27,16 +27,19 @@
 #include <seqan/platform.h>
 
 //#include <cstring>
-#include <limits>
+#ifdef PLATFORM_WINDOWS
+#include <limits>	// limits include file exists only for g++ >= 3.0
+#endif
 
-#include <cstddef> //size_t
+#include <cstddef>	// size_t
+#include <cstdio>	// FILE, basic_debug
 #include <ctime>
 #include <iterator>
 #include <algorithm>
 #include <memory.h> // memset
 #include <string>	// basic_profile
 
-#define SEQAN_NAMESPACE_MAIN seqan 
+#define SEQAN_NAMESPACE_MAIN seqan
 
 //____________________________________________________________________________
 

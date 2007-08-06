@@ -34,6 +34,7 @@
 #ifdef PLATFORM_WINDOWS
 # include <windows.h>
 #else //#ifdef PLATFORM_WINDOWS
+# include <cstdlib>
 # include <climits>
 # include <pthread.h>
 # include <errno.h>

@@ -89,7 +89,6 @@
 //#include <seqan/index/shape_gapped.h>
 #include <seqan/index/index_qgram.h>
 #include <seqan/index/index_qgram_nested.h>
-#include <seqan/index/index_qgram_find.h>
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -98,6 +97,7 @@
 
 #include <seqan/index/index_find.h>
 #include <seqan/index/index_shims.h>
+#include <seqan/index/index_qgram_find.h>
 
 //____________________________________________________________________________
 // (virtual) suffix tree
@@ -107,6 +107,7 @@
 #include <seqan/index/index_esa_algs.h>
 #include <seqan/index/index_esa_algs_multi.h>
 #include <seqan/index/index_esa_drawing.h>
+#include <seqan/index/index_wotd.h>
 
 
 
