@@ -1,5 +1,5 @@
  /*==========================================================================
-                SeqAn - The Library for Sequence Analysis
+                SeqAn - The Library for object Analysis
                           http://www.seqan.de 
  ============================================================================
   Copyright (C) 2007
@@ -63,11 +63,27 @@ inline void complementInPlace(TSequence & sequence) {
 	convertInPlace(sequence, FunctorComplement<typename Value<TSequence>::Type>());
 } 
 
+template < typename TSequence, typename TSpec >
+inline void complementInPlace(StringSet<TSequence, TSpec> & stringSet)
+{
+	unsigned seqCount = length(stringSet);
+	for(unsigned seqNo = 0; seqNo < seqCount; ++seqNo)
+		complementInPlace(stringSet[seqNo]);
+}
+
 template < typename TSequence >
 inline void reverseComplementInPlace(TSequence & sequence) {
 	convertInPlace(sequence, FunctorComplement<typename Value<TSequence>::Type>());
 	reverseInPlace(sequence);
 } 
+
+template < typename TSequence, typename TSpec >
+inline void reverseComplementInPlace(StringSet<TSequence, TSpec> & stringSet)
+{
+	unsigned seqCount = length(stringSet);
+	for(unsigned seqNo = 0; seqNo < seqCount; ++seqNo)
+		reverseComplementInPlace(stringSet[seqNo]);
+}
 
 
 //////////////////////////////////////////////////////////////////////////////

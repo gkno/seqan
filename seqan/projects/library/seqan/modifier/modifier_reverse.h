@@ -409,6 +409,15 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
 	}
 
+	template < typename TSequence, typename TSpec >
+	inline void
+	reverseInPlace(StringSet<TSequence, TSpec> & stringSet) 
+	{
+		unsigned seqCount = length(stringSet);
+		for(unsigned seqNo = 0; seqNo < seqCount; ++seqNo)
+			reverseComplementInPlace(stringSet[seqNo]);
+	}
+
 }
 
 #endif
