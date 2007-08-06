@@ -18,14 +18,6 @@
   $Id$
  ==========================================================================*/
 
-/*
- *  basic_metaprogramming.h
- *  SeqAn
- *
- *  Created by David Weese on 17.07.05.
- *
- */
-
 #ifndef SEQAN_BASIC_METAPROGRAMMING_H
 #define SEQAN_BASIC_METAPROGRAMMING_H
 

@@ -313,17 +313,17 @@ SEQAN_CHECKPOINT
 // operator +
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TContainer, typename TIntegral>
+template <typename TContainer>
 inline Iter<TContainer, PositionIterator>  
 operator + (Iter<TContainer, PositionIterator> const & left,
-			TIntegral right)
+			typename Difference<TContainer>::Type right)
 {
 SEQAN_CHECKPOINT
 	return Iter<TContainer, PositionIterator>(container(left), position(left) + right);
 }
-template <typename TContainer, typename TIntegral>
+template <typename TContainer>
 inline Iter<TContainer, PositionIterator>  
-operator + (TIntegral left,
+operator + (typename Difference<TContainer>::Type left,
 			Iter<TContainer, PositionIterator> const & right)
 {
 SEQAN_CHECKPOINT
@@ -334,10 +334,10 @@ SEQAN_CHECKPOINT
 // operator +=
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TContainer, typename TIntegral>
+template <typename TContainer>
 inline Iter<TContainer, PositionIterator> &
 operator += (Iter<TContainer, PositionIterator> & left,
-			 TIntegral right)
+			 typename Difference<TContainer>::Type right)
 {
 SEQAN_CHECKPOINT
 	setPosition(left, position(left) + right);
@@ -348,10 +348,10 @@ SEQAN_CHECKPOINT
 // operator -
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TContainer, typename TIntegral>
+template <typename TContainer>
 inline Iter<TContainer, PositionIterator>  
 operator - (Iter<TContainer, PositionIterator> const & left,
-			TIntegral right)
+			typename Difference<TContainer>::Type right)
 {
 SEQAN_CHECKPOINT
 	return Iter<TContainer, PositionIterator>(container(left), position(left) - right);
@@ -360,7 +360,7 @@ SEQAN_CHECKPOINT
 //____________________________________________________________________________
 
 template <typename TContainer>
-inline typename Difference<Iter<TContainer, PositionIterator> >::Type  
+inline typename Difference<TContainer>::Type  
 operator - (Iter<TContainer, PositionIterator> const & left,
 			Iter<TContainer, PositionIterator> const & right)
 {
@@ -372,10 +372,10 @@ SEQAN_CHECKPOINT
 // operator -=
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TContainer, typename TIntegral>
+template <typename TContainer>
 inline Iter<TContainer, PositionIterator> &
 operator -= (Iter<TContainer, PositionIterator> & left,
-			TIntegral right)
+			typename Difference<TContainer>::Type right)
 {
 SEQAN_CHECKPOINT
 	setPosition(left, position(left) - right);

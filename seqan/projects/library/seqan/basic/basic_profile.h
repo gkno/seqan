@@ -167,7 +167,13 @@
     #else
 
 		#include <unistd.h>
-		#ifndef _POSIX_MONOTONIC_CLOCK
+		#if _POSIX_TIMERS > 0
+			#ifndef SEQAN_USE_CLOCKGETTIME
+			#define SEQAN_USE_CLOCKGETTIME
+			#endif
+		#endif
+		
+		#ifndef SEQAN_USE_CLOCKGETTIME
 		/* some systems e.g. darwin have no clock_gettime */
 
 			inline _proFloat sysTime() {
@@ -337,7 +343,7 @@
             if (!mark.empty()) {
                 dumpTab();
                 fprintf(out, "\"%s\"", mark.c_str());
-                mark.clear();
+                mark.erase();
             }
         }
 

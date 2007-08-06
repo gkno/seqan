@@ -654,14 +654,22 @@ inline float const &
 supremumValueImpl(float *)
 {
 SEQAN_CHECKPOINT
-static float const _value = ::std::numeric_limits<float>::infinity( );
+#ifdef PLATFORM_WINDOWS
+	static float const _value = ::std::numeric_limits<float>::infinity( );
+#else
+	static float const _value = 3.40282347e+38F;
+#endif
 	return _value;
 }
 inline float const &
 infimumValueImpl(float *)
 {
 SEQAN_CHECKPOINT
-	static float const _value = - ::std::numeric_limits<float>::infinity( );
+#ifdef PLATFORM_WINDOWS
+	static float const _value = -::std::numeric_limits<float>::infinity( );
+#else
+	static float const _value = -3.40282347e+38F;
+#endif
 	return _value;
 }
 
@@ -673,14 +681,22 @@ inline double const &
 supremumValueImpl(double *)
 {
 SEQAN_CHECKPOINT
-static double const _value = ::std::numeric_limits<double>::infinity( );
+#ifdef PLATFORM_WINDOWS
+	static double const _value = ::std::numeric_limits<double>::infinity( );
+#else
+	static double const _value = 1.7976931348623157e+308;
+#endif
 	return _value;
 }
 inline double const &
 infimumValueImpl(double *)
 {
 SEQAN_CHECKPOINT
-	static double const _value = - ::std::numeric_limits<double>::infinity( );
+#ifdef PLATFORM_WINDOWS
+	static double const _value = -::std::numeric_limits<double>::infinity( );
+#else
+	static double const _value = -1.7976931348623157e+308;
+#endif
 	return _value;
 }
 
@@ -692,14 +708,22 @@ inline long double const &
 supremumValueImpl(long double *)
 {
 SEQAN_CHECKPOINT
-static long double const _value = ::std::numeric_limits<long double>::infinity( );
+#ifdef PLATFORM_WINDOWS
+	static long double const _value = ::std::numeric_limits<long double>::infinity( );
+#else
+	static long double const _value = 1.7976931348623157e+308;
+#endif
 	return _value;
 }
 inline long double const &
 infimumValueImpl(long double *)
 {
 SEQAN_CHECKPOINT
-	static long double const _value = - ::std::numeric_limits<long double>::infinity( );
+#ifdef PLATFORM_WINDOWS
+	static long double const _value = -::std::numeric_limits<long double>::infinity( );
+#else
+	static long double const _value = -1.7976931348623157e+308;
+#endif
 	return _value;
 }
 
