@@ -1,10 +1,22 @@
-/*
- *  index_qgram_nested.h
- *  SeqAn
- *
- *  Created by David Weese on 17.07.05.
- *
- */
+ /*==========================================================================
+                SeqAn - The Library for Sequence Analysis
+                          http://www.seqan.de 
+ ============================================================================
+  Copyright (C) 2007
+
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 3 of the License, or (at your option) any later version.
+
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+  Lesser General Public License for more details.
+
+ ============================================================================
+  $Id$
+ ==========================================================================*/
 
 #ifndef SEQAN_HEADER_INDEX_QGRAM_NESTED_H
 #define SEQAN_HEADER_INDEX_QGRAM_NESTED_H
@@ -91,9 +103,9 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		typedef typename Size<TText>::Type							TSize;
 
-		static TSize const SUBDIR        =  1 << (BitsPerValue<TSize>::VALUE - 1);
-		static TSize const SORTED_SUBDIR =  1 << (BitsPerValue<TSize>::VALUE - 2);
-		static TSize const SORTED_SA     =  1 << (BitsPerValue<TSize>::VALUE - 2);
+		static TSize const SUBDIR        = 1 << (BitsPerValue<TSize>::VALUE - 1);
+		static TSize const SORTED_SUBDIR = 1 << (BitsPerValue<TSize>::VALUE - 2);
+		static TSize const SORTED_SA     = 1 << (BitsPerValue<TSize>::VALUE - 2);
 		static TSize const BITMASK       = ~(SUBDIR | SORTED_SA);
 
 
@@ -287,7 +299,8 @@ namespace SEQAN_NAMESPACE_MAIN
 			while (it != itEnd) {
 				sum += diff_prev;
 				diff_prev = diff;
-				if (diff = *it) ++dirtyBuckets;
+				if ((diff = *it) != 0) 
+					++dirtyBuckets;
 				*it = sum;
 				++it;
 			}
@@ -431,14 +444,14 @@ namespace SEQAN_NAMESPACE_MAIN
 				infSA, infDir, indexText((TIndex const&)index),
 				shape, index.tempSA, lcp, sa1);
 
-		if (size < index.minDirSize) 
+/*		if (size < index.minDirSize) 
 		{
 			_compressQGramBucket(index, dir1);
 			dir2 = dir1 + 2 * size + 1;
 			resize(indexDir(index), dir2, Generous());
 			dir1 = (dir1 + 1) | index.SORTED_SUBDIR;
 		}
-
+*/
 
 		::std::cout << "." << ::std::endl;
 		// set link to sub-directory
@@ -510,7 +523,7 @@ namespace SEQAN_NAMESPACE_MAIN
 				if ((subDir & index.SORTED_SA) == 0)
 					subDir = _expandQGramNode(index, pos, lcp);
 
-				_dump(index);
+//				_dump(index);
 				if (subDir & index.SORTED_SA) {
 					subDir &= index.BITMASK;
 					TSize sa2 = _firstSuffixOfQGramBucket(index, pos + 1);
