@@ -107,7 +107,7 @@
 #include <seqan/index/index_esa_algs.h>
 #include <seqan/index/index_esa_algs_multi.h>
 #include <seqan/index/index_esa_drawing.h>
-#include <seqan/index/index_wotd.h>
+//#include <seqan/index/index_wotd.h>
 
 
 
