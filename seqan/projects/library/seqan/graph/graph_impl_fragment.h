@@ -20,6 +20,10 @@ class Fragment {
   TPos begin2;
   TSize len;
   
+  Fragment()
+  {
+  }
+
   Fragment(TId sqId1, TPos beg1, TId sqId2, TPos beg2, TSize l) :
     seqId1(sqId1), begin1(beg1), seqId2(sqId2), begin2(beg2), len(l) {
   }

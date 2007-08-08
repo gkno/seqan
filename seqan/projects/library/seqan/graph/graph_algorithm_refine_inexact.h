@@ -4,7 +4,7 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 
-	
+
 struct TagInexactRefinement_;
 typedef Tag<TagInexactRefinement_> const InexactRefinement;
 
@@ -108,9 +108,10 @@ SEQAN_CHECKPOINT
 
 //step 2 of constructing the refined alignment graph: add all edges    
 //version for inexact refinement
-template<typename TAlignmentString,typename TStringSet,typename TSeqMap, typename TScore,typename TAliGraph>
+template<typename TAlignmentString,typename TPropertyMap,typename TStringSet,typename TSeqMap, typename TScore,typename TAliGraph>
 void
 _makeRefinedGraphEdges(TAlignmentString & alis,
+					   TPropertyMap & pm,
 					  TStringSet & seqs,
 				      TSeqMap & seq_map,
 				      TScore & score_type,
@@ -180,6 +181,7 @@ SEQAN_CHECKPOINT
 				//seq2 = ...r.c...rc... 					   ...r.c...rc....
 				typename Value<TScore>::Type score = 0;
 				score = getScore(score_type,seqs,*ali_it,act_pos1,act_pos2,act_end_pos1-act_pos1,cut_act_end_pos2);
+				//score *= getAnnoScore(ali_g,pm,act_knot1,act_knot2,score_type);
 				//add score for
 				//
 				//seq1 = ...-cr....x....
@@ -208,6 +210,15 @@ SEQAN_CHECKPOINT
 
 
 
+
+/**
+.Function.matchRefinement:
+..signature:matchRefinement(matches,stringSet,scoringScheme,refinedGraph,minFragmentLen)
+..param.minFragmentLen:The minimal segment length allowed. If in the refinement process a cut would result in
+a segment shorter than minFragmentLen, then the cut is not made and a heuristic is applied to refine this short overlap.
+...remarks:If no minFragmentLen is given, then all cuts are made. This corresponds to a minFragmentLen of 1.
+...type:unsigned int
+*/
 //score type given, min fragment length given, if > 1 ==> inexact refinement
 template<typename TAlignmentString, typename TScoreValue,typename TScoreSpec, typename TOutGraph, typename TSequence, typename TSetSpec>
 void
@@ -218,13 +229,18 @@ matchRefinement(TAlignmentString & alis,
 				unsigned int min_frag_len)
 {
 SEQAN_CHECKPOINT
+	bool anno = false;
 	if(min_frag_len > 1)
-        matchRefinement(alis,seq,score_type,ali_graph,min_frag_len,InexactRefinement());
+        matchRefinement(alis,seq,score_type,ali_graph,min_frag_len,anno,InexactRefinement());
 	else
-        matchRefinement(alis,seq,score_type,ali_graph,min_frag_len,ExactRefinement());
+        matchRefinement(alis,seq,score_type,ali_graph,min_frag_len,anno,ExactRefinement());
 }
 
 
+/**
+.Function.matchRefinement:
+..signature:matchRefinement(matches,stringSet,refinedGraph,minFragmentLen)
+*/
 //score type not given, min fragment length given, if > 1 ==> inexact refinement
 template<typename TAlignmentString, typename TOutGraph, typename TSequence, typename TSetSpec>
 void
@@ -236,10 +252,11 @@ matchRefinement(TAlignmentString & alis,
 SEQAN_CHECKPOINT
 //	Score<int,FakeScore > fake_score;
 	typename Cargo<TOutGraph>::Type fake_score = 1;
+	bool anno = false;
 	if(min_frag_len > 1)
-        matchRefinement(alis,seq,fake_score,ali_graph,min_frag_len,InexactRefinement());
+        matchRefinement(alis,seq,fake_score,ali_graph,min_frag_len,anno,InexactRefinement());
 	else
-        matchRefinement(alis,seq,fake_score,ali_graph,min_frag_len,ExactRefinement());
+        matchRefinement(alis,seq,fake_score,ali_graph,min_frag_len,anno,ExactRefinement());
 }
 	
 }

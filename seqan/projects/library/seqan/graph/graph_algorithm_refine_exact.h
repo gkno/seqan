@@ -5,6 +5,7 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 
+
 	
 struct TagExactRefinement_;
 typedef Tag<TagExactRefinement_> const ExactRefinement;
@@ -205,7 +206,7 @@ SEQAN_CHECKPOINT
 			++next_it;
 		}
 		//last unaligned node
-		if(it !=end_it && *it<length(seqs[seq_i_pos])-1)
+		if(it !=end_it && *it<length(seqs[seq_i_pos]))
 			addVertex(ali_g, seq_i_id, *it, (length(seqs[seq_i_pos])-1) - *it);
 		all_nodes[seq_i_pos].clear();
 	}
@@ -214,9 +215,10 @@ SEQAN_CHECKPOINT
 
 //step 2 of constructing the refined alignment graph: add all edges    
 //version for exact refinement
-template<typename TAlignmentString,typename TStringSet,typename TSeqMap, typename TScore,typename TAliGraph>
+template<typename TAlignmentString,typename TStringSet,typename TSeqMap, typename TPropertyMap,typename TScore,typename TAliGraph>
 void
 _makeRefinedGraphEdges(TAlignmentString & alis,
+					   TPropertyMap & pm,
 					  TStringSet & seqs,
 				      TSeqMap & seq_map,
 				      TScore & score_type,
@@ -255,15 +257,18 @@ SEQAN_CHECKPOINT
 			
 			SEQAN_TASSERT(fragmentBegin(ali_g,vd)==pos_j)
 			typename Value<TScore>::Type score = getScore(score_type,seqs,*ali_it,act_pos,pos_j,fragmentLength(ali_g,act_knot),fragmentLength(ali_g,vd));//,fragmentLength(ali_g,vd));
-			//this needs to be generalized (makes sense for positive scores only)
+	//		typename Value<TScore>::Type score = fragmentLength(ali_g,vd);
+			score *= getAnnoScore(ali_g,pm,vd,act_knot,score_type);
+		//this needs to be generalized (makes sense for positive scores only)
+			if(score <= 0) score = 1;
 			if(score > 0)
 			{
 				if (findEdge(ali_g, act_knot, vd) == 0) addEdge(ali_g,act_knot,vd,(TCargo)score);
 				else {
 					TEdgeDescriptor ed = findEdge(ali_g, act_knot, vd);
-					if((TCargo)score > getCargo(ed))
-						assignCargo(ed, score);
-					// ToDo: Adapt score of the edge
+					//if((TCargo)score > getCargo(ed))
+						//assignCargo(ed, score);
+					assignCargo(ed, getCargo(ed)+score);
 				}
 			}
 			//prepare for next interval
@@ -294,7 +299,8 @@ _makeAlignmentGraphFromRefinedSegments(String<std::set<TValue> > & all_nodes,
 				   StringSet<TSequence, TSetSpec> & seqs,
 				   TSeqMap & seq_map,
 				   TAliGraph & ali_g,
-			   	   Tag<TTagSpec> const tag)
+			   	   Tag<TTagSpec> const tag, 
+				   bool)
 {
 SEQAN_CHECKPOINT
 	//std::cout << "making refined alignment graph...";
@@ -304,8 +310,10 @@ SEQAN_CHECKPOINT
 	
 	//make nodes (same function for inexact and exact refinement)
 	_makeRefinedGraphNodes(all_nodes,seqs,ali_g);
+
+	bool pm = false;
 	//add edges (different functions depending on exact/inexact refinement)
-	_makeRefinedGraphEdges(alis,seqs,seq_map,score_type,ali_g,tag);
+	_makeRefinedGraphEdges(alis,pm,seqs,seq_map,score_type,ali_g,tag);
 	
 	//std::cout << "check\n";
 	//finish1 = clock();
@@ -314,17 +322,59 @@ SEQAN_CHECKPOINT
 }
 
 
+      
+template<typename TValue,typename TAlignmentString,typename TScore,typename TSequence, typename TSetSpec,typename TAliGraph,typename TSeqMap,typename TAnnoString,typename TTagSpec>
+void
+_makeAlignmentGraphFromRefinedSegments(String<std::set<TValue> > & all_nodes,
+				   TAlignmentString & alis,
+				   TScore & score_type,
+				   StringSet<TSequence, TSetSpec> & seqs,
+				   TSeqMap & seq_map,
+				   TAliGraph & ali_g,
+			   	   Tag<TTagSpec> const tag,
+				   TAnnoString & annotation)
+{
+SEQAN_CHECKPOINT
+	//std::cout << "making refined alignment graph...";
+	//clock_t start, finish1;
+	//double duration;
+	//start = clock();
+	
+	//make nodes (same function for inexact and exact refinement)
+	_makeRefinedGraphNodes(all_nodes,seqs,ali_g);
+
+	//add annotation to nodes
+	typedef typename Value<TAnnoString>::Type TAnnotation;
+	//typedef typename Value<TAnnotation>::Type TLabel;
+	typedef char TLabel;
+	String<String<TLabel> > pm;
+	_addNodeAnnotation(seqs,seq_map,annotation,pm,ali_g,tag);
+
+	//add edges (different functions depending on exact/inexact refinement)
+	_makeRefinedGraphEdges(alis,pm,seqs,seq_map,score_type,ali_g,tag);
+	
+	//std::cout << "check\n";
+	//finish1 = clock();
+	//duration = (double)(finish1 - start) / CLOCKS_PER_SEC;
+	//std::cout << "\ntook " << duration << " seconds.\n";
+}
+
+
+
+
+
 ////////////////////////////////////////////////////////////////////////////////////////
 //The big matchRefinement function that does everything: build interval trees, do the 
 //refinement and construct a refined alignment graph
 ////////////////////////////////////////////////////////////////////////////////////////
-template<typename TAlignmentString, typename TOutGraph, typename TSequence, typename TSetSpec, typename TScore,typename TTagSpec>
+template<typename TAlignmentString, typename TAnnotation, typename TOutGraph, typename TSequence, typename TSetSpec, typename TScore,typename TTagSpec>
 void
 matchRefinement(TAlignmentString & alis,
 				StringSet<TSequence, TSetSpec> & seq, 
 				TScore & score_type,
 				TOutGraph & ali_graph,
 				unsigned int min_fragment_len,
+				TAnnotation & annotation,
 				Tag<TTagSpec> const tag)
 {
 SEQAN_CHECKPOINT
@@ -394,6 +444,9 @@ SEQAN_CHECKPOINT
 		}	
 		++ali_it;
 	}
+
+	_addAnnotationCuts(all_nodes,alis,gs,pms,seq,seq_map,annotation,min_fragment_len,tag);
+
 	finish1 = clock();
 	duration = (double)(finish1 - start) / CLOCKS_PER_SEC;
 	//std::cout << "\ntook " << duration << " seconds.\n";
@@ -413,11 +466,21 @@ SEQAN_CHECKPOINT
 	
 	////////////////////////////////////////////////////////////////
 	//build refined alignment graph
-	_makeAlignmentGraphFromRefinedSegments(all_nodes,alis,score_type,seq,seq_map,ali_graph,tag);
+	_makeAlignmentGraphFromRefinedSegments(all_nodes,alis,score_type,seq,seq_map,ali_graph,tag,annotation);
 }
 
 
 ///////WRAPPERS
+
+/**
+.Function.matchRefinement:
+..signature:matchRefinement(matches,stringSet,scoringScheme,refinedGraph)
+..param.matches:The set of matches.
+..param.scoringScheme:The scoring scheme used to score the refined matches (scores are attached to 
+edges in the refined Alignment Graph).
+...remarks:If no scoring scheme is given, all edges get weight 1.
+...type:Score<TValue,TSpec>
+*/
 //exact refinement, score type given
 template<typename TAlignmentString, typename TScoreValue,typename TScoreSpec,typename TOutGraph, typename TSequence, typename TSetSpec>
 void
@@ -428,10 +491,25 @@ matchRefinement(TAlignmentString & alis,
 {
 SEQAN_CHECKPOINT
 	//min_fragment_len = 1   ==> Exact cutting
-	matchRefinement(alis,seq,score_type,ali_graph,1,ExactRefinement());
+	bool anno = false;
+	matchRefinement(alis,seq,score_type,ali_graph,1,anno,ExactRefinement());
 }
 
 
+
+/**
+.Function.matchRefinement:
+..cat:Alignment
+..summary:Refines (i.e. cuts into smaller parts) a set of pairwise segment 
+matches in such a way that none of the segments partly overlap. They are either 
+identical (fully overlapping) or non-overlapping.
+..signature:matchRefinement(matches,stringSet,refinedGraph)
+..param.matches:The set of matches.
+..param.stringSet:The StringSet containing the sequences which the matches lie on.
+...type:StringSet<TSequence,TSpec>
+..param.refinedGraph:The resulting refined set of matches stored in a graph.
+...type:Alignment Graph
+*/
 //exact refinement, score type not given
 template<typename TAlignmentString, typename TOutGraph, typename TSequence, typename TSetSpec>
 void
@@ -442,7 +520,8 @@ matchRefinement(TAlignmentString & alis,
 SEQAN_CHECKPOINT
 //	Score<int,FakeScore > fake_score;
 	typename Cargo<TOutGraph>::Type fake_score = 1;
-	matchRefinement(alis,seq,fake_score,ali_graph,1,ExactRefinement());
+	bool anno = false;
+	matchRefinement(alis,seq,fake_score,ali_graph,1,anno,ExactRefinement());
 }
 
 
