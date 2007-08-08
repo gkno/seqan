@@ -38,6 +38,7 @@
 #include <queue>
 #include <typeinfo>
 #include <sstream> 
+#include <fstream> 
 
 
 #ifdef SEQAN_SWITCH_USE_FORWARDS

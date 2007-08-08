@@ -108,6 +108,10 @@ getKmerSimilarityMatrix(StringSet<TString, TSpec> const& strSet,
 			// Number of common q-grams / Number of possible common q-grams
 			val /= minVal;
 
+			// Prefer shorter sequences
+			//if (length(strSet[row]) > length(strSet[col])) val /= length(strSet[col]);
+			//else val /= length(strSet[row]);
+
 			// Assign the values
 			assignValue(mat, row*nseq+col, val);
 			assignValue(mat, col*nseq+row, val);

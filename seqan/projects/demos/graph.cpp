@@ -1079,7 +1079,8 @@ void TCoffee() {
 
 	// Generate a primary library, i.e., all global pairwise alignments
 	TGraph lib1(strSet);
-	generatePrimaryLibrary(lib1, score_type_global, GlobalPairwise_Library() );
+	String<double> distanceMatrix; 
+	generatePrimaryLibrary(lib1, distanceMatrix, score_type_global, GlobalPairwise_Library() );
 
 	// Generate a primary library, i.e., all local pairwise alignments
 	TGraph lib2(strSet);
@@ -1095,18 +1096,13 @@ void TCoffee() {
 	// Triplet library extension
 	tripletLibraryExtension(g);
 
-	// Calculate a distance matrix using a compressed alphabet or not
-	String<double> distanceMatrix; 
-	getKmerSimilarityMatrix(stringSet(g), distanceMatrix, 6, AAGroupsDayhoff() );
-	similarityToDistanceMatrix(distanceMatrix, KimuraDistance() );
-
 	// Build the neighbor joining tree
 	Graph<Tree<double> > njTreeOut;
 	slowNjTree(distanceMatrix, njTreeOut);
 
 	// Perform a progressive alignment
 	Graph<Alignment<TStringSet, void> > gOut(strSet);
-	progressiveAlignment(g, njTreeOut, gOut, Gotoh() );
+	iterativeProgressiveAlignment(g, njTreeOut, score_type_local, gOut);
 
 	// Print the alignment
 	std::cout << gOut << std::endl;

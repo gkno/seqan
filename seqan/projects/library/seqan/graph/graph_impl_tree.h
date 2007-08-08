@@ -969,6 +969,8 @@ childVertex(Graph<Tree<TCargo, TSpec> > const&,
 	return getTarget(edge);
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
 /**
 .Function.parentVertex:
 ..cat:Spec.Tree
@@ -982,13 +984,24 @@ childVertex(Graph<Tree<TCargo, TSpec> > const&,
 ...type:Metafunction.VertexDescriptor
 ..see:Function.parentVertex
 */
-template<typename TCargo, typename TSpec, typename TEdgeDescriptor>
+template<typename TCargo, typename TSpec>
 inline typename VertexDescriptor<Graph<Tree<TCargo, TSpec> > >::Type 
 parentVertex(Graph<Tree<TCargo, TSpec> > const& g,
-			 TEdgeDescriptor const edge) 
+			 typename EdgeDescriptor<Graph<Tree<TCargo, TSpec> > >::Type const edge) 
 {
 	SEQAN_CHECKPOINT
 	return getValue(g.data_parent, getTarget(edge));
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TCargo, typename TSpec>
+inline typename VertexDescriptor<Graph<Tree<TCargo, TSpec> > >::Type 
+parentVertex(Graph<Tree<TCargo, TSpec> > const& g,
+			 typename VertexDescriptor<Graph<Tree<TCargo, TSpec> > >::Type const v) 
+{
+	SEQAN_CHECKPOINT
+	return getValue(g.data_parent, v);
 }
 
 

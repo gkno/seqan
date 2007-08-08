@@ -726,7 +726,7 @@ int main()
 	SEQAN_TREPORT("TEST BEGIN")
 
 	Test_OnlineAlg<Horspool>();	
-	Test_OnlineAlg<ShiftAnd>();
+	//Test_OnlineAlg<ShiftAnd>();
 	Test_OnlineAlg<ShiftOr>();
 	Test_OnlineAlg<BndmAlgo>();
 	Test_OnlineAlg<BomAlgo>();

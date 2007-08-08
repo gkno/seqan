@@ -189,7 +189,6 @@ void Test_KmerCountingAndDistance() {
 	getSequenceSimilarity(g, sim, Value<TString>::Type());	
 	SEQAN_TASSERT((unsigned int) getSequenceSimilarity(g, Value<TString>::Type()) * 100 == (unsigned int) 5/6 * 100)
 	SEQAN_TASSERT((unsigned int) getValue(sim, 1) * 100 == (unsigned int) 5/6 * 100)
-	SEQAN_TASSERT((unsigned int) getSequenceSimilarity(matches,stringSet(g),0,length(matches),Value<TString>::Type()) * 100 == (unsigned int) 5/6 * 100)
 }
 
 
@@ -271,13 +270,13 @@ void Test_GuideTree() {
 	SEQAN_TASSERT(findEdge(njTreeOut, 8, 4) != 0)
 	SEQAN_TASSERT(findEdge(njTreeOut, 8, 5) != 0)
 	SEQAN_TASSERT(findEdge(njTreeOut, 9, 1) != 0)
-	SEQAN_TASSERT(findEdge(njTreeOut, 9, 2) != 0)
-	SEQAN_TASSERT(findEdge(njTreeOut, 10, 8) != 0)
+	SEQAN_TASSERT(findEdge(njTreeOut, 9, 8) != 0)
+	SEQAN_TASSERT(findEdge(njTreeOut, 10, 2) != 0)
 	SEQAN_TASSERT(findEdge(njTreeOut, 10, 9) != 0)
-	SEQAN_TASSERT(findEdge(njTreeOut, 11, 3) != 0)
+	SEQAN_TASSERT(findEdge(njTreeOut, 11, 0) != 0)
 	SEQAN_TASSERT(findEdge(njTreeOut, 11, 10) != 0)
 	SEQAN_TASSERT(findEdge(njTreeOut, 12, 11) != 0)
-	SEQAN_TASSERT(findEdge(njTreeOut, 12, 0) != 0)
+	SEQAN_TASSERT(findEdge(njTreeOut, 12, 3) != 0)
 	SEQAN_TASSERT(findEdge(njTreeOut, 13, 6) != 0)
 	SEQAN_TASSERT(findEdge(njTreeOut, 13, 12) != 0)
 	SEQAN_TASSERT(findEdge(njTreeOut, 14, 7) != 0)
@@ -305,12 +304,13 @@ void Test_TCoffeeGarfield() {
 	assignValueById(strSet, str4);
 
 	// Score object
-	Score<int, Pam<> > score_type_global(250, -1, -2);
-	Score<int, Pam<> > score_type_local(250, -1, -2);
-
+	Blosum62 score_type_global(-1,-11);
+	Blosum62 score_type_local(-2,-8);
+	
 	// Generate a primary library, i.e., all global pairwise alignments
 	TGraph lib1(strSet);
-	generatePrimaryLibrary(lib1, score_type_global, GlobalPairwise_Library() );
+	String<double> distanceMatrix; 
+	generatePrimaryLibrary(lib1, distanceMatrix, score_type_global, GlobalPairwise_Library() );
 
 	fstream strm01; // Alignment graph as dot
 	strm01.open(TEST_PATH "my_tcoffee01.dot", ios_base::out | ios_base::trunc);
@@ -350,19 +350,20 @@ void Test_TCoffeeGarfield() {
 	write(strm2,g,DotDrawing());
 	strm2.close();
 
-	// Calculate a distance matrix using a compressed alphabet or not
-	String<double> distanceMatrix; 
-	getKmerSimilarityMatrix(stringSet(g), distanceMatrix, 6, AAGroupsDayhoff() );
-	similarityToDistanceMatrix(distanceMatrix, KimuraDistance() );
+	//// Calculate a distance matrix using a compressed alphabet or not
+	//String<double> distanceMatrix; 
+	//getKmerSimilarityMatrix(stringSet(g), distanceMatrix, 6, AAGroupsDayhoff() );
+	//similarityToDistanceMatrix(distanceMatrix, KimuraDistance() );
 
 	// Build the neighbor joining tree
-	Graph<Tree<double> > njTreeOut;
-	slowNjTree(distanceMatrix, njTreeOut);
+	Graph<Tree<double> > guideTree;
+	upgmaTree(distanceMatrix, guideTree);
 
 	// Perform a progressive alignment
 	Graph<Alignment<TStringSet, void> > gOut(strSet);
-	progressiveAlignment(g, njTreeOut, gOut, Hirschberg() );
-
+	//progressiveAlignment(g, guideTree, gOut);
+	iterativeProgressiveAlignment(g, guideTree, score_type_local, gOut);
+	
 	// Print the alignment
 	std::cout << gOut << std::endl;
 
@@ -385,82 +386,44 @@ void Test_TCoffeeGarfield() {
 void Test_TCoffeeFromFile(String<char> const in_path, String<char> const file_prefix, String<char> const file_suffix) {
 //____________________________________________________________________________
 // T-Coffee
-	clock_t bigbang, startTime,endTime;
-	double time;
+	// Timing variables
+	clock_t bigbang, startTime;
 
-	// Sequences
+	// Import Sequences
 	typedef String<AminoAcid> TString;
 	StringSet<String<AminoAcid>, Owner<> > origStrSet;
-
-	// Count sequences and read names
+	String<String<char> > names;
 	startTime = clock();
 	bigbang = startTime;
-	String<String<char> > names;
-	unsigned seqCount = 0;
-	ifstream file;
-	std::stringstream input;
-	input << in_path << file_prefix << '.' << file_suffix;
-	std::cout << input.str().c_str() << std::endl;
-	file.open(input.str().c_str(), ios_base::in | ios_base::binary);
-	if (!file.is_open()) return;
-	while (!_streamEOF(file)) {
-		String<char> id;
-		readID(file, id, Fasta());
-		appendValue(names, id);
-		//std::cout << id << std::endl;
-		goNext(file, Fasta());
-		++seqCount;
-	}
-	std::cout << "Number of sequences: " << seqCount << std::endl;
-
-	// Import sequences
-	file.clear();
-	file.seekg(0, ios_base::beg);
-	resize(origStrSet, seqCount);
-	unsigned int count = 0;
-	for(unsigned i = 0; (i < seqCount) && !_streamEOF(file); ++i) 	{
-		read(file, origStrSet[i], Fasta());
-		count += length(origStrSet[i]);
-		std::cout << "Length of Sequence " << i << ": " << length(origStrSet[i]);
-		if (i<seqCount-1) std::cout << std::endl;
-	}
-    file.close();
-	std::cout << std::endl << "Total number of bp: " << count << std::endl;
-	endTime=clock();
-	time=((float)(endTime-startTime)/CLOCKS_PER_SEC);
-	startTime = endTime;
-	std::cout << "Import sequences done: " << time << " sec" << std::endl;
-
+	unsigned int nucCount = _alignImportSequences(in_path, file_prefix, file_suffix, origStrSet, names);
+	unsigned int seqCount = length(origStrSet);
+	std::cout << in_path << file_prefix << '.' << file_suffix << std::endl;
+	std::cout << "Total number of bp: " << nucCount << ", Number of sequences: " << seqCount << std::endl;
+	_alignTiming(startTime, "Import sequences done: ");
 
 	// Make dependent string set
 	typedef StringSet<TString, Dependent<> > TStringSet;
 	typedef Graph<Alignment<TStringSet, unsigned int, WithoutEdgeId> > TGraph;
 	TStringSet strSet;
-	for(unsigned int i = 0; i<length(origStrSet); ++i) {
-		appendValue(strSet, origStrSet[i]);
-	}
-
+	for(unsigned int i = 0; i<seqCount; ++i) appendValue(strSet, origStrSet[i]);
+	
 	// Score objects
-	Score<int, Pam<> > score_type_global(250, -1, -17);
-	Score<int, Pam<> > score_type_local(250, -2, -13);
+	Blosum62 score_type_global(-1,-11);
+	Blosum62 score_type_local(-2,-8);
+	//Score<int, Pam<> > score_type_global(250, -1, -17);
+	//Score<int, Pam<> > score_type_local(250, -2, -13);
 
 	// Generate a primary library, i.e., all global pairwise alignments
 	TGraph lib1(strSet);
-	generatePrimaryLibrary(lib1, score_type_global, GlobalPairwise_Library() );
-	endTime=clock();
-	time=((float)(endTime-startTime)/CLOCKS_PER_SEC);
-	startTime = endTime;
-	std::cout << "Stage 1)" << std::endl;
-	std::cout << "Global Pairwise alignments done: " << time << " sec" << std::endl;
+	String<double> distanceMatrix;
+	generatePrimaryLibrary(lib1, distanceMatrix, score_type_global, GlobalPairwise_Library() );
+	_alignTiming(startTime, "Global Pairwise alignments done: ");
 	std::cout << "Library size: " << numVertices(lib1) << " Vertices, " << numEdges(lib1) << " Edges" << std::endl;
 
 	// Generate a primary library, i.e., all local pairwise alignments
 	TGraph lib2(strSet);
 	generatePrimaryLibrary(lib2, score_type_local, LocalPairwise_Library() );
-	endTime=clock();
-	time=((float)(endTime-startTime)/CLOCKS_PER_SEC);
-	startTime = endTime;
-	std::cout << "Local Pairwise alignments done: " << time << " sec" << std::endl;
+	_alignTiming(startTime, "Local Pairwise alignments done: "); 
 	std::cout << "Library size: " << numVertices(lib2) << " Vertices, " << numEdges(lib2) << " Edges" << std::endl;
 
 	// Weighting of libraries (Signal addition)
@@ -469,12 +432,8 @@ void Test_TCoffeeFromFile(String<char> const in_path, String<char> const file_pr
 	appendValue(libs, &lib1);
 	appendValue(libs, &lib2);
 	combineGraphs(g, libs);
-	endTime=clock();
-	time=((float)(endTime-startTime)/CLOCKS_PER_SEC);
-	startTime = endTime;
-	std::cout << "Combining graphs / libraries done: " << time << " sec" << std::endl;
+	_alignTiming(startTime, "Combining graphs / libraries done: "); 
 	std::cout << "Library size: " << numVertices(g) << " Vertices, " << numEdges(g) << " Edges" << std::endl;
-
 
 	// Clear the old libraries
 	clear(lib1);
@@ -482,114 +441,40 @@ void Test_TCoffeeFromFile(String<char> const in_path, String<char> const file_pr
 
 	// Triplet library extension
 	tripletLibraryExtension(g);
-	endTime=clock();
-	time=((float)(endTime-startTime)/CLOCKS_PER_SEC);
-	startTime = endTime;
-	std::cout << "Triplet done: " << time << " sec" << std::endl;
+	_alignTiming(startTime, "Triplet done: ");
 	std::cout << "Library size: " << numVertices(g) << " Vertices, " << numEdges(g) << " Edges" << std::endl;
 
-	// Calculate a distance matrix using a compressed alphabet or not
-	String<double> distanceMatrix; 
-	getKmerSimilarityMatrix(stringSet(g), distanceMatrix, 4, AAGroupsDayhoff() );
-	similarityToDistanceMatrix(distanceMatrix, KimuraDistance() );
-	endTime=clock();
-	time=((float)(endTime-startTime)/CLOCKS_PER_SEC);
-	startTime = endTime;
-	std::cout << "Kmer done: " << time << " sec" << std::endl;
-
-	// Build the neighbor joining tree
-	Graph<Tree<double, WithoutEdgeId> > njTreeOut;
-	slowNjTree(distanceMatrix, njTreeOut);
-	endTime=clock();
-	time=((float)(endTime-startTime)/CLOCKS_PER_SEC);
-	startTime = endTime;
-	std::cout << "NjTree done: " << time << " sec" << std::endl;
+	// Build the guide tree
+	Graph<Tree<double, WithoutEdgeId> > guideTree;
+	upgmaTree(distanceMatrix, guideTree);
+	_alignTiming(startTime, "Guide tree done: ");
 
 	// Perform a progressive alignment
 	Graph<Alignment<TStringSet, void, WithoutEdgeId> > gOut(strSet);
-	progressiveAlignment(g, njTreeOut, gOut, Hirschberg() );
+	iterativeProgressiveAlignment(g, guideTree, score_type_local, gOut);
+	_alignTiming(startTime, "Progressive alignment done: ");
 	//std::cout << gOut << std::endl;
-	endTime=clock();
-	time=((float)(endTime-startTime)/CLOCKS_PER_SEC);
-	startTime = endTime;
-	std::cout << "Progressive alignment done: " << time << " sec" << std::endl;
-	//std::cout << gOut << std::endl;
-	//fstream strm3; // Alignment graph as dot
-	//strm3.open(TEST_PATH "my_tcoffee3.dot", ios_base::out | ios_base::trunc);
-	//write(strm3,gOut,DotDrawing());
-	//strm3.close();
 
-	//std::stringstream output3;
-	//output3 << in_path << "my_" << file_prefix << ".msf_middle";
-	//fstream strm9; // Alignment graph as msf
-	//strm9.open(output3.str().c_str(), ios_base::out | ios_base::trunc);
-	//write(strm9,gOut,names, MsfFormat());
-	//strm9.close();
-
-	// Calculate a distance matrix using a compressed alphabet or not
-	clear(distanceMatrix);
-	getSequenceSimilarity(gOut, distanceMatrix, AminoAcid() );
-	for(unsigned int row = 0; row<seqCount; ++row) {
-		for(unsigned int col = row + 1; col<seqCount; ++col) {
-			double val = getValue(distanceMatrix, row * seqCount + col);
-			if (length((stringSet(g))[row]) > length((stringSet(g))[col])) val /= length((stringSet(g))[col]);
-			else val /= length((stringSet(g))[row]);
-			assignValue(distanceMatrix, row * seqCount + col, val);
-			assignValue(distanceMatrix, col * seqCount + row, val);
-		}
-	}
-	similarityToDistanceMatrix(distanceMatrix, KimuraDistance() );
-	endTime=clock();
-	time=((float)(endTime-startTime)/CLOCKS_PER_SEC);
-	startTime = endTime;
-	std::cout << "Stage 2)" << std::endl;
-	std::cout << "Kmer done: " << time << " sec" << std::endl;
-
-	// Build the neighbor joining tree
-	clearVertices(njTreeOut);
-	slowNjTree(distanceMatrix, njTreeOut);
-	endTime=clock();
-	time=((float)(endTime-startTime)/CLOCKS_PER_SEC);
-	startTime = endTime;
-	std::cout << "NjTree done: " << time << " sec" << std::endl;
-
-	// Perform a progressive alignment
-	clearVertices(gOut);
-	progressiveAlignment(g, njTreeOut, gOut, Hirschberg() );
-	endTime=clock();
-	time=((float)(endTime-startTime)/CLOCKS_PER_SEC);
-	startTime = endTime;
-	std::cout << "Progressive alignment done: " << time << " sec" << std::endl;
-
-	// Print the alignment
-	// std::cout << gOut << std::endl;
-
+	// Output alignment
 	std::stringstream output2;
-	output2 << in_path << file_prefix << ".tfa_my";
+	output2 << in_path << file_prefix << "." << file_suffix << "_my";
 	fstream strm5; // Alignment graph as msf
 	strm5.open(output2.str().c_str(), ios_base::out | ios_base::trunc);
 	write(strm5,gOut,names, MsfFormat());
 	strm5.close();
-	endTime=clock();
-	time=((float)(endTime-startTime)/CLOCKS_PER_SEC);
-	startTime = endTime;
-	std::cout << "Alignment output done: " << time << " sec" << std::endl;
+	_alignTiming(startTime, "Alignment output done: ");
 
 	// Clean-up
-	clear(g);
+	clear(guideTree);
 	clear(gOut);
-	endTime=clock();
-	time=((float)(endTime-startTime)/CLOCKS_PER_SEC);
-	startTime = endTime;
-	std::cout << "Clean-up done: " << time << " sec" << std::endl;
-
-	endTime=clock();
-	time=((float)(endTime-bigbang)/CLOCKS_PER_SEC);
-	std::cout << "Total time: " << time << " sec" << std::endl;
+	clear(distanceMatrix);
+	clear(g);
+	_alignTiming(startTime, "Clean-up done: ");
+	_alignTiming(bigbang, "Total time: ");
 	std::cout << "==============================" << std::endl;
 }
 
-
+/*
 //////////////////////////////////////////////////////////////////////////////
 
 void Test_TCoffeeFromRandomSeq() {
@@ -663,7 +548,7 @@ void Test_TCoffeeFromRandomSeq() {
 		
 		// Perform a progressive alignment
 		Graph<Alignment<TStringSet, void> > gOut(strSet);
-		progressiveAlignment(g, njTreeOut, gOut, NeedlemanWunsch() );
+		progressiveAlignment(g, njTreeOut, gOut);
 		std::cout << "Alignment done" << std::endl;
 
 		
@@ -693,17 +578,17 @@ void Test_TCoffeeFromLibrary() {
 	read(strm,g,TCoffeeLib());
 	strm.close();
 
-	/*
-	fstream strmW; // Write the library
-	strmW.open(TEST_PATH "my_garfield.lib", ios_base::out | ios_base::trunc);
-	write(strmW,g,TCoffeeLib());
-	strmW.close();
 
-	fstream strm2; // Alignment graph as dot
-	strm2.open(TEST_PATH "my_tcoffee.dot", ios_base::out | ios_base::trunc);
-	write(strm2,g,DotDrawing());
-	strm2.close();
-	*/	
+	//fstream strmW; // Write the library
+	//strmW.open(TEST_PATH "my_garfield.lib", ios_base::out | ios_base::trunc);
+	//write(strmW,g,TCoffeeLib());
+	//strmW.close();
+
+	//fstream strm2; // Alignment graph as dot
+	//strm2.open(TEST_PATH "my_tcoffee.dot", ios_base::out | ios_base::trunc);
+	//write(strm2,g,DotDrawing());
+	//strm2.close();
+
 
 	// Generate additional primary libraries, e.g., all pairwise alignments
 	typedef StringSet<String<AminoAcid>, Dependent<> > TDependentStringSet;
@@ -757,14 +642,14 @@ void Test_TCoffeeFromLibrary() {
 
 	// Perform a progressive alignment
 	Graph<Alignment<TDependentStringSet, void> > gOut(depStrSet);
-	progressiveAlignment(gAux, njTreeOut, gOut, Hirschberg() );
+	progressiveAlignment(gAux, njTreeOut, gOut);
 
 	//fstream strm2; // Alignment graph as dot
 	//strm2.open(TEST_PATH "my_tcoffee.dot", ios_base::out | ios_base::trunc);
 	//write(strm2,gOut,DotDrawing());
 	//strm2.close();
 
-	/*
+
 	// Read a t-coffee library: Dna Alphabet
 	typedef StringSet<String<Dna>, Owner<> > TStringSetDna;
 	typedef Graph<Alignment<TStringSetDna, unsigned int, Default> > TGraphDna;
@@ -793,10 +678,10 @@ void Test_TCoffeeFromLibrary() {
 	Graph<Tree<double> > njTreeOutDna;
 	slowNjTree(distanceMatrixDna, njTreeOutDna);
 	std::cout << njTreeOutDna << std::endl;
-	*/
+
 
 }
-
+*/
 //////////////////////////////////////////////////////////////////////////////
 
 void Test_BaliBaseRef11() {
@@ -809,9 +694,17 @@ void Test_BaliBaseRef11() {
 	String<char> in_path("/home/takifugu/rausch/Balibase/bb3_release/RV11/");
 #endif
 
+	//for(int i = 1; i<39; ++i) {
+	//	std::stringstream s;
+	//	s << "BBS110";
+	//	if (i < 10) s << '0';
+	//	s << i;
+	//	Test_TCoffeeFromFile(in_path,s.str().c_str(), "tfa");
+	//}
+
 	for(int i = 1; i<39; ++i) {
 		std::stringstream s;
-		s << "BBS110";
+		s << "BB110";
 		if (i < 10) s << '0';
 		s << i;
 		Test_TCoffeeFromFile(in_path,s.str().c_str(), "tfa");
@@ -830,9 +723,17 @@ void Test_BaliBaseRef12() {
 	String<char> in_path("/home/takifugu/rausch/Balibase/bb3_release/RV12/");
 #endif
 
+	//for(int i = 1; i<45; ++i) {
+	//	std::stringstream s;
+	//	s << "BBS120";
+	//	if (i < 10) s << '0';
+	//	s << i;
+	//	Test_TCoffeeFromFile(in_path,s.str().c_str(), "tfa");
+	//}
+
 	for(int i = 1; i<45; ++i) {
 		std::stringstream s;
-		s << "BBS120";
+		s << "BB120";
 		if (i < 10) s << '0';
 		s << i;
 		Test_TCoffeeFromFile(in_path,s.str().c_str(), "tfa");
@@ -852,9 +753,17 @@ void Test_BaliBaseRef20() {
 	String<char> in_path("/home/takifugu/rausch/Balibase/bb3_release/RV20/");
 #endif
 
+	//for(int i = 1; i<42; ++i) {
+	//	std::stringstream s;
+	//	s << "BBS200";
+	//	if (i < 10) s << '0';
+	//	s << i;
+	//	Test_TCoffeeFromFile(in_path,s.str().c_str(), "tfa");
+	//}
+
 	for(int i = 1; i<42; ++i) {
 		std::stringstream s;
-		s << "BBS200";
+		s << "BB200";
 		if (i < 10) s << '0';
 		s << i;
 		Test_TCoffeeFromFile(in_path,s.str().c_str(), "tfa");
@@ -873,9 +782,17 @@ void Test_BaliBaseRef30() {
 	String<char> in_path("/home/takifugu/rausch/Balibase/bb3_release/RV30/");
 #endif
 
+	//for(int i = 1; i<31; ++i) {
+	//	std::stringstream s;
+	//	s << "BBS300";
+	//	if (i < 10) s << '0';
+	//	s << i;
+	//	Test_TCoffeeFromFile(in_path,s.str().c_str(), "tfa");
+	//}
+
 	for(int i = 1; i<31; ++i) {
 		std::stringstream s;
-		s << "BBS300";
+		s << "BB300";
 		if (i < 10) s << '0';
 		s << i;
 		Test_TCoffeeFromFile(in_path,s.str().c_str(), "tfa");
@@ -915,9 +832,17 @@ void Test_BaliBaseRef50() {
 	String<char> in_path("/home/takifugu/rausch/Balibase/bb3_release/RV50/");
 #endif
 
+	//for(int i = 1; i<17; ++i) {
+	//	std::stringstream s;
+	//	s << "BBS500";
+	//	if (i < 10) s << '0';
+	//	s << i;
+	//	Test_TCoffeeFromFile(in_path,s.str().c_str(), "tfa");
+	//}
+
 	for(int i = 1; i<17; ++i) {
 		std::stringstream s;
-		s << "BBS500";
+		s << "BB500";
 		if (i < 10) s << '0';
 		s << i;
 		Test_TCoffeeFromFile(in_path,s.str().c_str(), "tfa");
@@ -925,6 +850,217 @@ void Test_BaliBaseRef50() {
 }
 
 
+//////////////////////////////////////////////////////////////////////////////
+
+void Test_BaliBase201() {
+	
+	// Windows
+#ifdef PLATFORM_WINDOWS
+	String<char> in_path("Z:\\Balibase2.01\\ref1\\test1\\");
+#else
+	// Linux
+	String<char> in_path("/home/takifugu/rausch/Balibase2.01/ref1/test1/");
+#endif
+
+	Test_TCoffeeFromFile(in_path,"1aab_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"1dox_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"1hpi_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"1r69_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"1ycc_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"451c_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"1aboA_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"1fjlA_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"1idy_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"1tgxA_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"2fxb_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"9rnt_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"1aho_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"1fkj_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"1krn_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"1tvxA_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"2mhr_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"1csp_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"1fmb_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"1pfc_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"1ubi_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"2trx_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"1csy_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"1hfh_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"1plc_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"1wit_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"3cyr_ref1", "fasta");
+
+	// Windows
+#ifdef PLATFORM_WINDOWS
+	in_path = "Z:\\Balibase2.01\\ref1\\test2\\";
+#else
+	// Linux
+	in_path = "/home/takifugu/rausch/Balibase2.01/ref1/test2/";
+#endif
+
+	Test_TCoffeeFromFile(in_path,"1ad2_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"1ezm_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"1mrj_ref1", "fasta");  
+	Test_TCoffeeFromFile(in_path,"1sbp_ref1", "fasta");  
+	Test_TCoffeeFromFile(in_path,"1zin_ref1", "fasta");  
+	Test_TCoffeeFromFile(in_path,"5ptp_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"1amk_ref1", "fasta");  
+	Test_TCoffeeFromFile(in_path,"1gdoA_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"1pgtA_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"1thm_ref1", "fasta"); 
+	Test_TCoffeeFromFile(in_path,"2cba_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"kinase_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"1ar5A_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"1havA_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"1pii_ref1", "fasta"); 
+	Test_TCoffeeFromFile(in_path,"1tis_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"2hsdA_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"1aym3_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"1ldg_ref1", "fasta"); 
+	Test_TCoffeeFromFile(in_path,"1ppn_ref1", "fasta"); 
+	Test_TCoffeeFromFile(in_path,"1ton_ref1", "fasta");  
+	Test_TCoffeeFromFile(in_path,"2pia_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"1bbt3_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"1led_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"1pysA_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"1uky_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"3grs_ref1", "fasta");
+
+	
+	// Windows
+#ifdef PLATFORM_WINDOWS
+	in_path = "Z:\\Balibase2.01\\ref1\\test3\\";
+#else
+	// Linux
+	in_path = "/home/takifugu/rausch/Balibase2.01/ref1/test3/";
+#endif
+
+	Test_TCoffeeFromFile(in_path,"1ac5_ref1", "fasta");   
+	Test_TCoffeeFromFile(in_path,"1cpt_ref1", "fasta"); 
+	Test_TCoffeeFromFile(in_path,"1gpb_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"1ped_ref1", "fasta");  
+	Test_TCoffeeFromFile(in_path,"2ack_ref1", "fasta");  
+	Test_TCoffeeFromFile(in_path,"arp_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"1ad3_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"1dlc_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"1gtr_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"1pkm_ref1", "fasta");  
+	Test_TCoffeeFromFile(in_path,"2myr_ref1", "fasta");   
+	Test_TCoffeeFromFile(in_path,"gal4_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"1adj_ref1", "fasta"); 
+	Test_TCoffeeFromFile(in_path,"1eft_ref1", "fasta");  
+	Test_TCoffeeFromFile(in_path,"1lcf_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"1rthA_ref1", "fasta"); 
+	Test_TCoffeeFromFile(in_path,"3pmg_ref1", "fasta");  
+	Test_TCoffeeFromFile(in_path,"glg_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"1ajsA_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"1fieA_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"1lvl_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"1sesA_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"4enl_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"1bgl_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"1gowA_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"1pamA_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"1taq_ref1", "fasta");
+	Test_TCoffeeFromFile(in_path,"actin_ref1", "fasta");
+
+	// Windows
+#ifdef PLATFORM_WINDOWS
+	in_path = "Z:\\Balibase2.01\\ref2\\test1\\";
+#else
+	// Linux
+	in_path = "/home/takifugu/rausch/Balibase2.01/ref2/test1/";
+#endif
+
+	Test_TCoffeeFromFile(in_path,"1aboA_ref2", "fasta"); 
+	Test_TCoffeeFromFile(in_path,"1havA_ref2", "fasta");  
+	Test_TCoffeeFromFile(in_path,"1pamA_ref2", "fasta"); 
+	Test_TCoffeeFromFile(in_path,"1tgxA_ref2", "fasta");
+	Test_TCoffeeFromFile(in_path,"1wit_ref2", "fasta");
+	Test_TCoffeeFromFile(in_path,"2trx_ref2", "fasta");
+	Test_TCoffeeFromFile(in_path,"1ajsA_ref2", "fasta");
+	Test_TCoffeeFromFile(in_path,"1idy", "fasta");    
+	Test_TCoffeeFromFile(in_path,"1ped_ref2", "fasta"); 
+	Test_TCoffeeFromFile(in_path,"1tvxA_ref2", "fasta");
+	Test_TCoffeeFromFile(in_path,"2hsdA_ref2", "fasta"); 
+	Test_TCoffeeFromFile(in_path,"3grs_ref2", "fasta");
+	Test_TCoffeeFromFile(in_path,"1cpt_ref2", "fasta");
+	Test_TCoffeeFromFile(in_path,"1idy_ref2", "fasta"); 
+	Test_TCoffeeFromFile(in_path,"1r69_ref2", "fasta");  
+	Test_TCoffeeFromFile(in_path,"1ubi_ref2", "fasta"); 
+	Test_TCoffeeFromFile(in_path,"2myr_ref2", "fasta");
+	Test_TCoffeeFromFile(in_path,"4enl_ref2", "fasta");
+	Test_TCoffeeFromFile(in_path,"1csy_ref2", "fasta");   
+	Test_TCoffeeFromFile(in_path,"1lvl_ref2", "fasta"); 
+	Test_TCoffeeFromFile(in_path,"1sbp_ref2", "fasta"); 
+	Test_TCoffeeFromFile(in_path,"1uky_ref2", "fasta"); 
+	Test_TCoffeeFromFile(in_path,"2pia_ref2", "fasta"); 
+	Test_TCoffeeFromFile(in_path,"kinase_ref2", "fasta");
+
+	// Windows
+#ifdef PLATFORM_WINDOWS
+	in_path = "Z:\\Balibase2.01\\ref3\\test\\";
+#else
+	// Linux
+	in_path = "/home/takifugu/rausch/Balibase2.01/ref3/test/";
+#endif
+
+	Test_TCoffeeFromFile(in_path,"1ajsA_ref3", "fasta");
+	Test_TCoffeeFromFile(in_path,"1pamA_ref3", "fasta"); 
+	Test_TCoffeeFromFile(in_path,"1r69_ref3", "fasta"); 
+	Test_TCoffeeFromFile(in_path,"1uky_ref3", "fasta");  
+	Test_TCoffeeFromFile(in_path,"2myr_ref3", "fasta"); 
+	Test_TCoffeeFromFile(in_path,"4enl_ref3", "fasta");
+	Test_TCoffeeFromFile(in_path,"1idy_ref3", "fasta");   
+	Test_TCoffeeFromFile(in_path,"1ped_ref3", "fasta");
+	Test_TCoffeeFromFile(in_path,"1ubi_ref3", "fasta");
+	Test_TCoffeeFromFile(in_path,"1wit_ref3", "fasta");
+	Test_TCoffeeFromFile(in_path,"2pia_ref3", "fasta");
+	Test_TCoffeeFromFile(in_path,"kinase_ref3", "fasta");
+
+	// Windows
+#ifdef PLATFORM_WINDOWS
+	in_path = "Z:\\Balibase2.01\\ref4\\test\\";
+#else
+	// Linux
+	in_path = "/home/takifugu/rausch/Balibase2.01/ref4/test/";
+#endif
+
+	Test_TCoffeeFromFile(in_path,"1ckaA_ref4", "fasta");
+	Test_TCoffeeFromFile(in_path,"1dynA_ref4", "fasta");
+	Test_TCoffeeFromFile(in_path,"1mfa_ref4", "fasta");
+	Test_TCoffeeFromFile(in_path,"1pysA_ref4", "fasta");
+	Test_TCoffeeFromFile(in_path,"1ycc_ref4", "fasta");
+	Test_TCoffeeFromFile(in_path,"kinase1_ref4", "fasta");
+	Test_TCoffeeFromFile(in_path,"1csp_ref4", "fasta");
+	Test_TCoffeeFromFile(in_path,"1lkl_ref4", "fasta");
+	Test_TCoffeeFromFile(in_path,"1pfc_ref4", "fasta");
+	Test_TCoffeeFromFile(in_path,"1vln_ref4", "fasta");
+	Test_TCoffeeFromFile(in_path,"2abk_ref4", "fasta");
+	Test_TCoffeeFromFile(in_path,"kinase2_ref4", "fasta");
+
+
+	// Windows
+#ifdef PLATFORM_WINDOWS
+	in_path = "Z:\\Balibase2.01\\ref5\\test\\";
+#else
+	// Linux
+	in_path = "/home/takifugu/rausch/Balibase2.01/ref5/test/";
+#endif
+
+	Test_TCoffeeFromFile(in_path,"1eft_ref5", "fasta");
+	Test_TCoffeeFromFile(in_path,"1pysA_ref5", "fasta");
+	Test_TCoffeeFromFile(in_path,"1thm1_ref5", "fasta");
+	Test_TCoffeeFromFile(in_path,"2cba_ref5", "fasta");
+	Test_TCoffeeFromFile(in_path,"S52_ref5", "fasta");  
+	Test_TCoffeeFromFile(in_path,"kinase2_ref5", "fasta");
+	Test_TCoffeeFromFile(in_path,"1ivy_ref5", "fasta");
+	Test_TCoffeeFromFile(in_path,"1qpg_ref5", "fasta");
+	Test_TCoffeeFromFile(in_path,"1thm2_ref5", "fasta");
+	Test_TCoffeeFromFile(in_path,"S51_ref5", "fasta");  
+	Test_TCoffeeFromFile(in_path,"kinase1_ref5", "fasta");
+	Test_TCoffeeFromFile(in_path,"kinase3_ref5", "fasta");
+}
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -942,6 +1078,7 @@ void Test_GraphTCoffee() {
 	//Test_BaliBaseRef30();
 	//Test_BaliBaseRef40();
 	//Test_BaliBaseRef50();
+	//Test_BaliBase201();
 	
 	//Test_TCoffeeFromLibrary(); 
 

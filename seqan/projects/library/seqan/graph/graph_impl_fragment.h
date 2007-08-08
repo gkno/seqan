@@ -87,6 +87,16 @@ fragmentLength(Fragment<TId, TPos, TSize, TSpec> const& f,
 
 //////////////////////////////////////////////////////////////////////////////
 
+template<typename TId, typename TPos, typename TSize, typename TSpec>
+inline typename Size<Fragment<TId, TPos, TSize, TSpec> >::Type&
+fragmentLength(Fragment<TId, TPos, TSize, TSpec> const& f)
+{
+	SEQAN_CHECKPOINT
+	return const_cast<typename Size<Fragment<TId, TPos, TSize, TSpec> >::Type&>(f.len);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 template<typename TId, typename TPos, typename TSize, typename TSpec, typename TId1, typename TPosition1, typename TId2, typename TPosition2>
 inline void
 getProjectedPosition(Fragment<TId, TPos, TSize, TSpec> const& f,

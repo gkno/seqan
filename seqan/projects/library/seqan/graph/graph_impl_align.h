@@ -256,9 +256,10 @@ clearVertices(Graph<Alignment<TStringSet, TCargo, TSpec> >& g)
 	typedef typename Size<TStringSet>::Type TSize;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 
-	clearVertices(g.data_align);
 	clear(g.data_fragment);
 	g.data_pvMap.clear();
+	clearVertices(g.data_align);
+
 
 	// Don't forget to cover the sequences with nil vertices again
 	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
@@ -1192,6 +1193,7 @@ convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 
 	return true;
 }
+
 
 }// namespace SEQAN_NAMESPACE_MAIN
 

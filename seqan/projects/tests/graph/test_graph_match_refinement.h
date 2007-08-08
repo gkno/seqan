@@ -723,10 +723,10 @@ void Test_Problem()
 	TFragString alis;
 	//resize(alis,1);
 	//alis[0] = frag;
-	appendValue(alis,frag);
+	//appendValue(alis, (TFragment) frag);
 
-	TAlign outGraph(strSet);
-	matchRefinement(alis,strSet,outGraph);
+	//TAlign outGraph(strSet);
+	//matchRefinement(alis,strSet,outGraph);
 
 }
 

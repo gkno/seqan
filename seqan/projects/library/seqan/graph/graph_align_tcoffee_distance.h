@@ -42,19 +42,21 @@ getSequenceSimilarity(TAlignmentGraph& g,
 		}
 	}
 	
+	// Normalize by distance
 	if (len1 > len2) return sim / len2;
 	else return sim / len1;
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TAlignmentGraph, typename TSimilarityMatrix, typename TAlphabet>
+template<typename TAlignmentGraph, typename TValue, typename TSpec, typename TAlphabet>
 inline void 
 getSequenceSimilarity(TAlignmentGraph& g,
-					  TSimilarityMatrix& sim,
+					  String<TValue, TSpec>& sim,
 					  TAlphabet)
 {
 	SEQAN_CHECKPOINT
+	typedef String<TValue, TSpec> TSimilarityMatrix;
 	typedef typename Size<TAlignmentGraph>::Type TSize;
 	typedef typename VertexDescriptor<TAlignmentGraph>::Type TVertexDescriptor;
 	typedef typename Host<TAlignmentGraph>::Type TStringSet;
@@ -94,9 +96,13 @@ getSequenceSimilarity(TAlignmentGraph& g,
 			if (len1 > len2) {
 				value(sim, i * numSeqs + j) /= len2;
 				value(sim, j * numSeqs + i) /= len2;
+				//value(sim, i * numSeqs + j) /= (len2 * len2);
+				//value(sim, j * numSeqs + i) /= (len2 * len2);
 			} else {
 				value(sim, i * numSeqs + j) /= len1;
 				value(sim, j * numSeqs + i) /= len1;
+				//value(sim, i * numSeqs + j) /= (len1 * len1);
+				//value(sim, j * numSeqs + i) /= (len1 * len1);
 			}
 		}
 	}
@@ -104,12 +110,26 @@ getSequenceSimilarity(TAlignmentGraph& g,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TFragmentMatches, typename TStringSet, typename TSize1,  typename TSize2, typename TAlphabet>
+template<typename TAlignmentGraph, typename TValue, typename TSpec>
+inline void 
+getSequenceSimilarity(TAlignmentGraph& g,
+					  String<TValue, TSpec>& sim)
+{
+	SEQAN_CHECKPOINT
+	typedef typename Host<TAlignmentGraph>::Type TStringSet;
+	typedef typename Value<TStringSet>::Type TString;
+	getSequenceSimilarity(g, sim, typename Value<TString>::Type());
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TFragmentMatches, typename TStringSet, typename TSize1,  typename TSize2, typename TSize3, typename TAlphabet>
 inline double 
 getSequenceSimilarity(TFragmentMatches& matches,
 					  TStringSet& str,
 					  TSize1 const from,
 					  TSize2 const to,
+					  TSize3& alignLength,
 					  TAlphabet)
 {
 	SEQAN_CHECKPOINT
@@ -118,7 +138,10 @@ getSequenceSimilarity(TFragmentMatches& matches,
 	typedef typename Value<TStringSet>::Type TString;
 	typedef typename Infix<TString>::Type TInfix;
 
-	double sim = 0;
+	TSize sim = 0;
+	TSize match_length = 0;
+	TSize len1 = length(str[0]);
+	TSize len2 = length(str[1]);
 
 	typedef typename Iterator<TInfix>::Type TInfixIter;
 	for(TSize i = from;i<to;++i) {
@@ -128,17 +151,16 @@ getSequenceSimilarity(TFragmentMatches& matches,
 		TInfixIter sIt2 = begin(inf2);
 		while((!atEnd(sIt1)) || (!atEnd(sIt2))) {
 			if ( (TAlphabet) *sIt1  == (TAlphabet) *sIt2) {
-				sim += 1;
+				++sim;
 			}
 			goNext(sIt1); goNext(sIt2);
+			++match_length;
 		}
 	}
 
-	TSize len1 = length(str[0]);
-	TSize len2 = length(str[1]);
-
-	if (len1 > len2) return sim / len2;
-	else return sim / len1;
+	alignLength = match_length + (len1 - match_length) + (len2 - match_length);
+	if (len1 > len2) return (double) sim / (double) len2;
+	else return (double) sim / (double) len1;
 }
 
 
@@ -165,8 +187,8 @@ similarityToDistanceMatrix(TMatrix& mat,
 	for (TSize row=0;row<nseq;++row) {
 		for(TSize col=row+1;col<nseq;++col) {
 			// Kimura correction
-			TValue val = getValue(mat, row*nseq+col);
-			if (val < 0.2) val = 0.2;
+			TValue val = 0.8 * getValue(mat, row*nseq+col) + 0.2;
+			//if (val < 0.2) val = 0.2;
 			val = (TValue) log((TValue) val - (1.0 - val * val) / 5.0);
 			
 			// Assign values
@@ -186,6 +208,44 @@ similarityToDistanceMatrix(TMatrix& mat,
 	//std::cout << std::endl;
 }
 
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TMatrix>
+inline void
+similarityToDistanceMatrix(TMatrix& mat, 
+						   FractionalDistance) 
+{
+	SEQAN_CHECKPOINT
+	
+	typedef typename Value<TMatrix>::Type TValue;
+	typedef typename Size<TMatrix>::Type TSize;
+
+	// Initialize the mat matrix
+	TSize nseq = (TSize) sqrt((double)length(mat));
+
+	// Calculate the mat
+	for (TSize row=0;row<nseq;++row) {
+		for(TSize col=row+1;col<nseq;++col) {
+			// Distance must be between 0 and 1
+			TValue val = (1 - getValue(mat, row*nseq+col)) * 100;
+
+			// Assign values
+			assignValue(mat, row*nseq+col, val);
+			assignValue(mat, col*nseq+row, val);
+		}
+		assignValue(mat, row*nseq+row, 0);
+	}
+
+	//// Debug code
+	//for (TSize row=0;row<nseq;++row) {
+	//	for(TSize col=0;col<nseq;++col) {
+	//		std::cout << getValue(mat, row*nseq+col) << ",";
+	//	}
+	//	std::cout << std::endl;
+	//}
+	//std::cout << std::endl;
+}
 
 }// namespace SEQAN_NAMESPACE_MAIN
 

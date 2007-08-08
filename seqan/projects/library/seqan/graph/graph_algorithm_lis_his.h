@@ -309,7 +309,7 @@ heaviestIncreasingSubsequence(TString const& str,
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TStringSet, typename TCargo, typename TSpec, typename TString>
-inline void
+inline TCargo
 heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 						  TString const& str1, 
 						  TString const& str2,
@@ -392,7 +392,7 @@ heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	// Calculate the heaviest increasing subsequence
 	// Note edges with weight=0 are ignored!
 	String<unsigned int> pos;
-	heaviestIncreasingSubsequence(seq, weights, pos);
+	TCargo score = (TCargo) heaviestIncreasingSubsequence(seq, weights, pos);
 	
 	// Create the alignment sequence
 	TSize numMatches = length(pos);
@@ -462,6 +462,8 @@ heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 		}
 	}
 	SEQAN_TASSERT(position(pointerAlign) == length(align))
+
+	return score;
 }
 
 }// namespace SEQAN_NAMESPACE_MAIN

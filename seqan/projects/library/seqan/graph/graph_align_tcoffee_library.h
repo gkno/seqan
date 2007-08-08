@@ -128,7 +128,7 @@ template<typename TStringSet, typename TCargo, typename TSpec, typename TScore>
 inline void 
 generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 					   TScore const& score_type,
-					   LocalPairwise_Library)
+					   LocalTriple_Library)
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
@@ -210,14 +210,14 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 
 //////////////////////////////////////////////////////////////////////////////
 
+
 template<typename TStringSet, typename TCargo, typename TSpec, typename TScore>
-inline void 
+void 
 generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 					   TScore const& score_type,
-					   GlobalPairwise_Library)
+					   LocalPairwise_Library)
 {
 	SEQAN_CHECKPOINT
-
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename Size<TGraph>::Type TSize;
 	typedef typename Id<TGraph>::Type TId;
@@ -232,16 +232,89 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	// Pairwise alignments for all pairs of sequences
 	TStringSet& str = stringSet(g);	
 	TSize nseq = length(str);
+
+	// String of fragments to combine all pairwise alignments into a multiple alignment
+	typedef Fragment<> TFragment;
+	typedef String<TFragment, Block<> > TFragmentString;
+	typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
+	TFragmentString matches;
+	String<TScoreValue, Block<> > score_values;
+
+	for(TSize i=0; i<nseq; ++i) {
+		for(TSize j=i+1; j<nseq; ++j) {
+			// Pairwise alignment graph
+			TStringSet pairSet;
+			assignValueById(pairSet, str, positionToId(str, i));
+			assignValueById(pairSet, str, positionToId(str, j));
+			typedef Graph<Alignment<TStringSet, unsigned int> > TPairGraph;
+			typedef typename VertexDescriptor<TPairGraph>::Type TVD;
+			typedef typename Iterator<TPairGraph, EdgeIterator>::Type TEI;
+			TPairGraph pGraph(pairSet);
+			localAlignment(pGraph, score_type, SmithWatermanClump() );
+			
+			// Remember the matches and their scores
+			TEI it(pGraph);
+			for(;!atEnd(it);++it) {
+				TVD sV = sourceVertex(it);
+				TVD tV = targetVertex(it);
+				push_back(matches, TFragment( (unsigned int) sequenceId(pGraph, sV), (unsigned int) fragmentBegin(pGraph,sV), (unsigned int) sequenceId(pGraph, tV),  (unsigned int)  fragmentBegin(pGraph,tV),  (unsigned int)  fragmentLength(pGraph,tV)));
+				push_back(score_values, cargo(*it));
+			}
+		}
+	}
+
+	// Refine all matches, rescore matches and create multiple alignment
+	matchRefinement(matches,str,const_cast< TScore&>(score_type),g);
+
+	// Adapt edge weights, scale weights by significance of local match
+	TFragmentStringIter endIt = end(matches);
+	for(TFragmentStringIter it = begin(matches); it != endIt; ++it) {
+		TId id1 = sequenceId(*it,0);
+		TId id2 = sequenceId(*it,1);
+		TSize pos1 = fragmentBegin(*it, id1);
+		TSize pos2 = fragmentBegin(*it, id2);
+		TSize end1 = pos1 + fragmentLength(*it, id1);
+		while(pos1 < end1) {
+			TVertexDescriptor p1 = findVertex(g, id1, pos1);
+			TVertexDescriptor p2 = findVertex(g, id2, pos2);
+			TEdgeDescriptor e = findEdge(g, p1, p2);
+			if (e != 0) cargo(e) *= (TCargo) getValue(score_values, position(it));
+			else addEdge(g, p1, p2, (TCargo) getValue(score_values, position(it)));
+			pos1 += fragmentLength(g, p1);
+			pos2 += fragmentLength(g, p2);
+		}
+	}
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec, typename TDistanceMatrix, typename TScore>
+inline void 
+generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+					   TDistanceMatrix& dist,
+					   TScore const& score_type,
+					   GlobalPairwise_Library)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+
+	// Clear graph
+	clearVertices(g);
+
+	// Pairwise alignments for all pairs of sequences
+	TStringSet& str = stringSet(g);	
+	TSize nseq = length(str);
+	resize(dist, nseq * nseq);
 	
 	// String of fragments to combine all pairwise alignments into a multiple alignment
 	typedef Fragment<> TFragment;
 	typedef String<TFragment, Block<> > TFragmentString;
 	typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
 	TFragmentString matches;
-	typedef String<TScoreValue, Block<> > TScoreString;
-	typedef typename Iterator<TScoreString>::Type TScoreStringIter;
-	TScoreString score_values;
 
+	// All pairwise alignments
 	for(TSize i=0; i<nseq; ++i) {
 		for(TSize j=i+1; j<nseq; ++j) {
 			// Pairwise alignment, get the matches
@@ -249,42 +322,36 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 			assignValueById(pairSet, str, positionToId(str, i));
 			assignValueById(pairSet, str, positionToId(str, j));
 			TSize from = length(matches);
-			globalAlignment(matches, pairSet, score_type, AlignConfig<true,true,true,true>(), Gotoh() );
+
+			// Ends free-space alignment or not?
+			//TSize len1 = length(pairSet[0]);
+			//TSize len2 = length(pairSet[1]);
+			//if (!((double) len1 / (double) len2 > 0.80)) {
+			//	globalAlignment(matches, pairSet, score_type, AlignConfig<false,true,true,false>(), Gotoh() );
+			//} else if (!((double) len1 / (double) len2 < 1.20)) {
+			//	globalAlignment(matches, pairSet, score_type, AlignConfig<true,false,false,true>(), Gotoh() );
+			//} else {
+			//	globalAlignment(matches, pairSet, score_type, Gotoh() );
+			//}
+			globalAlignment(matches, pairSet, score_type, Gotoh() );
+
 			
 			// Determine a sequence weight
-			TCargo seqSim = (TCargo) ((double) getSequenceSimilarity(matches, pairSet, from, length(matches), typename Value<TStringSet>::Type() ) * 100.0);
+			TSize alignLen = 0;
+			double seqSim = getSequenceSimilarity(matches, pairSet, from, length(matches), alignLen, typename Value<TStringSet>::Type() );
 
-			// Remember the confidence in these matches (Score value)
-			TSize diff = length(matches) - length(score_values);
-			for(TSize k = 0; k<diff; ++k) push_back(score_values, seqSim);
+			// Normalize sequence similarity by alignment length
+			double normalizedSimilarity = (double) seqSim / (double) alignLen;
+
+			// Assign the values
+			assignValue(dist, i*nseq+j, 1 - normalizedSimilarity);
+			assignValue(dist, j*nseq+i, 1 - normalizedSimilarity);	
 		}
 	}
-	// Refine all matches and create multiple alignment
+
+	// Refine all matches, rescore the matches and create multiple alignment
 	matchRefinement(matches,str,const_cast<TScore&>(score_type),g);
-
-	// Adapt edge weights
-	TFragmentStringIter endIt = end(matches);
-	TScoreStringIter itScore = begin(score_values);
-	for(TFragmentStringIter it = begin(matches); it != endIt; ++it, ++itScore) {
-		TId id1 = sequenceId(*it,0);
-		TId id2 = sequenceId(*it,1);
-		TSize pos1 = fragmentBegin(*it, id1);
-		TSize pos2 = fragmentBegin(*it, id2);
-		TSize end1 = pos1 + fragmentLength(*it, id1);
-		while(pos1 < end1) {
-			SEQAN_TASSERT(pos2 < pos2 + fragmentLength(*it, id2))
-			TVertexDescriptor p1 = findVertex(g, id1, pos1);
-			TVertexDescriptor p2 = findVertex(g, id2, pos2);
-			TEdgeDescriptor e = findEdge(g, p1, p2);
-			if (e != 0) cargo(e) *= (TCargo) *itScore;
-			else addEdge(g, p1, p2, (TCargo) *itScore);
-			SEQAN_TASSERT(fragmentLength(g, p1) == fragmentLength(g, p2))
-			pos1 += fragmentLength(g, p1);
-			pos2 += fragmentLength(g, p2);
-		}
-	}
 }
-
 
 
 //////////////////////////////////////////////////////////////////////////////

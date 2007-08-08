@@ -49,7 +49,7 @@ int main()
 	Test_GraphAlgorithms();		// Test Graph Algorithms
 	Test_GraphAlignment();		// Test Graph Alignment
 	Test_GraphTCoffee();		// Test T-Coffee
-	//Test_GraphMatchRefinement();// Test Match Refinement
+	Test_GraphMatchRefinement();// Test Match Refinement
 	Test_GraphIntervalTree();	// Test Interval Tree
 	Test_GraphFolding();		// Test Folding
 

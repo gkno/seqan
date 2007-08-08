@@ -168,7 +168,7 @@ _align_smith_waterman(TTrace& trace,
 	resize(horizontal, (len2+1));   // One column for the horizontal matrix
 	resize(trace, len1*len2);
 	typedef typename Value<TTrace>::Type TTraceValue;
-	TTraceValue tvMat, tvHorizontal, tvVertical;
+	TTraceValue tvMat=0, tvHorizontal=0, tvVertical=0;
 
 	// Record the max score
 	TScoreValue score_max = 0;
