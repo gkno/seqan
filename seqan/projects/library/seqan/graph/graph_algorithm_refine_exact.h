@@ -207,7 +207,7 @@ SEQAN_CHECKPOINT
 		}
 		//last unaligned node
 		if(it !=end_it && *it<length(seqs[seq_i_pos]))
-			addVertex(ali_g, seq_i_id, *it, (length(seqs[seq_i_pos])-1) - *it);
+			addVertex(ali_g, seq_i_id, *it, (length(seqs[seq_i_pos])) - *it);
 		all_nodes[seq_i_pos].clear();
 	}
 }
