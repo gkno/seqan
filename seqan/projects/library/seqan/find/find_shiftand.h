@@ -156,12 +156,15 @@ SEQAN_CHECKPOINT
 
 
 template <typename TFinder, typename TNeedle>
-inline bool _findShiftAnd_SmallNeedle(TFinder & finder, Pattern<TNeedle, ShiftAnd> & me) {
-	SEQAN_CHECKPOINT
+inline bool _findShiftAnd_SmallNeedle(TFinder & finder, Pattern<TNeedle, ShiftAnd> & me) 
+{
+SEQAN_CHECKPOINT
+	typedef typename Value<TNeedle>::Type TValue;
 	typedef unsigned int TWord;
 	TWord compare = (1 << (me.needleLength-1));
-	while (!atEnd(finder)) {
-		TWord pos = convert<TWord>(*finder);
+	while (!atEnd(finder)) 
+	{
+		TWord pos = convert<TWord>(convert<TValue>(*finder));
 		me.prefSufMatch[0] = ((me.prefSufMatch[0] << 1) | 1) & me.table[me.blockCount*pos];
 		if ((me.prefSufMatch[0] & compare) != 0) {
 			finder-=(me.needleLength-1);
@@ -173,13 +176,15 @@ inline bool _findShiftAnd_SmallNeedle(TFinder & finder, Pattern<TNeedle, ShiftAn
 }
 
 template <typename TFinder, typename TNeedle>
-inline bool _findShiftAnd_LargeNeedle(TFinder & finder, Pattern<TNeedle, ShiftAnd> & me) {
-	SEQAN_CHECKPOINT
+inline bool _findShiftAnd_LargeNeedle(TFinder & finder, Pattern<TNeedle, ShiftAnd> & me) 
+{
+SEQAN_CHECKPOINT
+	typedef typename Value<TNeedle>::Type TValue;
 	typedef unsigned int TWord;
 	
 	TWord compare = (1 << ((me.needleLength-1) % BitsPerValue<TWord>::VALUE));
 	while (!atEnd(finder)) {
-		TWord pos = convert<TWord>(*finder);
+		TWord pos = convert<TWord>(convert<TValue>(*finder));
 		TWord carry = 1;
 		for(TWord block=0;block<me.blockCount;++block) {
 			bool newCarry = ((me.prefSufMatch[block] & (1<< (BitsPerValue<TWord>::VALUE - 1)))!=0); 
