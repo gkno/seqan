@@ -502,6 +502,9 @@ needlemanWunsch(Align<TSource, TSpec> & align_,
 				Score<TScoreValue, Simple> const & score_)
 {
 SEQAN_CHECKPOINT
+	clearGaps(row(align_,0));
+	clearGaps(row(align_,1));
+
 	TScoreValue ret;
 	if(scoreGapOpen(score_)==scoreGapExtend(score_))
 	{//linear gap costs
