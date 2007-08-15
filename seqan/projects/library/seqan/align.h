@@ -24,6 +24,7 @@
 //____________________________________________________________________________
 // prerequisites
 
+#include <stack>
 #include <seqan/sequence.h>
 #include <seqan/score.h>
 
@@ -48,5 +49,8 @@
 
 #include <seqan/align/align_dynprog.h>
 #include <seqan/align/align_local_dynprog.h>
+#include <seqan/align/hirschberg_set.h>
+#include <seqan/align/align_myers.h>
+
 
 #endif //#ifndef SEQAN_HEADER_...
