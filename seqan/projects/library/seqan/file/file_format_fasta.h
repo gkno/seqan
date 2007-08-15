@@ -207,6 +207,7 @@ read(TFile & file,
 SEQAN_CHECKPOINT
 
 	SEQAN_ASSERT(!_streamEOF(file))
+	clear(data);
 
 	//determine begin position
 	typename Value<TFile>::Type c_first = _streamGet(file);
@@ -216,14 +217,18 @@ SEQAN_CHECKPOINT
 	typename Size<TData>::Type count_valid = 1; //"valid" characters read (without line breaks)
 	typename Size<TData>::Type count_all = 1;	//all characters read (with line breaks)
 
+	if (_streamEOF(file))
+	{
+		return;
+	}	
+
 	if (c_first == '>')
 	{//there is an id line: skip it
 		c_first = _fasta_scan_line(file, count_valid, count_all);
 	}
 
-	if (c_first == '>') 
+	if ((c_first == '>') || _streamEOF(file)) 
 	{//another id line = empty entry
-		clear(data);
 		_streamSeekG(file, begin_pos);
 		_read_n_chars_from_file(file, count_all);
 		return;
@@ -234,13 +239,14 @@ SEQAN_CHECKPOINT
 	count_valid = 1;
 	count_all = 1;
 	typename Value<TFile>::Type c;
-
+	bool eof_reached = false;
 	//determine length
 	while (true)
 	{
 		c = _fasta_scan_line(file, count_valid, count_all);
 		if (_streamEOF(file)) 
 		{//end of file: stop searching
+			eof_reached = true;
 			break;
 		}
 		if (c == '>')
@@ -286,6 +292,8 @@ SEQAN_CHECKPOINT
 
 	//move file ptr to next entry
 	_read_n_chars_from_file(file, count_all - 1);
+	if(eof_reached)
+		_streamGet(file);
 }
 
 //____________________________________________________________________________
