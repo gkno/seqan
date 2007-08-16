@@ -365,12 +365,14 @@ sumOfPairsScore(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 						(v2 == nilVertex))) ++count;
 					continue;
 				}
-				typedef typename Iterator<TInfix>::Type TInfixIter;
+				typedef typename Iterator<TInfix,Standard>::Type TInfixIter;
 				TInfix inf1 = label(g,v1);
 				TInfix inf2 = label(g,v2);
-				TInfixIter sIt1 = begin(inf1);
-				TInfixIter sIt2 = begin(inf2);
-				while((!atEnd(sIt1)) || (!atEnd(sIt2))) {
+				TInfixIter sIt1 = begin(inf1,Standard());
+				TInfixIter sIt2 = begin(inf2,Standard());
+				TInfixIter sItEnd1 = end(inf1,Standard());
+				TInfixIter sItEnd2 = end(inf2,Standard());
+				while((sIt1!=sItEnd1) || (sIt2!=sItEnd2)) {
 					total += score(const_cast<TScore&>(score_type), *sIt1, *sIt2);
 					goNext(sIt1); goNext(sIt2);
 				}

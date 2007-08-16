@@ -97,15 +97,15 @@ struct Value<Annotation<TSequence,TValue,TSpec> >
 
 template<typename TValue, typename TAliString, typename TGraph, typename TPropertyMap, typename TStringSet, typename TMap, typename TTagSpec>
 inline void
-_addAnnotationCuts(String<std::set<TValue> > & all_nodes,
-				   TAliString & alis, 
-				   String<TGraph> & gs, 
-				   String<TPropertyMap> & pms, 
-				   TStringSet & seq,
-				   TMap & seq_map,
+_addAnnotationCuts(String<std::set<TValue> > &,
+				   TAliString &, 
+				   String<TGraph> &, 
+				   String<TPropertyMap> &, 
+				   TStringSet &,
+				   TMap &,
 				   bool,
-				   TValue min_fragment_len,
-				   Tag<TTagSpec> tag)
+				   TValue,
+				   Tag<TTagSpec>)
 {
 SEQAN_CHECKPOINT
 	return;
@@ -252,11 +252,11 @@ SEQAN_CHECKPOINT
 
 template<typename TAliGraph,typename TScore>
 typename Value<TScore>::Type 
-getAnnoScore(TAliGraph & ali_g,
+getAnnoScore(TAliGraph &,
 			 bool,
-			 typename VertexDescriptor<TAliGraph>::Type vd1,
-			 typename VertexDescriptor<TAliGraph>::Type vd2,
-			 TScore & score_type)
+			 typename VertexDescriptor<TAliGraph>::Type,
+			 typename VertexDescriptor<TAliGraph>::Type,
+			 TScore &)
 {
 SEQAN_CHECKPOINT
 	return (typename Value<TScore>::Type) 1;
