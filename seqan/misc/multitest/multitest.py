@@ -21,13 +21,13 @@ MODES = ['Simple justcompile']
 
 ### COMPILERS = [['<plaform>', '<name>', '<cmdline options>'], ...]
 COMPILERS = [
-    ['gcc',     'g++-3.0',   ['Compiler=g++-3.0']], 
-    ['gcc',     'g++-3.2',   ['Compiler=g++-3.2']], 
-    ['gcc',     'g++-3.3',   ['Compiler=g++-3.3']], 
-    ['gcc',     'g++-3.4',   ['Compiler=g++-3.4']], 
-    ['gcc',     'g++-4.1.1', ['Compiler=/import/testing/bin/g++']],
-    ['windows', 'vc++-2003', ['Version=7']],
-    ['windows', 'vc++-2005', ['Version=8', 'VSInstallDir=D:\\Program Files\\Microsoft Visual Studio 8\\']]
+    ['gcc',     'g++-3.0',   'Compiler=g++-3.0'], 
+    ['gcc',     'g++-3.2',   'Compiler=g++-3.2'], 
+    ['gcc',     'g++-3.3',   'Compiler=g++-3.3'], 
+    ['gcc',     'g++-3.4',   'Compiler=g++-3.4'], 
+    ['gcc',     'g++-4.1.1', 'Compiler=/import/testing/bin/g++'],
+    ['windows', 'vc++-2003', 'Version=7'],
+#    ['windows', 'vc++-2005', 'Version=8 "VSInstallDir=D:\\Program Files\\Microsoft Visual Studio 8\\ "']
 ]
 
 ### SERVERS = [['<plaform>', '<server>'], ...]
@@ -39,26 +39,26 @@ SERVERS = [
 #    ['gcc', 'aplysia'], 
     ['gcc', 'nawab'], 
 
-    ['gcc', 'duesseldorf'], 
-    ['gcc', 'hamm'], 
-    ['gcc', 'koeln'], 
-    ['gcc', 'bielefeld'], 
-    ['gcc', 'duisburg'], 
-    ['gcc', 'muenster'], 
-    ['gcc', 'aachen'], 
+#    ['gcc', 'duesseldorf'], 
+#    ['gcc', 'hamm'], 
+#    ['gcc', 'koeln'], 
+#    ['gcc', 'bielefeld'], 
+#    ['gcc', 'duisburg'], 
+#    ['gcc', 'muenster'], 
+#    ['gcc', 'aachen'], 
 #    ['gcc', 'dortmund'], 
 #    ['gcc', 'essen'], 
 #    ['gcc', 'hagen'], 
 
-#    ['gcc', 'guangzhou'], 
-#    ['gcc', 'harbin'], 
-#    ['gcc', 'chongqing'], 
-#    ['gcc', 'shenyang'], 
-#    ['gcc', 'wuhan'], 
-#    ['gcc', 'chengdu'], 
-#    ['gcc', 'tianjin'], 
-#    ['gcc', 'xian'], 
-#    ['gcc', 'peking'], 
+    ['gcc', 'guangzhou'], 
+    ['gcc', 'harbin'], 
+    ['gcc', 'chongqing'], 
+    ['gcc', 'shenyang'], 
+    ['gcc', 'wuhan'], 
+    ['gcc', 'chengdu'], 
+    ['gcc', 'tianjin'], 
+    ['gcc', 'xian'], 
+    ['gcc', 'peking'], 
 
 #    ['gcc', 'leningrad'], 
 #    ['gcc', 'jekatarinburg'], 
@@ -79,11 +79,11 @@ SERVER_FAILURE_LIMIT = 3
 ################################################################################
 
 PATH_MODULES = '../../projects/tests'
-PATH_OUTPUT = ''
 FILE_VIEWER = 'index.html'
 FILE_OUTPUT = 'data.js'
 FILE_OUTPUT_OLD = 'data_old.js'
 PATH_RESULTFILES = 'results/'
+PATH_GCC_RESULTFILES = PATH_SEQAN_GCC + 'misc/multitest/' + PATH_RESULTFILES
 
 ################################################################################
 
@@ -110,7 +110,7 @@ def main():
 
 def init():
     global SERVERS, COMPILERS, MODES, PATH_MODULES, LOAD_MAX
-    global PATH_OUTPUT, PATH_RESULTFILES
+    global PATH_RESULTFILES
     global MODULES, TASKS, LOAD
     global USERNAME, PASSWORD
     
@@ -135,6 +135,8 @@ def init():
         for [platform, compilername, compiler] in COMPILERS:
             compnum += 1
             for module in MODULES:
+            	filename = module + '_' + platform + '_' + compilername + '_' + mode;
+            	filename = filename.replace(' ', '_');
                 task = {
                     'platform': platform,
                     'compilername': compilername,
@@ -142,7 +144,7 @@ def init():
                     'mode': mode,
                     'module': module,
                     'state': 'pending',
-                    'filename': module + '_' + platform + '_' + compilername + '_' + mode,
+                    'filename': filename,
                     'proc' : None                    
                 }
                 TASKS.append(task)
@@ -163,11 +165,9 @@ def init():
         servers.append(server)
     SERVERS = servers
     
-    path_resultfiles = PATH_OUTPUT + PATH_RESULTFILES
-    if not os.access(path_resultfiles, os.F_OK):
-        os.mkdir(path_resultfiles)
+    if not os.access(PATH_RESULTFILES, os.F_OK):
+        os.mkdir(PATH_RESULTFILES)
 
-   
 ################################################################################
     
 def javaScriptEscape(s):
@@ -179,7 +179,7 @@ def javaScriptEscape(s):
 
 def createPage():
     global SERVERS, COMPILERS, MODES, MODULES, TASKS
-    global PATH_OUTPUT, FILE_OUTPUT, FILE_OUTPUT_OLD
+    global FILE_OUTPUT, FILE_OUTPUT_OLD
 
     s = ''
     i = 0
@@ -196,13 +196,16 @@ def createPage():
             s += '<td><nobr>' + platform + ': ' + compilername + '</nobr></td>'
             for module in MODULES:
                 task = TASKS[i]
-                link = '<a href="' + PATH_RESULTFILES + task['filename'] + '.txt">'
                 i += 1
                 state = task['state']
+                if state != 'pending': server = task['server']['server']
+                else: server = ''
+
+                link = '<a href="' + PATH_RESULTFILES + task['filename'] + '.txt">'
+                
                 if state == 'pending': c = '<td class=pending align=middle>&nbsp;</td>'
-                if state == 'started': 
-                    c = '<td class=started align=middle>(' + task['server']['server'] + ')</td>'
-                if state == 'error': c = '<td class=error align=middle>' + link + 'err</a></td>'
+                if state == 'started': c = '<td class=started align=middle>' + link + '<i>(' + server + ')</i></a></td>'
+                if state == 'error': c = '<td class=error align=middle>' + link + 'error</a></td>'
                 if state == 'ok': c = '<td class=ok align=middle>' + link + 'ok</a></td>'
                 s += c
                 
@@ -219,26 +222,26 @@ def createPage():
         s += '<tr><th ' + cls + '>' + server['server'] + '</td><td align=middle ' + cls + '>' + str(server['load']) + '</td><td align=middle ' + cls + '>' + str(server['count']) + '</td><td align=middle ' + cls + '>' + str(server['failures']) + '</td></tr>'
     s += '</table>'
     
-    if os.access(PATH_OUTPUT + FILE_OUTPUT, os.F_OK):
-	    f = open(PATH_OUTPUT + FILE_OUTPUT)
+    if os.access(FILE_OUTPUT, os.F_OK):
+	    f = open(FILE_OUTPUT)
 	    t = f.read()
 	    f.close()
     else:
     	t = ''
     	
-    f = open(PATH_OUTPUT + FILE_OUTPUT_OLD, "wb")
+    f = open(FILE_OUTPUT_OLD, "wb")
     f.write(t)
     f.close()
 
-    f = open(PATH_OUTPUT + FILE_OUTPUT, "wb")
+    f = open(FILE_OUTPUT, "wb")
     f.write(javaScriptEscape(s))
     f.close()
 
 ################################################################################
 
 def showPage():
-    global FILE_VIEWER, PATH_OUTPUT
-    c = [PATH_OUTPUT + FILE_VIEWER]
+    global FILE_VIEWER
+    c = [FILE_VIEWER]
     subprocess.Popen(c, shell=True)
 
 ################################################################################
@@ -258,6 +261,7 @@ def scheduleTasks():
     for server in SERVERS:
         if (server['load'] < server['loadmax']) and (server['failures'] < SERVER_FAILURE_LIMIT):
             startTaskForServer(server)
+            
         
 ################################################################################
        
@@ -286,20 +290,24 @@ def pollTasks():
 ################################################################################
 
 def onTaskStopped(task):
-    global ALL_STATES
+    global ALL_STATES, PATH_RESULTFILES
+    
     ALL_STATES = ''     # rebuild page
     
     server = task['server']
     server['load'] -= 1
 
     proc = task['proc']
-    out = proc.stdout.read()
-    err = proc.stderr.read()
-    
     is_error = (proc.poll() != 0)
     
     if is_error:
-        if (server['server'] != 'localhost') and (out.find('compile') == -1):
+        #read output file
+        f = open(PATH_RESULTFILES + task['filename'] + '.txt', "rb")
+        out = f.read()
+        f.close()
+        
+        #test for rescheduling
+        if (server['server'] != 'localhost') and (out.find('compile projects') == -1):
             #reschedule task
             server['failures'] += 1
             task['state'] = 'pending'
@@ -312,26 +320,6 @@ def onTaskStopped(task):
     if is_error: task['state'] = 'error'
     else: task['state'] = 'ok'
     
-    f = open(PATH_OUTPUT + PATH_RESULTFILES + task['filename'] + '.txt', "wb")
-    f.write('module:   ' + task['module'] + '\n')
-    f.write('platform: ' + task['platform'] + '\n')
-    f.write('compiler: ' + task['compilername'] + '\n')
-    f.write('options:  ' + str(task['compiler']) + '\n')
-    f.write('mode:     ' + task['mode'] + '\n')
-    f.write('server:   ' + task['server']['server'] + '\n')
-    f.write('result:   ' + task['state'] + '\n')
-    f.write('------------------------------------------------------------------\n')
-    f.write('----------------------------- STDOUT -----------------------------\n')
-    f.write('------------------------------------------------------------------\n')
-    f.write(out)
-    f.write('\n')
-    if len(err) > 1:
-        f.write('------------------------------------------------------------------\n')
-        f.write('----------------------------- STDERR -----------------------------\n')
-        f.write('------------------------------------------------------------------\n')
-        f.write(err)
-        f.write('\n')
-    f.close()
     
     print task['filename'] + ":",
     if is_error: print "ERROR"
@@ -344,10 +332,11 @@ def startTaskForServer(server):
     
     for task in TASKS:
         if (task['state'] == 'pending') and (task['platform'] == server['platform']):
-            task['proc'] = startTask(task, server)
             server['load'] += 1
             task['state'] = 'started'
             task['server'] = server
+            writeTaskHeader(task)
+            task['proc'] = startTask(task, server)
             ALL_STATES = '' #rebuild page
             return
             
@@ -361,36 +350,73 @@ def startTask(task, server):
     if platform == 'windows': return startTaskWindows(task, server)
     
 ################################################################################
+   
+def writeTaskHeader(task):
+    global PATH_RESULTFILES
+    
+    f = open(PATH_RESULTFILES + task['filename'] + '.txt', "wb")
+    f.write('module:   ' + task['module'] + '\n')
+    f.write('platform: ' + task['platform'] + '\n')
+    f.write('compiler: ' + task['compilername'] + '\n')
+    f.write('options:  ' + str(task['compiler']) + '\n')
+    f.write('mode:     ' + task['mode'] + '\n')
+    f.write('server:   ' + task['server']['server'] + '\n')
+    f.write('result:   ' + task['state'] + '\n')
+    f.write('------------------------------------------------------------------\n')
+    f.close()
+
+################################################################################
 
 def startTaskGCC(task, server):
-    global USERNAME, PASSWORD, PATH_SEQAN_GCC
+    global USERNAME, PASSWORD, PATH_SEQAN_GCC, PATH_GCC_RESULTFILES
+
+    cmd = 'bash -c "'
+    cmd += 'make -s -C' + PATH_SEQAN_GCC;
+    cmd += ' Platform=' + task['platform']
+    cmd += ' Project=' + task['module']
+    cmd += ' Mode=' + task['mode']
+    cmd += ' BuildFolder=' + task['platform'] + '/' + task['compilername']
+    cmd += ' ' + task['compiler']
+    cmd += ' 1>>' + PATH_GCC_RESULTFILES + task['filename'] + '.txt'
+    cmd += ' 2>&1'
+    cmd += '"'
     
-    c = ["plink.exe", "-batch", 
-            "-ssh", "-l", USERNAME, "-pw", PASSWORD, server['server'], 
-                "make", 
-                    "-s", 
-                    "-C\"" + PATH_SEQAN_GCC + "\"", 
-                    "Platform=" + task['platform'],
-                    "Project=" + task['module'],
-                    "Mode=" + task['mode'],
-                    "BuildFolder=" + task['platform'] + "/" + task['compilername']
-         ] + task['compiler']
-#    print c;
-    return subprocess.Popen(c, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    #print cmd
+    
+    c = ["plink.exe", "-batch", "-ssh", "-l", USERNAME, "-pw", PASSWORD, server['server'], cmd]
+    return subprocess.Popen(c, shell=False)
         
 
 def startTaskWindows(task, server):
     global PATH_SEQAN_WINDOWS
+
+
+#    cmd = ["visual_studio\\make", 
+#            "-s", 
+#            "-C" + PATH_SEQAN_WINDOWS,
+#            "Platform=" + task['platform'],
+#            "Project=" + task['module'],
+#            "Mode=" + task['mode'],
+#            "BuildFolder=" + task['platform'] + "/" + task['compilername']
+#         ] + task['compiler'] #+ ["1>>" + PATH_RESULTFILES + task['filename'] + ".txt", "2>&1"]
+#    print cmd;  
+#    return subprocess.Popen(cmd, shell=True)
     
-    c = ["visual_studio\\make", 
-            "-s", 
-            "Platform=" + task['platform'],
-            "Project=" + task['module'],
-            "Mode=" + task['mode'],
-            "BuildFolder=" + task['platform'] + "/" + task['compilername']
-         ] + task['compiler']
-#    print c;  
-    return subprocess.Popen(c, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=PATH_SEQAN_WINDOWS)
+    cmd = 'make -s -C' + PATH_SEQAN_WINDOWS
+    cmd += ' Platform=' + task['platform']
+    cmd += ' Project=' + task['module']
+    cmd += ' Mode=' + task['mode']
+    cmd += ' BuildFolder=' + task['platform'] + '/' + task['compilername']
+    cmd += ' ' + task['compiler']
+    cmd += ' 1>>' + PATH_RESULTFILES + task['filename'] + '.txt'
+    cmd += ' 2>&1'
+    cmd += '"'
+    
+#    print cmd
+    
+    c = [cmd]
+    return subprocess.Popen(c, shell=True)
+
 
 ################################################################################
 
