@@ -36,7 +36,7 @@ public:
 	{
 	}
 
-	Score(Score const & other)
+	Score(Score const & )
 	{
 	}
 

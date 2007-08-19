@@ -312,7 +312,7 @@ namespace seqan{
 	}
 
 
-};
+}
 
 #endif // SEQAN_HEADER_RMT_SL_COMMON_ALGOS_H
 

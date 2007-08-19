@@ -109,7 +109,7 @@ namespace seqan{
 		}
 			// perform backtracking
 		return _chain_trace( dest, metas );
-	};
+	}
 	
 }
 

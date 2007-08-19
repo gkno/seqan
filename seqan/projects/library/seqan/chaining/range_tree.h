@@ -38,7 +38,7 @@ namespace seqan
 {
 
 
-}; // namespace SEQAN_NAMESPACE_SKIPLIST
+} // namespace SEQAN_NAMESPACE_SKIPLIST
 
 
 #endif //_RANGE_TREE_H

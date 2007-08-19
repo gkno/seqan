@@ -365,7 +365,7 @@ template< typename TTag, typename TCargo > inline
 void
 _initCargo( TTag * /*tag*/, 
 		   TCargo & /*_cargo*/ )
-{};
+{}
 
 
 }

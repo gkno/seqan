@@ -358,7 +358,7 @@ makeEndFragment(TFragment & me,
 	};
 
 
-}; // namespace seqan
+} // namespace seqan
 
 #endif // SEQAN_HEADER_FRAGMENT_H
 

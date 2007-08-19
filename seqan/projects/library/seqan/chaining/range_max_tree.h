@@ -34,7 +34,7 @@ namespace seqan
 {
 
 
-}; // namespace SEQAN_NAMESPACE_SKIPLIST
+} // namespace SEQAN_NAMESPACE_SKIPLIST
 
 #endif // SEQAN_RANGE_MAX_TREE_H
 

@@ -357,7 +357,7 @@ SEQAN_ASSERT( me._meta != NULL )
 		{
 		}
 
-		_ChainPoint( typename Size< TFragType >::Type dim )
+		_ChainPoint( typename Size< TFragType >::Type )
 		: _meta( NULL )
 		, _prio( infimumValue< typename Weight< TFragType >::Type >() )
 		{
@@ -385,7 +385,7 @@ SEQAN_ASSERT( me._meta != NULL )
 
 		template< typename TSize >
 		_ChainPoint( _MetaFragment< TFragType > & meta,
-						TSize dim, 
+						TSize, 
 						bool begin = false )
 		: _meta( &meta )
 		, _prio( infimumValue< typename Weight< TFragType >::Type >() )

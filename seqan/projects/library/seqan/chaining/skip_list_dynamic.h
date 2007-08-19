@@ -359,6 +359,7 @@ namespace seqan
 			TKey theKey)
 	{
 		SEQAN_ASSERT2( false, "No deletion in static lists")
+		return false;
 	}
 
 	template< typename TObject, typename TSpec, typename TStructuring, typename TKey >
@@ -389,6 +390,7 @@ namespace seqan
 			TObject & obj )
 	{
 		SEQAN_ASSERT2( false, "No deletion in static lists")
+		return false;
 	}
 
 

@@ -223,6 +223,6 @@ public:
 }; // struct SkipList
 
 
-};
+}
 
 #endif	// SEQAN_HEADER_CRT_SKIPLIST_H

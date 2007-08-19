@@ -137,7 +137,7 @@ public:
 
 }; // struct RangeTree
 
-};
+}
 
 #endif // SEQAN_HEADER_COMPLETE_RANGE_TREE_H
 
