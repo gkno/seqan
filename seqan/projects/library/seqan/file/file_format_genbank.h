@@ -112,7 +112,7 @@ SEQAN_CHECKPOINT
 		}
 	}
 
-	it.data_file_pos = _streamTellG(host(it)) - 1;
+	it.data_file_pos = _streamTellG(host(it))-1;
 	it.data_eof = _streamEOF(host(it));
 }
 

@@ -64,8 +64,8 @@ SEQAN_CHECKPOINT
 		: x1(a1),x2(a2),y1(b1),y2(b2),score(sc)
 	{
 SEQAN_CHECKPOINT
-		SEQAN_ASSERT(a1 =< b1);
-		SEQAN_ASSERT(a2 =< b2);
+		SEQAN_ASSERT(a1 <= b1);
+		SEQAN_ASSERT(a2 <= b2);
 	}
 
 	_HirschbergSet & 

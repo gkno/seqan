@@ -465,6 +465,28 @@ SEQAN_CHECKPOINT
 	append(target, source, limit, Generous());
 }
 
+//////////////////////////////////////////////////////////////////////////////
+///.Function.appendValue.param.target.type:Adaption.std::basic_string
+
+template <typename TChar, typename TCharTraits, typename TAlloc, typename TValue, typename TTag>
+inline void
+appendValue(::std::basic_string<TChar, TCharTraits, TAlloc> & me, 
+			TValue const & _value,
+			TTag)
+{
+SEQAN_CHECKPOINT
+	me.push_back(_value);
+} 
+
+template <typename TChar, typename TCharTraits, typename TAlloc, typename TValue>
+inline void
+appendValue(::std::basic_string<TChar, TCharTraits, TAlloc> & me, 
+			TValue const & _value,
+			Limit)
+{
+SEQAN_CHECKPOINT
+	if (capacity(me) > length(me)) me.push_back(_value);
+} 
 
 //////////////////////////////////////////////////////////////////////////////
 //replace to ::std::basic_string

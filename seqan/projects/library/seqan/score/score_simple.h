@@ -256,12 +256,12 @@ scoreGap(Score<TValue, TSpec> const & me)
 
 template <typename TValue, typename T>
 inline TValue
-score(Score<TValue, Simple> & me,
+score(Score<TValue, Simple> const & me,
 	  T const & left,
 	  T const & right)
 {
-	if (left == right) return scoreMatch(me);
-	else return scoreMismatch(me);
+	if (left == right) return me.data_match; //scoreMatch(me);
+	else return me.data_mismatch; //scoreMismatch(me);
 }
 
 
