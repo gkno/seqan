@@ -381,8 +381,7 @@ operator + (Iter<TContainer, AdaptorIterator<TIterator, TSpec> > const & left,
 SEQAN_CHECKPOINT
 	return Iter<TContainer, AdaptorIterator<TIterator, TSpec> >(container(left), hostIterator(left) + right);
 }
-
-// STL adaption (the upper function wouldn't be found)
+// for <anonymous enum> types
 template <typename TContainer, typename TIterator, typename TSpec>
 inline Iter<TContainer, AdaptorIterator<TIterator, TSpec> >  
 operator + (Iter<TContainer, AdaptorIterator<TIterator, TSpec> > const & left,
@@ -395,6 +394,15 @@ SEQAN_CHECKPOINT
 template <typename TContainer, typename TIterator, typename TSpec, typename TIntegral>
 inline Iter<TContainer, AdaptorIterator<TIterator, TSpec> >  
 operator + (TIntegral left,
+			Iter<TContainer, AdaptorIterator<TIterator, TSpec> > const & right)
+{
+SEQAN_CHECKPOINT
+	return Iter<TContainer, AdaptorIterator<TIterator, TSpec> >(container(right), hostIterator(right) + left);
+}
+// for <anonymous enum> types
+template <typename TContainer, typename TIterator, typename TSpec>
+inline Iter<TContainer, AdaptorIterator<TIterator, TSpec> >  
+operator + (int left,
 			Iter<TContainer, AdaptorIterator<TIterator, TSpec> > const & right)
 {
 SEQAN_CHECKPOINT
@@ -414,8 +422,7 @@ SEQAN_CHECKPOINT
 	hostIterator(left) += right;
 	return left;
 }
-
-// STL adaption (the upper function wouldn't be found)
+// for <anonymous enum> types
 template <typename TContainer, typename TIterator, typename TSpec>
 inline Iter<TContainer, AdaptorIterator<TIterator, TSpec> > &
 operator += (Iter<TContainer, AdaptorIterator<TIterator, TSpec> > & left,
@@ -438,8 +445,7 @@ operator - (Iter<TContainer, AdaptorIterator<TIterator, TSpec> > const & left,
 SEQAN_CHECKPOINT
 	return Iter<TContainer, AdaptorIterator<TIterator, TSpec> >(container(left), hostIterator(left) - right);
 }
-
-// STL adaption (the upper function wouldn't be found)
+// for <anonymous enum> types
 template <typename TContainer, typename TIterator, typename TSpec>
 inline Iter<TContainer, AdaptorIterator<TIterator, TSpec> >  
 operator - (Iter<TContainer, AdaptorIterator<TIterator, TSpec> > const & left,
@@ -473,8 +479,7 @@ SEQAN_CHECKPOINT
 	hostIterator(left) -= right;
 	return left;
 }
-
-// STL adaption (the upper function wouldn't be found)
+// for <anonymous enum> types
 template <typename TContainer, typename TIterator, typename TSpec>
 inline Iter<TContainer, AdaptorIterator<TIterator, TSpec> > &
 operator -= (Iter<TContainer, AdaptorIterator<TIterator, TSpec> > & left,
