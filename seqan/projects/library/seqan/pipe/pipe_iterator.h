@@ -191,8 +191,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 
-    template < typename TInput, typename TSpec >
-	struct Iterator< Pipe< TInput, TSpec > > {
+    template < typename TInput, typename TSpec, typename TIteratorSpec >
+	struct Iterator< Pipe< TInput, TSpec >, TIteratorSpec> {
 		typedef IPipeIterator< Pipe< TInput, TSpec > > Type;
 	};
 

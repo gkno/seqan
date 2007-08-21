@@ -536,7 +536,7 @@ write(TFile & target,
 	typedef FragmentInfo<TIdType, TSize> TSegment;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
-	typedef typename Iterator<String<TEdgeStump*> const>::Type TIterConst;
+	typedef typename Iterator<String<TEdgeStump*> const, Rooted>::Type TIterConst;
 
 
 	

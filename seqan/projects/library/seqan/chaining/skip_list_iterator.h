@@ -76,14 +76,14 @@ namespace seqan
 //////////////////////////////////////////////////////////////////////////////
 
 	template< typename TType, typename TIterType > inline
-	typename Key< typename Value< typename Iterator< TType >::Type >::Type >::Type
+	typename Key< typename Value< Iter< TType, TIterType > >::Type >::Type
 	key( Iter< TType, TIterType > & it )
 	{
 		return key( value( it ) );
 	}
 
 	template< typename TType, typename TIterType, typename TParam > inline
-	typename Key< typename Value< typename Iterator< TType >::Type >::Type >::Type
+	typename Key< typename Value< Iter< TType, TIterType > >::Type >::Type
 	key( Iter< TType, TIterType > & it,
 			TParam & param )
 	{

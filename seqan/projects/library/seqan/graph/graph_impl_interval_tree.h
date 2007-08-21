@@ -173,7 +173,7 @@ _makePointerInterval(TIntervals & intervals,TIntervalPointers & interval_pointer
 {
 SEQAN_CHECKPOINT
 	typedef typename Value<TIntervalPointers>::Type TIntervalPointer;
-	typedef typename Iterator<TIntervalPointers>::Type TIntervalPointerIterator;
+	typedef typename Iterator<TIntervalPointers, Rooted>::Type TIntervalPointerIterator;
 
 	TIntervalPointer it;
 	TIntervalPointerIterator iit = begin(interval_pointers);
@@ -258,8 +258,8 @@ SEQAN_CHECKPOINT
 	resizeVertexMap(g,pm);
 	
 	TInterval a;
-	typename Iterator<TIntervals>::Type begin_ = begin(intervals);
-	typename Iterator<TIntervals>::Type end_ = end(intervals);
+	typename Iterator<TIntervals, Standard>::Type begin_ = begin(intervals);
+	typename Iterator<TIntervals, Standard>::Type end_ = end(intervals);
 	std::sort(begin_, end_ ,_less_compI1_ITree<TInterval>);
 
 	String<TInterval*> interval_pointers;

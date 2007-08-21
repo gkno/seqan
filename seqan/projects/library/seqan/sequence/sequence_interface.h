@@ -246,7 +246,7 @@ SEQAN_CHECKPOINT
 ...type:Class.String
 ...concept:Concept.Container
 ..param.tag:An @Tag.Iterator Spec.iterator spec@ tag that specifies the kind of the iterator returned. (optional)
-...default:Given by @Metafunction.DefaultIteratorSpec@.
+...default:Given by @Metafunction.DefaultGetIteratorSpec@.
 ..returns:An iterator to the first item in $object$. 
 ...metafunction:Metafunction.Iterator
 ..remarks.text:If the container does not contain any items at all, the function may return 0.
@@ -254,18 +254,18 @@ SEQAN_CHECKPOINT
 ..see:Metafunction.Iterator
 */
 template <typename T>
-inline typename Iterator<T, typename DefaultIteratorSpec<T>::Type>::Type 
+inline typename Iterator<T, typename DefaultGetIteratorSpec<T>::Type>::Type 
 begin(T & me)
 {
 SEQAN_CHECKPOINT
-	return begin(me, typename DefaultIteratorSpec<T>::Type()) ;
+	return begin(me, typename DefaultGetIteratorSpec<T>::Type()) ;
 }
 template <typename T>
-inline typename Iterator<T const, typename DefaultIteratorSpec<T>::Type>::Type
+inline typename Iterator<T const, typename DefaultGetIteratorSpec<T>::Type>::Type
 begin(T const & me)
 {
 SEQAN_CHECKPOINT
-	return begin(me, typename DefaultIteratorSpec<T>::Type()) ;
+	return begin(me, typename DefaultGetIteratorSpec<T>::Type()) ;
 }
 
 //____________________________________________________________________________
@@ -424,10 +424,12 @@ SEQAN_CHECKPOINT
 ..cat:Iteration
 ..cat:Containers
 ..summary:The end of a container. 
-..signature:Iterator end(object)
+..signature:Iterator end(object [, tag])
 ..param.object:A container.
 ...type:Class.String
 ...concept:Concept.Container
+..param.tag:An @Tag.Iterator Spec.iterator spec@ tag that specifies the kind of the iterator returned. (optional)
+...default:Given by @Metafunction.DefaultGetIteratorSpec@.
 ..returns:An iterator that points behind the last item in $object$.
 ...metafunction:Metafunction.Iterator
 ..remarks.text:If the container does not contain any items at all, the function may return 0.
@@ -435,18 +437,18 @@ SEQAN_CHECKPOINT
 ..see:Metafunction.Iterator
 */
 template <typename T>
-inline typename Iterator<T, typename DefaultIteratorSpec<T>::Type>::Type 
+inline typename Iterator<T, typename DefaultGetIteratorSpec<T>::Type>::Type 
 end(T & me)
 {
 SEQAN_CHECKPOINT
-	return end(me, typename DefaultIteratorSpec<T>::Type()) ;
+	return end(me, typename DefaultGetIteratorSpec<T>::Type()) ;
 }
 template <typename T>
-inline typename Iterator<T const, typename DefaultIteratorSpec<T>::Type>::Type 
+inline typename Iterator<T const, typename DefaultGetIteratorSpec<T>::Type>::Type 
 end(T const & me)
 {
 SEQAN_CHECKPOINT
-	return end(me, typename DefaultIteratorSpec<T>::Type()) ;
+	return end(me, typename DefaultGetIteratorSpec<T>::Type()) ;
 }
 
 //____________________________________________________________________________
@@ -701,7 +703,7 @@ SEQAN_CHECKPOINT
 ..param.pos:The position of an item in $object$.
 ...metafunction:Metafunction.Position
 ..param.tag:An @Tag.Iterator Spec.iterator spec@ tag that specifies the kind of the iterator returned. (optional)
-...default:Given by @Metafunction.DefaultIteratorSpec@.
+...default:Given by @Metafunction.DefaultGetIteratorSpec@.
 ..returns:An iterator to the item at position $pos$ in $object$.
 ...metafunction:Metafunction.Iterator
 ..remarks:
@@ -712,20 +714,20 @@ SEQAN_CHECKPOINT
 */
 
 template <typename T, typename TPos>
-inline typename Iterator<T, typename DefaultIteratorSpec<T>::Type>::Type
+inline typename Iterator<T, typename DefaultGetIteratorSpec<T>::Type>::Type
 iter(T & me, 
 	 TPos pos)
 {
 SEQAN_CHECKPOINT
-	return iter(me, pos, typename DefaultIteratorSpec<T>::Type());
+	return iter(me, pos, typename DefaultGetIteratorSpec<T>::Type());
 } 
 template <typename T, typename TPos>
-inline typename Iterator<T const, typename DefaultIteratorSpec<T>::Type>::Type
+inline typename Iterator<T const, typename DefaultGetIteratorSpec<T>::Type>::Type
 iter(T const & me, 
 	 TPos pos)
 {
 SEQAN_CHECKPOINT
-	return iter(me, pos, typename DefaultIteratorSpec<T const>::Type());
+	return iter(me, pos, typename DefaultGetIteratorSpec<T const>::Type());
 } 
 
 

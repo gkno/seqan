@@ -87,43 +87,43 @@ namespace SEQAN_NAMESPACE_MAIN
 	// use Value, GetValue, Reference, Size, ... from corresponding iterator
 	template < typename THost, typename TSpec >
 	struct Value< ModifiedString<THost, TSpec> >:
-		Value< typename Iterator< ModifiedString<THost, TSpec> >::Type > {};
+		Value< typename Iterator< ModifiedString<THost, TSpec>, Rooted >::Type > {};
 
 	template < typename THost, typename TSpec >
 	struct Value< ModifiedString<THost, TSpec> const >:
-		Value< typename Iterator< ModifiedString<THost, TSpec> const >::Type > {};
+		Value< typename Iterator< ModifiedString<THost, TSpec> const, Rooted >::Type > {};
 
 
 	template < typename THost, typename TSpec >
 	struct GetValue< ModifiedString<THost, TSpec> >:
-		GetValue< typename Iterator< ModifiedString<THost, TSpec> >::Type > {};
+		GetValue< typename Iterator< ModifiedString<THost, TSpec>, Rooted >::Type > {};
 
 	template < typename THost, typename TSpec >
 	struct GetValue< ModifiedString<THost, TSpec> const >:
-		GetValue< typename Iterator< ModifiedString<THost, TSpec> const >::Type > {};
+		GetValue< typename Iterator< ModifiedString<THost, TSpec> const, Rooted >::Type > {};
 
 
 	template < typename THost, typename TSpec >
 	struct Reference< ModifiedString<THost, TSpec> >:
-		Reference< typename Iterator< ModifiedString<THost, TSpec> >::Type > {};
+		Reference< typename Iterator< ModifiedString<THost, TSpec>, Rooted >::Type > {};
 
 	template < typename THost, typename TSpec >
 	struct Reference< ModifiedString<THost, TSpec> const >:
-		Reference< typename Iterator< ModifiedString<THost, TSpec> const >::Type > {};
+		Reference< typename Iterator< ModifiedString<THost, TSpec> const, Rooted >::Type > {};
 
 ///.Metafunction.Size.param.T.type:Class.ModifiedString
 
 	template < typename THost, typename TSpec >
 	struct Size< ModifiedString<THost, TSpec> >:
-		Size< typename Iterator< ModifiedString<THost, TSpec> >::Type > {};
+		Size< typename Iterator< ModifiedString<THost, TSpec>, Rooted >::Type > {};
 
 	template < typename THost, typename TSpec >
 	struct Position< ModifiedString<THost, TSpec> >:
-		Position< typename Iterator< ModifiedString<THost, TSpec> >::Type > {};
+		Position< typename Iterator< ModifiedString<THost, TSpec>, Rooted >::Type > {};
 
 	template < typename THost, typename TSpec >
 	struct Difference< ModifiedString<THost, TSpec> >:
-		Difference< typename Iterator< ModifiedString<THost, TSpec> >::Type > {};
+		Difference< typename Iterator< ModifiedString<THost, TSpec>, Rooted >::Type > {};
 
 
 ///.Metafunction.Iterator.param.T.type:Class.ModifiedString

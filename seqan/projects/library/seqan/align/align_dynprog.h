@@ -38,9 +38,9 @@ SEQAN_CHECKPOINT
 	typedef Matrix<TScoreValue, TMatrixSpec> TMatrix;
 
 	typedef typename Size<TMatrix>::Type TSize;
-	typedef typename Iterator<TMatrix>::Type TMatrixIterator;
+	typedef typename Iterator<TMatrix, Standard>::Type TMatrixIterator;
 
-	typedef typename Iterator<TString const>::Type TStringIterator;
+	typedef typename Iterator<TString const, Rooted>::Type TStringIterator;
 	typedef typename Value<TString const>::Type TValue;
 
 	//-------------------------------------------------------------------------
@@ -146,11 +146,11 @@ SEQAN_CHECKPOINT
 
 	typedef Align<TTargetSource, TTargetSpec> TAlign;
 	typedef typename Row<TAlign>::Type TRow;
-	typedef typename Iterator<TRow>::Type TTargetIterator;
+	typedef typename Iterator<TRow, Standard>::Type TTargetIterator;
 	TTargetIterator target_0 = iter(row(target_, 0), pos_0);
 	TTargetIterator target_1 = iter(row(target_, 1), pos_1);
 
-	typedef typename Iterator<TTargetSource>::Type TStringIterator;
+	typedef typename Iterator<TTargetSource, Rooted>::Type TStringIterator;
 	TStringIterator it_0 = iter(str_0, pos_0);
 	TStringIterator it_0_end = end(str_0);
 
@@ -231,9 +231,9 @@ SEQAN_CHECKPOINT
 	typedef Matrix<TScoreValue, TMatrixSpec> TMatrix;
 
 	typedef typename Size<TMatrix>::Type TSize;
-	typedef typename Iterator<TMatrix>::Type TMatrixIterator;
+	typedef typename Iterator<TMatrix, Rooted>::Type TMatrixIterator;
 
-	typedef typename Iterator<TString const>::Type TStringIterator;
+	typedef typename Iterator<TString const, Rooted>::Type TStringIterator;
 	typedef typename Value<TString const>::Type TValue;
 
 	//-------------------------------------------------------------------------

@@ -121,7 +121,7 @@ _makeRefinedGraphEdges(TAlignmentString & alis,
 SEQAN_CHECKPOINT
 	typedef typename Value<TAlignmentString>::Type TAlign;
 	typedef typename Value<TAlign>::Type TValue;
-	typedef typename Iterator<TAlignmentString>::Type TAliIterator;
+	typedef typename Iterator<TAlignmentString, Rooted>::Type TAliIterator;
 	typedef typename VertexDescriptor<TAliGraph>::Type TVertexDescriptor;
 	typedef typename EdgeDescriptor<TAliGraph>::Type TEdgeDescriptor;
 	typedef typename Cargo<TAliGraph>::Type TCargo;

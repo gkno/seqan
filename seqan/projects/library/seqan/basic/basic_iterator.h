@@ -70,6 +70,28 @@ typedef Tag<TagStandard_> const Standard;
 template <typename T>
 struct DefaultIteratorSpec
 {
+	typedef Standard Type;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Metafunction.DefaultGetIteratorSpec:
+..hidefromindex
+..summary:Specifies default kind of iterator returned by functions.
+..signature:DefaultGetIteratorSpec<T>::Type
+..param.T:Container type for which the spec is determined.
+...concept:Concept.Container
+..returns.param.Type:Iterator spec of $T$.
+..remarks:This metafunction returns the iterator spec of iterators that are returned by functions like 
+@Function.begin@, @Function.end@, or @Function.iter@.
+..see:Metafunction.Iterator
+..see:Metafunction.DefaultIteratorSpec
+*/
+
+template <typename T>
+struct DefaultGetIteratorSpec
+{
 	typedef Rooted Type;
 };
 

@@ -307,7 +307,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	// begin
 	//////////////////////////////////////////////////////////////////////////////
 
-	template < typename THost >
+	template < typename THost, typename TTag >
 	inline typename Iterator< ModifiedString<THost, ModReverse> const >::Type 
 	begin(ModifiedString<THost, ModReverse> const & me) {
 		typename Iterator< ModifiedString<THost, ModReverse> const >::Type temp_(end(host(me), Rooted()));

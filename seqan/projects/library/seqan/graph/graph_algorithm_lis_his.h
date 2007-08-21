@@ -86,7 +86,7 @@ longestIncreasingSubsequence(TString const& str, TPositions& pos) {
 	TGraph g;
 
 	// Walk through the sequence and build the decreasing covers
-	typedef typename Iterator<TString const>::Type TStringIter;
+	typedef typename Iterator<TString const, Rooted>::Type TStringIter;
 	TStringIter endIt = end(str);
 	for(TStringIter it = begin(str); it != endIt; ++it) {
 		// Get previous element
@@ -161,7 +161,7 @@ longestCommonSubsequence(TString1 const& str1,
 	typedef String<TPos, Block<> > TPositions;
 	String<TPositions> occ;
 	fill(occ, alphabet_size, TPositions());
-	typedef typename Iterator<TString2 const>::Type TStringIter;
+	typedef typename Iterator<TString2 const, Rooted>::Type TStringIter;
 	TStringIter endIt = end(str2);
 	for(TStringIter it = begin(str2); it != endIt; ++it) {
 		push_back(value(occ, (unsigned int) *it), position(it));
@@ -185,7 +185,7 @@ longestCommonSubsequence(TString1 const& str1,
 	longestIncreasingSubsequence(finalSeq, result);
 
 	// Insert the common pairs
-	typedef typename Iterator<TResult>::Type TResultIter;
+	typedef typename Iterator<TResult, Rooted>::Type TResultIter;
 	TResultIter endResult = end(result);
 	for(TResultIter it = begin(result); it != endResult; ++it) {
 		push_back(pos, std::make_pair(mapping[*it], finalSeq[*it]));
@@ -243,7 +243,7 @@ heaviestIncreasingSubsequence(TString const& str,
 	TGraph g;
 
 	// Walk through the sequence and build the decreasing covers
-	typedef typename Iterator<TString const>::Type TStringIter;
+	typedef typename Iterator<TString const, Rooted>::Type TStringIter;
 	TStringIter endIt = end(str);
 	for(TStringIter it = begin(str); it != endIt; ++it) {
 		TWeight w = getProperty(weights, position(it));
@@ -319,11 +319,11 @@ heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename Size<TStringSet>::Type TSize;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	typedef typename Iterator<TString const>::Type TStringIter;
-	typedef typename Iterator<TString>::Type TSIter;
+	typedef typename Iterator<TString const, Rooted>::Type TStringIter;
+	typedef typename Iterator<TString, Rooted>::Type TSIter;
 	typedef typename Value<TString>::Type TVertexSet;
-	typedef typename Iterator<TVertexSet const>::Type TVertexSetIter;
-	typedef typename Iterator<TVertexSet>::Type TIter;
+	typedef typename Iterator<TVertexSet const, Rooted>::Type TVertexSetIter;
+	typedef typename Iterator<TVertexSet, Rooted>::Type TIter;
 	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
 
 	
@@ -354,7 +354,7 @@ heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	// We do this for every node 0 ... m-1
 	String<TSize> seq;
 	resize(seq, n*m);
-	typedef typename Iterator<String<TSize> >::Type TSeqIter;
+	typedef typename Iterator<String<TSize>, Rooted>::Type TSeqIter;
 	TSeqIter itSeq = begin(seq);
 	for(TSize i=0; i<m;++i) {
 		for(int j=n-1;j>=0;--j) {

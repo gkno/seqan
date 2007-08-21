@@ -59,7 +59,7 @@ namespace seqan{
 	void
 	_resetPerm( TPerm & perm )
 	{
-		typename Iterator< TPerm >::Type permIt = begin( perm );
+		typename Iterator< TPerm, Rooted >::Type permIt = begin( perm );
 		int i = 0;
 		while( permIt != end( perm ) )
 		{
@@ -337,7 +337,7 @@ namespace seqan{
 		}
 		appendValue( dest, _getFrag( *pMeta ) );
 		std::reverse( begin( dest ), end( dest ) );
-		typename Iterator< TDest >::Type destIt = begin( dest );
+//		typename Iterator< TDest >::Type destIt = begin( dest );
 		return chain_score;
 	}
 
@@ -398,8 +398,8 @@ namespace seqan{
 		}
 
 			// traverse the set of fragments
-		typename Iterator< TSource >::Type sourceIt = begin( source );
-		typename Iterator< TMetas >::Type metaIt = begin( metas );
+		typename Iterator< TSource, Rooted >::Type sourceIt = begin( source );
+		typename Iterator< TMetas, Rooted >::Type metaIt = begin( metas );
 		goNext( metaIt );
 		while( sourceIt != end( source ) )
 		{
@@ -461,8 +461,8 @@ namespace seqan{
 		for( SizeType i = 0; i < dim; ++ i )
 			maxCoords[ i ] = 0;
 
-		typename Iterator< TSource >::Type sourceIt = begin( source );
-		typename Iterator< TMetas >::Type metaIt = begin( metas );
+		typename Iterator< TSource, Rooted >::Type sourceIt = begin( source );
+		typename Iterator< TMetas, Rooted >::Type metaIt = begin( metas );
 		goNext( metaIt );
 
 		while( sourceIt != end( source ) )

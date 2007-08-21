@@ -371,13 +371,13 @@ SEQAN_CHECKPOINT
 	typedef typename Value<TSource>::Type TAlphabet;
 	typedef typename Size<TSource>::Type TStringSize;
 	
-	typedef typename Iterator<TSource>::Type TStringIterator;
+	typedef typename Iterator<TSource, Rooted>::Type TStringIterator;
 
 	typedef Align<TSource, TSpec> TAlign;
 	typedef typename Row<TAlign>::Type TRow;
-	typedef typename Iterator<TRow>::Type TTargetIterator;
+	typedef typename Iterator<TRow, Rooted>::Type TTargetIterator;
 
-	typedef typename Iterator<Matrix<TScoreValue> >::Type TMatrixIterator;
+	typedef typename Iterator<Matrix<TScoreValue>, Rooted>::Type TMatrixIterator;
 
 	TTargetIterator target_0,target_1;
 

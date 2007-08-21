@@ -106,8 +106,8 @@ void testAlignColsBase()
 	typename Col<TAlign>::Type const c_col1 = c_cols1[1];
 	typename Col<TAlign const>::Type col2 = cols4[1];
 
-	typedef typename Iterator<TCols>::Type TColsIterator;
-	typedef typename Iterator<TCols const>::Type TConstColsIterator;
+	typedef typename Iterator<TCols, Rooted>::Type TColsIterator;
+	typedef typename Iterator<TCols const, Rooted>::Type TConstColsIterator;
 
 	TColsIterator col_it1 = begin(cols1);  //begin
 	TConstColsIterator const_col_it1 = begin(c_cols1); 

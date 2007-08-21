@@ -202,7 +202,7 @@ void TestGapsIterator()
 	typedef Gaps<TSource, TSpec> TGaps;
 
 
-	typedef typename Iterator<TGaps>::Type TIterator;
+	typedef typename Iterator<TGaps, Rooted>::Type TIterator;
 
 	TSource src1 = "hello";
 	TGaps gaps4(src1);

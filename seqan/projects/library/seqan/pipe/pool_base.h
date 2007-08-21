@@ -899,13 +899,13 @@ namespace SEQAN_NAMESPACE_MAIN
 
     };
 
-    template < typename TValue, typename TSpec >
-	struct Iterator< Pool< TValue, TSpec > const > {
+    template < typename TValue, typename TSpec, typename TIteratorSpec>
+	struct Iterator< Pool< TValue, TSpec > const, TIteratorSpec> {
 		typedef IPipeIterator< Pool< TValue, TSpec > > Type;
 	};
 
-    template < typename TValue, typename TSpec >
-	struct Iterator< Pool< TValue, TSpec > > {
+    template < typename TValue, typename TSpec, typename TIteratorSpec>
+	struct Iterator< Pool< TValue, TSpec >, TIteratorSpec> {
 		typedef OPipeIterator< Pool< TValue, TSpec > > Type;
 	};
 

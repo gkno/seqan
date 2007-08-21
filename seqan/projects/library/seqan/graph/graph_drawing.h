@@ -96,8 +96,8 @@ _createTrieNodeAttributes(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
 		if (!empty(endPositions)) {
 			s <<  " {";
 			append(tmp, "shape = box, ");
-			typename Iterator<String<unsigned int> >::Type itP = begin(endPositions);
-			typename Iterator<String<unsigned int> >::Type beginP = itP;
+			typename Iterator<String<unsigned int>, Rooted>::Type itP = begin(endPositions);
+			typename Iterator<String<unsigned int>, Rooted>::Type beginP = itP;
 			for(;!atEnd(itP);goNext(itP)) {
 				if (beginP != itP) s << ", ";
 				s << *itP;
@@ -342,7 +342,7 @@ _createEdgeAttributes(Graph<Automaton<TAlphabet, TCargo, WordGraph<TSpec> > > co
 		String<char> str;
 		resize(str,length(labelTmp)+1);
 		value(str,0) = label(itEd);
-		typename Iterator<String<TAlphabet> >::Type it = begin(labelTmp);
+		typename Iterator<String<TAlphabet>, Rooted>::Type it = begin(labelTmp);
 		for(;!atEnd(it);++it) {
 			char c = convert<char>(getValue(it));
 			value(str,position(it) + 1) = c;

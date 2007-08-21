@@ -507,7 +507,7 @@ kruskals_algorithm(Graph<TSpec> const& g,
 			assignValue(edges, index, x);
 			assignValue(edges, index+1, y);
 			index = index + 2;
-			typedef typename Iterator<String<TVertexDescriptor> >::Type TStrIterator;
+			typedef typename Iterator<String<TVertexDescriptor>, Rooted>::Type TStrIterator;
 			TStrIterator strIt = begin(property(set,getProperty(id, y)));
 			for(;!atEnd(strIt);goNext(strIt)) {
 				TVertexDescriptor owner = getProperty(id, x);
@@ -656,7 +656,7 @@ dag_shortest_path(Graph<TSpec> const& g,
 	typedef typename EdgeDescriptor<Graph<TSpec> >::Type TEdgeDescriptor;
 	typedef typename Iterator<Graph<TSpec>, EdgeIterator>::Type TEdgeIterator;
 	typedef typename Iterator<Graph<TSpec>, OutEdgeIterator>::Type TOutEdgeIterator;
-	typedef typename Iterator<String<TVertexDescriptor> >::Type TStringIterator;
+	typedef typename Iterator<String<TVertexDescriptor>, Rooted>::Type TStringIterator;
 	
 	// Initialization
 	resizeVertexMap(g,predecessor);
@@ -1171,7 +1171,7 @@ _get_minimum_aug(Graph<TSpec> const& rG,
 				 TVertexDescriptor sink)
 {
 	typedef unsigned int TFlow;
-	typedef typename Iterator<String<TVertexDescriptor> >::Type TIterator;
+	typedef typename Iterator<String<TVertexDescriptor>, Rooted>::Type TIterator;
 	
 	// Build secondary predecessor map just containing the path
 	TVertexDescriptor nilPred = getNilPredecessor(rG);

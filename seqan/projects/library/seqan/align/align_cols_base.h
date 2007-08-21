@@ -165,12 +165,12 @@ struct Iterator<AlignCols<TAlign> const, TIteratorSpec>
 
 template <typename TAlign>
 struct Value<AlignCols<TAlign> >:
-	Iterator<AlignCols<TAlign> >
+	Iterator<AlignCols<TAlign>, Standard >
 {
 };
 template <typename TAlign>
 struct Value<AlignCols<TAlign> const>:
-	Iterator<AlignCols<TAlign> const>
+	Iterator<AlignCols<TAlign> const, Standard>
 {
 };
 
@@ -231,21 +231,23 @@ SEQAN_CHECKPOINT
 
 ///.Function.iter.param.object.type:Class.AlignCols
 
-template <typename TAlign, typename TPosition>
-inline typename Iterator<AlignCols<TAlign> >::Type
+template <typename TAlign, typename TPosition, typename TTag>
+inline typename Iterator<AlignCols<TAlign>, Tag<TTag> const>::Type
 iter(AlignCols<TAlign> & me,
-	 TPosition pos_)
+	 TPosition pos_,
+	 Tag<TTag> const)
 {
 SEQAN_CHECKPOINT
-	return typename Iterator<AlignCols<TAlign> >::Type(host(me), pos_); 
+	return typename Iterator<AlignCols<TAlign>, Tag<TTag> const >::Type(host(me), pos_); 
 }
-template <typename TAlign, typename TPosition>
-inline typename Iterator<AlignCols<TAlign> const>::Type
+template <typename TAlign, typename TPosition, typename TTag>
+inline typename Iterator<AlignCols<TAlign> const, Tag<TTag> const>::Type
 iter(AlignCols<TAlign> const & me,
-	 TPosition pos_)
+	 TPosition pos_,
+	 Tag<TTag> const)
 {
 SEQAN_CHECKPOINT
-	return typename Iterator<AlignCols<TAlign> const>::Type(host(me), pos_); 
+	return typename Iterator<AlignCols<TAlign> const, Tag<TTag> const>::Type(host(me), pos_); 
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -320,19 +322,21 @@ SEQAN_CHECKPOINT
 
 ///.Function.begin.param.object.type:Class.AlignCols
 
-template <typename TAlign>
-inline typename Iterator<AlignCols<TAlign> >::Type
-begin(AlignCols<TAlign> & me)
+template <typename TAlign, typename TTag>
+inline typename Iterator<AlignCols<TAlign>, Tag<TTag> const>::Type
+begin(AlignCols<TAlign> & me,
+	  Tag<TTag> const tag_)
 {
 SEQAN_CHECKPOINT
-	return iter(me, beginPosition(me)); 
+	return iter(me, beginPosition(me), tag_); 
 }
-template <typename TAlign>
-inline typename Iterator<AlignCols<TAlign> const>::Type
-begin(AlignCols<TAlign> const & me)
+template <typename TAlign, typename TTag>
+inline typename Iterator<AlignCols<TAlign> const, Tag<TTag> const>::Type
+begin(AlignCols<TAlign> const & me,
+	  Tag<TTag> const tag_)
 {
 SEQAN_CHECKPOINT
-	return iter(me, beginPosition(me)); 
+	return iter(me, beginPosition(me), tag_); 
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -380,19 +384,21 @@ SEQAN_CHECKPOINT
 
 ///.Function.end.param.object.type:Class.AlignCols
 
-template <typename TAlign>
-inline typename Iterator<AlignCols<TAlign> >::Type
-end(AlignCols<TAlign> & me)
+template <typename TAlign, typename TTag>
+inline typename Iterator<AlignCols<TAlign>, Tag<TTag> const>::Type
+end(AlignCols<TAlign> & me,
+	 Tag<TTag> const tag_)
 {
 SEQAN_CHECKPOINT
-	return iter(me, endPosition(me)); 
+	return iter(me, endPosition(me), tag_); 
 }
-template <typename TAlign>
-inline typename Iterator<AlignCols<TAlign> const>::Type
-end(AlignCols<TAlign> const & me)
+template <typename TAlign, typename TTag>
+inline typename Iterator<AlignCols<TAlign> const, Tag<TTag> const>::Type
+end(AlignCols<TAlign> const & me,
+	 Tag<TTag> const tag_)
 {
 SEQAN_CHECKPOINT
-	return iter(me, endPosition(me)); 
+	return iter(me, endPosition(me), tag_); 
 }
 
 //////////////////////////////////////////////////////////////////////////////

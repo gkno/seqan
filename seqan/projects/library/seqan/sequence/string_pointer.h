@@ -140,11 +140,11 @@ struct IsSequence< TValue const [SIZE] >
 
 
 template <typename T>
-inline typename Iterator<T *, typename DefaultIteratorSpec<T>::Type>::Type 
+inline typename Iterator<T *, typename DefaultGetIteratorSpec<T>::Type>::Type 
 begin(T * me)
 {
 SEQAN_CHECKPOINT
-	return begin(me, typename DefaultIteratorSpec<T>::Type()) ;
+	return begin(me, typename DefaultGetIteratorSpec<T>::Type()) ;
 }
 
 ///.Function.begin.param.object.type:Adaption.char array

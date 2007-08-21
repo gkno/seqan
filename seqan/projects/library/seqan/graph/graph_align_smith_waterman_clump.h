@@ -81,7 +81,7 @@ _localAlignment(TAlign& align,
 	// String of fragments
 	typedef Fragment<> TFragment;
 	typedef String<TFragment, Block<> > TFragmentString;
-	typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
+	typedef typename Iterator<TFragmentString, Rooted>::Type TFragmentStringIter;
 	TFragmentString matches;
 	String<TScoreValue, Block<> > score_values;
 

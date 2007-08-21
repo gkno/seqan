@@ -360,7 +360,7 @@ detach(Align<TSource, TSpec> & me)
 SEQAN_CHECKPOINT
 	typedef Align<TSource, TSpec> TAlign;
 	typedef typename Rows<TAlign>::Type TRows;
-	typedef typename Iterator<TRows>::Type TRowsIterator;
+	typedef typename Iterator<TRows, Standard>::Type TRowsIterator;
 
 	TRowsIterator it = begin(rows(me));
 	TRowsIterator it_end = end(rows(me));
@@ -419,7 +419,7 @@ SEQAN_CHECKPOINT
 			for(unsigned int j = 0;j<leftSpace+2;++j) _streamPut(target, ' ');
 			if ((i % 2)==0) {
 				TRow& row_ = row(source, i/2);
-				typedef typename Iterator<typename Row<TAlign>::Type const>::Type TIter;
+				typedef typename Iterator<typename Row<TAlign>::Type const, Standard>::Type TIter;
 				TIter begin1_ = iter(row_, begin_);
 				TIter end1_ = iter(row_, begin_ + windowSize_);
 				for (; begin1_ != end1_; ++begin1_) {

@@ -131,7 +131,7 @@ _rebuildParentMap(Graph<Tree<TCargo, TSpec> >& g)
 	typedef Graph<Tree<TCargo, TSpec> > TGraph;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	typedef typename Iterator<String<TEdgeStump*> >::Type TIterConst;
+	typedef typename Iterator<String<TEdgeStump*>, Rooted>::Type TIterConst;
 	for(TIterConst it = begin(g.data_vertex);!atEnd(it);goNext(it)) {
 		TVertexDescriptor parent = position(it);
 		TEdgeStump* current = getValue(it);
@@ -155,8 +155,8 @@ _copyGraph(Graph<Tree<TCargo, TSpec> > const& source,
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
-	typedef typename Iterator<String<TEdgeStump*> const>::Type TIterConst;
-	typedef typename Iterator<String<TEdgeStump*> >::Type TIter;
+	typedef typename Iterator<String<TEdgeStump*> const, Rooted>::Type TIterConst;
+	typedef typename Iterator<String<TEdgeStump*>, Rooted>::Type TIter;
 	clear(dest);
 	resize(dest.data_vertex, length(source.data_vertex));
 	resize(dest.data_parent, length(source.data_parent));
@@ -234,7 +234,7 @@ numEdges(Graph<Tree<TCargo, TSpec> > const& g)
 	typedef Graph<Tree<TCargo, TSpec> > TGraph;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
 	typedef typename Size<TGraph>::Type TSize;
-	typedef typename Iterator<String<TEdgeStump*> const>::Type TIterConst;
+	typedef typename Iterator<String<TEdgeStump*> const, Rooted>::Type TIterConst;
 	TSize count=0;
 	for(TIterConst it = begin(g.data_vertex);!atEnd(it);goNext(it)) {
 		TEdgeStump* current = getValue(it);
@@ -277,7 +277,7 @@ clearEdges(Graph<Tree<TCargo, TSpec> >& g)
 	typedef Graph<Tree<TCargo, TSpec> > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
-	typedef typename Iterator<String<TEdgeStump*> >::Type TIter;
+	typedef typename Iterator<String<TEdgeStump*>, Rooted>::Type TIter;
 	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
 	for(TIter it = begin(g.data_vertex);!atEnd(it);goNext(it)) {
 		TEdgeStump* current = getValue(it);
@@ -346,7 +346,7 @@ inDegree(Graph<Tree<TCargo, TSpec> > const& g,
 	typedef Graph<Tree<TCargo, TSpec> > TGraph;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
 	typedef typename Size<TGraph>::Type TSize;
-	typedef typename Iterator<String<TEdgeStump*> const>::Type TIterConst;
+	typedef typename Iterator<String<TEdgeStump*> const, Rooted>::Type TIterConst;
 	TSize count=0;
 	for(TIterConst it = begin(g.data_vertex);!atEnd(it);goNext(it)) {
 		TEdgeStump* current = getValue(it);
@@ -545,7 +545,7 @@ removeInEdges(Graph<Tree<TCargo, TSpec> >& g,
 
 	typedef Graph<Tree<TCargo, TSpec> > TGraph;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
-	typedef typename Iterator<String<TEdgeStump*> >::Type TIter;
+	typedef typename Iterator<String<TEdgeStump*>, Rooted>::Type TIter;
 	for(TIter it = begin(g.data_vertex);!atEnd(it);goNext(it)) {
 		if (!idInUse(g.data_id_managerV, position(it))) continue;
 		TEdgeStump* current = getValue(it);
@@ -582,7 +582,7 @@ sourceVertex(Graph<Tree<TCargo, TSpec> > const& g,
 	SEQAN_CHECKPOINT
 	typedef Graph<Tree<TCargo, TSpec> > TGraph;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
-	typedef typename Iterator<String<TEdgeStump*> const>::Type TIterConst;
+	typedef typename Iterator<String<TEdgeStump*> const, Rooted>::Type TIterConst;
 	for(TIterConst it = begin(g.data_vertex);!atEnd(it);goNext(it)) {
 		TEdgeDescriptor current = getValue(it);
 		while(current!=(TEdgeDescriptor) 0) {
@@ -612,7 +612,7 @@ getAdjacencyMatrix(Graph<Tree<TCargo, TSpec> > const& g,
 	resize(mat);
 	for (TSize i=0;i<len*len;++i) value(mat,i) = 0;
 
-	typedef typename Iterator<String<TEdgeStump*> const>::Type TIterConst;
+	typedef typename Iterator<String<TEdgeStump*> const, Rooted>::Type TIterConst;
 	for(TIterConst it = begin(g.data_vertex);!atEnd(it);goNext(it)) {
 		TVertexDescriptor parentV = position(it);
 		TEdgeStump* current = getValue(it);
@@ -666,7 +666,7 @@ write(TFile & target,
 {
 	typedef Graph<Tree<TCargo, TSpec> > TGraph;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
-	typedef typename Iterator<String<TEdgeStump*> const>::Type TIterConst;
+	typedef typename Iterator<String<TEdgeStump*> const, Rooted>::Type TIterConst;
 	_streamWrite(target,"Adjacency list:\n");
 	for(TIterConst it = begin(g.data_vertex);!atEnd(it);goNext(it)) {
 		if (!idInUse(_getVertexIdManager(g), position(it))) continue;

@@ -49,7 +49,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	struct Pipe< TInput, Source<TSpec> >
     {
 		TInput const &in;
-		typename Iterator<TInput const>::Type cur;
+		typename Iterator<TInput const, Rooted>::Type cur;
 
 		Pipe(typename _RemoveConst<TInput>::Type &_cont):
 			in(_cont) {}
@@ -67,20 +67,20 @@ namespace SEQAN_NAMESPACE_MAIN
         }
     };
 
-    template < typename TInput, typename TSpec >
-	struct Iterator< Pipe< TInput, Source<TSpec> > > {
-		typedef typename Iterator<TInput const>::Type Type;
+    template < typename TInput, typename TSpec, typename TIteratorSpec >
+	struct Iterator< Pipe< TInput, Source<TSpec> >, TIteratorSpec> {
+		typedef typename Iterator<TInput const, TIteratorSpec>::Type Type;
 	};
 
-    template < typename TInput, typename TSpec >
-	inline typename Iterator< Pipe< TInput, Source<TSpec> > >::Type
-	begin(Pipe< TInput, Source<TSpec> > &pipe) {
+    template < typename TInput, typename TSpec, typename TTag >
+	inline typename Iterator< Pipe< TInput, Source<TSpec> >, Tag<TTag> const >::Type
+	begin(Pipe< TInput, Source<TSpec> > &pipe, Tag<TTag> const) {
 		return begin(pipe.in);
 	}
 
-    template < typename TInput, typename TSpec >
-	inline typename Iterator< Pipe< TInput, Source<TSpec> > >::Type
-	end(Pipe< TInput, Source<TSpec> > &pipe) {
+    template < typename TInput, typename TSpec, typename TTag >
+	inline typename Iterator< Pipe< TInput, Source<TSpec> >, Tag<TTag> const >::Type
+	end(Pipe< TInput, Source<TSpec> > &pipe, Tag<TTag> const) {
 		return end(pipe.in);
 	}
 
@@ -103,9 +103,9 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
     };
 
-    template < typename TContainer >
-	struct Iterator< ContainerBuffer<TContainer> >:
-		Iterator<TContainer> {};
+    template < typename TContainer, typename TIteratorSpec >
+	struct Iterator< ContainerBuffer<TContainer>, TIteratorSpec>:
+		Iterator<TContainer, TIteratorSpec> {};
 
     template < typename TContainer  >
 	struct Value< ContainerBuffer<TContainer> >:
@@ -145,9 +145,9 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
     };
 
-    template < typename TIterator >
-	struct Iterator< IteratorBuffer<TIterator> >:
-		Iterator<TIterator> {};
+    template < typename TIterator, typename TIteratorSpec >
+	struct Iterator< IteratorBuffer<TIterator>, TIteratorSpec >:
+		Iterator<TIterator, TIteratorSpec> {};
 
     template < typename TIterator  >
 	struct Value< IteratorBuffer<TIterator> >:
@@ -217,7 +217,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
         typedef SimpleBuffer<TValue>				TBuffer;
 		typedef IPipeIterator<TPipe>				ISource;
-		typedef typename Iterator<TBuffer>::Type	ITarget;
+		typedef typename Iterator<TBuffer, Rooted>::Type	ITarget;
 
 		TPipe		&pipe;
 		size_t		bufferSize;
@@ -276,8 +276,8 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef SimpleBuffer<TValue>				TBuffer;
         typedef Pipe<TSequence, TSpec>				TPipe;
 
-		typedef typename Iterator<TSequence const>::Type	ISource;
-		typedef typename Iterator<TBuffer>::Type			ITarget;
+		typedef typename Iterator<TSequence const, Rooted>::Type	ISource;
+		typedef typename Iterator<TBuffer, Rooted>::Type			ITarget;
 
 		TPipe		&pipe;
 		unsigned	bufferSize;
@@ -369,7 +369,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	
 	template < typename TInput, typename TSpec >
 	inline bool control(Pipe< TInput, Source<TSpec> > &me, ControlEndRead const &) {
-        me.cur = typename Iterator<TInput const>::Type();
+        me.cur = typename Iterator<TInput const, Rooted>::Type();
 		return true;
 	}
 	

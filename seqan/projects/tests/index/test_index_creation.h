@@ -75,7 +75,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	
     template <typename TSequence>
     void printArray(TSequence const &SA) {
-		typedef typename Iterator<TSequence const>::Type TIter;
+		typedef typename Iterator<TSequence const, Standard>::Type TIter;
 		TIter it = begin(SA);
 		TIter itEnd = end(SA);
 		for(; it != itEnd; ++it)
@@ -237,8 +237,8 @@ namespace SEQAN_NAMESPACE_MAIN
     template < typename TLCP, typename TSA, typename TText >
     bool isSortedLCP(TLCP &LCP, TSA &SA, TText const &s) {
         typedef typename Value<TSA>::Type TSize;
-        typedef typename Iterator<TSA>::Type ISA;
-        typedef typename Iterator<TLCP>::Type ILCP;
+        typedef typename Iterator<TSA, Rooted>::Type ISA;
+        typedef typename Iterator<TLCP, Standard>::Type ILCP;
 
         TSize n  = length(s);
         ISA  sa  = begin(SA);
@@ -307,8 +307,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template <typename TA, typename TB>
     bool isEqual(TA &_a, TB &_b) {
-        typedef typename Iterator<TA>::Type IA;
-        typedef typename Iterator<TB>::Type IB;
+        typedef typename Iterator<TA, Standard>::Type IA;
+        typedef typename Iterator<TB, Standard>::Type IB;
 
         IA a = begin(_a), e = end(_a);
         IB b = begin(_b);

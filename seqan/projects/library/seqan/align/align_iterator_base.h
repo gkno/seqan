@@ -34,7 +34,7 @@ class Iter<TAlign, AlignColIterator<TSpec> >
 public:
 	typedef typename Rows<TAlign>::Type TRows;
 	typedef typename Row<TAlign>::Type TRow;
-	typedef typename Iterator<TRow>::Type TRowIterator;
+	typedef typename Iterator<TRow, Standard>::Type TRowIterator;
 	typedef typename Position<TRow>::Type TRowPosition;
 	typedef String<TRowIterator> TIterators;
 
@@ -139,9 +139,9 @@ goNext(Iter<TAlign, AlignColIterator<TSpec> > & me)
 {
 SEQAN_CHECKPOINT
 	typedef typename Row<TAlign>::Type TRow;
-	typedef typename Iterator<TRow>::Type TRowIterator;
+	typedef typename Iterator<TRow, Standard>::Type TRowIterator;
 	typedef String<TRowIterator> TIterators;
-	typedef typename Iterator<TIterators>::Type TIteratorsIterator;
+	typedef typename Iterator<TIterators, Standard>::Type TIteratorsIterator;
 
 	TIteratorsIterator _it = begin(me.data_iterators);
 	TIteratorsIterator _it_end = end(me.data_iterators);
@@ -182,9 +182,9 @@ goPrevious(Iter<TAlign, AlignColIterator<TSpec> > & me)
 {
 SEQAN_CHECKPOINT
 	typedef typename Row<TAlign>::Type TRow;
-	typedef typename Iterator<TRow>::Type TRowIterator;
+	typedef typename Iterator<TRow, Standard>::Type TRowIterator;
 	typedef String<TRowIterator> TIterators;
-	typedef typename Iterator<TIterators>::Type TIteratorsIterator;
+	typedef typename Iterator<TIterators, Standard>::Type TIteratorsIterator;
 
 	TIteratorsIterator _it = begin(me.data_iterators);
 	TIteratorsIterator _it_end = end(me.data_iterators);

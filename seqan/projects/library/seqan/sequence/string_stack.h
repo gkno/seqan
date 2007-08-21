@@ -184,24 +184,9 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 // begin
 //////////////////////////////////////////////////////////////////////////////
-/**
-.Function.begin:
-..cat:Iteration
-..cat:String
-..summary:The begin of a container. 
-..signature:begin(object [, tag])
-..param.object:A container.
-...type:Class.String
-..param.tag:An @Tag.Iterator Spec.iterator spec@ tag that specifies the kind of the iterator returned. (optional)
-...default:Given by @Metafunction.DefaultIteratorSpec@.
-..returns:An iterator to the first item in $object$. 
-$Iterator<T>::Type$ is the type of the iterator for $object$-type $T$.
-..remarks.text:If the container does not contain any items at all, the function may return 0.
-..see:Function.end
-..see:Metafunction.Iterator
-*/
+
 	template<typename TValue, unsigned int SPACE, typename TSpec>
-	inline typename Iterator<String<TValue, Block<SPACE> > >::Type 
+	inline typename Iterator<String<TValue, Block<SPACE> >, Tag<TSpec> const >::Type 
 	begin(String<TValue, Block<SPACE> > &me, Tag<TSpec> const)
 	{
 	SEQAN_CHECKPOINT
@@ -209,7 +194,7 @@ $Iterator<T>::Type$ is the type of the iterator for $object$-type $T$.
 	}
 
 	template<typename TValue, unsigned int SPACE, typename TSpec>
-	inline typename Iterator<String<TValue, Block<SPACE> > const>::Type 
+	inline typename Iterator<String<TValue, Block<SPACE> > const, Tag<TSpec> const>::Type 
 	begin(String<TValue, Block<SPACE> > const &me, Tag<TSpec> const)
 	{
 	SEQAN_CHECKPOINT
@@ -218,7 +203,7 @@ $Iterator<T>::Type$ is the type of the iterator for $object$-type $T$.
 
 
 	template<typename TValue, unsigned int SPACE, typename TSpec>
-	inline typename Iterator<String<TValue, Block<SPACE> > >::Type 
+	inline typename Iterator<String<TValue, Block<SPACE> >, Tag<TSpec> const >::Type 
 	end(String<TValue, Block<SPACE> > &me, Tag<TSpec> const)
 	{
 	SEQAN_CHECKPOINT
@@ -226,7 +211,7 @@ $Iterator<T>::Type$ is the type of the iterator for $object$-type $T$.
 	}
 
 	template<typename TValue, unsigned int SPACE, typename TSpec>
-	inline typename Iterator<String<TValue, Block<SPACE> > const>::Type 
+	inline typename Iterator<String<TValue, Block<SPACE> > const, Tag<TSpec> const>::Type 
 	end(String<TValue, Block<SPACE> > const &me, Tag<TSpec> const)
 	{
 	SEQAN_CHECKPOINT
@@ -287,7 +272,7 @@ $Iterator<T>::Type$ is the type of the iterator for $object$-type $T$.
 	SEQAN_CHECKPOINT
 		typedef String<TValue, Block<SPACE>	>			TBlockString;
 		typedef typename TBlockString::TBlockTable		TBlockTable;
-		typedef typename Iterator<TBlockTable>::Type	TIter;
+		typedef typename Iterator<TBlockTable, Standard>::Type	TIter;
 		
 		TIter it = begin(me.blocks), itEnd = end(me.blocks);
 		while (it != itEnd) {

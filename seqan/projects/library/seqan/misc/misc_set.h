@@ -202,12 +202,12 @@ namespace SEQAN_NAMESPACE_MAIN
 	};
 
 
-	template <typename TObject, typename TSpec>
-	struct Iterator< VectorSet<TObject, TSpec> > {
+	template <typename TObject, typename TSpec, typename TIteratorSpec>
+	struct Iterator< VectorSet<TObject, TSpec>, TIteratorSpec > {
 		typedef Iter<VectorSet<TObject, TSpec>, VectorSetIterator> Type;
 	};
-	template <typename TObject, typename TSpec>
-	struct Iterator< VectorSet<TObject, TSpec> const> {
+	template <typename TObject, typename TSpec, typename TIteratorSpec>
+	struct Iterator< VectorSet<TObject, TSpec> const, TIteratorSpec> {
 		typedef Iter<VectorSet<TObject, TSpec> const, VectorSetIterator> Type;
 	};
 

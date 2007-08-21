@@ -180,7 +180,7 @@ SEQAN_CHECKPOINT
 	typedef typename Position<TMatrix>::Type TMatrixPosition;
 	typedef Iter<TMatrix,PositionIterator> TMatrixIterator;
 
-	typedef typename Iterator<TString const>::Type TStringIterator;
+	typedef typename Iterator<TString const, Rooted>::Type TStringIterator;
 	typedef typename Value<TString const>::Type TValue;
 
 	//-------------------------------------------------------------------------
@@ -291,12 +291,12 @@ SEQAN_CHECKPOINT
 	typedef Iter<typename LocalAlignmentFinder<TScoreValue>::TMatrix, PositionIterator> TMatrixIterator;
 	
 	typedef TSource TString;
-	typedef typename Iterator<TString>::Type TStringIterator;
+	typedef typename Iterator<TString, Rooted>::Type TStringIterator;
 	typedef typename Value<TString>::Type TValue;
 
 	typedef Align<TSource, TSpec> TAlign;
 	typedef typename Row<TAlign>::Type TRow;
-	typedef typename Iterator<TRow>::Type TAlignIterator;
+	typedef typename Iterator<TRow, Rooted>::Type TAlignIterator;
 
 //-------------------------------------------------------------------------
 //variables
@@ -473,7 +473,7 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 //traceback
 template <typename TTargetSource, typename TTargetSpec, typename TScoreValue, typename TSourceSpec>
-typename Iterator<Matrix<TScoreValue, TSourceSpec> >::Type
+typename Iterator<Matrix<TScoreValue, TSourceSpec>, Standard >::Type
 smith_waterman_trace(Align<TTargetSource, TTargetSpec> & target_,
 					 typename LocalAlignmentFinder<TScoreValue>::TBoolMatrix & fb_matrix, 
 					   Iter< Matrix<TScoreValue, TSourceSpec>, PositionIterator > source_,
@@ -490,7 +490,7 @@ SEQAN_CHECKPOINT
 
 	typedef Align<TTargetSource, TTargetSpec> TAlign;
 	typedef typename Row<TAlign>::Type TRow;
-	typedef typename Iterator<TRow>::Type TTargetIterator;
+	typedef typename Iterator<TRow, Rooted>::Type TTargetIterator;
 
 	//-------------------------------------------------------------------------
 	//variables

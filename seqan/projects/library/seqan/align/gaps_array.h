@@ -266,8 +266,8 @@ SEQAN_CHECKPOINT
 	typedef typename Size<TGaps>::Type TSize;
 	typedef String<TSize> const TArr;
 
-	typename Iterator<TArr>::Type arr_begin = begin(_dataArr(gaps));
-	typename Iterator<TArr>::Type arr_end = end(_dataArr(gaps));
+	typename Iterator<TArr, Standard>::Type arr_begin = begin(_dataArr(gaps));
+	typename Iterator<TArr, Standard>::Type arr_end = end(_dataArr(gaps));
 	typename Position<TGaps>::Type view_pos = pos;
 	typename Position<TSource>::Type source_pos = pos;
 	
@@ -299,8 +299,8 @@ SEQAN_CHECKPOINT
 	typedef typename Size<TGaps>::Type TSize;
 	typedef String<TSize> const TArr;
 
-	typename Iterator<TArr>::Type arr_begin = begin(_dataArr(gaps));
-	typename Iterator<TArr>::Type arr_end = end(_dataArr(gaps));
+	typename Iterator<TArr, Standard>::Type arr_begin = begin(_dataArr(gaps));
+	typename Iterator<TArr, Standard>::Type arr_end = end(_dataArr(gaps));
 	typename Position<TSource>::Type source_pos = sourceBeginPosition(gaps);
 	typename Position<TGaps>::Type view_pos = pos;
 	
@@ -326,7 +326,7 @@ SEQAN_CHECKPOINT
 // returns an iterator to view-Position 
 
 template <typename TGaps, typename TPosition>
-inline typename Iterator<TGaps>::Type
+inline typename Iterator<TGaps, Standard>::Type
 _iterator_gaps_array(TGaps & gaps, 
 					 TPosition view_position)
 {
@@ -350,7 +350,7 @@ _iterator_gaps_array(TGaps & gaps,
 			++block;
 			view_pos -= *arr_begin;
 		}
-		return typename Iterator<TGaps>::Type(
+		return typename Iterator<TGaps, Standard>::Type(
 			gaps, 
 			block, 
 			view_pos);
@@ -380,7 +380,7 @@ _iterator_gaps_array(TGaps & gaps,
 			++arr_begin;
 		}
 
-		return typename Iterator<TGaps>::Type(
+		return typename Iterator<TGaps, Standard>::Type(
 			gaps,
             iter(source(gaps), source_pos),
 			block, 
@@ -483,9 +483,9 @@ SEQAN_CHECKPOINT
 		TViewPosition source_pos_left = source_position - sourceBeginPosition(me);
 		TViewPosition gaps_count = 0;
 
-		typename Iterator<TArr>::Type it_arr_begin = begin(_dataArr(me));
-		typename Iterator<TArr>::Type it_arr_end = end(_dataArr(me));
-		typename Iterator<TArr>::Type it_arr = it_arr_begin;
+		typename Iterator<TArr, Standard>::Type it_arr_begin = begin(_dataArr(me));
+		typename Iterator<TArr, Standard>::Type it_arr_end = end(_dataArr(me));
+		typename Iterator<TArr, Standard>::Type it_arr = it_arr_begin;
 
 		while (it_arr != it_arr_end)
 		{
@@ -530,9 +530,9 @@ setSourceEndPosition(Gaps<TSource, ArrayGaps> & me,
 	else if (source_position < old_end_begin_pos)
 	{
 SEQAN_CHECKPOINT
-		typename Iterator<TArr>::Type it_arr_begin = begin(_dataArr(me));
-		typename Iterator<TArr>::Type it_arr_end = end(_dataArr(me));
-		typename Iterator<TArr>::Type it_arr = it_arr_begin;
+		typename Iterator<TArr, Standard>::Type it_arr_begin = begin(_dataArr(me));
+		typename Iterator<TArr, Standard>::Type it_arr_end = end(_dataArr(me));
+		typename Iterator<TArr, Standard>::Type it_arr = it_arr_begin;
 		TViewPosition end_pos = 0;
 		TViewPosition chars_to_scan = source_position - sourceBeginPosition(me);
 
@@ -823,7 +823,7 @@ insertGaps(Iter<TGaps, GapsIterator<TSpec> > const & me,
 
 	TArr & arr = _dataArr(container(me));
 	typename Position<TArr>::Type pos = me.data_block;
-	typename Iterator<TArr>::Type it = iter(arr, pos);
+	typename Iterator<TArr, Rooted>::Type it = iter(arr, pos);
 
 	if (isGap(me))
 	{
@@ -885,7 +885,7 @@ removeGaps(Iter<TGaps, GapsIterator<TSpec> > const & me,
 		TArr & arr = _dataArr(container(me));
 		if (me.data_block < length(arr))
 		{//not trailing gaps
-			typename Iterator<TArr>::Type it = iter(arr, me.data_block);
+			typename Iterator<TArr, Standard>::Type it = iter(arr, me.data_block);
 
 			TGapsSize rest_size = *it - me.data_sub;
 

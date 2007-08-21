@@ -85,7 +85,7 @@ SEQAN_CHECKPOINT
 	typedef Align<TAliSource,TAliSpec> TAlign;
 	typedef typename Row<TAlign>::Type TRow;
 //	typedef typename Iterator<TRow,GapsIterator<ArrayGaps> >::Type TIterator;	
-	typedef typename Iterator<TRow>::Type TIterator;
+	typedef typename Iterator<TRow, Rooted>::Type TIterator;
 	TIterator row0_it, row1_it;
 	row0_it = iter(row(segment,0),toViewPosition(row(segment,0),pos_i));
 	row1_it = iter(row(segment,1),toViewPosition(row(segment,1),pos_j));

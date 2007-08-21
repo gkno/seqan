@@ -137,8 +137,8 @@ SEQAN_CHECKPOINT
 	typedef typename Infix<typename Value<TStringSet>::Type>::Type TSegmentLabel;
 	TSegmentLabel label0 = label(segment,seqs, sequenceId(segment, 0));
 	TSegmentLabel label1 = label(segment,seqs, sequenceId(segment, 1));
-	typename Iterator<TSegmentLabel>::Type label_it0 = begin(label0) + (pos_i - fragmentBegin(segment,sequenceId(segment,0)));
-	typename Iterator<TSegmentLabel>::Type label_it1 = begin(label1) + (pos_j - fragmentBegin(segment,sequenceId(segment,1)));
+	typename Iterator<TSegmentLabel, Rooted>::Type label_it0 = begin(label0) + (pos_i - fragmentBegin(segment,sequenceId(segment,0)));
+	typename Iterator<TSegmentLabel, Rooted>::Type label_it1 = begin(label1) + (pos_j - fragmentBegin(segment,sequenceId(segment,1)));
 	int i = 0;
 	TScoreValue ret_score = 0;
 	while(i < (int) len)

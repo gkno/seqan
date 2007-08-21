@@ -490,7 +490,7 @@ The m-tuples are substrings of the input stream beginning at positions $i$, with
 	length(Pipe< TInput, Multi<Sampler<m, TCompression>, TPair, TLimitsString> > const &me)
 	{
 		typedef typename Size< Pipe< TInput, Multi<Sampler<m, TCompression>, TPair, TLimitsString> > >::Type TSize;
-		typename Iterator<TLimitsString const>::Type it = begin(me.limits), itEnd = end(me.limits);
+		typename Iterator<TLimitsString const, Standard>::Type it = begin(me.limits), itEnd = end(me.limits);
 		
 		if (it == itEnd) return 0;
 

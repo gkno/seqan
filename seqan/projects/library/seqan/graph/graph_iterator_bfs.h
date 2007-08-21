@@ -34,7 +34,7 @@ public:
 
 	void _init() {
 		resizeVertexMap(*data_host,data_tokenMap);
-		typedef typename Iterator<String<bool> >::Type TIter;
+		typedef typename Iterator<String<bool>, Rooted>::Type TIter;
 		TIter it = begin(data_tokenMap);
 		for(;!atEnd(it);goNext(it)) {
 			assignValue(it,false);

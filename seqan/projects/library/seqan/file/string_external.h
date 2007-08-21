@@ -1441,6 +1441,7 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef typename String<TValue, External<TConfig> >::iterator Type;
     };
 
+/*
     template < typename TValue, typename TConfig >
 	struct DefaultIteratorSpec< String<TValue, External<TConfig> > > {
 		typedef Standard Type;
@@ -1450,6 +1451,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	struct DefaultIteratorSpec< String<TValue, External<TConfig> > const > {
 		typedef Standard Type;
 	};
+*/
 
     template < typename TValue, typename TConfig >
 	struct AllowsFastRandomAccess< String<TValue, External<TConfig> > >
@@ -1688,7 +1690,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TSource const &source, 
 		Tag<TExpand> const) 
 	{
-        typedef typename Iterator<TSource const>::Type                          ISource;
+        typedef typename Iterator<TSource const, Standard>::Type                ISource;
         typedef typename String<TValue, External<TConfig> >::VectorFwdIterator  ITarget;
 
         resize(target, length(source));

@@ -120,8 +120,8 @@ _copyGraph(Graph<Undirected<TCargo, TSpec> > const& source,
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
-	typedef typename Iterator<String<TEdgeStump*> const>::Type TIterConst;
-	typedef typename Iterator<String<TEdgeStump*> >::Type TIter;
+	typedef typename Iterator<String<TEdgeStump*> const, Rooted>::Type TIterConst;
+	typedef typename Iterator<String<TEdgeStump*>, Rooted>::Type TIter;
 	clear(dest);
 	resize(dest.data_vertex, length(_getVertexString(source)));
 	TIter itInit = begin(dest.data_vertex);
@@ -232,7 +232,7 @@ clearEdges(Graph<Undirected<TCargo, TSpec> >& g)
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
-	typedef typename Iterator<String<TEdgeStump*> >::Type TIter;
+	typedef typename Iterator<String<TEdgeStump*>, Rooted>::Type TIter;
 
 	// Collect all edges
 	String<TEdgeDescriptor> edges;
@@ -256,7 +256,7 @@ clearEdges(Graph<Undirected<TCargo, TSpec> >& g)
 	SEQAN_TASSERT(numEdges(g) == length(edges))
 
 	// Release all edges
-	typedef typename Iterator<String<TEdgeDescriptor> >::Type TStringIter;
+	typedef typename Iterator<String<TEdgeDescriptor>, Rooted>::Type TStringIter;
 	TStringIter edgeEndIt = end(edges);
 	for(TStringIter edgeIt = begin(edges); edgeIt != edgeEndIt;++edgeIt) {
 		valueDestruct(*edgeIt);
@@ -599,7 +599,7 @@ getAdjacencyMatrix(Graph<Undirected<TCargo, TSpec> > const& g,
 	resize(mat);
 	for (TSize i=0;i<len*len;++i) value(mat,i) = 0;
 
-	typedef typename Iterator<String<TEdgeStump*> const>::Type TIterConst;
+	typedef typename Iterator<String<TEdgeStump*> const, Rooted>::Type TIterConst;
 	for(TIterConst it = begin(g.data_vertex);!atEnd(it);goNext(it)) {
 		TVertexDescriptor sourceV = position(it);
 		TEdgeStump* current = getValue(it);
@@ -659,7 +659,7 @@ write(TFile & target,
 	typedef Graph<Undirected<TCargo, TSpec> > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
-	typedef typename Iterator<String<TEdgeStump*> const>::Type TIterConst;
+	typedef typename Iterator<String<TEdgeStump*> const, Rooted>::Type TIterConst;
 	_streamWrite(target,"Adjacency list:\n");
 	for(TIterConst it = begin(g.data_vertex);!atEnd(it);goNext(it)) {
 		TVertexDescriptor sourceV = position(it);

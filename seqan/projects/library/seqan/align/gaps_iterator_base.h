@@ -32,7 +32,7 @@ template <typename TGaps, typename TSpec>
 struct Source<Iter<TGaps, GapsIterator<TSpec> > >
 {
 	typedef typename Source<TGaps>::Type TSource;
-	typedef typename Iterator<TSource>::Type Type;
+	typedef typename Iterator<TSource, Rooted>::Type Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////

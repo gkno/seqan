@@ -161,7 +161,7 @@ write(TFile & target,
 	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
 
 	_streamWrite(target,"WordGraph - Directed:\n");
-	typedef typename Iterator<String<AutomatonEdgeArray<TEdge, TAlphabet> > const>::Type TIterConst;
+	typedef typename Iterator<String<AutomatonEdgeArray<TEdge, TAlphabet> > const, Rooted>::Type TIterConst;
 	for(TIterConst it = begin(g.data_vertex);!atEnd(it);goNext(it)) {
 		if (!idInUse(g.data_id_managerV, position(it))) continue;
 		TVertexDescriptor sourceVertex = position(it);

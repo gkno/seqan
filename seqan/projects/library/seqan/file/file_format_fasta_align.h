@@ -255,7 +255,7 @@ void _write_impl(TFile& file, Align<TSource, TSpec>& align, TStringContainer& id
 	for(TRowsPosition i=0;i<row_count;++i) {
 		TRow & row_ = row(align, i);	
 	
-		typedef typename Iterator<typename Row<TAlign>::Type const>::Type TIter;
+		typedef typename Iterator<typename Row<TAlign>::Type const, Standard>::Type TIter;
 		TIter begin_ = iter(row_, beginPosition(cols(align)));
 		TIter end_ = iter(row_, endPosition(cols(align)));
 	

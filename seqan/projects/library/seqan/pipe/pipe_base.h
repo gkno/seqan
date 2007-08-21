@@ -513,7 +513,7 @@ SEQAN_CHECKPOINT
                typename TInput,
                typename TSpec >
     inline bool assign(String<TValue, TStringSpec> &dest, Pipe<TInput, TSpec> &src) {
-        typedef typename Iterator< String<TValue, TStringSpec> >::Type TIter;
+        typedef typename Iterator< String<TValue, TStringSpec>, Standard >::Type TIter;
         typename Size< Pipe<TInput, TSpec> >::Type _size = length(src);
         resize(dest, _size);
         if (!beginRead(src)) return false;
@@ -651,7 +651,7 @@ SEQAN_CHECKPOINT
 
 	template <typename TPair, typename TLimits>
 	struct _PairIncrementer {
-		typename Iterator<TLimits const>::Type						it, itEnd;
+		typename Iterator<TLimits const, Standard>::Type			it, itEnd;
 		typename _RemoveConst<typename Value<TLimits>::Type>::Type	old;
 		typename Value<TPair, 2>::Type								localEnd;
 
@@ -715,7 +715,7 @@ SEQAN_CHECKPOINT
 
 	template <typename TPair, typename TLimits, unsigned m = 0>
 	struct _PairDecrementer {
-		typename Iterator<TLimits const>::Type						it, itEnd;
+		typename Iterator<TLimits const, Standard>::Type			it, itEnd;
 		typename _RemoveConst<typename Value<TLimits>::Type>::Type	old;
 
 		TPair		pos;
@@ -770,7 +770,7 @@ SEQAN_CHECKPOINT
 
 	template <typename TPair, typename TLimits>
 	struct _PairDecrementer<TPair, TLimits, 0> {
-		typename Iterator<TLimits const>::Type						it, itEnd;
+		typename Iterator<TLimits const, Standard>::Type			it, itEnd;
 		typename _RemoveConst<typename Value<TLimits>::Type>::Type	old;
 
 		TPair		pos;

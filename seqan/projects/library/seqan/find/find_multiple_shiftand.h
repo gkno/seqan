@@ -132,7 +132,7 @@ void setHost (Pattern<TNeedle, MultipleShiftAnd> & me, TNeedle2 const & needle) 
 		deallocate(me, me.df, me.blockCount);
 	}
 
-	typename Iterator<TNeedle2 const>::Type it = begin(needle);
+	typename Iterator<TNeedle2 const, Rooted>::Type it = begin(needle);
 	me.totalLength = 0;
 	for(;!atEnd(it);goNext(it)) {
 		me.totalLength += length(*it);
@@ -279,7 +279,7 @@ bool _findShiftAnd_SmallNeedle(TFinder & finder, Pattern<TNeedle, MultipleShiftA
 
 		if ((me.prefSufMatch[0] & me.df[0]) != 0) {
 			// Check which pattern has matched
-			typename Iterator<TNeedle>::Type it = begin(value(me.data_needle));
+			typename Iterator<TNeedle, Rooted>::Type it = begin(value(me.data_needle));
 			TWord j = 0;
 			for(;!atEnd(it);goNext(it)) {
 				j += length(*it);
@@ -346,7 +346,7 @@ bool _findShiftAnd_LargeNeedle(TFinder & finder, Pattern<TNeedle, MultipleShiftA
 		}
 		if (match) {
 			// Check which pattern has matched
-			typename Iterator<TNeedle>::Type it = begin(value(me.data_needle));
+			typename Iterator<TNeedle, Rooted>::Type it = begin(value(me.data_needle));
 			TWord j = 0;
 			for(;!atEnd(it);goNext(it)) {
 				j += length(*it);

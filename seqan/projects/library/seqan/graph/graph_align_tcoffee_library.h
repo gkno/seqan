@@ -38,7 +38,7 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	// String of fragments to combine all pairwise alignments into a multiple alignment
 	typedef Fragment<> TFragment;
 	typedef String<TFragment, Block<> > TFragmentString;
-	typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
+	typedef typename Iterator<TFragmentString, Rooted>::Type TFragmentStringIter;
 	TFragmentString matches;
 
 	for(TSize i=0; i<nseq-2; ++i) {
@@ -149,7 +149,7 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	// String of fragments to combine all pairwise alignments into a multiple alignment
 	typedef Fragment<> TFragment;
 	typedef String<TFragment, Block<> > TFragmentString;
-	typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
+	typedef typename Iterator<TFragmentString, Rooted>::Type TFragmentStringIter;
 	TFragmentString matches;
 
 	for(TSize i=0; i<nseq-2; ++i) {
@@ -236,7 +236,7 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	// String of fragments to combine all pairwise alignments into a multiple alignment
 	typedef Fragment<> TFragment;
 	typedef String<TFragment, Block<> > TFragmentString;
-	typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
+	typedef typename Iterator<TFragmentString, Rooted>::Type TFragmentStringIter;
 	TFragmentString matches;
 	String<TScoreValue, Block<> > score_values;
 
@@ -311,7 +311,7 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	// String of fragments to combine all pairwise alignments into a multiple alignment
 	typedef Fragment<> TFragment;
 	typedef String<TFragment, Block<> > TFragmentString;
-	typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
+	typedef typename Iterator<TFragmentString, Rooted>::Type TFragmentStringIter;
 	TFragmentString matches;
 
 	// All pairwise alignments

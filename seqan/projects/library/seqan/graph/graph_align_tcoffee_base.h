@@ -92,7 +92,7 @@ combineGraphs(Graph<Alignment<TStringSet, TCargo, TSpec> >& outGraph,
 	// All the matches with score values
 	typedef Fragment<> TFragment;
 	typedef String<TFragment, Block<> > TFragmentString;
-	typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
+	typedef typename Iterator<TFragmentString, Rooted>::Type TFragmentStringIter;
 	TFragmentString matches;
 	String<TCargo, Block<> > score_values;
 
@@ -255,8 +255,8 @@ tripletLibraryExtension(Graph<Alignment<TStringSet, TCargo, TSpec> >& g)
 	clear(newCargoMap);
 	
 	// Finally add the new edges created by the triplet approach
-	typedef typename Iterator<TVertexString>::Type TVertexStringIter;
-	typedef typename Iterator<TCargoString>::Type TCargoStringIter;
+	typedef typename Iterator<TVertexString, Rooted>::Type TVertexStringIter;
+	typedef typename Iterator<TCargoString, Rooted>::Type TCargoStringIter;
 	TVertexStringIter endIt = end(edges_vertices);
 	TVertexStringIter itV = begin(edges_vertices);
 	TCargoStringIter itC = begin(edges_cargo);
@@ -304,7 +304,7 @@ sumOfPairsScore(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 		TOutEdgeIterator itEdge(g, *it);
 		TSize count = 0;
 		for(;!atEnd(itEdge);++itEdge) {
-			typedef typename Iterator<TInfix>::Type TInfixIter;
+			typedef typename Iterator<TInfix, Rooted>::Type TInfixIter;
 			TInfix inf1 = label(g,sourceVertex(itEdge));
 			TInfix inf2 = label(g,targetVertex(itEdge));
 			TInfixIter sIt1 = begin(inf1);

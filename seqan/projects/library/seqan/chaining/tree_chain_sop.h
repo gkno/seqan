@@ -51,7 +51,7 @@ namespace seqan
 			// meta information
 		String< _MetaFragment< FragType > > meta_inf;
 		reserve( meta_inf, length( source ) + 2 );
-		typename Iterator< String< _MetaFragment< FragType > > >::Type metaIt = begin( meta_inf );
+//		typename Iterator< String< _MetaFragment< FragType > > >::Type metaIt = begin( meta_inf );
 		
 			// wrapper points for the line sweep paradigma
 		std::vector< _WrapperPoint< FragType > > points;
@@ -105,7 +105,7 @@ namespace seqan
 		while( pointIt != points.end() )
 		{
 			_MetaFragment< FragType > & meta = _meta( *pointIt );
-			typename Iterator< String< RangeTree< _ChainPoint< FragType, SpecType >, SkipListStatic, RT< MaxTree< > >, TStructuring > * > >::Type treeIt = begin( trees );
+			typename Iterator< String< RangeTree< _ChainPoint< FragType, SpecType >, SkipListStatic, RT< MaxTree< > >, TStructuring > * >, Rooted >::Type treeIt = begin( trees );
 	
 				// actual point is the beginning of a frag
 				// => search for preceding fragment

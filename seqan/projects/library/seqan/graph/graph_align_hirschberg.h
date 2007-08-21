@@ -114,7 +114,7 @@ _align_hirschberg(TTrace& trace,
 	typedef String<TScoreValue> TColumn;
 	typedef typename Iterator<TTrace, Standard>::Type TTraceIter;
 	typedef typename Value<TStringSet const>::Type TString;
-	typedef typename Iterator<TString const>::Type TStringIter;
+	typedef typename Iterator<TString const, Standard>::Type TStringIter;
 	typedef typename Size<TString>::Type TSize;
 	typedef typename Value<TString>::Type TCharacter;
 	typedef Byte TTraceValue;   //Do not use Value<TTrace>::Type because these are positions, e.g., unsigned int

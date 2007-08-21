@@ -31,7 +31,7 @@ getSequenceSimilarity(TAlignmentGraph& g,
 	typedef typename Iterator<TAlignmentGraph, EdgeIterator>::Type TEdgeIterator;
 	TEdgeIterator it(g);
 	for(;!atEnd(it);++it) {
-		typedef typename Iterator<TInfix>::Type TInfixIter;
+		typedef typename Iterator<TInfix, Rooted>::Type TInfixIter;
 		TInfix inf1 = label(g,sourceVertex(it));
 		TInfix inf2 = label(g,targetVertex(it));
 		TInfixIter sIt1 = begin(inf1);
@@ -69,7 +69,7 @@ getSequenceSimilarity(TAlignmentGraph& g,
 	fill(sim, numSeqs * numSeqs, 0);
 
 	typedef typename Iterator<TAlignmentGraph, EdgeIterator>::Type TEdgeIterator;
-	typedef typename Iterator<TInfix>::Type TInfixIter;
+	typedef typename Iterator<TInfix, Rooted>::Type TInfixIter;
 	TEdgeIterator it(g);
 	for(;!atEnd(it);++it) {
 		TVertexDescriptor sV = sourceVertex(it);
@@ -143,7 +143,7 @@ getSequenceSimilarity(TFragmentMatches& matches,
 	TSize len1 = length(str[0]);
 	TSize len2 = length(str[1]);
 
-	typedef typename Iterator<TInfix>::Type TInfixIter;
+	typedef typename Iterator<TInfix, Rooted>::Type TInfixIter;
 	for(TSize i = from;i<to;++i) {
 		TInfix inf1 = label(matches[i], str, sequenceId(matches[i], 0));
 		TInfix inf2 = label(matches[i], str, sequenceId(matches[i], 1));

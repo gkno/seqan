@@ -168,7 +168,7 @@ _createAcTrie(Pattern<TNeedle, AhoCorasick> & me)
 			String<unsigned int> endPositions = getProperty(me.data_terminalStateMap, getProperty(me.data_supplyMap, *it));
 			if (!empty(endPositions)) {
 				String<unsigned int> endPositionsCurrent = getProperty(me.data_terminalStateMap, *it);
-				typedef typename Iterator<String<unsigned int> >::Type TStringIterator;
+				typedef typename Iterator<String<unsigned int>, Rooted >::Type TStringIterator;
 				TStringIterator sit = begin(endPositions);
 				for(;!atEnd(sit);goNext(sit)) {
 					appendValue(endPositionsCurrent, *sit);

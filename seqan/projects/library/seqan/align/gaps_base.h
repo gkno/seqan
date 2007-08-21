@@ -197,14 +197,14 @@ struct GetValue<Gaps<TSource, TSpec> const>:
 template <typename TSource, typename TSpec>
 struct Reference<Gaps<TSource, TSpec> >
 {
-	typedef typename Iterator<Gaps<TSource, TSpec> >::Type TIterator;
+	typedef typename Iterator<Gaps<TSource, TSpec>, Standard>::Type TIterator;
 	typedef Proxy<IteratorProxy<TIterator> > Type;
 };
 
 template <typename TSource, typename TSpec>
 struct Reference<Gaps<TSource, TSpec> const>
 {
-	typedef typename Iterator<Gaps<TSource, TSpec> const>::Type TIterator;
+	typedef typename Iterator<Gaps<TSource, TSpec> const, Standard>::Type TIterator;
 	typedef Proxy<IteratorProxy<TIterator> > Type;
 };
 
@@ -309,12 +309,12 @@ SEQAN_CHECKPOINT
 	return iter(source(me), sourceBeginPosition(me), tag_);
 }
 template <typename TSource, typename TSpec>
-inline typename Iterator<TSource>::Type 
+inline typename Iterator<TSource, typename DefaultGetIteratorSpec<TSource>::Type>::Type 
 sourceBegin(Gaps<TSource, TSpec> const & me)
 {
 SEQAN_CHECKPOINT
-	typedef typename DefaultIteratorSpec<TSource>::Type TDefaultIteratorSpec;
-	return iter(source(me), sourceBeginPosition(me), TDefaultIteratorSpec());
+	typedef typename DefaultGetIteratorSpec<TSource>::Type TDefaultGetIteratorSpec;
+	return iter(source(me), sourceBeginPosition(me), TDefaultGetIteratorSpec());
 }
 
 
@@ -343,12 +343,12 @@ SEQAN_CHECKPOINT
 	return iter(source(me), sourceEndPosition(me), tag_);
 }
 template <typename TSource, typename TSpec>
-inline typename Iterator<TSource>::Type 
+inline typename Iterator<TSource, typename DefaultGetIteratorSpec<TSource>::Type>::Type 
 sourceEnd(Gaps<TSource, TSpec> const & me)
 {
 SEQAN_CHECKPOINT
-	typedef typename DefaultIteratorSpec<TSource>::Type TDefaultIteratorSpec;
-	return iter(source(me), sourceEndPosition(me), TDefaultIteratorSpec());
+	typedef typename DefaultGetIteratorSpec<TSource>::Type TDefaultGetIteratorSpec;
+	return iter(source(me), sourceEndPosition(me), TDefaultGetIteratorSpec());
 }
 
 

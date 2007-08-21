@@ -46,7 +46,7 @@ _refine(TValue node_i,
 {
 SEQAN_CHECKPOINT
 	typedef typename Cargo<typename Value<TPropertyMap>::Type>::Type TAlignmentPointer;
-	typedef typename Iterator<String<TAlignmentPointer> >::Type TSegmentIterator;
+	typedef typename Iterator<String<TAlignmentPointer>, Rooted>::Type TSegmentIterator;
 	//find all segment matches that contain the current position (node_i)
 	String<TAlignmentPointer> relevant_segments;
 	TValue seq_i_pos = idToPosition(seqs,seq_i_id);
@@ -228,7 +228,7 @@ _makeRefinedGraphEdges(TAlignmentString & alis,
 SEQAN_CHECKPOINT
 	typedef typename Value<TAlignmentString>::Type TAlign;
 	typedef typename Size<TAlign>::Type TValue;
-	typedef typename Iterator<TAlignmentString>::Type TAliIterator;
+	typedef typename Iterator<TAlignmentString, Rooted>::Type TAliIterator;
 	typedef typename VertexDescriptor<TAliGraph>::Type TVertexDescriptor;
 	typedef typename EdgeDescriptor<TAliGraph>::Type TEdgeDescriptor;
 	typedef typename Cargo<TAliGraph>::Type TCargo;
@@ -381,7 +381,7 @@ SEQAN_CHECKPOINT
 	////////////////////////////////////////////////////////////////
 	//typedefs
 	typedef typename Value<TAlignmentString>::Type TAlign;
-	typedef typename Iterator<TAlignmentString>::Type TAliIterator;
+	typedef typename Iterator<TAlignmentString, Rooted>::Type TAliIterator;
 	typedef typename Size<TAlign>::Type TValue;
 	typedef TValue TCargo;
 	typedef IntervalAndCargo<int,TCargo> TInterval;

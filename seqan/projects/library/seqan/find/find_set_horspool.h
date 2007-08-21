@@ -131,7 +131,7 @@ void setHost (Pattern<TNeedle, SetHorspool> & me, TNeedle2 const & needle) {
 	TSize alphabet_size = ValueSize<TAlphabet>::VALUE;
 	resize(me.data_dMap, alphabet_size);
 	me.data_lmin = getInfinity<TSize>();
-	typename Iterator<TNeedle2 const>::Type it = begin(needle);
+	typename Iterator<TNeedle2 const, Rooted>::Type it = begin(needle);
 	for(;!atEnd(it);goNext(it)) {
 		TSize tmp = length(*it);
 		if (tmp<me.data_lmin) me.data_lmin = tmp;

@@ -1276,7 +1276,7 @@ namespace SEQAN_NAMESPACE_MAIN
 					appendValue(dest.ids, id);
 			} else {
 				typedef String<TId> TIdString;
-				typedef typename Iterator<TIdString>::Type TIter;
+				typedef typename Iterator<TIdString, Rooted>::Type TIter;
 				TIter it = begin(source.ids);
 				for(;!atEnd(it);goNext(it)) {
 					if (*it == id) {
@@ -1395,35 +1395,35 @@ namespace SEQAN_NAMESPACE_MAIN
 // begin
 
 	template < typename TStringSet, typename TSpec >
-	inline typename Iterator< ConcatenatorNto1<TStringSet const> >::Type
+	inline typename Iterator< ConcatenatorNto1<TStringSet const>, Tag<TSpec> const >::Type
 	begin(ConcatenatorNto1<TStringSet const> concat, Tag<TSpec> const)
 	{
-		return typename Iterator< ConcatenatorNto1<TStringSet const> >::Type (*concat.set);
+		return typename Iterator< ConcatenatorNto1<TStringSet const>, Tag<TSpec> const >::Type (*concat.set);
 	}
 
 	template < typename TStringSet, typename TSpec >
-	inline typename Iterator< ConcatenatorNto1<TStringSet> >::Type
+	inline typename Iterator< ConcatenatorNto1<TStringSet>, Tag<TSpec> const >::Type
 	begin(ConcatenatorNto1<TStringSet> concat, Tag<TSpec> const)
 	{
-		return typename Iterator< ConcatenatorNto1<TStringSet> >::Type (*concat.set);
+		return typename Iterator< ConcatenatorNto1<TStringSet>, Tag<TSpec> const >::Type (*concat.set);
 	}
 
 //////////////////////////////////////////////////////////////////////////////
 // end
 
 	template < typename TStringSet, typename TSpec >
-	inline typename Iterator< ConcatenatorNto1<TStringSet const> >::Type
+	inline typename Iterator< ConcatenatorNto1<TStringSet const>, Tag<TSpec> const >::Type
 	end(ConcatenatorNto1<TStringSet const> concat, Tag<TSpec> const)
 	{
-		return typename Iterator< ConcatenatorNto1<TStringSet> >::Type 
+		return typename Iterator< ConcatenatorNto1<TStringSet>, Tag<TSpec> const >::Type 
 			(*concat.set, length(*concat.set), 0);
 	}
 
 	template < typename TStringSet, typename TSpec >
-	inline typename Iterator< ConcatenatorNto1<TStringSet> >::Type
+	inline typename Iterator< ConcatenatorNto1<TStringSet>, Tag<TSpec> const >::Type
 	end(ConcatenatorNto1<TStringSet> concat, Tag<TSpec> const)
 	{
-		return typename Iterator< ConcatenatorNto1<TStringSet> >::Type 
+		return typename Iterator< ConcatenatorNto1<TStringSet>, Tag<TSpec> const >::Type 
 			(*concat.set, length(*concat.set), 0);
 	}
 
@@ -1583,12 +1583,12 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <typename TStringSet >
     struct Iterator< ConcatenatorNto1<TStringSet> const, Standard > {
-		typedef typename Iterator< ConcatenatorNto1<TStringSet> >::Type Type;
+		typedef typename Iterator< ConcatenatorNto1<TStringSet>, Standard >::Type Type;
     };
 
     template <typename TStringSet >
     struct Iterator< ConcatenatorNto1<TStringSet> const, Rooted > {
-		typedef typename Iterator< ConcatenatorNto1<TStringSet> >::Type Type;
+		typedef typename Iterator< ConcatenatorNto1<TStringSet>, Rooted >::Type Type;
     };
 
 	//////////////////////////////////////////////////////////////////////////////

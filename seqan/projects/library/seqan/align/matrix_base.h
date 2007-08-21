@@ -280,35 +280,35 @@ coordinate(Matrix<TValue, TSpec> & me,
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TValue, typename TSpec, typename TTag>
-inline typename Iterator<Matrix <TValue, TSpec> >::Type
+inline typename Iterator<Matrix <TValue, TSpec>, Tag<TTag> const>::Type
 begin(Matrix<TValue, TSpec> & me,
 	  Tag<TTag> const)
 {
-	return typename Iterator<Matrix <TValue, TSpec> >::Type(me, 0);
+	return typename Iterator<Matrix <TValue, TSpec>, Tag<TTag> const >::Type(me, 0);
 }
 template <typename TValue, typename TSpec, typename TTag>
-inline typename Iterator<Matrix <TValue, TSpec> >::Type
+inline typename Iterator<Matrix <TValue, TSpec> const, Tag<TTag> const>::Type
 begin(Matrix<TValue, TSpec> const & me,
 	  Tag<TTag> const)
 {
-	return typename Iterator<Matrix <TValue, TSpec> >::Type(me, 0);
+	return typename Iterator<Matrix <TValue, TSpec>, Tag<TTag> const >::Type(me, 0);
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TValue, typename TSpec, typename TTag>
-inline typename Iterator<Matrix <TValue, TSpec> >::Type
+inline typename Iterator<Matrix <TValue, TSpec>, Tag<TTag> const >::Type
 end(Matrix<TValue, TSpec> & me,
 	  Tag<TTag> const)
 {
-	return typename Iterator<Matrix <TValue, TSpec> >::Type(me, length(host(me)));
+	return typename Iterator<Matrix <TValue, TSpec>, Tag<TTag> const >::Type(me, length(host(me)));
 }
 template <typename TValue, typename TSpec, typename TTag>
-inline typename Iterator<Matrix <TValue, TSpec> >::Type
+inline typename Iterator<Matrix <TValue, TSpec> const, Tag<TTag> const >::Type
 end(Matrix<TValue, TSpec> const & me,
 	  Tag<TTag> const)
 {
-	return typename Iterator<Matrix <TValue, TSpec> >::Type(me, length(host(me)));
+	return typename Iterator<Matrix <TValue, TSpec>, Tag<TTag> const >::Type(me, length(host(me)));
 }
 
 //////////////////////////////////////////////////////////////////////////////
