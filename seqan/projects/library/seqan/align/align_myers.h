@@ -352,7 +352,7 @@ the Algorithm proposed by Hirschberg to compute Sequence Alignments with linear 
 template <typename TSource, typename TSpec, typename TScoreValue>
 TScoreValue
 hirschberg_myers(Align<TSource, TSpec> & align_,
-				Score<TScoreValue, Simple> const & score_)
+				Score<TScoreValue, Simple> const &)
 {
 SEQAN_CHECKPOINT
 	
@@ -407,9 +407,9 @@ SEQAN_CHECKPOINT
 	resize(c_score,len_x + 1);
 	
 	// scoring-scheme specific score values
-	TScoreValue score_match = scoreMatch(score_);
-	TScoreValue score_mismatch = scoreMismatch(score_);
-	TScoreValue score_gap = scoreGapExtend(score_);
+	TScoreValue score_match = 0;
+	TScoreValue score_mismatch = -1;
+	TScoreValue score_gap = -1;
 
 	// additional vars
 	int i;
