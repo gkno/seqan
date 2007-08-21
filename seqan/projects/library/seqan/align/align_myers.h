@@ -151,7 +151,7 @@ as proposed by Hyrroe to compute edit distance. To compute a complete Alignment 
 template <typename TSource, typename TSpec, typename TScoreValue>
 TScoreValue
 align_myers(Align<TSource, TSpec> & align_,
-				Score<TScoreValue, Simple> const & score_)
+				Score<TScoreValue, Simple> const &)
 {
 	clearGaps(row(align_,0));
 	clearGaps(row(align_,1));
