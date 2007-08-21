@@ -40,6 +40,13 @@ struct DefaultFinder<Index<TText, Index_QGram<TSpecShape> > >
     typedef HashLookup Type;
 };
 
+//////////////////////////////////////////////////////////////////////////////
+// Position Spec for Index Finder
+template <typename TIndex>
+struct Position< Finder<TIndex, HashLookup> > {
+	typedef typename SAValue<TIndex>::Type Type;
+};
+
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -74,148 +81,162 @@ public:
 	{
 		clear(*this);
 	}
+};
+
+//____________________________________________________________________________
+template <typename TIndex>
+inline typename _Parameter<TIndex>::Type 
+host(Finder<TIndex, HashLookup> & me)
+{
+SEQAN_CHECKPOINT
+	return value(me.index);
+}
+
+template <typename TIndex>
+inline typename _Parameter<TIndex>::Type 
+host(Finder<TIndex, HashLookup> const & me)
+{
+SEQAN_CHECKPOINT
+	return value(me.index);
+}
+
+template <typename TIndex>
+inline typename _Parameter<TIndex>::Type 
+container(Finder<TIndex, HashLookup> & me)
+{
+SEQAN_CHECKPOINT
+	return value(me.index);
+}
+
+template <typename TIndex>
+inline typename _Parameter<TIndex>::Type 
+container(Finder<TIndex, HashLookup> const & me)
+{
+SEQAN_CHECKPOINT
+	return value(me.index);
+}
+
+//____________________________________________________________________________
+
+template <typename TIndex>
+inline void
+setHost(Finder<TIndex, HashLookup> & me, typename _Parameter<TIndex>::Type container_)
+{
+SEQAN_CHECKPOINT
+	me.index = container;
+}
+
+template <typename TIndex>
+inline void
+setContainer(Finder<TIndex, HashLookup> & me, typename _Parameter<TIndex>::Type container_)
+{
+SEQAN_CHECKPOINT
+	me.index = container;
+}
+
+//____________________________________________________________________________
+
+template <typename TIndex>
+inline typename Iterator< typename Fibre<TIndex, QGram_SA>::Type const, Standard >::Type &
+hostIterator(Finder<TIndex, HashLookup> & me)
+{
+SEQAN_CHECKPOINT
+	return me.data_iterator;
+}
+
+template <typename TIndex>
+inline typename Iterator< typename Fibre<TIndex, QGram_SA>::Type const, Standard >::Type const &
+hostIterator(Finder<TIndex, HashLookup> const & me)
+{
+SEQAN_CHECKPOINT
+	return me.data_iterator;
+}
 
 
 //____________________________________________________________________________
 
-	friend inline typename _Parameter<TIndex>::Type 
-	host(Finder & me)
-	{
+template <typename TIndex>
+inline bool
+empty(Finder<TIndex, HashLookup> & me)
+{
 SEQAN_CHECKPOINT
-		return value(me.index);
-	}
+	return me.range.i1 == me.range.i2;
+}
 
-	friend inline typename _Parameter<TIndex>::Type 
-	host(Finder const & me)
-	{
+template <typename TIndex>
+inline void
+clear(Finder<TIndex, HashLookup> & me)
+{
 SEQAN_CHECKPOINT
-		return value(me.index);
-	}
-
-	friend inline typename _Parameter<TIndex>::Type 
-	container(Finder & me)
-	{
-SEQAN_CHECKPOINT
-		return value(me.index);
-	}
-
-	friend inline typename _Parameter<TIndex>::Type 
-	container(Finder const & me)
-	{
-SEQAN_CHECKPOINT
-		return value(me.index);
-	}
+	typedef typename Iterator< typename Fibre<TIndex, QGram_SA>::Type const, Standard >::Type TIterator;
+	me.range.i1 = me.range.i2 = TIterator();
+}
 
 //____________________________________________________________________________
 
-	friend inline void
-	setHost(Finder & me, typename _Parameter<TIndex>::Type container_)
-	{
+template <typename TIndex>
+inline bool
+atBegin(Finder<TIndex, HashLookup> & me)
+{
 SEQAN_CHECKPOINT
-		me.index = container;
-	}
+	return (empty(me) || hostIterator(me) == me.range.i1);
+}
 
-	friend inline void
-	setContainer(Finder & me, typename _Parameter<TIndex>::Type container_)
-	{
+template <typename TIndex>
+inline bool
+atEnd(Finder<TIndex, HashLookup> & me)
+{
 SEQAN_CHECKPOINT
-		me.index = container;
-	}
+	return (empty(me) || hostIterator(me) == me.range.i2);
+}
 
 //____________________________________________________________________________
 
-	friend inline TIterator &
-	hostIterator(Finder & me)
-	{
+template <typename TIndex>
+inline void
+goBegin(Finder<TIndex, HashLookup> & me)
+{
 SEQAN_CHECKPOINT
-		return me.data_iterator;
-	}
+	hostIterator(me) = me.range.i1;
+}
 
-	friend inline TIterator const &
-	hostIterator(Finder const & me)
-	{
+template <typename TIndex>
+inline void
+goEnd(Finder<TIndex, HashLookup> & me)
+{
 SEQAN_CHECKPOINT
-		return me.data_iterator;
-	}
-
-
-//____________________________________________________________________________
-
-	friend inline bool
-	empty(Finder & me)
-	{
-SEQAN_CHECKPOINT
-		return me.range.i1 == me.range.i2;
-	}
-
-	friend inline void
-	clear(Finder & me)
-	{
-SEQAN_CHECKPOINT
-		me.range.i1 = me.range.i2 = TIterator();
-	}
-
-//____________________________________________________________________________
-
-	friend inline bool
-	atBegin(Finder & me)
-	{
-SEQAN_CHECKPOINT
-		return (empty(me) || hostIterator(me) == me.range.i1);
-	}
-
-	friend inline bool
-	atEnd(Finder & me)
-	{
-SEQAN_CHECKPOINT
-		return (empty(me) || hostIterator(me) == me.range.i2);
-	}
-
-//____________________________________________________________________________
-
-	friend inline void
-	goBegin(Finder & me)
-	{
-SEQAN_CHECKPOINT
-		hostIterator(me) = me.range.i1;
-	}
-
-	friend inline void
-	goEnd(Finder & me)
-	{
-SEQAN_CHECKPOINT
-		hostIterator(me) = me.range.i2;
-	}
+	hostIterator(me) = me.range.i2;
+}
 
 //____________________________________________________________________________
 /*
-	template <typename TPosition>
-	friend inline void 
-	setPosition(Finder & me, TPosition pos_)
-	{
+template <typename TPosition>
+friend inline void 
+setPosition(Finder & me, TPosition pos_)
+{
 SEQAN_CHECKPOINT
-		hostIterator(me) = me.range.i1 + pos_;
-	}
+	hostIterator(me) = me.range.i1 + pos_;
+}
 */
 //____________________________________________________________________________
 
-	friend inline typename Position<Finder>::Type
-	position(Finder & me)
-	{
+template <typename TIndex>
+inline typename Position<Finder<TIndex, HashLookup> >::Type
+position(Finder<TIndex, HashLookup> & me)
+{
 SEQAN_CHECKPOINT
-		if (empty(me)) return 0;
-		return *me.data_iterator;
-	}
+	SEQAN_ASSERT(!empty(me))
+	return *me.data_iterator;
+}
 
-	friend inline typename Position<Finder>::Type
-	position(Finder const & me)
-	{
+template <typename TIndex>
+inline typename Position<Finder<TIndex, HashLookup> >::Type
+position(Finder<TIndex, HashLookup> const & me)
+{
 SEQAN_CHECKPOINT
-		if (empty(me)) return 0;
-		return hostIterator(me) - begin(container(me), Rooted());
-	}
-
-};
+	SEQAN_ASSERT(!empty(me))
+	return hostIterator(me) - begin(container(me), Rooted());
+}
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -281,7 +302,6 @@ find(Finder<Index<TText, Index_QGram<TSpecShape> >, TSpecFinder> & finder)
 	++hostIterator(finder);
 	return !atEnd(finder);
 }
-
 
 //////////////////////////////////////////////////////////////////////////////
 
