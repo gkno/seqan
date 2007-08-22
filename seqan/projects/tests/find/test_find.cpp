@@ -666,7 +666,7 @@ void Test_OnlineAlgWildcards()
 	SEQAN_TASSERT(length(pos) == 3);
 
 //____________________________________________________________________________
-// Test - handle \ 
+// Test - handle backslash
 	haystack = "annual_Annual_.nnual";
 	setHost(finder, haystack);
 	clear(finder);
