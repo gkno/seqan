@@ -100,56 +100,114 @@ namespace SEQAN_NAMESPACE_MAIN
 ..remarks:If $TNeedle$ is a set of strings, then $position(pattern)$ returns the index of the currently matching needle.
 */
 
-	template < typename TNeedle, typename TSpec = typename DefaultPattern<TNeedle>::Type >
-	class Pattern
-	{
-	private:
-		Holder<TNeedle> data_host;
+template < typename TNeedle, typename TSpec = typename DefaultPattern<TNeedle>::Type >
+class Pattern;
 
-	public:
+//default implementation
+template < typename TNeedle >
+class Pattern<TNeedle, void>
+{
+public:
+	typedef typename Position<TNeedle>::Type TNeedlePosition;
 
-		Pattern() {}
+	Holder<TNeedle> data_host;
+	TNeedlePosition data_begin_position;
+	TNeedlePosition data_end_position;
 
-		template <typename _TNeedle>
-		Pattern(_TNeedle & ndl):
-			data_host(ndl) {}
+	Pattern() {}
 
-		template <typename _TNeedle>
-		Pattern(_TNeedle const & ndl):
-			data_host(ndl) {}
+	template <typename _TNeedle>
+	Pattern(_TNeedle & ndl):
+		data_host(ndl) {}
 
-		friend inline typename Host<Pattern>::Type & 
-		host(Pattern &me) { 
-			return value(me.data_host);
-		}
+	template <typename _TNeedle>
+	Pattern(_TNeedle const & ndl):
+		data_host(ndl) {}
 
-		friend inline typename Host<Pattern>::Type const & 
-		host(Pattern const & me) {
-			return value(me.data_host);
-		}
+};
+//////////////////////////////////////////////////////////////////////////////
 
-		friend inline void
-		setHost(Pattern &me, TNeedle const & ndl) {
-			me.data_host = ndl;
-		}
+template <typename TNeedle, typename TSpec>
+inline Holder<TNeedle> & 
+_dataHost(Pattern<TNeedle, TSpec> & me) 
+{ 
+	return me.data_host;
+}
+template <typename TNeedle, typename TSpec>
+inline Holder<TNeedle> & 
+_dataHost(Pattern<TNeedle, TSpec> const & me) 
+{
+	return const_cast<Holder<TNeedle> &>(me.data_host);
+}
 
-		friend inline void
-		setHost(Pattern &me, TNeedle & ndl) {
-			me.data_host = ndl;
-		}
-	};
+//host access: see basic_host.h
 
-	template < typename TObject >
-	inline typename Needle<TObject>::Type &
-	needle(TObject &obj) {
-		return obj;
-	}
+//////////////////////////////////////////////////////////////////////////////
 
-	template < typename TObject >
-	inline typename Needle<TObject const>::Type &
-	needle(TObject const &obj) {
-		return obj;
-	}
+template <typename TNeedle, typename TSpec>
+inline typename Position<Pattern<TNeedle, TSpec> >::Type & 
+beginPosition(Pattern<TNeedle, TSpec> & me) 
+{
+	return me.data_begin_position;
+}
+template <typename TNeedle, typename TSpec>
+inline typename Position<Pattern<TNeedle, TSpec> const >::Type & 
+beginPosition(Pattern<TNeedle, TSpec> const & me) 
+{
+	return me.data_begin_position;
+}
+
+
+template <typename TNeedle, typename TSpec, typename TPosition>
+inline void
+setBeginPosition(Pattern<TNeedle, TSpec> & me, 
+				 TPosition _pos) 
+{
+	me.data_begin_position = _pos;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TNeedle, typename TSpec>
+inline typename Position<Pattern<TNeedle, TSpec> >::Type & 
+endPosition(Pattern<TNeedle, TSpec> & me) 
+{
+	return me.data_end_position;
+}
+template <typename TNeedle, typename TSpec>
+inline typename Position<Pattern<TNeedle, TSpec> const >::Type & 
+endPosition(Pattern<TNeedle, TSpec> const & me) 
+{
+	return me.data_end_position;
+}
+
+template <typename TNeedle, typename TSpec, typename TPosition>
+inline void
+setEndPosition(Pattern<TNeedle, TSpec> & me, 
+			   TPosition _pos) 
+{
+	me.data_end_position = _pos;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TNeedle, typename TSpec>
+inline typename Infix<TNeedle>::Type 
+segment(Pattern<TNeedle, TSpec> & me) 
+{
+	typedef typename Infix<TNeedle>::Type TInfix;
+	return TInfix(host(me), me.data_begin_position, me.data_end_position);
+}
+template <typename TNeedle, typename TSpec>
+inline typename Infix<TNeedle>::Type 
+segment(Pattern<TNeedle, TSpec> const & me) 
+{
+	typedef typename Infix<TNeedle>::Type TInfix;
+	return TInfix(host(me), me.data_begin_position, me.data_end_position);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 
 /**
 .Function.needle:
@@ -162,21 +220,36 @@ namespace SEQAN_NAMESPACE_MAIN
 ..remarks:The result type is @Metafunction.Needle@$<TPattern>::Type$ for pattern of type $TPattern$.
 */
 
+template < typename TObject >
+inline typename Needle<TObject>::Type &
+needle(TObject &obj) 
+{
+	return obj;
+}
+
+template < typename TObject >
+inline typename Needle<TObject const>::Type &
+needle(TObject const &obj) 
+{
+	return obj;
+}
+
+
 ///.Function.position.param.iterator.type:Class.Pattern
 
-	template < typename TNeedle, typename TSpec >
-	inline typename Needle< Pattern<TNeedle, TSpec> >::Type &
-	needle(Pattern<TNeedle, TSpec> & obj) 
-	{
-		return host(obj);
-	}
+template < typename TNeedle, typename TSpec >
+inline typename Needle< Pattern<TNeedle, TSpec> >::Type &
+needle(Pattern<TNeedle, TSpec> & obj) 
+{
+	return host(obj);
+}
 
-	template < typename TNeedle, typename TSpec >
-	inline typename Needle< Pattern<TNeedle, TSpec> const>::Type &
-	needle(Pattern<TNeedle, TSpec> const & obj) 
-	{
-		return host(obj);
-	}
+template < typename TNeedle, typename TSpec >
+inline typename Needle< Pattern<TNeedle, TSpec> const>::Type &
+needle(Pattern<TNeedle, TSpec> const & obj) 
+{
+	return host(obj);
+}
 
 /**
 .Function.setNeedle:
