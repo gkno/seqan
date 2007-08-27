@@ -81,8 +81,8 @@ void _printMask(String <unsigned int> const &  mask,unsigned int line,String <ch
 {
 	unsigned int len = length(mask);
 	std::cout << name << " " << line << "   ";
-	for(int j=0;j<len;++j) {
-		for(int bit_pos=0;bit_pos<BitsPerValue<unsigned int>::VALUE;++bit_pos) {
+	for(unsigned int j=0;j<len;++j) {
+		for(unsigned int bit_pos=0;bit_pos<BitsPerValue<unsigned int>::VALUE;++bit_pos) {
 			std::cout << ((mask[j] & (1<<(bit_pos % BitsPerValue<unsigned int>::VALUE))) !=0);
 		}
 		std::cout << " ";
@@ -96,7 +96,7 @@ void _printMask(String <unsigned int> const &  mask,unsigned int line,String <ch
 bool _isInt(String<char> const & number)
 {
 	unsigned int len = length(number);
-	for(int i = 0;i < len;++i){
+	for(unsigned int i = 0;i < len;++i){
 		if(!(convert<unsigned int>(getValue(number,i)) <= 57 && convert<unsigned int>(getValue(number,i)) >= 47))
 			return false;
 	}
@@ -316,7 +316,7 @@ SEQAN_CHECKPOINT
 		if (convert<char>(getValue(needle,j)) == '+'){
 SEQAN_CHECKPOINT
 			TWord len = length(last_char);
-			for (int k = 0; k < len; ++k)
+			for (unsigned int k = 0; k < len; ++k)
 				me.s_table[me.blockCount*last_char[k] + i / BitsPerValue<TWord>::VALUE] |= (1<<(i%BitsPerValue<TWord>::VALUE));
 		} 
 		else if (convert<char>(getValue(needle,j)) == '?'){
@@ -326,7 +326,7 @@ SEQAN_CHECKPOINT
 		else if (convert<char>(getValue(needle,j)) == '*'){
 SEQAN_CHECKPOINT
 			TWord len = length(last_char);
-			for (int k = 0; k < len; ++k)
+			for (unsigned int k = 0; k < len; ++k)
 				me.s_table[me.blockCount*last_char[k] + i / BitsPerValue<TWord>::VALUE] |= (1<<(i%BitsPerValue<TWord>::VALUE));
 			me.a_table[i / BitsPerValue<TWord>::VALUE] |= (1<<(i%BitsPerValue<TWord>::VALUE));
 		}
@@ -341,7 +341,7 @@ SEQAN_CHECKPOINT
 			
 			/* add class to the mask */
 			++i;
-			for (int k = 0; k < len; ++k){
+			for (unsigned int k = 0; k < len; ++k){
 SEQAN_CHECKPOINT
 				me.table[me.blockCount*last_char[k] + i / BitsPerValue<TWord>::VALUE] |= (1<<(i%BitsPerValue<TWord>::VALUE));
 			}
@@ -351,7 +351,7 @@ SEQAN_CHECKPOINT
 SEQAN_CHECKPOINT
 			clear(last_char);
 			++i;
-			for(int l = 0;l < ValueSize<TValue>::VALUE;++l){
+			for(unsigned int l = 0;l < ValueSize<TValue>::VALUE;++l){
 				append(last_char,l);
 				me.table[me.blockCount*l + i / BitsPerValue<TWord>::VALUE] |= (1<<(i%BitsPerValue<TWord>::VALUE));
 			}
@@ -395,7 +395,7 @@ SEQAN_CHECKPOINT
 			while(r < n){ // add n normal characters
 SEQAN_CHECKPOINT
 				++i;
-				for (int k = 0; k < len; ++k){
+				for (unsigned int k = 0; k < len; ++k){
 					me.table[me.blockCount*last_char[k] + i / BitsPerValue<TWord>::VALUE] |= (1<<(i%BitsPerValue<TWord>::VALUE));
 				}
 				++r;
@@ -405,7 +405,7 @@ SEQAN_CHECKPOINT
 SEQAN_CHECKPOINT
 				// add m - n charaters and make them optional
 				++i;
-				for (int k = 0; k < len; ++k){
+				for (unsigned int k = 0; k < len; ++k){
 SEQAN_CHECKPOINT
 					me.table[me.blockCount*last_char[k] + i / BitsPerValue<TWord>::VALUE] |= (1<<(i%BitsPerValue<TWord>::VALUE));
 				}
@@ -432,7 +432,7 @@ SEQAN_CHECKPOINT
 	clear(me.f_table);
 	fill(me.f_table,me.blockCount,0,Exact());
 
-	for (int i = 0; i < me.character_count; ++i){
+	for (unsigned int i = 0; i < me.character_count; ++i){
 SEQAN_CHECKPOINT
 		if ((me.a_table[i / BitsPerValue<TWord>::VALUE] & (1 << (i % BitsPerValue<TWord>::VALUE))) != 0){
 SEQAN_CHECKPOINT
@@ -453,7 +453,7 @@ SEQAN_CHECKPOINT
 			else{
 SEQAN_CHECKPOINT
 				TWord curBlock = i / BitsPerValue<TWord>::VALUE;
-				for (int k = 0; k < me.blockCount; ++k){
+				for (unsigned int k = 0; k < me.blockCount; ++k){
 SEQAN_CHECKPOINT
 					if(k != curBlock)
 						me.f_table[i / BitsPerValue<TWord>::VALUE] &= ~0;
@@ -491,7 +491,7 @@ SEQAN_CHECKPOINT
 	for(unsigned int i=0;i<ValueSize<TValue>::VALUE;++i) {
 		if (((i<97) && (4 < i) ) || (i>122)) continue;
 		std::cout << static_cast<TValue>(i) << ": ";
-		for(int j=0;j<me.blockCount;++j) {
+		for(unsigned int j=0;j<me.blockCount;++j) {
 			for(int bit_pos=0;bit_pos<BitsPerValue<unsigned int>::VALUE;++bit_pos) {
 				std::cout << ((me.table[me.blockCount*i+j] & (1<<(bit_pos % BitsPerValue<unsigned int>::VALUE))) !=0);
 			}
@@ -588,8 +588,9 @@ template <typename TFinder, typename TNeedle>
 inline bool _findShiftAnd_LargeNeedle(TFinder & finder, Pattern<TNeedle, WildShiftAnd> & me) {
 SEQAN_CHECKPOINT
 	typedef unsigned int TWord;
-	
+	const TWord all1 = ~0;	
 	TWord compare = (1 << ((me.character_count-1) % BitsPerValue<TWord>::VALUE));
+
 	while (!atEnd(finder)) {
 SEQAN_CHECKPOINT
 		TWord pos = convert<TWord>(*finder);
@@ -604,7 +605,7 @@ SEQAN_CHECKPOINT
 			
 			me.df[block] = me.prefSufMatch[block] | me.f_table[block];
 			TWord Z = me.df[block] - me.i_table[block] - wc_carry;
-			wc_carry = ((me.df[block] < Z) || (me.i_table[block]==~0 && wc_carry)) ? 1 : 0;
+			wc_carry = ((me.df[block] < Z) || (me.i_table[block]==all1 && wc_carry)) ? 1 : 0;
 			me.prefSufMatch[block] |= (me.a_table[block] & (~Z ^ me.df[block]));
 		}
 
