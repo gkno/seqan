@@ -142,6 +142,22 @@ _dataHost(Pattern<TNeedle, TSpec> const & me)
 
 //host access: see basic_host.h
 
+
+//???TODO: Diese Funktion entfernen! (sobald setHost bei anderen pattern nicht mehr eine Art "assignHost" ist)
+template <typename TNeedle, typename TSpec, typename TNeedle2>
+inline void 
+setHost(Pattern<TNeedle, TSpec> & me,
+		TNeedle2 const & ndl) 
+{ 
+	 me.data_host = ndl; //assign => Pattern haelt eine Kopie => doof!
+}
+template <typename TNeedle, typename TSpec, typename TNeedle2>
+inline void 
+setHost(Pattern<TNeedle, TSpec> & me,
+		TNeedle2 & ndl) 
+{ 
+	 me.data_host = ndl; //assign => Pattern haelt eine Kopie => doof!
+}
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TNeedle, typename TSpec>

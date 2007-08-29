@@ -35,6 +35,8 @@ namespace SEQAN_NAMESPACE_MAIN
 ..summary:Standard library string class.
 */
 
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 ///.Metafunction.Value.param.T.type:Adaption.std::basic_string
@@ -71,27 +73,27 @@ template <typename TChar, typename TCharTraits, typename TAlloc>
 struct Iterator< ::std::basic_string<TChar, TCharTraits, TAlloc>, Rooted>
 {
 	typedef ::std::basic_string<TChar, TCharTraits, TAlloc> TString;
-	typedef typename TString::iterator TIterator;
+	typedef Iter<TString, StdIteratorAdaptor> TIterator;
 	typedef Iter<TString, AdaptorIterator<TIterator> > Type;
 };
 template <typename TChar, typename TCharTraits, typename TAlloc>
 struct Iterator< ::std::basic_string<TChar, TCharTraits, TAlloc> const, Rooted>
 {
 	typedef ::std::basic_string<TChar, TCharTraits, TAlloc> const TString;
-	typedef typename TString::const_iterator TIterator;
+	typedef Iter<TString, StdIteratorAdaptor> TIterator;
 	typedef Iter<TString, AdaptorIterator<TIterator> > Type;
 };
 
-//TODO: Replace this by a special iterator adaptor
+
 template <typename TChar, typename TCharTraits, typename TAlloc>
-struct Iterator< ::std::basic_string<TChar, TCharTraits, TAlloc>, Standard>
+struct Iterator< ::std::basic_string<TChar, TCharTraits, TAlloc>, Standard >
 {
-	typedef typename ::std::basic_string<TChar, TCharTraits, TAlloc>::iterator Type;
+	typedef Iter< ::std::basic_string<TChar, TCharTraits, TAlloc>, StdIteratorAdaptor > Type;
 };
 template <typename TChar, typename TCharTraits, typename TAlloc>
 struct Iterator< ::std::basic_string<TChar, TCharTraits, TAlloc> const, Standard>
 {
-	typedef typename ::std::basic_string<TChar, TCharTraits, TAlloc>::const_iterator Type;
+	typedef Iter< ::std::basic_string<TChar, TCharTraits, TAlloc> const, StdIteratorAdaptor > Type;
 };
 
 //____________________________________________________________________________
@@ -142,7 +144,7 @@ begin(::std::basic_string<TChar, TCharTraits, TAlloc> & me,
 	  Standard)
 {
 SEQAN_CHECKPOINT
-	return me.begin();
+	return typename Iterator< ::std::basic_string<TChar, TCharTraits, TAlloc>, Standard>::Type(me.begin());
 }
 template <typename TChar, typename TCharTraits, typename TAlloc>
 inline typename Iterator< ::std::basic_string<TChar, TCharTraits, TAlloc> const, Standard>::Type 
@@ -150,7 +152,7 @@ begin(::std::basic_string<TChar, TCharTraits, TAlloc> const & me,
 	  Standard)
 {
 SEQAN_CHECKPOINT
-	return me.begin();
+	return typename Iterator< ::std::basic_string<TChar, TCharTraits, TAlloc> const, Standard>::Type(me.begin());
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -163,7 +165,7 @@ end(::std::basic_string<TChar, TCharTraits, TAlloc> & me,
 	Standard)
 {
 SEQAN_CHECKPOINT
-	return me.end();
+	return typename Iterator< ::std::basic_string<TChar, TCharTraits, TAlloc>, Standard>::Type(me.end());
 }
 template <typename TChar, typename TCharTraits, typename TAlloc>
 inline typename Iterator< ::std::basic_string<TChar, TCharTraits, TAlloc> const, Standard>::Type 
@@ -171,7 +173,7 @@ end(::std::basic_string<TChar, TCharTraits, TAlloc> const & me,
 	Standard)
 {
 SEQAN_CHECKPOINT
-	return me.end();
+	return typename Iterator< ::std::basic_string<TChar, TCharTraits, TAlloc> const, Standard>::Type(me.end());
 }
 
 //////////////////////////////////////////////////////////////////////////////

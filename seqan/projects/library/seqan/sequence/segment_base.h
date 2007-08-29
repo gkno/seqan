@@ -138,7 +138,7 @@ struct Iterator<Segment<THost, TSpec>, Standard>:
 };
 template <typename THost, typename TSpec>
 struct Iterator<Segment<THost, TSpec> const, Standard>:
-	Iterator<THost const, Standard>
+	Iterator<THost, Standard>
 {
 };
 

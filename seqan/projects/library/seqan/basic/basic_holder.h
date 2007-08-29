@@ -483,7 +483,6 @@ SEQAN_CHECKPOINT
 	return _toParameter<THolderType>(me.data_value);
 }
 
-
 //////////////////////////////////////////////////////////////////////////////
 
 ///.Function.assignValue.param.object.type:Class.Holder

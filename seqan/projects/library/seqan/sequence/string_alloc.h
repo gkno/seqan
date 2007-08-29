@@ -348,7 +348,7 @@ struct IsContiguous< String<TValue, Alloc<TSpec> > >
 //////////////////////////////////////////////////////////////////////////////
 
 //???TODO
-
+/*
 template <typename TTargetValue, typename TSourceValue, typename TSpec>
 inline void 
 move(String<TTargetValue, Alloc<TSpec> > & target, 
@@ -356,7 +356,7 @@ move(String<TTargetValue, Alloc<TSpec> > & target,
 {
 	_moveContiguous(target, source);
 }
-
+*/
 
 //////////////////////////////////////////////////////////////////////////////
 
