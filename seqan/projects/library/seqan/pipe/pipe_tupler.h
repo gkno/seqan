@@ -126,7 +126,10 @@ namespace SEQAN_NAMESPACE_MAIN
             unsigned i;
             for(i = 0; i < tupleLen && !eof(in); ++i, ++in)
                 tmp.i2.i[i] = *in;
-			lastTuples = eof(in)? 0: _TuplerLastTuples<Pipe>::VALUE;
+			if (_TuplerLastTuples<Pipe>::VALUE > tupleLen - i)
+				lastTuples = _TuplerLastTuples<Pipe>::VALUE - (tupleLen - i);
+			else
+				lastTuples = 0;
             for(; i < tupleLen; ++i)
                 tmp.i2.i[i] = TValue();
             tmp.i1 = 0;
@@ -168,7 +171,10 @@ namespace SEQAN_NAMESPACE_MAIN
                 tmp.i2 <<= 1;
                 tmp.i2 |= *in;
 			}
-			lastTuples = eof(in)? 0: _TuplerLastTuples<Pipe>::VALUE;
+			if (_TuplerLastTuples<Pipe>::VALUE > tupleLen - i)
+				lastTuples = _TuplerLastTuples<Pipe>::VALUE - (tupleLen - i);
+			else
+				lastTuples = 0;
             tmp.i2 <<= (tupleLen - i);
             tmp.i1 = 0;
         }
@@ -387,7 +393,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline bool 
 	control(
 		Pipe< TInput, Tupler< tupleLen, omitLast, TCompression > > &me, 
-		ControlEof const &command) 
+		ControlEof const &)
 	{
 		return me.lastTuples == 0;
     }
@@ -405,6 +411,15 @@ namespace SEQAN_NAMESPACE_MAIN
 		ControlEof const &) 
 	{
 		return me.lastTuples == 0;
+	}
+
+    template < typename TInput, unsigned tupleLen, bool omitLast, typename TCompression >
+	inline bool 
+	control(
+		Pipe< TInput, Tupler< tupleLen, omitLast, TCompression > > &me, 
+		ControlEos const &) 
+	{
+		return control(me, ControlEof());
 	}
 
     template < 

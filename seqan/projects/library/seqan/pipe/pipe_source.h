@@ -378,6 +378,11 @@ namespace SEQAN_NAMESPACE_MAIN
 		return me.cur == end(me.in);
 	}
 
+	template < typename TInput, typename TSpec >
+	inline bool control(Pipe< TInput, Source<TSpec> > &me, ControlEos const &) {
+		return control(me, ControlEof());
+	}
+
     template < typename TInput, typename TSpec >
     inline typename Size< Pipe< TInput, Source<TSpec> > >::Type
 	length(Pipe< TInput, Source<TSpec> > const &me) {

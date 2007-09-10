@@ -1074,6 +1074,11 @@ namespace SEQAN_NAMESPACE_MAIN
 	    }
     	
 		template < typename TValue, typename TSpec >
+	    inline bool control(Pool< TValue, TSpec > &me, ControlEos const &) {
+		    return me.eof();
+	    }
+    	
+		template < typename TValue, typename TSpec >
 	    inline bool control(Pool< TValue, TSpec > &me, ControlClear const &) {
 		    me.clear();
 		    return true;

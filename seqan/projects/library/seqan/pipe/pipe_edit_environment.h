@@ -27,14 +27,7 @@ namespace SEQAN_NAMESPACE_MAIN
 //namespace SEQAN_NAMESPACE_PIPELINING
 //{
 
-	struct _HammingDistance;
-	struct _LevenshteinDistance;
-
-	typedef Tag<_HammingDistance>		HammingDistance;
-	typedef Tag<_LevenshteinDistance>	LevenshteinDistance;
-	typedef Tag<_LevenshteinDistance>	EditDistance;
-
-    template < typename TDistanceSpec >
+    template < typename TDistanceSpec, unsigned STEP_SIZE = 1 >
     struct EditEnvironment;
 
 /**
@@ -55,8 +48,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
     //////////////////////////////////////////////////////////////////////////////
     // pipe to enumerate the hamming 1-environment
-    template < typename TInput >
-    struct Pipe< TInput, EditEnvironment< Tag<_HammingDistance> > >
+    template < typename TInput, unsigned STEP_SIZE >
+    struct Pipe< TInput, EditEnvironment< Tag<_HammingDistance>, STEP_SIZE > >
     {
 		typedef typename Value< typename Value<TInput>::Type, 2 >::Type	TTuple;
 		typedef typename Value<TTuple>::Type							TValue;
@@ -90,6 +83,8 @@ namespace SEQAN_NAMESPACE_MAIN
 						// next tuple
 						errorPos = 0;
 						++in;
+						for(unsigned i = 1; i < STEP_SIZE && !eof(in); ++i)
+							++in;
 						if (!eof(in)) {
 							tmp = orig = *in;
 							assignValueAt(tmp.i2, 0, (TValue) 0);
@@ -106,13 +101,13 @@ namespace SEQAN_NAMESPACE_MAIN
 
     //////////////////////////////////////////////////////////////////////////////
     // pipe to enumerate the levenshtein 1-environment
-    template < typename TInput >
-    struct Pipe< TInput, EditEnvironment< Tag<_LevenshteinDistance> > >
+    template < typename TInput, unsigned STEP_SIZE >
+    struct Pipe< TInput, EditEnvironment< Tag<_LevenshteinDistance>, STEP_SIZE > >
     {
 		typedef typename Value< typename Value<TInput>::Type, 2 >::Type	TTuple;
 		typedef typename Value<TTuple>::Type							TValue;
 
-		enum TState { _SUBST, _DELETE, _INSERT, _INSERT_LAST, _EOF };
+		enum TState { _SUBST, _DELETE, _INSERT, _INSERT_LAST, _EOF, _INSERT_EOS };
 
         TInput                      &in;
         typename Value<Pipe>::Type	tmp, orig, prev;
@@ -148,6 +143,8 @@ namespace SEQAN_NAMESPACE_MAIN
 							// NEXT TUPLE
 							// now (tmp == orig) holds
 							++in;
+							for(unsigned i = 1; i < STEP_SIZE && !eof(in); ++i)
+								++in;
 							if (!eos(in)) {
 								prev = orig;
 								orig = *in;
@@ -189,6 +186,9 @@ namespace SEQAN_NAMESPACE_MAIN
 					//::std::cerr << ::std::endl << "_INSERTS______" << ::std::endl;
 				}
 				break;
+
+			case _INSERT_EOS:
+				state = _INSERT;
 			case _INSERT:
 			case _INSERT_LAST:
 				// before _INSERT (prev=orig, ++in; tmp=prev) holds
@@ -217,7 +217,7 @@ namespace SEQAN_NAMESPACE_MAIN
 							shiftRight(tmp.i2);
 							assignValueAt(tmp.i2, 1, (TValue) 0);
 							errorPos = 0;
-							state = _INSERT;
+							state = _INSERT_EOS;
 							//::std::cerr << ::std::endl << "_INSERTS______" << ::std::endl;
 						}
 						break;
@@ -233,10 +233,10 @@ namespace SEQAN_NAMESPACE_MAIN
 
     //////////////////////////////////////////////////////////////////////////////
     // global pipe functions
-    template < typename TInput >
+    template < typename TInput, unsigned STEP_SIZE >
 	inline bool 
 	control(
-		Pipe< TInput, EditEnvironment< Tag<_HammingDistance> > > &me, 
+		Pipe< TInput, EditEnvironment< Tag<_HammingDistance>, STEP_SIZE > > &me, 
 		ControlBeginRead const &command) 
 	{
         if (!control(me.in, command)) return false;
@@ -248,10 +248,10 @@ namespace SEQAN_NAMESPACE_MAIN
 		return true;
 	}
     
-    template < typename TInput >
+    template < typename TInput, unsigned STEP_SIZE >
 	inline bool 
 	control(
-		Pipe< TInput, EditEnvironment< Tag<_LevenshteinDistance> > > &me, 
+		Pipe< TInput, EditEnvironment< Tag<_LevenshteinDistance>, STEP_SIZE > > &me, 
 		ControlBeginRead const &command) 
 	{
         if (!control(me.in, command)) return false;
@@ -277,36 +277,52 @@ namespace SEQAN_NAMESPACE_MAIN
 		return true;
 	}
     
-    template < typename TInput >
+    template < typename TInput, unsigned STEP_SIZE >
 	inline bool 
 	control(
-		Pipe< TInput, EditEnvironment< Tag<_LevenshteinDistance> > > &me, 
+		Pipe< TInput, EditEnvironment< Tag<_LevenshteinDistance>, STEP_SIZE > > &me, 
 		ControlEof const &command) 
 	{
 		return me.state == me._EOF;
     }
 
-    template < typename TInput >
-    inline typename Size< Pipe< TInput, Pipe< TInput, EditEnvironment< Tag<_HammingDistance> > > > >::Type
-    length(Pipe< TInput, EditEnvironment< Tag<_HammingDistance> > > const &me) {
-		typedef typename Value< typename Value<TInput>::Type, 2 >::Type TTuple;
-		unsigned alphabetSize = ValueSize< typename Value<TTuple>::Type >::VALUE;
-		return length(me.in) * (1 + length(me.tmp.i2) * (alphabetSize - 1));
+    template < typename TInput, unsigned STEP_SIZE >
+	inline bool 
+	control(
+		Pipe< TInput, EditEnvironment< Tag<_LevenshteinDistance>, STEP_SIZE > > &me, 
+		ControlEos const &command) 
+	{
+		return me.state == me._EOF || me.state == me.INSERT_EOS;
     }
 
-    template < typename TInput >
-    inline typename Size< Pipe< TInput, Pipe< TInput, EditEnvironment< Tag<_LevenshteinDistance> > > > >::Type
-    length(Pipe< TInput, EditEnvironment< Tag<_LevenshteinDistance> > > const &me) {
+    template < typename TInput, unsigned STEP_SIZE >
+    inline typename Size< Pipe< TInput, Pipe< TInput, EditEnvironment< Tag<_HammingDistance>, STEP_SIZE > > > >::Type
+    length(Pipe< TInput, EditEnvironment< Tag<_HammingDistance>, STEP_SIZE > > const &me) {
+		typedef typename Value< typename Value<TInput>::Type, 2 >::Type TTuple;
+		typedef typename Size< Pipe< TInput, Pipe< TInput, EditEnvironment< Tag<_HammingDistance>, STEP_SIZE > > > >::Type TSize;
+
+		unsigned alphabetSize = ValueSize< typename Value<TTuple>::Type >::VALUE;
+		unsigned seqs = countSequences(me.in);
+		TSize sum = 0;
+/*		for(unsigned i = 0; i < seqs; ++i)
+			sum += (length((*me.in.in.in.in.set)[i]) / STEP_SIZE) * (1 + length(me.tmp.i2) * (alphabetSize - 1));
+*/		return (length(me.in) / STEP_SIZE) * (1 + length(me.tmp.i2) * (alphabetSize - 1));
+		return sum;
+    }
+
+    template < typename TInput, unsigned STEP_SIZE >
+    inline typename Size< Pipe< TInput, Pipe< TInput, EditEnvironment< Tag<_LevenshteinDistance>, STEP_SIZE > > > >::Type
+    length(Pipe< TInput, EditEnvironment< Tag<_LevenshteinDistance>, STEP_SIZE > > const &me) {
 		typedef typename Value< typename Value<TInput>::Type, 2 >::Type TTuple;
 		unsigned alphabetSize = ValueSize< typename Value<TTuple>::Type >::VALUE;
 		unsigned seqs = countSequences(me.in);
 		// TODO: We run into problems when one sequence contains 1 or less tuples
 		// length should be ommitted in future, but Pools or the skew algorithm needs to know the stream length
-		if (length(me.in) > seqs)
+		if (length(me.in) >= seqs)
 			return 
-				  length(me.in)      * (1 + length(me.tmp.i2) * (alphabetSize - 1)) +	// substitutions and original
-				 (length(me.in) - seqs) * (length(me.tmp.i2) - 3) +						// deletions
-				((length(me.in) + seqs) * (length(me.tmp.i2) - 2) + 2 * seqs) * alphabetSize;	// insertions
+				  (length(me.in) / STEP_SIZE)     * (1 + length(me.tmp.i2) * (alphabetSize - 1)) +			// substitutions and original
+				 ((length(me.in) / STEP_SIZE) - seqs) * (length(me.tmp.i2) - 3) +							// deletions
+				(((length(me.in) / STEP_SIZE) + seqs) * (length(me.tmp.i2) - 2) + 2 * seqs) * alphabetSize;	// insertions
 		else
 			return 0;
     }

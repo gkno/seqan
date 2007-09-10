@@ -486,6 +486,11 @@ The m-tuples are substrings of the input stream beginning at positions $i$, with
     }
 
 	template < typename TInput, unsigned m, typename TCompression, typename TPair, typename TLimitsString >
+	inline bool control(Pipe< TInput, Multi<Sampler<m, TCompression>, TPair, TLimitsString> > &me, ControlEos const &command) {
+		return control(me, ControlEof());
+    }
+
+	template < typename TInput, unsigned m, typename TCompression, typename TPair, typename TLimitsString >
     inline typename Size< Pipe< TInput, Multi<Sampler<m, TCompression>, TPair, TLimitsString> > >::Type
 	length(Pipe< TInput, Multi<Sampler<m, TCompression>, TPair, TLimitsString> > const &me)
 	{

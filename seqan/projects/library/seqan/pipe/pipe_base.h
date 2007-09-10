@@ -429,7 +429,7 @@ SEQAN_CHECKPOINT
     template < typename TInput, typename TSpec >
 	inline bool eos(Pipe<TInput, TSpec> &me) {
 SEQAN_CHECKPOINT
-        return eof(me) || control(me, ControlEos());
+        return control(me, ControlEos());
     }
 
     template < typename TInput, typename TSpec >
