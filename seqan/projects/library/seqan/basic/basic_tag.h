@@ -37,6 +37,23 @@ struct DotDrawing_;
 typedef Tag<DotDrawing_> const DotDrawing;
 
 
+/**
+.Tag.HammingDistance
+..summary:Switch to trigger Hamming distance, which is a measure of character substitutions.
+*/
+
+/**
+.Tag.LevenshteinDistance
+..summary:Switch to trigger Levenshtein distance, which is a measure of edit operations (character substitutions, deletions or insertions).
+*/
+
+struct _HammingDistance;
+struct _LevenshteinDistance;
+
+typedef Tag<_HammingDistance>		HammingDistance;
+typedef Tag<_LevenshteinDistance>	LevenshteinDistance;
+typedef Tag<_LevenshteinDistance>	EditDistance;
+
 //////////////////////////////////////////////////////////////////////////////
 
 }// namespace SEQAN_NAMESPACE_MAIN

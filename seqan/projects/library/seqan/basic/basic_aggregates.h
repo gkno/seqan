@@ -424,6 +424,20 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 // assignValueAt
 
+    template <typename TObject, typename TPos, typename TSource>
+    inline TSource & 
+	assignValueAt(TObject &me, TPos k, TSource &source) {
+        assign(value(me, k), source);
+		return source;
+    }
+
+    template <typename TObject, typename TPos, typename TSource>
+    inline TSource const & 
+	assignValueAt(TObject &me, TPos k, TSource const &source) {
+        assign(value(me, k), source);
+		return source;
+    }
+
     template <typename _T, unsigned _size, typename _S, typename TPos>
     inline _S const assignValueAt(Tuple<_T, _size, void> &me, TPos k, _S const source) {
         return me.i[k] = source;
@@ -620,6 +634,41 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename T1, typename T2, typename T3, typename TCompression, typename T>
 	inline T const assignValueI3(Triple<T1, T2, T3, TCompression> &triple, T const &_i) {
 		return triple.i3 = _i;
+	}
+
+//////////////////////////////////////////////////////////////////////////////
+// operator ==/!= for pairs and triples
+
+	template <typename L1, typename L2, typename LCompression, typename R1, typename R2, typename RCompression>
+	inline bool operator==(Pair<L1, L2, LCompression> const &_left, Pair<R1, R2, RCompression> const &_right) {
+		return _left.i1 == _right.i1 && _left.i2 == _right.i2;
+	}
+	template <typename L1, typename L2, typename LCompression, typename R1, typename R2, typename RCompression>
+	inline bool operator!=(Pair<L1, L2, LCompression> const &_left, Pair<R1, R2, RCompression> const &_right) {
+		return _left.i1 != _right.i1 || _left.i2 != _right.i2;
+	}
+
+	template <typename L1, typename L2, unsigned LSizeI1, typename R1, typename R2, unsigned RSizeI1>
+	inline bool operator==(Pair<L1, L2, CutCompressed<LSizeI1> > const &_left, Pair<R1, R2, CutCompressed<RSizeI1> > const &_right) {
+		return _left.i12 == _right.i12;
+	}
+	template <typename L1, typename L2, unsigned LSizeI1, typename R1, typename R2, unsigned RSizeI1>
+	inline bool operator!=(Pair<L1, L2, CutCompressed<LSizeI1> > const &_left, Pair<R1, R2, CutCompressed<RSizeI1> > const &_right) {
+		return _left.i12 != _right.i12;
+	}
+//____________________________________________________________________________
+
+	template <
+		typename L1, typename L2, typename L3, typename LCompression, 
+		typename R1, typename R2, typename R3, typename RCompression>
+	inline bool operator==(Triple<L1, L2, L3, LCompression> const &_left, Triple<R1, R2, R3, RCompression> const &_right) {
+		return _left.i1 == _right.i1 && _left.i2 == _right.i2 && _left.i3 == _right.i3;
+	}
+	template <
+		typename L1, typename L2, typename L3, typename LCompression, 
+		typename R1, typename R2, typename R3, typename RCompression>
+	inline bool operator!=(Triple<L1, L2, L3, LCompression> const &_left, Triple<R1, R2, R3, RCompression> const &_right) {
+		return _left.i1 != _right.i1 || _left.i2 != _right.i2 || _left.i3 != _right.i3;
 	}
 
 }// namespace SEQAN_NAMESPACE_MAIN
