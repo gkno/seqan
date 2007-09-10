@@ -692,7 +692,7 @@ sumOfPairsScore(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 				TInfix inf2 = label(g,v2);
 				TInfixIter sIt1 = begin(inf1,Standard());
 				TInfixIter sIt2 = begin(inf2,Standard());
-				TInfixIter sItEnd1 = end(inf2,Standard());
+				TInfixIter sItEnd1 = end(inf1,Standard());
 				TInfixIter sItEnd2 = end(inf2,Standard());
 				while((sIt1 != sItEnd1) || (sIt2 != sItEnd2)) {
 					total += score(const_cast<TScore&>(score_type), *sIt1, *sIt2);
