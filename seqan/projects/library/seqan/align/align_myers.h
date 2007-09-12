@@ -442,8 +442,7 @@ SEQAN_CHECKPOINT
 	arrayFill(reverseBitMask, reverseBitMask + alphabetSize * blockCount, 0);
 
 	// encoding the letters as bit-vectors
-    for (unsigned int j = 0; j < len_y; j++)
-	{
+    for (unsigned int j = 0; j < len_y; j++){
 SEQAN_CHECKPOINT
 		forwardBitMask[blockCount * static_cast<unsigned int>(getValue(y,j)) + j/BLOCK_SIZE] = forwardBitMask[blockCount * static_cast<unsigned int>(getValue(y,j)) + j/BLOCK_SIZE] | 1 << (j%BLOCK_SIZE);
 		reverseBitMask[blockCount * static_cast<unsigned int>(getValue(y,len_y - j - 1)) + j/BLOCK_SIZE] = reverseBitMask[blockCount * static_cast<unsigned int>(getValue(y,len_y - j - 1)) + j/BLOCK_SIZE] | 1 << (j%BLOCK_SIZE);
@@ -465,7 +464,7 @@ SEQAN_CHECKPOINT
 		arrayCopy(forwardBitMask, forwardBitMask + alphabetSize * blockCount, fCopyMask);
 		arrayCopy(reverseBitMask, reverseBitMask + alphabetSize * blockCount, rCopyMask);
 
-		int i,j,m;
+		unsigned int i,j,m;
 		for(i=0;i < alphabetSize;++i)
 		{
 			// iterate over the whole alphabet
@@ -477,7 +476,7 @@ SEQAN_CHECKPOINT
 					unsigned int char_ind_i = blockCount*static_cast<unsigned int>(static_cast<TAlphabet>(i));
 					unsigned int char_ind_j = blockCount*static_cast<unsigned int>(static_cast<TAlphabet>(j));
 
-					for(int m = 0;m < blockCount;++m)
+					for(m = 0;m < blockCount;++m)
 					{
 						forwardBitMask[char_ind_i] |= fCopyMask[char_ind_j];
 						reverseBitMask[char_ind_i] |= rCopyMask[char_ind_j];
