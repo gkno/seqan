@@ -493,7 +493,7 @@ SEQAN_CHECKPOINT
 					unsigned int char_ind_i = blockCount*static_cast<unsigned int>(static_cast<TAlphabet>(i));
 					unsigned int char_ind_j = blockCount*static_cast<unsigned int>(static_cast<TAlphabet>(j));
 					
-					for(int m = 0;m < blockCount;++m)
+					for(m = 0;m < blockCount;++m)
 					{
 						forwardBitMask[char_ind_i] |= fCopyMask[char_ind_j];
 						reverseBitMask[char_ind_i] |= rCopyMask[char_ind_j];
