@@ -49,7 +49,10 @@ namespace SEQAN_NAMESPACE_MAIN
 		Handle              hFile, hFileAsync;
         bool                noBuffering;
 
-        File(void *dummy = NULL): // to be compatible with the FILE*(NULL) constructor
+        File():
+            hFile(INVALID_HANDLE_VALUE) {}
+
+        File(void *): // to be compatible with the FILE*(NULL) constructor
             hFile(INVALID_HANDLE_VALUE) {}
 
         bool open(char const *fileName, int openMode = DefaultOpenMode<File>::VALUE) {
@@ -181,18 +184,14 @@ namespace SEQAN_NAMESPACE_MAIN
     protected:
 
         DWORD getFileAccess(int openMode) {
-            DWORD result;
             switch (openMode & OPEN_MASK) {
                 case OPEN_RDONLY:
-                    result = GENERIC_READ;
-                    break;
+                    return GENERIC_READ;
                 case OPEN_WRONLY:
-                    result = GENERIC_WRITE;
-                    break;
+                    return GENERIC_WRITE;
                 case OPEN_RDWR:
-                    result = GENERIC_READ | GENERIC_WRITE;
+                    return GENERIC_READ | GENERIC_WRITE;
             }
-            return result;
         }
 
         DWORD getCreationFlags(int openMode) {
@@ -272,7 +271,7 @@ namespace SEQAN_NAMESPACE_MAIN
     }
 
 	template <typename TSpec>
-    inline unsigned sectorSize(File<Async<TSpec> > const &me) {
+    inline unsigned sectorSize(File<Async<TSpec> > const &) {
         DWORD SpC, nofC, tnoC, aligning;
         if (GetDiskFreeSpace(NULL, &SpC, &aligning, &nofC, &tnoC) == 0)  {
             ::std::cerr << "Error " << GetLastError() << " while querying cluster size" << ::std::endl;
@@ -376,7 +375,7 @@ namespace SEQAN_NAMESPACE_MAIN
         SEQAN_PROTIMESTART(tw);
         DWORD result = WaitForMultipleObjects(count, &handles, false, timeout_millis);
         SEQAN_PROADD(SEQAN_PROCWAIT, SEQAN_PROTIMEDIFF(tw));
-        if (result >= WAIT_OBJECT_0 && result < WAIT_OBJECT_0 + count)
+        if (/*result >= WAIT_OBJECT_0 && */result < WAIT_OBJECT_0 + count)
     		return result - WAIT_OBJECT_0;
         return count;
 	}
@@ -565,7 +564,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <typename T, typename TValue, typename TSize>
 	inline void
-	allocate(T const & me, 
+	allocate(T const &, 
 			 TValue * & data,
 			 TSize count,
 			 TagAllocateAligned const)
@@ -582,15 +581,16 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <typename T, typename TValue, typename TSize>
 	inline void 
-	deallocate( T const & me,
+	deallocate( T const &,
 				TValue * data, 
 				TSize count,
 				TagAllocateAligned const)
 	{
-        if (data) {
-            SEQAN_PROSUB(SEQAN_PROMEMORY, count * sizeof(TValue));
+		if (data) {
 			VirtualFree(data, 0, MEM_RELEASE);
-        }
+			if (count)	// .. to use count if SEQAN_PROFILE is not defined
+				SEQAN_PROSUB(SEQAN_PROMEMORY, count * sizeof(TValue));
+		}
 	}
 
 #else

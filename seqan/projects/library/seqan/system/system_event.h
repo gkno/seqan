@@ -122,7 +122,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
         DWORD result = WaitForMultipleObjects(count, &eventList[0].hEvent, false, timeout_millis = Event::Infinite);
 
-        if (result >= WAIT_OBJECT_0 && result < WAIT_OBJECT_0 + count)
+        if (/*result >= WAIT_OBJECT_0 && */result < WAIT_OBJECT_0 + count)
     		return result - WAIT_OBJECT_0;
 
         return -1;

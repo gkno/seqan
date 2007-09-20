@@ -671,7 +671,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 */
 
     template < typename TSpec, typename aRequest >
-    inline bool cancel(File<TSpec> & me, aRequest & request) {
+    inline bool cancel(File<TSpec> &, aRequest &) {
 		return true; 
 	}
 
