@@ -37,7 +37,7 @@ template <typename TNeedle>
 class Pattern<TNeedle, WildShiftAnd> {
 //____________________________________________________________________________
 public:
-	typedef unsigned int TWord;
+	typedef unsigned TWord;
 
 	Holder<TNeedle> data_needle;
 	String<TWord> table;			// Look up table for each character in the alphabet (called B in "Navarro")
@@ -77,9 +77,9 @@ public:
 //////////////////////////////////////////////////////////////////////////////
 
 // debug method to visualize bitmasks
-void _printMask(String <unsigned int> const &  mask,unsigned int line,String <char> name)
+void _printMask(String <unsigned> const &  mask,unsigned line,String <char> name)
 {
-	unsigned int len = length(mask);
+	unsigned len = length(mask);
 	std::cout << name << " " << line << "   ";
 	for(unsigned int j=0;j<len;++j) {
 		for(unsigned int bit_pos=0;bit_pos<BitsPerValue<unsigned int>::VALUE;++bit_pos) {
@@ -107,7 +107,7 @@ bool _isInt(String<char> const & number)
 template <typename TNeedle2>
 bool _validate(TNeedle2 const & needle)
 {
-	typedef unsigned int TWord;
+	typedef unsigned TWord;
 	
 	TWord nl = length(needle);
 	TWord len = nl;
@@ -184,9 +184,9 @@ SEQAN_CHECKPOINT
   currently supported +,*,[..],?,.,{n,m}
 */
 template <typename TNeedle>
-unsigned int _length_wo_wild(TNeedle const & needle) {
+unsigned _length_wo_wild(TNeedle const & needle) {
 
-	typedef unsigned int TWord;
+	typedef unsigned TWord;
 
 	TWord nl = length(needle);
 	TWord len = nl;
@@ -256,10 +256,10 @@ SEQAN_CHECKPOINT
 	returns all character codes contained in the class
 */
 template <typename TValue,typename TNeedle2>
-String <unsigned int> _getCharacterClass(TNeedle2 const & host,unsigned int start,unsigned int end){
-	typedef unsigned int TWord;
-	String <unsigned int> ret;
-	unsigned int pos = start;
+String <unsigned> _getCharacterClass(TNeedle2 const & host,unsigned start,unsigned end){
+	typedef unsigned TWord;
+	String <unsigned> ret;
+	unsigned pos = start;
 	while (pos < end){
 SEQAN_CHECKPOINT
 		if(convert<char>(getValue(host,pos)) != '-')
@@ -268,7 +268,7 @@ SEQAN_CHECKPOINT
 SEQAN_CHECKPOINT
 			// could be a range
 			if (pos > start && pos < end && (convert<TWord>(convert<TValue>(getValue(host,pos-1))) < convert<TWord>(convert<TValue>(getValue(host,pos+1)))) ){
-				unsigned int r_s = convert<TWord>(convert<TValue>(getValue(host,pos-1))) + 1;
+				unsigned r_s = convert<TWord>(convert<TValue>(getValue(host,pos-1))) + 1;
 				while(r_s < convert<TWord>(convert<TValue>(getValue(host,pos+1)))){
 					append(ret,r_s);
 					++r_s;
@@ -290,7 +290,7 @@ SEQAN_CHECKPOINT
 
 	if(!valid(me)) return;
 
-	typedef unsigned int TWord;
+	typedef unsigned TWord;
 	typedef typename Value<TNeedle>::Type TValue;
 	
 	me.needleLength = length(needle);
@@ -488,12 +488,12 @@ SEQAN_CHECKPOINT
 	_printMask(me.a_table,0,"A ");
 	std::cout << std::endl << std::endl;
 
-	for(unsigned int i=0;i<ValueSize<TValue>::VALUE;++i) {
+	for(unsigned i=0;i<ValueSize<TValue>::VALUE;++i) {
 		if (((i<97) && (4 < i) ) || (i>122)) continue;
 		std::cout << static_cast<TValue>(i) << ": ";
 		for(unsigned int j=0;j<me.blockCount;++j) {
-			for(int bit_pos=0;bit_pos<BitsPerValue<unsigned int>::VALUE;++bit_pos) {
-				std::cout << ((me.table[me.blockCount*i+j] & (1<<(bit_pos % BitsPerValue<unsigned int>::VALUE))) !=0);
+			for(int bit_pos=0;bit_pos<BitsPerValue<unsigned>::VALUE;++bit_pos) {
+				std::cout << ((me.table[me.blockCount*i+j] & (1<<(bit_pos % BitsPerValue<unsigned>::VALUE))) !=0);
 			}
 		}
 		std::cout << ::std::endl;
@@ -564,7 +564,7 @@ SEQAN_CHECKPOINT
 template <typename TFinder, typename TNeedle>
 inline bool _findShiftAnd_SmallNeedle(TFinder & finder, Pattern<TNeedle, WildShiftAnd> & me) {
 SEQAN_CHECKPOINT
-	typedef unsigned int TWord;
+	typedef unsigned TWord;
 	TWord compare = (1 << (me.character_count-1));
 	while (!atEnd(finder)) {
 SEQAN_CHECKPOINT
@@ -587,7 +587,7 @@ SEQAN_CHECKPOINT
 template <typename TFinder, typename TNeedle>
 inline bool _findShiftAnd_LargeNeedle(TFinder & finder, Pattern<TNeedle, WildShiftAnd> & me) {
 SEQAN_CHECKPOINT
-	typedef unsigned int TWord;
+	typedef unsigned TWord;
 	const TWord all1 = ~0;	
 	TWord compare = (1 << ((me.character_count-1) % BitsPerValue<TWord>::VALUE));
 
