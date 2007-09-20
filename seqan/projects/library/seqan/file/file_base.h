@@ -86,7 +86,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 */
 
 	// chained file's default filesize is 2gb-1byte (fat16 filesize limitation)
-	template < __int64 _FileSize = ~(__int64(1) << 63), typename TFile = File<> >
+	template < __int64 _FileSize = ~(((__int64)1) << 63), typename TFile = File<> >
 	struct Chained;
 
 /**
