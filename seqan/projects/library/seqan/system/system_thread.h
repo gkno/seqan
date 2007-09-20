@@ -58,7 +58,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
         inline bool open(BOOL initital = false) {
             return hThread = CreateThread(
-                &ThreadDefaultAttributes     // default security attributes 
+                &ThreadDefaultAttributes,    // default security attributes 
                 0,                           // use default stack size  
                 &_start,                     // thread function 
                 this,                        // argument to thread function 
@@ -75,7 +75,7 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 
         inline bool wait(DWORD timeout_millis = INFINITE) {
-            return WaitForSingleObject(hMutex, timeout_millis) != WAIT_TIMEOUT;
+            return WaitForSingleObject(hThread, timeout_millis) != WAIT_TIMEOUT;
         }
 
         inline operator bool() const {

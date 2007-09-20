@@ -714,7 +714,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		if (_hint)
 			::std::cerr << _hint << ::std::endl;
 		::std::cerr << "fildes:  " << request.aio_fildes << ::std::endl;
-		::std::cerr << "buffer:  " << (unsigned)request.aio_buf << ::std::endl;
+		::std::cerr << "buffer:  " << (unsigned long)request.aio_buf << ::std::endl;
 		::std::cerr << "offset:  " << request.aio_offset<< ::std::endl;
 		::std::cerr << "nbytes:  " << request.aio_nbytes << ::std::endl;
 		::std::cerr << "event:   " << request.aio_sigevent.sigev_notify << ::std::endl;

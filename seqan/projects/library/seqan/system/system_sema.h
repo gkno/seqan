@@ -47,7 +47,7 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 
         ~Semaphore() {
-            SEQAN_DO_SYS2(CloseHandle(hSemaphore) != NULL, "Could not destroy Semaphore")
+            SEQAN_DO_SYS2(CloseHandle(hSemaphore) != 0, "Could not destroy Semaphore")
         }
 
         bool lock(DWORD timeout_millis = INFINITE) {
@@ -55,7 +55,7 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 
         void unlock() {
-            SEQAN_DO_SYS2(ReleaseSemaphore(hSemaphore, 1, NULL) != NULL, "Could not unlock Semaphore")
+            SEQAN_DO_SYS2(ReleaseSemaphore(hSemaphore, 1, NULL) != 0, "Could not unlock Semaphore")
         }
 
     private:
