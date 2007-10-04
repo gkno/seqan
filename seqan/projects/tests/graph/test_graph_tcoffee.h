@@ -403,7 +403,7 @@ void Test_TCoffeeFromFile(String<char> const in_path, String<char> const file_pr
 
 	// Make dependent string set
 	typedef StringSet<TString, Dependent<> > TStringSet;
-	typedef Graph<Alignment<TStringSet, unsigned int, WithoutEdgeId> > TGraph;
+	typedef Graph<Alignment<TStringSet, unsigned int> > TGraph;
 	TStringSet strSet;
 	for(unsigned int i = 0; i<seqCount; ++i) appendValue(strSet, origStrSet[i]);
 	
@@ -445,7 +445,7 @@ void Test_TCoffeeFromFile(String<char> const in_path, String<char> const file_pr
 	std::cout << "Library size: " << numVertices(g) << " Vertices, " << numEdges(g) << " Edges" << std::endl;
 
 	// Build the guide tree
-	Graph<Tree<double, WithoutEdgeId> > guideTree;
+	Graph<Tree<double> > guideTree;
 	upgmaTree(distanceMatrix, guideTree);
 	_alignTiming(startTime, "Guide tree done: ");
 
