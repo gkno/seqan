@@ -132,6 +132,8 @@ void TopologicalSort() {
 	TGraph g;
 	addEdges(g, edges, numEdges);
 	std::cout << g << ::std::endl;
+	
+	
 	String<std::string> nameMap;
 	resizeVertexMap(g,nameMap, names);
 

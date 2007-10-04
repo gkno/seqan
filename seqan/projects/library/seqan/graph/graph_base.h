@@ -138,6 +138,17 @@ typedef Tag<MsfFormat_> const MsfFormat;
 //////////////////////////////////////////////////////////////////////////////
 
 /**
+.Tag.CgVizFormat
+..summary:Switch to trigger alignment output in cgviz format
+..value.CgVizFormat:Alignment graph in cgviz format
+*/
+
+struct CgVizFormat_;
+typedef Tag<CgVizFormat_> const CgVizFormat;
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
 .Tag.TCoffeeLib
 ..summary:Switch to trigger reading and writing in t-coffee lib format.
 ..value.TCoffeeLib:Library in T-Coffee Format.

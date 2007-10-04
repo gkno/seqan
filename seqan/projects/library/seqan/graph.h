@@ -85,6 +85,7 @@
 
 // Graph algorithms
 #include <seqan/graph/graph_algorithm_lis_his.h>
+#include <seqan/graph/graph_algorithm_hmm.h>
 #include <seqan/graph/graph_algorithm.h>
 
 // Alignment

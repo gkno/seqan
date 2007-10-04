@@ -257,17 +257,6 @@ void Test_Directed() {
 	removeEdge(g3,0,4);
 	removeEdge(g3,0,2);
 	SEQAN_TASSERT(numEdges(g3) == 2)
-
-		
-	clear(g);
-	TVertexDescriptor edges[] = {0,1, 1,2};
-	unsigned int numEdg = 2;
-	std::string nameEd[] = {"ar", "ae"};
-	addEdges(g, edges, numEdg);
-	String<std::string> edMap;
-	resizeEdgeMap(g, edMap, nameEd);
-	SEQAN_TASSERT(getProperty(edMap, 0) == "ar")
-	SEQAN_TASSERT(getProperty(edMap, 1) == "ae")
 }
 
 //////////////////////////////////////////////////////////////////////////////

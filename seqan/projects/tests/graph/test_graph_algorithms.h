@@ -814,6 +814,24 @@ void Test_HeaviestCommonSubsequence() {
 
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
+void Test_HiddenMarkovModel() {
+	HiddenMarkovModel<Byte> diceModel;
+	double trans[] = {0.95, 0.05, 
+					  0.10, 0.90};
+	double emis[] = {1.0/6.0 ,1.0/6.0, 1.0/6.0, 1.0/6.0, 1.0/6.0, 1.0/6.0,
+					 1.0/10.0,1.0/10.0,1.0/10.0,1.0/10.0,1.0/10.0,1.0/2.0};
+	double init[] = {1.0/2.0 ,1.0/2.0};
+	initializeModel(diceModel, 2, 6, trans, emis, init);
+
+	std::cout << diceModel << std::endl;
+
+	String<Byte> seqFromModel;
+	generateSequence(diceModel, 2, seqFromModel);
+	double prob = forwardAlgorithm(diceModel, seqFromModel);
+	std::cout << prob << std::endl;
+}
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -852,8 +870,13 @@ void Test_GraphAlgorithms() {
 	Test_HeaviestIncreasingSubsequence();
 	Test_HeaviestCommonSubsequence();
 
+	// HMM
+	//Test_HiddenMarkovModel();
+
+
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_algorithm.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_algorithm_lis_his.h");
+	//debug::verifyCheckpoints("projects/library/seqan/graph/graph_algorithm_hmm.h");
 }
 
 

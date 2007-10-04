@@ -719,6 +719,139 @@ write(TFile & file,
 	}
 }
 
+
+//////////////////////////////////////////////////////////////////////////////
+template <typename TFile, typename TStringSet, typename TSpec, typename TEdge>
+inline void
+__writeCargo(TFile & file,
+			 Graph<Alignment<TStringSet, void, TSpec> > const&,
+			 TEdge const&)
+{
+	_streamPutInt(file, 0);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+template <typename TFile, typename TStringSet, typename TCargo, typename TSpec, typename TEdge>
+inline void
+__writeCargo(TFile & file,
+			 Graph<Alignment<TStringSet, TCargo, TSpec> > const&,
+			 TEdge const& edge)
+{
+	_streamPutInt(file, getCargo(edge));
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+
+template <typename TFile, typename TStringSet, typename TCargo, typename TSpec, typename TNames>
+inline void
+write(TFile & file,
+	  Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
+	  TNames const& names,
+	  CgVizFormat) 
+{
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename Id<TGraph>::Type TId;
+	typedef FragmentInfo<TId, TSize> TSegment;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename EdgeType<TGraph>::Type TEdgeStump;
+	typedef typename Iterator<String<TEdgeStump*> const>::Type TIterConst;
+	
+	TStringSet& str = stringSet(g);
+	TSize nseq = length(str);
+
+	_streamWrite(file,"{DATA Data\n");
+	_streamWrite(file,"\t[__GLOBAL__] tracks=");
+	_streamPutInt(file, nseq);
+	_streamPut(file, '\n');
+	for(TSize i = 0; i<nseq; ++i) {
+		_streamWrite(file,"\tfasta_id=\"");
+		_streamWrite(file,names[i]);
+		_streamWrite(file,"\" sequence=\"");
+		_streamWrite(file,str[i]);
+		_streamWrite(file,"\" track=");
+		_streamPutInt(file, i);
+		_streamWrite(file," type=\"");
+		_streamWrite(file,"DNA");
+		_streamWrite(file,"\": ");
+		_streamPutInt(file, 0);
+		_streamPut(file, ' ');
+		_streamPutInt(file, length(str[i])- 1);
+		_streamPut(file, '\n');
+	}
+	_streamWrite(file,"}\n");
+	for(TSize i = 0; i<nseq; ++i) {
+		_streamWrite(file,"{DATA ");
+		_streamWrite(file,names[i]);
+		_streamWrite(file,"-seqlen\n");
+		_streamWrite(file,"\t[__GLOBAL__]\n");
+		_streamWrite(file,"\tlength=");
+		_streamPutInt(file, length(str[i]));
+		_streamWrite(file,":\t");
+		_streamPutInt(file, 0);
+		_streamPut(file, ' ');
+		_streamPutInt(file, length(str[i])- 1);
+		_streamPut(file, '\n');
+		_streamWrite(file,"}\n");
+	}
+	for(TSize i=0; i<nseq; ++i) {
+		for(TSize j=i+1; j<nseq; ++j) {
+			_streamWrite(file,"{DATA ");
+			_streamWrite(file,names[i]);
+			_streamWrite(file,"-vs-");
+			_streamWrite(file,names[j]);
+			_streamPut(file, '\n');
+			_streamWrite(file,"\t[__GLOBAL__]\n");
+			for(TIterConst it = begin(g.data_align.data_vertex);!atEnd(it);goNext(it)) {
+				TVertexDescriptor sourceV = position(it);
+				TId id1 = sequenceId(g, sourceV);
+				if ((positionToId(str, id1) != i) &&
+					(positionToId(str, id1) != j)) continue;
+				TEdgeStump* current = getValue(it);
+				while(current!=0) {
+					TVertexDescriptor targetV = getTarget(current);
+					TId id2 = sequenceId(g, targetV);
+					if (sourceV != targetV) {
+						if ((positionToId(str, id2) != i) &&
+							(positionToId(str, id2) != j)) {
+								current=getNextS(current);
+								continue;
+						}
+						_streamWrite(file,"\t");
+						_streamWrite(file,"Source=");
+						_streamPutInt(file, sourceV);		
+						_streamPut(file, ' ');
+						_streamWrite(file,"Target=");
+						_streamPutInt(file, targetV);
+						_streamPut(file, ' ');
+						_streamWrite(file,"EdgeId=");
+						_streamPutInt(file, _getId(current));
+						_streamPut(file, ' ');
+						_streamWrite(file," Cargo=");
+						__writeCargo(file,g,current);
+						_streamPut(file, ':');
+						_streamPut(file, '\t');
+						_streamPutInt(file, fragmentBegin(g, sourceV));
+						_streamPut(file, ' ');
+						_streamPutInt(file, fragmentBegin(g, targetV));
+						_streamPut(file, ' ');
+						_streamPutInt(file, fragmentBegin(g, sourceV) + fragmentLength(g, sourceV));
+						_streamPut(file, ' ');
+						_streamPutInt(file, fragmentBegin(g, targetV) + fragmentLength(g, targetV));
+						_streamPut(file, '\n');
+						current=getNextS(current);
+					} else {
+						current=getNextT(current);
+					}
+				}
+			}
+			_streamWrite(file,"}\n");	
+		}
+	}
+}
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 /**

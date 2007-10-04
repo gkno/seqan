@@ -111,8 +111,8 @@ See @Metafunction.Value@.
 template<typename TPropertyMap, typename TDescriptor, typename TValue>
 inline void
 assignProperty(TPropertyMap& pm,
-			TDescriptor const d,
-			TValue const val)
+			   TDescriptor const d,
+			   TValue const val)
 {
 	SEQAN_CHECKPOINT
 	assignValue(pm, _getId(d), val);
@@ -695,7 +695,7 @@ resizeVertexMap(Graph<TSpec> const& g,
 	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
 	TVertexIterator it(g);
 	for(;!atEnd(it);goNext(it)) {
-		assignProperty(pm,*it,prop[_getId(*it)]);
+		assignProperty(pm,getValue(it), getValue(prop, _getId(value(it))));
 	}
 }
 
