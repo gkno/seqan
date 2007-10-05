@@ -1,0 +1,26 @@
+.Page.Getting Started:
+..cat:Tutorials
+..summary:First steps using SeqAn.
+
+..description:
+...text:Ein Absatz.
+...section:Abschnitt 1
+...text:Noch ein Absatz.
+Hier kann man beliebig langen Text einbauen.
+Zeilenumbrueche werden allerdings nicht umgesetzt.
+Dafuer muss man einen anderen Absatz anfangen.
+
+...text:Und noch ein Absatz.
+...code:int x;  //ein codebeispiel
+int y;  //wie man sieht werden die Zeilen jetzt
+        //umgesetzt wie im Quelltext.
+        //1 tab = 4 blanks
+...text:Laengere Codebeispiele verlinken wir lieber, z.B. so: @Demo.Allocators@.
+...section:Abschnitt 2
+...text:noch mehr Text.
+
+
+..see:Spec.Single Pool Allocator
+..see:Spec.Multi Pool Allocator
+.
+

@@ -886,7 +886,14 @@ def subprintText(fl, data, subcategory = False):
             
     for line in data.at_level(1).by_occ().lines:
         name = line.name(data.level)
-        if name == 'text': 
+        if name == 'section': 
+            fl.write('<div class=section_headline_explicite>' + translateText(line.text()) + '</div>')
+            headline = ''
+            
+        elif name == 'subsection': 
+            headline = '<span class=section_sub_headline>' + translateText(line.text()) + '</span>'
+            
+        elif name == 'text': 
             s = translateText(line.text())
             fl.write('<div class=text_sub_block>' + headline + ' ' + s + '</div>')
             headline = ''

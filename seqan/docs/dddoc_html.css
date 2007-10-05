@@ -145,6 +145,13 @@ A:hover, A:link, A:visited
     margin-bottom: 2px;
     color: #333333;
 }
+.section_headline_explicite
+{
+    font-weight: bold;
+    margin-top: 10px;
+    margin-bottom: 2px;
+    color: #333333;
+}
 .section
 {
     margin-bottom: 10px;
