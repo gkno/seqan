@@ -19,9 +19,10 @@ int y;  //wie man sieht werden die Zeilen jetzt
 ...section:Abschnitt 2
 ...text:noch mehr Text.
 
-...table:key1|schluessel1|das Ende
-...table:key2|schluessel2|gugu
-...table:key2|schluessel2|gugu
+...tableheader:Eins|Zwei|Drei
+...table:Erste Spalte|Zweite Spalte|das Ende
+...table:Zweite Zeile|dummdidumm|gugu
+...table:usw.|dummdidumm|gugu
 
 ...text:weiter
 

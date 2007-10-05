@@ -889,10 +889,10 @@ def subprintText(fl, data, subcategory = False):
     for line in data.at_level(1).by_occ().lines:
         name = line.name(data.level)
         
-        if name == 'table':
+        if (name == 'table') or (name == 'tableheader'):
             if not in_table:
-                fl.write('<table class=value_tab2 cellspacing=0 cellpadding=0>')
-            subprintTableLine(fl, line.text())
+                fl.write('<table class=table_explicite cellspacing=0 cellpadding=0>')
+            subprintTableLine(fl, line.text(), (name == 'tableheader'))
             in_table = True
         else:
             if in_table:
@@ -974,7 +974,7 @@ def subprintLink(fl, data, subcategory):
 
 ################################################################################
 
-def subprintTableLine(fl, text):
+def subprintTableLine(fl, text, is_header):
     fl.write('<tr>')
 
     while len(text) > 0:
@@ -982,16 +982,19 @@ def subprintTableLine(fl, text):
         if (i >= 0):
             s = text[:i]
             text = text[i+1:]
-            fl.write('<td class=value_key valign=top>')
         else:
             s = text
             text = ''
-            fl.write('<td class=value_text valign=top>')
+        
         if len(s) > 0: 
-            fl.write(translateText(s))
+            s = translateText(s)
         else: 
-            fl.write('&nbsp;')
-        fl.write('</td>')
+            s = '&nbsp;'
+
+        if is_header:
+            fl.write('<td class=table_header_explicite valign=top><center>' + s + '</center></td>')
+        else:
+            fl.write('<td class=table_cell_explicite valign=top>' + s + '</td>')
         
     fl.write('</tr>')
     

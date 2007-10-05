@@ -250,7 +250,7 @@ A:hover, A:link, A:visited
     color: #2b2b2b;
 }
 
-.value_tab, .value_tab2
+.value_tab
 {
     margin-top: 4px;
     margin-left: 12px;
@@ -260,11 +260,7 @@ A:hover, A:link, A:visited
     border: 1px solid #999999;
     border-bottom: 0px;
 }
-.value_tab2
-{
-    margin-bottom: 4px;
-}
-.text_block .value_tab, .text_block .value_tab2
+.text_block .value_tab
 {
     margin-left:0px;
     margin-right:0px;
@@ -290,6 +286,39 @@ A:hover, A:link, A:visited
     padding-left: 6px;
     width:100%
 }
+
+.table_explicite
+{
+    margin-top: 4px;
+    margin-left: 12px;
+    margin-right: 12px;
+    margin-bottom: 4px;
+    padding-left: 0px;
+    padding-right: 0px;
+    border-top: 1px solid #999999;
+    border-left: 1px solid #999999;
+}
+.table_cell_explicite
+{
+    border-right: 1px solid #999999;
+    border-bottom: 1px solid #999999;
+    padding-top: 2px;
+    padding-bottom: 3px;
+    padding-right: 6px;
+    padding-left: 6px;
+}
+.table_header_explicite
+{
+    border-right: 1px solid #999999;
+    border-bottom: 1px solid #999999;
+    padding-top: 2px;
+    padding-bottom: 3px;
+    padding-right: 6px;
+    padding-left: 6px;
+    font-style:italic;
+    background-color:#f0f0f0;
+}
+
 
 .link_text, link_text_high
 {
