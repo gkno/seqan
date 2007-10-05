@@ -250,7 +250,7 @@ A:hover, A:link, A:visited
     color: #2b2b2b;
 }
 
-.value_tab
+.value_tab, .value_tab2
 {
     margin-top: 4px;
     margin-left: 12px;
@@ -258,10 +258,13 @@ A:hover, A:link, A:visited
     padding-left: 0px;
     padding-right: 0px;
     border: 1px solid #999999;
-    border-bottom:0px;
-    border-bottom: 0xp;
+    border-bottom: 0px;
 }
-.text_block .value_tab
+.value_tab2
+{
+    margin-bottom: 4px;
+}
+.text_block .value_tab, .text_block .value_tab2
 {
     margin-left:0px;
     margin-right:0px;
