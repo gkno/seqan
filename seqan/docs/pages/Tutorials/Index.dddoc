@@ -57,7 +57,9 @@ Index< String<char> > myIndex("tobeornottobe");
 ...section:2. How to find a pattern
 
 ...text:
-To find all occurrences of a pattern in an indexed @Class.String@ or a @StringSet@ SeqAn offers the @Class.Finder@ class
+To find all occurrences of a pattern in an indexed @Class.String@ or a @StringSet@, SeqAn provides the @Class.Finder@ class (see @Page.Searching.Finder tutorial@),
+which is also specialized for @Class.Index.indices@.
+
 To solve the dictionary problem see @Demo.Index@.
 ...text:noch mehr Text.
 
