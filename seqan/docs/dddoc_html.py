@@ -884,8 +884,21 @@ def subprintText(fl, data, subcategory = False):
             fl.write('<div class=text_sub_block>' + headline + ' ' + s + '</div>')
             headline = ''
             
+    in_table = False
+            
     for line in data.at_level(1).by_occ().lines:
         name = line.name(data.level)
+        
+        if name == 'table':
+            if not in_table:
+                fl.write('<table class=value_tab2 cellspacing=0 cellpadding=0>')
+            subprintTableLine(fl, line.text())
+            in_table = True
+        else:
+            if in_table:
+                fl.write('</table>')
+            in_table = False
+            
         if name == 'section': 
             fl.write('<div class=section_headline_explicite>' + translateText(line.text()) + '</div>')
             headline = ''
@@ -919,7 +932,9 @@ def subprintText(fl, data, subcategory = False):
             s += translateText(line.text())
             fl.write('<div class=note_sub_block>' + s + '</div>')
             
-
+    if in_table:
+        fl.write('</table>')
+       
     subprintLink(fl, data["metafunction"], "metafunction")
     subprintLink(fl, data["type"], "type")
     subprintLink(fl, data["concept"], "concept")
@@ -958,3 +973,27 @@ def subprintLink(fl, data, subcategory):
         fl.write('<div class=text_sub_block>' + headline + ' ' + str + '</div>');
 
 ################################################################################
+
+def subprintTableLine(fl, text):
+    fl.write('<tr>')
+
+    while len(text) > 0:
+        i = text.find('|');
+        if (i >= 0):
+            s = text[:i]
+            text = text[i+1:]
+            fl.write('<td class=value_key valign=top>')
+        else:
+            s = text
+            text = ''
+            fl.write('<td class=value_text valign=top>')
+        if len(s) > 0: 
+            fl.write(translateText(s))
+        else: 
+            fl.write('&nbsp;')
+        fl.write('</td>')
+        
+    fl.write('</tr>')
+    
+ 
+        

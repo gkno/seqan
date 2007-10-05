@@ -19,6 +19,12 @@ int y;  //wie man sieht werden die Zeilen jetzt
 ...section:Abschnitt 2
 ...text:noch mehr Text.
 
+...table:key1|schluessel1|das Ende
+...table:key2|schluessel2|gugu
+...table:key2|schluessel2|gugu
+
+...text:weiter
+
 
 ..see:Spec.Single Pool Allocator
 ..see:Spec.Multi Pool Allocator
