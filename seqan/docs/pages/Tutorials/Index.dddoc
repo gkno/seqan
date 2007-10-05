@@ -1,0 +1,81 @@
+.Page.Indices:
+..cat:Tutorials
+..summary:Substring indices in SeqAn.
+
+..description:
+...image:indices:
+...text:
+A substring index is a datatype which allows to seek efficiently for all occurrences of a pattern 
+in a string or a set of strings. 
+Substring indices are very efficient for the exact string matching problem, i.e. finding all exact occurrences of a pattern in a text or a text collection.
+Instead of searching through the text in O(n) like online-search algorithms do, a substring index looks up the pattern in sublinear time o(n).
+Substring indices are full-text indices, i.e. they handle all substrings of a text in contrast to inverted files or signature files, which need word delimiters.
+
+SeqAn contains data structures to create, hold and use substring indices.
+Based on a unified concept, SeqAn offers several concrete implementations (e.g. enhanced suffix array, lazy suffix tree,
+q-gram index, nested q-gram index, etc.) defined as specializations of @Class.Index@.
+
+The unified concept allows every index (except the simple q-gram index) to be used just like a suffix tree indepently of its concrete implementation.
+To access this (virtual) suffix tree SeqAn offers various @Concept.Iterator.iterators@.
+
+
+
+...section:1. Create an index
+
+...text:
+A substring index is a specialization of the generic class @Class.Index@ which expects 2 arguments (the second is optional).
+The first template argument is the type of the data structure the index should be built on.
+In the following, we denote this type by $TText$.
+For example, this could be @Class.String.String<char>@ to create a substring index on a string of characters:
+...code:Index< String<char> > myIndex;
+...text: 
+or @Class.StringSet.StringSet<String<char> >@ to create an index on a set of character strings:
+...code:Index< StringSet<String<char> > > myIndex;
+
+...text:
+The second template argument of the @Class.Index@ class specifies the concrete implementation.
+In the following, we denote this type by $TSpec$.
+By default, this is @Spec.Index_ESA.Index_ESA<>@ to use an enhanced suffix array. 
+So, our first code example could also be written as:
+...code:Index< String<char>, Index_ESA<> > myIndex;
+
+...text:
+After we have seen how to instantiate an index object, we need to know how to assign a sequence the index should be built on.
+This can be done with the function @Function.indexText@ which returns a reference to a $TText$ object stored in the index or
+directly with the index constructor:
+...code:// this ...
+Index< String<char> > myIndex;
+indexText(myIndex) = "tobeornottobe";
+	
+// ... could also be written as
+Index< String<char> > myIndex("tobeornottobe");
+
+...text:
+
+
+
+...section:2. How to find a pattern
+
+...text:
+To find all occurrences of a pattern in an indexed @Class.String@ or a @StringSet@ SeqAn offers the @Class.Finder@ class
+To solve the dictionary problem see @Demo.Index@.
+...text:noch mehr Text.
+
+
+
+...section:3. Index implementation details
+
+...text:
+The following index implementations are currently part of SeqAn:
+...tableheader:$TSpec$|Implementation|Reference
+...table:@Spec.Index_ESA@|Enhanced suffix array|Kurtz et al., "Replacing Suffix Trees with Enhanced Suffix Arrays", 2004
+...table:@Spec.Index_Wotd@|Lazy suffix tree|Giegerich et al., "Efficient Implementation of Lazy Suffix Trees", 2003
+...table:@Spec.Index_QGram@|Simple q-gram index (aka k-mer index)|
+...table:@Spec.Index_QGram_Nested@|Nested q-gram index|
+
+
+
+..see:Spec.Single Pool Allocator
+..see:Spec.Multi Pool Allocator
+.
+
