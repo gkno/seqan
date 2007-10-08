@@ -15,7 +15,7 @@ SeqAn contains data structures to create, hold and use substring indices.
 Based on a unified concept, SeqAn offers several concrete implementations (e.g. enhanced suffix array, lazy suffix tree,
 q-gram index, nested q-gram index, etc.) defined as specializations of @Class.Index@.
 
-The unified concept allows every index (except the simple q-gram index) to be used just like a suffix tree indepently of its concrete implementation.
+The unified concept allows every index (except the simple q-gram index) to be accessed just like a suffix tree indepently of its concrete implementation.
 To access this (virtual) suffix tree SeqAn offers various @Concept.Iterator.iterators@.
 
 
@@ -57,11 +57,42 @@ Index< String<char> > myIndex("tobeornottobe");
 ...section:2. How to find a pattern
 
 ...text:
-To find all occurrences of a pattern in an indexed @Class.String@ or a @StringSet@, SeqAn provides the @Class.Finder@ class (see @Page.Searching.Finder tutorial@),
+To find all occurrences of a pattern in an indexed @Class.String@ or a @Class.StringSet@, SeqAn provides the @Class.Finder@ class (see @Page.Searching.searching tutorial@),
 which is also specialized for @Class.Index.indices@.
+The following example shows, how to use the @Class.Finder@ class specialized for our index to search the pattern $"be"$.
+...code:Finder< Index< String<char> > > myFinder(myIndex);
+while (find(myFinder, "be"))
+	cout << position(myFinder) << " ";
+
+//output: "11 2"
+
+...text:
+The finder object $myFinder$ was created with a reference to $myIndex$.
+The function @Function.find@ searches the next occurence of $"be"$ and returns $true$ if an occurrence was found and $false$ after all occurrences have been passed.
+
+The positition of an occurrence in the text is returned by the function @Function.position@ called with the @Class.Finder@ object.
+
+Please note that in contrast to online-search algorithms (see @Page.Searching.searching tutorial@) the returned occurrence positions are not ascending.
+As you can see in the code example above, the pattern $"be"$ was passed directly to the function @Function.find@ function.
+This is a shortcut for indices and could be also written in a longer way (already known from the @Page.Searching.searching tutorial@):
+...code:Finder< Index< String<char> > > myFinder(myIndex);
+Pattern< String<char> >         myPattern("be");
+while (find(myFinder, myPattern))
+	cout << position(myFinder) << " ";
+
+//output: "11 2"
+
+...section:3. Suffix trees
+...text:
+...image:streeSentinel:
+...image:streeNoSentinel:
+
+...section:3. Multiple sequences
+...text:
+If $TText$ was a @Class.StringSet@, $position(finder)$ would return a @Class.Pair@ $(seqNo,seqOfs)$ where $seqNo$ is the number and $seqOfs$ the local position of the sequence the pattern occurs at.
+
 
 To solve the dictionary problem see @Demo.Index@.
-...text:noch mehr Text.
 
 
 
