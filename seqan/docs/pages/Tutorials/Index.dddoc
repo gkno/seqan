@@ -84,6 +84,11 @@ while (find(myFinder, myPattern))
 
 ...section:3. Suffix trees
 ...text:
+A suffix tree of a given string $s$ is a directed tree whose edges are labeled with substrings of $s$
+so that each outgoing edge begins with a different letter and each suffix of $s$ is the concatenation of edges from the root to a leaf node.
+To be well-defined, the suffix tree is build of a string $s\$$ where \$ is smaller than any other character.
+
+The following image figure shows the suffix tree of the string $s="mississippi\$":
 ...image:streeSentinel:
 ...image:streeNoSentinel:
 
