@@ -84,13 +84,30 @@ while (find(myFinder, myPattern))
 
 ...section:3. Suffix trees
 ...text:
-A suffix tree of a given string $s$ is a directed tree whose edges are labeled with substrings of $s$
-so that each outgoing edge begins with a different letter and each suffix of $s$ is the concatenation of edges from the root to a leaf node.
-To be well-defined, the suffix tree is build of a string $s\$$ where \$ is smaller than any other character.
+A suffix tree of a given string $s$ is a directed tree whose edges are labeled with substrings of $s$ with the following properties:
+...text:
+1. Each outgoing edge begins with a different letter and the outdegree of an inner node is greater than 1.
+...text:
+2. Each suffix of $s$ is the concatenation of edges from the root to a leaf node.
+...text:
+3. Each path from the root to a leaf node is a suffix of $s$.
+...text:
+To be well-defined (especially 2.), it is necessary to append a sentinel character $$ at the end of $s$, which is smaller than every other character in the alphabet.
 
-The following image figure shows the suffix tree of the string $s="mississippi\$":
+The following figure shows the suffix tree of the string $s="mississippi$$"$ (suffix nodes are shaded):
 ...image:streeSentinel:
+Suffix tree of $mississippi$$$
+
+...text:
+Many suffix tree construction algorithms expect $$ to be part of the string alphabet which is undesirable for small bit-compressible alphabets (e.g. DNA).
+In SeqAn there is no need to introduce a $$. We relax criteria 2. and consider trees that arises by removing the $$ character and all empty edges.
+In that tree a suffix can end in an inner node as you can see in the next figure (suffix $i$):
 ...image:streeNoSentinel:
+Relaxed suffix tree of $mississippi$
+
+...subsection:3.1. How to access a suffix tree
+...text:
+
 
 ...section:3. Multiple sequences
 ...text:

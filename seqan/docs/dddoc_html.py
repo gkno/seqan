@@ -156,9 +156,12 @@ def translateText(text):
             str += c;
             in_escaped = False;
         elif in_code:
-            if c == '$': 
-                ret += translateCode(str)
-                str = ''
+            if c == '$':
+                if str != '': 
+                    ret += translateCode(str)
+                    str = ''
+                else:
+                     str = '$'
                 in_code = False
             else: str += c
         elif in_link:
@@ -169,8 +172,11 @@ def translateText(text):
             else: str += c
         else:
             if c == '$': 
-                ret += escapeHTML(str)
-                str = ''
+                if str != '': 
+                    ret += escapeHTML(str)
+                    str = ''
+                else:
+                    str = '$'
                 in_code = True
             elif c == '@':
                 ret += escapeHTML(str)
