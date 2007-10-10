@@ -60,7 +60,7 @@ Index< String<char> > myIndex("tobeornottobe");
 To find all occurrences of a pattern in an indexed @Class.String@ or a @Class.StringSet@, SeqAn provides the @Class.Finder@ class (see @Page.Searching.searching tutorial@),
 which is also specialized for @Class.Index.indices@.
 The following example shows, how to use the @Class.Finder@ class specialized for our index to search the pattern $"be"$.
-...code:Finder< Index< String<char> > > myFinder(myIndex);
+...code:Finder< Index<String<char> > > myFinder(myIndex);
 while (find(myFinder, "be"))
 	cout << position(myFinder) << " ";
 
@@ -75,8 +75,8 @@ The positition of an occurrence in the text is returned by the function @Functio
 Please note that in contrast to online-search algorithms (see @Page.Searching.searching tutorial@) the returned occurrence positions are not ascending.
 As you can see in the code example above, the pattern $"be"$ was passed directly to the function @Function.find@ function.
 This is a shortcut for indices and could be also written in a longer way (already known from the @Page.Searching.searching tutorial@):
-...code:Finder< Index< String<char> > > myFinder(myIndex);
-Pattern< String<char> >         myPattern("be");
+...code:Finder< Index<String<char> > > myFinder(myIndex);
+Pattern< String<char> >        myPattern("be");
 while (find(myFinder, myPattern))
 	cout << position(myFinder) << " ";
 
@@ -84,32 +84,111 @@ while (find(myFinder, myPattern))
 
 ...section:3. Suffix trees
 ...text:
-A suffix tree of a given string $s$ is a directed tree whose edges are labeled with substrings of $s$ with the following properties:
+We consider an alphabet \Sigma and a sentinel character $$ that is smaller than every character of \Sigma.
+A suffix tree of a given string $s$ over \Sigma is a directed tree whose edges are labeled with substrings of $s$$$ with the following properties:
 ...text:
 1. Each outgoing edge begins with a different letter and the outdegree of an inner node is greater than 1.
 ...text:
-2. Each suffix of $s$ is the concatenation of edges from the root to a leaf node.
+2. Each suffix of $s$$$ is the concatenation of edges from the root to a leaf node.
 ...text:
-3. Each path from the root to a leaf node is a suffix of $s$.
+3. Each path from the root to a leaf node is a suffix of $s$$$.
 ...text:
-To be well-defined (especially 2.), it is necessary to append a sentinel character $$ at the end of $s$, which is smaller than every other character in the alphabet.
 
-The following figure shows the suffix tree of the string $s="mississippi$$"$ (suffix nodes are shaded):
+The following figure shows the suffix tree of the string $s="mississippi"$ (suffix nodes are shaded):
 ...image:streeSentinel:
-Suffix tree of $mississippi$$$
+Suffix tree of $mississippi$
 
 ...text:
 Many suffix tree construction algorithms expect $$ to be part of the string alphabet which is undesirable for small bit-compressible alphabets (e.g. DNA).
-In SeqAn there is no need to introduce a $$. We relax criteria 2. and consider trees that arises by removing the $$ character and all empty edges.
+In SeqAn there is no need to introduce a $$. We relax suffix tree criteria 2. and consider the relaxed suffix tree that arises from the suffix tree of $s$ by removing the $$ character and all empty edges.
 In that tree a suffix can end in an inner node as you can see in the next figure (suffix $i$):
 ...image:streeNoSentinel:
 Relaxed suffix tree of $mississippi$
 
-...subsection:3.1. How to access a suffix tree
+...subsection:3.1. How to traverse a suffix tree
 ...text:
+In SeqAn a suffix tree can be accessed with special @Spec.VSTree Iterator.suffix tree iterators@, which differ in the way the tree nodes are traversed.
+For a lot of sequence algorithms it is neccessary to do a full @http://en.wikipedia.org/wiki/Depth-first_search@ depth-first search (dfs) over all suffix tree nodes beginning either in the root (preorder dfs) or in a leaf node (postorder dfs).
+A preorder traversal halts in a node when visiting it for the first time whereas a postorder traversal halts when visiting a node for the last time.
+The following two figures give an example in which order the tree nodes are visited:
+
+...image:streePreorder:
+Preorder dfs traversal
+...image:streePostorder:
+Postorder dfs traversal
+
+...text:
+A postorder traversal, also known as bottom-up traversal, can be realized with the @Spec.BottomUp Iterator@. 
+This iterator starts in the left-most (lexicographically smallest) leaf and provides the functions @Function.goNext@, @Function.atEnd@, and @Function.goBegin@ 
+to proceed with the next node in postorder, to test for having been visiting all nodes, and to go back to the first node of the traversal.
+The @Spec.BottomUp Iterator@ can be optained by the @Metafunction.Iterator@ meta-function called with an @Class.Index@ type and the $BottomUp$ specialization type.
+The following example shows how our index can be traversed as a suffix tree with $myIterator$ in a bottom-up fashion:
+
+...code:// postorder dfs
+Iterator< Index<String<char> >, BottomUp<> >::Type myIterator(myIndex);
+for (; !atEnd(myIterator); goNext(myIterator)) 
+	// do something with myIterator
+
+...text:
+Another kind of traversing the suffix tree provides the light-weight @Spec.TopDown Iterator@. 
+Starting in the root node the iterator can @Function.goDown@ the left-most edge, the edge beginning with a certain character or the path of a certain string.
+@Function.goRight@ can be used to go to the right (lexicographically larger) sibling of the current node.
+These functions return a $bool$ which indicates whether the iterator could successfully be moved.
+To visit the children of the root node in lexicographical ascending order you could write:
+
+...code:Iterator< Index<String<char> >, TopDown<> >::Type myIterator(myIndex);
+goDown(myIterator);
+while (goRight(myIterator)) 
+	// do something with myIterator
+
+...text:
+To go back to upper nodes you can either save copies of the @Spec.TopDown Iterator@ or use the heavier @Spec.TopDownHistory Iterator@ which stores the way back to the root and can @Function.goUp@.
+This is a specialization of the @Spec.TopDown Iterator@ and can be instantiated with $Iterator< Index<String<char> >, TopDown<ParentLink<> > >::Type myIterator(myIndex);$.
+
+As this iterator can randomly walk through the suffix tree it can easily be used to do a preorder or postorder dfs.
+Therefore this iterator also implements the functions @Function.goNext@ and @Function.atEnd@.
+The order of the dfs traversal can be specified with an optional template argument of $ParentLink<..>$ which can be @Tag.Preorder@ (default) \ldots
+
+...code:// preorder dfs
+Iterator< Index<String<char> >, TopDown<ParentLink<Preorder> > >::Type myIterator(myIndex);
+for (; !atEnd(myIterator); goNext(myIterator)) 
+	// do something with myIterator
+
+...text: \ldots or @Tag.Postorder@. As top-down iterators starts in the root node, the iterator must manually be moved down to the first postorder node which is the left-most leaf:
+
+...code:// postorder dfs
+Iterator< Index<String<char> >, TopDown<ParentLink<Postorder> > >::Type myIterator(myIndex);
+while (goDown(myIterator));
+for (; !atEnd(myIterator); goNext(myIterator)) 
+	// do something with myIterator
+
+...subsection:3.2. How to access a suffix tree
+...text:
+In the previous subsection we have seen how to walk through a suffix tree. 
+We now want to know what can be done with a suffix tree iterator.
+As all iterators are specializations of the general @Spec.VSTree Iterator@ class, they inherit all of its functions.
+There are various functions to access the node the iterator points at, so we concentrate on the most important ones.
 
 
-...section:3. Multiple sequences
+...subsection:3.3. Additional iterators
+...text:
+By now we know the following iterators (n=text size, \sigma=alphabet size, d=tree depth):
+...tableheader:Iterator|Implementation|Space|Index tables
+...table:@Spec.BottomUp@|postorder dfs|O(d)|SA, LCP
+...table:@Spec.TopDown@|can go down and go right|O(1)|SA, LCP, ChildTab
+...table:@Spec.TopDownHistory@|can also go up, preorder/postorder dfs|O(d)|SA, LCP, ChildTab
+
+...text:
+Besides the iterators described above, there are some application-specific iterators in SeqAn:
+...tableheader:Iterator|Implementation|Space|Index tables
+...table:@Spec.MaxRepeats@|maximal repeats|O(n)|SA, LCP, BWT
+...table:@Spec.SuperMaxRepeats@|supermaximal repeats|O(d+\sigma)|SA, LCP, ChildTab, BWT
+...table:@Spec.SuperMaxRepeatsFast@|supermaximal repeats (optimized for enh. suffix arrays)|O(\sigma)|SA, LCP, BWT
+...table:@Spec.MUMs@|maximal unique matches|O(d)|SA, LCP, BWT
+...table:@Spec.MultiMEMs@|maximal repeats over different sequences (w.i.p.)|O(n)|SA, LCP, BWT
+
+
+...section:4. Multiple sequences
 ...text:
 If $TText$ was a @Class.StringSet@, $position(finder)$ would return a @Class.Pair@ $(seqNo,seqOfs)$ where $seqNo$ is the number and $seqOfs$ the local position of the sequence the pattern occurs at.
 
@@ -118,7 +197,7 @@ To solve the dictionary problem see @Demo.Index@.
 
 
 
-...section:3. Index implementation details
+...section:5. Index implementation details
 
 ...text:
 The following index implementations are currently part of SeqAn:
