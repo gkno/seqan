@@ -485,6 +485,11 @@ namespace SEQAN_NAMESPACE_MAIN
     }
 
     template < typename TInput >
+	inline bool control(Pipe< TInput, Merger7 > &me, ControlEos const &) {
+		return control(me, ControlEof());
+    }
+
+    template < typename TInput >
     inline typename Size< Pipe< TInput, Merger7 > >::Type
     length(Pipe< TInput, Merger7 > const &me) {
         return length(me.in.in1) +
@@ -507,6 +512,11 @@ namespace SEQAN_NAMESPACE_MAIN
     template < typename TInput, typename TLimitsString >
 	inline bool control(Pipe< TInput, Merger7Multi<TLimitsString> > &me, ControlEof const &) {
 		return me.first == 5;
+    }
+
+    template < typename TInput, typename TLimitsString >
+	inline bool control(Pipe< TInput, Merger7Multi<TLimitsString> > &me, ControlEos const &) {
+		return control(me, ControlEof());
     }
 
     template < typename TInput, typename TLimitsString >
