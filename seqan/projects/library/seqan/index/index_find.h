@@ -1657,6 +1657,25 @@ namespace SEQAN_NAMESPACE_MAIN
 
     //////////////////////////////////////////////////////////////////////////////
 	// wrappers with nice interfaces
+	// find first element not before _Val, using operator<
+
+	template <
+		class TText,
+		class TSA,
+		class TSubText >
+	inline typename Iterator<TSA const>::Type lowerBoundSA(
+		TText const &text,
+		TSA const &sa,
+		TSubText const &subtext)
+	{
+		return _Lower_bound_sa(
+			begin(text), end(text),
+			toTreeIterator(begin(sa), length(sa), SortedList()),
+			begin(subtext), end(subtext));
+	}
+
+    //////////////////////////////////////////////////////////////////////////////
+	// wrappers with nice interfaces
 
 	template <
 		class TText,
@@ -1666,7 +1685,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TText const &text,
 		TSA const &sa,
 		TSubText const &subtext)
-	{	// find first element not before _Val, using operator<
+	{
 		return _Equal_range_sa(
 			begin(text), end(text),
 			toTreeIterator(begin(sa), length(sa), SortedList()),
@@ -1683,7 +1702,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TSA const &sa,
 		TLCPE const &lcpe,
 		TSubText const &subtext)
-	{	// find first element not before _Val, using operator<
+	{
 		return _Equal_range_lcp_enhanced(
 			begin(text), end(text),
 			begin(sa), end(sa),
@@ -1699,7 +1718,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TText const &text,
 		TLCPH const &hybrid,
 		TSubText const &subtext)
-	{	// find first element not before _Val, using operator<
+	{
 		return _Equal_range_hybrid(
 			begin(text), end(text),
 			TreeIterator<typename Iterator<TLCPH const>::Type, LeftCompleteTree>(begin(hybrid), (length(text)>1)?length(text)-1:0),
