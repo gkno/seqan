@@ -304,14 +304,12 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 	};
 */
 	template < typename TText, typename TSpec >
-	struct SAValue< Index<TText, TSpec> > {
-		typedef typename SAValue<TText>::Type Type;
-	};
+	struct SAValue< Index<TText, TSpec> >:
+		SAValue<TText> {};
 
 	template < typename TObject, typename TSpec >
-    struct DefaultIndexStringSpec< Index<TObject, TSpec> > {
-		typedef typename DefaultIndexStringSpec<TObject>::Type Type;
-    };
+	struct DefaultIndexStringSpec< Index<TObject, TSpec> >:
+		DefaultIndexStringSpec<TObject> {};
 
 //////////////////////////////////////////////////////////////////////////////
 // value and size type of an index
