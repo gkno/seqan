@@ -85,9 +85,8 @@ namespace SEQAN_NAMESPACE_MAIN
     };
 
 	template < typename TString, typename TSpec >
-    struct DefaultIndexStringSpec< StringSet<TString, TSpec> > {
-		typedef typename DefaultIndexStringSpec<TString>::Type Type;
-    };
+	struct DefaultIndexStringSpec< StringSet<TString, TSpec> >:
+		DefaultIndexStringSpec<TString> {};
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -248,15 +247,40 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Metafunction.SAValue:
+..cat:Index
+..summary:The default alphabet type of a suffix array, i.e. the type to store a position of a string or string set.
+..signature:SAValue<TObject>::Type
+..param.TObject:A string, string set, or index type.
+...type:Class.String
+...type:Class.StringSet
+...type:Class.Index
+..returns:A type to store a position. 
+...text:If $TObject$ is a @Class.String@, it is a single integer value. By default this is the @Metafunction.Size@ type of $TObject$.
+...text:If $TObject$ is a @Class.StringSet@, it could be a single integer too (called global position, see @Spec.ConcatDirect@) or a @Class.Pair@ (called local position, see @Spec.Owner@).
+Currently SeqAn defaults to a local position for @Class.StringSet@ classes (index_base.h):
+...code:template < typename TString, typename TSpec >
+struct SAValue< StringSet<TString, TSpec> > {
+	typedef Pair<
+		typename Size< StringSet<TString, TSpec> >::Type,
+		typename SAValue<TString>::Type,
+		Compressed
+	> Type;
+};
+..note:SAValue is the return type of various function, e.g. @Function.position@ for the @Class.Index@ @Class.Finder@ class, @Function.getOccurrence@, @Function.getOccurrences@ etc.
+You should always use the type of this meta-function to store the return values.
+If you want to write algorithms for both variants (local and global positions) you 
+should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Function.getSeqNo@ and @Function.getSeqOffset@.
+..note:If $TObject$ is an @Class.Index@, @Metafunction.Position@ returns the same value as $SAValue$. You can change the position type of an index by overloading $SAValue$, not @Metafunction.Position@.
+*/
 	template <typename TObject>
-	struct SAValue {
-		typedef typename Size<TObject>::Type Type;
-	};
+	struct SAValue:
+		Size<TObject> {};
 	
 	template <typename TObject>
-	struct SAValue<TObject const> {
-		typedef typename SAValue<TObject>::Type Type;
-	};
+	struct SAValue<TObject const>:
+		SAValue<TObject> {};
 	
 	// to speed up sequence number computation
 	// we use a pair of seqNo and localPosition
@@ -305,6 +329,10 @@ namespace SEQAN_NAMESPACE_MAIN
 			typename Fibre< Index<TText, TSpec>, Tag<_Fibre_RawText> >::Type 
 		>::Type Type;
     };
+
+	template < typename TText, typename TSpec >
+	struct Position< Index<TText, TSpec> >:
+		SAValue< Index<TText, TSpec> > {};
 
 //////////////////////////////////////////////////////////////////////////////
 // default table type
