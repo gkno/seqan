@@ -279,7 +279,6 @@ They differ if the index text is a set of strings. Then, raw text is the concate
 
 	struct _Finder_MLR;		// simple Suffix Array finder with mlr-heuristic
 	struct _Finder_LCPE;	// Suffix Array finder using an enhanced LCP-Table
-	struct _Finder_LCPH;	// hybrid of Suffix Array and Enhanced LCP (to reduce random accesses)
 
 /**
 .Tag.ESA_FIND_MLR:
@@ -466,7 +465,7 @@ SEQAN_CHECKPOINT
 		position(Finder & me)
 		{
 SEQAN_CHECKPOINT
-			if (empty(me)) return 0;
+			SEQAN_ASSERT(!empty(me))
 			return *me.data_iterator;
 		}
 
@@ -474,7 +473,7 @@ SEQAN_CHECKPOINT
 		position(Finder const & me)
 		{
 SEQAN_CHECKPOINT
-			if (empty(me)) return 0;
+			SEQAN_ASSERT(!empty(me))
 			return hostIterator(me) - begin(container(me), Rooted());
 		}
 
