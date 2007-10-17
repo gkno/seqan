@@ -1,14 +1,19 @@
 body, TD
 {
-    font-family: verdana,arial,helvetica,sans-serif;
-    font-size: 68%;
-    color: #000000;
+    font-family:verdana,arial,helvetica,sans-serif;
+    font-size: 76%;
+    color: #444444;
     margin: 0px;
     margin-right:17px;
 }
+div
+{
+    font-family:verdana,arial,helvetica,sans-serif;
+    color: #444444;
+}
 B
 {
-    color: #333333;
+    color: #444444;
 }
 A:link, A:visited
 {
@@ -37,7 +42,8 @@ A:hover, A:link, A:visited
 }
 #content
 {
-    width: 100%;
+    XXXwidth: 100%;
+    width:800px;
     padding: 8px;
 }
 .page_category
@@ -50,7 +56,7 @@ A:hover, A:link, A:visited
     border-bottom: 1px solid #999999;
     margin-bottom: 8px;
     padding-bottom: 4px;
-    color: #333333;
+    color: #444444;
 }
 .indexpage_title
 {
@@ -99,10 +105,11 @@ A:hover, A:link, A:visited
     font-style: normal;
     border: 1px solid #aaaaaa;
     background-color: #eeeeee;
-    padding-top: 2px;
-    padding-left: 8px;
-    padding-right: 8px;
-    padding-bottom: 3px;
+    color:#222222;
+    padding-top: 0.6em;
+    padding-left: 1em;
+    padding-right: 1em;
+    padding-bottom: 0.7em;
 }
 #signature
 {
@@ -111,15 +118,15 @@ A:hover, A:link, A:visited
 }
 .code_block
 {
-    margin-top: 6px;
-    margin-bottom: 6px;
-    margin-left: 12px;
-    margin-right: 12px;
+    margin-bottom:1em;
+    margin-top:1em;
+    margin-left: 2em;
+    margin-right: 2em;
 }
 .code_sub_block
 {
-    margin-top: 6px;
-    margin-bottom: 6px;
+    margin-bottom:1em;
+    margin-top:1em;
     margin-left: 0px;
     margin-right: 0px;
 }
@@ -137,21 +144,36 @@ A:hover, A:link, A:visited
 {
     font-weight: bold;
     margin-bottom: 2px;
-    color: #333333;
+    color: #444444;
 }
 .section_sub_headline
 {
     font-weight: bold;
     margin-bottom: 2px;
-    color: #333333;
+    color: #444444;
 }
 .section_headline_explicite
 {
     font-weight: bold;
-    margin-top: 10px;
+    margin-top: 1em;
     margin-bottom: 2px;
-    color: #333333;
+    color: #444444;
 }
+.section_sub_headline_explicite
+{
+    font-weight: bold;
+    margin-top: 1em;
+    margin-bottom: 2px;
+    color: #444444;
+}
+
+#description .section_headline_explicite
+{
+    font-weight:normal;
+    color:#222222;
+    font-size:150%;
+}
+
 .section
 {
     margin-bottom: 10px;
@@ -160,10 +182,12 @@ A:hover, A:link, A:visited
 {
     margin-left: 16px;   
     font-family: 'courier new', courier, monospace;
+    color:#222222;
 }
 .code, #param .value_key
 {
     font-family: 'courier new', courier, monospace;
+    color:#222222;
     font-style: normal;
 }
 .page_footline
@@ -289,10 +313,10 @@ A:hover, A:link, A:visited
 
 .table_explicite
 {
-    margin-top: 4px;
+    margin-top: 0.6em;
     margin-left: 12px;
     margin-right: 12px;
-    margin-bottom: 4px;
+    margin-bottom: 0.7em;
     padding-left: 0px;
     padding-right: 0px;
     border-top: 1px solid #999999;
@@ -331,7 +355,7 @@ A:hover, A:link, A:visited
 .image_sub_block table
 {
 	border:1px dashed #999999;
-	margin:8px;
+	margin:1em 8px 1em 8px;
 }
 .image_sub_block_caption
 {
@@ -348,6 +372,7 @@ A:hover, A:link, A:visited
 {
     font-family: 'courier new', courier, monospace;
     margin-bottom:8px;
+    color:#222222;
 }
 .codefile .linenumber
 {
@@ -359,6 +384,7 @@ A:hover, A:link, A:visited
 {
     font-family: 'courier new', courier, monospace;
     width:100%;
+    color:#222222;
 }
 .codefile .comment
 {
@@ -368,4 +394,15 @@ A:hover, A:link, A:visited
 .broken_link
 {
     color:red;
+}
+
+#description
+{
+    line-height:1.4;
+    font-size:115%;
+    margin-left:10px;
+}
+#description .code_block, #description .code_sub_block
+{
+    line-height:1.2;
 }
