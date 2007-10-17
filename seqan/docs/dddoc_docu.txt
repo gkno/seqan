@@ -10,7 +10,8 @@ Version: 2.0
 - Sie ist auf mehrere Dateien verteilt.
 - Diese Dateien sind entweder spezielle dddoc-Dateien (Endung: ".dddoc"), oder aber C++-Sourcen.
 - In C++ Sourcen gelten Kommentare, die mit /** oder mit /// beginnen, als Bereiche, in denen dddoc-Information steht.
-- Python-Skripts durchsuchen alle Dateien des Projekts, sammeln die Information zusammen und generieren anschlieﬂend daraus die Dokumentation.
+- Python-Skripts durchsuchen alle Dateien des Projekts, sammeln die Information zusammen und generieren anschlieﬂend daraus die Dokumentation. 
+- Unter Windows baut man die Doku mit "make.bat", unter Linux mit "make.sh". Dabei kann man als optionale Argumente die Module angeben, deren Dokumentation gebaut werden soll. Wird kein Modul angegeben, so wird die komplette Doku gebaut. Mˆchte man ausschlieﬂlich die "statischen Seiten" (d.h. alles was unter dem Verzeichnis /docs liegt, z.B. die Tutorials und die Konzepte) bauen, so kann man einfach einen Fantasie-Modulnamen angeben (z.B. "make.bat blablabla").
 - Bislang ist die generierte Dokumentation in HTML, sp‰ter soll z.B. auch LaTeX dazu kommen.
 
 
