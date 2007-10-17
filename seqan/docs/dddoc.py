@@ -428,6 +428,39 @@ def splitName(line):
 
 ################################################################################
 
+def splitUrl(line):
+    pos = 0
+    key = ""
+    c_quoted = ""
+    is_escaped = False
+    li = []
+    while (pos < len(line)):
+        c = line[pos]
+        if c_quoted != "":
+            if c_quoted == c: c_quoted = ""
+            else: key += c                       
+        elif is_escaped: 
+            key += c
+            is_escaped = False
+        else:
+            if c == '\\': is_escaped = True
+            elif c in ['"', "'"]: c_quoted = c
+            elif c == '|':
+                if key != "":
+                    li.append(key)
+                    key = ""
+            elif c != '\n':
+                key += c
+                
+        pos += 1    
+    
+    if key != "": li.append(key)
+    
+    return li
+
+
+################################################################################
+
 def loadFiles(search_path):
     for root, dirs, files in os.walk(search_path):
         for file in files:

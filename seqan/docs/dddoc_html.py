@@ -6,15 +6,18 @@ import operator
 from os import F_OK
 
 
+
 ################################################################################
 
 def createDocs(path):
-    if not os.access(path, os.F_OK):
+    global globalDocsPath
+    globalDocsPath = path
+    if not os.access(path, os.F_OK): 
         os.mkdir(path)
-    copyFile(path, "dddoc_html.css")    
-    copyFile(path, "seqan_logo.gif")    
-    copyFile(path, "dddoc_plus.gif")    
-    copyFile(path, "dddoc_minus.gif")    
+    copyFile(path, "dddoc_html.css")
+    copyFile(path, "seqan_logo.gif")
+    copyFile(path, "dddoc_plus.gif")
+    copyFile(path, "dddoc_minus.gif")
     createPages(path)
     createIndexes(path)
 
@@ -172,7 +175,7 @@ def translateText(text):
             else: str += c
         else:
             if c == '$': 
-                if str != '': 
+                if str != '' or pos == 0: 
                     ret += escapeHTML(str)
                     str = ''
                 else:
@@ -225,18 +228,29 @@ def brokenLink(text):
 ################################################################################
 
 def translateLink(text):
+    if text.find("http:", 0, 5) == 0: 
+        arr = dddoc.splitUrl(text)
+        if len(arr) == 0: return brokenLink(text)
+        return '<a href="' + arr[0] + '">' + arr[len(arr) - 1] + '</a>'
+
     arr = dddoc.splitName(text)
     if len(arr) < 2: return brokenLink(text)
 
     obj = dddoc.DATA[arr[0]][arr[1]];
     if obj.empty(): return brokenLink(text);
-    
-    summary = translateTooltip(obj["summary"].text());
+
+    href = getFilename(arr[0], arr[1])
+    doc_path = os.path.join(globalDocsPath, href)
+    #if not os.access(doc_path, os.F_OK): 
+    #    return brokenLink(text);
+
+    if obj.empty(): 
+        summary = '';
+    else:
+        summary = translateTooltip(obj["summary"].text());
     if len(summary) > 0:
         summary = 'title="' + summary + '"'
     
-    href = getFilename(arr[0], arr[1])
-
     return '<a href="' + href + '" ' + summary + '>' + translateID(arr[len(arr) - 1]) + '</a>'
 
 ################################################################################
