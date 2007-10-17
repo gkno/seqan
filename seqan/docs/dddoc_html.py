@@ -275,12 +275,23 @@ def translateImage(text):
 
 ################################################################################
     
+#sortname
+def translateID4Sorting(text):
+    i = text.find('#');
+    if (i >= 0):
+        text = text[i + 1:]
+    return translateText(text)
+
+#real displayname
 def translateID(text):
     i = text.find('#');
     if (i >= 0):
-        text = text[i + 1: len(text)]
+        text = text[i + 1:]
+    i = text.find('|');
+    if (i >= 0):
+        text = text[i + 1:]
     return translateText(text)
-        
+          
 ################################################################################
 
 def getBeforeColon(text):
@@ -348,8 +359,9 @@ def pageIndex(fl, cat, subcat = ""):
                         s = '<div class=index_item>'
                         s += '<a class=index_link id="' + key + '" target=_top title="' + translateID(key) + '" href="' + getFilename(cat, key) + '">' + translateID(key) + '</a>'
                         s += '</div>'
-                        if not entries[subcat2].has_key(translateID(key)): entries[subcat2][translateID(key)] = ''
-                        entries[subcat2][translateID(key)] += s
+                        key4sorting = translateID4Sorting(key)
+                        if not entries[subcat2].has_key(key4sorting): entries[subcat2][key4sorting] = ''
+                        entries[subcat2][key4sorting] += s
                         
             keys = entries.keys()
             keys.sort()
@@ -434,8 +446,9 @@ def addIndexPageMembers(data, key, entries, subcat):
     
     s += '</td></tr>'
     
-    if not entries[subcat].has_key(translateID(key)): entries[subcat][translateID(key)] = ''
-    entries[subcat][translateID(key)] += s
+    key4sorting = translateID4Sorting(key)
+    if not entries[subcat].has_key(key4sorting): entries[subcat][key4sorting] = ''
+    entries[subcat][key4sorting] += s
 
 ################################################################################
 

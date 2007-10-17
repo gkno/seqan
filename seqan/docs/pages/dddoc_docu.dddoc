@@ -55,7 +55,10 @@ Ein Pfad wird als Unterpfad eines vorangegangenen Pfades des selben Kommentarblo
 ...section:3. Entries
 ...text:
 Die Dokumentation besteht aus einer Reihe von Entries.
-Jeder Entry in dddoc hat einen Pfad der Form "[Category].[Name]"
+Jeder Entry in dddoc hat einen Pfad der Form "[Category].[Name]".
+
+...subsection:3.1 Categories
+
 ...text:Im Moment gibt es folgende Kategorien von Entries: 
 ...table:"Page"|Generelle Seiten, z.B. Tutorials usw.
 ...table:"Concept"|Konzepte
@@ -76,10 +79,16 @@ Jeder Entry in dddoc hat einen Pfad der Form "[Category].[Name]"
     
 ...text:Unterkategorien werden mit dem "cat"-Entry spezifiziert.
 
+...subsection:3.2 Names
+
 ...text:[Name] ist der Name der in diesem Eintrag dokumentierten Entit\"at, d.h. der Funktion, Klasse, usw. 
     Wenn ein anderer Name als Titel angezeigt werden soll, so verwende man ein "title"-Field.
+...text:
     Enth\"alt der Name ein "#"-Zeichen, so wird lediglich der String hinter dem (ersten) "#"-Zeichen dargestellt.
     Dies sollte z.B. bei Memfunc und Memvar-Eintr\"agen geschehen: Vor dem "#"-Zeichen schreibe man den Klassennamen, hinter das "#"-Zeichen den Namen des Members.
+...text:\"Ahnlich verh\"alt es sich, wenn ein "\pipe"-Zeichen im Namen vorkommt: Alles vor dem "\pipe"-Zeichen (incl. des Zeichens selbst) wird weggeschnitten.
+    Anders als "#" wirkt sich "\pipe" jedoch nicht auf die Sortierung der Namen in Men\"us und Listen aus. Somit kann man den Text vor dem ersten "\pipe"-Zeichen dazu verwenden, 
+    die Reihenfolge der Namen zu manipulieren.
 
 ...section:4 Fields
 ...text:
@@ -185,5 +194,6 @@ In Texten (nicht in den ID-Strings) sind auch LaTeX-Sonderzeichen erlaubt, z.B. 
 Au\sserdem kann man auf diese Weise auch deutsche Umlaute und Sonderzeichen setzen, z.B. erzeugen \\"a und \\ss die Zeichen \"a bzw. \ss.
 In dddoc reservierte Zeichen k\"onnen auf diese ebenfalls escaped werden: \\dot, \\quote, \\at, \\pipe, \\dollar und \\backslash erzeugen \dot, \quote, \at, \pipe, \dollar bzw. \backslash.
 Die Liste mit allen verf\"ugbaren Zeichen steht in dddoc_html_trans.py.
+...text:Andere M\o"glichkeiten, Sonderzeichen zu "escapen": \\\\ steht f\"ur \\, \dollar\dollar steht f\"ur \dollar.
 ...text:
 Soll innerhalb eines Text-Fields/Subfields ein Text als C++-Code gesetzt werden, so schreibt man ihn zwischen zwei \dollar. z.B.: \dollarint x\dollar erzeugt: $int x$.
