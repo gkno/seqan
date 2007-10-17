@@ -924,7 +924,7 @@ def subprintText(fl, data, subcategory = False):
             headline = ''
             
         elif name == 'subsection': 
-            headline = '<span class=section_sub_headline>' + translateText(line.text()) + '</span>'
+            headline = '<div class=section_sub_headline_explicite>' + translateText(line.text()) + '</div>'
             
         elif name == 'text': 
             s = translateText(line.text())
