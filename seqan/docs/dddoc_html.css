@@ -93,6 +93,12 @@ A:hover, A:link, A:visited
     margin-right: 0px;
     margin-bottom: 4px;
 }
+#description .text_sub_block
+{
+    padding-top: 0.3em;
+    padding-bottom: 0.4em;
+}
+
 .text_block_indent
 {
     margin-left: 32px;
@@ -399,7 +405,7 @@ A:hover, A:link, A:visited
 #description
 {
     line-height:1.4;
-    font-size:115%;
+    font-size:112%;
     margin-left:10px;
 }
 #description .code_block, #description .code_sub_block
