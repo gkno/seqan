@@ -371,6 +371,9 @@ def parseString(str, context):
     c_quoted = ''
     while (pos < len(str)):
         c = str[pos]
+        if c == "\x0d":
+            pos += 1
+            continue
         if c_quoted != "":
             if c_quoted == c: c_quoted = ""
             else: key += c                       
