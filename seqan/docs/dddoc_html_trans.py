@@ -1,5 +1,25 @@
 def translate(text):
    
+
+#deutsche Umlaute und Sonderzeichen
+
+    text = text.replace("\\\"a", "&auml;")
+    text = text.replace("\\\"o", "&ouml;")
+    text = text.replace("\\\"u", "&uuml;")
+    text = text.replace("\\\"A", "&Auml;")
+    text = text.replace("\\\"O", "&Ouml;")
+    text = text.replace("\\\"U", "&Uuml;")
+    text = text.replace("\\3", "&szlig;")
+    text = text.replace("\\ss", "&szlig;")
+
+#escapen spezieller Zeichen
+    text = text.replace("\\dot", ".")
+    text = text.replace("\\at", "@")
+    text = text.replace("\\pipe", "|")
+    text = text.replace("\\dollar", "$")
+    text = text.replace("\\quote", "\"")
+    text = text.replace("\\backslash", "\\")
+
 #Vergleiche
 
     text = text.replace("\\neq", "&#x2260;")

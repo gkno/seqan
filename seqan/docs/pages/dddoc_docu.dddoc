@@ -1,0 +1,189 @@
+.Page.dddoc
+..summary:The documentation system "dot-dot-doc" (german text).
+..description
+...text:
+SeqAn verwendet ein spezielles Dokumentationssystem, genannt "dot-dot-doc", kurz "dddoc". 
+Dieser Text dokumentiert das Dokumentationssystem.
+...section:1. Prinzipien
+...text:
+Die Dokumentation ist eine gro\sse, hierarchisch gegliederte Datenstruktur ("Baum").
+Sie ist auf mehrere Dateien verteilt.
+Diese Dateien sind entweder spezielle dddoc-Dateien (Endung: ".dddoc"), oder aber C++-Sourcen.
+In C++ Sourcen gelten Kommentare, die mit /** oder mit /// beginnen, als Bereiche, in denen dddoc-Information steht.
+Python-Skripts durchsuchen alle Dateien des Projekts, sammeln die Information zusammen und generieren anschlie\ssend daraus die Dokumentation. 
+Unter Windows baut man die Doku mit "make.bat", unter Linux mit "make.sh". Dabei kann man als optionale Argumente die Module angeben, deren Dokumentation gebaut werden soll. Wird kein Modul angegeben, so wird die komplette Doku gebaut. M\"ochte man ausschlie\sslich die "statischen Seiten" (d.h. alles was unter dem Verzeichnis /docs liegt, z.B. die Tutorials und die Konzepte) bauen, so kann man einfach einen Fantasie-Modulnamen angeben (z.B. "make.bat blablabla").
+Bislang ist die generierte Dokumentation in HTML, sp\"ater soll z.B. auch LaTeX dazu kommen.
+
+...section:2. Notation
+...text:
+Die Dokumentation wird in Form eines dddoc-Baumes gespeichert.
+Jeder Konten in einem dddoc-Baum besitzt einen ID-String.
+Den Pfad im dddoc-Baum von der Wurzel zu einem Knoten notiert man durch Aufz\"ahlen der ID-Strings aller Knoten auf diesem Pfad, wobei man die ID-Strings durch "." voneinander abtrennt, z.B.: "Tiere.Haustiere.Hunde.Waldi"
+...text:
+Jeder Knoten in einem dddoc-Baum besitzt einen (eventuell leeren) Text. Existieren mehrere Eintr\"age f\"ur den gleichen Knoten, so werden alle Texte hintereinander geh\"angt.
+...text:
+Ein Eintrag in die Datenstruktur hat die Form ".[Pfad]:[Text]". Dabei muss der Eintrag mit einer neuen Zeile beginnen, d.h. das erste Zeichen in der Zeile ist ".".
+Ein Pfad wird als Unterpfad eines vorangegangenen Pfades des selben Kommentarblocks interpretiert, wenn er mit einem Punkt beginnt. Beginnt ein Pfad mit n Punkten, so bezieht er sich auf den letzten davor stehenden Pfad mit n-1 Punkten. 
+
+...subsection:Beispiel 1
+
+...code:.Tiere.Haustiere
+\dot.Hund.Waldi
+\dot..Name:Waldemar
+\dot..Alter:5
+\dot.Katze.Minka
+\dot..Alter:2
+
+...text:Das ist das selbe wie:
+
+...code:.Tiere.Haustiere.Hund.Waldi.Name:Waldemar
+\dotTiere.Haustiere.Hund.Waldi.Alter:5
+\dotTiere.Haustiere.Katze.Minka.Alter:2
+
+...subsection:Beispiel 2
+
+...code:.Adresse.Name:Andreas D\"oring
+\dot.Kommentar:Dies ist ein Kommentar,
+ der \"uber mehrere Zeilen geht.
+\dot.Kommentar:Dies wird an den anderen Kommentar angeh\"angt.
+
+...subsection:Beispiel 3
+
+...code:.Domainen."www.microsoft.com":Microsoft Homepage
+
+
+...section:3. Entries
+...text:
+Die Dokumentation besteht aus einer Reihe von Entries.
+Jeder Entry in dddoc hat einen Pfad der Form "[Category].[Name]"
+...text:Im Moment gibt es folgende Kategorien von Entries: 
+...table:"Page"|Generelle Seiten, z.B. Tutorials usw.
+...table:"Concept"|Konzepte
+...table:"Class"|Klassen
+...table:"Spec"|Spezialisierungen
+...table:"Shortcut"|Shortcuts
+...table:"Function"|(globale) Funktionen
+...table:"Memfunc"|Memberfunktionen
+...table:"Memvar"|Membervariablen
+...table:"Metafunction"|Metafunktionen
+...table:"Tag"|Tag
+...table:"Adaption"|Adaptoren
+...table:"Demo"|Beispielprogramme
+
+...text:Au\sserdem gibt es folgende technische Kategorien:        
+...table:"Internal"|dient zur Dokumentation interner Entit\"aten, die nicht zum offiziellen Benutzerinterface der Bibliothek geh\"oren. Auf Entit\"aten dieser Kategory sollte aus anderen Kategorien heraus nicht verlinkt werden oder umgekehrt.
+...table:"globals"|speichert Metainformation und Konstanten, die bei der Erzeugung der Dokumentation verwendet werden. Au\sserdem werden die Indexpages f\"ur die einzelnen Kategorien hier definiert.
+    
+...text:Unterkategorien werden mit dem "cat"-Entry spezifiziert.
+
+...text:[Name] ist der Name der in diesem Eintrag dokumentierten Entit\"at, d.h. der Funktion, Klasse, usw. 
+    Wenn ein anderer Name als Titel angezeigt werden soll, so verwende man ein "title"-Field.
+    Enth\"alt der Name ein "#"-Zeichen, so wird lediglich der String hinter dem (ersten) "#"-Zeichen dargestellt.
+    Dies sollte z.B. bei Memfunc und Memvar-Eintr\"agen geschehen: Vor dem "#"-Zeichen schreibe man den Klassennamen, hinter das "#"-Zeichen den Namen des Members.
+
+...section:4 Fields
+...text:
+Fields definieren die Eigenschaften der Entries. 
+Ein Field hat einen Pfad der Form "[Category].[Name].[Field]":
+
+...subsection:Spezielle Fields
+
+...table:"title"|Titel der Seite (optional). Default ist [Name].
+...table:"summary"|Kurzbeschreibung des Entrys. L\"angere Beschreibungen in "remarks" oder "description".
+...table:"cat"|Unterkategorie. 
+        Die Dokumentation erscheint in der Dokumentation unterhalb von [Category] in einem Unterordner. 
+        Ein Entry kann mehrere Unterkategorien besitzen, in diesem Fall erscheint die Dokumentation in verschiedenen Unterordnern.
+...table:"signature"|Abstrahiertes Codest\"uck, dass die Verwendung der Entit\"at verdeutlicht. 
+        Beispiel: "length(container)"
+...table:"file"|Zeigt einen Sourcefile an. Angegeben wird der Pfad auf eine .cpp-Datei. Sollte der \"Ubersicht halber nur in Demo-Entries eingesetzt werden.
+Zeilen im Sourcefile, die mit "///" beginnen, werden als Kommentar gesetzt.
+...table:"hidefromindex"|Entry nicht in Indexen (Navigation/\"Ubersichtsseiten) auff\"uhren.
+
+...subsection:Text Fields
+...table:"description"|Ausf\"uhrlicher Text. Wird z.B. f\"ur Tutorials verwendet. 
+...table:"example"|Beispieltext oder -code.
+...table:"include"|Name des Header-Files, das included werden muss, um die Entit\"at zu benutzen.
+...table:"remarks"|Kommentartext oder -code.
+...table:"returns"|R\"uckgabewert. Bei verschiedenen R\"uckgabewerten verwende man unterhalb von "return" das Subfield "param".
+    
+...subsection:Tabellen von Text Fields
+...text:Die Kindknoten unterhalb der eines Tabellen Fields werden alphabetisch sortiert in Form einer Tabelle ausgebeben, und zwar als Text Fields.
+...table:"param"|Funktionsargument. z.B. "..param.length:length of a field"
+...table:"value"|Ein Wert, den die Entit\"at annehmen kann.
+
+...subsection:Link Fields
+...text:Link Fields verkn\"upfen Entries untereinander.
+...table:"baseconcept"|Link auf Concept. Bei Concept: Basiskonzept. (erzeugt R\"uckverweis: "childconcept")
+...table:"class"|Link auf Class oder Spec. Bei Memfunc oder Memvar: Name der zu der Entit\"at geh\"orenden Klasse. (erzeugt R\"uckverweis "memfunc" oder "memvar")
+...table:"concept"|Link auf Concept. Concept fordert die Existenz des Entrys, um erf\"ullt zu sein. 
+...table:"demo"|Link auf eine Demo. Demo zeigt die Verwendung des Entrys. (erzeugt R\"uckverweis "demofor")
+...table:"general"|Bei Spec: Die zugeh\"orige generelle Klasse. (erzeugt R\"uckverweis "spec")
+...table:"implements"|Concept, das die aktuelle Klasse/Spec implementiert
+...table:"see"|Querverweis zu einem anderen Entry. (erzeugt R\"uckverweis "see").
+...table:"base"|Link auf Class oder Spec. Bei Class oder Spec: Die Basisklasse. (erzeugt R\"uckverweis: "derived")
+...table:"shortcutfor"|Link auf Entry, f\"ur den der aktueller Entry ein Shortcut ist. (erzeugt R\"uckverweis: "shortcut")
+
+...text: 
+    Es gibt au\sserdem folgende Link Fields, von deren Benutzung jedoch abgeraten wird, da sich die wechselseitigen Verlinkungen auch mit den oben genannten Link Fields vornehmen lassen:
+...table:"demofor"|Bei Demo: Link auf in Demo verwendete Entit\"at. (erzeugt R\"uckverweis "demo")
+...table:"derived"|Bei Spec oder Class: Eine Spezialisierung.
+...table:"memfunc"|Bei Class oder Spec: Eine Memberfunktion.
+...table:"memvar"|Bei Class oder Spec: Eine Membervariable.
+...table:"spec"|Bei Class oder Spec: Eine Spezialisierung.
+...table:"type"|Bei Class oder Spec: Eine Metafunktion (wird erzeugt als R\"uckverweis durch "param.[Name].type" in Metafunktion
+...table:"function"|Bei Class oder Spec: Eine Funktion (wird erzeugt als R\"uckverweis durch "param.[Name].type", "returns.type" oder "returns.[Name].type" in Funktion
+...table:"conceptmetafunc"| R\"uckverweise f\"ur "concept"
+...table:"conceptmemvar"| R\"uckverweise f\"ur "concept"
+...table:"conceptmemfunc"| R\"uckverweise f\"ur "concept"
+...table:"conceptfunc"| R\"uckverweise f\"ur "concept"
+...table:"conceptusedby"| R\"uckverweise f\"ur "concept"
+...table:"conceptimplements"|R\"uckverweis f\"ur "implements"
+...table:"childconcept"|R\"uckverweis f\"ur "baseconcept"
+...table:"shortcut"|Link auf Shortcut. (erzeugt R\"uckverweis "shortcutfor")
+
+
+...section:5 Subfields
+...text:Kindknoten unterhalb von Text Fields. 
+
+...subsection:Freie Subfields
+...text:
+    Werden in der Reihenfolge ihres Auftretens in den Sources ausgegeben. Alle anderen hier aufgef\"uhrten Subfields hingegen zusammengefasst und jeweils unterhalb einer Subsection-\"Uberschrift angezeigt.
+...table:"section"|F\"ugt \"Uberschrift f\"ur eine neue Sektion ein.
+...table:"subsection"|F\"ugt \"Uberschrift f\"ur eine neue Untersektion ein.
+...table:"text"|ein Textabsatz.
+...table:"note"|ein hervorgehobener Textabsatz.
+...table:"code"|ein St\"uck Beispielcode.
+...table:"image"|F\"ugt ein Bild ein. Angegeben wird der Name (opt. mit relativem Pfad) ohne Endung auf ein Bild. Bei HTML-Export wird automatisch ".png" angeh\"angt. Bilder sollten im "img"-Ordner abgelegt werden. Optional kann hinter einem weiteren ":" eine Bildunterschrift angegeben werden. z.B. "..remarks.image:seqan_logo_large:Dies ist das gro\sse SeqAn-Logo."
+...table:"table"|Anzeigen einer Tabellenzeile. Die Spalten werden mit "\pipe" voneinander abgetrennt. Hintereinander stehende "table"- und "tableheader"-Subfields werden zu einer gemeinsamen Tabelle zusammengef\"ugt.
+...table:"tableheader"|Anzeigen einer hervorgehobenen Tabellenzeile (Spalten\"uberschriften). Hintereinander stehende "table"- und "tableheader"-Subfields werden zu einer gemeinsamen Tabelle zusammengef\"ugt.
+
+...subsection:Text Subfields
+...table:"value"|Ein Wert.
+...table:"default"|Defaultwert.
+...table:"remarks"|Kommentartext oder -code.
+    
+...subsection:Tabellen von Text Subfields:
+...table:"param"|Liste von Parametern. Wird z.B. bei "returns" verwendet, um verschiedene R\"uckgabewerte aufzulisten.
+
+...subsection:Link Subfields
+...table:"metafunktion"|Link auf eine Metafunktion. Bei "param"- oder "return"-Fields z.B. diejenige Metafunktion, die den Typ des Arguments bzw. R\"uckgabewerte liefert.
+...table:"type"|Link auf einen Typ (Class, Spec oder Adaption). Bei "param"- oder "return"-Fields z.B. der Typ des Arguments bzw. R\"uckgabewertes. (erzeugt R\"uckverweis: "function" Function, "type" bei metafunction.)
+...table:"concept"|Link auf ein Concept. Bei "param"-Fields z.B. ein Concept, welches das Argument erf\"ullen muss. (erzeugt R\"uckverweis: "conceptusedby")
+...table:"see"|Link auf einen anderen Entry. (erzeugt keinen R\"uckverweis)
+   
+
+...section:6. Links
+...text:
+ Interne Links verweisen auf Entries und werden so geschrieben: "[Category].[Name]".
+ Links auf externe URLs beginnen mit "http://".
+ Soll ein anderer Text als "Name" als Link angezeigt werden, so verwendet man bei internen Links "[Category].[Name].[Displaytext]". Bei externen Links Steht der Displaytext hinter einem "\pipe"-Zeichen, z.B. "http://www.microsoft.com\pipeein Link zu Microsoft".
+ Innerhalb von Text-Fields/Subfields kann man Links einf\"ugen, indem man sie zwischen \at-Zeichen schreibt, z.b. "klicken Sie \atClass.String.hier\at!" erzeugt: klicken Sie @Class.String.hier@!
+
+...section:7. Textformatierung
+...text:
+In Texten (nicht in den ID-Strings) sind auch LaTeX-Sonderzeichen erlaubt, z.B. erzeugen \\Sigma, \\in und \\leftarrow die Zeichen \Sigma, \in bzw. \leftarrow. 
+Au\sserdem kann man auf diese Weise auch deutsche Umlaute und Sonderzeichen setzen, z.B. erzeugen \\"a und \\ss die Zeichen \"a bzw. \ss.
+In dddoc reservierte Zeichen k\"onnen auf diese ebenfalls escaped werden: \\dot, \\quote, \\at, \\pipe, \\dollar und \\backslash erzeugen \dot, \quote, \at, \pipe, \dollar bzw. \backslash.
+Die Liste mit allen verf\"ugbaren Zeichen steht in dddoc_html_trans.py.
+...text:
+Soll innerhalb eines Text-Fields/Subfields ein Text als C++-Code gesetzt werden, so schreibt man ihn zwischen zwei \dollar. z.B.: \dollarint x\dollar erzeugt: $int x$.
