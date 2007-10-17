@@ -94,7 +94,7 @@ Ein Field hat einen Pfad der Form "[Category].[Name].[Field]":
         Die Dokumentation erscheint in der Dokumentation unterhalb von [Category] in einem Unterordner. 
         Ein Entry kann mehrere Unterkategorien besitzen, in diesem Fall erscheint die Dokumentation in verschiedenen Unterordnern.
 ...table:"signature"|Abstrahiertes Codest\"uck, dass die Verwendung der Entit\"at verdeutlicht. 
-        Beispiel: "length(container)"
+        Beispiel: "$length(container)$"
 ...table:"file"|Zeigt einen Sourcefile an. Angegeben wird der Pfad auf eine .cpp-Datei. Sollte der \"Ubersicht halber nur in Demo-Entries eingesetzt werden.
 Zeilen im Sourcefile, die mit "///" beginnen, werden als Kommentar gesetzt.
 ...table:"hidefromindex"|Entry nicht in Indexen (Navigation/\"Ubersichtsseiten) auff\"uhren.
@@ -115,8 +115,8 @@ Zeilen im Sourcefile, die mit "///" beginnen, werden als Kommentar gesetzt.
 ...text:Link Fields verkn\"upfen Entries untereinander.
 ...table:"baseconcept"|Link auf Concept. Bei Concept: Basiskonzept. (erzeugt R\"uckverweis: "childconcept")
 ...table:"class"|Link auf Class oder Spec. Bei Memfunc oder Memvar: Name der zu der Entit\"at geh\"orenden Klasse. (erzeugt R\"uckverweis "memfunc" oder "memvar")
-...table:"concept"|Link auf Concept. Concept fordert die Existenz des Entrys, um erf\"ullt zu sein. 
-...table:"demo"|Link auf eine Demo. Demo zeigt die Verwendung des Entrys. (erzeugt R\"uckverweis "demofor")
+...table:"concept"|Link auf Concept. Concept fordert die Existenz des Entries, um erf\"ullt zu sein. 
+...table:"demo"|Link auf eine Demo. Demo zeigt die Verwendung des Entries. (erzeugt R\"uckverweis "demofor")
 ...table:"general"|Bei Spec: Die zugeh\"orige generelle Klasse. (erzeugt R\"uckverweis "spec")
 ...table:"implements"|Concept, das die aktuelle Klasse/Spec implementiert
 ...table:"see"|Querverweis zu einem anderen Entry. (erzeugt R\"uckverweis "see").
