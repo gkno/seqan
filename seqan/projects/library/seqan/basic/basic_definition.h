@@ -36,9 +36,7 @@ struct Tag
 .Tag.Default:
 ..summary:Tag that specifies default behavior.
 ..value.Default:Use default behavior. 
-
 */
-
 struct Default_;
 typedef Tag<Default_> const Default;
 
@@ -87,6 +85,11 @@ struct False { enum { VALUE = false }; };
 
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Tag.Nothing:
+..summary:Tag that represents an absent parameter or an absent type.
+..value.Nothing:Omit parameter.
+*/
 ///Empty Data Class.
 struct Nothing {};
 
