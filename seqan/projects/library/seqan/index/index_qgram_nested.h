@@ -30,13 +30,13 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	struct _Fibre_Dir_Nested;		// directory/hash table, contains start indices of buckets
 
-	typedef Tag<_Fibre_Text>		QGram_Nested_Text;
-	typedef Tag<_Fibre_RawText>		QGram_Nested_RawText;
-	typedef Tag<_Fibre_SA>			QGram_Nested_SA;
-	typedef Tag<_Fibre_RawSA>		QGram_Nested_RawSA;
-	typedef Tag<_Fibre_Dir>			QGram_Nested_Dir;
-	typedef Tag<_Fibre_SADir>		QGram_Nested_SADir;
-	typedef Tag<_Fibre_Shape>		QGram_Nested_Shape;
+	typedef Tag<_Fibre_Text> const		QGram_Nested_Text;
+	typedef Tag<_Fibre_RawText> const	QGram_Nested_RawText;
+	typedef Tag<_Fibre_SA> const		QGram_Nested_SA;
+	typedef Tag<_Fibre_RawSA> const		QGram_Nested_RawSA;
+	typedef Tag<_Fibre_Dir> const		QGram_Nested_Dir;
+	typedef Tag<_Fibre_SADir> const		QGram_Nested_SADir;
+	typedef Tag<_Fibre_Shape> const		QGram_Nested_Shape;
 
 //////////////////////////////////////////////////////////////////////////////
 // nested q-gram table
@@ -77,7 +77,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 /*
 	template < typename TObject, typename TShapeSpec >
-	struct Fibre< Index<TObject, Index_QGram_Nested<TShapeSpec> >, Tag<_Fibre_Dir> > 
+	struct Fibre< Index<TObject, Index_QGram_Nested<TShapeSpec> >, Tag<_Fibre_Dir> const > 
 	{
 		typedef Index<TObject, Index_QGram_Nested<TShapeSpec> > TIndex;
 		typedef String< 
@@ -87,7 +87,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	};
 */
 	template < typename TObject, typename TShapeSpec >
-	struct Fibre< Index<TObject, Index_QGram_Nested<TShapeSpec> >, Tag<_Fibre_Shape> > {
+	struct Fibre< Index<TObject, Index_QGram_Nested<TShapeSpec> >, Tag<_Fibre_Shape> const > {
 		typedef Index< TObject, Index_QGram_Nested<TShapeSpec> >	TIndex;
 		typedef Shape< typename Value<TIndex>::Type, TShapeSpec >	Type;
 	};
@@ -168,7 +168,7 @@ namespace SEQAN_NAMESPACE_MAIN
 // default fibre creators
 
 	template < typename TText, typename TSpec >
-	struct DefaultIndexCreator<Index<TText, Index_QGram_Nested<TSpec> >, Tag<_Fibre_SA> > {
+	struct DefaultIndexCreator<Index<TText, Index_QGram_Nested<TSpec> >, Tag<_Fibre_SA> const > {
         typedef Default Type;
     };
 

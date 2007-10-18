@@ -434,6 +434,10 @@ struct Infix< Segment<THost, TSpec> >
 	typedef Segment<THost, InfixSegment> Type;
 };
 
+template <typename THost, typename TSpec>
+struct Infix< Segment<THost, TSpec> const >:
+	Infix< Segment<THost, TSpec> > {};
+
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename THost1, typename THost2, typename TPosition1, typename TPosition2>
@@ -685,6 +689,17 @@ infix(Segment<T, TSpec> & t, TPosBegin pos_begin, TPosEnd pos_end)
 {
 SEQAN_CHECKPOINT
 	return typename Infix<Segment<T, TSpec> >::Type (
+		host(t), 
+		beginPosition(t) + pos_begin, 
+		beginPosition(t) + pos_end);
+}
+
+template <typename T, typename TSpec, typename TPosBegin, typename TPosEnd>
+inline typename Infix<Segment<T, TSpec> const>::Type
+infix(Segment<T, TSpec> const & t, TPosBegin pos_begin, TPosEnd pos_end)
+{
+SEQAN_CHECKPOINT
+	return typename Infix<Segment<T, TSpec> const>::Type (
 		host(t), 
 		beginPosition(t) + pos_begin, 
 		beginPosition(t) + pos_end);

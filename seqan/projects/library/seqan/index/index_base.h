@@ -156,7 +156,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	// less function to search in sorted list for fibre id
 	struct FibreLess: public ::std::binary_function<FibreRecord, unsigned, bool>
 	{	// functor for operator>
-		inline bool operator()(const FibreRecord& _Left, const unsigned _Right) const
+		inline bool operator()(FibreRecord const & _Left, unsigned const _Right) const
 		{	// apply operator> to operands
 			return (_Left.id < _Right);
 		}
@@ -177,7 +177,6 @@ namespace SEQAN_NAMESPACE_MAIN
 	struct DefaultIndexCreator {
 		typedef Default Type;
 	};
-
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -317,14 +316,14 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 	template < typename TText, typename TSpec >
     struct Value< Index<TText, TSpec> > {
 		typedef typename Value<
-			typename Fibre< Index<TText, TSpec>, Tag<_Fibre_RawText> >::Type 
+			typename Fibre< Index<TText, TSpec>, Tag<_Fibre_RawText> const >::Type 
 		>::Type Type;
     };
 
 	template < typename TText, typename TSpec >
     struct Size< Index<TText, TSpec> > {
 		typedef typename Size<
-			typename Fibre< Index<TText, TSpec>, Tag<_Fibre_RawText> >::Type 
+			typename Fibre< Index<TText, TSpec>, Tag<_Fibre_RawText> const >::Type 
 		>::Type Type;
     };
 
@@ -335,8 +334,8 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 //////////////////////////////////////////////////////////////////////////////
 // default table type
 
-	template < typename TObject, typename TSpec, typename TFibreSpec >
-	struct Fibre< Index<TObject, TSpec>, TFibreSpec > {
+	template < typename TObject, typename TSpec, typename TFibre >
+	struct Fibre< Index<TObject, TSpec>, Tag<TFibre> const > {
 		typedef String< 
 			typename Size< Index<TObject, TSpec> >::Type,
 			typename DefaultIndexStringSpec< Index<TObject, TSpec> >::Type 
@@ -347,7 +346,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 // original text
 
 	template < typename TText, typename TSpec >
-	struct Fibre< Index<TText, TSpec>, Tag<_Fibre_Text> > {
+	struct Fibre< Index<TText, TSpec>, Tag<_Fibre_Text> const > {
 		typedef TText Type;
 	};
 
@@ -355,7 +354,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 // concatenated text
 
 	template < typename TText, typename TSpec >
-	struct Fibre< Index<TText, TSpec>, Tag<_Fibre_RawText> > {
+	struct Fibre< Index<TText, TSpec>, Tag<_Fibre_RawText> const > {
 		typedef typename Concatenator<TText>::Type Type;
 	};
 
@@ -363,7 +362,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 // suffix array type
 
 	template < typename TText, typename TSpec >
-	struct Fibre< Index<TText, TSpec>, Tag<_Fibre_SA> > {
+	struct Fibre< Index<TText, TSpec>, Tag<_Fibre_SA> const > {
 		typedef String<
 			typename SAValue< Index<TText, TSpec> >::Type,
 			typename DefaultIndexStringSpec< Index<TText, TSpec> >::Type 
@@ -389,13 +388,13 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 // raw suffix array contains integer offsets relative to raw text
 
 	template < typename TString, typename TSSetSpec, typename TSpec >
-	struct Fibre< Index<StringSet<TString, TSSetSpec>, TSpec>, Tag<_Fibre_RawSA> > 
+	struct Fibre< Index<StringSet<TString, TSSetSpec>, TSpec>, Tag<_Fibre_RawSA> const > 
 	{
 		typedef Index< StringSet<TString, TSSetSpec>, TSpec> TIndex;
 		typedef ModifiedString<
-			typename Fibre<TIndex, Tag<_Fibre_SA> >::Type,
+			typename Fibre<TIndex, Tag<_Fibre_SA> const >::Type,
 			ModView< FunctorGlobalize< 
-				typename Value< typename Fibre<TIndex, Tag<_Fibre_SA> >::Type >::Type,
+				typename Value< typename Fibre<TIndex, Tag<_Fibre_SA> const >::Type >::Type,
 				typename StringSetLimits<StringSet<TString, TSSetSpec> >::Type >
 			>
 		> Type;
@@ -405,7 +404,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 // default burrows-wheeler table
 
 	template < typename TText, typename TSpec >
-	struct Fibre< Index<TText, TSpec>, Tag<_Fibre_BWT> > {
+	struct Fibre< Index<TText, TSpec>, Tag<_Fibre_BWT> const > {
 		typedef String <
 			typename Value< Index<TText, TSpec> >::Type,
 			typename DefaultIndexStringSpec< Index<TText, TSpec> >::Type
@@ -417,22 +416,22 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 // default fibre creators
 
 	template < typename TText, typename TSpec >
-	struct DefaultIndexCreator<Index<TText, TSpec>, Tag<_Fibre_SA> > {
+	struct DefaultIndexCreator<Index<TText, TSpec>, Tag<_Fibre_SA> const > {
         typedef Skew7 Type;							// standard suffix array creator is skew7
     };
 
 	template < typename TText, typename TSpec >
-	struct DefaultIndexCreator<Index<TText, TSpec>, Tag<_Fibre_LCP> > {
+	struct DefaultIndexCreator<Index<TText, TSpec>, Tag<_Fibre_LCP> const > {
         typedef Kasai Type;
     };
 
 	template < typename TText, typename TSpec >
-	struct DefaultIndexCreator<Index<TText, TSpec>, Tag<_Fibre_BWT> > {
+	struct DefaultIndexCreator<Index<TText, TSpec>, Tag<_Fibre_BWT> const > {
         typedef BWT Type;
     };
 
 	template < typename TText, typename TSpec >
-	struct DefaultIndexCreator<Index<TText, TSpec>, Tag<_Fibre_ChildTab> > {
+	struct DefaultIndexCreator<Index<TText, TSpec>, Tag<_Fibre_ChildTab> const > {
         typedef ChildTab Type;
     };
 
@@ -463,12 +462,12 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 //////////////////////////////////////////////////////////////////////////////
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_Text> >::Type & 
+	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_Text> const >::Type & 
 	getFibre(Index<TText, TSpec> &index, Tag<_Fibre_Text> const) {
 		return value(index.text);
 	}
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_Text> >::Type & 
+	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_Text> const >::Type & 
 	getFibre(Index<TText, TSpec> const &index, Tag<_Fibre_Text> const) {
 		return value(index.text);
 	}
@@ -476,12 +475,12 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 //////////////////////////////////////////////////////////////////////////////
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_RawText> >::Type & 
+	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_RawText> const >::Type & 
 	getFibre(Index<TText, TSpec> &index, Tag<_Fibre_RawText> const) {
 		return concat(value(index.text));
 	}
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_RawText> >::Type & 
+	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_RawText> const >::Type & 
 	getFibre(Index<TText, TSpec> const &index, Tag<_Fibre_RawText> const) {
 		return concat(value(index.text));
 	}
@@ -489,43 +488,43 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 //////////////////////////////////////////////////////////////////////////////
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_SA> >::Type & 
-	getFibre(Index<TText, TSpec> &index, Tag<_Fibre_SA>  const) {
+	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_SA> const >::Type & 
+	getFibre(Index<TText, TSpec> &index, Tag<_Fibre_SA> const) {
 		return index.sa;
 	}
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_SA> >::Type & 
-	getFibre(Index<TText, TSpec> const &index, Tag<_Fibre_SA>  const) {
+	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_SA> const >::Type & 
+	getFibre(Index<TText, TSpec> const &index, Tag<_Fibre_SA> const) {
 		return index.sa;
 	}
 
 //////////////////////////////////////////////////////////////////////////////
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_SA> >::Type & 
-	getFibre(Index<TText, TSpec> &index, Tag<_Fibre_RawSA>  const) {
+	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_SA> const >::Type & 
+	getFibre(Index<TText, TSpec> &index, Tag<_Fibre_RawSA> const) {
 		return indexSA(index);
 	}
 /*
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_SA> >::Type & 
-	getFibre(Index<TText, TSpec> const &index, Tag<_Fibre_RawSA>  const) {
+	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_SA> const >::Type & 
+	getFibre(Index<TText, TSpec> const &index, Tag<_Fibre_RawSA> const) {
 		return indexSA(index);
 	}
 */
 	template <typename TString, typename TSSetSpec, typename TSpec>
-	inline typename Fibre<Index<StringSet<TString, TSSetSpec>, TSpec>, Tag<_Fibre_RawSA> >::Type
-	getFibre(Index<StringSet<TString, TSSetSpec>, TSpec> &index, Tag<_Fibre_RawSA>  const) 
+	inline typename Fibre<Index<StringSet<TString, TSSetSpec>, TSpec>, Tag<_Fibre_RawSA> const >::Type
+	getFibre(Index<StringSet<TString, TSSetSpec>, TSpec> &index, Tag<_Fibre_RawSA> const) 
 	{
 		typedef Index< StringSet<TString, TSSetSpec>, TSpec> TIndex;
 		
 		typedef FunctorGlobalize<
-			typename Value< typename Fibre<TIndex, Tag<_Fibre_SA> >::Type >::Type,
+			typename Value< typename Fibre<TIndex, Tag<_Fibre_SA> const >::Type >::Type,
 			typename StringSetLimits<StringSet<TString, TSSetSpec> >::Type
 		> TFunctor;
 		
 		typedef ModifiedString<
-			typename Fibre<Index<StringSet<TString, TSSetSpec>, TSpec>, Tag<_Fibre_SA> >::Type,
+			typename Fibre<Index<StringSet<TString, TSSetSpec>, TSpec>, Tag<_Fibre_SA> const >::Type,
 			ModView< TFunctor >
 		> ModString;
 
@@ -535,12 +534,12 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 //////////////////////////////////////////////////////////////////////////////
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_LCP> >::Type & 
+	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_LCP> const >::Type & 
 	getFibre(Index<TText, TSpec> &index, Tag<_Fibre_LCP>  const) {
 		return index.lcp;
 	}
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_LCP> >::Type & 
+	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_LCP> const >::Type & 
 	getFibre(Index<TText, TSpec> const &index, Tag<_Fibre_LCP>  const) {
 		return index.lcp;
 	}
@@ -548,12 +547,12 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 //////////////////////////////////////////////////////////////////////////////
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_LCPE> >::Type & 
+	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_LCPE> const >::Type & 
 	getFibre(Index<TText, TSpec> &index, Tag<_Fibre_LCPE>  const) {
 		return index.lcpe;
 	}
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_LCPE> >::Type & 
+	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_LCPE> const >::Type & 
 	getFibre(Index<TText, TSpec> const &index, Tag<_Fibre_LCPE>  const) {
 		return index.lcpe;
 	}
@@ -561,12 +560,12 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 //////////////////////////////////////////////////////////////////////////////
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_ChildTab> >::Type & 
+	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_ChildTab> const >::Type & 
 	getFibre(Index<TText, TSpec> &index, Tag<_Fibre_ChildTab>  const) {
 		return index.childtab;
 	}
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_ChildTab> >::Type & 
+	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_ChildTab> const >::Type & 
 	getFibre(Index<TText, TSpec> const &index, Tag<_Fibre_ChildTab>  const) {
 		return index.childtab;
 	}
@@ -574,12 +573,12 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 //////////////////////////////////////////////////////////////////////////////
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_BWT> >::Type & 
+	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_BWT> const >::Type & 
 	getFibre(Index<TText, TSpec> &index, Tag<_Fibre_BWT>  const) {
 		return index.bwt;
 	}
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_BWT> >::Type & 
+	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_BWT> const >::Type & 
 	getFibre(Index<TText, TSpec> const &index, Tag<_Fibre_BWT>  const) {
 		return index.bwt;
 	}
@@ -633,23 +632,23 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 // unified textAt interface
 
 	template <typename TPos, typename TIndex>
-	inline typename Reference<typename Fibre<TIndex, Tag<_Fibre_RawText> >::Type>::Type 
+	inline typename Reference<typename Fibre<TIndex, Tag<_Fibre_RawText> const >::Type>::Type 
 	textAt(TPos i, TIndex &index) {
-		return value(getFibre(index, Tag<_Fibre_RawText> ()), i);
+		return value(getFibre(index, Tag<_Fibre_RawText>()), i);
 	}
 	template <typename TPos, typename TString, typename TSSetSpec, typename TSpec>
-	inline typename Reference<typename Fibre< Index< StringSet<TString, TSSetSpec>, TSpec>, Tag<_Fibre_RawText> >::Type>::Type 
+	inline typename Reference<typename Fibre< Index< StringSet<TString, TSSetSpec>, TSpec>, Tag<_Fibre_RawText> const >::Type>::Type 
 	textAt(TPos i, Index< StringSet<TString, TSSetSpec>, TSpec> &index) {
-		return value(getFibre(index, Tag<_Fibre_RawText> ()), posGlobalize(i, stringSetLimits(index)));
+		return value(getFibre(index, Tag<_Fibre_RawText>()), posGlobalize(i, stringSetLimits(index)));
 	}
 	template <typename TPos, typename TString, typename TSpec>
-	inline typename Reference<typename Fibre< Index< StringSet<TString, Owner<Default> >, TSpec>, Tag<_Fibre_RawText> >::Type>::Type 
+	inline typename Reference<typename Fibre< Index< StringSet<TString, Owner<Default> >, TSpec>, Tag<_Fibre_RawText> const >::Type>::Type 
 	textAt(TPos i, Index< StringSet<TString, Owner<Default> >, TSpec> &index) {
 		Pair <
 			typename Size< StringSet<TString, Owner<Default> > >::Type,
 			typename Size< TString >::Type > locPos;
 		posLocalize(locPos, i, stringSetLimits(index));
-		return value(value(getFibre(index, Tag<_Fibre_Text> ()), getValueI1(locPos)), getValueI2(locPos));
+		return value(value(getFibre(index, Tag<_Fibre_Text>()), getValueI1(locPos)), getValueI2(locPos));
 	}
 
 //////////////////////////////////////////////////////////////////////////////
@@ -665,12 +664,12 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 */
 
 	template <typename TPos, typename TIndex>
-	inline typename Reference<typename Fibre<TIndex, Tag<_Fibre_RawText> >::Type>::Type rawtextAt(TPos i, TIndex &index) {
-		return value(getFibre(index, Tag<_Fibre_RawText> ()), i);
+	inline typename Reference<typename Fibre<TIndex, Tag<_Fibre_RawText> const >::Type>::Type rawtextAt(TPos i, TIndex &index) {
+		return value(getFibre(index, Tag<_Fibre_RawText>()), i);
 	}
 	template <typename TPos, typename TIndex>
-	inline typename Reference<typename Fibre<TIndex const, Tag<_Fibre_RawText> >::Type>::Type rawtextAt(TPos i, TIndex const &index) {
-		return value(getFibre(index, Tag<_Fibre_RawText> ()), i);
+	inline typename Reference<typename Fibre<TIndex const, Tag<_Fibre_RawText> const >::Type>::Type rawtextAt(TPos i, TIndex const &index) {
+		return value(getFibre(index, Tag<_Fibre_RawText>()), i);
 	}
 
 //////////////////////////////////////////////////////////////////////////////
@@ -686,16 +685,16 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 */
 
 	template <typename TPos, typename TIndex>
-	inline typename Reference<typename Fibre<TIndex, Tag<_Fibre_SA> >::Type>::Type saAt(TPos i, TIndex &index) {
-		return value(getFibre(index, Tag<_Fibre_SA> ()), i);
+	inline typename Reference<typename Fibre<TIndex, Tag<_Fibre_SA> const >::Type>::Type saAt(TPos i, TIndex &index) {
+		return value(getFibre(index, Tag<_Fibre_SA>()), i);
 	}
 	template <typename TPos, typename TIndex>
-	inline typename Reference<typename Fibre<TIndex const, Tag<_Fibre_SA> >::Type>::Type saAt(TPos i, TIndex const &index) {
-		return value(getFibre(index, Tag<_Fibre_SA> ()), i);
+	inline typename Reference<typename Fibre<TIndex const, Tag<_Fibre_SA> const >::Type>::Type saAt(TPos i, TIndex const &index) {
+		return value(getFibre(index, Tag<_Fibre_SA>()), i);
 	}
 
 	template <typename TPos, typename TIndex>
-	inline typename Value<typename Fibre<TIndex const, Tag<_Fibre_RawSA> >::Type>::Type rawsaAt(TPos i, TIndex const &index) {
+	inline typename Value<typename Fibre<TIndex const, Tag<_Fibre_RawSA> const >::Type>::Type rawsaAt(TPos i, TIndex const &index) {
 		return posGlobalize(saAt(i, index), stringSetLimits(indexText(index)));
 	}
 
@@ -713,12 +712,12 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 */
 
 	template <typename TPos, typename TIndex>
-	inline typename Reference<typename Fibre<TIndex, Tag<_Fibre_LCP> >::Type>::Type lcpAt(TPos i, TIndex &index) {
-		return value(getFibre(index, Tag<_Fibre_LCP> ()), i);
+	inline typename Reference<typename Fibre<TIndex, Tag<_Fibre_LCP> const >::Type>::Type lcpAt(TPos i, TIndex &index) {
+		return value(getFibre(index, Tag<_Fibre_LCP>()), i);
 	}
 	template <typename TPos, typename TIndex>
-	inline typename Reference<typename Fibre<TIndex const, Tag<_Fibre_LCP> >::Type>::Type lcpAt(TPos i, TIndex const &index) {
-		return value(getFibre(index, Tag<_Fibre_LCP> ()), i);
+	inline typename Reference<typename Fibre<TIndex const, Tag<_Fibre_LCP> const >::Type>::Type lcpAt(TPos i, TIndex const &index) {
+		return value(getFibre(index, Tag<_Fibre_LCP>()), i);
 	}
 
 //////////////////////////////////////////////////////////////////////////////
@@ -734,12 +733,12 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 */
 
 	template <typename TPos, typename TIndex>
-	inline typename Reference<typename Fibre<TIndex, Tag<_Fibre_LCPE> >::Type>::Type lcpeAt(TPos i, TIndex &index) {
-		return value(getFibre(index, Tag<_Fibre_LCPE> ()), i);
+	inline typename Reference<typename Fibre<TIndex, Tag<_Fibre_LCPE> const >::Type>::Type lcpeAt(TPos i, TIndex &index) {
+		return value(getFibre(index, Tag<_Fibre_LCPE>()), i);
 	}
 	template <typename TPos, typename TIndex>
-	inline typename Reference<typename Fibre<TIndex const, Tag<_Fibre_LCPE> >::Type>::Type lcpeAt(TPos i, TIndex const &index) {
-		return value(getFibre(index, Tag<_Fibre_LCPE> ()), i);
+	inline typename Reference<typename Fibre<TIndex const, Tag<_Fibre_LCPE> const >::Type>::Type lcpeAt(TPos i, TIndex const &index) {
+		return value(getFibre(index, Tag<_Fibre_LCPE>()), i);
 	}
 
 //////////////////////////////////////////////////////////////////////////////
@@ -755,12 +754,12 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 */
 
 	template <typename TPos, typename TIndex>
-	inline typename Reference<typename Fibre<TIndex, Tag<_Fibre_ChildTab> >::Type>::Type childAt(TPos i, TIndex &index) {
-		return value(getFibre(index, Tag<_Fibre_ChildTab> ()), i);
+	inline typename Reference<typename Fibre<TIndex, Tag<_Fibre_ChildTab> const >::Type>::Type childAt(TPos i, TIndex &index) {
+		return value(getFibre(index, Tag<_Fibre_ChildTab>()), i);
 	}
 	template <typename TPos, typename TIndex>
-	inline typename Reference<typename Fibre<TIndex const, Tag<_Fibre_ChildTab> >::Type>::Type childAt(TPos i, TIndex const &index) {
-		return value(getFibre(index, Tag<_Fibre_ChildTab> ()), i);
+	inline typename Reference<typename Fibre<TIndex const, Tag<_Fibre_ChildTab> const >::Type>::Type childAt(TPos i, TIndex const &index) {
+		return value(getFibre(index, Tag<_Fibre_ChildTab>()), i);
 	}
 
 //////////////////////////////////////////////////////////////////////////////
@@ -776,12 +775,12 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 */
 
 	template <typename TPos, typename TIndex>
-	inline typename Reference<typename Fibre<TIndex, Tag<_Fibre_BWT> >::Type>::Type bwtAt(TPos i, TIndex &index) {
-		return value(getFibre(index, Tag<_Fibre_BWT> ()), i);
+	inline typename Reference<typename Fibre<TIndex, Tag<_Fibre_BWT> const >::Type>::Type bwtAt(TPos i, TIndex &index) {
+		return value(getFibre(index, Tag<_Fibre_BWT>()), i);
 	}
 	template <typename TPos, typename TIndex>
-	inline typename Reference<typename Fibre<TIndex const, Tag<_Fibre_BWT> >::Type>::Type bwtAt(TPos i, TIndex const &index) {
-		return value(getFibre(index, Tag<_Fibre_BWT> ()), i);
+	inline typename Reference<typename Fibre<TIndex const, Tag<_Fibre_BWT> const >::Type>::Type bwtAt(TPos i, TIndex const &index) {
+		return value(getFibre(index, Tag<_Fibre_BWT>()), i);
 	}
 
 //////////////////////////////////////////////////////////////////////////////
@@ -809,9 +808,9 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 */
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_Text> >::Type & indexText(Index<TText, TSpec> &index) { return getFibre(index, Tag<_Fibre_Text>()); }
+	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_Text> const >::Type & indexText(Index<TText, TSpec> &index) { return getFibre(index, Tag<_Fibre_Text>()); }
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_Text> >::Type & indexText(Index<TText, TSpec> const &index) { return getFibre(index, Tag<_Fibre_Text> ()); }
+	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_Text> const >::Type & indexText(Index<TText, TSpec> const &index) { return getFibre(index, Tag<_Fibre_Text>()); }
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -851,9 +850,9 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 */
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_RawText> >::Type & indexRawText(Index<TText, TSpec> &index) { return getFibre(index, Tag<_Fibre_RawText> ()); }
+	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_RawText> const >::Type & indexRawText(Index<TText, TSpec> &index) { return getFibre(index, Tag<_Fibre_RawText>()); }
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_RawText> >::Type & indexRawText(Index<TText, TSpec> const &index) { return getFibre(index, Tag<_Fibre_RawText> ()); }
+	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_RawText> const >::Type & indexRawText(Index<TText, TSpec> const &index) { return getFibre(index, Tag<_Fibre_RawText>()); }
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -867,9 +866,9 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 */
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_SA> >::Type & indexSA(Index<TText, TSpec> &index) { return getFibre(index, Tag<_Fibre_SA> ()); }
+	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_SA> const >::Type & indexSA(Index<TText, TSpec> &index) { return getFibre(index, Tag<_Fibre_SA>()); }
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_SA> >::Type & indexSA(Index<TText, TSpec> const &index) { return getFibre(index, Tag<_Fibre_SA> ()); }
+	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_SA> const >::Type & indexSA(Index<TText, TSpec> const &index) { return getFibre(index, Tag<_Fibre_SA>()); }
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -883,9 +882,9 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 */
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_RawSA> >::Type indexRawSA(Index<TText, TSpec> &index) { return getFibre(index, Tag<_Fibre_RawSA> ()); }
+	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_RawSA> const >::Type indexRawSA(Index<TText, TSpec> &index) { return getFibre(index, Tag<_Fibre_RawSA>()); }
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_RawSA> >::Type indexRawSA(Index<TText, TSpec> const &index) { return getFibre(index, Tag<_Fibre_RawSA> ()); }
+	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_RawSA> const >::Type indexRawSA(Index<TText, TSpec> const &index) { return getFibre(index, Tag<_Fibre_RawSA>()); }
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -899,9 +898,9 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 */
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_LCP> >::Type & indexLCP(Index<TText, TSpec> &index) { return getFibre(index, Tag<_Fibre_LCP> ()); }
+	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_LCP> const >::Type & indexLCP(Index<TText, TSpec> &index) { return getFibre(index, Tag<_Fibre_LCP>()); }
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_LCP> >::Type & indexLCP(Index<TText, TSpec> const &index) { return getFibre(index, Tag<_Fibre_LCP> ()); }
+	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_LCP> const >::Type & indexLCP(Index<TText, TSpec> const &index) { return getFibre(index, Tag<_Fibre_LCP>()); }
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -915,9 +914,9 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 */
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_LCPE> >::Type & indexLCPE(Index<TText, TSpec> &index) { return getFibre(index, Tag<_Fibre_LCPE> ()); }
+	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_LCPE> const >::Type & indexLCPE(Index<TText, TSpec> &index) { return getFibre(index, Tag<_Fibre_LCPE>()); }
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_LCPE> >::Type & indexLCPE(Index<TText, TSpec> const &index) { return getFibre(index, Tag<_Fibre_LCPE> ()); }
+	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_LCPE> const >::Type & indexLCPE(Index<TText, TSpec> const &index) { return getFibre(index, Tag<_Fibre_LCPE>()); }
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -931,9 +930,9 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 */
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_BWT> >::Type & indexBWT(Index<TText, TSpec> &index) { return getFibre(index, Tag<_Fibre_BWT> ()); }
+	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_BWT> const >::Type & indexBWT(Index<TText, TSpec> &index) { return getFibre(index, Tag<_Fibre_BWT>()); }
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_BWT> >::Type & indexBWT(Index<TText, TSpec> const &index) { return getFibre(index, Tag<_Fibre_BWT> ()); }
+	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_BWT> const >::Type & indexBWT(Index<TText, TSpec> const &index) { return getFibre(index, Tag<_Fibre_BWT>()); }
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -947,9 +946,9 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 */
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_ChildTab> >::Type & indexChildTab(Index<TText, TSpec> &index) { return getFibre(index, Tag<_Fibre_ChildTab> ()); }
+	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_ChildTab> const >::Type & indexChildTab(Index<TText, TSpec> &index) { return getFibre(index, Tag<_Fibre_ChildTab>()); }
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_ChildTab> >::Type & indexChildTab(Index<TText, TSpec> const &index) { return getFibre(index, Tag<_Fibre_ChildTab> ()); }
+	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_ChildTab> const >::Type & indexChildTab(Index<TText, TSpec> const &index) { return getFibre(index, Tag<_Fibre_ChildTab>()); }
 
 }
 

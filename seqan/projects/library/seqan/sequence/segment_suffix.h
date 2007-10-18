@@ -341,6 +341,10 @@ struct Suffix<Segment<THost, PrefixSegment> >
 	typedef Segment<THost, InfixSegment> Type;
 };
 
+template <typename THost, typename TSpec>
+struct Suffix< Segment<THost, TSpec> const >:
+	Suffix< Segment<THost, TSpec> > {};
+
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename THost1, typename THost2, typename TPosition1>
@@ -500,11 +504,32 @@ SEQAN_CHECKPOINT
 }
 
 template <typename T, typename TPosBegin>
+inline typename Suffix<Segment<T, SuffixSegment> const>::Type
+suffix(Segment<T, SuffixSegment> const & t, TPosBegin pos_begin)
+{
+SEQAN_CHECKPOINT
+	return typename Suffix<Segment<T, SuffixSegment> const>::Type (
+		host(t), 
+		beginPosition(t) + pos_begin);
+}
+
+template <typename T, typename TPosBegin>
 inline typename Suffix<Segment<T, InfixSegment> >::Type
 suffix(Segment<T, InfixSegment> & t, TPosBegin pos_begin)
 {
 SEQAN_CHECKPOINT
 	return typename Suffix<Segment<T, InfixSegment> >::Type (
+		host(t), 
+		beginPosition(t) + pos_begin, 
+		endPosition(t));
+}
+
+template <typename T, typename TPosBegin>
+inline typename Suffix<Segment<T, InfixSegment> const>::Type
+suffix(Segment<T, InfixSegment> const & t, TPosBegin pos_begin)
+{
+SEQAN_CHECKPOINT
+	return typename Suffix<Segment<T, InfixSegment> const>::Type (
 		host(t), 
 		beginPosition(t) + pos_begin, 
 		endPosition(t));

@@ -345,6 +345,11 @@ struct Prefix<Segment<THost, PrefixSegment> >
 	typedef Segment<THost, PrefixSegment> Type;
 };
 
+template <typename THost, typename TSpec>
+struct Prefix< Segment<THost, TSpec> const >:
+	Prefix< Segment<THost, TSpec> > {};
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename THost1, typename THost2, typename TPosition1>
@@ -505,11 +510,32 @@ SEQAN_CHECKPOINT
 }
 
 template <typename T, typename TPosEnd>
+inline typename Prefix<Segment<T, PrefixSegment> const>::Type
+prefix(Segment<T, PrefixSegment> const & t, TPosEnd pos_end)
+{
+SEQAN_CHECKPOINT
+	return typename Prefix<Segment<T, PrefixSegment> const>::Type (
+		host(t), 
+		beginPosition(t) + pos_end);
+}
+
+template <typename T, typename TPosEnd>
 inline typename Prefix<Segment<T, InfixSegment> >::Type
 prefix(Segment<T, InfixSegment> & t, TPosEnd pos_end)
 {
 SEQAN_CHECKPOINT
 	return typename Prefix<Segment<T, InfixSegment> >::Type (
+		host(t), 
+		beginPosition(t),
+		beginPosition(t) + pos_end);
+}
+
+template <typename T, typename TPosEnd>
+inline typename Prefix<Segment<T, InfixSegment> const>::Type
+prefix(Segment<T, InfixSegment> const & t, TPosEnd pos_end)
+{
+SEQAN_CHECKPOINT
+	return typename Prefix<Segment<T, InfixSegment> const>::Type (
 		host(t), 
 		beginPosition(t),
 		beginPosition(t) + pos_end);

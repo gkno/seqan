@@ -207,15 +207,15 @@ They differ if the index text is a set of strings. Then, raw text is the concate
 ///.Metafunction.Fibre.param.TSpec.type:Tag.ESA_BWT
 
 
-	typedef Tag<_Fibre_Text>		ESA_Text;
-	typedef Tag<_Fibre_RawText>		ESA_RawText;
-	typedef Tag<_Fibre_SA>			ESA_SA;
-	typedef Tag<_Fibre_RawSA>		ESA_RawSA;
-	typedef Tag<_Fibre_SAE>			ESA_SAE;
-	typedef Tag<_Fibre_LCP>			ESA_LCP;
-	typedef Tag<_Fibre_LCPE>		ESA_LCPE;
-	typedef Tag<_Fibre_ChildTab>	ESA_ChildTab;
-	typedef Tag<_Fibre_BWT>			ESA_BWT;
+	typedef Tag<_Fibre_Text> const		ESA_Text;
+	typedef Tag<_Fibre_RawText> const	ESA_RawText;
+	typedef Tag<_Fibre_SA> const		ESA_SA;
+	typedef Tag<_Fibre_RawSA> const		ESA_RawSA;
+	typedef Tag<_Fibre_SAE> const		ESA_SAE;
+	typedef Tag<_Fibre_LCP> const		ESA_LCP;
+	typedef Tag<_Fibre_LCPE> const		ESA_LCPE;
+	typedef Tag<_Fibre_ChildTab> const	ESA_ChildTab;
+	typedef Tag<_Fibre_BWT> const		ESA_BWT;
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -285,12 +285,13 @@ They differ if the index text is a set of strings. Then, raw text is the concate
 ..summary:Exact string matching using a suffix array binary search with the mlr-heuristic.
 ..general:Class.Finder
 ..cat:Index
+..signature:Finder<TIndex>
 ..signature:Finder<TIndex, ESA_FIND_MLR>
 ..param.TIndex:The index type.
 ...type:Spec.Index_ESA
 */
 
-	typedef Tag<_Finder_MLR>	ESA_FIND_MLR;
+	typedef Tag<_Finder_MLR> const	ESA_FIND_MLR;
 
 /**
 .Tag.ESA_FIND_LCPE:
@@ -302,24 +303,29 @@ They differ if the index text is a set of strings. Then, raw text is the concate
 ...type:Spec.Index_ESA
 */
 
-	typedef Tag<_Finder_LCPE>	ESA_FIND_LCPE;
-	typedef Tag<_Finder_LCPH>	ESA_FIND_LCPH;
+	typedef Tag<_Finder_LCPE> const	ESA_FIND_LCPE;
 
 	template < typename TText, typename TSpec >
 	struct DefaultFinder<Index<TText, Index_ESA<TSpec> > > {
-        typedef Tag<_Finder_MLR> Type;	// standard suffix array finder is mlr-heuristic
+        typedef ESA_FIND_MLR Type;	// standard suffix array finder is mlr-heuristic
     };
+
+
+	template < typename TText, typename TSpec, typename TSpecFinder >
+	struct Position< Finder< Index<TText, TSpec>, TSpecFinder > >:
+		SAValue< Index<TText, TSpec> > {};
 
 
 //////////////////////////////////////////////////////////////////////////////
 
-	template < typename TText, typename TSpecESA, typename TSpecFinder >
-	class Finder< Index<TText, Index_ESA<TSpecESA> >, TSpecFinder >
+	template < typename TText, typename TSpec, typename TSpecFinder >
+	class Finder< Index<TText, TSpec>, TSpecFinder >
 	{
-	public:
-		typedef Index<TText, Index_ESA<TSpecESA> > TIndex;
-		typedef typename Iterator< typename Fibre<TIndex, ESA_SA>::Type const >::Type TIterator;
+		typedef Index<TText, TSpec>									TIndex;
+		typedef typename Fibre<TIndex, Tag<_Fibre_SA> const >::Type	TSA;
+		typedef typename Iterator<TSA const, Standard>::Type		TIterator;
 
+	public:
 		Holder<TIndex>	index;
 		Pair<TIterator>	range;
 		TIterator		data_iterator;
@@ -336,194 +342,215 @@ They differ if the index text is a set of strings. Then, raw text is the concate
 		{
 			clear(*this);
 		}
+	};
+
+//____________________________________________________________________________
+
+	template < typename TText, typename TSpec, typename TSpecFinder >
+	inline typename _Parameter< Index<TText, TSpec> >::Type 
+	host(Finder< Index<TText, TSpec>, TSpecFinder > & me)
+	{
+SEQAN_CHECKPOINT
+		return value(me.index);
+	}
+
+	template < typename TText, typename TSpec, typename TSpecFinder >
+	inline typename _Parameter< Index<TText, TSpec> >::Type 
+	host(Finder< Index<TText, TSpec>, TSpecFinder > const & me)
+	{
+SEQAN_CHECKPOINT
+		return value(me.index);
+	}
+
+	template < typename TText, typename TSpec, typename TSpecFinder >
+	inline typename _Parameter< Index<TText, TSpec> >::Type 
+	container(Finder< Index<TText, TSpec>, TSpecFinder > & me)
+	{
+SEQAN_CHECKPOINT
+		return value(me.index);
+	}
+
+	template < typename TText, typename TSpec, typename TSpecFinder >
+	inline typename _Parameter< Index<TText, TSpec> >::Type 
+	container(Finder< Index<TText, TSpec>, TSpecFinder > const & me)
+	{
+SEQAN_CHECKPOINT
+		return value(me.index);
+	}
+
+//____________________________________________________________________________
+
+	template < typename TText, typename TSpec, typename TSpecFinder >
+	inline void
+	setHost(
+		Finder< Index<TText, TSpec>, TSpecFinder > & me, 
+		typename _Parameter<Index<TText, TSpec> >::Type container_)
+	{
+SEQAN_CHECKPOINT
+		me.index = container;
+	}
+
+	template < typename TText, typename TSpec, typename TSpecFinder >
+	inline void
+	setContainer(
+		Finder< Index<TText, TSpec>, TSpecFinder > & me, 
+		typename _Parameter<Index<TText, TSpec> >::Type container_)
+	{
+SEQAN_CHECKPOINT
+		me.index = container;
+	}
+
+//____________________________________________________________________________
+
+	template < typename TText, typename TSpec, typename TSpecFinder >
+	inline typename Iterator< typename Fibre<Index<TText, TSpec>, Tag<_Fibre_SA> const >::Type, Standard>::Type &
+	hostIterator(Finder< Index<TText, TSpec>, TSpecFinder > & me)
+	{
+SEQAN_CHECKPOINT
+		return me.data_iterator;
+	}
+
+	template < typename TText, typename TSpec, typename TSpecFinder >
+	inline typename Iterator< typename Fibre<Index<TText, TSpec>, Tag<_Fibre_SA> const >::Type, Standard>::Type const &
+	hostIterator(Finder< Index<TText, TSpec>, TSpecFinder > const & me)
+	{
+SEQAN_CHECKPOINT
+		return me.data_iterator;
+	}
 
 
 //____________________________________________________________________________
 
-		friend inline typename _Parameter<TIndex>::Type 
-		host(Finder & me)
-		{
+	template < typename TText, typename TSpec, typename TSpecFinder >
+	inline bool
+	empty(Finder< Index<TText, TSpec>, TSpecFinder > & me)
+	{
 SEQAN_CHECKPOINT
-			return value(me.index);
-		}
+		return me.range.i1 == me.range.i2;
+	}
 
-		friend inline typename _Parameter<TIndex>::Type 
-		host(Finder const & me)
-		{
+	template < typename TText, typename TSpec, typename TSpecFinder >
+	inline void
+	clear(Finder< Index<TText, TSpec>, TSpecFinder > & me)
+	{
 SEQAN_CHECKPOINT
-			return value(me.index);
-		}
-
-		friend inline typename _Parameter<TIndex>::Type 
-		container(Finder & me)
-		{
-SEQAN_CHECKPOINT
-			return value(me.index);
-		}
-
-		friend inline typename _Parameter<TIndex>::Type 
-		container(Finder const & me)
-		{
-SEQAN_CHECKPOINT
-			return value(me.index);
-		}
+		typedef Index<TText, TSpec>								TIndex;
+		typedef typename Fibre<TIndex, Tag<_Fibre_SA> const >::Type	TSA;
+		typedef typename Iterator<TSA, Standard>::Type			TIterator;
+		me.range.i1 = me.range.i2 = TIterator();
+	}
 
 //____________________________________________________________________________
 
-		friend inline void
-		setHost(Finder & me, typename _Parameter<TIndex>::Type container_)
-		{
+	template < typename TText, typename TSpec, typename TSpecFinder >
+	inline bool
+	atBegin(Finder< Index<TText, TSpec>, TSpecFinder > & me)
+	{
 SEQAN_CHECKPOINT
-			me.index = container;
-		}
+		return (empty(me) || hostIterator(me) == me.range.i1);
+	}
 
-		friend inline void
-		setContainer(Finder & me, typename _Parameter<TIndex>::Type container_)
-		{
+	template < typename TText, typename TSpec, typename TSpecFinder >
+	inline bool
+	atEnd(Finder< Index<TText, TSpec>, TSpecFinder > & me)
+	{
 SEQAN_CHECKPOINT
-			me.index = container;
-		}
+		return (empty(me) || hostIterator(me) == me.range.i2);
+	}
 
 //____________________________________________________________________________
 
-		friend inline TIterator &
-		hostIterator(Finder & me)
-		{
+	template < typename TText, typename TSpec, typename TSpecFinder >
+	inline void
+	goBegin(Finder< Index<TText, TSpec>, TSpecFinder > & me)
+	{
 SEQAN_CHECKPOINT
-			return me.data_iterator;
-		}
+		hostIterator(me) = me.range.i1;
+	}
 
-		friend inline TIterator const &
-		hostIterator(Finder const & me)
-		{
+	template < typename TText, typename TSpec, typename TSpecFinder >
+	inline void
+	goEnd(Finder< Index<TText, TSpec>, TSpecFinder > & me)
+	{
 SEQAN_CHECKPOINT
-			return me.data_iterator;
-		}
-
-
-//____________________________________________________________________________
-
-		friend inline bool
-		empty(Finder & me)
-		{
-SEQAN_CHECKPOINT
-			return me.range.i1 == me.range.i2;
-		}
-
-		friend inline void
-		clear(Finder & me)
-		{
-SEQAN_CHECKPOINT
-			me.range.i1 = me.range.i2 = TIterator();
-		}
-
-//____________________________________________________________________________
-
-		friend inline bool
-		atBegin(Finder & me)
-		{
-SEQAN_CHECKPOINT
-			return (empty(me) || hostIterator(me) == me.range.i1);
-		}
-
-		friend inline bool
-		atEnd(Finder & me)
-		{
-SEQAN_CHECKPOINT
-			return (empty(me) || hostIterator(me) == me.range.i2);
-		}
-
-//____________________________________________________________________________
-
-		friend inline void
-		goBegin(Finder & me)
-		{
-SEQAN_CHECKPOINT
-			hostIterator(me) = me.range.i1;
-		}
-
-		friend inline void
-		goEnd(Finder & me)
-		{
-SEQAN_CHECKPOINT
-			hostIterator(me) = me.range.i2;
-		}
+		hostIterator(me) = me.range.i2;
+	}
 
 //____________________________________________________________________________
 /*
-		template <typename TPosition>
-		friend inline void 
-		setPosition(Finder & me, TPosition pos_)
-		{
+	template < typename TText, typename TSpec, typename TSpecFinder, typename TPosition >
+	inline void 
+	setPosition(Finder< Index<TText, TSpec>, TSpecFinder > & me, TPosition pos_)
+	{
 SEQAN_CHECKPOINT
-			hostIterator(me) = me.range.i1 + pos_;
-		}
+		hostIterator(me) = me.range.i1 + pos_;
+	}
 */
 //____________________________________________________________________________
 
-		friend inline typename Position<Finder>::Type
-		position(Finder & me)
-		{
+	template < typename TText, typename TSpec, typename TSpecFinder >
+	inline typename Position< Finder< Index<TText, TSpec>, TSpecFinder > >::Type
+	position(Finder< Index<TText, TSpec>, TSpecFinder > & me)
+	{
 SEQAN_CHECKPOINT
-			SEQAN_ASSERT(!empty(me))
-			return *me.data_iterator;
-		}
+		SEQAN_ASSERT(!empty(me))
+		return *me.data_iterator;
+	}
 
-		friend inline typename Position<Finder>::Type
-		position(Finder const & me)
-		{
+	template < typename TText, typename TSpec, typename TSpecFinder >
+	inline typename Position< Finder< Index<TText, TSpec>, TSpecFinder > >::Type
+	position(Finder< Index<TText, TSpec>, TSpecFinder > const & me)
+	{
 SEQAN_CHECKPOINT
-			SEQAN_ASSERT(!empty(me))
-			return hostIterator(me) - begin(container(me), Rooted());
-		}
-
-	};
+		SEQAN_ASSERT(!empty(me))
+		return hostIterator(me) - begin(container(me), Rooted());
+	}
 
 
 //////////////////////////////////////////////////////////////////////////////
 // find implementation
 
-	template < typename TFinder, typename TPattern >
-	inline void _findFirstESAIndex(
-		TFinder &finder,
+	template < typename TText, typename TSpec, typename TSpecFinder, typename TPattern >
+	inline void _findFirstIndex(
+		Finder< Index<TText, TSpec>, TSpecFinder > &finder,
 		TPattern const &pattern,
 		ESA_FIND_MLR const)
 	{
-		typename Haystack<TFinder>::Type &index = haystack(finder);
+		Index<TText, TSpec> &index = haystack(finder);
 		indexRequire(index, ESA_SA());
-		finder.range = equalRangeSA(indexRawText(index), indexSA(index), pattern);
+		finder.range = equalRangeSAIterator(indexText(index), indexSA(index), pattern);
 	}
-
+/*
 	template < typename TFinder, typename TPattern >
-	inline void _findFirstESAIndex(
+	inline void _findFirstIndex(
 		TFinder &finder,
 		TPattern const &pattern,
 		ESA_FIND_LCPE const)
 	{
-		typename Haystack<TFinder>::Type &index = haystack(finder);
+		Index<TText, TSpec> &index = haystack(finder);
 		indexRequire(index, ESA_SA());
 		indexRequire(index, ESA_LCPE());
-		finder.range = equalRangeLCPE(indexRawText(index), indexSA(index), indexLCPE(index), pattern);
+		finder.range = equalRangeLCPEIterator(indexText(index), indexSA(index), indexLCPE(index), pattern);
 	}
-
+*/
 //////////////////////////////////////////////////////////////////////////////
 // find
 
-	template < typename TText, typename TSpecESA, typename TSpecFinder, typename TPattern >
+	template < typename TText, typename TSpec, typename TSpecFinder, typename TPattern >
 	inline bool find(
-		Finder<Index<TText, Index_ESA<TSpecESA> >, TSpecFinder> &finder,
+		Finder<Index<TText, TSpec>, TSpecFinder> &finder,
 		TPattern const &pattern)
 	{
 		if (empty(finder)) {
-			_findFirstESAIndex(finder, needle(pattern), TSpecFinder());
+			_findFirstIndex(finder, needle(pattern), TSpecFinder());
 			hostIterator(finder) = finder.range.i1;
 		} else
 			++hostIterator(finder);
 		return !atEnd(finder);
 	}
 
-	template < typename TText, typename TSpecESA, typename TSpecFinder >
-	inline bool find(Finder<Index<TText, Index_ESA<TSpecESA> >, TSpecFinder> &finder)
+	template < typename TText, typename TSpec, typename TSpecFinder >
+	inline bool find(Finder<Index<TText, TSpec>, TSpecFinder> &finder)
 	{
 		if (empty(finder)) return false;
 		++hostIterator(finder);

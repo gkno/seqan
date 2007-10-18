@@ -37,7 +37,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	struct Dependent;						// holds references of its elements
 
 
-	template < typename TLimiter = void >
+	template < typename TDelimiter = void >
 	struct ConcatDirect;					// contains 1 string (the concatenation of n strings)
 	//struct Default;							// contains n strings in a string
 
@@ -238,6 +238,38 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	//////////////////////////////////////////////////////////////////////////////
+	// suffix
+	//////////////////////////////////////////////////////////////////////////////
+
+	template < typename TString, typename TSpec, typename TPosition >
+	inline typename Suffix<TString>::Type 
+	suffix(StringSet< TString, TSpec > &me, TPosition pos)
+	{
+		typedef StringSet<TString, TSpec>				TStringSet;
+		typedef typename Size<TStringSet>::Type			TSetSize;
+		typedef typename Size<TString>::Type			TStringSize;
+		typedef Pair<TSetSize, TStringSize, Compressed>	TPair;
+
+		TPair lPos;
+		posLocalize(lPos, pos, stringSetLimits(me));
+		return suffix(me[getSeqNo(lPos)], getSeqOffset(lPos));
+	}
+
+	template < typename TString, typename TSpec, typename TPosition >
+	inline typename Suffix<TString const>::Type 
+	suffix(StringSet< TString, TSpec > const &me, TPosition pos)
+	{
+		typedef StringSet<TString, TSpec>				TStringSet;
+		typedef typename Size<TStringSet>::Type			TSetSize;
+		typedef typename Size<TString>::Type			TStringSize;
+		typedef Pair<TSetSize, TStringSize, Compressed>	TPair;
+
+		TPair lPos;
+		posLocalize(lPos, pos, stringSetLimits(me));
+		return suffix(me[getSeqNo(lPos)], getSeqOffset(lPos));
+	}
+
+	//////////////////////////////////////////////////////////////////////////////
 	// position arithmetics
 	//////////////////////////////////////////////////////////////////////////////
 
@@ -298,7 +330,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <typename T1, typename T2, typename TCompression>
 	inline bool posLess(Pair<T1, T2, TCompression> const &a, Pair<T1, T2, TCompression> const &b) {
-		return 
+		return
 			 (getValueI1(a) <  getValueI1(b)) ||
 			((getValueI1(a) == getValueI1(b)) && (getValueI2(a) < getValueI2(b)));
 	}
@@ -467,8 +499,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	//////////////////////////////////////////////////////////////////////////////
     // StringSet with directly concatenated sequences
-    template < typename TString, typename TLimiter >
-    class StringSet< TString, Owner<ConcatDirect<TLimiter> > >
+    template < typename TString, typename TDelimiter >
+    class StringSet< TString, Owner<ConcatDirect<TDelimiter> > >
     {
 	public:
 		typedef typename StringSetLimits<StringSet>::Type	TLimits;
@@ -515,40 +547,51 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef TString Type;
     };
 
-    template < typename TString, typename TSpec >
-    struct Size< StringSet< TString, TSpec > > {
-		typedef typename Size< typename StringSetLimits< StringSet<TString, TSpec> >::Type >::Type Type;
-    };
+	template < typename TString, typename TSpec >
+	struct Size< StringSet< TString, TSpec > >:
+		Size< typename StringSetLimits< StringSet<TString, TSpec> >::Type > {};
+
+	template < typename TString, typename TSpec >
+	struct Suffix< StringSet< TString, TSpec > >:
+		Suffix< TString > {};
+
+	template < typename TString, typename TSpec >
+	struct Suffix< StringSet< TString, TSpec > const >:
+		Suffix< TString const > {};
+
 
 	// direct concatenation
 	template < typename TString, typename TSpec >
-    struct Value< StringSet< TString, Owner<ConcatDirect<TSpec> > > > {
-		typedef typename Infix<TString>::Type Type;
-    };
+	struct Value< StringSet< TString, Owner<ConcatDirect<TSpec> > > >:
+		Infix<TString> {};
 
     template < typename TString, typename TSpec >
-    struct GetValue< StringSet< TString, Owner<ConcatDirect<TSpec> > > > {
-		typedef typename Infix<TString>::Type Type;
-    };
+	struct GetValue< StringSet< TString, Owner<ConcatDirect<TSpec> > > >:
+		Infix<TString> {};
 
     template < typename TString, typename TSpec >
-    struct GetValue< StringSet< TString, Owner<ConcatDirect<TSpec> > > const >{
-		typedef typename Infix<TString const>::Type Type;
-    };
+	struct GetValue< StringSet< TString, Owner<ConcatDirect<TSpec> > > const >:
+		Infix<TString const> {};
 
     template < typename TString, typename TSpec >
-    struct Reference< StringSet< TString, Owner<ConcatDirect<TSpec> > > > {
-		typedef typename Infix<TString>::Type Type;
-    };
+	struct Reference< StringSet< TString, Owner<ConcatDirect<TSpec> > > >:
+		Infix<TString> {};
 
     template < typename TString, typename TSpec >
-    struct Reference< StringSet< TString, Owner<ConcatDirect<TSpec> > > const > {
-		typedef typename Infix<TString const>::Type Type;
-    };
+	struct Reference< StringSet< TString, Owner<ConcatDirect<TSpec> > > const >:
+		Infix<TString const> {};
 
     template <typename TString, typename TSpec>
 	struct AllowsFastRandomAccess< StringSet< TString, TSpec > >:
 		AllowsFastRandomAccess<TString> {};
+
+	template < typename TString, typename TSpec >
+	struct Suffix< StringSet< TString, Owner<ConcatDirect<TSpec> > > >:
+		Infix< TString > {};
+
+	template < typename TString, typename TSpec >
+	struct Suffix< StringSet< TString, Owner<ConcatDirect<TSpec> > > const >:
+		Infix< TString const > {};
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -672,14 +715,14 @@ namespace SEQAN_NAMESPACE_MAIN
         appendValue(me.limits, lengthSum(me) + length(obj));
     }
 
-    template < typename TString, typename TLimiter, typename TString2, typename TExpand >
+    template < typename TString, typename TDelimiter, typename TString2, typename TExpand >
     inline void appendValue(
-		StringSet< TString, Owner<ConcatDirect<TLimiter> > > &me, 
+		StringSet< TString, Owner<ConcatDirect<TDelimiter> > > &me, 
 		TString2 const &obj,
 		Tag<TExpand> const) 
 	{
         append(me.concat_string, obj);
-        appendValue(me.concat_string, TLimiter());
+        appendValue(me.concat_string, TDelimiter());
         appendValue(me.limits, lengthSum(me) + length(obj) + 1);
     }
 
@@ -728,8 +771,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		me.limitsValid = true;
     }
 
-    template < typename TString, typename TLimiter >
-    inline void	clear(StringSet< TString, Owner<ConcatDirect<TLimiter> > > &me) 
+    template < typename TString, typename TDelimiter >
+    inline void	clear(StringSet< TString, Owner<ConcatDirect<TDelimiter> > > &me) 
 	{
 	SEQAN_CHECKPOINT
 		clear(me.concat_string);
@@ -1467,7 +1510,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	// as if they were directly concatenated (compare StringSet<.., Owner<ConcatDirect<> > >
     //////////////////////////////////////////////////////////////////////////////
 
-	template < typename TLimiter = void >
+	template < typename TDelimiter = void >
 	struct ConcatVirtual;
 
     template < typename TStringSet, typename TSpec >
@@ -1711,6 +1754,14 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename TStringSet, typename TSpec, typename TDelta>
 	inline Iter<TStringSet, ConcatVirtual<TSpec> >
 	operator + (Iter<TStringSet, ConcatVirtual<TSpec> > const & me, TDelta delta) {
+		Pair<unsigned, typename Size< typename Value<TStringSet>::Type >::Type> pos;
+		posLocalize(pos, me._tell() + delta, stringSetLimits(*me.host));
+        return Iter<TStringSet, ConcatVirtual<TSpec> > (*me.host, getValueI1(pos), getValueI2(pos));
+    }
+
+	template <typename TStringSet, typename TSpec, typename T1, typename T2, typename TCompression>
+	inline Iter<TStringSet, ConcatVirtual<TSpec> >
+	operator + (Iter<TStringSet, ConcatVirtual<TSpec> > const & me, Pair<T1, T2, TCompression> delta) {
 		Pair<unsigned, typename Size< typename Value<TStringSet>::Type >::Type> pos;
 		posLocalize(pos, me._tell() + delta, stringSetLimits(*me.host));
         return Iter<TStringSet, ConcatVirtual<TSpec> > (*me.host, getValueI1(pos), getValueI2(pos));

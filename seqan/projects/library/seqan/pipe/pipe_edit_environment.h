@@ -281,7 +281,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline bool 
 	control(
 		Pipe< TInput, EditEnvironment< Tag<_LevenshteinDistance>, STEP_SIZE > > &me, 
-		ControlEof const &command) 
+		ControlEof const &) 
 	{
 		return me.state == me._EOF;
     }
@@ -290,7 +290,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline bool 
 	control(
 		Pipe< TInput, EditEnvironment< Tag<_LevenshteinDistance>, STEP_SIZE > > &me, 
-		ControlEos const &command) 
+		ControlEos const &) 
 	{
 		return me.state == me._EOF || me.state == me.INSERT_EOS;
     }

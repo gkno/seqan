@@ -191,6 +191,8 @@ namespace SEQAN_NAMESPACE_MAIN
                     return GENERIC_WRITE;
                 case OPEN_RDWR:
                     return GENERIC_READ | GENERIC_WRITE;
+				default:
+					return 0;
             }
         }
 

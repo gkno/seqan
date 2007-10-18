@@ -33,5 +33,6 @@ int main()
 	String<Dna, FileReader<Fasta> > fr("testfile.fa");
 	cout << fr << "\n";			//prints the sequence
 
+	return 0;
 }
 

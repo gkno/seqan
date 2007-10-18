@@ -27,281 +27,59 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 // QGram finders
 
-struct _Finder_QGramHashLookup; //Finder that simply looks up the q-gram in the hash table
+	struct _Finder_QGramLookup; //Finder that simply looks up the q-gram in the hash table
 
-typedef Tag<_Finder_QGramHashLookup> const HashLookup;
-
-//____________________________________________________________________________
-
-
-template < typename TText, typename TSpecShape >
-struct DefaultFinder<Index<TText, Index_QGram<TSpecShape> > > 
-{
-    typedef HashLookup Type;
-};
-
-//////////////////////////////////////////////////////////////////////////////
-// Position Spec for Index Finder
-template <typename TIndex>
-struct Position< Finder<TIndex, HashLookup> > {
-	typedef typename SAValue<TIndex>::Type Type;
-};
-
-
-//////////////////////////////////////////////////////////////////////////////
 /**
-.Spec.HashLookup:
+.Tag.QGram_FIND_Lookup:
 ..summary:Finding q-grams in index using a hash table.
 ..general:Class.Finder
 ..cat:Index
-..signature:Finder<TIndex, HashLookup>
+..signature:Finder<TIndex>
+..signature:Finder<TIndex, QGram_FIND_Lookup>
 ..param.TIndex:The index type.
 ...type:Spec.Index_QGram
 */
 
-template <typename TIndex>
-class Finder <TIndex, HashLookup>
-{
-public:
-	typedef typename Iterator< typename Fibre<TIndex, QGram_SA>::Type const, Standard >::Type TIterator;
 
-	Holder<TIndex>	index;
-	Pair<TIterator>	range;
-	TIterator		data_iterator;
-
-	Finder() 
-	{
-		clear(*this);
-	}
-	Finder(TIndex &_index): index(_index) 
-	{
-		clear(*this);
-	}
-	Finder(TIndex const &_index): index(_index)
-	{
-		clear(*this);
-	}
-};
-
-//____________________________________________________________________________
-template <typename TIndex>
-inline typename _Parameter<TIndex>::Type 
-host(Finder<TIndex, HashLookup> & me)
-{
-SEQAN_CHECKPOINT
-	return value(me.index);
-}
-
-template <typename TIndex>
-inline typename _Parameter<TIndex>::Type 
-host(Finder<TIndex, HashLookup> const & me)
-{
-SEQAN_CHECKPOINT
-	return value(me.index);
-}
-
-template <typename TIndex>
-inline typename _Parameter<TIndex>::Type 
-container(Finder<TIndex, HashLookup> & me)
-{
-SEQAN_CHECKPOINT
-	return value(me.index);
-}
-
-template <typename TIndex>
-inline typename _Parameter<TIndex>::Type 
-container(Finder<TIndex, HashLookup> const & me)
-{
-SEQAN_CHECKPOINT
-	return value(me.index);
-}
+	typedef Tag<_Finder_QGramLookup> const QGram_FIND_Lookup;
 
 //____________________________________________________________________________
 
-template <typename TIndex>
-inline void
-setHost(Finder<TIndex, HashLookup> & me, typename _Parameter<TIndex>::Type container_)
-{
-SEQAN_CHECKPOINT
-	me.index = container;
-}
 
-template <typename TIndex>
-inline void
-setContainer(Finder<TIndex, HashLookup> & me, typename _Parameter<TIndex>::Type container_)
-{
-SEQAN_CHECKPOINT
-	me.index = container;
-}
-
-//____________________________________________________________________________
-
-template <typename TIndex>
-inline typename Iterator< typename Fibre<TIndex, QGram_SA>::Type const, Standard >::Type &
-hostIterator(Finder<TIndex, HashLookup> & me)
-{
-SEQAN_CHECKPOINT
-	return me.data_iterator;
-}
-
-template <typename TIndex>
-inline typename Iterator< typename Fibre<TIndex, QGram_SA>::Type const, Standard >::Type const &
-hostIterator(Finder<TIndex, HashLookup> const & me)
-{
-SEQAN_CHECKPOINT
-	return me.data_iterator;
-}
-
-
-//____________________________________________________________________________
-
-template <typename TIndex>
-inline bool
-empty(Finder<TIndex, HashLookup> & me)
-{
-SEQAN_CHECKPOINT
-	return me.range.i1 == me.range.i2;
-}
-
-template <typename TIndex>
-inline void
-clear(Finder<TIndex, HashLookup> & me)
-{
-SEQAN_CHECKPOINT
-	typedef typename Iterator< typename Fibre<TIndex, QGram_SA>::Type const, Standard >::Type TIterator;
-	me.range.i1 = me.range.i2 = TIterator();
-}
-
-//____________________________________________________________________________
-
-template <typename TIndex>
-inline bool
-atBegin(Finder<TIndex, HashLookup> & me)
-{
-SEQAN_CHECKPOINT
-	return (empty(me) || hostIterator(me) == me.range.i1);
-}
-
-template <typename TIndex>
-inline bool
-atEnd(Finder<TIndex, HashLookup> & me)
-{
-SEQAN_CHECKPOINT
-	return (empty(me) || hostIterator(me) == me.range.i2);
-}
-
-//____________________________________________________________________________
-
-template <typename TIndex>
-inline void
-goBegin(Finder<TIndex, HashLookup> & me)
-{
-SEQAN_CHECKPOINT
-	hostIterator(me) = me.range.i1;
-}
-
-template <typename TIndex>
-inline void
-goEnd(Finder<TIndex, HashLookup> & me)
-{
-SEQAN_CHECKPOINT
-	hostIterator(me) = me.range.i2;
-}
-
-//____________________________________________________________________________
-/*
-template <typename TPosition>
-friend inline void 
-setPosition(Finder & me, TPosition pos_)
-{
-SEQAN_CHECKPOINT
-	hostIterator(me) = me.range.i1 + pos_;
-}
-*/
-//____________________________________________________________________________
-
-template <typename TIndex>
-inline typename Position<Finder<TIndex, HashLookup> >::Type
-position(Finder<TIndex, HashLookup> & me)
-{
-SEQAN_CHECKPOINT
-	SEQAN_ASSERT(!empty(me))
-	return *me.data_iterator;
-}
-
-template <typename TIndex>
-inline typename Position<Finder<TIndex, HashLookup> >::Type
-position(Finder<TIndex, HashLookup> const & me)
-{
-SEQAN_CHECKPOINT
-	SEQAN_ASSERT(!empty(me))
-	return hostIterator(me) - begin(container(me), Rooted());
-}
+	template < typename TText, typename TSpec >
+	struct DefaultFinder<Index<TText, Index_QGram<TSpec> > > {
+        typedef QGram_FIND_Lookup Type;
+    };
 
 
 //////////////////////////////////////////////////////////////////////////////
 // find implementation
 
-template < typename TFinder, typename TPattern >
-inline void _findFirstQGramIndex(TFinder &finder,
-								 TPattern const &pattern,
-								 HashLookup)
-{
-	typedef typename Haystack<TFinder>::Type TIndex;
-
-	typedef typename Fibre<TIndex, QGram_SA>::Type TSA;
-
-	typedef typename Fibre<TIndex, QGram_Shape>::Type TShape;
-	typedef typename Value<TShape>::Type TShapeValue;
-
-	typedef typename Fibre<TIndex, QGram_Dir>::Type THash;
-
-	typedef typename Iterator<TPattern const, Standard>::Type TPatternIterator;
-
-	TIndex & _index = haystack(finder);
-	indexRequire(_index, QGram_SA());
-	TSA const & _sa = indexSA(_index);
-
-	//indexRequire(_index, QGram_Dir());
-
-	TShape & _shape = indexShape(_index);
-
-	TPatternIterator _it = begin(pattern, Standard());
-	TShapeValue hash_value = hash(_shape, _it);
-
-	THash & _dir = indexDir(_index);
-	finder.range.i1 = begin(_sa, Standard()) + _dir[hash_value];
-	finder.range.i2 = begin(_sa, Standard()) + _dir[hash_value+1];
-}
-
-//////////////////////////////////////////////////////////////////////////////
-// find
-
-template < typename TText, typename TSpecShape, typename TSpecFinder, typename TPattern >
-inline bool 
-find(Finder<Index<TText, Index_QGram<TSpecShape> >, TSpecFinder> & finder,
-	 TPattern const &pattern)
-{
-	if (empty(finder)) 
+	template < typename TText, typename TSpec, typename TSpecFinder, typename TPattern >
+	inline void _findFirstIndex(
+		Finder< Index<TText, TSpec>, TSpecFinder > &finder,
+		TPattern const &pattern,
+		QGram_FIND_Lookup const)
 	{
-		_findFirstQGramIndex(finder, needle(pattern), TSpecFinder());
-		hostIterator(finder) = finder.range.i1;
-	} 
-	else
-	{
-		++hostIterator(finder);
-	}	
-	return !atEnd(finder);
-}
+		typedef Index<TText, TSpec>									TIndex;
+		typedef typename Fibre<TIndex, QGram_SA>::Type				TSA;
+		typedef typename Fibre<TIndex, QGram_Shape>::Type			TShape;
+		typedef typename Fibre<TIndex, QGram_Dir>::Type				TDir;
+		typedef typename Iterator<TSA const, Standard>::Type		TSAIterator;
+		typedef typename Iterator<TPattern const, Standard>::Type	TPatternIterator;
 
-template < typename TText, typename TSpecShape, typename TSpecFinder >
-inline bool 
-find(Finder<Index<TText, Index_QGram<TSpecShape> >, TSpecFinder> & finder)
-{
-	if (empty(finder)) return false;
-	++hostIterator(finder);
-	return !atEnd(finder);
-}
+		TIndex &index = haystack(finder);
+		indexRequire(index, QGram_SADir());
+
+		TSAIterator saIt = begin(indexSA(index), Standard());
+		TPatternIterator pIt = begin(pattern, Standard());
+		TDir const &dir = indexDir(index);
+		TShape &shape = indexShape(index);
+
+		finder.range.i1 = saIt + dir[hash(shape, pIt, length(pattern))];
+		finder.range.i2 = saIt + dir[hashUpper(shape, pIt, length(pattern))];
+	}
+
 
 //////////////////////////////////////////////////////////////////////////////
 

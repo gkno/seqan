@@ -469,7 +469,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template < typename TInput, unsigned tupleLen, bool omitLast, typename TCompression >
     inline unsigned
-    countSequences(Pipe< TInput, Tupler< tupleLen, omitLast, TCompression > > const &me) {
+    countSequences(Pipe< TInput, Tupler< tupleLen, omitLast, TCompression > > const &) {
 		return 1;
 	}
 

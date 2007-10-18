@@ -271,6 +271,59 @@ Spec.SimpleShape
 		return me.hValue;
 	}
 
+	template <typename TValue, typename TSpec, typename TIter, typename TSize>
+	inline typename Value< Shape<TValue, TSpec> >::Type
+	hash(Shape<TValue, TSpec> &me, TIter it, TSize charsLeft)
+	{
+	SEQAN_CHECKPOINT
+		typedef typename Value< Shape<TValue, TSpec> >::Type	THValue;
+
+		TSize iEnd = me.span;
+		if (iEnd > charsLeft) iEnd = charsLeft;
+
+		TSize i = 0;
+		if (iEnd > 0) {
+			me.hValue = _ord(me.leftChar = *it);
+			for(i = 1; i < iEnd; ++i) {
+				++it;
+				me.hValue = me.hValue * ValueSize<TValue>::VALUE + _ord(*it);
+			}
+		} else
+			return me.hValue = 0;
+
+		// fill shape with zeros
+		for(; i < (TSize)me.span; ++i)
+			me.hValue *= ValueSize<TValue>::VALUE;
+		return me.hValue;
+	}
+
+	template <typename TValue, typename TSpec, typename TIter, typename TSize>
+	inline typename Value< Shape<TValue, TSpec> >::Type
+	hashUpper(Shape<TValue, TSpec> &me, TIter it, TSize charsLeft)
+	{
+	SEQAN_CHECKPOINT
+		typedef typename Value< Shape<TValue, TSpec> >::Type	THValue;
+
+		TSize iEnd = me.span;
+		if (iEnd > charsLeft) iEnd = charsLeft;
+
+		TSize i = 0;
+		if (iEnd > 0) {
+			me.hValue = _ord(me.leftChar = *it);
+			for(i = 1; i < iEnd; ++i) {
+				++it;
+				me.hValue = me.hValue * ValueSize<TValue>::VALUE + _ord(*it);
+			}
+			++me.hValue;
+		} else
+			me.hValue = 1;
+
+		// fill shape with zeros
+		for(; i < (TSize)me.span; ++i)
+			me.hValue *= ValueSize<TValue>::VALUE;
+		return me.hValue;
+	}
+
 //____________________________________________________________________________
 
 /**
@@ -333,7 +386,7 @@ Spec.SimpleShape
 				me.hValue = me.hValue * ValueSize<TValue>::VALUE + me.XValue;
 			}
 		} else
-			me.hValue = me.XValue = 0;
+			return me.hValue = me.XValue = 0;
 
 		// fill shape with zeros
 		for(; i < (TSize)me.span; ++i)

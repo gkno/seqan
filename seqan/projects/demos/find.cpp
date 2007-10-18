@@ -130,5 +130,6 @@ int main()
 {
 	testFinder("projects/apps/aav/sequences/", "dir.txt", "AA"); 
 	//performanceTest("fungi.fasta2"); 
+	return 0;
 }
 

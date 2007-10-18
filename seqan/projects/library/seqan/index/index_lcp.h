@@ -83,7 +83,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			process();
 		}
 
-        Pipe(Bundle2< TTextInput, TSuffixArrayInput > const &_bundleIn, const LcpConfig &_conf):
+        Pipe(Bundle2< TTextInput, TSuffixArrayInput > const &_bundleIn, LcpConfig const &_conf):
             textIn(&_bundleIn.in1),
 			suffixArrayIn(&_bundleIn.in2),
             in(mapper),
@@ -178,7 +178,7 @@ namespace SEQAN_NAMESPACE_MAIN
             in(mapper),
 			limits(_limits)	{}
 
-        Pipe(TLimitsString const &_limits, const LcpConfig &_conf):
+        Pipe(TLimitsString const &_limits, LcpConfig const &_conf):
             in(mapper),
 			limits(_limits),
 			conf(_conf) {}
@@ -190,7 +190,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			process(_bundleIn.in1, _bundleIn.in2);
 		}
 
-        Pipe(Bundle2< TTextInput, TSuffixArrayInput > const &_bundleIn, TLimitsString const &_limits, const LcpConfig &_conf):
+        Pipe(Bundle2< TTextInput, TSuffixArrayInput > const &_bundleIn, TLimitsString const &_limits, LcpConfig const &_conf):
             in(mapper),
 			limits(_limits),
 			conf(_conf)

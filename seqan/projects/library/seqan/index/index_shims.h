@@ -115,7 +115,7 @@ namespace SEQAN_NAMESPACE_MAIN
     inline void createSuffixArray(
 		TSA &SA,
 		TText const &s,
-		TAlgSpec const alg)
+		TAlgSpec const &alg)
 	{
 		// -> call internal memory algorithm with an extended interface (+ alphabet size, max_depth)
 		if (BitsPerValue< typename Value<TText>::Type >::VALUE > 16)
@@ -436,7 +436,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	struct _SAValueLess< Pair<T1,T2,TCompression> >:
 		public ::std::binary_function< Pair<T1,T2,TCompression>, Pair<T1,T2,TCompression>, bool> 
 	{
-		inline bool operator()(const Pair<T1,T2,TCompression> &a, const Pair<T1,T2,TCompression> &b) const {
+		inline bool operator()(Pair<T1,T2,TCompression> const &a, Pair<T1,T2,TCompression> const &b) const {
 			return	getValueI1(a) < getValueI1(b) ||
 					getValueI1(a) == getValueI1(b) && getValueI2(a) < getValueI2(b);
 		}
@@ -503,8 +503,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	template <typename TText, typename TSpec, typename TFibre>
-	inline bool indexCreate(Index<TText, TSpec> &index, TFibre const fibre) {
-		return indexCreate(index, fibre, typename DefaultIndexCreator<Index<TText, TSpec>, TFibre>::Type());
+	inline bool indexCreate(Index<TText, TSpec> &index, Tag<TFibre> const fibre) {
+		return indexCreate(index, fibre, typename DefaultIndexCreator<Index<TText, TSpec>, Tag<TFibre> const>::Type());
 	}
 
 //////////////////////////////////////////////////////////////////////////////
@@ -522,7 +522,7 @@ namespace SEQAN_NAMESPACE_MAIN
 */
 
 	template <typename TText, typename TSpec, typename TFibre>
-	inline bool indexSupplied(Index<TText, TSpec> &index, TFibre const fibre) {
+	inline bool indexSupplied(Index<TText, TSpec> &index, Tag<TFibre> const fibre) {
 		return !empty(getFibre(index, fibre));
 	}
 
@@ -542,7 +542,7 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 */
 
 	template <typename TText, typename TSpec, typename TFibre>
-	inline bool indexRequire(Index<TText, TSpec> &index, TFibre const fibre) {
+	inline bool indexRequire(Index<TText, TSpec> &index, Tag<TFibre> const fibre) {
 		if (indexSupplied(index, fibre)) return true;				// if the table doesn't exist,
 		if (!indexSolveDependencies(index, fibre)) return false;	// fulfill requirements
 		return indexCreate(index, fibre);							// and create table
@@ -553,27 +553,27 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 // solve dependencies
 
 	template <typename TText, typename TSpec, typename TFibre>
-	inline bool indexSolveDependencies(Index<TText, TSpec> &, TFibre const) {
+	inline bool indexSolveDependencies(Index<TText, TSpec> &, Tag<TFibre> const) {
 		return true;
 	}
 
-	template <typename TText, typename TSpec, typename TFibre>
-	inline bool indexSolveDependencies(Index<TText, TSpec> &index, Tag<_Fibre_LCP>) {
+	template <typename TText, typename TSpec>
+	inline bool indexSolveDependencies(Index<TText, TSpec> &index, Tag<_Fibre_LCP> const) {
 		return indexRequire(index, Tag<_Fibre_SA>());
 	}
 
-	template <typename TText, typename TSpec, typename TFibre>
-	inline bool indexSolveDependencies(Index<TText, TSpec> &index, Tag<_Fibre_LCPE>) {
+	template <typename TText, typename TSpec>
+	inline bool indexSolveDependencies(Index<TText, TSpec> &index, Tag<_Fibre_LCPE> const) {
 		return indexRequire(index, Tag<_Fibre_LCP>());
 	}
 
-	template <typename TText, typename TSpec, typename TFibre>
-	inline bool indexSolveDependencies(Index<TText, TSpec> &index, Tag<_Fibre_ChildTab>) {
+	template <typename TText, typename TSpec>
+	inline bool indexSolveDependencies(Index<TText, TSpec> &index, Tag<_Fibre_ChildTab> const) {
 		return indexRequire(index, Tag<_Fibre_LCP>());
 	}
 
-	template <typename TText, typename TSpec, typename TFibre>
-	inline bool indexSolveDependencies(Index<TText, TSpec> &index, Tag<_Fibre_BWT>) {
+	template <typename TText, typename TSpec>
+	inline bool indexSolveDependencies(Index<TText, TSpec> &index, Tag<_Fibre_BWT> const) {
 		return indexRequire(index, Tag<_Fibre_SA>());
 	}
 
