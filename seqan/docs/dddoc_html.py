@@ -1,3 +1,4 @@
+# coding: latin-1
 import os
 import dddoc
 import dddoc_html_trans
