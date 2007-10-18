@@ -1,4 +1,3 @@
-# coding: latin-1
 import os
 import dddoc
 import dddoc_html_trans
@@ -140,14 +139,6 @@ def escapeHTML(text):
     text = text.replace("<", "&lt;")
     text = text.replace(">", "&gt;")
     
-#    text = text.replace("ä", "&auml;")
-#    text = text.replace("ö", "&ouml;")
-#    text = text.replace("ü", "&uuml;")
-#    text = text.replace("ß", "&szlig;")
-#    text = text.replace("Ä", "&Auml;")
-#    text = text.replace("Ö", "&Ouml;")
-#    text = text.replace("Ü", "&Uuml;")
-    
     if (text.find("\\") >= 0):
         text = text.replace("\\\\", "&backslash;")
     	text = dddoc_html_trans.translate(text);
@@ -276,14 +267,6 @@ def translateImage(text):
 
 ################################################################################
     
-#sortname
-def translateID4Sorting(text):
-    i = text.find('#');
-    if (i >= 0):
-        text = text[i + 1:]
-    return translateText(text)
-
-#real displayname
 def translateID(text):
     i = text.find('#');
     if (i >= 0):
@@ -292,11 +275,22 @@ def translateID(text):
     if (i >= 0):
         text = text[i + 1:]
     return translateText(text)
-          
+
+################################################################################
+         
+def sortingKey(data, key):
+    if data[key]["order"].empty():
+        return translateID(key)
+    
+    return data[key]["order"].text();
+
+ 
 ################################################################################
 
 def getBeforeColon(text):
-	return text[0: text.find(':')]
+    pos = text.find(':')
+    if pos < 0: return text
+    else: return text[0: pos]
 
 ################################################################################
 
@@ -360,7 +354,8 @@ def pageIndex(fl, cat, subcat = ""):
                         s = '<div class=index_item>'
                         s += '<a class=index_link id="' + key + '" target=_top title="' + translateID(key) + '" href="' + getFilename(cat, key) + '">' + translateID(key) + '</a>'
                         s += '</div>'
-                        key4sorting = translateID4Sorting(key)
+                        
+                        key4sorting = sortingKey(dddoc.DATA[cat2], key)
                         if not entries[subcat2].has_key(key4sorting): entries[subcat2][key4sorting] = ''
                         entries[subcat2][key4sorting] += s
                         
@@ -447,7 +442,7 @@ def addIndexPageMembers(data, key, entries, subcat):
     
     s += '</td></tr>'
     
-    key4sorting = translateID4Sorting(key)
+    key4sorting = sortingKey(data, key)
     if not entries[subcat].has_key(key4sorting): entries[subcat][key4sorting] = ''
     entries[subcat][key4sorting] += s
 
@@ -650,13 +645,14 @@ def printTableContent(fl, data, category):
 ################################################################################
 
 
-def printTable(fl, data, category):
+def printTable(fl, data, category, showheadline = True):
     lines = data[category]
     if not lines.empty():
         fl.write('<div class=section id=' + category + '>')
         
-        s = dddoc.DATA["globals.sections"][category].text()
-        if s: fl.write('<div class=section_headline>' + s + '</div>')
+        if showheadline:
+            s = dddoc.DATA["globals.sections"][category].text()
+            if s: fl.write('<div class=section_headline>' + s + '</div>')
         
         s = translateText(lines.text())
         if s: fl.write('<div class=text_block>' + s + '</div>')
@@ -693,12 +689,13 @@ def findDataRek(fl, data, category, follow, lines, map):
       
 ################################################################################
 
-def printMemberOut(fl, data, category, lines, derivedfrom, highlight):
+def printMemberOut(fl, data, category, lines, derivedfrom, highlight, showheadline = True):
     if len(lines) > 0:
         fl.write('<div class=section id=' + category + '>')
 
-        s = dddoc.DATA["globals.sections"][category].text()
-        if s: fl.write('<div class=section_headline>' + s + '</div>')
+        if showheadline:
+            s = dddoc.DATA["globals.sections"][category].text()
+            if s: fl.write('<div class=section_headline>' + s + '</div>')
         
         fl.write('<table class=value_tab cellspacing=0 cellpadding=0>')
         
@@ -733,28 +730,29 @@ def printMemberOut(fl, data, category, lines, derivedfrom, highlight):
 
 ################################################################################
 
-def printMember(fl, data, category):
+def printMember(fl, data, category, showheadline = True):
     lines = data[category].lines
-    printMemberOut(fl, data, category, lines, {}, False)
+    printMemberOut(fl, data, category, lines, {}, False, showheadline)
 
 ################################################################################
 
-def printMemberRek(fl, data, category, follow):
+def printMemberRek(fl, data, category, follow, showheadline = True):
     lines = []
     map = {}
     highlight = findDataRek(fl, data, category, follow, lines, map)
     
-    printMemberOut(fl, data, category, lines, map, highlight)
+    printMemberOut(fl, data, category, lines, map, highlight, showheadline)
     
 
 ################################################################################
 
-def printLinkOut(fl, data, category, lines, derivedfrom, highlight):
+def printLinkOut(fl, data, category, lines, derivedfrom, highlight, showheadline = True):
     if len(lines) > 0:
         fl.write('<div class=section id=' + category + '>')
 
-        s = dddoc.DATA["globals.sections"][category].text()
-        if s: fl.write('<div class=section_headline>' + s + '</div>')
+        if showheadline:
+            s = dddoc.DATA["globals.sections"][category].text()
+            if s: fl.write('<div class=section_headline>' + s + '</div>')
 
         map = {}
         for line in lines:
@@ -784,29 +782,30 @@ def printLinkOut(fl, data, category, lines, derivedfrom, highlight):
 
 ################################################################################
 
-def printLink(fl, data, category):
+def printLink(fl, data, category, showheadline = True):
     lines = data[category].at_level().lines
-    printLinkOut(fl, data, category, lines, {}, False)
+    printLinkOut(fl, data, category, lines, {}, False, showheadline)
 
 ################################################################################
 
-def printLinkRek(fl, data, category, follow):
+def printLinkRek(fl, data, category, follow, showheadline = True):
     lines = []
     map = {}
     highlight = findDataRek(fl, data, category, follow, lines, map)
     
-    printLinkOut(fl, data, category, lines, map, highlight)
+    printLinkOut(fl, data, category, lines, map, highlight, showheadline)
 
 
 ################################################################################
 
-def printList(fl, data, category):
+def printList(fl, data, category, showheadline = True):
     lines = data[category]
     if not lines.empty():
         fl.write('<div class=section id=' + category + '>')
 
-        s = dddoc.DATA["globals.sections"][category].text()
-        if s: fl.write('<div class=section_headline>' + s + '</div>')
+        if showheadline:
+            s = dddoc.DATA["globals.sections"][category].text()
+            if s: fl.write('<div class=section_headline>' + s + '</div>')
 
         map = {}
         for line in lines.lines:
@@ -824,19 +823,20 @@ def printList(fl, data, category):
 
 ################################################################################
 
-def printShortcutfor(fl, data, category):
-    printLink(fl, data, category)
+def printShortcutfor(fl, data, category, showheadline = True):
+    printLink(fl, data, category, showheadline)
     printSignature(fl, data[category], "signature")
 
 ################################################################################
 
-def printTextblock(fl, data, category):
+def printTextblock(fl, data, category, showheadline = True):
     lines = data[category]
     if not lines.empty():
         fl.write('<div class=section id=' + category + '>')
-
-        s = dddoc.DATA["globals.sections"][category].text()
-        if s: fl.write('<div class=section_headline>' + s + '</div>')
+        
+        if showheadline:
+            s = dddoc.DATA["globals.sections"][category].text()
+            if s: fl.write('<div class=section_headline>' + s + '</div>')
         
         fl.write('<div class=text_block>')
         subprintText(fl, lines)
@@ -961,21 +961,16 @@ def subprintText(fl, data, subcategory = False):
             fl.write('<div class=code_sub_block>' + s + '</div>')
             
         elif name == 'image': 
-            img = translateImage(getBeforeColon(line.text()))
-            s = '<center><table width=0%><tr><td>' + img + '</td></tr>'
-            
-            caption = translateText(getAfterColon(line.text()))
-            if (len(caption) >= 2):
-            	s += '<tr><td lign=left class=image_sub_block_captionn>' + caption + '</td></tr>'
-            s += '</table></center>'
-            
-            fl.write('<div class=image_sub_block>' + s + '</div>')
+            subprintImage(fl, line.text())
             
         elif name == 'note':
             s = dddoc.DATA["globals.subsections.note"].text()
             s = '<span class=section_sub_headline>' + s + '</span> '
             s += translateText(line.text())
             fl.write('<div class=note_sub_block>' + s + '</div>')
+            
+        elif name == 'field':
+            subprintField(fl, line.text())
             
     if in_table:
         fl.write('</table>')
@@ -1042,6 +1037,83 @@ def subprintTableLine(fl, text, is_header):
             fl.write('<td class=table_cell_explicite valign=top>' + s + '</td>')
         
     fl.write('</tr>')
+
+################################################################################
+
+def subprintImage(fl, text):
+    s1 = ''
+    s2 = ''
+    is_image = True
     
- 
+    while len(text) > 0:
+        i = text.find('|');
         
+        if i >= 0:
+            t = text[:i]
+            text = text[i+1:]
+        else:
+            t = text
+            text = ''
+        
+        if len(t) > 0:
+            if is_image:
+                s1 += '<td>' + translateImage(t) + '</td>'
+            else:
+                s2 += '<td valign=top align=left class=image_sub_block_caption>' + translateText(t) + '</td>'
+        else:
+            if is_image:
+                s1 += '<td>&nbsp;</td>'
+            else:
+                s2 += '<td>&nbsp;</td>'
+        
+        is_image = not is_image
+        
+    s = '<center><table cellspacing=0 cellpadding=0 border=0><tr>' + s1 + '</tr><tr>' + s2 + '</tr></table></center>'
+    fl.write('<div class=image_sub_block>' + s + '</div>')
+
+################################################################################
+
+def subprintField(fl, text):
+    i = text.rfind('.')
+    entry = text[:i]
+    field = text[i+1:]
+
+    data = dddoc.DATA[entry]
+    
+    if   (field == "description"): printTextblock(fl, data, "description", False)
+    elif (field == "signature"): printSignature(fl, data, "signature")
+    elif (field == "param"): printTable(fl, data, "param", False)
+    elif (field == "returns"): printTextblock(fl, data, "returns", False)
+    elif (field == "class"): printLink(fl, data, "class", False)
+    elif (field == "general"): printLink(fl, data, "general", False)
+    elif (field == "shortcutfor"): printShortcutfor(fl, data, "shortcutfor", False)
+    elif (field == "implements"): printLinkRek(fl, data, "implements", "general", False)
+    elif (field == "baseconcept"): printLink(fl, data, "baseconcept", False)
+
+    elif (field == "spec"): printMember(fl, data, "spec", False)
+    elif (field == "shortcut"): printMember(fl, data, "shortcut", False)
+    elif (field == "type"): printMemberRek(fl, data, "type", "general", False)
+    elif (field == "memvar"): printMemberRek(fl, data, "memvar", "base", False)
+    elif (field == "memfunc"): printMemberRek(fl, data, "memfunc", "base", False)
+    elif (field == "function"): printMemberRek(fl, data, "function", "general", False)
+    
+    elif (field == "childconcept"): printMember(fl, data, "childconcept", False)
+    elif (field == "conceptimplements"): printMemberRek(fl, data, "conceptimplements", "childconcept", False)
+    elif (field == "conceptmetafunc"): printMemberRek(fl, data, "conceptmetafunc", "baseconcept", False)
+    elif (field == "conceptmemvar"): printMemberRek(fl, data, "conceptmemvar", "baseconcept", False)
+    elif (field == "conceptmemfunc"): printMemberRek(fl, data, "conceptmemfunc", "baseconcept", False)
+    elif (field == "conceptfunc"): printMemberRek(fl, data, "conceptfunc", "baseconcept", False)
+    
+    elif (field == "value"): printTable(fl, data, "value", False)
+
+    elif (field == "conceptusedby"): printLinkRek(fl, data, "conceptusedby", "childconcept", False)
+
+    elif (field == "remarks"): printTextblock(fl, data, "remarks", False)
+    elif (field == "example"): printTextblock(fl, data, "example", False)
+    elif (field == "demo"): printLinkRek(fl, data, "demo", "general", False)
+    elif (field == "file"): printFile(fl, data, "file")
+    
+    elif (field == "concept"): printLink(fl, data, "concept", False)
+    elif (field == "include"): printList(fl, data, "include", False)
+    elif (field == "demofor"): printLink(fl, data, "demofor", False)
+    elif (field == "see"): printLink(fl, data, "see", False)
