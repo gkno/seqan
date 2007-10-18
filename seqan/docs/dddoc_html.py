@@ -1,3 +1,4 @@
+# coding: latin-1
 import os
 import dddoc
 import dddoc_html_trans
@@ -139,13 +140,13 @@ def escapeHTML(text):
     text = text.replace("<", "&lt;")
     text = text.replace(">", "&gt;")
     
-#    text = text.replace("Ã¤", "&auml;")
-#    text = text.replace("Ã¶", "&ouml;")
-#    text = text.replace("Ã¼", "&uuml;")
-#    text = text.replace("ÃŸ", "&szlig;")
-#    text = text.replace("Ã„", "&Auml;")
-#    text = text.replace("Ã–", "&Ouml;")
-#    text = text.replace("Ãœ", "&Uuml;")
+#    text = text.replace("ä", "&auml;")
+#    text = text.replace("ö", "&ouml;")
+#    text = text.replace("ü", "&uuml;")
+#    text = text.replace("ß", "&szlig;")
+#    text = text.replace("Ä", "&Auml;")
+#    text = text.replace("Ö", "&Ouml;")
+#    text = text.replace("Ü", "&Uuml;")
     
     if (text.find("\\") >= 0):
         text = text.replace("\\\\", "&backslash;")
