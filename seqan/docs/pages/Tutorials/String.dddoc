@@ -1,8 +1,18 @@
-.Page.100|Sequences:
+.Page.Sequences:
+..order:100
 ..cat:Tutorials
 ..summary:Sequences in SeqAn.
 
-..description:
-...image:sequences:
-...text:
-A bla is ...
+.Page.Sequences.description:
+..image:sequences
+
+
+..section:Overview
+
+..text:SeqAn is a library for sequence analysis, so sequences are the core of SeqAn.
+This tutorial gives an overview of the variety of sequences types in SeqAn and basic manipulation algorithm.
+
+..subsection:Strings
+..text:@Class.String.Strings@ are @Concept.Container.containers@ of values.
+SeqAn offers the following kinds of string:
+..field:Class.String.spec 

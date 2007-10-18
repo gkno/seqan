@@ -86,9 +86,7 @@ Jeder Entry in dddoc hat einen Pfad der Form "[Category].[Name]".
 ...text:
     Enth\"alt der Name ein "#"-Zeichen, so wird lediglich der String hinter dem (ersten) "#"-Zeichen dargestellt.
     Dies sollte z.B. bei Memfunc und Memvar-Eintr\"agen geschehen: Vor dem "#"-Zeichen schreibe man den Klassennamen, hinter das "#"-Zeichen den Namen des Members.
-...text:\"Ahnlich verh\"alt es sich, wenn ein "\pipe"-Zeichen im Namen vorkommt: Alles vor dem "\pipe"-Zeichen (incl. des Zeichens selbst) wird weggeschnitten.
-    Anders als "#" wirkt sich "\pipe" jedoch nicht auf die Sortierung der Namen in Men\"us und Listen aus. Somit kann man den Text vor dem ersten "\pipe"-Zeichen dazu verwenden, 
-    die Reihenfolge der Namen zu manipulieren.
+    Statt eines "#"-Zeichen kann auch ein "\pipe"-Zeichen verwendet werden.
 
 ...section:4 Fields
 ...text:
@@ -107,6 +105,9 @@ Ein Field hat einen Pfad der Form "[Category].[Name].[Field]":
 ...table:"file"|Zeigt einen Sourcefile an. Angegeben wird der Pfad auf eine .cpp-Datei. Sollte der \"Ubersicht halber nur in Demo-Entries eingesetzt werden.
 Zeilen im Sourcefile, die mit "///" beginnen, werden als Kommentar gesetzt.
 ...table:"hidefromindex"|Entry nicht in Indexen (Navigation/\"Ubersichtsseiten) auff\"uhren.
+...table:"order"|gibt String an, der statt [Name] beim Sortieren der Entries in Indexen und Men\"us verwendet werden soll. 
+Dies kann dazu verwendet werden, um die Reihenfolge der Entries zu beeinflussen.
+Vorsicht: Selbst wenn hier Zahlen stehen, werden diese als Text aufgefasst, d.h. der Eintrag mit ".order:10" steht vor dem Eintrag mit ".order:2".
 
 ...subsection:Text Fields
 ...table:"description"|Ausf\"uhrlicher Text. Wird z.B. f\"ur Tutorials verwendet. 
@@ -162,9 +163,11 @@ Zeilen im Sourcefile, die mit "///" beginnen, werden als Kommentar gesetzt.
 ...table:"text"|ein Textabsatz.
 ...table:"note"|ein hervorgehobener Textabsatz.
 ...table:"code"|ein St\"uck Beispielcode.
-...table:"image"|F\"ugt ein Bild ein. Angegeben wird der Name (opt. mit relativem Pfad) ohne Endung auf ein Bild. Bei HTML-Export wird automatisch ".png" angeh\"angt. Bilder sollten im "img"-Ordner abgelegt werden. Optional kann hinter einem weiteren ":" eine Bildunterschrift angegeben werden. z.B. "..remarks.image:seqan_logo_large:Dies ist das gro\sse SeqAn-Logo."
+...table:"image"|F\"ugt ein Bild ein. Angegeben wird der Name (opt. mit relativem Pfad) ohne Endung auf ein Bild. Bei HTML-Export wird automatisch ".png" angeh\"angt. Bilder sollten im "img"-Ordner abgelegt werden. Optional kann hinter einem "\pipe" eine Bildunterschrift angegeben werden. z.B. "..image:seqan_logo_large\pipeDies ist das gro\sse SeqAn-Logo.".
+Sollen mehrere Bilder nebeneinander stehen, so kann man diese nach einem weiteren "\pipe" angeben. z.B. "..image:file1\pipecaption1\pipefile2\pipecaption2\pipefile3\pipecaption3".
 ...table:"table"|Anzeigen einer Tabellenzeile. Die Spalten werden mit "\pipe" voneinander abgetrennt. Hintereinander stehende "table"- und "tableheader"-Subfields werden zu einer gemeinsamen Tabelle zusammengef\"ugt.
 ...table:"tableheader"|Anzeigen einer hervorgehobenen Tabellenzeile (Spalten\"uberschriften). Hintereinander stehende "table"- und "tableheader"-Subfields werden zu einer gemeinsamen Tabelle zusammengef\"ugt.
+...table:"field"|Anzeige eines Fields eines Entries. z.B. gibt "..field:Class.String.spec" eine Liste aller Spezialisierungen f\"ur die Klasse "String" aus.
 
 ...subsection:Text Subfields
 ...table:"value"|Ein Wert.
@@ -181,19 +184,22 @@ Zeilen im Sourcefile, die mit "///" beginnen, werden als Kommentar gesetzt.
 ...table:"see"|Link auf einen anderen Entry. (erzeugt keinen R\"uckverweis)
    
 
-...section:6. Links
-...text:
- Interne Links verweisen auf Entries und werden so geschrieben: "[Category].[Name]".
- Links auf externe URLs beginnen mit "http://".
- Soll ein anderer Text als "Name" als Link angezeigt werden, so verwendet man bei internen Links "[Category].[Name].[Displaytext]". Bei externen Links Steht der Displaytext hinter einem "\pipe"-Zeichen, z.B. "http://www.microsoft.com\pipeein Link zu Microsoft".
- Innerhalb von Text-Fields/Subfields kann man Links einf\"ugen, indem man sie zwischen \at-Zeichen schreibt, z.b. "klicken Sie \atClass.String.hier\at!" erzeugt: klicken Sie @Class.String.hier@!
-
-...section:7. Textformatierung
+...section:6. Textformatierung
 ...text:
 In Texten (nicht in den ID-Strings) sind auch LaTeX-Sonderzeichen erlaubt, z.B. erzeugen \\Sigma, \\in und \\leftarrow die Zeichen \Sigma, \in bzw. \leftarrow. 
 Au\sserdem kann man auf diese Weise auch deutsche Umlaute und Sonderzeichen setzen, z.B. erzeugen \\"a und \\ss die Zeichen \"a bzw. \ss.
 In dddoc reservierte Zeichen k\"onnen auf diese ebenfalls escaped werden: \\dot, \\quote, \\at, \\pipe, \\dollar und \\backslash erzeugen \dot, \quote, \at, \pipe, \dollar bzw. \backslash.
 Die Liste mit allen verf\"ugbaren Zeichen steht in dddoc_html_trans.py.
-...text:Andere M\o"glichkeiten, Sonderzeichen zu "escapen": \\\\ steht f\"ur \\, \dollar\dollar steht f\"ur \dollar.
+...text:Andere M\"oglichkeiten, Sonderzeichen zu "escapen": \\\\ steht f\"ur \\, \dollar\dollar steht f\"ur \dollar.
 ...text:
 Soll innerhalb eines Text-Fields/Subfields ein Text als C++-Code gesetzt werden, so schreibt man ihn zwischen zwei \dollar. z.B.: \dollarint x\dollar erzeugt: $int x$.
+
+
+...section:7. Links
+...text:
+ Interne Links verweisen auf Entries und werden so geschrieben: "[Category].[Name]".
+ Links auf externe URLs beginnen mit "http://".
+ Soll ein anderer Text als "Name" als Link angezeigt werden, so verwendet man bei internen Links "[Category].[Name].[Displaytext]". Bei externen Links Steht der Displaytext hinter einem "\pipe"-Zeichen, 
+ z.B. "http://www.seqan.de\pipeLink auf SeqAn Homepage" erzeugt: @http://www.seqan.de|Link auf SeqAn Homepage@.
+ Innerhalb von Text-Fields/Subfields kann man Links einf\"ugen, indem man sie zwischen \at-Zeichen schreibt, z.b. "klicken Sie \atClass.String.hier\at!" erzeugt: klicken Sie @Class.String.hier@!
+

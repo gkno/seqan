@@ -362,6 +362,12 @@ A:hover, A:link, A:visited
 {
 	border:1px dashed #999999;
 	margin:1em 8px 1em 8px;
+	border-right:0px;
+}
+.image_sub_block td
+{
+	border-right:1px dashed #999999;
+	padding:0.4em;
 }
 .image_sub_block_caption
 {

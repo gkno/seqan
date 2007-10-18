@@ -1,4 +1,5 @@
-.Page.001|Getting Started:
+.Page.Getting Started:
+..order:000
 ..cat:Tutorials
 ..summary:First steps using SeqAn.
 

@@ -4,11 +4,11 @@
 ...text:SeqAn is the open source C++ library of efficient algorithms and data structures for the analysis of sequences with the focus on biological data.
 ...text:SeqAn applies a unique generic design that guarantees high performance, generality, extensibility, and integration with other libraries.
 ...text:SeqAn is easy to use and simplifies the development of new software tools with a minimal loss of performance.
-...image:seqan_logo_large:
+...image:seqan_logo_large
 ...note: 
     This is an alpha snapshot of our library that demonstrates some basic concepts.
     It is not complete in any sense. 
     SeqAn is work in progress.
-    A first beta version will be released in early 2007.
+    A first beta version will be released in late 2007.
     
 
