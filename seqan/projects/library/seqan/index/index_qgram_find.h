@@ -40,7 +40,6 @@ namespace SEQAN_NAMESPACE_MAIN
 ...type:Spec.Index_QGram
 */
 
-
 	typedef Tag<_Finder_QGramLookup> const QGram_FIND_Lookup;
 
 //____________________________________________________________________________
@@ -53,7 +52,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 //////////////////////////////////////////////////////////////////////////////
-// find implementation
+// _findFirstIndex implementation
 
 	template < typename TText, typename TSpec, typename TSpecFinder, typename TPattern >
 	inline void _findFirstIndex(

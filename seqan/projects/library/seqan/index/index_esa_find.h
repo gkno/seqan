@@ -18,17 +18,60 @@
   $Id$
  ==========================================================================*/
 
-#ifndef SEQAN_HEADER_INDEX_FIND_H
-#define SEQAN_HEADER_INDEX_FIND_H
+#ifndef SEQAN_HEADER_INDEX_ESA_FIND_H
+#define SEQAN_HEADER_INDEX_ESA_FIND_H
 
 namespace SEQAN_NAMESPACE_MAIN
 {
 
-	struct SortedList {};
-	struct LeftCompleteTree {};
+//////////////////////////////////////////////////////////////////////////////
+// ESA finders
+
+	struct _Finder_MLR;		// simple Suffix Array finder with mlr-heuristic
+	struct _Finder_LCPE;	// Suffix Array finder using an enhanced LCP-Table
+
+/**
+.Tag.ESA_FIND_MLR:
+..summary:Exact string matching using a suffix array binary search with the mlr-heuristic.
+..general:Class.Finder
+..cat:Index
+..signature:Finder<TIndex>
+..signature:Finder<TIndex, ESA_FIND_MLR>
+..param.TIndex:The index type.
+...type:Spec.Index_ESA
+*/
+
+	typedef Tag<_Finder_MLR> const ESA_FIND_MLR;
+
+/**
+.Tag.ESA_FIND_LCPE:
+..summary:Exact string matching using a suffix array binary search and a lcp-interval tree.
+..general:Class.Finder
+..cat:Index
+..signature:Finder<TIndex, ESA_FIND_LCPE>
+..param.TIndex:The index type.
+...type:Spec.Index_ESA
+*/
+
+	typedef Tag<_Finder_LCPE> const ESA_FIND_LCPE;
+
+//____________________________________________________________________________
+
+
+	template < typename TText, typename TSpec >
+	struct DefaultFinder< Index<TText, Index_ESA<TSpec> > > {
+        typedef ESA_FIND_MLR Type;	// standard suffix array finder is mlr-heuristic
+    };
+
+
+	//////////////////////////////////////////////////////////////////////////////
+	// different layouts of a suffix array or lcp table
+
+	struct SortedList {};			// classical sorted list (suffix array, sorted list, ...)
+	struct LeftCompleteTree {};		// flattened search tree root, left child, right child, left child's left child, left child's right child, ...
 
 	template < unsigned BlockSize = 4096 >
-	struct BTree {};
+	struct BTree {};				// b-tree compacts nodes and its children to blocks of BlockSize
 
 	template < typename TString, typename TSpec >
 	class SearchTreeIterator {};
@@ -47,42 +90,42 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Iterator<TString, Standard>::Type	TIterator;
 
 		inline SearchTreeIterator(TString &string):
-			_First(begin(string, Standard())),
-			_Count(length(string))
+			first(begin(string, Standard())),
+			count(length(string))
 		{
-			_Count2 = _Count / 2;
-			_Mid = _First;
-			goFurther(_Mid, _Count2);
+			count2 = count / 2;
+			_mid = first;
+			goFurther(_mid, count2);
 		}
 			
         inline const TValue& operator*() const {
-			return *_Mid;
+			return *_mid;
 		}
 
         inline const TValue* operator->() const {
-			return &*_Mid;
+			return &*_mid;
 		}
 
 		inline TSize mid() {
-			return _Count2;
+			return count2;
 		}
 
 		// descend left
 		inline SearchTreeIterator & left()
 		{
-			_Count = _Count2;
-			_Count2 /= 2;
-			_Mid = _First;
-			goFurther(_Mid, _Count2);
+			count = count2;
+			count2 /= 2;
+			_mid = first;
+			goFurther(_mid, count2);
 			return *this;
 		}
 
 		// descend right
         inline SearchTreeIterator & right()
 		{
-			_First = ++_Mid, _Count -= _Count2 + 1;
-			_Count2 = _Count / 2;
-			goFurther(_Mid, _Count2);
+			first = ++_mid, count -= count2 + 1;
+			count2 = count / 2;
+			goFurther(_mid, count2);
 			return *this;
 		}
 
@@ -95,16 +138,16 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 
         inline bool eof() {
-            return !_Count;
+            return !count;
         }
 
 		inline operator TIterator & () {
-			return _Mid;
+			return _mid;
 		}
 
 	private:
-		TIterator	_First, _Mid;
-		TSize		_Count, _Count2;
+		TIterator	first, _mid;
+		TSize		count, count2;
 	};
 
 
@@ -622,7 +665,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			
             // is text < query ?
 			if (q != qEnd && (t == tEnd || *t < *q))
-			{	// range begins above _Mid, loop
+			{	// range begins above mid, loop
 				treeIter.right();
 				lcpLower = lcp;
 			}
@@ -929,95 +972,114 @@ namespace SEQAN_NAMESPACE_MAIN
 		return equalRangeSA(text, sa, query, SortedList());
 	}
 
-/*
+
 	//////////////////////////////////////////////////////////////////////////////
 	// substring search with enhanced LCP-table
 	//
 
 	template <
-		typename TTextIter,
-		typename TSAIter,
-		typename LCPTreeIt,
-		typename TQueryIter
+		typename TText,
+		typename TSA,
+		typename TLCP,
+		typename TSpec,
+		typename TQuery,
+		typename TDiff_
 	>
-	inline TSAIter _Lower_bound_lcp_enhanced(
-		TTextIter tBegin,
-		TTextIter tEnd,
-		TSAIter _First,
-		TSAIter _Last,
-		LCPTreeIt _LCPTop,
-		TQueryIter qBegin,
-		TQueryIter qEnd,
-		typename Difference<TTextIter>::Type lcpLower,
-		typename Difference<TTextIter>::Type lcpUpper)
+	inline typename Iterator<TSA, Standard>::Type
+	_lowerBoundLCPE(
+		TText &text,
+		TSA &sa,
+		SearchTreeIterator< TLCP, TSpec > treeIter,
+		TQuery &query,
+		TDiff_ lcpLower,
+		TDiff_ lcpUpper)
 	{	// find first element not before query, using operator<
-		typedef typename Difference<TTextIter>::Type TDiff;
-        TDiff delta = difference(_First, _Last) - 1;
+		typedef typename Difference<TText>::Type			TDiff;
+		typedef typename Suffix<TText>::Type				TSuffix;
+		typedef typename Iterator<TSuffix, Standard>::Type	TTextIter;
+		typedef typename Iterator<TSA, Standard>::Type		TSAIter;
+		typedef SearchTreeIterator< TLCP, TSpec >			TLCPTreeIt;
+		typedef typename Iterator<TQuery, Standard>::Type	TQueryIter;
+
+		TDiff delta = length(sa) - 1;
 		TDiff lcp;
 		#ifdef SEQAN_PROFILE_LCPEFIND
 			TDiff skippedCompares = 0;	// difference of char compares related to xxx_bound_sa
 		#endif
 
-        // binary search with intervals >= 3 elements
+		TQueryIter qBegin = begin(query, Standard());
+		TQueryIter qEnd = end(query, Standard());
+		TSAIter first = begin(sa, Standard());
+
+		// binary search with intervals >= 3 elements
 		for (; 1 < delta; )
 		{	// divide and conquer, find half that contains answer
-			TDiff _Delta2 = _LCPTop.leftSize();
-			TSAIter _Mid = _First;
-			goFurther(_Mid, _Delta2);
+			TDiff delta2 = treeIter.leftSize();
+			TSAIter mid = first;
+			goFurther(mid, delta2);
 
-			if (lcpLower > lcpUpper) {
-                LCPTreeIt leftChild = _LCPTop;
+			if (lcpLower > lcpUpper) 
+			{
+                TLCPTreeIt leftChild = treeIter;
                 leftChild.left();
-				TDiff _lcpMidLower = *leftChild;
+				TDiff lcpMidLower = *leftChild;
 
-				if (_lcpMidLower > lcpLower) {
+				if (lcpMidLower > lcpLower) 
+				{
 					// second half
 					#ifdef SEQAN_PROFILE_LCPEFIND
 						skippedCompares += lcpLower - lcpUpper;
 					#endif
-					_First = _Mid;
-					_LCPTop.right();
-					if ((delta -= _Delta2) == 1) {
-						++_First;
+					first = mid;
+					treeIter.right();
+					if ((delta -= delta2) == 1) {
+						++first;
 						delta = 0;
 					}
 					continue;
-				} else	if (_lcpMidLower < lcpLower) {
+				} 
+				else if (lcpMidLower < lcpLower) 
+				{
 					// first half
 					#ifdef SEQAN_PROFILE_LCPEFIND
-						skippedCompares += _lcpMidLower - lcpUpper;
+						skippedCompares += lcpMidLower - lcpUpper;
 					#endif
-					lcpUpper = _lcpMidLower;
-					_LCPTop = leftChild;
-					if ((delta = _Delta2) == 1)
+					lcpUpper = lcpMidLower;
+					treeIter = leftChild;
+					if ((delta = delta2) == 1)
 						delta = 0;
 					continue;
 				}
 				lcp = lcpLower;
-			} else if (lcpLower < lcpUpper) {
-                LCPTreeIt rightChild = _LCPTop;
+			} 
+			else if (lcpLower < lcpUpper) 
+			{
+                TLCPTreeIt rightChild = treeIter;
                 rightChild.right();
-				TDiff _lcpMidUpper = *rightChild;
+				TDiff lcpMidUpper = *rightChild;
 
-				if (_lcpMidUpper > lcpUpper) {
+				if (lcpMidUpper > lcpUpper) 
+				{
 					// first half
 					#ifdef SEQAN_PROFILE_LCPEFIND
 						skippedCompares += lcpUpper - lcpLower;
 					#endif
-					_LCPTop.left();
-					if ((delta = _Delta2) == 1)
+					treeIter.left();
+					if ((delta = delta2) == 1)
 						delta = 0;
 					continue;
-				} else if (_lcpMidUpper < lcpUpper) {
+				} 
+				else if (lcpMidUpper < lcpUpper) 
+				{
 					// second half
 					#ifdef SEQAN_PROFILE_LCPEFIND
-						skippedCompares += _lcpMidUpper - lcpLower;
+						skippedCompares += lcpMidUpper - lcpLower;
 					#endif
-					lcpLower = _lcpMidUpper;
-					_First = _Mid;
-                    _LCPTop = rightChild;
-					if ((delta -= _Delta2) == 1) {
-						++_First;
+					lcpLower = lcpMidUpper;
+					first = mid;
+                    treeIter = rightChild;
+					if ((delta -= delta2) == 1) {
+						++first;
 						delta = 0;
 					}
 					continue;
@@ -1026,9 +1088,11 @@ namespace SEQAN_NAMESPACE_MAIN
 			} else
 				lcp = lcpUpper;
 
-			TTextIter t = tBegin;
-			TQueryIter q = qBegin;
-            goFurther(t, *_Mid);
+
+			TSuffix		suf = suffix(text, *mid);
+			TTextIter	t = begin(suf, Standard());
+			TTextIter	tEnd = end(suf, Standard());
+			TQueryIter	q = qBegin;
 
 			// lcp search changes MIN to MAX here
 //			TDiff lcp = Max(lcpLower, lcpUpper);
@@ -1042,20 +1106,21 @@ namespace SEQAN_NAMESPACE_MAIN
 				--i, ++t, ++q, ++lcp);
 
             // is text < query ?
-			if (q != qEnd && (t == tEnd || *t < *q)) {
+			if (q != qEnd && (t == tEnd || *t < *q)) 
+			{
 				// second half
 				lcpLower = lcp;
-				_First = _Mid;
-				_LCPTop.right();
-				if ((delta -= _Delta2) == 1) {
-					++_First;
+				first = mid;
+				treeIter.right();
+				if ((delta -= delta2) == 1) {
+					++first;
 					delta = 0;
 				}
 			} else {
 				// first half
 				lcpUpper = lcp;
-				_LCPTop.left();
-				if ((delta = _Delta2) == 1)
+				treeIter.left();
+				if ((delta = delta2) == 1)
 					delta = 0;
 			}
 		}
@@ -1066,14 +1131,15 @@ namespace SEQAN_NAMESPACE_MAIN
 
         // binary search for intervals of 2 or less elements
         lcp = Min(lcpLower, lcpUpper);
-
-        TQueryIter q = qBegin;
+		TQueryIter q = qBegin;
 		goFurther(q, lcp);
 
-        while (true) {
-			TTextIter t = tBegin;
-			goFurther(t, *_First + lcp);
+		while (true) {
+			TSuffix		suf = suffix(text, *first);
+			TTextIter	t = begin(suf, Standard());
+			TTextIter	tEnd = end(suf, Standard());
 
+			goFurther(t, lcp);
 			for(TDiff i = Min(difference(t, tEnd), difference(q, qEnd)); 
             	i && *t == *q;
             	 --i, ++t, ++q);
@@ -1081,118 +1147,132 @@ namespace SEQAN_NAMESPACE_MAIN
             // is text < query ?
 			if (q != qEnd && (t == tEnd || *t < *q)) {
 				// second half
-				++_First;
-				if (!delta) return _First;
+				++first;
+				if (!delta) return first;
                 --delta;
 			} else {
 				// first half -> end
-				return _First;
+				return first;
 			}
         }
 	}
 
 	template <
-		typename TTextIter,
-		typename TSAIter,
-		typename LCPFwdIt,
-		typename TQueryIter
+		typename TText,
+		typename TSA,
+		typename TLCP,
+		typename TSpec,
+		typename TQuery
 	>
-	inline TSAIter lower_bound(
-		TTextIter tBegin,
-		TTextIter tEnd,
-		TSAIter _First,
-		TSAIter _Last,
-		SearchTreeIterator<LCPFwdIt, LeftCompleteTree> _LCPTop,
-		TQueryIter qBegin,
-		TQueryIter qEnd)
-	{	// find first element not before query, using operator<
-		return _Lower_bound_lcp_enhanced(
-			tBegin, tEnd,
-			_First, _Last,
-			_LCPTop,
-			qBegin, qEnd,
-			0, 0);
+	inline typename Iterator<TSA, Standard>::Type
+	_lowerBoundLCPE(
+		TText &text,
+		TSA &sa,
+		SearchTreeIterator< TLCP, TSpec > &treeIter,
+		TQuery &query)
+	{
+		return _lowerBoundLCPE(text, sa, treeIter, query, 0, 0);
 	}
 
 
 	//////////////////////////////////////////////////////////////////////////////
 
 	template <
-		typename TTextIter,
-		typename TSAIter,
-		typename LCPTreeIt,
-		typename TQueryIter
+		typename TText,
+		typename TSA,
+		typename TLCP,
+		typename TSpec,
+		typename TQuery,
+		typename TDiff_
 	>
-	inline TSAIter _Upper_bound_lcp_enhanced(
-		TTextIter tBegin,
-		TTextIter tEnd,
-		TSAIter _First,
-		TSAIter _Last,
-		LCPTreeIt _LCPTop,
-		TQueryIter qBegin,
-		TQueryIter qEnd,
-		typename Difference<TTextIter>::Type lcpLower,
-		typename Difference<TTextIter>::Type lcpUpper)
+	inline typename Iterator<TSA, Standard>::Type
+	_upperBoundLCPE(
+		TText &text,
+		TSA &sa,
+		SearchTreeIterator< TLCP, TSpec > treeIter,
+		TQuery &query,
+		TDiff_ lcpLower,
+		TDiff_ lcpUpper)
 	{	// find first element not before query, using operator<
-		typedef typename Difference<TTextIter>::Type TDiff;
-        TDiff delta = difference(_First, _Last) - 1;
+		typedef typename Difference<TText>::Type			TDiff;
+		typedef typename Suffix<TText>::Type				TSuffix;
+		typedef typename Iterator<TSuffix, Standard>::Type	TTextIter;
+		typedef typename Iterator<TSA, Standard>::Type		TSAIter;
+		typedef SearchTreeIterator< TLCP, TSpec >			TLCPTreeIt;
+		typedef typename Iterator<TQuery, Standard>::Type	TQueryIter;
 
-        // binaray search with intervals >= 3 elements
+		TDiff delta = length(sa) - 1;
+
+		TQueryIter qBegin = begin(query, Standard());
+		TQueryIter qEnd = end(query, Standard());
+		TSAIter first = begin(sa, Standard());
+
+        // binary search with intervals >= 3 elements
 		for (; 1 < delta; )
 		{	// divide and conquer, find half that contains answer
-			TDiff _Delta2 = _LCPTop.leftSize();
-			TSAIter _Mid = _First;
-			goFurther(_Mid, _Delta2);
+			TDiff delta2 = treeIter.leftSize();
+			TSAIter mid = first;
+			goFurther(mid, delta2);
 
-			if (lcpLower > lcpUpper) {
-                LCPTreeIt leftChild = _LCPTop;
+			if (lcpLower > lcpUpper) 
+			{
+                TLCPTreeIt leftChild = treeIter;
                 leftChild.left();
-				TDiff _lcpMidLower = *leftChild;
+				TDiff lcpMidLower = *leftChild;
 
-				if (_lcpMidLower > lcpLower) {
+				if (lcpMidLower > lcpLower) 
+				{
 					// second half
-					_First = _Mid;
-					_LCPTop.right();
-					if ((delta -= _Delta2) == 1) {
-						++_First;
+					first = mid;
+					treeIter.right();
+					if ((delta -= delta2) == 1) {
+						++first;
 						delta = 0;
 					}
 					continue;
-				} else	if (_lcpMidLower < lcpLower) {
+				} 
+				else if (lcpMidLower < lcpLower) 
+				{
 					// first half
-					lcpUpper = _lcpMidLower;
-					_LCPTop = leftChild;
-					if ((delta = _Delta2) == 1)
+					lcpUpper = lcpMidLower;
+					treeIter = leftChild;
+					if ((delta = delta2) == 1)
 						delta = 0;
 					continue;
 				}
-			} else if (lcpLower < lcpUpper) {
-                LCPTreeIt rightChild = _LCPTop;
+			} 
+			else if (lcpLower < lcpUpper) 
+			{
+                TLCPTreeIt rightChild = treeIter;
                 rightChild.right();
-				TDiff _lcpMidUpper = *rightChild;
+				TDiff lcpMidUpper = *rightChild;
 
-				if (_lcpMidUpper > lcpUpper) {
+				if (lcpMidUpper > lcpUpper) 
+				{
 					// first half
-					_LCPTop.left();
-					if ((delta = _Delta2) == 1)
+					treeIter.left();
+					if ((delta = delta2) == 1)
 						delta = 0;
 					continue;
-				} else if (_lcpMidUpper < lcpUpper) {
+				}
+				else if (lcpMidUpper < lcpUpper) 
+				{
 					// second half
-					lcpLower = _lcpMidUpper;
-					_First = _Mid;
-                    _LCPTop = rightChild;
-					if ((delta -= _Delta2) == 1) {
-						++_First;
+					lcpLower = lcpMidUpper;
+					first = mid;
+                    treeIter = rightChild;
+					if ((delta -= delta2) == 1) {
+						++first;
 						delta = 0;
 					}
 					continue;
 				}
 			}
 
-			TTextIter t = tBegin;
-			TQueryIter q = qBegin;
-            goFurther(t, *_Mid);
+			TSuffix		suf = suffix(text, *mid);
+			TTextIter	t = begin(suf, Standard());
+			TTextIter	tEnd = end(suf, Standard());
+			TQueryIter	q = qBegin;
 
 			// lcp search changes MIN to MAX here
 			TDiff lcp = Max(lcpLower, lcpUpper);
@@ -1204,152 +1284,168 @@ namespace SEQAN_NAMESPACE_MAIN
 			lcp += max - i;
 
             // is text <= query ?
-			if (q == qEnd || t == tEnd || !(*q < *t)) {
+			if (q == qEnd || t == tEnd || !(*q < *t)) 
+			{
 				// second half
 				lcpLower = lcp;
-				_First = _Mid;
-				_LCPTop.right();
-				if ((delta -= _Delta2) == 1) {
-					++_First;
+				first = mid;
+				treeIter.right();
+				if ((delta -= delta2) == 1) {
+					++first;
 					delta = 0;
 				}
 			} else {
 				// first half
 				lcpUpper = lcp;
-				_LCPTop.left();
-				if ((delta = _Delta2) == 1)
+				treeIter.left();
+				if ((delta = delta2) == 1)
 					delta = 0;
 			}
 		}
 
         // binary search for intervals of 2 or less elements
         TDiff lcp = Min(lcpLower, lcpUpper);
-
-        TQueryIter q = qBegin;
+		TQueryIter q = qBegin;
 		goFurther(q, lcp);
 
-        while (true) {
-			TTextIter t = tBegin;
-			goFurther(t, *_First + lcp);
+		while (true) {
+			TSuffix		suf = suffix(text, *first);
+			TTextIter	t = begin(suf, Standard());
+			TTextIter	tEnd = end(suf, Standard());
 
+			goFurther(t, lcp);
 			TDiff i = Min(difference(t, tEnd), difference(q, qEnd));
             for(; i && *t == *q; --i, ++t, ++q);
 
             // is text <= query ?
 			if (q == qEnd || t == tEnd || !(*q < *t)) {
 				// second half
-				++_First;
-				if (!delta) return _First;
+				++first;
+				if (!delta) return first;
                 --delta;
 			} else {
 				// first half -> end
-				return _First;
+				return first;
 			}
         }
 	}
 
 	template <
-		typename TTextIter,
-		typename TSAIter,
-		typename LCPFwdIt,
-		typename TQueryIter
+		typename TText,
+		typename TSA,
+		typename TLCP,
+		typename TSpec,
+		typename TQuery
 	>
-	inline TSAIter upper_bound(
-		TTextIter tBegin,
-		TTextIter tEnd,
-		TSAIter _First,
-		TSAIter _Last,
-		SearchTreeIterator<LCPFwdIt, LeftCompleteTree> _LCPTop,
-		TQueryIter qBegin,
-		TQueryIter qEnd)
-	{	// find first element not before query, using operator<
-		return _Upper_bound_lcp_enhanced(
-			tBegin, tEnd,
-			_First, _Last,
-			_LCPTop,
-			qBegin, qEnd,
-			0, 0);
+	inline typename Iterator<TSA, Standard>::Type
+	_upperBoundLCPE(
+		TText &text,
+		TSA &sa,
+		SearchTreeIterator< TLCP, TSpec > &treeIter,
+		TQuery &query)
+	{
+		return _upperBoundLCPE(text, sa, treeIter, query, 0, 0);
 	}
 
 
 	//////////////////////////////////////////////////////////////////////////////
 
 	template <
-		typename TTextIter,
-		typename TSAIter,
-		typename LCPTreeIt,
-		typename TQueryIter
+		typename TText,
+		typename TSA,
+		typename TLCP,
+		typename TSpec,
+		typename TQuery
 	>
-	inline Pair<TSAIter> _Equal_range_lcp_enhanced(
-		TTextIter tBegin,
-		TTextIter tEnd,
-		TSAIter _First,
-		TSAIter _Last,
-		LCPTreeIt _LCPTop,
-		TQueryIter qBegin,
-		TQueryIter qEnd)
+	inline Pair< typename Iterator<TSA, Standard>::Type >
+	_equalRangeLCPE(
+		TText &text,
+		TSA &sa,
+		SearchTreeIterator< TLCP, TSpec > treeIter,
+		TQuery &query)
 	{	// find first element not before query, using operator<
-		typedef typename Difference<TTextIter>::Type TDiff;
+		typedef typename Difference<TText>::Type			TDiff;
+		typedef typename Suffix<TText>::Type				TSuffix;
+		typedef typename Iterator<TSuffix, Standard>::Type	TTextIter;
+		typedef typename Iterator<TSA, Standard>::Type		TSAIter;
+		typedef SearchTreeIterator< TLCP, TSpec >			TLCPTreeIt;
+		typedef typename Iterator<TQuery, Standard>::Type	TQueryIter;
+
 		TDiff lcpLower = 0;
 		TDiff lcpUpper = 0;
-        TDiff delta = difference(_First, _Last) - 1;
+        TDiff delta = length(sa) - 1;
 
-        // binaray search with intervals >= 3 elements
+		TQueryIter qBegin = begin(query, Standard());
+		TQueryIter qEnd = end(query, Standard());
+		TSAIter first = begin(sa, Standard());
+		TSAIter last = end(sa, Standard());
+
+        // binary search with intervals >= 3 elements
 		for (; 1 < delta; )
 		{	// divide and conquer, find half that contains answer
-			TDiff _Delta2 = _LCPTop.leftSize();
-			TSAIter _Mid = _First;
-			goFurther(_Mid, _Delta2);
+			TDiff delta2 = treeIter.leftSize();
+			TSAIter mid = first;
+			goFurther(mid, delta2);
 
-			if (lcpLower > lcpUpper) {
-                LCPTreeIt leftChild = _LCPTop;
+			if (lcpLower > lcpUpper) 
+			{
+                TLCPTreeIt leftChild = treeIter;
                 leftChild.left();
-				TDiff _lcpMidLower = *leftChild;
+				TDiff lcpMidLower = *leftChild;
 
-				if (_lcpMidLower > lcpLower) {
+				if (lcpMidLower > lcpLower) 
+				{
 					// second half
-					_First = _Mid;
-					_LCPTop.right();
-					if ((delta -= _Delta2) == 1) {
-						++_First;
+					first = mid;
+					treeIter.right();
+					if ((delta -= delta2) == 1) {
+						++first;
 						delta = 0;
 					}
 					continue;
-				} else	if (_lcpMidLower < lcpLower) {
+				}
+				else if (lcpMidLower < lcpLower) 
+				{
 					// first half
-					lcpUpper = _lcpMidLower;
-					_LCPTop = leftChild;
-					if ((delta = _Delta2) == 1)
+					lcpUpper = lcpMidLower;
+					treeIter = leftChild;
+					if ((delta = delta2) == 1)
 						delta = 0;
 					continue;
 				}
-			} else if (lcpLower < lcpUpper) {
-                LCPTreeIt rightChild = _LCPTop;
+			} 
+			else if (lcpLower < lcpUpper) 
+			{
+                TLCPTreeIt rightChild = treeIter;
                 rightChild.right();
-				TDiff _lcpMidUpper = *rightChild;
+				TDiff lcpMidUpper = *rightChild;
 
-				if (_lcpMidUpper > lcpUpper) {
+				if (lcpMidUpper > lcpUpper) 
+				{
 					// first half
-					_LCPTop.left();
-					if ((delta = _Delta2) == 1)
+					treeIter.left();
+					if ((delta = delta2) == 1)
 						delta = 0;
 					continue;
-				} else if (_lcpMidUpper < lcpUpper) {
+				} 
+				else if (lcpMidUpper < lcpUpper) 
+				{
 					// second half
-					lcpLower = _lcpMidUpper;
-					_First = _Mid;
-                    _LCPTop = rightChild;
-					if ((delta -= _Delta2) == 1) {
-						++_First;
+					lcpLower = lcpMidUpper;
+					first = mid;
+                    treeIter = rightChild;
+					if ((delta -= delta2) == 1) {
+						++first;
 						delta = 0;
 					}
 					continue;
 				}
 			}
 
-			TTextIter t = tBegin;
-			TQueryIter q = qBegin;
-            goFurther(t, *_Mid);
+			TSuffix		suf = suffix(text, *mid);
+			TTextIter	t = begin(suf, Standard());
+			TTextIter	tEnd = end(suf, Standard());
+			TQueryIter	q = qBegin;
 
 			// lcp search changes MIN to MAX here
 			TDiff lcp = Max(lcpLower, lcpUpper);
@@ -1364,10 +1460,10 @@ namespace SEQAN_NAMESPACE_MAIN
 			if (q != qEnd && (t == tEnd || !(*q < *t))) {
 				// second half
 				lcpLower = lcp;
-				_First = _Mid;
-				_LCPTop.right();
-				if ((delta -= _Delta2) == 1) {
-					++_First;
+				first = mid;
+				treeIter.right();
+				if ((delta -= delta2) == 1) {
+					++first;
 					delta = 0;
 				}
 			} else
@@ -1375,84 +1471,68 @@ namespace SEQAN_NAMESPACE_MAIN
 			if (q != qEnd && t != tEnd && (*q < *t)) {
 				// first half
 				lcpUpper = lcp;
-				_LCPTop.left();
-				if ((delta = _Delta2) == 1)
+				treeIter.left();
+				if ((delta = delta2) == 1)
 					delta = 0;
-			} else
+			} 
+			else
 			{	// range straddles mid, find each end and return
-				TSAIter _First2 = _Lower_bound_lcp_enhanced(
-					tBegin,	tEnd,
-        			_First,	_Mid,
-					_LCPTop.leftChild(),
-					qBegin, qEnd,
-					lcpLower, lcp);
-				_LCPTop.right();
-				if ((delta -= _Delta2) == 1) {
+				typename Infix<TSA>::Type leftRange(sa, first, mid);
+				TSAIter First2 = _lowerBoundLCPE(
+					text, leftRange, treeIter.leftChild(), query, lcpLower, lcp);
+
+				treeIter.right();
+				if ((delta -= delta2) == 1) {
 					delta = 0;
-					++_First;
+					++first;
 				}
-				TSAIter _Last2 = _Upper_bound_lcp_enhanced(
-					tBegin,	tEnd,
-        			_Mid, _Last,
-					_LCPTop,
-					qBegin, qEnd,
-					lcp, lcpUpper);
-				return Pair<TSAIter> (_First2, _Last2);
+
+				typename Infix<TSA>::Type rightRange(sa, mid, last);
+				TSAIter Last2 = _upperBoundLCPE(
+					text, rightRange, treeIter, query, lcp, lcpUpper);
+
+				return Pair<TSAIter> (First2, Last2);
 			}
 		}
 
 		// range straddles mid, find each end and return
+		typename Infix<TSA>::Type midRange(sa, first, last);
 		return Pair<TSAIter> (
-			_Lower_bound_lcp_enhanced(
-				tBegin,	tEnd,
-    			_First,	_Last,
-				_LCPTop,
-				qBegin, qEnd,
-				lcpLower, lcpUpper),
-			_Upper_bound_lcp_enhanced(
-				tBegin,	tEnd,
-    			_First,	_Last,
-				_LCPTop,
-				qBegin, qEnd,
-				lcpLower, lcpUpper));
+			_lowerBoundLCPE(text, midRange, treeIter, query, lcpLower, lcpUpper),
+			_upperBoundLCPE(text, midRange, treeIter, query, lcpLower, lcpUpper)
+		);
 	}
 
 	template <
-		typename TTextIter,
-		typename TSAIter,
-		typename LCPFwdIt,
-		typename TQueryIter
+		typename TText,
+		typename TSA,
+		typename TLCP,
+		typename TQuery
 	>
-	inline Pair<TSAIter> equal_range(
-		TTextIter tBegin,
-		TTextIter tEnd,
-		TSAIter _SAFirst,
-		TSAIter _SALast,
-		LCPFwdIt _LCPTop,
-		TQueryIter qBegin,
-		TQueryIter qEnd)
-	{	// find first element not before query, using operator<
-		return _Equal_range_lcp_enhanced(
-			tBegin,	tEnd,
-			_SAFirst,	_SALast,
-			SearchTreeIterator<LCPFwdIt, LeftCompleteTree>(_LCPTop),
-			qBegin, qEnd);
+	inline Pair< typename Iterator<TSA, Standard>::Type >
+	_equalRangeLCPE(
+		TText &text,
+		TSA &sa,
+		TLCP &lcp,
+		TQuery &query)
+	{
+		return _equalRangeLCPE(text, sa, SearchTreeIterator<TLCP, LeftCompleteTree>(lcp), query);
 	}
-*/
+
 
     //////////////////////////////////////////////////////////////////////////////
 	// little helpers (not used)
 /*
 	template < typename LCPFwdIt, typename TSize >
-	TSize lcp(LCPFwdIt _First, TSize _Count) {
-		if (_Count > 1) {
-			TSize lcp = *_First;
-			++_First;
-			_Count-=2;
-			while (_Count) {
-				if (lcp < *_First) lcp = *_First;
-				++_First;
-				--_Count;
+	TSize lcp(LCPFwdIt first, TSize count) {
+		if (count > 1) {
+			TSize lcp = *first;
+			++first;
+			count-=2;
+			while (count) {
+				if (lcp < *first) lcp = *first;
+				++first;
+				--count;
 			}
 			return lcp;
 		} else
@@ -1460,7 +1540,179 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 */
 
-    //////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////
+	// wrappers with nice interfaces
+
+	template <
+		typename TText,
+		typename TSA,
+		typename TLCPE,
+		typename TQuery
+	>
+	inline typename Position<TLCPE>::Type 
+	lowerBoundLCPE(
+		TText const &text,
+		TSA const &sa,
+		TLCPE const &lcpe,
+		TQuery const &query)
+	{	// find first element not before query, using operator<
+		return _lowerBoundLCPE(text, sa, SearchTreeIterator<TLCPE const, LeftCompleteTree>(lcpe), query, 0, 0) - begin(sa, Standard());
+	}
+
+	template <
+		typename TText,
+		typename TSA,
+		typename TLCPE,
+		typename TQuery
+	>
+	inline typename Position<TLCPE>::Type 
+	upperBoundLCPE(
+		TText const &text,
+		TSA const &sa,
+		TLCPE const &lcpe,
+		TQuery const &query)
+	{	// find first element that query is before, using operator<
+		return upperBoundLCPE(text, sa, SearchTreeIterator<TLCPE const, LeftCompleteTree>(lcpe), query, 0, 0) - begin(sa, Standard());
+	}
+
+	template <
+		typename TText,
+		typename TSA,
+		typename TLCPE,
+		typename TQuery
+	>
+	inline Pair< typename Position<TSA>::Type >
+	equalRangeLCPE(
+		TText const &text,
+		TSA const &sa,
+		TLCPE const &lcpe,
+		TQuery const &query)
+	{	// find range equivalent to query, using operator<
+		Pair< typename Iterator<TSA, Standard>::Type > itPair = 
+			_equalRangeLCPE(text, sa, SearchTreeIterator<TLCPE const, LeftCompleteTree>(lcpe), query);
+		return Pair< typename Position<TSA>::Type >
+			(itPair.i1 - begin(sa, Standard()), itPair.i2 - begin(sa, Standard()));
+	}
+
+	template <
+		typename TText,
+		typename TSA,
+		typename TLCPE,
+		typename TQuery
+	>
+	inline typename Iterator<TSA, Standard>::Type
+	lowerBoundLCPEIterator(
+		TText const &text,
+		TSA const &sa,
+		TLCPE const &lcpe,
+		TQuery const &query)
+	{	// find first element not before query, using operator<
+		return _lowerBoundLCPE(text, sa, SearchTreeIterator<TLCPE const, LeftCompleteTree>(lcpe), query, 0, 0);
+	}
+
+	template <
+		typename TText,
+		typename TSA,
+		typename TLCPE,
+		typename TQuery
+	>
+	inline typename Iterator<TSA, Standard>::Type
+	upperBoundLCPEIterator(
+		TText const &text,
+		TSA const &sa,
+		TLCPE const &lcpe,
+		TQuery const &query)
+	{	// find first element that query is before, using operator<
+		return upperBoundLCPE(text, sa, SearchTreeIterator<TLCPE const, LeftCompleteTree>(lcpe), query, 0, 0) - begin(sa, Standard());
+	}
+
+	template <
+		typename TText,
+		typename TSA,
+		typename TLCPE,
+		typename TQuery
+	>
+	inline Pair< typename Iterator<TSA, Standard>::Type >
+	equalRangeLCPEIterator(
+		TText const &text,
+		TSA const &sa,
+		TLCPE const &lcpe,
+		TQuery const &query)
+	{	// find range equivalent to query, using operator<
+		return _equalRangeLCPE(text, sa, SearchTreeIterator<TLCPE const, LeftCompleteTree>(lcpe), query);
+	}
+
+	//////////////////////////////////////////////////////////////////////////////
+	// workarounds for the Visual Studio array problem
+
+	template <
+		typename TText,
+		typename TSA,
+		typename TLCPE,
+		typename TQuery
+	>
+	inline typename Position<TLCPE>::Type 
+	lowerBoundLCPE(
+		TText const &text,
+		TSA const &sa,
+		TLCPE const &lcpe,
+		TQuery *query)
+	{	// find first element not before query, using operator<
+		return _lowerBoundLCPE(text, sa, SearchTreeIterator<TLCPE const, LeftCompleteTree>(lcpe), query, 0, 0) - begin(sa, Standard());
+	}
+
+	template <
+		typename TText,
+		typename TSA,
+		typename TLCPE,
+		typename TQuery
+	>
+	inline typename Position<TLCPE>::Type 
+	upperBoundLCPE(
+		TText const &text,
+		TSA const &sa,
+		TLCPE const &lcpe,
+		TQuery *query)
+	{	// find first element that query is before, using operator<
+		return upperBoundLCPE(text, sa, SearchTreeIterator<TLCPE const, LeftCompleteTree>(lcpe), query, 0, 0) - begin(sa, Standard());
+	}
+
+	template <
+		typename TText,
+		typename TSA,
+		typename TLCPE,
+		typename TQuery
+	>
+	inline Pair< typename Position<TSA>::Type >
+	equalRangeLCPE(
+		TText const &text,
+		TSA const &sa,
+		TLCPE const &lcpe,
+		TQuery *query)
+	{	// find range equivalent to query, using operator<
+		Pair< typename Iterator<TSA, Standard>::Type > itPair = 
+			_equalRangeLCPE(text, sa, SearchTreeIterator<TLCPE const, LeftCompleteTree>(lcpe), query);
+		return Pair< typename Position<TSA>::Type >
+			(itPair.i1 - begin(sa, Standard()), itPair.i2 - begin(sa, Standard()));
+	}
+
+	template <
+		typename TText,
+		typename TSA,
+		typename TLCPE,
+		typename TQuery
+	>
+	inline Pair< typename Iterator<TSA, Standard>::Type >
+	equalRangeLCPEIterator(
+		TText const &text,
+		TSA const &sa,
+		TLCPE const &lcpe,
+		TQuery *query)
+	{	// find range equivalent to query, using operator<
+		return _equalRangeLCPE(text, sa, SearchTreeIterator<TLCPE const, LeftCompleteTree>(lcpe), query);
+	}
+
+	//////////////////////////////////////////////////////////////////////////////
 	// wrappers with nice interfaces
 /*
 	template <
@@ -1474,12 +1726,42 @@ namespace SEQAN_NAMESPACE_MAIN
 		TLCPE const &lcpe,
 		TSubText const &subtext)
 	{
-		return _Equal_range_lcp_enhanced(
+		return _equalRangeLCPE(
 			begin(text), end(text),
 			begin(sa), end(sa),
             SearchTreeIterator<typename Iterator<TLCPE const>::Type, LeftCompleteTree>(begin(lcpe), (length(text)>1)?length(text)-1:0),
 			begin(subtext), end(subtext));
 	}
 */
+
+//////////////////////////////////////////////////////////////////////////////
+// _findFirstIndex implementation
+
+	template < typename TText, typename TSpec, typename TSpecFinder, typename TPattern >
+	inline void 
+	_findFirstIndex(
+		Finder< Index<TText, TSpec>, TSpecFinder > &finder,
+		TPattern const &pattern,
+		ESA_FIND_MLR const)
+	{
+		Index<TText, TSpec> &index = haystack(finder);
+		indexRequire(index, ESA_SA());
+		finder.range = equalRangeSAIterator(indexText(index), indexSA(index), pattern);
+	}
+
+	template < typename TText, typename TSpec, typename TSpecFinder, typename TPattern >
+	inline void 
+	_findFirstIndex(
+		Finder< Index<TText, TSpec>, TSpecFinder > &finder,
+		TPattern const &pattern,
+		ESA_FIND_LCPE const)
+	{
+		Index<TText, TSpec> &index = haystack(finder);
+		indexRequire(index, ESA_SA());
+		indexRequire(index, ESA_LCPE());
+		finder.range = equalRangeLCPEIterator(indexText(index), indexSA(index), indexLCPE(index), pattern);
+	}
+
+
 }
 #endif

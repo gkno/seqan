@@ -95,9 +95,10 @@
 // INDEX USAGE
 //////////////////////////////////////////////////////////////////////////////
 
-#include <seqan/index/index_esa_find.h>
 #include <seqan/index/index_shims.h>
+#include <seqan/index/index_esa_find.h>
 #include <seqan/index/index_qgram_find.h>
+#include <seqan/index/index_find.h>
 
 //____________________________________________________________________________
 // (virtual) suffix tree
