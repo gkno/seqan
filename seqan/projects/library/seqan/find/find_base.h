@@ -718,9 +718,8 @@ SEQAN_CHECKPOINT
 	};
 
 	template <typename THaystack, typename TSpec>
-	struct Position< Finder<THaystack, TSpec> > {
-		typedef typename Position<THaystack>::Type Type;
-	};
+	struct Position< Finder<THaystack, TSpec> >:
+		Position<THaystack> {};
 
 	template <typename THaystack, typename TSpec>
 	struct Difference< Finder<THaystack, TSpec> > {
