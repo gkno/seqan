@@ -69,7 +69,7 @@ String<char> str = "this is ";
 str += "a test.";
 cout << str;                    //output: "this is a test."
 ..text:
-For more examples, see @Demo.String Basics.this demo program@.
+For more examples see @Demo.String Basics.this demo program@.
 
 
 
@@ -82,7 +82,7 @@ Peptide prot = "AAADDDEEE";
 Suffix<Peptide>::Type suf = suffix(prot, 3);
 cout << suf;                                    //output: "DDDEEE"
 
-..text: The segment does not create a copy of the sequence. Changing the segment also changes it's host sequence, for example:
+..text: The segment does not create a copy of the sequence. Changing the segment also changes its host sequence, for example:
 ..code:
 CharString str = "start_middle_end";
 infix(str, 6, 12) = "overwrite";                //overwrites "middle"
@@ -91,7 +91,27 @@ cout << str;                                    //output: "start_overwrite_end";
 
 
 ..section:Iterators
-
+..text:@Concept.Iterator|Iterators@ are objects that are used to scan through @Concept.Container|containers@ like @Class.String|strings@ or @Class.Segment|segments@.
+For a given container class the metafunction @Metafunction.Iterator@ returns an appropriate iterator.
+An iterator always points to one value in the container.
+The function @Function.value@ (which does the same as the operator $*$) can be used to access this value.
+Functions like @Function.goNext@ or @Function.goPrevious@ (which do the same as $++$ and $--$, respectively)
+can be used to move the iterator to other values within the container.
+..text:The functions @Function.begin@ and @Function.end@ applied to a container return iterators to the begin and the end of the container.
+Note that, similar to C++ standard library iterators, the iterator returned by @Function.end@ does not points to the last value of the container but to the value that would come next.
+So if $s$ is empty, then $end(s) == begin(s)$.
+..text:
+The following code that prints out a sequence demonstrates a typical iteration through a string:
+..code:
+String<char> str = "acgt";
+typedef Iterator<String<char> >::Type TIterator;
+for (TIterator it = begin(str); it != end(str); ++it)
+{
+    cout << value(it);
+}
+..text:
+See @Demo.Iterators.this demo program@ for more examples.
+..text:(rooted iterators)
 
 ..section:Comparisons
 ..text:
@@ -104,7 +124,7 @@ bool a_not_equals_b = (a != b);     //true
 bool a_less_b       = (a < b);      //false
 
 ..text:
-Each comparison involes the scanning of the two sequences while searching for the first mismatch value between the strings. This could be costly if the two sequences share a long common prefix.
+Each comparison involes a scan of the two sequences for searching the first mismatch between the strings. This could be costly if the two sequences share a long common prefix.
 Suppose we want to act in different ways depending on $a < b$, $a == b$, or $a > b$, for example:
 ..code:
 if (a < b)      { /* code for case "a < b"  */ }

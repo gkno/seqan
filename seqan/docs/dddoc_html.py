@@ -19,8 +19,11 @@ def createDocs(path):
     copyFile(path, "seqan_logo.gif")
     copyFile(path, "dddoc_plus.gif")
     copyFile(path, "dddoc_minus.gif")
+    copyFile(path, "dddoc.js")
     createPages(path)
     createIndexes(path)
+    
+    createSearchfile(path)
 
 ################################################################################
 
@@ -33,7 +36,7 @@ def createIndexes(path):
 
         filename = os.path.join(path, getIndexname(cat, ""))
         fl = file(filename, "w")
-        pageIndex(fl, cat, "")
+        pageIndex(fl, path, cat, "")
         fl.close()
         
         entries[""] = 1
@@ -47,7 +50,7 @@ def createIndexes(path):
                     filename = os.path.join(path, getIndexname(cat, subcat))
                     fl = file(filename, "w")
                     print '.',
-                    pageIndex(fl, cat, subcat)
+                    pageIndex(fl, path, cat, subcat)
                     fl.close()
 
         filename = os.path.join(path, getIndexpage(cat))
@@ -74,6 +77,8 @@ def createPages(path):
             fl.close()
             
         print
+
+
 
 ################################################################################
 
@@ -112,6 +117,29 @@ def escapeFiles(text):
     
     return text
 
+################################################################################
+
+def escapeHTML(text):
+    text = text.replace("&", "&amp;")
+    text = text.replace("<", "&lt;")
+    text = text.replace(">", "&gt;")
+    
+    if (text.find("\\") >= 0):
+        text = text.replace("\\\\", "&backslash;")
+    	text = dddoc_html_trans.translate(text);
+        text = text.replace("&backslash;", "\\")
+
+    return text
+
+################################################################################
+
+def escapeJavaScript(text):
+    text = text.replace("\\", "\\\\")
+    text = text.replace("'", "\\'")
+
+    return text
+
+################################################################################
 
 def getFilename(cat, item):
     return escapeFiles(cat + "_" + item) + ".html"
@@ -133,19 +161,6 @@ def getIndexnameLink(cat, item, subcat = ""):
 def getDemoFilename(sourcefile):
     return escapeFiles("DEMO_" + sourcefile + ".html")
 
-################################################################################
-
-def escapeHTML(text):
-    text = text.replace("&", "&amp;")
-    text = text.replace("<", "&lt;")
-    text = text.replace(">", "&gt;")
-    
-    if (text.find("\\") >= 0):
-        text = text.replace("\\\\", "&backslash;")
-    	text = dddoc_html_trans.translate(text);
-        text = text.replace("&backslash;", "\\")
-
-    return text
     
 ################################################################################
     
@@ -251,7 +266,7 @@ def translateLink(text):
     if obj.empty(): return brokenLink(text);
 
     href = getFilename(arr[0], arr[1])
-    doc_path = os.path.join(globalDocsPath, href)
+    #doc_path = os.path.join(globalDocsPath, href)
     #if not os.access(doc_path, os.F_OK): 
     #    return brokenLink(text);
 
@@ -263,6 +278,7 @@ def translateLink(text):
         summary = 'title="' + summary + '"'
     
     return '<a href="' + href + '" ' + summary + '>' + translateID(arr[len(arr) - 1]) + '</a>'
+
 
 ################################################################################
     
@@ -326,12 +342,14 @@ def getCategoryTitle(cat):
 
 ################################################################################
 
-def pageIndex(fl, cat, subcat = ""):
+def pageIndex(fl, path, cat, subcat = ""):
     fl.write('<html>')
     fl.write('<head>')
     fl.write('<meta http-equiv="content-type" content="text/html; charset=UTF-8">');
     fl.write('<link rel="stylesheet" href="dddoc_html.css" type="text/css" />')
-    fl.write('</head>')
+    fl.write('</head>\n')
+    fl.write('<script src="searchfile.js"></script>\n') 
+    fl.write('<script src="dddoc.js"></script>\n') 
     fl.write('<body id=index_body>')
     
     lines = dddoc.DATA["globals.indexes"]
@@ -391,8 +409,19 @@ def pageIndex(fl, cat, subcat = ""):
                 else:
                     fl.write(text)
         fl.write('</div>')
+        
+    printSearchmask(fl)
     fl.write('</body>')
     fl.write('</html>')
+
+################################################################################
+
+def printSearchmask(fl):
+    fl.write('<div id=searchmask>')
+    fl.write('<div id=searchtitle>Searching</div>')
+    fl.write('<input id=search name=search onKeyUp="updateSearch(this.value);" onBlur="updateSearch(this.value);" autocomplete="off">')
+    fl.write('<div id=result></div>')
+    fl.write('</div>')
 
 ################################################################################
 
@@ -1212,3 +1241,62 @@ def subprintField(fl, text):
     elif (field == "include"): printList(fl, data, "include", False)
     elif (field == "demofor"): printLink(fl, data, "demofor", False)
     elif (field == "see"): printLink(fl, data, "see", False)
+
+
+################################################################################
+
+def createSearchfile(path):
+    print 'Create Searchfile'
+    
+    db = {}
+    
+    cats = dddoc.DATA["globals.categories"].keys()
+    for cat in cats:
+        entries = dddoc.DATA[cat]
+        title = getCategoryTitle(cat).lower()
+        pushSearchResult(db, title, cat, "")
+       
+        for key in entries.keys():
+            data = entries[key]
+            title = getPageTitle(data).lower()
+            pushSearchResult(db, title, cat, key)
+
+
+    searchfile = os.path.join(path, "searchfile.js")
+    fl = file(searchfile, "w")
+    
+    fl.write('var DB = [\n')
+
+    keys = db.keys()
+    keys.sort()
+    for key in keys:
+        if len(key) > 0:
+            fl.write('[\'' + escapeJavaScript(key) + '\', \'' + escapeJavaScript(str(db[key])) + '\'],\n')
+            
+    fl.write('false];\n')
+    fl.close()
+
+################################################################################
+
+def pushSearchResult(db, title, cat, name):
+
+    if (len(name) == 0):
+        link = '<div><nobr><a target=_parent href="' + getIndexpage(cat) + '">' + getCategoryTitle(cat) + '</a></nobr></div>'
+        
+    else:
+    
+        obj = dddoc.DATA[cat][name];
+        href = getFilename(cat, name)
+        if obj.empty(): 
+            summary = '';
+        else:
+            summary = translateTooltip(obj["summary"].text());
+        if len(summary) > 0:
+            summary = 'title="' + summary + '"'
+        
+        link = '<div><nobr><a target=_parent href="' + href + '" ' + summary + '>' + translateID(name) + ' (' + cat + ')</a></nobr></div>'
+
+    if not db.has_key(title): db[title] = ""
+    db[title] += link
+
+################################################################################
