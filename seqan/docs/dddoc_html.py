@@ -203,6 +203,7 @@ def translateText(text):
 ################################################################################
     
 def translateCode(text):
+    text = text.strip(" \n")
     text = escapeHTML(text)
     text = text.replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;")
     text = text.replace(" ", "&nbsp;")
@@ -231,14 +232,21 @@ def brokenLink(text):
 ################################################################################
 
 def translateLink(text):
-    if text.find("http:", 0, 5) == 0: 
+    if text.find("http:", 0, 5) == 0:  #external Link
         arr = dddoc.splitUrl(text)
         if len(arr) == 0: return brokenLink(text)
         return '<a href="' + arr[0] + '">' + arr[len(arr) - 1] + '</a>'
 
     arr = dddoc.splitName(text)
-    if len(arr) < 2: return brokenLink(text)
+    if text.find('.') < 0: #Link to indexpage
+        arr = dddoc.splitUrl(text)
+        if len(arr) == 0: return brokenLink(text)
+        if len(arr) == 1: t = arr[0]
+        else: t = arr[1]
+        return '<a href="' + getIndexpage(arr[0]) + '">' + t + '</a>'
 
+    if (len(arr) < 2): return brokenLink(text)
+    
     obj = dddoc.DATA[arr[0]][arr[1]];
     if obj.empty(): return brokenLink(text);
 
@@ -931,6 +939,9 @@ def subprintText(fl, data, subcategory = False):
             
     in_table = False
             
+    section_cout = 0
+    subsection_cout = 0
+    
     for line in data.at_level(1).by_occ().lines:
         name = line.name(data.level)
         
@@ -944,12 +955,20 @@ def subprintText(fl, data, subcategory = False):
                 fl.write('</table>')
             in_table = False
             
-        if name == 'section': 
-            fl.write('<div class=section_headline_explicite>' + translateText(line.text()) + '</div>')
+        if name == 'contents':
+            subprintContents(fl, data)
+            
+        elif name == 'section': 
+            section_cout += 1
+            subsection_cout = 0
+            t = translateSection(line.text(), section_cout)
+            fl.write('<div class=section_headline_explicite><a name="' + t + '"></a>' + t + '</div>')
             headline = ''
             
         elif name == 'subsection': 
-            fl.write('<div class=section_sub_headline_explicite>' + translateText(line.text()) + '</div>')
+            subsection_cout += 1
+            t = translateSubsection(line.text(), section_cout, subsection_cout)
+            fl.write('<div class=section_sub_headline_explicite><a name="' + t + '"></a>' + t + '</div>')
             headline = ''
             
         elif name == 'text': 
@@ -985,6 +1004,28 @@ def subprintText(fl, data, subcategory = False):
     subprintText(fl, data["remarks"], "remarks")    
     subprintLink(fl, data["see"], "see")
 
+
+################################################################################
+
+def translateSection(text, section_count):
+    i = text.find('#')
+    if (i >= 0):
+        text = text[:i] + str(section_count) + text[i+1:]
+    return translateText(text);
+
+################################################################################
+
+def translateSubsection(text, section_count, subsection_count):
+    text = translateText(text)
+    i = text.find('#')
+    if (i >= 0):
+        j = text.find('#', i+1)
+        if (j >= 0):
+            text = text[:i] + str(section_count) + text[i+1:j] + str(subsection_count) + text[j+1:]
+        else:
+            text = text[:i] + str(subsection_count) + text[i+1:]
+    return translateText(text);
+
 ################################################################################
 
 def subprintLink(fl, data, subcategory):                         
@@ -1018,42 +1059,64 @@ def subprintLink(fl, data, subcategory):
 def subprintTableLine(fl, text, is_header):
     fl.write('<tr>')
 
+    t = ''
+
     while len(text) > 0:
         i = text.find('|');
+        j = text.find('@');
+
+        if (j >= 0) and (j < i):
+            j2 = text.find('@', j+1)
+            if (j2 >= 0):
+                t += text[:j2+1]
+                text = text[j2+1:]
+                continue;
+
         if (i >= 0):
-            s = text[:i]
+            t += text[:i]
             text = text[i+1:]
         else:
-            s = text
+            t += text
             text = ''
         
-        if len(s) > 0: 
-            s = translateText(s)
+        if len(t) > 0: 
+            t = translateText(t)
         else: 
-            s = '&nbsp;'
+            t = '&nbsp;'
 
         if is_header:
-            fl.write('<td class=table_header_explicite valign=top><center>' + s + '</center></td>')
+            fl.write('<td class=table_header_explicite valign=top><center>' + t + '</center></td>')
         else:
-            fl.write('<td class=table_cell_explicite valign=top>' + s + '</td>')
+            fl.write('<td class=table_cell_explicite valign=top>' + t + '</td>')
+        
+        t = ''
         
     fl.write('</tr>')
 
 ################################################################################
 
 def subprintImage(fl, text):
+    t = ''
     s1 = ''
     s2 = ''
     is_image = True
     
     while len(text) > 0:
         i = text.find('|');
+        j = text.find('@');
+        
+        if (j >= 0) and (j < i):
+            j2 = text.find('@', j+1)
+            if (j2 >= 0):
+                t += text[:j2+1]
+                text = text[j2+1:]
+                continue;
         
         if i >= 0:
-            t = text[:i]
+            t += text[:i]
             text = text[i+1:]
         else:
-            t = text
+            t += text
             text = ''
         
         if len(t) > 0:
@@ -1067,10 +1130,41 @@ def subprintImage(fl, text):
             else:
                 s2 += '<td>&nbsp;</td>'
         
+        t = ''
         is_image = not is_image
         
     s = '<center><table cellspacing=0 cellpadding=0 border=0><tr>' + s1 + '</tr><tr>' + s2 + '</tr></table></center>'
     fl.write('<div class=image_sub_block>' + s + '</div>')
+
+################################################################################
+
+def subprintContents(fl, data):
+    s = ''
+    
+    section_cout = 0
+    subsection_cout = 0
+    
+    for line in data.at_level(1).by_occ().lines:
+        name = line.name(data.level)
+        
+        if name == 'section':
+            section_cout += 1
+            subsection_cout = 0
+            t = translateSection(line.text(), section_cout)
+            s += '<div class=contents_section><a href="#' + t + '">' + t + '</a></div>'
+            headline = ''
+            
+        if name == 'subsection': 
+            subsection_cout += 1
+            t = translateSubsection(line.text(), section_cout, subsection_cout)
+            s += '<div class=contents_subsection><a href="#' + t + '">' + t + '</a></div>'
+            headline = ''
+    
+    
+    t = dddoc.DATA["globals.subsections.contents"].text()
+    if t: s = '<div class=contents_headline><center>' + t + '</center></div>' + s
+    
+    fl.write('<div class=contents>' + s + '</div>');
 
 ################################################################################
 

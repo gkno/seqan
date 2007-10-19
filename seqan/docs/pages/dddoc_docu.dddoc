@@ -4,7 +4,10 @@
 ...text:
 SeqAn verwendet ein spezielles Dokumentationssystem, genannt "dot-dot-doc", kurz "dddoc". 
 Dieser Text dokumentiert das Dokumentationssystem.
-...section:1. Prinzipien
+
+...contents
+
+...section:# Prinzipien
 ...text:
 Die Dokumentation ist eine gro\sse, hierarchisch gegliederte Datenstruktur ("Baum").
 Sie ist auf mehrere Dateien verteilt.
@@ -14,7 +17,7 @@ Python-Skripts durchsuchen alle Dateien des Projekts, sammeln die Information zu
 Unter Windows baut man die Doku mit "make.bat", unter Linux mit "make.sh". Dabei kann man als optionale Argumente die Module angeben, deren Dokumentation gebaut werden soll. Wird kein Modul angegeben, so wird die komplette Doku gebaut. M\"ochte man ausschlie\sslich die "statischen Seiten" (d.h. alles was unter dem Verzeichnis /docs liegt, z.B. die Tutorials und die Konzepte) bauen, so kann man einfach einen Fantasie-Modulnamen angeben (z.B. "make.bat blablabla").
 Bislang ist die generierte Dokumentation in HTML, sp\"ater soll z.B. auch LaTeX dazu kommen.
 
-...section:2. Notation
+...section:# Notation
 ...text:
 Die Dokumentation wird in Form eines dddoc-Baumes gespeichert.
 Jeder Konten in einem dddoc-Baum besitzt einen ID-String.
@@ -25,7 +28,7 @@ Jeder Knoten in einem dddoc-Baum besitzt einen (eventuell leeren) Text. Existier
 Ein Eintrag in die Datenstruktur hat die Form ".[Pfad]:[Text]". Dabei muss der Eintrag mit einer neuen Zeile beginnen, d.h. das erste Zeichen in der Zeile ist ".".
 Ein Pfad wird als Unterpfad eines vorangegangenen Pfades des selben Kommentarblocks interpretiert, wenn er mit einem Punkt beginnt. Beginnt ein Pfad mit n Punkten, so bezieht er sich auf den letzten davor stehenden Pfad mit n-1 Punkten. 
 
-...subsection:Beispiel 1
+...subsection:Beispiel #
 
 ...code:.Tiere.Haustiere
 \dot.Hund.Waldi
@@ -40,24 +43,24 @@ Ein Pfad wird als Unterpfad eines vorangegangenen Pfades des selben Kommentarblo
 \dotTiere.Haustiere.Hund.Waldi.Alter:5
 \dotTiere.Haustiere.Katze.Minka.Alter:2
 
-...subsection:Beispiel 2
+...subsection:Beispiel #
 
 ...code:.Adresse.Name:Andreas D\"oring
 \dot.Kommentar:Dies ist ein Kommentar,
  der \"uber mehrere Zeilen geht.
 \dot.Kommentar:Dies wird an den anderen Kommentar angeh\"angt.
 
-...subsection:Beispiel 3
+...subsection:Beispiel #
 
 ...code:.Domainen."www.microsoft.com":Microsoft Homepage
 
 
-...section:3. Entries
+...section:# Entries
 ...text:
 Die Dokumentation besteht aus einer Reihe von Entries.
 Jeder Entry in dddoc hat einen Pfad der Form "[Category].[Name]".
 
-...subsection:3.1 Categories
+...subsection:#.# Categories
 
 ...text:Im Moment gibt es folgende Kategorien von Entries: 
 ...table:"Page"|Generelle Seiten, z.B. Tutorials usw.
@@ -79,7 +82,7 @@ Jeder Entry in dddoc hat einen Pfad der Form "[Category].[Name]".
     
 ...text:Unterkategorien werden mit dem "cat"-Entry spezifiziert.
 
-...subsection:3.2 Names
+...subsection:#.# Names
 
 ...text:[Name] ist der Name der in diesem Eintrag dokumentierten Entit\"at, d.h. der Funktion, Klasse, usw. 
     Wenn ein anderer Name als Titel angezeigt werden soll, so verwende man ein "title"-Field.
@@ -88,7 +91,7 @@ Jeder Entry in dddoc hat einen Pfad der Form "[Category].[Name]".
     Dies sollte z.B. bei Memfunc und Memvar-Eintr\"agen geschehen: Vor dem "#"-Zeichen schreibe man den Klassennamen, hinter das "#"-Zeichen den Namen des Members.
     Statt eines "#"-Zeichen kann auch ein "\pipe"-Zeichen verwendet werden.
 
-...section:4 Fields
+...section:# Fields
 ...text:
 Fields definieren die Eigenschaften der Entries. 
 Ein Field hat einen Pfad der Form "[Category].[Name].[Field]":
@@ -152,14 +155,18 @@ Vorsicht: Selbst wenn hier Zahlen stehen, werden diese als Text aufgefasst, d.h.
 ...table:"shortcut"|Link auf Shortcut. (erzeugt R\"uckverweis "shortcutfor")
 
 
-...section:5 Subfields
+...section:# Subfields
 ...text:Kindknoten unterhalb von Text Fields. 
 
 ...subsection:Freie Subfields
 ...text:
     Werden in der Reihenfolge ihres Auftretens in den Sources ausgegeben. Alle anderen hier aufgef\"uhrten Subfields hingegen zusammengefasst und jeweils unterhalb einer Subsection-\"Uberschrift angezeigt.
-...table:"section"|F\"ugt \"Uberschrift f\"ur eine neue Sektion ein.
-...table:"subsection"|F\"ugt \"Uberschrift f\"ur eine neue Untersektion ein.
+...table:"section"|F\"ugt \"Uberschrift f\"ur eine neue Sektion ein. Das erste vorkommende "#"-Zeichen wird durch eine Section-Nummer ersetzt. 
+Beispiel: "..section:#. Mein Kapitel"
+...table:"subsection"|F\"ugt \"Uberschrift f\"ur eine neue Untersektion ein. Enth\"alt die \"Uberschrift genau ein "#"-Zeichen, so wird dies durch die Subsection-Nummer ersetzt.
+Ansonsten wird das erste vorkommende "#"-Zeichen durch die Section-Nummer und das zweite "#"-Zeichen durch die Subsection-Nummer ersetzt.
+Beispiele: "..subsection:#.# Unterkapitel", "..subsection:Beispiel #"
+...table:"contents"|Erstellt ein Inhaltsverzeichnes, in dem alle Sections und Subsections dieses Fields aufgef\"uhrt werden.
 ...table:"text"|ein Textabsatz.
 ...table:"note"|ein hervorgehobener Textabsatz.
 ...table:"code"|ein St\"uck Beispielcode.
@@ -174,7 +181,7 @@ Sollen mehrere Bilder nebeneinander stehen, so kann man diese nach einem weitere
 ...table:"default"|Defaultwert.
 ...table:"remarks"|Kommentartext oder -code.
     
-...subsection:Tabellen von Text Subfields:
+...subsection:Tabellen von Text Subfields
 ...table:"param"|Liste von Parametern. Wird z.B. bei "returns" verwendet, um verschiedene R\"uckgabewerte aufzulisten.
 
 ...subsection:Link Subfields
@@ -184,7 +191,7 @@ Sollen mehrere Bilder nebeneinander stehen, so kann man diese nach einem weitere
 ...table:"see"|Link auf einen anderen Entry. (erzeugt keinen R\"uckverweis)
    
 
-...section:6. Textformatierung
+...section:# Textformatierung
 ...text:
 In Texten (nicht in den ID-Strings) sind auch LaTeX-Sonderzeichen erlaubt, z.B. erzeugen \\Sigma, \\in und \\leftarrow die Zeichen \Sigma, \in bzw. \leftarrow. 
 Au\sserdem kann man auf diese Weise auch deutsche Umlaute und Sonderzeichen setzen, z.B. erzeugen \\"a und \\ss die Zeichen \"a bzw. \ss.
@@ -195,11 +202,16 @@ Die Liste mit allen verf\"ugbaren Zeichen steht in dddoc_html_trans.py.
 Soll innerhalb eines Text-Fields/Subfields ein Text als C++-Code gesetzt werden, so schreibt man ihn zwischen zwei \dollar. z.B.: \dollarint x\dollar erzeugt: $int x$.
 
 
-...section:7. Links
+...section:# Links
 ...text:
- Interne Links verweisen auf Entries und werden so geschrieben: "[Category].[Name]".
- Links auf externe URLs beginnen mit "http://".
- Soll ein anderer Text als "Name" als Link angezeigt werden, so verwendet man bei internen Links "[Category].[Name].[Displaytext]". Bei externen Links Steht der Displaytext hinter einem "\pipe"-Zeichen, 
- z.B. "http://www.seqan.de\pipeLink auf SeqAn Homepage" erzeugt: @http://www.seqan.de|Link auf SeqAn Homepage@.
+ Links auf Entries werden so geschrieben: "[Category].[Name]", z.B. "Class.String" erzeugt: "@Class.String@".
+ Links auf die \"Ubersichtsseite einer Category so: "[Category]", z.B. "@Metafunction@".
+ Links auf externe URLs beginnen mit "http:", z.B. "@http://www.seqan.de@".
+...text:
+ Soll ein anderer Text als Link angezeigt werden, h\"angt man diesen abgetrennt mit einem "\pipe"-Zeichen hinten an, 
+ z.B. "Class.String\pipedie Stringklasse" erzeugt: @Class.String|die Stringklasse@. 
+ Dies geht auch bei externen Links, z.B. "http://www.seqan.de\pipeLink auf SeqAn Homepage" erzeugt: @http://www.seqan.de|Link auf SeqAn Homepage@.
+ Optional kann man bei einem Link auf einen Entry den Displaytext auch hinter einem weiteren "." statt einem "|" schreiben.
+...text:
  Innerhalb von Text-Fields/Subfields kann man Links einf\"ugen, indem man sie zwischen \at-Zeichen schreibt, z.b. "klicken Sie \atClass.String.hier\at!" erzeugt: klicken Sie @Class.String.hier@!
 

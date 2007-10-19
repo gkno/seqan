@@ -4,15 +4,132 @@
 ..summary:Sequences in SeqAn.
 
 .Page.Sequences.description:
-..image:sequences
+..contents
 
+..image:sequences
 
 ..section:Overview
 
-..text:SeqAn is a library for sequence analysis, so sequences are the core of SeqAn.
+..text:Sequences are the core of SeqAn.
 This tutorial gives an overview of the variety of sequences types in SeqAn and basic manipulation algorithm.
 
-..subsection:Strings
-..text:@Class.String.Strings@ are @Concept.Container.containers@ of values.
-SeqAn offers the following kinds of string:
-..field:Class.String.spec 
+
+..text:(weitere Uebersicht)
+
+..section:Strings
+..text:@Class.String.Strings@ are @Concept.Container.containers@ that store sequences of values, for example of $char$, @Spec.Dna.nucleotides@, or @Spec.AminoAcid.amino acids@. 
+The user of SeqAn can choose between several kinds of string and combine with with any kind of value.
+Typically, the value type is qualified as the first template argument, i.e. in angled brackets:
+..code:String<AminoAcid> myProteine;
+
+..text:SeqAn predefines @Shortcut|shotcuts@ for some usual value types, so we can also write:
+..code:Peptide myProteine;
+
+..text:In an optional second template argument, we can specify the kind of string that should be used.
+The user can choose between the following kinds of string:
+
+..tableheader:Specialization|Description|Applications|Limitations
+..table:@Spec.Alloc String@
+|Expandable string that is stored on heap.
+|The default string implementation that can be used for general purposes.
+|Changing the @Function.capacity@ can be very costly.
+..table:@Spec.Array String@
+|Fast but non-expandable string.
+|Fast storing of small sequences.
+|@Function.capacity|Capacity@ must already be known at runtime. Not suitable for storing large sequences.
+..table:@Spec.Block String@
+|String that stores its content in blocks
+|The @Function.capacity@ of the string can quickly be increased.
+Good choice for growing strings and for stacks.
+|Random access to values is slightly slower than for @Spec.Alloc String|Alloc Strings@.
+..table:@Spec.Packed String@
+|A string that stores as many values in one machine word as possible.
+|Suitable for storing large strings in memory.
+|Slower than other in-memory strings.
+..table:@Spec.External String@
+|String that is stored on secondary memory.
+|Suitable for storing very large strings (>2GB).
+Parts of the string are automatically loaded from secondary memory when needed.
+|Slower than other string classes.
+..table:@Spec.CStyle String@
+|Allows adaption of strings to C-style strings.
+|Used for transforming other String classes into C-style strings (i.e. null terminated $char$ arrays).
+Could be usefull for calling functions of C-libraries.
+|Only reasonable if value type is $char$ or $wchar_t$.
+
+..text:For example:
+..code:
+String<char, Array<100> > myArrayString;    //string with maximum length 100
+String<Dna, Packed<> > myPackedString;      //string that takes only 2 bits per nucleotide
+
+..text:SeqAn offers many functions and operators for initializing, converting, manipulating, and printing strings.
+For example:
+..code:
+String<char> str = "this is ";
+str += "a test.";
+cout << str;                    //output: "this is a test."
+..text:
+For more examples, see @Demo.String Basics.this demo program@.
+
+
+
+..section:Segments
+..text: Segments are sequences that represent parts of other sequences.
+There are three kinds of segments in SeqAn: @Function.infix.infixes@, @Function.prefix.prefixes@, and @Function.suffix.suffixes@.
+The metafunctions @Metafunction.Infix@, @Metafunction.Prefix@, and @Metafunction.Suffix@, respectively, return for a given sequence  an appropriate data type for storing the segment. For example:
+..code:
+Peptide prot = "AAADDDEEE";
+Suffix<Peptide>::Type suf = suffix(prot, 3);
+cout << suf;                                    //output: "DDDEEE"
+
+..text: The segment does not create a copy of the sequence. Changing the segment also changes it's host sequence, for example:
+..code:
+CharString str = "start_middle_end";
+infix(str, 6, 12) = "overwrite";                //overwrites "middle"
+cout << str;                                    //output: "start_overwrite_end";
+
+
+
+..section:Iterators
+
+
+..section:Comparisons
+..text:
+Two sequences can be lexicographically compared using usual operators like $<$ or $>=$, for example:
+..code:
+String<char> a      = "beta";
+String<char> b      = "alpha";
+
+bool a_not_equals_b = (a != b);     //true
+bool a_less_b       = (a < b);      //false
+
+..text:
+Each comparison involes the scanning of the two sequences while searching for the first mismatch value between the strings. This could be costly if the two sequences share a long common prefix.
+Suppose we want to act in different ways depending on $a < b$, $a == b$, or $a > b$, for example:
+..code:
+if (a < b)      { /* code for case "a < b"  */ }
+else if (a > b) { /* code for case "a > b"  */ }
+else            { /* code for case "a == b" */ }
+..text:
+In this case, although only one scan would be enough to decide what case is to be applied, each operator $>$ and $<$ performs a new comparison.
+SeqAn offers @Class.Lexical.lexicals@ to avoid unnecessary sequence scans.
+Lexicals can store the result of a comparison, for example:
+..code:
+Lexical<> comp(a, b);   //compare a and b and store the result in comp
+
+if (isLess(comp))           { /* code for case "a < b"  */ }
+else if (isGreater(comp))   { /* code for case "a > b"  */ }
+else                        { /* code for case "a == b" */ }
+
+
+..section:Stringsets
+
+
+
+
+..section:Gapped Sequences
+
+..XXXXtext:For simplification, SeqAn predefines several string for usual value types:
+..XXXtable:@Shortcut.CharString@|A string for storing text. The value type is $char$. If unicode characters are needed, @Shortcut.UnicodeString@ could be used.
+..XXXtable:@Shortcut.DnaString@|A string for storing DNA. The value type is @Spec.Dna@, that can store the four values 'A', 'C', 'G', and 'T'. If a fifth value 'N' (for 'not known') should also be allowed, you can use @Shortcut.Dna5String@.
+..XXXtable:@Shortcut.Peptide@|A string for storing proteine sequences. The value type is @Spec.AminoAcid@.

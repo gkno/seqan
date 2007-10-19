@@ -419,6 +419,13 @@ def splitName(line):
                 if key != "":
                     li.append(key)
                     key = ""
+            elif c == '|':
+                if key != "":
+                    li.append(key)
+                    key = ""
+                rest = line[pos+1:]
+                if len(rest)>0: li.append(rest)
+                break;
             elif c != '\n':
                 key += c
                 

@@ -418,3 +418,36 @@ A:hover, A:link, A:visited
 {
     line-height:1.2;
 }
+
+
+.contents
+{
+    border:1px solid #999999;
+    background-color:#f0f0f0;
+    float:right;
+    position:relative;
+    padding:0.5em 1em 0.6em 1em;
+    margin:0.5em 0em 1em 1em;
+}
+.contents_section
+{
+    font-size:90%;
+    margin-top:0.1em;
+}
+.contents_subsection
+{
+    font-size:80%;
+    padding-left:2em;
+}
+.contents_headline
+{
+    font-size:100%;
+    font-weight:bold;
+    color:#555555;
+    margin-bottom:0.3em;
+}
+.contents a
+{
+    color:#333333;
+}
+
