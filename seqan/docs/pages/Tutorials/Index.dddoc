@@ -241,15 +241,20 @@ If you want to write algorithms for both variants you should use the functions @
 
 To search in multiple strings the @Class.Finder@ example from above can be modified to:
 
-...code:Index< StringSet<String<char> > > myIndex;
-resize(indexText(myIndex), 3);
-indexText(myIndex)[0] = "tobeornottobe";
-indexText(myIndex)[1] = "thebeeonthecomb";
-indexText(myIndex)[2] = "beingjohnmalkovich";
+...code:// set StringSet
+StringSet< String<char> > mySet;
+resize(mySet, 3);
+mySet[0] = "tobeornottobe";
+mySet[1] = "thebeeonthecomb";
+mySet[2] = "beingjohnmalkovich";
 
+// find "be" in Index of StringSet
+Index< StringSet<String<char> > > myIndex(mySet);
 Finder< Index<StringSet<String<char> > > > myFinder(myIndex);
 while (find(myFinder, "be"))
-	cout << position(myFinder) << " ";
+	cout << position(myFinder) << "  ";
+	
+//output: < 0 , 11 >  < 1 , 3 >  < 2 , 0 >  < 0 , 2 >
 
 ...text:
 If $TText$ was a @Class.StringSet@, $position(finder)$ would return a @Class.Pair@ $(seqNo,seqOfs)$ where $seqNo$ is the number and $seqOfs$ the local position of the sequence the pattern occurs at.
