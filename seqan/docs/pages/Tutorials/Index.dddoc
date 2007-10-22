@@ -3,7 +3,8 @@
 ..summary:Substring indices in SeqAn.
 
 ..description:
-...image:indices:
+...contents
+...image:indices
 ...text:
 A substring index is a datatype which allows to seek efficiently for all occurrences of a pattern 
 in a string or a set of strings. 
@@ -97,16 +98,14 @@ A suffix tree of a given non-empty string $s$ over \Sigma is a directed tree who
 ...text:
 
 The following figure shows the suffix tree of the string $s="mississippi"$ (suffix nodes are shaded):
-...image:streeSentinel:
-Suffix tree of $mississippi$
+...image:streeSentinel|Suffix tree of $mississippi$
 
 ...text:
 Many suffix tree construction algorithms expect $$ to be part of the string alphabet which is undesirable for small bit-compressible alphabets (e.g. DNA).
 In SeqAn there is no need to introduce a $$. We relax suffix tree criteria 2. and consider the relaxed suffix tree that arises from the suffix tree of $s$ by removing the $$ character and all empty edges.
 In the following, we only consider relaxed suffix trees and simply call them suffix trees.
 In that tree a suffix can end in an inner node as you can see in the next figure (suffix $i$):
-...image:streeNoSentinel:
-Relaxed suffix tree of $mississippi$
+...image:streeNoSentinel|Relaxed suffix tree of $mississippi$
 
 ...subsection:3.1. How to traverse a suffix tree
 ...text:
@@ -115,10 +114,7 @@ For a lot of sequence algorithms it is neccessary to do a full @http://en.wikipe
 A preorder traversal halts in a node when visiting it for the first time whereas a postorder traversal halts when visiting a node for the last time.
 The following two figures give an example in which order the tree nodes are visited:
 
-...image:streePreorder:
-Preorder dfs traversal
-...image:streePostorder:
-Postorder dfs traversal
+...image:streePreorder|Preorder dfs traversal|streePostorder|Postorder dfs traversal
 
 ...text:
 A postorder traversal, also known as bottom-up traversal, can be realized with the @Spec.BottomUp Iterator@. 
@@ -270,10 +266,6 @@ The following index implementations are currently part of SeqAn:
 ...table:@Spec.Index_QGram@|Simple q-gram index (aka k-mer index)|
 ...table:@Spec.Index_QGram_Nested@|Nested q-gram index|
 
-To solve the dictionary problem see @Demo.Index@.
-
-
-..see:Spec.Single Pool Allocator
-..see:Spec.Multi Pool Allocator
-.
+...text:
+A simple example for specializing a suffix array based index and a q-gram index for the same pattern matching problem the @Demo.Index|Index demo@.
 
