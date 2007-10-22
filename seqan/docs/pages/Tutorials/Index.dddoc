@@ -21,7 +21,7 @@ To access this (virtual) suffix tree SeqAn offers various @Concept.Iterator.iter
 
 
 
-...section:1. Create an index
+...section:# Create an index
 
 ...text:
 A substring index is a specialization of the generic class @Class.Index@ which expects 2 arguments (the second is optional).
@@ -55,7 +55,7 @@ Index< String<char> > myIndex("tobeornottobe");
 
 
 
-...section:2. How to find a pattern
+...section:# How to find a pattern
 
 ...text:
 To find all occurrences of a pattern in an indexed @Class.String@ or a @Class.StringSet@, SeqAn provides the @Class.Finder@ class (see @Page.Searching.searching tutorial@),
@@ -85,7 +85,7 @@ while (find(myFinder, myPattern))
 
 
 
-...section:3. Suffix trees
+...section:# Suffix trees
 ...text:
 We consider an alphabet \Sigma and a sentinel character $$ that is smaller than every character of \Sigma.
 A suffix tree of a given non-empty string $s$ over \Sigma is a directed tree whose edges are labeled with non-empty substrings of $s$$$ with the following properties:
@@ -107,7 +107,7 @@ In the following, we only consider relaxed suffix trees and simply call them suf
 In that tree a suffix can end in an inner node as you can see in the next figure (suffix $i$):
 ...image:streeNoSentinel|Relaxed suffix tree of $mississippi$
 
-...subsection:3.1. How to traverse a suffix tree
+...subsection:#.# How to traverse a suffix tree
 ...text:
 In SeqAn a suffix tree can be accessed with special @Spec.VSTree Iterator.suffix tree iterators@, which differ in the way the tree nodes are traversed.
 For a lot of sequence algorithms it is neccessary to do a full @http://en.wikipedia.org/wiki/Depth-first_search|depth-first search@ (dfs) over all suffix tree nodes beginning either in the root (preorder dfs) or in a leaf node (postorder dfs).
@@ -167,7 +167,7 @@ For some bottom-up algorithms it would be better not to remove empty edges and t
 In that cases you can use the tags @Tag.PreorderEmptyEdges@ or @Tag.PostorderEmptyEdges@ instead of @Tag.Preorder@ or @Tag.Postorder@ or
 @Tag.EmptyEdges@ for the @Spec.TopDown Iterator@.
 
-...subsection:3.2. How to access a suffix tree
+...subsection:#.# How to access a suffix tree
 ...text:
 In the previous subsection we have seen how to walk through a suffix tree. 
 We now want to know what can be done with a suffix tree iterator.
@@ -188,7 +188,7 @@ In a relaxed suffix tree a leaf is always a suffix, but not vice versa, as there
 For them @Function.isLeaf@ returns false and @Function.isRightTerminal@ returns true.
 
 
-...subsection:3.3. Additional iterators
+...subsection:#.# Additional iterators
 ...text:
 By now, we know the following iterators (n=text size, \sigma=alphabet size, d=tree depth):
 ...tableheader:Iterator specialization|Description|Space|Index tables
@@ -220,7 +220,7 @@ An example for each of these iterators can be found here.
 
 
 
-...section:4. Multiple sequences
+...section:# Multiple sequences
 ...text:
 Section 1 briefly described how an index of a set of strings can be instantiated.
 Instead of creating an @Class.Index@ of a @Class.String@ you create one of a @Class.StringSet@.
@@ -256,7 +256,7 @@ If $TText$ was a @Class.StringSet@, $position(finder)$ would return a @Class.Pai
 
 
 
-...section:5. Index implementation details
+...section:# Index implementation details
 
 ...text:
 The following index implementations are currently part of SeqAn:
