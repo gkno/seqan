@@ -1,5 +1,7 @@
 def translate(text):
-   
+
+#spezielles
+    text = text.replace("\\br", "<p>")   
 
 #deutsche Umlaute und Sonderzeichen
 

@@ -1,0 +1,41 @@
+Zum Release Herbst 2007:
+
+(aus - mach +, sobald der Job erledigt ist)
+
+1. Doku:
+* Fehlende Dokumentation:
+    - External String
+    - ...
+* Überflüssige Doku raus:
+    - ...
+    
+* Tutorials:
+    - Getting Started
+    - Sequences
+    - Files
+    - Searching
+    + Indices
+    - Graphs
+    
+* Überblicksseite anpassen
+
+* Erklärung der Grundkonzepte (Metafunctions usw.)
+    
+* Concepts vervollständigen
+    - ...
+
+* Naming-Convention durchsetzen
+    - dddoc-Script entsprechend anpassen
+
+* Gebrochene Links raus (dddoc-Warnings)
+
+
+2. Inhalte:
+
+* Fehlende Funktionalität:
+    - "score" Funktion für approximative Suche
+    - operatoren! Da fehlt sicher irgendwo was.
+
+* Wechselseitige Konversion sicherstellen:
+    - die Sequenztypen
+    - die zwei Alignment-Datenstrukturen

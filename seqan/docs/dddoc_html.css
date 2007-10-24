@@ -234,7 +234,7 @@ A:hover, A:link, A:visited
 }
 .index_section_high
 {
-    background-color: white;
+    background-color: #ffffff;
     margin-top:2px;
     margin-bottom:2px;
     padding-top:1px;
@@ -455,9 +455,9 @@ A:hover, A:link, A:visited
 {
     margin-top:10px;
     padding:8px 0px 4px 8px;
-    border-top:1px solid #999990;
-    border-bottom:1px solid #999990;
-    background-color:#ffffdd;
+    border-top:1px solid #999999;
+    border-bottom:1px solid #999999;
+    background-color:#ffffff;
 }
 #searchtitle
 {

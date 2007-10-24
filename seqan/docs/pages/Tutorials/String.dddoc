@@ -8,7 +8,7 @@
 
 ..image:sequences
 
-..section:Overview
+..section:# Overview
 
 ..text:Sequences are the core of SeqAn.
 This tutorial gives an overview of the variety of sequences types in SeqAn and basic manipulation algorithm.
@@ -16,7 +16,8 @@ This tutorial gives an overview of the variety of sequences types in SeqAn and b
 
 ..text:(weitere Uebersicht)
 
-..section:Strings
+..section:# Sequence Classes
+..subsection:#.# Strings
 ..text:@Class.String.Strings@ are @Concept.Container.containers@ that store sequences of values, for example of $char$, @Spec.Dna.nucleotides@, or @Spec.AminoAcid.amino acids@. 
 The user of SeqAn can choose between several kinds of string and combine with with any kind of value.
 Typically, the value type is qualified as the first template argument, i.e. in angled brackets:
@@ -68,12 +69,21 @@ For example:
 String<char> str = "this is ";
 str += "a test.";
 cout << str;                    //output: "this is a test."
+cout << length(str);            //output: 15
 ..text:
 For more examples see @Demo.String Basics.this demo program@.
 
 
+..subsection:#.# Sequence Adaptions
+..text:SeqAn offers an interface for accessing @Adaption.std::basic_string|standard library strings@ and @Adaption.char array|c-style $char$ arrays@
+in the same way as @Class.String|SeqAn strings@.
+For example:
+..code:
+std::basic_string str = "a standard library string";
+cout << length(str);            //output: 25
 
-..section:Segments
+
+..subsection:#.# Segments
 ..text: Segments are sequences that represent parts of other sequences.
 There are three kinds of segments in SeqAn: @Function.infix.infixes@, @Function.prefix.prefixes@, and @Function.suffix.suffixes@.
 The metafunctions @Metafunction.Infix@, @Metafunction.Prefix@, and @Metafunction.Suffix@, respectively, return for a given sequence  an appropriate data type for storing the segment. For example:
@@ -89,8 +99,8 @@ infix(str, 6, 12) = "overwrite";                //overwrites "middle"
 cout << str;                                    //output: "start_overwrite_end";
 
 
-
-..section:Iterators
+..section:# Working with Sequences
+..subsection:#.# Iterators
 ..text:@Concept.Iterator|Iterators@ are objects that are used to scan through @Concept.Container|containers@ like @Class.String|strings@ or @Class.Segment|segments@.
 For a given container class the metafunction @Metafunction.Iterator@ returns an appropriate iterator.
 An iterator always points to one value in the container.
@@ -113,7 +123,7 @@ for (TIterator it = begin(str); it != end(str); ++it)
 See @Demo.Iterators.this demo program@ for more examples.
 ..text:(rooted iterators)
 
-..section:Comparisons
+..subsection:#.# Comparisons
 ..text:
 Two sequences can be lexicographically compared using usual operators like $<$ or $>=$, for example:
 ..code:
@@ -141,13 +151,32 @@ if (isLess(comp))           { /* code for case "a < b"  */ }
 else if (isGreater(comp))   { /* code for case "a > b"  */ }
 else                        { /* code for case "a == b" */ }
 
+..subsection:#.# Expansion
+..text:
+Each sequence object has a @Function.capacity@, i.e. the maximum @Function.length@ of a sequence that can be stored in this object.
+While some sequence types like @Spec.Array String@ or @Adaption.char array@ have a fixed capacity,
+the capacity of other sequence classes like @Spec.Alloc String@ or @Adaption.std::basic_string@ can be changed at runtime.
+Capacity can either be set explicitly by functions like @Function.reserve@ or @Function.resize@, or implicitly changed
+if a function like @Function.append@ or @Function.replace@ has a result that would be too long for the target string.
+There are several @Tag.Overflow Strategy.overflow strategies@ that determine what actually happens when a string should be expanded beyond its capacity.
+If no @Tag.Overflow Strategy.overflow strategy@ is specified for a function call, a default overflow strategy is selected depending on the type of the sequence.
+..text:Example:
+..code:
+String<char> str = "12345";
+append(str, "abcdefghijklmn", Limit());  //limits str to its current capacity
+append(str, "ABCDEFG");                  //use default expansion strategy
 
-..section:Stringsets
+..subsection:#.# Input/Output
+..text:SeqAn offers several Ways for loading and saving sequences in many formats.
+For more information, see @Pages.Files|here@.
+
+
+..section:# Stringsets
 
 
 
 
-..section:Gapped Sequences
+..section:# Gapped Sequences
 
 ..XXXXtext:For simplification, SeqAn predefines several string for usual value types:
 ..XXXtable:@Shortcut.CharString@|A string for storing text. The value type is $char$. If unicode characters are needed, @Shortcut.UnicodeString@ could be used.
