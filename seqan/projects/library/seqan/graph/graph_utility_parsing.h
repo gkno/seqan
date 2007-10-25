@@ -75,7 +75,7 @@ template<typename TChar>
 inline bool
 _parse_isAlphanumericChar(TChar const c)
 {
-	return ((_parse_isDigit(c)) || (_parse_isLetter(c)) || (c == '_'));
+	return ((_parse_isDigit(c)) || (_parse_isLetter(c)) || (c == '_') || (c == '.') || (c == '-'));
 }
 
 //////////////////////////////////////////////////////////////////////////////

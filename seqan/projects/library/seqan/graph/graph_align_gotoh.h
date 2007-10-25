@@ -67,66 +67,67 @@ _align_gotoh_trace(TAlign& align,
 
 	// Now follow the trace
 	do {
-	  nextTraceValue = getValue(trace, (len1 - 1)*numRows + (len2 - 1));
-	  switch( (Byte) tv) {
-	  case Diagonal:
-	    if ( (Byte) nextTraceValue / (Byte) 4 == 0) tv = (Byte) Diagonal;
-	    else if ((Byte) nextTraceValue / (Byte) 4 == 1) tv = (Byte) Horizontal;
-	    else tv = (Byte) Vertical;
-	    break;
-	  case Horizontal:
-	    if (((Byte) nextTraceValue / (Byte) 2) % 2 == 0) tv = (Byte) Diagonal;
-	    else tv = (Byte) Horizontal;
-	    break;
-	  case Vertical:
-	    if ( (Byte) nextTraceValue % (Byte) 2 == 0) tv = (Byte) Diagonal;
-	    else tv = (Byte) Vertical;
-	    break;
-	  }
+		nextTraceValue = getValue(trace, (len1 - 1)*numRows + (len2 - 1));
 		switch( (Byte) tv) {
-		case Diagonal: 
-		  if (tv != tvOld) {
-		    if (tvOld == (Byte) Vertical) --len2;
-		    else --len1;
-		    _align_trace_print(align, str, id1, len1, id2, len2, ++segLen, tvOld);
-		    tvOld = tv; segLen = 0;
-		  } else {
-		    ++segLen;
-		    --len1; --len2;
-		  }
-		  break;
+		case Diagonal:
+			if ( (Byte) nextTraceValue / (Byte) 4 == 0) tv = (Byte) Diagonal;
+			else if ((Byte) nextTraceValue / (Byte) 4 == 1) tv = (Byte) Horizontal;
+			else tv = (Byte) Vertical;
+			break;
 		case Horizontal:
-		  if (tv != tvOld) {
-		    _align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
-		    if (((Byte) nextTraceValue / (Byte) 2) % 2 == 0) {
-		      _align_trace_print(align, str, id1, --len1, id2, len2, (TSize) 1, (Byte) Horizontal);
-		      tv = (Byte) Diagonal; segLen = 0;
-		    } else {
-		      tvOld = tv; segLen = 1;
-		      --len1;
-		    }
-		  } else {
-		    ++segLen;
-		    --len1;
-		  }
-		  break;
+		    if (((Byte) nextTraceValue / (Byte) 2) % 2 == 0) tv = (Byte) Diagonal;
+		    else tv = (Byte) Horizontal;
+			break;
 		case Vertical:
-		  if (tv != tvOld) {
-		    _align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
-		    if ( (Byte) nextTraceValue % (Byte) 2 == 0) {
-		      _align_trace_print(align, str, id1, len1, id2, --len2, (TSize) 1, (Byte) Vertical);
-		      tv = (Byte) Diagonal; segLen = 0;
-		    } else {
-		      tvOld = tv; segLen = 1;
-		      --len2;
-		    }
-		  } else {
-		    ++segLen;
-		    --len2;
-		  }
-		  break;
+			if ( (Byte) nextTraceValue % (Byte) 2 == 0) tv = (Byte) Diagonal;
+			else tv = (Byte) Vertical;
+			break;
+		}
+		switch( (Byte) tv) {
+			case Diagonal: 
+				if (tv != tvOld) {
+					if (tvOld == (Byte) Vertical) --len2;
+					else --len1;
+					_align_trace_print(align, str, id1, len1, id2, len2, ++segLen, tvOld);
+					tvOld = tv; segLen = 0;
+				} else {
+					++segLen;
+					--len1; --len2;
+				}
+				break;
+			case Horizontal:
+				if (tv != tvOld) {
+					_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
+					if (((Byte) nextTraceValue / (Byte) 2) % 2 == 0) {
+						_align_trace_print(align, str, id1, --len1, id2, len2, (TSize) 1, (Byte) Horizontal);
+						tv = (Byte) Diagonal; segLen = 0;
+					} else {
+						tvOld = tv; segLen = 1;
+						--len1;
+					}
+				} else {
+					++segLen;
+					--len1;
+				}
+				break;
+			case Vertical:
+				if (tv != tvOld) {
+					_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
+					if ( (Byte) nextTraceValue % (Byte) 2 == 0) {
+						_align_trace_print(align, str, id1, len1, id2, --len2, (TSize) 1, (Byte) Vertical);
+						tv = (Byte) Diagonal; segLen = 0;
+					} else {
+						tvOld = tv; segLen = 1;
+						--len2;
+					}
+				} else {
+					++segLen;
+					--len2;
+				}
+				break;
 		}
 	} while ((len1 != 0) && (len2 !=0));
+
 	// Process left-overs
 	if (segLen) _align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
 
@@ -190,6 +191,9 @@ _align_gotoh(TTrace& trace,
 	for(TSize row = 1; row <= len2; ++row) {
 		_initFirstColumn(TAlignConfig(), value(mat, row), gapOpen + (row - 1) * gap);
 		assignValue(horizontal, row, getValue(mat, row) + gapOpen - gap);
+		//std::cout << getValue(mat, row) << std::endl;
+		//std::cout << getValue(horizontal, row) << std::endl;
+		//std::cout << "====" << std::endl;
 	}
 	for(TSize col = 1; col <= len1; ++col) {
 		TScoreValue diagValMat = getValue(mat, 0);

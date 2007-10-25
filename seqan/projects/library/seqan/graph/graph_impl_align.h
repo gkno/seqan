@@ -660,6 +660,44 @@ inline void
 write(TFile & file,
 	  Graph<TSpec> const& g,
 	  TNames const& names,
+	  FastaFormat) 
+{
+	typedef Graph<TSpec> TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+
+	String<char> align;
+	if (convertAlignment(g, align)) {	
+		TSize nseq = length(stringSet(g));
+		TSize colLen = length(align) / nseq;
+		
+		for(TSize i = 0; i<nseq; ++i) {
+			_streamPut(file, '>');
+			_streamWrite(file,names[i]);
+			_streamPut(file, '\n');
+			TSize col = 0;
+			while(col < colLen) {
+				TSize max = 0;
+				if ((colLen - col) < 60) max = colLen - col;
+				else max = 60;
+				for(TSize finger = col; finger<col+max; ++finger) {
+					_streamPut(file, getValue(align, i*colLen + finger));
+				}
+				col += max;
+				_streamPut(file, '\n');
+			}
+		}
+	}
+}
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TFile, typename TSpec, typename TNames>
+inline void
+write(TFile & file,
+	  Graph<TSpec> const& g,
+	  TNames const& names,
 	  MsfFormat) 
 {
 	typedef Graph<TSpec> TGraph;

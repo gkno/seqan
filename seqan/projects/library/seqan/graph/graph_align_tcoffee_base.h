@@ -75,8 +75,10 @@ typedef Tag<MUM_Library_> const MUM_Library;
 template<typename TStringSet, typename TCargo, typename TSpec, typename TLibraries> 
 inline void
 combineGraphs(Graph<Alignment<TStringSet, TCargo, TSpec> >& outGraph,
+			  bool onlyTopology,
 			  TLibraries& libs)
 {
+	SEQAN_CHECKPOINT
 	SEQAN_CHECKPOINT
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename Size<TGraph>::Type TSize;
@@ -84,7 +86,8 @@ combineGraphs(Graph<Alignment<TStringSet, TCargo, TSpec> >& outGraph,
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	typedef typename Id<TGraph>::Type TId;
 	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
-
+	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
+	
 	// Clear out-library
 	clearVertices(outGraph);
 	TSize numLibs = length(libs);	// Number of libraries
@@ -92,7 +95,7 @@ combineGraphs(Graph<Alignment<TStringSet, TCargo, TSpec> >& outGraph,
 	// All the matches with score values
 	typedef Fragment<> TFragment;
 	typedef String<TFragment, Block<> > TFragmentString;
-	typedef typename Iterator<TFragmentString, Rooted>::Type TFragmentStringIter;
+	typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
 	TFragmentString matches;
 	String<TCargo, Block<> > score_values;
 
@@ -124,7 +127,6 @@ combineGraphs(Graph<Alignment<TStringSet, TCargo, TSpec> >& outGraph,
 	// Match refinement
 	TStringSet& str = stringSet(outGraph);	
 	matchRefinement(matches,str,outGraph);  // Don't score matches!
-
 	//// Debug code
 	//TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
 	//for(TSize i = 0; i<length(str);++i) {
@@ -143,41 +145,233 @@ combineGraphs(Graph<Alignment<TStringSet, TCargo, TSpec> >& outGraph,
 	//	}
 	//}
 
-	// Adapt edge weights (fractional weights are used)
-	count = 0;
-	TSize currentLib = 0;
-	double scaling = (double) 100 / (double) getValue(max_scores, currentLib);
-	TSize nextLibCounter = length(matches);
-	if (currentLib < numLibs - 1) nextLibCounter = (TSize) getValue(index_start, currentLib+1);
-	TFragmentStringIter endIt = end(matches);
-	for(TFragmentStringIter it = begin(matches); it != endIt; ++it) {
-		if (count >= nextLibCounter) {
-			++currentLib;
-			scaling = (double) 100 / (double) getValue(max_scores, currentLib);
-			if (currentLib < numLibs - 1) nextLibCounter = (TSize) getValue(index_start, currentLib+1);
-			else nextLibCounter = length(matches);
+	if (!onlyTopology) {
+		// Adapt edge weights (fractional weights are used)
+		count = 0;
+		TSize currentLib = 0;
+		double upperBound = 100;
+		double scaling = upperBound / (double) getValue(max_scores, currentLib);
+		TSize nextLibCounter = length(matches);
+		if (currentLib < numLibs - 1) nextLibCounter = (TSize) getValue(index_start, currentLib+1);
+		TFragmentStringIter endIt = end(matches);
+		for(TFragmentStringIter it = begin(matches); it != endIt; ++it) {
+			if (count >= nextLibCounter) {
+				++currentLib;
+				scaling = upperBound / (double) getValue(max_scores, currentLib);
+				if (currentLib < numLibs - 1) nextLibCounter = (TSize) getValue(index_start, currentLib+1);
+				else nextLibCounter = length(matches);
+			}
+			TId id1 = sequenceId(*it,0);
+			TId id2 = sequenceId(*it,1);
+			TSize pos1 = fragmentBegin(*it, id1);
+			TSize pos2 = fragmentBegin(*it, id2);
+			TSize end1 = pos1 + fragmentLength(*it, id1);
+			while(pos1 < end1) {
+				TVertexDescriptor p1 = findVertex(outGraph, id1, pos1);
+				TVertexDescriptor p2 = findVertex(outGraph, id2, pos2);
+				TEdgeDescriptor e = findEdge(outGraph, p1, p2);
+				TSize fragLen = fragmentLength(outGraph, p1); 
+				double newVal = (double) fragLen / (double) (end1 - pos1);
+				newVal *= scaling;
+				newVal *= (double) getValue(score_values, position(it));
+				SEQAN_TASSERT(e != 0)  // Refined graph should have all edges (with weight 1)
+				cargo(e) += (TCargo) newVal;
+				pos1 += fragLen;
+				pos2 += fragLen;
+			}
+			++count;
 		}
-		TId id1 = sequenceId(*it,0);
-		TId id2 = sequenceId(*it,1);
-		TSize pos1 = fragmentBegin(*it, id1);
-		TSize pos2 = fragmentBegin(*it, id2);
-		TSize end1 = pos1 + fragmentLength(*it, id1);
-		while(pos1 < end1) {
-			TVertexDescriptor p1 = findVertex(outGraph, id1, pos1);
-			TVertexDescriptor p2 = findVertex(outGraph, id2, pos2);
-			TEdgeDescriptor e = findEdge(outGraph, p1, p2);
-			TSize fragLen = fragmentLength(outGraph, p1); 
-			double newVal = (double) fragLen / (double) (end1 - pos1);
-			newVal *= scaling;
-			newVal *= (double) getValue(score_values, position(it));
-			if (e != 0) cargo(e) += (TCargo) newVal;
-			else addEdge(outGraph, p1, p2, (TCargo) newVal);
-			pos1 += fragLen;
-			pos2 += fragLen;
-		}
-		++count;
 	}
 }
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec, typename TLibraries> 
+inline void
+combineGraphs(Graph<Alignment<TStringSet, TCargo, TSpec> >& outGraph,
+			  TLibraries& libs)
+{
+	SEQAN_CHECKPOINT
+	combineGraphs(outGraph, false, libs);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec, typename TSet>
+inline void 
+restrictedTripletLibraryExtension(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+								  TSet const& set1,
+								  TSet const& set2)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename Id<TGraph>::Type TId;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
+	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
+	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
+
+	// Two tasks:
+	// 1) Add edges for the case that a and c is aligned, b and c is aligned, but a and b are not, give these edges the appropriate weight
+	// 2) Augment all existing edges
+	String<TCargo> newCargoMap;
+	resize(newCargoMap, getIdUpperBound(_getEdgeIdManager(g)), Exact());
+	TEdgeIterator it(g);
+	for(;!atEnd(it);++it) assignProperty(newCargoMap, *it, cargo(*it));
+	
+	typedef String<TVertexDescriptor, Block<> > TVertexString;
+	typedef String<TCargo, Block<> > TCargoString;
+	TVertexString edges_vertices;
+	TCargoString edges_cargo;
+	TCargo avg = 0;
+	for(TVertexIterator itVertex(g);!atEnd(itVertex);++itVertex) {
+		TOutEdgeIterator outIt1(g, *itVertex);
+		for(;!atEnd(outIt1);goNext(outIt1)) {
+			if ((set1.find(sequenceId(g,targetVertex(outIt1))) == set1.end()) && 
+				(set2.find(sequenceId(g,targetVertex(outIt1))) == set2.end())) continue;
+			TOutEdgeIterator outIt2 = outIt1;
+			goNext(outIt2);
+			for(;!atEnd(outIt2);goNext(outIt2)) {
+				if ((set1.find(sequenceId(g,targetVertex(outIt2))) == set1.end()) && 
+					(set2.find(sequenceId(g,targetVertex(outIt2))) == set2.end())) continue;
+				TVertexDescriptor tV1 = targetVertex(outIt1);
+				TVertexDescriptor tV2 = targetVertex(outIt2);
+				if ((set1.find(sequenceId(g, tV1)) != set1.end()) &&
+					(set1.find(sequenceId(g, tV2)) != set1.end())) continue;
+				if ((set2.find(sequenceId(g, tV1)) != set2.end()) &&
+					(set2.find(sequenceId(g, tV2)) != set2.end())) continue;
+				TEdgeDescriptor e = findEdge(g, tV1, tV2);
+				if (e == 0) {
+					// New edge
+					TCargo val = cargo(*outIt1);
+					if (val > cargo(*outIt2)) val = cargo(*outIt2);
+					avg += val;
+
+					// Remember the edge with cargo
+					push_back(edges_vertices, tV1);
+					push_back(edges_vertices, tV2);
+					push_back(edges_cargo, val);
+				} else {
+					if (getCargo(*outIt2) > getCargo(*outIt1)) property(newCargoMap, e) += getCargo(*outIt1);
+					else property(newCargoMap, e) += getCargo(*outIt2);	
+				}
+			}
+		}
+	}
+	// Assign the new weights and clean-up the cargo map
+	goBegin(it);
+	for(;!atEnd(it);++it) cargo(*it) = getProperty(newCargoMap, *it);
+	clear(newCargoMap);
+
+	// Finally add the new edges created by the triplet approach
+	typedef typename Iterator<TVertexString, Rooted>::Type TVertexStringIter;
+	typedef typename Iterator<TCargoString, Rooted>::Type TCargoStringIter;
+	TVertexStringIter endIt = end(edges_vertices);
+	TVertexStringIter itV = begin(edges_vertices);
+	TCargoStringIter itC = begin(edges_cargo);
+	while(itV != endIt) {
+		TVertexStringIter itVNext = itV; ++itVNext;
+		// The same edge could have been created multiple times, so check if it exists
+		TEdgeDescriptor e = findEdge(g, *itV, *itVNext);
+		if (e == 0) {
+			addEdge(g, *itV, *itVNext, *itC);
+		} else {
+			cargo(e) += *itC;
+		}
+		++itV; ++itV;
+		++itC;
+	}
+	SEQAN_TASSERT(itC == end(edges_cargo))
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec, typename TSet>
+inline void 
+tripletLibraryExtensionOnSet(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+							 TSet const& set1)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename Id<TGraph>::Type TId;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
+	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
+	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
+
+	// Two tasks:
+	// 1) Add edges for the case that a and c is aligned, b and c is aligned, but a and b are not, give these edges the appropriate weight
+	// 2) Augment all existing edges
+	String<TCargo> newCargoMap;
+	resize(newCargoMap, getIdUpperBound(_getEdgeIdManager(g)), Exact());
+	TEdgeIterator it(g);
+	for(;!atEnd(it);++it) assignProperty(newCargoMap, *it, cargo(*it));
+	
+	typedef String<TVertexDescriptor, Block<> > TVertexString;
+	typedef String<TCargo, Block<> > TCargoString;
+	TVertexString edges_vertices;
+	TCargoString edges_cargo;
+	TCargo avg = 0;
+	for(TVertexIterator itVertex(g);!atEnd(itVertex);++itVertex) {
+		TOutEdgeIterator outIt1(g, *itVertex);
+		for(;!atEnd(outIt1);goNext(outIt1)) {
+			if (set1.find(sequenceId(g,targetVertex(outIt1))) == set1.end()) continue;
+			TOutEdgeIterator outIt2 = outIt1;
+			goNext(outIt2);
+			for(;!atEnd(outIt2);goNext(outIt2)) {
+				if (set1.find(sequenceId(g,targetVertex(outIt2))) == set1.end()) continue;
+				TVertexDescriptor tV1 = targetVertex(outIt1);
+				TVertexDescriptor tV2 = targetVertex(outIt2);
+				if (sequenceId(g, tV1) == sequenceId(g,tV2)) continue;
+				TEdgeDescriptor e = findEdge(g, tV1, tV2);
+				if (e == 0) {
+					// New edge
+					TCargo val = cargo(*outIt1);
+					if (val > cargo(*outIt2)) val = cargo(*outIt2);
+					avg += val;
+
+					// Remember the edge with cargo
+					push_back(edges_vertices, tV1);
+					push_back(edges_vertices, tV2);
+					push_back(edges_cargo, val);
+				} else {
+					if (getCargo(*outIt2) > getCargo(*outIt1)) property(newCargoMap, e) += getCargo(*outIt1);
+					else property(newCargoMap, e) += getCargo(*outIt2);	
+				}
+			}
+		}
+	}
+	// Assign the new weights and clean-up the cargo map
+	goBegin(it);
+	for(;!atEnd(it);++it) cargo(*it) = getProperty(newCargoMap, *it);
+	clear(newCargoMap);
+
+	// Finally add the new edges created by the triplet approach
+	typedef typename Iterator<TVertexString, Rooted>::Type TVertexStringIter;
+	typedef typename Iterator<TCargoString, Rooted>::Type TCargoStringIter;
+	TVertexStringIter endIt = end(edges_vertices);
+	TVertexStringIter itV = begin(edges_vertices);
+	TCargoStringIter itC = begin(edges_cargo);
+	while(itV != endIt) {
+		TVertexStringIter itVNext = itV; ++itVNext;
+		// The same edge could have been created multiple times, so check if it exists
+		TEdgeDescriptor e = findEdge(g, *itV, *itVNext);
+		if (e == 0) {
+			addEdge(g, *itV, *itVNext, *itC);
+		} else {
+			cargo(e) += *itC;
+		}
+		++itV; ++itV;
+		++itC;
+	}
+	SEQAN_TASSERT(itC == end(edges_cargo))
+}
+
+
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -202,16 +396,122 @@ tripletLibraryExtension(Graph<Alignment<TStringSet, TCargo, TSpec> >& g)
 	String<TCargo> newCargoMap;
 	resize(newCargoMap, getIdUpperBound(_getEdgeIdManager(g)), Exact());
 	TEdgeIterator it(g);
+	for(;!atEnd(it);++it) assignProperty(newCargoMap, *it, cargo(*it));
+
+	typedef String<TVertexDescriptor, Block<> > TVertexString;
+	typedef String<TCargo, Block<> > TCargoString;
+	TVertexString edges_vertices;
+	TCargoString edges_cargo;
+	for(TVertexIterator itVertex(g);!atEnd(itVertex);++itVertex) {
+		TOutEdgeIterator outIt1(g, *itVertex);
+		while (!atEnd(outIt1)) {
+			TOutEdgeIterator outIt2 = outIt1;
+			goNext(outIt2);
+			while (!atEnd(outIt2)) {
+				TVertexDescriptor tV1 = targetVertex(outIt1);
+				TVertexDescriptor tV2 = targetVertex(outIt2);
+				if (sequenceId(g, tV1) != sequenceId(g,tV2)) {
+					TEdgeDescriptor e = findEdge(g, tV1, tV2);
+					if (e == 0) {
+						// New edge
+						TCargo val = cargo(*outIt1);
+						if (val > cargo(*outIt2)) val = cargo(*outIt2);
+						
+						// Remember the edge with cargo
+						push_back(edges_vertices, tV1);
+						push_back(edges_vertices, tV2);
+						push_back(edges_cargo, val);
+					} else {
+						if (getCargo(*outIt2) > getCargo(*outIt1)) property(newCargoMap, e) += getCargo(*outIt1);
+						else property(newCargoMap, e) += getCargo(*outIt2);	
+					}
+				}
+				goNext(outIt2);
+			}
+			goNext(outIt1);
+		}
+	}
+
+	// Assign the new weights and clean-up the cargo map
+	goBegin(it);
+	for(;!atEnd(it);++it) cargo(*it) = getProperty(newCargoMap, *it);
+	clear(newCargoMap);
+
+	// Finally add the new edges created by the triplet approach
+	typedef typename Iterator<TVertexString, Rooted>::Type TVertexStringIter;
+	typedef typename Iterator<TCargoString, Rooted>::Type TCargoStringIter;
+	TVertexStringIter endIt = end(edges_vertices);
+	TVertexStringIter itV = begin(edges_vertices);
+	TCargoStringIter itC = begin(edges_cargo);
+	while(itV != endIt) {
+		TVertexStringIter itVNext = itV; ++itVNext;
+		// The same edge could have been created multiple times, so check if it exists
+		TEdgeDescriptor e = findEdge(g, *itV, *itVNext);
+		if (e == 0) {
+			addEdge(g, *itV, *itVNext, *itC);
+		} else {
+			cargo(e) += *itC;
+		}
+		++itV; ++itV;
+		++itC;
+	}
+	SEQAN_TASSERT(itC == end(edges_cargo))
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec>
+inline void 
+fullTripletLibraryExtension(Graph<Alignment<TStringSet, TCargo, TSpec> >& g)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename Id<TGraph>::Type TId;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
+	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
+	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
+
+	// 1) Augment all existing edges according to triplet paradigm
+	String<TCargo> newCargoMap;
+	resize(newCargoMap, getIdUpperBound(_getEdgeIdManager(g)), Exact());
+	TEdgeIterator it(g);
 	TSize nEdges = 0;
 	for(;!atEnd(it);++it) {
 		++nEdges;
 		assignProperty(newCargoMap, *it, cargo(*it));
 	}
+	for(TVertexIterator itVertex(g);!atEnd(itVertex);++itVertex) {
+		TOutEdgeIterator outIt1(g, *itVertex);
+		while (!atEnd(outIt1)) {
+			TOutEdgeIterator outIt2 = outIt1;
+			goNext(outIt2);
+			while (!atEnd(outIt2)) {
+				TVertexDescriptor tV1 = targetVertex(outIt1);
+				TVertexDescriptor tV2 = targetVertex(outIt2);
+				if (sequenceId(g, tV1) != sequenceId(g,tV2)) {
+					TEdgeDescriptor e = findEdge(g, tV1, tV2);
+					if (e != 0) {
+						if (getCargo(*outIt2) > getCargo(*outIt1)) property(newCargoMap, e) += getCargo(*outIt1);
+						else property(newCargoMap, e) += getCargo(*outIt2);	
+					}
+				}
+				goNext(outIt2);
+			}
+			goNext(outIt1);
+		}
+	}
+	// Assign the new weights and clean-up the cargo map
+	goBegin(it);
+	for(;!atEnd(it);++it) cargo(*it) = getProperty(newCargoMap, *it);
+	clear(newCargoMap);
 
-	//typedef String<TVertexDescriptor, Block<> > TVertexString;
-	//typedef String<TCargo, Block<> > TCargoString;
-	typedef String<TVertexDescriptor, External<> > TVertexString;
-	typedef String<TCargo, External<> > TCargoString;
+
+	// 2) Add missing edges according to triplet approach
+	typedef String<TVertexDescriptor, Block<> > TVertexString;
+	typedef String<TCargo, Block<> > TCargoString;
 	TVertexString edges_vertices;
 	TCargoString edges_cargo;
 	TCargo avg = 0;
@@ -230,14 +530,10 @@ tripletLibraryExtension(Graph<Alignment<TStringSet, TCargo, TSpec> >& g)
 						TCargo val = cargo(*outIt1);
 						if (val > cargo(*outIt2)) val = cargo(*outIt2);
 						avg += val;
-
 						// Remember the edge with cargo
 						push_back(edges_vertices, tV1);
 						push_back(edges_vertices, tV2);
 						push_back(edges_cargo, val);
-					} else {
-						if (getCargo(*outIt2) > getCargo(*outIt1)) property(newCargoMap, e) += getCargo(*outIt1);
-						else property(newCargoMap, e) += getCargo(*outIt2);	
 					}
 				}
 				goNext(outIt2);
@@ -248,13 +544,8 @@ tripletLibraryExtension(Graph<Alignment<TStringSet, TCargo, TSpec> >& g)
 	avg /= length(edges_cargo);
 	// Add all triplet edges if the graph is small
 	if (nEdges < 1000000) avg = 0;
-
-	// Assign the new weights and clean-up the cargo map
-	goBegin(it);
-	for(;!atEnd(it);++it) cargo(*it) = getProperty(newCargoMap, *it);
-	clear(newCargoMap);
-	
-	// Finally add the new edges created by the triplet approach
+		
+	// Add the newly created edges
 	typedef typename Iterator<TVertexString, Rooted>::Type TVertexStringIter;
 	typedef typename Iterator<TCargoString, Rooted>::Type TCargoStringIter;
 	TVertexStringIter endIt = end(edges_vertices);
@@ -272,7 +563,6 @@ tripletLibraryExtension(Graph<Alignment<TStringSet, TCargo, TSpec> >& g)
 		++itV; ++itV;
 		++itC;
 	}
-	SEQAN_TASSERT(itC == end(edges_cargo))
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -401,7 +691,8 @@ _alignImportSequences(TPath const& in_path,
 	unsigned seqCount = 0;
 	std::ifstream file;
 	std::stringstream input;
-	input << in_path << file_prefix << '.' << file_suffix;
+	if (length(file_suffix)) input << in_path << file_prefix << '.' << file_suffix;
+	else input << in_path << file_prefix;
 	file.open(input.str().c_str(), std::ios_base::in | std::ios_base::binary);
 	if (!file.is_open()) return 0;
 	while (!_streamEOF(file)) {
@@ -422,6 +713,7 @@ _alignImportSequences(TPath const& in_path,
 		count += length(origStrSet[i]);
 	}
     file.close();
+
 	return count;
 }
 
@@ -436,6 +728,100 @@ _alignTiming(std::clock_t& startTime,
 	double time=((float)(endTime-startTime)/CLOCKS_PER_SEC);
 	startTime = endTime;
 	std::cout << text << time << " sec" << std::endl;
+}
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+// T-Coffee - Main Routines
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TString, typename TAlignmentGraph>
+inline void
+tCoffeeProteinAlignment(StringSet<TString, Dependent<> > const& strSet,
+						TAlignmentGraph& gOut)
+{
+	SEQAN_CHECKPOINT
+	
+	typedef StringSet<TString, Dependent<> > TStringSet;
+	typedef Graph<Alignment<TStringSet, unsigned int> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+
+	// Score objects
+	Blosum62 score_type_global(-1,-11);
+	Blosum62 score_type_local(-2,-8);
+	//Score<int, Pam<> > score_type_global(250, -1, -17);
+	//Score<int, Pam<> > score_type_local(250, -2, -13);
+
+	// Generate a primary library, i.e., all global pairwise alignments
+	TGraph lib1(strSet);
+	String<double> distanceMatrix;
+	generatePrimaryLibrary(lib1, distanceMatrix, score_type_global, GlobalPairwise_Library() );
+	//std::cout << "Library size: " << numVertices(lib1) << " Vertices, " << numEdges(lib1) << " Edges" << std::endl;
+
+	// Generate a primary library, i.e., all local pairwise alignments
+	TGraph lib2(strSet);
+	generatePrimaryLibrary(lib2, score_type_local, LocalPairwise_Library() );
+	//std::cout << "Library size: " << numVertices(lib2) << " Vertices, " << numEdges(lib2) << " Edges" << std::endl;
+
+	// Weighting of libraries (Signal addition)
+	TGraph g(strSet);
+	String<TGraph*> libs;
+	appendValue(libs, &lib1);
+	appendValue(libs, &lib2);
+	combineGraphs(g, libs);
+	//// Only topology
+	//combineGraphs(g, true, libs);
+	//std::cout << "Library size: " << numVertices(g) << " Vertices, " << numEdges(g) << " Edges" << std::endl;
+
+	// Clear the old libraries
+	clear(lib1);
+	clear(lib2);
+
+
+	TSize nSeq = length(strSet);
+	TSize firstThreshold = 10;
+	TSize secondThreshold = 30;
+	if (nSeq < firstThreshold) {
+		// Full triplet...
+		tripletLibraryExtension(g);
+		
+		// ...  and alignment according to library information, that is no guide tree
+		highestScoreFirstAlignment(g, gOut);
+
+		//// Alternative 1: Pairwise library distances and guide tree
+		//pairwiseDistances(g, distanceMatrix);
+		//Graph<Tree<double> > guideTree;
+		//upgmaTree(distanceMatrix, guideTree);
+		//progressiveAlignment(g, guideTree, gOut);
+		//clear(guideTree);
+	
+		//// Alternative 2: Calculate a distance matrix using a compressed alphabet or not
+		//getKmerSimilarityMatrix(stringSet(g), distanceMatrix, 6, AAGroupsDayhoff() );
+		//similarityToDistanceMatrix(distanceMatrix, KimuraDistance() );
+		//Graph<Tree<double> > guideTree;
+		//upgmaTree(distanceMatrix, guideTree);
+		//progressiveAlignment(g, guideTree, gOut);
+		//clear(guideTree);
+	} else if (nSeq < secondThreshold) {
+		// Full triplet...
+		tripletLibraryExtension(g);
+
+		// ... and normal progressive alignment with guide tree
+		Graph<Tree<double> > guideTree;
+		slowNjTree(distanceMatrix, guideTree);
+		progressiveAlignment(g, guideTree, gOut);
+		clear(guideTree);
+	} else {
+		// Triplet only on groups of sequences
+		Graph<Tree<double> > guideTree;
+		slowNjTree(distanceMatrix, guideTree);	// More balanced than UPGMA
+		progressiveAlignmentWithTriplet(g, guideTree, gOut, secondThreshold);
+		clear(guideTree);
+	}
+	clear(distanceMatrix);
+	clear(g);
 }
 
 //////////////////////////////////////////////////////////////////////////////

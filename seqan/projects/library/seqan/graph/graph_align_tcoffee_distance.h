@@ -10,6 +10,162 @@ namespace SEQAN_NAMESPACE_MAIN
 // T-Coffee - Determining sequence similarity
 //////////////////////////////////////////////////////////////////////////////
 
+
+//////////////////////////////////////////////////////////////////////////////
+	
+template<typename TStringSet, typename TCargo, typename TSpec, typename TMatrix>
+inline void 
+pairwiseDistances(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+				  TMatrix& distanceMatrix)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename Id<TGraph>::Type TId;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
+	typedef typename Value<TMatrix>::Type TValue;
+
+	// Initialization
+	clear(distanceMatrix);
+	TStringSet& str = stringSet(g);	
+	TSize nseq = length(str);
+	resize(distanceMatrix, nseq * nseq);
+
+	// All pairwise alignments
+	typedef String<String<TVertexDescriptor> > TSegmentString;
+	TValue maxScore = 0;
+	for(TSize i=0; i<nseq; ++i) {
+		TSegmentString seq1;
+		TSize len1 = length(str[i]);
+		_buildLeafString(g, i, seq1);
+		for(TSize j=i+1; j<nseq; ++j) {
+			// Align the 2 strings
+			TSegmentString seq2;
+			TSize len2 = length(str[j]);
+			_buildLeafString(g, j, seq2);
+			TValue score = hcsPairwiseScore(g,seq1,seq2);
+			
+			// Normalize by distance
+			if (len1 > len2) score /= len1;
+			else score /= len2;
+			if (score > maxScore) maxScore = score;
+			
+			// Remember the value
+			assignValue(distanceMatrix, i*nseq+j, score);
+		}
+	}
+
+	// Normalize values
+	for(TSize i=0; i<nseq; ++i) {
+		for(TSize j=i+1; j<nseq; ++j) {
+			assignValue(distanceMatrix, i*nseq+j, 1 - (TValue) getValue(distanceMatrix, i*nseq+j) / (TValue) maxScore);
+		}
+	}
+}
+
+
+template<typename TStringSet, typename TCargo, typename TSpec, typename TOutGraph>
+inline void 
+highestScoreFirstAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+						   TOutGraph& gOut)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename Id<TGraph>::Type TId;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
+
+	// Initialization
+	String<double> distanceMatrix;
+	TStringSet& str = stringSet(g);	
+	TSize nseq = length(str);
+	resize(distanceMatrix, nseq * nseq);
+
+	// Build initial distance matrix
+	typedef String<String<TVertexDescriptor> > TSegmentString;
+	String<TSegmentString> segmentStr;
+	String<bool> active;
+	resize(segmentStr, nseq);
+	fill(active, nseq, true);
+	for(TSize i=0; i<nseq; ++i) _buildLeafString(g, i, value(segmentStr,i));
+	for(TSize i=0; i<nseq; ++i) {
+		TSize len1 = length(value(segmentStr,i));
+		for(TSize j=i+1; j<nseq; ++j) {
+			// Align the 2 strings
+			TSize len2 = length(value(segmentStr,j));
+			double score = hcsPairwiseScore(g,value(segmentStr,i),value(segmentStr,j));
+			
+			// Normalize by distance
+			score /= ((len1 + len2) / 2);
+						
+			// Remember the value
+			assignValue(distanceMatrix, i*nseq+j, score);
+		}
+	}
+
+	bool oneLeft = true;
+	do {
+		oneLeft = true;
+
+		// Find highest scoring pair
+		TSize index_i = 0;
+		TSize index_j = 0;
+		double maxScore = 0;
+		for(TSize i=0; i<nseq; ++i) {
+			if (!active[i]) continue;
+			for(TSize j=i+1; j<nseq; ++j) {
+				if (!active[j]) continue;
+				oneLeft = false;
+				//std::cout << getValue(distanceMatrix, i*nseq+j) << ',';
+				double tmp;
+				if ((tmp = getValue(distanceMatrix, i*nseq+j)) > maxScore) {
+					maxScore = tmp;
+					index_i = i;
+					index_j = j;
+				}
+			}
+			//std::cout << std::endl;
+		}
+		if (oneLeft) break;
+		//std::cout << index_i << ',' << index_j << ':' << maxScore << std::endl;
+
+		// Align this sequence pair
+		TSegmentString alignSeq;
+		heaviestCommonSubsequence(g,segmentStr[index_i],segmentStr[index_j],alignSeq);
+		active[index_j] = false;
+		clear(value(segmentStr, index_j));
+		segmentStr[index_i] = alignSeq;
+
+		// Recalculate distances
+		for(TSize i=0; i<nseq; ++i) {
+			if ((!active[i]) || (index_i == i)) continue;
+			TSize len1 = length(segmentStr[index_i]);
+			TSize len2 = length(segmentStr[i]);
+			double score = hcsPairwiseScore(g,segmentStr[index_i],segmentStr[i]);
+			
+			// Normalize by distance
+			score /= ((len1 + len2) / 2);
+					
+			// Remember the value
+			if (index_i < i) assignValue(distanceMatrix, index_i*nseq+i, score);
+			else assignValue(distanceMatrix, i*nseq+index_i, score);
+		}
+	} while (!oneLeft);
+
+	// Create alignment graph
+	for(TSize i=0; i<nseq; ++i) {
+		if (!active[i]) continue;
+		_createAlignmentGraph(g, segmentStr[i], gOut);
+		break;
+	}
+}
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 

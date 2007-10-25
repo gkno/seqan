@@ -138,6 +138,17 @@ typedef Tag<MsfFormat_> const MsfFormat;
 //////////////////////////////////////////////////////////////////////////////
 
 /**
+.Tag.FastaFormat
+..summary:Switch to trigger alignment output in fasta format
+..value.FastaFormat:Alignment graph in msf format
+*/
+
+struct FastaFormat_;
+typedef Tag<FastaFormat_> const FastaFormat;
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
 .Tag.CgVizFormat
 ..summary:Switch to trigger alignment output in cgviz format
 ..value.CgVizFormat:Alignment graph in cgviz format

@@ -69,6 +69,7 @@ getKmerSimilarityMatrix(StringSet<TString, TSpec> const& strSet,
 
 	// Initialization
 	// Matrix for common k-tupels between sequence i and j
+	clear(mat);
 	fill(mat, nseq*nseq, 0);
 
 	// Transform the set of strings into a set of strings of k-tupels

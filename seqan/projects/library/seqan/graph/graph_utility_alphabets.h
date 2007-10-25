@@ -3,7 +3,38 @@
 
 namespace SEQAN_NAMESPACE_MAIN
 {
-	
+
+//////////////////////////////////////////////////////////////////////////////
+// RNA Alphabet
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename T = void>
+struct _Translate_Table_Rna5_2_Ascii
+{
+	static char const VALUE[5];
+};
+template <typename T>
+char const _Translate_Table_Rna5_2_Ascii<T>::VALUE[5] = {'A', 'C', 'G', 'U', 'N'}; 
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Spec.Rna5:
+..cat:Alphabets
+..summary:Rna5 alphabet.
+..general:Class.SimpleType
+..signature:Rna5
+..remarks:
+...text:The @Metafunction.ValueSize@ of $Rna5$ is 5. 
+...text:Objects of type $Rna5$ cannot be converted into other types.
+..see:Metafunction.ValueSize
+*/
+struct _Rna5 {};
+typedef SimpleType<unsigned char, _Rna5> Rna5;
+
+template <> struct ValueSize< Rna5 > { enum { VALUE = 5 }; };
+template <> struct BitsPerValue< Rna5 > { enum { VALUE = 3 }; };
+
 //////////////////////////////////////////////////////////////////////////////
 // Compressed amino acid alphabets
 //////////////////////////////////////////////////////////////////////////////
