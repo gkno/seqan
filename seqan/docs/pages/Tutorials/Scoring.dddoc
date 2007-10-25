@@ -1,0 +1,8 @@
+.Page.Scoring:
+..cat:Tutorials
+..summary:Scoring and distance measures used for alignments and approximative search.
+
+.Page.Scoring.description:
+..contents
+
+..section:# Overview

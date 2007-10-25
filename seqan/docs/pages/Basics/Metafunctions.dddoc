@@ -1,0 +1,8 @@
+.Page.Metafunctions:
+..cat:Basics
+..summary:Metafunctions are used for getting types and constants at compile time.
+
+.Page.Metafunctions.description:
+..contents
+
+..section:# Overview

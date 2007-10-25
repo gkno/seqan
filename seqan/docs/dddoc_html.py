@@ -967,6 +967,7 @@ def subprintText(fl, data, subcategory = False):
             headline = ''
             
     in_table = False
+#    in_ol = False
             
     section_cout = 0
     subsection_cout = 0
@@ -983,6 +984,16 @@ def subprintText(fl, data, subcategory = False):
             if in_table:
                 fl.write('</table>')
             in_table = False
+
+#        if name == 'enumerate':
+#            if not in_ol:
+#                fl.write('<ol>')
+#            fl.write('<li>' + translateText(line.text()))
+#            in_ol = True
+#        else:
+#            if in_ol:
+#                fl.write('</ol>')
+#            in_ol = False
             
         if name == 'contents':
             subprintContents(fl, data)
@@ -1020,6 +1031,7 @@ def subprintText(fl, data, subcategory = False):
             
         elif name == 'field':
             subprintField(fl, line.text())
+
             
     if in_table:
         fl.write('</table>')

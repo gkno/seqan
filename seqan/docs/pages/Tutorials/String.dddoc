@@ -19,15 +19,25 @@ This tutorial gives an overview of the variety of sequences types in SeqAn and b
 ..section:# Sequence Classes
 ..subsection:#.# Strings
 ..text:@Class.String.Strings@ are @Concept.Container.containers@ that store sequences of values, for example of $char$, @Spec.Dna.nucleotides@, or @Spec.AminoAcid.amino acids@. 
-The user of SeqAn can choose between several kinds of string and combine with with any kind of value.
+The user of SeqAn can choose between several kinds of string and combine with any kind of value.
 Typically, the value type is qualified as the first template argument, i.e. in angled brackets:
 ..code:String<AminoAcid> myProteine;
 
 ..text:SeqAn predefines @Shortcut|shotcuts@ for some usual value types, so we can also write:
 ..code:Peptide myProteine;
 
-..text:In an optional second template argument, we can specify the kind of string that should be used.
-The user can choose between the following kinds of string:
+..text:SeqAn offers many functions and operators for initializing, converting, manipulating, and printing strings.
+For example:
+..code:
+String<char> str = "this is ";
+str += "a test.";
+cout << str;                    //output: "this is a test."
+cout << length(str);            //output: 15
+..text:
+For more examples see @Demo.String Basics.this demo program@.
+
+..text:The user can specify the kind of string that should be used in an optional second template argument of @Class.String@.
+There are the following kinds of string:
 
 ..tableheader:Specialization|Description|Applications|Limitations
 ..table:@Spec.Alloc String@
@@ -63,24 +73,17 @@ Could be usefull for calling functions of C-libraries.
 String<char, Array<100> > myArrayString;    //string with maximum length 100
 String<Dna, Packed<> > myPackedString;      //string that takes only 2 bits per nucleotide
 
-..text:SeqAn offers many functions and operators for initializing, converting, manipulating, and printing strings.
-For example:
-..code:
-String<char> str = "this is ";
-str += "a test.";
-cout << str;                    //output: "this is a test."
-cout << length(str);            //output: 15
-..text:
-For more examples see @Demo.String Basics.this demo program@.
-
 
 ..subsection:#.# Sequence Adaptions
 ..text:SeqAn offers an interface for accessing @Adaption.std::basic_string|standard library strings@ and @Adaption.char array|c-style $char$ arrays@
 in the same way as @Class.String|SeqAn strings@.
 For example:
 ..code:
-std::basic_string str = "a standard library string";
-cout << length(str);            //output: 25
+std::basic_string str1 = "a standard library string";
+cout << length(str1);           //output: 25
+
+char str2[] = "this is a char array";
+cout << length(str2);           //output: 20
 
 
 ..subsection:#.# Segments
@@ -166,17 +169,40 @@ String<char> str = "12345";
 append(str, "abcdefghijklmn", Limit());  //limits str to its current capacity
 append(str, "ABCDEFG");                  //use default expansion strategy
 
+..subsection:#.# Conversion
+..text:
+A sequence of type $A$ values can be converted into a sequence of type $B$ value, if $A$ can be converted into $B$.
+SeqAn offers three different ways for conversion:
+..text:
+1. Copy conversion. The source sequence is copied into the target sequence. This can be done by assignment (operator $=$) or using the function @Function.assign@, for example:
+..code:
+String<Dna> source = "acgtgcat";
+String<char> target;
+assign(target, source);     //copy conversion is done here
+
+..text:
+2. Move conversion. If the source sequence is not needed any more after the conversion, it is always advisable to use @Function.move@ instead of @Function.assign@.
+@Function.move@ need not to make a copy but can re-use the source sequence storage.
+In some cases, @Function.move@ can also perform an in-place conversion, for example: 
+..code:
+String<Dna> source = "acgtgcat";
+String<char> target;
+move(target, source);       //the in-place move conversion is done here
+
+..text:
+3. Modifier conversion. Instead of creating an actual target sequence, use a @Page.Modifiers@ to 'emulate' a sequence with a different value type, for example:
+..code:
+String<Dna> source = "acgtgcat";
+Modifier<String<Dna>, ModView<FunctorConvert<Dna, char> > > target(source);
+
 ..subsection:#.# Input/Output
 ..text:SeqAn offers several Ways for loading and saving sequences in many formats.
 For more information, see @Pages.Files|here@.
 
 
-..section:# Stringsets
-
-
-
-
 ..section:# Gapped Sequences
+..text:
+SeqAn contains a special class @Class.Gaps@ for storing sequences that contain gaps, e.g. lines in sequence alignments. See @Page.Alignments|here@ for more information. 
 
 ..XXXXtext:For simplification, SeqAn predefines several string for usual value types:
 ..XXXtable:@Shortcut.CharString@|A string for storing text. The value type is $char$. If unicode characters are needed, @Shortcut.UnicodeString@ could be used.
