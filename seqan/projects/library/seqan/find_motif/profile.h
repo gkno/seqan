@@ -14,7 +14,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ...signature:String<FrequencyDistribution, Alloc<> >
 */
 
-typedef String<FrequencyDistribution, Alloc<void> > Profile;
+//typedef String<FrequencyDistribution, Alloc<void> > Profile;
 
 //////////////////////////////////////////////////////////////////////////////
 // Functions

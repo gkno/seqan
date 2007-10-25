@@ -16,7 +16,7 @@ namespace SEQAN_NAMESPACE_MAIN
 // intPow, rechnet a hoch b aus (int)
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //hmmmmmmmmmmmmmmmmmm?
-int intPow(int a, int b)
+inline int intPow(int a, int b)
 {
 	int c = 1;	
 	for (int i = 0; i < b; ++i)
