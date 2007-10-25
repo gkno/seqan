@@ -39,3 +39,6 @@ Zum Release Herbst 2007:
 * Wechselseitige Konversion sicherstellen:
     - die Sequenztypen
     - die zwei Alignment-Datenstrukturen
+
+* Demos:
+    - Iterator demo kompiliert nicht
