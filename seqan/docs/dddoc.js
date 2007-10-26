@@ -1,4 +1,4 @@
-var MAX_RESULT = 20;
+var MAX_RESULT = 50;
 
 function updateSearch(text)
 {
@@ -7,7 +7,7 @@ function updateSearch(text)
     s = '';
     count = 1;
         
-    if (text.length >= 1)
+    if (text.length >= 2)
     {
         if (text.length < 3)
             reg = new RegExp('^(' + text.toLowerCase() + ')', "gi");
