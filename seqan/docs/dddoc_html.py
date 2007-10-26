@@ -1273,7 +1273,6 @@ def createSearchfile(path):
             title = getPageTitle(data).lower()
             pushSearchResult(db, title, cat, key)
 
-
     searchfile = os.path.join(path, "searchfile.js")
     fl = file(searchfile, "w")
     
@@ -1283,7 +1282,8 @@ def createSearchfile(path):
     keys.sort()
     for key in keys:
         if len(key) > 0:
-            fl.write('[\'' + escapeJavaScript(key) + '\', \'' + escapeJavaScript(str(db[key])) + '\'],\n')
+            for entry in db[key]:
+                fl.write('[\'' + escapeJavaScript(entry[0]) + '\', \'' + escapeJavaScript(entry[1]) + '\', \'' + escapeJavaScript(entry[2]) + '\'],\n')
             
     fl.write('false];\n')
     fl.close()
@@ -1293,10 +1293,11 @@ def createSearchfile(path):
 def pushSearchResult(db, title, cat, name):
 
     if (len(name) == 0):
-        link = '<div><nobr><a target=_parent href="' + getIndexpage(cat) + '">' + getCategoryTitle(cat) + '</a></nobr></div>'
+        link = '<a target=_parent href="' + getIndexpage(cat) + '">'
+        key = getCategoryTitle(cat)
+        text = ''
         
     else:
-    
         obj = dddoc.DATA[cat][name];
         href = getFilename(cat, name)
         if obj.empty(): 
@@ -1306,9 +1307,11 @@ def pushSearchResult(db, title, cat, name):
         if len(summary) > 0:
             summary = 'title="' + summary + '"'
         
-        link = '<div><nobr><a target=_parent href="' + href + '" ' + summary + '>' + translateID(name) + ' (' + cat + ')</a></nobr></div>'
+        link = '<a target=_parent href="' + href + '" ' + summary + '>'
+        key = translateID(name)
+        text =  '(' + cat + ')'
 
-    if not db.has_key(title): db[title] = ""
-    db[title] += link
+    if not db.has_key(title): db[title] = []
+    db[title].append([key, text, link])
 
 ################################################################################

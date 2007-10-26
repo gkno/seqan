@@ -40,5 +40,7 @@ Zum Release Herbst 2007:
     - die Sequenztypen
     - die zwei Alignment-Datenstrukturen
 
+* Strings auf "move" optimieren
+
 * Demos:
     - Iterator demo kompiliert nicht

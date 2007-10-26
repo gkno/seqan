@@ -7,9 +7,13 @@ function updateSearch(text)
     s = '';
     count = 1;
         
-    if (text.length >= 2)
+    if (text.length >= 1)
     {
-        reg = new RegExp("^" + text.toLowerCase(), "gi");
+        if (text.length < 3)
+            reg = new RegExp('^(' + text.toLowerCase() + ')', "gi");
+        else
+            reg = new RegExp('(' + text.toLowerCase() + ')', "gi");
+            
         for (i = 0; i < DB.length-1; ++i)
         {
             entry = DB[i];
@@ -17,7 +21,8 @@ function updateSearch(text)
             
             if (key.match(reg))
             {
-                s += entry[1];
+                displaytext = entry[0].replace(reg, '<b>$1</b>');
+                s += '<div><nobr>' + entry[2] + displaytext + ' ' + entry[1] + '</a></nobr></div>';
                 ++count;
                 if (count >= MAX_RESULT) break;
             }
