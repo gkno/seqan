@@ -8,13 +8,9 @@
 
 ..image:sequences
 
-..section:# Overview
-
 ..text:Sequences are the core of SeqAn.
 This tutorial gives an overview of the variety of sequences types in SeqAn and basic manipulation algorithm.
 
-
-..text:(weitere Uebersicht)
 
 ..section:# Sequence Classes
 ..subsection:#.# Strings
