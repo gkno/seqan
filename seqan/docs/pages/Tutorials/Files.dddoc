@@ -13,12 +13,16 @@
 ..text:SeqAn supports the input and output of files in different @Tag.File Format|file formats@.
 The most simple file format is $Raw$ that is used to load a file "as is" into a string or vice versa, e.g.:
 ..code:
+//loading
 fstream fstrm;
 fstrm.open("input.txt", ios_base::in | ios_base::binary);
+
 CharString str;
 read(fstrm, str, Raw());
+
 fstrm.close();
 
+//saving
 FILE * cstrm = fopen("output.txt", "w");
 write(cstrm, str, Raw());
 fclose(fstrm);
@@ -46,9 +50,9 @@ while (read(fstrm, est, Fasta())
 
 ..text:
 The function @Function.goNext@ skips the current record and proceeds to the next record.
+..text:
 Each record contains a piece of data (i.e. a sequence or an alignment) and optional some additional metadata.
-..text
-One can load these metadata before loading the actual data using @Function.readMeta@. 
+One can load these metadata before (not after) loading the actual data using @Function.readMeta@. 
 The function fills a string with the unparsed metadata.
 ..text:Example:
 ..code:
@@ -68,7 +72,7 @@ fclose(cstrm);
 ..text:
 @Function.write@ is used to write a record into a file. 
 Depending on the file format, a suitable metadata string must be passed to @Function.write@.
-..text:The following example program
+..text:Example: The following example program:
 ..code:
 FILE * cstrm = fopen("genomic_data.fa", "w");
 write(cstrm, "acgt", "the metadata", Fasta());
