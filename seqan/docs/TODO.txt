@@ -11,23 +11,40 @@ Zum Release Herbst 2007:
     
 * Tutorials:
     - Getting Started
-    - Sequences
+    + Sequences
     - Files
     - Searching
     + Indices
     - Graphs
+    - Modifiers
+    - Scoring
+    - Motif Search
     
 * Überblicksseite anpassen
-
+* Indexseiten mit Kommentartext versehen.
 * Erklärung der Grundkonzepte (Metafunctions usw.)
+
     
 * Concepts vervollständigen
     - ...
 
 * Naming-Convention durchsetzen
-    - dddoc-Script entsprechend anpassen
 
-* Gebrochene Links raus (dddoc-Warnings)
+* dddoc-Warnings raus
+
+* Dokusystem:
+    - Neue Warnung: Doppelte-Description
+    - Neue Warnung: Naming-Convention verletzt
+    - Neue Warnung: param nicht in einer der signaturen enthalten.
+    - Identische Values eliminieren
+    - ..param.concept erzeugt ..param.type für alle Typen, die das concept implementieren.
+    - Subsubkategorien
+    - Spezialseite mit Warnings
+    - Spezialseite: Index
+    
+* Demos vervollständigen
+
+* Tags nicht einzeln dokumentieren, sondern zusammenfassen
 
 
 2. Inhalte:

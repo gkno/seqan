@@ -9,7 +9,7 @@
 ..section:# File Format
 
 
-..subsection:#.# Raw data
+..subsection:#.# Raw Data
 ..text:SeqAn supports the input and output of files in different @Tag.File Format|file formats@.
 The most simple file format is $Raw$ that is used to load a file "as is" into a string or vice versa, e.g.:
 ..code:
@@ -27,7 +27,7 @@ fclose(fstrm);
 Instead of using @Function.read@ and @Function.write@ to read and write raw data, one can also use the operators $<<$ and $>>$.
 ..text:
 Files can either be instances of a @Adaption.std::iostream|standard stream classes@,
-or a @Adaption.FILE *|C-style stream (i.e. $FILE *$)@, or a @Class.File|SeqAn $File$ object@ (see below).
+or a C-style stream (i.e. $FILE *$), or a @Class.File|SeqAn $File$ object@ (see below).
 Note that the files should always be opened in binary mode.
 
 
@@ -47,7 +47,9 @@ while (read(fstrm, est, Fasta())
 ..text:
 The function @Function.goNext@ skips the current record and proceeds to the next record.
 Each record contains a piece of data (i.e. a sequence or an alignment) and optional some additional metadata.
+..text
 One can load these metadata before loading the actual data using @Function.readMeta@. 
+The function fills a string with the unparsed metadata.
 ..text:Example:
 ..code:
 FILE * cstrm = fopen("genomic_data.embl", "r");
@@ -63,15 +65,45 @@ read(cstrm, dna_sequence, Embl());      //reads third record
 
 fclose(cstrm);
 
+..text:
+@Function.write@ is used to write a record into a file. 
+Depending on the file format, a suitable metadata string must be passed to @Function.write@.
+..text:The following example program
+..code:
+FILE * cstrm = fopen("genomic_data.fa", "w");
+write(cstrm, "acgt", "the metadata", Fasta());
+fclose(cstrm);
+..text:creates the following file "genomic_data.fa":
+..code:
+>the metadata
+ACGT
+
 
 ..subsection:#.# File Reader Strings
-..text:The easiest way to read-only access sequence data stored in a file is a @Spec.File Reader String@.
-A @Spec.File Reader String@ implements the @Concept.Container|container concept@, i.e. it implements common functions like @Function.length@ or @Function.begin@.
+..text:The easiest way for a read-only access of sequence data stored in a file is a @Spec.File Reader String|file reader string@.
+A file reader string implements the @Concept.Container|container concept@, i.e. it implements common functions like @Function.length@ or @Function.begin@.
 It has minimal memory consumption, because each part of the sequence data is loaded not before it is needed.
 ..text:Example:
 ..code:
 String<Dna, FileReader<Fasta> > fr("ests.fa");  //opens "ests.fa" for reading
 cout << length(fr);                             //prints length of the sequence
 
-..section:# SeqAn File objects
+..text:
+The constructor of the file reader string can also take a file from which the sequences will be loaded.
+For example, the following code will read the second sequence in the file:
+..code:
+FILE * cstrm = fopen("genomic_data.embl", "r");
+
+goNext(cstrm, Embl());
+
+String<char> meta_data;
+readMeta(cstrm, meta_data, Embl());         //reads meta data of second record
+
+String<Dna, FileReader<Embl> > fr(cstrm);   //reads sequence data of second record
+
+fclose(cstrm);
+
+
+
+..section:# SeqAn File Objects
 ..text:(more information about @Class.File@)
