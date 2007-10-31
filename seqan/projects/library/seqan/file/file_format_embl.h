@@ -95,7 +95,8 @@ SEQAN_CHECKPOINT
 		}
 	}
 
-	it.data_file_pos = _streamTellG(host(it)) - 1;
+//	it.data_file_pos = _streamTellG(host(it));
+	it.data_file_pos -= 1;
 	it.data_eof = _streamEOF(host(it));
 }
 
@@ -113,7 +114,7 @@ SEQAN_CHECKPOINT
 			it.data_eof = true;
 			return;
 		}
-		++it.data_file_pos;
+		it.data_file_pos += 1;
 
 		if ((it.data_char == '\n') || (it.data_char == '\r'))
 		{//linebreak detected: find begin of next line
@@ -125,7 +126,7 @@ SEQAN_CHECKPOINT
 					it.data_eof = true;
 					return;
 				}
-				++it.data_file_pos;
+				it.data_file_pos += 1;
 			} while ((it.data_char == '\n') || (it.data_char == '\r'));
 
 			if (it.data_char == '/')
@@ -184,7 +185,6 @@ SEQAN_CHECKPOINT
 }
 
 //////////////////////////////////////////////////////////////////////////////
-
 template <typename TFile, typename TMeta>
 inline void
 readMeta(TFile & file,
@@ -223,6 +223,200 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 
+
+
+/**
+.Function.readLineType:
+..cat:File
+..summary:Reads the information belonging to the two-character line code specified.
+..signature:readLineType(file,data,key,Embl);
+..param.file:The input file or string.
+...remarks:This function works on an open file stream or on the string data obtained from calling Function.readMeta
+..param.data:The target container that will be filled.
+..param.key:The two-character code specifying the file entry to be read, e.g. "AC" for the acession number line or "DE" for the description line. 
+..see:Function.readMeta,Funtion.readFeature
+*/
+template<typename TFile, typename TData, typename TKey>
+inline void
+readLineType(TFile & file,
+			 TData & data,
+			 TKey key,
+			 Embl)
+
+{
+SEQAN_CHECKPOINT
+
+	//this function is meant to be used for two letter codes only 
+	SEQAN_TASSERT(length(key)==2); 
+
+	typedef typename Value<TFile>::Type TValue;
+	typedef typename Position<TFile>::Type TPosition;
+
+	clear(data);
+	if(_streamEOF(file))
+		return;
+	
+	TPosition pos = _streamTellG(file);
+	TValue c = _streamGet(file);
+	while (!_streamEOF(file))
+	{
+		if(c == '/')
+		{
+			_streamSeekG(file,pos);
+			return;
+		}
+		if(c == key[0])
+		{
+			c = _streamGet(file);
+			if(c == key[1])
+			{
+				for(unsigned int i = 0; i < 4; ++i)
+					c = _streamGet(file);
+				_stream_appendLine(file, data, c);
+				while(!_streamEOF(file) && _stream_readWord(file,c) == key)
+				{
+					appendValue(data, '\n');
+					for(unsigned int i = 0; i < 3; ++i)
+						c = _streamGet(file);
+					_stream_appendLine(file, data, c);
+				}
+				_streamSeekG(file,pos);
+				return;
+			}
+		}
+		_stream_skipLine(file, c);
+	}
+
+	_streamSeekG(file,pos);
+	
+}
+
+
+
+template<typename TData, typename TValue, typename TSpec, typename TKey>
+inline void
+readLineType(String<TValue,TSpec> & meta,
+			 TData & data,
+			 TKey key,
+			 Embl)
+
+{
+SEQAN_CHECKPOINT
+
+	//this function is meant to be used for two letter codes only 
+	SEQAN_TASSERT(length(key)==2); 
+
+	typedef typename Iterator<String<TValue,TSpec>,Standard>::Type TIterator;
+	typedef typename Position<String<TValue,TSpec> >::Type TPosition;
+
+	clear(data);
+	if(empty(meta))
+		return;
+	
+	TIterator it = begin(meta,Standard());
+	TIterator end_it = end(meta,Standard());
+
+	while (it != end_it)
+	{
+		if(*it == '/')
+			return;
+
+		if(*it == key[0])
+		{
+			++it;
+			if(*it == key[1])
+			{
+				it+=4;
+				_string_appendLine(meta, data, it);
+				while(it!=end_it && *it==key[0] && *(++it)==key[1])
+				{
+					appendValue(data, '\n');
+					it+=4;
+					_string_appendLine(meta, data, it);
+				}
+				return;
+			}
+		}
+		_string_skipLine(meta, it);
+	}
+
+	
+}
+
+
+/**
+.Function.readFeature:
+..cat:File
+..summary:Finds the first feature specified by 'key' starting from position 'start' in the feature table (the feature table can be
+obtained by calling readLineType with the two-character code "FT").
+..signature:readFeature(ft_string,start,data,key,Embl);
+..param.ft_string:The feature table.
+..param.start:Position in feature table where search begins.
+..param.data:The target container that will be filled.
+..param.key:The key word specifying the feature to be read, e.g. "mRNA" or "CDS".
+..return:The position behind the feature if found, 0 otherwise.
+..see:Function.readMeta,Funtion.readFeature
+*/
+//read parts of feature table (those that belong to key)
+template<typename TData, typename TKey, typename TString>
+inline typename Position<TString>::Type
+readFeature(TString & str,
+			typename Position<TString>::Type start_pos,
+			TData & data,
+			TKey key,
+			Embl)
+
+{
+SEQAN_CHECKPOINT
+
+	typedef typename Iterator<TString,Standard>::Type TIterator;
+	typedef typename Position<TString>::Type TPosition;
+
+	clear(data);
+	if(empty(str) || start_pos >= length(str))
+		return 0;
+	
+	TIterator it = iter(str,start_pos,Standard());
+	TIterator end_it = end(str,Standard());
+
+	while (it != end_it)
+	{
+		if(*it == key[0])
+		{
+			++it;
+			bool found = true;
+			for(unsigned int i = 1; i < length(key); ++i)
+			{
+				if(key[i] != *it)
+				{
+					found = false;
+					break;
+				}
+				++it;
+			}
+			if(found)
+			{
+				_string_skipWhitespace(str,it);
+				_string_appendLine(str, data, it);
+				while(it!=end_it && *it == ' ')
+				{
+					appendValue(data, '\n');
+					_string_skipWhitespace(str,it);
+					_string_appendLine(str, data, it);
+				}
+				return position(it,str);
+			}
+		}
+		_string_skipLine(str, it);
+	}
+
+	return 0;
+	
+}
+	
+
+
+//////////////////////////////////////////////////////////////////////////////
 template <typename TFile>
 inline void
 goNext(TFile & file,

@@ -519,6 +519,162 @@ _stream_skipLine(TFile & file,
 	return count;
 }
 
+
+
+
+////////////////////////////////////////////////////////////////////////////
+//new ones
+
+//new ones for streams
+template<typename TFile, typename TChar>
+inline void 
+_stream_skipWhitespace(TFile& file, TChar& c)
+{
+	if ((c!=' ') && (c != '\t')) return;
+	while (!_streamEOF(file)) {
+		c = _streamGet(file);
+		if ((c!=' ') && (c != '\t')) break;
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////
+
+
+template<typename TFile, typename TChar>
+inline String<char>
+_stream_readWord(TFile & file, TChar& c)
+{
+	// Read word
+	String<char> str(c);
+	while (!_streamEOF(file)) {
+		c = _streamGet(file);
+		if (!_stream_isLetter(c)) break;
+		append(str, c);
+	}
+	return str;
+}
+
+////////////////////////////////////////////////////////////////////////////
+
+template<typename TChar>
+inline bool
+_stream_isLetter(TChar const c)
+{
+	return ((c == 'a') || (c == 'b') || (c == 'c') || (c == 'd') || (c == 'e') || 
+			(c == 'f') || (c == 'g') || (c == 'h') || (c == 'i') || (c == 'j') ||
+			(c == 'k') || (c == 'l') || (c == 'm') || (c == 'n') || (c == 'o') || 
+			(c == 'p') || (c == 'q') || (c == 'r') || (c == 's') || (c == 't') ||
+			(c == 'u') || (c == 'v') || (c == 'w') || (c == 'x') || (c == 'y') || 
+			(c == 'z') || (c == 'A') || (c == 'B') || (c == 'C') || (c == 'D') ||
+			(c == 'E') || (c == 'F') || (c == 'G') || (c == 'H') || (c == 'I') || 
+			(c == 'J') || (c == 'K') || (c == 'L') || (c == 'M') || (c == 'N') ||
+			(c == 'O') || (c == 'P') || (c == 'Q') || (c == 'R') || (c == 'S') || 
+			(c == 'T') || (c == 'U') || (c == 'V') || (c == 'W') || (c == 'X') ||
+			(c == 'Y') || (c == 'Z'));
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+//new ones for strings
+
+template <typename TString, typename TIter>
+inline typename Size<TString>::Type
+_string_skipLine(TString & str,
+				 TIter & it)
+
+{
+	typename Size<TString>::Type count = 0;
+	typename Iterator<TString,Standard>::Type end_it = end(str,Standard());
+	while (true)
+	{
+		if (it == end_it) break;
+
+		if (*it == '\r')
+		{
+			++it;
+			if (*it == '\n') 
+			{
+				++it;
+			}
+			break;
+		}
+		if (*it == '\n')
+		{
+			++it;
+			break;
+		}
+
+		++count;
+		++it;
+	}
+
+	return count;
+}
+
+/////////////////////////////////////////////////////////////////////////
+
+template <typename TString1, typename TString2, typename TIter>
+inline void
+_string_appendLine(TString1 & str,
+				   TString2 & a_str,
+				   TIter & it)
+{
+	typename Iterator<TString1,Standard>::Type end_it = end(str,Standard());
+	while (true)
+	{
+		if (it == end_it) break;
+
+		if (*it == '\r')
+		{
+			++it; 
+			if (*it == '\n') 
+			{
+				++it;
+			}
+			break;
+		}
+		if (*it == '\n')
+		{
+			++it;
+			break;
+		}
+
+		appendValue(a_str, getValue(it));
+		++it;
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////
+
+template<typename TString, typename TIter>
+inline void 
+_string_skipWhitespace(TString& str, TIter& it)
+{
+	typename Iterator<TString,Standard>::Type end_it = end(str,Standard())-1;
+	while (it != end_it) {
+		if ((*it!=' ') && (*it != '\t')) break;
+		++it;
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////
+
+template<typename TString, typename TIter>
+inline int
+_string_readNumber(TString & str, TIter& it)
+{
+	// Read number
+	typename Iterator<TString,Standard>::Type end_it = end(str,Standard())-1;
+	String<char> numstr(getValue(it));
+	while (it != end_it) {
+		++it;
+		if (!_parse_isDigit(*it)) break;
+		append(numstr, getValue(it));
+	}
+ 	return atoi(toCString(numstr));
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 } //namespace SEQAN_NAMESPACE_MAIN

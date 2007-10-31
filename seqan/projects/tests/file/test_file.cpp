@@ -11,6 +11,8 @@
 #include <seqan/file.h>
 #include <seqan/align.h>
 
+#include "test_embl.h"
+
 
 #define TEST_PATH "projects/tests/file/"
 #define LIB_PATH "projects/library/seqan/file/"
@@ -1102,7 +1104,7 @@ void Test_FileReader()
 	Test_FileReader_String();
 
 	Test_FileReader_String2<Fasta>();
-	Test_FileReader_String2<Embl>();
+	//Test_FileReader_String2<Embl>();
 	Test_FileReader_String2<Genbank>();
 	
 }
@@ -1129,11 +1131,12 @@ int main()
 	Test_Embl(TEST_PATH "embl_crlf.txt", TEST_PATH "test_output.embl.txt");
 	Test_Genbank(TEST_PATH "genbank_crlf.txt", TEST_PATH "test_output.genbank.txt");
 
-	Test_FileReader();
+	//Test_FileReader();
 
+	Test_Embl();
 //____________________________________________________________________________
 
-
+	
 	debug::verifyCheckpoints(LIB_PATH "stream.h");
 	debug::verifyCheckpoints(LIB_PATH "cstream.h");
 	debug::verifyCheckpoints(LIB_PATH "meta.h");
@@ -1141,6 +1144,7 @@ int main()
 	debug::verifyCheckpoints(LIB_PATH "file_format_raw.h");
 	debug::verifyCheckpoints(LIB_PATH "file_format_fasta.h");
 	debug::verifyCheckpoints(LIB_PATH "file_format_fasta_align.h");
+	debug::verifyCheckpoints(LIB_PATH "file_format_embl.h");
 	debug::verifyCheckpoints(LIB_PATH "file_format_cgviz.h");
 	debug::verifyCheckpoints(LIB_PATH "file_format_guess.h");
 
