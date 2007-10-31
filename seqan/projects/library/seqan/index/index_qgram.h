@@ -31,6 +31,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	struct _Fibre_Dir;			// directory/hash table, contains start indices of buckets
 	struct _Fibre_SADir;		// identifies algorithm to construct both SA and directory at once
 	struct _Fibre_Shape;		// underlying shape
+	struct _Fibre_Counts;		// counts each q-gram
+	struct _Fibre_CountsDir;	// directory for counts buckets
 
 	typedef Tag<_Fibre_Text> const		QGram_Text;
 	typedef Tag<_Fibre_RawText> const	QGram_RawText;
@@ -39,6 +41,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	typedef Tag<_Fibre_Dir> const		QGram_Dir;
 	typedef Tag<_Fibre_SADir> const		QGram_SADir;
 	typedef Tag<_Fibre_Shape> const		QGram_Shape;
+	typedef Tag<_Fibre_Counts> const	QGram_Counts;
+	typedef Tag<_Fibre_CountsDir> const	QGram_CountsDir;
 
 //////////////////////////////////////////////////////////////////////////////
 // q-gram index
@@ -67,14 +71,18 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < typename TObject, typename TShapeSpec >
 	class Index<TObject, Index_QGram<TShapeSpec> > {
 	public:
-		typedef typename Fibre<Index, QGram_Text>::Type		TText;
-		typedef typename Fibre<Index, QGram_SA>::Type		TSA;
-		typedef typename Fibre<Index, QGram_Dir>::Type		TDir;
-		typedef typename Fibre<Index, QGram_Shape>::Type	TShape;
+		typedef typename Fibre<Index, QGram_Text>::Type			TText;
+		typedef typename Fibre<Index, QGram_SA>::Type			TSA;
+		typedef typename Fibre<Index, QGram_Dir>::Type			TDir;
+		typedef typename Fibre<Index, QGram_Counts>::Type		TCounts;
+		typedef typename Fibre<Index, QGram_CountsDir>::Type	TCountsDir;
+		typedef typename Fibre<Index, QGram_Shape>::Type		TShape;
 
 		Holder<TText>	text;	// underlying text
 		TSA				sa;		// suffix array sorted by the first q chars
 		TDir			dir;	// bucket directory
+		TCounts			counts;	// counts each q-gram per sequence
+		TCountsDir		countsDir;	// directory for count buckets
 		TShape			shape;	// underlying shape
 
 		Index() {}
@@ -118,6 +126,21 @@ namespace SEQAN_NAMESPACE_MAIN
     };
 
 //////////////////////////////////////////////////////////////////////////////
+// counts array type
+
+	template < typename TText, typename TSpec >
+	struct Fibre< Index<TText, TSpec>, Tag<_Fibre_Counts> const > {
+		typedef String<
+				Pair<
+					typename Size< TText >::Type,
+					typename Size< Index<TText, TSpec> >::Type
+				>,
+				typename DefaultIndexStringSpec< Index<TText, TSpec> >::Type 
+		> Type;
+	};
+
+
+//////////////////////////////////////////////////////////////////////////////
 
 	template <typename TText, typename TSpec>
 	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_Dir> const >::Type & 
@@ -128,6 +151,28 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_Dir> const >::Type & 
 	getFibre(Index<TText, TSpec> const &index, Tag<_Fibre_Dir> const) {
 		return index.dir;
+	}
+
+	template <typename TText, typename TSpec>
+	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_Counts> const >::Type & 
+	getFibre(Index<TText, TSpec> &index, Tag<_Fibre_Counts> const) {
+		return index.counts;
+	}
+	template <typename TText, typename TSpec>
+	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_Counts> const >::Type & 
+	getFibre(Index<TText, TSpec> const &index, Tag<_Fibre_Counts> const) {
+		return index.counts;
+	}
+
+	template <typename TText, typename TSpec>
+	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_CountsDir> const >::Type & 
+	getFibre(Index<TText, TSpec> &index, Tag<_Fibre_CountsDir> const) {
+		return index.countsDir;
+	}
+	template <typename TText, typename TSpec>
+	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_CountsDir> const >::Type & 
+	getFibre(Index<TText, TSpec> const &index, Tag<_Fibre_CountsDir> const) {
+		return index.countsDir;
 	}
 
 	template <typename TText, typename TSpec>
@@ -161,6 +206,28 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_Dir> const >::Type & 
 	indexDir(Index<TText, TSpec> const &index) { 
 		return getFibre(index, Tag<_Fibre_Dir>()); 
+	}
+
+	template <typename TText, typename TSpec>
+	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_Counts> const >::Type & 
+	indexCounts(Index<TText, TSpec> &index) {
+		return getFibre(index, Tag<_Fibre_Counts>()); 
+	}
+	template <typename TText, typename TSpec>
+	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_Counts> const >::Type & 
+	indexCounts(Index<TText, TSpec> const &index) {
+		return getFibre(index, Tag<_Fibre_Counts>()); 
+	}
+
+	template <typename TText, typename TSpec>
+	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_CountsDir> const >::Type & 
+	indexCountsDir(Index<TText, TSpec> &index) {
+		return getFibre(index, Tag<_Fibre_CountsDir>()); 
+	}
+	template <typename TText, typename TSpec>
+	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_CountsDir> const >::Type & 
+	indexCountsDir(Index<TText, TSpec> const &index) {
+		return getFibre(index, Tag<_Fibre_CountsDir>()); 
 	}
 
 	template <typename TText, typename TSpec>
@@ -335,6 +402,114 @@ namespace SEQAN_NAMESPACE_MAIN
 				++itText;
 				assignValueI2(localPos, i);
 				sa[dir[hashNext(shape, itText) + 1]++] = localPos;		// next hash
+			}
+		}
+	}
+
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+.Function.createCountArray:
+..summary:bla. 
+..cat:Index
+..signature:createQGramIndex(sa, dir, text, shape)
+..param.text:The sequence.
+..param.shape:The shape to be used.
+...type:Class.Shape
+..param.sa:The resulting list in which all q-grams are sorted alphabetically.
+..param.dir:The resulting array that indicates at which position in index the corresponding q-grams can be found.
+..returns:Index contains the sorted list of qgrams. For each possible q-gram pos contains the first position in index that corresponds to this q-gram. 
+*/
+
+	template < 
+		typename TCounts, 
+		typename TDir,
+		typename TString,
+		typename TSpec,
+		typename TShape >
+	void createCountsArray(
+		TCounts &counts,
+		TDir &dir,
+		StringSet<TString, TSpec> const &stringSet,
+		TShape &shape)
+	{
+	SEQAN_CHECKPOINT
+		typedef typename Iterator<TString const, Standard>::Type	TIterator;
+		typedef typename Iterator<TDir, Standard>::Type				TDirIterator;
+		typedef typename Value<TShape>::Type						TValue;
+		typedef typename Size<TString>::Type						TSize;
+
+		TDir lastSeqSeen;
+		resize(lastSeqSeen, length(dir));
+		
+		// 1. clear counters
+		arrayFill(begin(dir, Standard()), end(dir, Standard()), 0);
+		arrayFill(begin(lastSeqSeen, Standard()), end(lastSeqSeen, Standard()), -1);
+
+		// 2. count distinct sequences for each q-gram
+		for(unsigned seqNo = 0; seqNo < length(stringSet); ++seqNo) 
+		{
+			TString const &sequence = value(stringSet, seqNo);
+			if (length(sequence) < length(shape)) continue;
+			TSize num_qgrams = length(sequence) - length(shape) + 1;
+
+			TIterator itText = begin(sequence, Standard());
+			TValue hashValue = hash(shape, itText);
+			lastSeqSeen[hashValue] = seqNo;
+			++dir[hashValue];
+			for(TSize i = 1; i < num_qgrams; ++i)
+			{
+				++itText;
+				hashValue = hashNext(shape, itText);
+				if (seqNo != lastSeqSeen[hashValue]) {
+					lastSeqSeen[hashValue] = seqNo;
+					++dir[hashValue];
+				}
+			}
+		}
+
+		// 3. cumulative sum
+		{
+			TDirIterator it = begin(dir, Standard());
+			TDirIterator itEnd = end(dir, Standard());
+			TSize diff = 0, diff_prev = 0, sum = 0;
+			while (it != itEnd) {
+				sum += diff_prev;
+				diff_prev = diff;
+				diff = *it;
+				*it = sum;
+				++it;
+			}
+			resize(counts, sum + diff_prev);
+		}
+
+		// 4. fill count array
+		arrayFill(begin(lastSeqSeen, Standard()), end(lastSeqSeen, Standard()), -1);
+		for(unsigned seqNo = 0; seqNo < length(stringSet); ++seqNo) 
+		{
+			TString const &sequence = value(stringSet, seqNo);
+			if (length(sequence) < length(shape)) continue;
+			TSize num_qgrams = length(sequence) - length(shape) + 1;
+
+			TIterator itText = begin(sequence, Standard());
+			TValue hashValue = hash(shape, itText);
+			lastSeqSeen[hashValue] = seqNo;
+			TSize pos = dir[hashValue + 1]++;
+			counts[pos].i1 = seqNo;				// first hash
+			counts[pos].i2 = 1;
+
+			for(TSize i = 1; i < num_qgrams; ++i)
+			{
+				++itText;
+				hashValue = hashNext(shape, itText);
+				if (seqNo == lastSeqSeen[hashValue])
+					++(counts[dir[hashValue + 1] - 1].i2);
+				else {
+					lastSeqSeen[hashValue] = seqNo;
+					pos = dir[hashValue + 1]++;
+					counts[pos].i1 = seqNo;				// next hash
+					counts[pos].i2 = 1;
+				}
 			}
 		}
 	}
@@ -603,6 +778,15 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 		return indexCreate(index, QGram_SA(), alg);
 	}
+
+	template <typename TText, typename TShapeSpec>
+	inline bool indexCreate(Index<TText, Index_QGram<TShapeSpec> > &index, Tag<_Fibre_Counts> const, Default const) 
+	{
+		resize(indexCountsDir(index), _fullDirLength(index) + 1, Exact());
+		createCountsArray(indexCounts(index), indexCountsDir(index), indexText(index), indexShape(index));
+		return true;
+	}
+
 /*
 	template <typename TText, typename TShapeSpec>
 	inline bool indexCreate(Index<TText, Index_QGram<TShapeSpec> > &index, QGram_Dir const, Default const alg)
@@ -615,6 +799,218 @@ namespace SEQAN_NAMESPACE_MAIN
 		return true;
 	}
 */
+
+//////////////////////////////////////////////////////////////////////////////
+// getKmerSimilarityMatrix
+//     for the whole StringSet
+
+	template < typename TObject, typename TSpec, typename TDistMatrix >
+	inline void getKmerSimilarityMatrix(
+		Index< TObject, Index_QGram<TSpec> > &index, 
+		TDistMatrix &distMat)
+	{
+		typedef Index< TObject, Index_QGram<TSpec> >			TIndex;
+		typedef typename Size<TIndex>::Type						TSize;
+		typedef typename Size<TDistMatrix>::Type				TSizeMat;
+		typedef typename Value<TDistMatrix>::Type				TValueMat;
+
+		typedef typename Fibre<TIndex, QGram_CountsDir>::Type	TCountsDir;
+		typedef typename Iterator<TCountsDir, Standard>::Type	TIterCountsDir;
+		typedef typename Fibre<TIndex, QGram_Counts>::Type		TCounts;
+		typedef typename Iterator<TCounts, Standard>::Type		TIterCounts;
+
+		// declare requirements
+		indexRequire(index, QGram_Counts());
+
+		// initialize distance matrix
+		TSizeMat seqNoLength = countSequences(index);
+		clear(distMat);
+		resize(distMat, seqNoLength * seqNoLength);
+		arrayFill(begin(distMat, Standard()), end(distMat, Standard()), 0);
+
+		TIterCountsDir itCountsDir = begin(indexCountsDir(index), Standard());
+		TIterCountsDir itCountsDirEnd = end(indexCountsDir(index), Standard());
+		TIterCounts itCountsBegin = begin(indexCounts(index), Standard());
+
+		// for each bucket count common q-grams for each sequence pair
+		TSize bucketBegin = *itCountsDir;
+		for(++itCountsDir; itCountsDir != itCountsDirEnd; ++itCountsDir) 
+		{
+			TSize bucketEnd = *itCountsDir;
+
+			// q-gram must occur in at least 2 different sequences
+			if (bucketBegin != bucketEnd) 
+			{
+				TIterCounts itA = itCountsBegin + bucketBegin;
+				TIterCounts itEnd = itCountsBegin + bucketEnd;
+				for(; itA != itEnd; ++itA) 
+				{
+					TSizeMat ofs = (*itA).i1 * seqNoLength;
+					TSize countA = (*itA).i2;
+					TIterCounts itB = itA;
+
+					for(; itB != itEnd; ++itB) 
+					{
+						TSize countB = (*itB).i2;
+						if (countA < countB)
+							distMat[ofs + (*itB).i1] += countA;
+						else
+							distMat[ofs + (*itB).i1] += countB;
+					}
+				}
+			}
+			bucketBegin = bucketEnd;
+		}
+
+		// copy upper triangle to lower triangle and scale
+		for(TSizeMat row = 0; row < seqNoLength; ++row) 
+		{
+			TValueMat maxValRow = distMat[row * (seqNoLength + 1)];
+			for(TSizeMat col = row + 1; col < seqNoLength; ++col)
+			{
+				// fractional common kmer count
+				TValueMat maxValCol = distMat[col * (seqNoLength + 1)];
+				TValueMat val = distMat[row * seqNoLength + col];
+
+				// number of common q-grams / Number of possible common q-grams
+				if (maxValRow < maxValCol) {
+					if (maxValRow != 0)
+						val /= maxValRow;
+					distMat[col * seqNoLength + row] = val;
+					distMat[row * seqNoLength + col] = val;
+				} else {
+					if (maxValCol != 0)
+						val /= maxValCol;
+					distMat[col * seqNoLength + row] = val;
+					distMat[row * seqNoLength + col] = val;
+				}
+			}
+		}
+
+		// set diagonal to 1
+		for(TSizeMat i = 0; i < seqNoLength; ++i)
+			distMat[i * (seqNoLength + 1)] = 1;
+	}
+
+
+//////////////////////////////////////////////////////////////////////////////
+// getKmerSimilarityMatrix 
+//     for a subset of the StringSet given as a sorted string of sequence numbers
+
+	template < typename TObject, typename TSpec, typename TDistMatrix, typename TSeqNoString >
+	inline void getKmerSimilarityMatrix(
+		Index< TObject, Index_QGram<TSpec> > &index, 
+		TDistMatrix &distMat,
+		TSeqNoString const &seqNo)
+	{
+		typedef Index< TObject, Index_QGram<TSpec> >			TIndex;
+		typedef typename Size<TIndex>::Type						TSize;
+		typedef typename Size<TDistMatrix>::Type				TSizeMat;
+		typedef typename Value<TDistMatrix>::Type				TValueMat;
+
+		typedef typename Fibre<TIndex, QGram_CountsDir>::Type	TCountsDir;
+		typedef typename Iterator<TCountsDir, Standard>::Type	TIterCountsDir;
+		typedef typename Fibre<TIndex, QGram_Counts>::Type		TCounts;
+		typedef typename Iterator<TCounts, Standard>::Type		TIterCounts;
+		typedef typename Iterator<TSeqNoString, Standard>::Type	TIterSeqNo;
+
+		// declare requirements
+		indexRequire(index, QGram_Counts());
+
+		// initialize distance matrix
+		TSizeMat seqNoLength = length(seqNo);
+		clear(distMat);
+		resize(distMat, seqNoLength * seqNoLength);
+		arrayFill(begin(distMat, Standard()), end(distMat, Standard()), 0);
+
+		TIterCountsDir itCountsDir = begin(indexCountsDir(index), Standard());
+		TIterCountsDir itCountsDirEnd = end(indexCountsDir(index), Standard());
+		TIterCounts itCountsBegin = begin(indexCounts(index), Standard());
+		TIterSeqNo itSetBegin = begin(seqNo, Standard());
+		TIterSeqNo itSetEnd = end(seqNo, Standard());
+
+		// for each bucket count common q-grams for each sequence pair
+		TSize bucketBegin = *itCountsDir;
+		for(++itCountsDir; itCountsDir != itCountsDirEnd; ++itCountsDir) 
+		{
+			TSize bucketEnd = *itCountsDir;
+
+			// q-gram must occur in at least 2 different sequences
+			if (bucketBegin != bucketEnd) 
+			{
+				TIterCounts itA = itCountsBegin + bucketBegin;
+				TIterCounts itEnd = itCountsBegin + bucketEnd;
+				TIterSeqNo itSetA = itSetBegin;
+
+				while (itA != itEnd && itSetA != itSetEnd)
+				{
+					if ((*itA).i1 < *itSetA)
+						++itA;
+					else if ((*itA).i1 > *itSetA)
+						++itSetA;
+					else 
+					{
+						TSizeMat ofs = (*itA).i1 * seqNoLength;
+						TSize countA = (*itA).i2;
+						TIterCounts itB = itA;
+						TIterSeqNo itSetB = itSetA;
+
+						while (itB != itEnd && itSetB != itSetEnd)
+						{
+							if ((*itB).i1 < *itSetB)
+								++itB;
+							else if ((*itB).i1 > *itSetB)
+								++itSetB;
+							else 
+							{
+								TSize countB = (*itB).i2;
+								if (countA < countB)
+									distMat[ofs + (*itB).i1] += countA;
+								else
+									distMat[ofs + (*itB).i1] += countB;
+								++itB;
+								++itSetB;
+							}
+						}
+						++itA;
+						++itSetA;
+					}
+				}
+			}
+			bucketBegin = bucketEnd;
+		}
+
+		// copy upper triangle to lower triangle and scale
+		for(TSizeMat row = 0; row < seqNoLength; ++row) 
+		{
+			TValueMat maxValRow = distMat[row * (seqNoLength + 1)];
+			for(TSizeMat col = row + 1; col < seqNoLength; ++col)
+			{
+				// fractional common kmer count
+				TValueMat maxValCol = distMat[col * (seqNoLength + 1)];
+				TValueMat val = distMat[row * seqNoLength + col];
+
+				// number of common q-grams / Number of possible common q-grams
+				if (maxValRow < maxValCol) {
+					if (maxValRow != 0)
+						val /= maxValRow;
+					distMat[col * seqNoLength + row] = val;
+					distMat[row * seqNoLength + col] = val;
+				} else {
+					if (maxValCol != 0)
+						val /= maxValCol;
+					distMat[col * seqNoLength + row] = val;
+					distMat[row * seqNoLength + col] = val;
+				}
+			}
+		}
+
+		// set diagonal to 1
+		for(TSizeMat i = 0; i < seqNoLength; ++i)
+			distMat[i * (seqNoLength + 1)] = 1;
+	}
+
+
 //////////////////////////////////////////////////////////////////////////////
 // open
 

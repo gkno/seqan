@@ -80,8 +80,8 @@ namespace SEQAN_NAMESPACE_MAIN
     };
 
     template < typename TValue, typename TSpec >
-    struct DefaultIndexStringSpec< String<TValue, TSpec> > {
-        typedef TSpec Type;
+    struct DefaultIndexStringSpec< String<TValue, External<TSpec> > > {
+        typedef External<TSpec> Type;
     };
 
 	template < typename TString, typename TSpec >
