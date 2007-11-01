@@ -135,8 +135,8 @@ bool a_not_equals_b = (a != b);     //true
 bool a_less_b       = (a < b);      //false
 
 ..text:
-Each comparison involes a scan of the two sequences for searching the first mismatch between the strings. This could be costly if the two sequences share a long common prefix.
-Suppose we want to act in different ways depending on $a < b$, $a == b$, or $a > b$, for example:
+Each comparison involves a scan of the two sequences for searching the first mismatch between the strings. This could be costly if the two sequences share a long common prefix.
+Suppose we want to branch in a program depending on whether $a < b$, $a == b$, or $a > b$, for example:
 ..code:
 if (a < b)      { /* code for case "a < b"  */ }
 else if (a > b) { /* code for case "a > b"  */ }
