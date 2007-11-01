@@ -324,14 +324,15 @@ Spec.GappedShape
 
 //____________________________________________________________________________
 
-	template <typename TValue, typename TSpec, typename TIter>
-	inline void
-	_hashHardwiredShape(Shape<TValue, TSpec> &, TIter &, HardwiredShape<
+	template <typename THValue, typename TValue, typename TIter>
+	inline THValue
+	_hashHardwiredShape(THValue hash, TIter &, TValue const, HardwiredShape<
 		0,0,0,0,0,
 		0,0,0,0,0,
 		0,0,0,0,0,
 		0,0,0,0,0 > const)
 	{
+		return hash;
 	}
 
 	template <
@@ -339,25 +340,22 @@ Spec.GappedShape
 		int P05, int P06, int P07, int P08, int P09,
 		int P10, int P11, int P12, int P13, int P14,
 		int P15, int P16, int P17, int P18, int P19,
-		typename TValue, typename TSpec, typename TIter
+		typename THValue, typename TValue, typename TIter
 	>
-	inline void
-	_hashHardwiredShape(Shape<TValue, TSpec> &me, TIter &it, HardwiredShape<
+	inline THValue
+	_hashHardwiredShape(THValue hash, TIter &it, TValue const, HardwiredShape<
 		 1 ,P01,P02,P03,P04,
 		P05,P06,P07,P08,P09,
 		P10,P11,P12,P13,P14,
 		P15,P16,P17,P18,P19 > const)
 	{
-		typedef typename Value<Shape<TValue, TSpec> >::Type	THValue;
-
 		++it;
-		me.hValue = me.hValue * ValueSize<TValue>::VALUE + _ord(*it);
-
-		_hashHardwiredShape(me, it, HardwiredShape<
-			P01,P02,P03,P04,P05,
-			P06,P07,P08,P09,P10,
-			P11,P12,P13,P14,P15,
-			P16,P17,P18,P19, 0 >());
+		return _hashHardwiredShape(hash * ValueSize<TValue>::VALUE + _ord(*it),
+			it, TValue(), HardwiredShape<
+				P01,P02,P03,P04,P05,
+				P06,P07,P08,P09,P10,
+				P11,P12,P13,P14,P15,
+				P16,P17,P18,P19, 0 >());
 	}
 
 	template <
@@ -365,25 +363,22 @@ Spec.GappedShape
 		int P05, int P06, int P07, int P08, int P09,
 		int P10, int P11, int P12, int P13, int P14,
 		int P15, int P16, int P17, int P18, int P19,
-		typename TValue, typename TSpec, typename TIter
+		typename THValue, typename TValue, typename TIter
 	>
-	inline void
-	_hashHardwiredShape(Shape<TValue, TSpec> &me, TIter &it, HardwiredShape<
+	inline THValue
+	_hashHardwiredShape(THValue hash, TIter &it, TValue const, HardwiredShape<
 		P00,P01,P02,P03,P04,
 		P05,P06,P07,P08,P09,
 		P10,P11,P12,P13,P14,
 		P15,P16,P17,P18,P19 > const)
 	{
-		typedef typename Value<Shape<TValue, TSpec> >::Type	THValue;
-
 		it += P00;
-		me.hValue = me.hValue * ValueSize<TValue>::VALUE + _ord(*it);
-
-		_hashHardwiredShape(me, it, HardwiredShape<
-			P01,P02,P03,P04,P05,
-			P06,P07,P08,P09,P10,
-			P11,P12,P13,P14,P15,
-			P16,P17,P18,P19, 0 >());
+		return _hashHardwiredShape(hash * ValueSize<TValue>::VALUE + _ord(*it),
+			it, TValue(), HardwiredShape<
+				P01,P02,P03,P04,P05,
+				P06,P07,P08,P09,P10,
+				P11,P12,P13,P14,P15,
+				P16,P17,P18,P19, 0 >());
 	}
 
 	template <
@@ -399,7 +394,7 @@ Spec.GappedShape
 		P10,P11,P12,P13,P14,
 		P15,P16,P17,P18,P19 
 	> > > >::Type
-	hash(Shape<TValue, FixedGappedShape< HardwiredShape<
+	inline hash(Shape<TValue, FixedGappedShape< HardwiredShape<
 		P00,P01,P02,P03,P04,
 		P05,P06,P07,P08,P09,
 		P10,P11,P12,P13,P14,
@@ -414,11 +409,9 @@ Spec.GappedShape
 			P15,P16,P17,P18,P19 >								TSpec;
 		typedef FixedGappedShape<TSpec>							TShape;
 		typedef typename Value< Shape<TValue, TShape> >::Type	THValue;
-		typedef typename Size< Shape<TValue, TShape> >::Type	TSize;
 
-		me.hValue = _ord(*it);
-		_hashHardwiredShape(me, it, TSpec());
-		return me.hValue;
+		me.hValue = (THValue)_ord(*it);
+		return me.hValue = _hashHardwiredShape(me.hValue, it, TValue(), TSpec());
 	}
 
 //____________________________________________________________________________
