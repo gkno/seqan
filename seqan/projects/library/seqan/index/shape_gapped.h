@@ -186,6 +186,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..signature:Shape<TValue, GappedShape>
 ..param.TValue:The @Metafunction.Value@ type of the string the shape is applied to (e.g. $Dna$).
 ..remarks:A GappedShape must be initialized first with a valid shape. To do so, call @Function.stringToShape@.
+..see:Spec.FixedGappedShape
 */
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -209,13 +210,14 @@ namespace SEQAN_NAMESPACE_MAIN
 .Memfunc.GappedShape#Shape:
 ..class:Spec.GappedShape
 ..summary:Constructor
-..signature:Shape<TValue, SimpleShape> ()
-..signature:Shape<TValue, SimpleShape> (q)
+..signature:Shape<TValue, GappedShape> ()
+..signature:Shape<TValue, GappedShape> (q)
 ..signature:Shape<TValue, GappedShape> (shape)
 ..signature:Shape<TValue, GappedShape> (predefined)
 ..param.q:Creates an ungapped q-gram.
 ..param.shape:Any other gapped/ungapped shape.
 ..param.predefined:Any instance of a predefined shape spec (e.g. $ShapePatternHunter$).
+..see:Class.HardwiredShape
 */
 		Shape()	{}
 
@@ -311,6 +313,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ...type:Class.HardwiredShape
 ..remarks:There are predefined shapes in $index/shape_predefined.h$.
 You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
+..see:Class.HardwiredShape
 */
 
 	//////////////////////////////////////////////////////////////////////////////

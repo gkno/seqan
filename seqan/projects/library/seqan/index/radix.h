@@ -24,20 +24,6 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 
-    // map alphabet to unsigned ints
-    // signed alphabet needs a function to map char to [0..n) not to [-128..128) like char does
-
-	template <typename TValue>
-	inline unsigned _ord(TValue const &c) {
-		return (typename _MakeUnsigned<TValue>::Type const &)c;
-	}
-
-	template <typename TValue, typename TSpec>
-	inline unsigned _ord(SimpleType<TValue,TSpec> const &c) {
-		return c;
-	}
-
-
 	// stably sort a[0..n-1] to b[0..n-1] with keys in 0..K-1 from r
 	template <
 		typename TSortedArray, 

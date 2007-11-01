@@ -116,6 +116,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..signature:Shape<TValue, SimpleShape>
 ..param.TValue:The @Metafunction.Value@ type of the string the shape is applied to (e.g. $Dna$).
 ..remarks:A SimpleShape must be resized first to a valid length. To do so, call @Function.resize@.
+..see:Spec.FixedShape
 */
 
 	//////////////////////////////////////////////////////////////////////////////
