@@ -750,6 +750,34 @@ SEQAN_CHECKPOINT
     return _lex.data_lcp;
 }
 
+//////////////////////////////////////////////////////////////////////////////
+// lcpLength
+//////////////////////////////////////////////////////////////////////////////
+/**
+.Function._ord:
+..summary:Maps an alphabet 1-to-1 to the interval [0..ValueSize).
+..cat:Alphabets
+..signature:_ord(value)
+..param.value:Arbitrary character value.
+...type:Class.SimpleType
+..returns:An $unsigned int$ between 0 and @Metafunction.ValueSize@ of the type of value.
+..note:This function first converts value to its unsigned value type and after that to an $unsigned int$.
+You can't use $(unsigned int)c$ for a character $c$ as on some systems $char$ is signed and a $-1$ would be mapped to $0xffffffff$ instead of $0x000000ff$.
+*/
+
+template <typename TValue>
+inline unsigned _ord(TValue const &c) 
+{
+	return (typename _MakeUnsigned<TValue>::Type const &)c;
+}
+
+template <typename TValue, typename TSpec>
+inline unsigned _ord(SimpleType<TValue,TSpec> const &c) 
+{
+	return c;
+}
+
+
 
 //////////////////////////////////////////////////////////////////////////////
 
