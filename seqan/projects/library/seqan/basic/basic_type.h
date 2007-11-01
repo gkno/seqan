@@ -567,6 +567,27 @@ struct Length<T const>:
 {
 };
 
+/**
+.Metafunction.Weight:
+..summary:Number of significant positions in a (gapped) shape.
+..signature:Weight<T>::Type
+..param.T:Shape type for which the number of significant positions is determined.
+...type:Class.Shape
+..returns.param.VALUE:Number of significant positions.
+..remarks.text:The default return value is the result of the @Metafunction.Length@ function.
+For gapped shapes this is the number of '1's.
+*/
+template <typename T>
+struct Weight:
+	Length<T>
+{
+};
+template <typename T>
+struct Weight<T const>:
+	Weight<T>
+{
+};
+
 //////////////////////////////////////////////////////////////////////////////
 
 //Iterator: see basic_iterator.h

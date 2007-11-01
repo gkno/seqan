@@ -271,14 +271,14 @@ SEQAN_CHECKPOINT
 	setEnd(Segment & me, typename Iterator<Segment, Standard>::Type new_end)
 	{
 SEQAN_CHECKPOINT
-		me.data_end_position = new_end - begin(host(me), Standard());
+		me.data_end_position = new_end - begin(host(me));//, Standard());
 	}
 
 	friend inline void 
 	setEnd(typename Iterator<Segment, Rooted>::Type new_end)
 	{
 SEQAN_CHECKPOINT
-		container(new_end).data_end_position = hostIterator(new_end) - begin(host(container(new_end)), Standard());
+		container(new_end).data_end_position = hostIterator(new_end) - begin(host(container(new_end)));//, Standard());
 	}
 
 //____________________________________________________________________________
@@ -323,6 +323,9 @@ SEQAN_CHECKPOINT
 ..see:Metafunction.Infix
 */
 
+struct InfixSegment;
+struct SuffixSegment;
+
 template <typename THost>
 struct Prefix
 {
@@ -330,17 +333,17 @@ struct Prefix
 };
 
 template <typename THost>
-struct Prefix<Segment<THost, InfixSegment> >
+struct Prefix< Segment<THost, InfixSegment> >
 {
 	typedef Segment<THost, InfixSegment> Type;
 };
 template <typename THost>
-struct Prefix<Segment<THost, SuffixSegment> >
+struct Prefix< Segment<THost, SuffixSegment> >
 {
 	typedef Segment<THost, InfixSegment> Type;
 };
 template <typename THost>
-struct Prefix<Segment<THost, PrefixSegment> >
+struct Prefix< Segment<THost, PrefixSegment> >
 {
 	typedef Segment<THost, PrefixSegment> Type;
 };
@@ -380,6 +383,16 @@ template <typename THost, typename TSpec>
 inline void
 init(Segment<THost, PrefixSegment> & me,
 	 Segment<THost, TSpec> & source)
+{
+SEQAN_CHECKPOINT
+	setHost(me, host(source));
+	setEnd(me, end(source));
+}
+
+template <typename THost, typename TSpec>
+inline void
+init(Segment<THost, PrefixSegment> & me,
+	 Segment<THost, TSpec> const & source)
 {
 SEQAN_CHECKPOINT
 	setHost(me, host(source));
@@ -499,6 +512,8 @@ SEQAN_CHECKPOINT
 	return typename Prefix<T *>::Type (t, pos_end);
 }
 
+//////////////////////////////////////////////////////////////////////////////
+// A prefix of a prefix -> is a prefix
 template <typename T, typename TPosEnd>
 inline typename Prefix<Segment<T, PrefixSegment> >::Type
 prefix(Segment<T, PrefixSegment> & t, TPosEnd pos_end)
@@ -508,7 +523,6 @@ SEQAN_CHECKPOINT
 		host(t), 
 		beginPosition(t) + pos_end);
 }
-
 template <typename T, typename TPosEnd>
 inline typename Prefix<Segment<T, PrefixSegment> const>::Type
 prefix(Segment<T, PrefixSegment> const & t, TPosEnd pos_end)
@@ -519,6 +533,8 @@ SEQAN_CHECKPOINT
 		beginPosition(t) + pos_end);
 }
 
+//////////////////////////////////////////////////////////////////////////////
+// A prefix of an infix -> is an infix
 template <typename T, typename TPosEnd>
 inline typename Prefix<Segment<T, InfixSegment> >::Type
 prefix(Segment<T, InfixSegment> & t, TPosEnd pos_end)
@@ -529,13 +545,36 @@ SEQAN_CHECKPOINT
 		beginPosition(t),
 		beginPosition(t) + pos_end);
 }
-
 template <typename T, typename TPosEnd>
 inline typename Prefix<Segment<T, InfixSegment> const>::Type
 prefix(Segment<T, InfixSegment> const & t, TPosEnd pos_end)
 {
 SEQAN_CHECKPOINT
 	return typename Prefix<Segment<T, InfixSegment> const>::Type (
+		host(t), 
+		beginPosition(t),
+		beginPosition(t) + pos_end);
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+// A prefix of an suffix -> is an infix
+template <typename T, typename TPosEnd>
+inline typename Prefix<Segment<T, SuffixSegment> >::Type
+prefix(Segment<T, SuffixSegment> & t, TPosEnd pos_end)
+{
+SEQAN_CHECKPOINT
+	return typename Prefix<Segment<T, SuffixSegment> >::Type (
+		host(t), 
+		beginPosition(t),
+		beginPosition(t) + pos_end);
+}
+template <typename T, typename TPosEnd>
+inline typename Prefix<Segment<T, SuffixSegment> const>::Type
+prefix(Segment<T, SuffixSegment> const & t, TPosEnd pos_end)
+{
+SEQAN_CHECKPOINT
+	return typename Prefix<Segment<T, SuffixSegment> const>::Type (
 		host(t), 
 		beginPosition(t),
 		beginPosition(t) + pos_end);

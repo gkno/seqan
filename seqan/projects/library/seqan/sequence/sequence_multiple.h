@@ -32,15 +32,54 @@ namespace SEQAN_NAMESPACE_MAIN
 	//struct Tight;							// small string-string, small id-string
 	//struct Optimal??						// small string-string, large id-string
 
+/**
+.Spec.Dependent:
+..summary:A string set storing references of the strings.
+..cat:Sequences
+..general:Class.StringSet
+..signature:StringSet<TString, Dependent<TSpec> >
+..param.TString:The string type.
+...type:Class.String
+..param.TSpec:The specializing type for the dependent string set.
+...remarks:Possible values are $Tight$ or $Generous$
+...remarks:$Tight$ is very space efficient whereas $Generous$ provides fast access to the strings in the container via ids.
+*/
+
 	// Default id holder string set
 	template<typename TSpec = Generous >
 	struct Dependent;						// holds references of its elements
 
 
+/**
+.Spec.ConcatDirect:
+..summary:A string set storing the concatenation of all strings within one string.
+..cat:Sequences
+..general:Spec.Owner
+..signature:StringSet<TString, Owner<ConcatDirect<> > >
+..param.TString:The string type.
+...type:Class.String
+..remarks:The strings are internally stored in a $TString$ object and the character position type is a 
+a single integer value between 0 and the sum of string lengths minus 1.
+..remarks:The position type can be returned or modified by the meta-function @Metafunction.SAValue@ called with the @Class.StringSet@ type.
+*/
+
 	template < typename TDelimiter = void >
 	struct ConcatDirect;					// contains 1 string (the concatenation of n strings)
 	//struct Default;							// contains n strings in a string
 
+/**
+.Spec.Owner:
+..summary:A string set storing the strings as members.
+..cat:Sequences
+..general:Class.StringSet
+..signature:StringSet<TString, Owner<> >
+..signature:StringSet<TString, Owner<Default> >
+..param.TString:The string type.
+...type:Class.String
+..remarks:The strings are internally stored in a $String<TString>$ object and the character position type is a 
+@Class.Pair@ $(seqNo,seqOfs)$ where seqNo identifies the string within the stringset and seqOfs identifies the position within this string.
+..remarks:The position type can be returned or modified by the meta-function @Metafunction.SAValue@ called with the @Class.StringSet@ type.
+*/
 	template < typename TSpec = Default >
 	struct Owner;							// owns its elements
 
@@ -100,6 +139,19 @@ namespace SEQAN_NAMESPACE_MAIN
 	// get StringSet limits
 	//////////////////////////////////////////////////////////////////////////////
 
+/**
+.Function.stringSetLimits:
+..cat:Sequences
+..summary:Retrieves a string of delimiter positions of a @Class.StringSet@ which is needed for local<->global position conversions.
+..signature:stringSetLimits(me)
+..param.me:A string or string set.
+...type:Class.String
+...type:Class.StringSet
+..returns:A reference to a string.
+...remarks:If $me$ is a @Class.StringSet@ then the returned string is of size $length(me)+1$ and contains the ascending (virtual) delimiter positions of the concatenation of all strings in the string set.
+...remarks:If $me$ is a @Class.String@, @Tag.Nothing@ is returned.
+*/
+
     template <typename TStringSet>
 	inline typename StringSetLimits<TStringSet>::Type
 	stringSetLimits(TStringSet &) {
@@ -121,6 +173,38 @@ namespace SEQAN_NAMESPACE_MAIN
 			_refreshStringSetLimits(const_cast< StringSet<TString, TSpec>& >(stringSet));
 		return stringSet.limits;
 	}
+
+	//////////////////////////////////////////////////////////////////////////////
+	// accessing local positions
+	//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.getSeqNo:
+..cat:Sequences
+..summary:Returns the sequence number of a position.
+..signature:getSeqNo(pos[, limits])
+..param.pos:A position.
+...type:Class.Pair
+..param.limits:The limits string returned by @Function.stringSetLimits@.
+..returns:A single integer value that identifies the string within the stringset $pos$ points at.
+...remarks:If $limits$ is omitted or @Tag.Nothing@ $getSeqNo$ returns 0.
+...remarks:If $pos$ is a local position (of class @Class.Pair@) then $i1$ is returned.
+...remarks:If $pos$ is a global position (integer type and $limits$ is a @Class.String@) then $pos$ is converted to a local position and $i1$ is returned.
+*/
+
+/**
+.Function.getSeqOffset:
+..cat:Sequences
+..summary:Returns the local sequence offset of a position.
+..signature:getSeqOffset(pos[, limits])
+..param.pos:A position.
+...type:Class.Pair
+..param.limits:The limits string returned by @Function.stringSetLimits@.
+..returns:A single integer value that identifies the position within the string $pos$ points at.
+...remarks:If $limits$ is omitted or @Tag.Nothing@ $getSeqNo$ returns $pos$.
+...remarks:If $pos$ is a local position (of class @Class.Pair@) then $i2$ is returned.
+...remarks:If $pos$ is a global position (integer type and $limits$ is a @Class.String@) then $pos$ is converted to a local position and $i2$ is returned.
+*/
 
 	//////////////////////////////////////////////////////////////////////////////
 	// 1 sequence
@@ -195,8 +279,21 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	//////////////////////////////////////////////////////////////////////////////
-	// local -> global position
+	// local -> global conversions
 	//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.posGlobalize:
+..cat:Sequences
+..summary:Converts a local/global to a global position.
+..signature:posGlobalize(pos, limits)
+..param.pos:A local or global position (pair or integer value).
+...type:Class.Pair
+..param.limits:The limits string returned by @Function.stringSetLimits@.
+..returns:The corresponding global position of $pos$.
+...remarks:If $pos$ is an integral type $pos$ is returned.
+...remarks:If not, $limits[getSeqNo(pos, limits)] + getSeqOffset(pos, limits)$ is returned.
+*/
 
 	// any_position and no limits_string -> any_position
 	template <typename TLimitsString, typename TPosition>
@@ -214,6 +311,20 @@ namespace SEQAN_NAMESPACE_MAIN
 	//////////////////////////////////////////////////////////////////////////////
 	// global -> local position
 	//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.posLocalize:
+..cat:Sequences
+..summary:Converts a local/global to a local position.
+..signature:posLocalize(result, pos, limits)
+..param.pos:A local or global position (pair or integer value).
+...type:Class.Pair
+..param.limits:The limits string returned by @Function.stringSetLimits@.
+..param.result:Reference to the resulting corresponding local position of $pos$.
+...remarks:If $pos$ is an integral type and $limits$ is omitted or @Tag.Nothing@, $pos$ is returned.
+...remarks:If $pos$ is a local position (of class @Class.Pair@) then $pos$ is returned.
+...remarks:If $pos$ is a global position (integer type and $limits$ is a @Class.String@) then $pos$ is converted to a local position.
+*/
 
 	// any_position and no limits_string -> any_position
 	template <typename TResult, typename TPosition>
@@ -349,6 +460,18 @@ namespace SEQAN_NAMESPACE_MAIN
 		return posCompare(getValueI2(a), getValueI2(b));
 	}
 
+	template <typename TPos, typename TString>
+	inline typename Size<TString>::Type
+	suffixLength(TPos pos, TString const &string) {
+		return length(string) - pos;
+	}
+
+	template <typename TPos, typename TString, typename TSpec>
+	inline typename Size<TString>::Type
+	suffixLength(TPos pos, StringSet<TString, TSpec> const &stringSet) {
+		return length(stringSet[getSeqNo(pos, stringSetLimits(stringSet))]) - getSeqOffset(pos, stringSetLimits(stringSet));
+	}
+
 	//////////////////////////////////////////////////////////////////////////////
     // StringSet Container
     //////////////////////////////////////////////////////////////////////////////
@@ -362,8 +485,6 @@ namespace SEQAN_NAMESPACE_MAIN
 ...type:Class.String
 ..param.TSpec:The specializing type for the StringSet.
 ...metafunction:Metafunction.Spec
-...remarks:Possible values are Dependent<Tight> or Dependent<Generous>
-...remarks:Tight is very space efficient whereas Generous provides fast access to the strings in the container via ids.
 ...default:$Generous$.
 ..include:sequence.h
 */
@@ -483,7 +604,6 @@ namespace SEQAN_NAMESPACE_MAIN
 		inline typename Reference<StringSet>::Type
 		operator [] (TPos pos)
 		{
-		SEQAN_CHECKPOINT
 			return value(*this, pos);
 		}
 
@@ -491,7 +611,6 @@ namespace SEQAN_NAMESPACE_MAIN
 		inline typename Reference<StringSet const>::Type 
 		operator [] (TPos pos) const
 		{
-		SEQAN_CHECKPOINT
 			return value(*this, pos);
 		}
 	};
@@ -1575,6 +1694,12 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 //____________________________________________________________________________
 
+		inline bool _atEndOfSequence() {
+			if (_cur == _begin && objNo > 0) return true;
+			if (_cur == _end) return true;
+			return false;
+		}
+
 		inline void _testBegin() {
             while (_cur == _begin && objNo > 0) {
                 --objNo;
@@ -1834,6 +1959,49 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 		SEQAN_ASSERT(L.host == R.host);
 		return L.objNo > R.objNo || (L.objNo == R.objNo && L._cur > R._cur);
+	}
+
+	//////////////////////////////////////////////////////////////////////////////
+	// container
+	//////////////////////////////////////////////////////////////////////////////
+
+	template <typename TSSet, typename TSpec>
+	inline typename Concatenator<TSSet>::Type
+	container(Iter<TSSet, ConcatVirtual<TSpec> > &me)
+	{
+		return concat(*me.host);
+	}
+
+	template <typename TSSet, typename TSpec>
+	inline typename Concatenator<TSSet>::Type
+	container(Iter<TSSet, ConcatVirtual<TSpec> > const &me)
+	{
+		return concat(*me.host);
+	}
+
+	//////////////////////////////////////////////////////////////////////////////
+	// atEndOfSequence
+	//////////////////////////////////////////////////////////////////////////////
+
+	template <typename TIterator>
+	inline bool
+	atEndOfSequence(TIterator const &me)
+	{
+		return atEnd(me);
+	}
+
+	template <typename TSSet, typename TSpec>
+	inline bool
+	atEndOfSequence(Iter<TSSet, ConcatVirtual<TSpec> > const &me)
+	{
+		return me._atEndOfSequence();
+	}
+
+	template <typename TIterator>
+	inline bool
+	atEndOfSequence(TIterator &me)
+	{
+		return atEndOfSequence(reinterpret_cast<TIterator const &>(me));
 	}
 
 }

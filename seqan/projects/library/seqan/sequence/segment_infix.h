@@ -270,7 +270,7 @@ SEQAN_CHECKPOINT
 	setBegin(Segment & me, TIterator new_begin)
 	{
 SEQAN_CHECKPOINT
-		me.data_begin_position = new_begin - begin(host(me));
+		me.data_begin_position = new_begin - begin(host(me));//, Standard());
 	}
 
 
@@ -357,7 +357,7 @@ SEQAN_CHECKPOINT
 	setEnd(Segment & me, TIterator new_end)
 	{
 SEQAN_CHECKPOINT
-		me.data_end_position = new_end - begin(host(me));
+		me.data_end_position = new_end - begin(host(me));//, Standard());
 	}
 
 /* //unnoetig
@@ -461,8 +461,8 @@ init(Segment<THost1, InfixSegment> & me,
 {
 SEQAN_CHECKPOINT
 	setHost(me, host_);
-	setBegin(me, begin(host_));
-	setEnd(me, end(host_));
+	setBegin(me, begin(host_, Standard()));
+	setEnd(me, end(host_, Standard()));
 }
 template <typename THost1, typename THost2>
 inline void
@@ -471,8 +471,8 @@ init(Segment<THost1, InfixSegment> & me,
 {
 SEQAN_CHECKPOINT
 	setHost(me, host_);
-	setBegin(me, begin(host_));
-	setEnd(me, end(host_));
+	setBegin(me, begin(host_, Standard()));
+	setEnd(me, end(host_, Standard()));
 }
 
 //____________________________________________________________________________

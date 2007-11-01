@@ -464,6 +464,11 @@ SEQAN_CHECKPOINT
 	}
 }
 
+template <typename TNeedle, typename TSpec>
+int getScore(Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > > & me) {
+	return -(int)me.score;
+}
+
 }// namespace SEQAN_NAMESPACE_MAIN
 
 #endif //#ifndef SEQAN_HEADER_...

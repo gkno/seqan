@@ -237,14 +237,14 @@ SEQAN_CHECKPOINT
 	setBegin(Segment & me, TIterator new_begin)
 	{
 SEQAN_CHECKPOINT
-		me.data_begin_position = new_begin - begin(host(me));
+		me.data_begin_position = new_begin - begin(host(me));//, Standard());
 	}
 
 	friend inline void 
 	setBegin(typename Iterator<Segment, Rooted>::Type new_begin)
 	{
 SEQAN_CHECKPOINT
-		container(new_begin).data_begin_position = hostIterator(new_begin) - begin(host(container(new_begin)), Standard());
+		container(new_begin).data_begin_position = hostIterator(new_begin) - begin(host(container(new_begin)));//, Standard());
 	}
 
 //____________________________________________________________________________
@@ -317,6 +317,9 @@ SEQAN_CHECKPOINT
 ..see:Metafunction.Prefix
 */
 
+struct PrefixSegment;
+struct InfixSegment;
+
 template <typename THost>
 struct Suffix
 {
@@ -324,19 +327,17 @@ struct Suffix
 };
 
 template <typename THost>
-struct Suffix<Segment<THost, InfixSegment> >
+struct Suffix< Segment<THost, InfixSegment> >
 {
 	typedef Segment<THost, InfixSegment> Type;
 };
 template <typename THost>
-struct Suffix<Segment<THost, SuffixSegment> >
+struct Suffix< Segment<THost, SuffixSegment> >
 {
 	typedef Segment<THost, SuffixSegment> Type;
 };
-
-struct PrefixSegment; //forward declaration
 template <typename THost>
-struct Suffix<Segment<THost, PrefixSegment> >
+struct Suffix< Segment<THost, PrefixSegment> >
 {
 	typedef Segment<THost, InfixSegment> Type;
 };
@@ -366,7 +367,7 @@ init(Segment<THost1, SuffixSegment> & me,
 {
 SEQAN_CHECKPOINT
 	setHost(me, host_);
-	setBegin(me, begin(host_));
+	setBegin(me, begin(host_, Standard()));
 }
 
 //____________________________________________________________________________
@@ -378,7 +379,17 @@ init(Segment<THost, SuffixSegment> & me,
 {
 SEQAN_CHECKPOINT
 	setHost(me, host(source));
-	setBegin(me, begin(source));
+	setBegin(me, begin(source, Standard()));
+}
+
+template <typename THost, typename TSpec>
+inline void
+init(Segment<THost, SuffixSegment> & me,
+	 Segment<THost, TSpec> const & source)
+{
+SEQAN_CHECKPOINT
+	setHost(me, host(source));
+	setBegin(me, begin(source, Standard()));
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -493,26 +504,31 @@ SEQAN_CHECKPOINT
 	return typename Suffix<T *>::Type (t, pos_begin);
 }
 
+//////////////////////////////////////////////////////////////////////////////
+// A suffix of a prefix -> is an infix
 template <typename T, typename TPosBegin>
-inline typename Suffix<Segment<T, SuffixSegment> >::Type
-suffix(Segment<T, SuffixSegment> & t, TPosBegin pos_begin)
+inline typename Suffix<Segment<T, PrefixSegment> >::Type
+suffix(Segment<T, PrefixSegment> & t, TPosBegin pos_begin)
 {
 SEQAN_CHECKPOINT
-	return typename Suffix<Segment<T, SuffixSegment> >::Type (
+	return typename Suffix<Segment<T, PrefixSegment> >::Type (
 		host(t), 
-		beginPosition(t) + pos_begin);
+		beginPosition(t) + pos_begin, 
+		endPosition(t));
 }
-
 template <typename T, typename TPosBegin>
-inline typename Suffix<Segment<T, SuffixSegment> const>::Type
-suffix(Segment<T, SuffixSegment> const & t, TPosBegin pos_begin)
+inline typename Suffix<Segment<T, PrefixSegment> const>::Type
+suffix(Segment<T, PrefixSegment> const & t, TPosBegin pos_begin)
 {
 SEQAN_CHECKPOINT
-	return typename Suffix<Segment<T, SuffixSegment> const>::Type (
+	return typename Suffix<Segment<T, PrefixSegment> const>::Type (
 		host(t), 
-		beginPosition(t) + pos_begin);
+		beginPosition(t) + pos_begin, 
+		endPosition(t));
 }
 
+//////////////////////////////////////////////////////////////////////////////
+// A suffix of a infix -> is an infix
 template <typename T, typename TPosBegin>
 inline typename Suffix<Segment<T, InfixSegment> >::Type
 suffix(Segment<T, InfixSegment> & t, TPosBegin pos_begin)
@@ -523,7 +539,6 @@ SEQAN_CHECKPOINT
 		beginPosition(t) + pos_begin, 
 		endPosition(t));
 }
-
 template <typename T, typename TPosBegin>
 inline typename Suffix<Segment<T, InfixSegment> const>::Type
 suffix(Segment<T, InfixSegment> const & t, TPosBegin pos_begin)
@@ -533,6 +548,28 @@ SEQAN_CHECKPOINT
 		host(t), 
 		beginPosition(t) + pos_begin, 
 		endPosition(t));
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+// A suffix of a suffix -> is a suffix
+template <typename T, typename TPosBegin>
+inline typename Suffix<Segment<T, SuffixSegment> >::Type
+suffix(Segment<T, SuffixSegment> & t, TPosBegin pos_begin)
+{
+SEQAN_CHECKPOINT
+	return typename Suffix<Segment<T, SuffixSegment> >::Type (
+		host(t), 
+		beginPosition(t) + pos_begin);
+}
+template <typename T, typename TPosBegin>
+inline typename Suffix<Segment<T, SuffixSegment> const>::Type
+suffix(Segment<T, SuffixSegment> const & t, TPosBegin pos_begin)
+{
+SEQAN_CHECKPOINT
+	return typename Suffix<Segment<T, SuffixSegment> const>::Type (
+		host(t), 
+		beginPosition(t) + pos_begin);
 }
 
 //////////////////////////////////////////////////////////////////////////////
