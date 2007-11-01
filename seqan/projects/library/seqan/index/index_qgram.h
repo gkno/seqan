@@ -279,9 +279,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 		typedef typename Fibre<TIndex, Tag<_Fibre_Shape> const >::Type	TShape;
 		typedef typename Value<TIndex>::Type							TValue;
-		return _intPow(
-			(unsigned)ValueSize<TValue>::VALUE, 
-			length(indexShape(index)) - shapeCountBlanks(indexShape(index))) + 1;
+		return _intPow((unsigned)ValueSize<TValue>::VALUE, weight(indexShape(index))) + 1;
 	}
 
 	template <typename TIndex>
@@ -291,7 +289,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Value<TIndex>::Type							TValue;
 		return (_intPow(
 					(unsigned)ValueSize<TValue>::VALUE,
-					length(indexShape(index)) - shapeCountBlanks(indexShape(index)) + 1) - 1)
+					weight(indexShape(index)) + 1) - 1)
 				/ ((unsigned)ValueSize<TValue>::VALUE - 1) + 1;
 	}
 
@@ -1338,7 +1336,7 @@ namespace SEQAN_NAMESPACE_MAIN
 				qgram_count += sequenceLength(i, index) - (length(shape) - 1);
 
 		resize(indexSA(index), qgram_count, Exact());
-		resize(indexDir(index), _fullDirLength(index) + 1, Exact());
+		resize(indexDir(index), _fullDirLength(index), Exact());
 		createQGramIndex(indexSA(index), indexDir(index), indexText(index), indexShape(index));
 		return true;
 	}
@@ -1370,7 +1368,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename TText, typename TShapeSpec>
 	inline bool indexCreate(Index<TText, Index_QGram<TShapeSpec> > &index, Tag<_Fibre_Counts> const, Default const) 
 	{
-		resize(indexCountsDir(index), _fullDirLength(index) + 1, Exact());
+		resize(indexCountsDir(index), _fullDirLength(index), Exact());
 		createCountsArray(indexCounts(index), indexCountsDir(index), indexText(index), indexShape(index));
 		return true;
 	}
@@ -1381,7 +1379,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 		typedef Index<TText, Index_QGram<TShapeSpec> >			TIndex;
 
-		resize(indexDir(index), _fullDirLength(index) + 1, Exact());
+		resize(indexDir(index), _fullDirLength(index), Exact());
 		createQGramIndexDirOnly(indexDir(index), indexText(index), indexShape(index));
 		return true;
 	}

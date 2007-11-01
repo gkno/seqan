@@ -569,11 +569,11 @@ struct Length<T const>:
 
 /**
 .Metafunction.Weight:
-..summary:Number of significant positions in a (gapped) shape.
+..summary:Number of relevant positions in a shape.
 ..signature:Weight<T>::Type
-..param.T:Shape type for which the number of significant positions is determined.
+..param.T:Shape type for which the number of relevant positions is determined.
 ...type:Class.Shape
-..returns.param.VALUE:Number of significant positions.
+..returns.param.VALUE:Number of relevant positions.
 ..remarks.text:The default return value is the result of the @Metafunction.Length@ function.
 For gapped shapes this is the number of '1's.
 */

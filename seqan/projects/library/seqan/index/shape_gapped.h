@@ -53,7 +53,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		P00,P01,P02,P03,P04,
 		P05,P06,P07,P08,P09,
 		P10,P11,P12,P13,P14,
-		P15,P16,P17,P18,P19 
+		P15,P16,P17,P18,P19, 0 
 	};
 
 
@@ -206,7 +206,54 @@ Spec.GappedShape
 			weight(other.weight),
 			diffs(other.diffs),
 			hValue(other.hValue) {}	
+
+		template <typename TSpec>
+		Shape(Shape<TValue, TSpec> const &other)
+		{
+			*this = other;
+		}	
+
+		template <typename TSpec>
+		Shape(FixedGappedShape<TSpec> const &other)
+		{
+			*this = other;
+		}
+//____________________________________________________________________________
+
+		template <unsigned q>
+		inline Shape &
+		operator=(Shape<TValue, FixedShape<q> > const &other)
+		{
+			span = length(other);
+			weight = weight(other);
+			resize(diffs, weight);
+			for(unsigned i = 1; i < weight; ++i)
+				diffs[i] = 1;
+			hValue = other.hValue;
+			return *this;
+		}
+
+		template <typename TSpec>
+		inline Shape &
+		operator=(Shape<TValue, FixedGappedShape<TSpec> > const &other)
+		{
+			span = other.span;
+			weight = other.weight;
+			diffs = other.diffs;
+			hValue = other.hValue;
+			return *this;
+		}
+
+		template <typename TSpec>
+		inline Shape &
+		operator=(FixedGappedShape<TSpec> const)
+		{
+			typedef Shape<TValue, FixedGappedShape<TSpec> > TShape;
+			return *this = TShape();
+		}
 	};
+
+
 
 	//////////////////////////////////////////////////////////////////////////////
 	// fixed gapped shape
@@ -225,6 +272,7 @@ Spec.GappedShape
 		const int *diffs;
 	
 		typename Value<Shape>::Type	hValue;		// current hash value
+//____________________________________________________________________________
 
 		Shape():
 			diffs(TSpec::DIFFS) {}
@@ -232,25 +280,25 @@ Spec.GappedShape
 		Shape(Shape const &other):
 			diffs(other.diffs),	
 			hValue(other.hValue) {}
+//____________________________________________________________________________
+
+		inline Shape &
+		operator=(Shape const &other)
+		{
+			hValue = other.hValue;
+		}
 	};
 
 //////////////////////////////////////////////////////////////////////////////
 
 	template <typename TValue, typename TSpec>
 	inline typename Size< Shape<TValue, FixedGappedShape<TSpec> > >::Type
-	shapeCountBlanks(Shape<TValue, FixedGappedShape<TSpec> > const & me)
-	{
-	SEQAN_CHECKPOINT
-		return me.span - me.weight;
-	}
-
-	template <typename TValue, typename TSpec>
-	inline typename Size< Shape<TValue, FixedGappedShape<TSpec> > >::Type
-	shapeWeight(Shape<TValue, FixedGappedShape<TSpec> > const & me)
+	weight(Shape<TValue, FixedGappedShape<TSpec> > const & me)
 	{
 	SEQAN_CHECKPOINT
 		return me.weight;
 	}
+
 //____________________________________________________________________________
 
 	template <typename TValue, typename TIter>
@@ -262,7 +310,8 @@ Spec.GappedShape
 		typedef typename Size< Shape<TValue, GappedShape> >::Type	TSize;
 
 		me.hValue = _ord(*it);
-		for(TSize i = 1; i < me.span; ++i) {
+		TSize iEnd = me.weight - 1;
+		for(TSize i = 0; i < iEnd; ++i) {
 			goFurther(it, me.diffs[i]);
 			me.hValue = me.hValue * ValueSize<TValue>::VALUE + _ord(*it);
 		}
@@ -276,21 +325,23 @@ Spec.GappedShape
 	SEQAN_CHECKPOINT
 		typedef typename Value< Shape<TValue, FixedGappedShape<TSpec> > >::Type	THValue;
 
-		TSize iEnd = me.span;
+		TSize iEnd = me.weight;
 		if (iEnd > charsLeft) iEnd = charsLeft;
 
 		TSize i = 0;
 		if (iEnd > 0) {
 			me.hValue = _ord(*it);
-			for(TSize i = 1; i < iEnd; ++i) {
+			--iEnd;
+			for(; i < iEnd; ++i) {
 				goFurther(it, me.diffs[i]);
 				me.hValue = me.hValue * ValueSize<TValue>::VALUE + _ord(*it);
 			}
+			++i;
 		} else
 			return me.hValue = 0;
 
 		// fill shape with zeros
-		for(; i < (TSize)me.span; ++i)
+		for(; i < (TSize)me.weight; ++i)
 			me.hValue *= ValueSize<TValue>::VALUE;
 		return me.hValue;
 	}
@@ -302,22 +353,24 @@ Spec.GappedShape
 	SEQAN_CHECKPOINT
 		typedef typename Value< Shape<TValue, FixedGappedShape<TSpec> > >::Type	THValue;
 
-		TSize iEnd = me.span;
+		TSize iEnd = me.weight;
 		if (iEnd > charsLeft) iEnd = charsLeft;
 
 		TSize i = 0;
 		if (iEnd > 0) {
 			me.hValue = _ord(*it);
-			for(TSize i = 1; i < iEnd; ++i) {
+			--iEnd;
+			for(; i < iEnd; ++i) {
 				goFurther(it, me.diffs[i]);
 				me.hValue = me.hValue * ValueSize<TValue>::VALUE + _ord(*it);
 			}
+			++i;
 			++me.hValue;
 		} else
 			return me.hValue = 1;
 
 		// fill shape with zeros
-		for(; i < (TSize)me.span; ++i)
+		for(; i < (TSize)me.weight; ++i)
 			me.hValue *= ValueSize<TValue>::VALUE;
 		return me.hValue;
 	}
@@ -388,13 +441,13 @@ Spec.GappedShape
 		int P15, int P16, int P17, int P18, int P19,
 		typename TValue, typename TIter
 	>
-	typename Value< Shape<TValue, FixedGappedShape< HardwiredShape<
+	inline typename Value< Shape<TValue, FixedGappedShape< HardwiredShape<
 		P00,P01,P02,P03,P04,
 		P05,P06,P07,P08,P09,
 		P10,P11,P12,P13,P14,
 		P15,P16,P17,P18,P19 
 	> > > >::Type
-	inline hash(Shape<TValue, FixedGappedShape< HardwiredShape<
+	hash(Shape<TValue, FixedGappedShape< HardwiredShape<
 		P00,P01,P02,P03,P04,
 		P05,P06,P07,P08,P09,
 		P10,P11,P12,P13,P14,

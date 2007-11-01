@@ -25,11 +25,11 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 	template <unsigned q>
-	struct FixedShape;
+	struct FixedShape {};
 	typedef FixedShape<0> SimpleShape;
 
 	template <typename TSpec>
-	struct FixedGappedShape;
+	struct FixedGappedShape {};
 	typedef FixedGappedShape<Default> GappedShape;
 
 
@@ -145,13 +145,26 @@ Spec.SimpleShape
 			resize(*this, _span);
 		}
 
-		Shape(Shape const &other):
-			span(other.span),
-			hValue(other.hValue),
-			XValue(other.XValue),
-			leftFactor(other.leftFactor),
-			leftFactor2(other.leftFactor2),
-			leftChar(other.leftChar) {}
+		template <unsigned q>
+		Shape(Shape<TValue, FixedShape<q> > const &other)
+		{
+			*this = other;
+		}	
+
+//____________________________________________________________________________
+
+		template <unsigned q>
+		inline Shape &
+		operator=(Shape<TValue, FixedShape<q> > const &other)
+		{
+			span = other.span;
+			hValue = other.hValue;
+			XValue = other.XValue;
+			leftFactor = other.leftFactor;
+			leftFactor2 = other.leftFactor2;
+			leftChar = other.leftChar;
+			return *this;
+		}
 	};
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -174,10 +187,6 @@ Spec.SimpleShape
 		TValue						leftChar;	// left-most character
 //____________________________________________________________________________
 		
-		Shape() {}
-		Shape(Shape const &other):
-			hValue(other.hValue),
-			leftChar(other.leftChar) {}
 	};
 
 
@@ -210,19 +219,22 @@ Spec.SimpleShape
 
 //____________________________________________________________________________
 
-/**.Function.shapeCountBlanks:
+/**.Function.weight:
 ..cat:Index
-..summary:Number of blanks (irrelevant positions) in a shape.
-..signature:shapeCountBlanks(object)
-..param.object.type:Class.Shape
-..returns:Number of blanks in object.
+..summary:Number of relevant positions in a shape.
+..signature:weight(shape)
+..param.shape:Shape object for which the number of relevant positions is determined.
+...type:Class.Shape
+..returns:Number of relevant positions.
+..remarks.text:For ungapped shapes the return value is the result of the @Function.length@ function.
+For gapped shapes this is the number of '1's.
 */
 	template <typename TValue, typename TSpec>
 	inline typename Size< Shape<TValue, TSpec> >::Type
-	shapeCountBlanks(Shape<TValue, TSpec> const &)
+	weight(Shape<TValue, TSpec> const &me)
 	{
 	SEQAN_CHECKPOINT
-		return 0;
+		return length(me);
 	}
 
 //____________________________________________________________________________
@@ -257,13 +269,13 @@ Spec.SimpleShape
 ..returns:Hash value of the q-gram.
 */
 
-	template <typename TValue, typename TSpec, typename TIter>
-	inline typename Value< Shape<TValue, TSpec> >::Type
-	hash(Shape<TValue, TSpec> &me, TIter it)
+	template <typename TValue, typename TIter>
+	typename Value< Shape<TValue, SimpleShape> >::Type
+	hash(Shape<TValue, SimpleShape> &me, TIter it)
 	{
 	SEQAN_CHECKPOINT
-		typedef typename Value< Shape<TValue, TSpec> >::Type	THValue;
-		typedef typename Size< Shape<TValue, TSpec> >::Type		TSize;
+		typedef typename Value< Shape<TValue, SimpleShape> >::Type	THValue;
+		typedef typename Size< Shape<TValue, SimpleShape> >::Type	TSize;
 
 		me.hValue = _ord(me.leftChar = *it);
 		for(TSize i = 1; i < me.span; ++i) {
@@ -272,6 +284,36 @@ Spec.SimpleShape
 		}
 		return me.hValue;
 	}
+
+	// loop unrolling ...
+	template <typename THValue, typename TValue, typename TIter>
+	inline THValue
+	_hashFixedShape(THValue hash, TIter &, TValue const, FixedShape<1> const) {
+		return hash;
+	}
+
+	template <typename THValue, typename TValue, typename TIter, unsigned q>
+	inline THValue
+	_hashFixedShape(THValue hash, TIter &it, TValue const, FixedShape<q> const) {
+		++it;
+		return _hashFixedShape(
+			hash * ValueSize<TValue>::VALUE + _ord(*it),
+			it, TValue(), FixedShape<q - 1>());
+	}
+
+	// ... for fixed ungapped shapes
+	template <typename TValue, unsigned q, typename TIter>
+	inline typename Value< Shape<TValue, FixedShape<q> > >::Type
+	hash(Shape<TValue, FixedShape<q> > &me, TIter it)
+	{
+	SEQAN_CHECKPOINT
+		typedef typename Value< Shape<TValue, FixedShape<q> > >::Type	THValue;
+		typedef typename Size< Shape<TValue, FixedShape<q> > >::Type	TSize;
+
+		me.hValue = _ord(me.leftChar = *it);
+		return me.hValue = _hashFixedShape(me.hValue, it, TValue(), FixedShape<q>());
+	}
+
 
 	template <typename TValue, typename TSpec, typename TIter, typename TSize>
 	inline typename Value< Shape<TValue, TSpec> >::Type
