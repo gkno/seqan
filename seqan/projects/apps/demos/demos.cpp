@@ -8,7 +8,8 @@
 #include "../../demos/alphabet.cpp"
 #undef main
 
-/* !kompiliert nicht!
+/*
+//!kompiliert nicht!
 #define main runIterator
 #include "../../demos/iterator.cpp"
 #undef main
