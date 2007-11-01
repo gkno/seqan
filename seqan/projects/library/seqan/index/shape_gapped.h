@@ -27,6 +27,19 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 // HardwiredShape allows compiler-time defined gapped shape
 
+/**
+.Class.HardwiredShape:
+..cat:Index
+..summary:A structure to define a fixed gapped shape.
+..signature:HardwiredShape<P1, P2, ..., Pn>
+..param.Px:The distance of the x'th '1' to the next '1'.
+...remarks:At most 20 parameters are allowed, so the maximal shape weight is 21.
+..remarks:You can use this structure to define your one gapped shapes in conjunction with @Spec.FixedGappedShape@.
+..note:The shape $1100101$ corresponds to $HardwiredShape<1,3,2>$.
+..note:The following predefined shapes are already available in $seqan/index/shape_predefined.h$:
+..file:../projects/library/seqan/index/shape_predefined.h
+*/
+
 	// Pxx = spaces between '1's
 	template <
 		int P00 = 0, int P01 = 0, int P02 = 0, int P03 = 0, int P04 = 0, 
@@ -166,10 +179,13 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-Spec.GappedShape
+.Spec.GappedShape:
 ..cat:Index
+..summary:A variable gapped shape.
 ..general:Class.Shape
-..summary:For gapped q-grams.
+..signature:Shape<TValue, GappedShape>
+..param.TValue:The @Metafunction.Value@ type of the string the shape is applied to (e.g. $Dna$).
+..remarks:A GappedShape must be initialized first with a valid shape. To do so, call @Function.stringToShape@.
 */
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -187,7 +203,20 @@ Spec.GappedShape
 		String<int> diffs;
 	
 		typename Value<Shape>::Type	hValue;		// current hash value
+//____________________________________________________________________________
 
+/**
+.Memfunc.GappedShape#Shape:
+..class:Spec.GappedShape
+..summary:Constructor
+..signature:Shape<TValue, SimpleShape> ()
+..signature:Shape<TValue, SimpleShape> (q)
+..signature:Shape<TValue, GappedShape> (shape)
+..signature:Shape<TValue, GappedShape> (predefined)
+..param.q:Creates an ungapped q-gram.
+..param.shape:Any other gapped/ungapped shape.
+..param.predefined:Any instance of a predefined shape spec (e.g. $ShapePatternHunter$).
+*/
 		Shape()	{}
 
 		// c'tor for ungapped shapes
@@ -218,6 +247,13 @@ Spec.GappedShape
 		{
 			*this = other;
 		}
+
+		template <typename TStringValue, typename TSpec>
+		Shape(String<TStringValue, TSpec> const &bitmap)
+		{
+			*this = bitmap;
+		}	
+
 //____________________________________________________________________________
 
 		template <unsigned q>
@@ -251,9 +287,31 @@ Spec.GappedShape
 			typedef Shape<TValue, FixedGappedShape<TSpec> > TShape;
 			return *this = TShape();
 		}
+
+		template <typename TStringValue, typename TSpec>
+		inline Shape &
+		operator=(String<TStringValue, TSpec> const &bitmap)
+		{
+			stringToShape(*this, bitmap);
+			return *this;
+		}
 	};
 
 
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Spec.FixedGappedShape:
+..cat:Index
+..summary:A fixed gapped shape.
+..general:Class.Shape
+..signature:Shape<TValue, FixedGappedShape<TSpec> >
+..param.TValue:The @Metafunction.Value@ type of the string the shape is applied to (e.g. $Dna$).
+..param.TSpec:A structure to store the shape at compile-time.
+...type:Class.HardwiredShape
+..remarks:There are predefined shapes in $index/shape_predefined.h$.
+You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
+*/
 
 	//////////////////////////////////////////////////////////////////////////////
 	// fixed gapped shape
@@ -484,10 +542,11 @@ Spec.GappedShape
 ..cat:Index
 ..summary:Takes a shape given as a string of '1' (relevant position) and '0' 
 (irrelevant position) and converts it into a Shape object.
-..signature:stringToShape(shape, shapeString)
+..signature:stringToShape(shape, bitmap)
 ..param.shape:Shape object that is manipulated.
-...type:Class.Shape
-..param.shapeString:A string of '1' and '0' representing relevant and irrelevant positions (blanks) respectively. This string must begin with a '1'.
+...type:Spec.GappedShape
+..param.bitmap:A character string of '1' and '0' representing relevant and irrelevant positions (blanks) respectively.
+...remarks:This string must begin with a '1'.
 ...type:Class.String
 */
 
@@ -495,17 +554,17 @@ Spec.GappedShape
 	inline void
 	stringToShape(
 		Shape<TValue, FixedGappedShape<TSpec> > &me, 
-		TShapeString const &shapeString)
+		TShapeString const &bitmap)
 	{
 	SEQAN_CHECKPOINT
 		typedef typename Iterator<TShapeString const>::Type		TIter;
 		typedef typename Iterator<String<int> >::Type			TShapeIter;
 
-		me.span = length(shapeString);
+		me.span = length(bitmap);
 
 		unsigned oneCount = 0;
-		TIter it = begin(shapeString, Standard());
-		TIter itEnd = end(shapeString, Standard());
+		TIter it = begin(bitmap, Standard());
+		TIter itEnd = end(bitmap, Standard());
 		for(; it != itEnd; ++it)
 			if (*it == '1')
 				++oneCount;
@@ -514,7 +573,7 @@ Spec.GappedShape
 		resize(me.diffs, oneCount);
 
 		unsigned diff = 0;
-		it = begin(shapeString, Standard());
+		it = begin(bitmap, Standard());
 		TShapeIter itS = begin(me.diffs, Standard());
 		for(; it != itEnd; ++it) {
 			if (*it == '1') {

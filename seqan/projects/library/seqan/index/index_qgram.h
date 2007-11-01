@@ -983,15 +983,15 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 /**
 .Function.createCountArray:
-..summary:bla. 
+..summary:Builds an index on a StringSet storing how often a q-gram occurs in each sequence.
 ..cat:Index
-..signature:createQGramIndex(sa, dir, text, shape)
-..param.text:The sequence.
+..signature:createCountsArray(counts, dir, stringSet, shape)
+..param.text:The StringSet.
+...type:Class.StringSet
 ..param.shape:The shape to be used.
 ...type:Class.Shape
-..param.sa:The resulting list in which all q-grams are sorted alphabetically.
-..param.dir:The resulting array that indicates at which position in index the corresponding q-grams can be found.
-..returns:Index contains the sorted list of qgrams. For each possible q-gram pos contains the first position in index that corresponds to this q-gram. 
+..param.count:The resulting list of pairs (seqNo,count).
+..param.dir:The resulting array that indicates at which position in the count table the corresponding a certain q-gram can be found.
 */
 
 	template < 

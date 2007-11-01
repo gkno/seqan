@@ -50,12 +50,19 @@ namespace SEQAN_NAMESPACE_MAIN
 /**
 .Class.Shape:
 ..cat:Index
-..summary:Stores a shape for an ungapped or gapped q-gram.
+..summary:Stores hash value and shape for an ungapped or gapped q-gram.
 ..signature:Shape<TValue, TSpec>
-..remarks:The @Metafunction.ValueSize@ of Shape is the ValueSize of TValue which is the alphabet size.
-..param.TValue:The type of string the q-gram shape is applied to (e.g. $Dna$).
+..param.TValue:The @Metafunction.Value@ type of the string the shape is applied to (e.g. $Dna$).
 ..param.TSpec:The specializing type.
-...default:$GappedShape$, for gapped q-grams.
+...default:@Spec.SimpleShape@, for ungapped q-grams.
+..remarks:The @Metafunction.ValueSize@ of Shape is the ValueSize of TValue which is the alphabet size.
+..remarks:To get the span or the weight of a shape call @Function.length@ or @Function.weight@.
+.Memfunc.Shape#Shape:
+..class:Class.Shape
+..summary:Constructor
+..signature:Shape<TValue, TSpec> ()
+..signature:Shape<TValue, TSpec> (shape)
+..param.shape:Other Shape object. (copy constructor)
 */
 	template <typename TValue = Dna, typename TSpec = SimpleShape>
 	class Shape;
@@ -102,10 +109,13 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-Spec.SimpleShape
+.Spec.SimpleShape:
 ..cat:Index
+..summary:A variable length ungapped shape (also called q-gram or k-mer).
 ..general:Class.Shape
-..summary:For ungapped q-grams.
+..signature:Shape<TValue, SimpleShape>
+..param.TValue:The @Metafunction.Value@ type of the string the shape is applied to (e.g. $Dna$).
+..remarks:A SimpleShape must be resized first to a valid length. To do so, call @Function.resize@.
 */
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -127,16 +137,14 @@ Spec.SimpleShape
 //____________________________________________________________________________
 		
 /**
-.Shape#Shape:
-..class:Class.Shape
+.Memfunc.SimpleShape#Shape:
+..class:Spec.SimpleShape
 ..summary:Constructor
-..signature:Shape<TValue, TSpec> ()
-..signature:Shape<TValue, TSpec> (shape)
-..signature:Shape<TValue, SimpleShape> (span)
-..signature:Shape<TValue, GappedShape> (num_blanks, span)
+..signature:Shape<TValue, SimpleShape> ()
+..signature:Shape<TValue, SimpleShape> (shape)
+..signature:Shape<TValue, SimpleShape> (q)
 ..param.shape:Other Shape object. (copy constructor)
-..param.span:Total length of the q-gram (including blanks).
-..param.num_blanks:Number of blanks (irrelevant positions).
+..param.q:Length of the ungapped q-gram.
 */
 		Shape() {}
 
@@ -171,6 +179,16 @@ Spec.SimpleShape
 	// ungapped shape with fixed length q
 	//////////////////////////////////////////////////////////////////////////////
 
+/**
+.Spec.FixedShape:
+..cat:Index
+..summary:A fixed length ungapped shape (also called q-gram or k-mer).
+..general:Class.Shape
+..signature:Shape<TValue, FixedShape<q> >
+..param.TValue:The @Metafunction.Value@ type of the sequence the shape is applied to (e.g. $Dna$).
+..param.q:The length of the shape.
+*/
+
 	template <typename TValue, unsigned q>
 	class Shape<TValue, FixedShape<q> >
 	{
@@ -193,6 +211,7 @@ Spec.SimpleShape
 
 //////////////////////////////////////////////////////////////////////////////
 
+///.Function.value.param.object.type:Class.Shape
 	template <typename TValue, typename TSpec>
 	inline typename Value< Shape<TValue, TSpec> >::Type
 	value(Shape<TValue, TSpec> &me)
@@ -202,13 +221,7 @@ Spec.SimpleShape
 
 //____________________________________________________________________________
 
-/**.Function.shapeSpan:
-..cat:Index
-..summary:Span of a q-gram.
-..signature:shapeSpan(object)
-..param.object.type:Class.Shape
-..returns:Span of object.
-*/
+///.Function.length.param.object.type:Class.Shape
 	template <typename TValue, typename TSpec>
 	inline typename Size< Shape<TValue, TSpec> >::Type
 	length(Shape<TValue, TSpec> const &me)
@@ -239,6 +252,7 @@ For gapped shapes this is the number of '1's.
 
 //____________________________________________________________________________
 
+///.Function.resize.param.object.type:Spec.SimpleShape
 	template <typename TValue, typename TSize>
 	inline typename Size< Shape<TValue, SimpleShape> >::Type
 	resize(Shape<TValue, SimpleShape> & me, TSize new_length)
@@ -249,24 +263,19 @@ For gapped shapes this is the number of '1's.
 		return me.span = new_length;
 	}
 
-	template <typename TValue, typename TStringValue, typename TStringSpec>
-	inline void
-	stringToShape(Shape<TValue, SimpleShape> & me, String<TStringValue, TStringSpec> const & shape_string)
-	{
-	SEQAN_CHECKPOINT
-		resize(me, length(shape_string));
-	}
-
 //____________________________________________________________________________
 
 /**.Function.hash:
 ..cat:Index
-..summary:Computes a hash value for a q-gram.
+..summary:Computes a (lower) hash value for a shape applied to a sequence.
 ..signature:hash(shape, it)
-..param.shape:Shape to be used for hashing the q-gram.
+..signature:hash(shape, it, charsLeft)
+..param.shape:Shape to be used for hashing.
 ...type:Class.Shape
-..param.it:Sequence iterator pointing to the first character of the q-gram.
-..returns:Hash value of the q-gram.
+..param.it:Sequence iterator pointing to the first character of the shape.
+..param.charsLeft:The distance of $it$ to the string end. 
+If $charsLeft$ is smaller than the shape's span, the hash value corresponds to the smallest shape beginning with $charsLeft$ characters.
+..returns:Hash value of the shape.
 */
 
 	template <typename TValue, typename TIter>
@@ -341,6 +350,20 @@ For gapped shapes this is the number of '1's.
 		return me.hValue;
 	}
 
+//____________________________________________________________________________
+
+/**.Function.hashUpper:
+..cat:Index
+..summary:Computes an upper hash value for a shape applied to a sequence.
+..signature:hashUpper(shape, it, charsLeft)
+..param.shape:Shape to be used for hashing.
+...type:Class.Shape
+..param.it:Sequence iterator pointing to the first character of the shape.
+..param.charsLeft:The distance of $it$ to the string end. 
+If $charsLeft$ is smaller than the shape's span, the hash value corresponds to the biggest shape beginning with $charsLeft$ characters + 1.
+..returns:Upper hash value of the shape.
+*/
+
 	template <typename TValue, typename TSpec, typename TIter, typename TSize>
 	inline typename Value< Shape<TValue, TSpec> >::Type
 	hashUpper(Shape<TValue, TSpec> &me, TIter it, TSize charsLeft)
@@ -373,13 +396,13 @@ For gapped shapes this is the number of '1's.
 /**
 .Function.hashNext:
 ..cat:Index
-..summary:Computes the hash value for the next q-gram.
+..summary:Computes the hash value for the adjacent shape.
 ..signature:hashNext(shape, it)
-..param.shape:Shape to be used for hashing the q-gram.
+..param.shape:Shape to be used for hashing.
 ...type:Class.Shape
-..param.it:Sequence iterator pointing to the first character of the next q-gram.
+..param.it:Sequence iterator pointing to the first character of the adjacent shape.
 ..returns:Hash value of the q-gram.
-..remarks:@Function.hash@ has to be called before with $shape$ on the left adjacent q-gram.
+..remarks:@Function.hash@ has to be called before.
 */
 
 	template <typename TValue, typename TSpec, typename TIter>
@@ -400,13 +423,13 @@ For gapped shapes this is the number of '1's.
 
 /**.Function.hash2:
 ..cat:Index
-..summary:Computes a hash value for a q-gram, even if it is shorter than q.
+..summary:Computes a unique hash value of a shape, even if it is shorter than its span.
 ..signature:hash2(shape, it, charsLeft)
-..param.shape:Shape to be used for hashing the q-gram.
+..param.shape:Shape to be used for hashing.
 ...type:Class.Shape
-..param.it:Sequence iterator pointing to the first character of the q-gram.
-..param.shape:Number of characters left to read before the next border. The characters after a border are considered as 0's.
-..returns:Hash value of the q-gram.
+..param.it:Sequence iterator pointing to the first character of the shape.
+..param.charsLeft:The distance of $it$ to the string end. 
+..returns:Hash value of the shape.
 */
 
 	template <typename TValue, typename TSpec, typename TIter, typename TSize>
@@ -478,12 +501,12 @@ For gapped shapes this is the number of '1's.
 /**
 .Function.hash2Next:
 ..cat:Index
-..summary:Computes the hash value for the next q-gram, even if it is shorter than q.
+..summary:Computes a unique hash value for the adjacent shape, even if it is shorter than q.
 ..signature:hash2Next(shape, it)
 ..param.shape:Shape to be used for hashing the q-gram.
 ...type:Class.Shape
-..param.it:Sequence iterator pointing to the first character of the next q-gram.
-..returns:Hash value of the q-gram.
+..param.it:Sequence iterator pointing to the first character of the adjacent shape.
+..returns:Hash value of the shape.
 ..remarks:@Function.hash@ has to be called before with $shape$ on the left adjacent q-gram.
 */
 
