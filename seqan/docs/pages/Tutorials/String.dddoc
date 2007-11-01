@@ -15,11 +15,13 @@ This tutorial gives an overview of the variety of sequences types in SeqAn and b
 ..section:# Sequence Classes
 ..subsection:#.# Strings
 ..text:@Class.String.Strings@ are @Concept.Container.containers@ that store sequences of values, for example of $char$, @Spec.Dna.nucleotides@, or @Spec.AminoAcid.amino acids@. 
-The user of SeqAn can choose between several kinds of string and combine with any kind of value.
+The user of SeqAn can choose between several kinds of strings (see below for the different string implementations SeqAn offers)
+ and different values (i.e. alphabets). There is no restriction for the use of any combination of values and kinds of strings.
+
 Typically, the value type is qualified as the first template argument, i.e. in angled brackets:
 ..code:String<AminoAcid> myProteine;
 
-..text:SeqAn predefines @Shortcut|shotcuts@ for some usual value types, so we can also write:
+..text:SeqAn predefines @Shortcut|shortcuts@ for some usual value types, so we can also write:
 ..code:Peptide myProteine;
 
 ..text:SeqAn offers many functions and operators for initializing, converting, manipulating, and printing strings.
@@ -71,8 +73,7 @@ String<Dna, Packed<> > myPackedString;      //string that takes only 2 bits per 
 
 
 ..subsection:#.# Sequence Adaptions
-..text:SeqAn offers an interface for accessing @Adaption.std::basic_string|standard library strings@ and @Adaption.char array|c-style $char$ arrays@
-in the same way as @Class.String|SeqAn strings@.
+..text:SeqAn offers an interface for accessing @Adaption.std::basic_string|standard library strings@ and @Adaption.char array|c-style $char$ arrays@. Hence those built-in types can be handled in the same way as @Class.String|SeqAn strings@.
 For example:
 ..code:
 std::basic_string str1 = "a standard library string";
@@ -97,6 +98,7 @@ CharString str = "start_middle_end";
 infix(str, 6, 12) = "overwrite";                //overwrites "middle"
 cout << str;                                    //output: "start_overwrite_end";
 
+..text: If this effect is undesirable, one has to explicitely make a copy of the string.
 
 ..section:# Working with Sequences
 ..subsection:#.# Iterators
