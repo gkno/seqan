@@ -208,6 +208,39 @@ namespace SEQAN_NAMESPACE_MAIN
 		return getFibre(index, Tag<_Fibre_Dir>()); 
 	}
 
+//////////////////////////////////////////////////////////////////////////////
+/**
+.Function.dirAt:
+..summary:Shortcut for $value(indexDir(..), ..)$.
+..cat:Index
+..signature:dirAt(position, index)
+..param.position:A position in the array on which the value should be accessed.
+..param.index:The @Class.Index@ object holding the fibre.
+...type:Spec.Index_QGram
+..returns:A reference or proxy to the value.
+*/
+
+	template <typename TPos, typename TIndex>
+	inline typename Reference<typename Fibre<TIndex, Tag<_Fibre_Dir> >::Type>::Type dirAt(TPos i, TIndex &index) {
+		return value(getFibre(index, Tag<_Fibre_Dir> ()), i);
+	}
+	template <typename TPos, typename TIndex>
+	inline typename Reference<typename Fibre<TIndex const, Tag<_Fibre_Dir> >::Type>::Type dirAt(TPos i, TIndex const &index) {
+		return value(getFibre(index, Tag<_Fibre_Dir> ()), i);
+	}
+
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+.Function.indexShape:
+..summary:Shortcut for $getFibre(.., QGram_Shape)$.
+..cat:Index
+..signature:indexDir(index)
+..param.index:The @Class.Index@ object holding the fibre.
+...type:Spec.Index_QGram
+..returns:A reference to the @Tag.QGram_Shape@ fibre (shape of q-gram index).
+*/
+
 	template <typename TText, typename TSpec>
 	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_Counts> const >::Type & 
 	indexCounts(Index<TText, TSpec> &index) {
@@ -262,6 +295,299 @@ namespace SEQAN_NAMESPACE_MAIN
 				/ ((unsigned)ValueSize<TValue>::VALUE - 1) + 1;
 	}
 
+
+    //////////////////////////////////////////////////////////////////////////////
+    // QGramLess
+	//
+	// compare two q-grams of a given text (q-grams can be smaller than q)
+    template < typename TSAValue, typename TText >
+	struct _QGramLess : 
+		public ::std::binary_function < TSAValue, TSAValue, bool >
+    {
+		typedef typename Iterator<TText, Standard>::Type TIter;
+		TIter _begin, _end;
+		typename Size<TText>::Type _q;
+
+		template <typename TSize>
+		_QGramLess(TText &text, TSize q): 
+			_begin(begin(text, Standard())),
+			_end(end(text, Standard())),
+			_q(q) {}
+
+		// skip the first <offset> characters
+		template <typename TSize1, typename TSize2>
+		_QGramLess(TText &text, TSize1 q, TSize2 offset): 
+			_begin(begin(text, Standard()) + offset),
+			_end(end(text, Standard())),
+			_q(q) {}
+
+		inline bool operator() (TSAValue const a, TSAValue const b) const 
+		{
+			if (a == b) return false;
+			TIter itA = _begin + a;
+			TIter itB = _begin + b;
+			if (a <= b) {
+				TIter itEnd = itB + _q;
+				if (itEnd > _end)
+					itEnd = _end;
+				for(; itB != itEnd; ++itB, ++itA) {
+					if (lexLess(*itA, *itB)) return true;
+					if (lexLess(*itB, *itA)) return false;
+				}
+				return false;
+			} else {
+				TIter itEnd = itA + _q;
+				if (itEnd > _end)
+					itEnd = _end;
+				for(; itA != itEnd; ++itA, ++itB) {
+					if (lexLess(*itA, *itB)) return true;
+					if (lexLess(*itB, *itA)) return false;
+				}
+				return true;
+			}
+		}
+	};
+
+	template < typename TSAValue, typename TString, typename TSpec >
+	struct _QGramLess<TSAValue, StringSet<TString, TSpec> const> : 
+		public ::std::binary_function < TSAValue, TSAValue, bool >
+    {
+		typedef typename Iterator<TString, Standard>::Type TIter;
+		StringSet<TString, TSpec> const &_stringSet;
+		typename Size<TString>::Type _q;
+
+		template <typename TSize>
+		_QGramLess(StringSet<TString, TSpec> const &text, TSize q): 
+			_stringSet(text),
+			_q(q) {}
+
+		inline bool operator() (TSAValue const &a, TSAValue const &b) const 
+		{
+			if (a == b) return false;
+			TIter itA = begin(_stringSet[getValueI1(a)], Standard()) + getValueI2(a);
+			TIter itB = begin(_stringSet[getValueI1(b)], Standard()) + getValueI2(b);
+			if (suffixLength(a, _stringSet) > suffixLength(b, _stringSet)) {
+				TIter _end = end(_stringSet[getValueI1(b)], Standard());
+				TIter itEnd = itB + _q;
+				if (itEnd > _end)
+					itEnd = _end;
+				for(; itB != itEnd; ++itB, ++itA) {
+					if (lexLess(*itA, *itB)) return true;
+					if (lexLess(*itB, *itA)) return false;
+				}
+				return false;
+			} else {
+				TIter _end = end(_stringSet[getValueI1(a)], Standard());
+				TIter itEnd = itA + _q;
+				if (itEnd > _end)
+					itEnd = _end;
+				for(; itA != itEnd; ++itA, ++itB) {
+					if (lexLess(*itA, *itB)) return true;
+					if (lexLess(*itB, *itA)) return false;
+				}
+				return true;
+			}
+		}
+	};
+
+
+    //////////////////////////////////////////////////////////////////////////////
+    // QGramLessOffset
+	//
+	// compare two q-grams of a given text and skip the first <offset> characters
+    template < typename TSAValue, typename TText >
+	struct _QGramLessOffset :
+		_QGramLess<TSAValue, TText>
+	{
+		template <typename TSize1, typename TSize2>
+		_QGramLessOffset(TText &text, TSize1 q, TSize2 offset): 
+			_QGramLess<TSAValue, TText> (text, q, offset) {}
+	};
+
+	template < typename TSAValue, typename TString, typename TSpec >
+	struct _QGramLessOffset<TSAValue, StringSet<TString, TSpec> const> : 
+		public ::std::binary_function < TSAValue, TSAValue, bool >
+    {
+		typedef typename Iterator<TString, Standard>::Type	TIter;
+		typedef typename Size<TString>::Type				TSize;
+		StringSet<TString, TSpec> const &_stringSet;
+		typename Size<TString>::Type _q, _offset;
+
+		template <typename TSize1, typename TSize2>
+		_QGramLessOffset(StringSet<TString, TSpec> const &text, TSize1 q, TSize2 offset): 
+			_stringSet(text),
+			_q(q),
+			_offset(offset) {}
+
+		inline bool operator() (TSAValue const &a, TSAValue const &b) const 
+		{
+			if (a == b) return false;
+			TString const &sA = _stringSet[getValueI1(a)];
+			TString const &sB = _stringSet[getValueI1(b)];
+			TIter itA = begin(sA, Standard()) + getValueI2(a) + _offset;
+			TIter itB = begin(sB, Standard()) + getValueI2(b) + _offset;
+			TSize restA = length(sA) - getValueI2(a);
+			TSize restB = length(sB) - getValueI2(b);
+			if (restA > restB) {
+				TIter itEnd;
+				if (restB >= _q)
+					itEnd = itB + _q;
+				else
+					itEnd = end(sB, Standard());
+				for(; itB != itEnd; ++itB, ++itA) {
+					if (lexLess(*itA, *itB)) return true;
+					if (lexLess(*itB, *itA)) return false;
+				}
+				return false;
+			} else {
+				TIter itEnd;
+				if (restA >= _q)
+					itEnd = itA + _q;
+				else
+					itEnd = end(sA, Standard());
+				for(; itA != itEnd; ++itA, ++itB) {
+					if (lexLess(*itA, *itB)) return true;
+					if (lexLess(*itB, *itA)) return false;
+				}
+				return true;
+			}
+		}
+	};
+
+
+    //////////////////////////////////////////////////////////////////////////////
+    // QGramLessNoCheck
+	//
+	// compare two q-grams of a given text (no check for q-grams smaller than q)
+    template < typename TSAValue, typename TText >
+	struct _QGramLessNoCheck : 
+		public ::std::binary_function < TSAValue, TSAValue, bool >
+    {
+		typedef typename Iterator<TText, Standard>::Type TIter;
+		TIter _begin;
+		typename Size<TText>::Type _q;
+
+		template <typename TSize>
+		_QGramLessNoCheck(TText &text, TSize q): 
+			_begin(begin(text, Standard())),
+			_q(q) {}
+
+		// skip the first <offset> characters
+		template <typename TSize>
+		_QGramLessNoCheck(TText &text, TSize q, TSize offset): 
+			_begin(begin(text, Standard()) + offset),
+			_q(q) {}
+
+		inline bool operator() (TSAValue const a, TSAValue const b) const 
+		{
+			if (a == b) return false;
+			TIter itA = _begin + a;
+			TIter itB = _begin + b;
+			if (a <= b) {
+				TIter itEnd = itB + _q;
+				for(; itB != itEnd; ++itB, ++itA) {
+					if (lexLess(*itA, *itB)) return true;
+					if (lexLess(*itB, *itA)) return false;
+				}
+				return false;
+			} else {
+				TIter itEnd = itA + _q;
+				for(; itA != itEnd; ++itA, ++itB) {
+					if (lexLess(*itA, *itB)) return true;
+					if (lexLess(*itB, *itA)) return false;
+				}
+				return true;
+			}
+		}
+	};
+
+    template < typename TSAValue, typename TString, typename TSpec >
+	struct _QGramLessNoCheck<TSAValue, StringSet<TString, TSpec> const> : 
+		public ::std::binary_function < TSAValue, TSAValue, bool >
+    {
+		typedef typename Iterator<TString, Standard>::Type TIter;
+		StringSet<TString, TSpec> const &_stringSet;
+		typename Size<TString>::Type _q;
+
+		template <typename TSize>
+		_QGramLessNoCheck(StringSet<TString, TSpec> const &text, TSize q): 
+			_stringSet(text),
+			_q(q) {}
+
+		inline bool operator() (TSAValue const &a, TSAValue const &b) const 
+		{
+			if (a == b) return false;
+			TIter itA = begin(_stringSet[getValueI1(a)], Standard()) + getValueI2(a);
+			TIter itB = begin(_stringSet[getValueI1(b)], Standard()) + getValueI2(b);
+			if (suffixLength(a, _stringSet) > suffixLength(b, _stringSet)) {
+				TIter itEnd = itB + _q;
+				for(; itB != itEnd; ++itB, ++itA) {
+					if (lexLess(*itA, *itB)) return true;
+					if (lexLess(*itB, *itA)) return false;
+				}
+				return false;
+			} else {
+				TIter itEnd = itA + _q;
+				for(; itA != itEnd; ++itA, ++itB) {
+					if (lexLess(*itA, *itB)) return true;
+					if (lexLess(*itB, *itA)) return false;
+				}
+				return true;
+			}
+		}
+	};
+
+
+    //////////////////////////////////////////////////////////////////////////////
+    // _QGramLessNoCheckOffset
+	//
+	// compare two q-grams of a given text and skip the first <offset> characters
+    template < typename TSAValue, typename TText >
+	struct _QGramLessNoCheckOffset: _QGramLessNoCheck<TSAValue, TText> 
+	{
+		template <typename TSize1, typename TSize2>
+		_QGramLessNoCheckOffset(TText &text, TSize1 q, TSize2 offset): 
+			_QGramLessNoCheck<TSAValue, TText> (text, q, offset) {}
+	};
+
+	template < typename TSAValue, typename TString, typename TSpec >
+	struct _QGramLessNoCheckOffset<TSAValue, StringSet<TString, TSpec> const> : 
+		public ::std::binary_function < TSAValue, TSAValue, bool >
+    {
+		typedef typename Iterator<TString, Standard>::Type TIter;
+		StringSet<TString, TSpec> const &_stringSet;
+		typename Size<TString>::Type _q, _offset;
+
+		template <typename TSize1, typename TSize2>
+		_QGramLessNoCheckOffset(StringSet<TString, TSpec> const &text, TSize1 q, TSize2 offset): 
+			_stringSet(text),
+			_q(q),
+			_offset(offset) {}
+
+		inline bool operator() (TSAValue const &a, TSAValue const &b) const 
+		{
+			if (a == b) return false;
+			TIter itA = begin(_stringSet[getValueI1(a)], Standard()) + getValueI2(a) + _offset;
+			TIter itB = begin(_stringSet[getValueI1(b)], Standard()) + getValueI2(b) + _offset;
+			if (a <= b) {
+				TIter itEnd = itB + _q;
+				for(; itB != itEnd; ++itB, ++itA) {
+					if (lexLess(*itA, *itB)) return true;
+					if (lexLess(*itB, *itA)) return false;
+				}
+				return false;
+			} else {
+				TIter itEnd = itA + _q;
+				for(; itA != itEnd; ++itA, ++itB) {
+					if (lexLess(*itA, *itB)) return true;
+					if (lexLess(*itB, *itA)) return false;
+				}
+				return true;
+			}
+		}
+	};
+
+
 //////////////////////////////////////////////////////////////////////////////
 /**
 .Function.createQGramIndex:
@@ -276,10 +602,11 @@ namespace SEQAN_NAMESPACE_MAIN
 ..returns:Index contains the sorted list of qgrams. For each possible q-gram pos contains the first position in index that corresponds to this q-gram. 
 */
 
-	template < typename TSA, 
-			typename TDir,
-			typename TText,
-			typename TShape >
+	template <
+		typename TSA, 
+		typename TDir,
+		typename TText,
+		typename TShape >
 	void createQGramIndex(
 		TSA &sa,
 		TDir &dir,
@@ -403,6 +730,254 @@ namespace SEQAN_NAMESPACE_MAIN
 				assignValueI2(localPos, i);
 				sa[dir[hashNext(shape, itText) + 1]++] = localPos;		// next hash
 			}
+		}
+	}
+
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+.Function.createQGramIndexSAOnly:
+..summary:Builds the suffix array of a q-gram index on a sequence. 
+..cat:Index
+..signature:createQGramIndexSAOnly(sa, text, shape)
+..param.text:The sequence.
+..param.shape:The shape to be used. q is the length of this shape
+...type:Class.Shape
+..param.sa:The resulting list in which all q-grams are sorted alphabetically.
+*/
+
+	template < 
+		typename TSA, 
+		typename TText,
+		typename TShape >
+	void createQGramIndexSAOnly(
+		TSA &sa,
+		TText const &text,
+		TShape &shape)
+	{
+	SEQAN_CHECKPOINT
+		typedef typename Size<TSA>::Type TSize;
+		typedef typename Iterator<TSA, Standard>::Type TIter;
+
+		// 1. Fill suffix array with a permutation (the identity)
+		TIter it = begin(sa, Standard());
+		TIter itEnd = end(sa, Standard());
+		TSize i = 0;
+		for(; it != itEnd; ++it, ++i)
+			*it = i;
+
+		// 2. Sort suffix array with quicksort
+		TSize q = length(shape);
+		if (i + q > length(text) + 1)
+			::std::sort(
+				begin(sa, Standard()), 
+				end(sa, Standard()), 
+				_QGramLess<typename Value<TSA>::Type, TText const>(text, q));
+		else
+			::std::sort(
+				begin(sa, Standard()), 
+				end(sa, Standard()), 
+				_QGramLessNoCheck<typename Value<TSA>::Type, TText const>(text, q));
+	}
+
+	template < 
+		typename TSA, 
+		typename TString,
+		typename TSpec,
+		typename TShape >
+	void createQGramIndexSAOnly(
+		TSA &sa,
+		StringSet<TString, TSpec> const &stringSet,
+		TShape &shape)
+	{
+	SEQAN_CHECKPOINT
+		typedef typename Iterator<TSA, Standard>::Type	TIter;
+		typedef typename Value<TSA>::Type				TValue;
+		typedef typename Size<TString>::Type			TSize;
+		typedef StringSet<TString, TSpec>				TStringSet;
+		
+		// 1. Fill suffix array with a permutation (the identity)
+		TIter it = begin(sa, Standard());
+		TIter itEnd = end(sa, Standard());
+		TValue pair;
+		for(unsigned seqNo = 0; seqNo < length(stringSet); ++seqNo) 
+		{
+			assignValueI1(pair, seqNo);
+			TSize i = 0;
+			for(; it != itEnd; ++it, ++i) {
+				assignValueI2(pair, i);
+				*it = pair;
+			}
+		}
+
+		// 2. Sort suffix array with quicksort
+		TSize q = length(shape);
+		if (lengthSum(stringSet) == length(sa))
+			::std::sort(
+				begin(sa, Standard()), 
+				end(sa, Standard()), 
+				_QGramLess<typename Value<TSA>::Type, TStringSet const>(stringSet, q));
+		else
+			::std::sort(
+				begin(sa, Standard()), 
+				end(sa, Standard()), 
+				_QGramLessNoCheck<typename Value<TSA>::Type, TStringSet const>(stringSet, q));
+	}
+
+	template < 
+		typename TSA, 
+		typename TDir,
+		typename TText,
+		typename TSize1,
+		typename TSize2 >
+	void _refineQGramIndex(
+		TSA &sa,
+		TDir &dir,
+		TText const &text,
+		TSize1 oldQ,
+		TSize2 newQ)
+	{
+	SEQAN_CHECKPOINT
+		typedef typename Size<TSA>::Type TSize;
+		typedef typename Iterator<TSA, Standard>::Type		TIter;
+		typedef typename Iterator<TDir, Standard>::Type		TDirIter;
+
+		if (newQ <= (TSize2)oldQ) return;
+
+		if (length(dir) < 2) {
+			::std::sort(
+				begin(sa, Standard()), 
+				end(sa, Standard()), 
+				_QGramLessOffset<typename Value<TSA>::Type, TText const>(text, newQ - oldQ, oldQ));
+			return;
+		}
+
+		// 1. Sort each bucket with quicksort and compare substrings s[i+oldQ..i+newQ)
+		TDirIter dirIt = begin(dir, Standard());
+		TDirIter dirItEnd = end(dir, Standard());
+		TIter itBegin = begin(sa, Standard());
+		TIter itBktBegin = itBegin + *dirIt;
+		TIter itBktEnd;
+		++dirIt;
+		for(; dirIt != dirItEnd; ++dirIt, itBktBegin = itBktEnd) {
+			itBktEnd = itBegin + *dirIt;
+			if (itBktEnd - itBktBegin < 2) continue;
+			::std::sort(
+				itBktBegin, 
+				itBktEnd, 
+				_QGramLessOffset<typename Value<TSA>::Type, TText const>(text, newQ - oldQ, oldQ));
+		}
+	}
+
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+.Function.createQGramIndexDirOnly:
+..summary:Builds the directory of a q-gram index on a sequence. 
+..cat:Index
+..signature:createQGramIndexDirOnly(sa, dir, text, shape)
+..param.text:The sequence.
+..param.shape:The shape to be used.
+...type:Class.Shape
+..param.sa:The resulting list in which all q-grams are sorted alphabetically.
+..param.dir:The resulting array that indicates at which position in index the corresponding q-grams can be found.
+..returns:Index contains the sorted list of qgrams. For each possible q-gram pos contains the first position in index that corresponds to this q-gram. 
+*/
+
+	template <
+		typename TDir,
+		typename TText,
+		typename TShape >
+	void createQGramIndexDirOnly(
+		TDir &dir,
+		TText const &text,
+		TShape &shape)
+	{
+	SEQAN_CHECKPOINT
+		typedef typename Iterator<TText const, Standard>::Type	TIterator;
+		typedef typename Iterator<TDir, Standard>::Type			TDirIterator;
+		typedef typename Value<TShape>::Type					TValue;
+		typedef typename Size<TText>::Type						TSize;
+		
+		// 1. clear counters
+		arrayFill(begin(dir, Standard()), end(dir, Standard()), 0);
+
+		// 2. count q-grams
+		if (length(text) < length(shape)) return;
+		TSize num_qgrams = length(text) - length(shape) + 1;
+
+		TIterator itText = begin(text, Standard());
+		++dir[hash(shape, itText)];
+		for(TSize i = 1; i < num_qgrams; ++i)
+		{
+			++itText;
+			++dir[hashNext(shape, itText)];
+		}
+
+		// 3. cumulative sum
+		{
+			TDirIterator it = begin(dir, Standard());
+			TDirIterator itEnd = end(dir, Standard());
+			TSize diff = 0, diff_prev = 0, sum = 0;
+			while (it != itEnd) {
+				sum += diff_prev;
+				diff_prev = diff;
+				diff = *it;
+				*it = sum;
+				++it;
+			}
+			SEQAN_ASSERT(sum + diff_prev == length(sa));
+		}
+	}
+
+	template < 
+		typename TDir,
+		typename TString,
+		typename TSpec,
+		typename TShape >
+	void createQGramIndexDirOnly(
+		TDir &dir,
+		StringSet<TString, TSpec> const &stringSet,
+		TShape &shape)
+	{
+	SEQAN_CHECKPOINT
+		typedef typename Iterator<TString const, Standard>::Type	TIterator;
+		typedef typename Iterator<TDir, Standard>::Type				TDirIterator;
+		typedef typename Value<TShape>::Type						TValue;
+		typedef typename Size<TString>::Type						TSize;
+		
+		// 1. clear counters
+		arrayFill(begin(dir, Standard()), end(dir, Standard()), 0);
+
+		// 2. count q-grams
+		for(unsigned seqNo = 0; seqNo < length(stringSet); ++seqNo) 
+		{
+			TString const &sequence = value(stringSet, seqNo);
+			if (length(sequence) < length(shape)) continue;
+			TSize num_qgrams = length(sequence) - length(shape) + 1;
+
+			TIterator itText = begin(sequence, Standard());
+			++dir[hash(shape, itText)];
+			for(TSize i = 1; i < num_qgrams; ++i)
+			{
+				++itText;
+				++dir[hashNext(shape, itText)];
+			}
+		}
+
+		// 3. cumulative sum
+		{
+			TDirIterator it = begin(dir, Standard());
+			TDirIterator itEnd = end(dir, Standard());
+			TSize diff = 0, diff_prev = 0, sum = 0;
+			while (it != itEnd) {
+				sum += diff_prev;
+				diff_prev = diff;
+				diff = *it;
+				*it = sum;
+				++it;
+			}
+			SEQAN_ASSERT(sum + diff_prev == length(sa));
 		}
 	}
 
@@ -749,7 +1324,7 @@ namespace SEQAN_NAMESPACE_MAIN
 // interface for automatic index creation 
 
 	template <typename TText, typename TShapeSpec>
-	inline bool indexCreate(Index<TText, Index_QGram<TShapeSpec> > &index, Tag<_Fibre_SA> const, Default const) 
+	inline bool indexCreate(Index<TText, Index_QGram<TShapeSpec> > &index, Tag<_Fibre_SADir> const, Default const) 
 	{
 		typedef Index<TText, Index_QGram<TShapeSpec> >			TIndex;
 		typedef Shape<typename Value<TIndex>::Type, TShapeSpec>	TShape;
@@ -774,9 +1349,22 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	template <typename TText, typename TShapeSpec>
-	inline bool indexCreate(Index<TText, Index_QGram<TShapeSpec> > &index, QGram_SADir const, Default const alg)
+	inline bool indexCreate(Index<TText, Index_QGram<TShapeSpec> > &index, Tag<_Fibre_SA> const, Default const alg)
 	{
-		return indexCreate(index, QGram_SA(), alg);
+		typedef Index<TText, Index_QGram<TShapeSpec> >			TIndex;
+		typedef Shape<typename Value<TIndex>::Type, TShapeSpec>	TShape;
+
+		TShape &shape = indexShape(index);
+
+		// count all overlapping q-grams
+		typename Size<TIndex>::Type qgram_count = 0;
+		for(unsigned i = 0; i < countSequences(index); ++i)
+			if (sequenceLength(i, index) >= length(shape))
+				qgram_count += sequenceLength(i, index) - (length(shape) - 1);
+
+		resize(indexSA(index), qgram_count, Exact());
+		createQGramIndexSAOnly(indexSA(index), indexText(index), indexShape(index));
+		return true;
 	}
 
 	template <typename TText, typename TShapeSpec>
@@ -789,16 +1377,15 @@ namespace SEQAN_NAMESPACE_MAIN
 
 /*
 	template <typename TText, typename TShapeSpec>
-	inline bool indexCreate(Index<TText, Index_QGram<TShapeSpec> > &index, QGram_Dir const, Default const alg)
+	inline bool indexCreate(Index<TText, Index_QGram<TShapeSpec> > &index, Tag<_Fibre_Dir> const, Default const alg)
 	{
 		typedef Index<TText, Index_QGram<TShapeSpec> >			TIndex;
-		typedef Shape<typename Value<TIndex>::Type, TShapeSpec>	TShape;
 
 		resize(indexDir(index), _fullDirLength(index) + 1, Exact());
-		createQGramIndex(indexSA(index), indexDir(index), indexText(index), indexShape(index));
+		createQGramIndexDirOnly(indexDir(index), indexText(index), indexShape(index));
 		return true;
 	}
-*/
+
 
 //////////////////////////////////////////////////////////////////////////////
 // getKmerSimilarityMatrix

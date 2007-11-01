@@ -24,13 +24,13 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 
-	struct SimpleShape;
-	struct GappedShape;
-
 	template <unsigned q>
 	struct FixedShape;
-	template <unsigned q>
+	typedef FixedShape<0> SimpleShape;
+
+	template <typename TSpec>
 	struct FixedGappedShape;
+	typedef FixedGappedShape<Default> GappedShape;
 
 
 	template <typename TValue, typename TExponent>
@@ -82,8 +82,10 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 		enum { VALUE = q };
 	};
+
+///.Metafunction.Weight.param.T.type:Class.Shape
     template <typename TValue, unsigned q>
-	struct Length< Shape<TValue, FixedGappedShape<q> > >
+	struct Weight< Shape<TValue, FixedShape<q> > >
 	{
 		enum { VALUE = q };
 	};
@@ -93,7 +95,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	struct ValueSize< Shape<TValue, TSpec> > {
 		enum { VALUE = Power<
 						ValueSize<TValue>::VALUE, 
-						Length< Shape<TValue, TSpec> >::VALUE >::VALUE };
+						Weight< Shape<TValue, TSpec> >::VALUE >::VALUE };
 	};
 
 

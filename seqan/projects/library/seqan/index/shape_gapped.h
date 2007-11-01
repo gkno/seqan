@@ -24,7 +24,146 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 
-struct GappedShape;
+//////////////////////////////////////////////////////////////////////////////
+// HardwiredShape allows compiler-time defined gapped shape
+
+	// Pxx = spaces between '1's
+	template <
+		int P00 = 0, int P01 = 0, int P02 = 0, int P03 = 0, int P04 = 0, 
+		int P05 = 0, int P06 = 0, int P07 = 0, int P08 = 0, int P09 = 0,
+		int P10 = 0, int P11 = 0, int P12 = 0, int P13 = 0, int P14 = 0,
+		int P15 = 0, int P16 = 0, int P17 = 0, int P18 = 0, int P19 = 0	
+	>
+	struct HardwiredShape {
+		static const int DIFFS[];
+	};
+
+	template <
+		int P00, int P01, int P02, int P03, int P04, 
+		int P05, int P06, int P07, int P08, int P09,
+		int P10, int P11, int P12, int P13, int P14,
+		int P15, int P16, int P17, int P18, int P19	
+	>
+	const int HardwiredShape<
+		P00,P01,P02,P03,P04,
+		P05,P06,P07,P08,P09,
+		P10,P11,P12,P13,P14,
+		P15,P16,P17,P18,P19 
+	>::DIFFS[] = {
+		P00,P01,P02,P03,P04,
+		P05,P06,P07,P08,P09,
+		P10,P11,P12,P13,P14,
+		P15,P16,P17,P18,P19 
+	};
+
+
+//////////////////////////////////////////////////////////////////////////////
+// Length meta-function for fixed gapped shapes
+
+	template <>
+	struct Length< HardwiredShape<
+		0,0,0,0,0,
+		0,0,0,0,0,
+		0,0,0,0,0,
+		0,0,0,0,0> >
+	{
+		enum { VALUE = 1 };
+	};
+
+	template <
+		int P00, int P01, int P02, int P03, int P04, 
+		int P05, int P06, int P07, int P08, int P09,
+		int P10, int P11, int P12, int P13, int P14,
+		int P15, int P16, int P17, int P18, int P19	
+	>
+	struct Length< HardwiredShape<
+		P00,P01,P02,P03,P04,
+		P05,P06,P07,P08,P09,
+		P10,P11,P12,P13,P14,
+		P15,P16,P17,P18,P19> >
+	{
+		enum { VALUE = Length< HardwiredShape<
+			P01,P02,P03,P04,P05,
+			P06,P07,P08,P09,P10,
+			P11,P12,P13,P14,P15,
+			P16,P17,P18,P19, 0 > >::VALUE + P00 };
+	};
+
+	template <
+	    typename TValue,
+		int P00, int P01, int P02, int P03, int P04, 
+		int P05, int P06, int P07, int P08, int P09,
+		int P10, int P11, int P12, int P13, int P14,
+		int P15, int P16, int P17, int P18, int P19	
+	>
+	struct Length< Shape<TValue, FixedGappedShape< HardwiredShape<
+		P00,P01,P02,P03,P04,
+		P05,P06,P07,P08,P09,
+		P10,P11,P12,P13,P14,
+		P15,P16,P17,P18,P19 
+	> > > >:
+	Length< HardwiredShape<
+		P00,P01,P02,P03,P04,
+		P05,P06,P07,P08,P09,
+		P10,P11,P12,P13,P14,
+		P15,P16,P17,P18,P19 
+	> > {};
+
+
+//////////////////////////////////////////////////////////////////////////////
+// Weight meta-function for fixed gapped shapes
+
+	template <>
+	struct Weight< HardwiredShape<
+		0,0,0,0,0,
+		0,0,0,0,0,
+		0,0,0,0,0,
+		0,0,0,0,0> >
+	{
+		enum { VALUE = 1 };
+	};
+
+	template <
+		int P00, int P01, int P02, int P03, int P04, 
+		int P05, int P06, int P07, int P08, int P09,
+		int P10, int P11, int P12, int P13, int P14,
+		int P15, int P16, int P17, int P18, int P19	
+	>
+	struct Weight< HardwiredShape<
+		P00,P01,P02,P03,P04,
+		P05,P06,P07,P08,P09,
+		P10,P11,P12,P13,P14,
+		P15,P16,P17,P18,P19> >
+	{
+		enum { VALUE = Weight< HardwiredShape<
+			P01,P02,P03,P04,P05,
+			P06,P07,P08,P09,P10,
+			P11,P12,P13,P14,P15,
+			P16,P17,P18,P19, 0 > >::VALUE + 1 };
+	};
+
+	template <
+	    typename TValue,
+		int P00, int P01, int P02, int P03, int P04, 
+		int P05, int P06, int P07, int P08, int P09,
+		int P10, int P11, int P12, int P13, int P14,
+		int P15, int P16, int P17, int P18, int P19	
+	>
+	struct Weight< Shape<TValue, FixedGappedShape< HardwiredShape<
+		P00,P01,P02,P03,P04,
+		P05,P06,P07,P08,P09,
+		P10,P11,P12,P13,P14,
+		P15,P16,P17,P18,P19 
+	> > > >:
+	Weight< HardwiredShape<
+		P00,P01,P02,P03,P04,
+		P05,P06,P07,P08,P09,
+		P10,P11,P12,P13,P14,
+		P15,P16,P17,P18,P19 
+	> > {};
+
+
+//////////////////////////////////////////////////////////////////////////////
 
 /**
 Spec.GappedShape
@@ -32,171 +171,314 @@ Spec.GappedShape
 ..general:Class.Shape
 ..summary:For gapped q-grams.
 */
-template<typename TValue>
-class Shape<TValue,GappedShape>
-{
 
-public:
+	//////////////////////////////////////////////////////////////////////////////
+	// variable gapped shape
+	//////////////////////////////////////////////////////////////////////////////
 
-	unsigned span;
-	unsigned num_gaps;
-	unsigned shape_len;
-	String<unsigned> shape;
+	template <typename TValue>
+	class Shape<TValue, GappedShape>
+	{
+	public:
+//____________________________________________________________________________
+
+		unsigned span;
+		unsigned weight;
+		String<int> diffs;
 	
-	Shape()
+		typename Value<Shape>::Type	hValue;		// current hash value
+
+		Shape()	{}
+
+		// c'tor for ungapped shapes
+		Shape(unsigned _span):
+			span(_span),
+			weight(_span)
+		{
+		SEQAN_CHECKPOINT
+			resize(diffs, _span);
+			for(unsigned i = 0; i < _span; ++i)
+				diffs[i] = 1;
+		}
+
+		Shape(Shape const &other):
+			span(other.span),
+			weight(other.weight),
+			diffs(other.diffs),
+			hValue(other.hValue) {}	
+	};
+
+	//////////////////////////////////////////////////////////////////////////////
+	// fixed gapped shape
+	//////////////////////////////////////////////////////////////////////////////
+
+	template <typename TValue, typename TSpec>
+	class Shape<TValue, FixedGappedShape<TSpec> >
 	{
-SEQAN_CHECKPOINT
-	}
+	public:
+//____________________________________________________________________________
 
-	Shape(unsigned num_gaps, unsigned span):
-	span(span),
-	num_gaps(num_gaps),
-	shape_len(span - num_gaps)
-	{
-SEQAN_CHECKPOINT
-		resize(shape, span - num_gaps);
-		for(unsigned i = 0; i < span - num_gaps; ++i)
-			shape[i] = 1;
-	}
+		typedef FixedGappedShape<TSpec>	TShapeSpec;
 
-	Shape(Shape const & rhs):
-	span(rhs.span),
-	num_gaps(rhs.num_gaps),
-	shape_len(rhs.shape_len),
-	shape(rhs.shape)
-	{
-SEQAN_CHECKPOINT
-	}	
+		enum { span = Length<Shape>::VALUE };
+		enum { weight = Weight<Shape>::VALUE };
+		const int *diffs;
+	
+		typename Value<Shape>::Type	hValue;		// current hash value
 
+		Shape():
+			diffs(TSpec::DIFFS) {}
 
-	unsigned & operator[] (unsigned offset)
+		Shape(Shape const &other):
+			diffs(other.diffs),	
+			hValue(other.hValue) {}
+	};
+
+//////////////////////////////////////////////////////////////////////////////
+
+	template <typename TValue, typename TSpec>
+	inline typename Size< Shape<TValue, FixedGappedShape<TSpec> > >::Type
+	shapeCountBlanks(Shape<TValue, FixedGappedShape<TSpec> > const & me)
 	{
 	SEQAN_CHECKPOINT
-		return shape[offset];
+		return me.span - me.weight;
 	}
 
-
-
-	~Shape()
+	template <typename TValue, typename TSpec>
+	inline typename Size< Shape<TValue, FixedGappedShape<TSpec> > >::Type
+	shapeWeight(Shape<TValue, FixedGappedShape<TSpec> > const & me)
 	{
-		SEQAN_CHECKPOINT
+	SEQAN_CHECKPOINT
+		return me.weight;
 	}
-	
-};
+//____________________________________________________________________________
 
-
-
-
-
-
-template <typename TValue>
-void
-_setShape(Shape<TValue,GappedShape> & me, unsigned span, 
-		  unsigned num_gaps, unsigned shape_len)
-{
-SEQAN_CHECKPOINT
-	me.num_gaps = num_gaps;
-	me.span = span;
-	me.shape_len = shape_len;
-	resize(me.shape, shape_len);
-	for (unsigned i = 0; i < shape_len; ++i)
-		me.shape[i] = 1;
-	me.shape[0] = 0;
-
-}
-
-
-
-template <typename TValue>
-inline unsigned &
-shapeCountBlanks(Shape<TValue, GappedShape> const & me)
-{
-SEQAN_CHECKPOINT
-	return me.num_gaps;
-}
-
-
-
-template <typename TValue, typename TSequenceIterator>
-inline typename Size<Shape<TValue, GappedShape> >::Type
-hash(Shape<TValue, GappedShape> & shape, TSequenceIterator qgram_it)	
-{
-SEQAN_CHECKPOINT
-
-	typedef typename Size<Shape<TValue,GappedShape> >::Type TSize;
-	TValue pos = 0;			
-	TSize * pshape = begin(shape.shape);
-	TSize * pshape_end = end(shape.shape);//
-			
-	while(pshape < pshape_end)
+	template <typename TValue, typename TIter>
+	inline typename Value< Shape<TValue, GappedShape> >::Type
+	hash(Shape<TValue, GappedShape> &me, TIter it)	
 	{
-		qgram_it += *pshape;
-		pos = pos * ValueSize<TValue>::VALUE + (int)*qgram_it;
-		++pshape;
+	SEQAN_CHECKPOINT
+		typedef typename Value< Shape<TValue, GappedShape> >::Type	THValue;
+		typedef typename Size< Shape<TValue, GappedShape> >::Type	TSize;
+
+		me.hValue = _ord(*it);
+		for(TSize i = 1; i < me.span; ++i) {
+			goFurther(it, me.diffs[i]);
+			me.hValue = me.hValue * ValueSize<TValue>::VALUE + _ord(*it);
+		}
+		return me.hValue;
 	}
 
-	return pos;
+	template <typename TValue, typename TSpec, typename TIter, typename TSize>
+	inline typename Value< Shape<TValue, FixedGappedShape<TSpec> > >::Type
+	hash(Shape<TValue, FixedGappedShape<TSpec> > &me, TIter it, TSize charsLeft)
+	{
+	SEQAN_CHECKPOINT
+		typedef typename Value< Shape<TValue, FixedGappedShape<TSpec> > >::Type	THValue;
 
-}
+		TSize iEnd = me.span;
+		if (iEnd > charsLeft) iEnd = charsLeft;
+
+		TSize i = 0;
+		if (iEnd > 0) {
+			me.hValue = _ord(*it);
+			for(TSize i = 1; i < iEnd; ++i) {
+				goFurther(it, me.diffs[i]);
+				me.hValue = me.hValue * ValueSize<TValue>::VALUE + _ord(*it);
+			}
+		} else
+			return me.hValue = 0;
+
+		// fill shape with zeros
+		for(; i < (TSize)me.span; ++i)
+			me.hValue *= ValueSize<TValue>::VALUE;
+		return me.hValue;
+	}
+
+	template <typename TValue, typename TSpec, typename TIter, typename TSize>
+	inline typename Value< Shape<TValue, FixedGappedShape<TSpec> > >::Type
+	hashUpper(Shape<TValue, FixedGappedShape<TSpec> > &me, TIter it, TSize charsLeft)
+	{
+	SEQAN_CHECKPOINT
+		typedef typename Value< Shape<TValue, FixedGappedShape<TSpec> > >::Type	THValue;
+
+		TSize iEnd = me.span;
+		if (iEnd > charsLeft) iEnd = charsLeft;
+
+		TSize i = 0;
+		if (iEnd > 0) {
+			me.hValue = _ord(*it);
+			for(TSize i = 1; i < iEnd; ++i) {
+				goFurther(it, me.diffs[i]);
+				me.hValue = me.hValue * ValueSize<TValue>::VALUE + _ord(*it);
+			}
+			++me.hValue;
+		} else
+			return me.hValue = 1;
+
+		// fill shape with zeros
+		for(; i < (TSize)me.span; ++i)
+			me.hValue *= ValueSize<TValue>::VALUE;
+		return me.hValue;
+	}
+
+//____________________________________________________________________________
+
+	template <typename TValue, typename TSpec, typename TIter>
+	inline void
+	_hashHardwiredShape(Shape<TValue, TSpec> &, TIter &, HardwiredShape<
+		0,0,0,0,0,
+		0,0,0,0,0,
+		0,0,0,0,0,
+		0,0,0,0,0 > const)
+	{
+	}
+
+	template <
+		         int P01, int P02, int P03, int P04,
+		int P05, int P06, int P07, int P08, int P09,
+		int P10, int P11, int P12, int P13, int P14,
+		int P15, int P16, int P17, int P18, int P19,
+		typename TValue, typename TSpec, typename TIter
+	>
+	inline void
+	_hashHardwiredShape(Shape<TValue, TSpec> &me, TIter &it, HardwiredShape<
+		 1 ,P01,P02,P03,P04,
+		P05,P06,P07,P08,P09,
+		P10,P11,P12,P13,P14,
+		P15,P16,P17,P18,P19 > const)
+	{
+		typedef typename Value<Shape<TValue, TSpec> >::Type	THValue;
+
+		++it;
+		me.hValue = me.hValue * ValueSize<TValue>::VALUE + _ord(*it);
+
+		_hashHardwiredShape(me, it, HardwiredShape<
+			P01,P02,P03,P04,P05,
+			P06,P07,P08,P09,P10,
+			P11,P12,P13,P14,P15,
+			P16,P17,P18,P19, 0 >());
+	}
+
+	template <
+		int P00, int P01, int P02, int P03, int P04,
+		int P05, int P06, int P07, int P08, int P09,
+		int P10, int P11, int P12, int P13, int P14,
+		int P15, int P16, int P17, int P18, int P19,
+		typename TValue, typename TSpec, typename TIter
+	>
+	inline void
+	_hashHardwiredShape(Shape<TValue, TSpec> &me, TIter &it, HardwiredShape<
+		P00,P01,P02,P03,P04,
+		P05,P06,P07,P08,P09,
+		P10,P11,P12,P13,P14,
+		P15,P16,P17,P18,P19 > const)
+	{
+		typedef typename Value<Shape<TValue, TSpec> >::Type	THValue;
+
+		it += P00;
+		me.hValue = me.hValue * ValueSize<TValue>::VALUE + _ord(*it);
+
+		_hashHardwiredShape(me, it, HardwiredShape<
+			P01,P02,P03,P04,P05,
+			P06,P07,P08,P09,P10,
+			P11,P12,P13,P14,P15,
+			P16,P17,P18,P19, 0 >());
+	}
+
+	template <
+		int P00, int P01, int P02, int P03, int P04,
+		int P05, int P06, int P07, int P08, int P09,
+		int P10, int P11, int P12, int P13, int P14,
+		int P15, int P16, int P17, int P18, int P19,
+		typename TValue, typename TIter
+	>
+	typename Value< Shape<TValue, FixedGappedShape< HardwiredShape<
+		P00,P01,P02,P03,P04,
+		P05,P06,P07,P08,P09,
+		P10,P11,P12,P13,P14,
+		P15,P16,P17,P18,P19 
+	> > > >::Type
+	hash(Shape<TValue, FixedGappedShape< HardwiredShape<
+		P00,P01,P02,P03,P04,
+		P05,P06,P07,P08,P09,
+		P10,P11,P12,P13,P14,
+		P15,P16,P17,P18,P19 
+	> > > &me, TIter it)
+	{
+	SEQAN_CHECKPOINT
+		typedef HardwiredShape<
+			P00,P01,P02,P03,P04,
+			P05,P06,P07,P08,P09,
+			P10,P11,P12,P13,P14,
+			P15,P16,P17,P18,P19 >								TSpec;
+		typedef FixedGappedShape<TSpec>							TShape;
+		typedef typename Value< Shape<TValue, TShape> >::Type	THValue;
+		typedef typename Size< Shape<TValue, TShape> >::Type	TSize;
+
+		me.hValue = _ord(*it);
+		_hashHardwiredShape(me, it, TSpec());
+		return me.hValue;
+	}
+
+//____________________________________________________________________________
+
+	template <typename TValue, typename TSpec, typename TIter>
+	inline typename Value< Shape<TValue, FixedGappedShape<TSpec> > >::Type
+	hashNext(Shape<TValue, FixedGappedShape<TSpec> > &me, TIter it)	
+	{
+	SEQAN_CHECKPOINT
+		return hash(me, it);
+	}
 
 
-template <typename TSequenceIterator, typename TValue>
-inline typename Size<Shape<TValue, GappedShape> >::Type
-hashNext(
-	Shape<TValue, GappedShape> & shape,
-	TSequenceIterator qgram_1, 
-	TSequenceIterator qgram_2, 
-	typename Size<Shape<TValue, GappedShape> >::Type x)
-{
-SEQAN_CHECKPOINT
-	return hash(shape, qgram_2);
-}
-
-
+//____________________________________________________________________________
 
 /**.Function.stringToShape:
 ..cat:Index
-..summary:Takes a shape given as a string of 'x' (relevant position) and '_' 
+..summary:Takes a shape given as a string of '1' (relevant position) and '0' 
 (irrelevant position) and converts it into a Shape object.
-..signature:stringToShape(object,shape_string)
-..param.object:Shape object that is manipulated.
+..signature:stringToShape(shape, shapeString)
+..param.shape:Shape object that is manipulated.
 ...type:Class.Shape
-..param.shape_string:A string of 'x' and '_' representing relevant and irrelevant positions (blanks) respectively.
+..param.shapeString:A string of '1' and '0' representing relevant and irrelevant positions (blanks) respectively. This string must begin with a '1'.
 ...type:Class.String
 */
-template <typename TValue>
-void 
-stringToShape(Shape<TValue,GappedShape> & shape,String<char> const & shape_string)
-{
-SEQAN_CHECKPOINT
-	unsigned count_gaps = 0;
-	unsigned shape_len;
-	typename Iterator<String<char> const>::Type string_it, string_it_last, string_end;
-	string_it = begin(shape_string);
-	string_it_last = string_it;
-	++string_it;
-	string_end = end(shape_string);
-	while(string_it < string_end) 
-	{
-		if (*string_it == '_')
-			++count_gaps;
-		++string_it_last;
-		++string_it;
-	}
-	shape_len = length(shape_string) - count_gaps;
-	_setShape(shape,length(shape_string),count_gaps,shape_len);
-	string_it = begin(shape_string);
-	unsigned j = 0;
-	while(string_it < string_end && j < shape_len) 
-	{
-		if(*string_it != '_')
-			++j;
-		else
-			++shape[j];
-		++string_it;
-	}
-}
 
+	template <typename TValue, typename TSpec, typename TShapeString>
+	inline void
+	stringToShape(
+		Shape<TValue, FixedGappedShape<TSpec> > &me, 
+		TShapeString const &shapeString)
+	{
+	SEQAN_CHECKPOINT
+		typedef typename Iterator<TShapeString const>::Type		TIter;
+		typedef typename Iterator<String<int> >::Type			TShapeIter;
+
+		me.span = length(shapeString);
+
+		unsigned oneCount = 0;
+		TIter it = begin(shapeString, Standard());
+		TIter itEnd = end(shapeString, Standard());
+		for(; it != itEnd; ++it)
+			if (*it == '1')
+				++oneCount;
+
+		me.weight = oneCount;
+		resize(me.diffs, oneCount);
+
+		unsigned diff = 0;
+		it = begin(shapeString, Standard());
+		TShapeIter itS = begin(me.diffs, Standard());
+		for(; it != itEnd; ++it) {
+			if (*it == '1') {
+				*itS = diff;
+				++itS;
+				diff = 0;
+			}
+			++diff;
+		}
+	}
 
 }	// namespace seqan
 
