@@ -1385,7 +1385,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		createQGramIndexDirOnly(indexDir(index), indexText(index), indexShape(index));
 		return true;
 	}
-
+*/
 
 //////////////////////////////////////////////////////////////////////////////
 // getKmerSimilarityMatrix
