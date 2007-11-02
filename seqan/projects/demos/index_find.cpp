@@ -1,6 +1,8 @@
+#include <iostream>
 #include <seqan/index.h>
-using namespace seqan;
+
 using namespace std;
+using namespace seqan;
 
 int main ()
 {
@@ -16,7 +18,7 @@ int main ()
 ///Doing the same using a q-gram index (q==2)
 	typedef Index< String<char>, Index_QGram< FixedShape<2> > > TQGramIndex;
     TQGramIndex index_2gram("tobeornottobe");
-	Finder<TQGramIndex> finder_2gram(index_2gram);
+	Finder< TQGramIndex > finder_2gram(index_2gram);
 
 	cout << "hit at ";
 	while (find(finder_2gram, "be"))
