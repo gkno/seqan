@@ -382,7 +382,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <typename TText, typename TShapeSpec, typename TPos>
 	inline TPos
-	_firstSuffixOfQGramBucket(
+	_firstSuffixOfBucket(
 		Index<TText, Index_QGram_Nested<TShapeSpec> > &index, 
 		TPos pos)
 	{
@@ -413,8 +413,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Value<TDir>::Type							TDirValue;
 
 		// expand directory table
-		TSize sa1 = _firstSuffixOfQGramBucket(index, pos);
-		TSize sa2 = _firstSuffixOfQGramBucket(index, pos + 1);
+		TSize sa1 = _firstSuffixOfBucket(index, pos);
+		TSize sa2 = _firstSuffixOfBucket(index, pos + 1);
 
 		// sub-directory contains too little suffices
 		// maximal qgram-tree depth reached -> do a complete quicksort
@@ -526,7 +526,7 @@ namespace SEQAN_NAMESPACE_MAIN
 //				_dump(index);
 				if (subDir & index.SORTED_SA) {
 					subDir &= index.BITMASK;
-					TSize sa2 = _firstSuffixOfQGramBucket(index, pos + 1);
+					TSize sa2 = _firstSuffixOfBucket(index, pos + 1);
 					typedef typename Infix<TSA>::Type TInfSA;
 					typedef Pair<typename Iterator<TInfSA const>::Type> TItPair;
 					TItPair itP = equalRangeSA(
@@ -545,8 +545,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		TPair range;
 		TDirValue pos1 = dirOffset + hash2(shape, it, rest);
 		TDirValue pos2 = dirOffset + hash2Upper(shape, it, rest);
-		range.i1 = _firstSuffixOfQGramBucket(index, pos1);
-		range.i2 = _firstSuffixOfQGramBucket(index, pos2);
+		range.i1 = _firstSuffixOfBucket(index, pos1);
+		range.i2 = _firstSuffixOfBucket(index, pos2);
 
 		return range;
 	}

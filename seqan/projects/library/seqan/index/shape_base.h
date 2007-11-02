@@ -33,20 +33,6 @@ namespace SEQAN_NAMESPACE_MAIN
 	typedef FixedGappedShape<Default> GappedShape;
 
 
-	template <typename TValue, typename TExponent>
-	inline TValue _intPow(TValue a, TExponent b)
-	{
-	SEQAN_CHECKPOINT
-		TValue ret = 1;
-		while (b != 0)
-		{
-			if (b & 1) ret *= a;
-			a *= a;
-			b >>= 1;
-		}	
-		return ret;
-	}
-
 /**
 .Class.Shape:
 ..cat:Index

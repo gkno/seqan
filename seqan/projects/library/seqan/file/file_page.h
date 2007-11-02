@@ -455,7 +455,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < typename TValue, typename TFile > inline
 	unsigned readBucket(PageBucket<TValue> &b, int pageNo, unsigned pageSize, unsigned dataSize, TFile &file) {
 		typedef typename Position<TFile>::Type pos_t;
-        unsigned readSize = Min(dataSize - b.pageOfs, (unsigned)(b.end - b.begin));
+        unsigned readSize = _min(dataSize - b.pageOfs, (unsigned)(b.end - b.begin));
 		#ifdef SEQAN_VVERBOSE
 			::std::cerr << "readBucket:  " << ::std::hex << b.begin;
 			::std::cerr << " from page " << ::std::dec << pageNo << " at " << (pos_t)pageNo * (pos_t)pageSize + b.pageOfs;

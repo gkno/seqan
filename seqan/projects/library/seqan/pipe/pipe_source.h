@@ -232,7 +232,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
         inline TBuffer& first() {
             rest = length(pipe);
-			allocPage(buffer, Min(bufferSize, rest), *this);
+			allocPage(buffer, _min(bufferSize, rest), *this);
 			source = ISource(pipe);
 			for(ITarget target = buffer.begin; target != buffer.end; ++target) {
 				*target = *source;
@@ -243,7 +243,7 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 
         inline TBuffer& next() {
-			resize(buffer, Min(bufferSize, rest));
+			resize(buffer, _min(bufferSize, rest));
 			ITarget _end = buffer.begin + size(buffer);
 			for(ITarget target = buffer.begin; target != _end; ++target) {
 				*target = *source;
@@ -292,7 +292,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
         inline TBuffer& first() {
             rest = length(pipe.in);
-			allocPage(buffer, Min(bufferSize, rest), *this);
+			allocPage(buffer, _min(bufferSize, rest), *this);
 			source = begin(pipe.in);
 			for(ITarget target = buffer.begin; target != buffer.end; ++target) {
 				*target = *source;
@@ -303,7 +303,7 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 
         inline TBuffer& next() {
-			resize(buffer, Min(bufferSize, rest));
+			resize(buffer, _min(bufferSize, rest));
 			ITarget _end = buffer.begin + size(buffer);
 			for(ITarget target = buffer.begin; target != _end; ++target) {
 				*target = *source;
@@ -363,7 +363,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < typename TInput, typename TSpec >
 	inline bool control(Pipe< TInput, Source<TSpec> > &me, ControlBeginRead const &) {
-		me.cur = begin(me.in);
+		me.cur = begin(me.in, Rooted());
 		return true;
 	}
 	
@@ -375,12 +375,12 @@ namespace SEQAN_NAMESPACE_MAIN
 	
 	template < typename TInput, typename TSpec >
 	inline bool control(Pipe< TInput, Source<TSpec> > &me, ControlEof const &) {
-		return me.cur == end(me.in);
+		return atEnd(me.cur);
 	}
 
 	template < typename TInput, typename TSpec >
 	inline bool control(Pipe< TInput, Source<TSpec> > &me, ControlEos const &) {
-		return control(me, ControlEof());
+		return atEndOfSequence(me.cur);
 	}
 
     template < typename TInput, typename TSpec >

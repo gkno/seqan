@@ -309,12 +309,26 @@ log2(T val)
 	return _Log2_Impl<BITS_PER_VALUE>::log2(val, 0);
 }
 
+template <typename TValue, typename TExponent>
+inline TValue _intPow(TValue a, TExponent b)
+{
+SEQAN_CHECKPOINT
+	TValue ret = 1;
+	while (b != 0)
+	{
+		if (b & 1) ret *= a;
+		a *= a;
+		b >>= 1;
+	}	
+	return ret;
+}
+
 //////////////////////////////////////////////////////////////////////////////
 // to avoid conflicts with non-standard macros and namespaces
 // we define our own Min/Max functions
 
 template<typename _Tx> inline
-const _Tx& Min(const _Tx& _Left, const _Tx& _Right)
+const _Tx& _min(const _Tx& _Left, const _Tx& _Right)
 {	// return smaller of _Left and _Right
 	if (_Left < _Right)
 		return _Left;
@@ -323,13 +337,13 @@ const _Tx& Min(const _Tx& _Left, const _Tx& _Right)
 }
 
 template<typename _Tx, typename _Ty> inline
-_Tx Min(const _Tx& _Left, const _Ty& _Right)
+_Tx _min(const _Tx& _Left, const _Ty& _Right)
 {	// return smaller of _Left and _Right
     return (_Right < _Left ? _Right : _Left);
 }
 
 template<typename _Ty> inline
-const _Ty& Max(const _Ty& _Left, const _Ty& _Right)
+const _Ty& _max(const _Ty& _Left, const _Ty& _Right)
 {	// return larger of _Left and _Right
 	if (_Left < _Right)
 		return _Right;

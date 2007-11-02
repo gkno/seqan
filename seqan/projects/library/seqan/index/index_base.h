@@ -93,7 +93,7 @@ namespace SEQAN_NAMESPACE_MAIN
 /**
 .Class.Index:
 ..summary:Contains preprocessing data of a fixed text. Allows fast dictionary look-up and advanced computations.
-..cat:Pattern Matching
+..cat:Index
 ..signature:Index<TText[, TSpec]>
 ..param.TText:The text type.
 ...type:Class.String

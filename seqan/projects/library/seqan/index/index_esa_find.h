@@ -544,7 +544,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			TTextIter	t = begin(suf, Standard());
 			TTextIter	tEnd = end(suf, Standard());
 			TQueryIter	q = qBegin;
-            TDiff		lcp = Min(lcpLower, lcpUpper);
+            TDiff		lcp = _min(lcpLower, lcpUpper);
 
 			goFurther(t, lcp);
 			goFurther(q, lcp);
@@ -598,7 +598,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			TTextIter	t = begin(suf, Standard());
 			TTextIter	tEnd = end(suf, Standard());
 			TQueryIter	q = qBegin;
-            TDiff		lcp = Min(lcpLower, lcpUpper);
+            TDiff		lcp = _min(lcpLower, lcpUpper);
 
 			goFurther(t, lcp);
 			goFurther(q, lcp);
@@ -653,7 +653,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			TTextIter	t = begin(suf, Standard());
 			TTextIter	tEnd = end(suf, Standard());
 			TQueryIter	q = qBegin;
-            TDiff		lcp = Min(lcpLower, lcpUpper);
+            TDiff		lcp = _min(lcpLower, lcpUpper);
 
 			goFurther(t, lcp);
 			goFurther(q, lcp);
@@ -1095,13 +1095,13 @@ namespace SEQAN_NAMESPACE_MAIN
 			TQueryIter	q = qBegin;
 
 			// lcp search changes MIN to MAX here
-//			TDiff lcp = Max(lcpLower, lcpUpper);
+//			TDiff lcp = _max(lcpLower, lcpUpper);
 			#ifdef SEQAN_PROFILE_LCPEFIND
-				skippedCompares += lcp - Min(lcpLower, lcpUpper);
+				skippedCompares += lcp - _min(lcpLower, lcpUpper);
 			#endif
 			goFurther(t, lcp);
 			goFurther(q, lcp);
-			for(TDiff i = Min(difference(t, tEnd), difference(q, qEnd)); 
+			for(TDiff i = _min(difference(t, tEnd), difference(q, qEnd)); 
 				i && *t == *q;
 				--i, ++t, ++q, ++lcp);
 
@@ -1130,7 +1130,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		#endif
 
         // binary search for intervals of 2 or less elements
-        lcp = Min(lcpLower, lcpUpper);
+        lcp = _min(lcpLower, lcpUpper);
 		TQueryIter q = qBegin;
 		goFurther(q, lcp);
 
@@ -1140,7 +1140,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			TTextIter	tEnd = end(suf, Standard());
 
 			goFurther(t, lcp);
-			for(TDiff i = Min(difference(t, tEnd), difference(q, qEnd)); 
+			for(TDiff i = _min(difference(t, tEnd), difference(q, qEnd)); 
             	i && *t == *q;
             	 --i, ++t, ++q);
 
@@ -1275,10 +1275,10 @@ namespace SEQAN_NAMESPACE_MAIN
 			TQueryIter	q = qBegin;
 
 			// lcp search changes MIN to MAX here
-			TDiff lcp = Max(lcpLower, lcpUpper);
+			TDiff lcp = _max(lcpLower, lcpUpper);
 			goFurther(t, lcp);
 			goFurther(q, lcp);
-			TDiff max = Min(difference(t, tEnd), difference(q, qEnd));
+			TDiff max = _min(difference(t, tEnd), difference(q, qEnd));
             TDiff i = max;
 			for(; i && *t == *q; --i, ++t, ++q);
 			lcp += max - i;
@@ -1304,7 +1304,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
 
         // binary search for intervals of 2 or less elements
-        TDiff lcp = Min(lcpLower, lcpUpper);
+        TDiff lcp = _min(lcpLower, lcpUpper);
 		TQueryIter q = qBegin;
 		goFurther(q, lcp);
 
@@ -1314,7 +1314,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			TTextIter	tEnd = end(suf, Standard());
 
 			goFurther(t, lcp);
-			TDiff i = Min(difference(t, tEnd), difference(q, qEnd));
+			TDiff i = _min(difference(t, tEnd), difference(q, qEnd));
             for(; i && *t == *q; --i, ++t, ++q);
 
             // is text <= query ?
@@ -1448,10 +1448,10 @@ namespace SEQAN_NAMESPACE_MAIN
 			TQueryIter	q = qBegin;
 
 			// lcp search changes MIN to MAX here
-			TDiff lcp = Max(lcpLower, lcpUpper);
+			TDiff lcp = _max(lcpLower, lcpUpper);
 			goFurther(t, lcp);
 			goFurther(q, lcp);
-			TDiff max = Min(difference(t, tEnd), difference(q, qEnd));
+			TDiff max = _min(difference(t, tEnd), difference(q, qEnd));
             TDiff i = max;
 			for(; i && *t == *q; --i, ++t, ++q);
 			lcp += max - i;

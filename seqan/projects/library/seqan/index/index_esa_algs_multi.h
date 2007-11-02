@@ -30,6 +30,20 @@ namespace SEQAN_NAMESPACE_MAIN
 	//////////////////////////////////////////////////////////////////////////////
 
 
+/**
+.Spec.MUMs Iterator:
+..cat:Index
+..general:Spec.BottomUp Iterator
+..summary:Iterator to search for all maximum unique matches.
+..signature:Iterator<TContainer, MUMs>::Type
+..signature:Iter<TContainer, VSTree< BottomUp<MUMs> > >
+..param.TContainer:Type of an index that can be iterated with a bottom-up iterator.
+...type:Spec.Index_ESA
+...metafunction:Metafunction.Container
+..implements:Concept.Iterator
+..param.TSpec:The specialization type.
+*/
+
 	//////////////////////////////////////////////////////////////////////////////
 	// MUMs - generalized suffix tree version
 	//////////////////////////////////////////////////////////////////////////////
@@ -95,6 +109,20 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 	
+/**
+.Spec.MultiMEMs Iterator:
+..cat:Index
+..general:Spec.BottomUp Iterator
+..summary:Iterator to search for MultiMEMs.
+..signature:Iterator<TContainer, MultiMEMs>::Type
+..signature:Iter<TContainer, VSTree< BottomUp<MultiMEMs> > >
+..param.TContainer:Type of an index that can be iterated with a bottom-up iterator.
+...type:Spec.Index_ESA
+...metafunction:Metafunction.Container
+..implements:Concept.Iterator
+..param.TSpec:The specialization type.
+*/
+
 	//////////////////////////////////////////////////////////////////////////////
 	// MultiMEMs
 	//////////////////////////////////////////////////////////////////////////////

@@ -231,13 +231,13 @@ namespace SEQAN_NAMESPACE_MAIN
 
         BufferHandler(TPool &_pool):
             pool(_pool),
-            chain(Min(_pool.readAheadBuffers, _pool.pages())),
+            chain(_min(_pool.readAheadBuffers, _pool.pages())),
 			pageSize(_pool.pageSize) {}
 
         BufferHandler(TPool &_pool, unsigned _requestedBufferSize, unsigned _readAheadBuffers = 1):
             pool(_pool),
-//            pageSize(alignSize(Min(_pool.size(), _requestedBufferSize), _pool.pageSize)),
-            chain(Min(_readAheadBuffers, _pool.pages(pageSize = alignSize(Min(_pool.size(), _requestedBufferSize), _pool.pageSize)))) 
+//            pageSize(alignSize(_min(_pool.size(), _requestedBufferSize), _pool.pageSize)),
+            chain(_min(_readAheadBuffers, _pool.pages(pageSize = alignSize(_min(_pool.size(), _requestedBufferSize), _pool.pageSize)))) 
         {
 			#ifdef SEQAN_HEADER_PIPE_DEBUG
 				::std::cerr << "___BufferHandler___" << ::std::endl;
@@ -349,13 +349,13 @@ namespace SEQAN_NAMESPACE_MAIN
 
         BufferHandler(TPool &_pool):
             pool(_pool),
-            chain(Min(_pool.writeBackBuffers, _pool.pages())),
+            chain(_min(_pool.writeBackBuffers, _pool.pages())),
 			pageSize(_pool.pageSize) {}
 
         BufferHandler(TPool &_pool, unsigned _requestedBufferSize, unsigned _writeBackBuffers = 1):
             pool(_pool),
-            chain(Min(_writeBackBuffers, _pool.pages(pageSize))),
-			pageSize(alignSize(Min(_pool.size(), _requestedBufferSize), _pool.pageSize)) {}
+            chain(_min(_writeBackBuffers, _pool.pages(pageSize))),
+			pageSize(alignSize(_min(_pool.size(), _requestedBufferSize), _pool.pageSize)) {}
 
         ~BufferHandler() {
             cancel();

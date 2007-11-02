@@ -258,7 +258,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
         BufferHandler(TPool &_pool, unsigned _requestedBufferSize):
             pool(_pool),
-            mergeBufferSize(Min(_pool.size(), _requestedBufferSize)),
+            mergeBufferSize(_min(_pool.size(), _requestedBufferSize)),
             pqueue(StreamComparer(_pool.handlerData.compare)) { }
         
         ~BufferHandler() {

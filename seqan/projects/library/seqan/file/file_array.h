@@ -365,7 +365,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TOffset fileOfs = 0;
 		while (count) {
 			TFile &file = me.getFileAndOffset(offset, fileOfs, memPtr);
-			TSize xmitSize = Min(me.restAt(fileOfs, memPtr), (__int64)count);
+			TSize xmitSize = _min(me.restAt(fileOfs, memPtr), (__int64)count);
 			if (!readAt(file, memPtr, xmitSize, fileOfs)) return false;
 			count -= xmitSize;
 			offset += xmitSize;
@@ -379,7 +379,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TOffset fileOfs = 0;
 		while (count) {
 			TFile &file = me.getFileAndOffset(offset, fileOfs, memPtr);
-			TSize xmitSize = Min(me.restAt(fileOfs, memPtr), (__int64)count);
+			TSize xmitSize = _min(me.restAt(fileOfs, memPtr), (__int64)count);
 			if (!writeAt(file, memPtr, xmitSize, fileOfs)) return false;
 			count -= xmitSize;
 			offset += xmitSize;
@@ -393,7 +393,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TOffset fileOfs = 0;
 		while (count) {
 			TFile &file = me.getFileAndOffset(offset, fileOfs, memPtr);
-			TSize xmitSize = Min(me.restAt(fileOfs, memPtr), (__int64)count);
+			TSize xmitSize = _min(me.restAt(fileOfs, memPtr), (__int64)count);
 			if (count != xmitSize) {
 				if (!readAt(file, memPtr, xmitSize, fileOfs)) return false;
 			} else
@@ -410,7 +410,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TOffset fileOfs = 0;
 		while (count) {
 			TFile &file = me.getFileAndOffset(offset, fileOfs, memPtr);
-			TSize xmitSize = Min(me.restAt(fileOfs, memPtr), (__int64)count);
+			TSize xmitSize = _min(me.restAt(fileOfs, memPtr), (__int64)count);
 			if (count != xmitSize) {
 				if (!writeAt(file, memPtr, xmitSize, fileOfs)) return false;
 			} else

@@ -241,7 +241,7 @@ namespace SEQAN_NAMESPACE_MAIN
         BufferHandler(TPool &_pool, unsigned _requestedBufferSize, unsigned _readAheadBuffers = 1):
             Base(_pool, _requestedBufferSize, _readAheadBuffers)
         {
-            allocPage(mapBuffer, alignSize(Min((_pool.size(), _requestedBufferSize), _pool.pageSize), *this);
+            allocPage(mapBuffer, alignSize(_min((_pool.size(), _requestedBufferSize), _pool.pageSize), *this);
         }
 
         ~BufferHandler()

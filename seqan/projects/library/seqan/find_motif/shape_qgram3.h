@@ -34,7 +34,7 @@ public:
 	q(q),
 	shape_len(shape_len),
 	num_gaps(num_gaps),
-	term(intPow(alp_size, q-1-num_gaps))
+	term(_intPow(alp_size, q-1-num_gaps))
 	{
 		resize(shape, shape_len);
 		for(int i = 0; i < shape_len; ++i)
@@ -68,7 +68,7 @@ setShape(Shape<TString,GappedShape3> & me,int num_gaps, int q, int alp_size, int
 	me.num_gaps = num_gaps;
 	me.q = q;
 	me.shape_len = shape_len;
-	me.term = intPow(alp_size, q-1-num_gaps);
+	me.term = _intPow(alp_size, q-1-num_gaps);
 	resize(me.shape, shape_len);
 	for (int i = 0; i < shape_len; ++i)
 		me.shape[i] = 1;
@@ -84,7 +84,7 @@ setShape(Shape<TString,GappedShape3> & me,int num_gaps, int q, int alp_size, int
 	me.num_gaps = num_gaps;
 	me.q = q;
 	me.shape_len = shape_len;
-	me.term = intPow(alp_size, q-1-num_gaps);
+	me.term = _intPow(alp_size, q-1-num_gaps);
 	resize(me.shape, shape_len);
 	for (int i = 0; i < shape_len; ++i)
 		me.shape[i] = 0;

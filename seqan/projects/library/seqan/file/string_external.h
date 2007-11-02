@@ -1122,7 +1122,7 @@ namespace SEQAN_NAMESPACE_MAIN
 				PageFrameRef pf = cache[frameNo];
 				cache.upgrade(
                     pf, 
-                    Max(pf.priority, newLevel));    		// update lru order
+                    _max(pf.priority, newLevel));    		// update lru order
 
 				if (waitFor(pf))    						// wait for i/o transfer to complete
                     if (pf.pageNo >= lastDiskPage) {
@@ -1162,7 +1162,7 @@ namespace SEQAN_NAMESPACE_MAIN
 				pf.pageNo = pageNo;							// set back link
 				cache.upgrade(
                     pf,
-                    Max(getPriority(pageNo), newLevel));    // update lru order
+                    _max(getPriority(pageNo), newLevel));    // update lru order
 
                 if (prefetchPages > 0) prefetch(pageNo + 1, pageNo + 1 + prefetchPages, frameNo);
                 else if (prefetchPages < 0) prefetch(pageNo + prefetchPages, pageNo, frameNo);
@@ -1238,7 +1238,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			if (frameNo >= 0) {								        // release only cached pages
 				PageFrameRef pf = cache[frameNo];
 				if (pf.begin.isLonely() && pf.priority <= PageFrame::ITERATOR_LEVEL) {
-					cache.upgrade(pf, Max(getPriority(pageNo), PageFrame::NORMAL_LEVEL));
+					cache.upgrade(pf, _max(getPriority(pageNo), PageFrame::NORMAL_LEVEL));
                     if (writeThrough) {
                         #ifdef SEQAN_VERBOSE
                             if (pf.dirty)
@@ -1339,7 +1339,7 @@ namespace SEQAN_NAMESPACE_MAIN
         inline void resizeCache(unsigned newFrames) {
             unsigned oldFrames = cache.size();
             if (_size)
-                newFrames = Min(newFrames, (unsigned) enclosingBlocks(_size, (unsigned)_PageSize));
+                newFrames = _min(newFrames, (unsigned) enclosingBlocks(_size, (unsigned)_PageSize));
             if (newFrames < oldFrames) {
                 flush();
                 for(unsigned i = newFrames; i < oldFrames; ++i) {

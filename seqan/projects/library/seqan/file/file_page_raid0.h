@@ -133,7 +133,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		File< Striped<_FileCount, TFile> > &file) 
 	{
 		typedef typename Position<TFile>::Type pos_t;
-        unsigned readSize = Min(dataSize - b.pageOfs, (unsigned)(b.end - b.begin));
+        unsigned readSize = _min(dataSize - b.pageOfs, (unsigned)(b.end - b.begin));
 		#ifdef SEQAN_VVERBOSE
 			::std::cerr << "readBucket:  " << ::std::hex << b.begin;
 			::std::cerr << " from page " << ::std::dec << pageNo << " at " << (pos_t)(pageNo / _FileCount) * (pos_t)pageSize + b.pageOfs;

@@ -32,7 +32,7 @@ public:
 	// Konstruktor
 	Shape( int q, int alp_size):
 	q(q),
-	term(intPow(alp_size, q-1))
+	term(_intPow(alp_size, q-1))
 	{
 	}
 
