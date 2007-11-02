@@ -1,3 +1,4 @@
+#include <iostream>
 #include <fstream>
 #include <seqan/basic.h>
 #include <seqan/file.h>
