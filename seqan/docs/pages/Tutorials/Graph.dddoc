@@ -42,9 +42,11 @@ An @Spec.Undirected graph@ has, of course, undirected edges but in all other res
 it can be used in the same way as a directed graph.
 ...code:Graph<Undirected<void> > undirectedGraph;
 ...text:
-In this case, all edges have no cargo.
+In this example, the edges have no cargo.
 
-
+SeqAn is not a library for graph algorithms, but for sequence analysis. Hence we introduced graphs
+as a helper class for string matching or alignment algorithms. Those algorithms make use of special graphs 
+(like trees, automata, or alignment graphs) which are  therefor predefined in SeqAn.
 
 ...section:# Tree
 
