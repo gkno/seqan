@@ -10,13 +10,23 @@ namespace SEQAN_NAMESPACE_MAIN
 
 /**
 .Spec.EPatternBranching:
-..summary: Represents the ePatternBranching algorithm.
+..summary: Represents the ePatternBranching algorithm of Davila and Rajasekaran.
 ..general:Class.MotifFinder
 ..cat:Motif Finding
 ..signature:MotifFinder<TValue, EPatternBranching>
 ..param.TValue:The type of sequences to be analyzed.
 ...type:Spec.Dna
 ...type:Spec.AminoAcid
+..remarks:The @Spec.EPatternBranching@ algorithm is an extended version of the
+          well-known PatternBranching algorithm which was developed by Price et al. 
+		  It is a heuristic algorithm such as @Spec.Projection@ and uses a pattern-based
+		  approach. The algorithm searches in the space of possible motifs. The basic concept
+		  of @Spec.EPatternBranching@ remains the same as in the original PatternBranching algorithm
+		  Starting from each l-mer $x$ in the input sequences the algorithm iteratively searches
+		  around the vicinities of $x$ and finds the best neighbors by applying a specific function
+		  called bestNeighbors. At the end of each step, it selects those patterns from the set
+		  of best neighbors that fulfill a particular condition and that are therefore qualified
+		  for being a motif instance.
 */
 
 ///.Class.MotifFinder.param.TSpec.type:Spec.EPatternBranching
@@ -252,7 +262,7 @@ ePatternBranching(TStrings & result_set,
 	typedef typename String<int> TIntAr;
 	typename Size<TStrings>::Type t = length(dataset);
 	typename Iterator<TStrings>::Type ds_iter = begin(dataset);
-	Shape<TValue, SimpleShape> shape(l, ValueSize<TValue>::VALUE);
+	Shape<TValue> shape(l);
 	std::set<int> result;
 
 	//we only consider l-mers from the first input sequence as starting points
@@ -353,7 +363,7 @@ ePatternBranching(TStrings & result_set,
 	typedef typename String<int> TIntAr;
 	typename Size<TStrings>::Type t = length(dataset);
 	typename Iterator<TStrings>::Type ds_iter = begin(dataset);
-	Shape<TValue, SimpleShape> shape(l, ValueSize<TValue>::VALUE);
+	Shape<TValue> shape(l);
 	std::set<int> result;
 
 	//we only consider l-mers from the first input sequence as starting points
@@ -471,7 +481,7 @@ bestNeighbors(TIntSet & neighbors,
 	typedef typename Value<TString>::Type TValue;
 	typedef String<int> TIntArray;
 	typedef typename Position<TString>::Type TPos;
-	Shape<TValue, SimpleShape> shape(l, ValueSize<TValue>::VALUE);
+	Shape<TValue> shape(l);
 	typename Size<TStrings>::Type t = length(dataset);
 	int seq_nr = 0;
 	int seq_pos = 0;

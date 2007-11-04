@@ -8,12 +8,8 @@
 
 #include <seqan/sequence.h>
 #include <seqan/file.h>
-
-/// Anne-Katrin
-#include <seqan/find_motif/shape_base.h>
-#include <seqan/find_motif/shape_qgram3.h>
-#include <seqan/find_motif/index_qgram.h>
-///
+#include <seqan/index/shape_base.h>
+#include <seqan/index/shape_gapped.h>
 
 #include <seqan/find_motif/sequence_model_types.h>
 

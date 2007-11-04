@@ -10,13 +10,14 @@ namespace SEQAN_NAMESPACE_MAIN
 
 /**
 .Spec.CMode:
-..summary: "constant" mode (pseudocount = epsilon/alphabet_size).
+..summary: Represents the C ("constant") computation scheme for handling "zero" probabilities.
 ..general:Class.Pseudocount
 ..cat:Motif Finding
 ..signature:Pseudocount<TValue, CMode>
 ..param.TValue:The type of sequence which is considered.
 ...type:Spec.Dna
 ...type:Spec.AminoAcid
+..remarks:The pseudocount is identical for each residue (pseudocount = epsilon/alphabet_size).
 */
 
 ///.Class.Pseudocount.param.TSpec.type:Spec.CMode

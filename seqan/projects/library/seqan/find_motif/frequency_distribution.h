@@ -12,14 +12,15 @@ namespace SEQAN_NAMESPACE_MAIN
           the frequency (absolute or relative probability) of a particular residue which is a member
 		  of a fixed sequence alphabet.
 ..cat:Motif Finding
-..signature:MotifFinder<TValue[, TSpec]>
+..signature:FrequencyDistribution<TValue[, TSpec]>
 ..param.TValue:The type of sequence which is considered.
-...type:@Spec.Dna@ or @Spec.AminoAcid@
+...type:Spec.Dna
+...type:Spec.AminoAcid
 ..param.TSpec:The type of probability distribution. 
 ...default: $double$
-...type:$double$ for relative probabilities, $int$ for absolute probabilities
+...type:double (for relative probabilities), int (for absolute probabilities)
 ...remarks: It is preferable to use $double$.
-..remarks:The number of objects in "FrequencyDistribution" equals the size of the sequence alphabet.
+..remarks:The number of objects in @Class.FrequencyDistribution@ equals the size of the sequence alphabet.
 */
 
 template<typename TValue, typename TSpec = double>
@@ -32,20 +33,22 @@ class FrequencyDistribution
 //____________________________________________________________________________________________
 
 public:
-	TSpec frequency_list[SIZE];
+	String<TSpec> frequency_list;
 
 	// constructor & destructor
 	FrequencyDistribution()
 	{
-		std::fill(&frequency_list[0], &frequency_list[SIZE], 0);
+		resize(frequency_list, SIZE);
+		std::fill(begin(frequency_list), end(frequency_list), static_cast<TSpec>(0));
 	}
 	FrequencyDistribution(TValue const & letter_)
 	{
+		resize(frequency_list, SIZE);
 		convertResidueToFrequencyDist(*this, letter_);
 	}
 	FrequencyDistribution(FrequencyDistribution const & other_)
 	{
-		std::copy(&other_.frequency_list[0], &other_.frequency_list[SIZE], this->frequency_list); 
+		frequency_list = other_.frequency_list; 
 	}
 	~FrequencyDistribution()
 	{
@@ -57,7 +60,8 @@ public:
 	{
 		if(this!=&other_)
 		{
-			std::copy(&other_.frequency_list[0], &other_.frequency_list[SIZE], this->frequency_list);
+			clear(frequency_list);
+			frequency_list = other_.frequency_list; 
 		}
 		return *this;
 	}
@@ -131,9 +135,9 @@ public:
 		return frequency_list[index_];
 	}
 
-	template<typename TPos>
+	template<typename TPosition>
 	inline TSpec const & 
-	operator [] (TPos const index_) const
+	operator [] (TPosition const index_) const
 	{
 		return frequency_list[index_];
 	}
@@ -141,8 +145,7 @@ public:
     friend inline std::ostream & 
 	operator << (std::ostream & ostr, FrequencyDistribution & fd_) 
 	{ 
-		size_t i;
-		for(i=0; i<SIZE; ++i)
+		for(size_t i=0; i<SIZE; ++i)
 		{	
 			ostr.width(15);
 			ostr << std::left << fd_.frequency_list[i];
@@ -159,37 +162,17 @@ public:
 //Metafunctions
 //////////////////////////////////////////////////////////////////////////////
 
-/**
-.Metafunction.Value:
-..summary:Returns the sequence type of a @Class.FrequencyDistribution@ type.
-..cat:Motif Finding
-..signature:Value<TFrequencyDistribution>::Type
-..param.TFrequencyDistribution:A @Class.FrequencyDistribution@ type.
-...type:Class.FrequencyDistribution
-..returns:The sequence type of $TFrequencyDistribution$, i.e. $TValue$ for $FrequencyDistribution<TValue, TSpec>$.
-*/
-
-template<typename TValue, typename TSpec>
-struct Value< FrequencyDistribution<TValue, TSpec> >
-{
-	typedef TValue Type;
-};
-template<typename TValue, typename TSpec>
-struct Value< FrequencyDistribution<TValue, TSpec> const>
-{
-	typedef TValue const Type;
-};
-
 //////////////////////////////////////////////////////////////////////////////
 
 /**
 .Metafunction.FrequencyType:
-..summary:Returns the type of probability distribution of a @Class.FrequencyDistribution@ type.
+..summary:Type of the probabilities in the container.
 ..cat:Motif Finding
 ..signature:FrequencyType<TFrequencyDistribution>::Type
-..param.TFrequencyDistribution:A @Class.FrequencyDistribution@ type.
+..param.TFrequencyDistribution:Type for which the probability type is determined.
 ...type:Class.FrequencyDistribution
-..returns:The probability type of $TFrequencyDistribution$, i.e. $TSpec$ for $FrequencyDistribution<TValue, TSpec>$.
+..returns.param.Type:FrequencyType type of $TFrequencyDistribution$.
+..remarks.text:This type is the second template parameter $TSpec$ of $FrequencyDistribution<TValue, TSpec>$.
 */
 
 template<typename TFrequencyDistribution>
@@ -208,16 +191,13 @@ struct FrequencyType< FrequencyDistribution<TValue, TSpec> const>
 
 //////////////////////////////////////////////////////////////////////////////
 
-///.Metafunction.Size.param.T.type:Class.FrequencyDistribution
-template<typename TValue, typename TSpec>
-struct Size< FrequencyDistribution<TValue, TSpec> >
+///.Metafunction.Iterator.param.T.type:Class.FrequencyDistribution
+
+template <typename TValue, typename TSpec, typename TIteratorSpec>
+struct Iterator< FrequencyDistribution<TValue, TSpec>, TIteratorSpec >
 {
-	typedef typename Size<TValue>::Type Type;
-};
-template<typename TValue, typename TSpec>
-struct Size<FrequencyDistribution<TValue, TSpec> const>
-{
-	typedef typename Size<TValue const>::Type Type;
+	typedef String<TSpec> TString;
+	typedef typename Iterator<TString, TIteratorSpec>::Type Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -227,33 +207,51 @@ struct Size<FrequencyDistribution<TValue, TSpec> const>
 template<typename TValue, typename TSpec>
 struct Position< FrequencyDistribution<TValue, TSpec> >
 {
-	typedef typename Position<TValue>::Type Type;
+	typedef String<TSpec> TString;
+	typedef typename Position<TString>::Type Type;
 };
 template<typename TValue, typename TSpec>
 struct Position< FrequencyDistribution<TValue, TSpec> const>
 {
-	typedef typename Position<TValue const>::Type Type;
+	typedef String<TSpec> TString;
+	typedef typename Position<TString const>::Type Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
 
-///.Metafunction.Iterator.param.T.type:Class.FrequencyDistribution
-
-/*template <typename TValue, typename TSpec>
-struct Iterator< FrequencyDistribution<TValue, TSpec> >
-{
-	typedef typename Iterator< FrequencyDistribution<TValue, TSpec>, Standard >::Type Type;
-};*/
+///.Metafunction.Size.param.T.type:Class.FrequencyDistribution
 
 template<typename TValue, typename TSpec>
-struct Iterator< FrequencyDistribution<TValue, TSpec>, Standard >
+struct Size< FrequencyDistribution<TValue, TSpec> >
 {
-	typedef TSpec * Type;
+	typedef String<TSpec> TString;
+	typedef typename Size<TString>::Type Type;
 };
 template<typename TValue, typename TSpec>
-struct Iterator< FrequencyDistribution<TValue, TSpec> const, Standard >
+struct Size<FrequencyDistribution<TValue, TSpec> const>
 {
-	typedef TSpec const * Type;
+	typedef String<TSpec> TString;
+	typedef typename Size<TString const>::Type Type;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
+///.Metafunction.Value.param.T.type:Class.FrequencyDistribution
+/*
+.Metafunction.Value:
+..summary:Returns the sequence type of a @Class.FrequencyDistribution@ type
+	     (TValue for FrequencyDistribution<TValue, TSpec>).
+*/
+
+template<typename TValue, typename TSpec>
+struct Value< FrequencyDistribution<TValue, TSpec> >
+{
+	typedef TValue Type;
+};
+template<typename TValue, typename TSpec>
+struct Value< FrequencyDistribution<TValue, TSpec> const>
+{
+	typedef TValue const Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -264,29 +262,19 @@ struct Iterator< FrequencyDistribution<TValue, TSpec> const, Standard >
 .Function.absFreqOfLettersInSeq:
 ..summary:Counts the number of times each residue of a fixed sequence alphabet occurs in a given sequence.
 ..cat:Motif Finding
-..signature:absFreqOfLettersInSeq(frequencies,start,end)
-..param.frequencies:The @Class.FrequencyDistribution@ object which holds the calculated frequencies.
+..signature:absFreqOfLettersInSeq(frequencies,begin,end)
+..param.frequencies:The @Class.FrequencyDistribution@ object which will hold the calculated frequencies.
 ...type:Class.FrequencyDistribution
-..param.start:An iterator pointing to the beginning of a given sequence which is either
+..param.begin:An iterator pointing to the beginning of a given sequence which is either
               a string of @Spec.Dna@ or a string of @Spec.AminoAcid@. 
-...type:Concept.Iterator Iterator
-....remarks:Standard conform iterator
+...type:Concept.Iterator
 ...type:Shortcut.DnaIterator
-....remarks:Iterator for @Shortcut.DnaString@ (a string of @Spec.Dna@).
-....see:Shortcut.DnaIterator
 ...type:Shortcut.PeptideIterator
-....remarks:Iterator for @Shortcut.Peptide@ (a string of @Spec.AminoAcid@).
-....see:Shortcut.PeptideIterator
 ..param.end:An iterator pointing to the end of a given sequence which is either
             a string of @Spec.Dna@ or a string of @Spec.AminoAcid@.  
-...type:Concept.Iterator Iterator
-....remarks:Standard conform iterator
+...type:Concept.Iterator
 ...type:Shortcut.DnaIterator
-....remarks:Iterator for @Shortcut.DnaString@ (a string of @Spec.Dna@).
-....see:Shortcut.DnaIterator
 ...type:Shortcut.PeptideIterator
-....remarks:Iterator for @Shortcut.Peptide@ (a string of @Spec.AminoAcid@).
-....see:Shortcut.PeptideIterator
 */
 
 template<typename TValue, typename TSpec, typename TSeqIter> 
@@ -308,15 +296,13 @@ absFreqOfLettersInSeq(FrequencyDistribution<TValue, TSpec> & fd,
 .Function.absFreqOfLettersInSetOfSeqs:
 ..summary:Counts the number of times each residue of a fixed sequence alphabet occurs in a given set of sequences.
 ..cat:Motif Finding
-..signature:absFreqOfLettersInSetOfSeqs(frequencies,start,end)
+..signature:absFreqOfLettersInSetOfSeqs(frequencies,begin,end)
 ..param.frequencies:The @Class.FrequencyDistribution@ object which holds the calculated frequencies.
 ...type:Class.FrequencyDistribution
-..param.start:An iterator pointing to the first sequence of a given set of sequences which is considered. 
-...type:Concept.Iterator Iterator
-....remarks:Standard conform iterator
+..param.begin:An iterator pointing to the first sequence of a given set of sequences which is considered. 
+...type:Concept.Iterator
 ..param.end:An iterator pointing to the last sequence of a given set of sequences which is considered. 
-...type:Concept.Iterator Iterator
-....remarks:Standard conform iterator
+...type:Concept.Iterator
 ..remarks.text:This function is similar to @Function.absFreqOfLettersInSeq@ except that the function is performed
                on a set of sequences.
 */
@@ -344,7 +330,7 @@ absFreqOfLettersInSetOfSeqs(FrequencyDistribution<TValue, TSpec> & fd,
 ..param.frequencies:The @Class.FrequencyDistribution@ object which holds the calculated frequencies.
 ...type:Class.FrequencyDistribution
 ..param.value:The value object which is added to each element of a @Class.FrequencyDistribution@ object.
-...remarks:The value object should be identical in type to the elements of the @Class.FrequencyDistribution@ object.
+...remarks:The $value$ object should be identical in type to the elements of the @Class.FrequencyDistribution@ object.
 */
 
 template<typename TValue, typename TSpec, typename TType>
@@ -364,15 +350,13 @@ addValue(FrequencyDistribution<TValue, TSpec> & fd, TType const & val)
 .Function.backgroundFrequency:
 ..summary:Determines the background letter frequencies in a given dataset
 ..cat:Motif Finding
-..signature:backgroundFrequency(frequencies,start,end)
+..signature:backgroundFrequency(frequencies,begin,end)
 ..param.frequencies:The @Class.FrequencyDistribution@ object which holds the calculated frequencies.
 ...type:Class.FrequencyDistribution
-..param.start:An iterator pointing to the first sequence of a given dataset (set of sequences) which is considered. 
-...type:Concept.Iterator Iterator
-....remarks:Standard conform iterator
+..param.begin:An iterator pointing to the first sequence of a given dataset (set of sequences) which is considered. 
+...type:Concept.Iterator
 ..param.end:An iterator pointing to the last sequence of a given dataset (set of sequences) which is considered. 
-...type:Concept.Iterator Iterator
-....remarks:Standard conform iterator
+...type:Concept.Iterator
 */
 
 template<typename TValue, typename TSpec,typename TDatasetIter> 
@@ -396,47 +380,30 @@ backgroundFrequency(FrequencyDistribution<TValue, TSpec> & fd,
 
 //////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////
-/// .Function.begin.param.object.type:Class.FrequencyDistribution
+///.Function.begin.param.object.type:Class.FrequencyDistribution
 
-template<typename TValue, typename TSpec>
-inline typename Iterator< FrequencyDistribution<TValue, TSpec>, Standard >::Type
-begin(FrequencyDistribution<TValue, TSpec> & me, Standard)
-{
-	return me.frequency_list;
-}
-template<typename TValue, typename TSpec>
-inline typename Iterator< FrequencyDistribution<TValue, TSpec> const, Standard >::Type
-begin(FrequencyDistribution<TValue, TSpec> const & me, Standard)
-{
-	return me.frequency_list;
-}
-
-/*
-template<typename TValue, typename TSpec>
-inline typename Iterator< FrequencyDistribution<TValue, TSpec>, Standard >::Type
+template <typename TValue, typename TSpec>
+inline typename Iterator< FrequencyDistribution<TValue, TSpec> >::Type
 begin(FrequencyDistribution<TValue, TSpec> & me)
 {
-	return me.frequency_list;
+	return begin(me.frequency_list);
 }
-template<typename TValue, typename TSpec>
-inline typename Iterator< FrequencyDistribution<TValue, TSpec> const, Standard >::Type
+template <typename TValue, typename TSpec>
+inline typename Iterator< FrequencyDistribution<TValue, TSpec> >::Type
 begin(FrequencyDistribution<TValue, TSpec> const & me)
 {
-	return me.frequency_list;
+	return begin(me.frequency_list);
 }
-*/
 
 //////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////
-/// .Function.end.param.object.type:Class.FrequencyDistribution
+///.Function.clear.param.object.type:Class.FrequencyDistribution
 
 template<typename TValue, typename TSpec>
 void 
 clear(FrequencyDistribution<TValue, TSpec> & fd) 
 {
-	std::fill(begin(fd), end(fd), static_cast<TSpec>(0));
+	fd = FrequencyDistribution<TValue, TSpec>();
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -449,7 +416,10 @@ clear(FrequencyDistribution<TValue, TSpec> & fd)
 ..param.frequencies:The @Class.FrequencyDistribution@ object representing the profile for a specific residue.
 ...type:Class.FrequencyDistribution
 ..param.residue:The residue object which is considered.
-..remarks:This function is used to convert a sequence pattern into a profile (see Function.convertPatternToProfile).
+...type:Spec.Dna
+...type:Spec.AminoAcid
+..remarks:This function is used to convert a sequence pattern into a profile.
+..see:Function.convertPatternToProfile
 */
 
 template<typename TValue, typename TSpec>
@@ -475,37 +445,37 @@ convertResidueToFrequencyDist(FrequencyDistribution<TValue, TSpec> & fd, TValue 
 
 //////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////
-/// .Function.end.param.object.type:Class.FrequencyDistribution
+///.Function.end.param.object.type:Class.FrequencyDistribution
 
 template<typename TValue, typename TSpec>
-inline typename Iterator< FrequencyDistribution<TValue, TSpec>, Standard >::Type
+inline typename Iterator< FrequencyDistribution<TValue, TSpec> >::Type
 end(FrequencyDistribution<TValue, TSpec> & me)
 {
 	return begin(me)+length(me);
 }
 template<typename TValue, typename TSpec>
-inline typename Iterator< FrequencyDistribution<TValue, TSpec> const, Standard >::Type
+inline typename Iterator< FrequencyDistribution<TValue, TSpec> const >::Type
 end(FrequencyDistribution<TValue, TSpec> const & me)
 {
 	return begin(me)+length(me);
 }
 
 //////////////////////////////////////////////////////////////////////////////
-/// .Function.length.param.object.type:Class.FrequencyDistribution
+
+///.Function.length.param.object.type:Class.FrequencyDistribution
 
 template<typename TValue, typename TSpec>
 inline typename Size< FrequencyDistribution<TValue, TSpec> >::Type
 length(FrequencyDistribution<TValue, TSpec> & me)
 {
-	return sizeof(me.frequency_list)/sizeof(me.frequency_list[0]);
+	return length(me.frequency_list);
 }
 
 template<typename TValue, typename TSpec>
 inline typename Size< FrequencyDistribution<TValue, TSpec> >::Type
 length(FrequencyDistribution<TValue, TSpec> const & me)
 {
-	return sizeof(me.frequency_list)/sizeof(me.frequency_list[0]);
+	return length(me.frequency_list);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -534,9 +504,9 @@ logarithmize(FrequencyDistribution<TValue, TSpec> & fd)
 
 //////////////////////////////////////////////////////////////////////////////
 
-/**
+/* s. normalize() (profile.h)
 .Function.normalize:
-..summary:Determines the normalized frequencies of a given @Class.FrequencyDistribution@ object.
+..summary:Determines the normalized frequencies.
 ..cat:Motif Finding
 ..signature:normalize(frequencies)
 ..param.frequencies:The @Class.FrequencyDistribution@ object.
@@ -545,7 +515,7 @@ logarithmize(FrequencyDistribution<TValue, TSpec> & fd)
 
 template<typename TValue, typename TSpec>
 void 
-normalize(FrequencyDistribution<TValue, TSpec> & fd) //2)
+normalize(FrequencyDistribution<TValue, TSpec> & fd)
 {
 	typedef FrequencyDistribution<TValue, TSpec> TFrequencyDistribution;
 	typedef typename Position<TFrequencyDistribution>::Type TPos;
@@ -592,30 +562,6 @@ posOfMax(FrequencyDistribution<TValue, TSpec> & me)
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.setValue:
-..summary:Sets a given value to the element at the specified position of a @Class.FrequencyDistribution@ object.
-..cat:Motif Finding
-..signature:setValue(frequencies,position,value)
-..param.frequencies:The @Class.FrequencyDistribution@ object.
-...type:Class.FrequencyDistribution
-..param.position:Position of a given @Class.FrequencyDistribution@ object which is considered.
-...type:Metafunction.Position
-..param.value:The value object which represents a frequency value.
-...remarks:The value object should be identical in type to the elements of the @Class.FrequencyDistribution@ object.
-*/
-
-template<typename TValue, typename TSpec, typename TType>
-inline void
-setValue(FrequencyDistribution<TValue, TSpec> & me, 
-		 typename Position< FrequencyDistribution<TValue, TSpec> >::Type pos,
-		 TType prob)
-{
-	me[pos] = static_cast<TSpec>(prob);
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-/**
 .Function.sum:
 ..summary:Determines the sum of all frequencies in a given @Class.FrequencyDistribution@ object.
 ..cat:Motif Finding
@@ -633,33 +579,9 @@ sum(FrequencyDistribution<TValue, TSpec> & me)
 
 	return amount;
 }
-
-//////////////////////////////////////////////////////////////////////////////
-
-/**
-.Function.value:
-..summary:Returns the frequency value at a specific position of a @Class.FrequencyDistribution@ object.
-..cat:Motif Finding
-..signature:value(frequencies,position)
-..param.frequencies:The @Class.FrequencyDistribution@ object.
-...type:Class.FrequencyDistribution
-..param.position:Position of the specific element being searched in a given @Class.FrequencyDistribution@ object.
-*/
-
-template<typename TValue, typename TSpec, typename TPos>
-inline TSpec &
-value(FrequencyDistribution<TValue, TSpec> & me, TPos pos)
-{
-	return me[pos];
-}
-template<typename TValue, typename TSpec, typename TPos>
-inline TSpec const &
-value(FrequencyDistribution<TValue, TSpec> const & me, TPos pos)
-{
-	return me[pos];
-}
 								
 //////////////////////////////////////////////////////////////////////////////////////////////
+
 
 }// namespace SEQAN_NAMESPACE_MAIN
 

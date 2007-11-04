@@ -18,6 +18,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.profile:The  @Shortcut.Profile@ object which is a set of @Class.FrequencyDistribution|frequency distributions@.
 ...type:Shortcut.Profile
 ..param.dataset_start:An iterator pointing to the first input sequence of a given dataset.
+...type:Concept.Iterator
 ..param.t:The number of input sequences.
 ..param.l:The size of the motif.
 ..param.oops_model:The oops_model object.
@@ -28,6 +29,11 @@ namespace SEQAN_NAMESPACE_MAIN
 ...type:Tag.TCM
 ..param.gamma:The probability of sequence having a motif occurence.
 ..param.lambda:The probability of starting a motif occurence 
+...remarks:$lambda$ is calculated by dividing $gamma$ by the length of the corresponding sequence.
+..remarks:This version of EM is used in the MEME program of Bailey and Elkan. It is a Bayesian
+          variant of the basic EM which allows multiple occurrences of a motif in any sequence and can 
+		  therefore be performed on sequences of one of the model types @Tag.OOPS@, @Tag.ZOOPS@ and 
+		  @Tag.TCM@. We use the EM algorithm of MEME for the refinement step of PROJECTION.
 */
 
 //////////////////////////////////////////////////////////////////////////////

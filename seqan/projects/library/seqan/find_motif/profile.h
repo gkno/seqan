@@ -24,21 +24,24 @@ namespace SEQAN_NAMESPACE_MAIN
 .Function.convertPatternToProfile:
 ..summary:Converts a pattern into a profile which consists of a set of frequency distributions.
 ..cat:Motif Finding
-..signature:convertPatternToProfile(profile,start,end)
+..signature:convertPatternToProfile(profile,begin,end)
 ..param.profile:The  @Shortcut.Profile@ object which is a set of @Class.FrequencyDistribution|frequency distributions@.
 ...type:Shortcut.Profile
-..param.start:An iterator pointing to the beginning of a given sequence pattern which is either
-              a @Shortcut.DnaString@ or a @Shortcut.Peptide@. 
+..param.begin:An iterator pointing to the beginning of a given sequence pattern which is either
+              a @Shortcut.DnaString@ or a @Shortcut.Peptide@.
+...type:Concept.Iterator
 ...type:Shortcut.DnaIterator
 ...type:Shortcut.PeptideIterator
 ..param.end:An iterator pointing to the end of a given sequence pattern which is either
-            a @Shortcut.DnaString@ or a @Shortcut.Peptide@. 
+            a @Shortcut.DnaString@ or a @Shortcut.Peptide@.
+...type:Concept.Iterator
 ...type:Shortcut.DnaIterator
 ...type:Shortcut.PeptideIterator
 ..remarks:The number of @Class.FrequencyDistribution@ objects which together form the @Shortcut.Profile@ 
           equals the length of the given sequence.
-..remarks:e.g.:profile[0] represents the frequency distribution for the first residue of
+..remarks:e.g.:$profile[0]$ represents the frequency distribution for the first residue of
           the given sequence.
+..see:Function.convertResidueToFrequencyDist
 */
 
 template<typename TProfile, typename TIterStr>
@@ -72,6 +75,8 @@ convertPatternToProfile(TProfile & profile,
 ...type:Class.StringSet
 ..param.pseudocount_mode:The @Class.Pseudocount@ object for determining the pseudocount method.
 ...type:Class.Pseudocount
+..remarks:This function is used, for example, in the refinement step of the PROJECTION algorithm to convert
+          the collection of l-mers inside the corresponding buckets into a profile. 
 */
 
 template<typename TProfile, typename TStrings, typename TPseudocountMode>
@@ -81,17 +86,20 @@ convertSetOfPatternsToProfile(TProfile & profile,
 					 TPseudocountMode & pseudocount)
 {
 	typedef typename Value<TStrings>::Type TString;
+	typedef typename Value<TProfile>::Type TFrequencyDistribution;
 	typedef typename Position<TString>::Type TPos;
 
 	typename Size<TString>::Type l = length(l_mers[0]);
 	resize(profile, l);
-	typename Iterator<TStrings>::Type iter_strings;
 	for(TPos i=0; i<l; ++i)
 	{
-		typename Value<TProfile>::Type fd;
-		for(iter_strings=begin(l_mers); iter_strings!=end(l_mers); ++iter_strings)
+		TFrequencyDistribution fd;
+		typename Iterator<TStrings>::Type l_mers_iter = begin(l_mers);
+		typename Iterator<TStrings>::Type l_mers_end = end(l_mers);
+		while(l_mers_iter!=l_mers_end)
 		{
-			++fd[(int) *(begin(*iter_strings)+i)];
+			++fd[(int) *(begin(*l_mers_iter)+i)];
+			++l_mers_iter;
 		}
 		profile[i] = fd;
 	}
@@ -103,15 +111,19 @@ convertSetOfPatternsToProfile(TProfile & profile,
 
 /**
 .Function.normalize:
-..summary:Determines the normalized frequencies of a given profile. If necessary, pseudocounts
-          are first added to the frequency values before normalizing them.
+..summary:Determines the normalized frequencies.
 ..cat:Motif Finding
-..signature:normalize(profile)
+..signature:normalize(container)
 ..signature:normalize(profile,pseudocount_mode)
-..param.profile:The  @Shortcut.Profile@ object which is a set of @Class.FrequencyDistribution|frequency distributions@.
+..param.container:The @Class.FrequencyDistribution@ or @Shortcut.Profile@ object.
+...type:Class.FrequencyDistribution
+...type:Shortcut.Profile
+..param.profile:The @Shortcut.Profile@ object which is a set of @Class.FrequencyDistribution|frequency distributions@.
 ...type:Shortcut.Profile
 ..param.pseudocount_mode:The @Class.Pseudocount@ object for determining the pseudocount method.
 ...type:Class.Pseudocount
+..remarks:If necessary, pseudocounts are first added to the frequency values before normalizing them 
+          when the parameter is of type @Shortcut.Profile@.
 */
 
 template<typename TProfile>
@@ -138,7 +150,7 @@ normalize(TProfile & profile)
 ...type:Shortcut.Profile
 ..param.background_distribution:The @Class.FrequencyDistribution@ object which represents the backround distribution.
 ...type:Class.FrequencyDistribution
-..remarks:The first row of the @Shortcut.Profile|probability matrix@ represents the @Class.FrequencyDistribution|background distribution@.
+..remarks:The first row of the final @Shortcut.Profile|probability matrix@ represents the @Class.FrequencyDistribution|background distribution@.
 */
 
 template<typename TProfile>

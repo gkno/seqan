@@ -10,13 +10,20 @@ namespace SEQAN_NAMESPACE_MAIN
 
 /**
 .Spec.PMS1:
-..summary: Represents the PMS1 algorithm.
+..summary: Represents the PMS1 algorithm developed by Rajasekaran et al.
 ..general:Class.MotifFinder
 ..cat:Motif Finding
 ..signature:MotifFinder<TValue, PMS1>
 ..param.TValue:The type of sequences to be analyzed.
 ...type:Spec.Dna
 ...type:Spec.AminoAcid
+..remarks:The exact @Spec.PMS1|PMS1 algorithm@ (Planted Motif Search 1) searches in the space
+          of possible motifs such as @Spec.EPatternBranching@. The procedure of the algorithm
+		  is quite simple. For every l-mer in each input sequence the algorithm generates
+		  all possible length-l patterns in the Hamming distance $d$-neighborhood of $x$.
+		  The neighbor sets for each sequence are then intersected so that at the end of the process
+		  we get a group of l-mers or a single l-mer that occur(s) in each input sequence with $d$
+		  substitutions.
 */
 
 ///.Class.MotifFinder.param.TSpec.type:Spec.PMS1
@@ -144,7 +151,7 @@ pms1(TStrings & result_set,
 {
 	typedef Value<TStrings>::Type TString;
 	typedef Value<TString>::Type TValue;
-	Shape<TValue, SimpleShape> shape(l,ValueSize<TValue>::VALUE);
+	Shape<TValue> shape(l);
 	// ----------------------------------------------------------------------------
 	// STEP 1:
 	// processing the first sequence.
@@ -260,7 +267,7 @@ pms1(TStrings & result_set,
 {
 	typedef Value<TStrings>::Type TString;
 	typedef Value<TString>::Type TValue;
-	Shape<TValue, SimpleShape> shape(l,ValueSize<TValue>::VALUE);
+	Shape<TValue> shape(l);
 	// ----------------------------------------------------------------------------
 	// STEP 1:
 	// processing the first sequence.
@@ -348,7 +355,7 @@ pms1(TStrings & result_set,
 {
 	typedef Value<TStrings>::Type TString;
 	typedef Value<TString>::Type TValue;
-	Shape<TValue, SimpleShape> shape(l,ValueSize<TValue>::VALUE);
+	Shape<TValue> shape(l);
 
 	// ----------------------------------------------------------------------------
 	// STEP 1:
@@ -455,7 +462,7 @@ pms1(TStrings & result_set,
 {
 	typedef Value<TStrings>::Type TString;
 	typedef Value<TString>::Type TValue;
-	Shape<TValue, SimpleShape> shape(l,ValueSize<TValue>::VALUE);
+	Shape<TValue> shape(l);
 	// ----------------------------------------------------------------------------
 	// STEP 1:
 	// building d-variants for all l-mers from the input sequences and storing their
@@ -689,15 +696,14 @@ _getVariantsOfBitset(TStrings & bitsets,
 ..remarks: #variants = (alp_size-1)^d for a given bitset, d-value and l-mer.
 */
 
-template<typename TIntVect, typename TStringIter, typename TType, typename TBitset, typename TShape>
+template<typename TIntVect, typename TStringIter, typename TType, typename TBitset, typename TValue, typename TSpec>
 void
 _buildVariants(TIntVect & variants,
 			   TStringIter l_mer_begin,
 			   TType const & d,
 			   TBitset const & bitset,
-			   TShape & shape)
+			   Shape<TValue, TSpec> & shape)
 {
-	typedef typename ShapeType<TShape>::Type TValue;
 	typedef String<TValue> TString;
 	typedef typename Position<TString>::Type TPos;
 
@@ -756,3 +762,4 @@ _buildVariants(TIntVect & variants,
 }// namespace SEQAN_NAMESPACE_MAIN
 
 #endif //#ifndef SEQAN_HEADER_...
+

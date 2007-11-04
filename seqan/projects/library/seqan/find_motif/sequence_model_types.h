@@ -9,7 +9,13 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 
 
-// OOPS = One Occurence Per Sequence
+/**
+.Tag.OOPS:
+..summary:Represents the One Occurrence Per Sequence model.
+..remarks:The @Tag.OOPS@ model, which was introduced by Lawrence and Reilly permits 
+          exactly one motif occurrence in each sequence.
+*/
+
 struct OOPS
 {
 	enum{VALUE=0};
@@ -17,7 +23,13 @@ struct OOPS
 
 //////////////////////////////////////////////////////////////////////////////
 
-// OMOPS = One or More Occurence Per Sequence
+/**
+.Tag.OMOPS:
+..summary:Represents the One or More Occurence Per Sequence model.
+..remarks:The @Tag.OMOPS@ model is comparable with the @Tag.TCM@ model with the one difference
+          that zero occurrence in a sample sequence is not permitted.
+*/
+
 struct OMOPS
 {
 	enum{VALUE=1};
@@ -25,7 +37,13 @@ struct OMOPS
 
 //////////////////////////////////////////////////////////////////////////////
 
-// ZOOPS = Zero or One Occurence Per Sequence
+/**
+.Tag.ZOOPS:
+..summary:Represents the Zero or One Occurence Per Sequence model.
+..remarks:The @Tag.ZOOPS@ model formulated by Bailey and Elkan permits at most one
+          motif occurrence in each sequence.
+*/
+
 struct ZOOPS
 {
 	enum{VALUE=2};
@@ -46,7 +64,13 @@ struct ZOOPS
 
 //////////////////////////////////////////////////////////////////////////////
 
-// TCM = Two-Component-Mixture
+/**
+.Tag.TCM:
+..summary:Represents the Two-Component-Mixture Sequence model.
+..remarks:The @Tag.TCM@ model formulated by Bailey and Elkan permits any number pf
+          non-overlapping motif occurrences per sequence.
+*/
+
 struct TCM
 {
 	enum{VALUE=3};

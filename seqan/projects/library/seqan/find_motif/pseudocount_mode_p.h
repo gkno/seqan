@@ -10,14 +10,15 @@ namespace SEQAN_NAMESPACE_MAIN
 
 /**
 .Spec.PMode:
-..summary: A natural way of distributing the pseudocounts among the various residue is 
-           determing it according to their background probabilities fi (pseudocount = epsilon*fi).
+..summary: Represents the P computation scheme for handling "zero" probabilities.
 ..general:Class.Pseudocount
 ..cat:Motif Finding
 ..signature:Pseudocount<TValue, PMode>
 ..param.TValue:The type of sequence which is considered.
 ...type:Spec.Dna
 ...type:Spec.AminoAcid
+..remarks:The P mode computation scheme distributes the pseudocounts among the various residue
+          according to their background probabilities.
 */
 
 ///.Class.Pseudocount.param.TSpec.type:Spec.PMode

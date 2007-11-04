@@ -8,7 +8,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 /**
 .Class.MotifFinder:
-..summary:Holds the algorithm parameter values and the motif instance(s) found by the apprppriate
+..summary:Holds the algorithm parameter values and the motif instance(s) found by the appropriate
           motif discovery algorithm.
 ..cat:Motif Finding
 ..signature:MotifFinder<TValue, TSpec>
@@ -29,15 +29,7 @@ class MotifFinder;
 //Metafunctions
 //////////////////////////////////////////////////////////////////////////////
 
-/*
-.Metafunction.Value:
-..summary:Returns the sequence type of a @Class.MotifFinder@ type.
-..cat:Motif Finding
-..signature:Value<TMotifFinder>::Type
-..param.TMotifFinder:A @Class.MotifFinder@ type.
-...type:Class.MotifFinder
-..returns:The sequence type of $MotifFinder$, i.e. $TValue$ for $MotifFinder<TValue, TSpec>$.
-*/
+///.Metafunction.Value.param.T.type:Class.MotifFinder
 
 template<typename TValue, typename TSpec>
 struct Value< MotifFinder<TValue, TSpec> >
@@ -71,17 +63,21 @@ struct Value< MotifFinder<TValue, TSpec> const>
 ...type:Tag.TCM
 ...remarks:The sequence models rely on different assumptions about the distribution of motif occurrences
            across the sample sequences. 
-..remarks:The PROJECTION algorithm is able to run in OOPS, ZOOPS and TCM mode.
-..remarks:The ePatternBranching algorithm is able to run in OOPS and OMOPS mode.
-..remarks:The PMS1 and PMSP algorithm is able to run in OOPS, OMOPS, ZOOPS and TCM mode.
+..remarks:The PROJECTION algorithm is able to run in @Tag.OOPS@, @Tag.ZOOPS@ and @Tag.TCM@ mode.
+..remarks:The ePatternBranching algorithm is able to run in @Tag.OOPS@ and @Tag.OMOPS@ mode.
+..remarks:The PMS1 and PMSP algorithm is able to run in  @Tag.OOPS@,  @Tag.OMOPS@,  @Tag.ZOOPS@ and  
+          @Tag.TCM@ mode.
 */
 
 /**
 .Function.factorial:
-..summary:Calculates the factorial value of any value.
+..summary:Calculates the factorial value of any integer number.
 ..cat:Motif Finding
 ..signature:factorial(value)
 ..param.value:The value object.
+...type:unsigned int
+..remarks:The factorial of a non-negative integer $value$ is 
+          the product of all positive integers less than or equal to $value$.  
 */
 
 template<typename TType>
@@ -108,11 +104,18 @@ TType factorial(TType n)
 ..summary:Calculates the binomial coefficient C(n,k).
 ..cat:Motif Finding
 ..signature:binomialCoefficient(n,k)
+..param.n:The first parameter object.
+...type:unsigned int
+..param.k:The second parameter object.
+...type:unsigned int
+..remarks:The binomial coefficient of $n$ and $k$ is equal to zero 
+          if $k$ is greater than $n$.   
 */
 
 template<typename TType>
 TType binomialCoefficient(TType n, TType k)
 {
+	//SEQAN_ASSERT(!(n<0) & !(k<0));
 	TType result = 1;
 	for(TType i=(n-k+1); i<=n; ++i)
 	{
@@ -129,17 +132,20 @@ TType binomialCoefficient(TType n, TType k)
 .Function.hammingDistance:
 ..summary:Determines the Hamming distance between two sequences.
 ..cat:Motif Finding
-..signature:hammingDistance(start1,end1,start2)
-..param.start1:An iterator pointing to the beginning of the first sequence which is either
+..signature:hammingDistance(begin1,end1,begin2)
+..param.begin1:An iterator pointing to the beginning of the first sequence which is either
               a @Shortcut.DnaString@ or a @Shortcut.Peptide@. 
+...type:Concept.Iterator
 ...type:Shortcut.DnaIterator
 ...type:Shortcut.PeptideIterator
 ..param.end1:An iterator pointing to the end of the first sequence which is either
             a @Shortcut.DnaString@ or a @Shortcut.Peptide@. 
+...type:Concept.Iterator
 ...type:Shortcut.DnaIterator
 ...type:Shortcut.PeptideIterator
-..param.start2:An iterator pointing to the beginning of the second sequence which is either
+..param.begin2:An iterator pointing to the beginning of the second sequence which is either
               a @Shortcut.DnaString@ or a @Shortcut.Peptide@. 
+...type:Concept.Iterator
 ...type:Shortcut.DnaIterator
 ...type:Shortcut.PeptideIterator
 */
@@ -165,13 +171,13 @@ size_t hammingDistance(TStringIterator start1, TStringIterator end1, TStringIter
 
 /**
 .Function.inverseHash:
-..summary:Determines the corresponding sequence given the hash value.
+..summary:Determines the corresponding sequence pattern given the hash value.
 ..cat:Motif Finding
 ..signature:inverseHash<TValue>(hash_value,alphabet_size,seq_size)
 ..param.hash_value:The hash_value object.
-..param.alphabet_size:The alphabet_size object which is four for nucleotide sequences and twenty for amino acid sequences.
+..param.alphabet_size:The alphabet_size object.
+...remarks:$alphabet_size$ is four for nucleotide sequences and twenty for amino acid sequences.
 ..param.seq_size:The seq_size object representing the size of the corresponding sequence.
-..remarks:String<Dna> pattern = inverseHash<Dna>(hash_value,alphabet_size, seq_size)
 */
 
 template<typename TValue, typename TType>
@@ -207,8 +213,6 @@ inverseHash(TType const & hash_value,
 ..signature:displayResult(motif_finder)
 ..param.motif_finder:The @Class.MotifFinder@ object.
 ...type:Class.MotifFinder
-..param.dataset:The dataset object representing the input sequences.
-...type:Class.StringSet
 */
 
 template<typename TValue, typename TAlgorithm>

@@ -10,13 +10,16 @@ namespace SEQAN_NAMESPACE_MAIN
 
 /**
 .Spec.PMSP:
-..summary: Represents the PMSP algorithm.
+..summary: Represents the PMSP algorithm of Davila et al.
 ..general:Class.MotifFinder
 ..cat:Motif Finding
 ..signature:MotifFinder<TValue, PMSP>
 ..param.TValue:The type of sequences to be analyzed.
 ...type:Spec.Dna
 ...type:Spec.AminoAcid
+..remarks:The @Spec.PMSP|PMSP algorithm@ is an improvement of the @Spec.PMS1|PMS1 algorithm@.
+          It examines each possible l-mer of the first input sequence, explores its neighborhood
+		  and finally checks whether an l-mer in the neighborhood is a motif instance.
 */
 
 ///.Class.MotifFinder.param.TSpec.type:Spec.PMSP
@@ -156,7 +159,7 @@ pmsp(TStrings & result,
 
 	typename Size<TString>::Type seq_len1 = length(*ds_iter1); 
 	typename Iterator<TString>::Type seq_iter1 = begin(*ds_iter1);
-	Shape<TValue, SimpleShape> shape(l, ValueSize<TValue>::VALUE);
+	Shape<TValue> shape(l);
 	std::set<TString> result_set;
 	// ----------------------------------------------------------------------------
 	// STEP 1:
@@ -276,7 +279,7 @@ pmsp(TStrings & result,
 
 	typename Size<TString>::Type seq_len1 = length(*ds_iter1); 
 	typename Iterator<TString>::Type seq_iter1 = begin(*ds_iter1);
-	Shape<TValue, SimpleShape> shape(l, ValueSize<TValue>::VALUE);
+	Shape<TValue> shape(l);
 	std::set<TString> result_set;
 	// ----------------------------------------------------------------------------
 	// STEP 1:
@@ -407,7 +410,7 @@ pmsp(TStrings & result,
 		typename Size<TString>::Type seq_len1 = length(*ds_iter1);
 		typename Iterator<TString>::Type seq_iter1 = begin(*ds_iter1);
 		typename Iterator<TString>::Type seq_end1 = begin(*ds_iter1)+(seq_len1-l+1);
-		Shape<TValue, SimpleShape> shape(l, ValueSize<TValue>::VALUE);
+		Shape<TValue> shape(l);
 		while(seq_iter1!=seq_end1)
 		{
 			//construct set V
@@ -552,7 +555,7 @@ pmsp(TStrings & result,
 		typename Size<TString>::Type seq_len1 = length(*ds_iter1);
 		typename Iterator<TString>::Type seq_iter1 = begin(*ds_iter1);
 		typename Iterator<TString>::Type seq_end1 = begin(*ds_iter1)+(seq_len1-l+1);
-		Shape<TValue, SimpleShape> shape(l, ValueSize<TValue>::VALUE);
+		Shape<TValue> shape(l);
 		while(seq_iter1!=seq_end1)
 		{
 			//construct set V
