@@ -1,0 +1,15 @@
+.Page.Glossary
+..description:List of terms used in SeqAn
+..order:zzz
+
+
+.Page.Glossary.glossary
+
+..SeqAn: The C++ library for sequence analysis.
+You are just reading the documentation of this library.
+For more information see @http://www.seqan.de@.
+
+
+..Metafunction: A C++ construct that is used to determine types and constants at compile time.
+...see:Page.Metafunctions
+
