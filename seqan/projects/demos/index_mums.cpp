@@ -39,7 +39,7 @@ int main ()
 		cout << repLength(myMUMiterator) << "   ";
 
 ///The match string itself can be determined with @Function.representative@.
-		cout << '\"' << representative(myMUMiterator) << '\"' << endl;
+		cout << "\t\"" << representative(myMUMiterator) << '\"' << endl;
 
 		++myMUMiterator;
 	}
@@ -49,5 +49,5 @@ int main ()
 
 	//output:
 	//
-	// 0, 53, 45, 5   "SeqAn"
-	// 23, 36, 3, 8   "sequence"
+	// 0, 53, 33, 5    "SeqAn"
+	// 23, 36, 3, 8    "sequence"
