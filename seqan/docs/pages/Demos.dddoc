@@ -1,6 +1,7 @@
 
 
 .Demo.Allocators:
+..cat:Basics
 ..summary:Examples for memory allocation.
 ..file:../projects/demos/allocator.cpp
 ..see:Spec.Single Pool Allocator
@@ -17,6 +18,7 @@
 
 
 .Demo.Alphabets:
+..cat:Basics
 ..summary:Examples for common alphabets.
 ..description
 ...text:SeqAn offers some common alphabets like @Spec.Dna@, @Spec.Iupac@, and @Spec.AminoAcid@, which are all @Concept.Simple Type.simple types@.
@@ -29,6 +31,7 @@
 
 
 .Demo.Iterator Basics:
+..cat:Basics
 ..summary:Simple iterator functions.
 ..file:../projects/demos/iterator.cpp
 ..demofor:Metafunction.Iterator
@@ -47,6 +50,7 @@
 
 
 .Demo.Rooted Iterators:
+..cat:Basics
 ..summary:Example for some functions for handling (rooted) iterators.
 ..file:../projects/demos/rooted_iterator.cpp
 ..demofor:Metafunction.Iterator
@@ -58,34 +62,83 @@
 .
 
 
-
 .Demo.String Basics:
+..cat:Basics
 ..summary:Basic string class handling.
 ..file:../projects/demos/string_1.cpp
 ..demofor:Class.String
 .
 
 
+.Demo.Suffix Array:
+..cat:Index
+..summary:Example for how to create a suffix array and use it as a dictionary.
+..file:../projects/demos/index_sufarray.cpp
+..demofor:Function.createSuffixArray
+.
 
-.Demo.Index:
+
+.Demo.Index Finder:
+..cat:Index
 ..summary:Example for using a finder of an index.
-..file:../projects/demos/index.cpp
+..file:../projects/demos/index_find.cpp
 ..demofor:Class.Index
 ..demofor:Class.Finder
 ..demofor:Function.find
 .
 
 
+.Demo.Maximal Unique Matches:
+..cat:Index
+..summary:Example for using the MUMs iterator.
+..description
+...text:Given a set of sequences, a unique match is a match that occurs exactly once in each sequence.
+A maximal unique match (MUM) is a unique match that is not part of any longer unique match. The following
+example demonstrates how to iterate over all MUMs and output them.
+..file:../projects/demos/index_mums.cpp
+..demofor:Class.Index
+..demofor:Class.StringSet
+..demofor:Spec.MUMs Iterator
+..demofor:Function.representative
+..demofor:Function.orderOccurrences
+..demofor:Function.getOccurrences
+..demofor:Function.countOccurrences
+.
 
 
-.Demo.Suffix Array:
-..summary:Example for how to create a suffix array and use it as a dictionary.
-..file:../projects/demos/sufarray.cpp
-..demofor:Function.createSuffixArray
+.Demo.Super Maximal Repeats:
+..cat:Index
+..summary:Example for using the SuperMaxRepeats iterator.
+..description
+...text:Given a sequences, a repeat is a substring that occurs at at least 2 different positions.
+A supermaximal repeat is a repeat that is not part of any longer repeat. The following
+example demonstrates how to iterate over all supermaximal repeats and output them.
+..file:../projects/demos/index_supermaxrepeats.cpp
+..demofor:Class.Index
+..demofor:Spec.SuperMaxRepeats Iterator
+..demofor:Function.representative
+..demofor:Function.getOccurrences
+..demofor:Function.countOccurrences
+.
+
+
+.Demo.Maximal Repeats:
+..cat:Index
+..summary:Example for using the MaxRepeats iterator.
+..description
+...text:Given a sequences, a repeat is a substring that occurs at at least 2 different positions.
+A maximal repeat is a repeat that cannot be extended to the left or to right to a longer repeat. The following
+example demonstrates how to iterate over all maximal repeats and output them.
+..file:../projects/demos/index_maxrepeats.cpp
+..demofor:Class.Index
+..demofor:Spec.MaxRepeats Iterator
+..demofor:Function.representative
+..demofor:Function.orderOccurrences
 .
 
 
 .Demo.File Format I/O:
+..cat:System
 ..summary:Accessing sequence data in files.
 ..file:../projects/demos/file_format.cpp
 ..demofor:Function.write
