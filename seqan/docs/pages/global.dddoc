@@ -33,6 +33,7 @@
 ..returns:Return Values
 ..type:Metafunctions
 ..value:Values
+..tag:Tags
 ..memvar:Data Members
 ..memfunc:Member Functions
 ..function:Functions
@@ -54,6 +55,7 @@
 ..childconcept:Refinements
 ..shortcut:Shortcuts
 ..shortcutfor:Shortcut for
+..output:Output
 .
 .globals.subsections:
 ..metafunction:Metafunctions:
@@ -70,6 +72,14 @@
 ..name:SeqAn
 ..footline:SeqAn - Sequence Analysis Library - <a href="http://www.seqan.de">www.seqan.de</a>
 ..indexcategory:Page
+.
+.globals.namingconventions:
+..Class:bigsmall
+..Spec:bigsmall
+..Function:smallbig
+..Memfunc:smallbig
+..Metafunction:bigsmall
+..Tag:bigsmall
 .
 .globals.relations:
 ..memfunc:Memfunc.*.class

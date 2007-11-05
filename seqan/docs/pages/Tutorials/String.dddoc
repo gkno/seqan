@@ -41,7 +41,7 @@ There are the following kinds of string:
 ..table:@Spec.Alloc String@
 |Expandable string that is stored on heap.
 |The default string implementation that can be used for general purposes.
-|Changing the @Function.capacity@ can be very costly.
+|Changing the @Function.capacity@ can be very costly since all values must be copied.
 ..table:@Spec.Array String@
 |Fast but non-expandable string.
 |Fast storing of small sequences.
@@ -50,7 +50,7 @@ There are the following kinds of string:
 |String that stores its content in blocks
 |The @Function.capacity@ of the string can quickly be increased.
 Good choice for growing strings and for stacks.
-|Random access to values is slightly slower than for @Spec.Alloc String|Alloc Strings@.
+|Iteration and random access to values is slightly slower than for @Spec.Alloc String|Alloc Strings@.
 ..table:@Spec.Packed String@
 |A string that stores as many values in one machine word as possible.
 |Suitable for storing large strings in memory.
@@ -122,7 +122,7 @@ for (TIterator it = begin(str); it != end(str); ++it)
 }
 ..text:
 See @Demo.Iterators.this demo program@ for more examples.
-..text:(rooted iterators)
+
 
 ..subsection:#.# Comparisons
 ..text:
@@ -163,9 +163,10 @@ There are several @Tag.Overflow Strategy.overflow strategies@ that determine wha
 If no @Tag.Overflow Strategy.overflow strategy@ is specified for a function call, a default overflow strategy is selected depending on the type of the sequence.
 ..text:Example:
 ..code:
-String<char> str = "12345";
-append(str, "abcdefghijklmn", Limit());  //limits str to its current capacity
-append(str, "ABCDEFG");                  //use default expansion strategy
+String<char> str;
+resize(str, 5, Exact());                    //sets capacity of str to 5
+assign(str, "abcdefghijklmn", Limit());     //only "abcde" is assigned to str, since str is limited to 5
+append(str, "ABCDEFG");                     //Use default expansion strategy: now str == "abcdeABCDEFG"
 
 ..subsection:#.# Conversion
 ..text:
@@ -188,10 +189,13 @@ String<char> target;
 move(target, source);       //the in-place move conversion is done here
 
 ..text:
-3. Modifier conversion. Instead of creating an actual target sequence, use a @Page.Modifiers@ to 'emulate' a sequence with a different value type, for example:
+3. Modifier conversion. Instead of creating an actual target sequence, use a @Page.Modifiers|modifier (see the tutorial)@ to 'emulate' a sequence with a different value type, 
+i.e. the modifier $target$ in the following example behaves exactly like a $char$ sequence:
 ..code:
 String<Dna> source = "acgtgcat";
-Modifier<String<Dna>, ModView<FunctorConvert<Dna, char> > > target(source);
+typedef Modifier<String<Dna>, ModView<FunctorConvert<Dna, char> > > TDnaToCharModifier;
+TDnaToCharModifier target(source);      //this is a sequence of char that contains "acgtgcat"
+Value<TDnaToCharModifier>::Type c;      //defines a variable of type char
 
 ..subsection:#.# Input/Output
 ..text:SeqAn offers several Ways for loading and saving sequences in many formats.

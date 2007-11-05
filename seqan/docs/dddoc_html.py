@@ -74,6 +74,7 @@ def createPages(path):
             fl = file(filename, "w")
             print '.',
             pageContent(fl, data)
+            warningPage(cat, key, data)
             fl.close()
             
         print
@@ -218,7 +219,7 @@ def translateText(text):
 ################################################################################
     
 def translateCode(text):
-    text = text.strip(" \n")
+    text = text.strip(" \n\r")
     text = escapeHTML(text)
     text = text.replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;")
     text = text.replace(" ", "&nbsp;")
@@ -241,7 +242,7 @@ def translateTooltip(text):
 
 def brokenLink(text):
     print
-    print '   WARNING: broken link "' + text + '"'
+    print '    WARNING: broken link "' + text + '"'
     return '<span class=broken_link>' + text + '</span>'
     
 ################################################################################
@@ -587,6 +588,8 @@ def writePage(fl, data):
         if (s): fl.write('<div class=text>' + s + '</div>')
            
     printTextblock(fl, data, "description")
+    printGlossary(fl, data, "glossary")
+
     printSignature(fl, data, "signature")
     printTable(fl, data, "param")
     printTextblock(fl, data, "returns")
@@ -611,6 +614,7 @@ def writePage(fl, data):
     printMemberRek(fl, data, "conceptfunc", "baseconcept")
     
     printTable(fl, data, "value")
+    printTable(fl, data, "tag")
 
     printLinkRek(fl, data, "conceptusedby", "childconcept")
 
@@ -618,6 +622,7 @@ def writePage(fl, data):
     printTextblock(fl, data, "example")
     printLinkRek(fl, data, "demo", "general")
     printFile(fl, data, "file")
+    printTextblock(fl, data, "output")
     
     printLink(fl, data, "concept")
     printList(fl, data, "include")
@@ -882,6 +887,27 @@ def printTextblock(fl, data, category, showheadline = True):
             
         fl.write('</div>');
 
+
+################################################################################
+
+def printGlossary(fl, data, category):
+    lines = data[category]
+    if not lines.empty():
+        fl.write('<div class=section id=' + category + '>')
+        
+        keys = lines.keys()
+        if len(keys) > 0:         
+            for key in keys:
+                fl.write('<div class=glossary_entry>')
+                fl.write('<div class=glossary_title>' + translateText(key) + '</div>')
+                fl.write('<div class=glossary_content>')
+                subprintText(fl, lines[key])
+                fl.write('</div>')
+                fl.write('</div>')
+
+        fl.write('</div>');
+
+
 ################################################################################
 
 def printFile(fl, data, category):
@@ -891,7 +917,8 @@ def printFile(fl, data, category):
     
     if (filename != ''):
         if (not os.access(filename, F_OK)):
-            print '  WARNING: unknown file "' + filename + '"'
+            print
+            print '!   WARNING: unknown file "' + filename + '"'
         else:
             f = open(filename)
             lines = f.readlines()
@@ -1019,6 +1046,10 @@ def subprintText(fl, data, subcategory = False):
         elif name == 'code': 
             s = translateCode(line.text())
             fl.write('<div class=code_sub_block>' + s + '</div>')
+            
+        elif name == 'output':
+            s = translateCode(line.text())
+            fl.write('<div class=output_sub_block>' + s + '</div>')
             
         elif name == 'image': 
             subprintImage(fl, line.text())
@@ -1298,12 +1329,12 @@ def pushSearchResult(db, title, cat, name):
         text = ''
         
     else:
-        obj = dddoc.DATA[cat][name];
+        obj = dddoc.DATA[cat][name]
         href = getFilename(cat, name)
         if obj.empty(): 
             summary = '';
         else:
-            summary = translateTooltip(obj["summary"].text());
+            summary = translateTooltip(obj["summary"].text())
         if len(summary) > 0:
             summary = 'title="' + summary + '"'
         
@@ -1315,3 +1346,48 @@ def pushSearchResult(db, title, cat, name):
     db[title].append([key, text, link])
 
 ################################################################################
+
+def warningPage(cat, key, data):
+    #warning for multiple or no summary field
+    desc = data["summary"]
+    if desc.empty():
+        print
+        print "\n!!  WARNING: no summary field for \"" + cat + "." + key + "\""
+    elif len(desc.lines) > 1:
+        print
+        print "\n!!  WARNING: multiple summary fields for \"" + cat + "." + key + "\""
+
+
+
+    #warning for break of naming convention
+    convention = dddoc.DATA["globals.namingconventions"][cat].text()
+    title = getPageTitle(data)
+    
+    if (convention == 'bigsmall' and ((title[0] < 'A') or (title[0] > 'Z'))):
+        print
+        print "\n!   WARNING: \"" + title + "\" breaks naming convention: " + cat + " must start with capital letter."
+    elif (convention == 'smallbig' and ((title[0] < 'a') or (title[0] > 'z'))):
+        print
+        print "\n!   WARNING: \"" + title + "\" breaks naming convention: " + cat + " must start with lower case."
+    elif (title[len(title)-1] == '_'):
+        print
+        print "\n!   WARNING: \"" + title + "\" breaks naming convention: public identifiers must not end with \"_\"." # and private identifiers should not be documented
+
+
+    #warning for unknown params
+    sigs = data["signature"].text()
+    sigs = sigs.strip(" \n")
+    if len(sigs) > 0:
+        params = data["param"]
+        if not params.empty():
+            keys = params.keys_by_occ()
+            if len(keys) > 0:         
+                for k in keys:
+                    if sigs.find(k) < 0:
+                        print
+                        print "\n!!  WARNING: unknown param \"" + k + "\" in \"" + cat + "." + key + "\""
+                        
+                        
+        
+
+    

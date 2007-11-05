@@ -131,7 +131,7 @@ A field has therefore the form "[Category].[Name].[Field]":
 
 ...table:"title"|title of the page (optional). Default is [Name].
 Text pieces defined by several entries for the same "title" field are concatenated.
-...table:"summary"|Short summary of the item. Please place longer descriptions under "remarks" or "description".
+...table:"summary"|Short summary of the item. Each item should have exactly one summary, otherwise a warning is displayed. Place longer descriptions under "remarks" or "description". 
 Text pieces defined by several entries for the same "summary" field are concatenated.
 ...table:"cat"|subcategory. The text appears in the documentation in a subfolder of [Category].
 each item can possess several subcategories. In this case the tex appears in all corresponding subfolders.
@@ -150,13 +150,16 @@ Text pieces defined by several entries for the same text field are concatenated.
 ...table:"description"|descriptive text. Can be used for tutorials. 
 ...table:"example"|code examples.
 ...table:"include"|name of header file you have to include to use the entity.
+...table:"output"|the output of a program. "code" subfields of this field will be displayed in a special console like style.
 ...table:"remarks"|comments.
 ...table:"returns"|return value. If several return values are given, the subfield "param" should be used after "return". 
     
 ...subsection:#.# Tables of text fields
 ...text:Child nodes below a table field are sorted alphabetically and printed in form of a table of text fields.
-...table:"param"|argument. e.g. "param.length:length of a field"
+...table:"param"|argument. e.g. "param.length:length of a field". If a param does not appear in one of the item's signatures, a warning is displayed.
 ...table:"value"|Possible value an entity can take.
+...table:"tag"|Possible tag type.
+...table:"glossary"|Glossary entry. Glossary entries are displayed in alphabetic order. Should only be used in special glossary pages like @Page.Glossary|Page.Glossary@.
 
 ...subsection:#.# Link fields
 ...text:Link to other items. Most link fields automatically generate back links by creating new fields for the target item.
@@ -210,6 +213,7 @@ examples: "..subsection:#.# Subsection", "..subsection:Example #"
 ...table:"text"|a text paragraph.
 ...table:"note"|an emphasized text paragraph.
 ...table:"code"|example code.
+...table:"output"|output of a program, displayed in a console like style.
 ...table:"image"|Inserts an image. Needed is the name (optinally with a relativ path) of the image (without extension). 
 If the documentation is constructed in HTML then the extension ".png" is automatically appended.
 Note that there should also be an ".eps" version of the image for LaTeX exports in the future.

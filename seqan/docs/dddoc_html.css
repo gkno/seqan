@@ -105,7 +105,7 @@ A:hover, A:link, A:visited
     margin-right: 12px;
     margin-bottom: 4px;
 }
-#signature, .code_block, .code_sub_block, .codefiletab
+#signature, .code_block, .code_sub_block, .codefiletab, .output_sub_block
 {
     font-family: 'courier new', courier, monospace;
     font-style: normal;
@@ -129,7 +129,7 @@ A:hover, A:link, A:visited
     margin-left: 2em;
     margin-right: 2em;
 }
-.code_sub_block
+.code_sub_block, output_sub_block
 {
     margin-bottom:1em;
     margin-top:1em;
@@ -408,13 +408,14 @@ A:hover, A:link, A:visited
     color:red;
 }
 
-#description
+#content #description
 {
     line-height:1.4;
     font-size:112%;
     margin-left:10px;
+    text-align:justify;
 }
-#description .code_block, #description .code_sub_block
+#content #description .code_block, #content #description .code_sub_block
 {
     line-height:1.2;
 }
@@ -482,3 +483,51 @@ A:hover, A:link, A:visited
     color:#222222;
 }
 
+
+
+#content #glossary
+{
+    margin-left:10px;
+    text-align:justify;
+}
+#content #glossary .code_block, #content #glossary .code_sub_block
+{
+    line-height:1.2;
+}
+#content 
+
+.glossary_entry
+{
+    margin:0.5em 0 1.5em 0;
+}
+.glossary_title
+{
+    font-size:122%;
+    font-weight:bold;
+    margin-bottom:0.2em;
+}
+.glossary_content
+{
+    padding-left:0.5em;
+}
+
+
+#output
+{
+    width:600px;
+}
+#output .code_sub_block
+{
+    width:100%;
+    background-color:#000066;
+}
+#output .code, .output_sub_block .code
+{
+    color:#eeeeee;
+    font-weight:bold;
+}
+
+.output_sub_block
+{
+    background-color:#000066;
+}

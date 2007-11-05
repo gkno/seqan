@@ -1,6 +1,7 @@
 .Page.Files:
 ..cat:Tutorials
 ..summary:File Input/Output.
+..summary:second line
 
 .Page.Files.description:
 ..contents
@@ -111,3 +112,4 @@ fclose(cstrm);
 
 ..section:# SeqAn File Objects
 ..text:(more information about @Class.File@)
+
