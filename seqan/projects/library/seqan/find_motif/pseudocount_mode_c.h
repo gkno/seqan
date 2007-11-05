@@ -100,8 +100,8 @@ normalize(TProfile & profile, Pseudocount<TValue, CMode> & mode)
 		i<profile_size; 
 		++i)
 	{
-		Iterator<TFreqDist>::Type fd_begin = begin(profile[i]);
-		Iterator<TFreqDist>::Type fd_end = end(profile[i]);
+		typename Iterator<TFreqDist>::Type fd_begin = begin(profile[i]);
+		typename Iterator<TFreqDist>::Type fd_end = end(profile[i]);
 		if(std::find(fd_begin, fd_end, 0)!= fd_end)
 		{
 			// N:=row sum

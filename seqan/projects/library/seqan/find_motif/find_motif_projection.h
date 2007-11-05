@@ -1096,7 +1096,7 @@ determineConsensusSeq(TString & consensus_seq,
 					  TProfile & profile,
 					  typename Size<TString>::Type const & l)
 {
-	typedef Value<TString>::Type TValue;
+	typedef typename Value<TString>::Type TValue;
 	typename Position<TString>::Type i;
 
 	resize(consensus_seq, l);

@@ -259,7 +259,7 @@ ePatternBranching(TStrings & result_set,
 {
 	typedef typename Value<TStrings>::Type TString;
 	typedef typename Value<TString>::Type TValue;
-	typedef typename String<int> TIntAr;
+	typedef String<int> TIntAr;
 	typename Size<TStrings>::Type t = length(dataset);
 	typename Iterator<TStrings>::Type ds_iter = begin(dataset);
 	Shape<TValue> shape(l);
@@ -360,7 +360,7 @@ ePatternBranching(TStrings & result_set,
 {
 	typedef typename Value<TStrings>::Type TString;
 	typedef typename Value<TString>::Type TValue;
-	typedef typename String<int> TIntAr;
+	typedef String<int> TIntAr;
 	typename Size<TStrings>::Type t = length(dataset);
 	typename Iterator<TStrings>::Type ds_iter = begin(dataset);
 	Shape<TValue> shape(l);

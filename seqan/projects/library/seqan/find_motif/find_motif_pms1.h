@@ -149,8 +149,8 @@ pms1(TStrings & result_set,
 	 bool const & is_exact,
 	 OOPS const & model_type)
 {
-	typedef Value<TStrings>::Type TString;
-	typedef Value<TString>::Type TValue;
+	typedef typename Value<TStrings>::Type TString;
+	typedef typename Value<TString>::Type TValue;
 	Shape<TValue> shape(l);
 	// ----------------------------------------------------------------------------
 	// STEP 1:
@@ -265,8 +265,8 @@ pms1(TStrings & result_set,
 	 bool const & is_exact,
 	 OMOPS const & model_type)
 {
-	typedef Value<TStrings>::Type TString;
-	typedef Value<TString>::Type TValue;
+	typedef typename Value<TStrings>::Type TString;
+	typedef typename Value<TString>::Type TValue;
 	Shape<TValue> shape(l);
 	// ----------------------------------------------------------------------------
 	// STEP 1:
@@ -353,8 +353,8 @@ pms1(TStrings & result_set,
 	 bool const & is_exact,
 	 ZOOPS const & model_type)
 {
-	typedef Value<TStrings>::Type TString;
-	typedef Value<TString>::Type TValue;
+	typedef typename Value<TStrings>::Type TString;
+	typedef typename Value<TString>::Type TValue;
 	Shape<TValue> shape(l);
 
 	// ----------------------------------------------------------------------------
@@ -460,8 +460,8 @@ pms1(TStrings & result_set,
 	 bool const & is_exact,
 	 TCM const & model_type)
 {
-	typedef Value<TStrings>::Type TString;
-	typedef Value<TString>::Type TValue;
+	typedef typename Value<TStrings>::Type TString;
+	typedef typename Value<TString>::Type TValue;
 	Shape<TValue> shape(l);
 	// ----------------------------------------------------------------------------
 	// STEP 1:
