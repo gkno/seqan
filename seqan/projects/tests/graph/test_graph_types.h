@@ -11,7 +11,7 @@ void Test_Directed() {
 //____________________________________________________________________________
 // Graph without edge cargo but with edge ids
 
-	typedef Graph<> StandardGraph;
+	typedef Graph<Directed<> > StandardGraph;
 	typedef VertexDescriptor<StandardGraph>::Type TVertexDescriptor;
 	typedef EdgeDescriptor<StandardGraph>::Type TEdgeDescriptor;
 	

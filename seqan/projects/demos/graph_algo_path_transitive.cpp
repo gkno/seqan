@@ -1,0 +1,31 @@
+/// This code example illustrates the transitive closure algorithm
+#include <seqan/graph.h>
+#include <iostream>
+
+using namespace seqan;
+
+int main() {
+	typedef Graph<Directed<> > TGraph;
+	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef Size<TGraph>::Type TSize;
+/// Graph creation: 5 directed edges (3,0), (1,2), ...
+	TSize numEdges = 5;
+	TVertexDescriptor edges[] = {3,0, 1,2, 2,1, 1,3, 3,2};
+	TGraph g;
+	addEdges(g, edges, numEdges);
+	std::cout << g << ::std::endl;
+/// Out-parameter: Closure matrix
+	Matrix<bool> closure;
+/// Transitive-Closure 
+	transitive_closure(g,closure);
+/// Console output
+	TSize len = length(closure, 0);
+	for (TSize row=0;row < len;++row) {
+		for (TSize col=0;col < len;++col) {
+			std::cout << getValue(closure, row*len+col) << ",";
+		}
+		std::cout << ::std::endl;
+	}
+	return 0;
+}

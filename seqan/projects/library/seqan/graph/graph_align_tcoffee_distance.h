@@ -1,3 +1,23 @@
+ /*==========================================================================
+                SeqAn - The Library for Sequence Analysis
+                          http://www.seqan.de 
+ ============================================================================
+  Copyright (C) 2007
+
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 3 of the License, or (at your option) any later version.
+
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+  Lesser General Public License for more details.
+
+ ============================================================================
+  $Id$
+ ==========================================================================*/
+
 #ifndef SEQAN_HEADER_GRAPH_ALIGN_TCOFFEE_DISTANCE_H
 #define SEQAN_HEADER_GRAPH_ALIGN_TCOFFEE_DISTANCE_H
 
@@ -63,6 +83,67 @@ pairwiseDistances(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 			assignValue(distanceMatrix, i*nseq+j, 1 - (TValue) getValue(distanceMatrix, i*nseq+j) / (TValue) maxScore);
 		}
 	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+	
+template<typename TStringSet, typename TCargo, typename TSpec, typename TMatrix>
+inline void 
+pairwiseLibraryDistances(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+						 TMatrix& distanceMatrix)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename Id<TGraph>::Type TId;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
+	typedef typename Value<TMatrix>::Type TValue;
+
+	// Initialization
+	clear(distanceMatrix);
+	TStringSet& str = stringSet(g);	
+	TSize nseq = length(str);
+	fill(distanceMatrix, nseq * nseq, 0);
+
+	// All pairwise alignments
+	TEdgeIterator itE(g);
+	TCargo max_cargo = 0;
+	for(;!atEnd(itE);goNext(itE)) if (cargo(*itE) > max_cargo) max_cargo = cargo(*itE);
+	goBegin(itE);
+	for(;!atEnd(itE);goNext(itE)) {
+		TId id1 = sequenceId(g, sourceVertex(itE));
+		TId id2 = sequenceId(g, targetVertex(itE));
+		TCargo carg = (TCargo) (((double) cargo(*itE)) / ((double) max_cargo) * 100.0);
+		value(distanceMatrix, id1 * nseq + id2) += carg;
+		value(distanceMatrix, id2 * nseq + id1) += carg;
+		cargo(*itE) = carg;
+	}
+
+	// Find the maximum value
+	TValue max_similarity = 0;
+	for(TSize i = 0; i < length(distanceMatrix); ++i) if (max_similarity < distanceMatrix[i]) max_similarity = distanceMatrix[i];
+	max_similarity += 1;
+
+	// Build the distance matrix
+	TValue max_distance = 0;
+	for(TSize i = 0; i < length(distanceMatrix); ++i) {
+		value(distanceMatrix, i) = 1.0 - ((double) getValue(distanceMatrix, i) / max_similarity);
+		if (getValue(distanceMatrix, i) > max_distance) max_distance = getValue(distanceMatrix, i);
+	}
+
+	// Debug code
+	for(TSize row = 0;row < nseq; ++row) {
+		TSize count = 0;
+		for(TSize col = 0;col < nseq; ++col) {
+			if (getValue(distanceMatrix, row*nseq + col) == max_distance) {
+				++count;
+			}
+		}
+		std::cout << count << ','; 
+	}
+	std::cout << std::endl;	
 }
 
 
@@ -317,6 +398,60 @@ getSequenceSimilarity(TFragmentMatches& matches,
 	alignLength = match_length + (len1 - match_length) + (len2 - match_length);
 	if (len1 > len2) return (double) sim / (double) len2;
 	else return (double) sim / (double) len1;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TFragmentMatches, typename TStringSet, typename TSize, typename TAlphabet>
+inline TSize 
+getOverlapLength(TFragmentMatches& matches,
+				 TStringSet& str,
+				 TSize& matchLength,
+				 TAlphabet)
+{
+	SEQAN_CHECKPOINT
+	typedef typename Id<TFragmentMatches>::Type TId;
+	typedef typename Value<TStringSet>::Type TString;
+	typedef typename Infix<TString>::Type TInfix;
+
+	matchLength = 0;
+	TSize len1 = length(str[0]);
+	TSize len2 = length(str[1]);
+
+	typedef typename Iterator<TInfix, Rooted>::Type TInfixIter;
+	TSize minId1 = len1 + len2;
+	TSize minId2 = len1 + len2;
+	TSize maxId1 = 0;
+	TSize maxId2 = 0;
+	TSize matchMismatch_length = 0;
+	for(TSize i = 0;i<length(matches);++i) {
+		TId id1 = sequenceId(matches[i], 0);
+		TId id2 = sequenceId(matches[i], 1);
+		if (fragmentBegin(matches[i], id1) < minId1) minId1 = fragmentBegin(matches[i], id1);
+		if (fragmentBegin(matches[i], id2) < minId2) minId2 = fragmentBegin(matches[i], id2);
+		if (fragmentBegin(matches[i], id1) + fragmentLength(matches[i], id1) > maxId1) maxId1 = fragmentBegin(matches[i], id1) + fragmentLength(matches[i], id1);
+		if (fragmentBegin(matches[i], id2) + fragmentLength(matches[i], id2) > maxId2) maxId2 = fragmentBegin(matches[i], id2) + fragmentLength(matches[i], id2);
+		TInfix inf1 = label(matches[i], str, id1);
+		TInfix inf2 = label(matches[i], str, id2);
+		TInfixIter sIt1 = begin(inf1);
+		TInfixIter sIt2 = begin(inf2);
+		while((!atEnd(sIt1)) || (!atEnd(sIt2))) {
+			if ( (TAlphabet) *sIt1  == (TAlphabet) *sIt2) {
+				++matchLength;
+			}
+			goNext(sIt1); goNext(sIt2);
+			++matchMismatch_length;
+		}
+	}
+	//// Debug code
+	//std::cout <<  minId1 << std::endl;
+	//std::cout <<  minId2 << std::endl;
+	//std::cout <<  len1 << std::endl;
+	//std::cout <<  len2 << std::endl;
+	//std::cout <<  maxId1 << std::endl;
+	//std::cout <<  maxId2 << std::endl;
+	TSize alignLength = matchMismatch_length + (len1 - matchMismatch_length) + (len2 - matchMismatch_length);
+	return alignLength -  minId1 - minId2 - (len1 + len2 - maxId1 - maxId2);
 }
 
 

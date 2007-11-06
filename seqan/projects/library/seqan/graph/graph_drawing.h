@@ -488,7 +488,7 @@ _writeGraphType(TFile & file,
 				Graph<Tree<TCargo, TSpec> > const&,
 				DotDrawing)
 {
-	_streamWrite(file, "graph");
+	_streamWrite(file, "digraph");
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -543,7 +543,7 @@ _writeEdgeType(TFile & file,
 			   Graph<Tree<TCargo, TSpec> > const&,
 			   DotDrawing)
 {
-	_streamWrite(file, " -- ");
+	_streamWrite(file, " -> ");
 }
 
 //////////////////////////////////////////////////////////////////////////////

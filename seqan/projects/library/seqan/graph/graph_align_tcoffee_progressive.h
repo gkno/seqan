@@ -1,3 +1,23 @@
+ /*==========================================================================
+                SeqAn - The Library for Sequence Analysis
+                          http://www.seqan.de 
+ ============================================================================
+  Copyright (C) 2007
+
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 3 of the License, or (at your option) any later version.
+
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+  Lesser General Public License for more details.
+
+ ============================================================================
+  $Id$
+ ==========================================================================*/
+
 #ifndef SEQAN_HEADER_GRAPH_ALIGN_TCOFFEE_PROGRESSIVE_H
 #define SEQAN_HEADER_GRAPH_ALIGN_TCOFFEE_PROGRESSIVE_H
 
@@ -298,7 +318,7 @@ progressiveAlignmentWithTriplet(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 		for(;!atEnd(bfsIt);goNext(bfsIt)) {
 			std::set<TSize> sequenceSet;
 			_getAllChildren(g, copy_tree, *bfsIt, sequenceSet);
-			if (sequenceSet.size() <= seqPerGroup) {
+			if ((TSize) sequenceSet.size() <= (TSize) seqPerGroup) {
 				appendValue(sequenceGroups, sequenceSet);
 				// Find the proper root
 				TDfsPreorderIterator dfsItRootFinder(copy_tree, *bfsIt);
@@ -337,7 +357,7 @@ progressiveAlignmentWithTriplet(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 		TSegmentString alignSeq;
 		_recursiveProgressiveAlignment(copy_graph,tree,sequenceGroupRoots[i],alignSeq);
 		profileStrings[i] = alignSeq;
-		//std::cout << "One mini tree finished " << (sequenceGroups[i]).size() << std::endl;
+		std::cout << "One mini tree finished " << (sequenceGroups[i]).size() << std::endl;
 		clear(copy_graph);
 	}
 
@@ -351,7 +371,7 @@ progressiveAlignmentWithTriplet(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 		heaviestCommonSubsequence(g,profileStrings[lastIndex],profileStrings[lastIndex-y],alignSeq);
 		profileStrings[lastIndex] = alignSeq;
 		(sequenceGroups[lastIndex]).insert((sequenceGroups[lastIndex-y]).begin(),(sequenceGroups[lastIndex-y]).end());
-		//std::cout << "Two mini trees joined " << (sequenceGroups[lastIndex]).size() << std::endl;
+		std::cout << "Two mini trees joined " << (sequenceGroups[lastIndex]).size() << std::endl;
 		//clear(copy_graph);
 	}
 

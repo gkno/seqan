@@ -1,3 +1,23 @@
+ /*==========================================================================
+                SeqAn - The Library for Sequence Analysis
+                          http://www.seqan.de 
+ ============================================================================
+  Copyright (C) 2007
+
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 3 of the License, or (at your option) any later version.
+
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+  Lesser General Public License for more details.
+
+ ============================================================================
+  $Id$
+ ==========================================================================*/
+
 #ifndef SEQAN_HEADER_GRAPH_IMPL_ALIGN_H
 #define SEQAN_HEADER_GRAPH_IMPL_ALIGN_H
 
@@ -1234,43 +1254,42 @@ getLastCoveredPosition(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	return fragmentBegin(g, it->second) + fragmentLength(g, it->second);
 }
 
+
 //////////////////////////////////////////////////////////////////////////////
 
-/**
-.Function.convertAlignment:
-..cat:Spec.Alignment Graph
-..summary:Converts an alignment graph into an alignment matrix.
-..signature:convertAlignment(g, matrix)
-..param.g:In-parameter: An alignment graph.
-...type:Spec.Alignment Graph
-..param.matrix:Out-parameter: A string that represents an alignment matrix.
-..returns: A bool that is true iff the alignment graph is a valid alignment
-*/
-template<typename TStringSet, typename TCargo, typename TSpec, typename TMatrix> 
+
+template<typename TStringSet, typename TCargo, typename TSpec, typename TComponentMap, typename TOrderMap, typename TComponentLength> 
 inline bool
 convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
-				 TMatrix& mat)
+				 TComponentMap& component,
+				 TOrderMap& order,
+				 TComponentLength& compLength)
 {
 	SEQAN_CHECKPOINT
-	if (empty(g)) return false;
-
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
-	typedef typename Value<TMatrix>::Type TValue;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename Id<TGraph>::Type TIdType;
 	typedef typename Size<TGraph>::Type TSize;
-	typedef FragmentInfo<TIdType, TSize> TFragmentInfo;
 	typedef std::map<std::pair<TIdType, TIdType>, TVertexDescriptor> TPosToVertexMap;
-	typedef std::map<unsigned int, unsigned int> TComponentLength;
 	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
 
+	// Check for empty graph
+	if (empty(g)) return false;
+
 	// Strongly Connected Components
-	String<unsigned int> component;
 	strongly_connected_components(g, component);
 
 	// Make a directed graph to represent the ordering of the components
+	// Note: Multiple vertices might have the same component
 	Graph<Directed<void, WithoutEdgeId> > componentGraph;
-	for(TSize i = 0; i<length(component);++i) addVertex(componentGraph);
+	//std::cout << "Components: " << std::endl;
+	TSize comp_max = 0;
+	for(TSize i = 0; i<length(component);++i) {
+		if (component[i] > comp_max) comp_max = component[i];
+		//std::cout << component[i] << ',';
+	}
+	//std::cout << std::endl;
+	for(TSize i = 0; i<=comp_max;++i) addVertex(componentGraph);
 
 	// Walk through all sequences and add edges
 	typename TPosToVertexMap::const_iterator it1 = g.data_pvMap.begin();
@@ -1296,12 +1315,16 @@ convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	}
 
 	// Make a topological sort of the component graph
-	String<unsigned int> order;
 	topological_sort(componentGraph, order);
+	
+	//// Debug code
+	//std::cout << "Topological sort: " << std::endl;
+	//for(TSize i = 0; i<length(order);++i) {
+	//	std::cout << order[i] << ',';
+	//}
+	//std::cout << std::endl;
 
 	// Walk through all sequences and check the component order
-	// Also store the length of each component
-	TComponentLength compLength;
 	unsigned int compIndex = 0;
 	unsigned int compIndexLen = length(order);
 	typename TPosToVertexMap::const_iterator it = g.data_pvMap.begin();
@@ -1320,7 +1343,41 @@ convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 		++compIndex;
 	}
 
+	return true;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.convertAlignment:
+..cat:Spec.Alignment Graph
+..summary:Converts an alignment graph into an alignment matrix.
+..signature:convertAlignment(g, matrix)
+..param.g:In-parameter: An alignment graph.
+...type:Spec.Alignment Graph
+..param.matrix:Out-parameter: A string that represents an alignment matrix.
+..returns: A bool that is true iff the alignment graph is a valid alignment
+*/
+template<typename TStringSet, typename TCargo, typename TSpec, typename TMatrix> 
+inline bool
+convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
+				 TMatrix& mat)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename Value<TMatrix>::Type TValue;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename Id<TGraph>::Type TIdType;
+	typedef std::map<std::pair<TIdType, TIdType>, TVertexDescriptor> TPosToVertexMap;
+	typedef std::map<unsigned int, unsigned int> TComponentLength;
 	
+	// Strongly Connected Components, topological sort, and length of each component
+	String<unsigned int> component;
+	String<unsigned int> order;
+	TComponentLength compLength;
+	if (!convertAlignment(g, component, order, compLength)) return false;
+
 	// Create the matrix
 	TSize len = 0;
 	TSize nseq = length(stringSet(g));
@@ -1331,9 +1388,10 @@ convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	// Fill the matrix
 	TSize row = 0;
 	TSize col = 0;
-	it = g.data_pvMap.begin();
-	compIndex = 0;
-	currentSeq = it->first.first;
+	typename TPosToVertexMap::const_iterator it = g.data_pvMap.begin();
+	unsigned int compIndex = 0;
+	unsigned int compIndexLen = length(order);
+	TIdType currentSeq = it->first.first;
 	for(; it != g.data_pvMap.end(); ++it) {
 		if (it->first.first != currentSeq) {
 			SEQAN_TASSERT(col <= len);
@@ -1364,6 +1422,103 @@ convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 
 	return true;
 }
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec, typename TString> 
+inline void
+consensusSequence(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+				  TString& consensus)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename Value<TString>::Type TAlphabet;
+	typedef typename Infix<TString>::Type TInfix;
+	typedef typename Iterator<TInfix, Rooted>::Type TInfixIter;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename Id<TGraph>::Type TIdType;
+	typedef std::map<std::pair<TIdType, TIdType>, TVertexDescriptor> TPosToVertexMap;
+	typedef std::map<unsigned int, unsigned int> TComponentLength;
+	
+	// Strongly Connected Components, topological sort, and length of each component
+	String<unsigned int> component;
+	String<unsigned int> order;
+	TComponentLength compLength;
+	if (!convertAlignment(g, component, order, compLength)) return;
+
+	// Create the consensus
+	TStringSet& strSet = stringSet(g);
+	TSize nseq = length(strSet);
+	unsigned int compIndexLen = length(order);
+	typedef std::map<unsigned int, unsigned int> TComponentToRank;
+	TComponentToRank compToRank;
+	for(unsigned int compIndex = 0; compIndex < compIndexLen; ++compIndex) {
+		compToRank.insert(std::make_pair(order[compIndex], compIndex));
+	}
+	typedef Pair<unsigned int, unsigned int> TRankPair;
+	typedef String<TRankPair> TSequenceToRanks;
+	TSequenceToRanks seqToRank;
+	resize(seqToRank, nseq);
+	for(unsigned int i=0;i<nseq; ++i) {
+		unsigned int c1 = getProperty(component, findVertex(g, positionToId(strSet, i), 0));
+		unsigned int c2 = getProperty(component, findVertex(g, positionToId(strSet, i), length(strSet[i]) - 1));
+		unsigned int rank1 = (compToRank.find(c1))->second;
+		unsigned int rank2 = (compToRank.find(c2))->second;
+		value(seqToRank, i) = TRankPair(rank1, rank2);
+	}
+	for(unsigned int compIndex = 0; compIndex < compIndexLen; ++compIndex) {
+		typename TPosToVertexMap::const_iterator it = g.data_pvMap.begin();
+		unsigned int currentCompLength = compLength[order[compIndex]];
+		String<String<unsigned int> > counterValues;
+		resize(counterValues, currentCompLength);
+		for(unsigned int i=0;i<currentCompLength; ++i) {
+			String<unsigned int> counter;
+			fill(counter, (unsigned int) ValueSize<TAlphabet>::VALUE, 0);
+			value(counterValues, i) = counter;
+		}
+		// Count the letters for each position of the component
+		for(; it != g.data_pvMap.end(); ++it) {
+			unsigned int c = getProperty(component, it->second);
+			if (order[compIndex] != c) continue;
+			else {
+				TInfix str = label(g,it->second);
+				//std::cout << compLength[order[compIndex]] << std::endl;
+				//std::cout << str << std::endl;
+				TInfixIter sIt = begin(str);
+				unsigned int i = 0;
+				for(;!atEnd(sIt);goNext(sIt)) {
+					++((counterValues[i])[(unsigned int) *sIt]);
+					++i;
+				}
+			}
+		}
+		// Find the gaps
+		unsigned int gaps = 0;
+		for(unsigned int i=0;i<nseq; ++i) {
+			if (((seqToRank[i]).i1 <= compIndex) && ((seqToRank[i]).i2 >= compIndex)) ++gaps;
+		}
+		//std::cout << "Gaps: " << gaps << std::endl;
+		//std::cout << "Component Length: " << currentCompLength << std::endl;
+		for(unsigned int i=0;i<currentCompLength; ++i) {
+			TSize max = 0;
+			TSize index_max = 0;
+			TSize total_count = 0;
+			for(TSize j = 0; j < length(counterValues[i]); ++j) {
+				if ((counterValues[i])[j] > max) {
+					max = (counterValues[i])[j];
+					index_max = j;
+				}
+				total_count += (counterValues[i])[j];
+			}
+			//std::cout << "Total count: " << total_count << std::endl;
+			if ((counterValues[i])[index_max] > (gaps - total_count)) appendValue(consensus, Dna((Byte) index_max));
+		}
+		//std::cout << "........" << std::endl;
+	}
+}
+
 
 
 }// namespace SEQAN_NAMESPACE_MAIN

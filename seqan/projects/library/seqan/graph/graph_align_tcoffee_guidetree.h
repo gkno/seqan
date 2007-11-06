@@ -1,3 +1,23 @@
+ /*==========================================================================
+                SeqAn - The Library for Sequence Analysis
+                          http://www.seqan.de 
+ ============================================================================
+  Copyright (C) 2007
+
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 3 of the License, or (at your option) any later version.
+
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+  Lesser General Public License for more details.
+
+ ============================================================================
+  $Id$
+ ==========================================================================*/
+
 #ifndef SEQAN_HEADER_GRAPH_ALIGN_TCOFFEE_GUIDETREE_H
 #define SEQAN_HEADER_GRAPH_ALIGN_TCOFFEE_GUIDETREE_H
 
@@ -275,12 +295,12 @@ upgmaTree(String<double, TStringSpec>& mat,
 			if (!active[i]) continue;
 			else if (i == index_i) continue;
 			else if (i == index_j) continue;
-			//// Average
-			//double newDist = ((double) active[index_i] / (double) (active[index_i] + active[index_j])) * getValue(mat, index_i * nseq + i) + ((double) active[index_j] / (double) (active[index_i] + active[index_j])) * getValue(mat, index_j * nseq + i);
-			// Minimum
-			double newDist = ((double) active[index_i] / (double) (active[index_i] + active[index_j])) * getValue(mat, index_i * nseq + i);
-			double newDist2 = ((double) active[index_j] / (double) (active[index_i] + active[index_j])) * getValue(mat, index_j * nseq + i);
-			if (newDist2 < newDist) newDist = newDist2;
+			// Average
+			double newDist = ((double) active[index_i] / (double) (active[index_i] + active[index_j])) * getValue(mat, index_i * nseq + i) + ((double) active[index_j] / (double) (active[index_i] + active[index_j])) * getValue(mat, index_j * nseq + i);
+			//// Minimum
+			//double newDist = ((double) active[index_i] / (double) (active[index_i] + active[index_j])) * getValue(mat, index_i * nseq + i);
+			//double newDist2 = ((double) active[index_j] / (double) (active[index_i] + active[index_j])) * getValue(mat, index_j * nseq + i);
+			//if (newDist2 < newDist) newDist = newDist2;
 			assignValue(mat, index_i*nseq + i, newDist);
 			assignValue(mat, i*nseq + index_i, newDist);
 		}

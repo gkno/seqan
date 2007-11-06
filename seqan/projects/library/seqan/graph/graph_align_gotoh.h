@@ -1,3 +1,23 @@
+ /*==========================================================================
+                SeqAn - The Library for Sequence Analysis
+                          http://www.seqan.de 
+ ============================================================================
+  Copyright (C) 2007
+
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 3 of the License, or (at your option) any later version.
+
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+  Lesser General Public License for more details.
+
+ ============================================================================
+  $Id$
+ ==========================================================================*/
+
 #ifndef SEQAN_HEADER_GRAPH_ALIGN_GOTOH_H
 #define SEQAN_HEADER_GRAPH_ALIGN_GOTOH_H
 
@@ -276,10 +296,15 @@ _align_gotoh(TTrace& trace,
 	_processLastColumn(TAlignConfig(), overallMaxValue, overallMaxIndex, mat);
 	// If we got a new index, store direction
 	if (overallMaxIndex.second != len2) {
-		tmp = getValue(mat, len2);
-		initialDir = (Byte) Diagonal;
-		if (getValue(horizontal, len2) ==  tmp) {
-			initialDir = (Byte) Horizontal;
+		if (overallMaxValue.second > overallMaxValue.first) {
+			overallMaxIndex.first = len1;
+			tmp = getValue(mat, overallMaxIndex.second);
+			initialDir = (Byte) Diagonal;
+			if (getValue(horizontal, overallMaxIndex.second) ==  tmp) {
+				initialDir = (Byte) Horizontal;
+			}
+		} else if (overallMaxIndex.first != len1) {
+			overallMaxIndex.second = len2;
 		}
 	}
 

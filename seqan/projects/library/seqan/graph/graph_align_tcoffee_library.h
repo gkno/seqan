@@ -1,3 +1,23 @@
+ /*==========================================================================
+                SeqAn - The Library for Sequence Analysis
+                          http://www.seqan.de 
+ ============================================================================
+  Copyright (C) 2007
+
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 3 of the License, or (at your option) any later version.
+
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+  Lesser General Public License for more details.
+
+ ============================================================================
+  $Id$
+ ==========================================================================*/
+
 #ifndef SEQAN_HEADER_GRAPH_ALIGN_TCOFFEE_LIBRARY_H
 #define SEQAN_HEADER_GRAPH_ALIGN_TCOFFEE_LIBRARY_H
 
@@ -204,6 +224,342 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	// Refine all matches, rescore the matches and create multiple alignment
 	matchRefinement(matches,str,const_cast<TScore&>(score_type),g);
 }
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec, typename TPairList>
+inline void 
+selectPairsForLibraryGeneration(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+								TPairList& pList)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename Value<TPairList>::Type TPair;
+	TStringSet& str = stringSet(g);
+	TSize nseq = length(str);
+	for(TSize i=0; i<nseq; ++i) {
+		for(TSize j=i+1; j<nseq; ++j) {
+			appendValue(pList, TPair(positionToId(str, i), positionToId(str, j)));
+		}
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec, typename TPairList, typename TScore, typename TDistanceMatrix>
+inline void 
+testGeneratePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+						   TPairList const& pList,
+						   TScore const& score_type,
+						   TDistanceMatrix& dist,
+						   GlobalPairwise_Library)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename Id<TGraph>::Type TId;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef typename Value<TDistanceMatrix>::Type TValue;
+	typedef typename Value<TScore>::Type TScoreValue;
+
+	// Clear library graph and guide tree
+	clearVertices(g);
+
+	// Pairwise alignments for all pairs in the list
+	TStringSet& str = stringSet(g);	
+	TSize nseq = length(str);
+	fill(dist, nseq * nseq, 0);
+		
+	// String of fragments to combine all pairwise alignments into a multiple alignment
+	typedef Fragment<> TFragment;
+	typedef String<TFragment, Block<> > TFragmentString;
+	typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
+	TFragmentString matches;
+
+	// Distance graph
+	Graph<Undirected<void> > topologicalGraph;
+	for(TSize i=0;i<nseq; ++i) addVertex(topologicalGraph);
+
+	// All pairwise alignments
+	TSize amountOfPairs = length(pList);
+	for(TSize k=0; k<amountOfPairs; ++k) {
+		// Make a pairwise string-set
+		TStringSet pairSet;
+		TId id1 = (pList[k]).i1;
+		TId id2 = (pList[k]).i2;
+		assignValueById(pairSet, str, id1);
+		assignValueById(pairSet, str, id2);
+		
+		// Overlap alignment
+		TFragmentString pairwise_matches;
+		globalAlignment(pairwise_matches, pairSet, score_type, AlignConfig<true,true,true,true>(), Gotoh() );
+			
+		// Determine a sequence weight
+		TSize matchLen = 0;
+		TSize overlapLen = getOverlapLength(pairwise_matches, pairSet, matchLen, typename Value<TStringSet>::Type() );
+		double quality = (double) matchLen / (double) overlapLen;
+
+		// Get only the good overlap alignments
+		if (((quality >= 1) && (matchLen >= 8)) ||
+			((quality >= 0.8) && (matchLen >= 15))) {
+			TSize len = length(pairwise_matches);	
+			for(TSize z = 0; z<len; ++z) {
+				//TGraph tmp(pairSet);
+				//globalAlignment(tmp, pairSet, score_type, AlignConfig<true,true,true,true>(), Gotoh() );
+				//std::cout << "Match length: " << matchLen << std::endl;
+				//std::cout << "Overlap length: " << overlapLen << std::endl;
+				//std::cout << "Quality: " << quality << std::endl;
+				//std::cout << tmp << std::endl;
+
+				push_back(matches, pairwise_matches[z]);
+			}
+			// Create a corresponding edge
+			TSize i = idToPosition(str, id1);
+			TSize j = idToPosition(str, id2);
+			if (i<j) assignValue(dist, i*nseq+j, matchLen * quality);
+			else assignValue(dist, j*nseq+i, matchLen * quality);	
+			addEdge(topologicalGraph, i, j);
+		}
+	}
+	
+	// Refine all matches, rescore the matches and create multiple alignment
+	matchRefinement(matches,str,const_cast<TScore&>(score_type),g);
+	//matchRefinement(matches,str,g);
+
+	// Eliminate non-cliques of 3
+	for(TSize i=0;i<nseq;++i) {
+		for(TSize j=0;j<i;++j) {
+			if (getValue(dist, j*nseq+i) == 0) continue;
+			bool foundTriplet = false;
+			for(TSize k=0;k<j;++k) {
+				if ((getValue(dist, k*nseq+j) != 0) &&
+					(getValue(dist, k*nseq+i) != 0)) {
+					foundTriplet = true;
+					break;
+				}
+			}
+			if (!foundTriplet) {
+				for(TSize k=j+1;k<nseq;++k) {
+					if (getValue(dist, j*nseq+k) != 0) {
+						if (((i < k) && (getValue(dist, i*nseq+k) != 0)) ||
+							((i > k) && (getValue(dist, k*nseq+i) != 0))) {
+								foundTriplet = true;
+								break;
+						}
+					}
+				}
+			}
+			if (!foundTriplet) {
+				//std::cout << "Eliminate pair: " << j << ',' << i << std::endl;
+				value(dist, j*nseq+i) = 0;
+			}
+		}
+		for(TSize j=i+1;j<nseq;++j) {
+			if (getValue(dist, i*nseq+j) == 0) continue;
+			bool foundTriplet = false;
+			for(TSize k=0;k<j;++k) {
+				if (getValue(dist, k*nseq+j) != 0) {
+					if (((i < k) && (getValue(dist, i*nseq+k) != 0)) ||
+						((i > k) && (getValue(dist, k*nseq+i) != 0))) {
+							foundTriplet = true;
+							break;
+					}
+				}
+			}
+			if (!foundTriplet) {
+				for(TSize k=j+1;k<nseq;++k) {
+					if ((getValue(dist, j*nseq+k) != 0) &&
+						(getValue(dist, i*nseq+k) != 0)) {
+						foundTriplet = true;
+						break;
+					}
+				}
+			}
+			if (!foundTriplet) {
+				//std::cout << "Eliminate pair: " << i << ',' << j << std::endl;
+				value(dist, i*nseq+j) = 0;
+			}
+		}
+	}
+
+	// Prefer highly connected hubs
+	TValue max_value = 0;
+	for(TSize i=0;i<nseq;++i) {
+		TSize degI = degree(topologicalGraph, i);
+		for(TSize j=i+1;j<nseq;++j) {
+			TSize degJ = degree(topologicalGraph, j);
+			if ((degI == 0) || (degJ ==0)) {
+				std::cout << "Not connected." << std::endl;
+				//exit(0);
+			}
+			if (value(dist, i*nseq+j) != 0) {
+				value(dist, i*nseq+j) += ((degI + degJ) / 2);
+				if (value(dist, i*nseq+j) > max_value) max_value = value(dist, i*nseq+j);
+			}
+		}
+	}
+
+	// Make distances
+	for(TSize i=0;i<nseq;++i) {
+		for(TSize j=i+1;j<nseq;++j) {
+			if (value(dist, i*nseq+j) > 0) {
+				value(dist, i*nseq+j) = (max_value - getValue(dist, i*nseq+j));
+				value(dist, j*nseq+i) = (max_value - getValue(dist, i*nseq+j));
+			} else {
+				value(dist, i*nseq+j) = 1000000;
+				value(dist, j*nseq+i) = 1000000;
+			}
+		}
+	}
+}
+
+
+
+/*
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec, typename TPairList, typename TScore, typename TDistanceMatrix>
+inline void 
+testGeneratePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+						   TPairList const& pList,
+						   TScore const& score_type,
+						   TDistanceMatrix& dist,
+						   GlobalPairwise_Library)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename Id<TGraph>::Type TId;
+
+	// Clear library graph and guide tree
+	clearVertices(g);
+
+	// Pairwise alignments for all pairs in the list
+	TStringSet& str = stringSet(g);	
+	TSize nseq = length(str);
+	fill(dist, nseq * nseq, 1000000);
+		
+	// String of fragments to combine all pairwise alignments into a multiple alignment
+	typedef Fragment<> TFragment;
+	typedef String<TFragment, Block<> > TFragmentString;
+	typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
+	TFragmentString matches;
+
+	// Distance graph
+	Graph<Directed<void> > topologicalGraph;
+	for(TSize i=0;i<nseq; ++i) addVertex(topologicalGraph);
+
+	// All pairwise alignments
+	TSize amountOfPairs = length(pList);
+	for(TSize k=0; k<amountOfPairs; ++k) {
+		// Make a pairwise string-set
+		TStringSet pairSet;
+		TId id1 = (pList[k]).i1;
+		TId id2 = (pList[k]).i2;
+		assignValueById(pairSet, str, id1);
+		assignValueById(pairSet, str, id2);
+		
+		// Overlap alignment
+		TFragmentString pairwise_matches;
+		globalAlignment(pairwise_matches, pairSet, score_type, AlignConfig<true,true,true,true>(), Gotoh() );
+			
+		// Determine a sequence weight
+		TSize matchLen = 0;
+		TSize overlapLen = getOverlapLength(pairwise_matches, pairSet, matchLen, typename Value<TStringSet>::Type() );
+		double quality = (double) matchLen / (double) overlapLen;
+
+		// Get only the good overlap alignments
+		if (((quality >= 1) && (matchLen >= 5)) ||
+			((quality >= 0.8) && (matchLen >= 10))) {
+			TSize len = length(pairwise_matches);	
+			for(TSize z = 0; z<len; ++z) {
+				//TGraph tmp(pairSet);
+				//globalAlignment(tmp, pairSet, score_type, AlignConfig<true,true,true,true>(), Gotoh() );
+				//std::cout << "Match length: " << matchLen << std::endl;
+				//std::cout << "Overlap length: " << overlapLen << std::endl;
+				//std::cout << "Quality: " << quality << std::endl;
+				//std::cout << tmp << std::endl;
+
+				push_back(matches, pairwise_matches[z]);
+			}
+			// Create a corresponding edge
+			TSize i = idToPosition(str, id1);
+			TSize j = idToPosition(str, id2);
+			double distance = 100 - matchLen * quality;
+			if (distance < 0) distance = 0;
+			assignValue(dist, i*nseq+j, distance);
+			assignValue(dist, j*nseq+i, distance);	
+			if (i < j) addEdge(topologicalGraph, i, j);
+			else addEdge(topologicalGraph, j, i);
+		}
+	}
+	
+	// Refine all matches, rescore the matches and create multiple alignment
+	matchRefinement(matches,str,g);
+
+	typedef typename VertexDescriptor<Graph<Directed<void> > >::Type TVertexDescriptor;
+	
+
+	//typedef typename Iterator<Graph<Directed<void> >, VertexIterator>::Type TVertexIterator;
+	//TVertexIterator itV(topologicalGraph);
+	//for(;!atEnd(itV);goNext(itV)) {
+	//	if (degree(topologicalGraph, *itV) == 0) {
+	//		std::cout << "Not connected." << std::endl;
+	//		exit(0);
+	//	}
+	//}
+
+	// Topological sort the reads
+	String<TVertexDescriptor> order;
+	//std::cout << topologicalGraph << std::endl;
+	topological_sort(topologicalGraph, order);
+
+	// Adapt the distance matrix
+	typedef Iterator<String<TVertexDescriptor> >::Type TStringIterator;
+	TStringIterator itOrder = begin(order);
+	TStringIterator itOrderEnd = end(order);
+	TSize max_degree = 0;
+	TSize max_index = 0;
+	unsigned int count = 0;
+	while(itOrder != itOrderEnd) {
+		TSize current_degree = degree(topologicalGraph, *itOrder);
+		if (current_degree == 0) {
+			std::cout << "Not connected." << std::endl;
+			exit(0);
+		} else {
+			if (current_degree > max_degree) {
+				max_degree = current_degree;
+				max_index = count;
+			}
+		}
+		goNext(itOrder);
+		++count;
+	}
+	std::cout << max_index << std::endl;
+	std::cout << max_degree << std::endl;
+	
+	count = 0;
+	itOrder = begin(order);
+	while(itOrder != itOrderEnd) {
+		if (max_index > count) {
+			for(TSize i=0;i<nseq;++i) {
+				value(dist, i*nseq+(*itOrder)) += (max_index-count) * 10;
+				value(dist, (*itOrder)*nseq+i) += (max_index-count) * 10;
+			}
+		} else {
+			for(TSize i=0;i<nseq;++i) {
+				value(dist, i*nseq+(*itOrder)) += (count - max_index) * 10;
+				value(dist, (*itOrder)*nseq+i) += (count - max_index) * 10;
+			}
+		}
+		++count;
+		goNext(itOrder);
+	}
+}
+*/
 
 
 //////////////////////////////////////////////////////////////////////////////

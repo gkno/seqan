@@ -1,3 +1,23 @@
+ /*==========================================================================
+                SeqAn - The Library for Sequence Analysis
+                          http://www.seqan.de 
+ ============================================================================
+  Copyright (C) 2007
+
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 3 of the License, or (at your option) any later version.
+
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+  Lesser General Public License for more details.
+
+ ============================================================================
+  $Id$
+ ==========================================================================*/
+
 #ifndef SEQAN_HEADER_GRAPH_ALGORITHM_H
 #define SEQAN_HEADER_GRAPH_ALGORITHM_H
 
@@ -504,13 +524,14 @@ kruskals_algorithm(Graph<TSpec> const& g,
 		TVertexDescriptor y = q.top().second.second;
 		q.pop();
 		if (getProperty(id, x) != getProperty(id,y)) {
+			TVertexDescriptor owner = getProperty(id, x);
 			assignValue(edges, index, x);
 			assignValue(edges, index+1, y);
 			index = index + 2;
-			typedef typename Iterator<String<TVertexDescriptor>, Rooted>::Type TStrIterator;
+			typedef typename Iterator<String<TVertexDescriptor> >::Type TStrIterator;
 			TStrIterator strIt = begin(property(set,getProperty(id, y)));
-			for(;!atEnd(strIt);goNext(strIt)) {
-				TVertexDescriptor owner = getProperty(id, x);
+			TStrIterator strItEnd = end(property(set,getProperty(id, y)));
+			for(;strIt != strItEnd;goNext(strIt)) {				
 				TVertexDescriptor setMember = getValue(strIt);
 				appendValue(property(set, owner), setMember);
 				assignProperty(id, setMember, owner);
@@ -557,12 +578,12 @@ _print_path(Graph<TSpec> const& g,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TSpec, typename TPredecessorMap, typename TVertexDescriptor>
+template<typename TSpec, typename TPredecessorMap, typename TVertexDescriptor1, typename TVertexDescriptor2>
 inline void
 _print_path(Graph<TSpec> const& g,
 			TPredecessorMap const& predecessor,
-			TVertexDescriptor const source,
-			TVertexDescriptor const v)
+			TVertexDescriptor1 const source,
+			TVertexDescriptor2 const v)
 {
 	if (source == v) {
 		std::cout << source;
