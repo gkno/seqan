@@ -96,17 +96,26 @@
 A maximal unique match (MUM) is a unique match that is not part of any longer unique match. The following
 example demonstrates how to iterate over all MUMs and output them.
 ..file:../projects/demos/index_mums.cpp
+..output
+...text:The only maximal matches that occur in all 3 sequences are $"SeqAn"$ and $"sequence"$.
+They occur exactly once and thus are maximal unique matches.
+...code:weese@tanne:~/seqan$ cd demos
+weese@tanne:~/seqan/demos$ make index_mums
+weese@tanne:~/seqan/demos$ ./index_mums
+0, 53, 33, 5    "SeqAn"
+23, 36, 3, 8    "sequence"
+weese@tanne:~/seqan/demos$
 ..demofor:Class.Index
 ..demofor:Class.StringSet
 ..demofor:Spec.MUMs Iterator
 ..demofor:Function.representative
-..demofor:Function.orderOccurrences
+..demofor:Function.repLength
 ..demofor:Function.getOccurrences
-..demofor:Function.countOccurrences
+..demofor:Function.orderOccurrences
 .
 
 
-.Demo.Super Maximal Repeats:
+.Demo.Supermaximal Repeats:
 ..cat:Index
 ..summary:Example for using the SuperMaxRepeats iterator.
 ..description
@@ -114,9 +123,20 @@ example demonstrates how to iterate over all MUMs and output them.
 A supermaximal repeat is a repeat that is not part of any longer repeat. The following
 example demonstrates how to iterate over all supermaximal repeats and output them.
 ..file:../projects/demos/index_supermaxrepeats.cpp
+..output
+...text:The only supermaximal repeats of $"How many wood would a woodchuck chuck."$ of length at least 3
+are $" wood"$ and $"chuck"$. There are repeats of $" wo"$ which are maximal (see @Demo.Maximal Repeats@),
+ ut not supermaximal, as $" wo"$ is part of the longer repeat $" wood"$.
+...code:weese@tanne:~/seqan$ cd demos
+weese@tanne:~/seqan/demos$ make index_supermaxrepeats
+weese@tanne:~/seqan/demos$ ./index_supermaxrepeats
+8, 21, 5        " wood"
+26, 32, 5       "chuck"
+weese@tanne:~/seqan/demos$
 ..demofor:Class.Index
 ..demofor:Spec.SuperMaxRepeats Iterator
 ..demofor:Function.representative
+..demofor:Function.repLength
 ..demofor:Function.getOccurrences
 ..demofor:Function.countOccurrences
 .
@@ -130,6 +150,19 @@ example demonstrates how to iterate over all supermaximal repeats and output the
 A maximal repeat is a repeat that cannot be extended to the left or to right to a longer repeat. The following
 example demonstrates how to iterate over all maximal repeats and output them.
 ..file:../projects/demos/index_maxrepeats.cpp
+..output
+...text:As all supermaximal repeats (see @Demo.Supermaximal Repeats@) are also maximal repeats, 
+$" wood"$ and $"chuck"$ are outputted. In $"How many wood would a woodchuck chuck."$
+$" wo"$ is a repeat of length 3 that occurs at two pairs
+of positions which are maximal repeats ($" a wood", "od woul"$ and $"ny wood", "od woul"$).
+Beside these there are no other maximal repeats of length at least 3.
+...code:weese@tanne:~/seqan$ cd demos
+weese@tanne:~/seqan/demos$ make index_maxrepeats
+weese@tanne:~/seqan/demos$ ./index_maxrepeats
+< 8 , 21 >, 5           " wood"
+< 21 , 13 >, < 8 , 13 >, 3      " wo"
+< 26 , 32 >, 5          "chuck"
+weese@tanne:~/seqan/demos$
 ..demofor:Class.Index
 ..demofor:Spec.MaxRepeats Iterator
 ..demofor:Function.representative
