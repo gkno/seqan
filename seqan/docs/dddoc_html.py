@@ -32,33 +32,26 @@ def createIndexes(path):
     for cat in cats:
         print 'Indexes for ' + cat,
         
-        entries = {}
-
-        filename = os.path.join(path, getIndexname(cat, ""))
-        fl = file(filename, "w")
-        pageIndex(fl, path, cat, "")
-        fl.close()
+        entries = collectIndexEntries(cat)
         
-        entries[""] = 1
-        for key in dddoc.DATA[cat].keys():
-            data = dddoc.DATA[cat][key]
-            subcats = data["cat"].lines
-            for subcat_line in subcats:
-                subcat = subcat_line.text()
-                if not entries.has_key(subcat): 
-                    entries[subcat] = 1
-                    filename = os.path.join(path, getIndexname(cat, subcat))
-                    fl = file(filename, "w")
-                    print '.',
-                    pageIndex(fl, path, cat, subcat)
-                    fl.close()
-
+        subcats = entries.keys()
+        subcats.sort()
+        for subcat in subcats:
+            subcat_entries = entries[subcat]
+            filename = os.path.join(path, getIndexname(cat, subcat))
+            fl = file(filename, "w")
+            print '.',
+            pageIndex(fl, path, cat, subcat, entries, subcats)
+            fl.close()
+ 
+            
         filename = os.path.join(path, getIndexpage(cat))
         fl = file(filename, "w")
         print '.',
         pageIndexpage(fl, cat)
         fl.close()
         print
+
 
 ################################################################################
 
@@ -266,11 +259,11 @@ def translateLinkDisplaytext(text):
 
 ################################################################################
 
-def translateLink(text):
+def translateLink(text, attribs = ""):
     if text.find("http:", 0, 5) == 0:  #external Link
         arr = dddoc.splitUrl(text)
         if len(arr) == 0: return brokenLink(text)
-        return '<a href="' + arr[0] + '">' + arr[len(arr) - 1] + '</a>'
+        return '<a href="' + arr[0] + '" ' + attribs + '>' + arr[len(arr) - 1] + '</a>'
 
     arr = dddoc.splitName(text)
     if text.find('.') < 0: #Link to indexpage
@@ -279,7 +272,7 @@ def translateLink(text):
         if len(arr) == 1: t = arr[0]
         else: t = arr[1]
         if (dddoc.DATA["globals.indexes"][arr[0]].empty()): return brokenLink(text)
-        else: return '<a href="' + getIndexpage(arr[0]) + '">' + t + '</a>'
+        else: return '<a href="' + getIndexpage(arr[0]) + '" ' + attribs + '>' + t + '</a>'
 
     if (len(arr) < 2): return brokenLink(text)
     
@@ -298,7 +291,7 @@ def translateLink(text):
     if len(summary) > 0:
         summary = 'title="' + summary + '"'
     
-    return '<a href="' + href + '" ' + summary + '>' + translateID(arr[len(arr) - 1]) + '</a>'
+    return '<a href="' + href + '" ' + summary + ' ' + attribs + '>' + translateID(arr[len(arr) - 1]) + '</a>'
 
 
 ################################################################################
@@ -325,10 +318,10 @@ def translateID(text):
 ################################################################################
          
 def sortingKey(data, key):
-    if data[key]["order"].empty():
+    if data["order"].empty():
         return translateID(key)
     
-    return data[key]["order"].text();
+    return data["order"].text();
 
  
 ################################################################################
@@ -361,9 +354,41 @@ def getCategoryTitle(cat):
 	else:
 		return s
 
+
 ################################################################################
 
-def pageIndex(fl, path, cat, subcat = ""):
+def addCollectIndexEntry(data, cat, subcat, key, entries):
+    subcat2 = subcat
+    while subcat2 != '':
+        if not entries.has_key(subcat2): entries[subcat2] = {}
+        pos = subcat2.rfind('.')
+        if pos < 0: break
+        subcat2 = subcat2[:pos]
+        
+    key4sorting = sortingKey(data, key)
+    if not entries[subcat].has_key(key4sorting): entries[subcat][key4sorting] = []
+    entries[subcat][key4sorting].append(cat + "." +key)
+
+################################################################################
+
+def collectIndexEntries(cat):
+    entries = {}
+    entries[''] = {}
+    data = dddoc.DATA[cat]
+    for key in data.keys():
+        entry = data[key]
+        if not entry["hidefromindex"].empty(): continue
+        if entry["cat"].empty(): addCollectIndexEntry(entry, cat, '', key, entries)
+        else:
+            for subcat_line in entry["cat"].lines:
+                subcat = subcat_line.text()
+                addCollectIndexEntry(entry, cat, subcat, key, entries)
+                
+    return entries
+
+################################################################################
+
+def pageIndex(fl, path, cat, subcat, entries, subcats):
     fl.write('<html>')
     fl.write('<head>')
     fl.write('<meta http-equiv="content-type" content="text/html; charset=UTF-8">');
@@ -381,55 +406,38 @@ def pageIndex(fl, path, cat, subcat = ""):
             fl.write('<div class=index_section>')
         fl.write('<div class=index_cat><a class=index_link target=_top href="' + getIndexpage(cat2) + '">' + lines[cat2].text() + '</a></div>')
         if cat2 == cat:
-            keys = dddoc.DATA[cat2].keys_by_occ()
-            entries = {}
-            for key in keys:
-                data = dddoc.DATA[cat2][key]
-                if not data["hidefromindex"].empty():
-                    continue
-                    
-                subcats2 = data["cat"].lines
-                
-                map = {}
-                if (len(subcats2) == 0): map[""] = 1
-                else:
-                    for line in subcats2:
-                        map[line.text()] = 1
-        
-                for subcat2 in map.keys():
-                    if not entries.has_key(subcat2): entries[subcat2] = {}
-                    if subcat == subcat2:
-                        s = '<div class=index_item>'
-                        s += '<a class=index_link id="' + key + '" target=_top title="' + translateID(key) + '" href="' + getFilename(cat, key) + '">' + translateID(key) + '</a>'
-                        s += '</div>'
-                        
-                        key4sorting = sortingKey(dddoc.DATA[cat2], key)
-                        if not entries[subcat2].has_key(key4sorting): entries[subcat2][key4sorting] = ''
-                        entries[subcat2][key4sorting] += s
-                        
-            keys = entries.keys()
-            keys.sort()
-            for key in keys:
             
-                text = ''
-                subkeys = entries[key].keys()
-                subkeys.sort()
-                for subkey in subkeys:
-                    text += entries[key][subkey]
-
-                if key != "":
-                    fl.write('<div class=index_subsection>')
-                    fl.write('<div class=index_subcat><a class=index_link href="' + getIndexname(cat2, key) + '"></div>')
-                    if key == subcat:
-                        fl.write('<img src="dddoc_minus.gif" border=0>')
-                    else:
-                        fl.write('<img src="dddoc_plus.gif" border=0>')
-                    fl.write(key + '</a>')
-                    fl.write(text)
-                    fl.write('</div>')
-                else:
-                    fl.write(text)
-        fl.write('</div>')
+            # print subfolder
+            for subcat2 in subcats:
+                is_sub = ((subcat2.find(subcat) == 0) and (subcat2.find('.', len(subcat)+1) < 0))
+                is_super = (subcat.find(subcat2) == 0)
+                has_depth_greater_2 = (subcat2.find('.') >= 0)
+                is_sister = not has_depth_greater_2 or (subcat.find(subcat2[0:subcat2.rfind('.')]) == 0)
+                if (subcat2 != "") and (is_sub or is_super or is_sister or (subcat2 == subcat)):
+                    indent = ''
+                    display_text = subcat2
+                    while True:
+                        pos = display_text.find('.')
+                        if pos < 0: break
+                        indent += '&nbsp;&nbsp;'
+                        display_text = display_text[pos+1:]
+                        
+                    if is_super: image = 'dddoc_minus.gif'
+                    else: image = 'dddoc_plus.gif'
+                        
+                    fl.write('<div class=index_subcat>' + indent + '<img src="' + image + '" border=0><a class=index_link href="' + getIndexname(cat, subcat2) + '">' + display_text + '</div>')
+                    
+                if (subcat2 == subcat):
+                    data = entries[subcat]
+                    entrs = data.keys()
+                    entrs.sort()
+                    for entr in entrs:
+                        links = data[entr]
+                        for link in links:
+                            fl.write('<div class=index_item>' + translateLink(link, "target=_top") + '</div>')
+                    
+                    
+        fl.write('</div>') #index_section or index_section_high
         
     printSearchmask(fl)
     fl.write('</body>')
@@ -501,7 +509,7 @@ def addIndexPageMembers(data, key, entries, subcat):
     
     s += '</td></tr>'
     
-    key4sorting = sortingKey(data, key)
+    key4sorting = sortingKey(data[key], key)
     if not entries[subcat].has_key(key4sorting): entries[subcat][key4sorting] = ''
     entries[subcat][key4sorting] += s
 
@@ -1164,8 +1172,6 @@ def subprintLink(fl, data, subcategory):
 
 ################################################################################
 
-
-################################################################################
 
 def subprintConceptAndType(fl, data):    
     not_name_types = {}

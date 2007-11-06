@@ -133,7 +133,8 @@ A field has therefore the form "[Category].[Name].[Field]":
 Text pieces defined by several entries for the same "title" field are concatenated.
 ...table:"summary"|Short summary of the item. Each item should have exactly one summary, otherwise a warning is displayed. Place longer descriptions under "remarks" or "description". 
 Text pieces defined by several entries for the same "summary" field are concatenated.
-...table:"cat"|subcategory. The text appears in the documentation in a subfolder of [Category].
+...table:"cat"|subcategory. The text appears in the documentation in a subfolder of [Category]. Sub-subcategories can be defined by a "."-separated category path, 
+    e.g. "cat:animal.rodents.hamsters".
 each item can possess several subcategories. In this case the tex appears in all corresponding subfolders.
 ...table:"signature"|Isolated piece of code that demonstates the use of the item.
         for example: "$length(container)$"
