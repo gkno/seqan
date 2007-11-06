@@ -235,10 +235,12 @@ namespace SEQAN_NAMESPACE_MAIN
 .Function.indexShape:
 ..summary:Shortcut for $getFibre(.., QGram_Shape)$.
 ..cat:Index
-..signature:indexDir(index)
+..signature:indexShape(index)
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.Index_QGram
-..returns:A reference to the @Tag.QGram_Shape@ fibre (shape of q-gram index).
+..returns:Returns a reference to the @Class.Shape@ object of a q-gram index.
+Formally, this is a reference to the @Tag.QGram_Shape@ fibre.
+...type:Class.Shape
 */
 
 	template <typename TText, typename TSpec>
