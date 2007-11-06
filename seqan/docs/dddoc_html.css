@@ -378,7 +378,7 @@ A:hover, A:link, A:visited
 {
     margin-left:12px;
     margin-top:6px;
-    width:600px;
+    width:700px;
 }
 .codefiletab
 {
@@ -514,20 +514,30 @@ A:hover, A:link, A:visited
 
 #output
 {
-    width:600px;
+    width:700px;
 }
 #output .code_sub_block
 {
     width:100%;
-    background-color:#000066;
+    background-color:#000000;
 }
 #output .code, .output_sub_block .code
 {
-    color:#eeeeee;
+    color:#bbbbbb;
     font-weight:bold;
 }
 
 .output_sub_block
 {
-    background-color:#000066;
+    background-color:#000000;
+}
+
+#concept_block div
+{
+    padding-left:10px;
+    margin:0 0 2px 0;
+}
+#concept_block .section_sub_headline
+{
+    padding-left:0px;
 }

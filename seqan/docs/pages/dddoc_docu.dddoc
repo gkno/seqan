@@ -170,10 +170,10 @@ E.g. "Class.doc.base:Class.animal" creates a field "Class.animal.derived:Class.d
     (inserts back link: "childconcept")
 ...table:"class"|link to class or spec. Using Memfunc or Memvar: name of the class belonging to the item. 
 (inserts links "memfunc" or "memvar")
-...table:"concept"|link to concept. A class that implements this concept must implement the current item. Insert back link depending on the current item's category.
+...table:"concept"|link to concept. A class that implements this concept must implement the current item. Do not disturb with "implements". Insert back link depending on the current item's category.
 ...table:"demo"|link to a demo. Demo explains how to use the item. (inserts back link "demofor")
 ...table:"general"|for Spec: The correspnding class. (inserts back link "spec")
-...table:"implements"|concept that is implemented using the class/spec.
+...table:"implements"|link to concept that is implemented by the current item. Do not disturb with "concept". (inserts back link "conceptimplements")
 ...table:"see"|crossreference to another item. (inserts back link "see").
 ...table:"shortcutfor"|link to another item, for which the current item is a shortcut for. (inserts back  link: "shortcut")
 

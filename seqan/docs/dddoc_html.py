@@ -247,6 +247,25 @@ def brokenLink(text):
     
 ################################################################################
 
+def translateLinkDisplaytext(text):
+    if text.find("http:", 0, 5) == 0:  #external Link
+        arr = dddoc.splitUrl(text)
+        if len(arr) == 0: return brokenLink(text)
+        return arr[len(arr) - 1]
+
+    arr = dddoc.splitName(text)
+    if text.find('.') < 0: #Link to indexpage
+        arr = dddoc.splitUrl(text)
+        if len(arr) == 0: return brokenLink(text)
+        if len(arr) == 1: return arr[0]
+        else: return arr[1] 
+
+    if (len(arr) < 2): return brokenLink(text)
+    
+    return translateID(arr[len(arr) - 1])
+
+################################################################################
+
 def translateLink(text):
     if text.find("http:", 0, 5) == 0:  #external Link
         arr = dddoc.splitUrl(text)
@@ -259,7 +278,8 @@ def translateLink(text):
         if len(arr) == 0: return brokenLink(text)
         if len(arr) == 1: t = arr[0]
         else: t = arr[1]
-        return '<a href="' + getIndexpage(arr[0]) + '">' + t + '</a>'
+        if (dddoc.DATA["globals.indexes"][arr[0]].empty()): return brokenLink(text)
+        else: return '<a href="' + getIndexpage(arr[0]) + '">' + t + '</a>'
 
     if (len(arr) < 2): return brokenLink(text)
     
@@ -596,31 +616,32 @@ def writePage(fl, data):
     printLink(fl, data, "class")
     printLink(fl, data, "general")
     printShortcutfor(fl, data, "shortcutfor")
-    printLinkRek(fl, data, "implements", "general")
+    printLinkRek(fl, data, "implements")
     printLink(fl, data, "baseconcept")
 
     printMember(fl, data, "spec")
     printMember(fl, data, "shortcut")
-    printMemberRek(fl, data, "type", "general")
-    printMemberRek(fl, data, "memvar", "base")
-    printMemberRek(fl, data, "memfunc", "base")
-    printMemberRek(fl, data, "function", "general")
+    printMemberRek(fl, data, "type")
+    printMemberRek(fl, data, "memvar")
+    printMemberRek(fl, data, "memfunc")
+    printMemberRek(fl, data, "function")
     
     printMember(fl, data, "childconcept")
-    printMemberRek(fl, data, "conceptimplements", "childconcept")
-    printMemberRek(fl, data, "conceptmetafunc", "baseconcept")
-    printMemberRek(fl, data, "conceptmemvar", "baseconcept")
-    printMemberRek(fl, data, "conceptmemfunc", "baseconcept")
-    printMemberRek(fl, data, "conceptfunc", "baseconcept")
+    printMemberRek(fl, data, "conceptimplements")
+    printMemberRek(fl, data, "conceptmetafunc")
+    printMemberRek(fl, data, "conceptmemvar")
+    printMemberRek(fl, data, "conceptmemfunc")
+    printMemberRek(fl, data, "conceptfunc")
     
     printTable(fl, data, "value")
     printTable(fl, data, "tag")
 
-    printLinkRek(fl, data, "conceptusedby", "childconcept")
+    printLinkRek(fl, data, "conceptusedbymeta")
+    printLinkRek(fl, data, "conceptusedbyfunc")
 
     printTextblock(fl, data, "remarks")
     printTextblock(fl, data, "example")
-    printLinkRek(fl, data, "demo", "general")
+    printLinkRek(fl, data, "demo")
     printFile(fl, data, "file")
     printTextblock(fl, data, "output")
     
@@ -706,27 +727,32 @@ def printTable(fl, data, category, showheadline = True):
   
 ################################################################################
 
-def findDataRek(fl, data, category, follow, lines, map):
+def findDataRek(data, field, lines, map):
     highlight = False
     
-    lines.extend(data[category].lines)
+    lines.extend(data[field].lines)
 
     for line in lines:
         map[line.text()] = ''
-    
-    followups = data[follow].lines
-    for followup in followups:
-        dataup = dddoc.DATA[followup.text()]
         
-        submap = {}
-        findDataRek(fl, dataup, category, follow, lines, submap)
+    follows = dddoc.DATA["globals.inherit"][field]
+    for follow in follows.keys():
+        follow_field = follows[follow].text()
+        if follow_field.strip() == "": follow_field = field
         
-        for key in submap.keys():
-            if not map.has_key(key): 
-                origin = submap[key]
-                if origin == '': origin = followup.text()
-                map[key] = origin
-                highlight = True
+        followups = data[follow].lines
+        for followup in followups:
+            dataup = dddoc.DATA[followup.text()]
+            
+            submap = {}
+            findDataRek(dataup, follow_field, lines, submap)
+            
+            for key in submap.keys():
+                if not map.has_key(key): 
+                    origin = submap[key]
+                    if origin == '': origin = followup.text()
+                    map[key] = origin
+                    highlight = True
         
     return highlight
       
@@ -744,11 +770,12 @@ def printMemberOut(fl, data, category, lines, derivedfrom, highlight, showheadli
         
         map = {}
         for line in lines:
-            map[line.text()] = 1
+            map[translateLinkDisplaytext(line.text()).lower()] = line.text()
         
         texts = map.keys()
         texts.sort()
-        for text in texts:
+        for key in texts:
+            text = map[key]
             origin = ''
             do_highlight = highlight
             if derivedfrom.has_key(text) and len(derivedfrom[text]) > 0: 
@@ -779,10 +806,10 @@ def printMember(fl, data, category, showheadline = True):
 
 ################################################################################
 
-def printMemberRek(fl, data, category, follow, showheadline = True):
+def printMemberRek(fl, data, category, showheadline = True):
     lines = []
     map = {}
-    highlight = findDataRek(fl, data, category, follow, lines, map)
+    highlight = findDataRek(data, category, lines, map)
     
     printMemberOut(fl, data, category, lines, map, highlight, showheadline)
     
@@ -799,12 +826,13 @@ def printLinkOut(fl, data, category, lines, derivedfrom, highlight, showheadline
 
         map = {}
         for line in lines:
-            map[line.text()] = 1
+            map[translateLinkDisplaytext(line.text()).lower()] = line.text()
         
         str = ''
-        links = map.keys()
-        links.sort()
-        for link in links:
+        keys = map.keys()
+        keys.sort()
+        for key in keys:
+            link = map[key]
             if (link == ''): continue
             origin = ''
             do_highlight = highlight
@@ -831,10 +859,10 @@ def printLink(fl, data, category, showheadline = True):
 
 ################################################################################
 
-def printLinkRek(fl, data, category, follow, showheadline = True):
+def printLinkRek(fl, data, category, showheadline = True):
     lines = []
     map = {}
-    highlight = findDataRek(fl, data, category, follow, lines, map)
+    highlight = findDataRek(data, category, lines, map)
     
     printLinkOut(fl, data, category, lines, map, highlight, showheadline)
 
@@ -1068,8 +1096,7 @@ def subprintText(fl, data, subcategory = False):
         fl.write('</table>')
        
     subprintLink(fl, data["metafunction"], "metafunction")
-    subprintLink(fl, data["type"], "type")
-    subprintLink(fl, data["concept"], "concept")
+    subprintConceptAndType(fl, data)
     subprintText(fl, data["value"], "value")
     subprintText(fl, data["default"], "default")
     printTableContent(fl, data, "param")
@@ -1100,6 +1127,27 @@ def translateSubsection(text, section_count, subsection_count):
 
 ################################################################################
 
+def getLinkList(data_lines, not_name_types = {}):
+    map = {}
+    for line in data_lines:
+        map[translateLinkDisplaytext(line.text()).lower()] = line.text()
+    
+    str = ''
+    
+    keys = map.keys()
+    keys.sort()
+    for key in keys:
+        link = map[key]
+        if not_name_types.has_key(link): continue
+        s = translateLink(link)
+        if s:
+            if (str != ''): str += ', '
+            str += s
+            
+    return str
+
+################################################################################
+
 def subprintLink(fl, data, subcategory):                         
     if data.empty():
         return
@@ -1109,22 +1157,75 @@ def subprintLink(fl, data, subcategory):
         s = dddoc.DATA["globals.subsections"][subcategory].text()
         if s: headline = '<span class=section_sub_headline>' + s + '</span>'
         
-    map = {}
-    for line in data.lines:
-        map[line.text()] = 1
-    
-    str = ''
-    
-    links = map.keys()
-    links.sort()
-    for link in links:
-        s = translateLink(link)
-        if s:
-            if (str != ''): str += ', '
-            str += s
+    str = getLinkList(data.lines)
             
     if (str != ''):
-        fl.write('<div class=text_sub_block>' + headline + ' ' + str + '</div>');
+        fl.write('<div class=text_sub_block>' + headline + ' ' + str + '</div>')
+
+################################################################################
+
+
+################################################################################
+
+def subprintConceptAndType(fl, data):    
+    not_name_types = {}
+    type_title = ''
+
+    #display concepts
+    c_data = data["concept"]
+    t_data = data["type"]
+    
+    if not c_data.empty():
+        if len(c_data.lines) + len(t_data.lines) == 1: tag = 'span'
+        else: tag = 'div'
+        
+        fl.write('<div class=text_sub_block id=concept_block>');
+
+        title = dddoc.DATA["globals.subsections.concept"].text()
+        if title: fl.write('<' + tag + ' class=section_sub_headline>' + title + '</' + tag + '> ')
+        
+        
+        map = {}
+        for line in c_data.lines:
+            map[translateLinkDisplaytext(line.text()).lower()] = line.text()
+        
+        keys = map.keys()
+        keys.sort()
+        for key in keys:
+            link = map[key]
+            str_concept = translateLink(link)
+            if str_concept:
+                lines = []
+                findDataRek(dddoc.DATA[link], "conceptimplements", lines, {})
+                str_types = getLinkList(lines)
+                if (str_types != ''): str_types = ': ' + str_types
+                fl.write('<' + tag + ' class=text_sub_block>' + str_concept + str_types + '</' + tag + '>')
+                
+                for lin in lines:
+                    not_name_types[lin.text()] = 1
+                
+        subprintType(fl, t_data, '', not_name_types)
+        
+        fl.write('</div>')
+        
+    else:
+        s = dddoc.DATA["globals.subsections.type"].text()
+        if s: type_title = '<span class=section_sub_headline>' + s + '</span> '
+        
+        subprintType(fl, t_data, type_title, not_name_types)
+
+
+################################################################################
+
+def subprintType(fl, data, headline, not_name_types):                         
+    if data.empty():
+        return
+        
+    str = getLinkList(data.lines, not_name_types)
+            
+    if (str != ''):
+        fl.write('<div class=text_sub_block>' + headline + ' ' + str + '</div>')
+
 
 ################################################################################
 
@@ -1254,30 +1355,31 @@ def subprintField(fl, text):
     elif (field == "class"): printLink(fl, data, "class", False)
     elif (field == "general"): printLink(fl, data, "general", False)
     elif (field == "shortcutfor"): printShortcutfor(fl, data, "shortcutfor", False)
-    elif (field == "implements"): printLinkRek(fl, data, "implements", "general", False)
+    elif (field == "implements"): printLinkRek(fl, data, "implements", False)
     elif (field == "baseconcept"): printLink(fl, data, "baseconcept", False)
 
     elif (field == "spec"): printMember(fl, data, "spec", False)
     elif (field == "shortcut"): printMember(fl, data, "shortcut", False)
-    elif (field == "type"): printMemberRek(fl, data, "type", "general", False)
-    elif (field == "memvar"): printMemberRek(fl, data, "memvar", "base", False)
-    elif (field == "memfunc"): printMemberRek(fl, data, "memfunc", "base", False)
-    elif (field == "function"): printMemberRek(fl, data, "function", "general", False)
+    elif (field == "type"): printMemberRek(fl, data, "type", False)
+    elif (field == "memvar"): printMemberRek(fl, data, "memvar", False)
+    elif (field == "memfunc"): printMemberRek(fl, data, "memfunc", False)
+    elif (field == "function"): printMemberRek(fl, data, "function", False)
     
     elif (field == "childconcept"): printMember(fl, data, "childconcept", False)
-    elif (field == "conceptimplements"): printMemberRek(fl, data, "conceptimplements", "childconcept", False)
-    elif (field == "conceptmetafunc"): printMemberRek(fl, data, "conceptmetafunc", "baseconcept", False)
-    elif (field == "conceptmemvar"): printMemberRek(fl, data, "conceptmemvar", "baseconcept", False)
-    elif (field == "conceptmemfunc"): printMemberRek(fl, data, "conceptmemfunc", "baseconcept", False)
-    elif (field == "conceptfunc"): printMemberRek(fl, data, "conceptfunc", "baseconcept", False)
+    elif (field == "conceptimplements"): printMemberRek(fl, data, "conceptimplements", False)
+    elif (field == "conceptmetafunc"): printMemberRek(fl, data, "conceptmetafunc", False)
+    elif (field == "conceptmemvar"): printMemberRek(fl, data, "conceptmemvar", False)
+    elif (field == "conceptmemfunc"): printMemberRek(fl, data, "conceptmemfunc", False)
+    elif (field == "conceptfunc"): printMemberRek(fl, data, "conceptfunc", False)
     
     elif (field == "value"): printTable(fl, data, "value", False)
 
-    elif (field == "conceptusedby"): printLinkRek(fl, data, "conceptusedby", "childconcept", False)
+    elif (field == "conceptusedbymeta"): printLinkRek(fl, data, "conceptusedbymeta", False)
+    elif (field == "conceptusedbyfunc"): printLinkRek(fl, data, "conceptusedbyfunc", False)
 
     elif (field == "remarks"): printTextblock(fl, data, "remarks", False)
     elif (field == "example"): printTextblock(fl, data, "example", False)
-    elif (field == "demo"): printLinkRek(fl, data, "demo", "general", False)
+    elif (field == "demo"): printLinkRek(fl, data, "demo", False)
     elif (field == "file"): printFile(fl, data, "file")
     
     elif (field == "concept"): printLink(fl, data, "concept", False)

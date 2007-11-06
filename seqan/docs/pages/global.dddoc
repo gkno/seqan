@@ -44,13 +44,14 @@
 ..include:Include Headers
 ..see:See Also
 ..implements:Implements
-..conceptimplements:Provided by
-..concept:Required by
+..conceptimplements:Implemented by
+..concept:Part of Concept
 ..conceptmemvar:Required Member Variables
 ..conceptmemfunc:Required Member Functions
 ..conceptfunc:Required Functions
 ..conceptmetafunc:Required Metafunctions
-..conceptusedby:Used By
+..conceptusedbymeta:Used By Metafunction
+..conceptusedbyfunc:Used By Function
 ..baseconcept:Extends
 ..childconcept:Refinements
 ..shortcut:Shortcuts
@@ -60,7 +61,7 @@
 .globals.subsections:
 ..metafunction:Metafunctions:
 ..type:Types:
-..concept:Concepts:
+..concept:Types:
 ..value:Values:
 ..default:Default:
 ..remarks:Remarks:
@@ -97,11 +98,29 @@
 ..conceptmemfunc:Memfunc.*.concept
 ..conceptfunc:Function.*.concept
 ..conceptmetafunc:Metafunction.*.concept
-..conceptusedby:Function.*.param.*.concept
+..conceptusedbyfunc:Function.*.param.*.concept
 ..conceptimplements:*.*.implements
 ..childconcept:Concept.*.baseconcept
 ..demofor:*.*.demo
 ..demo:*.*.demofor
 ..shortcut:*.*.shortcutfor
 ..shortcutfor:*.*.shortcut
+.
+.globals.inherit:
+..implements.general
+..type.general
+..type.implements:conceptusedbymeta
+..type.baseconcept:conceptusedbymeta
+..memvar.base
+..function.general
+..function.implements:conceptusedbyfunc
+..function.baseconcept:conceptusedbyfunc
+..conceptimplements.childconcept
+..conceptmetafunc.baseconcept
+..conceptmemvar.baseconcept
+..conceptmemfunc.baseconcept
+..conceptfunc.baseconcept
+..conceptusedbyfunc.baseconcept
+..conceptusedbymeta.baseconcept
+..demo.general
 .
