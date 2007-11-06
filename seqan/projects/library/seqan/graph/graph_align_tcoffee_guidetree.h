@@ -297,7 +297,7 @@ upgmaTree(String<double, TStringSpec>& mat,
 			else if (i == index_j) continue;
 			// Average
 			double newDist = ((double) active[index_i] / (double) (active[index_i] + active[index_j])) * getValue(mat, index_i * nseq + i) + ((double) active[index_j] / (double) (active[index_i] + active[index_j])) * getValue(mat, index_j * nseq + i);
-			//// Minimum
+			// Minimum
 			//double newDist = ((double) active[index_i] / (double) (active[index_i] + active[index_j])) * getValue(mat, index_i * nseq + i);
 			//double newDist2 = ((double) active[index_j] / (double) (active[index_i] + active[index_j])) * getValue(mat, index_j * nseq + i);
 			//if (newDist2 < newDist) newDist = newDist2;

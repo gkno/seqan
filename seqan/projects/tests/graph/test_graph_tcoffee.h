@@ -270,13 +270,13 @@ void Test_GuideTree() {
 	SEQAN_TASSERT(findEdge(njTreeOut, 8, 4) != 0)
 	SEQAN_TASSERT(findEdge(njTreeOut, 8, 5) != 0)
 	SEQAN_TASSERT(findEdge(njTreeOut, 9, 1) != 0)
-	SEQAN_TASSERT(findEdge(njTreeOut, 9, 8) != 0)
-	SEQAN_TASSERT(findEdge(njTreeOut, 10, 2) != 0)
+	SEQAN_TASSERT(findEdge(njTreeOut, 9, 2) != 0)
+	SEQAN_TASSERT(findEdge(njTreeOut, 10, 8) != 0)
 	SEQAN_TASSERT(findEdge(njTreeOut, 10, 9) != 0)
-	SEQAN_TASSERT(findEdge(njTreeOut, 11, 0) != 0)
+	SEQAN_TASSERT(findEdge(njTreeOut, 11, 3) != 0)
 	SEQAN_TASSERT(findEdge(njTreeOut, 11, 10) != 0)
 	SEQAN_TASSERT(findEdge(njTreeOut, 12, 11) != 0)
-	SEQAN_TASSERT(findEdge(njTreeOut, 12, 3) != 0)
+	SEQAN_TASSERT(findEdge(njTreeOut, 12, 0) != 0)
 	SEQAN_TASSERT(findEdge(njTreeOut, 13, 6) != 0)
 	SEQAN_TASSERT(findEdge(njTreeOut, 13, 12) != 0)
 	SEQAN_TASSERT(findEdge(njTreeOut, 14, 7) != 0)
@@ -991,16 +991,16 @@ void Test_TCoffeeAssembly() {
 
 
 void Test_GraphTCoffee() {
-	//Test_CompressedAlphabets();
-	//Test_KmerCountingAndDistance();
-	//Test_GuideTree();
+	Test_CompressedAlphabets();
+	Test_KmerCountingAndDistance();
+	Test_GuideTree();
 
 	//Test_TCoffeeTmp();
-	//Test_TCoffeeGarfield();
+	Test_TCoffeeGarfield();
 	//Test_TCoffeeFromRandomSeq();
 
 	// Assembly
-	Test_TCoffeeAssembly();
+	//Test_TCoffeeAssembly();
 
 	//// Balibase
 	//Test_BaliBaseRef11();
@@ -1020,12 +1020,12 @@ void Test_GraphTCoffee() {
 	//Test_TCoffeeFromLibrary("Z:\\Bralibase\\k3_libs\\Cobalamin.apsi-42.sci-67.no-1.raw.fa.stacked_lara.lib");
 	//Test_TCoffeeFromLibrary("/home/takifugu/rausch/Bralibase/k3_libs/Cobalamin.apsi-42.sci-67.no-1.raw.fa.stacked_lara.lib");
 	
-	//debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_base.h");
-	//debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_kmer.h");
-	//debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_distance.h");
-	//debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_guidetree.h");
-	//debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_library.h");
-	//debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_progressive.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_base.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_kmer.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_distance.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_guidetree.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_library.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_progressive.h");
 	
 
 }
