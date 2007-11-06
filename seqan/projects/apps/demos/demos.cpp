@@ -23,13 +23,28 @@
 #include "../../demos/string_1.cpp"
 #undef main
 
-//#define main runSufarray
-//#include "../../demos/sufarray.cpp"
-//#undef main
-//
-//#define main runIndex
-//#include "../../demos/index.cpp"
-//#undef main
+
+
+#define main runIndexSA
+#include "../../demos/index_sufarray.cpp"
+#undef main
+
+#define main runIndexFind
+#include "../../demos/index_find.cpp"
+#undef main
+
+#define main runIndexMUMs
+#include "../../demos/index_mums.cpp"
+#undef main
+
+#define main runIndexSuperMaxRepeats
+#include "../../demos/index_supermaxrepeats.cpp"
+#undef main
+
+#define main runIndexMaxRepeats
+#include "../../demos/index_maxrepeats.cpp"
+#undef main
+
 
 
 #define main runGraph0
@@ -143,12 +158,18 @@ int main()
 	//runIterator();
 	runRootedIterator();
 	runString();
-	//runSufarray();
-	//runIndex();
+
+	runIndexSA();
+	runIndexFind();
+	runIndexMUMs();
+	runIndexSuperMaxRepeats();
+	runIndexMaxRepeats();
+
 	runGraph0();runGraph1();runGraph2();runGraph3();runGraph4();runGraph5();
 	runGraph6();runGraph7();runGraph8();runGraph9();runGraph10();runGraph11();
 	runGraph12();runGraph13();runGraph14();runGraph15();runGraph16();runGraph17();
 	runGraph18();runGraph19();runGraph20();runGraph21();runGraph22();runGraph23();
+
 	//runFind();
 	runFileFormat();
 }
