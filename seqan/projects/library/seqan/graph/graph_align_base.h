@@ -28,12 +28,16 @@ namespace SEQAN_NAMESPACE_MAIN
 // Alignment: Tags
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Tag.Alignment Algorithm:
+..summary:A tag to specify the alginment algorithm.
+*/
+
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Tag.NeedlemanWunsch
-..summary:Switch to trigger Needleman Wunsch Alignments
-..value.NeedlemanWunsch:Needleman Wunsch alignment
+.Tag.Alignment Algorithm.value.NeedlemanWunsch:
+	Triggers a Needleman-Wunsch Alignment
 */
 
 struct NeedlemanWunsch_;
@@ -42,66 +46,54 @@ typedef Tag<NeedlemanWunsch_> const NeedlemanWunsch;
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Tag.Gotoh
-..summary:Switch to trigger Gotoh Alignments with affine gap costs
-..value.Gotoh:Gotoh alignment
+.Tag.Alignment Algorithm.value.Gotoh:
+	Triggers a Gotoh Alignment
 */
-
 struct Gotoh_;
 typedef Tag<Gotoh_> const Gotoh;
 
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Tag.MyersBitVector
-..summary:Switch to trigger a Myers bit vector alignment
-..value.MyersBitVector:MyersBitVector alignment
+.Tag.Alignment Algorithm.value.MyersBitVector:
+	Triggers a MyersBitVector Alignment
 */
-
 struct MyersBitVector_;
 typedef Tag<MyersBitVector_> const MyersBitVector;
 
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Tag.Hirschberg
-..summary:Switch to trigger a Hirschberg algorithm that uses Gotoh
-..value.Hirschberg:Hirschberg alignment
+.Tag.Alignment Algorithm.value.Hirschberg:
+	Triggers a Hirschberg Alignment
 */
-
 struct Hirschberg_;
 typedef Tag<Hirschberg_> const Hirschberg;
 
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Tag.SmithWaterman
-..summary:Switch to trigger a Smith Waterman algorithm that uses affine gap costs
-..value.SmithWaterman:SmithWaterman alignment
+.Tag.Alignment Algorithm.value.SmithWaterman:
+	Triggers a SmithWaterman Alignment
 */
-
 struct SmithWaterman_;
 typedef Tag<SmithWaterman_> const SmithWaterman;
 
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Tag.SmithWatermanClump
-..summary:Switch to trigger a Smith SmithWatermanClump algorithm that uses affine gap costs
-..value.SmithWatermanClump:SmithWatermanClump alignment
+.Tag.Alignment Algorithm.value.SmithWatermanClump:
+	Triggers a SmithWatermanClump Alignment
 */
-
 struct SmithWatermanClump_;
 typedef Tag<SmithWatermanClump_> const SmithWatermanClump;
 
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Tag.Nussinov
-..summary:Switch to trigger a Nussinov rna folding algorithm.
-..value.Nussinov:Nussinov rna folding
+.Tag.Alignment Algorithm.value.Nussinov:
+	Triggers a Nussinov style Alignment
 */
-
 struct Nussinov_;
 typedef Tag<Nussinov_> const Nussinov;
 

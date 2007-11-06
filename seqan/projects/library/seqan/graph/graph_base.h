@@ -124,32 +124,29 @@ struct VertexIdHandler;
 
 //////////////////////////////////////////////////////////////////////////////
 
-/**
-.Tag.WithoutEdgeId
-..summary:Indicates whether an edge stump has an edge id or not.
-..value.WithoutEdgeId:No edge id is stored in the edge stump. 
-..example.code:Graph<Directed<void, WithoutEdgeId> > g; //g stores no edge ids
-*/
 struct WithoutEdgeId_;
 typedef Tag<WithoutEdgeId_> const WithoutEdgeId;
 
 //////////////////////////////////////////////////////////////////////////////
 
-/**
-.Tag.TreeTag
-..summary:Indicates whether an edge stump belongs to a tree or not.
-..remarks:Only for internal use.
-..value.TreeTag:EdgeStump belongs to a tree.
-*/
 struct TreeTag_;
 typedef Tag<TreeTag_> const TreeTag;
+
 
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Tag.MsfFormat
-..summary:Switch to trigger alignment output in msf format
-..value.MsfFormat:Alignment graph in msf format
+.Tag.Alignment Graph Format:
+..summary:A file format to write an alignment graph.
+*/
+
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Tag.Alignment Graph Format.value.MsfFormat:
+	Msf format to write an alignment graph.
 */
 
 struct MsfFormat_;
@@ -158,9 +155,8 @@ typedef Tag<MsfFormat_> const MsfFormat;
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Tag.FastaFormat
-..summary:Switch to trigger alignment output in fasta format
-..value.FastaFormat:Alignment graph in msf format
+.Tag.Alignment Graph Format.value.FastaFormat:
+	Fasta format to write an alignment graph.
 */
 
 struct FastaFormat_;
@@ -169,9 +165,8 @@ typedef Tag<FastaFormat_> const FastaFormat;
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Tag.CgVizFormat
-..summary:Switch to trigger alignment output in cgviz format
-..value.CgVizFormat:Alignment graph in cgviz format
+.Tag.Alignment Graph Format.value.CgVizFormat:
+	Cgviz format to write an alignment graph.
 */
 
 struct CgVizFormat_;
@@ -180,9 +175,8 @@ typedef Tag<CgVizFormat_> const CgVizFormat;
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Tag.TCoffeeLib
-..summary:Switch to trigger reading and writing in t-coffee lib format.
-..value.TCoffeeLib:Library in T-Coffee Format.
+.Tag.Alignment Graph Format.value.TCoffeeLib:
+	T-Coffee library format to read and write an alignment graph.
 */
 
 struct TCoffeeLib_;
@@ -191,13 +185,13 @@ typedef Tag<TCoffeeLib_> const TCoffeeLib;
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Tag.AtacMatches
-..summary:Switch to trigger reading of matches in atac format.
-..value.AtacMatches:File in Atac format.
+.Tag.Alignment Graph Format.value.AtacMatches:
+	Format to read matches in Atac format.
 */
 
 struct AtacMatches_;
 typedef Tag<AtacMatches_> const AtacMatches;
+
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -205,55 +199,58 @@ typedef Tag<AtacMatches_> const AtacMatches;
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
+
 /**
-.Tag.VertexIterator
-..summary:Tag for a VertexIterator
-..value.VertexIterator:Specifies the kind of graph iterator, i.e., VertexIterator.
+.Tag.Graph Iterator:
+..summary:A specification of the iterator to traverse a graph.
+*/
+
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+.Tag.Graph Iterator.value.VertexIterator:
+	Traverses all vertices of a graph.
 */
 struct VertexIterator_;
 typedef Tag<VertexIterator_> const VertexIterator;
 
 //////////////////////////////////////////////////////////////////////////////
 /**
-.Tag.EdgeIterator
-..summary:Tag for an EdgeIterator
-..value.EdgeIterator:Specifies the kind of graph iterator, i.e., EdgeIterator.
+.Tag.Graph Iterator.value.EdgeIterator:
+	Traverses all edges of a graph.
 */
 struct EdgeIterator_;
 typedef Tag<EdgeIterator_> const EdgeIterator;
 
 //////////////////////////////////////////////////////////////////////////////
 /**
-.Tag.OutEdgeIterator
-..summary:Tag for an OutEdgeIterator
-..value.OutEdgeIterator:Specifies the kind of graph iterator, i.e., OutEdgeIterator.
+.Tag.Graph Iterator.value.OutEdgeIterator:
+	Traverses all edges of a graph given a vertex.
 */
 struct OutEdgeIterator_;
 typedef Tag<OutEdgeIterator_> const OutEdgeIterator;
 
 //////////////////////////////////////////////////////////////////////////////
 /**
-.Tag.AdjacencyIterator
-..summary:Tag for an AdjacencyIterator
-..value.AdjacencyIterator:Specifies the kind of graph iterator, i.e., AdjacencyIterator.
+.Tag.Graph Iterator.value.AdjacencyIterator:
+	Traverses all neighbors of a graph given a vertex.
 */
 struct AdjacencyIterator_;
 typedef Tag<AdjacencyIterator_> const AdjacencyIterator;
 
 //////////////////////////////////////////////////////////////////////////////
 /**
-.Tag.BfsIterator
-..summary:Tag for a breath-first search iterator.
-..value.BfsIterator:Specifies the kind of graph iterator, i.e., BfsIterator.
+.Tag.Graph Iterator.value.BfsIterator:
+	Traverses all vertices of a graph in Bfs order.
 */
 struct BfsIterator_;
 typedef Tag<BfsIterator_> const BfsIterator;
 
 //////////////////////////////////////////////////////////////////////////////
 /**
-.Tag.DfsPreorder
-..summary:Tag for a depth-first postorder search iterator.
-..value.DfsPreorder:Specifies the kind of graph iterator, i.e., DfsPreorder.
+.Tag.Graph Iterator.value.DfsPreorder:
+	Traverses all vertices of a graph in Dfs order.
 */
 struct DfsPreorder_;
 typedef Tag<DfsPreorder_> const DfsPreorder;

@@ -28,63 +28,34 @@ namespace SEQAN_NAMESPACE_MAIN
 // T-Coffee - Tags
 //////////////////////////////////////////////////////////////////////////////
 
+	
 /**
-.Tag.KimuraDistance
-..summary:Tag to use the kimura distance correction.
-..value.KimuraDistance:Use the Kimura Distance.
+.Tag.Distance Calculation:
+..summary:A tag to specify how to calculate distance matrices.
+*/
+
+
+/**
+.Tag.Distance Calculation.value.KimuraDistance:
+	Using Kimura Distance
 */
 struct KimuraDistance_;
 typedef Tag<KimuraDistance_> const KimuraDistance;
 
 /**
-.Tag.FractionalDistance
-..summary:Tag to use the fractional distance correction.
-..value.FractionalDistance:Use the Fractional Distance.
+.Tag.Distance Calculation.value.FractionalDistance:
+	Using Fractional Distance
 */
 struct FractionalDistance_;
 typedef Tag<FractionalDistance_> const FractionalDistance;
 
-/**
-.Tag.GlobalPairwise_Library
-..summary:Tag to specify the type of the library.
-..value.GlobalPairwise_Library:Use of a pairwise global library.
-*/
+
 struct GlobalPairwise_Library_;
 typedef Tag<GlobalPairwise_Library_> const GlobalPairwise_Library;
 
-/**
-.Tag.LocalPairwise_Library
-..summary:Tag to specify the type of the library.
-..value.LocalPairwise_Library:Use of a pairwise local library.
-*/
+
 struct LocalPairwise_Library_;
 typedef Tag<LocalPairwise_Library_> const LocalPairwise_Library;
-
-/**
-.Tag.LocalTriple_Library
-..summary:Tag to specify the type of the library.
-..value.LocalTriple_Library:Use of pairwise local alignments to find matches present in 3 sequences.
-*/
-struct LocalTriple_Library_;
-typedef Tag<LocalTriple_Library_> const LocalTriple_Library;
-
-
-/**
-.Tag.Lcs_Library
-..summary:Tag to specify the type of the library.
-..value.Lcs_Library:Use of a lcs library.
-*/
-struct Lcs_Library_;
-typedef Tag<Lcs_Library_> const Lcs_Library;
-
-/**
-.Tag.MUM_Library
-..summary:Tag to specify the type of the library.
-..value.MUM_Library:Use of a maximal unique match library.
-*/
-struct MUM_Library_;
-typedef Tag<MUM_Library_> const MUM_Library;
-
 
 //////////////////////////////////////////////////////////////////////////////
 // T-Coffee - Signal addition, library extension, ...
