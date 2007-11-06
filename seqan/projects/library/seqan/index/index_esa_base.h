@@ -36,7 +36,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 /**
 .Tag.Preorder:
-..summary:Preorder depth-first-search.
+..summary:Preorder depth-first search.
 ..cat:Index
 ..signature:Preorder
 ..remarks:When given as a second parameter in @Function.goNext@ the Suffix Tree is traversed in a preorder fashion (visit the node before its children).
@@ -45,11 +45,49 @@ namespace SEQAN_NAMESPACE_MAIN
 
 /**
 .Tag.Postorder:
-..summary:Postorder depth-first-search.
+..summary:Postorder depth-first search.
 ..cat:Index
 ..signature:Postorder
 ..remarks:When given as a second parameter in @Function.goNext@ the Suffix Tree is traversed in a postorder fashion (visit the node after its children).
 ..see:Tag.Preorder
+*/
+
+/**
+.Tag.PreorderEmptyEdges:
+..summary:Preorder depth-first search in a suffix tree with leaves for every suffix.
+..cat:Index
+..signature:PreorderEmptyEdges
+..remarks:When given as a second parameter in @Function.goNext@ the Suffix Tree is traversed in a preorder fashion (visit the node before its children).
+Empty edges are traversed also, i.e. for every suffix there is a leaf node representing it.
+..see:Tag.PostorderEmptyEdges
+*/
+
+/**
+.Tag.Postorder:
+..summary:Postorder depth-first search in a suffix tree with leaves for every suffix.
+..cat:Index
+..signature:Postorder
+..remarks:When given as a second parameter in @Function.goNext@ the Suffix Tree is traversed in a postorder fashion (visit the node after its children).
+Empty edges are traversed also, i.e. for every suffix there is a leaf node representing it.
+..see:Tag.Preorder
+*/
+
+/**
+.Tag.EmptyEdges:
+..summary:Consider a suffix tree with leaves for every suffix.
+..cat:Index
+..signature:EmptyEdges
+..remarks:When given as a second parameter in @Function.goDown@, empty edges are traversed also, i.e. for every suffix there is a leaf node representing it.
+..see:Tag.HideEmptyEdges
+*/
+
+/**
+.Tag.HideEmptyEdges:
+..summary:Consider a suffix tree with no empty edges (default behaviour).
+..cat:Index
+..signature:HideEmptyEdges
+..remarks:When given as a second parameter in @Function.goDown@, only non-empty edges are traversed.
+..see:Tag.EmptyEdges
 */
 
 	// predefined iterator traits
@@ -90,7 +128,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			struct	MUMs;								// Maximal Unique Match (unique in every sequence)
 
 			typedef _MaxRepeats<void>		MaxRepeats;	// maximal repeat
-			struct	MaxRepeatOccurences;
+			struct	MaxRepeatOccurrences;
 			typedef _MaxRepeats<_MultiMEMs> MultiMEMs;	// Multiple Maximal Exact Match
 			struct	MultiMEMOccurences;					// i.e. maximal match over different sequences
 
@@ -110,13 +148,34 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //////////////////////////////////////////////////////////////////////////////
 
+	template <typename TSize>
+	struct VertexESA {
+		Pair<TSize> range;			// current SA interval of hits (unique node identifier)
+		TSize		parentRight;	// right boundary of parent node's range (allows to go right)
+
+		VertexESA() {}
+
+		VertexESA(MinimalCtor):
+			range(0,0),
+			parentRight(0) {}
+
+		VertexESA(TSize otherRangeLeft, TSize otherRangeRight, TSize otherParentRight):
+			range(Pair<TSize>(otherRangeLeft, otherRangeRight)),
+			parentRight(otherParentRight) {}
+
+		VertexESA(Pair<TSize> const &otherRange, TSize otherParentRight):
+			range(otherRange),
+			parentRight(otherParentRight) {}
+
+		VertexESA(VertexESA const &other):
+			range(other.range),
+			parentRight(other.parentRight) {}
+	};
+
 	template < typename TText, typename TSpec >
 	struct VertexDescriptor< Index<TText, Index_ESA<TSpec> > > {
 		typedef typename Size< Index<TText, Index_ESA<TSpec> > >::Type TSize;
-		typedef Pair<
-					Pair<TSize>,	// node range uniquely identifies every single suffix tree node
-					TSize			// right boundary of parent node's range (allows to go right)
-				> Type;
+		typedef VertexESA<TSize> Type;
 	};
 
 
@@ -161,7 +220,7 @@ They differ if the index text is a set of strings. Then, raw text is the concate
 ..param.TIndex:The ESA index type.
 ...type:Spec.Index_ESA
 ..remarks:The suffix array contains the indices of all suffices of @Tag.ESA_RawText@ in lexicographical order.
-..remarks:A @Class.String@ over the alphabet of a size type.
+..remarks:A @Class.String@ over the alphabet of the @Metafunction.SAValue@ of $TIndex$.
 */
 /**
 .Tag.ESA_LCP:
@@ -260,6 +319,23 @@ They differ if the index text is a set of strings. Then, raw text is the concate
 		Index(_TText const &_text):
 			text(_text) {}
 	};
+
+//////////////////////////////////////////////////////////////////////////////
+
+	template < typename TText, typename TSpec >
+	void _indexRequireTopDownIteration(Index<TText, Index_ESA<TSpec> > &index) 
+	{
+		indexRequire(index, ESA_SA());
+		indexRequire(index, ESA_LCP());
+		indexRequire(index, ESA_ChildTab());
+	}
+
+	template < typename TText, typename TSpec >
+	void _indexRequireBottomUpIteration(Index<TText, Index_ESA<TSpec> > &index) 
+	{
+		indexRequire(index, ESA_SA());
+		indexRequire(index, ESA_LCP());
+	}
 
 //////////////////////////////////////////////////////////////////////////////
 ///.Function.clear.param.object.type:Class.Index

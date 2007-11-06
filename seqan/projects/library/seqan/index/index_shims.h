@@ -443,7 +443,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	};
 
 	template <typename TValue, typename TSpec>
-	inline void orderOccurences(String<TValue, TSpec> &occString)
+	inline void orderOccurrences(String<TValue, TSpec> &occString)
 	{
 		::std::sort(begin(occString, Standard()), end(occString, Standard()), _SAValueLess<TValue>());
 	}

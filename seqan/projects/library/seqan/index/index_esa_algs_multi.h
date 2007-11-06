@@ -78,6 +78,9 @@ namespace SEQAN_NAMESPACE_MAIN
 			goNext(*this);	// the iterator starts in a suffix, i.e. not a MUM node (length(occ)<2<=seqCount)
 		}
 
+		Iter(TSTree &_tree, MinimalCtor):
+			TBase(_tree, MinimalCtor()) {}
+
 		Iter(TSTree &_tree, TSize _minLength):
 			TBase(_tree),
 			minLength(_minLength),
@@ -100,7 +103,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		do {
 			goNext(it, PostorderEmptyEdges());
 		} while (!atEnd(it) && 
-			     !(	(countOccurences(it) == it.seqCount) && 
+			     !(	(countOccurrences(it) == it.seqCount) && 
 					(repLength(it) >= it.minLength) &&
 					isUnique(it, it.seqSet) && 
 					isLeftMaximal(it)) );
@@ -183,6 +186,9 @@ namespace SEQAN_NAMESPACE_MAIN
 				goNext(*this);
 			}
 		}
+
+		Iter(TSTree &_tree, MinimalCtor):
+			TBase(_tree, MinimalCtor()) {}
 
 		Iter(TSTree &_index, TSize _minLength):
 			TBase(_index, MinimalCtor()),

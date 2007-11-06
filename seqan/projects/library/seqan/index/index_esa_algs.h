@@ -30,6 +30,20 @@ namespace SEQAN_NAMESPACE_MAIN
 	//////////////////////////////////////////////////////////////////////////////
 
 
+/**
+.Spec.SuperMaxRepeats Iterator:
+..cat:Index
+..general:Spec.BottomUp Iterator
+..summary:Iterator to search for all supermaximal repeats.
+..signature:Iterator<TContainer, SuperMaxRepeats>::Type
+..signature:Iter<TContainer, VSTree< BottomUp<SuperMaxRepeats> > >
+..param.TContainer:Type of an index that can be iterated with a bottom-up iterator.
+...type:Spec.Index_ESA
+...metafunction:Metafunction.Container
+..implements:Concept.Iterator
+..param.TSpec:The specialization type.
+*/
+
 	//////////////////////////////////////////////////////////////////////////////
 	// super-maximal repeats - suffix tree version
 	//////////////////////////////////////////////////////////////////////////////
@@ -62,10 +76,14 @@ namespace SEQAN_NAMESPACE_MAIN
 			goNext(*this);	// the iterator starts in a suffix, i.e. not a repeat
 		}
 
+		Iter(TSTree &_tree, MinimalCtor):
+			TBase(_tree, MinimalCtor()) {}
+
 		Iter(TSTree &_tree, TSize _minLength):
 			TBase(_tree),
 			minLength(_minLength)
 		{
+			indexRequire(_tree, ESA_ChildTab());
 			indexRequire(_tree, ESA_BWT());
 			goNext(*this);	// the iterator starts in a suffix, i.e. not a repeat
 		}
@@ -86,6 +104,20 @@ namespace SEQAN_NAMESPACE_MAIN
 					!isPartiallyLeftExtensible(it, it.charSet)) );
 	}
 		
+
+/**
+.Spec.SuperMaxRepeatsFast Iterator:
+..cat:Index
+..general:Spec.BottomUp Iterator
+..summary:Iterator to search for all supermaximal repeats (for enh. suffix arrays only).
+..signature:Iterator<TContainer, SuperMaxRepeatsFast>::Type
+..signature:Iter<TContainer, VSTree< BottomUp<SuperMaxRepeatsFast> > >
+..param.TContainer:Type of an index based on enhanced suffix array.
+...type:Spec.Index_ESA
+...metafunction:Metafunction.Container
+..implements:Concept.Iterator
+..param.TSpec:The specialization type.
+*/
 
 	//////////////////////////////////////////////////////////////////////////////
 	// supermaximal repeats - specialized for Enhanced Suffix Arrays
@@ -128,6 +160,9 @@ namespace SEQAN_NAMESPACE_MAIN
 			lEnd  = end(indexLCP(this->index));
 			goNext(*this);
 		}
+
+		Iter(TIndex &_index, MinimalCtor):
+			TBase(_index, MinimalCtor()) {}
 
 		Iter(TIndex &_index, TSize _minLength):
 			TBase(_index),
@@ -187,6 +222,20 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	
+/**
+.Spec.MaxRepeats Iterator:
+..cat:Index
+..general:Spec.BottomUp Iterator
+..summary:Iterator to search for all maximal repeats.
+..signature:Iterator<TContainer, MaxRepeats>::Type
+..signature:Iter<TContainer, VSTree< BottomUp<MaxRepeats> > >
+..param.TContainer:Type of an index that can be iterated with a bottom-up iterator.
+...type:Spec.Index_ESA
+...metafunction:Metafunction.Container
+..implements:Concept.Iterator
+..param.TSpec:The specialization type.
+*/
+
 	//////////////////////////////////////////////////////////////////////////////
 	// maximal repeats - suffix tree version
 	//////////////////////////////////////////////////////////////////////////////
@@ -282,6 +331,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		
 		typedef typename TFractionCompound::TSet		TSet;
 		typedef typename Iterator<TSet>::Type			TSetIterator;
+		typedef typename Iterator<TSet const>::Type		TConstSetIterator;
 
 		typedef typename TBase::TStackEntry				TStackEntry;
 
@@ -309,6 +359,9 @@ namespace SEQAN_NAMESPACE_MAIN
 				goNext(*this);
 			}
 		}
+
+		Iter(TSTree &_tree, MinimalCtor):
+			TBase(_tree, MinimalCtor()) {}
 
 		Iter(TSTree &_index, TSize _minLength):
 			TBase(_index, MinimalCtor()),
@@ -342,27 +395,27 @@ namespace SEQAN_NAMESPACE_MAIN
 			return _haveMaximalRepeats(top(setStack), topPrev(setStack)) > 0;
 		}
 
-		inline TSize countRepeats() 
+		inline TSize countRepeats() const
 		{
 			if (length(setStack) < 2) return 0;
 
-			TFractionCompound &child  = top(setStack);
-			TFractionCompound &parent = topPrev(setStack);
+			TFractionCompound const &child  = top(setStack);
+			TFractionCompound const &parent = topPrev(setStack);
 
-			TSetIterator childFraction	= begin(child.set);
-			TSetIterator childEnd		= end(child.set);
-			TSetIterator parentFraction	= begin(parent.set);
-			TSetIterator parentEnd		= end(parent.set);
+			TConstSetIterator childFraction	= begin(child.set);
+			TConstSetIterator childEnd		= end(child.set);
+			TConstSetIterator parentFraction	= begin(parent.set);
+			TConstSetIterator parentEnd		= end(parent.set);
 
 			TSize sum = 0;
 			for(; childFraction != childEnd; ++childFraction) {
 				for(; parentFraction != parentEnd; ++parentFraction) {
 					if (keyOf(childFraction) != keyOf(parentFraction))
-						sum += (*childFraction).size * (*parentFraction).size;
+						sum += objectOf(childFraction).size * objectOf(parentFraction).size;
 
-					sum += child.leftmost.size * (*parentFraction).size;
+					sum += child.leftmost.size * objectOf(parentFraction).size;
 				}
-				sum += (*childFraction).size * parent.leftmost.size;
+				sum += objectOf(childFraction).size * parent.leftmost.size;
 			}
 			sum += child.leftmost.size * parent.leftmost.size;
 			return sum;
@@ -393,24 +446,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			}
 		}
 	};
-
-	template < typename TSTree, typename TSpec >
-	inline typename VertexDescriptor<TSTree>::Type 
-	value(Iter< TSTree, VSTree< BottomUp<_MaxRepeats<TSpec> > > > const &it) 
-	{
-		if (empty(it.history))
-			return it.vDesc;
-		typedef typename VertexDescriptor<TSTree>::Type TDesc;
-		typedef typename Value<TDesc, 1>::Type			TRange;
-		return TDesc(TRange(top(it.history).i1, it.vDesc.i1.i2), 0);
-	}
-
-	template < typename TSTree, typename TSpec >
-	inline typename Size<TSTree>::Type 
-	repLength(Iter< TSTree, VSTree< BottomUp<_MaxRepeats<TSpec> > > > const &it) 
-	{
-		return top(it.history).i2;
-	}
+//____________________________________________________________________________
 
 	// add bwt partitions of child to parent node
 	template < typename TSTree, typename TSpec, typename TValue, typename TSize >
@@ -497,6 +533,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		it._dump();
 */	}
 
+//____________________________________________________________________________
+
 	template < typename TSTree, typename TSpec >
 	inline void goNext(Iter< TSTree, VSTree< BottomUp<_MaxRepeats<TSpec> > > > &it) {
 		do {
@@ -511,13 +549,59 @@ namespace SEQAN_NAMESPACE_MAIN
 				it.canMerge = !_dfsReversedOrder(it);
 		} while (!eof(it) && !(it.canMerge && (repLength(it) >= it.minLength) && it.hasRepeats()));
 	}
+//____________________________________________________________________________
 
+	template < typename TSTree, typename TSpec >
+	inline typename VertexDescriptor<TSTree>::Type 
+	value(Iter< TSTree, VSTree< BottomUp<_MaxRepeats<TSpec> > > > const &it) 
+	{
+		if (empty(it.history))
+			return it.vDesc;
+		typedef typename VertexDescriptor<TSTree>::Type TDesc;
+		return TDesc(top(it.history).i1, it.vDesc.range.i2, 0);
+	}
+//____________________________________________________________________________
+
+	template < typename TSTree, typename TSpec >
+	inline typename Size<TSTree>::Type 
+	repLength(Iter< TSTree, VSTree< BottomUp<_MaxRepeats<TSpec> > > > const &it) 
+	{
+		return top(it.history).i2;
+	}
+//____________________________________________________________________________
+
+///.Function.length.param.object.type:Spec.MaxRepeats Iterator
+	template < typename TSTree, typename TSpec >
+	inline typename Size<TSTree>::Type 
+	length(Iter< TSTree, VSTree< BottomUp<_MaxRepeats<TSpec> > > > const &it) {
+		return it.countRepeats();
+	}
+//____________________________________________________________________________
+
+///.Function.begin.param.object.type:Spec.MaxRepeats Iterator
+	template < typename TSTree, class TSpec >
+	inline typename Iterator< Iter< TSTree, VSTree< BottomUp<_MaxRepeats<TSpec> > > > >::Type
+	begin(Iter< TSTree, VSTree< BottomUp<_MaxRepeats<TSpec> > > > &it) 
+	{
+		typedef Iter< TSTree, VSTree< BottomUp<_MaxRepeats<TSpec> > > >	TIter;
+		return typename Iterator<TIter>::Type(it);
+	}
+//____________________________________________________________________________
+
+///.Function.end.param.object.type:Spec.MaxRepeats Iterator
+	template < typename TSTree, class TSpec >
+	inline typename Iterator< Iter< TSTree, VSTree< BottomUp<_MaxRepeats<TSpec> > > > >::Type
+	end(Iter< TSTree, VSTree< BottomUp<_MaxRepeats<TSpec> > > > &it) 
+	{
+		typedef Iter< TSTree, VSTree< BottomUp<_MaxRepeats<TSpec> > > >	TIter;
+		return typename Iterator<TIter>::Type(it, MinimalCtor());
+	}
 
 
 
 
 	//////////////////////////////////////////////////////////////////////////////
-	// maximal repeat representation
+	// maximal repeat representation (deprecated)
 	//////////////////////////////////////////////////////////////////////////////
 
 	template <typename TSTree>
@@ -541,6 +625,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	length(MaxRepeat<TSTree> const &repeat) {
 		return repeat.it.countRepeats();
 	}
+
 /*
 	template <typename TSTree>
 	inline typename Iterator< MaxRepeat<TSTree> >::Type 
@@ -557,7 +642,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 	template <typename TSTree>
-	class Iter< MaxRepeat<TSTree>, MaxRepeatOccurences > {
+	class Iter< MaxRepeat<TSTree>, MaxRepeatOccurrences > {
 	public:
 
 		typedef typename Value<TSTree>::Type	TValue;
@@ -582,6 +667,10 @@ namespace SEQAN_NAMESPACE_MAIN
 		{
 			_init();
 		}
+		
+		inline Iter(Iter<TSTree, VSTree<BottomUp<MaxRepeats> > > const &_maxIt, MinimalCtor):
+			maxIt(&_maxIt),
+			_atEnd(true) {}
 		
 		inline bool _innerStep() {
 			if (_isSizeInval(childPtr = maxIt->posList[childPtr])) {
@@ -690,22 +779,24 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
 	};
 
+//____________________________________________________________________________
 
 	template < typename TRepeat >
-	inline typename Value< Iter<TRepeat, MaxRepeatOccurences> >::Type &
-	value(Iter<TRepeat, MaxRepeatOccurences> const &it)  {
+	inline typename Value< Iter<TRepeat, MaxRepeatOccurrences> >::Type &
+	value(Iter<TRepeat, MaxRepeatOccurrences> const &it)  {
 		return it.tmp;
 	}
 
 	template < typename TRepeat >
-	inline typename Value< Iter<TRepeat, MaxRepeatOccurences> >::Type &
-	value(Iter<TRepeat, MaxRepeatOccurences> &it)  {
+	inline typename Value< Iter<TRepeat, MaxRepeatOccurrences> >::Type &
+	value(Iter<TRepeat, MaxRepeatOccurrences> &it)  {
 		return it.tmp;
 	}
+//____________________________________________________________________________
 
 	template < typename TRepeat >
-	inline Iter<TRepeat, MaxRepeatOccurences> &
-	goNext(Iter<TRepeat, MaxRepeatOccurences> &it)  {
+	inline Iter<TRepeat, MaxRepeatOccurrences> &
+	goNext(Iter<TRepeat, MaxRepeatOccurrences> &it)  {
 		if (it._innerStep()) {
 			it.tmp.i1 = saAt(it.parentPtr, container(*it.maxIt));
 			it.tmp.i2 = saAt(it.childPtr, container(*it.maxIt));
@@ -717,38 +808,67 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
 		return it;
 	}
+//____________________________________________________________________________
 
 	template < typename TRepeat >
-	inline bool atEnd(Iter<TRepeat, MaxRepeatOccurences> const &it) {
+	inline Iter<TRepeat, MaxRepeatOccurrences> &
+	goBegin(Iter<TRepeat, MaxRepeatOccurrences> &it) 
+	{
+		it._init;
+	}
+
+//____________________________________________________________________________
+
+	template < typename TRepeat >
+	inline Iter<TRepeat, MaxRepeatOccurrences> &
+	goEnd(Iter<TRepeat, MaxRepeatOccurrences> &it) 
+	{
+		it._atEnd = true;
+	}
+
+	template < typename TRepeat >
+	inline bool atEnd(Iter<TRepeat, MaxRepeatOccurrences> const &it) {
 		return it._atEnd;
 	}
 
 	template < typename TRepeat >
-	inline bool atEnd(Iter<TRepeat, MaxRepeatOccurences> &it) {
+	inline bool atEnd(Iter<TRepeat, MaxRepeatOccurrences> &it) {
 		return it._atEnd;
 	}
 
+//____________________________________________________________________________
 
-/*
-	template <typename TSTree, typename TSpec>
-	struct ItValue< Iter<TSTree, VSTree< BottomUp<_MaxRepeats<TSpec> > > > > {
-		typedef MaxRepeat<TSTree> Type;
-	};
-*/
+	template < typename TRepeat >
+	inline bool
+	operator == (
+		Iter<TRepeat, MaxRepeatOccurrences> const &itA,
+		Iter<TRepeat, MaxRepeatOccurrences> const &itB)
+	{
+		if (itA._atEnd && itB._atEnd) return true;
+		if (itA._atEnd || itB._atEnd) return false;
+		return (itA.childPtr == itB.childPtr) && (itA.parentPtr == itB.parentPtr);
+	}
+
+	template < typename TRepeat >
+	inline bool
+	operator != (
+		Iter<TRepeat, MaxRepeatOccurrences> const &itA,
+		Iter<TRepeat, MaxRepeatOccurrences> const &itB)
+	{
+		if (itA._atEnd && itB._atEnd) return false;
+		if (itA._atEnd || itB._atEnd) return true;
+		return (itA.childPtr != itB.childPtr) || (itA.parentPtr != itB.parentPtr);
+	}
+//____________________________________________________________________________
+
+
 	template <typename TSTree, typename TSpec>
 	struct Size< Iter<TSTree, VSTree< BottomUp<_MaxRepeats<TSpec> > > > > {
 		typedef typename Size<TSTree>::Type Type;
 	};
 
-
-
 	template <typename TSTree>
-	struct Iterator< MaxRepeat<TSTree> > {
-		typedef Iter<MaxRepeat<TSTree>, MaxRepeatOccurences> Type;
-	};
-
-	template <typename TSTree>
-	struct Size< Iter<MaxRepeat<TSTree>, MaxRepeatOccurences> > {
+	struct Size< Iter<MaxRepeat<TSTree>, MaxRepeatOccurrences> > {
 		typedef typename Size<TSTree>::Type Type;
 	};
 
@@ -757,19 +877,49 @@ namespace SEQAN_NAMESPACE_MAIN
 	// Iterator wrappers
 	//////////////////////////////////////////////////////////////////////////////
 
-	template <typename TObject>
-	struct Iterator< TObject, SuperMaxRepeats > {
-		typedef Iter< TObject, VSTree< BottomUp<SuperMaxRepeats> > > Type;
+	// iterates over all supermaximal repeats
+	template <typename TSTree>
+	struct Iterator< TSTree, SuperMaxRepeats > {
+		typedef Iter< TSTree, VSTree< BottomUp<SuperMaxRepeats> > > Type;
+	};
+//____________________________________________________________________________
+
+	// iterates over all maximal unique matches
+	template <typename TSTree>
+	struct Iterator< TSTree, SuperMaxRepeatsFast > {
+		typedef Iter< TSTree, VSTree< BottomUp<SuperMaxRepeatsFast> > > Type;
+	};
+//____________________________________________________________________________
+
+	// iterates over all maximal repeat structures
+	template <typename TSTree, typename TSpec>
+	struct Iterator< TSTree, _MaxRepeats<TSpec> > {
+		typedef Iter< TSTree, VSTree< BottomUp<_MaxRepeats<TSpec> > > > Type;
+	};
+//____________________________________________________________________________
+
+	// iterates over all maximal repeat pairs of a repeat structure
+
+	// Iterator of Iterator<TIndex, MaxRepeats>
+	template <typename TSTree, typename TSpec>
+	struct Iterator< Iter< TSTree, TSpec >, MaxRepeatOccurrences > {
+		typedef Iter< MaxRepeat<TSTree>, MaxRepeatOccurrences > Type;
 	};
 
-	template <typename TObject>
-	struct Iterator< TObject, SuperMaxRepeatsFast > {
-		typedef Iter< TObject, VSTree< BottomUp<SuperMaxRepeatsFast> > > Type;
+	template <typename TSTree, typename TSpec>
+	struct DefaultIteratorSpec< Iter< TSTree, VSTree< BottomUp<_MaxRepeats<TSpec> > > > > {
+		typedef MaxRepeatOccurrences Type;
 	};
 
-	template <typename TObject, typename TSpec>
-	struct Iterator< TObject, _MaxRepeats<TSpec> > {
-		typedef Iter< TObject, VSTree< BottomUp<_MaxRepeats<TSpec> > > > Type;
+	// alternative (use MaxRepeat<TIndex> as a wrapper in between)
+	template <typename TSTree>
+	struct Iterator< MaxRepeat<TSTree>, MaxRepeatOccurrences > {
+		typedef Iter <MaxRepeat<TSTree>, MaxRepeatOccurrences > Type;
+	};
+
+	template <typename TSTree>
+	struct DefaultIteratorSpec< MaxRepeat<TSTree> > {
+		typedef MaxRepeatOccurrences Type;
 	};
 
 //}
