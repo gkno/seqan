@@ -73,7 +73,25 @@
 .Demo.Suffix Array:
 ..cat:Index
 ..summary:Example for how to create a suffix array and use it as a dictionary.
+...text:Given a sequence $s$, a suffix array is an array containing start positions of all suffices of $s$ in
+lexicographical order. A suffix array can simply be used to find all occurrences of an arbitrary substring $t$
+in $s$ in O(|t|*log(|s|)).
+...text:SeqAn contains various suffix array construction algorithms like the Skew algorithm
+(J. Karkkainen and P. Sanders, "Simple Linear Work Suffix Array Construction", 2003), a more efficient 
+modification of the Skew algorithm (difference cover of 7), external memory Skew algorithms, the prefix-doubling
+algorithm (U. Manber and G. Myers, "Suffix arrays: A new method for online string searching", 1993), the algorithm of
+Larsson and Sadakane (N.J. Larsson and K. Sadakane, "Faster Suffix Sorting", 1999), and a quicksort based algorithm.
+...text:The following example constructs a suffix array using the modified Skew algorithm and searches the interval of
+suffices beginning with $t="l"$. The start positions of these suffices are the occurences of $t$, which are outputted at last.
+This is only an example for @Function.createSuffixArray@ and similar functions. For an index based substring search better use
+the more generic @Class.Finder@ class (see @Demo.Index Finder@ demo).
 ..file:../projects/demos/index_sufarray.cpp
+..output:
+...code:weese@tanne:~/seqan$ cd demos
+weese@tanne:~/seqan/demos$ make index_sufarray
+weese@tanne:~/seqan/demos$ ./index_sufarray
+9 2 3
+weese@tanne:~/seqan/demos$
 ..demofor:Function.createSuffixArray
 .
 
@@ -81,7 +99,15 @@
 .Demo.Index Finder:
 ..cat:Index
 ..summary:Example for using a finder of an index.
+...text:This example shows how to use the @Class.Finder@ class for an @Class.Index@ search.
 ..file:../projects/demos/index_find.cpp
+..output:
+...code:weese@tanne:~/seqan$ cd demos
+weese@tanne:~/seqan/demos$ make index_find
+weese@tanne:~/seqan/demos$ ./index_find
+hit at 11 2 
+hit at 2 11
+weese@tanne:~/seqan/demos$
 ..demofor:Class.Index
 ..demofor:Class.Finder
 ..demofor:Function.find
