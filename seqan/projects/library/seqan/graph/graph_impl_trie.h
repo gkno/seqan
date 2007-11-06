@@ -35,6 +35,8 @@ namespace SEQAN_NAMESPACE_MAIN
 ..cat:Graph
 ..general:Class.Graph
 ..summary:A keyword trie.
+..description:
+...image:trieGraph|A trie for the words announce, annual, and annually.
 ..remarks:A keyword trie is a special automaton and thus, it is not implemented in its own class.
 It solely provides create functions where based upon a set of strings a keyword trie is created.
 ..signature:Graph<Automaton<TAlphabet, TCargo, TSpec> > 

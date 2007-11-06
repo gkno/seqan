@@ -51,7 +51,10 @@ public:
 .Spec.Automaton:
 ..cat:Graph
 ..general:Class.Graph
-..summary:An automaton that stores the edges in a transition table.
+..summary:An Automaton has directed edges, labeled with input symbols, and a distinct start state, called root. The
+input symbols require the use of a third parameter: The alphabet of the input symbols.
+..description:
+...image:automatonGraph|An automaton, where $0$ is the start state.
 ..signature:Graph<Automaton<TAlphabet, TCargo, TSpec> > 
 ..param.TAlphabet:The alphabet type that is used for the transition labels.
 ...metafunction:Metafunction.Alphabet

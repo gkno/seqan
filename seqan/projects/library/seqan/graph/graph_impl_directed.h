@@ -34,6 +34,8 @@ namespace SEQAN_NAMESPACE_MAIN
 ..cat:Graph
 ..general:Class.Graph
 ..summary:A directed graph that stores the edges in an adjacency list.
+..description:
+...image:directedGraph|A directed graph.
 ..signature:Graph<Directed<TCargo, TSpec> >
 ..param.TCargo:The cargo type that can be attached to the edges.
 ...metafunction:Metafunction.Cargo

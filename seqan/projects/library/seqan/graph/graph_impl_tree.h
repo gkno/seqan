@@ -33,7 +33,10 @@ namespace SEQAN_NAMESPACE_MAIN
 .Spec.Tree:
 ..cat:Graph
 ..general:Class.Graph
-..summary:A tree that stores the edges in an adjacency list.
+..summary:A Tree has a distinct root and directed edges. The source vertex of each edge is the parent vertex, 
+the target vertex of each edge is the child. Trees provide fast access to child vertices and the parent.
+..description:
+...image:treeGraph|A tree, where $0$ is the root vertex.
 ..signature:Graph<Tree<TCargo, TSpec> >
 ..param.TCargo:The cargo type that can be attached to the edges.
 ...metafunction:Metafunction.Cargo

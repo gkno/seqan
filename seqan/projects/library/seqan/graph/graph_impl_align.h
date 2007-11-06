@@ -61,6 +61,8 @@ public:
 ..cat:Graph
 ..general:Class.Graph
 ..summary:An alignment graph.
+..description:
+...image:alignmentGraph|An alignment graph with 3 sequences.
 ..signature:Graph<Alignment<TStringSet, TCargo, TSpec> > 
 ..param.TStringSet:The type of the string set containing the sequence information.
 ...default:$Class.StringSet$

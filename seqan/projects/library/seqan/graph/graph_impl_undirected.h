@@ -34,6 +34,8 @@ namespace SEQAN_NAMESPACE_MAIN
 ..cat:Graph
 ..general:Class.Graph
 ..summary:An undirected graph that stores the edges in an adjacency list.
+..description:
+...image:undirectedGraph|An undirected graph with multiple components.
 ..signature:Graph<Undirected<TCargo, TSpec> >
 ..param.TCargo:The cargo type that can be attached to the edges.
 ...metafunction:Metafunction.Cargo

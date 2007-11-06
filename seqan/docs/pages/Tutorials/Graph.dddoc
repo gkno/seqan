@@ -44,60 +44,18 @@ it can be used in the same way as a directed graph.
 ...text:
 In this example, the edges have no cargo.
 
-SeqAn is not a library for graph algorithms, but for sequence analysis. Hence we introduced graphs
-as a helper class for string matching or alignment algorithms. Those algorithms make use of special graphs 
-(like trees, automata, or alignment graphs) which are  therefor predefined in SeqAn.
 
-...section:# Tree
 
-...image:treeGraph|A tree, where $0$ is the root vertex.
+...section:# Other graphs
+
+...image:otherGraphs|Alignment graph, tree, and trie.
 
 ...text:
-A @Spec.Tree@ has a distinct root and directed edges. The source vertex of each edge is the parent vertex, 
-the target vertex of each edge is the child. Trees provide fast access to child vertices and the parent.
-...code:Graph<Tree<Pair<char, int> > > myTree;
-...text:
-A tree with a cargo type @Class.Pair@. Each edge carries a character and an integer.
-
-
-...section:# Automaton
-
-...image:automatonGraph|An automaton, where $0$ is the start state.
-
-...text:
-An @Spec.Automaton@ has directed edges, labeled with input symbols, and a distinct start state, called root. The
-input symbols require the use of a third parameter: The alphabet of the input symbols.
-...code:Graph<Automaton<Dna> > myAutomaton;
-...text:
-An automaton with a @Spec.Dna@ input alphabet.
-
-
-...section:# Alignment Graph
-
-...image:alignmentGraph|An alignment graph with 3 sequences.
-
-...text:
-Since SeqAn is a library for sequence analysis, we included one special data type an @Spec.Alignment graph@ to represent alignments.
-It has various applications, including pairwise sequence alignments, segment matches, or multiple
-sequence alignments. However, it always requires a set of sequences (i.e. the set of sequences that
-are going to be aligned).
-...code:Graph<Alignment<TStringSet, unsigned int> > alignmentGraph;
-...text:
-$TStringSet$ is a @Class.StringSet@ that holds the sequences. The alignment graph can also have a cargo, e.g. the scores of segment matches.
-
-
-...section:# Other Graphs
-
-...image:trieGraph|A trie for the words announce, annual, and annually.
-
-...text:
-@Spec.Word Graph@ or @Spec.Trie@ are two examples of specialized graphs. They use an underlying graph and
-some kind of supplemental data structure. A trie, for instance, also needs to know where each word ends.
-
-
-
-
-
+SeqAn is not a new library for graph data structures and algorithms. It focusses on sequence analysis. 
+Hence we introduced graphs as helper classes for string matching or alignment algorithms. 
+Besides directed and undirected graphs, those algorithms make use of special graphs 
+like a @Spec.Tree@, an @Spec.Automaton@, a @Spec.Trie@ or an @Spec.Alignment Graph@.
+These graphs are therefore predefined in SeqAn.
 
 ...section:# Graph functions
 
