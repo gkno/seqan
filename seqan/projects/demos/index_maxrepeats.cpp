@@ -13,18 +13,24 @@ int main ()
 	typedef Index< String<char> > TMyIndex;
 	TMyIndex myIndex(myString);
 
-///To find supermaximal repeats, we use SeqAn's @Spec.SuperMaxRepeats Iterator@ 
+///To find maximal repeats, we use SeqAn's @Spec.MaxRepeats Iterator@
 ///and set the minimum repeat length to 3.
-	Iterator< TMyIndex, SuperMaxRepeats >::Type myRepeatIterator(myIndex, 3);
+	typedef Iterator< TMyIndex, MaxRepeats >::Type TMaxRepeatIterator;
+	TMaxRepeatIterator myRepeatIterator(myIndex, 3);
 
 	while (!atEnd(myRepeatIterator)) 
 	{
 ///A repeat can be represented by its length and positions it occurs at.
-///@Function.getOccurrences@ returns an unordered sequence of these positions
-///The length of this sequence, i.e. the repeat abundance can be obtained 
-///from @Function.countOccurrences@.
-		for(unsigned i = 0; i < countOccurrences(myRepeatIterator); ++i)
-			cout << getOccurrences(myRepeatIterator)[i] << ", ";
+///$myRepeatIterator$ iterates over all repeat strings.
+///Please note that in contrast to supermaximal repeats, given a maximal repeat string,
+///not all pairs of its occurences are maximal repeats.
+///So we need an iterator to iterate over all maximal pairs of this repeat string.
+///The @Spec.MaxRepeats Iterator@ can be seen as a container and be iterated for itself.
+		Iterator<TMaxRepeatIterator>::Type myRepeatPair(myRepeatIterator);
+		while (!atEnd(myRepeatPair)) {
+			cout << *myRepeatPair << ", ";
+			++myRepeatPair;
+		}
 
 ///@Function.repLength@ returns the length of the repeat string.
 		cout << repLength(myRepeatIterator) << "   ";

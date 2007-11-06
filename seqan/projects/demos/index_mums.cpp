@@ -17,9 +17,8 @@ int main ()
 	typedef Index< StringSet<String<char> > > TMyIndex;
 	TMyIndex myIndex(mySet);
 
-///To find maximal unique matches (MUMs),
-///we use an @Spec.MUMs Iterator.iterator@ of the index specialized for the search of MUMs.
-///We set the minimum MUM length to 3.
+///To find maximal unique matches (MUMs), we use the @Spec.MUMs Iterator@
+///and set the minimum MUM length to 3.
 	Iterator< TMyIndex, MUMs >::Type myMUMiterator(myIndex, 3);
 	String< SAValue<TMyIndex>::Type > occs;
 
@@ -46,8 +45,3 @@ int main ()
 
 	return 0;
 }
-
-	//output:
-	//
-	// 0, 53, 33, 5    "SeqAn"
-	// 23, 36, 3, 8    "sequence"
