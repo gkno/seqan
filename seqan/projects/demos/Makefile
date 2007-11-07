@@ -1,4 +1,16 @@
-SEQAN_INCLUDE=../library
-CPPFLAGS+=-I../../platforms/gcc
-CPPFLAGS+=-I$(SEQAN_INCLUDE)
-LDFLAGS+=-lrt
+SEQAN_DIR=..
+
+# The following 4 lines are for the SVN repository
+# You can remove them, if you use the snapshot
+ifeq ($(shell test -d ../library && echo Y),Y)
+  SEQAN_DIR=../library
+  CPPFLAGS+=-I../../platforms/gcc
+endif
+
+# Link against runtime library on Linux systems
+OS_NAME=$(shell uname)
+ifeq ($(OS_NAME),Linux)
+  LDFLAGS += -lrt
+endif
+
+CPPFLAGS+=-I$(SEQAN_DIR)
