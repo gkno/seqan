@@ -624,12 +624,12 @@ A:hover, A:link, A:visited
 
 .tree_td_node
 {
-    padding:0 5px 0 5px;
+    padding:3px 5px 3px 5px;
 }
 .tree_node
 {
     font-size:80%;
-    padding:0.2em 0.4em 0.2em 0.4em;
+    padding:2px 5px 2px 5px;
     border-width:1px
 }
 #tree_node_Concept

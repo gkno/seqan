@@ -121,7 +121,7 @@ for (TIterator it = begin(str); it != end(str); ++it)
     cout << value(it);
 }
 ..text:
-See @Demo.Iterators.this demo program@ for more examples.
+See @Demo.Iterator Basics|this demo program@ for more examples.
 
 
 ..subsection:#.# Comparisons
@@ -199,7 +199,7 @@ Value<TDnaToCharModifier>::Type c;      //defines a variable of type char
 
 ..subsection:#.# Input/Output
 ..text:SeqAn offers several Ways for loading and saving sequences in many formats.
-For more information, see @Pages.Files|here@.
+For more information, see @Page.Files|here@.
 
 
 ..section:# Gapped Sequences

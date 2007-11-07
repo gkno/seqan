@@ -4,15 +4,20 @@ import dddoc
 import dddoc_html_trans
 import xml.sax
 import operator
+import sys
 from os import F_OK
 
 
 
 ################################################################################
 
-def createDocs(path):
+def createDocs(path, buildfull):
     global globalDocsPath
     globalDocsPath = path
+
+    global globalBuildFull
+    globalBuildFull = buildfull
+    
     if not os.access(path, os.F_OK): 
         os.mkdir(path)
     copyFile(path, "dddoc_html.css")
@@ -20,10 +25,13 @@ def createDocs(path):
     copyFile(path, "dddoc_plus.gif")
     copyFile(path, "dddoc_minus.gif")
     copyFile(path, "dddoc.js")
+
+    if buildfull:
+        createIndexes(path)
+        createSearchfile(path)
+
     createPages(path)
-    createIndexes(path)
     
-    createSearchfile(path)
 
 ################################################################################
 
@@ -260,6 +268,8 @@ def translateLinkDisplaytext(text):
 ################################################################################
 
 def translateLink(text, attribs = ""):
+    global globalDocsPath
+
     if text.find("http:", 0, 5) == 0:  #external Link
         arr = dddoc.splitUrl(text)
         if len(arr) == 0: return brokenLink(text)
@@ -276,18 +286,18 @@ def translateLink(text, attribs = ""):
 
     if (len(arr) < 2): return brokenLink(text)
     
-    obj = dddoc.DATA[arr[0]][arr[1]];
-    if obj.empty(): return brokenLink(text);
-
     href = getFilename(arr[0], arr[1])
-    #doc_path = os.path.join(globalDocsPath, href)
-    #if not os.access(doc_path, os.F_OK): 
-    #    return brokenLink(text);
-
-    if obj.empty(): 
+    
+    obj = dddoc.DATA[arr[0]][arr[1]];
+    if obj.empty():
+        #test existing file
+        doc_path = os.path.join(globalDocsPath, href)
+        if not os.access(doc_path, os.F_OK): 
+            return brokenLink(text);
         summary = '';
     else:
         summary = translateTooltip(obj["summary"].text());
+        
     if len(summary) > 0:
         summary = 'title="' + summary + '"'
     
@@ -637,7 +647,6 @@ def writePage(fl, data):
     printMemberRek(fl, data, "function")
     
     printMember(fl, data, "childconcept")
-    printMemberRek(fl, data, "conceptimplements")
     printMemberRek(fl, data, "conceptmetafunc")
     printMemberRek(fl, data, "conceptmemvar")
     printMemberRek(fl, data, "conceptmemfunc")
@@ -646,6 +655,7 @@ def writePage(fl, data):
     printTable(fl, data, "value")
     printTable(fl, data, "tag")
 
+    printMemberRek(fl, data, "conceptimplements")
     printLinkRek(fl, data, "conceptusedbymeta")
     printLinkRek(fl, data, "conceptusedbyfunc")
 
@@ -1459,13 +1469,15 @@ def pushSearchResult(db, title, cat, name):
 
 def warningPage(cat, key, data):
     #warning for multiple or no summary field
-    desc = data["summary"]
-    if desc.empty():
-        print
-        print "\n!!  WARNING: no summary field for \"" + cat + "." + key + "\""
-    elif len(desc.lines) > 1:
-        print
-        print "\n!!  WARNING: multiple summary fields for \"" + cat + "." + key + "\""
+    global globalBuildFull    
+    if globalBuildFull: #only if full documentation is built
+        desc = data["summary"]
+        if desc.empty():
+            print
+            print "\n!!  WARNING: no summary field for \"" + cat + "." + key + "\""
+        elif len(desc.lines) > 1:
+            print
+            print "\n!!  WARNING: multiple summary fields for \"" + cat + "." + key + "\""
 
 
 

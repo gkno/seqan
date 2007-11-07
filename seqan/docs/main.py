@@ -10,7 +10,9 @@ else: inpath =  sys.argv[1]
 
 print("Welcome to Dot.Dot.Doc")
 
-if len(sys.argv) < 3:
+buildfull = (len(sys.argv) < 3)
+
+if buildfull:
     print("Scanning " + inpath + "...")
     os.path.normpath(inpath)
     dddoc.loadFiles(inpath)
@@ -34,8 +36,11 @@ dddoc.loadFiles("concepts")
 dddoc.DATA.init()
 
 print("Create HTML Documentation...")
-dddoc_html.createDocs("html")
+dddoc_html.createDocs("html", buildfull)
 
-print("Documentation created.")
+if buildfull:
+    print("Documentation created.")
+else:
+    print("Documentation updated.")
 
 #raw_input("press return")
