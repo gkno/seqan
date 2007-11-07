@@ -407,6 +407,7 @@ def writePage(fl, data):
         if (s): fl.write('<div class=text>' + s + '</div>')
            
     printTextblock(fl, data, "description")
+    printTree(fl, data)
     printSignature(fl, data, "signature")
     printTable(fl, data, "param")
     printTextblock(fl, data, "returns")
@@ -847,4 +848,3 @@ def subprintLink(fl, data, subcategory):
     if (str != ''):
         fl.write('<div class=text_sub_block>' + headline + ' ' + str + '</div>');
 
-################################################################################

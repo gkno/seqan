@@ -617,6 +617,8 @@ def writePage(fl, data):
            
     printTextblock(fl, data, "description")
     printGlossary(fl, data, "glossary")
+    
+    printTree(fl, data)
 
     printSignature(fl, data, "signature")
     printTable(fl, data, "param")
@@ -1496,6 +1498,118 @@ def warningPage(cat, key, data):
                         print "\n!!  WARNING: unknown param \"" + k + "\" in \"" + cat + "." + key + "\""
                         
                         
+################################################################################
+
+def printTree(fl, data):
+    cat = data.name(0)
+    treedown_fields = dddoc.DATA["globals.treedown"][cat]
+    treeup_fields = dddoc.DATA["globals.treeup"][cat]
+    
+    if treedown_fields.empty() and treeup_fields.empty(): return
+    
+    treedown = followTree(data, treedown_fields)
+    treeup = followTree(data, treeup_fields)
+
+    if len(treedown) + len(treeup) == 0: return;
+    fl.write("<div class=tree><center><table cellspacing=0 cellpadding=0>")
+    if len(treeup) > 0:
+        fl.write("<tr><td class=tree_td_subtree colspan=2 align=middle>" + translateTree(treeup, False) + "</td></tr>")
+        fl.write("<tr><td class=tree_td_line>&nbsp;</td><td class=tree_td_none>&nbsp;</td></tr>")
+
+    fl.write("<tr><td class=tree_td_central colspan=2><center><div class=tree_central id=\"tree_node_" + cat + "\">")
+    fl.write(getPageTitle(data))
+    fl.write("</div></center></td></tr>")
+    
+    if len(treedown) > 0:
+        fl.write("<tr><td class=tree_td_line>&nbsp;</td><td class=tree_td_none>&nbsp;</td></tr>")
+        fl.write("<tr><td class=tree_td_subtree colspan=2 align=middle>" + translateTree(treedown, True) + "</td></tr>")
         
+        
+    fl.write("</table></center></div>")
+
+################################################################################
+
+def followTree(data, follow_fields):
+    tree = {}
+    if data.empty(): return tree
+    
+    for field_line in follow_fields.lines:
+        field = field_line.text()
+        children = data[field]
+        if not children.empty():
+            for child_line in children.lines:
+                child = child_line.text()
+                if not tree.has_key(child):
+                    tree[child] = followTree(dddoc.DATA[child], follow_fields)
+                    
+    return tree
+
+################################################################################
+
+def translateTree(tree, print_down):
+    MAX_NUMBER_OF_NODES = 6
+    
+    tr1 = ''
+    tr2 = ''
+    tr3 = ''
+    tr4 = ''
+    multiblock = ''
+    i = 0
+
+    keys = tree.keys()
+    keys.sort()
+
+    for key in keys:
+        if (i > 0) and (i % MAX_NUMBER_OF_NODES == 0):
+            connector = '<td class=tree_td_connector rowspan = 5>&nbsp;</td>'
+            if print_down: multiblock +=  '<tr>' + connector + tr1 + '</tr><tr>' + tr2 + '</tr><tr>' + tr3 + '</tr><tr>' + tr4 + '</tr>'
+            else: multiblock += '<tr>' + connector + tr4 + '</tr><tr>' + tr3 + '</tr><tr>' + tr2 + '</tr><tr>' + tr1 + '</tr>'
+            multiblock += "<tr><td>&nbsp;</td></tr>"
+            tr1 = ''
+            tr2 = ''
+            tr3 = ''
+            tr4 = ''
+            
+        i += 1
+
+        if len(tree) > 1:
+            if (i % MAX_NUMBER_OF_NODES == 1): left_class = "tree_td_first"
+            else: left_class = "tree_td_left"
+            if (i % MAX_NUMBER_OF_NODES == 0) or (i == len(tree)): right_class = "tree_td_last"
+            else: right_class = "tree_td_right"
+            tr1 += "<td class=" + left_class + ">&nbsp;</td><td class=" + right_class + ">&nbsp;</td>"
+
+        
+        pos = key.find('.')
+        if pos > 0: node_cat = key[:pos]
+        else: node_cat = key
+        tr2 += "<td class=tree_td_node colspan=2><nobr><center><span class=tree_node id=\"tree_node_" + node_cat + "\">"
+        tr2 += translateLink(key)
+        tr2 += "</span></center></nobr></td>"
+        
+        subtree = tree[key]
+        if len(subtree) == 0: 
+            tr3 += "<td class=tree_td_none></td><td class=tree_td_none></td>"
+            tr4 += "<td class=tree_td_subtree colspan=2 align=middle></td>"
+        else: 
+            tr3 += "<td class=tree_td_line>&nbsp;</td><td class=tree_td_none>&nbsp;</td>"
+            tr4 += "<td class=tree_td_subtree colspan=2 align=middle>" + translateTree(subtree, print_down) + "</td>"
+            
+
+    if multiblock: connector = '<td class=tree_td_connector_end rowspan=5>&nbsp;</td>'
+    else: connector = ''
+               
+    if print_down: 
+        str = '<table class=tree_table_down cellspacing=0 cellpadding=0>'
+        str += multiblock + '<tr>' + connector + tr1 + '</tr><tr>' + tr2 + '</tr><tr>' + tr3 + '</tr><tr>' + tr4 + '</tr>'
+        str += '</table>'
+    else: 
+        str = '<table class=tree_table_up cellspacing=0 cellpadding=0>'
+        str += multiblock + '<tr>' + connector + tr4 + '</tr><tr>' + tr3 + '</tr><tr>' + tr2 + '</tr><tr>' + tr1 + '</tr>'
+        str += '</table>'
+        
+    if multiblock: return "<div id=tree_multiblock>" + str + "</div>"
+    else:return str
+                
 
     
