@@ -14,3 +14,13 @@ ifeq ($(OS_NAME),Linux)
 endif
 
 CPPFLAGS+=-I$(SEQAN_DIR)
+
+all: $(basename $(wildcard *.cpp))
+
+index: $(basename $(wildcard index_*.cpp))
+
+graph: $(basename $(wildcard graph_*.cpp))
+
+modifier: $(basename $(wildcard modifier_*.cpp))
+
+file: $(basename $(wildcard file_*.cpp))
