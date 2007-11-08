@@ -22,6 +22,7 @@ def createDocs(path, buildfull):
         os.mkdir(path)
     copyFile(path, "dddoc_html.css")
     copyFile(path, "seqan_logo.gif")
+    copyFile(path, "dddoc_empty.gif")
     copyFile(path, "dddoc_plus.gif")
     copyFile(path, "dddoc_minus.gif")
     copyFile(path, "dddoc.js")
@@ -548,7 +549,8 @@ def printIndexpageMembers(fl, data):
             fl.write('<div class=section>')
             
             if key != "":
-                fl.write('<div class=section_headline>' + key + '</div>')
+                s = key.replace('.', ': ')
+                fl.write('<div class=section_headline>' + s + '</div>')
             else:
                 s = dddoc.DATA["globals.indexes"][data.name(0)].text()
                 if s: fl.write('<div class=section_headline>' + s + '</div>')
@@ -1515,7 +1517,7 @@ def warningPage(cat, key, data):
 def printTree(fl, data):
     cat = data.name(0)
     treedown_fields = dddoc.DATA["globals.treedown"][cat]
-    treeup_fields = dddoc.DATA["globals.treeup"][cat]
+    treeup_fields= dddoc.DATA["globals.treeup"][cat]
     
     if treedown_fields.empty() and treeup_fields.empty(): return
     
@@ -1526,14 +1528,14 @@ def printTree(fl, data):
     fl.write("<div class=tree><center><table cellspacing=0 cellpadding=0>")
     if len(treeup) > 0:
         fl.write("<tr><td class=tree_td_subtree colspan=2 align=middle>" + translateTree(treeup, False) + "</td></tr>")
-        fl.write("<tr><td class=tree_td_line>&nbsp;</td><td class=tree_td_none>&nbsp;</td></tr>")
+        fl.write("<tr><td class=tree_td_line><img src=dddoc_empty.gif border=0 /></td><td class=tree_td_none><img src=dddoc_empty.gif border=0 /></td></tr>")
 
     fl.write("<tr><td class=tree_td_central colspan=2><center><div class=tree_central id=\"tree_node_" + cat + "\">")
     fl.write(getPageTitle(data))
     fl.write("</div></center></td></tr>")
     
     if len(treedown) > 0:
-        fl.write("<tr><td class=tree_td_line>&nbsp;</td><td class=tree_td_none>&nbsp;</td></tr>")
+        fl.write("<tr><td class=tree_td_line><img src=dddoc_empty.gif border=0 /></td><td class=tree_td_none><img src=dddoc_empty.gif border=0 /></td></tr>")
         fl.write("<tr><td class=tree_td_subtree colspan=2 align=middle>" + translateTree(treedown, True) + "</td></tr>")
         
         
@@ -1573,10 +1575,11 @@ def translateTree(tree, print_down):
 
     for key in keys:
         if (i > 0) and (i % MAX_NUMBER_OF_NODES == 0):
-            connector = '<td class=tree_td_connector rowspan = 5>&nbsp;</td>'
-            if print_down: multiblock +=  '<tr>' + connector + tr1 + '</tr><tr>' + tr2 + '</tr><tr>' + tr3 + '</tr><tr>' + tr4 + '</tr>'
-            else: multiblock += '<tr>' + connector + tr4 + '</tr><tr>' + tr3 + '</tr><tr>' + tr2 + '</tr><tr>' + tr1 + '</tr>'
-            multiblock += "<tr><td>&nbsp;</td></tr>"
+            separator_colspan = (2 *MAX_NUMBER_OF_NODES).__str__()
+            if print_down: 
+                multiblock = multiblock + '<tr><td class=tree_td_connector rowspan = 5><img src=dddoc_empty.gif border=0 /></td>' + tr1 + '</tr><tr>' + tr2 + '</tr><tr>' + tr3 + '</tr><tr>' + tr4 + '</tr><tr><td colspan=' + separator_colspan + '><img id=tree_block_separator src=dddoc_empty.gif border=0/></td></tr>'
+            else: 
+                multiblock = '<tr><td class=tree_td_connector rowspan = 5><img src=dddoc_empty.gif border=0 /></td><td colspan=' + separator_colspan + '><img id=tree_block_separator src=dddoc_empty.gif border=0/></td></tr><tr>' + tr4 + '</tr><tr>' + tr3 + '</tr><tr>' + tr2 + '</tr><tr>' + tr1 + '</tr>' + multiblock
             tr1 = ''
             tr2 = ''
             tr3 = ''
@@ -1589,7 +1592,7 @@ def translateTree(tree, print_down):
             else: left_class = "tree_td_left"
             if (i % MAX_NUMBER_OF_NODES == 0) or (i == len(tree)): right_class = "tree_td_last"
             else: right_class = "tree_td_right"
-            tr1 += "<td class=" + left_class + ">&nbsp;</td><td class=" + right_class + ">&nbsp;</td>"
+            tr1 += "<td class=" + left_class + "><img src=dddoc_empty.gif border=0 /></td><td class=" + right_class + "><img src=dddoc_empty.gif border=0 /></td>"
 
         
         pos = key.find('.')
@@ -1604,11 +1607,11 @@ def translateTree(tree, print_down):
             tr3 += "<td class=tree_td_none></td><td class=tree_td_none></td>"
             tr4 += "<td class=tree_td_subtree colspan=2 align=middle></td>"
         else: 
-            tr3 += "<td class=tree_td_line>&nbsp;</td><td class=tree_td_none>&nbsp;</td>"
+            tr3 += "<td class=tree_td_line><img src=dddoc_empty.gif border=0 /></td><td class=tree_td_none><img src=dddoc_empty.gif border=0 /></td>"
             tr4 += "<td class=tree_td_subtree colspan=2 align=middle>" + translateTree(subtree, print_down) + "</td>"
             
 
-    if multiblock: connector = '<td class=tree_td_connector_end rowspan=5>&nbsp;</td>'
+    if multiblock: connector = '<td class=tree_td_connector_end rowspan=4><img src=dddoc_empty.gif border=0 /></td>'
     else: connector = ''
                
     if print_down: 
@@ -1617,7 +1620,7 @@ def translateTree(tree, print_down):
         str += '</table>'
     else: 
         str = '<table class=tree_table_up cellspacing=0 cellpadding=0>'
-        str += multiblock + '<tr>' + connector + tr4 + '</tr><tr>' + tr3 + '</tr><tr>' + tr2 + '</tr><tr>' + tr1 + '</tr>'
+        str += '<tr>' + connector + tr4 + '</tr><tr>' + tr3 + '</tr><tr>' + tr2 + '</tr><tr>' + tr1 + '</tr>' + multiblock
         str += '</table>'
         
     if multiblock: return "<div id=tree_multiblock>" + str + "</div>"

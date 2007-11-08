@@ -2,7 +2,7 @@
 ..summary:The documentation system "dot-dot-doc".
 ..description
 ...text:
-Seqan uses its own documentation system, called "dot-dot-doc", or shortly "ddoc".
+Seqan uses its own documentation system, called "dot-dot-doc", or shortly "dddoc".
 This document describes the documentation system.
 
 ...contents
@@ -21,7 +21,9 @@ directory. In both cases optional arguments
 specify which modules are built, i.e. which subfolder of "application/library" should be scanned for documentation.
 If no modul is specified then the complete
 documentation is built. In order to build only the pages residing under "docs" one can specify as modul name
-"static" (or any other name that is not a real modul).
+"static" (or any other name that is not a real modul). 
+Note that indexes and menus are only created when the entire documentation is built.
+...text:
 SeqAn is released with the complete documentation and the release does not include the dddoc python scripts.
 
 ...section:# Notation
