@@ -70,6 +70,52 @@
 .
 
 
+
+
+
+
+.Demo.ModReverse:
+..cat:Modifiers
+..summary:Modifier example for reverse strings.
+..file:../projects/demos/modifier_modreverse.cpp
+..output:
+...code:weese@tanne:~/seqan$ cd demos
+weese@tanne:~/seqan/demos$ make modifier_modreverse
+weese@tanne:~/seqan/demos$ ./modifier_modreverse
+A man, a plan, a canal-Panama
+amanaP-lanac a ,nalp a ,nam A
+A man, a master plan, a canal-Panama
+amanaP-lanac a ,nalp retsam a ,nam A
+weese@tanne:~/seqan/demos$
+..demofor:Class.String
+..demofor:Spec.ModReverse
+..demofor:Spec.ModifiedString
+.
+
+
+.Demo.ModView:
+..cat:Modifiers
+..summary:How to modify strings with a per-character functor.
+..file:../projects/demos/modifier_modview.cpp
+..output:
+...code:weese@tanne:~/seqan$ cd demos
+weese@tanne:~/seqan/demos$ make modifier_modview
+weese@tanne:~/seqan/demos$ ./modifier_modview
+A man, a plan, a canal-Panama
+A MAN, A PLAN, A CANAL-PANAMA
+A man, a master plan, a canal-Panama
+A MAN, A MASTER PLAN, A CANAL-PANAMA
+weese@tanne:~/seqan/demos$
+..demofor:Class.String
+..demofor:Spec.ModView
+..demofor:Spec.ModifiedString
+.
+
+
+
+
+
+
 .Demo.Suffix Array:
 ..cat:Index
 ..summary:Example for how to create a suffix array and use it as a dictionary.
@@ -138,6 +184,7 @@ weese@tanne:~/seqan/demos$
 ..demofor:Function.repLength
 ..demofor:Function.getOccurrences
 ..demofor:Function.orderOccurrences
+..seealso:Demo.Mummy
 .
 
 
@@ -194,6 +241,33 @@ weese@tanne:~/seqan/demos$
 ..demofor:Function.representative
 ..demofor:Function.orderOccurrences
 .
+
+
+.Demo.Mummy:
+..cat:Index
+..summary:Simple MUMmer clone.
+..description
+...text:MUMmer is a tool to search for multiple exact matches (MUMs) between 2 given sequences.
+MUMs can be used as a starting point for a multiple genome alignment algorithm.
+This example shows how to implement a simple version of MUMer to find multiple exact matches of n sequences (n\geq2) in SeqAn.
+..file:../projects/demos/index_mummy.cpp
+..output
+...code:weese@tanne:~/seqan$ cd demos
+weese@tanne:~/seqan/demos$ make index_mummy
+weese@tanne:~/seqan/demos$ ./index_mummy
+..seealso:Demo.Maximal Unique Matches
+..demofor:Class.Index
+..demofor:Class.StringSet
+..demofor:Spec.MUMs Iterator
+..demofor:Function.representative
+..demofor:Function.repLength
+..demofor:Function.getOccurrences
+..demofor:Function.orderOccurrences
+.
+
+
+
+
 
 
 .Demo.Graph Algorithm Breadth-first search
@@ -390,6 +464,11 @@ weese@tanne:~/seqan/demos$
 ..demofor:Class.Graph
 ..demofor:Function.tCoffeeProteinAlignment
 .
+
+
+
+
+
 
 .Demo.File Format I/O:
 ..cat:System

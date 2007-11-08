@@ -216,7 +216,11 @@ Given a set of strings $s1$, \ldots, $sm$ a MultiMEM (multiple maximal exact mat
 at least once and cannot be extended to the left or to the right right.
 A MUM (maximal unique match) is a MultiMEM that occurs exactly once in each sequence.
 ...text:
-An example for each of these iterators can be found here.
+The following examples demonstrate the usage of these iterators:
+...tableheader:Example
+...table:@Demo.Maximal Unique Matches@
+...table:@Demo.Supermaximal Repeats@
+...table:@Demo.Maximal Repeats@
 
 
 

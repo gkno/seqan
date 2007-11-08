@@ -56,7 +56,7 @@ Good choice for growing strings and for stacks.
 |Suitable for storing large strings in memory.
 |Slower than other in-memory strings.
 ..table:@Spec.External String@
-|String that is stored on secondary memory.
+|String that is stored in secondary memory.
 |Suitable for storing very large strings (>2GB).
 Parts of the string are automatically loaded from secondary memory when needed.
 |Slower than other string classes.
