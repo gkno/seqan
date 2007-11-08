@@ -28,6 +28,8 @@
 
 //____________________________________________________________________________
 
+#include <seqan/sequence/sequence_forwards.h>
+
 #ifdef SEQAN_SWITCH_USE_FORWARDS
 #include <seqan/sequence/sequence_generated_forwards.h>
 #endif
