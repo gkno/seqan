@@ -112,6 +112,26 @@ weese@tanne:~/seqan/demos$
 .
 
 
+.Demo.Nested Modifiers:
+..cat:Modifiers
+..summary:How to combine modifiers.
+..file:../projects/demos/modifier_nested.cpp
+..output:
+...code:weese@tanne:~/seqan$ cd demos
+weese@tanne:~/seqan/demos$ make modifier_nested
+weese@tanne:~/seqan/demos$ ./modifier_nested
+ATTACGG
+CCGTAAT
+ACGTTTACGG
+CCGTAAACGT
+weese@tanne:~/seqan/demos$
+..demofor:Class.String
+..demofor:Spec.ModView
+..demofor:Spec.ModReverse
+..demofor:Spec.ModifiedString
+.
+
+
 
 
 

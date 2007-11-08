@@ -112,6 +112,19 @@ the @Class.ModifiedIterator@, whereas the @Class.ModifiedString@ only overloads 
 Normally, you are going to use the @Class.ModifiedString@ and maybe the result of its @Metafunction.Iterator@ meta-function
 instead of a @Class.ModifiedIterator@ directly.
 
+..section:# Shortcuts
+..text:
+For some common usage modifiers you can use the following shortcuts:
+..tableheader:Shortcut|Substitution
+..table:$ModComplementDna$|$ModView< FunctorComplement<Dna> >$
+..table:$ModComplementDna5$|$ModView< FunctorComplement<Dna5> >$
+..table:$DnaStringComplement$|$ModifiedString< DnaString, ModComplementDna >$
+..table:$Dna5StringComplement$|$ModifiedString< Dna5String, ModComplementDna5 >$
+..table:$DnaStringReverse$|$ModifiedString< DnaString, ModReverse >$
+..table:$Dna5StringReverse$|$ModifiedString< Dna5String, ModReverse >$
+..table:$DnaStringReverseComplement$|$ModifiedString< ModifiedString< DnaString, ModComplementDna >, ModReverse >$
+..table:$Dna5StringReverseComplement$|$ModifiedString< ModifiedString< Dna5String, ModComplementDna5 >, ModReverse >$
+
 ..section:# Nested Modifiers
 ..text:
 
