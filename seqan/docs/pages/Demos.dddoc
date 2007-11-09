@@ -98,6 +98,7 @@ weese@tanne:~/seqan/demos$
 ..cat:Modifiers
 ..summary:How to modify strings with a per-character functor.
 ..file:../projects/demos/modifier_modview.cpp
+..remarks:Take a look at the file seqan/modifier/modifier_functors.h to see what functors are already part of SeqAn.
 ..output:
 ...code:
 weese@tanne:~/seqan$ cd demos
