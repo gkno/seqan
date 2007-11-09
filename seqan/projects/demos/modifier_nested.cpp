@@ -9,10 +9,9 @@ int main ()
 {
 	String<Dna> myString = "attacgg";
 
-	typedef ModifiedString<DnaString, ModView< FunctorComplement<Dna> > > TMyComplement;
-	typedef ModifiedString<TMyComplement, ModReverse> TMyReverseComplement;
+	typedef ModifiedString<String<Dna>, ModComplementDna>   TMyComplement;
+	typedef ModifiedString<TMyComplement, ModReverse>       TMyReverseComplement;
 
-	TMyComplement myComplement(myString);
 	TMyReverseComplement myReverseComplement(myString);
 
 	cout << myString << endl;
