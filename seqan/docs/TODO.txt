@@ -36,14 +36,15 @@ Zum Release Herbst 2007:
     + Neue Warnung: Naming-Convention verletzt
     + Neue Warnung: param nicht in einer der signaturen enthalten.
     - Identische Values eliminieren
-    - ..param.concept erzeugt ..param.type für alle Typen, die das concept implementieren.
-    - Subsubkategorien
+    + ..param.concept erzeugt ..param.type für alle Typen, die das concept implementieren.
+    + Subsubkategorien
     - Spezialseite mit Warnings
     - Spezialseite: Index
     + "Tag" field, soll "Value" in "Tag"-Kategorie ersetzen
     + Glossar (- wird noch nicht in Suchfunktion gefunden)
     - References
     + Output field und subfield
+    + Visualisierung der Ableitungshierarchien
     
 * Demos vervollständigen
 

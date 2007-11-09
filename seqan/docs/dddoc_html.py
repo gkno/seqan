@@ -1550,6 +1550,8 @@ def warningPage(cat, key, data):
 ################################################################################
 
 def printTree(fl, data):
+    MAX_NUMBER_OF_NODES = 6
+
     cat = data.name(0)
     treedown_fields = dddoc.DATA["globals.treedown"][cat]
     treeup_fields= dddoc.DATA["globals.treeup"][cat]
@@ -1562,7 +1564,7 @@ def printTree(fl, data):
     if len(treedown) + len(treeup) == 0: return;
     fl.write("<div class=tree><center><table cellspacing=0 cellpadding=0>")
     if len(treeup) > 0:
-        fl.write("<tr><td class=tree_td_subtree colspan=2 align=middle>" + translateTree(treeup, False) + "</td></tr>")
+        fl.write("<tr><td class=tree_td_subtree colspan=2 align=middle>" + translateTree(treeup, False, MAX_NUMBER_OF_NODES) + "</td></tr>")
         fl.write("<tr><td class=tree_td_line><img src=dddoc_empty.gif border=0 /></td><td class=tree_td_none><img src=dddoc_empty.gif border=0 /></td></tr>")
 
     fl.write("<tr><td class=tree_td_central colspan=2><center><div class=tree_central id=\"tree_node_" + cat + "\">")
@@ -1571,7 +1573,7 @@ def printTree(fl, data):
     
     if len(treedown) > 0:
         fl.write("<tr><td class=tree_td_line><img src=dddoc_empty.gif border=0 /></td><td class=tree_td_none><img src=dddoc_empty.gif border=0 /></td></tr>")
-        fl.write("<tr><td class=tree_td_subtree colspan=2 align=middle>" + translateTree(treedown, True) + "</td></tr>")
+        fl.write("<tr><td class=tree_td_subtree colspan=2 align=middle>" + translateTree(treedown, True, MAX_NUMBER_OF_NODES) + "</td></tr>")
         
         
     fl.write("</table></center></div>")
@@ -1595,8 +1597,7 @@ def followTree(data, follow_fields):
 
 ################################################################################
 
-def translateTree(tree, print_down):
-    MAX_NUMBER_OF_NODES = 6
+def translateTree(tree, print_down, max_num_of_nodes):
     
     tr1 = ''
     tr2 = ''
@@ -1607,10 +1608,15 @@ def translateTree(tree, print_down):
 
     keys = tree.keys()
     keys.sort()
+    
+    new_max_num_of_nodes = round((max_num_of_nodes + len(keys) - 1)/ len(keys))
+    
+    if print_down: valign = "valign=top"
+    else: valign = "valign=bottom"
 
     for key in keys:
-        if (i > 0) and (i % MAX_NUMBER_OF_NODES == 0):
-            separator_colspan = (2 *MAX_NUMBER_OF_NODES).__str__()
+        if (i > 0) and (i % max_num_of_nodes == 0):
+            separator_colspan = (2 *max_num_of_nodes).__str__()
             if print_down: 
                 multiblock = multiblock + '<tr><td class=tree_td_connector rowspan = 5><img src=dddoc_empty.gif border=0 /></td>' + tr1 + '</tr><tr>' + tr2 + '</tr><tr>' + tr3 + '</tr><tr>' + tr4 + '</tr><tr><td colspan=' + separator_colspan + '><img id=tree_block_separator src=dddoc_empty.gif border=0/></td></tr>'
             else: 
@@ -1623,9 +1629,9 @@ def translateTree(tree, print_down):
         i += 1
 
         if len(tree) > 1:
-            if (i % MAX_NUMBER_OF_NODES == 1): left_class = "tree_td_first"
+            if (i % max_num_of_nodes == 1): left_class = "tree_td_first"
             else: left_class = "tree_td_left"
-            if (i % MAX_NUMBER_OF_NODES == 0) or (i == len(tree)): right_class = "tree_td_last"
+            if (i % max_num_of_nodes == 0) or (i == len(tree)): right_class = "tree_td_last"
             else: right_class = "tree_td_right"
             tr1 += "<td class=" + left_class + "><img src=dddoc_empty.gif border=0 /></td><td class=" + right_class + "><img src=dddoc_empty.gif border=0 /></td>"
 
@@ -1643,7 +1649,7 @@ def translateTree(tree, print_down):
             tr4 += "<td class=tree_td_subtree colspan=2 align=middle></td>"
         else: 
             tr3 += "<td class=tree_td_line><img src=dddoc_empty.gif border=0 /></td><td class=tree_td_none><img src=dddoc_empty.gif border=0 /></td>"
-            tr4 += "<td class=tree_td_subtree colspan=2 align=middle>" + translateTree(subtree, print_down) + "</td>"
+            tr4 += "<td class=tree_td_subtree colspan=2 align=middle " + valign + ">" + translateTree(subtree, print_down, new_max_num_of_nodes) + "</td>"
             
 
     if multiblock: connector = '<td class=tree_td_connector_end rowspan=4><img src=dddoc_empty.gif border=0 /></td>'
