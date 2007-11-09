@@ -38,7 +38,7 @@ struct Rows;
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Tag.File Format.value.Fasta alignment:
+.Tag.File Format.tag.Fasta alignment:
 	FASTA alignment file format for sequences.
 */
 struct TagFastaAlign_;

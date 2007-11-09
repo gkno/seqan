@@ -31,17 +31,17 @@ namespace SEQAN_NAMESPACE_MAIN
 /**
 .Tag.Overflow Strategy:
 ..summary:The strategy for resizing containers.
-..value.Insist:No capacity check. 
+..tag.Insist:No capacity check. 
 ...remarks:The user has to ensure that the container's capacity is large enough. 
-..value.Limit:Limit the contents to current capacity. 
+..tag.Limit:Limit the contents to current capacity. 
 ...remarks: All entries that exceed the capacity are lost. 
-..value.Exact:Expand as far as needed.
+..tag.Exact:Expand as far as needed.
 ...remarks: The capacity is only changed if the current capacity is not large enough.
  If the capacity can only be expanded up to a certain ammount, it will be increased as far as possible
  and the contents are limited to the new capacity.
 ...remarks:Note that the capacity will never be shrinked. 
  Use @Function.shrinkToFit@ to resize the capacity down to the current length.
-..value.Generous:Expand if needed, get precautionary extra space. 
+..tag.Generous:Expand if needed, get precautionary extra space. 
 ...remarks:Whenever the capacity has to be increased, the new capacity is choosen somewhat large than actually needed.
  This strategy limits the number of capacity changes, so that resizing takes armotized constant time.
  Use this strategy if the total amount of storage is unkown at first.  

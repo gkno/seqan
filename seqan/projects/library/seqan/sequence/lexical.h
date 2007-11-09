@@ -31,9 +31,9 @@ namespace SEQAN_NAMESPACE_MAIN
 /**
 .Tag.Prefix Order:
 ..summary:Specify whether a prefix is smaller or greater.
-..value.TagPrefixLess:A prefix is smaller.
+..tag.TagPrefixLess:A prefix is smaller.
 ...text:For example: $"abc" < "abcde"$.
-..value.TagPrefixGreater:A prefix is greater.
+..tag.TagPrefixGreater:A prefix is greater.
 ...text:For example: $"abc" > "abcde"$.
 ..remarks:The default for all comparison functions is $TagPrefixLess$.
 */

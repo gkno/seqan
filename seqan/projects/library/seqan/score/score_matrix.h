@@ -36,7 +36,7 @@ struct ScoreMatrix;
 
 
 /**
-.Tag.File Format.value.Fasta:
+.Tag.File Format.tag.Fasta:
 	FASTA file format for sequences.
 */
 struct TagScoreMatrixFile_;

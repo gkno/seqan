@@ -30,12 +30,12 @@ namespace SEQAN_NAMESPACE_MAIN
 /**
 .Tag.Iterator Spec:
 ..summary:Specifies the kind of an iterator.
-..value.Rooted:Rooted iterator. 
+..tag.Rooted:Rooted iterator. 
 ...remarks
 ....text:This iterator implements some more advanced functions like
 @Function.container@ and @Function.position@.
 ....concept:Concept.Rooted Iterator
-..value.Standard:Standard conform iterator. 
+..tag.Standard:Standard conform iterator. 
 ...remarks
 ....text:Note that standard iterators need not to implement all functions
 that are available for rooted iterators.

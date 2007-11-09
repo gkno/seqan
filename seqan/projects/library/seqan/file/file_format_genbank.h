@@ -29,7 +29,7 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Tag.File Format.value.Genbank:
+.Tag.File Format.tag.Genbank:
 	Genbank format for sequences from the Genbank database.
 */
 struct TagGenbank_;

@@ -35,7 +35,7 @@ struct Tag
 /**
 .Tag.Default:
 ..summary:Tag that specifies default behavior.
-..value.Default:Use default behavior. 
+..tag.Default:Use default behavior. 
 */
 struct Default_;
 typedef Tag<Default_> const Default;
@@ -44,7 +44,7 @@ typedef Tag<Default_> const Default;
 /**
 .Tag.Move Switch:
 ..summary:Switch to force move.
-..value.Move:Move instead of assign. 
+..tag.Move:Move instead of assign. 
 ..remarks.text:The difference between move constructor and copy constructor
 is that the source object is not copied but moved into the target object.
 The source object can lose its content and will be empty after
@@ -76,8 +76,8 @@ typedef Tag<MinimalCtor_> const MinimalCtor;
 /**
 .Tag.Logical Values:
 ..summary:Tag that represents true and false.
-..value.True:The logical value "true".
-..value.False:The logical value "false".
+..tag.True:The logical value "true".
+..tag.False:The logical value "false".
 */
 struct True { enum { VALUE = true }; };
 struct False { enum { VALUE = false }; };
@@ -88,7 +88,7 @@ struct False { enum { VALUE = false }; };
 /**
 .Tag.Nothing:
 ..summary:Tag that represents an absent parameter or an absent type.
-..value.Nothing:Omit parameter.
+..tag.Nothing:Omit parameter.
 */
 ///Empty Data Class.
 struct Nothing {};

@@ -408,6 +408,18 @@ void Test_Various()
 
 	while (find(fnd, pat))
 		printf("-- position %i\n", position(fnd));
+
+//____________________________________________________________________________
+
+	Pattern<String<char> > patrn(ndl);
+	setBeginPosition(patrn, 0);
+	SEQAN_TASSERT(beginPosition(patrn) == 0);
+
+	setEndPosition(patrn, length(ndl));
+	SEQAN_TASSERT(endPosition(patrn) == length(ndl));
+
+	SEQAN_TASSERT(segment(patrn) == ndl);
+
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -666,7 +678,7 @@ void Test_OnlineAlgWildcards()
 	SEQAN_TASSERT(length(pos) == 3);
 
 //____________________________________________________________________________
-// Test - handle backslash
+// Test - handle backslash 
 	haystack = "annual_Annual_.nnual";
 	setHost(finder, haystack);
 	clear(finder);
@@ -726,7 +738,7 @@ int main()
 	SEQAN_TREPORT("TEST BEGIN")
 
 	Test_OnlineAlg<Horspool>();	
-	//Test_OnlineAlg<ShiftAnd>();
+	Test_OnlineAlg<ShiftAnd>();
 	Test_OnlineAlg<ShiftOr>();
 	Test_OnlineAlg<BndmAlgo>();
 	Test_OnlineAlg<BomAlgo>();

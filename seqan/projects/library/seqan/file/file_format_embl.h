@@ -25,11 +25,11 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 //////////////////////////////////////////////////////////////////////////////
-// File Formats - EMBL
+// File Formats - Embl
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Tag.File Format.value.EMBL:EMBL format for sequences.
+.Tag.File Format.tag.Embl:EMBL format for sequences.
 */
 struct TagEmbl_;
 typedef Tag<TagEmbl_> const Embl;
@@ -42,7 +42,8 @@ typedef Tag<TagEmbl_> const Embl;
 
 template <typename TFile, typename TFile2, typename TSpec>
 inline void
-goBegin(Iter<TFile, FileReader<Embl, TFile2, TSpec> > & it, bool skip_meta = true)
+goBegin(Iter<TFile, FileReader<Embl, TFile2, TSpec> > & it, 
+bool skip_meta = true)
 {
 SEQAN_CHECKPOINT
 	if (skip_meta)

@@ -29,6 +29,23 @@ namespace SEQAN_NAMESPACE_MAIN
 // FileReader String
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Spec.File Reader String:
+..cat:Strings
+..cat:Files
+..general:Class.String
+..summary:Read sequence data from file.
+..signature:String<TValue, FileReader<TFormat, TFile, TSpec> >
+..param.TValue:The value type, that is the type of the items/characters stored in the string.
+...metafunction:Metafunction.Value
+..param.TFormat:A file format.
+...type:Tag.File Format
+..param.TFile:A file.
+..param.TSpec:A further specializing type.
+...default:@Tag.Default@
+*/
+
+
 template <typename TValue, typename TFormat, typename TFile, typename TSpec>
 class String<TValue, FileReader<TFormat, TFile, TSpec> >
 {

@@ -70,8 +70,8 @@ struct Spec<Allocator<TSpec> >
 /**
 .Tag.Allocator Usage:
 ..summary:The purpose of an allocated memory block.
-..value.TagAllocateTemp:Temporary memory. 
-..value.TagAllocateStorage:Memory for storing container content. 
+..tag.TagAllocateTemp:Temporary memory. 
+..tag.TagAllocateStorage:Memory for storing container content. 
 ..see:Function.allocate
 ..see:Function.deallocate
 */

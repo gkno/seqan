@@ -28,7 +28,7 @@ namespace SEQAN_NAMESPACE_MAIN
 // File Formats - Raw
 //////////////////////////////////////////////////////////////////////////////
 /**
-.Tag.File Format.value.Raw:
+.Tag.File Format.tag.Raw:
 	The file contains data in a raw format.
 ..remark:It is supposed that the file contains one single piece of data, 
 that is the file cannot store multiple records.

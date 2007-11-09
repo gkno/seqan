@@ -30,7 +30,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 /**
-.Tag.File Format.value.CGViz:
+.Tag.File Format.tag.CGViz:
 	CGViz file format for sequences. Only output.
 */
 struct TagCGViz_;
