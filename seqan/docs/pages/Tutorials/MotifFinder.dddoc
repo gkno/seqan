@@ -8,7 +8,7 @@
 Motifs are short sequence patterns of biological significance in either @Shortcut.DnaString|DNA@,  RNA or @Shortcut.Peptide|protein@ sequences. The discovery of such motifs is an important task in molecular biology. The characterization and localization of motifs is a fundamental approach to a better understanding of the structure, function and evolutionary relationships of the corresponding genes or proteins.
 
 ...text:
-The tutorial will focus on the implemented Motif Finder which was integrated in SeqAn. The Motif Finder, consisting of the class template @Class.MotifFinder@ and the function template @Function.findMotif@, provides four different motif finding algorithms, the two heuristic algorithms, PROJECTION and ePatternBranching, and the two exact algorithms, PMS1 and PMSP. In the following, the tutorial will shortly explain the structure of @Class.MotifFinder@ and @Function.findMotif@ and give some instructions on how to apply them in order to start a motif search. 
+The tutorial will focus on the implemented Motif Finder which was integrated in SeqAn. The Motif Finder, consisting of the class template @Class.MotifFinder@ and the function template @Function.findMotif@, provides four different motif finding algorithms, the two heuristic algorithms, @Spec.Projection|PROJECTION@ and @Spec.EPatternBranching|ePatternBranching@, and the two exact algorithms, @Spec.PMS1|PMS1@ and @Spec.PMSP|PMSP@. In the following, the tutorial will shortly explain the structure of @Class.MotifFinder@ and @Function.findMotif@ and give some instructions on how to apply them in order to start a motif search. 
 
 ...section:# Class template $MotifFinder$
 ...text:
