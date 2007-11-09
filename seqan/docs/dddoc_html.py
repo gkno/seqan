@@ -399,6 +399,16 @@ def collectIndexEntries(cat):
 
 ################################################################################
 
+def pageIndexPrintMembers(fl, data):
+    entrs = data.keys()
+    entrs.sort()
+    for entr in entrs:
+        links = data[entr]
+        for link in links:
+            fl.write('<div class=index_item>' + translateLink(link, "target=_top") + '</div>')
+
+################################################################################
+
 def pageIndex(fl, path, cat, subcat, entries, subcats):
     fl.write('<html>')
     fl.write('<head>')
@@ -419,12 +429,24 @@ def pageIndex(fl, path, cat, subcat, entries, subcats):
         if cat2 == cat:
             
             # print subfolder
+            this_reached = False
+            members_printed = False
             for subcat2 in subcats:
+                is_this = (subcat2 == subcat)
                 is_sub = ((subcat2.find(subcat) == 0) and (subcat2.find('.', len(subcat)+1) < 0))
                 is_super = (subcat.find(subcat2) == 0)
                 has_depth_greater_2 = (subcat2.find('.') >= 0)
                 is_sister = not has_depth_greater_2 or (subcat.find(subcat2[0:subcat2.rfind('.')]) == 0)
-                if (subcat2 != "") and (is_sub or is_super or is_sister or (subcat2 == subcat)):
+                
+                if not members_printed and this_reached and not is_sub:
+                    pageIndexPrintMembers(fl, entries[subcat])
+                    members_printed = True
+                    
+                if is_this:
+                    this_reached = True
+                
+                if (subcat2 != "") and (is_sub or is_super or is_sister or is_this):
+                    #print out folder
                     indent = ''
                     display_text = subcat2
                     while True:
@@ -438,15 +460,8 @@ def pageIndex(fl, path, cat, subcat, entries, subcats):
                         
                     fl.write('<div class=index_subcat>' + indent + '<img src="' + image + '" border=0><a class=index_link href="' + getIndexname(cat, subcat2) + '">' + display_text + '</div>')
                     
-                if (subcat2 == subcat):
-                    data = entries[subcat]
-                    entrs = data.keys()
-                    entrs.sort()
-                    for entr in entrs:
-                        links = data[entr]
-                        for link in links:
-                            fl.write('<div class=index_item>' + translateLink(link, "target=_top") + '</div>')
-                    
+            if not members_printed:
+                pageIndexPrintMembers(fl, entries[subcat]) 
                     
         fl.write('</div>') #index_section or index_section_high
         
@@ -632,6 +647,8 @@ def writePage(fl, data):
     
     printTree(fl, data)
 
+    printConcept(fl, data)
+
     printSignature(fl, data, "signature")
     printTable(fl, data, "param")
     printTextblock(fl, data, "returns")
@@ -639,27 +656,21 @@ def writePage(fl, data):
     printLink(fl, data, "general")
     printShortcutfor(fl, data, "shortcutfor")
     printLinkRek(fl, data, "implements")
-    printLink(fl, data, "baseconcept")
+
+    printMemberRek(fl, data, "conceptimplements")
+    printLinkRek(fl, data, "conceptusedbymeta")
+    printLinkRek(fl, data, "conceptusedbyfunc")
 
     printMember(fl, data, "spec")
-    printMember(fl, data, "shortcut")
     printMemberRek(fl, data, "type")
     printMemberRek(fl, data, "memvar")
     printMemberRek(fl, data, "memfunc")
     printMemberRek(fl, data, "function")
     
-    printMember(fl, data, "childconcept")
-    printMemberRek(fl, data, "conceptmetafunc")
-    printMemberRek(fl, data, "conceptmemvar")
-    printMemberRek(fl, data, "conceptmemfunc")
-    printMemberRek(fl, data, "conceptfunc")
-    
     printTable(fl, data, "value")
     printTable(fl, data, "tag")
 
-    printMemberRek(fl, data, "conceptimplements")
-    printLinkRek(fl, data, "conceptusedbymeta")
-    printLinkRek(fl, data, "conceptusedbyfunc")
+    printMember(fl, data, "shortcut")
 
     printTextblock(fl, data, "remarks")
     printTextblock(fl, data, "example")
@@ -672,6 +683,26 @@ def writePage(fl, data):
     printLink(fl, data, "demofor")
     printLink(fl, data, "see")
 
+################################################################################
+
+def printConcept(fl, data):
+    
+    if data["baseconcept"].empty() and data["childconcept"].empty() and data["conceptmetafunc"].empty() and data["conceptmemvar"].empty() and data["conceptmemfunc"].empty() and data["conceptfunc"].empty(): return
+    
+    fl.write('<div id=define_concept>')
+    
+    s = dddoc.DATA["globals.sections.conceptdefinition"].text()
+    if s: fl.write('<div class=define_concept_headline>' + s + '</div>')
+    
+    printLink(fl, data, "baseconcept")
+    printMemberRek(fl, data, "conceptmetafunc")
+    printMemberRek(fl, data, "conceptmemvar")
+    printMemberRek(fl, data, "conceptmemfunc")
+    printMemberRek(fl, data, "conceptfunc")
+    printMember(fl, data, "childconcept")
+    
+    fl.write('</div>')
+    
 ################################################################################
 
 def printTitle(fl, data):
@@ -872,6 +903,8 @@ def printLinkOut(fl, data, category, lines, derivedfrom, highlight, showheadline
                 
         if (str != ''):
             fl.write('<div class=text_block>' + str + '</div>');
+            
+        fl.write('</div>');
 
 ################################################################################
 
@@ -913,6 +946,8 @@ def printList(fl, data, category, showheadline = True):
                 
         if (str != ''):
             fl.write('<div class=text_block>' + str + '</div>');
+
+        fl.write('</div>');
 
 ################################################################################
 
