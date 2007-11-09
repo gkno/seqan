@@ -79,7 +79,8 @@
 ..summary:Modifier example for reverse strings.
 ..file:../projects/demos/modifier_modreverse.cpp
 ..output:
-...code:weese@tanne:~/seqan$ cd demos
+...code:
+weese@tanne:~/seqan$ cd demos
 weese@tanne:~/seqan/demos$ make modifier_modreverse
 weese@tanne:~/seqan/demos$ ./modifier_modreverse
 A man, a plan, a canal-Panama
@@ -98,7 +99,8 @@ weese@tanne:~/seqan/demos$
 ..summary:How to modify strings with a per-character functor.
 ..file:../projects/demos/modifier_modview.cpp
 ..output:
-...code:weese@tanne:~/seqan$ cd demos
+...code:
+weese@tanne:~/seqan$ cd demos
 weese@tanne:~/seqan/demos$ make modifier_modview
 weese@tanne:~/seqan/demos$ ./modifier_modview
 A man, a plan, a canal-Panama
@@ -117,12 +119,14 @@ weese@tanne:~/seqan/demos$
 ..summary:How to combine modifiers.
 ..file:../projects/demos/modifier_nested.cpp
 ..output:
-...code:weese@tanne:~/seqan$ cd demos
+...code:
+weese@tanne:~/seqan$ cd demos
 weese@tanne:~/seqan/demos$ make modifier_nested
 weese@tanne:~/seqan/demos$ ./modifier_nested
 ATTACGG
 CCGTAAT
 ACGTTTACGG
+CCGTAAACGT
 CCGTAAACGT
 weese@tanne:~/seqan/demos$
 ..demofor:Class.String
@@ -153,7 +157,8 @@ This is only an example for @Function.createSuffixArray@ and similar functions. 
 the more generic @Class.Finder@ class (see @Demo.Index Finder@ demo).
 ..file:../projects/demos/index_sufarray.cpp
 ..output:
-...code:weese@tanne:~/seqan$ cd demos
+...code:
+weese@tanne:~/seqan$ cd demos
 weese@tanne:~/seqan/demos$ make index_sufarray
 weese@tanne:~/seqan/demos$ ./index_sufarray
 9 2 3
@@ -168,7 +173,8 @@ weese@tanne:~/seqan/demos$
 ...text:This example shows how to use the @Class.Finder@ class for an @Class.Index@ search.
 ..file:../projects/demos/index_find.cpp
 ..output:
-...code:weese@tanne:~/seqan$ cd demos
+...code:
+weese@tanne:~/seqan$ cd demos
 weese@tanne:~/seqan/demos$ make index_find
 weese@tanne:~/seqan/demos$ ./index_find
 hit at 11 2 
@@ -191,7 +197,8 @@ example demonstrates how to iterate over all MUMs and output them.
 ..output
 ...text:The only maximal matches that occur in all 3 sequences are $"SeqAn"$ and $"sequence"$.
 They occur exactly once and thus are maximal unique matches.
-...code:weese@tanne:~/seqan$ cd demos
+...code:
+weese@tanne:~/seqan$ cd demos
 weese@tanne:~/seqan/demos$ make index_mums
 weese@tanne:~/seqan/demos$ ./index_mums
 0, 53, 33, 5    "SeqAn"
@@ -220,7 +227,8 @@ example demonstrates how to iterate over all supermaximal repeats and output the
 ...text:The only supermaximal repeats of $"How many wood would a woodchuck chuck."$ of length at least 3
 are $" wood"$ and $"chuck"$. There are repeats of $" wo"$ which are maximal (see @Demo.Maximal Repeats@),
  ut not supermaximal, as $" wo"$ is part of the longer repeat $" wood"$.
-...code:weese@tanne:~/seqan$ cd demos
+...code:
+weese@tanne:~/seqan$ cd demos
 weese@tanne:~/seqan/demos$ make index_supermaxrepeats
 weese@tanne:~/seqan/demos$ ./index_supermaxrepeats
 8, 21, 5        " wood"
@@ -249,7 +257,8 @@ $" wood"$ and $"chuck"$ are outputted. In $"How many wood would a woodchuck chuc
 $" wo"$ is a repeat of length 3 that occurs at two pairs
 of positions which are maximal repeats ($" a wood", "od woul"$ and $"ny wood", "od woul"$).
 Beside these there are no other maximal repeats of length at least 3.
-...code:weese@tanne:~/seqan$ cd demos
+...code:
+weese@tanne:~/seqan$ cd demos
 weese@tanne:~/seqan/demos$ make index_maxrepeats
 weese@tanne:~/seqan/demos$ ./index_maxrepeats
 < 8 , 21 >, 5           " wood"
@@ -272,7 +281,8 @@ MUMs can be used as a starting point for a multiple genome alignment algorithm.
 This example shows how to implement a simple version of MUMer to find multiple exact matches of n sequences (n\geq2) in SeqAn.
 ..file:../projects/demos/index_mummy.cpp
 ..output
-...code:weese@tanne:~/seqan$ cd demos
+...code:
+weese@tanne:~/seqan$ cd demos
 weese@tanne:~/seqan/demos$ make index_mummy
 weese@tanne:~/seqan/demos$ ./index_mummy
 ..seealso:Demo.Maximal Unique Matches
