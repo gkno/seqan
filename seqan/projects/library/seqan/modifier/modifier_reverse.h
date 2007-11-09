@@ -230,13 +230,17 @@ namespace SEQAN_NAMESPACE_MAIN
 			data_host(_origin.data_host),
 			data_cargo(_origin.data_cargo) {}
 
+		template <typename THostHost, typename THostSpec>
+		ModifiedString(ModifiedString<THostHost, THostSpec> &_origin):
+			data_host(_origin.data_host) {}
+
 		ModifiedString(THost &_origin) {
 			setHost(*this, _origin);
 		}
 
 		template <typename T>
 		ModifiedString(T & _origin) {
-			assign(*this, _origin);
+			setValue(*this, _origin);
 		}
 
 		template <typename T>

@@ -42,7 +42,7 @@ namespace SEQAN_NAMESPACE_MAIN
     };
 
     template <typename InType, typename Result = InType>
-    struct FunctorDowncase : public ::std::unary_function<InType,Result> 
+    struct FunctorLowcase : public ::std::unary_function<InType,Result> 
 	{
         inline Result operator()(InType x) const {
 			if (('A' <= x) && (x <= 'Z')) return (x + ('a' - 'A'));

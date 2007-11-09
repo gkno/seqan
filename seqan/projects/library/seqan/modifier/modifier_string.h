@@ -31,9 +31,9 @@ namespace SEQAN_NAMESPACE_MAIN
 .Class.ModifiedString:
 ..summary:Allows to modify arbitrary strings by specializing what differs from an origin.
 ..cat:Modifiers
-..signature:ModifiedIterator<THost[, TSpec]>
-..param.THost:Original iterator.
-...type:Concept.Iterator
+..signature:ModifiedString<THost[, TSpec]>
+..param.THost:Original sequence type.
+...type:Concept.Container
 ..param.TSpec:The modifier type.
 ...metafunction:Metafunction.Spec
 ..implements:Concept.Container
@@ -62,7 +62,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		template <typename T>
 		ModifiedString(T & _origin) {
-			assign(*this, _origin);
+			setValue(*this, _origin);
 		}
 
 		template <typename T>
@@ -286,7 +286,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename THost, typename TSpec>
 	inline ModifiedString<THost, TSpec> const &
 	setValue(ModifiedString<THost, TSpec> & me, ModifiedString<THost, TSpec> const & _origin) {
-		setHost(me) = host(_origin);
+		setHost(me, host(_origin));
 		_copyCargo(me, _origin);
 		return me;
 	}
@@ -294,22 +294,59 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename THost, typename TSpec>
 	inline ModifiedString<THost, TSpec> const &
 	setValue(ModifiedString<THost, TSpec> & me, ModifiedString<THost, TSpec> & _origin) {
-		setHost(me) = host(_origin);
+		setHost(me, host(_origin));
 		_copyCargo(me, _origin);
 		return me;
 	}
 
+	// pass _origin to parent modifier
+	template <typename THost, typename THostSpec, typename TSpec, typename THost2>
+	inline ModifiedString< ModifiedString<THost, THostSpec>, TSpec> const &
+	setValue(
+		ModifiedString< ModifiedString<THost, THostSpec>, TSpec> & me, 
+		THost2 const & _origin) 
+	{
+		setValue(host(me), _origin);
+		return me;
+	}
+
+	template <typename THost, typename THostSpec, typename TSpec, typename THost2>
+	inline ModifiedString< ModifiedString<THost, THostSpec>, TSpec> const &
+	setValue(
+		ModifiedString< ModifiedString<THost, THostSpec>, TSpec> & me, 
+		THost2 & _origin) 
+	{
+		setValue(host(me), _origin);
+		return me;
+	}
+
+	// set _origin at the innermost modifier
 	template <typename THost, typename TSpec>
 	inline ModifiedString<THost, TSpec> const &
 	setValue(ModifiedString<THost, TSpec> & me, THost const & _origin) {
-		setHost(me) = _origin;
+		setHost(me, _origin);
 		return me;
 	}
 
 	template <typename THost, typename TSpec>
 	inline ModifiedString<THost, TSpec> const &
 	setValue(ModifiedString<THost, TSpec> & me, THost & _origin) {
-		setHost(me) = _origin;
+		setHost(me, _origin);
+		return me;
+	}
+
+	// allow _origin conversion at the innermost modifier
+	template <typename THost, typename TSpec, typename THost2>
+	inline ModifiedString<THost, TSpec> const &
+	setValue(ModifiedString<THost, TSpec> & me, THost2 & _origin) {
+		assignHost(me, _origin);
+		return me;
+	}
+
+	template <typename THost, typename TSpec, typename THost2>
+	inline ModifiedString<THost, TSpec> const &
+	setValue(ModifiedString<THost, TSpec> & me, THost2 const & _origin) {
+		assignHost(me, _origin);
 		return me;
 	}
 

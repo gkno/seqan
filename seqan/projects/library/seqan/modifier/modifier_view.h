@@ -217,7 +217,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		template <typename T>
 		ModifiedString(T & _origin) {
-			assign(*this, _origin);
+			setValue(*this, _origin);
 		}
 
 		template <typename T>
