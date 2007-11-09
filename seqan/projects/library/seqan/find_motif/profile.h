@@ -5,7 +5,7 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 //////////////////////////////////////////////////////////////////////////////
-/**
+/*
 .Shortcut.Profile:
 ..cat:Strings
 ..summary:A string of @Class.FrequencyDistribution@.
@@ -25,8 +25,8 @@ namespace SEQAN_NAMESPACE_MAIN
 ..summary:Converts a pattern into a profile which consists of a set of frequency distributions.
 ..cat:Motif Finding
 ..signature:convertPatternToProfile(profile,begin,end)
-..param.profile:The  @Shortcut.Profile@ object which is a set of @Class.FrequencyDistribution|frequency distributions@.
-...type:Shortcut.Profile
+..param.profile:The $profile$ object which is a set of @Class.FrequencyDistribution|frequency distributions@.
+...remarks:$profile$ is of type $String<$ @Class.FrequencyDistribution@ $>$
 ..param.begin:An iterator pointing to the beginning of a given sequence pattern which is either
               a @Shortcut.DnaString@ or a @Shortcut.Peptide@.
 ...type:Concept.Iterator
@@ -37,7 +37,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ...type:Concept.Iterator
 ...type:Shortcut.DnaIterator
 ...type:Shortcut.PeptideIterator
-..remarks:The number of @Class.FrequencyDistribution@ objects which together form the @Shortcut.Profile@ 
+..remarks:The number of @Class.FrequencyDistribution@ objects which together form the $profile$
           equals the length of the given sequence.
 ..remarks:e.g.:$profile[0]$ represents the frequency distribution for the first residue of
           the given sequence.
@@ -69,8 +69,8 @@ convertPatternToProfile(TProfile & profile,
 ..summary:Converts a set of sequence patterns into a profile.
 ..cat:Motif Finding
 ..signature:convertSetOfPatternsToProfile(profile,l_mers,pseudocount_mode)
-..param.profile:The  @Shortcut.Profile@ object which is a set of @Class.FrequencyDistribution|frequency distributions@.
-...type:Shortcut.Profile
+..param.profile:The  $profile$ object which is a set of @Class.FrequencyDistribution|frequency distributions@.
+...remarks:$profile$ is of type $String<$ @Class.FrequencyDistribution@ $>$
 ..param.l_mers:The set of sequence patterns.
 ...type:Class.StringSet
 ..param.pseudocount_mode:The @Class.Pseudocount@ object for determining the pseudocount method.
@@ -87,23 +87,25 @@ convertSetOfPatternsToProfile(TProfile & profile,
 {
 	typedef typename Value<TStrings>::Type TString;
 	typedef typename Value<TProfile>::Type TFrequencyDistribution;
-	typedef typename Position<TString>::Type TPos;
 
 	typename Size<TString>::Type l = length(l_mers[0]);
 	resize(profile, l);
-	for(TPos i=0; i<l; ++i)
-	{
-		TFrequencyDistribution fd;
-		typename Iterator<TStrings>::Type l_mers_iter = begin(l_mers);
-		typename Iterator<TStrings>::Type l_mers_end = end(l_mers);
-		while(l_mers_iter!=l_mers_end)
-		{
-			++fd[(int) *(begin(*l_mers_iter)+i)];
-			++l_mers_iter;
-		}
-		profile[i] = fd;
-	}
 
+	typename Iterator<TStrings>::Type l_mers_iter, l_mers_end;
+	typename Iterator<TString>::Type l_mer_iter, l_mer_end;
+	l_mers_iter = begin(l_mers);
+	l_mers_end = end(l_mers);
+	while(l_mers_iter!=l_mers_end)
+	{
+		l_mer_iter = begin(*l_mers_iter);
+		l_mer_end = end(*l_mers_iter);
+		while(l_mer_iter!=l_mer_end)
+		{
+			++profile[(int)(l_mer_iter-begin(*l_mers_iter))][(int)*l_mer_iter];
+			++l_mer_iter;
+		}
+		++l_mers_iter;
+	}
 	normalize(profile, pseudocount);
 }
 
@@ -115,15 +117,16 @@ convertSetOfPatternsToProfile(TProfile & profile,
 ..cat:Motif Finding
 ..signature:normalize(container)
 ..signature:normalize(profile,pseudocount_mode)
-..param.container:The @Class.FrequencyDistribution@ or @Shortcut.Profile@ object.
-...type:Class.FrequencyDistribution
-...type:Shortcut.Profile
-..param.profile:The @Shortcut.Profile@ object which is a set of @Class.FrequencyDistribution|frequency distributions@.
-...type:Shortcut.Profile
+..param.container:The @Class.FrequencyDistribution@ object or a string of
+                  @Class.FrequencyDistribution@.
+...remarks:$container$ is of type @Class.FrequencyDistribution@ or 
+           $String<$ @Class.FrequencyDistribution@ $>$
+..param.profile:The $profile$ object which is a set of @Class.FrequencyDistribution|frequency distributions@.
+...remarks:$profile$ is of type $String<$ @Class.FrequencyDistribution@ $>$
 ..param.pseudocount_mode:The @Class.Pseudocount@ object for determining the pseudocount method.
 ...type:Class.Pseudocount
 ..remarks:If necessary, pseudocounts are first added to the frequency values before normalizing them 
-          when the parameter is of type @Shortcut.Profile@.
+          when the parameter is of type String<@Class.FrequencyDistribution@>.
 */
 
 template<typename TProfile>
@@ -146,11 +149,11 @@ normalize(TProfile & profile)
 ..summary:Concatenates the background frequency with the profile for the motif component.
 ..cat:Motif Finding
 ..signature:completeProfile(profile,background_distribution)
-..param.profile:The  @Shortcut.Profile@ object which is a set of @Class.FrequencyDistribution|frequency distributions@.
-...type:Shortcut.Profile
+..param.profile:The  $profile$ object which is a set of @Class.FrequencyDistribution|frequency distributions@.
+...remarks:$profile$ is of type $String<$ @Class.FrequencyDistribution@ $>$
 ..param.background_distribution:The @Class.FrequencyDistribution@ object which represents the backround distribution.
 ...type:Class.FrequencyDistribution
-..remarks:The first row of the final @Shortcut.Profile|probability matrix@ represents the @Class.FrequencyDistribution|background distribution@.
+..remarks:The first row of the final probability matrix ($profile$) represents the @Class.FrequencyDistribution|background distribution@.
 */
 
 template<typename TProfile>
@@ -180,11 +183,9 @@ completeProfile(TProfile & profile,
 ..signature:display(strings)
 ..param.strings:The set of strings.
 ...type:Class.StringSet
-...type:Shortcut.Profile
-..remarks:This function can also be used to display a @Shortcut.Profile|probability matrix@ 
+..remarks:This function can also be used to display a $String<$ @Class.FrequencyDistribution@ $>$ 
           which is a set of @Class.FrequencyDistribution|frequency distributions@.
 */
-
 
 template<typename TStrings>
 void 

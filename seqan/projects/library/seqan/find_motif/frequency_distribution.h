@@ -14,11 +14,12 @@ namespace SEQAN_NAMESPACE_MAIN
 ..cat:Motif Finding
 ..signature:FrequencyDistribution<TValue[, TSpec]>
 ..param.TValue:The type of sequence which is considered.
+...metafunction:Metafunction.Value
 ...type:Spec.Dna
 ...type:Spec.AminoAcid
 ..param.TSpec:The type of probability distribution. 
+...metafunction:Metafunction.Spec
 ...default: $double$
-...type:double (for relative probabilities), int (for absolute probabilities)
 ...remarks: It is preferable to use $double$.
 ..remarks:The number of objects in @Class.FrequencyDistribution@ equals the size of the sequence alphabet.
 */
@@ -164,29 +165,17 @@ public:
 
 //////////////////////////////////////////////////////////////////////////////
 
-/**
-.Metafunction.FrequencyType:
-..summary:Type of the probabilities in the container.
-..cat:Motif Finding
-..signature:FrequencyType<TFrequencyDistribution>::Type
-..param.TFrequencyDistribution:Type for which the probability type is determined.
-...type:Class.FrequencyDistribution
-..returns.param.Type:FrequencyType type of $TFrequencyDistribution$.
-..remarks.text:This type is the second template parameter $TSpec$ of $FrequencyDistribution<TValue, TSpec>$.
-*/
-
-template<typename TFrequencyDistribution>
-struct FrequencyType;
+///.Metafunction.Spec.param.T.type:Class.FrequencyDistribution
 
 template<typename TValue, typename TSpec>
-struct FrequencyType< FrequencyDistribution<TValue, TSpec> >
+struct Spec< FrequencyDistribution<TValue, TSpec> >
 {
 	typedef TSpec Type;
 };
 template<typename TValue, typename TSpec>
-struct FrequencyType< FrequencyDistribution<TValue, TSpec> const>
+struct Spec< FrequencyDistribution<TValue, TSpec> const>
 {
-	typedef TSpec const Type;
+	typedef TSpec Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////

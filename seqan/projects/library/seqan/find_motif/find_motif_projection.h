@@ -765,7 +765,7 @@ _refinementStep(TString & consensus_seq,
 	}
 	avg_m = avg_m/t;
 
-	int lower_limit = ceil(t*(tcm.threshold))-1;
+	int lower_limit = (int) (ceil(t*(tcm.threshold))-1);
 
 	// compute background frequency
 	FrequencyDistribution<TValue> background;
@@ -1085,8 +1085,8 @@ _computeLikelihoodRatioOfLMers(TStrings const & l_mers,
 ...type:Class.String
 ...type:Shortcut.DnaString
 ...type:Shortcut.Peptide
-..param.profile:The  @Shortcut.Profile@ object which is a set of @Class.FrequencyDistribution|frequency distributions@.
-...type:Shortcut.Profile
+..param.profile:The  $profile$ object which is a set of @Class.FrequencyDistribution|frequency distributions@.
+...remarks:$profile$ is of type $String<$ @Class.FrequencyDistribution@ $>$
 ..param.l:The size of the motif.
 */
 

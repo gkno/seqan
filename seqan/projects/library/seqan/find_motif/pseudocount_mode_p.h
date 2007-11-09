@@ -96,7 +96,7 @@ void
 normalize(TProfile & profile, Pseudocount<TValue, PMode> & mode)
 {
 	typedef typename Value<TProfile>::Type TFreqDist;
-	typedef typename FrequencyType<TFreqDist>::Type TFrequencyType;
+	typedef typename Spec<TFreqDist>::Type TFrequencyType;
 
 	typename Size<TProfile>::Type profile_size = length(profile);
 	for(typename Position<TProfile>::Type i=0; 

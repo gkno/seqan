@@ -13,6 +13,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..cat:Motif Finding
 ..signature:MotifFinder<TValue, TSpec>
 ..param.TValue:The type of sequences to be analyzed.
+...metafunction:Metafunction.Value
 ...type:Spec.Dna
 ...type:Spec.AminoAcid
 ..param.TSpec:The motif finding algorithm to search with.
@@ -75,7 +76,7 @@ struct Value< MotifFinder<TValue, TSpec> const>
 ..cat:Motif Finding
 ..signature:factorial(value)
 ..param.value:The value object.
-...type:unsigned int
+...remarks:$value$ should be a positive integer.
 ..remarks:The factorial of a non-negative integer $value$ is 
           the product of all positive integers less than or equal to $value$.  
 */
@@ -105,11 +106,10 @@ TType factorial(TType n)
 ..cat:Motif Finding
 ..signature:binomialCoefficient(n,k)
 ..param.n:The first parameter object.
-...type:unsigned int
 ..param.k:The second parameter object.
-...type:unsigned int
-..remarks:The binomial coefficient of $n$ and $k$ is equal to zero 
-          if $k$ is greater than $n$.   
+..remarks:Both parameters $n$ and $k$ should be a positive integer value. 
+          If $k$ is greater than $n$, the binomial coefficient of $n$ and $k$ 
+		  is equal to zero.   
 */
 
 template<typename TType>

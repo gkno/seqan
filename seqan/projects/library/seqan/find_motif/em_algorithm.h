@@ -15,8 +15,8 @@ namespace SEQAN_NAMESPACE_MAIN
 ..signature:em(profile,dataset_start,t,l,oops_model)
 ..signature:em(profile,dataset_start,t,l,gamma,zoops_model)
 ..signature:em(profile,dataset_start,t,l,lambda,tcm_model)
-..param.profile:The  @Shortcut.Profile@ object which is a set of @Class.FrequencyDistribution|frequency distributions@.
-...type:Shortcut.Profile
+..param.profile:The  $profile$ object which is a set of @Class.FrequencyDistribution|frequency distributions@.
+...remarks:$profile$ is of type $String<$ @Class.FrequencyDistribution@ $>$
 ..param.dataset_start:An iterator pointing to the first input sequence of a given dataset.
 ...type:Concept.Iterator
 ..param.t:The number of input sequences.

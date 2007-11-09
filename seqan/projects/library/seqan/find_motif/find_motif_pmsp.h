@@ -595,7 +595,7 @@ pmsp(TStrings & result,
 				std::set<TString>::iterator iter = result_set.find(l_mer);
 				if( iter==result_set.end() )
 				{
-					int lower_limit = ceil(t*(model_type.threshold))-1;
+					int lower_limit = (int) (ceil(t*(model_type.threshold))-1);
 					unsigned int number = 0;
 					for(typename Position< String< String<TPos2> > >::Type i=0; i<length(L); ++i)
 					{

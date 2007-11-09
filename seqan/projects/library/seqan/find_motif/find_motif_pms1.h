@@ -413,7 +413,7 @@ pms1(TStrings & result_set,
 	// STEP 2:
 	// count votes of l-mers (d-variants) and insert relevant d-variants into result set
 	// ----------------------------------------------------------------------------
-	int lower_limit = ceil(t*(model_type.threshold));
+	int lower_limit = (int) ceil(t*(model_type.threshold));
 	// count votes of relevant l-mers (d-variants)
 	std::vector<int>::iterator iter = result_vect.begin();
 	std::vector<int>::iterator end_iter = result_vect.end();
@@ -718,7 +718,7 @@ _buildVariants(TIntVect & variants,
 
 	// d-mers
 	unsigned int num_of_d_mers = 
-		pow(static_cast<double>(ValueSize<TValue>::VALUE), static_cast<int>(d));
+		(unsigned int)pow(static_cast<double>(ValueSize<TValue>::VALUE), static_cast<int>(d));
 	for(unsigned int i=0; i<num_of_d_mers; ++i)
 	{
 		TString d_mer = inverseHash<TValue>(i, ValueSize<TValue>::VALUE, d);
