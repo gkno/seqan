@@ -22,5 +22,7 @@ int main ()
 	cout << myString << endl;
 	cout << myReverseComplement << endl;
 
+	cout << DnaStringReverseComplement(myString) << endl;
+
 	return 0;
 }
