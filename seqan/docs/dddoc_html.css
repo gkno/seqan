@@ -36,8 +36,8 @@ A:hover, A:link, A:visited
 }
 #navigation
 {
-    width: 180px;
-    height: 100%;
+    width:180px;
+    height:100%;
     border-right: 1px solid #aaaaaa;
 }
 #content
@@ -665,4 +665,26 @@ A:hover, A:link, A:visited
     color:#555555;
     
 }
+#tree_block_separator
+{
+    height:12px;
+}
 
+
+#define_concept
+{
+    border:1px solid #999999;
+    background-color:#f0f0f0;
+    padding:0.5em 0.5em 0.2em 1.0em;
+    margin:0 1em 1em 1em;
+}
+#define_concept td
+{
+    background-color:#ffffff;
+}
+.define_concept_headline
+{
+    font-size:130%;
+    font-weight:bold;
+    margin:0.1em 0 0.9em 0;
+}
