@@ -90,7 +90,7 @@ amanaP-lanac a ,nalp retsam a ,nam A
 weese@tanne:~/seqan/demos$
 ..demofor:Class.String
 ..demofor:Spec.ModReverse
-..demofor:Spec.ModifiedString
+..demofor:Class.ModifiedString
 .
 
 
@@ -111,7 +111,7 @@ A MAN, A MASTER PLAN, A CANAL-PANAMA
 weese@tanne:~/seqan/demos$
 ..demofor:Class.String
 ..demofor:Spec.ModView
-..demofor:Spec.ModifiedString
+..demofor:Class.ModifiedString
 .
 
 
@@ -133,7 +133,7 @@ weese@tanne:~/seqan/demos$
 ..demofor:Class.String
 ..demofor:Spec.ModView
 ..demofor:Spec.ModReverse
-..demofor:Spec.ModifiedString
+..demofor:Class.ModifiedString
 .
 
 

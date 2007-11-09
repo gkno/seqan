@@ -44,7 +44,8 @@ So, our first code example could also be written as:
 After we have seen how to instantiate an index object, we need to know how to assign a sequence the index should be built on.
 This can be done with the function @Function.indexText@ which returns a reference to a $TText$ object stored in the index or
 directly with the index constructor:
-...code:// this ...
+...code:
+// this ...
 Index< String<char> > myIndex;
 indexText(myIndex) = "tobeornottobe";
 	
@@ -61,11 +62,11 @@ Index< String<char> > myIndex("tobeornottobe");
 To find all occurrences of a pattern in an indexed @Class.String@ or a @Class.StringSet@, SeqAn provides the @Class.Finder@ class (see @Page.Searching.searching tutorial@),
 which is also specialized for @Class.Index.indices@.
 The following example shows, how to use the @Class.Finder@ class specialized for our index to search the pattern $"be"$.
-...code:Finder< Index<String<char> > > myFinder(myIndex);
+...code:
+Finder< Index<String<char> > > myFinder(myIndex);
 while (find(myFinder, "be"))
 	cout << position(myFinder) << " ";
-
-//output: "11 2"
+...output:11 2
 
 ...text:
 The finder object $myFinder$ was created with a reference to $myIndex$.
@@ -76,12 +77,12 @@ The positition of an occurrence in the text is returned by the function @Functio
 Please note that in contrast to online-search algorithms (see @Page.Searching.searching tutorial@) the returned occurrence positions are not ascending.
 As you can see in the code example above, the pattern $"be"$ was passed directly to the function @Function.find@ function.
 This is a shortcut for indices and could be also written in a longer way (already known from the @Page.Searching.searching tutorial@):
-...code:Finder< Index<String<char> > > myFinder(myIndex);
+...code:
+Finder< Index<String<char> > > myFinder(myIndex);
 Pattern< String<char> >        myPattern("be");
 while (find(myFinder, myPattern))
 	cout << position(myFinder) << " ";
-
-//output: "11 2"
+...output:11 2
 
 
 
@@ -123,7 +124,8 @@ to proceed with the next node in postorder, to test for having been visiting all
 The @Spec.BottomUp Iterator@ can be optained by the @Metafunction.Iterator@ meta-function called with an @Class.Index@ type and the $BottomUp$ specialization type.
 The following example shows how our index can be traversed as a suffix tree with $myIterator$ in a bottom-up fashion:
 
-...code:// postorder dfs
+...code:
+// postorder dfs
 Iterator< Index<String<char> >, BottomUp<> >::Type myIterator(myIndex);
 for (; !atEnd(myIterator); goNext(myIterator)) 
 	// do something with myIterator
@@ -135,7 +137,8 @@ Starting in the root node the iterator can @Function.goDown@ the left-most edge,
 These functions return a $bool$ which indicates whether the iterator could successfully be moved.
 To visit the children of the root node in lexicographical ascending order you could write:
 
-...code:Iterator< Index<String<char> >, TopDown<> >::Type myIterator(myIndex);
+...code:
+Iterator< Index<String<char> >, TopDown<> >::Type myIterator(myIndex);
 goDown(myIterator);
 while (goRight(myIterator)) 
 	// do something with myIterator
@@ -148,14 +151,16 @@ As this iterator can randomly walk through the suffix tree it can easily be used
 Therefore this iterator also implements the functions @Function.goNext@ and @Function.atEnd@.
 The order of the dfs traversal can be specified with an optional template argument of $ParentLink<..>$ which can be @Tag.Preorder@ (default) \ldots
 
-...code:// preorder dfs
+...code:
+// preorder dfs
 Iterator< Index<String<char> >, TopDown<ParentLink<Preorder> > >::Type myIterator(myIndex);
 for (; !atEnd(myIterator); goNext(myIterator)) 
 	// do something with myIterator
 
 ...text: \ldots or @Tag.Postorder@. As top-down iterators starts in the root node, the iterator must manually be moved down to the first postorder node which is the left-most leaf:
 
-...code:// postorder dfs
+...code:
+// postorder dfs
 Iterator< Index<String<char> >, TopDown<ParentLink<Postorder> > >::Type myIterator(myIndex);
 while (goDown(myIterator));
 for (; !atEnd(myIterator); goNext(myIterator)) 
@@ -245,7 +250,8 @@ If you want to write algorithms for both variants you should use the functions @
 
 To search in multiple strings the @Class.Finder@ example from above can be modified to:
 
-...code:// set StringSet
+...code:
+// set StringSet
 StringSet< String<char> > mySet;
 resize(mySet, 3);
 mySet[0] = "tobeornottobe";
@@ -258,7 +264,7 @@ Finder< Index<StringSet<String<char> > > > myFinder(myIndex);
 while (find(myFinder, "be"))
 	cout << position(myFinder) << "  ";
 	
-//output: < 0 , 11 >  < 1 , 3 >  < 2 , 0 >  < 0 , 2 >
+...output:< 0 , 11 >  < 1 , 3 >  < 2 , 0 >  < 0 , 2 >
 
 ...text:
 If $TText$ was a @Class.StringSet@, $position(finder)$ would return a @Class.Pair@ $(seqNo,seqOfs)$ where $seqNo$ is the number and $seqOfs$ the local position of the sequence the pattern occurs at.
