@@ -215,9 +215,9 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef typename Value<TPipe>::Type			TValue;
         typedef typename Size<TPipe>::Type			TSize;
 
-        typedef SimpleBuffer<TValue>				TBuffer;
-		typedef IPipeIterator<TPipe>				ISource;
-		typedef typename Iterator<TBuffer, Rooted>::Type	ITarget;
+        typedef SimpleBuffer<TValue>						TBuffer;
+		typedef IPipeIterator<TPipe>						ISource;
+		typedef typename Iterator<TBuffer, Standard>::Type	ITarget;
 
 		TPipe		&pipe;
 		size_t		bufferSize;
@@ -276,8 +276,8 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef SimpleBuffer<TValue>				TBuffer;
         typedef Pipe<TSequence, TSpec>				TPipe;
 
-		typedef typename Iterator<TSequence const, Rooted>::Type	ISource;
-		typedef typename Iterator<TBuffer, Rooted>::Type			ITarget;
+		typedef typename Iterator<TSequence const, Standard>::Type	ISource;
+		typedef typename Iterator<TBuffer, Standard>::Type			ITarget;
 
 		TPipe		&pipe;
 		unsigned	bufferSize;

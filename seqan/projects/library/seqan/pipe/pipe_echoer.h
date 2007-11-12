@@ -56,8 +56,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template < typename TInput, unsigned echoRepeats, bool omitFirst >
     struct Value< Pipe< TInput, Echoer< echoRepeats, omitFirst > > > {
-        typedef Tuple<typename Value<TInput>::Type, echoRepeats>		EchoType;
-        typedef Pair<typename Size<TInput>::Type, EchoType, Compressed>	Type;
+        typedef Tuple<typename Value<TInput>::Type, echoRepeats>	EchoType;
+        typedef Pair<typename Size<TInput>::Type, EchoType>			Type;
     };
 
 

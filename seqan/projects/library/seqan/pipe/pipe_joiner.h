@@ -33,8 +33,7 @@ namespace SEQAN_NAMESPACE_MAIN
     struct Value< Pipe< Bundle2< TInput1, TInput2 >, Joiner > > {
 		typedef Pair<
 			typename Value<TInput1>::Type,
-			typename Value<TInput2>::Type,
-			Compressed
+			typename Value<TInput2>::Type
 		> Type;
 	};
 
@@ -43,8 +42,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef Triple<
 			typename Value<TInput1>::Type,
 			typename Value<TInput2>::Type,
-			typename Value<TInput3>::Type,
-			Compressed
+			typename Value<TInput3>::Type
 		> Type;
 	};
 

@@ -1980,6 +1980,42 @@ a single integer value between 0 and the sum of string lengths minus 1.
 	}
 
 	//////////////////////////////////////////////////////////////////////////////
+	// atBegin
+	//////////////////////////////////////////////////////////////////////////////
+
+	template <typename TSSet, typename TSpec>
+	inline bool
+	atBegin(Iter<TSSet, ConcatVirtual<TSpec> > &me)
+	{
+		return me._cur == me._begin && me.objNo == 0;
+	}
+
+	template <typename TSSet, typename TSpec>
+	inline bool
+	atBegin(Iter<TSSet, ConcatVirtual<TSpec> > const &me)
+	{
+		return me._cur == me._begin && me.objNo == 0;
+	}
+
+	//////////////////////////////////////////////////////////////////////////////
+	// atEnd
+	//////////////////////////////////////////////////////////////////////////////
+
+	template <typename TSSet, typename TSpec>
+	inline bool
+	atEnd(Iter<TSSet, ConcatVirtual<TSpec> > &me)
+	{
+		return me._cur == me._end && me.objNo == (length(*me.host) - 1);
+	}
+
+	template <typename TSSet, typename TSpec>
+	inline bool
+	atEnd(Iter<TSSet, ConcatVirtual<TSpec> > const &me)
+	{
+		return me._cur == me._end && me.objNo == (length(*me.host) - 1);
+	}
+
+	//////////////////////////////////////////////////////////////////////////////
 	// atEndOfSequence
 	//////////////////////////////////////////////////////////////////////////////
 

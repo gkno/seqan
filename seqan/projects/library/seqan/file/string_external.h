@@ -1625,6 +1625,86 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 
 //____________________________________________________________________________
 
+	template <typename TExtString>
+	inline TExtString &	container(VectorIterator<TExtString> &it) { return *(it.vector); }
+	template <typename TExtString>
+	inline TExtString &	container(VectorIterator<TExtString> const &it) { return *(it.vector); }
+
+	template <typename TExtString>
+	inline TExtString &	container(VectorConstIterator<TExtString> &it) { return *(it.vector); }
+	template <typename TExtString>
+	inline TExtString &	container(VectorConstIterator<TExtString> const &it) { return *(it.vector); }
+
+	template <typename TExtString>
+	inline TExtString &	container(VectorFwdIterator<TExtString> &it) { return *(it.vector); }
+	template <typename TExtString>
+	inline TExtString &	container(VectorFwdIterator<TExtString> const &it) { return *(it.vector); }
+
+	template <typename TExtString>
+	inline TExtString &	container(VectorFwdConstIterator<TExtString> &it) { return *(it.vector); }
+	template <typename TExtString>
+	inline TExtString &	container(VectorFwdConstIterator<TExtString> const &it) { return *(it.vector); }
+//____________________________________________________________________________
+
+	template <typename TExtString>
+	inline bool	atBegin(VectorIterator<TExtString> &it) { return it.offset == 0; }
+	template <typename TExtString>
+	inline bool	atBegin(VectorIterator<TExtString> const &it) { return it.offset == 0; }
+
+	template <typename TExtString>
+	inline bool	atBegin(VectorConstIterator<TExtString> &it) { return it.offset == 0; }
+	template <typename TExtString>
+	inline bool	atBegin(VectorConstIterator<TExtString> const &it) { return it.offset == 0; }
+
+	template <typename TExtString>
+	inline bool	atBegin(VectorFwdIterator<TExtString> &it) { 
+		return it.pageNo == 0 && it.pageOfs == 0;
+	}
+	template <typename TExtString>
+	inline bool	atBegin(VectorFwdIterator<TExtString> const &it) {
+		return it.pageNo == 0 && it.pageOfs == 0;
+	}
+
+	template <typename TExtString>
+	inline bool	atBegin(VectorFwdConstIterator<TExtString> &it) { 
+		return it.pageNo == 0 && it.pageOfs == 0;
+	}
+	template <typename TExtString>
+	inline bool	atBegin(VectorFwdConstIterator<TExtString> const &it) {
+		return it.pageNo == 0 && it.pageOfs == 0;
+	}
+//____________________________________________________________________________
+
+	template <typename TExtString>
+	inline bool	atEnd(VectorIterator<TExtString> &it) { return it.offset == it.vector->_size; }
+	template <typename TExtString>
+	inline bool	atEnd(VectorIterator<TExtString> const &it) { return it.offset == it.vector->_size; }
+
+	template <typename TExtString>
+	inline bool	atEnd(VectorConstIterator<TExtString> &it) { return it.offset == it.vector->_size; }
+	template <typename TExtString>
+	inline bool	atEnd(VectorConstIterator<TExtString> const &it) { return it.offset == it.vector->_size; }
+
+	template <typename TExtString>
+	inline bool	atEnd(VectorFwdIterator<TExtString> &it) { 
+		return TExtString::PageSize * it.pageNo + it.pageOfs == it.vector->_size;
+	}
+	template <typename TExtString>
+	inline bool	atEnd(VectorFwdIterator<TExtString> const &it) {
+		return TExtString::PageSize * it.pageNo + it.pageOfs == it.vector->_size;
+	}
+
+	template <typename TExtString>
+	inline bool	atEnd(VectorFwdConstIterator<TExtString> &it) { 
+		return TExtString::PageSize * it.pageNo + it.pageOfs == it.vector->_size;
+	}
+	template <typename TExtString>
+	inline bool	atEnd(VectorFwdConstIterator<TExtString> const &it) {
+		return TExtString::PageSize * it.pageNo + it.pageOfs == it.vector->_size;
+	}
+
+//____________________________________________________________________________
+
     template < typename TValue, typename TConfig >
     inline void 
     clear(String<TValue, External<TConfig> > &me) {

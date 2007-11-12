@@ -60,7 +60,7 @@
 #undef main
 
 #define main runIndexMummy
-//#include "../../demos/index_mummy.cpp"
+#include "../../demos/index_mummy.cpp"
 #undef main
 
 
@@ -168,7 +168,7 @@
 #define main runFileFormat
 #include "../../demos/file_format.cpp"
 #undef main
-*/
+
 int main(int argc, const char *argv[]) 
 {
 	runAllocator();
@@ -186,14 +186,14 @@ int main(int argc, const char *argv[])
 	runIndexMUMs();
 	runIndexSuperMaxRepeats();
 	runIndexMaxRepeats();
-//	runIndexMummy(argc, argv);
+	runIndexMummy(argc, argv);
 
 	runGraph0();runGraph1();runGraph2();runGraph3();runGraph4();runGraph5();
 	runGraph6();runGraph7();runGraph8();runGraph9();runGraph10();runGraph11();
 	runGraph12();runGraph13();runGraph14();runGraph15();runGraph16();runGraph17();
 	runGraph18();runGraph19();runGraph20();runGraph21();runGraph22();runGraph23();
 
-	//runFind();
+	runFind();
 	runFileFormat();
 
 	return 0;
