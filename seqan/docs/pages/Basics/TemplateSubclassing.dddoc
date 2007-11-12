@@ -4,5 +4,20 @@
 
 .Page.Template Subclassing.description:
 ..contents
+..image:template_subclassing
 
-..section:# Overview
+..section:# Motivation
+..text:
+SeqAn uses a special kind of hierarchical structure that we call 'template argument subclassing', which
+means that different specializations of a given class template are specified by template arguments. For
+example, the array string @Spec.Array String|String<char, Array<100> >@ is a subclass of @Class.String|String<char>@ in the sense that all @Function|functions@ and @Metafunction|metafunctions@ which are
+applicable to $String<char>$ can also be applied to $String<char, Array<100> >$, while it is possible to overload some
+functions especially for $String<char, Array<100> >$. The rules of C++ overload resolution guarantee that the
+compiler always applies the most specific variant out of all existing implementations when an algorithm or
+trait has been called. This approach resembles class derivation in standard object-oriented programming,
+but it is often faster, because it does not require a type conversion for a subclass calling a function that is
+already defined for the base class, and since the actual type of the object used in a function is therefore
+already known at compile time, it is not necessary to detect it at run time using virtual functions.
+Non-virtual functions have the advantage that C++ compilers can use function inlining to save their
+overhead completely. Template argument subclassing enables us both to specialize functions and to
+delegate tasks soundly to base classes while still maintaining static binding.

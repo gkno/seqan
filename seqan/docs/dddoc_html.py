@@ -11,7 +11,7 @@ from os import F_OK
 
 ################################################################################
 
-def createDocs(path, buildfull):
+def createDocs(path, buildfull, indexonly):
     global globalDocsPath
     globalDocsPath = path
 
@@ -26,12 +26,13 @@ def createDocs(path, buildfull):
     copyFile(path, "dddoc_plus.gif")
     copyFile(path, "dddoc_minus.gif")
     copyFile(path, "dddoc.js")
-
-    if buildfull:
+    
+    if buildfull or indexonly:
         createIndexes(path)
         createSearchfile(path)
 
-    createPages(path)
+    if not indexonly:
+        createPages(path)
     
 
 ################################################################################
@@ -1006,9 +1007,12 @@ def printGlossary(fl, data, category):
 ################################################################################
 
 def printFile(fl, data, category):
+    global globalDocsPath
+    
     filename = data[category].text()
     
     filename = filename.replace("\n", "")
+    filename = filename.replace("\\", "/")
     
     if (filename != ''):
         if (not os.access(filename, F_OK)):
@@ -1023,9 +1027,15 @@ def printFile(fl, data, category):
             codemode = False
 
             pos = filename.rfind("/")
-            if (pos >= 0): s = filename[pos+1:]
-            else: s = filename
-            fl.write('<div class=section_headline>File "' + s + '"</div>')
+            if (pos >= 0): 
+                s = filename[pos+1:]
+            else: 
+                s = filename
+
+            #copy file
+            f_out = open(os.path.join(globalDocsPath, s), "w")
+            
+            fl.write('<div class=section_headline>File "<a href="' + s + '">' + s + '</a>"</div>')
         
             fl.write('<div class=codefile >')
             for line in lines:
@@ -1060,6 +1070,8 @@ def printFile(fl, data, category):
                     fl.write('</nobr></td>')        
                     
                     fl.write('</tr>')
+                    
+                    f_out.write(line)
                 
             if codemode:
                 fl.write('</table>')
@@ -1067,6 +1079,8 @@ def printFile(fl, data, category):
                 fl.write('</div>')
             
             fl.write('</div>')    
+
+            f_out.close
 
 
 ################################################################################
