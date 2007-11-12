@@ -30,7 +30,7 @@ namespace SEQAN_NAMESPACE_MAIN
 /**
 .Class.ModifiedIterator:
 ..summary:Allows to modify arbitrary iterators by specializing what differs from an origin.
-..cat:Modifiers
+..cat:Modifier
 ..signature:ModifiedIterator<THost[, TSpec]>
 ..param.THost:Original iterator.
 ...type:Concept.Iterator

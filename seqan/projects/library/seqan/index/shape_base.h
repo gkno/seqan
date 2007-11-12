@@ -400,8 +400,8 @@ If $charsLeft$ is smaller than the shape's span, the hash value corresponds to t
 		// remove first, shift left, and add next character
 		typedef typename Value< Shape<TValue, TSpec> >::Type	THValue;
 		me.hValue = 
-			(me.hValue - _ord(me.leftChar) * me.leftFactor) * ValueSize<TValue>::VALUE
-			+ _ord(*(it + me.span - 1));
+			(me.hValue - _ord(me.leftChar) * (THValue)me.leftFactor) * ValueSize<TValue>::VALUE
+			+ _ord(*(it + (THValue)me.span - 1));
 		me.leftChar = *it;
 		return me.hValue;
 	}
@@ -509,13 +509,13 @@ If $charsLeft$ is smaller than the shape's span, the hash value corresponds to t
 			// update sum of x_i
 			me.XValue = me.XValue + _ord(*(it + me.span - 1)) - _ord(me.leftChar);
 			// shift hash
-			me.hValue = (me.hValue - _ord(me.leftChar) * me.leftFactor2) * ValueSize<TValue>::VALUE + me.XValue
+			me.hValue = (me.hValue - _ord(me.leftChar) * (THValue)me.leftFactor2) * ValueSize<TValue>::VALUE + me.XValue
 						- me.span * (ValueSize<TValue>::VALUE - 1);
 		} else {
 			// update sum of x_i
 			me.XValue -= _ord(me.leftChar);
 			// shift hash
-			me.hValue = (me.hValue - _ord(me.leftChar) * me.leftFactor2) * ValueSize<TValue>::VALUE + me.XValue
+			me.hValue = (me.hValue - _ord(me.leftChar) * (THValue)me.leftFactor2) * ValueSize<TValue>::VALUE + me.XValue
 				        - charsLeft * (ValueSize<TValue>::VALUE - 1) - ValueSize<TValue>::VALUE;
 		}
 

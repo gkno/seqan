@@ -30,7 +30,7 @@ namespace SEQAN_NAMESPACE_MAIN
 /**
 .Class.ModifiedString:
 ..summary:Allows to modify arbitrary strings by specializing what differs from an origin.
-..cat:Modifiers
+..cat:Modifier
 ..signature:ModifiedString<THost[, TSpec]>
 ..param.THost:Original sequence type.
 ...type:Concept.Container

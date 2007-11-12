@@ -30,7 +30,7 @@ namespace SEQAN_NAMESPACE_MAIN
 /**
 .Spec.ModReverse:
 ..summary:Mirrors the characters from begin to end.
-..cat:Modifiers
+..cat:Modifier
 ..general:Class.ModifiedIterator
 ..general:Class.ModifiedString
 ..signature:ModifiedIterator<THost, ModReverse>

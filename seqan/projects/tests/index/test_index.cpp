@@ -46,7 +46,7 @@ void testBuild()
 template <typename TIter>
 inline void _printNode(TIter const it) 
 {
-		cout << countOccurences(it) << "\t";
+		cout << countOccurrences(it) << "\t";
 		cout << representative(it) << "\t";
 //		cout << "parentEdgeLabel:" << parentEdgeLabel(it);
 		cout << endl;
@@ -55,7 +55,7 @@ inline void _printNode(TIter const it)
 void testMultiIndex()
 {
 		typedef String<Dna5> TText;
-		typedef StringSet< TText, Owner<ConcatDirect<> > > TMulti;
+		typedef StringSet< TText, Owner<> > TMulti;
 
 		String<Dna5> t[6];
 		//t[0] = "caterpillar";
@@ -223,7 +223,7 @@ void testSTreeIterators()
 
 //		while (goDown(it));
 		while (!atEnd(it)) {
-			cout << countOccurences(it) << "\t";
+			cout << countOccurrences(it) << "\t";
 			cout << representative(it) << "\t";
 			cout << "parentEdgeLabel: " << parentEdgeLabel(it);
 			cout << endl;
@@ -249,7 +249,7 @@ void testMaxRepeats()
 		typedef MaxRepeat< Index<TText> > TRepeat;
         while (!atEnd(it)) {
 			cout << representative(it) << ":";
-			Iterator<TRepeat>::Type mit(it);
+			Iterator<TRepeat, MaxRepeatOccurrences>::Type mit(it);
 			while (!atEnd(mit)) {
 				cout << "\t" << *mit;
 				++mit;
@@ -259,6 +259,39 @@ void testMaxRepeats()
         }
 }
 
+
+void testMultiMEMs()
+{
+		typedef String<char> TText;
+		typedef StringSet< TText, Owner<ConcatDirect<> > > TMulti;
+
+        Index<TMulti> esa;
+
+		String<Dna5> t[6];
+		t[0] = "caterpillar";
+		t[1] = "catwoman";
+		t[2] = "pillow";
+		t[3] = "willow";
+		t[4] = "ill";
+		t[5] = "wow";
+
+		FILE* dotFile = fopen("stree.dot","w");
+		write(dotFile, esa, DotDrawing());
+		fclose(dotFile);
+
+        Iterator< Index<TMulti>, MultiMEMs >::Type it(esa, 3);
+		typedef MultiMEM< Index<TMulti> > TMultiMEM;
+        while (!atEnd(it)) {
+			cout << representative(it) << ":";
+			Iterator<TMultiMEM>::Type mit(it);
+			while (!atEnd(mit)) {
+				cout << "\t" << *mit;
+				++mit;
+			}
+			cout << endl;
+            ++it;
+        }
+}
 
 template <typename TIteratorSpec>
 void testSuperMaxRepeats()
@@ -273,8 +306,8 @@ void testSuperMaxRepeats()
         typename Iterator< Index<TText>, TIteratorSpec >::Type it(esa);
         while (!atEnd(it)) {
 			cout << representative(it) << ":";
-			for(typename Size<Index<TText> >::Type i = 0; i < countOccurences(it); ++i)
-				cout << "\t" << getOccurences(it)[i];
+			for(typename Size<Index<TText> >::Type i = 0; i < countOccurrences(it); ++i)
+				cout << "\t" << getOccurrences(it)[i];
 			cout << endl;
             ++it;
         }
@@ -298,15 +331,15 @@ void testMUMs()
 		for(int i = 0; i < 3; ++i)
 			appendValue(indexText(esa), t[i]);			// add sequences to multiple index
 
-		Iterator<TIndex, MUMs>::Type it(esa, 3);		// set minimum MUM length to 3
+		Iterator<TIndex, MUMs>::Type  it(esa, 3);		// set minimum MUM length to 3
 		String< SAValue<TIndex>::Type > occs;			// temp. string storing the hit positions
 
 		cout << resetiosflags(ios::left);
 		while (!atEnd(it)) 
 		{
 			cout << representative(it) << ":";
-			occs = getOccurences(it);					// gives hit positions (seqNo,seqOfs)
-			orderOccurences(occs);						// order them by seqNo
+			occs = getOccurrences(it);					// gives hit positions (seqNo,seqOfs)
+			orderOccurrences(occs);						// order them by seqNo
 			
 			for(unsigned i = 0; i < length(occs); ++i)
 				cout << "\t" << getValueI2(occs[i]);

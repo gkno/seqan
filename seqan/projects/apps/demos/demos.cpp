@@ -25,6 +25,20 @@
 
 
 
+#define main runModifierModReverse
+#include "../../demos/modifier_modreverse.cpp"
+#undef main
+
+#define main runModifierModView
+#include "../../demos/modifier_modview.cpp"
+#undef main
+
+#define main runModifierNested
+#include "../../demos/modifier_nested.cpp"
+#undef main
+
+
+
 #define main runIndexSA
 #include "../../demos/index_sufarray.cpp"
 #undef main
@@ -43,6 +57,10 @@
 
 #define main runIndexMaxRepeats
 #include "../../demos/index_maxrepeats.cpp"
+#undef main
+
+#define main runIndexMummy
+//#include "../../demos/index_mummy.cpp"
 #undef main
 
 
@@ -150,8 +168,8 @@
 #define main runFileFormat
 #include "../../demos/file_format.cpp"
 #undef main
-
-int main() 
+*/
+int main(int argc, const char *argv[]) 
 {
 	runAllocator();
 	runAlphabet();
@@ -159,11 +177,16 @@ int main()
 	runRootedIterator();
 	runString();
 
+	runModifierModReverse();
+	runModifierModView();
+	runModifierNested();
+
 	runIndexSA();
 	runIndexFind();
 	runIndexMUMs();
 	runIndexSuperMaxRepeats();
 	runIndexMaxRepeats();
+//	runIndexMummy(argc, argv);
 
 	runGraph0();runGraph1();runGraph2();runGraph3();runGraph4();runGraph5();
 	runGraph6();runGraph7();runGraph8();runGraph9();runGraph10();runGraph11();
@@ -172,4 +195,6 @@ int main()
 
 	//runFind();
 	runFileFormat();
+
+	return 0;
 }

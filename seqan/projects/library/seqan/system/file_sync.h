@@ -189,14 +189,15 @@ namespace SEQAN_NAMESPACE_MAIN
 					break;
                 case OPEN_WRONLY:
                     result |= O_WRONLY;
+					if (!(openMode & OPEN_APPEND))	result |= O_TRUNC;
 					break;
                 case OPEN_RDWR:
                     result |= O_RDWR;
+					if (!(openMode & OPEN_APPEND))	result |= O_TRUNC;
 					break;
 			}
 
 			if (openMode & OPEN_CREATE)     result |= O_CREAT;
-			if (!(openMode & OPEN_APPEND))	result |= O_TRUNC;
 //			if (openMode & OPEN_TEMPORARY)  result |= O_TEMPORARY;
         #ifdef SEQAN_DIRECTIO
     		if (openMode & OPEN_ASYNC)		result |= O_DIRECT;

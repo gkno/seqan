@@ -30,7 +30,7 @@ namespace SEQAN_NAMESPACE_MAIN
 /**
 .Spec.ModView:
 ..summary:Transforms the characters of the $THost$ string/iterator using a custom function.
-..cat:Modifiers
+..cat:Modifier
 ..general:Class.ModifiedIterator
 ..general:Class.ModifiedString
 ..signature:ModifiedIterator<THost, ModView<TFunctor> >

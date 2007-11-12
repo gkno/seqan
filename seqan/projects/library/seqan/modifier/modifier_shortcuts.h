@@ -88,6 +88,109 @@ inline void reverseComplementInPlace(StringSet<TSequence, TSpec> & stringSet)
 
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Shortcut.ModComplementDna:
+..cat:Modifier
+..summary:Modifier specialization type for the complement of @Spec.Dna@ alphabet sequences.
+..signature:DnaStringComplement
+..shortcutfor:Class.ModView
+...signature:ModView< FunctorComplement<Dna> >
+..see:Spec.ModView
+..see:Class.FunctorComplement
+*/
+
+/**
+.Shortcut.ModComplementDna5:
+..cat:Modifier
+..summary:Modifier specialization type for the complement of @Spec.Dna5@ alphabet sequences.
+..signature:Dna5StringComplement
+..shortcutfor:Class.ModView
+...signature:ModView< FunctorComplement<Dna5> >
+..see:Spec.ModView
+..see:Class.FunctorComplement
+*/
+
+
+/**
+.Shortcut.DnaStringComplement:
+..cat:Modifier
+..summary:Modifier for the complement of a @Shortcut.DnaString@.
+..signature:DnaStringComplement
+..shortcutfor:Class.ModifiedString
+...signature:ModifiedString<DnaString, ModView< FunctorComplement<Dna> > >
+..see:Shortcut.DnaString
+..see:Class.ModifiedString
+..see:Spec.ModView
+..see:Class.FunctorComplement
+*/
+
+/**
+.Shortcut.Dna5StringComplement:
+..cat:Modifier
+..summary:Modifier for the complement of a @Shortcut.Dna5String@.
+..signature:Dna5StringComplement
+..shortcutfor:Class.ModifiedString
+...signature:ModifiedString<Dna5String, ModView< FunctorComplement<Dna5> > >
+..see:Shortcut.Dna5String
+..see:Class.ModifiedString
+..see:Spec.ModView
+..see:Class.FunctorComplement
+*/
+
+
+/**
+.Shortcut.DnaStringReverse:
+..cat:Modifier
+..summary:Modifier for the reverse of a @Shortcut.DnaString@.
+..signature:DnaStringReverse
+..shortcutfor:Class.ModifiedString
+...signature:ModifiedString<DnaString, ModReverse>
+..see:Shortcut.DnaString
+..see:Class.ModifiedString
+..see:Spec.ModReverse
+*/
+
+/**
+.Shortcut.Dna5StringReverse:
+..cat:Modifier
+..summary:Modifier for the reverse of a @Shortcut.Dna5String@.
+..signature:Dna5StringReverse
+..shortcutfor:Class.ModifiedString
+...signature:ModifiedString<Dna5String, ModReverse>
+..see:Shortcut.Dna5String
+..see:Class.ModifiedString
+..see:Spec.ModReverse
+*/
+
+
+/**
+.Shortcut.DnaStringReverseComplement:
+..cat:Modifier
+..summary:Modifier for the reverse complement of a @Shortcut.DnaString@.
+..signature:DnaStringReverseComplement
+..shortcutfor:Class.ModifiedString
+...signature:ModifiedString<ModifiedString<DnaString, ModView< FunctorComplement<Dna> > >, ModReverseComplement>
+..see:Shortcut.DnaString
+..see:Class.ModifiedString
+..see:Spec.ModReverse
+..see:Spec.ModView
+..see:Class.FunctorComplement
+*/
+
+/**
+.Shortcut.Dna5StringReverseComplement:
+..cat:Modifier
+..summary:Modifier for the reverse complement of a @Shortcut.Dna5String@.
+..signature:Dna5StringReverseComplement
+..shortcutfor:Class.ModifiedString
+...signature:ModifiedString<ModifiedString<Dna5String, ModView< FunctorComplement<Dna> > >, ModReverseComplement>
+..see:Shortcut.Dna5String
+..see:Class.ModifiedString
+..see:Spec.ModReverse
+..see:Spec.ModView
+..see:Class.FunctorComplement
+*/
+
 }
 
 #endif

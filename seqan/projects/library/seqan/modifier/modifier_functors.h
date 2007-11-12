@@ -32,6 +32,15 @@ namespace SEQAN_NAMESPACE_MAIN
 	// text transformation
 	//////////////////////////////////////////////////////////////////////////////
 
+/**
+.Class.FunctorUpcase:
+..cat:Modifier
+..summary:Functor that returns the upper case character to a given character.
+..signature:FunctorUpcase<TValue>
+..param.TValue:The input value type.
+..remarks:This Functor is a derivation of the STL unary function.
+*/
+
     template <typename InType, typename Result = InType>
 	struct FunctorUpcase : public ::std::unary_function<InType,Result> 
 	{
@@ -40,6 +49,15 @@ namespace SEQAN_NAMESPACE_MAIN
 			return x; 
 		}
     };
+
+/**
+.Class.FunctorLowcase:
+..cat:Modifier
+..summary:Functor that returns the lower case character to a given character.
+..signature:FunctorLowcase<TValue>
+..param.TValue:The input value type.
+..remarks:This Functor is a derivation of the STL unary function.
+*/
 
     template <typename InType, typename Result = InType>
     struct FunctorLowcase : public ::std::unary_function<InType,Result> 
@@ -55,6 +73,16 @@ namespace SEQAN_NAMESPACE_MAIN
 	// alphabet transformation
 	//////////////////////////////////////////////////////////////////////////////
 
+/**
+.Class.FunctorConvert:
+..cat:Modifier
+..summary:Functor that converts a $TInValue$ type to a $TOutValue$ type character.
+..signature:FunctorConvert<TInValue, TOutValue>
+..param.TInValue:The input value type.
+..param.TOutValue:The output value type.
+..remarks:This Functor is a derivation of the STL unary function.
+*/
+
     template <typename InType, typename OutType>
     struct FunctorConvert : public ::std::unary_function<InType,OutType> 
 	{
@@ -66,6 +94,17 @@ namespace SEQAN_NAMESPACE_MAIN
 	//////////////////////////////////////////////////////////////////////////////
 	// DNA complement
 	//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Class.FunctorComplement:
+..cat:Modifier
+..summary:Functor that returns the complement nucleotide to a given nucleotide.
+..signature:FunctorComplement<TValue>
+..param.TValue:The input value type.
+...type:Spec.Dna
+...type:Spec.Dna5
+..remarks:This Functor is a derivation of the STL unary function.
+*/
 
     template <typename TValue>
     struct FunctorComplement;

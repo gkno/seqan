@@ -40,7 +40,6 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TContainer:Type of an index that can be iterated with a bottom-up iterator.
 ...type:Spec.Index_ESA
 ...metafunction:Metafunction.Container
-..implements:Concept.Iterator
 ..param.TSpec:The specialization type.
 */
 
@@ -122,7 +121,6 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TContainer:Type of an index that can be iterated with a bottom-up iterator.
 ...type:Spec.Index_ESA
 ...metafunction:Metafunction.Container
-..implements:Concept.Iterator
 ..param.TSpec:The specialization type.
 */
 

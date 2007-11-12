@@ -84,6 +84,9 @@ while (find(myFinder, myPattern))
 	cout << position(myFinder) << " ";
 ...output:11 2
 
+...text:
+@Demo.Index Finder|Click here@ for an example of a @Class.Finder@ for an @Spec.Index_ESA.enhanced suffix array@
+and for a @Spec.Index_QGram.q-gram index@.
 
 
 ...section:# Suffix trees
@@ -267,7 +270,8 @@ while (find(myFinder, "be"))
 ...output:< 0 , 11 >  < 1 , 3 >  < 2 , 0 >  < 0 , 2 >
 
 ...text:
-If $TText$ was a @Class.StringSet@, $position(finder)$ would return a @Class.Pair@ $(seqNo,seqOfs)$ where $seqNo$ is the number and $seqOfs$ the local position of the sequence the pattern occurs at.
+As $TText$ is a @Class.StringSet@, $position(finder)$ returns a @Class.Pair@ $(seqNo,seqOfs)$ where $seqNo$ is the number and $seqOfs$ the local position of the sequence the pattern occurs at.
+@Demo.Index Finder StringSet|Click here@ to see the complete source code of this example.
 
 
 
