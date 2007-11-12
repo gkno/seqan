@@ -302,10 +302,40 @@ MUMs can be used as a starting point for a multiple genome alignment algorithm.
 This example shows how to implement a simple version of MUMer to find multiple exact matches of n sequences (n\geq2) in SeqAn.
 ..file:../projects/demos/index_mummy.cpp
 ..output
+...text:As an example data set we used 3 strains of chlamydia bacterium 
+(@ftp://ftp.ncbi.nih.gov/genomes/Bacteria/Chlamydia_muridarum/NC_002620.fna|NC_002620.fna@,
+@ftp://ftp.ncbi.nih.gov/genomes/Bacteria/Chlamydia_trachomatis/NC_000117.fna|NC_000117.fna@,
+@ftp://ftp.ncbi.nih.gov/genomes/Bacteria/Chlamydia_trachomatis_A_HAR-13/NC_007429.fna|NC_007429.fna@) and
+saved the Fasta files to the demos directory.
 ...code:
 weese@tanne:~/seqan$ cd demos
 weese@tanne:~/seqan/demos$ make index_mummy
-weese@tanne:~/seqan/demos$ ./index_mummy
+weese@tanne:~/seqan/demos$ ./index_mummy -h
+***************************************
+***        Simple MUM finder        ***
+*** written by David Weese (c) 2007 ***
+***************************************
+
+Usage: mummy [OPTION]... <SEQUENCE FILE> ... <SEQUENCE FILE>
+
+Options:
+  -e, --extern                  use external memory (for large datasets)
+  -l, --minlen                  set minimum MUM length
+                                if not set, default value is 20
+  -h, --help                    print this help
+weese@tanne:~/seqan/demos$ ./index_mummy NC*.fna |sort > mums.txt
+3159928 bps sequence imported.
+weese@tanne:~/seqan/demos$ head mums.txt
+    1565    323805      2159        48
+    1646    323886      2240        27
+    1722    323962      2316        37
+    1774    324014      2368        26
+    1941    324181      2535        23
+    2061    324301      2655        35
+    2102    324342      2696        29
+    2132    324372      2726        20
+    2183    324423      2777        24
+weese@tanne:~/seqan/demos$
 ..seealso:Demo.Maximal Unique Matches
 ..demofor:Class.Index
 ..demofor:Class.StringSet

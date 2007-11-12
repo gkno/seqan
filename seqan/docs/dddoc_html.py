@@ -250,7 +250,12 @@ def brokenLink(text):
 ################################################################################
 
 def translateLinkDisplaytext(text):
-    if text.find("http:", 0, 5) == 0:  #external Link
+    if text.find("http:", 0, 5) == 0:  #external HTTP Link
+        arr = dddoc.splitUrl(text)
+        if len(arr) == 0: return brokenLink(text)
+        return arr[len(arr) - 1]
+
+    if text.find("ftp:", 0, 4) == 0:   #external FTP Link
         arr = dddoc.splitUrl(text)
         if len(arr) == 0: return brokenLink(text)
         return arr[len(arr) - 1]
@@ -271,7 +276,12 @@ def translateLinkDisplaytext(text):
 def translateLink(text, attribs = ""):
     global globalDocsPath
 
-    if text.find("http:", 0, 5) == 0:  #external Link
+    if text.find("http:", 0, 5) == 0:  #external HTTP Link
+        arr = dddoc.splitUrl(text)
+        if len(arr) == 0: return brokenLink(text)
+        return '<a href="' + arr[0] + '" ' + attribs + '>' + arr[len(arr) - 1] + '</a>'
+
+    if text.find("ftp:", 0, 4) == 0:   #external FTP Link
         arr = dddoc.splitUrl(text)
         if len(arr) == 0: return brokenLink(text)
         return '<a href="' + arr[0] + '" ' + attribs + '>' + arr[len(arr) - 1] + '</a>'
