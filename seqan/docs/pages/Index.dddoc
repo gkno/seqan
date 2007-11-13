@@ -12,7 +12,7 @@
     This will also give you an overview about the content of the library.
 ..text:Refer to the @Page.Glossary|glossary@ if you encounter questionable terminology.
 ..text:The @Demo|collection of example programs@ demonstrate how to use the data structures and functions offered by SeqAn.
-    Read @Page.Compiling the Demos|here@ how to compile the example programs.    
+    Read @Page.Using Demos|here@ how to use the example programs.    
 ..text:For more information about SeqAn visit the SeqAn homepage @http://www.seqan.de|www.seqan.de@.
 
 ..section:# Contents
