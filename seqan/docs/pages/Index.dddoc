@@ -8,6 +8,25 @@
 ..contents
 
 ..section:# Getting Started
-..text:bla
+..text:A good starting point for learning more about SeqAn is to read the @Page.Getting Started|tutorials@.
+    This will also give you an overview about the content of the library.
+..text:Refer to the @Page.Glossary|glossary@ if you encounter questionable terminology.
+..text:The @Demo|collection of example programs@ demonstrate how to use the data structures and functions offered by SeqAn.
+    Read @Page.Compiling the Demos|here@ how to compile the example programs.    
+..text:For more information about SeqAn visit the SeqAn homepage @http://www.seqan.de|www.seqan.de@.
+
+..section:# Contents
+..table:Overview|An introduction to the basic techniques of SeqAn and tutorials to the parts of the library.
+    Here you can also find the @Page.Glossary|glossary@.
+..table:@Concept|Concepts@|The ontology of the generic interfaces used in SeqAn. 
+..table:@Class|Classes@|The data structures, most of them are class templates, and some of these templates have @Spec|specializations@.
+..table:@Spec|Specializations@|Specializations of @Class|class templates@ using @Page.Template Subclassing@.
+..table:@Shortcut|Shortcuts@|Abreviations for often used types, i.e. @Class|classes@ and @Spec|specializations@.
+..table:@Function|Functions@|Global functions that work on data structures.
+..table:@Metafunction|Metafunctions@|@Page.Metafunctions@ that are used to determine depending types or constants depending on given types or constants at compile time.
+..table:@Tag|Tags@|Special types that are used as switches when passed to functions.
+..table:@Adaption|Adaption@|Built-in types and classes of other libraries that can be accessed the same way as SeqAn datastructures.
+..table:@Demo|Examples@|Small programs that demonstrates the application of SeqAn functionality.
     
+..section:# More Overview Pages
 

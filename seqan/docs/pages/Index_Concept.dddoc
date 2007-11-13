@@ -1,0 +1,9 @@
+.Indexpage.Concept:
+..description:
+Concepts are the 'interfaces' in generic programming.
+They are not formulated as C++ constructs, but they are implemented by C++ classes.
+A concept is defined by a set of functions and metafunctions, 
+and a class implements a concept if it implements the functions and metafunctions of this concept.
+
+...note:The list of concepts is not complete yet. Completing it is ongoing work.
+
