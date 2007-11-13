@@ -3,18 +3,18 @@ import string
 import os
 
 BUILD_FLAGS_7 = '/I ".." /I "../library" /I "../../platforms/windows" /Op- /EHsc /D "DEBUG" /D "WIN32" /Zi /GR /W2 /Zc:wchar_t'
+BUILD_FLAGS_8 = '/I ".." /I "../library" /I "../../platforms/windows" /EHsc /MTd /Zi /D "_CONSOLE" /D "_CRT_SECURE_NO_DEPRECATE" /D "DEBUG" /D "WIN32" /Zc:wchar_t /W2 /wd4996'
 
 ################################################################################
 
-def addFile(name):
-    global BUILD_FLAGS
+def addFile(name, build_flags):
     global vcproj1
     global vcproj2
     
     print ".",
     
-    vcproj1 += '\t\t<Configuration Name="' + name + '|Win32" IntermediateDirectory="temp" ConfigurationType="0">\n'
-    vcproj1 += '\t\t\t<Tool Name="VCNMakeTool"\n\t\t\t\tBuildCommandLine="&quot;$(VCInstallDir)bin\\cl.exe&quot; &quot;$(ConfigurationName).cpp&quot; ' + BUILD_FLAGS + '" Output="&quot;$(ConfigurationName).exe&quot;"/>\n'
+    vcproj1 += '\t\t<Configuration Name="' + name + '|Win32" ConfigurationType="0">\n'
+    vcproj1 += '\t\t\t<Tool Name="VCNMakeTool"\n\t\t\t\tBuildCommandLine="&quot;$(VCInstallDir)bin\\cl.exe&quot; &quot;$(ConfigurationName).cpp&quot; ' + build_flags + '" Output="&quot;$(ConfigurationName).exe&quot;"/>\n'
     vcproj1 += '\t\t</Configuration>\n'
 
     vcproj2 += '\t\t<File RelativePath=".\\' + name + '.cpp"></File>\n'
@@ -22,12 +22,14 @@ def addFile(name):
 
 ################################################################################
 
-def scanDemos(search_path):
+def scanDemos(search_path, build_flags):
     global vcproj1
     global vcproj2
 
     vcproj1 = ""
     vcproj2 = ""
+    
+    build_flags = build_flags.replace('"', '&quot;');
     
     for root, dirs, files in os.walk(search_path):
         if 'CVS' in dirs: dirs.remove('CVS')
@@ -36,7 +38,7 @@ def scanDemos(search_path):
             pos = file.rfind(".")
             if pos < 0: continue
             if file[pos+1:] in ["cpp", "CPP"]:
-                addFile(file[:pos])
+                addFile(file[:pos], build_flags)
 
 ################################################################################
 
@@ -72,13 +74,16 @@ def main():
     print "This script creates Visual Studio files (.vcproj and .sln) for SeqAn demos"
     print "The created files are stored in the demos folder"
     
-    BUILD_FLAGS = BUILD_FLAGS.replace('"', '&quot;');
+    print "Visual Studio 7 (.net 2003) Files:",
+    scanDemos("..\\..\\projects\\demos", BUILD_FLAGS_7)
+    createProject("..\\..\\projects\\demos", "Seqan_7")
     
-    scanDemos("..\\..\\projects\\demos")
+    print
+    print "Visual Studio 8 (.net 2005) Files:",
+    scanDemos("..\\..\\projects\\demos", BUILD_FLAGS_8)
+    createProject("..\\..\\projects\\demos", "Seqan_8")
     
-    createProject("..\\..\\projects\\demos", "Seqan_7)
-    createProject("..\\..\\projects\\demos", "Seqan_8)
-    
+    print
     print "Files created."
     
     
