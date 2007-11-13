@@ -625,7 +625,7 @@ _readLibrary(TFile & file,
 			seq1 = _parse_readNumber(file, c);
 			seq2 = _parse_readNumber(file, c);
 			if (empty(g))
-				if ((seq1 != 0) || (seq2 != 0)) seq1ToN = true;
+				if ((seq1 != 0) && (seq2 != 0)) seq1ToN = true;
 			if (seq1ToN) {
 				--seq1;
 				--seq2;

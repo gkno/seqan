@@ -42,6 +42,7 @@ _buildLeafString(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	typedef typename Size<TGraph>::Type TSize;
 	typedef typename Id<TGraph>::Type TId;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
 
 	//TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
 	TStringSet& str = stringSet(g);
@@ -51,12 +52,12 @@ _buildLeafString(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	while(i<lenRoot) {
 		TVertexDescriptor nextVertex = findVertex(const_cast<TGraph&>(g), seqId, i);
 		SEQAN_TASSERT(nextVertex != getNil<TVertexDescriptor>())
-		//if (nextVertex == nilVertex) {
-		//	std::cout << "Nil Vertex" << std::endl;
-		//	TSize j = i + 1;
-		//	while ((j < lenRoot) && (findVertex(const_cast<TGraph&>(g), seqId, j) == nilVertex)) ++j;
-		//	nextVertex = addVertex(const_cast<TGraph&>(g), seqId, i, j-i);
-		//}
+		if (nextVertex == nilVertex) {
+			std::cout << "Warning: Nil Vertex" << std::endl;
+			TSize j = i + 1;
+			while ((j < lenRoot) && (findVertex(const_cast<TGraph&>(g), seqId, j) == nilVertex)) ++j;
+			nextVertex = addVertex(const_cast<TGraph&>(g), seqId, i, j-i);
+		}
 		appendValue(alignSeq, String<TVertexDescriptor>(nextVertex));
 		i += fragmentLength(g, nextVertex);
 	}
@@ -165,7 +166,7 @@ progressiveAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	typedef String<TVertexDescriptor> TVertexString;
 	typedef String<TVertexString> TSegmentString;
 
-	// Perform initial progressive alignment
+	// Perform progressive alignment
 	TSegmentString alignSeq;
 	TCargo maxSumScore = _recursiveProgressiveAlignment(g,tree,getRoot(tree),alignSeq);
 

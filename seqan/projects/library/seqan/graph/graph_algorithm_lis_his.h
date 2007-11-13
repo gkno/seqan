@@ -125,6 +125,7 @@ longestIncreasingSubsequence(TString const& str, TPositions& pos) {
 		// Note: The VertexDescriptor == position(it)
 		addVertex(g);
 
+
 		// Connect to predecessor
 		if (a_k_it != list.end()) addEdge(g, position(it), a_k_it->second);
 	}
@@ -266,16 +267,16 @@ heaviestIncreasingSubsequence(TString const& str,
 	// Walk through the sequence and build the decreasing covers
 	typedef typename Iterator<TString const>::Type TStringIter;
 	TStringIter endIt = end(str);
-	TSize pos_of_iterator = 0;
+	TPos pos_of_iterator = 0;
+	typedef std::map<TPos, TVertexDescriptor> TPosToVertex;
+	typedef std::map<TVertexDescriptor, TPos> TVertexToPos;
+	TPosToVertex posToVertexMap;
+	TVertexToPos vertexToPosMap;
 	for(TStringIter it = begin(str); it != endIt; ++it, ++pos_of_iterator) {
 		TWeight w = getValue(weights, pos_of_iterator);
 		// Letters that do not contribute a weight (e.g., w = 0) are excluded!
 		// Weights must increase!
-		if (w <= 0) {
-			addVertex(g);  // Note: The vertex id corresponds to the position
-			continue;
-		}
-
+		if (w <= 0) continue;
 
 		// Get previous element
 		TSortedSequenceIter a_k_it = _previousInSortedSequence(list, std::make_pair(*it, std::make_pair(0, 0))); 
@@ -300,30 +301,29 @@ heaviestIncreasingSubsequence(TString const& str,
 				list.insert(std::make_pair(*it, std::make_pair(w, pos_of_iterator)));
 		}
 
-		// Create the corresponding node, pos_of_iterator == Vertex Descriptor
-		addVertex(g);
+		// Create the corresponding node
+		TVertexDescriptor new_v = addVertex(g);
+		posToVertexMap.insert(std::make_pair(pos_of_iterator, new_v)); 
+		vertexToPosMap.insert(std::make_pair(new_v, pos_of_iterator));
 
 		// Connect to predecessor
-		if (a_k_it != list.end()) addEdge(g, pos_of_iterator, a_k_it->second.second);
+		if (a_k_it != list.end()) addEdge(g, posToVertexMap[pos_of_iterator], posToVertexMap[a_k_it->second.second]);
 	}
 
 	// Trace-back
 	TWeight w = 0;
-	if (list.rbegin() == list.rend()) return 0;
+	if (empty(g)) return 0;
 	else {
 		bool finished = false;
-		// Last vertex is end of heaviest increasing subsequence
-		TVertexDescriptor v = list.rbegin()->second.second;
+		// Last element in the list is the end of heaviest increasing subsequence
+		TVertexDescriptor v = posToVertexMap[list.rbegin()->second.second];
 		while (!finished) {
-			// Exclude edges with weight 0 !!!
-			// Note: Very important, do not delete this check!!!
-			//if (getProperty(weights, v) > 0) {
-				appendValue(pos, v);
-				w+=getValue(weights, v);
-			//}
+			TPos p = vertexToPosMap[v];
+			appendValue(pos, p);
+			w+=getValue(weights, p);
 			TOutEdgeIterator it(g, v);
 			if (atEnd(it)) finished = true;
-			else v = targetVertex(it);
+			else v = targetVertex(it);  // Only one predecessor
 		}
 	}
 	return w;
@@ -433,7 +433,9 @@ heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
-	typedef typename Size<TStringSet>::Type TSize;
+	//typedef typename Size<TStringSet>::Type TSize;
+	typedef __int64 TLargeSize;
+	typedef unsigned int TSize;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename Iterator<TString const, Rooted>::Type TStringIter;
 	typedef typename Iterator<TString, Rooted>::Type TSIter;
@@ -466,26 +468,17 @@ heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 		}
 	}
 
-	// We create the full graph
-	// For a given node number the edges in decreasing order, so
-	// during increasing subsequence computation no two edges are selected for a given node
-	// We do this for every node 0 ... m-1
-	String<TSize> seq;
-	resize(seq, n*m);
-	typedef typename Iterator<String<TSize>, Rooted>::Type TSeqIter;
-	TSeqIter itSeq = begin(seq);
-	for(TSize i=0; i<m;++i) {
-		for(int j=n-1;j>=0;--j) {
-			*itSeq = (TSize) j;
-			++itSeq;
-		}
-	}
+	
 	// Initially every edge receives weight=0
-	String<double> weights;
+	//String<TCargo, External<> > weights;
+	String<TCargo> weights;
 	// For profile alignments, take the average weight
-	double divider = (double) seqsInStr1 * (double) seqsInStr2;
-	fill(weights, n*m, 0);
-
+	TCargo divider = (TCargo) seqsInStr1 * (TCargo) seqsInStr2;
+	fill(weights,(TLargeSize) n * (TLargeSize) m,0);
+	//resize(weights,(TLargeSize) n * (TLargeSize) m);
+	//for(TLargeSize i = 0; i<(TLargeSize) n * (TLargeSize) m;++i) weights[i] = 0;
+	
+	
 	// Walk through str2 and fill in the weights of the actual edges
 	TStringIter itStrEnd2 = end(str2);
 	for(TStringIter itStr2 = begin(str2);itStr2 != itStrEnd2;++itStr2) {
@@ -498,8 +491,8 @@ heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 					TVertexToPosMapIter pPos = map.find(targetVertex(itOut));
 					if (pPos != map.end()) {
 						// Calculate the edge index
-						TSize index = pPos->second * n + (n - position(itStr2) - 1);
-						weights[index] += (double) cargo(*itOut) / divider;	
+						TSize index = (pPos->second) * n + (n - position(itStr2) - 1);
+						weights[index] += (TCargo) cargo(*itOut);	
 					}
 				}
 			}
@@ -507,9 +500,33 @@ heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	}
 	map.clear();
 
+	// We create the full graph
+	// For a given node number the edges in decreasing order, so
+	// during increasing subsequence computation no two edges are selected for a given node
+	// We do this for every node 0 ... m-1
+	//typedef String<TSize, External<> > TSequenceString;
+	typedef String<TSize> TSequenceString;
+	TSequenceString seq;
+	resize(seq, (TLargeSize) n * (TLargeSize) m);
+	typedef typename Iterator<TSequenceString, Rooted>::Type TSeqIter;
+	TLargeSize counter = 0;
+	TSeqIter itSeq = begin(seq);
+	for(TSize i=0; i<m;++i) {
+		for(TSize j=n-1;j>0;--j) {
+			*itSeq = (TSize) j;
+			weights[counter] /= divider;
+			++itSeq;
+			++counter;
+		}
+		*itSeq = (TSize) 0;
+		weights[counter] /= divider;
+		++itSeq;
+		++counter;
+	}
+
 	// Calculate the heaviest increasing subsequence
 	// Note edges with weight=0 are ignored!
-	String<unsigned int> pos;
+	String<TLargeSize> pos;
 	TCargo score = (TCargo) heaviestIncreasingSubsequence(seq, weights, pos);
 	
 	// Create the alignment sequence
@@ -521,13 +538,13 @@ heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	TSIter pointerAlignEnd = end(align);
 	TStringIter pointerStr1 = begin(str1);
 	TStringIter pointerStr2 = begin(str2);
-	int p = length(pos)-1;
+	TLargeSize p = (TLargeSize) length(pos) - (TLargeSize) 1;
 	while(pointerAlign != pointerAlignEnd) {
-		TSize i = m;
-		TSize j = n;
+		TLargeSize i = m;
+		TLargeSize j = n;
 		if (p>=0) {
-			i = pos[p] / n;   // Get the index in str1
-			j = n - 1 - (pos[p] % n); // Get the index in str2
+			i = pos[p] / (TLargeSize) n;   // Get the index in str1
+			j = n - 1 - (pos[p] % (TLargeSize) n); // Get the index in str2
 		};
 		// Gaps in seq 2
 		while (i != position(pointerStr1)) {
