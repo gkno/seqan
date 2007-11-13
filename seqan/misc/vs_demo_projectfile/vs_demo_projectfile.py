@@ -2,7 +2,7 @@ import sys
 import string
 import os
 
-BUILD_FLAGS = '/I "../library" /I "../../platforms/windows" /Op- /EHsc /D "DEBUG" /D "WIN32" /Zi /GR /W2 /Zc:wchar_t'
+BUILD_FLAGS_7 = '/I ".." /I "../library" /I "../../platforms/windows" /Op- /EHsc /D "DEBUG" /D "WIN32" /Zi /GR /W2 /Zc:wchar_t'
 
 ################################################################################
 
@@ -40,25 +40,25 @@ def scanDemos(search_path):
 
 ################################################################################
 
-def createProject(search_path):
+def createProject(search_path, version):
     global vcproj1
     global vcproj2
 
-    f = open("SeqAn.vcproj")
+    f = open(version + ".vcproj")
     t = f.read()
     f.close()
     
     t = t.replace("####PLATZHALTER1####", vcproj1)
     t = t.replace("####PLATZHALTER2####", vcproj2)
-    f = open(os.path.join(search_path, "SeqAn.vcproj"), "w")
+    f = open(os.path.join(search_path, version + ".vcproj"), "w")
     f.write(t)
     f.close()
     
 
-    f = open("SeqAn.sln")
+    f = open(version + ".sln")
     t = f.read()
     f.close()
-    f = open(os.path.join(search_path, "SeqAn.sln"), "w")
+    f = open(os.path.join(search_path, version + ".sln"), "w")
     f.write(t)
     f.close()
 
@@ -76,7 +76,8 @@ def main():
     
     scanDemos("..\\..\\projects\\demos")
     
-    createProject("..\\..\\projects\\demos")
+    createProject("..\\..\\projects\\demos", "Seqan_7)
+    createProject("..\\..\\projects\\demos", "Seqan_8)
     
     print "Files created."
     
