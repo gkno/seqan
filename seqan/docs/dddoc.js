@@ -22,7 +22,7 @@ function updateSearch(text)
             if (key.match(reg))
             {
                 displaytext = entry[0].replace(reg, '<b>$1</b>');
-                s += '<div><nobr>' + entry[2] + displaytext + ' ' + entry[1] + '</a></nobr></div>';
+                s += '<div><nobr><a target=_parent ' + entry[2] + displaytext + ' ' + entry[1] + '</a></nobr></div>';
                 ++count;
                 if (count >= MAX_RESULT) break;
             }

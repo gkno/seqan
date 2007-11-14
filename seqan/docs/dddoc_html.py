@@ -26,14 +26,15 @@ def createDocs(path, buildfull, indexonly):
     copyFile(path, "dddoc_plus.gif")
     copyFile(path, "dddoc_minus.gif")
     copyFile(path, "dddoc.js")
-    
+
+    gatherGlossary()
+        
     if buildfull or indexonly:
         createIndexes(path)
         createSearchfile(path)
 
     if not indexonly:
         createPages(path)
-    
 
 ################################################################################
 
@@ -140,6 +141,8 @@ def escapeHTML(text):
 def escapeJavaScript(text):
     text = text.replace("\\", "\\\\")
     text = text.replace("'", "\\'")
+    text = text.replace("\n", " ")
+    text = text.replace("\r", "")
 
     return text
 
@@ -247,25 +250,52 @@ def brokenLink(text):
     print
     print '    WARNING: broken link "' + text + '"'
     return '<span class=broken_link>' + text + '</span>'
+
+
+################################################################################
+
+def findGlossary(text):
+    global globalGlossary
+    
+    if globalGlossary.has_key(text):
+        return globalGlossary[text][0]
+       
+    text2 = text.lower() 
+    for key in globalGlossary.keys():
+        key2 = key.lower()
+        if text2.find(key2) == 0:
+            return globalGlossary[key][0]
+            
+    return False
     
 ################################################################################
 
 def translateLinkDisplaytext(text):
-    if text.find("http:", 0, 5) == 0:  #external HTTP Link
-        arr = dddoc.splitUrl(text)
-        if len(arr) == 0: return brokenLink(text)
-        return arr[len(arr) - 1]
+    pos = text.find(':')
+    if pos >= 0: 
+        protocol = text[:pos]
+        rest = text[pos+1:]
+    else: 
+        protocol = ""
+        rest = text
 
-    if text.find("ftp:", 0, 4) == 0:   #external FTP Link
+    if (protocol == 'http') or (protocol == 'ftp'):
         arr = dddoc.splitUrl(text)
-        if len(arr) == 0: return brokenLink(text)
         return arr[len(arr) - 1]
-
-    arr = dddoc.splitName(text)
-    if text.find('.') < 0: #Link to indexpage
-        arr = dddoc.splitUrl(text)
+        
+    if (protocol == 'glos'):
+        arr = dddoc.splitName(rest)
         if len(arr) == 0: return brokenLink(text)
+        glos = findGlossary(arr[0])
+        if not glos: return brokenLink(text)
         if len(arr) == 1: return arr[0]
+        return arr[1]
+        
+    arr = dddoc.splitName(text)
+    if len(arr) == 0: return brokenLink(text)
+
+    if text.find('.') < 0: #Link to indexpage
+        if len(arr) == 1: return getCategoryTitle(arr[0])
         else: return arr[1] 
 
     if (len(arr) < 2): return brokenLink(text)
@@ -274,32 +304,50 @@ def translateLinkDisplaytext(text):
 
 ################################################################################
 
+
 def translateLink(text, attribs = ""):
     global globalDocsPath
+    
+    pos = text.find(':')
+    if pos >= 0: 
+        protocol = text[:pos]
+        rest = text[pos+1:]
+    else: 
+        protocol = ""
+        rest = text
 
-    if text.find("http:", 0, 5) == 0:  #external HTTP Link
+    #external Link
+    if (protocol == 'http') or (protocol == 'ftp'): 
         arr = dddoc.splitUrl(text)
-        if len(arr) == 0: return brokenLink(text)
         return '<a href="' + arr[0] + '" ' + attribs + '>' + arr[len(arr) - 1] + '</a>'
 
-    if text.find("ftp:", 0, 4) == 0:   #external FTP Link
-        arr = dddoc.splitUrl(text)
+    #Glossary Link
+    if protocol == 'glos':
+        arr = dddoc.splitName(rest)
         if len(arr) == 0: return brokenLink(text)
-        return '<a href="' + arr[0] + '" ' + attribs + '>' + arr[len(arr) - 1] + '</a>'
+        glos = findGlossary(arr[0])
+        if not glos: return brokenLink(text)
+        if len(arr) == 1: t = arr[0]
+        else: t = arr[1]
+        return '<a class=glossary_link ' + glos[2] + t + '</a>'
+    
 
     arr = dddoc.splitName(text)
-    if text.find('.') < 0: #Link to indexpage
-        arr = dddoc.splitUrl(text)
-        if len(arr) == 0: return brokenLink(text)
-        if len(arr) == 1: t = arr[0]
+    if len(arr) == 0: return brokenLink(text)
+    
+    #Link to Indexpage
+    if text.find('.') < 0:
+        if len(arr) == 1: t = getCategoryTitle(arr[0])
         else: t = arr[1]
         if (dddoc.DATA["globals.indexes"][arr[0]].empty()): return brokenLink(text)
         else: return '<a href="' + getIndexpage(arr[0]) + '" ' + attribs + '>' + t + '</a>'
 
+
+    #Link to Page
     if (len(arr) < 2): return brokenLink(text)
-    
+
     href = getFilename(arr[0], arr[1])
-    
+
     obj = dddoc.DATA[arr[0]][arr[1]];
     if obj.empty():
         #test existing file
@@ -995,6 +1043,7 @@ def printGlossary(fl, data, category):
         if len(keys) > 0:         
             for key in keys:
                 fl.write('<div class=glossary_entry>')
+                fl.write('<a name="Glossary_' + escapeFiles(key) + '"></a>')
                 fl.write('<div class=glossary_title>' + translateText(key) + '</div>')
                 fl.write('<div class=glossary_content>')
                 subprintText(fl, lines[key])
@@ -1467,12 +1516,43 @@ def subprintField(fl, text):
     elif (field == "see"): printLink(fl, data, "see", False)
 
 
+        
+
+################################################################################
+
+def gatherGlossary():
+    global globalGlossary 
+    
+    globalGlossary = {}
+    got_it = {}
+    
+    print "Gather Glossary:",
+    
+    lines = dddoc.DATA.lines;
+    for line in lines:
+        key = line.name(3)
+        if (line.name(2) == 'glossary') and (key != '(unknown)'):
+            fname = line.name(0) + '.' + line.name(1) + '.glossary.' + key
+            if not got_it.has_key(fname):
+                got_it[fname] = 1
+                print ".",
+               
+                href = getFilename(line.name(0), line.name(1)) + '#Glossary_' + escapeFiles(key)
+                link = 'href="' + href + '" title="' + escapeJavaScript(dddoc.DATA[fname].text()) + '">'
+                
+                if not globalGlossary.has_key(key):  globalGlossary[key] = []
+                globalGlossary[key].append([key, '(Glossary)', link])
+                
+    print
+
 ################################################################################
 
 def createSearchfile(path):
     print 'Create Searchfile'
     
-    db = {}
+    global globalGlossary
+    
+    db = globalGlossary
     
     cats = dddoc.DATA["globals.categories"].keys()
     for cat in cats:
@@ -1503,7 +1583,6 @@ def createSearchfile(path):
 ################################################################################
 
 def pushSearchResult(db, title, cat, name):
-
     if (len(name) == 0):
         link = '<a target=_parent href="' + getIndexpage(cat) + '">'
         key = getCategoryTitle(cat)
@@ -1519,7 +1598,7 @@ def pushSearchResult(db, title, cat, name):
         if len(summary) > 0:
             summary = 'title="' + summary + '"'
         
-        link = '<a target=_parent href="' + href + '" ' + summary + '>'
+        link = 'href="' + href + '" ' + summary + '>'
         key = translateID(name)
         text =  '(' + cat + ')'
 

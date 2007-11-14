@@ -269,7 +269,11 @@ If C++ code should be displayed within a text field or subfield, it should be pl
 ...text:
  Links to entries are written as follows: "[Category].[Name]", e.g. "Class.String" gives: "@Class.String@".
  Links to the overview page of a category as follows: "[Category]", e.g. "@Metafunction@".
- Links to external  URLs start with "http:", e.g. "@http://www.seqan.de@".
+ Links to external  URLs start with "http:" or "ftp:", e.g. "@http://www.seqan.de@".
+...text:
+ Links to glossary entries start with "glos:", e.g. "glos:Concept" gives: "@glos:Concept@". 
+ Note that if there is no glossary entry that matches exact to the given string, an inexact search is performed, e.g. "glos:Concepts" and "glos:concept" will both 
+ refer to the entry "glos:Concept".
 ...text:
  If another text should be displayed fr the link it can be appended using the "\pipe" character, 
  e.g. "Class.String\pipethe string classe" erzeugt: @Class.String|the string class@. 

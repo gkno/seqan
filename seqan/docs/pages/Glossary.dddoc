@@ -6,10 +6,30 @@
 .Page.Glossary.glossary
 
 ..SeqAn: The C++ library for sequence analysis.
-You are just reading the documentation of this library.
-For more information see @http://www.seqan.de@.
+...text:You are just reading the documentation of this library. For more information see @http://www.seqan.de@.
+...see:Page
 
 
 ..Metafunction: A C++ construct that is used to determine types and constants at compile time.
 ...see:Page.Metafunctions
+...see:Metafunction
 
+
+..Concept:A kind of interface used in generic programmic that is not formulated in C++ but only a part of the documentation.
+...see:Concept
+
+
+..Template Subclassing:An alternative to inheritance for the refinement of classes that is based on class template specialization.
+...see:Page.Template Subclassing
+
+
+..Specialization:A refinement of a class that was defined using @glos:Template Subclassing@.
+...see:Spec
+
+
+..Tag:A type that acts as a switch when applied as argument to functions or @glos:Metafunction|metafunctions@.
+...see:Tag
+
+
+..Adaption:Functionality that allows to access built-in type or data types from external libraries in the same way as SeqAn classes.
+...see:Adaption

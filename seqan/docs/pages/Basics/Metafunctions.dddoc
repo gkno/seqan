@@ -85,3 +85,14 @@ while (! atEnd(it, str))
 ..table:$T1$, $T2$, ..., $TN$|Arguments (types or constants)
 ..table:$VALUE$|The resulting constant value
 
+..text:Example:The following function prints the length of a fixed sized using the value metafunction @Metafunction.VALUE@:
+..code:
+template <typename T>
+void printLenOfFixedSizeString(T const &)
+{
+    cout << LENGTH<T>::VALUE;
+}
+
+String<char, Array<100> > my_str;
+printLenOfFixedSizeString(my_str);      //output: 100
+

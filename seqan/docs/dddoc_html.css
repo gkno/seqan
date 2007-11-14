@@ -688,3 +688,10 @@ A:hover, A:link, A:visited
     font-weight:bold;
     margin:0.1em 0 0.9em 0;
 }
+
+
+.glossary_link
+{
+    font-style:italic;
+}
+
