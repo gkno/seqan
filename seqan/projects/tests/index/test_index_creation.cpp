@@ -52,6 +52,7 @@ bool testIndexCreation()
 			"ManberMyers  ", 
 			"LarssonSadake", 
 			"SAQSort      ", 
+			"SAQSortQGSR  ", 
 			"Skew3Ext     ", 
 			"Skew7Ext     ",
 			"Kasai        ",
@@ -72,10 +73,10 @@ bool testIndexCreation()
 //___randomize_text___________________________________________________________
 
 			resize(text,size);
-			if (i < runs/2)
+/*			if (i < runs/2)
 				randomize(text);
 			else
-				textRandomize(text);
+*/				textRandomize(text);
 /*			String<char,External<> > errorText;	// read in text causing an error
 			open(errorText,"error.txt");
 			text = errorText;
@@ -89,44 +90,44 @@ bool testIndexCreation()
 //___create_suffix_array______________________________________________________
 
 			resize(sa, size);
-			timeDelta[TI] = -SEQAN_PROGETTIME;
+/*			timeDelta[TI] = -SEQAN_PROGETTIME;
 			createSuffixArray(sa, text, Skew3());
 			timeDelta[TI++] += SEQAN_PROGETTIME;
 			if (!isSuffixArray(sa, text)) {
 				cout << "suffix array creation (internal Skew3) failed" << endl;
 				result = false;
 			}
-			cout << "."; cout.flush();
+*/			cout << "."; cout.flush();
 
 			blank(sa);
-			timeDelta[TI] = -SEQAN_PROGETTIME;
+/*			timeDelta[TI] = -SEQAN_PROGETTIME;
 			createSuffixArray(sa, text, Skew7());
 			timeDelta[TI++] += SEQAN_PROGETTIME;
 			if (!isSuffixArray(sa, text)) {
 				cout << "suffix array creation (internal Skew7) failed" << endl;
 				result = false;
 			}
-			cout << "."; cout.flush();
+*/			cout << "."; cout.flush();
 
 			blank(sa);
-			timeDelta[TI] = -SEQAN_PROGETTIME;
+/*			timeDelta[TI] = -SEQAN_PROGETTIME;
 			createSuffixArray(sa, text, ManberMyers());
 			timeDelta[TI++] += SEQAN_PROGETTIME;
 			if (!isSuffixArray(sa, text)) {
 				cout << "suffix array creation (internal ManberMyers) failed" << endl;
 				result = false;
 			}
-			cout << "."; cout.flush();
+*/			cout << "."; cout.flush();
 
 			blank(sa);
-			timeDelta[TI] = -SEQAN_PROGETTIME;
+/*			timeDelta[TI] = -SEQAN_PROGETTIME;
 			createSuffixArrayExt(sa, text, LarssonSadakane());
 			timeDelta[TI++] += SEQAN_PROGETTIME;
 			if (!isSuffixArray(sa, text)) {
 				cout << "suffix array creation (external LarssonSadakane) failed" << endl;
 				result = false;
 			}
-			cout << "."; cout.flush();
+*/			cout << "."; cout.flush();
 
 			blank(sa);
 			timeDelta[TI] = -SEQAN_PROGETTIME;
@@ -137,9 +138,19 @@ bool testIndexCreation()
 				result = false;
 			}
 			cout << "."; cout.flush();
-
+/*
 			blank(sa);
 			timeDelta[TI] = -SEQAN_PROGETTIME;
+			createSuffixArray(sa, text, QSQGSR(), 3);
+			timeDelta[TI++] += SEQAN_PROGETTIME;
+			if (!isSuffixArray(sa, text)) {
+				cout << "suffix array creation (internal QSQGSR) failed" << endl;
+				result = false;
+			}
+			cout << "."; cout.flush();
+*/
+			blank(sa);
+/*			timeDelta[TI] = -SEQAN_PROGETTIME;
 			createSuffixArrayExt(sa, text, Skew3());
 			timeDelta[TI++] += SEQAN_PROGETTIME;
 			if (!isSuffixArray(sa, text)) {
@@ -215,7 +226,7 @@ bool testIndexCreation()
 				cout << "child table creation failed" << endl;
 				result = false;
 			}
-
+*/
 //___update_performance_table_________________________________________________
 
 			for(int i=0; i<TI; ++i) {

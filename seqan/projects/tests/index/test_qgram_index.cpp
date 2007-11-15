@@ -16,22 +16,20 @@
 using namespace std;
 using namespace seqan;
 
-/*
+
 void testGappedShapes()
 {
-	String<char> shape_string = "__x_xxx_xxx_x";
+	String<char> shape_string = "0010011011101";
 	Shape<Dna,GappedShape> shape1;
 	stringToShape(shape1, shape_string);
 	Shape<Dna,GappedShape> shape2 = Shape<Dna,GappedShape>(shape1);
 
-	for(unsigned i = 0; i < shape1.shape_len; ++i)
-        SEQAN_ASSERT(shape1[i] == shape2[i]);
-	SEQAN_ASSERT(shape1.num_gaps == shape2.num_gaps);
+	SEQAN_ASSERT(shape1.weight == shape2.weight);
 	SEQAN_ASSERT(shape1.span == shape2.span);
-	SEQAN_ASSERT(shape1.shape_len == shape2.shape_len);
+	SEQAN_ASSERT(shape1.diffs == shape2.diffs);
 	SEQAN_ASSERT(length(shape1) == length(shape2));
-	SEQAN_ASSERT(shapeCountBlanks(shape1) == shapeCountBlanks(shape2));
-
+	SEQAN_ASSERT(weight(shape1) == weight(shape2));
+/*
 	Shape<Dna,GappedShape> shape3 = Shape<Dna,GappedShape>(5, 13);
 	shape3[0]=2;
 	shape3[1]=2;
@@ -43,22 +41,20 @@ void testGappedShapes()
 	shape3[7]=2;
 	for(int i = 0; i < 8; ++i)
         SEQAN_ASSERT(shape1[i] == shape3[i]);
-
-
-}
 */
+}
+
 
 void testUngappedShapes()
 {
-	String<char> shape_string = "xxxx";
 	Shape<Dna,SimpleShape> shape1;
-	stringToShape(shape1, shape_string);
+	resize(shape1, 4);
 	Shape<Dna,SimpleShape> shape2 = Shape<Dna,SimpleShape>(shape1);
 
 	SEQAN_ASSERT(shape1.span == shape2.span);
 	SEQAN_ASSERT(shape1.leftFactor == shape2.leftFactor);
 	SEQAN_ASSERT(length(shape1) == length(shape2));
-	SEQAN_ASSERT(shapeCountBlanks(shape1) == shapeCountBlanks(shape2));
+	SEQAN_ASSERT(weight(shape1) == weight(shape2));
 	
 
 	Shape<Dna,SimpleShape> shape3 = Shape<Dna,SimpleShape>(4);
@@ -87,7 +83,7 @@ void testQGramIndexSchnell()
 	}
 	strm_t.close();
 
-	String<char> shape_string = "x___x__x____xxx__xx";
+	String<char> shape_string = "1000100100001110011";
 	int q = length(shape_string);
 	Shape<Dna,GappedShape> shape;
 	stringToShape(shape, shape_string);
@@ -97,7 +93,7 @@ void testQGramIndexSchnell()
 	resize(index, length(text) - q + 2);	
 	
 	String<TPosition> pos;	
-	int pos_size = _intPow((unsigned)ValueSize<Dna>::VALUE, q - shapeCountBlanks(shape));
+	int pos_size = _intPow((unsigned)ValueSize<Dna>::VALUE, weight(shape));
 	pos_size += 1;	
 	resize(pos, pos_size);
 
@@ -114,7 +110,7 @@ void testQGramIndexSchnell()
 void testGappedQGramIndex()
 {
 	String<Dna> text = "CTGAACCCTAAACCCT";
-	String<char> shape_string = "x_x";
+	String<char> shape_string = "101";
 	int q = length(shape_string);
 	Shape<Dna,GappedShape> shape;
 	stringToShape(shape, shape_string);
@@ -124,7 +120,7 @@ void testGappedQGramIndex()
 	resize(index, length(text) - q + 2);
 	
 	String<TPosition> pos;
-    int pos_size = _intPow((unsigned)ValueSize<Dna>::VALUE, q - shapeCountBlanks(shape));
+    int pos_size = _intPow((unsigned)ValueSize<Dna>::VALUE, weight(shape));
 	pos_size += 1;	
 	resize(pos, pos_size);
 
@@ -168,17 +164,16 @@ void testGappedQGramIndex()
 void testUngappedQGramIndex()
 {
 	String<Dna> text = "CTGAACCCTAAACCCT";
-	String<char> shape_string = "xx";
-	int q = length(shape_string);
+	int q = 2;
 	Shape<Dna,SimpleShape> shape;
-	stringToShape(shape, shape_string);
+	resize(shape, q);
 
 	typedef Position<String<Dna> >::Type TPosition;
 	String<TPosition> index;
 	resize(index, length(text) - q + 1);
 	
 	String<TPosition> pos;
-    int pos_size = _intPow((unsigned)ValueSize<Dna>::VALUE, q - shapeCountBlanks(shape));
+    int pos_size = _intPow((unsigned)ValueSize<Dna>::VALUE, q);
 	pos_size += 1;	
 	resize(pos, pos_size);
 
@@ -249,7 +244,7 @@ void Main_TestQGram()
 //	testGappedQGramIndex();
 	testUngappedQGramIndex();
 //	testQGramIndexSchnell();
-//	testGappedShapes();
+	testGappedShapes();
 	testUngappedShapes();
 
 	testQGramFind();
