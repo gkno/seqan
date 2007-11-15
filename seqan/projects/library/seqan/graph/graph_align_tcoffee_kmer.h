@@ -120,23 +120,19 @@ getKmerSimilarityMatrix(StringSet<TString, TSpec> const& strSet,
 
 	// Copy upper triangle to lower triangle and scale
 	for(TWord row = 0; row < (TWord) nseq; ++row) {
-		for(TWord col = row + 1; col < (TWord) nseq; ++col) {
+		for(TWord col = row+1; col < (TWord) nseq; ++col) {
 			// Fractional common kmer count
+			// = Number of common q-grams / Number of possible common q-grams
 			TValue val = getValue(mat, row*nseq+col);
 			TValue minVal = getValue(mat, row*nseq+row);
-			TValue tmpVal;
-			if ((tmpVal = getValue(mat, col*nseq+col)) < minVal) minVal = tmpVal;
-			// Number of common q-grams / Number of possible common q-grams
+			if (getValue(mat, col*nseq+col) < minVal) minVal = getValue(mat, col*nseq+col);
 			val /= minVal;
-
-			// Prefer shorter sequences
-			//if (length(strSet[row]) > length(strSet[col])) val /= length(strSet[col]);
-			//else val /= length(strSet[row]);
 
 			// Assign the values
 			assignValue(mat, row*nseq+col, val);
 			assignValue(mat, col*nseq+row, val);
 		}
+		assignValue(mat, row*nseq+row, 1);
 	}
 
 	//// Debug code
@@ -150,26 +146,7 @@ getKmerSimilarityMatrix(StringSet<TString, TSpec> const& strSet,
 }
 
 
-//////////////////////////////////////////////////////////////////////////////
 
-template<typename TString, typename TSpec, typename THitMatrix>
-inline void
-getKmerSimilarityMatrix(StringSet<TString, TSpec> const& strSet, 
-						THitMatrix& mat) 
-{
-	getKmerSimilarityMatrix(strSet, mat, 3);
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TString, typename TSpec, typename THitMatrix, typename TSize>
-inline void
-getKmerSimilarityMatrix(StringSet<TString, TSpec> const& strSet, 
-						THitMatrix& mat, 
-						TSize ktup) 
-{
-	getKmerSimilarityMatrix(strSet, mat, ktup, typename Value<TString>::Type());
-}
 
 }// namespace SEQAN_NAMESPACE_MAIN
 

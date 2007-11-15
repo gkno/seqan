@@ -1143,7 +1143,7 @@ sourceVertex(Iter<TGraph, GraphIterator<InternalOutEdgeIterator<TSpec> > >& it)
 
 /**
 .Function.label:
-..cat:Spec.Automaton
+..cat:Graph.Automaton
 ..summary:Returns the label of the out-edge this iterator points to.
 ..signature:label(it)
 ..param.it:An out-edge iterator.

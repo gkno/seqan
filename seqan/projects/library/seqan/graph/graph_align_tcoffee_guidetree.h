@@ -220,23 +220,89 @@ slowNjTree(String<double, TStringSpec>& mat,
 	g.data_root = the_root;
 }
 
+
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TStringSpec, typename TCargo, typename TSpec>
+template<typename TMatrix, typename TActive, typename TSize>
+inline typename Value<TMatrix>::Type
+_upgmaTreeMerge(TMatrix const& mat, 
+				TActive const& active,
+				TSize index_i,
+				TSize index_j,
+				TSize i,
+				TSize nseq,
+				UpgmaAvg) 
+{
+	SEQAN_CHECKPOINT
+	typedef typename Value<TMatrix>::Type TValue;
+
+	// Average
+	return ((TValue) active[index_i] / (TValue) (active[index_i] + active[index_j])) * getValue(mat, index_i * nseq + i) + ((TValue) active[index_j] / (TValue) (active[index_i] + active[index_j])) * getValue(mat, index_j * nseq + i);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TMatrix, typename TActive, typename TSize>
+inline typename Value<TMatrix>::Type
+_upgmaTreeMerge(TMatrix const& mat, 
+				TActive const& active,
+				TSize index_i,
+				TSize index_j,
+				TSize i,
+				TSize nseq,
+				UpgmaMin) 
+{
+	SEQAN_CHECKPOINT
+	typedef typename Value<TMatrix>::Type TValue;
+
+	// Minimum
+	TValue newDist = ((TValue) active[index_i] / (TValue) (active[index_i] + active[index_j])) * getValue(mat, index_i * nseq + i);
+	TValue newDist2 = ((TValue) active[index_j] / (TValue) (active[index_i] + active[index_j])) * getValue(mat, index_j * nseq + i);
+	if (newDist2 < newDist) return newDist2;
+	else return newDist;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TMatrix, typename TActive, typename TSize>
+inline typename Value<TMatrix>::Type
+_upgmaTreeMerge(TMatrix const& mat, 
+				TActive const& active,
+				TSize index_i,
+				TSize index_j,
+				TSize i,
+				TSize nseq,
+				UpgmaMax) 
+{
+	SEQAN_CHECKPOINT
+	typedef typename Value<TMatrix>::Type TValue;
+
+	// Minimum
+	TValue newDist = ((TValue) active[index_i] / (TValue) (active[index_i] + active[index_j])) * getValue(mat, index_i * nseq + i);
+	TValue newDist2 = ((TValue) active[index_j] / (TValue) (active[index_i] + active[index_j])) * getValue(mat, index_j * nseq + i);
+	if (newDist2 < newDist) return newDist;
+	else return newDist2;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSpec, typename TCargo, typename TSpec, typename TTag>
 inline void
 upgmaTree(String<double, TStringSpec>& mat, 
-		  Graph<Tree<TCargo, TSpec> >& g) 
+		  Graph<Tree<TCargo, TSpec> >& g,
+		  TTag) 
 {
 	SEQAN_CHECKPOINT
 	
 	typedef typename Size<String<double, TStringSpec> >::Type TSize;
 	typedef Graph<Tree<TCargo, TSpec> > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename Value<String<double, TStringSpec> >::Type TValue;
 	
-	TSize nseq = (TSize) std::sqrt((double)length(mat));
+	TSize nseq = (TSize) std::sqrt((TValue)length(mat));
 
 	// First initialization
-	double minVal = getValue(mat, 1*nseq + 0);
+	TValue minVal = getValue(mat, 1*nseq + 0);
 	TSize index_i = 0;
 	TSize index_j = 1;
 	clearVertices(g);
@@ -245,10 +311,7 @@ upgmaTree(String<double, TStringSpec>& mat,
 	fill(active, nseq, 1);
 	// Vertex descriptor that represents that entry
 	String<TVertexDescriptor> nodes;
-	// Property map for sum of weights for each node
-	String<double> weights;
 	reserve(nodes, nseq);
-	fill(weights, nseq, 0);
 	for(TSize i=0;i<nseq;++i) {
 		for(TSize j=i+1;j<nseq;++j) {
 			if (minVal > getValue(mat, i*nseq + j)) {
@@ -259,6 +322,10 @@ upgmaTree(String<double, TStringSpec>& mat,
 		}
 		appendValue(nodes, addVertex(g));
 	}
+
+	// Property map for sum of weights for each node
+	String<TValue> weights;
+	fill(weights, nseq, 0);
 
 	// Merge groups
 	TSize m = nseq;
@@ -295,12 +362,7 @@ upgmaTree(String<double, TStringSpec>& mat,
 			if (!active[i]) continue;
 			else if (i == index_i) continue;
 			else if (i == index_j) continue;
-			// Average
-			double newDist = ((double) active[index_i] / (double) (active[index_i] + active[index_j])) * getValue(mat, index_i * nseq + i) + ((double) active[index_j] / (double) (active[index_i] + active[index_j])) * getValue(mat, index_j * nseq + i);
-			// Minimum
-			//double newDist = ((double) active[index_i] / (double) (active[index_i] + active[index_j])) * getValue(mat, index_i * nseq + i);
-			//double newDist2 = ((double) active[index_j] / (double) (active[index_i] + active[index_j])) * getValue(mat, index_j * nseq + i);
-			//if (newDist2 < newDist) newDist = newDist2;
+			TValue newDist = _upgmaTreeMerge(mat, active, index_i, index_j, i, nseq, TTag());
 			assignValue(mat, index_i*nseq + i, newDist);
 			assignValue(mat, i*nseq + index_i, newDist);
 		}
@@ -329,6 +391,19 @@ upgmaTree(String<double, TStringSpec>& mat,
 	}
 	g.data_root = numVertices(g) - 1;
 }
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSpec, typename TCargo, typename TSpec>
+inline void
+upgmaTree(String<double, TStringSpec>& mat, 
+		  Graph<Tree<TCargo, TSpec> >& g) 
+{
+	SEQAN_CHECKPOINT
+	upgmaTree(mat, g, UpgmaAvg());
+}
+
 
 }// namespace SEQAN_NAMESPACE_MAIN
 

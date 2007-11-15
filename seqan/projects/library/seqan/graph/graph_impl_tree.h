@@ -789,11 +789,11 @@ isRoot(Graph<Tree<TCargo, TSpec> > const& g,
 
 /**
 .Function.isLeaf:
-..cat:Spec.Tree
+..cat:Graph.Tree
 ..summary:Tests whether a given vertex is a leaf or not.
 ..signature:isLeaf(g, v)
 ..param.g:A tree.
-...type:Spec.Tree
+...type:Graph.Tree
 ..param.v:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
 ..returns:True if vertex is a leaf.
@@ -816,11 +816,11 @@ isLeaf(Graph<Tree<TCargo, TSpec> > const& g,
 
 /**
 .Function.numTreeEdges:
-..cat:Spec.Tree
+..cat:Graph.Tree
 ..summary:Number of tree edges.
 ..signature:numTreeEdges(g)
 ..param.g:A tree.
-...type:Spec.Tree
+...type:Graph.Tree
 ..returns:Number of tree edges. Faster than numEdges for trees.
 */
 
@@ -837,11 +837,11 @@ numTreeEdges(Graph<Tree<TCargo, TSpec> > const& g)
 
 /**
 .Function.numChildren:
-..cat:Spec.Tree
+..cat:Graph.Tree
 ..summary:Number of children of a given tree vertex.
 ..signature:numChildren(g, v)
 ..param.g:A tree.
-...type:Spec.Tree
+...type:Graph.Tree
 ..param.v:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
 ..returns:Number of children
@@ -861,12 +861,12 @@ numChildren(Graph<Tree<TCargo, TSpec> > const& g,
 
 /**
 .Function.addChild:
-..cat:Spec.Tree
+..cat:Graph.Tree
 ..summary:Adds a new child vertex to a parent vertex.
 Optionally a cargo can be attached to the parent-child edge.
 ..signature:addChild(g, parent [, cargo])
 ..param.g:A tree.
-...type:Spec.Tree
+...type:Graph.Tree
 ..param.parent:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
 ..param.cargo:A cargo object.
@@ -908,11 +908,11 @@ addChild(Graph<Tree<TCargo, TSpec> >& g,
 
 /**
 .Function.removeChild:
-..cat:Spec.Tree
+..cat:Graph.Tree
 ..summary:Removes a child from the tree given a parent.
 ..signature:removeChild(g, parent, child)
 ..param.g:A tree.
-...type:Spec.Tree
+...type:Graph.Tree
 ..param.parent:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
 ..param.child:A vertex descriptor.
@@ -938,11 +938,11 @@ removeChild(Graph<Tree<TCargo, TSpec> >& g,
 
 /**
 .Function.removeAllChildren:
-..cat:Spec.Tree
+..cat:Graph.Tree
 ..summary:Removes all children from the tree given a parent.
 ..signature:removeChild(g, parent)
 ..param.g:A tree.
-...type:Spec.Tree
+...type:Graph.Tree
 ..param.parent:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
 ..returns:void
@@ -972,11 +972,11 @@ removeAllChildren(Graph<Tree<TCargo, TSpec> >& g,
 
 /**
 .Function.childVertex:
-..cat:Spec.Tree
+..cat:Graph.Tree
 ..summary:Returns the child vertex of an edge.
 ..signature:childVertex(g, e)
 ..param.g:A tree.
-...type:Spec.Tree
+...type:Graph.Tree
 ..param.e:An edge descriptor.
 ...type:Metafunction.EdgeDescriptor
 ..returns:A vertex descriptor.
@@ -996,11 +996,11 @@ childVertex(Graph<Tree<TCargo, TSpec> > const&,
 
 /**
 .Function.parentVertex:
-..cat:Spec.Tree
+..cat:Graph.Tree
 ..summary:Returns the parent vertex of an edge.
 ..signature:parentVertex(g, e)
 ..param.g:A tree.
-...type:Spec.Tree
+...type:Graph.Tree
 ..param.e:An edge descriptor.
 ...type:Metafunction.EdgeDescriptor
 ..returns:A vertex descriptor.
@@ -1025,6 +1025,43 @@ parentVertex(Graph<Tree<TCargo, TSpec> > const& g,
 {
 	SEQAN_CHECKPOINT
 	return getValue(g.data_parent, v);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+
+/**
+.Function.collectLeaves:
+..cat:Graph.Tree
+..summary:Returns all leaves underneath a given vertex.
+..signature:collectLeaves(g, subtree_root, set)
+..param.g:A tree.
+...type:Graph.Tree
+..param.subtree_root:A vertex descriptor.
+...type:Metafunction.VertexDescriptor
+..param.set:A set of vertex descriptors.
+...type:STL set
+*/
+template<typename TCargo, typename TSpec, typename TVertexDescriptor, typename TSet>
+inline void
+collectLeaves(Graph<Tree<TCargo, TSpec> > const& g,
+			  TVertexDescriptor const root,
+			  TSet& set1)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Tree<TCargo, TSpec> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename Id<TGraph>::Type TId;
+	typedef typename Iterator<TGraph, AdjacencyIterator>::Type TAdjacencyIterator;
+
+	if (isLeaf(g, root)) {
+		set1.insert(root);
+	} else {
+		TAdjacencyIterator adjIt(g, root);
+		for(;!atEnd(adjIt);goNext(adjIt)) {
+			collectLeaves(g, *adjIt, set1);
+		}
+	}
 }
 
 

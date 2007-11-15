@@ -49,6 +49,7 @@ void  Test_NeedlemanWunsch() {
 	//score2 = globalAlignment(std::cout, str, score_type, NeedlemanWunsch() );
 	//SEQAN_TASSERT(score == score2)
 
+
 	str[0] = "annealing";
 	str[1] = "annual";
 	assignStringSet(g, str);

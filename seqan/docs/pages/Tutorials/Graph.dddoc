@@ -63,7 +63,7 @@ These graphs are therefore predefined in SeqAn.
 All graphs support a couple of common functions, including @Function.numEdges@, @Function.numVertices@, 
 @Function.addVertex@, @Function.removeVertex@, @Function.addEdge@ etc. The functions are listed and explained in the @Class.Graph@
 section but the function names should be self-explanatory. Besides this core set of function, some graphs
-have special methods, e.g., trees support @Function.childVertex@, @addChild@, and the like. See the documentation
+have special methods, e.g., trees support @Function.childVertex@, @Function.addChild@, and the like. See the documentation
 of these graphs for details. The following code snippet illustrates the use of these functions to create the directed
 graph in the first figure.
 ...code:

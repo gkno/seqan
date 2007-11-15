@@ -104,11 +104,11 @@ _addStringToTrie(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 
 /**
 .Function.createTrie:
-..cat:Spec.Trie
+..cat:Graph.Trie
 ..summary:Creates a trie.
 ..signature:createTrie(g, terminalStateMap, keywords)
 ..param.g:Out-parameter: An automaton.
-...type:Spec.Trie
+...type:Graph.Trie
 ..param.terminalStateMap:Out-parameter: An external property map.
 ...type:Class.External Property Map
 ...remarks:The external property map must be a String<String<unsigned int> > because
@@ -144,11 +144,11 @@ createTrie(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 
 /**
 .Function.createTrieOnReverse:
-..cat:Spec.Trie
+..cat:Graph.Trie
 ..summary:Creates a trie for all reversed keywords.
 ..signature:createTrieOnReverse(g, terminalStateMap, keywords)
 ..param.g:Out-parameter: An automaton.
-...type:Spec.Trie
+...type:Graph.Trie
 ..param.terminalStateMap:Out-parameter: An external property map.
 ...type:Class.External Property Map
 ...remarks:The external property map must be a String<String<unsigned int> > because

@@ -101,6 +101,7 @@
 
 // T-Coffee
 #include <seqan/graph/graph_align_tcoffee_base.h>
+#include <seqan/graph/graph_align_tcoffee_msa.h>
 #include <seqan/graph/graph_align_tcoffee_kmer.h>
 #include <seqan/graph/graph_align_tcoffee_distance.h>
 #include <seqan/graph/graph_align_tcoffee_guidetree.h>
