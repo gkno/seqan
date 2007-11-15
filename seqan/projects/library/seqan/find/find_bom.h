@@ -125,7 +125,7 @@ setHost (Pattern<TNeedle, BomAlgo> & me, TNeedle2 & needle)
 
 
 template <typename TNeedle>
-inline void _finderInit (Pattern<TNeedle, BomAlgo> & me) 
+inline void _patternInit (Pattern<TNeedle, BomAlgo> & me) 
 {
 SEQAN_CHECKPOINT
 	me.step = 0;
@@ -160,7 +160,7 @@ find(TFinder & finder, Pattern<TNeedle, BomAlgo> & me)
 	SEQAN_CHECKPOINT
 	
 	if (empty(finder)) {
-		_finderInit(me);
+		_patternInit(me);
 		_finderSetNonEmpty(finder);
 		me.haystackLength = length(container(finder));
 	} else

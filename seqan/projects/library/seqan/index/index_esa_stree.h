@@ -854,7 +854,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
        
 	template < typename TText, class TIndexSpec, class TSpec >
 	inline void 
-	_historyClear(Iter< Index<TText, Index_ESA<TIndexSpec> >, VSTree<TSpec> > &it) {
+	_historyClear(Iter< Index<TText, Index_ESA<TIndexSpec> >, VSTree<TSpec> > &) {
 	}
 	template < typename TText, class TIndexSpec, class TSpec >
 	inline void 
@@ -887,7 +887,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 		typedef Index<TText, Index_ESA<TIndexSpec> >	TIndex;
 
 		if (isLeaf(it)) return false;
-		_historyPush(it, value(it).i1);
+		_historyPush(it, value(it).range);
 
 		TIndex const &index = container(it);
 
@@ -912,7 +912,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 		if (isLeaf(it)) return false;
 
 		TDesc desc = value(it);			// save descriptor of the current node
-		_historyPush(it, desc.i1);
+		_historyPush(it, desc.range);
 
 		TIndex const &index = container(it);
 
@@ -945,7 +945,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 		typedef Index<TText, Index_ESA<TIndexSpec> >	TIndex;
 		
 		if (isLeaf(it)) return false;
-		_historyPush(it, value(it).i1);
+		_historyPush(it, value(it).range);
 
 		TIndex const &index = container(it);
 
@@ -1099,7 +1099,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 	goUp(Iter< TIndex, VSTree< TopDown< ParentLinks<TSpec> > > > &it) 
 	{
 		if (!empty(it.history)) {
-			value(it).i1 = top(it.history);
+			value(it).range = top(it.history);
 			pop(it.history);
 			if (!empty(it.history))
 				value(it).parentRight = top(it.history).i2;	// copy right boundary of parent's range

@@ -171,7 +171,7 @@ void setHost (Pattern<TNeedle, SetHorspool> & me, TNeedle2 & needle)
 
 
 template <typename TNeedle>
-inline void _finderInit (Pattern<TNeedle, SetHorspool> & me) 
+inline void _patternInit (Pattern<TNeedle, SetHorspool> & me) 
 {
 SEQAN_CHECKPOINT
 	clear(me.data_endPositions);
@@ -237,7 +237,7 @@ inline bool find(TFinder & finder, Pattern<TNeedle, SetHorspool> & me) {
 	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
 	TSize j = 0;
 	if (empty(finder)) {
-		_finderInit(me);
+		_patternInit(me);
 		_finderSetNonEmpty(finder);
 		finder += me.data_lmin - 1;
 	} else {

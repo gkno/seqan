@@ -126,7 +126,7 @@ inline void setHost (Pattern<TNeedle, ShiftAnd> & me, TNeedle2 & needle)
 
 
 template <typename TNeedle>
-inline void _finderInit (Pattern<TNeedle, ShiftAnd> & me) 
+inline void _patternInit (Pattern<TNeedle, ShiftAnd> & me) 
 {
 SEQAN_CHECKPOINT
 	clear(me.prefSufMatch);
@@ -218,7 +218,7 @@ inline bool find(TFinder & finder, Pattern<TNeedle, ShiftAnd> & me) {
 	SEQAN_CHECKPOINT
 
 	if (empty(finder)) {
-		_finderInit(me);
+		_patternInit(me);
 		_finderSetNonEmpty(finder);
 	} else
 		finder += me.needleLength;

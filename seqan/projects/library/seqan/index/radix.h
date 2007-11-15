@@ -43,13 +43,13 @@ namespace SEQAN_NAMESPACE_MAIN
 		TSize i, sum = 0, n = length(a);								// for (i = 0;  i < K;  i++) c[i] = 0;
 		arrayFill(begin(c, Standard()), begin(c, Standard()) + K, 0);	// reset counters
 		for (i = 0;  i < n;  i++)										// count occurences
-			c[_ord(r[a[i]])]++;
+			c[ordValue(r[a[i]])]++;
 		for (i = 0;  i < K;  i++) {										// exclusive prefix sums
 			TSize t = c[i];  c[i] = sum;  sum += t;
 		}
 		for (i = 0;  i < n;  i++) {
 			TSize j = a[i];												// sort
-			b[c[_ord(r[j])]++] = j;
+			b[c[ordValue(r[j])]++] = j;
 		}
 	}
 
@@ -74,7 +74,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		arrayFill(begin(c, Standard()), begin(c, Standard()) + K, 0);	// reset counters
 		for (i = 0;  i < n;  i++) {
 			TSize j = a[i] + shift;										// count occurences
-			if (j < sn) c[_ord(r[j])]++;
+			if (j < sn) c[ordValue(r[j])]++;
 			else        sum++;
 		}
 		for (i = 0;  i < K;  i++) {										// exclusive prefix sums
@@ -82,7 +82,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
 		for (i = 0, sum = 0;  i < n;  i++) {							// sort
 			TSize j = a[i] + shift;
-			if (j < sn) b[c[_ord(r[j])]++] = a[i];	// On Exception: Make sure, you have resized your sufarray
+			if (j < sn) b[c[ordValue(r[j])]++] = a[i];	// On Exception: Make sure, you have resized your sufarray
 			else        b[sum++    ] = a[i];		// before calling createSuffixArray(..) to length(text)?
 		}
 	}
@@ -107,13 +107,13 @@ namespace SEQAN_NAMESPACE_MAIN
 		TSize i, sum = 0, n = length(a);								// for (i = 0;  i < K;  i++) c[i] = 0;
 		arrayFill(begin(c, Standard()), begin(c, Standard()) + K, 0);	// reset counters
 		for (i = 0;  i < n;  i++)										// count occurences
-			c[_ord(rp[a[i]])]++;
+			c[ordValue(rp[a[i]])]++;
 		for (i = 0;  i < K;  i++) {										// exclusive prefix sums
 			TSize t = c[i];  c[i] = sum;  sum += t;
 		}
 		for (i = 0;  i < n;  i++) {
 			TSize j = a[i];												// sort
-			b[c[_ord(rp[j])]++] = j - 1;
+			b[c[ordValue(rp[j])]++] = j - 1;
 		}
 	}
 
@@ -138,14 +138,14 @@ namespace SEQAN_NAMESPACE_MAIN
 		arrayFill(begin(c, Standard()), begin(c, Standard()) + K, 0);	// reset counters
 		for (i = 0;  i < n;  i++) {										// count occurences
 	        TSize j = a[i];
-			if (j > 0) c[_ord(rp[j])]++;
+			if (j > 0) c[ordValue(rp[j])]++;
 		}
 		for (i = 0;  i < K;  i++) {										// exclusive prefix sums
 			TSize t = c[i];  c[i] = sum;  sum += t;
 		}
 		for (i = 0;  i < n;  i++) {
 			TSize j = a[i];												// sort
-			if (j > 0) b[c[_ord(rp[j])]++] = j - 1;
+			if (j > 0) b[c[ordValue(rp[j])]++] = j - 1;
 		}
 	}
 

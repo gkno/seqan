@@ -152,7 +152,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			lValueLast(0),
 			rising(true)
 		{
-			this->vDesc.i1 = Pair<TSize>(0,0);
+			this->vDesc.range = Pair<TSize>(0,0);
 			indexRequire(_index, ESA_BWT());
 			lIter = begin(indexLCP(this->index));
 			lEnd  = end(indexLCP(this->index));

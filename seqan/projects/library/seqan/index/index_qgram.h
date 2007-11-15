@@ -679,6 +679,7 @@ Formally, this is a reference to the @Tag.QGram_Shape@ fibre.
 		
 		// 1. clear counters
 		arrayFill(begin(dir, Standard()), end(dir, Standard()), 0);
+//		memset(begin(dir, Standard()), 0, length(dir) * sizeof(typename Value<TDir>::Type));
 
 		// 2. count q-grams
 		for(unsigned seqNo = 0; seqNo < length(stringSet); ++seqNo) 
@@ -926,7 +927,6 @@ Formally, this is a reference to the @Tag.QGram_Shape@ fibre.
 				*it = sum;
 				++it;
 			}
-			SEQAN_ASSERT(sum + diff_prev == length(sa));
 		}
 	}
 
@@ -977,7 +977,6 @@ Formally, this is a reference to the @Tag.QGram_Shape@ fibre.
 				*it = sum;
 				++it;
 			}
-			SEQAN_ASSERT(sum + diff_prev == length(sa));
 		}
 	}
 

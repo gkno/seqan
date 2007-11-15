@@ -209,7 +209,7 @@ setHost(Pattern<TNeedle, Score<TScoreValue, Simple> > & me, TNeedle2 const & ndl
 
 
 template <typename TNeedle, typename TScoreValue>
-inline void _finderInit (Pattern<TNeedle, Score<TScoreValue, Simple> > & me) 
+inline void _patternInit (Pattern<TNeedle, Score<TScoreValue, Simple> > & me) 
 {
 	typedef Pattern<TNeedle, Score<TScoreValue, Simple> > TPattern;
 	typedef typename Size<TPattern>::Type TSize;
@@ -294,7 +294,7 @@ _find_score_simple_proportional(TFinder & finder, Pattern<TNeedle, Score<TScoreV
 
 	if (! length(me.data_tab))
 	{
-		_finderInit(me);
+		_patternInit(me);
 	}
 	//start searching
 

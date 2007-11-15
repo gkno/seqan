@@ -214,7 +214,7 @@ void setHost (Pattern<TNeedle, MultipleShiftAnd> & me, TNeedle2 & needle)
 
 
 template <typename TNeedle>
-inline void _finderInit (Pattern<TNeedle, MultipleShiftAnd> & me) 
+inline void _patternInit (Pattern<TNeedle, MultipleShiftAnd> & me) 
 {
 SEQAN_CHECKPOINT
 	typedef unsigned int TWord;
@@ -399,7 +399,7 @@ inline bool find(TFinder & finder, Pattern<TNeedle, MultipleShiftAnd> & me) {
 
 
 	if (empty(finder)) {
-		_finderInit(me);
+		_patternInit(me);
 		_finderSetNonEmpty(finder);
 	} else
 		finder += me.data_needleLength;

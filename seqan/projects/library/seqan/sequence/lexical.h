@@ -754,10 +754,10 @@ SEQAN_CHECKPOINT
 // lcpLength
 //////////////////////////////////////////////////////////////////////////////
 /**
-.Function._ord:
+.Function.ordValue:
 ..summary:Maps an alphabet 1-to-1 to the interval [0..ValueSize).
 ..cat:Alphabets
-..signature:_ord(value)
+..signature:ordValue(value)
 ..param.value:Arbitrary character value.
 ...type:Class.SimpleType
 ..returns:An $unsigned int$ between 0 and @Metafunction.ValueSize@ of the type of value.
@@ -766,13 +766,13 @@ You can't use $(unsigned int)c$ for a character $c$ as on some systems $char$ is
 */
 
 template <typename TValue>
-inline unsigned _ord(TValue const &c) 
+inline unsigned ordValue(TValue const &c) 
 {
 	return (typename _MakeUnsigned<TValue>::Type const &)c;
 }
 
 template <typename TValue, typename TSpec>
-inline unsigned _ord(SimpleType<TValue,TSpec> const &c) 
+inline unsigned ordValue(SimpleType<TValue,TSpec> const &c) 
 {
 	return c;
 }

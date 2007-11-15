@@ -53,9 +53,9 @@ void write(TFile & file,
 	{
 		// dump node
        		_streamWrite(file, "\"[");
- 		_streamPutInt(file, value(it).i1.i1);
+ 		_streamPutInt(file, value(it).range.i1);
 		_streamPut(file, ':');
-		_streamPutInt(file, value(it).i1.i2);
+		_streamPutInt(file, value(it).range.i2);
        		_streamWrite(file, ")\"");
        		if (!isRightTerminal(it))
 			_streamWrite(file, " [style = dashed]");
@@ -66,17 +66,17 @@ void write(TFile & file,
 			TIteratorSimple src(container(it), nodeUp(it));
 
 			_streamWrite(file, "\"[");
-			_streamPutInt(file, value(src).i1.i1);
+			_streamPutInt(file, value(src).range.i1);
 			_streamPut(file, ':');
-			_streamPutInt(file, value(src).i1.i2);
+			_streamPutInt(file, value(src).range.i2);
 			_streamWrite(file, ")\"");
 
 			_streamWrite(file, " -> ");
 
 			_streamWrite(file, "\"[");
-			_streamPutInt(file, value(it).i1.i1);
+			_streamPutInt(file, value(it).range.i1);
 			_streamPut(file, ':');
-			_streamPutInt(file, value(it).i1.i2);
+			_streamPutInt(file, value(it).range.i2);
 			_streamWrite(file, ")\"");
 
 			_streamWrite(file, " [label = \"");

@@ -105,7 +105,7 @@ setHost (Pattern<TNeedle, Quasar> & me, TNeedle2 & needle)
 
 
 template <typename TNeedle>
-inline void _finderInit (Pattern<TNeedle, Quasar> & me) 
+inline void _patternInit (Pattern<TNeedle, Quasar> & me) 
 {
 SEQAN_CHECKPOINT
 }
@@ -139,7 +139,7 @@ find(TFinder & finder, Pattern<TNeedle, Quasar> & me)
 	SEQAN_CHECKPOINT
 	
 	if (empty(finder)) {
-		_finderInit(me);
+		_patternInit(me);
 		_finderSetNonEmpty(finder);
 	} else {
 		finder+=4;

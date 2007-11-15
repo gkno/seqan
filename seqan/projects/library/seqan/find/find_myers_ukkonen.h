@@ -44,6 +44,7 @@ namespace SEQAN_NAMESPACE_MAIN
 struct AlignTextLocal;
 struct AlignTextGlobal;
 struct AlignTextGlobalMinimum;
+struct AlignTextDiagonal;
 
 template <typename TSpec>
 struct _MyersUkkonen;
@@ -106,8 +107,8 @@ SEQAN_CHECKPOINT
 
 	// encoding the letters as bit-vectors
     for (unsigned int j = 0; j < me.needleSize; j++)
-		me.bitMasks[me.blockCount * static_cast<unsigned int>((typename Value<TNeedle>::Type) value(needle,j)) + j/me.MACHINE_WORD_SIZE] = me.bitMasks[me.blockCount * static_cast<unsigned int>((typename Value<TNeedle>::Type) value(needle,j)) + j/me.MACHINE_WORD_SIZE] | 1 << (j%me.MACHINE_WORD_SIZE);
-		//me.bitMasks[me.blockCount * static_cast<unsigned int>((CompareType< Value< TNeedle >::Type, Value< Container< THaystack >::Type >::Type >::Type) needle[j]) + j/me.MACHINE_WORD_SIZE] = me.bitMasks[me.blockCount * static_cast<unsigned int>((CompareType< Value< TNeedle >::Type, Value< Container< THaystack >::Type >::Type >::Type) needle[j]) + j/MACHINE_WORD_SIZE] | 1 << (j%MACHINE_WORD_SIZE);
+		me.bitMasks[me.blockCount * ordValue((typename Value<TNeedle>::Type) value(needle,j)) + j/me.MACHINE_WORD_SIZE] = me.bitMasks[me.blockCount * ordValue((typename Value<TNeedle>::Type) value(needle,j)) + j/me.MACHINE_WORD_SIZE] | 1 << (j%me.MACHINE_WORD_SIZE);
+		//me.bitMasks[me.blockCount * ordValue((CompareType< Value< TNeedle >::Type, Value< Container< THaystack >::Type >::Type >::Type) needle[j]) + j/me.MACHINE_WORD_SIZE] = me.bitMasks[me.blockCount * ordValue((CompareType< Value< TNeedle >::Type, Value< Container< THaystack >::Type >::Type >::Type) needle[j]) + j/MACHINE_WORD_SIZE] | 1 << (j%MACHINE_WORD_SIZE);
 }
 
 template <typename TNeedle, typename TSpec, typename TNeedle2>
@@ -121,7 +122,7 @@ SEQAN_CHECKPOINT
 
 
 template <typename TNeedle, typename TSpec>
-void _finderInit(Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > > & me)
+void _patternInit(Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > > & me)
 {
 SEQAN_CHECKPOINT
 	clear(me.VP);
@@ -174,7 +175,7 @@ SEQAN_CHECKPOINT
 		if (limit == me.blockCount)
 			limit--;
 
-		shift = me.blockCount * static_cast<unsigned int>((typename Value< TNeedle >::Type) *finder);
+		shift = me.blockCount * ordValue((typename Value< TNeedle >::Type) *finder);
 
 		// computing the necessary blocks, carries between blocks following one another are stored
 		for (currentBlock = 0; currentBlock <= limit; currentBlock++) {
@@ -258,7 +259,7 @@ SEQAN_CHECKPOINT
 
 	// computing the blocks
 	while (!atEnd(finder)) {
-		X = me.bitMasks[static_cast<unsigned int>((typename Value<TNeedle>::Type) *finder)] | me.VN[0];
+		X = me.bitMasks[ordValue((typename Value<TNeedle>::Type) *finder)] | me.VN[0];
 		
 		D0 = ((me.VP[0] + (X & me.VP[0])) ^ me.VP[0]) | X;
 		HN = me.VP[0] & D0;
@@ -306,7 +307,7 @@ SEQAN_CHECKPOINT
 		if (limit == me.blockCount)
 			limit--;
 
-		shift = me.blockCount * static_cast<unsigned int>((typename Value< TNeedle >::Type) *finder);
+		shift = me.blockCount * ordValue((typename Value< TNeedle >::Type) *finder);
 
 		// computing the necessary blocks, carries between blocks following one another are stored
 		for (currentBlock = 0; currentBlock <= limit; currentBlock++) {
@@ -390,7 +391,7 @@ SEQAN_CHECKPOINT
 
 	// computing the blocks
 	while (!atEnd(finder)) {
-		X = me.bitMasks[static_cast<unsigned int>((typename Value<TNeedle>::Type) *finder)] | me.VN[0];
+		X = me.bitMasks[ordValue((typename Value<TNeedle>::Type) *finder)] | me.VN[0];
 		
 		D0 = ((me.VP[0] + (X & me.VP[0])) ^ me.VP[0]) | X;
 		HN = me.VP[0] & D0;
@@ -429,7 +430,7 @@ SEQAN_CHECKPOINT
 
 	if (empty(finder))
 	{
-		_finderInit(me);
+		_patternInit(me);
 		_finderSetNonEmpty(finder);
 
 		// in seqan k is treated as score, here we need it as penalty, that is why it is negated

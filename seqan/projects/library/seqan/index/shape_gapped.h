@@ -370,11 +370,11 @@ You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 		typedef typename Value< Shape<TValue, GappedShape> >::Type	THValue;
 		typedef typename Size< Shape<TValue, GappedShape> >::Type	TSize;
 
-		me.hValue = _ord(*it);
+		me.hValue = ordValue(*it);
 		TSize iEnd = me.weight - 1;
 		for(TSize i = 0; i < iEnd; ++i) {
 			goFurther(it, me.diffs[i]);
-			me.hValue = me.hValue * ValueSize<TValue>::VALUE + _ord(*it);
+			me.hValue = me.hValue * ValueSize<TValue>::VALUE + ordValue(*it);
 		}
 		return me.hValue;
 	}
@@ -391,11 +391,11 @@ You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 
 		TSize i = 0;
 		if (iEnd > 0) {
-			me.hValue = _ord(*it);
+			me.hValue = ordValue(*it);
 			--iEnd;
 			for(; i < iEnd; ++i) {
 				goFurther(it, me.diffs[i]);
-				me.hValue = me.hValue * ValueSize<TValue>::VALUE + _ord(*it);
+				me.hValue = me.hValue * ValueSize<TValue>::VALUE + ordValue(*it);
 			}
 			++i;
 		} else
@@ -419,11 +419,11 @@ You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 
 		TSize i = 0;
 		if (iEnd > 0) {
-			me.hValue = _ord(*it);
+			me.hValue = ordValue(*it);
 			--iEnd;
 			for(; i < iEnd; ++i) {
 				goFurther(it, me.diffs[i]);
-				me.hValue = me.hValue * ValueSize<TValue>::VALUE + _ord(*it);
+				me.hValue = me.hValue * ValueSize<TValue>::VALUE + ordValue(*it);
 			}
 			++i;
 			++me.hValue;
@@ -464,7 +464,7 @@ You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 		P15,P16,P17,P18,P19 > const)
 	{
 		++it;
-		return _hashHardwiredShape(hash * ValueSize<TValue>::VALUE + _ord(*it),
+		return _hashHardwiredShape(hash * ValueSize<TValue>::VALUE + ordValue(*it),
 			it, TValue(), HardwiredShape<
 				P01,P02,P03,P04,P05,
 				P06,P07,P08,P09,P10,
@@ -487,7 +487,7 @@ You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 		P15,P16,P17,P18,P19 > const)
 	{
 		it += P00;
-		return _hashHardwiredShape(hash * ValueSize<TValue>::VALUE + _ord(*it),
+		return _hashHardwiredShape(hash * ValueSize<TValue>::VALUE + ordValue(*it),
 			it, TValue(), HardwiredShape<
 				P01,P02,P03,P04,P05,
 				P06,P07,P08,P09,P10,
@@ -524,7 +524,7 @@ You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 		typedef FixedGappedShape<TSpec>							TShape;
 		typedef typename Value< Shape<TValue, TShape> >::Type	THValue;
 
-		me.hValue = (THValue)_ord(*it);
+		me.hValue = (THValue)ordValue(*it);
 		return me.hValue = _hashHardwiredShape(me.hValue, it, TValue(), TSpec());
 	}
 

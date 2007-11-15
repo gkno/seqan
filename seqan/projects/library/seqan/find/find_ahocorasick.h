@@ -221,7 +221,7 @@ setHost (Pattern<TNeedle, AhoCorasick> & me, TNeedle2 & needle)
 
 
 template <typename TNeedle>
-inline void _finderInit (Pattern<TNeedle, AhoCorasick> & me) 
+inline void _patternInit (Pattern<TNeedle, AhoCorasick> & me) 
 {
 SEQAN_CHECKPOINT
 	clear(me.data_endPositions);
@@ -269,7 +269,7 @@ inline bool find(TFinder & finder, Pattern<TNeedle, AhoCorasick> & me) {
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	
 	if (empty(finder)) {
-		_finderInit(me);
+		_patternInit(me);
 		_finderSetNonEmpty(finder);
 	} else {
 		finder += me.data_needleLength;

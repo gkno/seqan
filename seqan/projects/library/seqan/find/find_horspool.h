@@ -122,7 +122,7 @@ setHost(Pattern<TNeedle, Horspool> & horsp, TNeedle2 & ndl)
 
 
 template <typename TNeedle>
-inline void _finderInit (Pattern<TNeedle, Horspool> &) {}
+inline void _patternInit (Pattern<TNeedle, Horspool> &) {}
 
 //____________________________________________________________________________
 
@@ -355,7 +355,7 @@ SEQAN_CHECKPOINT
 	bool find_first = empty(finder);
 	if (find_first)
 	{
-		_finderInit(me);
+		_patternInit(me);
 		_finderSetNonEmpty(finder);
 	}
 

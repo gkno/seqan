@@ -512,7 +512,7 @@ inline void setHost (Pattern<TNeedle, WildShiftAnd> & me, TNeedle2 & needle)
 
 
 template <typename TNeedle>
-inline void _finderInit (Pattern<TNeedle, WildShiftAnd> & me) 
+inline void _patternInit (Pattern<TNeedle, WildShiftAnd> & me) 
 {
 SEQAN_CHECKPOINT
 	clear(me.prefSufMatch);
@@ -630,7 +630,7 @@ inline bool find(TFinder & finder, Pattern<TNeedle, WildShiftAnd> & me) {
 SEQAN_CHECKPOINT
 
 	if (empty(finder)) {
-		_finderInit(me);
+		_patternInit(me);
 		_finderSetNonEmpty(finder);
 
 		if(!valid(me))
