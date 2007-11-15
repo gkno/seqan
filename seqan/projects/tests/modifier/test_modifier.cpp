@@ -25,7 +25,7 @@ using namespace seqan;
 	{
 		InType delta;
 
-		CaesarChiffre() {}
+		CaesarChiffre():delta(1) {}
 		CaesarChiffre(InType _delta) {
 			if (_delta < 0)
 				delta = ('z' - 'a' + 1) - (-_delta) % ('z' - 'a' + 1);
@@ -114,17 +114,17 @@ void testViewString()
 		cout << "chiffre: " << chiffre << endl << endl;
 
 	//____________________________________________________________________________
-	// Test3 - upcase/downcase
+	// Test3 - upcase/lowcase
 
 		typedef ModifiedString< String<char>, ModView< FunctorUpcase<char> > > TModStringUp;
-		typedef ModifiedString< String<char>, ModView< FunctorDowncase<char> > > TModStringDown;
+		typedef ModifiedString< String<char>, ModView< FunctorLowcase<char> > > TModStringLow;
 
 		TModStringUp	up(origin);
-		TModStringDown	down(origin);
+		TModStringLow	low(origin);
 
-		cout << "*** Test3: upcase/downcase ***" << endl;
+		cout << "*** Test3: upcase/lowcase ***" << endl;
 		cout << "upcase:   " << up << endl;
-		cout << "downcase: " << down << endl << endl;
+		cout << "lowcase: " << low << endl << endl;
 
 	//____________________________________________________________________________
 	// Test4 - alphabet conversion
@@ -143,24 +143,28 @@ void testViewString()
 
 		typedef CaesarChiffre<char> TEncode;
 		typedef ModifiedString< 
-					ModifiedString< 
+		//			ModifiedString< 
 						ModifiedString< 
 							String<char>, 
 							ModView<TEncode> 
 						>, 
 						ModView<TEncode> 
-					>, 
-					ModView<TEncode>
+		//			>, 
+		//			ModView<TEncode>
 				> TModStringNested;
 
 		TModStringNested nested(origin);
 
-		TEncode enc2(2), enc3(3), enc_5(-5);
+		TEncode enc2(2), enc3(-2), enc_5(-5);
 
 		assignModViewFunctor(nested, enc2);
 		assignModViewFunctor(host(nested), enc3);
-		assignModViewFunctor(host(host(nested)), enc_5);
-
+//		assignModViewFunctor(host(host(nested)), enc_5);
+		
+		cout << (int) (begin(nested)).data_cargo.func.delta << "  ";
+		cout << (int) host((begin(nested))).data_cargo.func.delta << "  ";
+//		cout << (int) host(host(nested)).data_cargo.func.delta << "  ";
+		
 		cout << "*** Test5: nested modifiers ***" << endl;
 		cout << "nested: " << nested << endl << endl;
 
