@@ -62,8 +62,6 @@ namespace SEQAN_NAMESPACE_MAIN
 		Holder<THost, Simple>					data_host;
 		typename Cargo<ModifiedIterator>::Type	data_cargo;
 
-		bool _atEnd;
-
 		ModifiedIterator(ModifiedIterator &_origin):
 			data_host(_origin.data_host),
 			data_cargo(_origin.data_cargo) {}
@@ -184,6 +182,32 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	//////////////////////////////////////////////////////////////////////////////
+	// position
+	//////////////////////////////////////////////////////////////////////////////
+
+	template <typename THost>
+	inline typename Position<ModifiedIterator<THost, ModReverse> const>::Type 
+	position(ModifiedIterator<THost, ModReverse> const & me)
+	{
+	SEQAN_CHECKPOINT
+		if (cargo(me)._atEnd)
+			return length(container(host(me)));
+		else
+			return length(container(host(me))) - 1 - position(host(me));
+	}
+
+	template <typename THost, typename TContainer>
+	inline typename Position<ModifiedIterator<THost, ModReverse> const>::Type 
+	position(ModifiedIterator<THost, ModReverse> const & me, TContainer const &cont)
+	{
+	SEQAN_CHECKPOINT
+		if (cargo(me)._atEnd)
+			return length(cont);
+		else
+			return length(cont) - 1 - position(host(me), cont);
+	}
+
+	//////////////////////////////////////////////////////////////////////////////
 	// operator ==
 	//////////////////////////////////////////////////////////////////////////////
 
@@ -203,6 +227,48 @@ namespace SEQAN_NAMESPACE_MAIN
 	operator < (ModifiedIterator<THost, ModReverse> const & a, ModifiedIterator<THost, ModReverse> const & b) {
 		return (!cargo(a)._atEnd && cargo(b)._atEnd) ||
 			   (!cargo(a)._atEnd && !cargo(b)._atEnd && host(a) > host(b));
+	}
+
+	//////////////////////////////////////////////////////////////////////////////
+	// atBegin
+	//////////////////////////////////////////////////////////////////////////////
+
+	template <typename THost, typename TContainer>
+	inline bool
+	atBegin(ModifiedIterator<THost, ModReverse> const & me,
+			TContainer const & container)
+	{
+	SEQAN_CHECKPOINT
+		return position(me, container) == 0;
+	}
+
+	template <typename THost>
+	inline bool
+	atBegin(ModifiedIterator<THost, ModReverse> const & me)
+	{
+	SEQAN_CHECKPOINT
+		return position(me) == 0;
+	}
+
+	//////////////////////////////////////////////////////////////////////////////
+	// atEnd
+	//////////////////////////////////////////////////////////////////////////////
+
+	template <typename THost, typename TContainer>
+	inline bool
+	atEnd(ModifiedIterator<THost, ModReverse> const & me,
+			TContainer const & container)
+	{
+	SEQAN_CHECKPOINT
+		return cargo(me)._atEnd;
+	}
+
+	template <typename THost>
+	inline bool
+	atEnd(ModifiedIterator<THost, ModReverse> const & me)
+	{
+	SEQAN_CHECKPOINT
+		return cargo(me)._atEnd;
 	}
 
 
@@ -240,6 +306,11 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		template <typename T>
 		ModifiedString(T & _origin) {
+			setValue(*this, _origin);
+		}
+
+		template <typename T>
+		ModifiedString(T const & _origin) {
 			setValue(*this, _origin);
 		}
 

@@ -589,34 +589,23 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 	template <typename TText, typename TSpec>
 	inline typename Size<Index<TText, TSpec> >::Type 
 	length(Index<TText, TSpec> const &index) {
-		return length(getFibre(index, Tag<_Fibre_RawText>()));
+		return length(indexRawText(index));
 	}
 
 //////////////////////////////////////////////////////////////////////////////
 
 	template <typename TText, typename TSpec>
-	inline typename Size<Index<TText, TSpec> >::Type 
-	countSequences(Index<TText, TSpec> const & /*index*/) {
-		return 1;
-	}
-	template <typename TString, typename TSSetSpec, typename TSpec>
-	inline typename Size<Index<StringSet<TString, TSSetSpec>, TSpec> >::Type 
-	countSequences(Index<StringSet<TString, TSSetSpec>, TSpec> const &index) {
-		return length(indexText(index));
+	inline typename Size<TText>::Type 
+	countSequences(Index<TText, TSpec> const &index) {
+		return countSequences(indexText(index));
 	}
 
 //////////////////////////////////////////////////////////////////////////////
 
 	template <typename TSeqNo, typename TText, typename TSpec>
 	inline typename Size<Index<TText, TSpec> >::Type 
-	sequenceLength(TSeqNo /*seqNo*/, Index<TText, TSpec> const &index) {
-		return length(index);
-	}
-
-	template <typename TSeqNo, typename TString, typename TSSetSpec, typename TSpec>
-	inline typename Size<Index<StringSet<TString, TSSetSpec>, TSpec> >::Type 
-	sequenceLength(TSeqNo seqNo, Index<StringSet<TString, TSSetSpec>, TSpec> const &index) {
-		return length(indexText(index)[seqNo]);
+	sequenceLength(TSeqNo seqNo, Index<TText, TSpec> const &index) {
+		return sequenceLength(seqNo, indexText(index));
 	}
 
 //////////////////////////////////////////////////////////////////////////////

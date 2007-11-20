@@ -59,7 +59,8 @@ typedef ModifiedString<
 //////////////////////////////////////////////////////////////////////////////
 
 template < typename TSequence >
-inline void complementInPlace(TSequence & sequence) {
+inline void complementInPlace(TSequence & sequence) 
+{
 	convertInPlace(sequence, FunctorComplement<typename Value<TSequence>::Type>());
 } 
 
@@ -72,7 +73,8 @@ inline void complementInPlace(StringSet<TSequence, TSpec> & stringSet)
 }
 
 template < typename TSequence >
-inline void reverseComplementInPlace(TSequence & sequence) {
+inline void reverseComplementInPlace(TSequence & sequence) 
+{
 	convertInPlace(sequence, FunctorComplement<typename Value<TSequence>::Type>());
 	reverseInPlace(sequence);
 } 

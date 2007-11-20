@@ -541,7 +541,7 @@ SEQAN_CHECKPOINT
 	{
 SEQAN_CHECKPOINT
 		if (empty(me)) return 0;
-		return hostIterator(me) - begin(container(me), Rooted());
+		return position(hostIterator(me));
 	}
 
 	template <typename THaystack, typename TSpec>
@@ -550,7 +550,7 @@ SEQAN_CHECKPOINT
 	{
 SEQAN_CHECKPOINT
 		if (empty(me)) return 0;
-		return hostIterator(me) - begin(container(me), Rooted());
+		return position(hostIterator(me));
 	}
 
 	template <typename THaystack, typename TSpec, typename TPosition>
@@ -558,7 +558,7 @@ SEQAN_CHECKPOINT
 	setPosition(Finder<THaystack, TSpec> & me, TPosition pos_)
 	{
 SEQAN_CHECKPOINT
-		hostIterator(me) = begin(container(me), Rooted()) + pos_;
+		setPosition(hostIterator(me), pos_);
 	}
 
 //____________________________________________________________________________

@@ -14,6 +14,7 @@ ifeq ($(OS_NAME),Linux)
 endif
 
 CPPFLAGS+=-I$(SEQAN_DIR)
+#CPPFLAGS+=-O3
 
 all: $(basename $(wildcard *.cpp))
 index: $(basename $(wildcard index_*.cpp))

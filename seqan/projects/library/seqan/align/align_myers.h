@@ -202,7 +202,7 @@ align_myers(Align<TSource, TSpec> & align_,
 
 	// encoding the letters as bit-vectors
     for (unsigned int j = 0; j < len_y; j++)
-		bitMask[blockCount * static_cast<unsigned int>(getValue(y,j)) + j/BLOCK_SIZE] = bitMask[blockCount * static_cast<unsigned int>(getValue(y,j)) + j/BLOCK_SIZE] | 1 << (j%BLOCK_SIZE);
+		bitMask[blockCount * ordValue(getValue(y,j)) + j/BLOCK_SIZE] = bitMask[blockCount * ordValue(getValue(y,j)) + j/BLOCK_SIZE] | 1 << (j%BLOCK_SIZE);
 
 #ifdef BAC_ALIGNER // see definition of BAC_ALIGNER
 	//extend the bitMasks for ambigous alphabets
@@ -222,8 +222,8 @@ align_myers(Align<TSource, TSpec> & align_,
 			{
 				if(static_cast<TAlphabet>(i) == static_cast<TAlphabet>(j))
 				{
-					unsigned int char_ind_i = blockCount * static_cast<unsigned int>(static_cast<TAlphabet>(i));
-					unsigned int char_ind_j = blockCount * static_cast<unsigned int>(static_cast<TAlphabet>(j));
+					unsigned int char_ind_i = blockCount * ordValue(static_cast<TAlphabet>(i));
+					unsigned int char_ind_j = blockCount * ordValue(static_cast<TAlphabet>(j));
 					for(m = 0;m < blockCount;++m)
 					{
 						bitMask[char_ind_i] |= copyMask[char_ind_j];
@@ -243,7 +243,7 @@ align_myers(Align<TSource, TSpec> & align_,
 	if(blockCount == 1)
 	{
 		while (pos < len_x) {
-			X = bitMask[static_cast<unsigned int>(getValue(x,pos))] | VN[0];
+			X = bitMask[ordValue(getValue(x,pos))] | VN[0];
 
 			D0 = ((VP[0] + (X & VP[0])) ^ VP[0]) | X;
 			HN = VP[0] & D0;
@@ -271,7 +271,7 @@ align_myers(Align<TSource, TSpec> & align_,
 		{
 			// set vars
 			carryD0 = carryHP = carryHN = 0;
-			shift = blockCount * static_cast<unsigned int>(getValue(x,pos));
+			shift = blockCount * ordValue(getValue(x,pos));
 
 			// computing first the top most block
 			X = bitMask[shift] | VN[0];
@@ -444,8 +444,8 @@ SEQAN_CHECKPOINT
 	// encoding the letters as bit-vectors
     for (unsigned int j = 0; j < len_y; j++){
 SEQAN_CHECKPOINT
-		forwardBitMask[blockCount * static_cast<unsigned int>(getValue(y,j)) + j/BLOCK_SIZE] = forwardBitMask[blockCount * static_cast<unsigned int>(getValue(y,j)) + j/BLOCK_SIZE] | 1 << (j%BLOCK_SIZE);
-		reverseBitMask[blockCount * static_cast<unsigned int>(getValue(y,len_y - j - 1)) + j/BLOCK_SIZE] = reverseBitMask[blockCount * static_cast<unsigned int>(getValue(y,len_y - j - 1)) + j/BLOCK_SIZE] | 1 << (j%BLOCK_SIZE);
+		forwardBitMask[blockCount * ordValue(getValue(y,j)) + j/BLOCK_SIZE] = forwardBitMask[blockCount * ordValue(getValue(y,j)) + j/BLOCK_SIZE] | 1 << (j%BLOCK_SIZE);
+		reverseBitMask[blockCount * ordValue(getValue(y,len_y - j - 1)) + j/BLOCK_SIZE] = reverseBitMask[blockCount * ordValue(getValue(y,len_y - j - 1)) + j/BLOCK_SIZE] | 1 << (j%BLOCK_SIZE);
 	}
 
 #ifdef BAC_ALIGNER // see definition of BAC_ALIGNER
@@ -473,8 +473,8 @@ SEQAN_CHECKPOINT
 			{
 				if(static_cast<TAlphabet>(i) == static_cast<TAlphabet>(j))
 				{
-					unsigned int char_ind_i = blockCount*static_cast<unsigned int>(static_cast<TAlphabet>(i));
-					unsigned int char_ind_j = blockCount*static_cast<unsigned int>(static_cast<TAlphabet>(j));
+					unsigned int char_ind_i = blockCount*ordValue(static_cast<TAlphabet>(i));
+					unsigned int char_ind_j = blockCount*ordValue(static_cast<TAlphabet>(j));
 
 					for(m = 0;m < blockCount;++m)
 					{
@@ -490,8 +490,8 @@ SEQAN_CHECKPOINT
 			{
 				if(static_cast<TAlphabet>(i) == static_cast<TAlphabet>(j))
 				{
-					unsigned int char_ind_i = blockCount*static_cast<unsigned int>(static_cast<TAlphabet>(i));
-					unsigned int char_ind_j = blockCount*static_cast<unsigned int>(static_cast<TAlphabet>(j));
+					unsigned int char_ind_i = blockCount*ordValue(static_cast<TAlphabet>(i));
+					unsigned int char_ind_j = blockCount*ordValue(static_cast<TAlphabet>(j));
 					
 					for(m = 0;m < blockCount;++m)
 					{
@@ -765,7 +765,7 @@ SEQAN_CHECKPOINT
 			{
 SEQAN_CHECKPOINT
 				while (pos < _end1(target)) {
-					X = (fSilencer & forwardBitMask[(blockCount * static_cast<unsigned int>(getValue(x,pos))) + fStartBlock]) | VN[fStartBlock];
+					X = (fSilencer & forwardBitMask[(blockCount * ordValue(getValue(x,pos))) + fStartBlock]) | VN[fStartBlock];
 
 					D0 = ((VP[fStartBlock] + (X & VP[fStartBlock])) ^ VP[fStartBlock]) | X;
 					HN = VP[fStartBlock] & D0;
@@ -795,7 +795,7 @@ SEQAN_CHECKPOINT
 				while (pos < _end1(target))
 				{
 					carryD0 = carryHP = carryHN = 0;
-					shift = blockCount * static_cast<unsigned int>(getValue(x,pos));
+					shift = blockCount * ordValue(getValue(x,pos));
 
 					// computing first the top most block
 					X = (fSilencer & forwardBitMask[shift + fStartBlock]) | VN[fStartBlock];
@@ -886,7 +886,7 @@ SEQAN_CHECKPOINT
 SEQAN_CHECKPOINT
 
 				while (pos >= _begin1(target)) {
-					X = (rSilencer & reverseBitMask[(blockCount * static_cast<unsigned int>(getValue(x,pos))) + rStartBlock]) | VN[rStartBlock];
+					X = (rSilencer & reverseBitMask[(blockCount * ordValue(getValue(x,pos))) + rStartBlock]) | VN[rStartBlock];
 
 					D0 = ((VP[rStartBlock] + (X & VP[rStartBlock])) ^ VP[rStartBlock]) | X;
 					HN = VP[rStartBlock] & D0;
@@ -923,7 +923,7 @@ SEQAN_CHECKPOINT
 				while (pos >= _begin1(target))
 				{
 					carryD0 = carryHP = carryHN = 0;
-					shift = blockCount * static_cast<unsigned int>(getValue(x,pos));
+					shift = blockCount * ordValue(getValue(x,pos));
 
 					// compute first the top most block
 					X = (rSilencer & reverseBitMask[shift + rStartBlock]) | VN[rStartBlock];

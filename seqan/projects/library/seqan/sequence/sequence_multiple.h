@@ -296,6 +296,18 @@ a single integer value between 0 and the sum of string lengths minus 1.
 */
 
 	// any_position and no limits_string -> any_position
+	template <typename TPosition>
+	inline TPosition posGlobalize(TPosition const &pos, Nothing const &) {
+		return pos;
+	}
+
+	// local_position (0,x) and no limits_string -> global_position x
+	template <typename T1, typename T2, typename TCompression>
+	inline T2 posGlobalize(Pair<T1, T2, TCompression> const &pos, Nothing const &) {
+		return getSeqOffset(pos);
+	}
+
+	// any_position and no limits_string -> any_position
 	template <typename TLimitsString, typename TPosition>
 	inline TPosition posGlobalize(TPosition const &pos, TLimitsString const &) {
 		return pos;
@@ -330,6 +342,12 @@ a single integer value between 0 and the sum of string lengths minus 1.
 	template <typename TResult, typename TPosition>
 	inline void posLocalize(TResult &result, TPosition const &pos, Nothing const &) {
 		result = pos;
+	}
+
+	template <typename T1, typename T2, typename TCompression, typename TPosition>
+	inline void posLocalize(Pair<T1, T2, TCompression> &result, TPosition const &pos, Nothing const &) {
+		result.i1 = 0;
+		result.i2 = pos;
 	}
 
 	// global_position and limits_string -> local_position
@@ -460,6 +478,8 @@ a single integer value between 0 and the sum of string lengths minus 1.
 		return posCompare(getValueI2(a), getValueI2(b));
 	}
 
+	//////////////////////////////////////////////////////////////////////////////
+
 	template <typename TPos, typename TString>
 	inline typename Size<TString>::Type
 	suffixLength(TPos pos, TString const &string) {
@@ -470,6 +490,34 @@ a single integer value between 0 and the sum of string lengths minus 1.
 	inline typename Size<TString>::Type
 	suffixLength(TPos pos, StringSet<TString, TSpec> const &stringSet) {
 		return length(stringSet[getSeqNo(pos, stringSetLimits(stringSet))]) - getSeqOffset(pos, stringSetLimits(stringSet));
+	}
+
+	//////////////////////////////////////////////////////////////////////////////
+
+	template <typename TString>
+	inline unsigned 
+	countSequences(TString const &) {
+		return 1;
+	}
+
+	template <typename TString, typename TSpec>
+	inline typename Size<StringSet<TString, TSpec> >::Type 
+	countSequences(StringSet<TString, TSpec> const &stringSet) {
+		return length(stringSet);
+	}
+
+	//////////////////////////////////////////////////////////////////////////////
+
+	template <typename TSeqNo, typename TString>
+	inline typename Size<TString>::Type 
+	sequenceLength(TSeqNo /*seqNo*/, TString const &string) {
+		return length(string);
+	}
+
+	template <typename TSeqNo, typename TString, typename TSpec>
+	inline typename Size<StringSet<TString, TSpec> >::Type 
+	sequenceLength(TSeqNo seqNo, StringSet<TString, TSpec> const &stringSet) {
+		return length(stringSet[seqNo]);
 	}
 
 	//////////////////////////////////////////////////////////////////////////////

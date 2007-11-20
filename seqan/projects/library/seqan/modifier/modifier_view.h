@@ -221,6 +221,11 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
 
 		template <typename T>
+		ModifiedString(T const & _origin) {
+			setValue(*this, _origin);
+		}
+
+		template <typename T>
 		inline ModifiedString const &
 		operator = (T & _origin) {
 			assign(*this, _origin);

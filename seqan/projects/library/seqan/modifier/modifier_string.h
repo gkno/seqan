@@ -66,6 +66,11 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
 
 		template <typename T>
+		ModifiedString(T const & _origin) {
+			setValue(*this, _origin);
+		}
+
+		template <typename T>
 		inline ModifiedString const &
 		operator = (T & _origin) {
 			assign(*this, _origin);
@@ -324,7 +329,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename THost, typename TSpec>
 	inline ModifiedString<THost, TSpec> const &
 	setValue(ModifiedString<THost, TSpec> & me, THost const & _origin) {
-		setHost(me, _origin);
+		assignHost(me, _origin);
 		return me;
 	}
 
