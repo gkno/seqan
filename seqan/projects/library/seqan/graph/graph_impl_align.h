@@ -911,6 +911,213 @@ write(TFile & file,
 	}
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TFile, typename TStringSet, typename TCargo, typename TSpec, typename TNames>
+inline void
+write(TFile & file,
+	  Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
+	  TNames const&,
+	  FastaReadFormat) 
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename Value<TFile>::Type TValue;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename Id<TGraph>::Type TIdType;
+	typedef typename Value<TStringSet>::Type TString;
+	typedef typename Value<TString>::Type TAlphabet;
+	typedef typename Infix<TString>::Type TInfix;
+	typedef typename Iterator<TInfix>::Type TInfixIter;
+	typedef std::map<std::pair<TIdType, TIdType>, TVertexDescriptor> TPosToVertexMap;
+	typedef std::map<unsigned int, unsigned int> TComponentLength;
+	
+	// Strongly Connected Components, topological sort, and length of each component
+	String<unsigned int> component;
+	String<unsigned int> order;
+	TComponentLength compLength;
+	if (convertAlignment(g, component, order, compLength)) {
+		unsigned int numOfComponents = length(order);
+		TStringSet& strSet = stringSet(g);
+		TSize nseq = length(strSet);
+		String<TValue> consensus;
+
+		// Assign to each sequence the start and end (in terms of component ranks)
+		typedef std::map<unsigned int, unsigned int> TComponentToRank;
+		TComponentToRank compToRank;
+		for(unsigned int compIndex = 0; compIndex < numOfComponents; ++compIndex) {
+			compToRank.insert(std::make_pair(order[compIndex], compIndex));
+		}
+		typedef Pair<unsigned int, unsigned int> TRankPair;
+		typedef String<TRankPair> TSequenceToRanks;
+		TSequenceToRanks seqToRank;
+		resize(seqToRank, nseq);
+		for(unsigned int i=0;i<nseq; ++i) value(seqToRank, i) = TRankPair((compToRank.find(getProperty(component, findVertex(const_cast<TGraph&>(g), positionToId(strSet, i), 0))))->second, (compToRank.find(getProperty(component, findVertex(const_cast<TGraph&>(g), positionToId(strSet, i), length(strSet[i]) - 1))))->second);
+		compToRank.clear();
+
+		// Get the coverage of each rank (maximum number of rows in the output)
+		unsigned int maxCoverage = 0;
+		for(unsigned int compIndex = 0; compIndex < numOfComponents; ++compIndex) {
+			unsigned int count = 0;
+			for(unsigned int i=0;i<nseq; ++i) {
+				if (((seqToRank[i]).i1 <= compIndex) && ((seqToRank[i]).i2 >= compIndex)) ++count;
+			}
+			if (count > maxCoverage) maxCoverage = count;
+		}
+
+		// Assign the sequences to rows
+		String<String<TRankPair> > intervalsPerRow;
+		String<unsigned int> seqToRow;
+		resize(seqToRow, nseq);
+		resize(intervalsPerRow, maxCoverage);
+		for(unsigned int i=0;i<maxCoverage; ++i) {
+			String<TRankPair> tmp;
+			value(intervalsPerRow, i) = tmp;
+		}
+		for(unsigned int i=0;i<nseq; ++i) {
+			for(unsigned int j=0;j<maxCoverage; ++j) {
+				bool fits = true;
+				for(unsigned int pos=0;pos<length(intervalsPerRow[j]);++pos) {
+					if ((((seqToRank[i]).i1 <= ((intervalsPerRow[j])[pos]).i2) && 
+						 ((seqToRank[i]).i1 >= ((intervalsPerRow[j])[pos]).i1)) || 
+						(((seqToRank[i]).i2 <= ((intervalsPerRow[j])[pos]).i2) && 
+						((seqToRank[i]).i2 >= ((intervalsPerRow[j])[pos]).i1))) {
+							fits = false;
+							break;
+					}
+				}
+				if (fits) {
+					seqToRow[i] = j;
+					appendValue(intervalsPerRow[j], seqToRank[i]);
+					break;
+				}
+			}
+		}
+		for(unsigned int i=0;i<maxCoverage; ++i) clear(value(intervalsPerRow, i));
+		clear(intervalsPerRow);
+
+
+		// Create the matrix
+		TSize len = 0;
+		String<TValue> mat;
+		for(TComponentLength::iterator cIt=compLength.begin(); cIt != compLength.end(); ++cIt) len+=cIt->second;
+		TValue gapChar = gapValue<TValue>();
+		TValue specialGap = '.';
+		fill(mat, len * maxCoverage, gapChar);
+		unsigned int col = 0;
+		String<bool> active;
+		for(unsigned int compIndex = 0; compIndex < numOfComponents; ++compIndex) {
+			typename TPosToVertexMap::const_iterator it = g.data_pvMap.begin();
+			unsigned int currentCompLength = compLength[order[compIndex]];
+			String<String<unsigned int> > counterValues;
+			resize(counterValues, currentCompLength);
+			for(unsigned int i=0;i<currentCompLength; ++i) {
+				String<unsigned int> counter;
+				fill(counter, (unsigned int) ValueSize<TAlphabet>::VALUE, 0);
+				value(counterValues, i) = counter;
+			}
+			fill(active, maxCoverage, false);
+			for(; it != g.data_pvMap.end(); ++it) {
+				unsigned int c = getProperty(component, it->second);
+				if (order[compIndex] != c) continue;
+				else {
+					TInfix str = label(g,it->second);
+					unsigned int row = seqToRow[idToPosition(strSet, it->first.first)];
+					TInfixIter sIt = begin(str);
+					TInfixIter sItEnd = end(str);
+					unsigned int i = 0;
+					for(unsigned int pCol = col;sIt!=sItEnd;goNext(sIt), ++pCol, ++i) {
+						assignValue(mat, row * len + pCol, *sIt);
+						++((counterValues[i])[(unsigned int) *sIt]);
+					}
+				}
+			}
+			// Find the empty rows
+			unsigned int activeRows = 0;
+			for(unsigned int i=0;i<nseq; ++i) {
+				if (((seqToRank[i]).i1 <= compIndex) && ((seqToRank[i]).i2 >= compIndex)) {
+					++activeRows;
+					active[seqToRow[i]] = true;
+				}
+			}
+
+			// Substitute false gaps with special gap character
+			for(unsigned int i = 0; i < maxCoverage; ++i) {
+				if (!active[i]) {
+					for(unsigned int pCol = col;pCol < col + currentCompLength;++pCol) assignValue(mat, i * len + pCol, specialGap);
+				}
+			}
+
+			// Build consensus
+			for(unsigned int i=0;i<currentCompLength; ++i) {
+				TSize max = 0;
+				TSize index_max = 0;
+				TSize total_count = 0;
+				for(TSize j = 0; j < length(counterValues[i]); ++j) {
+					if ((counterValues[i])[j] > max) {
+						max = (counterValues[i])[j];
+						index_max = j;
+					}
+					total_count += (counterValues[i])[j];
+				}
+				if ((counterValues[i])[index_max] > (activeRows - total_count)) appendValue(consensus, TAlphabet((Byte) index_max));
+				else appendValue(consensus, gapChar);
+			}
+
+			// Go to next component
+			col += currentCompLength;
+			clear(active);
+		}
+
+		// Write to file
+		unsigned int winSize = 60;
+		int offset = 2;
+		unsigned int column = 0;
+		while (column<len) {
+			unsigned int window_end = column + winSize;
+			if (window_end >= len) window_end = len;
+			for(unsigned int row = 0; row<maxCoverage; ++row) {
+				unsigned int tmp = row;
+				int off = 0;
+				while (tmp / 10 != 0) {
+					tmp /= 10;
+					++off;
+				}
+				for(int i = 0; i<offset - off; ++i) _streamPut(file,' ');
+				_streamPutInt(file, row);
+				_streamPut(file,':');
+				_streamPut(file,' ');
+				for(unsigned int local_col = column; local_col<window_end; ++local_col) {
+					_streamPut(file, getValue(mat, row*len+local_col));
+				}
+				_streamPut(file,'\n');
+			}
+			_streamPut(file,'\n');
+			int off = 0;
+			for(int i = 0; i<offset - off; ++i) _streamPut(file,' ');
+			_streamPut(file,'C');
+			_streamPut(file,':');
+			_streamPut(file,' ');
+			for(unsigned int local_col = column; local_col<window_end; ++local_col) _streamPut(file, consensus[local_col]);
+			_streamPut(file,'\n');
+			_streamPut(file,'\n');
+			_streamPut(file,'\n');
+			column+=winSize;
+		}
+		_streamWrite(file, ">Consensus with gaps removed");
+		column = 0;
+		for(unsigned int col = 0; col<len; ++col) {
+			if (consensus[col] != gapChar) {
+				if (column % winSize == 0) _streamPut(file,'\n');
+				_streamPut(file, consensus[col]);
+				++column;
+			}
+		}
+	}
+}
+
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -1424,6 +1631,7 @@ convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 
 	return true;
 }
+
 
 
 //////////////////////////////////////////////////////////////////////////////

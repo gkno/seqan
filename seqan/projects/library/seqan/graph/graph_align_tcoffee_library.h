@@ -232,6 +232,146 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	matchRefinement(matches,str,const_cast<TScore&>(score_type),g);
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec, typename TScore, typename TSize>
+inline void 
+generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+					   TScore const& score_type,
+					   TSize ktup,
+					   bool overlapping,
+					   Kmer_Library)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename Id<TGraph>::Type TId;
+	typedef typename Value<typename Value<TStringSet>::Type>::Type TAlphabet;
+	typedef __int64 TWord;
+	typedef String<TWord> TTupelString;
+	typedef String<TTupelString> TTupelStringSet;
+	
+	// Initialization
+	clearVertices(g);
+	TStringSet& str = stringSet(g);	
+	TSize nseq = length(str);
+	TWord alphabet_size = ValueSize<TAlphabet>::VALUE;
+	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
+
+	// All matching kmers
+	typedef Fragment<> TFragment;
+	typedef String<TFragment, Block<> > TFragmentString;
+	TFragmentString matches;
+
+	// Transform the set of strings into a set of strings of k-tupels
+	TTupelStringSet tupSet;
+	resize(tupSet, nseq);
+	for(TSize k=0;k<nseq;++k) {
+		if (overlapping) _getTupelString(str[k], tupSet[k], ktup, TAlphabet());
+		else _getNonOverlappingTupelString(str[k], tupSet[k], ktup, TAlphabet());
+	}
+
+	// Build for each sequence the q-gram Index and count common hits
+	String<TWord, External<> > qIndex;
+	TWord qIndexSize = 1;
+	for (TWord i=0; i<ktup;++i) qIndexSize *= alphabet_size;
+	for(TWord i = 0;i < qIndexSize;++i) push_back(qIndex, (TWord) 0);
+	for(TSize k=0;k<nseq-1;++k) {
+		TId id1 = positionToId(str, k);
+		//std::cout << str[k] << std::endl;
+
+		// First pass: Count occurrences
+		for(TWord i = 0;i < qIndexSize;++i) qIndex[i] = 0;
+		for(TWord i = 0;i < (TWord) length(tupSet[k]);++i) {
+			++qIndex[ tupSet[k][i] ];
+		}
+		// Build incremental sums
+		TWord sum = 0;
+		for(TWord i = 0;i < qIndexSize;++i) {
+			TWord tmp = qIndex[i];
+			qIndex[i] = sum;
+			sum += tmp;
+		}
+		// Second pass: Insert hits
+		String<TWord> positions;
+		resize(positions, sum, Exact());
+		for(TSize i = 0;i < (TSize) length(tupSet[k]);++i) {
+			positions[qIndex[ tupSet[k][i] ]] = i;
+			++qIndex[ tupSet[k][i] ];
+		}
+		// Reset pointers
+		for(TWord i = qIndexSize-1;i > 0; --i) {
+			qIndex[i] = qIndex[i-1];
+		}
+		qIndex[0] = 0;
+		for (TSize k2=k+1; k2<nseq; ++k2) {
+			TId id2 = positionToId(str, k2);
+			//std::cout << str[k2] << std::endl;
+
+			for(TSize i = 0;i < (TSize) length(tupSet[k2]);++i) {
+				TWord current_kmer = tupSet[k2][i];
+				TWord amount = 0;
+				if (current_kmer == qIndexSize - 1) amount = sum - qIndex[current_kmer];
+				else amount = qIndex[current_kmer+1] - qIndex[current_kmer];
+				for(TWord pos = qIndex[current_kmer]; pos < qIndex[current_kmer] + amount; ++pos) {
+					//std::cout << id1 << ',' << positions[pos] << ':' << id2 << ',' << i << std::endl;
+					//std::cout << tupSet[k2][i] << ',' << tupSet[k][positions[pos]] << std::endl;
+					if (overlapping) push_back(matches, TFragment(id1, positions[pos], id2, i, ktup));
+					else {
+						TVertexDescriptor v1 = findVertex(g, id1, (unsigned int) positions[pos] * ktup);
+						if (v1 == nilVertex) v1 = addVertex(g, id1, (unsigned int) positions[pos] * ktup, (unsigned int) ktup);
+						TVertexDescriptor v2 = findVertex(g, id2, (unsigned int) i * ktup);
+						if (v2 == nilVertex) v2 = addVertex(g, id2, (unsigned int) i * ktup, (unsigned int) ktup);
+						addEdge(g, v1, v2, (unsigned int) ktup);
+					}
+				}
+			}
+		}
+	}
+	
+	if (overlapping) matchRefinement(matches,str,const_cast<TScore&>(score_type),g);
+	else {
+		for(TSize k=0;k<nseq;++k) {
+			TId seqId = positionToId(str, k);
+			TSize i = 0;
+			TSize len = length(str[k]);
+			while(i<len) {
+				TVertexDescriptor nextVertex = findVertex(g, seqId, i);
+				if (nextVertex == nilVertex) {
+					TSize j = i + 1;
+					while ((j < len) && (findVertex(g, seqId, j) == nilVertex)) ++j;
+					nextVertex = addVertex(g, seqId, i, j-i);
+				}
+				i += fragmentLength(g, nextVertex);
+			}
+		}
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec, typename TScore, typename TSize>
+inline void 
+generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+					   TScore const& score_type,
+					   TSize ktup,
+					   Kmer_Library)
+{
+	SEQAN_CHECKPOINT
+	generatePrimaryLibrary(g,score_type,ktup,true,Kmer_Library());
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec, typename TScore>
+inline void 
+generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+					   TScore const& score_type,
+					   Kmer_Library)
+{
+	SEQAN_CHECKPOINT
+	generatePrimaryLibrary(g,score_type,3,Kmer_Library());
+}
 
 
 //////////////////////////////////////////////////////////////////////////////

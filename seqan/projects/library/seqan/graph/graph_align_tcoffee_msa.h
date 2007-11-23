@@ -63,9 +63,9 @@ tCoffeeProteinAlignment(StringSet<TString, Dependent<> > const& strSet,
 	String<TGraph*> libs;
 	appendValue(libs, &lib1);
 	appendValue(libs, &lib2);
-	combineGraphs(g, libs);
+	//combineGraphs(g, libs);
 	//// Only topology
-	//combineGraphs(g, true, libs);
+	combineGraphs(g, true, libs);
 	//std::cout << "Library size: " << numVertices(g) << " Vertices, " << numEdges(g) << " Edges" << std::endl;
 
 	// Clear the old libraries
@@ -81,18 +81,21 @@ tCoffeeProteinAlignment(StringSet<TString, Dependent<> > const& strSet,
 
 		// ... and normal progressive alignment with guide tree
 		Graph<Tree<double> > guideTree;
+		//upgmaTree(distanceMatrix, guideTree);	
 		slowNjTree(distanceMatrix, guideTree);
 		progressiveAlignment(g, guideTree, gOut);
 		clear(guideTree);
 	} else {
 		// Triplet only on groups of sequences
 		Graph<Tree<double> > guideTree;
-		slowNjTree(distanceMatrix, guideTree);
+		//upgmaTree(distanceMatrix, guideTree);	
+		slowNjTree(distanceMatrix, guideTree);	// More balanced than UPGMA
 		progressiveAlignment(g, guideTree, gOut, threshold);
 		clear(guideTree);
 	}
 	clear(distanceMatrix);
 	clear(g);
+
 }
 
 //////////////////////////////////////////////////////////////////////////////

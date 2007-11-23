@@ -141,23 +141,14 @@ void Test_GuideTree() {
 	// Create a distance matrix
 	String<double> mat;
 	fill(mat, 8*8, 0);
-	assignValue(mat, 0*8+0, 0);assignValue(mat, 0*8+1, 7);assignValue(mat, 0*8+2, 8);assignValue(mat, 0*8+3, 11);
-	assignValue(mat, 0*8+4, 13);assignValue(mat, 0*8+5, 16);assignValue(mat, 0*8+6, 13);assignValue(mat, 0*8+7, 17);
-	assignValue(mat, 1*8+0, 7);assignValue(mat, 1*8+1, 0);assignValue(mat, 1*8+2, 5);assignValue(mat, 1*8+3, 8);
-	assignValue(mat, 1*8+4, 10);assignValue(mat, 1*8+5, 13);assignValue(mat, 1*8+6, 10);assignValue(mat, 1*8+7, 14);
-	assignValue(mat, 2*8+0, 8);assignValue(mat, 2*8+1, 5);assignValue(mat, 2*8+2, 0);assignValue(mat, 2*8+3, 5);
-	assignValue(mat, 2*8+4, 7);assignValue(mat, 2*8+5, 10);assignValue(mat, 2*8+6, 7);assignValue(mat, 2*8+7, 11);
-	assignValue(mat, 3*8+0, 11);assignValue(mat, 3*8+1, 8);assignValue(mat, 3*8+2, 5);assignValue(mat, 3*8+3, 0);
+	assignValue(mat, 0*8+1, 7);assignValue(mat, 0*8+2, 8);assignValue(mat, 0*8+3, 11);assignValue(mat, 0*8+4, 13);assignValue(mat, 0*8+5, 16);assignValue(mat, 0*8+6, 13);assignValue(mat, 0*8+7, 17);
+	assignValue(mat, 1*8+2, 5);assignValue(mat, 1*8+3, 8);assignValue(mat, 1*8+4, 10);assignValue(mat, 1*8+5, 13);assignValue(mat, 1*8+6, 10);assignValue(mat, 1*8+7, 14);
+	assignValue(mat, 2*8+3, 5);assignValue(mat, 2*8+4, 7);assignValue(mat, 2*8+5, 10);assignValue(mat, 2*8+6, 7);assignValue(mat, 2*8+7, 11);
 	assignValue(mat, 3*8+4, 8);assignValue(mat, 3*8+5, 11);assignValue(mat, 3*8+6, 8);assignValue(mat, 3*8+7, 12);
-	assignValue(mat, 4*8+0, 13);assignValue(mat, 4*8+1, 10);assignValue(mat, 4*8+2, 7);assignValue(mat, 4*8+3, 8);
-	assignValue(mat, 4*8+4, 0);assignValue(mat, 4*8+5, 5);assignValue(mat, 4*8+6, 6);assignValue(mat, 4*8+7, 10);
-	assignValue(mat, 5*8+0, 16);assignValue(mat, 5*8+1, 13);assignValue(mat, 5*8+2, 10);assignValue(mat, 5*8+3, 11);
-	assignValue(mat, 5*8+4, 5);assignValue(mat, 5*8+5, 0);assignValue(mat, 5*8+6, 9);assignValue(mat, 5*8+7, 13);
-	assignValue(mat, 6*8+0, 13);assignValue(mat, 6*8+1, 10);assignValue(mat, 6*8+2, 7);assignValue(mat, 6*8+3, 8);
-	assignValue(mat, 6*8+4, 6);assignValue(mat, 6*8+5, 9);assignValue(mat, 6*8+6, 0);assignValue(mat, 6*8+7, 8);
-	assignValue(mat, 7*8+0, 17);assignValue(mat, 7*8+1, 14);assignValue(mat, 7*8+2, 11);assignValue(mat, 7*8+3, 12);
-	assignValue(mat, 7*8+4, 10);assignValue(mat, 7*8+5, 13);assignValue(mat, 7*8+6, 8);assignValue(mat, 7*8+7, 0);
-
+	assignValue(mat, 4*8+5, 5);assignValue(mat, 4*8+6, 6);assignValue(mat, 4*8+7, 10);
+	assignValue(mat, 5*8+6, 9);assignValue(mat, 5*8+7, 13);
+	assignValue(mat, 6*8+7, 8);
+	
 	typedef Graph<Tree<double> > TGraph;
 	TGraph guideTreeOut;
 	slowNjTree(mat, guideTreeOut);
@@ -186,25 +177,17 @@ void Test_GuideTree() {
 // UPGMA
 	clear(mat);
 	fill(mat, 8*8, 0);
-	assignValue(mat, 0*8+0, 0);assignValue(mat, 0*8+1, 32);assignValue(mat, 0*8+2, 48);assignValue(mat, 0*8+3, 51);
-	assignValue(mat, 0*8+4, 50);assignValue(mat, 0*8+5, 48);assignValue(mat, 0*8+6, 98);assignValue(mat, 0*8+7, 148);
-	assignValue(mat, 1*8+0, 32);assignValue(mat, 1*8+1, 0);assignValue(mat, 1*8+2, 26);assignValue(mat, 1*8+3, 34);
-	assignValue(mat, 1*8+4, 29);assignValue(mat, 1*8+5, 33);assignValue(mat, 1*8+6, 84);assignValue(mat, 1*8+7, 136);
-	assignValue(mat, 2*8+0, 48);assignValue(mat, 2*8+1, 26);assignValue(mat, 2*8+2, 0);assignValue(mat, 2*8+3, 42);
-	assignValue(mat, 2*8+4, 44);assignValue(mat, 2*8+5, 44);assignValue(mat, 2*8+6, 92);assignValue(mat, 2*8+7, 152);
-	assignValue(mat, 3*8+0, 51);assignValue(mat, 3*8+1, 34);assignValue(mat, 3*8+2, 42);assignValue(mat, 3*8+3, 0);
+	assignValue(mat, 0*8+1, 32);assignValue(mat, 0*8+2, 48);assignValue(mat, 0*8+3, 51);assignValue(mat, 0*8+4, 50);assignValue(mat, 0*8+5, 48);assignValue(mat, 0*8+6, 98);assignValue(mat, 0*8+7, 148);
+	assignValue(mat, 1*8+2, 26);assignValue(mat, 1*8+3, 34);assignValue(mat, 1*8+4, 29);assignValue(mat, 1*8+5, 33);assignValue(mat, 1*8+6, 84);assignValue(mat, 1*8+7, 136);
+	assignValue(mat, 2*8+3, 42);assignValue(mat, 2*8+4, 44);assignValue(mat, 2*8+5, 44);assignValue(mat, 2*8+6, 92);assignValue(mat, 2*8+7, 152);
 	assignValue(mat, 3*8+4, 44);assignValue(mat, 3*8+5, 38);assignValue(mat, 3*8+6, 86);assignValue(mat, 3*8+7, 142);
-	assignValue(mat, 4*8+0, 50);assignValue(mat, 4*8+1, 29);assignValue(mat, 4*8+2, 44);assignValue(mat, 4*8+3, 44);
-	assignValue(mat, 4*8+4, 0);assignValue(mat, 4*8+5, 24);assignValue(mat, 4*8+6, 89);assignValue(mat, 4*8+7, 142);
-	assignValue(mat, 5*8+0, 48);assignValue(mat, 5*8+1, 33);assignValue(mat, 5*8+2, 44);assignValue(mat, 5*8+3, 38);
-	assignValue(mat, 5*8+4, 24);assignValue(mat, 5*8+5, 0);assignValue(mat, 5*8+6, 90);assignValue(mat, 5*8+7, 142);
-	assignValue(mat, 6*8+0, 98);assignValue(mat, 6*8+1, 84);assignValue(mat, 6*8+2, 92);assignValue(mat, 6*8+3, 86);
-	assignValue(mat, 6*8+4, 89);assignValue(mat, 6*8+5, 90);assignValue(mat, 6*8+6, 0);assignValue(mat, 6*8+7, 148);
-	assignValue(mat, 7*8+0, 148);assignValue(mat, 7*8+1, 136);assignValue(mat, 7*8+2, 152);assignValue(mat, 7*8+3, 142);
-	assignValue(mat, 7*8+4, 142);assignValue(mat, 7*8+5, 142);assignValue(mat, 7*8+6, 148);assignValue(mat, 7*8+7, 0);
-
+	assignValue(mat, 4*8+5, 24);assignValue(mat, 4*8+6, 89);assignValue(mat, 4*8+7, 142);
+	assignValue(mat, 5*8+6, 90);assignValue(mat, 5*8+7, 142);
+	assignValue(mat, 6*8+7, 148);
+	
 	clear(guideTreeOut);
 	upgmaTree(mat, guideTreeOut);
+
 	//std::cout << guideTreeOut << std::endl;
 	SEQAN_TASSERT(numVertices(guideTreeOut) == 15)
 	SEQAN_TASSERT(findEdge(guideTreeOut, 8, 4) != 0)
@@ -227,10 +210,9 @@ void Test_GuideTree() {
 // UpgmaMin vs. UpgmaAvg
 	clear(mat);
 	fill(mat, 4*4, 0);
-	assignValue(mat, 0*4+0, 0);assignValue(mat, 0*4+1, 30);assignValue(mat, 0*4+2, 80);assignValue(mat, 0*4+3, 60);
-	assignValue(mat, 1*4+0, 30);assignValue(mat, 1*4+1, 0);assignValue(mat, 1*4+2, 20);assignValue(mat, 1*4+3, 40);
-	assignValue(mat, 2*4+0, 80);assignValue(mat, 2*4+1, 20);assignValue(mat, 2*4+2, 0);assignValue(mat, 2*4+3, 40);
-	assignValue(mat, 3*4+0, 60);assignValue(mat, 3*4+1, 40);assignValue(mat, 3*4+2, 40);assignValue(mat, 3*4+3, 0);
+	assignValue(mat, 0*4+1, 30);assignValue(mat, 0*4+2, 80);assignValue(mat, 0*4+3, 60);
+	assignValue(mat, 1*4+2, 20);assignValue(mat, 1*4+3, 40);
+	assignValue(mat, 2*4+3, 40);
 	clear(guideTreeOut);
 	upgmaTree(mat, guideTreeOut, UpgmaAvg());
 	//std::cout << guideTreeOut << std::endl;
@@ -240,10 +222,9 @@ void Test_GuideTree() {
 	SEQAN_TASSERT(findEdge(guideTreeOut, 0, 6) != 0)
 	clear(mat);
 	fill(mat, 4*4, 0);
-	assignValue(mat, 0*4+0, 0);assignValue(mat, 0*4+1, 30);assignValue(mat, 0*4+2, 80);assignValue(mat, 0*4+3, 60);
-	assignValue(mat, 1*4+0, 30);assignValue(mat, 1*4+1, 0);assignValue(mat, 1*4+2, 20);assignValue(mat, 1*4+3, 40);
-	assignValue(mat, 2*4+0, 80);assignValue(mat, 2*4+1, 20);assignValue(mat, 2*4+2, 0);assignValue(mat, 2*4+3, 40);
-	assignValue(mat, 3*4+0, 60);assignValue(mat, 3*4+1, 40);assignValue(mat, 3*4+2, 40);assignValue(mat, 3*4+3, 0);
+	assignValue(mat, 0*4+1, 30);assignValue(mat, 0*4+2, 80);assignValue(mat, 0*4+3, 60);
+	assignValue(mat, 1*4+2, 20);assignValue(mat, 1*4+3, 40);
+	assignValue(mat, 2*4+3, 40);
 	clear(guideTreeOut);
 	upgmaTree(mat, guideTreeOut, UpgmaMin());
 	//std::cout << guideTreeOut << std::endl;
@@ -278,7 +259,8 @@ void Test_TCoffeeGarfield() {
 	
 	// Generate a primary library, i.e., all global pairwise alignments
 	TGraph lib1(strSet);
-	generatePrimaryLibrary(lib1, score_type_global, GlobalPairwise_Library() );
+	generatePrimaryLibrary(lib1, score_type_local, GlobalPairwise_Library() );
+	//generatePrimaryLibrary(lib1, score_type_global, 5, false, Kmer_Library() );
 	
 	fstream strm01; // Alignment graph as dot
 	strm01.open(TEST_PATH "my_tcoffee01.dot", ios_base::out | ios_base::trunc);
@@ -438,8 +420,6 @@ void Test_TCoffeeAssemblyFromFile(String<char> const in_path) {
 	selectPairsForLibraryGeneration(g, pList);
 	String<double> distanceMatrix;
 	generatePrimaryLibrary(g, pList, score_type_global, distanceMatrix, Overlap_Library() );
-	std::cout << "Library size: " << numVertices(g) << " Vertices, " << numEdges(g) << " Edges" << std::endl;
-	_alignTiming(startTime, "Global pairwise library done: ");
 
 	// Triplet library extension
 	tripletLibraryExtension(g);
@@ -483,7 +463,7 @@ void Test_TCoffeeAssemblyFromFile(String<char> const in_path) {
 	output2 << in_path << "." << "my";
 	fstream strm5; // Alignment graph as fasta
 	strm5.open(output2.str().c_str(), ios_base::out | ios_base::trunc);
-	write(strm5,gOut,names, FastaFormat());
+	write(strm5,gOut,names, FastaReadFormat());
 	strm5.close();
 	_alignTiming(startTime, "Alignment output done: ");
 
@@ -535,7 +515,7 @@ void Test_TCoffeeFromLibrary(String<char> const in_path) {
 
 	//Score<int> score_type = Score<int>(5,-4,-1,-10);
 	Score<int> score_type = Score<int>(5,-4,-4,-14);
-		
+	
 	//// Generate a primary library, i.e., all global pairwise alignments
 	TGraph lib2(strSet);
 	String<double> distanceMatrix;
@@ -567,7 +547,6 @@ void Test_TCoffeeFromLibrary(String<char> const in_path) {
 	_alignTiming(startTime, "Triplet done: ");
 	std::cout << "Library size: " << numVertices(g) << " Vertices, " << numEdges(g) << " Edges" << std::endl;
 
-
 	// Build the guide tree
 	Graph<Tree<double> > guideTree;
 	upgmaTree(distanceMatrix, guideTree);
@@ -578,7 +557,7 @@ void Test_TCoffeeFromLibrary(String<char> const in_path) {
 	//progressiveAlignment(g, guideTree, gOut, Gotoh() );
 	progressiveAlignment(g, guideTree, gOut);
 	_alignTiming(startTime, "Progressive alignment done: ");
-	//std::cout << gOut << std::endl;
+	std::cout << gOut << std::endl;
 	clear(guideTree);
 
 	// Output alignment
@@ -598,6 +577,84 @@ void Test_TCoffeeFromLibrary(String<char> const in_path) {
 	_alignTiming(bigbang, "Total time: ");
 	std::cout << "==============================" << std::endl;
 }
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+void Test_TCoffeeScratch(String<char> const in_path) {
+//____________________________________________________________________________
+// T-Coffee
+	clock_t bigbang, startTime;
+	startTime = clock();
+	bigbang = startTime;
+
+	// Import Sequences
+	typedef String<Dna> TString;
+	StringSet<String<Dna>, Owner<> > origStrSet;
+	String<String<char> > names;
+	unsigned int nucCount = _alignImportSequences(in_path, "", "", origStrSet, names);
+	unsigned int seqCount = length(origStrSet);
+	_alignTiming(startTime, "Library reading done: ");
+	std::cout << "Total number of bp: " << nucCount << ", Number of sequences: " << seqCount << std::endl;
+
+	// Align the sequences
+	typedef StringSet<TString, Dependent<> > TStringSet;
+	typedef Graph<Alignment<TStringSet, unsigned int> > TGraph;
+	typedef Size<TGraph>::Type TSize;
+	typedef Id<TGraph>::Type TId;
+
+	// Make dependent string set
+	TStringSet strSet;
+	for(unsigned int i = 0; i<seqCount; ++i) appendValue(strSet, origStrSet[i]);
+	
+	//Score<int> score_type = Score<int>(5,-4,-1,-10);
+	Score<int> score_type = Score<int>(5,-4,-4,-14);
+
+	// Generate kmer primary library
+	TGraph g(strSet);
+	generatePrimaryLibrary(g, score_type, 15, false, Kmer_Library() );
+	_alignTiming(startTime, "Kmer library done: ");
+	std::cout << "Library size: " << numVertices(g) << " Vertices, " << numEdges(g) << " Edges" << std::endl;
+	
+	// Triplet library extension
+	tripletLibraryExtension(g);
+	_alignTiming(startTime, "Triplet done: ");
+	std::cout << "Library size: " << numVertices(g) << " Vertices, " << numEdges(g) << " Edges" << std::endl;
+
+	// Pairwise Distances
+	String<double> distanceMatrix;
+	getDistanceMatrix(g, distanceMatrix, LibraryDistance() ); 
+
+	// Build the guide tree
+	Graph<Tree<double> > guideTree;
+	upgmaTree(distanceMatrix, guideTree);
+	_alignTiming(startTime, "Guide tree done: ");
+
+	// Perform a progressive alignment
+	Graph<Alignment<TStringSet, void, WithoutEdgeId> > gOut(strSet);
+	progressiveAlignment(g, guideTree, gOut);
+	_alignTiming(startTime, "Progressive alignment done: ");
+	std::cout << gOut << std::endl;
+	clear(guideTree);
+
+	// Output alignment
+	std::stringstream output2;
+	output2 << in_path << "." << "fasta";
+	fstream strm6; // Alignment graph as msf
+	strm6.open(output2.str().c_str(), ios_base::out | ios_base::trunc);
+	write(strm6,gOut,names, FastaFormat());
+	strm6.close();
+	_alignTiming(startTime, "Alignment output done: ");
+
+	// Clean-up
+	clear(distanceMatrix);
+	clear(gOut);
+	clear(g);
+	_alignTiming(startTime, "Clean-up done: ");
+	_alignTiming(bigbang, "Total time: ");
+	std::cout << "==============================" << std::endl;
+}
+
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -870,7 +927,7 @@ void Test_GraphTCoffee() {
 	// Assembly
 	//Test_TCoffeeAssembly();
 
-	// Balibase
+	//// Balibase
 	//Test_BaliBaseRef11();
 	//Test_BaliBaseRef12();
 	//Test_BaliBaseRef20();
@@ -883,11 +940,9 @@ void Test_GraphTCoffee() {
 
 	// RnaLibraries
 	//Test_RnaLibraries();
-	//Test_TCoffeeFromLibrary("Z:\\seqan\\version7\\projects\\tests\\graph\\tRNA.k3.lib");
-	//Test_TCoffeeFromLibrary("Z:\\Bralibase\\my_problem.lib");
-	//Test_TCoffeeFromLibrary("/home/takifugu/rausch/Bralibase/my_problem.lib");
-	//
-
+	//Test_TCoffeeFromLibrary("/home/takifugu/rausch/Bralibase/small.lib");
+	//Test_TCoffeeScratch("Z://matches//test//pox_subset.fasta");
+	//Test_TCoffeeScratch("/home/takifugu/rausch/matches/test/pox_subset.fasta");
 
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_base.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_msa.h");

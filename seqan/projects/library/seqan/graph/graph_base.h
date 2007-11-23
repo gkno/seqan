@@ -165,6 +165,16 @@ typedef Tag<FastaFormat_> const FastaFormat;
 //////////////////////////////////////////////////////////////////////////////
 
 /**
+.Tag.Alignment Graph Format.value.FastaReadFormat:
+	Fasta read format to write an alignment graph.
+*/
+
+struct FastaReadFormat_;
+typedef Tag<FastaReadFormat_> const FastaReadFormat;
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
 .Tag.Alignment Graph Format.value.CgVizFormat:
 	Cgviz format to write an alignment graph.
 */

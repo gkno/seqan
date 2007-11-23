@@ -38,32 +38,34 @@ _getTupelString(TString const& str,
 				TAlphabet) 
 {
 	SEQAN_CHECKPOINT
-	typedef unsigned int TWord;
-	typedef typename Size<TString>::Type TSize;
-
+	typedef typename Value<typename Value<TTupelString>::Type>::Type TWord;
+	
 	// Alphabet size
-	TSize alphabet_size = ValueSize<TAlphabet>::VALUE;
+	TWord alphabet_size = ValueSize<TAlphabet>::VALUE;
 
 	// Assign a unique number to each k-tupel
 	String<TWord> prod;  // Scaling according to position in k-tupel
 	resize(prod,ktup);
-	for (TWord i=0; i< (TWord) ktup;++i) prod[ktup-i-1]=(TWord)pow((double)alphabet_size,(double)i);
+	for (TWord i=0; i< (TWord) ktup;++i) {
+		prod[ktup-i-1] = 1;
+		for(TWord j=0;j<i;++j) prod[ktup-i-1] *= alphabet_size;
+	}
 
-	TSize len = length(str);
+	TWord len = length(str);
 	clear(tupelString);
 	resize(tupelString, len-(ktup - 1)); 
-	TSize tupelIndex = 0;
-	TSize endTupel = 0;
+	TWord tupelIndex = 0;
+	TWord endTupel = 0;
 	tupelString[tupelIndex] = 0;
 	for(;endTupel< (TWord) ktup;++endTupel) {
-		tupelString[tupelIndex] += ((unsigned int) ((TAlphabet) str[endTupel])) * prod[endTupel];
+		tupelString[tupelIndex] += (TWord) ((Byte) ((TAlphabet) str[endTupel])) * prod[endTupel];
 	}
 	++tupelIndex;
 	for(;endTupel<len;++endTupel) {
 		tupelString[tupelIndex] = tupelString[tupelIndex - 1];
-		tupelString[tupelIndex] -= ((unsigned int) ((TAlphabet) str[endTupel - ktup])) * prod[0];
+		tupelString[tupelIndex] -= (TWord) ((Byte) ((TAlphabet) str[endTupel - ktup])) * prod[0];
 		tupelString[tupelIndex] *= alphabet_size;
-		tupelString[tupelIndex] += ((unsigned int) ((TAlphabet) str[endTupel]));
+		tupelString[tupelIndex] += (TWord) ((Byte) ((TAlphabet) str[endTupel]));
 		++tupelIndex;
 	}
 }
@@ -78,26 +80,27 @@ _getNonOverlappingTupelString(TString const& str,
 							  TAlphabet) 
 {
 	SEQAN_CHECKPOINT
-	typedef unsigned int TWord;
-	typedef typename Size<TString>::Type TSize;
-
+	typedef typename Value<typename Value<TTupelString>::Type>::Type TWord;
+	
 	// Alphabet size
-	TSize alphabet_size = ValueSize<TAlphabet>::VALUE;
+	TWord alphabet_size = ValueSize<TAlphabet>::VALUE;
 
 	// Assign a unique number to each k-tupel
 	String<TWord> prod;  // Scaling according to position in k-tupel
 	resize(prod,ktup);
-	for (TWord i=0; i< (TWord) ktup;++i) prod[ktup-i-1]=(TWord)pow((double)alphabet_size,(double)i);
-
-	TSize len = length(str);
+	for (TWord i=0; i< (TWord) ktup;++i) {
+		prod[ktup-i-1] = 1;
+		for(TWord j=0;j<i;++j) prod[ktup-i-1] *= alphabet_size;
+	}
+	TWord len = length(str);
 	clear(tupelString);
-	TSize lenOfTup = (TSize) std::floor((double) len / (double) ktup);
+	TWord lenOfTup = (TWord) std::floor((double) len / (double) ktup);
 	fill(tupelString, lenOfTup, 0, Exact()); 
-	TSize tupelIndex = 0;
-	TSize endTupel = 0;
+	TWord tupelIndex = 0;
+	TWord endTupel = 0;
 	tupelString[tupelIndex] = 0;
 	while (tupelIndex < lenOfTup) {
-		tupelString[tupelIndex] += ((unsigned int) ((TAlphabet) str[endTupel])) * prod[endTupel % 3];
+		tupelString[tupelIndex] += (TWord) ( (Byte) ( (TAlphabet) str[endTupel] ) ) * prod[endTupel % 3];
 		++endTupel;
 		if (endTupel % 3 == 0) ++tupelIndex;
 	}
@@ -113,7 +116,7 @@ getKmerSimilarityMatrix(StringSet<TString, TSpec> const& strSet,
 						TAlphabet) 
 {
 	SEQAN_CHECKPOINT
-	typedef unsigned int TWord;
+	typedef __int64 TWord;
 	typedef String<TWord> TTupelString;
 	typedef String<TTupelString> TTupelStringSet;
 	typedef typename Value<THitMatrix>::Type TValue;
@@ -137,12 +140,12 @@ getKmerSimilarityMatrix(StringSet<TString, TSpec> const& strSet,
 	String<TWord> compareIndex;
 	for(TSize k=0;k<nseq;++k) {
 		clear(qIndex);
-		fill(qIndex, (unsigned int) pow((double)alphabet_size, (double)ktup), (TWord) 0, Exact());
+		fill(qIndex, (TWord) pow((TWord)alphabet_size, (TWord)ktup), (TWord) 0, Exact());
 		for(TSize i = 0;i < (TSize) length(tupSet[k]);++i) ++qIndex[ tupSet[k][i] ];
 		TWord value;
 	    for (TSize k2=k; k2<nseq; ++k2) {
 			clear(compareIndex);
-			fill(compareIndex, (unsigned int) pow((double)alphabet_size, (double)ktup), (TWord) 0, Exact());
+			fill(compareIndex, (TWord) pow((TWord)alphabet_size, (TWord)ktup), (TWord) 0, Exact());
 			value = 0;
 			for(TSize i = 0;i < (TSize) length(tupSet[k2]);++i) {
 				//std::cout << tupSet[k2][i] << "," << compareIndex[ tupSet[k2][i] ] << "," << qIndex[ tupSet[k2][i] ]<< std::endl;
