@@ -267,6 +267,97 @@ heaviestIncreasingSubsequence(TString const& str,
 	// Walk through the sequence and build the decreasing covers
 	typedef typename Iterator<TString const>::Type TStringIter;
 	TStringIter endIt = end(str);
+	TSize pos_of_iterator = 0;
+	for(TStringIter it = begin(str); it != endIt; ++it, ++pos_of_iterator) {
+		TWeight w = getValue(weights, pos_of_iterator);
+		// Letters that do not contribute a weight (e.g., w = 0) are excluded!
+		// Weights must increase!
+		if (w <= 0) {
+			addVertex(g);  // Note: The vertex id corresponds to the position
+			continue;
+		}
+
+
+		// Get previous element
+		TSortedSequenceIter a_k_it = _previousInSortedSequence(list, std::make_pair(*it, std::make_pair(0, 0))); 
+		
+		// Get next element
+		TSortedSequenceIter b_l_it = _nextInSortedSequence(list, a_k_it);
+
+		// Determine new weight
+		if (a_k_it != list.end()) w += a_k_it->second.first;
+
+		// Delete from list
+		while ((b_l_it != list.end()) && 
+				(w >= b_l_it->second.first)) {
+					TSortedSequenceIter tmp = b_l_it;
+					b_l_it = _nextInSortedSequence(list, b_l_it);
+					list.erase(*tmp);
+		}
+
+		// Insert new list element
+		if ((b_l_it == list.end()) ||
+			(*it < b_l_it->first)) {
+				list.insert(std::make_pair(*it, std::make_pair(w, pos_of_iterator)));
+		}
+
+		// Create the corresponding node, pos_of_iterator == Vertex Descriptor
+		addVertex(g);
+
+		// Connect to predecessor
+		if (a_k_it != list.end()) addEdge(g, pos_of_iterator, a_k_it->second.second);
+	}
+
+	// Trace-back
+	TWeight w = 0;
+	if (list.rbegin() == list.rend()) return 0;
+	else {
+		bool finished = false;
+		// Last vertex is end of heaviest increasing subsequence
+		TVertexDescriptor v = list.rbegin()->second.second;
+		while (!finished) {
+			// Exclude edges with weight 0 !!!
+			// Note: Very important, do not delete this check!!!
+			//if (getProperty(weights, v) > 0) {
+				appendValue(pos, v);
+				w+=getValue(weights, v);
+			//}
+			TOutEdgeIterator it(g, v);
+			if (atEnd(it)) finished = true;
+			else v = targetVertex(it);
+		}
+	}
+	return w;
+}
+
+/*
+template<typename TString, typename TWeightMap, typename TPositions>
+inline typename Value<TWeightMap>::Type
+heaviestIncreasingSubsequence(TString const& str, 
+							  TWeightMap const& weights, 
+							  TPositions& pos) 
+{
+	SEQAN_CHECKPOINT
+	typedef typename Size<TString>::Type TSize;
+	typedef typename Value<TString>::Type TValue;
+	typedef typename Value<TPositions>::Type TPos;
+	typedef typename Value<TWeightMap>::Type TWeight;
+
+	// The list of decreasing covers, only the smallest element of each member must be remembered
+	typedef std::pair<TValue, std::pair<TWeight, TPos> > TKey;
+	typedef std::set<TKey, std::less<TKey> > TSortedSequence;
+	typedef typename TSortedSequence::const_iterator TSortedSequenceIter;
+	TSortedSequence list;
+	
+	// The trace-back graph
+	typedef Graph<Directed<void, WithoutEdgeId> > TGraph;
+	typedef Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
+	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	TGraph g;
+
+	// Walk through the sequence and build the decreasing covers
+	typedef typename Iterator<TString const>::Type TStringIter;
+	TStringIter endIt = end(str);
 	TPos pos_of_iterator = 0;
 	typedef std::map<TPos, TVertexDescriptor> TPosToVertex;
 	typedef std::map<TVertexDescriptor, TPos> TVertexToPos;
@@ -328,6 +419,7 @@ heaviestIncreasingSubsequence(TString const& str,
 	}
 	return w;
 }
+*/
 
 
 //////////////////////////////////////////////////////////////////////////////

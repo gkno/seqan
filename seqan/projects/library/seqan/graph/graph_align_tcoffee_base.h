@@ -116,6 +116,14 @@ typedef Tag<LocalPairwise_Library_> const LocalPairwise_Library;
 struct Overlap_Library_;
 typedef Tag<Overlap_Library_> const Overlap_Library;
 
+/**
+.Tag.Library Generation.value.Kmer_Library:
+	A primary library of kmer alignments.
+*/
+
+struct Kmer_Library_;
+typedef Tag<Kmer_Library_> const Kmer_Library;
+
 
 
 //////////////////////////////////////////////////////////////////////////////

@@ -250,7 +250,7 @@ _upgmaTreeMerge(TMatrix const& mat,
 template<typename TMatrix, typename TActive, typename TSize>
 inline typename Value<TMatrix>::Type
 _upgmaTreeMerge(TMatrix const& mat, 
-				TActive const& active,
+				TActive const&,
 				TSize index_i,
 				TSize index_j,
 				TSize i,
@@ -262,11 +262,11 @@ _upgmaTreeMerge(TMatrix const& mat,
 
 	// Minimum
 	TValue newDist = 0;
-	if (index_i < i) newDist = ((TValue) active[index_i] / (TValue) (active[index_i] + active[index_j])) * getValue(mat, index_i * nseq + i);
-	else newDist = ((TValue) active[index_i] / (TValue) (active[index_i] + active[index_j])) * getValue(mat, i * nseq + index_i);
+	if (index_i < i) newDist = getValue(mat, index_i * nseq + i);
+	else newDist = getValue(mat, i * nseq + index_i);
 	TValue newDist2 = 0;
-	if (index_j < i) newDist2 = ((TValue) active[index_j] / (TValue) (active[index_i] + active[index_j])) * getValue(mat, index_j * nseq + i);
-	else newDist2 = ((TValue) active[index_j] / (TValue) (active[index_i] + active[index_j])) * getValue(mat, i * nseq + index_j);
+	if (index_j < i) newDist2 = getValue(mat, index_j * nseq + i);
+	else newDist2 = getValue(mat, i * nseq + index_j);
 	if (newDist2 < newDist) return newDist2;
 	else return newDist;
 }
@@ -276,7 +276,7 @@ _upgmaTreeMerge(TMatrix const& mat,
 template<typename TMatrix, typename TActive, typename TSize>
 inline typename Value<TMatrix>::Type
 _upgmaTreeMerge(TMatrix const& mat, 
-				TActive const& active,
+				TActive const&,
 				TSize index_i,
 				TSize index_j,
 				TSize i,
@@ -288,11 +288,11 @@ _upgmaTreeMerge(TMatrix const& mat,
 
 	// Maximum
 	TValue newDist = 0;
-	if (index_i < i) newDist = ((TValue) active[index_i] / (TValue) (active[index_i] + active[index_j])) * getValue(mat, index_i * nseq + i);
-	else newDist = ((TValue) active[index_i] / (TValue) (active[index_i] + active[index_j])) * getValue(mat, i * nseq + index_i);
+	if (index_i < i) newDist = getValue(mat, index_i * nseq + i);
+	else newDist = getValue(mat, i * nseq + index_i);
 	TValue newDist2 = 0;
-	if (index_j < i) newDist2 = ((TValue) active[index_j] / (TValue) (active[index_i] + active[index_j])) * getValue(mat, index_j * nseq + i);
-	else newDist2 = ((TValue) active[index_j] / (TValue) (active[index_i] + active[index_j])) * getValue(mat, i * nseq + index_j);
+	if (index_j < i) newDist2 = getValue(mat, index_j * nseq + i);
+	else newDist2 = getValue(mat, i * nseq + index_j);
 	if (newDist2 < newDist) return newDist;
 	else return newDist2;
 }

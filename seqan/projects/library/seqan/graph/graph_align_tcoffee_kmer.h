@@ -70,6 +70,41 @@ _getTupelString(TString const& str,
 
 //////////////////////////////////////////////////////////////////////////////
 
+template<typename TString, typename TTupelString, typename TKTup, typename TAlphabet>
+inline void
+_getNonOverlappingTupelString(TString const& str, 
+							  TTupelString& tupelString,
+							  TKTup const ktup, 
+							  TAlphabet) 
+{
+	SEQAN_CHECKPOINT
+	typedef unsigned int TWord;
+	typedef typename Size<TString>::Type TSize;
+
+	// Alphabet size
+	TSize alphabet_size = ValueSize<TAlphabet>::VALUE;
+
+	// Assign a unique number to each k-tupel
+	String<TWord> prod;  // Scaling according to position in k-tupel
+	resize(prod,ktup);
+	for (TWord i=0; i< (TWord) ktup;++i) prod[ktup-i-1]=(TWord)pow((double)alphabet_size,(double)i);
+
+	TSize len = length(str);
+	clear(tupelString);
+	TSize lenOfTup = (TSize) std::floor((double) len / (double) ktup);
+	fill(tupelString, lenOfTup, 0, Exact()); 
+	TSize tupelIndex = 0;
+	TSize endTupel = 0;
+	tupelString[tupelIndex] = 0;
+	while (tupelIndex < lenOfTup) {
+		tupelString[tupelIndex] += ((unsigned int) ((TAlphabet) str[endTupel])) * prod[endTupel % 3];
+		++endTupel;
+		if (endTupel % 3 == 0) ++tupelIndex;
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 template<typename TString, typename TSpec, typename THitMatrix, typename TSize, typename TAlphabet>
 inline void
 getKmerSimilarityMatrix(StringSet<TString, TSpec> const& strSet, 
