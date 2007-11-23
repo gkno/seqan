@@ -237,7 +237,12 @@ _upgmaTreeMerge(TMatrix const& mat,
 	typedef typename Value<TMatrix>::Type TValue;
 
 	// Average
-	return ((TValue) active[index_i] / (TValue) (active[index_i] + active[index_j])) * getValue(mat, index_i * nseq + i) + ((TValue) active[index_j] / (TValue) (active[index_i] + active[index_j])) * getValue(mat, index_j * nseq + i);
+	TValue returnVal = 0;
+	if (index_i < i) returnVal = ((TValue) active[index_i] / (TValue) (active[index_i] + active[index_j])) * getValue(mat, index_i * nseq + i);
+	else returnVal = ((TValue) active[index_i] / (TValue) (active[index_i] + active[index_j])) * getValue(mat, i * nseq + index_i);
+	if (index_j < i) returnVal += ((TValue) active[index_j] / (TValue) (active[index_i] + active[index_j])) * getValue(mat, index_j * nseq + i);
+	else returnVal += ((TValue) active[index_j] / (TValue) (active[index_i] + active[index_j])) * getValue(mat, i * nseq + index_j);
+	return returnVal;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -256,8 +261,12 @@ _upgmaTreeMerge(TMatrix const& mat,
 	typedef typename Value<TMatrix>::Type TValue;
 
 	// Minimum
-	TValue newDist = ((TValue) active[index_i] / (TValue) (active[index_i] + active[index_j])) * getValue(mat, index_i * nseq + i);
-	TValue newDist2 = ((TValue) active[index_j] / (TValue) (active[index_i] + active[index_j])) * getValue(mat, index_j * nseq + i);
+	TValue newDist = 0;
+	if (index_i < i) newDist = ((TValue) active[index_i] / (TValue) (active[index_i] + active[index_j])) * getValue(mat, index_i * nseq + i);
+	else newDist = ((TValue) active[index_i] / (TValue) (active[index_i] + active[index_j])) * getValue(mat, i * nseq + index_i);
+	TValue newDist2 = 0;
+	if (index_j < i) newDist2 = ((TValue) active[index_j] / (TValue) (active[index_i] + active[index_j])) * getValue(mat, index_j * nseq + i);
+	else newDist2 = ((TValue) active[index_j] / (TValue) (active[index_i] + active[index_j])) * getValue(mat, i * nseq + index_j);
 	if (newDist2 < newDist) return newDist2;
 	else return newDist;
 }
@@ -277,9 +286,13 @@ _upgmaTreeMerge(TMatrix const& mat,
 	SEQAN_CHECKPOINT
 	typedef typename Value<TMatrix>::Type TValue;
 
-	// Minimum
-	TValue newDist = ((TValue) active[index_i] / (TValue) (active[index_i] + active[index_j])) * getValue(mat, index_i * nseq + i);
-	TValue newDist2 = ((TValue) active[index_j] / (TValue) (active[index_i] + active[index_j])) * getValue(mat, index_j * nseq + i);
+	// Maximum
+	TValue newDist = 0;
+	if (index_i < i) newDist = ((TValue) active[index_i] / (TValue) (active[index_i] + active[index_j])) * getValue(mat, index_i * nseq + i);
+	else newDist = ((TValue) active[index_i] / (TValue) (active[index_i] + active[index_j])) * getValue(mat, i * nseq + index_i);
+	TValue newDist2 = 0;
+	if (index_j < i) newDist2 = ((TValue) active[index_j] / (TValue) (active[index_i] + active[index_j])) * getValue(mat, index_j * nseq + i);
+	else newDist2 = ((TValue) active[index_j] / (TValue) (active[index_i] + active[index_j])) * getValue(mat, i * nseq + index_j);
 	if (newDist2 < newDist) return newDist;
 	else return newDist2;
 }
@@ -302,9 +315,6 @@ upgmaTree(String<double, TStringSpec>& mat,
 	TSize nseq = (TSize) std::sqrt((TValue)length(mat));
 
 	// First initialization
-	TValue minVal = getValue(mat, 1*nseq + 0);
-	TSize index_i = 0;
-	TSize index_j = 1;
 	clearVertices(g);
 	// Which entries in the matrix are still active and how many members belong to this group
 	String<unsigned int> active;
@@ -312,6 +322,11 @@ upgmaTree(String<double, TStringSpec>& mat,
 	// Vertex descriptor that represents that entry
 	String<TVertexDescriptor> nodes;
 	reserve(nodes, nseq);
+
+
+	TValue minVal = getInfinity<TValue>();
+	TSize index_i = 0;
+	TSize index_j = 0;
 	for(TSize i=0;i<nseq;++i) {
 		for(TSize j=i+1;j<nseq;++j) {
 			if (minVal > getValue(mat, i*nseq + j)) {
@@ -320,7 +335,7 @@ upgmaTree(String<double, TStringSpec>& mat,
 				index_j = j;
 			}
 		}
-		appendValue(nodes, addVertex(g));
+		appendValue(nodes, addVertex(g));	// For each sequence one vertex
 	}
 
 	// Property map for sum of weights for each node
@@ -332,17 +347,11 @@ upgmaTree(String<double, TStringSpec>& mat,
 	while (m>1) {
 		// Merge nodes
 		TVertexDescriptor internalNode = addVertex(g);
-		if (index_j < index_i) {
-			TSize tmp = index_i;
-			index_i = index_j;
-			index_j = tmp;
-		}
-
 
 		//// Debug code
 		//for(TSize i=0;i<nseq;++i) {
 		//	if (!active[i]) continue;
-		//	for(TSize j=0;j<nseq;++j) {
+		//	for(TSize j=i+1;j<nseq;++j) {
 		//		if (!active[j]) continue;
 		//		std::cout << getValue(mat, i*nseq+j) << ",";
 		//	}
@@ -359,12 +368,12 @@ upgmaTree(String<double, TStringSpec>& mat,
 
 		// Get the new distance values
 		for(TSize i=0;i<nseq;++i) {
-			if (!active[i]) continue;
-			else if (i == index_i) continue;
-			else if (i == index_j) continue;
+			if ((!active[i]) ||
+				(i == index_i) ||
+				(i == index_j)) continue;
 			TValue newDist = _upgmaTreeMerge(mat, active, index_i, index_j, i, nseq, TTag());
-			assignValue(mat, index_i*nseq + i, newDist);
-			assignValue(mat, i*nseq + index_i, newDist);
+			if (index_i < i) assignValue(mat, index_i*nseq + i, newDist);
+			else assignValue(mat, i*nseq + index_i, newDist);
 		}
 		// Inactivate one group, adjust the member count for the other one
 		active[index_i] = active[index_i] + active[index_j];
@@ -372,15 +381,12 @@ upgmaTree(String<double, TStringSpec>& mat,
 		active[index_j] = 0;
 
 		// Find new minimum
-		bool first = true;
+		minVal = getInfinity<TValue>();
 		for(TSize i=0;i<nseq;++i) {
 			if (!active[i]) continue;
 			for(TSize j=i+1;j<nseq;++j) {
 				if (!active[j]) continue;
-				if ((first) ||
-					(minVal > getValue(mat, i*nseq + j))) 
-				{
-					first = false;
+				if (minVal > getValue(mat, i*nseq + j)) {
 					minVal = getValue(mat, i*nseq + j);
 					index_i = i;
 					index_j = j;
