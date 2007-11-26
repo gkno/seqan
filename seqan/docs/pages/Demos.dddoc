@@ -70,8 +70,28 @@
 .
 
 
+.Demo.Exact Searching
+..order:Searching, 1
+..cat:Basics
+..summary:Exact string matching.
+..file:../projects/demos/find_exact.cpp
+..see:Page.Searching
+.
 
 
+.Demo.Approximate Searching
+..order:Searching, 2
+..cat:Basics
+..summary:Approximate string matching.
+..file:../projects/demos/find_approx.cpp
+..output.code:
+3: -1
+4: -1
+8: -1
+9: 0
+10: -1
+..see:Page.Searching
+.
 
 
 .Demo.ModReverse:

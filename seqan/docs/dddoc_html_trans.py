@@ -74,6 +74,8 @@ def translate(text):
 
     text = text.replace("\\infty", "&#x221E;")
     text = text.replace("\\ldots", "...")
+    text = text.replace("\\squared", "&#x00B2;")
+    text = text.replace("\\cubic", "&#x00B3;")
 
 #Griechische Buchstaben
 
