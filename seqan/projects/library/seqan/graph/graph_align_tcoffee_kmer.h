@@ -140,12 +140,12 @@ getKmerSimilarityMatrix(StringSet<TString, TSpec> const& strSet,
 	String<TWord> compareIndex;
 	for(TSize k=0;k<nseq;++k) {
 		clear(qIndex);
-		fill(qIndex, (TWord) pow((TWord)alphabet_size, (TWord)ktup), (TWord) 0, Exact());
+		fill(qIndex, (TWord) (double) pow((double)alphabet_size, (double)ktup), (TWord) 0, Exact());
 		for(TSize i = 0;i < (TSize) length(tupSet[k]);++i) ++qIndex[ tupSet[k][i] ];
 		TWord value;
 	    for (TSize k2=k; k2<nseq; ++k2) {
 			clear(compareIndex);
-			fill(compareIndex, (TWord) pow((TWord)alphabet_size, (TWord)ktup), (TWord) 0, Exact());
+			fill(compareIndex, (TWord) (double) pow((double)alphabet_size, (double)ktup), (TWord) 0, Exact());
 			value = 0;
 			for(TSize i = 0;i < (TSize) length(tupSet[k2]);++i) {
 				//std::cout << tupSet[k2][i] << "," << compareIndex[ tupSet[k2][i] ] << "," << qIndex[ tupSet[k2][i] ]<< std::endl;
