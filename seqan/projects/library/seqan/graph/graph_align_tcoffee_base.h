@@ -125,6 +125,15 @@ struct Kmer_Library_;
 typedef Tag<Kmer_Library_> const Kmer_Library;
 
 
+/**
+.Tag.Library Generation.value.MUMPairwise_Library:
+	A primary library of mums.
+*/
+
+struct MUMPairwise_Library_;
+typedef Tag<MUMPairwise_Library_> const MUMPairwise_Library;
+
+
 
 //////////////////////////////////////////////////////////////////////////////
 // T-Coffee - Library combination

@@ -5,6 +5,9 @@
 #define TEST_PATH "projects/tests/graph/"
 #define LIB_PATH "projects/library/seqan/graph/"
 
+
+//#include <seqan/index.h> // For MUMPairwise_Library
+
 #include <seqan/graph.h>
 
 

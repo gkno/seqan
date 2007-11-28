@@ -816,7 +816,7 @@ write(TFile & file,
 	typedef FragmentInfo<TId, TSize> TSegment;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
-	typedef typename Iterator<String<TEdgeStump*> const>::Type TIterConst;
+	typedef typename Iterator<String<TEdgeStump*> const, Rooted>::Type TIterConst;
 	
 	TStringSet& str = stringSet(g);
 	TSize nseq = length(str);
@@ -843,7 +843,8 @@ write(TFile & file,
 	_streamWrite(file,"}\n");
 	for(TSize i = 0; i<nseq; ++i) {
 		_streamWrite(file,"{DATA ");
-		_streamWrite(file,names[i]);
+		_streamPutInt(file, i);
+		//_streamWrite(file,names[i]);
 		_streamWrite(file,"-seqlen\n");
 		_streamWrite(file,"\t[__GLOBAL__]\n");
 		_streamWrite(file,"\tlength=");
@@ -858,9 +859,11 @@ write(TFile & file,
 	for(TSize i=0; i<nseq; ++i) {
 		for(TSize j=i+1; j<nseq; ++j) {
 			_streamWrite(file,"{DATA ");
-			_streamWrite(file,names[i]);
+			_streamPutInt(file, i);
+			//_streamWrite(file,names[i]);
 			_streamWrite(file,"-vs-");
-			_streamWrite(file,names[j]);
+			_streamPutInt(file, j);
+			//_streamWrite(file,names[j]);
 			_streamPut(file, '\n');
 			_streamWrite(file,"\t[__GLOBAL__]\n");
 			for(TIterConst it = begin(g.data_align.data_vertex);!atEnd(it);goNext(it)) {
@@ -879,17 +882,23 @@ write(TFile & file,
 								continue;
 						}
 						_streamWrite(file,"\t");
-						_streamWrite(file,"Source=");
+						_streamWrite(file,"source=");
 						_streamPutInt(file, sourceV);		
 						_streamPut(file, ' ');
-						_streamWrite(file,"Target=");
+						_streamWrite(file,"target=");
 						_streamPutInt(file, targetV);
 						_streamPut(file, ' ');
-						_streamWrite(file,"EdgeId=");
+						_streamWrite(file,"edgeId=");
 						_streamPutInt(file, _getId(current));
 						_streamPut(file, ' ');
-						_streamWrite(file," Cargo=");
+						_streamWrite(file,"cargo=");
 						__writeCargo(file,g,current);
+						_streamPut(file, ' ');
+						_streamWrite(file,"label=");
+						_streamWrite(file,label(g,sourceV));
+						_streamPut(file, ' ');
+						_streamWrite(file,"labelOpp=");
+						_streamWrite(file,label(g,targetV));
 						_streamPut(file, ':');
 						_streamPut(file, '\t');
 						_streamPutInt(file, fragmentBegin(g, sourceV));
@@ -991,10 +1000,12 @@ write(TFile & file,
 				if (fits) {
 					seqToRow[i] = j;
 					appendValue(intervalsPerRow[j], seqToRank[i]);
+					//std::cout << i << ':' << j << ',';
 					break;
 				}
 			}
 		}
+		//std::cout << std::endl;
 		for(unsigned int i=0;i<maxCoverage; ++i) clear(value(intervalsPerRow, i));
 		clear(intervalsPerRow);
 
@@ -1006,6 +1017,7 @@ write(TFile & file,
 		TValue gapChar = gapValue<TValue>();
 		TValue specialGap = '.';
 		fill(mat, len * maxCoverage, gapChar);
+		//std::cout << len << ',' << maxCoverage << std::endl;
 		unsigned int col = 0;
 		String<bool> active;
 		for(unsigned int compIndex = 0; compIndex < numOfComponents; ++compIndex) {

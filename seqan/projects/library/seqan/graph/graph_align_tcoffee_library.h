@@ -373,6 +373,63 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	generatePrimaryLibrary(g,score_type,3,Kmer_Library());
 }
 
+/*
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec, typename TScore>
+inline void 
+generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+					   TScore const& score_type,
+					   MUMPairwise_Library)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename Id<TGraph>::Type TId;
+
+	// Clear graph
+	clearVertices(g);
+
+	// Pairwise alignments for all pairs of sequences
+	TStringSet& str = stringSet(g);	
+	TSize nseq = length(str);
+	
+	// String of fragments to combine all pairwise alignments into a multiple alignment
+	typedef Fragment<> TFragment;
+	typedef String<TFragment, Block<> > TFragmentString;
+	typedef typename Iterator<TFragmentString, Rooted>::Type TFragmentStringIter;
+	TFragmentString matches;
+
+	// All pairwise alignments
+	for(TSize i=0; i<nseq; ++i) {
+		for(TSize j=i+1; j<nseq; ++j) {
+			// Pairwise alignment, get the matches
+			TStringSet pairSet;
+			TId id1 = positionToId(str, i);
+			TId id2 = positionToId(str, j);
+			assignValueById(pairSet, str, id1);
+			assignValueById(pairSet, str, id2);
+			
+			// Index creation
+			typedef Index<TStringSet> TMyIndex;
+			TMyIndex myIndex(pairSet);
+
+			typename Iterator< TMyIndex, MUMs >::Type myMUMiterator(myIndex, 10);
+			String< typename SAValue<TMyIndex>::Type > occs;
+			while (!atEnd(myMUMiterator)) {
+					occs = getOccurrences(myMUMiterator);
+					if (getSeqNo(occs[0]) == 0)	push_back(matches, TFragment(id1, getSeqOffset(occs[0]), id2, getSeqOffset(occs[1]), repLength(myMUMiterator)));
+					else push_back(matches, TFragment(id1, getSeqOffset(occs[1]), id2, getSeqOffset(occs[0]), repLength(myMUMiterator)));
+					++myMUMiterator;
+			}
+		}
+	}
+	
+	// Refine all matches, rescore the matches and create multiple alignment
+	matchRefinement(matches,str,const_cast<TScore&>(score_type),g);
+}
+*/
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -460,6 +517,7 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	matchRefinement(matches,str,const_cast<TScore&>(score_type),g);
 	//matchRefinement(matches,str,g);
 
+	/*
 	// Eliminate non-cliques of 3
 	for(TSize i=0;i<nseq;++i) {
 		for(TSize j=0;j<i;++j) {
@@ -515,6 +573,7 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 			}
 		}
 	}
+	*/
 
 	// Prefer highly connected hubs
 	TValue max_value = 0;
@@ -550,22 +609,39 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TStringSet, typename TCargo, typename TSpec, typename TPairList>
+template<typename TStringSet, typename TCargo, typename TSpec, typename TNames, typename TPairList>
 inline void 
 selectPairsForLibraryGeneration(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+								TNames& names,
 								TPairList& pList)
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename Size<TGraph>::Type TSize;
+	typedef typename Value<TNames>::Type TString;
 	typedef typename Value<TPairList>::Type TPair;
 	TStringSet& str = stringSet(g);
 	TSize nseq = length(str);
+	int threshold = 100;
+	//std::cout << "Selected pairs:" << std::endl;
 	for(TSize i=0; i<nseq; ++i) {
+		int posI = 0;
+		std::stringstream ssStream1(toCString(names[i]));
+		ssStream1 >> posI; 
 		for(TSize j=i+1; j<nseq; ++j) {
-			appendValue(pList, TPair(positionToId(str, i), positionToId(str, j)));
+			int posJ = 0;
+			std::stringstream ssStream2(toCString(names[j]));
+			ssStream2 >> posJ;
+			if (((posI > posJ) &&
+				(posI - posJ < threshold)) ||
+				((posI <= posJ) &&
+				(posJ - posI < threshold))) {
+					//std::cout << i << '(' << posI << ')' << ',' << j << '(' << posJ << ')' << ';';
+					appendValue(pList, TPair(positionToId(str, i), positionToId(str, j)));
+			}
 		}
 	}
+	//std::cout << std::endl;
 }
 
 
