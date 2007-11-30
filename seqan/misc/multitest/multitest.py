@@ -34,7 +34,7 @@ COMPILERS = [
 SERVERS = [
 #    ['gcc', 'mouse'], 
 #    ['gcc', 'frosch'], 
-    ['gcc', 'kiefer'], 
+#    ['gcc', 'kiefer'], 
 #    ['gcc', 'fichte'], 
 #    ['gcc', 'aplysia'], 
     ['gcc', 'nawab'], 

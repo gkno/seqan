@@ -1015,6 +1015,15 @@ SEQAN_CHECKPOINT
 // Comparison Operators
 //////////////////////////////////////////////////////////////////////////////
 
+template <typename TLeftSource, typename TLeftSpec, typename TRightSource, typename TRightSpec >
+inline bool
+operator == (Gaps<TLeftSource, TLeftSpec> const & left, 
+			 Gaps<TRightSource, TRightSpec> const & right)
+{
+SEQAN_CHECKPOINT
+	typename Comparator<Gaps<TLeftSource, TLeftSpec> >::Type _lex(left, right);
+    return isEqual(_lex);
+}
 template <typename TLeftSource, typename TLeftSpec, typename TRight >
 inline bool
 operator == (Gaps<TLeftSource, TLeftSpec> const & left, 
@@ -1024,9 +1033,27 @@ SEQAN_CHECKPOINT
 	typename Comparator<Gaps<TLeftSource, TLeftSpec> >::Type _lex(left, right);
     return isEqual(_lex);
 }
+template <typename TLeft, typename TRightSource, typename TRightSpec >
+inline bool
+operator == (TLeft const & left, 
+			 Gaps<TRightSource, TRightSpec> const & right)
+{
+SEQAN_CHECKPOINT
+	typename Comparator<Gaps<TRightSource, TRightSpec> >::Type _lex(left, right);
+    return isEqual(_lex);
+}
 
 //////////////////////////////////////////////////////////////////////////////
 
+template <typename TLeftSource, typename TLeftSpec, typename TRightSource, typename TRightSpec >
+inline bool
+operator != (Gaps<TLeftSource, TLeftSpec> const & left, 
+			 Gaps<TRightSource, TRightSpec> const & right)
+{
+SEQAN_CHECKPOINT
+	typename Comparator<Gaps<TLeftSource, TLeftSpec> >::Type _lex(left, right);
+    return isNotEqual(_lex);
+}
 template <typename TLeftSource, typename TLeftSpec, typename TRight >
 inline bool
 operator !=(Gaps<TLeftSource, TLeftSpec> const & left, 
@@ -1036,9 +1063,26 @@ SEQAN_CHECKPOINT
 	typename Comparator<Gaps<TLeftSource, TLeftSpec> >::Type _lex(left, right);
     return isNotEqual(_lex);
 }
-
+template <typename TLeft, typename TRightSource, typename TRightSpec >
+inline bool
+operator != (TLeft const & left, 
+			 Gaps<TRightSource, TRightSpec> const & right)
+{
+SEQAN_CHECKPOINT
+	typename Comparator<Gaps<TRightSource, TRightSpec> >::Type _lex(left, right);
+    return isNotEqual(_lex);
+}
 //////////////////////////////////////////////////////////////////////////////
 
+template <typename TLeftSource, typename TLeftSpec, typename TRightSource, typename TRightSpec >
+inline bool
+operator < (Gaps<TLeftSource, TLeftSpec> const & left, 
+			 Gaps<TRightSource, TRightSpec> const & right)
+{
+SEQAN_CHECKPOINT
+	typename Comparator<Gaps<TLeftSource, TLeftSpec> >::Type _lex(left, right);
+    return isLess(_lex);
+}
 template <typename TLeftSource, typename TLeftSpec, typename TRight>
 inline bool
 operator < (Gaps<TLeftSource, TLeftSpec> const & left, 
@@ -1047,9 +1091,27 @@ operator < (Gaps<TLeftSource, TLeftSpec> const & left,
 SEQAN_CHECKPOINT
 	return isLess(left, right, typename DefaultPrefixOrder<Gaps<TLeftSource, TLeftSpec> >::Type());
 }
+template <typename TLeft, typename TRightSource, typename TRightSpec >
+inline bool
+operator < (TLeft const & left, 
+			 Gaps<TRightSource, TRightSpec> const & right)
+{
+SEQAN_CHECKPOINT
+	typename Comparator<Gaps<TRightSource, TRightSpec> >::Type _lex(left, right);
+    return isLess(_lex);
+}
 
 //////////////////////////////////////////////////////////////////////////////
 
+template <typename TLeftSource, typename TLeftSpec, typename TRightSource, typename TRightSpec >
+inline bool
+operator <= (Gaps<TLeftSource, TLeftSpec> const & left, 
+			 Gaps<TRightSource, TRightSpec> const & right)
+{
+SEQAN_CHECKPOINT
+	typename Comparator<Gaps<TLeftSource, TLeftSpec> >::Type _lex(left, right);
+    return isLessOrEqual(_lex);
+}
 template <typename TLeftSource, typename TLeftSpec, typename TRight>
 inline bool
 operator <= (Gaps<TLeftSource, TLeftSpec> const & left, 
@@ -1058,8 +1120,26 @@ operator <= (Gaps<TLeftSource, TLeftSpec> const & left,
 SEQAN_CHECKPOINT
 	return isLessOrEqual(left, right, typename DefaultPrefixOrder<Gaps<TLeftSource, TLeftSpec> >::Type());
 }
+template <typename TLeft, typename TRightSource, typename TRightSpec >
+inline bool
+operator <= (TLeft const & left, 
+			 Gaps<TRightSource, TRightSpec> const & right)
+{
+SEQAN_CHECKPOINT
+	typename Comparator<Gaps<TRightSource, TRightSpec> >::Type _lex(left, right);
+    return isLessOrEqual(_lex);
+}
 //////////////////////////////////////////////////////////////////////////////
 
+template <typename TLeftSource, typename TLeftSpec, typename TRightSource, typename TRightSpec >
+inline bool
+operator > (Gaps<TLeftSource, TLeftSpec> const & left, 
+			 Gaps<TRightSource, TRightSpec> const & right)
+{
+SEQAN_CHECKPOINT
+	typename Comparator<Gaps<TLeftSource, TLeftSpec> >::Type _lex(left, right);
+    return isGreater(_lex);
+}
 template <typename TLeftSource, typename TLeftSpec, typename TRight>
 inline bool
 operator > (Gaps<TLeftSource, TLeftSpec> const & left, 
@@ -1068,9 +1148,26 @@ operator > (Gaps<TLeftSource, TLeftSpec> const & left,
 SEQAN_CHECKPOINT
 	return isGreater(left, right, typename DefaultPrefixOrder<Gaps<TLeftSource, TLeftSpec> >::Type());
 }
-
+template <typename TLeft, typename TRightSource, typename TRightSpec >
+inline bool
+operator > (TLeft const & left, 
+			 Gaps<TRightSource, TRightSpec> const & right)
+{
+SEQAN_CHECKPOINT
+	typename Comparator<Gaps<TRightSource, TRightSpec> >::Type _lex(left, right);
+    return isGreater(_lex);
+}
 //////////////////////////////////////////////////////////////////////////////
 
+template <typename TLeftSource, typename TLeftSpec, typename TRightSource, typename TRightSpec >
+inline bool
+operator >= (Gaps<TLeftSource, TLeftSpec> const & left, 
+			 Gaps<TRightSource, TRightSpec> const & right)
+{
+SEQAN_CHECKPOINT
+	typename Comparator<Gaps<TLeftSource, TLeftSpec> >::Type _lex(left, right);
+    return isGreaterOrEqual(_lex);
+}
 template <typename TLeftSource, typename TLeftSpec, typename TRight>
 inline bool
 operator >= (Gaps<TLeftSource, TLeftSpec> const & left, 
@@ -1078,6 +1175,15 @@ operator >= (Gaps<TLeftSource, TLeftSpec> const & left,
 {
 SEQAN_CHECKPOINT
 	return isGreaterOrEqual(left, right, typename DefaultPrefixOrder<Gaps<TLeftSource, TLeftSpec> >::Type());
+}
+template <typename TLeft, typename TRightSource, typename TRightSpec >
+inline bool
+operator >= (TLeft const & left, 
+			 Gaps<TRightSource, TRightSpec> const & right)
+{
+SEQAN_CHECKPOINT
+	typename Comparator<Gaps<TRightSource, TRightSpec> >::Type _lex(left, right);
+    return isGreaterOrEqual(_lex);
 }
 //////////////////////////////////////////////////////////////////////////////
 

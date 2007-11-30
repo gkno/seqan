@@ -2,8 +2,8 @@ import sys
 import string
 import os
 
-BUILD_FLAGS_7 = '/I ".." /I "../library" /I "../../platforms/windows" /Op- /EHsc /D "DEBUG" /D "WIN32" /Zi /GR /W2 /Zc:wchar_t'
-BUILD_FLAGS_8 = '/I ".." /I "../library" /I "../../platforms/windows" /EHsc /MTd /Zi /D "_CONSOLE" /D "_CRT_SECURE_NO_DEPRECATE" /D "DEBUG" /D "WIN32" /Zc:wchar_t /W2 /wd4996'
+BUILD_FLAGS_7 = '/I ".." /I "../../../platforms/windows" /Op- /EHsc /D "DEBUG" /D "WIN32" /Zi /GR /W2 /Zc:wchar_t'
+BUILD_FLAGS_8 = '/I ".." /I "../../../platforms/windows" /EHsc /MTd /Zi /D "_CONSOLE" /D "_CRT_SECURE_NO_DEPRECATE" /D "DEBUG" /D "WIN32" /Zc:wchar_t /W2 /wd4996'
 
 ################################################################################
 
@@ -75,13 +75,13 @@ def main():
     print "The created files are stored in the demos folder"
     
     print "Visual Studio 7 (.net 2003) Files:",
-    scanDemos("..\\..\\projects\\demos", BUILD_FLAGS_7)
-    createProject("..\\..\\projects\\demos", "Seqan_7")
+    scanDemos("..\\..\\projects\\library\\demos", BUILD_FLAGS_7)
+    createProject("..\\..\\projects\\library\\demos", "Seqan_7")
     
     print
     print "Visual Studio 8 (.net 2005) Files:",
-    scanDemos("..\\..\\projects\\demos", BUILD_FLAGS_8)
-    createProject("..\\..\\projects\\demos", "Seqan_8")
+    scanDemos("..\\..\\projects\\library\\demos", BUILD_FLAGS_8)
+    createProject("..\\..\\projects\\library\\demos", "Seqan_8")
     
     print
     print "Files created."

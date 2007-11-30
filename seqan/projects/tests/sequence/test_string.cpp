@@ -534,6 +534,8 @@ void Test_String_Pointer()
 //____________________________________________________________________________
 // compare operators 
 
+//operators disabled due to ambiguity pointer/iterator vs. c-style string
+/*
 	assign(str1, "hello");
 	String<char> str4 = str1;
 	SEQAN_TASSERT(str1 == str4);
@@ -555,6 +557,7 @@ void Test_String_Pointer()
 
 	SEQAN_TASSERT(str1 >= str4);
 	SEQAN_TASSERT(isGreaterOrEqual(str1, str4));
+*/
 }
 
 //////////////////////////////////////////////////////////////////////////////

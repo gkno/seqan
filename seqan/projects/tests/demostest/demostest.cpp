@@ -1,179 +1,179 @@
 // Projekt, mit dem die Demos getestet werden koennen
 //*
 #define main runAllocator
-#include "../../demos/allocator.cpp"
+#include "../../library/demos/allocator.cpp"
 #undef main
 
 #define main runAlphabet
-#include "../../demos/alphabet.cpp"
+#include "../../library/demos/alphabet.cpp"
 #undef main
 
 
 #define main runIterator
-#include "../../demos/iterator.cpp"
+#include "../../library/demos/iterator.cpp"
 #undef main
 
 
 #define main runRootedIterator
-#include "../../demos/rooted_iterator.cpp"
+#include "../../library/demos/rooted_iterator.cpp"
 #undef main
 
 #define main runString1
-#include "../../demos/string_1.cpp"
+#include "../../library/demos/string_1.cpp"
 #undef main
 
 
 #define main runModifierModReverse
-#include "../../demos/modifier_modreverse.cpp"
+#include "../../library/demos/modifier_modreverse.cpp"
 #undef main
 
 #define main runModifierModView
-#include "../../demos/modifier_modview.cpp"
+#include "../../library/demos/modifier_modview.cpp"
 #undef main
 
 #define main runModifierNested
-#include "../../demos/modifier_nested.cpp"
+#include "../../library/demos/modifier_nested.cpp"
 #undef main
 
 
 
 #define main runIndexSA
-#include "../../demos/index_sufarray.cpp"
+#include "../../library/demos/index_sufarray.cpp"
 #undef main
 
 #define main runIndexFind
-#include "../../demos/index_find.cpp"
+#include "../../library/demos/index_find.cpp"
 #undef main
 
 #define main runIndexMUMs
-#include "../../demos/index_mums.cpp"
+#include "../../library/demos/index_mums.cpp"
 #undef main
 
 #define main runIndexSuperMaxRepeats
-#include "../../demos/index_supermaxrepeats.cpp"
+#include "../../library/demos/index_supermaxrepeats.cpp"
 #undef main
 
 #define main runIndexMaxRepeats
-#include "../../demos/index_maxrepeats.cpp"
+#include "../../library/demos/index_maxrepeats.cpp"
 #undef main
 
 #define main runIndexMummy
-#include "../../demos/index_mummy.cpp"
+#include "../../library/demos/index_mummy.cpp"
 #undef main
 
 
 #define main runFind
-#include "../../demos/find.cpp"
+#include "../../library/demos/find.cpp"
 #undef main
 
 #define main runFindExact
-#include "../../demos/find_exact.cpp"
+#include "../../library/demos/find_exact.cpp"
 #undef main
 
 #define main runFindApprox
-#include "../../demos/find_approx.cpp"
+#include "../../library/demos/find_approx.cpp"
 #undef main
 
 #define main runFileFormat
-#include "../../demos/file_format.cpp"
+#include "../../library/demos/file_format.cpp"
 #undef main
 
 //*/
 
 #define main runGraph0
-#include "../../demos/graph_algo_bfs.cpp"
+#include "../../library/demos/graph_algo_bfs.cpp"
 #undef main
 
 #define main runGraph1
-#include "../../demos/graph_algo_dfs.cpp"
+#include "../../library/demos/graph_algo_dfs.cpp"
 #undef main
 
 #define main runGraph2
-#include "../../demos/graph_algo_topsort.cpp"
+#include "../../library/demos/graph_algo_topsort.cpp"
 #undef main
 
 #define main runGraph3
-#include "../../demos/graph_algo_scc.cpp"
+#include "../../library/demos/graph_algo_scc.cpp"
 #undef main
 
 #define main runGraph4
-#include "../../demos/graph_algo_tree_prim.cpp"
+#include "../../library/demos/graph_algo_tree_prim.cpp"
 #undef main
 
 #define main runGraph5
-#include "../../demos/graph_algo_tree_kruskal.cpp"
+#include "../../library/demos/graph_algo_tree_kruskal.cpp"
 #undef main
 
 #define main runGraph6
-#include "../../demos/graph_algo_path_dag.cpp"
+#include "../../library/demos/graph_algo_path_dag.cpp"
 #undef main
 
 #define main runGraph7
-#include "../../demos/graph_algo_path_bellmanford.cpp"
+#include "../../library/demos/graph_algo_path_bellmanford.cpp"
 #undef main
 
 #define main runGraph8
-#include "../../demos/graph_algo_path_dijkstra.cpp"
+#include "../../library/demos/graph_algo_path_dijkstra.cpp"
 #undef main
 
 #define main runGraph9
-#include "../../demos/graph_algo_path_allpairs.cpp"
+#include "../../library/demos/graph_algo_path_allpairs.cpp"
 #undef main
 
 #define main runGraph10
-#include "../../demos/graph_algo_path_floydwarshall.cpp"
+#include "../../library/demos/graph_algo_path_floydwarshall.cpp"
 #undef main
 
 #define main runGraph11
-#include "../../demos/graph_algo_path_transitive.cpp"
+#include "../../library/demos/graph_algo_path_transitive.cpp"
 #undef main
 
 #define main runGraph12
-#include "../../demos/graph_algo_flow_fordfulkerson.cpp"
+#include "../../library/demos/graph_algo_flow_fordfulkerson.cpp"
 #undef main
 
 #define main runGraph13
-#include "../../demos/graph_algo_matching_pathgrowing.cpp"
+#include "../../library/demos/graph_algo_matching_pathgrowing.cpp"
 #undef main
 
 #define main runGraph14
-#include "../../demos/graph_algo_lis.cpp"
+#include "../../library/demos/graph_algo_lis.cpp"
 #undef main
 
 #define main runGraph15
-#include "../../demos/graph_algo_his.cpp"
+#include "../../library/demos/graph_algo_his.cpp"
 #undef main
 
 #define main runGraph16
-#include "../../demos/graph_algo_lcs.cpp"
+#include "../../library/demos/graph_algo_lcs.cpp"
 #undef main
 
 #define main runGraph17
-#include "../../demos/graph_align_nw.cpp"
+#include "../../library/demos/graph_align_nw.cpp"
 #undef main
 
 #define main runGraph18
-#include "../../demos/graph_align_gotoh.cpp"
+#include "../../library/demos/graph_align_gotoh.cpp"
 #undef main
 
 #define main runGraph19
-#include "../../demos/graph_align_hirschberg.cpp"
+#include "../../library/demos/graph_align_hirschberg.cpp"
 #undef main
 
 #define main runGraph20
-#include "../../demos/graph_align_sw.cpp"
+#include "../../library/demos/graph_align_sw.cpp"
 #undef main
 
 #define main runGraph21
-#include "../../demos/graph_align_guide_nj.cpp"
+#include "../../library/demos/graph_align_guide_nj.cpp"
 #undef main
 
 #define main runGraph22
-#include "../../demos/graph_align_guide_upgma.cpp"
+#include "../../library/demos/graph_align_guide_upgma.cpp"
 #undef main
 
 #define main runGraph23
-#include "../../demos/graph_align_msa.cpp"
+#include "../../library/demos/graph_align_msa.cpp"
 #undef main
 
 
