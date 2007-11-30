@@ -18,21 +18,22 @@ int main()
 	std::cout << std::endl;
 ///Seqan offers an alternative style for accessing iterators that avoids operators.
 ///Note that the functions @Function.goBegin@ and @Function.atEnd@ do net get $str$ as arguments,
-/// because $it$ is a @Concept.Rooted Iterator.rooted iterator@.
+/// because $it2$ is a @Concept.Rooted Iterator.rooted iterator@.
 ///The following loop increments each character in $str$:
-	for (goBegin(it); !atEnd(it); goNext(it)) 
+	seqan::Iterator<seqan::String<char>, seqan::Rooted >::Type it2 = begin(str);
+	for (goBegin(it2); !atEnd(it2); goNext(it2)) 
 	{
-		++value(it);
+		++value(it2);
 	}
 ///This is a reverse loop through $str$.
-///Note that @Function.goPrevious@ is called before the value of $it$ is accessed,
+///Note that @Function.goPrevious@ is called before the value of $it2$ is accessed,
 /// because the end position of a container is the position behind the last item in the container:
-	goEnd(it);
+	goEnd(it2);
 
-	while (!atBegin(it))              //output: "oneb"
+	while (!atBegin(it2))              //output: "oneb"
 	{
-		goPrevious(it);
-		std::cout << getValue(it);
+		goPrevious(it2);
+		std::cout << getValue(it2);
 	}
 	std::cout << std::endl;
 ///Another (write only) way to access the value of an iterator is @Function.assignValue@:
