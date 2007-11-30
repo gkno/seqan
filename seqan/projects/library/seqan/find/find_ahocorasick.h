@@ -32,7 +32,7 @@ namespace SEQAN_NAMESPACE_MAIN
 .Spec.AhoCorasick:
 ..summary: Multiple exact string matching using Aho-Corasick.
 ..general:Class.Pattern
-..cat:Pattern Matching
+..cat:Searching
 ..signature:Pattern<TNeedle, AhoCorasick>
 ..param.TNeedle:The needle type, a string of keywords.
 ...type:Class.String

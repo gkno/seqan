@@ -25,48 +25,52 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 //////////////////////////////////////////////////////////////////////////////
-// Score
+// DPSearch
 //////////////////////////////////////////////////////////////////////////////
 
+template <typename TScore>
+struct DPSearch;
+
+
 /**
-.Spec.Score:
-..cat:Pattern Matching
+.Spec.DPSearch:
+..cat:Searching
 ..general:Class.Pattern
-..summary:Provides approximate string-matching with a user-definable scoring function.
-..signature:Pattern<TNeedle, TScore>
+..summary:A dynamic programming algorithm for approximate string-matching with a user-definable scoring function.
+..signature:Pattern<TNeedle, DPSearch<TScore> >
 ..param.TNeedle:The needle type.
 ...type:Class.String
 ..param.TScore:The scoring function.
 ...type:Class.Score
-..remarks.text:The algorithm is based on the Needleman-Wunsch dynamic progamming algorithm. The Pattern object only contains the right-most column of the DP matrix.
+..remarks.text:The algorithm is based on the Sellers/Needleman-Wunsch dynamic progamming algorithm. 
+The $Pattern$ object only contains the right-most column of the dynamic programming matrix.
+...note:At the moment, the algorithm only works on linear gap costs.
 */
 
 ///.Class.Pattern.param.TSpec.type:Spec.Score
 
 
-template <typename TNeedle, typename TScoreValue, typename TScoreSpec>
-class Pattern<TNeedle, Score<TScoreValue, TScoreSpec> >
+template <typename TNeedle, typename TScore>
+class Pattern<TNeedle, DPSearch<TScore> >
 {
 public:
-	typedef Score<TScoreValue, TScoreSpec> TScore;
-	typedef typename Value<TScore>::Type TTabValue;
+	typedef typename Value<TScore>::Type TScoreValue;
 
 	Holder<TNeedle>		data_needle;
-	Holder<TScore>		data_score;
-	TTabValue			data_limit;
-	String<TTabValue>	data_tab;
+	TScore				data_score;
+	TScoreValue			data_limit;
+	String<TScoreValue>	data_tab;
 
 public: 
 	Pattern(): 
 		data_limit(0)
 	{ 
 SEQAN_CHECKPOINT
-		create(data_score);
 	}
 
 	Pattern(TNeedle & _needle, 
 			TScore & _score_func, 
-			TTabValue _limit = 0): 
+			TScoreValue _limit = 0): 
 		data_score(_score_func),
 		data_limit(_limit)
 	{ 
@@ -75,15 +79,14 @@ SEQAN_CHECKPOINT
 	}
 
 	Pattern(TNeedle & _needle,
-			TTabValue _limit = 0): 
+			TScoreValue _limit = 0): 
 		data_limit(_limit)
 	{ 
 SEQAN_CHECKPOINT
-		create(data_score);
 		setHost(*this, _needle);
 	}
 
-	Pattern(TTabValue _limit): 
+	Pattern(TScoreValue _limit): 
 		data_limit(_limit)
 	{ 
 SEQAN_CHECKPOINT
@@ -110,119 +113,204 @@ SEQAN_CHECKPOINT
 
 		return *this;
 	}
-
-//____________________________________________________________________________
-
-	friend inline typename Host<Pattern const>::Type & 
-	host(Pattern & me)
-	{
-SEQAN_CHECKPOINT
-		return value(me.data_needle);
-	}
-
-	friend inline typename Host<Pattern const>::Type & 
-	host(Pattern const & me)
-	{
-SEQAN_CHECKPOINT
-		return value(me.data_needle);
-	}
-
-//____________________________________________________________________________
-
-	friend inline TScore const & 
-	scoring(Pattern & me)
-	{
-SEQAN_CHECKPOINT
-		return value(me.data_score);
-	}
-
-	friend inline void
-	setScoring(Pattern const & me, Score<TScoreValue, TScoreSpec> const & score)
-	{
-SEQAN_CHECKPOINT
-		me.data_score = score;
-		clear(me.data_tab);
-	}
-
-//____________________________________________________________________________
-
-	friend inline TScoreValue 
-	limit(Pattern & me)
-	{
-SEQAN_CHECKPOINT
-		return me.data_limit;
-	}
-	friend inline void 
-	setLimit(Pattern & me, TScoreValue _limit)
-	{
-SEQAN_CHECKPOINT
-		me.data_limit = _limit;
-	}
-
-//____________________________________________________________________________
-
-	friend inline typename Host<Pattern>::Type & 
-	_dataNeedle(Pattern & me)
-	{
-SEQAN_CHECKPOINT
-		return value(me.data_needle);
-	}
-
-//____________________________________________________________________________
 };
+
 
 //////////////////////////////////////////////////////////////////////////////
 // Host
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TNeedle, typename TScoreValue, typename TScoreSpec>
-struct Host< Pattern<TNeedle, Score<TScoreValue, TScoreSpec> > >
+/* //see find_base.h
+
+template <typename TNeedle, typename TScore>
+struct Host< Pattern<TNeedle, DPSearch<TScore> > >
 {
 	typedef TNeedle Type;
 };
 
-template <typename TNeedle, typename TScoreValue, typename TScoreSpec>
-struct Host< Pattern<TNeedle, Score<TScoreValue, TScoreSpec> > const>
+template <typename TNeedle, typename TScore>
+struct Host< Pattern<TNeedle, DPSearch<TScore> > const>
 {
 	typedef TNeedle const Type;
 };
-
+*/
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TNeedle, typename TNeedle2, typename TScoreValue>
+
+template <typename TNeedle, typename TScore>
+inline typename Host<Pattern<TNeedle, DPSearch<TScore> > >::Type & 
+host(Pattern<TNeedle, DPSearch<TScore> > & me)
+{
+SEQAN_CHECKPOINT
+	return value(me.data_needle);
+}
+
+template <typename TNeedle, typename TScore>
+inline typename Host<Pattern<TNeedle, DPSearch<TScore> > const>::Type & 
+host(Pattern<TNeedle, DPSearch<TScore> >  const & me)
+{
+SEQAN_CHECKPOINT
+	return value(me.data_needle);
+}
+
+
+//____________________________________________________________________________
+
+template <typename TNeedle, typename TScore, typename TNeedle2>
 void 
-setHost(Pattern<TNeedle, Score<TScoreValue, Simple> > & me, TNeedle2 & ndl)
+setHost(Pattern<TNeedle, DPSearch<TScore> > & me, 
+		TNeedle2 & ndl)
 {
 	me.data_needle = ndl;
 	clear(me.data_tab);
 }
-template <typename TNeedle, typename TNeedle2, typename TScoreValue>
+template <typename TNeedle, typename TScore, typename TNeedle2>
 void 
-setHost(Pattern<TNeedle, Score<TScoreValue, Simple> > & me, TNeedle2 const & ndl)
+setHost(Pattern<TNeedle, DPSearch<TScore> > & me, 
+		TNeedle2 const & ndl)
 {
 	me.data_needle = ndl;
+	clear(me.data_tab);
+}
+
+
+//____________________________________________________________________________
+
+/**.Function.scoringScheme
+..cat:Searching
+..summary:The @glos:scoring scheme@ used for finding or aligning.
+..signature:scoringScheme(obj)
+..param.obj:Object that holds a @glos:scoring scheme@
+...type:Spec.DPSearch
+..returns:The @glos:scoring scheme@ used in $obj$
+..see:glos:scoring scheme
+*/
+
+template <typename TNeedle, typename TScore>
+inline TScore const & 
+scoringScheme(Pattern<TNeedle, DPSearch<TScore> > & me)
+{
+SEQAN_CHECKPOINT
+	return me.data_score;
+}
+
+//____________________________________________________________________________
+
+/**.Function.setScoringScheme
+..cat:Searching
+..summary:Sets the @glos:scoring scheme@ used for finding or aligning.
+..signature:setScoringScheme(obj, score)
+..param.obj:Object that holds a @glos:scoring scheme@.
+...type:Spec.DPSearch
+..param.score:The new @glos:scoring scheme@ used by $obj$.
+..see:glos:scoring scheme
+..see:Function.scoringScheme
+*/
+
+template <typename TNeedle, typename TScore, typename TScore2>
+inline void
+setScoringScheme(Pattern<TNeedle, DPSearch<TScore> > & me, 
+				 TScore2 & score)
+{
+SEQAN_CHECKPOINT
+	me.data_score = score;
+	clear(me.data_tab);
+}
+template <typename TNeedle, typename TScore, typename TScore2>
+inline void
+setScoringScheme(Pattern<TNeedle, DPSearch<TScore> > & me, 
+				 TScore2 const & score)
+{
+SEQAN_CHECKPOINT
+	me.data_score = score;
 	clear(me.data_tab);
 }
 
 //____________________________________________________________________________
 
 
-template <typename TNeedle, typename TScoreValue>
-inline void _patternInit (Pattern<TNeedle, Score<TScoreValue, Simple> > & me) 
+/**.Function.scoreLimit
+..cat:Searching
+..summary:The minimal score a match must reach in approximate searching.
+..signature:scoreLimit(pattern)
+..param.pattern:A @Concept:Pattern|pattern@ that can be used for approximate searching.
+...type:Spec.DPSearch
+..returns:The current score limit of $pattern$.
+*/
+
+template <typename TNeedle, typename TScore>
+inline typename Value<TScore>::Type 
+scoreLimit(Pattern<TNeedle, DPSearch<TScore> > const & me)
 {
-	typedef Pattern<TNeedle, Score<TScoreValue, Simple> > TPattern;
+SEQAN_CHECKPOINT
+	return me.data_limit;
+}
+
+//____________________________________________________________________________
+
+/**.Function.setScoreLimit
+..cat:Searching
+..summary:Sets the minimal score a match must reach in approximate searching.
+..signature:setScoreLimit(pattern, limit)
+..param.pattern:A @Concept:Pattern|pattern@ that can be used for approximate searching.
+...type:Spec.DPSearch
+..param.limit:The new score limit.
+..see:Function.scoreLimit
+*/
+
+template <typename TNeedle, typename TScore, typename TScoreValue>
+inline void 
+setScoreLimit(Pattern<TNeedle, DPSearch<TScore> > & me, 
+			  TScoreValue _limit)
+{
+SEQAN_CHECKPOINT
+	me.data_limit = _limit;
+}
+
+//____________________________________________________________________________
+// returns the score of the last hit position found (note:position = end of occurrence in haystack)
+
+/**.Function.getScore
+..cat:Searching
+..summary:Score of the last found match in approximate searching.
+..signature:getScore(pattern)
+..param.pattern:A @Concept:Pattern|pattern@ that can be used for approximate searching.
+...type:Spec.DPSearch
+..returns:The score of the last match found using $pattern$.
+...remarks:If no match was found, the value is undefined.
+..see:Function.scoreLimit
+..see:Function.setScoreLimit
+..see:Function.find
+*/
+
+template <typename TNeedle, typename TScore>
+inline typename Value<TScore>::Type
+getScore(Pattern<TNeedle, DPSearch<TScore> > & me)
+{
+	return front(me.data_tab);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+
+template <typename TNeedle, typename TScore>
+inline void _patternInit (Pattern<TNeedle, DPSearch<TScore> > & me) 
+{
+	typedef Pattern<TNeedle, DPSearch<TScore> > TPattern;
+	typedef typename Value<TScore>::Type TScoreValue;
+
 	typedef typename Size<TPattern>::Type TSize;
 
 	typedef String<TScoreValue> TTab;
 	typedef typename Iterator<TTab, Standard>::Type TIterator;
 
-	TScoreValue score_gap = scoreGapExtend(scoring(me));
+	TScoreValue score_gap = scoreGapExtend(scoringScheme(me));
 
 	TTab & string_tab = me.data_tab;
 
 	//allocate enough memory for one column of DP matrix
-	TSize need_length = length(_dataNeedle(me));
+	TSize need_length = length(needle(me));
 	SEQAN_ASSERT(need_length);
 
 	TSize got_length = resize(string_tab, need_length);
@@ -245,15 +333,6 @@ inline void _patternInit (Pattern<TNeedle, Score<TScoreValue, Simple> > & me)
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// returns the score of the last hit position found (note:position = end of occurrence in haystack)
-
-template <typename TNeedle, typename TScoreValue>
-inline TScoreValue
-getScore(Pattern<TNeedle, Score<TScoreValue, Simple> > & me)
-{
-	return front(me.data_tab);
-}
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -265,10 +344,11 @@ getScore(Pattern<TNeedle, Score<TScoreValue, Simple> > & me)
 //???TODO: Ukkonen trick?
 //???TODO: Finder for affine gap costs?
 
-template <typename TFinder, typename TNeedle, typename TScoreValue>
+template <typename TFinder, typename TNeedle, typename TScore>
 bool 
-_find_score_simple_proportional(TFinder & finder, Pattern<TNeedle, Score<TScoreValue, Simple> > & me)
+_find_score_simple_proportional(TFinder & finder, Pattern<TNeedle, DPSearch<TScore> > & me)
 {
+	typedef typename Value<TScore>::Type TScoreValue;
 	typedef String<TScoreValue> TTab;
 	typedef typename Iterator<TTab, Standard>::Type TTabIterator;
 	typedef typename Iterator<TNeedle const, Standard>::Type TNeedleIterator;
@@ -276,9 +356,9 @@ _find_score_simple_proportional(TFinder & finder, Pattern<TNeedle, Score<TScoreV
 
 	String<TScoreValue> & string_tab = me.data_tab;
 
-	TScoreValue score_gap = scoreGapExtend(scoring(me));
-	TScoreValue score_match = scoreMatch(scoring(me));
-	TScoreValue score_mismatch = scoreMismatch(scoring(me));
+	TScoreValue score_gap = scoreGapExtend(scoringScheme(me));
+	TScoreValue score_match = scoreMatch(scoringScheme(me));
+	TScoreValue score_mismatch = scoreMismatch(scoringScheme(me));
 
 	//init table
 
@@ -330,7 +410,7 @@ _find_score_simple_proportional(TFinder & finder, Pattern<TNeedle, Score<TScoreV
 			++it;
 		}
 
-		if (*tab >= limit(me) )
+		if (*tab >= scoreLimit(me) )
 		{//found a hit
 			return true;
 		}
@@ -343,11 +423,23 @@ _find_score_simple_proportional(TFinder & finder, Pattern<TNeedle, Score<TScoreV
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TFinder, typename TNeedle, typename TScoreValue>
+template <typename TFinder, typename TNeedle, typename TScore>
 inline bool 
-find(TFinder & finder, Pattern<TNeedle, Score<TScoreValue, Simple> > & me)
+find(TFinder & finder, 
+	 Pattern<TNeedle, DPSearch<TScore> > & me)
 {
-	SEQAN_ASSERT(scoreGapOpen(scoring(me)) == scoreGapExtend(scoring(me))) //this finder is only defined for linear gap costs
+	SEQAN_ASSERT(scoreGapOpen(scoringScheme(me)) == scoreGapExtend(scoringScheme(me))) //this finder is only defined for linear gap costs
+	return _find_score_simple_proportional(finder, me);
+}
+
+template <typename TFinder, typename TNeedle, typename TScore>
+inline bool 
+find(TFinder & finder, 
+	 Pattern<TNeedle, DPSearch<TScore> > & me,
+	 int const limit_)
+{
+	SEQAN_ASSERT(scoreGapOpen(scoringScheme(me)) == scoreGapExtend(scoringScheme(me))) //this finder is only defined for linear gap costs
+	setScoreLimit(me, limit_);
 	return _find_score_simple_proportional(finder, me);
 }
 

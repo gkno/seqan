@@ -549,42 +549,42 @@ SEQAN_CHECKPOINT
 
 
 /**
-.Metafunction.Length:
+.Metafunction.LENGTH:
 ..summary:Number of elements in a fixed-size container.
-..signature:Length<T>::Type
+..signature:LENGTH<T>::Type
 ..param.T:Type for which the number of elements is determined.
 ..returns.param.VALUE:Number of elements.
 ..remarks.text:The default return value is 1 for dynamic-size containers.
 */
 template <typename T>
-struct Length
+struct LENGTH
 {
 	enum { VALUE = 1 };
 };
 template <typename T>
-struct Length<T const>:
-	Length<T>
+struct LENGTH<T const>:
+	LENGTH<T>
 {
 };
 
 /**
-.Metafunction.Weight:
+.Metafunction.WEIGHT:
 ..summary:Number of relevant positions in a shape.
-..signature:Weight<T>::Type
+..signature:WEIGHT<T>::Type
 ..param.T:Shape type for which the number of relevant positions is determined.
 ...type:Class.Shape
 ..returns.param.VALUE:Number of relevant positions.
-..remarks.text:The default return value is the result of the @Metafunction.Length@ function.
+..remarks.text:The default return value is the result of the @Metafunction.LENGTH@ function.
 For gapped shapes this is the number of '1's.
 */
 template <typename T>
-struct Weight:
-	Length<T>
+struct WEIGHT:
+	LENGTH<T>
 {
 };
 template <typename T>
-struct Weight<T const>:
-	Weight<T>
+struct WEIGHT<T const>:
+	WEIGHT<T>
 {
 };
 

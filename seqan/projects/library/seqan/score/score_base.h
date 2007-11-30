@@ -39,7 +39,7 @@ struct Simple;
 ..param.TValue:The value type.
 ...default:int
 ..param.TSpec:The specializing type.
-...default:@Spec.Simple@
+...default:@Spec.Simple Score@
 */
 template <typename TValue = int, typename TSpec = Simple>
 class Score;

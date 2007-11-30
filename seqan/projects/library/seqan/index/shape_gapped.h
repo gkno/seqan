@@ -71,10 +71,10 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 //////////////////////////////////////////////////////////////////////////////
-// Length meta-function for fixed gapped shapes
+// LENGTH meta-function for fixed gapped shapes
 
 	template <>
-	struct Length< HardwiredShape<
+	struct LENGTH< HardwiredShape<
 		0,0,0,0,0,
 		0,0,0,0,0,
 		0,0,0,0,0,
@@ -89,13 +89,13 @@ namespace SEQAN_NAMESPACE_MAIN
 		int P10, int P11, int P12, int P13, int P14,
 		int P15, int P16, int P17, int P18, int P19	
 	>
-	struct Length< HardwiredShape<
+	struct LENGTH< HardwiredShape<
 		P00,P01,P02,P03,P04,
 		P05,P06,P07,P08,P09,
 		P10,P11,P12,P13,P14,
 		P15,P16,P17,P18,P19> >
 	{
-		enum { VALUE = Length< HardwiredShape<
+		enum { VALUE = LENGTH< HardwiredShape<
 			P01,P02,P03,P04,P05,
 			P06,P07,P08,P09,P10,
 			P11,P12,P13,P14,P15,
@@ -109,13 +109,13 @@ namespace SEQAN_NAMESPACE_MAIN
 		int P10, int P11, int P12, int P13, int P14,
 		int P15, int P16, int P17, int P18, int P19	
 	>
-	struct Length< Shape<TValue, FixedGappedShape< HardwiredShape<
+	struct LENGTH< Shape<TValue, FixedGappedShape< HardwiredShape<
 		P00,P01,P02,P03,P04,
 		P05,P06,P07,P08,P09,
 		P10,P11,P12,P13,P14,
 		P15,P16,P17,P18,P19 
 	> > > >:
-	Length< HardwiredShape<
+	LENGTH< HardwiredShape<
 		P00,P01,P02,P03,P04,
 		P05,P06,P07,P08,P09,
 		P10,P11,P12,P13,P14,
@@ -124,10 +124,10 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 //////////////////////////////////////////////////////////////////////////////
-// Weight meta-function for fixed gapped shapes
+// WEIGHT meta-function for fixed gapped shapes
 
 	template <>
-	struct Weight< HardwiredShape<
+	struct WEIGHT< HardwiredShape<
 		0,0,0,0,0,
 		0,0,0,0,0,
 		0,0,0,0,0,
@@ -142,13 +142,13 @@ namespace SEQAN_NAMESPACE_MAIN
 		int P10, int P11, int P12, int P13, int P14,
 		int P15, int P16, int P17, int P18, int P19	
 	>
-	struct Weight< HardwiredShape<
+	struct WEIGHT< HardwiredShape<
 		P00,P01,P02,P03,P04,
 		P05,P06,P07,P08,P09,
 		P10,P11,P12,P13,P14,
 		P15,P16,P17,P18,P19> >
 	{
-		enum { VALUE = Weight< HardwiredShape<
+		enum { VALUE = WEIGHT< HardwiredShape<
 			P01,P02,P03,P04,P05,
 			P06,P07,P08,P09,P10,
 			P11,P12,P13,P14,P15,
@@ -162,13 +162,13 @@ namespace SEQAN_NAMESPACE_MAIN
 		int P10, int P11, int P12, int P13, int P14,
 		int P15, int P16, int P17, int P18, int P19	
 	>
-	struct Weight< Shape<TValue, FixedGappedShape< HardwiredShape<
+	struct WEIGHT< Shape<TValue, FixedGappedShape< HardwiredShape<
 		P00,P01,P02,P03,P04,
 		P05,P06,P07,P08,P09,
 		P10,P11,P12,P13,P14,
 		P15,P16,P17,P18,P19 
 	> > > >:
-	Weight< HardwiredShape<
+	WEIGHT< HardwiredShape<
 		P00,P01,P02,P03,P04,
 		P05,P06,P07,P08,P09,
 		P10,P11,P12,P13,P14,
@@ -328,8 +328,8 @@ You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 
 		typedef FixedGappedShape<TSpec>	TShapeSpec;
 
-		enum { span = Length<Shape>::VALUE };
-		enum { weight = Weight<Shape>::VALUE };
+		enum { span = LENGTH<Shape>::VALUE };
+		enum { weight = WEIGHT<Shape>::VALUE };
 		const int *diffs;
 	
 		typename Value<Shape>::Type	hValue;		// current hash value

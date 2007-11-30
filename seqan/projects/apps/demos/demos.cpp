@@ -1,5 +1,5 @@
 // Projekt, mit dem die Demos getestet werden koennen
-
+/*
 #define main runAllocator
 #include "../../demos/allocator.cpp"
 #undef main
@@ -7,14 +7,14 @@
 #define main runAlphabet
 #include "../../demos/alphabet.cpp"
 #undef main
-
+*/
 /*
 //!kompiliert nicht!
 #define main runIterator
 #include "../../demos/iterator.cpp"
 #undef main
 */
-
+/*
 #define main runRootedIterator
 #include "../../demos/rooted_iterator.cpp"
 #undef main
@@ -164,13 +164,22 @@
 #define main runFind
 #include "../../demos/find.cpp"
 #undef main
+*/
+#define main runFindExact
+#include "../../demos/find_exact.cpp"
+#undef main
 
+#define main runFindApprox
+#include "../../demos/find_approx.cpp"
+#undef main
+/*
 #define main runFileFormat
 #include "../../demos/file_format.cpp"
 #undef main
-
+*/
 int main(int argc, const char *argv[]) 
 {
+/*
 	runAllocator();
 	runAlphabet();
 	//runIterator();
@@ -194,7 +203,11 @@ int main(int argc, const char *argv[])
 	runGraph18();runGraph19();runGraph20();runGraph21();runGraph22();runGraph23();
 
 	runFind();
-	runFileFormat();
+*/
+//	runFindExact();
+	runFindApprox();
+
+//	runFileFormat();
 
 	return 0;
 }

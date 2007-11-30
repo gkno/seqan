@@ -69,16 +69,16 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef unsigned Type;
 	};
 
-///.Metafunction.Length.param.T.type:Class.Shape
+///.Metafunction.LENGTH.param.T.type:Class.Shape
     template <typename TValue, unsigned q>
-	struct Length< Shape<TValue, FixedShape<q> > >
+	struct LENGTH< Shape<TValue, FixedShape<q> > >
 	{
 		enum { VALUE = q };
 	};
 
-///.Metafunction.Weight.param.T.type:Class.Shape
+///.Metafunction.WEIGHT.param.T.type:Class.Shape
     template <typename TValue, unsigned q>
-	struct Weight< Shape<TValue, FixedShape<q> > >
+	struct WEIGHT< Shape<TValue, FixedShape<q> > >
 	{
 		enum { VALUE = q };
 	};
@@ -88,7 +88,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	struct ValueSize< Shape<TValue, TSpec> > {
 		enum { VALUE = Power<
 						ValueSize<TValue>::VALUE, 
-						Weight< Shape<TValue, TSpec> >::VALUE >::VALUE };
+						WEIGHT< Shape<TValue, TSpec> >::VALUE >::VALUE };
 	};
 
 

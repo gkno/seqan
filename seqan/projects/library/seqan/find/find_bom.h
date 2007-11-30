@@ -32,7 +32,7 @@ namespace SEQAN_NAMESPACE_MAIN
 .Spec.BomAlgo:
 ..summary: Backward Oracle Matching algorithm. Exact string matching using a factor oracle.
 ..general:Class.Pattern
-..cat:Pattern Matching
+..cat:Searching
 ..signature:Pattern<TNeedle, BomAlgo>
 ..param.TNeedle:The needle type.
 ...type:Class.String

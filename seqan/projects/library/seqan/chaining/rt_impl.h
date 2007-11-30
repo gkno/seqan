@@ -26,7 +26,7 @@ namespace seqan
 {
 
 
-/**
+/*DISABLED
 .Class.RangeTree:
 ..cat:Range Tree
 ..summary:The RangeTree is a data structure to solve the orthogonal range searching problem.

@@ -32,7 +32,7 @@ namespace SEQAN_NAMESPACE_MAIN
 .Spec.MultipleShiftAnd:
 ..summary: Multiple exact string matching using bit parallelism. The total size of the patterns should fit into a computer word.
 ..general:Class.Pattern
-..cat:Pattern Matching
+..cat:Searching
 ..signature:Pattern<TNeedle, MultipleShiftAnd>
 ..param.TNeedle:The needle type, a string of keywords.
 ...type:Class.String

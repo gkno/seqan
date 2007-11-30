@@ -84,6 +84,8 @@ public:
 	unsigned k;					// the maximal number of differences allowed
 	unsigned lastBlock;			// the block containing the last active cell
 
+	Holder<TNeedle>		data_needle;
+
 	TWord VP0;					// VP[0] (saves one dereferentiation)
 	TWord VN0;					// VN[0]
 
@@ -95,10 +97,13 @@ public:
 	
 //____________________________________________________________________________
 
-	Pattern() {}
+	Pattern(int _limit = -1):
+		k(- _limit)
+	{}
 
 	template <typename TNeedle2>
-	Pattern(TNeedle2 const & ndl)
+	Pattern(TNeedle2 const & ndl, int _limit = -1):
+		k(- _limit)
 	{
 		setHost(*this, ndl);
 	}
@@ -124,6 +129,8 @@ public:
 	TWord VP0;					// VP[0] (saves one dereferentiation)
 	TWord VN0;					// VN[0]
 
+	Holder<TNeedle>		data_needle;
+
 //	String<int> mat;
 
 	String<TWord> VP;
@@ -136,22 +143,26 @@ public:
 	
 //____________________________________________________________________________
 
-	Pattern() {}
+	Pattern(int _limit = -1):
+		k(- _limit)
+	{}
 
-	Pattern(TNeedle & ndl)
+	template <typename TNeedle2>
+	Pattern(TNeedle2 const & ndl, int _limit = -1):
+		k(- _limit)
 	{
 		setHost(*this, ndl);
 	}
 //____________________________________________________________________________
 };
 
-
 //////////////////////////////////////////////////////////////////////////////
 // Functions
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TNeedle, typename TSpec, typename TNeedle2>
-void setHost(Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > > & me, TNeedle2 const & needle) 
+void _initMyersPattern(Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > > & me, 
+					   TNeedle2 & needle) 
 {
 SEQAN_CHECKPOINT
 
@@ -173,21 +184,90 @@ SEQAN_CHECKPOINT
 		//me.bitMasks[me.blockCount * ordValue((CompareType< Value< TNeedle >::Type, Value< Container< THaystack >::Type >::Type >::Type) needle[j]) + j/me.MACHINE_WORD_SIZE] = me.bitMasks[me.blockCount * ordValue((CompareType< Value< TNeedle >::Type, Value< Container< THaystack >::Type >::Type >::Type) needle[j]) + j/MACHINE_WORD_SIZE] | 1 << (j%MACHINE_WORD_SIZE);
 }
 
-template <typename TNeedle>
-void setHost(Pattern<TNeedle, Tag<_MyersUkkonen<AlignTextBanded> > > & me, TNeedle & needle) 
+template <typename TNeedle, typename TSpec, typename TNeedle2>
+void setHost(Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > > & me, 
+			 TNeedle2 & ndl)
 {
 SEQAN_CHECKPOINT
-	me.needleSize = length(needle);
-	me.ndlIter = begin(needle, Rooted());
+	me.data_needle = ndl;
+	_initMyersPattern(me, ndl);
+}
+template <typename TNeedle, typename TSpec, typename TNeedle2>
+void setHost(Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > > & me, 
+			 TNeedle2 const & ndl) 
+{
+	me.data_needle = ndl;
+	_initMyersPattern(me, ndl);
+}
+
+template <typename TNeedle, typename TNeedle2>
+void setHost(Pattern<TNeedle, Tag<_MyersUkkonen<AlignTextBanded> > > & me, 
+			 TNeedle2 & ndl) 
+{
+SEQAN_CHECKPOINT
+	me.data_needle = ndl;
+
+	me.needleSize = length(ndl);
+	me.ndlIter = begin(ndl, Rooted());
 	me.finalScoreMask = 1 << (me.MACHINE_WORD_SIZE - 1);
 }
 
-template <typename TNeedle, typename TSpec, typename TNeedle2>
-void setHost(Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > > & me, TNeedle2 & needle)
+//____________________________________________________________________________
+
+template <typename TNeedle, typename TSpec>
+inline typename Host<Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > > >::Type & 
+host(Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > > & me)
 {
 SEQAN_CHECKPOINT
-	setHost(me, reinterpret_cast<TNeedle2 const &>(needle));
+	return value(me.data_needle);
 }
+
+template <typename TNeedle, typename TSpec>
+inline typename Host<Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > > const>::Type & 
+host(Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > >  const & me)
+{
+SEQAN_CHECKPOINT
+	return value(me.data_needle);
+}
+
+//____________________________________________________________________________
+
+///.Function.scoreLimit.param.pattern.type:Spec.MyersUkkonen
+
+template <typename TNeedle, typename TSpec>
+inline int 
+scoreLimit(Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > > const & me)
+{
+SEQAN_CHECKPOINT
+	return - (int) me.k;
+}
+
+//____________________________________________________________________________
+
+///.Function.scoreLimit.param.pattern.type:Spec.MyersUkkonen
+
+template <typename TNeedle, typename TSpec, typename TScoreValue>
+inline void 
+setScoreLimit(Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > > & me, 
+			  TScoreValue _limit)
+{
+SEQAN_CHECKPOINT
+	me.k = (- _limit);
+}
+
+//____________________________________________________________________________
+
+///.Function.getScore.param.pattern.type:Spec.MyersUkkonen
+
+template <typename TNeedle, typename TSpec>
+int getScore(Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > > & me) 
+{
+	return -(int)me.score;
+}
+//////////////////////////////////////////////////////////////////////////////
+// Functions
+//////////////////////////////////////////////////////////////////////////////
+
 
 //____________________________________________________________________________
 
@@ -739,9 +819,11 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 // find
 template <typename TFinder, typename TNeedle, typename TSpec>
-inline bool find (TFinder & finder, Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > > & me, int const k)
+inline bool find (TFinder & finder, 
+				  Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > > & me)
 {
 SEQAN_CHECKPOINT
+	int k = scoreLimit(me);
 
 	if (empty(finder))
 	{
@@ -770,12 +852,16 @@ SEQAN_CHECKPOINT
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// getScore
-template <typename TNeedle, typename TSpec>
-int getScore(Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > > & me) {
-	return -(int)me.score;
+template <typename TFinder, typename TNeedle, typename TSpec>
+inline bool find (TFinder & finder, 
+				  Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > > & me, 
+				  int const k)
+{
+	setScoreLimit(me, k);
+	find(finder, me);
 }
+//////////////////////////////////////////////////////////////////////////////
+
 
 }// namespace SEQAN_NAMESPACE_MAIN
 

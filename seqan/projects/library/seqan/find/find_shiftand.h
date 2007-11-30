@@ -32,7 +32,7 @@ namespace SEQAN_NAMESPACE_MAIN
 .Spec.ShiftAnd:
 ..summary: Exact string matching using bit parallelism. The Shift-And algorithm is applicable to search small patterns in texts using a small alphabet.
 ..general:Class.Pattern
-..cat:Pattern Matching
+..cat:Searching
 ..signature:Pattern<TNeedle, ShiftAnd>
 ..param.TNeedle:The needle type.
 ...type:Class.String

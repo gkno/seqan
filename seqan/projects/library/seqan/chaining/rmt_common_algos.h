@@ -40,7 +40,7 @@ namespace seqan{
 /////////////////////////////////////////////////////////////////////////////////////////
 
 
-/**
+/*DISABLED
 .Function.rangeMaxQuery:
 ..summary:Get the object with maximum priority in the RMT in a given intervall
 ..cat:Range Tree
@@ -79,7 +79,7 @@ namespace seqan{
 			_performRMQ( list, borderObj, searchKey, maxObject );
 	}
 
-/**
+/*DISABLED
 .Function.activate:
 ..summary:Update the internal pointer structure of the RMT. 
 ..cat:Range Tree
@@ -192,7 +192,7 @@ namespace seqan{
 /////////////////////////////////////////////////////////////////////////////////////////
 	
 
-/*
+/*DISABLED
 .Internal._connect_actualize_max:
 ..summary:As _connect_actualize, additionaly updates the max-pointers in the lowest layer of the RMT.
 ..cat:RangeMaximumTree

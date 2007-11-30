@@ -31,7 +31,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 /**
 .Metafunction.DefaultFinder:
-..cat:Pattern Matching
+..cat:Searching
 ..summary:Default @Class.Finder@ specialization type.
 ..signature:DefaultFinder<THaystack>::Type
 ..param.THaystack:The given haystack type.
@@ -44,7 +44,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 /**
 .Metafunction.DefaultPattern:
-..cat:Pattern Matching
+..cat:Searching
 ..summary:Default @Class.Pattern@ specialization type.
 ..signature:DefaultPattern<TNeedle>::Type
 ..param.TNeedle:The given needle type.
@@ -58,7 +58,7 @@ namespace SEQAN_NAMESPACE_MAIN
 /**
 .Metafunction.Haystack:
 ..summary:Returns the haystack type of a @Class.Finder@ type.
-..cat:Pattern Matching
+..cat:Searching
 ..signature:Haystack<TFinder>::Type
 ..param.TFinder:A @Class.Finder@ type.
 ...type:Class.Finder
@@ -73,7 +73,7 @@ namespace SEQAN_NAMESPACE_MAIN
 /**
 .Metafunction.Needle:
 ..summary:Returns the needle type of a @Class.Pattern@ type.
-..cat:Pattern Matching
+..cat:Searching
 ..signature:Needle<TPattern>::Type
 ..param.TPattern:A @Class.Pattern@ type.
 ...type:Class.Pattern
@@ -90,7 +90,7 @@ namespace SEQAN_NAMESPACE_MAIN
 /**
 .Class.Pattern:
 ..summary:Holds the needle and preprocessing data (depends on algorithm).
-..cat:Pattern Matching
+..cat:Searching
 ..signature:Pattern<TNeedle[, TSpec]>
 ..param.TNeedle:The needle type.
 ...type:Class.String
@@ -228,7 +228,7 @@ segment(Pattern<TNeedle, TSpec> const & me)
 /**
 .Function.needle:
 ..summary:Returns the needle of a @Class.Pattern@ object (not implemented for some online-algorithms).
-..cat:Pattern Matching
+..cat:Searching
 ..signature:needle(pattern)
 ..param.pattern:The @Class.Pattern@ object to search with.
 ...type:Class.Pattern
@@ -270,7 +270,7 @@ needle(Pattern<TNeedle, TSpec> const & obj)
 /**
 .Function.setNeedle:
 ..summary:Sets the needle of a @Class.Pattern@ object and optionally induces preprocessing.
-..cat:Pattern Matching
+..cat:Searching
 ..signature:setNeedle(pattern, needle)
 ..param.pattern:The @Class.Pattern@ object to search with.
 ...type:Class.Pattern
@@ -290,7 +290,7 @@ needle(Pattern<TNeedle, TSpec> const & obj)
 /**
 .Function.find:
 ..summary:Search for a @Class.Pattern@ in a @Class.Finder@ object.
-..cat:Pattern Matching
+..cat:Searching
 ..signature:find(finder, pattern)
 ..signature:find(finder, pattern, k)
 ..param.finder:The @Class.Finder@ object to search through.
@@ -310,7 +310,7 @@ needle(Pattern<TNeedle, TSpec> const & obj)
 /**
 .Class.Finder:
 ..summary:Holds the haystack and a current search context.
-..cat:Pattern Matching
+..cat:Searching
 ..signature:Finder<THaystack[, TSpec]>
 ..param.THaystack:The haystack type.
 ...type:Class.String
@@ -650,7 +650,7 @@ SEQAN_CHECKPOINT
 /**
 .Function.setHaystack:
 ..summary:Sets the haystack of a @Class.Finder@ object.
-..cat:Pattern Matching
+..cat:Searching
 ..signature:setHaystack(finder, haystack)
 ..param.finder:The @Class.Finder@ object to search with.
 ...type:Class.Finder
@@ -667,7 +667,7 @@ SEQAN_CHECKPOINT
 /**
 .Function.haystack:
 ..summary:Returns the haystack of a @Class.Finder@ object.
-..cat:Pattern Matching
+..cat:Searching
 ..signature:haystack(finder)
 ..param.finder:The @Class.Finder@ object to search through.
 ...type:Class.Finder

@@ -33,6 +33,7 @@ namespace SEQAN_NAMESPACE_MAIN
     
 /**
 .Spec.Pam:
+..cat:Scoring
 ..summary:Pam scoring matrices.
 ..general:Class.Score
 ..signature:Score<TValue, Pam<TSequenceValue, TSpec> >

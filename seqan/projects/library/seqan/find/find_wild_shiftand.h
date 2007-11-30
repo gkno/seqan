@@ -15,7 +15,7 @@ namespace SEQAN_NAMESPACE_MAIN
 .Spec.WildShiftAnd:
 ..summary: Exact string matching with wildcards using bit parallelism. The Shift-And algorithm is applicable to search small patterns in texts using a small alphabet.
 ..general:Class.Pattern
-..cat:Pattern Matching
+..cat:Searching
 ..signature:Pattern<TNeedle, WildShiftAnd>
 ..param.TNeedle:The needle type.
 ...type:Class.String

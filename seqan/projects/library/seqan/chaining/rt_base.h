@@ -238,7 +238,7 @@ namespace seqan{
 /////////////////////////////////////////////////////////////////////////////////////////
 	
 	
-/**
+/*DISABLED
 .Function.rangeQuery:
 ..summary:Get the object with maximum priority in the RMT in a given intervall
 ..cat:Range Tree

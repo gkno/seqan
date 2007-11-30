@@ -398,30 +398,6 @@ void Test_OnlineAlgMulti()
 
 
 
-void Test_Various()
-{
-	String<char> haystk("Dies ist ein Haystack. Ja, das ist wirklich einer!");
-	String<char> ndl("des");
-
-	Finder<String<char> > fnd(haystk);
-	Pattern<String<char>, SimpleScore> pat(ndl, -1);
-
-	while (find(fnd, pat))
-		printf("-- position %i\n", position(fnd));
-
-//____________________________________________________________________________
-
-	Pattern<String<char> > patrn(ndl);
-	setBeginPosition(patrn, 0);
-	SEQAN_TASSERT(beginPosition(patrn) == 0);
-
-	setEndPosition(patrn, length(ndl));
-	SEQAN_TASSERT(endPosition(patrn) == length(ndl));
-
-	SEQAN_TASSERT(segment(patrn) == ndl);
-
-}
-
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TAlgorithmSpec>
@@ -731,6 +707,95 @@ void Test_OnlineAlgWildcards()
 	SEQAN_TASSERT(length(pos) == 2);
 
 }
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TPatternSpec>
+void Test_Approx_EditDist()
+{
+//test DPSearch
+	String<char> haystk("Dies ist der Haystack des Tests. Ja, das ist er wirklich!");
+	String<char> ndl("des");
+
+	Finder<String<char> > fnd(haystk);
+
+	Pattern<String<char>, TPatternSpec> pat(ndl, -2);
+	SEQAN_TASSERT(scoreLimit(pat) == -2)
+	setScoreLimit(pat, -1);
+	SEQAN_TASSERT(scoreLimit(pat) == -1)
+
+	SEQAN_TASSERT(find(fnd, pat))
+	SEQAN_TASSERT(position(fnd) == 3)
+	SEQAN_TASSERT(getScore(pat) == -1)
+
+	SEQAN_TASSERT(find(fnd, pat))
+	SEQAN_TASSERT(position(fnd) == 10)
+	SEQAN_TASSERT(getScore(pat) == -1)
+
+	SEQAN_TASSERT(find(fnd, pat))
+	SEQAN_TASSERT(position(fnd) == 11)
+	SEQAN_TASSERT(getScore(pat) == -1)
+
+	SEQAN_TASSERT(find(fnd, pat))
+	SEQAN_TASSERT(position(fnd) == 23)
+	SEQAN_TASSERT(getScore(pat) == -1)
+
+	SEQAN_TASSERT(find(fnd, pat))
+	SEQAN_TASSERT(position(fnd) == 24)
+	SEQAN_TASSERT(getScore(pat) == 0)
+
+	SEQAN_TASSERT(find(fnd, pat))
+	SEQAN_TASSERT(position(fnd) == 25)
+	SEQAN_TASSERT(getScore(pat) == -1)
+
+	SEQAN_TASSERT(find(fnd, pat))
+	SEQAN_TASSERT(position(fnd) == 28)
+	SEQAN_TASSERT(getScore(pat) == -1)
+
+	SEQAN_TASSERT(find(fnd, pat))
+	SEQAN_TASSERT(position(fnd) == 39)
+	SEQAN_TASSERT(getScore(pat) == -1)
+
+	SEQAN_TASSERT(!find(fnd, pat))
+}
+//____________________________________________________________________________
+
+void Test_Approx()
+{
+//test DPSearch
+	Test_Approx_EditDist<DPSearch<SimpleScore> >();
+
+	Pattern<String<char>, DPSearch<SimpleScore> > pat1	;
+
+	SimpleScore sc;
+	scoreGap(sc) = -10;
+	setScoringScheme(pat1, sc);
+	SEQAN_TASSERT(scoreGap(scoringScheme(pat1)) == -10);
+
+	scoreGap(sc) = -1;
+	SEQAN_TASSERT(scoreGap(scoringScheme(pat1)) == -10);
+	setScoringScheme(pat1, sc);
+	SEQAN_TASSERT(scoreGap(scoringScheme(pat1)) == -1);
+
+
+//test MyersUkkonen
+	Test_Approx_EditDist<MyersUkkonen>();
+
+	/*
+//____________________________________________________________________________
+
+	Pattern<String<char> > patrn(ndl);
+	setBeginPosition(patrn, 0);
+	SEQAN_TASSERT(beginPosition(patrn) == 0);
+
+	setEndPosition(patrn, length(ndl));
+	SEQAN_TASSERT(endPosition(patrn) == length(ndl));
+
+	SEQAN_TASSERT(segment(patrn) == ndl);
+*/
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 int main() 
@@ -750,7 +815,7 @@ int main()
 	Test_OnlineAlgMulti<SetHorspool>();
 //	Test_OnlineAlgMulti<WuManber>();
 
-	Test_Various();
+	Test_Approx();
 
 //	testMyersUkkonen("accagaatatggagatctagggatcca", "agata", -2);
 //	testMyersUkkonen("actacctttatctatcatcggattcgcgatctctcgcgatcgatggcttcgagtacgtcacacagtgcatctagccggattcgcgatctctcgcgatcgatggcttcgtgtacgtcac", 

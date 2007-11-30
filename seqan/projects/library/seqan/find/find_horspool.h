@@ -32,7 +32,7 @@ namespace SEQAN_NAMESPACE_MAIN
 .Spec.Horspool:
 ..summary: Exact string matching using Horspool's algorithm (1980).
 ..general:Class.Pattern
-..cat:Pattern Matching
+..cat:Searching
 ..signature:Pattern<TNeedle, Horspool>
 ..param.TNeedle:The needle type.
 ...type:Class.String
@@ -206,6 +206,101 @@ VALIDATE:
 	return true;
 }
 
+//____________________________________________________________________________
+// Sentinel variant (not used at the moment)
+//TODO: if not enough space at the end of the haystack: call non-sentinel search
+/*
+template <typename TFinder, typename TNeedle2>
+bool
+find_horspool_sentinel(TFinder & finder, 
+					   Pattern<TNeedle2, Horspool> & me,
+					   bool find_first)
+{
+SEQAN_CHECKPOINT
+	typedef typename Haystack<TFinder>::Type THaystack;
+	THaystack & hayst = haystack(finder);
+	
+
+	typedef Pattern<TNeedle2, Horspool> TPattern;
+	typedef typename Needle<TPattern>::Type TNeedle;
+	TNeedle & ndl = needle(me);
+
+	//implant sentinel
+	typename Size<THaystack>::Type old_haystack_size = length(hayst);
+	if (find_first)
+	{
+		typedef typename Position<TFinder>::Type TFinderPosition;
+		TFinderPosition finder_pos = position(finder);
+
+		append(hayst, ndl, Exact());
+		if (length(hayst) != old_haystack_size + length(ndl))
+		{//not enough place in haystack
+//TODO!!!
+printf("error!");
+return false;
+		}
+		setPosition(finder, finder_pos);
+	}
+	else
+	{
+		_setLength(hayst, old_haystack_size + length(ndl));
+	}
+
+	typedef typename Size<TNeedle>::Type TNeedleSize;
+	TNeedleSize ndl_size = length(ndl);
+
+	typedef typename Iterator<THaystack, Standard>::Type THaystackIterator;
+	THaystackIterator it = begin(hayst, Standard());
+	THaystackIterator haystack_end = it + old_haystack_size;
+	it += position(finder) + ndl_size - 1; //it points to the last character
+
+	typedef typename Iterator<TNeedle, Standard>::Type TNeedleIterator;
+	TNeedleIterator nit; //needle iterator
+	TNeedleIterator nit_begin = begin(ndl, Standard());
+	TNeedleIterator nit_end = end(ndl, Standard()) - 1; //here the verification begins
+
+	typedef typename Value<TNeedle>::Type TNeedleValue;
+	TNeedleValue char_needle_last = *nit_end;
+	TNeedleValue char_haystack_last;
+
+	char_haystack_last = *it;
+
+	if (find_first)
+	{
+		goto VALIDATE;
+	}
+
+	//main loop
+MOVE_FURTHER:
+	it += me.data_map[_ord(char_haystack_last)];
+	char_haystack_last = *it;
+	if (char_haystack_last != char_needle_last) goto MOVE_FURTHER;
+
+
+	if (it >= haystack_end)
+	{//found nothing
+		resize(hayst, old_haystack_size);
+		return false;
+	}
+
+VALIDATE:
+	//validate current position
+	THaystackIterator it_back = it;
+	for (nit = nit_end; nit >= nit_begin; --nit)
+	{
+		if (*nit != *it_back)
+		{//invalid!
+			goto MOVE_FURTHER;
+		}
+		--it_back;
+	}
+
+	//valid! return hit
+	setPosition(finder, it - begin(hayst, Standard()) - ndl_size + 1);
+	resize(hayst, old_haystack_size);
+	return true;
+}
+*/
 //____________________________________________________________________________
 //spec for file reader haystacks
 

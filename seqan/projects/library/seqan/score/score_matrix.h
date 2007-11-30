@@ -46,7 +46,8 @@ typedef Tag<TagScoreMatrixFile_> const ScoreMatrixFile;
 
 
 /**
-.Spec.ScoreMatrix:
+.Spec.Score Matrix:
+..cat:Scoring
 ..summary:A general scoring matrix.
 ..general:Class.Score
 ..signature:Score<TValue, ScoreMatrix<TSequenceValue, TSpec> >

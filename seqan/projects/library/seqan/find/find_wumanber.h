@@ -33,7 +33,7 @@ namespace SEQAN_NAMESPACE_MAIN
 /**
 .Spec.WuManber:
 ..general:Class.Pattern
-..cat:Pattern Matching
+..cat:Searching
 ..summary:A fast online-algorithm for multi-pattern search
 ..signature:Pattern<TNeedle, WuManber<HashType> >
 ..param.TNeedle:The needle type.
@@ -333,7 +333,7 @@ SEQAN_CHECKPOINT
 
 /**
 .Function.hash:
-..cat:Pattern Matching
+..cat:Searching
 ..summary:Returns the Hashobject, that is used by the Finderobject
 ..signature:hash(Pattern)
 ..param.Pattern: Reference to the Pattern-Object
@@ -359,7 +359,7 @@ SEQAN_CHECKPOINT
 
 /**
 .Function.setHash:
-..cat:Pattern Matching
+..cat:Searching
 ..summary:Sets the Hashobject to a new Value
 ..signature:setHash(Pattern,THash)
 ..param.Pattern: Reference to the Pattern-Object
@@ -378,7 +378,7 @@ SEQAN_CHECKPOINT
 
 /**
 .Function.assignHash:
-..cat:Pattern Matching
+..cat:Searching
 ..summary: Sets the Hashobject to a new Value which is independent of the original Object
 ..signature:assignHash(Pattern,THash)
 ..param.Pattern: Reference to the Pattern-Object
@@ -407,7 +407,7 @@ SEQAN_CHECKPOINT
 
 /**
 .Function.window_with:
-..cat:Pattern Matching
+..cat:Searching
 ..summary:Returns the window-with which is used to search the Haystack
 ..signature:window_with(Pattern)
 ..param.Pattern: Reference to the Pattern-Object
@@ -432,7 +432,7 @@ SEQAN_CHECKPOINT
 
 /**
 .Function.setWindow_with:
-..cat:Pattern Matching
+..cat:Searching
 ..summary:Sets the window-with to a new value
 ..signature:window_with(Pattern,value_)
 ..param.Pattern: Reference to the Pattern-Object
@@ -450,7 +450,7 @@ SEQAN_CHECKPOINT
 
 /**
 .Function.minLength:
-..cat:Pattern Matching
+..cat:Searching
 ..summary:Returns the length of the shortest Searchpattern
 ..signature:minLength(Pattern,)
 ..param.Pattern: Reference to the Pattern-Object
@@ -475,7 +475,7 @@ SEQAN_CHECKPOINT
 
 /**
 .Function.setMinLength:
-..cat:Pattern Matching
+..cat:Searching
 ..summary:Sets the length of the shortest Searchpattern
 ..signature:minLength(Pattern,value_)
 ..param.Pattern: Reference to the Pattern-Object

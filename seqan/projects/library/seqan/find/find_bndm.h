@@ -32,7 +32,7 @@ namespace SEQAN_NAMESPACE_MAIN
 .Spec.BndmAlgo:
 ..summary: Backward Nondeterministic Dawg Matching algorithm. Exact string matching using bit parallelism.
 ..general:Class.Pattern
-..cat:Pattern Matching
+..cat:Searching
 ..signature:Pattern<TNeedle, BndmAlgo>
 ..param.TNeedle:The needle type.
 ...type:Class.String

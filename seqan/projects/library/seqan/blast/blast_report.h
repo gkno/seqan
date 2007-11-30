@@ -673,7 +673,8 @@ SEQAN_CHECKPOINT
 ...type:Class.BlastReport
 ..returns:The name (identifier) of the query.
 ...type:String<char>
-..see:Function.getQueryName, Function.databaseName
+..see:Function.getQueryName
+..see:Function.databaseName
 */
 template<typename TBlastHsp, typename TSpec>
 inline String<char> & 
@@ -692,7 +693,8 @@ SEQAN_CHECKPOINT
 ...type:Class.BlastReport
 ..returns:The name (identifier) of the query.
 ...type:String<char>
-..see:Function.queryName, Function.getDatabaseName
+..see:Function.queryName
+..see:Function.getDatabaseName
 */
 template<typename TBlastHsp, typename TSpec>
 inline String<char> 
@@ -711,7 +713,8 @@ SEQAN_CHECKPOINT
 ...type:Class.BlastReport
 ..returns:The name of the database.
 ...type:String<char>
-..see:Function.queryName, Function.getDatabaseName
+..see:Function.queryName
+..see:Function.getDatabaseName
 */
 template<typename TBlastHsp, typename TSpec>
 inline String<char> & 
@@ -730,7 +733,8 @@ SEQAN_CHECKPOINT
 ...type:Class.BlastReport
 ..returns:The name of the database.
 ...type:String<char>
-..see:Function.queryName, Function.getDatabaseName
+..see:Function.queryName
+..see:Function.getDatabaseName
 */
 template<typename TBlastHsp, typename TSpec>
 inline String<char> 

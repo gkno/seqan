@@ -33,7 +33,7 @@
 
 namespace seqan{
 
-/**
+/*DISABLED
 .Spec.RangeMaximumTree:
 ..cat:Range Tree
 ..summary:The RangeMaximumTree is a data structure to find the object with maximal score in a hypercorner.

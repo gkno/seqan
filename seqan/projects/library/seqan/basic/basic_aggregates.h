@@ -414,9 +414,9 @@ namespace SEQAN_NAMESPACE_MAIN
     template <typename _T, unsigned _size, typename TCompression>
 	inline unsigned length(Tuple<_T, _size, TCompression> const &) { return _size; }
 
-	///.Metafunction.Length.param.T.type:Class.Tuple
+	///.Metafunction.LENGTH.param.T.type:Class.Tuple
     template <typename _T, unsigned _size, typename TCompression>
-	struct Length< Tuple<_T, _size, TCompression> >
+	struct LENGTH< Tuple<_T, _size, TCompression> >
 	{
 		enum { VALUE = _size };
 	};

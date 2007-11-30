@@ -27,7 +27,7 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Spec.Simple
+.Spec.Simple Score
 ..cat:Scoring
 ..general:Class.Score
 ..summary:Simple scoring scheme that has scores for matches, mismatches, opening gaps and extending gaps.
@@ -121,7 +121,7 @@ typedef Score<int, Simple> SimpleScore;
 ..cat:Alignments
 ..summary:Match score.
 ..signature:scoreMatch(object)
-..param.object.type:Spec.Simple
+..param.object.type:Spec.Simple Score 
 ..returns:Match score.
 ..see:Function.scoreMismatch
 ..see:Function.scoreGapExtend
@@ -145,7 +145,7 @@ scoreMatch(Score<TValue, TSpec> const & me)
 ..cat:Alignments
 ..summary:Mismatch score.
 ..signature:scoreMismatch(object)
-..param.object.type:Spec.Simple
+..param.object.type:Spec.Simple Score
 ..returns:Mismatch score.
 ...note:Usually, mismatches have negative scores.
 ..see:Function.scoreMatch
@@ -170,7 +170,7 @@ scoreMismatch(Score<TValue, TSpec> const & me)
 ..cat:Alignments
 ..summary:Score for extending gaps.
 ..signature:scoreGapExtend(object)
-..param.object.type:Spec.Simple
+..param.object.type:Spec.Simple Score
 ..returns:Score for extending gaps.
 ...note:Usually, gaps have negative scores.
 ..see:Function.scoreMismatch
@@ -194,7 +194,7 @@ scoreGapExtend(Score<TValue, TSpec> const & me)
 ..cat:Alignments
 ..summary:Score for opening a gap.
 ..signature:scoreGapOpen(object)
-..param.object.type:Spec.Simple
+..param.object.type:Spec.Simple Score
 ..returns:Score for opening a gap.
 ...note:Usually, gaps have negative scores.
 ..see:Function.scoreMismatch
@@ -219,7 +219,7 @@ scoreGapOpen(Score<TValue, TSpec> const & me)
 ..cat:Alignments
 ..summary:Score for gaps.
 ..signature:scoreGapExtend(object)
-..param.object.type:Spec.Simple
+..param.object.type:Spec.Simple Score
 ..returns:Score for extending gaps.
 ...note:Usually, gaps have negative scores.
 ..remarks:This score is used for linear gap costs. For affine gap costs use @Function.scoreGapExtend@ and @Function.scoreGapOpen@ instead.

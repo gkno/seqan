@@ -32,7 +32,7 @@ namespace SEQAN_NAMESPACE_MAIN
 .Spec.SetHorspool:
 ..summary: Multiple exact string matching using set horspool algorithm.
 ..general:Class.Pattern
-..cat:Pattern Matching
+..cat:Searching
 ..signature:Pattern<TNeedle, SetHorspool>
 ..param.TNeedle:The needle type, a string of keywords.
 ...type:Class.String
