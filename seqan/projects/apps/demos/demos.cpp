@@ -1,5 +1,5 @@
 // Projekt, mit dem die Demos getestet werden koennen
-/*
+//*
 #define main runAllocator
 #include "../../demos/allocator.cpp"
 #undef main
@@ -7,22 +7,20 @@
 #define main runAlphabet
 #include "../../demos/alphabet.cpp"
 #undef main
-*/
-/*
-//!kompiliert nicht!
+
+
 #define main runIterator
 #include "../../demos/iterator.cpp"
 #undef main
-*/
-/*
+
+
 #define main runRootedIterator
 #include "../../demos/rooted_iterator.cpp"
 #undef main
 
-#define main runString
+#define main runString1
 #include "../../demos/string_1.cpp"
 #undef main
-
 
 
 #define main runModifierModReverse
@@ -64,6 +62,23 @@
 #undef main
 
 
+#define main runFind
+#include "../../demos/find.cpp"
+#undef main
+
+#define main runFindExact
+#include "../../demos/find_exact.cpp"
+#undef main
+
+#define main runFindApprox
+#include "../../demos/find_approx.cpp"
+#undef main
+
+#define main runFileFormat
+#include "../../demos/file_format.cpp"
+#undef main
+
+//*/
 
 #define main runGraph0
 #include "../../demos/graph_algo_bfs.cpp"
@@ -161,30 +176,21 @@
 #include "../../demos/graph_align_msa.cpp"
 #undef main
 
-#define main runFind
-#include "../../demos/find.cpp"
-#undef main
-*/
-#define main runFindExact
-#include "../../demos/find_exact.cpp"
-#undef main
 
-#define main runFindApprox
-#include "../../demos/find_approx.cpp"
-#undef main
-/*
-#define main runFileFormat
-#include "../../demos/file_format.cpp"
-#undef main
-*/
+//*/
 int main(int argc, const char *argv[]) 
 {
-/*
+//*
 	runAllocator();
 	runAlphabet();
-	//runIterator();
+	runIterator();
 	runRootedIterator();
-	runString();
+	runString1();
+
+	runFind();
+	runFindExact();
+	runFindApprox();
+	runFileFormat();
 
 	runModifierModReverse();
 	runModifierModView();
@@ -197,17 +203,12 @@ int main(int argc, const char *argv[])
 	runIndexMaxRepeats();
 	runIndexMummy(argc, argv);
 
+//*/
 	runGraph0();runGraph1();runGraph2();runGraph3();runGraph4();runGraph5();
 	runGraph6();runGraph7();runGraph8();runGraph9();runGraph10();runGraph11();
 	runGraph12();runGraph13();runGraph14();runGraph15();runGraph16();runGraph17();
 	runGraph18();runGraph19();runGraph20();runGraph21();runGraph22();runGraph23();
 
-	runFind();
-*/
-//	runFindExact();
-	runFindApprox();
-
-//	runFileFormat();
-
+//*/
 	return 0;
 }
