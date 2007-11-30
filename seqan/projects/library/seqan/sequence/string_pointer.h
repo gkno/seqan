@@ -693,7 +693,9 @@ SEQAN_CHECKPOINT
 }
 
 //////////////////////////////////////////////////////////////////////////////
-
+//PROBLEM: ambiguitiy "pointer/iterator" and "c-style string"
+//workaround: disable all operators
+/*
 template <typename TLeftValue, typename TRight >
 TLeftValue const *
 operator += (TLeftValue * left,
@@ -703,7 +705,7 @@ SEQAN_CHECKPOINT
 	append(left, right);
 	return left;
 }
-
+*/
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TLeftValue, typename TRight >
@@ -715,7 +717,7 @@ SEQAN_CHECKPOINT
 	typename Comparator<TLeftValue *>::Type _lex(left, right);
     return isEqual(_lex);
 }
-
+/*
 template <typename TLeftValue, typename TRight >
 inline bool
 operator == (TLeftValue * left, 
@@ -725,7 +727,7 @@ SEQAN_CHECKPOINT
 	typename Comparator<TLeftValue *>::Type _lex(left, right);
     return isEqual(_lex);
 }
-
+*/
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TLeftValue, typename TRight >
@@ -737,16 +739,17 @@ SEQAN_CHECKPOINT
 	typename Comparator<TLeftValue *>::Type _lex(left, right);
     return isNotEqual(_lex);
 }
-
+/*
 template <typename TLeftValue, typename TRight >
 inline bool
 operator != (TLeftValue * left, 
-			TRight const & right)
+			 TRight const & right)
 {
 SEQAN_CHECKPOINT
 	typename Comparator<TLeftValue *>::Type _lex(left, right);
     return isNotEqual(_lex);
 }
+*/
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -758,7 +761,7 @@ isLess(TLeftValue * left,
 SEQAN_CHECKPOINT
 	return isLess(left, right, typename DefaultPrefixOrder<TLeftValue *>::Type());
 }
-
+/*
 template <typename TLeftValue, typename TRight>
 inline bool
 operator < (TLeftValue * left, 
@@ -767,7 +770,7 @@ operator < (TLeftValue * left,
 SEQAN_CHECKPOINT
 	return isLess(left, right, typename DefaultPrefixOrder<TLeftValue *>::Type());
 }
-
+*/
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TLeftValue, typename TRight>
@@ -778,7 +781,7 @@ isLessOrEqual(TLeftValue * left,
 SEQAN_CHECKPOINT
 	return isLessOrEqual(left, right, typename DefaultPrefixOrder<TLeftValue *>::Type());
 }
-
+/*
 template <typename TLeftValue, typename TRight>
 inline bool
 operator <= (TLeftValue * left, 
@@ -787,7 +790,7 @@ operator <= (TLeftValue * left,
 SEQAN_CHECKPOINT
 	return isLessOrEqual(left, right, typename DefaultPrefixOrder<TLeftValue *>::Type());
 }
-
+*/
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TLeftValue, typename TRight>
@@ -798,7 +801,7 @@ isGreater(TLeftValue * left,
 SEQAN_CHECKPOINT
 	return isGreater(left, right, typename DefaultPrefixOrder<TLeftValue *>::Type());
 }
-
+/*
 template <typename TLeftValue, typename TRight>
 inline bool
 operator > (TLeftValue * left, 
@@ -807,7 +810,7 @@ operator > (TLeftValue * left,
 SEQAN_CHECKPOINT
 	return isGreater(left, right, typename DefaultPrefixOrder<TLeftValue *>::Type());
 }
-
+*/
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TLeftValue, typename TRight>
@@ -818,7 +821,7 @@ isGreaterOrEqual(TLeftValue * left,
 SEQAN_CHECKPOINT
 	return isGreaterOrEqual(left, right, typename DefaultPrefixOrder<TLeftValue *>::Type());
 }
-
+/*
 template <typename TLeftValue, typename TRight>
 inline bool
 operator >= (TLeftValue * left, 
@@ -827,6 +830,7 @@ operator >= (TLeftValue * left,
 SEQAN_CHECKPOINT
 	return isGreaterOrEqual(left, right, typename DefaultPrefixOrder<TLeftValue *>::Type());
 }
+*/
 //////////////////////////////////////////////////////////////////////////////
 
 } //namespace SEQAN_NAMESPACE_MAIN
