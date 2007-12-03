@@ -1096,7 +1096,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 	// go up one edge (returns false if in root node)
 	template < typename TIndex, class TSpec >
 	inline bool 
-	goUp(Iter< TIndex, VSTree< TopDown< ParentLinks<TSpec> > > > &it) 
+	_goUp(Iter< TIndex, VSTree< TopDown< ParentLinks<TSpec> > > > &it) 
 	{
 		if (!empty(it.history)) {
 			value(it).range = top(it.history);
@@ -1106,6 +1106,12 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 			return true;
 		}
 		return false;
+	}
+
+	// go up one edge
+	template < typename TIndex, class TSpec >
+	inline bool goUp(Iter< TIndex, VSTree< TopDown< ParentLinks<TSpec> > > > &it) {
+		return _goUp(it);
 	}
 
 	// return vertex descriptor of parent's node
