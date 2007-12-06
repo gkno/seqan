@@ -73,11 +73,12 @@ _localAlignment(TAlign& align,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TAlign, typename TStringSet, typename TScore>
+template<typename TAlign, typename TStringSet, typename TScore, typename TLimitCount>
 inline typename Value<TScore>::Type
 _localAlignment(TAlign& align,
 				TStringSet& str,
 				TScore const& sc,
+				TLimitCount limit_count,
 				SmithWatermanClump)
 {
 	SEQAN_CHECKPOINT
@@ -118,7 +119,7 @@ _localAlignment(TAlign& align,
 		for(TSize k = 0; k<diff; ++k) push_back(score_values, local_score);
 
 		++count;
-	} while ((local_score > 0.5 * maxScore) && (count < 4));
+	} while ((local_score > 0.5 * maxScore) && (count < limit_count));
 
 	// Refine all matches and create multiple alignment
 	matchRefinement(matches,str,align);
@@ -143,6 +144,19 @@ _localAlignment(TAlign& align,
 	}
 
 	return maxScore;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TAlign, typename TStringSet, typename TScore>
+inline typename Value<TScore>::Type
+_localAlignment(TAlign& align,
+				TStringSet& str,
+				TScore const& sc,
+				SmithWatermanClump)
+{
+	SEQAN_CHECKPOINT
+	return _localAlignment(align,str,sc,4,SmithWatermanClump());
 }
 
 }// namespace SEQAN_NAMESPACE_MAIN

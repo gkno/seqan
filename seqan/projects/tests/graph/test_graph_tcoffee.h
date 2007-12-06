@@ -447,6 +447,10 @@ void Test_TCoffeeAssemblyFromFile(String<char> const readsPath, String<char> con
 	std::cout << consens << std::endl;
 	_alignTiming(startTime, "Consensus done: ");
 	
+
+	exit(0);
+
+
 	// Make quick alignment
 	std::cout << "Alignment of consensus to reference: " << std::endl;
 	StringSet<TString, Owner<> > seqSet;
@@ -909,7 +913,7 @@ void Test_RnaLibraries() {
 void Test_TCoffeeAssembly() {
 	// Windows
 #ifdef PLATFORM_WINDOWS
-	Test_TCoffeeAssemblyFromFile("Z:\\matches\\reads\\readsim.out", "Z:\\matches\\reads\\sequence.fasta"); 
+	Test_TCoffeeAssemblyFromFile("D:\\matches\\reads\\readsim.out", "D:\\matches\\reads\\sequence.fasta"); 
 #else
 	// Linux
 	Test_TCoffeeAssemblyFromFile("/home/takifugu/rausch/matches/reads/readsim.out", "/home/takifugu/rausch/matches/reads/sequence.fasta"); 
@@ -954,8 +958,6 @@ void Test_GraphTCoffee() {
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_guidetree.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_library.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_progressive.h");
-	
-
 }
 
 

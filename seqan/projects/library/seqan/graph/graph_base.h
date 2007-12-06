@@ -195,6 +195,16 @@ typedef Tag<TCoffeeLib_> const TCoffeeLib;
 //////////////////////////////////////////////////////////////////////////////
 
 /**
+.Tag.Alignment Graph Format.value.NewickFormat:
+	NewickFormat format to write a guide tree.
+*/
+
+struct NewickFormat_;
+typedef Tag<NewickFormat_> const NewickFormat;
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
 .Tag.Alignment Graph Format.value.AtacMatches:
 	Format to read matches in Atac format.
 */

@@ -152,7 +152,7 @@ getKmerSimilarityMatrix(StringSet<TString, TSpec> const& strSet,
 				if (compareIndex[ tupSet[k2][i] ] < qIndex[ tupSet[k2][i] ]) ++value;
 				++compareIndex[ tupSet[k2][i] ];
 			}
-			assignValue(mat, k*nseq+k2, value);
+			assignValue(mat, k*nseq+k2, (TValue) value);
 		}
 	}
 

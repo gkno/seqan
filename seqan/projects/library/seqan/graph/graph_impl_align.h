@@ -1232,7 +1232,8 @@ label(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	//std::cout << seg.data_seq_id << ",";
 	//std::cout << seg.data_begin << ",";
 	//std::cout << seg.data_length << ",";
-	//std::cout << infix(getString(value(g.data_sequence), seg.data_seq_id), seg.data_begin, seg.data_begin + seg.data_length) << std::endl;
+	//std::cout << getValueById(value(g.data_sequence), seg.data_seq_id) << std::endl;
+	//std::cout << infix(getValueById(value(g.data_sequence), seg.data_seq_id), seg.data_begin, seg.data_begin + seg.data_length) << std::endl;
 	return infix(getValueById(value(g.data_sequence), seg.data_seq_id), seg.data_begin, seg.data_begin + seg.data_length);
 }
 

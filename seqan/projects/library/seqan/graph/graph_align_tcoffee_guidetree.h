@@ -306,16 +306,16 @@ upgmaTree(String<double, TStringSpec>& mat,
 		  TTag) 
 {
 	SEQAN_CHECKPOINT
-	
-	typedef typename Size<String<double, TStringSpec> >::Type TSize;
 	typedef Graph<Tree<TCargo, TSpec> > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename Size<TGraph>::Type TSize;
 	typedef typename Value<String<double, TStringSpec> >::Type TValue;
 	
 	TSize nseq = (TSize) std::sqrt((TValue)length(mat));
 
 	// First initialization
 	clearVertices(g);
+
 	// Which entries in the matrix are still active and how many members belong to this group
 	String<unsigned int> active;
 	fill(active, nseq, 1);
@@ -324,13 +324,16 @@ upgmaTree(String<double, TStringSpec>& mat,
 	reserve(nodes, nseq);
 
 
-	TValue minVal = getInfinity<TValue>();
+	// Find the minimal value
+	TValue infinityVal = getInfinity<TValue>();
+	TValue minVal = infinityVal;
 	TSize index_i = 0;
 	TSize index_j = 0;
+	TValue tmp;
 	for(TSize i=0;i<nseq;++i) {
 		for(TSize j=i+1;j<nseq;++j) {
-			if (minVal > getValue(mat, i*nseq + j)) {
-				minVal = getValue(mat, i*nseq + j);
+			if (minVal > (tmp = getValue(mat, i*nseq + j))) {
+				minVal = tmp;
 				index_i = i;
 				index_j = j;
 			}
@@ -339,8 +342,9 @@ upgmaTree(String<double, TStringSpec>& mat,
 	}
 
 	// Property map for sum of weights for each node
-	String<TValue> weights;
-	fill(weights, nseq, 0);
+	String<TCargo> weights;
+	fill(weights, nseq, (TCargo) 0);
+	reserve(weights, 2*nseq - 1);
 
 	// Merge groups
 	TSize m = nseq;
@@ -361,33 +365,32 @@ upgmaTree(String<double, TStringSpec>& mat,
 		//std::cout << nodes[index_i] << ',' << nodes[index_j] << std::endl;
 		//std::cout << std::endl;
 
-		TCargo w = getValue(mat, index_i*nseq + index_j) / 2;
+		TCargo w = (TCargo) (value(mat, index_i*nseq + index_j) / 2);
 		addEdge(g, internalNode, nodes[index_i], w - getProperty(weights, nodes[index_i]));
 		addEdge(g, internalNode, nodes[index_j], w - getProperty(weights, nodes[index_j]));
 		appendValue(weights, w);		
 
 		// Get the new distance values
 		for(TSize i=0;i<nseq;++i) {
-			if ((!active[i]) ||
-				(i == index_i) ||
-				(i == index_j)) continue;
-			TValue newDist = _upgmaTreeMerge(mat, active, index_i, index_j, i, nseq, TTag());
-			if (index_i < i) assignValue(mat, index_i*nseq + i, newDist);
-			else assignValue(mat, i*nseq + index_i, newDist);
+			if ((i == index_i) ||
+				(i == index_j) ||
+				(!active[i])) continue;
+			if (index_i < i) value(mat, index_i*nseq + i) = _upgmaTreeMerge(mat, active, index_i, index_j, i, nseq, TTag());
+			else value(mat, i*nseq + index_i) = _upgmaTreeMerge(mat, active, index_i, index_j, i, nseq, TTag());
 		}
 		// Inactivate one group, adjust the member count for the other one
-		active[index_i] = active[index_i] + active[index_j];
-		nodes[index_i] = internalNode;
+		active[index_i] += active[index_j];
 		active[index_j] = 0;
-
+		nodes[index_i] = internalNode;
+		
 		// Find new minimum
-		minVal = getInfinity<TValue>();
+		minVal = infinityVal;
 		for(TSize i=0;i<nseq;++i) {
 			if (!active[i]) continue;
 			for(TSize j=i+1;j<nseq;++j) {
 				if (!active[j]) continue;
-				if (minVal > getValue(mat, i*nseq + j)) {
-					minVal = getValue(mat, i*nseq + j);
+				if (minVal > (tmp = value(mat, i*nseq + j))) {
+					minVal = tmp;
 					index_i = i;
 					index_j = j;
 				}

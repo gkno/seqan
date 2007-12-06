@@ -57,7 +57,7 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	// String of fragments to combine all pairwise alignments into a multiple alignment
 	typedef Fragment<> TFragment;
 	typedef String<TFragment, Block<> > TFragmentString;
-	typedef typename Iterator<TFragmentString, Rooted>::Type TFragmentStringIter;
+	typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
 	TFragmentString matches;
 	String<TScoreValue, Block<> > score_values;
 
@@ -71,15 +71,16 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 			typedef typename VertexDescriptor<TPairGraph>::Type TVD;
 			typedef typename Iterator<TPairGraph, EdgeIterator>::Type TEI;
 			TPairGraph pGraph(pairSet);
+
 			localAlignment(pGraph, score_type, SmithWatermanClump() );
-			
+						
 			// Remember the matches and their scores
 			TEI it(pGraph);
 			for(;!atEnd(it);++it) {
 				TVD sV = sourceVertex(it);
 				TVD tV = targetVertex(it);
 				push_back(matches, TFragment( (unsigned int) sequenceId(pGraph, sV), (unsigned int) fragmentBegin(pGraph,sV), (unsigned int) sequenceId(pGraph, tV),  (unsigned int)  fragmentBegin(pGraph,tV),  (unsigned int)  fragmentLength(pGraph,tV)));
-				push_back(score_values, cargo(*it));
+				push_back(score_values, (TScoreValue) cargo(*it));
 			}
 		}
 	}
@@ -89,7 +90,8 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 
 	// Adapt edge weights, scale weights by significance of local match
 	TFragmentStringIter endIt = end(matches);
-	for(TFragmentStringIter it = begin(matches); it != endIt; ++it) {
+	unsigned int positionIt = 0;
+	for(TFragmentStringIter it = begin(matches); it != endIt; ++it, ++positionIt) {
 		TId id1 = sequenceId(*it,0);
 		TId id2 = sequenceId(*it,1);
 		TSize pos1 = fragmentBegin(*it, id1);
@@ -99,8 +101,8 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 			TVertexDescriptor p1 = findVertex(g, id1, pos1);
 			TVertexDescriptor p2 = findVertex(g, id2, pos2);
 			TEdgeDescriptor e = findEdge(g, p1, p2);
-			if (e != 0) cargo(e) *= (TCargo) getValue(score_values, position(it));
-			else addEdge(g, p1, p2, (TCargo) getValue(score_values, position(it)));
+			if (e != 0) cargo(e) *= (TCargo) getValue(score_values, positionIt);
+			else addEdge(g, p1, p2, (TCargo) getValue(score_values, positionIt));
 			pos1 += fragmentLength(g, p1);
 			pos2 += fragmentLength(g, p2);
 		}
@@ -688,6 +690,7 @@ _readLibrary(TFile & file,
 	
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename Id<TGraph>::Type TId;
 
 	TValue c;
@@ -696,7 +699,7 @@ _readLibrary(TFile & file,
 	else c = _streamGet(file);
 
 	typedef std::pair<unsigned int, unsigned int> TSeqRes;
-	typedef std::map<TSeqRes, unsigned int> TNodeMap;
+	typedef std::map<TSeqRes, TVertexDescriptor> TNodeMap;
 	TNodeMap node_map;
 	TWord seq1 = 0;
 	TWord seq2 = 0;
@@ -729,9 +732,10 @@ _readLibrary(TFile & file,
 			--res2;
 			bool newEdge = false;
 			TSeqRes key = std::make_pair(seq1, res1);
-			TNodeMap::iterator nodePos = node_map.find(key);
+			typename TNodeMap::iterator nodePos = node_map.find(key);
 			TId id1;
 			if (nodePos == node_map.end()) {
+				//std::cout << seq1 << ',' << res1 << std::endl;
 				id1 = addVertex(g, seq1, res1, 1); 
 				node_map.insert(std::make_pair(key, id1));
 				newEdge = true;
@@ -743,6 +747,7 @@ _readLibrary(TFile & file,
 			nodePos = node_map.find(key);
 			TId id2;
 			if (nodePos == node_map.end()) {
+				//std::cout << seq2 << ',' << res2 << std::endl;
 				id2 = addVertex(g, seq2, res2, 1); 
 				node_map.insert(std::make_pair(key, id2));
 				newEdge = true;
@@ -792,13 +797,15 @@ read(TFile & file,
 	// Read sequences
 	for(TWord i=0; i<nSeq; ++i) {
 		_parse_skipWhitespace(file, c);
-		std::cout << _parse_readIdentifier(file, c) << ", ";
+		//std::cout << _parse_readIdentifier(file, c) << ", ";
+		_parse_readIdentifier(file, c);
 		_parse_skipWhitespace(file, c);
-		std::cout << _parse_readNumber(file, c) << ", ";
+		//std::cout << _parse_readNumber(file, c) << ", ";
+		_parse_readNumber(file, c);
 		_parse_skipWhitespace(file, c);
 		TString sequence;
 		_parse_readSequenceData(file,c,sequence);
-		std::cout << sequence << std::endl;
+		//std::cout << sequence << std::endl;
 	}
 	// Reinitialize the graph, because we changed the sequences
 	clearVertices(g);
@@ -844,12 +851,13 @@ read(TFile & file,
 	}
 }
 
-
+/*
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TFile, typename TStringSet, typename TCargo, typename TSpec>
+template<typename TFile, typename TStringSet, typename TCargo, typename TSpec, typename TNames>
 void write(TFile & file, 
 		   Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
+		   TNames& names,
 		   TCoffeeLib) 
 {
 	SEQAN_CHECKPOINT
@@ -864,8 +872,7 @@ void write(TFile & file,
 	_streamPutInt(file, len);
 	_streamPut(file, '\n');
 	for(TSize i=0;i<len;++i) {
-		_streamWrite(file, "seq");
-		_streamPutInt(file, i);
+		_streamWrite(file, names[i]);
 		_streamPut(file, ' ');
 		TString str = value(getStringSet(g), i);
 		_streamPutInt(file, length(str));
@@ -890,30 +897,255 @@ void write(TFile & file,
 			sV = tV;
 			tV = tmp;
 		}
-		m.insert(std::make_pair(TSeq(sequenceId(g,sV), sequenceId(g,tV)), 
-								TData(fragmentBegin(g,sV) + 1, fragmentBegin(g,tV) + 1, getCargo(*it))));
+		for(TSize i = 0; i<fragmentLength(g,sV); ++i) {
+			m.insert(std::make_pair(TSeq(sequenceId(g,sV), sequenceId(g,tV)), TData(fragmentBegin(g,sV) + i, fragmentBegin(g,tV) + i, getCargo(*it))));
+		}
 	}
 	TSeq old;
 	for(TMap::iterator pos = m.begin();pos!=m.end();++pos) {
 		if (old != pos->first) {
 			old = pos->first; 
 			_streamPut(file, '#');
-			_streamPutInt(file, pos->first.first);
+			_streamPutInt(file, pos->first.first + 1);
 			_streamPut(file, ' ');
-			_streamPutInt(file, pos->first.second);
+			_streamPutInt(file, pos->first.second + 1);
 			_streamPut(file, '\n');		
 		}
-		_streamPutInt(file, pos->second.i1);
+		_streamPutInt(file, pos->second.i1 + 1);
 		_streamPut(file, ' ');
-		_streamPutInt(file, pos->second.i2);
+		_streamPutInt(file, pos->second.i2 + 1);
 		_streamPut(file, ' ');
 		_streamPutInt(file, pos->second.i3);
 		_streamPut(file, '\n');	
 	}
-	_streamWrite(file, "! SEQ_0_TO_N-1");
+	_streamWrite(file, "! SEQ_1_TO_N");
+	_streamPut(file, '\n');	
+}
+*/
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TFile, typename TStringSet, typename TCargo, typename TSpec, typename TNames>
+void write(TFile & file, 
+		   Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
+		   TNames& names,
+		   TCoffeeLib) 
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;\
+	typedef typename Value<TStringSet>::Type TString;
+	typedef typename Size<TStringSet>::Type TSize;
+
+	_streamWrite(file, "! TC_LIB_FORMAT_01\n");
+	TSize len = length(getStringSet(g));
+	_streamPutInt(file, len);
+	_streamPut(file, '\n');
+	for(TSize i=0;i<len;++i) {
+		_streamWrite(file, names[i]);
+		_streamPut(file, ' ');
+		TString str = value(getStringSet(g), i);
+		_streamPutInt(file, length(str));
+		_streamPut(file, ' ');
+		_streamWrite(file, str);
+		_streamPut(file, '\n');
+	}
+
+	typedef typename Iterator<TGraph, EdgeIterator>::Type TIter;
+	TIter it(g);
+	for(;!atEnd(it);++it) {
+		TVertexDescriptor sV = sourceVertex(it);
+		TVertexDescriptor tV = targetVertex(it);
+		if (sequenceId(g,sV) > sequenceId(g,tV)) {
+			TVertexDescriptor tmp = sV;
+			sV = tV;
+			tV = tmp;
+		}
+		_streamPut(file, '#');
+		_streamPutInt(file, sequenceId(g,sV) + 1);
+		_streamPut(file, ' ');
+		_streamPutInt(file, sequenceId(g,tV) + 1);
+		_streamPut(file, '\n');		
+		for(TSize i = 0; i<fragmentLength(g,sV); ++i) {
+			_streamPutInt(file, fragmentBegin(g,sV) + i + 1);
+			_streamPut(file, ' ');
+			_streamPutInt(file, fragmentBegin(g,tV) + i + 1);
+			_streamPut(file, ' ');
+			_streamPutInt(file, getCargo(*it));
+			_streamPut(file, '\n');	
+		}
+	}
+	_streamWrite(file, "! SEQ_1_TO_N");
 	_streamPut(file, '\n');	
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TFile, typename TCargo, typename TSpec, typename TNames>
+void 
+read(TFile & file,
+	 Graph<Tree<TCargo, TSpec> >& guideTree,
+	 TNames& names,
+	 NewickFormat) 
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Tree<TCargo, TSpec> > TGuideTree;
+	typedef typename VertexDescriptor<TGuideTree>::Type TVertexDescriptor;
+	typedef typename EdgeDescriptor<TGuideTree>::Type TEdgeDescriptor;
+	typedef typename Size<TGuideTree>::Type TSize;
+	typedef typename Id<TGuideTree>::Type TId;
+	typedef typename Position<TFile>::Type TPosition;
+	typedef typename Value<TFile>::Type TValue;
+	typedef typename Value<TNames>::Type TName;
+	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
+
+	typedef std::map<TName, TId> TNameToId;
+	TNameToId nameToId;
+	for(TId i=0; i<length(names);++i) {
+		addVertex(guideTree);	// Create the sequence vertices
+		nameToId.insert(std::make_pair(names[i], i));
+	}
+
+	TValue c;
+	if (_streamEOF(file)) return;
+	else c = _streamGet(file);
+
+	TVertexDescriptor lastVertex = nilVertex;
+	TVertexDescriptor lastChild = nilVertex;
+	while (!_streamEOF(file)) {
+		if (c=='(') {
+			if (lastVertex == nilVertex) {
+				lastVertex = addVertex(guideTree);
+				assignRoot(guideTree, lastVertex);
+			} else {
+				TVertexDescriptor ch = addChild(guideTree, lastVertex);
+				lastVertex = ch;
+			}
+			c = _streamGet(file);
+			_parse_skipWhitespace(file, c);
+		} else if (c==')') {
+			if (!isRoot(guideTree, lastVertex)) {
+				lastChild = lastVertex;
+				lastVertex = parentVertex(guideTree, lastVertex);
+			} else {
+				lastChild = lastVertex;
+				lastVertex = nilVertex;
+			}
+			c = _streamGet(file);
+			_parse_skipWhitespace(file, c);
+		} else if (c==',') {
+			c = _streamGet(file);
+			_parse_skipWhitespace(file, c);
+		} else if (c==':') {
+			c = _streamGet(file);
+			cargo(findEdge(guideTree, lastVertex, lastChild)) = _parse_readDouble(file,c);
+		} else if (c==';') {
+			c = _streamGet(file);
+			_parse_skipWhitespace(file, c);
+		} else {
+			TName tmp = _parse_readIdentifier(file, c);
+			//std::cout << tmp << std::endl;
+			if (lastVertex == nilVertex) {
+				// Tree is rooted at a leaf
+				// Create artificial root node
+				lastVertex = length(names);
+				assignRoot(guideTree, addVertex(guideTree));
+				addEdge(guideTree, getRoot(guideTree), lastVertex);
+				addEdge(guideTree, getRoot(guideTree), nameToId[tmp]);
+			} else {
+				addEdge(guideTree, lastVertex, nameToId[tmp]);
+			}
+			lastChild = nameToId[tmp];
+		}
+	}
+	
+	// Root the tree if necessary 
+	if (outDegree(guideTree, lastChild) > 2) {
+		TVertexDescriptor myRoot = addVertex(guideTree);
+		assignRoot(guideTree, myRoot);
+		typedef typename Iterator<TGuideTree, OutEdgeIterator>::Type TOutEdgeIterator;
+		TOutEdgeIterator it(guideTree, lastChild);
+		TVertexDescriptor tV = targetVertex(it);
+		TCargo c = cargo(*it);
+		removeEdge(guideTree, lastChild, tV);
+		addEdge(guideTree, myRoot, tV, c);
+		addEdge(guideTree, myRoot, lastChild, (TCargo) 0);
+	}
+
+	//std::fstream strm1; // Alignment graph as dot
+	//strm1.open("D:\\matches\\test\\tree.dot", std::ios_base::out | std::ios_base::trunc);
+	//write(strm1,guideTree,DotDrawing());
+	//strm1.close();
+
+
+	//std::cout << guideTree << std::endl;
+}
+
+/*
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TFile, typename TCargo, typename TSpec, typename TNames>
+void 
+write(TFile & file,
+	  Graph<Tree<TCargo, TSpec> >& guideTree,
+	  TNames& names,
+	  NewickFormat) 
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Tree<TCargo, TSpec> > TGuideTree;
+	typedef Iterator<TGuideTree, DfsPreorder>::Type TDfsPreorder;
+
+	String<unsigned int> predMap;
+	String<unsigned int> distMap;
+	breadth_first_search(guideTree, getRoot(guideTree), predMap, distMap);
+	unsigned int oldLevel = getProperty(distMap, getRoot(guideTree));
+	TDfsPreorder dfsIt(guideTree,getRoot(guideTree));
+	for(;!atEnd(dfsIt);goNext(dfsIt)) {
+		unsigned int newLevel = getProperty(distMap, *dfsIt);
+		if (!isLeaf(guideTree, *dfsIt)) {		
+			if (newLevel > oldLevel) {
+				_streamPut(file, '(');	
+				_streamPut(file, '\n');
+			} else {
+				unsigned int i = newLevel;
+				while (i < oldLevel) {
+					_streamPut(file, ')');	
+					_streamPut(file, '\n');
+					++i;
+				}
+			}
+		} else {
+			if (oldLevel == newLevel) {
+				_streamPut(file, ',');	
+				_streamPut(file, '\n');
+				_streamWrite(file, names[*dfsIt]);
+
+			} else {
+				if (newLevel > oldLevel) {
+					_streamPut(file, '(');	
+					_streamPut(file, '\n');
+				} else {
+					unsigned int i = newLevel;
+					while (i < oldLevel) {
+						_streamPut(file, ')');	
+						_streamPut(file, '\n');
+						++i;
+					}
+				}
+				_streamWrite(file, names[*dfsIt]);
+			}
+		}
+		oldLevel = newLevel;
+	}
+	unsigned int i = 0;
+	while (i < oldLevel) {
+		_streamPut(file, ')');	
+		_streamPut(file, '\n');
+		++i;
+	}
+}
+*/
 
 }// namespace SEQAN_NAMESPACE_MAIN
 

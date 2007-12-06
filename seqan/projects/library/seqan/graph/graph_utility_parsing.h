@@ -95,7 +95,7 @@ template<typename TChar>
 inline bool
 _parse_isAlphanumericChar(TChar const c)
 {
-	return ((_parse_isDigit(c)) || (_parse_isLetter(c)) || (c == '_') || (c == '.') || (c == '-'));
+	return ((_parse_isDigit(c)) || (_parse_isLetter(c)) || (c == '_') || (c == '.') || (c == '-') || (c == '|'));
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -112,6 +112,22 @@ _parse_readNumber(TFile & file, TChar& c)
 		append(str, c);
 	}
  	return atoi(toCString(str));
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TFile, typename TChar>
+inline double
+_parse_readDouble(TFile & file, TChar& c)
+{
+	// Read number
+	String<char> str(c);
+	while (!_streamEOF(file)) {
+		c = _streamGet(file);
+		if (!_parse_isDigit(c) && (c != '.')) break;
+		append(str, c);
+	}
+ 	return atof(toCString(str));
 }
 
 //////////////////////////////////////////////////////////////////////////////
