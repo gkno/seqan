@@ -45,7 +45,7 @@ while (find(finder, pattern))
 ..text:
 Other searching methods preprocess the @glos:haystack@ instead of the @glos:needle@.
 In this case, the @glos:haystack@ is the @glos:index@.
-\br Example: see @Demo.Index Finder@.
+\br Example: See @Demo.Index Finder@.
 
 
 ..section:# Searching Algorithms
@@ -89,7 +89,7 @@ the limit by @Function.scoreLimit@ and @Function.setScoreLimit@,
 and the score of the last found match by @Function.getScore@.
 All these functions are applied to the @Class.Pattern@ object that stores all information about the approximative search.
 ..text:Note:The position stored in the @Class.Finder@ is the end position, not the start position, of the last found match.
-..text:Example:See @Demo.Approximate Searching@.
+..text:Example: See @Demo.Approximate Searching@.
   
 
 
@@ -97,3 +97,4 @@ All these functions are applied to the @Class.Pattern@ object that stores all in
 
 
 ..section:# Index Search Algorithms
+..text:For more information about searching with indices, see @Page.Indices|this tutorial@.
