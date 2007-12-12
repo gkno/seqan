@@ -135,10 +135,10 @@ needleman_wunsch_trace(Align<TTargetSource, TTargetSpec> & target_,
 {
 SEQAN_CHECKPOINT
 	typedef Iter<Matrix<TScoreValue, TSourceSpec>, PositionIterator > TMatrixIterator;
-//	typedef Segment<TTargetSource, InfixSegment> TTargetSourceSegment;
+	typedef Segment<TTargetSource, InfixSegment> TTargetSourceSegment;
 
-	TTargetSource str_0 = source(row(target_, 0));
-	TTargetSource str_1 = source(row(target_, 1));
+	TTargetSourceSegment str_0 = sourceSegment(row(target_, 0));
+	TTargetSourceSegment str_1 = sourceSegment(row(target_, 1));
 
 	typedef typename Position<Matrix<TScoreValue, TSourceSpec> >::Type TPosition;
 	TPosition pos_0 = coordinate(source_, 0);
@@ -150,7 +150,7 @@ SEQAN_CHECKPOINT
 	TTargetIterator target_0 = iter(row(target_, 0), pos_0);
 	TTargetIterator target_1 = iter(row(target_, 1), pos_1);
 
-	typedef typename Iterator<TTargetSource, Rooted>::Type TStringIterator;
+	typedef typename Iterator<TTargetSourceSegment, Standard>::Type TStringIterator;
 	TStringIterator it_0 = iter(str_0, pos_0);
 	TStringIterator it_0_end = end(str_0);
 
@@ -172,6 +172,7 @@ SEQAN_CHECKPOINT
 		}
 		else
 		{
+
 			TMatrixIterator it_ = source_;
 
 			goNext(it_, 0);
@@ -186,6 +187,7 @@ SEQAN_CHECKPOINT
 
 			gv = (v >= h) | (d + score_diff >= h);
 			gh = (h >  v) | (d + score_diff >= v);
+
 		}
 
 		if (gv)
@@ -506,6 +508,7 @@ SEQAN_CHECKPOINT
 	clearGaps(row(align_,1));
 
 	TScoreValue ret;
+
 	if(scoreGapOpen(score_)==scoreGapExtend(score_))
 	{//linear gap costs
 		Matrix<TScoreValue> matr;
