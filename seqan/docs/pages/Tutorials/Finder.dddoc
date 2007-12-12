@@ -66,6 +66,7 @@ another special automaton to scan through the @glos:haystack@. An alternative to
 Should only be used for patterns that are not longer than a machine word, i.e. 32 or 64 characters.
 Even for small patterns, it is outperformed by @Spec.Horspool@ for alphabets larger than @Spec.Dna@.
 ..table:@Spec.ShiftAnd@|An alternative to @Spec.ShiftOr@ with similar characteristics.
+
  
 ..subsection:#.# Exact Multiple Pattern Matching
 ..text:The following algorithms can be used to search several @glos:needles@ at once:
@@ -76,6 +77,7 @@ Even for small patterns, it is outperformed by @Spec.Horspool@ for alphabets lar
 Should only be used for patterns that are not longer than a machine word, i.e. 32 or 64 characters.
 ..XXXtable:@Spec.WuManber@|A string matching algorithm similar to @Spec.Horspool@ for multiple patterns.
 Less advisable if the minimum length of the patterns is very small.
+
 
 ..subsection:#.# Approximative Search
 ..text:Approximative searching means to find all occurrences of the @glos:needle@ not below a given score limit.
@@ -92,8 +94,7 @@ All these functions are applied to the @Class.Pattern@ object that stores all in
 ..text:Example: See @Demo.Approximate Searching@.
   
 
-
-..subsection:#.# Complex Pattern Search
+..subsection:#.# Wildcard Search
 
 
 ..section:# Index Search Algorithms
