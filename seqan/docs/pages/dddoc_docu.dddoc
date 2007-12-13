@@ -1,4 +1,5 @@
 .Page.dddoc
+..hidefromindex
 ..summary:The documentation system "dot-dot-doc".
 ..description
 ...text:

@@ -72,7 +72,7 @@
 
 .Demo.Exact Searching
 ..order:Searching, 1
-..cat:Basics
+..cat:Searching
 ..summary:Exact string matching.
 ..file:../projects/library/demos/find_exact.cpp
 ..see:Page.Searching
@@ -81,7 +81,7 @@
 
 .Demo.Approximate Searching
 ..order:Searching, 2
-..cat:Basics
+..cat:Searching
 ..summary:Approximate string matching.
 ..file:../projects/library/demos/find_approx.cpp
 ..output.code:
@@ -91,6 +91,26 @@
 9: 0
 10: -1
 ..see:Page.Searching
+.
+
+
+.Demo.Wildcard Searching
+..order:Searching, 3
+..cat:Searching
+..summary:String matching using wildcards.
+..file:../projects/library/demos/find_wild.cpp
+..output:
+...code:
+22
+35
+49
+56
+93
+109
+116
+...text:Note that the printed positions are the positions of the last characters of the matches.
+..see:Page.Searching
+..demofor:Spec.WildShiftAnd
 .
 
 
@@ -374,114 +394,128 @@ weese@tanne:~/seqan/demos$
 
 
 
-.Demo.Graph Algorithm Breadth-first search
+.Demo.Breadth-First Search
 ..cat:Graph
-..summary:Breadth-first search code example
+..order:Graph Algorithm Breadth-first search
+..summary:Breadth-first search through a graph.
 ..file:../projects/library/demos/graph_algo_bfs.cpp
 ..demofor:Class.Graph
 ..demofor:Function.breadth_first_search
 .
 
-.Demo.Graph Algorithm Depth-first search
+.Demo.Depth-First Search
 ..cat:Graph
-..summary: Depth-first search code example
+..order:Graph Algorithm Depth-first search
+..summary: Depth-first search through a graph.
 ..file:../projects/library/demos/graph_algo_dfs.cpp
 ..demofor:Class.Graph
 ..demofor:Function.depth_first_search
 .
 
-.Demo.Graph Algorithm Strongly-connected-components
+.Demo.Strongly Connected Components
 ..cat:Graph
-..summary:Strongly-connected-components code example
+..order:Graph Algorithm Strongly-connected-components
+..summary:Computing all strongly-connected-components of a graph.
 ..file:../projects/library/demos/graph_algo_scc.cpp
 ..demofor:Class.Graph
 ..demofor:Function.strongly_connected_components
 .
 
-.Demo.Graph Algorithm Topological sort
+.Demo.Topological Sort
 ..cat:Graph
-..summary:Topological sort code example
+..order:Graph Algorithm Topological Sort
+..summary:Topological sort of a graph.
 ..file:../projects/library/demos/graph_algo_topsort.cpp
 ..demofor:Class.Graph
 ..demofor:Function.topological_sort
 .
 
 
-.Demo.Graph Minimum Spanning Tree Prim's algorithm
+.Demo.Prim's Algorithm
 ..cat:Graph
-..summary:Prim's algorithm code example
+..order:Graph Minimum Spanning Tree Prim's algorithm
+..summary:Prim's algorithm for computing a minimum spanning tree.
 ..file:../projects/library/demos/graph_algo_tree_prim.cpp
 ..demofor:Class.Graph
 ..demofor:Function.prims_algorithm
 .
 
-.Demo.Graph Minimum Spanning Tree Kruskal's algorithm
+.Demo.Kruskal's Algorithm
 ..cat:Graph
-..summary:Kruskal's algorithm code example
+..order:Graph Minimum Spanning Tree Kruskal's algorithm
+..summary:Kruskal's algorithm for computing a minimum spanning tree.
 ..file:../projects/library/demos/graph_algo_tree_kruskal.cpp
 ..demofor:Class.Graph
 ..demofor:Function.kruskals_algorithm
 .
 
 
-.Demo.Graph Single Source Shortest Path DAG
+.Demo.Shortest Path in DAGs
 ..cat:Graph
-..summary:DAG-Shortest path code example
+..order:Graph Single Source Shortest Path DAG
+..summary:Computing single source shortest paths in a directed acyclic graph.
 ..file:../projects/library/demos/graph_algo_path_dag.cpp
 ..demofor:Class.Graph
 ..demofor:Function.dag_shortest_path
 .
 
-.Demo.Graph Single Source Shortest Path Bellman-Ford
+.Demo.Bellman-Ford Algorithm
 ..cat:Graph
-..summary:Bellman-Ford code example
+..order:Graph Single Source Shortest Path Bellman-Ford
+..summary:Computing single source shortest paths using Bellman-Ford algorithm.
 ..file:../projects/library/demos/graph_algo_path_bellmanford.cpp
 ..demofor:Class.Graph
 ..demofor:Function.bellman_ford_algorithm
 .
 
-.Demo.Graph Single Source Shortest Path Dijkstra
+.Demo.Dijkstra's Algorithm
 ..cat:Graph
-..summary:Dijkstra code example
+..order:Graph Single Source Shortest Path Dijkstra
+..summary:Computing single source shortest paths using Dijkstra algorithm.
 ..file:../projects/library/demos/graph_algo_path_dijkstra.cpp
 ..demofor:Class.Graph
 ..demofor:Function.dijkstra
 .
 
-.Demo.Graph All Pairs Shortest Path
+.Demo.All Pairs Shortest Path
 ..cat:Graph
-..summary:All-pairs code example
+..order:Graph All Pairs Shortest Path
+..summary:Computing all-pairs shortest paths.
 ..file:../projects/library/demos/graph_algo_path_allpairs.cpp
 ..demofor:Class.Graph
 ..demofor:Function.all_pairs_shortest_path
 .
 
-.Demo.Graph All Pairs Shortest Path Floyd-Warshall
+.Demo.Floyd-Warshall Algorithm
 ..cat:Graph
-..summary:Floyd-Warshall code example
+..order:Graph All Pairs Shortest Path Floyd-Warshall
+..summary:Computing all-pairs shortest paths using Floyd-Warshall algorithm.
 ..file:../projects/library/demos/graph_algo_path_floydwarshall.cpp
 ..demofor:Class.Graph
 ..demofor:Function.floyd_warshall
 .
 
-.Demo.Graph Transitive closure
+.Demo.Transitive Closure
 ..cat:Graph
+..order:Graph Transitive closure
 ..summary:Transitive closure code example
 ..file:../projects/library/demos/graph_algo_path_transitive.cpp
 ..demofor:Class.Graph
 ..demofor:Function.transitive_closure
 . 
 
-.Demo.Graph Maximum Flow
+.Demo.Maximum Flow
 ..cat:Graph
+..order:Graph Maximum Flow
 ..summary:Ford-Fulkerson maximum flow code example
 ..file:../projects/library/demos/graph_algo_flow_fordfulkerson.cpp
 ..demofor:Class.Graph
 ..demofor:Function.ford_fulkerson
 .
 
-.Demo.Graph Heuristic Matching
+.Demo.Heuristic Matching
 ..cat:Graph
+..order:Graph Heuristic Matching
 ..summary:Path-growing code example
 ..file:../projects/library/demos/graph_algo_matching_pathgrowing.cpp
 ..demofor:Class.Graph
@@ -489,80 +523,90 @@ weese@tanne:~/seqan/demos$
 .
 
 
-.Demo.Graph Sequence Longest Increasing Subsequence
+.Demo.Longest Increasing Subsequence
 ..cat:Graph
+..order:Graph Sequence 1 Longest Increasing Subsequence
 ..summary:Longest increasing subsequence code example
 ..file:../projects/library/demos/graph_algo_lis.cpp
 ..demofor:Class.Graph
 ..demofor:Function.longestIncreasingSubsequence
 .
 
-.Demo.Graph Sequence Heaviest Increasing Subsequence
+.Demo.Heaviest Increasing Subsequence
 ..cat:Graph
+..order:Graph Sequence 2 Heaviest Increasing Subsequence
 ..summary:Heaviest increasing subsequence code example
 ..file:../projects/library/demos/graph_algo_his.cpp
 ..demofor:Class.Graph
 ..demofor:Function.heaviestIncreasingSubsequence
 .
 
-.Demo.Graph Sequence Longest Common Subsequence
+.Demo.Longest Common Subsequence
 ..cat:Graph
+..order:Graph Sequence 3 Longest Common Subsequence
 ..summary:Longest common subsequence code example
 ..file:../projects/library/demos/graph_algo_lcs.cpp
 ..demofor:Class.Graph
 ..demofor:Function.longestCommonSubsequence
 .
 
-.Demo.Graph Alignment Needleman-Wunsch
+.Demo.Needleman-Wunsch Algorithm
 ..cat:Graph
+..order:Graph Alignment 1 Needleman-Wunsch
 ..summary:Needleman-Wunsch alignment code example
 ..file:../projects/library/demos/graph_align_nw.cpp
 ..demofor:Class.Graph
 ..demofor:Function.globalAlignment
 .
 
-.Demo.Graph Alignment Gotoh
+.Demo.Gotoh's Algorithm
 ..cat:Graph
+..order:Graph Alignment 2 Gotoh
 ..summary:Gotoh alignment code example
 ..file:../projects/library/demos/graph_align_gotoh.cpp
 ..demofor:Class.Graph
 ..demofor:Function.globalAlignment
 .
 
-.Demo.Graph Alignment Hirschberg
+.Demo.Hirschberg's Algorithm
 ..cat:Graph
+..order:Graph Alignment 3 Hirschberg
 ..summary:Hirschberg with Gotoh alignment code example
 ..file:../projects/library/demos/graph_align_hirschberg.cpp
 ..demofor:Class.Graph
 ..demofor:Function.globalAlignment
 .
 
-.Demo.Graph Alignment Smith-Waterman
+.Demo.Smith-Waterman Algorithm
 ..cat:Graph
-..summary:Smith-Waterman alignment code example
+..order:Graph Alignment 4 Smith-Waterman
+..summary:Smith-Waterman local alignment code example.
 ..file:../projects/library/demos/graph_align_sw.cpp
 ..demofor:Class.Graph
 ..demofor:Function.localAlignment
 .
 
-.Demo.Graph Multiple Sequence Alignment Neighbor-Joining
+.Demo.MSA with Neighbor-Joining
 ..cat:Graph
-..summary:Neighbor joining guide tree code example
+..order:Graph Multiple Sequence Alignment 1 Neighbor-Joining
+..summary:Progressive multiple sequence alignment using neighbor joining for building the guide tree.
 ..file:../projects/library/demos/graph_align_guide_nj.cpp
 ..demofor:Class.Graph
 ..demofor:Function.slowNjTree
 .
 
-.Demo.Graph Multiple Sequence Alignment UPGMA
+.Demo.MSA with UPGMA
 ..cat:Graph
-..summary:UPGMA tree code example
+..order:Graph Multiple Sequence Alignment 2 UPGMA
+..summary:Progressive multiple sequence alignment using UPGMA for building the guide tree
 ..file:../projects/library/demos/graph_align_guide_upgma.cpp
 ..demofor:Class.Graph
 ..demofor:Function.upgmaTree
 .
 
-.Demo.Graph Multiple Sequence Alignment T-Coffee
+.Demo.T-Coffee
 ..cat:Graph
+..order:Graph Multiple Sequence Alignment 3 T-Coffee
 ..summary:T-Coffee code example
 ..file:../projects/library/demos/graph_align_msa.cpp
 ..demofor:Class.Graph

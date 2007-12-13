@@ -8,14 +8,15 @@
 ..contents
 
 ..section:# Getting Started
-..text:A good starting point for learning more about SeqAn is to read the @Page.Getting Started|tutorials@.
-    This will also give you an overview about the content of the library.
+..text:Follow the @Page.Installation|installation instructions@ to install SeqAn on your system.
+..text:A good starting point for learning more about SeqAn is to read the tutorials, which are listed at the end of this page.
+    This will introduce you into the basic concepts of the library and give you an overview about the content of the library.
 ..text:Refer to the @Page.Glossary|glossary@ if you encounter questionable terminology.
 ..text:The @Demo|collection of example programs@ demonstrate how to use the data structures and functions offered by SeqAn.
-    Read @Page.Using Demos|here@ how to use the example programs.    
+ Find instructions for the installation of the library and how to use the example programs @Page.Installation|here@.    
 ..text:For more information about SeqAn visit the SeqAn homepage @http://www.seqan.de|www.seqan.de@.
 
-..section:# Contents
+..section:# Contents of this Documentation
 ..table:Overview|An introduction to the basic techniques of SeqAn and tutorials to the parts of the library.
     Here you can also find the @Page.Glossary|glossary@.
 ..table:@Concept|Concepts@|The ontology of the generic interfaces used in SeqAn. 
@@ -28,5 +29,5 @@
 ..table:@Adaption|Adaption@|Built-in types and classes of other libraries that can be accessed the same way as SeqAn datastructures.
 ..table:@Demo|Examples@|Small programs that demonstrates the application of SeqAn functionality.
     
-..section:# More Overview Pages
+..section:# Concepts and Tutorials
 

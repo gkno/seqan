@@ -1,6 +1,6 @@
 .Page.Sequences:
 ..order:100
-..cat:Tutorials
+..XXXcat:Tutorials
 ..summary:Sequences in SeqAn.
 
 .Page.Sequences.description:

@@ -1,5 +1,5 @@
 .Page.Searching:
-..cat:Tutorials
+..XXXcat:Tutorials
 ..summary:Searching in SeqAn.
 
 .Page.Searching.description:
@@ -79,7 +79,7 @@ Should only be used for patterns that are not longer than a machine word, i.e. 3
 Less advisable if the minimum length of the patterns is very small.
 
 
-..subsection:#.# Approximative Search
+..subsection:#.# Approximative Searching
 ..text:Approximative searching means to find all occurrences of the @glos:needle@ not below a given score limit.
 ..tableheader:Algorithm|Description
 ..table:@Spec.DPSearch@|A dynamic programming algorithm for approximate string-matching.
@@ -94,8 +94,15 @@ All these functions are applied to the @Class.Pattern@ object that stores all in
 ..text:Example: See @Demo.Approximate Searching@.
   
 
-..subsection:#.# Wildcard Search
+..subsection:#.# Wildcard Searching
+..text:Wildcard searching algorithms make it possible to determine a more complex @glos:needle@. 
+The used syntax depends on the algorithms used. 
+A typical wildcard pattern could be "$ab+c$" that matches to "$abc$", "$abbc$", "$abbbc$", \ldots.
+..tableheader:Algorithm|Description
+..table:@Spec.WildShiftAnd@|An extension of @Spec.ShiftAnd@ supports some symbols like "$*$", "$+$", "$?$", and braces to specify the number of repeated characters.
+The algorithm also supports character classes, specified in square brackets.
+..text:Example: See @Demo.Wildcard Searching@.
 
 
-..section:# Index Search Algorithms
+..section:# Index Searching
 ..text:For more information about searching with indices, see @Page.Indices|this tutorial@.

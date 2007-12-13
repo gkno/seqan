@@ -492,7 +492,8 @@ def pageIndex(fl, path, cat, subcat, entries, subcats):
             members_printed = False
             for subcat2 in subcats:
                 is_this = (subcat2 == subcat)
-                is_sub = ((subcat2.find(subcat) == 0) and (subcat2.find('.', len(subcat)+1) < 0))
+                is_sub = ((subcat2.find(subcat) == 0) and (((len(subcat2) > len(subcat)) and (subcat2[len(subcat)] == '.')) or (len(subcat) == 0)))
+                is_child = (is_sub and (subcat2.find('.', len(subcat)+1) < 0))
                 is_super = (subcat.find(subcat2) == 0)
                 has_depth_greater_2 = (subcat2.find('.') >= 0)
                 is_sister = not has_depth_greater_2 or (subcat.find(subcat2[0:subcat2.rfind('.')]) == 0)
@@ -504,7 +505,7 @@ def pageIndex(fl, path, cat, subcat, entries, subcats):
                 if is_this:
                     this_reached = True
                 
-                if (subcat2 != "") and (is_sub or is_super or is_sister or is_this):
+                if (subcat2 != "") and (is_child or is_super or is_sister or is_this):
                     #print out folder
                     indent = ''
                     display_text = subcat2

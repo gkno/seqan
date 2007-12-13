@@ -1,5 +1,6 @@
 .Page.Template Subclassing:
-..cat:Basics
+..XXXcat:Basics
+..order:zzz020
 ..summary:Template subclassing is used in SeqAn as a generic alternative for class inheritance.
 
 .Page.Template Subclassing.description:

@@ -1,5 +1,6 @@
 .Page.Metafunctions:
-..cat:Basics
+..XXXcat:Basics
+..order:zzz010
 ..summary:Metafunctions are used for getting types and constants at compile time.
 
 .Page.Metafunctions.description:

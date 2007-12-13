@@ -1,7 +1,6 @@
 .Page.Files:
-..cat:Tutorials
+..XXXcat:Tutorials
 ..summary:File Input/Output.
-..summary:second line
 
 .Page.Files.description:
 ..contents
