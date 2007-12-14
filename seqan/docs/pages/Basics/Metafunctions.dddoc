@@ -54,7 +54,7 @@ void exchangeFirstValues(T & str)
 We can view $Value$ as a kind of "function" that takes $T$ as an argument (in angle brackets) and returns the required value type of $T$.
 In fact, $Value$ is not implemented as a C++ function, but as a class template. 
 This class template is specialized for each sequence type $T$ in a way that 
-the $typedef Type$ complies the value type of $T$.
+the $typedef Type$ provides the value type of $T$.
 Unfortunately, the current C++ language standard does not allow to write simply "$Value<T> temp;$", so we must select the return value by appending "$::Type$".
 The leading "$typename$" becomes necessary since $Value<T>::Type$ is a type that depends on a template parameter of the surrounding function template.
 
