@@ -24,7 +24,7 @@ and the last found position of the @glos:needle@ within the @glos:haystack@.
 Each call of @Function.find@ finds only one occurrence of the @glos:needle@ within the @glos:haystack@.
 The @Concept.Finder@ can be asked for the @Function.position@ of the last found occurrence.
 Subsequent calls of @Function.find@ can be used to find more occurrences of the @glos:needle@, 
-until no more occerrences can be found and @Function.find@ returns $false$.
+until no more occurrences can be found and @Function.find@ returns $false$.
 
 ..text:
 Search algorithms like @Spec.Horspool|horspool@ or @Spec.ShiftAnd|shift-AND@ scan the @glos:haystack@ itself 
@@ -44,7 +44,7 @@ while (find(finder, pattern))
 
 ..text:
 Other searching methods preprocess the @glos:haystack@ instead of the @glos:needle@.
-In this case, the @glos:haystack@ is the @glos:index@.
+In this case, the @glos:haystack@ is a @glos:index@.
 \br Example: See @Demo.Index Finder@.
 
 

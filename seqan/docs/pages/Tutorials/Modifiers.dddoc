@@ -46,7 +46,7 @@ A man, a plan, a canal-Panama
 amanaP-lanac a ,nalp a ,nam A
 
 ..text:
-To verify that we didn't copied $myString$, we do:
+To verify that we didn't copy $myString$, we replace an infix of the original string and see that, as a side effect, the modified string has also changed:
 ..code:
 infix(myString, 9, 9) = "master ";
 
@@ -123,14 +123,14 @@ We have seen how a @Class.ModifiedString@ can be used to modify strings without 
 The same can be done with iterators. The @Class.ModifiedIterator@ implements the @Concept.Iterator@ concept and
 thus can be used in every algorithm or data structure that expects an iterator. In fact, we have already used
 the @Class.ModifiedIterator@ unknowingly in the examples above, as in our cases the @Class.ModifiedString@ returns 
-a corresponding @Class.ModifiedIterator@ via the @Metafunction.Iterator@ meta-function. The chief work is done in
+a corresponding @Class.ModifiedIterator@ via the @Metafunction.Iterator@ meta-function. The main work is done in
 the @Class.ModifiedIterator@, whereas the @Class.ModifiedString@ only overloads the @Function.begin@ and @Function.end@.
 Normally, you are going to use the @Class.ModifiedString@ and maybe the result of its @Metafunction.Iterator@ meta-function
 instead of a @Class.ModifiedIterator@ directly.
 
 ..section:# Nested Modifiers
 ..text:
-As modifiers implement a certain concept and depend on classes of this concept, they can be linked in a daisy chain to
+As modifiers implement a certain concept and depend on classes of this concept, they can be chained to
 create a new modifier. We have seen how the @Class.ModifiedString@ specialized with @Spec.ModReverse@ and @Spec.ModView@
 can be used. Now we want to combine them to create a modifier for the reverse complement of a @Spec.Dna@ string.
 We begin with the original string:
