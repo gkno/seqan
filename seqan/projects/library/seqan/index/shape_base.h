@@ -281,6 +281,9 @@ If $charsLeft$ is smaller than the shape's span, the hash value corresponds to t
 		return me.hValue;
 	}
 
+//____________________________________________________________________________
+// fixed ungapped shapes
+
 	// loop unrolling ...
 	template <typename THValue, typename TValue, typename TIter>
 	inline THValue
@@ -335,6 +338,68 @@ If $charsLeft$ is smaller than the shape's span, the hash value corresponds to t
 		for(; i < (TSize)me.span; ++i)
 			me.hValue *= ValueSize<TValue>::VALUE;
 		return me.hValue;
+	}
+
+//____________________________________________________________________________
+// Tuple -> fixed ungapped shapes
+
+	template <typename THValue, typename TValue, typename TTValue, unsigned SIZE, typename TCompressed>
+	inline THValue
+	_hashTuple2FixedShape(
+		THValue const, 
+		Tuple<TTValue, SIZE, TCompressed> const &tuple,
+		TValue const,
+		FixedShape<1> const) 
+	{
+		return ordValue(tuple[0]);
+	}
+
+	template <typename THValue, typename TValue, typename TTValue, unsigned SIZE, typename TCompressed, unsigned q>
+	inline THValue
+	_hashTuple2FixedShape(
+		THValue const, 
+		Tuple<TTValue, SIZE, TCompressed> const &tuple,
+		TValue const,
+		FixedShape<q> const) 
+	{
+		return _hashTuple2FixedShape(THValue(), tuple, TValue(), FixedShape<q - 1>()) 
+			* ValueSize<TValue>::VALUE + ordValue(tuple[q-1]);
+	}
+
+	// ... for fixed ungapped shapes
+	template <
+		typename TValue,
+		typename TTValue, 
+		unsigned SIZE, 
+		unsigned q>
+	typename Value< Shape<TValue, FixedShape<q> > >::Type
+	hash(
+		Shape<TValue, FixedShape<q> > &me, 
+		Tuple<TTValue, SIZE, Compressed> const &tuple)
+	{
+	SEQAN_CHECKPOINT
+		if (ValueSize<TValue>::VALUE == (1 << BitsPerValue<TTValue>::VALUE))
+			if (q == SIZE)
+				return tuple.i;
+			else
+				return tuple >> (q - SIZE);
+		else
+			return me.hValue = _hashTuple2FixedShape(me.hValue, tuple, TValue(), FixedShape<q>());
+	}
+
+	template <
+		typename TValue,
+		typename TTValue, 
+		unsigned SIZE, 
+		typename TCompressed, 
+		unsigned q>
+	typename Value< Shape<TValue, FixedShape<q> > >::Type
+	hash(
+		Shape<TValue, FixedShape<q> > &me, 
+		Tuple<TTValue, SIZE, TCompressed> const &tuple)
+	{
+	SEQAN_CHECKPOINT
+		return me.hValue = _hashTuple2FixedShape(me.hValue, tuple, TValue(), FixedShape<q>());
 	}
 
 //____________________________________________________________________________

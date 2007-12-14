@@ -384,8 +384,8 @@ This interval is the @Function.value@ of the iterator.
 		typedef typename Size<TIndex>::Type TSize;
 
 		// push current intervals
-		push(a.history, value(a).i1);
-		push(b.history, value(b).i1);
+		push(a.history, value(a).range);
+		push(b.history, value(b).range);
 
 		TSize s = min(a.history.size(), b.history.size()), i0 = 0;
 		
@@ -436,8 +436,8 @@ This interval is the @Function.value@ of the iterator.
 		typedef typename VertexDescriptor<TIndex>::Type	TDesc;
 
 		// push current intervals
-		push(a.history, value(a).i1);
-		push(b.history, value(b).i1);
+		push(a.history, value(a).range);
+		push(b.history, value(b).range);
 
 		TSize s = min(a.history.size(), b.history.size()), i0 = 0;
 		
@@ -854,24 +854,24 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
        
 	template < typename TText, class TIndexSpec, class TSpec >
 	inline void 
-	_historyClear(Iter< Index<TText, Index_ESA<TIndexSpec> >, VSTree<TSpec> > &) {
-	}
+	_historyClear(Iter< Index<TText, Index_ESA<TIndexSpec> >, VSTree<TSpec> > &) {}
+
 	template < typename TText, class TIndexSpec, class TSpec >
 	inline void 
 	_historyClear(Iter< Index<TText, Index_ESA<TIndexSpec> >, VSTree< TopDown< ParentLinks<TSpec> > > > &it) {
 		clear(it.history);
 	}
 
-	template < typename TText, class TIndexSpec, class TSpec, typename TStackEntry >
+	template < typename TText, class TIndexSpec, class TSpec >
 	inline void 
-	_historyPush(Iter< Index<TText, Index_ESA<TIndexSpec> >, VSTree<TSpec> > &it, TStackEntry) {
+	_historyPush(Iter< Index<TText, Index_ESA<TIndexSpec> >, VSTree<TSpec> > &it) {
 		value(it).parentRight = value(it).range.i2;
 	}
-	template < typename TText, class TIndexSpec, class TSpec, typename TStackEntry >
+	template < typename TText, class TIndexSpec, class TSpec >
 	inline void 
-	_historyPush(Iter< Index<TText, Index_ESA<TIndexSpec> >, VSTree< TopDown< ParentLinks<TSpec> > > > &it, TStackEntry range) {
+	_historyPush(Iter< Index<TText, Index_ESA<TIndexSpec> >, VSTree< TopDown< ParentLinks<TSpec> > > > &it) {
 		value(it).parentRight = value(it).range.i2;
-		push(it.history, range);
+		push(it.history, value(it).range);
 	}
 
 
@@ -887,7 +887,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 		typedef Index<TText, Index_ESA<TIndexSpec> >	TIndex;
 
 		if (isLeaf(it)) return false;
-		_historyPush(it, value(it).range);
+		_historyPush(it);
 
 		TIndex const &index = container(it);
 
@@ -912,7 +912,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 		if (isLeaf(it)) return false;
 
 		TDesc desc = value(it);			// save descriptor of the current node
-		_historyPush(it, desc.range);
+		_historyPush(it);
 
 		TIndex const &index = container(it);
 
@@ -945,7 +945,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 		typedef Index<TText, Index_ESA<TIndexSpec> >	TIndex;
 		
 		if (isLeaf(it)) return false;
-		_historyPush(it, value(it).range);
+		_historyPush(it);
 
 		TIndex const &index = container(it);
 
@@ -983,9 +983,10 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 	template < typename TIndex, class TSpec, typename TValue >
 	inline bool _goDownChar(Iter< TIndex, VSTree< TopDown<TSpec> > > &it, TValue c) 
 	{
-		Pair<typename Size<TIndex>::Type> oldRange = value(it).i1;
-		if (_getNodeByChar(it, c, value(it))) {
-			_historyPush(it, oldRange);
+		typename VertexDescriptor<TIndex>::Type nodeDesc;
+		if (_getNodeByChar(it, c, nodeDesc)) {
+			_historyPush(it);
+			value(it) = nodeDesc;
 			return true;
 		}
 		return false;
