@@ -20,7 +20,7 @@
 ..table:Overview|An introduction to the basic techniques of SeqAn and tutorials to the parts of the library.
     Here you can also find the @Page.Glossary|glossary@.
 ..table:@Concept|Concepts@|The ontology of the generic interfaces used in SeqAn. 
-..table:@Class|Classes@|The data structures, most of them are class templates, and some of these templates have @Spec|specializations@.
+..table:@Class|Classes@|The data structures, most of them are class templates (some of these templates have @Spec|specializations@).
 ..table:@Spec|Specializations@|Specializations of @Class|class templates@ using @Page.Template Subclassing@.
 ..table:@Shortcut|Shortcuts@|Abreviations for often used types, i.e. @Class|classes@ and @Spec|specializations@.
 ..table:@Function|Functions@|Global functions that work on data structures.
