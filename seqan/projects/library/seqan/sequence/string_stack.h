@@ -428,7 +428,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template<typename TValue, unsigned int SPACE>
 	inline typename Size<String<TValue, Block<SPACE> > >::Type
-	length(String<TValue, Block<SPACE> > const& me) 
+	length(String<TValue, Block<SPACE> > const & me) 
 	{
 	SEQAN_CHECKPOINT
 		if (length(me.blocks))
@@ -437,6 +437,16 @@ namespace SEQAN_NAMESPACE_MAIN
 			return 0;
 	}
 
+	template<typename TValue, unsigned int SPACE>
+	inline typename Size<String<TValue, Block<SPACE> > >::Type
+	capacity(String<TValue, Block<SPACE> > const & me) 
+	{
+	SEQAN_CHECKPOINT
+		if (length(me.blocks))
+			return length(me.blocks) * SPACE;
+		else
+			return 0;
+	}
 
 }// namespace SEQAN_NAMESPACE_MAIN
 
