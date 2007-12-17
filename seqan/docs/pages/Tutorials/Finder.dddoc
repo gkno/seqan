@@ -99,8 +99,8 @@ All these functions are applied to the @Class.Pattern@ object that stores all in
 The used syntax depends on the algorithms used. 
 A typical wildcard pattern could be "$ab+c$" that matches to "$abc$", "$abbc$", "$abbbc$", \ldots.
 ..tableheader:Algorithm|Description
-..table:@Spec.WildShiftAnd@|An extension of @Spec.ShiftAnd@ supports some symbols like "$*$", "$+$", "$?$", and braces to specify the number of repeated characters.
-The algorithm also supports character classes, specified in square brackets.
+..table:@Spec.WildShiftAnd@|An extension of @Spec.ShiftAnd@ supports a subset of regular expressions, namely "$*$", "$+$", "$?$", braces to specify the number of repeated characters, 
+and character classes that are specified in square brackets.
 ..text:Example: See @Demo.Wildcard Searching@.
 
 

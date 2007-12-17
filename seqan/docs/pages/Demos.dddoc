@@ -1,3 +1,21 @@
+.Demo.Global Alignments:
+..cat:Basics
+..order:Alignments 1
+..summary:Computing an optimal global alignment between two sequences.
+..file:../projects/library/demos/alignment.cpp
+..demofor:Function.globalAlignment
+..demofor:Class.Align
+..demofor:Spec.Alignment Graph
+..demofor:Class.Score
+
+.Demo.Local Alignments:
+..cat:Basics
+..order:Alignments 2
+..summary:Computing local alignments between two sequences.
+..file:../projects/library/demos/alignment_local.cpp
+..demofor:Function.localAlignment
+..demofor:Class.Align
+..demofor:Class.Score
 
 
 .Demo.Allocators:
