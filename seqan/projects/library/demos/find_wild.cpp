@@ -3,19 +3,20 @@
 
 using namespace seqan;
 using namespace std;
-
 ///This program uses the algorithm @Spec.WildShiftAnd@ to perform a wildcard search.
 int main() 
 {
-	String<char> haystack = "send more money!";
-	String<char> needle = "mo";
+	String<char> hayst = "If you must cross a course cross cow across a crowded cow crossing, "
+						 "cross the cross coarse cow across the crowded cow crossing carefully.";
+	String<char> ndl = "cr?o[uw]";
+///The pattern matches e.g. "cow", "crow", and "cou", but not "cros".
+	Finder<String<char> > finder(hayst);
+	Pattern<String<char>, WildShiftAnd> pattern(ndl);
 
-	printAllOccs<Horspool>(haystack, needle);
-	printAllOccs<BomAlgo> (haystack, needle);
-	printAllOccs<BndmAlgo>(haystack, needle);
-	printAllOccs<ShiftAnd>(haystack, needle);
-	printAllOccs<ShiftOr> (haystack, needle);
-
+	while (find(finder, pattern))
+	{
+		cout << position(finder) << "\n";
+	}
 	return 0;
 }
 
