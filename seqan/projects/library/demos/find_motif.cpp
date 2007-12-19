@@ -49,7 +49,7 @@ int main()
     MotifFinder<Dna, Projection> finder_proj(t,l,m,d,is_exact);
 	findMotif(finder_proj, dataset, OOPS());
 	displayResult(finder_proj);
-/*
+
 ///Application of PROJECTION-OMOPS
     MotifFinder<Dna, Projection> finder_proj_omops(t,l,m,d,is_exact);
 	findMotif(finder_proj_omops, dataset, OMOPS());
@@ -64,7 +64,6 @@ int main()
     MotifFinder<Dna, Projection> finder_proj_tcm(t,l,m,d,is_exact);
 	findMotif(finder_proj_tcm, dataset, TCM());
 	displayResult(finder_proj_tcm);
-*/
 
 	SEQAN_TREPORT("TEST END")
 	return 0;
