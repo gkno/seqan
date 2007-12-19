@@ -656,6 +656,8 @@ weese@tanne:~/seqan/demos$
 projects/tests/find_motif/test_find_motif.cpp(10): TEST BEGIN
 [0]: AGCC
 
+[0]: AGCC
+
 [0]: AAGC 
 [1]: ACAG
 [2]: AGAC
