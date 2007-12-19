@@ -1,6 +1,9 @@
 #ifndef SEQAN_HEADER_FIND_MOTIF_H
 #define SEQAN_HEADER_FIND_MOTIF_H
 
+//____________________________________________________________________________
+// prerequisites
+
 #include <algorithm>
 #include <numeric>
 #include <vector>
@@ -10,6 +13,8 @@
 #include <seqan/file.h>
 #include <seqan/index/shape_base.h>
 #include <seqan/index/shape_gapped.h>
+
+//____________________________________________________________________________
 
 #include <seqan/find_motif/sequence_model_types.h>
 
