@@ -455,7 +455,7 @@ pmsp(TStrings & result,
 					                     begin(dataset[seq_nr]), 
 										 end(dataset[seq_nr]), l, d, is_exact) )
 				{
-					int lower_limit = ceil(t*(model_type.threshold))-1;
+					int lower_limit = (int) ceil(t*(model_type.threshold))-1;
 					bool isMotif = true;
 					unsigned int number = 0;
 					for(typename Position< String< String<TPos2> > >::Type i=0; i<length(L); ++i)
