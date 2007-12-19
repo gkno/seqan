@@ -11,7 +11,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..summary:Holds a collection of objects of a specific type, where each object represents
           the frequency (absolute or relative probability) of a particular residue which is a member
 		  of a fixed sequence alphabet.
-..cat:Motif Finding
+..cat:Motif Search
 ..signature:FrequencyDistribution<TValue[, TSpec]>
 ..param.TValue:The type of sequence which is considered.
 ...metafunction:Metafunction.Value
@@ -40,7 +40,7 @@ public:
 	FrequencyDistribution()
 	{
 		resize(frequency_list, SIZE);
-		std::fill(begin(frequency_list), end(frequency_list), static_cast<TSpec>(0));
+		std::fill(begin(frequency_list), end(frequency_list), (TSpec)0);
 	}
 	FrequencyDistribution(TValue const & letter_)
 	{
@@ -113,7 +113,7 @@ public:
 	{
 		for(size_t i=0; i<SIZE; ++i)
 		{
-			frequency_list[i]*= static_cast<TSpec>(value_);
+			frequency_list[i]*= (TSpec)value_;
 		}
 
 		return *this;
@@ -250,7 +250,7 @@ struct Value< FrequencyDistribution<TValue, TSpec> const>
 /**
 .Function.absFreqOfLettersInSeq:
 ..summary:Counts the number of times each residue of a fixed sequence alphabet occurs in a given sequence.
-..cat:Motif Finding
+..cat:Motif Search
 ..signature:absFreqOfLettersInSeq(frequencies,begin,end)
 ..param.frequencies:The @Class.FrequencyDistribution@ object which will hold the calculated frequencies.
 ...type:Class.FrequencyDistribution
@@ -284,7 +284,7 @@ absFreqOfLettersInSeq(FrequencyDistribution<TValue, TSpec> & fd,
 /**
 .Function.absFreqOfLettersInSetOfSeqs:
 ..summary:Counts the number of times each residue of a fixed sequence alphabet occurs in a given set of sequences.
-..cat:Motif Finding
+..cat:Motif Search
 ..signature:absFreqOfLettersInSetOfSeqs(frequencies,begin,end)
 ..param.frequencies:The @Class.FrequencyDistribution@ object which holds the calculated frequencies.
 ...type:Class.FrequencyDistribution
@@ -299,8 +299,8 @@ absFreqOfLettersInSeq(FrequencyDistribution<TValue, TSpec> & fd,
 template<typename TValue, typename TSpec, typename TIter>
 void
 absFreqOfLettersInSetOfSeqs(FrequencyDistribution<TValue, TSpec> & fd,
-							TIter & seq_start,
-							TIter & seq_end)
+							TIter seq_start,
+							TIter seq_end)
 {
 	while(seq_start!=seq_end)
 	{
@@ -314,7 +314,7 @@ absFreqOfLettersInSetOfSeqs(FrequencyDistribution<TValue, TSpec> & fd,
 /**
 .Function.addValue:
 ..summary:Adds a value of a specific type to each element of a given @Class.FrequencyDistribution@ object.
-..cat:Motif Finding
+..cat:Motif Search
 ..signature:addValue(frequencies,value)
 ..param.frequencies:The @Class.FrequencyDistribution@ object which holds the calculated frequencies.
 ...type:Class.FrequencyDistribution
@@ -329,7 +329,7 @@ addValue(FrequencyDistribution<TValue, TSpec> & fd, TType const & val)
 	typedef typename Position< FrequencyDistribution<TValue, TSpec> >::Type TPos;
 	for(TPos i=0; i<length(fd); ++i)
 	{
-		fd[i]+= static_cast<TSpec>(val);
+		fd[i]+= (TSpec)val;
 	}
 }
 
@@ -338,7 +338,7 @@ addValue(FrequencyDistribution<TValue, TSpec> & fd, TType const & val)
 /**
 .Function.backgroundFrequency:
 ..summary:Determines the background letter frequencies in a given dataset
-..cat:Motif Finding
+..cat:Motif Search
 ..signature:backgroundFrequency(frequencies,begin,end)
 ..param.frequencies:The @Class.FrequencyDistribution@ object which holds the calculated frequencies.
 ...type:Class.FrequencyDistribution
@@ -357,7 +357,7 @@ backgroundFrequency(FrequencyDistribution<TValue, TSpec> & fd,
 	absFreqOfLettersInSetOfSeqs(fd, dataset_start, dataset_end);
 
 	// check for zero entries
-	if(std::find(begin(fd), end(fd), static_cast<TSpec>(0))!= end(fd))
+	if(std::find(begin(fd), end(fd), (TSpec)0)!= end(fd))
 	{
 		// add pseudocounts
 		double epsilon = 0.1;
@@ -400,7 +400,7 @@ clear(FrequencyDistribution<TValue, TSpec> & fd)
 /**
 .Function.convertResidueToFrequencyDist:
 ..summary:Coverts a residue to a frequency distribution (profile).
-..cat:Motif Finding
+..cat:Motif Search
 ..signature:convertResidueToFrequencyDist(frequencies,residue)
 ..param.frequencies:The @Class.FrequencyDistribution@ object representing the profile for a specific residue.
 ...type:Class.FrequencyDistribution
@@ -417,7 +417,7 @@ convertResidueToFrequencyDist(FrequencyDistribution<TValue, TSpec> & fd, TValue 
 {
 	typedef typename Position< FrequencyDistribution<TValue, TSpec> >::Type TPos;
 	TSpec probability = 
-		static_cast<TSpec>(0.5/(ValueSize<TValue>::VALUE-1));
+		(TSpec)(0.5/(ValueSize<TValue>::VALUE-1));
 
 	for(TPos i=0; i<length(fd); ++i)
 	{
@@ -472,7 +472,7 @@ length(FrequencyDistribution<TValue, TSpec> const & me)
 /**
 .Function.logarithmize:
 ..summary:Logarithmizes each element of a given @Class.FrequencyDistribution@ object.
-..cat:Motif Finding
+..cat:Motif Search
 ..signature:logarithmize(frequencies)
 ..param.frequencies:The @Class.FrequencyDistribution@ object.
 ...type:Class.FrequencyDistribution
@@ -487,7 +487,7 @@ logarithmize(FrequencyDistribution<TValue, TSpec> & fd)
 	
 	for(TPos i=0; i<length(fd); ++i)
 	{
-		fd[i] = static_cast<TSpec>(log(fd[i]));
+		fd[i] = (TSpec)log(fd[i]);
 	}
 }
 
@@ -496,7 +496,7 @@ logarithmize(FrequencyDistribution<TValue, TSpec> & fd)
 /* s. normalize() (profile.h)
 .Function.normalize:
 ..summary:Determines the normalized frequencies.
-..cat:Motif Finding
+..cat:Motif Search
 ..signature:normalize(frequencies)
 ..param.frequencies:The @Class.FrequencyDistribution@ object.
 ...type:Class.FrequencyDistribution
@@ -512,7 +512,7 @@ normalize(FrequencyDistribution<TValue, TSpec> & fd)
 	TSpec amount = sum(fd);
 	for(TPos i=0; i<length(fd); ++i)
 	{
-		fd[i] = static_cast<TSpec>(fd[i]/amount);
+		fd[i] = (TSpec)(fd[i]/amount);
 	}
 }
 
@@ -521,7 +521,7 @@ normalize(FrequencyDistribution<TValue, TSpec> & fd)
 /**
 .Function.posOfMax:
 ..summary:Determines the residue position in a given @Class.FrequencyDistribution@ object with the maximum frequency.
-..cat:Motif Finding
+..cat:Motif Search
 ..signature:posOfMax(frequencies)
 ..param.frequencies:The @Class.FrequencyDistribution@ object.
 ...type:Class.FrequencyDistribution
@@ -535,7 +535,7 @@ posOfMax(FrequencyDistribution<TValue, TSpec> & me)
 	typedef typename Position<TFrequencyDistribution>::Type TPos;
 
 	TPos position = 0;
-	TSpec max_value = static_cast<TSpec>(0);
+	TSpec max_value = (TSpec)0;
 	for(TPos i=0; i<length(me); ++i)
 	{
 		if(me[i]>max_value)
@@ -553,7 +553,7 @@ posOfMax(FrequencyDistribution<TValue, TSpec> & me)
 /**
 .Function.sum:
 ..summary:Determines the sum of all frequencies in a given @Class.FrequencyDistribution@ object.
-..cat:Motif Finding
+..cat:Motif Search
 ..signature:sum(frequencies)
 ..param.frequencies:The @Class.FrequencyDistribution@ object.
 ...type:Class.FrequencyDistribution
@@ -564,7 +564,7 @@ TSpec
 sum(FrequencyDistribution<TValue, TSpec> & me)
 {
 	TSpec amount = 
-		std::accumulate(begin(me), end(me), static_cast<TSpec>(0));
+		std::accumulate(begin(me), end(me), (TSpec)0);
 
 	return amount;
 }

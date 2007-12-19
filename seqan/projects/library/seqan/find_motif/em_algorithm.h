@@ -11,12 +11,12 @@ namespace SEQAN_NAMESPACE_MAIN
 /**
 .Function.em:
 ..summary:Represents the EM algorithm as used by MEME.
-..cat:Motif Finding
+..cat:Motif Search
 ..signature:em(profile,dataset_start,t,l,oops_model)
 ..signature:em(profile,dataset_start,t,l,gamma,zoops_model)
 ..signature:em(profile,dataset_start,t,l,lambda,tcm_model)
-..param.profile:The  $profile$ object which is a set of @Class.FrequencyDistribution|frequency distributions@.
-...remarks:$profile$ is of type $String<$ @Class.FrequencyDistribution@ $>$
+..param.profile:The  @Shortcut.Profile@ object which is a set of @Class.FrequencyDistribution|frequency distributions@.
+...type:Shortcut.Profile
 ..param.dataset_start:An iterator pointing to the first input sequence of a given dataset.
 ...type:Concept.Iterator
 ..param.t:The number of input sequences.
@@ -58,7 +58,7 @@ em(TProfile & profile,
 	}
 
 	// E-step: compute matrix z and joint log likelihood
-	double log_likelihood = static_cast<double>(0);
+	double log_likelihood = 0;
 	_computeEStep(matrix_w,log_likelihood,profile,dataset_start,t,l,oops);
 
 	// M-step: refine profile
@@ -72,7 +72,7 @@ em(TProfile & profile,
 /*
 .Function._computeEStep:
 ..summary:Represents the E-step of the EM algorithm for OOPS models.
-..cat:Motif Finding
+..cat:Motif Search
 ..signature:_computeEStep(matrix_w,joint_log_likelihood,profile,dataset_start,t,l,oops_model)
 ..param.matrix_w:The matrix_w object.
 ...remarks:w(i,j) is the probability that the motif pattern 
@@ -101,79 +101,69 @@ _computeEStep(TMatrix & matrix_w,
 	OOPS const & oops)
 {
 	typedef typename Value<TProfile>::Type TFrequencyDist;
+	typedef typename Value<TFrequencyDist>::Type TValue;
+	typedef String<TValue> TString;
 	typedef typename Position<TProfile>::Type TPos;
-	TProfile log_profile = profile;
-	for(TPos i=0; i<length(log_profile); ++i)
+	for(TPos pos=0; pos<length(profile); ++pos)
 	{
-		logarithmize(log_profile[i]); 
+		logarithmize(profile[pos]); 
 	}
 
 	//compute matrix w
-	for(TType i=0; i<t; ++i)
+	TIter dataset_end = dataset_start+t;
+	while(dataset_start!=dataset_end)
 	{
-		TType m = length(*(dataset_start+i))-l+1;
-		double motif_prob = static_cast<double>(0);
-		TFrequencyDist letter_freq;
-		for(TType j=0; j<m; ++j)
+		TType seq_nr = t-(dataset_end-dataset_start);
+		TType m = length(*dataset_start)-l+1;
+		TFrequencyDist absLetterFrequencies;
+		absFreqOfLettersInSeq(absLetterFrequencies,begin(*dataset_start),end(*dataset_start));
+		typename Iterator<TString>::Type seq_iter, seq_end;
+		seq_iter = begin(*dataset_start);
+		seq_end = seq_iter+m;
+		while(seq_iter!=seq_end)
 		{
-			double sum_of_log_probs = static_cast<double>(0);
-			if(j==0)
+			TFrequencyDist fd = absLetterFrequencies;
+			double sum_of_log_probs = 0;
+			for(TType h=0; h<l; ++h)
 			{
-				//motif region
-				for(TPos h=1; h<=l; ++h)
-				{
-					motif_prob +=
-						log_profile[h][(int)(*(dataset_start+i))[j+h-1]];
-				}
-				sum_of_log_probs += motif_prob;
-
-				//background region
-				for(TType h=0; h<m-1; ++h)
-				{
-					sum_of_log_probs +=
-						log_profile[0][(int)(*(dataset_start+i))[j+l+h]];
-				}
+				sum_of_log_probs += profile[h+1][(int)*(seq_iter+h)];
+				--fd[(int)*(seq_iter+h)];
 			}
-			else
-			{
-				sum_of_log_probs = matrix_w[i][j-1]-motif_prob;
-				motif_prob = 0;
-				//motif region
-				for(TPos h=1; h<=l; ++h)
-				{
-					motif_prob +=
-						log_profile[h][(int)(*(dataset_start+i))[j+h-1]];
-				}
-				sum_of_log_probs += motif_prob;
-				sum_of_log_probs -= log_profile[0][(int)(*(dataset_start+i))[j+l-1]];
-				sum_of_log_probs += log_profile[0][(int)(*(dataset_start+i))[j-1]];
-			}
-			matrix_w[i][j] = sum_of_log_probs;
+			sum_of_log_probs +=
+				(double)std::inner_product(begin(fd),end(fd),begin(profile[0]),(double)0);
+			matrix_w[seq_nr][m-(seq_end-seq_iter)] = sum_of_log_probs;
+			++seq_iter;
 		}
-	
-		double log_of_sums = matrix_w[i][0];
-		for(TType j=1; j<m; ++j)
+		++dataset_start;
+	}
+
+	//
+	dataset_start -= t;
+	while(dataset_start!=dataset_end)
+	{
+		TType seq_nr = t-(dataset_end-dataset_start);
+		TType m = length(*dataset_start)-l+1;
+		joint_log_likelihood += (log((double)1)-log((double)m));
+
+		double log_of_sums = matrix_w[seq_nr][0];
+		TType j;
+		for(j=1; j<m; ++j)
 		{
-			if( (matrix_w[i][j]-log_of_sums)>DBL_MIN_EXP )
+			if( (matrix_w[seq_nr][j]-log_of_sums)>DBL_MIN_EXP )
 			{
-				//log_of_sums = 
-				//	log_of_sums+log(static_cast<double>(1)+exp(matrix_w[i][j]-log_of_sums));
-				log_of_sums += 
-					log(static_cast<double>(1)+exp(matrix_w[i][j]-log_of_sums));
+				log_of_sums += log(1+exp(matrix_w[seq_nr][j]-log_of_sums));
 			}
 		}
 
-		for(TType j=0; j<m; ++j)
+		for(j=0; j<m; ++j)
 		{
-			double prob = matrix_w[i][j];
-			matrix_w[i][j] = matrix_w[i][j]-log_of_sums;
-			joint_log_likelihood += matrix_w[i][j]*prob;
-			//exp(w_ij)=e^(w_ij) -> e is the base of the natural logarithm
-			matrix_w[i][j] = exp(matrix_w[i][j]);
+			double prob = matrix_w[seq_nr][j];
+			matrix_w[seq_nr][j] -= log_of_sums;
+			matrix_w[seq_nr][j] = exp(matrix_w[seq_nr][j]);
+			joint_log_likelihood += matrix_w[seq_nr][j]*prob;
 		}
-		//sum_{i=1}^{t}log(1/m_i)
-		joint_log_likelihood += 
-			log(static_cast<double>(1))-log(static_cast<double>(m));
+
+		++dataset_start;
 	}
 }
 
@@ -183,7 +173,7 @@ _computeEStep(TMatrix & matrix_w,
 .Function._computeStep_M:
 ..summary:Represents the M-step of the EM algorithm for OOPS models.
           Refines the background and motif component.
-..cat:Motif Finding
+..cat:Motif Search
 ..signature:_computeStep_M(profile,dataset_start,matrix_w,t,l,oops_model)
 ..param.profile:The profile object which is a set of frequency distributions.
 ...type:Class.String
@@ -211,27 +201,43 @@ _computeMStep(TProfile & profile,
 	typedef typename Value<TProfile>::Type TFrequencyDist;
 	typedef typename Value<TFrequencyDist>::Type TValue;
 	typedef typename Position<TProfile>::Type TPos;
-
-	// total_counts_of_letters is used for the computing of the background frequency
+	TPos k = 0;
+	typedef String<TValue> TString;
+	
+	// total_counts_of_letters is used for the computation of the background frequency
 	TFrequencyDist total_counts_of_letters; //<-c
-	absFreqOfLettersInSetOfSeqs(total_counts_of_letters,dataset_start+0, dataset_start+t);
+	absFreqOfLettersInSetOfSeqs(total_counts_of_letters,dataset_start, dataset_start+t);
+
+	//
+	for(k=0; k<length(profile); ++k)
+	{
+		profile[k] = TFrequencyDist();
+	}
 
 	// refine motif component
-	for(TPos h=1; h<=l; ++h)
+	TIter dataset_end = dataset_start+t;
+	while(dataset_start!=dataset_end)
 	{
-		TFrequencyDist letter_freq;//<-p'_h
-		for(TType i=0; i<t; ++i)
+		TType seq_nr = t-(dataset_end-dataset_start);
+		TType m = length(*dataset_start)-l+1;
+		typename Iterator<TString>::Type seq_iter, seq_end, ptr;
+		seq_iter = begin(*dataset_start);
+		seq_end = seq_iter+m;
+		while(seq_iter!=seq_end)
 		{
-			TType m = length(*(dataset_start+i))-l+1;
-			for(TType j=0; j<m; ++j)
+			ptr = seq_iter;
+			for(TType i=0; i<l; ++i)
 			{
-				TFrequencyDist frequency;
-	            frequency[(int) (*(dataset_start+i))[j+h-1]] = matrix_w[i][j];
-				letter_freq += frequency;
+				profile[i+1][(int)*(ptr+i)] += matrix_w[seq_nr][m-(seq_end-seq_iter)];
 			}
+			++seq_iter;
 		}
-		profile[h] = letter_freq;
-		total_counts_of_letters-=letter_freq;//c->p'_0
+		++dataset_start;
+	}
+
+	for(k=1; k<length(profile); ++k)
+	{
+		total_counts_of_letters -= profile[k];
 	}
 
 	// refine background component
@@ -274,7 +280,7 @@ em(TProfile & profile,
 	}
 
 	// compute matrix w and joint log likelihood, refine gamma
-	double log_likelihood = static_cast<double>(0);
+	double log_likelihood = 0;
 	_computeEStep(matrix_w,log_likelihood,profile,dataset_start,gamma,t,l,zoops);
 
 	// refine profile
@@ -288,7 +294,7 @@ em(TProfile & profile,
 /*
 .Function._computeEStep:
 ..summary:Represents the E-step of the EM algorithm for ZOOPS models.
-..cat:Motif Finding
+..cat:Motif Search
 ..signature:_computeEStep(matrix_w,joint_log_likelihood,profile,dataset_start,gamma,t,l,zoops_model)
 ..param.matrix_w:The matrix_w object.
 ...remarks:w(i,j) is the probability that the motif pattern 
@@ -321,115 +327,101 @@ _computeEStep(TMatrix & matrix_w,
 			  ZOOPS const & zoops)
 {
 	typedef typename Value<TProfile>::Type TFrequencyDist;
+	typedef typename Value<TFrequencyDist>::Type TValue;
+	typedef String<TValue> TString;
 	typedef typename Position<TProfile>::Type TPos;
-	double lambda_i = static_cast<double>(0); 
-	double sum_of_Q_i = static_cast<double>(0);
-
-	TProfile log_profile = profile;
-	for(TPos i=0; i<length(log_profile); ++i)
+	for(TPos pos=0; pos<length(profile); ++pos)
 	{
-		logarithmize(log_profile[i]); 
+		logarithmize(profile[pos]); 
 	}
+
+	double * log_probs_of_motifless_sequences = new double[t];
 
 	//compute matrix w
-	for(TType i=0; i<t; ++i)
+	TIter dataset_end = dataset_start+t;
+	while(dataset_start!=dataset_end)
 	{
-		TType m = length(*(dataset_start+i))-l+1;
-		lambda_i = gamma/static_cast<double>(m);
-		TFrequencyDist t_i;
-		absFreqOfLettersInSeq(t_i, begin(*(dataset_start+i)), end(*(dataset_start+i)));
-		double log_of_seq_prob_having_no_motif = 
-			std::inner_product(begin(t_i), end(t_i), 
-			                   begin(log_profile[0]), static_cast<double>(0));
-
-		double motif_prob = static_cast<double>(0);
-		//double sum_of_Q_i = static_cast<double>(0);
-		TFrequencyDist letter_freq;
-		for(TType j=0; j<m; ++j)
+		TType seq_nr = t-(dataset_end-dataset_start);
+		TType m = length(*dataset_start)-l+1;
+		TFrequencyDist absLetterFrequencies;
+		absFreqOfLettersInSeq(absLetterFrequencies,begin(*dataset_start),end(*dataset_start));
+		typename Iterator<TString>::Type seq_iter, seq_end;
+		seq_iter = begin(*dataset_start);
+		seq_end = seq_iter+m;
+		while(seq_iter!=seq_end)
 		{
-			double sum_of_log_probs = static_cast<double>(0);
-			if(j==0)
+			TFrequencyDist fd = absLetterFrequencies;
+			double sum_of_log_probs = 0;
+			for(TType h=0; h<l; ++h)
 			{
-				//motif region
-				for(TPos h=1; h<=l; ++h)
-				{
-					motif_prob +=
-						log_profile[h][(int)(*(dataset_start+i))[j+h-1]];
-				}
-				sum_of_log_probs += motif_prob;
-
-				//background region
-				for(TType h=0; h<m-1; ++h)
-				{
-					sum_of_log_probs +=
-						log_profile[0][(int)(*(dataset_start+i))[j+l+h]];
-				}
+				sum_of_log_probs += profile[h+1][(int)*(seq_iter+h)];
+				--fd[(int)*(seq_iter+h)];
 			}
-			else
-			{
-				sum_of_log_probs = matrix_w[i][j-1]-motif_prob;
-				motif_prob = 0;
-				//motif region
-				for(TPos h=1; h<=l; ++h)
-				{
-					motif_prob +=
-						log_profile[h][(int)(*(dataset_start+i))[j+h-1]];
-				}
-				sum_of_log_probs += motif_prob;
-				sum_of_log_probs -= log_profile[0][(int)(*(dataset_start+i))[j+l-1]];
-				sum_of_log_probs += log_profile[0][(int)(*(dataset_start+i))[j-1]];
-			}
-			matrix_w[i][j] = sum_of_log_probs;
+			sum_of_log_probs +=
+				(double)std::inner_product(begin(fd),end(fd),begin(profile[0]),(double)0);
+			matrix_w[seq_nr][m-(seq_end-seq_iter)] = sum_of_log_probs;
+			++seq_iter;
 		}
+		log_probs_of_motifless_sequences[seq_nr] =
+			(double)std::inner_product(begin(absLetterFrequencies),
+									   end(absLetterFrequencies),
+									   begin(profile[0]),(double)0);
+		++dataset_start;
+	}
 
-		//compute subtrahend - log(x+y) = log(x)+log(1+exp(log(y)-log(x)))
-		double log_of_sums = matrix_w[i][0];
-		for(TType j=1; j<m; ++j)
+	//
+	double lambda_i = 0; 
+	double sum_of_Q_i = 0;
+	dataset_start -= t;
+	while(dataset_start!=dataset_end)
+	{
+		TType seq_nr = t-(dataset_end-dataset_start);
+		TType m = length(*dataset_start)-l+1;
+		lambda_i = gamma/((double)m);
+		joint_log_likelihood += (log((double)1)-log((double)m));
+
+		double log_of_sums = matrix_w[seq_nr][0];
+		TType j;
+		for(j=1; j<m; ++j)
 		{
-			if( (matrix_w[i][j]-log_of_sums)>DBL_MIN_EXP )
+			if( (matrix_w[seq_nr][j]-log_of_sums)>DBL_MIN_EXP )
 			{
-				log_of_sums +=
-					log(static_cast<double>(1)+exp(matrix_w[i][j]-log_of_sums));
+				log_of_sums += log(1+exp(matrix_w[seq_nr][j]-log_of_sums));
 			}
 		}
-
-		for(TType j=0; j<m; ++j)
+		for(j=0; j<m; ++j)
 		{
-			//double prob = exp(matrix_w[i][j]);
-			double prob = matrix_w[i][j];
-			matrix_w[i][j] += log(lambda_i);
+			double prob = matrix_w[seq_nr][j];
+			matrix_w[seq_nr][j] += log(lambda_i);
 			double exponent =
-				log_of_sums+log(lambda_i)-log_of_seq_prob_having_no_motif
-			   -log(static_cast<double>(1)-gamma);
+				log_of_sums+log(lambda_i)-log_probs_of_motifless_sequences[seq_nr]-log(1-gamma);
 			if( exponent>DBL_MIN_EXP )
 			{
-				matrix_w[i][j] -=
-					(log_of_seq_prob_having_no_motif+log(static_cast<double>(1)-gamma)
-					+log(1+exp(exponent)));
+				matrix_w[seq_nr][j] -=
+					(log_probs_of_motifless_sequences[seq_nr]+log(1-gamma)+log(1+exp(exponent)));
 			}
 			else
 			{
-				matrix_w[i][j] -= 
-					(log_of_seq_prob_having_no_motif+log(static_cast<double>(1)-gamma));
+				matrix_w[seq_nr][j] -= 
+					(log_probs_of_motifless_sequences[seq_nr]+log(1-gamma));
 			}
-			matrix_w[i][j] = exp(matrix_w[i][j]);
-			joint_log_likelihood += matrix_w[i][j]*prob;
+			matrix_w[seq_nr][j] = exp(matrix_w[seq_nr][j]);
+			joint_log_likelihood += matrix_w[seq_nr][j]*prob;
 		}
-
 		double Q_i = 
-			std::accumulate(matrix_w[i]+0,matrix_w[i]+m,static_cast<double>(0));
-		sum_of_Q_i+=Q_i;
+			std::accumulate(matrix_w[seq_nr],matrix_w[seq_nr]+m,(double)0);
+		sum_of_Q_i += Q_i;
 		joint_log_likelihood +=
-			((1-Q_i)*log_of_seq_prob_having_no_motif
-		   +(Q_i*log(gamma/static_cast<double>(m))
-		   +(1-Q_i)*log(static_cast<double>(1)-gamma)));
-		/*joint_log_likelihood +=
-			((1-Q_i)*exp(log_of_seq_prob_having_no_motif)
-		   +(Q_i*log(gamma/static_cast<double>(m))
-		   +(1-Q_i)*log(static_cast<double>(1)-gamma)));*/
+			((1-Q_i)*log_probs_of_motifless_sequences[seq_nr])
+		   +(Q_i*log(lambda_i))
+		   +((1-Q_i)*log(1-gamma));
+
+		++dataset_start;
 	}
+	delete[] log_probs_of_motifless_sequences;
+
 	// refine value of gamma
-	gamma =  sum_of_Q_i*(static_cast<double>(1)/static_cast<double>(t));
+	gamma =  sum_of_Q_i*((double)1/(double)t);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -438,7 +430,7 @@ _computeEStep(TMatrix & matrix_w,
 .Function._computeStep_M:
 ..summary:Represents the M-step of the EM algorithm for ZOOPS models.
           Refines the background and motif component.
-..cat:Motif Finding
+..cat:Motif Search
 ..signature:_computeStep_M(profile,dataset_start,matrix_w,t,l,zoops_model)
 ..param.profile:The profile object which is a set of frequency distributions.
 ...type:Class.String
@@ -466,30 +458,48 @@ _computeMStep(TProfile & profile,
 	typedef typename Value<TProfile>::Type TFrequencyDist;
 	typedef typename Value<TFrequencyDist>::Type TValue;
 	typedef typename Position<TProfile>::Type TPos;
+	TPos k = 0;
+	typedef String<TValue> TString;
+	
+	// total_counts_of_letters is used for the computtation of the background frequency
+	TFrequencyDist total_counts_of_letters; //<-c
+	absFreqOfLettersInSetOfSeqs(total_counts_of_letters,dataset_start, dataset_start+t);
 
-    // total_counts_of_letters is used for the refinement of the background frequency
-	TFrequencyDist total_counts_of_letters;
-	absFreqOfLettersInSetOfSeqs(total_counts_of_letters, dataset_start+0, dataset_start+t); 
-
-	// refine motif component 
-	for(TPos h=1; h<=l; ++h)
+	//
+	for(k=0; k<length(profile); ++k)
 	{
-		TFrequencyDist letter_freq;
-		for(TType i=0; i<t; ++i)
-		{
-			TType m = length(*(dataset_start+i))-l+1;
-			for(TType j=0; j<m; ++j)
-			{
-				TFrequencyDist frequency;
-	            frequency[(int)(*(dataset_start+i))[j+h-1]] = matrix_w[i][j];
-				letter_freq += frequency;
-			}
-		}
-		profile[h] = letter_freq;
-		total_counts_of_letters-=letter_freq; // refine background component
+		profile[k] = TFrequencyDist();
 	}
-	profile[0] = total_counts_of_letters;
 
+	// refine motif component
+	TIter dataset_end = dataset_start+t;
+	while(dataset_start!=dataset_end)
+	{
+		TType seq_nr = t-(dataset_end-dataset_start);
+		TType m = length(*dataset_start)-l+1;
+		typename Iterator<TString>::Type seq_iter, seq_end, ptr;
+		seq_iter = begin(*dataset_start);
+		seq_end = seq_iter+m;
+		while(seq_iter!=seq_end)
+		{
+			ptr = seq_iter;
+			for(TType i=0; i<l; ++i)
+			{
+				profile[i+1][(int)*(ptr+i)] += matrix_w[seq_nr][m-(seq_end-seq_iter)];
+			}
+			++seq_iter;
+		}
+		++dataset_start;
+	}
+
+	for(k=1; k<length(profile); ++k)
+	{
+		total_counts_of_letters -= profile[k];
+	}
+
+	// refine background component
+	profile[0] = total_counts_of_letters;
+	
 	// addPseudocount (if necessary) & normalize
 	double epsilon = 0.1;
 	normalize(profile, Pseudocount<TValue, CMode>(epsilon));
@@ -535,7 +545,7 @@ em(TProfile & profile,
 	}
 
 	// E-step: compute matrix w and the joint log likelihood
-	double log_likelihood = static_cast<double>(0);
+	double log_likelihood = 0;
 	_computeEStep(matrix_w,log_likelihood,profile,dataset_start,lambda,t,l,tcm);
 
 	// M-step: refine profile
@@ -549,7 +559,7 @@ em(TProfile & profile,
 /*
 .Function._computeEStep:
 ..summary:Represents the E-step of the EM algorithm for TCM models.
-..cat:Motif Finding
+..cat:Motif Search
 ..signature:_computeEStep(matrix_w,joint_log_likelihood,profile,dataset_start,lambda,t,l,tcm_model)
 ..param.matrix_w:The matrix_w object.
 ...remarks:w(i,j) is the probability that the motif pattern 
@@ -582,84 +592,67 @@ _computeEStep(TMatrix & matrix_w,
 			  TCM const & tcm)
 {
 	typedef typename Value<TProfile>::Type TFrequencyDist;
+	typedef typename Value<TFrequencyDist>::Type TValue;
+	typedef String<TValue> TString;
 	typedef typename Position<TProfile>::Type TPos;
-	TProfile log_profile = profile;
-	for(TPos i=0; i<length(log_profile); ++i)
+	for(TPos pos=0; pos<length(profile); ++pos)
 	{
-		logarithmize(log_profile[i]); 
+		logarithmize(profile[pos]); 
 	}
+
+	//compute matrix w
 	double prev_lambda = lambda;
-	lambda = static_cast<double>(0);
-
-	//compute matrix z
-	for(TType i=0; i<t; ++i)
+	TIter dataset_end = dataset_start+t;
+	while(dataset_start!=dataset_end)
 	{
-		TType m = length(*(dataset_start+i))-l+1;
-		double prev_log_prob_given_theta0 = static_cast<double>(0);
-		double Q_i = static_cast<double>(0);
-		for(TType j=0; j<m; ++j)
+		TType seq_nr = t-(dataset_end-dataset_start);
+		TType m = length(*dataset_start)-l+1;
+		double Q_i = 0;
+		typename Iterator<TString>::Type seq_iter, seq_end, ptr;
+		seq_iter = begin(*dataset_start);
+		seq_end = seq_iter+m;
+		while(seq_iter!=seq_end)
 		{
-			double log_prob_given_theta1 = static_cast<double>(0);
-			double log_prob_given_theta0 = static_cast<double>(0);
-			if(j==0)
+			TType seq_pos = m-(seq_end-seq_iter);
+			ptr = seq_iter;
+			double log_prob_given_theta0 = 0;
+			double log_prob_given_theta1 = 0;
+			for(TType i=0; i<l; ++i)
 			{
-				for(TPos h=1; h<=l; ++h)
-				{
-					int letter = (int) (*(dataset_start+i))[j+h-1];
-					//assume that subsequence was generated by the motif component
-					log_prob_given_theta1 +=
-						log_profile[h][letter];
-
-					//assume that subsequence was generated by the background component
-					log_prob_given_theta0 +=
-						log_profile[0][letter];
-				}
-				prev_log_prob_given_theta0 = log_prob_given_theta0;
-			}
-			else
-			{
-				for(TPos h=1; h<=l; ++h)
-				{
-					int letter = (int) (*(dataset_start+i))[j+h-1];
-					//assume that subsequence was generated by the motif component
-					log_prob_given_theta1 +=
-						log_profile[h][letter];
-				}
-				log_prob_given_theta0 = 
-					prev_log_prob_given_theta0-log_profile[0][(int) (*(dataset_start+i))[j-1]]
-				  +log_profile[0][(int) (*(dataset_start+i))[j+l-1]];
-				prev_log_prob_given_theta0 = log_prob_given_theta0;
+				log_prob_given_theta0 += profile[0][(int)*(ptr+i)];
+				log_prob_given_theta1 += profile[i+1][(int)*(ptr+i)];
 			}
 			double minuend = log_prob_given_theta1+log(prev_lambda);
-			double subtrahend = static_cast<double>(0);
-			double exponent = minuend-log_prob_given_theta0-log(static_cast<double>(1)-prev_lambda);
+			double subtrahend = 0;
+			double exponent = minuend-log_prob_given_theta0-log((double)(1-prev_lambda));
 			if(exponent>DBL_MIN_EXP)
 			{
 				subtrahend =
-					log_prob_given_theta0+log(static_cast<double>(1)-prev_lambda)
-				   +log(static_cast<double>(1)+exp(exponent));
+					log_prob_given_theta0+log((double)(1-prev_lambda))
+				   +log((double)(1+exp(exponent)));
 			}
 			else
 			{
 				subtrahend =
-					log_prob_given_theta0+log(static_cast<double>(1)-prev_lambda);
+					log_prob_given_theta0+log((double)(1-prev_lambda));
 			}
 
-			matrix_w[i][j] = exp(minuend-subtrahend);
-			Q_i += matrix_w[i][j];
-			joint_log_likelihood +=
-				((static_cast<double>(1)-matrix_w[i][j])*log_prob_given_theta0
-			    +matrix_w[i][j]*log_prob_given_theta1
-			    +(static_cast<double>(1)-matrix_w[i][j])*log(static_cast<double>(1)-prev_lambda)
-			    +matrix_w[i][j]*log(prev_lambda));
+			matrix_w[seq_nr][seq_pos] = exp(minuend-subtrahend);
+			Q_i += matrix_w[seq_nr][seq_pos];
+			joint_log_likelihood += ((double)(1-matrix_w[seq_nr][seq_pos]))*log_prob_given_theta0
+									+matrix_w[seq_nr][seq_pos]*log_prob_given_theta1
+									+((double)(1-matrix_w[seq_nr][seq_pos]))*log((double)(1-prev_lambda))
+									+matrix_w[seq_nr][seq_pos]*log(prev_lambda);
+			++seq_iter;
 		}
-		lambda += Q_i/static_cast<double>(m);
-
+		lambda += (Q_i/((double)m));
+		++dataset_start;
 	}
-	lambda = lambda/static_cast<double>(t);
+	lambda = lambda/((double)t);
 
 	// apply a smoothing step to reduce the degree to which any two overlapping 
 	// subsequences can both be assigned to the motif component
+	dataset_start -= t;
 	_smoothingStep(matrix_w, dataset_start, t, l);
 }
 
@@ -669,7 +662,7 @@ _computeEStep(TMatrix & matrix_w,
 .Function._computeStep_M:
 ..summary:Represents the M-step of the EM algorithm for TCM models.
           Refines the background and motif component.
-..cat:Motif Finding
+..cat:Motif Search
 ..signature:_computeStep_M(profile,dataset_start,matrix_w,t,l,tcm_model)
 ..param.profile:The profile object which is a set of frequency distributions.
 ...type:Class.String
@@ -697,43 +690,36 @@ _computeMStep(TProfile & profile,
 	typedef typename Value<TProfile>::Type TFrequencyDist;
 	typedef typename Value<TFrequencyDist>::Type TValue;
 	typedef typename Position<TProfile>::Type TPos;
-
-    // total_counts_of_letters is used for the refinement of the background frequency
-	TFrequencyDist total_counts_of_letters;
-	absFreqOfLettersInSetOfSeqs(total_counts_of_letters, dataset_start+0, dataset_start+t); 
-
-	// refine motif component 
-	for(TPos h=1; h<=l; ++h)
+	TPos k = 0;
+	typedef String<TValue> TString;
+	
+	//
+	for(k=0; k<length(profile); ++k)
 	{
-		TFrequencyDist letter_freq;
-		for(TType i=0; i<t; ++i)
-		{
-			TType m = length(*(dataset_start+i))-l+1;
-			for(TType j=0; j<m; ++j)
-			{
-				TFrequencyDist frequency;
-	            frequency[(int)(*(dataset_start+i))[j+h-1]] = matrix_w[i][j];
-				letter_freq += frequency;
-			}
-		}
-		profile[h] = letter_freq;
-		total_counts_of_letters-=letter_freq; // refine background component
+		profile[k] = TFrequencyDist();
 	}
 
-	// refine background component
-	TFrequencyDist freq;
-	for(TType i=0; i<t; ++i)
+	// refine motif component
+	TIter dataset_end = dataset_start+t;
+	while(dataset_start!=dataset_end)
 	{
-		TType m = length(*(dataset_start+i))-l+1;
-		for(TType j=0; j<m; ++j)
+		TType seq_nr = t-(dataset_end-dataset_start);
+		TType m = length(*dataset_start)-l+1;
+		typename Iterator<TString>::Type seq_iter, seq_end, ptr;
+		seq_iter = begin(*dataset_start);
+		seq_end = seq_iter+m;
+		while(seq_iter!=seq_end)
 		{
-			for(TType h=1; h<=l; ++h)
+			ptr = seq_iter;
+			for(TType i=0; i<l; ++i)
 			{
-	            freq[(int)(*(dataset_start+i))[j+h-1]] += (static_cast<double>(1)-matrix_w[i][j]);
+				profile[i+1][(int)*(ptr+i)] += matrix_w[seq_nr][m-(seq_end-seq_iter)];
+				profile[0][(int)*(ptr+i)] += (double)(1-matrix_w[seq_nr][m-(seq_end-seq_iter)]);
 			}
+			++seq_iter;
 		}
+		++dataset_start;
 	}
-	profile[0] = freq;
 
 	// addPseudocount (if necessary) & normalize
 	double epsilon = 0.1;
@@ -757,7 +743,7 @@ _computeMStep(TProfile & profile,
           subsequences can both be assigned to the motif component.
          (We do not want the model to predict that two overlapping substrings are both 
           motif occurences.)
-..cat:Motif Finding
+..cat:Motif Search
 ..signature:_smoothingStep(matrix_w,dataset_start,t,l)
 ..param.matrix_w:The matrix_w object.
 ...remarks:w(i,j) is the probability that the motif pattern 
@@ -775,28 +761,58 @@ _smoothingStep(TMatrix & matrix_w,
 			   TType const & t,
 			   TType const & l)
 {
+	TType h = 0;
 	for(TType i=0; i<t; ++i)
 	{
 		TType m = length(*(dataset_start+i))-l+1;
-		for(TType k=0; k<l; ++k)
+		for(TType s=0; s<l; ++s)
 		{
-			for(TType j=k; j<m; ++j)
+			TType k = s;
+			double w_sum;
+			double w_max;
+			double factor;
+			while( ((m-k)/l)>=1 )
 			{
+				w_sum = 0;
+				w_max = 0;
+				factor = 0;
+
 				// w_sum:=sum of Zij in the current window of size l (l:=l)
-				double w_sum = 
-					static_cast<double>(std::accumulate(matrix_w[i]+j, 
-										matrix_w[i]+j+l, 
-										static_cast<double>(0)));
-
+				w_sum = (double)(std::accumulate(matrix_w[i]+k, 
+										matrix_w[i]+k+l, (double)0));
 				// w_max:=the largest Zij in the current window
-				double w_max =
-					static_cast<double>(*std::max_element(matrix_w[i]+j, 
-														  matrix_w[i]+j+l));
-
+				w_max =
+					(double)(*std::max_element(matrix_w[i]+k,matrix_w[i]+k+l));
 				if(w_sum>1.0)
 				{
-					double factor = (static_cast<double>(1)-w_max)/(w_sum-w_max);
-					for(TType h=j; h<j+l; ++h)
+					factor = ((double)1-w_max)/(w_sum-w_max);
+					for(h=k; h<k+l; ++h)
+					{
+						if(matrix_w[i][h]!=w_max)
+						{
+							matrix_w[i][h] *= factor;
+						}
+					}
+				}
+				k += l;
+			}
+
+			if( (m-k)>1 )
+			{
+				w_sum = 0;
+				w_max = 0;
+				factor = 0;
+
+				// w_sum:=sum of Zij in the current window of size l (l:=l)
+				w_sum = (double)(std::accumulate(matrix_w[i]+k, 
+										matrix_w[i]+m, (double)0));
+				// w_max:=the largest Zij in the current window
+				w_max =
+					(double)(*std::max_element(matrix_w[i]+k,matrix_w[i]+m));
+				if(w_sum>1.0)
+				{
+					factor = ((double)1-w_max)/(w_sum-w_max);
+					for(h=k; h<m; ++h)
 					{
 						if(matrix_w[i][h]!=w_max)
 						{

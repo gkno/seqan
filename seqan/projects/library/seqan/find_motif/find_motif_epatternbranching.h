@@ -12,7 +12,7 @@ namespace SEQAN_NAMESPACE_MAIN
 .Spec.EPatternBranching:
 ..summary: Represents the ePatternBranching algorithm of Davila and Rajasekaran.
 ..general:Class.MotifFinder
-..cat:Motif Finding
+..cat:Motif Search
 ..signature:MotifFinder<TValue, EPatternBranching>
 ..param.TValue:The type of sequences to be analyzed.
 ...type:Spec.Dna
@@ -132,7 +132,7 @@ public:
 /*
 .Function.computeH:
 ..summary:Computes the size of the neighborhood considering at first.
-..cat:Motif Finding
+..cat:Motif Search
 ..signature:computeH(t,l,d,is_exact,n_ar)
 ..param.t:The number of input sequences.
 ..param.l:The size of the motif.
@@ -148,23 +148,21 @@ TType
 computeH(TType const & t, TType const & l, TType const & d, bool const & is_exact, TIntAr & n_ar) 
 {
 	TType d_bar = d-1;
-	double sum = static_cast<double>(0); //probability p_d
-	double prob_P = static_cast<double>(1);
+	double sum = 0; //probability p_d
+	double prob_P = 1;
 
 	if(is_exact)
 	{
-		sum = static_cast<double>(binomialCoefficient(l,d_bar))
-			*pow(0.75, static_cast<double>(d_bar))
-			*pow(0.25, static_cast<double>(l-d_bar));
+		sum = ((double)binomialCoefficient(l,d_bar))
+			*pow(0.75, (double)d_bar)*pow(0.25, (double)l-d_bar);
 	}
 	else
 	{
 		for(unsigned int i=0; i<=d_bar; ++i)
 		{
 			sum+= 
-				static_cast<double>(binomialCoefficient(l,i))
-			   *pow(0.75, static_cast<double>(i))
-			   *pow(0.25, static_cast<double>(l-i));
+				((double)binomialCoefficient(l,i))
+			   *pow(0.75, (double)i)*pow(0.25, (double)l-i);
 		}
 	}
 
@@ -172,23 +170,20 @@ computeH(TType const & t, TType const & l, TType const & d, bool const & is_exac
 		++d_bar;
 		if(is_exact)
 		{
-			sum = static_cast<double>(0);
-			sum = static_cast<double>(binomialCoefficient(l,d_bar))
-				*pow(0.75, static_cast<double>(d_bar))
-		        *pow(0.25, static_cast<double>(l-d_bar));
+			sum = 0;
+			sum = ((double)binomialCoefficient(l,d_bar))
+				*pow(0.75, (double)d_bar)*pow(0.25, (double)l-d_bar);
 		}
 		else
 		{
-			sum += static_cast<double>(binomialCoefficient(l,d_bar))
-				  *pow(0.75, static_cast<double>(d_bar))
-		          *pow(0.25, static_cast<double>(l-d_bar));
+			sum += ((double)binomialCoefficient(l,d_bar))
+				  *pow(0.75, (double)d_bar)*pow(0.25, (double)l-d_bar);
 		}
-		prob_P = static_cast<double>(1);
+		prob_P = 1;
 		for(unsigned int i=0; i<t; ++i)
 		{
 			TType n = n_ar[i];
-			prob_P*=
-				static_cast<double>(1)-pow(static_cast<double>(1)-sum, static_cast<double>(n-l+1));
+			prob_P*= (double)(1-pow((double)1-sum, (doubke)(n-l+1)));
 		}
 	} while( (prob_P<0.95) & (d_bar<2*d-1) );
 
@@ -223,7 +218,7 @@ findMotif(MotifFinder<typename Value<typename Value<TStrings>::Type>::Type,EPatt
 /*
 .Function.ePatternBranching:
 ..summary:Represents the ePatternBranching algorithm.
-..cat:Motif Finding
+..cat:Motif Search
 ..signature:ePatternBranching(result_set,dataset,l,d,is_exact,h,seq_model)
 ..param.result_set:The result_set object.
 ..param.dataset:The dataset object representing the input sequences.
@@ -451,7 +446,7 @@ ePatternBranching(TStrings & result_set,
 /*
 .Function.bestNeighbors:
 ..summary:Represents the second version of GoodNeighbors described in the paper.
-..cat:Motif Finding
+..cat:Motif Search
 ..signature:bestNeighbors(neighbors,l_mer,j,l,d,dataset)
 ..param.neighbors:The set of best neighbors being in the Hamming distance 1-vicinity of l_mer.
 ..param.l_mer:The respective pattern represented by an integer value (hash value) 
@@ -485,7 +480,7 @@ bestNeighbors(TIntSet & neighbors,
 	typename Size<TStrings>::Type t = length(dataset);
 	int seq_nr = 0;
 	int seq_pos = 0;
-	int beta = static_cast<int>((t-1)*(2*d-j-1));
+	int beta = (int)((t-1)*(2*d-j-1));
 	TString l_mer_x = 
 		inverseHash<TValue>(l_mer,ValueSize<TValue>::VALUE,l);
 
@@ -646,7 +641,7 @@ bestNeighbors(TIntSet & neighbors,
 /*
 .Function.hasAtLeastOneOccurrence:
 ..summary:Checks if a given l-mer occurs at least once in a given sequence.
-..cat:Motif Finding
+..cat:Motif Search
 ..signature:hasAtLeastOneOccurrence(l_mer_begin,seq_begin,seq_end,l,d,is_exact)
 ..param.l_mer_begin:An iterator pointing to the beginning of a given l-mer pattern.
 ...type:Concept.Iterator Iterator

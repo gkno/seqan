@@ -12,6 +12,7 @@ namespace SEQAN_NAMESPACE_MAIN
 /**
 .Tag.OOPS:
 ..summary:Represents the One Occurrence Per Sequence model.
+..cat:Motif Search
 ..remarks:The @Tag.OOPS@ model, which was introduced by Lawrence and Reilly permits 
           exactly one motif occurrence in each sequence.
 */
@@ -26,6 +27,7 @@ struct OOPS
 /**
 .Tag.OMOPS:
 ..summary:Represents the One or More Occurence Per Sequence model.
+..cat:Motif Search
 ..remarks:The @Tag.OMOPS@ model is comparable with the @Tag.TCM@ model with the one difference
           that zero occurrence in a sample sequence is not permitted.
 */
@@ -40,6 +42,7 @@ struct OMOPS
 /**
 .Tag.ZOOPS:
 ..summary:Represents the Zero or One Occurence Per Sequence model.
+..cat:Motif Search
 ..remarks:The @Tag.ZOOPS@ model formulated by Bailey and Elkan permits at most one
           motif occurrence in each sequence.
 */
@@ -50,7 +53,7 @@ struct ZOOPS
 	double threshold;
 
 	ZOOPS():
-		threshold(static_cast<double>(0.5))
+		threshold((double)0.5)
 	{
 	}
 	ZOOPS(double val):
@@ -67,6 +70,7 @@ struct ZOOPS
 /**
 .Tag.TCM:
 ..summary:Represents the Two-Component-Mixture Sequence model.
+..cat:Motif Search
 ..remarks:The @Tag.TCM@ model formulated by Bailey and Elkan permits any number pf
           non-overlapping motif occurrences per sequence.
 */
@@ -77,7 +81,7 @@ struct TCM
 	double threshold;
 
 	TCM():
-		threshold(static_cast<double>(0.5))
+		threshold((double)0.5)
 	{
 	}
 	TCM(double val):

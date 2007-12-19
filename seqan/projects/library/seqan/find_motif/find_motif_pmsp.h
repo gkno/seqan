@@ -12,7 +12,7 @@ namespace SEQAN_NAMESPACE_MAIN
 .Spec.PMSP:
 ..summary: Represents the PMSP algorithm of Davila et al.
 ..general:Class.MotifFinder
-..cat:Motif Finding
+..cat:Motif Search
 ..signature:MotifFinder<TValue, PMSP>
 ..param.TValue:The type of sequences to be analyzed.
 ...type:Spec.Dna
@@ -116,7 +116,7 @@ findMotif(MotifFinder<typename Value<typename Value<TStrings>::Type>::Type,PMSP>
           and tries to guess if an l-mer y in that neighborhood is a motif by checking
           whether there are l-mers in the rest sequences (s1,s2,...,st-1) that are at/at most 
           distance d from it.
-..cat:Motif Finding
+..cat:Motif Search
 ..signature:pms1(result_set,dataset,l,d,is_exact,h,model_type)
 ..param.result_set:The result_set object.
 ..param.dataset:The dataset object representing the input sequences.
@@ -159,6 +159,7 @@ pmsp(TStrings & result,
 
 	typename Size<TString>::Type seq_len1 = length(*ds_iter1); 
 	typename Iterator<TString>::Type seq_iter1 = begin(*ds_iter1);
+	typename Iterator<TString>::Type seq_end1 = begin(*ds_iter1)+(seq_len1-l+1);
 	Shape<TValue> shape(l);
 	std::set<TString> result_set;
 	// ----------------------------------------------------------------------------
@@ -173,7 +174,7 @@ pmsp(TStrings & result,
 	std::vector<int> V;
 	String< String<TPos> > L;
 	unsigned int count = 0;
-	while(seq_iter1!=(begin(*ds_iter1)+seq_len1-l+1))
+	while(seq_iter1!=seq_end1)
 	{
 		//construct set V
 		createDVariants(V, seq_iter1, l, d, is_exact, shape);
@@ -595,7 +596,7 @@ pmsp(TStrings & result,
 				std::set<TString>::iterator iter = result_set.find(l_mer);
 				if( iter==result_set.end() )
 				{
-					int lower_limit = (int) (ceil(t*(model_type.threshold))-1);
+					int lower_limit = ((int)ceil(t*(model_type.threshold)))-1;
 					unsigned int number = 0;
 					for(typename Position< String< String<TPos2> > >::Type i=0; i<length(L); ++i)
 					{
@@ -661,7 +662,7 @@ pmsp(TStrings & result,
 /*
 .Function.hasExactOneOccurrence:
 ..summary:Checks if a given l-mer occurs exactly once in a given sequence
-..cat:Motif Finding
+..cat:Motif Search
 ..signature:hasExactOneOccurrence(l_mer_begin,seq_begin,seq_end,l,d,is_exact)
 ..param.l_mer_begin:An iterator pointing to the beginning of a given l-mer pattern.
 ...type:Concept.Iterator Iterator

@@ -12,7 +12,7 @@ namespace SEQAN_NAMESPACE_MAIN
 .Spec.PMode:
 ..summary: Represents the P computation scheme for handling "zero" probabilities.
 ..general:Class.Pseudocount
-..cat:Motif Finding
+..cat:Motif Search
 ..signature:Pseudocount<TValue, PMode>
 ..param.TValue:The type of sequence which is considered.
 ...type:Spec.Dna
@@ -78,7 +78,7 @@ private:
 		// pseudocount = epsilon*fi
 		for(TPos i=0; i<length(background_frequency); ++i)
 		{
-			pseudocounts[i] = static_cast<double>(epsilon*background_frequency[i]);
+			pseudocounts[i] = (double)(epsilon*background_frequency[i]);
 		}
 	}
 //_________________________________________________________________________________________________
@@ -114,8 +114,8 @@ normalize(TProfile & profile, Pseudocount<TValue, PMode> & mode)
 				++j)
 			{
 				profile[i][j] = 
-					static_cast<TFrequencyType>(profile[i][j]+mode.pseudocounts[j])/
-					static_cast<TFrequencyType>(N+mode.epsilon);
+					((TFrequencyType)(profile[i][j]+mode.pseudocounts[j]))/
+					((TFrequencyType)(N+mode.epsilon));
 			}
 		}
 		else

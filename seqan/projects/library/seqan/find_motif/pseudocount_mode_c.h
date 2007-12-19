@@ -12,7 +12,7 @@ namespace SEQAN_NAMESPACE_MAIN
 .Spec.CMode:
 ..summary: Represents the C ("constant") computation scheme for handling "zero" probabilities.
 ..general:Class.Pseudocount
-..cat:Motif Finding
+..cat:Motif Search
 ..signature:Pseudocount<TValue, CMode>
 ..param.TValue:The type of sequence which is considered.
 ...type:Spec.Dna
@@ -75,7 +75,7 @@ private:
 	{
 		// alphabet_size = ValueSize<TValue>::VALUE
 		pseudocount = 
-			static_cast<double>(epsilon/ValueSize<TValue>::VALUE);
+			(double)(epsilon/ValueSize<TValue>::VALUE);
 	}
 
 //_____________________________________________________________________________________________
@@ -113,8 +113,8 @@ normalize(TProfile & profile, Pseudocount<TValue, CMode> & mode)
 				++j)
 			{
 				profile[i][j] = 
-					static_cast<TFrequencyType>(profile[i][j]+mode.pseudocount)/
-					static_cast<TFrequencyType>(N+mode.epsilon);
+					((TFrequencyType)(profile[i][j]+mode.pseudocount))/
+					((TFrequencyType)(N+mode.epsilon));
 			}
 		}
 		else

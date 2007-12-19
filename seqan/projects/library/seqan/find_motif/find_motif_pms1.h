@@ -12,7 +12,7 @@ namespace SEQAN_NAMESPACE_MAIN
 .Spec.PMS1:
 ..summary: Represents the PMS1 algorithm developed by Rajasekaran et al.
 ..general:Class.MotifFinder
-..cat:Motif Finding
+..cat:Motif Search
 ..signature:MotifFinder<TValue, PMS1>
 ..param.TValue:The type of sequences to be analyzed.
 ...type:Spec.Dna
@@ -115,7 +115,7 @@ findMotif(MotifFinder<typename Value<typename Value<TStrings>::Type>::Type,PMS1>
 /*
 .Function.pms1:
 ..summary:Represents the PMS1 algorithm.
-..cat:Motif Finding
+..cat:Motif Search
 ..signature:pms1(result_set,dataset,l,d,is_exact,h,model_type)
 ..param.result_set:The result_set object.
 ..param.dataset:The dataset object representing the input sequences.
@@ -413,7 +413,7 @@ pms1(TStrings & result_set,
 	// STEP 2:
 	// count votes of l-mers (d-variants) and insert relevant d-variants into result set
 	// ----------------------------------------------------------------------------
-	int lower_limit = (int) ceil(t*(model_type.threshold));
+	int lower_limit = (int)ceil(t*(model_type.threshold));
 	// count votes of relevant l-mers (d-variants)
 	std::vector<int>::iterator iter = result_vect.begin();
 	std::vector<int>::iterator end_iter = result_vect.end();
@@ -549,7 +549,7 @@ pms1(TStrings & result_set,
 .Function.createDVariants:
 ..summary:Creates the d-variants of a given l-mer and computes their hash-values which will be
           finally stored in array 'variants'.
-..cat:Motif Finding
+..cat:Motif Search
 ..signature:createDVariants(variants,l_mer_begin,l,d,is_exact,shape)
 ..param.variants:The set of d-variants of a given l-mer.
 ...type:String<int>
@@ -629,7 +629,7 @@ createDVariants(TIntVect & variants,
 .Function._getVariantsOfBitset:
 ..summary:Builds all variants of bitsets consisting of d zeros & (l-d) ones which
           will be stored in an seqan::String.
-..cat:Motif Finding
+..cat:Motif Search
 ..signature:_getVariantsOfBitset(bitsets,l,d)
 ..param.bitsets:The collection of bitsets.
 ...type:Class.String
@@ -669,7 +669,7 @@ _getVariantsOfBitset(TStrings & bitsets,
 ..summary:Builds all d-variants of a given l-mer given the position(s) of mismatch(es) and 
           then computes the hash-values for each variant which will be finally stored 
           in an int-vector variants.
-..cat:Motif Finding
+..cat:Motif Search
 ..signature:_buildVariants(variants,l_mer_begin,d,bitset,shape)
 ..param.variants:The int-vector of d-variants of a given l-mer 
 ...remarks:The vector holds the hash-values of each d-variant. 
@@ -718,7 +718,7 @@ _buildVariants(TIntVect & variants,
 
 	// d-mers
 	unsigned int num_of_d_mers = 
-		(unsigned int)pow(static_cast<double>(ValueSize<TValue>::VALUE), static_cast<int>(d));
+		(unsigned int) pow((double)ValueSize<TValue>::VALUE, (int)d);
 	for(unsigned int i=0; i<num_of_d_mers; ++i)
 	{
 		TString d_mer = inverseHash<TValue>(i, ValueSize<TValue>::VALUE, d);

@@ -10,7 +10,7 @@ namespace SEQAN_NAMESPACE_MAIN
 .Class.MotifFinder:
 ..summary:Holds the algorithm parameter values and the motif instance(s) found by the appropriate
           motif discovery algorithm.
-..cat:Motif Finding
+..cat:Motif Search
 ..signature:MotifFinder<TValue, TSpec>
 ..param.TValue:The type of sequences to be analyzed.
 ...metafunction:Metafunction.Value
@@ -51,7 +51,7 @@ struct Value< MotifFinder<TValue, TSpec> const>
 /**
 .Function.findMotif:
 ..summary:Represents the main function which is used to start the search for noticeable motif patterns.
-..cat:Motif Finding
+..cat:Motif Search
 ..signature:findMotif(finder,dataset,seq_model)
 ..param.finder:The @Class.MotifFinder@ object.
 ...type:Class.MotifFinder
@@ -73,10 +73,10 @@ struct Value< MotifFinder<TValue, TSpec> const>
 /**
 .Function.factorial:
 ..summary:Calculates the factorial value of any integer number.
-..cat:Motif Finding
+..cat:Motif Search
 ..signature:factorial(value)
 ..param.value:The value object.
-...remarks:$value$ should be a positive integer.
+...type:unsigned int
 ..remarks:The factorial of a non-negative integer $value$ is 
           the product of all positive integers less than or equal to $value$.  
 */
@@ -103,13 +103,14 @@ TType factorial(TType n)
 /**
 .Function.binomialCoefficient:
 ..summary:Calculates the binomial coefficient C(n,k).
-..cat:Motif Finding
+..cat:Motif Search
 ..signature:binomialCoefficient(n,k)
 ..param.n:The first parameter object.
+...type:unsigned int
 ..param.k:The second parameter object.
-..remarks:Both parameters $n$ and $k$ should be a positive integer value. 
-          If $k$ is greater than $n$, the binomial coefficient of $n$ and $k$ 
-		  is equal to zero.   
+...type:unsigned int
+..remarks:The binomial coefficient of $n$ and $k$ is equal to zero 
+          if $k$ is greater than $n$.   
 */
 
 template<typename TType>
@@ -131,7 +132,7 @@ TType binomialCoefficient(TType n, TType k)
 /**
 .Function.hammingDistance:
 ..summary:Determines the Hamming distance between two sequences.
-..cat:Motif Finding
+..cat:Motif Search
 ..signature:hammingDistance(begin1,end1,begin2)
 ..param.begin1:An iterator pointing to the beginning of the first sequence which is either
               a @Shortcut.DnaString@ or a @Shortcut.Peptide@. 
@@ -172,7 +173,7 @@ size_t hammingDistance(TStringIterator start1, TStringIterator end1, TStringIter
 /**
 .Function.inverseHash:
 ..summary:Determines the corresponding sequence pattern given the hash value.
-..cat:Motif Finding
+..cat:Motif Search
 ..signature:inverseHash<TValue>(hash_value,alphabet_size,seq_size)
 ..param.hash_value:The hash_value object.
 ..param.alphabet_size:The alphabet_size object.
@@ -195,7 +196,7 @@ inverseHash(TType const & hash_value,
 	for(TPos i=0; i<seq_size; ++i)
 	{
 		int letter = hash_val%alp_size;
-		seq[i] = static_cast<TValue>(letter);
+		seq[i] = (TValue)letter;
 		hash_val = (hash_val-letter)/alp_size;
 	}
 
@@ -209,7 +210,7 @@ inverseHash(TType const & hash_value,
 .Function.displayResult:
 ..summary:Displays all found motif candidates. In the case of the Projection Motif Finder
           the function displays the consensus pattern of the found motif candidate.
-..cat:Motif Finding
+..cat:Motif Search
 ..signature:displayResult(motif_finder)
 ..param.motif_finder:The @Class.MotifFinder@ object.
 ...type:Class.MotifFinder

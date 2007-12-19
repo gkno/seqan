@@ -12,7 +12,7 @@ namespace SEQAN_NAMESPACE_MAIN
 .Spec.Projection:
 ..summary: Represents the PROJECTION algorithm of Buhler and Tompa.
 ..general:Class.MotifFinder
-..cat:Motif Finding
+..cat:Motif Search
 ..signature:MotifFinder<TValue, Projection>
 ..param.TValue:The type of sequences to be analyzed.
 ...type:Spec.Dna
@@ -24,8 +24,6 @@ namespace SEQAN_NAMESPACE_MAIN
 		  which are likely to be a collection of motif instances (filtering step) and 
 		  refines them by some local searching techniques, e.g. @Function.em|EM algorithm@, Gibbs Sampling etc (refinement step).
 */
-
-///.Class.MotifFinder.param.TSpec.type:Spec.Projection
 
 struct _Projection;
 typedef Tag<_Projection> Projection;
@@ -52,7 +50,6 @@ class MotifFinder<TValue, Projection>
 	typedef String<TString> TStrings;
 	typedef typename Size<TStrings>::Type TSize1;
 	typedef typename Size<TString>::Type TSize2;
-	typedef typename Position<TString>::Type TPos;
 
 //____________________________________________________________________________________________
 
@@ -66,7 +63,6 @@ public:
 	unsigned int bucket_threshold;
 	unsigned int num_of_trials;
 	TString consensus_pattern;
-	std::vector<TPos> pos_of_motif_instances;
 	int score;
 
 //____________________________________________________________________________________________
@@ -180,7 +176,7 @@ public:
 /*
 .Function._computeProjectionSize:
 ..summary:Computes the projection size (k).
-..cat:Motif Finding
+..cat:Motif Search
 ..signature:_computeProjectionSize(alp_size,l,d,m)
 ..param.alp_size:The size of the sequence alphabet.
 ...remarks:The alp_size object is four for nucleotide sequences and twenty for amino acid sequences.
@@ -218,7 +214,7 @@ _computeProjectionSize(TType const & alp_size,
 /*
 .Function._computeBucketThreshold:
 ..summary:Computes the bucket threshold size (s).
-..cat:Motif Finding
+..cat:Motif Search
 ..signature:_computeBucketThreshold(alp_size,l,d,m,k)
 ..param.alp_size:The size of the sequence alphabet.
 ...remarks:The alp_size object is four for nucleotide sequences and twenty for amino acid sequences.
@@ -260,7 +256,7 @@ _computeBucketThreshold(TType const & alp_size,
 /*
 .Function._computeNumOfTrials:
 ..summary:Computes the number of independent trials (tr).
-..cat:Motif Finding
+..cat:Motif Search
 ..signature:_computeNumOfTrials(t,l,d,k,s,prob_q)
 ..param.t:The number of input sequences.
 ..param.l:The size of the motif.
@@ -317,7 +313,7 @@ _computeNumOfTrials(TType const & t,
 /*
 .Function.findMotif (for PROJECTION)
 ..summary:Represents the PROJECTION algorithm.
-..cat:Motif Finding
+..cat:Motif Search
 ..signature:findMotif(finder,dataset,seq_model)
 ..param.finder:The @Class.MotifFinder@ object.
 ...type:Class.MotifFinder
@@ -355,8 +351,13 @@ findMotif(MotifFinder<TSeqType, Projection> & finder,
 	TArSize ar_size =
 		static_cast<TArSize>(pow(static_cast<double>(ValueSize<TSeqType>::VALUE), static_cast<int>(finder.projection_size)));
 	finder.score = -1;
+	//std::set< String<int> > occurred_positions;
 	for(unsigned int trial=0; trial<finder.num_of_trials; ++trial)
 	{
+		///
+		std::cout << " . ";
+		///
+
 		TArray count_ar;
 		resize(count_ar, ar_size);
 
@@ -371,13 +372,14 @@ findMotif(MotifFinder<TSeqType, Projection> & finder,
 		// create shape
 		//Shape<TSeqType, GappedShape> shape(finder.motif_size-finder.projection_size,
 		//								   finder.motif_size);
-		Shape<TSeqType, GappedShape> shape(finder.projection_size);
+		Shape<TSeqType, GappedShape> shape(finder.projection_size-1);
 		std::set<int>::iterator positions_iter, positions_end;
 		positions_iter = positions.begin();
 		positions_end = positions.end();
 		std::set<int>::value_type prev_val, cur_val;
-		prev_val = 0;
+		prev_val = *positions_iter;
 		cur_val = 0;
+		++positions_iter;
 		unsigned int index = 0;
 		while(positions_iter!=positions_end)
 		{
@@ -387,14 +389,17 @@ findMotif(MotifFinder<TSeqType, Projection> & finder,
 			++positions_iter;
 			++index;
 		}
+		shape.weight = finder.projection_size;
 
 		// array of collection of l-mers
 		TBuckets bucket_ar;
 		unsigned int num_of_relevant_buckets = 0;
+
 		_filteringStep(bucket_ar,
-			           count_ar,
+					   count_ar,
 					   num_of_relevant_buckets,
 					   dataset,
+					   positions,
 					   shape,
 					   finder.motif_size,
 					   finder.bucket_threshold);
@@ -410,10 +415,8 @@ findMotif(MotifFinder<TSeqType, Projection> & finder,
 			unsigned int bucket_size = (bucket_ar[i]).size();
 			if(bucket_size>=finder.bucket_threshold)
 			{
-				///
-				//std::cout << num_of_relevant_buckets-j << " ";
-				///
 				++j;
+
 				TStrings l_mers;
 				resize(l_mers, bucket_size);
 				TBucket::iterator bucket_iter, bucket_end;
@@ -430,33 +433,34 @@ findMotif(MotifFinder<TSeqType, Projection> & finder,
 				}
 
 				TString consensus_pat;
-				std::vector<TPos> pos_of_instances;
-				int score = _refinementStep(consensus_pat,
-					                        pos_of_instances,
-											l_mers,
-											dataset,
-											finder.motif_size,
-											finder.num_of_substitutions,
-											finder.has_exact_substitutions,
-											seq_model);
+				TStrings motif_instances;
+				int score = 
+					_refinementStep(consensus_pat,
+									l_mers,dataset,
+									finder.motif_size,
+									finder.num_of_substitutions,
+									finder.has_exact_substitutions,
+									seq_model);
 
 				if(score>finder.score)
 				{
 					finder.score = score;
 					finder.consensus_pattern = consensus_pat;
-					finder.pos_of_motif_instances.clear();
-					finder.pos_of_motif_instances.resize(t);
-					std::copy(pos_of_instances.begin(),
-							  pos_of_instances.end(),
-							  finder.pos_of_motif_instances.begin());	
+
+					if(finder.score==t)
+					{
+						trial = finder.num_of_trials;
+						j = num_of_relevant_buckets;
+					}
 				}
-				///
-				//if score==t break???
-				///
 			}
 			++i;
-		}
-	} 
+		}// end while( (j<num_of_relevant_buckets) & (i<ar_size) )
+	}// end for(unsigned int trial=0; trial<finder.num_of_trials; ++trial)
+	
+	///
+	std::cout << "\n";
+	///
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -466,23 +470,23 @@ findMotif(MotifFinder<TSeqType, Projection> & finder,
 ..summary:Given a position set with k different positions we compute a projection value
           for each l-mer in the input sequences and store the specific l-mer in the appropriate
 		  bucket which is labeled with the specific projection value.
-..cat:Motif Finding
+..cat:Motif Search
 ..signature:_filteringStep(buckets,count_ar,num_of_relevant_buckets,dataset,shape,l,s)
 */
 
-template<typename TBucketAr, typename TArray, typename TType, typename TStrings, typename TShape>
+template<typename TBucketAr, typename TArray, typename TType, typename TStrings, typename TPositions, typename TShape>
 void 
 _filteringStep(TBucketAr & buckets, 
 			   TArray & count_ar,
 			   TType & num_of_relevant_buckets,
 			   TStrings & dataset,
+			   TPositions & positions,
 			   TShape & shape,
 			   TType const & l,
 			   TType const & s)
 {
 	typedef typename Value<TStrings>::Type TString;
 	typedef typename Value<TString>::Type TValue;
-	typedef typename Position<TString>::Type TPos;
 	typedef typename Value<TBucketAr>::Type TBucket;
 	typename Iterator<TStrings>::Type ds_iter = begin(dataset);
 	typename Size<TArray>::Type ar_size = length(count_ar);
@@ -503,6 +507,7 @@ _filteringStep(TBucketAr & buckets,
 	resize(buckets, ar_size);
 	int y = 0; //hash-value of created k-mer
 	int x = 0; //hash-value of l-mer
+	int first_pos = *(positions.begin());
 	for(; !atEnd(ds_iter, dataset); goNext(ds_iter))
 	{
 		typename Size<TString>::Type seq_length = length(*ds_iter);
@@ -511,7 +516,7 @@ _filteringStep(TBucketAr & buckets,
 		while( seq_iter!=seq_end )
 		{
 			x = hash(shape2, seq_iter);
-			y = hash(shape, seq_iter);
+			y = hash(shape, (seq_iter+first_pos));
 	    	++count_ar[y];
 			(buckets[y]).push_back(x);
 			++seq_iter;
@@ -529,7 +534,7 @@ _filteringStep(TBucketAr & buckets,
 /*
 .Function._refinementStep:
 ..summary:Refines the collection of l-mers in each relevant bucket which contains at least s l-mers.
-..cat:Motif Finding
+..cat:Motif Search
 ..signature:_refinementStep(consensus_seq,positions,l_mers,dataset,t,l,d,is_exact,model_type)
 */
 
@@ -537,10 +542,9 @@ _filteringStep(TBucketAr & buckets,
 //	OOPS model
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TString, typename TPositions, typename TType>
-int 
+template<typename TString, typename TType>
+int
 _refinementStep(TString & consensus_seq,
-				TPositions & positions,
 			    String<TString> const & l_mers,
 			    String<TString> & dataset,
 				TType const & l,
@@ -568,116 +572,127 @@ _refinementStep(TString & consensus_seq,
 
 	// step2: refinement of initial profile with em: 5 trials
 	double likelihood_score = 0;
-	int iterations = 5; //3
+	int iterations = 3; //5
+
 	while(iterations>0)
 	{
-		//likelihood_score = em(profile, dataset, oops);
 		likelihood_score = em(profile, begin(dataset), t, l, oops);
 		--iterations;
 	}
 
-	// step3: form a guess for the planted motif by selecting from each input sequence
-	//		  the l-mer x with the largest likelihood ratio
-	TStrings multiset_T;
-	_getLMersWithTheLargestLikelihoodRatio(multiset_T, 
-										   positions, 
-										   begin(dataset), 
-										   end(dataset), 
-										   profile, 
-										   l);
-
-	////////////////////////////////////////////////////////////////////////////////////////////////
-	//further refinement: with SP Star refinement process
-	iterations = 3;
+	determineConsensusSeq(consensus_seq, profile, l);
+	typename Iterator<TStrings>::Type ds_iter, ds_end;
+	ds_iter = begin(dataset);
+	ds_end = end(dataset);
+	typename Position<TStrings>::Type seq_nr;
 	do
 	{
-		score = 0;
-		// step4: determine consensus sequence of multiset T
-		convertSetOfPatternsToProfile(profile, multiset_T, pseudocount_mode_c);
-		determineConsensusSeq(consensus_seq, profile, l);
-
-		// step5: determine score of multiset T
-		typename Iterator< TStrings >::Type T_iter = begin(multiset_T);
-		for(; !atEnd(T_iter, multiset_T); goNext(T_iter))
+		seq_nr = t-(ds_end-ds_iter);
+		TPos m = (TPos)(length(*ds_iter)-l+1);
+		int * hd_ar = new int[m];
+		typename Iterator<TString>::Type seq_iter, seq_end, consensus_begin;
+		seq_iter = begin(*ds_iter);
+		seq_end = seq_iter+m;
+		while(seq_iter!=seq_end)
 		{
-			if(!(is_exact) &
-				(hammingDistance(begin(*T_iter), end(*T_iter),begin(consensus_seq))<=d) )
-			{
-				++score;
-			}
-			else if( is_exact &
-					(hammingDistance(begin(*T_iter),end(*T_iter),begin(consensus_seq))==d) )
-			{
-				++score;
-			}
+			consensus_begin = begin(consensus_seq);
+			hd_ar[m-(seq_end-seq_iter)] = hammingDistance(seq_iter, seq_iter+l, consensus_begin);
+			++seq_iter;
 		}
 
-		if(score==t)
+		if( (!is_exact) & 
+			(count_if(hd_ar,hd_ar+m,bind2nd(std::less_equal<TType>(), d))==1) )
 		{
-			break;
+			++score;
 		}
-		else
+		else if( is_exact & 
+			     (count_if(hd_ar,hd_ar+m,bind2nd(std::equal_to<TType>(), d))==1) )
 		{
-			TStrings multiset_T_apostroph;
-			resize(multiset_T_apostroph, t);
-			TPositions min_dist_positions;
-			std::vector<int> min_dist_values;
-			typename Iterator<TStrings>::Type ds_iter = begin(dataset);
-			typename Iterator<TStrings>::Type ds_end = end(dataset);
-			while(ds_iter!=ds_end)
-			{
-				typename Position<TStrings>::Type seq_nr = t-(ds_end-ds_iter);
-				TPos m = static_cast<TPos>(length(*ds_iter)-l+1);
-				TPos pos_of_min = 0;
-				typename Iterator<TString>::Type seq_iter = begin(*ds_iter);
-				typename Iterator<TString>::Type seq_end = begin(*ds_iter)+m;
-				typename Iterator<TString>::Type consensus_begin = begin(consensus_seq);
-				int min = 
-					hammingDistance(seq_iter, seq_iter+l,consensus_begin);
-				++seq_iter;
-				while(seq_iter!=seq_end)
-				{
-					consensus_begin = begin(consensus_seq);
-					int hd = hammingDistance(seq_iter, seq_iter+l, consensus_begin);
-					if( hd<min )
-					{
-						min = hd;
-						pos_of_min = (seq_iter-begin(*ds_iter));
-					}
-					++seq_iter;
-				}
-				min_dist_positions.push_back(pos_of_min);
-				multiset_T_apostroph[seq_nr] = seqan::infix(*ds_iter, pos_of_min, pos_of_min+l);
-				min_dist_values.push_back(min);
-				++ds_iter;
-			}
-			int score_T_apostroph = 0;
-			if(!(is_exact))
-			{
-				score_T_apostroph = 
-					count_if(min_dist_values.begin(),min_dist_values.end(),bind2nd(std::less_equal<TType>(), d));
-			}
-			else
-			{
-				score_T_apostroph = 
-					count_if(min_dist_values.begin(),min_dist_values.end(),bind2nd(std::equal_to<TType>(), d));
-			}
+			++score;
+		}
 
-			if(score_T_apostroph>score)
-			{
-				score = score_T_apostroph;
-				positions.resize(t);
-				std::copy(min_dist_positions.begin(),min_dist_positions.end(),positions.begin());
-				multiset_T = multiset_T_apostroph;
-				--iterations;
-			}
-			else
-			{
-				iterations = -1;
-			}
-		}
+		delete[] hd_ar;
+		++ds_iter;
 	}
-	while( (score<t) & (iterations>=0) );
+	while( (ds_iter!=ds_end) & (score==seq_nr+1) );
+
+	return score;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//	OMOPS model
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TString, typename TType>
+int
+_refinementStep(TString & consensus_seq,
+			    String<TString> const & l_mers,
+			    String<TString> & dataset,
+				TType const & l,
+				TType const & d,
+				bool const & is_exact,
+				OMOPS const & omops)
+{
+	typedef String<TString> TStrings;
+	typedef typename Value<TString>::Type TValue;
+	typedef typename Position<TString>::Type TPos;
+	typedef FrequencyDistribution<TValue> TFrequencyDistribution;
+	typename Size<TStrings>::Type t = length(dataset);
+	int score = 0;
+
+	// compute background frequency
+	TFrequencyDistribution background;
+	backgroundFrequency(background, begin(dataset), end(dataset));
+
+	// step1: initial guess (profile) from bucket
+	double epsilon = 0.1;
+	Pseudocount<TValue, CMode> pseudocount_mode_c(epsilon);
+	String<TFrequencyDistribution> profile;
+	convertSetOfPatternsToProfile(profile, l_mers, pseudocount_mode_c);
+	completeProfile(profile, background);
+
+	// step2: refinement of initial profile with em: 5 trials
+	double likelihood_score = 0;
+	int iterations = 3; //5
+
+	while(iterations>0)
+	{
+		likelihood_score = em(profile, begin(dataset), t, l, OOPS());
+		--iterations;
+	}
+
+	determineConsensusSeq(consensus_seq, profile, l);
+	typename Iterator<TStrings>::Type ds_iter, ds_end;
+	ds_iter = begin(dataset);
+	ds_end = end(dataset);
+	typename Position<TStrings>::Type seq_nr;
+	do
+	{
+		seq_nr = t-(ds_end-ds_iter);
+		TPos m = (TPos)(length(*ds_iter)-l+1);
+		typename Iterator<TString>::Type seq_iter, seq_end, consensus_begin;
+		seq_iter = begin(*ds_iter);
+		seq_end = seq_iter+m;
+		while(seq_iter!=seq_end)
+		{
+			consensus_begin = begin(consensus_seq);
+			int hd = hammingDistance(seq_iter, seq_iter+l, consensus_begin);
+
+			if( (!is_exact) & (hd<=d) )
+			{
+				++score;
+				seq_iter = seq_end-1;
+			}
+			else if( is_exact & (hd==d) )
+			{
+				++score;
+				seq_iter = seq_end-1;
+			}
+			++seq_iter;
+		}
+		++ds_iter;
+	}
+	while( (ds_iter!=ds_end) & (score==seq_nr+1) );
 
 	return score;
 }
@@ -686,54 +701,98 @@ _refinementStep(TString & consensus_seq,
 //	ZOOPS model
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TStrings>
-double 
-_refinementStep(typename Value<TStrings>::Type & consensus_seq,
-			     TStrings const & l_mers,
-			     TStrings & dataset,
-				 typename Size<TStrings>::Type const & t,
-			     typename Size<typename Value<TStrings>::Type>::Type const & l,
-				 ZOOPS const & zoops)
+template<typename TString, typename TType>
+int
+_refinementStep(TString & consensus_seq,
+			    String<TString> const & l_mers,
+			    String<TString> & dataset,
+				TType const & l,
+				TType const & d,
+				bool const & is_exact,
+				ZOOPS const & zoops)
 {
-	typedef typename Value<TStrings>::Type TString;
+	typedef String<TString> TStrings;
 	typedef typename Value<TString>::Type TValue;
+	typedef typename Position<TString>::Type TPos;
+	typedef FrequencyDistribution<TValue> TFrequencyDistribution;
+	typename Size<TStrings>::Type t = length(dataset);
+	int score = 0;
+	int lower_limit = (int) floor(t*(zoops.threshold)+0.5);
 
 	// compute background frequency
-	FrequencyDistribution<TValue> background;
+	TFrequencyDistribution background;
 	backgroundFrequency(background, begin(dataset), end(dataset));
 
 	// step1: initial guess (profile) from bucket
 	double epsilon = 0.1;
 	Pseudocount<TValue, CMode> pseudocount_mode_c(epsilon);
-	String< FrequencyDistribution<TValue> > profile;
+	String<TFrequencyDistribution> profile;
 	convertSetOfPatternsToProfile(profile, l_mers, pseudocount_mode_c);
 	completeProfile(profile, background);
 
 	// step2: refinement of initial profile with em: 5 trials
-	double gamma = static_cast<double>(1)/sqrt(static_cast<double>(t));
 	double likelihood_score = 0;
-	unsigned int num_of_trials = 5;//5;
-	unsigned int trial_nr = 0;
-	while(trial_nr<num_of_trials)
+	double gamma = static_cast<double>(1)/sqrt(static_cast<double>(t));
+	int iterations = 3; //5
+	while(iterations>0)
 	{
 		likelihood_score = em(profile, begin(dataset), t, l, gamma, zoops);
-		++trial_nr;
+		--iterations;
 	}
 
-	// step3: form a guess for the planted motif by selecting from each input sequence
-	//		  the l-mer x with the largest likelihood ratio
-	TStrings set_of_l_mers;
-	_getLMersWithTheLargestLikelihoodRatio(set_of_l_mers, begin(dataset), end(dataset), t, profile, l);
+	determineConsensusSeq(consensus_seq, profile, l);
+	typename Iterator<TStrings>::Type ds_iter, ds_end;
+	ds_iter = begin(dataset);
+	ds_end = end(dataset);
+	typename Position<TStrings>::Type seq_nr;
+	do
+	{
+		seq_nr = t-(ds_end-ds_iter);
+		TPos m = (TPos)(length(*ds_iter)-l+1);
+		int * hd_ar = new int[m];
+		typename Iterator<TString>::Type seq_iter, seq_end, consensus_begin;
+		seq_iter = begin(*ds_iter);
+		seq_end = seq_iter+m;
+		while(seq_iter!=seq_end)
+		{
+			consensus_begin = begin(consensus_seq);
+			hd_ar[m-(seq_end-seq_iter)] = hammingDistance(seq_iter, seq_iter+l, consensus_begin);
+			++seq_iter;
+		}
 
-	// step4: form profile of l-mers inside the multiset &
-	//		  score multiset	
-	String< FrequencyDistribution<TValue> > new_profile;
-	convertSetOfPatternsToProfile(new_profile, set_of_l_mers, pseudocount_mode_c);
-	completeProfile(new_profile, background);
+		if(!is_exact)
+		{
+			TType num = count_if(hd_ar,hd_ar+m,bind2nd(std::less_equal<TType>(), d));
+			if(num>1)
+			{
+				ds_iter = ds_end-1;
+			}
+			else if(num==1)
+			{
+				++score;
+			}
+		}
+		else
+		{
+			TType num = count_if(hd_ar,hd_ar+m,bind2nd(std::equal_to<TType>(), d));
+			if(num>1)
+			{
+				ds_iter = ds_end-1;
+			}
+			else if(num==1)
+			{
+				++score;
+			}
+		}
+		delete[] hd_ar;
+		++ds_iter;
+	}
+	while(ds_iter!=ds_end);
 
-	// score each refined motif (multiset) by its likelihood ratio score
-	double score = _computeLikelihoodRatioOfLMers(set_of_l_mers, new_profile);
-	determineConsensusSeq(consensus_seq, new_profile, l);
+	if(score<lower_limit)
+	{
+		score = 0;
+	}
 
 	return score;
 }
@@ -741,10 +800,10 @@ _refinementStep(typename Value<TStrings>::Type & consensus_seq,
 //////////////////////////////////////////////////////////////////////////////
 //	TCM model
 //////////////////////////////////////////////////////////////////////////////
-template<typename TString, typename TPositions, typename TType>
+
+template<typename TString, typename TType>
 int 
 _refinementStep(TString & consensus_seq,
-				TPositions & positions,
 			    String<TString> const & l_mers,
 			    String<TString> & dataset,
 				TType const & l,
@@ -758,142 +817,79 @@ _refinementStep(TString & consensus_seq,
 	typedef FrequencyDistribution<TValue> TFrequencyDistribution;
 	typename Size<TStrings>::Type t = length(dataset);
 	int score = 0;
-	TType avg_m = 0;
-	for(TType i=0; i<t; ++i)
-	{
-		avg_m += length(dataset[i])-l+1;
-	}
-	avg_m = avg_m/t;
-
-	int lower_limit = (int) (ceil(t*(tcm.threshold))-1);
+	int lower_limit = (int) floor(t*(tcm.threshold)+0.5);
 
 	// compute background frequency
-	FrequencyDistribution<TValue> background;
+	TFrequencyDistribution background;
 	backgroundFrequency(background, begin(dataset), end(dataset));
 
 	// step1: initial guess (profile) from bucket
 	double epsilon = 0.1;
 	Pseudocount<TValue, CMode> pseudocount_mode_c(epsilon);
-	String< FrequencyDistribution<TValue> > profile;
+	String<TFrequencyDistribution> profile;
 	convertSetOfPatternsToProfile(profile, l_mers, pseudocount_mode_c);
 	completeProfile(profile, background);
 
 	// step2: refinement of initial profile with em: 5 trials
-	double lambda = 
-		static_cast<double>(1)/(sqrt(static_cast<double>(t))*static_cast<double>(avg_m));
+	double gamma = static_cast<double>(1)/sqrt(static_cast<double>(t));
+	double lambda = 0;
+	typename Iterator<TStrings>::Type ds_iter, ds_end;
+	ds_iter = begin(dataset);
+	ds_end = end(dataset);
+	while(ds_iter!=ds_end)
+	{
+		TPos m = (TPos)(length(*ds_iter)-l+1);
+		lambda += (gamma/((double)m));
+		++ds_iter;
+	}
+	lambda = lambda/((double)t);
+
 	double likelihood_score = 0;
-	int iterations = 5; //3
+	int iterations = 3; //3
 	while(iterations>0)
 	{
-		likelihood_score =  em(profile, begin(dataset), t, l, lambda, tcm);
+		likelihood_score = em(profile, begin(dataset), t, l, lambda, tcm);
 		--iterations;
 	}
 
-	// step3: form a guess for the planted motif by selecting from each input sequence
-	//		  the l-mer x with the largest likelihood ratio
-	TStrings multiset_T;
-	_getLMersWithTheLargestLikelihoodRatio(multiset_T, 
-										   positions, 
-										   begin(dataset), 
-										   end(dataset), 
-										   profile, 
-										   l);
-
-	////////////////////////////////////////////////////////////////////////////////////////////////
-	//further refinement: with SP Star refinement process
-	iterations = 3;
+	determineConsensusSeq(consensus_seq, profile, l);
+	ds_iter = begin(dataset);
+	typename Position<TStrings>::Type seq_nr;
 	do
 	{
-		score = 0;
-		// step4: determine consensus sequence of multiset T
-		convertSetOfPatternsToProfile(profile, multiset_T, pseudocount_mode_c);
-		determineConsensusSeq(consensus_seq, profile, l);
-
-		// step5: determine score of multiset T
-		typename Iterator< TStrings >::Type T_iter = begin(multiset_T);
-		for(; !atEnd(T_iter, multiset_T); goNext(T_iter))
+		seq_nr = t-(ds_end-ds_iter);
+		TPos m = (TPos)(length(*ds_iter)-l+1);
+		typename Iterator<TString>::Type seq_iter, seq_end, consensus_begin;
+		seq_iter = begin(*ds_iter);
+		seq_end = seq_iter+m;
+		while(seq_iter!=seq_end)
 		{
-			if(!(is_exact) &
-				(hammingDistance(begin(*T_iter), end(*T_iter),begin(consensus_seq))<=d) )
+			consensus_begin = begin(consensus_seq);
+			int hd = hammingDistance(seq_iter, seq_iter+l, consensus_begin);
+
+			if( (!is_exact) & (hd<=d) )
 			{
 				++score;
+				seq_iter = seq_end-1;
 			}
-			else if( is_exact &
-					(hammingDistance(begin(*T_iter),end(*T_iter),begin(consensus_seq))==d) )
+			else if( is_exact & (hd==d) )
 			{
 				++score;
+				seq_iter = seq_end-1;
 			}
+			++seq_iter;
 		}
-		if(score>=lower_limit)
-		{
-			break;
-		}
-		else
-		{
-			TStrings multiset_T_apostroph;
-			resize(multiset_T_apostroph, t);
-			TPositions min_dist_positions;
-			std::vector<int> min_dist_values;
-			typename Iterator<TStrings>::Type ds_iter = begin(dataset);
-			typename Iterator<TStrings>::Type ds_end = end(dataset);
-			while(ds_iter!=ds_end)
-			{
-				typename Position<TStrings>::Type seq_nr = t-(ds_end-ds_iter);
-				TPos m = static_cast<TPos>(length(*ds_iter)-l+1);
-				TPos pos_of_min = 0;
-				typename Iterator<TString>::Type seq_iter = begin(*ds_iter);
-				typename Iterator<TString>::Type seq_end = begin(*ds_iter)+m;
-				typename Iterator<TString>::Type consensus_begin = begin(consensus_seq);
-				int min = 
-					hammingDistance(seq_iter, seq_iter+l,consensus_begin);
-				++seq_iter;
-				while(seq_iter!=seq_end)
-				{
-					consensus_begin = begin(consensus_seq);
-					int hd = hammingDistance(seq_iter, seq_iter+l, consensus_begin);
-					if( hd<min )
-					{
-						min = hd;
-						pos_of_min = (seq_iter-begin(*ds_iter));
-					}
-					++seq_iter;
-				}
-				min_dist_positions.push_back(pos_of_min);
-				multiset_T_apostroph[seq_nr] = seqan::infix(*ds_iter, pos_of_min, pos_of_min+l);
-				min_dist_values.push_back(min);
-				++ds_iter;
-			}
-			int score_T_apostroph = 0;
-			if(!(is_exact))
-			{
-				score_T_apostroph = 
-					count_if(min_dist_values.begin(),min_dist_values.end(),bind2nd(std::less_equal<TType>(), d));
-			}
-			else
-			{
-				score_T_apostroph = 
-					count_if(min_dist_values.begin(),min_dist_values.end(),bind2nd(std::equal_to<TType>(), d));
-			}
-
-			if(score_T_apostroph>score)
-			{
-				score = score_T_apostroph;
-				positions.resize(t);
-				std::copy(min_dist_positions.begin(),min_dist_positions.end(),positions.begin());
-				multiset_T = multiset_T_apostroph;
-				--iterations;
-			}
-			else
-			{
-				iterations = -1;
-			}
-		}
+		++ds_iter;
 	}
-	while( (score<lower_limit) & (iterations>=0) );
+	while(ds_iter!=ds_end);
+
+	if(score<lower_limit)
+	{
+		score = 0;
+	}
 
 	return score;
 }
-
 
 //////////////////////////////////////////////////////////////////////////////
 //Subfunctions
@@ -902,7 +898,7 @@ _refinementStep(TString & consensus_seq,
 /*
 .Function.choosePositions:
 ..summary:Chooses randomly k different positions from {0,1,...,(l-1)}
-..cat:Motif Finding
+..cat:Motif Search
 ..signature:choosePositions(positions,l,k)
 ..param.positions:The set of k chosen positions.
 ...type:$set<int>$
@@ -921,6 +917,7 @@ choosePositions(TAssociativeContainer & positions, TType const & l, TType const 
 	}
 }
 
+
 //////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -938,10 +935,9 @@ choosePositions(TAssociativeContainer & positions, TType const & l, TType const 
 ..param.l:The size of the motif.
 */
 
-template<typename TStrings, typename TPositions, typename TIter, typename TType, typename TProfile>
+template<typename TStrings, typename TIter, typename TType, typename TProfile>
 void
 _getLMersWithTheLargestLikelihoodRatio(TStrings & l_mers,
-									   TPositions & positions,
 									   TIter dataset_start,
 									   TIter dataset_end,
 									   TProfile const & profile,
@@ -955,35 +951,23 @@ _getLMersWithTheLargestLikelihoodRatio(TStrings & l_mers,
 	while(dataset_start!=dataset_end)
 	{
 		typename Position<TStrings>::Type seq_nr = t-(dataset_end-dataset_start);
-		TPos2 m = static_cast<TPos2>(length(*dataset_start)-l+1);
-		double maximum =
-			_computeLikelihoodRatioOfLMer(begin(*dataset_start), begin(*dataset_start)+l, profile);
-		TPos2 pos = 0;
-		for(TPos2 i=1; i<m; ++i)
+		TPos2 m = (TPos2)(length(*dataset_start)-l+1);
+		double * likelihood_ratio_mat = new double[m];
+		typename Iterator<TString>::Type seq_iter, seq_end;
+		seq_iter = begin(*dataset_start);
+		seq_end = seq_iter+m;
+		while(seq_iter!=seq_end)
 		{
-			double likelihood_ratio = 
-				_computeLikelihoodRatioOfLMer(begin(*dataset_start)+i, begin(*dataset_start)+i+l, profile);
-			if(likelihood_ratio>maximum)
-			{
-				maximum = likelihood_ratio;
-				pos = i;
-			}
+			likelihood_ratio_mat[m-(seq_end-seq_iter)] = 
+				_computeLikelihoodRatioOfLMer(seq_iter, seq_iter+l, profile);
+			++seq_iter;
 		}
-		positions.push_back(pos);
-		++dataset_start;
-	}
 
-	dataset_start = dataset_start-t;
-	TPositions::iterator positions_iter, positions_end;
-	positions_iter = positions.begin();
-	positions_end = positions.end();
-	TPos1 index = 0;
-	while(positions_iter!=positions_end)
-	{
-		TString l_mer = infix(*dataset_start, *positions_iter, (*positions_iter)+l);
-		l_mers[index] = l_mer;
-		++positions_iter;
-		++index;
+		TPos2 max_pos = 
+			(std::max_element(likelihood_ratio_mat, likelihood_ratio_mat+m)-likelihood_ratio_mat);
+		l_mers[seq_nr] = infix(*dataset_start, max_pos, max_pos+l);
+
+		delete[] likelihood_ratio_mat;
 		++dataset_start;
 	}
 }
@@ -1024,7 +1008,8 @@ _computeLikelihoodRatioOfLMer(TStrIter l_mer_begin,
 							  TStrIter l_mer_end,
 							  TProfile const & profile)
 {
-	double result = static_cast<double>(0);
+	double result = 0;
+	unsigned int l = (unsigned int)(l_mer_end-l_mer_begin);
 	typedef typename Position<TProfile>::Type TPos;
 	TProfile log_profile = profile;
 	for(TPos i=0; i<length(log_profile); ++i)
@@ -1032,15 +1017,13 @@ _computeLikelihoodRatioOfLMer(TStrIter l_mer_begin,
 		logarithmize(log_profile[i]);
 	}
 
-	double motif_component = static_cast<double>(0);
-	double backgr_component = static_cast<double>(0);
-	unsigned int pos = 0;
+	double motif_component = 0;
+	double backgr_component = 0;
 	while(l_mer_begin!=l_mer_end)
 	{
-		motif_component += log_profile[pos+1][(int)*l_mer_begin];
+		motif_component += log_profile[l-(l_mer_end-l_mer_begin)+1][(int)*l_mer_begin];
 		backgr_component += log_profile[0][(int)*l_mer_begin];
 		++l_mer_begin;
-		++pos;
 	}
 	result = motif_component-backgr_component;
 
@@ -1064,9 +1047,10 @@ double
 _computeLikelihoodRatioOfLMers(TStrings const & l_mers, 
 							   TProfile const & profile)
 {
-	double score = static_cast<double>(1);
+	typedef typename Position<TStrings>::Type TPos;
+	double score = 1;
 	typename Size<TStrings>::Type num_of_l_mers = length(l_mers);
-	for(typename Position<TStrings>::Type i=0; i<num_of_l_mers; ++i)
+	for(TPos i=0; i<num_of_l_mers; ++i)
 	{
 		score *= _computeLikelihoodRatioOfLMer(begin(l_mers[i]), end(l_mers[i]), profile);
 	}
@@ -1079,14 +1063,14 @@ _computeLikelihoodRatioOfLMers(TStrings const & l_mers,
 /**
 .Function.determineConsensusSeq:
 ..summary:Determines the consensus pattern of a given profile.
-..cat:Motif Finding
+..cat:Motif Search
 ..signature:determineConsensusSeq(consensus_seq,profile,l)
 ..param.consensus_seq:The consensus pattern.
 ...type:Class.String
 ...type:Shortcut.DnaString
 ...type:Shortcut.Peptide
-..param.profile:The  $profile$ object which is a set of @Class.FrequencyDistribution|frequency distributions@.
-...remarks:$profile$ is of type $String<$ @Class.FrequencyDistribution@ $>$
+..param.profile:The  @Shortcut.Profile@ object which is a set of @Class.FrequencyDistribution|frequency distributions@.
+...type:Shortcut.Profile
 ..param.l:The size of the motif.
 */
 
@@ -1123,7 +1107,7 @@ determineConsensusSeq(TString & consensus_seq,
 /*
 .Function.displayResult:
 ..summary:Displays the consensus pattern of the found motif candidate.
-..cat:Motif Finding
+..cat:Motif Search
 ..signature:displayResult(motif_finder)
 ..param.motif_finder:The @Class.MotifFinder@ object.
 ...type:Class.MotifFinder
