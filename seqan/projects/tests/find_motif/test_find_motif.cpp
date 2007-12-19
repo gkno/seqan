@@ -3,10 +3,7 @@
 #define SEQAN_DEBUG
 #define SEQAN_TEST
 
-#define TEST_PATH "/projects/tests/find_motif/"
-
 #include <seqan/find_motif.h>
-#include <seqan/align.h>
 
 using namespace seqan;
 
