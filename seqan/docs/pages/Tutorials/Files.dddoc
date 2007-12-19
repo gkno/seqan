@@ -6,10 +6,8 @@
 ..contents
 
 
-..section:# File Format
 
-
-..subsection:#.# Raw Data
+..section:#.# Raw Data
 ..text:SeqAn supports the input and output of files in different @Tag.File Format|file formats@.
 The most simple file format is $Raw$ that is used to load a file "as is" into a string or vice versa, e.g.:
 ..code:
@@ -35,7 +33,7 @@ or a C-style stream (i.e. $FILE *$), or a @Class.File|SeqAn $File$ object@ (see 
 Note that the files should always be opened in binary mode.
 
 
-..subsection:#.# File Formats for Bioinformatics
+..section:#.# File Formats for Bioinformatics
 ..text:Apart from $Raw$, SeqAn offers @Tag.File Format|other file formats@ especially for bioinformatics, line $Fasta$, $EMBL$, or $Genbank$.
 These file formats consist of one or more data records. 
 For loading all records repeat calling @Function.read@, for example:
@@ -83,7 +81,7 @@ fclose(cstrm);
 ACGT
 
 
-..subsection:#.# File Reader Strings
+..section:#.# File Reader Strings
 ..text:The easiest way for a read-only access of sequence data stored in a file is a @Spec.File Reader String|file reader string@.
 A file reader string implements the @Concept.Container|container concept@, i.e. it implements common functions like @Function.length@ or @Function.begin@.
 It has minimal memory consumption, because each part of the sequence data is loaded not before it is needed.
@@ -108,7 +106,4 @@ String<Dna, FileReader<Embl> > fr(cstrm);   //reads sequence data of second reco
 fclose(cstrm);
 
 
-
-..section:# SeqAn File Objects
-..text:(more information about @Class.File@)
 

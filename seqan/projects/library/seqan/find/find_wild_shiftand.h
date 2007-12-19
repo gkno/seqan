@@ -20,7 +20,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TNeedle:The needle type.
 ...type:Class.String
 ..remarks.text:The supported wildcards are $*$ (zero or more occurence), $+$ (one or more occurences), $?$ (optional character), $.$ 
-(every character), charachter classes (e.g. $[a-z]$) and bounded repeats (e.g. ${n,m}$).
+(every character), character classes (e.g. $[a-z]$) and bounded repeats (e.g. ${n,m}$).
 ..remarks.text:After the find-Method returned the Finder will point to the last position of the occurence
 ..remarks.text:We encourage the user to intialize the Pattern with a $String<char>$ (@Function.setHost@ or the C'tor).
 If you use for instance $String <Dna>$ instead you won't be able to specify wildcards

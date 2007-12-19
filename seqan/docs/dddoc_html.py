@@ -630,7 +630,7 @@ def printIndexpageMembers(fl, data):
                 s = dddoc.DATA["globals.indexes"][data.name(0)].text()
                 if s: fl.write('<div class=section_headline>' + s + '</div>')
                 
-            fl.write('<table class=value_tab cellspacing=0 cellpadding=0>')
+            fl.write('<table class=indexpage_members_tab cellspacing=0 cellpadding=0>')
             
             entry_keys = entries[key].keys();
             entry_keys.sort();

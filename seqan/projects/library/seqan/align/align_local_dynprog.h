@@ -584,7 +584,7 @@ SEQAN_CHECKPOINT
 template <typename TScoreValue>
 typename LocalAlignmentFinder<TScoreValue>::TMatrixPosition
 get_next_best_end_position(LocalAlignmentFinder<TScoreValue> & sw ,
-				 TScoreValue & cutoff)
+				 TScoreValue cutoff)
 {
 SEQAN_CHECKPOINT
 
@@ -627,14 +627,15 @@ SEQAN_CHECKPOINT
 ...type:Class.LocalAlignmentFinder
 ..param.score:The score values to be used for computing the alignment.
 ...type:Class.Score
-..param.cutoff:Alignments with scores < cutoff will be discarded (starts being useful when
-..param.cutoff:not only the best, but also sub-optimal local aligments are of interest). 
-..param.cutoff:Low cut off scores cause a higher runtime.
+..param.cutoff:A score limit.
+...remarks:Alignments with scores < cutoff will be discarded (starts being useful when
+	not only the best, but also sub-optimal local aligments are of interest). 
+	Low cut off scores cause a higher runtime.
 ..returns:The score value of the best scoring local alignment or 0 if there was no alignment with score > cutoff.
-..returns:The corresponding alignment can be found in align.
-..remarks:So far only the case gap open = 0 is allowed.
+...param.align:The corresponding alignment.
+..remarks:So far, only linear gap costs are allowed.
 ..see:Function.smithWatermanGetNext
-..see:Function.needlemanWunsch
+..see:Function.localAlignment
 */
 ///////////////////////////////////////////////////////////////////////////////////
 //wrapper that computes the matrix and does the backtracking for the best alignment
@@ -643,7 +644,7 @@ TScoreValue
 smithWaterman(Align<TSource, TSpec> & align_,
 			  LocalAlignmentFinder<TScoreValue> & sw_finder ,
 			  Score<TScoreValue, Simple> const & score_, 
-			  TScoreValue & cutoff)
+			  TScoreValue cutoff)
 {
 SEQAN_CHECKPOINT
 	clearGaps(row(align_,0));
@@ -688,14 +689,14 @@ in previously found alignment to be used again.
 ..returns:The score value of the next best local alignment or 0 if there was no alignment with score > cutoff.
 ..returns:The corresponding alignment can be found in align.
 ..see:Function.smithWaterman
-..see:Function.needlemanWunsch
+..see:Function.localAlignment
 */
 template <typename TSource, typename TSpec, typename TScoreValue>
 TScoreValue
 smithWatermanGetNext(Align<TSource, TSpec> & align_,
-			   LocalAlignmentFinder<TScoreValue> & sw_finder ,
-				 Score<TScoreValue, Simple> const & score_, 
-				 TScoreValue & cutoff)
+					 LocalAlignmentFinder<TScoreValue> & sw_finder ,
+					 Score<TScoreValue, Simple> const & score_, 
+					 TScoreValue cutoff)
 {	
 SEQAN_CHECKPOINT
 
@@ -717,6 +718,21 @@ SEQAN_CHECKPOINT
 	
 	return getValue(sw_finder.matrix_,next_best_end);
 }
+
+//////////////////////////////////////////////////////////////////////////////
+//interface for Function.localAlignment
+
+template <typename TSource, typename TSpec, typename TScoreValue>
+inline TScoreValue
+localAlignment(Align<TSource, TSpec> & align_,
+			   Score<TScoreValue, Simple> const & score_, 
+			   SmithWaterman)
+{
+	LocalAlignmentFinder<TScoreValue> sw_finder(align_);
+
+	return smithWaterman(align_, sw_finder, score_, 0);
+}
+
 
 //////////////////////////////////////////////////////////////////////////////
 

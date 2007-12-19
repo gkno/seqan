@@ -248,7 +248,7 @@ void testGotohAlign()
 	assignSource(row(ali, 1), str1);
 
 	Score<int> score_type = Score<int>(1,-1,-1,-1);
-	int score = needlemanWunsch(ali,score_type);
+	int score = globalAlignment(ali,score_type);
 
 	SEQAN_TASSERT(score == 2);
 	SEQAN_TASSERT(row(ali,0) == "at-g-t" );
@@ -257,7 +257,7 @@ void testGotohAlign()
 	clearGaps(row(ali,1));
 
 	Score<int> score_type1 = Score<int>(1,-1,-1,-3) ;
-	score = needlemanWunsch(ali,score_type1);
+	score = globalAlignment(ali,score_type1);
 
 	SEQAN_TASSERT(score == -2);
 	SEQAN_TASSERT(row(ali,0) == "atg--t" );
@@ -283,7 +283,7 @@ void Main_TestAlign()
 	assignSource(row(a, 0), "ACATTTTCACTTTTTTTA");
 	assignSource(row(a, 1), "AGGGGGGGCACACA");
 
-	int score = needlemanWunsch(a, SimpleScore() );
+	int score = globalAlignment(a, SimpleScore() );
 
 	cout << a;
 */

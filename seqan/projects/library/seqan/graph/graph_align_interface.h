@@ -30,26 +30,30 @@ namespace SEQAN_NAMESPACE_MAIN
 .Function.globalAlignment:
 ..summary:Computes the best global alignment of the two sequences.
 ..cat:Alignments
-..signature:
- globalAlignment(g, score_type, Gotoh());
-globalAlignment( [strSet | graph | align, strSet], score [, align_config], tag)
-..param.strSet:A string set with 2 sequences.
+..signature:globalAlignment(align, score [, align_config], tag)
+..signature:globalAlignment(result, strings, score [, align_config], tag)
+..param.align:An alignment data structure containing two sequences.
+...type:Spec.Alignment Graph
+...type:Class.Align
+..param.result:A data structure that gets the result of the alignment procedure, 
+ e.g., a file stream, or std::cout for a textual alignment, or a FragmentString for storing all the matches.
+..param.strings:A string set with that contains two sequences.
 ...type:Class.StringSet
-..param.graph:An alignment graph containing 2 sequences.
-...type:Class.Graph Alignment
-..param.align:Different alignment data structures, e.g., a file stream or std::cout for a textual alignment or a FragmentString for all the matches.
 ..param.score:The score values to be used for computing the alignment.
 ...type:Class.Score
-..param.align_config:Alignment configuration options.
+..param.align_config:Alignment configuration options. (optional)
 ...type:Class.AlignConfig
 ...remarks:The class AlignConfig has four boolean parameters, i.e., TTop, TLeft, TRight, and TBottom.
 If TTop is true the first row of the DP Matrix is initialized with 0's. If TLeft is true the first
 column is initialized with 0's. If TRight is true, the maximum is search in the last column. If TBottom
 is true, the maximum is searched in the last row. All options can be combined in all possible ways.
-The Hirschberg algorithm currently doesn't support this kind of configuration.
+....text:This feature is not yet supported for all alignment algorithms (e.g. Hirschberg).
 ..param.tag:A tag indicating the alignment algorithm to use
-...remarks:NeedlemanWunsch, Gotoh, or Hirschberg.
-..returns:The maximum score of the best global alignment.
+...type:Tag.Global Alignment Algorithms
+..returns:The maximum score of an global alignment between two sequences given in $align$ or $strings$.
+...param.align:An optimal global alignment.
+....remarks:If there was an alignment stored in $align$ before $globalAlignment$ was called, it will be replaced.
+...param.result:An optimal global alignment.
 */
 template<typename TAlign, typename TStringSet, typename TScoreValue, typename TSpec, typename TTag>
 inline TScoreValue
@@ -154,7 +158,7 @@ localAlignment(file, strSet, score, tag)
 ...type:Class.StringSet
 ...remarks: If an alignment graph is used that graph must contain a string set with two sequences
 ..param.graph:The alignment graph having 2 sequences.
-...type:Class.Graph Alignment
+...type:Spec.Alignment Graph
 ..param.file:A file stream or std::cout to write a textual alignment
 ..param.score:The score values to be used for computing the alignment.
 ...type:Class.Score

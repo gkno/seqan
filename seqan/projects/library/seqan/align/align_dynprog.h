@@ -28,10 +28,10 @@ namespace SEQAN_NAMESPACE_MAIN
 //needleman wunsch alignment
 template <typename TScoreValue, typename TMatrixSpec, typename TString>
 TScoreValue
-needleman_wunsch(Matrix<TScoreValue, TMatrixSpec> & matrix_,
-				 TString const & str1_,
-				 TString const & str2_,
-				 Score<TScoreValue, Simple> const & score_)
+_needleman_wunsch(Matrix<TScoreValue, TMatrixSpec> & matrix_,
+				  TString const & str1_,
+				  TString const & str2_,
+				  Score<TScoreValue, Simple> const & score_)
 {
 SEQAN_CHECKPOINT
 
@@ -129,9 +129,9 @@ SEQAN_CHECKPOINT
 //traceback through needleman wunsch matrix
 template <typename TTargetSource, typename TTargetSpec, typename TScoreValue, typename TSourceSpec>
 void
-needleman_wunsch_trace(Align<TTargetSource, TTargetSpec> & target_,
-					   Iter< Matrix<TScoreValue, TSourceSpec>, PositionIterator > source_,
-					   Score<TScoreValue, Simple> const & score_)
+_needleman_wunsch_trace(Align<TTargetSource, TTargetSpec> & target_,
+						Iter< Matrix<TScoreValue, TSourceSpec>, PositionIterator > source_,
+						Score<TScoreValue, Simple> const & score_)
 {
 SEQAN_CHECKPOINT
 	typedef Iter<Matrix<TScoreValue, TSourceSpec>, PositionIterator > TMatrixIterator;
@@ -220,12 +220,12 @@ SEQAN_CHECKPOINT
 //Global alignment with affine gap costs
 template <typename TScoreValue, typename TMatrixSpec, typename TString>
 TScoreValue
-gotoh(Matrix<TScoreValue, TMatrixSpec> & diag_matrix_,
-				 Matrix<TScoreValue, TMatrixSpec> & vert_matrix_,
-				 Matrix<TScoreValue, TMatrixSpec> & hori_matrix_,
-				 TString const & str1_,
-				 TString const & str2_,
-				 Score<TScoreValue, Simple> const & score_)
+_gotoh(Matrix<TScoreValue, TMatrixSpec> & diag_matrix_,
+	   Matrix<TScoreValue, TMatrixSpec> & vert_matrix_,
+	   Matrix<TScoreValue, TMatrixSpec> & hori_matrix_,
+	   TString const & str1_,
+	   TString const & str2_,
+	   Score<TScoreValue, Simple> const & score_)
 {
 SEQAN_CHECKPOINT
 
@@ -365,11 +365,11 @@ SEQAN_CHECKPOINT
 //gotoh trace
 template <typename TTargetSource, typename TTargetSpec, typename TScoreValue, typename TMatrixSpec>
 void
-gotoh_trace(Align<TTargetSource, TTargetSpec> & target_,
-			Matrix<TScoreValue, TMatrixSpec> & diag_matrix_,
-				 Matrix<TScoreValue, TMatrixSpec> & vert_matrix_,
-				 Matrix<TScoreValue, TMatrixSpec> & hori_matrix_,
-				   Score<TScoreValue, Simple> const & score_)
+_gotoh_trace(Align<TTargetSource, TTargetSpec> & target_,
+			 Matrix<TScoreValue, TMatrixSpec> & diag_matrix_,
+			 Matrix<TScoreValue, TMatrixSpec> & vert_matrix_,
+			 Matrix<TScoreValue, TMatrixSpec> & hori_matrix_,
+			 Score<TScoreValue, Simple> const & score_)
 {
 SEQAN_CHECKPOINT
 	typedef Iter<Matrix<TScoreValue, TMatrixSpec>, PositionIterator > TMatrixIterator;
@@ -484,7 +484,7 @@ SEQAN_CHECKPOINT
 
 ///////////////////////////////////////////////////////////////////////////
 //if gap open == 0 regular needleman wunsch alignment, else gotoh alignment
-/**
+/*DISABLED
 .Function.needlemanWunsch:
 ..summary:Computes the best global alignment of the (two) sequences given in align according to the score values given in score.
 ..cat:Alignments
@@ -500,8 +500,27 @@ SEQAN_CHECKPOINT
 */
 template <typename TSource, typename TSpec, typename TScoreValue>
 TScoreValue
-needlemanWunsch(Align<TSource, TSpec> & align_,
+globalAlignment(Align<TSource, TSpec> & align_,
 				Score<TScoreValue, Simple> const & score_)
+{
+SEQAN_CHECKPOINT
+
+	if(scoreGapOpen(score_)==scoreGapExtend(score_))
+	{//linear gap costs
+		return globalAlignment(align_, score_, NeedlemanWunsch());
+	}
+	else
+	{//affine gap costs
+		return globalAlignment(align_, score_, Gotoh());
+	}
+}
+
+
+template <typename TSource, typename TSpec, typename TScoreValue>
+TScoreValue
+globalAlignment(Align<TSource, TSpec> & align_,
+				Score<TScoreValue, Simple> const & score_,
+				NeedlemanWunsch)
 {
 SEQAN_CHECKPOINT
 	clearGaps(row(align_,0));
@@ -509,23 +528,33 @@ SEQAN_CHECKPOINT
 
 	TScoreValue ret;
 
-	if(scoreGapOpen(score_)==scoreGapExtend(score_))
-	{//linear gap costs
-		Matrix<TScoreValue> matr;
-	    ret = needleman_wunsch(matr, sourceSegment(row(align_, 0)), sourceSegment(row(align_, 1)), score_);
-		needleman_wunsch_trace(align_, begin(matr), score_);
-	}
-	else
-	{//affine gap costs
-		Matrix<TScoreValue> d_matr;
-		Matrix<TScoreValue> v_matr;
-		Matrix<TScoreValue> h_matr;
-		ret = gotoh(d_matr, v_matr, h_matr, sourceSegment(row(align_, 0)), sourceSegment(row(align_, 1)), score_);
-		gotoh_trace(align_, d_matr, v_matr, h_matr, score_);	
-	}
+	Matrix<TScoreValue> matr;
+	ret = _needleman_wunsch(matr, sourceSegment(row(align_, 0)), sourceSegment(row(align_, 1)), score_);
+	_needleman_wunsch_trace(align_, begin(matr), score_);
+
 	return ret;
 }
 
+template <typename TSource, typename TSpec, typename TScoreValue>
+TScoreValue
+globalAlignment(Align<TSource, TSpec> & align_,
+				Score<TScoreValue, Simple> const & score_,
+				Gotoh)
+{
+SEQAN_CHECKPOINT
+	clearGaps(row(align_,0));
+	clearGaps(row(align_,1));
+
+	TScoreValue ret;
+
+	Matrix<TScoreValue> d_matr;
+	Matrix<TScoreValue> v_matr;
+	Matrix<TScoreValue> h_matr;
+	ret = _gotoh(d_matr, v_matr, h_matr, sourceSegment(row(align_, 0)), sourceSegment(row(align_, 1)), score_);
+	_gotoh_trace(align_, d_matr, v_matr, h_matr, score_);	
+
+	return ret;
+}
 
 
 //////////////////////////////////////////////////////////////////////////////

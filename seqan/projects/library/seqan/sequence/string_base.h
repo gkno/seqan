@@ -1086,7 +1086,7 @@ SEQAN_CHECKPOINT
 		typename Position<T>::Type me_length = length(me);
 		if (capacity(me) <= me_length)
 		{
-			typename Value<T>::Type temp_copy = _value; //temp copy because resize could invalidate _value
+			typename Value<T>::Type temp_copy(_value); //temp copy because resize could invalidate _value
 			typename Size<T>::Type new_length = resize(me, me_length + 1, TExpand());
 			if (me_length < new_length)
 			{

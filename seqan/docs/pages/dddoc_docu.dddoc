@@ -26,6 +26,8 @@ documentation is built. In order to build only the pages residing under "docs" o
 Note that indexes and menus are only created when the entire documentation is built, or if "indexonly" is specified instead of a real module name.
 ...text:
 SeqAn is released with the complete documentation and the release does not include the dddoc python scripts.
+...text:
+Files that contain the string "SEQAN_NO_DDDOC" are not scanned for documentation, i.e. all documentation in the file is ignored. 
 
 ...section:# Notation
 ...text:

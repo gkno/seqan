@@ -27,6 +27,13 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Shortcut.Blosum62:
+..cat:Scoring
+..summary:Blosum62 scoring matrix.
+..signature:Blosum62
+..remarks.text:This class is a shortcut for @Spec.Score Matrix|Score<int, ScoreMatrix<AminoAcid, _Blosum62> >@.
+*/
 
 struct _Blosum62{};
 typedef Score<int, ScoreMatrix<AminoAcid, _Blosum62> > Blosum62;

@@ -280,7 +280,7 @@ A:hover, A:link, A:visited
     color: #2b2b2b;
 }
 
-.value_tab
+.value_tab, .indexpage_members_tab
 {
     margin-top: 4px;
     margin-left: 12px;
@@ -315,6 +315,11 @@ A:hover, A:link, A:visited
     padding-top: 2px;
     padding-left: 6px;
     width:100%
+}
+
+.indexpage_members_tab
+{
+    margin-left:22px;
 }
 
 .table_explicite

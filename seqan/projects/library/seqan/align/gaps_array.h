@@ -73,10 +73,21 @@ SEQAN_CHECKPOINT
 		_init_to_resize(*this, length(source_));
 	}
 
+	template <typename TSource2>
+	Gaps(TSource2 const & source_):
+		data_source_begin_position(beginPosition(source_)),
+		data_source_end_position(endPosition(source_))
+	{
+SEQAN_CHECKPOINT
+		data_source = source_;
+		_init_to_resize(*this, length(source_));
+	}
+
 	Gaps(Gaps const & other_):
 		data_arr(other_.data_arr),
 		data_end_position(other_.data_end_position),
-		data_source(value(other_.data_source)),
+//		data_source(value(other_.data_source)), //variant: setValue => Align benutzen gemeinsame Sources
+		data_source(other_.data_source),		//variant: assignValue => Align kopieren Sources
 		data_source_begin_position(other_.data_source_begin_position),
 		data_source_end_position(other_.data_source_end_position)
 	{

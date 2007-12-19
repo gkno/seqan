@@ -136,7 +136,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 #endif
-/**
+/*DISABLED
 .Function.align_myers:
 ..cat:Alignment
 ..summary:(Name of the Function is going to be changed in future)Computes the global Alignmentscore for the passed Alignment-Container with an Edit-Distance Scoring Scheme
@@ -150,8 +150,9 @@ as proposed by Hyrroe to compute edit distance. To compute a complete Alignment 
 */
 template <typename TSource, typename TSpec, typename TScoreValue>
 TScoreValue
-align_myers(Align<TSource, TSpec> & align_,
-				Score<TScoreValue, Simple> const &)
+globalAlignment(Align<TSource, TSpec> & align_,
+				Score<TScoreValue, Simple> const &,
+				MyersBitVector)
 {
 	clearGaps(row(align_,0));
 	clearGaps(row(align_,1));
@@ -336,7 +337,7 @@ align_myers(Align<TSource, TSpec> & align_,
 
 } // end align_myers_score
 
-/**
+/*DISABLED
 .Function.hirschberg_myers:
 ..cat:Alignment
 ..summary:Computes the global Alignment for the passed Alignment-Container with an Edit-Distance Scoring Scheme.
@@ -351,8 +352,9 @@ the Algorithm proposed by Hirschberg to compute Sequence Alignments with linear 
 
 template <typename TSource, typename TSpec, typename TScoreValue>
 TScoreValue
-hirschberg_myers(Align<TSource, TSpec> & align_,
-				Score<TScoreValue, Simple> const &)
+globalAlignment(Align<TSource, TSpec> & align_,
+				Score<TScoreValue, Simple> const &,
+				MyersHirschberg)
 {
 SEQAN_CHECKPOINT
 	

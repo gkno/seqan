@@ -219,6 +219,12 @@ def loadCPPFile(filename):
     
     ret = []
     
+    #test for SEQAN_NO_DDDOC
+    for line in lines:
+        if line.find("SEQAN_NO_DDDOC") >= 0:
+            return ret;
+    
+    
     incomment = False
     innextcomment = False
     inextract = False

@@ -34,7 +34,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..signature:_HirschbergSet()
 ..signature:_HirschbergSet(begin1,end1,begin2,end2)
 ..remarks:This class is used to define the part of the sequences, that need to be inspected during in the alignment. It is
-used of @Function.hirschberg_myers@ and @Function.hirschberg@ 
+used of @Tag.MyersHirschberg@ and @Tag.Hirschberg@ 
 ..memfunc:Internal._begin1
 ..memfunc:Internal._begin2
 ..memfunc:Internal._setBegin1

@@ -111,11 +111,12 @@ struct Row<T const> {
 ...metafunction:Metafunction.Source
 ..param.TSpec:The specializing type.
 ...metafunction:Metafunction.Spec
+...default:@Spec.ArrayGaps@
 ..remarks:The default implementation of $Align$ stores the alignment in a set of @Class.Gaps.Gaps<TSource.TSpec>@ objects.
  Hence, the default implementation is row-based, so it will be faster to access the alignment row-wise than column-wise.
 */
 
-template <typename TSource, typename TSpec>
+template <typename TSource, typename TSpec = ArrayGaps>
 class Align
 {
 public:

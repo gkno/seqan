@@ -1,5 +1,13 @@
 // Projekt, mit dem die Demos getestet werden koennen
 //*
+#define main runAlignment
+#include "../../library/demos/alignment.cpp"
+#undef main
+
+#define main runAlignmentLocal
+#include "../../library/demos/alignment_local.cpp"
+#undef main
+
 #define main runAllocator
 #include "../../library/demos/allocator.cpp"
 #undef main
@@ -23,6 +31,30 @@
 #undef main
 
 
+#define main runFileFormat
+#include "../../library/demos/file_format.cpp"
+#undef main
+
+
+#define main runFind
+#include "../../library/demos/find.cpp"
+#undef main
+
+#define main runFindExact
+#include "../../library/demos/find_exact.cpp"
+#undef main
+
+#define main runFindApprox
+#include "../../library/demos/find_approx.cpp"
+#undef main
+
+#define main runFindWild
+#include "../../library/demos/find_wild.cpp"
+#undef main
+
+
+//*/
+
 #define main runModifierModReverse
 #include "../../library/demos/modifier_modreverse.cpp"
 #undef main
@@ -34,7 +66,6 @@
 #define main runModifierNested
 #include "../../library/demos/modifier_nested.cpp"
 #undef main
-
 
 
 #define main runIndexSA
@@ -62,23 +93,7 @@
 #undef main
 
 
-#define main runFind
-#include "../../library/demos/find.cpp"
-#undef main
-
-#define main runFindExact
-#include "../../library/demos/find_exact.cpp"
-#undef main
-
-#define main runFindApprox
-#include "../../library/demos/find_approx.cpp"
-#undef main
-
-#define main runFileFormat
-#include "../../library/demos/file_format.cpp"
-#undef main
-
-//*/
+//*
 
 #define main runGraph0
 #include "../../library/demos/graph_algo_bfs.cpp"
@@ -191,11 +206,16 @@ int main(int argc, const char *argv[])
 	runIterator();
 	runRootedIterator();
 	runString1();
+	runFileFormat();
 
 	runFind();
 	runFindExact();
 	runFindApprox();
-	runFileFormat();
+	runFindWild();
+
+	runAlignment();
+	runAlignmentLocal();
+
 
 	runModifierModReverse();
 	runModifierModView();
@@ -208,7 +228,7 @@ int main(int argc, const char *argv[])
 	runIndexMaxRepeats();
 	runIndexMummy(argc, argv);
 
-//*/
+//*
 	runGraph0();runGraph1();runGraph2();runGraph3();runGraph4();runGraph5();
 	runGraph6();runGraph7();runGraph8();runGraph9();runGraph10();runGraph11();
 	runGraph12();runGraph13();runGraph14();runGraph15();runGraph16();runGraph17();

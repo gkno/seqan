@@ -4,6 +4,7 @@
 ..summary:Installation of SeqAn and compiling example programs.
 
 .Page.Installation.description
+..contents
 ..section:# Installation
 ..subsection:#.# Linux, Darwin, Solaris
 ..text:
@@ -20,17 +21,16 @@ weese@tanne:~/seqan$ unzip path_to_SeqAn_XY.zip
 After that, you have to copy the platform-specific header (for Unix-like systems with an installed GCC compiler)
 $platform_linux_gcc.h$ to $platform.h$ with the following:
 ..output:
-weese@tanne:~/seqan$ cp library/seqan/platform_linux_gcc.h library/seqan/platform.h
+weese@tanne:~/seqan$ cp seqan/platform_linux_gcc.h seqan/platform.h
 
 
 ..subsection:#.# Windows
 ..text:
 SeqAn was successfully tested under Windows using MS Visual Studio 2003 or 2005 as well as 
 MinGW (Minimalist GNU for Windows) compiler.
-To install SeqAn, you have to download a current snapshot from @http://www.seqan.de@ and extract the file
-to (?). 
+To install SeqAn, you have to download a current snapshot from @http://www.seqan.de@ and extract the files.
 ..text:
-If you are working with Visual Studio, copy and rename the file $platform_windows_vs.h$ to $platform.h$ in the subfolder $library\seqan$.
+If you are working with Visual Studio, copy and rename the file $platform_windows_vs.h$ to $platform.h$ in the subfolder $seqan$.
 For MinGW copy and rename the file $platform_windows_mingw.h$ to $platform.h$.
 
 ..section:# Using Demos
@@ -58,15 +58,31 @@ to select "$iterator.cpp$" for compiling.
 ..section:# Compiling
 ..text:
 As a pure template library, SeqAn solely consists of header files.
-To use SeqAn, you only have to add the path to the $library$ folder of the installed snapshot to the compiler's include path.
+To use SeqAn, you only have to add the path to the SeqAn installation folder of the installed snapshot to the compiler's include path.
 
 ..subsection:#.# Linux, Darwin, Solaris, MinGW
 ..text:
+The SeqAn installation path is added as include path by adding the compiler argument '-I'.
 To compile your own projects using SeqAn, you can use the Makefile in the $demos$ folder as a 
 starting point or write your own.
+..text:
 By some (yet unknown) reasons, some versions of the GCC compiler needs the extra flag $-pedantic$ to compile flawlessly.
 For a large file (>4GB) access on 32-bit operating systems you should add $-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64$ to the compiler.
 Under GNU/Linux it is also necessary to link against the runtime library with the additional linker switch $-lrt$.
 
 ..subsection:#.# MS Visual C++ Projects
-..text:
+..text:To add the SeqAn installation folder to the include path for a specific VC++-project, do the following:
+..text:1. Open the projects property page by a right click on the project in the solution explorer and select "Properties".
+..text:2. In the "Configurations" box select "All Configurations".
+..text:3. In the section "Configurations Properties" - "C/C++" - "General" add the SeqAn installation path to the field "Additional Include Directories".
+..image:vc++_property_page|Adding the SeqAn installation path to the include path of a Visual Studio project.
+
+..text:Optionally, you could also add the SeqAn installation folder to the include path for all VC++-projects:
+..text:1. Open the option panel from the menu bar by selecting "Tools" - "Options".
+..text:2. Select section "Projects" - "VC++ Directories".
+..text:3. In the "Show directories for" box select "Include files".
+..text:4. Click the "New Line" button and insert the SeqAn installation path.
+..image:vc++_option_page|Adding the SeqAn installation path to the include path of all Visual Studio projects.
+
+
+
