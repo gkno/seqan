@@ -1,7 +1,7 @@
 #define SEQAN_DEBUG
 #define SEQAN_TEST
 
-#include "seqan/find_motif.h"
+#include <seqan/find_motif.h>
 
 using namespace seqan;
 
