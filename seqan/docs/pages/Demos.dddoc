@@ -645,3 +645,109 @@ weese@tanne:~/seqan/demos$
 ..demofor:Function.readMeta
 ..demofor:Spec.FileReader
 .
+
+
+.Demo.Motif Finder:
+..cat:Motif Search
+..summary:Examples for how to start a motif search using SeqAn's Motif Finder.
+..file:../projects/library/demos/find_motif.cpp
+..output
+...code:
+projects/tests/find_motif/test_find_motif.cpp(10): TEST BEGIN
+[0]: AGCC
+
+[0]: AAGC 
+[1]: ACAG
+[2]: AGAC
+[3]: AGCC
+[4]: AGGA
+[5]: AGTA
+[6]: CAGA
+[7]: CAGG
+[8]: CCAG
+[9]: CGCA
+[10]: CGGC
+[11]: GCAG
+[12]: TCAG
+[13]: TGCA
+
+[0]: AAGC
+[1]: AAGT
+[2]: AATC
+[3]: ACAG
+[4]: ACGC
+[5]: ACTC
+[6]: AGAC
+[7]: AGCA
+[8]: AGCC
+[9]: AGGA
+[10]: AGGC
+[11]: AGGG
+[12]: AGGT
+[13]: AGTA
+[14]: AGTC
+[15]: AGTG
+[16]: AGTT
+[17]: ATGC
+[18]: ATTC
+[19]: CAAT
+[20]: CACT
+[21]: CAGA
+[22]: CAGC
+[23]: CAGG
+[24]: CATT
+[25]: CCAG
+[26]: CCGT
+[27]: CGCA
+[28]: CGGC
+[29]: CGGT
+[30]: CGTC
+[31]: CTGT
+[32]: GAAG
+[33]: GACA
+[34]: GAGT
+[35]: GCAA
+[36]: GCAC
+[37]: GCAG
+[38]: GCAT
+[39]: GCCA
+[40]: GCCG
+[41]: GCGG
+[42]: GCTG
+[43]: GGAA
+[44]: GGAG
+[45]: GGCC
+[46]: GGCG
+[47]: GGCT
+[48]: GGGA
+[49]: GGGC
+[50]: GGTA
+[51]: GGTC
+[52]: GTAG
+[53]: GTCA
+[54]: TAAG
+[55]: TAGT
+[56]: TCAA
+[57]: TCAC
+[58]: TCAG
+[59]: TCAT
+[60]: TCCG
+[61]: TCGG
+[62]: TCTG
+[63]: TGAG
+[64]: TGCA
+[65]: TGGC
+[66]: TGTC
+[67]: TTAG
+
+AGCC
+
+AGCC
+
+TCAG
+
+TCAG
+projects/tests/find_motif/test_find_motif.cpp(82): TEST END
+..demofor:Class.MotifFinder
+..demofor:Function.findMotif
+.
