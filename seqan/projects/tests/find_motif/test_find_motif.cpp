@@ -59,13 +59,11 @@ void Test_approximationAlgorithms()
     MotifFinder<Dna, Projection> motif_finder3(t,l,m,d,is_exact);
 	findMotif(motif_finder3, dataset1, OMOPS());
 	displayResult(motif_finder3);
-	//SEQAN_TASSERT(motif_finder3.consensus_pattern=="AGCC");
 
 	//Application of ePatternBranching-OMOPS
 	MotifFinder<Dna, EPatternBranching> motif_finder4(t,l,d,is_exact,h);
 	findMotif(motif_finder4, dataset1, OMOPS());
 	displayResult(motif_finder4);
-	//SEQAN_TASSERT(motif_finder4.set_of_motifs[0]=="AGCC");
 
 //____________________________________________________________________________
 // Test3 - Search for ZOOPS motifs on a set of small nucleotide sequences
