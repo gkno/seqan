@@ -413,7 +413,7 @@ pms1(TStrings & result_set,
 	// STEP 2:
 	// count votes of l-mers (d-variants) and insert relevant d-variants into result set
 	// ----------------------------------------------------------------------------
-	int lower_limit = (int)ceil(t*(model_type.threshold));
+	int lower_limit = (int) floor(t*(model_type.threshold)+0.5);
 	// count votes of relevant l-mers (d-variants)
 	std::vector<int>::iterator iter = result_vect.begin();
 	std::vector<int>::iterator end_iter = result_vect.end();
@@ -506,7 +506,7 @@ pms1(TStrings & result_set,
 	// STEP 2:
 	// count votes of l-mers (d-variants) and insert relevant d-variants into result set
 	// ----------------------------------------------------------------------------
-	int lower_limit = (int) ceil(t*(model_type.threshold));
+	int lower_limit = (int) floor(t*(model_type.threshold)+0.5);
 
 	// count votes of relevant l-mers (d-variants)
 	std::vector<int>::iterator iter = result_vect.begin();

@@ -455,7 +455,7 @@ pmsp(TStrings & result,
 					                     begin(dataset[seq_nr]), 
 										 end(dataset[seq_nr]), l, d, is_exact) )
 				{
-					int lower_limit = (int) (ceil(t*(model_type.threshold))-1);
+					int lower_limit = (int) floor(t*(model_type.threshold)+0.5)-1;
 					bool isMotif = true;
 					unsigned int number = 0;
 					for(typename Position< String< String<TPos2> > >::Type i=0; i<length(L); ++i)
@@ -548,7 +548,7 @@ pmsp(TStrings & result,
 		std::vector<TPos1> relevant_pos_vect;
 		for(TPos1 i=0; i<t; ++i)
 		{
-			if(i!=position(ds_iter1))
+			if(i!=seq_nr)
 			{
 				relevant_pos_vect.push_back(i);
 			}
@@ -588,6 +588,7 @@ pmsp(TStrings & result,
 				pos_vect.clear();
 				clear(pos_ar);
 			}
+
 			std::vector<int>::iterator V_iter = V.begin();
 			std::vector<int>::iterator V_end = V.end();
 			while(V_iter!=V_end)
@@ -596,7 +597,8 @@ pmsp(TStrings & result,
 				std::set<TString>::iterator iter = result_set.find(l_mer);
 				if( iter==result_set.end() )
 				{
-					int lower_limit = ((int)ceil(t*(model_type.threshold)))-1;
+					int lower_limit = (int) floor(t*(model_type.threshold)+0.5)-1;
+					bool isMotif = false;
 					unsigned int number = 0;
 					for(typename Position< String< String<TPos2> > >::Type i=0; i<length(L); ++i)
 					{
@@ -626,13 +628,15 @@ pmsp(TStrings & result,
 						{
 							--lower_limit;
 						}
-						if(lower_limit<=0)
+
+						if(lower_limit==0)
 						{
+							isMotif = true;
 							i = length(L);
 						}
 						number = 0;
 					}
-					if(lower_limit<=0)
+					if(isMotif)
 					{
 						result_set.insert(l_mer);
 					}
