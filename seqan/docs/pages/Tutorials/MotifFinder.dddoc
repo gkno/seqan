@@ -150,7 +150,7 @@ of type @Class.MotifFinder@ specifies the algorithm which will be used to solve 
 ...subsection:#.# Query sequences
 ...text:
 The parameter $dataset$ represents the set of sequences which is analyzed for motif patterns that are shared among the 
-sequences. The sequences are, for example, @Shortcut.DnaString|Dna@ or @Shortcut.Peptide|protein@ sequences.
+sequences. The sequences are, for example, @Shortcut.DnaString|DNA@ or @Shortcut.Peptide|protein@ sequences.
 SeqAn provides different types for the representation of nucleotides and amino acids.
 
 ...subsection:#.# Sequence model
@@ -175,8 +175,8 @@ are able to run in all the four modes @Tag.OOPS@, @Tag.OMOPS@, @Tag.ZOOPS@ and @
 The motif finding process in SeqAn consists of four main steps.
 
 Before going into the details of each of the steps, let us first consider the following motif finding example.
-...text:Given a set of five DNA sequences, can we find the unknown motif $M$ of length $10$ which occurs once in each
-sequence with exactly two substitutions?
+...text:Given a set of five @Shortcut.DnaString|DNA sequences@, can we find the unknown motif $M$ of length $10$ which 
+occurs once in each sequence with exactly two substitutions?
 ...image:motif_finding_example
 
 ...text:Here is the solution of our motif finding example.
@@ -186,13 +186,13 @@ sequence with exactly two substitutions?
 Motif Finder in order to find the unknown motif $M = $GGTGTATAAA in the above example.
 ...text:
 Step 1: Defining the sample dataset
-...text:Before starting a motif search a sample set of sequences (e.g. @Shortcut.DnaString|Dna@ or 
+...text:Before starting a motif search a sample set of sequences (e.g. @Shortcut.DnaString|DNA@ or 
 @Shortcut.Peptide|protein@ sequences) must be defined which is believed to have highly conserved sequence motifs at unknown
-positions in the sample sequences. In the context of @Shortcut.DnaString|Dna sequences@, for example, the upstream
+positions in the sample sequences. In the context of @Shortcut.DnaString|DNA sequences@, for example, the upstream
 sequences of co-regulated genes which are controlled by the same regulatory mechanism can form a possible sample set.
 ...text:The user of SeqAn can specify the input dataset for which the task is to be performed in a number of ways. For
-short sequences, the easiest way is the explicit definition of the sample sequences which all must be of the same type. For
-example:
+short sequences, the easiest way is the explicit definition of the sample sequences which must be all of the same sequence 
+type. For example:
 ...code:
 String<DnaString> dataset;
 appendValue(dataset, DnaString("TCTCATCCGGTGGGAATCACTGCCGCATTTGGAGCATAAACAATGGGGGG"));
@@ -219,16 +219,16 @@ for(unsigned int i=0; i<t; ++i)
 }
 
 ...text:
-Step 2: Choosing the appropriate Motif Finder
-...text:As mentioned before, SeqAn provides the four Motif Finder types: @Spec.Projection|Projection Motif Finder@, 
-@Spec.ePatternBranching|ePatternBranching Motif Finder@, @Spec.PMS1|PMS1 Motif Finder@ and @Spec.PMSP|PMSP Motif Finder@. 
-Each of them represents one specific motif finding algorithm
-of the same name. If the user is interested in examining all possible motifs which occur in the sample sequences, 
+Step 2: Choosing the appropriate @Class.MotifFinder|Motif Finder@
+...text:As mentioned before, SeqAn provides the four @Class.MotifFinder|Motif Finder@ types: 
+@Spec.Projection|Projection Motif Finder@, @Spec.EPatternBranching|ePatternBranching Motif Finder@, 
+@Spec.PMS1|PMS1 Motif Finder@ and @Spec.PMSP|PMSP Motif Finder@. Each of them represents one specific motif finding 
+algorithm of the same name. If the user is interested in examining all possible motifs which occur in the sample sequences, 
 it is advisable to choose the @Spec.PMS1|PMS1@ or the @Spec.PMSP|PMSP Motif Finder@, because the other two
-Motif Finder types, @Spec.Projection|Projection Motif Finder@ and @Spec.ePatternBranching|ePatternBranching Motif Finder@, 
+Motif Finder types, @Spec.Projection|Projection Motif Finder@ and @Spec.EPatternBranching|ePatternBranching Motif Finder@, 
 are both approximation algorithms.
 
-...tableheader: Type of Motif Finder|Information concerning the algorithm performance 
+...tableheader: Type of Motif Finder| Information concerning the algorithm performance 
 ...table:Projection|The Projection algorithm is able to handle both short and longer motifs within a reasonable time.
 ...table:ePatternBranching|The ePatternBranching algorithm works with good experimental success rates and does not 
                            show any considerable loss of accuracy when comparing its performance results with those
@@ -248,8 +248,10 @@ are both approximation algorithms.
 MotifFinder<Dna, PMSP> motif_finder(10,2,true);
 
 ...text:
-Step 3: Performing the motif search using function $findMotif$()
-...text:In order to begin the motif search, the function template $findMotif$() must be applied to the input dataset.
+Step 3: Performing the motif search using function @Function.findMotif@
+...text:In order to begin the motif search, the function template @Function.findMotif@ must be applied to the input dataset. 
+Since instances of the variant motif are planted exactly once in each sample sequence, we set the third input parameter 
+$sequence_model$ to @Tag.OOPS@.
 For example:
 
 ...code:
