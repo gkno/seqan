@@ -1,3 +1,23 @@
+/*==========================================================================
+                SeqAn - The Library for Sequence Analysis
+                          http://www.seqan.de 
+ ============================================================================
+  Copyright (C) 2007
+
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 3 of the License, or (at your option) any later version.
+
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+  Lesser General Public License for more details.
+
+ ============================================================================
+  $Id:
+ ==========================================================================*/
+
 #ifndef SEQAN_HEADER_FIND_MOTIF_PROJECTION_H
 #define SEQAN_HEADER_FIND_MOTIF_PROJECTION_H
 
@@ -369,28 +389,6 @@ findMotif(MotifFinder<TSeqType, Projection> & finder,
 		std::set<int> positions;
 		choosePositions(positions,finder.motif_size,finder.projection_size);
 
-		// create shape
-		//Shape<TSeqType, GappedShape> shape(finder.motif_size-finder.projection_size,
-		//								   finder.motif_size);
-		Shape<TSeqType, GappedShape> shape(finder.projection_size-1);
-		std::set<int>::iterator positions_iter, positions_end;
-		positions_iter = positions.begin();
-		positions_end = positions.end();
-		std::set<int>::value_type prev_val, cur_val;
-		prev_val = *positions_iter;
-		cur_val = 0;
-		++positions_iter;
-		unsigned int index = 0;
-		while(positions_iter!=positions_end)
-		{
-			cur_val = *positions_iter;
-			shape.diffs[index] = cur_val-prev_val;
-			prev_val = cur_val;
-			++positions_iter;
-			++index;
-		}
-		shape.weight = finder.projection_size;
-
 		// array of collection of l-mers
 		TBuckets bucket_ar;
 		unsigned int num_of_relevant_buckets = 0;
@@ -400,7 +398,6 @@ findMotif(MotifFinder<TSeqType, Projection> & finder,
 					   num_of_relevant_buckets,
 					   dataset,
 					   positions,
-					   shape,
 					   finder.motif_size,
 					   finder.bucket_threshold);
 
@@ -474,14 +471,13 @@ findMotif(MotifFinder<TSeqType, Projection> & finder,
 ..signature:_filteringStep(buckets,count_ar,num_of_relevant_buckets,dataset,shape,l,s)
 */
 
-template<typename TBucketAr, typename TArray, typename TType, typename TStrings, typename TPositions, typename TShape>
+template<typename TBucketAr, typename TArray, typename TType, typename TStrings, typename TPositions>
 void 
 _filteringStep(TBucketAr & buckets, 
 			   TArray & count_ar,
 			   TType & num_of_relevant_buckets,
 			   TStrings & dataset,
 			   TPositions & positions,
-			   TShape & shape,
 			   TType const & l,
 			   TType const & s)
 {
@@ -490,7 +486,7 @@ _filteringStep(TBucketAr & buckets,
 	typedef typename Value<TBucketAr>::Type TBucket;
 	typename Iterator<TStrings>::Type ds_iter = begin(dataset);
 	typename Size<TArray>::Type ar_size = length(count_ar);
-	Shape<TValue> shape2(l); //to compute hash value of l-mer x
+	Shape<TValue> shape(l); //to compute hash value of l-mer x
  
 	// initialize pointer by setting it to null 
 	// (=std::fill(begin(count_ar),end(count_ar),0))
@@ -507,7 +503,6 @@ _filteringStep(TBucketAr & buckets,
 	resize(buckets, ar_size);
 	int y = 0; //hash-value of created k-mer
 	int x = 0; //hash-value of l-mer
-	int first_pos = *(positions.begin());
 	for(; !atEnd(ds_iter, dataset); goNext(ds_iter))
 	{
 		typename Size<TString>::Type seq_length = length(*ds_iter);
@@ -515,8 +510,8 @@ _filteringStep(TBucketAr & buckets,
 		typename Iterator<TString>::Type seq_end = begin(*ds_iter)+(seq_length-l+1);
 		while( seq_iter!=seq_end )
 		{
-			x = hash(shape2, seq_iter);
-			y = hash(shape, (seq_iter+first_pos));
+			x = hash(shape, seq_iter);
+			y = projectLMer<TValue>(positions, seq_iter);
 	    	++count_ar[y];
 			(buckets[y]).push_back(x);
 			++seq_iter;
@@ -915,6 +910,45 @@ choosePositions(TAssociativeContainer & positions, TType const & l, TType const 
 		int position = rand() % l;
 		positions.insert(position);
 	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+/*
+.Function.projectLMer:
+..summary:Based on set "positions" the function uses the letters of a given l-mer at
+          chosen k positions to compute an appropriate hash value of the new k-mer.
+..cat:Motif Search
+..signature:projectLMer(positions,l,k)
+..param.positions:The set of k chosen positions.
+...remarks:$positions$ is of type $set<int>$
+..param.k:An iterator pointing to the first positions of a given sequence.
+*/
+
+template<typename TValue, typename TIter>
+inline std::set<int>::value_type
+projectLMer(std::set<int> & positions, TIter it)
+{
+	typedef std::set<int>::value_type THValue;
+	THValue prev_pos, cur_pos;
+
+	std::set<int>::iterator positions_iter, positions_end;
+	positions_iter = positions.begin();
+	positions_end = positions.end();
+	prev_pos = *positions_iter;
+	it += prev_pos;
+	THValue hValue = ordValue(*it);
+	++positions_iter;
+	while(positions_iter!=positions_end)
+	{
+		THValue cur_pos = *positions_iter;
+		goFurther(it, (cur_pos-prev_pos));
+		hValue = hValue * ValueSize<TValue>::VALUE + ordValue(*it);
+		prev_pos = cur_pos;
+		++positions_iter;
+	}
+
+	return hValue;
 }
 
 
