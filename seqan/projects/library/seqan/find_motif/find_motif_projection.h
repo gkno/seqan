@@ -1069,8 +1069,8 @@ _computeLikelihoodRatioOfLMers(TStrings const & l_mers,
 ...type:Class.String
 ...type:Shortcut.DnaString
 ...type:Shortcut.Peptide
-..param.profile:The  @Shortcut.Profile@ object which is a set of @Class.FrequencyDistribution|frequency distributions@.
-...type:Shortcut.Profile
+..param.profile:A StringSet of @Class.FrequencyDistribution|frequency distributions@.
+...type:Class.StringSet
 ..param.l:The size of the motif.
 */
 

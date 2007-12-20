@@ -5,16 +5,6 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 //////////////////////////////////////////////////////////////////////////////
-/**
-.Shortcut.Profile:
-..cat:Strings
-..summary:A string of @Class.FrequencyDistribution@.
-..signature:Profile
-..shortcutfor:Spec.Alloc String
-...signature:String<FrequencyDistribution, Alloc<> >
-*/
-
-//typedef String<FrequencyDistribution, Alloc<void> > Profile;
 
 //////////////////////////////////////////////////////////////////////////////
 // Functions
@@ -25,8 +15,8 @@ namespace SEQAN_NAMESPACE_MAIN
 ..summary:Converts a pattern into a profile which consists of a set of frequency distributions.
 ..cat:Motif Search
 ..signature:convertPatternToProfile(profile,begin,end)
-..param.profile:The  @Shortcut.Profile@ object which is a set of @Class.FrequencyDistribution|frequency distributions@.
-...type:Shortcut.Profile
+..param.profile:A StringSet of @Class.FrequencyDistribution|frequency distributions@.
+...type:Class.StringSet
 ..param.begin:An iterator pointing to the beginning of a given sequence pattern which is either
               a @Shortcut.DnaString@ or a @Shortcut.Peptide@.
 ...type:Concept.Iterator
@@ -37,7 +27,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ...type:Concept.Iterator
 ...type:Shortcut.DnaIterator
 ...type:Shortcut.PeptideIterator
-..remarks:The number of @Class.FrequencyDistribution@ objects which together form the @Shortcut.Profile@ 
+..remarks:The number of @Class.FrequencyDistribution@ objects which together form the profile
           equals the length of the given sequence.
 ..remarks:e.g.:$profile[0]$ represents the frequency distribution for the first residue of
           the given sequence.
@@ -69,8 +59,8 @@ convertPatternToProfile(TProfile & profile,
 ..summary:Converts a set of sequence patterns into a profile.
 ..cat:Motif Search
 ..signature:convertSetOfPatternsToProfile(profile,l_mers,pseudocount_mode)
-..param.profile:The  @Shortcut.Profile@ object which is a set of @Class.FrequencyDistribution|frequency distributions@.
-...type:Shortcut.Profile
+..param.profile:A StringSet of @Class.FrequencyDistribution|frequency distributions@.
+...type:Class.StringSet
 ..param.l_mers:The set of sequence patterns.
 ...type:Class.StringSet
 ..param.pseudocount_mode:The @Class.Pseudocount@ object for determining the pseudocount method.
@@ -117,15 +107,15 @@ convertSetOfPatternsToProfile(TProfile & profile,
 ..cat:Motif Search
 ..signature:normalize(container)
 ..signature:normalize(profile,pseudocount_mode)
-..param.container:The @Class.FrequencyDistribution@ or @Shortcut.Profile@ object.
+..param.container:The @Class.FrequencyDistribution@ or @Class.StringSet@ (of @Class.FrequencyDistribution|frequency distributions@) object.
 ...type:Class.FrequencyDistribution
-...type:Shortcut.Profile
-..param.profile:The @Shortcut.Profile@ object which is a set of @Class.FrequencyDistribution|frequency distributions@.
-...type:Shortcut.Profile
+...type:Class.StringSet
+..param.profile:A StringSet of @Class.FrequencyDistribution|frequency distributions@.
+...type:Class.StringSet
 ..param.pseudocount_mode:The @Class.Pseudocount@ object for determining the pseudocount method.
 ...type:Class.Pseudocount
 ..remarks:If necessary, pseudocounts are first added to the frequency values before normalizing them 
-          when the parameter is of type @Shortcut.Profile@.
+          when the parameter $container$ is a StringSet of @Class.FrequencyDistribution|frequency distributions@ (profile).
 */
 
 template<typename TProfile>
@@ -148,11 +138,11 @@ normalize(TProfile & profile)
 ..summary:Concatenates the background frequency with the profile for the motif component.
 ..cat:Motif Search
 ..signature:completeProfile(profile,background_distribution)
-..param.profile:The  @Shortcut.Profile@ object which is a set of @Class.FrequencyDistribution|frequency distributions@.
-...type:Shortcut.Profile
+..param.profile:A StringSet of @Class.FrequencyDistribution|frequency distributions@.
+...type:Class.StringSet
 ..param.background_distribution:The @Class.FrequencyDistribution@ object which represents the backround distribution.
 ...type:Class.FrequencyDistribution
-..remarks:The first row of the final @Shortcut.Profile|probability matrix@ represents the @Class.FrequencyDistribution|background distribution@.
+..remarks:The first row of the final profile (probability matrix) represents the @Class.FrequencyDistribution|background distribution@.
 */
 
 template<typename TProfile>
@@ -180,10 +170,9 @@ completeProfile(TProfile & profile,
 ..summary:Displays a given set of strings.
 ..cat:Motif Search
 ..signature:display(strings)
-..param.strings:The set of strings.
+..param.strings:A StringSet.
 ...type:Class.StringSet
-...type:Shortcut.Profile
-..remarks:This function can also be used to display a @Shortcut.Profile|probability matrix@ 
+..remarks:This function can also be used to display a profile (probability matrix) 
           which is a set of @Class.FrequencyDistribution|frequency distributions@.
 */
 

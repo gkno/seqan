@@ -76,7 +76,7 @@ struct Value< MotifFinder<TValue, TSpec> const>
 ..cat:Motif Search
 ..signature:factorial(value)
 ..param.value:The value object.
-...type:unsigned int
+...remarks:$value$ must be a positive integer.
 ..remarks:The factorial of a non-negative integer $value$ is 
           the product of all positive integers less than or equal to $value$.  
 */
@@ -106,9 +106,9 @@ TType factorial(TType n)
 ..cat:Motif Search
 ..signature:binomialCoefficient(n,k)
 ..param.n:The first parameter object.
-...type:unsigned int
+...remarks:$n$ must be a positive integer.
 ..param.k:The second parameter object.
-...type:unsigned int
+...remarks:$k$ must be a positive integer.
 ..remarks:The binomial coefficient of $n$ and $k$ is equal to zero 
           if $k$ is greater than $n$.   
 */
