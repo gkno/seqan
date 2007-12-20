@@ -11,6 +11,8 @@ using namespace seqan;
 
 void Test_approximationAlgorithms()
 {
+	//Testing Projection & ePatternBranching algorithm
+
 	unsigned int t = 0;		//number of input sequences
 	unsigned int n = 0;		//length of sequence
 	unsigned int l = 0;		//length of motif
@@ -88,6 +90,8 @@ void Test_approximationAlgorithms()
 
 void Test_exactAlgorithms()
 {
+	//Testing PMS1 & PMSP algorithm
+
 	unsigned int l = 0;		//length of motif
 	unsigned int d = 0;		//number of substitutions
 	bool is_exact = false;	//size of Hamming distance
@@ -179,6 +183,33 @@ void Test_exactAlgorithms()
 	for(i=0; i<length(motif_finder5.set_of_motifs); ++i)
 	{
 		SEQAN_TASSERT(motif_finder5.set_of_motifs[i]==motif_finder6.set_of_motifs[i]);
+	}
+
+//____________________________________________________________________________
+// Test4 - Search for TCM motifs on a small set of nucleotide sequences
+//         given the exact Hamming distance (=d)
+
+	l = 5;		
+	d = 1;		
+
+	String<DnaString> dataset4;
+	appendValue(dataset4,DnaString("GCGGAGTACGATAACATTTC"));
+	appendValue(dataset4,DnaString("TCCATGATGGAGATGAAGAA"));
+	appendValue(dataset4,DnaString("AAAGGTCATCAGATCTAGAT"));
+
+	//Application of PMS1-TCM
+	MotifFinder<Dna, PMS1> motif_finder7(l,d,is_exact);
+	findMotif(motif_finder7,dataset4,TCM());
+
+	//Application of PMSP-TCM
+	MotifFinder<Dna, PMSP> motif_finder8(l,d,is_exact);
+	findMotif(motif_finder8,dataset4,TCM());
+	
+	SEQAN_TASSERT(length(motif_finder7.set_of_motifs)==length(motif_finder8.set_of_motifs));
+
+	for(i=0; i<length(motif_finder7.set_of_motifs); ++i)
+	{
+		SEQAN_TASSERT(motif_finder7.set_of_motifs[i]==motif_finder8.set_of_motifs[i]);
 	}
 }
 
