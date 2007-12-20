@@ -26,7 +26,7 @@ struct OOPS
 
 /**
 .Tag.OMOPS:
-..summary:Represents the One or More Occurence Per Sequence model.
+..summary:Represents the One or More Occurences Per Sequence model.
 ..cat:Motif Search
 ..remarks:The @Tag.OMOPS@ model is comparable with the @Tag.TCM@ model with the one difference
           that zero occurrence in a sample sequence is not permitted.
