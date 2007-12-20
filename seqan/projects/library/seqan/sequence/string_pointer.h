@@ -115,7 +115,9 @@ struct IsContiguous< TValue const [SIZE] >
 	enum { VALUE = true };
 };
 
-///.Metafunction.IsString.param.T.type:Adaption.char array
+/*DISABLED 
+.Metafunction.IsString.param.T.type:Adaption.char array
+*/
 
 template <typename TValue>
 struct IsSequence< TValue * >

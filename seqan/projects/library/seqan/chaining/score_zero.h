@@ -25,6 +25,13 @@ namespace seqan
 {
 
 //////////////////////////////////////////////////////////////////////////////
+/**.Spec.Score Zero
+..summary:Scoring scheme for chaining that set gap scores to 0
+..cat:Chaining
+..general:Class.Score
+..signature:Score<TValue, Zero>
+..param.TValue:Type of the score values.
+*/
 
 template <typename TValue>
 class Score<TValue, Zero>

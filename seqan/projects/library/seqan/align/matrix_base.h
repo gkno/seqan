@@ -31,6 +31,12 @@ class Matrix;
 
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Class.Matrix
+..summary:A simple n-dimensional matrix type.
+..cat:Miscellaneous
+*/
+
 template <typename TValue>
 class Matrix<TValue, void>
 {

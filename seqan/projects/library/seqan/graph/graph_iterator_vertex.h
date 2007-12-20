@@ -168,7 +168,7 @@ struct Spec<Iter<TGraph const, GraphIterator<InternalVertexIterator<TIteratorSpe
 
 //////////////////////////////////////////////////////////////////////////////
 
-/**
+/*DISABLED: see sequence_interface.h and basic_iterator.h
 .Function.getValue:
 ..cat:Graph
 ..summary:The vertex or edge the iterator points to.
@@ -185,6 +185,17 @@ struct Spec<Iter<TGraph const, GraphIterator<InternalVertexIterator<TIteratorSpe
 ...type:Metafunction.EdgeDescriptor
 ..see:Function.value
 */
+/**
+.Function.getValue:
+..cat:Graph
+..param.object
+...type:Spec.Vertex Iterator
+...type:Spec.Out-Edge Iterator
+...type:Spec.Edge Iterator
+...type:Spec.Adjacency Iterator
+...type:Spec.Bfs Iterator
+...type:Spec.Dfs Preorder Iterator
+*/
 
 template<typename TGraph, typename TSpec>
 inline typename GetValue<Iter<TGraph, GraphIterator<InternalVertexIterator<TSpec> > > >::Type
@@ -196,7 +207,7 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 
-/**
+/*DISABLED
 .Function.value:
 ..cat:Graph
 ..summary:The vertex the iterator points to.
@@ -212,6 +223,17 @@ SEQAN_CHECKPOINT
 ...type:Metafunction.VertexDescriptor
 ...type:Metafunction.EdgeDescriptor
 ..see:Function.getValue
+*/
+/**
+.Function.value:
+..cat:Graph
+..param.object
+...type:Spec.Vertex Iterator
+...type:Spec.Out-Edge Iterator
+...type:Spec.Edge Iterator
+...type:Spec.Adjacency Iterator
+...type:Spec.Bfs Iterator
+...type:Spec.Dfs Preorder Iterator
 */
 
 template<typename TGraph, typename TSpec>
@@ -259,7 +281,7 @@ hostGraph(Iter<TGraph, GraphIterator<InternalVertexIterator<TSpec> > >& it)
 
 //////////////////////////////////////////////////////////////////////////////
 
-/**
+/*DISABLED: see basic_iterator.h
 .Function.atBegin:
 ..cat:Graph
 ..summary:Determines whether the iterator is at the beginning or not.
@@ -274,6 +296,18 @@ hostGraph(Iter<TGraph, GraphIterator<InternalVertexIterator<TSpec> > >& it)
 ..returns:True if the iterator is at the beginning, false otherwise
 ..see:Function.goBegin
 */
+/**
+.Function.atBegin:
+..cat:Graph
+..param.iterator
+...type:Spec.Vertex Iterator
+...type:Spec.Out-Edge Iterator
+...type:Spec.Edge Iterator
+...type:Spec.Adjacency Iterator
+...type:Spec.Bfs Iterator
+...type:Spec.Dfs Preorder Iterator
+..see:Function.goBegin
+*/
 
 template<typename TGraph, typename TSpec>
 inline bool
@@ -285,7 +319,7 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 
-/**
+/*DISABLED: see basic_iterator.h
 .Function.goBegin:
 ..cat:Graph
 ..summary:Resets the iterator to the beginning.
@@ -300,6 +334,17 @@ SEQAN_CHECKPOINT
 ..returns:void
 ..see:Function.atBegin
 */
+/**
+.Function.goBegin:
+..cat:Graph
+..param.iterator
+...type:Spec.Vertex Iterator
+...type:Spec.Out-Edge Iterator
+...type:Spec.Edge Iterator
+...type:Spec.Adjacency Iterator
+...type:Spec.Bfs Iterator
+...type:Spec.Dfs Preorder Iterator
+*/
 
 template<typename TGraph, typename TSpec>
 inline void
@@ -311,7 +356,7 @@ goBegin(Iter<TGraph, GraphIterator<InternalVertexIterator<TSpec> > >& it)
 
 //////////////////////////////////////////////////////////////////////////////
 
-/**
+/*DISABLED: see basic_iterator.h
 .Function.atEnd:
 ..cat:Graph
 ..summary:Determines whether the iterator is at the end or not.
@@ -326,6 +371,18 @@ goBegin(Iter<TGraph, GraphIterator<InternalVertexIterator<TSpec> > >& it)
 ..returns:True if the iterator is at the end, false otherwise
 ..see:Function.goEnd
 */
+/**
+.Function.atEnd:
+..cat:Graph
+..param.iterator
+...type:Spec.Vertex Iterator
+...type:Spec.Out-Edge Iterator
+...type:Spec.Edge Iterator
+...type:Spec.Adjacency Iterator
+...type:Spec.Bfs Iterator
+...type:Spec.Dfs Preorder Iterator
+..see:Function.goEnd
+*/
 
 template<typename TGraph, typename TSpec>
 inline bool
@@ -337,7 +394,7 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 
-/**
+/*DISABLED: see basic_iterator.h
 .Function.goEnd:
 ..cat:Graph
 ..summary:Resets the iterator to the end.
@@ -352,7 +409,17 @@ SEQAN_CHECKPOINT
 ..returns:void
 ..see:Function.atEnd
 */
-
+/**
+.Function.goEnd:
+..cat:Graph
+..param.iterator
+...type:Spec.Vertex Iterator
+...type:Spec.Out-Edge Iterator
+...type:Spec.Edge Iterator
+...type:Spec.Adjacency Iterator
+...type:Spec.Bfs Iterator
+...type:Spec.Dfs Preorder Iterator
+*/
 template<typename TGraph, typename TSpec>
 inline void
 goEnd(Iter<TGraph, GraphIterator<InternalVertexIterator<TSpec> > >& it)
@@ -363,7 +430,7 @@ goEnd(Iter<TGraph, GraphIterator<InternalVertexIterator<TSpec> > >& it)
 
 //////////////////////////////////////////////////////////////////////////////
 
-/**
+/*DISABLED: see basic_iterator.h
 .Function.goNext:
 ..cat:Graph
 ..summary:Moves the iterator to the next vertex or next edge.
@@ -378,6 +445,17 @@ goEnd(Iter<TGraph, GraphIterator<InternalVertexIterator<TSpec> > >& it)
 ..returns:void
 ..remarks:This method does nothing if the iterator is already at the end.
 ..see:Function.goPrevious
+*/
+/**
+.Function.goNext:
+..cat:Graph
+..param.iterator
+...type:Spec.Vertex Iterator
+...type:Spec.Out-Edge Iterator
+...type:Spec.Edge Iterator
+...type:Spec.Adjacency Iterator
+...type:Spec.Bfs Iterator
+...type:Spec.Dfs Preorder Iterator
 */
 
 template<typename TGraph, typename TSpec>
@@ -414,7 +492,7 @@ operator ++(Iter<TGraph, GraphIterator<InternalVertexIterator<TSpec> > >& it, in
 
 //////////////////////////////////////////////////////////////////////////////
 
-/**
+/*DISABLED: see basic_iterator.h
 .Function.goPrevious:
 ..cat:Graph
 ..summary:Moves the iterator to the preceding vertex or the preceding edge.
@@ -427,6 +505,15 @@ operator ++(Iter<TGraph, GraphIterator<InternalVertexIterator<TSpec> > >& it, in
 ..returns:void
 ..remarks:This method does nothing if the iterator is already at the beginning.
 ..see:Function.goNext
+*/
+/**
+.Function.goPrevious:
+..cat:Graph
+..param.iterator
+...type:Spec.Vertex Iterator
+...type:Spec.Out-Edge Iterator
+...type:Spec.Edge Iterator
+...type:Spec.Adjacency Iterator
 */
 
 template<typename TGraph, typename TSpec>

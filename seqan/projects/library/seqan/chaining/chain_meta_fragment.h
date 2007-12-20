@@ -29,7 +29,7 @@ namespace seqan{
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/**
+/*DISABLED
 .Class._MetaFragment:
 ..summary:Basic data which associates fragments with prededing fragments and stores chain score informations
 ..cat:Chaining

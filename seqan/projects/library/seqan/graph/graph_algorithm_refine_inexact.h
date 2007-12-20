@@ -234,10 +234,10 @@ SEQAN_CHECKPOINT
 /**
 .Function.matchRefinement:
 ..signature:matchRefinement(matches,stringSet,scoringScheme,refinedGraph,minFragmentLen)
-..param.minFragmentLen:The minimal segment length allowed. If in the refinement process a cut would result in
+..param.minFragmentLen:The minimal segment length allowed (unsigned int).
+...remarks:If in the refinement process a cut would result in
 a segment shorter than minFragmentLen, then the cut is not made and a heuristic is applied to refine this short overlap.
 ...remarks:If no minFragmentLen is given, then all cuts are made. This corresponds to a minFragmentLen of 1.
-...type:unsigned int
 */
 //score type given, min fragment length given, if > 1 ==> inexact refinement
 template<typename TAlignmentString, typename TScoreValue,typename TScoreSpec, typename TOutGraph, typename TSequence, typename TSetSpec>

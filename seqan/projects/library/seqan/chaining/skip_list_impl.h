@@ -25,6 +25,9 @@
 *
 */
 
+//SEQAN_NO_DDDOC: do not generate documentation for this file
+
+
 #ifndef SEQAN_HEADER_SKIP_LIST_STATIC_H
 #define SEQAN_HEADER_SKIP_LIST_STATIC_H
 

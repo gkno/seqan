@@ -325,7 +325,7 @@ struct Spec<EdgeStump<TCargo, TList, TSource, TId, TSpec> const>
 ..returns:Returns the cargo.
 ..remarks:If cargo is not present the return value is (void*) 0.
 ..see:Function.cargo
-..see:Funktion.assignCargo
+..see:Function.assignCargo
 */
 
 
@@ -381,7 +381,7 @@ getCargo(EdgeStump<void, TList, TSource, TId, TSpec>*)
 ..returns:Returns a reference to the cargo.
 ..remarks:If cargo is not present the return value is (void*) 0.
 ..see:Function.getCargo
-..see:Funktion.assignCargo
+..see:Function.assignCargo
 */
 
 
@@ -440,7 +440,7 @@ cargo(EdgeStump<void, TList, TSource, TId, TSpec> const*)
 ..returns:void
 ..remarks:In cargoless EdgeStumps this operation is a NOP.
 ..see:Function.cargo
-..see:Funktion.getCargo
+..see:Function.getCargo
 */
 
 template<typename TCargo, bool TList, bool TSource, bool TId, typename TSpec, typename TCargo2>
@@ -475,7 +475,7 @@ assignCargo(EdgeStump<void, TList, TSource, TId, TSpec>*,
 ..param.t:Target vertex.
 ..returns:void
 ..see:Function.target
-..see:Funktion.getTarget
+..see:Function.getTarget
 */
 
 
@@ -499,7 +499,7 @@ assignTarget(EdgeStump<TCargo, TList, TSource, TId, TSpec>* es,
 ...type:Class.EdgeStump
 ..returns:Reference to the target vertex.
 ..see:Function.assignTarget
-..see:Funktion.getTarget
+..see:Function.getTarget
 */
 
 template<typename TCargo, bool TList, bool TSource, bool TId, typename TSpec>
@@ -531,7 +531,7 @@ target(EdgeStump<TCargo, TList, TSource, TId, TSpec> const* es)
 ...type:Class.EdgeStump
 ..returns:Target vertex.
 ..see:Function.assignTarget
-..see:Funktion.target
+..see:Function.target
 */
 
 template<typename TCargo, bool TList, bool TSource, bool TId, typename TSpec>
@@ -556,7 +556,7 @@ getTarget(EdgeStump<TCargo, TList, TSource, TId, TSpec>* es)
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.assignSource:
+.Function.Graph#assignSource:
 ..cat:Graph
 ..summary:Assigns a source vertex to an edge.
 ..remarks:A source vertex is not required in an edge stump.
@@ -564,10 +564,10 @@ However, EdgeStumps can be configured to contain a source vertex, e.g., in undir
 ..signature:assignSource(es, s)
 ..param.es:Pointer to the EdgeStump.
 ...type:Class.EdgeStump
-..param.t:Source vertex.
+..param.s:Source vertex.
 ..returns:void
 ..see:Function.source
-..see:Funktion.getSource
+..see:Function.getSource
 */
 
 template<typename TCargo, bool TList, bool TId, typename TSpec, typename TVertexDescriptor>
@@ -592,8 +592,8 @@ assignSource(EdgeStump<TCargo, TList, false, TId, TSpec>*,
 
 //////////////////////////////////////////////////////////////////////////////
 
-/**
-.Function.source:
+/*DISABLED: see gaps_base.h
+.Function.Graph#source:
 ..cat:Graph
 ..summary:Accesses the source of an EdgeStump.
 ..remarks:A source vertex is not required in an edge stump.
@@ -602,8 +602,8 @@ However, EdgeStumps can be configured to contain a source vertex, e.g., in undir
 ..param.es:Pointer to the EdgeStump.
 ...type:Class.EdgeStump
 ..returns:Reference to the source vertex.
-..see:Function.assignSource
-..see:Funktion.getSource
+..see:Function.Graph#assignSource
+..see:Function.getSource
 */
 
 template<typename TCargo, bool TList, bool TId, typename TSpec>
@@ -660,8 +660,8 @@ However, EdgeStumps can be configured to contain a source vertex, e.g., in undir
 ..param.es:Pointer to the EdgeStump.
 ...type:Class.EdgeStump
 ..returns:Source vertex.
-..see:Function.assignSource
-..see:Funktion.source
+..see:Function.Graph#assignSource
+..see:Function.source
 */
 
 template<typename TCargo, bool TList, bool TId, typename TSpec>
@@ -720,7 +720,7 @@ getSource(EdgeStump<TCargo, TList, false, TId, TSpec>*)
 ...type:Class.EdgeStump
 ..returns:void
 ..see:Function.nextT
-..see:Funktion.getNextT
+..see:Function.getNextT
 */
 
 template<typename TCargo, bool TSource, bool TId, typename TSpec>
@@ -743,7 +743,7 @@ assignNextT(EdgeStump<TCargo, true, TSource, TId, TSpec>* es,
 ...type:Class.EdgeStump
 ..returns:Reference to the next target pointer.
 ..see:Function.assignNextT
-..see:Funktion.getNextT
+..see:Function.getNextT
 */
 
 template<typename TCargo, bool TSource, bool TId, typename TSpec>
@@ -775,7 +775,7 @@ nextT(EdgeStump<TCargo, true, TSource, TId, TSpec> const* es)
 ...type:Class.EdgeStump
 ..returns:Pointer to the next edge stump in target list.
 ..see:Function.assignNextT
-..see:Funktion.nextT
+..see:Function.nextT
 */
 
 template<typename TCargo, bool TSource, bool TId, typename TSpec>
@@ -810,7 +810,7 @@ getNextT(EdgeStump<TCargo, true, TSource, TId, TSpec> const* es)
 ...type:Class.EdgeStump
 ..returns:void
 ..see:Function.nextS
-..see:Funktion.getNextS
+..see:Function.getNextS
 */
 
 template<typename TCargo, bool TId, typename TSpec>
@@ -846,7 +846,7 @@ assignNextS(EdgeStump<TCargo, true, false, TId, TSpec>*,
 ...type:Class.EdgeStump
 ..returns:Reference to the next source pointer.
 ..see:Function.assignNextS
-..see:Funktion.getNextS
+..see:Function.getNextS
 */
 
 template<typename TCargo, bool TId, typename TSpec>
@@ -899,7 +899,7 @@ nextS(EdgeStump<TCargo, true, false, TId, TSpec> const*)
 ...type:Class.EdgeStump
 ..returns:Pointer to the next edge stump in source list.
 ..see:Function.assignNextS
-..see:Funktion.nextS
+..see:Function.nextS
 */
 
 template<typename TCargo, bool TId, typename TSpec>

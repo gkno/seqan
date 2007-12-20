@@ -773,17 +773,8 @@ SEQAN_CHECKPOINT
 
 /**
 .Function.detach:
-..summary:Makes an object independent.
 ..cat:Alignments
-..signature:detach(object)
-..param.object:An object.
-...type:Class.Gaps
-..remarks:
-After this function, $object$ does not depends from any other entity outside of $object$,
-like a @Function.source@ or a @Function.host@. 
-..see:Function.source
-..see:Function.host
-..see:Function.createSource
+..param.object.type:Class.Gaps
 */
 template <typename TSource, typename TSpec>
 inline void

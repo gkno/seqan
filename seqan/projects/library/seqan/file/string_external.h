@@ -46,7 +46,7 @@ Sequences of nearly arbitrary size can be accessed, they can in particular conta
 See the @Memfunc.ExtString#String.constructor@ for more details.
 ..remarks:This String also supports fast appending and removing of values at the end (see @Spec.Block String@, @Function.appendValue@)
 ..remarks:The External String implements a LRU mechanism to swap out pages.
-The External String @Class.Iterator@ detects a forward or backward iteration and asynchronously prefetches pages that
+The External String's @Metafunction.Iterator@ detects a forward or backward iteration and asynchronously prefetches pages that
 certainly will be accessed and automatically swaps out pages that certainly won't be accessed any more in the iteration
 process.
 ..remarks:The String is implemented like a virtual memory manager.

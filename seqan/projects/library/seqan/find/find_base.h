@@ -553,6 +553,19 @@ SEQAN_CHECKPOINT
 		return position(hostIterator(me));
 	}
 
+//____________________________________________________________________________
+/**
+.Function.setPosition:
+..cat:Searching
+..summary:Sets the position of a finder.
+..signature:setPosition(finder, pos)
+..param.finder:A finder.
+...class:Class.Finder
+..param.pos:A position.
+...metafunction:Metafunction.Position
+..see:Function.position
+*/
+
 	template <typename THaystack, typename TSpec, typename TPosition>
 	inline void 
 	setPosition(Finder<THaystack, TSpec> & me, TPosition pos_)

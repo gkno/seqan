@@ -157,7 +157,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TInput3:The type of the third object.
 ..param.TInput4:The type of the fourth object.
 ..param.TInput5:The type of the fifth object.
-..remarks:Primarily used as an adaptor for pipes with five sources (see @Spec.Pipe Merger7@).
+..remarks:Primarily used as an adaptor for pipes with five sources.
 .Memvar.Bundle5#in1:
 ..class:Class.Bundle5
 ..summary:TInput1 reference

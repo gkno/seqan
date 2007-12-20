@@ -246,7 +246,7 @@ scoreGap(Score<TValue, TSpec> const & me)
 .Function.score:
 ..class:Class.Score
 ..summary:The score for aligning two values according to a scoring scheme.
-..signature:score(score, as_1, as_2)
+..signature:score(score, value1, value2)
 ..param.score:A scoring scheme.
 ...type:Class.Score
 ..param.value1:first value.

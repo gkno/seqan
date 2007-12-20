@@ -149,7 +149,7 @@ namespace SEQAN_NAMESPACE_MAIN
 // Iterators
 //////////////////////////////////////////////////////////////////////////////
 
-///.Metafunction.Iterator.param.T.type:Class.Block
+///.Metafunction.Iterator.param.T.type:Spec.Block String
 
 	template<typename TValue, unsigned int SPACE>
 	struct Iterator<String<TValue, Block<SPACE> >, Standard> 

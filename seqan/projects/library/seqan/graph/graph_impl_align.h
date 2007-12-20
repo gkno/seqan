@@ -1139,7 +1139,7 @@ write(TFile & file,
 ..summary:Assigns a new string set to an alignment graph.
 ..signature:assignStringSet(g, str)
 ..param.g:An alignment graph.
-...type:Graph.Alignment Graph
+...type:Spec.Alignment Graph
 ..param.str:A string set.
 ..see:Function.getStringSet
 ..see:Function.stringSet
@@ -1170,7 +1170,7 @@ assignStringSet(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 ..summary:Gets the string set of an alignment graph.
 ..signature:getStringSet(g)
 ..param.g:An alignment graph.
-...type:Graph.Alignment Graph
+...type:Spec.Alignment Graph
 ..returns:A string set.
 ..see:Function.assignStringSet
 ..see:Function.stringSet
@@ -1192,7 +1192,7 @@ getStringSet(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g)
 ..summary:Gets the string set of an alignment graph.
 ..signature:stringSet(g)
 ..param.g:An alignment graph.
-...type:Graph.Alignment Graph
+...type:Spec.Alignment Graph
 ..returns:A reference to a string set.
 ..see:Function.assignStringSet
 ..see:Function.getStringSet
@@ -1208,12 +1208,12 @@ stringSet(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g)
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.label:
+.Function.Alignment Graph#label:
 ..cat:Graph.Alignment Graph
 ..summary:Gets the label that is associated with this vertex descriptor.
 ..signature:label(g, v)
 ..param.g:An alignment graph.
-...type:Graph.Alignment Graph
+...type:Spec.Alignment Graph
 ..param.v:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
 ..returns:The label.
@@ -1245,7 +1245,7 @@ label(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 ..summary:Gets the sequence id that is associated with this vertex descriptor.
 ..signature:sequenceId(g, v)
 ..param.g:An alignment graph.
-...type:Graph.Alignment Graph
+...type:Spec.Alignment Graph
 ..param.v:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
 ..returns:The sequence id.
@@ -1268,7 +1268,7 @@ sequenceId(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 ..summary:Gets the begin position for this vertex descriptor in the sequence.
 ..signature:fragmentBegin(g, v)
 ..param.g:An alignment graph.
-...type:Graph.Alignment Graph
+...type:Spec.Alignment Graph
 ..param.v:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
 ..returns:The begin position.
@@ -1290,7 +1290,7 @@ fragmentBegin(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 ..summary:Gets the length of the label of a given vertex descriptor in the sequence.
 ..signature:fragmentLength(g, v)
 ..param.g:An alignment graph.
-...type:Graph.Alignment Graph
+...type:Spec.Alignment Graph
 ..param.v:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
 ..returns:The length of the fragment represented by this vertex descriptor.
@@ -1312,7 +1312,7 @@ fragmentLength(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 ..summary:Finds a vertex given a sequence id and a position.
 ..signature:fragmentLength(g, v)
 ..param.g:An alignment graph.
-...type:Graph.Alignment Graph
+...type:Spec.Alignment Graph
 ..param.v:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
 ..returns:The length of the fragment represented by this vertex descriptor.
@@ -1340,7 +1340,7 @@ findVertex(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 Works only on alignment graphs of two sequences (Pairwise alignment).
 ..signature:getProjectedPosition(g, id1, pos1, id2, pos2)
 ..param.g:In-parameter: An alignment graph.
-...type:Graph.Alignment Graph
+...type:Spec.Alignment Graph
 ..param.id1:In-parameter: A sequence id.
 ..param.pos1:In-parameter: A position.
 ..param.id2:Out-parameter: The projected sequence id.
@@ -1399,7 +1399,7 @@ getProjectedPosition(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 ..summary:Finds the first position in a sequence that is not assigned to a nil vertex.
 ..signature:getFirstCoveredPosition(g, id)
 ..param.g:An alignment graph.
-...type:Graph.Alignment Graph
+...type:Spec.Alignment Graph
 ..param.id:A sequence id.
 ..returns:A sequence position
 ..see:Function.getLastCoveredPosition
@@ -1442,7 +1442,7 @@ getFirstCoveredPosition(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 ..summary:Finds the last position in a sequence that is not assigned to a nil vertex.
 ..signature:getLastCoveredPosition(g, id)
 ..param.g:An alignment graph.
-...type:Graph.Alignment Graph
+...type:Spec.Alignment Graph
 ..param.id:A sequence id.
 ..returns:A sequence position
 ..see:Function.getFirstCoveredPosition
@@ -1576,7 +1576,7 @@ convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 ..summary:Converts an alignment graph into an alignment matrix.
 ..signature:convertAlignment(g, matrix)
 ..param.g:In-parameter: An alignment graph.
-...type:Graph.Alignment Graph
+...type:Spec.Alignment Graph
 ..param.matrix:Out-parameter: A string that represents an alignment matrix.
 ..returns: A bool that is true iff the alignment graph is a valid alignment
 */

@@ -47,7 +47,7 @@ The $Pattern$ object only contains the right-most column of the dynamic programm
 ...note:At the moment, the algorithm only works on linear gap costs.
 */
 
-///.Class.Pattern.param.TSpec.type:Spec.Score
+///.Class.Pattern.param.TSpec.type:Class.Score
 
 
 template <typename TNeedle, typename TScore>
@@ -234,7 +234,7 @@ SEQAN_CHECKPOINT
 ..cat:Searching
 ..summary:The minimal score a match must reach in approximate searching.
 ..signature:scoreLimit(pattern)
-..param.pattern:A @Concept:Pattern|pattern@ that can be used for approximate searching.
+..param.pattern:A @Concept.Pattern|pattern@ that can be used for approximate searching.
 ...type:Spec.DPSearch
 ..returns:The current score limit of $pattern$.
 */
@@ -253,7 +253,7 @@ SEQAN_CHECKPOINT
 ..cat:Searching
 ..summary:Sets the minimal score a match must reach in approximate searching.
 ..signature:setScoreLimit(pattern, limit)
-..param.pattern:A @Concept:Pattern|pattern@ that can be used for approximate searching.
+..param.pattern:A @Concept.Pattern|pattern@ that can be used for approximate searching.
 ...type:Spec.DPSearch
 ..param.limit:The new score limit.
 ..see:Function.scoreLimit
@@ -275,7 +275,7 @@ SEQAN_CHECKPOINT
 ..cat:Searching
 ..summary:Score of the last found match in approximate searching.
 ..signature:getScore(pattern)
-..param.pattern:A @Concept:Pattern|pattern@ that can be used for approximate searching.
+..param.pattern:A @Concept.Pattern|pattern@ that can be used for approximate searching.
 ...type:Spec.DPSearch
 ..returns:The score of the last match found using $pattern$.
 ...remarks:If no match was found, the value is undefined.

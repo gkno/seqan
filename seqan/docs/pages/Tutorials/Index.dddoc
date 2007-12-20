@@ -187,13 +187,13 @@ There are various functions to access the node the iterator points at, so we con
 ...table:@Function.getOccurrence@|returns a position where the representative occurs in the text
 ...table:@Function.getOccurrences@|returns a string of all positions where the representative occurs in the text
 ...table:@Function.isRightTerminal@|tests if the representative is a suffix in the text (corresponds to the shaded nodes in the figures above)
-...table:@Function.isLeaf@|tests if the current node is a tree leaf
+...table:@Function.Index#isLeaf@|tests if the current node is a tree leaf
 ...table:@Function.parentEdgeLabel@|returns the substring that represents the edge from the current node to its parent (only @Spec.TopDownHistory Iterator@)
 
 ...note:
-There is a difference between the functions @Function.isLeaf@ and @Function.isRightTerminal@.
+There is a difference between the functions @Function.Index#isLeaf@ and @Function.isRightTerminal@.
 In a relaxed suffix tree a leaf is always a suffix, but not vice versa, as there can be internal nodes a suffix ends in.
-For them @Function.isLeaf@ returns false and @Function.isRightTerminal@ returns true.
+For them @Function.Index#isLeaf@ returns false and @Function.isRightTerminal@ returns true.
 
 
 ...subsection:#.# Additional iterators
@@ -286,5 +286,5 @@ The following index implementations are currently part of SeqAn:
 ...table:@Spec.Index_QGram_Nested@|Nested q-gram index|
 
 ...text:
-A simple example for specializing a suffix array based index and a q-gram index for the same pattern matching problem the @Demo.Index|Index demo@.
+A simple example for specializing a suffix array based index and a q-gram index for the same pattern matching problem the @Demo.Index Finder@ demo.
 

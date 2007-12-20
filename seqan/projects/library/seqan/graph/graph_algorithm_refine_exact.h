@@ -499,7 +499,7 @@ SEQAN_CHECKPOINT
 ..param.scoringScheme:The scoring scheme used to score the refined matches (scores are attached to 
 edges in the refined Alignment Graph).
 ...remarks:If no scoring scheme is given, all edges get weight 1.
-...type:Score<TValue,TSpec>
+...type:Class.Score
 */
 //exact refinement, score type given
 template<typename TAlignmentString, typename TScoreValue,typename TScoreSpec,typename TOutGraph, typename TSequence, typename TSetSpec>
@@ -526,9 +526,9 @@ identical (fully overlapping) or non-overlapping.
 ..signature:matchRefinement(matches,stringSet,refinedGraph)
 ..param.matches:The set of matches.
 ..param.stringSet:The StringSet containing the sequences which the matches lie on.
-...type:StringSet<TSequence,TSpec>
+...type:Class.StringSet
 ..param.refinedGraph:The resulting refined set of matches stored in a graph.
-...type:Alignment Graph
+...type:Spec.Alignment Graph
 */
 //exact refinement, score type not given
 template<typename TAlignmentString, typename TOutGraph, typename TSequence, typename TSetSpec>

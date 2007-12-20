@@ -31,7 +31,7 @@ namespace seqan
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/**
+/*DISABLED
 .Class._ChainPoint:
 ..summary:Basic data structure to represent the end-point of a fragment for use in a RMT
 ..cat:Chaining

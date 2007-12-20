@@ -18,6 +18,8 @@
   $Id$
  ==========================================================================*/
 
+//SEQAN_NO_DDDOC: do not generate documentation for this file
+
 #ifndef SEQAN_RT_SKIP_LIST_BASE_H
 #define SEQAN_RT_SKIP_LIST_BASE_H
 

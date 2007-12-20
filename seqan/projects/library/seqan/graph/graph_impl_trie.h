@@ -108,7 +108,7 @@ _addStringToTrie(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 ..summary:Creates a trie.
 ..signature:createTrie(g, terminalStateMap, keywords)
 ..param.g:Out-parameter: An automaton.
-...type:Graph.Trie
+...type:Spec.Trie
 ..param.terminalStateMap:Out-parameter: An external property map.
 ...type:Class.External Property Map
 ...remarks:The external property map must be a String<String<unsigned int> > because
@@ -147,14 +147,14 @@ createTrie(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 ..cat:Graph.Trie
 ..summary:Creates a trie for all reversed keywords.
 ..signature:createTrieOnReverse(g, terminalStateMap, keywords)
-..param.g:Out-parameter: An automaton.
-...type:Graph.Trie
-..param.terminalStateMap:Out-parameter: An external property map.
+..returns.param.g:Out-parameter: An automaton.
+...type:Spec.Trie
+..returns.param.terminalStateMap:Out-parameter: An external property map.
 ...type:Class.External Property Map
 ...remarks:The external property map must be a String<String<unsigned int> > because
 in every vertex of the trie a number of keywords can end. This is the case in the Aho-Corasick
 algorithm if one pattern is a suffix of another pattern! Hence, we must associate with every vertex a set of indices that correspond to keywords.
-..param.text:In-parameter: A set of strings.
+..param.keywords:In-parameter: A set of strings.
 ...type:Class.String
 ..returns:void
 ..see:Function.createTrie

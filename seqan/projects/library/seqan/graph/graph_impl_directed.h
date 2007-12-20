@@ -272,11 +272,7 @@ numVertices(Graph<Directed<TCargo, TSpec> > const& g)
 /**
 .Function.empty:
 ..cat:Graph
-..summary:Indicates whether a graph is empty or not.
-..signature:empty(g)
-..param.g:A graph.
-...type:Class.Graph
-..returns:True if empty, false otherwise.
+..param.object.type:Class.Graph
 */
 
 template<typename TCargo, typename TSpec>

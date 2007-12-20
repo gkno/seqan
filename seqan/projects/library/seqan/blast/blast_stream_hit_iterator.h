@@ -188,18 +188,6 @@ SEQAN_CHECKPOINT
 
 
 
-/**
-.Function.goBegin:
-..cat:Blast
-..summary:Resets the iterator to the beginning.
-..signature:goBegin(file,it)
-..param.it:A hit or hsp iterator on a Blast report with @Spec.StreamReport@.
-..param.it:A stream.
-...type:Spec.HitIterator
-...type:Spec.HspIterator
-..returns:void
-..see:Function.atBegin
-*/
 template<typename TBlastReport, typename TFile>
 inline void
 goBegin(TFile &,

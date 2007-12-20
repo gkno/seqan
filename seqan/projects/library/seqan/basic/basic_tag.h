@@ -147,7 +147,7 @@ typedef Tag<SmithWatermanClump_> const SmithWatermanClump;
 
 //////////////////////////////////////////////////////////////////////////////
 
-/**
+/*DISABLED
 .Tag.RNA Folding Algorithms.value.Nussinov:
 	Nussinov style RNA folding algorithm
 */

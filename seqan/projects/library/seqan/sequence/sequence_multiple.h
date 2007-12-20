@@ -856,7 +856,7 @@ a single integer value between 0 and the sum of string lengths minus 1.
         return back(stringSetLimits(me));
     }
 
-///.Function.appendValue.param.object.type:Class.StringSet
+///.Function.appendValue.param.target.type:Class.StringSet
 //////////////////////////////////////////////////////////////////////////////
 // appendValue
 
@@ -1329,12 +1329,11 @@ a single integer value between 0 and the sum of string lengths minus 1.
 .Function.positionToId:
 ..cat:Sequences
 ..summary:Retrieves the id of a string in the StringSet given a position.
-..signature:positionToId(me, pos)
-..param.me:A StringSet.
+..signature:positionToId(string_set, pos)
+..param.string_set:A StringSet.
 ...type:Class.StringSet
-..param.id:An id.
-...type:Metafunction.Id
-..returns:A reference to a string.
+..param.pos:A position that is transfored into an id.
+..returns:An id that corresponds to $pos$ within $string_set$
 ..see:Function.assignValueById
 ..see:Function.valueById
 */

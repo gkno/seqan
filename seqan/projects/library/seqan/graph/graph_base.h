@@ -46,13 +46,17 @@ struct EdgeDescriptor;
 
 //////////////////////////////////////////////////////////////////////////////
 
-/**
+/*DISABLED: see basic_type.h
 .Metafunction.Cargo:
 ..summary:Type of the cargo of an edge.
 ..signature:Cargo<T>::Type
 ..param.T:Edge type for which the cargo type is determined.
 ..returns.param.Type:Cargo type.
 ..remarks.text:The cargo type of an edge indicates the kind of information that is stored with the edge.
+..example.code:Cargo<Graph<Directed<int> > >::Type c; //c has type int
+*/
+/**
+.Metafunction.Cargo
 ..example.code:Cargo<Graph<Directed<int> > >::Type c; //c has type int
 */
 template<typename T>

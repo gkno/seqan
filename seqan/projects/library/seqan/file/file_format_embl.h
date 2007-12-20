@@ -235,7 +235,8 @@ SEQAN_CHECKPOINT
 ...remarks:This function works on an open file stream or on the string data obtained from calling Function.readMeta
 ..param.data:The target container that will be filled.
 ..param.key:The two-character code specifying the file entry to be read, e.g. "AC" for the acession number line or "DE" for the description line. 
-..see:Function.readMeta,Funtion.readFeature
+..see:Function.readMeta
+..see:Function.readFeature
 */
 template<typename TFile, typename TData, typename TKey>
 inline void
@@ -356,7 +357,8 @@ obtained by calling readLineType with the two-character code "FT").
 ..param.data:The target container that will be filled.
 ..param.key:The key word specifying the feature to be read, e.g. "mRNA" or "CDS".
 ..return:The position behind the feature if found, 0 otherwise.
-..see:Function.readMeta,Funtion.readFeature
+..see:Function.readMeta
+..see:Function.readFeature
 */
 //read parts of feature table (those that belong to key)
 template<typename TData, typename TKey, typename TString>

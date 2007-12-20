@@ -176,7 +176,7 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.read:
+.Function.Fileformat#read:
 ..cat:Input/Output
 ..summary:Loads a record from file.
 ..signature:read(file, data [, meta], format)
@@ -218,6 +218,13 @@ SEQAN_CHECKPOINT
 /**
 .Function.readMeta:
 ..cat:Input/Output
+..summary:Read meta information from file.
+..signature:readMeta(file, meta, file_format)
+..param.file:A file that contains data in the format specified by $file_format$.
+..param.meta:A data structure that is able to store meta informations stored in $file$.
+..param.file_format:A file format.
+..returns.param.meta:The meta data read from $file$.
+...type:Tag.File Format
 */
 
 template <typename TFile, typename TData, typename TMeta, typename TFormat>
@@ -265,8 +272,17 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.write:
+.Function.Fileformat#write:
 ..cat:Input/Output
+..summary:Writes to stream.
+..signature:write(stream, source)
+..signature:write(stream, begin, end)
+..param.stream: A stream object.
+...type:Adaption."std::iostream"
+..param.source: Container that is written to $stream$.
+..param.begin: Iterator to the first character of the range.
+..param.end: Iterator behind the last character of the range.
+..remarks:The content of $source$ is written 'as-is' to $stream$.
 */
 
 template <typename TFile, typename TData, typename TMeta, typename TFormat>
@@ -357,21 +373,7 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 //TODO??? Das muss in eine extra Datei
 
-/*DISABLED
-.Function.write:
-..summary:Writes to stream.
-..cat:Input/Output
-..signature:write(stream, source)
-..signature:write(stream, begin, end)
-..param.stream: A stream object.
-...type:Adaption."std::iostream"
-..param.source: Container that is written to $stream$.
-..param.begin: Iterator to the first character of the range.
-..param.end: Iterator behind the last character of the range.
-..param.limit: The maximal number of charactes written to $stream$. (optional)
-..remarks:The content of $source$ is written 'as-is' to $stream$.
-??? TODO: save as file format
-*/
+
 /*
 template <typename TStream, typename TIterator>
 inline void

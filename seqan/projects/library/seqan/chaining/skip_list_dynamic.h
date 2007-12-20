@@ -27,6 +27,9 @@
 *
 */
 
+//SEQAN_NO_DDDOC: do not generate documentation for this file
+
+
 #ifndef SEQAN_HEADER_SKIP_LIST_DYNAMIC_H
 #define SEQAN_HEADER_SKIP_LIST_DYNAMIC_H
 
@@ -238,7 +241,6 @@ namespace seqan
 ..param.iterator:Iterator to an entry, that should be deleted.
 ...concept:Concept.Iterator
 ..param.object:An object in the list, that should be deleted.
-...type:TObject
 ..param.key:A key.
 ...type:A key. All entries with the given theKeywill be deleted.
 ..remarks.text:Returns true, if at least one element is deleted, false otherwise.

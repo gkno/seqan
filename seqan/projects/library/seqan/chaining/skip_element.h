@@ -26,6 +26,9 @@
 *	Elements in the higher layers of the Skip List
 *
 */
+
+//SEQAN_NO_DDDOC: do not generate documentation for this file
+
 #ifndef SEQAN_HEADER_SKIP_ELEMENT_H
 #define SEQAN_HEADER_SKIP_ELEMENT_H
 

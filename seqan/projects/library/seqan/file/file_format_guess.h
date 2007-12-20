@@ -40,9 +40,9 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.data: The target container.
 ...remarks:This container is not modified by this function.
 ..returns:A file format object instance that represents the determined file format.
-...type:$Class.FileFormat$
+...type:Class.FileFormat
 ..remarks:The $data$-argument is used here as a tag to determine the type of the target.
-..see:Function.read
+..see:Function.Fileformat#read
 ..see:Tag.File Format
 */
 template <typename TFile, typename TData, typename TMeta>

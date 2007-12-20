@@ -60,16 +60,17 @@ namespace SEQAN_NAMESPACE_MAIN
 ..remarks:When given as a second parameter in @Function.goNext@ the Suffix Tree is traversed in a preorder fashion (visit the node before its children).
 Empty edges are traversed also, i.e. for every suffix there is a leaf node representing it.
 ..see:Tag.PostorderEmptyEdges
+..see:Tag.Preorder
 */
 
 /**
-.Tag.Postorder:
+.Tag.PostorderEmptyEdges:
 ..summary:Postorder depth-first search in a suffix tree with leaves for every suffix.
 ..cat:Index
-..signature:Postorder
+..signature:PostorderEmptyEdges
 ..remarks:When given as a second parameter in @Function.goNext@ the Suffix Tree is traversed in a postorder fashion (visit the node after its children).
 Empty edges are traversed also, i.e. for every suffix there is a leaf node representing it.
-..see:Tag.Preorder
+..see:Tag.Postorder
 */
 
 /**

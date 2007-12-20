@@ -278,9 +278,9 @@ struct DeepestSpec<T const>:
 
 /**
 .Metafunction.Cargo:
-..summary:Additional data of a class. 
+..summary:Type of additional data stored in an object. 
 ..signature:Cargo<T>::Type
-..param.T:Type for which the cargo is determined.
+..param.T:Type for which the cargo tyoe is determined.
 ..returns.param.Type:Cargo of $T$.
 ..remarks:The definition of Cargo allows the addition of user specific data to existing data structures.
 */

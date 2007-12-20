@@ -55,7 +55,7 @@ If integer scores are produced, each value is rounded separately.
 .Function.getScale.param.score.type:Spec.Pam
 .Function.getDist.param.score.type:Spec.Pam
 .Function.getEntropy.param.score.type:Spec.Pam
-.Function.write.param.data.type:Spec.Pam
+.DISABLEDFunction.write.param.data.type:Spec.Pam
 .Internal.getPamProperties.param._score.type:Class.Score
 .Internal.showPamMatrix.param._score.type:Class.Score
 .Internal._setDist.param._score.type:Class.Score
@@ -120,15 +120,12 @@ public:
 ..summary:Constructor
 ..signature:Score(const & other)
 ..signature:Score(distance, gap [, gap_open])
-..param.distance: desired evolutionary distance
+..param.distance: desired evolutionary distance (int).
 ...default:250
-...type:int
 ..param.gap: desired penalty for gap (extension).
 ...default:-1
-...type: TValue
 ..param.gap_open: desired penalty for gap opening.
 ...default:$gap$
-...type: TValue
 ..param.other:Score to be copied
 ...text:If both gap and gap_open are specified, the total score of a length $n$ gap is $gap_open + (n-1)*gap$.
 ...note:Usually $gap$, $gap_extend$, and $gap_open$ are negative values.
@@ -239,8 +236,7 @@ public:
 ..summary:Access function returning the distance dependent $scaling factor$ used for PAM matrix computation
 ..signature:getScale(score)
 ..param.score:Score class instance containing scoring matrix as a member.
-..returns:Scaling factor used for current PAM matrix computation.
-...type:double
+..returns:Scaling factor used for current PAM matrix computation (double).
 */	
 		
 	friend inline void
@@ -256,8 +252,7 @@ public:
 ..summary:assigns given value to $scaling_factor$
 ..signature:_setScale(& _score, _scale)
 ..param._score:Score class instance in which Pam computation is to be performed.
-..param._scale:Is assigned to the member attribute $scaling_factor$.
-...type:double
+..param._scale:Is assigned to the member attribute $scaling_factor$ (double).
 */	
 		
 	friend inline int
@@ -279,7 +274,6 @@ public:
 ..signature:getDist(const & _score)
 ..param._score:Score class instance containing scoring matrix as a member.
 ..returns:Distance used for current PAM matrix computation.
-...type:int
 */	
 		
 	friend inline void
@@ -295,7 +289,6 @@ public:
 ..signature:_setDist(& _score, _givenDist)
 ..param._score:Score class instance in which Pam computation is to be performed.
 ..param._givenDist:Is assigned to the member attribute $dist$.
-...type:int
 */
 	friend inline double
 		getEntropy(Score & _score) {
@@ -315,8 +308,7 @@ public:
 ..signature:getEntropy(& _score)
 ..signature:getEntropy(const & _score)
 ..param._score:Score class instance containing scoring matrix as a member.
-..returns:Entropy of the matrix currently hold in Score $_score$.
-...type:double
+..returns:Entropy of the matrix currently hold in Score $_score$ (double).
 */
 	friend inline void
 		_setEntropy(Score & _score, double H) {
@@ -329,8 +321,7 @@ public:
 ..summary:assigns given value to $entropy$.
 ..signature:_setEntropy(Score & _score, double H)
 ..param._score:Score class instance containing scoring matrix as a member.
-..param.H:Is assigned to the member attribute $entropy$.
-...type:double
+..param.H:Is assigned to the member attribute $entropy$ (double).
 */
 
 

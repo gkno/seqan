@@ -18,6 +18,8 @@
   $Id$
  ==========================================================================*/
 
+//SEQAN_NO_DDDOC: do not generate documentation for this file
+
 #ifndef _RANGE_TREE_H
 #define _RANGE_TREE_H
 

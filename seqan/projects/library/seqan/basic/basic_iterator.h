@@ -375,7 +375,7 @@ SEQAN_CHECKPOINT
 /**
 .Function.atBegin:
 ..cat:Iteration
-..summary:Test whether end of container has been reached. 
+..summary:Determines whether an iterator is at the beginning position.
 ..signature:bool atBegin(iterator [, container])
 ..param.iterator:An iterator.
 ...type:Class.Iter
@@ -414,7 +414,7 @@ SEQAN_CHECKPOINT
 /**
 .Function.atEnd:
 ..cat:Iteration
-..summary:Test whether end of container has been reached. 
+..summary:Determines whether an iterator is at the end position. 
 ..signature:bool atEnd(iterator [, container])
 ..param.iterator:An iterator.
 ...type:Class.Iter

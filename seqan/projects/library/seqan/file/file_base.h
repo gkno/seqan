@@ -435,7 +435,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 ..signature:resize(file, new_length)
 ..param.file:A File object.
 ...type:Class.File
-..param.newLength:The new file size measured in bytes.
+..param.new_length:The new file size measured in bytes.
 */
 
     template < typename TSpec, typename TSize >

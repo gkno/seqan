@@ -27,6 +27,15 @@ namespace seqan
 //////////////////////////////////////////////////////////////////////////////
 // Score spec for sum of pairs distance
 
+/**.Spec.Score ChainSoP
+..summary:Scoring scheme for chaining that uses a special method for scoring the gaps between two fragments.
+..cat:Chaining
+..general:Class.Score
+..signature:Score<TValue, ChainSoP>
+..param.TValue:Type of the score values.
+..remarks:This scoring scheme is used to score gaps between to fragments in chaining.
+*/
+
 template <typename TValue>
 class Score<TValue, ChainSoP>
 {

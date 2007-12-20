@@ -194,13 +194,9 @@ SEQAN_CHECKPOINT
 /**
 .Function.goBegin:
 ..cat:Blast
-..summary:Resets the iterator to the beginning.
-..signature:goBegin(it)
-..param.it:A hit or hsp iterator.
+..param.iterator
 ...type:Spec.HitIterator
 ...type:Spec.HspIterator
-..returns:void
-..see:Function.atBegin
 */
 template<typename TBlastObject, typename TIteratorSpec>
 inline void

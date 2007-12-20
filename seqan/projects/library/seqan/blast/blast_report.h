@@ -456,7 +456,7 @@ SEQAN_CHECKPOINT
 
 
 /**
-.Function.read:
+.Function.File#read:
 ..cat:Blast
 ..summary:Reads a Blast report.
 ..signature:read(file,blastReport,Blast())
@@ -755,8 +755,7 @@ SEQAN_CHECKPOINT
 ..signature:numHits(blastReport);
 ..param.it:A Blast Report.
 ...type:Class.BlastReport with @Spec.StoreReport@.
-..returns:The number of hits.
-...type:unsigned int
+..returns:The number of hits (unsigned int).
 ..see:Function.numHsps
 */
 template<typename TBlastHsp, typename TInfoSpec>
@@ -776,8 +775,7 @@ SEQAN_CHECKPOINT
 ..param.it:A Blast report or a Blast hit.
 ...type:Class.BlastReport with @Spec.StoreReport@.
 ...type:Class.BlastHit with @Spec.StoreReport@.
-..returns:The number of hsps.
-...type:unsigned int
+..returns:The number of hsps (unsigned int)
 ..see:Function.numHits
 */
 template<typename TBlastHsp, typename TInfoSpec>

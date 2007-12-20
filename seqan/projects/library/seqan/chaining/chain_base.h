@@ -311,7 +311,7 @@ chain(TSource & source,
 ...default:$Default$
 ...value:$Default$: Compiler selects best algorithm.
 ...value:$GenericChaining$: A simple generic chaining algorithm.
-...value:$RangetreeChaining$: An elaborated chaining algorithm for @Spec.Score Zero@, @Spec.Score Manhattan@, and @Score ChainSoP@ scoring schemes.
+...value:$RangetreeChaining$: An elaborated chaining algorithm for @Spec.Score Zero@, @Spec.Score Manhattan@, and @Spec.Score ChainSoP@ scoring schemes.
 */
 
 

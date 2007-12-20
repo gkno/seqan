@@ -101,7 +101,7 @@ addLetterToOracle(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 ..summary:Creates a factor oracle.
 ..signature:createOracle(g, text)
 ..param.g:Out-parameter: An oracle.
-...type:Graph.Oracle
+...type:Spec.Oracle
 ..param.text:In-parameter: A string.
 ...type:Class.String
 ..returns:void
@@ -135,7 +135,7 @@ createOracle(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 ..summary:Creates a factor oracle for the reversed string.
 ..signature:createOracleOnReverse(g, text)
 ..param.g:Out-parameter: An oracle.
-...type:Graph.Oracle
+...type:Spec.Oracle
 ..param.text:In-parameter: A string.
 ...type:Class.String
 ..returns:void

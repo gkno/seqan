@@ -144,7 +144,7 @@ struct IsContiguous<T const>:
 ..signature:IsSequence<T>::VALUE
 ..param.T:Type that is tested for being a sequence.
 ..returns.param.VALUE:$true$ if $T$ is a sequence, $false$ otherwise.
-..remarks:For example @Class.String@, @Class.Segment@, and @Class.ModifierString@ return $true$.
+..remarks:For example @Class.String@ and @Class.Segment@ return $true$.
 */
 template <typename T>
 struct IsSequence
@@ -585,8 +585,8 @@ SEQAN_CHECKPOINT
 
 /**
 .Function.getValue:
+..summary:Access to the value.
 ..cat:Containers
-..summary:Access value. 
 ..cat:Content Manipulation
 ..signature:GetValue getValue(container, pos)
 ..param.container:A container.
@@ -1129,7 +1129,15 @@ SEQAN_CHECKPOINT
 /**
 .Function.insertValue:
 ..cat:Content Manipulation
+..summary:Inserts a single value into a container.
 ..signature:insertValue(target, pos, value [, resize_tag])
+..param.target:The container
+..param.pos:Position within $target$ at which $value$ is to be inserted.
+..param.value:Value that will be inserted into $target$.
+..param.resize_tag:Strategy that is applied if $target$ has not enough capacity to store the complete content.
+...type:Tag.Overflow Strategy
+..see:Function.assignValue
+..see:Function.appendValue
 */
 
 template <typename T, typename TPosition, typename TValue>

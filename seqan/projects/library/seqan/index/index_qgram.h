@@ -987,12 +987,12 @@ Formally, this is a reference to the @Tag.QGram_Shape@ fibre.
 ..summary:Builds an index on a StringSet storing how often a q-gram occurs in each sequence.
 ..cat:Index
 ..signature:createCountsArray(counts, dir, stringSet, shape)
-..param.text:The StringSet.
+..param.stringSet:The StringSet.
 ...type:Class.StringSet
 ..param.shape:The shape to be used.
 ...type:Class.Shape
-..param.count:The resulting list of pairs (seqNo,count).
-..param.dir:The resulting array that indicates at which position in the count table the corresponding a certain q-gram can be found.
+..returns.param.counts:The resulting list of pairs (seqNo,count).
+..returns.param.dir:The resulting array that indicates at which position in the count table the corresponding a certain q-gram can be found.
 */
 
 	template < 

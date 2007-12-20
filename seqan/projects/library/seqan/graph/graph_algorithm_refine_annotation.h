@@ -32,16 +32,16 @@ class Annotation;
 
 
 
-//
-//.Class.Annotation:
-//..cat:Sequences
-//..summary:Class for annotating sequences. 
-//..signature:Annotation<TSequence, TSpec>  
-//..param.TSequence:The sequence that annotation is available for.
-//..param.TSpec:The specializing type.
-//...default:Simple (sequence is annotated with a character (or char string? or int? ) )
-//..include:blast.h
-//
+/**
+.Class.Annotation:
+..cat:Sequences
+..summary:Class for annotating sequences. 
+..signature:Annotation<TSequence, TSpec>  
+..param.TSequence:The sequence that annotation is available for.
+..param.TSpec:The specializing type.
+...default:Simple (sequence is annotated with a character (or char string? or int? ) )
+..include:blast.h
+*/
 template<typename TSequence,typename TValue>
 class Annotation<TSequence,TValue,Simple>{
 
@@ -290,7 +290,7 @@ SEQAN_CHECKPOINT
 .Function.matchRefinement:
 ..signature:matchRefinement(matches,annotation,stringSet,scoringScheme,refinedGraph)
 ..param.annotation:Sequence annotation data.
-...type:@Class.Annotation@
+...type:Class.Annotation
 */
 //annotation given,exact refinement, score type given
 template<typename TAlignmentString, typename TScoreValue,typename TScoreSpec,typename TAnnoString,typename TOutGraph, typename TSequence, typename TSetSpec>

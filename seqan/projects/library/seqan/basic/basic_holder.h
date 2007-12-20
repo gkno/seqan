@@ -168,7 +168,7 @@ struct Reference< Holder<TValue, TSpec> const>
 .Spec.Tristate Holder
 ..cat:Holders
 ..summary:Holder that can be empty, dependent, or owner.
-..signature:Holder<Value, Tristate>
+..signature:Holder<TValue, Tristate>
 ..param.TValue:Type of the managed object.
 ..general:Class.Holder
 ..remarks.text:A tristate holder $A$ that holds an object $B$ has one of the following states:
@@ -415,7 +415,12 @@ SEQAN_CHECKPOINT
 ..signature:detach(object)
 ..param.object:An object.
 ...type:Class.Holder
-..remarks.text:After calling this function, @Function.dependent.dependent(object)@ returns $false$.
+..remarks:
+After this function, $object$ does not depends from any other entity outside of $object$,
+like a @Function.source@ or a @Function.host@, and @Function.dependent.dependent(object)@ returns $false$ 
+..see:Function.source
+..see:Function.host
+..see:Function.createSource
 ..see:Function.create
 */
 
@@ -906,23 +911,7 @@ SEQAN_CHECKPOINT
 }
 
 //////////////////////////////////////////////////////////////////////////////
-/**
-.Function.create:
-..summary:Makes an object to owner of its content.
-..cat:Dependent Objects
-..signature:create(holder [, object])
-..param.holder:A holder object.
-...type:Class.Holder
-..param.object:Object from which a copy is made and stored in $holder$. (optional)
-...type:Metafunction.Value.Value<Holder>::Type
-..remarks.text:After this operation, $holder$ will be in state 'owner'.
-If $object$ is specified, $holder$ will hold a copy of $object$ at the end of this function.
-If $object$ is not specified, the action depends on the former state of $holder$:
-..remarks.text:- If the state of $holder$ was 'empty', a new object is default constructed and stored into $holder$.
-..remarks.text:- If the state of $holder$ was 'dependent', a copy of the former object is made and stored into $holder$. 
-..remarks.text:- If the state of $holder$ was already 'owner', nothing happens.
-..see:Class.Holder
-*/
+
 
 template <typename TValue>
 inline void
@@ -977,16 +966,7 @@ SEQAN_CHECKPOINT
 }
 
 //////////////////////////////////////////////////////////////////////////////
-/**
-.Function.detach:
-..summary:Makes an object independent from other objects.
-..cat:Dependent Objects
-..signature:detach(object)
-..param.object:An object.
-...type:Class.Holder
-..remarks.text:After calling this function, @Function.dependent.dependent(object)@ returns $false$.
-..see:Function.create
-*/
+
 
 template <typename TValue>
 inline void
@@ -997,18 +977,7 @@ SEQAN_CHECKPOINT
 }
 
 //////////////////////////////////////////////////////////////////////////////
-/**
-.Function.setValue:
-..cat:Content Manipulation
-..summary:Makes holder dependent.
-..signature:setValue(holder, object)
-..param.holder:A holder object.
-...type:Class.Holder
-..param.object:Object from which $holder$ will be dependent.
-...type:Metafunction.Value.Value<Holder>::Type
-..remarks.text:After this operation, $holder$ will be dependent in state 'dependent'.
-..see:Class.Holder
-*/
+
 
 template <typename TValue>
 inline void

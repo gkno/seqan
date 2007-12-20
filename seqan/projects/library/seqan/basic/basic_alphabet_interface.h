@@ -68,7 +68,7 @@ typedef wchar_t Unicode;
 .Function.valueConstruct:
 ..cat:Content Manipulation
 ..summary:Constructs an object at specified position.
-..signature:valueConstruct(interator [, param [, move_tag] ])
+..signature:valueConstruct(iterator [, param [, move_tag] ])
 ..param.iterator:Pointer or iterator to position where the object should be constructed.
 ..param.param:Parameter that is forwarded to constructor. (optional)
 ..param.move_tag:Instance of the @Tag.Move Switch.move switch tag@. (optional)
@@ -205,7 +205,7 @@ SEQAN_CHECKPOINT
 .Function.valueDestruct:
 ..cat:Content Manipulation
 ..summary:Destoys an object at specified position.
-..signature:valueDestruct(interator)
+..signature:valueDestruct(iterator)
 ..param.iterator:Pointer or iterator to position where the object should be constructed.
 ..remarks:The type of the constructed object is the @Metafunction.Value.value type@ of $iterator$.
 ..see:Function.valueConstruct
@@ -437,7 +437,7 @@ SEQAN_CHECKPOINT
 .Function.arrayFill:
 ..cat:Array Handling
 ..summary:Assigns one object to each element of a range.
-..signature:arrayFill(target_begin, count, value)
+..signature:arrayFill(begin, end, value)
 ..param.begin:Iterator to the begin of the range that is to be filled.
 ..param.end:Iterator behind the end of the range.
 ..param.value:Argument that is assigned to all $count$ objects in $array$.

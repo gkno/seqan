@@ -95,7 +95,7 @@ inline void reverseComplementInPlace(StringSet<TSequence, TSpec> & stringSet)
 ..cat:Modifier
 ..summary:Modifier specialization type for the complement of @Spec.Dna@ alphabet sequences.
 ..signature:DnaStringComplement
-..shortcutfor:Class.ModView
+..shortcutfor:Spec.ModView
 ...signature:ModView< FunctorComplement<Dna> >
 ..see:Spec.ModView
 ..see:Class.FunctorComplement
@@ -106,7 +106,7 @@ inline void reverseComplementInPlace(StringSet<TSequence, TSpec> & stringSet)
 ..cat:Modifier
 ..summary:Modifier specialization type for the complement of @Spec.Dna5@ alphabet sequences.
 ..signature:Dna5StringComplement
-..shortcutfor:Class.ModView
+..shortcutfor:Spec.ModView
 ...signature:ModView< FunctorComplement<Dna5> >
 ..see:Spec.ModView
 ..see:Class.FunctorComplement

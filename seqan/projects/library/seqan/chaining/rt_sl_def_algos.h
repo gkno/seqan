@@ -18,6 +18,8 @@
   $Id$
  ==========================================================================*/
 
+//SEQAN_NO_DDDOC: do not generate documentation for this file
+
 #ifndef SEQAN_HEADER_RT_SL_DEF_ALGOS_H
 #define SEQAN_HEADER_RT_SL_DEF_ALGOS_H
 

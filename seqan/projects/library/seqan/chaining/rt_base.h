@@ -18,6 +18,9 @@
   $Id$
  ==========================================================================*/
 
+//SEQAN_NO_DDDOC: do not generate documentation for this file
+
+
 #ifndef SEQAN_RT_BASE_H
 #define SEQAN_RT_BASE_H
 
@@ -246,9 +249,7 @@ namespace seqan{
 ..param.tree:A Range Tree.
 ...type:RangeTree
 ..param.lower_border:The object that stores the lower borders for all dimensions, i.e. $key( lower_border ) <= key( point in range )$
-...type:TObject.
 ..param.lower_border:The object that stores the upper borders for all dimensions, i.e. $key( point in range ) <= key( upper_border )$
-...type:TObject.
 ..param.dest:A container to save the objects.
 ..remarks:The size of $dest$ should be sufficient.
 */

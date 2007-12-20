@@ -48,7 +48,6 @@ namespace seqan{
 ..param.tree:A Range Tree with spec MaxTree.
 ...type:RangeMaximumTree
 ..param.border:The object that stores the borders for all dimensions.
-...type:TObject.
 ..returns:A pointer to the object witch maximal priority in the given intervall.
 */
 
@@ -88,7 +87,6 @@ namespace seqan{
 ..param.tree:The tree.
 ...type:Class.RangeMaximumTree
 ..param.obj:The object.
-...type:TObject.
 ..param.prio:The new priority (optional). $prio > priority( obj )$ must hold.
 ...type:$Metafunction.Weight< TObject >::Type$.
 */
@@ -206,7 +204,6 @@ namespace seqan{
 ..param.searchPath:The search path.
 ...type:SkipElement**
 ..param.max_obj:The object with maximal priority.
-...type:TObject of the RMT.
 */
 	
 	template< typename TObject, typename TSpec, typename TStructuring, typename TSize, typename TKey >

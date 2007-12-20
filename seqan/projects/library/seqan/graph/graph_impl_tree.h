@@ -788,12 +788,12 @@ isRoot(Graph<Tree<TCargo, TSpec> > const& g,
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.isLeaf:
+.Function.Graph#isLeaf:
 ..cat:Graph.Tree
 ..summary:Tests whether a given vertex is a leaf or not.
 ..signature:isLeaf(g, v)
 ..param.g:A tree.
-...type:Graph.Tree
+...type:Spec.Tree
 ..param.v:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
 ..returns:True if vertex is a leaf.
@@ -820,7 +820,7 @@ isLeaf(Graph<Tree<TCargo, TSpec> > const& g,
 ..summary:Number of tree edges.
 ..signature:numTreeEdges(g)
 ..param.g:A tree.
-...type:Graph.Tree
+...type:Spec.Tree
 ..returns:Number of tree edges. Faster than numEdges for trees.
 */
 
@@ -841,7 +841,7 @@ numTreeEdges(Graph<Tree<TCargo, TSpec> > const& g)
 ..summary:Number of children of a given tree vertex.
 ..signature:numChildren(g, v)
 ..param.g:A tree.
-...type:Graph.Tree
+...type:Spec.Tree
 ..param.v:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
 ..returns:Number of children
@@ -866,7 +866,7 @@ numChildren(Graph<Tree<TCargo, TSpec> > const& g,
 Optionally a cargo can be attached to the parent-child edge.
 ..signature:addChild(g, parent [, cargo])
 ..param.g:A tree.
-...type:Graph.Tree
+...type:Spec.Tree
 ..param.parent:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
 ..param.cargo:A cargo object.
@@ -912,7 +912,7 @@ addChild(Graph<Tree<TCargo, TSpec> >& g,
 ..summary:Removes a child from the tree given a parent.
 ..signature:removeChild(g, parent, child)
 ..param.g:A tree.
-...type:Graph.Tree
+...type:Spec.Tree
 ..param.parent:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
 ..param.child:A vertex descriptor.
@@ -942,7 +942,7 @@ removeChild(Graph<Tree<TCargo, TSpec> >& g,
 ..summary:Removes all children from the tree given a parent.
 ..signature:removeChild(g, parent)
 ..param.g:A tree.
-...type:Graph.Tree
+...type:Spec.Tree
 ..param.parent:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
 ..returns:void
@@ -976,7 +976,7 @@ removeAllChildren(Graph<Tree<TCargo, TSpec> >& g,
 ..summary:Returns the child vertex of an edge.
 ..signature:childVertex(g, e)
 ..param.g:A tree.
-...type:Graph.Tree
+...type:Spec.Tree
 ..param.e:An edge descriptor.
 ...type:Metafunction.EdgeDescriptor
 ..returns:A vertex descriptor.
@@ -1000,7 +1000,7 @@ childVertex(Graph<Tree<TCargo, TSpec> > const&,
 ..summary:Returns the parent vertex of an edge.
 ..signature:parentVertex(g, e)
 ..param.g:A tree.
-...type:Graph.Tree
+...type:Spec.Tree
 ..param.e:An edge descriptor.
 ...type:Metafunction.EdgeDescriptor
 ..returns:A vertex descriptor.
@@ -1036,11 +1036,10 @@ parentVertex(Graph<Tree<TCargo, TSpec> > const& g,
 ..summary:Returns all leaves underneath a given vertex.
 ..signature:collectLeaves(g, subtree_root, set)
 ..param.g:A tree.
-...type:Graph.Tree
+...type:Spec.Tree
 ..param.subtree_root:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
-..param.set:A set of vertex descriptors.
-...type:STL set
+..param.set:A set of vertex descriptors (STL set).
 */
 template<typename TCargo, typename TSpec, typename TVertexDescriptor, typename TSet>
 inline void

@@ -246,10 +246,13 @@ def translateTooltip(text):
 
 ################################################################################
 
+def brokenLinkText(text):
+    return '<span class=broken_link>' + text + '</span>'
+
 def brokenLink(text):
     print
     print '    WARNING: broken link "' + text + '"'
-    return '<span class=broken_link>' + text + '</span>'
+    return brokenLinkText(text)
 
 
 ################################################################################
@@ -285,20 +288,23 @@ def translateLinkDisplaytext(text):
         
     if (protocol == 'glos'):
         arr = dddoc.splitName(rest)
-        if len(arr) == 0: return brokenLink(text)
+        if len(arr) == 0: return brokenLinkText(text)
         glos = findGlossary(arr[0])
-        if not glos: return brokenLink(text)
+        if not glos: return brokenLinkText(text)
         if len(arr) == 1: return arr[0]
         return arr[1]
         
     arr = dddoc.splitName(text)
-    if len(arr) == 0: return brokenLink(text)
+    if len(arr) == 0: return brokenLinkText(text)
+
+    if (dddoc.DATA["globals.categories"][arr[0]].empty()): return brokenLinkText(text)
 
     if text.find('.') < 0: #Link to indexpage
+        if (dddoc.DATA["globals.indexes"][arr[0]].empty()): return brokenLinkText(text)
         if len(arr) == 1: return getCategoryTitle(arr[0])
         else: return arr[1] 
 
-    if (len(arr) < 2): return brokenLink(text)
+    if (len(arr) < 2): return brokenLinkText(text)
     
     return translateID(arr[len(arr) - 1])
 
@@ -335,12 +341,14 @@ def translateLink(text, attribs = ""):
     arr = dddoc.splitName(text)
     if len(arr) == 0: return brokenLink(text)
     
+    if (dddoc.DATA["globals.categories"][arr[0]].empty()): return brokenLink(text)
+    
     #Link to Indexpage
     if text.find('.') < 0:
+        if (dddoc.DATA["globals.indexes"][arr[0]].empty()): return brokenLink(text)
         if len(arr) == 1: t = getCategoryTitle(arr[0])
         else: t = arr[1]
-        if (dddoc.DATA["globals.indexes"][arr[0]].empty()): return brokenLink(text)
-        else: return '<a href="' + getIndexpage(arr[0]) + '" ' + attribs + '>' + t + '</a>'
+        return '<a href="' + getIndexpage(arr[0]) + '" ' + attribs + '>' + t + '</a>'
 
 
     #Link to Page

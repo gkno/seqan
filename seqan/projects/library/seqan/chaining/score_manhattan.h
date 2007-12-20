@@ -27,6 +27,14 @@ namespace seqan
 //////////////////////////////////////////////////////////////////////////////
 // Score spec for manhattan distance
 
+/**.Spec.Score Manhattan
+..summary:Scoring scheme for chaining that computes gap scores using manhattan distance.
+..cat:Chaining
+..general:Class.Score
+..signature:Score<TValue, Manhattan>
+..param.TValue:Type of the score values.
+..remarks:The manhattan distance between two n-dimensional points is defined is the sum of the (absolute) differences of their coordinates. 
+*/
 template <typename TValue>
 class Score<TValue, Manhattan>
 {

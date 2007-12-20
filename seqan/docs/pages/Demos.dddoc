@@ -202,6 +202,7 @@ weese@tanne:~/seqan/demos$
 .Demo.Suffix Array:
 ..cat:Index
 ..summary:Example for how to create a suffix array and use it as a dictionary.
+..description:
 ...text:Given a sequence $s$, a suffix array is an array containing start positions of all suffices of $s$ in
 lexicographical order. A suffix array can simply be used to find all occurrences of an arbitrary substring $t$
 in $s$ in O(|t|*log(|s|)).
@@ -229,7 +230,7 @@ weese@tanne:~/seqan/demos$
 .Demo.Index Finder:
 ..cat:Index
 ..summary:Example for using a @Class.Finder@ of an @Class.Index@.
-...text:This example shows how to use the @Class.Finder@ class for an @Class.Index@ search.
+..description:This example shows how to use the @Class.Finder@ class for an @Class.Index@ search.
 ..file:../projects/library/demos/index_find.cpp
 ..output:
 ...code:
@@ -248,7 +249,7 @@ weese@tanne:~/seqan/demos$
 .Demo.Index Finder StringSet:
 ..cat:Index
 ..summary:Example for using a @Class.Finder@ of an @Class.Index@ of a @Class.StringSet@.
-...text:This example shows how to use the @Class.Finder@ class for an @Class.Index@ search.
+..description:This example shows how to use the @Class.Finder@ class for an @Class.Index@ search.
 The @Class.Index@ was build for a given @Class.StringSet@.
 ..file:../projects/library/demos/index_find_stringset.cpp
 ..output:
@@ -537,7 +538,7 @@ weese@tanne:~/seqan/demos$
 ..summary:Path-growing code example
 ..file:../projects/library/demos/graph_algo_matching_pathgrowing.cpp
 ..demofor:Class.Graph
-..demofor:Function.path_growing_algorithm
+..DISABLEDdemofor:Function.path_growing_algorithm
 .
 
 
@@ -610,7 +611,7 @@ weese@tanne:~/seqan/demos$
 ..summary:Progressive multiple sequence alignment using neighbor joining for building the guide tree.
 ..file:../projects/library/demos/graph_align_guide_nj.cpp
 ..demofor:Class.Graph
-..demofor:Function.slowNjTree
+..DISABLEDdemofor:Function.slowNjTree
 .
 
 .Demo.MSA with UPGMA
@@ -619,7 +620,7 @@ weese@tanne:~/seqan/demos$
 ..summary:Progressive multiple sequence alignment using UPGMA for building the guide tree
 ..file:../projects/library/demos/graph_align_guide_upgma.cpp
 ..demofor:Class.Graph
-..demofor:Function.upgmaTree
+..DISABLEDdemofor:Function.upgmaTree
 .
 
 .Demo.T-Coffee
@@ -628,7 +629,7 @@ weese@tanne:~/seqan/demos$
 ..summary:T-Coffee code example
 ..file:../projects/library/demos/graph_align_msa.cpp
 ..demofor:Class.Graph
-..demofor:Function.tCoffeeProteinAlignment
+..DISABLEDdemofor:Function.tCoffeeProteinAlignment
 .
 
 
@@ -643,7 +644,7 @@ weese@tanne:~/seqan/demos$
 ..demofor:Function.write
 ..demofor:Function.read
 ..demofor:Function.readMeta
-..demofor:Spec.FileReader
+..demofor:Spec.File Reader String
 .
 
 

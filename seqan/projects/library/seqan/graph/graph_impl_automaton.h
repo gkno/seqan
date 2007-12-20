@@ -690,8 +690,8 @@ write(TFile & target,
 ..summary:Creates the root in a tree or an automaton.
 ..signature:createRoot(g)
 ..param.g:A tree or an automaton.
-...type:Graph.Automaton
-...type:Graph.Tree
+...type:Spec.Automaton
+...type:Spec.Tree
 ..returns:void
 */
 
@@ -715,13 +715,13 @@ createRoot(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g)
 ..summary:Assigns a new root vertex to the automaton.
 ..signature:assignRoot(g, vertex)
 ..param.g:A automaton.
-...type:Graph.Automaton
+...type:Spec.Automaton
 ..param.vertex:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
 ..returns:void
 ..see:Function.getRoot
 ..see:Function.root
-..see:Function.isRoot
+..see:Function.Graph#isRoot
 */
 
 template<typename TAlphabet, typename TCargo, typename TSpec, typename TVertexDescriptor>
@@ -742,13 +742,13 @@ assignRoot(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 ..summary:Gets a reference to the root of the tree.
 ..signature:root(g)
 ..param.g:A tree or an automaton.
-...type:Graph.Automaton
-...type:Graph.Tree
+...type:Spec.Automaton
+...type:Spec.Tree
 ..returns:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
 ..see:Function.getRoot
 ..see:Function.assignRoot
-..see:Function.isRoot
+..see:Function.Graph#isRoot
 */
 
 template<typename TAlphabet, typename TCargo, typename TSpec>
@@ -768,13 +768,13 @@ root(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g)
 ..summary:Get method for the root of a tree or an automaton.
 ..signature:getRoot(g)
 ..param.g:An automaton or a tree.
-...type:Graph.Automaton
-...type:Graph.Tree
+...type:Spec.Automaton
+...type:Spec.Tree
 ..returns:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
 ..see:Function.assignRoot
 ..see:Function.root
-..see:Function.isRoot
+..see:Function.Graph#isRoot
 */
 
 template<typename TAlphabet, typename TCargo, typename TSpec>
@@ -788,14 +788,14 @@ getRoot(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g)
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.isRoot:
+.Function.Graph#isRoot:
 ..cat:Graph.Automaton
 ..cat:Graph.Tree
 ..summary:Tests whether a given vertex is the root or not.
 ..signature:isRoot(g, v)
 ..param.g:An automaton or a tree.
-...type:Graph.Automaton
-...type:Graph.Tree
+...type:Spec.Automaton
+...type:Spec.Tree
 ..param.v:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
 ..returns:True if vertex is the root.
@@ -825,8 +825,8 @@ For an automaton a single character is required whereas for a word graph getSucc
 ..signature:getSuccessor(g, v, c)
 ..signature:getSuccessor(g, v, str)
 ..param.g:An automaton or a word graph.
-...type:Graph.Automaton
-...type:Graph.Word Graph
+...type:Spec.Automaton
+...type:Spec.Word Graph
 ..param.v:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
 ..param.c:A label.
@@ -860,8 +860,8 @@ getSuccessor(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
 ..signature:parseString(g, v, beginIt, endIt)
 ..signature:parseString(g, v, str)
 ..param.g:An automaton or a word graph.
-...type:Graph.Automaton
-...type:Graph.Word Graph
+...type:Spec.Automaton
+...type:Spec.Word Graph
 ..param.v:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
 ..param.beginIt:An iterator to the beginning of the string.

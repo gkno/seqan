@@ -24,6 +24,9 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 
+//SEQAN_NO_DDDOC: do not generate documentation for this file
+
+
 /**
 .Metafunction.Key:
 ..summary:Type of the theKeyattribute of an object. 

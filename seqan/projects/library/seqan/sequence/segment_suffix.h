@@ -62,7 +62,7 @@ protected:
 public:
 
 /**
-.Memfunc.PrefixSegment#Segment:
+.Memfunc.SuffixSegment#Segment:
 ..class:Spec.SuffixSegment
 ..summary:Constructor
 ..signature:Segment<THost, SuffixSegment> ()
