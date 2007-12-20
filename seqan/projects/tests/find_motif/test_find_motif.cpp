@@ -101,16 +101,14 @@ void Test_exactAlgorithms()
 // Test1 - Search for OOPS motifs on a small set of nucleotide sequences
 //         given the exact Hamming distance (=d)
 
-	l = 8;		
-	d = 2;		
+	l = 4;		
+	d = 1;		
 	is_exact = true;	
 
 	String<DnaString> dataset1;
-	appendValue(dataset1,DnaString("CAGAAGGCTCTAAACAGGTA"));
-	appendValue(dataset1,DnaString("CCACAAATCTTTCTCCGGCG"));
-	appendValue(dataset1,DnaString("TCGACTGAAATGGAGAACAG"));
-	appendValue(dataset1,DnaString("GCTTACGTACTGAACGTGCG"));
-	appendValue(dataset1,DnaString("TAACTTACACTCAACAGGTG"));
+	appendValue(dataset1,DnaString("ACAGCA"));
+	appendValue(dataset1,DnaString("AGGCAG"));
+	appendValue(dataset1,DnaString("TCAGTC"));
 
 	//Application of PMS1-OOPS
 	MotifFinder<Dna, PMS1> motif_finder1(l,d,is_exact);
@@ -219,12 +217,6 @@ int main()
 
 	Test_approximationAlgorithms();
 	Test_exactAlgorithms();
-
-	debug::verifyCheckpoints("projects/library/seqan/find_motif/find_motif_base.h");
-	debug::verifyCheckpoints("projects/library/seqan/find_motif/find_motif_projection.h");
-	debug::verifyCheckpoints("projects/library/seqan/find_motif/find_motif_epatternbranching.h");
-	debug::verifyCheckpoints("projects/library/seqan/find_motif/find_motif_pms1.h");
-	debug::verifyCheckpoints("projects/library/seqan/find_motif/find_motif_pmsp.h");
 
 	SEQAN_TREPORT("TEST FIND MOTIF END");
 
