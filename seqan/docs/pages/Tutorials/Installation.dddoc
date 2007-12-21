@@ -21,7 +21,7 @@ weese@tanne:~/seqan$ unzip path_to_SeqAn_XY.zip
 After that, you have to copy the platform-specific header (for Unix-like systems with an installed GCC compiler)
 $platform_linux_gcc.h$ to $platform.h$ with the following:
 ..output:
-weese@tanne:~/seqan$ cp seqan/platform_linux_gcc.h seqan/platform.h
+weese@tanne:~/seqan$ cp platform_linux_gcc.h seqan/platform.h
 
 
 ..subsection:#.# Windows
