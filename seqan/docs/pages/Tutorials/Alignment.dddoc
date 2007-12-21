@@ -94,6 +94,7 @@ AlignConfig<true,false,false,true> ac;
 int score = globalAlignment(g, score_type, ac, Gotoh() );
 
 ...text:
-Multiple sequence alignments are currently under development.
+Multiple sequence alignments are part of SeqAn and currently under 
+development. If needed contact the SeqAn team.
 ...XXXtext: Note that the basic syntax will remain the same since an
 alignment graph and a string set can hold an arbitrary number of sequences.
