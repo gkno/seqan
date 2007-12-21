@@ -86,7 +86,7 @@ while (! atEnd(it, str))
 ..table:$T1$, $T2$, ..., $TN$|Arguments (types or constants)
 ..table:$VALUE$|The resulting constant value
 
-..text:Example:The following function prints the length of a fixed sized using the value metafunction @Metafunction.VALUE@:
+..text:Example:The following function prints the length of a fixed sized using the value metafunction @Metafunction.LENGTH@:
 ..code:
 template <typename T>
 void printLenOfFixedSizeString(T const &)
