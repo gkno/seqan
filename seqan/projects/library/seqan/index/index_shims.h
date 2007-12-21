@@ -470,7 +470,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..signature:indexCreate(index, fibre_tag[, algo_tag])
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Class.Index
-..param.fibre_tag:A tag that identifies the @Metafunction.Fibre@ (e.g. @Tag.ESA_SA@).
+..param.fibre_tag:A tag that identifies the @Metafunction.Fibre@ (e.g. @Tag.ESA Index Fibres.ESA_SA@).
 ..param.algo_tag:A tag that identifies the algorithm which is used to create the fibre.
 ...default:The result of @Metafunction.DefaultIndexCreator@.
 ..returns:A $bool$ which is $true$ on a successful creation.
@@ -528,7 +528,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..signature:indexSupplied(index, fibre_tag)
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Class.Index
-..param.fibre_tag:A tag that identifies the @Metafunction.Fibre@ (e.g. @Tag.ESA_SA@).
+..param.fibre_tag:A tag that identifies the @Metafunction.Fibre@ (e.g. @Tag.ESA Index Fibres.ESA_SA@).
 ..returns:A $bool$ which is $true$, iff the fibre is present.
 */
 
@@ -546,7 +546,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..signature:indexRequire(index, fibre_tag)
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Class.Index
-..param.fibre_tag:A tag that identifies the @Metafunction.Fibre@ (e.g. @Tag.ESA_SA@).
+..param.fibre_tag:A tag that identifies the @Metafunction.Fibre@ (e.g. @Tag.ESA Index Fibres.ESA_SA@).
 ..returns:A $bool$ which is $true$ on a successful creation.
 ..remarks:If the fibre already exists (@Function.indexSupplied@ is true) then $indexRequire$ does nothing.
 If the fibre doesn't exist then @Function.indexCreate@ is called to create it.

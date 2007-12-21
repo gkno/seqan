@@ -30,14 +30,9 @@ namespace SEQAN_NAMESPACE_MAIN
 	struct _Finder_QGramLookup; //Finder that simply looks up the q-gram in the hash table
 
 /**
-.Tag.QGram_FIND_Lookup:
-..summary:Finding q-grams in index using a hash table.
-..general:Class.Finder
-..cat:Index
-..signature:Finder<TIndex>
-..signature:Finder<TIndex, QGram_FIND_Lookup>
-..param.TIndex:The index type.
-...type:Spec.Index_QGram
+.Tag.Index Find Algorithm
+..tag.QGram_FIND_Lookup:q-gram search.
+Finds q-grams in a @Spec.Index_QGram@ index using the hash table.
 */
 
 	typedef Tag<_Finder_QGramLookup> const QGram_FIND_Lookup;

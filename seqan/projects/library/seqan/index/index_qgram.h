@@ -28,6 +28,36 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 // q-gram index fibres
 
+/**
+.Tag.QGram Index Fibres
+..summary:Tag to select a specific fibre (e.g. table, object, ...) of an @Spec.Index_QGram.q-gram@ index.
+..remarks:These tags can be used to get @Metafunction.Fibre.Fibres@ of an Enhanced Suffix Array based @Spec.Index_ESA.Index@.
+..cat:Index
+
+..tag.QGram_Text:The original text the index should be based on.
+
+..tag.QGram_RawText:The raw text the index is really based on.
+...remarks:$QGram_Text$ and $QGram_RawText$ fibres are equal by default.
+They differ if the index text is a set of strings. Then, raw text is the concatenation of all strings in this set.
+
+..tag.QGram_SA:The suffix array.
+...remarks:The suffix array contains the indices of all suffices of $QGram_RawText$ in lexicographical order.
+...remarks:@Metafunction.Fibre@ returns a @Class.String@ over the alphabet of the @Metafunction.SAValue@ of $TIndex$.
+
+..tag.QGram_Dir:The directory/hash table.
+...remarks:The directory contains the start indices of the q-gram buckets. A q-gram bucket is a contiguous interval in the suffix array ($QGram_SA$).
+Each suffix in this interval begins with the same q-gram.
+...remarks:@Metafunction.Fibre@ returns a @Class.String@ over the alphabet of a size type.
+
+..tag.QGram_Shape:The shape the index is based on.
+...remarks:The q-gram index needs an underlying @Class.Shape@. This shape can be gapped or ungapped.
+The number of '1's (relevant positions) in the shape determines $q$ and the size of the directory table.
+
+..see:Metafunction.Fibre
+..see:Function.getFibre
+..see:Spec.Index_QGram
+*/
+
 	struct _Fibre_Dir;			// directory/hash table, contains start indices of buckets
 	struct _Fibre_SADir;		// identifies algorithm to construct both SA and directory at once
 	struct _Fibre_Shape;		// underlying shape
@@ -55,7 +85,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..signature:Index<TText, Index_QGram<> >
 ..param.TText:The text type.
 ...type:Class.String
-..remarks:The fibres (see @Class.Index@ and @Metafunction.Fibre@) of this index are a suffix array sorted by the first q characters (see @Tag.QGram_SA@) and a q-gram directory (see @Tag.QGram_Dir@).
+..remarks:The fibres (see @Class.Index@ and @Metafunction.Fibre@) of this index are a suffix array sorted by the first q characters (see @Tag.QGram Index Fibres.QGram_SA@) and a q-gram directory (see @Tag.QGram_Dir@).
 */
 
 	template < typename TShapeSpec >
@@ -194,7 +224,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..signature:indexDir(index)
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.Index_QGram
-..returns:A reference to the @Tag.QGram_Dir@ fibre (q-gram directory).
+..returns:A reference to the @Tag.QGram Index Fibres.QGram_Dir@ fibre (q-gram directory).
 */
 
 	template <typename TText, typename TSpec>
@@ -239,7 +269,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.Index_QGram
 ..returns:Returns a reference to the @Class.Shape@ object of a q-gram index.
-Formally, this is a reference to the @Tag.QGram_Shape@ fibre.
+Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 ...type:Class.Shape
 */
 

@@ -193,88 +193,40 @@ Empty edges are traversed also, i.e. for every suffix there is a leaf node repre
 // ESA fibres
 
 /**
-.Tag.ESA_Text:
-..summary:The original text the index should be based on.
-..general:Metafunction.Fibre
+.Tag.ESA Index Fibres
+..summary:Tag to select a specific fibre (e.g. table, object, ...) of an @Spec.Index_ESA.ESA@ index.
+..remarks:These tags can be used to get @Metafunction.Fibre.Fibres@ of an Enhanced Suffix Array based @Spec.Index_ESA.Index@.
 ..cat:Index
-..signature:Fibre<TIndex, ESA_Text>::Type
-..param.TIndex:The ESA index type.
-...type:Spec.Index_ESA
-*/
 
-/**
-HIER WEITERMACHEN
-.Tag.ESA Fibres
-..cat:Index
+..tag.ESA_Text:The original text the index should be based on.
+
 ..tag.ESA_RawText:The raw text the index is really based on.
-...remarks:@Tag.ESA_Text@ and @Tag.ESA_RawText@ fibres are equal by default. 
+...remarks:$ESA_Text$ and $ESA_RawText$ fibres are equal by default.
 They differ if the index text is a set of strings. Then, raw text is the concatenation of all strings in this set.
+
+..tag.ESA_SA:The suffix array.
+...remarks:The suffix array contains the indices of all suffices of $ESA_RawText$ in lexicographical order.
+...remarks:@Metafunction.Fibre@ returns a @Class.String@ over the alphabet of the @Metafunction.SAValue@ of $TIndex$.
+
+..tag.ESA_LCP:The lcp table.
+...remarks:The lcp table contains the lcp-value of two adjacent suffices in the suffix array $ESA_SA$.
+...remarks:@Metafunction.Fibre@ returns a @Class.String@ over the alphabet of a size type.
+
+..tag.ESA_ChildTab:The child table.
+...remarks:The child table contains structural information of the suffix tree (see Abhouelda et al.).
+...remarks:@Metafunction.Fibre@ returns a @Class.String@ over the alphabet of a size type.
+
+..tag.ESA_BWT:The Burrows-Wheeler table.
+...remarks:The Burrows-Wheeler table contains the Burrows-Wheeler transformation of $ESA_RawText$.
+The entries are the characters left of the corresponding suffix in the suffix array $ESA_SA$.
+...remarks:@Metafunction.Fibre@ returns the same type for $ESA_RawText$ and for $ESA_BWT$.
+
+..see:Metafunction.Fibre
+..see:Function.getFibre
+..see:Spec.Index_ESA
 */
 
-/**
-.Tag.ESA_RawText:
-..summary:The raw text the index is really based on.
-..general:Metafunction.Fibre
-..cat:Index
-..signature:Fibre<TIndex, ESA_RawText>::Type
-..param.TIndex:The ESA index type.
-...type:Spec.Index_ESA
-..remarks:@Tag.ESA_Text@ and @Tag.ESA_RawText@ fibres are equal by default. 
-They differ if the index text is a set of strings. Then, raw text is the concatenation of all strings in this set.
-*/
-/**
-.Tag.ESA_SA:
-..summary:The suffix array.
-..general:Metafunction.Fibre
-..cat:Index
-..signature:Fibre<TIndex, ESA_SA>::Type
-..param.TIndex:The ESA index type.
-...type:Spec.Index_ESA
-..remarks:The suffix array contains the indices of all suffices of @Tag.ESA_RawText@ in lexicographical order.
-..remarks:A @Class.String@ over the alphabet of the @Metafunction.SAValue@ of $TIndex$.
-*/
-/**
-.Tag.ESA_LCP:
-..summary:The lcp table.
-..general:Metafunction.Fibre
-..cat:Index
-..signature:Fibre<TIndex, ESA_LCP>::Type
-..param.TIndex:The ESA index type.
-...type:Spec.Index_ESA
-..remarks:The lcp table contains the lcp-value of two adjacent suffices in the suffix array @Tag.ESA_SA@.
-..returns:A @Class.String@ over the alphabet of a size type.
-*/
-/**
-.Tag.ESA_ChildTab:
-..summary:The child table.
-..general:Metafunction.Fibre
-..cat:Index
-..signature:Fibre<TIndex, ESA_ChildTab>::Type
-..param.TIndex:The ESA index type.
-...type:Spec.Index_ESA
-..remarks:The child table contains structural information of the suffix tree (see Abhouelda et al.).
-..returns:A @Class.String@ over the alphabet of a size type.
-*/
-/**
-.Tag.ESA_BWT:
-..summary:The Burrows-Wheeler table.
-..general:Metafunction.Fibre
-..cat:Index
-..signature:Fibre<TIndex, ESA_BWT>::Type
-..param.TIndex:The ESA index type.
-...type:Spec.Index_ESA
-..remarks:The Burrows-Wheeler table contains the Burrows-Wheeler transformation of @Tag.ESA_RawText@.
-..remarks:The entries are the characters left of the corresponding suffix in the suffix array @Tag.ESA_SA@.
-..returns:The type @Tag.ESA_RawText@ returns.
-*/
-
-///.Metafunction.Fibre.param.TSpec.type:Tag.ESA_Text
-///.Metafunction.Fibre.param.TSpec.type:Tag.ESA_RawText
-///.Metafunction.Fibre.param.TSpec.type:Tag.ESA_SA
-///.Metafunction.Fibre.param.TSpec.type:Tag.ESA_LCP
-///.Metafunction.Fibre.param.TSpec.type:Tag.ESA_LCPE
-///.Metafunction.Fibre.param.TSpec.type:Tag.ESA_ChildTab
-///.Metafunction.Fibre.param.TSpec.type:Tag.ESA_BWT
+///.Metafunction.Fibre.param.TSpec.type:Tag.ESA Index Fibres
 
 
 	typedef Tag<_Fibre_Text> const		ESA_Text;
@@ -299,7 +251,7 @@ They differ if the index text is a set of strings. Then, raw text is the concate
 ..signature:Index<TText, Index_ESA<> >
 ..param.TText:The text type.
 ...type:Class.String
-..remarks:The fibres (see @Class.Index@ and @Metafunction.Fibre@) of this index are a suffix array (see @Tag.ESA_SA@), a lcp table (see @Tag.ESA_LCP@), etc.
+..remarks:The fibres (see @Class.Index@ and @Metafunction.Fibre@) of this index are a suffix array (see @Tag.ESA Index Fibres.ESA_SA@), a lcp table (see @Tag.ESA Index Fibres.ESA_LCP@), etc.
 ..remarks:This index can be accessed as a Suffix Tree using the @Spec.VSTree Iterator@ classes.
 */
 

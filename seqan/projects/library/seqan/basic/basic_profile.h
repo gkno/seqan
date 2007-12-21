@@ -175,7 +175,9 @@
 		
 		#ifndef SEQAN_USE_CLOCKGETTIME
 		/* some systems e.g. darwin have no clock_gettime */
-
+		
+			#include <sys/time.h>
+			
 			inline _proFloat sysTime() {
 				struct timeval tp;
 				gettimeofday(&tp, NULL);

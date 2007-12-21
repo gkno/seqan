@@ -134,7 +134,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TSpec:Type to specify the fibre.
 ..returns:Fibre type.
 ..remarks:An @Class.Index@ can be seen as a bundle consisting of various fibres. In most cases this type is $String<Size<TIndex>::Type>$.
-..remarks:A @Metafunction.Fibre@ need not to be a real container. It can also be view (see @Tag.ESA_RawText@).
+..remarks:A @Metafunction.Fibre@ need not to be a real container. It can also be view (see @Tag.ESA Index Fibres.ESA_RawText@).
 */
 	// meta function to get the type of a bundle fibre
 	template < typename TIndex, typename TSpec >
@@ -169,7 +169,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..summary:Default algorithm to create a demanded and not yet existing @Metafunction.Fibre@.
 ..signature:DefaultIndexCreator<TIndex, TFibre>::Type
 ..param.TIndex:An @Class.Index@ Type.
-..param.TFibre:A tag specifying the fibre (e.g. @Tag.ESA_SA@).
+..param.TFibre:A tag specifying the fibre (e.g. @Tag.ESA Index Fibres.ESA_SA@).
 ..returns:A tag specifying the default algorithm to create the fibre with.
 */
     // standard algorithm for indices creation
@@ -446,7 +446,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 ..signature:getFibre(index, fibre_tag)
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Class.Index
-..param.fibre_tag:A tag that identifies the @Metafunction.Fibre@ (e.g. @Tag.ESA_SA@).
+..param.fibre_tag:A tag that identifies the @Metafunction.Fibre@ (e.g. @Tag.ESA Index Fibres.ESA_SA@).
 ..returns:A reference to the @Metafunction.Fibre@ object.
 */
 
@@ -793,7 +793,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 ..signature:indexText(index)
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.Index_ESA
-..returns:A reference to the @Tag.ESA_Text@ fibre (original text).
+..returns:A reference to the @Tag.ESA Index Fibres.ESA_Text@ fibre (original text).
 */
 
 	template <typename TText, typename TSpec>
@@ -835,7 +835,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 ..signature:indexRawText(index)
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.Index_ESA
-..returns:A reference to the @Tag.ESA_RawText@ fibre (concatenated input text).
+..returns:A reference to the @Tag.ESA Index Fibres.ESA_RawText@ fibre (concatenated input text).
 */
 
 	template <typename TText, typename TSpec>
@@ -851,7 +851,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 ..signature:indexSA(index)
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.Index_ESA
-..returns:A reference to the @Tag.ESA_SA@ fibre (suffix array).
+..returns:A reference to the @Tag.ESA Index Fibres.ESA_SA@ fibre (suffix array).
 */
 
 	template <typename TText, typename TSpec>
@@ -867,7 +867,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 ..signature:indexRawSA(index)
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.Index_ESA
-..returns:A reference to the @Tag.ESA_RawSA@ fibre (suffix array).
+..returns:A reference to the @Tag.ESA Index Fibres.ESA_RawSA@ fibre (suffix array).
 */
 
 	template <typename TText, typename TSpec>
@@ -883,7 +883,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 ..signature:indexLCP(index)
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.Index_ESA
-..returns:A reference to the @Tag.ESA_LCP@ fibre (lcp table).
+..returns:A reference to the @Tag.ESA Index Fibres.ESA_LCP@ fibre (lcp table).
 */
 
 	template <typename TText, typename TSpec>
@@ -899,7 +899,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 ..signature:indexLCPE(index)
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.Index_ESA
-..returns:A reference to the @Tag.ESA_LCPE@ fibre (enhanced lcp table).
+..returns:A reference to the @Tag.ESA Index Fibres.ESA_LCPE@ fibre (enhanced lcp table).
 */
 
 	template <typename TText, typename TSpec>
@@ -915,7 +915,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 ..signature:indexBWT(index)
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.Index_ESA
-..returns:A reference to the @Tag.ESA_BWT@ fibre (Burrows-Wheeler table).
+..returns:A reference to the @Tag.ESA Index Fibres.ESA_BWT@ fibre (Burrows-Wheeler table).
 */
 
 	template <typename TText, typename TSpec>
@@ -931,7 +931,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 ..signature:indexChildTab(index)
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.Index_ESA
-..returns:A reference to the @Tag.ESA_ChildTab@ fibre (child table).
+..returns:A reference to the @Tag.ESA Index Fibres.ESA_ChildTab@ fibre (child table).
 */
 
 	template <typename TText, typename TSpec>

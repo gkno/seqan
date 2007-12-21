@@ -27,32 +27,28 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 // ESA finders
 
+/**
+.Tag.Index Find Algorithm
+..summary:Tag to specify the index search algorithm.
+..remarks:These tag can be used to specify the @Function.find@ algorithm 
+for @Class.Index@ based substring searches.
+..cat:Index
+
+..tag.ESA_FIND_MLR:Binary search with mlr-heuristic.
+...remarks:Exact string matching using a suffix array binary search with the mlr-heuristic.
+
+..tag.ESA_FIND_LCPE:Binary search using lcp values.
+...remarks:Exact string matching using a suffix array binary search and a lcp-interval tree.
+
+..see:Class.Finder
+..see:Spec.Index_ESA
+..see:Spec.Index_QGram
+*/
+
 	struct _Finder_MLR;		// simple Suffix Array finder with mlr-heuristic
 	struct _Finder_LCPE;	// Suffix Array finder using an enhanced LCP-Table
 
-/**
-.Tag.ESA_FIND_MLR:
-..summary:Exact string matching using a suffix array binary search with the mlr-heuristic.
-..general:Class.Finder
-..cat:Index
-..signature:Finder<TIndex>
-..signature:Finder<TIndex, ESA_FIND_MLR>
-..param.TIndex:The index type.
-...type:Spec.Index_ESA
-*/
-
 	typedef Tag<_Finder_MLR> const ESA_FIND_MLR;
-
-/**
-.Tag.ESA_FIND_LCPE:
-..summary:Exact string matching using a suffix array binary search and a lcp-interval tree.
-..general:Class.Finder
-..cat:Index
-..signature:Finder<TIndex, ESA_FIND_LCPE>
-..param.TIndex:The index type.
-...type:Spec.Index_ESA
-*/
-
 	typedef Tag<_Finder_LCPE> const ESA_FIND_LCPE;
 
 //____________________________________________________________________________
