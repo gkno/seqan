@@ -201,7 +201,7 @@ appendValue(dataset, DnaString("ATACAAACGAAAGCGAGAAGCTCGCAGAAGCATGGGAGTGTAAATAAG
 appendValue(dataset, DnaString("GGCGCCTCATTCTCGGTTTATAAGCCAAAACCTTGTCGAGGCAACTGTCA"));
 appendValue(dataset, DnaString("TCAAATGATGCTAGCCGTCGGAATCTGGCGAGTGCATAAAAAGAGTCAAC"));
 
-...text:Otherwise, the user can define the input dataset by reading the sequences from a data file. For example:
+...text:Another possibility is to read the input sequences from a data file. For example:
 
 ...code:
 //Assume that the sample sequences from the above motif finding example 
