@@ -28,11 +28,18 @@
 #include <numeric>
 #include <vector>
 #include <set>
+#include <cfloat>
 
 #include <seqan/sequence.h>
 #include <seqan/file.h>
 #include <seqan/index/shape_base.h>
 #include <seqan/index/shape_gapped.h>
+
+//____________________________________________________________________________
+
+#ifdef SEQAN_SWITCH_USE_FORWARDS
+#include <seqan/find_motif/find_motif_generated_forwards.h>
+#endif
 
 //____________________________________________________________________________
 

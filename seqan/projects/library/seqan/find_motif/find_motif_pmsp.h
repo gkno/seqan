@@ -45,7 +45,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ///.Class.MotifFinder.param.TSpec.type:Spec.PMSP
 
 struct _PMSP;
-typedef Tag<_PMSP> PMSP;
+typedef Tag<_PMSP> const PMSP;
 
 //////////////////////////////////////////////////////////////////////////////
 // MotifFinder - PMSP Spec
@@ -113,11 +113,11 @@ public:
 // Functions
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TStrings, typename TModel>
+template<typename TSeqType, typename TStrings, typename TModel>
 inline void
-findMotif(MotifFinder<typename Value<typename Value<TStrings>::Type>::Type,PMSP> & finder, 
+findMotif(MotifFinder<TSeqType ,PMSP> & finder, 
 		  TStrings & dataset, 
-		  TModel & seq_model)
+		  TModel seq_model)
 {
 	pmsp(finder.set_of_motifs,
 		 dataset, 
@@ -168,7 +168,7 @@ pmsp(TStrings & result,
 	  TType const & l,
 	  TType const & d, 
 	  bool const & is_exact,
-	  OOPS const & model_type)
+	  OOPS const & /*model_type*/)
 {
 	typedef typename Value<TStrings>::Type TString;
 	typedef typename Value<TString>::Type TValue;
@@ -193,7 +193,7 @@ pmsp(TStrings & result,
 	// ----------------------------------------------------------------------------
 	std::vector<int> V;
 	String< String<TPos> > L;
-	unsigned int count = 0;
+	//unsigned int count = 0;
 	while(seq_iter1!=seq_end1)
 	{
 		//construct set V
@@ -289,7 +289,7 @@ pmsp(TStrings & result,
 	  TType  const & l,
 	  TType const & d, 
 	  bool const & is_exact,
-	  OMOPS const & model_type)
+	  OMOPS const & /*model_type*/)
 {
 	typedef typename Value<TStrings>::Type TString;
 	typedef typename Value<TString>::Type TValue;
@@ -417,7 +417,7 @@ pmsp(TStrings & result,
 	typename Iterator<TStrings>::Type ds_iter1 = begin(dataset);
 
 	std::set<TString> result_set;
-	int seq_nr = 0;
+	TPos1 seq_nr = 0;
 	for(; !atEnd(ds_iter1, dataset); goNext(ds_iter1))
 	{
 		std::vector<TPos1> relevant_pos_vect;
@@ -469,7 +469,7 @@ pmsp(TStrings & result,
 			while(V_iter!=V_end)
 			{
 				TString l_mer = inverseHash<TValue>(*V_iter, ValueSize<TValue>::VALUE, l);
-				std::set<TString>::iterator iter = result_set.find(l_mer);
+				typename std::set<TString>::iterator iter = result_set.find(l_mer);
 				if( iter==result_set.end() &
 					hasExactOneOccurrence(begin(l_mer), 
 					                     begin(dataset[seq_nr]), 
@@ -562,7 +562,7 @@ pmsp(TStrings & result,
 	typename Iterator<TStrings>::Type ds_iter1 = begin(dataset);
 
 	std::set<TString> result_set;
-	int seq_nr = 0;
+	TPos1 seq_nr = 0;
 	for(; !atEnd(ds_iter1, dataset); goNext(ds_iter1))
 	{
 		std::vector<TPos1> relevant_pos_vect;
@@ -614,7 +614,7 @@ pmsp(TStrings & result,
 			while(V_iter!=V_end)
 			{
 				TString l_mer = inverseHash<TValue>(*V_iter, ValueSize<TValue>::VALUE, l);
-				std::set<TString>::iterator iter = result_set.find(l_mer);
+				typename std::set<TString>::iterator iter = result_set.find(l_mer);
 				if( iter==result_set.end() )
 				{
 					int lower_limit = (int) floor(t*(model_type.threshold)+0.5)-1;

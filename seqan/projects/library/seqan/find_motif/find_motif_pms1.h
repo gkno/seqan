@@ -49,7 +49,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ///.Class.MotifFinder.param.TSpec.type:Spec.PMS1
 
 struct _PMS1;
-typedef Tag<_PMS1> PMS1;
+typedef Tag<_PMS1> const PMS1;
 
 //////////////////////////////////////////////////////////////////////////////
 // MotifFinder - PMS1 Spec
@@ -116,11 +116,11 @@ public:
 // Functions
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TStrings, typename TModel>
+template<typename TSeqType, typename TStrings, typename TModel>
 inline void
-findMotif(MotifFinder<typename Value<typename Value<TStrings>::Type>::Type,PMS1> & finder, 
+findMotif(MotifFinder<TSeqType, PMS1> & finder, 
 		  TStrings & dataset, 
-		  TModel & seq_model)
+		  TModel seq_model)
 {
 	pms1(finder.set_of_motifs,
 		 dataset, 
@@ -167,7 +167,7 @@ pms1(TStrings & result_set,
 	 TType const & l,
 	 TType const & d, 
 	 bool const & is_exact,
-	 OOPS const & model_type)
+	 OOPS const & /*model_type*/)
 {
 	typedef typename Value<TStrings>::Type TString;
 	typedef typename Value<TString>::Type TValue;
@@ -283,7 +283,7 @@ pms1(TStrings & result_set,
 	 TType const & l,
 	 TType const & d, 
 	 bool const & is_exact,
-	 OMOPS const & model_type)
+	 OMOPS const & /*model_type*/)
 {
 	typedef typename Value<TStrings>::Type TString;
 	typedef typename Value<TString>::Type TValue;

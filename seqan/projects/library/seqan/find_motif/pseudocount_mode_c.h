@@ -64,8 +64,8 @@ public:
 	{
 	}
 	Pseudocount(double epsilon_):
-		epsilon(epsilon_),
-		pseudocount(0)
+		pseudocount(0),
+		epsilon(epsilon_)
 	{
 		_computePseudocount();
 	}
@@ -110,7 +110,8 @@ private:
 
 template<typename TProfile, typename TValue>
 void 
-normalize(TProfile & profile, Pseudocount<TValue, CMode> & mode)
+normalize(TProfile & profile, 
+		  Pseudocount<TValue, CMode> const & mode)
 {
 	typedef typename Value<TProfile>::Type TFreqDist;
 	typedef typename Spec<TFreqDist>::Type TFrequencyType;

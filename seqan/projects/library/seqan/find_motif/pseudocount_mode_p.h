@@ -78,8 +78,8 @@ public:
 	Pseudocount const &
 	operator = (Pseudocount const & other_)
 	{
-		pseudocount = other_.pseudocounts;
-		epsilon = other_.epsilon;
+		this->pseudocount = other_.pseudocounts;
+		this->epsilon = other_.epsilon;
 
 		return *this;
 	}

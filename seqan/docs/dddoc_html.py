@@ -375,11 +375,24 @@ def translateLink(text, attribs = ""):
 ################################################################################
     
 def translateImage(text):
+    in_path = 'img/' + text + '.png'
+    out_path = './' + text + '.png'
+    
+    if os.access(in_path, os.F_OK):
+        in_fl = file(in_path, "rb")
+        out_fl = file(out_path, "wb")
+        out_fl.write(in_fl.read())
+        in_fl.close()
+        out_fl.close()
+    else:
+        print
+        print "\n!!  WARNING: image not found: \"" + text + ".png\""
+
     text = escapeHTML(text)
     text = text.replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;")
     text = text.replace(" ", "&nbsp;")
     text = text.replace("\n", "<br >")
-    return '<img class=image src="../img/' + text + '.png" border=0 />'
+    return '<img class=image src="' + out_path + '" border=0 />'
 
 
 ################################################################################

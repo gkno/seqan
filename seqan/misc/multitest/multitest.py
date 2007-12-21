@@ -21,11 +21,12 @@ MODES = ['Simple justcompile']
 
 ### COMPILERS = [['<plaform>', '<name>', '<cmdline options>'], ...]
 COMPILERS = [
-    ['gcc',     'g++-3.0',   'Compiler=g++-3.0'], 
-    ['gcc',     'g++-3.2',   'Compiler=g++-3.2'], 
+#    ['gcc',     'g++-3.0',   'Compiler=g++-3.0'], 
+#    ['gcc',     'g++-3.2',   'Compiler=g++-3.2'], 
     ['gcc',     'g++-3.3',   'Compiler=g++-3.3'], 
     ['gcc',     'g++-3.4',   'Compiler=g++-3.4'], 
-    ['gcc',     'g++-4.1.1', 'Compiler=/import/testing/bin/g++'],
+    ['gcc',     'g++-4.1.2',   'Compiler=g++-4.1'], 
+#    ['gcc',     'g++-4.1.1', 'Compiler=/import/testing/bin/g++'],
     ['windows', 'vc++-2003', 'Version=7'],
 #    ['windows', 'vc++-2005', 'Version=8 "VSInstallDir=D:\\Program Files\\Microsoft Visual Studio 8\\ "']
 ]
@@ -50,25 +51,25 @@ SERVERS = [
 #    ['gcc', 'essen'], 
 #    ['gcc', 'hagen'], 
 
-#    ['gcc', 'guangzhou'], 
-#    ['gcc', 'harbin'], 
-#    ['gcc', 'chongqing'], 
-#    ['gcc', 'shenyang'], 
-#    ['gcc', 'wuhan'], 
-#    ['gcc', 'chengdu'], 
-#    ['gcc', 'tianjin'], 
-#    ['gcc', 'xian'], 
-#    ['gcc', 'peking'], 
+    ['gcc', 'guangzhou'], 
+    ['gcc', 'harbin'], 
+    ['gcc', 'chongqing'], 
+    ['gcc', 'shenyang'], 
+    ['gcc', 'wuhan'], 
+    ['gcc', 'chengdu'], 
+    ['gcc', 'tianjin'], 
+    ['gcc', 'xian'], 
+    ['gcc', 'peking'], 
 
-    ['gcc', 'leningrad'], 
-    ['gcc', 'jekatarinburg'], 
-    ['gcc', 'irkutsk'], 
-    ['gcc', 'wladiwostok'], 
-    ['gcc', 'kaliningrad'], 
-    ['gcc', 'wolgograd'], 
-    ['gcc', 'omsk'], 
-    ['gcc', 'nowosibirsk'], 
-    ['gcc', 'moskau'], 
+#    ['gcc', 'leningrad'], 
+#    ['gcc', 'jekatarinburg'], 
+#    ['gcc', 'irkutsk'], 
+#    ['gcc', 'wladiwostok'], 
+#    ['gcc', 'kaliningrad'], 
+#    ['gcc', 'wolgograd'], 
+#    ['gcc', 'omsk'], 
+#    ['gcc', 'nowosibirsk'], 
+#    ['gcc', 'moskau'], 
 
     ['windows', 'localhost']
 ]

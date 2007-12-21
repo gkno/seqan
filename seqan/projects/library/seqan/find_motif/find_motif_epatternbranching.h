@@ -52,7 +52,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ///.Class.MotifFinder.param.TSpec.type:Spec.EPatternBranching
 
 struct _EPatternBranching;
-typedef Tag<_EPatternBranching> EPatternBranching;
+typedef Tag<_EPatternBranching> const EPatternBranching;
 
 //////////////////////////////////////////////////////////////////////////////
 // MotifFinder - EPatternBranching Spec
@@ -118,7 +118,7 @@ public:
 	    dataset_size(other_.dataset_size),
 		motif_size(other_.motif_size),
 		num_of_substitutions(other_.num_of_substitutions),
-		has_exact_substitutions(other_.has_exact_substitutions)
+		has_exact_substitutions(other_.has_exact_substitutions),
 		neighborhood_size(other_.neighborhood_size)
 	{
 	}
@@ -203,7 +203,7 @@ computeH(TType const & t, TType const & l, TType const & d, bool const & is_exac
 		for(unsigned int i=0; i<t; ++i)
 		{
 			TType n = n_ar[i];
-			prob_P*= (double)(1-pow((double)1-sum, (doubke)(n-l+1)));
+			prob_P*= (double)(1-pow((double)1-sum, (double)(n-l+1)));
 		}
 	} while( (prob_P<0.95) & (d_bar<2*d-1) );
 
@@ -218,11 +218,11 @@ computeH(TType const & t, TType const & l, TType const & d, bool const & is_exac
 
 /////////////////////////////////////////////////////////////////////////
 
-template<typename TStrings, typename TModel>
+template<typename TSeqType, typename TStrings, typename TModel>
 inline void
-findMotif(MotifFinder<typename Value<typename Value<TStrings>::Type>::Type,EPatternBranching> & epb2, 
+findMotif(MotifFinder<TSeqType ,EPatternBranching> & epb2, 
 		  TStrings & dataset, 
-		  TModel & seq_model)
+		  TModel seq_model)
 {
 	ePatternBranching(epb2.set_of_motifs,
 		               dataset,
@@ -270,12 +270,12 @@ ePatternBranching(TStrings & result_set,
 				   TType const & d,
 				   bool const & is_exact,
 				   TType & h,
-				   OMOPS const & omops)
+				   OMOPS const & /*omops*/)
 {
 	typedef typename Value<TStrings>::Type TString;
 	typedef typename Value<TString>::Type TValue;
 	typedef String<int> TIntAr;
-	typename Size<TStrings>::Type t = length(dataset);
+	//typename Size<TStrings>::Type t = length(dataset);
 	typename Iterator<TStrings>::Type ds_iter = begin(dataset);
 	Shape<TValue> shape(l);
 	std::set<int> result;
@@ -371,12 +371,12 @@ ePatternBranching(TStrings & result_set,
 				  TType const & d, 
 				  bool const & is_exact,
 				  TType & h,
-				  OOPS const & oops)
+				  OOPS const & /*oops*/)
 {
 	typedef typename Value<TStrings>::Type TString;
 	typedef typename Value<TString>::Type TValue;
 	typedef String<int> TIntAr;
-	typename Size<TStrings>::Type t = length(dataset);
+	//typename Size<TStrings>::Type t = length(dataset);
 	typename Iterator<TStrings>::Type ds_iter = begin(dataset);
 	Shape<TValue> shape(l);
 	std::set<int> result;
@@ -620,7 +620,7 @@ bestNeighbors(TIntSet & neighbors,
 				{
 					dist_y-=1;
 				}
-				else if( (counter2==num1) & (counter3==num2) )
+				else if( (counter2==num1) && (counter3==num2) )
 				{
 					dist_y+=1;
 				}
@@ -633,15 +633,15 @@ bestNeighbors(TIntSet & neighbors,
 				++seq_nr;
 			}
 			int lowercase_delta = max_dist_of_y-max_dist_of_x;
-			if( (uppercase_delta==d-j) & (lowercase_delta==-1) & (sum_of_dist_y<=beta) )
+			if( (uppercase_delta == ((int) (d-j))) && (lowercase_delta==-1) && (sum_of_dist_y<=beta) )
 			{
 				neighbors.insert(*V_iter);
 			}
-			else if( (uppercase_delta==d-j-1) & (lowercase_delta<=0) & (sum_of_dist_y<=beta) )
+			else if( (uppercase_delta==((int) (d-j-1))) && (lowercase_delta<=0) && (sum_of_dist_y<=beta) )
 			{
 				neighbors.insert(*V_iter);
 			}
-			else if( (uppercase_delta<d-j-1) & (sum_of_dist_y<=beta))
+			else if( (uppercase_delta < ((int) (d-j-1))) && (sum_of_dist_y<=beta))
 			{
 				neighbors.insert(*V_iter);
 			}

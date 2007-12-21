@@ -118,7 +118,7 @@ _computeEStep(TMatrix & matrix_w,
 	TIter dataset_start, //start iterator of dataset 
 	TType const & t,
 	TType const & l,
-	OOPS const & oops)
+	OOPS const & /*oops*/)
 {
 	typedef typename Value<TProfile>::Type TFrequencyDist;
 	typedef typename Value<TFrequencyDist>::Type TValue;
@@ -216,7 +216,7 @@ _computeMStep(TProfile & profile,
 	TMatrix const & matrix_w,
 	TType const & t,
 	TType const & l,
-	OOPS const & oops)
+	OOPS const & /*oops*/)
 {
 	typedef typename Value<TProfile>::Type TFrequencyDist;
 	typedef typename Value<TFrequencyDist>::Type TValue;
@@ -344,7 +344,7 @@ _computeEStep(TMatrix & matrix_w,
 			  double & gamma,
 			  TType const & t,
 			  TType const & l,
-			  ZOOPS const & zoops)
+			  ZOOPS const & /*zoops*/)
 {
 	typedef typename Value<TProfile>::Type TFrequencyDist;
 	typedef typename Value<TFrequencyDist>::Type TValue;
@@ -473,7 +473,7 @@ _computeMStep(TProfile & profile,
 			  TMatrix const & matrix_w,
 			  TType const & t,
 	          TType const & l,
-			  ZOOPS const & zoops)
+			  ZOOPS const & /*zoops*/)
 {
 	typedef typename Value<TProfile>::Type TFrequencyDist;
 	typedef typename Value<TFrequencyDist>::Type TValue;
@@ -609,7 +609,7 @@ _computeEStep(TMatrix & matrix_w,
 			  double & lambda,
 			  TType const & t,
 			  TType const & l,
-			  TCM const & tcm)
+			  TCM const & /*tcm*/)
 {
 	typedef typename Value<TProfile>::Type TFrequencyDist;
 	typedef typename Value<TFrequencyDist>::Type TValue;
@@ -705,7 +705,7 @@ _computeMStep(TProfile & profile,
 			  TMatrix const & matrix_w,
 			  TType const & t,
 	          TType const & l,
-			  TCM const & tcm)
+			  TCM const & /*tcm*/)
 {
 	typedef typename Value<TProfile>::Type TFrequencyDist;
 	typedef typename Value<TFrequencyDist>::Type TValue;

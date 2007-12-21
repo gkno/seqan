@@ -46,7 +46,7 @@ namespace SEQAN_NAMESPACE_MAIN
 */
 
 struct _Projection;
-typedef Tag<_Projection> Projection;
+typedef Tag<_Projection> const Projection;
 
 //////////////////////////////////////////////////////////////////////////////
 // MotifFinder - Projection Spec
@@ -355,7 +355,7 @@ template<typename TSeqType, typename TStrings, typename TModel>
 void
 findMotif(MotifFinder<TSeqType, Projection> & finder, 
 		  TStrings & dataset,
-		  TModel & seq_model)
+		  TModel seq_model)
 {
 	typedef typename Value<TStrings>::Type TString;
 	typedef typename Position<TString>::Type TPos;
@@ -365,7 +365,8 @@ findMotif(MotifFinder<TSeqType, Projection> & finder,
 	typedef String<TBucket> TBuckets;
 
 	// dataset information
-	typename Size<TStrings>::Type t = length(dataset);
+	typedef typename Size<TStrings>::Type TStringsSize;
+	TStringsSize t = length(dataset);
 
 	// count_ar:=array of votes for each h(k-mer)
 	TArSize ar_size =
@@ -444,7 +445,7 @@ findMotif(MotifFinder<TSeqType, Projection> & finder,
 					finder.score = score;
 					finder.consensus_pattern = consensus_pat;
 
-					if(finder.score==t)
+					if((TStringsSize) finder.score==t)
 					{
 						trial = finder.num_of_trials;
 						j = num_of_relevant_buckets;
@@ -609,7 +610,7 @@ _refinementStep(TString & consensus_seq,
 		delete[] hd_ar;
 		++ds_iter;
 	}
-	while( (ds_iter!=ds_end) & (score==seq_nr+1) );
+	while( (ds_iter!=ds_end) & (score==(int) seq_nr+1) );
 
 	return score;
 }
@@ -626,7 +627,7 @@ _refinementStep(TString & consensus_seq,
 				TType const & l,
 				TType const & d,
 				bool const & is_exact,
-				OMOPS const & omops)
+				OMOPS const & /*omops*/)
 {
 	typedef String<TString> TStrings;
 	typedef typename Value<TString>::Type TValue;
@@ -671,7 +672,7 @@ _refinementStep(TString & consensus_seq,
 		while(seq_iter!=seq_end)
 		{
 			consensus_begin = begin(consensus_seq);
-			int hd = hammingDistance(seq_iter, seq_iter+l, consensus_begin);
+			TType hd = hammingDistance(seq_iter, seq_iter+l, consensus_begin);
 
 			if( (!is_exact) & (hd<=d) )
 			{
@@ -687,7 +688,7 @@ _refinementStep(TString & consensus_seq,
 		}
 		++ds_iter;
 	}
-	while( (ds_iter!=ds_end) & (score==seq_nr+1) );
+	while( (ds_iter!=ds_end) & (score== (int) seq_nr+1) );
 
 	return score;
 }
@@ -860,7 +861,7 @@ _refinementStep(TString & consensus_seq,
 		while(seq_iter!=seq_end)
 		{
 			consensus_begin = begin(consensus_seq);
-			int hd = hammingDistance(seq_iter, seq_iter+l, consensus_begin);
+			TType hd = hammingDistance(seq_iter, seq_iter+l, consensus_begin);
 
 			if( (!is_exact) & (hd<=d) )
 			{
@@ -930,7 +931,7 @@ inline std::set<int>::value_type
 projectLMer(std::set<int> & positions, TIter it)
 {
 	typedef std::set<int>::value_type THValue;
-	THValue prev_pos, cur_pos;
+	THValue prev_pos; //, cur_pos;
 
 	std::set<int>::iterator positions_iter, positions_end;
 	positions_iter = positions.begin();

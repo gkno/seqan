@@ -740,7 +740,7 @@ void Test_FastaAlign() {
 	resize(rows(align5), 2);
 	assignSource(row(align5, 0), "aaccggtt");
 	assignSource(row(align5, 1), "accgtttt");
-	needlemanWunsch(align5, SimpleScore());
+	globalAlignment(align5, SimpleScore(), NeedlemanWunsch());
 
 
 //____________________________________________________________________________

@@ -44,7 +44,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..remarks:The number of objects in @Class.FrequencyDistribution@ equals the size of the sequence alphabet.
 */
 
-template<typename TValue, typename TSpec = double>
+template <typename TValue, typename TSpec = double>
 class FrequencyDistribution
 {
 //____________________________________________________________________________________________
@@ -59,12 +59,12 @@ public:
 	// constructor & destructor
 	FrequencyDistribution()
 	{
-		resize(frequency_list, SIZE);
+		resize(frequency_list, (unsigned int) SIZE);
 		std::fill(begin(frequency_list), end(frequency_list), (TSpec)0);
 	}
 	FrequencyDistribution(TValue const & letter_)
 	{
-		resize(frequency_list, SIZE);
+		resize(frequency_list, (unsigned int) SIZE);
 		convertResidueToFrequencyDist(*this, letter_);
 	}
 	FrequencyDistribution(FrequencyDistribution const & other_)
@@ -187,16 +187,30 @@ public:
 
 ///.Metafunction.Spec.param.T.type:Class.FrequencyDistribution
 
-template<typename TValue, typename TSpec>
+template <typename TValue, typename TSpec>
 struct Spec< FrequencyDistribution<TValue, TSpec> >
 {
 	typedef TSpec Type;
 };
-template<typename TValue, typename TSpec>
+
+template <typename TValue, typename TSpec>
 struct Spec< FrequencyDistribution<TValue, TSpec> const>
 {
 	typedef TSpec Type;
 };
+
+//the following is a workaround for an error in GCC 4.1.2
+template <typename TValue>
+struct Spec< FrequencyDistribution<TValue, double> >
+{
+	typedef double Type;
+};
+template <typename TValue>
+struct Spec< FrequencyDistribution<TValue, double> const>
+{
+	typedef double Type;
+};
+
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -289,8 +303,8 @@ struct Value< FrequencyDistribution<TValue, TSpec> const>
 template<typename TValue, typename TSpec, typename TSeqIter> 
 void 
 absFreqOfLettersInSeq(FrequencyDistribution<TValue, TSpec> & fd,
-					  TSeqIter & seq_start,
-					  TSeqIter & seq_end) 
+					  TSeqIter seq_start,
+					  TSeqIter seq_end) 
 {	
 	while(seq_start!=seq_end)
 	{
