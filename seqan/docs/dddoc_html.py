@@ -376,7 +376,7 @@ def translateLink(text, attribs = ""):
     
 def translateImage(text):
     in_path = 'img/' + text + '.png'
-    out_path = './' + text + '.png'
+    out_path = 'html/' + text + '.png'
     
     if os.access(in_path, os.F_OK):
         in_fl = file(in_path, "rb")
@@ -392,7 +392,7 @@ def translateImage(text):
     text = text.replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;")
     text = text.replace(" ", "&nbsp;")
     text = text.replace("\n", "<br >")
-    return '<img class=image src="' + out_path + '" border=0 />'
+    return '<img class=image src="./' + text + '.png" border=0 />'
 
 
 ################################################################################
