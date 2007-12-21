@@ -8,7 +8,7 @@
 ..text:
 Scoring schemes define the score for aligning two characters of a given alphabet and the score for gaps within @glos:alignments@.
 Given an alignment between two sequences and a scoring scheme, 
-    the score of the alignment can be computed the sum of the scores for aligned character pairs
+    the score of the alignment can be computed as the sum of the scores for aligned character pairs
     plus the sum of the scores for all gaps.
 ..text:
 An example for a scoring scheme is the levenshtein distance, for which each mismatch between two aligned characters costs and
