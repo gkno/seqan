@@ -201,6 +201,16 @@ Empty edges are traversed also, i.e. for every suffix there is a leaf node repre
 ..param.TIndex:The ESA index type.
 ...type:Spec.Index_ESA
 */
+
+/**
+HIER WEITERMACHEN
+.Tag.ESA Fibres
+..cat:Index
+..tag.ESA_RawText:The raw text the index is really based on.
+...remarks:@Tag.ESA_Text@ and @Tag.ESA_RawText@ fibres are equal by default. 
+They differ if the index text is a set of strings. Then, raw text is the concatenation of all strings in this set.
+*/
+
 /**
 .Tag.ESA_RawText:
 ..summary:The raw text the index is really based on.

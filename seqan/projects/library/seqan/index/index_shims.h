@@ -442,6 +442,17 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
 	};
 
+/**
+.Function.orderOccurrences:
+..summary:Sorts a string of occurrences.
+..cat:Index
+..signature:orderOccurrences(occstring)
+..param.occstring:String of occurrences.
+...remarks:Contains suffix array values returned by @Function.getOccurrences@.
+..remarks:The occurrences are sorted by increasing positions.
+..see:Function.getOccurrences
+..see:Metafunction.SAValue
+*/
 	template <typename TValue, typename TSpec>
 	inline void orderOccurrences(String<TValue, TSpec> &occString)
 	{
