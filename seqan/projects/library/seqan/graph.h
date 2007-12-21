@@ -108,6 +108,9 @@
 #include <seqan/graph/graph_align_tcoffee_library.h>
 #include <seqan/graph/graph_align_tcoffee_progressive.h>
 
+// Consensus tool
+#include <seqan/graph/graph_align_consensus_base.h>
+
 // Folding
 #include <seqan/graph/graph_fold_nussinov.h>
 

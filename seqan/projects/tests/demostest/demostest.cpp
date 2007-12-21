@@ -36,10 +36,6 @@
 #undef main
 
 
-#define main runFind
-#include "../../library/demos/find.cpp"
-#undef main
-
 #define main runFindExact
 #include "../../library/demos/find_exact.cpp"
 #undef main
@@ -197,6 +193,11 @@
 #undef main
 
 
+#define main runGraph25
+#include "../../library/demos/graph_consensus.cpp"
+#undef main
+
+
 //*/
 int main(int argc, const char *argv[]) 
 {
@@ -208,7 +209,6 @@ int main(int argc, const char *argv[])
 	runString1();
 	runFileFormat();
 
-	runFind();
 	runFindExact();
 	runFindApprox();
 	runFindWild();
@@ -234,6 +234,7 @@ int main(int argc, const char *argv[])
 	runGraph12();runGraph13();runGraph14();runGraph15();runGraph16();runGraph17();
 	runGraph18();runGraph19();runGraph20();runGraph21();runGraph22();runGraph23();
 	runGraph24(argc, argv);
+	runGraph25(argc, argv);
 //*/
 	return 0;
 }

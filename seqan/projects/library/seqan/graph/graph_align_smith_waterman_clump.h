@@ -119,7 +119,7 @@ _localAlignment(TAlign& align,
 		for(TSize k = 0; k<diff; ++k) push_back(score_values, local_score);
 
 		++count;
-	} while ((local_score > 0.5 * maxScore) && (count < limit_count));
+	} while ((local_score > 0.5 * maxScore) && (count < (TSize) limit_count));
 
 	// Refine all matches and create multiple alignment
 	matchRefinement(matches,str,align);

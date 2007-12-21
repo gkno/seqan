@@ -343,6 +343,15 @@ getInfinity()
 
 //////////////////////////////////////////////////////////////////////////////
 
+template <>
+inline double const
+getInfinity()
+{
+	return 1000000000;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 /**
 .Function.getNil:
 ..cat:Graph
@@ -409,7 +418,7 @@ template<typename TWeightMap>
 inline typename Value<TWeightMap>::Type
 getInfinityDistance(TWeightMap const&)
 {
-	// We need to divide by 2 because of addition: infinity + something
+	// We need to divide by 2 because of addition in some graph algorithms: infinity + something
 	return (getInfinity<typename Value<TWeightMap>::Type>()/2);
 }
 

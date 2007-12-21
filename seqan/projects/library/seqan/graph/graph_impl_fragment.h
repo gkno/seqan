@@ -49,6 +49,27 @@ class Fragment {
   }
 
 };
+
+template<typename TId, typename TPos, typename TSize, typename TSpec>
+struct Position<Fragment<TId, TPos, TSize, TSpec> > {
+	typedef TPos Type;
+};
+
+template<typename TId, typename TPos, typename TSize, typename TSpec>
+struct Position<Fragment<TId, TPos, TSize, TSpec> const> {
+	typedef TPos const Type;
+};
+
+
+template<typename TId, typename TPos, typename TSize, typename TSpec>
+struct Size<Fragment<TId, TPos, TSize, TSpec> > {
+	typedef TSize Type;
+};
+
+template<typename TId, typename TPos, typename TSize, typename TSpec>
+struct Size<Fragment<TId, TPos, TSize, TSpec> const> {
+	typedef TSize const Type;
+};
   
 //////////////////////////////////////////////////////////////////////////////
 

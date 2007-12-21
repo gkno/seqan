@@ -1018,7 +1018,7 @@ parentVertex(Graph<Tree<TCargo, TSpec> > const& g,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TCargo, typename TSpec>
+template<typename TCargo, typename TSpec, typename TVertexDescriptor>
 inline typename VertexDescriptor<Graph<Tree<TCargo, TSpec> > >::Type 
 parentVertex(Graph<Tree<TCargo, TSpec> > const& g,
 			 typename VertexDescriptor<Graph<Tree<TCargo, TSpec> > >::Type const v) 

@@ -330,201 +330,135 @@ heaviestIncreasingSubsequence(TString const& str,
 	return w;
 }
 
-/*
-template<typename TString, typename TWeightMap, typename TPositions>
-inline typename Value<TWeightMap>::Type
-heaviestIncreasingSubsequence(TString const& str, 
-							  TWeightMap const& weights, 
-							  TPositions& pos) 
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TKey, typename TValue, typename TPositions, typename TSize, typename TVertexDescriptor, typename TString>
+inline void
+__heaviestCommonSubsequence(std::map<TKey, TValue>&,
+							TPositions const&,
+							TSize const,
+							TSize const,
+							TVertexDescriptor const,
+							TString const&, 
+							TString const&,
+							Nothing&) 
 {
 	SEQAN_CHECKPOINT
-	typedef typename Size<TString>::Type TSize;
-	typedef typename Value<TString>::Type TValue;
-	typedef typename Value<TPositions>::Type TPos;
-	typedef typename Value<TWeightMap>::Type TWeight;
-
-	// The list of decreasing covers, only the smallest element of each member must be remembered
-	typedef std::pair<TValue, std::pair<TWeight, TPos> > TKey;
-	typedef std::set<TKey, std::less<TKey> > TSortedSequence;
-	typedef typename TSortedSequence::const_iterator TSortedSequenceIter;
-	TSortedSequence list;
-	
-	// The trace-back graph
-	typedef Graph<Directed<void, WithoutEdgeId> > TGraph;
-	typedef Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
-	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	TGraph g;
-
-	// Walk through the sequence and build the decreasing covers
-	typedef typename Iterator<TString const>::Type TStringIter;
-	TStringIter endIt = end(str);
-	TPos pos_of_iterator = 0;
-	typedef std::map<TPos, TVertexDescriptor> TPosToVertex;
-	typedef std::map<TVertexDescriptor, TPos> TVertexToPos;
-	TPosToVertex posToVertexMap;
-	TVertexToPos vertexToPosMap;
-	for(TStringIter it = begin(str); it != endIt; ++it, ++pos_of_iterator) {
-		TWeight w = getValue(weights, pos_of_iterator);
-		// Letters that do not contribute a weight (e.g., w = 0) are excluded!
-		// Weights must increase!
-		if (w <= 0) continue;
-
-		// Get previous element
-		TSortedSequenceIter a_k_it = _previousInSortedSequence(list, std::make_pair(*it, std::make_pair(0, 0))); 
-		
-		// Get next element
-		TSortedSequenceIter b_l_it = _nextInSortedSequence(list, a_k_it);
-
-		// Determine new weight
-		if (a_k_it != list.end()) w += a_k_it->second.first;
-
-		// Delete from list
-		while ((b_l_it != list.end()) && 
-				(w >= b_l_it->second.first)) {
-					TSortedSequenceIter tmp = b_l_it;
-					b_l_it = _nextInSortedSequence(list, b_l_it);
-					list.erase(*tmp);
-		}
-
-		// Insert new list element
-		if ((b_l_it == list.end()) ||
-			(*it < b_l_it->first)) {
-				list.insert(std::make_pair(*it, std::make_pair(w, pos_of_iterator)));
-		}
-
-		// Create the corresponding node
-		TVertexDescriptor new_v = addVertex(g);
-		posToVertexMap.insert(std::make_pair(pos_of_iterator, new_v)); 
-		vertexToPosMap.insert(std::make_pair(new_v, pos_of_iterator));
-
-		// Connect to predecessor
-		if (a_k_it != list.end()) addEdge(g, posToVertexMap[pos_of_iterator], posToVertexMap[a_k_it->second.second]);
-	}
-
-	// Trace-back
-	TWeight w = 0;
-	if (empty(g)) return 0;
-	else {
-		bool finished = false;
-		// Last element in the list is the end of heaviest increasing subsequence
-		TVertexDescriptor v = posToVertexMap[list.rbegin()->second.second];
-		while (!finished) {
-			TPos p = vertexToPosMap[v];
-			appendValue(pos, p);
-			w+=getValue(weights, p);
-			TOutEdgeIterator it(g, v);
-			if (atEnd(it)) finished = true;
-			else v = targetVertex(it);  // Only one predecessor
-		}
-	}
-	return w;
 }
-*/
-
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TStringSet, typename TCargo, typename TSpec, typename TString>
-inline TCargo
-hcsPairwiseScore(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
-				 TString const& str1, 
-				 TString const& str2) 
+template<typename TKey, typename TValue, typename TPositions, typename TSize, typename TVertexDescriptor, typename TString, typename TOutString>
+inline void
+__heaviestCommonSubsequence(std::map<TKey, TValue>& posToSlotMap,
+							TPositions const& positions,
+							TSize const m,
+							TSize const n,
+							TVertexDescriptor const nilVertex,
+							TString const& str1, 
+							TString const& str2,
+							TOutString& align) 
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
-	typedef typename Size<TStringSet>::Type TSize;
-	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef __int64 TLargeSize;
+	typedef std::map<TKey, TValue> TPositionToSlotMap;
+	typedef typename Value<TString>::Type TVertexSet;
 	typedef typename Iterator<TString const, Rooted>::Type TStringIter;
 	typedef typename Iterator<TString, Rooted>::Type TSIter;
-	typedef typename Value<TString>::Type TVertexSet;
 	typedef typename Iterator<TVertexSet const, Rooted>::Type TVertexSetIter;
-	typedef typename Iterator<TVertexSet, Rooted>::Type TIter;
-	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
+	typedef typename Iterator<TVertexSet, Rooted>::Type TIter;	
 
-	// Size of the sequences
-	// Note for profile alignments every member of the sequence is a String!!! of vertex descriptors
-	TSize m = length(str1);  // How many sets of vertex descriptors in seq1
-	TSize n = length(str2);  // How many sets of vertex descriptors in seq1
-	TSize seqsInStr1 = length(str1[0]);	 // #Vertex descriptors per node
+	// #Vertex descriptors per node
+	TSize seqsInStr1 = length(str1[0]);	 
 	TSize seqsInStr2 = length(str2[0]);	
-	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
-	
-	// Fill the vertex to position map for str1
-	// Remember for each vertex descriptor the position in the sequence
-	typedef std::map<TVertexDescriptor, TSize> TVertexToPosMap;
-	typedef typename TVertexToPosMap::const_iterator TVertexToPosMapIter;
-	TVertexToPosMap map;
-	TStringIter itStrEnd1 = end(str1);
-	for(TStringIter itStr1 = begin(str1);itStr1 != itStrEnd1;++itStr1) {
-		TVertexSetIter itVEnd = end(getValue(itStr1));
-		for(TVertexSetIter itV = begin(getValue(itStr1));itV != itVEnd;++itV) {
-			if (*itV != nilVertex) map.insert(std::make_pair(*itV, position(itStr1)));
-		}
-	}
 
-	// We create the full graph
-	// For a given node number the edges in decreasing order, so
-	// during increasing subsequence computation no two edges are selected for a given node
-	// We do this for every node 0 ... m-1
-	String<TSize> seq;
-	resize(seq, n*m);
-	typedef typename Iterator<String<TSize>, Rooted>::Type TSeqIter;
-	TSeqIter itSeq = begin(seq);
-	for(TSize i=0; i<m;++i) {
-		for(int j=n-1;j>=0;--j) {
-			*itSeq = (TSize) j;
-			++itSeq;
-		}
+	// Reverse the map
+	String<TLargeSize> slotToPos;
+	resize(slotToPos, posToSlotMap.size());
+	unsigned int counter = 0;
+	for(typename TPositionToSlotMap::const_iterator mapIt = posToSlotMap.begin();mapIt != posToSlotMap.end(); ++mapIt, ++counter) {
+		value(slotToPos, counter) = mapIt->first;
 	}
-	// Initially every edge receives weight=0
-	String<double> weights;
-	// For profile alignments, take the average weight
-	double divider = (double) seqsInStr1 * (double) seqsInStr2;
-	fill(weights, n*m, 0);
+	posToSlotMap.clear();
 
-	// Walk through str2 and fill in the weights of the actual edges
-	TStringIter itStrEnd2 = end(str2);
-	for(TStringIter itStr2 = begin(str2);itStr2 != itStrEnd2;++itStr2) {
-		TVertexSetIter itVEnd = end(getValue(itStr2));
-		for(TVertexSetIter itV = begin(getValue(itStr2));itV != itVEnd;++itV) {
-			if (*itV != nilVertex) {
-				TOutEdgeIterator itOut(g, *itV);
-				for(;!atEnd(itOut); ++itOut) {
-					// Target vertex must be in the map
-					TVertexToPosMapIter pPos = map.find(targetVertex(itOut));
-					if (pPos != map.end()) {
-						// Calculate the edge index
-						TSize index = pPos->second * n + (n - position(itStr2) - 1);
-						weights[index] += (double) cargo(*itOut) / divider;	
-					}
-				}
+	// Create the alignment sequence
+	TSize numMatches = length(positions);
+	TSize alignLength = numMatches + (n - numMatches) + (m - numMatches);
+	clear(align);
+	resize(align, alignLength);
+	TSIter pointerAlign = begin(align);
+	TSIter pointerAlignEnd = end(align);
+	TStringIter pointerStr1 = begin(str1);
+	TStringIter pointerStr2 = begin(str2);
+	int p = length(positions) - 1;
+	while(pointerAlign != pointerAlignEnd) {
+		TSize i = m;
+		TSize j = n;
+		if (p>=0) {
+			i = (TSize) (slotToPos[positions[p]] / (TLargeSize) n);   // Get the index in str1
+			j = n - 1 - (TSize) (slotToPos[positions[p]] % (TLargeSize) n); // Get the index in str2
+		};
+		// Gaps in seq 2
+		while (i != position(pointerStr1)) {
+			TVertexSet tmp;
+			fill(tmp, (seqsInStr1 + seqsInStr2), nilVertex);
+			TVertexSetIter itVEnd = end(value(pointerStr1));
+			TSize count = 0;
+			for(TVertexSetIter itV = begin(value(pointerStr1));itV != itVEnd;++itV) {
+				tmp[count] = *itV;
+				++count;
 			}
+			value(pointerAlign) = tmp;
+			++pointerAlign;
+			++pointerStr1;
+		}
+		// Gaps in seq 1
+		while (j != position(pointerStr2)) {
+			TVertexSet tmp;
+			fill(tmp, (seqsInStr1 + seqsInStr2), nilVertex);
+			TVertexSetIter itVEnd = end(value(pointerStr2));
+			TSize count = 0;
+			for(TVertexSetIter itV = begin(value(pointerStr2));itV != itVEnd;++itV) {
+				tmp[count] = *itV;
+				++count;
+			}
+			value(pointerAlign) = tmp;
+			++pointerAlign;
+			++pointerStr2;
+		}
+		if (p>=0) {
+			// Matches
+			TVertexSet tmp;
+			fill(tmp, (seqsInStr1 + seqsInStr2), nilVertex);
+			TVertexSetIter itVEnd = end(value(pointerStr1));
+			TSize count = 0;
+			for(TVertexSetIter itV = begin(value(pointerStr1));itV != itVEnd;++itV) {
+				tmp[count] = *itV;
+				++count;
+			}
+			TVertexSetIter itVEnd2 = end(value(pointerStr2));
+			for(TVertexSetIter itV2 = begin(value(pointerStr2));itV2 != itVEnd2;++itV2) {
+				tmp[count] = *itV2;
+				++count;
+			}
+			value(pointerAlign) = tmp;
+			++pointerAlign;
+			++pointerStr1;
+			++pointerStr2;
+			--p;
 		}
 	}
-	
-	// Calculate the heaviest increasing subsequence
-	// Note edges with weight=0 are ignored!
-	String<unsigned int> pos;
-
-	// Debug code
-	//for (int i = 0; i<n*m; ++i) {
-	//	std::cout << seq[i] << '(' << weights[i] << ')' << ',';
-	//}
-	
-	return (TCargo) heaviestIncreasingSubsequence(seq, weights, pos);
+	SEQAN_TASSERT(position(pointerAlign) == length(align))
 }
-
-
-
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TStringSet, typename TCargo, typename TSpec, typename TString>
+template<typename TStringSet, typename TCargo, typename TSpec, typename TString, typename TOutString>
 inline TCargo
 heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 						  TString const& str1, 
 						  TString const& str2,
-						  TString& align) 
+						  TOutString& align) 
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
@@ -534,16 +468,12 @@ heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
 	typedef typename Value<TString>::Type TVertexSet;
 
-	// Initialization
-	clear(align);
+	TSize m = length(str1);  // How many sets of vertex descriptors in seq1
+	TSize n = length(str2);  // How many sets of vertex descriptors in seq1
 
 	// Size of the sequences
 	// Note for profile alignments every member of the sequence is a String!!! of vertex descriptors
-	TSize m = length(str1);  // How many sets of vertex descriptors in seq1
-	TSize n = length(str2);  // How many sets of vertex descriptors in seq1
-	TSize seqsInStr1 = length(str1[0]);	 // #Vertex descriptors per node
-	TSize seqsInStr2 = length(str2[0]);	
-	TCargo divider = (TCargo) seqsInStr1 * (TCargo) seqsInStr2;
+	TCargo divider = (TCargo) length(str1[0]) * (TCargo) length(str2[0]);
 	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
 	
 	// Fill the vertex to position map for str1
@@ -630,95 +560,12 @@ heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	String<TSize> positions;
 	TCargo score = (TCargo) heaviestIncreasingSubsequence(seq, weights, positions);
 
-	// Reverse the map
-	String<TLargeSize> slotToPos;
-	resize(slotToPos, posToSlotMap.size());
-	counter = 0;
-	for(typename TPositionToSlotMap::const_iterator mapIt = posToSlotMap.begin();mapIt != posToSlotMap.end(); ++mapIt, ++counter) {
-		value(slotToPos, counter) = mapIt->first;
-	}
-	posToSlotMap.clear();
-
-	// Create the alignment sequence
-	typedef typename Iterator<TString const, Rooted>::Type TStringIter;
-	typedef typename Iterator<TString, Rooted>::Type TSIter;
-	typedef typename Iterator<TVertexSet const, Rooted>::Type TVertexSetIter;
-	typedef typename Iterator<TVertexSet, Rooted>::Type TIter;
-	TSize numMatches = length(positions);
-	TSize alignLength = numMatches + (n - numMatches) + (m - numMatches);
-	clear(align);
-	resize(align, alignLength);
-	TSIter pointerAlign = begin(align);
-	TSIter pointerAlignEnd = end(align);
-	TStringIter pointerStr1 = begin(str1);
-	TStringIter pointerStr2 = begin(str2);
-	int p = length(positions) - 1;
-	while(pointerAlign != pointerAlignEnd) {
-		TSize i = m;
-		TSize j = n;
-		if (p>=0) {
-			i = (TSize) (slotToPos[positions[p]] / (TLargeSize) n);   // Get the index in str1
-			j = n - 1 - (TSize) (slotToPos[positions[p]] % (TLargeSize) n); // Get the index in str2
-		};
-		// Gaps in seq 2
-		while (i != position(pointerStr1)) {
-			TVertexSet tmp;
-			fill(tmp, (seqsInStr1 + seqsInStr2), nilVertex);
-			TVertexSetIter itVEnd = end(value(pointerStr1));
-			TSize count = 0;
-			for(TVertexSetIter itV = begin(value(pointerStr1));itV != itVEnd;++itV) {
-				tmp[count] = *itV;
-				++count;
-			}
-			value(pointerAlign) = tmp;
-			++pointerAlign;
-			++pointerStr1;
-		}
-		// Gaps in seq 1
-		while (j != position(pointerStr2)) {
-			TVertexSet tmp;
-			fill(tmp, (seqsInStr1 + seqsInStr2), nilVertex);
-			TVertexSetIter itVEnd = end(value(pointerStr2));
-			TSize count = 0;
-			for(TVertexSetIter itV = begin(value(pointerStr2));itV != itVEnd;++itV) {
-				tmp[count] = *itV;
-				++count;
-			}
-			value(pointerAlign) = tmp;
-			++pointerAlign;
-			++pointerStr2;
-		}
-		if (p>=0) {
-			// Matches
-			TVertexSet tmp;
-			fill(tmp, (seqsInStr1 + seqsInStr2), nilVertex);
-			TVertexSetIter itVEnd = end(value(pointerStr1));
-			TSize count = 0;
-			for(TVertexSetIter itV = begin(value(pointerStr1));itV != itVEnd;++itV) {
-				tmp[count] = *itV;
-				++count;
-			}
-			TVertexSetIter itVEnd2 = end(value(pointerStr2));
-			for(TVertexSetIter itV2 = begin(value(pointerStr2));itV2 != itVEnd2;++itV2) {
-				tmp[count] = *itV2;
-				++count;
-			}
-			value(pointerAlign) = tmp;
-			++pointerAlign;
-			++pointerStr1;
-			++pointerStr2;
-			--p;
-		}
-	}
-	SEQAN_TASSERT(position(pointerAlign) == length(align))
+	// Retrieve the alignment sequence
+	__heaviestCommonSubsequence(posToSlotMap, positions, m, n, nilVertex, str1, str2, align);
 
 	return score;
 
 }
-
-
-
-/*
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -726,180 +573,12 @@ template<typename TStringSet, typename TCargo, typename TSpec, typename TString>
 inline TCargo
 heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 						  TString const& str1, 
-						  TString const& str2,
-						  TString& align) 
+						  TString const& str2) 
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
-	//typedef typename Size<TStringSet>::Type TSize;
-	typedef __int64 TLargeSize;
-	typedef unsigned int TSize;
-	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	typedef typename Iterator<TString const, Rooted>::Type TStringIter;
-	typedef typename Iterator<TString, Rooted>::Type TSIter;
-	typedef typename Value<TString>::Type TVertexSet;
-	typedef typename Iterator<TVertexSet const, Rooted>::Type TVertexSetIter;
-	typedef typename Iterator<TVertexSet, Rooted>::Type TIter;
-	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
-
-	// Initialization
-	clear(align);
-
-	// Size of the sequences
-	// Note for profile alignments every member of the sequence is a String!!! of vertex descriptors
-	TSize m = length(str1);  // How many sets of vertex descriptors in seq1
-	TSize n = length(str2);  // How many sets of vertex descriptors in seq1
-	TSize seqsInStr1 = length(str1[0]);	 // #Vertex descriptors per node
-	TSize seqsInStr2 = length(str2[0]);	
-	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
-	
-	// Fill the vertex to position map for str1
-	// Remember for each vertex descriptor the position in the sequence
-	typedef std::map<TVertexDescriptor, TSize> TVertexToPosMap;
-	typedef typename TVertexToPosMap::const_iterator TVertexToPosMapIter;
-	TVertexToPosMap map;
-	TStringIter itStrEnd1 = end(str1);
-	for(TStringIter itStr1 = begin(str1);itStr1 != itStrEnd1;++itStr1) {
-		TVertexSetIter itVEnd = end(getValue(itStr1));
-		for(TVertexSetIter itV = begin(getValue(itStr1));itV != itVEnd;++itV) {
-			if (*itV != nilVertex) map.insert(std::make_pair(*itV, position(itStr1)));
-		}
-	}
-
-	
-	// Initially every edge receives weight=0
-	//String<TCargo, External<> > weights;
-	String<TCargo> weights;
-	// For profile alignments, take the average weight
-	TCargo divider = (TCargo) seqsInStr1 * (TCargo) seqsInStr2;
-	fill(weights,(TLargeSize) n * (TLargeSize) m,0);
-	//resize(weights,(TLargeSize) n * (TLargeSize) m);
-	//for(TLargeSize i = 0; i<(TLargeSize) n * (TLargeSize) m;++i) weights[i] = 0;
-	
-	
-	// Walk through str2 and fill in the weights of the actual edges
-	TStringIter itStrEnd2 = end(str2);
-	for(TStringIter itStr2 = begin(str2);itStr2 != itStrEnd2;++itStr2) {
-		TVertexSetIter itVEnd = end(getValue(itStr2));
-		for(TVertexSetIter itV = begin(getValue(itStr2));itV != itVEnd;++itV) {
-			if (*itV != nilVertex) {
-				TOutEdgeIterator itOut(g, *itV);
-				for(;!atEnd(itOut); ++itOut) {
-					// Target vertex must be in the map
-					TVertexToPosMapIter pPos = map.find(targetVertex(itOut));
-					if (pPos != map.end()) {
-						// Calculate the edge index
-						TSize index = (pPos->second) * n + (n - position(itStr2) - 1);
-						weights[index] += (TCargo) cargo(*itOut);	
-					}
-				}
-			}
-		}
-	}
-	map.clear();
-
-	// We create the full graph
-	// For a given node number the edges in decreasing order, so
-	// during increasing subsequence computation no two edges are selected for a given node
-	// We do this for every node 0 ... m-1
-	//typedef String<TSize, External<> > TSequenceString;
-	typedef String<TSize> TSequenceString;
-	TSequenceString seq;
-	resize(seq, (TLargeSize) n * (TLargeSize) m);
-	typedef typename Iterator<TSequenceString, Rooted>::Type TSeqIter;
-	TLargeSize counter = 0;
-	TSeqIter itSeq = begin(seq);
-	for(TSize i=0; i<m;++i) {
-		for(TSize j=n-1;j>0;--j) {
-			*itSeq = (TSize) j;
-			weights[counter] /= divider;
-			++itSeq;
-			++counter;
-		}
-		*itSeq = (TSize) 0;
-		weights[counter] /= divider;
-		++itSeq;
-		++counter;
-	}
-
-	// Calculate the heaviest increasing subsequence
-	// Note edges with weight=0 are ignored!
-	String<TLargeSize> pos;
-	TCargo score = (TCargo) heaviestIncreasingSubsequence(seq, weights, pos);
-	
-	// Create the alignment sequence
-	TSize numMatches = length(pos);
-	TSize alignLength = numMatches + (n - numMatches) + (m - numMatches);
-	clear(align);
-	resize(align, alignLength);
-	TSIter pointerAlign = begin(align);
-	TSIter pointerAlignEnd = end(align);
-	TStringIter pointerStr1 = begin(str1);
-	TStringIter pointerStr2 = begin(str2);
-	TLargeSize p = (TLargeSize) length(pos) - (TLargeSize) 1;
-	while(pointerAlign != pointerAlignEnd) {
-		TLargeSize i = m;
-		TLargeSize j = n;
-		if (p>=0) {
-			i = pos[p] / (TLargeSize) n;   // Get the index in str1
-			j = n - 1 - (pos[p] % (TLargeSize) n); // Get the index in str2
-		};
-		// Gaps in seq 2
-		while (i != position(pointerStr1)) {
-			TVertexSet tmp;
-			fill(tmp, (seqsInStr1 + seqsInStr2), nilVertex);
-			TVertexSetIter itVEnd = end(value(pointerStr1));
-			TSize count = 0;
-			for(TVertexSetIter itV = begin(value(pointerStr1));itV != itVEnd;++itV) {
-				tmp[count] = *itV;
-				++count;
-			}
-			value(pointerAlign) = tmp;
-			++pointerAlign;
-			++pointerStr1;
-		}
-		// Gaps in seq 1
-		while (j != position(pointerStr2)) {
-			TVertexSet tmp;
-			fill(tmp, (seqsInStr1 + seqsInStr2), nilVertex);
-			TVertexSetIter itVEnd = end(value(pointerStr2));
-			TSize count = 0;
-			for(TVertexSetIter itV = begin(value(pointerStr2));itV != itVEnd;++itV) {
-				tmp[count] = *itV;
-				++count;
-			}
-			value(pointerAlign) = tmp;
-			++pointerAlign;
-			++pointerStr2;
-		}
-		if (p>=0) {
-			// Matches
-			TVertexSet tmp;
-			fill(tmp, (seqsInStr1 + seqsInStr2), nilVertex);
-			TVertexSetIter itVEnd = end(value(pointerStr1));
-			TSize count = 0;
-			for(TVertexSetIter itV = begin(value(pointerStr1));itV != itVEnd;++itV) {
-				tmp[count] = *itV;
-				++count;
-			}
-			TVertexSetIter itVEnd2 = end(value(pointerStr2));
-			for(TVertexSetIter itV2 = begin(value(pointerStr2));itV2 != itVEnd2;++itV2) {
-				tmp[count] = *itV2;
-				++count;
-			}
-			value(pointerAlign) = tmp;
-			++pointerAlign;
-			++pointerStr1;
-			++pointerStr2;
-			--p;
-		}
-	}
-	SEQAN_TASSERT(position(pointerAlign) == length(align))
-
-	return score;
+	Nothing noth;
+	return heaviestCommonSubsequence(g, str1, str2, noth);
 }
-*/
-
 
 }// namespace SEQAN_NAMESPACE_MAIN
 

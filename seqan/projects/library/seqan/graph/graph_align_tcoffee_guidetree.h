@@ -237,12 +237,12 @@ _upgmaTreeMerge(TMatrix const& mat,
 	typedef typename Value<TMatrix>::Type TValue;
 
 	// Average
-	TValue returnVal = 0;
-	if (index_i < i) returnVal = ((TValue) active[index_i] / (TValue) (active[index_i] + active[index_j])) * getValue(mat, index_i * nseq + i);
-	else returnVal = ((TValue) active[index_i] / (TValue) (active[index_i] + active[index_j])) * getValue(mat, i * nseq + index_i);
-	if (index_j < i) returnVal += ((TValue) active[index_j] / (TValue) (active[index_i] + active[index_j])) * getValue(mat, index_j * nseq + i);
-	else returnVal += ((TValue) active[index_j] / (TValue) (active[index_i] + active[index_j])) * getValue(mat, i * nseq + index_j);
-	return returnVal;
+	double returnVal = 0;
+	if (index_i < i) returnVal = ((double) active[index_i] / (double) (active[index_i] + active[index_j])) * getValue(mat, index_i * nseq + i);
+	else returnVal = ((double) active[index_i] / (double) (active[index_i] + active[index_j])) * getValue(mat, i * nseq + index_i);
+	if (index_j < i) returnVal += ((double) active[index_j] / (double) (active[index_i] + active[index_j])) * getValue(mat, index_j * nseq + i);
+	else returnVal += ((double) active[index_j] / (double) (active[index_i] + active[index_j])) * getValue(mat, i * nseq + index_j);
+	return (TValue) returnVal;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -299,9 +299,113 @@ _upgmaTreeMerge(TMatrix const& mat,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TStringSpec, typename TCargo, typename TSpec, typename TTag>
+template<typename TCargo, typename TSpec, typename TActive, typename TEdgeDescriptor>
 inline void
-upgmaTree(String<double, TStringSpec>& mat, 
+_upgmaTreeMerge(Graph<Undirected<TCargo, TSpec> >& pairGraph, 
+				TActive const&,
+				TEdgeDescriptor best,
+				UpgmaMax) 
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Undirected<TCargo, TSpec> > TGraph;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
+	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
+
+	TCargo infCargo = getInfinity<TCargo>();
+	TVertexDescriptor s = sourceVertex(pairGraph,best);
+	TVertexDescriptor t = targetVertex(pairGraph,best);
+	
+	for(TOutEdgeIterator outIt(pairGraph, s);!atEnd(outIt);goNext(outIt)) {
+		if (targetVertex(outIt) == t) continue;
+		TEdgeDescriptor e = findEdge(pairGraph, targetVertex(outIt), t);
+		if (e == 0) cargo(*outIt) = infCargo;
+		else if (cargo(e) > cargo(*outIt)) cargo(*outIt) = cargo(e);
+	}
+	removeVertex(pairGraph, t);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TCargo, typename TSpec, typename TActive, typename TEdgeDescriptor>
+inline void
+_upgmaTreeMerge(Graph<Undirected<TCargo, TSpec> >& pairGraph, 
+				TActive const&,
+				TEdgeDescriptor best,
+				UpgmaMin) 
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Undirected<TCargo, TSpec> > TGraph;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
+	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
+
+	TVertexDescriptor s = sourceVertex(pairGraph,best);
+	TVertexDescriptor t = targetVertex(pairGraph,best);
+	
+	for(TOutEdgeIterator outIt(pairGraph, s);!atEnd(outIt);goNext(outIt)) {
+		if (targetVertex(outIt) == t) continue;
+		TEdgeDescriptor e = findEdge(pairGraph, targetVertex(outIt), t);
+		if (e != 0) {
+			if (cargo(e) < cargo(*outIt)) cargo(*outIt) = cargo(e);
+		}
+	}
+	for(TOutEdgeIterator outIt(pairGraph, t);!atEnd(outIt);goNext(outIt)) {
+		if (targetVertex(outIt) == s) continue;
+		TEdgeDescriptor e = findEdge(pairGraph, targetVertex(outIt), s);
+		if (e == 0)  {
+			addEdge(pairGraph, s, targetVertex(outIt), cargo(*outIt));
+		}
+	}
+	removeVertex(pairGraph, t);
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TCargo, typename TSpec, typename TActive, typename TEdgeDescriptor>
+inline void
+_upgmaTreeMerge(Graph<Undirected<TCargo, TSpec> >& pairGraph, 
+				TActive const& active,
+				TEdgeDescriptor best,
+				UpgmaAvg) 
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Undirected<TCargo, TSpec> > TGraph;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
+	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
+
+	TCargo infCargo = getInfinity<TCargo>();
+	TVertexDescriptor s = sourceVertex(pairGraph,best);
+	TVertexDescriptor t = targetVertex(pairGraph,best);
+	
+	for(TOutEdgeIterator outIt(pairGraph, s);!atEnd(outIt);goNext(outIt)) {
+		if (targetVertex(outIt) == t) continue;
+		TEdgeDescriptor e = findEdge(pairGraph, targetVertex(outIt), t);
+		if (e != 0) {
+			cargo(*outIt) = ((double) active[s] / (double) (active[s] + active[t])) * cargo(*outIt) + ((double) active[t] / (double) (active[s] + active[t])) * cargo(e);
+		} else {
+			cargo(*outIt) = ((double) active[s] / (double) (active[s] + active[t])) * cargo(*outIt) + ((double) active[t] / (double) (active[s] + active[t])) * infCargo;
+		}
+	}
+	for(TOutEdgeIterator outIt(pairGraph, t);!atEnd(outIt);goNext(outIt)) {
+		if (targetVertex(outIt) == s) continue;
+		TEdgeDescriptor e = findEdge(pairGraph, targetVertex(outIt), s);
+		if (e == 0)  {
+			TCargo c = ((double) active[s] / (double) (active[s] + active[t])) * infCargo + ((double) active[t] / (double) (active[s] + active[t])) * cargo(*outIt);
+			addEdge(pairGraph, s, targetVertex(outIt), c);
+		}
+	}
+	removeVertex(pairGraph, t);
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringValue, typename TStringSpec, typename TCargo, typename TSpec, typename TTag>
+inline void
+upgmaTree(String<TStringValue, TStringSpec>& mat, 
 		  Graph<Tree<TCargo, TSpec> >& g,
 		  TTag) 
 {
@@ -309,11 +413,10 @@ upgmaTree(String<double, TStringSpec>& mat,
 	typedef Graph<Tree<TCargo, TSpec> > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename Size<TGraph>::Type TSize;
-	typedef typename Value<String<double, TStringSpec> >::Type TValue;
+	typedef typename Value<String<TStringValue, TStringSpec> >::Type TValue;
 	
-	TSize nseq = (TSize) std::sqrt((TValue)length(mat));
-
 	// First initialization
+	TSize nseq = (TSize) std::sqrt((double)length(mat));
 	clearVertices(g);
 
 	// Which entries in the matrix are still active and how many members belong to this group
@@ -328,7 +431,7 @@ upgmaTree(String<double, TStringSpec>& mat,
 	TValue infinityVal = getInfinity<TValue>();
 	TValue minVal = infinityVal;
 	TSize index_i = 0;
-	TSize index_j = 0;
+	TSize index_j = 1;
 	TValue tmp;
 	for(TSize i=0;i<nseq;++i) {
 		for(TSize j=i+1;j<nseq;++j) {
@@ -365,7 +468,7 @@ upgmaTree(String<double, TStringSpec>& mat,
 		//std::cout << nodes[index_i] << ',' << nodes[index_j] << std::endl;
 		//std::cout << std::endl;
 
-		TCargo w = (TCargo) (value(mat, index_i*nseq + index_j) / 2);
+		TCargo w = (TCargo) (minVal / 2);
 		addEdge(g, internalNode, nodes[index_i], w - getProperty(weights, nodes[index_i]));
 		addEdge(g, internalNode, nodes[index_j], w - getProperty(weights, nodes[index_j]));
 		appendValue(weights, w);		
@@ -385,11 +488,14 @@ upgmaTree(String<double, TStringSpec>& mat,
 		
 		// Find new minimum
 		minVal = infinityVal;
+		bool found = false;
 		for(TSize i=0;i<nseq;++i) {
 			if (!active[i]) continue;
 			for(TSize j=i+1;j<nseq;++j) {
 				if (!active[j]) continue;
-				if (minVal > (tmp = value(mat, i*nseq + j))) {
+				if ((minVal > (tmp = value(mat, i*nseq + j))) ||
+					(!found)) {
+					found = true;
 					minVal = tmp;
 					index_i = i;
 					index_j = j;
@@ -401,16 +507,109 @@ upgmaTree(String<double, TStringSpec>& mat,
 	g.data_root = numVertices(g) - 1;
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TValue, typename TSpec1, typename TCargo, typename TSpec2, typename TTag>
+inline void
+upgmaTree(Graph<Undirected<TValue, TSpec1> >& pairGraph, 
+		  Graph<Tree<TCargo, TSpec2> >& g,
+		  TTag) 
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Undirected<TValue, TSpec1> > TPairGraph;
+	typedef Graph<Tree<TCargo, TSpec2> > TGuideTree;
+	typedef typename VertexDescriptor<TGuideTree>::Type TVertexDescriptor;
+	typedef typename VertexDescriptor<TGuideTree>::Type TVD;
+	typedef typename EdgeDescriptor<TPairGraph>::Type TED;
+	typedef typename Iterator<TPairGraph, EdgeIterator>::Type TEdgeI;
+	typedef typename Iterator<TPairGraph, VertexIterator>::Type TVertexI;
+	typedef typename Size<TPairGraph>::Type TSize;
+	
+	// First initialization
+	TSize nseq = numVertices(pairGraph);
+	clearVertices(g);
+
+	// Which entries in the matrix are still active and how many members belong to this group
+	String<unsigned int> active;
+	fill(active, nseq, 1);
+	// Vertex descriptor that represents that entry
+	String<TVertexDescriptor> nodes;
+	reserve(nodes, nseq);
+	for(TSize i=0;i<nseq;++i) appendValue(nodes, addVertex(g));	// For each sequence one vertex
+
+	// Find the minimal value
+	TValue infinityVal = getInfinity<TValue>();
+	TValue minVal = infinityVal;
+	TED best = 0;
+	TEdgeI itE(pairGraph);
+	for(;!atEnd(itE);++itE) {
+		if (minVal > cargo(*itE)) {
+			best = *itE;
+			minVal = cargo(*itE);
+		}
+	}
+
+	// Property map for sum of weights for each node
+	String<TCargo> weights;
+	fill(weights, nseq, (TCargo) 0);
+	reserve(weights, 2*nseq - 1);
+
+	// Merge groups
+	TSize m = nseq;
+	while (m>1) {
+		// Merge nodes
+		TVertexDescriptor internalNode = addVertex(g);
+		TVD s = sourceVertex(pairGraph, best);
+		TVD t = targetVertex(pairGraph, best);
+
+		//// Debug code
+		//std::cout << s << ',' << t << ':' << minVal << std::endl;
+
+
+		TCargo w = (TCargo) (minVal / 2);
+		addEdge(g, internalNode, nodes[s], w - getProperty(weights, nodes[s]));
+		addEdge(g, internalNode, nodes[t], w - getProperty(weights, nodes[t]));
+		appendValue(weights, w);		
+
+		// Get the new distance values
+		_upgmaTreeMerge(pairGraph, active, best, TTag());
+		
+		// Inactivate one group, adjust the member count for the other one
+		active[s] += active[t];
+		active[t] = 0;
+		nodes[s] = internalNode;
+		
+		// Find new minimum
+		minVal = infinityVal;
+		TEdgeI it(pairGraph);
+		bool found = false;
+		for(;!atEnd(it);++it) {
+			if (minVal > cargo(*it)) {
+				found = true;
+				best = *it;
+				minVal = cargo(*it);
+			}
+		}
+		if ((!found) && (m>2)) {
+			TVertexI itV(pairGraph);
+			TVD i1 = *itV;
+			goNext(itV);
+			best = addEdge(pairGraph, i1, *itV, infinityVal);
+		}
+		--m;
+	}
+	g.data_root = numVertices(g) - 1;
+}
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TStringSpec, typename TCargo, typename TSpec>
+template<typename TDistance, typename TCargo, typename TSpec>
 inline void
-upgmaTree(String<double, TStringSpec>& mat, 
+upgmaTree(TDistance& dist, 
 		  Graph<Tree<TCargo, TSpec> >& g) 
 {
 	SEQAN_CHECKPOINT
-	upgmaTree(mat, g, UpgmaAvg());
+	upgmaTree(dist, g, UpgmaAvg());
 }
 
 

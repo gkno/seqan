@@ -32,8 +32,6 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 
 
-
-
 template <typename TAlign, typename TStringSet, typename TTrace, typename TIndexPair>
 void
 _align_needleman_wunsch_trace(TAlign& align,
@@ -109,7 +107,7 @@ _align_needleman_wunsch_trace(TAlign& align,
 	
 
 //////////////////////////////////////////////////////////////////////////////
-//*
+
 template <typename TTrace, typename TStringSet, typename TScore, typename TValPair, typename TIndexPair, typename TAlignConfig>
 inline typename Value<TScore>::Type
 _align_needleman_wunsch(TTrace & trace,
@@ -219,6 +217,7 @@ _align_needleman_wunsch(TTrace & trace,
 
 	return _retrieveMaxOfAlignment(TAlignConfig(), overallMaxValue);
 }
+
 //*/
 /*
 template <typename TTrace, typename TStringSet, typename TScore, typename TValPair, typename TIndexPair, typename TAlignConfig>
@@ -230,7 +229,6 @@ _align_needleman_wunsch(TTrace& trace,
 						TIndexPair& overallMaxIndex,
 						TAlignConfig const) 
 {
-	SEQAN_CHECKPOINT
 	typedef typename Value<TScore>::Type TScoreValue;
 
 	// TraceBack values

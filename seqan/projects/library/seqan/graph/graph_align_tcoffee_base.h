@@ -148,7 +148,6 @@ combineGraphs(Graph<Alignment<TStringSet, TCargo, TSpec> >& outGraph,
 			  TLibraries& libs)
 {
 	SEQAN_CHECKPOINT
-	SEQAN_CHECKPOINT
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename Size<TGraph>::Type TSize;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;

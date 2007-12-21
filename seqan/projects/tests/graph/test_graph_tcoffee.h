@@ -383,103 +383,6 @@ void Test_TCoffeeFromFile(String<char> const in_path, String<char> const file_pr
 
 //////////////////////////////////////////////////////////////////////////////
 
-void Test_TCoffeeAssemblyFromFile(String<char> const readsPath, String<char> const sequencePath) {
-//____________________________________________________________________________
-// T-Coffee
-	// Timing variables
-	clock_t bigbang, startTime;
-
-	// Import Sequences
-	typedef String<Dna> TString;
-	StringSet<TString, Owner<> > origStrSet;
-	String<String<char> > names;
-	startTime = clock();
-	bigbang = startTime;
-	unsigned int nucCount = _alignImportSequences(readsPath, "", "", origStrSet, names);
-	unsigned int seqCount = length(origStrSet);
-	std::cout << readsPath << std::endl;
-	std::cout << "Total number of bp: " << nucCount << ", Number of sequences: " << seqCount << std::endl;
-	_alignTiming(startTime, "Import sequences done: ");
-
-	// Make dependent string set
-	typedef StringSet<TString, Dependent<> > TStringSet;
-	TStringSet strSet;
-	for(unsigned int i = 0; i<seqCount; ++i) appendValue(strSet, origStrSet[i]);
-
-	// Score objects
-	Score<int> score_type_global = Score<int>(5,-4,-6,-14);
-
-	// Align the sequences
-	typedef StringSet<TString, Dependent<> > TStringSet;
-	typedef Graph<Alignment<TStringSet, unsigned int> > TGraph;
-	typedef Size<TGraph>::Type TSize;
-	typedef Id<TGraph>::Type TId;
-
-	// Generate a primary library, i.e., all global pairwise alignments
-	TGraph g(strSet);
-	String<Pair<TId, TId> > pList;
-	selectPairsForLibraryGeneration(g, names, pList);
-	String<double> distanceMatrix;
-	generatePrimaryLibrary(g, pList, score_type_global, distanceMatrix, Overlap_Library() );
-	_alignTiming(startTime, "Overlap done: ");
-	
-	// Triplet library extension
-	tripletLibraryExtension(g);
-	std::cout << "Library size: " << numVertices(g) << " Vertices, " << numEdges(g) << " Edges" << std::endl;
-	_alignTiming(startTime, "Triplet done: ");
-
-	// Build the guide tree
-	Graph<Tree<double> > guideTree;
-	upgmaTree(distanceMatrix, guideTree);
-	_alignTiming(startTime, "Guide tree done: ");
-
-	// Perform a progressive alignment
-	Graph<Alignment<TStringSet, void> > gOut(strSet);
-	progressiveAlignment(g, guideTree, gOut);
-	clear(guideTree);
-	clear(g);
-	_alignTiming(startTime, "Progressive alignment done: ");
-
-	// Create the consensus alignment
-	std::cout << "Consensus sequence: " << std::endl;
-	TString consens;
-	consensusSequence(gOut, consens);
-	std::cout << consens << std::endl;
-	_alignTiming(startTime, "Consensus done: ");
-	
-
-	exit(0);
-
-
-	// Make quick alignment
-	std::cout << "Alignment of consensus to reference: " << std::endl;
-	StringSet<TString, Owner<> > seqSet;
-	_alignImportSequences(sequencePath, "", "", seqSet, names);
-	TStringSet str;
-	assignValueById(str, consens);
-	assignValueById(str, seqSet[0]);
-	TGraph ali(str);
-	Score<int> score_type = Score<int>(0,-1,-1,0);
-	globalAlignment(ali, score_type, NeedlemanWunsch() );
-	std::cout << ali << std::endl;
-
-	// Output alignment
-	std::stringstream output2;
-	output2 << sequencePath << "." << "my";
-	fstream strm5; // Alignment graph as fasta
-	strm5.open(output2.str().c_str(), ios_base::out | ios_base::trunc);
-	write(strm5,gOut,names, FastaReadFormat());
-	strm5.close();
-	_alignTiming(startTime, "Alignment output done: ");
-
-	// Finished
-	clear(gOut);
-	_alignTiming(bigbang, "Total time: ");
-	std::cout << "==============================" << std::endl;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
 void Test_TCoffeeFromLibrary(String<char> const in_path) {
 //____________________________________________________________________________
 // Graph TCoffee
@@ -910,18 +813,6 @@ void Test_RnaLibraries() {
 
 //////////////////////////////////////////////////////////////////////////////
 
-void Test_TCoffeeAssembly() {
-	// Windows
-#ifdef PLATFORM_WINDOWS
-	Test_TCoffeeAssemblyFromFile("D:\\matches\\reads\\readsim.out", "D:\\matches\\reads\\sequence.fasta"); 
-#else
-	// Linux
-	Test_TCoffeeAssemblyFromFile("/home/takifugu/rausch/matches/reads/readsim.out", "/home/takifugu/rausch/matches/reads/sequence.fasta"); 
-#endif
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
 
 void Test_GraphTCoffee() {
 	Test_CompressedAlphabets();
@@ -930,9 +821,6 @@ void Test_GraphTCoffee() {
 	// Toy example
 	Test_TCoffeeGarfield();
 	
-	// Assembly
-	//Test_TCoffeeAssembly();
-
 	//// Balibase
 	//Test_BaliBaseRef11();
 	//Test_BaliBaseRef12();
@@ -951,13 +839,15 @@ void Test_GraphTCoffee() {
 	//Test_TCoffeeScratch("/home/takifugu/rausch/matches/test/adeno.fasta");
 	//Test_TCoffeeScratch("Z://matches//test//adeno.fasta");
 
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_base.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_msa.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_kmer.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_distance.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_guidetree.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_library.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_progressive.h");
+	//debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_base.h");
+	//debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_msa.h");
+	//debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_kmer.h");
+	//debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_distance.h");
+	//debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_guidetree.h");
+	//debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_library.h");
+	//debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_progressive.h");
+
+	//debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_consensus_base.h");
 }
 
 

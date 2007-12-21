@@ -1128,6 +1128,9 @@ void Test_Tree() {
 	SEQAN_TASSERT(root(g) == rootV)
 	SEQAN_TASSERT(empty(g) == false)
 	TVertexDescriptor childC1 = addChild(g,rootV);
+	std::set<TVertexDescriptor> leaves;
+	collectLeaves(g, rootV, leaves);
+	SEQAN_TASSERT(*(leaves.begin()) == childC1)
 	TEdgeDescriptor childC1e = findEdge(g, rootV, childC1);
 	SEQAN_TASSERT(_getVertexString(g)[0] == childC1e)
 	SEQAN_TASSERT(getIdUpperBound(_getVertexIdManager(g)) == 2)
@@ -1140,6 +1143,9 @@ void Test_Tree() {
 	SEQAN_TASSERT(outDegree(g, rootV) == 1)
 	TVertexDescriptor childC2 = addChild(g,rootV);
 	TVertexDescriptor childC3 = addChild(g,rootV);
+	leaves.clear();
+	collectLeaves(g, rootV, leaves);
+	SEQAN_TASSERT(leaves.size() == 3)
 	SEQAN_TASSERT(outDegree(g, rootV) == 3)
 	SEQAN_TASSERT(childC1 == 1)
 	SEQAN_TASSERT(childC2 == 2)
@@ -1825,6 +1831,7 @@ void Test_Fragment() {
 	SEQAN_TASSERT(fragmentBegin(f2, 1) == 4)
 	SEQAN_TASSERT(fragmentLength(f2, 0) == 1)
 	SEQAN_TASSERT(fragmentLength(f2, 1) == 1)
+	SEQAN_TASSERT(fragmentLength(f2) == 1)
 	SEQAN_TASSERT(label(f2, str, 0) == "a")
 	SEQAN_TASSERT(label(f2, str, 1) == "a")
 	getProjectedPosition(f2, 0, 0, id2, pos2);

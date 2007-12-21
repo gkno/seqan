@@ -97,7 +97,7 @@ _createAlignmentGraph(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 			for(TSize k = j; k>0; --k) {
 				if (getValue(alignSeq_i, k - 1) != nilVertex) {
 					SEQAN_TASSERT(fragmentLength(gOut,l) == fragmentLength(gOut,l - count))
-					addEdge(gOut, l - count, l);
+					addEdge(gOut, (TVertexDescriptor) l - count, (TVertexDescriptor) l);
 					++count;
 				}
 			}
@@ -386,7 +386,7 @@ highestScoreFirstAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 		for(TSize j=i+1; j<nseq; ++j) {
 			// Align the 2 strings
 			TSize len2 = length(value(segmentStr,j));
-			double score = hcsPairwiseScore(g,value(segmentStr,i),value(segmentStr,j));
+			double score = heaviestCommonSubsequence(g,value(segmentStr,i),value(segmentStr,j));
 			
 			// Normalize by distance
 			score /= ((len1 + len2) / 2);
@@ -434,7 +434,7 @@ highestScoreFirstAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 			if ((!active[i]) || (index_i == i)) continue;
 			TSize len1 = length(segmentStr[index_i]);
 			TSize len2 = length(segmentStr[i]);
-			double score = hcsPairwiseScore(g,segmentStr[index_i],segmentStr[i]);
+			double score = heaviestCommonSubsequence(g,segmentStr[index_i],segmentStr[i]);
 			
 			// Normalize by distance
 			score /= ((len1 + len2) / 2);
@@ -603,7 +603,7 @@ highestScoreFirstAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 		for(TSize j=i+1; j<nseq; ++j) {
 			// Align the 2 strings
 			TSize len2 = length(value(segmentStr,j));
-			double score = hcsPairwiseScore(g,value(segmentStr,i),value(segmentStr,j));
+			double score = heaviestCommonSubsequence(g,value(segmentStr,i),value(segmentStr,j));
 			
 			// Normalize by distance
 			score /= ((len1 + len2) / 2);
@@ -651,7 +651,7 @@ highestScoreFirstAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 			if ((!active[i]) || (index_i == i)) continue;
 			TSize len1 = length(segmentStr[index_i]);
 			TSize len2 = length(segmentStr[i]);
-			double score = hcsPairwiseScore(g,segmentStr[index_i],segmentStr[i]);
+			double score = heaviestCommonSubsequence(g,segmentStr[index_i],segmentStr[i]);
 			
 			// Normalize by distance
 			score /= ((len1 + len2) / 2);

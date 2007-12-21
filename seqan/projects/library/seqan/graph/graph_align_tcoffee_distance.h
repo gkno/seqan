@@ -153,7 +153,7 @@ getDistanceMatrix(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 
 template<typename TFragmentMatches, typename TStringSet, typename TPos, typename TSize1, typename TAlphabet>
 inline void 
-getAlignmentStatistics(TFragmentMatches& matches,
+getAlignmentStatistics(TFragmentMatches const& matches,
 					   TStringSet& str,
 					   TPos const from,
 					   TPos const to,
@@ -164,6 +164,7 @@ getAlignmentStatistics(TFragmentMatches& matches,
 {
 	SEQAN_CHECKPOINT
 	typedef typename Size<TFragmentMatches>::Type TSize;
+	typedef typename Value<TFragmentMatches>::Type TFragment;
 	typedef typename Id<TFragmentMatches>::Type TId;
 	typedef typename Value<TStringSet>::Type TString;
 	typedef typename Infix<TString>::Type TInfix;
@@ -208,8 +209,8 @@ template<typename TFragmentMatches, typename TStringSet, typename TPos, typename
 inline void 
 getAlignmentStatistics(TFragmentMatches& matches,
 					   TStringSet& str,
-					   TPos const from,
-					   TPos const to,
+					   TPos from,
+					   TPos to,
 					   TSize& matchLength,
 					   TSize& overlapLength,
 					   TSize& alignLength)

@@ -787,8 +787,18 @@ void Test_HeaviestCommonSubsequence() {
 	clear(tmp); appendValue(tmp, 2); appendValue(str1, tmp);
 	clear(tmp); appendValue(tmp, 3); appendValue(str2, tmp);
 	clear(tmp); appendValue(tmp, 4); appendValue(str2, tmp);
-	heaviestCommonSubsequence(g, str1, str2, align);
-
+	SEQAN_TASSERT(heaviestCommonSubsequence(g, str1, str2, align) == 20);
+	Graph<Alignment<TStringSet, void> > gOut(strSet);
+	_createAlignmentGraph(g, align, gOut);
+	String<char> aMat;
+	convertAlignment(gOut, aMat);
+	SEQAN_TASSERT(getValue(aMat, 0*3 + 0) == 'A');
+	SEQAN_TASSERT(getValue(aMat, 0*3 + 1) == 'A');
+	SEQAN_TASSERT(getValue(aMat, 0*3 + 2) == 'A');
+	SEQAN_TASSERT(getValue(aMat, 1*3 + 0) == '-');
+	SEQAN_TASSERT(getValue(aMat, 1*3 + 1) == 'A');
+	SEQAN_TASSERT(getValue(aMat, 1*3 + 2) == 'A');
+	
 
 	s1 = "aaaaa";
 	s2 = "aaa";
@@ -811,7 +821,20 @@ void Test_HeaviestCommonSubsequence() {
 	clear(tmp); appendValue(tmp, 3); appendValue(str2, tmp);
 	clear(tmp); appendValue(tmp, 4); appendValue(str2, tmp);
 	heaviestCommonSubsequence(g, str1, str2, align);
-
+	clear(gOut);
+	assignStringSet(gOut, strSet);
+	_createAlignmentGraph(g, align, gOut);
+	clear(aMat);
+	convertAlignment(gOut, aMat);
+	SEQAN_TASSERT(getValue(aMat, 0*7 + 0) == 'A');
+	SEQAN_TASSERT(getValue(aMat, 0*7 + 1) == 'A');
+	SEQAN_TASSERT(getValue(aMat, 0*7 + 2) == 'A');
+	SEQAN_TASSERT(getValue(aMat, 0*7 + 3) == 'A');
+	SEQAN_TASSERT(getValue(aMat, 1*7 + 0) == '-');
+	SEQAN_TASSERT(getValue(aMat, 1*7 + 1) == '-');
+	SEQAN_TASSERT(getValue(aMat, 1*7 + 2) == 'A');
+	SEQAN_TASSERT(getValue(aMat, 1*7 + 3) == '-');
+	SEQAN_TASSERT(heaviestCommonSubsequence(g, str1, str2) == heaviestCommonSubsequence(g, str1, str2, align))
 }
 
 //////////////////////////////////////////////////////////////////////////////

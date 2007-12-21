@@ -275,8 +275,9 @@ _align_trace_print(String<TFragment, Block<> >& matches,
 
 
 
+
 //////////////////////////////////////////////////////////////////////////////
-// Graph: T-Coffee - Scoring Schema
+// Graph: DP with gap penalty score object
 //////////////////////////////////////////////////////////////////////////////
 
 
@@ -395,7 +396,6 @@ _align_trace_print(String<String<TVertexDescriptor, TSpec> >& nodeString,
 				   TPos const segLen,
 				   TTraceValue const tv)
 {
-	SEQAN_CHECKPOINT
 	typedef String<TVertexDescriptor, TSpec> TVertexDescriptorString;
 	typedef typename Size<TStringSet>::Type TSize;
 	typedef typename Iterator<TVertexDescriptorString>::Type TStringIter;
@@ -455,6 +455,7 @@ _align_trace_print(String<String<TVertexDescriptor, TSpec> >& nodeString,
 		}
 	}
 }
+
 
 
 }// namespace SEQAN_NAMESPACE_MAIN
