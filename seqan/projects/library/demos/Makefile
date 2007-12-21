@@ -9,7 +9,8 @@ ifeq ($(OS_NAME),Linux)
 endif
 
 CPPFLAGS += -I..
-#CPPFLAGS += -O3
+CPPFLAGS += -O3
+CPPFLAGS += -pedantic
 
 all: $(basename $(wildcard *.cpp))
 index: $(basename $(wildcard index_*.cpp))
