@@ -379,6 +379,24 @@ This interval is the @Function.value@ of the iterator.
 	}
 
 /**
+.Function.parentRepLength:
+..summary:Returns the length of the substring representing the path from root to $iterator$'s parent node.
+..cat:Index
+..signature:parentRepLength(iterator)
+..param.iterator:An iterator of a Suffix Tree.
+...type:Spec.VSTree Iterator
+..returns:The length of the sequence returned by @Function.parentRepresentative@
+...type:Metafunction.Size|Size type of the underlying index
+*/
+
+	template < typename TIndex, typename TSpec >
+	inline typename Size<TIndex>::Type
+	parentRepLength(Iter< TIndex, VSTree<TopDown<ParentLinks<TSpec> > > > const &it) 
+	{
+		return repLength(container(it), nodeUp(it));
+	}
+
+/**
 .Function.lca:
 ..summary:Returns the last common ancestor of two tree nodes.
 ..cat:Index
@@ -683,13 +701,10 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 */
 
 	template < typename TIndex, class TSpec >
-	inline typename Infix< typename Fibre<TIndex, ESA_RawText>::Type const >::Type 
+	inline typename Infix< typename Fibre<TIndex, Tag<_Fibre_Text> const>::Type const >::Type 
 	representative(Iter< TIndex, VSTree<TSpec> > const &it) 
 	{
-		typedef typename Size<TIndex>::Type TSize;
-		TSize occ = posGlobalize(getOccurrence(it), stringSetLimits(container(it)));
-		TSize len = repLength(it);
-		return infix(indexRawText(container(it)), occ, occ + len);
+		return infixWithLength(indexText(container(it)), getOccurrence(it), repLength(it));
 	}
 
 
@@ -1191,6 +1206,25 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 	}
 
 /**
+.Function.parentEdgeLength:
+..summary:Returns the length of the edge from an $iterator$ node to its parent.
+..cat:Index
+..signature:parentEdgeLength(iterator)
+..param.iterator:An iterator of a Suffix Tree.
+...type:Spec.TopDownHistory Iterator
+..returns:The returned value is equal to $length(parentEdgeLabel(iterator))$.
+*/
+
+	template < typename TText, class TIndexSpec, class TSpec >
+	inline typename Size< Index<TText, Index_ESA<TIndexSpec> > >::Type
+	parentEdgeLength(Iter< 
+		Index<TText, Index_ESA<TIndexSpec> >, 
+		VSTree< TopDown< ParentLinks<TSpec> > > > const &it) 
+	{
+		return repLength(it) - parentRepLength(it);
+	}
+
+/**
 .Function.parentEdgeLabel:
 ..summary:Returns a substring representing the edge from an $iterator$ node to its parent.
 ..cat:Index
@@ -1201,24 +1235,15 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TIndex, ESA_RawText>::Type>::Type$.
 */
 
-	template < typename TText, class TIndexSpec, class TSpec >
-	inline typename Infix< typename Fibre<Index<TText, Index_ESA<TIndexSpec> >, ESA_RawText>::Type const >::Type 
-	parentEdgeLabel(Iter< Index<TText, Index_ESA<TIndexSpec> >, VSTree< TopDown< ParentLinks<TSpec> > > > const &it) 
+	template < typename TIndex, class TSpec >
+	inline typename Infix< typename Fibre<TIndex, Tag<_Fibre_Text> const>::Type const >::Type
+	parentEdgeLabel(Iter< TIndex, VSTree< TopDown< ParentLinks<TSpec> > > > const &it)
 	{
-		typedef Index<TText, Index_ESA<TIndexSpec> >	TIndex;
-		typedef typename Size<TIndex>::Type		TSize;
-
-		if (isRoot(it))
-			return infix(indexRawText(container(it)), 0, 0);
-		else {
-			TSize occ = posGlobalize(getOccurrence(it), stringSetLimits(container(it)));
-			return infix(
-				indexRawText(container(it)), 
-				occ + repLength(container(it), nodeUp(it)), 
-				occ + repLength(it));
-		}
+		return infixWithLength(
+			indexText(container(it)), 
+			posAdd(getOccurrence(it), parentRepLength(it)),
+			parentEdgeLength(it));
 	}
-
 
 	template < typename TIndex, class TSpec >
 	inline void clear(Iter<TIndex, VSTree<TSpec> > &it) 

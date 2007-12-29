@@ -367,6 +367,52 @@ a single integer value between 0 and the sum of string lengths minus 1.
 	}
 
 	//////////////////////////////////////////////////////////////////////////////
+	// prefix
+	//////////////////////////////////////////////////////////////////////////////
+
+	template < typename TString, typename TSpec, typename TPosition >
+	inline typename Prefix<TString>::Type 
+	prefix(StringSet< TString, TSpec > &me, TPosition pos)
+	{
+		typedef StringSet<TString, TSpec>				TStringSet;
+		typedef typename Size<TStringSet>::Type			TSetSize;
+		typedef typename Size<TString>::Type			TStringSize;
+		typedef Pair<TSetSize, TStringSize, Compressed>	TPair;
+
+		TPair lPos;
+		posLocalize(lPos, pos, stringSetLimits(me));
+		return prefix(me[getSeqNo(lPos)], getSeqOffset(lPos));
+	}
+
+	template < typename TString, typename TSpec, typename TPosition >
+	inline typename Prefix<TString const>::Type 
+	prefix(StringSet< TString, TSpec > const &me, TPosition pos)
+	{
+		typedef StringSet<TString, TSpec>				TStringSet;
+		typedef typename Size<TStringSet>::Type			TSetSize;
+		typedef typename Size<TString>::Type			TStringSize;
+		typedef Pair<TSetSize, TStringSize, Compressed>	TPair;
+
+		TPair lPos;
+		posLocalize(lPos, pos, stringSetLimits(me));
+		return prefix(me[getSeqNo(lPos)], getSeqOffset(lPos));
+	}
+
+	template < typename TString, typename TDelimiter, typename TPosition >
+	inline typename Infix<TString>::Type 
+	prefix(StringSet< TString, Owner<ConcatDirect<TDelimiter> > > &me, TPosition pos)
+	{
+		return infix(me.concat, stringSetLimits(me)[getSeqNo(pos, stringSetLimits(me))], posGlobalize(pos, stringSetLimits(me)));
+	}
+
+	template < typename TString, typename TDelimiter, typename TPosition >
+	inline typename Infix<TString const>::Type 
+	prefix(StringSet< TString, Owner<ConcatDirect<TDelimiter> > > const &me, TPosition pos)
+	{
+		return infix(me.concat, stringSetLimits(me)[getSeqNo(pos, stringSetLimits(me))], posGlobalize(pos, stringSetLimits(me)));
+	}
+
+	//////////////////////////////////////////////////////////////////////////////
 	// suffix
 	//////////////////////////////////////////////////////////////////////////////
 
@@ -396,6 +442,66 @@ a single integer value between 0 and the sum of string lengths minus 1.
 		TPair lPos;
 		posLocalize(lPos, pos, stringSetLimits(me));
 		return suffix(me[getSeqNo(lPos)], getSeqOffset(lPos));
+	}
+
+	template < typename TString, typename TDelimiter, typename TPosition >
+	inline typename Infix<TString>::Type 
+	suffix(StringSet< TString, Owner<ConcatDirect<TDelimiter> > > &me, TPosition pos)
+	{
+		return infix(me.concat, posGlobalize(pos, stringSetLimits(me)), stringSetLimits(me)[getSeqNo(pos, stringSetLimits(me)) + 1]);
+	}
+
+	template < typename TString, typename TDelimiter, typename TPosition >
+	inline typename Infix<TString const>::Type 
+	suffix(StringSet< TString, Owner<ConcatDirect<TDelimiter> > > const &me, TPosition pos)
+	{
+		return infix(me.concat, posGlobalize(pos, stringSetLimits(me)), stringSetLimits(me)[getSeqNo(pos, stringSetLimits(me)) + 1]);
+	}
+
+	//////////////////////////////////////////////////////////////////////////////
+	// infixWithLength
+	//////////////////////////////////////////////////////////////////////////////
+
+	template < typename TString, typename TSpec, typename TPosition, typename TSize >
+	inline typename Infix<TString>::Type 
+	infixWithLength(StringSet< TString, TSpec > &me, TPosition pos, TSize length)
+	{
+		typedef StringSet<TString, TSpec>				TStringSet;
+		typedef typename Size<TStringSet>::Type			TSetSize;
+		typedef typename Size<TString>::Type			TStringSize;
+		typedef Pair<TSetSize, TStringSize, Compressed>	TPair;
+
+		TPair lPos;
+		posLocalize(lPos, pos, stringSetLimits(me));
+		return infixWithLength(me[getSeqNo(lPos)], getSeqOffset(lPos), length);
+	}
+
+	template < typename TString, typename TSpec, typename TPosition, typename TSize >
+	inline typename Infix<TString const>::Type 
+	infixWithLength(StringSet< TString, TSpec > const &me, TPosition pos, TSize length)
+	{
+		typedef StringSet<TString, TSpec>				TStringSet;
+		typedef typename Size<TStringSet>::Type			TSetSize;
+		typedef typename Size<TString>::Type			TStringSize;
+		typedef Pair<TSetSize, TStringSize, Compressed>	TPair;
+
+		TPair lPos;
+		posLocalize(lPos, pos, stringSetLimits(me));
+		return infixWithLength(me[getSeqNo(lPos)], getSeqOffset(lPos), length);
+	}
+
+	template < typename TString, typename TDelimiter, typename TPosition, typename TSize >
+	inline typename Infix<TString>::Type 
+	infixWithLength(StringSet< TString, Owner<ConcatDirect<TDelimiter> > > &me, TPosition pos, TSize length)
+	{
+		return infixWithLength(me.concat, posGlobalize(pos, stringSetLimits(me)), length);
+	}
+
+	template < typename TString, typename TDelimiter, typename TPosition, typename TSize >
+	inline typename Infix<TString const>::Type 
+	infixWithLength(StringSet< TString, Owner<ConcatDirect<TDelimiter> > > const &me, TPosition pos, TSize length)
+	{
+		return infixWithLength(me.concat, posGlobalize(pos, stringSetLimits(me)), length);
 	}
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -719,12 +825,28 @@ a single integer value between 0 and the sum of string lengths minus 1.
 		Size< typename StringSetLimits< StringSet<TString, TSpec> >::Type > {};
 
 	template < typename TString, typename TSpec >
+	struct Prefix< StringSet< TString, TSpec > >:
+		Prefix< TString > {};
+
+	template < typename TString, typename TSpec >
+	struct Prefix< StringSet< TString, TSpec > const >:
+		Prefix< TString const > {};
+
+	template < typename TString, typename TSpec >
 	struct Suffix< StringSet< TString, TSpec > >:
 		Suffix< TString > {};
 
 	template < typename TString, typename TSpec >
 	struct Suffix< StringSet< TString, TSpec > const >:
 		Suffix< TString const > {};
+
+	template < typename TString, typename TSpec >
+	struct Infix< StringSet< TString, TSpec > >:
+		Infix< TString > {};
+
+	template < typename TString, typename TSpec >
+	struct Infix< StringSet< TString, TSpec > const >:
+		Infix< TString const > {};
 
 
 	// direct concatenation
@@ -753,11 +875,27 @@ a single integer value between 0 and the sum of string lengths minus 1.
 		AllowsFastRandomAccess<TString> {};
 
 	template < typename TString, typename TSpec >
+	struct Prefix< StringSet< TString, Owner<ConcatDirect<TSpec> > > >:
+		Infix< TString > {};
+
+	template < typename TString, typename TSpec >
+	struct Prefix< StringSet< TString, Owner<ConcatDirect<TSpec> > > const >:
+		Infix< TString const > {};
+
+	template < typename TString, typename TSpec >
 	struct Suffix< StringSet< TString, Owner<ConcatDirect<TSpec> > > >:
 		Infix< TString > {};
 
 	template < typename TString, typename TSpec >
 	struct Suffix< StringSet< TString, Owner<ConcatDirect<TSpec> > > const >:
+		Infix< TString const > {};
+
+	template < typename TString, typename TSpec >
+	struct Infix< StringSet< TString, Owner<ConcatDirect<TSpec> > > >:
+		Infix< TString > {};
+
+	template < typename TString, typename TSpec >
+	struct Infix< StringSet< TString, Owner<ConcatDirect<TSpec> > > const >:
 		Infix< TString const > {};
 
 

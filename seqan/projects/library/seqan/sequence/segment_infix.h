@@ -662,7 +662,7 @@ SEQAN_CHECKPOINT
 ..param.end:Position or iterator behind the last element of the segment.
 ...remarks:$end$ must have the same type as $begin$.
 ..returns:The infix of $host$ between $begin$ and $end-1$.
-...remarks:The type of the suffix is given by @Metafunction.Suffix@.
+...remarks:The type of the infix is given by @Metafunction.Infix@.
 ..remarks:Notational sugar.
 ..see:Spec.InfixSegment
 */
@@ -703,6 +703,64 @@ SEQAN_CHECKPOINT
 		host(t), 
 		beginPosition(t) + pos_begin, 
 		beginPosition(t) + pos_end);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.infixWithLength:
+..cat:Containers
+..summary:Creates infix object.
+..signature:infixWithLength(host, begin, length)
+..param.host:The complete sequence.
+...type:Class.String
+...type:Adaption.char array
+..param.begin:Position or iterator of the first element of the segment.
+...type:Metafunction.Position
+...type:Metafunction.Iterator
+..param.length:Length of the returned infix.
+..returns:The infix of $host$ between $begin$ and $begin+length-1$.
+...remarks:The type of the infix is given by @Metafunction.Infix@.
+..remarks:Notational sugar.
+..see:Spec.InfixSegment
+*/
+
+template <typename T, typename TPosBegin, typename TSize>
+inline typename Infix<T>::Type
+infixWithLength(T & t, TPosBegin pos_begin, TSize length)
+{
+SEQAN_CHECKPOINT
+	return typename Infix<T>::Type(t, pos_begin, pos_begin + length);
+}
+
+template <typename T, typename TPosBegin, typename TSize>
+inline typename Infix<T *>::Type
+infixWithLength(T * t, TPosBegin pos_begin, TSize length)
+{
+SEQAN_CHECKPOINT
+	return typename Infix<T *>::Type (t, pos_begin, pos_begin + length);
+}
+
+template <typename T, typename TSpec, typename TPosBegin, typename TSize>
+inline typename Infix<Segment<T, TSpec> >::Type
+infixWithLength(Segment<T, TSpec> & t, TPosBegin pos_begin, TSize length)
+{
+SEQAN_CHECKPOINT
+	return typename Infix<Segment<T, TSpec> >::Type (
+		host(t), 
+		beginPosition(t) + pos_begin, 
+		beginPosition(t) + pos_begin + length);
+}
+
+template <typename T, typename TSpec, typename TPosBegin, typename TSize>
+inline typename Infix<Segment<T, TSpec> const>::Type
+infixWithLength(Segment<T, TSpec> const & t, TPosBegin pos_begin, TSize length)
+{
+SEQAN_CHECKPOINT
+	return typename Infix<Segment<T, TSpec> const>::Type (
+		host(t), 
+		beginPosition(t) + pos_begin, 
+		beginPosition(t) + pos_begin + length);
 }
 
 //////////////////////////////////////////////////////////////////////////////
