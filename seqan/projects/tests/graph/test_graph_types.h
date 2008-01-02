@@ -1139,6 +1139,7 @@ void Test_Tree() {
 	SEQAN_TASSERT(sourceVertex(g, childC1e) == rootV)  // Source in a tree = parent
 	SEQAN_TASSERT(childVertex(g, childC1e) == childC1)  // Shortcuts
 	SEQAN_TASSERT(parentVertex(g, childC1e) == rootV)
+	SEQAN_TASSERT(parentVertex(g, childC1) == rootV)
 	SEQAN_TASSERT(empty(g) == false)
 	SEQAN_TASSERT(outDegree(g, rootV) == 1)
 	TVertexDescriptor childC2 = addChild(g,rootV);
@@ -1895,6 +1896,154 @@ void Test_Fragment() {
 	SEQAN_TASSERT(id2 == 1)
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
+void Test_Hmm() {
+	typedef double TProbability;
+	typedef Dna TAlphabet;
+	typedef Size<TAlphabet>::Type TSize;
+	typedef Graph<Hmm<TAlphabet, TProbability> > THmm;
+	typedef VertexDescriptor<THmm>::Type TVertexDescriptor;
+	typedef EdgeDescriptor<THmm>::Type TEdgeDescriptor;
+	TSize alph_size = ValueSize<TAlphabet>::VALUE;
+	
+	Dna dnaA = Dna('A');
+	Dna dnaC = Dna('C');
+	Dna dnaG = Dna('G');
+	Dna dnaT = Dna('T');
+
+	// Create an empty HMM
+	THmm hmm;
+	SEQAN_TASSERT(numVertices(hmm) == 0)
+	SEQAN_TASSERT(numEdges(hmm) == 0)
+	SEQAN_TASSERT(empty(hmm) == true)
+	clearEdges(hmm);
+	clearVertices(hmm);
+	SEQAN_TASSERT(numVertices(hmm) == 0)
+	SEQAN_TASSERT(numEdges(hmm) == 0)
+	SEQAN_TASSERT(empty(hmm) == true)
+
+	// Add state1
+	TVertexDescriptor state1 = addVertex(hmm);
+	SEQAN_TASSERT(length(_getVertexString(hmm)) == 1)
+	SEQAN_TASSERT(empty(hmm) == false)
+	SEQAN_TASSERT(outDegree(hmm, state1) == 0)
+	SEQAN_TASSERT(inDegree(hmm, state1) == 0)
+	SEQAN_TASSERT(degree(hmm, state1) == 0)
+	SEQAN_TASSERT(numVertices(hmm) == 1)
+	SEQAN_TASSERT(numEdges(hmm) == 0)
+	emissionProbability(hmm, state1, dnaA) = 0.2;
+	SEQAN_TASSERT(getEmissionProbability(hmm, state1, dnaA) == 0.2)
+	emissionProbability(hmm, state1, dnaC) = 0.2;
+	emissionProbability(hmm, state1, dnaG) = 0.3;
+	emissionProbability(hmm, state1, dnaT) = 0.3;
+	SEQAN_TASSERT(getEmissionProbability(hmm, state1, dnaA) == 0.2)
+	SEQAN_TASSERT(getEmissionProbability(hmm, state1, dnaG) == 0.3)
+
+	// Add state2
+	String<TProbability> emis;
+	resize(emis, alph_size);
+	value(emis, (Byte) dnaA) = 0.5;
+	value(emis, (Byte) dnaC) = 0.5;
+	value(emis, (Byte) dnaG) = 0.0;
+	value(emis, (Byte) dnaT) = 0.0;
+	TVertexDescriptor state2 = addVertex(hmm, emis);
+	SEQAN_TASSERT(numVertices(hmm) == 2)
+	SEQAN_TASSERT(numEdges(hmm) == 0)
+	SEQAN_TASSERT(getEmissionProbability(hmm, state2, dnaC) == 0.5)
+
+	// Add state3
+	TVertexDescriptor state3 = addVertex(hmm, emis);
+	assignEmissionProbability(hmm, state3, dnaA, 0.3);
+	assignEmissionProbability(hmm, state3, dnaC, 0.3);
+	assignEmissionProbability(hmm, state3, dnaG, 0.2);
+	assignEmissionProbability(hmm, state3, dnaT, 0.2);
+	SEQAN_TASSERT(numVertices(hmm) == 3)
+	SEQAN_TASSERT(numEdges(hmm) == 0)
+	SEQAN_TASSERT(getEmissionProbability(hmm, state3, dnaC) == 0.3)
+
+	// Add edges (transitions)
+	TEdgeDescriptor e = addEdge(hmm, state1, state1, 0.95);
+	SEQAN_TASSERT(numEdges(hmm) == 1)
+	removeEdge(hmm, e);
+	SEQAN_TASSERT(numEdges(hmm) == 0)
+	e = addEdge(hmm, state1, state1, 0.95);
+	SEQAN_TASSERT(numEdges(hmm) == 1)
+	removeOutEdges(hmm, state1);
+	SEQAN_TASSERT(numEdges(hmm) == 0)
+	e = addEdge(hmm, state1, state1, 0.95);
+	removeEdge(hmm, sourceVertex(hmm, e), targetVertex(hmm, e));
+	SEQAN_TASSERT(numEdges(hmm) == 0)
+	e = addEdge(hmm, state1, state1, 0.95);
+	removeInEdges(hmm, state1);
+	SEQAN_TASSERT(numEdges(hmm) == 0)
+	e = addEdge(hmm, state1, state1, 0.95);
+	SEQAN_TASSERT(outDegree(hmm, state1) == 1)
+	SEQAN_TASSERT(inDegree(hmm, state1) == 1)
+	SEQAN_TASSERT(degree(hmm, state1) == 2)
+	e = addEdge(hmm, state1, state3);
+	assignTransitionProbability(hmm, e, 0.05);
+	THmm hmm_tr = hmm;
+	transpose(hmm_tr);
+	SEQAN_TASSERT(getTransitionProbability(hmm_tr, state3, state1) == 0.05)
+	clear(hmm_tr);
+	transpose(hmm, hmm_tr);
+	SEQAN_TASSERT(getTransitionProbability(hmm_tr, state3, state1) == 0.05)
+	e = addEdge(hmm, state3, state3);
+	transitionProbability(hmm, e) = 0.4;
+	SEQAN_TASSERT(getTransitionProbability(hmm, e) == 0.4)
+	e = addEdge(hmm, state3, state1);
+	transitionProbability(hmm, state3, state1) = 0.1;
+	e = addEdge(hmm, state2, state2);
+	assignTransitionProbability(hmm, state2, state2, 1.0);
+	SEQAN_TASSERT(numVertices(hmm) == 3)
+	SEQAN_TASSERT(numEdges(hmm) == 5)
+	SEQAN_TASSERT(getTransitionProbability(hmm, state3, state1) == 0.1)
+	
+	// Add begin and end state
+	TVertexDescriptor begState = addVertex(hmm);
+	TVertexDescriptor eState = addVertex(hmm);
+	addEdge(hmm, begState, state1, 1.0);
+	addEdge(hmm, state3, eState, 0.5);
+	addEdge(hmm, eState, eState, 1.0);
+	beginState(hmm) = state3;
+	SEQAN_TASSERT(numVertices(hmm) == 5)
+	SEQAN_TASSERT(getBeginState(hmm) == state3)
+	assignBeginState(hmm, begState);
+	SEQAN_TASSERT(getBeginState(hmm) == begState)
+	endState(hmm) = state3;
+	SEQAN_TASSERT(getEndState(hmm) == state3)
+	assignEndState(hmm, eState);
+	SEQAN_TASSERT(getEndState(hmm) == eState)
+	
+	// Change model
+	removeVertex(hmm, state2);
+	THmm hmm_copy(hmm);
+	SEQAN_TASSERT(numVertices(hmm_copy) == 4)
+	SEQAN_TASSERT(getBeginState(hmm_copy) == begState)
+	SEQAN_TASSERT(getEndState(hmm_copy) == eState)
+	clear(hmm_copy);
+	SEQAN_TASSERT(numVertices(hmm_copy) == 0)
+	hmm_copy = hmm;
+	SEQAN_TASSERT(numVertices(hmm_copy) == 4)
+	SEQAN_TASSERT(getBeginState(hmm_copy) == begState)
+	SEQAN_TASSERT(getEndState(hmm_copy) == eState)
+	SEQAN_TASSERT(idCount(_getEdgeIdManager(hmm_copy)) == 7)
+
+	// Algorithms
+	String<Dna> sequence = "AC";
+	String<TVertexDescriptor> path;
+	TProbability p = viterbiAlgorithm(hmm, sequence, path);
+	int i = (int) (p * 10000);
+	SEQAN_TASSERT(i == 15)
+	p = forwardAlgorithm(hmm, sequence);
+	i = (int) (p * 10000);
+	SEQAN_TASSERT(i == 15)
+	p = backwardAlgorithm(hmm, sequence);
+	i = (int) (p * 10000);
+	SEQAN_TASSERT(i == 15)
+}
+
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -1906,6 +2055,7 @@ void Test_GraphTypes() {
 	Test_Tree();		// Trees
 	Test_Alignment();	// Alignment graph
 	Test_Fragment();	// Fragment
+	Test_Hmm();			// Hmm
 
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_directed.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_undirected.h");
@@ -1914,6 +2064,7 @@ void Test_GraphTypes() {
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_tree.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_align.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_fragment.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_impl_hmm.h");
 }
 
 

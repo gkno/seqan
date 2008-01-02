@@ -1,5 +1,6 @@
 // Projekt, mit dem die Demos getestet werden koennen
 //*
+
 #define main runAlignment
 #include "../../library/demos/alignment.cpp"
 #undef main
@@ -197,6 +198,10 @@
 #include "../../library/demos/graph_consensus.cpp"
 #undef main
 
+#define main runGraph26
+#include "../../library/demos/graph_hmm.cpp"
+#undef main
+
 
 //*/
 int main(int argc, const char *argv[]) 
@@ -235,6 +240,7 @@ int main(int argc, const char *argv[])
 	runGraph18();runGraph19();runGraph20();runGraph21();runGraph22();runGraph23();
 	runGraph24(argc, argv);
 	runGraph25(argc, argv);
+	runGraph26();
 //*/
 	return 0;
 }

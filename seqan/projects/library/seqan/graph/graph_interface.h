@@ -44,6 +44,10 @@ struct Automaton;
 template<typename TStringSet, typename TCargo = unsigned int, typename TSpec = Default>
 struct Alignment;
 
+// Default Hmm
+template<typename TAlphabet = Dna, typename TCargo = double, typename TSpec = Default>
+struct Hmm;
+
 
 //////////////////////////////////////////////////////////////////////////////
 // Graph
@@ -211,20 +215,6 @@ struct EdgeType<Graph<Undirected<TCargo, WithoutEdgeId> > const> {
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TStringSet, typename TCargo, typename TSpec>
-struct EdgeType<Graph<Alignment<TStringSet, TCargo, TSpec> > const> {
-	typedef typename EdgeType<Graph<Undirected<TCargo, TSpec> > const>::Type Type;
-};
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TStringSet, typename TCargo, typename TSpec>
-struct EdgeType<Graph<Alignment<TStringSet, TCargo, TSpec> > > {
-	typedef typename EdgeType<Graph<Undirected<TCargo, TSpec> > >::Type Type;
-};
-
-//////////////////////////////////////////////////////////////////////////////
-
 template<typename TAlphabet, typename TCargo, typename TSpec>
 struct EdgeType<Graph<Automaton<TAlphabet, TCargo, TSpec> > > {
 	typedef EdgeStump<TCargo, false, false, true, TSpec> Type;
@@ -249,6 +239,35 @@ struct EdgeType<Graph<Automaton<TAlphabet, TCargo, WithoutEdgeId> > > {
 template<typename TAlphabet, typename TCargo>
 struct EdgeType<Graph<Automaton<TAlphabet, TCargo, WithoutEdgeId> > const> {
 	typedef EdgeStump<TCargo, false, false, false, WithoutEdgeId> const Type;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec>
+struct EdgeType<Graph<Alignment<TStringSet, TCargo, TSpec> > const> {
+	typedef typename EdgeType<Graph<Undirected<TCargo, TSpec> > const>::Type Type;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec>
+struct EdgeType<Graph<Alignment<TStringSet, TCargo, TSpec> > > {
+	typedef typename EdgeType<Graph<Undirected<TCargo, TSpec> > >::Type Type;
+};
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TAlphabet, typename TCargo, typename TSpec>
+struct EdgeType<Graph<Hmm<TAlphabet, TCargo, TSpec> > const> {
+	typedef typename EdgeType<Graph<Directed<TCargo, TSpec> > const>::Type Type;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TAlphabet, typename TCargo, typename TSpec>
+struct EdgeType<Graph<Hmm<TAlphabet, TCargo, TSpec> > > {
+	typedef typename EdgeType<Graph<Directed<TCargo, TSpec> > >::Type Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -289,7 +308,7 @@ struct EdgeIdHandler<Graph<TSpec> > {
 
 //////////////////////////////////////////////////////////////////////////////
 
-///.Metafunction.EdgeType.param.T.type:Class.Graph
+///.Metafunction.Alphabet.param.T.type:Class.Graph
 
 template<typename TAlphabet, typename TCargo, typename TSpec>
 struct Alphabet<Graph<Automaton<TAlphabet, TCargo, TSpec> > > {
@@ -300,6 +319,20 @@ struct Alphabet<Graph<Automaton<TAlphabet, TCargo, TSpec> > > {
 
 template<typename TAlphabet, typename TCargo, typename TSpec>
 struct Alphabet<Graph<Automaton<TAlphabet, TCargo, TSpec> > const> {
+	typedef TAlphabet Type;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TAlphabet, typename TCargo, typename TSpec>
+struct Alphabet<Graph<Hmm<TAlphabet, TCargo, TSpec> > > {
+	typedef TAlphabet Type;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TAlphabet, typename TCargo, typename TSpec>
+struct Alphabet<Graph<Hmm<TAlphabet, TCargo, TSpec> > const> {
 	typedef TAlphabet Type;
 };
 
@@ -424,11 +457,11 @@ getInfinityDistance(TWeightMap const&)
 
 //////////////////////////////////////////////////////////////////////////////
 
-inline unsigned int
+template <typename T>
+inline T const
 getInfinityDistance()
 {
-	// We need to divide by 2 because of addition: infinity + something
-	return (getInfinity<unsigned int>() / 2);
+	return (getInfinity<T>() / 2);
 }
 
 //////////////////////////////////////////////////////////////////////////////

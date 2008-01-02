@@ -60,6 +60,7 @@
 #include <seqan/graph/graph_impl_tree.h>		// Tree
 #include <seqan/graph/graph_impl_fragment.h>    // Fragment
 #include <seqan/graph/graph_impl_align.h>		// Alignment Graph
+#include <seqan/graph/graph_impl_hmm.h>			// HMM
 
 // Graph iterators
 #include <seqan/graph/graph_iterator.h>

@@ -26,270 +26,197 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 //////////////////////////////////////////////////////////////////////////////
-
-
-template<typename TAlphabet, typename TProb = double, typename TSpec = Default>
-class HiddenMarkovModel;
-
+// Basic HMM algorithms
 //////////////////////////////////////////////////////////////////////////////
-
-
-template<typename TAlphabet, typename TProb, typename TSpec>
-class HiddenMarkovModel 
-{
-	public:
-		typedef String<TProb> TEmissionProb;
-		typedef String<TProb> TTransitionProb;
-		typedef String<TProb> TInitialProb;
-		
-		TTransitionProb data_state;
-		TEmissionProb data_emission;
-		TInitialProb data_initial;
-
-	public:
-		HiddenMarkovModel()
-		{
-			SEQAN_CHECKPOINT
-		}
-
-		~HiddenMarkovModel() 
-		{
-			SEQAN_CHECKPOINT
-		}
-
-		HiddenMarkovModel(HiddenMarkovModel const & _other)
-		{
-			SEQAN_CHECKPOINT
-			data_state = _other.data_state;
-			data_emission = _other.data_emission;
-			data_initial = _other.data_initial;
-		}
-
-		HiddenMarkovModel const& 
-		operator = (HiddenMarkovModel const& _other) 
-		{
-			SEQAN_CHECKPOINT
-			if (this == &_other) return *this;
-			data_state = _other.data_state;
-			data_emission = _other.data_emission;
-			data_initial = _other.data_initial;
-			return *this;
-		}
-};
 
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TAlphabet, typename TProb, typename TSpec, typename TSize, typename TTransitionProb, typename TEmissionProb, typename TInitialProb>
-inline void
-initializeModel(HiddenMarkovModel<TAlphabet, TProb, TSpec>& hmm,
-				TSize const nStates,
-				TSize const alphSize,
-				TTransitionProb const& trans,
-				TEmissionProb const& emis,
-				TInitialProb const& init)
+template<typename TAlphabet, typename TCargo, typename TSpec, typename TSequence, typename TPath>
+inline TCargo
+viterbiAlgorithm(Graph<Hmm<TAlphabet, TCargo, TSpec> > const& hmm,
+				 TSequence const& seq,
+				 TPath& path)
 {
 	SEQAN_CHECKPOINT
-		
-	typedef HiddenMarkovModel<TAlphabet, TProb, TSpec> THMM;
-	typedef typename Iterator<String<TProb> >::Type TStringIter;
-
-	// Resize all tables
-	resize(hmm.data_state, nStates * nStates);
-	resize(hmm.data_emission, nStates * alphSize);
-	resize(hmm.data_initial, nStates);
-
-	// Assign values
-	TStringIter it = begin(hmm.data_initial);
-	for(TSize i=0;i<nStates;++i) {
-		value(it) = getValue(init, i);
-		goNext(it);
-	}
-	it = begin(hmm.data_state);
-	for(TSize i=0;i<nStates;++i) {
-		for(TSize j=0;j<nStates;++j) {
-			value(it) = getValue(trans, i*nStates + j);
-			goNext(it);
-		}
-	}
-	it = begin(hmm.data_emission);
-	for(TSize i=0;i<nStates;++i) {
-		for(TSize j=0;j<alphSize;++j) {
-			value(it) = getValue(emis, i*alphSize + j);
-			goNext(it);
-		}
-	}
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TAlphabet, typename TProb, typename TSpec, typename TSize, typename TSequence>
-inline void
-generateSequence(HiddenMarkovModel<TAlphabet, TProb, TSpec> const& hmm,
-				 TSize const& len,
-				 TSequence& seq)
-{
-	SEQAN_CHECKPOINT		
-	typedef HiddenMarkovModel<TAlphabet, TProb, TSpec> THMM;
-	typedef typename Iterator<String<TProb> >::Type TStringIter;
+	typedef Graph<Hmm<TAlphabet, TCargo, TSpec> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
 
 	// Initialization
-	mtRandInit();
-	clear(seq);
-	resize(seq, len);
-	TSize nStates = length(hmm.data_initial);
-	TSize alphSize = length(hmm.data_emission) / nStates;
+	String<TCargo> vMat;
+	String<TSize> traceback;
+	TSize numCols = length(seq) + 2;
+	TSize numRows = getIdUpperBound(_getVertexIdManager(hmm));
+	TCargo infVal = infimumValue<TCargo>();
+	fill(vMat, numCols * numRows, infVal);
+	reserve(traceback, numCols * numRows);
+	value(vMat, getBeginState(hmm)) = (TCargo) 0;
+	TVertexDescriptor eState = getEndState(hmm);
 
-	// Initial state
-	TProb rmd = (TProb) (mtRand() % 101) / 100.0;
-	TSize current_state = nStates - 1;
-	TProb incSum = 0;
-	for(TSize i=0; i<nStates; ++i) {
-		incSum += getValue(hmm.data_initial, i);
-		if (incSum > rmd) {
-			current_state = i;
-			break;
-		}
-	}
-
-	// Generate sequence
-	for(TSize i=0; i<len; ++i) {
-		// Generate random character
-		rmd = (TProb) (mtRand() % 101) / 100.0;
-		incSum = 0;
-		seq[i] = TAlphabet(alphSize - 1);
-		for(TSize j=0; j<alphSize; ++j) {
-			incSum += getValue(hmm.data_emission, current_state*alphSize+j);
-			if (incSum > rmd) {
-				seq[i] = TAlphabet(j);
-				break;
-			}
-		}
-
-		//std::cout << current_state << ": " << (unsigned int) seq[i] << std::endl;
-
-		// Generate random next state
-		rmd = (TProb) (mtRand() % 101) / 100.0;
-		incSum = 0;
-		TSize new_state = nStates - 1;
-		for(TSize j=0; j<nStates; ++j) {
-			incSum += getValue(hmm.data_state, current_state*nStates+j);
-			if (incSum > rmd) {
-				new_state = j;
-				break;
-			}
-		}
-		current_state = new_state;
-	}
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TAlphabet, typename TProb, typename TSpec, typename TSequence>
-inline TProb
-forwardAlgorithm(HiddenMarkovModel<TAlphabet, TProb, TSpec> const& hmm,
-				 TSequence const& seq)
-{
-	SEQAN_CHECKPOINT		
-	typedef HiddenMarkovModel<TAlphabet, TProb, TSpec> THMM;
-	typedef typename Size<THMM>::Type TSize;
-	typedef typename Iterator<String<TProb> >::Type TStringIter;
-
-	// Initialization
-	TSize nStates = length(hmm.data_initial);
+	// Recurrence
 	TSize len = length(seq);
-	TSize alphSize = length(hmm.data_emission) / nStates;
-	String<TProb> alpha;
-	resize(alpha, nStates * len);
-
-	// Initialization
-	for(TSize i=0; i<nStates; ++i) {
-		value(alpha, i) = getValue(hmm.data_initial, i) * getValue(hmm.data_emission, i*alphSize + (TSize) seq[0]);
-	}
-
-	// Recursion
-	for(TSize pos=0; pos<len-1; ++pos) {
-		for(TSize j=0; j<nStates; ++j) {
-			TProb sum = 0;
-			for(TSize i=0; i<nStates; ++i) {
-				sum += getValue(alpha, pos * nStates + i) * getValue(hmm.data_state, i*nStates + j);
+	for(TSize i=1; i<=len; ++i) {
+		TVertexIterator itV(hmm);
+		for(;!atEnd(itV);++itV) {
+			TCargo maxValue = infVal;
+			TVertexDescriptor maxVertex = 0;
+			TVertexIterator itMax(hmm);
+			for(;!atEnd(itMax);++itMax) {
+				TCargo local = value(vMat, (i-1) * numRows + *itMax) + std::log( (double) getTransitionProbability(hmm, *itMax, *itV)) / std::log( (double) 2);
+				if (local > maxValue) {
+					maxValue = local;
+					maxVertex = *itMax;
+				}
 			}
-			value(alpha, (pos+1) * nStates + j) = sum * getValue(hmm.data_emission, j*alphSize + (TSize) seq[pos+1]);
+			value(traceback, i * numRows + *itV) = maxVertex;
+			value(vMat, i * numRows + *itV) = std::log( (double) getEmissionProbability(hmm, *itV, seq[i-1])) / log( (double) 2) + maxValue;
 		}
 	}
 
 	// Termination
-	TProb total = 0;
-	for(TSize i=0; i<nStates; ++i) {
-		total += getValue(alpha, (len-1) * nStates + i);
+	TCargo maxValue = infVal;
+	TVertexDescriptor maxVertex = 0;
+	TVertexIterator itMax(hmm);
+	for(;!atEnd(itMax);++itMax) {
+		TCargo local = value(vMat, len * numRows + *itMax) + std::log( (double) getTransitionProbability(hmm, *itMax, eState)) / std::log( (double) 2);
+		if (local > maxValue) {
+			maxValue = local;
+			maxVertex = *itMax;
+		}
 	}
+	value(traceback, (len + 1) * numRows + eState) = maxVertex;
+	value(vMat, (len+1) * numRows + eState) = maxValue;
 
-	return total;
+	// Traceback
+	clear(path);
+	resize(path, len + 2);
+	path[len + 1] = eState;
+	for(TSize i = len + 1; i>=1; --i) path[i - 1] = value(traceback, i * numRows + path[i]);
+
+	//// Debug code
+	//for(unsigned  int i = 0; i<numRows; ++i) {
+	//	for(unsigned int j=0; j<numCols; ++j) {
+	//		std::cout << value(vMat, j*numRows + i) << ',';
+	//	}
+	//	std::cout << std::endl;
+	//}
+	//for(unsigned  int i = 0; i<length(path); ++i) {
+	//	std::cout << path[i] << ',';
+	//}
+	//std::cout << std::endl;
+	return (TCargo) std::pow( (double) 2, (double) value(vMat, (len+1) * numRows + eState));
 }
+
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TFile, typename TAlphabet, typename TProb, typename TSpec, typename TIDString>
-inline void
-write(TFile &,
-	  HiddenMarkovModel<TAlphabet, TProb, TSpec> const& hmm,
-	  TIDString const &,
-	  Raw)
-{
-	typedef HiddenMarkovModel<TAlphabet, TProb, TSpec> const THMM;
-	typedef typename Size<THMM>::Type TSize;
-	typedef typename Iterator<String<TProb> const, Rooted>::Type TStringIter;
-	
-	TSize nStates = length(hmm.data_initial);
-	TSize alphSize = length(hmm.data_emission) / nStates;
-	std::cout << "Number of states: " << nStates << std::endl;
-	TStringIter it = begin(hmm.data_initial);
-	TStringIter itEnd = end(hmm.data_initial);
-	std::cout << "Initial state distribution:" << std::endl;
-	while(it != itEnd) {
-		std::cout << *it;
-		++it;
-		if (it != itEnd) std::cout << ", ";
-	}
-	std::cout << std::endl;
-	it = begin(hmm.data_state);
-	itEnd = end(hmm.data_state);
-	std::cout << "State transition probabilities:" << std::endl;
-	while(it != itEnd) {
-		std::cout << *it;
-		++it;
-		if (position(it) % nStates == 0) {
-			if (it!= itEnd) std::cout << std::endl;
-		} else {
-			std::cout << ", ";
-		}
-	}
-	std::cout << std::endl;
-	it = begin(hmm.data_emission);
-	itEnd = end(hmm.data_emission);
-	std::cout << "State emission probabilities:" << std::endl;
-	while(it != itEnd) {
-		std::cout << *it;
-		++it;
-		if (position(it) % alphSize == 0) {
-			if (it!= itEnd) std::cout << std::endl;
-		} else {
-			std::cout << ", ";
-		}
-	}
-	std::cout << std::endl;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename TStream, typename TAlphabet, typename TProb, typename TSpec>
-inline TStream &
-operator <<(TStream & target, 
-			HiddenMarkovModel<TAlphabet, TProb, TSpec> const& source)
+template<typename TAlphabet, typename TCargo, typename TSpec, typename TSequence>
+inline TCargo
+forwardAlgorithm(Graph<Hmm<TAlphabet, TCargo, TSpec> > const& hmm,
+				 TSequence const& seq)
 {
 	SEQAN_CHECKPOINT
-	write(target, source);
-	return target;
+	typedef Graph<Hmm<TAlphabet, TCargo, TSpec> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
+
+	// Initialization
+	String<TCargo> fMat;
+	TSize numCols = length(seq) + 2;
+	TSize numRows = getIdUpperBound(_getVertexIdManager(hmm));
+	fill(fMat, numCols * numRows, 0);
+	value(fMat, getBeginState(hmm)) = (TCargo) 1;
+	TVertexDescriptor eState = getEndState(hmm);
+	TSize scaling = 10;
+
+	// Recurrence
+	TSize len = length(seq);
+	for(TSize i=1; i<=len; ++i) {
+		TVertexIterator itV(hmm);
+		for(;!atEnd(itV);++itV) {
+			TCargo sum = 0;
+			TVertexIterator itAll(hmm);
+			for(;!atEnd(itAll);++itAll) sum += value(fMat, (i-1) * numRows + *itAll) * getTransitionProbability(hmm, *itAll, *itV);
+			value(fMat, i * numRows + *itV) = getEmissionProbability(hmm, *itV, seq[i-1]) * sum * scaling;
+		}
+	}
+
+	// Termination
+	TCargo sum = 0;
+	TVertexIterator itAll(hmm);
+	for(;!atEnd(itAll);++itAll) {
+		sum += value(fMat, len * numRows + *itAll) * getTransitionProbability(hmm, *itAll, eState);
+	}
+	value(fMat, (len+1) * numRows + eState) = sum;
+
+	//// Debug code
+	//for(unsigned  int i = 0; i<numRows; ++i) {
+	//	for(unsigned int j=0; j<numCols; ++j) {
+	//		std::cout << value(fMat, j*numRows + i) << ',';
+	//	}
+	//	std::cout << std::endl;
+	//}
+
+	return (TCargo) (value(fMat, (len+1) * numRows + eState) / ( (double) std::pow( (double) scaling, (double) len)));
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TAlphabet, typename TCargo, typename TSpec, typename TSequence>
+inline TCargo
+backwardAlgorithm(Graph<Hmm<TAlphabet, TCargo, TSpec> > const& hmm,
+				  TSequence const& seq)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Hmm<TAlphabet, TCargo, TSpec> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
+
+	// Initialization
+	String<TCargo> bMat;
+	TSize numCols = length(seq) + 1;
+	TSize numRows = getIdUpperBound(_getVertexIdManager(hmm));
+	fill(bMat, numCols * numRows, 0);
+	TVertexDescriptor bState = getBeginState(hmm);
+	TVertexDescriptor eState = getEndState(hmm);
+	TSize len = length(seq);
+	TVertexIterator itAll(hmm);
+	TSize scaling = 10;
+	for(;!atEnd(itAll);++itAll) value(bMat, len * numRows + *itAll) = getTransitionProbability(hmm, *itAll, eState) * scaling;
+	
+	// Recurrence
+	for(TSize i=len - 1; i>0; --i) {
+		TVertexIterator itV(hmm);
+		for(;!atEnd(itV);++itV) {
+			TCargo sum = 0;
+			TVertexIterator itAll(hmm);
+			for(;!atEnd(itAll);++itAll) sum += value(bMat, (i+1) * numRows + *itAll) * getTransitionProbability(hmm, *itV, *itAll) * getEmissionProbability(hmm, *itAll, seq[i]);
+			value(bMat, i * numRows + *itV) =  sum * scaling;
+		}
+	}
+
+	// Termination
+	TCargo sum = 0;
+	goBegin(itAll);
+	for(;!atEnd(itAll);++itAll) {
+		sum += value(bMat, 1 * numRows + *itAll) * getTransitionProbability(hmm, bState, *itAll) * getEmissionProbability(hmm, *itAll, seq[0]);
+	}
+	value(bMat, bState) = sum;
+
+	//// Debug code
+	//for(unsigned  int i = 0; i<numRows; ++i) {
+	//	for(unsigned int j=0; j<numCols; ++j) {
+	//		std::cout << value(bMat, j*numRows + i) << ',';
+	//	}
+	//	std::cout << std::endl;
+	//}
+
+	return (TCargo) (value(bMat, bState) / ( (double) std::pow( (double) scaling, (double) len)));
 }
 
 }// namespace SEQAN_NAMESPACE_MAIN

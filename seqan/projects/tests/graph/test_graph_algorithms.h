@@ -837,24 +837,66 @@ void Test_HeaviestCommonSubsequence() {
 	SEQAN_TASSERT(heaviestCommonSubsequence(g, str1, str2) == heaviestCommonSubsequence(g, str1, str2, align))
 }
 
+
 //////////////////////////////////////////////////////////////////////////////
 
-void Test_HiddenMarkovModel() {
-	HiddenMarkovModel<Byte> diceModel;
-	double trans[] = {0.95, 0.05, 
-					  0.10, 0.90};
-	double emis[] = {1.0/6.0 ,1.0/6.0, 1.0/6.0, 1.0/6.0, 1.0/6.0, 1.0/6.0,
-					 1.0/10.0,1.0/10.0,1.0/10.0,1.0/10.0,1.0/10.0,1.0/2.0};
-	double init[] = {1.0/2.0 ,1.0/2.0};
-	initializeModel(diceModel, 2, 6, trans, emis, init);
+void Test_HmmAlgorithms() {
+	typedef double TProbability;
+	typedef Dna TAlphabet;
+	typedef Size<TAlphabet>::Type TSize;
+	typedef Graph<Hmm<TAlphabet, TProbability> > THmm;
+	typedef VertexDescriptor<THmm>::Type TVertexDescriptor;
+	typedef EdgeDescriptor<THmm>::Type TEdgeDescriptor;
+	TSize alph_size = ValueSize<TAlphabet>::VALUE;
+	
+	Dna dnaA = Dna('A');
+	Dna dnaC = Dna('C');
+	Dna dnaG = Dna('G');
+	Dna dnaT = Dna('T');
 
-	std::cout << diceModel << std::endl;
+	THmm hmm;
+	TVertexDescriptor state1 = addVertex(hmm);
+	emissionProbability(hmm, state1, dnaA) = 0.2;
+	emissionProbability(hmm, state1, dnaC) = 0.2;
+	emissionProbability(hmm, state1, dnaG) = 0.3;
+	emissionProbability(hmm, state1, dnaT) = 0.3;
+	String<TProbability> emis;
+	resize(emis, alph_size);
+	value(emis, (Byte) dnaA) = 0.5;
+	value(emis, (Byte) dnaC) = 0.5;
+	value(emis, (Byte) dnaG) = 0.0;
+	value(emis, (Byte) dnaT) = 0.0;
+	TVertexDescriptor state2 = addVertex(hmm, emis);
+	TVertexDescriptor state3 = addVertex(hmm, emis);
+	assignEmissionProbability(hmm, state3, dnaA, 0.3);
+	assignEmissionProbability(hmm, state3, dnaC, 0.3);
+	assignEmissionProbability(hmm, state3, dnaG, 0.2);
+	assignEmissionProbability(hmm, state3, dnaT, 0.2);
+	addEdge(hmm, state1, state1, 0.95);
+	addEdge(hmm, state1, state3, 0.05);
+	TVertexDescriptor begState = addVertex(hmm);
+	TVertexDescriptor eState = addVertex(hmm);
+	addEdge(hmm, begState, state1, 1.0);
+	addEdge(hmm, state3, eState, 0.5);
+	addEdge(hmm, eState, eState, 1.0);
+	assignBeginState(hmm, begState);
+	assignEndState(hmm, eState);
+	removeVertex(hmm, state2);
 
-	String<Byte> seqFromModel;
-	generateSequence(diceModel, 2, seqFromModel);
-	double prob = forwardAlgorithm(diceModel, seqFromModel);
-	std::cout << prob << std::endl;
+	// Algorithms
+	String<Dna> sequence = "AC";
+	String<TVertexDescriptor> path;
+	TProbability p = viterbiAlgorithm(hmm, sequence, path);
+	int i = (int) (p * 10000);
+	SEQAN_TASSERT(i == 15)
+	p = forwardAlgorithm(hmm, sequence);
+	i = (int) (p * 10000);
+	SEQAN_TASSERT(i == 15)
+	p = backwardAlgorithm(hmm, sequence);
+	i = (int) (p * 10000);
+	SEQAN_TASSERT(i == 15)
 }
+
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -893,13 +935,12 @@ void Test_GraphAlgorithms() {
 	Test_HeaviestIncreasingSubsequence();
 	Test_HeaviestCommonSubsequence();
 
-	// HMM
-	//Test_HiddenMarkovModel();
-
+	// Hmm algorithms
+	Test_HmmAlgorithms();
 
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_algorithm.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_algorithm_lis_his.h");
-	//debug::verifyCheckpoints("projects/library/seqan/graph/graph_algorithm_hmm.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_algorithm_hmm.h");
 }
 
 

@@ -31,7 +31,7 @@ namespace SEQAN_NAMESPACE_MAIN
 .Internal._streamPutInt:
 ..summary:Converts an integer to a character and writes it to stream.
 ..cat:Streams
-..signature:_streamPutInt(stream, integer [, format_string])
+..signature:_streamPutInt(stream, number [, format_string])
 ..param.target:An output stream.
 ...type:Adaption."std::iostream"
 ..param.number:A number that is written to $stream$.
@@ -54,6 +54,35 @@ _streamPutInt(TStream & target,
 {
 SEQAN_CHECKPOINT
 	_streamPutInt(target, number, "%d");
+}
+
+/**
+.Internal._streamPutFloat:
+..summary:Converts a float to a character and writes it to stream.
+..cat:Streams
+..signature:_streamPutFloat(stream, number [, format_string])
+..param.target:An output stream.
+...type:Adaption."std::iostream"
+..param.number:A number that is written to $stream$.
+*/
+template <typename TStream>
+inline void
+_streamPutFloat(TStream & target,
+			  float number, 
+			  char const * format_string)
+{
+SEQAN_CHECKPOINT
+	char str[BitsPerValue<float>::VALUE];
+	sprintf(str, format_string, number);
+	_streamWrite(target, str);
+}
+template <typename TStream>
+inline void
+_streamPutFloat(TStream & target,
+				float number)
+{
+SEQAN_CHECKPOINT
+	_streamPutFloat(target, number, "%f");
 }
 
 //////////////////////////////////////////////////////////////////////////////
