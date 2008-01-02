@@ -657,7 +657,7 @@ getTransitionProbability(Graph<Hmm<TAlphabet, TCargo, TSpec> > const& g,
 
 template<typename TAlphabet, typename TCargo, typename TSpec, typename TEdgeDescriptor>
 inline TCargo
-getTransitionProbability(Graph<Hmm<TAlphabet, TCargo, TSpec> > const& g,
+getTransitionProbability(Graph<Hmm<TAlphabet, TCargo, TSpec> > const&,
 						 TEdgeDescriptor const e)
 {
 	SEQAN_CHECKPOINT
@@ -683,7 +683,7 @@ transitionProbability(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g,
 
 template<typename TAlphabet, typename TCargo, typename TSpec, typename TEdgeDescriptor>
 inline TCargo&
-transitionProbability(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g,
+transitionProbability(Graph<Hmm<TAlphabet, TCargo, TSpec> >&,
 					  TEdgeDescriptor e)
 {
 	SEQAN_CHECKPOINT
@@ -710,7 +710,7 @@ assignTransitionProbability(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g,
 
 template<typename TAlphabet, typename TCargo, typename TSpec, typename TEdgeDescriptor, typename TTransProb>
 inline void
-assignTransitionProbability(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g,
+assignTransitionProbability(Graph<Hmm<TAlphabet, TCargo, TSpec> >&,
 							TEdgeDescriptor e,
 							TTransProb const t)
 {
