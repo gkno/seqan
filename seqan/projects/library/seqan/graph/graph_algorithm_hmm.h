@@ -54,6 +54,7 @@ viterbiAlgorithm(Graph<Hmm<TAlphabet, TCargo, TSpec> > const& hmm,
 	reserve(traceback, numCols * numRows);
 	value(vMat, getBeginState(hmm)) = (TCargo) 0;
 	TVertexDescriptor eState = getEndState(hmm);
+	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
 
 	// Recurrence
 	TSize len = length(seq);
@@ -61,17 +62,18 @@ viterbiAlgorithm(Graph<Hmm<TAlphabet, TCargo, TSpec> > const& hmm,
 		TVertexIterator itV(hmm);
 		for(;!atEnd(itV);++itV) {
 			TCargo maxValue = infVal;
-			TVertexDescriptor maxVertex = 0;
+			TVertexDescriptor maxVertex = nilVertex;
 			TVertexIterator itMax(hmm);
 			for(;!atEnd(itMax);++itMax) {
-				TCargo local = value(vMat, (i-1) * numRows + *itMax) + std::log( (double) getTransitionProbability(hmm, *itMax, *itV)) / std::log( (double) 2);
+				TCargo local = value(vMat, (i-1) * numRows + *itMax) + std::log( (double) getTransitionProbability(hmm, *itMax, *itV));
 				if (local > maxValue) {
 					maxValue = local;
 					maxVertex = *itMax;
 				}
 			}
 			value(traceback, i * numRows + *itV) = maxVertex;
-			value(vMat, i * numRows + *itV) = std::log( (double) getEmissionProbability(hmm, *itV, seq[i-1])) / log( (double) 2) + maxValue;
+			TCargo emis = std::log( (double) getEmissionProbability(hmm, *itV, seq[i-1]));
+			if ((maxVertex != nilVertex) && (emis > infVal)) value(vMat, i * numRows + *itV) = emis + maxValue;
 		}
 	}
 
@@ -80,14 +82,14 @@ viterbiAlgorithm(Graph<Hmm<TAlphabet, TCargo, TSpec> > const& hmm,
 	TVertexDescriptor maxVertex = 0;
 	TVertexIterator itMax(hmm);
 	for(;!atEnd(itMax);++itMax) {
-		TCargo local = value(vMat, len * numRows + *itMax) + std::log( (double) getTransitionProbability(hmm, *itMax, eState)) / std::log( (double) 2);
+		TCargo local = value(vMat, len * numRows + *itMax) + std::log( (double) getTransitionProbability(hmm, *itMax, eState));
 		if (local > maxValue) {
 			maxValue = local;
 			maxVertex = *itMax;
 		}
 	}
 	value(traceback, (len + 1) * numRows + eState) = maxVertex;
-	value(vMat, (len+1) * numRows + eState) = maxValue;
+	if (maxVertex != nilVertex) value(vMat, (len+1) * numRows + eState) = maxValue;
 
 	// Traceback
 	clear(path);
@@ -106,7 +108,8 @@ viterbiAlgorithm(Graph<Hmm<TAlphabet, TCargo, TSpec> > const& hmm,
 	//	std::cout << path[i] << ',';
 	//}
 	//std::cout << std::endl;
-	return (TCargo) std::pow( (double) 2, (double) value(vMat, (len+1) * numRows + eState));
+
+	return (TCargo) value(vMat, (len+1) * numRows + eState);
 }
 
 

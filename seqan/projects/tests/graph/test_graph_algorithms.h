@@ -887,14 +887,11 @@ void Test_HmmAlgorithms() {
 	String<Dna> sequence = "AC";
 	String<TVertexDescriptor> path;
 	TProbability p = viterbiAlgorithm(hmm, sequence, path);
-	int i = (int) (p * 10000);
-	SEQAN_TASSERT(i == 15)
-	p = forwardAlgorithm(hmm, sequence);
-	i = (int) (p * 10000);
-	SEQAN_TASSERT(i == 15)
-	p = backwardAlgorithm(hmm, sequence);
-	i = (int) (p * 10000);
-	SEQAN_TASSERT(i == 15)
+	TProbability p1 = forwardAlgorithm(hmm, sequence);
+	TProbability p2 = backwardAlgorithm(hmm, sequence);
+	p = std::pow(std::exp((double)1), (double)p);
+	SEQAN_TASSERT( (int) (p1 * 100000.0) == (int) (p2 * 100000.0))
+	SEQAN_TASSERT( (int) (p * 100000.0) == (int) (p2 * 100000.0))
 }
 
 

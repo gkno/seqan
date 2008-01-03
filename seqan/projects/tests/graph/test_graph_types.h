@@ -2029,19 +2029,6 @@ void Test_Hmm() {
 	SEQAN_TASSERT(getBeginState(hmm_copy) == begState)
 	SEQAN_TASSERT(getEndState(hmm_copy) == eState)
 	SEQAN_TASSERT(idCount(_getEdgeIdManager(hmm_copy)) == 7)
-
-	// Algorithms
-	String<Dna> sequence = "AC";
-	String<TVertexDescriptor> path;
-	TProbability p = viterbiAlgorithm(hmm, sequence, path);
-	int i = (int) (p * 10000);
-	SEQAN_TASSERT(i == 15)
-	p = forwardAlgorithm(hmm, sequence);
-	i = (int) (p * 10000);
-	SEQAN_TASSERT(i == 15)
-	p = backwardAlgorithm(hmm, sequence);
-	i = (int) (p * 10000);
-	SEQAN_TASSERT(i == 15)
 }
 
 
