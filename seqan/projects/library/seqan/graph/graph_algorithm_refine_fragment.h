@@ -143,11 +143,11 @@ SEQAN_CHECKPOINT
 
 //get score for alignment of length len starting at pos_i on one sequence (first sequence if i_am_first==true)
 //and pos_j on other sequence (second sequence if i_am_first==true)
-template<typename TScoreValue,typename TScoreSpec,typename TStringSet,typename TFragId,typename TFragPos,typename TFragSize, typename TFragSpec>
+template<typename TScoreValue,typename TScoreSpec,typename TStringSet,typename TFragment,typename TFragPos,typename TFragSize>
 TScoreValue
 getScore(Score<TScoreValue,TScoreSpec> & score_type,
 		 TStringSet & seqs,
-		 Fragment<TFragId,TFragPos,TFragSize,TFragSpec> & segment,
+		 TFragment& segment,
 		 TFragPos pos_i,
 		 TFragPos pos_j,
 		 TFragSize len,
