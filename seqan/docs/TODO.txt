@@ -1,69 +1,21 @@
-Zum Release Herbst 2007:
-
-(aus - mach +, sobald der Job erledigt ist)
-
-1. Doku:
-* Fehlende Dokumentation:
-    - External String
-    - ...
-* Überflüssige Doku raus:
-    - ...
-    
-* Tutorials:
-    - Getting Started
-    + Sequences
-    - Alignments
-    - Files
-    - Graphs
-    + Indices
-    - Modifiers
-    - Motif Search
-    - Scoring
-    - Searching
-    
-* Überblicksseite anpassen
-* Indexseiten mit Kommentartext versehen.
-* Erklärung der Grundkonzepte (Metafunctions usw.)
-
-    
-* Concepts vervollständigen
-    - ...
-
-* dddoc-Warnings raus
-
-* Dokusystem:
-    + Neue Warnung: Doppelte summaries
-    + Neue Warnung: Naming-Convention verletzt
-    + Neue Warnung: param nicht in einer der signaturen enthalten.
-    - Identische Values eliminieren
-    + ..param.concept erzeugt ..param.type für alle Typen, die das concept implementieren.
-    + Subsubkategorien
-    - Spezialseite mit Warnings
-    - Spezialseite: Index
-    + "Tag" field, soll "Value" in "Tag"-Kategorie ersetzen
-    + Glossar (- wird noch nicht in Suchfunktion gefunden)
-    - References
-    + Output field und subfield
-    + Visualisierung der Ableitungshierarchien
-    
-* Demos vervollständigen
-
-* Tags nicht einzeln dokumentieren, sondern zusammenfassen
+Zum Release Mitte 2008:
 
 
-2. Inhalte:
+Inhalte:
+* Local Alignment Declumping debuggen und freischalten
+* BLAST-Anbindung
+* Approximative Stringsuchalgorithmen aus Stephan Aiches BSc-Arbeit einbauen
+* Filtering-Algorithmen Swift & Co.
+* Wu-Manber wieder lauffähig machen
+* Seed-Klassen (Kemena)
 
-* Fehlende Funktionalität:
-    + "score" Funktion für approximative Suche
-    - operatoren! Da fehlt sicher irgendwo was.
 
-* Wechselseitige Konversion sicherstellen:
-    - die Sequenztypen
-    - die zwei Alignment-Datenstrukturen
-
+Korrekturen/Anpassungen:
 * Strings auf "move" optimieren
+* alte Alignment-Datenstruktur auf Stringsets umstricken
 
-* Demos:
-    - Iterator demo kompiliert nicht
 
-* Fehler im file reader (test file)
+Sonstiges:
+* Dokusystem: BibTeX-verträgliche References ermöglichen
+* Concepts vervollständigen
+
