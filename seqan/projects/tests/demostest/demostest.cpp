@@ -194,9 +194,9 @@
 #undef main
 
 
-#define main runGraph25
-#include "../../library/demos/graph_consensus.cpp"
-#undef main
+//#define main runGraph25
+//#include "../../library/demos/graph_consensus.cpp"
+//#undef main
 
 #define main runGraph26
 #include "../../library/demos/graph_hmm.cpp"
@@ -239,7 +239,7 @@ int main(int argc, const char *argv[])
 	runGraph12();runGraph13();runGraph14();runGraph15();runGraph16();runGraph17();
 	runGraph18();runGraph19();runGraph20();runGraph21();runGraph22();runGraph23();
 	runGraph24(argc, argv);
-	runGraph25(argc, argv);
+	//runGraph25(argc, argv);
 	runGraph26();
 //*/
 	return 0;

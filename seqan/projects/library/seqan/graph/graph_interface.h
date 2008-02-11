@@ -95,7 +95,7 @@ struct Spec<Graph<TSpec> const>
 template<typename TSpec>
 struct Size<Graph<TSpec> > 
 {
-	typedef size_t Type;
+	typedef unsigned int Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -103,7 +103,7 @@ struct Size<Graph<TSpec> >
 template<typename TSpec>
 struct Size<Graph<TSpec> const>
 {
-	typedef size_t Type;
+	typedef unsigned int Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////

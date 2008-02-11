@@ -185,7 +185,7 @@ void Test_MutualInformation() {
 		while (seq < length(str)) {
 			TVertexDescriptor v2 = addVertex(g, seq, pos, 1);
 			for(TSize i = seq; i>0;--i) {
-				addEdge(g, v2 - i, v2);
+				addEdge(g, (TVertexDescriptor) (v2 - i), (TVertexDescriptor) v2);
 			}
 			++seq;
 		}

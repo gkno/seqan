@@ -32,7 +32,7 @@
 //#include "test_graph_tcoffee.h"
 //#include "test_graph_match_refinement.h"
 #include "test_graph_interval_tree.h"
-#include "test_graph_folding.h"
+//#include "test_graph_folding.h"
 
 using namespace std;
 using namespace seqan;
@@ -54,7 +54,7 @@ int main()
 	//Test_GraphTCoffee();		// Test T-Coffee
 	//Test_GraphMatchRefinement();// Test Match Refinement
 	Test_GraphIntervalTree();	// Test Interval Tree
-	Test_GraphFolding();		// Test Folding
+	//Test_GraphFolding();		// Test Folding
 
 
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_interface.h");

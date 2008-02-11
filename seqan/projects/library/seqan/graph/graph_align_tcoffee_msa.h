@@ -170,6 +170,19 @@ tCoffeeProteinAlignment(StringSet<TString, Dependent<> > const& strSet,
 
 template<typename TString, typename TAlignmentGraph>
 inline void
+tCoffeeProteinAlignment(StringSet<TString, Dependent<> > const& strSet,
+						TAlignmentGraph& gOut)
+{
+	SEQAN_CHECKPOINT
+	String<String<char> > names;
+	tCoffeeProteinAlignment(strSet, names, gOut);
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TString, typename TAlignmentGraph>
+inline void
 tCoffeeDnaAlignment(StringSet<TString, Dependent<> > const& strSet,
 					TAlignmentGraph& gOut)
 {
