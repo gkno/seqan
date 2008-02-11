@@ -30,21 +30,20 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TStringSet, typename TCargo, typename TSpec, typename TValue, typename TCoverage, typename TGappedConsensus, typename TConsensus, typename TPolymorphMap, typename TSize>
+template <typename TStringSet, typename TCargo, typename TSpec, typename TValue, typename TBegEndRowPos, typename TCoverage, typename TGappedConsensus>
 inline void
 consensusAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 				   String<TValue>& mat,
+				   TBegEndRowPos& readBegEndRowPos,
 				   TCoverage& coverage,
-				   TGappedConsensus& gappedConsensus,
-				   TConsensus& ungappedConsensus,
-				   TPolymorphMap& polyMap,
-				   TSize& maxCoverage)
+				   TGappedConsensus& gappedConsensus)
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
 	typedef typename Id<TGraph>::Type TIdType;
+	typedef typename Size<TGraph>::Type TSize;
 	typedef typename Value<TStringSet>::Type TString;
 	typedef typename Value<TString>::Type TAlphabet;
 	typedef typename Infix<TString>::Type TInfix;
@@ -62,6 +61,8 @@ consensusAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 		TSize nseq = length(strSet);
 		clear(gappedConsensus);
 		clear(coverage);
+		clear(readBegEndRowPos);
+		resize(readBegEndRowPos, nseq);
 		
 		// Assign to each sequence the start and end (in terms of component ranks)
 		typedef std::map<unsigned int, unsigned int> TComponentToRank;
@@ -79,7 +80,7 @@ consensusAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 		// Assign the sequences to rows
 		String<unsigned int> seqToRow;
 		resize(seqToRow, nseq);
-		maxCoverage = 0;
+		TSize maxCoverage = 0;
 		typedef std::set<unsigned int> TLeftOver;
 		TLeftOver leftOver;
 		for(unsigned int i=0;i<nseq; ++i) {
@@ -130,7 +131,8 @@ consensusAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 		for(typename TPosToVertexMap::const_iterator it = g.data_pvMap.begin();it != g.data_pvMap.end(); ++it) {
 			TInfix str = label(g,it->second);
 			unsigned int c = property(component, it->second);
-			unsigned int row = seqToRow[idToPosition(strSet, it->first.first)];
+			unsigned int strPos = idToPosition(strSet, it->first.first);
+			unsigned int row = seqToRow[strPos];
 			//if (row == 0) {
 			//	std::cout << sequenceId(g, it->second) << ':' << str << ',' << strSet[sequenceId(g, it->second)] << std::endl;
 			//	std::cout << getProperty(component, it->second) << ',' << order[compIndex] << std::endl;
@@ -139,9 +141,16 @@ consensusAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 			TInfixIter sIt = begin(str);
 			TInfixIter sItEnd = end(str);
 			unsigned int i = compOffset[c];
+			if ((seqToRank[strPos]).i1 == c) {
+				readBegEndRowPos[strPos].i1 = i;
+				readBegEndRowPos[strPos].i3 = row;
+			}
 			for(unsigned int pCol = i;sIt!=sItEnd;goNext(sIt), ++pCol, ++i) {
 				assignValue(mat, row * len + pCol, *sIt);
 				++((counterValues[i])[(unsigned int) *sIt]);
+			}
+			if ((seqToRank[strPos]).i2 == c) {
+				readBegEndRowPos[strPos].i2 = i;
 			}
 		}
 		String<bool> active;
@@ -192,26 +201,9 @@ consensusAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 				}
 				// Coverage
 				value(coverage, i) = activeRows;
-				if ((counterValues[i])[index_max] > (activeRows - total_count)) {
-					value(gappedConsensus, i) = TAlphabet((Byte) index_max);
-					// SNP ?
-					if (index_max2nd != -1) {
-						TSize threshold = activeRows / 5;
-						if (threshold < 2) threshold = 2;
-						if ((counterValues[i])[index_max2nd] >= threshold) {
-							polyMap.insert(std::make_pair(i, TAlphabet((Byte) index_max2nd)));
-						} 
-					}
-				}
-				else {
-					value(gappedConsensus, i) = gapChar;
-				}
-
+				if ((counterValues[i])[index_max] > (activeRows - total_count)) value(gappedConsensus, i) = TAlphabet((Byte) index_max);
+				else value(gappedConsensus, i) = gapChar;
 			}
-		}
-		clear(ungappedConsensus);
-		for(unsigned int col = 0; col<len; ++col) {
-			if (gappedConsensus[col] != gapChar) appendValue(ungappedConsensus, gappedConsensus[col]);
 		}
 	}
 }

@@ -97,7 +97,7 @@ _createAlignmentGraph(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 			for(TSize k = j; k>0; --k) {
 				if (getValue(alignSeq_i, k - 1) != nilVertex) {
 					SEQAN_TASSERT(fragmentLength(gOut,l) == fragmentLength(gOut,l - count))
-					addEdge(gOut, (TVertexDescriptor) l - count, (TVertexDescriptor) l);
+					addEdge(gOut, (TVertexDescriptor) (l - count), (TVertexDescriptor) l);
 					++count;
 				}
 			}
@@ -171,6 +171,8 @@ progressiveAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	// Create the alignment graph
 	_createAlignmentGraph(g, alignSeq, gOut);
 }
+
+
 				
 
 //////////////////////////////////////////////////////////////////////////////

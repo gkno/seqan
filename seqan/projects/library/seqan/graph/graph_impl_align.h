@@ -923,24 +923,28 @@ write(TFile & file,
 //////////////////////////////////////////////////////////////////////////////
 
 
-template <typename TFile, typename TValue, typename TSpec, typename TGappedConsensus, typename TConsensus, typename TPolymorphismMap, typename TSize>
+template <typename TFile, typename TStringSet, typename TCargo, typename TSpec, typename TAlignmentMatrix, typename TOldBegEndPos, typename TReadBegEndPos, typename TGappedConsensus>
 inline void
 write(TFile & file,
-	  String<TValue, TSpec> const& mat,
+	  Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
+	  TAlignmentMatrix const& mat,
+	  TOldBegEndPos const& oldBegEndPos,
+	  TReadBegEndPos const& readBegEndPos,
 	  TGappedConsensus const& gappedConsensus,
-	  TConsensus& ungappedConsensus,
-	  TPolymorphismMap& polyMap,
-	  TSize maxCoverage,
 	  FastaReadFormat) 
 {
+	typedef typename Size<TAlignmentMatrix>::Type TSize;
+
+	// Initialization
+	TStringSet& str = stringSet(g);
+	TSize nseq = length(str);
 	TSize len = length(gappedConsensus);
+	TSize maxCoverage = length(mat) / len;
+	
+	// Print the alignment matrix
 	TSize winSize = 60;
 	int offset = 2;
 	TSize column = 0;
-	typename TPolymorphismMap::const_iterator polyMapPointer = polyMap.begin();
-	typename TPolymorphismMap::const_iterator polyMapPointerEnd = polyMap.end();
-	TSize nextSnp = len;
-	if (polyMapPointer != polyMapPointerEnd) nextSnp = (*polyMapPointer).first;
 	while (column<len) {
 		TSize window_end = column + winSize;
 		if (window_end >= len) window_end = len;
@@ -980,32 +984,36 @@ write(TFile & file,
 		_streamWrite(file,"C: ");
 		for(unsigned int local_col = column; local_col<window_end; ++local_col) _streamPut(file, gappedConsensus[local_col]);
 		_streamPut(file,'\n');
-		// SNPs ?
-		for(int i = 0; i<offset - 2; ++i) _streamPut(file,' ');
-		_streamWrite(file,"SNP: ");
-		TSize old_column = column;
-		while ((old_column <= nextSnp) && (window_end > nextSnp)) {
-			for(TSize local_col = old_column; local_col<nextSnp; ++local_col) {
-				_streamPut(file, ' ');
-			}
-			_streamPut(file, (*polyMapPointer).second);
-			old_column = nextSnp + 1;
-			++polyMapPointer;
-			nextSnp = len;
-			if (polyMapPointer != polyMapPointerEnd) nextSnp = (*polyMapPointer).first;
-		}
-		_streamPut(file,'\n');
-		_streamPut(file,'\n');
 		_streamPut(file,'\n');
 		column+=winSize;
 	}
-	_streamWrite(file, ">Consensus with gaps removed");
-	column = 0;
-	for(TSize col = 0; col<length(ungappedConsensus); ++col) {
-		if (col % winSize == 0) _streamPut(file,'\n');
-		_streamPut(file, ungappedConsensus[col]);
-	}
 	_streamPut(file,'\n');
+	_streamPut(file,'\n');
+
+	// Print all reads
+	for(TSize i = 0; i<nseq; ++i) {
+		_streamWrite(file,"typ:R");
+		_streamPutInt(file, i);
+		_streamPut(file,'\n');
+		_streamWrite(file,"seq:");
+		if ((oldBegEndPos[i]).i1 > (oldBegEndPos[i]).i2) reverseComplementInPlace(str[i]);
+		_streamWrite(file,str[i]);
+		_streamPut(file,'\n');
+		_streamWrite(file,"Pos:");
+		if ((oldBegEndPos[i]).i1 > (oldBegEndPos[i]).i2) {
+			_streamPutInt(file, (readBegEndPos[i]).i2);
+			_streamPut(file,',');
+			_streamPutInt(file, (readBegEndPos[i]).i1);
+		} else {
+			_streamPutInt(file, (readBegEndPos[i]).i1);
+			_streamPut(file,',');
+			_streamPutInt(file, (readBegEndPos[i]).i2);
+		}
+		_streamPut(file,'\n');
+		_streamWrite(file,"dln:0");
+		_streamPut(file,'\n');
+		_streamPut(file,'\n');
+	}
 }
 
 
@@ -1370,53 +1378,63 @@ convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename Id<TGraph>::Type TIdType;
 	typedef typename Size<TGraph>::Type TSize;
+	typedef typename Value<TComponentMap>::Type TComponent;
 	typedef std::map<std::pair<TIdType, TIdType>, TVertexDescriptor> TPosToVertexMap;
 	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
 
 	// Check for empty graph
 	if (empty(g)) return false;
 
-	// Strongly Connected Components
-	strongly_connected_components(g, component);
+	// Connected Components
+	TSize numComponents = connected_components(g, component);
 
 	// Make a directed graph to represent the ordering of the components
 	// Note: Multiple vertices might have the same component
 	Graph<Directed<void, WithoutEdgeId> > componentGraph;
-	//std::cout << "Components: " << std::endl;
-	TSize comp_max = 0;
-	for(TSize i = 0; i<length(component);++i) {
-		if (component[i] > comp_max) comp_max = component[i];
-		//std::cout << component[i] << ',';
-	}
-	//std::cout << std::endl;
-	for(TSize i = 0; i<=comp_max;++i) addVertex(componentGraph);
-
-	// Walk through all sequences and add edges
+	reserve(_getVertexString(componentGraph), numComponents);
+	for(TSize i = 0; i<numComponents;++i) addVertex(componentGraph);
+	
+	TSize nseq = length(value(g.data_sequence));
+	String<std::set<TComponent> > componentsPerSeq;
+	typedef String<String<TComponent> > TOrderedComponents;
+	TOrderedComponents orderedComponentsPerSeq;
+	resize(componentsPerSeq, nseq);
+	resize(orderedComponentsPerSeq, nseq);
 	typename TPosToVertexMap::const_iterator it1 = g.data_pvMap.begin();
-	while (it1!=g.data_pvMap.end()) {
+	typename TPosToVertexMap::const_iterator it1End = g.data_pvMap.end();
+	for(;it1!=it1End;++it1) {
 		// If sections are not assigned to a vertex -> no alignment
 		if (it1->second == nilVertex) return false;
-		typename TPosToVertexMap::const_iterator it2 = it1;
-		++it2;
-		TIdType currentSeq = it1->first.first;
-		while ((it2!=g.data_pvMap.end()) && 
-			(it2->first.first == currentSeq)) {
-			if (it2->second == nilVertex) return false;
-			unsigned int c1 = getProperty(component, it1->second);
-			unsigned int c2 = getProperty(component, it2->second);
-			// If two components appear twice in the same sequence -> no alignment
-			if (c1 == c2) return false;
-			else {
-				if (findEdge(componentGraph, c1, c2) == 0) addEdge(componentGraph, c1, c2);
-			}
-			++it2;
-		}
-		++it1;
-	}
+		
+		// Remember the sequence that component belongs to 
+		TSize currentSeq = idToPosition(value(g.data_sequence), it1->first.first);
 
+		// Append component
+		TComponent c = getProperty(component, it1->second);
+		if ((value(componentsPerSeq,currentSeq)).empty()) {
+			String<TComponent> tmp;
+			value(orderedComponentsPerSeq, currentSeq) = tmp;
+		}
+		appendValue(value(orderedComponentsPerSeq, currentSeq), c);
+		// If two components appear twice in the same sequence -> no alignment
+		if (!((value(componentsPerSeq,currentSeq)).insert(c)).second) return false;	
+	}
+	clear(componentsPerSeq);
+
+	// Draw edges for the components within a sequence
+	typedef typename Iterator<TOrderedComponents>::Type TIterTOrderedComponents;
+	TIterTOrderedComponents itBegin = begin(orderedComponentsPerSeq);
+	TIterTOrderedComponents itEnd = end(orderedComponentsPerSeq);
+	for(;itBegin != itEnd; ++itBegin) {
+		TSize n = length(*itBegin);
+		for(TSize i = 0; i<n-1; ++i) {
+			addEdge(componentGraph, value((*itBegin), i), value((*itBegin), i+1));
+		}
+	}
+	
 	// Make a topological sort of the component graph
 	topological_sort(componentGraph, order);
-	
+
 	//// Debug code
 	//std::cout << "Topological sort: " << std::endl;
 	//for(TSize i = 0; i<length(order);++i) {
@@ -1476,6 +1494,7 @@ convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	String<unsigned int> component;
 	String<unsigned int> order;
 	TComponentLength compLength;
+
 	if (!convertAlignment(g, component, order, compLength)) return false;
 
 	// Create the matrix

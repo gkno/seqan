@@ -369,6 +369,82 @@ strongly_connected_components(Graph<TSpec> const& g_source,
 	}
 }
 
+//////////////////////////////////////////////////////////////////////////////
+// Connected components
+//////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TSpec, typename TVertexDescriptor, typename TTokenMap, typename TComponents, typename TVal>
+void
+_cc_visit(Graph<TSpec> const& g,
+		  TVertexDescriptor const u,
+		  TTokenMap& tokenMap,
+		  TComponents& components,
+		  TVal& label)
+{
+	SEQAN_CHECKPOINT
+
+	typedef typename Iterator<Graph<TSpec>, AdjacencyIterator>::Type TAdjacencyIterator;
+
+	assignProperty(tokenMap, u, true);
+	assignProperty(components, u, label);
+	TAdjacencyIterator itad(g,u);
+	for(;!atEnd(itad);goNext(itad)) {
+		TVertexDescriptor v = getValue(itad);
+		if (getProperty(tokenMap, v) == false) {
+			_cc_visit(g, v, tokenMap, components, label);
+		}
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.connected_components:
+..cat:Graph
+..summary:Decomposes an undirected graph into its connected components.
+..signature:connected_components(g, components)
+..param.g:In-parameter:An undirected graph.
+...type:Spec.Undirected graph
+..param.components:Out-parameter:A property map.
+...remarks:Each vertex is mapped to a component id. If two vertices share the same id they are in the same component.
+..returns: The number of components.
+*/
+
+template<typename TSpec, typename TComponents>
+unsigned int
+connected_components(Graph<TSpec> const& g_source,
+					 TComponents& components)
+{
+	SEQAN_CHECKPOINT
+
+	typedef typename Iterator<Graph<TSpec>, EdgeIterator>::Type TEdgeIterator;
+	typedef typename Iterator<Graph<TSpec>, VertexIterator>::Type TVertexIterator;
+	typedef typename VertexDescriptor<Graph<TSpec> >::Type TVertexDescriptor;
+	clear(components);
+	resizeVertexMap(g_source,components);
+	
+	// Initialization
+	String<bool> tokenMap;
+	fill(tokenMap, getIdUpperBound(_getVertexIdManager(g_source)), false);
+
+	// Connected components
+	unsigned int label = 0;
+	TVertexIterator it(g_source);
+	for(;!atEnd(it);goNext(it)) {
+		TVertexDescriptor u = getValue(it);
+		if (getProperty(tokenMap, u) == false) {
+			_cc_visit(g_source, u, tokenMap, components, label);
+			++label;
+		}
+	}
+	return label;
+}
+
+
+
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////

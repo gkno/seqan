@@ -116,7 +116,7 @@ getKmerSimilarityMatrix(StringSet<TString, TSpec> const& strSet,
 						TAlphabet) 
 {
 	SEQAN_CHECKPOINT
-	typedef __int64 TWord;
+	typedef unsigned int TWord;
 	typedef String<TWord> TTupelString;
 	typedef String<TTupelString> TTupelStringSet;
 	typedef typename Value<THitMatrix>::Type TValue;
@@ -140,12 +140,13 @@ getKmerSimilarityMatrix(StringSet<TString, TSpec> const& strSet,
 	String<TWord> compareIndex;
 	for(TSize k=0;k<nseq;++k) {
 		clear(qIndex);
-		fill(qIndex, (TWord) (double) pow((double)alphabet_size, (double)ktup), (TWord) 0, Exact());
+		TWord qIndexSize = (TWord) std::pow((double)alphabet_size, (double)ktup);
+		fill(qIndex, qIndexSize, (TWord) 0, Exact());
 		for(TSize i = 0;i < (TSize) length(tupSet[k]);++i) ++qIndex[ tupSet[k][i] ];
 		TWord value;
 	    for (TSize k2=k; k2<nseq; ++k2) {
 			clear(compareIndex);
-			fill(compareIndex, (TWord) (double) pow((double)alphabet_size, (double)ktup), (TWord) 0, Exact());
+			fill(compareIndex, qIndexSize, (TWord) 0, Exact());
 			value = 0;
 			for(TSize i = 0;i < (TSize) length(tupSet[k2]);++i) {
 				//std::cout << tupSet[k2][i] << "," << compareIndex[ tupSet[k2][i] ] << "," << qIndex[ tupSet[k2][i] ]<< std::endl;

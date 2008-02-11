@@ -133,7 +133,13 @@ typedef Tag<Kmer_Library_> const Kmer_Library;
 struct MUMPairwise_Library_;
 typedef Tag<MUMPairwise_Library_> const MUMPairwise_Library;
 
+/**
+.Tag.Library Generation.value.Lcs_Library:
+	A primary library generated using the longest common subsequence algorithm.
+*/
 
+struct Lcs_Library_;
+typedef Tag<Lcs_Library_> const Lcs_Library;
 
 //////////////////////////////////////////////////////////////////////////////
 // T-Coffee - Library combination

@@ -127,7 +127,7 @@ longestIncreasingSubsequence(TString const& str, TPositions& pos) {
 
 
 		// Connect to predecessor
-		if (a_k_it != list.end()) addEdge(g, position(it), a_k_it->second);
+		if (a_k_it != list.end()) addEdge(g, (TVertexDescriptor) position(it), (TVertexDescriptor) a_k_it->second);
 	}
 
 	// Trace-back
@@ -166,10 +166,11 @@ longestIncreasingSubsequence(TString const& str, TPositions& pos) {
 The last pair of positions in pos indicates the first pair in the longest common subsequence.
 That's why pos should be a Block-String (Stack).
 */
-template<typename TString1, typename TString2, typename TFinalPos>
+template<typename TString1, typename TString2, typename TNeighborhoodSize, typename TFinalPos>
 inline void
 longestCommonSubsequence(TString1 const& str1,
 						 TString2 const& str2,
+						 TNeighborhoodSize nSize,
 						 TFinalPos& pos) 
 {
 	SEQAN_CHECKPOINT
@@ -182,21 +183,29 @@ longestCommonSubsequence(TString1 const& str1,
 	typedef String<TPos, Block<> > TPositions;
 	String<TPositions> occ;
 	fill(occ, alphabet_size, TPositions());
-	typedef typename Iterator<TString2 const, Rooted>::Type TStringIter;
+	typedef typename Iterator<TString2 const>::Type TStringIter;
 	TStringIter endIt = end(str2);
-	for(TStringIter it = begin(str2); it != endIt; ++it) {
-		push_back(value(occ, (unsigned int) *it), position(it));
+	TPos current_pos = 0;
+	for(TStringIter it = begin(str2); it != endIt; ++it, ++current_pos) {
+		push_back(value(occ, (unsigned int) *it), current_pos);
 	}
 
 	// Build the combined string
 	String<TPos, Block<> > finalSeq;
 	String<TPos, Block<> > mapping;
 	TStringIter endIt1 = end(str1);
-	for(TStringIter it = begin(str1); it != endIt1; ++it) {
-		for(int i = length(occ[(unsigned int) *it])-1; i>=0; --i) {
-			TPos source = position(it);
-			push_back(finalSeq, (occ[(unsigned int) *it])[i]);
-			push_back(mapping, source);
+	current_pos = 0;
+	for(TStringIter it = begin(str1); it != endIt1; ++it, ++current_pos) {
+		TPositions& current_occ = occ[(unsigned int) *it];
+		for(int i = length(current_occ)-1; i>=0; --i) {
+			// Do we have a neighborhood
+			if (nSize != 0) {
+				TPos diff = current_pos - current_occ[i];
+				if (current_pos < current_occ[i]) diff = current_occ[i] - current_pos;
+				if ((TPos) diff > (TPos) nSize) continue;
+			}
+			push_back(finalSeq, current_occ[i]);
+			push_back(mapping, current_pos);
 		}
 	}
 
@@ -204,9 +213,9 @@ longestCommonSubsequence(TString1 const& str1,
 	typedef String<unsigned int, Block<> > TResult;
 	TResult result;
 	longestIncreasingSubsequence(finalSeq, result);
-
+	
 	// Insert the common pairs
-	typedef typename Iterator<TResult, Rooted>::Type TResultIter;
+	typedef typename Iterator<TResult>::Type TResultIter;
 	TResultIter endResult = end(result);
 	for(TResultIter it = begin(result); it != endResult; ++it) {
 		push_back(pos, std::make_pair(mapping[*it], finalSeq[*it]));
@@ -217,6 +226,16 @@ longestCommonSubsequence(TString1 const& str1,
 	//	std::cout << pos[i].first << ',' << pos[i].second << ';';
 	//}
 	//std::cout << std::endl;
+}
+
+template<typename TString1, typename TString2, typename TFinalPos>
+inline void
+longestCommonSubsequence(TString1 const& str1,
+						 TString2 const& str2,
+						 TFinalPos& pos) 
+{
+	SEQAN_CHECKPOINT
+	longestCommonSubsequence(str1, str2, 0, pos);
 }
 
 
@@ -305,7 +324,7 @@ heaviestIncreasingSubsequence(TString const& str,
 		addVertex(g);
 
 		// Connect to predecessor
-		if (a_k_it != list.end()) addEdge(g, pos_of_iterator, a_k_it->second.second);
+		if (a_k_it != list.end()) addEdge(g, (TVertexDescriptor) pos_of_iterator, (TVertexDescriptor) a_k_it->second.second);
 	}
 
 	// Trace-back

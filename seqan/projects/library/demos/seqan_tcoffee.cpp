@@ -4,128 +4,191 @@
 
 using namespace seqan;
 
-int main(int argc, const char *argv[]) {
-	// The original string set
-	typedef String<AminoAcid> TString;
-	StringSet<TString, Owner<> > origStrSet;
-	typedef String<char> TFileName;
-	String<TFileName> names;
-	TFileName outfile = "out.fasta";
-	TFileName sequencefile = "";
-	TFileName libfile = "";
-	TFileName treefile = "";
-	String<char> method = "";
-	String<char> output = "";
 
-	// Command-line parsing
-	if (argc <= 1) return 0;
+template<typename TName>
+class ConfigOptions {
+public:
+	TName sequencefile;
+	TName libfile;
+	TName matchfile;
+	TName treefile;
+	TName outfile;
+	TName method;
+	TName output;
+
+	ConfigOptions() : outfile("out.fasta"), output("fasta") {}
+};
+
+inline bool
+printErrorForCmd()
+{
+	std::cerr << "Usage: seqan_tcoffee -seq <sequence file> [OPTIONS]" << std::endl;
+	return false;
+}
+
+template<typename TConfigOptions>
+inline bool
+parseCommandLine(int argc, const char *argv[], TConfigOptions& cfgOpt) {
+	if (argc <= 2) return printErrorForCmd();
 	for(int i = 1; i < argc; ++i) {
-		//std::cout << argv[i] << std::endl;
 		if (argv[i][0] == '-') {
 			// parse option
 			if (strcmp(argv[i], "-seq")==0) {
-				if (i + 1 == argc) {
-					//printHelp(argc, argv);
-					return 0;
-				}
+				if (i + 1 == argc) return printErrorForCmd();
 				++i;
-				sequencefile = argv[i];
+				cfgOpt.sequencefile = argv[i];
 				continue;
 			}
 			if (strcmp(argv[i], "-lib")==0) {
-				if (i + 1 == argc) {
-					//printHelp(argc, argv);
-					return 0;
-				}
+				if (i + 1 == argc) return printErrorForCmd();
 				++i;
-				libfile = argv[i];
+				cfgOpt.libfile = argv[i];
+				continue;
+			}
+			if (strcmp(argv[i], "-matches")==0) {
+				if (i + 1 == argc) return printErrorForCmd();
+				++i;
+				cfgOpt.matchfile = argv[i];
 				continue;
 			}
 			if (strcmp(argv[i], "-usetree")==0) {
-				if (i + 1 == argc) {
-					//printHelp(argc, argv);
-					return 0;
-				}
+				if (i + 1 == argc) return printErrorForCmd();
 				++i;
-				treefile = argv[i];
+				cfgOpt.treefile = argv[i];
 				continue;
 			}
 			if (strcmp(argv[i], "-outfile")==0) {
-				if (i + 1 == argc) {
-					//printHelp(argc, argv);
-					return 0;
-				}
+				if (i + 1 == argc) return printErrorForCmd();
 				++i;
-				outfile = argv[i];
+				cfgOpt.outfile = argv[i];
 				continue;
 			}
 			if (strcmp(argv[i], "-method")==0) {
-				if (i+1 == argc) {
-					//printHelp(argc, argv);
-					return 0;
-				}
+				if (i+1 == argc) return printErrorForCmd();
 				++i;
-				method = argv[i];
+				cfgOpt.method = argv[i];
 				continue;
 			}
 			if (strcmp(argv[i], "-output")==0) {
-				if (i+1 == argc) {
-					//printHelp(argc, argv);
-					return 0;
-				}
+				if (i+1 == argc) return printErrorForCmd();
 				++i;
-				output = argv[i];
+				cfgOpt.output = argv[i];
 				continue;
 			}
 		}
 	}
+	return true;
+}
 
-	if (output == "tc_lib") {
-		std::cout << "Sequence File: " << sequencefile << std::endl;
-		std::cout << "Output File: " << outfile << std::endl;
-		std::cout << "Method: " << method << std::endl;
-		std::cout << "Output format: " << output << std::endl;
-	} else {
-		std::cout << "Sequence File: " << sequencefile << std::endl;
-		std::cout << "Library file: " << libfile << std::endl;
-		std::cout << "Tree file: " << treefile << std::endl;
-		std::cout << "Output File: " << outfile << std::endl;
-	}
-
-	if ((length(libfile)) &&
-		(!length(sequencefile))) {
-			// Read sequences from library
-			std::fstream strm;
-			strm.open(toCString(libfile), std::ios_base::in | std::ios_base::binary);
-			read(strm,origStrSet,names,TCoffeeLib());	// Read identifiers and strings
-			strm.close();			
-	} else {
+template<typename TConfigOptions>
+inline int
+dnaAlignment(TConfigOptions& cfgOpt) {
+	// Read the sequences
+	typedef String<Dna> TString;
+	StringSet<TString, Owner<> > origStrSet;
+	String<String<char> > names;
+	if (length(cfgOpt.sequencefile)) {
 		// Read the sequences from sequencefile
-		_alignImportSequences(sequencefile, "", "", origStrSet, names);
+		_alignImportSequences(cfgOpt.sequencefile, "", "", origStrSet, names);
+	} else {
+		std::cerr << "No sequences provided." << std::endl;
+		return -1;
 	}
 
-	// Make dependent string set
+	// Make a dependent string set
 	typedef StringSet<TString, Dependent<> > TStringSet;
 	TStringSet strSet;
 	for(unsigned int i = 0; i<length(origStrSet); ++i) appendValue(strSet, origStrSet[i]);
 
+	// Start the alignment
+	typedef Graph<Alignment<TStringSet, unsigned int> > TGraph;
+	typedef Id<TGraph>::Type TId;
+	Graph<Alignment<TStringSet, void, WithoutEdgeId> > gOut(strSet);
+	if (cfgOpt.method == "dna") tCoffeeDnaAlignment(strSet, gOut);
+	else {
+		String<char> lib = cfgOpt.matchfile;
+		tCoffeeLongDnaAlignment(strSet, names, lib, gOut);
+	}
+
+	// Output alignment
+	if (cfgOpt.output == "fasta") {
+		std::fstream strm;
+		strm.open(toCString(cfgOpt.outfile), std::ios_base::out | std::ios_base::trunc);
+		write(strm,gOut,names,FastaFormat());
+		strm.close();
+	} else if (cfgOpt.output == "msf") {
+		std::fstream strm;
+		strm.open(toCString(cfgOpt.outfile), std::ios_base::out | std::ios_base::trunc);
+		write(strm,gOut,names,MsfFormat());
+		strm.close();
+	}
+
+	return 0;
+}
+
+
+int main(int argc, const char *argv[]) {
+	// Parse the command line options
+	ConfigOptions<String<char> > cfgOpt;
+	if (!parseCommandLine(argc, argv, cfgOpt)) return -1;
+	if ((cfgOpt.method == "dna") || (cfgOpt.method == "genome")) return dnaAlignment(cfgOpt);
+	
+	// Read the sequences
+	typedef String<AminoAcid> TString;
+	StringSet<TString, Owner<> > origStrSet;
+	String<String<char> > names;
+	if ((!length(cfgOpt.sequencefile)) && (length(cfgOpt.libfile))) {
+		// Read sequences from library
+		std::fstream strm;
+		strm.open(toCString(cfgOpt.libfile), std::ios_base::in | std::ios_base::binary);
+		read(strm,origStrSet,names,TCoffeeLib());	// Read identifiers and strings
+		strm.close();			
+	} else if (length(cfgOpt.sequencefile)) {
+		// Read the sequences from sequencefile
+		_alignImportSequences(cfgOpt.sequencefile, "", "", origStrSet, names);
+	} else {
+		printErrorForCmd();
+		return -1;
+	}
+
+	// Make a dependent string set
+	typedef StringSet<TString, Dependent<> > TStringSet;
+	TStringSet strSet;
+	for(unsigned int i = 0; i<length(origStrSet); ++i) appendValue(strSet, origStrSet[i]);
 
 	// Start the alignment
 	typedef Graph<Alignment<TStringSet, unsigned int> > TGraph;
+	typedef Id<TGraph>::Type TId;
 	Graph<Alignment<TStringSet, void, WithoutEdgeId> > gOut(strSet);
-	if (output == "tc_lib") {
+	if (cfgOpt.output == "tc_lib") {
 		Blosum62 score_type_global(-1,-11);
 		Blosum62 score_type_local(-2,-8);
 		TGraph lib(strSet);
-		if (method == "global") {
-			generatePrimaryLibrary(lib, score_type_global, GlobalPairwise_Library() );
-		} else if (method == "local") {
-			generatePrimaryLibrary(lib, score_type_local, LocalPairwise_Library() );
+		String<Pair<TId, TId> > pList;
+		selectPairsForLibraryGeneration(lib, pList);
+		if (cfgOpt.method == "global") {
+			generatePrimaryLibrary(lib, pList, score_type_global, GlobalPairwise_Library() );
+		} else if (cfgOpt.method == "local") {
+			generatePrimaryLibrary(lib, pList, score_type_local, LocalPairwise_Library() );
+		} else if (cfgOpt.method == "motif") {
+			if (length(cfgOpt.matchfile)) {
+				std::fstream strm_lib;
+				strm_lib.open(toCString(cfgOpt.matchfile), std::ios_base::in | std::ios_base::binary);
+				read(strm_lib, lib, names, MemeMotif());	// Read library
+				strm_lib.close();
+			}
+		} else if (cfgOpt.method == "blast") {
+			if (length(cfgOpt.matchfile)) {
+				std::fstream strm_lib;
+				strm_lib.open(toCString(cfgOpt.matchfile), std::ios_base::in | std::ios_base::binary);
+				read(strm_lib, lib, names, BlastLib());	// Read library
+				strm_lib.close();
+			}
 		} else {
 			TGraph lib1(strSet);
-			generatePrimaryLibrary(lib1, score_type_global, GlobalPairwise_Library() );
+			generatePrimaryLibrary(lib1, pList, score_type_global, GlobalPairwise_Library() );
 			TGraph lib2(strSet);
-			generatePrimaryLibrary(lib2, score_type_local, LocalPairwise_Library() );
+			generatePrimaryLibrary(lib2, pList, score_type_local, LocalPairwise_Library() );
 	
 			// Weighting of libraries (Signal addition)
 			TGraph g(strSet);
@@ -139,34 +202,34 @@ int main(int argc, const char *argv[]) {
 
 		// Write the library
 		std::fstream strm;
-		strm.open(toCString(outfile), std::ios_base::out | std::ios_base::trunc);
+		strm.open(toCString(cfgOpt.outfile), std::ios_base::out | std::ios_base::trunc);
 		write(strm,lib,names,TCoffeeLib());
 		strm.close();
-	} else if (length(libfile)) {
+	} 
+	else if (length(cfgOpt.libfile)) {
 		TGraph g(strSet);
 		std::fstream strm_lib;
-		strm_lib.open(toCString(libfile), std::ios_base::in | std::ios_base::binary);
+		strm_lib.open(toCString(cfgOpt.libfile), std::ios_base::in | std::ios_base::binary);
 		read(strm_lib,g,TCoffeeLib());	// Read library
 		strm_lib.close();
 
-		//// Debug code
-		//typedef Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
-		//typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
-		//TEdgeIterator it(g);
-		//for(;!atEnd(it);++it) {
-		//	TVertexDescriptor sV = sourceVertex(it);
-		//	TVertexDescriptor tV = targetVertex(it);
-		//	std::cout << label(g, sV) << ',' << label(g,tV) << std::endl;	
-		//}
-
-		// Triplet library extension
-		tripletLibraryExtension(g);
+		//unsigned int nucs = 0;
+		//for(unsigned int i = 0; i<length(strSet); ++i) nucs += length(strSet[i]);
+		//std::cerr << "Avg. segment length: " << (double) nucs / (double) numVertices(g) << std::endl;
 
 		// Build the guide tree
 		Graph<Tree<double> > guideTree;
-		if (length(treefile)) {
+		if (length(strSet) < 3) {
+			typedef VertexDescriptor<Graph<Tree<double> > >::Type TVertexDescriptor;
+			TVertexDescriptor v1 = addVertex(guideTree);
+			TVertexDescriptor v2 = addVertex(guideTree);
+			TVertexDescriptor internalVertex = addVertex(guideTree);
+			addEdge(guideTree, internalVertex, v1, 1.0);
+			addEdge(guideTree, internalVertex, v2, 1.0);
+			guideTree.data_root = internalVertex;
+		} else if (length(cfgOpt.treefile)) {
 			std::fstream strm_tree;
-			strm_tree.open(toCString(treefile), std::ios_base::in | std::ios_base::binary);
+			strm_tree.open(toCString(cfgOpt.treefile), std::ios_base::in | std::ios_base::binary);
 			read(strm_tree,guideTree,names,NewickFormat());	// Read newick tree
 			strm_tree.close();
 		} else {
@@ -176,63 +239,65 @@ int main(int argc, const char *argv[]) {
 			upgmaTree(distanceMatrix, guideTree);
 		}
 
-		// Progressive alignment
-		progressiveAlignment(g, guideTree, gOut);
-	} else {
-		if (length(treefile)) {
-			// Score objects
-			Blosum62 score_type_global(-1,-11);
-			Blosum62 score_type_local(-2,-8);
-	
-			// Generate a primary library, i.e., all global pairwise alignments
-			TGraph lib1(strSet);
-			generatePrimaryLibrary(lib1, score_type_global, GlobalPairwise_Library() );
-	
-			TGraph lib2(strSet);
-			generatePrimaryLibrary(lib2, score_type_local, LocalPairwise_Library() );
-	
-			// Weighting of libraries (Signal addition)
-			TGraph g(strSet);
-			String<TGraph*> libs;
-			appendValue(libs, &lib1);
-			appendValue(libs, &lib2);
-			combineGraphs(g, libs);
+		// Fast progressive alignment
+		unsigned int nSeq = length(strSet);
+		unsigned int threshold = 30;
+		if (nSeq < threshold) {
+			// Full triplet...
+			tripletLibraryExtension(g);
 
-			// Clear the old libraries
-			clear(lib1);
-			clear(lib2);
-
-			//Retrieve the guide tree
-			Graph<Tree<double> > guideTree;
-			std::fstream strm_tree;
-			strm_tree.open(toCString(treefile), std::ios_base::in | std::ios_base::binary);
-			read(strm_tree,guideTree,names,NewickFormat());	// Read newick tree
-			strm_tree.close();
-
-			unsigned int nSeq = length(strSet);
-			unsigned int threshold = 30;
-			if (nSeq < threshold) {
-				tripletLibraryExtension(g);
-				progressiveAlignment(g, guideTree, gOut);		
-			} else {
-				progressiveAlignment(g, guideTree, gOut, threshold);
-			}
-
-			//write(std::cout,guideTree,names,NewickFormat());	// Write newick tree
-
-			clear(guideTree);
+			progressiveAlignment(g, guideTree, gOut);
 		} else {
-			// Full-blown alignment
-			tCoffeeProteinAlignment(strSet, gOut);
+			// Triplet only on groups of sequences
+			progressiveAlignment(g, guideTree, gOut, threshold);
 		}
+	} 
+	//else if (length(cfgOpt.libfile)) {
+	//	TGraph lib1(strSet);
+	//	std::fstream strm_lib;
+	//	strm_lib.open(toCString(cfgOpt.libfile), std::ios_base::in | std::ios_base::binary);
+	//	read(strm_lib,lib1,TCoffeeLib());	// Read library
+	//	strm_lib.close();
+
+	//	Blosum62 score_type_global(-1,-11);
+	//	TGraph lib2(strSet);
+	//	String<Pair<TId, TId> > pList;
+	//	selectPairsForLibraryGeneration(lib2, pList);
+	//	String<double> distanceMatrix;
+	//	generatePrimaryLibrary(lib2, pList, distanceMatrix, score_type_global, GlobalPairwise_Library() );
+	//
+	//	TGraph g(strSet);
+	//	String<TGraph*> libs;
+	//	appendValue(libs, &lib1);
+	//	appendValue(libs, &lib2);
+	//	combineGraphs(g, true, libs);
+
+	//	// Triplet library extension
+	//	tripletLibraryExtension(g);
+
+	//	// Build the guide tree
+	//	Graph<Tree<double> > guideTree;
+	//	upgmaTree(distanceMatrix, guideTree);
+
+	//	// Progressive alignment
+	//	progressiveAlignment(g, guideTree, gOut);
+	//} 
+	else {
+		// Full-blown alignment
+		tCoffeeProteinAlignment(strSet, names, cfgOpt.matchfile, gOut);
+		//tCoffeeProteinAlignment(strSet, names, gOut);
 	}
 
-	if (output != "tc_lib") {
-
+	if (cfgOpt.output == "fasta") {
 		// Output alignment
-		std::fstream strm; // Alignment graph as fasta
-		strm.open(toCString(outfile), std::ios_base::out | std::ios_base::trunc);
+		std::fstream strm;
+		strm.open(toCString(cfgOpt.outfile), std::ios_base::out | std::ios_base::trunc);
 		write(strm,gOut,names,FastaFormat());
+		strm.close();
+	} else if (cfgOpt.output == "msf") {
+		std::fstream strm;
+		strm.open(toCString(cfgOpt.outfile), std::ios_base::out | std::ios_base::trunc);
+		write(strm,gOut,names,MsfFormat());
 		strm.close();
 	}
 

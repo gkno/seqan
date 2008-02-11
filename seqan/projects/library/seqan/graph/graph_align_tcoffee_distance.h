@@ -151,9 +151,9 @@ getDistanceMatrix(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TFragmentMatches, typename TStringSet, typename TPos, typename TSize1, typename TAlphabet>
+template<typename TFragment, typename TSpec1, typename TStringSet, typename TPos, typename TSize1, typename TAlphabet>
 inline void 
-getAlignmentStatistics(TFragmentMatches const& matches,
+getAlignmentStatistics(String<TFragment, TSpec1> const& matches,
 					   TStringSet& str,
 					   TPos const from,
 					   TPos const to,
@@ -163,8 +163,8 @@ getAlignmentStatistics(TFragmentMatches const& matches,
 					   TAlphabet)
 {
 	SEQAN_CHECKPOINT
+	typedef String<TFragment, TSpec1> TFragmentMatches;
 	typedef typename Size<TFragmentMatches>::Type TSize;
-	typedef typename Value<TFragmentMatches>::Type TFragment;
 	typedef typename Id<TFragmentMatches>::Type TId;
 	typedef typename Value<TStringSet>::Type TString;
 	typedef typename Infix<TString>::Type TInfix;
@@ -205,9 +205,9 @@ getAlignmentStatistics(TFragmentMatches const& matches,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TFragmentMatches, typename TStringSet, typename TPos, typename TSize>
+template<typename TFragment, typename TSpec1, typename TStringSet, typename TPos, typename TSize>
 inline void 
-getAlignmentStatistics(TFragmentMatches& matches,
+getAlignmentStatistics(String<TFragment, TSpec1>& matches,
 					   TStringSet& str,
 					   TPos from,
 					   TPos to,
@@ -221,9 +221,9 @@ getAlignmentStatistics(TFragmentMatches& matches,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TFragmentMatches, typename TStringSet, typename TSize>
+template<typename TFragment, typename TSpec1, typename TStringSet, typename TSize>
 inline void 
-getAlignmentStatistics(TFragmentMatches& matches,
+getAlignmentStatistics(String<TFragment, TSpec1>& matches,
 					   TStringSet& str,
 					   TSize& matchLength,
 					   TSize& overlapLength,

@@ -199,6 +199,26 @@ typedef Tag<TCoffeeLib_> const TCoffeeLib;
 //////////////////////////////////////////////////////////////////////////////
 
 /**
+.Tag.Alignment Graph Format.value.BlastLib:
+	A blast library for matches for an alignment graph.
+*/
+
+struct BlastLib_;
+typedef Tag<BlastLib_> const BlastLib;
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Tag.Alignment Graph Format.value.MemeMotif:
+	A meme file with motifs for an alignment graph.
+*/
+
+struct MemeMotif_;
+typedef Tag<MemeMotif_> const MemeMotif;
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
 .Tag.Alignment Graph Format.value.NewickFormat:
 	NewickFormat format to write a guide tree.
 */

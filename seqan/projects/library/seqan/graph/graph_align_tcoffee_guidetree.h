@@ -53,6 +53,15 @@ slowNjTree(String<double, TStringSpec>& mat,
 
 	// First initialization
 	clearVertices(g);
+	if (nseq < 3) {
+		TVertexDescriptor v1 = addVertex(g);
+		TVertexDescriptor v2 = addVertex(g);
+		TVertexDescriptor internalVertex = addVertex(g);
+		addEdge(g, internalVertex, v1, (TCargo) getValue(mat, 1) / 2);
+		addEdge(g, internalVertex, v2, (TCargo) getValue(mat, 1) / 2);
+		g.data_root = internalVertex;
+		return;
+	}
 	String<double> av;    // Average branch length to a combined node
 	fill(av,nseq,0.0);
 
