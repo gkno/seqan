@@ -1,4 +1,8 @@
 This is a SeqAn snapshot.
 See www.seqan.de
 
-read docs/Page_Installation.html for installation instructions.
+Read "docs/Page_Installation.html" for detailled installation instructions.
+
+Have fun!
+
+Your SeqAn Team
