@@ -80,11 +80,14 @@ This interval is the @Function.value@ of the iterator.
 		TVertexDesc		vDesc;		// current interval in suffix array and
 									// right border of parent interval (needed in goRight)
 
+		// pseudo history stack (to go up at most one node)
+		TVertexDesc		_parentDesc;
+
 		Iter(TIndex &_index):
 			index(_index)
 		{
 			_indexRequireTopDownIteration(_index);
-			goBegin(*this);
+			goRoot(*this);
 		}
 
 		Iter(TIndex &_index, MinimalCtor):
@@ -134,7 +137,7 @@ This interval is the @Function.value@ of the iterator.
 	public:
 
 		typedef Iter< TIndex, VSTree< TopDown<> > >		TBase;
-		typedef	typename _HistoryStackEntry<Iter>::Type	TStackEntry, TRange;
+		typedef	typename _HistoryStackEntry<Iter>::Type	TStackEntry;
 		typedef String<TStackEntry, Block<> >			TStack;
 		typedef Iter									iterator;
 
@@ -296,7 +299,7 @@ This interval is the @Function.value@ of the iterator.
 
 				if (lcp_i < _top_.i2) {
 					_dfsOnPop(it, lcp_i);
-					return;
+					if (nodePredicate(it)) return;
 				}
 
 				if (lcp_i > _top_.i2) {
@@ -330,7 +333,7 @@ This interval is the @Function.value@ of the iterator.
 	// wenn danach kein Pop, aber Push -> Vater wird erst noch gepusht
 	// wenn danach Pop				   -> Vater ist Top des Stack
 			}
-			return;
+			if (nodePredicate(it)) return;
 		} while (true);
 	}
 
@@ -781,6 +784,54 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 		}
 		return false;
 	}
+
+
+/**
+.Function.nodePredicate:
+..summary:If $false$ this node will be skipped during the bottom-up traversal.
+..cat:Index
+..signature:nodePredicate(iterator)
+..param.iterator:An iterator of a Suffix Tree.
+...type:Spec.VSTree Iterator
+..returns:
+*/
+
+	template < typename TIndex, class TSpec >
+	inline bool
+	nodePredicate(Iter<TIndex, TSpec> const &)
+	{
+		return true;
+	}
+
+
+/**
+.Function.nodeHullPredicate:
+..summary:If $false$ this node will be skipped during the bottom-up traversal.
+..cat:Index
+..signature:nodePredicate(iterator)
+..param.iterator:An iterator of a Suffix Tree.
+...type:Spec.VSTree Iterator
+..returns:
+*/
+
+	template < typename TIndex, class TSpec >
+	inline bool
+	nodeHullPredicate(Iter<TIndex, TSpec> const &)
+	{
+		return true;
+	}
+
+
+//____________________________________________________________________________
+
+	template < typename TText, typename TIndexSpec, class TSpec >
+	inline void goRoot(Iter<Index<TText, TIndexSpec>, VSTree<TSpec> > &it) 
+	{
+		_historyClear(it);
+		clear(it);							// start in root node with range (0,infty)
+		_setSizeInval(value(it).range.i2);	// infty is equivalent to length(index) and faster to compare
+	}
+
 //____________________________________________________________________________
 
 ///.Function.begin.param.object.type:Class.Index
@@ -796,11 +847,20 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 
 ///.Function.goBegin.param.iterator.type:Spec.VSTree Iterator
 	template < typename TText, typename TIndexSpec, class TSpec >
-	inline void goBegin(Iter<Index<TText, Index_ESA<TIndexSpec> >, VSTree<TSpec> > &it) 
-	{
-		_historyClear(it);
-		clear(it);							// start in root node with range (0,infty)
-		_setSizeInval(value(it).range.i2);	// infty is equivalent to length(index) and faster to compare
+	inline void goBegin(Iter<Index<TText, TIndexSpec>, VSTree<TSpec> > &it) 
+	{	
+		typedef Iter<Index<TText, TIndexSpec>, VSTree<TSpec> >	TIter;
+		typedef typename GetVSTreeIteratorTraits<TIter>::Type	TTraits;
+		goRoot(it);
+
+		if (TYPECMP<typename TTraits::DFSOrder, _Postorder>::VALUE) {
+			while (goDown(it));
+			return;
+		}
+
+		// if root doesn't suffice predicate, do a dfs-step
+		if (!nodeHullPredicate(it) || (TTraits::HideEmptyEdges::VALUE && emptyEdge(it)))
+			goNext(it);
 	}
 
 	template < typename TText, typename TIndexSpec, class TSpec >
@@ -813,9 +873,8 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 		typedef	Pair<TSize>									TStackEntry;
 
 		_dfsClear(it);
-		clear(it);
-		if (!empty(indexSA(container(it)))) 
-		{
+		clear(it);							// start in root node with range (0,infty)
+		if (!empty(indexSA(container(it)))) {
 			_dfsOnPush(it, TStackEntry(0,0));
 			goNextImpl(it, typename GetVSTreeIteratorTraits< TIter >::Type());
 		}
@@ -896,10 +955,16 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 	_historyClear(Iter< TIndex, VSTree< TopDown< ParentLinks<TSpec> > > > &it) {
 		clear(it.history);
 	}
-
+/*
 	template < typename TText, class TIndexSpec, class TSpec >
 	inline void 
 	_historyPush(Iter< Index<TText, Index_ESA<TIndexSpec> >, VSTree<TSpec> > &it) {
+		value(it).parentRight = value(it).range.i2;
+	}
+*/	template < typename TText, class TIndexSpec, class TSpec >
+	inline void 
+	_historyPush(Iter< Index<TText, Index_ESA<TIndexSpec> >, VSTree< TopDown<TSpec> > > &it) {
+		it._parentDesc = value(it);
 		value(it).parentRight = value(it).range.i2;
 	}
 	template < typename TText, class TIndexSpec, class TSpec >
@@ -933,48 +998,10 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 		return true;
 	}
 
-	// go down the leftmost edge (skip empty $-edges) 
-	// without calling goUp(..)
-	template < typename TText, class TIndexSpec, class TSpec, typename TDFSOrder >
-	inline bool _goDown(
-		Iter< Index<TText, Index_ESA<TIndexSpec> >, VSTree< TopDown<TSpec> > > &it,
-		VSTreeIteratorTraits<TDFSOrder, True> const)
-	{
-		typedef Index<TText, Index_ESA<TIndexSpec> >	TIndex;
-		typedef Iter<TIndex, VSTree< TopDown<TSpec> > >	TIter;
-		typedef typename Value<TIter>::Type				TDesc;
-
-		if (isLeaf(it)) return false;
-
-		TDesc desc = value(it);			// save descriptor of the current node
-		_historyPush(it);
-
-		TIndex const &index = container(it);
-
-		typename Size<TIndex>::Type lval = _getUp(value(it).range.i2, index);
-		if (!(value(it).range.i1 < lval && lval < value(it).range.i2))
-			lval = _getDown(value(it).range.i1, index);
-		value(it).range.i2 = lval;
-
-		typename Size<TIndex>::Type lcp = lcpAt(lval - 1, index);
-		//typename typename StringSetLimits<TIndex const>::Type &limits = stringSetLimits(index);
-		while (isLeaf(it)) {
-			typename SAValue<TIndex>::Type pos = getOccurrence(it);
-			if (getSeqOffset(pos, stringSetLimits(index)) + lcp == sequenceLength(getSeqNo(pos, stringSetLimits(index)), index)) {
-				if (!goRight(it)) {
-					value(it) = desc;	// restore descriptor
-					return false;
-				}
-			} else
-				break;
-		}
-		return true;
-	}
-
 	// go down the leftmost edge (skip empty $-edges)
 	template < typename TText, class TIndexSpec, class TSpec, typename TDFSOrder >
 	inline bool _goDown(
-		Iter< Index<TText, Index_ESA<TIndexSpec> >, VSTree< TopDown< ParentLinks<TSpec> > > > &it,
+		Iter< Index<TText, Index_ESA<TIndexSpec> >, VSTree< TopDown<TSpec> > > &it,
 		VSTreeIteratorTraits<TDFSOrder, True> const)
 	{
 		typedef Index<TText, Index_ESA<TIndexSpec> >	TIndex;
@@ -995,7 +1022,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 			typename SAValue<TIndex>::Type pos = getOccurrence(it);
 			if (getSeqOffset(pos, stringSetLimits(index)) + lcp == sequenceLength(getSeqNo(pos, stringSetLimits(index)), index)) {
 				if (!goRight(it)) {
-					goUp(it);
+					_goUp(it);
 					return false;
 				}
 			} else
@@ -1130,6 +1157,19 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 */
 
 	// go up one edge (returns false if in root node)
+	// can be used at most once, as no history stack is available
+	template < typename TIndex, class TSpec >
+	inline bool 
+	_goUp(Iter< TIndex, VSTree< TopDown<TSpec> > > &it) 
+	{
+		if (!isRoot(it)) {
+			value(it) = it._parentDesc;
+			return true;
+		}
+		return false;
+	}
+
+	// go up one edge (returns false if in root node)
 	template < typename TIndex, class TSpec >
 	inline bool 
 	_goUp(Iter< TIndex, VSTree< TopDown< ParentLinks<TSpec> > > > &it) 
@@ -1237,7 +1277,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 
 	template < typename TIndex, class TSpec >
 	inline typename Infix< typename Fibre<TIndex, Tag<_Fibre_Text> const>::Type const >::Type
-	parentEdgeLabel(Iter< TIndex, VSTree< TopDown< ParentLinks<TSpec> > > > const &it)
+	parentEdgeLabel(Iter< TIndex, VSTree< TopDown<TSpec> > > const &it)
 	{
 		return infixWithLength(
 			indexText(container(it)), 
@@ -1267,9 +1307,14 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 		VSTreeIteratorTraits<_Preorder, THideEmptyEdges> const)
 	{
 		// preorder dfs
-		if (!goDown(it) && !goRight(it))
-			while (goUp(it) && !goRight(it));
-		if (isRoot(it)) clear(it);
+		do {
+			if (!goDown(it) && !goRight(it))
+				while (goUp(it) && !goRight(it));
+			if (isRoot(it)) {
+				clear(it);
+				return;
+			}
+		} while (!nodePredicate(it));
 	}
 
 	template < typename TIndex, typename TSpec, typename THideEmptyEdges >
@@ -1278,10 +1323,15 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 		VSTreeIteratorTraits<_Postorder, THideEmptyEdges> const)
 	{
 		// postorder dfs
-		if (goRight(it))
-			while (goDown(it));
-		else
-			if (!goUp(it)) clear(it);
+		do {
+			if (goRight(it))
+				while (goDown(it));
+			else
+				if (!goUp(it)) {
+					clear(it);
+					return;
+				}
+		} while (!nodePredicate(it));
 	}
 
 
