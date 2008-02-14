@@ -268,7 +268,7 @@ progressiveAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	_createAlignmentGraph(g, profileStrings[lastIndex], gOut);
 }
 
-
+/*
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TStringSet, typename TCargo, typename TSpec, typename TGuideTree, typename TVertexDescriptor, typename TSequence, typename TTag>
@@ -327,6 +327,7 @@ _recursiveProgressiveAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 		//std::cout << std::endl;
 	}
 }
+*/
 
 //////////////////////////////////////////////////////////////////////////////
 

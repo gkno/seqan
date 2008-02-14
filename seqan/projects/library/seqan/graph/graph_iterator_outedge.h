@@ -186,7 +186,7 @@ struct Iterator<Graph<Tree<TCargo, TGraphSpec> > const, OutEdgeIterator>
 
 
 //////////////////////////////////////////////////////////////////////////////
-// InternalOutEdgeIterator for Undirected Graph
+// InternalOutEdgeIterator for Undirected graph
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TCargo, typename TGraphSpec, typename TSpec>

@@ -25,14 +25,199 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 //////////////////////////////////////////////////////////////////////////////
-// T-Coffee - Library generation
+// Alignment graph generation
+//////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////////
+// Tags
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Tag.Library Generation:
+..summary:A tag that specifies how to generate alignment graph edges (T-Coffee library).
+*/
+
+
+/**
+.Tag.Library Generation.value.GlobalPairwise_Library:
+	A primary library of global alignments.
+*/
+
+struct GlobalPairwise_Library_;
+typedef Tag<GlobalPairwise_Library_> const GlobalPairwise_Library;
+
+
+/**
+.Tag.Library Generation.value.GlobalPairwise_Library:
+	A primary library of local alignments.
+*/
+
+struct LocalPairwise_Library_;
+typedef Tag<LocalPairwise_Library_> const LocalPairwise_Library;
+
+
+/**
+.Tag.Library Generation.value.Overlap_Library:
+	A primary library of overlap alignments.
+*/
+
+struct Overlap_Library_;
+typedef Tag<Overlap_Library_> const Overlap_Library;
+
+/**
+.Tag.Library Generation.value.Kmer_Library:
+	A primary library of kmer alignments.
+*/
+
+struct Kmer_Library_;
+typedef Tag<Kmer_Library_> const Kmer_Library;
+
+
+/**
+.Tag.Library Generation.value.Lcs_Library:
+	A primary library generated using the longest common subsequence algorithm.
+*/
+
+struct Lcs_Library_;
+typedef Tag<Lcs_Library_> const Lcs_Library;
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+// Pair selection to calculate alignment
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
-	
-template<typename TStringSet, typename TCargo, typename TSpec>
+
+// Dummy function selecting all pairs
+template<typename TStringSet, typename TCargo, typename TSpec, typename TPairList>
+inline void 
+selectPairsForLibraryGeneration(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+								TPairList& pList)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename Value<TPairList>::Type TPair;
+
+	TStringSet& str = stringSet(g);
+	TSize nseq = length(str);
+	for(TSize i=0; i<nseq; ++i) {
+		for(TSize j=i+1; j<nseq; ++j) {
+			appendValue(pList, TPair(positionToId(str, i), positionToId(str, j)));
+		}
+	}
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+// Alignment statistics
+//////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TFragment, typename TSpec1, typename TStringSet, typename TPos, typename TSize1, typename TAlphabet>
+inline void 
+getAlignmentStatistics(String<TFragment, TSpec1> const& matches,
+					   TStringSet& str,
+					   TPos const from,
+					   TPos const to,
+					   TSize1& matchLength,	// Number of identical characters
+					   TSize1& overlapLength,	// Number of character in overlapping segments (with mismatches and gaps)
+					   TSize1& alignLength,	// Length of the alignment
+					   TAlphabet)
+{
+	SEQAN_CHECKPOINT
+	typedef String<TFragment, TSpec1> TFragmentMatches;
+	typedef typename Size<TFragmentMatches>::Type TSize;
+	typedef typename Id<TFragmentMatches>::Type TId;
+	typedef typename Value<TStringSet>::Type TString;
+	typedef typename Infix<TString>::Type TInfix;
+
+	matchLength = 0;
+	TSize len1 = length(str[0]);
+	TSize len2 = length(str[1]);
+
+	typedef typename Iterator<TInfix, Rooted>::Type TInfixIter;
+	TSize minId1 = len1 + len2;
+	TSize minId2 = len1 + len2;
+	TSize maxId1 = 0;
+	TSize maxId2 = 0;
+	TSize matchMismatch_length = 0;
+
+	for(TSize i = from;i<to;++i) {
+		TId id1 = sequenceId(matches[i], 0);
+		TId id2 = sequenceId(matches[i], 1);
+		if (fragmentBegin(matches[i], id1) < minId1) minId1 = fragmentBegin(matches[i], id1);
+		if (fragmentBegin(matches[i], id2) < minId2) minId2 = fragmentBegin(matches[i], id2);
+		if (fragmentBegin(matches[i], id1) + fragmentLength(matches[i], id1) > maxId1) maxId1 = fragmentBegin(matches[i], id1) + fragmentLength(matches[i], id1);
+		if (fragmentBegin(matches[i], id2) + fragmentLength(matches[i], id2) > maxId2) maxId2 = fragmentBegin(matches[i], id2) + fragmentLength(matches[i], id2);
+		TInfix inf1 = label(matches[i], str, id1);
+		TInfix inf2 = label(matches[i], str, id2);
+		TInfixIter sIt1 = begin(inf1);
+		TInfixIter sIt2 = begin(inf2);
+		while((!atEnd(sIt1)) || (!atEnd(sIt2))) {
+			if ( (TAlphabet) *sIt1  == (TAlphabet) *sIt2) {
+				++matchLength;
+			}
+			goNext(sIt1); goNext(sIt2);
+			++matchMismatch_length;
+		}
+	}
+	alignLength = matchMismatch_length + (len1 - matchMismatch_length) + (len2 - matchMismatch_length);
+	overlapLength = alignLength -  minId1 - minId2 - (len1 + len2 - maxId1 - maxId2);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TFragment, typename TSpec1, typename TStringSet, typename TPos, typename TSize>
+inline void 
+getAlignmentStatistics(String<TFragment, TSpec1>& matches,
+					   TStringSet& str,
+					   TPos from,
+					   TPos to,
+					   TSize& matchLength,
+					   TSize& overlapLength,
+					   TSize& alignLength)
+{
+	SEQAN_CHECKPOINT
+	getAlignmentStatistics(matches, str, from, to, matchLength, overlapLength, alignLength, typename Value<typename Value<TStringSet>::Type>::Type() );
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TFragment, typename TSpec1, typename TStringSet, typename TSize>
+inline void 
+getAlignmentStatistics(String<TFragment, TSpec1>& matches,
+					   TStringSet& str,
+					   TSize& matchLength,
+					   TSize& overlapLength,
+					   TSize& alignLength)
+{
+	SEQAN_CHECKPOINT
+	getAlignmentStatistics(matches, str, (TSize) 0, (TSize) length(matches), matchLength, overlapLength, alignLength, typename Value<TStringSet>::Type() );
+}
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+// Library Generation
+//////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+
+template<typename TStringSet, typename TCargo, typename TSpec, typename TScore, typename TPairList>
 inline void 
 generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+					   TPairList& pList,
+					   TScore const& score_type,
 					   Lcs_Library)
 {
 	SEQAN_CHECKPOINT
@@ -46,7 +231,6 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 
 	// Pairwise alignments for all pairs of sequences
 	TStringSet& str = stringSet(g);	
-	TSize nseq = length(str);
 
 	// String of fragments to combine all pairwise alignments into a multiple alignment
 	typedef Fragment<> TFragment;
@@ -54,50 +238,168 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
 	TFragmentString matches;
 
-	for(TSize i=0; i<nseq-1; ++i) {
-		for(TSize j=i+1; j<nseq; ++j) {
-			// Lcs between first and second string
-			String<std::pair<unsigned int, unsigned int>, Block<> > pos1;
-			longestCommonSubsequence(str[i], str[j], 1000, pos1);
+	TSize amountOfPairs = length(pList);
+	for(TSize k=0; k<amountOfPairs; ++k) {
+		TSize i = idToPosition(str, (pList[k]).i1);
+		TSize j = idToPosition(str, (pList[k]).i2);
+		
+		// Lcs between first and second string
+		String<std::pair<unsigned int, unsigned int>, Block<> > pos1;
+		longestCommonSubsequence(str[i], str[j], 1000, pos1);
 
-			// Get the significant matches in all 3 sequences
-			TSize lenMatch = 1;						
-			int last = length(pos1)-1;		
-			TSize iBegin = pos1[last].first;
-			TSize jBegin = pos1[last].second;
-			for(int z = last - 1; z>=0; --z) {
-				if ((pos1[z].first == pos1[z+1].first + 1) &&
-					(pos1[z].second == pos1[z+1].second + 1)) 
-				{
-					++lenMatch;
-				} else {
-					//// Debug code
-					//typedef typename Infix<TString>::Type TInfix;
-					//TInfix inf1 = infix(str1,iBegin, iBegin + lenMatch);
-					//TInfix inf2 = infix(str2,jBegin, jBegin + lenMatch);
-					//std::cout << inf1 << std::endl;
-					//std::cout << inf2 << std::endl;
+		// Extend the matches as long as possible
+		TSize lenMatch = 1;						
+		int last = length(pos1)-1;		
+		TSize iBegin = pos1[last].first;
+		TSize jBegin = pos1[last].second;
+		for(int z = last - 1; z>=0; --z) {
+			if ((pos1[z].first == pos1[z+1].first + 1) &&
+				(pos1[z].second == pos1[z+1].second + 1)) 
+			{
+				++lenMatch;
+			} else {
+				//// Debug code
+				//typedef typename Infix<TString>::Type TInfix;
+				//TInfix inf1 = infix(str1,iBegin, iBegin + lenMatch);
+				//TInfix inf2 = infix(str2,jBegin, jBegin + lenMatch);
+				//std::cout << inf1 << std::endl;
+				//std::cout << inf2 << std::endl;
 						
-					push_back(matches, TFragment(positionToId(str, i),iBegin,positionToId(str, j),jBegin,lenMatch));
-					lenMatch = 1;
-					iBegin = pos1[z].first;
-					jBegin = pos1[z].second;
-				}
+				push_back(matches, TFragment(positionToId(str, i),iBegin,positionToId(str, j),jBegin,lenMatch));
+				lenMatch = 1;
+				iBegin = pos1[z].first;
+				jBegin = pos1[z].second;
 			}
-			// Process last match
-			push_back(matches, TFragment(positionToId(str, i),iBegin,positionToId(str, j),jBegin,lenMatch));
 		}
+		// Process last match
+		push_back(matches, TFragment(positionToId(str, i),iBegin,positionToId(str, j),jBegin,lenMatch));
 	}
 
-	// Clear graph
+	// Refine all matches and create multiple alignment
+	matchRefinement(matches,str,const_cast<TScore&>(score_type),g);
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec, typename TScore, typename TSize>
+inline void 
+generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+					   TScore const& score_type,
+					   TSize ktup,
+					   Kmer_Library)
+{
+	SEQAN_CHECKPOINT
+	typedef unsigned int TWord;
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename Id<TGraph>::Type TId;
+	typedef typename Value<typename Value<TStringSet>::Type>::Type TAlphabet;
+	typedef String<TWord> TTupelString;
+	typedef String<TTupelString> TTupelStringSet;
+	
+	// Clear Graph
 	clearVertices(g);
 
-	// Refine all matches and create multiple alignment
-	matchRefinement(matches,str,g);
+	// Initialization
+	TStringSet& str = stringSet(g);	
+	TSize nseq = length(str);
+	TWord alphabet_size = ValueSize<TAlphabet>::VALUE;
+
+	// All matching kmers
+	typedef Fragment<> TFragment;
+	typedef String<TFragment, Block<> > TFragmentString;
+	TFragmentString matches;
+
+	// Transform the set of strings into a set of strings of k-tupels
+	TTupelStringSet tupSet;
+	resize(tupSet, nseq);
+	for(TSize k=0;k<nseq;++k) {
+		_getTupelString(str[k], tupSet[k], ktup, TAlphabet());
+	}
+
+	// Build for each sequence the q-gram Index and count common hits
+	String<TWord, Block<> > qIndex;
+	TWord qIndexSize = 1;
+	for (TWord i=0; i< (TWord) ktup;++i) qIndexSize *= alphabet_size;
+	for(TWord i = 0;i < qIndexSize;++i) push_back(qIndex, (TWord) 0);
+	for(TSize k=0;k<nseq-1;++k) {
+		TId id1 = positionToId(str, k);
+		//std::cout << str[k] << std::endl;
+
+		// First pass: Count occurrences
+		for(TWord i = 0;i < qIndexSize;++i) qIndex[i] = 0;
+		for(TWord i = 0;i < (TWord) length(tupSet[k]);++i) {
+			++qIndex[ tupSet[k][i] ];
+		}
+		// Build incremental sums
+		TWord sum = 0;
+		for(TWord i = 0;i < qIndexSize;++i) {
+			TWord tmp = qIndex[i];
+			qIndex[i] = sum;
+			sum += tmp;
+		}
+		// Second pass: Insert hits
+		String<TWord> positions;
+		resize(positions, sum, Exact());
+		for(TSize i = 0;i < (TSize) length(tupSet[k]);++i) {
+			positions[qIndex[ tupSet[k][i] ]] = i;
+			++qIndex[ tupSet[k][i] ];
+		}
+		// Reset pointers
+		for(TWord i = qIndexSize-1;i > 0; --i) {
+			qIndex[i] = qIndex[i-1];
+		}
+		qIndex[0] = 0;
+		for (TSize k2=k+1; k2<nseq; ++k2) {
+			TId id2 = positionToId(str, k2);
+			for(TSize i = 0;i < (TSize) length(tupSet[k2]);++i) {
+				TWord current_kmer = tupSet[k2][i];
+				TWord amount = 0;
+				if (current_kmer == qIndexSize - 1) amount = sum - qIndex[current_kmer];
+				else amount = qIndex[current_kmer+1] - qIndex[current_kmer];
+				for(TWord pos = qIndex[current_kmer]; pos < qIndex[current_kmer] + amount; ++pos) {
+					//std::cout << id1 << ',' << positions[pos] << ':' << id2 << ',' << i << std::endl;
+					//std::cout << tupSet[k2][i] << ',' << tupSet[k][positions[pos]] << std::endl;
+					push_back(matches, TFragment(id1, positions[pos], id2, i, ktup));
+				}
+			}
+		}
+	}
+	
+	matchRefinement(matches,str,const_cast<TScore&>(score_type),g);
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
+template<typename TStringSet, typename TCargo, typename TSpec, typename TScore>
+inline void 
+generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+					   TScore const& score_type,
+					   Kmer_Library)
+{
+	SEQAN_CHECKPOINT
+	generatePrimaryLibrary(g, score_type, 3, Kmer_Library());
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+
+template<typename TStringSet, typename TCargo, typename TSpec, typename TScore>
+inline void 
+generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+					   TScore const& score_type,
+					   Lcs_Library)
+{
+	SEQAN_CHECKPOINT
+	typedef typename Id<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type TId;
+	String<Pair<TId, TId> > pList;
+	selectPairsForLibraryGeneration(g, pList);
+	generatePrimaryLibrary(g, pList, score_type, Lcs_Library() );
+}
+
+//////////////////////////////////////////////////////////////////////////////
 
 template<typename TStringSet, typename TCargo, typename TSpec, typename TPairList, typename TScore>
 void 
@@ -154,7 +456,22 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	}
 
 	// Refine all matches and create multiple alignment
-	matchRefinement(matches,str,g);
+	matchRefinement(matches,str,const_cast<TScore&>(score_type),g);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec, typename TScore>
+void 
+generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+					   TScore const& score_type,
+					   LocalPairwise_Library)
+{
+	SEQAN_CHECKPOINT
+	typedef typename Id<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type TId;
+	String<Pair<TId, TId> > pList;
+	selectPairsForLibraryGeneration(g, pList);
+	generatePrimaryLibrary(g, pList, score_type, LocalPairwise_Library() );
 }
 
 
@@ -221,14 +538,14 @@ __getAlignmentStatistics(String<TFragment, TSpec1>& matches,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TFragment, typename TSpec1, typename TString, typename TSpec2, typename TStringSet, typename TCargo,  typename TSpec, typename TSize>
+template<typename TFragment, typename TSpec1, typename TString, typename TSpec2, typename TCargo,  typename TSpec, typename TSize>
 inline void 
 __getAlignmentStatistics(String<TFragment, TSpec1>& matches,
 						 StringSet<TString, TSpec2>& pairSet,
 						 Graph<Undirected<TCargo, TSpec> >& dist,
 						 TSize i,
 						 TSize j,
-						 TSize nseq,
+						 TSize,
 						 TSize from)
 {
 	SEQAN_CHECKPOINT
@@ -237,7 +554,7 @@ __getAlignmentStatistics(String<TFragment, TSpec1>& matches,
 	TCargo matchLen = 0;
 	TCargo overlapLen = 0;
 	TCargo alignLen = 0;
-	getAlignmentStatistics(matches, pairSet, from, length(matches),  matchLen, overlapLen, alignLen);
+	getAlignmentStatistics(matches, pairSet, (TSize) from, (TSize) length(matches),  matchLen, overlapLen, alignLen);
 			
 	// Calculate sequence similarity
 	TCargo normalizedSimilarity = (matchLen / overlapLen) * (overlapLen / alignLen);
@@ -306,11 +623,11 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 		globalAlignment(matches, pairSet, score_type, ac, Gotoh() );
 			
 		// Get the alignment statistics
-		__getAlignmentStatistics(matches, pairSet, dist, idToPosition(str,id1), idToPosition(str,id2), nseq, from);
+		__getAlignmentStatistics(matches, pairSet, dist, (TSize) idToPosition(str,id1), (TSize) idToPosition(str,id2), (TSize) nseq, (TSize) from);
 	}
 
 	// Refine all matches and create multiple alignment
-	matchRefinement(matches,str,g);
+	matchRefinement(matches,str,const_cast<TScore&>(score_type),g);
 }
 
 
@@ -330,10 +647,26 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TStringSet, typename TCargo, typename TSpec, typename TPairList, typename TScoreValue, typename TScoreSpec>
+template<typename TStringSet, typename TCargo, typename TSpec, typename TDistance, typename TScoreValue, typename TScoreSpec>
 inline void 
 generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-					   TPairList& pList,
+					   TDistance& dist,
+					   Score<TScoreValue, TScoreSpec> const& score_type,
+					   GlobalPairwise_Library)
+{
+	SEQAN_CHECKPOINT
+	typedef typename Id<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type TId;
+	String<Pair<TId, TId> > pList;
+	selectPairsForLibraryGeneration(g, pList);
+	generatePrimaryLibrary(g, pList, dist, score_type, GlobalPairwise_Library()); 
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec, typename TId, typename TScoreValue, typename TScoreSpec>
+inline void 
+generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+					   String<Pair<TId, TId> >& pList,
 					   Score<TScoreValue, TScoreSpec> const& score_type,
 					   GlobalPairwise_Library)
 {
@@ -341,6 +674,22 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	Nothing noth;
 	generatePrimaryLibrary(g, pList, noth, score_type, GlobalPairwise_Library());
 }
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec, typename TScoreValue, typename TScoreSpec>
+inline void 
+generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+					   Score<TScoreValue, TScoreSpec> const& score_type,
+					   GlobalPairwise_Library)
+{
+	SEQAN_CHECKPOINT
+	typedef typename Id<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type TId;
+	String<Pair<TId, TId> > pList;
+	selectPairsForLibraryGeneration(g, pList);
+	generatePrimaryLibrary(g, pList, score_type, GlobalPairwise_Library());
+}
+
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -357,518 +706,49 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	generatePrimaryLibrary(g, pList, noth, score_type, ac, GlobalPairwise_Library());
 }
 
-
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TSize>
-inline void 
-__getAlignmentStatistics(Nothing&,
-						 TSize,
-						 TSize,
-						 TSize,
-						 double,
-						 double)
-{
-	SEQAN_CHECKPOINT
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TValue, typename TSpec, typename TSize>
-inline void 
-__getAlignmentStatistics(String<TValue, TSpec>& dist,
-						 TSize i,
-						 TSize j,
-						 TSize nseq,
-						 double matchLen,
-						 double quality)
-{
-	SEQAN_CHECKPOINT
-	TValue sim = matchLen * quality;
-	if (sim > 1000) sim = 1000;
-	assignValue(dist, i*nseq + j, 1000 - sim);
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TCargo, typename TSpec, typename TSize>
-inline void 
-__getAlignmentStatistics(Graph<Undirected<TCargo, TSpec> >& dist,
-						 TSize i,
-						 TSize j,
-						 TSize,
-						 double matchLen,
-						 double quality)
-{
-	SEQAN_CHECKPOINT
-	TCargo sim = matchLen * quality;
-	if (sim > 1000) sim = 1000;
-	addEdge(dist, i, j, 1000 - sim);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TStringSet, typename TCargo, typename TSpec, typename TPair, typename TPairSpec, typename TDistance, typename TScore>
-inline void 
-generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-					   String<TPair, TPairSpec> const& pList,
-					   TDistance& dist,
-					   TScore const& score_type,
-					   Overlap_Library)
-{
-	SEQAN_CHECKPOINT
-	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
-	typedef typename Size<TGraph>::Type TSize;
-	typedef typename Id<TGraph>::Type TId;
-
-	// Clear library graph and guide tree
-	TStringSet& str = stringSet(g);
-	TSize nseq = length(str);
-	clearVertices(g);
-	__resizeWithRespectToDistance(dist, nseq);
-
-	// String of fragments to combine all pairwise alignments into a multiple alignment
-	typedef Fragment<> TFragment;
-	typedef String<TFragment, Block<> > TFragmentString;
-	typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
-	TFragmentString matches;
-
-	// All pairwise alignments
-	TSize amountOfPairs = length(pList);
-	for(TSize k=0; k<amountOfPairs; ++k) {
-		// Make a pairwise string-set
-		TStringSet pairSet;
-		TId id1 = (pList[k]).i1;
-		TId id2 = (pList[k]).i2;
-		assignValueById(pairSet, str, id1);
-		assignValueById(pairSet, str, id2);
-		
-		// Overlap alignment
-		TFragmentString pairwise_matches;
-		globalAlignment(pairwise_matches, pairSet, score_type, AlignConfig<true,true,true,true>(), Gotoh() );
-			
-		// Determine a sequence weight
-		TSize matchLen = 0;
-		TSize overlapLen = 0;
-		TSize alignLen = 0;
-		getAlignmentStatistics(pairwise_matches, pairSet, matchLen, overlapLen, alignLen);
-		double quality = (double) matchLen / (double) overlapLen;
-
-		// Get only the good overlap alignments
-		if (((quality >= 1) && (matchLen >= 8)) ||
-			((quality >= 0.85) && (matchLen >= 15))) {
-			TSize len = length(pairwise_matches);	
-			for(TSize z = 0; z<len; ++z) {
-				//TGraph tmp(pairSet);
-				//globalAlignment(tmp, pairSet, score_type, AlignConfig<true,true,true,true>(), Gotoh() );
-				//std::cout << "Match length: " << matchLen << std::endl;
-				//std::cout << "Overlap length: " << overlapLen << std::endl;
-				//std::cout << "Align length: " << alignLen << std::endl;
-				//std::cout << "Quality: " << quality << std::endl;
-				//std::cout << tmp << std::endl;
-
-				push_back(matches, pairwise_matches[z]);
-			}
-			// Create a corresponding edge
-			TSize i = idToPosition(str, id1);
-			TSize j = idToPosition(str, id2);
-
-			if (i<j) __getAlignmentStatistics(dist, i, j, nseq, matchLen, quality);
-			else __getAlignmentStatistics(dist, j, i, nseq, matchLen, quality);
-		}
-	}
-
-	// Refine all matches, rescore the matches and create multiple alignment
-	matchRefinement(matches,str,const_cast<TScore&>(score_type),g);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TStringSet, typename TCargo, typename TSpec, typename TPair, typename TPairSpec, typename TScore>
-inline void 
-generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-					   String<TPair, TPairSpec> const& pList,
-					   TScore const& score_type,
-					   Overlap_Library)
-{
-	SEQAN_CHECKPOINT
-	Nothing noth;
-	generatePrimaryLibrary(g, pList, noth, score_type, Overlap_Library());
-}
-
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TStringSet, typename TCargo, typename TSpec, typename TScore, typename TSize>
-inline void 
-generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-					   TScore const& score_type,
-					   TSize ktup,
-					   bool overlapping,
-					   Kmer_Library)
-{
-	SEQAN_CHECKPOINT
-	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
-	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	typedef typename Id<TGraph>::Type TId;
-	typedef typename Value<typename Value<TStringSet>::Type>::Type TAlphabet;
-	typedef __int64 TWord;
-	typedef String<TWord> TTupelString;
-	typedef String<TTupelString> TTupelStringSet;
-	
-	// Initialization
-	clearVertices(g);
-	TStringSet& str = stringSet(g);	
-	TSize nseq = length(str);
-	TWord alphabet_size = ValueSize<TAlphabet>::VALUE;
-	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
-
-	// All matching kmers
-	typedef Fragment<> TFragment;
-	typedef String<TFragment, Block<> > TFragmentString;
-	TFragmentString matches;
-
-	// Transform the set of strings into a set of strings of k-tupels
-	TTupelStringSet tupSet;
-	resize(tupSet, nseq);
-	for(TSize k=0;k<nseq;++k) {
-		if (overlapping) _getTupelString(str[k], tupSet[k], ktup, TAlphabet());
-		else _getNonOverlappingTupelString(str[k], tupSet[k], ktup, TAlphabet());
-	}
-
-	// Build for each sequence the q-gram Index and count common hits
-	String<TWord, External<> > qIndex;
-	TWord qIndexSize = 1;
-	for (TWord i=0; i<ktup;++i) qIndexSize *= alphabet_size;
-	for(TWord i = 0;i < qIndexSize;++i) push_back(qIndex, (TWord) 0);
-	for(TSize k=0;k<nseq-1;++k) {
-		TId id1 = positionToId(str, k);
-		//std::cout << str[k] << std::endl;
-
-		// First pass: Count occurrences
-		for(TWord i = 0;i < qIndexSize;++i) qIndex[i] = 0;
-		for(TWord i = 0;i < (TWord) length(tupSet[k]);++i) {
-			++qIndex[ tupSet[k][i] ];
-		}
-		// Build incremental sums
-		TWord sum = 0;
-		for(TWord i = 0;i < qIndexSize;++i) {
-			TWord tmp = qIndex[i];
-			qIndex[i] = sum;
-			sum += tmp;
-		}
-		// Second pass: Insert hits
-		String<TWord> positions;
-		resize(positions, sum, Exact());
-		for(TSize i = 0;i < (TSize) length(tupSet[k]);++i) {
-			positions[qIndex[ tupSet[k][i] ]] = i;
-			++qIndex[ tupSet[k][i] ];
-		}
-		// Reset pointers
-		for(TWord i = qIndexSize-1;i > 0; --i) {
-			qIndex[i] = qIndex[i-1];
-		}
-		qIndex[0] = 0;
-		for (TSize k2=k+1; k2<nseq; ++k2) {
-			TId id2 = positionToId(str, k2);
-			//std::cout << str[k2] << std::endl;
-
-			for(TSize i = 0;i < (TSize) length(tupSet[k2]);++i) {
-				TWord current_kmer = tupSet[k2][i];
-				TWord amount = 0;
-				if (current_kmer == qIndexSize - 1) amount = sum - qIndex[current_kmer];
-				else amount = qIndex[current_kmer+1] - qIndex[current_kmer];
-				for(TWord pos = qIndex[current_kmer]; pos < qIndex[current_kmer] + amount; ++pos) {
-					//std::cout << id1 << ',' << positions[pos] << ':' << id2 << ',' << i << std::endl;
-					//std::cout << tupSet[k2][i] << ',' << tupSet[k][positions[pos]] << std::endl;
-					if (overlapping) push_back(matches, TFragment(id1, positions[pos], id2, i, ktup));
-					else {
-						TVertexDescriptor v1 = findVertex(g, id1, (unsigned int) positions[pos] * ktup);
-						if (v1 == nilVertex) v1 = addVertex(g, id1, (unsigned int) positions[pos] * ktup, (unsigned int) ktup);
-						TVertexDescriptor v2 = findVertex(g, id2, (unsigned int) i * ktup);
-						if (v2 == nilVertex) v2 = addVertex(g, id2, (unsigned int) i * ktup, (unsigned int) ktup);
-						addEdge(g, v1, v2, (unsigned int) ktup);
-					}
-				}
-			}
-		}
-	}
-	
-	if (overlapping) matchRefinement(matches,str,const_cast<TScore&>(score_type),g);
-	else {
-		for(TSize k=0;k<nseq;++k) {
-			TId seqId = positionToId(str, k);
-			TSize i = 0;
-			TSize len = length(str[k]);
-			while(i<len) {
-				TVertexDescriptor nextVertex = findVertex(g, seqId, i);
-				if (nextVertex == nilVertex) {
-					TSize j = i + 1;
-					while ((j < len) && (findVertex(g, seqId, j) == nilVertex)) ++j;
-					nextVertex = addVertex(g, seqId, i, j-i);
-				}
-				i += fragmentLength(g, nextVertex);
-			}
-		}
-	}
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TStringSet, typename TCargo, typename TSpec, typename TScoreValue, typename TScoreSpec, typename TSize>
+template<typename TStringSet, typename TCargo, typename TSpec, typename TScoreValue, typename TScoreSpec, typename TAlignConfig>
 inline void 
 generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 					   Score<TScoreValue, TScoreSpec> const& score_type,
-					   TSize ktup,
-					   Kmer_Library)
+					   TAlignConfig const& ac,
+					   GlobalPairwise_Library)
 {
 	SEQAN_CHECKPOINT
-	generatePrimaryLibrary(g,score_type,ktup,true,Kmer_Library());
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TStringSet, typename TCargo, typename TSpec, typename TScoreValue, typename TScoreSpec>
-inline void 
-generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-					   Score<TScoreValue, TScoreSpec> const& score_type,
-					   Kmer_Library)
-{
-	SEQAN_CHECKPOINT
-	generatePrimaryLibrary(g,score_type,3,Kmer_Library());
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TCargo, typename TSpec, typename TGuideTree>
-inline void 
-subtreeMerging(Graph<Undirected<TCargo, TSpec> >& pairGraph,
-			   TGuideTree& guideTree)
-{
-	SEQAN_CHECKPOINT
-	typedef Graph<Undirected<TCargo, TSpec> > TPairGraph;
-	typedef typename VertexDescriptor<TPairGraph>::Type TVertexDescriptor;
-	typedef typename Iterator<TPairGraph, VertexIterator>::Type TVertexIterator;
-	typedef typename Iterator<TPairGraph, OutEdgeIterator>::Type TOutEdgeIterator;
-	typedef typename EdgeDescriptor<TPairGraph>::Type TEdgeDescriptor;
-	typedef typename Size<TPairGraph>::Type TSize;
-	
-	// Copy distance graph
-	TPairGraph reference(pairGraph);
-	TCargo infCargo = getInfinity<TCargo>();
-
-	// Collect the vertices for each subtree
-	typedef String<TVertexDescriptor> TVertexSet;
-	String<TVertexSet> setCollection;
-	TSize threshold = 100;	// Maximum amount of members per group
-
-	// Start from the best sequence and spread outwards
-	TVertexIterator it(pairGraph);
-	TVertexDescriptor maxVertex = 0;
-	TSize maxDegree = 0;
-	for(;!atEnd(it);++it) {
-		TSize tmp = degree(pairGraph, *it);
-		if (tmp == 0) {
-			std::cout << "Not connected!!!" << std::endl;
-			exit(0);
-		} else if (tmp > maxDegree) {
-			maxDegree = tmp;
-			maxVertex = *it;
-		}
-		addVertex(guideTree);	// For each sequence one vertex in the guide tree
-	}
-	TVertexSet currentSet;
-	appendValue(currentSet, maxVertex);
-	while (numVertices(pairGraph) > 1) {
-		TOutEdgeIterator itE(pairGraph, maxVertex);
-		double maxWeight = 0;
-		TVertexDescriptor next_maxVertex = 0;
-		for(;!atEnd(itE);++itE) {
-			if (cargo(*itE) > maxWeight) {
-				maxWeight = cargo(*itE);
-				next_maxVertex = targetVertex(itE);
-			}
-		}
-		goBegin(itE);
-		for(;!atEnd(itE);++itE) {
-			if (targetVertex(itE) != next_maxVertex) {
-				TEdgeDescriptor e = findEdge(pairGraph, targetVertex(itE), next_maxVertex);
-				if (e == 0) addEdge(pairGraph, targetVertex(itE),  next_maxVertex, cargo(*itE));
-				else {
-					if (cargo(*itE) < infCargo) cargo(e) += cargo(*itE);
-					else cargo(e) = infCargo;
-				}
-			}
-		}
-		if ((findEdge(reference, maxVertex, next_maxVertex) == 0) ||
-			(length(currentSet) > threshold)) {
-			appendValue(setCollection, currentSet);
-			clear(currentSet);
-		} 
-		removeVertex(pairGraph, maxVertex);
-		maxVertex = next_maxVertex;
-		appendValue(currentSet, next_maxVertex);
-	}
-	TVertexIterator itLast(pairGraph);
-	if (findEdge(reference, maxVertex, *itLast) == 0) {
-		appendValue(setCollection, currentSet);
-		clear(currentSet);
-	}
-	appendValue(currentSet, *itLast);
-	appendValue(setCollection, currentSet);
-
-
-	// Calculate a guide tree for each subtree
-	String<TVertexDescriptor> singletons;
-	String<TVertexDescriptor> roots;
-	for(TSize z = 0; z<length(setCollection);++z) {
-		String<TCargo> dist;
-		TSize len = length(setCollection[z]);
-		if (len < 3) {
-			for(TSize k = 0; k<len;++k) appendValue(singletons, (setCollection[z])[k]);
-			continue;
-		}
-		fill(dist, len * len, infCargo);
-		for(TSize i = 0; i<len; ++i) {
-			for(TSize j = i+1; j<len;++j) {
-				TEdgeDescriptor e = findEdge(reference, (setCollection[z])[i], (setCollection[z])[j]);
-				if (e != 0) {
-					if (cargo(e) > 1000) assignValue(dist, i * len + j, 0);
-					else assignValue(dist, i * len + j, 1000 - cargo(e));
-				}
-			}
-		}
-		TGuideTree gTree;
-		upgmaTree(dist, gTree);
-		std::map<typename VertexDescriptor<TGuideTree>::Type, TVertexDescriptor> mapping;
-		typename Iterator<TGuideTree, BfsIterator>::Type itVert(gTree, getRoot(gTree));
-		TVertexDescriptor intVertex = addVertex(guideTree);
-		appendValue(roots, intVertex);
-		mapping.insert(std::make_pair(getRoot(gTree), intVertex));
-		++itVert;
-		for(;!atEnd(itVert); ++itVert) {
-			if (isLeaf(gTree, *itVert)) {
-				addEdge(guideTree, (mapping.find(parentVertex(gTree, *itVert)))->second, (setCollection[z])[*itVert]);
-			} else {
-				intVertex = addVertex(guideTree);
-				mapping.insert(std::make_pair(*itVert, intVertex));
-				addEdge(guideTree, (mapping.find(parentVertex(gTree, *itVert)))->second, intVertex);
-			}
-		}
-	}
-	for(TSize z = 0; z<length(singletons);++z) {
-		appendValue(roots, singletons[z]);
-	}
-	clear(singletons);
-
-	// Combine the subtrees into a full guide tree
-	if (length(roots) == 1) {
-		assignRoot(guideTree, roots[0]);
-	} else {
-		TVertexDescriptor internalVertex = addVertex(guideTree);
-		addEdge(guideTree, internalVertex, roots[0]);
-		addEdge(guideTree, internalVertex, roots[1]);
-		for(TSize z = 2; z<length(roots);++z) {
-			TVertexDescriptor newInternalVertex = addVertex(guideTree);
-			addEdge(guideTree, newInternalVertex, internalVertex);
-			addEdge(guideTree, newInternalVertex, roots[z]);
-			internalVertex = newInternalVertex;
-		}
-		assignRoot(guideTree, internalVertex);
-	}
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TStringSet, typename TCargo, typename TSpec, typename TPairList>
-inline void 
-selectPairsForLibraryGeneration(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-								TPairList& pList)
-{
-	SEQAN_CHECKPOINT
-	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
-	typedef typename Size<TGraph>::Type TSize;
-	typedef typename Value<TPairList>::Type TPair;
-
-	TStringSet& str = stringSet(g);
-	TSize nseq = length(str);
-	for(TSize i=0; i<nseq; ++i) {
-		for(TSize j=i+1; j<nseq; ++j) {
-			appendValue(pList, TPair(positionToId(str, i), positionToId(str, j)));
-		}
-	}
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TString, typename TSpec, typename TRead, typename TSpec2, typename TBegEndPositions>
-inline void 
-layoutReads(String<TString, TSpec>& names,
-			StringSet<TRead, TSpec2>& strSet,
-			TBegEndPositions& begEndPos)
-{
-	SEQAN_CHECKPOINT
-	typedef typename Size<TString>::Type TSize;
-	typedef typename Value<TBegEndPositions>::Type TPair;
-
-	TSize nseq = length(strSet);
-	reserve(begEndPos, nseq);
-
-	for(TSize i=0; i<nseq; ++i) {
-		TSize brPoint = 0;
-		for(TSize ind = 0; ind<length(names[i]); ++ind) {
-			if ((names[i])[ind] == ',') {
-				brPoint = ind;
-				break;
-			}
-		}
-		TSize posI = 0;
-		TSize posJ = 0;
-		TString inf1 = infix(names[i], 0, brPoint);
-		TString inf2 = infix(names[i], brPoint+1, length(names[i]));
-		std::stringstream ssStream1(toCString(inf1));
-		ssStream1 >> posI; 
-		std::stringstream ssStream2(toCString(inf2));
-		ssStream2 >> posJ;
-		appendValue(begEndPos, TPair(posI, posJ));
-		if (posI > posJ) reverseComplementInPlace(strSet[i]);
-	}
+	typedef typename Id<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type TId;
+	String<Pair<TId, TId> > pList;
+	selectPairsForLibraryGeneration(g, pList);
+	generatePrimaryLibrary(g, pList, score_type, ac, GlobalPairwise_Library());
 }
 
 
-//////////////////////////////////////////////////////////////////////////////
 
-template<typename TStringSet, typename TCargo, typename TSpec, typename TBegEndPositions, typename TPairList, typename TReadLength>
-inline void 
-selectPairsForLibraryGeneration(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-								TBegEndPositions& begEndPos,
-								TPairList& pList,
-								TReadLength readLen)
-{
-	SEQAN_CHECKPOINT
-	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
-	typedef typename Size<TGraph>::Type TSize;
-	typedef typename Value<TPairList>::Type TPair;
-	TStringSet& str = stringSet(g);
-	TSize nseq = length(str);
-	int threshold = (int) (1.5 * (double) readLen);
-	for(TSize i=0; i<nseq; ++i) {
-		int posI = begEndPos[i].i1;
-		if (posI > (int) begEndPos[i].i2) posI = begEndPos[i].i2;
-		for(TSize j=i+1; j<nseq; ++j) {
-			int posJ = begEndPos[j].i1;
-			if (posJ > (int) begEndPos[j].i2) posJ = begEndPos[j].i2;
-			if (((posI > posJ) &&
-				(posI - posJ < threshold)) ||
-				((posI <= posJ) &&
-				(posJ - posI < threshold))) {
-					appendValue(pList, TPair(positionToId(str, i), positionToId(str, j)));
-			}
-		}
-	}
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -901,94 +781,6 @@ _parse_readSequenceData(TFile & file,
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////////
-
-//template<typename TFile, typename TStringSet, typename TCargo, typename TSpec>
-//inline void
-//_readLibrary(TFile & file,
-//			 Graph<Alignment<TStringSet, TCargo, TSpec> >& g)
-//{
-//	SEQAN_CHECKPOINT
-//	typedef unsigned int TWord;
-//	typedef typename Value<TFile>::Type TValue;
-//	
-//	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
-//	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
-//	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-//	typedef typename Id<TGraph>::Type TId;
-//
-//	TValue c;
-//	bool seq1ToN = false;
-//	if (_streamEOF(file)) return;
-//	else c = _streamGet(file);
-//
-//	typedef std::pair<unsigned int, unsigned int> TSeqRes;
-//	typedef std::map<TSeqRes, TVertexDescriptor> TNodeMap;
-//	TNodeMap node_map;
-//	TWord seq1 = 0;
-//	TWord seq2 = 0;
-//	while (!_streamEOF(file)) {
-//		_parse_skipWhitespace(file,c);
-//		if (_streamEOF(file)) break;
-//		if (c == '#') {
-//			c = _streamGet(file);
-//			_parse_skipWhitespace(file,c);
-//			seq1 = _parse_readNumber(file, c);
-//			seq2 = _parse_readNumber(file, c);
-//			if (empty(g))
-//				if ((seq1 != 0) && (seq2 != 0)) seq1ToN = true;
-//			if (seq1ToN) {
-//				--seq1;
-//				--seq2;
-//			}
-//		} else if (c == '!') {
-//			_parse_skipLine(file, c);
-//		} else {
-//			unsigned int res1 = _parse_readNumber(file, c);
-//			_parse_skipWhitespace(file,c);
-//			unsigned int res2 = _parse_readNumber(file, c);
-//			_parse_skipWhitespace(file,c);
-//			unsigned int weight = _parse_readNumber(file, c);
-//			_parse_skipLine(file,c);
-//		
-//			// Insert new vertex if necessary
-//			--res1;
-//			--res2;
-//			bool newEdge = false;
-//			TSeqRes key = std::make_pair(seq1, res1);
-//			typename TNodeMap::iterator nodePos = node_map.find(key);
-//			TId id1;
-//			if (nodePos == node_map.end()) {
-//				//std::cout << seq1 << ',' << res1 << std::endl;
-//				id1 = addVertex(g, seq1, res1, 1); 
-//				node_map.insert(std::make_pair(key, id1));
-//				newEdge = true;
-//			} else {
-//				id1 = nodePos->second;
-//			}
-//
-//			key = std::make_pair(seq2, res2);
-//			nodePos = node_map.find(key);
-//			TId id2;
-//			if (nodePos == node_map.end()) {
-//				//std::cout << seq2 << ',' << res2 << std::endl;
-//				id2 = addVertex(g, seq2, res2, 1); 
-//				node_map.insert(std::make_pair(key, id2));
-//				newEdge = true;
-//			} else {
-//				id2 = nodePos->second;
-//			}
-//
-//			// Insert a new edge or adapt the weight
-//			if (newEdge) addEdge(g,id1,id2,weight);
-//			else {
-//				TEdgeDescriptor e = findEdge(g,id1,id2);
-//				if( e == 0 ) addEdge(g,id1,id2,weight);
-//				else cargo(e) += weight;
-//			}
-//		}
-//	}
-//}
 
 template<typename TFile, typename TStringSet, typename TCargo, typename TSpec>
 inline void
@@ -1354,21 +1146,21 @@ read(TFile & file,
 
 		if (((beg1 > beg2) && ((beg1 - beg2) > window)) ||
 			((beg1 < beg2) && ((beg2 - beg1) > window))) {
-				std::cout << "Out of window" << std::endl;
+				//std::cout << "Out of window" << std::endl;
 				_parse_skipLine(file, c);
 				continue;
 		}
 		if	(((beg1 + len) > length(strSet[seq1Id])) ||
 			((beg2 + len) > length(strSet[seq2Id]))) {
-				std::cout << "Wrong match" << std::endl;
+				//std::cout << "Wrong match" << std::endl;
 				_parse_skipLine(file, c);
 				continue;
 		}
 
-		// Debug code
-		std::cout << seq1Id << ',' << beg1 << ',' << seq2Id << ',' << beg2 << ',' << len << std::endl;
-		std::cout << infix(strSet[seq1Id], beg1, beg1+len) << std::endl;
-		std::cout << infix(strSet[seq2Id], beg2, beg2+len) << std::endl;
+		//// Debug code
+		//std::cout << seq1Id << ',' << beg1 << ',' << seq2Id << ',' << beg2 << ',' << len << std::endl;
+		//std::cout << infix(strSet[seq1Id], beg1, beg1+len) << std::endl;
+		//std::cout << infix(strSet[seq2Id], beg2, beg2+len) << std::endl;
 		
 		push_back(matches, TFragment(seq1Id, beg1, seq2Id,  beg2, len));
 		_parse_skipLine(file, c);

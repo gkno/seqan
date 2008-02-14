@@ -9,7 +9,22 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //////////////////////////////////////////////////////////////////////////////
 
-void  Test_CompressedAlphabets() {
+void  Test_Alphabets() {
+	// Test Rna
+	Rna5 r = 'U';
+	SEQAN_TASSERT(r == 3)
+	r = Byte(0);
+	SEQAN_TASSERT(r == 'a')
+	char c = 'c';
+	r = c;
+	c = r;
+	SEQAN_TASSERT(r == Rna5('c'))
+	SEQAN_TASSERT((c == 'C' || c == 'c'))
+	Unicode u = 'g';
+	r = u;
+	SEQAN_TASSERT(r == Rna5('g'))
+	
+
 	// Test Dayhoff
 	AAGroupsDayhoff gr;
 	gr = AminoAcid('T');
@@ -175,19 +190,29 @@ void Test_GuideTree() {
 
 //____________________________________________________________________________
 // UPGMA
+	Graph<Undirected<double> > sparse_mat;
+	for(unsigned int i = 0; i<8; ++i) addVertex(sparse_mat);
 	clear(mat);
 	fill(mat, 8*8, 0);
+	addEdge(sparse_mat,0,1,32);addEdge(sparse_mat,0,2,48);addEdge(sparse_mat,0,3,51);addEdge(sparse_mat,0,4,50);addEdge(sparse_mat,0,5,48);addEdge(sparse_mat,0,6,98);addEdge(sparse_mat,0,7,148);
 	assignValue(mat, 0*8+1, 32);assignValue(mat, 0*8+2, 48);assignValue(mat, 0*8+3, 51);assignValue(mat, 0*8+4, 50);assignValue(mat, 0*8+5, 48);assignValue(mat, 0*8+6, 98);assignValue(mat, 0*8+7, 148);
+	addEdge(sparse_mat,1,2,26);addEdge(sparse_mat,1,3,34);addEdge(sparse_mat,1,4,29);addEdge(sparse_mat,1,5,33);addEdge(sparse_mat,1,6,84);addEdge(sparse_mat,1,7,136);
 	assignValue(mat, 1*8+2, 26);assignValue(mat, 1*8+3, 34);assignValue(mat, 1*8+4, 29);assignValue(mat, 1*8+5, 33);assignValue(mat, 1*8+6, 84);assignValue(mat, 1*8+7, 136);
+	addEdge(sparse_mat,2,3,42);addEdge(sparse_mat,2,4,44);addEdge(sparse_mat,2,5,44);addEdge(sparse_mat,2,6,92);addEdge(sparse_mat,2,7,152);
 	assignValue(mat, 2*8+3, 42);assignValue(mat, 2*8+4, 44);assignValue(mat, 2*8+5, 44);assignValue(mat, 2*8+6, 92);assignValue(mat, 2*8+7, 152);
+	addEdge(sparse_mat,3,4,44);addEdge(sparse_mat,3,5,38);addEdge(sparse_mat,3,6,86);addEdge(sparse_mat,3,7,142);
 	assignValue(mat, 3*8+4, 44);assignValue(mat, 3*8+5, 38);assignValue(mat, 3*8+6, 86);assignValue(mat, 3*8+7, 142);
+	addEdge(sparse_mat,4,5,24);addEdge(sparse_mat,4,6,89);addEdge(sparse_mat,4,7,142);
 	assignValue(mat, 4*8+5, 24);assignValue(mat, 4*8+6, 89);assignValue(mat, 4*8+7, 142);
+	addEdge(sparse_mat,5,6,90);addEdge(sparse_mat,5,7,142);
 	assignValue(mat, 5*8+6, 90);assignValue(mat, 5*8+7, 142);
+	addEdge(sparse_mat,6,7,148);
 	assignValue(mat, 6*8+7, 148);
-	
 	clear(guideTreeOut);
+	String<double> mat2;
+	mat2 = mat;
 	upgmaTree(mat, guideTreeOut);
-
+	mat = mat2;
 	//std::cout << guideTreeOut << std::endl;
 	SEQAN_TASSERT(numVertices(guideTreeOut) == 15)
 	SEQAN_TASSERT(findEdge(guideTreeOut, 8, 4) != 0)
@@ -205,6 +230,58 @@ void Test_GuideTree() {
 	SEQAN_TASSERT(findEdge(guideTreeOut, 14, 7) != 0)
 	SEQAN_TASSERT(findEdge(guideTreeOut, 14, 13) != 0)
 	SEQAN_TASSERT(getRoot(guideTreeOut) == 14)
+
+	typedef Iterator<TGraph, BfsIterator>::Type TBfsIter;
+	String< VertexDescriptor<TGraph>::Type > vertices1;
+	for(TBfsIter it(guideTreeOut, getRoot(guideTreeOut)); !atEnd(it); ++it) {
+		appendValue(vertices1, *it);
+	}
+	clear(guideTreeOut);
+	Graph<Undirected<double> > sparse_mat2;
+	sparse_mat2 = sparse_mat;
+	upgmaTree(sparse_mat, guideTreeOut);
+	sparse_mat = sparse_mat2;
+	String< VertexDescriptor<TGraph>::Type > vertices2;
+	for(TBfsIter it(guideTreeOut, getRoot(guideTreeOut)); !atEnd(it); ++it) {
+		appendValue(vertices2, *it);
+	}
+	SEQAN_TASSERT(vertices1 == vertices2)
+
+
+	clear(vertices1);
+	clear(guideTreeOut);
+	mat2 = mat;
+	upgmaTree(mat, guideTreeOut, UpgmaMin());
+	mat = mat2;
+	for(TBfsIter it(guideTreeOut, getRoot(guideTreeOut)); !atEnd(it); ++it) appendValue(vertices1, *it);
+	clear(vertices2);
+	clear(guideTreeOut);
+	sparse_mat2 = sparse_mat;
+	upgmaTree(sparse_mat, guideTreeOut, UpgmaMin());
+	sparse_mat = sparse_mat2;
+	//std::cout << guideTreeOut << std::endl;
+	for(TBfsIter it(guideTreeOut, getRoot(guideTreeOut)); !atEnd(it); ++it) {
+		appendValue(vertices2, *it);
+	}
+	SEQAN_TASSERT(vertices1 == vertices2)
+
+	clear(vertices1);
+	clear(guideTreeOut);
+	mat2 = mat;
+	upgmaTree(mat, guideTreeOut, UpgmaMax());
+	mat = mat2;
+	for(TBfsIter it(guideTreeOut, getRoot(guideTreeOut)); !atEnd(it); ++it) {
+		appendValue(vertices1, *it);
+	}
+	clear(vertices2);
+	clear(guideTreeOut);
+	sparse_mat2 = sparse_mat;
+	upgmaTree(sparse_mat, guideTreeOut, UpgmaMax());
+	sparse_mat = sparse_mat2;
+	for(TBfsIter it(guideTreeOut, getRoot(guideTreeOut)); !atEnd(it); ++it) {
+		appendValue(vertices2, *it);
+	}
+	SEQAN_TASSERT(vertices1 == vertices2)
 
 //____________________________________________________________________________
 // UpgmaMin vs. UpgmaAvg
@@ -234,6 +311,81 @@ void Test_GuideTree() {
 	SEQAN_TASSERT(findEdge(guideTreeOut, 3, 6) != 0)
 }
 
+
+//////////////////////////////////////////////////////////////////////////////
+
+void Test_Distances() {
+	typedef String<AminoAcid> TString;
+	typedef StringSet<TString, Dependent<> > TStringSet;
+	typedef Graph<Alignment<TStringSet, unsigned int> > TGraph;
+	
+	TString str1 = "GARFIELDTHELASTFATCAT";
+	TString str2 = "GARFIELDTHEFASTCAT";
+	TString str3 = "GARFIELDTHEVERYFASTCAT";
+	TString str4 = "THEFATCAT";
+	TStringSet strSet;
+	assignValueById(strSet, str1);
+	assignValueById(strSet, str2);
+	assignValueById(strSet, str3);
+	assignValueById(strSet, str4);
+	TGraph g(strSet);
+
+	String<double> distanceMatrix;
+	getDistanceMatrix(g,distanceMatrix);
+	SEQAN_TASSERT((unsigned int) getValue(distanceMatrix, 3) == (unsigned int) ((double) (1.0 - 5.0 / 7.0) * 100.0))
+	SEQAN_TASSERT((unsigned int) getValue(distanceMatrix, 1 * length(strSet) + 3) == (unsigned int) ((double) (1.0 - 5.0 / 7.0) * 100.0))
+	SEQAN_TASSERT((unsigned int) getValue(distanceMatrix, 2 * length(strSet) + 3) == (unsigned int) ((double) (1.0 - 3.0 / 7.0) * 100.0))
+
+	clear(distanceMatrix);
+	String<Pair<unsigned int, unsigned int> > pList;
+	selectPairsForLibraryGeneration(g, pList);
+	Blosum62 score_type(-1,-11);
+	generatePrimaryLibrary(g, pList, score_type, GlobalPairwise_Library() );
+	getDistanceMatrix(g,distanceMatrix,LibraryDistance());
+	SEQAN_TASSERT(getValue(distanceMatrix, 0 * length(strSet) + 1) < getValue(distanceMatrix, 2 * length(strSet) + 3))
+	SEQAN_TASSERT(getValue(distanceMatrix, 1 * length(strSet) + 2) < getValue(distanceMatrix, 2 * length(strSet) + 3))
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+void Test_Libraries() {
+	typedef String<AminoAcid> TString;
+	typedef StringSet<TString, Dependent<> > TStringSet;
+	typedef Graph<Alignment<TStringSet, unsigned int> > TGraph;
+	
+	TString str1 = "GARFIELDTHELASTFATCAT";
+	TString str2 = "GARFIELDTHEFASTCAT";
+	TString str3 = "GARFIELDTHEVERYFASTCAT";
+	TString str4 = "THEFATCAT";
+	TStringSet strSet;
+	assignValueById(strSet, str1);
+	assignValueById(strSet, str2);
+	assignValueById(strSet, str3);
+	assignValueById(strSet, str4);
+	TGraph g(strSet);
+	Blosum62 score_type(-1,-11);
+	generatePrimaryLibrary(g, score_type, Lcs_Library() );
+	generatePrimaryLibrary(g, score_type, Kmer_Library() );
+	generatePrimaryLibrary(g, score_type, LocalPairwise_Library() );
+	generatePrimaryLibrary(g, score_type, GlobalPairwise_Library() );
+	generatePrimaryLibrary(g, score_type, AlignConfig<false,false,false,false>(), GlobalPairwise_Library() );
+	String<double> distanceMatrix;
+	generatePrimaryLibrary(g, distanceMatrix, score_type, GlobalPairwise_Library() );
+	Graph<Undirected<double> > distGraph;
+	generatePrimaryLibrary(g, distGraph, score_type, GlobalPairwise_Library() );
+	generatePrimaryLibrary(g, score_type, Overlap_Library() );
+	clear(distanceMatrix);
+	generatePrimaryLibrary(g, distanceMatrix, score_type, Overlap_Library() );
+	clear(distGraph);
+	generatePrimaryLibrary(g, distGraph, score_type, Overlap_Library() );
+}
+
+
+
+
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 void Test_TCoffeeGarfield() {
@@ -259,7 +411,7 @@ void Test_TCoffeeGarfield() {
 	
 	// Generate a primary library, i.e., all global pairwise alignments
 	TGraph lib1(strSet);
-	generatePrimaryLibrary(lib1, score_type_local, GlobalPairwise_Library() );
+//	generatePrimaryLibrary(lib1, score_type_local, GlobalPairwise_Library() );
 	//generatePrimaryLibrary(lib1, score_type_local, MUMPairwise_Library() );
 	//generatePrimaryLibrary(lib1, score_type_global, 5, false, Kmer_Library() );
 	
@@ -270,7 +422,7 @@ void Test_TCoffeeGarfield() {
 
 	// Generate a primary library, i.e., all local pairwise alignments
 	TGraph lib2(strSet);
-	generatePrimaryLibrary(lib2, score_type_local, LocalPairwise_Library() );
+//	generatePrimaryLibrary(lib2, score_type_local, LocalPairwise_Library() );
 
 	fstream strm02; // Alignment graph as dot
 	strm02.open(TEST_PATH "my_tcoffee02.dot", ios_base::out | ios_base::trunc);
@@ -332,6 +484,8 @@ void Test_TCoffeeGarfield() {
 	write(strm4,gOut,names, FastaFormat());
 	strm4.close();
 }
+
+
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -427,7 +581,7 @@ void Test_TCoffeeFromLibrary(String<char> const in_path) {
 	//// Generate a primary library, i.e., all global pairwise alignments
 	TGraph lib2(strSet);
 	String<double> distanceMatrix;
-	generatePrimaryLibrary(lib2, distanceMatrix, score_type, GlobalPairwise_Library() );
+//	generatePrimaryLibrary(lib2, distanceMatrix, score_type, GlobalPairwise_Library() );
 	_alignTiming(startTime, "Global Pairwise alignments done: ");
 	std::cout << "Library size: " << numVertices(lib2) << " Vertices, " << numEdges(lib2) << " Edges" << std::endl;
 
@@ -521,7 +675,7 @@ void Test_TCoffeeScratch(String<char> const in_path) {
 	// Generate kmer primary library
 	TGraph g(strSet);
 	//generatePrimaryLibrary(g, score_type, MUMPairwise_Library() );
-	generatePrimaryLibrary(g, score_type, 15, false, Kmer_Library() );
+	generatePrimaryLibrary(g, score_type, 15, Kmer_Library() );
 	_alignTiming(startTime, "MUM library done: ");
 	std::cout << "Library size: " << numVertices(g) << " Vertices, " << numEdges(g) << " Edges" << std::endl;
 	
@@ -565,286 +719,54 @@ void Test_TCoffeeScratch(String<char> const in_path) {
 }
 
 
-//////////////////////////////////////////////////////////////////////////////
-
-void Test_BaliBaseRef11() {
-	
-	// Windows
-#ifdef PLATFORM_WINDOWS
-	String<char> in_path("Z:\\Balibase\\bb3_release\\RV11\\");
-#else
-	// Linux
-	String<char> in_path("/home/takifugu/rausch/Balibase/bb3_release/RV11/");
-#endif
-
-	//for(int i = 1; i<39; ++i) {
-	//	std::stringstream s;
-	//	s << "BBS110";
-	//	if (i < 10) s << '0';
-	//	s << i;
-	//	Test_TCoffeeFromFile(in_path,s.str().c_str(), "tfa");
-	//}
-
-	for(int i = 1; i<39; ++i) {
-		std::stringstream s;
-		s << "BB110";
-		if (i < 10) s << '0';
-		s << i;
-		Test_TCoffeeFromFile(in_path,s.str().c_str(), "tfa");
-	}
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-void Test_BaliBaseRef12() {
-	
-	// Windows
-#ifdef PLATFORM_WINDOWS
-	String<char> in_path("Z:\\Balibase\\bb3_release\\RV12\\");
-#else
-	// Linux
-	String<char> in_path("/home/takifugu/rausch/Balibase/bb3_release/RV12/");
-#endif
-
-	//for(int i = 1; i<45; ++i) {
-	//	std::stringstream s;
-	//	s << "BBS120";
-	//	if (i < 10) s << '0';
-	//	s << i;
-	//	Test_TCoffeeFromFile(in_path,s.str().c_str(), "tfa");
-	//}
-
-	for(int i = 1; i<45; ++i) {
-		std::stringstream s;
-		s << "BB120";
-		if (i < 10) s << '0';
-		s << i;
-		Test_TCoffeeFromFile(in_path,s.str().c_str(), "tfa");
-	}
-}
 
 
-//////////////////////////////////////////////////////////////////////////////
-
-void Test_BaliBaseRef20() {
-	
-	// Windows
-#ifdef PLATFORM_WINDOWS
-	String<char> in_path("Z:\\Balibase\\bb3_release\\RV20\\");
-#else
-	// Linux
-	String<char> in_path("/home/takifugu/rausch/Balibase/bb3_release/RV20/");
-#endif
-
-	//for(int i = 1; i<42; ++i) {
-	//	std::stringstream s;
-	//	s << "BBS200";
-	//	if (i < 10) s << '0';
-	//	s << i;
-	//	Test_TCoffeeFromFile(in_path,s.str().c_str(), "tfa");
-	//}
-
-	for(int i = 1; i<42; ++i) {
-		std::stringstream s;
-		s << "BB200";
-		if (i < 10) s << '0';
-		s << i;
-		Test_TCoffeeFromFile(in_path,s.str().c_str(), "tfa");
-	}
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-void Test_BaliBaseRef30() {
-	
-	// Windows
-#ifdef PLATFORM_WINDOWS
-	String<char> in_path("Z:\\Balibase\\bb3_release\\RV30\\");
-#else
-	// Linux
-	String<char> in_path("/home/takifugu/rausch/Balibase/bb3_release/RV30/");
-#endif
-
-	//for(int i = 1; i<31; ++i) {
-	//	std::stringstream s;
-	//	s << "BBS300";
-	//	if (i < 10) s << '0';
-	//	s << i;
-	//	Test_TCoffeeFromFile(in_path,s.str().c_str(), "tfa");
-	//}
-
-	for(int i = 1; i<31; ++i) {
-		std::stringstream s;
-		s << "BB300";
-		if (i < 10) s << '0';
-		s << i;
-		Test_TCoffeeFromFile(in_path,s.str().c_str(), "tfa");
-	}
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-void Test_BaliBaseRef40() {
-	
-	// Windows
-#ifdef PLATFORM_WINDOWS
-	String<char> in_path("Z:\\Balibase\\bb3_release\\RV40\\");
-#else
-	// Linux
-	String<char> in_path("/home/takifugu/rausch/Balibase/bb3_release/RV40/");
-#endif
-
-	for(int i = 1; i<50; ++i) {
-		std::stringstream s;
-		s << "BB400";
-		if (i < 10) s << '0';
-		s << i;
-		Test_TCoffeeFromFile(in_path,s.str().c_str(), "tfa");
-	}
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-void Test_BaliBaseRef50() {
-	
-	// Windows
-#ifdef PLATFORM_WINDOWS
-	String<char> in_path("Z:\\Balibase\\bb3_release\\RV50\\");
-#else
-	// Linux
-	String<char> in_path("/home/takifugu/rausch/Balibase/bb3_release/RV50/");
-#endif
-
-	//for(int i = 1; i<17; ++i) {
-	//	std::stringstream s;
-	//	s << "BBS500";
-	//	if (i < 10) s << '0';
-	//	s << i;
-	//	Test_TCoffeeFromFile(in_path,s.str().c_str(), "tfa");
-	//}
-
-	for(int i = 1; i<17; ++i) {
-		std::stringstream s;
-		s << "BB500";
-		if (i < 10) s << '0';
-		s << i;
-		Test_TCoffeeFromFile(in_path,s.str().c_str(), "tfa");
-	}
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-void _findFilesPrefab(char const * path, char const * index_file_name)
-{
-	char filepath[1024];
-	strcpy(filepath, path);
-	char * filename = filepath + strlen(path);
-
-	strcpy(filename, index_file_name);
-
-	fstream strm;
-	strm.open(filepath, ios_base::in);
-	while (!strm.eof())
-	{
-		strm.getline(filename, 512);
-		//std::cout << filename << "\n";
-		Test_TCoffeeFromFile(filepath,"", "");
-	}
-	//std::cout << "---------------" << "\n";
-	strm.close();
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-void Test_Prefab() {
-	// Windows
-#ifdef PLATFORM_WINDOWS
-	_findFilesPrefab("Z:\\Prefab4.0\\in\\", "..\\dir.txt"); 
-#else
-	// Linux
-	_findFilesPrefab("/home/takifugu/rausch/Prefab4.0/in/", "..//dir.txt"); 
-#endif
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-void _findFilesRna(char const * path, char const * index_file_name)
-{
-	char filepath[1024];
-	strcpy(filepath, path);
-	char * filename = filepath + strlen(path);
-
-	strcpy(filename, index_file_name);
-
-	fstream strm;
-	strm.open(filepath, ios_base::in);
-	while (!strm.eof())
-	{
-		strm.getline(filename, 512);
-		std::cout << filename << "\n";
-		Test_TCoffeeFromLibrary(filepath);
-	}
-	std::cout << "---------------" << "\n";
-	strm.close();
-}
 
 
-//////////////////////////////////////////////////////////////////////////////
 
-void Test_RnaLibraries() {
-	// Windows
-#ifdef PLATFORM_WINDOWS
-	_findFilesRna("Z:\\Bralibase\\libs\\k3\\stacked_lara\\", "dir.txt"); 
-	_findFilesRna("Z:\\Bralibase\\libs\\k5\\stacked_lara\\", "dir.txt"); 
-	_findFilesRna("Z:\\Bralibase\\libs\\k7\\stacked_lara\\", "dir.txt"); 
-	_findFilesRna("Z:\\Bralibase\\libs\\k10\\stacked_lara\\", "dir.txt"); 
-	_findFilesRna("Z:\\Bralibase\\libs\\k15\\stacked_lara\\", "dir.txt"); 
-	//_findFilesRna("Z:\\Bralibase\\libs\\k3\\lara\\", "dir.txt"); 
-#else
-	// Linux
-	_findFilesRna("/home/takifugu/rausch/Bralibase/libs/k3/stacked_lara/", "dir.txt"); 
-	_findFilesRna("/home/takifugu/rausch/Bralibase/libs/k5/stacked_lara/", "dir.txt"); 
-	_findFilesRna("/home/takifugu/rausch/Bralibase/libs/k7/stacked_lara/", "dir.txt"); 
-	_findFilesRna("/home/takifugu/rausch/Bralibase/libs/k10/stacked_lara/", "dir.txt"); 
-	_findFilesRna("/home/takifugu/rausch/Bralibase/libs/k15/stacked_lara/", "dir.txt"); 
-	//_findFilesRna("/home/takifugu/rausch/Bralibase/libs/k3/lara/", "dir.txt"); 
-#endif
-}
+
+
+
+
+
+
+
+
+
+
+
+
 
 //////////////////////////////////////////////////////////////////////////////
 
 
 void Test_GraphTCoffee() {
-	Test_CompressedAlphabets();
+	Test_Alphabets();
 	Test_GuideTree();
+	Test_Distances();
+	Test_Libraries();
 	
 	// Toy example
-	Test_TCoffeeGarfield();
+	//Test_TCoffeeGarfield();
 	
-	//// Balibase
-	//Test_BaliBaseRef11();
-	//Test_BaliBaseRef12();
-	//Test_BaliBaseRef20();
-	//Test_BaliBaseRef30();
-	//Test_BaliBaseRef40();
-	//Test_BaliBaseRef50();
-
 	// Prefab
 	//Test_Prefab();
 
 	// RnaLibraries
-	//Test_RnaLibraries();
 	//Test_TCoffeeFromLibrary("/home/takifugu/rausch/Bralibase/small.lib");
 	//Test_TCoffeeScratch("Z://matches//test//pox_subset.fasta");
 	//Test_TCoffeeScratch("/home/takifugu/rausch/matches/test/adeno.fasta");
 	//Test_TCoffeeScratch("Z://matches//test//adeno.fasta");
 
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_utility_alphabets.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_kmer.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_distance.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_guidetree.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_library.h");
+
 	//debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_base.h");
 	//debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_msa.h");
-	//debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_kmer.h");
-	//debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_distance.h");
-	//debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_guidetree.h");
-	//debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_library.h");
+	
 	//debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_progressive.h");
 
 	//debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_consensus_base.h");

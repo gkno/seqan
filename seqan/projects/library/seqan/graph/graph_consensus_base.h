@@ -18,8 +18,8 @@
   $Id$
  ==========================================================================*/
 
-#ifndef SEQAN_HEADER_GRAPH_ALIGN_CONSENSUS_BASE_H
-#define SEQAN_HEADER_GRAPH_ALIGN_CONSENSUS_BASE_H
+#ifndef SEQAN_HEADER_GRAPH_CONSENSUS_BASE_H
+#define SEQAN_HEADER_GRAPH_CONSENSUS_BASE_H
 
 namespace SEQAN_NAMESPACE_MAIN
 {

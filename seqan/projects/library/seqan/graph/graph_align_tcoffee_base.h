@@ -25,123 +25,6 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 //////////////////////////////////////////////////////////////////////////////
-// T-Coffee - Tags
-//////////////////////////////////////////////////////////////////////////////
-
-/**
-.Tag.Guide Tree Configurator:
-..summary:A tag to configure the guide tree construction.
-*/
-
-//////////////////////////////////////////////////////////////////////////////
-
-/**
-.Tag.Guide Tree Configurator.UpgmaMin:
-	Uses the min operation in the upgma algorithm
-*/
-
-struct UpgmaMin_;
-typedef Tag<UpgmaMin_> const UpgmaMin;
-
-//////////////////////////////////////////////////////////////////////////////
-
-/**
-.Tag.Guide Tree Configurator.UpgmaMax:
-	Uses the max operation in the upgma algorithm
-*/
-
-struct UpgmaMax_;
-typedef Tag<UpgmaMax_> const UpgmaMax;
-
-//////////////////////////////////////////////////////////////////////////////
-
-/**
-.Tag.Guide Tree Configurator.UpgmaAvg:
-	Uses the average operation in the upgma algorithm
-*/
-
-struct UpgmaAvg_;
-typedef Tag<UpgmaAvg_> const UpgmaAvg;
-
-/**
-.Tag.Distance Calculation:
-..summary:A tag to specify how to calculate distance matrices.
-*/
-
-/**
-.Tag.Distance Calculation.value.LibraryDistance:
-	Using the library itself and heaviest common subsequence to determine a distance matrix
-*/
-struct LibraryDistance_;
-typedef Tag<LibraryDistance_> const LibraryDistance;
-
-
-/**
-.Tag.Distance Calculation.value.KmerDistance:
-	Using a simple kmer count to determine a distance matrix
-*/
-struct KmerDistance_;
-typedef Tag<KmerDistance_> const KmerDistance;
-
-
-/**
-.Tag.Library Generation:
-..summary:A tag to specify how to generate a T-Coffee library.
-*/
-
-
-/**
-.Tag.Library Generation.value.GlobalPairwise_Library:
-	A primary library of global alignments.
-*/
-
-struct GlobalPairwise_Library_;
-typedef Tag<GlobalPairwise_Library_> const GlobalPairwise_Library;
-
-
-/**
-.Tag.Library Generation.value.GlobalPairwise_Library:
-	A primary library of local alignments.
-*/
-
-struct LocalPairwise_Library_;
-typedef Tag<LocalPairwise_Library_> const LocalPairwise_Library;
-
-
-/**
-.Tag.Library Generation.value.Overlap_Library:
-	A primary library of overlap alignments.
-*/
-
-struct Overlap_Library_;
-typedef Tag<Overlap_Library_> const Overlap_Library;
-
-/**
-.Tag.Library Generation.value.Kmer_Library:
-	A primary library of kmer alignments.
-*/
-
-struct Kmer_Library_;
-typedef Tag<Kmer_Library_> const Kmer_Library;
-
-
-/**
-.Tag.Library Generation.value.MUMPairwise_Library:
-	A primary library of mums.
-*/
-
-struct MUMPairwise_Library_;
-typedef Tag<MUMPairwise_Library_> const MUMPairwise_Library;
-
-/**
-.Tag.Library Generation.value.Lcs_Library:
-	A primary library generated using the longest common subsequence algorithm.
-*/
-
-struct Lcs_Library_;
-typedef Tag<Lcs_Library_> const Lcs_Library;
-
-//////////////////////////////////////////////////////////////////////////////
 // T-Coffee - Library combination
 //////////////////////////////////////////////////////////////////////////////
 
@@ -693,6 +576,80 @@ sumOfPairsScore(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	return total;
 }
 
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TVertexDescriptor, typename TSpec, typename TStringSet, typename TId, typename TPos, typename TTraceValue>
+inline void
+_align_trace_print(String<String<TVertexDescriptor, TSpec> >& nodeString,
+				   TStringSet const& str,
+				   TId const,
+				   TPos const pos1,
+				   TId const,
+				   TPos const pos2,
+				   TPos const segLen,
+				   TTraceValue const tv)
+{
+	SEQAN_CHECKPOINT
+	typedef String<TVertexDescriptor, TSpec> TVertexDescriptorString;
+	typedef typename Size<TStringSet>::Type TSize;
+	typedef typename Iterator<TVertexDescriptorString>::Type TStringIter;
+	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
+
+	// TraceBack values
+	enum {Diagonal = 0, Horizontal = 1, Vertical = 2};
+
+	if (segLen == 0) return;
+	// Number of vertex descriptors in the first string at any position (e.g., group of 5 sequences = group of 5 vertex descriptors)
+	TSize len1 = length(getValue(getValue(str,0), 0));
+	// Number of vertex descriptors in the second string at any position (e.g., group of 5 sequences = group of 5 vertex descriptors)
+	TSize len2 = length(getValue(getValue(str,1), 0));
+
+	// Resize the node string
+	TSize index = length(nodeString);
+	resize(nodeString, index + segLen);
+
+	if (tv == (Byte) Horizontal) {
+		for (int i = pos1 + segLen - 1; i>= (int) pos1;--i) {
+			fill(value(nodeString, index), len1 + len2, nilVertex);
+			TStringIter it = begin(value(nodeString, index));
+			for(TPos all = 0;all<len1;++all) {
+				*it = getValue(getValue(getValue(str,0),i), all);
+				goNext(it);
+			}
+			++index;
+		}
+	}
+	else if (tv == (Byte) Vertical) {
+		for (int i = pos2 + segLen - 1; i>= (int) pos2;--i) {
+			fill(value(nodeString, index), len1 + len2, nilVertex);
+			TStringIter it = begin(value(nodeString, index));
+			it+=len1;
+			for(TPos all = 0;all<len2;++all) {
+				*it = getValue(getValue(getValue(str,1),i), all);
+				goNext(it);
+			}
+			++index;
+		}
+	}
+	else if (tv == (Byte) Diagonal) {
+		int j = pos2 + segLen - 1;
+		for (int i = pos1 + segLen - 1; i>= (int) pos1;--i) {
+			resize(value(nodeString, index), len1 + len2);
+			TStringIter it = begin(value(nodeString, index));
+			for(TPos all = 0;all<len1;++all) {
+				*it = getValue(getValue(getValue(str,0),i), all);
+				goNext(it);
+			}
+			for(TPos all = 0;all<len2;++all) {
+				*it = getValue(getValue(getValue(str,1),j), all);
+				goNext(it);
+			}
+			++index;
+			--j;
+		}
+	}
+}
 
 
 

@@ -25,11 +25,33 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 //////////////////////////////////////////////////////////////////////////////
-// T-Coffee - Guide Tree
+// Guide Tree
 //////////////////////////////////////////////////////////////////////////////
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+// Neighbor Joining
+//////////////////////////////////////////////////////////////////////////////
+
 
 //////////////////////////////////////////////////////////////////////////////
 
+
+/**
+.Function.slowNjTree:
+..summary:Computes a guide tree from a distance matrix.
+..cat:Graph
+..signature:
+slowNjTree(mat, graph)
+..param.mat:A string of pairwise distance values, representing a square matrix.
+...type:Class.String
+...remarks: String must use double values because the algorithm recycles this string to store intermediate possibly fractional results.
+..param.graph:Out-parameter:The guide tree.
+...type:Spec.Tree
+..returns:void
+*/
 template<typename TStringSpec, typename TCargo, typename TSpec>
 inline void
 slowNjTree(String<double, TStringSpec>& mat, 
@@ -228,6 +250,52 @@ slowNjTree(String<double, TStringSpec>& mat,
 	addEdge(g, the_root, internalVertex, (TCargo) 0);
 	g.data_root = the_root;
 }
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+// Unweighted Pair Group Mean Average (UPGMA)
+//////////////////////////////////////////////////////////////////////////////
+
+
+/**
+.Tag.Upgma Configurator:
+..summary:A tag to configure the guide tree construction.
+*/
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Tag.Upgma Configurator.value.UpgmaMin:
+	Uses the min operation in the upgma algorithm
+*/
+
+struct UpgmaMin_;
+typedef Tag<UpgmaMin_> const UpgmaMin;
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Tag.Upgma Configurator.value.UpgmaMax:
+	Uses the max operation in the upgma algorithm
+*/
+
+struct UpgmaMax_;
+typedef Tag<UpgmaMax_> const UpgmaMax;
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Tag.Upgma Configurator.value.UpgmaAvg:
+	Uses the average operation in the upgma algorithm
+*/
+
+struct UpgmaAvg_;
+typedef Tag<UpgmaAvg_> const UpgmaAvg;
+
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -612,6 +680,26 @@ upgmaTree(Graph<Undirected<TValue, TSpec1> >& pairGraph,
 
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Function.upgmaTree:
+..summary:Computes a guide tree from a distance matrix.
+..cat:Graph
+..signature:
+upgmaTree(mat, graph [,tag])
+upgmaTree(sparse_mat, graph [,tag])
+..param.mat:A string of pairwise distance values, representing a square matrix.
+...type:Class.String
+...remarks: String must use double values because the algorithm recycles this string to store intermediate possibly fractional results.
+..param.sparse_mat:An undirected graph where each edge corresponds to the distance between sequence i and sequence j.
+...type:Spec.Undirected graph
+..param.graph:Out-parameter:The guide tree.
+...type:Spec.Tree
+..param.tag:Tag that indicates how to calculate cluster distances.
+...remarks:Possible values are UpgmaAvg, UpgmaMax, and UpgmaMin.
+...type:Tag.Upgma Configurator
+...default:UpgmaAvg
+..returns:void
+*/
 template<typename TDistance, typename TCargo, typename TSpec>
 inline void
 upgmaTree(TDistance& dist, 

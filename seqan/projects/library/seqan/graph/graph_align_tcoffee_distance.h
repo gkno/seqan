@@ -25,9 +25,38 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 //////////////////////////////////////////////////////////////////////////////
-// T-Coffee - Distance matrix calculation
+// Distance matrix calculation
 //////////////////////////////////////////////////////////////////////////////
 
+
+/**
+.Tag.Distance Calculation:
+..summary:A tag to specify how to calculate distance matrices.
+*/
+
+/**
+.Tag.Distance Calculation.value.LibraryDistance:
+	Using the library itself and heaviest common subsequence to determine a distance matrix
+*/
+struct LibraryDistance_;
+typedef Tag<LibraryDistance_> const LibraryDistance;
+
+
+/**
+.Tag.Distance Calculation.value.KmerDistance:
+	Using a simple kmer count to determine a distance matrix
+*/
+struct KmerDistance_;
+typedef Tag<KmerDistance_> const KmerDistance;
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+// LibraryDistance
+//////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -87,7 +116,13 @@ getDistanceMatrix(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	}
 }
 
+
 //////////////////////////////////////////////////////////////////////////////
+// KmerDistance
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+
 
 template<typename TStringSet, typename TCargo, typename TSpec, typename TMatrix, typename TSize, typename TAlphabet>
 inline void 
@@ -145,93 +180,38 @@ getDistanceMatrix(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 
 
 //////////////////////////////////////////////////////////////////////////////
-// T-Coffee - Determining alignment statistics
-//////////////////////////////////////////////////////////////////////////////
 
 
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TFragment, typename TSpec1, typename TStringSet, typename TPos, typename TSize1, typename TAlphabet>
+/**
+.Function.getDistanceMatrix:
+..summary:Computes a pairwise distance matrix from an alignment graph.
+..cat:Graph
+..signature:
+getDistanceMatrix(graph, mat [, tag])
+getDistanceMatrix(graph, mat [, ktup] [, alphabet], KmerDistance)
+..param.graph:An alignment graph containing the sequences and possible alignment edges.
+...type:Spec.Alignment Graph
+..param.mat:Out-parameter:Pairwise distance matrix.
+...type:Class.String
+..param.ktup:Length of k-mers.
+...remarks:For KmerDistance the length of the k-mers.
+..param.alphabet:Alphabet
+...remarks:For KmerDistance the alphabet to use for k-mer counting (e.g., compressed alphabets).
+..param.tag:Distance tag
+...type:Tag.Distance Calculation
+...remarks:Possible values are LibraryDistance or KmerDistance.
+...default:KmerDistance
+..returns:void
+*/
+template<typename TStringSet, typename TCargo, typename TSpec, typename TMatrix>
 inline void 
-getAlignmentStatistics(String<TFragment, TSpec1> const& matches,
-					   TStringSet& str,
-					   TPos const from,
-					   TPos const to,
-					   TSize1& matchLength,	// Number of identical characters
-					   TSize1& overlapLength,	// Number of character in overlapping segments (with mismatches and gaps)
-					   TSize1& alignLength,	// Length of the alignment
-					   TAlphabet)
+getDistanceMatrix(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+				  TMatrix& distanceMatrix)
 {
 	SEQAN_CHECKPOINT
-	typedef String<TFragment, TSpec1> TFragmentMatches;
-	typedef typename Size<TFragmentMatches>::Type TSize;
-	typedef typename Id<TFragmentMatches>::Type TId;
-	typedef typename Value<TStringSet>::Type TString;
-	typedef typename Infix<TString>::Type TInfix;
-
-	matchLength = 0;
-	TSize len1 = length(str[0]);
-	TSize len2 = length(str[1]);
-
-	typedef typename Iterator<TInfix, Rooted>::Type TInfixIter;
-	TSize minId1 = len1 + len2;
-	TSize minId2 = len1 + len2;
-	TSize maxId1 = 0;
-	TSize maxId2 = 0;
-	TSize matchMismatch_length = 0;
-
-	for(TSize i = from;i<to;++i) {
-		TId id1 = sequenceId(matches[i], 0);
-		TId id2 = sequenceId(matches[i], 1);
-		if (fragmentBegin(matches[i], id1) < minId1) minId1 = fragmentBegin(matches[i], id1);
-		if (fragmentBegin(matches[i], id2) < minId2) minId2 = fragmentBegin(matches[i], id2);
-		if (fragmentBegin(matches[i], id1) + fragmentLength(matches[i], id1) > maxId1) maxId1 = fragmentBegin(matches[i], id1) + fragmentLength(matches[i], id1);
-		if (fragmentBegin(matches[i], id2) + fragmentLength(matches[i], id2) > maxId2) maxId2 = fragmentBegin(matches[i], id2) + fragmentLength(matches[i], id2);
-		TInfix inf1 = label(matches[i], str, id1);
-		TInfix inf2 = label(matches[i], str, id2);
-		TInfixIter sIt1 = begin(inf1);
-		TInfixIter sIt2 = begin(inf2);
-		while((!atEnd(sIt1)) || (!atEnd(sIt2))) {
-			if ( (TAlphabet) *sIt1  == (TAlphabet) *sIt2) {
-				++matchLength;
-			}
-			goNext(sIt1); goNext(sIt2);
-			++matchMismatch_length;
-		}
-	}
-	alignLength = matchMismatch_length + (len1 - matchMismatch_length) + (len2 - matchMismatch_length);
-	overlapLength = alignLength -  minId1 - minId2 - (len1 + len2 - maxId1 - maxId2);
+	getDistanceMatrix(g, distanceMatrix, KmerDistance() );
 }
 
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TFragment, typename TSpec1, typename TStringSet, typename TPos, typename TSize>
-inline void 
-getAlignmentStatistics(String<TFragment, TSpec1>& matches,
-					   TStringSet& str,
-					   TPos from,
-					   TPos to,
-					   TSize& matchLength,
-					   TSize& overlapLength,
-					   TSize& alignLength)
-{
-	SEQAN_CHECKPOINT
-	getAlignmentStatistics(matches, str, from, to, matchLength, overlapLength, alignLength, typename Value<typename Value<TStringSet>::Type>::Type() );
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TFragment, typename TSpec1, typename TStringSet, typename TSize>
-inline void 
-getAlignmentStatistics(String<TFragment, TSpec1>& matches,
-					   TStringSet& str,
-					   TSize& matchLength,
-					   TSize& overlapLength,
-					   TSize& alignLength)
-{
-	SEQAN_CHECKPOINT
-	getAlignmentStatistics(matches, str, (TSize) 0, (TSize) length(matches), matchLength, overlapLength, alignLength, typename Value<TStringSet>::Type() );
-}
 
 
 }// namespace SEQAN_NAMESPACE_MAIN

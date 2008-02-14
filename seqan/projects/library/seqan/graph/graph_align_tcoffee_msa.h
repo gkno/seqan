@@ -269,14 +269,17 @@ tCoffeeLongDnaAlignment(StringSet<TString, Dependent<> >& strSet,
 
 	TGraph g(strSet);
 	TGraph lib1(strSet);
-	std::fstream strm_lib;
-	strm_lib.open(toCString(libFile), std::ios_base::in | std::ios_base::binary);
-	read(strm_lib, lib1, names, BlastLib());	// Read library
-	strm_lib.close();
+	if (length(libFile)) {
+		std::fstream strm_lib;
+		strm_lib.open(toCString(libFile), std::ios_base::in | std::ios_base::binary);
+		read(strm_lib, lib1, names, BlastLib());	// Read library
+		strm_lib.close();
+	}
 
 	// Generate a primary library, i.e., all local pairwise alignments
 	TGraph lib2(strSet);
-	generatePrimaryLibrary(lib2, Lcs_Library() );
+	Score<int> score_type = Score<int>(5,-4,-4,-14);
+	generatePrimaryLibrary(lib2, score_type, Lcs_Library() );
 	
 	
 	//String<Pair<TId, TId> > pList;
@@ -288,7 +291,7 @@ tCoffeeLongDnaAlignment(StringSet<TString, Dependent<> >& strSet,
 
 	// Weighting of libraries (Signal addition)
 	String<TGraph*> libs;
-	appendValue(libs, &lib1);
+	if (!empty(lib1)) appendValue(libs, &lib1);
 	appendValue(libs, &lib2);
 	combineGraphs(g, true, libs);
 

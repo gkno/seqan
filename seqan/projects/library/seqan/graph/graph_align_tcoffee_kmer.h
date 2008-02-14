@@ -25,7 +25,7 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 //////////////////////////////////////////////////////////////////////////////
-// T-Coffee - Simple k-mer counter
+// Simple k-mer counter
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -67,42 +67,6 @@ _getTupelString(TString const& str,
 		tupelString[tupelIndex] *= alphabet_size;
 		tupelString[tupelIndex] += (TWord) ((Byte) ((TAlphabet) str[endTupel]));
 		++tupelIndex;
-	}
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TString, typename TTupelString, typename TKTup, typename TAlphabet>
-inline void
-_getNonOverlappingTupelString(TString const& str, 
-							  TTupelString& tupelString,
-							  TKTup const ktup, 
-							  TAlphabet) 
-{
-	SEQAN_CHECKPOINT
-	typedef typename Value<typename Value<TTupelString>::Type>::Type TWord;
-	
-	// Alphabet size
-	TWord alphabet_size = ValueSize<TAlphabet>::VALUE;
-
-	// Assign a unique number to each k-tupel
-	String<TWord> prod;  // Scaling according to position in k-tupel
-	resize(prod,ktup);
-	for (TWord i=0; i< (TWord) ktup;++i) {
-		prod[ktup-i-1] = 1;
-		for(TWord j=0;j<i;++j) prod[ktup-i-1] *= alphabet_size;
-	}
-	TWord len = length(str);
-	clear(tupelString);
-	TWord lenOfTup = (TWord) std::floor((double) len / (double) ktup);
-	fill(tupelString, lenOfTup, 0, Exact()); 
-	TWord tupelIndex = 0;
-	TWord endTupel = 0;
-	tupelString[tupelIndex] = 0;
-	while (tupelIndex < lenOfTup) {
-		tupelString[tupelIndex] += (TWord) ( (Byte) ( (TAlphabet) str[endTupel] ) ) * prod[endTupel % 3];
-		++endTupel;
-		if (endTupel % 3 == 0) ++tupelIndex;
 	}
 }
 

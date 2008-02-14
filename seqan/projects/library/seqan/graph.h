@@ -28,7 +28,7 @@
 #include <seqan/align/matrix_base.h>
 #include <seqan/misc/misc_random.h>
 #include <seqan/score.h>
-#include <seqan/align.h>
+//#include <seqan/align.h>
 
 // External / STL
 #include <deque>
@@ -109,7 +109,8 @@
 #include <seqan/graph/graph_align_tcoffee_progressive.h>
 
 // Consensus tool
-#include <seqan/graph/graph_align_consensus_base.h>
+#include <seqan/graph/graph_consensus_base.h>
+#include <seqan/graph/graph_consensus_library.h>
 
 // Folding
 #include <seqan/graph/graph_fold_nussinov.h>
