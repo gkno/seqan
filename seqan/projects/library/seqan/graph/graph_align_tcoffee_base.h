@@ -25,16 +25,47 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 //////////////////////////////////////////////////////////////////////////////
-// T-Coffee - Library combination
+// Tags
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TStringSet, typename TCargo, typename TSpec, typename TLibraries> 
+/**
+.Tag.Alignment Graph Combination:
+..summary:A tag to specify how to combine alignment graphs.
+*/
+
+/**
+.Tag.Alignment Graph Combination.value.FractionalScore:
+	Rescores matches with the appropriate fractional score.
+*/
+struct FractionalScore_;
+typedef Tag<FractionalScore_> const FractionalScore;
+
+
+/**
+.Tag.Alignment Graph Combination.value.FrequencyCount:
+	Rescores matches with the frequency count for this edge.
+*/
+struct FrequencyCounting_;
+typedef Tag<FrequencyCounting_> const FrequencyCounting;
+
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+// Merging of alignment graphs
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec, typename TWeights, typename TLibraries> 
 inline void
 combineGraphs(Graph<Alignment<TStringSet, TCargo, TSpec> >& outGraph,
-			  bool onlyTopology,
-			  TLibraries& libs)
+			  TLibraries& libs,
+			  TWeights& weights,
+			  FractionalScore)
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
@@ -84,80 +115,151 @@ combineGraphs(Graph<Alignment<TStringSet, TCargo, TSpec> >& outGraph,
 	// Match refinement
 	TStringSet& str = stringSet(outGraph);	
 	matchRefinement(matches,str,outGraph);  // Don't score matches!
-	//// Debug code
-	//TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
-	//for(TSize i = 0; i<length(str);++i) {
-	//	TId seqId = positionToId(str, i);
-	//	TSize j = 0;
-	//	TSize len = length(str[i]);
-	//	while(j<len) {
-	//		TVertexDescriptor nextVertex = findVertex(outGraph, seqId, j);
-	//		if (nextVertex == nilVertex) {
-	//			std::cout << j << std::endl;
-	//			std::cout << findVertex(outGraph, seqId, len - 1) << std::endl;
-	//			std::cout << "Nil Vertex!!" << std::endl;
-	//			exit(0);
-	//		}
-	//		j += fragmentLength(outGraph, nextVertex);
-	//	}
-	//}
 
-	if (!onlyTopology) {
-		// Adapt edge weights (fractional weights are used)
-		count = 0;
-		TSize currentLib = 0;
-		double upperBound = 100;
-		double scaling = upperBound / (double) getValue(max_scores, currentLib);
-		TSize nextLibCounter = length(matches);
-		if (currentLib < numLibs - 1) nextLibCounter = (TSize) getValue(index_start, currentLib+1);
-		TFragmentStringIter endIt = end(matches);
-		for(TFragmentStringIter it = begin(matches); it != endIt; ++it) {
-			if (count >= nextLibCounter) {
-				++currentLib;
-				scaling = upperBound / (double) getValue(max_scores, currentLib);
-				if (currentLib < numLibs - 1) nextLibCounter = (TSize) getValue(index_start, currentLib+1);
-				else nextLibCounter = length(matches);
-			}
-			TId id1 = sequenceId(*it,0);
-			TId id2 = sequenceId(*it,1);
-			TSize pos1 = fragmentBegin(*it, id1);
-			TSize pos2 = fragmentBegin(*it, id2);
-			TSize end1 = pos1 + fragmentLength(*it, id1);
-			while(pos1 < end1) {
-				TVertexDescriptor p1 = findVertex(outGraph, id1, pos1);
-				TVertexDescriptor p2 = findVertex(outGraph, id2, pos2);
-				TEdgeDescriptor e = findEdge(outGraph, p1, p2);
-				TSize fragLen = fragmentLength(outGraph, p1); 
-				double newVal = (double) fragLen / (double) (end1 - pos1);
-				newVal *= scaling;
-				newVal *= (double) getValue(score_values, position(it));
-				SEQAN_TASSERT(e != 0)  // Refined graph should have all edges (with weight 1)
-				cargo(e) += (TCargo) newVal;
-				pos1 += fragLen;
-				pos2 += fragLen;
-			}
-			++count;
+	// Adapt edge weights (fractional weights are used)
+	count = 0;
+	TSize currentLib = 0;
+	double upperBound = 1000 * value(weights, currentLib);
+	double scaling = upperBound / (double) getValue(max_scores, currentLib);
+	TSize nextLibCounter = length(matches);
+	if (currentLib < numLibs - 1) nextLibCounter = (TSize) getValue(index_start, currentLib+1);
+	TFragmentStringIter endIt = end(matches);
+	for(TFragmentStringIter it = begin(matches); it != endIt; ++it) {
+		if (count >= nextLibCounter) {
+			++currentLib;
+			upperBound = 1000 * value(weights, currentLib);
+			scaling = upperBound / (double) getValue(max_scores, currentLib);
+			if (currentLib < numLibs - 1) nextLibCounter = (TSize) getValue(index_start, currentLib+1);
+			else nextLibCounter = length(matches);
 		}
+		TId id1 = sequenceId(*it,0);
+		TId id2 = sequenceId(*it,1);
+		TSize pos1 = fragmentBegin(*it, id1);
+		TSize pos2 = fragmentBegin(*it, id2);
+		TSize end1 = pos1 + fragmentLength(*it, id1);
+		TSize oldFragLen = (end1 - pos1);
+		while(pos1 < end1) {
+			TVertexDescriptor p1 = findVertex(outGraph, id1, pos1);
+			TVertexDescriptor p2 = findVertex(outGraph, id2, pos2);
+			TEdgeDescriptor e = findEdge(outGraph, p1, p2);
+			TSize fragLen = fragmentLength(outGraph, p1); 
+			double newVal = (double) (fragLen) / (double) (oldFragLen);
+			newVal *= scaling;
+			newVal *= (double) getValue(score_values, position(it));
+			SEQAN_TASSERT(e != 0)  // Refined graph should have all edges (with weight 1)
+			cargo(e) += (TCargo) newVal;
+			pos1 += fragLen;
+			pos2 += fragLen;
+		}
+		++count;
 	}
 }
+
 
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TStringSet, typename TCargo, typename TSpec, typename TLibraries> 
 inline void
 combineGraphs(Graph<Alignment<TStringSet, TCargo, TSpec> >& outGraph,
+			  TLibraries& libs,
+			  FrequencyCounting)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef typename Id<TGraph>::Type TId;
+	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
+	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
+	
+	// Clear out-library
+	clearVertices(outGraph);
+	TSize numLibs = length(libs);	// Number of libraries
+
+	// All the matches
+	typedef Fragment<> TFragment;
+	typedef String<TFragment, Block<> > TFragmentString;
+	typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
+	TFragmentString matches;
+
+	// Index start position for every library
+	String<TCargo> index_start;
+	resize(index_start, numLibs);
+
+	// Get all matches
+	TSize count = 0;
+	for(TSize i = 0; i<numLibs; ++i) {
+		assignValue(index_start, i, count);
+		TGraph const& lib = *(getValue(libs, i));
+		TEdgeIterator it(lib);
+		for(;!atEnd(it);++it) {
+			TVertexDescriptor sV = sourceVertex(it);
+			TVertexDescriptor tV = targetVertex(it);
+			push_back(matches, TFragment( (unsigned int) sequenceId(lib, sV), (unsigned int) fragmentBegin(lib,sV), (unsigned int) sequenceId(lib, tV),  (unsigned int)  fragmentBegin(lib,tV),  (unsigned int)  fragmentLength(lib,tV)));
+			++count;
+		}
+	}
+
+	// Match refinement
+	TStringSet& str = stringSet(outGraph);	
+	matchRefinement(matches,str,outGraph);  // Don't score matches, just count the number of occurrences
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec, typename TLibraries> 
+inline void
+combineGraphs(Graph<Alignment<TStringSet, TCargo, TSpec> >& outGraph,
+			  TLibraries& libs,
+			  FractionalScore)
+{
+	SEQAN_CHECKPOINT
+	String<unsigned int> weights;
+	fill(weights, length(libs), 1);
+	combineGraphs(outGraph, libs, weights, FractionalScore() );
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+
+/**
+.Function.combineGraphs:
+..summary:Combines multiple alignment graphs into one single graph.
+..cat:Graph
+..signature:
+combineGraphs(graph, libs [, weights], tag)
+..param.graph:Out-parameter:The final alignment graph.
+...type:Spec.Alignment Graph
+..param.libs:String of pointers to alignment graph data structures.
+..param.weights:String of weights.
+...remarks:Needs to have the same length as the libs string.
+..param.tag:Combination strategy.
+...type:Tag.Alignment Graph Combination
+..returns:void
+*/
+template<typename TStringSet, typename TCargo, typename TSpec, typename TLibraries> 
+inline void
+combineGraphs(Graph<Alignment<TStringSet, TCargo, TSpec> >& outGraph,
 			  TLibraries& libs)
 {
 	SEQAN_CHECKPOINT
-	combineGraphs(outGraph, false, libs);
+	combineGraphs(outGraph, libs, FractionalScore() );
 }
 
 
 
 
 
+
+
+
+
+
+
 //////////////////////////////////////////////////////////////////////////////
-// T-Coffee - Triplet extension
+// Consistency: Triplet extension
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -381,6 +483,21 @@ _addNewEdgesFoundByTriplet(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 
 //////////////////////////////////////////////////////////////////////////////
 
+
+/**
+.Function.tripletLibraryExtension:
+..summary:Performs the consistency extension proposed in T-Coffee.
+..cat:Graph
+..signature:
+tripletLibraryExtension(graph, [,set1] [,set2])
+..param.graph:An alignment graph.
+...type:Spec.Alignment Graph
+..param.set1:A STL set of sequences.
+...remarks:If only one set is given the triplet extension is limited to this set of sequences. Edges to other sequences remain unchanged.
+..param.set2:A STL set of sequences.
+...remarks:If a second set is given, the triplet extension is performed only on edges that have one vertex in set1 and the other one in set2.
+..returns:void
+*/
 template<typename TStringSet, typename TCargo, typename TSpec>
 inline void 
 tripletLibraryExtension(Graph<Alignment<TStringSet, TCargo, TSpec> >& g)
@@ -459,198 +576,120 @@ tripletLibraryExtension(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 
 
 
-
-
 //////////////////////////////////////////////////////////////////////////////
-// T-Coffee - Sum of Pairs Scoring
+// Sum of Pairs Scoring
 //////////////////////////////////////////////////////////////////////////////
 
 
 //////////////////////////////////////////////////////////////////////////////
+// This version is sensitive to gap openings
 
+/**
+.Function.sumOfPairsScore:
+..summary:Given a multiple alignment, this function calculates the sum-of-pairs score.
+..cat:Graph
+..signature:
+sumOfPairsScore(graph, score_type)
+..param.graph:An alignment graph.
+...type:Spec.Alignment Graph
+..param.score_type:A STL set of sequences.
+...type:Class.Score
+..remarks:This function does NOT assume independent columns. 
+That is, gap openings are properly scored. 
+If you want the fast version assuming independ columns use sumOfPairsScoreInd.
+..returns:void
+*/
 template<typename TStringSet, typename TCargo, typename TSpec, typename TScore> 
 inline typename Value<TScore>::Type
 sumOfPairsScore(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 				TScore const& score_type)
 {
 	SEQAN_CHECKPOINT
-	SEQAN_TASSERT(convertAlignment(g, String<char>()) == true)
-
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename Size<TGraph>::Type TSize;
 	typedef typename Value<TScore>::Type TScoreValue;
-	typedef typename Value<TStringSet>::Type TString;
-	typedef typename Infix<TString>::Type TInfix;
+
+	// Convert the graph
+	String<char> mat;
+	convertAlignment(g, mat);
+	char gapChar = gapValue<char>();
 
 	TScoreValue gap = scoreGapExtend(score_type);
 	TScoreValue gapOpen = scoreGapOpen(score_type);
 	TSize nseq = length(stringSet(g));
-	TScoreValue total = 0;
-	TScoreValue mismatch = 0;
-		
-	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
-	TVertexIterator it(g);
-	for(;!atEnd(it);++it) {
-		typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
-		TOutEdgeIterator itEdge(g, *it);
-		TSize count = 0;
-		for(;!atEnd(itEdge);++itEdge) {
-			typedef typename Iterator<TInfix, Rooted>::Type TInfixIter;
-			TInfix inf1 = label(g,sourceVertex(itEdge));
-			TInfix inf2 = label(g,targetVertex(itEdge));
-			TInfixIter sIt1 = begin(inf1);
-			TInfixIter sIt2 = begin(inf2);
-			while((!atEnd(sIt1)) || (!atEnd(sIt2))) {
-				mismatch += score(const_cast<TScore&>(score_type), *sIt1, *sIt2);
-				goNext(sIt1); goNext(sIt2);
+	TSize len = length(mat) / nseq;
+	
+	bool gapOpeni = false;
+	bool gapOpenj = false;
+	TScoreValue totalScore = 0;
+	for(TSize i = 0; i<nseq-1; ++i) {
+		for(TSize j=i+1; j<nseq; ++j) {
+			for(TSize k=0;k<len; ++k) {
+				if (value(mat, i*len+k) != gapChar) {
+					if (value(mat, j*len + k) != gapChar) {
+						gapOpeni = false;
+						gapOpenj = false;
+						totalScore += score(const_cast<TScore&>(score_type), value(mat, i*len+k), value(mat, j*len + k));
+					} else {
+						if (gapOpenj) {
+							totalScore += gap;
+						} else {
+							gapOpenj = true;
+							totalScore += gapOpen;
+						}
+					}
+				} else if (value(mat, j*len + k) != gapChar) {
+						if (gapOpeni) {
+							totalScore += gap;
+						} else {
+							gapOpeni = true;
+							totalScore += gapOpen;
+						}
+				}
 			}
-			++count;
 		}
-		// How many sequences are left? --> Aligned with gaps
-		total += (( (TScoreValue) (nseq - count - 1) ) * (gapOpen + ( (TScoreValue) fragmentLength(g, *it) - 1) * gap));
 	}
-	return total + (TScoreValue) ((double) 0.5 * (double) mismatch);
+	return totalScore;
 }
 
+
 //////////////////////////////////////////////////////////////////////////////
-
-
-template<typename TStringSet, typename TCargo, typename TSpec, typename TSegmentString, typename TScore> 
+// This version is insensitive to gap openings, assumes independent columns
+template<typename TStringSet, typename TCargo, typename TSpec, typename TScore> 
 inline typename Value<TScore>::Type
-sumOfPairsScore(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
-				TSegmentString const& alignSeq,
-				TScore const& score_type)
+sumOfPairsScoreInd(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
+				   TScore const& score_type)
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename Size<TGraph>::Type TSize;
-	typedef typename Id<TGraph>::Type TId;
-	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename Value<TScore>::Type TScoreValue;
-	typedef typename Value<TStringSet>::Type TString;
-	typedef typename Infix<TString>::Type TInfix;
 
-	// Initialization
+	// Convert the graph
+	String<char> mat;
+	convertAlignment(g, mat);
+	char gapChar = gapValue<char>();
+
 	TScoreValue gap = scoreGapExtend(score_type);
-	TScoreValue gapOpen = scoreGapOpen(score_type);
-	TScoreValue total = 0;
-
-	// Sum of pair scores
-	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
-	TSize alignSeqLen = length(alignSeq);
-	for(TSize i = 0; i<alignSeqLen;++i) {
-		TSize count = 0;
-		TSize vertexSetLen = length(alignSeq[i]);
-		TSize fragLen = 0;
-		for(TSize j=0; j<vertexSetLen;++j) {
-			TVertexDescriptor v1 = getValue(alignSeq[i], j);
-			if ((fragLen == 0) && (v1 != nilVertex)) fragLen = fragmentLength(g, v1);
-			for(TSize k=j+1; k<vertexSetLen;++k) {
-				TVertexDescriptor v2 = getValue(alignSeq[i], k);
-				if ((v1 == nilVertex) ||
-					(v2 == nilVertex))
-				{
-					// Count number of pairs where one vertex is a nil vertex
-					// If both are nil this pair would be removed in a pairwise alignment, so don't count
-					if (!((v1 == nilVertex) &&
-						(v2 == nilVertex))) ++count;
-					continue;
-				}
-				typedef typename Iterator<TInfix,Standard>::Type TInfixIter;
-				TInfix inf1 = label(g,v1);
-				TInfix inf2 = label(g,v2);
-				TInfixIter sIt1 = begin(inf1,Standard());
-				TInfixIter sIt2 = begin(inf2,Standard());
-				TInfixIter sItEnd1 = end(inf1,Standard());
-				TInfixIter sItEnd2 = end(inf2,Standard());
-				while((sIt1!=sItEnd1) || (sIt2!=sItEnd2)) {
-					total += score(const_cast<TScore&>(score_type), *sIt1, *sIt2);
-					goNext(sIt1); goNext(sIt2);
+	TSize nseq = length(stringSet(g));
+	TSize len = length(mat) / nseq;
+	
+	TScoreValue totalScore = 0;
+	for(TSize k=0;k<len; ++k) {
+		for(TSize i = 0; i<nseq-1; ++i) {
+			for(TSize j=i+1; j<nseq; ++j) {
+				if (value(mat, i*len+k) != gapChar) {
+					if (value(mat, j*len + k) != gapChar) {
+						totalScore += score(const_cast<TScore&>(score_type), value(mat, i*len+k), value(mat, j*len + k));
+					} else totalScore += gap;
+				} else if (value(mat, j*len + k) != gapChar) {
+						totalScore += gap;
 				}
 			}
 		}
-		SEQAN_TASSERT(fragLen > 0)
-		// How many sequences are left? --> Aligned with gaps
-		total += (( (TScoreValue) (count) ) * (gapOpen + ( (TScoreValue) fragLen - 1) * gap));
 	}
-	return total;
+	return totalScore;
 }
-
-
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename TVertexDescriptor, typename TSpec, typename TStringSet, typename TId, typename TPos, typename TTraceValue>
-inline void
-_align_trace_print(String<String<TVertexDescriptor, TSpec> >& nodeString,
-				   TStringSet const& str,
-				   TId const,
-				   TPos const pos1,
-				   TId const,
-				   TPos const pos2,
-				   TPos const segLen,
-				   TTraceValue const tv)
-{
-	SEQAN_CHECKPOINT
-	typedef String<TVertexDescriptor, TSpec> TVertexDescriptorString;
-	typedef typename Size<TStringSet>::Type TSize;
-	typedef typename Iterator<TVertexDescriptorString>::Type TStringIter;
-	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
-
-	// TraceBack values
-	enum {Diagonal = 0, Horizontal = 1, Vertical = 2};
-
-	if (segLen == 0) return;
-	// Number of vertex descriptors in the first string at any position (e.g., group of 5 sequences = group of 5 vertex descriptors)
-	TSize len1 = length(getValue(getValue(str,0), 0));
-	// Number of vertex descriptors in the second string at any position (e.g., group of 5 sequences = group of 5 vertex descriptors)
-	TSize len2 = length(getValue(getValue(str,1), 0));
-
-	// Resize the node string
-	TSize index = length(nodeString);
-	resize(nodeString, index + segLen);
-
-	if (tv == (Byte) Horizontal) {
-		for (int i = pos1 + segLen - 1; i>= (int) pos1;--i) {
-			fill(value(nodeString, index), len1 + len2, nilVertex);
-			TStringIter it = begin(value(nodeString, index));
-			for(TPos all = 0;all<len1;++all) {
-				*it = getValue(getValue(getValue(str,0),i), all);
-				goNext(it);
-			}
-			++index;
-		}
-	}
-	else if (tv == (Byte) Vertical) {
-		for (int i = pos2 + segLen - 1; i>= (int) pos2;--i) {
-			fill(value(nodeString, index), len1 + len2, nilVertex);
-			TStringIter it = begin(value(nodeString, index));
-			it+=len1;
-			for(TPos all = 0;all<len2;++all) {
-				*it = getValue(getValue(getValue(str,1),i), all);
-				goNext(it);
-			}
-			++index;
-		}
-	}
-	else if (tv == (Byte) Diagonal) {
-		int j = pos2 + segLen - 1;
-		for (int i = pos1 + segLen - 1; i>= (int) pos1;--i) {
-			resize(value(nodeString, index), len1 + len2);
-			TStringIter it = begin(value(nodeString, index));
-			for(TPos all = 0;all<len1;++all) {
-				*it = getValue(getValue(getValue(str,0),i), all);
-				goNext(it);
-			}
-			for(TPos all = 0;all<len2;++all) {
-				*it = getValue(getValue(getValue(str,1),j), all);
-				goNext(it);
-			}
-			++index;
-			--j;
-		}
-	}
-}
-
 
 
 }// namespace SEQAN_NAMESPACE_MAIN

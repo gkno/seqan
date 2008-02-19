@@ -98,6 +98,20 @@ selectPairsForLibraryGeneration(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 
 //////////////////////////////////////////////////////////////////////////////
 
+template<typename TFragment, typename TSpec1, typename TStringSet, typename TSize>
+inline void 
+getAlignmentStatistics(String<TFragment, TSpec1>& matches,
+					   TStringSet& str,
+					   TSize& matchLength,
+					   TSize& overlapLength,
+					   TSize& alignLength)
+{
+	SEQAN_CHECKPOINT
+	getAlignmentStatistics(matches, str, (TSize) 0, (TSize) length(matches), matchLength, overlapLength, alignLength, typename Value<TStringSet>::Type() );
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 template<typename TSize>
 inline void 
 __getAlignmentStatistics(Nothing&,

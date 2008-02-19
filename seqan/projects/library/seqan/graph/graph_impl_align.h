@@ -77,21 +77,20 @@ Note: If edges do not store ids external property maps do not work.
 ...default:$Default$, see @Tag.Default@.
 ..include:graph.h
 */
-template<typename TStringSet, typename TCargo, typename TSpec>
-class Graph<Alignment<TStringSet, TCargo, TSpec> > 
+template<typename TString, typename TSpecial, typename TCargo, typename TSpec>
+class Graph<Alignment<StringSet<TString, Dependent<TSpecial> >, TCargo, TSpec> > 
 {
 	public:
 		typedef typename Id<Graph>::Type TIdType;
 		typedef typename VertexDescriptor<Graph>::Type TVertexDescriptor;
 		typedef typename Size<Graph>::Type TSize;
-		typedef typename Size<TStringSet>::Type TStringSetSize;
 		typedef std::map<std::pair<TIdType, TIdType>, TVertexDescriptor> TPosToVertexMap;
 
 		// Alignment graph
 		Graph<Undirected<TCargo, TSpec> > data_align;
 
 		// Sequences
-		Holder<TStringSet> data_sequence;
+		Holder<StringSet<TString, Dependent<TSpecial> > > data_sequence;
 		
 		// Alignment specific members
 		String<FragmentInfo<TIdType, TSize> > data_fragment;
@@ -104,14 +103,28 @@ class Graph<Alignment<TStringSet, TCargo, TSpec> >
 		}
 
 
-		Graph(TStringSet sSet) {
+		template <typename TDefault>
+		Graph(StringSet<TString, Dependent<TDefault> > const& sSet) {
 			SEQAN_CHECKPOINT
 			data_sequence = sSet;
 
 			// Cover all sequences with nil vertices
 			TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
-			for(TStringSetSize k=0; k<length(sSet);++k) {
+			for(TSize k=0; k<length(sSet);++k) {
 				data_pvMap.insert(std::make_pair(std::make_pair(positionToId(sSet,k), length(sSet[k])), nilVertex));
+			}
+		}
+
+		template <typename TDefault>
+		Graph(StringSet<TString, Owner<TDefault> > const& sSet) {
+			SEQAN_CHECKPOINT
+			StringSet<TString, Dependent<> > depStr(sSet);
+			data_sequence = depStr;
+
+			// Cover all sequences with nil vertices
+			TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
+			for(TSize k=0; k<length(sSet);++k) {
+				data_pvMap.insert(std::make_pair(std::make_pair(positionToId(const_cast<StringSet<TString, Owner<TDefault> >&>(sSet),k), length(sSet[k])), nilVertex));
 			}
 		}
 
@@ -1030,21 +1043,33 @@ write(TFile & file,
 ..see:Function.getStringSet
 ..see:Function.stringSet
 */
-template<typename TStringSet, typename TCargo, typename TSpec, typename TStringSet2>
+template<typename TString, typename TDefault, typename TCargo, typename TSpec, typename TDefault2>
 inline void
-assignStringSet(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-				TStringSet2& sStr)
+assignStringSet(Graph<Alignment<StringSet<TString, Dependent<TDefault> >, TCargo, TSpec> >& g,
+				StringSet<TString, Dependent<TDefault2> >& sStr)
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef Graph<Alignment<StringSet<TString, Dependent<TDefault> >, TCargo, TSpec> > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 
 	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
 	clear(g);
-	g.data_sequence = (TStringSet) sStr;
+	g.data_sequence = (StringSet<TString, Dependent<TDefault> >) sStr;
 	for(unsigned k=0; k<length(sStr);++k) {
 		g.data_pvMap.insert(std::make_pair(std::make_pair(positionToId(sStr,k), length(sStr[k])), nilVertex));
 	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TString, typename TDefault, typename TCargo, typename TSpec, typename TDefault2>
+inline void
+assignStringSet(Graph<Alignment<StringSet<TString, Dependent<TDefault> >, TCargo, TSpec> >& g,
+				StringSet<TString, Owner<TDefault2> >& sStr)
+{
+	SEQAN_CHECKPOINT
+	StringSet<TString, Dependent<> > depStr(sStr);
+	assignStringSet(g, depStr);
 }
 
 

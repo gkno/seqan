@@ -30,10 +30,10 @@
 #include "test_graph_algorithms.h"
 #include "test_graph_alignment.h"
 #include "test_graph_tcoffee.h"
-#include "test_graph_consensus.h"
+//#include "test_graph_consensus.h"
 //#include "test_graph_match_refinement.h"
 //#include "test_graph_interval_tree.h"
-//#include "test_graph_folding.h"
+#include "test_graph_folding.h"
 
 using namespace std;
 using namespace seqan;
@@ -53,11 +53,10 @@ int main()
 	Test_GraphAlgorithms();		// Test Graph Algorithms
 	Test_GraphAlignment();		// Test Graph Alignment
 	Test_GraphTCoffee();		// Test T-Coffee
-	Test_GraphConsensus();		// Test Graph Consensus
+	//Test_GraphConsensus();		// Test Graph Consensus
 	//Test_GraphMatchRefinement();// Test Match Refinement
 	//Test_GraphIntervalTree();	// Test Interval Tree
-	//Test_GraphFolding();		// Test Folding
-
+	Test_GraphFolding();		// Test Folding
 
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_interface.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_drawing.h");

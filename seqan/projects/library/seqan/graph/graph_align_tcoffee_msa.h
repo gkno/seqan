@@ -25,34 +25,67 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 //////////////////////////////////////////////////////////////////////////////
-// T-Coffee - Main Routines
+// Multiple sequence alignment
+//////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////////
+// Tags
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Tag.Global Alignment Algorithms.value.MSA_Protein:
+	Multiple sequence alignment for protein sequences.
+*/
+struct MSA_Protein_;
+typedef Tag<MSA_Protein_> const MSA_Protein;
+
+/**
+.Tag.Global Alignment Algorithms.value.MSA_Dna:
+	Multiple sequence alignment for nucleotide sequences.
+*/
+struct MSA_Dna_;
+typedef Tag<MSA_Dna_> const MSA_Dna;
+
+
+/**
+.Tag.Global Alignment Algorithms.value.MSA_Genome:
+	Multiple sequence alignment for genomic, closely related sequences.
+*/
+struct MSA_Genome_;
+typedef Tag<MSA_Genome_> const MSA_Genome;
+
+
+//////////////////////////////////////////////////////////////////////////////
+// Global Alignment functions
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TString, typename TNames, typename TMemeFile, typename TAlignmentGraph>
+template<typename TString, typename TSpec, typename TName, typename TSpec2, typename TFileName, typename TAlignmentGraph>
 inline void
-tCoffeeProteinAlignment(StringSet<TString, Dependent<> > const& strSet,
-						TNames& names,
-						TMemeFile& matchfile,
-						TAlignmentGraph& gOut)
+globalAlignment(StringSet<TString, TSpec> const& seqSet,
+				StringSet<TName, TSpec2> const& nameSet,
+				TFileName& matchfile,
+				TAlignmentGraph& gOut,
+				MSA_Protein)
 {
 	SEQAN_CHECKPOINT
-	
+
 	typedef StringSet<TString, Dependent<> > TStringSet;
 	typedef Graph<Alignment<TStringSet, unsigned int> > TGraph;
 	typedef typename Size<TGraph>::Type TSize;
 	typedef typename Id<TGraph>::Type TId;
-	TSize nSeq = length(strSet);
+	TSize nSeq = length(seqSet);
 	TSize threshold = 30;
 	
 	// Select informative pairs
-	TGraph g(strSet);
+	TGraph g(seqSet);
 	String<Pair<TId, TId> > pList;
 	selectPairsForLibraryGeneration(g, pList);
 
 	// Generate a primary library, i.e., all global pairwise alignments
-	TGraph lib1(strSet);
+	TGraph lib1(seqSet);
 	String<double> distanceMatrix;
 	Blosum62 score_type_global(-1,-11);
 	generatePrimaryLibrary(lib1, pList, distanceMatrix, score_type_global, GlobalPairwise_Library() );
@@ -84,8 +117,8 @@ tCoffeeProteinAlignment(StringSet<TString, Dependent<> > const& strSet,
 	}
 
 	// Generate a third primary library, i.e., all local pairwise alignments and external matches
-	TGraph lib2(strSet);
-	TGraph lib3(strSet);
+	TGraph lib2(seqSet);
+	TGraph lib3(seqSet);
 	if (length(matchfile)) {
 		// Only a selected list of local alignments
 		Blosum62 score_type_local(-2,-8);
@@ -94,7 +127,7 @@ tCoffeeProteinAlignment(StringSet<TString, Dependent<> > const& strSet,
 		// Blast matches
 		std::fstream strm_lib;
 		strm_lib.open(toCString(matchfile), std::ios_base::in | std::ios_base::binary);
-		read(strm_lib, lib3, names, BlastLib());	// Read library
+		read(strm_lib, lib3, nameSet, BlastLib());	// Read library
 		strm_lib.close();
 	} else {
 		Blosum62 score_type_local(-2,-8);
@@ -102,7 +135,7 @@ tCoffeeProteinAlignment(StringSet<TString, Dependent<> > const& strSet,
 	}
 
 
-	TGraph lib4(strSet);
+	TGraph lib4(seqSet);
 	if (dist > 0.75) {
 		Blosum30 sT(-4,-20);
 		AlignConfig<true,true,true,true> ac;
@@ -117,13 +150,15 @@ tCoffeeProteinAlignment(StringSet<TString, Dependent<> > const& strSet,
 		generatePrimaryLibrary(lib4, pListLocal, sT, ac, GlobalPairwise_Library() );
 	}
 
+
 	// Weighting of libraries (Signal addition)
 	String<TGraph*> libs;
 	appendValue(libs, &lib1);
 	appendValue(libs, &lib2);
 	if (!empty(lib3)) appendValue(libs, &lib3);
 	appendValue(libs, &lib4);
-	combineGraphs(g, true, libs);
+	combineGraphs(g, libs, FrequencyCounting() );
+	//combineGraphs(g, libs);
 
 	// Clear the old libraries
 	clear(lib1);
@@ -155,36 +190,13 @@ tCoffeeProteinAlignment(StringSet<TString, Dependent<> > const& strSet,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TString, typename TNames, typename TAlignmentGraph>
+template<typename TString, typename TSpec, typename TName, typename TSpec2, typename TFileName, typename TAlignmentGraph>
 inline void
-tCoffeeProteinAlignment(StringSet<TString, Dependent<> > const& strSet,
-						TNames& names,
-						TAlignmentGraph& gOut)
-{
-	SEQAN_CHECKPOINT
-	tCoffeeProteinAlignment(strSet, names, "", gOut);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TString, typename TAlignmentGraph>
-inline void
-tCoffeeProteinAlignment(StringSet<TString, Dependent<> > const& strSet,
-						TAlignmentGraph& gOut)
-{
-	SEQAN_CHECKPOINT
-	String<String<char> > names;
-	tCoffeeProteinAlignment(strSet, names, gOut);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TString, typename TAlignmentGraph>
-inline void
-tCoffeeDnaAlignment(StringSet<TString, Dependent<> > const& strSet,
-					TAlignmentGraph& gOut)
+globalAlignment(StringSet<TString, TSpec> const& seqSet,
+				StringSet<TName, TSpec2> const& nameSet,
+				TFileName const& matchfile,
+				TAlignmentGraph& gOut,
+				MSA_Genome)
 {
 	SEQAN_CHECKPOINT
 	
@@ -193,91 +205,17 @@ tCoffeeDnaAlignment(StringSet<TString, Dependent<> > const& strSet,
 	typedef typename Size<TGraph>::Type TSize;
 	typedef typename Id<TGraph>::Type TId;
 
-	// Score objects
-	Score<int> score_type_global = Score<int>(5,-4,-4,-14);
-	Score<int> score_type_local = Score<int>(5,-4,-4,-14);
-
-	// Select pairs
-	TGraph g(strSet);
-	String<Pair<TId, TId> > pList;
-	selectPairsForLibraryGeneration(g, pList);
-
-	// Generate a primary library, i.e., all global pairwise alignments
-	TGraph lib1(strSet);
-	String<double> distanceMatrix;
-	generatePrimaryLibrary(lib1, pList, distanceMatrix, score_type_global, GlobalPairwise_Library() );
-	//std::cout << "Library size: " << numVertices(lib1) << " Vertices, " << numEdges(lib1) << " Edges" << std::endl;
-
-	// Generate a primary library, i.e., all local pairwise alignments
-	TGraph lib2(strSet);
-	generatePrimaryLibrary(lib2, pList, score_type_local, LocalPairwise_Library() );
-	//std::cout << "Library size: " << numVertices(lib2) << " Vertices, " << numEdges(lib2) << " Edges" << std::endl;
-
-	// Weighting of libraries (Signal addition)
-	String<TGraph*> libs;
-	appendValue(libs, &lib1);
-	appendValue(libs, &lib2);
-	//combineGraphs(g, libs);
-	//// Only topology
-	combineGraphs(g, true, libs);
-	//std::cout << "Library size: " << numVertices(g) << " Vertices, " << numEdges(g) << " Edges" << std::endl;
-
-	// Clear the old libraries
-	clear(lib1);
-	clear(lib2);
-
-
-	TSize nSeq = length(strSet);
-	TSize threshold = 30;
-	if (nSeq < threshold) {
-		// Full triplet...
-		tripletLibraryExtension(g);
-
-		// ... and normal progressive alignment with guide tree
-		Graph<Tree<double> > guideTree;
-		//upgmaTree(distanceMatrix, guideTree);	
-		slowNjTree(distanceMatrix, guideTree);
-		progressiveAlignment(g, guideTree, gOut);
-		clear(guideTree);
-	} else {
-		// Triplet only on groups of sequences
-		Graph<Tree<double> > guideTree;
-		//upgmaTree(distanceMatrix, guideTree);	
-		slowNjTree(distanceMatrix, guideTree);	// More balanced than UPGMA
-		progressiveAlignment(g, guideTree, gOut, threshold);
-		clear(guideTree);
-	}
-	clear(distanceMatrix);
-	clear(g);
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TString, typename TNames, typename TFileName, typename TAlignmentGraph>
-inline void
-tCoffeeLongDnaAlignment(StringSet<TString, Dependent<> >& strSet,
-						TNames& names,
-						TFileName& libFile,
-						TAlignmentGraph& gOut)
-{
-	SEQAN_CHECKPOINT
-	
-	typedef StringSet<TString, Dependent<> > TStringSet;
-	typedef Graph<Alignment<TStringSet, unsigned int> > TGraph;
-	typedef typename Size<TGraph>::Type TSize;
-	typedef typename Id<TGraph>::Type TId;
-
-	TGraph g(strSet);
-	TGraph lib1(strSet);
-	if (length(libFile)) {
+	TGraph g(seqSet);
+	TGraph lib1(seqSet);
+	if (length(matchfile)) {
 		std::fstream strm_lib;
-		strm_lib.open(toCString(libFile), std::ios_base::in | std::ios_base::binary);
-		read(strm_lib, lib1, names, BlastLib());	// Read library
+		strm_lib.open(toCString(matchfile), std::ios_base::in | std::ios_base::binary);
+		read(strm_lib, lib1, nameSet, BlastLib());	// Read library
 		strm_lib.close();
 	}
 
 	// Generate a primary library, i.e., all local pairwise alignments
-	TGraph lib2(strSet);
+	TGraph lib2(seqSet);
 	Score<int> score_type = Score<int>(5,-4,-4,-14);
 	generatePrimaryLibrary(lib2, score_type, Lcs_Library() );
 	
@@ -293,7 +231,7 @@ tCoffeeLongDnaAlignment(StringSet<TString, Dependent<> >& strSet,
 	String<TGraph*> libs;
 	if (!empty(lib1)) appendValue(libs, &lib1);
 	appendValue(libs, &lib2);
-	combineGraphs(g, true, libs);
+	combineGraphs(g, libs, FrequencyCounting() );
 
 
 
@@ -318,66 +256,194 @@ tCoffeeLongDnaAlignment(StringSet<TString, Dependent<> >& strSet,
 }
 
 
-
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TPath, typename TFilePrefix, typename TFileSuffix, typename TNames, typename TStringSet>
-inline unsigned int
-_alignImportSequences(TPath const& in_path, 
-					  TFilePrefix const& file_prefix, 
-					  TFileSuffix const& file_suffix,
-					  TStringSet& origStrSet,
-					  TNames& names)
+template<typename TString, typename TSpec, typename TName, typename TSpec2, typename TFileName, typename TAlignmentGraph>
+inline void
+globalAlignment(StringSet<TString, TSpec> const& seqSet,
+				StringSet<TName, TSpec2> const& nameSet,
+				TFileName const& matchfile,
+				TAlignmentGraph& gOut,
+				MSA_Dna)
 {
 	SEQAN_CHECKPOINT
+	
+	typedef StringSet<TString, Dependent<> > TStringSet;
+	typedef Graph<Alignment<TStringSet, unsigned int> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename Id<TGraph>::Type TId;
 
-	// Count sequences and read names
-	unsigned seqCount = 0;
-	std::ifstream file;
-	std::stringstream input;
-	if (length(file_suffix)) input << in_path << file_prefix << '.' << file_suffix;
-	else input << in_path << file_prefix;
-	file.open(input.str().c_str(), std::ios_base::in | std::ios_base::binary);
-	if (!file.is_open()) return 0;
-	while (!_streamEOF(file)) {
-		String<char> id;
-		readID(file, id, Fasta());
-		appendValue(names, id);
-		goNext(file, Fasta());
-		++seqCount;
+	// Score objects
+	Score<int> score_type_global = Score<int>(5,-4,-4,-14);
+	Score<int> score_type_local = Score<int>(5,-4,-4,-14);
+
+	// Select pairs
+	TGraph g(seqSet);
+	String<Pair<TId, TId> > pList;
+	selectPairsForLibraryGeneration(g, pList);
+
+	// Generate a primary library, i.e., all global pairwise alignments
+	TGraph lib1(seqSet);
+	String<double> distanceMatrix;
+	generatePrimaryLibrary(lib1, pList, distanceMatrix, score_type_global, GlobalPairwise_Library() );
+	//std::cout << "Library size: " << numVertices(lib1) << " Vertices, " << numEdges(lib1) << " Edges" << std::endl;
+
+	// Generate a primary library, i.e., all local pairwise alignments
+	TGraph lib2(seqSet);
+	generatePrimaryLibrary(lib2, pList, score_type_local, LocalPairwise_Library() );
+	//std::cout << "Library size: " << numVertices(lib2) << " Vertices, " << numEdges(lib2) << " Edges" << std::endl;
+
+	TGraph lib3(seqSet);
+	if (length(matchfile)) {
+		std::fstream strm_lib;
+		strm_lib.open(toCString(matchfile), std::ios_base::in | std::ios_base::binary);
+		read(strm_lib, lib3, nameSet, BlastLib());	// Read library
+		strm_lib.close();
 	}
 
-	// Import sequences
-	file.clear();
-	file.seekg(0, std::ios_base::beg);
-	resize(origStrSet, seqCount);
-	unsigned int count = 0;
-	for(unsigned i = 0; (i < seqCount) && !_streamEOF(file); ++i) 	{
-		read(file, origStrSet[i], Fasta());
-		count += length(origStrSet[i]);
-	}
-    file.close();
+	// Weighting of libraries (Signal addition)
+	String<TGraph*> libs;
+	appendValue(libs, &lib1);
+	appendValue(libs, &lib2);
+	if (!empty(lib3)) appendValue(libs, &lib3);
+	//combineGraphs(g, libs);
+	//// Only topology
+	combineGraphs(g, libs, FrequencyCounting() );
+	//std::cout << "Library size: " << numVertices(g) << " Vertices, " << numEdges(g) << " Edges" << std::endl;
 
-	return count;
+	// Clear the old libraries
+	clear(lib1);
+	clear(lib2);
+	clear(lib3);
+
+
+	TSize nSeq = length(seqSet);
+	TSize threshold = 30;
+	if (nSeq < threshold) {
+		// Full triplet...
+		tripletLibraryExtension(g);
+
+		// ... and normal progressive alignment with guide tree
+		Graph<Tree<double> > guideTree;
+		//upgmaTree(distanceMatrix, guideTree);	
+		slowNjTree(distanceMatrix, guideTree);
+		progressiveAlignment(g, guideTree, gOut);
+		clear(guideTree);
+	} else {
+		// Triplet only on groups of sequences
+		Graph<Tree<double> > guideTree;
+		//upgmaTree(distanceMatrix, guideTree);	
+		slowNjTree(distanceMatrix, guideTree);	// More balanced than UPGMA
+		progressiveAlignment(g, guideTree, gOut, threshold);
+		clear(guideTree);
+	}
+	clear(distanceMatrix);
+	clear(g);
 }
 
-//////////////////////////////////////////////////////////////////////////////
 
-template<typename TText>
+
+template<typename TString, typename TSpec, typename TName, typename TSpec2, typename TAlignmentGraph, typename TTag>
 inline void
-_alignTiming(std::clock_t& startTime,
-			 TText const& text)
+globalAlignment(StringSet<TString, TSpec> const& seqSet,
+				StringSet<TName, TSpec2> const& nameSet,
+				TAlignmentGraph& gOut,
+				TTag)
 {
-	std::clock_t endTime=clock();
-	double time=((float)(endTime-startTime)/CLOCKS_PER_SEC);
-	startTime = endTime;
-	std::cout << text << time << " sec" << std::endl;
+	SEQAN_CHECKPOINT
+	globalAlignment(seqSet, nameSet, "", gOut, TTag() );
+}
+
+
+template<typename TString, typename TSpec, typename TDependentSequenceSet, typename TCargo, typename TSpec2, typename TTag>
+inline void
+globalAlignment(StringSet<TString, TSpec> const& seqSet,
+				Graph<Alignment<TDependentSequenceSet, TCargo, TSpec2> >& gOut,
+				TTag)
+{
+	SEQAN_CHECKPOINT
+	StringSet<String<char> > names;
+	globalAlignment(seqSet, names, gOut, TTag() );
 }
 
 
 
+
+
+
+
+
+
+
+
+
+
 //////////////////////////////////////////////////////////////////////////////
-// T-Coffee - Debug stuff
+
+template<typename TString, typename TSpec, typename TName, typename TSpec2, typename TFileName, typename TAlignmentGraph>
+inline void
+testFabian(StringSet<TString, TSpec> const& seqSet,
+		   StringSet<TName, TSpec2> const& nameSet,
+		   TFileName& matchfile,
+		   TAlignmentGraph& gOut)
+{
+	typedef StringSet<TString, Dependent<> > TStringSet;
+	typedef Graph<Alignment<TStringSet, unsigned int> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename Id<TGraph>::Type TId;
+	TGraph g(seqSet);
+	
+	// Generate a primary library, i.e., all global pairwise alignments
+	TGraph lib1(seqSet);
+	String<double> distanceMatrix;
+	Blosum62 score_type_global(-1,-11);
+	generatePrimaryLibrary(lib1, distanceMatrix, score_type_global, GlobalPairwise_Library() );
+	std::cout << "Primary library" << std::endl;
+
+	// Generate a second second primary library, i.e., his matches
+	TGraph lib2(seqSet);
+	if (length(matchfile)) {
+		// Blast matches
+		std::fstream strm_lib;
+		strm_lib.open(toCString(matchfile), std::ios_base::in | std::ios_base::binary);
+		read(strm_lib, lib2, nameSet, BlastLib());	// Read library
+		strm_lib.close();
+		std::cout << "Matches" << std::endl;
+	}
+
+	// Weighting of libraries (Signal addition)
+	String<TGraph*> libs;
+	appendValue(libs, &lib1);
+	if (!empty(lib2)) appendValue(libs, &lib2);
+
+	String<unsigned int> weights;
+	fill(weights, length(libs), 1);
+	if (!empty(lib2)) weights[1] = 3;
+	combineGraphs(g, libs, weights, FractionalScore() );
+	
+	// Clear the old libraries
+	clear(lib1);
+	clear(lib2);
+	
+	// Full triplet...
+	tripletLibraryExtension(g);
+
+	// ... and normal progressive alignment with guide tree
+	Graph<Tree<double> > guideTree;
+	slowNjTree(distanceMatrix, guideTree);
+	progressiveAlignment(g, guideTree, gOut);
+	clear(guideTree);
+	clear(distanceMatrix);
+	clear(g);
+}
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+// The 2 most useful functions in SeqAn!!!
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -437,6 +503,7 @@ _debugRefinedMatches(TGraph& g)
 		std::cout << label(g,sourceVertex(it_tmp));
 		std::cout << ',' <<	id2 << ',' << fragmentBegin(g,targetVertex(it_tmp)) << ',';
 		std::cout << label(g,targetVertex(it_tmp));
+		std::cout << " (" << cargo(*it_tmp) << ")";
 		std::cout << std::endl;	
 
 		SEQAN_TASSERT(sequenceId(g,sourceVertex(it_tmp)) != sequenceId(g,targetVertex(it_tmp)))
@@ -448,6 +515,299 @@ _debugRefinedMatches(TGraph& g)
 
 	}
 }
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////////
+//
+//template<typename TString, typename TNames, typename TMemeFile, typename TAlignmentGraph>
+//inline void
+//tCoffeeProteinAlignment(StringSet<TString, Dependent<> > const& strSet,
+//						TNames& names,
+//						TMemeFile& matchfile,
+//						TAlignmentGraph& gOut)
+//{
+//	typedef StringSet<TString, Dependent<> > TStringSet;
+//	typedef Graph<Alignment<TStringSet, unsigned int> > TGraph;
+//	typedef typename Size<TGraph>::Type TSize;
+//	typedef typename Id<TGraph>::Type TId;
+//	TSize nSeq = length(strSet);
+//	TSize threshold = 30;
+//	
+//	// Select informative pairs
+//	TGraph g(strSet);
+//	String<Pair<TId, TId> > pList;
+//	selectPairsForLibraryGeneration(g, pList);
+//
+//	// Generate a primary library, i.e., all global pairwise alignments
+//	TGraph lib1(strSet);
+//	String<double> distanceMatrix;
+//	Blosum62 score_type_global(-1,-11);
+//	generatePrimaryLibrary(lib1, pList, distanceMatrix, score_type_global, GlobalPairwise_Library() );
+//	
+//	// Select pairs for end-gaps free and local alignments?
+//	typedef std::multimap<double, Pair<TId, TId> > TBestPairs;
+//	TBestPairs bestPairs;
+//	double dist = 0;
+//	for(TSize i=0;i<nSeq-1;++i) {
+//		for(TSize j=i+1;j<nSeq;++j) {
+//			double d = getValue(distanceMatrix, i*nSeq+j);
+//			bestPairs.insert(std::make_pair(d, Pair<TId, TId>(positionToId(stringSet(g), i),positionToId(stringSet(g), j)))); 
+//			dist+=d;
+//		}
+//	}
+//	TSize numPairs = nSeq * (nSeq - 1) / 2;
+//	dist /= numPairs;
+//	String<Pair<TId, TId> > pListLocal;
+//	pListLocal = pList;
+//	if (nSeq > threshold) {
+//		clear(pListLocal);
+//		typename TBestPairs::reverse_iterator itBestR = bestPairs.rbegin();
+//		typename TBestPairs::iterator itBestF = bestPairs.begin();
+//		TSize limit = 4 * nSeq;
+//		for(TSize i=0;i<limit;++i, ++itBestR, ++itBestF) {
+//			appendValue(pListLocal, itBestF->second);
+//			appendValue(pListLocal, itBestR->second);
+//		}
+//	}
+//
+//	// Generate a third primary library, i.e., all local pairwise alignments and external matches
+//	TGraph lib2(strSet);
+//	TGraph lib3(strSet);
+//	if (length(matchfile)) {
+//		// Only a selected list of local alignments
+//		Blosum62 score_type_local(-2,-8);
+//		generatePrimaryLibrary(lib2, pListLocal, score_type_local, LocalPairwise_Library() );
+//
+//		// Blast matches
+//		std::fstream strm_lib;
+//		strm_lib.open(toCString(matchfile), std::ios_base::in | std::ios_base::binary);
+//		read(strm_lib, lib3, names, BlastLib());	// Read library
+//		strm_lib.close();
+//	} else {
+//		Blosum62 score_type_local(-2,-8);
+//		generatePrimaryLibrary(lib2, pList, score_type_local, LocalPairwise_Library() );
+//	}
+//
+//
+//	TGraph lib4(strSet);
+//	if (dist > 0.75) {
+//		Blosum30 sT(-4,-20);
+//		AlignConfig<true,true,true,true> ac;
+//		generatePrimaryLibrary(lib4, pListLocal, sT, ac, GlobalPairwise_Library() );
+//	} else if (dist < 0.50) {
+//		Blosum80 sT(-2, -12);
+//		AlignConfig<true,true,true,true> ac;
+//		generatePrimaryLibrary(lib4, pListLocal, sT, ac, GlobalPairwise_Library() );
+//	} else {
+//		Blosum62 sT(-3,-14);
+//		AlignConfig<true,true,true,true> ac;
+//		generatePrimaryLibrary(lib4, pListLocal, sT, ac, GlobalPairwise_Library() );
+//	}
+//
+//
+//	// Weighting of libraries (Signal addition)
+//	String<TGraph*> libs;
+//	appendValue(libs, &lib1);
+//	appendValue(libs, &lib2);
+//	if (!empty(lib3)) appendValue(libs, &lib3);
+//	appendValue(libs, &lib4);
+//	combineGraphs(g, libs, FrequencyCounting() );
+//	//combineGraphs(g, libs);
+//
+//	// Clear the old libraries
+//	clear(lib1);
+//	clear(lib2);
+//	clear(lib3);
+//	clear(lib4);
+//
+//	if (nSeq < threshold) {
+//		// Full triplet...
+//		tripletLibraryExtension(g);
+//
+//		// ... and normal progressive alignment with guide tree
+//		Graph<Tree<double> > guideTree;
+//		//upgmaTree(distanceMatrix, guideTree, UpgmaMin() );	
+//		slowNjTree(distanceMatrix, guideTree);
+//		progressiveAlignment(g, guideTree, gOut);
+//		clear(guideTree);
+//	} else {
+//		// Triplet only on groups of sequences
+//		Graph<Tree<double> > guideTree;
+//		//upgmaTree(distanceMatrix, guideTree);	
+//		slowNjTree(distanceMatrix, guideTree);	// More balanced than UPGMA
+//		progressiveAlignment(g, guideTree, gOut, threshold);
+//		clear(guideTree);
+//	}
+//	clear(distanceMatrix);
+//	clear(g);
+//}
+//
+////////////////////////////////////////////////////////////////////////////////
+//
+//template<typename TString, typename TNames, typename TAlignmentGraph>
+//inline void
+//tCoffeeProteinAlignment(StringSet<TString, Dependent<> > const& strSet,
+//						TNames& names,
+//						TAlignmentGraph& gOut)
+//{
+//	tCoffeeProteinAlignment(strSet, names, "", gOut);
+//}
+//
+//
+////////////////////////////////////////////////////////////////////////////////
+//
+//template<typename TString, typename TAlignmentGraph>
+//inline void
+//tCoffeeProteinAlignment(StringSet<TString, Dependent<> > const& strSet,
+//						TAlignmentGraph& gOut)
+//{
+//	String<String<char> > names;
+//	tCoffeeProteinAlignment(strSet, names, gOut);
+//}
+
+
+////////////////////////////////////////////////////////////////////////////////
+//
+//template<typename TString, typename TNames, typename TFileName, typename TAlignmentGraph>
+//inline void
+//tCoffeeLongDnaAlignment(StringSet<TString, Dependent<> >& strSet,
+//						TNames& names,
+//						TFileName& libFile,
+//						TAlignmentGraph& gOut)
+//{
+//	
+//	typedef StringSet<TString, Dependent<> > TStringSet;
+//	typedef Graph<Alignment<TStringSet, unsigned int> > TGraph;
+//	typedef typename Size<TGraph>::Type TSize;
+//	typedef typename Id<TGraph>::Type TId;
+//
+//	TGraph g(strSet);
+//	TGraph lib1(strSet);
+//	if (length(libFile)) {
+//		std::fstream strm_lib;
+//		strm_lib.open(toCString(libFile), std::ios_base::in | std::ios_base::binary);
+//		read(strm_lib, lib1, names, BlastLib());	// Read library
+//		strm_lib.close();
+//	}
+//
+//	// Generate a primary library, i.e., all local pairwise alignments
+//	TGraph lib2(strSet);
+//	Score<int> score_type = Score<int>(5,-4,-4,-14);
+//	generatePrimaryLibrary(lib2, score_type, Lcs_Library() );
+//	
+//	
+//	//String<Pair<TId, TId> > pList;
+//	//selectPairsForLibraryGeneration(g, pList);
+//	//Score<int> score_type_global = Score<int>(5,-4,-4,-14);
+//	//String<double> distanceMatrix;
+//	//generatePrimaryLibrary(lib1, pList, distanceMatrix, score_type_global, GlobalPairwise_Library() );
+//	//
+//
+//	// Weighting of libraries (Signal addition)
+//	String<TGraph*> libs;
+//	if (!empty(lib1)) appendValue(libs, &lib1);
+//	appendValue(libs, &lib2);
+//	combineGraphs(g, libs, FrequencyCounting() );
+//
+//
+//
+//	// Calculate a distance matrix using kmer counts
+//	String<double> distanceMatrix;
+//	getDistanceMatrix(g, distanceMatrix, KmerDistance());
+//
+//
+//
+//
+//	// Full triplet...
+//	tripletLibraryExtension(g);
+//
+//	// ... and normal progressive alignment with guide tree
+//	Graph<Tree<double> > guideTree;
+//	//upgmaTree(distanceMatrix, guideTree);	
+//	slowNjTree(distanceMatrix, guideTree);
+//	progressiveAlignment(g, guideTree, gOut);
+//	clear(guideTree);
+//	clear(distanceMatrix);
+//	clear(g);
+//}
+
+////////////////////////////////////////////////////////////////////////////////
+//
+//template<typename TString, typename TAlignmentGraph>
+//inline void
+//tCoffeeDnaAlignment(StringSet<TString, Dependent<> > const& strSet,
+//					TAlignmentGraph& gOut)
+//{
+//	
+//	typedef StringSet<TString, Dependent<> > TStringSet;
+//	typedef Graph<Alignment<TStringSet, unsigned int> > TGraph;
+//	typedef typename Size<TGraph>::Type TSize;
+//	typedef typename Id<TGraph>::Type TId;
+//
+//	// Score objects
+//	Score<int> score_type_global = Score<int>(5,-4,-4,-14);
+//	Score<int> score_type_local = Score<int>(5,-4,-4,-14);
+//
+//	// Select pairs
+//	TGraph g(strSet);
+//	String<Pair<TId, TId> > pList;
+//	selectPairsForLibraryGeneration(g, pList);
+//
+//	// Generate a primary library, i.e., all global pairwise alignments
+//	TGraph lib1(strSet);
+//	String<double> distanceMatrix;
+//	generatePrimaryLibrary(lib1, pList, distanceMatrix, score_type_global, GlobalPairwise_Library() );
+//	//std::cout << "Library size: " << numVertices(lib1) << " Vertices, " << numEdges(lib1) << " Edges" << std::endl;
+//
+//	// Generate a primary library, i.e., all local pairwise alignments
+//	TGraph lib2(strSet);
+//	generatePrimaryLibrary(lib2, pList, score_type_local, LocalPairwise_Library() );
+//	//std::cout << "Library size: " << numVertices(lib2) << " Vertices, " << numEdges(lib2) << " Edges" << std::endl;
+//
+//	// Weighting of libraries (Signal addition)
+//	String<TGraph*> libs;
+//	appendValue(libs, &lib1);
+//	appendValue(libs, &lib2);
+//	//combineGraphs(g, libs);
+//	//// Only topology
+//	combineGraphs(g, libs, FrequencyCounting() );
+//	//std::cout << "Library size: " << numVertices(g) << " Vertices, " << numEdges(g) << " Edges" << std::endl;
+//
+//	// Clear the old libraries
+//	clear(lib1);
+//	clear(lib2);
+//
+//
+//	TSize nSeq = length(strSet);
+//	TSize threshold = 30;
+//	if (nSeq < threshold) {
+//		// Full triplet...
+//		tripletLibraryExtension(g);
+//
+//		// ... and normal progressive alignment with guide tree
+//		Graph<Tree<double> > guideTree;
+//		//upgmaTree(distanceMatrix, guideTree);	
+//		slowNjTree(distanceMatrix, guideTree);
+//		progressiveAlignment(g, guideTree, gOut);
+//		clear(guideTree);
+//	} else {
+//		// Triplet only on groups of sequences
+//		Graph<Tree<double> > guideTree;
+//		//upgmaTree(distanceMatrix, guideTree);	
+//		slowNjTree(distanceMatrix, guideTree);	// More balanced than UPGMA
+//		progressiveAlignment(g, guideTree, gOut, threshold);
+//		clear(guideTree);
+//	}
+//	clear(distanceMatrix);
+//	clear(g);
+//}
 
 
 }// namespace SEQAN_NAMESPACE_MAIN

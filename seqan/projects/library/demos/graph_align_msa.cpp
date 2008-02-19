@@ -22,7 +22,7 @@ int main() {
 /// Out-parameter: An alignment graph of multiple sequences
 	Graph<Alignment<TStringSet, void, WithoutEdgeId> > gOut(strSet);
 /// Consistency-based multiple sequence alignment
-	tCoffeeProteinAlignment(strSet, gOut);
+	globalAlignment(strSet, gOut, MSA_Protein() );
 /// Console output
 	std::cout << gOut << std::endl;
 	return 0;

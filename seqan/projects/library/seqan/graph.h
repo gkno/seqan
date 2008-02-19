@@ -105,6 +105,7 @@
 #include <seqan/graph/graph_align_tcoffee_kmer.h>
 #include <seqan/graph/graph_align_tcoffee_distance.h>
 #include <seqan/graph/graph_align_tcoffee_guidetree.h>
+#include <seqan/graph/graph_align_tcoffee_io.h>
 #include <seqan/graph/graph_align_tcoffee_library.h>
 #include <seqan/graph/graph_align_tcoffee_progressive.h>
 

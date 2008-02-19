@@ -98,7 +98,8 @@ _align_nussinov_trace(Graph<Undirected<TCargo, TSpec> >& g,
 {
 	SEQAN_CHECKPOINT
 
-	typedef typename Size<TString>::Type TSize;
+	typedef Graph<Undirected<TCargo, TSpec> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
 	typedef typename Value<TString>::Type TCharacter;
 
 	TSize len = length(str);

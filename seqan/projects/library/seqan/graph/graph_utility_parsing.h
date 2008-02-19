@@ -358,6 +358,62 @@ parseCmdLine(int argc, const char *argv[], ConfigOptions<TKey, TValue>& cfgOpt) 
 
 
 
+//////////////////////////////////////////////////////////////////////////////
+// File reading and timing functions
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TPath, typename TNames, typename TStringSet>
+inline unsigned int
+_alignImportSequences(TPath const& in_path, 
+					  TStringSet& origStrSet,
+					  TNames& names)
+{
+	// Count sequences and read names
+	unsigned seqCount = 0;
+	std::ifstream file;
+	std::stringstream input;
+	input << in_path;
+	file.open(input.str().c_str(), std::ios_base::in | std::ios_base::binary);
+	if (!file.is_open()) return 0;
+	while (!_streamEOF(file)) {
+		String<char> id;
+		readID(file, id, Fasta());
+		appendValue(names, id);
+		goNext(file, Fasta());
+		++seqCount;
+	}
+
+	// Import sequences
+	file.clear();
+	file.seekg(0, std::ios_base::beg);
+	resize(origStrSet, seqCount);
+	unsigned int count = 0;
+	for(unsigned i = 0; (i < seqCount) && !_streamEOF(file); ++i) 	{
+		read(file, origStrSet[i], Fasta());
+		count += length(origStrSet[i]);
+	}
+    file.close();
+
+	return count;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TText>
+inline void
+_alignTiming(std::clock_t& startTime,
+			 TText const& text)
+{
+	std::clock_t endTime=clock();
+	double time=((float)(endTime-startTime)/CLOCKS_PER_SEC);
+	startTime = endTime;
+	std::cout << text << time << " sec" << std::endl;
+}
+
 
 }// namespace SEQAN_NAMESPACE_MAIN
 

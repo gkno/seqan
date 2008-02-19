@@ -348,6 +348,28 @@ void Test_Distances() {
 
 //////////////////////////////////////////////////////////////////////////////
 
+void 
+__testquickAlign(Graph<Alignment<StringSet<String<AminoAcid>, Dependent<> >, unsigned int> >& g) 
+{
+	Graph<Alignment<StringSet<String<AminoAcid>, Dependent<> >, void, WithoutEdgeId> > gOut(stringSet(g));
+	tripletLibraryExtension(g);
+	String<double> distForGuideTree;
+	getDistanceMatrix(g,distForGuideTree,LibraryDistance());
+	Graph<Tree<double> > guideTree;
+	slowNjTree(distForGuideTree, guideTree);
+	progressiveAlignment(g, guideTree, gOut);
+	//std::cout << gOut << std::endl;
+	String<char> alignMat;	
+	convertAlignment(gOut,alignMat);
+	unsigned int len = length(alignMat) / 4;
+	SEQAN_TASSERT(String<char>(infix(alignMat, 0, 8)) == "GARFIELD");
+	SEQAN_TASSERT(String<char>(infix(alignMat, 1*len + 0, 1*len+8)) == "GARFIELD");
+	SEQAN_TASSERT(String<char>(infix(alignMat, 2*len + 0, 2*len+8)) == "GARFIELD");
+	SEQAN_TASSERT(String<char>(infix(alignMat, 3*len + 0, 3*len+8)) == "--------");
+
+	//std::cout << gOut << std::endl;
+}
+
 void Test_Libraries() {
 	typedef String<AminoAcid> TString;
 	typedef StringSet<TString, Dependent<> > TStringSet;
@@ -365,364 +387,357 @@ void Test_Libraries() {
 	TGraph g(strSet);
 	Blosum62 score_type(-1,-11);
 	generatePrimaryLibrary(g, score_type, Lcs_Library() );
+	__testquickAlign(g);
 	generatePrimaryLibrary(g, score_type, Kmer_Library() );
+	__testquickAlign(g);
 	generatePrimaryLibrary(g, score_type, LocalPairwise_Library() );
+	__testquickAlign(g);
 	generatePrimaryLibrary(g, score_type, GlobalPairwise_Library() );
+	__testquickAlign(g);
 	generatePrimaryLibrary(g, score_type, AlignConfig<false,false,false,false>(), GlobalPairwise_Library() );
 	String<double> distanceMatrix;
 	generatePrimaryLibrary(g, distanceMatrix, score_type, GlobalPairwise_Library() );
+	__testquickAlign(g);
 	Graph<Undirected<double> > distGraph;
 	generatePrimaryLibrary(g, distGraph, score_type, GlobalPairwise_Library() );
-	generatePrimaryLibrary(g, score_type, Overlap_Library() );
-	clear(distanceMatrix);
-	generatePrimaryLibrary(g, distanceMatrix, score_type, Overlap_Library() );
-	clear(distGraph);
-	generatePrimaryLibrary(g, distGraph, score_type, Overlap_Library() );
+	__testquickAlign(g);
 }
 
-
-
-
-
-
-
-//////////////////////////////////////////////////////////////////////////////
-
-void Test_TCoffeeGarfield() {
-//____________________________________________________________________________
-// T-Coffee
-	typedef String<AminoAcid> TString;
-	typedef StringSet<TString, Dependent<> > TStringSet;
-	typedef Graph<Alignment<TStringSet, unsigned int> > TGraph;
+void Test_ExternalLibraries() {
+	typedef String<char> TName;
+	typedef StringSet<TName, Owner<> > TNameSet;
+	typedef String<AminoAcid> TSequence;
+	typedef StringSet<TSequence, Owner<> > TSequenceSet;
 	
-	TString str1 = "GARFIELDTHELASTFATCAT";
-	TString str2 = "GARFIELDTHEFASTCAT";
-	TString str3 = "GARFIELDTHEVERYFASTCAT";
-	TString str4 = "THEFATCAT";
-	TStringSet strSet;
-	assignValueById(strSet, str1);
-	assignValueById(strSet, str2);
-	assignValueById(strSet, str3);
-	assignValueById(strSet, str4);
+	TSequenceSet seqSet;
+	appendValue(seqSet, "GARFIELDTHELASTFATCAT");
+	appendValue(seqSet, "GARFIELDTHEFASTCAT");
+	appendValue(seqSet, "GARFIELDTHEVERYFASTCAT");
+	appendValue(seqSet, "THEFATCAT");
+	TNameSet nameSet;
+	appendValue(nameSet, "seq1");
+	appendValue(nameSet, "seq2");
+	appendValue(nameSet, "seq3");
+	appendValue(nameSet, "seq4");
 
-	// Score object
-	Blosum62 score_type_global(-1,-11);
-	Blosum62 score_type_local(-2,-8);
+	typedef Graph<Alignment<StringSet<TSequence, Dependent<> >, unsigned int> > TGraph;
+	TGraph g(seqSet);
+	Blosum62 score_type(-1,-11);
+	generatePrimaryLibrary(g, score_type, GlobalPairwise_Library() );
 	
-	// Generate a primary library, i.e., all global pairwise alignments
-	TGraph lib1(strSet);
-//	generatePrimaryLibrary(lib1, score_type_local, GlobalPairwise_Library() );
-	//generatePrimaryLibrary(lib1, score_type_local, MUMPairwise_Library() );
-	//generatePrimaryLibrary(lib1, score_type_global, 5, false, Kmer_Library() );
-	
-	fstream strm01; // Alignment graph as dot
-	strm01.open(TEST_PATH "my_tcoffee01.dot", ios_base::out | ios_base::trunc);
-	write(strm01,lib1,DotDrawing());
-	strm01.close();
+	// T-Coffee lib format
 
-	// Generate a primary library, i.e., all local pairwise alignments
-	TGraph lib2(strSet);
-//	generatePrimaryLibrary(lib2, score_type_local, LocalPairwise_Library() );
-
-	fstream strm02; // Alignment graph as dot
-	strm02.open(TEST_PATH "my_tcoffee02.dot", ios_base::out | ios_base::trunc);
-	write(strm02,lib2,DotDrawing());
-	strm02.close();
-
-	// Weighting of libraries (Signal addition)
-	TGraph g(strSet);
-	String<TGraph*> libs;
-	appendValue(libs, &lib1);
-	appendValue(libs, &lib2);
-	combineGraphs(g, libs);
-
-	// Clear the old libraries
-	clear(lib1);
-	clear(lib2);
-
-	fstream strm1; // Alignment graph as dot
-	strm1.open(TEST_PATH "my_tcoffee1.dot", ios_base::out | ios_base::trunc);
-	write(strm1,g,DotDrawing());
-	strm1.close();
-
-	// Triplet library extension
-	tripletLibraryExtension(g);
-
-	fstream strm2; // Alignment graph as dot
-	strm2.open(TEST_PATH "my_tcoffee2.dot", ios_base::out | ios_base::trunc);
-	write(strm2,g,DotDrawing());
-	strm2.close();
-
-	// Pairwise Distances
-	String<double> distanceMatrix;
-	getDistanceMatrix(g, distanceMatrix, LibraryDistance() ); 
-	//getDistanceMatrix(g, distanceMatrix, KmerDistance() );
-	//getDistanceMatrix(g, distanceMatrix, 6, AAGroupsDayhoff(), KmerDistance());
-
-	// Build the neighbor joining tree
-	Graph<Tree<double> > guideTree;
-	upgmaTree(distanceMatrix, guideTree, UpgmaMin() );
-
-	// Perform a progressive alignment
-	Graph<Alignment<TStringSet, void> > gOut(strSet);
-	progressiveAlignment(g, guideTree, gOut);
-	//iterativeProgressiveAlignment(g, guideTree, score_type_local, gOut);
-	
-	// Print the alignment
-	std::cout << gOut << std::endl;
-
-	fstream strm3; // Alignment graph as dot
-	strm3.open(TEST_PATH "my_tcoffee3.dot", ios_base::out | ios_base::trunc);
-	write(strm3,gOut,DotDrawing());
-	strm3.close();
-
-	String<String<char> > names;
-	appendValue(names, "seq1");	appendValue(names, "seq2");
-	appendValue(names, "seq3");	appendValue(names, "seq4");
-	fstream strm4; // Alignment graph as msf
-	strm4.open(TEST_PATH "my_alignment.fasta", ios_base::out | ios_base::trunc);
-	write(strm4,gOut,names, FastaFormat());
-	strm4.close();
-}
-
-
-
-//////////////////////////////////////////////////////////////////////////////
-
-void Test_TCoffeeFromFile(String<char> const in_path, String<char> const file_prefix, String<char> const file_suffix) {
-//____________________________________________________________________________
-// T-Coffee
-	// Timing variables
-	clock_t bigbang, startTime;
-
-	// Import Sequences
-	typedef String<AminoAcid> TString;
-	StringSet<String<AminoAcid>, Owner<> > origStrSet;
-	String<String<char> > names;
-	startTime = clock();
-	bigbang = startTime;
-	unsigned int nucCount = _alignImportSequences(in_path, file_prefix, file_suffix, origStrSet, names);
-	unsigned int seqCount = length(origStrSet);
-	if (length(file_suffix)) std::cout << in_path << file_prefix << '.' << file_suffix << std::endl;
-	else std::cout << in_path << file_prefix << std::endl;
-	std::cout << "Total number of bp: " << nucCount << ", Number of sequences: " << seqCount << std::endl;
-	_alignTiming(startTime, "Import sequences done: ");
-
-	// Make dependent string set
-	typedef StringSet<TString, Dependent<> > TStringSet;
-	TStringSet strSet;
-	for(unsigned int i = 0; i<seqCount; ++i) appendValue(strSet, origStrSet[i]);
-
-	// Align the sequences
-	Graph<Alignment<TStringSet, void, WithoutEdgeId> > gOut(strSet);
-	tCoffeeProteinAlignment(strSet, gOut);
-	_alignTiming(startTime, "T-Coffee alignment done: ");
-	
-	// Output alignment
-	std::stringstream output2;
-	if (length(file_suffix)) output2 << in_path << file_prefix << "." << file_suffix << "_my";
-	else output2 << in_path << file_prefix << "." << "my";
-	fstream strm5; // Alignment graph as fasta
-	strm5.open(output2.str().c_str(), ios_base::out | ios_base::trunc);
-	write(strm5,gOut,names, MsfFormat());
-	strm5.close();
-	_alignTiming(startTime, "Alignment output done: ");
-
-	// Finished
-	clear(gOut);
-	_alignTiming(bigbang, "Total time: ");
-	std::cout << "==============================" << std::endl;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////
-
-void Test_TCoffeeFromLibrary(String<char> const in_path) {
-//____________________________________________________________________________
-// Graph TCoffee
-	clock_t bigbang, startTime;
-	startTime = clock();
-	bigbang = startTime;
-
-	// Read a t-coffee library
-	typedef String<Rna5> TString;
-	fstream strm;
-	std::stringstream input;
-	input << in_path;
-	std::cout << input.str().c_str() << std::endl;
-	strm.open(input.str().c_str(), std::ios_base::in | std::ios_base::binary);
-	String<String<char> > names;
-	typedef StringSet<TString, Owner<> > TOwnerStringSet;
-	TOwnerStringSet oriStr;
-	read(strm,oriStr,names,TCoffeeLib());	// Read identifiers and strings
+	// Writing
+	std::fstream strm;
+	strm.open(TEST_PATH "test.lib", ios_base::out | ios_base::trunc);
+	write(strm, g, nameSet, TCoffeeLib());
 	strm.close();
-	typedef StringSet<TString, Dependent<> > TStringSet;
-	typedef Graph<Alignment<TStringSet, unsigned int> > TGraph;
-	TStringSet strSet;
-	for(unsigned int i = 0; i<length(oriStr); ++i) {
-		assignValueById(strSet, oriStr, i);
-	}
-	TGraph lib1(strSet);
-	fstream strm2;
-	strm2.open(input.str().c_str(), std::ios_base::in | std::ios_base::binary);
-	read(strm2,lib1,TCoffeeLib());	// Read sequences
-	strm2.close();
-	_alignTiming(startTime, "Library reading done: ");
+	//_debugRefinedMatches(g);
+	__testquickAlign(g);
 
-	//// Write the library
-	//fstream strmW; 
-	//strmW.open(TEST_PATH "my_garfield.lib", ios_base::out | ios_base::trunc);
-	//write(strmW,g,TCoffeeLib());
-	//strmW.close();
+	// Reading
+	clear(seqSet);
+	clear(nameSet);
+	std::fstream strmRead;
+	strmRead.open(TEST_PATH "test.lib", std::ios_base::in | std::ios_base::binary);
+	read(strmRead,seqSet,nameSet,TCoffeeLib());
+	strmRead.close();
+	clear(g);
+	assignStringSet(g, seqSet);
+	std::fstream strm_lib;
+	strm_lib.open(TEST_PATH "test.lib", std::ios_base::in | std::ios_base::binary);
+	read(strm_lib,g,TCoffeeLib());	// Read library
+	strm_lib.close();
+	//_debugRefinedMatches(g);
+	__testquickAlign(g);
 
-	//Score<int> score_type = Score<int>(5,-4,-1,-10);
-	Score<int> score_type = Score<int>(5,-4,-4,-14);
+	clear(g);
+	assignStringSet(g, seqSet);
+	generatePrimaryLibrary(g, score_type, GlobalPairwise_Library() );
+
+	// Blast lib format
+
+	// Writing
+	std::fstream strmBlast;
+	strmBlast.open(TEST_PATH "test.lib", ios_base::out | ios_base::trunc);
+	write(strmBlast, g, nameSet, BlastLib());
+	strmBlast.close();
+	//_debugRefinedMatches(g);
+	__testquickAlign(g);
 	
-	//// Generate a primary library, i.e., all global pairwise alignments
-	TGraph lib2(strSet);
-	String<double> distanceMatrix;
-//	generatePrimaryLibrary(lib2, distanceMatrix, score_type, GlobalPairwise_Library() );
-	_alignTiming(startTime, "Global Pairwise alignments done: ");
-	std::cout << "Library size: " << numVertices(lib2) << " Vertices, " << numEdges(lib2) << " Edges" << std::endl;
+	// Reading
+	clear(g);
+	assignStringSet(g, seqSet);
+	std::fstream strmBlastLib;
+	strmBlastLib.open(TEST_PATH "test.lib", std::ios_base::in | std::ios_base::binary);
+	read(strmBlastLib,g, nameSet, BlastLib());	// Read library
+	strmBlastLib.close();
+	//_debugRefinedMatches(g);
+	__testquickAlign(g);
 
-	//// Generate a primary library, i.e., all local pairwise alignments
-	//TGraph lib3(strSet);
-	//generatePrimaryLibrary(lib3, score_type, LocalPairwise_Library() );
-	//_alignTiming(startTime, "Local Pairwise alignments done: "); 
-	//std::cout << "Library size: " << numVertices(lib3) << " Vertices, " << numEdges(lib3) << " Edges" << std::endl;
+}
 
-	//// Weighting of libraries (Signal addition)
-	TGraph g(strSet);
+
+void Test_GraphCombination() {
+	typedef String<char> TName;
+	typedef StringSet<TName, Owner<> > TNameSet;
+	typedef String<AminoAcid> TSequence;
+	typedef StringSet<TSequence, Owner<> > TSequenceSet;
+	typedef StringSet<TSequence, Dependent<> > TDependentSequenceSet;
+	
+	TSequenceSet seqSet;
+	appendValue(seqSet, "GARFIELD");
+	appendValue(seqSet, "GARFIELDIELD");
+	TNameSet nameSet;
+	appendValue(nameSet, "seq1");
+	appendValue(nameSet, "seq2");
+	
+	typedef Graph<Alignment<TDependentSequenceSet, unsigned int> > TGraph;
+	TGraph lib1(seqSet);
+	addEdge(lib1, addVertex(lib1, 0, 0, 8), addVertex(lib1, 1, 0, 8), 40);
+	addVertex(lib1, 1, 8, 4);
+	//_debugRefinedMatches(lib1);
+	TGraph lib2(seqSet);
+	addEdge(lib2, addVertex(lib2, 0, 4, 4), addVertex(lib2, 1, 4, 4), 20);
+	addEdge(lib2, findVertex(lib2, 0, 4), addVertex(lib2, 1, 8, 4), 40);
+	addVertex(lib2, 0, 0, 4);
+	addVertex(lib2, 1, 0, 4);
+	//_debugRefinedMatches(lib2);
+	TGraph lib3(seqSet);
+	addEdge(lib3, addVertex(lib3, 0, 2, 6), addVertex(lib3, 1, 2, 6), 30);
+	addVertex(lib3, 0, 0, 2);
+	addVertex(lib3, 1, 0, 2);
+	addVertex(lib3, 1, 8, 4);
+	//_debugRefinedMatches(lib3);
+	TGraph g(seqSet);
 	String<TGraph*> libs;
 	appendValue(libs, &lib1);
 	appendValue(libs, &lib2);
+	appendValue(libs, &lib3);
 	combineGraphs(g, libs);
-	_alignTiming(startTime, "Combining graphs / libraries done: "); 
-	std::cout << "Library size: " << numVertices(g) << " Vertices, " << numEdges(g) << " Edges" << std::endl;
+	//_debugRefinedMatches(g);
 
-	// Clear the old libraries
-	clear(lib1);
-	clear(lib2);
+	SEQAN_TASSERT(cargo(findEdge(g, findVertex(g, 0, 0), findVertex(g, 1, 0))) < cargo(findEdge(g, findVertex(g, 0, 2), findVertex(g, 1, 2))));
+	SEQAN_TASSERT(cargo(findEdge(g, findVertex(g, 0, 2), findVertex(g, 1, 2))) < cargo(findEdge(g, findVertex(g, 0, 4), findVertex(g, 1, 4))));
+	SEQAN_TASSERT(cargo(findEdge(g, findVertex(g, 0, 2), findVertex(g, 1, 2))) < cargo(findEdge(g, findVertex(g, 0, 4), findVertex(g, 1, 8))));
+	SEQAN_TASSERT(cargo(findEdge(g, findVertex(g, 0, 4), findVertex(g, 1, 8))) < cargo(findEdge(g, findVertex(g, 0, 4), findVertex(g, 1, 4))));
+
+	clearVertices(g);
+	combineGraphs(g, libs, FrequencyCounting() );
+	//_debugRefinedMatches(g);
 	
-	// Triplet library extension
-	tripletLibraryExtension(g);
-	_alignTiming(startTime, "Triplet done: ");
-	std::cout << "Library size: " << numVertices(g) << " Vertices, " << numEdges(g) << " Edges" << std::endl;
+	SEQAN_TASSERT(cargo(findEdge(g, findVertex(g, 0, 0), findVertex(g, 1, 0))) == 1);
+	SEQAN_TASSERT(cargo(findEdge(g, findVertex(g, 0, 2), findVertex(g, 1, 2))) == 2);
+	SEQAN_TASSERT(cargo(findEdge(g, findVertex(g, 0, 4), findVertex(g, 1, 4))) == 3);
+	SEQAN_TASSERT(cargo(findEdge(g, findVertex(g, 0, 4), findVertex(g, 1, 8))) == 1);
 
-	// Build the guide tree
-	Graph<Tree<double> > guideTree;
-	upgmaTree(distanceMatrix, guideTree);
-	_alignTiming(startTime, "Guide tree done: ");
+	String<unsigned int> weights;
+	fill(weights, length(libs), 1);
+	weights[0] = 10;
+	clearVertices(g);
+	combineGraphs(g, libs, weights, FractionalScore() );
+	//_debugRefinedMatches(g);
 
-	// Perform a progressive alignment
-	Graph<Alignment<TStringSet, void, WithoutEdgeId> > gOut(strSet);
-	//progressiveAlignment(g, guideTree, gOut, Gotoh() );
-	progressiveAlignment(g, guideTree, gOut);
-	_alignTiming(startTime, "Progressive alignment done: ");
-	std::cout << gOut << std::endl;
-	clear(guideTree);
-
-	// Output alignment
-	std::stringstream output2;
-	output2 << in_path << "." << "fasta";
-	fstream strm6; // Alignment graph as msf
-	strm6.open(output2.str().c_str(), ios_base::out | ios_base::trunc);
-	write(strm6,gOut,names, FastaFormat());
-	strm6.close();
-	_alignTiming(startTime, "Alignment output done: ");
-
-	// Clean-up
-	clear(distanceMatrix);
-	clear(gOut);
-	clear(g);
-	_alignTiming(startTime, "Clean-up done: ");
-	_alignTiming(bigbang, "Total time: ");
-	std::cout << "==============================" << std::endl;
+	SEQAN_TASSERT(cargo(findEdge(g, findVertex(g, 0, 0), findVertex(g, 1, 0))) > cargo(findEdge(g, findVertex(g, 0, 4), findVertex(g, 1, 8))));
 }
 
 
-//////////////////////////////////////////////////////////////////////////////
+void Test_TripletExtension() {
+	typedef String<char> TName;
+	typedef StringSet<TName, Owner<> > TNameSet;
+	typedef String<AminoAcid> TSequence;
+	typedef StringSet<TSequence, Owner<> > TSequenceSet;
+	typedef StringSet<TSequence, Dependent<> > TDependentSequenceSet;
 
-void Test_TCoffeeScratch(String<char> const in_path) {
-//____________________________________________________________________________
-// T-Coffee
-	clock_t bigbang, startTime;
-	startTime = clock();
-	bigbang = startTime;
+	TSequenceSet seqSet;//1234567890
+	appendValue(seqSet, "GARFIELDTHE");
+	appendValue(seqSet, "GARFIELDTHE");
+	appendValue(seqSet, "GARFIELDTHE");
+	appendValue(seqSet, "THE");
+	TNameSet nameSet;
+	appendValue(nameSet, "seq1");
+	appendValue(nameSet, "seq2");
+	appendValue(nameSet, "seq3");
+	appendValue(nameSet, "seq4");
 
-	// Import Sequences
-	typedef String<Dna> TString;
-	StringSet<String<Dna>, Owner<> > origStrSet;
-	String<String<char> > names;
-	unsigned int nucCount = _alignImportSequences(in_path, "", "", origStrSet, names);
-	unsigned int seqCount = length(origStrSet);
-	_alignTiming(startTime, "Library reading done: ");
-	std::cout << "Total number of bp: " << nucCount << ", Number of sequences: " << seqCount << std::endl;
-
-	// Align the sequences
-	typedef StringSet<TString, Dependent<> > TStringSet;
-	typedef Graph<Alignment<TStringSet, unsigned int> > TGraph;
-	typedef Size<TGraph>::Type TSize;
-	typedef Id<TGraph>::Type TId;
-
-	// Make dependent string set
-	TStringSet strSet;
-	for(unsigned int i = 0; i<seqCount; ++i) appendValue(strSet, origStrSet[i]);
-	
-	//Score<int> score_type = Score<int>(5,-4,-1,-10);
-	Score<int> score_type = Score<int>(5,-4,-4,-14);
-
-	// Generate kmer primary library
-	TGraph g(strSet);
-	//generatePrimaryLibrary(g, score_type, MUMPairwise_Library() );
-	generatePrimaryLibrary(g, score_type, 15, Kmer_Library() );
-	_alignTiming(startTime, "MUM library done: ");
-	std::cout << "Library size: " << numVertices(g) << " Vertices, " << numEdges(g) << " Edges" << std::endl;
-	
-	// Triplet library extension
+	// Triplet extension
+	typedef Graph<Alignment<TDependentSequenceSet, unsigned int> > TGraph;
+	TGraph g(seqSet);
+	addEdge(g, addVertex(g, 0, 0, 8), addVertex(g, 1, 0, 8), 40);
+	addEdge(g, findVertex(g, 0, 0), addVertex(g, 2, 0, 8), 30);
+	addEdge(g, addVertex(g, 1, 8, 3), addVertex(g, 0, 8, 3), 40);
+	addEdge(g, findVertex(g, 1, 8), addVertex(g, 2, 8, 3), 30);
+	addEdge(g, findVertex(g, 1, 8), addVertex(g, 3, 0, 3), 20);
+	addEdge(g, findVertex(g, 2, 8), findVertex(g, 3, 0), 40);
 	tripletLibraryExtension(g);
-	_alignTiming(startTime, "Triplet done: ");
-	std::cout << "Library size: " << numVertices(g) << " Vertices, " << numEdges(g) << " Edges" << std::endl;
+	SEQAN_TASSERT(cargo(findEdge(g, findVertex(g, 1, 0), findVertex(g, 2, 0))) == 30);
+	SEQAN_TASSERT(cargo(findEdge(g, findVertex(g, 0, 8), findVertex(g, 3, 0))) == 20);
+	SEQAN_TASSERT(cargo(findEdge(g, findVertex(g, 0, 8), findVertex(g, 2, 8))) == 30);
+	SEQAN_TASSERT(cargo(findEdge(g, findVertex(g, 2, 8), findVertex(g, 3, 0))) == 60);
 
-	// Pairwise Distances
+	// Triplet extension confined on a set of sequences
+	clearVertices(g);
+	addEdge(g, addVertex(g, 0, 0, 8), addVertex(g, 1, 0, 8), 40);
+	addEdge(g, findVertex(g, 0, 0), addVertex(g, 2, 0, 8), 30);
+	addEdge(g, addVertex(g, 1, 8, 3), addVertex(g, 0, 8, 3), 40);
+	addEdge(g, findVertex(g, 1, 8), addVertex(g, 2, 8, 3), 30);
+	addEdge(g, findVertex(g, 1, 8), addVertex(g, 3, 0, 3), 20);
+	addEdge(g, findVertex(g, 2, 8), findVertex(g, 3, 0), 40);
+	std::set<VertexDescriptor<TGraph>::Type> seqs;
+	seqs.insert(1);seqs.insert(2);seqs.insert(3);
+	tripletLibraryExtension(g, seqs);
+	SEQAN_TASSERT(cargo(findEdge(g, findVertex(g, 1, 0), findVertex(g, 2, 0))) == 30);
+	SEQAN_TASSERT(findEdge(g, findVertex(g, 0, 8), findVertex(g, 3, 0)) == 0);
+	SEQAN_TASSERT(cargo(findEdge(g, findVertex(g, 2, 8), findVertex(g, 3, 0))) == 60);
+
+	// Triplet extension between 2 sets of sequences
+	clearVertices(g);
+	addEdge(g, addVertex(g, 0, 0, 8), addVertex(g, 1, 0, 8), 40);
+	addEdge(g, findVertex(g, 0, 0), addVertex(g, 2, 0, 8), 30);
+	addEdge(g, addVertex(g, 1, 8, 3), addVertex(g, 0, 8, 3), 40);
+	addEdge(g, findVertex(g, 1, 8), addVertex(g, 2, 8, 3), 30);
+	addEdge(g, findVertex(g, 1, 8), addVertex(g, 3, 0, 3), 20);
+	addEdge(g, findVertex(g, 2, 8), findVertex(g, 3, 0), 40);
+	std::set<VertexDescriptor<TGraph>::Type> seqs1;
+	std::set<VertexDescriptor<TGraph>::Type> seqs2;
+	seqs1.insert(0);seqs1.insert(1);seqs1.insert(3);
+	seqs2.insert(2);
+	//_debugRefinedMatches(g);
+	tripletLibraryExtension(g, seqs1, seqs2);
+	//_debugRefinedMatches(g);
+	SEQAN_TASSERT(cargo(findEdge(g, findVertex(g, 1, 0), findVertex(g, 2, 0))) == 30);
+	SEQAN_TASSERT(findEdge(g, findVertex(g, 0, 8), findVertex(g, 3, 0)) == 0);
+	SEQAN_TASSERT(cargo(findEdge(g, findVertex(g, 1, 8), findVertex(g, 3, 0))) == 20);
+}
+
+
+void Test_SumOfPairsScore() {
+	typedef String<char> TName;
+	typedef StringSet<TName, Owner<> > TNameSet;
+	typedef String<Dna> TSequence;
+	typedef StringSet<TSequence, Owner<> > TSequenceSet;
+	typedef StringSet<TSequence, Dependent<> > TDependentSequenceSet;
+	typedef Graph<Alignment<TDependentSequenceSet, unsigned int> > TGraph;
+
+	TSequenceSet seqSet;
+	appendValue(seqSet, "ACAAGTA");
+	appendValue(seqSet, "AA");
+	appendValue(seqSet, "ACCTA");
+	TNameSet nameSet;
+	appendValue(nameSet, "seq1");
+	appendValue(nameSet, "seq2");
+	appendValue(nameSet, "seq3");
+
+	TGraph g(seqSet);
+	Score<int> score_type = Score<int>(5,-4,-2,-10);
 	String<double> distanceMatrix;
-	getDistanceMatrix(g, distanceMatrix, LibraryDistance() ); 
-
-	// Build the guide tree
+	generatePrimaryLibrary(g, distanceMatrix, score_type, GlobalPairwise_Library() );
+	tripletLibraryExtension(g);
 	Graph<Tree<double> > guideTree;
-	upgmaTree(distanceMatrix, guideTree);
-	_alignTiming(startTime, "Guide tree done: ");
-
-	// Perform a progressive alignment
-	Graph<Alignment<TStringSet, void, WithoutEdgeId> > gOut(strSet);
+	slowNjTree(distanceMatrix, guideTree);
+	TGraph gOut(seqSet);
 	progressiveAlignment(g, guideTree, gOut);
-	_alignTiming(startTime, "Progressive alignment done: ");
 	//std::cout << gOut << std::endl;
-	clear(guideTree);
+	SEQAN_TASSERT(sumOfPairsScore(gOut, score_type) == -8)
+	SEQAN_TASSERT(sumOfPairsScoreInd(gOut, score_type) == 16)
 
-	// Output alignment
-	std::stringstream output3;
-	output3 << in_path << "." << "cgviz";
-	fstream strm7; // Alignment graph as cgviz
-	strm7.open(output3.str().c_str(), ios_base::out | ios_base::trunc);
-	write(strm7,gOut,names, CgVizFormat());
-	strm7.close();
-	_alignTiming(startTime, "Alignment output done: ");
-
-	// Clean-up
+	seqSet[1] = "AAG";
+	Score<int> score_type2 = Score<int>(5,-4,-1,-2);
 	clear(distanceMatrix);
-	clear(gOut);
-	clear(g);
-	_alignTiming(startTime, "Clean-up done: ");
-	_alignTiming(bigbang, "Total time: ");
-	std::cout << "==============================" << std::endl;
+	clearVertices(g);
+	generatePrimaryLibrary(g, distanceMatrix, score_type, GlobalPairwise_Library() );
+	tripletLibraryExtension(g);
+	clear(guideTree);
+	slowNjTree(distanceMatrix, guideTree);
+	clearVertices(gOut);
+	progressiveAlignment(g, guideTree, gOut);
+	SEQAN_TASSERT(sumOfPairsScore(gOut, score_type2) == 16)
+	SEQAN_TASSERT(sumOfPairsScoreInd(gOut, score_type2) == 22)
 }
 
 
+void Test_Progressive() {
+	typedef String<char> TName;
+	typedef StringSet<TName, Owner<> > TNameSet;
+	typedef String<AminoAcid> TSequence;
+	typedef StringSet<TSequence, Owner<> > TSequenceSet;
+	typedef StringSet<TSequence, Dependent<> > TDependentSequenceSet;
+	
+	TSequenceSet seqSet;
+	appendValue(seqSet, "GARFIELDTHELASTFATCAT");
+	appendValue(seqSet, "GARFIELDTHEFASTCAT");
+	appendValue(seqSet, "GARFIELDTHEVERYFASTCAT");
+	appendValue(seqSet, "THEFATCAT");
+	appendValue(seqSet, "GARFIELDTHELASTFATCAT");
+	appendValue(seqSet, "GARFIELDTHEFASTCAT");
+	appendValue(seqSet, "GARFIELDTHEVERYFASTCAT");
+	appendValue(seqSet, "THEFATCAT");
+	TNameSet nameSet;
+	appendValue(nameSet, "seq1");
+	appendValue(nameSet, "seq2");
+	appendValue(nameSet, "seq3");
+	appendValue(nameSet, "seq4");
+	appendValue(nameSet, "seq5");
+	appendValue(nameSet, "seq6");
+	appendValue(nameSet, "seq7");
+	appendValue(nameSet, "seq8");
+
+	typedef Graph<Alignment<TDependentSequenceSet, unsigned int> > TGraph;
+	TGraph g(seqSet);
+	Blosum62 score_type(-1,-11);
+	String<double> distanceMatrix;
+	generatePrimaryLibrary(g, distanceMatrix, score_type, GlobalPairwise_Library() );
+	tripletLibraryExtension(g);
+	Graph<Tree<double> > guideTree;
+	slowNjTree(distanceMatrix, guideTree);
+	TGraph gOut(seqSet);
+	progressiveAlignment(g, guideTree, gOut);
+	int score = (int) sumOfPairsScore(gOut, score_type);
+	clearVertices(gOut);
+	progressiveAlignment(g, guideTree, gOut, 4);
+	int score2 = (int) sumOfPairsScore(gOut, score_type);
+	SEQAN_TASSERT(score == score2)
+}
 
 
+void Test_Alignments1() {
+	typedef String<AminoAcid> TSequence;
+	typedef StringSet<TSequence, Owner<> > TSequenceSet;
+	typedef StringSet<TSequence, Dependent<> > TDependentSequenceSet;
+	
+	TSequenceSet seqSet;
+	appendValue(seqSet, "GARFIELDTHELASTFATCAT");
+	appendValue(seqSet, "GARFIELDTHEFASTCAT");
+	appendValue(seqSet, "GARFIELDTHEVERYFASTCAT");
+	appendValue(seqSet, "THEFATCAT");
 
+	typedef Graph<Alignment<TDependentSequenceSet, unsigned int> > TGraph;
+	TGraph gOut(seqSet);
+	globalAlignment(seqSet, gOut, MSA_Protein());
+	Blosum62 score_type(-2,-8);
+	SEQAN_TASSERT(sumOfPairsScore(gOut, score_type) == 273)
+}
 
+void Test_Alignments2() {
+	typedef String<Dna> TSequence;
+	typedef StringSet<TSequence, Owner<> > TSequenceSet;
+	typedef StringSet<TSequence, Dependent<> > TDependentSequenceSet;
+	
+	TSequenceSet seqSet;
+	appendValue(seqSet, "AACCTTGGAA");
+	appendValue(seqSet, "ACCTGAA");
+	appendValue(seqSet, "TTGG");
+	appendValue(seqSet, "AACCTT");
+
+	typedef Graph<Alignment<TDependentSequenceSet, unsigned int> > TGraph;
+	TGraph gOut(seqSet);
+	globalAlignment(seqSet, gOut, MSA_Dna());
+	Score<int> score_type = Score<int>(5,-4,-2,-6);
+	SEQAN_TASSERT(sumOfPairsScore(gOut, score_type) == 5)
+	clearVertices(gOut);
+	globalAlignment(seqSet, gOut, MSA_Genome());
+	SEQAN_TASSERT(sumOfPairsScore(gOut, score_type) == 11)
+}
 
 
 
@@ -745,31 +760,24 @@ void Test_GraphTCoffee() {
 	Test_GuideTree();
 	Test_Distances();
 	Test_Libraries();
+	Test_ExternalLibraries();
+	Test_GraphCombination();
+	Test_TripletExtension();
+	Test_SumOfPairsScore();
+	Test_Progressive();
+	Test_Alignments1();
+	Test_Alignments2();
 	
-	// Toy example
-	//Test_TCoffeeGarfield();
 	
-	// Prefab
-	//Test_Prefab();
-
-	// RnaLibraries
-	//Test_TCoffeeFromLibrary("/home/takifugu/rausch/Bralibase/small.lib");
-	//Test_TCoffeeScratch("Z://matches//test//pox_subset.fasta");
-	//Test_TCoffeeScratch("/home/takifugu/rausch/matches/test/adeno.fasta");
-	//Test_TCoffeeScratch("Z://matches//test//adeno.fasta");
-
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_utility_alphabets.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_kmer.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_distance.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_guidetree.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_library.h");
-
-	//debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_base.h");
-	//debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_msa.h");
-	
-	//debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_progressive.h");
-
-	//debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_consensus_base.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_io.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_base.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_progressive.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph/graph_align_tcoffee_msa.h");
 }
 
 

@@ -538,7 +538,6 @@ matchRefinement(TFragmentString & matches,
 				TOutGraph & ali_graph)
 {
 SEQAN_CHECKPOINT
-//	Score<int,FakeScore > fake_score;
 	typedef typename Size<TFragmentString>::Type TSize;
 		
 	TSize totalCount = 0;

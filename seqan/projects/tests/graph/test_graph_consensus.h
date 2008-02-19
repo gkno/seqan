@@ -13,6 +13,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 void Test_GraphConsensus() {
+
+
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_consensus_base.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_consensus_library.h");
 }

@@ -671,6 +671,16 @@ a single integer value between 0 and the sum of string lengths minus 1.
 				concat.set = this;
 			}
 
+			template <typename TDefault>
+			StringSet(StringSet<TString, Owner<TDefault> > const& _other) :
+				limitsValid(true)
+			{
+				SEQAN_CHECKPOINT
+				appendValue(limits, 0);
+				concat.set = this;
+				for(unsigned int i = 0; i<length(_other); ++i) appendValue(*this, _other[i]);
+			}
+
 			template <typename TPos>
 			inline typename Reference<StringSet>::Type
 			operator [] (TPos pos)
@@ -711,6 +721,16 @@ a single integer value between 0 and the sum of string lengths minus 1.
 			SEQAN_CHECKPOINT
 				appendValue(limits, 0);
 				concat.set = this;
+			}
+
+			template <typename TDefault>
+			StringSet(StringSet<TString, Owner<TDefault> > const& _other) :
+				limitsValid(true)
+			{
+				SEQAN_CHECKPOINT
+				appendValue(limits, 0);
+				concat.set = this;
+				for(unsigned int i = 0; i<length(_other); ++i) appendValue(*this, _other[i]);
 			}
 
 			template <typename TPos>
@@ -1495,8 +1515,26 @@ a single integer value between 0 and the sum of string lengths minus 1.
 	}
 
 	template <typename TString, typename TPos>
+	inline typename Id<StringSet<TString, Dependent<Generous> > >::Type
+	positionToId(StringSet<TString, Dependent<Generous> > const& me, 
+				TPos const pos) 
+	{
+	SEQAN_CHECKPOINT
+		return _findIthNonZeroValue(me.strings,pos);
+	}
+
+	template <typename TString, typename TPos>
 	inline typename Id<StringSet<TString, Dependent<Tight> > >::Type
 	positionToId(StringSet<TString, Dependent<Tight> >&me, 
+				TPos const pos) 
+	{
+	SEQAN_CHECKPOINT
+		return me.ids[pos];
+	}
+
+	template <typename TString, typename TPos>
+	inline typename Id<StringSet<TString, Dependent<Tight> > >::Type
+	positionToId(StringSet<TString, Dependent<Tight> > const&me, 
 				TPos const pos) 
 	{
 	SEQAN_CHECKPOINT
