@@ -821,7 +821,6 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 		return true;
 	}
 
-
 //____________________________________________________________________________
 
 	template < typename TText, typename TIndexSpec, class TSpec >
@@ -848,7 +847,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 ///.Function.goBegin.param.iterator.type:Spec.VSTree Iterator
 	template < typename TText, typename TIndexSpec, class TSpec >
 	inline void goBegin(Iter<Index<TText, TIndexSpec>, VSTree<TSpec> > &it) 
-	{	
+	{
 		typedef Iter<Index<TText, TIndexSpec>, VSTree<TSpec> >	TIter;
 		typedef typename GetVSTreeIteratorTraits<TIter>::Type	TTraits;
 		goRoot(it);
@@ -859,7 +858,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 		}
 
 		// if root doesn't suffice predicate, do a dfs-step
-		if (!nodeHullPredicate(it) || (TTraits::HideEmptyEdges::VALUE && emptyEdge(it)))
+		if (!nodePredicate(it) || (TTraits::HideEmptyEdges::VALUE && emptyEdge(it)))
 			goNext(it);
 	}
 
