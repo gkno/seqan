@@ -114,7 +114,8 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
         OPEN_CREATE     = 4,
         OPEN_APPEND     = 8,
         OPEN_ASYNC      = 16,
-		OPEN_TEMPORARY	= 32
+		OPEN_TEMPORARY	= 32,
+		OPEN_QUIET		= 128
     };
 
 	template <typename T>

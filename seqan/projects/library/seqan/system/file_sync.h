@@ -89,7 +89,8 @@ namespace SEQAN_NAMESPACE_MAIN
         bool open(char const *fileName, int openMode = DefaultOpenMode<File>::VALUE) {
             handle = _open(fileName, _getOFlag(openMode), _S_IREAD | _S_IWRITE);
 			if (handle == -1) {
-				::std::cerr << "Open failed on file " << fileName << ". (" << ::strerror(errno) << ")" << ::std::endl;
+				if (!(openMode & OPEN_QUIET))
+					::std::cerr << "Open failed on file " << fileName << ". (" << ::strerror(errno) << ")" << ::std::endl;
 				return false;
 			}
 			SEQAN_PROADD(SEQAN_PROOPENFILES, 1);
@@ -103,7 +104,8 @@ namespace SEQAN_NAMESPACE_MAIN
 			char *fileName = _tempnam(NULL, "GNDX");
 #endif
 			if (!fileName) {
-				::std::cerr << "Cannot create a unique temporary filename" << ::std::endl;
+				if (!(openMode & OPEN_QUIET))
+					::std::cerr << "Cannot create a unique temporary filename" << ::std::endl;
 				return false;
 			}
             bool result = open(fileName, openMode | OPEN_TEMPORARY);
@@ -209,17 +211,19 @@ namespace SEQAN_NAMESPACE_MAIN
             handle = ::open(fileName, _getOFlag(openMode), S_IREAD | S_IWRITE);
 			if (handle == -1 && errno == EINVAL) {	// fall back to cached access
 	            #ifdef SEQAN_DEBUG_OR_TEST_
-					::std::cerr << "Warning: Direct access openening failed: " << fileName << "." << ::std::endl;
+					if (!(openMode & OPEN_QUIET))
+						::std::cerr << "Warning: Direct access openening failed: " << fileName << "." << ::std::endl;
 				#endif			
           	    handle = ::open(fileName, _getOFlag(openMode & ~OPEN_ASYNC), S_IREAD | S_IWRITE);
 			}
 			
 			if (handle == -1) {
-				::std::cerr << "Open failed on file " << fileName << ". (" << ::strerror(errno) << ")" << ::std::endl;
+				if (!(openMode & OPEN_QUIET))
+					::std::cerr << "Open failed on file " << fileName << ". (" << ::strerror(errno) << ")" << ::std::endl;
 				return false;
 			}
 
-			if (sizeof(FilePtr) < 8)
+			if (sizeof(FilePtr) < 8 && !(openMode & OPEN_QUIET))
 				// To remove this warning, you have to options:
 				// 1. include the following line before including anything in your application
 				//    #define _FILE_OFFSET_BITS 64
@@ -233,7 +237,8 @@ namespace SEQAN_NAMESPACE_MAIN
         bool openTemp(int openMode = DefaultOpenTempMode<File>::VALUE) {
 			char tmpFileName[] = "/GNDXXXXXXX";
 			if ((handle = ::mkstemp(tmpFileName)) == -1) {
-				::std::cerr << "Cannot create temporary file " << tmpFileName << ". (" << ::strerror(errno) << ")" << ::std::endl;
+				if (!(openMode & OPEN_QUIET))
+					::std::cerr << "Cannot create temporary file " << tmpFileName << ". (" << ::strerror(errno) << ")" << ::std::endl;
 				return false;
 			}
 			if (!(close() && open(tmpFileName, openMode))) return false;
@@ -242,7 +247,7 @@ namespace SEQAN_NAMESPACE_MAIN
             #endif
 			::unlink(tmpFileName);
             #ifdef SEQAN_DEBUG
-				if (result == -1)
+				if (result == -1 && !(openMode & OPEN_QUIET))
 					::std::cerr << "Cannot unlink temporary file " << tmpFileName << ". (" << ::strerror(errno) << ")" << ::std::endl;
             #endif
 			return true;

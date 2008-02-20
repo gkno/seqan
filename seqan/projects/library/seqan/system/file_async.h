@@ -67,11 +67,13 @@ namespace SEQAN_NAMESPACE_MAIN
                                 NULL);
 
             if (hFileAsync == INVALID_HANDLE_VALUE) {
-				::std::cerr << "Open failed on file " << fileName << ". (ErrNo=" << GetLastError() << ")" << ::std::endl;
+				if (!(openMode & OPEN_QUIET))
+					::std::cerr << "Open failed on file " << fileName << ". (ErrNo=" << GetLastError() << ")" << ::std::endl;
                 return false;
             }
             #ifdef SEQAN_VERBOSE
-                ::std::cerr << "file opened asynchronously " << fileName << " handle " << ::std::hex << hFileAsync << ::std::dec << ::std::endl;
+				if (!(openMode & OPEN_QUIET))
+	                ::std::cerr << "file opened asynchronously " << fileName << " handle " << ::std::hex << hFileAsync << ::std::dec << ::std::endl;
             #endif
 
             if (noBuffering) {
@@ -83,11 +85,13 @@ namespace SEQAN_NAMESPACE_MAIN
                                 getExtraFlags(openMode & ~OPEN_ASYNC),
                                 NULL);
                 if (hFile == INVALID_HANDLE_VALUE) {
-                	::std::cerr << "Open failed on secondary file " << fileName << ". (ErrNo=" << GetLastError() << ")" << ::std::endl;
+					if (!(openMode & OPEN_QUIET))
+	                	::std::cerr << "Open failed on secondary file " << fileName << ". (ErrNo=" << GetLastError() << ")" << ::std::endl;
                     return false;
                 }
 	            #ifdef SEQAN_VERBOSE
-                	::std::cerr << "async file opened  " << fileName << " handle " << ::std::hex << hFile << ::std::dec << ::std::endl;
+					if (!(openMode & OPEN_QUIET))
+	                	::std::cerr << "async file opened  " << fileName << " handle " << ::std::hex << hFile << ::std::dec << ::std::endl;
                 #endif
             } else
                 hFile = hFileAsync;
@@ -102,12 +106,14 @@ namespace SEQAN_NAMESPACE_MAIN
 #else
             char szTempPath[MAX_PATH];
             if (!GetTempPath(MAX_PATH, szTempPath)) {
-				::std::cerr << "Couldn't get a temporary path name. (ErrNo=" << GetLastError() << ")" << ::std::endl;
+				if (!(openMode & OPEN_QUIET))
+					::std::cerr << "Couldn't get a temporary path name. (ErrNo=" << GetLastError() << ")" << ::std::endl;
                 return false;
             }
 #endif
             if (!GetTempFileName(szTempPath, "GNDX", 0, szTempName)) {
-				::std::cerr << "Couldn't get a temporary file name. (ErrNo=" << GetLastError() << ")" << ::std::endl;
+				if (!(openMode & OPEN_QUIET))
+					::std::cerr << "Couldn't get a temporary file name. (ErrNo=" << GetLastError() << ")" << ::std::endl;
                 return false;
             }
             return open(szTempName, openMode | OPEN_TEMPORARY);
@@ -619,7 +625,8 @@ namespace SEQAN_NAMESPACE_MAIN
         bool open(char const *fileName, int openMode = DefaultOpenMode<File>::VALUE) {
             handle = ::open(fileName, Base::_getOFlag(openMode & ~OPEN_ASYNC), S_IREAD | S_IWRITE);
 			if (handle == -1) {
-				::std::cerr << "Open failed on file " << fileName << ". (" << ::strerror(errno) << ")" << ::std::endl;
+				if (!(openMode & OPEN_QUIET))
+					::std::cerr << "Open failed on file " << fileName << ". (" << ::strerror(errno) << ")" << ::std::endl;
 				return false;
 			}
 
@@ -627,18 +634,20 @@ namespace SEQAN_NAMESPACE_MAIN
 				handleAsync = ::open(fileName, Base::_getOFlag(openMode | OPEN_ASYNC & ~OPEN_CREATE), S_IREAD | S_IWRITE);
 				if (handleAsync == -1 || errno == EINVAL) {	// fall back to cached access
 					#ifdef SEQAN_DEBUG_OR_TEST_
-						::std::cerr << "Warning: Direct access openening failed. (" << ::strerror(errno) << ")" << ::std::endl;
+						if (!(openMode & OPEN_QUIET))
+							::std::cerr << "Warning: Direct access openening failed. (" << ::strerror(errno) << ")" << ::std::endl;
 					#endif
 					handleAsync = handle;
 				}
 				#ifdef SEQAN_DEBUG_OR_TEST_
 				    else
-						::std::cerr << "Direct access successfully initiated" << ::std::endl;
+						if (!(openMode & OPEN_QUIET))
+							::std::cerr << "Direct access successfully initiated" << ::std::endl;
 				#endif
 			} else
 				handleAsync = handle;
 
-			if (sizeof(FilePtr) < 8)
+			if (sizeof(FilePtr) < 8 && !(openMode & OPEN_QUIET))
 				// To remove this warning, you have to options:
 				// 1. include the following line before including anything in your application
 				//    #define _FILE_OFFSET_BITS 64
@@ -657,12 +666,13 @@ namespace SEQAN_NAMESPACE_MAIN
 			char tmpFileName[] = "/var/tmp/GNDXXXXXXX";
 #endif
 			if ((handle = handleAsync = ::mkstemp(tmpFileName)) == -1) {
-				::std::cerr << "Couldn't create temporary file " << tmpFileName << ". (" << ::strerror(errno) << ")" << ::std::endl;
+				if (!(openMode & OPEN_QUIET))
+					::std::cerr << "Couldn't create temporary file " << tmpFileName << ". (" << ::strerror(errno) << ")" << ::std::endl;
 				return false;
 			}
 			if (!(close() && open(tmpFileName, openMode))) return false;
             #ifdef SEQAN_DEBUG
-				if (::unlink(tmpFileName) == -1)
+				if (::unlink(tmpFileName) == -1 && !(openMode & OPEN_QUIET))
 					::std::cerr << "Couldn't unlink temporary file " << tmpFileName << ". (" << ::strerror(errno) << ")" << ::std::endl;
             #else
 				::unlink(tmpFileName);

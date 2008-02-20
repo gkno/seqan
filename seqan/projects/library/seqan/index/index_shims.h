@@ -619,13 +619,13 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 	template < typename TValue, typename TSpec, typename TSSSpec >
 	inline bool open(StringSet<String<TValue, TSpec>, TSSSpec> &multi, const char *fileName, int openMode) {
 		bool more = true;
-		char id[11]; // 2^32 has 10 decimal digits + 1 (0x00)
+		char id[12]; // 2^32 has 10 decimal digits + 1 (0x00)
 		unsigned i = 0;
 		for(; more; ++i) {
-			sprintf(id, "%u", i);
+			sprintf(id, ".%u", i);
 			String<char> name;
 			name = fileName;	append(name, id);
-			more = open(value(multi, i), toCString(name), openMode);
+			more = open(value(multi, i), toCString(name), openMode | OPEN_QUIET);
 		}
 		return i > 1;
 	}
@@ -640,7 +640,8 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 
 	template < typename TValue, typename TSpec >
 	inline bool save(String<TValue, TSpec> const &string, const char *fileName, int openMode) {
-		if (length(string) == 0) return true;
+// 
+//		if (length(string) == 0) return true;
 		String<TValue, External< ExternalConfigLarge<> > > extString;
 		if (!open(extString, fileName, openMode)) return false;
 		assign(extString, string);
