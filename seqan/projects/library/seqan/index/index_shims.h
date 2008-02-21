@@ -618,14 +618,19 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 
 	template < typename TValue, typename TSpec, typename TSSSpec >
 	inline bool open(StringSet<String<TValue, TSpec>, TSSSpec> &multi, const char *fileName, int openMode) {
-		bool more = true;
 		char id[12]; // 2^32 has 10 decimal digits + 1 (0x00)
 		unsigned i = 0;
-		for(; more; ++i) {
+		while (true) {
 			sprintf(id, ".%u", i);
 			String<char> name;
 			name = fileName;	append(name, id);
-			more = open(value(multi, i), toCString(name), openMode | OPEN_QUIET);
+			{
+				String<TValue, External< ExternalConfigLarge<> > > extString;
+				if (!open(extString, toCString(name), openMode | OPEN_QUIET)) break;
+				resize(multi, i + 1);
+				assign(value(multi, i), extString);
+			}
+			++i;
 		}
 		return i > 1;
 	}
@@ -668,7 +673,6 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 	template < typename TValue, typename TSpec, typename TSSSpec>
 	inline bool save(StringSet<String<TValue, TSpec>, TSSSpec> const &multi, const char *fileName, int openMode) {
 		if (length(multi) == 0) return true;
-		bool result = true;
 		char id[12]; // 2^32 has 10 decimal digits + 2 ('.' and 0x00)
 		for(unsigned i = 0; i < length(multi); ++i) {
 			sprintf(id, ".%u", i);
@@ -676,9 +680,9 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 			name = fileName;	
 			append(name, &(id[0]));
 			if (!save(getValue(multi, i), toCString(name), openMode))
-				result = false;
+				return false;
 		}
-		return result;
+		return true;
 	}
 	template < typename TValue, typename TSpec, typename TSSSpec>
 	inline bool save(StringSet<String<TValue, TSpec>, TSSSpec> const &multi, const char *fileName) {
