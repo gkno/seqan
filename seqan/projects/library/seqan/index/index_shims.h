@@ -620,6 +620,7 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 	inline bool open(StringSet<String<TValue, TSpec>, TSSSpec> &multi, const char *fileName, int openMode) {
 		char id[12]; // 2^32 has 10 decimal digits + 1 (0x00)
 		unsigned i = 0;
+		clear(multi);
 		while (true) {
 			sprintf(id, ".%u", i);
 			String<char> name;
