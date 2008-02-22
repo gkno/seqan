@@ -68,3 +68,4 @@ int main()
 	SEQAN_TREPORT("TEST END")
 	return 0;
 }
+
