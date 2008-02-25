@@ -41,7 +41,7 @@ struct Unlimited
 struct Limited
 {};
 
-/**
+/*DISABLED
 .Spec.Class Pool Allocator:
 ..cat:Allocators
 ..general:Class.Allocator

@@ -114,7 +114,7 @@ SEQAN_CHECKPOINT
 	operator = (Proxy const & _other)
 	{
 SEQAN_CHECKPOINT
-		data_iterator = _other.data_iterator;
+		assignValue(data_iterator, getValue(_other.data_iterator));
 		return *this;
 	}
 

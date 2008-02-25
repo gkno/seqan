@@ -1817,6 +1817,18 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 	}
 //____________________________________________________________________________
 
+    template < typename TValue, typename TConfig, typename TSize, typename TExpand >
+    inline typename Size< String<TValue, External<TConfig> > >::Type
+    reserve(
+	    String<TValue, External<TConfig> > &me,
+		TSize new_capacity,
+		Tag<TExpand> const)
+	{
+		me.resize(new_capacity);
+		return capacity(me);
+	}
+//____________________________________________________________________________
+
 	template < typename TValue, typename TConfig, typename TSpec >
     inline typename Iterator<String<TValue, External<TConfig> >, Tag<TSpec> const>::Type
     begin(String<TValue, External<TConfig> > &me, Tag<TSpec> const) {
@@ -1865,6 +1877,17 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
     {
 	    return me.push_back(_Val);
     }
+
+	template < typename TValue, typename TConfig, typename TExpand >
+	inline void
+	appendValue(String<TValue, External<TConfig> > &me, 
+				TValue const &_Val,
+				Tag<TExpand> const)
+	{
+		return me.push_back(_Val);
+	}
+
+
 /*
     template < typename TSpec >
 	std::ostream& operator<<(std::ostream &out, String<char, TSpec > &p) {

@@ -177,6 +177,7 @@ SEQAN_CHECKPOINT
 	{
 SEQAN_CHECKPOINT
 		me.data_length = new_length;
+		_setLength(host(me), _PackedConsts<String>::toHostLength(new_length));
 	}
 
 //____________________________________________________________________________
@@ -260,7 +261,19 @@ struct Reference<String<TValue, Packed<THostspec> > const>
 	typedef Proxy<IteratorProxy<TIterator> > Type;
 };
 
-
+//////////////////////////////////////////////////////////////////////////////
+/*
+template <typename TValue, typename THostspec>
+struct Size<String<TValue, Packed<THostspec> > >
+{
+	typedef __int64 Type;
+};
+template <typename TValue, typename THostspec>
+struct Size<String<TValue, Packed<THostspec> > const>
+{
+	typedef __int64 Type;
+};
+//*/
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
@@ -491,7 +504,10 @@ inline typename Size<String<TValue, Packed<THostspec> > const>::Type
 capacity(String<TValue, Packed<THostspec> > const & me)
 {
 SEQAN_CHECKPOINT
-	return length(host(me)) * _PackedConsts<String<TValue, Packed<THostspec> > >::VALUES_PER_WORD;
+	typedef typename Size<String<TValue, Packed<THostspec> > const>::Type TSize;
+	TSize len = capacity(host(me));
+	len *= _PackedConsts<String<TValue, Packed<THostspec> > >::VALUES_PER_WORD;
+	return len;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -711,8 +727,9 @@ reserve(
 SEQAN_CHECKPOINT
 
 	typedef String<TValue, Packed<TSpec> > TString;
-
-	return reserve(host(seq), _PackedConsts<TString>::toHostLength(new_capacity), tag) * _PackedConsts<TString>::VALUES_PER_WORD;
+	typedef typename Size<TString>::Type TSize;
+	TSize ret_value = reserve(host(seq), _PackedConsts<TString>::toHostLength(new_capacity), tag);
+	return ret_value * _PackedConsts<TString>::VALUES_PER_WORD;
 }
 
 template <typename TValue, typename TSpec, typename _TSize>
@@ -945,12 +962,12 @@ SEQAN_CHECKPOINT
 // assignValue
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename Iter, typename TValue>
+template <typename TIter, typename TValue>
 inline void
-_assignValue_packed_string_iterator(Iter & me,
-									TValue _value)
+_assignValue_packed_string_iterator(TIter & me,
+									TValue & _value)
 {
-	typedef typename Container<Iter>::Type TContainer;
+	typedef typename Container<TIter>::Type TContainer;
 	typedef typename Host<TContainer>::Type THost;
 	typedef typename Value<THost>::Type THostValue;
 	THostValue mask_ = _PackedConsts<TContainer>::VALUE_MASK << _bitpos(me);

@@ -283,6 +283,66 @@ namespace SEQAN_NAMESPACE_MAIN
 		me.lastValue = me.blockLast = typename TBlockString::TBlockIter();
 	}
 
+
+	template<typename TValue, unsigned int SPACE, typename TSize2, typename TExpand>
+	inline typename Size< String<TValue, Block<SPACE> > >::Type
+	resize(String<TValue, Block<SPACE> > & me,
+		TSize2 new_length,
+		Tag<TExpand> const)
+	{
+	SEQAN_CHECKPOINT
+		typedef String<TValue, Block<SPACE>	>			TBlockString;
+		typedef typename Size<TBlockString>::Type		TSize;
+		TSize len = length(me);
+
+		if (new_length > len)
+		{
+			for (; len < new_length; ++len) push(me);
+		}
+		else if (new_length < len)
+		{
+			for (; len > new_length; --len) pop(me);
+		}
+		return new_length;
+	}
+	template<typename TValue, unsigned int SPACE, typename TSize2>
+	inline typename Size< String<TValue, Block<SPACE> > >::Type
+	resize(String<TValue, Block<SPACE> > & me,
+		TSize2 new_length,
+		Limit)
+	{
+	SEQAN_CHECKPOINT
+		typedef String<TValue, Block<SPACE>	>			TBlockString;
+		typedef typename Size<TBlockString>::Type		TSize;
+		TSize len = length(me);
+
+		if (new_length > capacity(me)) new_length = capacity(me);
+
+		if (new_length > len)
+		{
+			TValue val;
+			for (; len < new_length; ++len) push(me, val);
+		}
+		else if (new_length < len)
+		{
+			for (; len > new_length; --len) pop(me);
+		}
+		return new_length;
+	}
+
+	
+	//dummy implementation
+	template<typename TValue, unsigned int SPACE, typename TSize, typename TExpand>
+	inline typename Size< String<TValue, Block<SPACE> > >::Type
+	reserve(String<TValue, Block<SPACE> > & me,
+		TSize new_capacity,
+		Tag<TExpand> const)
+	{
+	SEQAN_CHECKPOINT
+		return new_capacity;
+	}
+
+
 	template<typename TValue, unsigned int SPACE, typename TSource, typename TExpand>
 	inline void 
 	append(

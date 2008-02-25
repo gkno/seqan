@@ -86,7 +86,14 @@ SEQAN_CHECKPOINT
 SEQAN_CHECKPOINT
 		assign(*this, source);
 	}
-
+	String(String const & source, Move):
+		data_begin(0),
+		data_end(0),
+		data_capacity(0)
+	{
+SEQAN_CHECKPOINT
+		move(*this, source);
+	}
 	template <typename TSource, typename TSize>
 	String(TSource & source, TSize limit):
 		data_begin(0),

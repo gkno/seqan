@@ -76,8 +76,9 @@ public:
 // Functions
 //////////////////////////////////////////////////////////////////////////////
 
+/*
 // debug method to visualize bitmasks
-void _printMask(String <unsigned> const &  mask,unsigned line,String <char> name)
+inline void _printMask(String <unsigned> const &  mask,unsigned line,String <char> name)
 {
 	unsigned len = length(mask);
 	std::cout << name << " " << line << "   ";
@@ -89,11 +90,12 @@ void _printMask(String <unsigned> const &  mask,unsigned line,String <char> name
 	}
 	std::cout << ::std::endl;
 }
+*/
 
 //____________________________________________________________________________
 //								VALIDATION
 
-bool _isInt(String<char> const & number)
+inline bool _isInt(String<char> const & number)
 {
 	unsigned int len = length(number);
 	for(unsigned int i = 0;i < len;++i){

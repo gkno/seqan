@@ -8,6 +8,7 @@ Inhalte:
 * Filtering-Algorithmen Swift & Co.
 * Wu-Manber wieder lauffähig machen
 * Seed-Klassen (Kemena)
+* Hamming-Distanz-Sucher
 
 
 Korrekturen/Anpassungen:

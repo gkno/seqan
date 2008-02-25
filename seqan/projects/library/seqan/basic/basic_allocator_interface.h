@@ -114,7 +114,7 @@ typedef Tag<TagAllocateStorage_> const TagAllocateStorage;
 to construct the objects.
 A $new$ operator which is part of the C++ standard (defined in $<new>$)
  can also be used to construct objects at a given memory address.
- ..note:All allocated memory blocks should be deallocated by the corresponding function @Function.deallocate@.
+..note:All allocated memory blocks should be deallocated by the corresponding function @Function.deallocate@.
 ..see:Function.deallocate
 ..see:Function.valueConstruct
 ..see:Function.arrayFill
