@@ -7,7 +7,7 @@ using namespace seqan;
 /// constraint parameters
 struct TMyConstraints {
 	double p_min;
-	int replen_max;
+	unsigned int replen_max;
 };
 
 /// SeqAn extensions
@@ -26,10 +26,10 @@ namespace seqan
 	bool nodePredicate(Iter<Index<TText, Index_Wotd<TMyIndex> >, TSpec> const &it) 
 	{
 		TMyConstraints const &cons = cargo(container(it));
-		unsigned replen = repLength(it);
-		unsigned textLen = length(container(it));
+		unsigned int replen = repLength(it);
+		unsigned int textLen = length(container(it));
 
-		if (textLen == replen) return false;
+		if (textLen == replen) return true;
 		return ((double)countOccurrences(it) / 
 				(double)(textLen - replen)) > cons.p_min;
 	}
@@ -38,12 +38,13 @@ namespace seqan
 	template <typename TText, typename TSpec>
 	bool nodeHullPredicate(Iter<Index<TText, Index_Wotd<TMyIndex> >, TSpec> const &it) 
 	{
-		Index<TText, Index_Wotd<TMyIndex> > const &index = container(it);
-		TMyConstraints const &cons = cargo(index);
+		TMyConstraints const &cons = cargo(container(it));
+		unsigned int textLen = length(container(it));
 
 		if (repLength(it) > cons.replen_max) return false;
+		if (textLen <= cons.replen_max) return true;
 		return ((double)countOccurrences(it) / 
-				(double)(length(index) - cons.replen_max)) > cons.p_min;
+				(double)(textLen - cons.replen_max)) > cons.p_min;
 	}
 }
 
