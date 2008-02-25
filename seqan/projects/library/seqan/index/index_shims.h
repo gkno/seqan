@@ -38,6 +38,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TObject const &text,
 		TAlgSpec const)
 	{
+	SEQAN_CHECKPOINT
         // signed characters behave different than unsigned when compared
         // to get the same index with signed or unsigned chars we simply cast them to unsigned
         // before feeding them into the pipeline
@@ -71,6 +72,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		StringSet<TString, TSpec> const &stringSet,
 		TAlgSpec const)
 	{
+	SEQAN_CHECKPOINT
         // signed characters behave different than unsigned when compared
         // to get the same index with signed or unsigned chars we simply cast them to unsigned
         // before feeding them into the pipeline
@@ -117,6 +119,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TText const &s,
 		TAlgSpec const &alg)
 	{
+	SEQAN_CHECKPOINT
 		// -> call internal memory algorithm with an extended interface (+ alphabet size, max_depth)
 		if (BitsPerValue< typename Value<TText>::Type >::VALUE > 16)
 			createSuffixArray(SA, s, alg, length(s), 0);
@@ -134,6 +137,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		String< TValue, External<TConfig> > const &s,
 		TAlgSpec const alg)
 	{
+	SEQAN_CHECKPOINT
 		// -> explicitly create SA using external memory
         createSuffixArrayExt(SA, s, alg);
 	}
@@ -149,6 +153,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		StringSet< String<TValue, TSpec>, TSSetSpec > const &s,
 		TAlgSpec const)
 	{
+	SEQAN_CHECKPOINT
         createSuffixArrayExt(SA, s, Skew7());
 	}
 
@@ -172,6 +177,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TSA const &suffixArray,
 		TAlgSpec const)
 	{
+	SEQAN_CHECKPOINT
 		// specialization
 		typedef Pipe< TObject, Source<> >							srcText_t;
 		typedef Pipe< TSA, Source<> >   							srcSA_t;
@@ -202,6 +208,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TSA const &suffixArray,
 		TAlgSpec const)
 	{
+	SEQAN_CHECKPOINT
 		typedef typename Concatenator<StringSet<TString, TSpec> >::Type TConcat;
 		typedef Multi<
 			TAlgSpec, 
@@ -248,6 +255,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TSA const &SA,
 		Kasai const)
 	{
+	SEQAN_CHECKPOINT
         createLCPTableExt(LCP, s, SA, Kasai());
 	}
 
@@ -291,6 +299,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TSA const &suffixArray,
 		TAlgSpec const)
 	{
+	SEQAN_CHECKPOINT
 		typedef typename Concatenator<TObject>::Type				TConcat;
 
 		// specialization
@@ -323,6 +332,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TSA const &SA,
 		TAlgSpec const alg)
 	{
+	SEQAN_CHECKPOINT
         //TSA LCP;
         //resize(LCP, length(s), Exact());
 		// we use LCPE[n-lcpSize..n-1] as a temporary buffer instead of allocating one
@@ -347,6 +357,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TSA const &SA,
 		TAlgSpec const alg)
 	{
+	SEQAN_CHECKPOINT
         createLCPETableExt(LCPE, s, SA, alg);
     }
 
@@ -360,6 +371,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TText &s,
 		TSA &SA)
 	{
+	SEQAN_CHECKPOINT
 		CreateLCPETable(LCPE, s, SA, Kasai());
     }
 
@@ -380,6 +392,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TText const &s,
 		TSA const &SA)
 	{
+	SEQAN_CHECKPOINT
 		// specialization
 		typedef Pipe< TText, Source<> >						srcText_t;
 		typedef Pipe< TSA, Source<> >   					srcSA_t;
@@ -409,6 +422,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < typename TBWT, typename TText, typename TSA, typename _TTextRandom >
     inline void _createBWTableWrapper(TBWT &bwt, TText const &s, TSA const &sa,		_TTextRandom const)
 	{
+	SEQAN_CHECKPOINT
 		createBWTableExt(bwt, concat(s), sa);
 	}
 
@@ -416,12 +430,14 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < typename TBWT, typename TText, typename TSA >
     inline void _createBWTableWrapper(TBWT &bwt, TText const &s, TSA const &sa,		True const)
 	{
+	SEQAN_CHECKPOINT
 		createBWTableInt(bwt, concat(s), sa);
 	}
 
 	template < typename TBWT, typename TText, typename TSA >
     inline void createBWTable(TBWT &bwt, TText const &s, TSA const &sa)
 	{
+	SEQAN_CHECKPOINT
 		_createBWTableWrapper(bwt, s, sa, typename AllowsFastRandomAccess<TText>::Type());
 	}
 
@@ -456,12 +472,13 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename TValue, typename TSpec>
 	inline void orderOccurrences(String<TValue, TSpec> &occString)
 	{
+	SEQAN_CHECKPOINT
 		::std::sort(begin(occString, Standard()), end(occString, Standard()), _SAValueLess<TValue>());
 	}
 
 
 //////////////////////////////////////////////////////////////////////////////
-// table creators
+// fibre creators
 
 /**
 .Function.indexCreate:
@@ -479,6 +496,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <typename TText, typename TSpec, typename TSpecAlg>
 	inline bool indexCreate(Index<TText, TSpec> &index, Tag<_Fibre_SA> const, TSpecAlg const alg) {
+	SEQAN_CHECKPOINT
 		resize(indexSA(index), length(indexRawText(index)), Exact());
 		createSuffixArray(indexSA(index), indexText(index), alg);
 		return true;
@@ -486,6 +504,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <typename TText, typename TSpec, typename TSpecAlg>
 	inline bool indexCreate(Index<TText, TSpec> &index, Tag<_Fibre_LCP> const, TSpecAlg const alg) {
+	SEQAN_CHECKPOINT
 		resize(indexLCP(index), length(indexRawText(index)), Exact());
 		createLCPTable(indexLCP(index), indexText(index), indexSA(index), alg);
 		return true;
@@ -493,6 +512,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <typename TText, typename TSpec, typename TSpecAlg>
 	inline bool indexCreate(Index<TText, TSpec> &index, Tag<_Fibre_LCPE> const, TSpecAlg const alg) {
+	SEQAN_CHECKPOINT
 	//TODO: separate LCP from LCPE (for now LCPE = LCP + extra)
 //		resize(indexLCP(index), length(indexRawText(index)), Exact());
 //		createLCPETable(indexLCPE(index), indexRawText(index), indexSA(index), alg);
@@ -501,6 +521,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <typename TText, typename TSpec>
 	inline bool indexCreate(Index<TText, TSpec> &index, Tag<_Fibre_BWT> const, BWT const) {
+	SEQAN_CHECKPOINT
 		resize(indexBWT(index), length(indexRawText(index)), Exact());
 		createBWTable(indexBWT(index), indexText(index), indexRawSA(index));
 		return true;
@@ -508,6 +529,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <typename TText, typename TSpec>
 	inline bool indexCreate(Index<TText, TSpec> &index, Tag<_Fibre_ChildTab> const, ChildTab const) {
+	SEQAN_CHECKPOINT
 		resize(indexChildTab(index), length(indexRawText(index)), Exact());
 		createChildTable(indexChildTab(index), indexLCP(index));
 		return true;
@@ -515,11 +537,13 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <typename TText, typename TSpec, typename TFibre>
 	inline bool indexCreate(Index<TText, TSpec> &index, Tag<TFibre> const fibre) {
+	SEQAN_CHECKPOINT
 		return indexCreate(index, fibre, typename DefaultIndexCreator<Index<TText, TSpec>, Tag<TFibre> const>::Type());
 	}
 
+
 //////////////////////////////////////////////////////////////////////////////
-// automatic creation
+// automatic fibre creation
 
 /**
 .Function.indexSupplied:
@@ -534,6 +558,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <typename TText, typename TSpec, typename TFibre>
 	inline bool indexSupplied(Index<TText, TSpec> &index, Tag<TFibre> const fibre) {
+	SEQAN_CHECKPOINT
 		return !empty(getFibre(index, fibre));
 	}
 
@@ -554,6 +579,7 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 
 	template <typename TText, typename TSpec, typename TFibre>
 	inline bool indexRequire(Index<TText, TSpec> &index, Tag<TFibre> const fibre) {
+	SEQAN_CHECKPOINT
 		if (indexSupplied(index, fibre)) return true;				// if the table doesn't exist,
 		if (!indexSolveDependencies(index, fibre)) return false;	// fulfill requirements
 		return indexCreate(index, fibre);							// and create table
@@ -561,30 +587,54 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 
 
 //////////////////////////////////////////////////////////////////////////////
+// index cargo interface
+
+	template <typename TText, typename TSpec>
+	inline typename Reference< typename Cargo<Index<TText, TSpec> >::Type >::Type
+	cargo(Index<TText, TSpec> & me)
+	{
+	SEQAN_CHECKPOINT
+		return me.cargo;
+	}
+
+	template <typename TText, typename TSpec>
+	inline typename Reference< typename Cargo<Index<TText, TSpec> const>::Type >::Type
+	cargo(Index<TText, TSpec> const & me)
+	{
+	SEQAN_CHECKPOINT
+		return me.cargo;
+	}
+
+//////////////////////////////////////////////////////////////////////////////
 // solve dependencies
 
 	template <typename TText, typename TSpec, typename TFibre>
 	inline bool indexSolveDependencies(Index<TText, TSpec> &, Tag<TFibre> const) {
+	SEQAN_CHECKPOINT
 		return true;
 	}
 
 	template <typename TText, typename TSpec>
 	inline bool indexSolveDependencies(Index<TText, TSpec> &index, Tag<_Fibre_LCP> const) {
+	SEQAN_CHECKPOINT
 		return indexRequire(index, Tag<_Fibre_SA>());
 	}
 
 	template <typename TText, typename TSpec>
 	inline bool indexSolveDependencies(Index<TText, TSpec> &index, Tag<_Fibre_LCPE> const) {
+	SEQAN_CHECKPOINT
 		return indexRequire(index, Tag<_Fibre_LCP>());
 	}
 
 	template <typename TText, typename TSpec>
 	inline bool indexSolveDependencies(Index<TText, TSpec> &index, Tag<_Fibre_ChildTab> const) {
+	SEQAN_CHECKPOINT
 		return indexRequire(index, Tag<_Fibre_LCP>());
 	}
 
 	template <typename TText, typename TSpec>
 	inline bool indexSolveDependencies(Index<TText, TSpec> &index, Tag<_Fibre_BWT> const) {
+	SEQAN_CHECKPOINT
 		return indexRequire(index, Tag<_Fibre_SA>());
 	}
 
@@ -594,6 +644,7 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 
 	template < typename TValue, typename TSpec >
 	inline bool open(String<TValue, TSpec> &string, const char *fileName, int openMode) {
+	SEQAN_CHECKPOINT
 		String<TValue, External< ExternalConfigLarge<> > > extString;
 		if (!open(extString, fileName, openMode)) return false;
 		assign(string, extString);
@@ -601,11 +652,13 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 	}
 	template < typename TValue, typename TSpec >
 	inline bool open(String<TValue, TSpec> &string, const char *fileName) {
+	SEQAN_CHECKPOINT
 		return open(string, fileName, OPEN_RDONLY);
 	}
 
 	template < typename THost, typename TSpec >
 	inline bool open(Segment<THost, TSpec> &string, const char *fileName, int openMode) {
+	SEQAN_CHECKPOINT
 		String<typename Value<THost>::Type, External< ExternalConfigLarge<> > > extString;
 		if (!open(extString, fileName, openMode)) return false;
 		assign(string, extString);
@@ -613,11 +666,13 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 	}
 	template < typename THost, typename TSpec >
 	inline bool open(Segment<THost, TSpec> &string, const char *fileName) {
+	SEQAN_CHECKPOINT
 		return open(string, fileName, OPEN_RDONLY);
 	}
 
 	template < typename TValue, typename TSpec, typename TSSSpec >
 	inline bool open(StringSet<String<TValue, TSpec>, TSSSpec> &multi, const char *fileName, int openMode) {
+	SEQAN_CHECKPOINT
 		char id[12]; // 2^32 has 10 decimal digits + 1 (0x00)
 		unsigned i = 0;
 		clear(multi);
@@ -637,6 +692,7 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 	}
 	template < typename TValue, typename TSpec, typename TSSSpec>
 	inline bool open(StringSet<String<TValue, TSpec>, TSSSpec> &multi, const char *fileName) {
+	SEQAN_CHECKPOINT
 		return open(multi, fileName, OPEN_RDONLY);
 	}
 
@@ -646,6 +702,7 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 
 	template < typename TValue, typename TSpec >
 	inline bool save(String<TValue, TSpec> const &string, const char *fileName, int openMode) {
+	SEQAN_CHECKPOINT
 // 
 //		if (length(string) == 0) return true;
 		String<TValue, External< ExternalConfigLarge<> > > extString;
@@ -655,11 +712,13 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 	}
 	template < typename TValue, typename TSpec >
 	inline bool save(String<TValue, TSpec> &string, const char *fileName) {
+	SEQAN_CHECKPOINT
 		return save(string, fileName, OPEN_WRONLY | OPEN_CREATE);
 	}
 
 	template < typename THost, typename TSpec >
 	inline bool save(Segment<THost, TSpec> const &string, const char *fileName, int openMode) {
+	SEQAN_CHECKPOINT
 		if (length(string) == 0) return true;
 		String<typename Value<THost>::Type, External< ExternalConfigLarge<> > > extString;
 		if (!open(extString, fileName, openMode)) return false;
@@ -668,11 +727,13 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 	}
 	template < typename THost, typename TSpec >
 	inline bool save(Segment<THost, TSpec> const &string, const char *fileName) {
+	SEQAN_CHECKPOINT
 		return save(string, fileName, OPEN_WRONLY | OPEN_CREATE);
 	}
 
 	template < typename TValue, typename TSpec, typename TSSSpec>
 	inline bool save(StringSet<String<TValue, TSpec>, TSSSpec> const &multi, const char *fileName, int openMode) {
+	SEQAN_CHECKPOINT
 		if (length(multi) == 0) return true;
 		char id[12]; // 2^32 has 10 decimal digits + 2 ('.' and 0x00)
 		for(unsigned i = 0; i < length(multi); ++i) {
@@ -687,6 +748,7 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 	}
 	template < typename TValue, typename TSpec, typename TSSSpec>
 	inline bool save(StringSet<String<TValue, TSpec>, TSSSpec> const &multi, const char *fileName) {
+	SEQAN_CHECKPOINT
 		return save(multi, fileName, OPEN_WRONLY | OPEN_CREATE);
 	}
 

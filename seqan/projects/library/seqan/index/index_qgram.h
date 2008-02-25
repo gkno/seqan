@@ -107,13 +107,15 @@ The number of '1's (relevant positions) in the shape determines $q$ and the size
 		typedef typename Fibre<Index, QGram_Counts>::Type		TCounts;
 		typedef typename Fibre<Index, QGram_CountsDir>::Type	TCountsDir;
 		typedef typename Fibre<Index, QGram_Shape>::Type		TShape;
+		typedef typename Cargo<Index>::Type						TCargo;
 
-		Holder<TText>	text;	// underlying text
-		TSA				sa;		// suffix array sorted by the first q chars
-		TDir			dir;	// bucket directory
-		TCounts			counts;	// counts each q-gram per sequence
+		Holder<TText>	text;		// underlying text
+		TSA				sa;			// suffix array sorted by the first q chars
+		TDir			dir;		// bucket directory
+		TCounts			counts;		// counts each q-gram per sequence
 		TCountsDir		countsDir;	// directory for count buckets
-		TShape			shape;	// underlying shape
+		TShape			shape;		// underlying shape
+		TCargo			cargo;		// user-defined cargo
 
 		Index() {}
 

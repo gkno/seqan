@@ -80,6 +80,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Size<TText>::Type					TSize;
 		typedef String<TSize, Alloc<> >						TCounter;
 		typedef String<typename Value<TSA>::Type, Alloc<> >	TTempSA;
+		typedef typename Cargo<Index>::Type					TCargo;
 
 		// 1st word flags
 		static TSize const LEAF          = (TSize)1 << (BitsPerValue<TSize>::VALUE - 1); // this node is a leaf
@@ -95,6 +96,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		Holder<TText>	text;	// underlying text
 		TSA				sa;		// suffix array sorted by the first q chars
 		TDir			dir;	// bucket directory
+		TCargo			cargo;	// user-defined cargo
 
 
 		TTempSA			tempSA;

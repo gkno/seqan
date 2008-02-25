@@ -266,11 +266,12 @@ The entries are the characters left of the corresponding suffix in the suffix ar
 	class Index<TText, Index_ESA<TSpec> > {
 	public:
 		Holder<typename Fibre<Index, ESA_Text>::Type>	text;
-		typename Fibre<Index, ESA_SA>::Type				sa;
-		typename Fibre<Index, ESA_LCP>::Type			lcp;
-		typename Fibre<Index, ESA_LCPE>::Type			lcpe;
-		typename Fibre<Index, ESA_ChildTab>::Type		childtab;
-		typename Fibre<Index, ESA_BWT>::Type			bwt;
+		typename Fibre<Index, ESA_SA>::Type				sa;			// suffix array 
+		typename Fibre<Index, ESA_LCP>::Type			lcp;		// longest-common-prefix table
+		typename Fibre<Index, ESA_LCPE>::Type			lcpe;		// extended lcp table
+		typename Fibre<Index, ESA_ChildTab>::Type		childtab;	// child table (tree topology)
+		typename Fibre<Index, ESA_BWT>::Type			bwt;		// burrows-wheeler table
+		typename Cargo<Index>::Type						cargo;		// user-defined cargo
 
 		Index() {}
 
