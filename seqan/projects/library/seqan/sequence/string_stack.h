@@ -284,6 +284,22 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 
+//////////////////////////////////////////////////////////////////////////////
+///.Function.reserve.param.object.type:Spec.Block String
+/*
+	template <typename TValue, unsigned int SPACE, typename TSize, typename TExpand>
+	inline typename Size< String<TValue, Block<SPACE> > >::Type
+	reserve(
+		String<TValue, Block<SPACE> >& me, 
+		TSize new_capacity,
+		Tag<TExpand> const tag)
+	{
+	SEQAN_CHECKPOINT
+		reserve(me.blocks, (new_capacity + SPACE - 1) / SPACE, tag);
+		return capacity(me.blocks) * SPACE;
+	}
+*/
+
 	template<typename TValue, unsigned int SPACE, typename TSize2, typename TExpand>
 	inline typename Size< String<TValue, Block<SPACE> > >::Type
 	resize(String<TValue, Block<SPACE> > & me,
@@ -355,6 +371,9 @@ namespace SEQAN_NAMESPACE_MAIN
 		for(TIter it = begin(source, Standard()); !atEnd(it, source); goNext(it))
 			appendValue(me, *it);
 	}
+
+//////////////////////////////////////////////////////////////////////////////
+///.Function.appendValue.param.object.type:Spec.Block String
 
 	template<typename TValue, unsigned int SPACE, typename TVal, typename TExpand>
 	inline void 
