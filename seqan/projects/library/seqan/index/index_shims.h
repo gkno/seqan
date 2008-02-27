@@ -495,7 +495,7 @@ namespace SEQAN_NAMESPACE_MAIN
 */
 
 	template <typename TText, typename TSpec, typename TSpecAlg>
-	inline bool indexCreate(Index<TText, TSpec> &index, Tag<_Fibre_SA> const, TSpecAlg const alg) {
+	inline bool indexCreate(Index<TText, TSpec> &index, Fibre_SA, TSpecAlg const alg) {
 	SEQAN_CHECKPOINT
 		resize(indexSA(index), length(indexRawText(index)), Exact());
 		createSuffixArray(indexSA(index), indexText(index), alg);
@@ -503,7 +503,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	template <typename TText, typename TSpec, typename TSpecAlg>
-	inline bool indexCreate(Index<TText, TSpec> &index, Tag<_Fibre_LCP> const, TSpecAlg const alg) {
+	inline bool indexCreate(Index<TText, TSpec> &index, Fibre_LCP, TSpecAlg const alg) {
 	SEQAN_CHECKPOINT
 		resize(indexLCP(index), length(indexRawText(index)), Exact());
 		createLCPTable(indexLCP(index), indexText(index), indexSA(index), alg);
@@ -511,7 +511,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	template <typename TText, typename TSpec, typename TSpecAlg>
-	inline bool indexCreate(Index<TText, TSpec> &index, Tag<_Fibre_LCPE> const, TSpecAlg const alg) {
+	inline bool indexCreate(Index<TText, TSpec> &index, Fibre_LCPE, TSpecAlg const alg) {
 	SEQAN_CHECKPOINT
 	//TODO: separate LCP from LCPE (for now LCPE = LCP + extra)
 //		resize(indexLCP(index), length(indexRawText(index)), Exact());
@@ -520,7 +520,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	template <typename TText, typename TSpec>
-	inline bool indexCreate(Index<TText, TSpec> &index, Tag<_Fibre_BWT> const, BWT const) {
+	inline bool indexCreate(Index<TText, TSpec> &index, Fibre_BWT, BWT const) {
 	SEQAN_CHECKPOINT
 		resize(indexBWT(index), length(indexRawText(index)), Exact());
 		createBWTable(indexBWT(index), indexText(index), indexRawSA(index));
@@ -528,7 +528,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	template <typename TText, typename TSpec>
-	inline bool indexCreate(Index<TText, TSpec> &index, Tag<_Fibre_ChildTab> const, ChildTab const) {
+	inline bool indexCreate(Index<TText, TSpec> &index, Fibre_ChildTab, ChildTab const) {
 	SEQAN_CHECKPOINT
 		resize(indexChildTab(index), length(indexRawText(index)), Exact());
 		createChildTable(indexChildTab(index), indexLCP(index));
@@ -615,27 +615,27 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 	}
 
 	template <typename TText, typename TSpec>
-	inline bool indexSolveDependencies(Index<TText, TSpec> &index, Tag<_Fibre_LCP> const) {
+	inline bool indexSolveDependencies(Index<TText, TSpec> &index, Fibre_LCP) {
 	SEQAN_CHECKPOINT
-		return indexRequire(index, Tag<_Fibre_SA>());
+		return indexRequire(index, Fibre_SA());
 	}
 
 	template <typename TText, typename TSpec>
-	inline bool indexSolveDependencies(Index<TText, TSpec> &index, Tag<_Fibre_LCPE> const) {
+	inline bool indexSolveDependencies(Index<TText, TSpec> &index, Fibre_LCPE) {
 	SEQAN_CHECKPOINT
-		return indexRequire(index, Tag<_Fibre_LCP>());
+		return indexRequire(index, Fibre_LCP());
 	}
 
 	template <typename TText, typename TSpec>
-	inline bool indexSolveDependencies(Index<TText, TSpec> &index, Tag<_Fibre_ChildTab> const) {
+	inline bool indexSolveDependencies(Index<TText, TSpec> &index, Fibre_ChildTab) {
 	SEQAN_CHECKPOINT
-		return indexRequire(index, Tag<_Fibre_LCP>());
+		return indexRequire(index, Fibre_LCP());
 	}
 
 	template <typename TText, typename TSpec>
-	inline bool indexSolveDependencies(Index<TText, TSpec> &index, Tag<_Fibre_BWT> const) {
+	inline bool indexSolveDependencies(Index<TText, TSpec> &index, Fibre_BWT) {
 	SEQAN_CHECKPOINT
-		return indexRequire(index, Tag<_Fibre_SA>());
+		return indexRequire(index, Fibre_SA());
 	}
 
 

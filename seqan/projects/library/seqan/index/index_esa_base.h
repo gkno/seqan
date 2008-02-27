@@ -228,16 +228,15 @@ The entries are the characters left of the corresponding suffix in the suffix ar
 
 ///.Metafunction.Fibre.param.TSpec.type:Tag.ESA Index Fibres
 
-
-	typedef Tag<_Fibre_Text> const		ESA_Text;
-	typedef Tag<_Fibre_RawText> const	ESA_RawText;
-	typedef Tag<_Fibre_SA> const		ESA_SA;
-	typedef Tag<_Fibre_RawSA> const		ESA_RawSA;
-	typedef Tag<_Fibre_SAE> const		ESA_SAE;
-	typedef Tag<_Fibre_LCP> const		ESA_LCP;
-	typedef Tag<_Fibre_LCPE> const		ESA_LCPE;
-	typedef Tag<_Fibre_ChildTab> const	ESA_ChildTab;
-	typedef Tag<_Fibre_BWT> const		ESA_BWT;
+	typedef Fibre_Text		ESA_Text;
+	typedef Fibre_RawText	ESA_RawText;
+	typedef Fibre_SA		ESA_SA;
+	typedef Fibre_RawSA		ESA_RawSA;
+	typedef Fibre_SAE		ESA_SAE;
+	typedef Fibre_LCP		ESA_LCP;
+	typedef Fibre_LCPE		ESA_LCPE;
+	typedef Fibre_ChildTab	ESA_ChildTab;
+	typedef Fibre_BWT		ESA_BWT;
 
 
 //////////////////////////////////////////////////////////////////////////////

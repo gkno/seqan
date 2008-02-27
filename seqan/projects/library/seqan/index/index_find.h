@@ -52,9 +52,9 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < typename TText, typename TSpec, typename TSpecFinder >
 	class Finder< Index<TText, TSpec>, TSpecFinder >
 	{
-		typedef Index<TText, TSpec>									TIndex;
-		typedef typename Fibre<TIndex, Tag<_Fibre_SA> const >::Type	TSA;
-		typedef typename Iterator<TSA const, Standard>::Type		TIterator;
+		typedef Index<TText, TSpec>								TIndex;
+		typedef typename Fibre<TIndex, Fibre_SA>::Type			TSA;
+		typedef typename Iterator<TSA const, Standard>::Type	TIterator;
 
 	public:
 		Holder<TIndex>	index;
@@ -134,7 +134,7 @@ SEQAN_CHECKPOINT
 //____________________________________________________________________________
 
 	template < typename TText, typename TSpec, typename TSpecFinder >
-	inline typename Iterator< typename Fibre<Index<TText, TSpec>, Tag<_Fibre_SA> const >::Type, Standard>::Type &
+	inline typename Iterator< typename Fibre<Index<TText, TSpec>, Fibre_SA>::Type, Standard>::Type &
 	hostIterator(Finder< Index<TText, TSpec>, TSpecFinder > & me)
 	{
 SEQAN_CHECKPOINT
@@ -142,7 +142,7 @@ SEQAN_CHECKPOINT
 	}
 
 	template < typename TText, typename TSpec, typename TSpecFinder >
-	inline typename Iterator< typename Fibre<Index<TText, TSpec>, Tag<_Fibre_SA> const >::Type, Standard>::Type const &
+	inline typename Iterator< typename Fibre<Index<TText, TSpec>, Fibre_SA>::Type, Standard>::Type const &
 	hostIterator(Finder< Index<TText, TSpec>, TSpecFinder > const & me)
 	{
 SEQAN_CHECKPOINT
@@ -165,9 +165,9 @@ SEQAN_CHECKPOINT
 	clear(Finder< Index<TText, TSpec>, TSpecFinder > & me)
 	{
 SEQAN_CHECKPOINT
-		typedef Index<TText, TSpec>								TIndex;
-		typedef typename Fibre<TIndex, Tag<_Fibre_SA> const >::Type	TSA;
-		typedef typename Iterator<TSA, Standard>::Type			TIterator;
+		typedef Index<TText, TSpec>						TIndex;
+		typedef typename Fibre<TIndex, Fibre_SA>::Type	TSA;
+		typedef typename Iterator<TSA, Standard>::Type	TIterator;
 		me.range.i1 = me.range.i2 = TIterator();
 	}
 

@@ -64,15 +64,23 @@ The number of '1's (relevant positions) in the shape determines $q$ and the size
 	struct _Fibre_Counts;		// counts each q-gram
 	struct _Fibre_CountsDir;	// directory for counts buckets
 
-	typedef Tag<_Fibre_Text> const		QGram_Text;
-	typedef Tag<_Fibre_RawText> const	QGram_RawText;
-	typedef Tag<_Fibre_SA> const		QGram_SA;
-	typedef Tag<_Fibre_RawSA> const		QGram_RawSA;
-	typedef Tag<_Fibre_Dir> const		QGram_Dir;
-	typedef Tag<_Fibre_SADir> const		QGram_SADir;
-	typedef Tag<_Fibre_Shape> const		QGram_Shape;
-	typedef Tag<_Fibre_Counts> const	QGram_Counts;
-	typedef Tag<_Fibre_CountsDir> const	QGram_CountsDir;
+	typedef Tag<_Fibre_Dir> const		Fibre_Dir;
+	typedef Tag<_Fibre_SADir> const		Fibre_SADir;
+	typedef Tag<_Fibre_Shape> const		Fibre_Shape;
+	typedef Tag<_Fibre_Counts> const	Fibre_Counts;
+	typedef Tag<_Fibre_CountsDir> const	Fibre_CountsDir;
+
+//////////////////////////////////////////////////////////////////////////////
+
+	typedef Fibre_Text		QGram_Text;
+	typedef Fibre_RawText	QGram_RawText;
+	typedef Fibre_SA		QGram_SA;
+	typedef Fibre_RawSA		QGram_RawSA;
+	typedef Fibre_Dir		QGram_Dir;
+	typedef Fibre_SADir		QGram_SADir;
+	typedef Fibre_Shape		QGram_Shape;
+	typedef Fibre_Counts	QGram_Counts;
+	typedef Fibre_CountsDir	QGram_CountsDir;
 
 //////////////////////////////////////////////////////////////////////////////
 // q-gram index
@@ -93,7 +101,7 @@ The number of '1's (relevant positions) in the shape determines $q$ and the size
 
 
 	template < typename TObject, typename TShapeSpec >
-	struct Fibre< Index<TObject, Index_QGram<TShapeSpec> >, Tag<_Fibre_Shape> const > {
+	struct Fibre< Index<TObject, Index_QGram<TShapeSpec> >, Fibre_Shape> {
 		typedef Index< TObject, Index_QGram<TShapeSpec> >			TIndex;
 		typedef Shape< typename Value<TIndex>::Type, TShapeSpec >	Type;
 	};
@@ -153,7 +161,7 @@ The number of '1's (relevant positions) in the shape determines $q$ and the size
 // default fibre creators
 
 	template < typename TText, typename TSpec >
-	struct DefaultIndexCreator<Index<TText, Index_QGram<TSpec> >, Tag<_Fibre_SA> const > {
+	struct DefaultIndexCreator<Index<TText, Index_QGram<TSpec> >, Fibre_SA> {
         typedef Default Type;
     };
 
@@ -161,7 +169,7 @@ The number of '1's (relevant positions) in the shape determines $q$ and the size
 // counts array type
 
 	template < typename TText, typename TSpec >
-	struct Fibre< Index<TText, TSpec>, Tag<_Fibre_Counts> const > {
+	struct Fibre< Index<TText, TSpec>, Fibre_Counts> {
 		typedef String<
 				Pair<
 					typename Size< TText >::Type,
@@ -175,46 +183,46 @@ The number of '1's (relevant positions) in the shape determines $q$ and the size
 //////////////////////////////////////////////////////////////////////////////
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_Dir> const >::Type & 
-	getFibre(Index<TText, TSpec> &index, Tag<_Fibre_Dir> const) {
+	inline typename Fibre<Index<TText, TSpec>, Fibre_Dir>::Type & 
+	getFibre(Index<TText, TSpec> &index, Fibre_Dir) {
 		return index.dir;
 	}
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_Dir> const >::Type & 
-	getFibre(Index<TText, TSpec> const &index, Tag<_Fibre_Dir> const) {
+	inline typename Fibre<Index<TText, TSpec> const, Fibre_Dir>::Type & 
+	getFibre(Index<TText, TSpec> const &index, Fibre_Dir) {
 		return index.dir;
 	}
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_Counts> const >::Type & 
-	getFibre(Index<TText, TSpec> &index, Tag<_Fibre_Counts> const) {
+	inline typename Fibre<Index<TText, TSpec>, Fibre_Counts>::Type & 
+	getFibre(Index<TText, TSpec> &index, Fibre_Counts) {
 		return index.counts;
 	}
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_Counts> const >::Type & 
-	getFibre(Index<TText, TSpec> const &index, Tag<_Fibre_Counts> const) {
+	inline typename Fibre<Index<TText, TSpec> const, Fibre_Counts>::Type & 
+	getFibre(Index<TText, TSpec> const &index, Fibre_Counts) {
 		return index.counts;
 	}
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_CountsDir> const >::Type & 
-	getFibre(Index<TText, TSpec> &index, Tag<_Fibre_CountsDir> const) {
+	inline typename Fibre<Index<TText, TSpec>, Fibre_CountsDir>::Type & 
+	getFibre(Index<TText, TSpec> &index, Fibre_CountsDir) {
 		return index.countsDir;
 	}
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_CountsDir> const >::Type & 
-	getFibre(Index<TText, TSpec> const &index, Tag<_Fibre_CountsDir> const) {
+	inline typename Fibre<Index<TText, TSpec> const, Fibre_CountsDir>::Type & 
+	getFibre(Index<TText, TSpec> const &index, Fibre_CountsDir) {
 		return index.countsDir;
 	}
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_Shape> const >::Type & 
-	getFibre(Index<TText, TSpec> &index, Tag<_Fibre_Shape> const) {
+	inline typename Fibre<Index<TText, TSpec>, Fibre_Shape>::Type & 
+	getFibre(Index<TText, TSpec> &index, Fibre_Shape) {
 		return index.shape;
 	}
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_Shape> const >::Type & 
-	getFibre(Index<TText, TSpec> const &index, Tag<_Fibre_Shape> const) {
+	inline typename Fibre<Index<TText, TSpec> const, Fibre_Shape>::Type & 
+	getFibre(Index<TText, TSpec> const &index, Fibre_Shape) {
 		return index.shape;
 	}
 
@@ -230,14 +238,14 @@ The number of '1's (relevant positions) in the shape determines $q$ and the size
 */
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_Dir> const >::Type & 
+	inline typename Fibre<Index<TText, TSpec>, Fibre_Dir>::Type & 
 	indexDir(Index<TText, TSpec> &index) { 
-		return getFibre(index, Tag<_Fibre_Dir>()); 
+		return getFibre(index, Fibre_Dir()); 
 	}
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_Dir> const >::Type & 
+	inline typename Fibre<Index<TText, TSpec> const, Fibre_Dir>::Type & 
 	indexDir(Index<TText, TSpec> const &index) { 
-		return getFibre(index, Tag<_Fibre_Dir>()); 
+		return getFibre(index, Fibre_Dir()); 
 	}
 
 //////////////////////////////////////////////////////////////////////////////
@@ -253,12 +261,12 @@ The number of '1's (relevant positions) in the shape determines $q$ and the size
 */
 
 	template <typename TPos, typename TIndex>
-	inline typename Reference<typename Fibre<TIndex, Tag<_Fibre_Dir> >::Type>::Type dirAt(TPos i, TIndex &index) {
-		return value(getFibre(index, Tag<_Fibre_Dir> ()), i);
+	inline typename Reference<typename Fibre<TIndex, Fibre_Dir>::Type>::Type dirAt(TPos i, TIndex &index) {
+		return value(getFibre(index, Fibre_Dir()), i);
 	}
 	template <typename TPos, typename TIndex>
-	inline typename Reference<typename Fibre<TIndex const, Tag<_Fibre_Dir> >::Type>::Type dirAt(TPos i, TIndex const &index) {
-		return value(getFibre(index, Tag<_Fibre_Dir> ()), i);
+	inline typename Reference<typename Fibre<TIndex const, Fibre_Dir>::Type>::Type dirAt(TPos i, TIndex const &index) {
+		return value(getFibre(index, Fibre_Dir()), i);
 	}
 
 
@@ -276,42 +284,42 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 */
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_Counts> const >::Type & 
+	inline typename Fibre<Index<TText, TSpec>, Fibre_Counts>::Type & 
 	indexCounts(Index<TText, TSpec> &index) {
-		return getFibre(index, Tag<_Fibre_Counts>()); 
+		return getFibre(index, Fibre_Counts()); 
 	}
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_Counts> const >::Type & 
+	inline typename Fibre<Index<TText, TSpec> const, Fibre_Counts>::Type & 
 	indexCounts(Index<TText, TSpec> const &index) {
-		return getFibre(index, Tag<_Fibre_Counts>()); 
+		return getFibre(index, Fibre_Counts()); 
 	}
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_CountsDir> const >::Type & 
+	inline typename Fibre<Index<TText, TSpec>, Fibre_CountsDir>::Type & 
 	indexCountsDir(Index<TText, TSpec> &index) {
-		return getFibre(index, Tag<_Fibre_CountsDir>()); 
+		return getFibre(index, Fibre_CountsDir()); 
 	}
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_CountsDir> const >::Type & 
+	inline typename Fibre<Index<TText, TSpec> const, Fibre_CountsDir>::Type & 
 	indexCountsDir(Index<TText, TSpec> const &index) {
-		return getFibre(index, Tag<_Fibre_CountsDir>()); 
+		return getFibre(index, Fibre_CountsDir()); 
 	}
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, Tag<_Fibre_Shape> const >::Type & 
+	inline typename Fibre<Index<TText, TSpec>, Fibre_Shape>::Type & 
 	indexShape(Index<TText, TSpec> &index) { 
-		return getFibre(index, Tag<_Fibre_Shape>()); 
+		return getFibre(index, Fibre_Shape()); 
 	}
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, Tag<_Fibre_Shape> const >::Type & 
+	inline typename Fibre<Index<TText, TSpec> const, Fibre_Shape>::Type & 
 	indexShape(Index<TText, TSpec> const &index) { 
-		return getFibre(index, Tag<_Fibre_Shape>()); 
+		return getFibre(index, Fibre_Shape()); 
 	}
 
 	template <typename TIndex>
 	inline int _fullDirLength(TIndex const &index) 
 	{
-		typedef typename Fibre<TIndex, Tag<_Fibre_Shape> const >::Type	TShape;
+		typedef typename Fibre<TIndex, Fibre_Shape>::Type	TShape;
 		typedef typename Value<TIndex>::Type							TValue;
 		return _intPow((unsigned)ValueSize<TValue>::VALUE, weight(indexShape(index))) + 1;
 	}
@@ -319,7 +327,7 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 	template <typename TIndex>
 	inline int _fullDir2Length(TIndex const &index) 
 	{
-		typedef typename Fibre<TIndex, Tag<_Fibre_Shape> const >::Type	TShape;
+		typedef typename Fibre<TIndex, Fibre_Shape>::Type	TShape;
 		typedef typename Value<TIndex>::Type							TValue;
 		return (_intPow(
 					(unsigned)ValueSize<TValue>::VALUE,
@@ -1355,7 +1363,7 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 // interface for automatic index creation 
 
 	template <typename TText, typename TShapeSpec>
-	inline bool indexCreate(Index<TText, Index_QGram<TShapeSpec> > &index, Tag<_Fibre_SADir> const, Default const) 
+	inline bool indexCreate(Index<TText, Index_QGram<TShapeSpec> > &index, Fibre_SADir, Default const) 
 	{
 		typedef Index<TText, Index_QGram<TShapeSpec> >			TIndex;
 		typedef Shape<typename Value<TIndex>::Type, TShapeSpec>	TShape;
@@ -1375,12 +1383,12 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 	}
 
 	template <typename TText, typename TSpec>
-	inline bool indexSupplied(Index<TText, TSpec> &index, Tag<_Fibre_SADir> const) {
-		return !(empty(getFibre(index, Tag<_Fibre_SA>())) || empty(getFibre(index, Tag<_Fibre_Dir>())));
+	inline bool indexSupplied(Index<TText, TSpec> &index, Fibre_SADir) {
+		return !(empty(getFibre(index, Fibre_SA())) || empty(getFibre(index, Fibre_Dir())));
 	}
 
 	template <typename TText, typename TShapeSpec>
-	inline bool indexCreate(Index<TText, Index_QGram<TShapeSpec> > &index, Tag<_Fibre_SA> const, Default const alg)
+	inline bool indexCreate(Index<TText, Index_QGram<TShapeSpec> > &index, Fibre_SA, Default const alg)
 	{
 		typedef Index<TText, Index_QGram<TShapeSpec> >			TIndex;
 		typedef Shape<typename Value<TIndex>::Type, TShapeSpec>	TShape;
@@ -1399,7 +1407,7 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 	}
 
 	template <typename TText, typename TShapeSpec>
-	inline bool indexCreate(Index<TText, Index_QGram<TShapeSpec> > &index, Tag<_Fibre_Counts> const, Default const) 
+	inline bool indexCreate(Index<TText, Index_QGram<TShapeSpec> > &index, Fibre_Counts, Default const) 
 	{
 		resize(indexCountsDir(index), _fullDirLength(index), Exact());
 		createCountsArray(indexCounts(index), indexCountsDir(index), indexText(index), indexShape(index));
@@ -1408,7 +1416,7 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 
 /*
 	template <typename TText, typename TShapeSpec>
-	inline bool indexCreate(Index<TText, Index_QGram<TShapeSpec> > &index, Tag<_Fibre_Dir> const, Default const alg)
+	inline bool indexCreate(Index<TText, Index_QGram<TShapeSpec> > &index, Fibre_Dir, Default const alg)
 	{
 		typedef Index<TText, Index_QGram<TShapeSpec> >			TIndex;
 

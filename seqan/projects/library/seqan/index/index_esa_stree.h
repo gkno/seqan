@@ -699,12 +699,12 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 ..signature:representative(iterator)
 ..param.iterator:An iterator of a Suffix Tree.
 ...type:Spec.VSTree Iterator
-..returns:An @Spec.InfixSegment@ of the raw text of an index (see @Tag.ESA Index Fibres.ESA_RawText@).
+..returns:An @Spec.InfixSegment@ of the raw text of an index (see @Tag.ESA Index Fibres.ESA_Text@).
 If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TIndex, ESA_RawText>::Type>::Type$.
 */
 
 	template < typename TIndex, class TSpec >
-	inline typename Infix< typename Fibre<TIndex, Tag<_Fibre_Text> const>::Type const >::Type 
+	inline typename Infix< typename Fibre<TIndex, Fibre_Text>::Type const >::Type 
 	representative(Iter< TIndex, VSTree<TSpec> > const &it) 
 	{
 		return infixWithLength(indexText(container(it)), getOccurrence(it), repLength(it));
@@ -743,17 +743,17 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 	}
 
 	// get the interval of SA of the subtree under the edge beginning with character c
-	template < typename TIndex, class TSpec, typename TValue >
+	template < typename TText, class TSpec, typename TValue >
 	inline bool 
 	_getNodeByChar(
-		Iter< TIndex, VSTree<TSpec> > const &it, 
+		Iter< Index<TText, Index_ESA<TSpec> >, VSTree<TSpec> > const &it, 
 		TValue c, 
-		typename VertexDescriptor<TIndex>::Type &childDesc)
+		typename VertexDescriptor< Index<TText, Index_ESA<TSpec> > >::Type &childDesc)
 	{
-		if (isLeaf(it)) return false;
+		typedef Index<TText, Index_ESA<TSpec> >				TIndex;
+		typedef typename Size<TIndex>::Type					TSize;
 
-		typedef typename Size<TIndex>::Type		TSize;
-		typedef Iter< TIndex, VSTree<TSpec> >	iterator;
+		if (isLeaf(it)) return false;
 
 		Pair<TSize> child(value(it).range.i1, _getUp(value(it).range.i2, container(it)));
 		if (!(value(it).range.i1 < child.i2 && child.i2 < value(it).range.i2))
@@ -761,20 +761,22 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 
 		TSize _lcp = lcpAt(child.i2 - 1, container(it));
 		if (textAt(saAt(child.i1, container(it)) + _lcp, container(it)) == c) {
-			childDesc.i1 = child;
-			childDesc.i2 = value(it).range.i2;
+			childDesc.range = child;
+			childDesc.parentRight = value(it).range.i2;
 			return true;
 		}
 		child.i1 = child.i2;
-		while (_isNextl(child.i2, container(it))) {
+		while (_isNextl(child.i2, container(it))) 
+		{
 			child.i2 = _getNextl(child.i2, container(it));
-		if (textAt(saAt(child.i1, container(it)) + _lcp, container(it)) == c) {
-				childDesc.i1 = child;
-				childDesc.i2 = value(it).range.i2;
+			if (textAt(saAt(child.i1, container(it)) + _lcp, container(it)) == c) {
+				childDesc.range = child;
+				childDesc.parentRight = value(it).range.i2;
 				return true;
 			}
 			child.i1 = child.i2;
 		}
+
 		if (!isRoot(it)) {
 			if (textAt(saAt(child.i1, container(it)) + _lcp, container(it)) == c) {
 				childDesc.range.i1 = child.i1;
@@ -1062,8 +1064,8 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 		TString const &pattern, 
 		TSize &lcp) 
 	{
-		typedef typename Fibre<TIndex, ESA_RawText>::Type const		TRawText;
-		typedef typename Infix<TRawText>::Type						TInfix;
+		typedef typename Fibre<TIndex, Fibre_Text>::Type const		TText;
+		typedef typename Infix<TText>::Type							TInfix;
 		typedef typename Iterator<TInfix, Standard>::Type			IText;
 		typedef typename Iterator<TString const, Standard>::Type	IPattern;
 		
@@ -1075,72 +1077,74 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 			return true;
 		}
 
-		TSize c = 0;
-		while (goDown(node, *p_begin)) {
+		TSize parentRepLen = 0;
+		// go down the edge beginning with a pattern character
+		while (_goDownChar(node, *p_begin))
+		{
 			TInfix t = representative(node);
-			t_begin = begin(t, Standard()) + c;
+			t_begin = begin(t, Standard()) + parentRepLen;
 			t_end = end(t, Standard());
 
-			while (t_begin != t_end && p_begin != p_end && *p_begin == *t_begin) {
+			while (t_begin != t_end && p_begin != p_end) 
+			{
+				// compare each character along the edge
+				if (*p_begin != *t_begin) {
+					lcp = p_begin - begin(pattern, Standard());
+					return false;
+				}
 				++t_begin;
 				++p_begin;
 			}
+
+			// was the whole pattern found?
 			if (p_begin == p_end) {
 				lcp = length(pattern);
 				return true;
 			}
-			c = length(t);
+			parentRepLen = length(t);
 		}
 		lcp = p_begin - begin(pattern, Standard());
 		return false;
 	}
 
-	template < typename TIndex, typename TSpecIter, typename TValue >
+	template < typename TIndex, typename TSpec, typename TObject >
 	inline bool 
-	goDown(
-		Iter< TIndex, VSTree< TopDown<TSpecIter> > > &it, 
-		TValue const &c) 
+	_goDownObject(
+		Iter< TIndex, VSTree< TopDown<TSpec> > > &it, 
+		TObject const &obj,
+		False)
 	{
-		return _goDownChar(it, c);
+		return _goDownChar(it, obj);
 	}
 
-	template < typename TIndex, typename TSpecIter, typename TValue, typename TSpec >
+	template < typename TIndex, typename TSpec, typename TObject >
 	inline bool 
-	goDown(
-		Iter< TIndex, VSTree< TopDown<TSpecIter> > > &it, 
-		String<TValue, TSpec> const &pattern) 
-	{
-		typename Size<TIndex>::Type dummy;
-		return _goDownString(it, pattern, dummy);
-	}
-
-	template < typename TIndex, typename TSpecIter, typename THost, typename TSpec >
-	inline bool 
-	goDown(
-		Iter< TIndex, VSTree< TopDown<TSpecIter> > > &it, 
-		Segment<THost, TSpec> const &pattern) 
+	_goDownObject(
+		Iter< TIndex, VSTree< TopDown<TSpec> > > &it, 
+		TObject const &obj,
+		True)
 	{
 		typename Size<TIndex>::Type dummy;
-		return _goDownString(it, pattern, dummy);
+		return _goDownString(it, obj, dummy);
 	}
 
 
-	template < typename TIndex, typename TSpecIter, typename TValue, typename TSpec, typename TSize >
-	inline bool 
+	// public interface for goDown(it, ...)
+	template < typename TIndex, typename TSpec, typename TObject >
+	inline bool
 	goDown(
-		Iter< TIndex, VSTree< TopDown<TSpecIter> > > &it, 
-		String<TValue, TSpec> const &pattern, 
-		TSize lcp) 
+		Iter< TIndex, VSTree< TopDown<TSpec> > > &it, 
+		TObject const &obj) 
 	{
-		return _goDownString(it, pattern, lcp);
+		return _goDownObject(it, obj, typename IsSequence<TObject>::Type());
 	}
 
-	template < typename TIndex, typename TSpecIter, typename THost, typename TSpec, typename TSize  >
+	template < typename TIndex, typename TSpec, typename TString, typename TSize >
 	inline bool 
 	goDown(
-		Iter< TIndex, VSTree< TopDown<TSpecIter> > > &it, 
-		Segment<THost, TSpec> const &pattern, 
-		TSize lcp) 
+		Iter< TIndex, VSTree< TopDown<TSpec> > > &it, 
+		TString const &pattern,
+		TSize &lcp)
 	{
 		return _goDownString(it, pattern, lcp);
 	}
@@ -1275,7 +1279,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 */
 
 	template < typename TIndex, class TSpec >
-	inline typename Infix< typename Fibre<TIndex, Tag<_Fibre_Text> const>::Type const >::Type
+	inline typename Infix< typename Fibre<TIndex, Fibre_Text>::Type const >::Type
 	parentEdgeLabel(Iter< TIndex, VSTree< TopDown<TSpec> > > const &it)
 	{
 		return infixWithLength(
