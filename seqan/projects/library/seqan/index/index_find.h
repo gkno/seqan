@@ -15,7 +15,7 @@
   Lesser General Public License for more details.
 
  ============================================================================
-  $Id: index_find.h 1182 2007-10-18 13:36:52Z weese@PCPOOL.MI.FU-BERLIN.DE $
+  $Id$
  ==========================================================================*/
 
 #ifndef SEQAN_HEADER_INDEX_FIND_H

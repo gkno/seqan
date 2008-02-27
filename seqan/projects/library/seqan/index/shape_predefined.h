@@ -15,7 +15,7 @@
   Lesser General Public License for more details.
 
  ============================================================================
-  $Id: shape_gapped.h 996 2007-08-06 16:38:01Z weese@PCPOOL.MI.FU-BERLIN.DE $
+  $Id$
  ==========================================================================*/
 
 #ifndef SEQAN_HEADER_SHAPE_PREDEFINED_H
