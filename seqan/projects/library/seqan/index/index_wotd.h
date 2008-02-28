@@ -574,11 +574,11 @@ namespace SEQAN_NAMESPACE_MAIN
 				w1 & index.BITMASK1, 
 				repLength(it));
 
-			if (globalDumpFlag) {
+/*			if (globalDumpFlag) {
 				::std::cerr << '"' << representative(it) << '"' << ::std::endl;
 				_dumpFreq(index);
 			}
-
+*/
 			resize(indexDir(index), dst + size, Generous());
 			_storeWotdChildren(index, dst, repLength(it));
 
@@ -1639,10 +1639,10 @@ namespace SEQAN_NAMESPACE_MAIN
 			dirAt(0, index) = 0 | index.LAST_CHILD;
 			dirAt(1, index) = w1;
 
-			if (globalDumpFlag) {
+/*			if (globalDumpFlag) {
 				_dump(index);
 			}
-
+*/
 		} else {
 			resize(indexDir(index), 1);
 			dirAt(0, index) = 0 | index.LAST_CHILD | index.LEAF;
