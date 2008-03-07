@@ -211,11 +211,7 @@ assignKeys(ConfigOptions<TKey, TValue>& cfgOpt,
 		   TContainer& params,
 		   TSize numKeys) 
 {
-	typedef typename Iterator<TContainer>::Type TIter;
-	TIter it = begin(params);
-	TIter itEnd = end(params);
-	TSize positionIt = 0;
-	for(;(positionIt < numKeys) && (it!=itEnd);++it, ++positionIt) cfgOpt.option.insert(std::make_pair(*it, TValue()));
+	for(TSize positionIt = 0;positionIt < numKeys;++positionIt) cfgOpt.option.insert(std::make_pair(value(params, positionIt), TValue()));
 }
 
 //////////////////////////////////////////////////////////////////////////////

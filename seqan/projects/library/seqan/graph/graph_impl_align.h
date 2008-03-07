@@ -944,15 +944,18 @@ write(TFile & file,
 	  TOldBegEndPos const& oldBegEndPos,
 	  TReadBegEndPos const& readBegEndPos,
 	  TGappedConsensus const& gappedConsensus,
+	  bool deltas,
 	  FastaReadFormat) 
 {
 	typedef typename Size<TAlignmentMatrix>::Type TSize;
+	typedef typename Value<TAlignmentMatrix>::Type TValue;
 
 	// Initialization
 	TStringSet& str = stringSet(g);
 	TSize nseq = length(str);
 	TSize len = length(gappedConsensus);
 	TSize maxCoverage = length(mat) / len;
+	TValue gapChar = gapValue<TValue>();
 	
 	// Print the alignment matrix
 	TSize winSize = 60;
@@ -1023,7 +1026,25 @@ write(TFile & file,
 			_streamPutInt(file, (readBegEndPos[i]).i2);
 		}
 		_streamPut(file,'\n');
-		_streamWrite(file,"dln:0");
+		
+		if (deltas) {
+			std::stringstream gapCoords;
+			TSize letterCount = 0;
+			TSize gapCount = 0;
+			for(TSize column = (readBegEndPos[i]).i1; column<(readBegEndPos[i]).i2; ++column) {
+				if (value(mat, (readBegEndPos[i]).i3 * len + column) == gapChar) {
+					++gapCount;
+					gapCoords << letterCount << ' ';
+				} else ++letterCount;
+			}
+			_streamWrite(file,"dln:");
+			_streamPutInt(file, gapCount);
+			_streamPut(file,'\n');
+			_streamWrite(file,"del:");
+			_streamWrite(file, gapCoords.str().c_str());
+		} else {
+			_streamWrite(file,"dln:0");
+		}
 		_streamPut(file,'\n');
 		_streamPut(file,'\n');
 	}
@@ -1566,6 +1587,80 @@ convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 
 	return true;
 }
+
+
+template<typename TStringSet, typename TCargo, typename TSpec>
+inline void
+rebuildGraph(Graph<Alignment<TStringSet, TCargo, TSpec> >& g)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
+	typedef typename Size<TGraph>::Type TSize;
+
+	// Initialization
+	typedef Fragment<> TFragment;
+	typedef String<TFragment> TFragmentString;
+	typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
+	TFragmentString matches;
+	TSize nseq = length(stringSet(g));
+
+	// Collect all character pairs
+	typedef std::pair<TSize, TSize> TResiduePair;
+	typedef std::set<TResiduePair> TResiduePairSet;
+	String<TResiduePairSet> resPair;
+	resize(resPair, nseq * nseq);	
+	TEdgeIterator itE(g);
+	for(;!atEnd(itE);++itE) {
+		TVertexDescriptor sV = sourceVertex(itE);
+		TVertexDescriptor tV = targetVertex(itE);
+		TSize seq1 = idToPosition(stringSet(g), sequenceId(g, sV));
+		TSize seq2 = idToPosition(stringSet(g), sequenceId(g, tV));
+		TSize index = 0;
+		TSize pos1 = 0;
+		TSize pos2 = 0;
+		if (seq1 < seq2) {
+			index = seq1 * nseq + seq2;
+			pos1 = fragmentBegin(g, sV);
+			pos2 = fragmentBegin(g, tV);
+		} else {
+			index = seq2 * nseq + seq1;
+			pos1 = fragmentBegin(g, tV);
+			pos2 = fragmentBegin(g, sV);
+		}
+		for(TSize i = 0; i<fragmentLength(g, sV); ++i) {
+			resPair[index].insert(std::make_pair(pos1 + i, pos2 + i));
+		}
+	}
+
+	// Rebuild the graph with maximal segments
+	for(TSize i = 0; i<length(resPair); ++i) {
+		if (resPair[i].empty()) continue;
+		TSize seq1 = i / nseq;
+		TSize seq2 = i % nseq;
+		typename TResiduePairSet::const_iterator pos = resPair[i].begin();
+		typename TResiduePairSet::const_iterator posEnd = resPair[i].end();
+		TSize startMatch1 = pos->first;
+		TSize startMatch2 = pos->second;
+		TSize len = 1;
+		++pos;
+		while(pos != posEnd) {
+			if ((startMatch1 + len == pos->first) && (startMatch2 + len == pos->second)) ++len;
+			else {
+				appendValue(matches, TFragment(seq1, startMatch1, seq2, startMatch2, len));
+				startMatch1 = pos->first;
+				startMatch2 = pos->second;
+				len = 1;
+			}
+			++pos;
+		}
+		appendValue(matches, TFragment(seq1, startMatch1, seq2, startMatch2, len));
+	}
+	clearVertices(g);
+	matchRefinement(matches,stringSet(g),g);
+}
+
 
 }// namespace SEQAN_NAMESPACE_MAIN
 

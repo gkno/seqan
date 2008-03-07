@@ -73,8 +73,18 @@ consensusAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 		typedef Pair<unsigned int, unsigned int> TRankPair;
 		typedef String<TRankPair> TSequenceToRanks;
 		TSequenceToRanks seqToRank;
-		reserve(seqToRank, nseq);
-		for(unsigned int i=0;i<nseq; ++i) appendValue(seqToRank, TRankPair((compToRank.find(getProperty(component, findVertex(const_cast<TGraph&>(g), positionToId(strSet, i), 0))))->second, (compToRank.find(getProperty(component, findVertex(const_cast<TGraph&>(g), positionToId(strSet, i), length(strSet[i]) - 1))))->second));
+		fill(seqToRank, nseq, TRankPair(0, 0));	
+		TVertexIterator itVertex(g);
+		for(;!atEnd(itVertex);++itVertex) {
+			TVertexDescriptor vert = value(itVertex);
+			TSize seq = idToPosition(strSet, sequenceId(g, vert));
+			if (fragmentBegin(g, vert) == 0) {
+				(value(seqToRank, seq)).i1 = (compToRank.find(getProperty(component,vert)))->second;
+			}
+			if (fragmentBegin(g, vert) + fragmentLength(g, vert) == length(value(strSet, seq))) {
+				(value(seqToRank, seq)).i2 = (compToRank.find(getProperty(component,vert)))->second;
+			}
+		}
 		compToRank.clear();
 
 		// Assign the sequences to rows
@@ -141,16 +151,9 @@ consensusAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 			TInfixIter sIt = begin(str);
 			TInfixIter sItEnd = end(str);
 			unsigned int i = compOffset[c];
-			if ((seqToRank[strPos]).i1 == c) {
-				readBegEndRowPos[strPos].i1 = i;
-				readBegEndRowPos[strPos].i3 = row;
-			}
 			for(unsigned int pCol = i;sIt!=sItEnd;goNext(sIt), ++pCol, ++i) {
 				assignValue(mat, row * len + pCol, *sIt);
 				++((counterValues[i])[(unsigned int) *sIt]);
-			}
-			if ((seqToRank[strPos]).i2 == c) {
-				readBegEndRowPos[strPos].i2 = i;
 			}
 		}
 		String<bool> active;
@@ -205,6 +208,16 @@ consensusAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 				else value(gappedConsensus, i) = gapChar;
 			}
 		}
+
+		// Get the new begin and end positions
+		for(unsigned int i=0;i<nseq; ++i) {
+			TVertexDescriptor lastVertex = findVertex(const_cast<TGraph&>(g), positionToId(strSet, i), length(strSet[i]) - 1);
+			unsigned int readBegin = compOffset[getProperty(component, findVertex(const_cast<TGraph&>(g), positionToId(strSet, i), 0))];
+			unsigned int readEnd = compOffset[getProperty(component, lastVertex)] + fragmentLength(const_cast<TGraph&>(g), lastVertex);
+			readBegEndRowPos[i].i1 = readBegin;
+			readBegEndRowPos[i].i2 = readEnd;
+			readBegEndRowPos[i].i3 = seqToRow[i];
+		}
 	}
 }
 
@@ -212,7 +225,95 @@ consensusAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 
 //////////////////////////////////////////////////////////////////////////////
 
+template <typename TStringSet, typename TCargo, typename TSpec, typename TPairList, typename TBegEndRowPos, typename TNewLibraryGraph>
+inline unsigned int
+realignLowQualityReads(Graph<Alignment<TStringSet, TCargo, TSpec> > const& gIn,
+					   TPairList const& pList,
+					   TBegEndRowPos const& readBegEndRowPos,
+					   TNewLibraryGraph& gOut)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename Id<TGraph>::Type TId;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename Iterator<TBegEndRowPos>::Type TBegEndIter;
+	typedef typename Iterator<TPairList>::Type TPairIter;
 
+	// Initialization
+	TStringSet& str = stringSet(gIn);
+	clearVertices(gOut);
+	
+	// Find disrupted reads
+	std::set<TId> unalignedRead;
+	TBegEndIter beIt = begin(readBegEndRowPos);
+	TBegEndIter beItEnd = end(readBegEndRowPos);
+	TSize pos = 0;
+	for(;beIt != beItEnd; ++beIt, ++pos) {
+		TSize lenStr = length(value(str, pos));
+		if (((value(beIt)).i2 - (value(beIt)).i1) > (lenStr + lenStr / 3)) unalignedRead.insert(positionToId(str, pos));
+	}
+
+	// Any disrupted reads
+	if (unalignedRead.empty()) return 0;
+	
+	// String of fragments to combine all pairwise alignments into a multiple alignment
+	typedef Fragment<> TFragment;
+	typedef String<TFragment> TFragmentString;
+	typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
+	TFragmentString matches;
+
+	// Insert all overlaps from the previous alignment
+	TEdgeIterator it_tmp(gIn);
+	for(;!atEnd(it_tmp);++it_tmp) {
+		TVertexDescriptor sV = sourceVertex(it_tmp);
+		TVertexDescriptor tV = targetVertex(it_tmp);
+		TId id1 = sequenceId(gIn, sV);
+		TId id2 = sequenceId(gIn, tV);
+		appendValue(matches, TFragment(id1,fragmentBegin(gIn, sV), id2, fragmentBegin(gIn, tV), fragmentLength(gIn, sV)));
+	}
+	
+	// Recompute the overlap of interesting pairs
+	Score<int> score_type = Score<int>(2,-1,-4,-6);
+	TPairIter pairIt = begin(pList);
+	TPairIter pairItEnd = end(pList);
+	for(;pairIt != pairItEnd; ++pairIt) {
+		TId id1 = (value(pairIt)).i1;
+		TId id2 = (value(pairIt)).i2;
+
+		if ((unalignedRead.find(id1) != unalignedRead.end()) || (unalignedRead.find(id2) != unalignedRead.end())) {
+			// Make a pairwise string-set
+			TStringSet pairSet;
+			assignValueById(pairSet, str, id1);
+			assignValueById(pairSet, str, id2);
+
+			// Overlap alignment with a small mismatch score
+			TSize from = length(matches);
+			globalAlignment(matches, pairSet, score_type, AlignConfig<true,true,true,true>(), Gotoh() );
+
+			// Determine a sequence weight
+			TSize matchLen = 0;
+			TSize overlapLen = 0;
+			TSize alignLen = 0;
+			getAlignmentStatistics(matches, pairSet, from, matchLen, overlapLen, alignLen);
+			double quality = (double) matchLen / (double) overlapLen;
+
+			// Take all overlaps of good quality
+			if (quality < 0.5) {
+				resize(matches, from);
+			}
+		}
+	}
+
+	// Refine all matches
+	matchRefinement(matches,stringSet(gOut),score_type, gOut);
+
+	return unalignedRead.size();
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
 
 }// namespace SEQAN_NAMESPACE_MAIN
 

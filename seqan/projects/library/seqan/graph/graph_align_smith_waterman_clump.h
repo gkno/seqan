@@ -101,10 +101,10 @@ _localAlignment(TAlign& align,
 
 	// String of fragments
 	typedef Fragment<> TFragment;
-	typedef String<TFragment, Block<> > TFragmentString;
+	typedef String<TFragment> TFragmentString;
 	typedef typename Iterator<TFragmentString, Rooted>::Type TFragmentStringIter;
 	TFragmentString matches;
-	String<TScoreValue, Block<> > score_values;
+	String<TScoreValue> score_values;
 
 	// Stop looking for local alignments, if there score is too low
 	TScoreValue local_score = 0;
@@ -116,7 +116,7 @@ _localAlignment(TAlign& align,
 
 		// Remember the confidence in these matches (Score value)
 		TSize diff = length(matches) - length(score_values);
-		for(TSize k = 0; k<diff; ++k) push_back(score_values, local_score);
+		for(TSize k = 0; k<diff; ++k) appendValue(score_values, local_score);
 
 		++count;
 	} while ((local_score > 0.5 * maxScore) && (count < (TSize) limit_count));
@@ -126,7 +126,8 @@ _localAlignment(TAlign& align,
 
 	// Adapt edge weights
 	TFragmentStringIter endIt = end(matches);
-	for(TFragmentStringIter it = begin(matches); it != endIt; ++it) {
+	TSize posit = 0;
+	for(TFragmentStringIter it = begin(matches); it != endIt; ++it, ++posit) {
 		TId id1 = sequenceId(*it,0);
 		TId id2 = sequenceId(*it,1);
 		TSize pos1 = fragmentBegin(*it, id1);
@@ -136,7 +137,7 @@ _localAlignment(TAlign& align,
 			TVertexDescriptor p1 = findVertex(align, id1, pos1);
 			TVertexDescriptor p2 = findVertex(align, id2, pos2);
 			TEdgeDescriptor e = findEdge(align, p1, p2);
-			cargo(e) = (TCargo) getValue(score_values, position(it));
+			cargo(e) = (TCargo) getValue(score_values, posit);
 			SEQAN_TASSERT(fragmentLength(align, p1) == fragmentLength(align, p2))
 			pos1 += fragmentLength(align, p1);
 			pos2 += fragmentLength(align, p2);

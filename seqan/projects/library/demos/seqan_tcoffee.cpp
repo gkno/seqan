@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <cstdio>
 #include <seqan/graph.h>
 
 using namespace seqan;
@@ -194,7 +195,7 @@ int main(int argc, const char *argv[]) {
 	// Case 3: Full protein alignment
 	else {
 		globalAlignment(strSet, names, value(cfgOpt, "matches"), gOut, MSA_Protein() );
-		//testFabian(strSet, names, value(cfgOpt, "matches"), gOut);
+		//testProfiles(strSet, names, value(cfgOpt, "matches"), gOut);
 	}
 
 

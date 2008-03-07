@@ -109,9 +109,9 @@ getDistanceMatrix(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	// Normalize values
 	for(TSize i=0; i<nseq; ++i) {
 		for(TSize j=i+1; j<nseq; ++j) {
-			TValue normalizedScore = (TValue) 100 - (TValue) ( ( (double) getValue(distanceMatrix, i*nseq+j) / (double) maxScore ) * 100);
-			assignValue(distanceMatrix, i*nseq+j, normalizedScore);
-			assignValue(distanceMatrix, j*nseq+i, normalizedScore);
+			TValue normalizedScore = (TValue) 100 - (TValue) ( ( (double) value(distanceMatrix, i*nseq+j) / (double) maxScore ) * 100);
+			value(distanceMatrix, i*nseq+j) = normalizedScore;
+			value(distanceMatrix, j*nseq+i) = normalizedScore;
 		}
 	}
 }

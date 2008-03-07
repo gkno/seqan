@@ -437,8 +437,10 @@ SEQAN_CHECKPOINT
 	_streamWrite(file, id);
 	_streamPut(file, '\n');
 
-	typename Iterator<TData, Standard>::Type it = begin(data, Standard());
-	typename Iterator<TData, Standard>::Type it_end = end(data, Standard());
+	//typename Iterator<TData, Standard>::Type it = begin(data, Standard());
+	//typename Iterator<TData, Standard>::Type it_end = end(data, Standard());
+	typename Iterator<TData>::Type it = begin(data);
+	typename Iterator<TData>::Type it_end = end(data);
 
 	int i = 0;
 

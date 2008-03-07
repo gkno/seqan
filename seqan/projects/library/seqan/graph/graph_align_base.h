@@ -247,7 +247,7 @@ _align_trace_print(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 
 template <typename TFragment, typename TStringSet, typename TId, typename TPos, typename TTraceValue>
 inline void
-_align_trace_print(String<TFragment, Block<> >& matches,
+_align_trace_print(String<TFragment>& matches,
 				   TStringSet const&,
 				   TId const id1,
 				   TPos const pos1,
@@ -268,7 +268,7 @@ _align_trace_print(String<TFragment, Block<> >& matches,
 	} else if (tv == (Byte) Vertical) {
 		// Nop, no match
 	} else if (tv == (Byte) Diagonal) {
-		push_back(matches, TFragment(id1, pos1, id2, pos2, seqLen));
+		appendValue(matches, TFragment(id1, pos1, id2, pos2, seqLen));
 	}
 }
 

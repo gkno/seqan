@@ -38,7 +38,7 @@ void  Test_NeedlemanWunsch() {
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,true>(), NeedlemanWunsch() );
 	SEQAN_TASSERT(score + 3 == score2)
 	typedef Fragment<> TFragment;
-	typedef String<TFragment, Block<> > TFragmentString;
+	typedef String<TFragment> TFragmentString;
 	TFragmentString matches;
 	int score3 = globalAlignment(matches, stringSet(g), score_type, NeedlemanWunsch() );
 	SEQAN_TASSERT(length(matches) == 1)
@@ -715,7 +715,6 @@ void Test_SmithWaterman() {
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 3)) == "tgag")
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 7)) == "ata")
 	SEQAN_TASSERT(numEdges(g) == 2)
-	SEQAN_TASSERT(numVertices(g) == 5)
 	int score2 = localAlignment(stringSet(g), score_type, SmithWaterman());
 	SEQAN_TASSERT(score == score2)
 	//std::cout << g << std::endl;
@@ -729,7 +728,6 @@ void Test_SmithWaterman() {
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "TTGACAC")
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 9)) == "TTTACAC")
 	SEQAN_TASSERT(numEdges(g) == 1)
-	SEQAN_TASSERT(numVertices(g) == 2)
 	score2 = localAlignment(stringSet(g), score_type, SmithWaterman());
 	SEQAN_TASSERT(score == score2)
 	//std::cout << g << std::endl;

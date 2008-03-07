@@ -157,10 +157,10 @@ _readLibrary(TFile & file,
 	}
 
 	typedef Fragment<TWord, TWord, TWord> TFragment;
-	typedef String<TFragment, Block<> > TFragmentString;
+	typedef String<TFragment> TFragmentString;
 	typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
 	TFragmentString matches;
-	String<TCargo, Block<> > score_values;
+	String<TCargo> score_values;
 
 	for(unsigned int i = 0; i<length(resPair); ++i) {
 		if (resPair[i].empty()) continue;
@@ -181,8 +181,8 @@ _readLibrary(TFile & file,
 					carg += pos->second;
 					++len;
 			} else {
-				push_back(matches, TFragment(seq1, startMatch1, seq2, startMatch2, len));
-				push_back(score_values, carg);
+				appendValue(matches, TFragment(seq1, startMatch1, seq2, startMatch2, len));
+				appendValue(score_values, carg);
 				startMatch1 = pos->first.first;
 				startMatch2 = pos->first.second;
 				carg = pos->second;
@@ -191,8 +191,8 @@ _readLibrary(TFile & file,
 			//std::cout << pos->first.first << ',' << pos->first.second << ',' << pos->second << std::endl;
 			++pos;
 		}
-		push_back(matches, TFragment(seq1, startMatch1, seq2, startMatch2, len));
-		push_back(score_values, carg);
+		appendValue(matches, TFragment(seq1, startMatch1, seq2, startMatch2, len));
+		appendValue(score_values, carg);
 	}
 
 	// Refine all matches, rescore matches and create multiple alignment
@@ -410,10 +410,10 @@ read(TFile & file,
 	
 	// Initialization
 	typedef Fragment<> TFragment;
-	typedef String<TFragment, Block<> > TFragmentString;
+	typedef String<TFragment> TFragmentString;
 	typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
 	TFragmentString matches;
-	String<TCargo, Block<> > score_values;
+	String<TCargo> score_values;
 
 	// Map the names to slots
 	typedef std::map<TName, TWord> TNameToPosition;
@@ -486,8 +486,8 @@ read(TFile & file,
 		//std::cout << infix(strSet[seq1Id], beg1, beg1+len) << std::endl;
 		//std::cout << infix(strSet[seq2Id], beg2, beg2+len) << std::endl;
 		
-		push_back(matches, TFragment(seq1Id, beg1, seq2Id,  beg2, len));
-		push_back(score_values, carg);
+		appendValue(matches, TFragment(seq1Id, beg1, seq2Id,  beg2, len));
+		appendValue(score_values, carg);
 		_parse_skipLine(file, c);
 	}
 
@@ -514,7 +514,56 @@ read(TFile & file,
 			pos2 += fragLen;
 		}
 	}
-	
+
+	//SEQAN_CHECKPOINT
+	//typedef unsigned int TWord;
+	//typedef typename Position<TFile>::Type TPosition;
+	//typedef typename Value<TFile>::Type TValue;
+	//typedef typename Value<TNames>::Type TName;
+	//typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	//typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	//typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	//typedef typename Id<TGraph>::Type TId;
+	//
+	//// Initialization
+	//typedef Fragment<> TFragment;
+	//typedef String<TFragment, Block<> > TFragmentString;
+	//typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
+	//TFragmentString matches;
+
+	//// Read the Mafft file
+	//TValue c;
+	//if (_streamEOF(file)) return;
+	//else c = _streamGet(file);
+	//TStringSet& strSet = stringSet(g);
+
+	//TWord seq1;
+	//TWord seq2;
+	//TWord window = 1000;
+	//while (!_streamEOF(file)) {
+	//	_parse_skipWhitespace(file, c);
+	//	seq1 = _parse_readNumber(file, c);
+	//	_parse_skipWhitespace(file, c);
+	//	seq2 = _parse_readNumber(file, c);
+	//	_parse_skipWhitespace(file, c);
+	//	_parse_readDouble(file, c);
+	//	_parse_skipWhitespace(file, c);
+	//	_parse_readDouble(file, c);
+	//	_parse_skipWhitespace(file, c);
+	//	TWord beg1 = _parse_readNumber(file, c);
+	//	_parse_skipWhitespace(file, c);
+	//	TWord end1 = _parse_readNumber(file, c);
+	//	TWord len = end1 - beg1 + 1;
+	//	_parse_skipWhitespace(file, c);
+	//	TWord beg2 = _parse_readNumber(file, c);
+	//	// Debug code
+	//	std::cout << seq1 << ',' << beg1 << ',' << seq2 << ',' << beg2 << ',' << len << std::endl;
+	//	appendValue(matches, TFragment(seq1, beg1, seq2,  beg2, len));
+	//	_parse_skipLine(file, c);
+	//}
+
+	//// Refine all matches, rescore matches and create multiple alignment
+	//matchRefinement(matches,strSet,g);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -570,10 +619,48 @@ void write(TFile & file,
 		_streamPutInt(file, my_carg);
 		_streamPut(file, '\n');
 	}
+
+	//// For Mafft
+	//SEQAN_CHECKPOINT
+	//typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	//typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	//typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	//typedef typename Value<TStringSet>::Type TString;
+	//typedef typename Size<TStringSet>::Type TSize;
+	//
+	//TStringSet& str = stringSet(g);
+	//
+	//typedef typename Iterator<TGraph, EdgeIterator>::Type TIter;
+	//TIter it(g);
+	//for(;!atEnd(it);++it) {
+	//	TVertexDescriptor sV = sourceVertex(it);
+	//	TVertexDescriptor tV = targetVertex(it);
+	//	TSize fragLen = fragmentLength(g,sV);
+	//	TSize fragPos1 = fragmentBegin(g,sV);
+	//	TSize fragPos2 = fragmentBegin(g,tV);
+	//	TSize seq1 = idToPosition(str, sequenceId(g,sV));
+	//	TSize seq2 = idToPosition(str, sequenceId(g,tV));
+	//	TCargo my_carg =  getCargo(*it);
+	//	_streamPutInt(file, seq1);
+	//	_streamPut(file, ' ');	
+	//	_streamPutInt(file, seq2);
+	//	_streamPut(file, ' ');	
+	//	_streamPutInt(file, fragLen);
+	//	_streamPut(file, ' ');	
+	//	_streamPutInt(file, fragLen);
+	//	_streamPut(file, ' ');	
+	//	_streamPutInt(file, fragPos1);
+	//	_streamPut(file, ' ');	
+	//	_streamPutInt(file, fragPos1 + fragLen);
+	//	_streamPut(file, ' ');	
+	//	_streamPutInt(file, fragPos2);
+	//	_streamPut(file, ' ');	
+	//	_streamPutInt(file, fragPos2 + fragLen);
+	//	_streamPut(file, ' ');	
+	//	_streamWrite(file, "(nil)");
+	//	_streamPut(file, '\n');
+	//}
 }
-
-
-
 
 /////////////////////////////////////////////////////////////////////////////
 // Newick Format

@@ -16,7 +16,7 @@ int main() {
 	Score<int> score_type = Score<int>(2,-1,-1,-2);
 /// We could again use a graph to retrieve the local alignment, but as with all other alignment algorithms we can also use a string of fragments or simply std::cout.
 	typedef Fragment<> TFragment;
-	typedef String<TFragment, Block<> > TFragmentString;
+	typedef String<TFragment> TFragmentString;
 	TFragmentString matches;
 /// Local alignment with Smith-Waterman
 	int score = localAlignment(matches, str, score_type, SmithWaterman() );

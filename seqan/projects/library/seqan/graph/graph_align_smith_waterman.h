@@ -53,6 +53,12 @@ _align_smith_waterman_trace(TAlign& align,
 	TSize len1 = best_col;
 	TSize len2 = best_row;
 	if ((best_col == 0) || (best_row == 0)) return;
+	if (len1 < length(str[0])) {
+		_align_trace_print(align, str, id1, len1, id2, len2, length(str[0]) - len1, (Byte) Horizontal);
+	}
+	if (len2 < length(str[1])) {
+		_align_trace_print(align, str, id1, len1, id2, len2, length(str[1]) - len2, (Byte) Vertical);
+	}
 	TSize numRows = length(str[1]);
 
 	// Initialize everything	
@@ -148,6 +154,10 @@ _align_smith_waterman_trace(TAlign& align,
 	} while ((len1 != 0) && (len2 !=0));
 	// Process left-overs
 	if (segLen) _align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
+
+	// Handle the remaining sequence
+	if (len1 != 0) _align_trace_print(align, str, (TId) id1, (TSize) 0, (TId) 0, (TSize) 0, (TSize) len1, (Byte) Horizontal);
+	if (len2 != 0) _align_trace_print(align, str, (TId) 0, (TSize) 0, (TId) id2, (TSize) 0, (TSize) len2, (Byte) Vertical);
 }
 
 //////////////////////////////////////////////////////////////////////////////

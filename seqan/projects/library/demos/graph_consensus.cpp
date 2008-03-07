@@ -114,6 +114,9 @@ evaluationOfReadAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const&,
 
 
 int main(int argc, const char *argv[]) {
+	bool deltas = true;
+
+
 	//////////////////////////////////////////////////////////////////////////////
 	// Command line parsing
 	//////////////////////////////////////////////////////////////////////////////
@@ -122,7 +125,7 @@ int main(int argc, const char *argv[]) {
 	typedef String<char> TKey;
 	typedef String<char> TValue;
 	ConfigOptions<TKey, TValue> cfgOpt;
-	TKey keys[] = {"reads","haplotypes","outfile"};
+	TKey keys[] = {"reads", "haplotypes","outfile"};
 	assignKeys(cfgOpt, keys, 3);
 	assign(cfgOpt, "outfile", "readAlign.txt");
 	// Help Message
@@ -154,44 +157,59 @@ int main(int argc, const char *argv[]) {
 	std::cout << "Number of reads: " << nseq << ", Total number of nucleotides: " << nucCount << std::endl;
 	std::cout << "Average read length: " << avgReadLength << std::endl;
 	_alignTiming(startTime, "Import sequences done: ");
+
+	//// Debug code
+	//for(unsigned int i = 0; i<nseq; ++i) {
+	//	std::cout << '>' << names[i] << std::endl;
+	//	std::cout << origStrSet[i] << std::endl;
+	//}
+
 	// Extract positions and reverse complement reads
 	String<Pair<unsigned int, unsigned int> > begEndPos;
 	layoutReads(names, origStrSet, begEndPos);
 	// Make dependent string set
 	typedef StringSet<TSequence, Dependent<> > TDepSequenceSet;
 	TDepSequenceSet strSet(origStrSet);
+	unsigned int sequenceThreshold = 100;
+
+	//// Debug code
+	//for(unsigned int i = 0; i<nseq; ++i) std::cout << begEndPos[i].i1 << ',' << begEndPos[i].i2 << std::endl;
 
 	//////////////////////////////////////////////////////////////////////////////
 	// Align the sequences
 	//////////////////////////////////////////////////////////////////////////////
 
 	typedef Graph<Alignment<TDepSequenceSet, unsigned int> > TGraph;
-	typedef Size<TGraph>::Type TSize;
 	typedef Id<TGraph>::Type TId;
-	Score<int> score_type_global = Score<int>(5,-4,-6,-14);
-
+	//Score<int> score_type = Score<int>(5,-4,-4,-14);
+	Score<int> score_type = Score<int>(2,-6,-4,-9);
+	
 	// Generate a primary library, i.e., all global pairwise alignments
 	TGraph g(strSet);
 	String<Pair<TId, TId> > pList;
 	selectPairsForLibraryGeneration(g, begEndPos, pList, avgReadLength);
 	Graph<Undirected<double> > pairGraph;
-	generatePrimaryLibrary(g, pList, pairGraph, score_type_global, Overlap_Library() );
+	String<double> distanceMatrix;
+	if (nseq < sequenceThreshold) generatePrimaryLibrary(g, pList, distanceMatrix, score_type, Overlap_Library() );
+	else generatePrimaryLibrary(g, pList, pairGraph, score_type, Overlap_Library() );
 	_alignTiming(startTime, "Overlap done: ");
-	
+
 	// Triplet library extension
 	tripletLibraryExtension(g);
 	_alignTiming(startTime, "Triplet done: ");
 
 	// Guide Tree
 	Graph<Tree<double> > guideTree;
-	upgmaTree(pairGraph, guideTree);
+	if (nseq < sequenceThreshold) slowNjTree(distanceMatrix, guideTree);
+	else upgmaTree(pairGraph, guideTree);
 	_alignTiming(startTime, "Guide tree done: ");
+	clear(distanceMatrix);
+	clear(pairGraph);
 
 	// Perform a progressive alignment
 	Graph<Alignment<TDepSequenceSet, void, WithoutEdgeId> > gOut(strSet);
 	progressiveAlignment(g, guideTree, gOut);
-	clear(guideTree);
-	clear(g);
+	clearVertices(g);
 	_alignTiming(startTime, "Progressive alignment done: ");
 
 	// Build the read alignment matrix
@@ -201,7 +219,34 @@ int main(int argc, const char *argv[]) {
 	String<Triple<unsigned int, unsigned int, unsigned int> > readBegEndRowPos;
 	consensusAlignment(gOut, alignmentMatrix, readBegEndRowPos, coverage, gappedConsensus);
 	_alignTiming(startTime, "Consensus done: ");
-	
+
+	//// Debug code
+	//for(unsigned int i = 0; i<nseq; ++i) std::cout << readBegEndRowPos[i].i1 << ',' << readBegEndRowPos[i].i2 << ',' << readBegEndRowPos[i].i3 << std::endl;
+
+	// Realign disrupted reads
+	unsigned int numUnalignedReads = realignLowQualityReads(gOut, pList, readBegEndRowPos, g);
+	if (numUnalignedReads > 0) {
+		std::cout << "Disrupted reads: " << numUnalignedReads << std::endl;
+		clearVertices(gOut);
+		progressiveAlignment(g, guideTree, gOut);
+		clear(alignmentMatrix);
+		clear(coverage);
+		clear(gappedConsensus);
+		clear(readBegEndRowPos);
+		consensusAlignment(gOut, alignmentMatrix, readBegEndRowPos, coverage, gappedConsensus);
+		_alignTiming(startTime, "Realignment done: ");
+	}
+	clear(g);
+	clear(guideTree);
+
+	//// Debug code
+	//TSequence consensus;
+	//char gapChar = gapValue<char>();
+	//for(unsigned int i = 0; i<length(gappedConsensus); ++i) {
+	//	if (gappedConsensus[i] != gapChar) appendValue(consensus, gappedConsensus[i]);
+	//}
+	//std::cout << consensus << std::endl;
+
 	
 	//////////////////////////////////////////////////////////////////////////////
 	// Output of aligned reads
@@ -209,7 +254,7 @@ int main(int argc, const char *argv[]) {
 
 	std::fstream strm;
 	strm.open(toCString(value(cfgOpt, "outfile")), std::ios_base::out | std::ios_base::trunc);
-	write(strm, gOut, alignmentMatrix, begEndPos, readBegEndRowPos, gappedConsensus, FastaReadFormat());
+	write(strm, gOut, alignmentMatrix, begEndPos, readBegEndRowPos, gappedConsensus, deltas, FastaReadFormat());
 	strm.close();
 	_alignTiming(startTime, "Output done: ");
 

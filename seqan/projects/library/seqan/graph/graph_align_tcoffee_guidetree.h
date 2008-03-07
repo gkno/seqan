@@ -75,7 +75,10 @@ slowNjTree(String<double, TStringSpec>& mat,
 
 	// First initialization
 	clearVertices(g);
-	if (nseq < 3) {
+	if (nseq == 1) {
+		g.data_root = addVertex(g);
+		return;
+	} else if (nseq == 2) {
 		TVertexDescriptor v1 = addVertex(g);
 		TVertexDescriptor v2 = addVertex(g);
 		TVertexDescriptor internalVertex = addVertex(g);
@@ -496,6 +499,20 @@ upgmaTree(String<TStringValue, TStringSpec>& mat,
 	TSize nseq = (TSize) std::sqrt((double)length(mat));
 	clearVertices(g);
 
+	// Is it possible to make a guide tree?
+	if (nseq == 1) {
+		g.data_root = addVertex(g);
+		return;
+	} else if (nseq == 2) {
+		TVertexDescriptor v1 = addVertex(g);
+		TVertexDescriptor v2 = addVertex(g);
+		TVertexDescriptor internalVertex = addVertex(g);
+		addEdge(g, internalVertex, v1, (TCargo) 1.0);
+		addEdge(g, internalVertex, v2, (TCargo) 1.0);
+		g.data_root = internalVertex;
+		return;
+	}
+
 	// Which entries in the matrix are still active and how many members belong to this group
 	String<unsigned int> active;
 	fill(active, nseq, 1);
@@ -601,10 +618,24 @@ upgmaTree(Graph<Undirected<TValue, TSpec1> >& pairGraph,
 	typedef typename Iterator<TPairGraph, EdgeIterator>::Type TEdgeI;
 	typedef typename Iterator<TPairGraph, VertexIterator>::Type TVertexI;
 	typedef typename Size<TPairGraph>::Type TSize;
-	
+
 	// First initialization
 	TSize nseq = numVertices(pairGraph);
 	clearVertices(g);
+
+	// Is it possible to make a guide tree?
+	if (nseq == 1) {
+		g.data_root = addVertex(g);
+		return;
+	} else if (nseq == 2) {
+		TVertexDescriptor v1 = addVertex(g);
+		TVertexDescriptor v2 = addVertex(g);
+		TVertexDescriptor internalVertex = addVertex(g);
+		addEdge(g, internalVertex, v1, (TCargo) 1.0);
+		addEdge(g, internalVertex, v2, (TCargo) 1.0);
+		g.data_root = internalVertex;
+		return;
+	}
 
 	// Which entries in the matrix are still active and how many members belong to this group
 	String<unsigned int> active;
