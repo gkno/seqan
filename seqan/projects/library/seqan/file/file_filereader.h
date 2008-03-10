@@ -294,6 +294,16 @@ _FileReaderString_loadComplete(String<TValue, FileReader<TFormat, TFile, TSpec> 
 }
 
 //////////////////////////////////////////////////////////////////////////////
+ 
+template <typename TValue, typename TFormat, typename TFile, typename TSpec>
+inline void const * 
+id(String<TValue, FileReader<TFormat, TFile, TSpec> > const & me)
+{
+SEQAN_CHECKPOINT
+	return &me;
+}
+
+//////////////////////////////////////////////////////////////////////////////
 
 template <typename TValue, typename TFormat, typename TFile, typename TSpec, typename TPos>
 inline TValue
