@@ -196,6 +196,13 @@ namespace seqan
 	SEQAN_CHECKPOINT
 		return *me->_obj;
 	}
+	template< typename TObject, typename TModus, typename TSpec, typename TStructuring >
+	inline typename Reference< SkipBaseElement< TObject, TModus, TSpec, TStructuring > >::Type
+	value( SkipBaseElement< TObject, TModus, TSpec, TStructuring > const * me)
+	{
+	SEQAN_CHECKPOINT
+		return *me->_obj;
+	}
 
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring >
 	inline typename GetValue< SkipBaseElement< TObject, TModus, TSpec, TStructuring > >::Type

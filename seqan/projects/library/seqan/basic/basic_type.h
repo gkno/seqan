@@ -351,8 +351,11 @@ struct Id<T const> {
 ..param.T:Type for which a key type is determined.
 ..returns.param.Type:Key type.
 */
-template<typename T>
-struct Key; 
+template< typename T >
+struct Key
+{
+	typedef T Type;
+};
 
 template <typename T>
 struct Key<T const>:

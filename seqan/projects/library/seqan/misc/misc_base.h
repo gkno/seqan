@@ -36,11 +36,12 @@ namespace SEQAN_NAMESPACE_MAIN
 	// Key/Object meta-functions
 	//////////////////////////////////////////////////////////////////////////////
 
+/* moved to basic_h, see #6
 	template <typename TElement>
 	struct Key {
 		typedef TElement Type;
 	};
-
+*/
 	template <typename TKey, typename TObject, typename TSpec>
 	struct Key< Pair<TKey, TObject, TSpec> > {
 		typedef TKey Type;

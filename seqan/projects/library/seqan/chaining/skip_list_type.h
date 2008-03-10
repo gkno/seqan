@@ -36,12 +36,13 @@ namespace SEQAN_NAMESPACE_MAIN
 ..remarks.text:The theKeytype of an object is used for sorting and searching.
 */
 
+/* moved to basic_h, see #6
 	template< typename T >
 	struct Key
 	{
 		typedef T Type;
 	};
-
+*/
 		// default for Pair
 	template < typename _T1, typename _T2, typename Compressed >
     struct Pair;
