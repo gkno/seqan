@@ -1098,15 +1098,34 @@ void Test_FileReader_String2()
 
 //____________________________________________________________________________
 
+void Test_FileReader_String3()
+{
+	FILE * file_fasta = fopen(TEST_PATH "fasta_crlf.txt", "rb");
+	SEQAN_TASSERT(file_fasta)
+
+	String<AminoAcid, FileReader<Fasta> > str(file_fasta);
+	String<AminoAcid> str2(str);
+
+	SEQAN_TASSERT(str == str2);
+
+	append(str2, str);
+	SEQAN_TASSERT(str2 == "ACGTACGT");
+
+	fclose(file_fasta);
+}
+
+//____________________________________________________________________________
+
 void Test_FileReader()
 {
 	Test_FileReader_Iterator();
 	Test_FileReader_String();
 
+	Test_FileReader_String3();
+
 	Test_FileReader_String2<Fasta>();
-	//Test_FileReader_String2<Embl>();
+	Test_FileReader_String2<Embl>();
 	Test_FileReader_String2<Genbank>();
-	
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1131,7 +1150,7 @@ int main()
 	Test_Embl(TEST_PATH "embl_crlf.txt", TEST_PATH "test_output.embl.txt");
 	Test_Genbank(TEST_PATH "genbank_crlf.txt", TEST_PATH "test_output.genbank.txt");
 
-	//Test_FileReader();
+	Test_FileReader();
 
 	Test_Embl();
 //____________________________________________________________________________
