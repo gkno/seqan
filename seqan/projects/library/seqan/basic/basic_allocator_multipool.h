@@ -51,7 +51,7 @@ struct MultiPool;
 
 //////////////////////////////////////////////////////////////////////////////
 
-typedef Allocator<MultiPool<Allocator<SimpleAlloc<Default> > > > PoolAllocator;
+typedef Allocator<MultiPool<Allocator<SimpleAlloc<Default> >, 0x100> > PoolAllocator;
 
 template <typename TParentAllocator, unsigned int BLOCKING_LIMIT_>
 struct Allocator<MultiPool<TParentAllocator, BLOCKING_LIMIT_> >
