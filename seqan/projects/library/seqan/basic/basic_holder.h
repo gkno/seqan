@@ -469,9 +469,13 @@ inline typename Reference<Holder<TValue, Tristate> >::Type
 value(Holder<TValue, Tristate> & me)
 {
 SEQAN_CHECKPOINT
+	typedef Holder<TValue, Tristate> THolder;
+
 	if (empty(me))
 	{
-		create(me);
+		allocate(me, me.data_value, 1);
+		valueConstruct(me.data_value);
+		me.data_state = THolder::OWNER;
 	}
 
 	typedef typename Value<Holder<TValue, Tristate> >::Type THolderType;
@@ -1002,9 +1006,13 @@ inline typename Reference<Holder<TValue, Tristate2> >::Type
 value(Holder<TValue, Tristate2> & me)
 {
 SEQAN_CHECKPOINT
+	typedef Holder<TValue, Tristate2> THolder;
+
 	if (empty(me))
 	{
-		create(me);
+		allocate(me, me.data_value, 1);
+		valueConstruct(me.data_value);
+		me.data_state = THolder::OWNER;
 	}
 
 	typedef typename Value<Holder<TValue, Tristate2> >::Type THolderType;
