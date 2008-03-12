@@ -1627,7 +1627,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		resize(index.tempBound, ValueSize<TValue>::VALUE + 1);
 
 		TSize size = _sortFirstWotdBucket(index);
-		if (size > 0) {
+		if (size > 0) 
+		{
 			resize(indexDir(index), size + 2, Generous());
 			_storeWotdChildren(index, 2, 0);
 
@@ -1639,10 +1640,6 @@ namespace SEQAN_NAMESPACE_MAIN
 			dirAt(0, index) = 0 | index.LAST_CHILD;
 			dirAt(1, index) = w1;
 
-/*			if (globalDumpFlag) {
-				_dump(index);
-			}
-*/
 		} else {
 			resize(indexDir(index), 1);
 			dirAt(0, index) = 0 | index.LAST_CHILD | index.LEAF;
