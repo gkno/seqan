@@ -404,6 +404,16 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TAlign>
+inline typename Size<AlignCols<TAlign> >::Type
+length(AlignCols<TAlign> const & me)
+{
+SEQAN_CHECKPOINT
+	return endPosition(me) - beginPosition(me);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TAlign>
 inline bool
 operator ==(AlignCols<TAlign> const & left, 
 			AlignCols<TAlign> const & right)
