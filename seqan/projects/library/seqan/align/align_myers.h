@@ -636,6 +636,9 @@ SEQAN_CHECKPOINT
 				}
 			}	
 
+			// if computed the whole matrix last value of v = alignment score
+			if(target == hs_complete)   total_score = v;
+
 			/* TRACE BACK */
 			finger1 = begin(matrix_);
 			xs = iter(x,_begin1(target));
@@ -711,6 +714,8 @@ SEQAN_CHECKPOINT
 				++ys;
 			}
 			/* END ALIGN */
+
+
 #ifdef MYERS_HIRSCHBERG_VERBOSE
 			std::cout << std::endl << align_ << std::endl << std::endl;
 #endif
