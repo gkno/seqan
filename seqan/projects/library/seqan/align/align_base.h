@@ -137,6 +137,12 @@ SEQAN_CHECKPOINT
 	{
 SEQAN_CHECKPOINT
 	}
+	template <typename TString, typename TStringsetSpec>
+	Align(StringSet<TString, TStringsetSpec> & stringset)
+	{
+SEQAN_CHECKPOINT
+		setStrings(*this, stringset);
+	}
 	~Align()
 	{
 SEQAN_CHECKPOINT
@@ -373,6 +379,7 @@ SEQAN_CHECKPOINT
 	}
 }
 
+
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TFile, typename TSource, typename TSpec, typename TIDString>
@@ -474,6 +481,46 @@ SEQAN_CHECKPOINT
 	return source;
 }
 */
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.setStrings:
+..cat:Alignments
+..summary:Loads the sequences of a stringset into an alignment.
+..signature:setStrings(align, stringset)
+..param.align:An alignment.
+...type:Class.Align
+..param.stringset:A string set.
+...type:Class.StringSet
+..remarks:The function clears $align$ and creates an new global alignment between strings in $stringset$ that contains only trainling gaps.
+The alignment will be dependent from the strings in the stringset; use @Function.detach@ to make $align$ the owner of its strings.
+*/
+
+template <typename TSource, typename TSpec, typename TString, typename TSpec2>
+inline void
+setStrings(Align<TSource, TSpec> & me,
+		   StringSet<TString, TSpec2> & stringset)
+{
+SEQAN_CHECKPOINT
+	typedef Align<TSource, TSpec> TAlign;
+	typedef StringSet<TString, TSpec2> TStringset;
+
+	typedef typename Rows<TAlign>::Type TRows;
+	typedef typename Iterator<TRows>::Type TRowsIterator;
+	typedef typename Size<TStringset>::Type TStringsetSize;
+
+	clear(me.data_rows);
+	resize(me.data_rows, length(stringset));
+	TRowsIterator it = begin(rows(me));
+	TStringsetSize stringset_length = length(stringset);
+	for (TStringsetSize i = 0; i < stringset_length; ++i)
+	{
+		setSource(*it, value(stringset, i));
+		++it;
+	}
+}
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 }// namespace SEQAN_NAMESPACE_MAIN
