@@ -32,21 +32,27 @@ void testAlignBasics()
 	TAlign ali2(ali1);
 	SEQAN_TASSERT(row(ali1, 0) == row(ali2, 0))	//is the same as ali1
 	SEQAN_TASSERT(row(ali1, 1) == row(ali2, 1))
-	SEQAN_TASSERT(id(row(ali1, 0)) == id(row(ali2, 0))) //(its not a real copy)
-	SEQAN_TASSERT(id(row(ali1, 1)) == id(row(ali2, 1)))
+
+//  it is a real copy
+//	SEQAN_TASSERT(id(row(ali1, 0)) == id(row(ali2, 0))) //(its not a real copy)
+//	SEQAN_TASSERT(id(row(ali1, 1)) == id(row(ali2, 1)))
 
 	TAlign ali3;
 	ali3 = ali1;			//operator =
 	SEQAN_TASSERT(row(ali1, 0) == row(ali3, 0))	//is the same as ali1
 	SEQAN_TASSERT(row(ali1, 1) == row(ali3, 1))
-	SEQAN_TASSERT(id(row(ali1, 0)) == id(row(ali3, 0))) //(its not a real copy)
-	SEQAN_TASSERT(id(row(ali1, 1)) == id(row(ali3, 1)))
+
+//  it is a real copy
+//	SEQAN_TASSERT(id(row(ali1, 0)) == id(row(ali3, 0))) //(its not a real copy)
+//	SEQAN_TASSERT(id(row(ali1, 1)) == id(row(ali3, 1)))
 
 	detach(ali3);			//detach
 	SEQAN_TASSERT(row(ali1, 0) == row(ali3, 0))	//is the same as ali1
 	SEQAN_TASSERT(row(ali1, 1) == row(ali3, 1))
-	SEQAN_TASSERT(id(row(ali1, 0)) != id(row(ali3, 0))) //ali3 is not dependent anymore
-	SEQAN_TASSERT(id(row(ali1, 1)) != id(row(ali3, 1)))
+//  it is a real copy
+//	SEQAN_TASSERT(id(row(ali1, 0)) != id(row(ali3, 0))) //ali3 is not dependent anymore
+//	SEQAN_TASSERT(id(row(ali1, 1)) != id(row(ali3, 1)))
+
 	SEQAN_TASSERT(!dependentSource(row(ali3, 0))) //dependent
 	SEQAN_TASSERT(!dependentSource(row(ali3, 1)))
 
@@ -228,6 +234,7 @@ void testAlignColsBase()
 	SEQAN_TASSERT(row(ali1, 0) == "aY---cdef")
 
 
+	SEQAN_TASSERT(length(cols(ali1)) == 11);
 
 //____________________________________________________________________________
 }
@@ -269,11 +276,29 @@ void testGotohAlign()
 
 //////////////////////////////////////////////////////////////////////////////
 
+template <typename TAlign>
+void testAlignBasics2()
+{
+	StringSet<String<char> > ss;
+	appendValue(ss, "accagtta");
+	appendValue(ss, "ccactagggg");
+
+	TAlign aa(ss);
+	SEQAN_TASSERT(row(aa, 0) == "accagtta")
+	SEQAN_TASSERT(id(row(aa, 0)) == id(value(ss, 0)))
+	SEQAN_TASSERT(row(aa, 1) == "ccactagggg")
+	SEQAN_TASSERT(id(row(aa, 1)) == id(value(ss, 1)))
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
 void Main_TestAlign() 
 {
 	SEQAN_TREPORT("TEST ALIGN BEGIN")
 
 	testAlignBasics<Align<String<char>, ArrayGaps> >();
+	testAlignBasics2<Align<String<char>, ArrayGaps> >();
 	testAlignColsBase<Align<String<char>, ArrayGaps> >();
 	testGotohAlign<Align< String<char>, ArrayGaps> >();
 /*
