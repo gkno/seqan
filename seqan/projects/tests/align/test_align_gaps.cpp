@@ -47,7 +47,9 @@ void TestGapsBase()
 	SEQAN_TASSERT(id(gaps1) != id(src1))
 
 	TGaps gaps2(gaps1);				//copy ctor
-	SEQAN_TASSERT(id(gaps1) == id(gaps2)) //(its not a real copy)
+
+//  it is a real copy
+//	SEQAN_TASSERT(id(gaps1) == id(gaps2)) //(its not a real copy)
 
 //____________________________________________________________________________
 
