@@ -69,8 +69,13 @@ typedef Tag<GoEnd_> const GoEnd;
 
 //////////////////////////////////////////////////////////////////////////////
 
+//construct without initializing
 struct MinimalCtor_;
 typedef Tag<MinimalCtor_> const MinimalCtor;
+
+//construct with initializing
+struct NonMinimalCtor_;
+typedef Tag<NonMinimalCtor_> const NonMinimalCtor;
 
 //////////////////////////////////////////////////////////////////////////////
 /**

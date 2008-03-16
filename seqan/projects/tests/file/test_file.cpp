@@ -1150,7 +1150,7 @@ int main()
 	Test_Embl(TEST_PATH "embl_crlf.txt", TEST_PATH "test_output.embl.txt");
 	Test_Genbank(TEST_PATH "genbank_crlf.txt", TEST_PATH "test_output.genbank.txt");
 
-	Test_FileReader();
+//	Test_FileReader();
 
 	Test_Embl();
 //____________________________________________________________________________

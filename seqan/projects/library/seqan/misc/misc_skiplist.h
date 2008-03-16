@@ -38,7 +38,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //forwards
 
-template <typename TKey, typename TValue, typename TSpec>
+template <typename TKey, typename TValue, typename TSpec = Default>
 class Skiplist;
 
 template <typename TKey, typename TValue, typename TSpec>
@@ -54,10 +54,6 @@ class SkiplistPath;
 // Tags
 struct SkiplistIterator;
 
-
-struct _SkiplistFindLast_; //search with _skiplistFind the last element in Skiplist
-typedef Tag<_SkiplistFindLast_> _SkiplistFindLast;
-
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
@@ -71,6 +67,36 @@ struct AllocatorType<Skiplist<TKey, TValue, TSpec> >
 
 //////////////////////////////////////////////////////////////////////////////
 
+template <typename TKey, typename TValue, typename TSpec>
+struct Value<Skiplist<TKey, TValue, TSpec> >
+{
+	typedef TValue Type;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TKey, typename TValue, typename TSpec>
+struct Key<Skiplist<TKey, TValue, TSpec> >
+{
+	typedef TKey Type;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TKey, typename TValue, typename TSpec>
+struct Spec<Skiplist<TKey, TValue, TSpec> >
+{
+	typedef TSpec Type;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TKey, typename TValue, typename TSpec, typename TIteratorSpec>
+struct Iterator<Skiplist<TKey, TValue, TSpec>, TIteratorSpec >
+{
+	typedef Skiplist<TKey, TValue, TSpec> TSkiplist;
+	typedef Iter<TSkiplist, SkiplistIterator> Type;
+};
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -81,20 +107,20 @@ public:
 	typedef typename AllocatorType<Skiplist>::Type TAllocator;
 	typedef SkiplistElement<TKey, TValue, TSpec> TElement;
 	typedef typename Size<Skiplist>::Type TSize;
+	typedef typename Value<Skiplist>::Type TValue2;
 
 	enum
 	{
-		MAX_HEIGHT = 26;
-		BLOCK_SIZE = 0x400;
+		MAX_HEIGHT = 28,
+		BLOCK_SIZE = 0x200
 	};
 
-
 	Holder<TAllocator> data_allocator;
-	TElement * data_recycle[TElement::MAX_HEIGHT];
+	TElement * data_recycle[MAX_HEIGHT];
 	unsigned char * data_mem_begin;
 	unsigned char * data_mem_end;
 
-	SkiplistElement data_border;
+	TElement data_border;
 	TSize data_length;
 	unsigned char data_height;
 
@@ -104,13 +130,23 @@ public:
 		, data_length(0)
 		, data_height(0)
 	{
-		arrayFill(data_recycle, data_recycle + MAX_HEIGHT, 0);
-		arrayFill(data_border.data_next, data_border.data_next + MAX_HEIGHT, 0);
+		for (unsigned char i = 0; i < MAX_HEIGHT; ++i)
+		{
+			data_recycle[i] = 0;
+			valueConstruct(data_border.data_next + i, NonMinimalCtor()); 
+		}
 
 		mtRandInit();
 	}
 	~Skiplist()
 	{
+	}
+
+	template <typename TKey2>
+	inline TValue2 &
+	operator [] (TKey2 const & key)
+	{
+		return value(*this, key);
 	}
 
 private:
@@ -129,7 +165,7 @@ public:
 
 	enum
 	{
-		MAX_HEIGHT = TSkiplist::MAX_HEIGHT;
+		MAX_HEIGHT = TSkiplist::MAX_HEIGHT
 	};
 
 	struct Data
@@ -153,7 +189,7 @@ public:
 
 	enum
 	{
-		MAX_HEIGHT = TSkiplist::MAX_HEIGHT;
+		MAX_HEIGHT = TSkiplist::MAX_HEIGHT
 	};
 
 	struct Data
@@ -177,7 +213,23 @@ class SkiplistNext
 public:
 	typedef SkiplistElement<TKey, TValue, TSpec> TElement;
 
-	SkiplistElement * data_element;
+	TElement * data_element;
+
+	SkiplistNext()
+	{}
+	SkiplistNext(NonMinimalCtor)
+		: data_element(0)
+	{}
+	SkiplistNext(SkiplistNext const & other)
+		: data_element(other.data_element)
+	{}
+	~SkiplistNext()
+	{}
+	SkiplistNext const & operator = (SkiplistNext const & other)
+	{
+		data_element = other.data_element;
+		return *this;
+	}
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -192,22 +244,13 @@ public:
 
 	enum
 	{
-		MAX_HEIGHT = TSkiplist::MAX_HEIGHT;
+		MAX_HEIGHT = TSkiplist::MAX_HEIGHT
 	};
 
 	TElement * data_elements[MAX_HEIGHT];
 //	unsigned char data_height; //is stored in Skiplist
 };
 
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename TKey, typename TValue, typename TSpec, typename TIteratorSpec>
-struct Iterator<Skiplist<TKey, TValue, TSpec>, TIteratorSpec>
-{
-	typedef Iter<Skiplist<TKey, TValue, TSpec>, SkiplistIterator> Type;
-};
-
-//////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TKey, typename TValue, typename TSpec, typename TSize, typename TUsage>
@@ -237,21 +280,21 @@ _skiplistAllocateElement(Skiplist<TKey, TValue, TSpec> & me,
 	if (me.data_recycle[height])
 	{//use recycled
 		ret = me.data_recycle[height];
-		me.data_recycle[height] = reinterpret_cast<TElement *>(* me.data_recycle[height]);
+		me.data_recycle[height] = * reinterpret_cast<TElement **>(me.data_recycle[height]);
 	}
 	else
 	{
-		int need_size = sizeof(typename TElement::Data) + height * sizeof(TNext);
-		int buf_size = me.data_mem_end - me.data_mem_begin
+		int need_size = sizeof(typename TElement::Data) + (height+1) * sizeof(TNext);
+		int buf_size = me.data_mem_end - me.data_mem_begin;
 		if (buf_size < need_size)
 		{//need new memory
-			if (buf_size >= sizeof(typename TElement::Data))
+			if (buf_size >= (sizeof(typename TElement::Data) + sizeof(TNext)))
 			{//link rest memory in recycle 
-				int rest_height = (buf_size - sizeof(typename TElement::Data)) / sizeof(TNext); //must be < height, because buf_size < need_size
-				* reinterpret_cast<TElement *>(me.data_mem_begin) = me.data_recycle[rest_height];
+				int rest_height = (buf_size - sizeof(typename TElement::Data)) / sizeof(TNext) - 1; //must be < height, because buf_size < need_size
+				* reinterpret_cast<TElement **>(me.data_mem_begin) = me.data_recycle[rest_height];
 				me.data_recycle[rest_height] = reinterpret_cast<TElement *>(me.data_mem_begin);
 			}
-			allocate(me), me.data_mem_begin, TSkiplist::BLOCK_SIZE, TagAllocateStorage());
+			allocate(me, me.data_mem_begin, TSkiplist::BLOCK_SIZE, TagAllocateStorage());
 			me.data_mem_end = me.data_mem_begin + TSkiplist::BLOCK_SIZE;
 		}
 		ret = reinterpret_cast<TElement *>(me.data_mem_begin);
@@ -300,10 +343,11 @@ _skiplistConstructElement(Skiplist<TKey, void, TSpec> & me,
 template <typename TKey, typename TValue, typename TSpec>
 inline void
 _skiplistDeallocateElement(Skiplist<TKey, TValue, TSpec> & me,
-						   SkiplistElement<TKey, TValue, TSpec> & el
+						   SkiplistElement<TKey, TValue, TSpec> & el,
 						   unsigned char height)
 {
-	* reinterpret_cast<TElement *>(&el) = me.data_recycle[height]
+	typedef SkiplistElement<TKey, TValue, TSpec> TElement;
+	* reinterpret_cast<TElement *>(&el) = me.data_recycle[height];
 	me.data_recycle[height] = reinterpret_cast<TElement *>(&el);
 	//the real deallocation is done by the allocator on destruction 
 }
@@ -314,7 +358,7 @@ _skiplistDeallocateElement(Skiplist<TKey, TValue, TSpec> & me,
 template <typename TKey, typename TValue, typename TSpec>
 inline void
 _skiplistDestructElement(Skiplist<TKey, TValue, TSpec> & me,
-						 SkiplistElement<TKey, TValue, TSpec> & el
+						 SkiplistElement<TKey, TValue, TSpec> & el,
 						 unsigned char height)
 {
 	valueDestruct(& (el.data.key) );
@@ -327,12 +371,52 @@ _skiplistDestructElement(Skiplist<TKey, TValue, TSpec> & me,
 template <typename TKey, typename TSpec>
 inline void
 _skiplistDestructElement(Skiplist<TKey, void, TSpec> & me,
-						 SkiplistElement<TKey, void, TSpec> & el
+						 SkiplistElement<TKey, void, TSpec> & el,
 						 unsigned char height)
 {
 	valueDestruct(& (el.data.key) );
 	//no need to construct the next array
 	_skiplistDeallocateElement(me, el, height);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+//creates height for new SkiplistElement.
+//increases the Skiplist height if necessary
+template <typename TKey, typename TValue, typename TSpec>
+inline unsigned char
+_skiplistCreateHeight(Skiplist<TKey, TValue, TSpec> & me)
+{
+	typedef Skiplist<TKey, TValue, TSpec> TSkiplist;
+
+	unsigned char height = geomRand<unsigned char>();
+	if (height >= TSkiplist::MAX_HEIGHT) height = TSkiplist::MAX_HEIGHT-1;
+
+	if (height > me.data_height) me.data_height = height;
+
+	return height;
+}
+
+template <typename TKey, typename TValue, typename TSpec>
+inline unsigned char
+_skiplistCreateHeight(Skiplist<TKey, TValue, TSpec> & me,
+					  SkiplistPath<TKey, TValue, TSpec> & path) //extend path if height is increased
+{
+	typedef Skiplist<TKey, TValue, TSpec> TSkiplist;
+
+	unsigned char height = geomRand<unsigned char>();
+	if (height >= TSkiplist::MAX_HEIGHT) height = TSkiplist::MAX_HEIGHT-1;
+
+	if (height > me.data_height)
+	{
+		for (unsigned char i = me.data_height + 1; i <= height; ++i)
+		{
+			path.data_elements[i] = & me.data_border;
+		}
+		me.data_height = height;
+	}
+
+	return height;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -346,7 +430,7 @@ _skiplistGetHeight(Skiplist<TKey, TValue, TSpec> & me,
 	int height = me.data_height;
 	for (; height > 0 ; --height)
 	{
-		if (path.elements[height]->data_next[height2] == el) break;
+		if (path.elements[height]->data_next[height] == el) break;
 	}
 	return height;
 }
@@ -379,22 +463,20 @@ _skiplistGetHeight(Skiplist<TKey, TValue, TSpec> & me,
 // - the first element that has the smallest key larger than the key of the given element,
 //or a path to the last element, if all keys are smaller than the key of the given element
 
-template <typename TKey, typename TValue, typename TSpec, typename TTag>
+template <typename TKey, typename TValue, typename TSpec>
 inline bool
 _skiplistFindGoNext(SkiplistNext<TKey, TValue, TSpec> & next,
 					unsigned char,
-					TKey const & key,
-					Tag<TTag> const)
+					TKey const & key)
 {
 	return (next.data_element->data.key < key);
 }
 
-template <typename TKey, typename TValue, typename TSpec, typename TTag>
+template <typename TKey, typename TValue, typename TSpec>
 inline bool
 _skiplistFindGoNext(SkiplistNext<TKey, TValue, TSpec> & next,
 					unsigned char,
-					SkiplistElement<TKey, TValue, TSpec> const & el,
-					Tag<TTag> const)
+					SkiplistElement<TKey, TValue, TSpec> const & el)
 {
 	return (next.data_element->data.key <= el.data.key) && (next.data_element != & el);
 }
@@ -403,42 +485,58 @@ template <typename TKey, typename TValue, typename TSpec>
 inline bool
 _skiplistFindGoNext(SkiplistNext<TKey, TValue, TSpec> & next,
 					unsigned char height,
-					TFind const &,
-					_SkiplistFindLast)
+					GoEnd)
 {
 	return next.data_element->data_next[height];
 }
 
 
-template <typename TKey, typename TValue, typename TSpec, typename TFind, typename TTag>
+template <typename TKey, typename TValue, typename TSpec, typename TFind>
 inline void
 _skiplistFind(Skiplist<TKey, TValue, TSpec> & me,
-			  TFind const & find, //can be a TKey or a SkiplistElement
-			  /*OUT*/ SkiplistPath<TKey, TValue, TSpec> & path,
-			  Tag<TTag> const tag)
+			  TFind const & find, //can be a TKey or a SkiplistElement or GoEnd
+			  /*OUT*/ SkiplistPath<TKey, TValue, TSpec> & path)
 {
 	typedef SkiplistElement<TKey, TValue, TSpec> TElement;
 	typedef SkiplistNext<TKey, TValue, TSpec> TNext;
 
-	TElement * here = me.data_border;
+	TElement * here = & me.data_border;
 
 	for (int i = me.data_height; i >= 0; --i)
 	{
-		TNext & next = here.data_next[i];
-		while (next.data_element && _skiplistFindGoNext(next, i, find, tag))
+		while (true)
 		{
+			TNext & next = here->data_next[i];
+			if (!next.data_element || !_skiplistFindGoNext(next, i, find)) break;
 			here = next.data_element;
 		}
 		path.data_elements[i] = here;
 	}
 }
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+
 template <typename TKey, typename TValue, typename TSpec, typename TFind>
-inline void
-_skiplistFind(Skiplist<TKey, TValue, TSpec> & me,
-			  TFind const & find, //can be a TKey or a SkiplistElement
-			  /*OUT*/ SkiplistPath<TKey, TValue, TSpec> & path)
+inline typename Iterator< Skiplist<TKey, TValue, TSpec> >::Type
+findElement(Skiplist<TKey, TValue, TSpec> & me,
+			TFind const & find, //can be a TKey or a SkiplistElement or GoEnd
+			SkiplistPath<TKey, TValue, TSpec> & path) 
 {
-	_skiplistFind(me, find, path, Default());
+	typedef typename Iterator< Skiplist<TKey, TValue, TSpec> >::Type TIterator;
+
+	_skiplistFind(me, find, path);
+	return TIterator(path.data_elements[0]->data_next[0].data_element);
+}
+template <typename TKey, typename TValue, typename TSpec, typename TFind>
+inline typename Iterator< Skiplist<TKey, TValue, TSpec> >::Type
+findElement(Skiplist<TKey, TValue, TSpec> & me,
+			TFind const & find) //can be a TKey or a SkiplistElement or GoEnd
+{
+	typedef SkiplistPath<TKey, TValue, TSpec> TPath;
+	TPath path;
+	return findElement(me, find, path);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -456,8 +554,8 @@ _skiplistInsertElement(SkiplistElement<TKey, TValue, TSpec> & el,
 {
 	for (int i = height; i >= 0; --i)
 	{
-		el.data_next[i].element = path.data_elements[i];
-		path.data_elements[i]->data_next[i].element = el;
+		el.data_next[i].data_element = path.data_elements[i]->data_next[i].data_element;
+		path.data_elements[i]->data_next[i].data_element = & el;
 	}
 }
 
@@ -495,27 +593,11 @@ _skiplistInsertElement(Skiplist<TKey, TValue, TSpec> & me,
 
 //////////////////////////////////////////////////////////////////////////////
 
-//creates height for new SkiplistElement.
-//increases the Skiplist height if necessary
-template <typename TKey, typename TValue, typename TSpec>
-inline unsigned char
-_skiplistCreateHeight(Skiplist<TKey, TValue, TSpec> & me)
-{
-	unsigned char height = geomRand<unsigned char>();
-	if (height >= TSkiplist::MAX_HEIGHT) height = TSkiplist::MAX_HEIGHT-1;
-
-	if (height > me.data_height) me.data_height = height;
-
-	return height;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename TKey, typename TValue, typename TSpec>
+template <typename TKey, typename TValue, typename TSpec, typename TKey2, typename TValue2>
 inline void
 insertElement(Skiplist<TKey, TValue, TSpec> & me,
-			  TKey const & key,
-			  TValue const & value)
+			  TKey2 const & key,
+			  TValue2 const & value)
 {
 	typedef Skiplist<TKey, TValue, TSpec> TSkiplist;
 	typedef SkiplistElement<TKey, TValue, TSpec> TElement;
@@ -524,10 +606,10 @@ insertElement(Skiplist<TKey, TValue, TSpec> & me,
 	TElement & el = _skiplistConstructElement(me, height, key, value);
 	_skiplistInsertElement(me, el, height);
 }
-template <typename TKey, typename TSpec>
+template <typename TKey, typename TSpec, typename TKey2>
 inline void
 insertElement(Skiplist<TKey, void, TSpec> & me,
-			  TKey const & key)
+			  TKey2 const & key)
 {
 	typedef Skiplist<TKey, void, TSpec> TSkiplist;
 	typedef SkiplistElement<TKey, void, TSpec> TElement;
@@ -543,7 +625,7 @@ insertElement(Skiplist<TKey, void, TSpec> & me,
 template <typename TKey, typename TValue, typename TSpec>
 inline void
 _skiplistUnlinkElement(Skiplist<TKey, TValue, TSpec> & me,
-					   SkiplistPath<TKey, TValue, TSpec> & el)
+					   SkiplistElement<TKey, TValue, TSpec> & el)
 {
 	typedef SkiplistPath<TKey, TValue, TSpec> TPath;
 
@@ -552,50 +634,144 @@ _skiplistUnlinkElement(Skiplist<TKey, TValue, TSpec> & me,
 
 	for (int i = me.data_height; i >= 0; --i)
 	{
-		if (path.elements[i]->data_next[i].element == el)
+		if (path.data_elements[i]->data_next[i].data_element == & el)
 		{
-			path.elements[i]->data_next[i].element = el.data_next[i].element;
+			path.data_elements[i]->data_next[i].data_element = el.data_next[i].data_element;
 		}
 	}
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// SkiplistIterator
+
+template <typename TKey, typename TValue, typename TSpec, typename TIterator>
+inline void
+removeElement(Skiplist<TKey, TValue, TSpec> & me,
+			  TIterator it)
+{
+	_skiplistUnlinkElement(me, * it.data_pointer);
+	--me.data_length;
+}
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TKey, typename TValue, typename TSpec>
-class Iter< Skiplist<TKey, TValue, TSpec>, SkiplistIterator>
+inline typename Size< Skiplist<TKey, TValue, TSpec> >::Type
+length(Skiplist<TKey, TValue, TSpec> const & me)
+{
+	return me.data_length;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TKey, typename TValue, typename TSpec, typename TIteratorSpec>
+inline typename Iterator< Skiplist<TKey, TValue, TSpec>, TIteratorSpec>::Type
+begin(Skiplist<TKey, TValue, TSpec> & me,
+	  TIteratorSpec)
+{
+	typedef typename Iterator< Skiplist<TKey, TValue, TSpec>, TIteratorSpec>::Type TIterator;
+	return TIterator(me);
+}
+template <typename TKey, typename TValue, typename TSpec>
+inline typename Iterator< Skiplist<TKey, TValue, TSpec> >::Type
+begin(Skiplist<TKey, TValue, TSpec> & me)
+{
+	typedef typename Iterator< Skiplist<TKey, TValue, TSpec> >::Type TIterator;
+	return TIterator(me);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TKey, typename TValue, typename TSpec, typename TIteratorSpec>
+inline typename Iterator< Skiplist<TKey, TValue, TSpec>, TIteratorSpec>::Type
+end(Skiplist<TKey, TValue, TSpec> &,
+	TIteratorSpec)
+{
+	typedef typename Iterator< Skiplist<TKey, TValue, TSpec>, TIteratorSpec>::Type TIterator;
+	return TIterator();
+}
+template <typename TKey, typename TValue, typename TSpec>
+inline typename Iterator< Skiplist<TKey, TValue, TSpec> >::Type
+end(Skiplist<TKey, TValue, TSpec> &)
+{
+	typedef typename Iterator< Skiplist<TKey, TValue, TSpec> >::Type TIterator;
+	return TIterator();
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TKey, typename TValue, typename TSpec, typename TKey2>
+inline typename Value< Skiplist<TKey, TValue, TSpec> >::Type &
+value(Skiplist<TKey, TValue, TSpec> & me,
+	  TKey2 const & _key)
+{
+	typedef Skiplist<TKey, TValue, TSpec> TSkiplist;
+	typedef SkiplistPath<TKey, TValue, TSpec> TPath;
+	typedef SkiplistElement<TKey, TValue, TSpec> TElement;
+	typedef typename Iterator<TSkiplist>::Type TIterator;
+	typedef typename Value<TSkiplist>::Type TValue2;
+
+	TPath path;
+	TIterator it = findElement(me, _key, path);
+	if (it && (key(it) == _key))
+	{
+		return value(it);
+	}
+	else
+	{// insert new value
+		unsigned char height = _skiplistCreateHeight(me, path);
+		TElement & el = _skiplistConstructElement(me, height, _key, TValue2());
+		_skiplistInsertElement(el, path, height);
+		++me.data_length;
+		return el.data.value;
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TKey, typename TValue, typename TSpec, typename TKey2>
+inline bool
+hasKey(Skiplist<TKey, TValue, TSpec> & me,
+	   TKey2 const & _key)
+{
+	typedef Skiplist<TKey, TValue, TSpec> TSkiplist;
+	typedef typename Iterator<TSkiplist>::Type TIterator;
+	TIterator it = findElement(me, _key);
+
+	return (it && (key(it) == _key));
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// SkiplistIterator: Standard Iterator for Skiplist
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TSkiplist>
+class Iter< TSkiplist, SkiplistIterator>
 {
 public:
-	typedef Skiplist<TKey, TValue, TSpec> TSkiplist;
-	typedef SkiplistElement<TKey, TValue, TSpec> TElement;
-	typedef SkiplistPath<TKey, TValue, TSpec> TPath;
+	typedef typename Key<TSkiplist>::Type TKey;
+	typedef typename Value<TSkiplist>::Type TValue;
+	typedef typename Spec<TSkiplist>::Type TSpec;
 
-	TPath data_path;
+	typedef SkiplistElement<TKey, TValue, TSpec> TElement;
+
 	TElement * data_pointer;
-	TSkiplist * data_container;
-	bool data_is_path_valid;
 
 	Iter()
 		: data_pointer(0)
-		, data_container(0)
-		, data_is_path_valid(false)
 	{
-	}
-	Iter(TSkiplist & sk)
-		: data_container(& sk)
-	{
-		goBegin(*this);
 	}
 	Iter(Iter const & other)
 		: data_pointer(other.data_pointer)
-		, data_container(other.data_container)
-		, data_is_path_valid(other.data_is_path_valid)
 	{
-		for (int i = data_container->data_height; i > 0 ; --i)
-		{
-			data_path[i] = other.data_path[i];
-		}
+	}
+	Iter(TElement * ptr)
+		: data_pointer(ptr)
+	{
+	}
+	Iter(TSkiplist & sk)
+		: data_pointer(sk.data_border.data_next[0].data_element)
+	{
 	}
 	~Iter()
 	{
@@ -605,98 +781,52 @@ public:
 	operator = (Iter const & other)
 	{
 		data_pointer = other.data_pointer;
-		data_container = other.data_container;
-		data_is_path_valid = other.data_is_path_valid;
-		for (int i = data_container->data_height; i > 0 ; --i)
-		{
-			data_path[i] = other.data_path[i];
-		}
+		return *this;
+	}
+	operator bool () const
+	{
+		return data_pointer;
 	}
 
 };
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TKey, typename TValue, typename TSpec>
+template <typename TSkiplist>
+inline bool
+atEnd(Iter<TSkiplist, SkiplistIterator> & it)
+{
+	return (!it.data_pointer);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TSkiplist>
 inline void
-goBegin(Iter< Skiplist<TKey, TValue, TSpec>, SkiplistIterator> & it)
+goNext(Iter<TSkiplist, SkiplistIterator> & it)
 {
-	typedef Skiplist<TKey, TValue, TSpec> TSkiplist;
-	TSkiplist & sk = * (it.data_container);
-
-	it.data_pointer = sk.data_border.data_next[0].data_element;
-
-	for (int i = sk.data_height; i > 0 ; --i)
-	{
-		it.data_path[i] = & (sk.data_border);
-	}
-
-	it.data_is_path_valid = true;
+	it.data_pointer = it.data_pointer->data_next[0].data_element;
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TKey, typename TValue, typename TSpec>
-inline void
-goLast(Iter< Skiplist<TKey, TValue, TSpec>, SkiplistIterator> & it)
+template <typename TSkiplist>
+inline typename Value<TSkiplist>::Type &
+value(Iter<TSkiplist, SkiplistIterator> & it)
 {
-	_skiplistFind(* it.data_container, 0, it.data_path, _SkiplistFindLast());
-	id.data_pointer = id.data_path.data_elements[0]->data_next[0];
-	it.data_is_path_valid = true;
+	return it.data_pointer->data.value;
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TKey, typename TValue, typename TSpec>
-inline bool
-atEnd(Iter< Skiplist<TKey, TValue, TSpec>, SkiplistIterator> & it)
+template <typename TSkiplist>
+inline typename Key<TSkiplist>::Type const &
+key(Iter<TSkiplist, SkiplistIterator> & it)
 {
-	return (!it.data_pointer)
+	return it.data_pointer->data.key;
 }
 
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename TKey, typename TValue, typename TSpec, typename TFind>
-inline bool
-findElement(Iter< Skiplist<TKey, TValue, TSpec>, SkiplistIterator> & it,
-			TFind const & find) //find can be a key or an SkiplistElement
-{
-	_skiplistFind(* it.data_container, key, it.data_path);
-	it.data_pointer = id.data_path.data_elements[0]->data_next[0];
-	it.data_is_path_valid = true;
-
-	return it.data_pointer;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename TKey, typename TValue, typename TSpec, typename TKey2, typename TValue2>
-inline bool
-insertElement(Iter< Skiplist<TKey, TValue, TSpec>, SkiplistIterator> & it,
-			  TKey2 const & key,
-			  TValue2 const & value)
-{
-	typedef SkiplistElement<TKey, TValue, TSpec> TElement;
-
-	if (!it.data_is_path_valid) _skiplistValidatePath(it);
-
-	unsigned char height = _skiplistCreateHeight(me);
-	TElement & el = _skiplistConstructElement(*it.data_container, height, key, value);
-
-	_skiplistFind(* it.data_container, key, it.data_path);
-	it.data_pointer = id.data_path.data_elements[0]->data_next[0];
-	it.data_is_path_valid = true;
-
-	return it.data_pointer;
-}
-	typedef Skiplist<TKey, TValue, TSpec> TSkiplist;
-	typedef SkiplistElement<TKey, TValue, TSpec> TElement;
-
-	unsigned char height = _skiplistCreateHeight(me);
-	TElement & el = _skiplistConstructElement(me, height, key, value);
-	_skiplistInsertElement(me, el, height);
-
-//////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 //____________________________________________________________________________
 

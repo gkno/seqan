@@ -514,7 +514,7 @@ SEQAN_CHECKPOINT
 /**
 .Function.goEnd:
 ..cat:Iteration
-..summary:Iterates to the first position of a container. 
+..summary:Iterates to the last position of a container. 
 ..signature:goEnd(iterator [, container])
 ..param.iterator:Object that iterates through $container$.
 ...type:Class.Iter
