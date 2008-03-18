@@ -9,6 +9,7 @@
 #include "test_index_creation.h"
 #include <seqan/align.h>
 #include <seqan/index.h>
+#include <seqan/index/index_wotd.h>
 
 
 using namespace std;
@@ -193,11 +194,89 @@ void testMultiIndex()
 */
 }
 
+template <typename TIndex1, typename TIndex2>
+bool compareTreeIterators(TIndex1 &index1, TIndex2 &index2)
+{
+	Iter<TIndex1, VSTree< TopDown< ParentLinks<Preorder> > > > it1(index1);
+	Iter<TIndex2, VSTree< TopDown< ParentLinks<Preorder> > > > it2(index2);
 
+	while (!atEnd(it1) && !atEnd(it2)) {
+		if (representative(it1) != representative(it2)) 
+		{
+			cout << representative(it1) << " != " << representative(it2) << endl;
+			return false;
+		}
+		goNext(it1);
+		goNext(it2);
+	}
 
+	if (!(atEnd(it1) && atEnd(it1)))
+		return false;
+
+	return true;
+}
+
+template <typename TIndexSpec1, typename TIndexSpec2>
+bool compareIndices()
+{
+	bool equal = true;
+	{
+		CharString text("mississippi");
+		Index<CharString, TIndexSpec1> index1(text);
+		Index<CharString, TIndexSpec2> index2(text);
+		if (!compareTreeIterators(index1, index2)) {
+			cout << text << " indices differ" << endl;
+			equal = false;
+		}
+	}
+	{
+		DnaString text("acaaacatat");
+		Index<DnaString, TIndexSpec1> index1(text);
+		Index<DnaString, TIndexSpec2> index2(text);
+		if (!compareTreeIterators(index1, index2)) {
+			cout << text << " indices differ" << endl;
+			equal = false;
+		}
+	}
+	{
+		StringSet<CharString> t;
+		resize(t, 6);
+		t[0] = "caterpillar";
+		t[1] = "catwoman";
+		t[2] = "pillow";
+		t[3] = "willow";
+		t[4] = "ill";
+		t[5] = "wow";
+		Index<StringSet<CharString>, TIndexSpec1> index1(t);
+		Index<StringSet<CharString>, TIndexSpec2> index2(t);
+		if (!compareTreeIterators(index1, index2)) {
+			cout << " indices differ" << endl;
+			equal = false;
+		}
+	}
+	{
+		StringSet<DnaString> t;
+		resize(t, 6);
+		t[0] = "caggctcgcgt";
+		t[1] = "caggaacg";
+		t[2] = "tcgttg";
+		t[3] = "tggtcg";
+		t[4] = "agg";
+		t[5] = "ctg";
+		Index<StringSet<DnaString>, TIndexSpec1> index1(t);
+		Index<StringSet<DnaString>, TIndexSpec2 > index2(t);
+		if (!compareTreeIterators(index1, index2)) {
+			cout << " indices differ" << endl;
+			equal = false;
+		}
+	}
+	return equal;
+}
+
+template <typename TIndexSpec>
 void testSTreeIterators()
 {
-		typedef Index<String<char>, Index_ESA<> > TIndex;
+		typedef Index<String<char>, TIndexSpec> TIndex;
 
 		String<char> text("acaaacatatz");
 //		String<char> text("AAAAAGGGGG");
@@ -206,30 +285,26 @@ void testSTreeIterators()
 		Iter<TIndex, VSTree< TopDown<> > > itNoLinks(it);	// test conversion
 		//Iter<TIndex, VSTree< BottomUp<> > > it(index);
 
-		cout << "SA       = ";
-		for(unsigned i=0; i<length(indexSA(index)); ++i)
-			cout << saAt(i, index) << "  ";
-		cout << endl;
-
-		cout << "LCP      = ";
-		for(unsigned i=0; i<length(indexLCP(index)); ++i)
-			cout << lcpAt(i, index) << "  ";
-		cout << endl;
-
-		cout << "ChildTab = ";
-		for(unsigned i=0; i<length(indexChildTab(index)); ++i)
-			cout << childAt(i, index) << "  ";
-		cout << endl;
-
 //		while (goDown(it));
 		while (!atEnd(it)) {
-			cout << countOccurrences(it) << "\t";
+//			cout << countOccurrences(it) << "\t";
 			cout << representative(it) << "\t";
-			cout << "parentEdgeLabel: " << parentEdgeLabel(it);
+			cout << "parentEdgeLabel: " << parentEdgeLabel(it); // << " " << value(it).node << "  " << value(it).range;
 			cout << endl;
 			goNext(it);
 		}
-}
+			cout << endl;
+		_dump(index);
+/*		goBegin(it);
+		while (!atEnd(it)) {
+			cout << countOccurrences(it) << "\t";
+			cout << representative(it) << "\t";
+			cout << "parentEdgeLabel: " << parentEdgeLabel(it) << " " << value(it).node << "  " << value(it).range;
+			cout << endl;
+			goNext(it);
+		}
+		_dump(index);
+*/}
 
 
 void testMaxRepeats()
@@ -391,6 +466,13 @@ void testFind()
 		SEQAN_TASSERT(pos[0] == 26);
 }
 
+void dumpStatus(bool status) {
+	if (status)
+		cout << "OK" << endl;
+	else
+		cout << "FAILED!" << endl;
+	}
+
 
 bool testIndexCreation();
 void Main_TestQGram();
@@ -401,7 +483,12 @@ int main()
 
 	cout << "===================================" << endl;
 	cout << "----Basic Suffix Tree iterators----" << endl;
-	testSTreeIterators();
+	testSTreeIterators<Index_Wotd<> >();
+	testSTreeIterators<Index_Wotd<WotdOriginal> >();
+	testSTreeIterators<Index_ESA<> >();
+	cout << "===================================" << endl;
+	cout << "----Compare Indices----------------" << endl;
+	dumpStatus(compareIndices<Index_ESA<>, Index_Wotd<> >());
 	cout << "===================================" << endl;
 	cout << "----Suffix Array based Finder------" << endl;
 	testFind<ESA_FIND_MLR>();

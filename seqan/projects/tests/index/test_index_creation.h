@@ -258,17 +258,17 @@ namespace SEQAN_NAMESPACE_MAIN
     template <typename TSufArray, typename TText>
     bool isSuffixArray(TSufArray &SA, TText const &s) {
         if (length(SA) != length(s)) {
-            printf("isSuffixArray: length is bad: SA=%d, s=%d\n", length(SA), length(s));
+			::std::cerr<<"isSuffixArray: length is bad: SA="<<length(SA)<<", s="<<length(s)<<::std::endl;
             return false;
         }
         
         if (!isPermutation(SA)) {
-            ::std::cerr<<"isSuffixArray: SA is not a permutation!\n";
+            ::std::cerr<<"isSuffixArray: SA is not a permutation!"<<::std::endl;
             return false;
         }
 
         if (!isSorted(SA, s)) {
-            ::std::cerr<<"isSuffixArray: SA is not sorted!\n";
+            ::std::cerr<<"isSuffixArray: SA is not sorted!"<<::std::endl;
 /*			String<unsigned char, External<> > textfile;
 			if (!open(textfile,"error.txt")) printf("could not open ERROR.TXT\n");
 			textfile=s;
