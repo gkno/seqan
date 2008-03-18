@@ -48,36 +48,9 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef TKey Type;
 	};
 
-	template <typename TKey, typename TCargo, typename TSpec>
-	struct Cargo< Pair<TKey, TCargo, TSpec> > 
-	{
-		typedef TCargo Type;
-	};
-
-
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TMap, typename TCargo>
-struct _MapValue_Impl
-{
-	typedef TCargo & Type;
-};
-template <typename TMap>
-struct _MapValue_Impl<TMap, Nothing>
-{
-	typedef bool Type;
-};
-
-template <typename TMap>
-struct MapValue:
-	_MapValue_Impl< TMap, typename Cargo<TMap>::Type >
-{
-};
-
-//////////////////////////////////////////////////////////////////////////////
-
-/*trash
 	template <typename TElement>
 	struct Object {
 		typedef Nothing Type;
@@ -87,7 +60,7 @@ struct MapValue:
 	struct Object< Pair<TKey, TObject, TSpec> > {
 		typedef TObject Type;
 	};
-*/
+
 
 	//////////////////////////////////////////////////////////////////////////////
 	// keyOf function
@@ -95,25 +68,25 @@ struct MapValue:
 
 	template <typename TElement>
 	inline typename Key<TElement>::Type & 
-	key(TElement & element) 
+	keyOf(TElement & element) 
 	{
 		return element;
 	}
 	template <typename TElement>
 	inline typename Key<TElement const>::Type & 
-	key(TElement const & element) 
+	keyOf(TElement const & element) 
 	{
 		return element;
 	}
 
 	template <typename TKey, typename TObject, typename TSpec>
 	inline TKey & 
-	key(Pair<TKey, TObject, TSpec> &element) {
+	keyOf(Pair<TKey, TObject, TSpec> &element) {
 		return element.i1;
 	}
 	template <typename TKey, typename TObject, typename TSpec>
 	inline TKey const &
-	key(Pair<TKey, TObject, TSpec> const &element) {
+	keyOf(Pair<TKey, TObject, TSpec> const &element) {
 		return element.i1;
 	}
 
@@ -123,12 +96,12 @@ struct MapValue:
 
 	template <typename TKey, typename TObject, typename TSpec>
 	inline TObject & 
-	cargo(Pair<TKey, TObject, TSpec> &element) {
+	objectOf(Pair<TKey, TObject, TSpec> &element) {
 		return element.i2;
 	}
 	template <typename TKey, typename TObject, typename TSpec>
 	inline TObject const &
-	cargo(Pair<TKey, TObject, TSpec> const &element) {
+	objectOf(Pair<TKey, TObject, TSpec> const &element) {
 		return element.i2;
 	}
 
