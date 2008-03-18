@@ -231,7 +231,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < typename TText, typename TIndexSpec, typename TSpec >
 	inline void 
-	_historyPush(Iter< Index<TText, Index_Wotd<TIndexSpec> >, VSTree< TopDown<TSpec> > > &it) {
+	_historyPush(Iter< Index<TText, Index_Wotd<TIndexSpec> >, VSTree< TopDown<TSpec> > > &it) 
+	{
 		it._parentDesc = value(it);
 		value(it).parentRepLen += parentEdgeLength(it);
 		value(it).parentRight = value(it).range.i2;
@@ -239,7 +240,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < typename TText, typename TSpec >
 	inline void 
-	_historyPush(Iter< Index<TText, Index_Wotd<WotdOriginal> >, VSTree< TopDown< ParentLinks<TSpec> > > > &it) {
+	_historyPush(Iter< Index<TText, Index_Wotd<WotdOriginal> >, VSTree< TopDown< ParentLinks<TSpec> > > > &it) 
+	{
 		typedef typename Size< Index<TText, Index_Wotd<WotdOriginal> > >::Type TSize;
 		TSize edgeLen = parentEdgeLength(it);
 		_HistoryStackWotdOriginal<TSize> entry = { value(it).node, edgeLen };
@@ -249,7 +251,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < typename TText, typename TIndexSpec, typename TSpec >
 	inline void 
-	_historyPush(Iter< Index<TText, Index_Wotd<TIndexSpec> >, VSTree< TopDown< ParentLinks<TSpec> > > > &it) {
+	_historyPush(Iter< Index<TText, Index_Wotd<TIndexSpec> >, VSTree< TopDown< ParentLinks<TSpec> > > > &it) 
+	{
 		typedef typename Size< Index<TText, Index_Wotd<TIndexSpec> > >::Type TSize;
 		TSize edgeLen = parentEdgeLength(it);
 		_HistoryStackWotdModified<TSize> entry = { value(it).node, edgeLen, value(it).range };
@@ -270,15 +273,32 @@ namespace SEQAN_NAMESPACE_MAIN
 		return value.node == 0; 
 	}
 
-	template < typename TText, typename TIndexSpec, typename TSpec >
-	inline bool 
-	isLeaf(Iter<
-		Index<TText, Index_Wotd<TIndexSpec> >, 
-		VSTree<TSpec> > const &it) 
+	// is this a leaf? (including empty $-edges)
+	template < typename TText, typename TIndexSpec, typename TSpec, typename TDFSOrder >
+	inline bool _isLeaf(
+		Iter< Index<TText, Index_Wotd<TIndexSpec> >, VSTree<TSpec> > const &it,
+		VSTreeIteratorTraits<TDFSOrder, False> const)
 	{
 		typedef Index<TText, Index_Wotd<TIndexSpec> > TIndex;
 		TIndex const &index = container(it);
-		return dirAt(value(it).node, container(it)) & index.LEAF;
+		return dirAt(value(it).node, index) & index.LEAF;
+	}
+
+	// is this a leaf? (excluding empty $-edges)
+	template < typename TText, typename TIndexSpec, typename TSpec, typename TDFSOrder >
+	inline bool _isLeaf(
+		Iter< Index<TText, Index_Wotd<TIndexSpec> >, VSTree<TSpec> > const &it,
+		VSTreeIteratorTraits<TDFSOrder, True> const)
+	{
+		typedef Index<TText, Index_Wotd<TIndexSpec> >	TIndex;
+		typedef typename Size<TIndex>::Type				TSize;
+
+		TIndex const &index = container(it);
+		if (dirAt(value(it).node, index) & index.LEAF)
+			return true;
+
+		// ensure node evaluation and test for sentinel child edges?
+		return _wotdEvaluate(it) & index.SENTINELS;
 	}
 
 
@@ -401,7 +421,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < typename TText, typename TIndexSpec, typename TSpec >
 	inline bool
-	emptyEdge(Iter< Index<TText, Index_Wotd<TIndexSpec> >, VSTree<TSpec> > const &it) 
+	emptyParentEdge(Iter< Index<TText, Index_Wotd<TIndexSpec> >, VSTree<TSpec> > const &it) 
 	{
 		typedef Index<TText, Index_Wotd<TIndexSpec> > TIndex;
 
@@ -411,6 +431,18 @@ namespace SEQAN_NAMESPACE_MAIN
 			== sequenceLength(getSeqNo(pos, stringSetLimits(index)), index);
 	}
 
+	// to avoid ambiguity
+	template < typename TText, typename TIndexSpec, typename TSpec >
+	inline bool
+	emptyParentEdge(Iter< Index<TText, Index_Wotd<TIndexSpec> >, VSTree<TopDown<ParentLinks<TSpec> > > > const &it) 
+	{
+		typedef Index<TText, Index_Wotd<TIndexSpec> > TIndex;
+
+		TIndex const &index = container(it);
+		typename SAValue<TIndex>::Type pos = getOccurrence(it);
+		return getSeqOffset(pos, stringSetLimits(index)) + value(it).parentRepLen
+			== sequenceLength(getSeqNo(pos, stringSetLimits(index)), index);
+	}
 
 
 
@@ -493,52 +525,24 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef Index<TText, Index_Wotd<WotdOriginal> >	TIndex;
 		typedef typename Size<TIndex>::Type				TSize;
 
-		if (isLeaf(it)) return false;
-
-		_historyPush(it);
+		if (_isLeaf(it, EmptyEdges())) return false;
 
 		TIndex &index = container(it);
+		_historyPush(it);
 
-		TSize pos = value(it).node;
-		TSize w0 = dirAt(pos, index);
-		TSize w1 = dirAt(pos + 1, index);
+		// ensure node evaluation
+		TSize childNode = _wotdEvaluate(it);
 
-		// test for evaluation
-		if (w1 & index.UNEVALUATED) 
-		{
-			TSize lp = saAt(w0 & index.BITMASK0, index);
-			TSize dst = length(indexDir(index));
-
-			TSize size = _sortWotdBucket(
-				index, 
-				w0 & index.BITMASK0, 
-				w1 & index.BITMASK1, 
-				parentEdgeLength(it));
-
-			resize(indexDir(index), dst + size, Generous());
-			_storeWotdChildren(index, dst);
-
-			// mark nodes with solely empty child edges
-			w1 = dst;
-			if (index.sentinelOcc > 1)
-				if (size == 2) w1 |= index.SENTINELS;
-
-			assert(!(index.sentinelOcc == 1 && size == 1));
-
-			dirAt(pos, index)     = (w0 & ~index.BITMASK0) | lp;
-			dirAt(pos + 1, index) = w1;
-		}
-
-		if (THideEmptyEdges::VALUE && (w1 & index.SENTINELS) != 0)
+		if (THideEmptyEdges::VALUE && (childNode & index.SENTINELS) != 0)
 			return false;
 
 		// go down
-		value(it).node = w1;
+		value(it).node = childNode;
 		value(it).edgeLen = -1;
 
 		// go right if parent edge is empty 
 		// or hull predicate is false
-		if (!nodeHullPredicate(it) || (THideEmptyEdges::VALUE && emptyEdge(it)))
+		if (!nodeHullPredicate(it) || (THideEmptyEdges::VALUE && emptyParentEdge(it)))
 			if (!goRight(it)) {
 				_goUp(it);
 				return false;
@@ -557,51 +561,24 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef Index<TText, Index_Wotd<TIndexSpec> >	TIndex;
 		typedef typename Size<TIndex>::Type				TSize;
 
-		if (isLeaf(it)) return false;
-
+		if (_isLeaf(it, EmptyEdges())) return false;
 		TIndex &index = container(it);
-		TSize pos = value(it).node;
-		TSize w1 = dirAt(pos + 1, index);
 
-		// test for evaluation
-		if (w1 & index.UNEVALUATED) 
-		{
-			TSize dst = length(indexDir(index));
+		// ensure node evaluation
+		TSize childNode = _wotdEvaluate(it);
 
-			TSize size = _sortWotdBucket(
-				index, 
-				value(it).range.i1, 
-				w1 & index.BITMASK1, 
-				repLength(it));
-
-/*			if (globalDumpFlag) {
-				::std::cerr << '"' << representative(it) << '"' << ::std::endl;
-				_dumpFreq(index);
-			}
-*/
-			resize(indexDir(index), dst + size, Generous());
-			_storeWotdChildren(index, dst, repLength(it));
-
-			// mark nodes with solely empty child edges
-			w1 = dst;
-			if (index.sentinelOcc > 1)
-				if (size == 2) w1 |= index.SENTINELS;
-
-			dirAt(pos + 1, index) = w1;
-		}
-
-		if (THideEmptyEdges::VALUE && (w1 & index.SENTINELS) != 0)
+		if (THideEmptyEdges::VALUE && (childNode & index.SENTINELS) != 0)
 			return false;
 
 		// go down
 		_historyPush(it);
-		value(it).node = w1;
+		value(it).node = childNode;
 		value(it).edgeLen = -1;
 		_adjustRightBorder(it);
 
 		// go right if parent edge is empty
 		// or hull predicate is false
-		if (!nodeHullPredicate(it) || (THideEmptyEdges::VALUE && emptyEdge(it)))
+		if (!nodeHullPredicate(it) || (THideEmptyEdges::VALUE && emptyParentEdge(it)))
 			if (!goRight(it)) {
 				_goUp(it);
 				return false;
@@ -631,7 +608,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			value(it).edgeLen = -1;
 
 			_adjustRightBorder(it);
-		} while (!nodeHullPredicate(it) || (THideEmptyEdges::VALUE && emptyEdge(it)));
+		} while (!nodeHullPredicate(it) || (THideEmptyEdges::VALUE && emptyParentEdge(it)));
 		return true;
 	}
 
@@ -656,7 +633,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 			value(it).range.i1 = value(it).range.i2;
 			_adjustRightBorder(it);
-		} while (!nodeHullPredicate(it) || (THideEmptyEdges::VALUE && emptyEdge(it)));
+		} while (!nodeHullPredicate(it) || (THideEmptyEdges::VALUE && emptyParentEdge(it)));
 		return true;
 	}
 
@@ -1512,6 +1489,90 @@ namespace SEQAN_NAMESPACE_MAIN
 		if (itPrev != itDirEnd)
 			*itPrev |= index.LAST_CHILD;
 	}
+
+
+	template < typename TText, typename TSpec >
+	inline typename Size< Index<TText, Index_Wotd<WotdOriginal> > >::Type 
+	_wotdEvaluate(Iter< Index<TText, Index_Wotd<WotdOriginal> >, VSTree<TSpec> > &it)
+	{
+		typedef Index<TText, Index_Wotd<WotdOriginal> >	TIndex;
+		typedef typename Size<TIndex>::Type				TSize;
+
+		TIndex &index = container(it);
+		TSize pos = value(it).node;
+		TSize w1 = dirAt(pos + 1, index);
+
+		// test for evaluation
+		if (w1 & index.UNEVALUATED)
+		{
+			TSize w0 = dirAt(pos, index);
+			TSize lp = saAt(w0 & index.BITMASK0, index);
+			TSize dst = length(indexDir(index));
+
+			TSize size = _sortWotdBucket(
+				index, 
+				w0 & index.BITMASK0, 
+				w1 & index.BITMASK1, 
+				parentEdgeLength(it));
+
+			resize(indexDir(index), dst + size, Generous());
+			_storeWotdChildren(index, dst);
+
+			// mark nodes with solely empty child edges
+			w1 = dst;
+			if (index.sentinelOcc > 1)
+				if (size == 2) w1 |= index.SENTINELS;
+
+			assert(!(index.sentinelOcc == 1 && size == 1));
+
+			dirAt(pos, index)     = (w0 & ~index.BITMASK0) | lp;
+			dirAt(pos + 1, index) = w1;
+		}
+
+		return w1;
+	}
+
+	template < typename TText, typename TIndexSpec, typename TSpec >
+	inline typename Size< Index<TText, Index_Wotd<TIndexSpec> > >::Type 
+	_wotdEvaluate(Iter< Index<TText, Index_Wotd<TIndexSpec> >, VSTree<TSpec> > &it)
+	{
+		typedef Index<TText, Index_Wotd<TIndexSpec> >	TIndex;
+		typedef typename Size<TIndex>::Type				TSize;
+
+		TIndex &index = container(it);
+		TSize pos = value(it).node;
+		TSize w1 = dirAt(pos + 1, index);
+
+		// test for evaluation
+		if (w1 & index.UNEVALUATED) 
+		{
+			TSize dst = length(indexDir(index));
+
+			TSize size = _sortWotdBucket(
+				index, 
+				value(it).range.i1, 
+				w1 & index.BITMASK1, 
+				repLength(it));
+
+/*			if (globalDumpFlag) {
+				::std::cerr << '"' << representative(it) << '"' << ::std::endl;
+				_dumpFreq(index);
+			}
+*/
+			resize(indexDir(index), dst + size, Generous());
+			_storeWotdChildren(index, dst, repLength(it));
+
+			// mark nodes with solely empty child edges
+			w1 = dst;
+			if (index.sentinelOcc > 1)
+				if (size == 2) w1 |= index.SENTINELS;
+
+			dirAt(pos + 1, index) = w1;
+		}
+
+		return w1;
+	}
+
 
 	template <typename TText, typename TSpec>
 	inline void

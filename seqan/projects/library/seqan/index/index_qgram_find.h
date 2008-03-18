@@ -40,8 +40,8 @@ Finds q-grams in a @Spec.Index_QGram@ index using the hash table.
 //____________________________________________________________________________
 
 
-	template < typename TText, typename TSpec >
-	struct DefaultFinder<Index<TText, Index_QGram<TSpec> > > {
+	template < typename TText, typename TShapeSpec, typename TSpec >
+	struct DefaultFinder<Index<TText, Index_QGram<TShapeSpec, TSpec> > > {
         typedef QGram_FIND_Lookup Type;
     };
 

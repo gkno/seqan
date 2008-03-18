@@ -96,18 +96,19 @@ The number of '1's (relevant positions) in the shape determines $q$ and the size
 ..remarks:The fibres (see @Class.Index@ and @Metafunction.Fibre@) of this index are a suffix array sorted by the first q characters (see @Tag.QGram Index Fibres.QGram_SA@) and a q-gram directory (see @Tag.QGram Index Fibres.QGram_Dir@).
 */
 
-	template < typename TShapeSpec >
+	template < typename TShapeSpec, typename TSpec = Default >
 	struct Index_QGram;
 
 
-	template < typename TObject, typename TShapeSpec >
-	struct Fibre< Index<TObject, Index_QGram<TShapeSpec> >, Fibre_Shape> {
-		typedef Index< TObject, Index_QGram<TShapeSpec> >			TIndex;
+	template < typename TObject, typename TShapeSpec, typename TSpec >
+	struct Fibre< Index<TObject, Index_QGram<TShapeSpec, TSpec> >, Fibre_Shape> 
+	{
+		typedef Index< TObject, Index_QGram<TShapeSpec, TSpec> >	TIndex;
 		typedef Shape< typename Value<TIndex>::Type, TShapeSpec >	Type;
 	};
 
-	template < typename TObject, typename TShapeSpec >
-	class Index<TObject, Index_QGram<TShapeSpec> > {
+	template < typename TObject, typename TShapeSpec, typename TSpec >
+	class Index<TObject, Index_QGram<TShapeSpec, TSpec> > {
 	public:
 		typedef typename Fibre<Index, QGram_Text>::Type			TText;
 		typedef typename Fibre<Index, QGram_SA>::Type			TSA;
@@ -146,22 +147,22 @@ The number of '1's (relevant positions) in the shape determines $q$ and the size
 			shape(_shape) {}
 	};
 
-    template < typename TText, typename TSpec >
-    struct Value< Index<TText, Index_QGram<TSpec> > > {
-		typedef typename Value< typename Fibre< Index<TText, Index_QGram<TSpec> >, QGram_RawText >::Type >::Type Type;
+    template < typename TText, typename TShapeSpec, typename TSpec >
+    struct Value< Index<TText, Index_QGram<TShapeSpec, TSpec> > > {
+		typedef typename Value< typename Fibre< Index<TText, Index_QGram<TShapeSpec, TSpec> >, QGram_RawText >::Type >::Type Type;
     };
 
-	template < typename TText, typename TSpec >
-    struct Size< Index<TText, Index_QGram<TSpec> > > {
-		typedef typename Size< typename Fibre< Index<TText, Index_QGram<TSpec> >, QGram_RawText >::Type >::Type Type;
+	template < typename TText, typename TShapeSpec, typename TSpec >
+    struct Size< Index<TText, Index_QGram<TShapeSpec, TSpec> > > {
+		typedef typename Size< typename Fibre< Index<TText, Index_QGram<TShapeSpec, TSpec> >, QGram_RawText >::Type >::Type Type;
     };
 
 
 //////////////////////////////////////////////////////////////////////////////
 // default fibre creators
 
-	template < typename TText, typename TSpec >
-	struct DefaultIndexCreator<Index<TText, Index_QGram<TSpec> >, Fibre_SA> {
+	template < typename TText, typename TShapeSpec, typename TSpec >
+	struct DefaultIndexCreator<Index<TText, Index_QGram<TShapeSpec, TSpec> >, Fibre_SA> {
         typedef Default Type;
     };
 
@@ -1362,10 +1363,13 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 //////////////////////////////////////////////////////////////////////////////
 // interface for automatic index creation 
 
-	template <typename TText, typename TShapeSpec>
-	inline bool indexCreate(Index<TText, Index_QGram<TShapeSpec> > &index, Fibre_SADir, Default const) 
+	template <typename TText, typename TShapeSpec, typename TSpec>
+	inline bool indexCreate(
+		Index<TText, Index_QGram<TShapeSpec, TSpec> > &index, 
+		Fibre_SADir, 
+		Default const) 
 	{
-		typedef Index<TText, Index_QGram<TShapeSpec> >			TIndex;
+		typedef Index<TText, Index_QGram<TShapeSpec, TSpec> >	TIndex;
 		typedef Shape<typename Value<TIndex>::Type, TShapeSpec>	TShape;
 
 		TShape &shape = indexShape(index);
@@ -1387,10 +1391,13 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 		return !(empty(getFibre(index, Fibre_SA())) || empty(getFibre(index, Fibre_Dir())));
 	}
 
-	template <typename TText, typename TShapeSpec>
-	inline bool indexCreate(Index<TText, Index_QGram<TShapeSpec> > &index, Fibre_SA, Default const alg)
+	template <typename TText, typename TShapeSpec, typename TSpec>
+	inline bool indexCreate(
+		Index<TText, Index_QGram<TShapeSpec, TSpec> > &index, 
+		Fibre_SA, 
+		Default const alg)
 	{
-		typedef Index<TText, Index_QGram<TShapeSpec> >			TIndex;
+		typedef Index<TText, Index_QGram<TShapeSpec, TSpec> >	TIndex;
 		typedef Shape<typename Value<TIndex>::Type, TShapeSpec>	TShape;
 
 		TShape &shape = indexShape(index);
@@ -1406,8 +1413,11 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 		return true;
 	}
 
-	template <typename TText, typename TShapeSpec>
-	inline bool indexCreate(Index<TText, Index_QGram<TShapeSpec> > &index, Fibre_Counts, Default const) 
+	template <typename TText, typename TShapeSpec, typename TSpec>
+	inline bool indexCreate(
+		Index<TText, Index_QGram<TShapeSpec, TSpec> > &index, 
+		Fibre_Counts, 
+		Default const) 
 	{
 		resize(indexCountsDir(index), _fullDirLength(index), Exact());
 		createCountsArray(indexCounts(index), indexCountsDir(index), indexText(index), indexShape(index));
@@ -1415,10 +1425,13 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 	}
 
 /*
-	template <typename TText, typename TShapeSpec>
-	inline bool indexCreate(Index<TText, Index_QGram<TShapeSpec> > &index, Fibre_Dir, Default const alg)
+	template <typename TText, typename TShapeSpec, typename TSpec>
+	inline bool indexCreate(
+		Index<TText, Index_QGram<TShapeSpec, TSpec> > &index, 
+		Fibre_Dir, 
+		Default const alg)
 	{
-		typedef Index<TText, Index_QGram<TShapeSpec> >			TIndex;
+		typedef Index<TText, Index_QGram<TShapeSpec, TSpec> > TIndex;
 
 		resize(indexDir(index), _fullDirLength(index), Exact());
 		createQGramIndexDirOnly(indexDir(index), indexText(index), indexShape(index));
@@ -1430,12 +1443,12 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 // getKmerSimilarityMatrix
 //     for the whole StringSet
 
-	template < typename TObject, typename TSpec, typename TDistMatrix >
+	template < typename TObject, typename TShapeSpec, typename TSpec, typename TDistMatrix >
 	inline void getKmerSimilarityMatrix(
-		Index< TObject, Index_QGram<TSpec> > &index, 
+		Index< TObject, Index_QGram<TShapeSpec, TSpec> > &index, 
 		TDistMatrix &distMat)
 	{
-		typedef Index< TObject, Index_QGram<TSpec> >			TIndex;
+		typedef Index< TObject, Index_QGram<TShapeSpec,TSpec> >	TIndex;
 		typedef typename Size<TIndex>::Type						TSize;
 		typedef typename Size<TDistMatrix>::Type				TSizeMat;
 		typedef typename Value<TDistMatrix>::Type				TValueMat;
@@ -1523,13 +1536,19 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 // getKmerSimilarityMatrix 
 //     for a subset of the StringSet given as a sorted string of sequence numbers
 
-	template < typename TObject, typename TSpec, typename TDistMatrix, typename TSeqNoString >
+	template < 
+		typename TObject, 
+		typename TShapeSpec, 
+		typename TSpec, 
+		typename TDistMatrix, 
+		typename TSeqNoString 
+	>
 	inline void getKmerSimilarityMatrix(
-		Index< TObject, Index_QGram<TSpec> > &index, 
+		Index< TObject, Index_QGram<TShapeSpec, TSpec> > &index, 
 		TDistMatrix &distMat,
 		TSeqNoString const &seqNo)
 	{
-		typedef Index< TObject, Index_QGram<TSpec> >			TIndex;
+		typedef Index< TObject, Index_QGram<TShapeSpec,TSpec> >	TIndex;
 		typedef typename Size<TIndex>::Type						TSize;
 		typedef typename Size<TDistMatrix>::Type				TSizeMat;
 		typedef typename Value<TDistMatrix>::Type				TValueMat;
@@ -1640,9 +1659,9 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 //////////////////////////////////////////////////////////////////////////////
 // open
 
-	template < typename TObject, typename TSpec >
+	template < typename TObject, typename TShapeSpec, typename TSpec >
 	inline bool open(
-		Index< TObject, Index_QGram<TSpec> > &index, 
+		Index< TObject, Index_QGram<TShapeSpec, TSpec> > &index, 
 		const char *fileName,
 		int openMode)
 	{
@@ -1655,9 +1674,9 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 		name = fileName;	append(name, ".dir");	open(getFibre(index, QGram_Dir()), toCString(name), openMode);
 		return true;
 	}
-	template < typename TObject, typename TSpec >
+	template < typename TObject, typename TShapeSpec, typename TSpec >
 	inline bool open(
-		Index< TObject, Index_QGram<TSpec> > &index, 
+		Index< TObject, Index_QGram<TShapeSpec, TSpec> > &index, 
 		const char *fileName) 
 	{
 		return open(index, fileName, OPEN_RDONLY);
@@ -1667,9 +1686,9 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 //////////////////////////////////////////////////////////////////////////////
 // save
 
-	template < typename TObject, typename TSpec >
+	template < typename TObject, typename TShapeSpec, typename TSpec >
 	inline bool save(
-		Index< TObject, Index_QGram<TSpec> > &index, 
+		Index< TObject, Index_QGram<TShapeSpec, TSpec> > &index, 
 		const char *fileName,
 		int openMode)
 	{
@@ -1682,9 +1701,9 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 		name = fileName;	append(name, ".dir");	save(getFibre(index, QGram_Dir()), toCString(name), openMode);
 		return true;
 	}
-	template < typename TObject, typename TSpec >
+	template < typename TObject, typename TShapeSpec, typename TSpec >
 	inline bool save(
-		Index< TObject, Index_QGram<TSpec> > &index, 
+		Index< TObject, Index_QGram<TShapeSpec, TSpec> > &index, 
 		const char *fileName)
 	{
 		return save(index, fileName, OPEN_WRONLY | OPEN_CREATE);
