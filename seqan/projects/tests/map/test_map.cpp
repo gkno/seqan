@@ -110,8 +110,41 @@ void Test_Cargo_Single()
 	SEQAN_TASSERT(!hasKey(map, 8));
 	SEQAN_TASSERT(length(map) == 4)
 
+	erase(map, 2);
+	SEQAN_TASSERT(!hasKey(map, 2));
+	SEQAN_TASSERT(length(map) == 3)
+
+	erase(map, 8);
+	SEQAN_TASSERT(length(map) == 3)
+
 	clear(map);
 	SEQAN_TASSERT(length(map) == 0)
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TMap>
+void Test_Cargo_Multiple() 
+{
+	typedef typename Value<TMap>::Type TValue;
+	typedef typename Iterator<TMap>::Type TIterator;
+
+	TMap map;
+
+	insert(map, 2, 4);
+	SEQAN_TASSERT(length(map) == 1)
+
+	insert(map, 2, 5);
+	SEQAN_TASSERT(length(map) == 1)
+
+	add(map, 2, 6);
+	SEQAN_TASSERT(length(map) == 2)
+
+	add(map, 3, 7);
+	SEQAN_TASSERT(length(map) == 3)
+
+	eraseAll(map, 2);
+	SEQAN_TASSERT(length(map) == 1)
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -119,7 +152,7 @@ void Test_Cargo_Single()
 void Test_Skiplist_Extra()
 {
 	typedef Pair<char, int> TValue;
-	Map<TValue, Skiplist<MultiMap> > map;
+	Map<TValue, Skiplist< > > map;
 
 	map[8] = 5;
 	SEQAN_TASSERT(value(map, 8) == TValue(8, 5) );
@@ -135,11 +168,13 @@ int main()
 //____________________________________________________________________________
 
 
-	Test_Cargo_Single< Map< Pair<char, int>, Skiplist<SingleMap> > >();
+	Test_Cargo_Single< Map< Pair<char, int>, Skiplist< > > >();
 	Test_Cargo_Single< Map< Pair<char, int>, VectorSet< > > >();
 
-	Test_NoCargo_Single< Map< char, Skiplist<SingleMap> > >();
+	Test_NoCargo_Single< Map< char, Skiplist< > > >();
 	Test_NoCargo_Single< Map< char, VectorSet< > > >();
+
+	Test_Cargo_Multiple< Map< Pair<char, int>, Skiplist< > > >();
 
 	Test_Skiplist_Extra();
 

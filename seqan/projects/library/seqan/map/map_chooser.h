@@ -29,26 +29,21 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 // Set meta-function to choose an efficient implementation
 
-template <typename TValue, typename TInsertMode, size_t SIZE>
+template <typename TValue, size_t SIZE>
 struct _ChooseMap2
 {
-	typedef Map<TValue, Skiplist<TInsertMode> > Type;
+	typedef Map<TValue, Skiplist< > > Type;
 };
-template <typename TValue, typename TInsertMode>
-struct _ChooseMap2<TValue, TInsertMode, 1>
+template <typename TValue>
+struct _ChooseMap2<TValue, 1>
 {
 	typedef Map<TValue, VectorSet< > > Type;
 };
 
 
-template <typename TValue, typename TInsertMode = SingleMap>
-struct ChooseMap
-{
-	typedef Map<TValue, Skiplist<TInsertMode> > Type;
-};
 template <typename TValue>
-struct ChooseMap<TValue, SingleMap>:
-	_ChooseMap2<TValue, SingleMap, sizeof(typename Key<TValue>::Type)>
+struct ChooseMap:
+	_ChooseMap2<TValue, sizeof(typename Key<TValue>::Type)>
 {};
 
 

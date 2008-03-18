@@ -569,74 +569,48 @@ cargo(Map<TValue, Skiplist<TSpec> > & me,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TTag>
-struct _Skiplist_Insert
-{
-	template <typename TValue, typename TSpec, typename TValue2>
-	static inline void
-	insert_(Map<TValue, Skiplist<TSpec> > & me,
-		TValue2 const & _value)
-	{
-		value(me, key(_value)) = _value;
-	}
-};
-template <>
-struct _Skiplist_Insert<MultiMap>
-{
-	template <typename TValue, typename TSpec, typename TValue2>
-	static inline void
-	insert_(Map<TValue, Skiplist<TSpec> > & me,
-		TValue2 const & _value)
-	{
-		typedef Map<TValue, Skiplist<TSpec> > TSkiplist;
-		typedef SkiplistElement<TValue, TSpec> TElement;
-
-		unsigned char height = _skiplistCreateHeight(me);
-		TElement & el = _skiplistConstructElement(me, height, _value);
-		_skiplistInsertElement(me, el, height);
-	}
-};
-
-//____________________________________________________________________________
-
-template <typename TValue, typename TSpec, typename TValue2, typename TTag>
-inline void
-insert(Map<TValue, Skiplist<TSpec> > & me,
-	   TValue2 const & _value,
-	   Tag<TTag> const)
-{
-	_Skiplist_Insert<Tag<TTag> const>::insert_(me, _value);
-}
-template <typename TValue, typename TSpec, typename TKey2, typename TCargo2, typename TTag>
-inline void
-insert(Map<TValue, Skiplist<TSpec> > & me,
-	   TKey2 const & _key,
-	   TCargo2 const & _cargo,
-	   Tag<TTag> const tag)
-{
-	TValue temp_val;
-	key(temp_val) = _key;
-	cargo(temp_val) = _cargo;
-
-	insert(me, temp_val, tag);
-}
-
 template <typename TValue, typename TSpec, typename TValue2>
 inline void
 insert(Map<TValue, Skiplist<TSpec> > & me,
 	   TValue2 const & _value)
 {
-	typedef Map<TValue, Skiplist<TSpec> > TMap;
-	insert(me, _value, SingleMap());
+	value(me, key(_value)) = _value;
 }
-template <typename TValue, typename TSpec, typename TKey, typename TCargo>
+template <typename TValue, typename TSpec, typename TKey2, typename TCargo2>
 inline void
 insert(Map<TValue, Skiplist<TSpec> > & me,
-	   TKey const & _key,
-	   TCargo const & _cargo)
+	   TKey2 const & _key,
+	   TCargo2 const & _cargo)
 {
-	typedef Map<TValue, Skiplist<TSpec> > TMap;
-	insert(me, _key, _cargo, SingleMap());
+	cargo(me, _key) = _cargo;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//multiple key insert
+
+template <typename TValue, typename TSpec, typename TValue2>
+inline void
+add(Map<TValue, Skiplist<TSpec> > & me,
+	TValue2 const & _value)
+{
+	typedef Map<TValue, Skiplist<TSpec> > TSkiplist;
+	typedef SkiplistElement<TValue, TSpec> TElement;
+
+	unsigned char height = _skiplistCreateHeight(me);
+	TElement & el = _skiplistConstructElement(me, height, _value);
+	_skiplistInsertElement(me, el, height);
+}
+template <typename TValue, typename TSpec, typename TKey2, typename TCargo2>
+inline void
+add(Map<TValue, Skiplist<TSpec> > & me,
+	TKey2 const & _key,
+	TCargo2 const & _cargo)
+{
+	TValue temp_val;
+	key(temp_val) = _key;
+	cargo(temp_val) = _cargo;
+
+	add(me, temp_val);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -663,13 +637,45 @@ _skiplistUnlinkElement(Map<TValue, Skiplist<TSpec> > & me,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TValue, typename TSpec, typename TIterator>
+template <typename TValue, typename TSpec, typename TMap2>
 inline void
 erase(Map<TValue, Skiplist<TSpec> > & me,
-	  TIterator it)
+	  Iter<TMap2, SkiplistIterator> const & it)
 {
 	_skiplistUnlinkElement(me, * it.data_pointer);
 	--me.data_length;
+}
+
+template <typename TValue, typename TSpec, typename TToRemove>
+inline void
+erase(Map<TValue, Skiplist<TSpec> > & me,
+	  TToRemove const & to_remove)
+{
+	typedef Map<TValue, Skiplist<TSpec> > TMap;
+	typedef typename Iterator<TMap>::Type TIterator;
+	TIterator it = find(me, to_remove);
+	if (it && (key(it) == key(to_remove)))
+	{
+		erase(me, it);
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TValue, typename TSpec, typename TToRemove>
+inline void
+eraseAll(Map<TValue, Skiplist<TSpec> > & me,
+		 TToRemove const & to_remove)
+{
+	typedef Map<TValue, Skiplist<TSpec> > TMap;
+	typedef typename Iterator<TMap>::Type TIterator;
+	TIterator it = find(me, to_remove);
+	while (it && (key(it) == key(to_remove)))
+	{
+		TIterator it_old = it;
+		++it;
+		erase(me, it_old);
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////

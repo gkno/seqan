@@ -30,15 +30,7 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 //insertion tags
 
-struct SingleMap_;
-typedef Tag<SingleMap_> SingleMap;
-
-struct MultiMap_;
-typedef Tag<MultiMap_> MultiMap;
-
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename TSpec = SingleMap>
+template <typename TSpec = Default>
 struct Skiplist;
 
 template <typename TElement, typename TSpec = Skiplist<> >

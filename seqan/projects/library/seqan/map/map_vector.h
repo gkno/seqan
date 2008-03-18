@@ -41,52 +41,6 @@ struct VectorSet;
 //////////////////////////////////////////////////////////////////////////////
 // internal set meta-functions
 
-//template <typename TValue>
-//struct _VectorSetKeySize {
-//	enum { VALUE = ValueSize< typename Key<TValue>::Type >::VALUE };
-//};
-//
-//
-//template <typename TSet>
-//struct _SetSetVector
-//{
-//	typedef void * Type; //dummy implementation due to VC++ bug
-//};
-//template <typename TValue, typename TSpec>
-//struct _SetSetVector< Map<TValue, VectorSet<TSpec> > > 
-//{
-//	typedef String<bool, TSpec> Type;
-//};
-//template <typename TSet>
-//struct _SetSetVector<TSet const> 
-//{
-//	typedef typename _SetSetVector<TSet>::Type const Type;
-//};
-//
-//
-//
-//template <typename TSet, typename TCargo>
-//struct _SetObjVector
-//{
-//	typedef void * Type; //dummy implementation due to VC++ bug
-//};
-//template <typename TValue, typename TSpec, typename TCargo>
-//struct _SetObjVector<Map<TValue, VectorSet<TSpec> >, TCargo>
-//{
-//	typedef String<TCargo, TSpec> Type;
-//};
-//template <typename TValue, typename TSpec>
-//struct _SetObjVector<Map<TValue, VectorSet<TSpec> >, Nothing>
-//{
-//	typedef void * Type; //dummy type
-//};
-//template <typename TSet, typename TCargo>
-//struct _SetObjVector<TSet const, TCargo> 
-//{
-//	typedef typename _SetObjVector<TSet, TCargo>::Type const Type;
-//};
-
-
 template <typename TCargo>
 struct _VectorSetElement
 {
@@ -99,6 +53,7 @@ struct _VectorSetElement<Nothing>
 	bool data_valid;
 };
 
+//////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
 struct _VectorSetElements
@@ -303,24 +258,6 @@ insert(Map<TValue, VectorSet<TSpec> > &set,
 	key(new_val) = _key;
 	cargo(new_val) = _cargo;
 	_VectorSet_Insert<TCargo>::insert_(set, new_val);
-}
-
-template <typename TValue, typename TSpec, typename TElement>
-inline void 
-insert(Map<TValue, VectorSet<TSpec> > &set,
-	   TElement const &element,
-	   SingleMap) 
-{
-	insert(set, element);
-}
-template <typename TValue, typename TSpec, typename TKey, typename TCargo>
-inline void 
-insert(Map<TValue, VectorSet<TSpec> > &set,
-	   TKey const & _key,
-	   TCargo const & _cargo,
-	   SingleMap) 
-{
-	insert(set, _key, _cargo);
 }
 
 //////////////////////////////////////////////////////////////////////////////
