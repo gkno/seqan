@@ -8,6 +8,7 @@ using namespace seqan;
 struct TMyConstraints {
 	double p_min;
 	unsigned int replen_max;
+	bool _cachedPred;
 };
 
 /// SeqAn extensions
@@ -23,28 +24,30 @@ namespace seqan
 
 	// node predicate
 	template <typename TText, typename TSpec>
-	bool nodePredicate(Iter<Index<TText, Index_Wotd<TMyIndex> >, TSpec> const &it) 
+	bool nodePredicate(Iter<Index<TText, Index_Wotd<TMyIndex> >, TSpec> &it) 
 	{
-		TMyConstraints const &cons = cargo(container(it));
-		unsigned int replen = repLength(it);
+		TMyConstraints &cons = cargo(container(it));
+		unsigned int delta = countSequences(container(it)) * repLength(it);
 		unsigned int textLen = length(container(it));
 
-		if (textLen == replen) return true;
-		return ((double)countOccurrences(it) / 
-				(double)(textLen - replen)) > cons.p_min;
+		if (textLen <= delta) return cons._cachedPred = true;
+		return cons._cachedPred = 
+			((double)countOccurrences(it) / (double)(textLen - delta)) > cons.p_min;
 	}
 
 	// monotonic hull
 	template <typename TText, typename TSpec>
-	bool nodeHullPredicate(Iter<Index<TText, Index_Wotd<TMyIndex> >, TSpec> const &it) 
+	bool nodeHullPredicate(Iter<Index<TText, Index_Wotd<TMyIndex> >, TSpec> &it) 
 	{
 		TMyConstraints const &cons = cargo(container(it));
 		unsigned int textLen = length(container(it));
 
 		if (repLength(it) > cons.replen_max) return false;
-		if (textLen <= cons.replen_max) return true;
+
+		unsigned int delta = countSequences(container(it)) * cons.replen_max;
+		if (textLen <= delta) return true;
 		return ((double)countOccurrences(it) / 
-				(double)(textLen - cons.replen_max)) > cons.p_min;
+				(double)(textLen - delta)) > cons.p_min;
 	}
 }
 

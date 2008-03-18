@@ -827,7 +827,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 
 	template < typename TIndex, class TSpec >
 	inline bool
-	nodePredicate(Iter<TIndex, TSpec> const &)
+	nodePredicate(Iter<TIndex, TSpec> &)
 	{
 		return true;
 	}
@@ -845,7 +845,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 
 	template < typename TIndex, class TSpec >
 	inline bool
-	nodeHullPredicate(Iter<TIndex, TSpec> const &)
+	nodeHullPredicate(Iter<TIndex, TSpec> &)
 	{
 		return true;
 	}
