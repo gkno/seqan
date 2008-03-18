@@ -201,6 +201,7 @@ struct Spec {
 	typedef void Type;
 };
 
+
 // one argument case
 template <template <typename> class T, typename TSpec>
 struct Spec< T<TSpec> > {
@@ -346,10 +347,11 @@ struct Id<T const> {
 
 /**
 .Metafunction.Key:
-..summary:Key type of a key to object mapping.
+..summary:Key type of a key to cargo mapping.
 ..signature:Key<T>::Type
 ..param.T:Type for which a key type is determined.
 ..returns.param.Type:Key type.
+...default:The type $T$ itself.
 */
 template< typename T >
 struct Key
@@ -363,19 +365,21 @@ struct Key<T const>:
 
 //____________________________________________________________________________
 
-/**
+/*VERALTET
 .Metafunction.Object:
 ..summary:Object type of a key to object mapping.
 ..signature:Object<T>::Type
 ..param.T:Type for which a object type is determined.
 ..returns.param.Type:Object type.
 */
+
 template<typename T>
 struct Object; 
 
 template <typename T>
 struct Object<T const>:
 	Object<T> {};
+
 
 //____________________________________________________________________________
 

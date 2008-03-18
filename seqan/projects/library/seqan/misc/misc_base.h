@@ -43,10 +43,41 @@ namespace SEQAN_NAMESPACE_MAIN
 	};
 */
 	template <typename TKey, typename TObject, typename TSpec>
-	struct Key< Pair<TKey, TObject, TSpec> > {
+	struct Key< Pair<TKey, TObject, TSpec> > 
+	{
 		typedef TKey Type;
 	};
 
+	template <typename TKey, typename TCargo, typename TSpec>
+	struct Cargo< Pair<TKey, TCargo, TSpec> > 
+	{
+		typedef TCargo Type;
+	};
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TMap, typename TCargo>
+struct _MapValue_Impl
+{
+	typedef TCargo & Type;
+};
+template <typename TMap>
+struct _MapValue_Impl<TMap, Nothing>
+{
+	typedef bool Type;
+};
+
+template <typename TMap>
+struct MapValue:
+	_MapValue_Impl< TMap, typename Cargo<TMap>::Type >
+{
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
+/*trash
 	template <typename TElement>
 	struct Object {
 		typedef Nothing Type;
@@ -56,31 +87,33 @@ namespace SEQAN_NAMESPACE_MAIN
 	struct Object< Pair<TKey, TObject, TSpec> > {
 		typedef TObject Type;
 	};
-
+*/
 
 	//////////////////////////////////////////////////////////////////////////////
 	// keyOf function
 	//////////////////////////////////////////////////////////////////////////////
 
 	template <typename TElement>
-	inline TElement & 
-	keyOf(TElement &element) {
+	inline typename Key<TElement>::Type & 
+	key(TElement & element) 
+	{
 		return element;
 	}
 	template <typename TElement>
-	inline TElement const & 
-	keyOf(TElement const &element) {
+	inline typename Key<TElement const>::Type & 
+	key(TElement const & element) 
+	{
 		return element;
 	}
 
 	template <typename TKey, typename TObject, typename TSpec>
 	inline TKey & 
-	keyOf(Pair<TKey, TObject, TSpec> &element) {
+	key(Pair<TKey, TObject, TSpec> &element) {
 		return element.i1;
 	}
 	template <typename TKey, typename TObject, typename TSpec>
 	inline TKey const &
-	keyOf(Pair<TKey, TObject, TSpec> const &element) {
+	key(Pair<TKey, TObject, TSpec> const &element) {
 		return element.i1;
 	}
 
@@ -90,12 +123,12 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <typename TKey, typename TObject, typename TSpec>
 	inline TObject & 
-	objectOf(Pair<TKey, TObject, TSpec> &element) {
+	cargo(Pair<TKey, TObject, TSpec> &element) {
 		return element.i2;
 	}
 	template <typename TKey, typename TObject, typename TSpec>
 	inline TObject const &
-	objectOf(Pair<TKey, TObject, TSpec> const &element) {
+	cargo(Pair<TKey, TObject, TSpec> const &element) {
 		return element.i2;
 	}
 
