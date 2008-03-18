@@ -27,6 +27,20 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 
+/**
+.Spec.VectorSet:
+..cat:Map
+..general:Class.Map
+..summary:A fast map for small key types.
+..signature:Map<TValue, VectorSet<TSpec> >
+..param.TValue:The type of value stored in the map.
+...metafunction:Metafunction.Value
+..param.TSpec:The specializing type.
+...default:@Spec.Alloc String.Alloc@
+...remarks:$TSpec$ is used as specialization for the @Class.String@ type that is used to store the values.
+..remarks:The memory needed is linear to the number different values the @Metafunction.Key.key type@ of $TValue$ can get.
+So do not use this map for large key types.
+*/
 //////////////////////////////////////////////////////////////////////////////
 // 
 //	VectorSet

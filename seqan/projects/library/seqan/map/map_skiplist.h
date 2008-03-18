@@ -30,7 +30,18 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 
-
+/**
+.Spec.Skiplist:
+..cat:Map
+..general:Class.Map
+..summary:General purpose map container.
+..signature:Map<TValue, Skiplist<TSpec> >
+..param.TValue:The type of value stored in the map.
+...metafunction:Metafunction.Value
+..param.TSpec:The specializing type.
+..remarks:The skiplist takes in average an oberhead of only two pointers per value stored in the map.
+...default:$Default$
+*/
 
 //////////////////////////////////////////////////////////////////////////////
 // Skiplist
@@ -467,6 +478,21 @@ _skiplistFind(Map<TValue, Skiplist<TSpec> > & me,
 
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Function.map#find:
+..cat:Map
+..summary:Find a value in a map. 
+..signature:Iterator find(map, key)
+..param.map:A map.
+...type:Class.Map
+..param.key:A key.
+...metafunction:Metafunction.Key
+..returns:An iterator to the first value in $map$ of the given key, if there is any.
+An iterator to the fist value in $map$ with key > $key$, otherwise
+...metafunction:Metafunction.Iterator
+..see:Function.map#value
+*/
+
 template <typename TValue, typename TSpec, typename TFind>
 inline typename Iterator< Map<TValue, Skiplist<TSpec> > >::Type
 find(Map<TValue, Skiplist<TSpec> > & me,
@@ -529,6 +555,22 @@ _skiplistInsertElement(Map<TValue, Skiplist<TSpec> > & me,
 //////////////////////////////////////////////////////////////////////////////
 //creates entry if necessary
 
+/**
+.Function.map#value:
+..cat:Map
+..summary:Returns a value given a key. 
+..signature:Value find(map, key)
+..param.map:A map.
+...type:Spec.Skiplist
+..param.key:A key.
+...metafunction:Metafunction.Key
+..returns:The first value in $map$ of the given key, if there is any.
+Otherwise, a new value that is inserted to $map$.
+...metafunction:Metafunction.Value
+..see:map#find
+..see:map#insert
+*/
+
 template <typename TValue, typename TSpec, typename TKey2>
 inline typename Value< Map<TValue, Skiplist<TSpec> > >::Type &
 value(Map<TValue, Skiplist<TSpec> > & me,
@@ -559,6 +601,23 @@ value(Map<TValue, Skiplist<TSpec> > & me,
 
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Function.map#cargo:
+..cat:Map
+..summary:Returns a cargo given a key. 
+..signature:Cargo find(map, key)
+..param.map:A map.
+...type:Class.Map
+..param.key:A key.
+...metafunction:Metafunction.Key
+..returns:The cargo of the first value in $map$ of the given key, if there is any.
+Otherwise, the cargo of a new value that is inserted to $map$.
+...metafunction:Metafunction.Cargo
+..see:map#value
+..see:map#find
+..see:map#insert
+*/
+
 template <typename TValue, typename TSpec, typename TKey2>
 inline typename Cargo< Map<TValue, Skiplist<TSpec> > >::Type &
 cargo(Map<TValue, Skiplist<TSpec> > & me,
@@ -568,6 +627,28 @@ cargo(Map<TValue, Skiplist<TSpec> > & me,
 }
 
 //////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.map#insert:
+..cat:Map
+..summary:Insert new value into map. 
+..signature:insert(map, value)
+..signature:insert(map, key, cargo)
+..param.map:A map.
+...type:Class.Map
+..param.value:A value that is added to $map$.
+...metafunction:Metafunction.Value
+..param.key:A key.
+...metafunction:Metafunction.Key
+..param.cargo:A cargo.
+...metafunction:Metafunction.Cargo
+..remarks:If $key$ and $cargo$ are specified, a new value of that key and value is added.
+If there is already a value of that key in $map$, the value of this element is changed to $cargo$.
+...text:If $value$ is specified, and there is already a value in map of key @Function.key.key(value)@, than
+the cargo of this value is changed to @Function.cargo.cargo(value)@.
+...text:Use @Function.add@ instead to insert multiple values of the same key
+..see:map#add
+*/
 
 template <typename TValue, typename TSpec, typename TValue2>
 inline void
@@ -587,6 +668,23 @@ insert(Map<TValue, Skiplist<TSpec> > & me,
 
 //////////////////////////////////////////////////////////////////////////////
 //multiple key insert
+
+/**
+.Function.map#add:
+..cat:Map
+..summary:Insert another value into a multi map.
+..signature:add(map, value)
+..signature:add(map, key, cargo)
+..param.map:A map.
+...type:Spec.Skiplist
+..param.value:A value that is added to $map$.
+...metafunction:Metafunction.Value
+..param.key:A key.
+...metafunction:Metafunction.Key
+..param.cargo:A cargo.
+...metafunction:Metafunction.Cargo
+..remarks:If $key$ and $cargo$ are specified, a new value of that key and value is added.
+*/
 
 template <typename TValue, typename TSpec, typename TValue2>
 inline void
@@ -637,6 +735,24 @@ _skiplistUnlinkElement(Map<TValue, Skiplist<TSpec> > & me,
 
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Function.map#erase:
+..cat:Map
+..summary:Removes a value from a map. 
+..signature:erase(map, key)
+..signature:erase(map, iterator)
+..param.map:A map.
+...type:Class.Map
+..param.key:The key of a value in $map$.
+...metafunction:Metafunction.Key
+..param.iterator:An iterator to a value in $map$.
+...metafunction:Metafunction.Iterator
+..remarks:Removes the first value in $map$ of the given key, if there is any.
+...text:Use @Function.map#eraseAll@ to remove all values of the given key in a multi map.
+..see:map#add
+..see:map#insert
+*/
+
 template <typename TValue, typename TSpec, typename TMap2>
 inline void
 erase(Map<TValue, Skiplist<TSpec> > & me,
@@ -661,6 +777,23 @@ erase(Map<TValue, Skiplist<TSpec> > & me,
 }
 
 //////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.map#eraseAll:
+..cat:Map
+..summary:Removes a value from a map. 
+..signature:eraseAll(map, key)
+..param.map:A map.
+...type:Spec.Skiplist
+..param.key:The key of a value in $map$.
+...metafunction:Metafunction.Key
+..param.iterator:An iterator to a value in $map$.
+...metafunction:Metafunction.Iterator
+..remarks:Removes the first value in $map$ of the given key, if there is any.
+...text:Use @Function.map#eraseAll@ to remove all values of the given key in a multi map.
+..see:map#add
+..see:map#insert
+*/
 
 template <typename TValue, typename TSpec, typename TToRemove>
 inline void
@@ -701,6 +834,8 @@ clear(Map<TValue, Skiplist<TSpec> > & me)
 
 //////////////////////////////////////////////////////////////////////////////
 
+///.Function.length.param.object.type:Class.Map
+
 template <typename TValue, typename TSpec>
 inline typename Size< Map<TValue, Skiplist<TSpec> > >::Type
 length(Map<TValue, Skiplist<TSpec> > const & me)
@@ -709,6 +844,8 @@ length(Map<TValue, Skiplist<TSpec> > const & me)
 }
 
 //////////////////////////////////////////////////////////////////////////////
+
+///.Function.begin.param.object.type:Class.Map
 
 template <typename TValue, typename TSpec, typename TIteratorSpec>
 inline typename Iterator< Map<TValue, Skiplist<TSpec> >, TIteratorSpec>::Type
@@ -727,6 +864,8 @@ begin(Map<TValue, Skiplist<TSpec> > & me)
 }
 
 //////////////////////////////////////////////////////////////////////////////
+
+///.Function.end.param.object.type:Class.Map
 
 template <typename TValue, typename TSpec, typename TIteratorSpec>
 inline typename Iterator< Map<TValue, Skiplist<TSpec> >, TIteratorSpec>::Type
@@ -783,6 +922,18 @@ mapValue(Map<TValue, Skiplist<TSpec> > & me,
 }
 
 //////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.map#hasKey:
+..cat:Map
+..summary:Determines whether a map contains a value given key. 
+..signature:hasKey(map, key)
+..param.map:A map.
+...type:Class.Map
+..param.key:A key.
+...metafunction:Metafunction.Key
+..returns:$true$, if there is a value in $map$ of that key, $false$ otherwise.
+*/
 
 template <typename TValue, typename TSpec, typename TKey2>
 inline bool
