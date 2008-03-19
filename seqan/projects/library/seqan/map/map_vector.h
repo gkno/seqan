@@ -123,9 +123,19 @@ public:
 // set meta-functions
 
 template <typename TValue, typename TSpec>
-struct Value< Map<TValue, VectorSet<TSpec> > > {
+struct Value< Map<TValue, VectorSet<TSpec> > > 
+{
 	typedef TValue Type;
 };
+template <typename TValue, typename TSpec>
+struct Reference< Map<TValue, VectorSet<TSpec> > > 
+{
+	typedef Map<TValue, VectorSet<TSpec> > TMap;
+	typedef typename Iterator<TMap>::Type TIterator;
+	typedef Proxy<IteratorProxy<TIterator> > Type;
+};
+
+
 template <typename TValue, typename TSpec>
 struct Size< Map<TValue, VectorSet<TSpec> > >:
 	Size<typename _VectorSetElements< Map<TValue, VectorSet<TSpec> > >::Type> {};
@@ -227,12 +237,12 @@ struct _VectorSet_Insert
 	insert_(Map<TValue, VectorSet<TSpec> > & set,
 		TElement const &element) 
 	{
-		if (!set.data_elements[(unsigned)(key(element))].data_valid) 
+		if (!set.data_elements[ordValue(key(element))].data_valid) 
 		{
 			++set.data_length;
-			set.data_elements[(unsigned)(key(element))].data_valid = true;
+			set.data_elements[ordValue(key(element))].data_valid = true;
 		}
-		set.data_elements[(unsigned)(key(element))].data_cargo = cargo(element);
+		set.data_elements[ordValue(key(element))].data_cargo = cargo(element);
 	}
 };
 template <>
@@ -243,10 +253,10 @@ struct _VectorSet_Insert<Nothing>
 	insert_(Map<TValue, VectorSet<TSpec> > & set,
 		TElement const &element) 
 	{
-		if (!set.data_elements[(unsigned)(key(element))].data_valid) 
+		if (!set.data_elements[ordValue(key(element))].data_valid) 
 		{
 			++set.data_length;
-			set.data_elements[(unsigned)(key(element))].data_valid = true;
+			set.data_elements[ordValue(key(element))].data_valid = true;
 		}
 	}
 };
@@ -281,10 +291,10 @@ inline void
 erase(Map<TValue, VectorSet<TSpec> > &set, 
 	  T const & tokill)  //can be an element, a key, or an iterator
 {
-	if (set.data_elements[(unsigned)(key(tokill))].data_valid) 
+	if (set.data_elements[ordValue(key(tokill))].data_valid) 
 	{
 		--set.data_length;
-		set.data_elements[(unsigned)(key(tokill))].data_valid = false;
+		set.data_elements[ordValue(key(tokill))].data_valid = false;
 	}
 }
 
@@ -294,7 +304,7 @@ template <typename TKey, typename TValue, typename TSpec>
 inline bool 
 hasKey(Map<TValue, VectorSet<TSpec> > const &set, TKey const &key) 
 {
-	return set.data_elements[(unsigned)(key)].data_valid;
+	return set.data_elements[ordValue(key)].data_valid;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -306,7 +316,7 @@ find(Map<TKey2, VectorSet<TSpec> > & set,
 {
 	typedef Map<TKey2, VectorSet<TSpec> > TMap;
 	typedef typename Iterator<TMap>::Type TIterator;
-	return TIterator(begin(set.data_elements) + (unsigned)(key));
+	return TIterator(begin(set.data_elements) + ordValue(key));
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -324,7 +334,7 @@ cargo(Map<TKey, VectorSet<TSpec> > & set,
 		key(new_value) = _key;
 		insert(set, new_value);
 	}
-	return set.data_elements[(unsigned) _key].data_cargo;
+	return set.data_elements[ordValue(_key)].data_cargo;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -409,17 +419,22 @@ cargo(Iter<TSet, VectorSetIterator> const &it) {
 	return (*it.data_iterator).data_cargo;
 }
 
+//////////////////////////////////////////////////////////////////////////////
 
-//template <typename TSet>
-//inline typename Value<TSet>::Type &
-//value(Iter<TSet, VectorSetIterator> &it) {
-//	return *it;
-//}
-//template <typename TSet>
-//inline typename Value<TSet>::Type &
-//value(Iter<TSet, VectorSetIterator> const &it) {
-//	return *it;
-//}
+template <typename TSet>
+inline typename Reference<TSet>::Type 
+value(Iter<TSet, VectorSetIterator> &it) 
+{
+	typedef typename Reference<TSet>::Type TReference;
+	return TReference(it);
+}
+template <typename TSet>
+inline typename Reference<TSet>::Type 
+value(Iter<TSet, VectorSetIterator> const &it) 
+{
+	typedef typename Reference<TSet>::Type TReference;
+	return TReference(it);
+}
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -436,6 +451,38 @@ goNext(Iter<TSet, VectorSetIterator> & it)
 		++it.data_iterator;
 	}
 }
+
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TSet>
+inline typename Key<TSet>::Type
+key(Proxy<IteratorProxy<Iter<TSet, VectorSetIterator> > > & pr) 
+{
+	return key(iter(pr));
+}
+template <typename TSet>
+inline typename Key<TSet>::Type
+key(Proxy<IteratorProxy<Iter<TSet, VectorSetIterator> > > const & pr) 
+{
+	return key(iter(pr));
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TSet>
+inline typename Cargo<TSet>::Type &
+cargo(Proxy<IteratorProxy<Iter<TSet, VectorSetIterator> > >& pr) 
+{
+	return cargo(iter(pr));
+}
+template <typename TSet>
+inline typename Cargo<TSet>::Type &
+cargo(Proxy<IteratorProxy<Iter<TSet, VectorSetIterator> > > const & pr) 
+{
+	return cargo(iter(pr));
+}
+
 
 //////////////////////////////////////////////////////////////////////////////
 

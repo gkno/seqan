@@ -559,14 +559,16 @@ _skiplistInsertElement(Map<TValue, Skiplist<TSpec> > & me,
 .Function.map#value:
 ..cat:Map
 ..summary:Returns a value given a key. 
-..signature:Value find(map, key)
+..signature:Reference find(map, key)
 ..param.map:A map.
-...type:Spec.Skiplist
+...type:Class.Map
 ..param.key:A key.
 ...metafunction:Metafunction.Key
 ..returns:The first value in $map$ of the given key, if there is any.
 Otherwise, a new value that is inserted to $map$.
-...metafunction:Metafunction.Value
+...metafunction:Metafunction.Reference
+..remarks:
+...note:Do not change the key of a value in the map.
 ..see:map#find
 ..see:map#insert
 */
