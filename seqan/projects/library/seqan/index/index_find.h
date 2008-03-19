@@ -52,6 +52,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < typename TText, typename TSpec, typename TSpecFinder >
 	class Finder< Index<TText, TSpec>, TSpecFinder >
 	{
+    protected:
 		typedef Index<TText, TSpec>								TIndex;
 		typedef typename Fibre<TIndex, Fibre_SA>::Type			TSA;
 		typedef typename Iterator<TSA const, Standard>::Type	TIterator;
