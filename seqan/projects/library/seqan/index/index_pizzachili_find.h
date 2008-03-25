@@ -98,7 +98,11 @@ SEQAN_CHECKPOINT
                 typename Value<TPattern>::Type
             >::Type alph_t;
 
-        String<alph_t, CStyle> cstr = pattern;
+        // This const_cast is safe because 'cstr' is only read.
+        // On the other hand, this cast is necessary to prevent a copy from
+        // being made: this would result in an invalid pointer to local memory.
+        String<alph_t, CStyle> const cstr = *const_cast<TPattern*>(&pattern);
+        // This const_cast is safe because the return value is only read.
         return
             reinterpret_cast<uchar*>(
                 const_cast<alph_t*>(static_cast<alph_t const*>(cstr))

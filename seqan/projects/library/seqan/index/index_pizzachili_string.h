@@ -36,7 +36,7 @@ actually read, the index is queried for the text. If only a substring is
 needed, this string tries to query only a substring.
 ..cat:Strings
 ..general:Class.String
-..signaure:String<TValue, PizzaChili<TSpec> >
+..signature:String<TValue, PizzaChili<TSpec> >
 ..param.TValue:The value type, that is the type of them items/characters stored in the string.
 ...remarks:This type must be a simple type and it must hold that $sizeof(TValue) == 1$.
 ..param.TSpec:unused.

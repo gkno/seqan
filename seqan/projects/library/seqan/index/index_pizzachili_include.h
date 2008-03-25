@@ -36,6 +36,19 @@ namespace SEQAN_NAMESPACE_MAIN {
         typedef void* index_t;
         typedef int error_t;
 
+#if 0
+
+        extern "C" {
+#   include "pizzachili_interface.h"
+
+            // Undo header file defines:
+#   undef uchar
+#   undef uint
+#   undef ulong
+        }
+
+#else
+
         struct test_index {
             ulong m_len;
             uchar* m_text;
@@ -175,7 +188,9 @@ namespace SEQAN_NAMESPACE_MAIN {
             return 0;
         }
 
-    } }
-}
+#endif
+
+    } } // namespace impl::pizzachili
+} // namespace SEQAN_NAMESPACE_MAIN
 
 #endif // SEQAN_HEADER_INDEX_PC_SCAFFOLD_H

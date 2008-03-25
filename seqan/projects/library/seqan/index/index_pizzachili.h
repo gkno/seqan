@@ -63,8 +63,9 @@ typedef Fibre_PizzaChili_Compressed PizzaChili_Compressed;
 ..see:Tag.Index Find Algorithm
 */
 
-template <typename TSpec = void>
-struct PizzaChili;
+// Already declared in included file "index_pizzachili_string.h".
+//template <typename TSpec = void>
+//struct PizzaChili;
 
 template <typename TText, typename TSpec>
 class Index<TText, PizzaChili<TSpec> > {
@@ -183,8 +184,10 @@ namespace impl {
         pizzachili::uchar* textstart,
         pizzachili::ulong textlength
     ) {
+        // Read-only access, therefore safe cast.
+        char* options = const_cast<char*>("");
         pizzachili::error_t e =
-            pizzachili::build_index(textstart, textlength, "", &me.index_handle);
+            pizzachili::build_index(textstart, textlength, options, &me.index_handle);
 
         if (e != 0) {
     #if DEBUG || TRACE
