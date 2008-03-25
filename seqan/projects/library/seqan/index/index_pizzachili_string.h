@@ -232,9 +232,9 @@ SEQAN_CHECKPOINT
 template <typename TValue, typename TSpec>
 inline void
 _deallocateStorage(
-   String<TValue, PizzaChili<TSpec> >& me,
+   String<TValue, PizzaChili<TSpec> >& /*me*/,
    TValue* begin,
-   typename Size<String<TValue, PizzaChili<TSpec> > >::Type count
+   typename Size<String<TValue, PizzaChili<TSpec> > >::Type /*count*/
 ) {
     if (begin != 0)
         ::std::free(begin);
@@ -430,7 +430,7 @@ SEQAN_CHECKPOINT
         typedef typename Infix<String<TValue, PizzaChili<TSpec> > >::Type TResult;
 
         static inline TResult
-        infix(String<TValue, PizzaChili<TSpec> > const& me, TPos begin, TPos end) {
+        infix(String<TValue, PizzaChili<TSpec> > const& /*me*/, TPos begin, TPos end) {
 SEQAN_CHECKPOINT
             // Iterators were used, therefore it's safe to assume that the
             // string is already in memory.

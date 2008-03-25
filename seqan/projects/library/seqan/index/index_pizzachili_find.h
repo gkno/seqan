@@ -31,7 +31,9 @@ namespace impl {
 
 /**
 .Tag.Index Find Algorithm
-..tag.PizzaChiliFinder:Finds an occurrence in a @Spec.PizzaChili@ index.
+..cat:Searching
+..tag.PizzaChiliFinder:Finds an occurrence in a @Spec.Pizza & Chili Index@ index.
+..see:Spec.Pizza & Chili Index
 */
 
 typedef Tag<impl::PizzaChiliFinder> const PizzaChiliFinder;

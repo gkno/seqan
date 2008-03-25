@@ -18,7 +18,7 @@ int main() {
 
     Finder<index_t> finder(idx);
     String<char> needle = "st";
-    while (find(finder, needle)) {
+    while (find(finder, "st")) {
         Position<Finder<index_t> >::Type pos = position(finder);
         cout << pos << ":\t" << infix(indexText(idx), pos, length(indexText(idx))) << endl;
     }

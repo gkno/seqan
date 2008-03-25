@@ -35,7 +35,7 @@ namespace SEQAN_NAMESPACE_MAIN {
 ...remarks:Pizza & Chili indices are compressed indices. Hence, this fibre is used for searching in the index.
 ..see:Metafunction.Fibre
 ..see:Function.getFibre
-..see:Spec.Index_PizzaChili
+..see:Spec.Pizza & Chili Index
 */
 
 struct _Fibre_PizzaChili_Compressed;
@@ -57,6 +57,10 @@ typedef Fibre_PizzaChili_Compressed PizzaChili_Compressed;
 ...type:Class.String
 ..param.TSpec:Algorithm-specific parameters.
 ...default:$void$
+..demo:index_pizzachili.h
+..see:Spec.Pizza & Chili String
+..see:Tag.Pizza & Chili Index Fibres
+..see:Tag.Index Find Algorithm
 */
 
 template <typename TSpec = void>
@@ -249,6 +253,29 @@ SEQAN_CHECKPOINT
 
 
 //////////////////////////////////////////////////////////////////////////////
+
+template <typename TText, typename TSpec>
+inline bool open(
+    Index<TText, PizzaChili<TSpec> >& me,
+    char const* filename
+) {
+SEQAN_CHECKPOINT
+    clear(me);
+    impl::pizzachili::error_t e =
+        impl::pizzachili::load_index(const_cast<char*>(filename), &me.index_handle);
+    return e == 0;
+}
+
+template <typename TText, typename TSpec>
+inline bool save(
+    Index<TText, PizzaChili<TSpec> >& me,
+    char const* filename
+) {
+SEQAN_CHECKPOINT
+    impl::pizzachili::error_t e =
+        impl::pizzachili::save_index(me.index_handle, const_cast<char*>(filename));
+    return e == 0;
+}
 
 } // namespace SEQAN_NAMESPACE_MAIN
 
