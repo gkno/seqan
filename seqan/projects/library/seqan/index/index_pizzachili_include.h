@@ -18,12 +18,18 @@
   $Id$
  ==========================================================================*/
 
+#ifndef SEQAN_HEADER_INDEX_PIZZACHILI_INCLUDE_H
+#define SEQAN_HEADER_INDEX_PIZZACHILI_INCLUDE_H
+
+//SEQAN_NO_GENERATED_FORWARDS: no forwards are generated for this file
+
+// For debugging without linking a Pizza & Chili library file, define the flag
+// 'SEQAN_DEBUG_PIZZACHILI' to switch to debug code that does not rely on
+// extern definitions. Note that not all functions of the API are implemented.
+
 #include <cstdlib>
 #include <algorithm>
 #include <vector>
-
-#ifndef SEQAN_HEADER_INDEX_PC_SCAFFOLD_H
-#define SEQAN_HEADER_INDEX_PC_SCAFFOLD_H
 
 namespace SEQAN_NAMESPACE_MAIN {
     //
@@ -36,7 +42,7 @@ namespace SEQAN_NAMESPACE_MAIN {
         typedef void* index_t;
         typedef int error_t;
 
-#if 0
+#ifndef SEQAN_DEBUG_PIZZACHILI
 
         extern "C" {
 #   include "pizzachili_interface.h"
@@ -193,4 +199,4 @@ namespace SEQAN_NAMESPACE_MAIN {
     } } // namespace impl::pizzachili
 } // namespace SEQAN_NAMESPACE_MAIN
 
-#endif // SEQAN_HEADER_INDEX_PC_SCAFFOLD_H
+#endif // SEQAN_HEADER_INDEX_PIZZACHILI_INCLUDE_H

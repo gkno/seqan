@@ -25,9 +25,7 @@
 
 namespace SEQAN_NAMESPACE_MAIN {
 
-namespace impl {
-    struct PizzaChiliFinder;
-} // namespace impl
+struct _PizzaChiliFinder;
 
 /**
 .Tag.Index Find Algorithm
@@ -36,7 +34,7 @@ namespace impl {
 ..see:Spec.Pizza & Chili Index
 */
 
-typedef Tag<impl::PizzaChiliFinder> const PizzaChiliFinder;
+typedef Tag<_PizzaChiliFinder> const PizzaChiliFinder;
 
 //////////////////////////////////////////////////////////////////////////////
 

@@ -1,5 +1,7 @@
 #include <iostream>
 
+#define SEQAN_DEBUG_PIZZACHILI
+
 #include <seqan/sequence.h>
 #include <seqan/index.h>
 #include <seqan/find.h>

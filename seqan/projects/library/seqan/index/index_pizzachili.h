@@ -254,7 +254,6 @@ SEQAN_CHECKPOINT
     impl::createPizzaChiliIndex(me, textstart, textlength);
 }
 
-
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TText, typename TSpec>
