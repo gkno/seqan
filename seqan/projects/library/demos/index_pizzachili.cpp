@@ -1,11 +1,12 @@
 #include <iostream>
+
+//The following is needed if we don't want to link a Pizza & Chili index.
+#define SEQAN_DEBUG_PIZZACHILI
+
 #include <seqan/index.h>
 
 using namespace std;
 using namespace seqan;
-
-//The following is needed if we don't want to link a Pizza & Chili index.
-#define SEQAN_DEBUG_PIZZACHILI
 
 int main() {
 ///The following code creates a Pizza & Chili index and assigns it the text
