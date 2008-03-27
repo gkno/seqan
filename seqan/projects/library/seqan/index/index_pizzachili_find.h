@@ -21,8 +21,6 @@
 #ifndef SEQAN_HEADER_INDEX_PIZZACHILI_FIND_H
 #define SEQAN_HEADER_INDEX_PIZZACHILI_FIND_H
 
-#include "index_pizzachili.h"
-
 namespace SEQAN_NAMESPACE_MAIN {
 
 struct _PizzaChiliFinder;

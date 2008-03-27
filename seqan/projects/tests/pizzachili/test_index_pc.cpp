@@ -5,13 +5,21 @@
 #include <seqan/sequence.h>
 #include <seqan/index.h>
 #include <seqan/find.h>
-#include <seqan/index/index_pizzachili.h>
-#include <seqan/index/index_pizzachili_find.h>
+//#include <seqan/index/index_pizzachili.h>
+//#include <seqan/index/index_pizzachili_find.h>
 
 using namespace std;
 using namespace seqan;
 
+#define main pizzachili_test
+#include "../library/demos/index_pizzachili.cpp"
+#undef main
+
 int main() {
+    cout << "TEST" << endl;
+    pizzachili_test();
+    cout << "END TEST" << endl;
+
     typedef Index<CharString, PizzaChili<> > index_t;
     index_t idx;
     indexText(idx) = "Dies ist ein Test mit Bast";

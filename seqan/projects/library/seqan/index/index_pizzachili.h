@@ -21,8 +21,8 @@
 #ifndef SEQAN_HEADER_INDEX_PIZZACHILI_H
 #define SEQAN_HEADER_INDEX_PIZZACHILI_H
 
-#include "index_pizzachili_include.h"
-#include "index_pizzachili_string.h"
+#include <seqan/index/index_pizzachili_include.h>
+#include <seqan/index/index_pizzachili_string.h>
 
 namespace SEQAN_NAMESPACE_MAIN {
 
@@ -47,6 +47,43 @@ typedef Fibre_PizzaChili_Text PizzaChili_Text;
 typedef Fibre_PizzaChili_Compressed PizzaChili_Compressed;
 
 /**
+.Spec.PizzaChili_SA:
+..summary:Pizza & Chili Suffix Array Index.
+..cat:Index
+..base:Spec.Pizza & Chili Index
+..signature:Index<TText, PizzaChili<PizzaChili_SA> >
+..param.TText:The text type.
+...type:Class.String
+..remarks:To be used in conjunction with Pizza & Chili's $SAu$ and $SAc$ index.
+
+.Spec.PizzaChili_SSA:
+..summary:Pizza & Chili Sufficient Suffix Array Index.
+..cat:Index
+..base:Spec.Pizza & Chili Index
+..signature:Index<TText, PizzaChili<PizzaChili_SSA> >
+..param.TText:The text type.
+...type:Class.String
+..remarks:To be used in conjunction with Pizza & Chili's $SSA*$ indices.
+
+.Spec.PizzaChili_AF:
+..summary:Pizza & Chili Alphabet-Friendly FM Index.
+..cat:Index
+..base:Spec.Pizza & Chili Index
+..signature:Index<TText, PizzaChili<PizzaChili_AF> >
+..param.TText:The text type.
+...type:Class.String
+..remarks:To be used in conjunction with Pizza & Chili's $af_index$.
+*/
+
+struct _PizzaChili_SA;
+struct _PizzaChili_SSA;
+struct _PizzaChili_AF;
+
+typedef Tag<_PizzaChili_SA> const PizzaChili_SA;
+typedef Tag<_PizzaChili_SSA> const PizzaChili_SSA;
+typedef Tag<_PizzaChili_AF> const PizzaChili_AF;
+
+/**
 .Spec.Pizza & Chili Index:
 ..summary:An adapter for the Pizza & Chili index API.
 ..remarks:
@@ -57,10 +94,10 @@ typedef Fibre_PizzaChili_Compressed PizzaChili_Compressed;
 ...type:Class.String
 ..param.TSpec:Algorithm-specific parameters.
 ...default:$void$
-..demo:index_pizzachili.h
 ..see:Spec.Pizza & Chili String
 ..see:Tag.Pizza & Chili Index Fibres
 ..see:Tag.Index Find Algorithm
+..demo:../projects/library/demos/index_pizzachili.cpp
 */
 
 // Already declared in included file "index_pizzachili_string.h".
@@ -133,6 +170,30 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 
+namespace impl {
+
+    template <typename TText, typename TSpec>
+    inline char const*
+    getOptionsString(Index<TText, PizzaChili<TSpec> >& /*me*/) {
+        return "";
+    }
+
+    template <typename TText>
+    inline char const*
+    getOptionsString(Index<TText, PizzaChili<void> >& /*me*/) {
+        return "copy_text";
+    }
+
+    template <typename TText>
+    inline char const*
+    getOptionsString(Index<TText, PizzaChili<PizzaChili_SA> >& /*me*/) {
+        return "copy_text";
+    }
+
+} // namespace impl
+
+//////////////////////////////////////////////////////////////////////////////
+
 template <typename TText, typename TSpec>
 inline typename Fibre<Index<TText, PizzaChili<TSpec> >, PizzaChili_Text>::Type
 indexText(Index<TText, PizzaChili<TSpec> >& me) {
@@ -185,7 +246,8 @@ namespace impl {
         pizzachili::ulong textlength
     ) {
         // Read-only access, therefore safe cast.
-        char* options = const_cast<char*>("");
+        //char* options = const_cast<char*>("");
+        char* options = const_cast<char*>(impl::getOptionsString(me));
         pizzachili::error_t e =
             pizzachili::build_index(textstart, textlength, options, &me.index_handle);
 

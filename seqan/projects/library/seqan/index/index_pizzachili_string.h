@@ -21,9 +21,9 @@
 #ifndef SEQAN_HEADER_INDEX_PIZZACHILI_STRING_H
 #define SEQAN_HEADER_INDEX_PIZZACHILI_STRING_H
 
-#include <cstdlib>
+#include <cstdlib> // for std::malloc, std::realloc, std::free
 
-#include "index_pizzachili_include.h"
+#include <seqan/index/index_pizzachili_include.h>
 
 namespace SEQAN_NAMESPACE_MAIN {
 

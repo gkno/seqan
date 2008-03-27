@@ -4,11 +4,13 @@
 using namespace std;
 using namespace seqan;
 
-int main ()
-{
+//The following is needed if we don't want to link a Pizza & Chili index.
+#define SEQAN_DEBUG_PIZZACHILI
+
+int main() {
 ///The following code creates a Pizza & Chili index and assigns it the text
 ///$"tobeornottobe"$.
-    typedef Index<String<char>, PizzaChili<> > index_t;
+    typedef Index<String<char>, PizzaChili<PizzaChili_SA> > index_t;
     index_t index_pc;
     indexText(index_pc) = "tobeornottobe";
 
@@ -32,4 +34,5 @@ int main ()
     index_t index2;
     open(index2, "pizzachili");
     cout << indexText(index2) << endl;
+    return 0;
 }
