@@ -77,14 +77,14 @@ addLetterToOracle(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 	addEdge(g, pred, newState, c);
 	TVertexDescriptor k = getProperty(supplyState, pred);
 	while ((k!=nilVal) &&
-			(getTarget(&g.data_vertex[k].data_edge[(TSize) TAlphabet(c)])==nilVal))
+			(getTarget(&g.data_vertex[k].data_edge[ordValue(TAlphabet(c))])==nilVal))
 	{
 		addEdge(g,k,newState,c);
 		k = getProperty(supplyState, k);
 	}
 	TVertexDescriptor s;
 	if (k==nilVal) s=0;
-	else s = getTarget(&g.data_vertex[k].data_edge[(TSize) TAlphabet(c)]);
+	else s = getTarget(&g.data_vertex[k].data_edge[ordValue(TAlphabet(c))]);
 	assignProperty(supplyState, newState, s);
 }
 

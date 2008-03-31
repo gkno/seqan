@@ -40,17 +40,6 @@ _align_hirschberg_trace(TAlign& align,
 						TTrace& trace)
 {
 	SEQAN_CHECKPOINT
-
-	//// Debug
-	//typedef typename Iterator<TTrace>::Type TTraceIter;
-	//TTraceIter traceIter = begin(trace, Standard() );
-	//TTraceIter traceIterEnd = end(trace, Standard() );
-	//unsigned int count = 0;
-	//for(;traceIter != traceIterEnd;goNext(traceIter)) {
-	//  std::cout << count << ',' << getValue(traceIter) << std::endl;
-	//  ++count;
-	//}
-		
 	typedef typename Size<TStringSet>::Type TSize;
 	typedef typename Id<TStringSet>::Type TId;
 	
@@ -459,7 +448,7 @@ _align_hirschberg(TTrace& trace,
 	else if ((!midpoints.empty()) && (it->second == (Byte) Vertical)) {
 		// Where is the best exit
 		TScoreValue best = score(const_cast<Score<TScoreValue, TSpec>&>(sc), str[0][0], str[1][0]);
-		unsigned int index = 0;
+		TSize index = 0;
 		if (it->first.second > 1) best += gapOpen;
 		if (it->first.second > 2) best += gap * (it->first.second - 2);
 		for(TSize row = 2; row < it->first.second;++row) {

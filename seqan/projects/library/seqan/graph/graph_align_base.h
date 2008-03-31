@@ -354,7 +354,7 @@ convertScoringMatrix(Score<TSourceValue, TType> const & in,
 					 TVal1 gapExtend,
 					 TVal2 gapOpen)
 {
-	typedef unsigned int TSize;
+	typedef typename Size<Score<TSourceValue, TType> >::Type TSize;
 	out.data_gap_extend = (TTargetValue) gapExtend;
 	out.data_gap_open = (TTargetValue) gapOpen;
 	TSize alphSize = ValueSize<TSequenceValue>::VALUE;

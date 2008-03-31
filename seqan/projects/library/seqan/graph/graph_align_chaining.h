@@ -228,15 +228,6 @@ _setRightPosition( PseudoFragment<TGraph,Default> & me,
 }
 
 
-
-
-template< typename TGraph >
-struct Size< PseudoFragment<TGraph,Default> >
-{
-	typedef size_t Type;
-};
-
-
 template< typename TGraph >
 struct Weight< PseudoFragment<TGraph,Default> >
 {

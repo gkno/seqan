@@ -90,24 +90,6 @@ struct Spec<Graph<TSpec> const>
 
 //////////////////////////////////////////////////////////////////////////////
 
-///.Metafunction.Size.param.T.type:Class.Graph
-
-template<typename TSpec>
-struct Size<Graph<TSpec> > 
-{
-	typedef unsigned int Type;
-};
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TSpec>
-struct Size<Graph<TSpec> const>
-{
-	typedef unsigned int Type;
-};
-
-//////////////////////////////////////////////////////////////////////////////
-
 ///.Metafunction.EdgeDescriptor.param.T.type:Class.Graph
 
 template<typename TSpec>

@@ -294,8 +294,8 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 					   Kmer_Library)
 {
 	SEQAN_CHECKPOINT
-	typedef unsigned int TWord;
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef TSize TWord;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename Id<TGraph>::Type TId;
 	typedef String<TWord> TTupelString;
@@ -658,8 +658,8 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 					   GlobalPairwise_Library)
 {
 	SEQAN_CHECKPOINT
-	typedef unsigned int TSize;
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
 	typedef typename Value<TScore>::Type TScoreValue;
 	typedef typename Id<TGraph>::Type TId;
 

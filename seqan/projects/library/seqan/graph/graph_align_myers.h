@@ -37,9 +37,9 @@ _align_myers_bit_vector(TString const & str1,
 						TString const & str2)
 {
 	SEQAN_CHECKPOINT
-	typedef unsigned int TWord;
 	typedef typename Value<TString>::Type TAlphabet;
 	typedef typename Size<TString>::Type TSize;
+	typedef unsigned int TWord;
 	typedef String<TWord> BitVector;
 	typedef String<BitVector> TLookupTable;
 	TSize alphLen = ValueSize<TAlphabet>::VALUE;
@@ -70,11 +70,11 @@ _align_myers_bit_vector(TString const & str1,
 	//// Debug code
 	//std::cout << "Alphabet size: " << alphLen << ::std::endl;
 	//std::cout << "Block count: " << blockCount << ::std::endl;
-	//for(unsigned int i=0;i<alphLen;++i) {
+	//for(TSize i=0;i<alphLen;++i) {
 	//	if ((i<97) || (i>122)) continue;
 	//	std::cout << static_cast<char>(i) << ": ";
-	//	for(int j=0;j<(int)blockCount;++j) {
-	//		for(int bit_pos=0;bit_pos<BitsPerValue<TWord>::VALUE;++bit_pos) {
+	//	for(TSize j=0;j<(TSize)blockCount;++j) {
+	//		for(TSize bit_pos=0;bit_pos<BitsPerValue<TWord>::VALUE;++bit_pos) {
 	//		  std::cout << ((lT[i][j] & (1<<(bit_pos % BitsPerValue<unsigned int>::VALUE))) !=0);
 	//		}
 	//	}
@@ -144,32 +144,32 @@ _align_myers_bit_vector(TString const & str1,
 
 		/*
 		std::cout << err << std::endl;
-		for(int block=0;block<(int)blockCount;++block) {
-			for(int bit_pos=0;bit_pos<BitsPerValue<TWord>::VALUE;++bit_pos) {
+		for(TSize block=0;block<(int)blockCount;++block) {
+			for(TSize bit_pos=0;bit_pos<BitsPerValue<TWord>::VALUE;++bit_pos) {
 				std::cout << ((D0[block] & (1<<(bit_pos % BitsPerValue<unsigned int>::VALUE))) !=0);
 			}
 		}
 		std::cout << ::std::endl;
-		for(int block=0;block<(int)blockCount;++block) {
-			for(int bit_pos=0;bit_pos<BitsPerValue<TWord>::VALUE;++bit_pos) {
+		for(TSize block=0;block<(int)blockCount;++block) {
+			for(TSize bit_pos=0;bit_pos<BitsPerValue<TWord>::VALUE;++bit_pos) {
 				std::cout << ((HN[block] & (1<<(bit_pos % BitsPerValue<unsigned int>::VALUE))) !=0);
 			}
 		}
 		std::cout << ::std::endl;
-		for(int block=0;block<(int)blockCount;++block) {
-			for(int bit_pos=0;bit_pos<BitsPerValue<TWord>::VALUE;++bit_pos) {
+		for(TSize block=0;block<(int)blockCount;++block) {
+			for(TSize bit_pos=0;bit_pos<BitsPerValue<TWord>::VALUE;++bit_pos) {
 				std::cout << ((HP[block] & (1<<(bit_pos % BitsPerValue<unsigned int>::VALUE))) !=0);
 			}
 		}
 		std::cout << ::std::endl;
-		for(int block=0;block<(int)blockCount;++block) {
-			for(int bit_pos=0;bit_pos<BitsPerValue<TWord>::VALUE;++bit_pos) {
+		for(TSize block=0;block<(int)blockCount;++block) {
+			for(TSize bit_pos=0;bit_pos<BitsPerValue<TWord>::VALUE;++bit_pos) {
 				std::cout << ((VN[block] & (1<<(bit_pos % BitsPerValue<unsigned int>::VALUE))) !=0);
 			}
 		}
 		std::cout << ::std::endl;
-		for(int block=0;block<(int)blockCount;++block) {
-			for(int bit_pos=0;bit_pos<BitsPerValue<TWord>::VALUE;++bit_pos) {
+		for(TSize block=0;block<(int)blockCount;++block) {
+			for(TSize bit_pos=0;bit_pos<BitsPerValue<TWord>::VALUE;++bit_pos) {
 				std::cout << ((VP[block] & (1<<(bit_pos % BitsPerValue<unsigned int>::VALUE))) !=0);
 			}
 		}

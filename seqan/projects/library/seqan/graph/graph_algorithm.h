@@ -200,7 +200,7 @@ depth_first_search(Graph<TSpec> const& g,
 				   TFinishingTimeMap& finish)
 {
 	SEQAN_CHECKPOINT
-
+	typedef typename Size<Graph<TSpec> >::Type TSize;
 	typedef typename Iterator<Graph<TSpec>, EdgeIterator>::Type TEdgeIterator;
 	typedef typename Iterator<Graph<TSpec>, VertexIterator>::Type TVertexIterator;
 	typedef typename VertexDescriptor<Graph<TSpec> >::Type TVertexDescriptor;
@@ -220,7 +220,7 @@ depth_first_search(Graph<TSpec> const& g,
 		assignProperty(predecessor, getValue(it), nilPred);
 	}
 
-	unsigned int time = 0;
+	TSize time = 0;
 
 	goBegin(it);
 	for(;!atEnd(it);goNext(it)) {
@@ -256,17 +256,18 @@ topological_sort(Graph<TSpec> const& g,
 				 String<TVertexDescriptor>& topSort)
 {
 	SEQAN_CHECKPOINT
+	typedef typename Size<Graph<TSpec> >::Type TSize;
 
 	// Initialization
-	String<unsigned int> predMap;
-	String<unsigned int> discoveryTimeMap;
-	String<unsigned int> finishingTimeMap;
+	String<TSize> predMap;
+	String<TSize> discoveryTimeMap;
+	String<TSize> finishingTimeMap;
 	
 	// Dfs
 	depth_first_search(g, predMap, discoveryTimeMap, finishingTimeMap);
 
 	// Order vertices
-	typedef ::std::pair<unsigned int, TVertexDescriptor> TTimeVertexPair;
+	typedef ::std::pair<TSize, TVertexDescriptor> TTimeVertexPair;
 	std::priority_queue<TTimeVertexPair> q;
 	typedef typename Iterator<Graph<TSpec>, VertexIterator>::Type TVertexIterator;
 	TVertexIterator it(g);
@@ -276,7 +277,7 @@ topological_sort(Graph<TSpec> const& g,
 
 	// Create topological order
 	resize(topSort,numVertices(g));
-	unsigned int count=0;
+	TSize count=0;
 	while(!q.empty()) {
 		assignValue(topSort, count, q.top().second);
 		q.pop();
@@ -310,14 +311,15 @@ strongly_connected_components(Graph<TSpec> const& g_source,
 	SEQAN_CHECKPOINT
 
 	// Initialization
+	typedef typename Size<Graph<TSpec> >::Type TSize;
 	typedef typename VertexDescriptor<Graph<TSpec> >::Type TVertexDescriptor;
 	typedef typename Iterator<Graph<TSpec>, EdgeIterator>::Type TEdgeIterator;
 	typedef typename Iterator<Graph<TSpec>, VertexIterator>::Type TVertexIterator;
 	typedef typename Value<TComponents>::Type TCompVal;
 	resizeVertexMap(g_source,components);
-	String<unsigned int> predMap;
-	String<unsigned int> discoveryTimeMap;
-	String<unsigned int> finishingTimeMap;
+	String<TSize> predMap;
+	String<TSize> discoveryTimeMap;
+	String<TSize> finishingTimeMap;
 	
 	// Dfs
 	depth_first_search(g_source, predMap, discoveryTimeMap, finishingTimeMap);
@@ -326,9 +328,9 @@ strongly_connected_components(Graph<TSpec> const& g_source,
 	transpose(g_source, g);
 
 	// Second Dfs
-	String<unsigned int> predecessor;
-	String<unsigned int> disc;
-	String<unsigned int> finish;
+	String<TSize> predecessor;
+	String<TSize> disc;
+	String<TSize> finish;
 	resizeVertexMap(g,predecessor);
 	resizeVertexMap(g,disc);
 	resizeVertexMap(g,finish);
@@ -343,15 +345,15 @@ strongly_connected_components(Graph<TSpec> const& g_source,
 	}
 
 	// Order vertices
-	typedef ::std::pair<unsigned int, TVertexDescriptor> TTimeVertexPair;
+	typedef ::std::pair<TSize, TVertexDescriptor> TTimeVertexPair;
 	std::priority_queue<TTimeVertexPair> q;
 	goBegin(it);
 	for(;!atEnd(it);++it) {
 		q.push(std::make_pair(getProperty(finishingTimeMap, getValue(it)), getValue(it)));
 	}
 
-	unsigned int time = 0;
-	unsigned int label = 0;
+	TSize time = 0;
+	TSize label = 0;
 	while(!q.empty()) {
 		TVertexDescriptor u = q.top().second;
 		q.pop();
@@ -414,12 +416,13 @@ _cc_visit(Graph<TSpec> const& g,
 */
 
 template<typename TSpec, typename TComponents>
-unsigned int
+typename Size<Graph<TSpec> >::Type
 connected_components(Graph<TSpec> const& g_source,
 					 TComponents& components)
 {
 	SEQAN_CHECKPOINT
 
+	typedef typename Size<Graph<TSpec> >::Type TSize;
 	typedef typename Iterator<Graph<TSpec>, EdgeIterator>::Type TEdgeIterator;
 	typedef typename Iterator<Graph<TSpec>, VertexIterator>::Type TVertexIterator;
 	typedef typename VertexDescriptor<Graph<TSpec> >::Type TVertexDescriptor;
@@ -431,7 +434,7 @@ connected_components(Graph<TSpec> const& g_source,
 	fill(tokenMap, getIdUpperBound(_getVertexIdManager(g_source)), false);
 
 	// Connected components
-	unsigned int label = 0;
+	TSize label = 0;
 	TVertexIterator it(g_source);
 	for(;!atEnd(it);goNext(it)) {
 		TVertexDescriptor u = getValue(it);
@@ -560,7 +563,8 @@ kruskals_algorithm(Graph<TSpec> const& g,
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<TSpec> TGraph;
-	typedef typename Iterator<Graph<TSpec>, VertexIterator>::Type TVertexIterator;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
 	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
 	typedef typename Value<TWeightMap>::Type TWeight;
 
@@ -594,7 +598,7 @@ kruskals_algorithm(Graph<TSpec> const& g,
 	}
 
 	// Process each edge
-	unsigned int index = 0;
+	TSize index = 0;
 	while(!q.empty()) {
 		TVertexDescriptor x = q.top().second.first;
 		TVertexDescriptor y = q.top().second.second;
@@ -813,6 +817,8 @@ bellman_ford_algorithm(Graph<TSpec> const& g,
 					   TDistanceMap& distance)
 {
 	SEQAN_CHECKPOINT
+	typedef typename Size<Graph<TSpec> >::Type TSize;
+
 	// Initialization
 	typedef typename EdgeDescriptor<Graph<TSpec> >::Type TEdgeDescriptor;
 	typedef typename Iterator<Graph<TSpec>, VertexIterator>::Type TVertexIterator;
@@ -822,7 +828,7 @@ bellman_ford_algorithm(Graph<TSpec> const& g,
 	_initialize_single_source(g, source, weight, predecessor, distance);
 
 	// Run Bellman-Ford
-	for(unsigned int i=0; i<numVertices(g) - 1; ++i) {
+	for(TSize i=0; i<numVertices(g) - 1; ++i) {
 		TVertexIterator it(g);
 		for(;!atEnd(it);goNext(it)) {
 			TVertexDescriptor u = getValue(it);
@@ -883,6 +889,7 @@ dijkstra(Graph<TSpec> const& g,
 		 TDistanceMap& distance)
 {
 	SEQAN_CHECKPOINT
+	typedef typename Size<Graph<TSpec> >::Type TSize;
 	typedef typename Value<TDistanceMap>::Type TDistVal;
 	typedef typename Iterator<Graph<TSpec>, VertexIterator>::Type TVertexIterator;
 	typedef typename Iterator<Graph<TSpec>, OutEdgeIterator>::Type TOutEdgeIterator;
@@ -903,7 +910,7 @@ dijkstra(Graph<TSpec> const& g,
 	TVertexDescriptor nilVertex = getNilPredecessor(g);
 
 	// Run Dijkstra
-	unsigned int count = numVertices(g);
+	TSize count = numVertices(g);
 	while (count > 0) {
 		// Extract min
 		TDistVal min = infDist;
@@ -1261,13 +1268,14 @@ _build_residual_graph(Graph<TSpec> const& g,
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TSpec, typename TPredecessorMap, typename TVertexDescriptor>
-inline unsigned int
+inline typename Size<Graph<TSpec> >::Type
 _get_minimum_aug(Graph<TSpec> const& rG,
 				 TPredecessorMap& predecessor,
 				 TVertexDescriptor const source,
 				 TVertexDescriptor sink)
 {
-	typedef unsigned int TFlow;
+	typedef typename Size<Graph<TSpec> >::Type TSize;
+	typedef TSize TFlow;
 	typedef typename Iterator<String<TVertexDescriptor>, Rooted>::Type TIterator;
 	
 	// Build secondary predecessor map just containing the path

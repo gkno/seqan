@@ -393,7 +393,7 @@ matchRefinement(TAlignmentString & alis,
 				StringSet<TSequence, TSetSpec> & seq, 
 				TScore & score_type,
 				TOutGraph & ali_graph,
-				unsigned int min_fragment_len,
+				typename Size<typename Value<TAlignmentString>::Type>::Type min_fragment_len,
 				TAnnotation & annotation,
 				Tag<TTagSpec> const tag)
 {
@@ -456,10 +456,10 @@ SEQAN_CHECKPOINT
 			}
 			//and end position
 			iter = all_nodes[seq_i_pos].find(end_i);		
-			if(cutIsOk(all_nodes,seq_i_pos,end_i,iter,min_fragment_len,tag))
+			if(cutIsOk(all_nodes,seq_i_pos,end_i,iter,(TValue) min_fragment_len,tag))
 			{
 				all_nodes[seq_i_pos].insert(end_i);
-				_refine(end_i, seq_i_id, seq, seq_map, alis, gs,pms,all_nodes,min_fragment_len,tag);//TStop());
+				_refine(end_i, seq_i_id, seq, seq_map, alis, gs,pms,all_nodes, min_fragment_len,tag);//TStop());
 			}
 		}	
 		++ali_it;

@@ -98,13 +98,13 @@ viterbiAlgorithm(Graph<Hmm<TAlphabet, TCargo, TSpec> > const& hmm,
 	for(TSize i = len + 1; i>=1; --i) path[i - 1] = value(traceback, i * numRows + path[i]);
 
 	//// Debug code
-	//for(unsigned  int i = 0; i<numRows; ++i) {
-	//	for(unsigned int j=0; j<numCols; ++j) {
+	//for(TSize i = 0; i<numRows; ++i) {
+	//	for(TSize j=0; j<numCols; ++j) {
 	//		std::cout << value(vMat, j*numRows + i) << ',';
 	//	}
 	//	std::cout << std::endl;
 	//}
-	//for(unsigned  int i = 0; i<length(path); ++i) {
+	//for(TSize i = 0; i<length(path); ++i) {
 	//	std::cout << path[i] << ',';
 	//}
 	//std::cout << std::endl;
@@ -156,8 +156,8 @@ forwardAlgorithm(Graph<Hmm<TAlphabet, TCargo, TSpec> > const& hmm,
 	value(fMat, (len+1) * numRows + eState) = sum;
 
 	//// Debug code
-	//for(unsigned  int i = 0; i<numRows; ++i) {
-	//	for(unsigned int j=0; j<numCols; ++j) {
+	//for(TSize i = 0; i<numRows; ++i) {
+	//	for(TSize j=0; j<numCols; ++j) {
 	//		std::cout << value(fMat, j*numRows + i) << ',';
 	//	}
 	//	std::cout << std::endl;
@@ -212,8 +212,8 @@ backwardAlgorithm(Graph<Hmm<TAlphabet, TCargo, TSpec> > const& hmm,
 	value(bMat, bState) = sum;
 
 	//// Debug code
-	//for(unsigned  int i = 0; i<numRows; ++i) {
-	//	for(unsigned int j=0; j<numCols; ++j) {
+	//for(TSize i = 0; i<numRows; ++i) {
+	//	for(TSize j=0; j<numCols; ++j) {
 	//		std::cout << value(bMat, j*numRows + i) << ',';
 	//	}
 	//	std::cout << std::endl;

@@ -187,7 +187,7 @@ longestCommonSubsequence(TString1 const& str1,
 	TStringIter endIt = end(str2);
 	TPos current_pos = 0;
 	for(TStringIter it = begin(str2); it != endIt; ++it, ++current_pos) {
-		push_back(value(occ, (unsigned int) *it), current_pos);
+		push_back(value(occ, ordValue(value(it))), current_pos);
 	}
 
 	// Build the combined string
@@ -196,7 +196,7 @@ longestCommonSubsequence(TString1 const& str1,
 	TStringIter endIt1 = end(str1);
 	current_pos = 0;
 	for(TStringIter it = begin(str1); it != endIt1; ++it, ++current_pos) {
-		TPositions& current_occ = occ[(unsigned int) *it];
+		TPositions& current_occ = occ[ordValue(value(it))];
 		for(int i = length(current_occ)-1; i>=0; --i) {
 			// Do we have a neighborhood
 			if (nSize != 0) {
@@ -210,7 +210,7 @@ longestCommonSubsequence(TString1 const& str1,
 	}
 
 	// Call longest increasing subsequence
-	typedef String<unsigned int, Block<> > TResult;
+	typedef String<TSize, Block<> > TResult;
 	TResult result;
 	longestIncreasingSubsequence(finalSeq, result);
 	
@@ -222,7 +222,7 @@ longestCommonSubsequence(TString1 const& str1,
 	}
 
 	//// Debug code
-	//for(int i=0; i<length(pos);++i) {
+	//for(TSize i=0; i<length(pos);++i) {
 	//	std::cout << pos[i].first << ',' << pos[i].second << ';';
 	//}
 	//std::cout << std::endl;
@@ -394,7 +394,7 @@ __heaviestCommonSubsequence(std::map<TKey, TValue>& posToSlotMap,
 	// Reverse the map
 	String<TLargeSize> slotToPos;
 	resize(slotToPos, posToSlotMap.size());
-	unsigned int counter = 0;
+	TSize counter = 0;
 	for(typename TPositionToSlotMap::const_iterator mapIt = posToSlotMap.begin();mapIt != posToSlotMap.end(); ++mapIt, ++counter) {
 		value(slotToPos, counter) = mapIt->first;
 	}

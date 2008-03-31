@@ -208,9 +208,9 @@ _align_needleman_wunsch(TTrace & trace,
 	}
 	_processLastColumn(TAlignConfig(), overallMaxValue, overallMaxIndex, column);
 
-	//for(unsigned int i= 0; i<len2;++i) {
-	//	for(unsigned int j= 0; j<len1;++j) {
-	//		std::cout << (unsigned int) getValue(trace, j*len2 + i) << ',';
+	//for(TSize i= 0; i<len2;++i) {
+	//	for(TSize j= 0; j<len1;++j) {
+	//		std::cout << (TSize) getValue(trace, j*len2 + i) << ',';
 	//	}
 	//	std::cout << std::endl;
 	//}
@@ -286,9 +286,9 @@ _align_needleman_wunsch(TTrace& trace,
 	}
 	_processLastColumn(TAlignConfig(), overallMaxValue, overallMaxIndex, column);
 
-	//for(unsigned int i= 0; i<len2;++i) {
-	//	for(unsigned int j= 0; j<len1;++j) {
-	//		std::cout << (unsigned int) getValue(trace, j*len2 + i) << ',';
+	//for(TSize i= 0; i<len2;++i) {
+	//	for(TSize j= 0; j<len1;++j) {
+	//		std::cout << (TSize) getValue(trace, j*len2 + i) << ',';
 	//	}
 	//	std::cout << std::endl;
 	//}

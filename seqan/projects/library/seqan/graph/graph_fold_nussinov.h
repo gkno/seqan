@@ -113,8 +113,8 @@ _align_nussinov_trace(Graph<Undirected<TCargo, TSpec> >& g,
 		else {
 			for(TSize k=i+1;k<j-1;++k) {
 				if (getValue(mat, i*len+j)==getValue(mat, i*len+k) + getValue(mat,(k+1)*len+j)) {
-					_align_nussinov_trace(g,mat,str,sc,i,k);
-					_align_nussinov_trace(g,mat,str,sc,k+1,j);
+					_align_nussinov_trace(g,mat,str,sc, (TSize) i, (TSize) k);
+					_align_nussinov_trace(g,mat,str,sc, (TSize) k+1, (TSize) j);
 				}
 			}
 		}

@@ -324,8 +324,8 @@ _align_gotoh(TTrace& trace,
 	}
 
 	//// Debug code
-	//for(unsigned int i= 0; i<len2;++i) {
-	//	for(unsigned int j= 0; j<len1;++j) {
+	//for(TSize i= 0; i<len2;++i) {
+	//	for(TSize j= 0; j<len1;++j) {
 	//		std::cout << (unsigned int) getValue(trace, j*len2 + i) << ',';
 	//	}
 	//	std::cout << std::endl;

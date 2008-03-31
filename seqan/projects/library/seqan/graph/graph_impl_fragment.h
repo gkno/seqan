@@ -61,16 +61,6 @@ struct Position<Fragment<TId, TPos, TSize, TSpec> const> {
 };
 
 
-template<typename TId, typename TPos, typename TSize, typename TSpec>
-struct Size<Fragment<TId, TPos, TSize, TSpec> > {
-	typedef TSize Type;
-};
-
-template<typename TId, typename TPos, typename TSize, typename TSpec>
-struct Size<Fragment<TId, TPos, TSize, TSpec> const> {
-	typedef TSize const Type;
-};
-  
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TId, typename TPos, typename TSize, typename TSpec, typename TStringSet, typename TVal>
@@ -122,22 +112,22 @@ fragmentBegin(Fragment<TId, TPos, TSize, TSpec> const& f,
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TId, typename TPos, typename TSize, typename TSpec, typename TVal>
-inline typename Size<Fragment<TId, TPos, TSize, TSpec> >::Type&
+inline TSize&
 fragmentLength(Fragment<TId, TPos, TSize, TSpec> const& f,
 			   TVal const)
 {
 	SEQAN_CHECKPOINT
-	return const_cast<typename Size<Fragment<TId, TPos, TSize, TSpec> >::Type&>(f.len);
+	return const_cast<TSize&>(f.len);
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TId, typename TPos, typename TSize, typename TSpec>
-inline typename Size<Fragment<TId, TPos, TSize, TSpec> >::Type&
+inline TSize&
 fragmentLength(Fragment<TId, TPos, TSize, TSpec> const& f)
 {
 	SEQAN_CHECKPOINT
-	return const_cast<typename Size<Fragment<TId, TPos, TSize, TSpec> >::Type&>(f.len);
+	return const_cast<TSize&>(f.len);
 }
 
 //////////////////////////////////////////////////////////////////////////////

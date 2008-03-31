@@ -53,6 +53,8 @@ class IdManager
 		IdManager()
 		{
 			SEQAN_CHECKPOINT
+			clear(data_in_use);
+			clear(data_freeIds);
 		}
 
 		~IdManager() 
@@ -118,22 +120,6 @@ struct Spec<IdManager<TIdType, TSpec> const>
 };
 
 //////////////////////////////////////////////////////////////////////////////
-
-///.Metafunction.Size.param.T.type:Class.IdManager
-
-template<typename TIdType, typename TSpec> 
-struct Size<IdManager<TIdType, TSpec> > 
-{
-	typedef unsigned int Type;
-};
-
-template<typename TIdType, typename TSpec> 
-struct Size<IdManager<TIdType, TSpec> const> 
-{
-	typedef unsigned int Type;
-};
-
-//////////////////////////////////////////////////////////////////////////////
 // FUNCTIONS
 //////////////////////////////////////////////////////////////////////////////
 
@@ -163,7 +149,8 @@ obtainId(IdManager<TIdType, TSpec>& idm)
 		resize(idm.data_freeIds, length(idm.data_freeIds) - 1);
 		assignValue(idm.data_in_use, id, true);
 	} else {
-		id = length(idm.data_in_use);
+		if (empty(idm.data_in_use)) id = 0;
+		else id = (TIdType) length(idm.data_in_use);
 		resize(idm.data_in_use, id + 1, Generous());
 		assignValue(idm.data_in_use, id, true);
 	}
@@ -192,7 +179,7 @@ releaseId(IdManager<TIdType, TSpec>& idm,
 	SEQAN_CHECKPOINT
 	SEQAN_ASSERT(idInUse(idm,id) == true)
 	if (id == (TId) length(idm.data_in_use) - 1) {
-		_setLength(idm.data_in_use, length(idm.data_in_use) - 1);
+		resize(idm.data_in_use, length(idm.data_in_use) - 1);
 	} else {
 		assignValue(idm.data_in_use, id, false);
 		appendValue(idm.data_freeIds, id);
@@ -240,11 +227,13 @@ releaseAll(IdManager<TIdType, TSpec>& idm)
 */
 
 template<typename TIdType, typename TSpec>
-inline typename Size<IdManager<TIdType, TSpec> >::Type 
+inline typename Value<IdManager<TIdType, TSpec> >::Type 
 getIdUpperBound(IdManager<TIdType, TSpec> const& idm)
 {
 	SEQAN_CHECKPOINT
-	return length(idm.data_in_use);
+	typedef typename Value<IdManager<TIdType, TSpec> >::Type TReturnType;
+	if (empty(idm.data_in_use)) return 0;
+	else return (TReturnType) length(idm.data_in_use);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -261,12 +250,11 @@ getIdUpperBound(IdManager<TIdType, TSpec> const& idm)
 */
 
 template<typename TIdType, typename TSpec>
-inline typename Size<IdManager<TIdType, TSpec> >::Type 
+inline typename Value<IdManager<TIdType, TSpec> >::Type 
 getIdLowerBound(IdManager<TIdType, TSpec> const& idm)
 {
 	SEQAN_CHECKPOINT
-	typedef typename Size<IdManager<TIdType, TSpec> >::Type TSize;
-	for(TSize it = 0; it < length(idm.data_in_use); ++it) {
+	for(TIdType it = 0; it < length(idm.data_in_use); ++it) {
 		if (getValue(idm.data_in_use, it)) return it;
 	}
 	return 0;
@@ -286,7 +274,7 @@ getIdLowerBound(IdManager<TIdType, TSpec> const& idm)
 */
 
 template<typename TIdType, typename TSpec>
-inline typename Size<IdManager<TIdType, TSpec> >::Type 
+inline typename Value<IdManager<TIdType, TSpec> >::Type 
 idCount(IdManager<TIdType, TSpec> const& idm)
 {
 	SEQAN_CHECKPOINT
@@ -379,12 +367,12 @@ class IdManager<void, TSpec>
 ///.Metafunction.Value.param.T.type:Class.IdManager
 template<typename TSpec> 
 struct Value<IdManager<void, TSpec> > {
-	typedef unsigned int Type;
+	typedef typename Size<IdManager<void, TSpec> >::Type Type;
 };
 
 template<typename TSpec> 
 struct Value<IdManager<void, TSpec> const> {
-	typedef unsigned int Type;
+	typedef typename Size<IdManager<void, TSpec> const>::Type Type;
 };
 
 
@@ -428,7 +416,7 @@ releaseAll(IdManager<void, TSpec>& idm)
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TSpec>
-inline typename Size<IdManager<void, TSpec> >::Type 
+inline typename Value<IdManager<void, TSpec> >::Type 
 getIdUpperBound(IdManager<void, TSpec> const& idm)
 {
 	SEQAN_CHECKPOINT
@@ -440,7 +428,7 @@ getIdUpperBound(IdManager<void, TSpec> const& idm)
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TSpec>
-inline typename Size<IdManager<void, TSpec> >::Type 
+inline typename Value<IdManager<void, TSpec> >::Type 
 getIdLowerBound(IdManager<void, TSpec> const&)
 {
 	SEQAN_CHECKPOINT
@@ -451,7 +439,7 @@ getIdLowerBound(IdManager<void, TSpec> const&)
 
 
 template <typename TSpec>
-inline typename Size<IdManager<void, TSpec> >::Type 
+inline typename Value<IdManager<void, TSpec> >::Type 
 idCount(IdManager<void, TSpec> const& idm)
 {
 	SEQAN_CHECKPOINT

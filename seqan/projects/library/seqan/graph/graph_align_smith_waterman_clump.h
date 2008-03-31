@@ -55,9 +55,9 @@ _localAlignment(TAlign& align,
 	maxScore = _align_smith_waterman(trace, str, sc, initialDir, best_row, best_col, forbidden);	
 
 	//// Debug code
-	//for(unsigned int i= 0; i<length(str[1]);++i) {
-	//	for(unsigned int j= 0; j<length(str[0]);++j) {
-	//		std::cout << (unsigned int) getValue(forbidden, j*length(str[1]) + i) << ',';
+	//for(TSize i= 0; i<length(str[1]);++i) {
+	//	for(TSize j= 0; j<length(str[0]);++j) {
+	//		std::cout << (TSize) getValue(forbidden, j*length(str[1]) + i) << ',';
 	//	}
 	//	std::cout << std::endl;
 	//}

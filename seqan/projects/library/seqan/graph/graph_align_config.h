@@ -257,10 +257,12 @@ _processLastColumn(AlignConfig<TTop, TLeft, true, TBottom, TSpec> const,
 				   TColumn const& column)
 {
 	SEQAN_CHECKPOINT
+	typedef typename Size<TColumn>::Type TSize;
+	
 	maxIndex.second = length(column) - 1;
 	maxValue.second = getValue(column, maxIndex.second);
-	unsigned int limit = maxIndex.second;
-	for(unsigned int i = 1; i<limit; ++ i) {
+	TSize limit = maxIndex.second;
+	for(TSize i = 1; i<limit; ++ i) {
 		if (getValue(column, i) > maxValue.second) {
 			maxValue.second = getValue(column, i);
 			maxIndex.second = i;

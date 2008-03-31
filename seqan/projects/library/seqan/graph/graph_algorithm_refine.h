@@ -59,7 +59,7 @@ SEQAN_CHECKPOINT
 
 //unspektakuläre funktion, die die int ID zurückgibt (braucht man damit es für alle alignment typen geht)
 template<typename TSource,typename TSpec, typename TValue, typename TSeqMap>					
-int 
+typename Size<TSeqMap>::Type
 _getSeqMapId(TSeqMap & seq_map,
 			Align<TSource,TSpec> & segment,
 			TValue seq_i)

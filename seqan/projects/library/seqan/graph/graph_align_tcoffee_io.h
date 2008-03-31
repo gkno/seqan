@@ -98,7 +98,9 @@ _readLibrary(TFile & file,
 			 Graph<Alignment<TStringSet, TCargo, TSpec> >& g)
 {
 	SEQAN_CHECKPOINT
-	typedef unsigned int TWord;
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef TSize TWord;
 	typedef typename Value<TFile>::Type TValue;
 	
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
@@ -138,11 +140,11 @@ _readLibrary(TFile & file,
 		} else if (c == '!') {
 			_parse_skipLine(file, c);
 		} else {
-			unsigned int res1 = _parse_readNumber(file, c);
+			TSize res1 = _parse_readNumber(file, c);
 			_parse_skipWhitespace(file,c);
-			unsigned int res2 = _parse_readNumber(file, c);
+			TSize res2 = _parse_readNumber(file, c);
 			_parse_skipWhitespace(file,c);
-			unsigned int weight = _parse_readNumber(file, c);
+			TSize weight = _parse_readNumber(file, c);
 			_parse_skipLine(file,c);
 		
 			// Insert new vertex if necessary
@@ -162,7 +164,7 @@ _readLibrary(TFile & file,
 	TFragmentString matches;
 	String<TCargo> score_values;
 
-	for(unsigned int i = 0; i<length(resPair); ++i) {
+	for(TSize i = 0; i<length(resPair); ++i) {
 		if (resPair[i].empty()) continue;
 		TWord seq1 = i / nseq;
 		TWord seq2 = i % nseq;
@@ -200,7 +202,7 @@ _readLibrary(TFile & file,
 
 	// Adapt edge weights
 	TFragmentStringIter endIt = end(matches);
-	unsigned int positionIt = 0;
+	TSize positionIt = 0;
 	for(TFragmentStringIter it = begin(matches); it != endIt; ++it, ++positionIt) {
 		TId id1 = sequenceId(*it,0);
 		TId id2 = sequenceId(*it,1);
@@ -229,8 +231,9 @@ read(TFile & file,
 	 TCoffeeLib) 
 {
 	SEQAN_CHECKPOINT
-	typedef unsigned int TWord;
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef TSize TWord;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename Position<TFile>::Type TPosition;
 	typedef typename Value<TFile>::Type TValue;
@@ -272,7 +275,7 @@ read(TFile & file,
 	 TCoffeeLib) 
 {
 	SEQAN_CHECKPOINT
-	typedef unsigned int TWord;
+	typedef typename Size<TNames>::Type TSize;
 	typedef typename Position<TFile>::Type TPosition;
 	typedef typename Value<TFile>::Type TValue;
 	
@@ -285,12 +288,12 @@ read(TFile & file,
 	_parse_skipWhitespace(file, c);
 	
 	// Read number of sequences
-	TWord nSeq = (TWord) _parse_readNumber(file, c);
+	TSize nSeq = (TSize) _parse_readNumber(file, c);
 	resize(oriStr, nSeq);
 	_parse_skipLine(file, c);
 
 	// Read sequences
-	for(TWord i=0; i<nSeq; ++i) {
+	for(TSize i=0; i<nSeq; ++i) {
 		_parse_skipWhitespace(file, c);
 		appendValue(names, _parse_readIdentifier(file, c));
 		_parse_skipWhitespace(file, c);
@@ -353,7 +356,7 @@ void write(TFile & file,
 		_streamPut(file, '\n');
 	}
 
-	for(unsigned int i = 0; i<length(resPair); ++i) {
+	for(TSize i = 0; i<length(resPair); ++i) {
 		if (resPair[i].empty()) continue;
 		TSize seq1 = i / nseq;
 		TSize seq2 = i % nseq;
@@ -393,7 +396,8 @@ read(TFile & file,
 	 FastaAlign) 
 {
 	SEQAN_CHECKPOINT
-	typedef unsigned int TWord;
+	typedef typename Size<TNames>::Type TSize;
+	typedef TSize TWord;
 	typedef typename Value<TFile>::Type TValue;
 	
 	TValue c;
@@ -501,7 +505,7 @@ read(TFile & file,
 	 FastaAlign) 
 {
 	SEQAN_CHECKPOINT
-	typedef unsigned int TSize;
+	typedef typename Size<TNames>::Type TSize;
 	typedef typename Value<TFile>::Type TValue;
 	
 	TValue c;
@@ -561,7 +565,8 @@ read(TFile & file,
 	 BlastLib) 
 {
 	SEQAN_CHECKPOINT
-	typedef unsigned int TWord;
+	typedef typename Size<TNames>::Type TSize;
+	typedef TSize TWord;
 	typedef typename Position<TFile>::Type TPosition;
 	typedef typename Value<TFile>::Type TValue;
 	typedef typename Value<TNames>::Type TName;
@@ -658,7 +663,7 @@ read(TFile & file,
 
 	// Adapt edge weights
 	TFragmentStringIter endIt = end(matches);
-	unsigned int positionIt = 0;
+	TSize positionIt = 0;
 	for(TFragmentStringIter it = begin(matches); it != endIt; ++it, ++positionIt) {
 		TId id1 = sequenceId(*it,0);
 		TId id2 = sequenceId(*it,1);
@@ -678,7 +683,8 @@ read(TFile & file,
 	}
 
 	//SEQAN_CHECKPOINT
-	//typedef unsigned int TWord;
+	//typedef typename Size<TNames>::Type TSize;
+	//typedef TSize TWord;
 	//typedef typename Position<TFile>::Type TPosition;
 	//typedef typename Value<TFile>::Type TValue;
 	//typedef typename Value<TNames>::Type TName;

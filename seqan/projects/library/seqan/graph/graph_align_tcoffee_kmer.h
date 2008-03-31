@@ -80,7 +80,7 @@ getKmerSimilarityMatrix(StringSet<TString, TSpec> const& strSet,
 						TAlphabet) 
 {
 	SEQAN_CHECKPOINT
-	typedef unsigned int TWord;
+	typedef TSize TWord;
 	typedef String<TWord> TTupelString;
 	typedef String<TTupelString> TTupelStringSet;
 	typedef typename Value<THitMatrix>::Type TValue;

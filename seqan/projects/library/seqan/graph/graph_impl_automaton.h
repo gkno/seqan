@@ -455,7 +455,7 @@ removeEdge(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 	typedef typename Size<TGraph>::Type TSize;
 
 	TAlphabet letter(label);
-	removeEdge(g, &g.data_vertex[source].data_edge[(TSize) letter]);
+	removeEdge(g, &g.data_vertex[source].data_edge[ordValue(letter)]);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -622,7 +622,7 @@ findEdge(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 	typedef typename Size<TGraph>::Type TSize;
 
 	TAlphabet label(c);
-	return &g.data_vertex[v].data_edge[(TSize) label];
+	return &g.data_vertex[v].data_edge[ordValue(label)];
 }
 
 //////////////////////////////////////////////////////////////////////////////

@@ -54,11 +54,11 @@ _align_smith_waterman_island(TTrace& trace,
 
 	// The Island Matrices
 	typedef typename Value<TIslandIndex>::Type TIndexPair;
-	typedef String<unsigned int> TIslandColumn;
+	typedef String<TSize> TIslandColumn;
 	typedef typename Iterator<TIslandColumn>::Type TIslandColumnIter;
 	TIslandColumn islandMat;
 	TIslandColumn islandHorizontal;
-	unsigned int islandVert = 0;
+	TSize islandVert = 0;
 
 	// Initialization
 	TString const& str1 = str[0];
