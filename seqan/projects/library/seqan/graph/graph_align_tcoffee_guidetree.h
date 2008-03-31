@@ -514,7 +514,7 @@ upgmaTree(String<TStringValue, TStringSpec>& mat,
 	}
 
 	// Which entries in the matrix are still active and how many members belong to this group
-	String<unsigned int> active;
+	String<TSize> active;
 	fill(active, nseq, 1);
 	// Vertex descriptor that represents that entry
 	String<TVertexDescriptor> nodes;
@@ -638,7 +638,7 @@ upgmaTree(Graph<Undirected<TValue, TSpec1> >& pairGraph,
 	}
 
 	// Which entries in the matrix are still active and how many members belong to this group
-	String<unsigned int> active;
+	String<TSize> active;
 	fill(active, nseq, 1);
 	// Vertex descriptor that represents that entry
 	String<TVertexDescriptor> nodes;

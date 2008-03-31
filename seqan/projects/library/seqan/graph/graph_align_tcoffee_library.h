@@ -247,7 +247,7 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 		TSize j = idToPosition(str, (pList[k]).i2);
 		
 		// Lcs between first and second string
-		String<std::pair<unsigned int, unsigned int>, Block<> > pos1;
+		String<std::pair<TSize, TSize>, Block<> > pos1;
 		longestCommonSubsequence(str[i], str[j], 1000, pos1);
 
 		// Extend the matches as long as possible

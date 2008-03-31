@@ -135,9 +135,9 @@ _recursiveProgressiveAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 		heaviestCommonSubsequence(g,seq1,seq2,alignSeq);
 
 		//// Debug Code
-		//for(unsigned int i = 0; i<length(alignSeq);++i) {
+		//for(TSize i = 0; i<length(alignSeq);++i) {
 		//	std::cout << '(';
-		//	for(unsigned int j=0; j<length(alignSeq[i]);++j) {
+		//	for(TSize j=0; j<length(alignSeq[i]);++j) {
 		//		std::cout << getValue(alignSeq[i], j) << ',';
 		//	}
 		//	std::cout << ')' << ',';
