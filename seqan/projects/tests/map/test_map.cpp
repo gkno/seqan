@@ -109,6 +109,9 @@ void Test_Cargo_Single()
 	cargo(value(it)) = 20;
 	SEQAN_TASSERT(cargo(it) == 20)
 
+	SEQAN_TASSERT(it != begin(map))
+	SEQAN_TASSERT(it == it);
+
 	SEQAN_TASSERT(hasKey(map, 8));
 	SEQAN_TASSERT(length(map) == 5)
 	erase(map, it);

@@ -475,7 +475,6 @@ _skiplistFind(Map<TValue, Skiplist<TSpec> > & me,
 }
 
 
-
 //////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -1055,6 +1054,24 @@ inline typename Cargo<TSkiplist>::Type &
 cargo(Iter<TSkiplist, SkiplistIterator> const & it)
 {
 	return cargo(it.data_pointer->data_value);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TSkiplist>
+inline bool
+operator == (Iter<TSkiplist, SkiplistIterator> const & left,
+			 Iter<TSkiplist, SkiplistIterator> const & right)
+{
+	return left.data_pointer == right.data_pointer;
+}
+
+template <typename TSkiplist>
+inline bool
+operator != (Iter<TSkiplist, SkiplistIterator> const & left,
+			 Iter<TSkiplist, SkiplistIterator> const & right)
+{
+	return left.data_pointer != right.data_pointer;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
