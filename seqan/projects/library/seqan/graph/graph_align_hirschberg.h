@@ -212,7 +212,7 @@ _align_hirschberg(TTrace& trace,
 			// Additionally, every pointer has to remember how its trace point was traversed
 			// We do need diagonal, vertical, and horizontal pointers!!!
 			// The vertical and horizontal once are sometimes fixed depending on the way how we leave the trace point!!!
-			typedef std::pair<unsigned int, TTraceValue> TBackPointer;
+			typedef std::pair<TSize, TTraceValue> TBackPointer;
 			String<TBackPointer> verticalPointer;
 			String<TBackPointer> horizontalPointer;
 			String<TBackPointer> diagonalPointer;
@@ -430,7 +430,7 @@ _align_hirschberg(TTrace& trace,
 			//std::cout << infix2 << std::endl;
 			//std::cout << "Trace-Point " << middle << ',' << cut << std::endl;
 			//std::cout << "Max-Score " << maxVal << std::endl;
-			//std::cout << "Direction " << (unsigned int) tmpPointer.second << std::endl;
+			//std::cout << "Direction " << (TSize) tmpPointer.second << std::endl;
 			//std::cout << "--" << std::endl;
 
 		} while (it != midpoints.end());
@@ -487,7 +487,7 @@ _globalAlignment(TAlign& align,
 	typedef typename Size<TStringSet>::Type TSize;
 	
 	// Trace
-	String<unsigned int> trace;
+	String<TSize> trace;
 	TScoreValue maxScore = _align_hirschberg(trace, str, sc, Hirschberg());
 
 	// Follow the trace and create the graph
@@ -506,7 +506,8 @@ _globalAlignment(TStringSet const& str,
 				 Hirschberg)
 {
 	SEQAN_CHECKPOINT
-	String<unsigned int> trace;
+	typedef typename Size<TStringSet>::Type TSize;
+	String<TSize> trace;
 	return _align_hirschberg(trace, str, sc, Hirschberg());	
 }
 

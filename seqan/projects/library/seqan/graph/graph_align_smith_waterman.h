@@ -320,7 +320,7 @@ _align_smith_waterman(TTrace& trace,
 	//	}
 	//	std::cout << std::endl;
 	//}
-	//std::cout << "Max score: " << best_row << ',' << best_col << ':' << score_max << " (" << (unsigned int) initialDir << ")" << std::endl;
+	//std::cout << "Max score: " << best_row << ',' << best_col << ':' << score_max << " (" << (TSize) initialDir << ")" << std::endl;
 
 	return score_max;
 }

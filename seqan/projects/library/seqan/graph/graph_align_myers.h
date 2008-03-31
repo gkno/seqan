@@ -32,14 +32,14 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TString>
-unsigned int
+typename Size<TString>::Type
 _align_myers_bit_vector(TString const & str1,
 						TString const & str2)
 {
 	SEQAN_CHECKPOINT
 	typedef typename Value<TString>::Type TAlphabet;
-	typedef typename Size<TString>::Type TSize;
-	typedef unsigned int TWord;
+	typedef unsigned int TSize;
+	typedef TSize TWord;
 	typedef String<TWord> BitVector;
 	typedef String<BitVector> TLookupTable;
 	TSize alphLen = ValueSize<TAlphabet>::VALUE;
@@ -75,7 +75,7 @@ _align_myers_bit_vector(TString const & str1,
 	//	std::cout << static_cast<char>(i) << ": ";
 	//	for(TSize j=0;j<(TSize)blockCount;++j) {
 	//		for(TSize bit_pos=0;bit_pos<BitsPerValue<TWord>::VALUE;++bit_pos) {
-	//		  std::cout << ((lT[i][j] & (1<<(bit_pos % BitsPerValue<unsigned int>::VALUE))) !=0);
+	//		  std::cout << ((lT[i][j] & (1<<(bit_pos % BitsPerValue<TSize>::VALUE))) !=0);
 	//		}
 	//	}
 	//	std::cout << ::std::endl;
@@ -106,11 +106,11 @@ _align_myers_bit_vector(TString const & str1,
 		for(TWord block=0;block<blockCount;++block) {
 			X[block] = lT[pos][block] | VN[block];
 			D0[block] = X[block] & VP[block];
-			if (( (unsigned int) D0[block] + VP[block] < (unsigned int) D0[block] ) ||
-				( (unsigned int) D0[block] + VP[block] < (unsigned int) VP[block] )) newCarry = 1;
+			if (( (TSize) D0[block] + VP[block] < (TSize) D0[block] ) ||
+				( (TSize) D0[block] + VP[block] < (TSize) VP[block] )) newCarry = 1;
 			else newCarry = 0;
 			D0[block] += VP[block];
-			if ((carry) && ( (unsigned int) D0[block] == (unsigned int) ~0)) {
+			if ((carry) && ( (TSize) D0[block] == (TSize) ~0)) {
 				if (newCarry) {
 					std::cerr << "Two carries. Error !!!";
 					exit(-1);
@@ -146,31 +146,31 @@ _align_myers_bit_vector(TString const & str1,
 		std::cout << err << std::endl;
 		for(TSize block=0;block<(int)blockCount;++block) {
 			for(TSize bit_pos=0;bit_pos<BitsPerValue<TWord>::VALUE;++bit_pos) {
-				std::cout << ((D0[block] & (1<<(bit_pos % BitsPerValue<unsigned int>::VALUE))) !=0);
+				std::cout << ((D0[block] & (1<<(bit_pos % BitsPerValue<TSize>::VALUE))) !=0);
 			}
 		}
 		std::cout << ::std::endl;
 		for(TSize block=0;block<(int)blockCount;++block) {
 			for(TSize bit_pos=0;bit_pos<BitsPerValue<TWord>::VALUE;++bit_pos) {
-				std::cout << ((HN[block] & (1<<(bit_pos % BitsPerValue<unsigned int>::VALUE))) !=0);
+				std::cout << ((HN[block] & (1<<(bit_pos % BitsPerValue<TSize>::VALUE))) !=0);
 			}
 		}
 		std::cout << ::std::endl;
 		for(TSize block=0;block<(int)blockCount;++block) {
 			for(TSize bit_pos=0;bit_pos<BitsPerValue<TWord>::VALUE;++bit_pos) {
-				std::cout << ((HP[block] & (1<<(bit_pos % BitsPerValue<unsigned int>::VALUE))) !=0);
+				std::cout << ((HP[block] & (1<<(bit_pos % BitsPerValue<TSize>::VALUE))) !=0);
 			}
 		}
 		std::cout << ::std::endl;
 		for(TSize block=0;block<(int)blockCount;++block) {
 			for(TSize bit_pos=0;bit_pos<BitsPerValue<TWord>::VALUE;++bit_pos) {
-				std::cout << ((VN[block] & (1<<(bit_pos % BitsPerValue<unsigned int>::VALUE))) !=0);
+				std::cout << ((VN[block] & (1<<(bit_pos % BitsPerValue<TSize>::VALUE))) !=0);
 			}
 		}
 		std::cout << ::std::endl;
 		for(TSize block=0;block<(int)blockCount;++block) {
 			for(TSize bit_pos=0;bit_pos<BitsPerValue<TWord>::VALUE;++bit_pos) {
-				std::cout << ((VP[block] & (1<<(bit_pos % BitsPerValue<unsigned int>::VALUE))) !=0);
+				std::cout << ((VP[block] & (1<<(bit_pos % BitsPerValue<TSize>::VALUE))) !=0);
 			}
 		}
 		std::cout << ::std::endl;

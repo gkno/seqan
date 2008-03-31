@@ -647,7 +647,7 @@ write(TFile & target,
 			TSize offset=0;
 			// Larger numbers need to be further left
 			if (baseCount != 0) offset = (unsigned int) floor(log((double)baseCount) / log((double)10));
-			for(unsigned int j = 0;j<leftSpace-offset;++j) {
+			for(TSize j = 0;j<leftSpace-offset;++j) {
 				_streamPut(target, ' ');
 			}
 			_streamPutInt(target, baseCount);

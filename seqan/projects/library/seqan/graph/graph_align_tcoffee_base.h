@@ -216,7 +216,9 @@ combineGraphs(Graph<Alignment<TStringSet, TCargo, TSpec> >& outGraph,
 			  FractionalScore)
 {
 	SEQAN_CHECKPOINT
-	String<unsigned int> weights;
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	String<TSize> weights;
 	fill(weights, length(libs), 1);
 	combineGraphs(outGraph, libs, weights, FractionalScore() );
 }

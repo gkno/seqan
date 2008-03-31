@@ -326,11 +326,11 @@ _align_gotoh(TTrace& trace,
 	//// Debug code
 	//for(TSize i= 0; i<len2;++i) {
 	//	for(TSize j= 0; j<len1;++j) {
-	//		std::cout << (unsigned int) getValue(trace, j*len2 + i) << ',';
+	//		std::cout << (TSize) getValue(trace, j*len2 + i) << ',';
 	//	}
 	//	std::cout << std::endl;
 	//}
-	//std::cout << (unsigned int) initialDir << std::endl;
+	//std::cout << (TSize) initialDir << std::endl;
 
 	return _retrieveMaxOfAlignment(TAlignConfig(), overallMaxValue);
 }
