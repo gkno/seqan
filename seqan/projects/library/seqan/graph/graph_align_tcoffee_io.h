@@ -379,8 +379,170 @@ void write(TFile & file,
 }
 
 
+/////////////////////////////////////////////////////////////////////////////
+// FastaAlign Reading
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TFile, typename TString, typename TSpec, typename TNames>
+void 
+read(TFile & file,
+	 StringSet<TString, TSpec>& oriStr,
+	 TNames& names,
+	 FastaAlign) 
+{
+	SEQAN_CHECKPOINT
+	typedef unsigned int TWord;
+	typedef typename Value<TFile>::Type TValue;
+	
+	TValue c;
+	if (_streamEOF(file)) return;
+	else c = _streamGet(file);
+
+	// Read sequences
+	TString seq;
+	while(!_streamEOF(file)) {
+		_parse_skipWhitespace(file, c);
+		if (_streamEOF(file)) break;
+		if (c == '>') {
+			if (length(seq)) {
+				appendValue(oriStr, seq);
+				clear(seq);
+			}
+			c = _streamGet(file);
+			appendValue(names, _parse_readIdentifier(file, c));
+			_parse_skipLine(file, c);
+		} else if ((c == '-') || (c == '.') || (c == '\n') || (c == '\r')) {
+			c = _streamGet(file);
+		} else {
+			appendValue(seq, c);
+			c = _streamGet(file);
+		}
+	}
+	if (length(seq)) appendValue(oriStr, seq);
+}
 
 
+template<typename TValue, typename TScore, typename TStringSet, typename TCargo, typename TSpec>
+void 
+_buildAlignmentGraph(String<TValue> const& mat,
+					 TScore const& scType,
+					 Graph<Alignment<TStringSet, TCargo, TSpec> >& g) 
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	TSize nseq = length(stringSet(g));
+	TSize len = length(mat) / nseq;
+	TValue gapChar = gapValue<TValue>();
+
+	// Create the anchor graph
+	typedef Fragment<> TFragment;
+	typedef String<TFragment> TFragmentString;
+	typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
+	TFragmentString matches;
+
+	typedef std::pair<TSize, TSize> TResiduePair;
+	typedef std::set<TResiduePair> TResiduePairSet;
+	String<TResiduePairSet> resPair;
+	resize(resPair, nseq * nseq);	
+	for(TSize seq1 = 0; seq1 < nseq - 1; ++seq1) {
+		for(TSize seq2 = seq1 + 1; seq2 < nseq; ++seq2) {
+			TSize index = seq1 * nseq + seq2;
+			TSize offset1 = 0;
+			TSize offset2 = 0;
+			for(TSize col = 0; col<len; ++col) {
+				if (value(mat, seq1 * len + col) != gapChar) {
+					if (value(mat, seq2 * len + col) != gapChar) {
+						resPair[index].insert(std::make_pair(offset1, offset2));
+						++offset1;
+						++offset2;
+					} else ++offset1;
+				} else if (value(mat, seq2 * len + col) != gapChar) ++offset2;
+			}
+		}
+	}
+	for(TSize i = 0; i<length(resPair); ++i) {
+		if (resPair[i].empty()) continue;
+		TSize seq1 = i / nseq;
+		TSize seq2 = i % nseq;
+		typename TResiduePairSet::const_iterator pos = resPair[i].begin();
+		typename TResiduePairSet::const_iterator posEnd = resPair[i].end();
+		TSize startMatch1 = pos->first;
+		TSize startMatch2 = pos->second;
+		TSize len = 1;
+		++pos;
+		while(pos != posEnd) {
+			if ((startMatch1 + len == pos->first) && (startMatch2 + len == pos->second)) ++len;
+			else {
+				appendValue(matches, TFragment(seq1, startMatch1, seq2, startMatch2, len));
+				startMatch1 = pos->first;
+				startMatch2 = pos->second;
+				len = 1;
+			}
+			++pos;
+		}
+		appendValue(matches, TFragment(seq1, startMatch1, seq2, startMatch2, len));
+	}
+	clearVertices(g);
+	matchRefinement(matches,stringSet(g),const_cast<TScore&>(scType),g);
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TFile, typename TStringSet, typename TCargo, typename TSpec, typename TNames, typename TScoreType>
+void 
+read(TFile & file,
+	 Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+	 TNames const& origNames,
+	 TScoreType const& scType,
+	 FastaAlign) 
+{
+	SEQAN_CHECKPOINT
+	typedef unsigned int TSize;
+	typedef typename Value<TFile>::Type TValue;
+	
+	TValue c;
+	if (_streamEOF(file)) return;
+	else c = _streamGet(file);
+
+	// Read sequences
+	String<TValue> mat;
+	TNames names;
+	while(!_streamEOF(file)) {
+		_parse_skipWhitespace(file, c);
+		if (_streamEOF(file)) break;
+		if (c == '>') {
+			c = _streamGet(file);
+			appendValue(names, _parse_readIdentifier(file, c));
+			_parse_skipLine(file, c);
+		} else if ((c == '\n') || (c == '\r')) {
+			c = _streamGet(file);
+		} else {
+			appendValue(mat, c);
+			c = _streamGet(file);
+		}
+	}
+	// Reorder rows according to names order
+	String<TValue> finalMat = mat;
+	TSize nseq = length(stringSet(g));
+	TSize len = length(mat) / nseq;
+	for(TSize i = 0; i<length(names); ++i) {
+		if (value(names, i) == value(origNames, i)) continue;
+		else {
+			for(TSize j = 0; j<length(origNames); ++j) {
+				if (value(names, i) != value(origNames, j)) continue;
+				for(TSize k = 0; k<len; ++k) {
+					value(finalMat, j * len + k) = value(mat, i * len + k);
+				}
+			}
+		}
+	}
+	clear(mat);
+	_buildAlignmentGraph(finalMat, scType, g); 
+}
 
 /////////////////////////////////////////////////////////////////////////////
 // BLAST Library Reading / Writing

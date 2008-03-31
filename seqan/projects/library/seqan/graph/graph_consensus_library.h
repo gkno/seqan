@@ -45,19 +45,21 @@ layoutReads(String<TString, TSpec>& names,
 	TSize count = 0;
 	for(;itName != itNameEnd; ++itName, ++count) {
 		TSize brPoint = 0;
+		TSize brPoint2 = length(value(itName));
 		TIter nIt = begin(value(itName));
 		TIter nItEnd = end(value(itName));
 		TSize ind = 0;
 		for(;nIt!=nItEnd;++ind, ++nIt) {
-			if (value(nIt) == ',') {
-				brPoint = ind;
+			if (value(nIt) == ',') brPoint = ind;
+			if (value(nIt) == '[') {
+				brPoint2 = ind;
 				break;
 			}
 		}
 		TSize posI = 0;
 		TSize posJ = 0;
 		TString inf1 = infix(value(itName), 0, brPoint);
-		TString inf2 = infix(value(itName), brPoint+1, length(value(itName)));
+		TString inf2 = infix(value(itName), brPoint+1, brPoint2);
 		std::stringstream ssStream1(toCString(inf1));
 		ssStream1 >> posI; 
 		std::stringstream ssStream2(toCString(inf2));

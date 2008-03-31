@@ -637,7 +637,6 @@ void Test_SumOfPairsScore() {
 	slowNjTree(distanceMatrix, guideTree);
 	TGraph gOut(seqSet);
 	progressiveAlignment(g, guideTree, gOut);
-	//std::cout << gOut << std::endl;
 	SEQAN_TASSERT(sumOfPairsScore(gOut, score_type) == -8)
 	SEQAN_TASSERT(sumOfPairsScoreInd(gOut, score_type) == 16)
 
@@ -651,8 +650,8 @@ void Test_SumOfPairsScore() {
 	slowNjTree(distanceMatrix, guideTree);
 	clearVertices(gOut);
 	progressiveAlignment(g, guideTree, gOut);
-	SEQAN_TASSERT(sumOfPairsScore(gOut, score_type2) == 16)
-	SEQAN_TASSERT(sumOfPairsScoreInd(gOut, score_type2) == 22)
+	SEQAN_TASSERT(sumOfPairsScore(gOut, score_type2) == 9)
+	SEQAN_TASSERT(sumOfPairsScoreInd(gOut, score_type2) == 15)
 }
 
 

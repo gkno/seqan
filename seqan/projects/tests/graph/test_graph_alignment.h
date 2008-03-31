@@ -751,7 +751,9 @@ void Test_SmithWatermanClump() {
 	TString str1("cgttgagatact"); assignValueById(str, str1);
 	TGraph g(str);
 	Score<int> score_type = Score<int>(2,-1,-2,-2);
-	localAlignment(g, score_type, SmithWatermanClump());
+	typedef String<Pair<int, int> > TAlignIdAndScore;
+	TAlignIdAndScore alignIdScore;
+	multiLocalAlignment(g, alignIdScore, score_type, 4, SmithWatermanClump() );
 	
 	//SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "cgt")
 	//SEQAN_TASSERT(label(g, findVertex(g, 1, 3)) == "t")

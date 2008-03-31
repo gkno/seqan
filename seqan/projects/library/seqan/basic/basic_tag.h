@@ -147,6 +147,15 @@ typedef Tag<SmithWatermanClump_> const SmithWatermanClump;
 
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Tag.Local Alignment Algorithms.value.SmithWatermanIsland:
+	Local alignment algorithm finding all "islands".
+*/
+struct SmithWatermanIsland_;
+typedef Tag<SmithWatermanIsland_> const SmithWatermanIsland;
+
+//////////////////////////////////////////////////////////////////////////////
+
 /*DISABLED
 .Tag.RNA Folding Algorithms.value.Nussinov:
 	Nussinov style RNA folding algorithm

@@ -73,91 +73,41 @@ _localAlignment(TAlign& align,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TAlign, typename TStringSet, typename TScore, typename TLimitCount>
-inline typename Value<TScore>::Type
+template<typename TAlign, typename TStringSet, typename TPropertyMap, typename TScore, typename TSize1>
+inline void
 _localAlignment(TAlign& align,
-				TStringSet& str,
+				TStringSet const& str,
+				TPropertyMap& propMap,
 				TScore const& sc,
-				TLimitCount limit_count,
+				TSize1 numAlignments,
 				SmithWatermanClump)
 {
 	SEQAN_CHECKPOINT
+	typedef typename Value<TPropertyMap>::Type TRankScorePair;
 	typedef typename Value<TScore>::Type TScoreValue;
 	typedef typename Size<TStringSet>::Type TSize;
-	typedef typename VertexDescriptor<TAlign>::Type TVertexDescriptor;
-	typedef typename EdgeDescriptor<TAlign>::Type TEdgeDescriptor;
-	typedef typename Id<TAlign>::Type TId;
-	typedef typename Cargo<TAlign>::Type TCargo;
-	typedef typename Iterator<TAlign, EdgeIterator>::Type TEdgeIterator;
   
-	// Score of the best alignment
-	TScoreValue maxScore = 0;
-
 	// For clumpping remember the used positions
 	TSize len0 = length(str[0]);
 	TSize len1 = length(str[1]);
 	String<bool> forbidden;
 	fill(forbidden, len0 * len1, false);
 
-	// String of fragments
-	typedef Fragment<> TFragment;
-	typedef String<TFragment> TFragmentString;
-	typedef typename Iterator<TFragmentString, Rooted>::Type TFragmentStringIter;
-	TFragmentString matches;
-	String<TScoreValue> score_values;
-
 	// Stop looking for local alignments, if there score is too low
 	TScoreValue local_score = 0;
+	TScoreValue maxScore = 0;
 	TSize count = 0;
 	do {
 		// Create the local alignment
-		local_score = _localAlignment(matches, str, forbidden, sc, SmithWatermanClump());
+		TSize from = length(align);
+		local_score = _localAlignment(align, str, forbidden, sc, SmithWatermanClump());
+		TSize to = length(align);
 		if (local_score > maxScore) maxScore = local_score;
 
-		// Remember the confidence in these matches (Score value)
-		TSize diff = length(matches) - length(score_values);
-		for(TSize k = 0; k<diff; ++k) appendValue(score_values, local_score);
-
+		resize(propMap, to);
+		for(TSize k = from; k<to; ++k) value(propMap, k) = TRankScorePair(count, local_score);
 		++count;
-	} while ((local_score > 0.5 * maxScore) && (count < (TSize) limit_count));
-
-	// Refine all matches and create multiple alignment
-	matchRefinement(matches,str,align);
-
-	// Adapt edge weights
-	TFragmentStringIter endIt = end(matches);
-	TSize posit = 0;
-	for(TFragmentStringIter it = begin(matches); it != endIt; ++it, ++posit) {
-		TId id1 = sequenceId(*it,0);
-		TId id2 = sequenceId(*it,1);
-		TSize pos1 = fragmentBegin(*it, id1);
-		TSize pos2 = fragmentBegin(*it, id2);
-		TSize end1 = pos1 + fragmentLength(*it, id1);
-		while(pos1 < end1) {
-			TVertexDescriptor p1 = findVertex(align, id1, pos1);
-			TVertexDescriptor p2 = findVertex(align, id2, pos2);
-			TEdgeDescriptor e = findEdge(align, p1, p2);
-			cargo(e) = (TCargo) getValue(score_values, posit);
-			SEQAN_TASSERT(fragmentLength(align, p1) == fragmentLength(align, p2))
-			pos1 += fragmentLength(align, p1);
-			pos2 += fragmentLength(align, p2);
-		}
-	}
-
-	return maxScore;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TAlign, typename TStringSet, typename TScore>
-inline typename Value<TScore>::Type
-_localAlignment(TAlign& align,
-				TStringSet& str,
-				TScore const& sc,
-				SmithWatermanClump)
-{
-	SEQAN_CHECKPOINT
-	return _localAlignment(align,str,sc,4,SmithWatermanClump());
+	} while ((local_score > 0.5 * maxScore) && (count < (TSize) numAlignments));
 }
 
 }// namespace SEQAN_NAMESPACE_MAIN

@@ -38,6 +38,7 @@
 #include <typeinfo>
 #include <sstream> 
 #include <fstream> 
+#include <limits>
 
 
 #ifdef SEQAN_SWITCH_USE_FORWARDS
@@ -97,6 +98,7 @@
 #include <seqan/graph/graph_align_hirschberg.h>
 #include <seqan/graph/graph_align_smith_waterman.h>
 #include <seqan/graph/graph_align_smith_waterman_clump.h>
+#include <seqan/graph/graph_align_smith_waterman_island.h>
 #include <seqan/graph/graph_align_interface.h>
 
 // T-Coffee

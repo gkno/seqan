@@ -118,6 +118,22 @@ struct Spec<IdManager<TIdType, TSpec> const>
 };
 
 //////////////////////////////////////////////////////////////////////////////
+
+///.Metafunction.Size.param.T.type:Class.IdManager
+
+template<typename TIdType, typename TSpec> 
+struct Size<IdManager<TIdType, TSpec> > 
+{
+	typedef unsigned int Type;
+};
+
+template<typename TIdType, typename TSpec> 
+struct Size<IdManager<TIdType, TSpec> const> 
+{
+	typedef unsigned int Type;
+};
+
+//////////////////////////////////////////////////////////////////////////////
 // FUNCTIONS
 //////////////////////////////////////////////////////////////////////////////
 

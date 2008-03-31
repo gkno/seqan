@@ -679,6 +679,7 @@ sumOfPairsScore(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename Size<TGraph>::Type TSize;
 	typedef typename Value<TScore>::Type TScoreValue;
+	typedef typename Value<typename Value<TStringSet>::Type>::Type TAlphabet;
 
 	// Convert the graph
 	String<char> mat;
@@ -700,7 +701,7 @@ sumOfPairsScore(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 					if (value(mat, j*len + k) != gapChar) {
 						gapOpeni = false;
 						gapOpenj = false;
-						totalScore += score(const_cast<TScore&>(score_type), value(mat, i*len+k), value(mat, j*len + k));
+						totalScore += score(const_cast<TScore&>(score_type), TAlphabet(value(mat, i*len+k)), TAlphabet(value(mat, j*len + k)));
 					} else {
 						if (gapOpenj) {
 							totalScore += gap;
@@ -724,6 +725,75 @@ sumOfPairsScore(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 }
 
 
+template<typename TStringSet, typename TCargo, typename TSpec, typename TScore, typename TSize> 
+inline typename Value<TScore>::Type
+alignmentEvaluation(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
+					TScore const& score_type,
+					TSize& gapExCount,
+					TSize& gapCount,
+					TSize& pairCount,
+					String<TSize>& numPairs,
+					TSize& len)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename Value<TScore>::Type TScoreValue;
+	typedef typename Value<typename Value<TStringSet>::Type>::Type TAlphabet;
+	TSize alphSize = ValueSize<TAlphabet>::VALUE;
+
+	// Convert the graph
+	String<char> mat;
+	convertAlignment(g, mat);
+	char gapChar = gapValue<char>();
+
+	TScoreValue gap = scoreGapExtend(score_type);
+	TScoreValue gapOpen = scoreGapOpen(score_type);
+	TSize nseq = length(stringSet(g));
+	len = length(mat) / nseq;
+	
+	bool gapOpeni = false;
+	bool gapOpenj = false;
+	TScoreValue totalScore = 0;
+	fill(numPairs, alphSize * alphSize, 0);
+	for(TSize i = 0; i<nseq-1; ++i) {
+		for(TSize j=i+1; j<nseq; ++j) {
+			for(TSize k=0;k<len; ++k) {
+				if (value(mat, i*len+k) != gapChar) {
+					if (value(mat, j*len + k) != gapChar) {
+						gapOpeni = false;
+						gapOpenj = false;
+						++pairCount;
+						TSize index1 = (TSize) (TAlphabet(value(mat, i*len+k)));
+						TSize index2 = (TSize) (TAlphabet(value(mat, j*len + k)));
+						value(numPairs, index1 * alphSize + index2) += 1;
+						totalScore += score(const_cast<TScore&>(score_type), TAlphabet(value(mat, i*len+k)), TAlphabet(value(mat, j*len + k)));
+					} else {
+						if (gapOpenj) {
+							++gapExCount;
+							totalScore += gap;
+						} else {
+							gapOpenj = true;
+							++gapCount;
+							totalScore += gapOpen;
+						}
+					}
+				} else if (value(mat, j*len + k) != gapChar) {
+						if (gapOpeni) {
+							++gapExCount;
+							totalScore += gap;
+						} else {
+							++gapCount;
+							gapOpeni = true;
+							totalScore += gapOpen;
+						}
+				}
+			}
+		}
+	}
+	return totalScore;
+}
+
+
 //////////////////////////////////////////////////////////////////////////////
 // This version is insensitive to gap openings, assumes independent columns
 template<typename TStringSet, typename TCargo, typename TSpec, typename TScore> 
@@ -735,6 +805,7 @@ sumOfPairsScoreInd(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename Size<TGraph>::Type TSize;
 	typedef typename Value<TScore>::Type TScoreValue;
+	typedef typename Value<typename Value<TStringSet>::Type>::Type TAlphabet;
 
 	// Convert the graph
 	String<char> mat;
@@ -751,7 +822,7 @@ sumOfPairsScoreInd(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 			for(TSize j=i+1; j<nseq; ++j) {
 				if (value(mat, i*len+k) != gapChar) {
 					if (value(mat, j*len + k) != gapChar) {
-						totalScore += score(const_cast<TScore&>(score_type), value(mat, i*len+k), value(mat, j*len + k));
+						totalScore += score(const_cast<TScore&>(score_type), TAlphabet(value(mat, i*len+k)), TAlphabet(value(mat, j*len + k)));
 					} else totalScore += gap;
 				} else if (value(mat, j*len + k) != gapChar) {
 						totalScore += gap;
@@ -760,303 +831,6 @@ sumOfPairsScoreInd(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 		}
 	}
 	return totalScore;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TValue, typename TScore, typename TSize, typename TScoreValue> 
-inline void
-sumOfPairsScoreInd(String<TValue> const& mat,
-				   TScore const& score_type,
-				   TSize const nseq,
-				   TSize const len,
-				   String<TScoreValue>& columnScores)
-{
-	char gapChar = gapValue<char>();
-	TScoreValue gap = scoreGapExtend(score_type);
-	for(TSize k=0;k<len; ++k) {
-		TScoreValue totalScore = 0;
-		for(TSize i = 0; i<nseq-1; ++i) {
-			for(TSize j=i+1; j<nseq; ++j) {
-				if (value(mat, i*len+k) != gapChar) {
-					if (value(mat, j*len + k) != gapChar) {
-						totalScore += score(const_cast<TScore&>(score_type), value(mat, i*len+k), value(mat, j*len + k));
-					} else totalScore += gap;
-				} else if (value(mat, j*len + k) != gapChar) {
-						totalScore += gap;
-				}
-			}
-		}
-		appendValue(columnScores, totalScore);
-	}
-}
-
-
-//////////////////////////////////////////////////////////////////////////////
-
-
-template<typename TStringSet, typename TCargo, typename TSpec, typename TScore, typename TDistanceMatrix>
-inline void
-reduceGraph(Graph<Alignment<TStringSet, TCargo, TSpec> >& anchorGraph,
-			TScore const& score_type,
-			TDistanceMatrix& distMatrix)
-{
-	typedef String<char> TAlignMatrix;
-	typedef String<bool> TActive;
-	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
-	typedef typename Size<TGraph>::Type TSize;
-	typedef typename Value<TScore>::Type TScoreValue;
-
-	// Anchor-graph parameters
-	TSize minCoverage = 3;
-	TSize minBlockLen = 3;
-	
-	// Create an alignment matrix
-	TAlignMatrix mat;
-	char gapChar = gapValue<char>();
-	convertAlignment(anchorGraph, mat);
-	TStringSet& seqSet = stringSet(anchorGraph);
-	TSize nseq = length(seqSet);
-	TSize len = length(mat) / nseq;
-	
-	// Mark the gaps and the characters
-	typedef typename Iterator<TAlignMatrix>::Type TAlignIter;
-	typedef typename Iterator<TActive>::Type TActiveIter;
-	TActive active;
-	fill(active, length(mat), true);
-	String<unsigned int> coverage;
-	fill(coverage, len, 0);
-	TAlignIter itA = begin(mat);
-	TAlignIter itAEnd = end(mat);
-	TActiveIter itB = begin(active);
-	TSize col = 0;
-	for(; itA != itAEnd; ++itA, ++itB, col = (++col) % len) {
-		if (*itA == gapChar) value(itB) = false;
-		else value(coverage, col) += 1;
-	}
-
-	// Clear blocks with low coverage
-	itA = begin(mat);
-	itB = begin(active);
-	col = 0;
-	for(;itA != itAEnd; ++itA, ++itB, col = (++col) % len) {
-		if (value(coverage, col) < minCoverage) value(itB) = false;
-	}
-
-	// Collect all blocks of minimum length
-	TSize blockStart = len;
-	TSize blockEnd = 0;
-	typedef std::set<TSize> TSequenceSet;
-	typedef Triple<TSequenceSet, TSize, TSize> TBlock;
-	typedef String<TBlock> TConservedBlock;
-	TConservedBlock conservedBlock;
-	TSequenceSet thisSeqSet;
-	TSequenceSet nextSeqSet;
-	for(TSize column = 0; column < len; ++column) {
-		for(TSize seq = 0; seq < nseq; ++seq) {
-			if (!value(active, seq * len + column)) continue;
-			nextSeqSet.insert(seq);
-		}
-		if (thisSeqSet != nextSeqSet) {
-			if (blockStart == len) {
-				blockStart = column;
-			} else  {
-				if ((column - blockStart) > minBlockLen) appendValue(conservedBlock, TBlock(thisSeqSet, blockStart, column));
-				if (nextSeqSet.empty()) blockStart = len;
-				else blockStart = column;
-			}
-			thisSeqSet = nextSeqSet;
-		}
-		nextSeqSet.clear();
-	}
-	clear(active);
-	fill(active, length(mat), false);
-	typedef typename Iterator<TConservedBlock>::Type TConsBlockIter;
-	
-	// Check quality of blocks
-	TConsBlockIter itCB = begin(conservedBlock);
-	TConsBlockIter itCBEnd = end(conservedBlock);
-
-	//typedef std::set<std::pair<TScoreValue, TConsBlockIter> > TBlockQuality;
-	//TBlockQuality bQual;
-	//for(;itCB != itCBEnd; ++itCB) {
-	//	TScoreValue totalScore = 0;
-	//	for(TSize column = (value(itCB)).i2; column < (value(itCB)).i3; ++column) {
-	//		typename TSequenceSet::const_iterator itCons = (value(itCB)).i1.begin();
-	//		typename TSequenceSet::const_iterator itConsEnd = (value(itCB)).i1.end();
-	//		for(;itCons != itConsEnd; ++itCons) {
-	//			typename TSequenceSet::const_iterator pairItCons = itCons;
-	//			++pairItCons;
-	//			for(;pairItCons != itConsEnd; ++pairItCons) {
-	//				totalScore += score(const_cast<TScore&>(score_type), value(mat, *itCons * len + column), value(mat, *pairItCons * len + column));
-	//			}
-	//		}
-	//	}
-	//	totalScore /= (TScoreValue) (value(itCB)).i1.size();
-	//	bQual.insert(std::make_pair(totalScore, itCB));
-	//	//if (totalScore < 0) (value(itCB)).i1.clear();
-	//}
-	//// Outlier detection
-	//TSize n = length(conservedBlock);
-	//typename TBlockQuality::const_iterator scrIt = bQual.begin();
-	//typename TBlockQuality::const_iterator scrItEnd = bQual.end();
-	//TScoreValue upperQuartile = 0;
-	//TScoreValue lowerQuartile = 0;
-	//TSize count = 0;
-	//for(;scrIt != scrItEnd; ++scrIt, ++count) {
-	//	if (n / 4 == count) lowerQuartile = scrIt->first;
-	//	else if ( (3 * n) / 4 == count) upperQuartile = scrIt->first;
-	//}
-	//TScoreValue interQR = upperQuartile - lowerQuartile;
-	//TScoreValue lowerInnerFence = (TScoreValue) ((double) lowerQuartile - 0.5 * (double) interQR);
-	//scrIt = bQual.begin();
-	//scrItEnd = bQual.end();
-	//for(;((scrIt != scrItEnd) && (scrIt->first < lowerInnerFence)); ++scrIt) {
-	//	(value(scrIt->second)).i1.clear();			
-	//}
-
-	//// Check blocks for outliers
-	//typedef std::pair<TScoreValue, TSize> TQualitySeqPair;
-	//typedef std::set<TQualitySeqPair, std::greater<TQualitySeqPair> > TSeqQuality;
-	//itCB = begin(conservedBlock);
-	//itCBEnd = end(conservedBlock);
-	//for(;itCB != itCBEnd; ++itCB) {
-	//	TSeqQuality seqQuality;
-	//	typename TSequenceSet::const_iterator leaveOut = (value(itCB)).i1.begin();
-	//	typename TSequenceSet::const_iterator leaveOutEnd = (value(itCB)).i1.end();
-	//	for(;leaveOut != leaveOutEnd; ++leaveOut) {
-	//		TScoreValue totalScore = 0;
-	//		for(TSize column = (value(itCB)).i2; column < (value(itCB)).i3; ++column) {
-	//			typename TSequenceSet::const_iterator itCons = (value(itCB)).i1.begin();
-	//			typename TSequenceSet::const_iterator itConsEnd = (value(itCB)).i1.end();
-	//			for(;itCons != itConsEnd; ++itCons) {
-	//				if (*itCons == *leaveOut) continue;
-	//				typename TSequenceSet::const_iterator pairItCons = itCons;
-	//				++pairItCons;
-	//				for(;pairItCons != itConsEnd; ++pairItCons) {
-	//					if (*pairItCons == *leaveOut) continue;
-	//					totalScore += score(const_cast<TScore&>(score_type), value(mat, *itCons * len + column), value(mat, *pairItCons * len + column));
-	//				}
-	//			}
-	//		}
-	//		seqQuality.insert(std::make_pair(totalScore, *leaveOut));
-	//	}
-	//	// Outlier detection
-	//	TSize n = (value(itCB)).i1.size();
-	//	typename TSeqQuality::const_iterator screenIt = seqQuality.begin();
-	//	typename TSeqQuality::const_iterator screenItEnd = seqQuality.end();
-	//	TScoreValue upperQuartile = 0;
-	//	TScoreValue lowerQuartile = 0;
-	//	TSize count = 0;
-	//	for(;screenIt != screenItEnd; ++screenIt, ++count) {
-	//		if (n / 4 == count) upperQuartile = screenIt->first;
-	//		else if ( (3 * n) / 4 == count) lowerQuartile = screenIt->first;
-	//	}
-	//	TScoreValue interQR = upperQuartile - lowerQuartile;
-	//	TScoreValue upperInnerFence = upperQuartile + 3 * interQR;
-	//	screenIt = seqQuality.begin();
-	//	screenItEnd = seqQuality.end();
-	//	for(;((screenIt != screenItEnd) && (screenIt->first > upperInnerFence)); ++screenIt) {
-	//		(value(itCB)).i1.erase(screenIt->second);			
-	//	}
-	//}
-
-	
-	
-	// Debug code: All blocks
-	itCB = begin(conservedBlock);
-	itCBEnd = end(conservedBlock);
-	for(;itCB != itCBEnd; ++itCB) {
-		typename TSequenceSet::const_iterator itCons = (value(itCB)).i1.begin();
-		typename TSequenceSet::const_iterator itConsEnd = (value(itCB)).i1.end();
-		for(;itCons != itConsEnd; ++itCons) {
-			for(TSize column = (value(itCB)).i2; column < (value(itCB)).i3; ++column) {
-				std::cout << value(mat, *itCons * len + column);
-			}
-			std::cout << std::endl;
-		}
-		std::cout << std::endl;
-	}
-
-
-	itCB = begin(conservedBlock);
-	itCBEnd = end(conservedBlock);
-	for(;itCB != itCBEnd; ++itCB) {
-		typename TSequenceSet::const_iterator itCons = (value(itCB)).i1.begin();
-		typename TSequenceSet::const_iterator itConsEnd = (value(itCB)).i1.end();
-		for(;itCons != itConsEnd; ++itCons) {
-			for(TSize column = (value(itCB)).i2; column < (value(itCB)).i3; ++column) {
-				value(active, *itCons * len + column) = true;
-			}
-		}
-	}
-
-
-	// Compute a distance matrix from the anchor graph
-	clear(distMatrix);
-	resize(distMatrix, nseq * nseq);
-	for(TSize seq1 = 0; seq1 < nseq-1; ++seq1) {
-		for(TSize seq2 = seq1+1; seq2 < nseq; ++seq2) {
-			typename Value<TDistanceMatrix>::Type diff = 0;
-			for(TSize column = 0; column < len; ++column) {
-				if ((value(active, seq1 * len + column) != value(active, seq2 * len + column)) ||
-					(value(active, seq1 * len + column) == 0))	++diff;
-			}
-			value(distMatrix, seq1 * nseq + seq2) = diff;
-		}
-	}
-
-	// Create the anchor graph
-	typedef Fragment<> TFragment;
-	typedef String<TFragment> TFragmentString;
-	typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
-	TFragmentString matches;
-	typedef std::pair<TSize, TSize> TResiduePair;
-	typedef std::set<TResiduePair> TResiduePairSet;
-	String<TResiduePairSet> resPair;
-	resize(resPair, nseq * nseq);	
-	for(TSize seq1 = 0; seq1 < nseq - 1; ++seq1) {
-		for(TSize seq2 = seq1 + 1; seq2 < nseq; ++seq2) {
-			TSize index = seq1 * nseq + seq2;
-			TSize offset1 = 0;
-			TSize offset2 = 0;
-			for(TSize col = 0; col<len; ++col) {
-				if (value(mat, seq1 * len + col) != gapChar) {
-					if (value(mat, seq2 * len + col) != gapChar) {
-						if ((value(active, seq1 * len + col) == true) && (value(active, seq2 * len + col) == true)) {
-							resPair[index].insert(std::make_pair(offset1, offset2));
-						}
-						++offset1;
-						++offset2;
-					} else ++offset1;
-				} else if (value(mat, seq2 * len + col) != gapChar) ++offset2;
-			}
-		}
-	}
-	for(TSize i = 0; i<length(resPair); ++i) {
-		if (resPair[i].empty()) continue;
-		TSize seq1 = i / nseq;
-		TSize seq2 = i % nseq;
-		typename TResiduePairSet::const_iterator pos = resPair[i].begin();
-		typename TResiduePairSet::const_iterator posEnd = resPair[i].end();
-		TSize startMatch1 = pos->first;
-		TSize startMatch2 = pos->second;
-		TSize len = 1;
-		++pos;
-		while(pos != posEnd) {
-			if ((startMatch1 + len == pos->first) && (startMatch2 + len == pos->second)) ++len;
-			else {
-				appendValue(matches, TFragment(seq1, startMatch1, seq2, startMatch2, len));
-				startMatch1 = pos->first;
-				startMatch2 = pos->second;
-				len = 1;
-			}
-			++pos;
-		}
-		appendValue(matches, TFragment(seq1, startMatch1, seq2, startMatch2, len));
-	}
-	clearVertices(anchorGraph);
-	matchRefinement(matches,stringSet(anchorGraph),const_cast<TScore&>(score_type),anchorGraph);
 }
 
 

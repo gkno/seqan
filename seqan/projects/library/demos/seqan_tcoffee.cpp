@@ -49,6 +49,108 @@ dnaAlignment(TConfigOptions& cfgOpt) {
 	return 0;
 }
 
+template<typename TConfigOptions>
+inline int
+evaluateAlignment(TConfigOptions& cfgOpt) {
+	typedef unsigned int TSize;
+	typedef String<AminoAcid> TSequence;
+	typedef String<char> TName;
+	StringSet<TSequence, Owner<> > origStrSet;
+	StringSet<TName> names;
+
+	if (!length(value(cfgOpt, "infile"))) {
+		std::cerr << valueHelp(cfgOpt) << std::endl;
+		return -1;
+	}
+
+	// Read the sequences
+	std::fstream strm;
+	strm.open(toCString(value(cfgOpt, "infile")), std::ios_base::in | std::ios_base::binary);
+	read(strm,origStrSet,names,FastaAlign());	
+	strm.close();
+	typedef StringSet<TSequence, Dependent<> > TDepSequenceSet;
+	TDepSequenceSet strSet(origStrSet);
+	
+	//// Debug code
+	//std::cout << "Sequences:" << std::endl;
+	//for(TSize i = 0; i<length(origStrSet); ++i) {
+	//	std::cout << '>' << names[i] << std::endl;
+	//	std::cout << strSet[i] << std::endl;
+	//}
+
+	// Read the scoring matrix
+	double gopening = 0; 
+	double gextend = 0; 
+	std::stringstream ssStream1(toCString(value(cfgOpt, "gop")));
+	ssStream1 >> gopening; 
+	gopening *= -1.0;
+	std::stringstream ssStream2(toCString(value(cfgOpt, "gex")));
+	ssStream2 >> gextend;
+	gextend *= -1.0;
+	typedef Score<double, ScoreMatrix<> > TScore;
+	TScore scType;
+	if (!length(value(cfgOpt, "matrix"))) {
+		Blosum62 sc(-1 , -11);
+		convertScoringMatrix(sc, scType, gextend, gopening);
+	} else {
+		loadScoreMatrix(scType, value(cfgOpt, "matrix"));
+		scType.data_gap_extend = (double) (gextend);
+		scType.data_gap_open = (double) (gopening);
+	}
+
+	// Read the alignment
+	typedef Graph<Alignment<TDepSequenceSet, unsigned int> > TGraph;
+	TGraph g(strSet);
+	std::fstream strm_lib;
+	strm_lib.open(toCString(value(cfgOpt, "infile")), std::ios_base::in | std::ios_base::binary);
+	read(strm_lib,g,names,scType,FastaAlign());	
+	strm_lib.close();
+
+	//// Debug code
+	//std::cout << g << std::endl;
+	//std::cout << "Scoring parameters:" << std::endl;
+	//std::cout << "Gap opening: " << gopening << std::endl;
+	//std::cout << "Gap extension: " << gextend << std::endl;
+	//typedef typename Value<TSequence>::Type TAlphabet;
+	//TSize alphSize = ValueSize<TAlphabet>::VALUE;
+	//for(TSize col = 0; col<alphSize; ++col) std::cout << TAlphabet(col) << ',';
+	//std::cout << std::endl;
+	//for(TSize row = 0; row<alphSize; ++row) {
+	//	for(TSize col = 0; col<alphSize; ++col) {
+	//		std::cout << score(scType, TAlphabet(row), TAlphabet(col)) << ',';
+	//	}
+	//	std::cout << std::endl;
+	//}
+
+	unsigned int numGapEx = 0;
+	unsigned int numGap = 0;
+	unsigned int numPairs = 0;
+	unsigned int alignLen = 0;
+	String<unsigned int> pairCount;
+	double alignScore = alignmentEvaluation(g, scType, numGapEx, numGap, numPairs, pairCount, alignLen);
+	std::cout << "Alignment Score: " << alignScore << std::endl;
+	std::cout << "Alignment Length: " << alignLen << std::endl;
+	std::cout << "#Match/Mismatch pairs: " << numPairs << std::endl;
+	std::cout << "Score contribution by match/mismatch pairs: " << (alignScore - ((numGap * gopening) + (numGapEx * gextend))) << std::endl;
+	std::cout << "#Gap extensions: " << numGapEx << std::endl;
+	std::cout << "Score contribution by gap extensions: " << (numGapEx * gextend) << std::endl;
+	std::cout << "#Gap openings: " << numGap << std::endl;
+	std::cout << "Score contribution by gap openings: " << (numGap * gopening) << std::endl;
+	typedef typename Value<TSequence>::Type TAlphabet;
+	TSize alphSize = ValueSize<TAlphabet>::VALUE;
+	std::cout << "#Pairs: " << std::endl;
+	for(TSize col = 0; col<alphSize; ++col) std::cout << TAlphabet(col) << ',';
+	std::cout << std::endl;
+	for(TSize row = 0; row<alphSize; ++row) {
+		for(TSize col = 0; col<alphSize; ++col) {
+			std::cout << value(pairCount, row * alphSize + col) << ',';
+		}
+		std::cout << std::endl;
+	}
+
+	return 0;
+}
+
 
 int main(int argc, const char *argv[]) {
 	//////////////////////////////////////////////////////////////////////////////
@@ -59,12 +161,15 @@ int main(int argc, const char *argv[]) {
 	typedef String<char> TKey;
 	typedef String<char> TValue;
 	ConfigOptions<TKey, TValue> cfgOpt;
-	TKey keys[] = {"seq","lib","matches","usetree","outfile","method","output"};
-	assignKeys(cfgOpt, keys, 7);
+	TKey keys[] = {"seq","infile", "aln", "lib","matches","usetree","outfile","method","output","gop", "gex", "matrix", "score"};
+	assignKeys(cfgOpt, keys, 13);
 	// Set default options
 	assign(cfgOpt, "output", "fasta");
 	assign(cfgOpt, "outfile", "out.fasta");
 	assign(cfgOpt, "method", "protein");
+	assign(cfgOpt, "score", "false");
+	assign(cfgOpt, "gop", "11");
+	assign(cfgOpt, "gex", "1");
 	// Help Message
 	String<char> helpMsg;
 	append(helpMsg, "Usage: seqan_tcoffee -seq <FASTA Sequence File> [ARGUMENTS]\n");
@@ -85,7 +190,13 @@ int main(int argc, const char *argv[]) {
 	if (!parseCmdLine(argc, argv, cfgOpt)) return -1;
 	if ((value(cfgOpt, "method") == "dna") || (value(cfgOpt, "method") == "genome")) return dnaAlignment(cfgOpt);
 
+	//////////////////////////////////////////////////////////////////////////////
+	// Evaluation mode?
+	//////////////////////////////////////////////////////////////////////////////
 
+	if (value(cfgOpt, "score") == "true") {
+		return evaluateAlignment(cfgOpt);
+	}
 
 	//////////////////////////////////////////////////////////////////////////////
 	// Read the sequences
@@ -194,8 +305,12 @@ int main(int argc, const char *argv[]) {
 	} 
 	// Case 3: Full protein alignment
 	else {
-		globalAlignment(strSet, names, value(cfgOpt, "matches"), gOut, MSA_Protein() );
+		if (length(value(cfgOpt, "matrix"))) testChristian(strSet, names, value(cfgOpt, "matrix"), value(cfgOpt, "gex"), value(cfgOpt, "gop"), gOut);
+		else if (!length(value(cfgOpt, "aln"))) globalAlignment(strSet, names, value(cfgOpt, "matches"), gOut, MSA_Protein() );
+		else metaGlobalAlignment(strSet, names, value(cfgOpt, "aln"), gOut, MSA_Protein() );
+		//testChristian(strSet, names, value(cfgOpt, "matrix"), value(cfgOpt, "gex"), value(cfgOpt, "gop"), gOut);
 		//testProfiles(strSet, names, value(cfgOpt, "matches"), gOut);
+		//testIslands(strSet, names, value(cfgOpt, "matches"), gOut);
 	}
 
 

@@ -284,6 +284,129 @@ progressiveAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	_createAlignmentGraph(g, profileStrings[lastIndex], gOut);
 }
 
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec, typename TGuideTree, typename TScore, typename TOutGraph>
+inline TCargo 
+iterativeProgressiveAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+							  TGuideTree& tree,
+							  TScore const& score_type,
+							  TOutGraph& gOut)			 
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename Value<TScore>::Type TScoreValue;
+	typedef typename Iterator<TGuideTree, AdjacencyIterator>::Type TAdjacencyIterator;
+	typedef String<TVertexDescriptor> TVertexString;
+	typedef String<TVertexString> TSegmentString;
+
+	// Perform initial progressive alignment
+	TSegmentString alignSeq;
+	_recursiveProgressiveAlignment(g,tree,getRoot(tree),alignSeq);
+	clearVertices(gOut);
+	_createAlignmentGraph(g, alignSeq, gOut);
+	TScoreValue maxSumScore = sumOfPairsScore(gOut, score_type);
+	std::cout << maxSumScore << std::endl;
+
+	// Build cutting order of edges
+	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
+	String<TVertexDescriptor, Block<> > finalOrder;
+	std::deque<TVertexDescriptor> toDoList;
+	toDoList.push_back(getRoot(tree));
+	while(!toDoList.empty()) {
+		TVertexDescriptor v = toDoList[0];
+		toDoList.pop_front();
+		push_back(finalOrder, v);
+		if (!isLeaf(tree, v)) {
+			TAdjacencyIterator adjIt(tree, v);
+			toDoList.push_back(*adjIt);
+			goNext(adjIt);
+			toDoList.push_back(*adjIt);
+		}
+	}
+
+	// Iterative alignment of profiles
+	TSize nseq = length(stringSet(g));
+	TSize len = length(finalOrder) - 1;  // Don't touch the root again
+	TSize iterationsWithoutImprovement = 0;
+	for(TSize edge_count=0; ((edge_count<len) && (iterationsWithoutImprovement<5));++edge_count) {
+		TVertexDescriptor subtree_root = top(finalOrder);
+		pop(finalOrder);
+
+		// Collect all vertex descriptors that belong to the subtree
+		std::set<TVertexDescriptor> subtree;
+		toDoList.clear();
+		toDoList.push_back(subtree_root);
+		TSize numSeqs2 = 0;
+		while(!toDoList.empty()) {
+			TVertexDescriptor v = toDoList[0];
+			toDoList.pop_front();
+			if (!isLeaf(tree, v)) {
+				TAdjacencyIterator adjIt(tree, v);
+				toDoList.push_back(*adjIt);
+				goNext(adjIt);
+				toDoList.push_back(*adjIt);
+			} else {
+				// Insert the sequence id into the subtree set
+				subtree.insert(positionToId(stringSet(g), v));
+				++numSeqs2;
+			}
+		}
+
+		// Build the 2 profile strings
+		TSegmentString seq1;
+		TSegmentString seq2;
+		TSize numSeqs1 = nseq - numSeqs2;
+		TSize alignSeqLen = length(alignSeq);
+		for(TSize i = 0; i<alignSeqLen;++i) {
+			TVertexString set1; TVertexString set2;
+			TSize count1 = 0; TSize count2 = 0;
+			TVertexString& alignSeq_i = alignSeq[i];
+			TSize vertexSetLen = length(alignSeq_i);
+			for(TSize j=0; j<vertexSetLen; ++j) {
+				fill(set1, numSeqs1, nilVertex);
+				fill(set2, numSeqs2, nilVertex);
+				TVertexDescriptor v = getValue(alignSeq_i, j);
+				if (v ==nilVertex) continue;
+				else if (subtree.find(sequenceId(g,v)) == subtree.end()) set1[count1++] = v;
+				else set2[count2++] = v;
+			}
+			if (count1 != 0) appendValue(seq1, set1);
+			if (count2 != 0) appendValue(seq2, set2);
+		}
+
+		// Align profile strings
+		TSegmentString localAlignSeq;
+		heaviestCommonSubsequence(g,seq1,seq2,localAlignSeq);
+		clearVertices(gOut);
+		_createAlignmentGraph(g, localAlignSeq, gOut);
+		TScoreValue localSumScore = sumOfPairsScore(gOut, score_type);
+		std::cout << localSumScore << std::endl;
+
+		// New maximum?
+		if (localSumScore > maxSumScore) {
+			iterationsWithoutImprovement = 0;
+			maxSumScore = localSumScore;
+			alignSeq = localAlignSeq;
+		} else {
+			++iterationsWithoutImprovement;
+		}
+	}
+
+	// Create the alignment graph
+	clearVertices(gOut);
+	_createAlignmentGraph(g, alignSeq, gOut);
+	maxSumScore = sumOfPairsScore(gOut, score_type);
+	std::cout << maxSumScore << std::endl;
+
+	// Return alignment score
+	return (TCargo) maxSumScore;
+}
+
+
 }// namespace SEQAN_NAMESPACE_MAIN
 
 #endif //#ifndef SEQAN_HEADER_...
