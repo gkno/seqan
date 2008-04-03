@@ -166,8 +166,21 @@ public:
 
 		mtRandInit();
 	}
+	Map(Map const & other)
+		: data_mem_begin(0)
+		, data_mem_end(0)
+		, data_length(0)
+		, data_height(0)
+	{
+		assign(*this, other);
+	}
 	~Map()
 	{
+	}
+	Map const & operator =(Map const & other)
+	{
+		assign(*this, other);
+		return *this;
 	}
 
 	template <typename TKey>
@@ -176,10 +189,6 @@ public:
 	{
 		return mapValue(*this, key);
 	}
-
-private:
-	Map(Map const &);
-	Map const & operator = (Map const &);
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -249,6 +258,36 @@ public:
 
 	TElement * data_elements[MAX_HEIGHT];
 };
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TValue, typename TSpec>
+inline void
+assign(Map<TValue, Skiplist<TSpec> > & target,
+	   Map<TValue, Skiplist<TSpec> > const & source)
+{
+	typedef Map<TValue, Skiplist<TSpec> > TSkiplist;
+	typedef SkiplistPath<TValue, TSpec> TPath;
+	typedef SkiplistElement<TValue, TSpec> TElement;
+	typedef typename Iterator<TSkiplist>::Type TIterator;
+	typedef typename Value<TSkiplist>::Type TValue2;
+
+	clear(target);
+
+	TPath path;
+	path.data_elements[0] = & target.data_border;
+
+	for (TIterator it(source); !atEnd(it); goNext(it))
+	{
+		unsigned char height = _skiplistCreateHeight(target, path);
+		TElement & el = _skiplistConstructElement(target, height, value(it));
+		_skiplistInsertElement(target, el, path, height);
+		for (int i = 0; i <= height; ++i)
+		{
+			path.data_elements[i] = & el;
+		}
+	}
+}
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -972,7 +1011,7 @@ public:
 		: data_pointer(ptr)
 	{
 	}
-	Iter(TSkiplist & sk)
+	Iter(TSkiplist const & sk)
 		: data_pointer(sk.data_border.data_next[0].data_element)
 	{
 	}

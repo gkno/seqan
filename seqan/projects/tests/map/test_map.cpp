@@ -160,11 +160,17 @@ void Test_Cargo_Multiple()
 void Test_Skiplist_Extra()
 {
 	typedef Pair<char, int> TValue;
-	Map<TValue, Skiplist< > > map;
+	typedef Map<TValue, Skiplist< > > TMap;
+	TMap map;
 
 	map[8] = 5;
-	SEQAN_TASSERT(value(map, 8) == TValue(8, 5) );
+	SEQAN_TASSERT(value(map, 8) == TValue(8, 5) )
 
+	map[2] = 3;
+	TMap map2 = map;
+	SEQAN_TASSERT(length(map2) == 2)
+	SEQAN_TASSERT(map2[8] == 5)
+	SEQAN_TASSERT(map2[2] == 3)
 }
 
 
