@@ -840,7 +840,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	// Counting sort - Step 3: Cumulative sum
 	template < typename TBounds, typename TBuckets, typename TSize >
 	inline typename Size<TBuckets>::Type
-	_wotdCummulativeSumWotd(TBounds &bounds, TBuckets const &buckets, TSize offset)
+	_wotdCummulativeSum(TBounds &bounds, TBuckets const &buckets, TSize offset)
 	{
 	SEQAN_CHECKPOINT
 		typedef typename Iterator<TBounds, Standard>::Type		TBoundIterator;
@@ -866,9 +866,9 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < typename TBounds, typename TBuckets >
 	inline typename Size<TBuckets>::Type
-	_wotdCummulativeSumWotd(TBounds &bounds, TBuckets const &buckets)
+	_wotdCummulativeSum(TBounds &bounds, TBuckets const &buckets)
 	{
-		return _wotdCummulativeSumWotd(bounds, buckets, 0);
+		return _wotdCummulativeSum(bounds, buckets, 0);
 	}
 
 //////////////////////////////////////////////////////////////////////////////
@@ -909,7 +909,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		_wotdCountChars(occ, text);
 
 		// 3. cumulative sum
-		TSize requiredSize = _wotdCummulativeSumWotd(bound, occ);
+		TSize requiredSize = _wotdCummulativeSum(bound, occ);
 
 		// 4. fill suffix array
 		{
@@ -955,7 +955,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		_wotdCountChars(occ, stringSet);
 
 		// 3. cummulative sum
-		TSize requiredSize = _wotdCummulativeSumWotd(bound, occ);
+		TSize requiredSize = _wotdCummulativeSum(bound, occ);
 
 		// 4. fill suffix array
 		for(unsigned seqNo = 0; seqNo < length(stringSet); ++seqNo) 
@@ -1026,7 +1026,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		if (index.sentinelOcc != 0)
 			requiredSize = (index.sentinelOcc > 1)? 2: 1;
 
-		requiredSize += _wotdCummulativeSumWotd(bound, occ, left + index.sentinelOcc);
+		requiredSize += _wotdCummulativeSum(bound, occ, left + index.sentinelOcc);
 		index.sentinelBound = left;
 
 		// 4. fill suffix array
@@ -1134,7 +1134,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		if (index.sentinelOcc != 0)
 			requiredSize = (index.sentinelOcc > 1)? 2: 1;
 
-		requiredSize += _wotdCummulativeSumWotd(bound, occ, left + index.sentinelOcc);
+		requiredSize += _wotdCummulativeSum(bound, occ, left + index.sentinelOcc);
 		index.sentinelBound = left;
 
 		// 4. fill suffix array
@@ -1202,7 +1202,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		if (index.sentinelOcc != 0)
 			requiredSize = (index.sentinelOcc > 1)? 2: 1;
 
-		requiredSize += _wotdCummulativeSumWotd(bound, occ, left + index.sentinelOcc);
+		requiredSize += _wotdCummulativeSum(bound, occ, left + index.sentinelOcc);
 		index.sentinelBound = left;
 
 		// 4. fill suffix array
@@ -1493,12 +1493,12 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < typename TText, typename TSpec >
 	inline typename Size< Index<TText, Index_Wotd<WotdOriginal> > >::Type 
-	_wotdEvaluate(Iter< Index<TText, Index_Wotd<WotdOriginal> >, VSTree<TSpec> > &it)
+	_wotdEvaluate(Iter< Index<TText, Index_Wotd<WotdOriginal> >, VSTree<TSpec> > const &it)
 	{
 		typedef Index<TText, Index_Wotd<WotdOriginal> >	TIndex;
 		typedef typename Size<TIndex>::Type				TSize;
 
-		TIndex &index = container(it);
+		TIndex &index = const_cast<TIndex&>(container(it));
 		TSize pos = value(it).node;
 		TSize w1 = dirAt(pos + 1, index);
 
@@ -1534,12 +1534,12 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < typename TText, typename TIndexSpec, typename TSpec >
 	inline typename Size< Index<TText, Index_Wotd<TIndexSpec> > >::Type 
-	_wotdEvaluate(Iter< Index<TText, Index_Wotd<TIndexSpec> >, VSTree<TSpec> > &it)
+	_wotdEvaluate(Iter< Index<TText, Index_Wotd<TIndexSpec> >, VSTree<TSpec> > const &it)
 	{
 		typedef Index<TText, Index_Wotd<TIndexSpec> >	TIndex;
 		typedef typename Size<TIndex>::Type				TSize;
 
-		TIndex &index = container(it);
+		TIndex &index = const_cast<TIndex&>(container(it));
 		TSize pos = value(it).node;
 		TSize w1 = dirAt(pos + 1, index);
 
