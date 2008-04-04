@@ -628,6 +628,138 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 		}
 	};
 
+	//////////////////////////////////////////////////////////////////////////////
+	// Counting sort
+	//
+
+	//////////////////////////////////////////////////////////////////////////////
+	// Counting sort - Step 2: Count q-grams
+	template < typename TDir, typename TText, typename TShape >
+	inline void
+	_qgramCountQGrams(TDir &dir, TText const &text, TShape &shape)
+	{
+	SEQAN_CHECKPOINT
+		typedef typename Iterator<TText const, Standard>::Type	TIterator;
+		typedef typename Value<TDir>::Type						TSize;
+
+		if (length(text) < length(shape)) return;
+		TSize num_qgrams = length(text) - length(shape) + 1;
+
+		TIterator itText = begin(text, Standard());
+		++dir[hash(shape, itText)];
+		for(TSize i = 1; i < num_qgrams; ++i)
+		{
+			++itText;
+			++dir[hashNext(shape, itText)];
+		}
+	}
+
+	template < typename TDir, typename TString, typename TSpec, typename TShape >
+	inline void
+	_qgramCountQGrams(TDir &dir, StringSet<TString, TSpec> const &stringSet, TShape &shape)
+	{
+	SEQAN_CHECKPOINT
+		typedef typename Iterator<TString const, Standard>::Type	TIterator;
+		typedef typename Value<TDir>::Type							TSize;
+
+		for(unsigned seqNo = 0; seqNo < length(stringSet); ++seqNo) 
+		{
+			TString const &sequence = value(stringSet, seqNo);
+			if (length(sequence) < length(shape)) continue;
+			TSize num_qgrams = length(sequence) - length(shape) + 1;
+
+			TIterator itText = begin(sequence, Standard());
+			++dir[hash(shape, itText)];
+			for(TSize i = 1; i < num_qgrams; ++i)
+			{
+				++itText;
+				++dir[hashNext(shape, itText)];
+			}
+		}
+	}
+
+	//////////////////////////////////////////////////////////////////////////////
+	// Counting sort - Step 3: Cumulative sum
+	template < typename TDir >
+	inline typename Value<TDir>::Type
+	_qgramCummulativeSum(TDir &dir)
+	{
+	SEQAN_CHECKPOINT
+		typedef typename Iterator<TDir, Standard>::Type			TDirIterator;
+		typedef typename Value<TDir>::Type						TSize;
+
+		TDirIterator it = begin(dir, Standard());
+		TDirIterator itEnd = end(dir, Standard());
+		TSize diff = 0, diff_prev = 0, sum = 0;
+		while (it != itEnd) {
+			sum += diff_prev;
+			diff_prev = diff;
+			diff = *it;
+			*it = sum;
+			++it;
+		}
+		return sum + diff_prev;
+	}
+
+	//////////////////////////////////////////////////////////////////////////////
+	// Counting sort - Step 4: Fill suffix array
+	template < typename TSA, typename TText, typename TShape, typename TDir >
+	inline void
+	_qgramFillSuffixArray(TSA &sa, TText const &text, TShape &shape, TDir &dir)
+	{
+	SEQAN_CHECKPOINT
+		typedef typename Iterator<TText const, Standard>::Type	TIterator;
+		typedef typename Value<TDir>::Type						TSize;
+
+		TSize num_qgrams = length(text) - length(shape) + 1;
+		TIterator itText = begin(text, Standard());
+		sa[dir[hash(shape, itText) + 1]++] = 0;				// first hash
+		for(TSize i = 1; i < num_qgrams; ++i)
+		{
+			++itText;
+			sa[dir[hashNext(shape, itText) + 1]++] = i;		// next hash
+		}
+	}
+
+	template <
+		typename TSA, 
+		typename TString, 
+		typename TSpec, 
+		typename TShape, 
+		typename TDir 
+	>
+	inline void
+	_qgramFillSuffixArray(
+		TSA &sa, 
+		StringSet<TString, TSpec> const &stringSet,
+		TShape &shape, 
+		TDir &dir)
+	{
+	SEQAN_CHECKPOINT
+		typedef typename Iterator<TString const, Standard>::Type	TIterator;
+		typedef typename Value<TDir>::Type							TSize;
+
+		for(unsigned seqNo = 0; seqNo < length(stringSet); ++seqNo) 
+		{
+			TString const &sequence = value(stringSet, seqNo);
+			if (length(sequence) < length(shape)) continue;
+			TSize num_qgrams = length(sequence) - length(shape) + 1;
+
+			typename Value<TSA>::Type localPos;
+			assignValueI1(localPos, seqNo);
+			assignValueI2(localPos, 0);
+
+			TIterator itText = begin(sequence, Standard());
+			sa[dir[hash(shape, itText) + 1]++] = localPos;				// first hash
+			for(TSize i = 1; i < num_qgrams; ++i)
+			{
+				++itText;
+				assignValueI2(localPos, i);
+				sa[dir[hashNext(shape, itText) + 1]++] = localPos;		// next hash
+			}
+		}
+	}
+
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -655,49 +787,18 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 		TShape &shape)
 	{
 	SEQAN_CHECKPOINT
-		typedef typename Iterator<TText const, Standard>::Type	TIterator;
-		typedef typename Iterator<TDir, Standard>::Type			TDirIterator;
-		typedef typename Value<TShape>::Type					TValue;
-		typedef typename Size<TText>::Type						TSize;
 		
 		// 1. clear counters
 		arrayFill(begin(dir, Standard()), end(dir, Standard()), 0);
 
 		// 2. count q-grams
-		if (length(text) < length(shape)) return;
-		TSize num_qgrams = length(text) - length(shape) + 1;
-
-		TIterator itText = begin(text, Standard());
-		++dir[hash(shape, itText)];
-		for(TSize i = 1; i < num_qgrams; ++i)
-		{
-			++itText;
-			++dir[hashNext(shape, itText)];
-		}
+		_qgramCountQGrams(dir, text, shape);
 
 		// 3. cumulative sum
-		{
-			TDirIterator it = begin(dir, Standard());
-			TDirIterator itEnd = end(dir, Standard());
-			TSize diff = 0, diff_prev = 0, sum = 0;
-			while (it != itEnd) {
-				sum += diff_prev;
-				diff_prev = diff;
-				diff = *it;
-				*it = sum;
-				++it;
-			}
-			SEQAN_ASSERT(sum + diff_prev == length(sa));
-		}
+		SEQAN_DO(_qgramCummulativeSum(dir) == length(sa));
 		
 		// 4. fill suffix array
-		itText = begin(text, Standard());
-		sa[dir[hash(shape, itText) + 1]++] = 0;				// first hash
-		for(TSize i = 1; i < num_qgrams; ++i)
-		{
-			++itText;
-			sa[dir[hashNext(shape, itText) + 1]++] = i;		// next hash
-		}
+		_qgramFillSuffixArray(sa, text, shape, dir);
 	}
 
 	template < 
@@ -713,66 +814,19 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 		TShape &shape)
 	{
 	SEQAN_CHECKPOINT
-		typedef typename Iterator<TString const, Standard>::Type	TIterator;
-		typedef typename Iterator<TDir, Standard>::Type				TDirIterator;
-		typedef typename Value<TShape>::Type						TValue;
-		typedef typename Size<TString>::Type						TSize;
 		
 		// 1. clear counters
 		arrayFill(begin(dir, Standard()), end(dir, Standard()), 0);
 //		memset(begin(dir, Standard()), 0, length(dir) * sizeof(typename Value<TDir>::Type));
 
 		// 2. count q-grams
-		for(unsigned seqNo = 0; seqNo < length(stringSet); ++seqNo) 
-		{
-			TString const &sequence = value(stringSet, seqNo);
-			if (length(sequence) < length(shape)) continue;
-			TSize num_qgrams = length(sequence) - length(shape) + 1;
-
-			TIterator itText = begin(sequence, Standard());
-			++dir[hash(shape, itText)];
-			for(TSize i = 1; i < num_qgrams; ++i)
-			{
-				++itText;
-				++dir[hashNext(shape, itText)];
-			}
-		}
+		_qgramCountQGrams(dir, stringSet, shape);
 
 		// 3. cumulative sum
-		{
-			TDirIterator it = begin(dir, Standard());
-			TDirIterator itEnd = end(dir, Standard());
-			TSize diff = 0, diff_prev = 0, sum = 0;
-			while (it != itEnd) {
-				sum += diff_prev;
-				diff_prev = diff;
-				diff = *it;
-				*it = sum;
-				++it;
-			}
-			SEQAN_ASSERT(sum + diff_prev == length(sa));
-		}
+		SEQAN_DO(_qgramCummulativeSum(dir) == length(sa));
 		
 		// 4. fill suffix array
-		for(unsigned seqNo = 0; seqNo < length(stringSet); ++seqNo) 
-		{
-			TString const &sequence = value(stringSet, seqNo);
-			if (length(sequence) < length(shape)) continue;
-			TSize num_qgrams = length(sequence) - length(shape) + 1;
-
-			typename Value<TSA>::Type localPos;
-			assignValueI1(localPos, seqNo);
-			assignValueI2(localPos, 0);
-
-			TIterator itText = begin(sequence, Standard());
-			sa[dir[hash(shape, itText) + 1]++] = localPos;				// first hash
-			for(TSize i = 1; i < num_qgrams; ++i)
-			{
-				++itText;
-				assignValueI2(localPos, i);
-				sa[dir[hashNext(shape, itText) + 1]++] = localPos;		// next hash
-			}
-		}
+		_qgramFillSuffixArray(sa, stringSet, shape, dir);
 	}
 
 
@@ -936,39 +990,15 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 		TShape &shape)
 	{
 	SEQAN_CHECKPOINT
-		typedef typename Iterator<TText const, Standard>::Type	TIterator;
-		typedef typename Iterator<TDir, Standard>::Type			TDirIterator;
-		typedef typename Value<TShape>::Type					TValue;
-		typedef typename Size<TText>::Type						TSize;
-		
+
 		// 1. clear counters
 		arrayFill(begin(dir, Standard()), end(dir, Standard()), 0);
 
 		// 2. count q-grams
-		if (length(text) < length(shape)) return;
-		TSize num_qgrams = length(text) - length(shape) + 1;
-
-		TIterator itText = begin(text, Standard());
-		++dir[hash(shape, itText)];
-		for(TSize i = 1; i < num_qgrams; ++i)
-		{
-			++itText;
-			++dir[hashNext(shape, itText)];
-		}
+		_qgramCountQGrams(dir, text, shape);
 
 		// 3. cumulative sum
-		{
-			TDirIterator it = begin(dir, Standard());
-			TDirIterator itEnd = end(dir, Standard());
-			TSize diff = 0, diff_prev = 0, sum = 0;
-			while (it != itEnd) {
-				sum += diff_prev;
-				diff_prev = diff;
-				diff = *it;
-				*it = sum;
-				++it;
-			}
-		}
+		_qgramCummulativeSum(dir);
 	}
 
 	template < 
@@ -982,43 +1012,15 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 		TShape &shape)
 	{
 	SEQAN_CHECKPOINT
-		typedef typename Iterator<TString const, Standard>::Type	TIterator;
-		typedef typename Iterator<TDir, Standard>::Type				TDirIterator;
-		typedef typename Value<TShape>::Type						TValue;
-		typedef typename Size<TString>::Type						TSize;
-		
+
 		// 1. clear counters
 		arrayFill(begin(dir, Standard()), end(dir, Standard()), 0);
 
 		// 2. count q-grams
-		for(unsigned seqNo = 0; seqNo < length(stringSet); ++seqNo) 
-		{
-			TString const &sequence = value(stringSet, seqNo);
-			if (length(sequence) < length(shape)) continue;
-			TSize num_qgrams = length(sequence) - length(shape) + 1;
-
-			TIterator itText = begin(sequence, Standard());
-			++dir[hash(shape, itText)];
-			for(TSize i = 1; i < num_qgrams; ++i)
-			{
-				++itText;
-				++dir[hashNext(shape, itText)];
-			}
-		}
+		_qgramCountQGrams(dir, stringSet, shape);
 
 		// 3. cumulative sum
-		{
-			TDirIterator it = begin(dir, Standard());
-			TDirIterator itEnd = end(dir, Standard());
-			TSize diff = 0, diff_prev = 0, sum = 0;
-			while (it != itEnd) {
-				sum += diff_prev;
-				diff_prev = diff;
-				diff = *it;
-				*it = sum;
-				++it;
-			}
-		}
+		_qgramCummulativeSum(dir);
 	}
 
 
@@ -1084,19 +1086,7 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 		}
 
 		// 3. cumulative sum
-		{
-			TDirIterator it = begin(dir, Standard());
-			TDirIterator itEnd = end(dir, Standard());
-			TSize diff = 0, diff_prev = 0, sum = 0;
-			while (it != itEnd) {
-				sum += diff_prev;
-				diff_prev = diff;
-				diff = *it;
-				*it = sum;
-				++it;
-			}
-			resize(counts, sum + diff_prev);
-		}
+		resize(counts, _qgramCummulativeSum(dir));
 
 		// 4. fill count array
 		arrayFill(begin(lastSeqSeen, Standard()), end(lastSeqSeen, Standard()), -1);
