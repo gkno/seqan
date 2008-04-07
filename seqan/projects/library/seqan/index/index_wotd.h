@@ -542,7 +542,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		// go right if parent edge is empty 
 		// or hull predicate is false
-		if (!nodeHullPredicate(it) || (THideEmptyEdges::VALUE && emptyParentEdge(it)))
+		if ((THideEmptyEdges::VALUE && emptyParentEdge(it)) || !nodeHullPredicate(it))
 			if (!goRight(it)) {
 				_goUp(it);
 				return false;
@@ -578,7 +578,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		// go right if parent edge is empty
 		// or hull predicate is false
-		if (!nodeHullPredicate(it) || (THideEmptyEdges::VALUE && emptyParentEdge(it)))
+		if ((THideEmptyEdges::VALUE && emptyParentEdge(it)) || !nodeHullPredicate(it))
 			if (!goRight(it)) {
 				_goUp(it);
 				return false;
@@ -608,7 +608,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			value(it).edgeLen = -1;
 
 			_adjustRightBorder(it);
-		} while (!nodeHullPredicate(it) || (THideEmptyEdges::VALUE && emptyParentEdge(it)));
+		} while ((THideEmptyEdges::VALUE && emptyParentEdge(it)) || !nodeHullPredicate(it));
 		return true;
 	}
 
@@ -633,7 +633,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 			value(it).range.i1 = value(it).range.i2;
 			_adjustRightBorder(it);
-		} while (!nodeHullPredicate(it) || (THideEmptyEdges::VALUE && emptyParentEdge(it)));
+		} while ((THideEmptyEdges::VALUE && emptyParentEdge(it)) || !nodeHullPredicate(it));
 		return true;
 	}
 
