@@ -421,7 +421,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < typename TText, typename TIndexSpec, typename TSpec >
 	inline bool
-	emptyParentEdge(Iter< Index<TText, Index_Wotd<TIndexSpec> >, VSTree<TSpec> > const &it) 
+	emptyParentEdge(Iter< Index<TText, Index_Wotd<TIndexSpec> >, VSTree<TopDown<TSpec> > > const &it) 
 	{
 		typedef Index<TText, Index_Wotd<TIndexSpec> > TIndex;
 

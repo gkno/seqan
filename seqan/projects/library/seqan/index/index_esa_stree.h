@@ -397,7 +397,7 @@ This interval is the @Function.value@ of the iterator.
 
 	template < typename TIndex, typename TSpec >
 	inline typename Size<TIndex>::Type
-	parentRepLength(Iter< TIndex, VSTree<TopDown<ParentLinks<TSpec> > > > const &it) 
+	parentRepLength(Iter< TIndex, VSTree<TopDown<TSpec> > > const &it) 
 	{
 		return repLength(container(it), nodeUp(it));
 	}
@@ -416,7 +416,7 @@ This interval is the @Function.value@ of the iterator.
 
 	template < typename TIndex, typename TSpec >
 	inline bool
-	emptyParentEdge(Iter< TIndex, VSTree<TopDown<ParentLinks<TSpec> > > > const &it) 
+	emptyParentEdge(Iter< TIndex, VSTree<TopDown<TSpec> > > const &it) 
 	{
 		// the following is more efficient than 
 		// return parentEdgeLength(it) == 0;
@@ -425,6 +425,7 @@ This interval is the @Function.value@ of the iterator.
 		return getSeqOffset(pos, stringSetLimits(index)) + parentRepLength(it)
 			== sequenceLength(getSeqNo(pos, stringSetLimits(index)), index);
 	}
+
 
 /**
 .Function.lca:
@@ -879,6 +880,8 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 	{
 		typedef Iter<Index<TText, TIndexSpec>, VSTree<TSpec> >	TIter;
 		typedef typename GetVSTreeIteratorTraits<TIter>::Type	TTraits;
+		typedef typename TTraits::HideEmptyEdges				THideEmptyEdges;
+
 		goRoot(it);
 
 		if (TYPECMP<typename TTraits::DFSOrder, _Postorder>::VALUE) {
@@ -887,7 +890,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 		}
 
 		// if root doesn't suffice predicate, do a dfs-step
-		if (!nodePredicate(it) || (TTraits::HideEmptyEdges::VALUE && emptyParentEdge(it)))
+		if ((THideEmptyEdges::VALUE && emptyParentEdge(it)) || !nodeHullPredicate(it))
 			goNext(it);
 	}
 
@@ -1057,15 +1060,15 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 
 		typename Size<TIndex>::Type lcp = lcpAt(lval - 1, index);
 		//typename typename StringSetLimits<TIndex const>::Type &limits = stringSetLimits(index);
-		while (_isLeaf(it, EmptyEdges())) {
-			typename SAValue<TIndex>::Type pos = getOccurrence(it);
-			if (getSeqOffset(pos, stringSetLimits(index)) + lcp == sequenceLength(getSeqNo(pos, stringSetLimits(index)), index)) {
-				if (!goRight(it)) {
-					_goUp(it);
-					return false;
-				}
-			} else
-				break;
+		
+		typename SAValue<TIndex>::Type pos = getOccurrence(it);
+		if (getSeqOffset(pos, stringSetLimits(index)) + lcp == sequenceLength(getSeqNo(pos, stringSetLimits(index)), index)
+			|| !nodeHullPredicate(it)) 
+		{
+			if (!goRight(it)) {
+				_goUp(it);
+				return false;
+			}
 		}
 		return true;
 	}
@@ -1253,6 +1256,15 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 			return value(it);
 	}
 
+	// nodeUp adaption for non-history iterators
+	// ATTENTION: Do not call nodeUp after a goDown that returned false (or after _goUp)!
+	template < typename TIndex, class TSpec >
+	inline typename VertexDescriptor<TIndex>::Type const &
+	nodeUp(Iter< TIndex, VSTree< TopDown<TSpec> > > const &it) 
+	{
+		return it._parentDesc;
+	}
+
 /**
 .Function.goRight:
 ..summary:Iterates to the next sibling in a tree.
@@ -1268,24 +1280,26 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 		Iter< Index<TText, Index_ESA<TIndexSpec> >, VSTree< TopDown<TSpec> > > &it, 
 		TTraits const) 
 	{
-		if (value(it).range.i2 == length(container(it)))
-			return false;		// right-most intervals have no right (would cause trouble with i2=\infty)
+		typedef typename TTraits::HideEmptyEdges THideEmptyEdges;
 
-		if (!isRoot(it)) {
-			if (value(it).range.i2 < value(it).parentRight)		// not the right-most child?
+		if (value(it).range.i2 == length(container(it)) || isRoot(it))
+			return false;		// right-most intervals or root have no right (would cause trouble with i2=\infty)
+
+		do {
+			if (value(it).range.i2 == value(it).parentRight)		// not the right-most child?
+				return false;
+
+			if (_isNextl(value(it).range.i2, container(it))) 
 			{
-				if (_isNextl(value(it).range.i2, container(it))) 
-				{
-					value(it).range.i1 = value(it).range.i2;	// go right
-					value(it).range.i2 = _getNextl(value(it).range.i2, container(it));
-				} else {
-					value(it).range.i1 = value(it).range.i2;	// now it is the right-most child
-					value(it).range.i2 = value(it).parentRight;
-				}
-				return true;
+				value(it).range.i1 = value(it).range.i2;	// go right
+				value(it).range.i2 = _getNextl(value(it).range.i2, container(it));
+			} else {
+				value(it).range.i1 = value(it).range.i2;	// now it is the right-most child
+				value(it).range.i2 = value(it).parentRight;
 			}
-		}
-		return false;
+
+		} while ((THideEmptyEdges::VALUE && emptyParentEdge(it)) || !nodeHullPredicate(it));
+		return true;
 	}
 
 	// go down the leftmost edge
