@@ -202,7 +202,7 @@ To iterate the exact solution set of $TPred$, use a $Spec.TopDownHistory Iterato
 		_wotdCountChars(occ, stringSet);
 
 		// 3. cummulative sum
-		TSize requiredSize = _wotdCummulativeSumWotd(bound, occ);
+		TSize requiredSize = _wotdCummulativeSum(bound, occ);
 
 		// 4. fill suffix array
 		unsigned dsNo = 0;
@@ -343,7 +343,7 @@ To iterate the exact solution set of $TPred$, use a $Spec.TopDownHistory Iterato
 		if (index.sentinelOcc != 0)
 			requiredSize = (index.sentinelOcc > 1)? 2: 1;
 
-		requiredSize += _wotdCummulativeSumWotd(bound, occ, left + index.sentinelOcc);
+		requiredSize += _wotdCummulativeSum(bound, occ, left + index.sentinelOcc);
 		index.sentinelBound = left;
 /*
 		::std::cout << "$=" << index.sentinelOcc<<"@"<<index.sentinelBound << "\t";
