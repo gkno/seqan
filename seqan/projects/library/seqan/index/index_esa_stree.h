@@ -1281,12 +1281,15 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 		TTraits const) 
 	{
 		typedef typename TTraits::HideEmptyEdges THideEmptyEdges;
+		typedef Index<TText, Index_ESA<TIndexSpec> > TIndex;
 
-		if (value(it).range.i2 == length(container(it)) || isRoot(it))
-			return false;		// right-most intervals or root have no right (would cause trouble with i2=\infty)
+		if (isRoot(it)) return false;		
+
+		typename Size<TIndex>::Type right = value(it).parentRight;
+		if (_isSizeInval(right)) right = length(indexSA(container(it)));
 
 		do {
-			if (value(it).range.i2 == value(it).parentRight)		// not the right-most child?
+			if (value(it).range.i2 == right)				// not the right-most child?
 				return false;
 
 			if (_isNextl(value(it).range.i2, container(it))) 
