@@ -1275,14 +1275,11 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 */
 
 	// go right to the lexic. next sibling
-	template < typename TText, class TIndexSpec, class TSpec, typename TTraits >
+	template < typename TText, class TIndexSpec, class TSpec, typename TDFSOrder, typename THideEmptyEdges >
 	inline bool _goRight(
 		Iter< Index<TText, Index_ESA<TIndexSpec> >, VSTree< TopDown<TSpec> > > &it, 
-		TTraits const) 
+		VSTreeIteratorTraits<TDFSOrder, THideEmptyEdges> const) 
 	{
-		typedef typename TTraits::HideEmptyEdges THideEmptyEdges;
-		typedef Index<TText, Index_ESA<TIndexSpec> > TIndex;
-
 		if (isRoot(it)) return false;		
 
 		typename Size<TIndex>::Type right = value(it).parentRight;
