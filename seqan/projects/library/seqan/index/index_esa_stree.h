@@ -1280,6 +1280,8 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 		Iter< Index<TText, Index_ESA<TIndexSpec> >, VSTree< TopDown<TSpec> > > &it, 
 		VSTreeIteratorTraits<TDFSOrder, THideEmptyEdges> const) 
 	{
+		typedef Index<TText, Index_ESA<TIndexSpec> > TIndex;
+
 		if (isRoot(it)) return false;		
 
 		typename Size<TIndex>::Type right = value(it).parentRight;
