@@ -42,6 +42,7 @@
 #include <seqan/map/map_vector.h>
 #include <seqan/map/map_skiplist.h>
 #include <seqan/map/map_chooser.h>
+#include <seqan/map/map_adapter_stl.h>
 
 //____________________________________________________________________________
 
