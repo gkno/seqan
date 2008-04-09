@@ -75,13 +75,13 @@ def main():
     print "The created files are stored in the demos folder"
     
     print "Visual Studio 7 (.net 2003) Files:",
-    scanDemos("..\\..\\projects\\library\\demos", BUILD_FLAGS_7)
-    createProject("..\\..\\projects\\library\\demos", "Seqan_7")
+    scanDemos("../../projects/library/demos", BUILD_FLAGS_7)
+    createProject("../../projects/library/demos", "SeqAn_7")
     
     print
     print "Visual Studio 8 (.net 2005) Files:",
-    scanDemos("..\\..\\projects\\library\\demos", BUILD_FLAGS_8)
-    createProject("..\\..\\projects\\library\\demos", "Seqan_8")
+    scanDemos("../../projects/library/demos", BUILD_FLAGS_8)
+    createProject("../../projects/library/demos", "SeqAn_8")
     
     print
     print "Files created."
