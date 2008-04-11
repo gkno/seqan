@@ -42,7 +42,8 @@ void Test_STLSet()
 	SEQAN_TASSERT(hasKey(map, 1));
 
 	int arr1[] = {1, 2, 5};
-	TIterator it = begin(map);
+	TIterator it;
+    it = begin(map);
     int i;
 	for (i = 0; !atEnd(it); ++i)
 	{
@@ -53,8 +54,23 @@ void Test_STLSet()
     SEQAN_TASSERT(i == 3)
 
 	it = find(map, 2);
+
+    TIterator it2(it);
+    SEQAN_TASSERT(it == it2);
+    SEQAN_TASSERT(key(it) == 2);
+    SEQAN_TASSERT(key(it2) == 2);
+    
+    goNext(it2);
+    SEQAN_TASSERT(it != it2);
+
 	erase(map, it);
 	SEQAN_TASSERT(!hasKey(map,2));
+
+    erase(map, 5);
+    SEQAN_TASSERT(!hasKey(map,5));
+
+    clear(map);
+	SEQAN_TASSERT(length(map) == 0)
 }
 
 
@@ -113,14 +129,17 @@ void Test_STLMap()
 
 	insert(map, TValue(3, 1) );
 	insert(map, TValue(1, 2) );
-	insert(map, 10, 3);
+	insert(map, 10);
+   	map[10] = 3;
+
 	insert(map, 2, 4);
 
 	SEQAN_TASSERT(length(map) == 4)
 
 	int arr1[] = {2, 4, 1, 3};
 	int arr2[] = {1, 2, 3, 10};
-	TIterator it = begin(map);
+	TIterator it;
+    it = begin(map);
 	int i;
 	for (i = 0; !atEnd(it); ++i)
 	{
@@ -153,6 +172,11 @@ void Test_STLMap()
 	SEQAN_TASSERT(it)
 	SEQAN_TASSERT(key(it) == 8)
 	SEQAN_TASSERT(cargo(it) == 5)
+
+    TIterator it2(it);
+	SEQAN_TASSERT(it2)
+	SEQAN_TASSERT(key(it2) == 8)
+	SEQAN_TASSERT(cargo(it2) == 5)
 
 	//SEQAN_TASSERT(key(value(it)) == 8)
 	//SEQAN_TASSERT(cargo(*it) == 5)
