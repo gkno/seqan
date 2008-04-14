@@ -25,6 +25,7 @@
 // prerequisites
 
 #include <set>
+#include <map>
 
 #include <seqan/sequence.h>
 #include <seqan/misc/misc_random.h>
