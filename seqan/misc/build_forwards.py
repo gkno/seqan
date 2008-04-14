@@ -553,12 +553,12 @@ def outChangeNamespaces(old_namespaces, new_namespaces):
 
 ################################################################################
 # searches for projects without generated forward and build forward file
+# if force_recreate is True, all forward files are rebuilt
 # returns True if one or more files were built
 
-def buildAllForwards(project_path):
+def buildAllForwards(project_path, force_recreate = False):
     pos1 = project_path.rfind('/')
-    if (pos1 < 0): return False
-    project_path = project_path[:pos1]
+    if (pos1 >= 0): project_path = project_path[:pos1]
     
     ret = False
     
@@ -568,13 +568,12 @@ def buildAllForwards(project_path):
         m = os.stat(p)[ST_MODE]
         if S_ISDIR(m):
             file = p + "/" + forwardFilename(f)
-            if not os.path.exists(file):
+            if force_recreate or not os.path.exists(file):
                 ret = True
                 buildProject(p)
     return ret
 
 ################################################################################
-# Start: parse arguments and call main
 
 #buildProject("../projects/library/seqan")
 
@@ -583,6 +582,8 @@ if len(sys.argv) < 2:
     exit ('too few arguments');
 
 #if (os.path.exists("V:/seqan2/" + sys.argv[1])):
-if not buildAllForwards(sys.argv[1]):
+
+force_rebuild = (len(sys.argv) >= 3) and  ((sys.argv[2] == 'all') or (sys.argv[2] == 'ALL'))
+if not buildAllForwards(sys.argv[1], force_rebuild):
     buildProject (sys.argv[1]);
 
