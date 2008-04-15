@@ -39,6 +39,20 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //////////////////////////////////////////////////////////////////////////////
 
+///.Metafunction.IsContiguous.param.T.type:Adaption.std::basic_string
+
+template <typename  TChar, typename TCharTraits, typename TAlloc>
+struct IsContiguous< ::std::basic_string<TChar, TCharTraits, TAlloc> >
+{
+    enum { VALUE = true };
+};
+
+template <typename  TChar, typename TCharTraits, typename TAlloc>
+struct IsContiguous< ::std::basic_string<TChar, TCharTraits, TAlloc> const>
+{
+    enum { VALUE = true };
+};
+
 ///.Metafunction.Value.param.T.type:Adaption.std::basic_string
 template <typename TChar, typename TCharTraits, typename TAlloc>
 struct Value< ::std::basic_string<TChar, TCharTraits, TAlloc> >
