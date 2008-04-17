@@ -1,3 +1,4 @@
+//SEQAN_NO_GENERATED_FORWARDS: no forwards are generated for this file
 
 /* General interface for using the compressed index libraries */
 
@@ -46,8 +47,6 @@ int free_index (void *index);
         /* Gives the memory occupied by index in bytes. */
 
 int index_size(void *index, ulong *size);
-int index_size_count(void *index, ulong *size);
-int index_size_locate(void *index, ulong *size);
 
 /* Querying the index */
 
