@@ -87,21 +87,21 @@ struct TestHelper {
     static void test_all() {
         try {
             {
-                //string text = "This is the best test with a bast jest";
-                DnaString text = "GATTACATAG";
+                string text = "This is the best test with a bast jest";
                 index_t idx = test_index_create(text);
 
-                DnaString needle = "AT";
+                string_t needle = "est";
                 test_index_find(idx, needle);
                 test_index_save(idx, "indexdata");
+                cout << "again: " << endl;
+                cout << indexText(idx) << endl;
             }
 
             {
                 index_t idx;
                 test_index_load(idx, "indexdata");
 
-                //string_t needle = "est";
-                DnaString needle = "AT";
+                string_t needle = "est";
                 test_index_find(idx, needle);
             }
         }
@@ -113,22 +113,22 @@ struct TestHelper {
 
 int main() {
     cout << "Test AF" << endl;
-    TestHelper<PizzaChili_AF, Dna>::test_all();
+    TestHelper<PizzaChili_AF, char>::test_all();
 
     cout << endl << "Test CCSA" << endl;
-    TestHelper<PizzaChili_CCSA, Dna>::test_all();
+    TestHelper<PizzaChili_CCSA, char>::test_all();
 
     cout << endl << "Test FM" << endl;
-    TestHelper<PizzaChili_FM, Dna>::test_all();
+    TestHelper<PizzaChili_FM, char>::test_all();
 
     cout << endl << "Test RSA" << endl;
-    TestHelper<PizzaChili_RSA, Dna>::test_all();
+    TestHelper<PizzaChili_RSA, char>::test_all();
 
     cout << endl << "Test SA" << endl;
-    TestHelper<PizzaChili_SA, Dna>::test_all();
+    TestHelper<PizzaChili_SA, char>::test_all();
 
     cout << endl <<"Text SADA" << endl;
-    TestHelper<PizzaChili_SADA, Dna>::test_all();
+    TestHelper<PizzaChili_SADA, char>::test_all();
 
     return 0;
     //test_all();

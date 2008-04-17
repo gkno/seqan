@@ -169,6 +169,12 @@ namespace impl {
         return "-f 1 -a 2";
     }
 
+    template <typename TText>
+    inline char const*
+    getOptionsString(Index<TText, PizzaChili<PizzaChili_RSA> >& /*me*/) {
+        return "copy_text";
+    }
+
 } // namespace impl
 
 //////////////////////////////////////////////////////////////////////////////
