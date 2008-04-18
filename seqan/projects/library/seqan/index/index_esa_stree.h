@@ -609,7 +609,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 */
 
 	template < typename TIndex, class TSpec >
-	inline typename Infix< typename Fibre<TIndex, ESA_SA>::Type const >::Type 
+	inline typename Infix< typename Fibre<TIndex, Fibre_SA>::Type const >::Type 
 	getOccurrences(Iter< TIndex, VSTree<TSpec> > const &it) 
 	{
 		if (_isSizeInval(value(it).range.i2))
@@ -1653,7 +1653,8 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 */
 
 	template < typename TIndex, class TSpec, typename TSet >
-	inline int getFrequency(Iter<TIndex, VSTree<TSpec> > const &it, TSet &set)
+	inline typename Size<TIndex>::Type
+	getFrequency(Iter<TIndex, VSTree<TSpec> > const &it, TSet &set)
 	{
 		typedef typename Infix< typename Fibre<TIndex, ESA_SA>::Type const >::Type TOccs;
 		typedef typename Iterator<TOccs, Standard>::Type TIter;
@@ -1680,7 +1681,9 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 	}
 
 	template < typename TIndex, class TSpec >
-	inline int getFrequency(Iter<TIndex, VSTree<TSpec> > const &it) {
+	inline typename Size<TIndex>::Type
+	getFrequency(Iter<TIndex, VSTree<TSpec> > const &it) 
+	{
 		VectorSet<
 			typename Size<TIndex>::Type,
 			Alloc<> 

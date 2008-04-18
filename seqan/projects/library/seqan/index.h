@@ -117,6 +117,7 @@
 #include <seqan/index/index_esa_algs.h>
 #include <seqan/index/index_esa_algs_multi.h>
 #include <seqan/index/index_esa_drawing.h>
+#include <seqan/index/repeat_base.h>
 
 //____________________________________________________________________________
 // Pizza & Chili indices

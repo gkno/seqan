@@ -588,6 +588,20 @@ If $charsLeft$ is smaller than the shape's span, the hash value corresponds to t
 		return me.hValue;
 	}
 
+	template <typename TString, typename THash>
+	inline void unhash(TString &result, THash hash, unsigned q)
+	{
+	SEQAN_CHECKPOINT
+		typedef typename Value<TString>::Type	TValue;
+
+		resize(result, q);
+		for (unsigned i = q; i > 0; ) 
+		{
+			result[--i] = (TValue)(hash % ValueSize<TValue>::VALUE);
+			hash /= ValueSize<TValue>::VALUE;
+		}
+	}
+
 }	// namespace seqan
 
 #endif

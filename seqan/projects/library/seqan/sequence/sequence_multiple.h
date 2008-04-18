@@ -554,6 +554,21 @@ a single integer value between 0 and the sum of string lengths minus 1.
 		return Pair<T1, T2, TCompression>(getValueI1(pos), getValueI2(pos) + delta);
 	}
 
+	// posSub
+	template <typename TA, typename TB>
+	inline TA posSub(TA a, TB b) {
+		return a - b;
+	}
+
+	template <
+		typename TA1, typename TA2, typename TACompression,
+		typename TB1, typename TB2, typename TBCompression
+	>
+	inline TA2
+	posSub(Pair<TA1, TA2, TACompression> const &a, Pair<TB1, TB2, TBCompression> const &b) {
+		return getValueI2(a) - getValueI2(b);
+	}
+
 	//////////////////////////////////////////////////////////////////////////////
 	// position relations
 	//////////////////////////////////////////////////////////////////////////////
