@@ -140,7 +140,9 @@ public:
 	enum
 	{
 		MAX_HEIGHT = 28, //heights are in {0, 1, ..., MAX_HEIGHT-1}
-		BLOCK_SIZE = 0x200
+		_BLOCK_SIZE_1 = sizeof(TElement) * 20, //store min. 20 elements
+		_BLOCK_SIZE_2 = 0x200,	//minimal block size
+		BLOCK_SIZE = (_BLOCK_SIZE_1 > _BLOCK_SIZE_2) ? _BLOCK_SIZE_1 : _BLOCK_SIZE_2 //block size is the max out of both values
 	};
 
 	Holder<TAllocator> data_allocator;
@@ -359,7 +361,7 @@ _skiplistDeallocateElement(Map<TValue, Skiplist<TSpec> > & me,
 						   unsigned char height)
 {
 	typedef SkiplistElement<TValue, TSpec> TElement;
-	* reinterpret_cast<TElement *>(&el) = me.data_recycle[height];
+	* reinterpret_cast<TElement **>(& el) = me.data_recycle[height];
 	me.data_recycle[height] = reinterpret_cast<TElement *>(&el);
 	//the real deallocation is done by the allocator on destruction 
 }
@@ -486,7 +488,8 @@ _skiplistFindGoNext(SkiplistNext<TValue, TSpec> & next,
 					unsigned char height,
 					GoEnd)
 {
-	return next.data_element->data_next[height];
+	return next.data_element;
+//	return next.data_element->data_next[height];
 }
 
 

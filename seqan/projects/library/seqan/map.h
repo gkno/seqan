@@ -47,4 +47,10 @@
 
 //____________________________________________________________________________
 
+#include <seqan/map/sumlist.h>
+#include <seqan/map/sumlist_mini.h>
+#include <seqan/map/sumlist_skip.h>
+
+//____________________________________________________________________________
+
 #endif //#ifndef SEQAN_HEADER_...

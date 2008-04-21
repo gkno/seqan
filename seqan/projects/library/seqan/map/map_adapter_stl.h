@@ -84,7 +84,7 @@ struct Size< ::std::map<TKey,TCargo, TCompare, TAlloc> >
 //////////////////////////////////////////////////////////////////////////////
 
 // traits for stl usage
-
+/*
 template <typename TKey, typename TCompare, typename TAlloc>
 struct AllocatorType< ::std::set<TKey, TCompare, TAlloc> >
 {
@@ -112,6 +112,24 @@ struct _STLComparator< ::std::map<TKey, TCargo, TCompare, TAlloc> >
     typedef TCompare Type;
 };
 
+*/
+
+
+template <typename T>
+struct _STLIterator
+{
+	typedef int Type;
+};
+template <typename TKey, typename TCompare, typename TAlloc>
+struct _STLIterator< ::std::set<TKey, TCompare, TAlloc> >
+{
+	typedef typename ::std::set<TKey, TCompare, TAlloc>::iterator Type;
+};
+template <typename TKey, typename TCargo, typename TCompare, typename TAlloc>
+struct _STLIterator< ::std::map<TKey, TCargo, TCompare, TAlloc> >
+{
+	typedef typename ::std::map<TKey, TCargo, TCompare, TAlloc>::iterator Type;
+};
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -273,14 +291,17 @@ struct Iterator< ::std::map<TKey,TCargo, TCompare, TAlloc> , TIteratorSpec >
 	typedef Iter<TSTLMap, STLMapIterator> Type;
 };
 
+
 template <typename TSTLMap>
 class Iter< TSTLMap, STLMapIterator>
 {
 public:    
-    typedef typename ::std::map<typename Key<TSTLMap>::Type,
-                                typename Cargo<TSTLMap>::Type,
-                                typename _STLComparator<TSTLMap>::Type,
-                                typename AllocatorType<TSTLMap>::Type >::iterator THostIter;
+    //typedef typename ::std::map<typename Key<TSTLMap>::Type,
+    //                            typename Cargo<TSTLMap>::Type,
+    //                            typename _STLComparator<TSTLMap>::Type,
+    //                            typename AllocatorType<TSTLMap>::Type >::iterator THostIter;
+
+	typedef typename _STLIterator<TSTLMap>::Type THostIter;
 	THostIter _iter;
     Holder<TSTLMap> host_map_holder;
 
@@ -475,9 +496,10 @@ template <typename TSTLMap>
 class Iter< TSTLMap, STLSetIterator>
 {
 public:    
-    typedef typename ::std::set<typename Key<TSTLMap>::Type,
-                                typename _STLComparator<TSTLMap>::Type,
-                                typename AllocatorType<TSTLMap>::Type >::iterator THostIter;
+    //typedef typename ::std::set<typename Key<TSTLMap>::Type,
+    //                            typename _STLComparator<TSTLMap>::Type,
+    //                            typename AllocatorType<TSTLMap>::Type >::iterator THostIter;
+	typedef typename _STLIterator<TSTLMap>::Type THostIter;
 	THostIter _iter;
     Holder<TSTLMap> host_map_holder;
 

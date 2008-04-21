@@ -33,7 +33,7 @@ void Test_Proxy_Iterator()
 	int * pi2 = i1 + 1;
 	Proxy<IteratorProxy<int *> > px2(pi2);
 	px = px2;
-	SEQAN_TASSERT(i1[0] = 11);
+	SEQAN_TASSERT(i1[0] == 20);
 	SEQAN_TASSERT(px == 20);
 
 //copy ctor

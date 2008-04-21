@@ -252,10 +252,10 @@ of $begin$ and $end$.
 ..see:Class.SimpleType
 ..see:Function.valueConstruct
 */
-template<typename TIterator>
+template<typename TIterator1, typename TIterator2>
 inline void 
-_arrayConstruct_Default(TIterator begin_, 
-						TIterator end_)
+_arrayConstruct_Default(TIterator1 begin_, 
+						TIterator2 end_)
 {
 SEQAN_CHECKPOINT
 	while (begin_ != end_)
@@ -264,10 +264,10 @@ SEQAN_CHECKPOINT
 		++begin_;
 	}
 }
-template<typename TIterator>
+template<typename TIterator1, typename TIterator2>
 inline void 
-arrayConstruct(TIterator begin_, 
-			   TIterator end_)
+arrayConstruct(TIterator1 begin_, 
+			   TIterator2 end_)
 {
 SEQAN_CHECKPOINT
 	_arrayConstruct_Default(begin_, end_);
@@ -275,10 +275,10 @@ SEQAN_CHECKPOINT
 
 //____________________________________________________________________________
 
-template<typename TIterator, typename TParam>
+template<typename TIterator1, typename TIterator2, typename TParam>
 inline void 
-_arrayConstruct_Default(TIterator begin_, 
-						TIterator end_, 
+_arrayConstruct_Default(TIterator1 begin_, 
+						TIterator2 end_, 
 						TParam const & param_)
 {
 SEQAN_CHECKPOINT
@@ -288,10 +288,10 @@ SEQAN_CHECKPOINT
 		++begin_;
 	}
 }
-template<typename TIterator, typename TParam>
+template<typename TIterator1, typename TIterator2, typename TParam>
 inline void 
-arrayConstruct(TIterator begin_, 
-			   TIterator end_, 
+arrayConstruct(TIterator1 begin_, 
+			   TIterator2 end_, 
 			   TParam const & param_)
 {
 SEQAN_CHECKPOINT
@@ -320,10 +320,10 @@ An appropriate (copy-) constructor that constructs an target objects given a sou
 ..see:Function.arrayCopy
 ..see:Function.valueConstruct
 */
-template<typename TTarget, typename TSource>
+template<typename TTarget, typename TSource1, typename TSource2>
 inline void 
-_arrayConstructCopy_Default(TSource source_begin, 
-							TSource source_end, 
+_arrayConstructCopy_Default(TSource1 source_begin, 
+							TSource2 source_end, 
 							TTarget target_begin)
 {
 SEQAN_CHECKPOINT
@@ -335,10 +335,10 @@ SEQAN_CHECKPOINT
 	}
 }
 
-template<typename TTarget, typename TSource>
+template<typename TTarget, typename TSource1, typename TSource2>
 inline void 
-arrayConstructCopy(TSource source_begin, 
-				   TSource source_end, 
+arrayConstructCopy(TSource1 source_begin, 
+				   TSource2 source_end, 
 				   TTarget target_begin)
 {
 SEQAN_CHECKPOINT
@@ -368,10 +368,10 @@ An appropriate move constructor that constructs an target objects given a source
 ..see:Function.arrayMove
 ..see:Function.valueConstruct
 */
-template<typename TTarget, typename TSource>
+template<typename TTarget, typename TSource1, typename TSource2>
 inline void 
-_arrayConstructMove_Default(TSource source_begin, 
-							TSource source_end, 
+_arrayConstructMove_Default(TSource1 source_begin, 
+							TSource2 source_end, 
 							TTarget target_begin)
 {
 SEQAN_CHECKPOINT
@@ -383,10 +383,10 @@ SEQAN_CHECKPOINT
 	}
 }
 
-template<typename TTarget, typename TSource>
+template<typename TTarget, typename TSource1, typename TSource2>
 inline void 
-arrayConstructMove(TSource source_begin, 
-				   TSource source_end, 
+arrayConstructMove(TSource1 source_begin, 
+				   TSource2 source_end, 
 				   TTarget target_begin)
 {
 SEQAN_CHECKPOINT
@@ -408,10 +408,10 @@ SEQAN_CHECKPOINT
 ..see:Class.SimpleType
 ..see:Function.valueDestruct
 */
-template<typename TIterator>
+template<typename TIterator1, typename TIterator2>
 inline void 
-_arrayDestruct_Default(TIterator begin_, 
-					   TIterator end_)
+_arrayDestruct_Default(TIterator1 begin_, 
+					   TIterator2 end_)
 {
 SEQAN_CHECKPOINT
 	while (begin_ != end_)
@@ -420,10 +420,10 @@ SEQAN_CHECKPOINT
 		++begin_;
 	}
 }
-template<typename TIterator>
+template<typename TIterator1, typename TIterator2>
 inline void 
-arrayDestruct(TIterator begin_, 
-			  TIterator end_)
+arrayDestruct(TIterator1 begin_, 
+			  TIterator2 end_)
 {
 SEQAN_CHECKPOINT
 	_arrayDestruct_Default(begin_, end_);
@@ -445,10 +445,10 @@ SEQAN_CHECKPOINT
 ..see:Function.arrayCopy
 ..see:Function.arrayCopyForward
 */
-template<typename TIterator, typename TValue>
+template<typename TIterator1, typename TIterator2, typename TValue>
 inline void 
-arrayFill(TIterator begin_,
-		  TIterator end_, 
+arrayFill(TIterator1 begin_,
+		  TIterator2 end_, 
 		  TValue const & value)
 {
 SEQAN_CHECKPOINT
@@ -475,19 +475,19 @@ SEQAN_CHECKPOINT
 @Function.arrayMoveForward@ instead to improve performance.
 ..see:Class.SimpleType
 */
-template<typename TTarget, typename TSource>
+template<typename TTarget, typename TSource1, typename TSource2>
 inline void 
-_arrayCopyForward_Default(TSource source_begin, 
-						  TSource source_end, 
+_arrayCopyForward_Default(TSource1 source_begin, 
+						  TSource2 source_end, 
 						  TTarget target_begin)
 {
 SEQAN_CHECKPOINT
 	::std::copy(source_begin, source_end, target_begin);
 }
-template<typename TTarget, typename TSource>
+template<typename TTarget, typename TSource1, typename TSource2>
 inline void 
-arrayCopyForward(TSource source_begin, 
-				 TSource source_end, 
+arrayCopyForward(TSource1 source_begin, 
+				 TSource2 source_end, 
 				 TTarget target_begin)
 {
 SEQAN_CHECKPOINT
@@ -518,19 +518,19 @@ SEQAN_CHECKPOINT
 ..see:Function.arrayCopyForward
 ..see:Class.SimpleType
 */
-template<typename TTarget, typename TSource>
+template<typename TTarget, typename TSource1, typename TSource2>
 inline void 
-_arrayCopyBackward_Default(TSource source_begin, 
-						   TSource source_end, 
+_arrayCopyBackward_Default(TSource1 source_begin, 
+						   TSource2 source_end, 
 						   TTarget target_begin)
 {
 SEQAN_CHECKPOINT
 	::std::copy_backward(source_begin, source_end, target_begin + (source_end - source_begin));
 }
-template<typename TTarget, typename TSource>
+template<typename TTarget, typename TSource1, typename TSource2>
 inline void 
-arrayCopyBackward(TSource source_begin, 
-				  TSource source_end, 
+arrayCopyBackward(TSource1 source_begin, 
+				  TSource2 source_end, 
 				  TTarget target_begin)
 {
 SEQAN_CHECKPOINT
@@ -563,9 +563,9 @@ SEQAN_CHECKPOINT
 ..see:Function.arrayCopyBackward
 ..see:Class.SimpleType
 */
-template<typename TTarget, typename TSource>
-inline void arrayCopy(TSource source_begin, 
-					  TSource source_end, 
+template<typename TTarget, typename TSource1, typename TSource2>
+inline void arrayCopy(TSource1 source_begin, 
+					  TSource2 source_end, 
 					  TTarget target_begin)
 {
 	if ((void *) source_begin >= (void *) target_begin)
@@ -601,10 +601,10 @@ SEQAN_CHECKPOINT
 ..see:Function.arrayCopyForward
 ..see:Class.SimpleType
 */
-template<typename TTarget, typename TSource>
+template<typename TTarget, typename TSource1, typename TSource2>
 inline void 
-_arrayMoveForward_Default(TSource source_begin, 
-						  TSource source_end, 
+_arrayMoveForward_Default(TSource1 source_begin, 
+						  TSource2 source_end, 
 						  TTarget target_begin)
 {
 SEQAN_CHECKPOINT
@@ -615,10 +615,10 @@ SEQAN_CHECKPOINT
 		++target_begin;
 	}
 }
-template<typename TTarget, typename TSource>
+template<typename TTarget, typename TSource1, typename TSource2>
 inline void 
-arrayMoveForward(TSource source_begin, 
-				 TSource source_end, 
+arrayMoveForward(TSource1 source_begin, 
+				 TSource2 source_end, 
 				 TTarget target_begin)
 {
 SEQAN_CHECKPOINT
@@ -650,10 +650,10 @@ SEQAN_CHECKPOINT
 ..see:Function.arrayCopyBackward
 ..see:Class.SimpleType
 */
-template<typename TTarget, typename TSource>
+template<typename TTarget, typename TSource1, typename TSource2>
 inline void 
-_arrayMoveBackward_Default(TSource source_begin, 
-						   TSource source_end, 
+_arrayMoveBackward_Default(TSource1 source_begin, 
+						   TSource2 source_end, 
 						   TTarget target_begin)
 {
 SEQAN_CHECKPOINT
@@ -665,10 +665,10 @@ SEQAN_CHECKPOINT
 		move(*target_begin, *source_end);
 	}
 }
-template<typename TTarget, typename TSource>
+template<typename TTarget, typename TSource1, typename TSource2>
 inline void 
-arrayMoveBackward(TSource source_begin, 
-				  TSource source_end, 
+arrayMoveBackward(TSource1 source_begin, 
+				  TSource2 source_end, 
 				  TTarget target_begin)
 {
 SEQAN_CHECKPOINT
@@ -703,10 +703,10 @@ resembles @Function.arrayCopy@.
 ..see:Function.arrayCopy
 ..see:Class.SimpleType
 */
-template<typename TTarget, typename TSource>
+template<typename TTarget, typename TSource1, typename TSource2>
 inline void 
-arrayMove(TSource source_begin, 
-		  TSource source_end,
+arrayMove(TSource1 source_begin, 
+		  TSource2 source_end,
 		  TTarget target_begin)
 {
 	if ((void *) source_begin >= (void *) target_begin)
