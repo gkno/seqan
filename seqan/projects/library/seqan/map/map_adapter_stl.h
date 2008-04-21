@@ -212,29 +212,32 @@ SEQAN_CHECKPOINT
     me.insert(_value);
 }
 
+template <typename TKey, typename TCargo, typename TCompare, typename TAlloc, typename TKey2, typename TCargo2>
+inline void
+insert(::std::map<TKey,TCargo, TCompare, TAlloc> & me, 
+	   TKey2 const & _key, 
+	   TCargo2 const & _cargo)
+{
+SEQAN_CHECKPOINT
+
+	me[_key] = _cargo;
+}
 template <typename TKey, typename TCargo, typename TCompare, typename TAlloc, typename TKey2>
 inline void
 insert(::std::map<TKey,TCargo, TCompare, TAlloc> & me,TKey2 const & _key)
 {
 SEQAN_CHECKPOINT
-    me.insert(::std::make_pair(_key,TCargo()));
-}
 
+	insert(me, _key, TCargo());
+}
 template <typename TKey, typename TCargo, typename TCompare, typename TAlloc, typename TKey2, typename TCargo2, typename TSpec>
 inline void
 insert(::std::map<TKey,TCargo, TCompare, TAlloc> & me, Pair<TKey2,TCargo2,TSpec> const & _value)
 {
 SEQAN_CHECKPOINT
-    me.insert(::std::make_pair(_value.i1,_value.i2));
+	insert(me, _value.i1, _value.i2);
 }
 
-template <typename TKey, typename TCargo, typename TCompare, typename TAlloc, typename TKey2, typename TCargo2>
-inline void
-insert(::std::map<TKey,TCargo, TCompare, TAlloc> & me, TKey2 const & _key, TCargo2 const & _cargo)
-{
-SEQAN_CHECKPOINT
-    me.insert(::std::make_pair(_key,_cargo));
-}
 
 //////////////////////////////////////////////////////////////////////////////
 

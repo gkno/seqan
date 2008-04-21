@@ -1,22 +1,9 @@
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <typeinfo>
-#include <ctime>
-
-#include <map>
-#include <set>
-
 #define SEQAN_DEBUG
 #define SEQAN_TEST
 #define SEQAN_NOSRAN
 
-#include <seqan/map.h>
+#include <seqan/basic.h>
 
-
-#include <seqan/find.h>
-
-using namespace std;
 using namespace seqan;
 
 //////////////////////////////////////////////////////////////////////////////

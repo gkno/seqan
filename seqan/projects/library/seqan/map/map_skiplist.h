@@ -283,12 +283,17 @@ assign(Map<TValue, Skiplist<TSpec> > & target,
 	{
 		unsigned char height = _skiplistCreateHeight(target, path);
 		TElement & el = _skiplistConstructElement(target, height, value(it));
-		_skiplistInsertElement(target, el, path, height);
+
 		for (int i = 0; i <= height; ++i)
 		{
+			el.data_next[i].data_element = 0;
+			path.data_elements[i]->data_next[i].data_element = & el;
 			path.data_elements[i] = & el;
 		}
+
 	}
+
+	target.data_length = length(source);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -862,7 +867,7 @@ clear(Map<TValue, Skiplist<TSpec> > & me)
 {
 	typedef Map<TValue, Skiplist<TSpec> > TSkiplist;
 
-	me.data_mem_begin = me.data_mem_begin = 0;
+	me.data_mem_begin = me.data_mem_end = 0;
 	me.data_length = 0;
 	me.data_height = 0;
 

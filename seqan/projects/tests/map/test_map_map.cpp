@@ -327,6 +327,91 @@ void Test_Skiplist_Extra()
 	SEQAN_TASSERT(map2[2] == 3)
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TMap1, typename TMap2>
+void _CompareMaps(TMap1 & map1, TMap2 & map2)
+{
+	typedef typename Iterator<TMap1>::Type TIter1;
+	typedef typename Iterator<TMap2>::Type TIter2;
+
+	SEQAN_TASSERT(length(map1) == length(map2))
+
+	TIter1 it1(map1);
+	TIter2 it2(map2);
+
+	while (!atEnd(it1))
+	{
+		SEQAN_TASSERT(!atEnd(it2))
+		SEQAN_TASSERT(key(it1) == key(it2))
+		SEQAN_TASSERT(cargo(it1) == cargo(it2))
+
+		goNext(it1);
+		goNext(it2);
+	}
+
+	SEQAN_TASSERT(atEnd(it2))
+}
+
+//____________________________________________________________________________
+
+void Test_Skiplist_Stress()
+{
+	typedef Pair<int, int> TValue;
+	typedef Map<TValue, Skiplist< > > TSkipList;
+	typedef Iterator<TSkipList>::Type TSkipListIterator;
+
+	typedef ::std::map<int, int> TSTDMap;
+	typedef Iterator<TSTDMap>::Type TSTDMapIterator;
+
+	TSkipList sl;
+	TSkipList sl2;
+	TSTDMap stdmap;
+
+	TSkipListIterator sl_it(sl);
+	TSTDMapIterator stdmap_it(stdmap);
+
+	for (int j = 0; j < 100; ++j)
+	{
+		cout << ".";
+
+		for (int i = 0; i < 500; ++i)
+		{
+			int _key = rand();
+			int value = rand();
+
+			insert(sl, _key, value);
+			insert(stdmap, _key, value);
+		}
+
+		_CompareMaps(sl, stdmap);
+
+		for (int i = 0; i < 100; ++i)
+		{
+			int _key = (rand() + (rand() << 16));
+
+			sl_it = find(sl, _key);
+			stdmap_it = find(stdmap, _key);
+
+			SEQAN_TASSERT(atEnd(sl_it) == atEnd(stdmap_it))
+			if (! atEnd(sl_it))
+			{
+				SEQAN_TASSERT(key(sl_it) == key(stdmap_it))
+				SEQAN_TASSERT(cargo(sl_it) == cargo(stdmap_it))
+
+				erase(sl, key(sl_it));
+				erase(stdmap, key(stdmap_it));
+			}
+		}
+
+		_CompareMaps(sl, stdmap);
+
+		sl2 = sl;
+		_CompareMaps(sl2, stdmap);
+	}
+	cout << "\n";
+
+}
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -349,6 +434,8 @@ void Main_Test_Map()
    	Test_Cargo_Multiple< Map< Pair<char, int>, Skiplist< > > >();
 
 	Test_Skiplist_Extra();
+
+	Test_Skiplist_Stress();
 //____________________________________________________________________________
 
 	SEQAN_TREPORT("TEST MAP END")
