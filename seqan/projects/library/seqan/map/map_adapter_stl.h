@@ -141,9 +141,26 @@ SEQAN_CHECKPOINT
     return (me.count(_key) != 0);
 }
 
+template <typename TValue, typename TCompare, typename TAlloc, typename TKey2>
+inline bool
+hasKey(::std::set<TValue,TCompare,TAlloc> const & me, TKey2 const & _key)
+{
+SEQAN_CHECKPOINT
+    return (me.count(_key) != 0);
+}
+
+
 template <typename TKey, typename TCargo, typename TCompare, typename TAlloc, typename TKey2>
 inline bool
 hasKey(::std::map<TKey, TCargo, TCompare, TAlloc> & me, TKey2 const & _key)
+{
+SEQAN_CHECKPOINT
+    return (me.count(_key) != 0);
+}
+
+template <typename TKey, typename TCargo, typename TCompare, typename TAlloc, typename TKey2>
+inline bool
+hasKey(::std::map<TKey, TCargo, TCompare, TAlloc> const & me, TKey2 const & _key)
 {
 SEQAN_CHECKPOINT
     return (me.count(_key) != 0);
