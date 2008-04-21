@@ -14,6 +14,10 @@ extern "C" {
 }
 #endif
 
+// Needed by the FM index.
+extern "C"
+int init_ds_ssort(int adist, int bs_ratio);
+
 namespace SEQAN_NAMESPACE_MAIN {
 
 char* PCINDEX_NAME::error_index(int e) {
@@ -83,5 +87,14 @@ int PCINDEX_NAME::display(
 ) {
     return ::display(index, pattern, length, numc, numocc, snippet_text, snippet_length);
 }
+
+
+#ifdef PCINDEX_FM
+
+int PCINDEX_NAME::init_ds_ssort(int adist, int bs_ratio) {
+    return ::init_ds_ssort(adist, bs_ratio);
+}
+
+#endif
 
 } // namespace SEQAN_NAMESPACE_MAIN

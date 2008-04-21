@@ -144,6 +144,11 @@ struct DefaultOverflowImplicit<String<TValue, PizzaChili<TSpec> > > {
     typedef Exact Type;
 };
 
+template <typename TValue>
+struct DefaultOverflowImplicit<String<TValue, PizzaChili<PizzaChili_FM> > > {
+    typedef Generous Type;
+};
+
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TValue, typename TSpec>
@@ -212,7 +217,7 @@ SEQAN_CHECKPOINT
 
 template <typename TValue, typename TSpec>
 inline typename Value<String<TValue, PizzaChili<TSpec> > >::Type*
-_allocateStorage(
+_pizzaChiliAllocate(
     String<TValue, PizzaChili<TSpec> >& me,
     typename Size<String<TValue, PizzaChili<TSpec> > >::Type new_capacity
 ) {
@@ -224,21 +229,104 @@ SEQAN_CHECKPOINT
 
 template <typename TValue, typename TSpec>
 inline typename Value<String<TValue, PizzaChili<TSpec> > >::Type*
-_reallocateStorage(
+_pizzaChiliReallocate(
     String<TValue, PizzaChili<TSpec> >& me,
-    typename Size<String<TValue, PizzaChili<TSpec> > >::Type new_capacity,
-    Exact
+    typename Size<String<TValue, PizzaChili<TSpec> > >::Type new_capacity
 ) {
 SEQAN_CHECKPOINT
     if (new_capacity <= capacity(me))
         return 0;
 
     if (me.data_begin == 0)
-        return _allocateStorage(me, new_capacity);
+        return _pizzaChiliAllocate(me, new_capacity);
 
-    me.data_begin = static_cast<TValue*>(::std::realloc(me.data_begin, new_capacity));
+    me.data_begin =
+        static_cast<TValue*>(::std::realloc(me.data_begin, new_capacity));
     // ::std::realloc does the cleanup itself.
     return 0;
+}
+
+template <typename TValue>
+inline void
+_pizzaChiliDeallocate(TValue* begin) {
+SEQAN_CHECKPOINT
+    if (begin != 0)
+        ::std::free(begin);
+}
+
+template <typename TValue, typename TSpec>
+struct _AllocHelper {
+    typedef String<TValue, PizzaChili<TSpec> > string_type;
+    typedef typename Value<string_type>::Type* pointer_type;
+    typedef typename Size<string_type>::Type size_type;
+
+    static pointer_type allocate(string_type& me, size_type new_capacity) {
+SEQAN_CHECKPOINT
+        return _pizzaChiliAllocate(me, new_capacity);
+    }
+
+    static pointer_type reallocate(string_type& me, size_type new_capacity) {
+SEQAN_CHECKPOINT
+        return _pizzaChiliReallocate(me, new_capacity);
+    }
+
+    static void deallocate(pointer_type begin) {
+SEQAN_CHECKPOINT
+        _pizzaChiliDeallocate(begin);
+    }
+};
+
+// This specialization is needed because the FM index requires than an
+// overshoot be reserved after each string.
+template <typename TValue>
+struct _AllocHelper<TValue, PizzaChili_FM> {
+    typedef PizzaChili_FM TSpec;
+    typedef String<TValue, PizzaChili<TSpec> > string_type;
+    typedef typename Value<string_type>::Type* pointer_type;
+    typedef typename Size<string_type>::Type size_type;
+
+    static size_type real_capacity(size_type new_capacity) {
+        typedef typename PizzaChiliCodeProvider<TSpec>::Type TCodeProvider;
+        // The numerical constant values are taken from the fm_build.c example
+        // in th FM library folder.
+        return new_capacity + TCodeProvider::init_ds_ssort(500, 2000);
+    }
+
+    static pointer_type allocate(string_type& me, size_type new_capacity) {
+SEQAN_CHECKPOINT
+        return _pizzaChiliAllocate(me, real_capacity(new_capacity));
+    }
+
+    static pointer_type reallocate(string_type& me, size_type new_capacity) {
+SEQAN_CHECKPOINT
+        return _pizzaChiliReallocate(me, real_capacity(new_capacity));
+    }
+
+    static void deallocate(pointer_type begin) {
+SEQAN_CHECKPOINT
+        _pizzaChiliDeallocate(begin);
+    }
+};
+
+template <typename TValue, typename TSpec>
+inline typename Value<String<TValue, PizzaChili<TSpec> > >::Type*
+_allocateStorage(
+    String<TValue, PizzaChili<TSpec> >& me,
+    typename Size<String<TValue, PizzaChili<TSpec> > >::Type new_capacity
+) {
+SEQAN_CHECKPOINT
+    return _AllocHelper<TValue, TSpec>::allocate(me, new_capacity);
+}
+
+template <typename TValue, typename TSpec>
+inline typename Value<String<TValue, PizzaChili<TSpec> > >::Type*
+_reallocateStorage(
+    String<TValue, PizzaChili<TSpec> >& me,
+    typename Size<String<TValue, PizzaChili<TSpec> > >::Type new_capacity,
+    Exact
+) {
+SEQAN_CHECKPOINT
+    return _AllocHelper<TValue, TSpec>::reallocate(me, new_capacity);
 }
 
 template <typename TValue, typename TSpec>
@@ -248,8 +336,8 @@ _deallocateStorage(
    TValue* begin,
    typename Size<String<TValue, PizzaChili<TSpec> > >::Type /*count*/
 ) {
-    if (begin != 0)
-        ::std::free(begin);
+SEQAN_CHECKPOINT
+    _AllocHelper<TValue, TSpec>::deallocate(begin);
 }
 
 //////////////////////////////////////////////////////////////////////////////

@@ -2,9 +2,11 @@
 #include <iomanip>
 #include <string>
 #include <vector>
+#include <fstream>
 
 #define SEQAN_DEBUG_PIZZACHILI
 #define SEQAN_DEBUG
+#define SEQAN_TEST
 
 #include <seqan/sequence.h>
 #include <seqan/index.h>
@@ -28,18 +30,18 @@ struct TestHelper {
     static index_t test_index_create(TStr const& str) {
         index_t idx(str);
         cout << "Index text (set by c'tor):" << endl;
-        cout << indexText(idx) << endl;
+        //cout << indexText(idx) << endl;
         
         //indexText(idx) = str;
         setIndexText(idx, str);
         cout << "Index text (set explicitly):" << endl;
-        cout << indexText(idx) << endl;
+        //cout << indexText(idx) << endl;
 
         return idx;
     }
 
     template <typename TStr>
-    static void test_index_find(index_t& idx, TStr const& needle) {
+    static size_t test_index_find(index_t& idx, TStr const& needle) {
         typedef Finder<index_t> finder_t;
 
         finder_t finder(idx);
@@ -60,8 +62,10 @@ struct TestHelper {
             typename Size<string_t>::Type len = length(found_text);
 
             for (const_iter_t i = hits.begin(); i != hits.end(); ++i)
-                cout << setw(8) << *i << ", " << infix(found_text, *i, len) << endl;
+                cout << setw(8) << *i << ", " /*<< infix(found_text, *i, len)*/ << endl;
         }
+
+        return hits.size();
     }
 
     static void test_index_save(index_t& idx, char const* filename) {
@@ -87,14 +91,19 @@ struct TestHelper {
     static void test_all() {
         try {
             {
-                string text = "This is the best test with a bast jest";
+                ifstream ifs("../example.txt");
+                if (!ifs)
+                    throw 1;
+                string text((istreambuf_iterator<char>(ifs)), istreambuf_iterator<char>());
+                //string text = "This is the best test with a bast jest";
                 index_t idx = test_index_create(text);
 
                 string_t needle = "est";
+                //SEQAN_TASSERT(test_index_find(idx, needle) == 3);
                 test_index_find(idx, needle);
                 test_index_save(idx, "indexdata");
                 cout << "again: " << endl;
-                cout << indexText(idx) << endl;
+                //cout << indexText(idx) << endl;
             }
 
             {
@@ -102,7 +111,7 @@ struct TestHelper {
                 test_index_load(idx, "indexdata");
 
                 string_t needle = "est";
-                test_index_find(idx, needle);
+                //SEQAN_TASSERT(test_index_find(idx, needle) == 3);
             }
         }
         catch (...) {
@@ -112,6 +121,8 @@ struct TestHelper {
 };
 
 int main() {
+    SEQAN_TREPORT("TEST BEGIN");
+
     cout << "Test AF" << endl;
     TestHelper<PizzaChili_AF, char>::test_all();
 
@@ -130,7 +141,13 @@ int main() {
     cout << endl <<"Text SADA" << endl;
     TestHelper<PizzaChili_SADA, char>::test_all();
 
+    debug::verifyCheckpoints("projects/library/seqan/index/index_pizzachili.h");
+    debug::verifyCheckpoints("projects/library/seqan/index/index_pizzachili_find.h");
+    debug::verifyCheckpoints("projects/library/seqan/index/index_pizzachili_string.h");
+
+    SEQAN_TREPORT("TEST END");
     return 0;
+
     //test_all();
     //pizzachili_test();
 

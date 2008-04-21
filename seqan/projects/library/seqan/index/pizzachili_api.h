@@ -156,6 +156,7 @@ typedef Tag<_PizzaChili_Test> const PizzaChili_Test;
             impl::uchar_t** snippet_text, \
             impl::ulong_t** snippet_length \
         ); \
+        static int init_ds_ssort(int adist, int bs_ratio); \
     }; \
     \
     /*struct _PizzaChili_##name; \

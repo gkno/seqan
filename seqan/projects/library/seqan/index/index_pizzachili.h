@@ -166,7 +166,8 @@ namespace impl {
     template <typename TText>
     inline char const*
     getOptionsString(Index<TText, PizzaChili<PizzaChili_FM> >& /*me*/) {
-        return "-f 1 -a 2";
+        //return "-f 1 -a 0";
+        return "-a 0";
     }
 
     template <typename TText>

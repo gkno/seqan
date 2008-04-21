@@ -142,7 +142,8 @@ libpizzachili.o: $(WrapperObjects)
 # 10. Mark all the private Pizza & Chili symbols in wrapper.o local.
 %-wrap.o: %.o pizzachili_api.cpp interface.h
 	$(CXX) $(CPPFLAGS) -I$(SeqanPath) -c -o $*-tmp.o \
-		-DPCINDEX_NAME=PizzaChiliApi$* -DPCINDEX_$($*_type) pizzachili_api.cpp
+		-DPCINDEX_NAME=PizzaChiliApi$* \
+		-DPCINDEX_$* -DPCINDEX_$($*_type) pizzachili_api.cpp
 	$(LD) -i -x $*-tmp.o $*.d/tmp/*.o -o $@
 	$(OBJCOPY) -w -G \*PizzaChili\* -G _ZSt\* -G _ZNSt\* $@
 	
