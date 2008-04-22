@@ -18,8 +18,6 @@
   $Id$
  ==========================================================================*/
 
-//SEQAN_NO_GENERATED_FORWARDS: no forwards are generated for this file
-
 #ifndef SEQAN_HEADER_MISC_SET_H
 #define SEQAN_HEADER_MISC_SET_H
 
@@ -162,10 +160,10 @@ namespace SEQAN_NAMESPACE_MAIN
 	//
 
 	struct _VectorSetIterator;
-	typedef Tag<_VectorSetIterator> _VectorSetIterator;
+	typedef Tag<_VectorSetIterator> _VectorSetIterator_;
 
 	template <typename TVectorSet>
-	class Iter< TVectorSet, _VectorSetIterator > 
+	class Iter< TVectorSet, _VectorSetIterator_ > 
 	{
 		typedef typename _SetSetVector<TVectorSet>::Type		TSetVector;
 		typedef typename _SetObjVector<TVectorSet>::Type		TObjVector;
@@ -206,11 +204,11 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <typename TObject, typename TSpec, typename TIteratorSpec>
 	struct Iterator< VectorSet<TObject, TSpec>, TIteratorSpec > {
-		typedef Iter<VectorSet<TObject, TSpec>, _VectorSetIterator> Type;
+		typedef Iter<VectorSet<TObject, TSpec>, _VectorSetIterator_> Type;
 	};
 	template <typename TObject, typename TSpec, typename TIteratorSpec>
 	struct Iterator< VectorSet<TObject, TSpec> const, TIteratorSpec> {
-		typedef Iter<VectorSet<TObject, TSpec> const, _VectorSetIterator> Type;
+		typedef Iter<VectorSet<TObject, TSpec> const, _VectorSetIterator_> Type;
 	};
 
 	template <typename TValue, typename TSpec>
@@ -262,7 +260,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline typename Iterator< VectorSet<TKey2, TSpec> >::Type 
 	find(TKey const &key, VectorSet<TKey2, TSpec> &set) {
 		if (in(key, set))
-			return Iter<VectorSet<TKey2, TSpec>, _VectorSetIterator>
+			return Iter<VectorSet<TKey2, TSpec>, _VectorSetIterator_>
 				(begin(set.vector, Rooted()) + (unsigned)(key),
 				 begin(set.obj, Standard()) + (unsigned)(key));
 		else
@@ -272,7 +270,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline typename Iterator< VectorSet<TKey2, TSpec> const>::Type 
 	find(TKey const &key, VectorSet<TKey2, TSpec> const &set) {
 		if (in(key, set))
-			return Iter<VectorSet<TKey2, TSpec> const, _VectorSetIterator>
+			return Iter<VectorSet<TKey2, TSpec> const, _VectorSetIterator_>
 				(begin(set.vector, Rooted()) + (unsigned)(key), 
 				 begin(set.obj, Standard()) + (unsigned)(key));
 		else
@@ -282,47 +280,47 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename TElement, typename TSpec>
 	inline typename Iterator< VectorSet<TElement, TSpec> >::Type 
 	begin(VectorSet<TElement, TSpec> &set) {
-		return Iter<VectorSet<TElement, TSpec>, _VectorSetIterator> 
+		return Iter<VectorSet<TElement, TSpec>, _VectorSetIterator_> 
 			(begin(set.vector, Rooted()), begin(set.obj, Standard()));
 	}
 	template <typename TElement, typename TSpec>
 	inline typename Iterator< VectorSet<TElement, TSpec> const>::Type 
 	begin(VectorSet<TElement, TSpec> const &set) {
-		return Iter<VectorSet<TElement, TSpec> const, _VectorSetIterator> 
+		return Iter<VectorSet<TElement, TSpec> const, _VectorSetIterator_> 
 			(begin(set.vector, Rooted()), begin(set.obj, Standard()));
 	}
 
 	template <typename TElement, typename TSpec>
 	inline typename Iterator< VectorSet<TElement, TSpec> >::Type 
 	end(VectorSet<TElement, TSpec> &set) {
-		return Iter<VectorSet<TElement, TSpec>, _VectorSetIterator> 
+		return Iter<VectorSet<TElement, TSpec>, _VectorSetIterator_> 
 			(end(set.vector, Rooted()), begin(set.obj, Standard()));
 	}
 	template <typename TElement, typename TSpec>
 	inline typename Iterator< VectorSet<TElement, TSpec> const>::Type 
 	end(VectorSet<TElement, TSpec> const &set) {
-		return Iter<VectorSet<TElement, TSpec> const, _VectorSetIterator> 
+		return Iter<VectorSet<TElement, TSpec> const, _VectorSetIterator_> 
 			(end(set.vector, Rooted()), begin(set.obj, Standard()));
 	}
 
 	template <typename TSet>
 	inline bool 
-	operator==(Iter<TSet, _VectorSetIterator> const &a, Iter<TSet, _VectorSetIterator> const &b) {
+	operator==(Iter<TSet, _VectorSetIterator_> const &a, Iter<TSet, _VectorSetIterator_> const &b) {
 		return a.ptr == b.ptr;
 	}
 	template <typename TSet>
 	inline bool 
-	operator!=(Iter<TSet, _VectorSetIterator> const &a, Iter<TSet, _VectorSetIterator> const &b) {
+	operator!=(Iter<TSet, _VectorSetIterator_> const &a, Iter<TSet, _VectorSetIterator_> const &b) {
 		return a.ptr != b.ptr;
 	}
 	template <typename TSet>
 	inline bool 
-	eof(Iter<TSet, _VectorSetIterator> const &a) {
+	eof(Iter<TSet, _VectorSetIterator_> const &a) {
 		return atEnd(a.ptr);
 	}
 	template <typename TSet>
 	inline bool 
-	atEnd(Iter<TSet, _VectorSetIterator> const &a) {
+	atEnd(Iter<TSet, _VectorSetIterator_> const &a) {
 		return atEnd(a.ptr);
 	}
 
@@ -330,23 +328,23 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <typename TSet>
 	inline typename Key<TSet>::Type
-	keyOf(Iter<TSet, _VectorSetIterator> &it) {
+	keyOf(Iter<TSet, _VectorSetIterator_> &it) {
 		return position(it.ptr);
 	}
 	template <typename TSet>
 	inline typename Key<TSet>::Type
-	keyOf(Iter<TSet, _VectorSetIterator> const &it) {
+	keyOf(Iter<TSet, _VectorSetIterator_> const &it) {
 		return position(it.ptr);
 	}
 
 	template <typename TSet>
 	inline typename Object<TSet>::Type &
-	objectOf(Iter<TSet, _VectorSetIterator> &it) {
+	objectOf(Iter<TSet, _VectorSetIterator_> &it) {
 		return *it.obj;
 	}
 	template <typename TSet>
 	inline typename Object<TSet>::Type &
-	objectOf(Iter<TSet, _VectorSetIterator> const &it) {
+	objectOf(Iter<TSet, _VectorSetIterator_> const &it) {
 		return *it.obj;
 	}
 
