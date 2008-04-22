@@ -1634,7 +1634,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 
 	template < typename TIndex, class TSpec >
 	inline bool isUnique(Iter<TIndex, VSTree<TSpec> > const &it) {
-		VectorSet<
+		_VectorSet<
 			typename Size<TIndex>::Type,
 			Alloc<> 
 		> set(countSequences(container(it)));
@@ -1684,7 +1684,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 	inline typename Size<TIndex>::Type
 	getFrequency(Iter<TIndex, VSTree<TSpec> > const &it) 
 	{
-		VectorSet<
+		_VectorSet<
 			typename Size<TIndex>::Type,
 			Alloc<> 
 		> set(countSequences(container(it)));

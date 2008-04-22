@@ -58,7 +58,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	public:
 		typedef Iter< TSTree, VSTree< BottomUp<> > >	TBase;
 		typedef typename Size<TSTree>::Type				TSize;
-		typedef VectorSet<TSize, Alloc<> >				TSeqSet;
+		typedef _VectorSet<TSize, Alloc<> >				TSeqSet;
 //____________________________________________________________________________
 
 		TSize		minLength;
