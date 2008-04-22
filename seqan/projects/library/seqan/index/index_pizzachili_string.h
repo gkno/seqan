@@ -130,12 +130,25 @@ struct Infix<String<TValue, PizzaChili<TSpec> > > {
 };
 
 template <typename TValue, typename TSpec>
+struct Infix<String<TValue, PizzaChili<TSpec> > const> {
+    typedef String<TValue, PizzaChili<TSpec> > const Type;
+};
+
+template <typename TValue, typename TSpec>
 struct Prefix<String<TValue, PizzaChili<TSpec> > >
     : Infix<String<TValue, PizzaChili<TSpec> > > { };
 
 template <typename TValue, typename TSpec>
+struct Prefix<String<TValue, PizzaChili<TSpec> > const>
+    : Infix<String<TValue, PizzaChili<TSpec> > const> { };
+
+template <typename TValue, typename TSpec>
 struct Suffix<String<TValue, PizzaChili<TSpec> > >
     : Infix<String<TValue, PizzaChili<TSpec> > > { };
+
+template <typename TValue, typename TSpec>
+struct Suffix<String<TValue, PizzaChili<TSpec> > const>
+    : Infix<String<TValue, PizzaChili<TSpec> > const> { };
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -144,10 +157,12 @@ struct DefaultOverflowImplicit<String<TValue, PizzaChili<TSpec> > > {
     typedef Exact Type;
 };
 
+/*
 template <typename TValue>
 struct DefaultOverflowImplicit<String<TValue, PizzaChili<PizzaChili_FM> > > {
     typedef Generous Type;
 };
+*/
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -215,6 +230,7 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 
+/*
 template <typename TValue, typename TSpec>
 inline typename Value<String<TValue, PizzaChili<TSpec> > >::Type*
 _pizzaChiliAllocate(
@@ -226,6 +242,7 @@ SEQAN_CHECKPOINT
     me.data_begin = static_cast<TValue*>(::std::malloc(new_capacity));
     return old == me.data_begin ? 0 : old;
 }
+*/
 
 template <typename TValue, typename TSpec>
 inline typename Value<String<TValue, PizzaChili<TSpec> > >::Type*
@@ -237,8 +254,9 @@ SEQAN_CHECKPOINT
     if (new_capacity <= capacity(me))
         return 0;
 
-    if (me.data_begin == 0)
-        return _pizzaChiliAllocate(me, new_capacity);
+    SEQAN_ASSERT(me.data_begin != 0);
+    //if (me.data_begin == 0)
+    //    return _pizzaChiliAllocate(me, new_capacity);
 
     me.data_begin =
         static_cast<TValue*>(::std::realloc(me.data_begin, new_capacity));
@@ -260,10 +278,12 @@ struct _AllocHelper {
     typedef typename Value<string_type>::Type* pointer_type;
     typedef typename Size<string_type>::Type size_type;
 
+    /*
     static pointer_type allocate(string_type& me, size_type new_capacity) {
 SEQAN_CHECKPOINT
         return _pizzaChiliAllocate(me, new_capacity);
     }
+    */
 
     static pointer_type reallocate(string_type& me, size_type new_capacity) {
 SEQAN_CHECKPOINT
@@ -292,10 +312,12 @@ struct _AllocHelper<TValue, PizzaChili_FM> {
         return new_capacity + TCodeProvider::init_ds_ssort(500, 2000);
     }
 
+    /*
     static pointer_type allocate(string_type& me, size_type new_capacity) {
 SEQAN_CHECKPOINT
         return _pizzaChiliAllocate(me, real_capacity(new_capacity));
     }
+    */
 
     static pointer_type reallocate(string_type& me, size_type new_capacity) {
 SEQAN_CHECKPOINT
@@ -308,6 +330,7 @@ SEQAN_CHECKPOINT
     }
 };
 
+/*
 template <typename TValue, typename TSpec>
 inline typename Value<String<TValue, PizzaChili<TSpec> > >::Type*
 _allocateStorage(
@@ -317,6 +340,7 @@ _allocateStorage(
 SEQAN_CHECKPOINT
     return _AllocHelper<TValue, TSpec>::allocate(me, new_capacity);
 }
+*/
 
 template <typename TValue, typename TSpec>
 inline typename Value<String<TValue, PizzaChili<TSpec> > >::Type*
@@ -541,6 +565,66 @@ SEQAN_CHECKPOINT
             ret.data_begin = begin;
             ret.data_end = end;
             return ret;
+        }
+
+        static inline TResult
+        prefix(String<TValue, PizzaChili<TSpec> > const& me, TPos end) {
+            return infix(me, begin(me), end);
+        }
+
+        static inline TResult
+        prefix(String<TValue, PizzaChili<TSpec> >& me, TPos end) {
+            return infix(me, begin(me), end);
+        }
+
+        static inline TResult
+        suffix(String<TValue, PizzaChili<TSpec> > const& me, TPos begin) {
+            return infix(me, begin, end(me));
+        }
+
+        static inline TResult
+        suffix(String<TValue, PizzaChili<TSpec> >& me, TPos begin) {
+            return infix(me, begin, end(me));
+        }
+    };
+
+    template <typename TValue, typename TSpec>
+    struct substringHelperPizzaChili<
+        TValue,
+        TSpec,
+        typename Iterator<
+            String<TValue, PizzaChili<TSpec> > const,
+            typename DefaultIteratorSpec<String<TValue, PizzaChili<TSpec> > >::Type
+        >::Type
+    > : substringHelperPizzaChili<
+        TValue, TSpec,
+        typename Iterator<
+            String<TValue, PizzaChili<TSpec> >,
+            typename DefaultIteratorSpec<String<TValue, PizzaChili<TSpec> > >::Type
+        >::Type
+    > {
+        typedef
+            typename Iterator<
+                String<TValue, PizzaChili<TSpec> > const,
+                typename DefaultIteratorSpec<String<TValue, PizzaChili<TSpec> > >::Type
+            >::Type TPos;
+        typedef typename Infix<String<TValue, PizzaChili<TSpec> > const>::Type TResult;
+        typedef substringHelperPizzaChili<
+            TValue, TSpec,
+            typename Iterator<
+                String<TValue, PizzaChili<TSpec> >,
+                typename DefaultIteratorSpec<String<TValue, PizzaChili<TSpec> > >::Type
+            >::Type
+        > TBase;
+
+        static inline TResult
+        infix(String<TValue, PizzaChili<TSpec> > const& me, TPos begin, TPos end) {
+SEQAN_CHECKPOINT
+            return TBase::infix(
+                me,
+                const_cast<typename TBase::TPos>(begin),
+                const_cast<typename TBase::TPos>(end)
+            );
         }
 
         static inline TResult
