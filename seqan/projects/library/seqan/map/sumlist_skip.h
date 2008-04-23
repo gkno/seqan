@@ -38,22 +38,7 @@ struct _SkipSumList;
 // Map<_SkipSumList>
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TValue, unsigned int DIM, typename TSpec>
-class SkiplistElement<TValue, _SkipSumList<DIM, TSpec> >
-{
-public:
-	typedef Map<TValue, Skiplist<_SkipSumList<DIM, TSpec> > > TSkiplist;
-	typedef SkiplistNext<TValue, _SkipSumList<DIM, TSpec> > TNext;
-	typedef SumList<DIM, TValue, MiniSumList< > > TMiniSumList;
 
-	enum
-	{
-		MAX_HEIGHT = TSkiplist::MAX_HEIGHT
-	};
-
-	TMiniSumList minilist;
-	TNext data_next[MAX_HEIGHT]; //note: only parts of this array available
-};
 
 /*
 template <typename TValue, unsigned int DIM, typename TSpec>
@@ -99,6 +84,26 @@ public:
 		values = other.values;
 		return *this;
 	}
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
+
+template <typename TValue, unsigned int DIM, typename TSpec>
+class SkiplistElement<TValue, _SkipSumList<DIM, TSpec> >
+{
+public:
+	typedef Map<TValue, Skiplist<_SkipSumList<DIM, TSpec> > > TSkiplist;
+	typedef SkiplistNext<TValue, _SkipSumList<DIM, TSpec> > TNext;
+	typedef SumList<DIM, TValue, MiniSumList< > > TMiniSumList;
+
+	enum
+	{
+		MAX_HEIGHT = TSkiplist::MAX_HEIGHT
+	};
+
+	TMiniSumList minilist;
+	TNext data_next[MAX_HEIGHT]; //note: only parts of this array available
 };
 
 //////////////////////////////////////////////////////////////////////////////
