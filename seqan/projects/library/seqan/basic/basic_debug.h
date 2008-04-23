@@ -294,7 +294,7 @@ namespace debug
 {
 struct Checkpoint
 {
-	char * file;
+	char const* file;
 	unsigned int line;
 };
 
@@ -317,10 +317,10 @@ template <typename T>
 
 
 inline bool 
-checkpoint(unsigned int line, char * file)
+checkpoint(unsigned int line, char const* file)
 {
-	char * file_name = strrchr(file, '/');
-	char * file_name_2 = strrchr(file, '\\');
+	char const* file_name = strrchr(file, '/');
+	char const* file_name_2 = strrchr(file, '\\');
 	if (file_name_2 > file_name) file_name = file_name_2;
 	if (!file_name) file_name = file;
 	else ++file_name;
@@ -334,7 +334,7 @@ checkpoint(unsigned int line, char * file)
 
 
 inline void 
-testCheckpoint(char * file, unsigned int line)
+testCheckpoint(char const* file, unsigned int line)
 {
 	Checkpoint cp = {file, line};
 	if (CheckpointStore<>::data.find(cp) == CheckpointStore<>::data.end())
@@ -342,10 +342,10 @@ testCheckpoint(char * file, unsigned int line)
 }
 
 inline void 
-verifyCheckpoints(char * file)
+verifyCheckpoints(char const* file)
 {
-	char * file_name = strrchr(file, '/');
-	char * file_name_2 = strrchr(file, '\\');
+	char const* file_name = strrchr(file, '/');
+	char const* file_name_2 = strrchr(file, '\\');
 	if (file_name_2 > file_name) file_name = file_name_2;
 	if (!file_name) file_name = file;
 	else ++file_name;

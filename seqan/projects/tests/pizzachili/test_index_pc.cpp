@@ -180,9 +180,9 @@ int main() {
     cout << endl << "Other tests" << endl;
     TestHelper<PizzaChili_AF, char>::test_infix();
 
-    debug::verifyCheckpoints(const_cast<char*>("projects/library/seqan/index/index_pizzachili.h"));
-    debug::verifyCheckpoints(const_cast<char*>("projects/library/seqan/index/index_pizzachili_find.h"));
-    debug::verifyCheckpoints(const_cast<char*>("projects/library/seqan/index/index_pizzachili_string.h"));
+    debug::verifyCheckpoints("projects/library/seqan/index/index_pizzachili.h");
+    debug::verifyCheckpoints("projects/library/seqan/index/index_pizzachili_find.h");
+    debug::verifyCheckpoints("projects/library/seqan/index/index_pizzachili_string.h");
 
     SEQAN_TREPORT("TEST END");
 }
