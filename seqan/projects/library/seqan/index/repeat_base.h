@@ -109,51 +109,61 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		TNodeIterator nodeIt(index);
 		TOccIterator itA, itB, itRepBegin, itEnd;
-		TRepeat rep;
-		while (!atEnd(nodeIt)) 
+		TRepeat rep, period;
+		for (; !atEnd(nodeIt); goNext(nodeIt))
 		{
+			if (isRoot(nodeIt)) continue;
+
 			// get occurrences
 			TOccString occ = getOccurrences(nodeIt);
 			itA = begin(occ, Standard());
 			itEnd = end(occ, Standard());
 			itRepBegin = itB = itA;
 
-			// get representative/repeat length
-			TSize repLen = repLength(nodeIt);
-			if (repLen > 0) 
-			{
-				TSize minRepeats = (minRepeatLen + repLen - 1) / repLen - 1;
+			TSize repLen = repLength(nodeIt);		// representative length
+			if ((TSize)minRepeatLen <= repLen) continue;
 
-				for (++itB; itB != itEnd; ++itB)
+			TSize diff, period = 0;					// period of current repeat
+			TSize repeatLen = 0;					// overall length of current repeat
+			TSize minLen = minRepeatLen - repLen;	// minimum repeat length minus length of representative
+
+			for (++itB; itB != itEnd; ++itB)
+			{
+				diff = posSub(*itB, *itA);
+				if (diff != period || getSeqNo(*itA) != getSeqNo(*itB))
 				{
-					if (posSub(*itB, *itA) != repLen || getSeqNo(*itA) != getSeqNo(*itB))
-					{
-						if ((TSize)(itA - itRepBegin) >= minRepeats) 
+					// is the repeat long enough?
+					if (repeatLen >= minLen)
+						// is the repeat self overlapping or connected?
+						if (parentRepLength(nodeIt) < period && period <= repLen)
 						{
 							// insert repeat
 							rep.beginPosition = *itRepBegin;
-							rep.endPosition = posAdd(*itA, repLen);
-							rep.period = repLen;
-//							::std::cerr<<"left:"<<rep.beginPosition<<"  right:"<<rep.endPosition<<"  length:"<<posSub(rep.endPosition,rep.beginPosition)<<"  period:"<<rep.period<<::std::endl;
+							rep.endPosition = posAdd(*itA, period);
+							rep.period = period;
+							::std::cerr<<"left:"<<rep.beginPosition<<"  right:"<<rep.endPosition<<"  length:"<<posSub(rep.endPosition,rep.beginPosition)<<"  period:"<<rep.period<<::std::endl;
 							list.insert(::std::pair<TOcc,TRepeat>(rep.beginPosition, rep));
 						}
-						itRepBegin = itB;
-					}
-					itA = itB;
+					itRepBegin = itA;
+					period = diff;
+					repeatLen = 0;
 				}
+				repeatLen += period;
+				itA = itB;
+			}
 
-				if ((TSize)(itA - itRepBegin) >= minRepeats) 
+			// is the last repeat long enough?
+			if (repeatLen >= minLen)
+				// is the repeat self overlapping or connected?
+				if (parentRepLength(nodeIt) < period && period <= repLen)
 				{
 					// insert repeat
 					rep.beginPosition = *itRepBegin;
-					rep.endPosition = posAdd(*itA, repLen);
-					rep.period = repLen;
-//					::std::cerr<<"left:"<<rep.beginPosition<<"  right:"<<rep.endPosition<<"  length:"<<posSub(rep.endPosition,rep.beginPosition)<<"  period:"<<rep.period<<::std::endl;
+					rep.endPosition = posAdd(*itA, period);
+					rep.period = period;
+					::std::cerr<<"left:"<<rep.beginPosition<<"  right:"<<rep.endPosition<<"  length:"<<posSub(rep.endPosition,rep.beginPosition)<<"  period:"<<rep.period<<::std::endl;
 					list.insert(::std::pair<TOcc,TRepeat>(rep.beginPosition, rep));
 				}
-			}
-
-			goNext(nodeIt);
 		}
 
 		// copy low-complex regions to result string
