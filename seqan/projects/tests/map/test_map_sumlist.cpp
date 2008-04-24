@@ -590,6 +590,10 @@ void testSkipSumListIntegrity(SumList<DIM, TValue, SkipSumList< > > & ssl)
 	for (int counter = 0; !atEnd(path); ++counter)
 	{
 		//is the bottom line edges correct?
+if (path.data_elements[0]->data_next[0].values != path.data_elements[0]->minilist.data_sum)
+{
+	int j = 0;
+}
 		SEQAN_TASSERT(path.data_elements[0]->data_next[0].values == path.data_elements[0]->minilist.data_sum)
 
 		//are the other edges correct?
@@ -613,6 +617,7 @@ void Test_SkipSumListStress()
 	typedef SumListValues<DIM, TValue> TValues;
 
 	TSkipSumList ssl;
+	TSkipSumList ssl2;
 	TDummySumList dsl;
 
 	//appendValues
@@ -741,6 +746,11 @@ void Test_SkipSumListStress()
 			compareIterators<DIM>(sit, dit);
 			compareSumLists(ssl, dsl);
 		}
+
+		ssl2 = ssl;
+		testSkipSumListIntegrity(ssl);
+		testSkipSumListIntegrity(ssl2);
+		compareSumLists(ssl, ssl2);
 	}
 	cout << "\n";
 

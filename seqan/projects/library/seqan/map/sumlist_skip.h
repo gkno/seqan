@@ -242,6 +242,70 @@ _skipsumlistFind(Map<TValue, Skiplist<_SkipSumList<DIM, TSpec> > > & me,
 }
 
 
+template <typename TValue, unsigned int DIM, typename TSpec>
+inline void
+assign(Map<TValue, Skiplist< _SkipSumList<DIM, TSpec> > > & target,
+	   Map<TValue, Skiplist< _SkipSumList<DIM, TSpec> > > const & source_)
+{
+	typedef Map<TValue, Skiplist< _SkipSumList<DIM, TSpec> > > TSkiplist;
+	typedef SkiplistPath<TValue, _SkipSumList<DIM, TSpec> > TPath;
+	typedef SkiplistElement<TValue, _SkipSumList<DIM, TSpec> > TElement;
+	//typedef typename Iterator<TSkiplist>::Type TIterator;
+	//typedef typename Value<TSkiplist>::Type TValue2;
+
+	TSkiplist & source = const_cast<TSkiplist &>(source_); //oh, I'm so damned lazy :-P
+
+	//first clear target
+	clear(target);
+
+	//init path variable that is used as iterator-like construct to build up target
+	//and copy link values outgoing from target border
+	TPath target_path(target);
+	target.data_height = source.data_height;
+	for (unsigned int i = 0; i <= target.data_height; ++i)
+	{
+		target_path.data_elements[i] = & target.data_border;
+		target.data_border.data_next[i].values = source.data_border.data_next[i].values;
+	}
+
+	//copy the first minilist
+	target.data_border.minilist = source.data_border.minilist;
+
+	TPath source_path(source);
+	//copy rest of the values
+	while (true)
+	{
+		goNext(source_path, source);
+
+		if (atEnd(source_path)) break;
+
+		//determine height of current tower
+		unsigned char height;
+		for (height = 1; height < TSkiplist::MAX_HEIGHT; ++height)
+		{
+			if (source_path.data_elements[height] != source_path.data_elements[0]) break;
+		}
+		--height;
+
+		//create new element in target and copy minilist
+		TElement & el = _skiplistAllocateElement(target, height);
+		el.minilist = source_path.data_elements[0]->minilist;
+
+		//insert element in target
+		for (int i = 0; i <= height; ++i)
+		{
+			el.data_next[i].data_element = 0;
+			el.data_next[i].values = source_path.data_elements[i]->data_next[i].values;
+			target_path.data_elements[i]->data_next[i].data_element = & el;
+			target_path.data_elements[i] = & el;
+		}
+
+	}
+
+	//set length
+	target.data_length = length(source);
+}
+
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 // SumList<_SkipSumList>
@@ -281,14 +345,17 @@ public:
 
 //////////////////////////////////////////////////////////////////////////////
 
-/*
+
 template <unsigned int DIM, typename TValue, typename TSpec>
 inline void
 assign(SumList<DIM, TValue, SkipSumList<TSpec> > & target,
-	   SumList<DIM, TValue, SkipSumList<TSpec> > & source)
+	   SumList<DIM, TValue, SkipSumList<TSpec> > const & source)
 {
+	target.map = source.map;
+	target.length = source.length;
+	target.sum = source.sum;
 }
-*/
+
 
 //////////////////////////////////////////////////////////////////////////////
 

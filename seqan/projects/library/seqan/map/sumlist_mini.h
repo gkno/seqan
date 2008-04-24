@@ -185,6 +185,7 @@ public:
 	operator = (SumList const & other)
 	{
 		assign(*this, other);
+		return *this;
 	}
 
 
@@ -213,11 +214,12 @@ struct Position< SumList<DIM, TValue, MiniSumList<SIZE, TSpec> > >
 template <unsigned int DIM, typename TValue, unsigned short SIZE, typename TSpec>
 inline void
 assign(SumList<DIM, TValue, MiniSumList<SIZE, TSpec> > & target,
-	   SumList<DIM, TValue, MiniSumList<SIZE, TSpec> > & source)
+	   SumList<DIM, TValue, MiniSumList<SIZE, TSpec> > const & source)
 {
+	arrayCopyForward(source.data_, source.data_ + source.data_size, target.data_);
 	target.data_length = source.data_length;
-	arrayCopyForward(source.data_, source.data_ + SIZE, target.data_);
-	arrayCopyForward(source.data_sum, source.data_sum + DIM, target.data_sum);
+	target.data_size = source.data_size;
+	target.data_sum = source.data_sum;
 }
 
 //////////////////////////////////////////////////////////////////////////////

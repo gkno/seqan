@@ -13,6 +13,7 @@
 
 #include <seqan/map.h>
 
+#include <seqan/misc/misc_set.h>
 
 #include <seqan/find.h>
 
