@@ -56,6 +56,7 @@ typedef Fibre_PizzaChili_Compressed PizzaChili_Compressed;
 ..param.TText:The text type.
 ...type:Class.String
 ..param.TSpec:Tag specifying the Pizza & Chili index library to use.
+...type.Tag.Pizza & Chili Index Tags
 ..see:Spec.Pizza & Chili String
 ..see:Tag.Pizza & Chili Index Fibres
 ..see:Tag.Index Find Algorithm
@@ -73,29 +74,36 @@ public:
     Index() : index_handle(0), text() { }
 
     Index(Index& other) : index_handle(0), text() {
+SEQAN_CHECKPOINT
         // Explicitly request the other's index text.
         setIndexText(*this, indexText(other));
     }
 
     Index(Index const& other) : index_handle(0), text() {
+SEQAN_CHECKPOINT
         // Explicitly request the other's index text.
         setIndexText(*this, indexText(other));
     }
 
     template <typename TOtherText>
     Index(TOtherText& txt) : index_handle(0), text() {
+SEQAN_CHECKPOINT
         setIndexText(*this, txt);
     }
 
     ~Index() {
+SEQAN_CHECKPOINT
         clear(*this);
     }
 
-    // EffC++ trick for nothrow operator = (item 11)
-    Index& operator =(Index other) {
-        // TODO This is obviously wrong: need to specialize swap.
-        using ::std::swap;
-        swap(*this, other);
+    Index& operator =(Index const& other) {
+SEQAN_CHECKPOINT
+        if (this == &other)
+            return *this;
+
+        clear(*this);
+        setIndexText(*this, indexText(other));
+
         return *this;
     }
 
@@ -122,17 +130,15 @@ namespace impl {
     template <typename TText, typename TSpec>
     inline void
     clearIndex(Index<TText, PizzaChili<TSpec> >& me) {
+SEQAN_CHECKPOINT
         typedef typename PizzaChiliCodeProvider<TSpec>::Type TCodeProvider;
 
         if (me.index_handle != 0) {
             impl::error_t e =
                 TCodeProvider::free_index(me.index_handle);
 
-            if (e != 0) {
-                SEQAN_REPORT(TCodeProvider::error_index(e));
-                struct {} ex;
-                throw ex;
-            }
+            if (e != 0)
+                SEQAN_ABORT(TCodeProvider::error_index(e));
 
             me.index_handle = 0;
         }
@@ -154,25 +160,28 @@ namespace impl {
     template <typename TText, typename TSpec>
     inline char const*
     getOptionsString(Index<TText, PizzaChili<TSpec> >& /*me*/) {
+SEQAN_CHECKPOINT
         return "";
     }
 
     template <typename TText>
     inline char const*
     getOptionsString(Index<TText, PizzaChili<PizzaChili_SA> >& /*me*/) {
+SEQAN_CHECKPOINT
         return "copy_text";
     }
 
     template <typename TText>
     inline char const*
     getOptionsString(Index<TText, PizzaChili<PizzaChili_FM> >& /*me*/) {
-        //return "-f 1 -a 0";
+SEQAN_CHECKPOINT
         return "-a 0";
     }
 
     template <typename TText>
     inline char const*
     getOptionsString(Index<TText, PizzaChili<PizzaChili_RSA> >& /*me*/) {
+SEQAN_CHECKPOINT
         return "copy_text";
     }
 

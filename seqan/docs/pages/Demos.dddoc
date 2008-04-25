@@ -409,7 +409,39 @@ weese@tanne:~/seqan/demos$
 .
 
 
+.Demo.Pizza & Chili Index
+..cat:Index
+..summary:Using a @Spec.Pizza & Chili Index@ for searching and the @Spec.Pizza & Chili String@ for displaying.
+..description
+...text:This demonstrates how the Pizza & Chili index libraries may be used in
+conjunction with Seqan.
+In order to run this example you have to statically link the Pizza & Chili
+library (found in seqan/lib/libpizzachili.a).
+..output:
+...code:
+~/seqan$ cd demos/extra
+~/seqan/demos/extra$ make pizzachili
+~/seqan/demos/extra$ ./pizzachili
+Test the alphabet-friendly FM index:
+This is the best test with a bast jest.
+Hit at position 13
+Hit at position 18
+Hit at position 35
+infix(text, 12, 21): best test
+This is the best test with a bast jest.
 
+Test the compressed compact suffix array index:
+This is the best test with a bast jest.
+Hit at position 13
+Hit at position 18
+Hit at position 35
+infix(text, 12, 21): best test
+This is the best test with a bast jest.
+~/seqan/demos/extra$
+..file:../projects/library/demos/extra/pizzachili.cpp
+..demofor:Spec.Pizza & Chili Index
+..demofor:Spec.Pizza & Chili String
+.
 
 
 

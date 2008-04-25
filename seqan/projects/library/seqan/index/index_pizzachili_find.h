@@ -29,6 +29,7 @@ struct _PizzaChiliFinder;
 .Tag.Index Find Algorithm
 ..cat:Searching
 ..tag.PizzaChiliFinder:Finds an occurrence in a @Spec.Pizza & Chili Index@ index.
+...remarks:The actual algorithm used for searching depends on the @Tag.Pizza & Chili Index Tags@ used.
 ..see:Spec.Pizza & Chili Index
 */
 
@@ -78,6 +79,7 @@ public:
     Finder(TIndex const& index) : TBase(index) { }
 
     ~Finder() {
+SEQAN_CHECKPOINT
         if (range.i1 != 0)
             ::std::free(range.i1);
     }
@@ -145,11 +147,8 @@ SEQAN_CHECKPOINT
             &numocc
         );
 
-    if (e != 0) {
-        SEQAN_REPORT(TCodeProvider::error_index(e));
-        struct { } ex;
-        throw ex;
-    }
+    if (e != 0)
+        SEQAN_ABORT(TCodeProvider::error_index(e));
 
     finder.range.i1 = occ;
     finder.range.i2 = occ + numocc;

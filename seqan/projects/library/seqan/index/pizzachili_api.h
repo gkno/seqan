@@ -42,41 +42,23 @@ struct PizzaChiliCodeProvider {
 };
 
 /**
-.Spec.PizzaChili_AF:
-..summary:Pizza & Chili Alphabet-Friendly FM Index.
+.Tag.Pizza & Chili Index Tags
+..summary:Tag specifying the Pizza & Chili library to use.
+..remarks:More information for all the index libraries can be found in the
+@http://pizzachili.dcc.uchile.cl|original documentation@ (or the
+@http://pizzachili.di.unipi.it|Italian mirror@).
 ..cat:Index
-..base:Spec.Pizza & Chili Index
-..signature:Index<TText, PizzaChili<PizzaChili_AF> >
-..param.TText:The text type.
-...type:Class.String
-..remarks:To be used in conjunction with Pizza & Chili's $af_index$.
-
-.Spec.PizzaChili_CCSA:
-..summary:Pizza & Chili Compressed Compact Suffix Array Index.
-..cat:Index
-..base:Spec.Pizza & Chili Index
-..signature:Index<TText, PizzaChili<PizzaChili_CCSA> >
-..param.TText:The text type.
-...type:Class.String
-..remarks:To be used in conjunction with Pizza & Chili's $CCSA$ index.
-
-.Spec.PizzaChili_SA:
-..summary:Pizza & Chili Suffix Array Index.
-..cat:Index
-..base:Spec.Pizza & Chili Index
-..signature:Index<TText, PizzaChili<PizzaChili_SA> >
-..param.TText:The text type.
-...type:Class.String
-..remarks:To be used in conjunction with Pizza & Chili's $SAu$ and $SAc$ index.
-
-.Spec.PizzaChili_SSA:
-..summary:Pizza & Chili Sufficient Suffix Array Index.
-..cat:Index
-..base:Spec.Pizza & Chili Index
-..signature:Index<TText, PizzaChili<PizzaChili_SSA> >
-..param.TText:The text type.
-...type:Class.String
-..remarks:To be used in conjunction with Pizza & Chili's $SSA*$ indices.
+..tag.PizzaChili_AF:The alphabet-friendly FM index.
+..tag.PizzaChili_CCSA:The compressed compact suffix array index.
+..tag.PizzaChili_FM: The FM (full-text in minute space) index.
+..tag.PizzaChiili_RSA:The repair suffix array index.
+...remarks:The index cannot be saved and loaded.
+..tag.PizzaChili_SA: The simple suffix array index.
+...remarks:The index cannot be saved and loaded.
+..tag.PizzaChili_SADA: the compressed suffix array index.
+...remarks:The index cannot be saved and loaded.
+..see:Spec.Pizza & Chili Index
+..see:Spec.Pizza & Chili String
 */
 
 // We need to declare these explicitly instead through macro expansion in order

@@ -40,6 +40,7 @@ needed, this string tries to query only a substring.
 ..param.TValue:The value type, that is the type of them items/characters stored in the string.
 ...remarks:This type must be a simple type and it must hold that $sizeof(TValue) == 1$.
 ..param.TSpec:Tag specifying the Pizza & Chili index library to use.
+...type.Tag.Pizza & Chili Index Tags
 */
 
 template <typename TSpec>
@@ -63,25 +64,36 @@ public:
     String(TText& other)
         : index_handle(0), owned(true), data_begin(0), data_end(0)
     {
+SEQAN_CHECKPOINT
         assign(*this, other);
     }
 
     String(impl::index_t index_handle)
         : index_handle(index_handle), owned(true), data_begin(0), data_end(0) { }
 
+    String(String& other)
+        : index_handle(0), owned(true), data_begin(0), data_end(0)
+    {
+SEQAN_CHECKPOINT
+        assign(*this, other);
+    }
+
     String(String const& other)
         : index_handle(0), owned(true), data_begin(0), data_end(0)
     {
+SEQAN_CHECKPOINT
         assign(*this, other);
     }
 
     String& operator =(String const& other) {
+SEQAN_CHECKPOINT
         if (this != &other)
             assign(*this, other);
         return *this;
     }
 
     ~String() {
+SEQAN_CHECKPOINT
         clear(*this);
     }
 
@@ -89,11 +101,13 @@ public:
 
     template <typename TPos>
     inline TValue& operator [](TPos index) {
+SEQAN_CHECKPOINT
         return value(*this, index);
     }
 
     template <typename TPos>
     inline TValue operator [](TPos index) const {
+SEQAN_CHECKPOINT
         return value(*this, index);
     }
 };
@@ -156,13 +170,6 @@ template <typename TValue, typename TSpec>
 struct DefaultOverflowImplicit<String<TValue, PizzaChili<TSpec> > > {
     typedef Exact Type;
 };
-
-/*
-template <typename TValue>
-struct DefaultOverflowImplicit<String<TValue, PizzaChili<PizzaChili_FM> > > {
-    typedef Generous Type;
-};
-*/
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -237,7 +244,7 @@ _pizzaChiliAllocate(
     String<TValue, PizzaChili<TSpec> >& me,
     typename Size<String<TValue, PizzaChili<TSpec> > >::Type new_capacity
 ) {
-SEQAN_CHECKPOINT
+SEQAN_ CHECKPOINT
     TValue* old = me.data_begin;
     me.data_begin = static_cast<TValue*>(::std::malloc(new_capacity));
     return old == me.data_begin ? 0 : old;
@@ -280,7 +287,7 @@ struct _AllocHelper {
 
     /*
     static pointer_type allocate(string_type& me, size_type new_capacity) {
-SEQAN_CHECKPOINT
+SEQAN_ CHECKPOINT
         return _pizzaChiliAllocate(me, new_capacity);
     }
     */
@@ -306,6 +313,7 @@ struct _AllocHelper<TValue, PizzaChili_FM> {
     typedef typename Size<string_type>::Type size_type;
 
     static size_type real_capacity(size_type new_capacity) {
+SEQAN_CHECKPOINT
         typedef typename PizzaChiliCodeProvider<TSpec>::Type TCodeProvider;
         // The numerical constant values are taken from the fm_build.c example
         // in th FM library folder.
@@ -314,7 +322,7 @@ struct _AllocHelper<TValue, PizzaChili_FM> {
 
     /*
     static pointer_type allocate(string_type& me, size_type new_capacity) {
-SEQAN_CHECKPOINT
+SEQAN_ CHECKPOINT
         return _pizzaChiliAllocate(me, real_capacity(new_capacity));
     }
     */
@@ -337,7 +345,7 @@ _allocateStorage(
     String<TValue, PizzaChili<TSpec> >& me,
     typename Size<String<TValue, PizzaChili<TSpec> > >::Type new_capacity
 ) {
-SEQAN_CHECKPOINT
+SEQAN_ CHECKPOINT
     return _AllocHelper<TValue, TSpec>::allocate(me, new_capacity);
 }
 */
@@ -372,9 +380,12 @@ length(String<TValue, PizzaChili<TSpec> > const& me) {
 SEQAN_CHECKPOINT
     typedef typename PizzaChiliCodeProvider<TSpec>::Type TCodeProvider;
 
-    if (me.data_begin != 0)
+    if (me.data_begin != 0) {
+SEQAN_CHECKPOINT
         return me.data_end - me.data_begin;
+    }
     else if (me.index_handle != 0) {
+SEQAN_CHECKPOINT
         impl::ulong_t len;
         impl::error_t e =
             TCodeProvider::get_length(me.index_handle, &len);
@@ -408,14 +419,18 @@ namespace impl {
     queryText(String<TValue, PizzaChili<TSpec> > const& me) {
 SEQAN_CHECKPOINT
         typedef typename PizzaChiliCodeProvider<TSpec>::Type TCodeProvider;
-        if (me.data_begin != 0)
+        if (me.data_begin != 0) {
+SEQAN_CHECKPOINT
             return;
+        }
         if (me.index_handle == 0) {
+SEQAN_CHECKPOINT
             me.data_begin = static_cast<TValue*>(::std::malloc(1));
             me.data_begin[0] = '\0';
             me.data_end = me.data_begin;
         }
         else {
+SEQAN_CHECKPOINT
             impl::uchar_t* snippet;
             impl::ulong_t len;
             impl::error_t e =
@@ -487,23 +502,40 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 
+// NOTE: The following might seem redundant -- and it is -- but I don't see an
+// easier way to implement it. The helper constructs the infix, prefix and
+// suffix for a given Pizza & Chili string. The partial specializations cover
+// the following cases:
+//
+//  - integral positions are given
+//  - positions are iterators
+//  - positions are const iterators
+//
+// Additionally, every of those cases handles const and non-const string
+// arguments, for all three algorithms. Thus, there's a total of 3 * 3 * 2
+// cases, resulting in 18 functions.
+
 namespace impl {
     template <typename TValue, typename TSpec, typename TPos>
     struct substringHelperPizzaChili {
-        typedef typename Infix<String<TValue, PizzaChili<TSpec> > >::Type TResult;
+        typedef String<TValue, PizzaChili<TSpec> > TString;
+        typedef typename Infix<TString>::Type TResult;
+        typedef typename Infix<TString const>::Type TConstResult;
         typedef typename PizzaChiliCodeProvider<TSpec>::Type TCodeProvider;
 
         static inline TResult
-        infix(String<TValue, PizzaChili<TSpec> > const& me, TPos begin, TPos end) {
+        infix(TString& me, TPos begin, TPos end) {
 SEQAN_CHECKPOINT
             TResult ret;
 
             if (me.data_begin != 0) {
+SEQAN_CHECKPOINT
                 ret.owned = false;
                 ret.data_begin = me.data_begin + begin;
                 ret.data_end = me.data_begin + end;
             }
             else if (me.index_handle != 0) {
+SEQAN_CHECKPOINT
                 impl::uchar_t* snippet;
                 impl::ulong_t len;
                 impl::error_t e =
@@ -528,16 +560,37 @@ SEQAN_CHECKPOINT
             return ret;
         }
 
+        static inline TConstResult
+        infix(TString const& me, TPos begin, TPos end) {
+SEQAN_CHECKPOINT
+            // This cast is safe as the content is never written to.
+            return infix(const_cast<TString&>(me), begin, end);
+        }
+
         static inline TResult
-        prefix(String<TValue, PizzaChili<TSpec> > const& me, TPos end) {
+        prefix(TString& me, TPos end) {
+SEQAN_CHECKPOINT
+            return infix(me, 0, end);
+        }
+
+        static inline TConstResult
+        prefix(TString const& me, TPos end) {
+SEQAN_CHECKPOINT
             return infix(me, 0, end);
         }
 
         static inline TResult
-        suffix(String<TValue, PizzaChili<TSpec> > const& me, TPos begin) {
+        suffix(TString& me, TPos begin) {
+SEQAN_CHECKPOINT
             return infix(me, begin, length(me));
         }
-    };
+
+        static inline TConstResult
+        suffix(TString const& me, TPos begin) {
+SEQAN_CHECKPOINT
+            return infix(me, begin, length(me));
+        }
+    }; // substringHelperPizzaChili
 
     template <typename TValue, typename TSpec>
     struct substringHelperPizzaChili<
@@ -548,15 +601,16 @@ SEQAN_CHECKPOINT
             typename DefaultIteratorSpec<String<TValue, PizzaChili<TSpec> > >::Type
         >::Type
     > {
+        typedef String<TValue, PizzaChili<TSpec> > TString;
         typedef
             typename Iterator<
-                String<TValue, PizzaChili<TSpec> >,
-                typename DefaultIteratorSpec<String<TValue, PizzaChili<TSpec> > >::Type
+                TString, typename DefaultIteratorSpec<TString>::Type
             >::Type TPos;
-        typedef typename Infix<String<TValue, PizzaChili<TSpec> > >::Type TResult;
+        typedef typename Infix<TString>::Type TResult;
+        typedef typename Infix<TString const>::Type TConstResult;
 
         static inline TResult
-        infix(String<TValue, PizzaChili<TSpec> > const& /*me*/, TPos begin, TPos end) {
+        infix(TString& /*me*/, TPos begin, TPos end) {
 SEQAN_CHECKPOINT
             // Iterators were used, therefore it's safe to assume that the
             // string is already in memory.
@@ -567,27 +621,41 @@ SEQAN_CHECKPOINT
             return ret;
         }
 
+        static inline TConstResult
+        infix(TString const& me, TPos begin, TPos end) {
+SEQAN_CHECKPOINT
+            // This cast is safe as the content is never written to.
+            return infix(const_cast<TString&>(me), begin, end);
+        }
+
         static inline TResult
-        prefix(String<TValue, PizzaChili<TSpec> > const& me, TPos end) {
+        prefix(TString& me, TPos end) {
+SEQAN_CHECKPOINT
             return infix(me, begin(me), end);
         }
 
-        static inline TResult
-        prefix(String<TValue, PizzaChili<TSpec> >& me, TPos end) {
-            return infix(me, begin(me), end);
+        static inline TConstResult
+        prefix(TString const& me, TPos end) {
+SEQAN_CHECKPOINT
+            // This cast is safe as the content is never written to.
+            return infix(me, begin(const_cast<TString&>(me)), end);
         }
 
         static inline TResult
-        suffix(String<TValue, PizzaChili<TSpec> > const& me, TPos begin) {
+        suffix(TString& me, TPos begin) {
+SEQAN_CHECKPOINT
             return infix(me, begin, end(me));
         }
 
-        static inline TResult
-        suffix(String<TValue, PizzaChili<TSpec> >& me, TPos begin) {
-            return infix(me, begin, end(me));
+        static inline TConstResult
+        suffix(TString const& me, TPos begin) {
+SEQAN_CHECKPOINT
+            // This cast is safe as the content is never written to.
+            return infix(me, begin, end(const_cast<TString&>(me)));
         }
-    };
+    }; // substringHelperPizzaChili
 
+    // Specialization for const iterators.
     template <typename TValue, typename TSpec>
     struct substringHelperPizzaChili<
         TValue,
@@ -603,23 +671,26 @@ SEQAN_CHECKPOINT
             typename DefaultIteratorSpec<String<TValue, PizzaChili<TSpec> > >::Type
         >::Type
     > {
+        typedef String<TValue, PizzaChili<TSpec> > TString;
         typedef
             typename Iterator<
-                String<TValue, PizzaChili<TSpec> > const,
-                typename DefaultIteratorSpec<String<TValue, PizzaChili<TSpec> > >::Type
+                TString const,
+                typename DefaultIteratorSpec<TString>::Type
             >::Type TPos;
-        typedef typename Infix<String<TValue, PizzaChili<TSpec> > const>::Type TResult;
+        typedef typename Infix<TString const>::Type TResult;
+        typedef typename Infix<TString const>::Type TConstResult;
         typedef substringHelperPizzaChili<
             TValue, TSpec,
             typename Iterator<
-                String<TValue, PizzaChili<TSpec> >,
-                typename DefaultIteratorSpec<String<TValue, PizzaChili<TSpec> > >::Type
+                TString,
+                typename DefaultIteratorSpec<TString>::Type
             >::Type
         > TBase;
 
-        static inline TResult
-        infix(String<TValue, PizzaChili<TSpec> > const& me, TPos begin, TPos end) {
+        static inline TConstResult
+        infix(TString const& me, TPos begin, TPos end) {
 SEQAN_CHECKPOINT
+            // This cast is safe as the content is never written to.
             return TBase::infix(
                 me,
                 const_cast<typename TBase::TPos>(begin),
@@ -627,23 +698,15 @@ SEQAN_CHECKPOINT
             );
         }
 
-        static inline TResult
-        prefix(String<TValue, PizzaChili<TSpec> > const& me, TPos end) {
+        static inline TConstResult
+        prefix(TString const& me, TPos end) {
+SEQAN_CHECKPOINT
             return infix(me, begin(me), end);
         }
 
-        static inline TResult
-        prefix(String<TValue, PizzaChili<TSpec> >& me, TPos end) {
-            return infix(me, begin(me), end);
-        }
-
-        static inline TResult
-        suffix(String<TValue, PizzaChili<TSpec> > const& me, TPos begin) {
-            return infix(me, begin, end(me));
-        }
-
-        static inline TResult
-        suffix(String<TValue, PizzaChili<TSpec> >& me, TPos begin) {
+        static inline TConstResult
+        suffix(TString const& me, TPos begin) {
+SEQAN_CHECKPOINT
             return infix(me, begin, end(me));
         }
     };

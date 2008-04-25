@@ -4,7 +4,6 @@
 #include <vector>
 #include <fstream>
 
-#define SEQAN_DEBUG_PIZZACHILI
 #define SEQAN_DEBUG
 #define SEQAN_TEST
 
@@ -56,7 +55,7 @@ struct TestHelper {
             cout << "No matches found." << endl;
         else {
             cout << "Hits: " << hits.size() << endl;
-            cout << "Position, Suffix" << endl;
+            cout << "Position, Extract" << endl;
 
             string_t found_text = indexText(idx);
             typename Size<TStr>::Type len = length(needle) + 10;
@@ -93,31 +92,68 @@ struct TestHelper {
         cout << prefix(indexText(idx), 20) << "..." << endl;
     }
 
-    template <typename TStr>
-    static void test_infix(TStr& str) {
-        cout << "---------- Infix iterator test:" << endl;
-        typename Iterator<TStr>::Type start = begin(str);
+    static void test_index_copy() {
+        index_t idx1("This is the best test with a bast jest");
+        index_t idx2 = idx1;
+
+        cout << "---------- Index copy test." << endl;
+        cout << "Old index: " << indexText(idx1) << endl;
+        cout << "New index: " << indexText(idx2) << endl;
+
+        // Force index creation.
+        indexRequire(idx1, PizzaChili_Compressed());
+
+        index_t const& cr_idx1 = idx1;
+        index_t idx3 = cr_idx1;
+
+        cout << "Copy from const: " << indexText(idx3) << endl;
+
+        idx2 = idx1;
+
+        cout << "Assigned  index: " << indexText(idx2) << endl;
+    }
+
+    template <typename TStr, typename TIter>
+    static void test_infix(TStr& str, TIter start) {
+        cout << "Infix iterator test: ";
         cout << infix(str, start + 10, start + 20) << endl;
-        cout << "Prefix iterator test:" << endl;
+        cout << "Prefix iterator test: ";
         cout << prefix(str, start + 10) << endl;
-        cout << "Suffix iterator test:" << endl;
+        cout << "Suffix iterator test: ";
         cout << suffix(str, start + 10) << endl;
 
-        cout << "---------- Infix position test:" << endl;
+        cout << "Infix position test: ";
         cout << infix(str, 10, 20) << endl;
-        cout << "Prefix position test:" << endl;
+        cout << "Prefix position test: ";
         cout << prefix(str, 10) << endl;
-        cout << "Suffix iterator test:" << endl;
+        cout << "Suffix iterator test: ";
         cout << suffix(str, 10) << endl;
     }
 
     static void test_infix() {
-        string_t str = "---------- This is the best test with a bast jest.";
+        string_t str = "This is the best test with a bast jest.";
+        cout << "----------String tests:" << endl;
         cout << "----- Non-const" << endl;
-        test_infix(str);
-        cout << "----- Const" << endl;
+        test_infix(str, begin(str));
+        cout << "----- Const string, non-const iterator" << endl;
         string_t const& crstr = str;
-        test_infix(crstr);
+        test_infix(crstr, begin(str));
+        cout << "----- Const string, const iterator" << endl;
+        test_infix(crstr, begin(crstr));
+
+        string_t str2 = str;
+        string_t str3 = crstr;
+
+        cout << "----- Tests with string copy:" << endl;
+        cout << "Copy: " << str2 << endl;
+        cout << "Copy from const: " << str3 << endl;
+
+        str2 = str;
+        cout << "Assigned: " << str2 << endl;
+
+        cout << "----- Indexed access:" << endl;
+        cout << "str[2]: " << str[2] << endl;
+        cout << "crstr[2]: " << crstr[2] << endl;
     }
 
     static void test_all() {
@@ -140,6 +176,7 @@ struct TestHelper {
                 cout << "---------- Saving:" << endl;
                 test_index_save(idx, "indexdata");
                 test_const_specs(idx);
+                test_index_copy();
             }
 
             {
