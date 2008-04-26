@@ -1,7 +1,8 @@
 #
 #  Possible targets:
 #
-#	- all (default):    builds the index
+#	- all (default):    builds and installs the index
+#	- install:          dito
 #	- test:             builds the index and the test executable
 #	- clean:            removes all temporary binary files and the directories
 #	- cleanall:         like clean, but also removes all binary files
@@ -14,6 +15,12 @@
 OBJCOPY := objcopy
 GET := ./get.sh
 CPPFLAGS := -Wall -pedantic
+SYSTEM := $(shell uname)
+
+# On Darwin use gobjcopy of MacPorts binutils
+ifeq ($(SYSTEM),Darwin)
+  OBJCOPY := gobjcopy
+endif
 
 #
 # The source of the libraries.
@@ -26,7 +33,11 @@ Rel := indexes
 # The seqan library location.
 #
 
-SeqanPath := ../..
+SEQAN := ../..
+
+# The following line is for the SVN repository
+# You can remove it, if you use the release/snapshot
+CPPFLAGS += -I$(SEQAN)/../../platforms/gcc
 
 #
 # Pizza & Chili libraries that go into the final bundle.
@@ -117,14 +128,16 @@ CleanDirs := $(addsuffix -clean,$(Directories))
 #
 ################################################################################
 
-all: libpizzachili.a
-	@cp libpizzachili.a $(SeqanPath)/lib/
+all: install
+
+install: libpizzachili.a
+	cp $< $(SEQAN)/lib/
 	
 # To replace default implicit rule (%: %.o)
 %: 
 	
 test: test.cpp libpizzachili.a
-	$(CXX) $(CPPFLAGS) -I $(SeqanPath) -o test test.cpp libpizzachili.a
+	$(CXX) $(CPPFLAGS) -I$(SEQAN) $< libpizzachili.a -o $@
 
 test.cpp: test.bak
 	@cp test.bak test.cpp
@@ -135,16 +148,16 @@ libpizzachili.a: libpizzachili.o
 
 # 11. Link all the wrappers together into one object file.
 libpizzachili.o: $(WrapperObjects)
-	$(LD) -i $(WrapperObjects) -z muldefs -o $@
+	$(LD) -r $(WrapperObjects) -z muldefs -o $@
 
 #  8. Compile the wrapper.
 #  9. Re-link the wrapper.o with all the .o files from the temporary directory.
 # 10. Mark all the private Pizza & Chili symbols in wrapper.o local.
 %-wrap.o: %.o pizzachili_api.cpp interface.h
-	$(CXX) $(CPPFLAGS) -I$(SeqanPath) -c -o $*-tmp.o \
+	$(CXX) $(CPPFLAGS) -I$(SEQAN) -c -o $*-tmp.o \
 		-DPCINDEX_NAME=PizzaChiliApi$* \
 		-DPCINDEX_$* -DPCINDEX_$($*_type) pizzachili_api.cpp
-	$(LD) -i -x $*-tmp.o $*.d/tmp/*.o -o $@
+	$(LD) -r -x $*-tmp.o $*.d/tmp/*.o -o $@
 	$(OBJCOPY) -w -G \*PizzaChili\* -G _ZSt\* -G _ZNSt\* $@
 	
 #. 6. Build the source by recursively calling make.
@@ -184,8 +197,8 @@ FM.o: FM.d
 	@-mv $(notdir $($*)) $@
 
 clean: $(CleanDirs)
-	@echo "Removing temporary object files ..."
-	@rm -f *-tmp.o *-wrap.o
+	@echo "Removing object files ..."
+	@rm -f *-tmp.o *-wrap.o libpizzachili.o libpizzachili.a
 
 %-clean:
 	@echo "Removing directory $(patsubst %-clean,%,$@) ..."

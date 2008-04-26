@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "pizzachili_api.h"
+#include <seqan/index/pizzachili_api.h>
 
 using namespace std;
 using namespace seqan;
@@ -35,11 +35,16 @@ using namespace seqan;
     }
 
 MAKE_TEST(AF, "AF", "")
+MAKE_TEST(CCSA, "CCSA", "")
+MAKE_TEST(FM, "FM", "")
+MAKE_TEST(RSA, "RSA", "")
+MAKE_TEST(RLFM, "RLFM", "")
 MAKE_TEST(SA, "SA", "copy_text")
+MAKE_TEST(SADA, "SADA", "")
 MAKE_TEST(SSA, "SSA", "")
 
 int main() {
     test_AF();
     test_SA();
-    test_SSA();
+//    test_SSA();
 }
