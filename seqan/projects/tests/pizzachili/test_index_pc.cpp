@@ -1,3 +1,6 @@
+// To build this test, type:
+// make Platform=gcc Mode=Debug Project=pizzachili LDFlags="-lpizzachili -Lprojects/library/lib/"
+
 #include <iostream>
 #include <iomanip>
 #include <string>
