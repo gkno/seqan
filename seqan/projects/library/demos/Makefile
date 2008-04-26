@@ -1,6 +1,8 @@
+SEQAN = ..
+
 # The following line is for the SVN repository
 # You can remove it, if you use the release/snapshot
-CPPFLAGS += -I../../../platforms/gcc
+CPPFLAGS += -I$(SEQAN)/../../platforms/gcc
 
 # Link against runtime library on Linux systems
 OS_NAME=$(shell uname)
@@ -8,7 +10,7 @@ ifeq ($(OS_NAME),Linux)
   LDFLAGS += -lrt
 endif
 
-CPPFLAGS += -I..
+CPPFLAGS += -I$(SEQAN)
 CPPFLAGS += -O3
 CPPFLAGS += -pedantic
 CPPFLAGS += -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
