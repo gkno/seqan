@@ -139,9 +139,6 @@ install: libpizzachili.a
 test: test.cpp libpizzachili.a
 	$(CXX) $(CPPFLAGS) -I$(SEQAN) $< libpizzachili.a -o $@
 
-test.cpp: test.bak
-	@cp test.bak test.cpp
-
 # 12. Bundle the final object file into a library.
 libpizzachili.a: libpizzachili.o
 	ar rcs $@ $<
