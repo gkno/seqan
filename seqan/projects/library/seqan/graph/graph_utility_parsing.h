@@ -37,7 +37,10 @@ template<typename TFile, typename TChar>
 inline void 
 _parse_skipLine(TFile& file, TChar& c)
 {
-	if (c == '\n' || (c == '\r' && _streamPeek(file) != '\n')) return;
+	if (c == '\n' || (c == '\r' && _streamPeek(file) != '\n')) {
+		c = _streamGet(file);
+		return;
+	}
 	while (!_streamEOF(file)) {
 		c = _streamGet(file);
 		if (c == '\n' || (c == '\r' && _streamPeek(file) != '\n')) break;

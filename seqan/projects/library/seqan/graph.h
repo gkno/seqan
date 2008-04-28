@@ -113,7 +113,11 @@
 
 // Consensus tool
 #include <seqan/graph/graph_consensus_base.h>
+#include <seqan/graph/graph_consensus_ctgstore.h>
 #include <seqan/graph/graph_consensus_library.h>
+#include <seqan/graph/graph_consensus_readstore.h>
+#include <seqan/graph/graph_consensus_frgstore.h>
+#include <seqan/graph/graph_consensus_libstore.h>
 
 // Folding
 #include <seqan/graph/graph_fold_nussinov.h>

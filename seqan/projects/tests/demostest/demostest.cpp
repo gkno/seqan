@@ -197,10 +197,6 @@
 	#include "../../library/demos/graph_align_hirschberg.cpp"
 	#undef main
 
-	#define main runGraph25
-	#include "../../library/demos/graph_consensus.cpp"
-	#undef main
-
 	#define main runGraph20
 	#include "../../library/demos/graph_align_sw.cpp"
 	#undef main
@@ -221,8 +217,16 @@
 	#include "../../library/demos/seqan_tcoffee.cpp"
 	#undef main
 
+	#define main runGraph25
+	#include "../../library/demos/graph_consensus.cpp"
+	#undef main
+
 	#define main runGraph26
 	#include "../../library/demos/graph_hmm.cpp"
+	#undef main
+
+	#define main runGraph27
+	#include "../../library/demos/graph_matching.cpp"
 	#undef main
 
 #endif
@@ -273,7 +277,7 @@ int main(int argc, const char *argv[])
 	runGraph18();runGraph19();runGraph20();runGraph21();runGraph22();runGraph23();
 	runGraph24(argc, argv);
 	runGraph25(argc, argv);
-	runGraph26();
+	runGraph26();runGraph27();
 #endif
 
 	return 0;

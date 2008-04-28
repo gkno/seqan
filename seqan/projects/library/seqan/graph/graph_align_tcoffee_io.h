@@ -597,7 +597,6 @@ read(TFile & file,
 
 	TName seq1;
 	TName seq2;
-	TWord window = 1000;
 	while (!_streamEOF(file)) {
 		clear(seq1);
 		clear(seq2);
@@ -635,12 +634,13 @@ read(TFile & file,
 		--beg1;
 		--beg2;
 
-		if (((beg1 > beg2) && ((beg1 - beg2) > window)) ||
-			((beg1 < beg2) && ((beg2 - beg1) > window))) {
-				//std::cout << "Out of window" << std::endl;
-				_parse_skipLine(file, c);
-				continue;
-		}
+		//TWord window = 1000;
+		//if (((beg1 > beg2) && ((beg1 - beg2) > window)) ||
+		//	((beg1 < beg2) && ((beg2 - beg1) > window))) {
+		//		//std::cout << "Out of window" << std::endl;
+		//		_parse_skipLine(file, c);
+		//		continue;
+		//}
 		if	(((beg1 + len) > length(strSet[seq1Id])) ||
 			((beg2 + len) > length(strSet[seq2Id]))) {
 				//std::cout << "Wrong match" << std::endl;
@@ -676,7 +676,7 @@ read(TFile & file,
 			TVertexDescriptor p2 = findVertex(g, id2, pos2);
 			TWord fragLen = fragmentLength(g, p1);
 			TEdgeDescriptor e = findEdge(g, p1, p2);
-			cargo(e) *= (TCargo) ( (double) fragLen / (double) origFragLen * (double) getValue(score_values, positionIt));
+			cargo(e) += (TCargo) ( (double) fragLen / (double) origFragLen * (double) getValue(score_values, positionIt));
 			pos1 += fragLen;
 			pos2 += fragLen;
 		}
@@ -756,6 +756,11 @@ void write(TFile & file,
 	for(;!atEnd(it);++it) {
 		TVertexDescriptor sV = sourceVertex(it);
 		TVertexDescriptor tV = targetVertex(it);
+		if (sequenceId(g,sV) < sequenceId(g,tV)) {
+			TVertexDescriptor tmp = sV;
+			sV = tV;
+			tV = tmp;
+		}
 		TSize fragLen = fragmentLength(g,sV);
 		TSize fragPos1 = fragmentBegin(g,sV);
 		TSize fragPos2 = fragmentBegin(g,tV);

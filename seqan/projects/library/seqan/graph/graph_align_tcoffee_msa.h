@@ -523,6 +523,61 @@ testChristian(StringSet<TString, TSpec> const& seqSet,
 
 
 
+template<typename TString, typename TSpec, typename TName, typename TSpec2, typename TFileName, typename TAlignmentGraph>
+inline void
+testIslands(StringSet<TString, TSpec> const& seqSet,
+			 StringSet<TName, TSpec2> const& nameSet,
+			 TFileName& matchfile,
+			 TAlignmentGraph& gOut)
+{
+	typedef StringSet<TString, Dependent<> > TStringSet;
+	typedef Graph<Alignment<TStringSet, unsigned int> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename Id<TGraph>::Type TId;
+	TSize nseq = length(seqSet);
+	TSize threshold = 38;
+
+	// Select all pairs
+	TGraph g(seqSet);
+	String<Pair<TId, TId> > pList;
+	selectPairsForLibraryGeneration(g, pList);
+
+
+	TGraph lib1(seqSet);
+	String<double> distanceMatrix;
+	Blosum62 scType(-1,-11);
+	generatePrimaryLibrary(lib1, pList, distanceMatrix, scType, GlobalPairwise_Library() );
+	
+	TGraph lib2(seqSet);
+	generatePrimaryLibrary(lib2, pList, scType, Interleaved_Library() );
+
+	// Weighting of libraries (Signal addition)
+	String<TGraph*> libs;
+	appendValue(libs, &lib2);
+	//appendValue(libs, &lib2);
+	//appendValue(libs, &lib2);
+	combineGraphs(g, libs);
+	//combineGraphs(g, libs, FrequencyCounting() );
+
+	if (nseq < threshold) {
+		// Full triplet...
+		tripletLibraryExtension(g);
+
+		// ... and normal progressive alignment with guide tree
+		Graph<Tree<double> > guideTree;
+		slowNjTree(distanceMatrix, guideTree);
+		progressiveAlignment(g, guideTree, gOut);
+		clear(guideTree);
+	} else {
+		// Triplet only on groups of sequences
+		Graph<Tree<double> > guideTree;
+		slowNjTree(distanceMatrix, guideTree);	// More balanced than UPGMA
+		progressiveAlignment(g, guideTree, gOut, threshold);
+		clear(guideTree);
+	}
+
+	std::cout << gOut << std::endl;
+}
 
 
 

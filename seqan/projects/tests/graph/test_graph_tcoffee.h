@@ -641,17 +641,56 @@ void Test_SumOfPairsScore() {
 	SEQAN_TASSERT(sumOfPairsScoreInd(gOut, score_type) == 16)
 
 	seqSet[1] = "AAG";
-	Score<int> score_type2 = Score<int>(5,-4,-1,-2);
+	Score<int> scType = Score<int>(5,-4,-1,-2);
 	clear(distanceMatrix);
 	clearVertices(g);
-	generatePrimaryLibrary(g, distanceMatrix, score_type, GlobalPairwise_Library() );
+	generatePrimaryLibrary(g, distanceMatrix, scType, GlobalPairwise_Library() );
 	tripletLibraryExtension(g);
 	clear(guideTree);
 	slowNjTree(distanceMatrix, guideTree);
 	clearVertices(gOut);
 	progressiveAlignment(g, guideTree, gOut);
-	SEQAN_TASSERT(sumOfPairsScore(gOut, score_type2) == 9)
-	SEQAN_TASSERT(sumOfPairsScoreInd(gOut, score_type2) == 15)
+	SEQAN_TASSERT(sumOfPairsScore(gOut, scType) == 13)
+
+
+	resize(seqSet, 2);
+	seqSet[0] = "TTT";
+	seqSet[1] = "AAA";
+	clear(distanceMatrix);
+	clear(g);
+	assignStringSet(g, seqSet);
+	generatePrimaryLibrary(g, distanceMatrix, scType, GlobalPairwise_Library() );
+	tripletLibraryExtension(g);
+	clear(guideTree);
+	slowNjTree(distanceMatrix, guideTree);
+	clear(gOut);
+	assignStringSet(gOut, seqSet);
+	progressiveAlignment(g, guideTree, gOut);
+	SEQAN_TASSERT(sumOfPairsScore(gOut, scType) == -8)
+
+	seqSet[0] = "TTTAAATTT";
+	seqSet[1] = "AAA";
+	clear(distanceMatrix);
+	clearVertices(g);
+	generatePrimaryLibrary(g, distanceMatrix, scType, GlobalPairwise_Library() );
+	tripletLibraryExtension(g);
+	clear(guideTree);
+	slowNjTree(distanceMatrix, guideTree);
+	clearVertices(gOut);
+	progressiveAlignment(g, guideTree, gOut);
+	SEQAN_TASSERT(sumOfPairsScore(gOut, scType) == 7)
+
+	seqSet[0] = "AAAAAA";
+	seqSet[1] = "TTTAAATTTAAATTT";
+	clear(distanceMatrix);
+	clearVertices(g);
+	generatePrimaryLibrary(g, distanceMatrix, scType, GlobalPairwise_Library() );
+	tripletLibraryExtension(g);
+	clear(guideTree);
+	slowNjTree(distanceMatrix, guideTree);
+	clearVertices(gOut);
+	progressiveAlignment(g, guideTree, gOut);
+	SEQAN_TASSERT(sumOfPairsScore(gOut, scType) == 18)
 }
 
 

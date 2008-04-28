@@ -1,0 +1,677 @@
+ /*==========================================================================
+                SeqAn - The Library for Sequence Analysis
+                          http://www.seqan.de 
+ ============================================================================
+  Copyright (C) 2007
+
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 3 of the License, or (at your option) any later version.
+
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+  Lesser General Public License for more details.
+
+ ============================================================================
+  $Id: graph_consensus_readstore.h 1811 2008-03-31 15:38:54Z rausch@PCPOOL.MI.FU-BERLIN.DE $
+ ==========================================================================*/
+
+#ifndef SEQAN_HEADER_GRAPH_CONSENSUS_READSTORE_H
+#define SEQAN_HEADER_GRAPH_CONSENSUS_READSTORE_H
+
+namespace SEQAN_NAMESPACE_MAIN
+{
+//////////////////////////////////////////////////////////////////////////////
+// Read Store
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TAlphabet = Dna, typename TSpec = Default>
+class ReadStore;
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TAlphabet, typename TSpec>
+class ReadStore
+{
+	public:
+		typedef typename Size<ReadStore>::Type TSize;
+		String<TAlphabet, External<> > data_reads;
+		String<char, External<> > data_qualities;
+		StringSet<String<char, External<> >, Owner<ConcatDirect<> > > data_names;
+		String<Pair<TSize, TSize> > data_begin_end;
+		String<Pair<TSize, TSize> > data_clr;
+		String<TSize> data_frg_id;
+		TSize data_pos_count;
+		
+	public:
+		ReadStore() : data_pos_count(0)
+		{
+			SEQAN_CHECKPOINT
+			clear(data_reads);
+			clear(data_qualities);
+			clear(data_names);
+			clear(data_begin_end);
+			clear(data_clr);
+			clear(data_frg_id);
+		}
+
+		~ReadStore() 
+		{
+			SEQAN_CHECKPOINT
+		}
+
+
+	private:
+		ReadStore(ReadStore const & _other)
+		{
+			SEQAN_CHECKPOINT
+			data_reads = _other.data_reads;
+			data_qualities = _other.data_qualities;
+			data_names = _other.data_names;
+			data_begin_end = _other.data_begin_end;
+			data_frg_id = _other.data_frg_id;
+			data_clr = _other.data_clr;
+			data_pos_count = _other.data_pos_count;
+		}
+
+		ReadStore const& 
+		operator = (ReadStore const& _other) 
+		{
+			SEQAN_CHECKPOINT
+			if (this == &_other) return *this;
+			data_reads = _other.data_reads;
+			data_qualities = _other.data_qualities;
+			data_names = _other.data_names;
+			data_begin_end = _other.data_begin_end;
+			data_frg_id = _other.data_frg_id;
+			data_clr = _other.data_clr;
+			data_pos_count = _other.data_pos_count;
+			return *this;
+		}
+};
+	
+
+
+//////////////////////////////////////////////////////////////////////////////
+// FUNCTIONS
+//////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TAlphabet, typename TSpec, typename TSize, typename TRead>
+inline void 
+loadRead(ReadStore<TAlphabet, TSpec>& readSt, 
+		 TSize index,
+		 TRead& seq) 
+{
+	SEQAN_CHECKPOINT
+	clear(seq);
+	seq = infix(readSt.data_reads, (value(readSt.data_begin_end, index)).i1, (value(readSt.data_begin_end, index)).i2);
+}
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TAlphabet, typename TSpec, typename TSize, typename TRead>
+inline void 
+loadQuality(ReadStore<TAlphabet, TSpec>& readSt,
+			TSize index,
+			TRead& seq) 
+{
+	SEQAN_CHECKPOINT
+	clear(seq);
+	seq = infix(readSt.data_qualities, (value(readSt.data_begin_end, index)).i1, (value(readSt.data_begin_end, index)).i2);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TAlphabet, typename TSpec, typename TSize, typename TName>
+inline void 
+loadExtId(ReadStore<TAlphabet, TSpec>& readSt,
+		  TSize index,
+		  TName& name) 
+{
+	SEQAN_CHECKPOINT
+	name = value(readSt.data_names, index);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TAlphabet, typename TSpec, typename TSize>
+inline typename Id<ReadStore<TAlphabet, TSpec> >::Type
+loadFrgId(ReadStore<TAlphabet, TSpec>& readSt, 
+		  TSize index) 
+{
+	SEQAN_CHECKPOINT
+	return value(readSt.data_frg_id, index);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TAlphabet, typename TSpec>
+inline typename Size<ReadStore<TAlphabet, TSpec> >::Type
+length(ReadStore<TAlphabet, TSpec>& readSt) 
+{
+	SEQAN_CHECKPOINT
+	return readSt.data_pos_count;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TAlphabet, typename TSpec, typename TAlph2, typename TSpec2, typename TSize, typename TStringSet, typename TLayoutPos>
+inline void
+loadReadsClr(ReadStore<TAlphabet, TSpec>& readSt,
+			 CtgStore<TAlph2, TSpec2>& ctgSt,
+			 TSize index,
+			 TStringSet& strSet,
+			 TLayoutPos& startEndPos) 
+{
+	SEQAN_CHECKPOINT
+	typedef typename Value<TLayoutPos>::Type TPair;
+	String<GappedRead<> >& gapReads = value(ctgSt.data_reads, index);
+	TSize numReads = length(gapReads);
+	resize(strSet, numReads);
+	for(TSize i = 0; i<numReads; ++i) {
+		GappedRead<>& gRead = value(gapReads, i);
+		String<TAlphabet> seq;
+		loadRead(readSt, gRead.data_source , seq);
+		if (gRead.data_clr.i1 < gRead.data_clr.i2) {
+			value(strSet, i) = infix(seq, gRead.data_clr.i1, gRead.data_clr.i2);
+		} else {
+			value(strSet, i) = infix(seq, gRead.data_clr.i2, gRead.data_clr.i1);
+			reverseComplementInPlace(value(strSet, i));
+		}
+		appendValue(startEndPos, TPair(gRead.data_clr.i1 + gRead.data_offset, gRead.data_clr.i2 + gRead.data_offset));
+	}
+}
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+
+template<typename TFile, typename TAlphabet, typename TSpec, typename TFragmentStore, typename TLibraryStore, typename TContigStore>
+inline void 
+read(TFile & file,
+	 ReadStore<TAlphabet, TSpec>& readSt,
+	 TFragmentStore& frgSt,
+	 TLibraryStore& libSt,
+	 TContigStore& ctgSt,
+	 Amos) 
+{
+	SEQAN_CHECKPOINT
+	typedef ReadStore<TAlphabet, TSpec> TReadStore;
+	typedef typename Id<TReadStore>::Type TId;
+	typedef typename Size<TReadStore>::Type TSize;
+	typedef typename Value<TFile>::Type TValue;
+
+	// All maps to mirror file ids to our ids
+	typedef std::map<TSize, TSize> TIdMap;
+	TIdMap libIdMap;
+	TIdMap frgIdMap;
+	TIdMap readIdMap;
+	TIdMap ctgIdMap;
+
+	// Parse the file and convert the internal ids
+	TValue c;
+	if (_streamEOF(file)) return;
+	else c = _streamGet(file);
+	while (!_streamEOF(file)) {
+		if (_streamEOF(file)) break;
+
+		// New block?
+		if (c == '{') {
+			c = _streamGet(file);
+			String<char> blockIdentifier = _parse_readIdentifier(file, c);
+			_parse_skipLine(file, c);
+
+			// Library block
+			if (blockIdentifier == "LIB") {
+				TSize id = 0;
+				TSize mean = 0;
+				TSize std = 0;
+				String<char> fieldIdentifier;
+				String<char> eid;
+				while (c != '}') {
+					fieldIdentifier = _parse_readIdentifier(file, c);
+					if (fieldIdentifier == "iid") {
+						c = _streamGet(file);
+						id = _parse_readNumber(file, c);
+						_parse_skipLine(file, c);
+					} else if (fieldIdentifier == "eid") {
+						c = _streamGet(file);
+						while ((c != '\n') && (c != '\r')) {
+							appendValue(eid, c);
+							c = _streamGet(file);
+						}
+						_parse_skipLine(file, c);
+					} else if (fieldIdentifier == "mea") {
+						c = _streamGet(file);
+						mean = _parse_readNumber(file, c);
+						_parse_skipLine(file, c);
+					} else if (fieldIdentifier == "std") {
+						c = _streamGet(file);
+						std = _parse_readNumber(file, c);
+						_parse_skipLine(file, c);
+					} else {
+						_parse_skipLine(file, c);
+					}
+				}
+				appendValue(libSt.data_mean, mean);
+				appendValue(libSt.data_std, std);
+				appendValue(libSt.data_names, eid);
+				libIdMap.insert(std::make_pair(id, libSt.data_pos_count));
+				++libSt.data_pos_count;
+			} else if (blockIdentifier == "FRG") {  // Fragment block
+				TSize libId = 0;
+				TSize id = 0;
+				TSize rds1Id = 0;
+				TSize rds2Id = 0;
+				String<char> fieldIdentifier;
+				String<char> eid;
+				while (c != '}') {
+					fieldIdentifier = _parse_readIdentifier(file, c);
+					if (fieldIdentifier == "iid") {
+						c = _streamGet(file);
+						id = _parse_readNumber(file, c);
+						_parse_skipLine(file, c);
+					} else if (fieldIdentifier == "eid") {
+						c = _streamGet(file);
+						while ((c != '\n') && (c != '\r')) {
+							appendValue(eid, c);
+							c = _streamGet(file);
+						}
+						_parse_skipLine(file, c);
+					} else if (fieldIdentifier == "lib") {
+						c = _streamGet(file);
+						libId = _parse_readNumber(file, c);
+						_parse_skipLine(file, c);
+					} else if (fieldIdentifier == "rds") {
+						c = _streamGet(file);
+						rds1Id = _parse_readNumber(file, c);
+						c = _streamGet(file);
+						rds2Id = _parse_readNumber(file, c);
+						_parse_skipLine(file, c);
+					} else {
+						_parse_skipLine(file, c);
+					}
+				}
+				appendValue(frgSt.data_lib_id, libId);
+				appendValue(frgSt.data_rds, Pair<TSize, TSize>(rds1Id, rds2Id));
+				appendValue(frgSt.data_names, eid);
+				frgIdMap.insert(std::make_pair(id, frgSt.data_pos_count));
+				++frgSt.data_pos_count;
+			} else if (blockIdentifier == "RED") {   // Read block
+				String<TAlphabet> seq;
+				String<char> qlt;
+				TId id = 0;
+				TId frgId = 0;
+				TSize clr1 = 0;
+				TSize clr2 = 0;
+				String<char> fieldIdentifier;
+				String<char> eid;
+				while (c != '}') {
+					fieldIdentifier = _parse_readIdentifier(file, c);
+					if (fieldIdentifier == "iid") {
+						c = _streamGet(file);
+						id = _parse_readNumber(file, c);
+						_parse_skipLine(file, c);
+					} else if (fieldIdentifier == "eid") {
+						c = _streamGet(file);
+						while ((c != '\n') && (c != '\r')) {
+							appendValue(eid, c);
+							c = _streamGet(file);
+						}
+						_parse_skipLine(file, c);
+					} else if (fieldIdentifier == "frg") {
+						c = _streamGet(file);
+						frgId = _parse_readNumber(file, c);
+						_parse_skipLine(file, c);
+					} else if (fieldIdentifier == "seq") {
+						c = _streamGet(file);
+						_parse_skipWhitespace(file, c);
+						while (c != '.') {
+							_parse_readSequenceData(file,c,seq);
+							_parse_skipLine(file, c);
+						}
+					} else if (fieldIdentifier == "qlt") {
+						c = _streamGet(file);
+						_parse_skipWhitespace(file, c);
+						while (c != '.') {
+							if ((c!=' ') && (c != '\t') && (c != '\n') && (c != '\r')) {
+								appendValue(qlt, c);
+							}
+							c = _streamGet(file);
+						}
+					} else if (fieldIdentifier == "clr") {
+						c = _streamGet(file);
+						clr1 = _parse_readNumber(file, c);
+						c = _streamGet(file);
+						clr2 = _parse_readNumber(file, c);
+						_parse_skipLine(file, c);
+					} else {
+						_parse_skipLine(file, c);
+					}
+				}
+				TSize begRead;
+				if (readSt.data_pos_count == 0) begRead = 0;
+				else begRead = (value(readSt.data_begin_end, readSt.data_pos_count - 1)).i2;
+				TSize endRead = begRead + length(seq);
+				typedef typename Iterator<String<TAlphabet> >::Type TSeqIter;
+				TSeqIter itSeq = begin(seq);
+				TSeqIter itSeqEnd = end(seq);
+				for(;itSeq != itSeqEnd; ++itSeq) appendValue(readSt.data_reads, *itSeq);
+				typedef typename Iterator<String<char> >::Type TQualityIter;
+				TQualityIter itQlt = begin(qlt);
+				TQualityIter itQltEnd = end(qlt);
+				for(;itQlt != itQltEnd; ++itQlt) appendValue(readSt.data_qualities, *itQlt);
+				appendValue(readSt.data_begin_end, Pair<TSize,TSize>(begRead, endRead));
+				appendValue(readSt.data_frg_id, frgId);
+				appendValue(readSt.data_names, eid);
+				appendValue(readSt.data_clr, Pair<TSize, TSize>(clr1, clr2));
+				readIdMap.insert(std::make_pair(id, readSt.data_pos_count));
+				++readSt.data_pos_count;
+			} else if (blockIdentifier == "CTG") {   // Contig block
+				String<char> seq;
+				String<char> qlt;
+				TId id = 0;
+				String<char> fieldIdentifier;
+				String<char> eid;
+				appendValue(ctgSt.data_reads, String<GappedRead<> >());
+				while (c != '}') {
+					// Are we entering a TLE block
+					if (c == '{') {
+						GappedRead<> gapRead;
+						gapRead.data_gap = String<TSize>();
+						String<char> fdIdentifier;
+						while (c != '}') {
+							fdIdentifier = _parse_readIdentifier(file, c);
+							if (fdIdentifier == "src") {
+								c = _streamGet(file);
+								gapRead.data_source = _parse_readNumber(file, c);
+								_parse_skipLine(file, c);
+							} else if (fdIdentifier == "off") {
+								c = _streamGet(file);
+								gapRead.data_offset = _parse_readNumber(file, c);
+								_parse_skipLine(file, c);
+							} else if (fdIdentifier == "clr") {
+								c = _streamGet(file);
+								TSize clr1 = _parse_readNumber(file, c);
+								c = _streamGet(file);
+								TSize clr2 = _parse_readNumber(file, c);
+								_parse_skipLine(file, c);
+								gapRead.data_clr = Pair<TSize, TSize>(clr1, clr2);
+							} else if (fdIdentifier == "gap") {
+								c = _streamGet(file);
+								_parse_skipWhitespace(file, c);
+								while (c != '.') {
+									if ((c!=' ') && (c != '\t') && (c != '\n') && (c != '\r')) {
+										TSize nextGap = _parse_readNumber(file, c);
+										appendValue(gapRead.data_gap, nextGap);
+									}
+									c = _streamGet(file);
+								}
+							} else {
+								_parse_skipLine(file, c);
+							}
+						}
+						_parse_skipLine(file, c);
+						appendValue(value(ctgSt.data_reads, ctgSt.data_pos_count), gapRead);
+					} else {
+						fieldIdentifier = _parse_readIdentifier(file, c);
+						if (fieldIdentifier == "iid") {
+							c = _streamGet(file);
+							id = _parse_readNumber(file, c);
+							_parse_skipLine(file, c);
+						} else if (fieldIdentifier == "eid") {
+							c = _streamGet(file);
+							while ((c != '\n') && (c != '\r')) {
+								appendValue(eid, c);
+								c = _streamGet(file);
+							}
+							_parse_skipLine(file, c);
+						} else if (fieldIdentifier == "seq") {
+							c = _streamGet(file);
+							_parse_skipWhitespace(file, c);
+							while (c != '.') {
+								// Also include the gaps
+								do {
+									_parse_readSequenceData(file,c,seq);
+								} while (c == '-');
+								_parse_skipLine(file, c);
+							}
+						} else if (fieldIdentifier == "qlt") {
+							c = _streamGet(file);
+							_parse_skipWhitespace(file, c);
+							while (c != '.') {
+								if ((c!=' ') && (c != '\t') && (c != '\n') && (c != '\r')) {
+									appendValue(qlt, c);
+								}
+								c = _streamGet(file);
+							}
+						} else {
+							_parse_skipLine(file, c);
+						}
+					}
+				}
+				TSize begContig;
+				if (ctgSt.data_pos_count == 0) begContig = 0;
+				else begContig = (value(ctgSt.data_begin_end, ctgSt.data_pos_count - 1)).i2;
+				TSize endContig = begContig + length(seq);
+				typedef typename Iterator<String<char> >::Type TSeqIter;
+				TSeqIter itSeq = begin(seq);
+				TSeqIter itSeqEnd = end(seq);
+				for(;itSeq != itSeqEnd; ++itSeq) appendValue(ctgSt.data_contig, *itSeq);
+				typedef typename Iterator<String<char> >::Type TQualityIter;
+				TQualityIter itQlt = begin(qlt);
+				TQualityIter itQltEnd = end(qlt);
+				for(;itQlt != itQltEnd; ++itQlt) appendValue(ctgSt.data_quality, *itQlt);
+				appendValue(ctgSt.data_begin_end, Pair<TSize,TSize>(begContig, endContig));
+				appendValue(ctgSt.data_names, eid);
+				ctgIdMap.insert(std::make_pair(id, ctgSt.data_pos_count));
+				++ctgSt.data_pos_count;
+			}
+		} else {
+			_parse_skipLine(file, c);
+		}
+	}
+
+	// Renumber all ids
+	for(TSize i = 0; i<length(frgSt); ++i) {
+		value(frgSt.data_lib_id, i) = (libIdMap.find(value(frgSt.data_lib_id, i)))->second;
+		TId id1 = (value(frgSt.data_rds, i)).i1;
+		TId id2 = (value(frgSt.data_rds, i)).i2;
+		if (id1 != id2) {
+			(value(frgSt.data_rds, i)).i1 = (readIdMap.find(id1))->second;
+			(value(frgSt.data_rds, i)).i2 = (readIdMap.find(id2))->second;
+		}
+	}
+	for(TSize i = 0; i<length(readSt); ++i) {
+		value(readSt.data_frg_id, i) = (frgIdMap.find(value(readSt.data_frg_id, i)))->second;
+	}
+	for(TSize i = 0; i<length(ctgSt); ++i) {
+		for(TSize k = 0; k<length(value(ctgSt.data_reads, i)); ++k) {
+			(value(value(ctgSt.data_reads, i), k)).data_source = (readIdMap.find((value(value(ctgSt.data_reads, i), k)).data_source))->second;
+		}
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+
+template<typename TFile, typename TAlphabet, typename TSpec, typename TFragmentStore, typename TLibraryStore, typename TContigStore>
+inline void 
+write(TFile& target,
+	  ReadStore<TAlphabet, TSpec>& readSt,
+	  TFragmentStore& frgSt,
+	  TLibraryStore& libSt,
+	  TContigStore& ctgSt,
+	  Amos) 
+{
+	SEQAN_CHECKPOINT
+	typedef ReadStore<TAlphabet, TSpec> TReadStore;
+	typedef typename Id<TReadStore>::Type TId;
+	typedef typename Size<TReadStore>::Type TSize;
+	typedef typename Value<TFile>::Type TValue;
+	typedef String<char> TCharString;
+
+	// Write Header
+	_streamWrite(target,"{UNV\niid:1\ncom:\nafg file created with SeqAn\n.\n}\n");
+	
+	// Write Libraries
+	for(TSize i = 0; i<length(libSt); ++i) {
+		_streamWrite(target,"{LIB\n");
+		_streamWrite(target,"iid:");
+		_streamPutInt(target, i + 1);
+		_streamPut(target, '\n');
+		_streamWrite(target,"eid:");
+		_streamWrite(target, value(libSt.data_names, i));
+		_streamPut(target, '\n');
+		_streamWrite(target,"{DST\n");
+		_streamWrite(target,"mea:");
+		_streamPutInt(target, value(libSt.data_mean, i));
+		_streamPut(target, '\n');
+		_streamWrite(target,"std:");
+		_streamPutInt(target, value(libSt.data_std, i));
+		_streamPut(target, '\n');
+		_streamWrite(target,"}\n");	
+		_streamWrite(target,"}\n");
+	}
+
+	// Write Fragments
+	for(TSize i = 0; i<length(frgSt); ++i) {
+		_streamWrite(target,"{FRG\n");
+		_streamWrite(target,"iid:");
+		_streamPutInt(target, i + 1);
+		_streamPut(target, '\n');
+		_streamWrite(target,"eid:");
+		_streamWrite(target, value(frgSt.data_names, i));
+		_streamPut(target, '\n');
+		_streamWrite(target,"lib:");
+		_streamPutInt(target, value(frgSt.data_lib_id, i) + 1);
+		_streamPut(target, '\n');
+		TId id1 = (value(frgSt.data_rds, i)).i1;
+		TId id2 = (value(frgSt.data_rds, i)).i2;
+		if (id1 != id2) {
+			_streamWrite(target,"rds:");
+			_streamPutInt(target, id1 + 1);
+			_streamPut(target, ',');
+			_streamPutInt(target, id2 + 1);
+			_streamPut(target, '\n');
+		}
+		_streamWrite(target,"}\n");
+	}
+
+	// Write Reads
+	for(TSize i = 0; i<length(readSt); ++i) {
+		_streamWrite(target,"{RED\n");
+		_streamWrite(target,"iid:");
+		_streamPutInt(target, i + 1);
+		_streamPut(target, '\n');
+		_streamWrite(target,"eid:");
+		_streamWrite(target, value(readSt.data_names, i));
+		_streamPut(target, '\n');
+		_streamWrite(target,"seq:\n");
+		String<TAlphabet> read;
+		loadRead(readSt, i, read);
+		for(TSize k = 0;k<length(read); k+=60) {
+			TSize endK = k + 60;
+			if (endK > length(read)) endK = length(read);
+			_streamWrite(target, infix(read, k, endK));
+			_streamPut(target, '\n');
+		}
+		_streamWrite(target, ".\n");
+		_streamWrite(target,"qlt:\n");
+		String<char> qlt;
+		loadQuality(readSt, i, qlt);
+		for(TSize k = 0;k<length(qlt); k+=60) {
+			TSize endK = k + 60;
+			if (endK > length(qlt)) endK = length(qlt);
+			_streamWrite(target, infix(qlt, k, endK));
+			_streamPut(target, '\n');
+		}
+		_streamWrite(target, ".\n");
+		_streamWrite(target,"frg:");
+		_streamPutInt(target, value(readSt.data_frg_id, i) + 1);
+		_streamPut(target, '\n');
+		_streamWrite(target,"clr:");
+		_streamPutInt(target, value(readSt.data_clr, i).i1);
+		_streamPut(target, ',');
+		_streamPutInt(target, value(readSt.data_clr, i).i2);
+		_streamPut(target, '\n');
+		_streamWrite(target,"}\n");
+	}
+
+	// Write Contigs
+	for(TSize i = 0; i<length(ctgSt); ++i) {
+		_streamWrite(target,"{CTG\n");
+		_streamWrite(target,"iid:");
+		_streamPutInt(target, i + 1);
+		_streamPut(target, '\n');
+		_streamWrite(target,"eid:");
+		_streamWrite(target, value(ctgSt.data_names, i));
+		_streamPut(target, '\n');
+		_streamWrite(target,"seq:\n");
+		String<char> contig;
+		loadContig(ctgSt, i, contig);
+		for(TSize k = 0;k<length(contig); k+=70) {
+			TSize endK = k + 70;
+			if (endK > length(contig)) endK = length(contig);
+			_streamWrite(target, infix(contig, k, endK));
+			_streamPut(target, '\n');
+		}
+		_streamWrite(target, ".\n");
+		_streamWrite(target,"qlt:\n");
+		String<char> qlt;
+		loadQuality(ctgSt, i, qlt);
+		for(TSize k = 0;k<length(qlt); k+=70) {
+			TSize endK = k + 70;
+			if (endK > length(qlt)) endK = length(qlt);
+			_streamWrite(target, infix(qlt, k, endK));
+			_streamPut(target, '\n');
+		}
+		_streamWrite(target, ".\n");
+		String<GappedRead<> >& gappedReads = value(ctgSt.data_reads, i);
+		for(TSize k = 0; k<length(gappedReads); ++k) {
+			_streamWrite(target,"{TLE\n");
+			_streamWrite(target,"src:");
+			_streamPutInt(target, (value(gappedReads, k)).data_source + 1);
+			_streamPut(target, '\n');
+			_streamWrite(target,"off:");
+			_streamPutInt(target, (value(gappedReads, k)).data_offset);
+			_streamPut(target, '\n');
+			TSize clr1 = (value(gappedReads, k)).data_clr.i1;
+			TSize clr2 = (value(gappedReads, k)).data_clr.i2;
+			_streamWrite(target,"clr:");
+			_streamPutInt(target, clr1);
+			_streamPut(target, ',');
+			_streamPutInt(target, clr2);
+			_streamPut(target, '\n');
+			String<TSize>& gaps = (value(gappedReads, k)).data_gap;
+			if (!empty(gaps)) {
+				_streamWrite(target,"gap:\n");
+				for(TSize z = 0;z<length(gaps); ++z) {
+					_streamPutInt(target, value(gaps, z));
+					_streamPut(target, ' ');
+				}
+				_streamPut(target, '\n');
+				_streamWrite(target, ".\n");
+			}
+			_streamWrite(target,"}\n");
+		}
+		_streamWrite(target,"}\n");
+	}
+}
+
+
+}// namespace SEQAN_NAMESPACE_MAIN
+
+#endif //#ifndef SEQAN_HEADER_...

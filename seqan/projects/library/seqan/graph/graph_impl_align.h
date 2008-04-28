@@ -944,7 +944,6 @@ write(TFile & file,
 	  TOldBegEndPos const& oldBegEndPos,
 	  TReadBegEndPos const& readBegEndPos,
 	  TGappedConsensus const& gappedConsensus,
-	  bool deltas,
 	  FastaReadFormat) 
 {
 	typedef typename Size<TAlignmentMatrix>::Type TSize;
@@ -1027,24 +1026,20 @@ write(TFile & file,
 		}
 		_streamPut(file,'\n');
 		
-		if (deltas) {
-			std::stringstream gapCoords;
-			TSize letterCount = 0;
-			TSize gapCount = 0;
-			for(TSize column = (readBegEndPos[i]).i1; column<(readBegEndPos[i]).i2; ++column) {
-				if (value(mat, (readBegEndPos[i]).i3 * len + column) == gapChar) {
-					++gapCount;
-					gapCoords << letterCount << ' ';
-				} else ++letterCount;
-			}
-			_streamWrite(file,"dln:");
-			_streamPutInt(file, gapCount);
-			_streamPut(file,'\n');
-			_streamWrite(file,"del:");
-			_streamWrite(file, gapCoords.str().c_str());
-		} else {
-			_streamWrite(file,"dln:0");
+		std::stringstream gapCoords;
+		TSize letterCount = 0;
+		TSize gapCount = 0;
+		for(TSize column = (readBegEndPos[i]).i1; column<(readBegEndPos[i]).i2; ++column) {
+			if (value(mat, (readBegEndPos[i]).i3 * len + column) == gapChar) {
+				++gapCount;
+				gapCoords << letterCount << ' ';
+			} else ++letterCount;
 		}
+		_streamWrite(file,"dln:");
+		_streamPutInt(file, gapCount);
+		_streamPut(file,'\n');
+		_streamWrite(file,"del:");
+		_streamWrite(file, gapCoords.str().c_str());
 		_streamPut(file,'\n');
 		_streamPut(file,'\n');
 	}

@@ -1061,8 +1061,8 @@ a single integer value between 0 and the sum of string lengths minus 1.
 		TString2 const &obj,
 		Tag<TExpand> const) 
 	{
-        append(me.concat_string, obj);
-        appendValue(me.concat_string, TDelimiter());
+        append(me.concat, obj);
+        appendValue(me.concat, TDelimiter());
         appendValue(me.limits, lengthSum(me) + length(obj) + 1);
     }
 
@@ -1115,7 +1115,7 @@ a single integer value between 0 and the sum of string lengths minus 1.
     inline void	clear(StringSet< TString, Owner<ConcatDirect<TDelimiter> > > &me) 
 	{
 	SEQAN_CHECKPOINT
-		clear(me.concat_string);
+		clear(me.concat);
 		resize(me.limits, 1);
     }
 

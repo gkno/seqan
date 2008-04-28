@@ -113,10 +113,168 @@ evaluationOfReadAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const&,
 }
 
 
+
+template <typename TOptions, typename TAlphabet, typename TSpec, typename TFragmentStore, typename TLibraryStore, typename TContigStore>
+inline void 
+convertSimulationFile(ReadStore<TAlphabet, TSpec>& readSt,
+					  TFragmentStore& frgSt,
+					  TLibraryStore& libSt,
+					  TContigStore& ctgSt,
+					  TOptions& cfgOpt)
+{
+	typedef typename Size<TFragmentStore>::Type TSize;
+	typedef String<char> TName;
+
+	// Convert Libraries
+	String<char> filePath = value(cfgOpt, "reads");
+	appendValue(filePath, 'L');
+	StringSet<String<char>, Owner<> > libSet;
+	String<TName> libIds;
+	_alignImportSequences(filePath, libSet, libIds);
+	for(TSize i = 0; i<length(libSet); ++i) {
+		std::stringstream input;
+		input << "L" << i;
+		String<char> tmp(input.str().c_str());
+		appendValue(libSt.data_names, tmp);
+		TSize brPoint = 0;
+		TSize mean;
+		TSize std;
+		for(TSize k = 0; k<length(value(libSet, i)); ++k) {
+			if (value(value(libSet,i),k) == ',') brPoint = k;
+		}
+		String<char> inf1 = infix(value(libSet,i), 0, brPoint);
+		String<char> inf2 = infix(value(libSet,i), brPoint+1, length(value(libSet,i)));
+		std::stringstream ssStream1(toCString(inf1));
+		ssStream1 >> mean; 
+		std::stringstream ssStream2(toCString(inf2));
+		ssStream2 >> std;
+		appendValue(libSt.data_mean, mean);
+		appendValue(libSt.data_std, std);
+		++libSt.data_pos_count;
+	}
+
+	// Convert Fragments
+	filePath = value(cfgOpt, "reads");
+	appendValue(filePath, 'F');
+	StringSet<String<char>, Owner<> > fragSet;
+	String<TName> fragIds;
+	_alignImportSequences(filePath, fragSet, fragIds);
+	for(TSize i = 0; i<length(fragSet); ++i) {
+		std::stringstream input;
+		input << "F" << i;
+		String<char> tmp(input.str().c_str());
+		appendValue(frgSt.data_names, tmp);
+		TSize brPoint1 = 0;
+		TSize brPoint2 = 0;
+		TSize libId;
+		for(TSize k = 0; k<length(value(fragIds, i)); ++k) {
+			if (value(value(fragIds,i),k) == '=') brPoint1 = k + 1;
+			if (value(value(fragIds,i),k) == ']') brPoint2 = k;
+		}
+		String<char> inf = infix(value(fragIds,i), brPoint1, brPoint2);
+		std::stringstream ssStream(toCString(inf));
+		ssStream >> libId; 
+		appendValue(frgSt.data_lib_id, libId - 1);
+		TSize brPoint = 0;
+		TSize rds1;
+		TSize rds2;
+		for(TSize k = 0; k<length(value(fragSet, i)); ++k) {
+			if (value(value(fragSet,i),k) == ',') brPoint = k;
+		}
+		String<char> inf1 = infix(value(fragSet,i), 0, brPoint);
+		String<char> inf2 = infix(value(fragSet,i), brPoint+1, length(value(fragSet,i)));
+		std::stringstream ssStream1(toCString(inf1));
+		ssStream1 >> rds1; 
+		std::stringstream ssStream2(toCString(inf2));
+		ssStream2 >> rds2;
+		if (rds1 < rds2) appendValue(frgSt.data_rds, Pair<TSize, TSize>(rds1 - 1, rds2 - 1));
+		else appendValue(frgSt.data_rds, Pair<TSize, TSize>(rds1 - 1, rds2 - 1));
+		++frgSt.data_pos_count;
+	}
+
+	// Convert reads
+	typedef String<TAlphabet> TSequence;
+	StringSet<String<TAlphabet>, Owner<> > origStrSet;
+	String<TName> names;
+	filePath = value(cfgOpt, "reads");
+	_alignImportSequences(filePath, origStrSet, names);
+	for(TSize i = 0; i<length(origStrSet); ++i) {
+		TSize begRead;
+		if (readSt.data_pos_count == 0) begRead = 0;
+		else begRead = (value(readSt.data_begin_end, readSt.data_pos_count - 1)).i2;
+		TSize endRead = begRead + length(value(origStrSet, i));
+		typedef typename Iterator<String<TAlphabet> >::Type TSeqIter;
+		TSeqIter itSeq = begin(value(origStrSet, i));
+		TSeqIter itSeqEnd = end(value(origStrSet, i));
+		for(;itSeq != itSeqEnd; ++itSeq) appendValue(readSt.data_reads, *itSeq);
+		itSeq = begin(value(origStrSet, i));
+		for(;itSeq != itSeqEnd; ++itSeq) appendValue(readSt.data_qualities, char(48+20));
+		appendValue(readSt.data_begin_end, Pair<TSize,TSize>(begRead, endRead));
+		TSize brPoint1 = 0;
+		TSize brPoint2 = 0;
+		TSize fragId;
+		for(TSize k = 0; k<length(value(names, i)); ++k) {
+			if (value(value(names,i),k) == '=') brPoint1 = k + 1;
+			if (value(value(names,i),k) == ']') brPoint2 = k;
+		}
+		String<char> inf = infix(value(names,i), brPoint1, brPoint2);
+		std::stringstream ssStream(toCString(inf));
+		ssStream >> fragId; 
+		appendValue(readSt.data_frg_id, fragId - 1);
+		std::stringstream input;
+		input << "R" << i;
+		String<char> tmp(input.str().c_str());
+		appendValue(readSt.data_names, tmp);
+		appendValue(readSt.data_clr, Pair<TSize, TSize>(0, length(value(origStrSet, i))));
+		++readSt.data_pos_count;
+	}
+
+	// Write minimal contig
+	appendValue(ctgSt.data_reads, String<GappedRead<> >());
+	for(TSize i = 0; i<length(names); ++i) {
+		GappedRead<> gapRead;
+		gapRead.data_source = i;
+		TSize brPoint1 = 0;
+		TSize brPoint2 = 0;
+		for(TSize k = 0; k<length(value(names, i)); ++k) {
+			if (value(value(names,i),k) == ',') brPoint1 = k;
+			if (value(value(names,i),k) == '[') {
+				brPoint2 = k;
+				break;
+			}
+		}
+		TSize posI = 0;
+		TSize posJ = 0;
+		String<char> inf1 = infix(value(names,i), 0, brPoint1);
+		String<char> inf2 = infix(value(names,i), brPoint1+1, brPoint2);
+		std::stringstream ssStream1(toCString(inf1));
+		ssStream1 >> posI; 
+		std::stringstream ssStream2(toCString(inf2));
+		ssStream2 >> posJ;
+		if (posI < posJ) {
+			gapRead.data_offset = posI;
+			gapRead.data_clr = Pair<TSize, TSize>(0, length(value(origStrSet, i)));
+		} else {
+			gapRead.data_offset = posJ;
+			gapRead.data_clr = Pair<TSize, TSize>(length(value(origStrSet, i)), 0);
+		}
+		appendValue(value(ctgSt.data_reads, ctgSt.data_pos_count), gapRead);
+	}
+	String<char> tmp = "C0";
+	appendValue(ctgSt.data_names, tmp);
+	StringSet<String<char>, Owner<> > seqSet;
+	String<TName> seqNames;
+	filePath = value(cfgOpt, "reads");
+	appendValue(filePath, 'S');
+	_alignImportSequences(filePath, seqSet, seqNames);
+	for(TSize l = 0;l < length(seqSet[0]); ++l) appendValue(ctgSt.data_contig, value(value(seqSet, 0), l));
+	for(TSize l = 0;l < length(seqSet[0]); ++l) appendValue(ctgSt.data_quality, 'D');
+	appendValue(ctgSt.data_begin_end, Pair<TSize,TSize>(0, length(seqSet[0])));
+	++ctgSt.data_pos_count;
+}
+
+
 int main(int argc, const char *argv[]) {
-	bool deltas = true;
-
-
 	//////////////////////////////////////////////////////////////////////////////
 	// Command line parsing
 	//////////////////////////////////////////////////////////////////////////////
@@ -124,9 +282,11 @@ int main(int argc, const char *argv[]) {
 	// Set the keys
 	typedef String<char> TKey;
 	typedef String<char> TValue;
+	typedef Size<TValue>::Type TSize;
 	ConfigOptions<TKey, TValue> cfgOpt;
-	TKey keys[] = {"reads", "haplotypes","outfile"};
-	assignKeys(cfgOpt, keys, 3);
+	TKey keys[] = {"afg", "reads", "haplotypes","outfile", "output"};
+	assignKeys(cfgOpt, keys, 5);
+	assign(cfgOpt, "output", "seqan");
 	assign(cfgOpt, "outfile", "readAlign.txt");
 	// Help Message
 	String<char> helpMsg;
@@ -138,35 +298,54 @@ int main(int argc, const char *argv[]) {
 	}
 	if (!parseCmdLine(argc, argv, cfgOpt)) return -1;
 
+
+	//////////////////////////////////////////////////////////////////////////////
+	// Convert simulation files
+	//////////////////////////////////////////////////////////////////////////////
+	ReadStore<> readSt;
+	FrgStore<> frgSt;
+	LibStore<> libSt;
+	CtgStore<> ctgSt;
+
+	if (!empty(value(cfgOpt, "reads"))) {
+		convertSimulationFile(readSt, frgSt, libSt, ctgSt, cfgOpt);
+		
+		//std::fstream strmWrite;
+		//strmWrite.open(toCString(value(cfgOpt, "outfile")), std::ios_base::out | std::ios_base::trunc);
+		//write(strmWrite,readSt,frgSt,libSt,ctgSt,Amos());	
+		//strmWrite.close();
+
+		//return 0;
+	} else {
+		// Read Amos
+		std::fstream strmReads;
+		strmReads.open(toCString(value(cfgOpt, "afg")), std::ios_base::in | std::ios_base::binary);
+		read(strmReads,readSt,frgSt,libSt,ctgSt,Amos());	
+		strmReads.close();
+	}
+	
+	//////////////////////////////////////////////////////////////////////////////
+	// Import sequences
+	//////////////////////////////////////////////////////////////////////////////
+
 	// Timing variables
 	clock_t bigbang, startTime;
 	startTime = clock();
 	bigbang = startTime;
 
-	//////////////////////////////////////////////////////////////////////////////
-	// Import sequences
-	//////////////////////////////////////////////////////////////////////////////
-
 	typedef String<Dna> TSequence;
 	StringSet<TSequence, Owner<> > origStrSet;
-	typedef String<char> TName;
-	String<TName> names;
-	unsigned int nucCount = _alignImportSequences(value(cfgOpt, "reads"), origStrSet, names);
+	String<Pair<unsigned int, unsigned int> > begEndPos;
+	unsigned int currentContig = 0;
+	loadReadsClr(readSt, ctgSt, currentContig, origStrSet, begEndPos);
 	unsigned int nseq = length(origStrSet);
-	unsigned int avgReadLength = nucCount / nseq;
-	std::cout << "Number of reads: " << nseq << ", Total number of nucleotides: " << nucCount << std::endl;
+	unsigned int avgReadLength = 0;
+	for(unsigned int i = 0; i<length(origStrSet);++i) avgReadLength += length(value(origStrSet,i));
+	avgReadLength /= nseq;
+	std::cout << "Number of reads: " << nseq << std::endl;
 	std::cout << "Average read length: " << avgReadLength << std::endl;
 	_alignTiming(startTime, "Import sequences done: ");
-
-	//// Debug code
-	//for(unsigned int i = 0; i<nseq; ++i) {
-	//	std::cout << '>' << names[i] << std::endl;
-	//	std::cout << origStrSet[i] << std::endl;
-	//}
-
-	// Extract positions and reverse complement reads
-	String<Pair<unsigned int, unsigned int> > begEndPos;
-	layoutReads(names, origStrSet, begEndPos);
+		
 	// Make dependent string set
 	typedef StringSet<TSequence, Dependent<> > TDepSequenceSet;
 	TDepSequenceSet strSet(origStrSet);
@@ -252,11 +431,40 @@ int main(int argc, const char *argv[]) {
 	// Output of aligned reads
 	//////////////////////////////////////////////////////////////////////////////
 
-	std::fstream strm;
-	strm.open(toCString(value(cfgOpt, "outfile")), std::ios_base::out | std::ios_base::trunc);
-	write(strm, gOut, alignmentMatrix, begEndPos, readBegEndRowPos, gappedConsensus, deltas, FastaReadFormat());
-	strm.close();
-	_alignTiming(startTime, "Output done: ");
+	if (value(cfgOpt, "output") == "seqan") {
+		std::fstream strm;
+		strm.open(toCString(value(cfgOpt, "outfile")), std::ios_base::out | std::ios_base::trunc);
+		write(strm, gOut, alignmentMatrix, begEndPos, readBegEndRowPos, gappedConsensus, FastaReadFormat());
+		strm.close();
+		_alignTiming(startTime, "Output done: ");
+	} else if (value(cfgOpt, "output") == "afg") {
+		TSize len = length(gappedConsensus);
+		TSize begContig = (value(ctgSt.data_begin_end, ctgSt.data_pos_count - 1)).i2;
+		TSize endContig = begContig + length(gappedConsensus);
+		for(TSize i = 0; i<len; ++i) appendValue(ctgSt.data_contig, gappedConsensus[i]);
+		for(TSize i = 0; i<len; ++i) appendValue(ctgSt.data_quality, 'D');
+		value(ctgSt.data_begin_end, currentContig) = Pair<TSize, TSize>(begContig, endContig);
+
+		for(TSize i = 0; i < length(readBegEndRowPos); ++i) {
+			String<TSize> gaps;
+			TSize letterCount = 0;
+			TSize gapCount = 0;
+			for(TSize column = (readBegEndRowPos[i]).i1; column<(readBegEndRowPos[i]).i2; ++column) {
+				if (value(alignmentMatrix, (readBegEndRowPos[i]).i3 * len + column) == '-') {
+					++gapCount;
+					appendValue(gaps, letterCount);
+				} else ++letterCount;
+			}
+			value(value(ctgSt.data_reads, currentContig), i).data_gap = gaps;
+			value(value(ctgSt.data_reads, currentContig), i).data_offset = (readBegEndRowPos[i]).i1;
+		}
+
+		// Write Amos
+		std::fstream strmWrite;
+		strmWrite.open(toCString(value(cfgOpt, "outfile")), std::ios_base::out | std::ios_base::trunc);
+		write(strmWrite,readSt,frgSt,libSt,ctgSt,Amos());	
+		strmWrite.close();
+	}
 
 	std::cout << "==============================" << std::endl;
 	_alignTiming(bigbang, "Total time: ");

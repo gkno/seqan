@@ -1887,6 +1887,18 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 		return me.push_back(_Val);
 	}
 
+	template < typename TValue, typename TConfig, typename TString, typename TExpand >
+	inline void
+	append(String<TValue, External<TConfig> > &me, 
+				TString const &string,
+				Tag<TExpand> const expand)
+	{
+		typename Iterator<TString>::Type it = begin(string, Standard());
+		typename Iterator<TString>::Type itEnd = end(string, Standard());
+		for (; it != itEnd; ++it)
+			appendValue(me, *it, expand);
+	}
+
 
 /*
     template < typename TSpec >
