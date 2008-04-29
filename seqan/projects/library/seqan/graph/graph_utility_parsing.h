@@ -356,6 +356,16 @@ parseCmdLine(int argc, const char *argv[], ConfigOptions<TKey, TValue>& cfgOpt) 
 }
 
 
+template <typename T, typename TString>
+inline T const
+_stringToNumber(TString& str)
+{
+	T val = 0;
+	std::stringstream ssStream1(toCString(str));
+	ssStream1 >> val; 
+	return val;
+}
+
 
 //////////////////////////////////////////////////////////////////////////////
 // File reading and timing functions

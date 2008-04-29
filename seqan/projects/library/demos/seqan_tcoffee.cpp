@@ -5,73 +5,6 @@
 
 using namespace seqan;
 
-
-template<typename TString, typename TSpec, typename TName, typename TSpec2, typename TConfigOptions>
-inline void
-globalMatching(StringSet<TString, TSpec> const& seqSet,
-			   StringSet<TName, TSpec2> const& nameSet,
-			   TConfigOptions& cfgOpt)
-{
-	SEQAN_CHECKPOINT
-	
-	typedef StringSet<TString, Dependent<> > TStringSet;
-	typedef Graph<Alignment<TStringSet, unsigned int> > TGraph;
-	typedef typename Size<TGraph>::Type TSize;
-	typedef typename Id<TGraph>::Type TId;
-
-	// Score objects
-	Score<int> score_type_global = Score<int>(5,-4,-4,-14);
-	Score<int> score_type_local = Score<int>(5,-4,-4,-14);
-
-	TGraph g(seqSet);
-	String<Pair<TId, TId> > pList;
-	selectPairsForLibraryGeneration(g, pList);
-
-	std::fstream strm_lib;
-	strm_lib.open(toCString(value(cfgOpt, "matches")), std::ios_base::in | std::ios_base::binary);
-	read(strm_lib, g, nameSet, BlastLib());	// Read library
-	strm_lib.close();
-	//generatePrimaryLibrary(g, score_type_global, 5, Kmer_Library() );
-
-	String<double> distanceMatrix;
-	getDistanceMatrix(g,distanceMatrix,LibraryDistance() );
-
-	tripletLibraryExtension(g);
-
-	
-	// ... and normal progressive alignment with guide tree
-	Graph<Tree<double> > guideTree;
-	//upgmaTree(distanceMatrix, guideTree);	
-	slowNjTree(distanceMatrix, guideTree);
-
-	TGraph gOut(seqSet);
-	progressiveAlignment(g, guideTree, gOut);
-
-	TGraph gOut2(seqSet);
-	progressiveMatching(g, guideTree, gOut2);
-
-
-	std::fstream strm_lib1;
-	strm_lib1.open("/home/takifugu/rausch/matches/reads/library.txt", std::ios_base::out | std::ios_base::trunc);
-	write(strm_lib1, g, nameSet, BlastLib());	// Write library
-	strm_lib1.close();
-
-	std::fstream strm_lib2;
-	strm_lib2.open("/home/takifugu/rausch/matches/reads/alignment.txt", std::ios_base::out | std::ios_base::trunc);
-	write(strm_lib2, gOut, nameSet, BlastLib());	// Write library
-	strm_lib2.close();
-
-	std::fstream strm_lib3;
-	strm_lib3.open("/home/takifugu/rausch/matches/reads/matching.txt", std::ios_base::out | std::ios_base::trunc);
-	write(strm_lib3, gOut2, nameSet, BlastLib());	// Write library
-	strm_lib3.close();
-
-	clear(guideTree);
-	clear(distanceMatrix);
-	clear(g);
-}
-
-
 template<typename TConfigOptions>
 inline int
 dnaAlignment(TConfigOptions& cfgOpt) {
@@ -80,26 +13,28 @@ dnaAlignment(TConfigOptions& cfgOpt) {
 	//////////////////////////////////////////////////////////////////////////////
 	
 	typedef String<Dna> TSequence;
-	StringSet<TSequence, Owner<> > origStrSet;
 	typedef String<char> TName;
+	StringSet<TSequence, Owner<> > origStrSet;
 	StringSet<TName> names;
 	_alignImportSequences(value(cfgOpt, "seq"), origStrSet, names);
 	typedef StringSet<TSequence, Dependent<> > TDepSequenceSet;
+	typedef typename Size<TDepSequenceSet>::Type TSize;
 	TDepSequenceSet strSet(origStrSet);
 	
 	//////////////////////////////////////////////////////////////////////////////
 	// Alignment
 	//////////////////////////////////////////////////////////////////////////////
-	typedef Graph<Alignment<TDepSequenceSet, unsigned int> > TGraph;
+
+	typedef Graph<Alignment<TDepSequenceSet, TSize> > TGraph;
 	typedef Id<TGraph>::Type TId;
 	Graph<Alignment<TDepSequenceSet, void, WithoutEdgeId> > gOut(strSet);
-	if (value(cfgOpt, "method") == "dna") globalAlignment(strSet, names, value(cfgOpt, "matches"), gOut, MSA_Dna() );
-	else if (value(cfgOpt, "method") == "matching") globalMatching(strSet, names, cfgOpt);
-	else globalAlignment(strSet, names, value(cfgOpt, "matches"), gOut, MSA_Genome() );
+	if (value(cfgOpt, "method") == "dna") globalAlignment(strSet, names, cfgOpt, gOut, MSA_Dna() );
+	else globalAlignment(strSet, names, cfgOpt, gOut, MSA_Genome() );
 
 	//////////////////////////////////////////////////////////////////////////////
 	// Output
 	//////////////////////////////////////////////////////////////////////////////
+
 	if (value(cfgOpt, "output") == "fasta") {
 		std::fstream strm;
 		strm.open(toCString(value(cfgOpt, "outfile")), std::ios_base::out | std::ios_base::trunc);
@@ -118,7 +53,7 @@ dnaAlignment(TConfigOptions& cfgOpt) {
 template<typename TConfigOptions>
 inline int
 evaluateAlignment(TConfigOptions& cfgOpt) {
-	typedef unsigned int TSize;
+	typedef typename Size<TConfigOptions>::Type TSize;
 	typedef String<AminoAcid> TSequence;
 	typedef String<char> TName;
 	StringSet<TSequence, Owner<> > origStrSet;
@@ -134,38 +69,28 @@ evaluateAlignment(TConfigOptions& cfgOpt) {
 	strm.open(toCString(value(cfgOpt, "infile")), std::ios_base::in | std::ios_base::binary);
 	read(strm,origStrSet,names,FastaAlign());	
 	strm.close();
+
+	// Make a dependent StringSet
 	typedef StringSet<TSequence, Dependent<> > TDepSequenceSet;
 	TDepSequenceSet strSet(origStrSet);
 	
-	//// Debug code
-	//std::cout << "Sequences:" << std::endl;
-	//for(TSize i = 0; i<length(origStrSet); ++i) {
-	//	std::cout << '>' << names[i] << std::endl;
-	//	std::cout << strSet[i] << std::endl;
-	//}
-
 	// Read the scoring matrix
-	double gopening = 0; 
-	double gextend = 0; 
-	std::stringstream ssStream1(toCString(value(cfgOpt, "gop")));
-	ssStream1 >> gopening; 
-	gopening *= -1.0;
-	std::stringstream ssStream2(toCString(value(cfgOpt, "gex")));
-	ssStream2 >> gextend;
-	gextend *= -1.0;
 	typedef Score<double, ScoreMatrix<> > TScore;
+	typedef typename Value<TScore>::Type TScoreValue;
+	TScoreValue gopening = -1 * _stringToNumber<TScoreValue>(value(cfgOpt, "gop"));
+	TScoreValue gextend = -1 * _stringToNumber<TScoreValue>(value(cfgOpt, "gex"));	
 	TScore scType;
 	if (!length(value(cfgOpt, "matrix"))) {
 		Blosum62 sc(-1 , -11);
 		convertScoringMatrix(sc, scType, gextend, gopening);
 	} else {
 		loadScoreMatrix(scType, value(cfgOpt, "matrix"));
-		scType.data_gap_extend = (double) (gextend);
-		scType.data_gap_open = (double) (gopening);
+		scType.data_gap_extend = (TScoreValue) (gextend);
+		scType.data_gap_open = (TScoreValue) (gopening);
 	}
 
 	// Read the alignment
-	typedef Graph<Alignment<TDepSequenceSet, unsigned int> > TGraph;
+	typedef Graph<Alignment<TDepSequenceSet, TSize> > TGraph;
 	TGraph g(strSet);
 	std::fstream strm_lib;
 	strm_lib.open(toCString(value(cfgOpt, "infile")), std::ios_base::in | std::ios_base::binary);
@@ -188,11 +113,11 @@ evaluateAlignment(TConfigOptions& cfgOpt) {
 	//	std::cout << std::endl;
 	//}
 
-	unsigned int numGapEx = 0;
-	unsigned int numGap = 0;
-	unsigned int numPairs = 0;
-	unsigned int alignLen = 0;
-	String<unsigned int> pairCount;
+	TSize numGapEx = 0;
+	TSize numGap = 0;
+	TSize numPairs = 0;
+	TSize alignLen = 0;
+	String<TSize> pairCount;
 	double alignScore = alignmentEvaluation(g, scType, numGapEx, numGap, numPairs, pairCount, alignLen);
 	std::cout << "Alignment Score: " << alignScore << std::endl;
 	std::cout << "Alignment Length: " << alignLen << std::endl;
@@ -226,6 +151,7 @@ int main(int argc, const char *argv[]) {
 	// Set the keys
 	typedef String<char> TKey;
 	typedef String<char> TValue;
+	typedef Size<TKey>::Type TSize;
 	ConfigOptions<TKey, TValue> cfgOpt;
 	TKey keys[] = {"seq","infile", "aln", "lib","matches","usetree","outfile","method","output","gop", "gex", "matrix", "score"};
 	assignKeys(cfgOpt, keys, 13);
@@ -239,34 +165,70 @@ int main(int argc, const char *argv[]) {
 	// Help Message
 	String<char> helpMsg;
 	append(helpMsg, "Usage: seqan_tcoffee -seq <FASTA Sequence File> [ARGUMENTS]\n");
-	append(helpMsg, "Arguments\n");
-	append(helpMsg, "-matches <File with Segment Matches>\n");
-	append(helpMsg, "\tSpecifies a file with gapless segment matches in BLAST Tabular Format (-m 8).\n");
+	append(helpMsg, "\nArguments\n===================\n");
+	append(helpMsg, "-seq <FASTA Sequence File>\n");
+	append(helpMsg, "\tA file with multiple sequences in FASTA format.\n");
 	append(helpMsg, "-method [protein | dna | genome]\n");
 	append(helpMsg, "\tSpecifies the type of sequence data, default is protein.\n");
+	append(helpMsg, "-matches <File with Segment Matches>\n");
+	append(helpMsg, "\tA file with gapless segment matches in BLAST Tabular Format (-m 8).\n");
+	append(helpMsg, "-aln <FASTA Alignment File>,<FASTA Alignment File>,<FASTA Alignment File>\n");
+	append(helpMsg, "\tTriggers a meta-alignment of all given alignment files.\n");
+	append(helpMsg, "-infile <FASTA Alignment File>\n");
+	append(helpMsg, "\tSwitch to evaluate a given multiple alignment file in FASTA format.\n");
 	append(helpMsg, "-outfile <Alignment Filename>\n");
 	append(helpMsg, "\tSpecifies the name of the output file, default is out.fasta.\n");
-	append(helpMsg, "-output [fasta| msf]\n");
+	append(helpMsg, "-output [fasta | msf]\n");
 	append(helpMsg, "\tSpecifies the output format, default is fasta.\n");
+	append(helpMsg, "-gop <Number>\n");
+	append(helpMsg, "\tSpecifies the gap open penalty, default is 11.\n");
+	append(helpMsg, "-gex <Number>\n");
+	append(helpMsg, "\tSpecifies the gap extension penalty, default is 1.\n");
+	append(helpMsg, "-matrix <Matrix File>\n");
+	append(helpMsg, "\tSpecifies a matrix file, default for protein is Blosum62.\n");
+	append(helpMsg, "-usetree <Newick Guide Tree>\n");
+	append(helpMsg, "\tA guide tree in newick format.\n");
+	append(helpMsg, "-lib <T-Coffee library>\n");
+	append(helpMsg, "\tA T-Coffee library that is used to align the sequences.\n");
+
+	append(helpMsg, "\n\n\nCommon Tasks\n===================\n");
+	append(helpMsg, "\nProtein Alignment:\n");
+	append(helpMsg, "seqan_tcoffee -seq seq.fasta\n");
+	append(helpMsg, "seqan_tcoffee -seq seq.fasta -usetree guideTree.dnd -output fasta -outfile align.fasta\n");
+	append(helpMsg, "seqan_tcoffee -seq seq.fasta -usetree guideTree.dnd -matrix BLOSUM45 -gop 11 -gex 1 -output msf -outfile align.msf\n");
+	append(helpMsg, "\nDna / Genome Alignment:\n");
+	append(helpMsg, "seqan_tcoffee -seq seq.fasta -method dna\n");
+	append(helpMsg, "seqan_tcoffee -seq seq.fasta -method genome -output fasta -outfile genomeAlign.fasta\n");
+	append(helpMsg, "seqan_tcoffee -seq seq.fasta -matches blastHit.tab -method genome\n");
+	append(helpMsg, "\nMeta-Alignment:\n");
+	append(helpMsg, "seqan_tcoffee -seq seq.fasta -aln sub1.fasta,sub2.fasta\n");
+	append(helpMsg, "seqan_tcoffee -seq seq.fasta -usetree guideTree.dnd -aln sub1.fasta,sub2.fasta -output msf -outfile final.msf\n");
+	append(helpMsg, "\nAlignment Evaluation:\n");
+	append(helpMsg, "seqan_tcoffee -infile align.fasta\n");
+	append(helpMsg, "seqan_tcoffee -infile align.fasta -gop 2 -gex 1 -matrix BLOSUM45\n");
+	append(helpMsg, "\nAlignment from a T-Coffee Library:\n");
+	append(helpMsg, "seqan_tcoffee -lib tcoffee.tc_lib\n");
+	append(helpMsg, "seqan_tcoffee -lib tcoffee.tc_lib -usetree tcTree.dnd -output msf -outfile align.msf\n");
 	assignHelp(cfgOpt, helpMsg);
-	if (argc < 2) {
-		std::cerr << valueHelp(cfgOpt) << std::endl;
-		return -1;
-	}
+	
+	if (argc < 2) {	std::cerr << valueHelp(cfgOpt) << std::endl; return -1; }
 	if (!parseCmdLine(argc, argv, cfgOpt)) return -1;
-	if ((value(cfgOpt, "method") == "dna") || 
-		(value(cfgOpt, "method") == "genome") ||
-		(value(cfgOpt, "method") == "matching")) {
-			return dnaAlignment(cfgOpt);
+
+	//////////////////////////////////////////////////////////////////////////////
+	// Alignment of Dna Sequences
+	//////////////////////////////////////////////////////////////////////////////
+
+	if ((value(cfgOpt, "method") == "dna") || (value(cfgOpt, "method") == "genome")) {
+		return dnaAlignment(cfgOpt);
 	}
+
 
 	//////////////////////////////////////////////////////////////////////////////
 	// Evaluation mode?
 	//////////////////////////////////////////////////////////////////////////////
 
-	if (value(cfgOpt, "score") == "true") {
-		return evaluateAlignment(cfgOpt);
-	}
+	if (!empty(value(cfgOpt, "infile"))) assign(cfgOpt, "score", "true");
+	if (value(cfgOpt, "score") == "true") return evaluateAlignment(cfgOpt);
 
 	//////////////////////////////////////////////////////////////////////////////
 	// Read the sequences
@@ -292,61 +254,22 @@ int main(int argc, const char *argv[]) {
 	typedef StringSet<TSequence, Dependent<> > TDepSequenceSet;
 	TDepSequenceSet strSet(origStrSet);
 
-
 	//////////////////////////////////////////////////////////////////////////////
 	// Alignment of the sequences
 	//////////////////////////////////////////////////////////////////////////////
 	
-	typedef Graph<Alignment<TDepSequenceSet, unsigned int> > TGraph;
+	typedef Graph<Alignment<TDepSequenceSet, TSize> > TGraph;
 	typedef Id<TGraph>::Type TId;
 	Graph<Alignment<TDepSequenceSet, void, WithoutEdgeId> > gOut(strSet);
 	
-	// Case 1: Create a T-Coffee library
-	if (value(cfgOpt, "output") == "tc_lib") {
-		Blosum62 score_type_global(-1,-11);
-		Blosum62 score_type_local(-2,-8);
-		TGraph lib(strSet);
-		if (value(cfgOpt, "method") == "global") generatePrimaryLibrary(lib, score_type_global, GlobalPairwise_Library() );
-		else if (value(cfgOpt, "method") == "local") generatePrimaryLibrary(lib, score_type_local, LocalPairwise_Library() );
-		else if (value(cfgOpt, "method") == "blast") {
-			if (length(value(cfgOpt, "matches"))) {
-				std::fstream strm_lib;
-				strm_lib.open(toCString(value(cfgOpt, "matches")), std::ios_base::in | std::ios_base::binary);
-				read(strm_lib, lib, names, BlastLib());	// Read library
-				strm_lib.close();
-			}
-		} else {
-			TGraph lib1(strSet);
-			generatePrimaryLibrary(lib1, score_type_global, GlobalPairwise_Library() );
-			TGraph lib2(strSet);
-			generatePrimaryLibrary(lib2, score_type_local, LocalPairwise_Library() );
-	
-			// Weighting of libraries (Signal addition)
-			TGraph g(strSet);
-			String<TGraph*> libs;
-			appendValue(libs, &lib1);
-			appendValue(libs, &lib2);
-			combineGraphs(lib, libs);
-		}
-
-		// Write the library
-		std::fstream strm;
-		strm.open(toCString(value(cfgOpt, "outfile")), std::ios_base::out | std::ios_base::trunc);
-		write(strm,lib,names,TCoffeeLib());
-		//write(strm,lib,names,BlastLib());
-		strm.close();
-	} 
-	// Case 2: A library is send to us and we just align the library (SeqAn::M-Coffee)
-	else if (length(value(cfgOpt, "lib"))) {
+	// Case 1: Interaction with T-Coffee
+	// A T-Coffee library is send to us and we just align according to the library (SeqAn::M-Coffee)
+	if (length(value(cfgOpt, "lib"))) {
 		TGraph g(strSet);
 		std::fstream strm_lib;
 		strm_lib.open(toCString(value(cfgOpt, "lib")), std::ios_base::in | std::ios_base::binary);
 		read(strm_lib,g,TCoffeeLib());	// Read library
 		strm_lib.close();
-
-		//unsigned int nucs = 0;
-		//for(unsigned int i = 0; i<length(strSet); ++i) nucs += length(strSet[i]);
-		//std::cerr << "Avg. segment length: " << (double) nucs / (double) numVertices(g) << std::endl;
 
 		// Read or build the guide tree
 		Graph<Tree<double> > guideTree;
@@ -362,8 +285,8 @@ int main(int argc, const char *argv[]) {
 		}
 
 		//Progressive alignment
-		unsigned int nSeq = length(strSet);
-		unsigned int threshold = 30;
+		TSize nSeq = length(strSet);
+		TSize threshold = 30;
 		if (nSeq < threshold) {
 			// Full triplet...
 			tripletLibraryExtension(g);
@@ -374,14 +297,14 @@ int main(int argc, const char *argv[]) {
 			progressiveAlignment(g, guideTree, gOut, threshold);
 		}
 	} 
-	// Case 3: Full protein alignment
+	// Case 2: Alignment via SeqAn
 	else {
-		if (length(value(cfgOpt, "matrix"))) testChristian(strSet, names, value(cfgOpt, "matrix"), value(cfgOpt, "gex"), value(cfgOpt, "gop"), gOut);
-		else if (!length(value(cfgOpt, "aln"))) globalAlignment(strSet, names, value(cfgOpt, "matches"), gOut, MSA_Protein() );
-		else metaGlobalAlignment(strSet, names, value(cfgOpt, "aln"), gOut, MSA_Protein() );
-		//testChristian(strSet, names, value(cfgOpt, "matrix"), value(cfgOpt, "gex"), value(cfgOpt, "gop"), gOut);
-		//testProfiles(strSet, names, value(cfgOpt, "matches"), gOut);
-		//testIslands(strSet, names, value(cfgOpt, "matches"), gOut);
+		// Normal Alignment
+		if ((!length(value(cfgOpt, "aln"))) && (!length(value(cfgOpt, "matrix")))) globalAlignment(strSet, names, cfgOpt, gOut, MSA_Protein() );
+		// Meta-Alignment
+		else if (length(value(cfgOpt, "aln"))) metaGlobalAlignment(strSet, names, cfgOpt, gOut, MSA_Protein() );
+		// Custom Alignment
+		else globalAlignment(strSet, names, cfgOpt, gOut, MSA_ProteinCustom() );
 	}
 
 

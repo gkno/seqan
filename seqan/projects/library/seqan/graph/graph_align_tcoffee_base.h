@@ -765,8 +765,8 @@ alignmentEvaluation(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 						gapOpeni = false;
 						gapOpenj = false;
 						++pairCount;
-						TSize index1 = (TSize) (TAlphabet(value(mat, i*len+k)));
-						TSize index2 = (TSize) (TAlphabet(value(mat, j*len + k)));
+						TSize index1 = ordValue(TAlphabet(value(mat, i*len+k)));
+						TSize index2 = ordValue(TAlphabet(value(mat, j*len + k)));
 						value(numPairs, index1 * alphSize + index2) += 1;
 						totalScore += score(const_cast<TScore&>(score_type), TAlphabet(value(mat, i*len+k)), TAlphabet(value(mat, j*len + k)));
 					} else {

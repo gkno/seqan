@@ -100,10 +100,7 @@ _readLibrary(TFile & file,
 	SEQAN_CHECKPOINT
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename Size<TGraph>::Type TSize;
-	typedef TSize TWord;
 	typedef typename Value<TFile>::Type TValue;
-	
-	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename Id<TGraph>::Type TId;
@@ -112,13 +109,13 @@ _readLibrary(TFile & file,
 	bool seq1ToN = false;
 	if (_streamEOF(file)) return;
 	
-	typedef std::pair<std::pair<TWord, TWord>, TCargo> TResiduePair;
+	typedef std::pair<std::pair<TSize, TSize>, TCargo> TResiduePair;
 	typedef std::set<TResiduePair> TResiduePairSet;
-	TWord nseq = length(stringSet(g));
+	TSize nseq = length(stringSet(g));
 	String<TResiduePairSet> resPair;
 	resize(resPair, nseq * nseq);	
-	TWord seq1 = 0;
-	TWord seq2 = 0;
+	TSize seq1 = 0;
+	TSize seq2 = 0;
 	bool firstPass = true;
 	while (!_streamEOF(file)) {
 		_parse_skipWhitespace(file,c);
@@ -146,19 +143,18 @@ _readLibrary(TFile & file,
 			_parse_skipWhitespace(file,c);
 			TSize weight = _parse_readNumber(file, c);
 			_parse_skipLine(file,c);
-		
-			// Insert new vertex if necessary
-			--res1;
-			--res2;
 
-			TWord index = 0;
-			if (seq1 < seq2) index = seq1 * nseq + seq2;
-			else index = seq2 * nseq + seq1;
-			resPair[index].insert(std::make_pair(std::make_pair(res1,res2), weight));
+			if (seq1 < seq2) {
+				TSize index = seq1 * nseq + seq2;
+				resPair[index].insert(std::make_pair(std::make_pair(--res1,--res2), weight));
+			} else {
+				TSize index = seq2 * nseq + seq1;
+				resPair[index].insert(std::make_pair(std::make_pair(--res2,--res1), weight));
+			}		
 		}
 	}
 
-	typedef Fragment<TWord, TWord, TWord> TFragment;
+	typedef Fragment<TSize, TSize, TSize> TFragment;
 	typedef String<TFragment> TFragmentString;
 	typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
 	TFragmentString matches;
@@ -166,15 +162,16 @@ _readLibrary(TFile & file,
 
 	for(TSize i = 0; i<length(resPair); ++i) {
 		if (resPair[i].empty()) continue;
-		TWord seq1 = i / nseq;
-		TWord seq2 = i % nseq;
+		TSize seq1 = i / nseq;
+		TSize seq2 = i % nseq;
 		//std::cout << "#" << seq1 << ',' << seq2 << std::endl;
 		typename TResiduePairSet::const_iterator pos = resPair[i].begin();
 		typename TResiduePairSet::const_iterator posEnd = resPair[i].end();
-		TWord startMatch1 = pos->first.first;
-		TWord startMatch2 = pos->first.second;
+		TSize startMatch1 = pos->first.first;
+		TSize startMatch2 = pos->first.second;
 		TCargo carg = pos->second;
-		TWord len = 1;
+		TSize len = 1;
+		//std::cout << pos->first.first << ',' << pos->first.second << ',' << pos->second << std::endl;
 		++pos;
 		while(pos != posEnd) {
 			if ((startMatch1 + len == pos->first.first) &&
@@ -206,16 +203,16 @@ _readLibrary(TFile & file,
 	for(TFragmentStringIter it = begin(matches); it != endIt; ++it, ++positionIt) {
 		TId id1 = sequenceId(*it,0);
 		TId id2 = sequenceId(*it,1);
-		TWord pos1 = fragmentBegin(*it, id1);
-		TWord pos2 = fragmentBegin(*it, id2);
-		TWord origFragLen = fragmentLength(*it, id1);
-		TWord end1 = pos1 + origFragLen;
+		TSize pos1 = fragmentBegin(*it, id1);
+		TSize pos2 = fragmentBegin(*it, id2);
+		TSize origFragLen = fragmentLength(*it, id1);
+		TSize end1 = pos1 + origFragLen;
 		while(pos1 < end1) {
 			TVertexDescriptor p1 = findVertex(g, id1, pos1);
 			TVertexDescriptor p2 = findVertex(g, id2, pos2);
-			TWord fragLen = fragmentLength(g, p1);
+			TSize fragLen = fragmentLength(g, p1);
 			TEdgeDescriptor e = findEdge(g, p1, p2);
-			cargo(e) *= (TCargo) ( (double) fragLen / (double) origFragLen * (double) getValue(score_values, positionIt));
+			cargo(e) += (TCargo) ( (double) fragLen / (double) origFragLen * (double) getValue(score_values, positionIt));
 			pos1 += fragLen;
 			pos2 += fragLen;
 		}
@@ -233,7 +230,6 @@ read(TFile & file,
 	SEQAN_CHECKPOINT
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename Size<TGraph>::Type TSize;
-	typedef TSize TWord;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename Position<TFile>::Type TPosition;
 	typedef typename Value<TFile>::Type TValue;
@@ -246,22 +242,16 @@ read(TFile & file,
 
 	// Ignore first line
 	_parse_skipLine(file, c);
-	_parse_skipWhitespace(file, c);
-	
+		
 	// Read number of sequences
-	TWord nSeq = (TWord) _parse_readNumber(file, c);
+	TSize nSeq = (TSize) _parse_readNumber(file, c);
 	_parse_skipLine(file, c);
 	
 	// Skip header
-	for(TWord i=0; i<nSeq; ++i) {
-		c = _streamGet(file);
-		_parse_skipLine(file, c);
-	}
-
-	// Reinitialize the graph, because we changed the sequences
-	clearVertices(g);
+	for(TSize i=0; i<nSeq; ++i) _parse_skipLine(file, c);
 
 	// Read library
+	clearVertices(g);
 	_readLibrary(file,g);
 }
 
@@ -285,7 +275,6 @@ read(TFile & file,
 
 	// Ignore first line
 	_parse_skipLine(file, c);
-	_parse_skipWhitespace(file, c);
 	
 	// Read number of sequences
 	TSize nSeq = (TSize) _parse_readNumber(file, c);
@@ -294,12 +283,12 @@ read(TFile & file,
 
 	// Read sequences
 	for(TSize i=0; i<nSeq; ++i) {
-		_parse_skipWhitespace(file, c);
 		appendValue(names, _parse_readIdentifier(file, c));
 		_parse_skipWhitespace(file, c);
 		_parse_readNumber(file, c);
 		_parse_skipWhitespace(file, c);
 		_parse_readSequenceData(file,c,oriStr[i]);
+		_parse_skipLine(file, c);
 	}
 }
 
