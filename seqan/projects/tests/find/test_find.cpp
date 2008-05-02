@@ -426,6 +426,7 @@ void Test_OnlineAlgWildcards()
 	needle = "ist";
 	setHost(pattern, needle);
 	SEQAN_TASSERT(valid(pattern) == true);
+	SEQAN_TASSERT(valid(reinterpret_cast<Pattern<String<char>, TAlgorithmSpec> const &>(pattern)) == true);
 
 	needle = "i[a-z]s{3,4}t?a*a+c..\\a";
 	setHost(pattern, needle);
@@ -715,12 +716,15 @@ template <typename TPatternSpec>
 void Test_Approx_EditDist()
 {
 //test DPSearch
-	String<char> haystk("Dies ist der Haystack des Tests. Ja, das ist er wirklich!");
+  	String<char> haystk("Dies ist der Haystack des Tests. Ja, das ist er wirklich!");
 	String<char> ndl("des");
 
 	Finder<String<char> > fnd(haystk);
 
 	Pattern<String<char>, TPatternSpec> pat(ndl, -2);
+	SEQAN_TASSERT(host(pat) == ndl);
+	SEQAN_TASSERT(host(reinterpret_cast<Pattern<String<char>, TPatternSpec> const &>(pat)) == ndl);
+
 	SEQAN_TASSERT(scoreLimit(pat) == -2)
 	setScoreLimit(pat, -1);
 	SEQAN_TASSERT(scoreLimit(pat) == -1)
@@ -758,6 +762,41 @@ void Test_Approx_EditDist()
 	SEQAN_TASSERT(getScore(pat) == -1)
 
 	SEQAN_TASSERT(!find(fnd, pat))
+
+	// Test with long needles and a Dna Alphabet
+  	String<Dna> long_haystk("taaaataaaatacaataaaataaaataaaataaaataaaataaaataaaataaaataaaataaaataaaat");
+	String<Dna> long_ndl("taaaataaaatacaataaaataaaatataataaaataaaataaaat");
+
+	Finder<String<Dna> > long_fnd(long_haystk);
+
+	Pattern<String<Dna>, TPatternSpec> long_pat(long_ndl, -2);
+
+	SEQAN_TASSERT(find(long_fnd,long_pat))
+	SEQAN_TASSERT(position(long_fnd) == 44)
+	SEQAN_TASSERT(getScore(long_pat) == -2)
+
+	SEQAN_TASSERT(find(long_fnd,long_pat))
+	SEQAN_TASSERT(position(long_fnd) == 45)
+	SEQAN_TASSERT(getScore(long_pat) == -1)
+
+	SEQAN_TASSERT(find(long_fnd,long_pat))
+	SEQAN_TASSERT(position(long_fnd) == 46)
+	SEQAN_TASSERT(getScore(long_pat) == -2)
+
+	SEQAN_TASSERT(find(long_fnd,long_pat))
+	SEQAN_TASSERT(position(long_fnd) == 60)
+	SEQAN_TASSERT(getScore(long_pat) == -2)
+
+	SEQAN_TASSERT(find(long_fnd,long_pat))
+	SEQAN_TASSERT(position(long_fnd) == 65)
+	SEQAN_TASSERT(getScore(long_pat) == -2)
+
+	SEQAN_TASSERT(find(long_fnd,long_pat))
+	SEQAN_TASSERT(position(long_fnd) == 70)
+	SEQAN_TASSERT(getScore(long_pat) == -2)
+
+	SEQAN_TASSERT(!find(long_fnd,long_pat))
+
 }
 //____________________________________________________________________________
 
@@ -781,7 +820,7 @@ void Test_Approx()
 
 //test MyersUkkonen
 	Test_Approx_EditDist<MyersUkkonen>();
-
+	Test_Approx_EditDist<AbndmAlgo>();
 	/*
 //____________________________________________________________________________
 
@@ -836,7 +875,7 @@ int main()
 	debug::verifyCheckpoints("projects/library/seqan/find/find_multiple_shiftand.h");
 	debug::verifyCheckpoints("projects/library/seqan/find/find_set_horspool.h");
 	debug::verifyCheckpoints("projects/library/seqan/find/find_wumanber.h");
-
+	debug::verifyCheckpoints("projects/library/seqan/find/find_abndm.h");
 
 	SEQAN_TREPORT("TEST END")
 	return 0;
