@@ -849,12 +849,8 @@ read(TFile & file,
 		}
 	}
 
-	_debugMatches(strSet, matches);
-
 	// Refine all matches, rescore matches and create multiple alignment
 	matchRefinement(matches,strSet,g);
-
-	_debugRefinedMatches(g);
 	resizeEdgeMap(g, edgeMap);
 
 	// Adapt edge weights

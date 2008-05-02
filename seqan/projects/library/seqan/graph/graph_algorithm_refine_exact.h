@@ -592,9 +592,7 @@ SEQAN_CHECKPOINT
 		TFragmentStringIter endIt = end(matches);
 		for(TFragmentStringIter it = begin(matches); it != endIt; ++it) {
 			TId id1 = sequenceId(*it,0);
-			TId id2 = sequenceId(*it,1);
 			TSize pos1 = fragmentBegin(*it, id1);
-			TSize pos2 = fragmentBegin(*it, id2);
 			TSize len = fragmentLength(*it, id1);
 			for(TSize p = 0; p < len; ++p) {
 				TSize pos2 = 0;

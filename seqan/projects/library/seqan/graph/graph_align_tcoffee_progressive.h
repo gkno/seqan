@@ -412,8 +412,50 @@ iterativeProgressiveAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 
 
 
+//////////////////////////////////////////////////////////////////////////////
 
+template<typename TStringSet, typename TCargo, typename TSpec, typename TSegmentString, typename TEdgeMap, typename TOutGraph>
+inline void 
+_createMatchingGraph(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
+					 TSegmentString& alignSeq,
+					 TEdgeMap& edgeMap,
+					 TOutGraph& gOut,
+					 TEdgeMap& edgeMapOut)			 
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef String<TVertexDescriptor> TVertexString;
 
+	// Initialization
+	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
+
+	// Create the matching graph
+	clear(edgeMapOut);
+	TSize alignSeqLen = length(alignSeq);
+	for(TSize i = 0; i<alignSeqLen;++i) {
+		TVertexString& alignSeq_i = alignSeq[i];
+		TSize len_i = length(alignSeq_i);
+		for(TSize j=0; j<len_i - 1; ++j) {
+			for(TSize k=j+1; k<len_i; ++k) {
+				TVertexDescriptor v1 = getValue(alignSeq_i, j);
+				TVertexDescriptor v2 = getValue(alignSeq_i, k);
+				if ((v1 == nilVertex) || (v2 == nilVertex)) continue;
+				
+				TVertexDescriptor v1New = findVertex(gOut, sequenceId(g, v1), fragmentBegin(g,v1));
+				if (v1New == nilVertex) v1New = addVertex(gOut, sequenceId(g, v1), fragmentBegin(g,v1), fragmentLength(g,v1));
+				TVertexDescriptor v2New = findVertex(gOut, sequenceId(g, v2), fragmentBegin(g,v2));
+				if (v2New == nilVertex) v2New = addVertex(gOut, sequenceId(g, v2), fragmentBegin(g,v2), fragmentLength(g,v2));
+			
+				TEdgeDescriptor e = findEdge(g, v1, v2);
+				addEdge(gOut, v1New, v2New, cargo(e));
+				appendValue(edgeMapOut, property(edgeMap, e));
+			}
+		}
+	}
+}
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -642,11 +684,13 @@ _recursiveProgressiveMatching(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 }
 
 
-template<typename TStringSet, typename TCargo, typename TSpec, typename TGuideTree, typename TOutGraph>
+template<typename TStringSet, typename TCargo, typename TSpec, typename TGuideTree, typename TEdgeMap, typename TOutGraph>
 inline void 
 progressiveMatching(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 					TGuideTree& tree,
-					TOutGraph& gOut)			 
+					TEdgeMap& edgeMap,
+					TOutGraph& gOut,
+					TEdgeMap& edgeMapOut)			 
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
@@ -660,7 +704,7 @@ progressiveMatching(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	_recursiveProgressiveMatching(g,tree,getRoot(tree),alignSeq);
 
 	// Create the alignment graph
-	_createAlignmentGraph(g, alignSeq, gOut);
+	_createMatchingGraph(g, alignSeq, edgeMap, gOut, edgeMapOut);
 }
 
 

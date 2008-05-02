@@ -6,71 +6,53 @@
 using namespace seqan;
 
 
-template<typename TString, typename TSpec, typename TName, typename TSpec2, typename TConfigOptions, typename TOutGraph>
+template<typename TString, typename TSpec, typename TName, typename TSpec2, typename TConfigOptions, typename TOutGraph, typename TEdgeMap>
 inline void
 globalMatching(StringSet<TString, TSpec> const& seqSet,
 			   StringSet<TName, TSpec2> const& nameSet,
 			   TConfigOptions& cfgOpt,
-			   TOutGraph& gOut)
+			   TOutGraph& gOut,
+			   TEdgeMap& edgeMapOut)
 {
 	SEQAN_CHECKPOINT
 	
 	typedef StringSet<TString, Dependent<> > TStringSet;
-	typedef Graph<Alignment<TStringSet, unsigned int> > TGraph;
+	typedef TOutGraph TGraph;
 	typedef typename Size<TGraph>::Type TSize;
 	typedef typename Id<TGraph>::Type TId;
 
-	// Score objects
-	Score<int> score_type_global = Score<int>(5,-4,-4,-14);
-	Score<int> score_type_local = Score<int>(5,-4,-4,-14);
-
+	// Read all matches and reversed matches
 	TGraph g(seqSet);
-	String<Pair<TId, TId> > pList;
-	selectPairsForLibraryGeneration(g, pList);
-
-	String<bool> edgeMap;
+	TEdgeMap edgeMap;
 	std::fstream strm_lib;
 	strm_lib.open(toCString(value(cfgOpt, "matches")), std::ios_base::in | std::ios_base::binary);
 	read(strm_lib, g, nameSet, edgeMap, MummerLib());	// Read library
 	strm_lib.close();
-	
+
+	// Write out that library
 	std::fstream strm_lib1;
-	strm_lib1.open("Z:\\matches\\reads\\library.txt", std::ios_base::out | std::ios_base::trunc);
-	//strm_lib1.open("/home/takifugu/rausch/matches/reads/library.txt", std::ios_base::out | std::ios_base::trunc);
+	strm_lib1.open(toCString(value(cfgOpt, "library")), std::ios_base::out | std::ios_base::trunc);
 	write(strm_lib1, g, nameSet, edgeMap, BlastLib());	// Write library
 	strm_lib1.close();
 
+	// Compute a rough and roudy distance matrix
+	String<double> distanceMatrix;
+	getDistanceMatrix(g,distanceMatrix,LibraryDistance() );
 
-	//String<double> distanceMatrix;
-	//getDistanceMatrix(g,distanceMatrix,LibraryDistance() );
+	// Perform the triplet extension
+	tripletLibraryExtension(g);
+	
+	// Get a guide tree
+	Graph<Tree<double> > guideTree;
+	slowNjTree(distanceMatrix, guideTree);
 
-	//tripletLibraryExtension(g);
+	// Progressive matching
+	progressiveMatching(g, guideTree, edgeMap, gOut, edgeMapOut);
 
-	//
-	//// ... and normal progressive alignment with guide tree
-	//Graph<Tree<double> > guideTree;
-	////upgmaTree(distanceMatrix, guideTree);	
-	//slowNjTree(distanceMatrix, guideTree);
-
-	//progressiveAlignment(g, guideTree, gOut);
-
-	//TGraph gOut2(seqSet);
-	//progressiveMatching(g, guideTree, gOut2);
-
-
-	//std::fstream strm_lib1;
-	//strm_lib1.open("/home/takifugu/rausch/matches/reads/library.txt", std::ios_base::out | std::ios_base::trunc);
-	//write(strm_lib1, g, nameSet, BlastLib());	// Write library
-	//strm_lib1.close();
-
-	//std::fstream strm_lib3;
-	//strm_lib3.open("/home/takifugu/rausch/matches/reads/matching.txt", std::ios_base::out | std::ios_base::trunc);
-	//write(strm_lib3, gOut2, nameSet, BlastLib());	// Write library
-	//strm_lib3.close();
-
-	//clear(guideTree);
-	//clear(distanceMatrix);
-	//clear(g);
+	// Clean-up
+	clear(guideTree);
+	clear(distanceMatrix);
+	clear(g);
 }
 
 int main(int argc, const char *argv[]) {
@@ -83,11 +65,12 @@ int main(int argc, const char *argv[]) {
 	typedef String<char> TValue;
 	typedef Size<TKey>::Type TSize;
 	ConfigOptions<TKey, TValue> cfgOpt;
-	TKey keys[] = {"seq","outfile","output", "matches"};
-	assignKeys(cfgOpt, keys, 4);
+	TKey keys[] = {"seq","outfile","output", "matches", "library"};
+	assignKeys(cfgOpt, keys, 5);
 	// Set default options
 	assign(cfgOpt, "output", "fasta");
-	assign(cfgOpt, "outfile", "out.fasta");
+	assign(cfgOpt, "library", "library.txt");
+	assign(cfgOpt, "outfile", "matching.txt");
 	// Help Message
 	String<char> helpMsg;
 	append(helpMsg, "Usage: seqan_matching -seq <FASTA Sequence File> [ARGUMENTS]\n");
@@ -114,12 +97,18 @@ int main(int argc, const char *argv[]) {
 	//////////////////////////////////////////////////////////////////////////////
 
 	typedef Graph<Alignment<TDepSequenceSet, TSize> > TGraph;
-	Graph<Alignment<TDepSequenceSet, void, WithoutEdgeId> > gOut(strSet);
-	globalMatching(strSet, names, cfgOpt, gOut);
+	Graph<Alignment<TDepSequenceSet, TSize> > gOut(strSet);
+	String<bool> edgeMap;
+	globalMatching(strSet, names, cfgOpt, gOut, edgeMap);
 
 	////////////////////////////////////////////////////////////////////////////
 	// Alignment output
 	////////////////////////////////////////////////////////////////////////////
+
+	std::fstream strm_lib3;
+	strm_lib3.open(toCString(value(cfgOpt, "outfile")), std::ios_base::out | std::ios_base::trunc);
+	write(strm_lib3, gOut, names, edgeMap, BlastLib());	// Write library
+	strm_lib3.close();
 
 	//std::fstream strm;
 	//strm.open(toCString(value(cfgOpt, "outfile")), std::ios_base::out | std::ios_base::trunc);
