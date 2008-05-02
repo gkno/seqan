@@ -571,8 +571,11 @@ SEQAN_CHECKPOINT
 			TSize pos2 = fragmentBegin(*it, id2);
 			TSize len = fragmentLength(*it, id1);
 			for(TSize p = 0; p < len; ++p) {
+				TSize pos2 = 0;
+				TId id2 = 0;
+				getProjectedPosition(*it, id1, pos1 + p, id2, pos2);
 				TVertexDescriptor v1 = findVertex(ali_graph, id1, pos1 + p);
-				TVertexDescriptor v2 = findVertex(ali_graph, id2, pos2 + p);
+				TVertexDescriptor v2 = findVertex(ali_graph, id2, pos2);
 				TEdgeDescriptor e = findEdge(ali_graph, v1, v2);
 				if (e == 0) addEdge(ali_graph, v1, v2, 1);
 				else cargo(e) += 1;

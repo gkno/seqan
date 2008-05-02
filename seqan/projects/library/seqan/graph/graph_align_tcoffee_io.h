@@ -650,13 +650,14 @@ read(TFile & file,
 	TSize positionIt = 0;
 	for(TFragmentStringIter it = begin(matches); it != endIt; ++it, ++positionIt) {
 		TId id1 = sequenceId(*it,0);
-		TId id2 = sequenceId(*it,1);
 		TSize pos1 = fragmentBegin(*it, id1);
-		TSize pos2 = fragmentBegin(*it, id2);
 		TSize origFragLen = fragmentLength(*it, id1);
 		TSize end1 = pos1 + origFragLen;
 		bool reversed = isReversed(*it);
 		while(pos1 < end1) {
+			TSize pos2 = 0;
+			TId id2 = 0;
+			getProjectedPosition(*it, id1, pos1, id2, pos2);
 			TVertexDescriptor p1 = findVertex(g, id1, pos1);
 			TVertexDescriptor p2 = findVertex(g, id2, pos2);
 			TSize fragLen = fragmentLength(g, p1);
@@ -841,6 +842,7 @@ read(TFile & file,
 			TSize len = _parse_readNumber(file, c);
 			_parse_skipLine(file, c);
 			if (seq1Id == seq2Id) continue;
+			
 			if (!reversed) appendValue(matches, TFragment(seq1Id, --beg1, seq2Id,  --beg2, len, reversed));
 			else appendValue(matches, TFragment(seq1Id, (length(value(strSet, seq1Id)) - (--beg1 + len)), seq2Id,  --beg2, len, reversed));
 			appendValue(score_values, (TCargo) len);
@@ -860,13 +862,14 @@ read(TFile & file,
 	TSize positionIt = 0;
 	for(TFragmentStringIter it = begin(matches); it != endIt; ++it, ++positionIt) {
 		TId id1 = sequenceId(*it,0);
-		TId id2 = sequenceId(*it,1);
 		TSize pos1 = fragmentBegin(*it, id1);
-		TSize pos2 = fragmentBegin(*it, id2);
 		TSize origFragLen = fragmentLength(*it, id1);
 		TSize end1 = pos1 + origFragLen;
 		bool reversed = isReversed(*it);
 		while(pos1 < end1) {
+			TSize pos2 = 0;
+			TId id2 = 0;
+			getProjectedPosition(*it, id1, pos1, id2, pos2);
 			TVertexDescriptor p1 = findVertex(g, id1, pos1);
 			TVertexDescriptor p2 = findVertex(g, id2, pos2);
 			TSize fragLen = fragmentLength(g, p1);
