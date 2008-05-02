@@ -25,95 +25,145 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 
-	
-template<typename TId = unsigned int, typename TPos = unsigned int, typename TSize = unsigned int, typename TSpec = Default()>
+//////////////////////////////////////////////////////////////////////////////
+// Fragment Specs
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TSpec = Default>
+struct ExactFragment;	
+
+
+template<typename TSpec = Default>
+struct ExactReversableFragment;	
+
+
+//////////////////////////////////////////////////////////////////////////////
+// Default Fragment is the exact one
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TSize = typename Size<String<char> >::Type, typename TSpec = ExactFragment<> >
 class Fragment;
 
 
+//////////////////////////////////////////////////////////////////////////////
+// Size Metafunction
+//////////////////////////////////////////////////////////////////////////////
 
-template<typename TId, typename TPos, typename TSize, typename TSpec>
-class Fragment {
+template<typename TSize, typename TSpec>
+struct Size<Fragment<TSize, TSpec> > {
+	typedef TSize Type;
+};
+
+
+template<typename TSize, typename TSpec>
+struct Size<Fragment<TSize, TSpec> const> {
+	typedef TSize Type;
+};
+
+
+//////////////////////////////////////////////////////////////////////////////
+// Exact Fragment
+//////////////////////////////////////////////////////////////////////////////
+	
+
+template<typename TSize, typename TSpec>
+class Fragment<TSize, ExactFragment<TSpec> > {
  public:
-  TId seqId1;
-  TPos begin1;
-  TId seqId2;
-  TPos begin2;
-  TSize len;
+	 typedef typename Id<Fragment>::Type TId;
+	 TId seqId1;
+	 TSize begin1;
+	 TId seqId2;
+	 TSize begin2;
+	 TSize len;
   
-  Fragment()
-  {
-  }
+	 Fragment()	 {}
 
-  Fragment(TId sqId1, TPos beg1, TId sqId2, TPos beg2, TSize l) :
-    seqId1(sqId1), begin1(beg1), seqId2(sqId2), begin2(beg2), len(l) {
-  }
+	 Fragment(TId sqId1, TSize beg1, TId sqId2, TSize beg2, TSize l) :
+	 seqId1(sqId1), begin1(beg1), seqId2(sqId2), begin2(beg2), len(l) 
+	 {
+	 }
 
 };
 
-template<typename TId, typename TPos, typename TSize, typename TSpec>
-struct Position<Fragment<TId, TPos, TSize, TSpec> > {
-	typedef TPos Type;
-};
 
-template<typename TId, typename TPos, typename TSize, typename TSpec>
-struct Position<Fragment<TId, TPos, TSize, TSpec> const> {
-	typedef TPos const Type;
+//////////////////////////////////////////////////////////////////////////////
+// Exact Fragment that is a forward or reverse match
+//////////////////////////////////////////////////////////////////////////////
+	
+
+template<typename TSize, typename TSpec>
+class Fragment<TSize, ExactReversableFragment<TSpec> > {
+ public:
+	 typedef typename Id<Fragment>::Type TId;
+	 TId seqId1;
+	 TSize begin1;
+	 TId seqId2;
+	 TSize begin2;
+	 TSize len;
+	 bool reversed;
+  
+	 Fragment()	 {}
+
+	 Fragment(TId sqId1, TSize beg1, TId sqId2, TSize beg2, TSize l) :
+	 seqId1(sqId1), begin1(beg1), seqId2(sqId2), begin2(beg2), len(l), reversed(false) 
+	 {
+	 }
+
+ 	 Fragment(TId sqId1, TSize beg1, TId sqId2, TSize beg2, TSize l, bool rev) :
+	 seqId1(sqId1), begin1(beg1), seqId2(sqId2), begin2(beg2), len(l), reversed(rev) 
+	 {
+	 }
 };
 
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TId, typename TPos, typename TSize, typename TSpec, typename TStringSet, typename TVal>
+template<typename TSize, typename TSpec, typename TStringSet, typename TVal>
 inline typename Infix<typename Value<TStringSet>::Type>::Type
-label(Fragment<TId, TPos, TSize, TSpec> const& f,
+label(Fragment<TSize, TSpec> const& f,
       TStringSet& str,
       TVal const seqId)
 {
 	SEQAN_CHECKPOINT
-	typedef Fragment<TId, TPos, TSize, TSpec> TFragment;
+	typedef typename Id<Fragment<TSize, TSpec> >::Type TId;
 
-	if ((TId) seqId == f.seqId1) {
-		return infix(getValueById(str, (TId) seqId), f.begin1, f.begin1 + f.len);
-	} else {
-		return infix(getValueById(str, (TId) seqId), f.begin2, f.begin2 + f.len);
-	}
+	if ((TId) seqId == f.seqId1) return infix(getValueById(str, (TId) seqId), f.begin1, f.begin1 + f.len);
+	else return infix(getValueById(str, (TId) seqId), f.begin2, f.begin2 + f.len);
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TId, typename TPos, typename TSize, typename TSpec, typename TVal>
-inline TId
-sequenceId(Fragment<TId, TPos, TSize, TSpec> const& f,
+template<typename TSize, typename TSpec, typename TVal>
+inline typename Id<Fragment<TSize, TSpec> >::Type
+sequenceId(Fragment<TSize, TSpec> const& f,
 		   TVal const seqId)
 {
 	SEQAN_CHECKPOINT
-	if ((TId) seqId == 0) {
-		return f.seqId1;
-	} else {
-		return f.seqId2;
-	}
+	typedef typename Id<Fragment<TSize, TSpec> >::Type TId;
+
+	if ((TId) seqId == 0) return f.seqId1;
+	else return f.seqId2;
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TId, typename TPos, typename TSize, typename TSpec, typename TVal>
-inline typename Position<Fragment<TId, TPos, TSize, TSpec> >::Type&
-fragmentBegin(Fragment<TId, TPos, TSize, TSpec> const& f,
+template<typename TSize, typename TSpec, typename TVal>
+inline TSize&
+fragmentBegin(Fragment<TSize, TSpec> const& f,
 			  TVal const seqId)
 {
 	SEQAN_CHECKPOINT
-	if ((TId) seqId == f.seqId1) {
-	  return const_cast<typename Position<Fragment<TId, TPos, TSize, TSpec> >::Type&>(f.begin1);
-	} else {
-	  return const_cast<typename Position<Fragment<TId, TPos, TSize, TSpec> >::Type&>(f.begin2);
-	}
+	typedef typename Id<Fragment<TSize, TSpec> >::Type TId;
+
+	if ((TId) seqId == f.seqId1) return const_cast<TSize&>(f.begin1);
+	else return const_cast<TSize&>(f.begin2);
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TId, typename TPos, typename TSize, typename TSpec, typename TVal>
+template<typename TSize, typename TSpec, typename TVal>
 inline TSize&
-fragmentLength(Fragment<TId, TPos, TSize, TSpec> const& f,
+fragmentLength(Fragment<TSize, TSpec> const& f,
 			   TVal const)
 {
 	SEQAN_CHECKPOINT
@@ -122,9 +172,9 @@ fragmentLength(Fragment<TId, TPos, TSize, TSpec> const& f,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TId, typename TPos, typename TSize, typename TSpec>
+template<typename TSize, typename TSpec>
 inline TSize&
-fragmentLength(Fragment<TId, TPos, TSize, TSpec> const& f)
+fragmentLength(Fragment<TSize, TSpec> const& f)
 {
 	SEQAN_CHECKPOINT
 	return const_cast<TSize&>(f.len);
@@ -132,15 +182,17 @@ fragmentLength(Fragment<TId, TPos, TSize, TSpec> const& f)
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TId, typename TPos, typename TSize, typename TSpec, typename TId1, typename TPosition1, typename TId2, typename TPosition2>
+template<typename TSize, typename TSpec, typename TId1, typename TPosition1, typename TId2, typename TPosition2>
 inline void
-getProjectedPosition(Fragment<TId, TPos, TSize, TSpec> const& f,
+getProjectedPosition(Fragment<TSize, ExactFragment<TSpec> > const& f,
 					 TId1 const seqId,
 					 TPosition1 const pos,
 					 TId2& seqId2,
 					 TPosition2& pos2)
 {
 	SEQAN_CHECKPOINT
+	typedef typename Id<Fragment<TSize, TSpec> >::Type TId;
+	
 	if ((TId) seqId == f.seqId1) {
 		SEQAN_TASSERT((TPosition1)f.begin1<=pos)
 		SEQAN_TASSERT(pos - f.begin1 < f.len)	
@@ -154,6 +206,47 @@ getProjectedPosition(Fragment<TId, TPos, TSize, TSpec> const& f,
 		seqId2 = f.seqId1;
 		return;
 	}
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TSize, typename TSpec, typename TId1, typename TPosition1, typename TId2, typename TPosition2>
+inline void
+getProjectedPosition(Fragment<TSize, ExactReversableFragment<TSpec> > const& f,
+					 TId1 const seqId,
+					 TPosition1 const pos,
+					 TId2& seqId2,
+					 TPosition2& pos2)
+{
+	SEQAN_CHECKPOINT
+	typedef typename Id<Fragment<TSize, TSpec> >::Type TId;
+	
+	if ((TId) seqId == f.seqId1) {
+		SEQAN_TASSERT((TPosition1)f.begin1<=pos)
+		SEQAN_TASSERT(pos - f.begin1 < f.len)	
+		if (f.reversed) pos2 = (f.begin2 + f.len - 1) - (pos - f.begin1);
+		else pos2 = f.begin2 + (pos - f.begin1);
+		seqId2 = f.seqId2;
+		return;
+	} else {
+		SEQAN_TASSERT((TPosition1)f.begin2<=pos)
+		SEQAN_TASSERT(pos - f.begin2 < f.len)
+		if (f.reversed) pos2 = (f.begin1 + f.len - 1) - (pos - f.begin2);
+		else pos2 = f.begin1 + (pos - f.begin2);
+		seqId2 = f.seqId1;
+		return;
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TSize, typename TSpec>
+inline bool
+isReversed(Fragment<TSize, ExactReversableFragment<TSpec> > const& f)
+{
+	SEQAN_CHECKPOINT
+	return f.reversed;
 }
 
 }// namespace SEQAN_NAMESPACE_MAIN

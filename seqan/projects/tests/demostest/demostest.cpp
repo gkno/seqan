@@ -229,6 +229,9 @@
 	#include "../../library/demos/graph_matching.cpp"
 	#undef main
 
+	#define main runGraph28
+	#include "../../library/demos/seqan_matching.cpp"
+	#undef main
 #endif
 
 
@@ -278,6 +281,7 @@ int main(int argc, const char *argv[])
 	runGraph24(argc, argv);
 	runGraph25(argc, argv);
 	runGraph26();runGraph27();
+	runGraph28(argc, argv);
 #endif
 
 	return 0;

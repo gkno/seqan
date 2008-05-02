@@ -5,12 +5,13 @@
 
 using namespace seqan;
 
-/*
-template<typename TString, typename TSpec, typename TName, typename TSpec2, typename TConfigOptions>
+
+template<typename TString, typename TSpec, typename TName, typename TSpec2, typename TConfigOptions, typename TOutGraph>
 inline void
 globalMatching(StringSet<TString, TSpec> const& seqSet,
 			   StringSet<TName, TSpec2> const& nameSet,
-			   TConfigOptions& cfgOpt)
+			   TConfigOptions& cfgOpt,
+			   TOutGraph& gOut)
 {
 	SEQAN_CHECKPOINT
 	
@@ -44,7 +45,6 @@ globalMatching(StringSet<TString, TSpec> const& seqSet,
 	//upgmaTree(distanceMatrix, guideTree);	
 	slowNjTree(distanceMatrix, guideTree);
 
-	TGraph gOut(seqSet);
 	progressiveAlignment(g, guideTree, gOut);
 
 	TGraph gOut2(seqSet);
@@ -56,11 +56,6 @@ globalMatching(StringSet<TString, TSpec> const& seqSet,
 	write(strm_lib1, g, nameSet, BlastLib());	// Write library
 	strm_lib1.close();
 
-	std::fstream strm_lib2;
-	strm_lib2.open("/home/takifugu/rausch/matches/reads/alignment.txt", std::ios_base::out | std::ios_base::trunc);
-	write(strm_lib2, gOut, nameSet, BlastLib());	// Write library
-	strm_lib2.close();
-
 	std::fstream strm_lib3;
 	strm_lib3.open("/home/takifugu/rausch/matches/reads/matching.txt", std::ios_base::out | std::ios_base::trunc);
 	write(strm_lib3, gOut2, nameSet, BlastLib());	// Write library
@@ -71,10 +66,58 @@ globalMatching(StringSet<TString, TSpec> const& seqSet,
 	clear(g);
 }
 
-*/
+int main(int argc, const char *argv[]) {
+	////////////////////////////////////////////////////////////////////////////////
+	//// Command line parsing
+	////////////////////////////////////////////////////////////////////////////////
+	//
+	//// Set the keys
+	//typedef String<char> TKey;
+	//typedef String<char> TValue;
+	//typedef Size<TKey>::Type TSize;
+	//ConfigOptions<TKey, TValue> cfgOpt;
+	//TKey keys[] = {"seq","outfile","output", "matches"};
+	//assignKeys(cfgOpt, keys, 4);
+	//// Set default options
+	//assign(cfgOpt, "output", "fasta");
+	//assign(cfgOpt, "outfile", "out.fasta");
+	//// Help Message
+	//String<char> helpMsg;
+	//append(helpMsg, "Usage: seqan_matching -seq <FASTA Sequence File> [ARGUMENTS]\n");
+	//assignHelp(cfgOpt, helpMsg);
+	//
+	//if (argc < 2) {	std::cerr << valueHelp(cfgOpt) << std::endl; return -1; }
+	//if (!parseCmdLine(argc, argv, cfgOpt)) return -1;
 
+	////////////////////////////////////////////////////////////////////////////////
+	//// Read the sequences
+	////////////////////////////////////////////////////////////////////////////////
+	//
+	//typedef String<Dna> TSequence;
+	//typedef String<char> TName;
+	//StringSet<TSequence, Owner<> > origStrSet;
+	//StringSet<TName> names;
+	//_alignImportSequences(value(cfgOpt, "seq"), origStrSet, names);
+	//typedef StringSet<TSequence, Dependent<> > TDepSequenceSet;
+	//typedef Size<TDepSequenceSet>::Type TSize;
+	//TDepSequenceSet strSet(origStrSet);
+	//
+	////////////////////////////////////////////////////////////////////////////////
+	//// Alignment
+	////////////////////////////////////////////////////////////////////////////////
 
-int main(/*int argc, const char *argv[]*/) {
+	//typedef Graph<Alignment<TDepSequenceSet, TSize> > TGraph;
+	//Graph<Alignment<TDepSequenceSet, void, WithoutEdgeId> > gOut(strSet);
+	//globalMatching(strSet, names, cfgOpt, gOut);
 
+	//////////////////////////////////////////////////////////////////////////////
+	// Alignment output
+	//////////////////////////////////////////////////////////////////////////////
+
+	//std::fstream strm;
+	//strm.open(toCString(value(cfgOpt, "outfile")), std::ios_base::out | std::ios_base::trunc);
+	//write(strm,gOut,names,XMFA());
+	//strm.close();
+	
 	return 0;
 }

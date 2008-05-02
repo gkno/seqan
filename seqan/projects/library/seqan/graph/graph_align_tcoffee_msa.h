@@ -333,7 +333,7 @@ globalAlignment(StringSet<TString, TSpec> const& seqSet,
 	TGraph g(seqSet);
 	String<TGraph*> libs;
 	if (!empty(lib1)) appendValue(libs, &lib1);
-	appendValue(libs, &lib2);
+	if (!empty(lib2)) appendValue(libs, &lib2);
 	combineGraphs(g, libs, FrequencyCounting() );
 
 	// Guide tree

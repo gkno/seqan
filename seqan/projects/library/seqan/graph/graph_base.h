@@ -197,6 +197,15 @@ typedef Tag<CgVizFormat_> const CgVizFormat;
 struct AtacMatches_;
 typedef Tag<AtacMatches_> const AtacMatches;
 
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Tag.Alignment Graph Format.value.XMFA:
+	Format to write an alignment in xmfa format.
+*/
+
+struct XMFA_;
+typedef Tag<XMFA_> const XMFA;
 
 
 //////////////////////////////////////////////////////////////////////////////

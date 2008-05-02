@@ -142,9 +142,9 @@ SEQAN_CHECKPOINT
 ///////////////////////////////////////////////////////////////////////////////////////////////////////	
 //Functions for Fragments
 //project onto other sequence for Graph<Alignment>
-template<typename TStringSet,typename TFragId,typename TFragPos,typename TFragSize, typename TFragSpec,typename TValue, typename TMap>
+template<typename TStringSet,typename TFragSize, typename TFragSpec,typename TValue, typename TMap>
 bool
-_getOtherSequenceAndProject(Fragment<TFragId,TFragPos,TFragSize,TFragSpec> & segment,
+_getOtherSequenceAndProject(Fragment<TFragSize,TFragSpec> & segment,
 							TStringSet & seqs,
 						   TMap &,
 						   TValue seq_i,
@@ -614,11 +614,11 @@ SEQAN_CHECKPOINT
 //get score for alignment starting at pos_i on one sequence (first sequence if i_am_first==true)
 //and pos_j on other sequence (second sequence if i_am_first==true), if len1!=len2 then the refinement
 //process was stopped (the cut is not exact)
-template<typename TScore,typename TStringSet,typename TFragId,typename TFragPos,typename TFragSize, typename TFragSpec,typename TValue>
+template<typename TScore,typename TStringSet,typename TFragSize, typename TFragSpec,typename TValue>
 typename Value<TScore>::Type
 getScore(TScore & score_type, 
 		 TStringSet & seqs,
-		 Fragment<TFragId,TFragPos,TFragSize,TFragSpec> & segment, 
+		 Fragment<TFragSize,TFragSpec> & segment, 
 		 bool i_am_first, 
 		 TValue pos_i, 
 		 TValue pos_j,
@@ -657,11 +657,11 @@ SEQAN_CHECKPOINT
 //get score for alignment starting at pos_i on one sequence (first sequence if i_am_first==true)
 //and pos_j on other sequence (second sequence if i_am_first==true), if len1!=len2 then the refinement
 //process was stopped (the cut is not exact)
-template<typename TScoreValue, typename TSpec, typename TStringSet,typename TFragId,typename TFragPos,typename TFragSize, typename TFragSpec>
+template<typename TScoreValue, typename TSpec, typename TStringSet,typename TFragPos,typename TFragSize, typename TFragSpec>
 TScoreValue
 getScore(Score<TScoreValue, TSpec> & score_type,
 		 TStringSet & seqs, 
-		 Fragment<TFragId,TFragPos,TFragSize,TFragSpec> & segment, 
+		 Fragment<TFragSize,TFragSpec> & segment, 
 		 bool i_am_first, 
 		 TFragPos pos_i, 
 		 TFragPos pos_j, 
@@ -693,11 +693,11 @@ SEQAN_CHECKPOINT
 
 //get score for alignment of length len starting at pos_i on one sequence (first sequence if i_am_first==true)
 //and pos_j on other sequence (second sequence if i_am_first==true)
-template<typename TScoreValue, typename TSpec, typename TStringSet,typename TFragId,typename TFragPos,typename TFragSize, typename TFragSpec>
+template<typename TScoreValue, typename TSpec, typename TStringSet,typename TFragPos, typename TFragSize, typename TFragSpec>
 TScoreValue
 getScore(Score<TScoreValue, TSpec> & score_type,
 		 TStringSet & seqs,
-		 Fragment<TFragId,TFragPos,TFragSize,TFragSpec> & segment,
+		 Fragment<TFragSize,TFragSpec> & segment,
 		 bool, 
 		 TFragPos pos_i,
 		 TFragPos pos_j,
@@ -789,11 +789,11 @@ struct Value< Score<TValue, FakeScore> >
 
 
 //fake score function 
-template<typename TScoreValue,typename TStringSet,typename TFragId,typename TFragPos,typename TFragSize, typename TFragSpec>
+template<typename TScoreValue,typename TStringSet,typename TFragPos, typename TFragSize, typename TFragSpec>
 TScoreValue
 getScore(Score<TScoreValue,FakeScore> &,
 		 TStringSet &,
-		 Fragment<TFragId,TFragPos,TFragSize,TFragSpec> &,
+		 Fragment<TFragSize,TFragSpec> &,
 		 bool, 
 		 TFragPos,
 		 TFragPos,

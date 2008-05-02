@@ -154,7 +154,7 @@ _readLibrary(TFile & file,
 		}
 	}
 
-	typedef Fragment<TSize, TSize, TSize> TFragment;
+	typedef Fragment<> TFragment;
 	typedef String<TFragment> TFragmentString;
 	typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
 	TFragmentString matches;

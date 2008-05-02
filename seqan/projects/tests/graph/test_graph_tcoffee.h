@@ -779,16 +779,32 @@ void Test_Alignments2() {
 
 
 
-
-
-
-
-
-
-
-
-
-
+void Test_ReversableFragments() {
+	typedef unsigned int TSize;
+	typedef String<Dna> TSequence;
+	TSequence seq1 = "AACGTT";
+	TSequence seq2 = "AACGTTC";
+	typedef StringSet<TSequence, Dependent<> > TDepSequenceSet;
+	TDepSequenceSet strSet;
+	appendValue(strSet, seq1);
+	appendValue(strSet, seq2);
+	typedef Fragment<TSize, ExactReversableFragment<> > TFragment;
+	typedef String<TFragment> TFragmentString;
+	TFragmentString matches;
+	appendValue(matches, TFragment(0,0,1,0,2));
+	appendValue(matches, TFragment(0,3,1,3,3));
+	appendValue(matches, TFragment(0,1,1,2,3, true));
+	typedef Graph<Alignment<TDepSequenceSet, TSize> > TGraph;
+	TGraph g(strSet);
+	matchRefinement(matches,strSet,g);
+	SEQAN_ASSERT(findEdge(g, findVertex(g, 0, 1), findVertex(g, 1, 2)) == 0)
+	SEQAN_ASSERT(findEdge(g, findVertex(g, 0, 1), findVertex(g, 1, 4)) != 0)
+	SEQAN_ASSERT(findEdge(g, findVertex(g, 0, 2), findVertex(g, 1, 3)) != 0)
+	SEQAN_ASSERT(findEdge(g, findVertex(g, 0, 3), findVertex(g, 1, 2)) != 0)
+	SEQAN_ASSERT(findEdge(g, findVertex(g, 0, 3), findVertex(g, 1, 4)) == 0)
+	SEQAN_ASSERT(findEdge(g, findVertex(g, 0, 0), findVertex(g, 1, 0)) != 0)
+	SEQAN_ASSERT(findEdge(g, findVertex(g, 0, 1), findVertex(g, 1, 1)) != 0)
+}
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -805,6 +821,7 @@ void Test_GraphTCoffee() {
 	Test_Progressive();
 	Test_Alignments1();
 	Test_Alignments2();
+	Test_ReversableFragments();
 	
 	
 	debug::verifyCheckpoints("projects/library/seqan/graph/graph_utility_alphabets.h");

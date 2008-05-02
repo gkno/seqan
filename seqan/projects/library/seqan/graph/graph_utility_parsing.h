@@ -245,7 +245,11 @@ inline TValue&
 value(ConfigOptions<TKey, TValue>& cfgOpt,
 	  TKey1& key1)
 {
-	return (cfgOpt.option.find(key1))->second;
+	if (cfgOpt.option.find(key1) == cfgOpt.option.end()) {
+		static TValue tmp;
+		return tmp;
+	}
+	else return (cfgOpt.option.find(key1))->second;
 }
 
 //////////////////////////////////////////////////////////////////////////////

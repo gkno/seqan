@@ -26,16 +26,15 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 
-// Spec for exact matches (no mismatches)
-struct ExactFragment;
+
 
 	
 ///////////////////////////////////////////////////////////////////////////////////////////////////////	
 //Functions for Fragments
 //project onto other sequence for Graph<Alignment>
-template<typename TFragId,typename TFragPos,typename TFragSize, typename TFragSpec,typename TValue, typename TMap>
+template<typename TFragSize, typename TFragSpec,typename TValue, typename TMap>
 void
-_getOtherSequenceAndProject(Fragment<TFragId,TFragPos,TFragSize,TFragSpec> & segment,
+_getOtherSequenceAndProject(Fragment<TFragSize,TFragSpec> & segment,
 						   TMap &,
 						   TValue seq_i_id,
 						   TValue pos_i,
@@ -55,9 +54,9 @@ SEQAN_CHECKPOINT
 //given seq and segment, get the sequenceId (seq_i) and its begin and end
 //if seq = 0 get first sequence (that takes part in the segment match)
 //if seq = 1 get second sequence
-template<typename TFragId,typename TFragPos,typename TFragSize, typename TFragSpec, typename TValue>
+template<typename TFragSize, typename TFragSpec, typename TValue>
 void
-_getSeqBeginAndEnd(Fragment<TFragId,TFragPos,TFragSize,TFragSpec> & segment,
+_getSeqBeginAndEnd(Fragment<TFragSize,TFragSpec> & segment,
 				  std::map<const void * ,int> &, 
 				  TValue & seq_i_id, 
 				  TValue & begin_i, 
@@ -174,11 +173,11 @@ SEQAN_CHECKPOINT
 
 //get score for alignment of length len starting at pos_i on one sequence (first sequence if i_am_first==true)
 //and pos_j on other sequence (second sequence if i_am_first==true)
-template<typename TScoreValue,typename TStringSet,typename TFragId,typename TFragPos,typename TFragSize>
+template<typename TScoreValue,typename TStringSet,typename TFragPos,typename TFragSize, typename TSpec>
 TScoreValue
 getScore(Score<TScoreValue, Simple> & score_type,
 		 TStringSet &,
-		 Fragment<TFragId,TFragPos,TFragSize,ExactFragment> &,
+		 Fragment<TFragSize,ExactFragment<TSpec> > &,
 		 TFragPos,
 		 TFragPos,
 		 TFragSize len,
