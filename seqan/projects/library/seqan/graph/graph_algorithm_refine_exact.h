@@ -50,11 +50,19 @@ SEQAN_CHECKPOINT
 
 template<typename TSize, typename TSpec,typename TPos>
 inline void
-updateCutPosition(Fragment<TSize, ExactReversableFragment<TSpec> > const& f, TPos & pos_j)
+updateCutPosition(Fragment<TSize, ExactReversableFragment<TSpec> > & f, TPos & pos_j)
 {
 	if(f.reversed)
 		++pos_j;
 }
+//template<typename TSize, typename TSpec,typename TPos>
+//inline void
+//updateCutPosition(Fragment<TSize, ExactReversableFragment<TSpec> > const& f, TPos & pos_j)
+//{
+//	if(f.reversed)
+//		++pos_j;
+//}
+
 
 template<typename TFrag,typename TPos>
 inline void
