@@ -48,11 +48,26 @@ SEQAN_CHECKPOINT
 }
 
 
+template<typename TSize, typename TSpec,typename TPos>
+inline void
+updateCutPosition(Fragment<TSize, ExactReversableFragment<TSpec> > const& f, TPos & pos_j)
+{
+	if(f.reversed)
+		++pos_j;
+}
+
+template<typename TFrag,typename TPos>
+inline void
+updateCutPosition(TFrag & segment, TPos & pos_j)
+{
+	return;
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////	
 //Recursive Refinement
 //refine position node_i on sequence seq_i
 template<typename TValue, typename TAlignmentString, typename TStringSet,typename TGraph, typename TPropertyMap,typename TSeqMap, typename TTagSpec>
-void
+inline void
 _refine(TValue node_i, 
 	 TValue seq_i_id, 
 	 TStringSet & seqs,
@@ -71,6 +86,7 @@ SEQAN_CHECKPOINT
 	String<TAlignmentPointer> relevant_segments;
 	TValue seq_i_pos = idToPosition(seqs,seq_i_id);
 	findIntervalsExcludeTouching(gs[seq_i_pos],pms[seq_i_pos],node_i,relevant_segments);
+
 	
 	TSegmentIterator segment_it = begin(relevant_segments);
 	TSegmentIterator segment_end = end(relevant_segments);
@@ -82,6 +98,8 @@ SEQAN_CHECKPOINT
 		TValue seq_j_id, node_j;
 		_getOtherSequenceAndProject(alis[*segment_it],seq_map,seq_i_id,node_i,seq_j_id,node_j);
 		TValue seq_j_pos = idToPosition(seqs,seq_j_id);
+		updateCutPosition(alis[*segment_it],node_j);
+
 		typename std::set<TValue>::iterator iter;
 		iter = all_nodes[seq_j_pos].find(node_j);
 		
@@ -90,7 +108,7 @@ SEQAN_CHECKPOINT
 		{
 			all_nodes[seq_j_pos].insert(node_j);
 			_refine(node_j,seq_j_id,seqs,seq_map,alis,gs,pms,all_nodes,min_len,tag);
-			//TODO: else //verschmelzen, abschneiden und übergehen, erst später... 	
+			//TODO: else //verschmelzen, abschneiden und ï¿½bergehen, erst spï¿½ter... 	
 			//do nothing or resolve problems  
 		}
 	
@@ -274,7 +292,7 @@ SEQAN_CHECKPOINT
 			_getOtherSequenceAndProject(*ali_it,seq_map,seq_id,act_pos,seq_j_id,pos_j);
 			//find node that contains the projected position (pos_j)
 			TVertexDescriptor vd = findVertex(ali_g, seq_j_id, pos_j);
-			
+		
 			SEQAN_TASSERT(fragmentBegin(ali_g,vd)==pos_j)
 			typename Value<TScore>::Type score = getScore(score_type,seqs,*ali_it,act_pos,pos_j,fragmentLength(ali_g,act_knot),fragmentLength(ali_g,vd));//,fragmentLength(ali_g,vd));
 	//		typename Value<TScore>::Type score = fragmentLength(ali_g,vd);
@@ -472,8 +490,8 @@ SEQAN_CHECKPOINT
 	//std::cout << "\ntook " << duration << " seconds.\n";
 	//for(int seq_i = 0; seq_i < length(seq); ++seq_i)
 	//{
-	//	std::set<TValue>::iterator it = all_nodes[seq_i].begin();
-	//	std::set<TValue>::iterator end_it = all_nodes[seq_i].end();
+	//	typename std::set<TValue>::iterator it = all_nodes[seq_i].begin();
+	//	typename std::set<TValue>::iterator end_it = all_nodes[seq_i].end();
 	//
 	//	while(it != end_it)
 	//	{
