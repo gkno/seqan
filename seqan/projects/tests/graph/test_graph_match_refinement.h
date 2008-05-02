@@ -1,6 +1,9 @@
 #ifndef SEQAN_HEADER_TEST_GRAPH_MATCH_REFINEMENT_H
 #define SEQAN_HEADER_TEST_GRAPH_MATCH_REFINEMENT_H
 
+#include <seqan/align.h>
+
+
 using namespace std;
 using namespace seqan;
 
@@ -71,13 +74,14 @@ void Test_GraphMatchRefine() {
 	typedef Size<TStringSet>::Type TSize;
 
 	// Matches
-	typedef String<Fragment<unsigned int,unsigned int,unsigned int,ExactFragment>, External<ExternalConfig<File<>, 64*1024> > > TFragmentString;
+	typedef String<Fragment<>, External<ExternalConfig<File<>, 64*1024> > > TFragmentString;
 	//typedef String<Fragment<>, External<> > TFragmentString;
 
 	// Windows
 #ifdef PLATFORM_WINDOWS
 	String<char> in_path("Z:\\matches\\");
 	String<char> out_path("Z:\\matches\\out\\");
+	return;
 #else
 	// Linux
 	String<char> in_path("/home/takifugu2/data/SeqAn/binary/");
@@ -227,9 +231,9 @@ void Test_GraphMatchRefine() {
 
 
 //produce pairwise alignments (Align object)
-template<typename TAlign, typename TSequence, typename TScore>
+template<typename TAlign, typename TSequence, typename TSeqSpec, typename TScore>
 void 
-getAlignments(String<TAlign> & alis, StringSet<TSequence> & seq, TScore & score_type, int & numAlignments, int cutoff)
+getAlignments(String<TAlign> & alis, StringSet<TSequence, TSeqSpec> & seq, TScore & score_type, int & numAlignments, int cutoff)
 {
 
 	unsigned int gesamt = 0;
@@ -279,7 +283,7 @@ void
 Test_RefineAlign(){
 
 	typedef String<char> TString;
-	typedef StringSet<TString> TStringSet;
+	typedef StringSet<TString, Dependent<> > TStringSet;
 	typedef Align<TString, ArrayGaps> TAlign;
 
 	int numSequences = 4;
@@ -316,7 +320,7 @@ Test_RefineAlign(){
 	typedef Graph<Alignment<TStringSet> > TAliGraph;
 	TAliGraph ali_graph(seq_set);
 
-//	std::cout <<"Number of Segments: "<<length(alis)<<"\n";
+	//std::cout <<"Number of Segments: "<<length(alis)<<"\n";
 	matchRefinement(alis,seq_set,score_type,ali_graph);
 
 	//std::cout << "\nnumEdges: "<<numEdges(ali_graph)<<"\n";
@@ -718,7 +722,7 @@ void Test_Problem()
 
 	TFragment frag(0,28,3,35,18);
 
-//	typedef String<Fragment<unsigned int,unsigned int,unsigned int,ExactFragment>, External<ExternalConfig<File<>, 64*1024> > > TFragString;
+//	typedef String<Fragment<>, External<ExternalConfig<File<>, 64*1024> > > TFragString;
 
 	TFragString alis;
 	//resize(alis,1);
@@ -737,7 +741,7 @@ void Test_GraphMatchRefinement()
 //	Test_Problem();
 
 	//test for refinement on Align<TSource,TSpec>
-	Test_RefineAlign();
+//	Test_RefineAlign();
 	
 	//test for refinement on Graph<Alignment<> >
 //	Test_RefineAlignGraph();
