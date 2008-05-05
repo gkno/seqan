@@ -104,14 +104,14 @@ public:
 
 	template <typename TNeedle2>
 	Pattern(TNeedle2 const & ndl)
-	  : limit(-1),cP(0),verifier(ndl,-1)
+	  : limit(1),cP(0),verifier(ndl,-1)
 	{
 		setHost(*this, ndl);
 	}
 
    	template <typename TNeedle2>
 	Pattern(TNeedle2 const & ndl, int _limit = -1):
-		limit(- _limit),cP(0),verifier(ndl,- _limit)
+		limit(- _limit),cP(0),verifier(ndl,_limit)
 	{
 SEQAN_CHECKPOINT
 		setHost(*this, ndl);
@@ -180,7 +180,8 @@ SEQAN_CHECKPOINT
 #endif
     clear(me.r_table); // init is only possible if we know the the error count
 
-	me.data_needle = needle;
+    me.data_needle = needle;
+    setHost(me.verifier,needle);
 }
 
 template <typename TNeedle, typename TNeedle2>
@@ -540,7 +541,7 @@ SEQAN_CHECKPOINT
 
 
 //////////////////////////////////////////////////////////////////////////////
-///.Function.scoreLimit.param.pattern.type:Spec.AbndmAlgo
+///.Function.setScoreLimit.param.pattern.type:Spec.AbndmAlgo
 
 template <typename TNeedle, typename TScoreValue>
 inline void 
@@ -553,7 +554,7 @@ SEQAN_CHECKPOINT
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// find
+
 template <typename TFinder, typename TNeedle>
 inline bool find (TFinder & finder, 
 				  Pattern<TNeedle, Tag<_AbndmAlgo> > & me)

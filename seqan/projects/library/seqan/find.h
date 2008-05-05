@@ -54,6 +54,7 @@
 #include <seqan/find/find_score.h>
 #include <seqan/find/find_myers_ukkonen.h>
 #include <seqan/find/find_abndm.h>
+#include <seqan/find/find_pex.h>
 
 #include <seqan/graph.h>
 #include <seqan/find/find_bom.h>

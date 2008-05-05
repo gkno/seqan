@@ -716,7 +716,25 @@ template <typename TPatternSpec>
 void Test_Approx_EditDist()
 {
 //test DPSearch
-  	String<char> haystk("Dies ist der Haystack des Tests. Ja, das ist er wirklich!");
+  	String<char> hstk("any_annealing");
+	String<char> nl("annual");
+
+	Finder<String<char> > fd(hstk);
+
+	Pattern<String<char>, TPatternSpec> pt(nl, -2);
+	SEQAN_TASSERT(find(fd, pt))
+	SEQAN_TASSERT(position(fd) == 8)
+	SEQAN_TASSERT(getScore(pt) == -2)
+	SEQAN_TASSERT(find(fd, pt))
+	SEQAN_TASSERT(position(fd) == 9)
+	SEQAN_TASSERT(getScore(pt) == -1)
+	SEQAN_TASSERT(find(fd, pt))
+	SEQAN_TASSERT(position(fd) == 10)
+	SEQAN_TASSERT(getScore(pt) == -2)
+
+	SEQAN_TASSERT(!find(fd,pt))
+
+	String<char> haystk("Dies ist der Haystack des Tests. Ja, das ist er wirklich!");
 	String<char> ndl("des");
 
 	Finder<String<char> > fnd(haystk);
@@ -821,6 +839,9 @@ void Test_Approx()
 //test MyersUkkonen
 	Test_Approx_EditDist<MyersUkkonen>();
 	Test_Approx_EditDist<AbndmAlgo>();
+	Test_Approx_EditDist<PexNonHierarchical>();
+	Test_Approx_EditDist<PexHierarchical>();
+
 	/*
 //____________________________________________________________________________
 
@@ -876,6 +897,7 @@ int main()
 	debug::verifyCheckpoints("projects/library/seqan/find/find_set_horspool.h");
 	debug::verifyCheckpoints("projects/library/seqan/find/find_wumanber.h");
 	debug::verifyCheckpoints("projects/library/seqan/find/find_abndm.h");
+	debug::verifyCheckpoints("projects/library/seqan/find/find_pex.h");
 
 	SEQAN_TREPORT("TEST END")
 	return 0;
