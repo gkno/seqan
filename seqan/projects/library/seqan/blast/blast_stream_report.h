@@ -8,7 +8,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 //TODO macht noch nicht so richtig sinn mit dem stringSet 
-//+vielleicht wär ne map von fasta id -> stringset id gut
+//+vielleicht wï¿½r ne map von fasta id -> stringset id gut
 template<typename TBlastHsp, typename TFile>
 class BlastReport<TBlastHsp, StreamReport<TFile> > 
 {
@@ -21,7 +21,7 @@ class BlastReport<TBlastHsp, StreamReport<TFile> >
 		
 
 		TPosition first_hit_pos;
-		char act_c; //wie unnötig
+		char act_c; //wie unnï¿½tig
 		bool hits_found;
 		bool next_report;
 		TPosition next_report_pos;
@@ -31,6 +31,7 @@ class BlastReport<TBlastHsp, StreamReport<TFile> >
 		{
 		SEQAN_CHECKPOINT
 			next_report = true;
+			next_report_pos = 0;
 		}
 
 		BlastReport(BlastReport const& other)
@@ -43,6 +44,7 @@ class BlastReport<TBlastHsp, StreamReport<TFile> >
 			hits_found = other.hits_found;
 			first_hit_pos = other.first_hit_pos;
 			next_report = other.next_report;
+			next_report_pos = other.next_report_pos;
 		}
 
 		BlastReport(TFile file)
@@ -79,6 +81,9 @@ SEQAN_CHECKPOINT
 	typedef typename Value<TFile>::Type TValue;
 
 	TValue c = blastObj.act_c;
+	if(blastObj.next_report)
+		_streamSeekG(file,blastObj.next_report_pos);
+
 	blastObj.next_report = false;
 
 	if (_streamEOF(file)) return;
@@ -116,7 +121,7 @@ SEQAN_CHECKPOINT
 		else
 			next_event_pos = after_dbquery_pos;
 	}
-	//get some more values aber erst später
+	//get some more values aber erst spï¿½ter
 	//_readParameters(file,c,blastObj) ;
 
 	if(blastObj.hits_found)

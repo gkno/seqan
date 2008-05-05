@@ -8,32 +8,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 
-struct TagBlastN_;
-struct TagMegaBlast_;
-struct TagBlastP_;
-struct TagBlastX_;
-struct TagTBlastN_;
-struct TagTBlastX_;
 
-template<typename TSpec = TagBlastN_>
-class NucleotideBlast{
-	NucleotideBlast(){}
-	~NucleotideBlast(){}
-};
-
-template<typename TSpec = TagBlastP_>
-class ProteinBlast{
-	ProteinBlast(){}
-	~ProteinBlast(){}
-};
-
-typedef NucleotideBlast<TagBlastN_> BlastN;
-typedef NucleotideBlast<TagMegaBlast_> MegaBlast;
-
-typedef ProteinBlast<TagBlastP_> BlastP;
-typedef ProteinBlast<TagBlastX_> BlastX;
-typedef ProteinBlast<TagTBlastN_> TBlastN;
-typedef ProteinBlast<TagTBlastX_> TBlastX;
 
 
 
@@ -70,6 +45,7 @@ class BlastHsp<NucleotideBlast<TSpec>, FullInfo>
 		double expect;
 		unsigned int identity;
 		unsigned int gaps; 
+		unsigned int abs_gaps; 
 		bool query_strand;  //false=>minus, true=>plus
 		bool db_strand;
 		unsigned int query_begin;
@@ -85,8 +61,12 @@ class BlastHsp<NucleotideBlast<TSpec>, FullInfo>
 		{
 		SEQAN_CHECKPOINT
 			//defaults for those values that are not necessarily present in each HSP in the Blast Report
+			score = 0.0;
+			bits = 0.0;
+			expect = 0.0;
 			identity = 0;
 			gaps = 0; 
+			abs_gaps = 0; 
 			query_strand = true;  //false=>minus, true=>plus
 			db_strand = true;
 		}
@@ -99,6 +79,7 @@ class BlastHsp<NucleotideBlast<TSpec>, FullInfo>
 			expect = other.expect;
 			identity = other.identity;
 			gaps = other.gaps;
+			abs_gaps = other.abs_gaps;
 			query_strand = other.query_strand;
 			db_strand = other.db_strand;
 			query_begin = other.query_begin;
@@ -118,6 +99,7 @@ class BlastHsp<NucleotideBlast<TSpec>, FullInfo>
 			expect = other.expect;
 			identity = other.identity;
 			gaps = other.gaps;
+			abs_gaps = other.abs_gaps;
 			query_strand = other.query_strand;
 			db_strand = other.db_strand;
 			query_begin = other.query_begin;
@@ -148,6 +130,7 @@ _parseBlastHsp(TFile & file,
 SEQAN_CHECKPOINT
 	typedef typename Position<TFile>::Type TPosition;
 	
+	clear(hsp);
 	String<char> pword;
 	int pint;
 	float pfloat;
@@ -161,7 +144,7 @@ SEQAN_CHECKPOINT
 	_parse_skipWhitespace(file,c);
 	c = _streamGet(file);
 	_parse_skipWhitespace(file,c);
-	pfloat = _parse_readFloat(file, c);
+	pfloat = (float)_parse_readEValue(file, c);
 	hsp.bits = pfloat;
 	if(_parse_lineUntil(file,c,'('))
 	{
@@ -195,11 +178,20 @@ SEQAN_CHECKPOINT
 	query = "Gaps";
 	if(_parse_lineUntil(file,c,query,4))
 	{
-		_parse_until(file,c,'(');
+		_parse_lineUntil(file,c,'=');
+		c = _streamGet(file);
+		pint = _parse_readNumber(file, c);
+		hsp.abs_gaps = pint;
+		_parse_lineUntil(file,c,'(');
 		c = _streamGet(file);
 		pint = _parse_readNumber(file, c);
 		hsp.gaps = pint;
 	}
+	//else
+	//{
+	//	hsp.abs_gaps = 0;
+	//	hsp.gaps = 0;
+	//}
 
 	query = "Strand";
 	if(_parse_untilBeginLine(file,c,query,6,3))
@@ -303,7 +295,15 @@ clear(BlastHsp<NucleotideBlast<TSpec>, FullInfo>& blastHsp)
 SEQAN_CHECKPOINT
 
 	blastHsp.identity = 0;
+	blastHsp.score = 0;
+	blastHsp.bits = 0.0;
+	blastHsp.expect = 0.0;
 	blastHsp.gaps = 0; 
+	blastHsp.abs_gaps = 0; 
+	blastHsp.query_begin = 0;  
+	blastHsp.db_end = 0;
+	blastHsp.query_end = 0;  
+	blastHsp.db_begin = 0;
 	blastHsp.query_strand = true;  
 	blastHsp.db_strand = true;
 	resize(blastHsp.query_string,0);
@@ -329,6 +329,7 @@ class BlastHsp<ProteinBlast<TSpec>, FullInfo>
 		unsigned int identity;
 		unsigned int positives; 
 		unsigned int gaps; 
+		unsigned int abs_gaps; 
 		bool query_strand;  //false=>minus, true=>plus
 		bool db_strand;
 		unsigned int query_begin;
@@ -344,9 +345,13 @@ class BlastHsp<ProteinBlast<TSpec>, FullInfo>
 		BlastHsp()
 		{
 		SEQAN_CHECKPOINT
+			score = 0.0;
+			bits = 0.0 ;
+			expect = 0.0;
 			identity = 0;
 			positives = 0; 
 			gaps = 0; 
+			abs_gaps = 0;
 			query_strand = true;  //false=>minus, true=>plus
 			db_strand = true;
 			query_frame = 1;
@@ -361,6 +366,7 @@ class BlastHsp<ProteinBlast<TSpec>, FullInfo>
 			expect = other.expect;
 			identity = other.identity;
 			gaps = other.gaps;
+			abs_gaps = other.abs_gaps;
 			query_strand = other.query_strand;
 			db_strand = other.db_strand;
 			query_begin = other.query_begin;
@@ -382,6 +388,7 @@ class BlastHsp<ProteinBlast<TSpec>, FullInfo>
 			expect = other.expect;
 			identity = other.identity;
 			gaps = other.gaps;
+			abs_gaps = other.abs_gaps;
 			query_strand = other.query_strand;
 			db_strand = other.db_strand;
 			query_begin = other.query_begin;
@@ -414,6 +421,7 @@ _parseBlastHsp(TFile & file,
 SEQAN_CHECKPOINT
 	typedef typename Position<TFile>::Type TPosition;
 	
+	clear(hsp);
 	String<char> pword;
 	int pint;
 	float pfloat;
@@ -431,7 +439,7 @@ SEQAN_CHECKPOINT
 	if(c == '=')
 		c = _streamGet(file);
 	_parse_skipWhitespace(file,c);
-	pfloat = _parse_readFloat(file, c);
+	pfloat = (float)_parse_readEValue(file, c);
 	hsp.bits = pfloat;
 	if(_parse_lineUntil(file,c,'('))
 	{
@@ -474,7 +482,11 @@ SEQAN_CHECKPOINT
 	query = "Gaps";
 	if(_parse_lineUntil(file,c,query,4))
 	{
-		_parse_until(file,c,'(');
+		_parse_lineUntil(file,c,'=');
+		c = _streamGet(file);
+		pint = _parse_readNumber(file, c);
+		hsp.abs_gaps = pint;
+		_parse_lineUntil(file,c,'(');
 		c = _streamGet(file);
 		pint = _parse_readNumber(file, c);
 		hsp.gaps = pint;
@@ -580,6 +592,14 @@ inline void
 clear(BlastHsp<ProteinBlast<TSpec>, FullInfo>& blastHsp)
 {
 SEQAN_CHECKPOINT
+	blastHsp.score = 0;
+	blastHsp.bits = 0.0;
+	blastHsp.expect = 0.0;
+	blastHsp.abs_gaps = 0; 
+	blastHsp.query_begin = 0;  
+	blastHsp.db_end = 0;
+	blastHsp.query_end = 0;  
+	blastHsp.db_begin = 0;
 	blastHsp.positives = 0; 
 	blastHsp.query_frame = 1;
 	blastHsp.db_frame = 1;
@@ -620,6 +640,7 @@ class BlastHsp<TBlastSpec, BasicInfo>
 		BlastHsp()
 		{
 		SEQAN_CHECKPOINT
+			expect = 0;	
 		}
 
 		BlastHsp(BlastHsp const& other)
@@ -659,6 +680,12 @@ inline void
 clear(BlastHsp<TBlastSpec, BasicInfo>& blastHsp)
 {
 SEQAN_CHECKPOINT
+
+	blastHsp.expect = 0.0;
+	blastHsp.query_begin = 0;  
+	blastHsp.db_end = 0;
+	blastHsp.query_end = 0;  
+	blastHsp.db_begin = 0;
 	resize(blastHsp.query_string,0);
 	resize(blastHsp.db_string,0);
 }
@@ -674,6 +701,8 @@ _parseBlastHsp(TFile & file,
 {
 SEQAN_CHECKPOINT
 	typedef typename Position<TFile>::Type TPosition;
+	
+	clear(hsp);
 	
 	String<char> pword;
 	int pint;
@@ -776,7 +805,7 @@ typedef Tag<TagKnownSource_> const KnownSource;
 /////////////////////////////////////////////////////////////
 // get Alignment for Align<TSource,TSpec>
 template<typename TBlastHsp, typename TSpec, typename TSource>
-inline void
+inline unsigned int
 getAlignment(TBlastHsp & hsp,
 			 Align<TSource,TSpec> & ali, 
 			 UnknownSource)
@@ -870,7 +899,8 @@ SEQAN_CHECKPOINT
 	}
 	detach(ali);
 
-	
+	return length(queryAlignmentString(hsp));
+
 }
 
 /**
@@ -885,7 +915,7 @@ SEQAN_CHECKPOINT
 ...type:Class.Graph
 */
 template<typename TBlastHsp, typename TSpec, typename TSource>
-inline void
+inline unsigned int
 getAlignment(TBlastHsp & hsp,
 			 Align<TSource,TSpec> & ali)
 {
@@ -893,9 +923,9 @@ SEQAN_CHECKPOINT
 
 	if(length(rows(ali))>1)
         if(!emptySource(rows(ali,0)) && !!emptySource(rows(ali,1)))
-			getAlignment(hsp,ali,KnownSource());
+			return getAlignment(hsp,ali,KnownSource());
 	
-	getAlignment(hsp,ali,UnknownSource());
+	return getAlignment(hsp,ali,UnknownSource());
 
 }
 
@@ -904,7 +934,7 @@ SEQAN_CHECKPOINT
 /////////////////////////////////////////////////////////////
 // get Alignment for Align<TSource,TSpec>
 template<typename TBlastHsp, typename TSpec, typename TSource>
-inline void
+inline unsigned int
 getAlignment(TBlastHsp & hsp,
 			 Align<TSource,TSpec> & ali, 
 			 KnownSource)
@@ -977,7 +1007,7 @@ SEQAN_CHECKPOINT
 /////////////////////////////////////////////////////////////
 // get Alignment for Graph<TAlign>
 template<typename TBlastHsp, typename TAlign, typename TId>
-inline void
+inline unsigned int
 getAlignment(TBlastHsp & hsp,
 			 Graph<TAlign> & ali,
 			 TId id0, //query ID 
@@ -1049,12 +1079,16 @@ SEQAN_CHECKPOINT
 		++act_len;
 
 	}
+	SEQAN_TASSERT(act0_pos+act_len == getQueryEnd(hsp))
+	SEQAN_TASSERT(act1_pos+act_len == getDatabaseEnd(hsp))
 	if(act_len>0)
 	{
 		TVertexDescriptor vd0 = addVertex(ali,id0,act0_pos,act_len);
 		TVertexDescriptor vd1 = addVertex(ali,id1,act1_pos,act_len);
 		addEdge(ali,vd0,vd1);
 	}
+
+	return length(queryAlignmentString(hsp));
 
 }
 
@@ -1063,7 +1097,7 @@ SEQAN_CHECKPOINT
 /////////////////////////////////////////////////////////////
 // get Alignment for Graph<TAlign> (stringSet and sequence ids not given)
 template<typename TBlastHsp, typename TStringSet, typename TCargo, typename TSpec>
-inline void
+inline unsigned int //returns the length of the alignment
 getAlignment(TBlastHsp & hsp,
 			 Graph<Alignment<TStringSet,TCargo,TSpec> > & ali) //hit ID
 {
@@ -1185,6 +1219,7 @@ SEQAN_CHECKPOINT
 		++nodes1it;
 	}
 
+	return length(databaseAlignmentString(hsp));
 
 }
 
@@ -1382,6 +1417,22 @@ SEQAN_CHECKPOINT
 	return blastHsp.gaps;
 }
 	
+template<typename TBlastSpec>
+inline unsigned int &
+numGaps(BlastHsp<TBlastSpec, FullInfo>& blastHsp)
+{
+SEQAN_CHECKPOINT
+	return blastHsp.abs_gaps;
+}
+
+template<typename TBlastSpec>
+inline unsigned int
+getNumGaps(BlastHsp<TBlastSpec, FullInfo>& blastHsp)
+{
+SEQAN_CHECKPOINT
+	return blastHsp.abs_gaps;
+}
+
 
 template<typename TBlastSpec>
 inline bool

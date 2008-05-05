@@ -19,7 +19,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..summary:Hit iterator for @Class.BlastReport@.
 ..signature:Iterator<TBlastReport, HitIterator>
 ..param.TBlastReport:A Blast report with @Spec.StreamReport@.
-...type:Class.Blast
+...type:Class.BlastReport
 ..general:Class.Iter
 */
 template<typename TBlastHsp, typename TFile>
@@ -88,7 +88,7 @@ public:
 
 //////////////////////////////////////////////////////////////////////////////
 
-///.Metafunction.Host.param.T.type:Class.Blast
+///.Metafunction.Host.param.T.type:Class.BlastReport
 template<typename TBlastReport>
 struct Host<Iter<TBlastReport, StreamBlastIterator<HitIterator> > >
 {	
@@ -96,7 +96,7 @@ struct Host<Iter<TBlastReport, StreamBlastIterator<HitIterator> > >
 };
 
 
-///.Metafunction.Iterator.param.T.type:Class.Blast
+///.Metafunction.Iterator.param.T.type:Class.BlastReport
 
 template<typename TBlastHsp, typename TFile>
 struct Iterator<BlastReport<TBlastHsp,StreamReport<TFile> >, HitIterator>
@@ -188,6 +188,18 @@ SEQAN_CHECKPOINT
 
 
 
+/**
+.Function.goBegin:
+..cat:Blast
+..summary:Resets the iterator to the beginning.
+..signature:goBegin(file,it)
+..param.it:A hit or hsp iterator on a Blast report with @Spec.StreamReport@.
+..param.it:A stream.
+...type:Spec.HitIterator
+...type:Spec.HspIterator
+..returns:void
+..see:Function.atBegin
+*/
 template<typename TBlastReport, typename TFile>
 inline void
 goBegin(TFile &,

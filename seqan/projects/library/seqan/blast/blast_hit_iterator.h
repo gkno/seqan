@@ -19,7 +19,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..summary:Hit iterator for @Class.BlastReport@.
 ..signature:Iterator<TBlastReport, HitIterator>
 ..param.TBlastReport:A Blast report.
-...type:Class.Blast
+...type:Class.BlastReport
 ..general:Class.Iter
 */
 template<typename TBlastReport>
@@ -70,7 +70,7 @@ public:
 // SimpleBlastIterator<TSpec> - Metafunctions
 //////////////////////////////////////////////////////////////////////////////
 
-///.Metafunction.Host.param.T.type:Class.Blast
+///.Metafunction.Host.param.T.type:Class.BlastReport
 template<typename TBlastObject, typename TIteratorSpec>
 struct Host<Iter<TBlastObject, SimpleBlastIterator<TIteratorSpec> > >
 {	
@@ -115,7 +115,7 @@ struct GetValue<Iter<TBlastObject const, SimpleBlastIterator<TIteratorSpec> > >
 
 //////////////////////////////////////////////////////////////////////////////
 
-///.Metafunction.Iterator.param.T.type:Class.Blast
+///.Metafunction.Iterator.param.T.type:Class.BlastReport
 
 template<typename TBlastHsp, typename TInfoSpec>
 struct Iterator<BlastReport<TBlastHsp,StoreReport<TInfoSpec> >, HitIterator>
@@ -194,9 +194,13 @@ SEQAN_CHECKPOINT
 /**
 .Function.goBegin:
 ..cat:Blast
-..param.iterator
+..summary:Resets the iterator to the beginning.
+..signature:goBegin(it)
+..param.it:A hit or hsp iterator.
 ...type:Spec.HitIterator
 ...type:Spec.HspIterator
+..returns:void
+..see:Function.atBegin
 */
 template<typename TBlastObject, typename TIteratorSpec>
 inline void

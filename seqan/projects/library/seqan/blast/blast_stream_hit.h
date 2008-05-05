@@ -61,6 +61,8 @@ _parseBlastHit(TFile & file,
 		pword = _parse_readWord(file, c);
 		while (!_streamEOF(file) && c != '\n' && c != '\r')
 			pword += _parse_readWord(file, c);
+		if(pword[length(pword)-1] == ' ')
+			resize(pword,length(pword)-1);
 		hit.name = pword;
 		_parse_skipWhitespace(file,c);
 		String<char> search = "Length";

@@ -78,6 +78,46 @@ typedef Tag<TagBlast_> const Blast;
 
 
 //////////////////////////////////////////////////////////////////////////////
+// Blat Tag
+struct TagBlat_;
+typedef Tag<TagBlat_> const Blat;
+
+//////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+struct TagBlastN_;
+struct TagMegaBlast_;
+struct TagBlastP_;
+struct TagBlastX_;
+struct TagTBlastN_;
+struct TagTBlastX_;
+
+template<typename TSpec = TagBlastN_>
+class NucleotideBlast{
+public:
+	NucleotideBlast(){}
+	~NucleotideBlast(){}
+};
+
+template<typename TSpec = TagBlastP_>
+class ProteinBlast{
+public:
+	ProteinBlast(){}
+	~ProteinBlast(){}
+};
+
+typedef NucleotideBlast<TagBlastN_> BlastN;
+typedef NucleotideBlast<TagMegaBlast_> MegaBlast;
+
+typedef ProteinBlast<TagBlastP_> BlastP;
+typedef ProteinBlast<TagBlastX_> BlastX;
+typedef ProteinBlast<TagTBlastN_> TBlastN;
+typedef ProteinBlast<TagTBlastX_> TBlastX;
+
+
 
 }// namespace SEQAN_NAMESPACE_MAIN
 

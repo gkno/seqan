@@ -18,6 +18,9 @@ typedef Tag<TagRunBlastN_> const RunBlastN;
 // megablast
 struct TagRunMegaBlast_;
 typedef Tag<TagRunMegaBlast_> const RunMegaBlast;
+//blat
+struct TagRunBlat_;
+typedef Tag<TagRunBlat_> const RunBlat;
 
 // Protein alignments
 // blastp compares an amino acid query sequence against a protein sequence database
@@ -45,14 +48,14 @@ typedef Tag<TagRunTBlastX_> const RunTBlastX;
 
 //////////////////////////////////////////////////////////////////////////////
 //blastn
-template<typename TString, typename TParamString>
+template<typename TString, typename TPath1, typename TPath, typename TParamString>
 void
-_runBlast(TString blast_path,
-	TString db_path,
+_runBlast(TPath1 blast_path,
+	TPath db_path,
 	TString db_name,
-	TString query_path,
+	TPath query_path,
 	TString query_name,
-	TString out_path,
+	TPath out_path,
 	TString outfile_name,
 	Tag<TagRunBlastN_>,
 	TParamString params)
@@ -66,8 +69,9 @@ SEQAN_CHECKPOINT
 	blastcall << " -d " << db_path << db_name; 
 	blastcall << " -i " << query_path << query_name; 
 	blastcall << " -o " << out_path << outfile_name; 
+	blastcall << " " << params; 
+	//process params?
 
-	//process params
 	std::cout <<"\n"<< blastcall.str()<<"\n";
 	system((blastcall.str()).c_str());	
 
@@ -117,14 +121,14 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 //megablast
-template<typename TString, typename TParamString>
+template<typename TString, typename TPath1, typename TPath, typename TParamString>
 void
-_runBlast(TString blast_path,
-	TString db_path,
+_runBlast(TPath1 blast_path,
+	TPath db_path,
 	TString db_name,
-	TString query_path,
+	TPath query_path,
 	TString query_name,
-	TString out_path,
+	TPath out_path,
 	TString outfile_name,
 	Tag<TagRunMegaBlast_>,
 	TParamString params)
@@ -136,6 +140,7 @@ SEQAN_CHECKPOINT
 	blastcall << " -d " << db_path << db_name; 
 	blastcall << " -i " << query_path << query_name; 
 	blastcall << " -o " << out_path << outfile_name; 
+	blastcall << " " << params; 
 
 	//process params
 
@@ -146,20 +151,52 @@ SEQAN_CHECKPOINT
 
 
 
+//////////////////////////////////////////////////////////////////////////////
+//blat
+template<typename TString, typename TPath1, typename TPath, typename TParamString>
+void
+_runBlat(TPath1 blat_path,
+	TPath db_path,
+	TString db_name,
+	TPath query_path,
+	TString query_name,
+	TPath out_path,
+	TString outfile_name,
+	Tag<TagRunBlat_>,
+	TParamString params)
+{
+SEQAN_CHECKPOINT
+
+	std::stringstream blatcall;
+	blatcall << blat_path << "blat "; 
+	blatcall << db_path << db_name<<" "; 
+	blatcall << query_path << query_name<<" "; 
+	blatcall << " " << params; 
+	blatcall << " -out=blast " << out_path << outfile_name; 
+	
+	//process params
+
+	std::cout << blatcall.str() << "\n";
+	system((blatcall.str()).c_str());	
+
+
+}
+
+
 
 //////////////////////////////////////////////////////////////////////////////
 
 
 //////////////////////////////////////////////////////////////////////////////
 //blastp
-template<typename TString, typename TParamString>
+template<typename TString, typename TPath1, typename TPath, typename TParamString>
 void
-_runBlast(TString blast_path,
-	TString db_path,
+_runBlast(TPath1 blast_path,
+	TPath db_path,
 	TString db_name,
-	TString query_path,
+	TPath query_path,
 	TString query_name,
-	TString out_path,
+	TPath out_path,
 	TString outfile_name,
 	Tag<TagRunBlastP_>,
 	TParamString params)
@@ -173,6 +210,7 @@ SEQAN_CHECKPOINT
 	blastcall << " -d " << db_path << db_name; 
 	blastcall << " -i " << query_path << query_name; 
 	blastcall << " -o " << out_path << outfile_name; 
+	blastcall << " " << params; 
 
 	//process params
 
@@ -188,14 +226,14 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 //tblastn
-template<typename TString, typename TParamString>
+template<typename TString, typename TPath1, typename TPath, typename TParamString>
 void
-_runBlast(TString blast_path,
-	TString db_path,
+_runBlast(TPath1 blast_path,
+	TPath db_path,
 	TString db_name,
-	TString query_path,
+	TPath query_path,
 	TString query_name,
-	TString out_path,
+	TPath out_path,
 	TString outfile_name,
 	Tag<TagRunTBlastN_>,
 	TParamString params)
@@ -209,6 +247,7 @@ SEQAN_CHECKPOINT
 	blastcall << " -d " << db_path << db_name; 
 	blastcall << " -i " << query_path << query_name; 
 	blastcall << " -o " << out_path << outfile_name; 
+	blastcall << " " << params; 
 
 	//process params
 
@@ -222,14 +261,14 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 //tblastx
-template<typename TString, typename TParamString>
+template<typename TString, typename TPath1, typename TPath, typename TParamString>
 void
-_runBlast(TString blast_path,
-	TString db_path,
+_runBlast(TPath1 blast_path,
+	TPath db_path,
 	TString db_name,
-	TString query_path,
+	TPath query_path,
 	TString query_name,
-	TString out_path,
+	TPath out_path,
 	TString outfile_name,
 	Tag<TagRunTBlastX_>,
 	TParamString params)
@@ -243,7 +282,7 @@ SEQAN_CHECKPOINT
 	blastcall << " -d " << db_path << db_name; 
 	blastcall << " -i " << query_path << query_name; 
 	blastcall << " -o " << out_path << outfile_name; 
-
+	blastcall << " " << params; 
 	//process params
 
 	system((blastcall.str()).c_str());	
@@ -256,16 +295,18 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 
+
+
 //////////////////////////////////////////////////////////////////////////////
 //blastx
-template<typename TString, typename TParamString>
+template<typename TString, typename TPath1, typename TPath, typename TParamString>
 void
-_runBlast(TString blast_path,
-	TString db_path,
+_runBlast(TPath1 blast_path,
+	TPath db_path,
 	TString db_name,
-	TString query_path,
+	TPath query_path,
 	TString query_name,
-	TString out_path,
+	TPath out_path,
 	TString outfile_name,
 	Tag<TagRunBlastX_>,
 	TParamString params)
@@ -279,6 +320,7 @@ SEQAN_CHECKPOINT
 	blastcall << " -d " << db_path << db_name; 
 	blastcall << " -i " << query_path << query_name; 
 	blastcall << " -o " << out_path << outfile_name; 
+	blastcall << " " << params; 
 
 	//process params
 
@@ -286,6 +328,38 @@ SEQAN_CHECKPOINT
 
 
 }
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+//formatdb
+template<typename TStr,typename TString, typename TParamString>
+void
+_runFormatDB(TStr blast_path,
+			 TStr db_path,
+			 TString db_file,
+			 TParamString params)
+{
+SEQAN_CHECKPOINT
+
+
+	std::stringstream blastcall;
+	blastcall << blast_path << "formatdb "; 
+	blastcall << " -i " <<db_path << db_file; 
+	blastcall << " " << params; 
+
+	//process params
+
+	system((blastcall.str()).c_str());	
+
+
+}
+
+
+
 
 
 

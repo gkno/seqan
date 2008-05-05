@@ -24,8 +24,7 @@ class BlastReport;
 ...default:$BlastHsp<BlastN,BasicInfo>$
 ..param.TSpec:The specializing type.
 ...type:Spec.StreamReport: Work on a stream (parse hits/HSPs when iterating over them).
-...type:Spec.StoreReport: Parse a Blast report and store all hits and HSPs. 
-report and store it before working on it.
+...type:Spec.StoreReport: Parse a Blast report and store all hits and HSPs.
 ...default:StoreReport 
 ...remarks:StoreReport requires more space while StreamReport will be more time consuming if hits are iterated over more than once.
 ..include:blast.h
@@ -969,8 +968,6 @@ SEQAN_CHECKPOINT
 
 
 
-//	lustige funktionen
-///////////////////////////////////////////////////////////////////
 
 
 /**

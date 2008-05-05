@@ -12,7 +12,7 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 
 
-	//die beiden raus hier, gehören in streamAlgorithms.h
+	//die beiden raus hier, gehï¿½ren in streamAlgorithms.h
 
 		template <typename TStream>
 		inline void
@@ -71,7 +71,7 @@ SEQAN_CHECKPOINT
 			c = _streamGet(file);
 			resize(str,0);
 		}
-		if (!_parse_isDigit(c) && c != '.' && c != '-') break;
+		if (!_parse_isDigit(c) && c != '.' && c != '-' && c != '+') break;
 		append(str, c);
 	}
 	if(e)

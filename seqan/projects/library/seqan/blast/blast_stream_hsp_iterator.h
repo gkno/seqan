@@ -20,7 +20,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..summary:Hsp iterator for @Class.BlastHit@.
 ..signature:Iterator<TBlastHit, HspIterator>
 ..param.TBlastHit:A Blast hit.
-...type:Class.Blast
+...type:Class.BlastHit
 ..general:Class.Iter
 */
 template<typename TBlastHsp, typename TFile>
@@ -137,7 +137,7 @@ struct Value<Iter<BlastHit<TBlastHsp,StreamReport<TFile> > const, StreamBlastIte
 
 
 
-///.Metafunction.Host.param.T.type:Class.Blast
+///.Metafunction.Host.param.T.type:Class.BlastHit
 template<typename TBlastHit>
 struct Host<Iter<TBlastHit, StreamBlastIterator<HspIterator> > >
 {	
