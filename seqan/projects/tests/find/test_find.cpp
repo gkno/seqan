@@ -841,6 +841,8 @@ void Test_Approx()
 	Test_Approx_EditDist<AbndmAlgo>();
 	Test_Approx_EditDist<PexNonHierarchical>();
 	Test_Approx_EditDist<PexHierarchical>();
+	// test with different multifinder
+	Test_Approx_EditDist< Pex<NonHierarchical,MultipleShiftAnd > >();
 
 	/*
 //____________________________________________________________________________

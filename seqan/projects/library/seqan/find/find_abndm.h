@@ -73,8 +73,7 @@ inline void _printMask(String <unsigned> const &  mask,unsigned start, unsigned 
 
 ///.Class.Pattern.param.TSpec.type:Spec.AbndmAlgo
 
-struct _AbndmAlgo;
-typedef Tag<_AbndmAlgo> AbndmAlgo;
+struct AbndmAlgo;
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -225,7 +224,7 @@ SEQAN_CHECKPOINT
 ///.Function.getScore.param.pattern.type:Spec.AbndmAlgo
 
 template <typename TNeedle>
-int getScore(Pattern<TNeedle, Tag<_AbndmAlgo > > & me) 
+int getScore(Pattern<TNeedle, AbndmAlgo > & me) 
 {
 SEQAN_CHECKPOINT
 	return getScore(me.verifier);
@@ -533,7 +532,7 @@ SEQAN_CHECKPOINT
 
 template <typename TNeedle>
 inline int 
-scoreLimit(Pattern<TNeedle, Tag<_AbndmAlgo > > const & me)
+scoreLimit(Pattern<TNeedle, AbndmAlgo > const & me)
 {
 SEQAN_CHECKPOINT
 	return - (int) me.limit;
@@ -545,7 +544,7 @@ SEQAN_CHECKPOINT
 
 template <typename TNeedle, typename TScoreValue>
 inline void 
-setScoreLimit(Pattern<TNeedle, Tag<_AbndmAlgo> > & me, 
+setScoreLimit(Pattern<TNeedle, AbndmAlgo > & me, 
 			  TScoreValue _limit)
 {
 SEQAN_CHECKPOINT
@@ -557,7 +556,7 @@ SEQAN_CHECKPOINT
 
 template <typename TFinder, typename TNeedle>
 inline bool find (TFinder & finder, 
-				  Pattern<TNeedle, Tag<_AbndmAlgo> > & me)
+				  Pattern<TNeedle, AbndmAlgo > & me)
 {
 SEQAN_CHECKPOINT
 	if (empty(finder)) {
@@ -575,7 +574,7 @@ SEQAN_CHECKPOINT
 
 template <typename TFinder, typename TNeedle>
 inline bool find (TFinder & finder, 
-				  Pattern<TNeedle, Tag<_AbndmAlgo> > & me, 
+				  Pattern<TNeedle, AbndmAlgo > & me, 
 				  int const k)
 {
 SEQAN_CHECKPOINT

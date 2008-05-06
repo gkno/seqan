@@ -21,7 +21,8 @@
 #ifndef SEQAN_HEADER_FIND_PEX_H
 #define SEQAN_HEADER_FIND_PEX_H
 
-#define SEQAN_DEBUG_PEX
+// uncomment this for verbose debug output
+//#define SEQAN_DEBUG_PEX
 
 #include<seqan/map.h>
 #include<math.h>
@@ -32,12 +33,34 @@ namespace SEQAN_NAMESPACE_MAIN
 struct Hierarchical;			
 struct NonHierarchical;			
 
-template <typename TSpec>
-struct _Pex;
+template <typename TVerification, typename TMultiFinder = AhoCorasick>
+struct Pex;
 
-typedef Tag<_Pex<Hierarchical> >      PexHierarchical;
-typedef Tag<_Pex<NonHierarchical> >  PexNonHierarchical;
+typedef Pex<Hierarchical,AhoCorasick>      PexHierarchical;
+typedef Pex<NonHierarchical,AhoCorasick>   PexNonHierarchical;
 
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Metafunction.PexMultiFinder:
+..summary:Determines the multiple exact string matching algorithm used by the Pex algorithm.
+..signature:PexMultiFinder< Pattern<TNeedle,Pex<TVerification,TMultiFinder> > >::Type
+..param.TMultiFinder:The specification for the multiple exact string matching algorithm that should be used with the Pex algorithm.
+..returns.param.Type:Pattern type of the multiple exact string matching algorithm for the specified Pattern.
+..see:Spec.Pex
+..remarks: For a description of Pattern usage see @Class.Pattern@.
+..remarks: Overload this Metafunction if you want to use something else for verification then $Pattern<String<Segment<TNeedle> > , TMultiFinder>$.
+*/
+
+template<typename T>
+struct PexMultiFinder;
+
+template<typename TNeedle,typename TVerification, typename TMultiFinder>
+struct PexMultiFinder< Pattern<TNeedle, Pex<TVerification , TMultiFinder > > >
+{
+  typedef Pattern<String<Segment<TNeedle> > , TMultiFinder> Type;
+};
+ 
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TPosition,typename TScore,typename TVerifier,typename TNeedle>
@@ -53,43 +76,60 @@ struct _PexRange{
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Spec.PexNonHierarchical:
-..summary: Provides a fast approximate string matching filter that splits the needle into several pieces that are searched with a multiple exact string matching algorithm.
+.Spec.Pex:
+..summary: Provides a fast approximate string matching filter that splits the needle into several pieces that are searched with a multiple exact string matching algorithm and later verified.
 ..general:Class.Pattern
 ..cat:Searching
-..signature:Pattern<TNeedle, AbndmAlgo>
+..signature:Pattern<TNeedle, Pex<TVerification,TMultiFinder> >
 ..param.TNeedle:The needle type.
 ...type:Class.String
-..remarks.text:This version does not use the hierarchical verification suggested by G. Navarro and R. Baeza-Yates
+..param.TVerification: Determines if the hierarchical verification proposed by Navarro and Baeza-Yates is used or not.
+..param.TMultiFinder: Specifies the algorithm for the multiple exact string matching algorithm
+...type:Spec.AhoCorasick
+..remarks: There are two defaults available $PexHierarchical$ and $PexNonHierarchical$ (e.g. $Pattern<String<char> ,PexHierarchical> $) that both use the @Spec.AhoCorasick@ algorithm for the multiple exact string matching.
 */
-///.Class.Pattern.param.TSpec.type:Spec.PexNonHierarchical
-/**
-.Spec.PexHierarchical:
-..summary: Provides a fast approximate string matching filter that splits the needle into several pieces that are searched with a multiple exact string matching algorithm.
-..general:Class.Pattern
-..cat:Searching
-..signature:Pattern<TNeedle, AbndmAlgo>
-..param.TNeedle:The needle type.
-...type:Class.String
-..remarks.text:This version uses the hierarchical verification suggested by G. Navarro and R. Baeza-Yates
-*/
-///.Class.Pattern.param.TSpec.type:Spec.PexHierarchical
+///.Class.Pattern.param.TSpec.type:Spec.Pex
 
-template <typename TNeedle,typename TSpec>
-class Pattern<TNeedle, Tag<_Pex<TSpec> > > 
+/**
+.Spec.Hierarchical:
+..summary: By using this Specialization the hierarchical verification is enabled.
+..general:Spec.Pex
+..cat:Searching
+..signature:Pattern<TNeedle, Pex<Hierarchical,TMultiFinder> >
+..param.TNeedle:The needle type.
+...type:Class.String
+..param.TMultiFinder: Specifies the algorithm for the multiple exact string matching algorithm
+*/
+///.Spec.Pex.param.TVerification.type:Spec.Hierarchical
+/**
+.Spec.NonHierarchical:
+..summary: By using this Specialization the hierarchical verification is disabled.
+..general:Spec.Pex
+..cat:Searching
+..signature:Pattern<TNeedle, Pex<NonHierarchical,TMultiFinder> >
+..param.TNeedle:The needle type.
+...type:Class.String
+..param.TMultiFinder: Specifies the algorithm for the multiple exact string matching algorithm
+*/
+///.Spec.Pex.param.TVerification.type:Spec.NonHierarchical
+
+template <typename TNeedle, typename TVerification, typename TMultiFinder>
+class Pattern<TNeedle, Pex<TVerification,TMultiFinder > > 
 {
  public:
    typedef typename Position<TNeedle>::Type TPosition;
    typedef unsigned TScore;
    typedef Pattern<TNeedle,MyersUkkonen> TVerifier;
-   typedef Pattern<String<Segment<TNeedle> > , AhoCorasick> TMultiFinder; 
+   typedef typename PexMultiFinder< 
+                       Pattern<TNeedle, Pex<TVerification,TMultiFinder > > 
+                                  >::Type TMFinder; 
   
    // the maximal accepted error
    TScore limit;
    // reference to the needle
    Holder<TNeedle> data_needle;
    // pattern object for the multi pattern search
-   TMultiFinder multiPattern;
+   TMFinder multiPattern;
    // needles for the multi pattern search
    String<Segment<TNeedle> >  splitted_needles;
    
@@ -134,8 +174,8 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TNeedle, typename TNeedle2,typename TSpec>
-void setHost (Pattern<TNeedle, Tag<_Pex<TSpec> > > & me, TNeedle2 const & needle) 
+template <typename TNeedle, typename TNeedle2, typename TVerification, typename TMultiFinder>
+void setHost (Pattern<TNeedle, Pex<TVerification,TMultiFinder > > & me, TNeedle2 const & needle) 
 {
   // initialisation of the find-tree etc. will be done when patternInit
   // is called to assure that we already know the scoreLimit
@@ -145,25 +185,25 @@ void setHost (Pattern<TNeedle, Tag<_Pex<TSpec> > > & me, TNeedle2 const & needle
   me.patternNeedsInit = true;
 }
 
-template <typename TNeedle, typename TNeedle2,typename TSpec>
-void setHost (Pattern<TNeedle, Tag<_Pex<TSpec> > > & me, TNeedle2 & needle)
+template <typename TNeedle, typename TNeedle2, typename TVerification, typename TMultiFinder>
+void setHost (Pattern<TNeedle, Pex<TVerification,TMultiFinder > > & me, TNeedle2 & needle)
 {
   setHost(me, reinterpret_cast<TNeedle2 const &>(needle));
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TNeedle,typename TSpec>
-inline typename Host<Pattern<TNeedle,  Tag<_Pex<TSpec> > > const>::Type & 
-host(Pattern<TNeedle, Tag<_Pex<TSpec> > > & me)
+template <typename TNeedle, typename TVerification, typename TMultiFinder>
+inline typename Host<Pattern<TNeedle, Pex<TVerification,TMultiFinder > > const>::Type & 
+host(Pattern<TNeedle, Pex<TVerification,TMultiFinder > > & me)
 {
 SEQAN_CHECKPOINT
   return value(me.data_needle);
 }
 
-template <typename TNeedle,typename TSpec>
-inline typename Host<Pattern<TNeedle,  Tag<_Pex<TSpec> > > const>::Type & 
-host(Pattern<TNeedle, Tag<_Pex<TSpec> > > const & me)
+template <typename TNeedle, typename TVerification, typename TMultiFinder>
+inline typename Host<Pattern<TNeedle, Pex<TVerification,TMultiFinder > > const>::Type & 
+host(Pattern<TNeedle, Pex<TVerification,TMultiFinder > > const & me)
 {
 SEQAN_CHECKPOINT
   return value(me.data_needle);
@@ -171,38 +211,36 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TNeedle>
-int _getRoot(Pattern<TNeedle, Tag<_Pex<NonHierarchical> > > & me) 
+template <typename TNeedle, typename TMultiFinder>
+int _getRoot(Pattern<TNeedle, Pex<NonHierarchical, TMultiFinder > > & me) 
 {
 SEQAN_CHECKPOINT
   return length(me.splitted_needles);
 }
 
-template <typename TNeedle>
-int _getRoot(Pattern<TNeedle, Tag<_Pex<Hierarchical> > > & me) 
+template <typename TNeedle, typename TMultiFinder>
+int _getRoot(Pattern<TNeedle, Pex<Hierarchical, TMultiFinder > > & me) 
 {
 SEQAN_CHECKPOINT
   return 1;
 }
 
 //////////////////////////////////////////////////////////////////////////////
-///.Function.getScore.param.pattern.type:Spec.PexHierarchical
-///.Function.getScore.param.pattern.type:Spec.PexNonHierarchical
+///.Function.getScore.param.pattern.type:Spec.Pex
 
-template <typename TNeedle, typename TSpec>
-int getScore(Pattern<TNeedle, Tag<_Pex<TSpec> > > & me) 
+template <typename TNeedle, typename TVerification, typename TMultiFinder>
+int getScore(Pattern<TNeedle, Pex<TVerification,TMultiFinder > > & me) 
 {
 SEQAN_CHECKPOINT
   return getScore(me.range_table[_getRoot(me)].verifier);
 }
 
 //////////////////////////////////////////////////////////////////////////////
-///.Function.scoreLimit.param.pattern.type:Spec.PexHierarchical
-///.Function.scoreLimit.param.pattern.type:Spec.PexNonHierarchical
+///.Function.scoreLimit.param.pattern.type:Spec.Pex
 
-template <typename TNeedle, typename TSpec>
+template <typename TNeedle, typename TVerification, typename TMultiFinder>
 inline int 
-scoreLimit(Pattern<TNeedle, Tag<_Pex<TSpec> > > const & me)
+scoreLimit(Pattern<TNeedle, Pex<TVerification,TMultiFinder > > const & me)
 {
 SEQAN_CHECKPOINT
   return - (int) me.limit;
@@ -210,12 +248,11 @@ SEQAN_CHECKPOINT
 
 
 //////////////////////////////////////////////////////////////////////////////
-///.Function.setScoreLimit.param.pattern.type:Spec.PexHierarchical
-///.Function.setScoreLimit.param.pattern.type:Spec.PexNonHierarchical
+///.Function.setScoreLimit.param.pattern.type:Spec.Pex
 
-template <typename TNeedle, typename TScoreValue, typename TSpec>
+template <typename TNeedle, typename TScoreValue,typename TVerification, typename TMultiFinder>
 inline void 
-setScoreLimit(Pattern<TNeedle, Tag<_Pex<TSpec> > > & me, 
+setScoreLimit(Pattern<TNeedle, Pex<TVerification,TMultiFinder > > & me, 
 			  TScoreValue _limit)
 {
 SEQAN_CHECKPOINT
@@ -227,8 +264,8 @@ SEQAN_CHECKPOINT
 //   PexNonHierarchical -- functions
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TNeedle, typename TFinder>
-void _patternInit(Pattern<TNeedle, PexNonHierarchical > &me, TFinder &)
+template <typename TNeedle, typename TFinder, typename TMultiFinder>
+void _patternInit(Pattern<TNeedle, Pex<NonHierarchical, TMultiFinder > > &me, TFinder &)
 {
 SEQAN_CHECKPOINT
   typedef typename Position<TNeedle>::Type TPosition;
@@ -296,9 +333,8 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TFinder, typename TNeedle>
-inline bool find (TFinder & finder, 
-				  Pattern<TNeedle, PexNonHierarchical > & me)
+template <typename TFinder, typename TNeedle, typename TMultiFinder>
+inline bool find (TFinder & finder, Pattern<TNeedle, Pex<NonHierarchical, TMultiFinder > > & me)
 {
 SEQAN_CHECKPOINT
 
@@ -385,8 +421,8 @@ SEQAN_CHECKPOINT
 //   PexHierarchical -- functions
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TNeedle>
-void _createTree(Pattern<TNeedle, PexHierarchical > &me, unsigned start, unsigned end,
+template <typename TNeedle, typename TMultiFinder>
+void _createTree(Pattern<TNeedle, Pex<Hierarchical, TMultiFinder > > &me, unsigned start, unsigned end,
 		 unsigned k, unsigned parent, unsigned direction ,unsigned idx, unsigned plen)
 {
   //create tree like proposed in Navarro & Raffinot
@@ -439,8 +475,8 @@ void _createTree(Pattern<TNeedle, PexHierarchical > &me, unsigned start, unsigne
   }
 }
 
-template <typename TNeedle, typename TFinder>
-void _patternInit(Pattern<TNeedle, PexHierarchical > &me, TFinder &)
+template <typename TNeedle, typename TFinder, typename TMultiFinder>
+void _patternInit(Pattern<TNeedle, Pex<Hierarchical, TMultiFinder > > &me, TFinder &)
 {
 SEQAN_CHECKPOINT
   typedef typename Position<TNeedle>::Type TPosition;
@@ -470,7 +506,6 @@ SEQAN_CHECKPOINT
   ::std::cout << "                   PATTERN INIT                     " << ::std::endl;
   ::std::cout << "Needle:   " << value(me.data_needle) << ::std::endl;
   ::std::cout << "|Needle|: " << me.needleLength << ::std::endl;
-  ::std::cout << "seg_len:  " << seg_len << ::std::endl;
   ::std::cout << "limit:    " << me.limit << ::std::endl;
   ::std::cout << "k:        " << k << ::std::endl;
   ::std::cout << "computed following needles for multipattern search: " << ::std::endl;
@@ -481,9 +516,8 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TFinder, typename TNeedle>
-inline bool find (TFinder & finder, 
-				  Pattern<TNeedle, PexHierarchical > & me)
+template <typename TFinder, typename TNeedle, typename TMultiFinder>
+inline bool find (TFinder & finder, Pattern<TNeedle, Pex<Hierarchical, TMultiFinder > > & me)
 {
 SEQAN_CHECKPOINT
 
