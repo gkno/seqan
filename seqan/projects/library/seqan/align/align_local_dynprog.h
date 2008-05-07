@@ -306,6 +306,8 @@ SEQAN_CHECKPOINT
 	TAlignIterator ali_it0_stop = iter(row0,beginPosition(row0));
 	TAlignIterator ali_it1_stop = iter(row1,beginPosition(row1));
 
+	SEQAN_TASSERT( endPosition(row0)- beginPosition(row0) == endPosition(row1)- beginPosition(row1) )
+
 	TAlignIterator ali_it0 = iter(row0,endPosition(row0));
 	TAlignIterator ali_it1 = iter(row1,endPosition(row1));
 
@@ -333,28 +335,30 @@ SEQAN_CHECKPOINT
 	bool end_reached = false;
 	bool skip_row = false;
 	
+
+	int str0_length = length(source(row(align_,0)))+1;
+	int str1_length = length(source(row(align_,1)))+1;
+
+/*	for(int i = 0; i <str1_length; ++i){
+ 		for(int j=0;j<str0_length;++j){
+ 			std::cout << getValue(sw.matrix_,(str0_length*i)+j);
+ 			if(sw.forbidden_[(str0_length*i)+j]==true)
+ 				std::cout <<"(1) ";
+ 			else
+ 				std::cout <<"(0) ";
+ 		}
+ 		std::cout <<"\n";
+ 	}*/
+	
 	setSourceBeginPosition(row(align_, 0),0);
 	setSourceBeginPosition(row(align_, 1),0);
-
-	//int str0_length = length(source(row(align_,0)))+1;
-	//int str1_length = length(source(row(align_,1)))+1;
-	//for(int i = 0; i <str1_length; ++i){
-	//	for(int j=0;j<str0_length;++j){
-	//		cout << getValue(sw.matrix_,(str0_length*i)+j);
-	//		//if(sw.forbidden_[(str0_length*i)+j]==true)
-	//		//	cout <<"(1) ";
-	//		//else
-	//		//	cout <<"(0) ";
-	//	}
-	//	cout <<"\n";
-	//}
+	
 
 	for (y = y_end; (y != y_begin) ; --y)
 	{
 		different = true;
-
 		//compute next "forbidden" cell (where you are not allowed to go diagonal)
-		if(forbidden_reached&&!end_reached)
+		if(forbidden_reached && !end_reached)
 		{
 
 			if(ali_it0==ali_it0_stop && ali_it1==ali_it1_stop)
@@ -369,7 +373,7 @@ SEQAN_CHECKPOINT
 				while(isGap(ali_it0)&& ali_it0!=ali_it0_stop)
 				{
 					skip_row = true;			
-					--ali_it0; 
+					--ali_it0;
 					--ali_it1;
 					goPrevious(forbidden,1);
 				}
@@ -442,8 +446,7 @@ SEQAN_CHECKPOINT
 				if(x<x_stop)
 				{
 					different=false;
-					x_stop=x;
-					//goto??
+			//		x_stop=x;
 				}
 				else
 				{
@@ -455,9 +458,15 @@ SEQAN_CHECKPOINT
 					}
 				}
 			} 
+			if(x<x_stop)// && different)
+			{
+				x_stop=x;
+			}
 			*finger0 = v;
 			--x;
 		}
+		if(x_end==x_begin)
+			break;
 	}
 
 
@@ -628,9 +637,11 @@ SEQAN_CHECKPOINT
 ..param.score:The score values to be used for computing the alignment.
 ...type:Class.Score
 ..param.cutoff:A score limit.
-...remarks:Alignments with scores < cutoff will be discarded (starts being useful when
+...remarks:Alignments with scores < cutoff will be discarded (starTCGCGCCTGGAC
+CAAGACA
+ts being useful when
 	not only the best, but also sub-optimal local aligments are of interest). 
-	Low cut off scores cause a higher runtime.
+	Low cutoff scores cause a higher runtime.
 ..returns:The score value of the best scoring local alignment or 0 if there was no alignment with score > cutoff.
 ...param.align:The corresponding alignment.
 ..remarks:So far, only linear gap costs are allowed.
@@ -711,7 +722,6 @@ SEQAN_CHECKPOINT
 	next_best_end = get_next_best_end_position(sw_finder,cutoff);
 	if(next_best_end==0)
 		return 0;
-
 	typename LocalAlignmentFinder<TScoreValue>::TMatrixIterator next_best_begin;
 	next_best_begin= smith_waterman_trace(align_,sw_finder.forbidden_,iter(sw_finder.matrix_,next_best_end), score_);
 	sw_finder.best_begin_pos_ = position(next_best_begin);
