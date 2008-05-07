@@ -336,10 +336,9 @@ SEQAN_CHECKPOINT
 	bool skip_row = false;
 	
 
-	int str0_length = length(source(row(align_,0)))+1;
+/*	int str0_length = length(source(row(align_,0)))+1;
 	int str1_length = length(source(row(align_,1)))+1;
-
-/*	for(int i = 0; i <str1_length; ++i){
+	for(int i = 0; i <str1_length; ++i){
  		for(int j=0;j<str0_length;++j){
  			std::cout << getValue(sw.matrix_,(str0_length*i)+j);
  			if(sw.forbidden_[(str0_length*i)+j]==true)
