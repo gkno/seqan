@@ -1354,6 +1354,27 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 			parentEdgeLength(it));
 	}
 
+/**
+.Function.parentEdgeFirstChar:
+..summary:Returns the first character of the edge from an $iterator$ node to its parent.
+..cat:Index
+..signature:parentEdgeFirstChar(iterator)
+..param.iterator:An iterator of a Suffix Tree.
+...type:Spec.TopDownHistory Iterator
+..returns:A single character of type $Value<TIndex>::Type$ which is identical to $Value<Fibre<TIndex, ESA_RawText>::Type>::Type$.
+*/
+
+	template < typename TIndex, class TSpec >
+	inline typename Value<TIndex>::Type 
+	parentEdgeFirstChar(Iter< TIndex, VSTree<TSpec> > const &it) 
+	{
+		return infixWithLength(
+			indexText(container(it)),
+			posAdd(getOccurrence(it), parentRepLength(it)),
+			1)[0];
+	}
+
+
 	template < typename TIndex, class TSpec >
 	inline void clear(Iter<TIndex, VSTree<TSpec> > &it) 
 	{
