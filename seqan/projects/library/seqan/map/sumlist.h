@@ -25,8 +25,14 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 //////////////////////////////////////////////////////////////////////////////
+//Default Specialization Tag
 
-template <unsigned int DIM, typename TValue, typename TSpec>
+template <typename TSpec = Default>
+struct SkipSumList;
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <unsigned int DIM, typename TValue, typename TSpec = SkipSumList<> >
 class SumList;
 
 //////////////////////////////////////////////////////////////////////////////
@@ -42,6 +48,11 @@ struct DIMENSION< SumList<_DIM, TValue, TSpec> >
 {
 	enum { VALUE = _DIM};
 };
+template <unsigned int _DIM, typename TValue, typename TSpec>
+struct DIMENSION< SumList<_DIM, TValue, TSpec> const>
+{
+	enum { VALUE = _DIM};
+};
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -50,6 +61,12 @@ struct Value< SumList<DIM, TValue, TSpec> >
 {
 	typedef TValue Type;
 };
+template <unsigned int DIM, typename TValue, typename TSpec>
+struct Value< SumList<DIM, TValue, TSpec> const >
+{
+	typedef TValue Type;
+};
+
 
 //////////////////////////////////////////////////////////////////////////////
 // SumListValues: 

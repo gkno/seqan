@@ -22,7 +22,6 @@ int main()
 	Main_TestAlign();
 	Main_TestMyers();
 
-
 	SEQAN_TREPORT("TEST END");
 
 	return 0;

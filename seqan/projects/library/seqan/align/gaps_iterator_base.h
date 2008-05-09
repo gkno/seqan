@@ -171,26 +171,6 @@ SEQAN_CHECKPOINT
 	return TReference(me);
 }
 
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename TGaps, typename TSpec>
-inline typename GetValue< Iter<TGaps, GapsIterator<TSpec> > >::Type
-getValue(Iter<TGaps, GapsIterator<TSpec> > & me)
-{
-SEQAN_CHECKPOINT
-	typedef typename Value<Iter<TGaps, GapsIterator<TSpec> > >::Type TValue;
-	if (isGap(me)) return gapValue<TValue>();
-	else return getValue(source(me));
-}
-template <typename TGaps, typename TSpec>
-inline typename GetValue< Iter<TGaps, GapsIterator<TSpec> > const>::Type
-getValue(Iter<TGaps, GapsIterator<TSpec> > const & me)
-{
-SEQAN_CHECKPOINT
-	typedef typename Value<Iter<TGaps, GapsIterator<TSpec> > const>::Type TValue;
-	if (isGap(me)) return gapValue<TValue>();
-	else return getValue(source(me));
-}
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -241,6 +221,47 @@ SEQAN_CHECKPOINT
 		moveValue(source(me), val);
 	}
 }
+
+//////////////////////////////////////////////////////////////////////////////
+
+//____________________________________________________________________________
+
+template <typename TGaps, typename TSpec>
+inline TGaps &
+container(Iter<TGaps, GapsIterator<TSpec> > & me)
+{
+SEQAN_CHECKPOINT
+	return *me.data_container;
+}
+
+template <typename TGaps, typename TSpec>
+inline TGaps &
+container(Iter<TGaps, GapsIterator<TSpec> > const & me)
+{
+SEQAN_CHECKPOINT
+	return *me.data_container;
+}
+
+//____________________________________________________________________________
+
+template <typename TGaps, typename TSpec>
+inline typename Source<Iter<TGaps, GapsIterator<TSpec> > >::Type /*returns copy*/
+source(Iter<TGaps, GapsIterator<TSpec> > & me)
+{
+SEQAN_CHECKPOINT
+	return me.data_source;
+}
+template <typename TGaps, typename TSpec>
+inline typename Source<Iter<TGaps, GapsIterator<TSpec> > const>::Type /*returns copy*/
+source(Iter<TGaps, GapsIterator<TSpec> > const & me)
+{
+SEQAN_CHECKPOINT
+	return me.data_source;
+}
+
+//todo??? setSource? setContainer?
+//////////////////////////////////////////////////////////////////////////////
+
 
 //////////////////////////////////////////////////////////////////////////////
 

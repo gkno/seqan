@@ -335,6 +335,11 @@ void Main_TestGaps()
 {
 	SEQAN_TREPORT("TEST GAPS BEGIN")
 
+	TestGapsBase<String<char>, SumlistGaps>();
+//	TestGapsIterator<String<char>, SumlistGaps>(); TODO
+//	TestGapManipulation<String<char>, SumlistGaps>(); TODO
+
+
 	TestGapsBase<String<char>, ArrayGaps>();
 	TestGapsIterator<String<char>, ArrayGaps>();
 	TestGapManipulation<String<char>, ArrayGaps>();

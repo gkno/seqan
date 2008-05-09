@@ -243,3 +243,4 @@ void Main_TestMyers()
 	debug::verifyCheckpoints("projects/library/seqan/align/align_hirschberg.h");
 	debug::verifyCheckpoints("projects/library/seqan/align/hirschberg_set.h");
 }
+

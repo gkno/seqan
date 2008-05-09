@@ -270,7 +270,7 @@ searchSumList(Iter<TSumList, _DummySumListIterator> & it,
 {
 	goBegin(it);
 	TValue sum = 0;
-	while (!atEnd(it) && ((sum + getValue(it, dim))< val))
+	while (!atEnd(it) && ((sum + getValue(it, dim))<= val)) // SEARCH SEMANTICS
 	{
 		sum += getValue(it, dim);
 		goNext(it);
@@ -282,8 +282,8 @@ searchSumList(Iter<TSumList, _DummySumListIterator> & it,
 template <typename TSumList, typename TValue2>
 inline void 
 assignValue(Iter<TSumList, _DummySumListIterator > & it,
-			TValue2 val,
-			int dim)
+			int dim,
+			TValue2 val)
 {
 	value(it.iter)[dim] = val;
 }
@@ -447,7 +447,7 @@ void Test_MiniSumList2()
 
 	TIterator it(sl);
 
-	searchSumList(it, 3, 0);
+	searchSumList(it, 2, 0); // SEARCH SEMANTICS
 	SEQAN_TASSERT(getValue(it, 0) == 2)
 	SEQAN_TASSERT(getValue(it, 1) == 3)
 	SEQAN_TASSERT(getValue(it, 2) == 1)
@@ -464,7 +464,7 @@ void Test_MiniSumList2()
 	SEQAN_TASSERT(it != begin(sl))
 
 
-	searchSumList(it, 4, 0);
+	searchSumList(it, 3, 0);// SEARCH SEMANTICS
 	SEQAN_TASSERT(getValue(it, 0) == 3)
 	SEQAN_TASSERT(getValue(it, 1) == 1)
 	SEQAN_TASSERT(getValue(it, 2) == 1)
@@ -472,7 +472,7 @@ void Test_MiniSumList2()
 	SEQAN_TASSERT(getSum(it, 1) == 6)
 	SEQAN_TASSERT(getSum(it, 2) == 6)
 
-	assignValue(it, 80000, 0);
+	assignValue(it, 0, 80000);
 	SEQAN_TASSERT(getValue(it, 0) == 80000)
 	SEQAN_TASSERT(getSum(sl, 0) == 80004)
 
@@ -590,10 +590,6 @@ void testSkipSumListIntegrity(SumList<DIM, TValue, SkipSumList< > > & ssl)
 	for (int counter = 0; !atEnd(path); ++counter)
 	{
 		//is the bottom line edges correct?
-if (path.data_elements[0]->data_next[0].values != path.data_elements[0]->minilist.data_sum)
-{
-	int j = 0;
-}
 		SEQAN_TASSERT(path.data_elements[0]->data_next[0].values == path.data_elements[0]->minilist.data_sum)
 
 		//are the other edges correct?
@@ -703,10 +699,10 @@ void Test_SkipSumListStress()
 
 		compareIterators<DIM>(sit, dit);
 
-		assignValue(sit, new_value, dim);
+		assignValue(sit, dim, new_value);
 		testSkipSumListIntegrity(ssl);
 
-		assignValue(dit, new_value, dim);
+		assignValue(dit, dim, new_value);
 
 		compareIterators<DIM>(sit, dit);
 		compareSumLists(ssl, dsl);

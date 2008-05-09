@@ -28,6 +28,8 @@
 #include <seqan/sequence.h>
 #include <seqan/score.h>
 
+#include <seqan/map.h>
+
 //____________________________________________________________________________
 
 #ifdef SEQAN_SWITCH_USE_FORWARDS
@@ -38,6 +40,7 @@
 #include <seqan/align/gaps_iterator_base.h>
 
 #include <seqan/align/gaps_array.h>
+#include <seqan/align/gaps_sumlist.h>
 
 #include <seqan/align/align_base.h>
 #include <seqan/align/align_cols_base.h>

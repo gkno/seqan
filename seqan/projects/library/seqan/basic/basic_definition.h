@@ -99,6 +99,21 @@ struct False { enum { VALUE = false }; };
 struct Nothing {};
 
 
+
+//////////////////////////////////////////////////////////////////////////////
+// returns TTo const, if TFrom is const, TTo otherwise
+
+template <typename TFrom, typename TTo>
+struct _CopyConst
+{
+	typedef TTo Type;
+};
+template <typename TFrom, typename TTo>
+struct _CopyConst<TFrom const, TTo>
+{
+	typedef TTo const Type;
+};
+
 //////////////////////////////////////////////////////////////////////////////
 
 /**

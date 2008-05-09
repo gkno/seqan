@@ -108,15 +108,18 @@ struct Position<Gaps<TSource, TSpec> const>:
 */
 
 template <typename T>
-struct Source;
+struct Source
+{//dummy implementation for VC++ .net2003
+	typedef int Type;
+};
+template <typename T>
+struct Source<T const>:
+	Source<T>
+{
+};
 
 template <typename TSource, typename TSpec>
 struct Source<Gaps<TSource, TSpec> >
-{
-	typedef TSource Type;
-};
-template <typename TSource, typename TSpec>
-struct Source<Gaps<TSource, TSpec> const>
 {
 	typedef TSource Type;
 };
@@ -130,12 +133,12 @@ struct Source<Gaps<TSource, TSpec> const>
 template <typename TSource, typename TSpec, typename TIteratorSpec>
 struct Iterator<Gaps<TSource, TSpec>, TIteratorSpec>
 {
-	typedef Iter<Gaps<TSource, TSpec>, GapsIterator<void> > Type;
+	typedef Iter<Gaps<TSource, TSpec>, GapsIterator<TSpec> > Type;
 };
 template <typename TSource, typename TSpec, typename TIteratorSpec>
 struct Iterator<Gaps<TSource, TSpec> const, TIteratorSpec>
 {
-	typedef Iter<Gaps<TSource, TSpec> const, GapsIterator<void> > Type;
+	typedef Iter<Gaps<TSource, TSpec> const, GapsIterator<TSpec> > Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -461,6 +464,14 @@ SEQAN_CHECKPOINT
 
 template <typename TSource, typename TSpec, typename TPosition>
 inline bool 
+isGap(Gaps<TSource, TSpec> & me,
+	  TPosition view_pos)
+{
+SEQAN_CHECKPOINT
+	return isGap(iter(me, view_pos));
+}
+template <typename TSource, typename TSpec, typename TPosition>
+inline bool 
 isGap(Gaps<TSource, TSpec> const & me,
 	  TPosition view_pos)
 {
@@ -487,6 +498,14 @@ SEQAN_CHECKPOINT
 // count gaps beginning at given view position
 // counting trailing gaps returns 0
 
+template <typename TSource, typename TSpec, typename TPosition>
+inline typename Size<Gaps<TSource, TSpec> >::Type
+countGaps(Gaps<TSource, TSpec> & me,
+		  TPosition view_pos)
+{
+SEQAN_CHECKPOINT
+	return countGaps(iter(me, view_pos));
+}
 template <typename TSource, typename TSpec, typename TPosition>
 inline typename Size<Gaps<TSource, TSpec> >::Type
 countGaps(Gaps<TSource, TSpec> const & me,
@@ -845,6 +864,35 @@ SEQAN_CHECKPOINT
 	return infix(source(me), sourceBeginPosition(me), sourceEndPosition(me));
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.sourceLength:
+..summary:Length of the source. 
+..cat:Alignments
+..signature:Size sourceLength(gaps)
+..param.gaps:A gaps object.
+...type:Class.Gaps
+..returns:Length of the used part of the source.
+...metafunction:Metafunction.Size
+..remarks:This function is equivalent to $sourceEndPosition(gaps) - sourceBeginPosition(gaps)$.
+..see:sourceEndPosition
+..see:sourceBeginPosition
+*/
+template <typename TSource, typename TSpec>
+inline typename Size<TSource>::Type
+sourceLength(Gaps<TSource, TSpec> & me)
+{
+SEQAN_CHECKPOINT
+	return sourceEndPosition(me) - sourceBeginPosition(me);
+}
+template <typename TSource, typename TSpec>
+inline typename Size<TSource>::Type
+sourceLength(Gaps<TSource, TSpec> const & me)
+{
+SEQAN_CHECKPOINT
+	return sourceEndPosition(me) - sourceBeginPosition(me);
+}
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -971,8 +1019,10 @@ SEQAN_CHECKPOINT
 	TIter begin_ = begin(source);
 	TIter end_ = end(source);
 	for (; begin_ != end_; ++begin_) {
-		if (isGap(begin_)) _streamPut(target, gapValue<char>());
-		else _streamPut(target, *begin_);
+		if (isGap(begin_))
+			_streamPut(target, gapValue<char>());
+		else 
+			_streamPut(target, *begin_);
 	}
 }
 
@@ -1176,6 +1226,7 @@ SEQAN_CHECKPOINT
 	typename Comparator<Gaps<TRightSource, TRightSpec> >::Type _lex(left, right);
     return isGreaterOrEqual(_lex);
 }
+
 //////////////////////////////////////////////////////////////////////////////
 
 }// namespace SEQAN_NAMESPACE_MAIN

@@ -588,8 +588,9 @@ SEQAN_CHECKPOINT
 // Gaps Iterator
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TGaps, typename TSpec>
-class Iter<TGaps, GapsIterator<TSpec> >
+
+template <typename TGaps>
+class Iter<TGaps, GapsIterator<ArrayGaps> >
 {
 public:
 	typedef typename Size<TGaps>::Type TGapsSize;
@@ -653,47 +654,32 @@ SEQAN_CHECKPOINT
 	}
 };
 
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TGaps>
+inline typename GetValue< Iter<TGaps, GapsIterator<ArrayGaps> > >::Type
+getValue(Iter<TGaps, GapsIterator<ArrayGaps> > & me)
+{
+SEQAN_CHECKPOINT
+	typedef typename Value<Iter<TGaps, GapsIterator<ArrayGaps> > >::Type TValue;
+	if (isGap(me)) return gapValue<TValue>();
+	else return getValue(source(me));
+}
+template <typename TGaps>
+inline typename GetValue< Iter<TGaps, GapsIterator<ArrayGaps> > const>::Type
+getValue(Iter<TGaps, GapsIterator<ArrayGaps> > const & me)
+{
+SEQAN_CHECKPOINT
+	typedef typename Value<Iter<TGaps, GapsIterator<ArrayGaps> > const>::Type TValue;
+	if (isGap(me)) return gapValue<TValue>();
+	else return getValue(source(me));
+}
+
 //____________________________________________________________________________
 
-template <typename TGaps, typename TSpec>
-inline TGaps &
-container(Iter<TGaps, GapsIterator<TSpec> > & me)
-{
-SEQAN_CHECKPOINT
-	return *me.data_container;
-}
-
-template <typename TGaps, typename TSpec>
-inline TGaps &
-container(Iter<TGaps, GapsIterator<TSpec> > const & me)
-{
-SEQAN_CHECKPOINT
-	return *me.data_container;
-}
-
-//____________________________________________________________________________
-
-template <typename TGaps, typename TSpec>
-inline typename Source<Iter<TGaps, GapsIterator<TSpec> > >::Type /*returns copy*/
-source(Iter<TGaps, GapsIterator<TSpec> > & me)
-{
-SEQAN_CHECKPOINT
-	return me.data_source;
-}
-template <typename TGaps, typename TSpec>
-inline typename Source<Iter<TGaps, GapsIterator<TSpec> > >::Type /*returns copy*/
-source(Iter<TGaps, GapsIterator<TSpec> > const & me)
-{
-SEQAN_CHECKPOINT
-	return me.data_source;
-}
-
-//todo??? setSource? setContainer?
-//____________________________________________________________________________
-
-template <typename TGaps, typename TSpec>
+template <typename TGaps>
 inline bool 
-isGap(Iter<TGaps, GapsIterator<TSpec> > const & me)
+isGap(Iter<TGaps, GapsIterator<ArrayGaps> > const & me)
 {
 SEQAN_CHECKPOINT
 	return !(me.data_block & 1);
@@ -701,9 +687,9 @@ SEQAN_CHECKPOINT
 
 //____________________________________________________________________________
 
-template <typename TGaps, typename TSpec>
+template <typename TGaps>
 inline typename Size<TGaps>::Type
-countGaps(Iter<TGaps, GapsIterator<TSpec> > const & me)
+countGaps(Iter<TGaps, GapsIterator<ArrayGaps> > const & me)
 {
 	if (isGap(me))
 	{
@@ -735,7 +721,7 @@ SEQAN_CHECKPOINT
 
 template <typename T>
 inline void 
-_goNext_gapsIterator(T const & me)
+_goNext_arrayGapsIterator(T const & me)
 {
 	if (!isGap(me))
 	{
@@ -751,24 +737,24 @@ SEQAN_CHECKPOINT
 		me.data_sub = 0;
 	}
 }
-template <typename TGaps, typename TSpec>
+template <typename TGaps>
 inline void 
-goNext(Iter<TGaps, GapsIterator<TSpec> > & me)
+goNext(Iter<TGaps, GapsIterator<ArrayGaps> > & me)
 {
-	_goNext_gapsIterator(me);
+	_goNext_arrayGapsIterator(me);
 }
-template <typename TGaps, typename TSpec>
+template <typename TGaps>
 inline void 
-goNext(Iter<TGaps, GapsIterator<TSpec> > const & me)
+goNext(Iter<TGaps, GapsIterator<ArrayGaps> > const & me)
 {
-	_goNext_gapsIterator(me);
+	_goNext_arrayGapsIterator(me);
 }
 
 //____________________________________________________________________________
 
 template <typename T>
 inline void 
-_goPrevious_gapsIterator(T const & me)
+_goPrevious_arrayGapsIterator(T const & me)
 {
 	if (me.data_sub > 0)
 	{
@@ -790,23 +776,23 @@ SEQAN_CHECKPOINT
 		goPrevious(me.data_source);
 	}
 }
-template <typename TGaps, typename TSpec>
+template <typename TGaps>
 inline void 
-goPrevious(Iter<TGaps, GapsIterator<TSpec> > & me)
+goPrevious(Iter<TGaps, GapsIterator<ArrayGaps> > & me)
 {
-	_goPrevious_gapsIterator(me);
+	_goPrevious_arrayGapsIterator(me);
 }
-template <typename TGaps, typename TSpec>
+template <typename TGaps>
 inline void 
-goPrevious(Iter<TGaps, GapsIterator<TSpec> > const & me)
+goPrevious(Iter<TGaps, GapsIterator<ArrayGaps> > const & me)
 {
-	_goPrevious_gapsIterator(me);
+	_goPrevious_arrayGapsIterator(me);
 }
 //____________________________________________________________________________
 
-template <typename TGaps, typename TSpec>
+template <typename TGaps>
 inline bool 
-atBegin(Iter<TGaps, GapsIterator<TSpec> > const & me)
+atBegin(Iter<TGaps, GapsIterator<ArrayGaps> > const & me)
 {
 SEQAN_CHECKPOINT
 	return ((me.data_block == 1) && (me.data_sub == 0));
@@ -814,9 +800,9 @@ SEQAN_CHECKPOINT
 
 //____________________________________________________________________________
 
-template <typename TGaps, typename TSpec>
+template <typename TGaps>
 inline bool 
-atEnd(Iter<TGaps, GapsIterator<TSpec> > const & me)
+atEnd(Iter<TGaps, GapsIterator<ArrayGaps> > const & me)
 {
 SEQAN_CHECKPOINT
 	return ((me.data_block == length(_dataArr(container(me)))) && (me.data_sub == 0));
@@ -824,9 +810,9 @@ SEQAN_CHECKPOINT
 
 //____________________________________________________________________________
 
-template <typename TGaps, typename TSpec, typename TCount>
+template <typename TGaps, typename TCount>
 inline void
-insertGaps(Iter<TGaps, GapsIterator<TSpec> > const & me,
+insertGaps(Iter<TGaps, GapsIterator<ArrayGaps> > const & me,
 		   TCount size)
 {
 	typedef typename Size<TGaps>::Type TGapsSize;
@@ -881,9 +867,9 @@ SEQAN_CHECKPOINT
 
 //delete up to size gaps 
 	
-template <typename TGaps, typename TSpec, typename TCount>
+template <typename TGaps, typename TCount>
 inline void
-removeGaps(Iter<TGaps, GapsIterator<TSpec> > const & me,
+removeGaps(Iter<TGaps, GapsIterator<ArrayGaps> > const & me,
 		   TCount _size)
 {
 	typedef typename Size<TGaps>::Type TGapsSize;
@@ -936,72 +922,72 @@ SEQAN_CHECKPOINT
 
 //____________________________________________________________________________
 
-template <typename TGaps1, typename TGaps2, typename TSpec>
+template <typename TGaps1, typename TGaps2>
 inline bool
-operator == (Iter<TGaps1, GapsIterator<TSpec> > & _left, 
-			 Iter<TGaps2, GapsIterator<TSpec> > & _right)
+operator == (Iter<TGaps1, GapsIterator<ArrayGaps> > & _left, 
+			 Iter<TGaps2, GapsIterator<ArrayGaps> > & _right)
 {
 SEQAN_CHECKPOINT
 	return (_left.data_block == _right.data_block) && (_left.data_sub == _right.data_sub);
 }
-template <typename TGaps1, typename TGaps2, typename TSpec>
+template <typename TGaps1, typename TGaps2>
 inline bool
-operator == (Iter<TGaps1, GapsIterator<TSpec> > const & _left, 
-			 Iter<TGaps2, GapsIterator<TSpec> > & _right)
+operator == (Iter<TGaps1, GapsIterator<ArrayGaps> > const & _left, 
+			 Iter<TGaps2, GapsIterator<ArrayGaps> > & _right)
 {
 SEQAN_CHECKPOINT
 	return (_left.data_block == _right.data_block) && (_left.data_sub == _right.data_sub);
-}template <typename TGaps1, typename TGaps2, typename TSpec>
+}
+template <typename TGaps1, typename TGaps2>
 inline bool
-operator == (Iter<TGaps1, GapsIterator<TSpec> > & _left, 
-			 Iter<TGaps2, GapsIterator<TSpec> > const & _right)
+operator == (Iter<TGaps1, GapsIterator<ArrayGaps> > & _left, 
+			 Iter<TGaps2, GapsIterator<ArrayGaps> > const & _right)
 {
 SEQAN_CHECKPOINT
 	return (_left.data_block == _right.data_block) && (_left.data_sub == _right.data_sub);
-}template <typename TGaps1, typename TGaps2, typename TSpec>
+}
+template <typename TGaps1, typename TGaps2>
 inline bool
-operator == (Iter<TGaps1, GapsIterator<TSpec> > const & _left, 
-			 Iter<TGaps2, GapsIterator<TSpec> > const & _right)
+operator == (Iter<TGaps1, GapsIterator<ArrayGaps> > const & _left, 
+			 Iter<TGaps2, GapsIterator<ArrayGaps> > const & _right)
 {
 SEQAN_CHECKPOINT
 	return (_left.data_block == _right.data_block) && (_left.data_sub == _right.data_sub);
 }
 //____________________________________________________________________________
 
-template <typename TGaps1, typename TGaps2, typename TSpec>
+template <typename TGaps1, typename TGaps2>
 inline bool
-operator != (Iter<TGaps1, GapsIterator<TSpec> > & _left, 
-			 Iter<TGaps2, GapsIterator<TSpec> > & _right)
+operator != (Iter<TGaps1, GapsIterator<ArrayGaps> > & _left, 
+			 Iter<TGaps2, GapsIterator<ArrayGaps> > & _right)
 {
 SEQAN_CHECKPOINT
 	return (_left.data_block != _right.data_block) || (_left.data_sub != _right.data_sub);
 }
-template <typename TGaps1, typename TGaps2, typename TSpec>
+template <typename TGaps1, typename TGaps2>
 inline bool
-operator != (Iter<TGaps1, GapsIterator<TSpec> > const & _left, 
-			 Iter<TGaps2, GapsIterator<TSpec> > & _right)
-{
-SEQAN_CHECKPOINT
-	return (_left.data_block != _right.data_block) || (_left.data_sub != _right.data_sub);
-}template <typename TGaps1, typename TGaps2, typename TSpec>
-inline bool
-operator != (Iter<TGaps1, GapsIterator<TSpec> > & _left, 
-			 Iter<TGaps2, GapsIterator<TSpec> > const & _right)
-{
-SEQAN_CHECKPOINT
-	return (_left.data_block != _right.data_block) || (_left.data_sub != _right.data_sub);
-}template <typename TGaps1, typename TGaps2, typename TSpec>
-inline bool
-operator != (Iter<TGaps1, GapsIterator<TSpec> > const & _left, 
-			 Iter<TGaps2, GapsIterator<TSpec> > const & _right)
+operator != (Iter<TGaps1, GapsIterator<ArrayGaps> > const & _left, 
+			 Iter<TGaps2, GapsIterator<ArrayGaps> > & _right)
 {
 SEQAN_CHECKPOINT
 	return (_left.data_block != _right.data_block) || (_left.data_sub != _right.data_sub);
 }
-//____________________________________________________________________________
-
-//??? TODO: restliche Iterator-Funktionen (gibt's hier allerdings nicht alle)
-//??? TODO: typedefs für ::std::iterator_traits
+template <typename TGaps1, typename TGaps2>
+inline bool
+operator != (Iter<TGaps1, GapsIterator<ArrayGaps> > & _left, 
+			 Iter<TGaps2, GapsIterator<ArrayGaps> > const & _right)
+{
+SEQAN_CHECKPOINT
+	return (_left.data_block != _right.data_block) || (_left.data_sub != _right.data_sub);
+}
+template <typename TGaps1, typename TGaps2>
+inline bool
+operator != (Iter<TGaps1, GapsIterator<ArrayGaps> > const & _left, 
+			 Iter<TGaps2, GapsIterator<ArrayGaps> > const & _right)
+{
+SEQAN_CHECKPOINT
+	return (_left.data_block != _right.data_block) || (_left.data_sub != _right.data_sub);
+}
 
 
 //////////////////////////////////////////////////////////////////////////////
