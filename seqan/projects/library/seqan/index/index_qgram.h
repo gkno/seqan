@@ -859,7 +859,7 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 */
 
 	template < typename TIndex >
-	inline bool _qgramDisableBuckets(TIndex &index)
+	inline bool _qgramDisableBuckets(TIndex &)
 	{
 		return false;	// we disable no buckets by default
 	}
