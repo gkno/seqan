@@ -276,7 +276,7 @@ If $charsLeft$ is smaller than the shape's span, the hash value corresponds to t
 		me.hValue = ordValue(me.leftChar = *it);
 		for(TSize i = 1; i < me.span; ++i) {
 			++it;
-			me.hValue = me.hValue * ValueSize<TValue>::VALUE + ordValue(*it);
+			me.hValue = me.hValue * ValueSize<TValue>::VALUE + ordValue((TValue)*it);
 		}
 		return me.hValue;
 	}
@@ -296,7 +296,7 @@ If $charsLeft$ is smaller than the shape's span, the hash value corresponds to t
 	_hashFixedShape(THValue hash, TIter &it, TValue const, FixedShape<q> const) {
 		++it;
 		return _hashFixedShape(
-			hash * ValueSize<TValue>::VALUE + ordValue(*it),
+			hash * ValueSize<TValue>::VALUE + ordValue((TValue)*it),
 			it, TValue(), FixedShape<q - 1>());
 	}
 
@@ -329,7 +329,7 @@ If $charsLeft$ is smaller than the shape's span, the hash value corresponds to t
 			me.hValue = ordValue(me.leftChar = *it);
 			for(i = 1; i < iEnd; ++i) {
 				++it;
-				me.hValue = me.hValue * ValueSize<TValue>::VALUE + ordValue(*it);
+				me.hValue = me.hValue * ValueSize<TValue>::VALUE + ordValue((TValue)*it);
 			}
 		} else
 			return me.hValue = 0;
@@ -431,7 +431,7 @@ If $charsLeft$ is smaller than the shape's span, the hash value corresponds to t
 			me.hValue = ordValue(me.leftChar = *it);
 			for(i = 1; i < iEnd; ++i) {
 				++it;
-				me.hValue = me.hValue * ValueSize<TValue>::VALUE + ordValue(*it);
+				me.hValue = me.hValue * ValueSize<TValue>::VALUE + ordValue((TValue)*it);
 			}
 			++me.hValue;
 		} else
@@ -466,7 +466,7 @@ If $charsLeft$ is smaller than the shape's span, the hash value corresponds to t
 		typedef typename Value< Shape<TValue, TSpec> >::Type	THValue;
 		me.hValue = 
 			(me.hValue - ordValue(me.leftChar) * (THValue)me.leftFactor) * ValueSize<TValue>::VALUE
-			+ ordValue(*(it + (THValue)me.span - 1));
+			+ ordValue((TValue)*(it + (THValue)me.span - 1));
 		me.leftChar = *it;
 		return me.hValue;
 	}
@@ -500,7 +500,7 @@ If $charsLeft$ is smaller than the shape's span, the hash value corresponds to t
 			for(i = 1; i < iEnd; ++i) {
 				++it;
 				// update sum of x_i
-				me.XValue += ordValue(*it);
+				me.XValue += ordValue((TValue)*it);
 				// shift hash
 				me.hValue = me.hValue * ValueSize<TValue>::VALUE + me.XValue;
 			}
@@ -526,11 +526,11 @@ If $charsLeft$ is smaller than the shape's span, the hash value corresponds to t
 		THValue hValue, XValue;
 		TSize i = 0;
 		if (iEnd > 0) {
-			hValue = XValue = ordValue(*it);
+			hValue = XValue = ordValue((TValue)*it);
 			for(i = 1; i < iEnd; ++i) {
 				++it;
 				// update sum of x_i
-				XValue += ordValue(*it);
+				XValue += ordValue((TValue)*it);
 				// shift hash
 				hValue = hValue * ValueSize<TValue>::VALUE + XValue;
 			}
@@ -572,7 +572,7 @@ If $charsLeft$ is smaller than the shape's span, the hash value corresponds to t
 
 		if (charsLeft >= me.span) {
 			// update sum of x_i
-			me.XValue = me.XValue + ordValue(*(it + me.span - 1)) - ordValue(me.leftChar);
+			me.XValue = me.XValue + ordValue((TValue)*(it + me.span - 1)) - ordValue(me.leftChar);
 			// shift hash
 			me.hValue = (me.hValue - ordValue(me.leftChar) * (THValue)me.leftFactor2) * ValueSize<TValue>::VALUE + me.XValue
 						- me.span * (ValueSize<TValue>::VALUE - 1);
