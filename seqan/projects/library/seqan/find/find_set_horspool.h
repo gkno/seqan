@@ -142,7 +142,7 @@ void setHost (Pattern<TNeedle, SetHorspool> & me, TNeedle2 const & needle) {
 	goBegin(it);
 	for(;!atEnd(it);goNext(it)) {
 		for(TSize pos = 0;pos < length(*it) - 1; ++pos) {
-			TSize ind = convert<TSize>((*it)[pos]);	
+			TSize ind = ordValue((TAlphabet)(*it)[pos]);	
 			if ((length(*it)- 1 - pos) < me.data_dMap[ind]) {
 				me.data_dMap[ind] = (length(*it) - 1 - pos);
 			}
@@ -273,7 +273,7 @@ inline bool find(TFinder & finder, Pattern<TNeedle, SetHorspool> & me) {
 			return true;
 		}
 		oldMatch = false;
-		TSize ind = convert<TSize>(*finder);	
+		TSize ind = ordValue(*finder);
 		setPosition(finder, position(finder) + getValue(me.data_dMap, ind));
 		j = 0;
 		current = getRoot(me.data_reverseTrie);
