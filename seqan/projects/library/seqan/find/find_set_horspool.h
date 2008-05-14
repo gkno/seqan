@@ -125,7 +125,7 @@ void setHost (Pattern<TNeedle, SetHorspool> & me, TNeedle2 const & needle) {
 	// Create Trie
 	createTrieOnReverse(me.data_reverseTrie,me.data_terminalStateMap,needle);
 	assignRoot(me.data_reverseTrie,0);
-	me.data_needle = needle;
+	setValue(me.data_needle, needle);
 
 	// Create jump map
 	TSize alphabet_size = ValueSize<TAlphabet>::VALUE;

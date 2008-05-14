@@ -187,7 +187,7 @@ template <typename TNeedle, typename TNeedle2>
 void setHost (Pattern<TNeedle, AhoCorasick> & me, TNeedle2 const & needle) {
 	SEQAN_CHECKPOINT
 	SEQAN_ASSERT(!empty(needle));
-	me.data_needle = needle;
+	setValue(me.data_needle, needle);
 	clear(me.data_graph);
 	clear(me.data_supplyMap);
 	clear(me.data_endPositions);

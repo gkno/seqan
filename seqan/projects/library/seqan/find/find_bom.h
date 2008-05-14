@@ -111,7 +111,7 @@ setHost (Pattern<TNeedle, BomAlgo> & me, TNeedle2 const& needle)
 	clear(me.oracle);
 	createOracleOnReverse(me.oracle,needle);
 	assignRoot(me.oracle,0);
-	me.data_needle = needle;
+	setValue(me.data_needle, needle);
 }
 
 template <typename TNeedle, typename TNeedle2>

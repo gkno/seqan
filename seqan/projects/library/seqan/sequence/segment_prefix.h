@@ -235,6 +235,14 @@ SEQAN_CHECKPOINT
 
 //____________________________________________________________________________
 
+	template <typename TIterator>
+	friend inline void
+	setBegin(Segment &, TIterator)
+	{
+	}
+
+//____________________________________________________________________________
+
 	friend inline typename Iterator<Segment, Standard>::Type 
 	end(Segment & me,
 		Standard)
@@ -261,7 +269,7 @@ SEQAN_CHECKPOINT
 	}
 */
 	friend inline void 
-	setEnd(Segment & me, typename Position<Segment>::Type new_end)
+	setEndPosition(Segment & me, typename Position<Segment>::Type new_end)
 	{
 SEQAN_CHECKPOINT
 		me.data_end_position = new_end;
@@ -355,11 +363,11 @@ struct Prefix< Segment<THost, TSpec> const >:
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename THost1, typename THost2, typename TPosition1>
+template <typename THost, typename TPosition>
 inline void
-init(Segment<THost1, PrefixSegment> & me,
-	 THost2 & host_,
-	 TPosition1 end_)
+set(Segment<THost, PrefixSegment> & me,
+	THost & host_,
+	TPosition end_)
 {
 SEQAN_CHECKPOINT
 	setHost(me, host_);
@@ -367,10 +375,10 @@ SEQAN_CHECKPOINT
 }
 //____________________________________________________________________________
 
-template <typename THost1, typename THost2>
+template <typename THost>
 inline void
-init(Segment<THost1, PrefixSegment> & me,
-	 THost2 & host_)
+set(Segment<THost, PrefixSegment> & me,
+	THost & host_)
 {
 SEQAN_CHECKPOINT
 	setHost(me, host_);
@@ -381,22 +389,22 @@ SEQAN_CHECKPOINT
 
 template <typename THost, typename TSpec>
 inline void
-init(Segment<THost, PrefixSegment> & me,
-	 Segment<THost, TSpec> & source)
+set(Segment<THost, PrefixSegment> & me,
+	Segment<THost, TSpec> & source)
 {
 SEQAN_CHECKPOINT
 	setHost(me, host(source));
-	setEnd(me, end(source));
+	setEndPosition(me, endPosition(source));
 }
 
 template <typename THost, typename TSpec>
 inline void
-init(Segment<THost, PrefixSegment> & me,
-	 Segment<THost, TSpec> const & source)
+set(Segment<THost, PrefixSegment> & me,
+	Segment<THost, TSpec> const & source)
 {
 SEQAN_CHECKPOINT
 	setHost(me, host(source));
-	setEnd(me, end(source));
+	setEndPosition(me, endPosition(source));
 }
 
 //////////////////////////////////////////////////////////////////////////////

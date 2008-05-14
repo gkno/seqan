@@ -293,10 +293,14 @@ SEQAN_CHECKPOINT
 
 //____________________________________________________________________________
 
+	template <typename TIterator>
+	friend inline void
+	setEnd(Segment &, TIterator)
+	{
+	}
+
 	friend inline void 
-	_setLength(
-		Segment & me, 
-		typename Size<THost>::Type new_length)
+	_setLength(Segment &, typename Size<THost>::Type)
 	{
 	}
 
@@ -348,11 +352,11 @@ struct Suffix< Segment<THost, TSpec> const >:
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename THost1, typename THost2, typename TPosition1>
+template <typename THost, typename TPosition>
 inline void
-init(Segment<THost1, SuffixSegment> & me,
-	 THost2 & host_,
-	 TPosition1 begin_)
+set(Segment<THost, SuffixSegment> & me,
+	THost & host_,
+	TPosition begin_)
 {
 SEQAN_CHECKPOINT
 	setHost(me, host_);
@@ -360,10 +364,10 @@ SEQAN_CHECKPOINT
 }
 //____________________________________________________________________________
 
-template <typename THost1, typename THost2>
+template <typename THost>
 inline void
-init(Segment<THost1, SuffixSegment> & me,
-	 THost2 & host_)
+set(Segment<THost, SuffixSegment> & me,
+	THost & host_)
 {
 SEQAN_CHECKPOINT
 	setHost(me, host_);
@@ -374,22 +378,22 @@ SEQAN_CHECKPOINT
 
 template <typename THost, typename TSpec>
 inline void
-init(Segment<THost, SuffixSegment> & me,
-	 Segment<THost, TSpec> & source)
+set(Segment<THost, SuffixSegment> & me,
+	Segment<THost, TSpec> & source)
 {
 SEQAN_CHECKPOINT
 	setHost(me, host(source));
-	setBegin(me, begin(source, Standard()));
+	setBeginPosition(me, beginPosition(source));
 }
 
 template <typename THost, typename TSpec>
 inline void
-init(Segment<THost, SuffixSegment> & me,
-	 Segment<THost, TSpec> const & source)
+set(Segment<THost, SuffixSegment> & me,
+	Segment<THost, TSpec> const & source)
 {
 SEQAN_CHECKPOINT
 	setHost(me, host(source));
-	setBegin(me, begin(source, Standard()));
+	setBeginPosition(me, beginPosition(source));
 }
 
 //////////////////////////////////////////////////////////////////////////////

@@ -162,7 +162,7 @@ void setHost (Pattern<TNeedle, MultipleShiftAnd> & me, TNeedle2 const & needle) 
 		}
 		me.df[(j - 1) / BitsPerValue<TWord>::VALUE] |= (1<<((j-1)%BitsPerValue<TWord>::VALUE));
 	}
-	me.data_needle = needle;
+	setValue(me.data_needle, needle);
 
 	/*
 	// Debug code

@@ -474,7 +474,7 @@ SEQAN_CHECKPOINT
 		}
 	}
 
-	me.data_needle = needle;
+	setValue(me.data_needle, needle);
 
 #ifdef SEQAN_WILD_SHIFTAND_DEBUG	
 	// Debug code

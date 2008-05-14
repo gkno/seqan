@@ -460,6 +460,15 @@ SEQAN_CHECKPOINT
 	addRef(_toParameter<THolderType>(me.data_value));
 }
 
+template <typename TValue, typename TValue2>
+inline void
+setValue(Holder<TValue, Tristate> & me,
+		 TValue2 const & value_)
+{
+SEQAN_CHECKPOINT
+	set(value(me), value_);
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 ///.Function.value.param.object.type:Class.Holder

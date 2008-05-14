@@ -94,7 +94,7 @@ void setHost (Pattern<TNeedle, ShiftOr> & me, TNeedle2 const & needle) {
 		me.table[me.blockCount*pos + j / BitsPerValue<TWord>::VALUE] ^= (1<<(j%BitsPerValue<TWord>::VALUE));
 	}
 
-	me.data_needle = needle;
+	setValue(me.data_needle, needle);
 
 	/*
 	// Debug code

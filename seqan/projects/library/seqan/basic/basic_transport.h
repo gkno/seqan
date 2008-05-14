@@ -136,6 +136,58 @@ SEQAN_CHECKPOINT
 
 
 //////////////////////////////////////////////////////////////////////////////
+// set
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.set:
+..summary:Assigns one object to another object avoiding to copy contents.
+..cat:Content Manipulation
+..signature:assign(target, source)
+..signature:assign(target, source)
+..param.target: Gets the content of $source$.
+..param.source: Content source.
+..remarks:$set(target, source)$ is semantically equivalent to $target = source$.
+If possible, $set$ copies content references instead of the content itself.
+*/
+
+//TODO: rename set to ...
+/*
+template<typename TTarget, typename TSource>
+inline void 
+set(TTarget & target,
+	TSource & source)
+{
+SEQAN_CHECKPOINT
+	assign(target, source);
+}
+template<typename TTarget, typename TSource>
+inline void 
+set(TTarget const & target,
+	TSource & source)
+{
+SEQAN_CHECKPOINT
+	assign(target, source);
+}
+template<typename TTarget, typename TSource>
+inline void 
+set(TTarget & target,
+	TSource const & source)
+{
+SEQAN_CHECKPOINT
+	assign(target, source);
+}
+template<typename TTarget, typename TSource>
+inline void 
+set(TTarget const & target,
+	TSource const & source)
+{
+SEQAN_CHECKPOINT
+	assign(target, source);
+}
+*/
+
+//////////////////////////////////////////////////////////////////////////////
 
 } //namespace SEQAN_NAMESPACE_MAIN
 

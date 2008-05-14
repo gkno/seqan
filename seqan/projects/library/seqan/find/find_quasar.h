@@ -91,7 +91,7 @@ inline void
 setHost (Pattern<TNeedle, Quasar> & me, TNeedle2 const& needle) 
 {
 	SEQAN_CHECKPOINT
-	me.data_needle = needle;
+	setValue(me.data_needle, needle);
 }
 
 template <typename TNeedle, typename TNeedle2>

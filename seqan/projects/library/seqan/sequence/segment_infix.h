@@ -440,12 +440,12 @@ struct Infix< Segment<THost, TSpec> const >:
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename THost1, typename THost2, typename TPosition1, typename TPosition2>
+template <typename THost, typename TPosition1, typename TPosition2>
 inline void
-init(Segment<THost1, InfixSegment> & me,
-	 THost2 & host_,
-	 TPosition1 begin_,
-	 TPosition2 end_)
+set(Segment<THost, InfixSegment> & me,
+	THost & host_,
+	TPosition1 begin_,
+	TPosition2 end_)
 {
 SEQAN_CHECKPOINT
 	setHost(me, host_);
@@ -454,20 +454,20 @@ SEQAN_CHECKPOINT
 }
 //____________________________________________________________________________
 
-template <typename THost1, typename THost2>
+template <typename THost>
 inline void
-init(Segment<THost1, InfixSegment> & me,
-	 THost2 & host_)
+set(Segment<THost, InfixSegment> & me,
+	THost & host_)
 {
 SEQAN_CHECKPOINT
 	setHost(me, host_);
 	setBegin(me, begin(host_, Standard()));
 	setEnd(me, end(host_, Standard()));
 }
-template <typename THost1, typename THost2>
+template <typename THost>
 inline void
-init(Segment<THost1, InfixSegment> & me,
-	 THost2 const & host_)
+set(Segment<THost, InfixSegment> & me,
+	THost const & host_)
 {
 SEQAN_CHECKPOINT
 	setHost(me, host_);
@@ -479,23 +479,23 @@ SEQAN_CHECKPOINT
 
 template <typename THost, typename TSpec>
 inline void
-init(Segment<THost, InfixSegment> & me,
-	 Segment<THost, TSpec> & source)
+set(Segment<THost, InfixSegment> & me,
+	Segment<THost, TSpec> & source)
 {
 SEQAN_CHECKPOINT
 	setHost(me, host(source));
-	setBegin(me, beginPosition(source));
-	setEnd(me, endPosition(source));
+	setBeginPosition(me, beginPosition(source));
+	setEndPosition(me, endPosition(source));
 }
 template <typename THost, typename TSpec>
 inline void
-init(Segment<THost, InfixSegment> & me,
-	 Segment<THost, TSpec> const & source)
+set(Segment<THost, InfixSegment> & me,
+	Segment<THost, TSpec> const & source)
 {
 SEQAN_CHECKPOINT
 	setHost(me, host(source));
-	setBegin(me, beginPosition(source));
-	setEnd(me, endPosition(source));
+	setBeginPosition(me, beginPosition(source));
+	setEndPosition(me, endPosition(source));
 }
 
 //////////////////////////////////////////////////////////////////////////////

@@ -160,6 +160,18 @@ struct Size<Segment<THost, TSpec> const >
 	typedef typename Size<THost>::Type Type;
 };
 
+template <typename THost, typename TSpec>
+struct Position<Segment<THost, TSpec> >
+{
+	typedef typename Position<THost>::Type Type;
+};
+
+template <typename THost, typename TSpec>
+struct Position<Segment<THost, TSpec> const >
+{
+	typedef typename Position<THost>::Type Type;
+};
+
 //////////////////////////////////////////////////////////////////////////////
 
 ///.Metafunction.DefaultOverflowImplicit.param.T.type:Class.Segment
