@@ -9,10 +9,12 @@
 #include <seqan/basic.h>
 
 #include <seqan/misc/misc_random.h>
-//#include <seqan/misc/misc_set.h>
-//#include <seqan/misc/misc_map.h>
-//#include <seqan/misc/priority_type_base.h>
-//#include <seqan/misc/priority_type_heap.h>
+#include <seqan/map.h>
+
+#include <seqan/misc/misc_set.h>
+//#include <seqan/misc/misc_map.h> geht nicht
+#include <seqan/misc/priority_type_base.h>
+#include <seqan/misc/priority_type_heap.h>
 
 using namespace std;
 using namespace seqan;

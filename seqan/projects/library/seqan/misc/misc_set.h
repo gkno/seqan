@@ -22,8 +22,7 @@
 #define SEQAN_HEADER_MISC_SET_H
 
 #include <set>
-#include "misc_base.h"
-
+#include <seqan/misc/misc_base.h>
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -371,6 +370,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
 	};
 
+/* DISABLED: this part of code interferes with map_adapter_stl.h
+
 	template <typename TElement>
 	struct Value< ::std::set<TElement> > {
 		typedef TElement Type;
@@ -527,6 +528,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 
+*/
 
 //____________________________________________________________________________
 

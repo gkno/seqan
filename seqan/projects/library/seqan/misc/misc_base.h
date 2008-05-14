@@ -42,12 +42,13 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef TElement Type;
 	};
 */
+/* moved to basic_aggregates
 	template <typename TKey, typename TObject, typename TSpec>
 	struct Key< Pair<TKey, TObject, TSpec> > 
 	{
 		typedef TKey Type;
 	};
-
+*/
 
 //////////////////////////////////////////////////////////////////////////////
 

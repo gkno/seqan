@@ -31,7 +31,7 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 struct Hierarchical;			
-struct NonHierarchical;			
+struct NonHierarchical;
 
 template <typename TVerification, typename TMultiFinder = AhoCorasick>
 struct Pex;

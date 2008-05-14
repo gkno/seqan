@@ -168,6 +168,19 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //____________________________________________________________________________
 
+	template <typename TKey, typename TObject, typename TSpec>
+	struct Key< Pair<TKey, TObject, TSpec> > 
+	{
+		typedef TKey Type;
+	};
+
+	template <typename TKey, typename TCargo, typename TSpec>
+	struct Cargo< Pair<TKey, TCargo, TSpec> > 
+	{
+		typedef TCargo Type;
+	};
+//____________________________________________________________________________
+
 /**
 .Class.Triple:
 ..cat:Aggregates

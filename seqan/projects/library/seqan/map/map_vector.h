@@ -19,8 +19,8 @@
  ==========================================================================*/
 
 
-#ifndef SEQAN_HEADER_MISC_SET_H
-#define SEQAN_HEADER_MISC_SET_H
+#ifndef SEQAN_HEADER_MAP_VECTOR_H
+#define SEQAN_HEADER_MAP_VECTOR_H
 
 //////////////////////////////////////////////////////////////////////////////
 

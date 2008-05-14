@@ -24,8 +24,11 @@
 //____________________________________________________________________________
 // prerequisites
 
+#include <deque>
+
 #include <seqan/sequence.h>
 #include <seqan/score.h>
+#include <seqan/graph.h>
 
 //____________________________________________________________________________
 
@@ -49,17 +52,6 @@
 #include <seqan/find/find_wild_shiftand.h>
 
 //____________________________________________________________________________
-// approximate pattern matching
-
-#include <seqan/find/find_score.h>
-#include <seqan/find/find_myers_ukkonen.h>
-#include <seqan/find/find_abndm.h>
-#include <seqan/find/find_pex.h>
-
-#include <seqan/graph.h>
-#include <seqan/find/find_bom.h>
-
-//____________________________________________________________________________
 //multiple pattern search
 
 #include <seqan/find/find_ahocorasick.h>
@@ -68,5 +60,15 @@
 
 //#include <seqan/find/find_multi.h> //wegwerfen
 //#include <seqan/find/find_wumanber.h> //todo
+
+//____________________________________________________________________________
+// approximate pattern matching
+
+#include <seqan/find/find_score.h>
+#include <seqan/find/find_myers_ukkonen.h>
+#include <seqan/find/find_abndm.h>
+#include <seqan/find/find_pex.h>
+
+#include <seqan/find/find_bom.h>
 
 #endif //#ifndef SEQAN_HEADER_...

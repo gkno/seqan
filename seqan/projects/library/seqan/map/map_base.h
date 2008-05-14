@@ -55,6 +55,7 @@ class Map;
 // the elements of sets without objects are the keys.
 //////////////////////////////////////////////////////////////////////////////
 
+/*moved to basic_aggregates.h
 template <typename TKey, typename TObject, typename TSpec>
 struct Key< Pair<TKey, TObject, TSpec> > 
 {
@@ -66,7 +67,7 @@ struct Cargo< Pair<TKey, TCargo, TSpec> >
 {
 	typedef TCargo Type;
 };
-
+*/
 
 //////////////////////////////////////////////////////////////////////////////
 // Type for mapValue function that implements [] for map types 
