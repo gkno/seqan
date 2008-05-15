@@ -409,6 +409,56 @@ weese@tanne:~/seqan/demos$
 .
 
 
+.Demo.Constraint Iterator:
+..cat:Index
+..summary:Example for using node predicates on a deferred suffix tree.
+..description
+...text:Given a sequences, we want to find all substrings $s$ that fulfill certain constraints.
+The relative probabilty to see $s$ should be at least $p_min$. $s$ should also be not longer than
+$replen_max$.
+The latter constraint is a anti-monotonic pattern predicate and can be used in conjunction with the
+first constraint to cut of the trunk of a suffix tree. Only the top of the suffix tree contains candidates
+that might fulfill both predicates, so we can use an @Class.Index@ based on a deferred suffix tree (see @Spec.Index_Wotd@).
+The following example demonstrates how to iterate over all suffix tree nodes fulfilling the constraints and output them.
+..file:../projects/library/demos/index_node_predicate.cpp
+..output
+...text:
+...code:
+weese@tanne:~/seqan$ cd demos
+weese@tanne:~/seqan/demos$ make index_node_predicate
+weese@tanne:~/seqan/demos$ ./index_node_predicate
+38x     ""
+6x      " "
+3x      " wo"
+2x      " wood"
+2x      "a"
+4x      "c"
+2x      "chuck"
+2x      "ck"
+3x      "d"
+2x      "d "
+2x      "huck"
+2x      "k"
+6x      "o"
+2x      "od"
+2x      "ood"
+3x      "u"
+2x      "uck"
+4x      "w"
+3x      "wo"
+2x      "wood"
+weese@tanne:~/seqan/demos$
+..demofor:Spec.Index_Wotd
+..demofor:Spec.TopDownHistory Iterator
+..demofor:Function.nodePredicate
+..demofor:Function.nodeHullPredicate
+..demofor:Function.representative
+..demofor:Function.countOccurrences.
+
+
+
+
+
 .Demo.Pizza & Chili Index
 ..cat:Index
 ..summary:Using a @Spec.Pizza & Chili Index@ for searching and the @Spec.Pizza & Chili String@ for displaying.
@@ -442,6 +492,8 @@ This is the best test with a bast jest.
 ..demofor:Spec.Pizza & Chili Index
 ..demofor:Spec.Pizza & Chili String
 .
+
+
 
 
 
