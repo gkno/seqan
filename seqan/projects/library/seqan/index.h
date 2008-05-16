@@ -120,9 +120,14 @@
 #include <seqan/index/repeat_base.h>
 
 //____________________________________________________________________________
-// Pizza & Chili indices
+// Pizza & Chili interface (compressed indices)
 
 #include <seqan/index/index_pizzachili.h>
 #include <seqan/index/index_pizzachili_find.h>
+
+//____________________________________________________________________________
+// Shawarma interface (suffix array creators)
+
+#include <seqan/index/index_shawarma.h>
 
 #endif //#ifndef SEQAN_HEADER_...

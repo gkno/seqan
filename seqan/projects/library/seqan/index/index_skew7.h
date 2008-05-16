@@ -1,4 +1,4 @@
- /*==========================================================================
+	/*==========================================================================
                 SeqAn - The Library for Sequence Analysis
                           http://www.seqan.de 
  ============================================================================
@@ -409,10 +409,10 @@ namespace SEQAN_NAMESPACE_MAIN
 	// typedefs and helpers
 
 	// compares n characters and in case of equality the names a2 and b2 (no clipping)
-    template <typename T, typename ST> inline
-    bool _leqSkew7(const T * a1, ST a2,   const T * b1, ST b2,   ST n)
+    template <typename TTextIter, typename TSize> inline
+    bool _leqSkew7(TTextIter a1, TSize a2,   TTextIter b1, TSize b2,   TSize n)
     { // lexic. order for n-tupels
-        for(ST i = 0; i < n; ++i, ++a1, ++b1) {
+        for (; n != 0; --n, ++a1, ++b1) {
             if (lexLess(*a1, *b1)) return true;
             if (lexLess(*b1, *a1)) return false;
         }
@@ -420,10 +420,10 @@ namespace SEQAN_NAMESPACE_MAIN
     }
 
 	// compares at most the last n characters (a) with b (clipping)
-    template <typename T, typename ST> inline
-    bool _leqSkew7(const T * a,   const T * b,   ST n)
+    template <typename TTextIter, typename TSize> inline
+    bool _leqSkew7(TTextIter a,   TTextIter b,   TSize n)
     { // lexic. order for n-tupels
-        for(ST i = 0; i < n; ++i, ++a, ++b) {
+        for (; n != 0; --n, ++a, ++b) {
             if (lexLess(*a, *b)) return true;
             if (lexLess(*b, *a)) return false;
         }
@@ -431,12 +431,12 @@ namespace SEQAN_NAMESPACE_MAIN
     }
 
 	// compares two suffixes of residue classes a and b
-    template <typename T, typename ST, typename TString> inline
-    bool _leqSkew7(unsigned a, unsigned b,   const T* spos[], const ST tpos[], const bool islast[], const TString &s124, const int adjust[7][7])
+    template <typename TTextIter, typename TSize, typename TString> inline
+    bool _leqSkew7(unsigned a, unsigned b,   TTextIter spos[], const TSize tpos[], const bool islast[], const TString &s124, const long adjust[7][7])
     {
-        const T* sa = spos[a];
-        const T* sb = spos[b];
-		ST shft = _SkewShift<7>::VALUE[a][b];
+        TTextIter sa = spos[a];
+        TTextIter sb = spos[b];
+		TSize shft = _SkewShift<7>::VALUE[a][b];
         if (sa > sb) {
             if ((a != 0) && (a < shft) && islast[a]) // do we need to clip?
                 return _leqSkew7 (sa,   sb,   a);
@@ -472,6 +472,8 @@ namespace SEQAN_NAMESPACE_MAIN
     {
 		typedef typename Value<TSA>::Type TSize;
 		typedef typename Value<TText>::Type TValue;
+		typedef typename Iterator<TSA, Standard>::Type TSAIter;
+		typedef typename Iterator<TText const, Standard>::Type TValueIter;
 
 		SEQAN_ASSERT(IsContiguous<TText>::VALUE);
 		SEQAN_ASSERT(IsContiguous<TSA>::VALUE);
@@ -489,7 +491,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	    
 		_n[0] = n/7;
 		_o[0] = n%7;
-		for(int i = 1, j = n + 6; i < 7; ++i, --j) {
+		TSize j = n + 6;
+		for(int i = 1; i < 7; ++i, --j) {
 			_n[i] = j/7;
 			_o[i] = j%7;
 		}
@@ -628,7 +631,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			// MULTIWAY MERGE all SA_ streams
 			{
 				// a helper matrix to lex-name-compare every combination of suffixes
-				int adjust[7][7] = // we use int instead of TSize because we need a sign
+				long adjust[7][7] = // we use long instead of TSize because we need a sign
 					//      0               1              2             3             4              5               6
 				   {{0             , _n124-_n[0]   , _n24-_n[0]  , _n124-_n[0] , _n[4]-_n[0] , _n[4]-_n[0]   , _n24-_n[0]    },  // 0
 					{1-_n[1]       , 0             , 0           , 1-_n[1]     , 0           , 1-_n[1]-_n[2] , 1-_n[1]-_n[2] },  // 1*
@@ -638,11 +641,11 @@ namespace SEQAN_NAMESPACE_MAIN
 					{_n24-_n[5]    , _n124-_n[5]   , _n[4]-_n[5] , _n[4]-_n[5] , _n24-_n[5]  , 0             , _n124-_n[5]   },  // 5
 					{_n124-_n[6]   , _n24-_n[6]    , _n124-_n[6] , _n[4]-_n[6] , _n[4]-_n[6] , _n24-_n[6]    , 0             }}; // 6
 
-				TSize* pos[7]  = {begin(SA0)      , begin(SA124)      , begin(SA124)      , 
+				TSAIter pos[7] = {begin(SA0)      , begin(SA124)      , begin(SA124)      , 
 								  begin(SA3)      , begin(SA124)      , begin(SA5)        , begin(SA6)      };
-				TSize* max[7]  = {begin(SA0)+_n[0], begin(SA124)+_n124, begin(SA124)+_n124,
+				TSAIter max[7] = {begin(SA0)+_n[0], begin(SA124)+_n124, begin(SA124)+_n124,
 								  begin(SA3)+_n[3], begin(SA124)+_n124, begin(SA5)+_n[5]  , begin(SA6)+_n[6]};
-				const TValue* spos[7];
+				TValueIter spos[7];
 				TSize tpos[7];
 				bool islast[7];
 

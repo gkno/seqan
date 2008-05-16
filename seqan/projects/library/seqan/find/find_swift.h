@@ -45,9 +45,13 @@ struct Swift {
 	enum { SEMIGLOBAL = 1 };		// 0..match eps-match of min.length n0; 1..match the whole read
 	enum { DIAGONAL = 1 };			// 0..use rectangular buckets (QUASAR); 1..use diagonal buckets (SWIFT)
 	enum { LOG2DELTA_MIN = 3 };		// set minimal delta to 8
-	enum { THRESHOLD_MIN = 6 };		// set minimal threshold to 1
+	enum { THRESHOLD_MIN = 1 };	    // set minimal threshold to 1
+#ifdef WITH_1HULL
 	enum { QGRAM_ERRORS = 1 };		// allow 1 error per q-gram
-	enum { HAMMING_ONLY = 0 };
+#else
+	enum { QGRAM_ERRORS = 0 };		// allow 0 error per q-gram
+#endif
+	enum { HAMMING_ONLY = 1 };
 	enum { PARAMS_BY_LENGTH = 1 };	// params are determined only by seq.length
 };
 
@@ -69,12 +73,18 @@ struct Swift<SwiftLocal> {
 		TSize			firstIncrement;
 		TSize			lastIncrement;
 		TShortSize		counter;
+#ifdef SEQAN_DEBUG_SWIFT
+		TSize			_lastIncDiag;
+#endif
 	};
 
 	template <typename TSize, typename TShortSize>
 	struct _SwiftBucket<SwiftSemiGlobal, TSize, TShortSize> {
 		TSize			lastIncrement;
 		TShortSize		counter;
+#ifdef SEQAN_DEBUG_SWIFT
+		TSize			_lastIncDiag;
+#endif
 	};
 
 	template <typename TSpec, typename TSize, typename TShortSize = unsigned short>
@@ -114,6 +124,7 @@ struct Swift<SwiftLocal> {
 		TIterator		data_iterator;
 		TIterator		haystackEnd;
 		bool			_needReinit;	// if true, the Pattern needs to be reinitialized
+		bool			_atEnd;
 		THitString		hits;
 		THitIterator	curHit, endHit;
 		THstkPos		curPos;
@@ -254,13 +265,38 @@ struct Swift<SwiftLocal> {
 template <typename TParams>
 inline void _printSwiftParams(TParams &params)
 {
-	::std::cout << "firstBucket: " << params.firstBucket << ::std::endl;
-	::std::cout << "reuseMask:   " << params.reuseMask << ::std::endl;
-	::std::cout << "distanceCut: " << params.distanceCut << ::std::endl;
-	::std::cout << "delta:       " << params.delta << ::std::endl;
-	::std::cout << "threshold:   " << params.threshold << ::std::endl;
-	::std::cout << "overlap:     " << params.overlap << ::std::endl;
-	::std::cout << "logDelta:    " << (int)params.logDelta << ::std::endl << ::std::endl;
+	::std::cout << "  firstBucket: " << params.firstBucket << ::std::endl;
+	::std::cout << "  reuseMask:   " << params.reuseMask << ::std::endl;
+	::std::cout << "  distanceCut: " << params.distanceCut << ::std::endl;
+	::std::cout << "  delta:       " << params.delta << ::std::endl;
+	::std::cout << "  threshold:   " << params.threshold << ::std::endl;
+	::std::cout << "  overlap:     " << params.overlap << ::std::endl;
+	::std::cout << "  logDelta:    " << (int)params.logDelta << ::std::endl << ::std::endl;
+}
+
+template < typename TNeedle, typename TIndexSpec, typename TSpec >
+inline void _printSwiftBuckets(Pattern< Index<TNeedle, TIndexSpec>, Swift<TSpec> > &p)
+{
+	typedef Index<TNeedle, TIndexSpec> TIndex;
+	typedef typename Pattern<TIndex, Swift<TSpec> >::TBucketParams TParams;
+
+	unsigned j = 0;
+	TParams *params = &_getSwiftParams(p, 0);
+
+	for(unsigned i=0; i<length(p.buckets) && i<10; ++i) 
+	{
+		if ((i & params->reuseMask) == 0)
+		{
+			::std::cout << ::std::endl << "ReadBucket #" << j << "    " << '"';
+			::std::cout << indexText(host(p))[j] << '"' << ::std::endl;
+			::std::cout << "  length:      " << sequenceLength(j, host(p)) << ::std::endl;
+			params = &_getSwiftParams(p, j++);
+			_printSwiftParams(*params);
+		}
+
+		::std::cout << "    lastInc: " << (int)p.buckets[i].lastIncrement;
+		::std::cout << "  \tCounter: " << p.buckets[i].counter << ::std::endl;
+	}
 }
 
 template <typename TIndex, typename TSpec, typename TSize>
@@ -463,7 +499,7 @@ inline bool _swiftMultiProcessQGram(
 		unsigned bktNo = (diag >> params.logDelta) & params.reuseMask;
 		unsigned bktOfs = diag & (params.delta - 1);
 
-		TBucketIter bkt = bktBegin + _getSwiftBucketNo(pattern, params, getSeqNo(ndlPos)) + bktNo;
+		TBucketIter bkt = bktBegin + (_getSwiftBucketNo(pattern, params, getSeqNo(ndlPos)) + bktNo);
 		
 		do {
 			if ((*bkt).lastIncrement + params.distanceCut <= finder.curPos)
@@ -480,10 +516,9 @@ inline bool _swiftMultiProcessQGram(
 					if (Swift<TSpec>::DIAGONAL == 1)
 						height = sequenceLength(getSeqNo(ndlPos), host(pattern)) - 1;
 
-					// we must decrement bucket no. until (no. mod 4 == bktNo)
+					// we must decrement bucket no. until (no. mod reuse == bktNo)
 					__int64 bktBeginHstk = 
-						(__int64) upperBktNo - 
-						(__int64) (((upperBktNo - bktNo) & params.reuseMask) << params.logDelta);
+						(__int64) (upperBktNo - ((upperBktNo - bktNo) & params.reuseMask)) << params.logDelta;
 
 					if (bktBeginHstk >= 0) {
 						THit hit = {
@@ -505,6 +540,9 @@ inline bool _swiftMultiProcessQGram(
 				}
 				(*bkt).lastIncrement = finder.curPos;
 				(*bkt).counter = 1;
+#ifdef SEQAN_DEBUG_SWIFT
+				(*bkt)._lastIncDiag = diag;
+#endif
 			}
 			else
 			{
@@ -513,6 +551,9 @@ inline bool _swiftMultiProcessQGram(
 				(*bkt).lastIncrement = finder.curPos;
 				if (++(*bkt).counter <= 0)
 					(*bkt).counter = params.threshold;
+#ifdef SEQAN_DEBUG_SWIFT
+				(*bkt)._lastIncDiag = diag;
+#endif
 			}
 
 			if (bktOfs >= params.overlap) break;
@@ -562,7 +603,7 @@ inline bool _swiftMultiFlushBuckets(
 	{
 		TBucketParams &params = _getSwiftParams(pattern, ndlSeqNo);
 		bktEnd = bkt + (params.reuseMask + 1);
-		for(unsigned bktNo = 0; bkt == bktEnd; ++bkt, ++bktNo)
+		for(unsigned bktNo = 0; bkt != bktEnd; ++bkt, ++bktNo)
 		{
 			if ((*bkt).counter >= params.threshold)
 			{
@@ -573,10 +614,9 @@ inline bool _swiftMultiFlushBuckets(
 				if (Swift<TSpec>::DIAGONAL == 1)
 					height = sequenceLength(ndlSeqNo, host(pattern)) - 1;
 
-				// we must decrement bucket no. until (no. mod 4 == bktNo)
+				// we must decrement bucket no. until (no. mod reuse == bktNo)
 				__int64 bktBeginHstk = 
-					(__int64) upperBktNo - 
-					(__int64) (((upperBktNo - bktNo) & params.reuseMask) << params.logDelta);
+					(__int64) (upperBktNo - ((upperBktNo - bktNo) & params.reuseMask)) << params.logDelta;
 
 				if (bktBeginHstk >= 0) {
 					THit hit = {
@@ -683,16 +723,32 @@ template <typename THaystack, typename TSpec>
 inline typename Infix<THaystack>::Type
 range(Finder<THaystack, Swift<TSpec> > &finder)
 {
+	typedef typename Size<THaystack>::Type TSize;
+
 	typename Finder<THaystack, Swift<TSpec> >::TSwiftHit &hit = *finder.curHit;
-	return infix(haystack(finder), hit.hstkPos, hit.hstkPos + hit.bucketWidth);
+	TSize hitEnd = hit.hstkPos + hit.bucketWidth;
+	TSize textEnd = length(haystack(finder));
+
+	if (hitEnd > textEnd)
+		return infix(haystack(finder), hit.hstkPos, textEnd);
+	else
+		return infix(haystack(finder), hit.hstkPos, hitEnd);
 }
 
 template <typename THaystack, typename TSpec, typename TText>
 inline typename Infix<TText>::Type
 range(Finder<THaystack, Swift<TSpec> > &finder, TText &text)
 {
+	typedef  typename Size<TText>::Type TSize;
+
 	typename Finder<THaystack, Swift<TSpec> >::TSwiftHit &hit = *finder.curHit;
-	return infix(text, hit.hstkPos, hit.hstkPos + hit.bucketWidth);
+	TSize hitEnd = hit.hstkPos + hit.bucketWidth;
+	TSize textEnd = length(text);
+
+	if (hitEnd > textEnd)
+		return infix(text, hit.hstkPos, textEnd);
+	else
+		return infix(text, hit.hstkPos, hitEnd);
 }
 
 template <typename TNeedle, typename TIndexSpec, typename TSpec>
@@ -781,10 +837,13 @@ find(
 		}
 
 	clear(finder.hits);
+	if (eof(finder.in)) return false;
+
 	do {
 		++finder.in;
 		if (eof(finder.in)) {
 			endRead(finder.in);
+			_printSwiftBuckets(pattern);
 			if (_swiftMultiFlushBuckets(finder, pattern))
 				break;
 			else

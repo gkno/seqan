@@ -369,7 +369,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	
 	template < typename TInput, typename TSpec >
 	inline bool control(Pipe< TInput, Source<TSpec> > &me, ControlEndRead const &) {
-        me.cur = typename Iterator<TInput const, Rooted>::Type();
+        me.cur = end(me.in, Rooted());
 		return true;
 	}
 	

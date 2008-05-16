@@ -65,6 +65,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename TText, typename TSpec>
 	bool nodePredicate(Iter<Index<TText, Index_Wotd<TRepeatFinder> >, TSpec> &it) 
 	{
+//		return countOccurrences(it) * nodeDepth(it) >= cargo(container(it)).minRepeatLen;
 		return countOccurrences(it) * repLength(it) >= cargo(container(it)).minRepeatLen;
 	}
 
@@ -72,6 +73,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename TText, typename TSpec>
 	bool nodeHullPredicate(Iter<Index<TText, Index_Wotd<TRepeatFinder> >, TSpec> &it) 
 	{
+//		return nodeDepth(it) <= cargo(container(it)).maxPeriod;
 		return repLength(it) <= cargo(container(it)).maxPeriod;
 	}
 
@@ -100,6 +102,13 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		typedef ::std::map<TOcc,TRepeat,_RepeatLess<TOcc> >					TRepeatList;
 
+		if (maxPeriod < 1) return;
+		if (maxPeriod == 1) 
+		{
+			findRepeats(repString, text, minRepeatLen);
+			return;
+		}
+
 		TIndex		index(text);
 		TRepeatList list;
 
@@ -109,7 +118,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		TNodeIterator nodeIt(index);
 		TOccIterator itA, itB, itRepBegin, itEnd;
-		TRepeat rep, period;
+		TRepeat rep;
 		for (; !atEnd(nodeIt); goNext(nodeIt))
 		{
 			if (isRoot(nodeIt)) continue;
@@ -141,7 +150,7 @@ namespace SEQAN_NAMESPACE_MAIN
 							rep.beginPosition = *itRepBegin;
 							rep.endPosition = posAdd(*itA, period);
 							rep.period = period;
-							::std::cerr<<"left:"<<rep.beginPosition<<"  right:"<<rep.endPosition<<"  length:"<<posSub(rep.endPosition,rep.beginPosition)<<"  period:"<<rep.period<<::std::endl;
+//							::std::cerr<<"left:"<<rep.beginPosition<<"  right:"<<rep.endPosition<<"  length:"<<posSub(rep.endPosition,rep.beginPosition)<<"  period:"<<rep.period<<::std::endl;
 							list.insert(::std::pair<TOcc,TRepeat>(rep.beginPosition, rep));
 						}
 					itRepBegin = itA;
@@ -161,7 +170,7 @@ namespace SEQAN_NAMESPACE_MAIN
 					rep.beginPosition = *itRepBegin;
 					rep.endPosition = posAdd(*itA, period);
 					rep.period = period;
-					::std::cerr<<"left:"<<rep.beginPosition<<"  right:"<<rep.endPosition<<"  length:"<<posSub(rep.endPosition,rep.beginPosition)<<"  period:"<<rep.period<<::std::endl;
+//					::std::cerr<<"left:"<<rep.beginPosition<<"  right:"<<rep.endPosition<<"  length:"<<posSub(rep.endPosition,rep.beginPosition)<<"  period:"<<rep.period<<::std::endl;
 					list.insert(::std::pair<TOcc,TRepeat>(rep.beginPosition, rep));
 				}
 		}
@@ -169,9 +178,61 @@ namespace SEQAN_NAMESPACE_MAIN
 		// copy low-complex regions to result string
 		resize(repString, list.size());
 		typename TRepeatList::const_iterator lit = list.begin();
-		typename TRepeatList::const_iterator litEnd = list.begin();
+		typename TRepeatList::const_iterator litEnd = list.end();
 		for (TSize i = 0; lit != litEnd; ++lit, ++i)
 			repString[i] = (*lit).second;
+	}
+
+	// period-1 optimization
+	template <typename TRepeatStore, typename TString, typename TSpec, typename TRepeatSize>
+	void findRepeats(TRepeatStore &repString, StringSet<TString, TSpec> const &text, TRepeatSize minRepeatLen) 
+	{
+		typedef typename Value<TRepeatStore>::Type	TRepeat;
+		typedef typename Iterator<TString>::Type	TIterator;
+		typedef typename Value<TString>::Type		TValue;
+		typedef typename Size<TString>::Type		TSize;
+
+		TRepeat rep;
+		rep.period = 1;
+		clear(repString);
+
+		for( unsigned i = 0; i < length(text); ++i)
+		{
+			TIterator it = begin(text[i], Standard());
+			TIterator itEnd = end(text[i], Standard());
+			if (it == itEnd) continue;
+
+			TValue last = *it;
+			TSize repLeft = 0;
+			TSize repRight = 1;
+			rep.beginPosition.i1 = i;
+			rep.endPosition.i1 = i;
+
+			for (++it; it != itEnd; ++it, ++repRight) 
+			{
+				if (last != *it)
+				{
+					if ((TRepeatSize)(repRight - repLeft) > minRepeatLen)
+					{
+						// insert repeat
+						rep.beginPosition.i2 = repLeft;
+						rep.endPosition.i2 = repRight;
+//						::std::cerr<<"left:"<<rep.beginPosition<<"  right:"<<rep.endPosition<<"  length:"<<posSub(rep.endPosition,rep.beginPosition)<<"  period:"<<rep.period<<::std::endl;
+						appendValue(repString, rep);
+					}
+					repLeft = repRight;
+					last = *it;
+				}
+			}
+			if ((TRepeatSize)(repRight - repLeft) > minRepeatLen)
+			{
+				// insert repeat
+				rep.beginPosition.i2 = repLeft;
+				rep.endPosition.i2 = repRight;
+//				::std::cerr<<"left:"<<rep.beginPosition<<"  right:"<<rep.endPosition<<"  length:"<<posSub(rep.endPosition,rep.beginPosition)<<"  period:"<<rep.period<<::std::endl;
+				appendValue(repString, rep);
+			}
+		}
 	}
 
 }	// namespace seqan

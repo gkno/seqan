@@ -152,7 +152,7 @@ If possible, $set$ copies content references instead of the content itself.
 */
 
 //TODO: rename set to ...
-/*
+
 template<typename TTarget, typename TSource>
 inline void 
 set(TTarget & target,
@@ -185,7 +185,7 @@ set(TTarget const & target,
 SEQAN_CHECKPOINT
 	assign(target, source);
 }
-*/
+
 
 //////////////////////////////////////////////////////////////////////////////
 

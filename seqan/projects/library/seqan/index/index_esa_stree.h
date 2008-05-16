@@ -384,6 +384,13 @@ This interval is the @Function.value@ of the iterator.
 		return repLength(container(it), value(it));
 	}
 
+	template < typename TIndex, typename TSpec >
+	inline typename Size<TIndex>::Type
+	nodeDepth(Iter< TIndex, VSTree<TopDown<ParentLinks<TSpec> > > > const &it) 
+	{
+		return length(it.history);
+	}
+
 /**
 .Function.parentRepLength:
 ..summary:Returns the length of the substring representing the path from root to $iterator$'s parent node.
