@@ -13,6 +13,7 @@
 #
 
 OBJCOPY := objcopy
+LDINC := $(LD) -r
 GET := ./get.sh
 CPPFLAGS := -Wall -pedantic
 SYSTEM := $(shell uname)
@@ -145,7 +146,7 @@ libpizzachili.a: libpizzachili.o
 
 # 11. Link all the wrappers together into one object file.
 libpizzachili.o: $(WrapperObjects)
-	$(LD) -r $(WrapperObjects) -z muldefs -o $@
+	$(LDINC) $(WrapperObjects) -z muldefs -o $@
 
 #  8. Compile the wrapper.
 #  9. Re-link the wrapper.o with all the .o files from the temporary directory.
@@ -154,7 +155,7 @@ libpizzachili.o: $(WrapperObjects)
 	$(CXX) $(CPPFLAGS) -I$(SEQAN) -c -o $*-tmp.o \
 		-DPCINDEX_NAME=PizzaChiliApi$* \
 		-DPCINDEX_$* -DPCINDEX_$($*_type) pizzachili_api.cpp
-	$(LD) -r -x $*-tmp.o $*.d/tmp/*.o -o $@
+	$(LDINC) -x $*-tmp.o $*.d/tmp/*.o -o $@
 	$(OBJCOPY) -w -G \*PizzaChili\* -G _ZSt\* -G _ZNSt\* $@
 	
 #. 6. Build the source by recursively calling make.

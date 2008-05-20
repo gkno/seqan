@@ -55,6 +55,7 @@ CXXFLAGS += -I$(SEQAN)/../../platforms/gcc
 #
 
 Libraries := divsufsort msufsort ds qsufsort
+#Libraries := ds
 Directories := $(addsuffix .d,$(Libraries))
 Objects := $(addsuffix .o,$(Libraries))
 WrapperCodes := $(addsuffix -api.cpp,$(Libraries))
@@ -68,6 +69,7 @@ CleanDirs := $(addsuffix -clean,$(Directories))
 	%.tgz \
 	%.tar.bz2 \
 	%.zip \
+	qsufsort.c \
 	%.d
 
 
@@ -83,8 +85,8 @@ test: test.cpp libshawarma.a
 	$(CXX) $(CXXFLAGS) $< libshawarma.a -o $@
 
 # Bundle the final object file into a library.
-libshawarma.a: libshawarma.o
-	ar rcs $@ $<
+libshawarma.a: $(Objects)
+	ar rcs $@ $^
 
 # Link all the wrappers together into one object file.
 libshawarma.o: $(Objects)
@@ -112,7 +114,6 @@ msufsort.o: msufsort-api.o msufsort.d/MSufSort/MSufSort.o
 	$(OBJCOPY) -w -G \*seqan\* -G _ZSt\* -G _ZNSt\* $@
 	
 msufsort.d/MSufSort/MSufSort.o: msufsort.d
-
 msufsort-api.o: msufsort.d
 
 ################################################################################
