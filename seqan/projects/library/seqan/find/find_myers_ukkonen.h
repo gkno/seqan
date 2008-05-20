@@ -102,6 +102,13 @@ public:
 	{}
 
 	template <typename TNeedle2>
+	Pattern(TNeedle2 & ndl, int _limit = -1):
+		k(- _limit)
+	{
+		setHost(*this, ndl);
+	}
+
+	template <typename TNeedle2>
 	Pattern(TNeedle2 const & ndl, int _limit = -1):
 		k(- _limit)
 	{
@@ -116,8 +123,8 @@ template <typename TNeedle>
 class Pattern<TNeedle, Tag<_MyersUkkonen<AlignTextBanded> > > {
 //____________________________________________________________________________
 public:
-	typedef unsigned int TWord;
-	typedef typename Iterator<TNeedle, Rooted>::Type TIter;
+	typedef unsigned long TWord;
+	typedef typename Iterator<TNeedle, Standard>::Type TIter;
 	enum { MACHINE_WORD_SIZE = sizeof(TWord) * 8 };
 
 	unsigned needleSize;
@@ -128,6 +135,7 @@ public:
 
 	TWord VP0;					// VP[0] (saves one dereferentiation)
 	TWord VN0;					// VN[0]
+	int scoreBit;
 
 	Holder<TNeedle>		data_needle;
 
@@ -161,8 +169,8 @@ public:
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TNeedle, typename TSpec, typename TNeedle2>
-void _initMyersPattern(Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > > & me, 
-					   TNeedle2 & needle) 
+inline void _patternFirstInit(Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > > & me, 
+					   TNeedle2 & needle)
 {
 SEQAN_CHECKPOINT
 
@@ -184,32 +192,29 @@ SEQAN_CHECKPOINT
 		//me.bitMasks[me.blockCount * ordValue((CompareType< Value< TNeedle >::Type, Value< Container< THaystack >::Type >::Type >::Type) needle[j]) + j/me.MACHINE_WORD_SIZE] = me.bitMasks[me.blockCount * ordValue((CompareType< Value< TNeedle >::Type, Value< Container< THaystack >::Type >::Type >::Type) needle[j]) + j/MACHINE_WORD_SIZE] | 1 << (j%MACHINE_WORD_SIZE);
 }
 
+template <typename TNeedle, typename TNeedle2>
+inline void _patternFirstInit(Pattern<TNeedle, Tag<_MyersUkkonen<AlignTextBanded> > > & me, 
+					   TNeedle2 & ndl)
+{
+SEQAN_CHECKPOINT
+	me.needleSize = length(ndl);
+	me.finalScoreMask = 1 << (me.MACHINE_WORD_SIZE - 1);
+}
+
 template <typename TNeedle, typename TSpec, typename TNeedle2>
 void setHost(Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > > & me, 
 			 TNeedle2 & ndl)
 {
 SEQAN_CHECKPOINT
-	me.data_needle = ndl;
-	_initMyersPattern(me, ndl);
+	setValue(me.data_needle, ndl);
+	_patternFirstInit(me, ndl);
 }
 template <typename TNeedle, typename TSpec, typename TNeedle2>
 void setHost(Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > > & me, 
 			 TNeedle2 const & ndl) 
 {
-	me.data_needle = ndl;
-	_initMyersPattern(me, ndl);
-}
-
-template <typename TNeedle, typename TNeedle2>
-void setHost(Pattern<TNeedle, Tag<_MyersUkkonen<AlignTextBanded> > > & me, 
-			 TNeedle2 & ndl) 
-{
-SEQAN_CHECKPOINT
-	me.data_needle = ndl;
-
-	me.needleSize = length(ndl);
-	me.ndlIter = begin(ndl, Rooted());
-	me.finalScoreMask = 1 << (me.MACHINE_WORD_SIZE - 1);
+	setValue(me.data_needle, ndl);
+	_patternFirstInit(me, ndl);
 }
 
 //____________________________________________________________________________
@@ -306,82 +311,8 @@ void _patternInit(Pattern<TNeedle, Tag<_MyersUkkonen<AlignTextBanded> > > &me, T
 SEQAN_CHECKPOINT
 	typedef typename Pattern<TNeedle, Tag<_MyersUkkonen<AlignTextBanded> > >::TWord TWord;
 	typedef typename Value<TNeedle>::Type TValue;
-/*
-	fill(me.mat, (length(container(finder))+1) * (me.needleSize+1), 0, Exact());
-	for(int i=1;i<=me.needleSize;++i)
-		me.mat[i] = i;
-	
-	for(int j=1;j<=length(container(finder));++j)
-		for(int i=1;i<=me.needleSize;++i) {
-			int min = me.mat[(j-1)*(me.needleSize+1)+i-1];
-			if (container(finder)[j-1] != container(me.ndlIter)[i-1]) ++min;
-			int h = me.mat[(j-1)*(me.needleSize+1)+i]+1;
-			int v = me.mat[(j)*(me.needleSize+1)+i-1]+1;
-			int d = j-i;
-			if (0<=d && d<8)
-			{
-				if (0<d)
-					if (min>h) min=h;
-				if (d<7)
-					if (min>v) min=v;
-				me.mat[j*(me.needleSize+1)+i] = min;
-			}
-		}
 
-	for(int j=1;j<=length(container(finder));++j) {
-		::std::cout << "VD: ";
-		for(int i=me.needleSize;i>=1;--i) {
-			int diff = me.mat[j*(me.needleSize+1)+i] - me.mat[(j)*(me.needleSize+1)+i-1];
-			int d = j-i;
-			if (0<=d && d<8) {
-				if (diff>=0) ::std::cout<<" ";
-				::std::cout << diff<<" ";
-			} else
-				::std::cout << "   ";
-		}
-		::std::cout << "   ";
-		if (j>0)
-			::std::cout << container(finder)[j-1];
-		::std::cout << ::std::endl;
-	}
-
-	for(int j=1;j<=length(container(finder));++j) {
-		::std::cout << "HD: ";
-		for(int i=me.needleSize;i>=1;--i) {
-			int diff = me.mat[j*(me.needleSize+1)+i];// - me.mat[(j-1)*(me.needleSize+1)+i];
-			int d = j-i;
-			if (0<=d && d<8) {
-				if (diff>=0) ::std::cout<<" ";
-				::std::cout << diff<<" ";
-			} else
-				::std::cout << "   ";
-		}
-		::std::cout << "   ";
-		if (j>0)
-			::std::cout << container(finder)[j-1];
-		::std::cout << ::std::endl;
-	}
-
-	for(int j=1;j<=length(container(finder));++j) {
-		::std::cout << "DD: ";
-		for(int i=me.needleSize;i>=1;--i) {
-			int diff = me.mat[j*(me.needleSize+1)+i] - me.mat[(j-1)*(me.needleSize+1)+i-1];
-			int d = j-i;
-			if (0<=d && d<8) {
-				if (diff>=0) ::std::cout<<" ";
-				::std::cout << diff<<" ";
-			} else
-				::std::cout << "   ";
-		}
-		::std::cout << "   ";
-		if (j>0)
-			::std::cout << container(finder)[j-1];
-		::std::cout << ::std::endl;
-	}
-
-*/
-
-	goBegin(me.ndlIter);
+	me.ndlIter = begin(host(me), Standard());
 	unsigned diagWidth = length(container(finder)) - me.needleSize;
 	if (diagWidth >= me.needleSize)
 		diagWidth = me.needleSize - 1;
@@ -393,6 +324,8 @@ SEQAN_CHECKPOINT
 	if (me.blockCount == 1) 
 	{
 		me.score = 0;
+		me.scoreMask = 1;
+		me.scoreBit = 0;
 		me.VP0 = ~0;
 		me.VN0 = 0;
 	} 
@@ -405,7 +338,7 @@ SEQAN_CHECKPOINT
 			me.lastBlock = me.blockCount - 1;
 */
 		clear(me.VP);
-		fill(me.VP, me.blockCount, (TWord) ~0, Exact());
+		fill(me.VP, me.blockCount, 0, Exact());
 
 		clear(me.VN);
 		fill(me.VN, me.blockCount, 0, Exact());
@@ -506,7 +439,7 @@ SEQAN_CHECKPOINT
 				me.score--;
 		}
 
-		SEQAN_ASSERT (me.score >= 0);
+//		SEQAN_ASSERT (me.score >= 0);
 
 		goNext(finder);
 	}
@@ -682,14 +615,14 @@ SEQAN_CHECKPOINT
 				me.score--;
 		}
 
-		SEQAN_ASSERT (me.score >= 0);
+//		SEQAN_ASSERT (me.score >= 0);
 
 		goNext(finder);
 	}
 
 	return false;
 }
-
+/*
 template <typename TFinder, typename TNeedle>
 inline bool 
 _findMyersSmallPatterns(
@@ -700,10 +633,9 @@ SEQAN_CHECKPOINT
 	typedef typename Pattern<TNeedle, Tag<_MyersUkkonen<AlignTextBanded> > >::TWord TWord;
 
 	TWord X, D0, HN, HP;
-//	unsigned SHIFT=me.needleSize;
-
-	unsigned minScore = SupremumValue<unsigned>::VALUE;
-	TFinder minPos;
+#ifdef SEQAN_DEBUG_MYERSBITVECTOR
+	unsigned SHIFT=me.needleSize;
+#endif
 
 	if (!atEnd(me.ndlIter)) 
 	{
@@ -717,8 +649,6 @@ SEQAN_CHECKPOINT
 				me.bitMasks[i] >>= 1;
 			me.bitMasks[ordValue(*me.ndlIter)] |= (1 << (me.MACHINE_WORD_SIZE - 1));
 			
-//			--SHIFT;
-
 			// Myers core
 			X = me.bitMasks[ordValue((typename Value<TNeedle>::Type) *finder)] | me.VN0;
 			D0 = ((me.VP0 + (X & me.VP0)) ^ me.VP0) | X;
@@ -728,34 +658,34 @@ SEQAN_CHECKPOINT
 			me.VN0 = X & D0;
 			me.VP0 = (HN << 1) | ~(X | D0);
 
-/*
-					for(int i=0; i<SHIFT; ++i) 
-						::std::cout << "   ";
-					::std::cout << "DD: ";
-					for(int i=me.MACHINE_WORD_SIZE-1; i>=0 ;--i) 
-					{
-						CharString vd = " 1 ";
-						if (D0 & (1 << i)) vd = " 0 ";
-						::std::cout << vd;
-					}
-					::std::cout << "   ";
-					::std::cout << *finder;
-*/
-
+#ifdef SEQAN_DEBUG_MYERSBITVECTOR
+			--SHIFT;
+			for(int i=0; i<SHIFT; ++i) 
+				::std::cerr << "   ";
+			::std::cerr << "dD: ";
+			for(int i=me.MACHINE_WORD_SIZE-1; i>=0 ;--i) 
+			{
+				CharString vd = " 1 ";
+				if (D0 & (1 << i)) vd = " 0 ";
+				::std::cerr << vd;
+			}
+			::std::cerr << "   ";
+			::std::cerr << *finder;
+#endif
 
 			if (!(D0 & (1 << (me.MACHINE_WORD_SIZE - 1))))
 				++me.score;
 
-//			::std::cout << me.score <<::std::endl;
+#ifdef SEQAN_DEBUG_MYERSBITVECTOR
+			::std::cerr << me.score <<::std::endl;
+#endif
 
 			goNext(me.ndlIter);
-			if (atEnd(me.ndlIter))
+//			if (atEnd(me.ndlIter))
 			{
-//				if (me.score <= me.k)
-//					return true;
-				minScore = me.score;
-				minPos = finder;
-				break;
+				if (me.score <= me.k)
+					return true;
+//				break;
 			}
 			goNext(finder);
 		} while (true);
@@ -771,49 +701,254 @@ SEQAN_CHECKPOINT
 		D0 = ((me.VP0 + (X & me.VP0)) ^ me.VP0) | X;
 		HN = me.VP0 & D0;
 		HP = me.VN0 | ~(me.VP0 | D0);
-		X = (HP << 1);
+		X = (HP << 1) |1;
 		me.VN0 = X & D0;
 		me.VP0 = (HN << 1) | ~(X | D0);
 
-/*
-				for(int i=0; i<SHIFT; ++i) 
-					::std::cout << "   ";
-				::std::cout << "HD: ";
-				for(int i=me.MACHINE_WORD_SIZE-1; i>=0 ;--i) 
-				{
-					CharString hd = " 0 ";
-					if (HP & (1 << i)) hd = " 1 ";
-					if (HN & (1 << i)) hd = "-1 ";
-					::std::cout << hd;
-				}
-				::std::cout << "   ";
-				::std::cout << *finder;
-*/
+#ifdef __SEQAN_DEBUG_MYERSBITVECTOR
+		::std::cerr << "dH: ";
+		for(int i=me.MACHINE_WORD_SIZE-1; i>=0 ;--i) 
+		{
+			CharString hd = " 0 ";
+			if (HP & (1 << i)) hd = " 1 ";
+			if (HN & (1 << i)) hd = "-1 ";
+			::std::cerr << hd;
+		}
+		::std::cerr << "   ";
+		::std::cerr << *finder;
+#endif
 
 		if (HP & (1 << (me.MACHINE_WORD_SIZE - 1)))
 			++me.score;
 		else if (HN & (1 << (me.MACHINE_WORD_SIZE - 1)))
 			--me.score;
 
-//		::std::cout << me.score <<::std::endl;
-		if (me.score <= minScore) {
-			minScore = me.score;
-			minPos = finder;
-		}
+#ifdef SEQAN_DEBUG_MYERSBITVECTOR
+		::std::cerr << me.score <<::std::endl;
+#endif
+
+		if (me.score <= me.k)
+			return true;
+		goNext(finder);
+	}
+	return false;
+}
+*/
+
+template <typename TWord, typename TAlignSpec>
+inline int
+_myersCoreSmall(TWord &VP, TWord &VN, TWord const &bitmap, int scoreBit, Tag<_MyersUkkonen<TAlignSpec> >) 
+{
+	// Myers core
+	TWord X = bitmap | VN;
+	TWord D0 = ((VP + (X & VP)) ^ VP) | X;
+	TWord HN = VP & D0;
+	TWord HP = VN | ~(VP | D0);
+	X = HP << 1;
+	VN = X & D0;
+	VP = (HN << 1) | ~(X | D0);
+	return (int)((HP >> scoreBit) & 1) - (int)((HN >> scoreBit) & 1);
+}
+
+template <typename TWord, typename TAlignSpec>
+inline int
+_myersCoreSmallDiag(TWord &VP, TWord &VN, TWord const &bitmap, int scoreBit, Tag<_MyersUkkonen<TAlignSpec> >) 
+{
+	// Myers core
+	TWord X = bitmap | VN;
+	TWord D0 = ((VP + (X & VP)) ^ VP) | X;
+	TWord HN = VP & D0;
+	TWord HP = VN | ~(VP | D0);
+	X = HP << 1;
+	VN = X & D0;
+	VP = (HN << 1) | ~(X | D0);
+	return (!D0 >> scoreBit) & 1;
+}
+
+template <typename TFinder, typename TNeedle>
+inline bool 
+_findMyersSmallPatterns(
+	TFinder & finder, 
+	Pattern<TNeedle, Tag<_MyersUkkonen<AlignTextBanded> > > & me)
+{
+SEQAN_CHECKPOINT
+	typedef Pattern<TNeedle, Tag<_MyersUkkonen<AlignTextBanded> > > TPattern;
+	typedef typename TPattern::TWord TWord;
+	typedef typename TPattern::TIter TIter;
+
+	TWord X, D0, HN, HP;
+	//TWord maskMax = 1 << (length(container(finder)) - me.needleSize);
+	int bitMax = length(container(finder)) - me.needleSize;
+
+#ifdef SEQAN_DEBUG_MYERSBITVECTOR_DUMP
+	int SHIFT = me.needleSize - (me.ndlIter-begin(host(me), Standard()));
+#endif
+
+	TIter ndlEnd = end(host(me), Standard());
+
+#ifdef SEQAN_DEBUG_MYERSBITVECTOR
+	if (me.ndlIter != ndlEnd && me.scoreBit != bitMax)
+#else
+	if (me.ndlIter != ndlEnd)
+#endif
+	{
+		// Part 1: left-upper triangle of parallelogram
+		do
+		{
+			me.bitMasks[ordValue(*me.ndlIter)] |= me.scoreMask;
+			me.score += _myersCoreSmallDiag(
+				me.VP0, me.VN0, me.bitMasks[ordValue((typename Value<TNeedle>::Type) *finder)],
+				me.scoreBit, Tag<_MyersUkkonen<AlignTextBanded> >());
+
+#ifdef SEQAN_DEBUG_MYERSBITVECTOR_DUMP
+			--SHIFT;
+			::std::cerr << "1D:  ";
+			for(int i=0; i<SHIFT; ++i) 
+				::std::cerr << "     ";
+			for(int i=me.scoreMask; i>0 ;i>>=1) 
+			{
+/*				char const *vd = "  1  ";
+				if (D0 & i) vd = "  0  ";
+*/				char const *vd = "  0  ";
+				if (me.VP0 & i) vd = "  1  ";
+				if (me.VN0 & i) vd = " -1  ";
+				::std::cerr << vd;
+			}
+			::std::cerr << "   ";
+			::std::cerr << *finder;
+			::std::cerr << me.score <<::std::endl;
+#endif
+#ifdef SEQAN_DEBUG_MYERSBITVECTOR
+			resize(me.VP,1);
+			resize(me.VN,1);
+			me.VP[0] = me.VP0;
+			me.VN[0] = me.VN0;
+#endif
+
+			me.scoreMask <<= 1;
+			++me.scoreBit;
+			goNext(me.ndlIter);
+
+#ifdef SEQAN_DEBUG_MYERSBITVECTOR
+			return true;
+#endif
+			if (me.scoreBit == bitMax || (me.ndlIter == ndlEnd))
+			{
+				if (me.score <= me.k)
+					return true;
+				break;
+			}
+			goNext(finder);
+		} while (true);
 		
 		goNext(finder);
 	}
 
-	if (minScore <= me.k) {
-		finder = minPos;
-		me.score = minScore;
-		return true;
+
+	if (me.ndlIter != ndlEnd)
+	{
+		// Part 2: go down the parallelogram
+		do
+		{
+			me.bitMasks[ordValue(*me.ndlIter)] |= me.scoreMask;
+			me.score += _myersCoreSmallDiag(
+				me.VP0, me.VN0, me.bitMasks[ordValue((typename Value<TNeedle>::Type) *finder)],
+				me.scoreBit, Tag<_MyersUkkonen<AlignTextBanded> >());
+
+#ifdef SEQAN_DEBUG_MYERSBITVECTOR_DUMP
+			--SHIFT;
+			::std::cerr << "2D:  ";
+			for(int i=0; i<SHIFT; ++i) 
+				::std::cerr << "     ";
+			for(int i=me.scoreMask; i>0 ;i>>=1) 
+			{
+/*				char const *vd = "  0  ";
+				if (me.VP0 & i) vd = "  1  ";
+				if (me.VN0 & i) vd = " -1  ";
+*/				char const *vd = "  1  ";
+				if (D0 & i) vd = "  0  ";
+				::std::cerr << vd;
+			}
+			::std::cerr << "   ";
+			::std::cerr << *finder;
+			::std::cerr << me.score <<::std::endl;
+#endif
+#ifdef SEQAN_DEBUG_MYERSBITVECTOR
+			resize(me.VP,1);
+			resize(me.VN,1);
+			me.VP[0] = me.VP0;
+			me.VN[0] = me.VN0;
+#endif
+
+			// shift bitmasks and states
+			me.VN0 >>= 1;
+			me.VP0 = (me.VP0 >> 1) | (1 << (me.MACHINE_WORD_SIZE - 1)); // ignore the field left of the leftmost diagonal
+			for(unsigned i = 0; i < length(me.bitMasks); ++i)
+				me.bitMasks[i] >>= 1;
+
+			goNext(me.ndlIter);
+#ifdef SEQAN_DEBUG_MYERSBITVECTOR
+			return true;
+#endif
+			if (atEnd(me.ndlIter))
+			{
+				if (me.score <= me.k)
+					return true;
+				break;
+			}
+			goNext(finder);
+		} while (true);
+		
+		goNext(finder);
 	}
 
-	return false;
+	if (!atEnd(finder))
+	{
+		// Part 3: go down the parallelogram
+		do
+		{
+			me.score += _myersCoreSmall(
+				me.VP0, me.VN0, me.bitMasks[ordValue((typename Value<TNeedle>::Type) *finder)],
+				--me.scoreBit, Tag<_MyersUkkonen<AlignTextBanded> >());
+
+			// shift bitmasks and states
+#ifdef SEQAN_DEBUG_MYERSBITVECTOR_DUMP
+			::std::cerr << "3H:  ";
+			for(int i=me.scoreMask; i>0 ;i>>=1) 
+			{
+				char const *vd = "  0  ";
+/*				if (HP & i) vd = "  1  ";
+				if (HN & i) vd = " -1  ";
+*/				if (me.VP0 & i) vd = "  1  ";
+				if (me.VN0 & i) vd = " -1  ";
+				::std::cerr << vd;
+			}
+			::std::cerr << "   ";
+			::std::cerr << *finder;
+			::std::cerr << me.score <<::std::endl;
+#endif
+#ifdef SEQAN_DEBUG_MYERSBITVECTOR
+			resize(me.VP,1);
+			resize(me.VN,1);
+			me.VP[0] = me.VP0;
+			me.VN[0] = me.VN0;
+#endif
+			me.VN0 >>= 1;
+			me.VP0 = (me.VP0 >> 1) | (1 << (me.MACHINE_WORD_SIZE - 1)); // ignore the field left of the leftmost diagonal
+			for(unsigned i = 0; i < length(me.bitMasks); ++i)
+				me.bitMasks[i] >>= 1;			
+
+#ifdef SEQAN_DEBUG_MYERSBITVECTOR
+			return true;
+#endif
+			if (me.score <= me.k)
+				return true;
+
+			goNext(finder);
+		} while (!atEnd(finder));
+	}
+    return false;
 }
-
-
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -835,7 +970,7 @@ SEQAN_CHECKPOINT
 
 		//TODO: adapt myers-ukkonnen to dynamically change k
 
-		// distinguish between the version for needles not longer than one machinword and the version for longer needles
+		// distinguish between the version for needles not longer than one machineword and the version for longer needles
 		if (me.blockCount == 1) 
 			return _findMyersSmallPatterns(finder, me);
 		else 
@@ -843,6 +978,7 @@ SEQAN_CHECKPOINT
 	}
 	else
 	{
+		if (atEnd(finder)) return false;
 		goNext(finder);
 		// distinguish between the version for needles not longer than one machineword and the version for longer needles
 		if (me.blockCount == 1) 
