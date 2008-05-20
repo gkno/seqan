@@ -75,7 +75,7 @@ template <typename TNeedle, typename TSpec>
 class Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > > {
 //____________________________________________________________________________
 public:
-	typedef unsigned int TWord;
+	typedef unsigned long TWord;
 	enum { MACHINE_WORD_SIZE = sizeof(TWord) * 8 };
 
 	unsigned needleSize;
@@ -174,11 +174,12 @@ inline void _patternFirstInit(Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > > & me
 {
 SEQAN_CHECKPOINT
 
+	typedef typename Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > >::TWord TWord;
 	typedef typename Value<TNeedle>::Type TValue;
 
 	me.needleSize = length(needle);
 	me.blockCount = (me.needleSize + me.MACHINE_WORD_SIZE - 1) / me.MACHINE_WORD_SIZE;
-	me.finalScoreMask = 1 << ((me.needleSize + me.MACHINE_WORD_SIZE - 1) % me.MACHINE_WORD_SIZE);
+	me.finalScoreMask = (TWord)1 << ((me.needleSize + me.MACHINE_WORD_SIZE - 1) % me.MACHINE_WORD_SIZE);
 
 	clear(me.bitMasks);
 	fill(me.bitMasks, ValueSize<TValue>::VALUE * me.blockCount, 0, Exact());
@@ -188,8 +189,8 @@ SEQAN_CHECKPOINT
 		me.bitMasks[
 			me.blockCount * ordValue((typename Value<TNeedle>::Type) value(needle, j))
 			+ j / me.MACHINE_WORD_SIZE
-		] |= 1 << (j % me.MACHINE_WORD_SIZE);
-		//me.bitMasks[me.blockCount * ordValue((CompareType< Value< TNeedle >::Type, Value< Container< THaystack >::Type >::Type >::Type) needle[j]) + j/me.MACHINE_WORD_SIZE] = me.bitMasks[me.blockCount * ordValue((CompareType< Value< TNeedle >::Type, Value< Container< THaystack >::Type >::Type >::Type) needle[j]) + j/MACHINE_WORD_SIZE] | 1 << (j%MACHINE_WORD_SIZE);
+		] |= (TWord)1 << (j % me.MACHINE_WORD_SIZE);
+		//me.bitMasks[me.blockCount * ordValue((CompareType< Value< TNeedle >::Type, Value< Container< THaystack >::Type >::Type >::Type) needle[j]) + j/me.MACHINE_WORD_SIZE] = me.bitMasks[me.blockCount * ordValue((CompareType< Value< TNeedle >::Type, Value< Container< THaystack >::Type >::Type >::Type) needle[j]) + j/MACHINE_WORD_SIZE] | ((TWord)1 << (j%MACHINE_WORD_SIZE));
 }
 
 template <typename TNeedle, typename TNeedle2>
@@ -197,8 +198,9 @@ inline void _patternFirstInit(Pattern<TNeedle, Tag<_MyersUkkonen<AlignTextBanded
 					   TNeedle2 & ndl)
 {
 SEQAN_CHECKPOINT
+	typedef typename Pattern<TNeedle, Tag<_MyersUkkonen<AlignTextBanded> > >::TWord TWord;
 	me.needleSize = length(ndl);
-	me.finalScoreMask = 1 << (me.MACHINE_WORD_SIZE - 1);
+	me.finalScoreMask = (TWord)1 << (me.MACHINE_WORD_SIZE - 1);
 }
 
 template <typename TNeedle, typename TSpec, typename TNeedle2>
@@ -291,7 +293,7 @@ SEQAN_CHECKPOINT
 	else 
 	{
 		me.score = me.k + 1;
-		me.scoreMask = 1 << (me.k % me.MACHINE_WORD_SIZE);
+		me.scoreMask = (TWord)1 << (me.k % me.MACHINE_WORD_SIZE);
 		me.lastBlock = me.k / me.MACHINE_WORD_SIZE; 
 		if (me.lastBlock >= me.blockCount)
 			me.lastBlock = me.blockCount - 1;
@@ -332,7 +334,7 @@ SEQAN_CHECKPOINT
 	else 
 	{
 /*		me.score = me.k + 1;
-		me.scoreMask = 1 << (me.k % me.MACHINE_WORD_SIZE);
+		me.scoreMask = (TWord)1 << (me.k % me.MACHINE_WORD_SIZE);
 		me.lastBlock = me.k / me.MACHINE_WORD_SIZE; 
 		if (me.lastBlock >= me.blockCount)
 			me.lastBlock = me.blockCount - 1;
@@ -419,7 +421,7 @@ SEQAN_CHECKPOINT
 
 			me.scoreMask >>= 1;
 			if (!me.scoreMask) {
-				me.scoreMask = 1 << (me.MACHINE_WORD_SIZE - 1);
+				me.scoreMask = (TWord)1 << (me.MACHINE_WORD_SIZE - 1);
 				me.lastBlock--;
 			}
 		}
@@ -470,9 +472,9 @@ SEQAN_CHECKPOINT
 		me.VN0 = X & D0;
 		me.VP0 = (HN << 1) | ~(X | D0);
 
-		if (HP & (1 << (me.needleSize-1)))
+		if (HP & ((TWord)1 << (me.needleSize-1)))
 			me.score++;
-		else if (HN & (1 << (me.needleSize-1)))
+		else if (HN & ((TWord)1 << (me.needleSize-1)))
 			me.score--;
 
 		if (me.score <= me.k)
@@ -537,7 +539,7 @@ SEQAN_CHECKPOINT
 			}
 
 			me.bitMasks[me.blockCount * (ordValue(*me.ndlIter) + 1) - 1]
-				|= 1 << (me.MACHINE_WORD_SIZE - 1);
+				|= (TWord)1 << (me.MACHINE_WORD_SIZE - 1);
 
 			goNext(me.ndlIter);
 		}
@@ -595,7 +597,7 @@ SEQAN_CHECKPOINT
 
 			me.scoreMask >>= 1;
 			if (!me.scoreMask) {
-				me.scoreMask = 1 << (me.MACHINE_WORD_SIZE - 1);
+				me.scoreMask = (TWord)1 << (me.MACHINE_WORD_SIZE - 1);
 				me.lastBlock--;
 			}
 		}
@@ -644,10 +646,10 @@ SEQAN_CHECKPOINT
 		{
 			// shift bitmasks and states
 			me.VN0 >>= 1;
-			me.VP0 = (me.VP0 >> 1) | (1 << (me.MACHINE_WORD_SIZE - 1)); // ignore the field left of the leftmost diagonal
+			me.VP0 = (me.VP0 >> 1) | ((TWord)1 << (me.MACHINE_WORD_SIZE - 1)); // ignore the field left of the leftmost diagonal
 			for(unsigned i = 0; i < length(me.bitMasks); ++i)
 				me.bitMasks[i] >>= 1;
-			me.bitMasks[ordValue(*me.ndlIter)] |= (1 << (me.MACHINE_WORD_SIZE - 1));
+			me.bitMasks[ordValue(*me.ndlIter)] |= ((TWord)1 << (me.MACHINE_WORD_SIZE - 1));
 			
 			// Myers core
 			X = me.bitMasks[ordValue((typename Value<TNeedle>::Type) *finder)] | me.VN0;
@@ -666,14 +668,14 @@ SEQAN_CHECKPOINT
 			for(int i=me.MACHINE_WORD_SIZE-1; i>=0 ;--i) 
 			{
 				CharString vd = " 1 ";
-				if (D0 & (1 << i)) vd = " 0 ";
+				if (D0 & ((TWord)1 << i)) vd = " 0 ";
 				::std::cerr << vd;
 			}
 			::std::cerr << "   ";
 			::std::cerr << *finder;
 #endif
 
-			if (!(D0 & (1 << (me.MACHINE_WORD_SIZE - 1))))
+			if (!(D0 & ((TWord)1 << (me.MACHINE_WORD_SIZE - 1))))
 				++me.score;
 
 #ifdef SEQAN_DEBUG_MYERSBITVECTOR
@@ -710,17 +712,17 @@ SEQAN_CHECKPOINT
 		for(int i=me.MACHINE_WORD_SIZE-1; i>=0 ;--i) 
 		{
 			CharString hd = " 0 ";
-			if (HP & (1 << i)) hd = " 1 ";
-			if (HN & (1 << i)) hd = "-1 ";
+			if (HP & ((TWord)1 << i)) hd = " 1 ";
+			if (HN & ((TWord)1 << i)) hd = "-1 ";
 			::std::cerr << hd;
 		}
 		::std::cerr << "   ";
 		::std::cerr << *finder;
 #endif
 
-		if (HP & (1 << (me.MACHINE_WORD_SIZE - 1)))
+		if (HP & ((TWord)1 << (me.MACHINE_WORD_SIZE - 1)))
 			++me.score;
-		else if (HN & (1 << (me.MACHINE_WORD_SIZE - 1)))
+		else if (HN & ((TWord)1 << (me.MACHINE_WORD_SIZE - 1)))
 			--me.score;
 
 #ifdef SEQAN_DEBUG_MYERSBITVECTOR
@@ -777,7 +779,7 @@ SEQAN_CHECKPOINT
 	typedef typename TPattern::TIter TIter;
 
 	TWord X, D0, HN, HP;
-	//TWord maskMax = 1 << (length(container(finder)) - me.needleSize);
+	//TWord maskMax = (TWord)1 << (length(container(finder)) - me.needleSize);
 	int bitMax = length(container(finder)) - me.needleSize;
 
 #ifdef SEQAN_DEBUG_MYERSBITVECTOR_DUMP
@@ -882,7 +884,7 @@ SEQAN_CHECKPOINT
 
 			// shift bitmasks and states
 			me.VN0 >>= 1;
-			me.VP0 = (me.VP0 >> 1) | (1 << (me.MACHINE_WORD_SIZE - 1)); // ignore the field left of the leftmost diagonal
+			me.VP0 = (me.VP0 >> 1) | ((TWord)1 << (me.MACHINE_WORD_SIZE - 1)); // ignore the field left of the leftmost diagonal
 			for(unsigned i = 0; i < length(me.bitMasks); ++i)
 				me.bitMasks[i] >>= 1;
 
@@ -934,7 +936,7 @@ SEQAN_CHECKPOINT
 			me.VN[0] = me.VN0;
 #endif
 			me.VN0 >>= 1;
-			me.VP0 = (me.VP0 >> 1) | (1 << (me.MACHINE_WORD_SIZE - 1)); // ignore the field left of the leftmost diagonal
+			me.VP0 = (me.VP0 >> 1) | ((TWord)1 << (me.MACHINE_WORD_SIZE - 1)); // ignore the field left of the leftmost diagonal
 			for(unsigned i = 0; i < length(me.bitMasks); ++i)
 				me.bitMasks[i] >>= 1;			
 
