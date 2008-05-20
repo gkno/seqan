@@ -537,7 +537,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			return false;
 
 		// go down
-		value(it).node = childNode;
+		value(it).node = childNode & index.BITMASK1;
 		value(it).edgeLen = -1;
 
 		// go right if parent edge is empty 
@@ -572,7 +572,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		// go down
 		_historyPush(it);
-		value(it).node = childNode;
+		value(it).node = childNode & index.BITMASK1;
 		value(it).edgeLen = -1;
 		_adjustRightBorder(it);
 

@@ -44,8 +44,6 @@ template <typename TSpec = SwiftSemiGlobal>
 struct Swift {
 	enum { SEMIGLOBAL = 1 };		// 0..match eps-match of min.length n0; 1..match the whole read
 	enum { DIAGONAL = 1 };			// 0..use rectangular buckets (QUASAR); 1..use diagonal buckets (SWIFT)
-	enum { LOG2DELTA_MIN = 3 };		// set minimal delta to 8
-	enum { THRESHOLD_MIN = 1 };	    // set minimal threshold to 1
 #ifdef WITH_1HULL
 	enum { QGRAM_ERRORS = 1 };		// allow 1 error per q-gram
 #else
@@ -59,11 +57,20 @@ template <>
 struct Swift<SwiftLocal> {
 	enum { SEMIGLOBAL = 0 };	// 0..match eps-match of min.length n0; 1..match the whole read
 	enum { DIAGONAL = 1 };		// 0..use rectangular buckets (QUASAR); 1..use diagonal buckets (SWIFT)
-	enum { LOG2DELTA_MIN = 3 };	// set minimal delta to 8
-	enum { THRESHOLD_MIN = 1 };	// set minimal threshold to 1
 	enum { QGRAM_ERRORS = 0 };	// allow 0 errors per q-gram
 	enum { HAMMING_ONLY = 0 };
 	enum { PARAMS_BY_LENGTH = 0 };
+};
+
+struct SwiftParameters {
+	int minThreshold;
+	int minLog2Delta;
+	int tabooLength;
+
+	SwiftParameters():
+		minThreshold(1),		// set minimal threshold to 1
+		minLog2Delta(3),		// set minimal delta to 8
+		tabooLength(1) {}		// minimal genomic distance between q-gram hits
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -95,6 +102,7 @@ struct Swift<SwiftLocal> {
 		TShortSize		delta;			// buckets begin at multiples of delta
 		TShortSize		threshold;		// at least threshold q-gram hits induce an approx match
 		TShortSize		overlap;		// number of diagonals/columns a bucket shares with its neighbor
+		TShortSize		tabooLength;	// minimal genomic distance between q-gram hits
 		unsigned char	logDelta;		// log2(delta)
 	};
 
@@ -240,7 +248,8 @@ struct Swift<SwiftLocal> {
 		
 		TShape					shape;
 		TBucketString			buckets;
-		TBucketParamsString		params;
+		TBucketParamsString		bucketParams;
+		SwiftParameters			params;
 		unsigned				curSeqNo;
 
 		Holder<TIndex>	data_host;
@@ -263,15 +272,15 @@ struct Swift<SwiftLocal> {
 
 
 template <typename TParams>
-inline void _printSwiftParams(TParams &params)
+inline void _printSwiftParams(TParams &bucketParams)
 {
-	::std::cout << "  firstBucket: " << params.firstBucket << ::std::endl;
-	::std::cout << "  reuseMask:   " << params.reuseMask << ::std::endl;
-	::std::cout << "  distanceCut: " << params.distanceCut << ::std::endl;
-	::std::cout << "  delta:       " << params.delta << ::std::endl;
-	::std::cout << "  threshold:   " << params.threshold << ::std::endl;
-	::std::cout << "  overlap:     " << params.overlap << ::std::endl;
-	::std::cout << "  logDelta:    " << (int)params.logDelta << ::std::endl << ::std::endl;
+	::std::cout << "  firstBucket: " << bucketParams.firstBucket << ::std::endl;
+	::std::cout << "  reuseMask:   " << bucketParams.reuseMask << ::std::endl;
+	::std::cout << "  distanceCut: " << bucketParams.distanceCut << ::std::endl;
+	::std::cout << "  delta:       " << bucketParams.delta << ::std::endl;
+	::std::cout << "  threshold:   " << bucketParams.threshold << ::std::endl;
+	::std::cout << "  overlap:     " << bucketParams.overlap << ::std::endl;
+	::std::cout << "  logDelta:    " << (int)bucketParams.logDelta << ::std::endl << ::std::endl;
 }
 
 template < typename TNeedle, typename TIndexSpec, typename TSpec >
@@ -281,17 +290,17 @@ inline void _printSwiftBuckets(Pattern< Index<TNeedle, TIndexSpec>, Swift<TSpec>
 	typedef typename Pattern<TIndex, Swift<TSpec> >::TBucketParams TParams;
 
 	unsigned j = 0;
-	TParams *params = &_getSwiftParams(p, 0);
+	TParams *bucketParams = &_swiftBucketParams(p, 0);
 
 	for(unsigned i=0; i<length(p.buckets) && i<10; ++i) 
 	{
-		if ((i & params->reuseMask) == 0)
+		if ((i & bucketParams->reuseMask) == 0)
 		{
 			::std::cout << ::std::endl << "ReadBucket #" << j << "    " << '"';
 			::std::cout << indexText(host(p))[j] << '"' << ::std::endl;
 			::std::cout << "  length:      " << sequenceLength(j, host(p)) << ::std::endl;
-			params = &_getSwiftParams(p, j++);
-			_printSwiftParams(*params);
+			bucketParams = &_swiftBucketParams(p, j++);
+			_printSwiftParams(*bucketParams);
 		}
 
 		::std::cout << "    lastInc: " << (int)p.buckets[i].lastIncrement;
@@ -301,26 +310,26 @@ inline void _printSwiftBuckets(Pattern< Index<TNeedle, TIndexSpec>, Swift<TSpec>
 
 template <typename TIndex, typename TSpec, typename TSize>
 inline typename Pattern<TIndex, Swift<TSpec> >::TBucketParams &
-_getSwiftParams(Pattern<TIndex, Swift<TSpec> > & pattern, TSize seqNo) 
+_swiftBucketParams(Pattern<TIndex, Swift<TSpec> > & pattern, TSize seqNo) 
 {
 	if (Swift<TSpec>::PARAMS_BY_LENGTH)
-		return pattern.params[sequenceLength(seqNo, host(pattern))];
+		return pattern.bucketParams[sequenceLength(seqNo, host(pattern))];
 	else
-		return pattern.params[seqNo];
+		return pattern.bucketParams[seqNo];
 }
 
 template <typename TIndex, typename TSpec, typename TParams, typename TSize>
 inline unsigned
-_getSwiftBucketNo(Pattern<TIndex, Swift<TSpec> > const &, TParams & params, TSize seqNo) 
+_swiftBucketNo(Pattern<TIndex, Swift<TSpec> > const &, TParams &bucketParams, TSize seqNo) 
 {
 	if (Swift<TSpec>::PARAMS_BY_LENGTH)
-		return (params.reuseMask + 1) * seqNo;
+		return (bucketParams.reuseMask + 1) * seqNo;
 	else
-		return params.firstBucket;
+		return bucketParams.firstBucket;
 }
 
 template <typename TIndex, typename TFloat, typename _TSize, typename TSpec>
-inline void _patternInit(Pattern<TIndex, Swift<TSpec> > & pattern, TFloat errorRate, _TSize minLengthForAll) 
+inline void _patternInit(Pattern<TIndex, Swift<TSpec> > &pattern, TFloat errorRate, _TSize minLengthForAll) 
 {
 	typedef Pattern<TIndex, Swift<TSpec> >			TPattern;
 	typedef typename Size<TIndex>::Type				TSize;
@@ -343,9 +352,9 @@ inline void _patternInit(Pattern<TIndex, Swift<TSpec> > & pattern, TFloat errorR
 			if (maxLength < length)
 				maxLength = length;
 		}
-		resize(pattern.params, maxLength + 1);
+		resize(pattern.bucketParams, maxLength + 1);
 	} else
-		resize(pattern.params, seqCount);
+		resize(pattern.bucketParams, seqCount);
 	
 	if (minLengthForAll != 0) 
 	{
@@ -354,28 +363,34 @@ inline void _patternInit(Pattern<TIndex, Swift<TSpec> > & pattern, TFloat errorR
 		for(unsigned seqNo = 0; seqNo < seqCount; ++seqNo) 
 		{
 			// swift q-gram lemma
-			TBucketParams &params = _getSwiftParams(pattern, seqNo);
+			TBucketParams &bucketParams = _swiftBucketParams(pattern, seqNo);
 			// n..next length that could decrease threshold
 			TSize n = (TSize) ceil((floor(errorRate * minLength) + 1) / errorRate);
 			// minimal threshold is minimum errors of minLength and n
 			int threshold = (TSize) min(
 				(n + 1) - span * (floor(errorRate * n) + 1),
 				(minLength + 1) - span * (floor(errorRate * minLength) + 1));
-			if (threshold < Swift<TSpec>::THRESHOLD_MIN) threshold = Swift<TSpec>::THRESHOLD_MIN;
-			params.threshold = threshold;
 
-			TSize errors = (TSize) floor((2 * params.threshold + span - 3) / (1 / errorRate - span));
-			params.overlap = errors;
-			params.distanceCut = (params.threshold - 1) + span * (errors + span);
-			params.logDelta = (TSize) ceil(log((double)errors) / log(2.0));
-			params.delta = 1 << params.logDelta;
+			if (threshold > pattern.params.minThreshold)
+				bucketParams.threshold = threshold;
+			else
+				bucketParams.threshold = pattern.params.minThreshold;
+
+			TSize errors = (TSize) floor((2 * bucketParams.threshold + span - 3) / (1 / errorRate - span));
+			bucketParams.overlap = errors;
+			bucketParams.distanceCut = (bucketParams.threshold - 1) + span * (errors + span);
+			bucketParams.logDelta = (TSize) ceil(log((double)errors) / log(2.0));
+			if (bucketParams.logDelta < pattern.params.minLog2Delta) 
+				bucketParams.logDelta = pattern.params.minLog2Delta;
+			bucketParams.delta = 1 << bucketParams.logDelta;
+			bucketParams.tabooLength = pattern.params.tabooLength;
 			// TODO: classical swift for rectangular buckets
 		}
 	} else
 		for(unsigned seqNo = 0; seqNo < seqCount; ++seqNo) 
 		{
 			// get pattern length and max. allowed errors
-			TBucketParams &params = _getSwiftParams(pattern, seqNo);
+			TBucketParams &bucketParams = _swiftBucketParams(pattern, seqNo);
 			TSize length = sequenceLength(seqNo, host(pattern));
 			TSize errors = (TSize) floor(errorRate * length);
 			TSize errorsWC = errors / (1 + Swift<TSpec>::QGRAM_ERRORS);
@@ -383,8 +398,10 @@ inline void _patternInit(Pattern<TIndex, Swift<TSpec> > & pattern, TFloat errorR
 			// q-gram lemma: How many conserved q-grams we see at least?
 			// (define a minimal threshold of 1)
 			int threshold = length + 1 - span * (errorsWC + 1);
-			if (threshold < Swift<TSpec>::THRESHOLD_MIN) threshold = Swift<TSpec>::THRESHOLD_MIN;
-			params.threshold = threshold;
+			if (threshold > pattern.params.minThreshold)
+				bucketParams.threshold = threshold;
+			else
+				bucketParams.threshold = pattern.params.minThreshold;
 			
 			if (Swift<TSpec>::HAMMING_ONLY == 0)
 				errors = 0;			
@@ -392,42 +409,45 @@ inline void _patternInit(Pattern<TIndex, Swift<TSpec> > & pattern, TFloat errorR
 			// a bucket has distanceCut different positions of q-grams
 			// if a q-gram is this far or farer away it can't belong to the
 			// same bucket
-			params.distanceCut = length - (span - 1) + errors;
+			bucketParams.distanceCut = length - (span - 1) + errors;
 
 			TSize bucketsPerCol2;
 			if (Swift<TSpec>::DIAGONAL == 1)
 			{
 				// Use overlapping parallelograms				
-				params.overlap = errors;
+				bucketParams.overlap = errors;
 				
 				// delta must be a power of 2 greater then errors (define a minimal delta of 8)
-				params.logDelta = (TSize) ceil(log((double)(errors + 1)) / log(2.0));
-				if (params.logDelta < Swift<TSpec>::LOG2DELTA_MIN) params.logDelta = Swift<TSpec>::LOG2DELTA_MIN;
-				params.delta = 1 << params.logDelta;
+				bucketParams.logDelta = (TSize) ceil(log((double)(errors + 1)) / log(2.0));
+				if (bucketParams.logDelta < pattern.params.minLog2Delta) 
+					bucketParams.logDelta = pattern.params.minLog2Delta;
+				bucketParams.delta = 1 << bucketParams.logDelta;
 
 				// the formula for bucketsPerCol is (worst-case):
 				// (height-(q-1) - 1 - (delta+1-e))/delta + 3
 				//    ^-- full paral. in the middle --^     ^-- 2 at the bottom, 1 at the top
-				TSize bucketsPerCol = (length - span + 2 * params.delta + errors - 1) / params.delta;
+				TSize bucketsPerCol = (length - span + 2 * bucketParams.delta + errors - 1) / bucketParams.delta;
 				bucketsPerCol2 = 1 << (TSize) ceil(log((double)bucketsPerCol) / log(2.0));
 			}
 			else
 			{
 				// Use overlapping rectangles
-				params.overlap = length - span + errors;
+				bucketParams.overlap = length - span + errors;
 
 				// delta must be a power of 2 greater then seq.length + errors (define a minimal delta of 32)
-				params.logDelta = (TSize) ceil(log((double)(length - span + 1 + errors)) / log(2.0));
-				if (params.logDelta < Swift<TSpec>::LOG2DELTA_MIN) params.logDelta = Swift<TSpec>::LOG2DELTA_MIN;
-				params.delta = 1 << params.logDelta;
+				bucketParams.logDelta = (TSize) ceil(log((double)(length - span + 1 + errors)) / log(2.0));
+				if (bucketParams.logDelta < pattern.params.minLog2Delta) 
+					bucketParams.logDelta = pattern.params.minLog2Delta;
+				bucketParams.delta = 1 << bucketParams.logDelta;
 
 				bucketsPerCol2 = 2;
 			}
 
 			SEQAN_ASSERT(distanceCut <= bucketsPerCol * (TSize) delta);
 
-			params.firstBucket = count;
-			params.reuseMask = bucketsPerCol2 - 1;
+			bucketParams.firstBucket = count;
+			bucketParams.reuseMask = bucketsPerCol2 - 1;
+			bucketParams.tabooLength = 1;
 			
 			if (Swift<TSpec>::PARAMS_BY_LENGTH) {
 				++count;
@@ -437,22 +457,22 @@ inline void _patternInit(Pattern<TIndex, Swift<TSpec> > & pattern, TFloat errorR
 				count += bucketsPerCol2;
 			
 /*			if (seqNo<3)
-				_printSwiftParams(params);
+				_printSwiftParams(bucketParams);
 */		}
 
 	if (Swift<TSpec>::PARAMS_BY_LENGTH) {
 		count *= bucketsPerCol2Max;
-		for(unsigned i = 0; i < length(pattern.params); ++i)
-			pattern.params[i].reuseMask = bucketsPerCol2Max - 1;
+		for(unsigned i = 0; i < length(pattern.bucketParams); ++i)
+			pattern.bucketParams[i].reuseMask = bucketsPerCol2Max - 1;
 	}
 			
 	resize(pattern.buckets, count);
 	for(unsigned seqNo = 0, i = 0, next = 0; seqNo < seqCount; ++seqNo)
 	{
-		TBucketParams &params = _getSwiftParams(pattern, seqNo);
-		next = i + params.reuseMask + 1;
+		TBucketParams &bucketParams = _swiftBucketParams(pattern, seqNo);
+		next = i + bucketParams.reuseMask + 1;
 		for(; i < next; ++i) {
-			pattern.buckets[i].lastIncrement = 0 - params.distanceCut;
+			pattern.buckets[i].lastIncrement = 0 - bucketParams.distanceCut;
 			pattern.buckets[i].counter = 0;
 		}
 	}
@@ -491,26 +511,26 @@ inline bool _swiftMultiProcessQGram(
 	for(; occ != occEnd; ++occ) 
 	{
 		posLocalize(ndlPos, *occ, stringSetLimits(index));
-		TBucketParams &params = _getSwiftParams(pattern, getSeqNo(ndlPos));
+		TBucketParams &bucketParams = _swiftBucketParams(pattern, getSeqNo(ndlPos));
 
 		__int64 diag = finder.curPos;
 		if (Swift<TSpec>::DIAGONAL == 1) diag -= getSeqOffset(ndlPos);
 		
-		unsigned bktNo = (diag >> params.logDelta) & params.reuseMask;
-		unsigned bktOfs = diag & (params.delta - 1);
+		unsigned bktNo = (diag >> bucketParams.logDelta) & bucketParams.reuseMask;
+		unsigned bktOfs = diag & (bucketParams.delta - 1);
 
-		TBucketIter bkt = bktBegin + (_getSwiftBucketNo(pattern, params, getSeqNo(ndlPos)) + bktNo);
+		TBucketIter bkt = bktBegin + (_swiftBucketNo(pattern, bucketParams, getSeqNo(ndlPos)) + bktNo);
 		
 		do {
-			if ((*bkt).lastIncrement + params.distanceCut <= finder.curPos)
+			if ((*bkt).lastIncrement + bucketParams.distanceCut <= finder.curPos)
 			{
 				// too far away - could be:
 				// 1. too far to reach the treshold
 				// 2. too far to be in the same bucket (we must ensure that bucketIdx doesn't collide) 
-				if ((*bkt).counter >= params.threshold)
+				if ((*bkt).counter >= bucketParams.threshold)
 				{
 					// upper bucket no. of lastIncr. q-gram
-					unsigned upperBktNo = (*bkt).lastIncrement >> params.logDelta;
+					unsigned upperBktNo = (*bkt).lastIncrement >> bucketParams.logDelta;
 
 					TSize height = 0;
 					if (Swift<TSpec>::DIAGONAL == 1)
@@ -518,13 +538,13 @@ inline bool _swiftMultiProcessQGram(
 
 					// we must decrement bucket no. until (no. mod reuse == bktNo)
 					__int64 bktBeginHstk = 
-						(__int64) (upperBktNo - ((upperBktNo - bktNo) & params.reuseMask)) << params.logDelta;
+						(__int64) (upperBktNo - ((upperBktNo - bktNo) & bucketParams.reuseMask)) << bucketParams.logDelta;
 
 					if (bktBeginHstk >= 0) {
 						THit hit = {
 							bktBeginHstk,							// bucket begin in haystack
 							getSeqNo(ndlPos),						// needle seq. number
-							height + params.delta + params.overlap	// bucket width (non-diagonal)
+							height + bucketParams.delta + bucketParams.overlap	// bucket width (non-diagonal)
 						};
 						appendValue(finder.hits, hit);
 					} else {
@@ -532,7 +552,7 @@ inline bool _swiftMultiProcessQGram(
 						THit hit = {
 							0,										// bucket begin in haystack
 							getSeqNo(ndlPos),						// needle seq. number
-							height + params.delta + params.overlap	// bucket width (non-diagonal)
+							height + bucketParams.delta + bucketParams.overlap	// bucket width (non-diagonal)
 							+ bktBeginHstk
 						};
 						appendValue(finder.hits, hit);
@@ -546,22 +566,22 @@ inline bool _swiftMultiProcessQGram(
 			}
 			else
 			{
-				if ((*bkt).lastIncrement == finder.curPos) 
+				if ((*bkt).lastIncrement + bucketParams.tabooLength > finder.curPos) 
 					break;	// increment only once per sequence			
 				(*bkt).lastIncrement = finder.curPos;
 				if (++(*bkt).counter <= 0)
-					(*bkt).counter = params.threshold;
+					(*bkt).counter = bucketParams.threshold;
 #ifdef SEQAN_DEBUG_SWIFT
 				(*bkt)._lastIncDiag = diag;
 #endif
 			}
 
-			if (bktOfs >= params.overlap) break;
+			if (bktOfs >= bucketParams.overlap) break;
 			
 			// repeat with the previous overlapping bucket
-			bktOfs = params.overlap;
+			bktOfs = bucketParams.overlap;
 			if (!bktNo) {
-				bktNo = params.reuseMask;
+				bktNo = bucketParams.reuseMask;
 				bkt += bktNo;
 			} else {
 				--bktNo;
@@ -601,14 +621,14 @@ inline bool _swiftMultiFlushBuckets(
 	
 	for(TSize ndlSeqNo = 0; ndlSeqNo < seqCount; ++ndlSeqNo) 
 	{
-		TBucketParams &params = _getSwiftParams(pattern, ndlSeqNo);
-		bktEnd = bkt + (params.reuseMask + 1);
+		TBucketParams &bucketParams = _swiftBucketParams(pattern, ndlSeqNo);
+		bktEnd = bkt + (bucketParams.reuseMask + 1);
 		for(unsigned bktNo = 0; bkt != bktEnd; ++bkt, ++bktNo)
 		{
-			if ((*bkt).counter >= params.threshold)
+			if ((*bkt).counter >= bucketParams.threshold)
 			{
 				// upper bucket no. of lastIncr. q-gram
-				unsigned upperBktNo = (*bkt).lastIncrement >> params.logDelta;
+				unsigned upperBktNo = (*bkt).lastIncrement >> bucketParams.logDelta;
 
 				TSize height = 0;
 				if (Swift<TSpec>::DIAGONAL == 1)
@@ -616,13 +636,13 @@ inline bool _swiftMultiFlushBuckets(
 
 				// we must decrement bucket no. until (no. mod reuse == bktNo)
 				__int64 bktBeginHstk = 
-					(__int64) (upperBktNo - ((upperBktNo - bktNo) & params.reuseMask)) << params.logDelta;
+					(__int64) (upperBktNo - ((upperBktNo - bktNo) & bucketParams.reuseMask)) << bucketParams.logDelta;
 
 				if (bktBeginHstk >= 0) {
 					THit hit = {
 						bktBeginHstk,							// bucket begin in haystack
 						ndlSeqNo,								// needle seq. number
-						height + params.delta + params.overlap	// bucket width (non-diagonal)
+						height + bucketParams.delta + bucketParams.overlap	// bucket width (non-diagonal)
 					};
 					appendValue(finder.hits, hit);
 				} else {
@@ -630,14 +650,14 @@ inline bool _swiftMultiFlushBuckets(
 					THit hit = {
 						0,										// bucket begin in haystack
 						ndlSeqNo,								// needle seq. number
-						height + params.delta + params.overlap	// bucket width (non-diagonal)
+						height + bucketParams.delta + bucketParams.overlap	// bucket width (non-diagonal)
 						+ bktBeginHstk
 					};
 					appendValue(finder.hits, hit);
 				}
 
 			}
-			(*bkt).lastIncrement = 0 - params.distanceCut;
+			(*bkt).lastIncrement = 0 - bucketParams.distanceCut;
 			(*bkt).counter = 0;
 		}
 	}
@@ -652,14 +672,14 @@ template <typename TNeedle, typename TIndexSpec, typename TSpec>
 inline bool 
 empty(Pattern<Index<TNeedle, TIndexSpec>, Swift<TSpec> > & me) 
 {
-	return empty(me.params);
+	return empty(me.bucketParams);
 }
 
 template <typename TNeedle, typename TIndexSpec, typename TSpec>
 inline void 
 clear(Pattern<Index<TNeedle, TIndexSpec>, Swift<TSpec> > & me) 
 {
-	clear(me.params);
+	clear(me.bucketParams);
 	clear(me.buckets);
 }
 
@@ -843,7 +863,9 @@ find(
 		++finder.in;
 		if (eof(finder.in)) {
 			endRead(finder.in);
+#ifdef SEQAN_DEBUG_SWIFT
 			_printSwiftBuckets(pattern);
+#endif
 			if (_swiftMultiFlushBuckets(finder, pattern))
 				break;
 			else
