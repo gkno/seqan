@@ -69,7 +69,7 @@ struct SwiftParameters {
 
 	SwiftParameters():
 		minThreshold(1),		// set minimal threshold to 1
-		minLog2Delta(3),		// set minimal delta to 8
+		minLog2Delta(4),		// set minimal delta to 16
 		tabooLength(1) {}		// minimal genomic distance between q-gram hits
 };
 
@@ -90,7 +90,7 @@ struct SwiftParameters {
 		TSize			lastIncrement;
 		TShortSize		counter;
 #ifdef SEQAN_DEBUG_SWIFT
-		TSize			_lastIncDiag;
+		int				_lastIncDiag;
 #endif
 	};
 
@@ -447,7 +447,7 @@ inline void _patternInit(Pattern<TIndex, Swift<TSpec> > &pattern, TFloat errorRa
 
 			bucketParams.firstBucket = count;
 			bucketParams.reuseMask = bucketsPerCol2 - 1;
-			bucketParams.tabooLength = 1;
+			bucketParams.tabooLength = pattern.params.tabooLength;
 			
 			if (Swift<TSpec>::PARAMS_BY_LENGTH) {
 				++count;
@@ -539,7 +539,12 @@ inline bool _swiftMultiProcessQGram(
 					// we must decrement bucket no. until (no. mod reuse == bktNo)
 					__int64 bktBeginHstk = 
 						(__int64) (upperBktNo - ((upperBktNo - bktNo) & bucketParams.reuseMask)) << bucketParams.logDelta;
-
+#ifdef SEQAN_DEBUG_SWIFT
+					if ((*bkt)._lastIncDiag - bktBeginHstk >= bucketParams.delta + bucketParams.overlap || (*bkt)._lastIncDiag < bktBeginHstk) {
+						::std::cout << "qgram stored in wrong bucket (diag:" << (*bkt)._lastIncDiag << ", begin:" << bktBeginHstk;
+						::std::cout << ", delta:" << bucketParams.delta << ", overlap:" << bucketParams.overlap << ")" << ::std::endl;
+					}
+#endif
 					if (bktBeginHstk >= 0) {
 						THit hit = {
 							bktBeginHstk,							// bucket begin in haystack
@@ -637,6 +642,12 @@ inline bool _swiftMultiFlushBuckets(
 				// we must decrement bucket no. until (no. mod reuse == bktNo)
 				__int64 bktBeginHstk = 
 					(__int64) (upperBktNo - ((upperBktNo - bktNo) & bucketParams.reuseMask)) << bucketParams.logDelta;
+#ifdef SEQAN_DEBUG_SWIFT
+				if ((*bkt)._lastIncDiag - bktBeginHstk >= bucketParams.delta + bucketParams.overlap || (*bkt)._lastIncDiag < bktBeginHstk) {
+					::std::cout << "qgram stored in wrong bucket (diag:" << (*bkt)._lastIncDiag << ", begin:" << bktBeginHstk;
+					::std::cout << ", delta:" << bucketParams.delta << ", overlap:" << bucketParams.overlap << ")" << ::std::endl;
+				}
+#endif
 
 				if (bktBeginHstk >= 0) {
 					THit hit = {
