@@ -149,7 +149,9 @@ _align_needleman_wunsch(TTrace & trace,
 	typedef typename Value<TTrace>::Type TTraceValue;
 	TTraceIter it = begin(trace, Standard() );
 	// Max values: overall.first = last column, overall.second = last row
-	overallMaxValue = std::make_pair(InfimumValue<TScoreValue>::VALUE, InfimumValue<TScoreValue>::VALUE);
+	TScoreValue infValue = -1 * (getInfinity<TScoreValue>() / 2);
+	overallMaxValue = std::make_pair(infValue, infValue);
+	//overallMaxValue = std::make_pair(InfimumValue<TScoreValue>::VALUE, InfimumValue<TScoreValue>::VALUE);
 	overallMaxIndex = std::make_pair(len1, len2);
 
 	for(TSize col = 1; col <= len1; ++col) 
@@ -207,6 +209,15 @@ _align_needleman_wunsch(TTrace & trace,
 		_processLastRow(TAlignConfig(), overallMaxValue, overallMaxIndex, vertiVal, col);
 	}
 	_processLastColumn(TAlignConfig(), overallMaxValue, overallMaxIndex, column);
+
+	// Fix the indices
+ 	if (overallMaxIndex.second != len2) {
+		if (overallMaxValue.second > overallMaxValue.first) {
+			overallMaxIndex.first = len1;
+		} else if (overallMaxIndex.first != len1) {
+			overallMaxIndex.second = len2;
+ 		}
+ 	}
 
 	//for(TSize i= 0; i<len2;++i) {
 	//	for(TSize j= 0; j<len1;++j) {
