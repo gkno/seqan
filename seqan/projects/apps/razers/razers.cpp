@@ -1,9 +1,8 @@
-// enable time measurements
-#define SEQAN_PROFILE
-//#define SEQAN_DEBUG_SWIFT
-#define RAZERS_PROFILE
-//#define RAZERS_DEBUG
-//#define WITH_1HULL
+#define SEQAN_PROFILE			// enable time measuring
+//#define SEQAN_DEBUG_SWIFT		// test SWIFT correctness and print bucket parameters
+//#define RAZERS_PROFILE		// omit dumping results
+//#define RAZERS_DEBUG			// print verification regions
+//#define WITH_1HULL			// allow 1-error per qgram
 
 #include "seqan/platform.h"
 #ifdef PLATFORM_WINDOWS
@@ -34,7 +33,7 @@ using namespace seqan;
 */
 	// DNA setup
 	typedef	Dna				TAlphabet;
-	const int				QGRAM_LEN = 8;
+	const int				QGRAM_LEN = 11;
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -51,6 +50,7 @@ using namespace seqan;
 															// 1..enumerate reads beginning with 1
 															// 2..use the read sequence (only for short reads!)
 	static int			optionThreshold = 1;				// threshold
+	static int			optionTabooLength = 1;				// taboo length
 	static int			_debugLevel = 0;					// level of verbosity
 
 
@@ -96,7 +96,7 @@ namespace seqan
 	struct SAValue<TReadIndex> {
 		typedef Pair<
 			unsigned,		// many
-			unsigned,	// short reads
+			unsigned,		// short reads
 			Compressed
 		> Type;
 	};
@@ -219,6 +219,7 @@ void findReads(
 
 	TSwiftPattern swiftPattern(readIndex);
 	swiftPattern.params.minThreshold = optionThreshold;
+	swiftPattern.params.tabooLength = optionTabooLength;
 
 	// VERIFICATION
 /*	String<TMyersPattern> myersPattern;
@@ -247,10 +248,12 @@ void findReads(
 	for(unsigned i=0;i<length(borders);++i)
 		cout << borders[i] << "  " << endl;
 
+	// iterate all genomic sequences
 	for(unsigned hstkSeqNo = 0; hstkSeqNo < length(genomes); ++hstkSeqNo) 
 	{
 		TGenome &genome = genomes[hstkSeqNo];
 
+		// get intervals of non-repeat regions
 		resize(borders, 0);
 		TSize last = 0;
 		while (repeatIt != repeatItEnd && (*repeatIt).beginPosition.i1 == hstkSeqNo)
@@ -261,6 +264,7 @@ void findReads(
 		}
 		appendValue(borders, Pair<TSize>(last, length(genome)));
 
+		// iterate all non-repeat regions
 		for(unsigned segment = 0; segment < length(borders); ++segment)
 		{
 			if (_debugLevel >= 1)
@@ -276,7 +280,7 @@ void findReads(
 #else
 			TSwiftFinder	swiftFinder(tupler);
 #endif
-
+			// iterate all verification regions returned bz SWIFT
 			while (find(swiftFinder, swiftPattern, optionErrorRate, (_debugLevel >= 1))) 
 			{
 				unsigned ndlSeqNo = (*swiftFinder.curHit).ndlSeqNo;
@@ -294,7 +298,7 @@ void findReads(
 				cout<<"Genome: "<<inf<<endl;
 				cout<<"Read:   "<<host(myersPattern)<<endl;
 #endif
-
+				// find end of best semi-global alignment
 				int maxScore = InfimumValue<int>::VALUE;
 				int minScore = -(int)(ndlLength * optionErrorRate);
 				TMyersFinder maxPos;
@@ -322,10 +326,11 @@ void findReads(
 					TMyersFinderRev		myersFinderRev(infRev);
 					TMyersPatternRev	myersPatternRev(readRev);
 
-
+					// find beginning of best semi-global alignment
 					if (find(myersFinderRev, myersPatternRev, maxScore))
 						m.gBegin = m.gEnd - (position(myersFinderRev) + 1);
 					else {
+						// this case should never occur
 						::std::cerr << "1GENOME: " << host(myersFinder) << ::std::endl;
 						::std::cerr << "1READ:   " << indexText(readIndex)[ndlSeqNo] << ::std::endl;
 						::std::cerr << "2GENOME: " << infix(genome, m.gBegin, m.gEnd) << ::std::endl;
@@ -573,7 +578,7 @@ void printHelp(int, const char *[], bool longHelp = false)
 	cerr << "***  RazerS - Read Matching with SWIFT  ***" << endl;
 	cerr << "*** written by David Weese (c) Nov 2008 ***" << endl;
 	cerr << "*******************************************" << endl << endl;
-	cerr << "Usage: razer2 [OPTION]... <GENOME FILE> <READS FILE>" << endl;
+	cerr << "Usage: razers [OPTION]... <GENOME FILE> <READS FILE>" << endl;
 	if (longHelp) {
 		cerr << endl << "Options:" << endl;
 		cerr << "  -f,  --forward               \t" << "only compute forward matches" << endl;
@@ -591,12 +596,13 @@ void printHelp(int, const char *[], bool longHelp = false)
 		cerr << "                               \t" << "0 = use Fasta id (default)" << endl;
 		cerr << "                               \t" << "1 = enumerate beginning with 1" << endl;
 		cerr << "                               \t" << "2 = use the read sequence (only for short reads!)" << endl;
-		cerr << "  -t,  --threshold             \t" << "set minimum threshold (default 1)" << endl;
+		cerr << "  -t,  --threshold             \t" << "set minimum threshold (default " << optionThreshold << ")" << endl;
+		cerr << "  -tl, --taboo-length          \t" << "set taboo length (default " << optionTabooLength << ")" << endl;
 		cerr << "  -v,  --verbose               \t" << "verbose mode" << endl;
 		cerr << "  -vv, --vverbose              \t" << "very verbose mode" << endl;
 		cerr << "  -h,  --help                  \t" << "print this help" << endl;
 	} else {
-		cerr << "Try 'razer2 --help' for more information." << endl;
+		cerr << "Try 'razers --help' for more information." << endl;
 	}
 }
 
@@ -690,6 +696,20 @@ int main(int argc, const char *argv[])
 				printHelp(argc, argv);
 				return 0;
 			}
+			if (strcmp(argv[arg], "-tl") == 0 || strcmp(argv[arg], "--taboo-length") == 0) {
+				if (arg + 1 < argc) {
+					++arg;
+					istringstream istr(argv[arg]);
+					istr >> optionTabooLength;
+					if (!istr.fail())
+						if (optionTabooLength < 1)
+							cerr << "TabooLength must be a value greater than 0" << endl << endl;
+						else
+							continue;
+				}
+				printHelp(argc, argv);
+				return 0;
+			}
 			if (strcmp(argv[arg], "-h") == 0 || strcmp(argv[arg], "--help") == 0) {
 				// print help
 				printHelp(argc, argv, true);
@@ -730,6 +750,8 @@ int main(int argc, const char *argv[])
 		if (optionRev)		cerr << "YES" << endl;
 		else				cerr << "NO" << endl;
 		cerr << "Error rate:                      \t" << optionErrorRate << endl;
+		cerr << "Minimal threshold:               \t" << optionThreshold << endl;
+		cerr << "Taboo length:                    \t" << optionTabooLength << endl;
 		cerr << endl;
 	}
 
