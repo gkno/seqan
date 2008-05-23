@@ -384,6 +384,24 @@ struct Object<T const>:
 //____________________________________________________________________________
 
 /**
+.Metafunction.Source
+*/
+
+template < typename TSpec = void >
+struct Source
+{
+	typedef TSpec Type;
+};
+
+template <typename T>
+struct Source<T const>:
+	Source<T>
+{
+};
+
+//____________________________________________________________________________
+
+/**
 .Internal._Parameter:
 ..cat:Metafunctions
 ..summary:Type for function parameters and return values.

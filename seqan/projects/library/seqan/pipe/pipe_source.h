@@ -24,8 +24,6 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 
-	template < typename TSpec = void >
-	struct Source;
 /*
 	template < typename TValue >
     struct Size< Pipe< TValue*, Source<> > > {

@@ -107,17 +107,6 @@ struct Position<Gaps<TSource, TSpec> const>:
 ..returns.param.Type:Source type of $T$.
 */
 
-template <typename T>
-struct Source
-{//dummy implementation for VC++ .net2003
-	typedef int Type;
-};
-template <typename T>
-struct Source<T const>:
-	Source<T>
-{
-};
-
 template <typename TSource, typename TSpec>
 struct Source<Gaps<TSource, TSpec> >
 {
