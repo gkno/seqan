@@ -2,8 +2,8 @@
 #define SEQAN_TEST
 #define SEQAN_VERBOSE
 
-#define TEST_PATH "projects/tests/graph/"
-#define LIB_PATH "projects/library/seqan/graph/"
+#define TEST_PATH "projects/tests/graph_msa/"
+#define LIB_PATH "projects/library/seqan/graph_msa/"
 
 //STL
 #include <iostream>
