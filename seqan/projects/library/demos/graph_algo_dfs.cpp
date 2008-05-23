@@ -1,6 +1,6 @@
 /// This code example illustrates a depth-first search.
 
-#include <seqan/graph.h>
+#include <seqan/graph_algorithms.h>
 #include <iostream>
 
 using namespace seqan;

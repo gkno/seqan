@@ -28,7 +28,8 @@
 
 #include <seqan/sequence.h>
 #include <seqan/score.h>
-#include <seqan/graph.h>
+#include <seqan/graph_types.h>
+#include <seqan/graph_algorithms.h>
 
 //____________________________________________________________________________
 

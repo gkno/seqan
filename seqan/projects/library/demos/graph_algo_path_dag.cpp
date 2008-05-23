@@ -1,5 +1,5 @@
 /// This code example illustrates a shortest path search in a directed acyclic graph
-#include <seqan/graph.h>
+#include <seqan/graph_algorithms.h>
 #include <iostream>
 
 using namespace seqan;

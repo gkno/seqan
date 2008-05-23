@@ -201,14 +201,6 @@
 	#include "../../library/demos/graph_align_sw.cpp"
 	#undef main
 
-	#define main runGraph21
-	#include "../../library/demos/graph_align_guide_nj.cpp"
-	#undef main
-
-	#define main runGraph22
-	#include "../../library/demos/graph_align_guide_upgma.cpp"
-	#undef main
-
 	#define main runGraph23
 	#include "../../library/demos/graph_align_msa.cpp"
 	#undef main
@@ -277,7 +269,7 @@ int main(int argc, const char *argv[])
 	runGraph0();runGraph1();runGraph2();runGraph3();runGraph4();runGraph5();
 	runGraph6();runGraph7();runGraph8();runGraph9();runGraph10();runGraph11();
 	runGraph12();runGraph13();runGraph14();runGraph15();runGraph16();runGraph17();
-	runGraph18();runGraph19();runGraph20();runGraph21();runGraph22();runGraph23();
+	runGraph18();runGraph19();runGraph20();runGraph23();
 	runGraph24(argc, argv);
 	runGraph25(argc, argv);
 	runGraph26();runGraph27();

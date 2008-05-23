@@ -1,4 +1,4 @@
-#include <seqan/graph.h>
+#include <seqan/consensus.h>
 #include <seqan/modifier.h>
 
 #include <iostream>

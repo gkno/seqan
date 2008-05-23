@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <cstdio>
-#include <seqan/graph.h>
+#include <seqan/graph_msa.h>
 
 using namespace seqan;
 

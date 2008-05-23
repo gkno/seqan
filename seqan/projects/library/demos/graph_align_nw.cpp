@@ -1,5 +1,5 @@
 /// This code example illustrates a graph-based Needleman-Wunsch alignment
-#include <seqan/graph.h>
+#include <seqan/graph_align.h>
 #include <iostream>
 
 using namespace seqan;

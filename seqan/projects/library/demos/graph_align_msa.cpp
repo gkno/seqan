@@ -1,5 +1,5 @@
 /// This code example illustrates a consistency-based multiple sequence alignment using an amino acid alphabet
-#include <seqan/graph.h>
+#include <seqan/graph_msa.h>
 #include <iostream>
 
 using namespace seqan;

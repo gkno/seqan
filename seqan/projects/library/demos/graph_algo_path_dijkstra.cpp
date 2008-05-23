@@ -1,5 +1,5 @@
 /// This code example illustrates the dijkstra's algorithm, once using an external map and once using an internal map.
-#include <seqan/graph.h>
+#include <seqan/graph_algorithms.h>
 #include <iostream>
 
 using namespace seqan;

@@ -1,6 +1,6 @@
 #include <iostream>
 #include <seqan/align.h>
-#include <seqan/graph.h>
+#include <seqan/graph_align.h>
 
 using namespace std;
 using namespace seqan;
@@ -11,7 +11,7 @@ int main()
 	DnaString seq1 = "atcgaatgcgga";
 	DnaString seq2 = "actcgttgca";
 ///Now we choose a scoring scheme with affine gap costs ("gap open" == -2, "gap extend" == -1).
-	Score<int> score(0, -1, -2, -1);
+	Score<int> score(0, -1, -1, -2);
 ///Example 1: We use @Class.Align@ to align the two sequences. 
 ///Since we does not specify an @Tag.Global Alignment Algorithms|algorithm tag@ when we call @Function.globalAlignment@, 
 ///a suitable algorithm (@Tag.Global Alignment Algorithms|Gotoh@) is automatically choosen.

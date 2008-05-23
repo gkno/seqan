@@ -1,5 +1,5 @@
 /// This code example illustrates the topological sort algorithm
-#include <seqan/graph.h>
+#include <seqan/graph_algorithms.h>
 #include <iostream>
 
 using namespace seqan;

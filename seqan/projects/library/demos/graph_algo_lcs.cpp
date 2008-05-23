@@ -1,5 +1,5 @@
 /// This code example illustrates the longest common subsequence algorithm
-#include <seqan/graph.h>
+#include <seqan/graph_algorithms.h>
 #include <iostream>
 
 using namespace seqan;

@@ -1,5 +1,5 @@
 /// This code example illustrates a shortest path search using Bellman-Ford
-#include <seqan/graph.h>
+#include <seqan/graph_algorithms.h>
 #include <iostream>
 
 using namespace seqan;

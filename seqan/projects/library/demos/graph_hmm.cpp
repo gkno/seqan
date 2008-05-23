@@ -1,6 +1,6 @@
 #include <iostream>
 #include <fstream>
-#include <seqan/graph.h>
+#include <seqan/graph_algorithms.h>
 
 using namespace seqan;
 

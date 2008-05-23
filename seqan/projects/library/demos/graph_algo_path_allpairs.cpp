@@ -1,5 +1,5 @@
 /// This code example illustrates an all-pair shortest path algorithm
-#include <seqan/graph.h>
+#include <seqan/graph_algorithms.h>
 #include <iostream>
 
 using namespace seqan;

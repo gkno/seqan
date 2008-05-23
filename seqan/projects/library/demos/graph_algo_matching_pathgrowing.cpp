@@ -1,5 +1,5 @@
 /// This code example illustrates the simple path growing heuristic for matching
-#include <seqan/graph.h>
+#include <seqan/graph_algorithms.h>
 #include <iostream>
 
 using namespace seqan;

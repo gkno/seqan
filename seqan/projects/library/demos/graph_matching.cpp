@@ -1,5 +1,5 @@
 /// This code example illustrates how to perform a weighted bipartite matching
-#include <seqan/graph.h>
+#include <seqan/graph_algorithms.h>
 #include <iostream>
 
 using namespace seqan;

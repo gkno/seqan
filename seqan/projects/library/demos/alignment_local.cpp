@@ -1,6 +1,5 @@
 #include <iostream>
 #include <seqan/align.h>
-#include <seqan/graph.h>
 
 using namespace std;
 using namespace seqan;
