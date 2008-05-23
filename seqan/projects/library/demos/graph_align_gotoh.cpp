@@ -1,5 +1,5 @@
 /// This code example illustrates a graph-based Gotoh alignment
-#include <seqan/graph_algorithms.h>
+#include <seqan/graph_align.h>
 #include <iostream>
 
 using namespace seqan;
