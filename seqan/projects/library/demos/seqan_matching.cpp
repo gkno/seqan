@@ -55,7 +55,113 @@ globalMatching(StringSet<TString, TSpec> const& seqSet,
 	clear(g);
 }
 
+
+template<typename TGraph, typename TVertexSet, typename TCliques>
+inline void
+enumNextMaximalClique(TGraph& g, 
+					  TVertexSet& setC, 
+					  TVertexSet& setN, 
+					  TVertexSet& setP,
+					  TCliques& cliques) 
+{
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename Iterator<TGraph, AdjacencyIterator>::Type TAdjacencyIterator;
+	typedef typename TVertexSet::const_iterator TSetIter;
+	// Check the bound
+	bool oldClique = false;
+	for(TSetIter itP = setP.begin(); itP != setP.end(); ++itP) {
+		TVertexSet copySetN = setN;
+		for(TAdjacencyIterator itA(g, *itP); !atEnd(itA); ++itA) copySetN.erase(*itA);
+		if (copySetN.empty()) {
+			oldClique = true;
+			break;
+		}
+	}
+	if (!oldClique) {
+		while (!setN.empty()) {
+			TVertexDescriptor v = *(setN.begin());
+			setC.insert(v);
+			setN.erase(v);
+			TVertexSet setNN;
+			TVertexSet setNP;
+			for(TAdjacencyIterator itA(g,v);!atEnd(itA); ++itA) {
+				if (setN.find(*itA) != setN.end()) setNN.insert(*itA);
+				else if (setP.find(*itA) != setP.end()) setNP.insert(*itA);
+			}
+			if ((setNN.empty()) && (setNP.empty())) appendValue(cliques, setC);
+			else enumNextMaximalClique(g, setC, setNN, setNP, cliques);
+			setC.erase(v);
+			setP.insert(v);
+		}
+	}
+}
+
+template<typename TGraph, typename TCliques>
+inline void
+enumMaximalCliques(TGraph& g,
+				   TCliques& cliques) {
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
+	typedef std::set<TVertexDescriptor> TVertexSet;
+	TVertexSet setN;
+	TVertexSet setP;
+	TVertexSet setC;
+	for(TVertexIterator itV(g);!atEnd(itV);++itV) setN.insert(value(itV));
+	enumNextMaximalClique(g, setC, setN, setP, cliques);
+}
+
 int main(int argc, const char *argv[]) {
+	typedef Graph<Undirected<> > TUndirectedGraph;
+	typedef Size<TUndirectedGraph>::Type TSize;
+	typedef VertexDescriptor<TUndirectedGraph>::Type TVertexDescriptor;
+	typedef std::set<TVertexDescriptor> TVertexSet;
+
+	TUndirectedGraph g;
+	addVertex(g);addVertex(g);addVertex(g);addVertex(g);addVertex(g);addVertex(g);addVertex(g);
+	addEdge(g, 0, 1);addEdge(g, 0, 2);addEdge(g, 0, 3);addEdge(g, 0, 4);
+	addEdge(g, 1, 2);addEdge(g, 1, 3);addEdge(g, 1, 4);
+	addEdge(g, 3, 4);
+	addEdge(g, 3, 5);
+	addEdge(g, 5, 6);
+	addEdge(g, 4, 6);
+
+	String<TVertexSet> cliques;
+	enumMaximalCliques(g, cliques);
+	
+	std::cout << g << std::endl;
+	std::cout << "Cliques" << std::endl;
+	for(TSize i = 0; i < length(cliques); ++i) {
+		for(TVertexSet::const_iterator vIt = (value(cliques, i)).begin(); vIt != (value(cliques, i)).end(); ++vIt) {
+			std::cout << *vIt << ',';
+		}
+		std::cout << std::endl;
+	}
+	
+
+
+	exit(0);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	//////////////////////////////////////////////////////////////////////////////
 	// Command line parsing
 	//////////////////////////////////////////////////////////////////////////////

@@ -8,6 +8,7 @@
 using namespace seqan;
 
 
+
 template <typename TStringSet, typename TCargo, typename TSpec, typename TAlignmentMatrix, typename TConsensus, typename TCoverage, typename TOptions>
 inline void 
 evaluationOfReadAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const&,
@@ -39,8 +40,7 @@ evaluationOfReadAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const&,
 	typedef StringSet<TString, Dependent<> > TDepStringSet;
 	typedef Graph<Alignment<TDepStringSet, unsigned int> > TAliGraph;
 	TStringSet strSetAli;
-	appendValue(strSetAli, seqSet[0]);
-	appendValue(strSetAli, seqSet[1]);
+	for(TSize i = 0; i < length(seqSet); ++i) appendValue(strSetAli, seqSet[i]);
 	appendValue(strSetAli, ungappedConsensus);
 	Score<int> score_type = Score<int>(5,-4,-4,-14);
 	TAliGraph lib1(strSetAli);
@@ -53,7 +53,7 @@ evaluationOfReadAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const&,
 	upgmaTree(distanceMatrix, aliGuideTree);
 	Graph<Alignment<TStringSet, void, WithoutEdgeId> > aliOut(strSetAli);
 	progressiveAlignment(lib1, aliGuideTree, aliOut);
-	std::cout << "Alignment of Haplotype 1, Haplotype 2, and Consensus: " << std::endl;
+	std::cout << "Alignment of Haplotypes and Consensus: " << std::endl;
 	std::cout << aliOut << std::endl;
 
 
@@ -63,10 +63,7 @@ evaluationOfReadAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const&,
 	convertAlignment(aliOut, align);
 	TSize nseq = length(stringSet(aliOut));
 	TSize colLen = length(align) / nseq;
-	typedef Triple<unsigned int, unsigned int, unsigned int> TTriple;
-	String<TTriple> posit;
 	unsigned int posGappedConsensus = 0;
-	unsigned int posUngappedConsensus = 0;
 	unsigned int recoveredMatch = 0;
 	unsigned int totalMatchCount = 0;
 	unsigned int coverageThreshold = 2;
@@ -74,42 +71,51 @@ evaluationOfReadAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const&,
 	unsigned int totalCoveredMatchCount = 0;
 	String<unsigned int> missedMatch;
 	std::set<unsigned int> covertAlignmentPositions;
+
+	// Walk through the alignment
 	for(unsigned int col = 0; col < colLen; ++col) {
-		char curC = value(align, 2*colLen+col);
+		char curC = value(align, (length(strSetAli) - 1)*colLen+col);
 		if (curC != gap) {
+			// The consensus was gapped in the alignment
 			unsigned int oldValue = posGappedConsensus;
 			while(gappedConsensus[posGappedConsensus] == gap) ++posGappedConsensus;
 			for(unsigned int i = col - (posGappedConsensus - oldValue); i<=col;++i) covertAlignmentPositions.insert(i);
-			appendValue(posit, TTriple(col, posUngappedConsensus, posGappedConsensus));
-			if ((value(align, 0*colLen+col) == value(align, 1*colLen+col)) &&
-				(value(align, 0*colLen+col) == value(align, 2*colLen+col))) {
-					++recoveredMatch;
-					if (coverage[posGappedConsensus] > coverageThreshold) ++recoveredMatchAndCovered;
+			bool recov = true;
+			for(TSize i = 1; i<length(strSetAli); ++i) {
+				if (value(align, 0*colLen+col) != value(align, i*colLen+col)) {
+					recov = false;
+					break;
+				}
 			}
-			++posUngappedConsensus;
+			if (recov) {
+				++recoveredMatch;
+				if (coverage[posGappedConsensus] > coverageThreshold) ++recoveredMatchAndCovered;
+			}
 			++posGappedConsensus;
 		}
-		if ((value(align, 0*colLen+col) == value(align, 1*colLen+col)) &&
+		bool allMatch = true;
+		for(TSize i = 1; i<length(strSetAli) - 1; ++i) {
+			if (value(align, 0*colLen+col) != value(align, 1*colLen+col)) {
+				allMatch = false;
+				break;
+			}
+		}
+		if ((allMatch) &&
 			(covertAlignmentPositions.find(col) != covertAlignmentPositions.end())) {
-			if (value(align, 0*colLen+col) != value(align, 2*colLen+col)) appendValue(missedMatch, col);
+			if (value(align, 0*colLen+col) != value(align, (length(strSetAli) - 1)*colLen+col)) appendValue(missedMatch, col);
 			++totalMatchCount;
 			if (coverage[posGappedConsensus - 1] > coverageThreshold) ++totalCoveredMatchCount;
 		}
 	}
 	std::cout << std::endl;
-	std::cout << "#Matches Consensus to Hap1 and Hap2 / #Matches between Hap1 and Hap2 = " << recoveredMatch << "/" << totalMatchCount << "  (with Coverage > 0)" << std::endl;
+	std::cout << "#Matches Consensus to Haplotypes / #Matches between Haplotypes = " << recoveredMatch << "/" << totalMatchCount << "  (with Coverage > 0)" << std::endl;
 	std::cout << "Missed Match positions (in final Alignment): ";
 	for(unsigned int i = 0; i<length(missedMatch);++i) {
 		std::cout << missedMatch[i] << ' ';
 	}
 	std::cout << std::endl;
-	std::cout << "#Matches Consensus to Hap1 and Hap2 / #Matches between Hap1 and Hap2 = " << recoveredMatchAndCovered << "/" << totalCoveredMatchCount << "  (with Coverage > 2)" << std::endl;
+	std::cout << "#Matches Consensus to Haplotypes / #Matches between Haplotypes = " << recoveredMatchAndCovered << "/" << totalCoveredMatchCount << "  (with Coverage > 2)" << std::endl;
 	std::cout << std::endl;
-
-	std::cout << "Alignment position, Position in ungapped consensus, Position in gapped consensus (Read alignment)" << std::endl;
-	for(unsigned int i = 0; i<length(posit);++i) {
-		std::cout << posit[i].i1 << ',' << posit[i].i2 << ',' << posit[i].i3 << std::endl;
-	}
 }
 
 
@@ -196,6 +202,7 @@ convertSimulationFile(ReadStore<TAlphabet, TSpec>& readSt,
 	typedef String<TAlphabet> TSequence;
 	StringSet<String<TAlphabet>, Owner<> > origStrSet;
 	String<TName> names;
+	clear(filePath);
 	filePath = value(cfgOpt, "reads");
 	_alignImportSequences(filePath, origStrSet, names);
 	for(TSize i = 0; i<length(origStrSet); ++i) {
@@ -208,19 +215,21 @@ convertSimulationFile(ReadStore<TAlphabet, TSpec>& readSt,
 		TSeqIter itSeqEnd = end(value(origStrSet, i));
 		for(;itSeq != itSeqEnd; ++itSeq) appendValue(readSt.data_reads, *itSeq);
 		itSeq = begin(value(origStrSet, i));
-		for(;itSeq != itSeqEnd; ++itSeq) appendValue(readSt.data_qualities, char(48+20));
+		for(;itSeq != itSeqEnd; ++itSeq) appendValue(readSt.data_qualities, char(48+60));
 		appendValue(readSt.data_begin_end, Pair<TSize,TSize>(begRead, endRead));
 		TSize brPoint1 = 0;
 		TSize brPoint2 = 0;
-		TSize fragId;
+		TSize fragId = 0;
 		for(TSize k = 0; k<length(value(names, i)); ++k) {
 			if (value(value(names,i),k) == '=') brPoint1 = k + 1;
 			if (value(value(names,i),k) == ']') brPoint2 = k;
 		}
-		String<char> inf = infix(value(names,i), brPoint1, brPoint2);
-		std::stringstream ssStream(toCString(inf));
-		ssStream >> fragId; 
-		appendValue(readSt.data_frg_id, fragId - 1);
+		if (brPoint1 != brPoint2) {
+			String<char> inf = infix(value(names,i), brPoint1, brPoint2);
+			std::stringstream ssStream(toCString(inf));
+			ssStream >> fragId; 
+			appendValue(readSt.data_frg_id, fragId - 1);
+		}
 		std::stringstream input;
 		input << "R" << i;
 		String<char> tmp(input.str().c_str());
@@ -235,7 +244,7 @@ convertSimulationFile(ReadStore<TAlphabet, TSpec>& readSt,
 		GappedRead<> gapRead;
 		gapRead.data_source = i;
 		TSize brPoint1 = 0;
-		TSize brPoint2 = 0;
+		TSize brPoint2 = length(value(names, i));
 		for(TSize k = 0; k<length(value(names, i)); ++k) {
 			if (value(value(names,i),k) == ',') brPoint1 = k;
 			if (value(value(names,i),k) == '[') {
@@ -267,10 +276,12 @@ convertSimulationFile(ReadStore<TAlphabet, TSpec>& readSt,
 	filePath = value(cfgOpt, "reads");
 	appendValue(filePath, 'S');
 	_alignImportSequences(filePath, seqSet, seqNames);
-	for(TSize l = 0;l < length(seqSet[0]); ++l) appendValue(ctgSt.data_contig, value(value(seqSet, 0), l));
-	for(TSize l = 0;l < length(seqSet[0]); ++l) appendValue(ctgSt.data_quality, 'D');
-	appendValue(ctgSt.data_begin_end, Pair<TSize,TSize>(0, length(seqSet[0])));
-	++ctgSt.data_pos_count;
+	if (!empty(seqSet)) {
+		for(TSize l = 0;l < length(seqSet[0]); ++l) appendValue(ctgSt.data_contig, value(value(seqSet, 0), l));
+		for(TSize l = 0;l < length(seqSet[0]); ++l) appendValue(ctgSt.data_quality, 'D');
+		appendValue(ctgSt.data_begin_end, Pair<TSize,TSize>(0, length(seqSet[0])));
+		++ctgSt.data_pos_count;
+	}
 }
 
 
@@ -284,8 +295,8 @@ int main(int argc, const char *argv[]) {
 	typedef String<char> TValue;
 	typedef Size<TValue>::Type TSize;
 	ConfigOptions<TKey, TValue> cfgOpt;
-	TKey keys[] = {"afg", "reads", "haplotypes","outfile", "output"};
-	assignKeys(cfgOpt, keys, 5);
+	TKey keys[] = {"afg", "reads", "haplotypes","outfile", "output", "convert"};
+	assignKeys(cfgOpt, keys, 6);
 	assign(cfgOpt, "output", "seqan");
 	assign(cfgOpt, "outfile", "readAlign.txt");
 	// Help Message
@@ -298,9 +309,8 @@ int main(int argc, const char *argv[]) {
 	}
 	if (!parseCmdLine(argc, argv, cfgOpt)) return -1;
 
-
 	//////////////////////////////////////////////////////////////////////////////
-	// Convert simulation files
+	// Read simulation file, afg file or celera consensus file
 	//////////////////////////////////////////////////////////////////////////////
 	ReadStore<> readSt;
 	FrgStore<> frgSt;
@@ -309,19 +319,37 @@ int main(int argc, const char *argv[]) {
 
 	if (!empty(value(cfgOpt, "reads"))) {
 		convertSimulationFile(readSt, frgSt, libSt, ctgSt, cfgOpt);
-		
-		//std::fstream strmWrite;
-		//strmWrite.open(toCString(value(cfgOpt, "outfile")), std::ios_base::out | std::ios_base::trunc);
-		//write(strmWrite,readSt,frgSt,libSt,ctgSt,Amos());	
-		//strmWrite.close();
-
-		//return 0;
-	} else {
+	} else if (!empty(value(cfgOpt, "afg"))) {
 		// Read Amos
 		std::fstream strmReads;
 		strmReads.open(toCString(value(cfgOpt, "afg")), std::ios_base::in | std::ios_base::binary);
 		read(strmReads,readSt,frgSt,libSt,ctgSt,Amos());	
 		strmReads.close();
+	} else {
+		return -1;
+	}
+
+	//////////////////////////////////////////////////////////////////////////////
+	// Just convert the input file
+	//////////////////////////////////////////////////////////////////////////////
+	if (!empty(value(cfgOpt, "convert"))) {
+		if (value(cfgOpt, "convert") == "afg") {
+			std::fstream strmWrite;
+			strmWrite.open(toCString(value(cfgOpt, "outfile")), std::ios_base::out | std::ios_base::trunc);
+			write(strmWrite,readSt,frgSt,libSt,ctgSt,Amos());	
+			strmWrite.close();
+		} else if (value(cfgOpt, "convert") == "frg") {
+			std::fstream strmWrite;
+			strmWrite.open(toCString(value(cfgOpt, "outfile")), std::ios_base::out | std::ios_base::trunc);
+			write(strmWrite,readSt,frgSt,libSt,ctgSt,CeleraFrg());	
+			strmWrite.close();
+		} else if (value(cfgOpt, "convert") == "cgb") {
+			std::fstream strmWrite;
+			strmWrite.open(toCString(value(cfgOpt, "outfile")), std::ios_base::out | std::ios_base::trunc);
+			write(strmWrite,readSt,frgSt,libSt,ctgSt,CeleraCgb());	
+			strmWrite.close();
+		}
+		return 0;
 	}
 	
 	//////////////////////////////////////////////////////////////////////////////
@@ -402,21 +430,22 @@ int main(int argc, const char *argv[]) {
 	//// Debug code
 	//for(unsigned int i = 0; i<nseq; ++i) std::cout << readBegEndRowPos[i].i1 << ',' << readBegEndRowPos[i].i2 << ',' << readBegEndRowPos[i].i3 << std::endl;
 
-	// Realign disrupted reads
-	unsigned int numUnalignedReads = realignLowQualityReads(gOut, pList, readBegEndRowPos, g);
-	if (numUnalignedReads > 0) {
-		std::cout << "Disrupted reads: " << numUnalignedReads << std::endl;
-		clearVertices(gOut);
-		progressiveAlignment(g, guideTree, gOut);
-		clear(alignmentMatrix);
-		clear(coverage);
-		clear(gappedConsensus);
-		clear(readBegEndRowPos);
-		consensusAlignment(gOut, alignmentMatrix, readBegEndRowPos, coverage, gappedConsensus);
-		_alignTiming(startTime, "Realignment done: ");
-	}
-	clear(g);
-	clear(guideTree);
+	//// Realign disrupted reads
+	//unsigned int numUnalignedReads = realignLowQualityReads(gOut, pList, readBegEndRowPos, g);
+	//if (numUnalignedReads > 0) {
+	//	std::cout << "Disrupted reads: " << numUnalignedReads << std::endl;
+	//	_alignTiming(startTime, "Disrupted read scan done: ");
+	//	clearVertices(gOut);
+	//	progressiveAlignment(g, guideTree, gOut);
+	//	clear(alignmentMatrix);
+	//	clear(coverage);
+	//	clear(gappedConsensus);
+	//	clear(readBegEndRowPos);
+	//	consensusAlignment(gOut, alignmentMatrix, readBegEndRowPos, coverage, gappedConsensus);
+	//	_alignTiming(startTime, "Realignment done: ");
+	//}
+	//clear(g);
+	//clear(guideTree);
 
 	//// Debug code
 	//TSequence consensus;

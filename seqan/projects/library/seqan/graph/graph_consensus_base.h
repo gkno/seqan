@@ -37,6 +37,22 @@ namespace SEQAN_NAMESPACE_MAIN
 struct TagAmos_;
 typedef Tag<TagAmos_> const Amos;
 
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Tag.File Format.tag.CeleraFrg message file:
+	Celera fragment message file.
+*/
+struct TagCeleraFrg_;
+typedef Tag<TagCeleraFrg_> const CeleraFrg;
+
+/**
+.Tag.File Format.tag.CeleraCgb message file:
+	Celera cgb file.
+*/
+struct TagCeleraCgb_;
+typedef Tag<TagCeleraCgb_> const CeleraCgb;
+
 
 //////////////////////////////////////////////////////////////////////////////
 // Read alignment and Consensus Generation
@@ -266,7 +282,7 @@ realignLowQualityReads(Graph<Alignment<TStringSet, TCargo, TSpec> > const& gIn,
 	TSize pos = 0;
 	for(;beIt != beItEnd; ++beIt, ++pos) {
 		TSize lenStr = length(value(str, pos));
-		if (((value(beIt)).i2 - (value(beIt)).i1) > (lenStr + lenStr / 3)) unalignedRead.insert(positionToId(str, pos));
+		if (((value(beIt)).i2 - (value(beIt)).i1) > (lenStr + lenStr / 3 + 10)) unalignedRead.insert(positionToId(str, pos));
 	}
 
 	// Any disrupted reads
@@ -277,16 +293,11 @@ realignLowQualityReads(Graph<Alignment<TStringSet, TCargo, TSpec> > const& gIn,
 	typedef String<TFragment> TFragmentString;
 	typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
 	TFragmentString matches;
+	reserve(matches, numEdges(gIn));
 
 	// Insert all overlaps from the previous alignment
 	TEdgeIterator it_tmp(gIn);
-	for(;!atEnd(it_tmp);++it_tmp) {
-		TVertexDescriptor sV = sourceVertex(it_tmp);
-		TVertexDescriptor tV = targetVertex(it_tmp);
-		TId id1 = sequenceId(gIn, sV);
-		TId id2 = sequenceId(gIn, tV);
-		appendValue(matches, TFragment(id1,fragmentBegin(gIn, sV), id2, fragmentBegin(gIn, tV), fragmentLength(gIn, sV)));
-	}
+	for(;!atEnd(it_tmp);++it_tmp) appendValue(matches, TFragment(sequenceId(gIn, sourceVertex(it_tmp)),fragmentBegin(gIn, sourceVertex(it_tmp)), sequenceId(gIn, targetVertex(it_tmp)), fragmentBegin(gIn, targetVertex(it_tmp)), fragmentLength(gIn, sourceVertex(it_tmp))));
 	
 	// Recompute the overlap of interesting pairs
 	Score<int> score_type = Score<int>(2,-1,-4,-6);
@@ -314,7 +325,7 @@ realignLowQualityReads(Graph<Alignment<TStringSet, TCargo, TSpec> > const& gIn,
 			double quality = (double) matchLen / (double) overlapLen;
 
 			// Take all overlaps of good quality
-			if (quality < 0.5) {
+			if ((quality < 0.75) || (matchLen < 8)) {
 				resize(matches, from);
 			}
 		}

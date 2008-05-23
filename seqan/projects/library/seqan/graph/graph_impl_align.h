@@ -1260,19 +1260,6 @@ findVertex(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 
 //////////////////////////////////////////////////////////////////////////////
 
-/**
-.Function.getProjectedPosition:
-..cat:Graph.Alignment Graph
-..summary:Finds the projected position given a sequence id and a position.
-Works only on alignment graphs of two sequences (Pairwise alignment).
-..signature:getProjectedPosition(g, id1, pos1, id2, pos2)
-..param.g:In-parameter: An alignment graph.
-...type:Spec.Alignment Graph
-..param.id1:In-parameter: A sequence id.
-..param.pos1:In-parameter: A position.
-..param.id2:Out-parameter: The projected sequence id.
-..param.pos2:In-parameter: The projected position.
-*/
 template<typename TStringSet, typename TCargo, typename TSpec, typename TSeqId, typename TPosition, typename TSeqId2, typename TPosition2> 
 inline void
 getProjectedPosition(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
