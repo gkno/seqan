@@ -120,8 +120,8 @@ loadRdsId(FrgStore<TSpec>& frgSt,
 		  TId2& id2) 
 {
 	SEQAN_CHECKPOINT
-	id1 = (value(frgSt.data_rds)).i1;
-	id2 = (value(frgSt.data_rds)).i2;
+	id1 = (value(frgSt.data_rds,index)).i1;
+	id2 = (value(frgSt.data_rds,index)).i2;
 }
 
 //////////////////////////////////////////////////////////////////////////////

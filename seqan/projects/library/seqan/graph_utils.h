@@ -21,6 +21,9 @@
 #ifndef SEQAN_HEADER_GRAPH_UTILS_H
 #define SEQAN_HEADER_GRAPH_UTILS_H
 
+// External
+#include <fstream>
+
 // Seqan
 #include <seqan/graph_types.h>
 
