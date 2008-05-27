@@ -21,12 +21,10 @@
 #ifndef SEQAN_HEADER_REFINEMENT_H
 #define SEQAN_HEADER_REFINEMENT_H
 
-// External / STL
-#include <fstream> 
-
 // Seqan
 #include <seqan/score.h>
 #include <seqan/graph_types.h>
+#include <seqan/graph_align.h>
 
 
 #ifdef SEQAN_SWITCH_USE_FORWARDS

@@ -2,6 +2,9 @@
 #define SEQAN_TEST
 #define SEQAN_VERBOSE
 
+// External / STL
+#include <fstream> 
+
 // SeqAn Includes
 #include <seqan/refinement.h>
 #include "test_graph_match_refinement.h"
