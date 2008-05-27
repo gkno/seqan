@@ -673,6 +673,7 @@ write(TFile & target,
 	  TIDString const &,
 	  Raw)
 {
+	SEQAN_CHECKPOINT
 	typedef Graph<Undirected<TCargo, TSpec> > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;

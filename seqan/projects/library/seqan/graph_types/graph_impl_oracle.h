@@ -61,9 +61,9 @@ Note: If edges do not store ids external property maps do not work.
 
 template<typename TAlphabet, typename TCargo, typename TSpec, typename TPropertyMap, typename TChar>
 inline void
-addLetterToOracle(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
-				  TPropertyMap& supplyState,
-				  TChar const c)
+_addLetterToOracle(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
+				   TPropertyMap& supplyState,
+				   TChar const c)
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
@@ -121,9 +121,7 @@ createOracle(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 	resize(supplyState, len+1);
 	TVertexDescriptor v1 = addVertex(g);
 	assignProperty(supplyState, v1, nilVal);
-	for(TSize i = 0; i<len; ++i) {
-		addLetterToOracle(g, supplyState, getValue(text,i));
-	}
+	for(TSize i = 0; i<len; ++i) _addLetterToOracle(g, supplyState, getValue(text,i));
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -155,10 +153,8 @@ createOracleOnReverse(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 	resize(supplyState, len+1);
 	TVertexDescriptor v1 = addVertex(g);
 	assignProperty(supplyState, v1, nilVal);
-	for(TSize i = len-1; i>0; --i) {
-		addLetterToOracle(g, supplyState, getValue(text,i));
-	}
-	addLetterToOracle(g, supplyState, getValue(text,0));
+	for(TSize i = len-1; i>0; --i) _addLetterToOracle(g, supplyState, getValue(text,i));
+	_addLetterToOracle(g, supplyState, getValue(text,0));
 }
 
 

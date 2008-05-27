@@ -852,7 +852,7 @@ inline bool
 operator ==(Iter<Graph<Directed<TCargo, TGraphSpec> >, GraphIterator<InternalOutEdgeIterator<TSpec> > >& it1,
 			Iter<Graph<Directed<TCargo, TGraphSpec> >, GraphIterator<InternalOutEdgeIterator<TSpec> > >& it2)
 {
-SEQAN_CHECKPOINT
+	SEQAN_CHECKPOINT
 	return ((it1.data_edge==it2.data_edge) && 
 			(it1.data_source==it2.data_source));
 }
@@ -864,7 +864,7 @@ inline bool
 operator ==(Iter<Graph<Tree<TCargo, TGraphSpec> >, GraphIterator<InternalOutEdgeIterator<TSpec> > >& it1,
 			Iter<Graph<Tree<TCargo, TGraphSpec> >, GraphIterator<InternalOutEdgeIterator<TSpec> > >& it2)
 {
-SEQAN_CHECKPOINT
+	SEQAN_CHECKPOINT
 	return ((it1.data_edge==it2.data_edge) && 
 			(it1.data_source==it2.data_source));
 }
@@ -876,7 +876,7 @@ inline bool
 operator ==(Iter<Graph<Undirected<TCargo, TGraphSpec> >, GraphIterator<InternalOutEdgeIterator<TSpec> > >& it1,
 			Iter<Graph<Undirected<TCargo, TGraphSpec> >, GraphIterator<InternalOutEdgeIterator<TSpec> > >& it2)
 {
-SEQAN_CHECKPOINT
+	SEQAN_CHECKPOINT
 	return ((it1.data_edge==it2.data_edge) && 
 			(it1.data_source==it2.data_source));
 }
@@ -888,7 +888,7 @@ inline bool
 operator ==(Iter<Graph<Automaton<TAlphabet, TCargo, TGraphSpec> >, GraphIterator<InternalOutEdgeIterator<TSpec> > >& it1,
 			Iter<Graph<Automaton<TAlphabet, TCargo, TGraphSpec> >, GraphIterator<InternalOutEdgeIterator<TSpec> > >& it2)
 {
-SEQAN_CHECKPOINT
+	SEQAN_CHECKPOINT
 	return ((it1.data_pos==it2.data_pos) && 
 			(it1.data_source==it2.data_source));
 }
@@ -900,7 +900,7 @@ inline bool
 operator !=(Iter<Graph<Directed<TCargo, TGraphSpec> >, GraphIterator<InternalOutEdgeIterator<TSpec> > >& it1,
 			Iter<Graph<Directed<TCargo, TGraphSpec> >, GraphIterator<InternalOutEdgeIterator<TSpec> > >& it2)
 {
-SEQAN_CHECKPOINT
+	SEQAN_CHECKPOINT
 	return ((it1.data_edge!=it2.data_edge) || 
 			(it1.data_source!=it2.data_source));
 }
@@ -912,7 +912,7 @@ inline bool
 operator !=(Iter<Graph<Tree<TCargo, TGraphSpec> >, GraphIterator<InternalOutEdgeIterator<TSpec> > >& it1,
 			Iter<Graph<Tree<TCargo, TGraphSpec> >, GraphIterator<InternalOutEdgeIterator<TSpec> > >& it2)
 {
-SEQAN_CHECKPOINT
+	SEQAN_CHECKPOINT
 	return ((it1.data_edge!=it2.data_edge) || 
 			(it1.data_source!=it2.data_source));
 }
@@ -924,7 +924,7 @@ inline bool
 operator !=(Iter<Graph<Undirected<TCargo, TGraphSpec> >, GraphIterator<InternalOutEdgeIterator<TSpec> > >& it1,
 			Iter<Graph<Undirected<TCargo, TGraphSpec> >, GraphIterator<InternalOutEdgeIterator<TSpec> > >& it2)
 {
-SEQAN_CHECKPOINT
+	SEQAN_CHECKPOINT
 	return ((it1.data_edge!=it2.data_edge) || 
 			(it1.data_source!=it2.data_source));
 }
@@ -936,7 +936,7 @@ inline bool
 operator !=(Iter<Graph<Automaton<TAlphabet, TCargo, TGraphSpec> >, GraphIterator<InternalOutEdgeIterator<TSpec> > >& it1,
 			Iter<Graph<Automaton<TAlphabet, TCargo, TGraphSpec> >, GraphIterator<InternalOutEdgeIterator<TSpec> > >& it2)
 {
-SEQAN_CHECKPOINT
+	SEQAN_CHECKPOINT
 	return ((it1.data_pos!=it2.data_pos) || 
 			(it1.data_source!=it2.data_source));
 }

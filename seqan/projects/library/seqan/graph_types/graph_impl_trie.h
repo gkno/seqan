@@ -134,9 +134,7 @@ createTrie(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 	resize(terminalStateMap, numVertices(g), Generous());
 	assignProperty(terminalStateMap,root,String<TPos>());
 	typename Iterator<TKeywords const, Rooted>::Type it = begin(keywords);
-	for(;!atEnd(it);goNext(it)) {
-		_addStringToTrie(g,terminalStateMap,*it,position(it));
-	}
+	for(;!atEnd(it);goNext(it)) _addStringToTrie(g,terminalStateMap,*it,position(it));
 }
 
 //////////////////////////////////////////////////////////////////////////////

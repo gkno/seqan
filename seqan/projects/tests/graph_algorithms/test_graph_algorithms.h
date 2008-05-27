@@ -789,63 +789,6 @@ void Test_HeaviestIncreasingSubsequence() {
 	//std::cout << std::endl;
 }
 
-//////////////////////////////////////////////////////////////////////////////
-
-void Test_HeaviestCommonSubsequence() {
-	typedef String<AminoAcid> TString;
-	typedef StringSet<TString, Dependent<> > TStringSet;
-	typedef Graph<Alignment<TStringSet, int> > TGraph;
-	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	
-	TString s1 = "aaa";
-	TString s2 = "aa";
-	TStringSet strSet;
-	assignValueById(strSet, s1);
-	assignValueById(strSet, s2);
-	TGraph g(strSet);
-	addVertex(g, 0, 0, 1);
-	addVertex(g, 0, 1, 1);
-	addVertex(g, 0, 2, 1);
-	addVertex(g, 1, 0, 1);
-	addVertex(g, 1, 1, 1);
-	addEdge(g, 0, 3, 10); addEdge(g, 0, 4, 15);
-	addEdge(g, 1, 3, 10); addEdge(g, 1, 4, 10);
-	addEdge(g, 2, 3, 15); addEdge(g, 2, 4, 10);
-	String<String<TVertexDescriptor> > str1;
-	String<String<TVertexDescriptor> > str2;
-	String<String<TVertexDescriptor> > align;
-	String<TVertexDescriptor> tmp;
-	clear(tmp); appendValue(tmp, 0); appendValue(str1, tmp);
-	clear(tmp); appendValue(tmp, 1); appendValue(str1, tmp);
-	clear(tmp); appendValue(tmp, 2); appendValue(str1, tmp);
-	clear(tmp); appendValue(tmp, 3); appendValue(str2, tmp);
-	clear(tmp); appendValue(tmp, 4); appendValue(str2, tmp);
-	SEQAN_TASSERT(heaviestCommonSubsequence(g, str1, str2, align) == 20);
-
-	s1 = "aaaaa";
-	s2 = "aaa";
-	clear(strSet);
-	assignValueById(strSet, s1);
-	assignValueById(strSet, s2);
-	assignStringSet(g, strSet);
-	addVertex(g, 0, 0, 2);
-	addVertex(g, 0, 2, 1);
-	addVertex(g, 0, 3, 2);
-	addVertex(g, 1, 0, 1);
-	addVertex(g, 1, 1, 2);
-	addEdge(g, 0, 4, 10); addEdge(g, 1, 3, 20);
-	clear(align);
-	clear(str1);
-	clear(str2);
-	clear(tmp); appendValue(tmp, 0); appendValue(str1, tmp);
-	clear(tmp); appendValue(tmp, 1); appendValue(str1, tmp);
-	clear(tmp); appendValue(tmp, 2); appendValue(str1, tmp);
-	clear(tmp); appendValue(tmp, 3); appendValue(str2, tmp);
-	clear(tmp); appendValue(tmp, 4); appendValue(str2, tmp);
-	heaviestCommonSubsequence(g, str1, str2, align);
-	SEQAN_TASSERT(heaviestCommonSubsequence(g, str1, str2) == heaviestCommonSubsequence(g, str1, str2, align))
-}
-
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -940,7 +883,6 @@ void Test_GraphAlgorithms() {
 	Test_LongestIncreasingSubsequence();
 	Test_LongestCommonSubsequence();
 	Test_HeaviestIncreasingSubsequence();
-	Test_HeaviestCommonSubsequence();
 
 	// Hmm algorithms
 	Test_HmmAlgorithms();

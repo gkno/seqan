@@ -1,9 +1,6 @@
 #ifndef SEQAN_HEADER_TEST_GRAPH_TYPES_H
 #define SEQAN_HEADER_TEST_GRAPH_TYPES_H
 
-using namespace std;
-using namespace seqan;
-
 namespace SEQAN_NAMESPACE_MAIN
 {
 
@@ -71,6 +68,9 @@ void Test_Directed() {
 	SEQAN_TASSERT(numEdges(g) == 5)
 	SEQAN_TASSERT(outDegree(g, v3) == 3)	
 	
+	// Output
+	std::cout << g << std::endl;
+
 	// Remove edges
 	removeEdge(g,my_edge);
 	removeEdge(g,0,1);
@@ -297,6 +297,9 @@ void Test_Undirected() {
 	SEQAN_TASSERT(outDegree(g, v3) == 3)
 	SEQAN_TASSERT(inDegree(g, v3) == 3)
 	SEQAN_TASSERT(degree(g, v3) == 3)
+
+	// Output
+	std::cout << g << std::endl;
 
 	// Remove edges
 	removeEdge(g,my_edge);
@@ -639,6 +642,9 @@ void Test_Automaton() {
 	SEQAN_TASSERT(sourceVertex(g, my_edge) == 3)
 	SEQAN_TASSERT(numEdges(g) == 5)
 	SEQAN_TASSERT(outDegree(g, v3) == 3)	
+
+	// Output
+	std::cout << g << std::endl;
 
 	// Remove edges
 	removeEdge(g,3,1,'c');
@@ -1024,6 +1030,9 @@ void Test_WordGraph() {
 	SEQAN_TASSERT(parseString(g, 0, "gagggg") == 2)
 	assignRoot(g,0);
 
+	// Output
+	std::cout << g << std::endl;
+
 	assignRoot(g,2);
 	TWordGraph g_tmp(g);
 	SEQAN_TASSERT(numVertices(g_tmp) == 8)
@@ -1103,6 +1112,9 @@ void Test_Tree() {
 	SEQAN_TASSERT(numTreeEdges(g) == numVertices(g) - 1)
 	TEdgeDescriptor childC2C1C1e = findEdge(g, childC2C1C1, childC2C1);
 	
+	// Output
+	std::cout << g << std::endl;
+
 	SEQAN_TASSERT(g.data_parent[0]==getNil<TVertexDescriptor>())
 	SEQAN_TASSERT(g.data_parent[1]==0)
 	SEQAN_TASSERT(g.data_parent[2]==0)
@@ -1539,6 +1551,9 @@ void Test_Hmm() {
 	assignEndState(hmm, eState);
 	SEQAN_TASSERT(getEndState(hmm) == eState)
 	
+	// Output
+	std::cout << hmm << std::endl;
+
 	// Change model
 	removeVertex(hmm, state2);
 	THmm hmm_copy(hmm);

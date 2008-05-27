@@ -645,6 +645,7 @@ write(TFile & target,
 	  TIDString const &,
 	  Raw)
 {
+	SEQAN_CHECKPOINT
 	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename EdgeType<TGraph>::Type TEdge;
