@@ -397,27 +397,6 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.getNilPredecessor:
-..cat:Graph
-..summary:Utility function for various graph algorithms.
-..remarks:A nil predecessor can be assigned to a vertex that has no predecessor, e.g., the root in a tree.
-..signature:getNilPredecessor(g)
-..param.g:A graph.
-...type:Class.Graph
-..returns:A nil vertex descriptor.
-...type:Metafunction.VertexDescriptor
-*/
-
-template<typename TSpec>
-inline typename VertexDescriptor<Graph<TSpec> >::Type
-getNilPredecessor(Graph<TSpec> const&)
-{
-	return getNil<typename VertexDescriptor<Graph<TSpec> >::Type>();
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-/**
 .Function.getInfinityDistance:
 ..cat:Graph
 ..summary:Utility function for various graph algorithms.

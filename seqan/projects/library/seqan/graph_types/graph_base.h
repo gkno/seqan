@@ -46,15 +46,6 @@ struct EdgeDescriptor;
 
 //////////////////////////////////////////////////////////////////////////////
 
-/*DISABLED: see basic_type.h
-.Metafunction.Cargo:
-..summary:Type of the cargo of an edge.
-..signature:Cargo<T>::Type
-..param.T:Edge type for which the cargo type is determined.
-..returns.param.Type:Cargo type.
-..remarks.text:The cargo type of an edge indicates the kind of information that is stored with the edge.
-..example.code:Cargo<Graph<Directed<int> > >::Type c; //c has type int
-*/
 /**
 .Metafunction.Cargo
 ..example.code:Cargo<Graph<Directed<int> > >::Type c; //c has type int
@@ -187,25 +178,7 @@ struct CgVizFormat_;
 typedef Tag<CgVizFormat_> const CgVizFormat;
 
 
-//////////////////////////////////////////////////////////////////////////////
 
-/**
-.Tag.Alignment Graph Format.value.AtacMatches:
-	Format to read matches in Atac format.
-*/
-
-struct AtacMatches_;
-typedef Tag<AtacMatches_> const AtacMatches;
-
-//////////////////////////////////////////////////////////////////////////////
-
-/**
-.Tag.Alignment Graph Format.value.XMFA:
-	Format to write an alignment in xmfa format.
-*/
-
-struct XMFA_;
-typedef Tag<XMFA_> const XMFA;
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -269,6 +242,10 @@ typedef Tag<BfsIterator_> const BfsIterator;
 struct DfsPreorder_;
 typedef Tag<DfsPreorder_> const DfsPreorder;
 
+
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 // Graph - Default edge stump
 //////////////////////////////////////////////////////////////////////////////
@@ -295,6 +272,8 @@ struct VertexDescriptor<EdgeStump<TCargo, TList, TSource, TId, TSpec> const>
 {
 	typedef typename Id<EdgeStump<TCargo, TList, TSource, TId, TSpec> >::Type Type;
 };
+
+
 
 
 //////////////////////////////////////////////////////////////////////////////

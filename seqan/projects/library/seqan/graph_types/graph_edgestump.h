@@ -281,6 +281,7 @@ struct Cargo<EdgeStump<TCargo, TList, TSource, TId, TSpec> const> {
 	typedef TCargo const Type;
 };
 
+
 template<bool TList, bool TSource, bool TId, typename TSpec>
 struct Cargo<EdgeStump<void, TList, TSource, TId, TSpec> > {
 	typedef void* Type;
@@ -290,6 +291,7 @@ template<bool TList, bool TSource, bool TId, typename TSpec>
 struct Cargo<EdgeStump<void, TList, TSource, TId, TSpec> const> {
 	typedef void* Type;
 };
+
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -590,20 +592,6 @@ assignSource(EdgeStump<TCargo, TList, false, TId, TSpec>*,
 }
 
 //////////////////////////////////////////////////////////////////////////////
-
-/*DISABLED: see gaps_base.h
-.Function.Graph#source:
-..cat:Graph
-..summary:Accesses the source of an EdgeStump.
-..remarks:A source vertex is not required in an edge stump.
-However, EdgeStumps can be configured to contain a source vertex, e.g., in undirected graphs.
-..signature:source(es)
-..param.es:Pointer to the EdgeStump.
-...type:Class.EdgeStump
-..returns:Reference to the source vertex.
-..see:Function.Graph#assignSource
-..see:Function.getSource
-*/
 
 template<typename TCargo, bool TList, bool TId, typename TSpec>
 inline typename VertexDescriptor<EdgeStump<TCargo, TList, true, TId, TSpec> >::Type&

@@ -91,15 +91,16 @@ breadth_first_search(Graph<TSpec> const& g,
 					 TDistanceMap& distance)
 {
 	SEQAN_CHECKPOINT
-	typedef typename Iterator<Graph<TSpec>, EdgeIterator>::Type TEdgeIterator;
-	typedef typename Iterator<Graph<TSpec>, VertexIterator>::Type TVertexIterator;
+	typedef Graph<TSpec> TGraph;
+	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
+	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
 	typedef typename Value<TPredecessorMap>::Type TPredVal;
 	typedef typename Value<TDistanceMap>::Type TDistVal;
 
 	// Initialization
 	resizeVertexMap(g,predecessor);
 	resizeVertexMap(g,distance);
-	TPredVal nilPred = getNilPredecessor(g);
+	TPredVal nilPred = getNil<typename VertexDescriptor<TGraph>::Type>();
 	TDistVal infDist = getInfinityDistance(distance);
 	
 	String<bool> tokenMap;
@@ -200,17 +201,18 @@ depth_first_search(Graph<TSpec> const& g,
 				   TFinishingTimeMap& finish)
 {
 	SEQAN_CHECKPOINT
-	typedef typename Size<Graph<TSpec> >::Type TSize;
-	typedef typename Iterator<Graph<TSpec>, EdgeIterator>::Type TEdgeIterator;
-	typedef typename Iterator<Graph<TSpec>, VertexIterator>::Type TVertexIterator;
-	typedef typename VertexDescriptor<Graph<TSpec> >::Type TVertexDescriptor;
+	typedef Graph<TSpec> TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
+	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename Value<TPredecessorMap>::Type TPredVal;
 
 	// Initialization
 	resizeVertexMap(g,predecessor);
 	resizeVertexMap(g,disc);
 	resizeVertexMap(g,finish);
-	TPredVal nilPred = getNilPredecessor(g);
+	TPredVal nilPred = getNil<TVertexDescriptor>();
 		
 	String<bool> tokenMap;
 	resizeVertexMap(g, tokenMap);
@@ -311,10 +313,11 @@ strongly_connected_components(Graph<TSpec> const& g_source,
 	SEQAN_CHECKPOINT
 
 	// Initialization
-	typedef typename Size<Graph<TSpec> >::Type TSize;
-	typedef typename VertexDescriptor<Graph<TSpec> >::Type TVertexDescriptor;
-	typedef typename Iterator<Graph<TSpec>, EdgeIterator>::Type TEdgeIterator;
-	typedef typename Iterator<Graph<TSpec>, VertexIterator>::Type TVertexIterator;
+	typedef Graph<TSpec> TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
+	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
 	typedef typename Value<TComponents>::Type TCompVal;
 	resizeVertexMap(g_source,components);
 	String<TSize> predMap;
@@ -334,7 +337,7 @@ strongly_connected_components(Graph<TSpec> const& g_source,
 	resizeVertexMap(g,predecessor);
 	resizeVertexMap(g,disc);
 	resizeVertexMap(g,finish);
-	TCompVal nilPred = getNilPredecessor(g);
+	TCompVal nilPred = getNil<TVertexDescriptor>();
 	String<bool> tokenMap;
 	resizeVertexMap(g, tokenMap);
 	TVertexIterator it(g);
@@ -485,7 +488,7 @@ prims_algorithm(Graph<TSpec> const& g,
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<TSpec> TGraph;
-	typedef typename Iterator<Graph<TSpec>, VertexIterator>::Type TVertexIterator;
+	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
 	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
 	typedef typename Value<TPredecessorMap>::Type TPred;
 	typedef typename Value<TWeightMap>::Type TWeight;
@@ -496,7 +499,7 @@ prims_algorithm(Graph<TSpec> const& g,
 	// Initialization
 	String<bool> tokenMap;
 	String<TWeight> key;
-	TPred nilPred = getNilPredecessor(g);
+	TPred nilPred = getNil<typename VertexDescriptor<TGraph>::Type>();
 	TWeight infWeight = getInfinityDistance(weight);
 	resizeVertexMap(g,predecessor);
 	resizeVertexMap(g,tokenMap);
@@ -648,7 +651,7 @@ _print_path(Graph<TSpec> const& g,
 {
 	if (source == v) {
 		std::cout << getProperty(nameMap, source);
-	} else if (getProperty(predecessor, v) == getNilPredecessor(g)) {
+	} else if (getProperty(predecessor, v) == getNil<typename VertexDescriptor<Graph<TSpec> >::Type>()) {
 		std::cout << "No path from " << getProperty(nameMap, source) << " to " << getProperty(nameMap, v) << " exists.";
 	} else {
 		_print_path(g,predecessor, source, getProperty(predecessor, v), nameMap);
@@ -667,7 +670,7 @@ _print_path(Graph<TSpec> const& g,
 {
 	if (source == v) {
 		std::cout << source;
-	} else if (getProperty(predecessor, v) == getNilPredecessor(g)) {
+	} else if (getProperty(predecessor, v) == getNil<typename VertexDescriptor<Graph<TSpec> >::Type>()) {
 		std::cout << "No path from " << source << " to " << v << " exists.";
 	} else {
 		_print_path(g,predecessor, source, getProperty(predecessor, v));
@@ -685,10 +688,11 @@ _initialize_single_source(Graph<TSpec> const& g,
 						  TPredecessorMap& predecessor, 
 						  TDistanceMap& distance)
 {
-	typedef typename Iterator<Graph<TSpec>, VertexIterator>::Type TVertexIterator;
+	typedef Graph<TSpec> TGraph;
+	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
 	typedef typename Value<TPredecessorMap>::Type TPredVal;
 	typedef typename Value<TWeightMap>::Type TDistVal;
-	TPredVal nilPred = getNilPredecessor(g);
+	TPredVal nilPred = getNil<typename VertexDescriptor<TGraph>::Type>();
 	TDistVal infDist = getInfinityDistance(weight);
 	
 	TVertexIterator it(g);
@@ -889,10 +893,11 @@ dijkstra(Graph<TSpec> const& g,
 		 TDistanceMap& distance)
 {
 	SEQAN_CHECKPOINT
-	typedef typename Size<Graph<TSpec> >::Type TSize;
+	typedef Graph<TSpec> TGraph;
+	typedef typename Size<TGraph>::Type TSize;
 	typedef typename Value<TDistanceMap>::Type TDistVal;
-	typedef typename Iterator<Graph<TSpec>, VertexIterator>::Type TVertexIterator;
-	typedef typename Iterator<Graph<TSpec>, OutEdgeIterator>::Type TOutEdgeIterator;
+	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
+	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
 	
 	// Initialization
 	resizeVertexMap(g,predecessor);
@@ -907,7 +912,7 @@ dijkstra(Graph<TSpec> const& g,
 		assignProperty(setS, getValue(it), false);
 	}
 	TDistVal infDist = getInfinityDistance(weight);
-	TVertexDescriptor nilVertex = getNilPredecessor(g);
+	TVertexDescriptor nilVertex = getNil<typename VertexDescriptor<TGraph>::Type>();
 
 	// Run Dijkstra
 	TSize count = numVertices(g);
@@ -965,7 +970,7 @@ _print_all_pairs_shortest_path(Graph<TSpec> const& g,
 	TSize len = getIdUpperBound(g.data_id_managerV);
 	if (i==j) {
 		std::cout << i;
-	} else if (getValue(predecessor, i*len+j) == getNilPredecessor(g)) {
+	} else if (getValue(predecessor, i*len+j) == getNil<typename VertexDescriptor<Graph<TSpec> >::Type>()) {
 		std::cout << "No path from " << i << " to " << j << " exists.";
 	} else {
 		_print_all_pairs_shortest_path(g,predecessor, i, (TVertexDescriptor) getValue(predecessor, i*len+j));
@@ -983,9 +988,10 @@ _initialize_all_pairs(Graph<TSpec> const& g,
 						TMatrix& matrix,
 						TPredecessor& predecessor)
 {
-	typedef typename VertexDescriptor<Graph<TSpec> >::Type TVertexDescriptor;
-	typedef typename Iterator<Graph<TSpec>, VertexIterator>::Type TVertexIterator;
-	typedef typename Iterator<Graph<TSpec>, OutEdgeIterator>::Type TOutEdgeIterator;
+	typedef Graph<TSpec> TGraph;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
+	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
 	typedef typename Size<TMatrix>::Type TSize;
 	typedef typename Value<TWeightMap>::Type TWeightVal;
 	typedef typename Value<TPredecessor>::Type TPredVal;
@@ -1001,7 +1007,7 @@ _initialize_all_pairs(Graph<TSpec> const& g,
 	setLength(predecessor, 1, len);
 	resize(predecessor);
 	TWeightVal infWeight = getInfinityDistance(weight);
-	TPredVal nilPred = getNilPredecessor(g);
+	TPredVal nilPred = getNil<TVertexDescriptor>();
 	for (TSize row=0;row < len;++row) {
 		for (TSize col=0;col < len;++col) {
 			if (row != col) assignValue(matrix, row*len + col, infWeight);
@@ -1274,12 +1280,13 @@ _get_minimum_aug(Graph<TSpec> const& rG,
 				 TVertexDescriptor const source,
 				 TVertexDescriptor sink)
 {
-	typedef typename Size<Graph<TSpec> >::Type TSize;
+	typedef Graph<TSpec> TGraph;
+	typedef typename Size<TGraph>::Type TSize;
 	typedef TSize TFlow;
 	typedef typename Iterator<String<TVertexDescriptor>, Rooted>::Type TIterator;
 	
 	// Build secondary predecessor map just containing the path
-	TVertexDescriptor nilPred = getNilPredecessor(rG);
+	TVertexDescriptor nilPred = getNil<typename VertexDescriptor<TGraph>::Type>();
 	String<TVertexDescriptor> predMap;
 	resizeVertexMap(rG, predMap);
 	TIterator it = begin(predMap);
@@ -1341,7 +1348,7 @@ ford_fulkerson(Graph<TSpec> const& g,
 	typedef typename Value<TFlowMap>::Type TFlow;
 
 	// Initialization
-	TVertexDescriptor nilPred = getNilPredecessor(g);
+	TVertexDescriptor nilPred = getNil<typename VertexDescriptor<TGraph>::Type>();
 	resizeEdgeMap(g,flow);
 	TEdgeIterator itE(g);
 	for(;!atEnd(itE);goNext(itE)) {
