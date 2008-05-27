@@ -41,9 +41,9 @@ void Test_Trie() {
 	SEQAN_TASSERT(parseString(g, 0, "ann") == 3)
 	SEQAN_TASSERT(parseString(g, 0, "anno") == 4)
 	SEQAN_TASSERT(parseString(g, 0, "annu") == 9)
-	SEQAN_TASSERT(getProperty(pos, 11) == 1) // In vertex 11 keyword 1 ends
-	SEQAN_TASSERT(getProperty(pos, 13) == 2)
-	SEQAN_TASSERT(getProperty(pos, 8) == 0)
+	SEQAN_TASSERT(getProperty(pos, 11) == (unsigned int) 1) // In vertex 11 keyword 1 ends
+	SEQAN_TASSERT(getProperty(pos, 13) == (unsigned int) 2)
+	SEQAN_TASSERT(getProperty(pos, 8) == (unsigned int) 0)
 
 	clear(g);
 	clear(pos);
@@ -53,9 +53,9 @@ void Test_Trie() {
 	SEQAN_TASSERT(parseString(g, 0, "l") == 9)
 	SEQAN_TASSERT(parseString(g, 0, "y") == 15)
 	SEQAN_TASSERT(parseString(g, 0, "ec") == 2)
-	SEQAN_TASSERT(getProperty(pos, 8) == 0) // In vertex 8 keyword 0 ends
-	SEQAN_TASSERT(getProperty(pos, 14) == 1)
-	SEQAN_TASSERT(getProperty(pos, 22) == 2)
+	SEQAN_TASSERT(getProperty(pos, 8) == (unsigned int) 0) // In vertex 8 keyword 0 ends
+	SEQAN_TASSERT(getProperty(pos, 14) == (unsigned int) 1)
+	SEQAN_TASSERT(getProperty(pos, 22) == (unsigned int) 2)
 
 	Graph<Automaton<Dna> > gDna;
 	clear(pos);
@@ -69,9 +69,9 @@ void Test_Trie() {
 	SEQAN_TASSERT(parseString(gDna, 0, "T") == 8)
 	SEQAN_TASSERT(parseString(gDna, 0, "AT") == 2)
 	SEQAN_TASSERT(parseString(gDna, 0, "AC") == 13)
-	SEQAN_TASSERT(getProperty(pos, 7) == 0) // In vertex 7 keyword 0 ends
-	SEQAN_TASSERT(getProperty(pos, 18) == 2)
-	SEQAN_TASSERT(getProperty(pos, 12) == 1)
+	SEQAN_TASSERT(getProperty(pos, 7) == (unsigned int) 0) // In vertex 7 keyword 0 ends
+	SEQAN_TASSERT(getProperty(pos, 18) == (unsigned int) 2)
+	SEQAN_TASSERT(getProperty(pos, 12) == (unsigned int) 1)
 
 }
 
