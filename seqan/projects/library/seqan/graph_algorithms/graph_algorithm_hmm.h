@@ -32,6 +32,20 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Function.viterbiAlgorithm:
+..cat:Graph.Hmm
+..summary:Implements the viterbi algorithm.
+..signature:viterbiAlgorithm(hmm, seq, path)
+..param.hmm:In-parameter:Input HMM.
+...type:Spec.Hmm
+..param.seq:In-parameter:Input sequence.
+..param.path:Out-parameter:State path.
+..returns:TCargo
+...remarks:Probability of the path.
+..see:Function.forwardAlgorithm
+..see:Function.backwardAlgorithm
+*/
 template<typename TAlphabet, typename TCargo, typename TSpec, typename TSequence, typename TPath>
 inline TCargo
 viterbiAlgorithm(Graph<Hmm<TAlphabet, TCargo, TSpec> > const& hmm,
@@ -115,6 +129,19 @@ viterbiAlgorithm(Graph<Hmm<TAlphabet, TCargo, TSpec> > const& hmm,
 
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Function.forwardAlgorithm:
+..cat:Graph.Hmm
+..summary:Implements the forward algorithm.
+..signature:forwardAlgorithm(hmm, seq)
+..param.hmm:In-parameter:Input HMM.
+...type:Spec.Hmm
+..param.seq:In-parameter:Input sequence.
+..returns:TCargo
+...remarks:Probability of the sequence.
+..see:Function.viterbiAlgorithm
+..see:Function.backwardAlgorithm
+*/
 template<typename TAlphabet, typename TCargo, typename TSpec, typename TSequence>
 inline TCargo
 forwardAlgorithm(Graph<Hmm<TAlphabet, TCargo, TSpec> > const& hmm,
@@ -169,6 +196,19 @@ forwardAlgorithm(Graph<Hmm<TAlphabet, TCargo, TSpec> > const& hmm,
 
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Function.backwardAlgorithm:
+..cat:Graph.Hmm
+..summary:Implements the backward algorithm.
+..signature:backwardAlgorithm(hmm, seq)
+..param.hmm:In-parameter:Input HMM.
+...type:Spec.Hmm
+..param.seq:In-parameter:Input sequence.
+..returns:TCargo
+...remarks:Probability of the sequence.
+..see:Function.viterbiAlgorithm
+..see:Function.forwardAlgorithm
+*/
 template<typename TAlphabet, typename TCargo, typename TSpec, typename TSequence>
 inline TCargo
 backwardAlgorithm(Graph<Hmm<TAlphabet, TCargo, TSpec> > const& hmm,

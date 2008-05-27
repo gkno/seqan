@@ -1478,6 +1478,141 @@ getLastCoveredPosition(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TKey, typename TValue, typename TPositions, typename TSize, typename TVertexDescriptor, typename TString>
+inline void
+__heaviestCommonSubsequence(std::map<TKey, TValue>&,
+							TPositions const&,
+							TSize const,
+							TSize const,
+							TVertexDescriptor const,
+							TString const&, 
+							TString const&,
+							Nothing&) 
+{
+	SEQAN_CHECKPOINT
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TKey, typename TValue, typename TPositions, typename TSize, typename TVertexDescriptor, typename TString, typename TOutString>
+inline void
+__heaviestCommonSubsequence(std::map<TKey, TValue>& posToSlotMap,
+							TPositions const& positions,
+							TSize const m,
+							TSize const n,
+							TVertexDescriptor const nilVertex,
+							TString const& str1, 
+							TString const& str2,
+							TOutString& align) 
+{
+	SEQAN_CHECKPOINT
+	typedef __int64 TLargeSize;
+	typedef std::map<TKey, TValue> TPositionToSlotMap;
+	typedef typename Value<TString>::Type TVertexSet;
+	typedef typename Iterator<TString const, Rooted>::Type TStringIter;
+	typedef typename Iterator<TString, Rooted>::Type TSIter;
+	typedef typename Iterator<TVertexSet const, Rooted>::Type TVertexSetIter;
+	typedef typename Iterator<TVertexSet, Rooted>::Type TIter;	
+
+	// #Vertex descriptors per node
+	TSize seqsInStr1 = length(str1[0]);	 
+	TSize seqsInStr2 = length(str2[0]);	
+
+	// Reverse the map
+	String<TLargeSize> slotToPos;
+	resize(slotToPos, posToSlotMap.size());
+	TSize counter = 0;
+	for(typename TPositionToSlotMap::const_iterator mapIt = posToSlotMap.begin();mapIt != posToSlotMap.end(); ++mapIt, ++counter) {
+		value(slotToPos, counter) = mapIt->first;
+	}
+	posToSlotMap.clear();
+
+	// Create the alignment sequence
+	TSize numMatches = length(positions);
+	TSize alignLength = numMatches + (n - numMatches) + (m - numMatches);
+	clear(align);
+	resize(align, alignLength);
+	TSIter pointerAlign = begin(align);
+	TSIter pointerAlignEnd = end(align);
+	TStringIter pointerStr1 = begin(str1);
+	TStringIter pointerStr2 = begin(str2);
+	int p = length(positions) - 1;
+	while(pointerAlign != pointerAlignEnd) {
+		TSize i = m;
+		TSize j = n;
+		if (p>=0) {
+			i = (TSize) (slotToPos[positions[p]] / (TLargeSize) n);   // Get the index in str1
+			j = n - 1 - (TSize) (slotToPos[positions[p]] % (TLargeSize) n); // Get the index in str2
+		};
+		// Gaps in seq 2
+		while (i != position(pointerStr1)) {
+			TVertexSet tmp;
+			fill(tmp, (seqsInStr1 + seqsInStr2), nilVertex);
+			TVertexSetIter itVEnd = end(value(pointerStr1));
+			TSize count = 0;
+			for(TVertexSetIter itV = begin(value(pointerStr1));itV != itVEnd;++itV) {
+				tmp[count] = *itV;
+				++count;
+			}
+			value(pointerAlign) = tmp;
+			++pointerAlign;
+			++pointerStr1;
+		}
+		// Gaps in seq 1
+		while (j != position(pointerStr2)) {
+			TVertexSet tmp;
+			fill(tmp, (seqsInStr1 + seqsInStr2), nilVertex);
+			TVertexSetIter itVEnd = end(value(pointerStr2));
+			TSize count = 0;
+			for(TVertexSetIter itV = begin(value(pointerStr2));itV != itVEnd;++itV) {
+				tmp[count] = *itV;
+				++count;
+			}
+			value(pointerAlign) = tmp;
+			++pointerAlign;
+			++pointerStr2;
+		}
+		if (p>=0) {
+			// Matches
+			TVertexSet tmp;
+			fill(tmp, (seqsInStr1 + seqsInStr2), nilVertex);
+			TVertexSetIter itVEnd = end(value(pointerStr1));
+			TSize count = 0;
+			for(TVertexSetIter itV = begin(value(pointerStr1));itV != itVEnd;++itV) {
+				tmp[count] = *itV;
+				++count;
+			}
+			TVertexSetIter itVEnd2 = end(value(pointerStr2));
+			for(TVertexSetIter itV2 = begin(value(pointerStr2));itV2 != itVEnd2;++itV2) {
+				tmp[count] = *itV2;
+				++count;
+			}
+			value(pointerAlign) = tmp;
+			++pointerAlign;
+			++pointerStr1;
+			++pointerStr2;
+			--p;
+		}
+	}
+	SEQAN_TASSERT(position(pointerAlign) == length(align))
+}
+
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TStringSet, typename TCargo, typename TSpec, typename TString, typename TOutString>

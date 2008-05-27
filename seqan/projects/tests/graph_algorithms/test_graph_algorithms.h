@@ -1,9 +1,6 @@
 #ifndef SEQAN_HEADER_TEST_GRAPH_ALGORITHMS_H
 #define SEQAN_HEADER_TEST_GRAPH_ALGORITHMS_H
 
-using namespace std;
-using namespace seqan;
-
 namespace SEQAN_NAMESPACE_MAIN
 {
 
@@ -883,13 +880,14 @@ void Test_GraphAlgorithms() {
 	Test_LongestIncreasingSubsequence();
 	Test_LongestCommonSubsequence();
 	Test_HeaviestIncreasingSubsequence();
+	// ToDo: Generic heaviest common subsequence
 
 	// Hmm algorithms
 	Test_HmmAlgorithms();
 
 	debug::verifyCheckpoints("projects/library/seqan/graph_algorithms/graph_algorithm.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph_algorithms/graph_algorithm_lis_his.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph_algorithms/graph_algorithm_hmm.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph_algorithms/graph_algorithm_lis_his.h");
 }
 
 

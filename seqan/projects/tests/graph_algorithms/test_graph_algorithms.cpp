@@ -6,6 +6,9 @@
 #include <seqan/graph_algorithms.h>
 #include "test_graph_algorithms.h"
 
+// SeqAn Namespace
+using namespace seqan;
+
 //////////////////////////////////////////////////////////////////////////////
 
 int main() 

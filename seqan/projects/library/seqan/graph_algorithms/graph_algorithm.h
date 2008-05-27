@@ -32,10 +32,6 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 
-
-
-
-
 //////////////////////////////////////////////////////////////////////////////
 
 
@@ -1386,6 +1382,27 @@ ford_fulkerson(Graph<TSpec> const& g,
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+// ToDo: Not yet tested, use with care
+//////////////////////////////////////////////////////////////////////////////
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 // Matching
 //////////////////////////////////////////////////////////////////////////////
@@ -1396,10 +1413,6 @@ ford_fulkerson(Graph<TSpec> const& g,
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
-
-/*
-.Function.path_growing_algorithm:
-*/
 
 template<typename TSpec, typename TWeightMap, typename TEdgeMap>
 typename Value<TWeightMap>::Type
@@ -1788,220 +1801,6 @@ weighted_bipartite_matching(Graph<TSpec>& g,
 	}
 	return weight;
 }
-
-
-
-
-
-////////////////////////////////////////////////////////////////////////////////
-//
-//template<typename TSpec, typename TVertexMap, typename TWeightMap, typename TEdges>
-//inline typename Value<TWeightMap>::Type
-//__weighted_bipartite_matching(Graph<TSpec>& g,
-//							  TVertexMap& vertMap,
-//							  TWeightMap& weightMap,
-//							  String<TEdges>& edges)
-//{
-//	typedef Graph<TSpec> TGraph;
-//	typedef typename Size<TGraph>::Type TSize;
-//	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-//	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
-//	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
-//	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
-//	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIter;
-//	typedef typename Value<TWeightMap>::Type TCargo;
-//
-//	TSize numVert = 0;
-//	TCargo maxEdgeVal = 0;
-//
-//	// Find an initial labeling
-//	String<TCargo> label;
-//	resizeVertexMap(g, label);
-//	TVertexIterator itV(g);
-//	for(;!atEnd(itV); goNext(itV)) {
-//		if (property(vertMap, value(itV)) == true) value(label, value(itV)) = 0;
-//		else {
-//			TCargo maxCargo = 0;
-//			for(TOutEdgeIter itOutE(g, value(itV));!atEnd(itOutE); goNext(itOutE)) {
-//				if (property(weightMap, (value(itOutE))) > maxCargo) maxCargo = getProperty(weightMap, (value(itOutE)));
-//			}
-//			value(label, value(itV)) = maxCargo;
-//			if (maxCargo > maxEdgeVal) maxEdgeVal = maxCargo;
-//		}
-//		++numVert;
-//	}
-//
-//	// Generate Equality Graph
-//	typedef Graph<Directed<void> > TEqualityGraph;
-//	typedef typename EdgeType<TEqualityGraph>::Type TEdgeStump;
-//	TEqualityGraph equalGraph;
-//	fill(equalGraph.data_vertex, length(_getVertexString(g)), (TEdgeStump*) 0);
-//	equalGraph.data_id_managerV = g.data_id_managerV;
-//	TEdgeIterator itE(g);
-//	for(;!atEnd(itE); goNext(itE)) {
-//		if (property(weightMap, (value(itE))) == property(label, sourceVertex(itE)) + property(label, targetVertex(itE))) {
-//			// All edges run from false to true
-//			if (getProperty(vertMap, sourceVertex(itE)) == true) addEdge(equalGraph, targetVertex(itE), sourceVertex(itE));
-//			else addEdge(equalGraph, sourceVertex(itE), targetVertex(itE));
-//		}
-//	}
-//
-//	// Start with empty matching
-//	typedef std::pair<TVertexDescriptor, TVertexDescriptor> TEdge;
-//	typedef std::set<TEdge> TEdgeSet;
-//	TEdgeSet edgeSet;
-//
-//	typedef std::set<TVertexDescriptor> TVertexSet;
-//	TVertexSet setS;
-//	TVertexSet setNeighborS;
-//	TVertexSet setT;
-//	String<bool> free;
-//	typedef Graph<Directed<void> > TTree;
-//	TTree alterTree;
-//	String<TVertexDescriptor> reverseNeighbor;
-//	resize(reverseNeighbor, numVert);
-//	fill(alterTree.data_vertex, length(_getVertexString(g)), (TEdgeStump*) 0);
-//	alterTree.data_id_managerV = g.data_id_managerV;
-//
-//	// Find free vertex
-//	TVertexDescriptor u = _find_free_vertex(g, vertMap, free, edgeSet);
-//	setS.insert(u);
-//
-//	// Find neighboring vertices
-//	_find_neighbors(equalGraph, setS, setNeighborS, reverseNeighbor);
-//
-//	// While the matching is not perfect
-//	while (edgeSet.size() != numVert / 2) {
-//
-//		// Update Labels
-//		if (setNeighborS == setT) {		
-//			TCargo minVal = maxEdgeVal;
-//			TEdgeIterator itEdge(g);
-//			for(;!atEnd(itEdge); goNext(itEdge)) {
-//				TVertexDescriptor sV = sourceVertex(itEdge);
-//				TVertexDescriptor tV = targetVertex(itEdge);
-//				if (property(vertMap, sV) == true) { TVertexDescriptor tmp = sV; sV = tV; tV = tmp;	}
-//				if ((setS.find(sV) != setS.end()) &&
-//					(setT.find(tV) == setT.end())) {
-//					TCargo thisVal = property(label, sV) + property(label, tV) - property(weightMap, (value(itEdge)));
-//					if (thisVal < minVal) minVal = thisVal;
-//				}
-//			}
-//			TVertexIterator myVertexIt(g);
-//			for(;!atEnd(myVertexIt); goNext(myVertexIt)) {
-//				if (setS.find(value(myVertexIt)) != setS.end()) value(label, value(myVertexIt)) -= minVal;
-//				else if (setT.find(value(myVertexIt)) != setT.end()) value(label, value(myVertexIt)) += minVal;
-//			}
-//
-//			// Build new equal graph
-//			clear(equalGraph);
-//			fill(equalGraph.data_vertex, length(_getVertexString(g)), (TEdgeStump*) 0);
-//			equalGraph.data_id_managerV = g.data_id_managerV;
-//			TEdgeIterator itE(g);
-//			for(;!atEnd(itE); goNext(itE)) {
-//				if (getProperty(weightMap, (value(itE))) == getProperty(label, sourceVertex(itE)) + getProperty(label, targetVertex(itE))) {
-//					if (getProperty(vertMap, sourceVertex(itE)) == true) addEdge(equalGraph, targetVertex(itE), sourceVertex(itE));
-//					else addEdge(equalGraph, sourceVertex(itE), targetVertex(itE));
-//				}
-//			}
-//
-//			// Find new neighboring vertices
-//			setNeighborS.clear();
-//			_find_neighbors(equalGraph, setS, setNeighborS, reverseNeighbor);
-//		}
-//
-//		// Try to find augmenting path
-//		while (setNeighborS != setT) {
-//			// Get the difference set
-//			TVertexSet diffSet = setNeighborS;
-//			typedef typename TVertexSet::iterator TVertexSetIter;
-//			TVertexSetIter itT = setT.begin();
-//			TVertexSetIter itTEnd = setT.end();
-//			for(;itT != itTEnd; ++itT) diffSet.erase(*itT);
-//			TVertexDescriptor y = *(diffSet.begin());
-//			
-//			// If y is matched:
-//			if (value(free, y) == false) {
-//				typedef typename TEdgeSet::const_iterator TStringEdgeIter;
-//				TStringEdgeIter itSE = edgeSet.begin();
-//				TStringEdgeIter itSEEnd = edgeSet.end();
-//				TVertexDescriptor z = 0;
-//				for(;itSE != itSEEnd; ++itSE) {
-//					if (itSE->first == y) {
-//						z = itSE->second;
-//						break;
-//					} else if (itSE->second == y) {
-//						z = itSE->first;
-//						break;
-//					}
-//				}
-//				setT.insert(y);
-//				if ((setS.insert(z)).second) {
-//					typedef typename Iterator<TEqualityGraph, OutEdgeIterator>::Type TOutEdgeIterator;
-//					TOutEdgeIterator itOE(equalGraph, z);
-//					for(;!atEnd(itOE); ++itOE) {
-//						if ((setNeighborS.insert(targetVertex(itOE))).second) {
-//							value(reverseNeighbor, targetVertex(itOE)) = z;
-//						}
-//					}
-//					if (outDegree(alterTree, y) == 0) {
-//						addEdge(alterTree, value(reverseNeighbor, y), y);
-//						addEdge(alterTree, y, z);
-//					}
-//				}
-//			} else {
-//				// New augmenting path
-//				TVertexDescriptor pred = value(reverseNeighbor, y);
-//				TVertexDescriptor tV = pred;
-//				TVertexDescriptor sV = y;
-//				if (sV > tV) { TVertexDescriptor tmp = sV; sV=tV; tV=tmp; }
-//				edgeSet.insert(std::make_pair(sV, tV));
-//				bool isNewEdge = false;
-//				while(outDegree(alterTree, pred) != 0) {
-//					typedef typename Iterator<TTree, OutEdgeIterator>::Type TOutEdgeIter;
-//					TOutEdgeIter itOut(alterTree, pred);
-//					sV = pred;
-//					pred = targetVertex(itOut);
-//					tV = pred;
-//
-//					if (sV > tV) { TVertexDescriptor tmp = sV; sV=tV; tV=tmp; }
-//					if (isNewEdge) edgeSet.insert(std::make_pair(sV, tV));
-//					else edgeSet.erase(std::make_pair(sV, tV));
-//					isNewEdge = (!isNewEdge);
-//				}
-//				
-//				if (edgeSet.size() != numVert / 2) {
-//					// Find free vertex
-//					setS.clear();
-//					setT.clear();
-//					clear(free);
-//					u = _find_free_vertex(g, vertMap, free, edgeSet);
-//					setS.insert(u);
-//
-//					// Find neighboring vertices
-//					setNeighborS.clear();
-//					_find_neighbors(equalGraph, setS, setNeighborS, reverseNeighbor);
-//
-//					// Create new tree
-//					clearEdges(alterTree);
-//				}
-//				break;
-//			}
-//		}
-//	}
-//	typedef typename TEdgeSet::const_iterator TStringEdgeIter;
-//	TStringEdgeIter itSE = edgeSet.begin();
-//	TStringEdgeIter itSEEnd = edgeSet.end();
-//	TCargo sumWeight = 0;
-//	for(;itSE != itSEEnd; ++itSE) {
-//		TEdgeDescriptor e = findEdge(g, itSE->first, itSE->second);
-//		sumWeight += getProperty(weightMap, e);
-//		appendValue(edges, TEdges(itSE->first, itSE->second));
-//	}
-//
-//	return sumWeight;
-//}
-
 
 
 }// namespace SEQAN_NAMESPACE_MAIN
