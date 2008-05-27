@@ -587,11 +587,7 @@ getAdjacencyMatrix(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
 	TSize table_length = ValueSize<TAlphabet>::VALUE;
 	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
 	TMatrixSize len = getIdUpperBound(g.data_id_managerV);
-	setDimension(mat, 2);
-	setLength(mat, 0, len);
-	setLength(mat, 1, len);
-	resize(mat);
-	for (TMatrixSize i=0;i<len*len;++i) value(mat,i) = 0;
+	fill(mat, len*len, 0);
 	typedef typename Iterator<String<AutomatonEdgeArray<TEdge, TAlphabet> > const, Rooted>::Type TIterConst;
 	for(TIterConst it = begin(g.data_vertex);!atEnd(it);goNext(it)) {
 		if (!idInUse(g.data_id_managerV, position(it))) continue;

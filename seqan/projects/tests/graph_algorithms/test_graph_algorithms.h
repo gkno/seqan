@@ -434,13 +434,13 @@ void Test_AllPairsShortestPath() {
 	resizeEdgeMap(g,weightMap, weights);
 
 	// Out parameter
-	Matrix<int> distMat;
-	Matrix<TVertexDescriptor> predMat;
+	String<int> distMat;
+	String<TVertexDescriptor> predMat;
 
 	// All-Pairs shortest path
 	all_pairs_shortest_path(g,weightMap, distMat, predMat);
 
-	unsigned int len = length(distMat, 0);
+	unsigned int len = (unsigned int) sqrt((double) length(distMat));
 	SEQAN_TASSERT(getValue(distMat, 0*len + 0) == 0)
 	SEQAN_TASSERT(getValue(distMat, 0*len + 1) == 1)
 	SEQAN_TASSERT(getValue(distMat, 0*len + 2) == -3)
@@ -517,13 +517,13 @@ void Test_FloydWarshall() {
 	resizeEdgeMap(g,weightMap, weights);
 
 	// Out parameter
-	Matrix<int> distMat;
-	Matrix<TVertexDescriptor> predMat;
+	String<int> distMat;
+	String<TVertexDescriptor> predMat;
 
 	// Floyd-Warshall
 	floyd_warshall(g,weightMap, distMat, predMat);
 
-	unsigned int len = length(distMat, 0);
+	unsigned int len = (unsigned int) sqrt((double) length(distMat));
 	SEQAN_TASSERT(getValue(distMat, 0*len + 0) == 0)
 	SEQAN_TASSERT(getValue(distMat, 0*len + 1) == 1)
 	SEQAN_TASSERT(getValue(distMat, 0*len + 2) == -3)
@@ -597,10 +597,10 @@ void Test_TransitiveClosure() {
 	addEdges(g,edges, numEdges);
 
 	// Transitive-Closure
-	Matrix<bool> closure;
+	String<bool> closure;
 	transitive_closure(g,closure);
 	
-	unsigned int len = length(closure, 0);
+	unsigned int len = (unsigned int) sqrt((double) length(closure));
 	SEQAN_TASSERT(getValue(closure, 0*len + 0) == 1)
 	SEQAN_TASSERT(getValue(closure, 0*len + 1) == 0)
 	SEQAN_TASSERT(getValue(closure, 0*len + 2) == 0)

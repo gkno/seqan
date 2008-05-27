@@ -28,7 +28,6 @@
 #include <seqan/basic.h>
 #include <seqan/sequence.h>
 #include <seqan/file.h>
-#include <seqan/align/matrix_base.h>
 
 
 #ifdef SEQAN_SWITCH_USE_FORWARDS

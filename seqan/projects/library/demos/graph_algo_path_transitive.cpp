@@ -16,11 +16,11 @@ int main() {
 	addEdges(g, edges, numEdges);
 	std::cout << g << ::std::endl;
 /// Out-parameter: Closure matrix
-	Matrix<bool> closure;
+	String<bool> closure;
 /// Transitive-Closure 
 	transitive_closure(g,closure);
 /// Console output
-	TSize len = length(closure, 0);
+	TSize len = (TSize) std::sqrt((double) length(closure));
 	for (TSize row=0;row < len;++row) {
 		for (TSize col=0;col < len;++col) {
 			std::cout << getValue(closure, row*len+col) << ",";

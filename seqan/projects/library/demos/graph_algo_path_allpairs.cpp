@@ -20,12 +20,12 @@ int main() {
 	String<int> weightMap;
 	resizeEdgeMap(g,weightMap, weights);
 /// Out-parameters: Predecessor and distance matrices
-	Matrix<int> distMat;
-	Matrix<TVertexDescriptor> predMat;
+	String<int> distMat;
+	String<TVertexDescriptor> predMat;
 /// All-Pairs shortest path
 	all_pairs_shortest_path(g,weightMap, distMat, predMat);
 /// Console Output
-	unsigned int len = length(distMat, 0);
+	unsigned int len = (unsigned int) std::sqrt((double) length(distMat));
 	for (TSize row=0;row < len;++row) {
 		for (TSize col=0;col < len;++col) {
 			std::cout << row << "," << col << " (Distance=" << getValue(distMat, row*len + col) << "): "; 

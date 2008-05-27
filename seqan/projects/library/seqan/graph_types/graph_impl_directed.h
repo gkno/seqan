@@ -829,13 +829,9 @@ getAdjacencyMatrix(Graph<Directed<TCargo, TSpec> > const& g,
 	typedef typename Size<TMatrix>::Type TSize;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename Iterator<String<TEdgeStump*> const, Rooted>::Type TIterConst;
+	typedef typename Value<TMatrix>::Type TMatValue;
 	TSize len = getIdUpperBound(g.data_id_managerV);
-	setDimension(mat, 2);
-	setLength(mat, 0, len);
-	setLength(mat, 1, len);
-	resize(mat);
-	for (TSize i=0;i<len*len;++i) value(mat,i) = 0;
-	
+	fill(mat, len * len, (TMatValue) 0);
 	for(TIterConst it = begin(g.data_vertex);!atEnd(it);goNext(it)) {
 		TEdgeStump* current = getValue(it);
 		TVertexDescriptor const source = position(it);

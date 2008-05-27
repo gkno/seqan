@@ -38,7 +38,7 @@ int main()
 		std::cout << "Finishing time = " << getProperty(finishingTimeMap, getValue(it)) << ",";
 		typedef Value<String<unsigned int> >::Type TPredVal;
 		TPredVal pre = getProperty(predMap, getValue(it));
-		if (pre != getNilPredecessor(g)) {
+		if (pre != getNil<TVertexDescriptor>()) {
 			std::cout << "Predecessor = " << getProperty(nameMap, pre) << ::std::endl;
 		} else {
 			std::cout << "Predecessor = nil" << ::std::endl;

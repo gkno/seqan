@@ -147,9 +147,9 @@ void Test_Directed() {
 
 
 	// Adjacency matrix
-	Matrix<unsigned int> mat;
+	String<unsigned int> mat;
 	getAdjacencyMatrix(g, mat);
-	unsigned int len = length(mat, 0);
+	unsigned int len = (unsigned int) std::sqrt((double) length(mat));
 	SEQAN_TASSERT(getValue(mat, 1*len+4) == 1)
 	SEQAN_TASSERT(getValue(mat, 2*len+4) == 1)
 	SEQAN_TASSERT(getValue(mat, 2*len+2) == 0)
@@ -371,9 +371,9 @@ void Test_Undirected() {
 	SEQAN_TASSERT(inDegree(g_copy, 4) == 2)
 
 	// Adjacency matrix
-	Matrix<unsigned int> mat;
+	String<unsigned int> mat;
 	getAdjacencyMatrix(g, mat);
-	unsigned int len = getIdUpperBound(g.data_id_managerV);
+	unsigned int len = (unsigned int) std::sqrt((double) length(mat));
 	SEQAN_TASSERT(getValue(mat,0*len+2) == 1)
 	SEQAN_TASSERT(getValue(mat,3*len+2) == 0)
 	SEQAN_TASSERT(getValue(mat,0*len+2) == getValue(mat,2*len+0))
@@ -715,9 +715,9 @@ void Test_Automaton() {
 	removeVertex(g,0);
 
 	// Adjacency matrix
-	Matrix<unsigned int> mat;
+	String<unsigned int> mat;
 	getAdjacencyMatrix(g, mat);
-	unsigned int len = length(mat,0);
+	unsigned int len = (unsigned int) std::sqrt((double) length(mat));
 	SEQAN_TASSERT(getValue(mat,1*len+4) == 1)
 	SEQAN_TASSERT(getValue(mat,2*len+4) == 1)
 	SEQAN_TASSERT(getValue(mat,0*len+2) == 0)
@@ -1176,9 +1176,9 @@ void Test_Tree() {
 	childC2C1C1C1 = addChild(g,childC2C1C1);
 	childC2C1C1C2 = addChild(g,childC2C1C1);
 	childC4 = addChild(g,rootV);
-	Matrix<unsigned int> mat; 	// Adjacency matrix
+	String<unsigned int> mat; 	// Adjacency matrix
 	getAdjacencyMatrix(g, mat);
-	unsigned int len = length(mat, 0);
+	unsigned int len = (unsigned int) std::sqrt((double) length(mat));
 	SEQAN_TASSERT(getValue(mat, 0*len+8) == 1)
 	SEQAN_TASSERT(getValue(mat, 8*len+0) == 0)
 	SEQAN_TASSERT(getValue(mat, 3*len+0) == 0)
@@ -1493,9 +1493,9 @@ void Test_Alignment() {
 	SEQAN_TASSERT(inDegree(g_copy, 4) == 2)
 
 	// Adjacency matrix
-	Matrix<unsigned int> mat;
+	String<unsigned int> mat;
 	getAdjacencyMatrix(g, mat);
-	unsigned int len = getIdUpperBound(g.data_align.data_id_managerV);
+	unsigned int len = (unsigned int) std::sqrt((double) length(mat));
 	SEQAN_TASSERT(getValue(mat,0*len+2) == 1)
 	SEQAN_TASSERT(getValue(mat,3*len+2) == 0)
 	SEQAN_TASSERT(getValue(mat,0*len+2) == getValue(mat,2*len+0))

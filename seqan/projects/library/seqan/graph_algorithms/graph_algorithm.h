@@ -998,14 +998,8 @@ _initialize_all_pairs(Graph<TSpec> const& g,
 	
 	// Create adjacency-like matrix
 	TSize len = getIdUpperBound(g.data_id_managerV);
-	setDimension(matrix, 2);
-	setLength(matrix, 0, len);
-	setLength(matrix, 1, len);
-	resize(matrix);
-	setDimension(predecessor, 2);
-	setLength(predecessor, 0, len);
-	setLength(predecessor, 1, len);
-	resize(predecessor);
+	resize(matrix, len * len);
+	resize(predecessor, len * len);
 	TWeightVal infWeight = _getInfinityDistance(weight);
 	TPredVal nilPred = getNil<TVertexDescriptor>();
 	for (TSize row=0;row < len;++row) {
@@ -1043,7 +1037,7 @@ _extend_shortest_paths(TMatrix& local,
 	typedef typename Size<TMatrix>::Type TSize;
 	TMatrix oldLocal = local;
 	TPredecessor oldPredecessor = predecessor;
-	TSize len = length(oldLocal, 0);
+	TSize len = (TSize) std::sqrt((double) length(oldLocal));
 	for(TSize i = 0; i<len;++i) {
 		for(TSize j = 0; j<len;++j) {
 			if (i==j) continue;
@@ -1103,7 +1097,7 @@ all_pairs_shortest_path(Graph<TSpec> const& g,
 	// Initialize first distance matrix
 	_initialize_all_pairs(g,weight,distMatrix,predecessor);
 
-	TSize len = length(distMatrix, 0);
+	TSize len = (TSize) sqrt((double) length(distMatrix));
 	TMatrix local = distMatrix;
 	for(TSize m=2;m<len;++m) {
 		_extend_shortest_paths(local,distMatrix,predecessor, infWeight);
@@ -1152,7 +1146,7 @@ floyd_warshall(Graph<TSpec> const& g,
 	_initialize_all_pairs(g,weight,distMatrix,predecessor);
 
 	// Floyd-Warshall
-	TSize len = length(distMatrix, 0);
+	TSize len = (TSize) std::sqrt((double) length(distMatrix));
 	TMatrix local = distMatrix;
 	for(TSize k=0;k<len;++k) {
 		for(TSize i=0;i<len;++i) {
@@ -1200,7 +1194,7 @@ transitive_closure(Graph<TSpec> const& g,
 
 	// Initialize first closure matrix
 	getAdjacencyMatrix(g,closure);
-	TSize len = length(closure, 0);
+	TSize len = (TSize) std::sqrt((double) length(closure));
 	for (TSize diag=0;diag < len;++diag) assignValue(closure, diag*len+diag,1);
 
 	// Transitive Closure
