@@ -25,9 +25,95 @@
 
 namespace SEQAN_NAMESPACE_MAIN
 {
+
 //////////////////////////////////////////////////////////////////////////////
 // Graph - Alignment
 //////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Tag.Alignment Graph Format:
+..summary:A file format to write an alignment graph.
+*/
+
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Tag.Alignment Graph Format.value.MsfFormat:
+	Msf format to write an alignment graph.
+*/
+
+struct MsfFormat_;
+typedef Tag<MsfFormat_> const MsfFormat;
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Tag.Alignment Graph Format.value.FastaFormat:
+	Fasta format to write an alignment graph.
+*/
+
+struct FastaFormat_;
+typedef Tag<FastaFormat_> const FastaFormat;
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Tag.Alignment Graph Format.value.FastaReadFormat:
+	Fasta read format to write an alignment graph.
+*/
+
+struct FastaReadFormat_;
+typedef Tag<FastaReadFormat_> const FastaReadFormat;
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Tag.Alignment Graph Format.value.CgVizFormat:
+	Cgviz format to write an alignment graph.
+*/
+
+struct CgVizFormat_;
+typedef Tag<CgVizFormat_> const CgVizFormat;
+
+
+// Default Alignment Graph
+template<typename TStringSet, typename TCargo = unsigned int, typename TSpec = Default>
+struct Alignment;
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec>
+struct EdgeType<Graph<Alignment<TStringSet, TCargo, TSpec> > const> {
+	typedef typename EdgeType<Graph<Undirected<TCargo, TSpec> > const>::Type Type;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec>
+struct EdgeType<Graph<Alignment<TStringSet, TCargo, TSpec> > > {
+	typedef typename EdgeType<Graph<Undirected<TCargo, TSpec> > >::Type Type;
+};
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec>
+struct Host<Graph<Alignment<TStringSet, TCargo, TSpec> > > {
+	typedef TStringSet Type;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec>
+struct Host<Graph<Alignment<TStringSet, TCargo, TSpec> > const> {
+	typedef TStringSet const Type;
+};
+
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -1389,6 +1475,137 @@ getLastCoveredPosition(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	return fragmentBegin(g, it->second) + fragmentLength(g, it->second);
 }
 
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec, typename TString, typename TOutString>
+inline TCargo
+heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
+						  TString const& str1, 
+						  TString const& str2,
+						  TOutString& align) 
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef __int64 TLargeSize;
+	typedef typename Size<TStringSet>::Type TSize;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
+	typedef typename Value<TString>::Type TVertexSet;
+
+	TSize m = length(str1);  // How many sets of vertex descriptors in seq1
+	TSize n = length(str2);  // How many sets of vertex descriptors in seq1
+
+	// Size of the sequences
+	// Note for profile alignments every member of the sequence is a String!!! of vertex descriptors
+	TCargo divider = (TCargo) length(str1[0]) * (TCargo) length(str2[0]);
+	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
+	
+	// Fill the vertex to position map for str1
+	// Remember for each vertex descriptor the position in the sequence
+	typedef std::map<TVertexDescriptor, TSize> TVertexToPosMap;
+	typedef typename TVertexToPosMap::const_iterator TVertexToPosMapIter;
+	TVertexToPosMap map;
+	typedef typename Iterator<TString const>::Type TStringIterConst;
+	typedef typename Iterator<TVertexSet const>::Type TVertexSetIterConst;
+	TStringIterConst itStrEnd1 = end(str1);
+	TSize pos = 0;
+	for(TStringIterConst itStr1 = begin(str1);itStr1 != itStrEnd1;++itStr1, ++pos) {
+		TVertexSetIterConst itVEnd = end(getValue(itStr1));	
+		for(TVertexSetIterConst itV = begin(getValue(itStr1));itV != itVEnd;++itV) {
+			if (*itV != nilVertex) map.insert(std::make_pair(*itV, pos));
+		}
+	}
+
+	// We could create the full graph -> too expensive
+	// Remember which edges are actually present
+	typedef std::set<TLargeSize> TOccupiedPositions;
+	TOccupiedPositions occupiedPositions;
+	TStringIterConst itStrEnd2 = end(str2);
+	TSize posItStr2 = 0;
+	for(TStringIterConst itStr2 = begin(str2);itStr2 != itStrEnd2;++itStr2, ++posItStr2) {
+		TVertexSetIterConst itVEnd = end(getValue(itStr2));
+		for(TVertexSetIterConst itV = begin(getValue(itStr2));itV != itVEnd;++itV) {
+			if (*itV != nilVertex) {
+				TOutEdgeIterator itOut(g, *itV);
+				for(;!atEnd(itOut); ++itOut) {
+					// Target vertex must be in the map
+					TVertexToPosMapIter pPos = map.find(targetVertex(itOut));
+					if (pPos != map.end()) occupiedPositions.insert( (TLargeSize) (pPos->second) * (TLargeSize) n + (TLargeSize) (n - posItStr2 - 1) );
+				}
+			}
+		}
+	}
+	// Map the occupied positions to slots
+	typedef std::map<TLargeSize, TSize> TPositionToSlotMap;
+	TPositionToSlotMap posToSlotMap;
+	TSize counter = 0;
+	for(typename TOccupiedPositions::const_iterator setIt = occupiedPositions.begin();setIt != occupiedPositions.end(); ++setIt, ++counter) {
+		posToSlotMap.insert(std::make_pair(*setIt, counter));
+	}
+	occupiedPositions.clear();
+
+	// Walk through str2 and fill in the weights of the actual edges
+	typedef String<TCargo> TWeights;
+	typedef typename Iterator<TWeights>::Type TWeightsIter;
+	TWeights weights;
+	fill(weights, posToSlotMap.size(),0);
+	posItStr2 = 0;
+	for(TStringIterConst itStr2 = begin(str2);itStr2 != itStrEnd2;++itStr2, ++posItStr2) {
+		TVertexSetIterConst itVEnd = end(getValue(itStr2));
+		for(TVertexSetIterConst itV = begin(getValue(itStr2));itV != itVEnd;++itV) {
+			if (*itV != nilVertex) {
+				TOutEdgeIterator itOut(g, *itV);
+				for(;!atEnd(itOut); ++itOut) {
+					// Target vertex must be in the map
+					TVertexToPosMapIter pPos = map.find(targetVertex(itOut));
+					if (pPos != map.end()) weights[posToSlotMap[ (TLargeSize) (pPos->second) * (TLargeSize) n + (TLargeSize) (n - posItStr2 - 1) ]] += (TCargo) cargo(*itOut);
+				}
+			}
+		}
+	}
+	map.clear();
+	// Average weights
+	TWeightsIter itWeights = begin(weights);
+	TWeightsIter itWeightsEnd = begin(weights);
+	for(;itWeights != itWeightsEnd; ++itWeights) *itWeights /= divider;
+
+
+	// Now the tough part: Find the right number for a given position
+	typedef String<TSize> TSequenceString;
+	typedef typename Iterator<TSequenceString>::Type TSeqIter;
+	TSequenceString seq;
+	resize(seq, posToSlotMap.size());
+	TSeqIter itSeq = begin(seq);
+	for(typename TPositionToSlotMap::const_iterator mapIt = posToSlotMap.begin();mapIt != posToSlotMap.end(); ++mapIt, ++counter) {
+		*itSeq = n - 1 - (TSize) (mapIt->first % (TLargeSize) n); ++itSeq;
+	}
+
+	// Calculate the heaviest increasing subsequence
+	String<TSize> positions;
+	TCargo score = (TCargo) heaviestIncreasingSubsequence(seq, weights, positions);
+
+	// Retrieve the alignment sequence
+	__heaviestCommonSubsequence(posToSlotMap, positions, m, n, nilVertex, str1, str2, align);
+
+	return score;
+
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec, typename TString>
+inline TCargo
+heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
+						  TString const& str1, 
+						  TString const& str2) 
+{
+	SEQAN_CHECKPOINT
+	Nothing noth;
+	return heaviestCommonSubsequence(g, str1, str2, noth);
+}
 
 }// namespace SEQAN_NAMESPACE_MAIN
 

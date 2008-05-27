@@ -23,7 +23,9 @@
 
 namespace SEQAN_NAMESPACE_MAIN
 {
-//Alignment Tags: see basic/basic_tag.h
+
+
+
 
 //////////////////////////////////////////////////////////////////////////////
 // Alignment: Simple Traceback Alphabet

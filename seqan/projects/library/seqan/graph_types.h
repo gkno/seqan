@@ -48,7 +48,6 @@
 #include <seqan/graph_types/graph_impl_wordgraph.h>	// Specialized automaton: Word graph
 #include <seqan/graph_types/graph_impl_tree.h>		// Tree
 #include <seqan/graph_types/graph_impl_fragment.h>    // Fragment
-#include <seqan/graph_types/graph_impl_align.h>		// Alignment Graph
 #include <seqan/graph_types/graph_impl_hmm.h>			// HMM
 
 // Graph iterators

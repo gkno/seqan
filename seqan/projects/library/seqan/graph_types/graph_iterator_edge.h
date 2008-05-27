@@ -313,22 +313,6 @@ goNext(Iter<Graph<Undirected<TCargo, TGraphSpec> >, GraphIterator<InternalEdgeIt
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TStringSet, typename TCargo, typename TGraphSpec, typename TSpec>
-inline void
-goNext(Iter<Graph<Alignment<TStringSet, TCargo, TGraphSpec> >, GraphIterator<InternalEdgeIterator<TSpec> > >& it)
-{
-	typedef Graph<Alignment<TStringSet, TCargo, TGraphSpec> > TGraph;
-	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	_goNextInternal(it);
-	TVertexDescriptor sourceV = sourceVertex(it.data_edge_it);
-	while((!atEnd(it)) && (targetVertex(hostGraph(it), getValue(it.data_edge_it)) == sourceV)) {
-		_goNextInternal(it);
-		sourceV = sourceVertex(it.data_edge_it);
-	}
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
 template<typename TGraph, typename TSpec>
 inline Iter<TGraph, GraphIterator<InternalEdgeIterator<TSpec> > >&
 operator ++(Iter<TGraph, GraphIterator<InternalEdgeIterator<TSpec> > >& it)

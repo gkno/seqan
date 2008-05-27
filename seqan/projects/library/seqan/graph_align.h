@@ -32,6 +32,9 @@
 #endif
 
 // Alignment
+
+#include <seqan/graph_align/graph_impl_align.h>		// Alignment Graph
+#include <seqan/graph_align/graph_impl_align_adapt.h>
 #include <seqan/graph_align/graph_align_base.h>
 #include <seqan/graph_align/graph_align_config.h>
 #include <seqan/graph_align/graph_align_needleman_wunsch.h>

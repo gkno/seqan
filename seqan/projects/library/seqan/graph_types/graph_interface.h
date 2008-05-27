@@ -40,10 +40,6 @@ struct Tree;
 template<typename TAlphabet = char, typename TCargo = void, typename TSpec = Default>
 struct Automaton;
 
-// Default Alignment Graph
-template<typename TStringSet, typename TCargo = unsigned int, typename TSpec = Default>
-struct Alignment;
-
 // Default Hmm
 template<typename TAlphabet = Dna, typename TCargo = double, typename TSpec = Default>
 struct Hmm;
@@ -224,21 +220,6 @@ struct EdgeType<Graph<Automaton<TAlphabet, TCargo, WithoutEdgeId> > const> {
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TStringSet, typename TCargo, typename TSpec>
-struct EdgeType<Graph<Alignment<TStringSet, TCargo, TSpec> > const> {
-	typedef typename EdgeType<Graph<Undirected<TCargo, TSpec> > const>::Type Type;
-};
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TStringSet, typename TCargo, typename TSpec>
-struct EdgeType<Graph<Alignment<TStringSet, TCargo, TSpec> > > {
-	typedef typename EdgeType<Graph<Undirected<TCargo, TSpec> > >::Type Type;
-};
-
-
-//////////////////////////////////////////////////////////////////////////////
-
 template<typename TAlphabet, typename TCargo, typename TSpec>
 struct EdgeType<Graph<Hmm<TAlphabet, TCargo, TSpec> > const> {
 	typedef typename EdgeType<Graph<Directed<TCargo, TSpec> > const>::Type Type;
@@ -316,21 +297,6 @@ template<typename TAlphabet, typename TCargo, typename TSpec>
 struct Alphabet<Graph<Hmm<TAlphabet, TCargo, TSpec> > const> {
 	typedef TAlphabet Type;
 };
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TStringSet, typename TCargo, typename TSpec>
-struct Host<Graph<Alignment<TStringSet, TCargo, TSpec> > > {
-	typedef TStringSet Type;
-};
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TStringSet, typename TCargo, typename TSpec>
-struct Host<Graph<Alignment<TStringSet, TCargo, TSpec> > const> {
-	typedef TStringSet const Type;
-};
-
 
 //////////////////////////////////////////////////////////////////////////////
 // Generic Graph Functions
