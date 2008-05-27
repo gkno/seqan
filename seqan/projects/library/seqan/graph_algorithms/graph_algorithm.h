@@ -101,7 +101,7 @@ breadth_first_search(Graph<TSpec> const& g,
 	resizeVertexMap(g,predecessor);
 	resizeVertexMap(g,distance);
 	TPredVal nilPred = getNil<typename VertexDescriptor<TGraph>::Type>();
-	TDistVal infDist = getInfinityDistance(distance);
+	TDistVal infDist = _getInfinityDistance(distance);
 	
 	String<bool> tokenMap;
 	resizeVertexMap(g, tokenMap);
@@ -500,7 +500,7 @@ prims_algorithm(Graph<TSpec> const& g,
 	String<bool> tokenMap;
 	String<TWeight> key;
 	TPred nilPred = getNil<typename VertexDescriptor<TGraph>::Type>();
-	TWeight infWeight = getInfinityDistance(weight);
+	TWeight infWeight = _getInfinityDistance(weight);
 	resizeVertexMap(g,predecessor);
 	resizeVertexMap(g,tokenMap);
 	resizeVertexMap(g,key);
@@ -693,7 +693,7 @@ _initialize_single_source(Graph<TSpec> const& g,
 	typedef typename Value<TPredecessorMap>::Type TPredVal;
 	typedef typename Value<TWeightMap>::Type TDistVal;
 	TPredVal nilPred = getNil<typename VertexDescriptor<TGraph>::Type>();
-	TDistVal infDist = getInfinityDistance(weight);
+	TDistVal infDist = _getInfinityDistance(weight);
 	
 	TVertexIterator it(g);
 	while(!atEnd(it)) {
@@ -911,7 +911,7 @@ dijkstra(Graph<TSpec> const& g,
 	for(;!atEnd(it);++it) {
 		assignProperty(setS, getValue(it), false);
 	}
-	TDistVal infDist = getInfinityDistance(weight);
+	TDistVal infDist = _getInfinityDistance(weight);
 	TVertexDescriptor nilVertex = getNil<typename VertexDescriptor<TGraph>::Type>();
 
 	// Run Dijkstra
@@ -1006,7 +1006,7 @@ _initialize_all_pairs(Graph<TSpec> const& g,
 	setLength(predecessor, 0, len);
 	setLength(predecessor, 1, len);
 	resize(predecessor);
-	TWeightVal infWeight = getInfinityDistance(weight);
+	TWeightVal infWeight = _getInfinityDistance(weight);
 	TPredVal nilPred = getNil<TVertexDescriptor>();
 	for (TSize row=0;row < len;++row) {
 		for (TSize col=0;col < len;++col) {
@@ -1098,7 +1098,7 @@ all_pairs_shortest_path(Graph<TSpec> const& g,
 	SEQAN_CHECKPOINT
 	typedef typename Size<TMatrix>::Type TSize;
 	typedef typename Value<TWeightMap>::Type TWeightVal;
-	TWeightVal infWeight = getInfinityDistance(weight);
+	TWeightVal infWeight = _getInfinityDistance(weight);
 
 	// Initialize first distance matrix
 	_initialize_all_pairs(g,weight,distMatrix,predecessor);

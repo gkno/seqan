@@ -1195,7 +1195,7 @@ _debugRefinedMatches(TGraph& g)
 //		TScoreValue sumScore = 0;
 //		for(TSize column = (value(itConsBlock)).i2; column < (value(itConsBlock)).i3; ++column) {
 //			AminoAcid chooseX = AminoAcid(0);
-//			TScoreValue maxVal = -1 * getInfinity<TScoreValue>();
+//			TScoreValue maxVal = -1 * _getInfinity<TScoreValue>();
 //			for(unsigned int aminoWalker = 0; aminoWalker < 20; ++aminoWalker) {
 //				TScoreValue sum = 0;
 //				AminoAcid x = AminoAcid(aminoWalker);
@@ -1215,7 +1215,7 @@ _debugRefinedMatches(TGraph& g)
 //		appendValue(consensus, consString);
 //		appendValue(scores, sumScore);
 //	}
-//	TScoreValue maxValueCons =  -1 * getInfinity<TScoreValue>();
+//	TScoreValue maxValueCons =  -1 * _getInfinity<TScoreValue>();
 //	TSize maxIndexCons = 0;
 //	for(TSize i = 0; i<length(scores); ++i) {
 //		if (scores[i] > maxValueCons) {

@@ -339,41 +339,13 @@ struct Host<Graph<Alignment<TStringSet, TCargo, TSpec> > const> {
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.getInfinity:
-..cat:Graph
-..summary:Utility function returning a value that represents infinity.
-Useful for various graph algorithms, e.g., Dijkstra.
-..signature:getInfinity<T>()
-..returns:Pseudo infinity value for type T.
-..see:Function.getNil
-*/
-template <typename T>
-inline T const
-getInfinity()
-{
-	T * _tag = 0;
-	return supremumValueImpl(_tag);
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template <>
-inline double const
-getInfinity()
-{
-	return 1000000000;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-/**
 .Function.getNil:
 ..cat:Graph
 ..summary:Utility function returning a value that represents nil.
 Useful for various graph algorithms, e.g., missing predecessors, vertices that have not been visited, etc.
 ..signature:getNil<T>()
 ..returns:Pseudo nil value for type T.
-..see:Function.getInfinity
+..see:Function._getInfinity
 */
 template <typename T>
 inline T const
@@ -396,32 +368,44 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 
-/**
-.Function.getInfinityDistance:
-..cat:Graph
-..summary:Utility function for various graph algorithms.
-The infinity distance can be used to indicate not reachable, e.g., in shortest path problem.
-..signature:getInfinityDistance([distance_map])
-..param.distance_map:A property map.
-...remarks:Given the value type of a distance map an appropriate infinity value is returned.
-..returns:Infinity value.
-*/
+// Purely internal!!! Never compare to _getInfinity()!!!.
+// Just returns a very large value.
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename T>
+inline T const
+_getInfinity()
+{
+	T * _tag = 0;
+	return supremumValueImpl(_tag);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <>
+inline double const
+_getInfinity()
+{
+	return 1000000000;
+}
+
+//////////////////////////////////////////////////////////////////////////////
 
 template<typename TWeightMap>
 inline typename Value<TWeightMap>::Type
-getInfinityDistance(TWeightMap const&)
+_getInfinityDistance(TWeightMap const&)
 {
 	// We need to divide by 2 because of addition in some graph algorithms: infinity + something
-	return (getInfinity<typename Value<TWeightMap>::Type>()/2);
+	return (_getInfinity<typename Value<TWeightMap>::Type>()/2);
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
 inline T const
-getInfinityDistance()
+_getInfinityDistance()
 {
-	return (getInfinity<T>() / 2);
+	return (_getInfinity<T>() / 2);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -443,10 +427,7 @@ _createVertices(Graph<TSpec>& g,
 				TVertexDescriptor const maxId) 
 {
 		// Create missing vertices
-		while (maxId >= getIdUpperBound(g.data_id_managerV))
-		{
-			addVertex(g);
-		}
+		while (maxId >= getIdUpperBound(g.data_id_managerV)) addVertex(g);
 }
 
 //////////////////////////////////////////////////////////////////////////////

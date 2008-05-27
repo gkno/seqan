@@ -205,7 +205,7 @@ _align_gotoh(TTrace& trace,
 	typedef typename Iterator<TTrace, Standard>::Type TTraceIter;
 	TTraceIter it = begin(trace, Standard() );
 	// Max values: overall.first = last column, overall.second = last row
-	TScoreValue infValue = -1 * (getInfinity<TScoreValue>() / 2);
+	TScoreValue infValue = -1 * (_getInfinity<TScoreValue>() / 2);
 	overallMaxValue = std::make_pair(infValue, infValue);
 	//overallMaxValue = std::make_pair(InfimumValue<TScoreValue>::VALUE, InfimumValue<TScoreValue>::VALUE);
 	overallMaxIndex = std::make_pair(len1, len2);

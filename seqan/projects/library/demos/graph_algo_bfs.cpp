@@ -32,7 +32,7 @@ int main()
 	TVertexIterator it(g);
 	while(!atEnd(it)) {
 		std::cout << "Vertex " << getProperty(nameMap, getValue(it)) << ": ";
-		if (getProperty(distMap, getValue(it))== getInfinityDistance(distMap)) {
+		if (getProperty(distMap, getValue(it))== _getInfinityDistance(distMap)) {
 			std::cout << "Not reachable!";
 		} else {
 			std::cout << "Level = " << getProperty(distMap, getValue(it));

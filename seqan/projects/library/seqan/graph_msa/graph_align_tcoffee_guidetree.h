@@ -392,7 +392,7 @@ _upgmaTreeMerge(Graph<Undirected<TCargo, TSpec> >& pairGraph,
 	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
 	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
 
-	TCargo infCargo = getInfinity<TCargo>();
+	TCargo infCargo = _getInfinity<TCargo>();
 	TVertexDescriptor s = sourceVertex(pairGraph,best);
 	TVertexDescriptor t = targetVertex(pairGraph,best);
 	
@@ -456,7 +456,7 @@ _upgmaTreeMerge(Graph<Undirected<TCargo, TSpec> >& pairGraph,
 	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
 	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
 
-	TCargo infCargo = getInfinity<TCargo>();
+	TCargo infCargo = _getInfinity<TCargo>();
 	TVertexDescriptor s = sourceVertex(pairGraph,best);
 	TVertexDescriptor t = targetVertex(pairGraph,best);
 	
@@ -522,7 +522,7 @@ upgmaTree(String<TStringValue, TStringSpec>& mat,
 
 
 	// Find the minimal value
-	TValue infinityVal = getInfinity<TValue>();
+	TValue infinityVal = _getInfinity<TValue>();
 	TValue minVal = infinityVal;
 	TSize index_i = 0;
 	TSize index_j = 1;
@@ -646,7 +646,7 @@ upgmaTree(Graph<Undirected<TValue, TSpec1> >& pairGraph,
 	for(TSize i=0;i<nseq;++i) appendValue(nodes, addVertex(g));	// For each sequence one vertex
 
 	// Find the minimal value
-	TValue infinityVal = getInfinity<TValue>();
+	TValue infinityVal = _getInfinity<TValue>();
 	TValue minVal = infinityVal;
 	TED best = 0;
 	TEdgeI itE(pairGraph);

@@ -749,7 +749,7 @@ __resizeWithRespectToDistance(String<TValue, TSpec>& dist, TSize nseq)
 {
 	SEQAN_CHECKPOINT
 	clear(dist);
-	TValue infDist = getInfinity<TValue>(); 
+	TValue infDist = _getInfinity<TValue>(); 
 	fill(dist, nseq * nseq, infDist);
 }
 

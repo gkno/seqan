@@ -312,7 +312,6 @@ void Test_DagShortestPath() {
 	// DAG-Shortest path(Graph, sourceVertex_vertex, weightMap, predMap, distMap)
 	dag_shortest_path(g,1,weightMap,predMap,distMap);
 	
-	SEQAN_TASSERT(getProperty(distMap, 0) == (unsigned int) getInfinityDistance(weightMap))
 	SEQAN_TASSERT(getProperty(distMap, 1) == 0)
 	SEQAN_TASSERT(getProperty(distMap, 2) == 2)
 	SEQAN_TASSERT(getProperty(distMap, 3) == 6)
