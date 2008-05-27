@@ -22,60 +22,20 @@
 #define SEQAN_HEADER_CONSENSUS_H
 
 // Seqan
-#include <seqan/basic.h>
-#include <seqan/sequence.h>
-#include <seqan/file.h>
-#include <seqan/align/matrix_base.h>
-#include <seqan/misc/misc_random.h>
 #include <seqan/score.h>
 #include <seqan/modifier.h>
-//#include <seqan/align.h>
-
-// External / STL
-#include <deque>
-#include <map>
-#include <set>
-#include <queue>
-#include <typeinfo>
-#include <sstream> 
-#include <fstream> 
-#include <limits>
-
-
-
 #include <seqan/graph_types.h>
 #include <seqan/graph_algorithms.h>
 #include <seqan/refinement.h>
+#include <seqan/graph_utils.h>
 #include <seqan/graph_align.h>
 #include <seqan/graph_msa.h>
+
 
 
 #ifdef SEQAN_SWITCH_USE_FORWARDS
 #include <seqan/consensus/consensus_generated_forwards.h>
 #endif
-
-#ifdef SEQAN_SWITCH_USE_FORWARDS
-#include <seqan/refinement/refinement_generated_forwards.h>
-#endif
-
-#ifdef SEQAN_SWITCH_USE_FORWARDS
-#include <seqan/graph_types/graph_types_generated_forwards.h>
-#endif
-
-#ifdef SEQAN_SWITCH_USE_FORWARDS
-#include <seqan/graph_align/graph_align_generated_forwards.h>
-#endif
-
-#ifdef SEQAN_SWITCH_USE_FORWARDS
-#include <seqan/graph_algorithms/graph_algorithms_generated_forwards.h>
-#endif
-
-#ifdef SEQAN_SWITCH_USE_FORWARDS
-#include <seqan/graph_msa/graph_msa_generated_forwards.h>
-#endif
-
-
-
 
 // Consensus tool
 #include <seqan/consensus/graph_consensus_base.h>

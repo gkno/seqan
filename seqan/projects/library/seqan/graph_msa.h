@@ -22,13 +22,12 @@
 #define SEQAN_HEADER_GRAPH_MSA_H
 
 // Seqan
+#include <seqan/score.h>
 #include <seqan/graph_types.h>
 #include <seqan/graph_algorithms.h>
 #include <seqan/refinement.h>
 #include <seqan/graph_align.h>
 #include <seqan/graph_utils.h>
-#include <seqan/score.h>
-
 
 #ifdef SEQAN_SWITCH_USE_FORWARDS
 #include <seqan/graph_msa/graph_msa_generated_forwards.h>

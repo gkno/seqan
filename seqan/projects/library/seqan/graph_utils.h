@@ -26,6 +26,7 @@
 
 // Seqan
 #include <seqan/graph_types.h>
+#include <seqan/refinement.h>
 
 #ifdef SEQAN_SWITCH_USE_FORWARDS
 #include <seqan/graph_utils/graph_utils_generated_forwards.h>

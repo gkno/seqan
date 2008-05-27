@@ -76,14 +76,6 @@ struct Island_Library_;
 typedef Tag<Island_Library_> const Island_Library;
 
 /**
-.Tag.Library Generation.value.Overlap_Library:
-	A primary library of overlap alignments.
-*/
-
-struct Overlap_Library_;
-typedef Tag<Overlap_Library_> const Overlap_Library;
-
-/**
 .Tag.Library Generation.value.Kmer_Library:
 	A primary library of kmer alignments.
 */

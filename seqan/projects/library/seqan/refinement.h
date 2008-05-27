@@ -21,20 +21,28 @@
 #ifndef SEQAN_HEADER_REFINEMENT_H
 #define SEQAN_HEADER_REFINEMENT_H
 
+// External STL
+#include <map>
+
 // Seqan
 #include <seqan/score.h>
 #include <seqan/graph_types.h>
-#include <seqan/graph_align.h>
+#include <seqan/graph_algorithms.h>
 
 
 #ifdef SEQAN_SWITCH_USE_FORWARDS
 #include <seqan/refinement/refinement_generated_forwards.h>
 #endif
 
+// Alignment graph
+#include <seqan/refinement/graph_impl_align.h>
+#include <seqan/refinement/graph_impl_align_adapt.h>
 
-// Refinement
+// Intervall trees
 #include <seqan/refinement/graph_impl_interval_types.h>
 #include <seqan/refinement/graph_impl_interval_tree.h>
+
+// Refinement
 //#include <seqan/refinement/graph_algorithm_refine.h>
 #include <seqan/refinement/graph_algorithm_refine_scoring.h>
 #include <seqan/refinement/graph_algorithm_refine_fragment.h>

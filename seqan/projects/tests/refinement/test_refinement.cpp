@@ -2,13 +2,25 @@
 #define SEQAN_TEST
 #define SEQAN_VERBOSE
 
+// Test path
+#define TEST_PATH "projects/tests/refinement/"
+
 // External / STL
-#include <fstream> 
+#include <iostream>
+#include <fstream>
+#include <string>
 
 // SeqAn Includes
 #include <seqan/refinement.h>
+
+// Test files
+#include "test_graph_impl_align.h"
 #include "test_graph_match_refinement.h"
 #include "test_graph_interval_tree.h"
+
+
+using namespace seqan;
+
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -16,8 +28,18 @@ int main()
 {
 	SEQAN_TREPORT("TEST BEGIN")
 
+	// Redirect std::cout
+    std::ofstream file(TEST_PATH "redirect.txt");
+    std::streambuf* strm_puffer = std::cout.rdbuf();
+    std::cout.rdbuf(file.rdbuf());
+
+	Test_AlignmentGraph();
 	//Test_GraphMatchRefinement();// Test Match Refinement
 	//Test_GraphIntervalTree();	// Test Interval Tree
+
+	// Restore std::cout
+	std::cout.rdbuf(strm_puffer);
+
 
 	debug::verifyCheckpoints("projects/library/seqan/refinement/graph_impl_interval_types.h");
 	debug::verifyCheckpoints("projects/library/seqan/refinement/graph_impl_interval_tree.h");
