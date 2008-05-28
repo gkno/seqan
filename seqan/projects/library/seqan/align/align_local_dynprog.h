@@ -596,9 +596,9 @@ get_next_best_end_position(LocalAlignmentFinder<TScoreValue> & sw ,
 {
 SEQAN_CHECKPOINT
 
-	TScoreValue top_score;
+	TScoreValue top_score = 0;
 	if(!empty(sw.pq_))
-        top_score = getValue(sw.matrix_,top(sw.pq_).id_);
+	        top_score = getValue(sw.matrix_,top(sw.pq_).id_);
 
 	while (!empty(sw.pq_) && (top(sw.pq_).value_ != top_score))
 	{

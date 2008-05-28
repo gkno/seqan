@@ -66,7 +66,7 @@ updateCutPosition(Fragment<TSize, ExactReversableFragment<TSpec> > & f, TPos & p
 
 template<typename TFrag,typename TPos>
 inline void
-updateCutPosition(TFrag & segment, TPos & pos_j)
+updateCutPosition(TFrag &, TPos &)
 {
 	return;
 }
