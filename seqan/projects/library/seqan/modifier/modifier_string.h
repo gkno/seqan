@@ -467,6 +467,22 @@ namespace SEQAN_NAMESPACE_MAIN
 		return source;
 	}
 
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename THost, typename TSpec>
+inline void const *
+id(ModifiedString<THost, TSpec> & me) 
+{
+SEQAN_CHECKPOINT
+	return id(host(me));
+}
+template <typename THost, typename TSpec>
+inline void const *
+id(ModifiedString<THost, TSpec> const & me) 
+{
+SEQAN_CHECKPOINT
+	return id(host(me));
+}
 
 }
 
