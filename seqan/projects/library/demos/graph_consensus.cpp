@@ -35,7 +35,7 @@ evaluationOfReadAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const&,
 	// Make an alignment of haplotypes and consensus
 	StringSet<TString, Owner<> > seqSet;
 	String<String<char> > names;
-	_alignImportSequences(value(cfgOpt, "haplotypes"), seqSet, names);
+	_loadSequences(value(cfgOpt, "haplotypes"), seqSet, names);
 	
 	typedef StringSet<TString, Dependent<> > TDepStringSet;
 	typedef Graph<Alignment<TDepStringSet, unsigned int> > TAliGraph;
@@ -136,7 +136,7 @@ convertSimulationFile(ReadStore<TAlphabet, TSpec>& readSt,
 	appendValue(filePath, 'L');
 	StringSet<String<char>, Owner<> > libSet;
 	String<TName> libIds;
-	_alignImportSequences(filePath, libSet, libIds);
+	_loadSequences(filePath, libSet, libIds);
 	for(TSize i = 0; i<length(libSet); ++i) {
 		std::stringstream input;
 		input << "L" << i;
@@ -164,7 +164,7 @@ convertSimulationFile(ReadStore<TAlphabet, TSpec>& readSt,
 	appendValue(filePath, 'F');
 	StringSet<String<char>, Owner<> > fragSet;
 	String<TName> fragIds;
-	_alignImportSequences(filePath, fragSet, fragIds);
+	_loadSequences(filePath, fragSet, fragIds);
 	for(TSize i = 0; i<length(fragSet); ++i) {
 		std::stringstream input;
 		input << "F" << i;
@@ -204,7 +204,7 @@ convertSimulationFile(ReadStore<TAlphabet, TSpec>& readSt,
 	String<TName> names;
 	clear(filePath);
 	filePath = value(cfgOpt, "reads");
-	_alignImportSequences(filePath, origStrSet, names);
+	_loadSequences(filePath, origStrSet, names);
 	for(TSize i = 0; i<length(origStrSet); ++i) {
 		TSize begRead;
 		if (readSt.data_pos_count == 0) begRead = 0;
@@ -275,7 +275,7 @@ convertSimulationFile(ReadStore<TAlphabet, TSpec>& readSt,
 	String<TName> seqNames;
 	filePath = value(cfgOpt, "reads");
 	appendValue(filePath, 'S');
-	_alignImportSequences(filePath, seqSet, seqNames);
+	_loadSequences(filePath, seqSet, seqNames);
 	if (!empty(seqSet)) {
 		for(TSize l = 0;l < length(seqSet[0]); ++l) appendValue(ctgSt.data_contig, value(value(seqSet, 0), l));
 		for(TSize l = 0;l < length(seqSet[0]); ++l) appendValue(ctgSt.data_quality, 'D');

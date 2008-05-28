@@ -308,7 +308,6 @@ inline void
 _createEdgeAttributes(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 					  TEdgeAttributes& edgeMap)
 {
-	SEQAN_CHECKPOINT
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	resizeEdgeMap(g, edgeMap);
 
@@ -362,6 +361,7 @@ _writeGraphFooter(TFile &,
 				  Graph<Directed<TCargo, TSpec> > const&,
 				  DotDrawing)
 {
+	SEQAN_CHECKPOINT
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -372,6 +372,7 @@ _writeGraphFooter(TFile &,
 				  Graph<Undirected<TCargo, TSpec> > const&,
 				  DotDrawing)
 {
+	SEQAN_CHECKPOINT
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -382,6 +383,7 @@ _writeGraphFooter(TFile & file,
 				  Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 				  DotDrawing)
 {
+	SEQAN_CHECKPOINT
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename Size<TGraph>::Type TSize;
 	typedef typename Id<TGraph>::Type TId;
@@ -423,6 +425,7 @@ _writeGraphFooter(TFile &,
 				  Graph<Tree<TCargo, TSpec> > const&,
 				  DotDrawing)
 {
+	SEQAN_CHECKPOINT
 }
 
 
@@ -434,6 +437,7 @@ _writeGraphFooter(TFile &,
 				  Graph<Automaton<TAlphabet, TCargo, TSpec> > const&,
 				  DotDrawing)
 {
+	SEQAN_CHECKPOINT
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -444,6 +448,7 @@ _writeGraphType(TFile & file,
 				Graph<Automaton<TAlphabet, TCargo, TSpec> > const&,
 				DotDrawing)
 {
+	SEQAN_CHECKPOINT
 	_streamWrite(file, "digraph");
 }
 
@@ -455,6 +460,7 @@ _writeGraphType(TFile & file,
 				Graph<Directed<TCargo, TSpec> > const&,
 				DotDrawing)
 {
+	SEQAN_CHECKPOINT
 	_streamWrite(file, "digraph");
 }
 
@@ -466,6 +472,7 @@ _writeGraphType(TFile & file,
 				Graph<Undirected<TCargo, TSpec> > const&,
 				DotDrawing)
 {
+	SEQAN_CHECKPOINT
 	_streamWrite(file, "graph");
 }
 
@@ -477,6 +484,7 @@ _writeGraphType(TFile & file,
 				Graph<Alignment<TStringSet, TCargo, TSpec> > const&,
 				DotDrawing)
 {
+	SEQAN_CHECKPOINT
 	_streamWrite(file, "graph");
 }
 
@@ -488,6 +496,7 @@ _writeGraphType(TFile & file,
 				Graph<Tree<TCargo, TSpec> > const&,
 				DotDrawing)
 {
+	SEQAN_CHECKPOINT
 	_streamWrite(file, "digraph");
 }
 
@@ -499,6 +508,7 @@ _writeEdgeType(TFile & file,
 			   Graph<Automaton<TAlphabet, TCargo, TSpec> > const&,
 			   DotDrawing)
 {
+	SEQAN_CHECKPOINT
 	_streamWrite(file, " -> ");
 }
 
@@ -510,6 +520,7 @@ _writeEdgeType(TFile & file,
 			   Graph<Directed<TCargo, TSpec> > const&,
 			   DotDrawing)
 {
+	SEQAN_CHECKPOINT
 	_streamWrite(file, " -> ");
 }
 
@@ -521,6 +532,7 @@ _writeEdgeType(TFile & file,
 			   Graph<Undirected<TCargo, TSpec> > const&,
 			   DotDrawing)
 {
+	SEQAN_CHECKPOINT
 	_streamWrite(file, " -- ");
 }
 
@@ -532,6 +544,7 @@ _writeEdgeType(TFile & file,
 			   Graph<Alignment<TStringSet, TCargo, TSpec> > const&,
 			   DotDrawing)
 {
+	SEQAN_CHECKPOINT
 	_streamWrite(file, " -- ");
 }
 
@@ -543,6 +556,7 @@ _writeEdgeType(TFile & file,
 			   Graph<Tree<TCargo, TSpec> > const&,
 			   DotDrawing)
 {
+	SEQAN_CHECKPOINT
 	_streamWrite(file, " -> ");
 }
 
@@ -668,7 +682,6 @@ _addEdge(Graph<Directed<TCargo, TSpec> >& g,
 		 TEdgeAttributes& edgeMap,
 		 TStatement& attr_list)
 {
-	SEQAN_CHECKPOINT
 	typedef Graph<Directed<TCargo, TSpec> > TGraph;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	TEdgeDescriptor e = addEdge(g, sourceV, targetV);
@@ -687,7 +700,6 @@ _addEdge(Graph<Undirected<TCargo, TSpec> >& g,
 		 TEdgeAttributes& edgeMap,
 		 TStatement& attr_list)
 {
-	SEQAN_CHECKPOINT
 	typedef Graph<Undirected<TCargo, TSpec> > TGraph;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	TEdgeDescriptor e = addEdge(g, sourceV, targetV);
@@ -724,7 +736,6 @@ _addEdge(Graph<Tree<TCargo, TSpec> >& g,
 		 TEdgeAttributes& edgeMap,
 		 TStatement& attr_list)
 {
-	SEQAN_CHECKPOINT
 	typedef Graph<Tree<TCargo, TSpec> > TGraph;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	TEdgeDescriptor e = addEdge(g, sourceV, targetV);
@@ -763,7 +774,6 @@ _addEdge(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 		 TEdgeAttributes& edgeMap,
 		 TStatement& attr_list)
 {
-	SEQAN_CHECKPOINT
 	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 
@@ -806,7 +816,6 @@ _addEdge(Graph<TSpec>& g,
 		 TEdgeAttributes& edgeMap,
 		 TNodeIdMap& nodeIdMap)
 {
-	SEQAN_CHECKPOINT
 	typedef Graph<TSpec> TGraph;
 	typedef typename Value<TStatement>::Type TValue;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
@@ -837,7 +846,6 @@ _processNodeStatement(Graph<TSpec>& g,
 					  TEdgeAttributes& edgeMap,
 					  TNodeIdMap& nodeIdMap) 
 {
-	SEQAN_CHECKPOINT
 	typedef typename Value<TStatement>::Type TValue;
 	typedef typename Iterator<TStatement>::Type TIter;
 	
@@ -877,7 +885,6 @@ _processEdgeStatement(Graph<TSpec>& g,
 					  TPosition pos,
 					  TNodeIdMap& nodeIdMap) 
 {
-	SEQAN_CHECKPOINT
 	typedef typename Value<TStatement>::Type TValue;
 	typedef typename Iterator<TStatement>::Type TIter;
 	
@@ -918,7 +925,6 @@ _processStatement(Graph<TSpec>& g,
 				  TEdgeAttributes& edgeMap,
 				  TNodeIdMap& nodeIdMap) 
 {
-	SEQAN_CHECKPOINT
 	// Clear everything up to the last line
 	Finder<TStatement> finder(stmt);
 	TStatement needle("\n");
@@ -979,7 +985,6 @@ void read(TFile & file,
 		  TEdgeAttributes& edgeMap,
 		  DotDrawing) 
 {
-	SEQAN_CHECKPOINT
 	typedef Graph<TSpec> TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename Position<TFile>::Type TPosition;
@@ -1008,7 +1013,6 @@ void read(TFile & file,
 		  Graph<TSpec>& g,
 		  DotDrawing) 
 {
-	SEQAN_CHECKPOINT
 	String<String<char> > nodeMap;
 	String<String<char> > edgeMap;
 	read(file,g,nodeMap,edgeMap,DotDrawing());

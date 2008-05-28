@@ -34,13 +34,13 @@
 // Alignment
 #include <seqan/graph_align/graph_align_base.h>
 #include <seqan/graph_align/graph_align_config.h>
+#include <seqan/graph_align/graph_align_interface.h>
 #include <seqan/graph_align/graph_align_needleman_wunsch.h>
 #include <seqan/graph_align/graph_align_gotoh.h>
 #include <seqan/graph_align/graph_align_hirschberg.h>
 #include <seqan/graph_align/graph_align_smith_waterman.h>
 #include <seqan/graph_align/graph_align_smith_waterman_clump.h>
 #include <seqan/graph_align/graph_align_smith_waterman_island.h>
-#include <seqan/graph_align/graph_align_interface.h>
 
 
 #endif //#ifndef SEQAN_HEADER_...

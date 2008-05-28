@@ -38,7 +38,6 @@
 // Utilities
 #include <seqan/graph_utils/graph_utility_alphabets.h>
 #include <seqan/graph_utils/graph_utility_parsing.h>
-#include <seqan/graph_utils/graph_utility_match_parsing.h>
 
 
 #endif //#ifndef SEQAN_HEADER_...

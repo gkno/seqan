@@ -193,7 +193,7 @@ int main(int argc, const char *argv[]) {
 	typedef String<char> TName;
 	StringSet<TSequence, Owner<> > origStrSet;
 	StringSet<TName> names;
-	_alignImportSequences(value(cfgOpt, "seq"), origStrSet, names);
+	_loadSequences(value(cfgOpt, "seq"), origStrSet, names);
 	typedef StringSet<TSequence, Dependent<> > TDepSequenceSet;
 	typedef Size<TDepSequenceSet>::Type TSize;
 	TDepSequenceSet strSet(origStrSet);

@@ -1,13 +1,8 @@
 #ifndef SEQAN_HEADER_TEST_GRAPH_ALIGNMENT_H
 #define SEQAN_HEADER_TEST_GRAPH_ALIGNMENT_H
 
-using namespace std;
-using namespace seqan;
-
 namespace SEQAN_NAMESPACE_MAIN
 {
-
-
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -48,10 +43,7 @@ void  Test_NeedlemanWunsch() {
 	SEQAN_TASSERT(label(matches[0], stringSet(g), 0) == "annual")
 	SEQAN_TASSERT(label(matches[0], stringSet(g), 1) == "anneal")
 	SEQAN_TASSERT(score3 == score)
-	//std::cout << g << std::endl;
-	//score2 = globalAlignment(std::cout, str, score_type, NeedlemanWunsch() );
-	//SEQAN_TASSERT(score == score2)
-
+	std::cout << g << std::endl;
 
 	str[0] = "annealing";
 	str[1] = "annual";
@@ -72,9 +64,7 @@ void  Test_NeedlemanWunsch() {
 	SEQAN_TASSERT(score + 3 == score2)
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,true>(), NeedlemanWunsch() );
 	SEQAN_TASSERT(score + 3 == score2)
-	//std::cout << g << std::endl;
-	//score2 = globalAlignment(std::cout, str, score_type, NeedlemanWunsch() );
-	//SEQAN_TASSERT(score == score2)
+	std::cout << g << std::endl;
 
 	str[0] = "ThisisGarfieldthecat";
 	str[1] = "Garfield";
@@ -98,9 +88,7 @@ void  Test_NeedlemanWunsch() {
 	SEQAN_TASSERT(score + 6 == score2)
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<true,false,false,true>(), NeedlemanWunsch() );
 	SEQAN_TASSERT(score + 12 == score2)
-	//std::cout << g << std::endl;
-	//score2 = globalAlignment(std::cout, str, score_type, NeedlemanWunsch() );
-	//SEQAN_TASSERT(score == score2)
+	std::cout << g << std::endl;
 
 	str[0] = "Garfield";
 	str[1] = "ThisisGarfieldthecat";
@@ -126,9 +114,7 @@ void  Test_NeedlemanWunsch() {
 	SEQAN_TASSERT(score == score2)
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,true,true,false>(), NeedlemanWunsch() );
 	SEQAN_TASSERT(score + 12 == score2)
-	//std::cout << g << std::endl;
-	//score2 = globalAlignment(std::cout, str, score_type, NeedlemanWunsch() );
-	//SEQAN_TASSERT(score == score2)
+	std::cout << g << std::endl;
 
 	str[0] = "cat";
 	str[1] = "ThisisGarfieldthecat";
@@ -139,9 +125,7 @@ void  Test_NeedlemanWunsch() {
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "cat")
 	SEQAN_TASSERT(numEdges(g) == 1)
 	SEQAN_TASSERT(numVertices(g) == 3)
-	//std::cout << g << std::endl;
-	//score2 = globalAlignment(std::cout, str, score_type, NeedlemanWunsch() );
-	//SEQAN_TASSERT(score == score2)
+	std::cout << g << std::endl;
 
 	str[0] = "ThisisGarfieldthecat";
 	str[1] = "cat";
@@ -152,9 +136,7 @@ void  Test_NeedlemanWunsch() {
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "cat")
 	SEQAN_TASSERT(numEdges(g) == 1)
 	SEQAN_TASSERT(numVertices(g) == 3)
-	//std::cout << g << std::endl;
-	//score2 = globalAlignment(std::cout, str, score_type, NeedlemanWunsch() );
-	//SEQAN_TASSERT(score == score2)
+	std::cout << g << std::endl;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -190,9 +172,7 @@ void Test_Gotoh() {
 	SEQAN_TASSERT(score == score2)
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,true>(), Gotoh() );
 	SEQAN_TASSERT(score == score2)
-	//std::cout << g << std::endl;
-	//double score2 = globalAlignment(std::cout, str, score_type, Gotoh() );
-	//SEQAN_TASSERT(score == score2)
+	std::cout << g << std::endl;
 
 	str[0] = "ttgt";
 	str[1] = "ttagt";
@@ -215,9 +195,7 @@ void Test_Gotoh() {
 	SEQAN_TASSERT(score == score2)
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,true>(), Gotoh() );
 	SEQAN_TASSERT(score == score2)
-	//std::cout << g << std::endl;
-	//score2 = globalAlignment(std::cout, str, score_type, Gotoh() );
-	//SEQAN_TASSERT(score == score2)
+	std::cout << g << std::endl;
 
 	str[0] = "tagt";
 	str[1] = "ttagt";
@@ -238,9 +216,7 @@ void Test_Gotoh() {
 	SEQAN_TASSERT(score == score2)
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,true>(), Gotoh() );
 	SEQAN_TASSERT(score == score2)
-	//std::cout << g << std::endl;
-	//score2 = globalAlignment(std::cout, str, score_type, Gotoh() );
-	//SEQAN_TASSERT(score == score2)
+	std::cout << g << std::endl;
 
 	str[0] = "ttagt";
 	str[1] = "tagt";
@@ -261,9 +237,7 @@ void Test_Gotoh() {
 	SEQAN_TASSERT(score == score2)
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,true>(), Gotoh() );
 	SEQAN_TASSERT(score == score2)
-	//std::cout << g << std::endl;
-	//score2 = globalAlignment(std::cout, str, score_type, Gotoh() );
-	//SEQAN_TASSERT(score == score2)
+	std::cout << g << std::endl;
 
 	str[0] = "ttagt";
 	str[1] = "ttag";
@@ -284,9 +258,7 @@ void Test_Gotoh() {
 	SEQAN_TASSERT(score + 2 == score2)
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,true>(), Gotoh() );
 	SEQAN_TASSERT(score + 2 == score2)
-	//std::cout << g << std::endl;
-	//score2 = globalAlignment(std::cout, str, score_type, Gotoh() );
-	//SEQAN_TASSERT(score == score2)
+	std::cout << g << std::endl;
 
 	str[0] = "ttag";
 	str[1] = "ttagt";
@@ -307,9 +279,7 @@ void Test_Gotoh() {
 	SEQAN_TASSERT(score == score2)
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,true>(), Gotoh() );
 	SEQAN_TASSERT(score + 2 == score2)
-	//std::cout << g << std::endl;
-	//score2 = globalAlignment(std::cout, str, score_type, Gotoh() );
-	//SEQAN_TASSERT(score == score2)
+	std::cout << g << std::endl;
 
 	str[0] = "cttagt";
 	str[1] = "ttag";
@@ -331,9 +301,7 @@ void Test_Gotoh() {
 	SEQAN_TASSERT(score + 2 == score2)
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<true,false,true,true>(), Gotoh() );
 	SEQAN_TASSERT(score + 4 == score2)
-	//std::cout << g << std::endl;
-	//score2 = globalAlignment(std::cout, str, score_type, Gotoh() );
-	//SEQAN_TASSERT(score == score2)
+	std::cout << g << std::endl;
 
 	str[0] = "ttag";
 	str[1] = "cttagt";
@@ -355,9 +323,7 @@ void Test_Gotoh() {
 	SEQAN_TASSERT(score == score2)
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,true,true,false>(), Gotoh() );
 	SEQAN_TASSERT(score + 4 == score2)
-	//std::cout << g << std::endl;
-	//score2 = globalAlignment(std::cout, str, score_type, Gotoh() );
-	//SEQAN_TASSERT(score == score2)
+	std::cout << g << std::endl;
 
 	str[0] = "cttccagt";
 	str[1] = "ttag";
@@ -372,9 +338,7 @@ void Test_Gotoh() {
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 2)) == "ag")
 	SEQAN_TASSERT(numEdges(g) == 2)
 	SEQAN_TASSERT(numVertices(g) == 7)
-	//std::cout << g << std::endl;
-	//score2 = globalAlignment(std::cout, str, score_type, Gotoh() );
-	//SEQAN_TASSERT(score == score2)
+	std::cout << g << std::endl;
 
 	str[0] = "ttag";
 	str[1] = "cttccagt";
@@ -389,9 +353,7 @@ void Test_Gotoh() {
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 2)) == "ag")
 	SEQAN_TASSERT(numEdges(g) == 2)
 	SEQAN_TASSERT(numVertices(g) == 7)
-	//std::cout << g << std::endl;
-	//score2 = globalAlignment(std::cout, str, score_type, Gotoh() );
-	//SEQAN_TASSERT(score == score2)
+	std::cout << g << std::endl;
 
 	str[0] = "ttattaa";
 	str[1] = "aaa";
@@ -410,9 +372,7 @@ void Test_Gotoh() {
 	SEQAN_TASSERT(score + 3 == score2)
 	score2 = globalAlignment(stringSet(g), score_type2, AlignConfig<false,true,false,false>(), Gotoh() );
 	SEQAN_TASSERT(score == score2)
-	//std::cout << g << std::endl;
-	//score2 = globalAlignment(std::cout, str, score_type2, Gotoh() );
-	//SEQAN_TASSERT(score == score2)
+	std::cout << g << std::endl;
 
 	str[0] = "aaa";
 	str[1] = "ttattaa";
@@ -426,9 +386,7 @@ void Test_Gotoh() {
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 1)) == "aa")
 	SEQAN_TASSERT(numEdges(g) == 2)
 	SEQAN_TASSERT(numVertices(g) == 6)
-	//std::cout << g << std::endl;
-	//score2 = globalAlignment(std::cout, str, score_type2, Gotoh() );
-	//SEQAN_TASSERT(score == score2)
+	std::cout << g << std::endl;
 
 	// Note: Depending on the used recursion formula, the gotoh algorithms can differ !!!
 	// Gotoh: Vertical gap and subsequent horizontal gap allowed
@@ -467,9 +425,7 @@ void Test_Hirschberg() {
 	SEQAN_TASSERT(numVertices(g) == 5)
 	int score2 = globalAlignment(stringSet(g), score_type, Hirschberg() );
 	SEQAN_TASSERT(score == score2)
-	//std::cout << g << std::endl;
-	//double score2 = globalAlignment(std::cout, str, score_type, Hirschberg() );
-	//SEQAN_TASSERT(score == score2)
+	std::cout << g << std::endl;
 
 	str[0] = "ttgt";
 	str[1] = "ttagt";
@@ -482,9 +438,7 @@ void Test_Hirschberg() {
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 2)) == "gt")
 	SEQAN_TASSERT(numEdges(g) == 2)
 	SEQAN_TASSERT(numVertices(g) == 5)
-	//std::cout << g << std::endl;
-	//score2 = globalAlignment(std::cout, str, score_type, Hirschberg() );
-	//SEQAN_TASSERT(score == score2)
+	std::cout << g << std::endl;
 
 	str[0] = "tagt";
 	str[1] = "attagt";
@@ -495,9 +449,7 @@ void Test_Hirschberg() {
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "at")
 	SEQAN_TASSERT(numEdges(g) == 1)
 	SEQAN_TASSERT(numVertices(g) == 3)
-	//std::cout << g << std::endl;
-	//score2 = globalAlignment(std::cout, str, score_type, Hirschberg() );
-	//SEQAN_TASSERT(score == score2)
+	std::cout << g << std::endl;
 
 	str[0] = "attagt";
 	str[1] = "tagt";
@@ -508,9 +460,7 @@ void Test_Hirschberg() {
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "at")
 	SEQAN_TASSERT(numEdges(g) == 1)
 	SEQAN_TASSERT(numVertices(g) == 3)
-	//std::cout << g << std::endl;
-	//score2 = globalAlignment(std::cout, str, score_type, Hirschberg() );
-	//SEQAN_TASSERT(score == score2)
+	std::cout << g << std::endl;
 
 	str[0] = "ttagt";
 	str[1] = "ttag";
@@ -521,9 +471,7 @@ void Test_Hirschberg() {
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 4)) == "t")
 	SEQAN_TASSERT(numEdges(g) == 1)
 	SEQAN_TASSERT(numVertices(g) == 3)
-	//std::cout << g << std::endl;
-	//score2 = globalAlignment(std::cout, str, score_type, Hirschberg() );
-	//SEQAN_TASSERT(score == score2)
+	std::cout << g << std::endl;
 
 	str[0] = "ttag";
 	str[1] = "ttagt";
@@ -534,9 +482,7 @@ void Test_Hirschberg() {
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 4)) == "t")
 	SEQAN_TASSERT(numEdges(g) == 1)
 	SEQAN_TASSERT(numVertices(g) == 3)
-	//std::cout << g << std::endl;
-	//score2 = globalAlignment(std::cout, str, score_type, Hirschberg() );
-	//SEQAN_TASSERT(score == score2)
+	std::cout << g << std::endl;
 
 	str[0] = "cttagt";
 	str[1] = "ttag";
@@ -548,9 +494,7 @@ void Test_Hirschberg() {
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "ttag")
 	SEQAN_TASSERT(numEdges(g) == 1)
 	SEQAN_TASSERT(numVertices(g) == 4)
-	//std::cout << g << std::endl;
-	//score2 = globalAlignment(std::cout, str, score_type, Hirschberg() );
-	//SEQAN_TASSERT(score == score2)
+	std::cout << g << std::endl;
 
 	str[0] = "ttag";
 	str[1] = "cttagt";
@@ -562,9 +506,7 @@ void Test_Hirschberg() {
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "ttag")
 	SEQAN_TASSERT(numEdges(g) == 1)
 	SEQAN_TASSERT(numVertices(g) == 4)
-	//std::cout << g << std::endl;
-	//score2 = globalAlignment(std::cout, str, score_type, Hirschberg() );
-	//SEQAN_TASSERT(score == score2)
+	std::cout << g << std::endl;
 
 	str[0] = "cttccagt";
 	str[1] = "ttag";
@@ -579,9 +521,7 @@ void Test_Hirschberg() {
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 2)) == "ag")
 	SEQAN_TASSERT(numEdges(g) == 2)
 	SEQAN_TASSERT(numVertices(g) == 7)
-	//std::cout << g << std::endl;
-	//score2 = globalAlignment(std::cout, str, score_type, Hirschberg() );
-	//SEQAN_TASSERT(score == score2)
+	std::cout << g << std::endl;
 
 	str[0] = "ttag";
 	str[1] = "cttccagt";
@@ -596,9 +536,7 @@ void Test_Hirschberg() {
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 2)) == "ag")
 	SEQAN_TASSERT(numEdges(g) == 2)
 	SEQAN_TASSERT(numVertices(g) == 7)
-	//std::cout << g << std::endl;
-	//score2 = globalAlignment(std::cout, str, score_type, Hirschberg() );
-	//SEQAN_TASSERT(score == score2)
+	std::cout << g << std::endl;
 
 	str[0] = "ttattaa";
 	str[1] = "aaa";
@@ -613,9 +551,7 @@ void Test_Hirschberg() {
 	SEQAN_TASSERT(label(g, findVertex(g, 1, 1)) == "aa")
 	SEQAN_TASSERT(numEdges(g) == 2)
 	SEQAN_TASSERT(numVertices(g) == 6)
-	//std::cout << g << std::endl;
-	//score2 = globalAlignment(std::cout, str, score_type2, Hirschberg() );
-	//SEQAN_TASSERT(score == score2)
+	std::cout << g << std::endl;
 
 	str[0] = "aaa";
 	str[1] = "ttattaa";
@@ -629,9 +565,7 @@ void Test_Hirschberg() {
 	SEQAN_TASSERT(label(g, findVertex(g, 0, 1)) == "aa")
 	SEQAN_TASSERT(numEdges(g) == 2)
 	SEQAN_TASSERT(numVertices(g) == 6)
-	//std::cout << g << std::endl;
-	//score2 = globalAlignment(std::cout, str, score_type2, Hirschberg() );
-	//SEQAN_TASSERT(score == score2)
+	std::cout << g << std::endl;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -658,9 +592,7 @@ void Test_SmithWaterman() {
 	SEQAN_TASSERT(numEdges(g) == 2)
 	int score2 = localAlignment(stringSet(g), score_type, SmithWaterman());
 	SEQAN_TASSERT(score == score2)
-	//std::cout << g << std::endl;
-	//score2 = localAlignment(std::cout, str, score_type, SmithWaterman() );
-	//SEQAN_TASSERT(score == score2)
+	std::cout << g << std::endl;
 	
 	str[0] = "TTGACACCCTCCCAATTGTA";
 	str[1] = "ACCCCAGGCTTTACACAT";
@@ -671,9 +603,7 @@ void Test_SmithWaterman() {
 	SEQAN_TASSERT(numEdges(g) == 1)
 	score2 = localAlignment(stringSet(g), score_type, SmithWaterman());
 	SEQAN_TASSERT(score == score2)
-	//std::cout << g << std::endl;
-	//score2 = localAlignment(std::cout, str, score_type, SmithWaterman() );
-	//SEQAN_TASSERT(score == score2)
+	std::cout << g << std::endl;
 }
 	
 
@@ -695,28 +625,7 @@ void Test_SmithWatermanClump() {
 	typedef String<Pair<int, int> > TAlignIdAndScore;
 	TAlignIdAndScore alignIdScore;
 	multiLocalAlignment(g, alignIdScore, score_type, 4, SmithWatermanClump() );
-	
-	//SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "cgt")
-	//SEQAN_TASSERT(label(g, findVertex(g, 1, 3)) == "t")
-	//SEQAN_TASSERT(label(g, findVertex(g, 1, 4)) == "ga")
-	//SEQAN_TASSERT(label(g, findVertex(g, 1, 6)) == "g")
-	//SEQAN_TASSERT(label(g, findVertex(g, 1, 7)) == "at")
-	//SEQAN_TASSERT(label(g, findVertex(g, 1, 9)) == "a")
-	//SEQAN_TASSERT(label(g, findVertex(g, 1, 10)) == "c")
-	//SEQAN_TASSERT(label(g, findVertex(g, 1, 11)) == "t")
-	//SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "g")
-	//SEQAN_TASSERT(label(g, findVertex(g, 0, 1)) == "ct")
-	//SEQAN_TASSERT(label(g, findVertex(g, 0, 3)) == "c")
-	//SEQAN_TASSERT(label(g, findVertex(g, 0, 4)) == "t")
-	//SEQAN_TASSERT(label(g, findVertex(g, 0, 5)) == "gc")
-	//SEQAN_TASSERT(label(g, findVertex(g, 0, 7)) == "g")
-	//SEQAN_TASSERT(label(g, findVertex(g, 0, 8)) == "a")
-	//SEQAN_TASSERT(label(g, findVertex(g, 0, 9)) == "at")
-	//SEQAN_TASSERT(label(g, findVertex(g, 0, 11)) == "a")
-
-	//SEQAN_TASSERT(numEdges(g) == 9)
-	//SEQAN_TASSERT(numVertices(g) == 17)
-		
+	std::cout << g << std::endl;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -733,13 +642,13 @@ void Test_GraphAlignment() {
 
 	debug::verifyCheckpoints("projects/library/seqan/graph_align/graph_align_base.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph_align/graph_align_config.h");
+	debug::verifyCheckpoints("projects/library/seqan/graph_align/graph_align_interface.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph_align/graph_align_needleman_wunsch.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph_align/graph_align_gotoh.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph_align/graph_align_hirschberg.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph_align/graph_align_smith_waterman.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph_align/graph_align_smith_waterman_clump.h");
 	//debug::verifyCheckpoints("projects/library/seqan/graph_align/graph_align_smith_waterman_island.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph_align/graph_align_interface.h");
 }
 
 }

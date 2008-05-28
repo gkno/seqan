@@ -308,7 +308,6 @@ inline TStream &
 operator << (TStream & target, 
 			 ConfigOptions<TKey, TValue>& source)
 {
-	SEQAN_CHECKPOINT
 	write(target, source);
 	return target;
 }
@@ -371,6 +370,8 @@ _stringToNumber(TString& str)
 }
 
 
+
+
 //////////////////////////////////////////////////////////////////////////////
 // File reading and timing functions
 //////////////////////////////////////////////////////////////////////////////
@@ -379,14 +380,16 @@ _stringToNumber(TString& str)
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TPath, typename TNames, typename TStringSet>
+template<typename TPath, typename TStringSet, typename TNames>
 inline unsigned int
-_alignImportSequences(TPath const& in_path, 
+_loadSequences(TPath const& in_path, 
 					  TStringSet& origStrSet,
 					  TNames& names)
 {
+	typedef typename Size<TStringSet>::Type TSize;
+	
 	// Count sequences and read names
-	unsigned seqCount = 0;
+	TSize seqCount = 0;
 	std::ifstream file;
 	std::stringstream input;
 	input << in_path;
@@ -400,12 +403,12 @@ _alignImportSequences(TPath const& in_path,
 		++seqCount;
 	}
 
-	// Import sequences
+	// Load sequences
 	file.clear();
 	file.seekg(0, std::ios_base::beg);
 	resize(origStrSet, seqCount);
-	unsigned int count = 0;
-	for(unsigned i = 0; (i < seqCount) && !_streamEOF(file); ++i) 	{
+	TSize count = 0;
+	for(TSize i = 0; (i < seqCount) && !_streamEOF(file); ++i) 	{
 		read(file, origStrSet[i], Fasta());
 		count += length(origStrSet[i]);
 	}

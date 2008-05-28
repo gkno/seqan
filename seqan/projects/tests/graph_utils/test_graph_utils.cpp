@@ -2,20 +2,23 @@
 #define SEQAN_TEST
 #define SEQAN_VERBOSE
 
-//STL
+// Test path
+#define TEST_PATH "projects/tests/graph_utils/"
+
+// External / STL
 #include <iostream>
 #include <fstream>
-#include <typeinfo>
-#include <time.h>
-#include <cstdio>
-#include <vector>
-#include <time.h>
 #include <string>
-#include <ctime>
 
 //SeqAn
 #include <seqan/graph_utils.h>
+
+// Test files
 #include "test_graph_utils.h"
+
+
+using namespace seqan;
+
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -23,7 +26,15 @@ int main()
 {
 	SEQAN_TREPORT("TEST BEGIN")
 
+	// Redirect std::cout
+    std::ofstream file(TEST_PATH "redirect.txt");
+    std::streambuf* strm_puffer = std::cout.rdbuf();
+    std::cout.rdbuf(file.rdbuf());
+
 	Test_GraphUtils();		// Test Utilities
+
+	// Restore std::cout
+	std::cout.rdbuf(strm_puffer);
 
 	SEQAN_TREPORT("TEST END")
 

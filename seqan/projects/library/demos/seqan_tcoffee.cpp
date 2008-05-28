@@ -16,7 +16,7 @@ dnaAlignment(TConfigOptions& cfgOpt) {
 	typedef String<char> TName;
 	StringSet<TSequence, Owner<> > origStrSet;
 	StringSet<TName> names;
-	_alignImportSequences(value(cfgOpt, "seq"), origStrSet, names);
+	_loadSequences(value(cfgOpt, "seq"), origStrSet, names);
 	typedef StringSet<TSequence, Dependent<> > TDepSequenceSet;
 	typedef typename Size<TDepSequenceSet>::Type TSize;
 	TDepSequenceSet strSet(origStrSet);
@@ -246,7 +246,7 @@ int main(int argc, const char *argv[]) {
 		read(strm,origStrSet,names,TCoffeeLib());	
 		strm.close();			
 	} else if (length(value(cfgOpt, "seq"))) {
-		_alignImportSequences(value(cfgOpt, "seq"), origStrSet, names);
+		_loadSequences(value(cfgOpt, "seq"), origStrSet, names);
 	} else {
 		std::cerr << valueHelp(cfgOpt) << std::endl;
 		return -1;
