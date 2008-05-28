@@ -17,10 +17,10 @@ int main()
 {
 	SEQAN_TREPORT("TEST BEGIN")
 
-	Main_TestLocalAlign();
+//	Main_TestLocalAlign();
 	Main_TestGaps();
-	Main_TestAlign();
-	Main_TestMyers();
+//	Main_TestAlign();
+//	Main_TestMyers();
 
 	SEQAN_TREPORT("TEST END");
 

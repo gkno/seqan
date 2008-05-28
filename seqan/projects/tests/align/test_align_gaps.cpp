@@ -304,6 +304,7 @@ void TestGapManipulation()
 
 	SEQAN_TASSERT(countGaps(gaps5, 0) == 2);
 	SEQAN_TASSERT(countGaps(gaps5, 2) == 0);
+	int x = countGaps(gaps5, 3);
 	SEQAN_TASSERT(countGaps(gaps5, 3) == 4);
 	SEQAN_TASSERT(countGaps(gaps5, 4) == 3);
 	SEQAN_TASSERT(countGaps(gaps5, 6) == 1);
@@ -328,6 +329,74 @@ void TestGapManipulation()
 //____________________________________________________________________________
 
 }
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TSource, typename TSpec>
+void TestSequenceGapsBase()
+{
+	typedef Gaps<TSource, TSpec> TGaps;
+
+	TGaps gaps3;
+	assignSource(gaps3, "hello");
+
+	insertGaps(gaps3, 2, 3);
+	setBeginPosition(gaps3, 2);
+	SEQAN_TASSERT(gaps3 == "he---llo") //"--he---llo"
+	SEQAN_TASSERT(beginPosition(gaps3) == 2)
+
+	//toSourcePosition
+	SEQAN_TASSERT(toSourcePosition(gaps3, 0) == 0)
+	SEQAN_TASSERT(toSourcePosition(gaps3, 1) == 0)
+	SEQAN_TASSERT(toSourcePosition(gaps3, 2) == 0)
+	SEQAN_TASSERT(toSourcePosition(gaps3, 3) == 1)
+	SEQAN_TASSERT(toSourcePosition(gaps3, 4) == 2)
+	SEQAN_TASSERT(toSourcePosition(gaps3, 5) == 2)
+	SEQAN_TASSERT(toSourcePosition(gaps3, 6) == 2)
+	SEQAN_TASSERT(toSourcePosition(gaps3, 7) == 2)
+	SEQAN_TASSERT(toSourcePosition(gaps3, 8) == 3)
+	SEQAN_TASSERT(toSourcePosition(gaps3, 9) == 4)
+	SEQAN_TASSERT(toSourcePosition(gaps3, 10) == 5)
+	SEQAN_TASSERT(toSourcePosition(gaps3, 11) == 5)
+
+	//toViewPosition
+	SEQAN_TASSERT(toViewPosition(gaps3, 0) == 2)
+	SEQAN_TASSERT(toViewPosition(gaps3, 1) == 3)
+	SEQAN_TASSERT(toViewPosition(gaps3, 2) == 7)
+	SEQAN_TASSERT(toViewPosition(gaps3, 3) == 8)
+	SEQAN_TASSERT(toViewPosition(gaps3, 4) == 9)
+	SEQAN_TASSERT(toViewPosition(gaps3, 5) == 10)
+
+//____________________________________________________________________________
+
+	SEQAN_TASSERT(gaps3 == "he---llo") //"--he---llo"
+	SEQAN_TASSERT(beginPosition(gaps3) == 2)
+
+	clearGaps(gaps3, 1, 5);
+	SEQAN_TASSERT(gaps3 == "he--llo") //"-he--llo"
+	SEQAN_TASSERT(beginPosition(gaps3) == 1)
+
+	clearGaps(gaps3, 1, 5);
+	SEQAN_TASSERT(gaps3 == "hello") //"-hello"
+	SEQAN_TASSERT(beginPosition(gaps3) == 1)
+
+	clearGaps(gaps3);
+	SEQAN_TASSERT(gaps3 == "hello") //"hello"
+	SEQAN_TASSERT(beginPosition(gaps3) == 0)
+
+	assign(gaps3, "el");
+	SEQAN_TASSERT(gaps3 == "el") //"el"
+
+//____________________________________________________________________________
+// Comparison Functions
+
+	SEQAN_TASSERT(gaps3 == "el") 
+	SEQAN_TASSERT(gaps3 != "ello")
+	SEQAN_TASSERT(gaps3 <= "el")
+	SEQAN_TASSERT(gaps3 < "ello")
+	SEQAN_TASSERT(gaps3 > "a")
+	SEQAN_TASSERT(gaps3 >= "el")
+
+}
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -335,14 +404,15 @@ void Main_TestGaps()
 {
 	SEQAN_TREPORT("TEST GAPS BEGIN")
 
-	TestGapsBase<String<char>, SumlistGaps>();
-//	TestGapsIterator<String<char>, SumlistGaps>(); TODO
-//	TestGapManipulation<String<char>, SumlistGaps>(); TODO
-
 
 	TestGapsBase<String<char>, ArrayGaps>();
 	TestGapsIterator<String<char>, ArrayGaps>();
 	TestGapManipulation<String<char>, ArrayGaps>();
+
+	TestGapsBase<String<char>, SumlistGaps>();
+	TestGapManipulation<String<char>, SumlistGaps>(); 
+
+	TestSequenceGapsBase<String<char>, SequenceGaps>();
 
 
 	debug::verifyCheckpoints("projects/library/seqan/align/gaps_base.h");

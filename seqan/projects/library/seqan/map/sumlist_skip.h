@@ -728,6 +728,15 @@ goBeforeEnd(Iter<SumList<DIM, TValue, SkipSumList<TSpec> >, SkipSumListIterator 
 
 template <typename TSumList>
 inline bool
+atBegin(Iter<TSumList, SkipSumListIterator> & it)
+{
+	return (it.iter == begin(it.element->minilist));
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TSumList>
+inline bool
 atEnd(Iter<TSumList, SkipSumListIterator> & it)
 {
 	return (!it.element);
@@ -1013,6 +1022,12 @@ searchSumList(Iter<SumList<DIM, TValue, SkipSumList<TSpec> >, SkipSumListIterato
 //	typedef SumList<DIM, TValue, MiniSumList< > > TMiniSumList;
 
 	TPath path;
+
+	if (val >= getSum(*it.container, dim))
+	{
+		goEnd(it);
+		return;
+	}
 
 	_skipsumlistFind(it.container->map, val, dim, path);
 

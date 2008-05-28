@@ -113,6 +113,26 @@ struct Source<Gaps<TSource, TSpec> >
 	typedef TSource Type;
 };
 
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Metafunction.GetSource:
+..summary:The type returned by the @Function.source@ function.
+..signature:GetSource<T>::Type
+..param.T:Type for which the source is retrieved by @Function.source@.
+...type:Class.Gaps
+..returns.param.Type:The type returned by the @Function.source@ function.
+...remarks:This type is a reference to @Metafunction.Source@ by default,
+with the exception of @Spec.SequenceGaps@ data structure, which returns
+a temporary.
+*/
+template <typename T>
+struct GetSource
+{
+	typedef typename Source<T>::Type & Type;
+};
+
 //////////////////////////////////////////////////////////////////////////////
 // Iterator
 //////////////////////////////////////////////////////////////////////////////

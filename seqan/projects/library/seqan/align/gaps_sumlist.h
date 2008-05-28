@@ -156,6 +156,14 @@ inline typename Position< Gaps<TSource, SumlistGaps> const>::Type
 beginPosition(Gaps<TSource, SumlistGaps> const & gaps)
 {
 SEQAN_CHECKPOINT
+/*	
+typedef Gaps<TSource, SumlistGaps> const TGaps;
+typedef typename Size<TGaps>::Type TSize;
+typedef SumList<2, TSize> const TSumlist;
+typedef typename Iterator<TSumlist>::Type TSumlistIterator;
+
+TSumlistIterator it = begin(gaps.data_sumlist);
+*/
 	if (length(gaps.data_sumlist))
 	{
 		return getValue(begin(gaps.data_sumlist), 0) - getValue(begin(gaps.data_sumlist), 1);
@@ -279,9 +287,9 @@ SEQAN_CHECKPOINT
 
 	typedef Gaps<TSource, SumlistGaps> const TGaps;
 	typedef typename Size<TGaps>::Type TSize;
-	typedef SumList<2, TSize> TSumlist;
+	typedef SumList<2, TSize> const TSumlist;
 	typedef typename Iterator<TSumlist>::Type TSumlistIterator;
-	TSumlistIterator it;
+	TSumlistIterator it(gaps.data_sumlist);
 	searchSumList(it, pos, 1);
 	return getSum(it, 0) + getValue(it, 0) - (getSum(it, 1) + getValue(it, 1)) + pos;
 }
@@ -296,9 +304,9 @@ toSourcePosition(Gaps<TSource, SumlistGaps> const & gaps,
 SEQAN_CHECKPOINT
 	typedef Gaps<TSource, SumlistGaps> const TGaps;
 	typedef typename Size<TGaps>::Type TSize;
-	typedef SumList<2, TSize> TSumlist;
+	typedef SumList<2, TSize> const TSumlist;
 	typedef typename Iterator<TSumlist>::Type TSumlistIterator;
-	TSumlistIterator it;
+	TSumlistIterator it(gaps.data_sumlist);
 	searchSumList(it, pos, 0);
 
 	TSize dif = getValue(it, 0) - getValue(it, 1);
@@ -708,7 +716,9 @@ insertGaps(Iter<TGaps, GapsIterator<SumlistGaps> > const & me,
 {
 	typedef typename Size<TGaps>::Type TSize;
 
-	if (isGap(me))
+	if (atEnd(me)) return;
+
+	if (getValue(me.iter, 0) - getValue(me.iter, 1) >= me.pos)
 	{//gap verlaengern
 		assignValue(me.iter, 0, getValue(me.iter, 0) + size); 
 	}
