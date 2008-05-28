@@ -23,6 +23,15 @@
 
 namespace SEQAN_NAMESPACE_MAIN
 {
+
+//////////////////////////////////////////////////////////////////////////////
+// Adaptations so that the alignment graph works like any other graph
+//////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 // Alignment Graph OutEdgeIterator
 //////////////////////////////////////////////////////////////////////////////
@@ -206,7 +215,7 @@ inline bool
 operator ==(Iter<Graph<Alignment<TStringSet, TCargo, TGraphSpec> >, GraphIterator<InternalOutEdgeIterator<TSpec> > >& it1,
 			Iter<Graph<Alignment<TStringSet, TCargo, TGraphSpec> >, GraphIterator<InternalOutEdgeIterator<TSpec> > >& it2)
 {
-SEQAN_CHECKPOINT
+	SEQAN_CHECKPOINT
 	return ((it1.data_edge==it2.data_edge) && 
 			(it1.data_source==it2.data_source));
 }
@@ -218,7 +227,7 @@ inline bool
 operator !=(Iter<Graph<Alignment<TStringSet, TCargo, TGraphSpec> >, GraphIterator<InternalOutEdgeIterator<TSpec> > >& it1,
 			Iter<Graph<Alignment<TStringSet, TCargo, TGraphSpec> >, GraphIterator<InternalOutEdgeIterator<TSpec> > >& it2)
 {
-SEQAN_CHECKPOINT
+	SEQAN_CHECKPOINT
 	return ((it1.data_edge!=it2.data_edge) || 
 			(it1.data_source!=it2.data_source));
 }
@@ -249,6 +258,7 @@ template<typename TStringSet, typename TCargo, typename TGraphSpec, typename TSp
 inline void
 goNext(Iter<Graph<Alignment<TStringSet, TCargo, TGraphSpec> >, GraphIterator<InternalEdgeIterator<TSpec> > >& it)
 {
+	SEQAN_CHECKPOINT
 	typedef Graph<Alignment<TStringSet, TCargo, TGraphSpec> > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	_goNextInternal(it);

@@ -111,9 +111,6 @@ void Test_AlignmentGraphFunctions() {
 	SEQAN_TASSERT(inDegree(g, v3) == 3)
 	SEQAN_TASSERT(degree(g, v3) == 3)
 
-	// Output of the alignment graph
-	std::cout << g << std::endl;
-
 	// Remove edges
 	removeEdge(g,3,1);
 	removeEdge(g,0,1);
@@ -397,6 +394,17 @@ void Test_AlignmentGraphFunctions() {
 	addEdge(gAl, vJ, vO);addEdge(gAl, vJ, vS);addEdge(gAl, vO, vS);
 	SEQAN_TASSERT(getFirstCoveredPosition(gAl, i3) == 0)
 	SEQAN_TASSERT(getLastCoveredPosition(gAl, i3) == 9) 
+
+	// Output of the alignment graph
+	std::cout << gAl << std::endl;
+	StringSet<String<char> > seqs;
+	appendValue(seqs, "seq1");
+	appendValue(seqs, "seq2");
+	appendValue(seqs, "seq3");
+	appendValue(seqs, "seq4");
+	write(std::cout,gAl,seqs,FastaFormat());
+	write(std::cout,gAl,seqs,MsfFormat());
+	write(std::cout,gAl,seqs,CgVizFormat());
 }
 
 

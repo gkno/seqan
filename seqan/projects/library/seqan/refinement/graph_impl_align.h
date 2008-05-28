@@ -655,6 +655,7 @@ inline void
 getAdjacencyMatrix(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g, 
 				   TMatrix& mat) 
 {
+	SEQAN_CHECKPOINT
 	getAdjacencyMatrix(g.data_align, mat);
 }
 
@@ -810,6 +811,7 @@ write(TFile & file,
 	  TNames const& names,
 	  FastaFormat) 
 {
+	SEQAN_CHECKPOINT
 	typedef Graph<TSpec> TGraph;
 	typedef typename Size<TGraph>::Type TSize;
 
@@ -848,6 +850,7 @@ write(TFile & file,
 	  TNames const& names,
 	  MsfFormat) 
 {
+	SEQAN_CHECKPOINT
 	typedef Graph<TSpec> TGraph;
 	typedef typename Size<TGraph>::Type TSize;
 
@@ -936,6 +939,7 @@ write(TFile & file,
 	  TNames const& names,
 	  CgVizFormat) 
 {
+	SEQAN_CHECKPOINT
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename Size<TGraph>::Type TSize;
 	typedef typename Id<TGraph>::Type TId;
