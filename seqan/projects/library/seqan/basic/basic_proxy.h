@@ -365,6 +365,7 @@ SEQAN_CHECKPOINT
 	return convert<TAccessor>(left_) != convert<TAccessor>(right_);
 }
 
+
 //____________________________________________________________________________
 // operator <
 
@@ -554,6 +555,50 @@ SEQAN_CHECKPOINT
 	typedef typename GetValue<Proxy<TSpec> >::Type TAccessor;
 	return convert<TAccessor>(left_) >= convert<TAccessor>(right_);
 }
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TStream, typename TSpec>
+inline TStream &
+operator >> (TStream & strm,
+			 Proxy<TSpec> & proxy)
+{
+	typedef Proxy<TSpec> TProxy;
+	typedef typename Value<TProxy>::Type TValue;
+	TValue temp;
+	strm >> temp;
+	assignValue(iter(proxy), temp);
+	return strm;
+}
+template <typename TStream, typename TSpec>
+inline TStream &
+operator >> (TStream & strm,
+			 Proxy<TSpec> const& proxy)
+{
+	typedef Proxy<TSpec> TProxy;
+	typedef typename Value<TProxy>::Type TValue;
+	TValue temp;
+	strm >> temp;
+	assignValue(iter(proxy), temp);
+	return strm;
+}
+
+
+template <typename TStream, typename TSpec>
+inline TStream &
+operator << (TStream & strm,
+			 Proxy<TSpec> & proxy)
+{
+	return strm << getValue(proxy);
+}
+template <typename TStream, typename TSpec>
+inline TStream &
+operator << (TStream & strm,
+			 Proxy<TSpec> const & proxy)
+{
+	return strm << getValue(proxy);
+}
+
 
 //////////////////////////////////////////////////////////////////////////////
 } //namespace SEQAN_NAMESPACE_MAIN

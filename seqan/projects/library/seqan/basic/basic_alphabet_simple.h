@@ -255,7 +255,7 @@ SEQAN_CHECKPOINT
 template <typename TStream, typename TValue, typename TSpec>
 inline TStream &
 operator >> (TStream & stream, 
-			 SimpleType<TValue, TSpec> const & data)
+			 SimpleType<TValue, TSpec> & data)
 {
 SEQAN_CHECKPOINT
 	char c;
@@ -544,6 +544,31 @@ SEQAN_CHECKPOINT
 	return convert<TValue>(left_) == convert<TValue>(right_);
 }
 
+
+template <typename TSpec, typename TValue, typename TSpec2>
+inline bool
+operator == (Proxy<TSpec> const & left_, 
+			 SimpleType<TValue, TSpec2> const & right_)
+{
+SEQAN_CHECKPOINT
+	typedef Proxy<TSpec> TLeft;
+	typedef SimpleType<TValue, TSpec> TRight;
+	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
+	return convert<TCompareType>(left_) == convert<TCompareType>(right_);
+}
+template <typename TSpec, typename TValue, typename TSpec2>
+inline bool
+operator == (SimpleType<TValue, TSpec2> const & left_,
+			 Proxy<TSpec> const & right_)
+{
+SEQAN_CHECKPOINT
+	typedef SimpleType<TValue, TSpec> TLeft;
+	typedef Proxy<TSpec> TRight;
+	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
+	return convert<TCompareType>(left_) == convert<TCompareType>(right_);
+}
+
+
 //____________________________________________________________________________
 // operator !=
 
@@ -589,6 +614,31 @@ operator != (SimpleType<TValue, TSpec> const & left_,
 SEQAN_CHECKPOINT
 	return convert<TValue>(left_) != convert<TValue>(right_);
 }
+
+
+template <typename TSpec, typename TValue, typename TSpec2>
+inline bool
+operator != (Proxy<TSpec> const & left_, 
+			 SimpleType<TValue, TSpec2> const & right_)
+{
+SEQAN_CHECKPOINT
+	typedef Proxy<TSpec> TLeft;
+	typedef SimpleType<TValue, TSpec> TRight;
+	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
+	return convert<TCompareType>(left_) != convert<TCompareType>(right_);
+}
+template <typename TSpec, typename TValue, typename TSpec2>
+inline bool
+operator != (SimpleType<TValue, TSpec2> const & left_,
+			 Proxy<TSpec> const & right_)
+{
+SEQAN_CHECKPOINT
+	typedef SimpleType<TValue, TSpec> TLeft;
+	typedef Proxy<TSpec> TRight;
+	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
+	return convert<TCompareType>(left_) != convert<TCompareType>(right_);
+}
+
 
 //____________________________________________________________________________
 // operator <
@@ -636,6 +686,31 @@ SEQAN_CHECKPOINT
 	return convert<TValue>(left_) < convert<TValue>(right_);
 }
 
+
+template <typename TSpec, typename TValue, typename TSpec2>
+inline bool
+operator < (Proxy<TSpec> const & left_, 
+			 SimpleType<TValue, TSpec2> const & right_)
+{
+SEQAN_CHECKPOINT
+	typedef Proxy<TSpec> TLeft;
+	typedef SimpleType<TValue, TSpec> TRight;
+	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
+	return convert<TCompareType>(left_) < convert<TCompareType>(right_);
+}
+template <typename TSpec, typename TValue, typename TSpec2>
+inline bool
+operator < (SimpleType<TValue, TSpec2> const & left_,
+			 Proxy<TSpec> const & right_)
+{
+SEQAN_CHECKPOINT
+	typedef SimpleType<TValue, TSpec> TLeft;
+	typedef Proxy<TSpec> TRight;
+	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
+	return convert<TCompareType>(left_) < convert<TCompareType>(right_);
+}
+
+
 //____________________________________________________________________________
 // operator <=
 
@@ -681,6 +756,31 @@ operator <= (SimpleType<TValue, TSpec> const & left_,
 SEQAN_CHECKPOINT
 	return convert<TValue>(left_) <= convert<TValue>(right_);
 }
+
+
+template <typename TSpec, typename TValue, typename TSpec2>
+inline bool
+operator <= (Proxy<TSpec> const & left_, 
+			 SimpleType<TValue, TSpec2> const & right_)
+{
+SEQAN_CHECKPOINT
+	typedef Proxy<TSpec> TLeft;
+	typedef SimpleType<TValue, TSpec> TRight;
+	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
+	return convert<TCompareType>(left_) <= convert<TCompareType>(right_);
+}
+template <typename TSpec, typename TValue, typename TSpec2>
+inline bool
+operator <= (SimpleType<TValue, TSpec2> const & left_,
+			 Proxy<TSpec> const & right_)
+{
+SEQAN_CHECKPOINT
+	typedef SimpleType<TValue, TSpec> TLeft;
+	typedef Proxy<TSpec> TRight;
+	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
+	return convert<TCompareType>(left_) <= convert<TCompareType>(right_);
+}
+
 
 
 //____________________________________________________________________________
@@ -730,6 +830,30 @@ SEQAN_CHECKPOINT
 }
 
 
+template <typename TSpec, typename TValue, typename TSpec2>
+inline bool
+operator > (Proxy<TSpec> const & left_, 
+			 SimpleType<TValue, TSpec2> const & right_)
+{
+SEQAN_CHECKPOINT
+	typedef Proxy<TSpec> TLeft;
+	typedef SimpleType<TValue, TSpec> TRight;
+	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
+	return convert<TCompareType>(left_) > convert<TCompareType>(right_);
+}
+template <typename TSpec, typename TValue, typename TSpec2>
+inline bool
+operator > (SimpleType<TValue, TSpec2> const & left_,
+			 Proxy<TSpec> const & right_)
+{
+SEQAN_CHECKPOINT
+	typedef SimpleType<TValue, TSpec> TLeft;
+	typedef Proxy<TSpec> TRight;
+	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
+	return convert<TCompareType>(left_) > convert<TCompareType>(right_);
+}
+
+
 //____________________________________________________________________________
 // operator >=
 
@@ -775,6 +899,31 @@ operator >= (SimpleType<TValue, TSpec> const & left_,
 SEQAN_CHECKPOINT
 	return convert<TValue>(left_) >= convert<TValue>(right_);
 }
+
+
+template <typename TSpec, typename TValue, typename TSpec2>
+inline bool
+operator >= (Proxy<TSpec> const & left_, 
+			 SimpleType<TValue, TSpec2> const & right_)
+{
+SEQAN_CHECKPOINT
+	typedef Proxy<TSpec> TLeft;
+	typedef SimpleType<TValue, TSpec> TRight;
+	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
+	return convert<TCompareType>(left_) >= convert<TCompareType>(right_);
+}
+template <typename TSpec, typename TValue, typename TSpec2>
+inline bool
+operator >= (SimpleType<TValue, TSpec2> const & left_,
+			 Proxy<TSpec> const & right_)
+{
+SEQAN_CHECKPOINT
+	typedef SimpleType<TValue, TSpec> TLeft;
+	typedef Proxy<TSpec> TRight;
+	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
+	return convert<TCompareType>(left_) >= convert<TCompareType>(right_);
+}
+
 
 //////////////////////////////////////////////////////////////////////////////
 
