@@ -112,7 +112,8 @@ SEQAN_CHECKPOINT
 		}
 	}
 
-	it.data_file_pos = _streamTellG(host(it))-1;
+	it.data_file_pos = _streamTellG(host(it));
+	it.data_file_pos -=1;
 	it.data_eof = _streamEOF(host(it));
 }
 
@@ -130,7 +131,7 @@ SEQAN_CHECKPOINT
 			it.data_eof = true;
 			return;
 		}
-		++it.data_file_pos;
+		it.data_file_pos += 1;
 
 		if ((it.data_char == '\n') || (it.data_char == '\r'))
 		{//linebreak detected: find begin of next line
@@ -142,7 +143,7 @@ SEQAN_CHECKPOINT
 					it.data_eof = true;
 					return;
 				}
-				++it.data_file_pos;
+				it.data_file_pos += 1;
 			} while ((it.data_char == '\n') || (it.data_char == '\r'));
 
 			if (it.data_char == '/')
