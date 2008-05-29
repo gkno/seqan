@@ -578,78 +578,6 @@ tripletLibraryExtension(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 
 
 //////////////////////////////////////////////////////////////////////////////
-
-/**
-.Function.cliqueReduction:
-..summary:Performs an edge reduction on an alignment graph producing cliques.
-..cat:Graph
-..signature:
-cliqueReduction(graph)
-..param.graph:An alignment graph.
-...type:Spec.Alignment Graph
-...remarks:
-Finds all 3 member cliques and single-edge cliques in an alignment graph.
-The found cliques never have two vertices on the same sequence.
-..returns:void
-*/
-template<typename TStringSet, typename TCargo, typename TSpec>
-inline void 
-cliqueReduction(Graph<Alignment<TStringSet, TCargo, TSpec> >& g)
-{
-	SEQAN_CHECKPOINT
-	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
-	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
-	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
-	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
-	typedef String<TVertexDescriptor> TVertexString;
-	typedef typename Iterator<TVertexString>::Type TVertexStringIter;
-	TVertexString keepEdges;
-
-	// Iterate over all vertices
-	for(TVertexIterator itVertex(g);!atEnd(itVertex);++itVertex) {
-		TOutEdgeIterator outIt1(g, *itVertex);
-		while (!atEnd(outIt1)) {
-			TOutEdgeIterator outIt2 = outIt1;
-			goNext(outIt2);
-			// Consider always 2 neighbors
-			while (!atEnd(outIt2)) {
-				TVertexDescriptor tV1 = targetVertex(outIt1);
-				TVertexDescriptor tV2 = targetVertex(outIt2);
-				if (sequenceId(g, tV1) != sequenceId(g,tV2)) {
-					TEdgeDescriptor e = findEdge(g, tV1, tV2);
-					if (e != 0) {
-						appendValue(keepEdges, *itVertex);
-						appendValue(keepEdges, tV1);
-						appendValue(keepEdges, *itVertex);
-						appendValue(keepEdges, tV2);
-						appendValue(keepEdges, tV1);
-						appendValue(keepEdges, tV2);
-					} 
-				}
-				goNext(outIt2);
-			}
-			goNext(outIt1);
-		}
-	}
-
-	// Remove all edges and re-insert the cliques
-	clearEdges(g);
-	TVertexStringIter itV = begin(keepEdges);
-	TVertexStringIter endIt = end(keepEdges);
-	while(itV != endIt) {
-		TVertexStringIter itVNext = itV; ++itVNext;
-		// The same edge could have been inserted multiple times
-		TEdgeDescriptor e = findEdge(g, *itV, *itVNext);
-		if (e == 0) addEdge(g, *itV, *itVNext, 1);
-		else cargo(e) += 1;
-		++itV; ++itV;
-	}
-}
-
-
-
-//////////////////////////////////////////////////////////////////////////////
 // Sum of Pairs Scoring
 //////////////////////////////////////////////////////////////////////////////
 
@@ -665,7 +593,7 @@ cliqueReduction(Graph<Alignment<TStringSet, TCargo, TSpec> >& g)
 sumOfPairsScore(graph, score_type)
 ..param.graph:An alignment graph.
 ...type:Spec.Alignment Graph
-..param.score_type:A STL set of sequences.
+..param.score_type:A score object.
 ...type:Class.Score
 ..remarks:This function does NOT assume independent columns. 
 That is, gap openings are properly scored. 
@@ -726,7 +654,65 @@ sumOfPairsScore(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	return totalScore;
 }
 
+//////////////////////////////////////////////////////////////////////////////
+// This version is insensitive to gap openings, assumes independent columns
+template<typename TStringSet, typename TCargo, typename TSpec, typename TScore> 
+inline typename Value<TScore>::Type
+sumOfPairsScoreInd(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
+				   TScore const& score_type)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename Value<TScore>::Type TScoreValue;
+	typedef typename Value<typename Value<TStringSet>::Type>::Type TAlphabet;
 
+	// Convert the graph
+	String<char> mat;
+	convertAlignment(g, mat);
+	char gapChar = gapValue<char>();
+
+	TScoreValue gap = scoreGapExtend(score_type);
+	TSize nseq = length(stringSet(g));
+	TSize len = length(mat) / nseq;
+	
+	TScoreValue totalScore = 0;
+	for(TSize k=0;k<len; ++k) {
+		for(TSize i = 0; i<nseq-1; ++i) {
+			for(TSize j=i+1; j<nseq; ++j) {
+				if (value(mat, i*len+k) != gapChar) {
+					if (value(mat, j*len + k) != gapChar) {
+						totalScore += score(const_cast<TScore&>(score_type), TAlphabet(value(mat, i*len+k)), TAlphabet(value(mat, j*len + k)));
+					} else totalScore += gap;
+				} else if (value(mat, j*len + k) != gapChar) {
+						totalScore += gap;
+				}
+			}
+		}
+	}
+	return totalScore;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.alignmentEvaluation:
+..summary:Given a multiple alignment, this function calculates all kinds of alignment statistics.
+..cat:Graph
+..signature:
+alignmentEvaluation(graph, score_type, gapExCount, gapCount, pairCount, numPairs, len)
+..param.graph:An alignment graph.
+...type:Spec.Alignment Graph
+..param.score_type:A score object.
+...type:Class.Score
+..param.gapExCount:Number of gap extensions.
+..param.gapCount:Number of gaps.
+..param.pairCount:Number of aligned pairs.
+..param.numPairs:Counter for each pair.
+..param.len:Alignment length.
+..returns:Score of the alignment.
+*/
 template<typename TStringSet, typename TCargo, typename TSpec, typename TScore, typename TSize> 
 inline typename Value<TScore>::Type
 alignmentEvaluation(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
@@ -742,6 +728,12 @@ alignmentEvaluation(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	typedef typename Value<TScore>::Type TScoreValue;
 	typedef typename Value<typename Value<TStringSet>::Type>::Type TAlphabet;
 	TSize alphSize = ValueSize<TAlphabet>::VALUE;
+
+	// Initialization;
+	gapExCount = 0;
+	gapCount = 0;
+	pairCount = 0;
+	clear(numPairs);
 
 	// Convert the graph
 	String<char> mat;
@@ -788,46 +780,6 @@ alignmentEvaluation(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 							gapOpeni = true;
 							totalScore += gapOpen;
 						}
-				}
-			}
-		}
-	}
-	return totalScore;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////
-// This version is insensitive to gap openings, assumes independent columns
-template<typename TStringSet, typename TCargo, typename TSpec, typename TScore> 
-inline typename Value<TScore>::Type
-sumOfPairsScoreInd(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
-				   TScore const& score_type)
-{
-	SEQAN_CHECKPOINT
-	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
-	typedef typename Size<TGraph>::Type TSize;
-	typedef typename Value<TScore>::Type TScoreValue;
-	typedef typename Value<typename Value<TStringSet>::Type>::Type TAlphabet;
-
-	// Convert the graph
-	String<char> mat;
-	convertAlignment(g, mat);
-	char gapChar = gapValue<char>();
-
-	TScoreValue gap = scoreGapExtend(score_type);
-	TSize nseq = length(stringSet(g));
-	TSize len = length(mat) / nseq;
-	
-	TScoreValue totalScore = 0;
-	for(TSize k=0;k<len; ++k) {
-		for(TSize i = 0; i<nseq-1; ++i) {
-			for(TSize j=i+1; j<nseq; ++j) {
-				if (value(mat, i*len+k) != gapChar) {
-					if (value(mat, j*len + k) != gapChar) {
-						totalScore += score(const_cast<TScore&>(score_type), TAlphabet(value(mat, i*len+k)), TAlphabet(value(mat, j*len + k)));
-					} else totalScore += gap;
-				} else if (value(mat, j*len + k) != gapChar) {
-						totalScore += gap;
 				}
 			}
 		}

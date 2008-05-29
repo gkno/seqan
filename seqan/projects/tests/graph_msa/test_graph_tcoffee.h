@@ -284,7 +284,8 @@ void Test_ExternalLibraries() {
 	TGraph g(seqSet);
 	Blosum62 score_type(-1,-11);
 	generatePrimaryLibrary(g, score_type, GlobalPairwise_Library() );
-	
+	std::cout << g << std::endl;
+
 	// T-Coffee lib format
 
 	// Writing
@@ -302,6 +303,27 @@ void Test_ExternalLibraries() {
 	strmRead.open(TEST_PATH "test.lib", std::ios_base::in | std::ios_base::binary);
 	read(strmRead,seqSet,nameSet,TCoffeeLib());
 	strmRead.close();
+	std::cout << g << std::endl;
+
+
+	// Blast format
+
+	// Writing
+	std::fstream strm2;
+	strm2.open(TEST_PATH "test.blast", ios_base::out | ios_base::trunc);
+	write(strm2, g, nameSet, BlastLib());
+	strm2.close();
+
+	// Reading
+	std::fstream strmRead2;
+	strmRead2.open(TEST_PATH "test.blast", std::ios_base::in | std::ios_base::binary);
+	clearVertices(g);
+	read(strmRead2, g, nameSet,BlastLib());
+	strmRead2.close();
+	std::cout << g << std::endl;
+
+
+	// Re-read everything
 	clear(g);
 	assignStringSet(g, seqSet);
 	std::fstream strm_lib;
@@ -599,6 +621,7 @@ void Test_Progressive() {
 
 
 void Test_Alignments1() {
+	typedef unsigned int TSize;
 	typedef String<AminoAcid> TSequence;
 	typedef StringSet<TSequence, Owner<> > TSequenceSet;
 	typedef StringSet<TSequence, Dependent<> > TDependentSequenceSet;
@@ -614,18 +637,37 @@ void Test_Alignments1() {
 	globalAlignment(seqSet, gOut, MSA_Protein());
 	Blosum62 score_type(-2,-8);
 	SEQAN_TASSERT(sumOfPairsScore(gOut, score_type) == 273)
+
+
+	TSize gapExCount;
+	TSize gapCount;
+	TSize pairCount;
+	String<TSize> numPairs;
+	TSize len;
+	alignmentEvaluation(gOut, score_type, gapExCount, gapCount, pairCount, numPairs, len);
+	std::cout << gOut << std::endl;
+	SEQAN_TASSERT(gapExCount == 33)
+	SEQAN_TASSERT(gapCount == 11)
+	SEQAN_TASSERT(pairCount == 83)
+	SEQAN_TASSERT(len == 22)
 }
 
 void Test_Alignments2() {
 	typedef String<Dna> TSequence;
+	typedef StringSet<String<char>, Owner<> > TNameSet;
 	typedef StringSet<TSequence, Owner<> > TSequenceSet;
 	typedef StringSet<TSequence, Dependent<> > TDependentSequenceSet;
 	
 	TSequenceSet seqSet;
+	TNameSet nameSet;
 	appendValue(seqSet, "AACCTTGGAA");
+	appendValue(nameSet, "seq1");
 	appendValue(seqSet, "ACCTGAA");
+	appendValue(nameSet, "seq2");
 	appendValue(seqSet, "TTGG");
+	appendValue(nameSet, "seq3");
 	appendValue(seqSet, "AACCTT");
+	appendValue(nameSet, "seq4");
 
 	typedef Graph<Alignment<TDependentSequenceSet, unsigned int> > TGraph;
 	TGraph gOut(seqSet);
@@ -635,6 +677,29 @@ void Test_Alignments2() {
 	clearVertices(gOut);
 	globalAlignment(seqSet, gOut, MSA_Genome());
 	SEQAN_TASSERT(sumOfPairsScore(gOut, score_type) == 11)
+	std::cout << gOut << std::endl;
+	
+	// Fasta format
+
+	// Writing
+	std::fstream strm3;
+	strm3.open(TEST_PATH "align.fasta", ios_base::out | ios_base::trunc);
+	write(strm3,gOut,nameSet,FastaFormat());
+	strm3.close();
+
+	// Reading
+	clear(seqSet);
+	clear(nameSet);
+	std::fstream strmRead3a;
+	strmRead3a.open(TEST_PATH "align.fasta", std::ios_base::in | std::ios_base::binary);
+	read(strmRead3a,seqSet,nameSet,FastaAlign()); 
+	strmRead3a.close();
+	std::fstream strmRead3;
+	strmRead3.open(TEST_PATH "align.fasta", std::ios_base::in | std::ios_base::binary);
+	clearVertices(gOut);
+	read(strmRead3, gOut, nameSet, score_type, FastaAlign());
+	strmRead3.close();
+	std::cout << gOut << std::endl;
 }
 
 

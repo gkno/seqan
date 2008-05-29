@@ -285,6 +285,29 @@ progressiveAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Testing stuff
+
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TStringSet, typename TCargo, typename TSpec, typename TGuideTree, typename TScore, typename TOutGraph>
@@ -294,7 +317,6 @@ iterativeProgressiveAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 							  TScore const& score_type,
 							  TOutGraph& gOut)			 
 {
-	SEQAN_CHECKPOINT
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename Size<TGraph>::Type TSize;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
@@ -422,7 +444,6 @@ _createMatchingGraph(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 					 TOutGraph& gOut,
 					 TEdgeMap& edgeMapOut)			 
 {
-	SEQAN_CHECKPOINT
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename Size<TGraph>::Type TSize;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
@@ -466,7 +487,6 @@ heaviestMatching(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 				 TString const& str2,
 				 TOutString& align) 
 {
-	SEQAN_CHECKPOINT
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef __int64 TLargeSize;
 	typedef typename Size<TStringSet>::Type TSize;
@@ -650,7 +670,6 @@ _recursiveProgressiveMatching(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 							  TVertexDescriptor const root,
 							  TSequence& alignSeq)
 {
-	SEQAN_CHECKPOINT
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename Size<TGraph>::Type TSize;
 	typedef typename Id<TGraph>::Type TId;
@@ -692,7 +711,6 @@ progressiveMatching(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 					TOutGraph& gOut,
 					TEdgeMap& edgeMapOut)			 
 {
-	SEQAN_CHECKPOINT
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename Size<TGraph>::Type TSize;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
