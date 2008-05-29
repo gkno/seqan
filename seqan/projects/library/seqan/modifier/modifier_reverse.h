@@ -132,20 +132,32 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <typename THost, typename TDelta>
 	inline ModifiedIterator<THost, ModReverse> &
-	operator += (ModifiedIterator<THost, ModReverse> & me, TDelta delta) {
-		if (delta < 0) {
-			if (cargo(me)._atEnd) {
-				cargo(me)._atEnd = false;
-				++delta;
-			}
-			host(me) += -delta;
-		} else {
+	operator += (ModifiedIterator<THost, ModReverse> & me, TDelta delta_) 
+	{
+		typedef ModifiedIterator<THost, ModReverse> TIterator;
+		typedef typename Position<TIterator>::Type TPosition;
+		TPosition delta = delta_;
+
+		if (delta == 0)
+		{
+			return me;
+		}
+		if (delta > 0)
+		{
 			if (position(host(me)) < delta) {
 				cargo(me)._atEnd = true;
 				--delta;
 			}
 			host(me) -= delta;
 		}
+		else
+		{
+			if (cargo(me)._atEnd) {
+				cargo(me)._atEnd = false;
+				++delta;
+			}
+			host(me) -= delta;
+		} 
 		return me;
 	}
 
