@@ -205,10 +205,6 @@
 	#include "../../library/demos/graph_align_msa.cpp"
 	#undef main
 
-	#define main runGraph24
-	#include "../../library/demos/seqan_tcoffee.cpp"
-	#undef main
-
 	#define main runGraph25
 	#include "../../library/demos/graph_consensus.cpp"
 	#undef main
@@ -270,7 +266,6 @@ int main(int argc, const char *argv[])
 	runGraph6();runGraph7();runGraph8();runGraph9();runGraph10();runGraph11();
 	runGraph12();runGraph13();runGraph14();runGraph15();runGraph16();runGraph17();
 	runGraph18();runGraph19();runGraph20();runGraph23();
-	runGraph24(argc, argv);
 	runGraph25(argc, argv);
 	runGraph26();runGraph27();
 	runGraph28(argc, argv);
