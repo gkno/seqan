@@ -61,20 +61,20 @@ _align_gotoh_trace(TAlign& align,
 	TSize numRows = length(str[1]);
 
 	// Initialize everything	
-	TTraceValue nextTraceValue = getValue(trace, (len1 - 1)*numRows + (len2 - 1));
+	TTraceValue nextTraceValue = value(trace, (len1 - 1)*numRows + (len2 - 1));
 	TTraceValue tv = 0;
 	if (initialDir == Diagonal) {
-		if ( (Byte) nextTraceValue /  (Byte) 4 == 0) tv =  Diagonal;
-		else if ( (Byte) nextTraceValue /  (Byte) 4 == 1) tv =  Horizontal;
+		if ( ((unsigned char) nextTraceValue >> 2) == 0) tv = Diagonal;
+		else if ( ((unsigned char) nextTraceValue >> 2) == 1) tv =  Horizontal;
 		else tv =  Vertical;
 	} else if (initialDir == Horizontal) {
-		if (( (Byte) nextTraceValue /  (Byte) 2) % (Byte) 2 == 0) {
+		if (((unsigned char) nextTraceValue >> 1) % (unsigned char) 2 == 0) {
 		  _align_trace_print(align, str, id1, --len1, id2, len2, (TSize) 1,  Horizontal);
 		  tv =  Diagonal;
 		}
 		else tv =  Horizontal;
 	} else if (initialDir == Vertical) {
-		if (  (Byte) nextTraceValue % (Byte) 2 == 0) {
+		if ((unsigned char) nextTraceValue % (unsigned char) 2 == 0) {
 		  _align_trace_print(align, str, id1, len1, id2, --len2, (TSize) 1,  Vertical);
 		  tv =  Diagonal;
 		}
@@ -85,16 +85,16 @@ _align_gotoh_trace(TAlign& align,
 
 	// Now follow the trace
 	do {
-		nextTraceValue = getValue(trace, (len1 - 1)*numRows + (len2 - 1));
+		nextTraceValue = value(trace, (len1 - 1)*numRows + (len2 - 1));
 		if (tv == Diagonal) {
-			if (  (Byte) nextTraceValue /  (Byte) 4 == 0) tv =  Diagonal;
-			else if ( (Byte) nextTraceValue /  (Byte) 4 == 1) tv =  Horizontal;
+			if (((unsigned char) nextTraceValue >> 2) == 0) tv = Diagonal;
+			else if (((unsigned char) nextTraceValue >> 2) == 1) tv = Horizontal;
 			else tv =  Vertical;
 		} else if (tv == Horizontal) {
-			if (( (Byte) nextTraceValue /  (Byte) 2) % (Byte) 2 == 0) tv =  Diagonal;
+			if ((((unsigned char) nextTraceValue >> 1) % (unsigned char) 2) == 0) tv =  Diagonal;
 		    else tv =  Horizontal;
 		} else if (tv == Vertical) {
-			if (  (Byte) nextTraceValue %  (Byte) 2 == 0) tv =  Diagonal;
+			if (((unsigned char) nextTraceValue %  (unsigned char) 2) == 0) tv =  Diagonal;
 			else tv =  Vertical;
 		}
 		if (tv == Diagonal) {
@@ -110,7 +110,7 @@ _align_gotoh_trace(TAlign& align,
 		} else if(tv == Horizontal) {
 			if (tv != tvOld) {
 				_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
-				if (( (Byte) nextTraceValue /  (Byte) 2) % (Byte) 2 == 0) {
+				if ((((unsigned char) nextTraceValue >> 1) % (unsigned char) 2) == 0) {
 					_align_trace_print(align, str, id1, --len1, id2, len2, (TSize) 1,  Horizontal);
 					tv =  Diagonal; segLen = 0;
 				} else {
@@ -124,7 +124,7 @@ _align_gotoh_trace(TAlign& align,
 		} else if (tv == Vertical) {
 			if (tv != tvOld) {
 				_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
-				if (  (Byte) nextTraceValue %  (Byte) 2 == 0) {
+				if (((unsigned char) nextTraceValue %  (unsigned char) 2) == 0) {
 					_align_trace_print(align, str, id1, len1, id2, --len2, (TSize) 1,  Vertical);
 					tv =  Diagonal; segLen = 0;
 				} else {
@@ -196,25 +196,24 @@ _align_gotoh(TTrace& trace,
 	typedef typename Iterator<TTrace, Standard>::Type TTraceIter;
 	TTraceIter it = begin(trace, Standard() );
 	// Max values: overall.first = last column, overall.second = last row
-	TScoreValue infValue = -1 * (_getInfinity<TScoreValue>() / 2);
+	TScoreValue infValue = -1 * _getInfinityDistance<TScoreValue>();
 	overallMaxValue = std::make_pair(infValue, infValue);
-	//overallMaxValue = std::make_pair(InfimumValue<TScoreValue>::VALUE, InfimumValue<TScoreValue>::VALUE);
 	overallMaxIndex = std::make_pair(len1, len2);
 	assignValue(mat, 0, 0);
 	for(TSize row = 1; row <= len2; ++row) {
 		_initFirstColumn(TAlignConfig(), value(mat, row), gapOpen + (row - 1) * gap);
-		assignValue(horizontal, row, getValue(mat, row) + gapOpen - gap);
+		assignValue(horizontal, row, value(mat, row) + gapOpen - gap);
 		//std::cout << getValue(mat, row) << std::endl;
 		//std::cout << getValue(horizontal, row) << std::endl;
 		//std::cout << "====" << std::endl;
 	}
 	for(TSize col = 1; col <= len1; ++col) {
-		TScoreValue diagValMat = getValue(mat, 0);
+		TScoreValue diagValMat = value(mat, 0);
 		_initFirstRow(TAlignConfig(), value(mat, 0), gapOpen + (col - 1) * gap);
-		vert = getValue(mat, 0) + gapOpen - gap;
+		vert = value(mat, 0) + gapOpen - gap;
 		for(TSize row = 1; row <= len2; ++row) {
 			// Get the new maximum for vertical
-			if ((tmp = getValue(mat, row - 1) + gapOpen) > vert + gap) {
+			if ((tmp = value(mat, row - 1) + gapOpen) > vert + gap) {
 				vert = tmp;
 				tvVertical = Diagonal;
 			} else {
@@ -223,11 +222,11 @@ _align_gotoh(TTrace& trace,
 			}
 
 			// Get the new maximum for left
-			if ((tmp = getValue(mat, row) + gapOpen) > getValue(horizontal, row) + gap) {
+			if ((tmp = value(mat, row) + gapOpen) > value(horizontal, row) + gap) {
 				assignValue(horizontal, row, tmp);
 				tvHorizontal = Diagonal;
 			} else {
-				assignValue(horizontal, row, getValue(horizontal, row) + gap);
+				assignValue(horizontal, row, value(horizontal, row) + gap);
 				tvHorizontal = Horizontal;
 			}
 
@@ -239,13 +238,13 @@ _align_gotoh(TTrace& trace,
 				tmp = vert;
 				tvMat = Vertical;
 			}
-			if (getValue(horizontal, row) > tmp) {
-				tmp = getValue(horizontal,row);
+			if (value(horizontal, row) > tmp) {
+				tmp = value(horizontal,row);
 				tvMat = Horizontal;
 			}
 
 			// Assign the new diagonal values
-			diagValMat = getValue(mat, row);
+			diagValMat = value(mat, row);
 			assignValue(mat, row, tmp);
 
 			// Assign the right trace value
