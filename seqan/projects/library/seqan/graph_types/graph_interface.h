@@ -311,7 +311,6 @@ struct Alphabet<Graph<Hmm<TAlphabet, TCargo, TSpec> > const> {
 Useful for various graph algorithms, e.g., missing predecessors, vertices that have not been visited, etc.
 ..signature:getNil<T>()
 ..returns:Pseudo nil value for type T.
-..see:Function._getInfinity
 */
 template <typename T>
 inline T const
@@ -333,7 +332,6 @@ SEQAN_CHECKPOINT
 
 
 //////////////////////////////////////////////////////////////////////////////
-
 // Purely internal!!! Never compare to _getInfinity()!!!.
 // Just returns a very large value.
 //////////////////////////////////////////////////////////////////////////////

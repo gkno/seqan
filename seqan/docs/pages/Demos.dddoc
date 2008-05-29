@@ -616,16 +616,6 @@ This is the best test with a bast jest.
 ..demofor:Function.ford_fulkerson
 .
 
-.Demo.Heuristic Matching
-..cat:Graph
-..order:Graph Heuristic Matching
-..summary:Path-growing code example
-..file:../projects/library/demos/graph_algo_matching_pathgrowing.cpp
-..demofor:Class.Graph
-..DISABLEDdemofor:Function.path_growing_algorithm
-.
-
-
 .Demo.Longest Increasing Subsequence
 ..cat:Graph
 ..order:Graph Sequence 1 Longest Increasing Subsequence
@@ -689,23 +679,6 @@ This is the best test with a bast jest.
 ..demofor:Function.localAlignment
 .
 
-.Demo.MSA with Neighbor-Joining
-..cat:Graph
-..order:Graph Multiple Sequence Alignment 1 Neighbor-Joining
-..summary:Progressive multiple sequence alignment using neighbor joining for building the guide tree.
-..file:../projects/library/demos/graph_align_guide_nj.cpp
-..demofor:Class.Graph
-..DISABLEDdemofor:Function.slowNjTree
-.
-
-.Demo.MSA with UPGMA
-..cat:Graph
-..order:Graph Multiple Sequence Alignment 2 UPGMA
-..summary:Progressive multiple sequence alignment using UPGMA for building the guide tree
-..file:../projects/library/demos/graph_align_guide_upgma.cpp
-..demofor:Class.Graph
-..DISABLEDdemofor:Function.upgmaTree
-.
 
 .Demo.T-Coffee
 ..cat:Graph
@@ -715,11 +688,6 @@ This is the best test with a bast jest.
 ..demofor:Class.Graph
 ..DISABLEDdemofor:Function.tCoffeeProteinAlignment
 .
-
-
-
-
-
 
 .Demo.File Format I/O:
 ..cat:System

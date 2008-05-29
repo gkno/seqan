@@ -702,13 +702,15 @@ getEndState(Graph<Hmm<TAlphabet, TCargo, TSpec> > const& g)
 .Function.getTransitionProbability:
 ..cat:Graph.Hmm
 ..summary:Returns the transition probability.
-..signature:getTransitionProbability(g, s1, s2)
+..signature:getTransitionProbability(g, [s1, s2 | e])
 ..param.g:A HMM.
 ...type:Spec.Hmm
 ..param.s1:State 1.
 ...type:Metafunction.VertexDescriptor
 ..param.s2:State 2.
 ...type:Metafunction.VertexDescriptor
+..param.e:Edge between two states.
+...type:Metafunction.EdgeDescriptor
 ..returns:Returns the transition probability.
 */
 template<typename TAlphabet, typename TCargo, typename TSpec, typename TVertexDescriptor>
@@ -727,17 +729,6 @@ getTransitionProbability(Graph<Hmm<TAlphabet, TCargo, TSpec> > const& g,
 
 //////////////////////////////////////////////////////////////////////////////
 
-/**
-.Function.getTransitionProbability:
-..cat:Graph.Hmm
-..summary:Returns the transition probability.
-..signature:getTransitionProbability(g, e)
-..param.g:A HMM.
-...type:Spec.Hmm
-..param.e:Edge between two states.
-...type:Metafunction.EdgeDescriptor
-..returns:Returns the transition probability.
-*/
 template<typename TAlphabet, typename TCargo, typename TSpec, typename TEdgeDescriptor>
 inline TCargo
 getTransitionProbability(Graph<Hmm<TAlphabet, TCargo, TSpec> > const&,
@@ -753,13 +744,15 @@ getTransitionProbability(Graph<Hmm<TAlphabet, TCargo, TSpec> > const&,
 .Function.transitionProbability:
 ..cat:Graph.Hmm
 ..summary:Returns a reference to the transition probability.
-..signature:transitionProbability(g, s1, s2)
+..signature:transitionProbability(g, [s1, s2 | e])
 ..param.g:A HMM.
 ...type:Spec.Hmm
 ..param.s1:State 1.
 ...type:Metafunction.VertexDescriptor
 ..param.s2:State 2.
 ...type:Metafunction.VertexDescriptor
+..param.e:Edge connecting two states.
+...type:Metafunction.EdgeDescriptor
 ..returns:Returns a reference to the transition probability.
 */
 template<typename TAlphabet, typename TCargo, typename TSpec, typename TVertexDescriptor>
@@ -777,17 +770,6 @@ transitionProbability(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g,
 
 //////////////////////////////////////////////////////////////////////////////
 
-/**
-.Function.transitionProbability:
-..cat:Graph.Hmm
-..summary:Returns a reference to the transition probability.
-..signature:transitionProbability(g, e)
-..param.g:A HMM.
-...type:Spec.Hmm
-..param.e:Edge connecting two states.
-...type:Metafunction.EdgeDescriptor
-..returns:Returns a reference to the transition probability.
-*/
 template<typename TAlphabet, typename TCargo, typename TSpec, typename TEdgeDescriptor>
 inline TCargo&
 transitionProbability(Graph<Hmm<TAlphabet, TCargo, TSpec> >&,
@@ -829,18 +811,6 @@ assignTransitionProbability(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g,
 
 //////////////////////////////////////////////////////////////////////////////
 
-/**
-.Function.assignTransitionProbability:
-..cat:Graph.Hmm
-..summary:Assigns a new transition probability.
-..signature:assignTransitionProbability(g, e, prob)
-..param.g:A HMM.
-...type:Spec.Hmm
-..param.e:Edge in the HMM.
-...type:Metafunction.EdgeDescriptor
-..param.prob:New probability.
-..returns:void.
-*/
 template<typename TAlphabet, typename TCargo, typename TSpec, typename TEdgeDescriptor, typename TTransProb>
 inline void
 assignTransitionProbability(Graph<Hmm<TAlphabet, TCargo, TSpec> >&,
