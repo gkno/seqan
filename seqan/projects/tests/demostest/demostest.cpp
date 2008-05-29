@@ -117,109 +117,94 @@
 
 #ifdef TEST_GRAPH
 
-	#define main runGraph0
+	#define main runGraphBfs
 	#include "../../library/demos/graph_algo_bfs.cpp"
 	#undef main
 
-	#define main runGraph1
+	#define main runGraphDfs
 	#include "../../library/demos/graph_algo_dfs.cpp"
 	#undef main
 
-	#define main runGraph2
+	#define main runGraphTopsort
 	#include "../../library/demos/graph_algo_topsort.cpp"
 	#undef main
 
-	#define main runGraph3
+	#define main runGraphScc
 	#include "../../library/demos/graph_algo_scc.cpp"
 	#undef main
 
-	#define main runGraph4
+	#define main runGraphPrim
 	#include "../../library/demos/graph_algo_tree_prim.cpp"
 	#undef main
 
-	#define main runGraph5
+	#define main runGraphKruskal
 	#include "../../library/demos/graph_algo_tree_kruskal.cpp"
 	#undef main
 
-	#define main runGraph6
+	#define main runGraphDag
 	#include "../../library/demos/graph_algo_path_dag.cpp"
 	#undef main
 
-	#define main runGraph7
+	#define main runGraphBellman
 	#include "../../library/demos/graph_algo_path_bellmanford.cpp"
 	#undef main
 
-	#define main runGraph8
+	#define main runGraphDijkstra
 	#include "../../library/demos/graph_algo_path_dijkstra.cpp"
 	#undef main
 
-	#define main runGraph9
+	#define main runGraphAllpairs
 	#include "../../library/demos/graph_algo_path_allpairs.cpp"
 	#undef main
 
-	#define main runGraph10
+	#define main runGraphFloyd
 	#include "../../library/demos/graph_algo_path_floydwarshall.cpp"
 	#undef main
 
-	#define main runGraph11
+	#define main runGraphTransitive
 	#include "../../library/demos/graph_algo_path_transitive.cpp"
 	#undef main
 
-	#define main runGraph12
+	#define main runGraphFord
 	#include "../../library/demos/graph_algo_flow_fordfulkerson.cpp"
 	#undef main
 
-	#define main runGraph13
-	#include "../../library/demos/graph_algo_matching_pathgrowing.cpp"
-	#undef main
-
-	#define main runGraph14
+	#define main runGraphLis
 	#include "../../library/demos/graph_algo_lis.cpp"
 	#undef main
 
-	#define main runGraph15
+	#define main runGraphHis
 	#include "../../library/demos/graph_algo_his.cpp"
 	#undef main
 
-	#define main runGraph16
+	#define main runGraphLcs
 	#include "../../library/demos/graph_algo_lcs.cpp"
 	#undef main
 
-	#define main runGraph17
+	#define main runGraphNw
 	#include "../../library/demos/graph_align_nw.cpp"
 	#undef main
 
-	#define main runGraph18
+	#define main runGraphGotoh
 	#include "../../library/demos/graph_align_gotoh.cpp"
 	#undef main
 
-	#define main runGraph19
+	#define main runGraphHirschberg
 	#include "../../library/demos/graph_align_hirschberg.cpp"
 	#undef main
 
-	#define main runGraph20
+	#define main runGraphSw
 	#include "../../library/demos/graph_align_sw.cpp"
 	#undef main
 
-	#define main runGraph23
+	#define main runGraphMsa
 	#include "../../library/demos/graph_align_msa.cpp"
 	#undef main
 
-	#define main runGraph25
-	#include "../../library/demos/graph_consensus.cpp"
-	#undef main
-
-	#define main runGraph26
+	#define main runGraphHmm
 	#include "../../library/demos/graph_hmm.cpp"
 	#undef main
 
-	#define main runGraph27
-	#include "../../library/demos/graph_matching.cpp"
-	#undef main
-
-	#define main runGraph28
-	#include "../../library/demos/seqan_matching.cpp"
-	#undef main
 #endif
 
 
@@ -262,13 +247,28 @@ int main(int argc, const char *argv[])
 #endif
 
 #ifdef TEST_GRAPH
-	runGraph0();runGraph1();runGraph2();runGraph3();runGraph4();runGraph5();
-	runGraph6();runGraph7();runGraph8();runGraph9();runGraph10();runGraph11();
-	runGraph12();runGraph13();runGraph14();runGraph15();runGraph16();runGraph17();
-	runGraph18();runGraph19();runGraph20();runGraph23();
-	runGraph25(argc, argv);
-	runGraph26();runGraph27();
-	runGraph28(argc, argv);
+	runGraphBfs();
+	runGraphDfs();
+	runGraphTopsort();
+	runGraphScc();
+	runGraphPrim();
+	runGraphKruskal();
+	runGraphDag();
+	runGraphBellman();
+	runGraphDijkstra();
+	runGraphAllpairs();
+	runGraphFloyd();
+	runGraphTransitive();
+	runGraphFord();
+	runGraphLis();
+	runGraphHis();
+	runGraphLcs();
+	runGraphNw();
+	runGraphGotoh();
+	runGraphHirschberg();
+	runGraphSw();
+	runGraphMsa();
+	runGraphHmm();
 #endif
 
 	return 0;
