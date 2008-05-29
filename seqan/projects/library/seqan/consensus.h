@@ -32,7 +32,6 @@
 #include <seqan/graph_msa.h>
 
 
-
 #ifdef SEQAN_SWITCH_USE_FORWARDS
 #include <seqan/consensus/consensus_generated_forwards.h>
 #endif

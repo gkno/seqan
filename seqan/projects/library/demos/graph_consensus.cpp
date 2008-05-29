@@ -1,5 +1,5 @@
 #include <seqan/consensus.h>
-#include <seqan/modifier.h>
+
 
 #include <iostream>
 #include <fstream>
