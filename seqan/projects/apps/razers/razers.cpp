@@ -12,6 +12,7 @@
 #endif
 
 #include <iostream>
+#include <fstream>
 #include <seqan/pipe.h>
 #include <seqan/find.h>
 #include <seqan/align.h>
