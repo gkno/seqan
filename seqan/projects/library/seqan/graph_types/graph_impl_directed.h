@@ -653,7 +653,32 @@ removeEdge(Graph<Directed<TCargo, TSpec> >& g,
 		   TEdgeDescriptor const edge)
 {
 	SEQAN_CHECKPOINT
-	removeEdge(g, sourceVertex(g,edge), targetVertex(g,edge));
+	SEQAN_ASSERT(idInUse(g.data_id_managerV, sourceVertex(g,edge)) == true)
+	SEQAN_ASSERT(idInUse(g.data_id_managerV, targetVertex(g,edge)) == true)
+	
+	typedef Graph<Directed<TCargo, TSpec> > TGraph;
+	typedef typename EdgeType<TGraph>::Type TEdgeStump;
+
+	// Find edge and predecessor
+	TEdgeStump* pred = 0;
+	TEdgeStump* current = getValue(g.data_vertex, sourceVertex(g,edge));
+	while(current != (TEdgeStump*) 0) {
+		if (current == edge) break;
+		pred = current;
+		current = getNextT(current);
+	}
+	
+	// Not found?
+	if (current == (TEdgeStump*) 0) return;
+	
+	// Relink the next pointer of predecessor
+	if (pred != (TEdgeStump*) 0) assignNextT(pred, getNextT(current));
+	else value(g.data_vertex, sourceVertex(g,edge)) = getNextT(current);
+	
+	// Deallocate
+	releaseId(g.data_id_managerE, _getId(current));
+	valueDestruct(current);
+	deallocate(g.data_allocator, current, 1);
 }
 
 //////////////////////////////////////////////////////////////////////////////

@@ -545,8 +545,88 @@ inline void
 removeEdge(Graph<Undirected<TCargo, TSpec> >& g,
 		   TEdgeDescriptor const edge)
 {
+	
 	SEQAN_CHECKPOINT
-	removeEdge(g, sourceVertex(g,edge), targetVertex(g,edge));
+	SEQAN_ASSERT(idInUse(g.data_id_managerV, sourceVertex(g,edge)) == true)
+	SEQAN_ASSERT(idInUse(g.data_id_managerV, targetVertex(g,edge)) == true)
+	typedef Graph<Undirected<TCargo, TSpec> > TGraph;
+	typedef typename EdgeType<TGraph>::Type TEdgeStump;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	TVertexDescriptor source = sourceVertex(g,edge);
+	TVertexDescriptor target = targetVertex(g,edge);
+
+	// Find edge and source predecessor
+	TEdgeStump* predSource = 0;
+	TEdgeStump* current = getValue(g.data_vertex, source);
+	while(current != (TEdgeStump*) 0) {
+		TVertexDescriptor adjV = (TVertexDescriptor) getTarget(current);
+		if (adjV != source) {
+			if ((adjV == target) && (current == edge)) break;
+			predSource = current;
+			current = getNextS(current);
+		} else {
+			adjV = (TVertexDescriptor) getSource(current);
+			if ((adjV == target) && (current == edge)) break;
+			predSource = current;
+			current = getNextT(current);
+		}
+	}
+	
+	// Not found?
+	if (current == (TEdgeStump*) 0) return;
+
+	// Find edge and target predecessor
+	TEdgeStump* predTarget = 0;
+	current = getValue(g.data_vertex, target);
+	while(current != (TEdgeStump*) 0) {
+		TVertexDescriptor adjV = (TVertexDescriptor) getTarget(current);
+		if (adjV != target) {
+			if ((adjV == source) && (current == edge)) break;
+			predTarget = current;
+			current = getNextS(current);
+		} else {
+			adjV = (TVertexDescriptor) getSource(current);
+			if ((adjV == source) && (current == edge)) break;
+			predTarget = current;
+			current = getNextT(current);
+		}
+	}
+
+	
+	// Relink the next pointer of source predecessor
+	if (predSource != (TEdgeStump*) 0) {
+		if (source != (TVertexDescriptor) getTarget(current)) {
+			if (source != (TVertexDescriptor) getTarget(predSource)) assignNextS(predSource, getNextS(current));
+			else assignNextT(predSource, getNextS(current));
+		} else {
+			if (source != (TVertexDescriptor) getTarget(predSource)) assignNextS(predSource, getNextT(current));
+			else assignNextT(predSource, getNextT(current));
+		}
+	}
+	else {
+		if (source != (TVertexDescriptor) getTarget(current)) value(g.data_vertex, source) = getNextS(current);
+		else value(g.data_vertex, source) = getNextT(current);
+	}
+
+	// Relink the next pointer of target predecessor
+	if (predTarget != (TEdgeStump*) 0) {
+		if (target != (TVertexDescriptor) getTarget(current)) {
+			if (target != (TVertexDescriptor) getTarget(predTarget)) assignNextS(predTarget, getNextS(current));
+			else assignNextT(predTarget, getNextS(current));
+		} else {
+			if (target != (TVertexDescriptor) getTarget(predTarget)) assignNextS(predTarget, getNextT(current));
+			else assignNextT(predTarget, getNextT(current));
+		}
+	}
+	else {
+		if (target != (TVertexDescriptor) getTarget(current)) value(g.data_vertex, target) = getNextS(current);
+		else value(g.data_vertex, target) = getNextT(current);
+	}
+
+	// Deallocate
+	releaseId(g.data_id_managerE, _getId(current));
+	valueDestruct(current);
+	deallocate(g.data_allocator, current, 1);
 }
 
 //////////////////////////////////////////////////////////////////////////////

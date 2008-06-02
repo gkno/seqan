@@ -238,6 +238,17 @@ void Test_Directed() {
 	removeEdge(g3,0,4);
 	removeEdge(g3,0,2);
 	SEQAN_TASSERT(numEdges(g3) == 2)
+
+	// Multigraph
+	StandardGraph multiG;
+	addVertex(multiG);addVertex(multiG);addVertex(multiG);
+	TEdgeDescriptor edgeD1 = addEdge(multiG, 1, 2);
+	TEdgeDescriptor edgeD2 = addEdge(multiG, 1, 2);
+	TEdgeDescriptor edgeD3 = addEdge(multiG, 1, 2);
+	removeEdge(multiG, edgeD2);
+	SEQAN_TASSERT(sourceVertex(multiG,edgeD1) == 1)
+	SEQAN_TASSERT(sourceVertex(multiG,edgeD2) == 0) // EdgeDescriptor invalid
+	SEQAN_TASSERT(sourceVertex(multiG,edgeD3) == 1)
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -569,6 +580,15 @@ void Test_Undirected() {
 	SEQAN_TASSERT(targetVertex(gIter, getValue(itEdge))==4)
 	SEQAN_TASSERT(atBegin(itEdge)==true)
 	SEQAN_TASSERT(atEnd(itEdge)==false)
+
+	// Multigraph
+	StandardGraph multiG;
+	addVertex(multiG);addVertex(multiG);addVertex(multiG);
+	addEdge(multiG, 1, 2);
+	TEdgeDescriptor edgeD2 = addEdge(multiG, 1, 2);
+	addEdge(multiG, 1, 2);
+	removeEdge(multiG, edgeD2);
+	SEQAN_TASSERT(numEdges(multiG) == 2)
 }
 
 
@@ -943,6 +963,15 @@ void Test_Automaton() {
 	SEQAN_TASSERT(getCargo(edg2)==21)
 	SEQAN_TASSERT(getCargo(edg1_10)==12)
 	SEQAN_TASSERT(getCargo(edg1_11)==21)
+
+	// Multigraph
+	StandardAutomaton multiG;
+	addVertex(multiG);addVertex(multiG);addVertex(multiG);
+	addEdge(multiG, 1, 2, 'a');
+	TEdgeDescriptor edgeD2 = addEdge(multiG, 1, 2, 'c');
+	addEdge(multiG, 1, 2, 'g');
+	removeEdge(multiG, edgeD2);
+	SEQAN_TASSERT(numEdges(multiG) == 2)
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1302,9 +1331,6 @@ void Test_Tree() {
 	SEQAN_TASSERT((getCargo(ed1)).i2 == 1)
 	assignRoot(g2,1);
 	SEQAN_TASSERT(getRoot(g2) == 1)
-
-
-
 
 	//// File read
 	//fstream strmKnut;

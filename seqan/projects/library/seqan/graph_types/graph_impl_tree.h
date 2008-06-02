@@ -454,6 +454,7 @@ addEdge(Graph<Tree<TCargo, TSpec> >& g,
 	SEQAN_CHECKPOINT
 	SEQAN_ASSERT(idInUse(g.data_id_managerV, parent) == true)
 	SEQAN_ASSERT(idInUse(g.data_id_managerV, child) == true)
+	SEQAN_ASSERT(findEdge(g, parent, child) == 0) // No multi-graphs as trees!!!
 
 	typedef Graph<Tree<TCargo, TSpec> > TGraph;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
