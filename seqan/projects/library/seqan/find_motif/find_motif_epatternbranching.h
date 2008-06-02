@@ -68,31 +68,30 @@ template <typename TValue>
 class MotifFinder<TValue, EPatternBranching>
 {
 //_________________________________________________________________________________
-	
-	typedef String<TValue> TString;
-	typedef String<TString> TStrings;
-	typedef typename Size<TStrings>::Type TSize1;
-	typedef typename Size<TString>::Type TSize2;
-	typedef String<int> TIntAr;
-
-//_________________________________________________________________________________
 
 public:
-	TSize1 dataset_size;
-	TSize2 motif_size;
-	unsigned int num_of_substitutions;
+	typedef unsigned int TSize;
+	typedef String<TValue> TString;
+	typedef String<TString> TStrings;
+	typedef String<int> TIntAr;
+
+	TSize dataset_size;
+	TSize motif_size;
+	TSize num_of_substitutions;
 	bool has_exact_substitutions;
-	unsigned int neighborhood_size;
+	TSize neighborhood_size;
 	TStrings set_of_motifs; // result set
+
+//_________________________________________________________________________________
 
 	MotifFinder()
 	{
 	}
-	MotifFinder(TSize1 const & t_, 
-		        TSize2 const & l_, 
-				unsigned int const & d_, 
+	MotifFinder(TSize const & t_, 
+		        TSize const & l_, 
+				TSize const & d_, 
 				bool const & is_exact_, 
-				unsigned int const & h_):
+				TSize const & h_):
 		dataset_size(t_),
 	    motif_size(l_),
 		num_of_substitutions(d_),
@@ -100,9 +99,9 @@ public:
 		neighborhood_size(h_)
 	{
 	}
-	MotifFinder(TSize1 const & t_, 
-		        TSize2 const & l_, 
-				unsigned int const & d_, 
+	MotifFinder(TSize const & t_, 
+		        TSize const & l_, 
+				TSize const & d_, 
 				bool const & is_exact_, 
 				TIntAr & n_ar_):
 		dataset_size(t_),
@@ -520,7 +519,7 @@ bestNeighbors(TIntSet & neighbors,
 		{
 			typename Iterator<TString>::Type x_iter = begin(l_mer_x);
 			typename Iterator<TString>::Type x_end = end(l_mer_x);
-			int dist = hammingDistance(x_iter,x_end,seq_iter);
+			int dist = hammingDistance<int>(x_iter,x_end,seq_iter);
 			hd_mat[seq_nr][seq_pos] = dist;
 			if(dist<min_dist)
 			{
@@ -713,11 +712,11 @@ hasAtLeastOneOccurrence(TStringIter l_mer_begin,
 	{
 		if(is_exact)
 		{
-			counter += (hammingDistance(seq_begin, seq_begin+l, l_mer_begin)==d) ? 1 : 0;
+			counter += (hammingDistance<TType>(seq_begin, seq_begin+l, l_mer_begin)==d) ? 1 : 0;
 		}
 		else
 		{
-			counter += (hammingDistance(seq_begin, seq_begin+l, l_mer_begin)<=d) ? 1 : 0;
+			counter += (hammingDistance<TType>(seq_begin, seq_begin+l, l_mer_begin)<=d) ? 1 : 0;
 		}		
 		++seq_begin;
 	}

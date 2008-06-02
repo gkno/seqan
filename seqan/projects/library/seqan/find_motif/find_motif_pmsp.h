@@ -60,23 +60,23 @@ template <typename TValue>
 class MotifFinder<TValue, PMSP>
 {
 //_________________________________________________________________________________
-	
-	typedef String<TValue> TString;
-	typedef String<TString> TStrings;
-	typedef typename Size<TString>::Type TSize;
-
-//_________________________________________________________________________________
 
 public:
+	typedef unsigned int TSize;
+	typedef String<TValue> TString;
+	typedef String<TString> TStrings;
+	
 	TSize motif_size;
-	unsigned int num_of_substitutions;
+	TSize num_of_substitutions;
 	bool has_exact_substitutions;
 	TStrings set_of_motifs; // result set
+
+//_________________________________________________________________________________
 
 	MotifFinder()
 	{
 	}
-	MotifFinder(TSize & l_, unsigned int d_, bool is_exact_):
+	MotifFinder(TSize const & l_, TSize const & d_, bool const & is_exact_):
 		motif_size(l_),
 		num_of_substitutions(d_),
 		has_exact_substitutions(is_exact_)
@@ -211,7 +211,7 @@ pmsp(TStrings & result,
 			int seq_pos = 0;
 			while(seq_iter2!=seq_end2)
 			{
-				if( hammingDistance(seq_iter2, seq_iter2+l, seq_iter1)<=2*d )
+				if( hammingDistance<TType>(seq_iter2, seq_iter2+l, seq_iter1)<=2*d )
 				{
 					pos_vect.push_back(seq_pos);
 				}
@@ -239,13 +239,13 @@ pmsp(TStrings & result,
 					while(l_iter!=l_end & number<2)
 					{
 						TPos pos = *l_iter;
-						if(is_exact & hammingDistance(begin(dataset[i+1])+pos, begin(dataset[i+1])+pos+l, 
+						if(is_exact & hammingDistance<TType>(begin(dataset[i+1])+pos, begin(dataset[i+1])+pos+l, 
 							                          begin(l_mer))==d)
 						{
 							++number;
 						}
 						else if(!(is_exact) & 
-							      hammingDistance(begin(dataset[i+1])+pos, begin(dataset[i+1])+pos+l,
+							      hammingDistance<TType>(begin(dataset[i+1])+pos, begin(dataset[i+1])+pos+l,
 								                        begin(l_mer))<=d)                  
 						{
 							++number;
@@ -330,7 +330,7 @@ pmsp(TStrings & result,
 			int seq_pos = 0;
 			while(seq_iter2!=seq_end2)
 			{
-				if( hammingDistance(seq_iter2, seq_iter2+l, seq_iter1)<=2*d )
+				if( hammingDistance<TType>(seq_iter2, seq_iter2+l, seq_iter1)<=2*d )
 				{
 					pos_vect.push_back(seq_pos);
 				}
@@ -356,13 +356,13 @@ pmsp(TStrings & result,
 				while(l_iter!=l_end & number<1)
 				{
 					TPos pos = *l_iter;
-					if(is_exact & hammingDistance(begin(dataset[i+1])+pos, begin(dataset[i+1])+pos+l, 
+					if(is_exact & hammingDistance<TType>(begin(dataset[i+1])+pos, begin(dataset[i+1])+pos+l, 
 												  begin(l_mer))==d)
 					{
 						++number;
 					}
 					else if(!(is_exact) & 
-							  hammingDistance(begin(dataset[i+1])+pos, begin(dataset[i+1])+pos+l,
+							  hammingDistance<TType>(begin(dataset[i+1])+pos, begin(dataset[i+1])+pos+l,
 													begin(l_mer))<=d)                              
 					{
 						++number;
@@ -450,7 +450,7 @@ pmsp(TStrings & result,
 				int seq_pos = 0;
 				while(seq_iter2!=seq_end2)
 				{
-					if( hammingDistance(seq_iter2, seq_iter2+l, seq_iter1)<=2*d )
+					if( hammingDistance<TType>(seq_iter2, seq_iter2+l, seq_iter1)<=2*d )
 					{
 						pos_vect.push_back(seq_pos);
 					}
@@ -486,14 +486,14 @@ pmsp(TStrings & result,
 						{
 							TPos2 pos = *L_iter;
 							if(is_exact & 
-								hammingDistance(begin(dataset[relevant_pos_vect[i]])+pos, 
+								hammingDistance<TType>(begin(dataset[relevant_pos_vect[i]])+pos, 
 												begin(dataset[relevant_pos_vect[i]])+pos+l, 
 												begin(l_mer))==d)
 							{
 								++number;
 							}
 							else if((!is_exact) & 
-								hammingDistance(begin(dataset[relevant_pos_vect[i]])+pos, 
+								hammingDistance<TType>(begin(dataset[relevant_pos_vect[i]])+pos, 
 												begin(dataset[relevant_pos_vect[i]])+pos+l, 
 												begin(l_mer))<=d)
 							{
@@ -595,7 +595,7 @@ pmsp(TStrings & result,
 				int seq_pos = 0;
 				while(seq_iter2!=seq_end2)
 				{
-					if( hammingDistance(seq_iter2, seq_iter2+l, seq_iter1)<=2*d )
+					if( hammingDistance<TType>(seq_iter2, seq_iter2+l, seq_iter1)<=2*d )
 					{
 						pos_vect.push_back(seq_pos);
 					}
@@ -628,14 +628,14 @@ pmsp(TStrings & result,
 						{
 							TPos2 pos = *L_iter;
 							if(is_exact & 
-								hammingDistance(begin(dataset[relevant_pos_vect[i]])+pos, 
+								hammingDistance<TType>(begin(dataset[relevant_pos_vect[i]])+pos, 
 												begin(dataset[relevant_pos_vect[i]])+pos+l, 
 												begin(l_mer))==d)
 							{
 								++number;
 							}
 							else if((!is_exact) & 
-								hammingDistance(begin(dataset[relevant_pos_vect[i]])+pos, 
+								hammingDistance<TType>(begin(dataset[relevant_pos_vect[i]])+pos, 
 												begin(dataset[relevant_pos_vect[i]])+pos+l, 
 												begin(l_mer))<=d)
 							{
@@ -736,11 +736,11 @@ hasExactOneOccurrence(TStringIter l_mer_begin,
 	{
 		if(is_exact)
 		{
-			counter += (hammingDistance(seq_begin, seq_begin+l, l_mer_begin)==d) ? 1 : 0;
+			counter += (hammingDistance<TType>(seq_begin, seq_begin+l, l_mer_begin)==d) ? 1 : 0;
 		}
 		else
 		{
-			counter += (hammingDistance(seq_begin, seq_begin+l, l_mer_begin)<=d) ? 1 : 0;
+			counter += (hammingDistance<TType>(seq_begin, seq_begin+l, l_mer_begin)<=d) ? 1 : 0;
 		}		
 		++seq_begin;
 	}

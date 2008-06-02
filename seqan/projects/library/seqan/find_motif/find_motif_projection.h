@@ -63,25 +63,31 @@ typedef Tag<_Projection> const Projection;
 template <typename TValue>
 class MotifFinder<TValue, Projection>
 {
+	enum { ALPHABET_SIZE = ValueSize<TValue>::VALUE };
 //____________________________________________________________________________________________
-
+	/*
 	enum { ALPHABET_SIZE = ValueSize<TValue>::VALUE };
 	typedef String<TValue> TString;
 	typedef String<TString> TStrings;
 	typedef typename Size<TStrings>::Type TSize1;
-	typedef typename Size<TString>::Type TSize2;
+	typedef typename Size<TString>::Type TSize2;*/
 
 //____________________________________________________________________________________________
 
 public:
-	TSize1 dataset_size;
-	TSize2 motif_size;
-	unsigned int total_num_of_l_mers;
-	unsigned int num_of_substitutions;
+	typedef unsigned int TSize;
+	typedef String<TValue> TString;
+	typedef String<TString> TStrings;
+
+
+	TSize dataset_size;
+	TSize motif_size;
+	TSize total_num_of_l_mers;
+	TSize num_of_substitutions;
 	bool has_exact_substitutions;
-	unsigned int projection_size;
-	unsigned int bucket_threshold;
-	unsigned int num_of_trials;
+	TSize projection_size;
+	TSize bucket_threshold;
+	TSize num_of_trials;
 	TString consensus_pattern;
 	int score;
 
@@ -98,14 +104,14 @@ public:
 		num_of_trials(0)
 	{
 	}
-	MotifFinder(TSize1 const & t_, 
-				TSize2 const & l_, 
-				unsigned int const & m_total_,
-				unsigned int const & d_,
+	MotifFinder(TSize const & t_, 
+				TSize const & l_, 
+				TSize const & m_total_,
+				TSize const & d_,
 				bool const & is_exact_,
-				unsigned int const & k_,
-				unsigned int const & s_,
-				unsigned int const & tr_):
+				TSize const & k_,
+				TSize const & s_,
+				TSize const & tr_):
 		dataset_size(t_),
 		motif_size(l_),
         total_num_of_l_mers(m_total_),
@@ -116,10 +122,10 @@ public:
 		num_of_trials(tr_)
 	{
 	}
-	MotifFinder(TSize1 const & t_, 
-				TSize2 const & l_, 
-				unsigned int const & m_total_,
-				unsigned int const & d_,
+	MotifFinder(TSize const & t_, 
+				TSize const & l_, 
+				TSize const & m_total_,
+				TSize const & d_,
 				bool const & is_exact_):
 		dataset_size(t_),
 		motif_size(l_),
@@ -131,13 +137,13 @@ public:
 		num_of_trials(0)
 	{
 		projection_size = 
-			_computeProjectionSize<unsigned int>(ALPHABET_SIZE,
+			_computeProjectionSize<TSize>(ALPHABET_SIZE,
 			                                     motif_size,
 								                 num_of_substitutions,
 								                 total_num_of_l_mers);
 		
 		bucket_threshold = 
-			_computeBucketThreshold<unsigned int>(ALPHABET_SIZE,
+			_computeBucketThreshold<TSize>(ALPHABET_SIZE,
 			                                      motif_size,
 								                  num_of_substitutions,
 								                  total_num_of_l_mers,
@@ -552,7 +558,7 @@ _refinementStep(TString & consensus_seq,
 	typedef typename Value<TString>::Type TValue;
 	typedef typename Position<TString>::Type TPos;
 	typedef FrequencyDistribution<TValue> TFrequencyDistribution;
-	typename Size<TStrings>::Type t = length(dataset);
+	TType t = length(dataset);
 	int score = 0;
 
 	// compute background frequency
@@ -592,7 +598,7 @@ _refinementStep(TString & consensus_seq,
 		while(seq_iter!=seq_end)
 		{
 			consensus_begin = begin(consensus_seq);
-			hd_ar[m-(seq_end-seq_iter)] = hammingDistance(seq_iter, seq_iter+l, consensus_begin);
+			hd_ar[m-(seq_end-seq_iter)] = hammingDistance<int>(seq_iter, seq_iter+l, consensus_begin);
 			++seq_iter;
 		}
 
@@ -633,7 +639,7 @@ _refinementStep(TString & consensus_seq,
 	typedef typename Value<TString>::Type TValue;
 	typedef typename Position<TString>::Type TPos;
 	typedef FrequencyDistribution<TValue> TFrequencyDistribution;
-	typename Size<TStrings>::Type t = length(dataset);
+	TType t = length(dataset);
 	int score = 0;
 
 	// compute background frequency
@@ -672,7 +678,7 @@ _refinementStep(TString & consensus_seq,
 		while(seq_iter!=seq_end)
 		{
 			consensus_begin = begin(consensus_seq);
-			TType hd = hammingDistance(seq_iter, seq_iter+l, consensus_begin);
+			TType hd = hammingDistance<TType>(seq_iter, seq_iter+l, consensus_begin);
 
 			if( (!is_exact) & (hd<=d) )
 			{
@@ -711,7 +717,7 @@ _refinementStep(TString & consensus_seq,
 	typedef typename Value<TString>::Type TValue;
 	typedef typename Position<TString>::Type TPos;
 	typedef FrequencyDistribution<TValue> TFrequencyDistribution;
-	typename Size<TStrings>::Type t = length(dataset);
+	TType t = length(dataset);
 	int score = 0;
 	int lower_limit = (int) floor(t*(zoops.threshold)+0.5);
 
@@ -752,7 +758,7 @@ _refinementStep(TString & consensus_seq,
 		while(seq_iter!=seq_end)
 		{
 			consensus_begin = begin(consensus_seq);
-			hd_ar[m-(seq_end-seq_iter)] = hammingDistance(seq_iter, seq_iter+l, consensus_begin);
+			hd_ar[m-(seq_end-seq_iter)] = hammingDistance<int>(seq_iter, seq_iter+l, consensus_begin);
 			++seq_iter;
 		}
 
@@ -811,7 +817,7 @@ _refinementStep(TString & consensus_seq,
 	typedef typename Value<TString>::Type TValue;
 	typedef typename Position<TString>::Type TPos;
 	typedef FrequencyDistribution<TValue> TFrequencyDistribution;
-	typename Size<TStrings>::Type t = length(dataset);
+	TType t = length(dataset);
 	int score = 0;
 	int lower_limit = (int) floor(t*(tcm.threshold)+0.5);
 
@@ -861,7 +867,7 @@ _refinementStep(TString & consensus_seq,
 		while(seq_iter!=seq_end)
 		{
 			consensus_begin = begin(consensus_seq);
-			TType hd = hammingDistance(seq_iter, seq_iter+l, consensus_begin);
+			TType hd = hammingDistance<TType>(seq_iter, seq_iter+l, consensus_begin);
 
 			if( (!is_exact) & (hd<=d) )
 			{

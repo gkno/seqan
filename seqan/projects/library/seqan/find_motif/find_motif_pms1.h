@@ -64,23 +64,23 @@ template <typename TValue>
 class MotifFinder<TValue, PMS1>
 {
 //_________________________________________________________________________________
-	
-	typedef String<TValue> TString;
-	typedef String<TString> TStrings;
-	typedef typename Size<TString>::Type TSize;
-
-//_________________________________________________________________________________
 
 public:
+	typedef unsigned int TSize;
+	typedef String<TValue> TString;
+	typedef String<TString> TStrings; 
+
 	TSize motif_size;
-	unsigned int num_of_substitutions;
+	TSize num_of_substitutions;
 	bool has_exact_substitutions;
 	TStrings set_of_motifs; // result set
+
+//_________________________________________________________________________________
 
 	MotifFinder()
 	{
 	}
-	MotifFinder(TSize & l_, unsigned int d_, bool is_exact_):
+	MotifFinder(TSize const & l_, TSize const & d_, bool const & is_exact_):
 		motif_size(l_),
 		num_of_substitutions(d_),
 		has_exact_substitutions(is_exact_)

@@ -90,7 +90,7 @@ public:
 	FrequencyDistribution &
 	operator += (FrequencyDistribution const & other_)
 	{
-		for(size_t i=0; i<SIZE; ++i)
+		for(unsigned int i=0; i<SIZE; ++i)
 		{
 			frequency_list[i]+=other_.frequency_list[i];
 		}
@@ -110,7 +110,7 @@ public:
 	FrequencyDistribution &
 	operator -= (FrequencyDistribution const & other_)
 	{
-		for(size_t i=0; i<SIZE; ++i)
+		for(unsigned int i=0; i<SIZE; ++i)
 		{
 			frequency_list[i]-=other_.frequency_list[i];
 		}
@@ -131,7 +131,7 @@ public:
 	FrequencyDistribution &
 	operator *= (TType value_)
 	{
-		for(size_t i=0; i<SIZE; ++i)
+		for(unsigned int i=0; i<SIZE; ++i)
 		{
 			frequency_list[i]*= (TSpec)value_;
 		}
@@ -166,7 +166,7 @@ public:
     friend inline std::ostream & 
 	operator << (std::ostream & ostr, FrequencyDistribution & fd_) 
 	{ 
-		for(size_t i=0; i<SIZE; ++i)
+		for(unsigned int i=0; i<SIZE; ++i)
 		{	
 			ostr.width(15);
 			ostr << std::left << fd_.frequency_list[i];

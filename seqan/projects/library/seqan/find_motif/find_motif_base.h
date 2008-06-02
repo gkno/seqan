@@ -153,7 +153,8 @@ TType binomialCoefficient(TType n, TType k)
 .Function.hammingDistance:
 ..summary:Determines the Hamming distance between two sequences.
 ..cat:Motif Search
-..signature:hammingDistance(begin1,end1,begin2)
+..signature:hammingDistance<TType>(begin1,end1,begin2)
+..param.TType:Distance type.
 ..param.begin1:An iterator pointing to the beginning of the first sequence which is either
               a @Shortcut.DnaString@ or a @Shortcut.Peptide@. 
 ...type:Concept.Iterator
@@ -171,10 +172,10 @@ TType binomialCoefficient(TType n, TType k)
 ...type:Shortcut.PeptideIterator
 */
 
-template<typename TStringIterator>
-size_t hammingDistance(TStringIterator start1, TStringIterator end1, TStringIterator start2)
+template<typename TType, typename TStringIterator>
+TType hammingDistance(TStringIterator start1, TStringIterator end1, TStringIterator start2)
 {
-	unsigned int num_of_mismatches = 0;
+	TType num_of_mismatches = 0;
 	while(start1!=end1)
 	{
 		if(*start1!=*start2)
