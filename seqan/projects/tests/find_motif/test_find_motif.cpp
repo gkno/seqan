@@ -27,7 +27,7 @@ isOOPSMotif(TIter ds_iter, TIter ds_end, TString const & motif, TType const & d,
 		while( (seq_iter!=seq_end) & (counter<2) )
 		{
 			l_mer_begin = begin(motif);
-			hd = hammingDistance(seq_iter, seq_iter+l, l_mer_begin);
+			hd = hammingDistance<int>(seq_iter, seq_iter+l, l_mer_begin);
 			if( is_exact & (hd == (int) d) )
 			{
 				++counter;
@@ -69,7 +69,7 @@ isOMOPSMotif(TIter ds_iter, TIter ds_end, TString const & motif, TType const & d
 		while( (seq_iter!=seq_end) & (counter<1) )
 		{
 			l_mer_begin = begin(motif);
-			hd = hammingDistance(seq_iter, seq_iter+l, l_mer_begin);
+			hd = hammingDistance<int>(seq_iter, seq_iter+l, l_mer_begin);
 			if( is_exact & (hd== (int) d) )
 			{
 				++counter;
@@ -112,7 +112,7 @@ isZOOPSMotif(TIter ds_iter, TIter ds_end, TString const & motif, TType const & d
 		while( (seq_iter!=seq_end) & (counter<2) )
 		{
 			l_mer_begin = begin(motif);
-			hd = hammingDistance(seq_iter, seq_iter+l, l_mer_begin);
+			hd = hammingDistance<int>(seq_iter, seq_iter+l, l_mer_begin);
 			if( is_exact & (hd== (int) d) )
 			{
 				++counter;
@@ -155,7 +155,7 @@ isTCMMotif(TIter ds_iter, TIter ds_end, TString const & motif, TType const & d, 
 		while( (seq_iter!=seq_end) & (counter<1) )
 		{
 			l_mer_begin = begin(motif);
-			hd = hammingDistance(seq_iter, seq_iter+l, l_mer_begin);
+			hd = hammingDistance<int>(seq_iter, seq_iter+l, l_mer_begin);
 			if( is_exact & (hd==(int) d) )
 			{
 				++counter;
