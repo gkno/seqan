@@ -31,27 +31,27 @@ namespace SEQAN_NAMESPACE_MAIN
 #ifdef SEQAN_DEBUG_ABNDM
 inline void _printMask(String <unsigned> const &  mask,String <char> name)
 {
-  unsigned len = length(mask);
-  std::cout << name << ": ";
-  for(unsigned int j=0;j<len;++j) {
-    for(unsigned int bit_pos=0;bit_pos<BitsPerValue<unsigned int>::VALUE;++bit_pos) {
-      std::cout << ((mask[j] & (1<<(bit_pos % BitsPerValue<unsigned int>::VALUE))) !=0);
+    unsigned len = length(mask);
+    std::cout << name << ": ";
+    for(unsigned int j=0;j<len;++j) {
+        for(unsigned int bit_pos=0;bit_pos<BitsPerValue<unsigned int>::VALUE;++bit_pos) {
+            std::cout << ((mask[j] & (1<<(bit_pos % BitsPerValue<unsigned int>::VALUE))) !=0);
+        }
+        std::cout << " ";
     }
-    std::cout << " ";
-  }
-  std::cout << ::std::endl;
+    std::cout << ::std::endl;
 }
 
 inline void _printMask(String <unsigned> const &  mask,unsigned start, unsigned len,String <char> name)
 {
-  std::cout << name << ": ";
-  for(unsigned int j=start;j<start + len;++j) {
-    for(unsigned int bit_pos=0;bit_pos<BitsPerValue<unsigned int>::VALUE;++bit_pos) {
-      std::cout << ((mask[j] & (1<<(bit_pos % BitsPerValue<unsigned int>::VALUE))) !=0);
+    std::cout << name << ": ";
+    for(unsigned int j=start;j<start + len;++j) {
+        for(unsigned int bit_pos=0;bit_pos<BitsPerValue<unsigned int>::VALUE;++bit_pos) {
+            std::cout << ((mask[j] & (1<<(bit_pos % BitsPerValue<unsigned int>::VALUE))) !=0);
+        }
+        std::cout << " ";
     }
-    std::cout << " ";
-  }
-  std::cout << ::std::endl;
+    std::cout << ::std::endl;
 }
 
 #endif
@@ -61,14 +61,14 @@ inline void _printMask(String <unsigned> const &  mask,unsigned start, unsigned 
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Spec.AbndmAlgo:
-..summary: Approximate Backward Nondeterministic Dawg Matching algorithm. Approximate string matching using bit parallelism.
-..general:Class.Pattern
-..cat:Searching
-..signature:Pattern<TNeedle, AbndmAlgo>
-..param.TNeedle:The needle type.
-...type:Class.String
-..remarks.text:The types of the needle and the haystack have to match.
+   .Spec.AbndmAlgo:
+   ..summary: Approximate Backward Nondeterministic Dawg Matching algorithm. Approximate string matching using bit parallelism.
+   ..general:Class.Pattern
+   ..cat:Searching
+   ..signature:Pattern<TNeedle, AbndmAlgo>
+   ..param.TNeedle:The needle type.
+   ...type:Class.String
+   ..remarks.text:The types of the needle and the haystack have to match.
 */
 
 ///.Class.Pattern.param.TSpec.type:Spec.AbndmAlgo
@@ -81,8 +81,8 @@ template <typename TNeedle>
 class Pattern<TNeedle, AbndmAlgo> {
 //////////////////////////////////////////////////////////////////////////////
 public:
-	typedef unsigned int TWord;
-   	Holder<TNeedle> data_needle;
+    typedef unsigned int TWord;
+    Holder<TNeedle> data_needle;
 
     String<TWord>       b_table;    // called B in Navarro
     String<TWord>       r_table;    // called R in Navarro
@@ -99,20 +99,20 @@ public:
     Pattern<TNeedle,MyersUkkonen> verifier;
 //////////////////////////////////////////////////////////////////////////////
 
-	Pattern() {}
+    Pattern() {}
 
-	template <typename TNeedle2>
-	Pattern(TNeedle2 const & ndl)
-	  : limit(1),cP(0),verifier(ndl,-1)
+    template <typename TNeedle2>
+    Pattern(TNeedle2 const & ndl)
+        : limit(1),cP(0),verifier(ndl,-1)
 	{
-		setHost(*this, ndl);
+            setHost(*this, ndl);
 	}
 
-   	template <typename TNeedle2>
-	Pattern(TNeedle2 const & ndl, int _limit = -1):
-		limit(- _limit),cP(0),verifier(ndl,_limit)
+    template <typename TNeedle2>
+    Pattern(TNeedle2 const & ndl, int _limit = -1):
+        limit(- _limit),cP(0),verifier(ndl,_limit)
 	{
-SEQAN_CHECKPOINT
+            SEQAN_CHECKPOINT
 		setHost(*this, ndl);
 	}
 
@@ -128,7 +128,7 @@ void _printR(Pattern<TNeedle, AbndmAlgo> & me)
     ::std::cout << "R ----------------------------- " << ::std::endl;
     for(unsigned i = 0;i <= me.limit;++i)
     {
-      _printMask(me.r_table,me.blockCount * i, me.blockCount ," ");
+        _printMask(me.r_table,me.blockCount * i, me.blockCount ," ");
     }
     ::std::cout << " ------------------------------ " << ::std::endl;
 }
@@ -138,44 +138,44 @@ void _printR(Pattern<TNeedle, AbndmAlgo> & me)
 template <typename TNeedle, typename TNeedle2>
 void setHost (Pattern<TNeedle, AbndmAlgo> & me, TNeedle2 const& needle) 
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT
 	typedef unsigned int TWord;
-	typedef typename Value<TNeedle>::Type TValue;
+    typedef typename Value<TNeedle>::Type TValue;
 
-	me.cP = 0;
-	me.findNext = false;
+    me.cP = 0;
+    me.findNext = false;
 
-	me.needleLength = length(needle);
-	if (me.needleLength<1) 
+    me.needleLength = length(needle);
+    if (me.needleLength<1) 
         me.blockCount = 1;
-	else 
+    else 
         me.blockCount = ((me.needleLength-1) / BitsPerValue<TWord>::VALUE)+1;
 			
-	clear(me.b_table);
-	fill(me.b_table, me.blockCount * ValueSize<TValue>::VALUE, 0, Exact());
+    clear(me.b_table);
+    fill(me.b_table, me.blockCount * ValueSize<TValue>::VALUE, 0, Exact());
 
-	for (TWord j = 0; j < me.needleLength; ++j) {
-		// Determine character position in array table
-		TWord pos = convert<TWord>(getValue(needle,j));
-		me.b_table[me.blockCount*pos + j / BitsPerValue<TWord>::VALUE] |= (1<<(j%BitsPerValue<TWord>::VALUE));
-	}
+    for (TWord j = 0; j < me.needleLength; ++j) {
+        // Determine character position in array table
+        TWord pos = convert<TWord>(getValue(needle,j));
+        me.b_table[me.blockCount*pos + j / BitsPerValue<TWord>::VALUE] |= (1<<(j%BitsPerValue<TWord>::VALUE));
+    }
 
 #ifdef SEQAN_DEBUG_ABNDM
-	std::cout << "Needle:   " << needle << ::std::endl;    
-	std::cout << "|Needle|: " << length(needle) << ::std::endl;
-	std::cout << "Alphabet size: " << ValueSize<TValue>::VALUE << ::std::endl;
+    std::cout << "Needle:   " << needle << ::std::endl;    
+    std::cout << "|Needle|: " << length(needle) << ::std::endl;
+    std::cout << "Alphabet size: " << ValueSize<TValue>::VALUE << ::std::endl;
 
-	for(unsigned i=0;i<ValueSize<TValue>::VALUE;++i) {
-		if (((i<97) && (4 < i) ) || (i>122)) continue;
-		std::cout << static_cast<TValue>(i) << ": ";
-		for(unsigned int j=0;j<me.blockCount;++j) {
-			for(int bit_pos=0;bit_pos<BitsPerValue<unsigned>::VALUE;++bit_pos) {
-				std::cout << ((me.b_table[me.blockCount*i+j] & (1<<(bit_pos % BitsPerValue<unsigned>::VALUE))) !=0);
-			}
-			std::cout << " ";
-		}
-		std::cout << ::std::endl;
-	}
+    for(unsigned i=0;i<ValueSize<TValue>::VALUE;++i) {
+        if (((i<97) && (4 < i) ) || (i>122)) continue;
+        std::cout << static_cast<TValue>(i) << ": ";
+        for(unsigned int j=0;j<me.blockCount;++j) {
+            for(int bit_pos=0;bit_pos<BitsPerValue<unsigned>::VALUE;++bit_pos) {
+                std::cout << ((me.b_table[me.blockCount*i+j] & (1<<(bit_pos % BitsPerValue<unsigned>::VALUE))) !=0);
+            }
+            std::cout << " ";
+        }
+        std::cout << ::std::endl;
+    }
 #endif
     clear(me.r_table); // init is only possible if we know the the error count
 
@@ -186,7 +186,7 @@ SEQAN_CHECKPOINT
 template <typename TNeedle, typename TNeedle2>
 void setHost (Pattern<TNeedle, AbndmAlgo> & me, TNeedle2 & needle)
 {
-	setHost(me, reinterpret_cast<TNeedle2 const &>(needle));
+    setHost(me, reinterpret_cast<TNeedle2 const &>(needle));
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -194,11 +194,11 @@ void setHost (Pattern<TNeedle, AbndmAlgo> & me, TNeedle2 & needle)
 template <typename TNeedle>
 inline void _patternInit (Pattern<TNeedle, AbndmAlgo> & me) 
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT
 	clear(me.r_table);
-	fill(me.r_table, me.blockCount * (me.limit + 1), 0, Exact());
-	me.findNext = false;
-	me.last = 0;
+    fill(me.r_table, me.blockCount * (me.limit + 1), 0, Exact());
+    me.findNext = false;
+    me.last = 0;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -207,7 +207,7 @@ template <typename TNeedle>
 inline typename Host<Pattern<TNeedle, AbndmAlgo>const>::Type & 
 host(Pattern<TNeedle, AbndmAlgo> & me)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT
 	return value(me.data_needle);
 }
 
@@ -215,7 +215,7 @@ template <typename TNeedle>
 inline typename Host<Pattern<TNeedle, AbndmAlgo>const>::Type & 
 host(Pattern<TNeedle, AbndmAlgo> const & me)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT
 	return value(me.data_needle);
 }
 
@@ -226,7 +226,7 @@ SEQAN_CHECKPOINT
 template <typename TNeedle>
 int getScore(Pattern<TNeedle, AbndmAlgo > & me) 
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT
 	return getScore(me.verifier);
 }
 
@@ -235,7 +235,7 @@ SEQAN_CHECKPOINT
 template <typename TFinder, typename TNeedle>
 inline bool _findAbndm_SmallNeedle(TFinder & finder, Pattern<TNeedle, AbndmAlgo> & me) 
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT
 	typedef unsigned int TWord;
 
     typedef typename Host<TFinder>::Type    THost;
@@ -248,42 +248,45 @@ SEQAN_CHECKPOINT
     // if returned from previous search we need to check the current position for additional matches    
     if(me.findNext)
     {
-      // reset the finder
-      TWord offset = startPos - me.cP;
-      finder -= offset;
+        // reset the finder
+        TWord offset = startPos - me.cP;
+        finder -= offset;
+        int end = me.cP + me.needleLength + me.limit;
+        // adjust end if it points over the edges of host(finder)
+        end = (end > static_cast<int>(length(host(finder))) ? length(host(finder)) : end);
 
-      THostSegment s(infix(host(finder),me.cP, me.cP + me.needleLength + me.limit));
-      THSFinder f(s);
+        THostSegment s(infix(host(finder),me.cP, end));
+        THSFinder f(s);
 #ifdef SEQAN_DEBUG_ABNDM
-      ::std::cout << "additional verification of current position" << ::std::endl;
-      ::std::cout << "initialized on: " << s << ::std::endl;
-      ::std::cout << "parameters are: " << me.cP << " " << (me.cP + me.needleLength + me.limit) << ::std::endl;
-      ::std::cout << "original start pos: " << startPos << ::std::endl;
+        ::std::cout << "additional verification of current position" << ::std::endl;
+        ::std::cout << "initialized on: " << s << ::std::endl;
+        ::std::cout << "parameters are: " << me.cP << " " << (me.cP + me.needleLength + me.limit) << ::std::endl;
+        ::std::cout << "original start pos: " << startPos << ::std::endl;
 #endif
 
-      while(find(f,me.verifier,- (int) me.limit)){
-        TWord newP = position(finder) + position(f);
+        while(find(f,me.verifier,- (int) me.limit)){
+            TWord newP = position(finder) + position(f);
 #ifdef SEQAN_DEBUG_ABNDM
-	::std::cout << "found on new position: " << newP << ::std::endl; 
+            ::std::cout << "found on new position: " << newP << ::std::endl; 
 #endif
-        if(newP > startPos){
-	  finder += position(f);
-	  return true;
-	}
-      }
+            if(newP > startPos){
+                finder += position(f);
+                return true;
+            }
+        }
 #ifdef SEQAN_DEBUG_ABNDM
-      ::std::cout << "additional verification done .. shifted by last=" << me.last << ::std::endl << ::std::endl;
+        ::std::cout << "additional verification done .. shifted by last=" << me.last << ::std::endl << ::std::endl;
 #endif 
-      finder += me.last;
-      me.cP += me.last;
+        finder += me.last;
+        me.cP += me.last;
     }
     
     me.cP = position(finder);
     // walk on  
     while (position(finder) <= me.haystackLength - me.needleLength) 
     {
-SEQAN_CHECKPOINT
-        j = me.needleLength - me.limit - 1;
+        SEQAN_CHECKPOINT
+            j = me.needleLength - me.limit - 1;
         me.last = j;
     
         // init R_0
@@ -311,7 +314,7 @@ SEQAN_CHECKPOINT
                 nR = ((me.r_table[i] >> 1) & cB) | oR | ((oR | nR) >> 1);
                 oR = me.r_table[i];
                 me.r_table[i] = nR;
-			}
+            }
 #ifdef SEQAN_DEBUG_ABNDM
             ::std::cout << "reading " << *(finder + j - 1) << ::std::endl;
             _printMask(me.b_table[pos],"");
@@ -328,7 +331,11 @@ SEQAN_CHECKPOINT
                 else // verify
                 {
                     // call find 
-                    THostSegment s(infix(host(finder),me.cP, me.cP + me.needleLength + me.limit));
+                    int end = me.cP + me.needleLength + me.limit;
+                    // adjust end if it points over the edges of host(finder)
+                    end = (end > static_cast<int>(length(host(finder))) ? length(host(finder)) : end);
+
+                    THostSegment s(infix(host(finder),me.cP, end));
                     THSFinder f(s);
                     
 #ifdef SEQAN_DEBUG_ABNDM
@@ -339,12 +346,12 @@ SEQAN_CHECKPOINT
 #endif                  
                     // try to find the sequence
                     while(find(f,me.verifier,- (int) me.limit)){
-		      TWord nP = position(finder) + position(f);
-		      if(nP > startPos){
-			finder += position(f);
-			me.findNext = true;
-                        return true;
-		      }
+                        TWord nP = position(finder) + position(f);
+                        if(nP > startPos){
+                            finder += position(f);
+                            me.findNext = true;
+                            return true;
+                        }
                     }
                 }  
             }
@@ -362,8 +369,8 @@ SEQAN_CHECKPOINT
 template <typename TFinder, typename TNeedle>
 inline bool _findAbndm_LargeNeedle(TFinder & finder, Pattern<TNeedle, AbndmAlgo> & me) 
 {
-SEQAN_CHECKPOINT
-    typedef unsigned int TWord;
+    SEQAN_CHECKPOINT
+        typedef unsigned int TWord;
     TWord carryPattern = (1<< (BitsPerValue<TWord>::VALUE - 1));
     typedef typename Host<TFinder>::Type    THost;
     typedef Segment<THost>                  THostSegment;
@@ -376,40 +383,44 @@ SEQAN_CHECKPOINT
     // if returned from previous search we need to check the current position for additional matches    
     if(me.findNext)
     {
-      // reset the finder
-      TWord offset = startPos - me.cP;
-      finder -= offset;
+        // reset the finder
+        TWord offset = startPos - me.cP;
+        finder -= offset;
 
-      THostSegment s(infix(host(finder),me.cP, me.cP + me.needleLength + me.limit));
-      THSFinder f(s);
+        int end = me.cP + me.needleLength + me.limit;
+        // adjust end if it points over the edges of host(finder)
+        end = (end > static_cast<int>(length(host(finder))) ? length(host(finder)) : end);
+
+        THostSegment s(infix(host(finder),me.cP, end));
+        THSFinder f(s);
 #ifdef SEQAN_DEBUG_ABNDM
-      ::std::cout << "additional verification of current position" << ::std::endl;
-      ::std::cout << "initialized on: " << s << ::std::endl;
-      ::std::cout << "parameters are: " << me.cP << " " << (me.cP + me.needleLength + me.limit) << ::std::endl;
-      ::std::cout << "original start pos: " << startPos << ::std::endl;
+        ::std::cout << "additional verification of current position" << ::std::endl;
+        ::std::cout << "initialized on: " << s << ::std::endl;
+        ::std::cout << "parameters are: " << me.cP << " " << (me.cP + me.needleLength + me.limit) << ::std::endl;
+        ::std::cout << "original start pos: " << startPos << ::std::endl;
 #endif
 
-      while(find(f,me.verifier,- (int) me.limit)){
-        TWord newP = position(finder) + position(f);
+        while(find(f,me.verifier,- (int) me.limit)){
+            TWord newP = position(finder) + position(f);
 #ifdef SEQAN_DEBUG_ABNDM
-	::std::cout << "found on new position: " << newP << ::std::endl; 
+            ::std::cout << "found on new position: " << newP << ::std::endl; 
 #endif
-        if(newP > startPos){
-	  finder += position(f);
-	  return true;
-	}
-      }
+            if(newP > startPos){
+                finder += position(f);
+                return true;
+            }
+        }
 #ifdef SEQAN_DEBUG_ABNDM
-      ::std::cout << "additional verification done .. shifted by last=" << me.last << ::std::endl << ::std::endl;
+        ::std::cout << "additional verification done .. shifted by last=" << me.last << ::std::endl << ::std::endl;
 #endif 
-      finder += me.last;
-      me.cP += me.last;
+        finder += me.last;
+        me.cP += me.last;
     }else me.cP = position(finder);
     // walk on  
     while (position(finder) <= me.haystackLength - me.needleLength) 
     {
-SEQAN_CHECKPOINT
-        j = me.needleLength - me.limit - 1;
+        SEQAN_CHECKPOINT
+            j = me.needleLength - me.limit - 1;
         me.last = j;
 
 #ifdef SEQAN_DEBUG_ABNDM    
@@ -418,7 +429,7 @@ SEQAN_CHECKPOINT
         // init R_0
         TWord pos = convert<TWord>(*(finder + j));
 	for(int block = me.blockCount - 1;block >= 0;--block){
-	  me.r_table[block] = me.b_table[pos * me.blockCount + block];
+            me.r_table[block] = me.b_table[pos * me.blockCount + block];
 	}
         //me.r_table[0] = me.b_table[pos];				    
         
@@ -427,9 +438,9 @@ SEQAN_CHECKPOINT
 	// nR = 0 - 1;
 	//for(i = me.blockCount;i <= me.limit * me.blockCount;++i) me.r_table[i] = 0 - 1;//set all states in r_table to 1
 	for(i = 1;i <= me.limit;++i){
-	  for(int block = me.blockCount - 1;block >= 0;--block){
-	    me.r_table[me.blockCount * i + block] = 0 -1 ;
-	  }
+            for(int block = me.blockCount - 1;block >= 0;--block){
+                me.r_table[me.blockCount * i + block] = 0 -1 ;
+            }
 	}
 
 	// track active states in nR
@@ -442,80 +453,84 @@ SEQAN_CHECKPOINT
 #endif
         while((nRTrack != 0) && (j != 0))
         {
-	  // get current letter
-          pos = convert<TWord>(*(finder + j - 1));
+            // get current letter
+            pos = convert<TWord>(*(finder + j - 1));
 
-	  bool carry = 0;
-	  for(int block = me.blockCount -1;block >= 0;--block){
-	    oR[block] = me.r_table[block];	    
-	    bool nCarry=((oR[block] & 1) != 0);	    
-	    TWord toR = oR[block] >> 1;
-	    if(carry) toR |= carryPattern;
-	    carry = nCarry;
-	    nR[block] = toR & me.b_table[pos*me.blockCount + block];
-	    me.r_table[block] = nR[block];
-	  }
+            bool carry = 0;
+            for(int block = me.blockCount -1;block >= 0;--block){
+                oR[block] = me.r_table[block];	    
+                bool nCarry=((oR[block] & 1) != 0);	    
+                TWord toR = oR[block] >> 1;
+                if(carry) toR |= carryPattern;
+                carry = nCarry;
+                nR[block] = toR & me.b_table[pos*me.blockCount + block];
+                me.r_table[block] = nR[block];
+            }
 	    
 	    
-	  for(i = 1;i <= me.limit;++i){
-	    bool rCarry = 0;
-	    bool nCarry = 0;
-	    for(int block = me.blockCount - 1;block >= 0;--block){
-	      bool nRCarry = ((me.r_table[i * me.blockCount + block] & 1) != 0);
-	      bool nNCarry = (((oR[block] | nR[block]) & 1) != 0);
+            for(i = 1;i <= me.limit;++i){
+                bool rCarry = 0;
+                bool nCarry = 0;
+                for(int block = me.blockCount - 1;block >= 0;--block){
+                    bool nRCarry = ((me.r_table[i * me.blockCount + block] & 1) != 0);
+                    bool nNCarry = (((oR[block] | nR[block]) & 1) != 0);
 
-	      TWord rPattern = (rCarry ? carryPattern : 0);
-	      TWord nPattern = (nCarry ? carryPattern : 0);
-	      nR[block] = (((me.r_table[i * me.blockCount + block] >> 1) | rPattern) & me.b_table[pos*me.blockCount + block]) | (((oR[block] | nR[block]) >> 1) | nPattern) | oR[block];
-	      rCarry = nRCarry;
-	      nCarry = nNCarry;
-	      oR[block] = me.r_table[i  * me.blockCount + block];
-	      me.r_table[i * me.blockCount + block] = nR[block];
-	    }
-	  }
+                    TWord rPattern = (rCarry ? carryPattern : 0);
+                    TWord nPattern = (nCarry ? carryPattern : 0);
+                    nR[block] = (((me.r_table[i * me.blockCount + block] >> 1) | rPattern) & me.b_table[pos*me.blockCount + block]) | (((oR[block] | nR[block]) >> 1) | nPattern) | oR[block];
+                    rCarry = nRCarry;
+                    nCarry = nNCarry;
+                    oR[block] = me.r_table[i  * me.blockCount + block];
+                    me.r_table[i * me.blockCount + block] = nR[block];
+                }
+            }
 #ifdef SEQAN_DEBUG_ABNDM
             ::std::cout << "reading " << *(finder + j - 1) << ::std::endl;
  	    _printMask(me.b_table,pos*me.blockCount, me.blockCount," ");
             _printR(me);
 #endif
-	  --j;
-	  // track active states in nR
-	  nRTrack = 0;
-	  for(i = 0;i < me.blockCount;++i) nRTrack |= nR[i];
+            --j;
+            // track active states in nR
+            nRTrack = 0;
+            for(i = 0;i < me.blockCount;++i) nRTrack |= nR[i];
 
-	  if((nR[0] & 1) != 0){
-	    if(j > 0){
+            if((nR[0] & 1) != 0){
+                if(j > 0){
 #ifdef SEQAN_DEBUG_ABNDM
-	      ::std::cout << "last bit is set so last is set to " << j << ::std::endl;
+                    ::std::cout << "last bit is set so last is set to " << j << ::std::endl;
 #endif 
-	      me.last = j;
-	    }
-	    else // verify
-	      {
-		// call find 
-		THostSegment s(infix(host(finder),me.cP, me.cP + me.needleLength + me.limit));
-		THSFinder f(s);
+                    me.last = j;
+                }
+                else // verify
+                {
+                    // call find 
+                    int end = me.cP + me.needleLength + me.limit;
+                    // adjust end if it points over the edges of host(finder)
+                    end = (end > static_cast<int>(length(host(finder))) ? length(host(finder)) : end);
+
+                    THostSegment s(infix(host(finder),me.cP, end));
+                    THSFinder f(s);
                     
 #ifdef SEQAN_DEBUG_ABNDM
-		::std::cout << "found verifiable prefix" << ::std::endl;
-		// init finder on infix 
-		::std::cout << "parameters are " << me.cP << " " << (me.cP + me.needleLength + me.limit) << ::std::endl;
-		::std::cout << "init finder on: " << s << ::std::endl;
+                    ::std::cout << "found verifiable prefix" << ::std::endl;
+                    // init finder on infix 
+                    ::std::cout << "parameters are " << me.cP << " " << (me.cP + me.needleLength + me.limit) << ::std::endl;
+                    ::std::cout << "init finder on: " << s << ::std::endl;
 #endif                  
-		// try to find the sequence
-		while(find(f,me.verifier,- (int) me.limit)){
-		  TWord nP = position(finder) + position(f);
-		  if(nP > startPos){
-		    finder += position(f);
+                    // try to find the sequence
+                    while(find(f,me.verifier,- (int) me.limit)){
+                        TWord nP = position(finder) + position(f);
+                        if(nP > startPos){
+                            finder += position(f);
 #ifdef SEQAN_DEBUG_ABNDM
-			::std::cout << "found pattern at position " << position(finder) << ::std::endl;
+                            ::std::cout << "found pattern at position " << position(finder) << ::std::endl;
 #endif
-		    me.findNext = true;
-		    return true;
-		  }
-		}
-	      }  
-	  }
+                            me.findNext = true;
+                            return true;
+                        }
+                    }
+                }  
+            }
         }
 #ifdef SEQAN_DEBUG_ABNDM
         ::std::cout << "automaton runs out of active stats so window is shifted by last=" << me.last << ::std::endl << ::std::endl;
@@ -534,7 +549,7 @@ template <typename TNeedle>
 inline int 
 scoreLimit(Pattern<TNeedle, AbndmAlgo > const & me)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT
 	return - (int) me.limit;
 }
 
@@ -545,41 +560,41 @@ SEQAN_CHECKPOINT
 template <typename TNeedle, typename TScoreValue>
 inline void 
 setScoreLimit(Pattern<TNeedle, AbndmAlgo > & me, 
-			  TScoreValue _limit)
+              TScoreValue _limit)
 {
-SEQAN_CHECKPOINT
-    setScoreLimit(me.verifier,_limit);
-	me.limit = (- _limit);
+    SEQAN_CHECKPOINT
+        setScoreLimit(me.verifier,_limit);
+    me.limit = (- _limit);
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TFinder, typename TNeedle>
 inline bool find (TFinder & finder, 
-				  Pattern<TNeedle, AbndmAlgo > & me)
+                  Pattern<TNeedle, AbndmAlgo > & me)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT
 	if (empty(finder)) {
-		_patternInit(me);
-		_finderSetNonEmpty(finder);
-		me.haystackLength = length(container(finder));
+            _patternInit(me);
+            _finderSetNonEmpty(finder);
+            me.haystackLength = length(container(finder));
 	} 
 
-	if (me.blockCount == 1) {
-		return _findAbndm_SmallNeedle(finder, me);
-	} else {
-		return _findAbndm_LargeNeedle(finder, me);
-	}
+    if (me.blockCount == 1) {
+        return _findAbndm_SmallNeedle(finder, me);
+    } else {
+        return _findAbndm_LargeNeedle(finder, me);
+    }
 }
 
 template <typename TFinder, typename TNeedle>
 inline bool find (TFinder & finder, 
-				  Pattern<TNeedle, AbndmAlgo > & me, 
-				  int const k)
+                  Pattern<TNeedle, AbndmAlgo > & me, 
+                  int const k)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT
 	setScoreLimit(me, k);
-	return find(finder, me);
+    return find(finder, me);
 }
 
 //////////////////////////////////////////////////////////////////////////////
