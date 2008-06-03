@@ -484,8 +484,8 @@ SEQAN_CHECKPOINT
 		if (old_array)
 		{
 SEQAN_CHECKPOINT
-			arrayConstructCopy(old_array, old_array + start, seq_array);
-			arrayConstructCopy(old_array + end, old_array + old_length, seq_array + start + size);
+			arrayConstructMove(old_array, old_array + start, seq_array);
+			arrayConstructMove(old_array + end, old_array + old_length, seq_array + start + size);
 			_deallocateStorage(seq, old_array, old_capacity);
 		}
 		else
@@ -530,10 +530,10 @@ SEQAN_CHECKPOINT
 		if (old_array)
 		{//new buffer allocated
 		 //so old_length < limit, so start <= limit
-			arrayConstructCopy(old_array, old_array + start, seq_array);
+			arrayConstructMove(old_array, old_array + start, seq_array);
 			if (keep_second_part)
 			{
-				arrayConstructCopy(old_array + end, old_array + length_to_copy, seq_array + start + size);
+				arrayConstructMove(old_array + end, old_array + length_to_copy, seq_array + start + size);
 			}
 			_deallocateStorage(seq, old_array, old_capacity);
 		}
@@ -949,6 +949,21 @@ SEQAN_CHECKPOINT
 	assign(target, source, tag);
 }
 
+//////////////////////////////////////////////////////////////////////////////
+// valueConstructMove: 
+// it is usually better for strings to default construct and move instead of
+// copy construct strings
+
+/*
+template <typename TIterator, typename TValue, typename TSpec>
+inline void
+valueConstructMove(TIterator it, 
+				   String<TValue, TSpec> const & value)
+{
+	valueConstruct(it);
+	move(*it, value);
+}
+*/
 
 //////////////////////////////////////////////////////////////////////////////
 // append

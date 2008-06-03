@@ -44,7 +44,7 @@ namespace SEQAN_NAMESPACE_MAIN
 template <typename TValue>
 class String<TValue, Alloc<void> >
 {
-protected:
+public:
 	typename Value<String>::Type * data_begin;
 	typename Value<String>::Type * data_end;
 	size_t data_capacity;
@@ -205,12 +205,11 @@ SEQAN_CHECKPOINT
 	}
 
 //____________________________________________________________________________
-
+/* Entwicklungsschrott?
 	inline void 
 	move(String & target, 
 		 String & source)
 	{
-SEQAN_CHECKPOINT
 		clear(target);
 		target.data_begin = source.data_begin;
 		target.data_end = source.data_end;
@@ -220,7 +219,7 @@ SEQAN_CHECKPOINT
 		source.data_end = 0;
 		source.data_capacity = 0;
 	}
-
+*/
 //____________________________________________________________________________
 
 /**
@@ -354,8 +353,6 @@ struct IsContiguous< String<TValue, Alloc<TSpec> > >
 
 //////////////////////////////////////////////////////////////////////////////
 
-//???TODO
-/*
 template <typename TTargetValue, typename TSourceValue, typename TSpec>
 inline void 
 move(String<TTargetValue, Alloc<TSpec> > & target, 
@@ -363,7 +360,42 @@ move(String<TTargetValue, Alloc<TSpec> > & target,
 {
 	_moveContiguous(target, source);
 }
-*/
+template <typename TTargetValue, typename TSourceValue, typename TSpec>
+inline void 
+move(String<TTargetValue, Alloc<TSpec> > & target, 
+	 String<TSourceValue, Alloc<TSpec> > const & source)
+{
+	_moveContiguous(target, source);
+}
+
+template <typename TValue, typename TSpec>
+inline void 
+move(String<TValue, Alloc<TSpec> > & target, 
+	 String<TValue, Alloc<TSpec> > & source)
+{
+	clear(target);
+	target.data_begin = source.data_begin;
+	target.data_end = source.data_end;
+	target.data_capacity = source.data_capacity;
+
+	source.data_begin = 0;
+	source.data_end = 0;
+	source.data_capacity = 0;
+}
+template <typename TValue, typename TSpec>
+inline void 
+move(String<TValue, Alloc<TSpec> > & target, 
+	 String<TValue, Alloc<TSpec> > const & source)
+{
+	clear(target);
+	target.data_begin = source.data_begin;
+	target.data_end = source.data_end;
+	target.data_capacity = source.data_capacity;
+
+	source.data_begin = 0;
+	source.data_end = 0;
+	source.data_capacity = 0;
+}
 
 //////////////////////////////////////////////////////////////////////////////
 

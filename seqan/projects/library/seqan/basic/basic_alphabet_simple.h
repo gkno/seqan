@@ -109,6 +109,21 @@ SEQAN_CHECKPOINT
 	//this cannot be a template since a template would be in conflict to
 	//the template c'tor
 
+
+	operator long() const
+	{
+SEQAN_CHECKPOINT
+		long c;
+		assign(c, *this);
+		return c;
+	}
+	operator unsigned long() const
+	{
+SEQAN_CHECKPOINT
+		unsigned long c;
+		assign(c, *this);
+		return c;
+	}
 	operator int() const
 	{
 SEQAN_CHECKPOINT

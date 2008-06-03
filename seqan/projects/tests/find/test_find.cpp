@@ -874,7 +874,7 @@ int main()
 
 	Test_OnlineAlgMulti<AhoCorasick>();
 	Test_OnlineAlgMulti<MultipleShiftAnd>();
-	Test_OnlineAlgMulti<SetHorspool>();
+//	Test_OnlineAlgMulti<SetHorspool>();
 //	Test_OnlineAlgMulti<WuManber>();
 
 	Test_Approx();

@@ -24,7 +24,9 @@
 //____________________________________________________________________________
 // prerequisites
 
+#include <cmath>
 #include <stack>
+
 #include <seqan/sequence.h>
 #include <seqan/score.h>
 

@@ -21,8 +21,6 @@
 #ifndef SEQAN_HEADER_ALIGN_BASE_H
 #define SEQAN_HEADER_ALIGN_BASE_H
 
-#include <cmath>
-
 namespace SEQAN_NAMESPACE_MAIN
 {
 

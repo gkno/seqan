@@ -26,7 +26,10 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TValue, typename TSpec = void>
+struct NDimensional;
+
+
+template <typename TValue, typename TSpec = NDimensional>
 class Matrix;
 
 //////////////////////////////////////////////////////////////////////////////
@@ -38,7 +41,7 @@ class Matrix;
 */
 
 template <typename TValue>
-class Matrix<TValue, void>
+class Matrix<TValue, NDimensional>
 {
 //____________________________________________________________________________
 
@@ -146,35 +149,35 @@ public:
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TValue, typename TSpec>
-struct Value< Matrix<TValue, TSpec> >
+template <typename TValue>
+struct Value< Matrix<TValue, NDimensional> >
 {
 	typedef TValue Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TValue, typename TSpec, typename TIteratorSpec>
-struct Iterator< Matrix<TValue, TSpec>, TIteratorSpec >
+template <typename TValue, typename TIteratorSpec>
+struct Iterator< Matrix<TValue, NDimensional>, TIteratorSpec >
 {
-	typedef Iter<Matrix<TValue, TSpec>, PositionIterator> Type;
+	typedef Iter<Matrix<TValue, NDimensional>, PositionIterator> Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TValue, typename TSpec>
+template <typename TValue>
 inline unsigned int
-dimension(Matrix<TValue, TSpec> & me)
+dimension(Matrix<TValue, NDimensional> & me)
 {
 	return length(_dataLengths(me));
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TValue, typename TSpec>
+template <typename TValue>
 inline void
-setDimension(Matrix<TValue, TSpec> & me,
+setDimension(Matrix<TValue, NDimensional> & me,
 			 unsigned int dim_)
 {
 	SEQAN_ASSERT(dim_ > 0)
@@ -187,26 +190,26 @@ setDimension(Matrix<TValue, TSpec> & me,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TValue, typename TSpec>
-inline typename Size<Matrix<TValue, TSpec> >::Type
-length(Matrix<TValue, TSpec> const & me,
+template <typename TValue>
+inline typename Size<Matrix<TValue, NDimensional> >::Type
+length(Matrix<TValue, NDimensional> const & me,
 	   unsigned int dim_)
 {
 	return me.data_lengths[dim_];
 }
 
-template <typename TValue, typename TSpec>
-inline typename Size<Matrix <TValue, TSpec> >::Type
-length(Matrix<TValue, TSpec> const & me)
+template <typename TValue>
+inline typename Size<Matrix <TValue, NDimensional> >::Type
+length(Matrix<TValue, NDimensional> const & me)
 {
 	return length(host(me));
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TValue, typename TSpec, typename TSize>
+template <typename TValue, typename TSize>
 inline void
-setLength(Matrix<TValue, TSpec> & me,
+setLength(Matrix<TValue, NDimensional> & me,
 		  unsigned int dim_,
 		  TSize length_)
 {
@@ -218,11 +221,11 @@ setLength(Matrix<TValue, TSpec> & me,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TValue, typename TSpec>
+template <typename TValue>
 inline void
-resize(Matrix<TValue, TSpec> & me)
+resize(Matrix<TValue, NDimensional> & me)
 {
-	typedef Matrix<TValue, TSpec> TMatrix;
+	typedef Matrix<TValue, NDimensional> TMatrix;
 	typedef typename Size<TMatrix>::Type TSize;
 
 	unsigned int dimension_ = dimension(me);
@@ -245,18 +248,18 @@ resize(Matrix<TValue, TSpec> & me)
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TValue, typename TSpec, typename TPosition>
-inline typename Position<Matrix <TValue, TSpec> >::Type
-nextPosition(Matrix<TValue, TSpec> & me,
+template <typename TValue, typename TPosition>
+inline typename Position<Matrix <TValue, NDimensional> >::Type
+nextPosition(Matrix<TValue, NDimensional> & me,
 			 TPosition position_,
 			 unsigned int dimension_)
 {
 	return position_ + _dataFactors(me)[dimension_];
 }
 
-template <typename TValue, typename TSpec, typename TPosition>
-inline typename Position<Matrix <TValue, TSpec> >::Type
-previousPosition(Matrix<TValue, TSpec> & me,
+template <typename TValue, typename TPosition>
+inline typename Position<Matrix <TValue, NDimensional> >::Type
+previousPosition(Matrix<TValue, NDimensional> & me,
 				 TPosition position_,
 				 unsigned int dimension_)
 {
@@ -265,9 +268,9 @@ previousPosition(Matrix<TValue, TSpec> & me,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TValue, typename TSpec, typename TPosition>
-inline typename Size< Matrix <TValue, TSpec> >::Type
-coordinate(Matrix<TValue, TSpec> & me,
+template <typename TValue, typename TPosition>
+inline typename Size< Matrix <TValue, NDimensional> >::Type
+coordinate(Matrix<TValue, NDimensional> & me,
 		   TPosition position_,
 		   unsigned int dimension_)
 {
@@ -285,43 +288,43 @@ coordinate(Matrix<TValue, TSpec> & me,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TValue, typename TSpec, typename TTag>
-inline typename Iterator<Matrix <TValue, TSpec>, Tag<TTag> const>::Type
-begin(Matrix<TValue, TSpec> & me,
+template <typename TValue, typename TTag>
+inline typename Iterator<Matrix <TValue, NDimensional>, Tag<TTag> const>::Type
+begin(Matrix<TValue, NDimensional> & me,
 	  Tag<TTag> const)
 {
-	return typename Iterator<Matrix <TValue, TSpec>, Tag<TTag> const >::Type(me, 0);
+	return typename Iterator<Matrix <TValue, NDimensional>, Tag<TTag> const >::Type(me, 0);
 }
-template <typename TValue, typename TSpec, typename TTag>
-inline typename Iterator<Matrix <TValue, TSpec> const, Tag<TTag> const>::Type
-begin(Matrix<TValue, TSpec> const & me,
+template <typename TValue, typename TTag>
+inline typename Iterator<Matrix <TValue, NDimensional> const, Tag<TTag> const>::Type
+begin(Matrix<TValue, NDimensional> const & me,
 	  Tag<TTag> const)
 {
-	return typename Iterator<Matrix <TValue, TSpec>, Tag<TTag> const >::Type(me, 0);
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename TValue, typename TSpec, typename TTag>
-inline typename Iterator<Matrix <TValue, TSpec>, Tag<TTag> const >::Type
-end(Matrix<TValue, TSpec> & me,
-	  Tag<TTag> const)
-{
-	return typename Iterator<Matrix <TValue, TSpec>, Tag<TTag> const >::Type(me, length(host(me)));
-}
-template <typename TValue, typename TSpec, typename TTag>
-inline typename Iterator<Matrix <TValue, TSpec> const, Tag<TTag> const >::Type
-end(Matrix<TValue, TSpec> const & me,
-	  Tag<TTag> const)
-{
-	return typename Iterator<Matrix <TValue, TSpec>, Tag<TTag> const >::Type(me, length(host(me)));
+	return typename Iterator<Matrix <TValue, NDimensional>, Tag<TTag> const >::Type(me, 0);
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TValue, typename TSpec, typename TPosition>
-inline typename Reference<Matrix<TValue, TSpec> >::Type
-value(Matrix<TValue, TSpec> & me,
+template <typename TValue, typename TTag>
+inline typename Iterator<Matrix <TValue, NDimensional>, Tag<TTag> const >::Type
+end(Matrix<TValue, NDimensional> & me,
+	  Tag<TTag> const)
+{
+	return typename Iterator<Matrix <TValue, NDimensional>, Tag<TTag> const >::Type(me, length(host(me)));
+}
+template <typename TValue, typename TTag>
+inline typename Iterator<Matrix <TValue, NDimensional> const, Tag<TTag> const >::Type
+end(Matrix<TValue, NDimensional> const & me,
+	  Tag<TTag> const)
+{
+	return typename Iterator<Matrix <TValue, NDimensional>, Tag<TTag> const >::Type(me, length(host(me)));
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TValue, typename TPosition>
+inline typename Reference<Matrix<TValue, NDimensional> >::Type
+value(Matrix<TValue, NDimensional> & me,
 	  TPosition position_)
 {
 	return value(host(me), position_);
@@ -333,9 +336,9 @@ value(Matrix<TValue, TSpec> & me,
 // Iterator: goNext
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TValue, typename TSpec>
+template <typename TValue>
 inline void
-goNext(Iter< Matrix<TValue, TSpec>, PositionIterator > & me,
+goNext(Iter< Matrix<TValue, NDimensional>, PositionIterator > & me,
 	   unsigned int dimension_ = 0)
 {
 	setPosition(me, nextPosition(container(me), position(me), dimension_));
@@ -345,9 +348,9 @@ goNext(Iter< Matrix<TValue, TSpec>, PositionIterator > & me,
 // Iterator: goPevious
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TValue, typename TSpec>
+template <typename TValue>
 inline void
-goPrevious(Iter< Matrix<TValue, TSpec>, PositionIterator > & me,
+goPrevious(Iter< Matrix<TValue, NDimensional>, PositionIterator > & me,
 		   unsigned int dimension_ = 0)
 {
 	setPosition(me, previousPosition(container(me), position(me), dimension_));
@@ -356,9 +359,9 @@ goPrevious(Iter< Matrix<TValue, TSpec>, PositionIterator > & me,
 //////////////////////////////////////////////////////////////////////////////
 // Iterator: coordinate
 
-template <typename TValue, typename TSpec>
-inline typename Size< Matrix<TValue, TSpec> >::Type 
-coordinate(Iter< Matrix<TValue, TSpec>, PositionIterator > & me,
+template <typename TValue>
+inline typename Size< Matrix<TValue, NDimensional> >::Type 
+coordinate(Iter< Matrix<TValue, NDimensional>, PositionIterator > & me,
 		   unsigned int dimension_)
 {
 	return coordinate(container(me), position(me), dimension_);

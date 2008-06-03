@@ -511,21 +511,19 @@ SEQAN_CHECKPOINT
 
 template<typename TTargetValue, typename TSource>
 inline void 
-move(TTargetValue * target, 
+move(TTargetValue * & target, 
 	 TSource & source)
 {
 SEQAN_CHECKPOINT
-	typedef TTargetValue * TTarget;
-	move(target, source, typename DefaultOverflowImplicit<TTarget>::Type());
+	target = source;
 }
 template<typename TTargetValue, typename TSource>
 inline void 
-move(TTargetValue * target, 
+move(TTargetValue * & target, 
 	 TSource const & source)
 {
 SEQAN_CHECKPOINT
-	typedef TTargetValue * TTarget;
-	move(target, source, typename DefaultOverflowImplicit<TTarget>::Type());
+	target = source;
 }
 
 

@@ -24,12 +24,15 @@
 //____________________________________________________________________________
 // prerequisites
 
+#include <cmath>
+
 #include <deque>
 
 #include <seqan/sequence.h>
 #include <seqan/score.h>
 #include <seqan/graph_types.h>
 #include <seqan/graph_algorithms.h>
+#include <seqan/map.h>
 
 //____________________________________________________________________________
 

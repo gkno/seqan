@@ -261,7 +261,7 @@ SEQAN_CHECKPOINT
       ::std::cout << "original start pos: " << startPos << ::std::endl;
 #endif
 
-      while(find(f,me.verifier,- me.limit)){
+      while(find(f,me.verifier,- (int) me.limit)){
         TWord newP = position(finder) + position(f);
 #ifdef SEQAN_DEBUG_ABNDM
 	::std::cout << "found on new position: " << newP << ::std::endl; 
@@ -338,7 +338,7 @@ SEQAN_CHECKPOINT
 		    ::std::cout << "init finder on: " << s << ::std::endl;
 #endif                  
                     // try to find the sequence
-                    while(find(f,me.verifier,- me.limit)){
+                    while(find(f,me.verifier,- (int) me.limit)){
 		      TWord nP = position(finder) + position(f);
 		      if(nP > startPos){
 			finder += position(f);
@@ -389,7 +389,7 @@ SEQAN_CHECKPOINT
       ::std::cout << "original start pos: " << startPos << ::std::endl;
 #endif
 
-      while(find(f,me.verifier,- me.limit)){
+      while(find(f,me.verifier,- (int) me.limit)){
         TWord newP = position(finder) + position(f);
 #ifdef SEQAN_DEBUG_ABNDM
 	::std::cout << "found on new position: " << newP << ::std::endl; 
@@ -503,7 +503,7 @@ SEQAN_CHECKPOINT
 		::std::cout << "init finder on: " << s << ::std::endl;
 #endif                  
 		// try to find the sequence
-		while(find(f,me.verifier,- me.limit)){
+		while(find(f,me.verifier,- (int) me.limit)){
 		  TWord nP = position(finder) + position(f);
 		  if(nP > startPos){
 		    finder += position(f);

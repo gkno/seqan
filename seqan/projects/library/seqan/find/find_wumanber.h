@@ -23,8 +23,6 @@
 #ifndef SEQAN_HEADER_FIND_WUMANBER_H
 #define SEQAN_HEADER_FIND_WUMANBER_H
 
-#include <cmath>
-
 namespace SEQAN_NAMESPACE_MAIN
 {
 

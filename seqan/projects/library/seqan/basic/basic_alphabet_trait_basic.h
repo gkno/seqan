@@ -342,7 +342,7 @@ _arrayClearSpace_Pointer(TValue * array_begin,
 {
 	if (keep_from == move_to) return;
 SEQAN_CHECKPOINT
-	arrayCopy(array_begin + keep_from, array_begin + array_length, array_begin + move_to);
+	arrayMove(array_begin + keep_from, array_begin + array_length, array_begin + move_to);
 }
 template <typename TValue>
 inline void 

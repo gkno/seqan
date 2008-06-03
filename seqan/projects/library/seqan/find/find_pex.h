@@ -24,9 +24,6 @@
 // uncomment this for verbose debug output
 //#define SEQAN_DEBUG_PEX
 
-#include<seqan/map.h>
-#include<math.h>
-
 namespace SEQAN_NAMESPACE_MAIN 
 {
 
@@ -274,7 +271,7 @@ SEQAN_CHECKPOINT
 
   // split pattern
   unsigned k = me.limit + 1;
-  unsigned seg_len = ::std::floor(me.needleLength/k);
+  unsigned seg_len = me.needleLength / k; //::std::floor(me.needleLength/k); //Wer hat den floor-Quatsch hier programmiert?
   
   // 
   clear(me.splitted_needles);
@@ -454,7 +451,7 @@ void _createTree(Pattern<TNeedle, Pex<Hierarchical, TMultiFinder > > &me, unsign
   setScoreLimit(pr.verifier, - static_cast<int>(pr.error));
   setHost(pr.verifier, me.segment_store[length(me.segment_store) - 1]);
   
-  unsigned left = ::std::ceil(static_cast<double>(k + 1)/2);
+  unsigned left = k/2 + 1; //::std::ceil(static_cast<double>(k + 1)/2);
   unsigned cur_idx = (parent << 1) + direction;
 
   // insert pr into the tree
@@ -470,8 +467,10 @@ void _createTree(Pattern<TNeedle, Pex<Hierarchical, TMultiFinder > > &me, unsign
     me.leaf_map[length(me.splitted_needles) - 1] = cur_idx;
   }else{
     // recusivly create the rest of the tree
-    _createTree(me, start, start + left * plen - 1, ::std::floor(static_cast<double>(left * k)/ static_cast<double>(k + 1)),cur_idx,0,idx,plen);
-    _createTree(me,  start + left * plen, end, ::std::floor(static_cast<double>((k + 1 - left)*k)/ static_cast<double>(k + 1)),cur_idx,1,idx + left,plen);
+//    _createTree(me, start, start + left * plen - 1, ::std::floor(static_cast<double>(left * k)/ static_cast<double>(k + 1)),cur_idx,0,idx,plen);
+    _createTree(me, start, start + left * plen - 1, left * k / (k+1),cur_idx,0,idx,plen);
+//    _createTree(me,  start + left * plen, end, ::std::floor(static_cast<double>((k + 1 - left)*k)/ static_cast<double>(k + 1)),cur_idx,1,idx + left,plen);
+    _createTree(me,  start + left * plen, end, (k + 1 - left)*k / (k+1),cur_idx,1,idx + left,plen);
   }
 }
 
@@ -484,7 +483,7 @@ SEQAN_CHECKPOINT
   typedef Pattern<TNeedle,MyersUkkonen> TVerifier;
 
   unsigned k = me.limit + 1;
-  unsigned plen = ::std::floor(static_cast<double>(me.needleLength)/static_cast<double>(k));
+  unsigned plen = me.needleLength / k; //::std::floor(static_cast<double>(me.needleLength)/static_cast<double>(k));
   
   // reset
   clear(me.splitted_needles);

@@ -229,6 +229,27 @@ SEQAN_CHECKPOINT
 	TDestructor::destruct(it);
 }
 
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.valueConstructMove:
+..cat:Content Manipulation
+..summary:Move constructs an object at specified position.
+..signature:valueConstructMove(iterator, param)
+..param.iterator:Pointer or iterator to position where the object should be constructed.
+..param.param:Parameter that is moved to the new constructed object.
+..remarks:The type of the destructed object is the @Metafunction.Value.value type@ of $iterator$.
+..remarks:The default implementation just calls @Function.valueConstruct@.
+*/
+template <typename TIterator, typename TValue>
+inline void
+valueConstructMove(TIterator it, TValue const & value)
+{
+	valueConstruct(it, value);
+}
+
+
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
@@ -377,7 +398,7 @@ _arrayConstructMove_Default(TSource1 source_begin,
 SEQAN_CHECKPOINT
 	while (source_begin < source_end)
 	{
-		valueConstruct(target_begin, *source_begin, Move());
+		valueConstructMove(target_begin, *source_begin);
 		++source_begin;
 		++target_begin;
 	}
@@ -769,21 +790,21 @@ void _arrayClearSpace_Default(TIterator array_begin,
 		{
 SEQAN_CHECKPOINT
 			size_t middle = array_length - (move_to - keep_from);
-			arrayConstructCopy(array_begin + middle, array_begin + array_length, array_begin + array_length);
-			arrayCopy(array_begin + keep_from, array_begin + middle, array_begin + move_to);
+			arrayConstructMove(array_begin + middle, array_begin + array_length, array_begin + array_length);
+			arrayMove(array_begin + keep_from, array_begin + middle, array_begin + move_to);
 			arrayDestruct(array_begin, array_begin + move_to);
 		}
 		else
 		{
 SEQAN_CHECKPOINT
-			arrayConstructCopy(array_begin + keep_from, array_begin + array_length, array_begin + move_to);
+			arrayConstructMove(array_begin + keep_from, array_begin + array_length, array_begin + move_to);
 			arrayDestruct(array_begin, array_begin + array_length);
 		}
 	}
 	else
 	{
 SEQAN_CHECKPOINT
-		arrayCopy(array_begin + keep_from, array_begin + array_length, array_begin + move_to);
+		arrayMove(array_begin + keep_from, array_begin + array_length, array_begin + move_to);
 		arrayDestruct(array_begin, array_begin + move_to);
 		arrayDestruct(array_begin + array_length - (keep_from - move_to), array_begin + array_length);
 	}
