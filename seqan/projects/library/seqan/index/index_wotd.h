@@ -500,7 +500,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef Index<TText, Index_Wotd<TIndexSpec> >	TIndex;
 		typedef typename Size<TIndex>::Type				TSize;
 
-		TIndex	&index = container(it);
+		TIndex	const &index = container(it);
 		TSize	pos = value(it).node;
 
 		TSize w0 = dirAt(pos, index);
@@ -562,7 +562,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Size<TIndex>::Type				TSize;
 
 		if (_isLeaf(it, EmptyEdges())) return false;
-		TIndex &index = container(it);
+		TIndex const &index = container(it);
 
 		// ensure node evaluation
 		TSize childNode = _wotdEvaluate(it);
