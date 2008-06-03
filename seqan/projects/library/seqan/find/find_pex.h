@@ -216,7 +216,7 @@ SEQAN_CHECKPOINT
 }
 
 template <typename TNeedle, typename TMultiFinder>
-int _getRoot(Pattern<TNeedle, Pex<Hierarchical, TMultiFinder > > & me) 
+int _getRoot(Pattern<TNeedle, Pex<Hierarchical, TMultiFinder > > &) 
 {
 SEQAN_CHECKPOINT
   return 1;
@@ -451,7 +451,7 @@ void _createTree(Pattern<TNeedle, Pex<Hierarchical, TMultiFinder > > &me, unsign
   setScoreLimit(pr.verifier, - static_cast<int>(pr.error));
   setHost(pr.verifier, me.segment_store[length(me.segment_store) - 1]);
   
-  unsigned left = k/2 + 1; //::std::ceil(static_cast<double>(k + 1)/2);
+  unsigned left = (k+1)/2; //::std::ceil(static_cast<double>(k + 1)/2);
   unsigned cur_idx = (parent << 1) + direction;
 
   // insert pr into the tree
