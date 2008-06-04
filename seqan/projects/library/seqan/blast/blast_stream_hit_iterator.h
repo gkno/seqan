@@ -18,7 +18,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..cat:Blast
 ..summary:Hit iterator for @Class.BlastReport@.
 ..signature:Iterator<TBlastReport, HitIterator>
-..param.TBlastReport:A Blast report with @Spec.StreamReport@.
+..param.TBlastReport:A Blast report container.
 ...type:Class.BlastReport
 ..general:Class.Iter
 */
@@ -168,8 +168,8 @@ struct GetValue<Iter<TBlastReport const, StreamBlastIterator<HitIterator> > >
 ..cat:Blast
 ..summary:Determines whether the iterator is at the beginning or not.
 ..signature:atBegin(file,it)
-..param.it:A hit or hsp iterator on a Blast report with @Spec.StreamReport@.
-..param.it:A stream.
+..param.file:A file stream.
+..param.it:A hit or hsp iterator on a BlastReport
 ...type:Spec.HitIterator
 ...type:Spec.HspIterator
 ..returns:True if the iterator is at the beginning, false otherwise
@@ -193,8 +193,8 @@ SEQAN_CHECKPOINT
 ..cat:Blast
 ..summary:Resets the iterator to the beginning.
 ..signature:goBegin(file,it)
-..param.it:A hit or hsp iterator on a Blast report with @Spec.StreamReport@.
-..param.it:A stream.
+..param.file:A file stream.
+..param.it:A hit or hsp iterator on a BlastReport 
 ...type:Spec.HitIterator
 ...type:Spec.HspIterator
 ..returns:void
@@ -223,8 +223,8 @@ goBegin(TFile &,
 ..cat:Blast
 ..summary:Moves the iterator to the next hit or hsp.
 ..signature:goNext(file,it)
-..param.it:A hit or hsp iterator on a Blast report with @Spec.StreamReport@.
-..param.it:A stream.
+..param.file:A file stream.
+..param.it:A hit or hsp iterator on a BlastReport
 ...type:Spec.HitIterator
 ...type:Spec.HspIterator
 ..returns:void
@@ -303,10 +303,10 @@ SEQAN_CHECKPOINT
 ..cat:Blast
 ..summary:The hit the iterator points to.
 ..signature:getValue(file,it)
-..param.it:A hit or hsp iterator on a Blast report with @Spec.StreamReport@.
-..param.it:A stream.
-...type:Spec.Hit Iterator
-...type:Spec.Hsp Iterator
+..param.file:A file stream.
+..param.it:A hit or hsp iterator on a BlastReport
+...type:Spec.HitIterator
+...type:Spec.HspIterator
 ..returns:A BlastHit or BlastHsp.
 ...type:Metafunction.Hit
 ...type:Metafunction.Hsp
@@ -336,8 +336,8 @@ SEQAN_CHECKPOINT
 ..cat:Blast
 ..summary:The hit the iterator points to.
 ..signature:value(file,it)
-..param.it:A hit or hsp iterator on a Blast report with @Spec.StreamReport@.
-..param.it:A stream.
+..param.file:A file stream.
+..param.it:A hit or hsp iterator on a BlastReport
 ...type:Spec.HitIterator
 ...type:Spec.HspIterator
 ..returns:A BlastHit or BlastHsp.
@@ -375,8 +375,8 @@ hostReport(Iter<TBlastReport, StreamBlastIterator<HitIterator> >& it)
 ..cat:Blast
 ..summary:Determines whether the iterator is at the end or not.
 ..signature:atEnd(file,it)
-..param.it:A hit or hsp iterator on a Blast report with @Spec.StreamReport@.
-..param.it:A stream.
+..param.file:A file stream.
+..param.it:A hit or hsp iterator on a Spec.StreamReport
 ...type:Spec.HitIterator
 ...type:Spec.HspIterator
 ..returns:True if the iterator is at the end, false otherwise

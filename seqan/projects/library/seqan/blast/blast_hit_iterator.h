@@ -1,7 +1,6 @@
 #ifndef SEQAN_HEADER_BLAST_HIT_ITERATOR_H
 #define SEQAN_HEADER_BLAST_HIT_ITERATOR_H
 
-//SEQAN_NO_DDDOC: do not generate documentation for this file
 
 namespace SEQAN_NAMESPACE_MAIN
 {
@@ -70,7 +69,8 @@ public:
 // SimpleBlastIterator<TSpec> - Metafunctions
 //////////////////////////////////////////////////////////////////////////////
 
-///.Metafunction.Host.param.T.type:Class.BlastReport
+///.Metafunction.Host.param.T.type:Spec.HitIterator
+///.Metafunction.Host.param.T.type:Spec.HspIterator
 template<typename TBlastObject, typename TIteratorSpec>
 struct Host<Iter<TBlastObject, SimpleBlastIterator<TIteratorSpec> > >
 {	
@@ -328,8 +328,8 @@ SEQAN_CHECKPOINT
 ..summary:The hit the iterator points to.
 ..signature:getValue(it)
 ..param.it:A Blast search result iterator.
-...type:Spec.Hit Iterator
-...type:Spec.Hsp Iterator
+...type:Spec.HitIterator
+...type:Spec.HspIterator
 ..returns:A BlastHit or BlastHsp.
 ...type:Metafunction.Hit
 ...type:Metafunction.Hsp

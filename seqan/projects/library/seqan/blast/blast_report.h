@@ -1,14 +1,14 @@
 #ifndef SEQAN_HEADER_BLAST_REPORT_H
 #define SEQAN_HEADER_BLAST_REPORT_H
 
-//SEQAN_NO_DDDOC: do not generate documentation for this file
 
 namespace SEQAN_NAMESPACE_MAIN
 {
 
 // 
 
-template<typename TBlastHsp = BlastHsp<>, typename TStoreSpec = StoreReport<BasicInfo> >
+//template<typename TBlastHsp = BlastHsp<>, typename TStoreSpec = StoreReport<BasicInfo> >
+template<typename TBlastHsp = BlastHsp<>, typename TStoreSpec = StreamReport<FullInfo> >
 class BlastReport;
 
 
@@ -19,16 +19,18 @@ class BlastReport;
 ..signature:BlastReport<TBlastHsp, TSpec>  
 ..param.TBlastHsp:The type of HSPs that are to be stored.
 ...remarks:see @Class.BlastHsp@.
-...metafunction:Metafunction.Hsp
-...metafunction:Metafunction.Hit
 ...default:$BlastHsp<BlastN,BasicInfo>$
 ..param.TSpec:The specializing type.
-...type:Spec.StreamReport: Work on a stream (parse hits/HSPs when iterating over them).
-...type:Spec.StoreReport: Parse a Blast report and store all hits and HSPs.
-...default:StoreReport 
+...type:Spec.StreamReport
+...type:Spec.StoreReport
+...default:StreamReport 
 ...remarks:StoreReport requires more space while StreamReport will be more time consuming if hits are iterated over more than once.
+..metafunction:Metafunction.Hsp
+..metafunction:Metafunction.Hit
+...remarks:Use @Metafunction.Hit@ to get the type of BlastHit.
 ..include:blast.h
 */
+
 template<typename TBlastHsp>
 class BlastReport<TBlastHsp, StoreReport<FullInfo> > 
 {
@@ -670,7 +672,7 @@ SEQAN_CHECKPOINT
 ..cat:Blast
 ..summary:Reference to the name (identifier) of the query in a Blast report.
 ..signature:queryName(blastReport);
-..param.it:A Blast Report.
+..param.blastReport:A Blast Report.
 ...type:Class.BlastReport
 ..returns:The name (identifier) of the query.
 ...type:String<char>
@@ -690,7 +692,7 @@ SEQAN_CHECKPOINT
 ..cat:Blast
 ..summary:The name (identifier) of the query in a Blast report.
 ..signature:getQueryName(blastReport);
-..param.it:A Blast Report.
+..param.blastReport:A Blast Report.
 ...type:Class.BlastReport
 ..returns:The name (identifier) of the query.
 ...type:String<char>
@@ -710,7 +712,7 @@ SEQAN_CHECKPOINT
 ..cat:Blast
 ..summary:Reference to the name (identifier) of the database in a Blast report.
 ..signature:databaseName(blastReport);
-..param.it:A Blast Report.
+..param.blastReport:A Blast Report.
 ...type:Class.BlastReport
 ..returns:The name of the database.
 ...type:String<char>
@@ -730,7 +732,7 @@ SEQAN_CHECKPOINT
 ..cat:Blast
 ..summary:The name (identifier) of the database in a Blast report.
 ..signature:getDatabaseName(blastReport);
-..param.it:A Blast Report.
+..param.blastReport:A Blast Report.
 ...type:Class.BlastReport
 ..returns:The name of the database.
 ...type:String<char>
@@ -752,8 +754,8 @@ SEQAN_CHECKPOINT
 ..cat:Blast
 ..summary:The total number of hits in a Blast report.
 ..signature:numHits(blastReport);
-..param.it:A Blast Report.
-...type:Class.BlastReport with @Spec.StoreReport@.
+..param.blastReport:A Blast Report.
+...type:Spec.StoreReport
 ..returns:The number of hits (unsigned int).
 ..see:Function.numHsps
 */
@@ -771,9 +773,8 @@ SEQAN_CHECKPOINT
 ..cat:Blast
 ..summary:The number of HSPs for an entire Blast report or for one Blast hit.
 ..signature:numHits(blastObj);
-..param.it:A Blast report or a Blast hit.
-...type:Class.BlastReport with @Spec.StoreReport@.
-...type:Class.BlastHit with @Spec.StoreReport@.
+..param.blastObj:A Blast report or a Blast hit.
+...type:Spec.StoreReport
 ..returns:The number of hsps (unsigned int)
 ..see:Function.numHits
 */
@@ -789,6 +790,18 @@ SEQAN_CHECKPOINT
 }		
 		
 
+
+
+// /**
+//.Function.eValueCutoff:
+//..cat:Blast
+//..summary:The Expect-Value cutoff of a Blast report.
+//..signature:eValueCutoff(blastReport);
+//..param.blastReport:A Blast Report.
+//...type:Spec.StoreReport
+//..returns:The E-value cutoff (read from the Blast report file).
+//...type:double
+//*/
 //for StoreReport FullInfo only
 template<typename TBlastHsp>
 inline double & 
@@ -798,6 +811,17 @@ SEQAN_CHECKPOINT
 	return blastObj.min_expect;
 }
 
+
+/**
+.Function.getEValueCutoff:
+..cat:Blast
+..summary:The Expect-Value cutoff parsed from a Blast report.
+..signature:getEValueCutoff(blastReport);
+..param.blastReport:A Blast Report.
+...type:Spec.StoreReport
+..returns:The E-value cutoff (read from the Blast report file).
+...type:double
+*/
 template<typename TBlastHsp>
 inline double
 getEValueCutoff(BlastReport<TBlastHsp,StoreReport<FullInfo> > & blastObj)
@@ -830,6 +854,16 @@ SEQAN_CHECKPOINT
     return blastObj.gap_open;
 }		
 
+/**
+.Function.getGetOpen:
+..cat:Blast
+..summary:The gap open penalty parsed from a Blast report.
+..signature:getGapOpen(blastReport);
+..param.blastReport:A Blast Report.
+...type:Spec.StoreReport
+..returns:The gap open penalty.
+...type:float
+*/
 template<typename TBlastHsp>
 inline float 
 getGapOpen(BlastReport<TBlastHsp,StoreReport<FullInfo> > & blastObj)
@@ -846,6 +880,17 @@ SEQAN_CHECKPOINT
 	return blastObj.gap_extension;
 }		
 
+
+/**
+.Function.getGetExtension:
+..cat:Blast
+..summary:The gap extension penalty parsed from a Blast report.
+..signature:getGapExtension(blastReport);
+..param.blastReport:A Blast Report.
+...type:Spec.StoreReport
+..returns:The gap open penalty.
+...type:float
+*/
 template<typename TBlastHsp>
 inline float 
 getGapExtension(BlastReport<TBlastHsp,StoreReport<FullInfo> > & blastObj)
@@ -872,6 +917,16 @@ SEQAN_CHECKPOINT
 	return blastObj.lambda;
 }		
 
+/**
+.Function.getLambda:
+..cat:Blast
+..summary:The lambda value parsed from a Blast report.
+..signature:getLambda(blastReport);
+..param.blastReport:A Blast Report.
+...type:Spec.StoreReport
+..returns:The lambda value.
+...type:float
+*/
 template<typename TBlastHsp>
 inline float
 getLambda(BlastReport<TBlastHsp,StoreReport<FullInfo> > & blastObj)
@@ -889,6 +944,16 @@ SEQAN_CHECKPOINT
 	return blastObj.gapped_lambda;
 }		
 
+/**
+.Function.getGappedLambda:
+..cat:Blast
+..summary:The lambda value parsed from a Blast report.
+..signature:getGappedLambda(blastReport);
+..param.blastReport:A Blast Report.
+...type:Spec.StoreReport
+..returns:The gapped lambda value.
+...type:float
+*/
 template<typename TBlastHsp>
 inline float
 getGappedLambda(BlastReport<TBlastHsp,StoreReport<FullInfo> > & blastObj)
@@ -907,6 +972,17 @@ SEQAN_CHECKPOINT
 	return blastObj.k;
 }		
 
+
+/**
+.Function.getKappa:
+..cat:Blast
+..summary:The kappa value parsed from a Blast report.
+..signature:getKappa(blastReport);
+..param.blastReport:A Blast Report.
+...type:Spec.StoreReport
+..returns:The kappa value.
+...type:float
+*/
 template<typename TBlastHsp>
 inline float
 getKappa(BlastReport<TBlastHsp,StoreReport<FullInfo> > & blastObj)
@@ -924,6 +1000,16 @@ SEQAN_CHECKPOINT
 	return blastObj.gapped_k;
 }		
 
+/**
+.Function.getGappedKappa:
+..cat:Blast
+..summary:The gapped kappa value parsed from a Blast report.
+..signature:getGappedKappa(blastReport);
+..param.blastReport:A Blast Report.
+...type:Spec.StoreReport
+..returns:The gapped kappa value.
+...type:float
+*/
 template<typename TBlastHsp>
 inline float
 getGappedKappa(BlastReport<TBlastHsp,StoreReport<FullInfo> > & blastObj)
@@ -973,13 +1059,14 @@ SEQAN_CHECKPOINT
 /**
 .Function.atEnd:
 ..cat:Blast
-..summary:Indicates whether there are more Blast reports in the stream to be parsed.
+..summary:Indicates whether there are more Blast reports in the file that is being parsed.
 ..signature:atEnd(file,blastReport);
-..param.file:A stream.
-..param.it:A Blast Report.
+..param.file:A file stream.
+..param.blastReport:A Blast report.
 ...type:Class.BlastReport
 ..returns:True if there are Blast reports left in the stream.
 ..remarks: Use function getNext(file,blastReport) to read next report.
+..see:Function.getNext
 */
 template<typename TBlastHsp, typename TSpec, typename TFile>
 inline bool
@@ -992,6 +1079,17 @@ SEQAN_CHECKPOINT
 }
 
 
+/**
+.Function.getNext:
+..cat:Blast
+..summary:Get next Blast report from a file containing multiple Blast reports.
+..signature:getNext(file,blastReport);
+..param.file:A file stream.
+..param.blastReport:A Blast report.
+...type:Class.BlastReport
+..returns:The result is stored in parameter blastReport.
+..see:Function.atEnd
+*/
 template<typename TBlastHsp, typename TSpec, typename TFile>
 inline void
 getNext(TFile & file,

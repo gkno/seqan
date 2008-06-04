@@ -1,7 +1,6 @@
 #ifndef SEQAN_HEADER_BLAST_STREAM_REPORT_H
 #define SEQAN_HEADER_BLAST_STREAM_REPORT_H
 
-//SEQAN_NO_DDDOC: do not generate documentation for this file
 
 namespace SEQAN_NAMESPACE_MAIN
 {
@@ -18,10 +17,10 @@ class BlastReport<TBlastHsp, StreamReport<TFile> >
 	
 		String<char> query_name;
 		String<char> db_name;
-		
-
+	
+	
 		TPosition first_hit_pos;
-		char act_c; //wie unn�tig
+		char act_c; 
 		bool hits_found;
 		bool next_report;
 		TPosition next_report_pos;

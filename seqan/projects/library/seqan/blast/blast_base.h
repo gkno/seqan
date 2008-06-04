@@ -1,7 +1,6 @@
 #ifndef SEQAN_HEADER_BLAST_BASE_H
 #define SEQAN_HEADER_BLAST_BASE_H
 
-//SEQAN_NO_DDDOC: do not generate documentation for this file
 
 namespace SEQAN_NAMESPACE_MAIN
 {
@@ -11,8 +10,8 @@ namespace SEQAN_NAMESPACE_MAIN
 // Blast Report types
 
 
-//Info types
 struct FullInfo;
+//...remarks:BasicInfo stores begin and end positions on query and database sequence, as well as the alignment. FullInfo stores additional information such as score, e-value...
 
 struct BasicInfo;
 
@@ -21,8 +20,8 @@ struct BasicInfo;
 /**
 .Spec.StoreReport:
 ..cat:Blast
-..general:Class.Blast
-..summary:Stores a Blast report.
+..general:Class.BlastReport
+..summary:BlastReport specialization. Parses a Blast report and stores all hits and HSPs.
 ..signature:BlastReport<TBlastHsp,StoreReport<TSpec> >
 ..param.TBlastHsp:The type of HSPs to be stored. See @Class.BlastHsp@
 ...metafunction:Metafunction.Hsp
@@ -44,8 +43,8 @@ struct StoreReport;		//stores the whole report
 /**
 .Spec.StreamReport:
 ..cat:Blast
-..general:Class.Blast
-..summary:Reads a Blast report from a file stream.
+..general:Class.BlastReport
+..summary:BlastReport specialization that works on a file stream; parses hits/HSPs when iterating over them).
 ..signature:BlastReport<TBlastHsp,StreamReport<TFile> >
 ..param.TBlastHsp:The type of HSPs to be stored. See @Class.BlastHsp@
 ...metafunction:Metafunction.Hsp
@@ -63,9 +62,27 @@ struct StreamReport;
 //////////////////////////////////////////////////////////////////////////////
 //Blast Meta functions
 
+
+/**
+.Metafunction.Hit:
+..summary:Blast Hit type of a Blast object.
+..signature:Hsp<T>::Type
+..param.T:A Blast report object.
+...type:Class.BlastReport
+..returns.param.Type:BlastHit type.
+*/
 template<typename T>
 struct Hit;
 
+/**
+.Metafunction.Hsp:
+..summary:Blast HSP type of a Blast object.
+..signature:Hsp<T>::Type
+..param.T:A Blast object.
+...type:Class.BlastReport
+...type:Class.BlastHit
+..returns.param.Type:BlastHsp type.
+*/
 template<typename T>
 struct Hsp;
 
@@ -85,6 +102,25 @@ typedef Tag<TagBlat_> const Blat;
 //////////////////////////////////////////////////////////////////////////////
 
 
+
+/**
+.Spec.BlastN:
+..cat:Blast
+..general:Class.BlastHsp
+..summary:For BlastN Blast reports.
+..signature:BlastN
+..include:blast.h
+*/
+
+
+/**
+.Spec.BlastP:
+..cat:Blast
+..general:Class.BlastHsp
+..summary:For BlastP Blast reports.
+..signature:BlastP
+..include:blast.h
+*/
 
 
 

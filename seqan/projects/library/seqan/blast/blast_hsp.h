@@ -1,7 +1,6 @@
 #ifndef SEQAN_HEADER_BLAST_HSP_H
 #define SEQAN_HEADER_BLAST_HSP_H
 
-//SEQAN_NO_DDDOC: do not generate documentation for this file
 
 namespace SEQAN_NAMESPACE_MAIN
 {
@@ -22,17 +21,41 @@ class BlastHsp;
 //////////////////////// FullInfo Nucleotide Spec //////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
 
+//Info types
+/**
+.Spec.FullInfo:
+..cat:Blast
+..general:Class.BlastHsp
+..summary:Stores all pieces of information delivered with an alignment in a Blast report.
+..signature:FullInfo
+..include:blast.h
+*/
+
+/**
+.Spec.BasicInfo:
+..cat:Blast
+..general:Class.BlastHsp
+..summary:Stores only the basic pieces of information delivered with an alignment in a Blast report.
+..signature:BasicInfo
+..include:blast.h
+*/
+
+
 
 /**
 .Class.BlastHsp:
 ..cat:Blast
 ..summary:Class for storing Blast HSPs. 
 ..signature:BlastHsp<TBlastSpec, TInfoSpec>  
-..param.TBlastSpec:BlastN, BlastP, BlastX, TBlastX, TBlastN, MegaBlast.
-...default:BlastN
-..param.TInfoSpec:Either BasicInfo or FullInfo.
+..param.TBlastSpec:The type of Blast report to be parsed.
+...type:Spec.BlastN
+...type:Spec.BlastP
+...default:Spec.BlastN
+..param.TInfoSpec:The specializing type determining the amount of information to be stored.
+...type:Spec.BasicInfo
+...type:Spec.FullInfo
 ...default:BasicInfo
-...remarks:BasicInfo only stores begin and end positions on query and database sequence, as well as the alignment.
+...remarks:BasicInfo stores begin and end positions on query and database sequence, as well as the alignment. FullInfo stores additional information such as score, e-value...
 ..include:blast.h
 */
 template<typename TSpec>
@@ -912,7 +935,7 @@ SEQAN_CHECKPOINT
 ...type:Class.BlastHsp
 ..param.alignment:An Alignment object to be filled.
 ...type:Class.Align
-...type:Class.Graph
+...type:Spec.Alignment Graph
 */
 template<typename TBlastHsp, typename TSpec, typename TSource>
 inline unsigned int
@@ -997,10 +1020,6 @@ SEQAN_CHECKPOINT
 .Function.getAlignment
 ..cat:Blast
 ..signature:getAlignment(hsp,alignment,id0,id1)
-..param.hsp:A Blast HSP.
-...type:Class.BlastHsp
-..param.alignment:An Alignment object to be filled.
-...type:Class.Graph
 ..param.id0:The Id of the query sequence in the StringSet of the Alignment Graph.
 ..param.id1:The Id of the hit sequence in the StringSet of the Alignment Graph.
 */
@@ -1503,6 +1522,12 @@ SEQAN_CHECKPOINT
 }
 
 
+template<typename TBlast, typename TSpec>
+inline unsigned int
+length(BlastHsp<TBlast,TSpec >& blastHsp)
+{
+	return length(databaseAlignmentString(blastHsp));
+}
 
 }// namespace SEQAN_NAMESPACE_MAIN
 
