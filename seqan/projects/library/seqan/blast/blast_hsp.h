@@ -1010,6 +1010,8 @@ SEQAN_CHECKPOINT
 	setSourceEndPosition(row(ali,0),queryEnd(hsp));
 	setSourceEndPosition(row(ali,1),databaseEnd(hsp));
 
+	return length(databaseAlignmentString(hsp));
+
 }
 
 

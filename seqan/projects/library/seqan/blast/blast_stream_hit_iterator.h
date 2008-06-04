@@ -96,7 +96,7 @@ struct Host<Iter<TBlastReport, StreamBlastIterator<HitIterator> > >
 };
 
 
-///.Metafunction.Iterator.param.T.type:Class.BlastReport
+
 
 template<typename TBlastHsp, typename TFile>
 struct Iterator<BlastReport<TBlastHsp,StreamReport<TFile> >, HitIterator>
