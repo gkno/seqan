@@ -19,7 +19,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..summary:Hsp iterator for @Class.BlastHit@.
 ..signature:Iterator<TBlastHit, HspIterator>
 ..param.TBlastHit:A Blast hit.
-...type:Class.Blast
+...type:Class.BlastHit
 ..general:Class.Iter
 */
 template<typename TBlastHsp, typename TStoreSpec>

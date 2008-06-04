@@ -45,7 +45,7 @@ class BlastHsp;
 /**
 .Class.BlastHsp:
 ..cat:Blast
-..summary:Class for storing Blast HSPs. 
+..summary:Object for storing Blast HSPs. 
 ..signature:BlastHsp<TBlastSpec, TInfoSpec>  
 ..param.TBlastSpec:The type of Blast report to be parsed.
 ...type:Spec.BlastN

@@ -28,6 +28,7 @@ class BlastReport;
 ..metafunction:Metafunction.Hsp
 ..metafunction:Metafunction.Hit
 ...remarks:Use @Metafunction.Hit@ to get the type of BlastHit.
+..remarks:Hits and HSPs can be iterated over by using @Spec.HitIterator@ and @Spec.HspIterator@.
 ..include:blast.h
 */
 
@@ -457,13 +458,8 @@ SEQAN_CHECKPOINT
 
 
 /**
-.Function.File#read:
+.Function.read:
 ..cat:Blast
-..summary:Reads a Blast report.
-..signature:read(file,blastReport,Blast())
-..param.file:A filestream containing the Blast report.
-..param.blastReport:A @Class.BlastReport@ object to be filled.
-..remarks:Hits and HSPs can be iterated over by using @Spec.HitIterator@ and @Spec.HspIterator@.
 */
 template<typename TFile, typename TBlastHsp, typename TInfoSpec>
 void 

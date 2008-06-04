@@ -217,12 +217,8 @@ goBegin(Iter<TBlastObject, SimpleBlastIterator<TIteratorSpec> >& it)
 /**
 .Function.goNext:
 ..cat:Blast
-..summary:Moves the iterator to the next hit or hsp.
-..signature:goNext(it)
-..param.it:A hit or hsp iterator.
 ...type:Spec.HitIterator
 ...type:Spec.HspIterator
-..returns:void
 ..remarks:This method does nothing if the iterator is already at the end.
 ..see:Function.goPrevious
 */
@@ -252,9 +248,8 @@ SEQAN_CHECKPOINT
 /**
 .Function.goPrevious:
 ..cat:Blast
-..summary:Moves the iterator to the preceding hit or hsp.
-..signature:goPrevious(it)
-..param.it:A hit or hsp iterator.
+..signature:goPrevious(iterator)
+..param.iterator:An iterator.
 ...type:Spec.HitIterator
 ...type:Spec.HspIterator
 ..returns:void
@@ -325,9 +320,8 @@ SEQAN_CHECKPOINT
 /**
 .Function.getValue:
 ..cat:Blast
-..summary:The hit the iterator points to.
-..signature:getValue(it)
-..param.it:A Blast search result iterator.
+..signature:getValue(object)
+..param.object:A Blast search result iterator.
 ...type:Spec.HitIterator
 ...type:Spec.HspIterator
 ..returns:A BlastHit or BlastHsp.
@@ -348,9 +342,8 @@ SEQAN_CHECKPOINT
 /**
 .Function.value:
 ..cat:Blast
-..summary:The hit the iterator points to.
-..signature:value(it)
-..param.it:A Blast search result iterator.
+..signature:value(object)
+..param.object:A Blast search result iterator.
 ...type:Spec.HitIterator
 ...type:Spec.HspIterator
 ..returns:A BlastHit or BlastHsp.
@@ -391,9 +384,8 @@ hostReport(Iter<TBlastReport, SimpleBlastIterator<HitIterator> > & it)
 /**
 .Function.atEnd:
 ..cat:Blast
-..summary:Determines whether the iterator is at the end or not.
-..signature:atEnd(it)
-..param.it:A hit or hsp iterator.
+..signature:atEnd(iterator)
+..param.iterator:An iterator.
 ...type:Spec.HitIterator
 ...type:Spec.HspIterator
 ..returns:True if the iterator is at the end, false otherwise
