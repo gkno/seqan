@@ -4,6 +4,9 @@
 
 #define TEST_PATH "projects/tests/blast/"
 #define LIB_PATH "projects/library/seqan/blast/"
+//#define TEST_PATH "C:\\seqan\\projects\\tests\\blast\\"
+//#define LIB_PATH "C:\\seqan\\projects\\library\\seqan\\blast\\"
+
 
 
 #include <seqan/file.h>
@@ -21,7 +24,7 @@
 #include <ctime>
 
 
-//#include "test_blast_calling.h"
+//#include "test_blast_library.h"
 #include "test_blast_parsing.h"
 
 using namespace std;
@@ -34,13 +37,26 @@ int main()
 {
 	SEQAN_TREPORT("TEST BEGIN")
 
-	//Test_BlastCalling();
-	//Test_BlastHsp<int>(); 
-	//Test_BlastSclGCoffee<int>();
 	Test_BlastStoreReport<int>();
-	//Test_BlastParsing<int>();
-	//debug::verifyCheckpoints("projects/library/seqan/blast/blast_parsing.h");
-	//debug::verifyCheckpoints("projects/tests/blast/test_blast_parsing.h");
+	Test_BlastStoreReportBasic<int>();
+	Test_BlastParsing<int>(BlastN());
+	Test_BlastParsing<int>(BlastP());
+	Test_BlastParsingBasic<int>(BlastN());
+	Test_BlastParsingBasic<int>(BlastP());
+	
+	debug::verifyCheckpoints(LIB_PATH "blast_parsing.h");
+	debug::verifyCheckpoints(LIB_PATH "blast_base.h");
+	debug::verifyCheckpoints(LIB_PATH "blast_report.h");
+	debug::verifyCheckpoints(LIB_PATH "blast_hit.h");
+	debug::verifyCheckpoints(LIB_PATH "blast_hsp.h");
+	debug::verifyCheckpoints(LIB_PATH "blast_stream_report.h");
+	debug::verifyCheckpoints(LIB_PATH "blast_stream_hit.h");
+
+	debug::verifyCheckpoints(LIB_PATH "blast_iterator.h");
+	debug::verifyCheckpoints(LIB_PATH "blast_hit_iterator.h");
+	debug::verifyCheckpoints(LIB_PATH "blast_hsp_iterator.h");
+	debug::verifyCheckpoints(LIB_PATH "blast_stream_hit_iterator.h");
+	debug::verifyCheckpoints(LIB_PATH "blast_stream_hsp_iterator.h");
 
 
 	SEQAN_TREPORT("TEST END")
