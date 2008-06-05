@@ -58,14 +58,14 @@ _getTupelString(TString const& str,
 	TWord endTupel = 0;
 	tupelString[tupelIndex] = 0;
 	for(;endTupel< (TWord) ktup;++endTupel) {
-		tupelString[tupelIndex] += (TWord) ((Byte) ((TAlphabet) str[endTupel])) * prod[endTupel];
+		tupelString[tupelIndex] += (TWord) (ordValue((TAlphabet) str[endTupel])) * prod[endTupel];
 	}
 	++tupelIndex;
 	for(;endTupel<len;++endTupel) {
 		tupelString[tupelIndex] = tupelString[tupelIndex - 1];
-		tupelString[tupelIndex] -= (TWord) ((Byte) ((TAlphabet) str[endTupel - ktup])) * prod[0];
+		tupelString[tupelIndex] -= (TWord) (ordValue((TAlphabet) str[endTupel - ktup])) * prod[0];
 		tupelString[tupelIndex] *= alphabet_size;
-		tupelString[tupelIndex] += (TWord) ((Byte) ((TAlphabet) str[endTupel]));
+		tupelString[tupelIndex] += (TWord) (ordValue((TAlphabet) str[endTupel]));
 		++tupelIndex;
 	}
 }

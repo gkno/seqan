@@ -46,7 +46,9 @@ _align_needleman_wunsch_trace(TAlign& align,
 
 
 	// TraceBack values
-	enum {Diagonal = 0, Horizontal = 1, Vertical = 2};
+	TTraceValue Diagonal = 0;
+	TTraceValue Horizontal = 1;
+	TTraceValue Vertical = 2;
 	
 	// Initialization
 	TId id1 = positionToId(const_cast<TStringSet&>(str), 0);
@@ -54,9 +56,9 @@ _align_needleman_wunsch_trace(TAlign& align,
 	TSize len1 = overallMaxIndex.first;
 	TSize len2 = overallMaxIndex.second;
 	if (len1 < length(str[0])) {
-		_align_trace_print(align, str, id1, len1, id2, len2, length(str[0]) - len1, (Byte) Horizontal);
+		_align_trace_print(align, str, id1, len1, id2, len2, length(str[0]) - len1, Horizontal);
 	} else if (len2 < length(str[1])) {
-		_align_trace_print(align, str, id1, len1, id2, len2, length(str[1]) - len2, (Byte) Vertical);
+		_align_trace_print(align, str, id1, len1, id2, len2, length(str[1]) - len2, Vertical);
 	}
 	TSize numRows = length(str[1]);
 		
@@ -65,29 +67,29 @@ _align_needleman_wunsch_trace(TAlign& align,
 	TTraceValue tvOld = tv;  // We need to know when the direction of the trace changes
 
 	TSize segLen = 1;
-	if (tv == (Byte) Diagonal) {
+	if (tv == Diagonal) {
 		--len1; --len2;
 	}
-	else if (tv == (Byte) Horizontal) --len1;
-	else if (tv == (Byte) Vertical) --len2;
+	else if (tv == Horizontal) --len1;
+	else if (tv == Vertical) --len2;
 
 	// Now follow the trace
 	do {
 		tv = getValue(trace, (len1-1)*numRows + (len2-1));
-		if (tv == (Byte) Diagonal) {
+		if (tv == Diagonal) {
 			if (tv != tvOld) {
 				_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
 				tvOld = tv; segLen = 1;
 			} else ++segLen;
 			--len1; --len2;
-		} else if (tv == (Byte) Horizontal) {
+		} else if (tv == Horizontal) {
 			//std::cout << '(' << ((*str)[0])[len1 - 1] << ',' << '-' << ')' << std::endl;
 			if (tv != tvOld) {
 				_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
 				tvOld = tv; segLen = 1;
 			} else ++segLen;
 			--len1;
-		} else if (tv == (Byte) Vertical) {
+		} else if (tv == Vertical) {
 			//std::cout << '(' << '-' << ',' << ((*str)[1])[len2-1] << ')' << std::endl;
 			if (tv != tvOld) {
 				_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
@@ -100,8 +102,8 @@ _align_needleman_wunsch_trace(TAlign& align,
 	_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
 
 	// Handle the remaining sequence
-	if (len1 != 0) _align_trace_print(align, str, (TId) id1, (TSize) 0, (TId) 0, (TSize) 0, (TSize) len1, (Byte) Horizontal);
-	else if (len2 != 0) _align_trace_print(align, str, (TId) 0, (TSize) 0, (TId) id2, (TSize) 0, (TSize) len2, (Byte) Vertical);
+	if (len1 != 0) _align_trace_print(align, str, (TId) id1, (TSize) 0, (TId) 0, (TSize) 0, (TSize) len1, Horizontal);
+	else if (len2 != 0) _align_trace_print(align, str, (TId) 0, (TSize) 0, (TId) id2, (TSize) 0, (TSize) len2, Vertical);
 }
 
 	
@@ -119,9 +121,12 @@ _align_needleman_wunsch(TTrace & trace,
 {
 	SEQAN_CHECKPOINT
 	typedef typename Value<TScore>::Type TScoreValue;
+	typedef typename Value<TTrace>::Type TTraceValue;
 
 	// TraceBack values
-	enum {Diagonal = 0, Horizontal = 1, Vertical = 2};
+	TTraceValue Diagonal = 0;
+	TTraceValue Horizontal = 1;
+	TTraceValue Vertical = 2;
 
 	TScore const & _sc = sc;
 
@@ -146,7 +151,6 @@ _align_needleman_wunsch(TTrace & trace,
 
 	// Classical DP
 	typedef typename Iterator<TTrace, Standard>::Type TTraceIter;
-	typedef typename Value<TTrace>::Type TTraceValue;
 	TTraceIter it = begin(trace, Standard() );
 	// Max values: overall.first = last column, overall.second = last row
 	TScoreValue infValue = -1 * (_getInfinity<TScoreValue>() / 2);
@@ -178,12 +182,12 @@ _align_needleman_wunsch(TTrace & trace,
 			if (*coit >= vertiVal)
 			{
 				max_hori_verti = *coit;
-				tv_hori_verti = (Byte) Horizontal;
+				tv_hori_verti = Horizontal;
 			}
 			else
 			{
 				max_hori_verti = vertiVal;
-				tv_hori_verti = (Byte) Vertical;
+				tv_hori_verti = Vertical;
 			}
 			max_hori_verti += gap;
 
@@ -192,7 +196,7 @@ _align_needleman_wunsch(TTrace & trace,
 
 			if (vertiVal >= max_hori_verti)
 			{
-				*it = (Byte) Diagonal;
+				*it = Diagonal;
 				++it;
 			}
 			else

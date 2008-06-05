@@ -1504,10 +1504,10 @@ void Test_Hmm() {
 	// Add state2
 	String<TProbability> emis;
 	resize(emis, alph_size);
-	value(emis, (Byte) dnaA) = 0.5;
-	value(emis, (Byte) dnaC) = 0.5;
-	value(emis, (Byte) dnaG) = 0.0;
-	value(emis, (Byte) dnaT) = 0.0;
+	value(emis, ordValue(dnaA)) = 0.5;
+	value(emis, ordValue(dnaC)) = 0.5;
+	value(emis, ordValue(dnaG)) = 0.0;
+	value(emis, ordValue(dnaT)) = 0.0;
 	TVertexDescriptor state2 = addVertex(hmm, emis);
 	SEQAN_TASSERT(numVertices(hmm) == 2)
 	SEQAN_TASSERT(numEdges(hmm) == 0)

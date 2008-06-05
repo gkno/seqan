@@ -39,9 +39,11 @@ _align_smith_waterman_island(TTrace& trace,
 							 TIslandIndex& islandIndex)
 {
 	SEQAN_CHECKPOINT
+	typedef typename Value<TTrace>::Type TTraceValue;
+	
 	// TraceBack values for Smith Waterman
-	enum {Diagonal = 0, Horizontal = 1, Vertical = 2, Stop = 12};
-
+	TTraceValue Diagonal = 0; TTraceValue Horizontal = 1; TTraceValue Vertical = 2; TTraceValue Stop = 12;
+	
 	// The DP Matrices
 	typedef typename Value<TStringSet>::Type TString;
 	typedef typename Size<TString>::Type TSize;
@@ -70,7 +72,6 @@ _align_smith_waterman_island(TTrace& trace,
 	fill(mat, (len2 + 1), 0);
 	fill(horizontal, len2, gapOpen);
 	resize(trace, len1*len2);
-	typedef typename Value<TTrace>::Type TTraceValue;
 	TTraceValue tvMat=0, tvHorizontal=0, tvVertical=0;
 	fill(islandMat, (len2 + 1), 0);
 	fill(islandHorizontal, len2, 0);
@@ -95,10 +96,10 @@ _align_smith_waterman_island(TTrace& trace,
 			if (value(previousMatIt) + gapOpen > vert + gap) {
 				vert = value(previousMatIt) + gapOpen;
 				islandVert = value(previousIslandMatIt);
-				tvVertical = (Byte) Diagonal;
+				tvVertical =  Diagonal;
 			} else {
 				vert = vert + gap;
-				tvVertical = (Byte) Vertical;
+				tvVertical =  Vertical;
 			}
 			if (vert < 0) islandVert = 0;
 
@@ -107,21 +108,21 @@ _align_smith_waterman_island(TTrace& trace,
 			if (value(matIt) + gapOpen > value(horizontalIt) + gap) {
 				value(horizontalIt) = value(matIt) + gapOpen;
 				value(islandHorizontalIt) = value(previousIslandMatIt);
-				tvHorizontal = (Byte) Diagonal;
+				tvHorizontal =  Diagonal;
 			} else {
 				value(horizontalIt) = value(horizontalIt) + gap;
-				tvHorizontal = (Byte) Horizontal;
+				tvHorizontal =  Horizontal;
 			}
 			if (value(horizontalIt) < 0) value(islandHorizontalIt) = 0;
 	
 			// Get the new maximum for mat
 			
 			TScoreValue tmp = diagValMat + score(const_cast<TScore&>(sc), str1[col-1], str2[row-1]);
-			tvMat = (Byte) Diagonal;
+			tvMat =  Diagonal;
 			if (0 >= tmp) {
 				tmp = 0;
 				value(islandMatIt) = 0;
-				tvMat = (Byte) Stop;
+				tvMat =  Stop;
 			} else {
 				if (value(previousIslandMatIt) == 0) {
 					value(islandMatIt) = value(islandMax, 0) + 1;
@@ -132,12 +133,12 @@ _align_smith_waterman_island(TTrace& trace,
 			if (vert > tmp) {
 				tmp = vert;
 				value(islandMatIt) = islandVert;
-				tvMat = (Byte) Vertical;
+				tvMat =  Vertical;
 			}
 			if (value(horizontalIt) > tmp) {
 				tmp = value(horizontalIt);
 				value(islandMatIt) = value(islandHorizontalIt);
-				tvMat = (Byte) Horizontal;
+				tvMat =  Horizontal;
 			}
 
 			// Assign the new diagonal value
@@ -157,30 +158,30 @@ _align_smith_waterman_island(TTrace& trace,
 			}
 
 			// Assign the right trace value
-			if (tvMat == (Byte) Stop) {
+			if (tvMat ==  Stop) {
 				assignValue(it, 12);
-			} else if (tvMat == (Byte) Diagonal) {
-				if (tvHorizontal == (Byte) Diagonal) {
-					if (tvVertical == (Byte) Diagonal) assignValue(it, 0);
+			} else if (tvMat ==  Diagonal) {
+				if (tvHorizontal ==  Diagonal) {
+					if (tvVertical ==  Diagonal) assignValue(it, 0);
 					else assignValue(it, 1);
-				} else if (tvHorizontal == (Byte) Horizontal) {
-					if (tvVertical == (Byte) Diagonal) assignValue(it, 2);
+				} else if (tvHorizontal ==  Horizontal) {
+					if (tvVertical ==  Diagonal) assignValue(it, 2);
 					else assignValue(it, 3);
 				}
-			} else if (tvMat == (Byte) Horizontal) {
-				if (tvHorizontal == (Byte) Diagonal) {
-					if (tvVertical == (Byte) Diagonal) assignValue(it, 4);
+			} else if (tvMat ==  Horizontal) {
+				if (tvHorizontal ==  Diagonal) {
+					if (tvVertical ==  Diagonal) assignValue(it, 4);
 					else assignValue(it, 5);
-				} else if (tvHorizontal == (Byte) Horizontal) {
-					if (tvVertical == (Byte) Diagonal) assignValue(it, 6);
+				} else if (tvHorizontal ==  Horizontal) {
+					if (tvVertical ==  Diagonal) assignValue(it, 6);
 					else assignValue(it, 7);
 				}
-			} else if (tvMat == (Byte) Vertical) {
-				if (tvHorizontal == (Byte) Diagonal) {
-					if (tvVertical == (Byte) Diagonal) assignValue(it, 8);
+			} else if (tvMat ==  Vertical) {
+				if (tvHorizontal ==  Diagonal) {
+					if (tvVertical ==  Diagonal) assignValue(it, 8);
 					else assignValue(it, 9);
-				} else if (tvHorizontal == (Byte) Horizontal) {
-					if (tvVertical == (Byte) Diagonal) assignValue(it, 10);
+				} else if (tvHorizontal ==  Horizontal) {
+					if (tvVertical ==  Diagonal) assignValue(it, 10);
 					else assignValue(it, 11);
 				}
 			}

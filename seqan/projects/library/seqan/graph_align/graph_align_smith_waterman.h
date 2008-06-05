@@ -46,7 +46,7 @@ _align_smith_waterman_trace(TAlign& align,
 	typedef typename Id<TStringSet>::Type TId;
 
 	// TraceBack values for Gotoh
-	enum {Diagonal = 0, Horizontal = 1, Vertical = 2, Stop = 12};
+	TTraceValue Diagonal = 0; TTraceValue Horizontal = 1; TTraceValue Vertical = 2; TTraceValue Stop = 12;
 
 	TId id1 = positionToId(const_cast<TStringSet&>(str), 0);
 	TId id2 = positionToId(const_cast<TStringSet&>(str), 1);	 
@@ -54,36 +54,32 @@ _align_smith_waterman_trace(TAlign& align,
 	TSize len2 = best_row;
 	if ((best_col == 0) || (best_row == 0)) return;
 	if (len1 < length(str[0])) {
-		_align_trace_print(align, str, id1, len1, id2, len2, length(str[0]) - len1, (Byte) Horizontal);
+		_align_trace_print(align, str, id1, len1, id2, len2, length(str[0]) - len1, Horizontal);
 	}
 	if (len2 < length(str[1])) {
-		_align_trace_print(align, str, id1, len1, id2, len2, length(str[1]) - len2, (Byte) Vertical);
+		_align_trace_print(align, str, id1, len1, id2, len2, length(str[1]) - len2, Vertical);
 	}
 	TSize numRows = length(str[1]);
 
 	// Initialize everything	
 	TTraceValue nextTraceValue = getValue(trace, (len1 - 1)*numRows + (len2 - 1));
 	TTraceValue tv = 0;
-	switch( (Byte) initialDir) {
-		case Diagonal:
-			if ((Byte) nextTraceValue / (Byte) 4 == 0) tv = (Byte) Diagonal;
-			else if ((Byte) nextTraceValue / (Byte) 4 == 1) tv = (Byte) Horizontal;
-			else tv = (Byte) Vertical;
-			break;
-		case Horizontal:
-			if (((Byte) nextTraceValue / (Byte) 2) % 2 == 0) {
-			  _align_trace_print(align, str, id1, --len1, id2, len2, (TSize) 1, (Byte) Horizontal);
-			  tv = (Byte) Diagonal;
-			}
-			else tv = (Byte) Horizontal;
-			break;
-		case Vertical:
-			if ( (Byte) nextTraceValue % 2 == 0) {
-			  _align_trace_print(align, str, id1, len1, id2, --len2, (TSize) 1, (Byte) Vertical);
-			  tv = (Byte) Diagonal;
-			}
-			else tv = (Byte) Vertical;
-			break;
+	if (initialDir == Diagonal) {
+		if (((unsigned char) nextTraceValue >> 2) == 0) tv = Diagonal;
+		else if (((unsigned char) nextTraceValue >> 2) == 1) tv = Horizontal;
+		else tv = Vertical;
+	} else if (initialDir == Horizontal) {
+		if ((((unsigned char) nextTraceValue >> 1) % (unsigned char) 2) == 0) {
+		  _align_trace_print(align, str, id1, --len1, id2, len2, (TSize) 1, Horizontal);
+		  tv = Diagonal;
+		}
+		else tv = Horizontal;
+	} else if (initialDir == Vertical) {
+		if ((unsigned char) nextTraceValue % (unsigned char) 2 == 0) {
+		  _align_trace_print(align, str, id1, len1, id2, --len2, (TSize) 1, Vertical);
+		  tv = Diagonal;
+		}
+		else tv = Vertical;
 	}
 	TSize segLen = 0;
 	TTraceValue tvOld = tv;
@@ -91,27 +87,22 @@ _align_smith_waterman_trace(TAlign& align,
 	// Now follow the trace
 	do {
 		nextTraceValue = getValue(trace, (len1 - 1)*numRows + (len2 - 1));
-		if ((Byte) nextTraceValue == Stop) break;
+		if (nextTraceValue == Stop) break;
 		if (!empty(forbidden)) assignValue(forbidden, (len1 - 1)*numRows + (len2 - 1), true);
-		switch( (Byte) tv) {
-		  case Diagonal:
-			  if ( (Byte) nextTraceValue / (Byte) 4 == 0) tv = (Byte) Diagonal;
-			  else if ((Byte) nextTraceValue / (Byte) 4 == 1) tv = (Byte) Horizontal;
-			  else tv = (Byte) Vertical;
-			  break;
-		  case Horizontal:
-			  if (((Byte) nextTraceValue / (Byte) 2) % 2 == 0) tv = (Byte) Diagonal;
-			  else tv = (Byte) Horizontal;
-			  break;
-		  case Vertical:
-			  if ( (Byte) nextTraceValue % (Byte) 2 == 0) tv = (Byte) Diagonal;
-			  else tv = (Byte) Vertical;
-			  break;
-	  }
-	  switch( (Byte) tv) {
-		case Diagonal: 
+		if (tv == Diagonal) {
+			if (((unsigned char) nextTraceValue >> 2) == 0) tv = Diagonal;
+			else if (((unsigned char) nextTraceValue >> 2) == 1) tv = Horizontal;
+			else tv = Vertical;
+		} else if (tv == Horizontal) {
+			if ((((unsigned char) nextTraceValue >> 1) % (unsigned char) 2) == 0) tv = Diagonal;
+			else tv = Horizontal;
+		} else if (tv == Vertical) {
+			if ((unsigned char) nextTraceValue % (unsigned char) 2 == 0) tv = Diagonal;
+			else tv = Vertical;
+		}
+		if (tv == Diagonal) {
 			if (tv != tvOld) {
-				if (tvOld == (Byte) Vertical) --len2;
+				if (tvOld == Vertical) --len2;
 				else --len1;
 				_align_trace_print(align, str, id1, len1, id2, len2, ++segLen, tvOld);
 				tvOld = tv; segLen = 0;
@@ -119,13 +110,12 @@ _align_smith_waterman_trace(TAlign& align,
 				++segLen;
 				--len1; --len2;
 			}
-			break;
-		case Horizontal:
+		} else if (tv == Horizontal) {
 			if (tv != tvOld) {
 				_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
-				if (((Byte) nextTraceValue / (Byte) 2) % 2 == 0) {
-					_align_trace_print(align, str, id1, --len1, id2, len2, (TSize) 1, (Byte) Horizontal);
-					tv = (Byte) Diagonal; segLen = 0;
+				if ((((unsigned char) nextTraceValue >> 1) % (unsigned char) 2) == 0) {
+					_align_trace_print(align, str, id1, --len1, id2, len2, (TSize) 1, Horizontal);
+					tv = Diagonal; segLen = 0;
 				} else {
 					tvOld = tv; segLen = 1;
 					--len1;
@@ -134,13 +124,12 @@ _align_smith_waterman_trace(TAlign& align,
 				++segLen;
 				--len1;
 			}
-			break;
-		case Vertical:
+		} else if (tv == Vertical) {
 			if (tv != tvOld) {
 				_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
-				if ( (Byte) nextTraceValue % (Byte) 2 == 0) {
-					_align_trace_print(align, str, id1, len1, id2, --len2, (TSize) 1, (Byte) Vertical);
-					tv = (Byte) Diagonal; segLen = 0;
+				if ((unsigned char) nextTraceValue % (unsigned char) 2 == 0) {
+					_align_trace_print(align, str, id1, len1, id2, --len2, (TSize) 1, Vertical);
+					tv = Diagonal; segLen = 0;
 				} else {
 					tvOld = tv; segLen = 1;
 					--len2;
@@ -149,15 +138,14 @@ _align_smith_waterman_trace(TAlign& align,
 				++segLen;
 				--len2;
 			}
-			break;
-	  }
+		}
 	} while ((len1 != 0) && (len2 !=0));
 	// Process left-overs
 	if (segLen) _align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
 
 	// Handle the remaining sequence
-	if (len1 != 0) _align_trace_print(align, str, (TId) id1, (TSize) 0, (TId) 0, (TSize) 0, (TSize) len1, (Byte) Horizontal);
-	if (len2 != 0) _align_trace_print(align, str, (TId) 0, (TSize) 0, (TId) id2, (TSize) 0, (TSize) len2, (Byte) Vertical);
+	if (len1 != 0) _align_trace_print(align, str, (TId) id1, (TSize) 0, (TId) 0, (TSize) 0, (TSize) len1, Horizontal);
+	if (len2 != 0) _align_trace_print(align, str, (TId) 0, (TSize) 0, (TId) id2, (TSize) 0, (TSize) len2, Vertical);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -173,8 +161,10 @@ _align_smith_waterman(TTrace& trace,
 					  TForbidden& forbidden)
 {
 	SEQAN_CHECKPOINT
+	typedef typename Value<TTrace>::Type TTraceValue;
+	
 	// TraceBack values for Smith Waterman
-	enum {Diagonal = 0, Horizontal = 1, Vertical = 2, Stop = 12};
+	TTraceValue Diagonal = 0; TTraceValue Horizontal = 1; TTraceValue Vertical = 2; TTraceValue Stop = 12;
 
 	// The DP Matrix for diagonal walks
 	typedef typename Value<TScore>::Type TScoreValue;
@@ -197,14 +187,13 @@ _align_smith_waterman(TTrace& trace,
 	resize(mat, (len2+1));   // One column for the diagonal matrix
 	resize(horizontal, (len2+1));   // One column for the horizontal matrix
 	resize(trace, len1*len2);
-	typedef typename Value<TTrace>::Type TTraceValue;
 	TTraceValue tvMat=0, tvHorizontal=0, tvVertical=0;
 
 	// Record the max score
 	TScoreValue score_max = 0;
 	best_row = 0;
 	best_col = 0;
-	initialDir = (Byte) Stop;
+	initialDir = Stop;
 	bool emptyForbidden = empty(forbidden);
 
 	
@@ -224,42 +213,42 @@ _align_smith_waterman(TTrace& trace,
 			if ((!emptyForbidden) && (getValue(forbidden, (col-1) * len2 + (row-1)) == true)) {
 				tmp = 0;
 				vert = 0;
-				tvMat = (Byte) Stop;
+				tvMat =  Stop;
 				assignValue(horizontal, row, 0);
 			} else {
 				// Get the new maximum for vertical
 				if ((tmp = getValue(mat, row - 1) + gapOpen) > vert + gap) {
 					vert = tmp;
-					tvVertical = (Byte) Diagonal;
+					tvVertical =  Diagonal;
 				} else {
 					vert = vert + gap;
-					tvVertical = (Byte) Vertical;
+					tvVertical =  Vertical;
 				}
 	
 				// Get the new maximum for horizontal
 				if ((tmp = getValue(mat, row) + gapOpen) > getValue(horizontal, row) + gap) {
 					assignValue(horizontal, row, tmp);
-					tvHorizontal = (Byte) Diagonal;
+					tvHorizontal =  Diagonal;
 				} else {
 					assignValue(horizontal, row, getValue(horizontal, row) + gap);
-					tvHorizontal = (Byte) Horizontal;
+					tvHorizontal =  Horizontal;
 				}
 	
 				// Get the new maximum for mat
 				TScoreValue sc_ = score(const_cast<TScore&>(sc), str1[col-1], str2[row-1]);
 				tmp = diagValMat + sc_;
-				tvMat = (Byte) Diagonal;
+				tvMat =  Diagonal;
 				if (vert > tmp) {
 					tmp = vert;
-					tvMat = (Byte) Vertical;
+					tvMat =  Vertical;
 				}
 				if (getValue(horizontal, row) > tmp) {
 					tmp = getValue(horizontal,row);
-					tvMat = (Byte) Horizontal;
+					tvMat =  Horizontal;
 				}
 				if (0 >= tmp) {
 					tmp = 0;
-					tvMat = (Byte) Stop;
+					tvMat =  Stop;
 				}
 			}
 
@@ -272,40 +261,40 @@ _align_smith_waterman(TTrace& trace,
 				best_row = row;
 				best_col = col;
 				score_max = tmp;
-				initialDir = (Byte) Diagonal;
+				initialDir =  Diagonal;
 				if (getValue(horizontal, row) ==  tmp) {
-					initialDir = (Byte) Horizontal;
+					initialDir =  Horizontal;
 				}
 				else if (vert == tmp) {
-					initialDir = (Byte) Vertical;
+					initialDir =  Vertical;
 				}
 			}
 
 			// Assign the right trace value
-			if (tvMat == (Byte) Stop) {
+			if (tvMat ==  Stop) {
 				assignValue(it, 12);
-			} else if (tvMat == (Byte) Diagonal) {
-				if (tvHorizontal == (Byte) Diagonal) {
-					if (tvVertical == (Byte) Diagonal) assignValue(it, 0);
+			} else if (tvMat ==  Diagonal) {
+				if (tvHorizontal ==  Diagonal) {
+					if (tvVertical ==  Diagonal) assignValue(it, 0);
 					else assignValue(it, 1);
-				} else if (tvHorizontal == (Byte) Horizontal) {
-					if (tvVertical == (Byte) Diagonal) assignValue(it, 2);
+				} else if (tvHorizontal ==  Horizontal) {
+					if (tvVertical ==  Diagonal) assignValue(it, 2);
 					else assignValue(it, 3);
 				}
-			} else if (tvMat == (Byte) Horizontal) {
-				if (tvHorizontal == (Byte) Diagonal) {
-					if (tvVertical == (Byte) Diagonal) assignValue(it, 4);
+			} else if (tvMat ==  Horizontal) {
+				if (tvHorizontal ==  Diagonal) {
+					if (tvVertical ==  Diagonal) assignValue(it, 4);
 					else assignValue(it, 5);
-				} else if (tvHorizontal == (Byte) Horizontal) {
-					if (tvVertical == (Byte) Diagonal) assignValue(it, 6);
+				} else if (tvHorizontal ==  Horizontal) {
+					if (tvVertical ==  Diagonal) assignValue(it, 6);
 					else assignValue(it, 7);
 				}
-			} else if (tvMat == (Byte) Vertical) {
-				if (tvHorizontal == (Byte) Diagonal) {
-					if (tvVertical == (Byte) Diagonal) assignValue(it, 8);
+			} else if (tvMat ==  Vertical) {
+				if (tvHorizontal ==  Diagonal) {
+					if (tvVertical ==  Diagonal) assignValue(it, 8);
 					else assignValue(it, 9);
-				} else if (tvHorizontal == (Byte) Horizontal) {
-					if (tvVertical == (Byte) Diagonal) assignValue(it, 10);
+				} else if (tvHorizontal ==  Horizontal) {
+					if (tvVertical ==  Diagonal) assignValue(it, 10);
 					else assignValue(it, 11);
 				}
 			}

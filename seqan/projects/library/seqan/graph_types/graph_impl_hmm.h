@@ -848,7 +848,7 @@ getEmissionProbability(Graph<Hmm<TAlphabet, TCargo, TSpec> > const& g,
 	typedef typename Size<TAlphabet>::Type TSize;
 	TSize alph_size = ValueSize<TAlphabet>::VALUE;
 
-	return getValue(g.data_emission, state * alph_size + (Byte) symbol);
+	return getValue(g.data_emission, state * alph_size + ordValue(symbol));
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -878,7 +878,7 @@ emissionProbability(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g,
 	typedef typename Size<TAlphabet>::Type TSize;
 	TSize alph_size = ValueSize<TAlphabet>::VALUE;
 
-	return value(g.data_emission, state * alph_size + (Byte) symbol);
+	return value(g.data_emission, state * alph_size + ordValue(symbol));
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -910,7 +910,7 @@ assignEmissionProbability(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g,
 	typedef typename Size<TAlphabet>::Type TSize;
 	TSize alph_size = ValueSize<TAlphabet>::VALUE;
 
-	value(g.data_emission, state * alph_size + (Byte) symbol) = (TCargo) eProb;
+	value(g.data_emission, state * alph_size + ordValue(symbol)) = (TCargo) eProb;
 }
 
 

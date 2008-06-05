@@ -811,10 +811,10 @@ void Test_HmmAlgorithms() {
 	emissionProbability(hmm, state1, dnaT) = 0.3;
 	String<TProbability> emis;
 	resize(emis, alph_size);
-	value(emis, (Byte) dnaA) = 0.5;
-	value(emis, (Byte) dnaC) = 0.5;
-	value(emis, (Byte) dnaG) = 0.0;
-	value(emis, (Byte) dnaT) = 0.0;
+	value(emis, ordValue(dnaA)) = 0.5;
+	value(emis, ordValue(dnaC)) = 0.5;
+	value(emis, ordValue(dnaG)) = 0.0;
+	value(emis, ordValue(dnaT)) = 0.0;
 	TVertexDescriptor state2 = addVertex(hmm, emis);
 	TVertexDescriptor state3 = addVertex(hmm, emis);
 	assignEmissionProbability(hmm, state3, dnaA, 0.3);

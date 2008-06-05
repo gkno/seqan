@@ -248,7 +248,7 @@ consensusAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 				}
 				// Coverage
 				value(coverage, i) = activeRows;
-				if ((counterValues[i])[index_max] > (activeRows - total_count)) value(gappedConsensus, i) = TAlphabet((Byte) index_max);
+				if ((counterValues[i])[index_max] > (activeRows - total_count)) value(gappedConsensus, i) = TAlphabet((TSize) index_max);
 				else value(gappedConsensus, i) = gapChar;
 			}
 		}

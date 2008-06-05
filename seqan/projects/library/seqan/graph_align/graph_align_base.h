@@ -79,18 +79,6 @@ template <> struct ValueSize< TraceBack > { enum { VALUE = 3 }; };
 template <> struct BitsPerValue< TraceBack > { enum { VALUE = 2 }; };
 
 //////////////////////////////////////////////////////////////////////////////
-
-template <>
-struct CompareType<TraceBack, Byte> { typedef TraceBack Type; };
-inline void assign(TraceBack & target, Byte const c_source)
-{
-SEQAN_CHECKPOINT
-	target.value = _Translate_Table_Byte_2_TraceBack<>::VALUE[c_source];
-}
-
-
-
-//////////////////////////////////////////////////////////////////////////////
 // Alignment: Extended Traceback Alphabet (Gotoh)
 //////////////////////////////////////////////////////////////////////////////
 
@@ -148,18 +136,6 @@ typedef SimpleType<unsigned char, _TraceBackGotoh> TraceBackGotoh;
 template <> struct ValueSize< TraceBackGotoh > { enum { VALUE = 13 }; };
 template <> struct BitsPerValue< TraceBackGotoh > { enum { VALUE = 4 }; };
 
-//////////////////////////////////////////////////////////////////////////////
-
-template <>
-struct CompareType<TraceBackGotoh, Byte> { typedef TraceBackGotoh Type; };
-inline void assign(TraceBackGotoh & target, Byte const c_source)
-{
-SEQAN_CHECKPOINT
-	target.value = _Translate_Table_Byte_2_TraceBackGotoh<>::VALUE[c_source];
-}
-
-
-
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -180,11 +156,11 @@ _align_trace_print(TFile& file,
 				   TTraceValue const tv)
 {
 	// TraceBack values
-	enum {Diagonal = 0, Horizontal = 1, Vertical = 2};
+	TTraceValue Diagonal = 0; TTraceValue Horizontal = 1; TTraceValue Vertical = 2;
 
 	if (segLen == 0) return;
 
-	if (tv == (Byte) Horizontal) {
+	if (tv == Horizontal) {
 		for (int i = pos1 + segLen - 1; i>= (int) pos1;--i) {
 			_streamPut(file, '(');
 			_streamPut(file, (str[0])[i]);
@@ -194,7 +170,7 @@ _align_trace_print(TFile& file,
 			_streamPut(file, '\n');
 		}
 	}
-	else if (tv == (Byte) Vertical) {
+	else if (tv == Vertical) {
 		for (int i = pos2 + segLen - 1; i>= (int) pos2;--i) {
 			_streamPut(file, '(');
 			_streamPut(file, gapValue<char>());
@@ -204,7 +180,7 @@ _align_trace_print(TFile& file,
 			_streamPut(file, '\n');
 		}
 	}
-	else if (tv == (Byte) Diagonal) {
+	else if (tv == Diagonal) {
 		int j = pos2 + segLen - 1;
 		for (int i = pos1 + segLen - 1; i>= (int) pos1;--i) {
 			_streamPut(file, '(');
@@ -235,13 +211,13 @@ _align_trace_print(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	SEQAN_CHECKPOINT
 
 	// TraceBack values
-	enum {Diagonal = 0, Horizontal = 1, Vertical = 2};
+	TTraceValue Diagonal = 0; TTraceValue Horizontal = 1; TTraceValue Vertical = 2;
 
 	if (segLen == 0) return;
 
-	if (tv == (Byte) Horizontal) addVertex(g, id1, pos1, segLen);
-	else if (tv == (Byte) Vertical) addVertex(g, id2, pos2, segLen);
-	else if (tv == (Byte) Diagonal) addEdge(g, addVertex(g, id1, pos1, segLen), addVertex(g, id2, pos2, segLen));
+	if (tv == Horizontal) addVertex(g, id1, pos1, segLen);
+	else if (tv == Vertical) addVertex(g, id2, pos2, segLen);
+	else if (tv == Diagonal) addEdge(g, addVertex(g, id1, pos1, segLen), addVertex(g, id2, pos2, segLen));
 }
 
 
@@ -261,15 +237,15 @@ _align_trace_print(String<TFragment>& matches,
 	SEQAN_CHECKPOINT
 
 	// TraceBack values
-	enum {Diagonal = 0, Horizontal = 1, Vertical = 2};
-
+	TTraceValue Diagonal = 0; TTraceValue Horizontal = 1; TTraceValue Vertical = 2;
+	
 	if (seqLen == 0) return;
 
-	if (tv == (Byte) Horizontal) {
+	if (tv == Horizontal) {
 		// Nop, no match
-	} else if (tv == (Byte) Vertical) {
+	} else if (tv == Vertical) {
 		// Nop, no match
-	} else if (tv == (Byte) Diagonal) {
+	} else if (tv == Diagonal) {
 		appendValue(matches, TFragment(id1, pos1, id2, pos2, seqLen));
 	}
 }
@@ -293,8 +269,8 @@ _align_trace_print(String<String<TVertexDescriptor, TSpec> >& nodeString,
 	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
 
 	// TraceBack values
-	enum {Diagonal = 0, Horizontal = 1, Vertical = 2};
-
+	TTraceValue Diagonal = 0; TTraceValue Horizontal = 1; TTraceValue Vertical = 2;
+	
 	if (segLen == 0) return;
 	// Number of vertex descriptors in the first string at any position (e.g., group of 5 sequences = group of 5 vertex descriptors)
 	TSize len1 = length(getValue(getValue(str,0), 0));
@@ -305,7 +281,7 @@ _align_trace_print(String<String<TVertexDescriptor, TSpec> >& nodeString,
 	TSize index = length(nodeString);
 	resize(nodeString, index + segLen);
 
-	if (tv == (Byte) Horizontal) {
+	if (tv == Horizontal) {
 		for (int i = pos1 + segLen - 1; i>= (int) pos1;--i) {
 			fill(value(nodeString, index), len1 + len2, nilVertex);
 			TStringIter it = begin(value(nodeString, index));
@@ -316,7 +292,7 @@ _align_trace_print(String<String<TVertexDescriptor, TSpec> >& nodeString,
 			++index;
 		}
 	}
-	else if (tv == (Byte) Vertical) {
+	else if (tv == Vertical) {
 		for (int i = pos2 + segLen - 1; i>= (int) pos2;--i) {
 			fill(value(nodeString, index), len1 + len2, nilVertex);
 			TStringIter it = begin(value(nodeString, index));
@@ -328,7 +304,7 @@ _align_trace_print(String<String<TVertexDescriptor, TSpec> >& nodeString,
 			++index;
 		}
 	}
-	else if (tv == (Byte) Diagonal) {
+	else if (tv == Diagonal) {
 		int j = pos2 + segLen - 1;
 		for (int i = pos1 + segLen - 1; i>= (int) pos1;--i) {
 			resize(value(nodeString, index), len1 + len2);
