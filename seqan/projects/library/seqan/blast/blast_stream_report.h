@@ -46,12 +46,10 @@ class BlastReport<TBlastHsp, StreamReport<TFile> >
 			next_report_pos = other.next_report_pos;
 		}
 
-		BlastReport(TFile file)
-		{
-		SEQAN_CHECKPOINT
-			read(file,*this, Blast());
-	
-		}
+		//BlastReport(TFile file)
+		//{
+		//	read(file,*this, Blast());
+		//}
 
 		~BlastReport()
 		{

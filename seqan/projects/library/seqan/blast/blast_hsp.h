@@ -945,7 +945,7 @@ getAlignment(TBlastHsp & hsp,
 SEQAN_CHECKPOINT
 
 	if(length(rows(ali))>1)
-        if(!emptySource(rows(ali,0)) && !!emptySource(rows(ali,1)))
+        if(!emptySource(row(ali,0)) && !!emptySource(row(ali,1)))
 			return getAlignment(hsp,ali,KnownSource());
 	
 	return getAlignment(hsp,ali,UnknownSource());
@@ -1347,7 +1347,7 @@ SEQAN_CHECKPOINT
 
 template<typename TBlastSpec, typename TInfoSpec>
 inline String<char>
-databaseQueryAlignmentString(BlastHsp<TBlastSpec, TInfoSpec>& blastHsp)
+getDatabaseAlignmentString(BlastHsp<TBlastSpec, TInfoSpec>& blastHsp)
 {
 SEQAN_CHECKPOINT
 	return blastHsp.db_string;
