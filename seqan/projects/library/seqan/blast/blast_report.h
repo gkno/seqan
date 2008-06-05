@@ -97,7 +97,7 @@ class BlastReport<TBlastHsp, StoreReport<FullInfo> >
 		BlastReport(BlastReport const& other)
 		{
 		SEQAN_CHECKPOINT
-			hits = other.hits;
+			assign(hits,other.hits);
 			query_name = other.query_name;
 			db_name = other.db_name;
 			next_report = other.next_report;
@@ -119,7 +119,7 @@ class BlastReport<TBlastHsp, StoreReport<FullInfo> >
 		BlastReport & operator = (BlastReport const& other)
 		{
 		SEQAN_CHECKPOINT
-			hits = other.hits;
+			assign(hits,other.hits);
 			query_name = other.query_name;
 			db_name = other.db_name;
 
@@ -135,31 +135,30 @@ class BlastReport<TBlastHsp, StoreReport<FullInfo> >
 			gapped_lambda = other.gapped_lambda;
 			gapped_k = other.gapped_k;
 			gapped_h = other.gapped_h;
+			return *this;
 		}
 
-		BlastReport(const char * file_name,
-					double mineval = -1.0) // -1 => alle
-		{
-		SEQAN_CHECKPOINT
-			min_expect = mineval;
-			std::fstream strm; 
-			strm.open(file_name,::std::ios_base::in | ::std::ios_base::binary);
-			read(strm, *this, Blast());
-			strm.close();
+		//BlastReport(const char * file_name,
+		//			double mineval = -1.0) // -1 => alle
+		//{
+		//	min_expect = mineval;
+		//	std::fstream strm; 
+		//	strm.open(file_name,::std::ios_base::in | ::std::ios_base::binary);
+		//	read(strm, *this, Blast());
+		//	strm.close();
 
-		}
+		//}
 
-		template<typename TFile>
-		BlastReport(TFile & file,
-					double mineval = -1.0) // -1 => alle
-		{
-		SEQAN_CHECKPOINT
-			min_expect = mineval;
-//			strm.open(file_name.c_str(),ios_base::in | ios_base::binary);
-			read(file, *this, Blast());
-//			strm.close();
-
-		}
+//		template<typename TFile>
+//		BlastReport(TFile & file,
+//					double mineval = -1.0) // -1 => alle
+//		{
+//			min_expect = mineval;
+////			strm.open(file_name.c_str(),ios_base::in | ios_base::binary);
+//			read(file, *this, Blast());
+////			strm.close();
+//
+//		}
 
 		~BlastReport()
 		{
@@ -291,39 +290,46 @@ class BlastReport<TBlastHsp, StoreReport<BasicInfo> >
 
 		BlastReport()
 		{
-		SEQAN_CHECKPOINT
 			next_report = true;
 		}
 
 		BlastReport(BlastReport const& other)
 		{
 		SEQAN_CHECKPOINT
-			hits = other.hits;
+			assign(hits,other.hits);
 			query_name = other.query_name;
 			db_name = other.db_name;
 			next_report = other.next_report;
 		}
 
-		BlastReport(const char * file_name)
+		BlastReport & operator = (BlastReport const& other)
 		{
 		SEQAN_CHECKPOINT
-			std::fstream strm; 
-		strm.open(file_name,::std::ios_base::in |::std::ios_base::binary);
-			read(strm, *this, Blast());
-			strm.close();
-
+			assign(hits,other.hits);
+			query_name = other.query_name;
+			db_name = other.db_name;
+			next_report = other.next_report;
+			return *this;
 		}
 
-		template<typename TFile>
-		BlastReport(TFile & file)
-		{
-		SEQAN_CHECKPOINT
+//		BlastReport(const char * file_name)
+//		{
 //			std::fstream strm; 
-			//strm.open(file_name,ios_base::in |ios_base::binary);
-			read(file, *this, Blast());
+//		strm.open(file_name,::std::ios_base::in |::std::ios_base::binary);
+//			read(strm, *this, Blast());
 //			strm.close();
-
-		}
+//
+//		}
+//
+//		template<typename TFile>
+//		BlastReport(TFile & file)
+//		{
+////			std::fstream strm; 
+//			//strm.open(file_name,ios_base::in |ios_base::binary);
+//			read(file, *this, Blast());
+////			strm.close();
+//
+//		}
 
 		~BlastReport()
 		{
@@ -468,7 +474,8 @@ read(TFile & file,
 	 Tag<TagBlast_>) 
 {
 SEQAN_CHECKPOINT
-	typedef BlastReport<TBlastHsp, StoreReport<FullInfo> > TBlastReport;
+	typedef BlastReport<TBlastHsp, StoreReport<TInfoSpec> > TBlastReport;
+//	typedef BlastReport<TBlastHsp, StoreReport<FullInfo> > TBlastReport;
 //	typedef TBlastReport::TBlastHit TBlastHit;
 //	typedef BlastHit<TBlastHsp,StoreReport> TBlastHit;
 	typedef typename Hit<TBlastReport>::Type TBlastHit;
@@ -539,124 +546,136 @@ SEQAN_CHECKPOINT
 
 
 /////////////////////////// writing //////////////////////////
+//
 
 
-template <typename TFile, typename TBlastSpec>
-inline void
-_streamPutHspInfo(TFile & target,
-				  BlastHsp<TBlastSpec,BasicInfo> const & hsp)
-{
-SEQAN_CHECKPOINT
-			_streamWrite(target,"\n\te-val: ");
-			//todo: e value ausgabe weil doof
-			_streamPutFloatBlast(target,hsp.expect);
-			_streamPut(target,'\n');
-}
-
-
-
-
-template <typename TFile, typename TBlastSpec>
-inline void
-_streamPutHspInfo(TFile & target,
-				  BlastHsp<TBlastSpec,FullInfo> const & hsp)
-{
-SEQAN_CHECKPOINT
-			_streamWrite(target,"\n\tScore: ");
-			_streamPutFloatBlast(target,(float)hsp.bits, "%.2f");
-			_streamWrite(target," bits (");
-			_streamPutFloatBlast(target,hsp.score, "%.1f");
-			_streamPut(target,')');
-			_streamWrite(target,"\n\te-val: ");
-			//todo: e value ausgabe weil doof
-			_streamPutFloatBlast(target,hsp.expect);
-			_streamPut(target,'\n');
-}
-
-
-template <typename TFile, typename TInfoSpec, typename TBlastHsp>
-inline void
-write(TFile & target,
-	  BlastReport<TBlastHsp,StoreReport<TInfoSpec> > & blastObj, 
-	  Blast)
-{
-SEQAN_CHECKPOINT
-
-	typedef BlastReport<TBlastHsp,StoreReport<TInfoSpec> > TBlastReport;
-	typedef typename Hit<TBlastReport>::Type TBlastHit;
-	//typedef BlastHit<TBlastHsp,StoreReport> TBlastHit;
-	typedef typename Iterator<TBlastReport,HitIterator>::Type THitIterator;
-	typedef typename Iterator<TBlastHit,HspIterator>::Type THspIterator;
-
-	_streamWrite(target,"Query:    ");
-	_streamWrite(target,blastObj.query_name);
-	_streamPut(target, '\n');
-
-	_streamWrite(target,"Database: ");
-	_streamWrite(target,blastObj.db_name);
-	_streamWrite(target, "\n\n");
-
-	int hit_count = 1;
-	THitIterator hit_it(blastObj); 
-	for(goBegin(hit_it); !atEnd(hit_it); goNext(hit_it)) 
-	{
-		TBlastHit hit = getValue(hit_it);
-		int hsp_count = 1;
-		_streamPutInt(target, hit_count);
-		_streamWrite(target,". Hit: ");
-		_streamWrite(target,hit.name);
-		//_streamWrite(target,(*hit_it).name);
-		_streamPut(target,'\n');
-		THspIterator hsp_it(hit);
-		for(goBegin(hsp_it); !atEnd(hsp_it); goNext(hsp_it)) 
-		{
-			TBlastHsp hsp = getValue(hsp_it);
-			_streamPut(target,'\t');
-			_streamPut(target,'\n');
-			_streamWrite(target,"    HSP ");
-			_streamPutInt(target, hsp_count);
-			_streamWrite(target,":\n\tQuery: ");
-			_streamPutInt(target,hsp.query_begin);
-			_streamWrite(target,"...");
-			_streamPutInt(target,hsp.query_end);
-			_streamWrite(target,"\n\tSbjct: ");
-			_streamPutInt(target,hsp.db_begin);
-			_streamWrite(target,"...");
-			_streamPutInt(target,hsp.db_end);
-			_streamPut(target,'\n');
-
-			_streamPutHspInfo(target,hsp);
-
-			_streamPut(target,'\n');
-			_streamWrite(target,"\tAlignment:\n\t");
-			_streamWrite(target,hsp.query_string);
-			_streamWrite(target,"\n\t");
-			_streamWrite(target,hsp.db_string);
-			_streamPut(target,'\n');
-			_streamPut(target,'\n');
-			++hsp_count;
-		}
-		_streamPut(target,'\n');
-		++hit_count;
-	}
-	
-}
-
-
-
-
-
-
-
-template <typename TStream, typename TBlastHsp, typename TInfoSpec>
-inline TStream &
-operator << (TStream & target, 
-			 BlastReport<TBlastHsp,StoreReport<TInfoSpec> >& source)
-{
-SEQAN_CHECKPOINT
-	write(target, source, Blast());
-	return target;
-}
+//template <typename TStream>
+//inline void
+//_streamPutFloatBlast(TStream & target,
+//			float number, 
+//			char const * format_string)
+//{
+//	char str[32];
+//	sprintf(str, format_string, number);
+//	_streamWrite(target, str);
+//}
+//
+//template <typename TStream>
+//inline void
+//_streamPutFloatBlast(TStream & target,
+//			float number)
+//{
+//	_streamPutFloatBlast(target, number, "%f");
+//}
+//
+//
+//template <typename TFile, typename TBlastSpec>
+//inline void
+//_streamPutHspInfo(TFile & target,
+//				  BlastHsp<TBlastSpec,BasicInfo> const & hsp)
+//{
+//			_streamWrite(target,"\n\te-val: ");
+//			//todo: e value ausgabe weil doof
+//			_streamPutFloatBlast(target,hsp.expect);
+//			_streamPut(target,'\n');
+//}
+//
+//
+//
+//
+//template <typename TFile, typename TBlastSpec>
+//inline void
+//_streamPutHspInfo(TFile & target,
+//				  BlastHsp<TBlastSpec,FullInfo> const & hsp)
+//{
+//			_streamWrite(target,"\n\tScore: ");
+//			_streamPutFloatBlast(target,(float)hsp.bits, "%.2f");
+//			_streamWrite(target," bits (");
+//			_streamPutFloatBlast(target,hsp.score, "%.1f");
+//			_streamPut(target,')');
+//			_streamWrite(target,"\n\te-val: ");
+//			//todo: e value ausgabe weil doof
+//			_streamPutFloatBlast(target,hsp.expect);
+//			_streamPut(target,'\n');
+//}
+//
+//
+//template <typename TFile, typename TInfoSpec, typename TBlastHsp>
+//inline void
+//write(TFile & target,
+//	  BlastReport<TBlastHsp,StoreReport<TInfoSpec> > & blastObj, 
+//	  Blast)
+//{
+//
+//	typedef BlastReport<TBlastHsp,StoreReport<TInfoSpec> > TBlastReport;
+//	typedef typename Hit<TBlastReport>::Type TBlastHit;
+//	//typedef BlastHit<TBlastHsp,StoreReport> TBlastHit;
+//	typedef typename Iterator<TBlastReport,HitIterator>::Type THitIterator;
+//	typedef typename Iterator<TBlastHit,HspIterator>::Type THspIterator;
+//
+//	_streamWrite(target,"Query:    ");
+//	_streamWrite(target,blastObj.query_name);
+//	_streamPut(target, '\n');
+//
+//	_streamWrite(target,"Database: ");
+//	_streamWrite(target,blastObj.db_name);
+//	_streamWrite(target, "\n\n");
+//
+//	int hit_count = 1;
+//	THitIterator hit_it(blastObj); 
+//	for(goBegin(hit_it); !atEnd(hit_it); goNext(hit_it)) 
+//	{
+//		TBlastHit hit = getValue(hit_it);
+//		int hsp_count = 1;
+//		_streamPutInt(target, hit_count);
+//		_streamWrite(target,". Hit: ");
+//		_streamWrite(target,hit.name);
+//		//_streamWrite(target,(*hit_it).name);
+//		_streamPut(target,'\n');
+//		THspIterator hsp_it(hit);
+//		for(goBegin(hsp_it); !atEnd(hsp_it); goNext(hsp_it)) 
+//		{
+//			TBlastHsp hsp = getValue(hsp_it);
+//			_streamPut(target,'\t');
+//			_streamPut(target,'\n');
+//			_streamWrite(target,"    HSP ");
+//			_streamPutInt(target, hsp_count);
+//			_streamWrite(target,":\n\tQuery: ");
+//			_streamPutInt(target,hsp.query_begin);
+//			_streamWrite(target,"...");
+//			_streamPutInt(target,hsp.query_end);
+//			_streamWrite(target,"\n\tSbjct: ");
+//			_streamPutInt(target,hsp.db_begin);
+//			_streamWrite(target,"...");
+//			_streamPutInt(target,hsp.db_end);
+//			_streamPut(target,'\n');
+//
+//			_streamPutHspInfo(target,hsp);
+//
+//			_streamPut(target,'\n');
+//			_streamWrite(target,"\tAlignment:\n\t");
+//			_streamWrite(target,hsp.query_string);
+//			_streamWrite(target,"\n\t");
+//			_streamWrite(target,hsp.db_string);
+//			_streamPut(target,'\n');
+//			_streamPut(target,'\n');
+//			++hsp_count;
+//		}
+//		_streamPut(target,'\n');
+//		++hit_count;
+//	}
+//	
+//}
+//
+//
+//template <typename TStream, typename TBlastHsp, typename TInfoSpec>
+//inline TStream &
+//operator << (TStream & target, 
+//			 BlastReport<TBlastHsp,StoreReport<TInfoSpec> >& source)
+//{
+//	write(target, source, Blast());
+//	return target;
+//}
 
 
 ///////////////////////// loads of get functions ////////////////////

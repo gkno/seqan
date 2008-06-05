@@ -32,7 +32,6 @@ public:
 
 	Iter()	
 	{
-	SEQAN_CHECKPOINT
 	}
 	
 	Iter(BlastHit<TBlastHsp, TStoreSpec> & blast) : 
@@ -139,22 +138,21 @@ operator * (Iter<BlastHit<TBlastHsp, TStoreSpec> , SimpleBlastIterator<HspIterat
 
 //////////////////////////////////////////////////////////////////////////////
 
-/**
-.Function.hostHit:
-..cat:Blast
-..summary:The BlastHit this iterator is working on.
-..signature:hostHit(it)
-..param.it:A Blast hsp iterator.
-...type:Spec.HspIterator
-..returns:A pointer to the host Blast hit.
-*/
-template<typename TBlastHsp, typename TStoreSpec>
-inline typename Host<Iter<BlastHit<TBlastHsp, TStoreSpec> , SimpleBlastIterator<HspIterator> > >::Type &
-hostHit(Iter<BlastHit<TBlastHsp, TStoreSpec> , SimpleBlastIterator<HspIterator> >& it)
-{
-	SEQAN_CHECKPOINT
-	return *it.data_host;
-} 
+///**
+//.Function.hostHit:
+//..cat:Blast
+//..summary:The BlastHit this iterator is working on.
+//..signature:hostHit(it)
+//..param.it:A Blast hsp iterator.
+//...type:Spec.HspIterator
+//..returns:A pointer to the host Blast hit.
+//*/
+//template<typename TBlastHsp, typename TStoreSpec>
+//inline typename Host<Iter<BlastHit<TBlastHsp, TStoreSpec> , SimpleBlastIterator<HspIterator> > >::Type &
+//hostHit(Iter<BlastHit<TBlastHsp, TStoreSpec> , SimpleBlastIterator<HspIterator> >& it)
+//{
+//	return *it.data_host;
+//} 
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -193,7 +191,7 @@ template<typename TBlastHsp, typename TStoreSpec>
 inline void
 goEnd(Iter<BlastHit<TBlastHsp, TStoreSpec> , SimpleBlastIterator<HspIterator> >& it)
 {
-	SEQAN_CHECKPOINT
+SEQAN_CHECKPOINT
 	it.data_pos = length(it.data_host->hsps);
 }
 
@@ -243,15 +241,14 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TBlastHsp, typename TStoreSpec>
-inline Iter<BlastHit<TBlastHsp, TStoreSpec> , SimpleBlastIterator<HspIterator> >
-operator --(Iter<BlastHit<TBlastHsp, TStoreSpec> , SimpleBlastIterator<HspIterator> >& it, int)
-{
-	SEQAN_CHECKPOINT
-	Iter<BlastHit<TBlastHsp, TStoreSpec> , SimpleBlastIterator<HspIterator> > ret = it;
-	goPrevious(it);
-	return ret;
-}
+//template<typename TBlastHsp, typename TStoreSpec>
+//inline Iter<BlastHit<TBlastHsp, TStoreSpec> , SimpleBlastIterator<HspIterator> >
+//operator --(Iter<BlastHit<TBlastHsp, TStoreSpec> , SimpleBlastIterator<HspIterator> >& it, int)
+//{
+//	Iter<BlastHit<TBlastHsp, TStoreSpec> , SimpleBlastIterator<HspIterator> > ret = it;
+//	goPrevious(it);
+//	return ret;
+//}
 
 //////////////////////////////////////////////////////////////////////////////
 

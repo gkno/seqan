@@ -39,7 +39,6 @@ public:
 
 	Iter()	
 	{
-	SEQAN_CHECKPOINT
 	}
 	
 	Iter(TBlastHit & blast) 
@@ -70,10 +69,11 @@ public:
 
 	Iter const&	operator = (Iter const & other) 
 	{
-	SEQAN_CHECKPOINT
+		SEQAN_CHECKPOINT
 		if (this == &other) return *this;
 		data_host = other.data_host;
 		data_pos = other.data_pos;
+		data_at_end = other.data_at_end;
 		data_hsp = other.data_hsp;
 		data_next_pos = other.data_next_pos;
 		return *this;
@@ -235,7 +235,6 @@ goNext(TFile & file,
 //inline void
 //goPrevious(Iter<TBlastHit, StreamBlastIterator<HspIterator> >& it)
 //{
-//	SEQAN_CHECKPOINT
 //	if (!atBegin(it)) --it.data_pos;
 //}
 //
@@ -259,7 +258,7 @@ operator !=(Iter<TBlastHit, StreamBlastIterator<HspIterator> >& it1,
 			Iter<TBlastHit, StreamBlastIterator<HspIterator> >& it2)
 {
 SEQAN_CHECKPOINT
-	return (it1.data_pos!=it2.data_pos && it1.data_host!=it2.data_host);
+	return (it1.data_pos!=it2.data_pos || it1.data_host!=it2.data_host);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -301,17 +300,18 @@ SEQAN_CHECKPOINT
 
 
 //////////////////////////////////////////////////////////////////////////////
-
-
-template<typename TBlastHit>
-inline typename Host<typename Host<Iter<TBlastHit, StreamBlastIterator<HspIterator> > >::Type>::Type const&
-hostReport(Iter<TBlastHit, StreamBlastIterator<HspIterator> >& it)
-{
-	SEQAN_CHECKPOINT
-	return *(it.data_host->data_host);
-} 
+//
+//
+//template<typename TBlastHit>
+//inline typename Host< typename Iterator< typename Host< Iter<TBlastHit, StreamBlastIterator<HspIterator> >::Type>::Type, StreamBlastIterator<HitIterator> >::Type >::Type const&
+//hostReport(Iter<TBlastHit, StreamBlastIterator<HspIterator> >& it)
+//{
+//	return *(it.data_host->data_host);
+//} 
 
 //////////////////////////////////////////////////////////////////////////////
+
+
 
 /**
 .Function.hostHit:
@@ -349,7 +349,6 @@ SEQAN_CHECKPOINT
 //inline void
 //goEnd(Iter<TBlastHit, StreamBlastIterator<HspIterator> >& it)
 //{
-//	SEQAN_CHECKPOINT
 //	it.data_pos = doof;
 //}
 

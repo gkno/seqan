@@ -1,7 +1,6 @@
 #ifndef SEQAN_HEADER_BLAST_STREAM_HIT_ITERATOR_H
 #define SEQAN_HEADER_BLAST_STREAM_HIT_ITERATOR_H
 
-//SEQAN_NO_DDDOC: do not generate documentation for this file
 
 namespace SEQAN_NAMESPACE_MAIN
 {
@@ -37,7 +36,6 @@ public:
 
 	Iter()	
 	{
-	SEQAN_CHECKPOINT
 	}
 	
 	Iter(TBlastReport & blast)  
@@ -76,6 +74,7 @@ public:
 		data_host = other.data_host;
 		data_pos = other.data_pos;
 		data_next_pos = other.data_next_pos;
+		data_at_end = other.data_at_end;
 		data_hit = other.data_hit;
 		return *this;
 	}
@@ -248,14 +247,12 @@ goNext(TFile & file,
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////////
-
+///////////////////////////////////////////////////////////////////////
 
 //template<typename TBlastReport>
 //inline void
 //goPrevious(Iter<TBlastReport, StreamBlastIterator<HitIterator> >& it)
 //{
-//	SEQAN_CHECKPOINT
 //	if (!atBegin(it)) --it.data_pos;
 //}
 //
@@ -267,7 +264,6 @@ goNext(TFile & file,
 //inline Iter<TBlastReport, StreamBlastIterator<HitIterator> >
 //operator --(Iter<TBlastReport, StreamBlastIterator<HitIterator> >& it, int)
 //{
-//	SEQAN_CHECKPOINT
 //	Iter<TBlastReport, StreamBlastIterator<HitIterator> > ret = it;
 //	goPrevious(it);
 //	return ret;
@@ -292,7 +288,7 @@ operator !=(Iter<TBlastReport, StreamBlastIterator<HitIterator> >& it1,
 			Iter<TBlastReport, StreamBlastIterator<HitIterator> >& it2)
 {
 SEQAN_CHECKPOINT
-	return (it1.data_pos!=it2.data_pos && it1.data_host!=it2.data_host);
+	return (it1.data_pos!=it2.data_pos || it1.data_host!=it2.data_host);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -399,7 +395,6 @@ SEQAN_CHECKPOINT
 //inline void
 //goEnd(Iter<TBlastReport, StreamBlastIterator<HitIterator> >& it)
 //{
-//	SEQAN_CHECKPOINT
 //	it.data_pos = doof;
 //}
 

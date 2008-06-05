@@ -12,26 +12,6 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 
 
-	//die beiden raus hier, geh�ren in streamAlgorithms.h
-
-		//template <typename TStream>
-		//inline void
-		//_streamPutFloatBlast(TStream & target,
-		//			float number, 
-		//			char const * format_string)
-		//{
-		//	char str[32];
-		//	sprintf(str, format_string, number);
-		//	_streamWrite(target, str);
-		//}
-
-		//template <typename TStream>
-		//inline void
-		//_streamPutFloatBlast(TStream & target,
-		//			float number)
-		//{
-		//	_streamPutFloatBlast(target, number, "%f");
-		//}
 
 
 
@@ -291,26 +271,27 @@ SEQAN_CHECKPOINT
 
 
 
-///////////////////////////////////////////////////////////////////////////////////
-////parse until word
-////zeigt am ende dahinter!
-//template<typename TFile, typename TChar, typename TSize>
-//inline bool
-//_parse_until(TFile & file, TChar& c, String<TChar> & word, TSize len)
-//{
-//	typename Position<TFile>::Type pos = _streamTellG(file);
-//	TChar c_before = c;
-//	while (!_streamEOF(file)){
-//		if(c == word[0])
-//			if(word == _parse_readWord(file,c,len))
-//				break;
-//		c = _streamGet(file);
-//	}
-//	if(!_streamEOF(file)) return true;
-//	_streamSeekG(file,pos);
-//	c = c_before;
-//	return false;
-//}
+/////////////////////////////////////////////////////////////////////////////////
+//parse until word
+//zeigt am ende dahinter!
+template<typename TFile, typename TChar, typename TSize>
+inline bool
+_parse_until(TFile & file, TChar& c, String<TChar> & word, TSize len)
+{
+SEQAN_CHECKPOINT
+	typename Position<TFile>::Type pos = _streamTellG(file);
+	TChar c_before = c;
+	while (!_streamEOF(file)){
+		if(c == word[0])
+			if(word == _parse_readWord(file,c,len))
+				break;
+		c = _streamGet(file);
+	}
+	if(!_streamEOF(file)) return true;
+	_streamSeekG(file,pos);
+	c = c_before;
+	return false;
+}
 
 
 /////////////////////////////////////////////////////////////////////////////////

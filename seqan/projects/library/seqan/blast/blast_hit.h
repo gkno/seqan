@@ -25,7 +25,7 @@ class BlastHit<TBlastHsp, StoreReport<TSpec> >
 {
 	public:
 		String<char> name;
-		unsigned int length; //length of whole sequence  
+		unsigned int length; //length of whole sequence 
 
 		String<TBlastHsp> hsps;
 		
@@ -34,18 +34,17 @@ class BlastHit<TBlastHsp, StoreReport<TSpec> >
 		SEQAN_CHECKPOINT
 		}
 
-		BlastHit(String<char> name, unsigned int len)
-		{
-		SEQAN_CHECKPOINT
-			name = name;
-			length = length;
-			clear(hsps);
-		}
+		//BlastHit(String<char> name, unsigned int len)
+		//{
+		//	name = name;
+		//	length = length;
+		//	clear(hsps);
+		//}
 
 		BlastHit(BlastHit const& other)
 		{
 		SEQAN_CHECKPOINT
-			hsps = other.hsps;
+			assign(hsps,other.hsps);
 			name = other.name;
 			length = other.length;
 		}
@@ -53,7 +52,7 @@ class BlastHit<TBlastHsp, StoreReport<TSpec> >
 		BlastHit & operator = (BlastHit const & other)
 		{
 		SEQAN_CHECKPOINT
-			hsps = other.hsps;
+			assign(hsps,other.hsps);
 			name = other.name;
 			length = other.length;
 			return *this;

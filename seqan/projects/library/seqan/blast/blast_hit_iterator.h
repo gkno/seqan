@@ -31,7 +31,6 @@ public:
 
 	Iter()	
 	{
-	SEQAN_CHECKPOINT
 	}
 	
 	Iter(TBlastReport & blast) : 
@@ -278,15 +277,14 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TBlastObject, typename TIteratorSpec>
-inline Iter<TBlastObject, SimpleBlastIterator<TIteratorSpec> >
-operator --(Iter<TBlastObject, SimpleBlastIterator<TIteratorSpec> >& it, int)
-{
-	SEQAN_CHECKPOINT
-	Iter<TBlastObject, SimpleBlastIterator<TIteratorSpec> > ret = it;
-	goPrevious(it);
-	return ret;
-}
+//template<typename TBlastObject, typename TIteratorSpec>
+//inline Iter<TBlastObject, SimpleBlastIterator<TIteratorSpec> >
+//operator --(Iter<TBlastObject, SimpleBlastIterator<TIteratorSpec> >& it, int)
+//{
+//	Iter<TBlastObject, SimpleBlastIterator<TIteratorSpec> > ret = it;
+//	goPrevious(it);
+//	return ret;
+//}
 
 //////////////////////////////////////////////////////////////////////////////
 
