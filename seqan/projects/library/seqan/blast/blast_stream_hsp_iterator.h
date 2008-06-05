@@ -1,7 +1,6 @@
 #ifndef SEQAN_HEADER_BLAST_STREAM_HSP_ITERATOR_H
 #define SEQAN_HEADER_BLAST_STREAM_HSP_ITERATOR_H
 
-//SEQAN_NO_DDDOC: do not generate documentation for this file
 
 namespace SEQAN_NAMESPACE_MAIN
 {
@@ -39,6 +38,7 @@ public:
 
 	Iter()	
 	{
+	data_at_end = false;
 	}
 	
 	Iter(TBlastHit & blast) 

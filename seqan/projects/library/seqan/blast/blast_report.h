@@ -453,9 +453,9 @@ SEQAN_CHECKPOINT
 
 template<typename TFile, typename TChar, typename TBlastHsp>
 void
-_readParameters(TFile & file,
-				TChar & c,
-                BlastReport<TBlastHsp, StoreReport<BasicInfo> >& blastObj) 
+_readParameters(TFile & ,
+				TChar & ,
+                BlastReport<TBlastHsp, StoreReport<BasicInfo> >& ) 
 {
 SEQAN_CHECKPOINT
 	return;

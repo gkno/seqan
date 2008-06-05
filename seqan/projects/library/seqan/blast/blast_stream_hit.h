@@ -1,7 +1,6 @@
 #ifndef SEQAN_HEADER_BLAST_STREAM_HIT_H
 #define SEQAN_HEADER_BLAST_STREAM_HIT_H
 
-//SEQAN_NO_DDDOC: do not generate documentation for this file
 
 namespace SEQAN_NAMESPACE_MAIN
 {

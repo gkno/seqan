@@ -36,6 +36,7 @@ public:
 
 	Iter()	
 	{
+		data_at_end = false;
 	}
 	
 	Iter(TBlastReport & blast)  
