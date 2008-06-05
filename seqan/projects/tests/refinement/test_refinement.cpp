@@ -43,7 +43,6 @@ int main()
 
 	debug::verifyCheckpoints("projects/library/seqan/refinement/graph_impl_interval_types.h");
 	debug::verifyCheckpoints("projects/library/seqan/refinement/graph_impl_interval_tree.h");
-	debug::verifyCheckpoints("projects/library/seqan/refinement/graph_algorithm_refine.h");
 	debug::verifyCheckpoints("projects/library/seqan/refinement/graph_algorithm_refine_scoring.h");
 	debug::verifyCheckpoints("projects/library/seqan/refinement/graph_algorithm_refine_fragment.h");
 	debug::verifyCheckpoints("projects/library/seqan/refinement/graph_algorithm_refine_aligngraph.h");
