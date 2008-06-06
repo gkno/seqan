@@ -290,7 +290,7 @@ void findReads(
 		for(unsigned segment = 0; segment < length(borders); ++segment)
 		{
 			if (_debugLevel >= 1)
-				::std::cerr << "Process genome seq:" << hstkSeqNo << " range:" << borders[segment] << ::std::endl;
+				::std::cerr << ::std::endl << "Process genome seq:" << hstkSeqNo << " range:" << borders[segment] << ::std::endl;
 			// 1-HULL
 			TGenomeInfix	genomeInf(genome, borders[segment].i1, borders[segment].i2);
 			TSource			src(genomeInf);
@@ -411,9 +411,9 @@ SEQAN_CHECKPOINT
 	// Print sequences
 	for(TRowsPosition i=0;i<row_count;++i) {
 		if (i == 0)
-			_streamWrite(target, "#read  #");
+			_streamWrite(target, "#Read:   ");
 		else
-			_streamWrite(target, "#genome#");
+			_streamWrite(target, "#Genome: ");
 		TRow& row_ = row(source, i);
 		typedef typename Iterator<typename Row<TAlign>::Type const>::Type TIter;
 		TIter begin1_ = iter(row_, begin_);
@@ -548,9 +548,9 @@ void dumpMatches(
 				}
 
 				if (orientation == 0)
-					file << ",L,0," << readMatchLen << ",-1,";
+					file << ",0," << readMatchLen << ",F,";
 				else
-					file << ",L,0," << readMatchLen << ",1,";
+					file << ",0," << readMatchLen << ",R,";
 
 				switch (optionGenomeNaming)
 				{
@@ -568,8 +568,7 @@ void dumpMatches(
 							file << genomeName;
 				}
 
-				file << "," << gBegin << "," << gEnd << ","
-						<< setprecision(5) << percId << ",>1" << endl;
+				file << "," << gBegin << "," << gEnd << "," << setprecision(5) << percId << endl;
 
 				if (optionDumpAlignment) {
 					assignSource(row(align, 0), reads[readNo]);
@@ -596,10 +595,10 @@ void dumpMatches(
 // Print usage
 void printHelp(int, const char *[], bool longHelp = false) 
 {
-	cerr << "*******************************************" << endl;
-	cerr << "***  RazerS - Read Matching with SWIFT  ***" << endl;
-	cerr << "*** written by David Weese (c) Nov 2008 ***" << endl;
-	cerr << "*******************************************" << endl << endl;
+	cerr << "********************************************" << endl;
+	cerr << "*** RazerS - Fast Mapping of Short Reads ***" << endl;
+	cerr << "*** written by David Weese (c) June 2008 ***" << endl;
+	cerr << "********************************************" << endl << endl;
 	cerr << "Usage: razers [OPTION]... <GENOME FILE> <READS FILE>" << endl;
 	if (longHelp) {
 		cerr << endl << "Options:" << endl;
@@ -609,8 +608,6 @@ void printHelp(int, const char *[], bool longHelp = false)
 		cerr << "                               \t" << "default value is 80" << endl;
 		cerr << "  -a,  --alignment             \t" << "also dump the alignment for each match" << endl;
 		cerr << "  -o,  --output FILE           \t" << "change output filename (default: <READS FILE>.result)" << endl;
-		cerr << "                               \t" << "if set, all matches are stored in output files named after the reads" << endl;
-		cerr << "                               \t" << "if not set, all matches are stored in one file (default)" << endl;
 		cerr << "  -GN, --genome-naming NUM     \t" << "select how genomes are named" << endl;
 		cerr << "                               \t" << "0 = use Fasta id (default)" << endl;
 		cerr << "                               \t" << "1 = enumerate beginning with 1" << endl;

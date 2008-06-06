@@ -1,0 +1,194 @@
+*** RazerS - Fast Mapping of Short Reads ***
+http://www.seqan.de/projects/razers.html
+
+---------------------------------------------------------------------------
+Table of Contents
+---------------------------------------------------------------------------
+  1.   Overview
+  2.   Installation
+  3.   Usage
+  4.   Output Format
+  5.   Example
+  6.   Contact
+
+---------------------------------------------------------------------------
+1. Overview
+---------------------------------------------------------------------------
+
+RazerS is a tool for mapping millions of short genomic reads against a 
+reference genome. It was designed with focus on mapping next-generation 
+sequencing reads against whole DNA genomes. RazerS searches for matches of 
+reads with minimum percent identity, whereby it detects matches with 
+mismatches as well as gaps.
+
+---------------------------------------------------------------------------
+2. Installation
+---------------------------------------------------------------------------
+
+RazerS is distributed with SeqAn - The C++ Sequence Analysis Library (see 
+http://www.seqan.de). To build RazerS do the following:
+
+  1)  Download the latest snapshot of SeqAn
+  2)  Unzip it to a directory of your choice (e.g. snapshot)
+  3)  cd snapshot
+  4)  cd apps
+  5)  make razers
+  6)  cd razers
+  7)  ./razers --help
+
+On success, an executable file razers was build and a brief usage 
+description was dumped.
+
+---------------------------------------------------------------------------
+3. Usage
+---------------------------------------------------------------------------
+
+To get a short usage description of RazerS, you can execute razers -h or 
+razers --help.
+
+Usage: razers [OPTION]... <GENOME FILE> <READS FILE>
+
+RazerS expects the names of two DNA (multi-)Fasta files. The first contains 
+a reference genome and the second contains genomic reads that should be 
+mapped against the reference. Without any additional parameters RazerS 
+would map all reads against both strands of the reference genome with 80% 
+identity (i.e. 20% errors per read) and dump all found matches in an output  
+file. The output file name is the read file name extended by the suffix 
+".result".
+The default parameters can be modified by adding the following options to 
+the command line:
+
+Options:
+
+  [ -f ],  [ --forward ]
+
+  Only map reads against the positive/forward strand of the genome. By
+  default, both strands are scanned.
+
+  [ -r ],  [ --reverse ]
+
+  Only map reads against the negative/reverse strand of the genome. By
+  default, both strands are scanned.
+
+  [ -i NUM ],  [ --percent-identity NUM ]
+
+  Set the percent identity threshold. NUM must be a value between 50 and
+  100 (default is 80). RazerS searches for matches with a percent identity
+  of at least NUM. A match of a read R with e errors has percent identity
+  of 100*(1 - e/|R|), whereby |R| is the read length. In other words, a
+  read is allowed to have not more than |R|*(100-NUM)/100 errors.
+
+  [ -a ],  [ --alignment ]
+
+  Dump the alignment for each match in the ".result" file. The alignment is
+  written directly after the match and has the following format:
+  #Read:   CAGGAGATAAGCTGGATCGTTTACGGT
+  #Genome: CAGGAGATAAGC-GGATCTTTTACG--
+
+  [ -o FILE ],  [ --output FILE ]
+
+  Change the output filename to FILE. By default, this is the read file
+  name extended by the suffix ".result".
+
+  [ -GN NUM ],  [ --genome-naming NUM ]
+
+  Select how genomes are named in the output file. If NUM is 0, the Fasta
+  ids of the genome sequences are used (default). If NUM is 1, the genome
+  sequences are enumerated beginning with 1.
+
+  [ -RN NUM ], [ --read-naming NUM ]
+  
+  Select how reads are named in the output file. If NUM is 0, the Fasta ids 
+  of the reads are used (default). If NUM is 1, the reads are enumerated
+  beginning with 1. If NUM is 2, the read sequence itself is used.
+
+  [ -t NUM ],  [ --threshold NUM ]
+
+  Depending on the percent identity and the length, for each read a
+  threshold of common k-mers between read and reference genome is
+  calculated. If this option is given, all threshold values smaller than
+  NUM are raised to NUM (default is 1).
+
+  [ -tl NUM ],  [ --taboo-length NUM ]
+
+  The taboo length is the minimal distance two k-mer must have in the
+  reference genome when counting common k-mers between reads and reference
+  genome (default is 1).
+
+  [ -v ],  [ --verbose ]
+  
+  Verbose. Print extra information and running times.
+
+  [ -vv ], [ --vverbose ]
+
+  Very verbose. Like -v, but also print filtering statistics like true and
+  false positives (TP/FP).
+
+  [ -h ],  [ --help ]
+
+  Print a brief usage summary.
+
+---------------------------------------------------------------------------
+4. Output Format
+---------------------------------------------------------------------------
+
+The output file is a text file whose lines represent matches. A line 
+consists of different comma-separated match values. In the following 
+format:
+
+RName,0,RLength,GStrand,GName,GBegin,GEnd,PercID
+
+Match value description:
+
+  RName        Name of the read sequence (see --read-naming)
+  RLength      Length of the read
+  GStrand      'F'=forward strand or 'R'=reverse strand
+  GName        Name of the genome sequence (see --genome-naming)
+  GBegin       Beginning position in the genome sequence
+  GEnd         End position in the genome sequence
+  PercID       Percent identity (see --percent-identity)
+
+---------------------------------------------------------------------------
+5. Example
+---------------------------------------------------------------------------
+
+There are example read and genome files in the folder in snapshot/apps/
+razers/ containing 2 27bp reads and a short genome sequence. The 2 reads 
+and their reverse-complements were planted with errors into the genome. To 
+see map the example reads against the genome do the following:
+
+  1)  cd snapshot
+  2)  cd apps
+  3)  cd razers
+  4)  ./razers example/genome.fa example/reads.fa -v -a
+  5)  less example/reads.fa.result
+
+On success, RazerS dumped the resulting matches with their corresponding 
+semi-global alignments into the file example/reads.fa.result:
+
+read1,0,27,F,genome,47,73,92.593
+#Read:   AATTGAATGAGGTCTTGCAGCCATGGC
+#Genome: AATTGAATGACGTCT-GCAGCCATGGC
+read2,0,27,F,genome,110,134,88.889
+#Read:   CAGGAGATAAGCTGGATCGTTTACGGT
+#Genome: CAGGAGATAAGCTGGATCGTTTAC---
+read1,0,27,R,genome,260,288,92.593
+#Read:   AATTGAATGAGGTCTT-GCAGCCATGGC
+#Genome: AATTGAATGAGGTCTTCGCAGTCATGGC
+read2,0,27,R,genome,188,215,96.296
+#Read:   CAGGAGATAAGCTGGATCGTTTACGGT
+#Genome: CAGGAGATAAGCTGGATCGTTTACAGT
+
+If the alignments are not needed '-a' can be omited resulting in:
+
+read1,0,27,F,genome,47,73,92.593
+read2,0,27,F,genome,110,134,88.889
+read1,0,27,R,genome,260,288,92.593
+read2,0,27,R,genome,188,215,96.296
+
+---------------------------------------------------------------------------
+6. Contact
+---------------------------------------------------------------------------
+
+For questions or comments, contact:
+  David Weese <weese@inf.fu-berlin.de>
