@@ -465,7 +465,8 @@ void Test_BlastParsingBasic(BlastN)
 		THitIterator hit_it2(blast2); 
 		for(; !atEnd(strm2,hit_it2); goNext(strm2,hit_it2)) 
 		{
-			THitIterator hit_it = hit_it2;
+			THitIterator hit_it;
+			hit_it = hit_it2;
 			goNext(strm2,hit_it2);
 			SEQAN_TASSERT(hit_it != hit_it2 || (atEnd(strm2,hit_it2)&&hit_it == hit_it2))
 			hit_it2=hit_it;
@@ -568,10 +569,11 @@ void Test_BlastParsingBasic(BlastP) {
 
 		for(; !atEnd(strm,hit_it2); goNext(strm,hit_it2)) 
 		{		
-			THitIterator hit_it(hit_it2); 
+			TBlastHit hit = getValue(strm,hit_it2);
+			THitIterator hit_it;
+			hit_it = hit_it2; 
 			SEQAN_TASSERT(hit_it==hit_it2)
 			++hitcount;
-			TBlastHit hit = getValue(strm,hit_it);
 			SEQAN_TASSERT(hitcount!=3 || (hitcount==3 && "gb|AAC76950.1| (AE000471) UDP-N-acetylenolpyruvoylglucosamine reductase"))
 			THspIterator hsp_it2(hit);
 			SEQAN_TASSERT(atBegin(strm,hsp_it2))
@@ -583,10 +585,11 @@ void Test_BlastParsingBasic(BlastP) {
 			for(; !atEnd(strm,hsp_it2); goNext(strm,hsp_it2)) 
 			{
 				++hspcount;
+				TBlastHsp hsp = getValue(strm,hsp_it2);
 
-				THspIterator hsp_it(hsp_it2);
+				THspIterator hsp_it;
+				hsp_it = hsp_it2;
 				SEQAN_TASSERT(hsp_it==hsp_it2)
-				TBlastHsp hsp = getValue(strm,hsp_it);
  				if(hspcount == 80 )
 				{
 					std::cout << "  HspQueryBegin: "<<getQueryBegin(hsp)<<"\n";
