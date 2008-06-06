@@ -747,7 +747,7 @@ void Test_GraphMatchRefinement()
 //	Test_RefineAlignGraph();
 
 	//test for refinement on Fragment<>
-	Test_GraphMatchRefine();
+//	Test_GraphMatchRefine();
 }
 
 }

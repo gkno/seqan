@@ -304,7 +304,7 @@ void Test_GraphIntervalTree()
 	IntervalTreeTest<int,RandomCenter,StorePointsOnly>();
 
 //	std::cout << "\nMidCenter ";
-	IntervalTreeTest<double,MidCenter,StoreIntervals>();
+	IntervalTreeTest<unsigned,MidCenter,StoreIntervals>();
 	
 //	std::cout << "\nComputeCenter ";
 	IntervalTreeTest<int,ComputeCenter,StoreIntervals>();
