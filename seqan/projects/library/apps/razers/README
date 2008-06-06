@@ -148,7 +148,8 @@ Match value description:
   GEnd         End position in the genome sequence
   PercID       Percent identity (see --percent-identity)
 
-For matches on the reverse strand, GBegin and GEnd are positions on the related forward strand.
+For matches on the reverse strand, GBegin and GEnd are positions on the 
+related forward strand.
 
 ---------------------------------------------------------------------------
 5. Example
