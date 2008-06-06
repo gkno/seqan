@@ -67,8 +67,8 @@ Options:
 
   [ -r ],  [ --reverse ]
 
-  Only map reads against the negative/reverse strand of the genome. By
-  default, both strands are scanned.
+  Only map reads against the negative/reverse-complement strand of the
+  genome. By default, both strands are scanned.
 
   [ -i NUM ],  [ --percent-identity NUM ]
 
@@ -147,6 +147,8 @@ Match value description:
   GBegin       Beginning position in the genome sequence
   GEnd         End position in the genome sequence
   PercID       Percent identity (see --percent-identity)
+
+For matches on the reverse strand, GBegin and GEnd are positions on the related forward strand.
 
 ---------------------------------------------------------------------------
 5. Example
