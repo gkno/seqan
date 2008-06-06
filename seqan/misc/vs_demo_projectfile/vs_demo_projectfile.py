@@ -4,6 +4,7 @@ import os
 
 BUILD_FLAGS_7 = '/I ".." /I "../../../platforms/windows" /Op- /EHsc /D "DEBUG" /D "WIN32" /Zi /GR /W2 /Zc:wchar_t'
 BUILD_FLAGS_8 = '/I ".." /I "../../../platforms/windows" /EHsc /MTd /Zi /D "_CONSOLE" /D "_CRT_SECURE_NO_DEPRECATE" /D "DEBUG" /D "WIN32" /Zc:wchar_t /W2 /wd4996'
+BUILD_FLAGS_9 = '/I ".." /I "../../../platforms/windows" /EHsc /MTd /Zi /D "_CONSOLE" /D "_CRT_SECURE_NO_DEPRECATE" /D "DEBUG" /D "WIN32" /Zc:wchar_t /W2 /wd4996'
 
 ################################################################################
 
@@ -83,6 +84,11 @@ def main():
     scanDemos("../../projects/library/demos", BUILD_FLAGS_8)
     createProject("../../projects/library/demos", "SeqAn_8")
     
+    print
+    print "Visual Studio 9 (.net 2008) Files:",
+    scanDemos("../../projects/library/demos", BUILD_FLAGS_9)
+    createProject("../../projects/library/demos", "SeqAn_9")
+
     print
     print "Files created."
     
