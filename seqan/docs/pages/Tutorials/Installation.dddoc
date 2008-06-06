@@ -47,8 +47,9 @@ Moreover, you can find them in the $demos$ subfolder of the SeqAn installation d
 
 ..subsection:#.# MS Visual C++ Projects
 ..text:There are two pairs of MS Visual Studio project and solution files in the $demos$ folder: 
-\br 1: $Seqan_7.vcproj$ and $Seqan_7.sln$ for Microsoft Visual C++ Version 7 ("Visual Studio .net 2003"), and
-\br 2: $Seqan_8.vcproj$ and $Seqan_8.sln$ for Microsoft Visual C++ Version 8 ("Visual Studio .net 2005").
+\br 1: $Seqan_7.vcproj$ and $Seqan_7.sln$ for Microsoft Visual C++ Version 7 ("Visual Studio .net 2003"),
+\br 2: $Seqan_8.vcproj$ and $Seqan_8.sln$ for Microsoft Visual C++ Version 8 ("Visual Studio .net 2005"), and
+\br 3: $Seqan_9.vcproj$ and $Seqan_9.sln$ for Microsoft Visual C++ Version 9 ("Visual Studio .net 2008").
 ..text:
 Each example file has its own solution configuration, e.g. set the solution configuration "$iterator$" to the active solution configuration
 to select "$iterator.cpp$" for compiling.
