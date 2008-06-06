@@ -18,6 +18,8 @@ CPPFLAGS += -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
 TARGETS = razers/razers seqan_tcoffee/seqan_tcoffee
 
 all: check_seqan_base $(TARGETS)
+razers: check_seqan_base razers/razers
+seqan_tcoffee: check_seqan_base seqan_tcoffee/seqan_tcoffee
 
 check_seqan_base:
 	@if [ ! -d "$(SEQAN_BASE)/seqan" ]; then \
