@@ -44,7 +44,7 @@ struct StoreReport;		//stores the whole report
 .Spec.StreamReport:
 ..cat:Blast
 ..general:Class.BlastReport
-..summary:BlastReport specialization that works on a file stream; parses hits/HSPs when iterating over them).
+..summary:BlastReport specialization that works on a file stream (parses hits/HSPs when iterating over them).
 ..signature:BlastReport<TBlastHsp,StreamReport<TFile> >
 ..param.TBlastHsp:The type of HSPs to be stored. See @Class.BlastHsp@
 ...metafunction:Metafunction.Hsp

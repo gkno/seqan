@@ -13,15 +13,15 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 
-/**
-.Spec.HspIterator:
-..cat:Blast
-..summary:Hsp iterator for @Class.BlastHit@.
-..signature:Iterator<TBlastHit, HspIterator>
-..param.TBlastHit:A Blast hit.
-...type:Class.BlastHit
-..general:Class.Iter
-*/
+////**
+//.Spec.HspIterator:
+//..cat:Blast
+//..summary:Hsp iterator for @Class.BlastHit@.
+//..signature:Iterator<TBlastHit, HspIterator>
+//..param.TBlastHit:A Blast hit.
+//...type:Class.BlastHit
+//..general:Class.Iter
+//*/
 template<typename TBlastHsp, typename TFile>
 class Iter<BlastHit<TBlastHsp,StreamReport<TFile> >, StreamBlastIterator<HspIterator> > 
 {
@@ -318,7 +318,7 @@ SEQAN_CHECKPOINT
 ..cat:Blast
 ..summary:The BlastHit this iterator is working on.
 ..signature:hostHit(it)
-..param.it:A Blast hsp iterator.
+..param.it:An iterator.
 ...type:Spec.HspIterator
 ..returns:A pointer to the host BlastHit.
 */

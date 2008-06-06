@@ -50,7 +50,7 @@ class BlastHsp;
 ..param.TBlastSpec:The type of Blast report to be parsed.
 ...type:Spec.BlastN
 ...type:Spec.BlastP
-...default:Spec.BlastN
+...default:BlastN
 ..param.TInfoSpec:The specializing type determining the amount of information to be stored.
 ...type:Spec.BasicInfo
 ...type:Spec.FullInfo
@@ -1256,6 +1256,19 @@ SEQAN_CHECKPOINT
 	return blastHsp.query_begin;
 }
 
+
+
+
+/**
+.Function.getQueryBegin:
+..cat:Blast
+..summary:The begin position of the HSP on the query sequence.
+..signature:getQueryBegin(object);
+..param.object:A Blast HSP object.
+...type:Class.BlastHsp
+..returns:The begin position.
+...type:unsigned
+*/
 template<typename TBlastSpec, typename TInfoSpec>
 inline unsigned int
 getQueryBegin(BlastHsp<TBlastSpec, TInfoSpec>& blastHsp)
@@ -1274,6 +1287,16 @@ SEQAN_CHECKPOINT
 	return blastHsp.db_begin;
 }
 
+/**
+.Function.getDatabaseBegin:
+..cat:Blast
+..summary:The begin position of the HSP on the database sequence.
+..signature:getDatabaseBegin(object);
+..param.object:A Blast HSP object.
+...type:Class.BlastHsp
+..returns:The begin position.
+...type:unsigned
+*/
 template<typename TBlastSpec, typename TInfoSpec>
 inline unsigned int
 getDatabaseBegin(BlastHsp<TBlastSpec, TInfoSpec>& blastHsp)
@@ -1292,6 +1315,16 @@ SEQAN_CHECKPOINT
 	return blastHsp.query_end;
 }
 
+/**
+.Function.getQueryEnd:
+..cat:Blast
+..summary:The end position of the HSP on the query sequence.
+..signature:getQueryEnd(object);
+..param.object:A Blast HSP object.
+...type:Class.BlastHsp
+..returns:The end position.
+...type:unsigned
+*/
 template<typename TBlastSpec, typename TInfoSpec>
 inline unsigned int
 getQueryEnd(BlastHsp<TBlastSpec, TInfoSpec>& blastHsp)
@@ -1302,6 +1335,16 @@ SEQAN_CHECKPOINT
 	
 
 
+/**
+.Function.getDatabaseEnd:
+..cat:Blast
+..summary:The end position of the HSP on the database sequence.
+..signature:getDatabaseEnd(object);
+..param.object:A Blast HSP object.
+...type:Class.BlastHsp
+..returns:The end position.
+...type:unsigned
+*/
 template<typename TBlastSpec, typename TInfoSpec>
 inline unsigned int &
 databaseEnd(BlastHsp<TBlastSpec, TInfoSpec>& blastHsp)
@@ -1326,6 +1369,7 @@ queryAlignmentString(BlastHsp<TBlastSpec, TInfoSpec>& blastHsp)
 SEQAN_CHECKPOINT
 	return blastHsp.query_string;
 }
+
 
 template<typename TBlastSpec, typename TInfoSpec>
 inline String<char>
@@ -1362,6 +1406,16 @@ SEQAN_CHECKPOINT
 	return blastHsp.expect;
 }
 
+/**
+.Function.getEValue:
+..cat:Blast
+..summary:The e-value associated with a Blast HSP.
+..signature:getEValue(object);
+..param.object:A Blast HSP object.
+...type:Class.BlastHsp
+..returns:The e-value.
+...type:double
+*/
 template<typename TBlastSpec, typename TInfoSpec>
 inline double
 getEValue(BlastHsp<TBlastSpec, TInfoSpec>& blastHsp)
@@ -1381,6 +1435,16 @@ SEQAN_CHECKPOINT
 	return blastHsp.score;
 }
 
+/**
+.Function.getScore:
+..cat:Blast
+..summary:The Smith-Waterman score associated with a Blast HSP.
+..signature:getScore(object);
+..param.object:A Blast HSP object.
+...type:Spec.FullInfo
+..returns:The score.
+...type:float
+*/
 template<typename TBlastSpec>
 inline float 
 getScore(BlastHsp<TBlastSpec, FullInfo>& blastHsp)
@@ -1397,6 +1461,17 @@ SEQAN_CHECKPOINT
 	return blastHsp.bits;
 }
 
+
+/**
+.Function.getBitScore:
+..cat:Blast
+..summary:The bit score associated with a Blast HSP.
+..signature:getBitScore(object);
+..param.object:A Blast HSP object.
+...type:Spec.FullInfo
+..returns:The bit score.
+...type:float
+*/
 template<typename TBlastSpec>
 inline float 
 getBitScore(BlastHsp<TBlastSpec, FullInfo>& blastHsp)
@@ -1413,6 +1488,8 @@ percentIdentity(BlastHsp<TBlastSpec, FullInfo>& blastHsp)
 SEQAN_CHECKPOINT
 	return blastHsp.identity;
 }
+
+
 
 template<typename TBlastSpec>
 inline unsigned int
@@ -1446,6 +1523,18 @@ SEQAN_CHECKPOINT
 	return blastHsp.abs_gaps;
 }
 
+
+
+/**
+.Function.getNumGaps:
+..cat:Blast
+..summary:The number of gaps within a Blast HSP alignment.
+..signature:getNumGaps(object);
+..param.object:A Blast HSP object.
+...type:Spec.FullInfo
+..returns:The number of gaps.
+...type:unsigned
+*/
 template<typename TBlastSpec>
 inline unsigned int
 getNumGaps(BlastHsp<TBlastSpec, FullInfo>& blastHsp)
@@ -1455,6 +1544,17 @@ SEQAN_CHECKPOINT
 }
 
 
+
+/**
+.Function.queryOrientationPlus:
+..cat:Blast
+..summary:Orientation of the query sequence within a Blast HSP alignment.
+..signature:queryOrientationPlus(object);
+..param.object:A Blast HSP object.
+...type:Spec.FullInfo
+..returns:True if the query is in forward orientation.
+...type:bool
+*/
 template<typename TBlastSpec>
 inline bool
 queryOrientationPlus(BlastHsp<TBlastSpec, FullInfo>& blastHsp)
@@ -1463,6 +1563,16 @@ SEQAN_CHECKPOINT
 	return blastHsp.query_strand;
 }
 
+/**
+.Function.databaseOrientationPlus:
+..cat:Blast
+..summary:Orientation of the database sequence within a Blast HSP alignment.
+..signature:databaseOrientationPlus(object);
+..param.object:A Blast HSP object.
+...type:Spec.FullInfo
+..returns:True if the database sequence is in forward orientation.
+...type:bool
+*/
 template<typename TBlastSpec>
 inline bool
 databaseOrientationPlus(BlastHsp<TBlastSpec, FullInfo>& blastHsp)
@@ -1523,7 +1633,12 @@ SEQAN_CHECKPOINT
 	return blastHsp.positives;
 }
 
-
+/**
+.Function.length:
+..cat:Blast
+..param.object:
+...type:Class.BlastHsp
+*/
 template<typename TBlast, typename TSpec>
 inline unsigned int
 length(BlastHsp<TBlast,TSpec >& blastHsp)

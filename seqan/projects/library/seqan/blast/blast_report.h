@@ -1074,13 +1074,10 @@ SEQAN_CHECKPOINT
 /**
 .Function.atEnd:
 ..cat:Blast
-..summary:Indicates whether there are more Blast reports in the file that is being parsed.
-..signature:atEnd(file,blastReport);
+..signature:atEnd(file,object);
 ..param.file:A file stream.
-..param.blastReport:A Blast report.
+..param.it:A Blast report.
 ...type:Class.BlastReport
-..returns:True if there are Blast reports left in the stream.
-..remarks: Use function getNext(file,blastReport) to read next report.
 ..see:Function.getNext
 */
 template<typename TBlastHsp, typename TSpec, typename TFile>

@@ -12,15 +12,15 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 
-/**
-.Spec.HitIterator:
-..cat:Blast
-..summary:Hit iterator for @Class.BlastReport@.
-..signature:Iterator<TBlastReport, HitIterator>
-..param.TBlastReport:A Blast report container.
-...type:Class.BlastReport
-..general:Class.Iter
-*/
+////**
+//.Spec.HitIterator:
+//..cat:Blast
+//..summary:Hit iterator for @Class.BlastReport@.
+//..signature:Iterator<TBlastReport, HitIterator>
+//..param.TBlastReport:A Blast report container.
+//...type:Class.BlastReport
+//..general:Class.Iter
+//*/
 template<typename TBlastHsp, typename TFile>
 class Iter<BlastReport<TBlastHsp, StreamReport<TFile> >, StreamBlastIterator<HitIterator> > 
 {
@@ -166,14 +166,11 @@ struct GetValue<Iter<TBlastReport const, StreamBlastIterator<HitIterator> > >
 /**
 .Function.atBegin:
 ..cat:Blast
-..summary:Determines whether the iterator is at the beginning or not.
 ..signature:atBegin(file,it)
 ..param.file:A file stream.
-..param.it:A hit or hsp iterator on a BlastReport
+..param.it:An iterator.
 ...type:Spec.HitIterator
 ...type:Spec.HspIterator
-..returns:True if the iterator is at the beginning, false otherwise
-..see:Function.goBegin
 */
 template<typename TBlastReport, typename TFile>
 inline bool
@@ -191,14 +188,11 @@ SEQAN_CHECKPOINT
 /**
 .Function.goBegin:
 ..cat:Blast
-..summary:Resets the iterator to the beginning.
 ..signature:goBegin(file,it)
 ..param.file:A file stream.
-..param.it:A hit or hsp iterator on a BlastReport 
+..param.it:An iterator.
 ...type:Spec.HitIterator
 ...type:Spec.HspIterator
-..returns:void
-..see:Function.atBegin
 */
 template<typename TBlastReport, typename TFile>
 inline void
@@ -221,15 +215,11 @@ goBegin(TFile &,
 /**
 .Function.goNext:
 ..cat:Blast
-..summary:Moves the iterator to the next hit or hsp.
 ..signature:goNext(file,it)
 ..param.file:A file stream.
-..param.it:A hit or hsp iterator on a BlastReport
+..param.it:An iterator.
 ...type:Spec.HitIterator
 ...type:Spec.HspIterator
-..returns:void
-..remarks:This method does nothing if the iterator is already at the end.
-..see:Function.goPrevious
 */
 template<typename TBlastReport, typename TFile>
 inline void
@@ -298,16 +288,11 @@ SEQAN_CHECKPOINT
 /**
 .Function.getValue:
 ..cat:Blast
-..summary:The hit the iterator points to.
 ..signature:getValue(file,it)
 ..param.file:A file stream.
-..param.it:A hit or hsp iterator on a BlastReport
+..param.it:An iterator.
 ...type:Spec.HitIterator
 ...type:Spec.HspIterator
-..returns:A BlastHit or BlastHsp.
-...type:Metafunction.Hit
-...type:Metafunction.Hsp
-..see:Function.value
 */
 template<typename TBlastReport, typename TFile>
 inline typename GetValue<Iter<TBlastReport, StreamBlastIterator<HitIterator> > >::Type
@@ -331,16 +316,11 @@ SEQAN_CHECKPOINT
 /**
 .Function.value:
 ..cat:Blast
-..summary:The hit the iterator points to.
 ..signature:value(file,it)
 ..param.file:A file stream.
-..param.it:A hit or hsp iterator on a BlastReport
+..param.it:An iterator.
 ...type:Spec.HitIterator
 ...type:Spec.HspIterator
-..returns:A BlastHit or BlastHsp.
-...type:Metafunction.Hit
-...type:Metafunction.Hsp
-..see:Function.getValue
 */
 template<typename TBlastReport, typename TFile>
 inline typename Reference<Iter<TBlastReport, StreamBlastIterator<HitIterator> > >::Type
@@ -370,14 +350,11 @@ hostReport(Iter<TBlastReport, StreamBlastIterator<HitIterator> >& it)
 /**
 .Function.atEnd:
 ..cat:Blast
-..summary:Determines whether the iterator is at the end or not.
 ..signature:atEnd(file,it)
 ..param.file:A file stream.
-..param.it:A hit or hsp iterator on a Spec.StreamReport
+..param.it:An iterator.
 ...type:Spec.HitIterator
 ...type:Spec.HspIterator
-..returns:True if the iterator is at the end, false otherwise
-..see:Function.goEnd
 */
 
 template<typename TBlastReport, typename TFile>

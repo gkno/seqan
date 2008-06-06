@@ -170,13 +170,9 @@ operator * (Iter<TBlastObject, SimpleBlastIterator<TIteratorSpec> >& it)
 /**
 .Function.atBegin:
 ..cat:Blast
-..summary:Determines whether the iterator is at the beginning or not.
-..signature:atBegin(it)
-..param.it:A hit or hsp iterator.
+..param.iterator:
 ...type:Spec.HitIterator
 ...type:Spec.HspIterator
-..returns:True if the iterator is at the beginning, false otherwise
-..see:Function.goBegin
 */
 template<typename TBlastObject, typename TIteratorSpec>
 inline bool
@@ -193,13 +189,9 @@ SEQAN_CHECKPOINT
 /**
 .Function.goBegin:
 ..cat:Blast
-..summary:Resets the iterator to the beginning.
-..signature:goBegin(it)
-..param.it:A hit or hsp iterator.
+..param.iterator:
 ...type:Spec.HitIterator
 ...type:Spec.HspIterator
-..returns:void
-..see:Function.atBegin
 */
 template<typename TBlastObject, typename TIteratorSpec>
 inline void
@@ -218,8 +210,6 @@ goBegin(Iter<TBlastObject, SimpleBlastIterator<TIteratorSpec> >& it)
 ..cat:Blast
 ...type:Spec.HitIterator
 ...type:Spec.HspIterator
-..remarks:This method does nothing if the iterator is already at the end.
-..see:Function.goPrevious
 */
 template<typename TBlastObject, typename TIteratorSpec>
 inline void
@@ -247,13 +237,9 @@ SEQAN_CHECKPOINT
 /**
 .Function.goPrevious:
 ..cat:Blast
-..signature:goPrevious(iterator)
-..param.iterator:An iterator.
+..param.iterator:
 ...type:Spec.HitIterator
 ...type:Spec.HspIterator
-..returns:void
-..remarks:This method does nothing if the iterator is already at the beginning.
-..see:Function.goNext
 */
 
 template<typename TBlastObject, typename TIteratorSpec>
@@ -318,14 +304,9 @@ SEQAN_CHECKPOINT
 /**
 .Function.getValue:
 ..cat:Blast
-..signature:getValue(object)
-..param.object:A Blast search result iterator.
+..param.object:
 ...type:Spec.HitIterator
 ...type:Spec.HspIterator
-..returns:A BlastHit or BlastHsp.
-...type:Metafunction.Hit
-...type:Metafunction.Hsp
-..see:Function.value
 */
 template<typename TBlastReport>
 inline typename GetValue<Iter<TBlastReport, SimpleBlastIterator<HitIterator> > >::Type
@@ -340,14 +321,9 @@ SEQAN_CHECKPOINT
 /**
 .Function.value:
 ..cat:Blast
-..signature:value(object)
-..param.object:A Blast search result iterator.
+..param.object:
 ...type:Spec.HitIterator
 ...type:Spec.HspIterator
-..returns:A BlastHit or BlastHsp.
-...type:Metafunction.Hit
-...type:Metafunction.Hsp
-..see:Function.getValue
 */
 template<typename TBlastReport>
 inline typename Reference<Iter<TBlastReport, SimpleBlastIterator<HitIterator> > >::Type 
@@ -364,7 +340,7 @@ SEQAN_CHECKPOINT
 ..cat:Blast
 ..summary:The BlastReport this iterator is working on.
 ..signature:hostReport(it)
-..param.it:A Blast hit iterator.
+..param.it:An iterator.
 ...type:Spec.HitIterator
 ..returns:A pointer to the host BlastReport.
 */
@@ -382,12 +358,9 @@ hostReport(Iter<TBlastReport, SimpleBlastIterator<HitIterator> > & it)
 /**
 .Function.atEnd:
 ..cat:Blast
-..signature:atEnd(iterator)
-..param.iterator:An iterator.
+..param.iterator:
 ...type:Spec.HitIterator
 ...type:Spec.HspIterator
-..returns:True if the iterator is at the end, false otherwise
-..see:Function.goEnd
 */
 template<typename TBlastReport>
 inline bool
@@ -402,13 +375,9 @@ SEQAN_CHECKPOINT
 /**
 .Function.goEnd:
 ..cat:Blast
-..summary:Resets the iterator to the end.
-..signature:goEnd(it)
-..param.it:A hit or hsp iterator.
+..param.iterator:
 ...type:Spec.HitIterator
 ...type:Spec.HspIterator
-..returns:void
-..see:Function.atEnd
 */
 template<typename TBlastReport>
 inline void

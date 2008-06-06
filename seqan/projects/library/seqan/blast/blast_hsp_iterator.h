@@ -138,7 +138,7 @@ operator * (Iter<BlastHit<TBlastHsp, TStoreSpec> , SimpleBlastIterator<HspIterat
 
 //////////////////////////////////////////////////////////////////////////////
 
-///**
+////**
 //.Function.hostHit:
 //..cat:Blast
 //..summary:The BlastHit this iterator is working on.
