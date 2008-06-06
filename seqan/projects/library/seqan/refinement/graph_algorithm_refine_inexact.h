@@ -21,6 +21,9 @@
 #ifndef SEQAN_HEADER_GRAPH_REFINE_INEXACT_H
 #define SEQAN_HEADER_GRAPH_REFINE_INEXACT_H
 
+
+//SEQAN_NO_DDDOC: do not generate documentation for this file
+
 namespace SEQAN_NAMESPACE_MAIN
 {
 

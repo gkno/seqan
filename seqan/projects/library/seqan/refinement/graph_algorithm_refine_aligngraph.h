@@ -21,12 +21,14 @@
 #ifndef SEQAN_HEADER_GRAPH_REFINE_ALIGRAPH_H
 #define SEQAN_HEADER_GRAPH_REFINE_ALIGRAPH_H
 
+//SEQAN_NO_DDDOC: do not generate documentation for this file
+
 
 namespace SEQAN_NAMESPACE_MAIN
 {
 
 	
-/////////////////////// NOCH NICHT EINSATZFÄHIG!!!!! /////////////////////////////////
+/////////////////////// NOCH NICHT EINSATZFï¿½HIG!!!!! /////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////	
 //Functios for Align Graphs
 //project onto other sequence for Graph<Alignment>
@@ -112,7 +114,7 @@ SEQAN_CHECKPOINT
 ////	typename Infix<typename Value<TStringSet>::Type>::Type label0 = infix(getValueById(seqs,seq_i_id),pos_i,last_pos_i);
 ////	typename Infix<typename Value<TStringSet>::Type>::Type label1 = infix(getValueById(seqs,seq_j_id),pos_j,last_pos_j);
 //	
-////bääääääääääääääääääääää
+////bï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 //	typename Value<TScore>::Type score = 0;
 //	TValue i = 0;
 //	while (i < len)

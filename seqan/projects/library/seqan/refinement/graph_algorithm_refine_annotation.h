@@ -22,6 +22,8 @@
 #ifndef SEQAN_HEADER_GRAPH_REFINE_ANNOTATION_H
 #define SEQAN_HEADER_GRAPH_REFINE_ANNOTATION_H
 
+//SEQAN_NO_DDDOC: do not generate documentation for this file
+
 
 namespace SEQAN_NAMESPACE_MAIN
 {
@@ -36,10 +38,11 @@ class Annotation;
 .Class.Annotation:
 ..cat:Sequences
 ..summary:Class for annotating sequences. 
-..signature:Annotation<TSequence, TSpec>  
+..signature:Annotation<TSequence, TLabel, TSpec>  
 ..param.TSequence:The sequence that annotation is available for.
+..param.TLabel:The label type (e.g. int or String<char>)
 ..param.TSpec:The specializing type.
-...default:Simple (sequence is annotated with a character (or char string? or int? ) )
+...default:Simple
 ..include:blast.h
 */
 template<typename TSequence,typename TValue>
@@ -289,7 +292,8 @@ SEQAN_CHECKPOINT
 /**
 .Function.matchRefinement:
 ..signature:matchRefinement(matches,annotation,stringSet,scoringScheme,refinedGraph)
-..param.annotation:Sequence annotation data.
+..param.annotation:Sequence annotation data. 
+...remarks: Additional semgent match subdivisions will be made at sequence positions at which the annotation label changes.
 ...type:Class.Annotation
 */
 //annotation given,exact refinement, score type given
