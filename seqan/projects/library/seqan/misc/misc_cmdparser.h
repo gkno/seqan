@@ -578,19 +578,7 @@ help(CommandLineParser & me)
 inline bool
 isSet(CommandLineParser & me,char const & shortName)
 {
-    if(find(me._shortNameMap,shortName) == end(me._shortNameMap)) return false; // this option does not exist
-    else
-    {
-        // if value != "" -> value was set
-        if(value(me._valueMap,cargo(me._shortNameMap,shortName)) != "") return true;
-        else return false;
-    }
-}
-
-inline bool
-isSet(CommandLineParser const & me,char const & shortName)
-{
-    if(find(me._shortNameMap,shortName) == end(me._shortNameMap)) return false; // this option does not exist
+    if(!hasKey(me._shortNameMap,shortName)) return false; // this option does not exist
     else
     {
         // if value != "" -> value was set
@@ -602,19 +590,7 @@ isSet(CommandLineParser const & me,char const & shortName)
 inline bool
 isSet(CommandLineParser & me,CharString const & longName)
 {
-    if(find(me._longNameMap,longName) == end(me._longNameMap)) return false; // this option does not exist
-    else
-    {
-        // if value != "" -> value was set
-        if(value(me._valueMap,cargo(me._longNameMap,longName)) != "") return true;
-        else return false;
-    }
-}
-
-inline bool
-isSet(CommandLineParser const & me,CharString const & longName)
-{
-    if(find(me._longNameMap,longName) == end(me._longNameMap)) return false; // this option does not exist
+    if(!hasKey(me._longNameMap,longName)) return false; // this option does not exist
     else
     {
         // if value != "" -> value was set
