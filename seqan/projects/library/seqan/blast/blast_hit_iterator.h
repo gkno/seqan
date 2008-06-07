@@ -208,6 +208,7 @@ goBegin(Iter<TBlastObject, SimpleBlastIterator<TIteratorSpec> >& it)
 /**
 .Function.goNext:
 ..cat:Blast
+..param.iterator
 ...type:Spec.HitIterator
 ...type:Spec.HspIterator
 */

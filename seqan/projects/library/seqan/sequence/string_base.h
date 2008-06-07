@@ -185,7 +185,7 @@ SEQAN_CHECKPOINT
 
 /**
 .Function.clear:
-..cat:Container
+..cat:Containers
 ..summary:Resets an object.
 ..signature:clear(object)
 ..param.object:The object that will be resetted.

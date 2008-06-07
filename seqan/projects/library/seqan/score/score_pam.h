@@ -268,6 +268,7 @@ public:
 
 /**
 .Function.getDist:
+..cat:Scoring
 ..class:Class.Score
 ..summary:returns the distance on which PAM matrix computation is based.
 ..signature:getDist(& _score)
@@ -303,6 +304,7 @@ public:
 
 /**
 .Function.getEntropy:
+..cat:Scoring
 ..class:Class.Score
 ..summary:returns entropy of the PAM matrix.
 ..signature:getEntropy(& _score)
@@ -416,6 +418,7 @@ void buildPam(Score<TValue, Pam<TSequenceValue, TSource> > & _score, int _givenD
 {
 /**
 .Function.buildPam:
+..cat:Scoring
 ..class:Class.Score
 ..summary:Coordinates computation by invokating extrapolation, alphabet extension, rounding, scaling, type conversion and symmetrization.
 ..signature:buildPam(_score, _givenDist)

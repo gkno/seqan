@@ -203,7 +203,7 @@ _getDiagSet(Seed<TPosition,MultiSeed> & seed){
 /**
 .Function.appendDiag
 ..summary: Adds diagonal to the seed.
-..cat: Seed Handling
+..cat:Seed Handling
 ..signature:appendDiag(seed, diagonal)
 ..param.seed: The seed to which the diagonal should be added.
 ...type:Spec.MultiSeed

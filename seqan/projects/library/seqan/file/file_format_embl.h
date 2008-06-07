@@ -228,7 +228,7 @@ SEQAN_CHECKPOINT
 
 /**
 .Function.readLineType:
-..cat:File
+..cat:Input/Output
 ..summary:Reads the information belonging to the two-character line code specified.
 ..signature:readLineType(file,data,key,Embl);
 ..param.file:The input file or string.
@@ -348,7 +348,7 @@ SEQAN_CHECKPOINT
 
 /**
 .Function.readFeature:
-..cat:File
+..cat:Input/Output
 ..summary:Finds the first feature specified by 'key' starting from position 'start' in the feature table (the feature table can be
 obtained by calling readLineType with the two-character code "FT").
 ..signature:readFeature(ft_string,start,data,key,Embl);
