@@ -806,3 +806,19 @@ projects/tests/find_motif/test_find_motif.cpp(82): TEST END
 ..demofor:Class.MotifFinder
 ..demofor:Function.findMotif
 .
+
+
+
+
+.Demo.Blast Reports:
+..cat:Miscellaneous
+..summary:Parsing the output of BLAST call.
+..file:../projects/library/demos/blast_report.cpp
+..demofor:Class.BlastHsp
+..demofor:Class.BlastReport
+..demofor:Metafunction.Hit
+..demofor:Function.getBitScore
+..demofor:Function.getEValue
+..demofor:Function.getQueryName
+..demofor:Function.getDatabaseName
+.
