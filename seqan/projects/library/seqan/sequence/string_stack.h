@@ -373,7 +373,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 //////////////////////////////////////////////////////////////////////////////
-///.Function.appendValue.param.object.type:Spec.Block String
+///.Function.appendValue.param.target.type:Spec.Block String
 
 	template<typename TValue, unsigned int SPACE, typename TVal, typename TExpand>
 	inline void 

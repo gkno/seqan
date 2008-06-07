@@ -927,7 +927,7 @@ SEQAN_CHECKPOINT
 }
 
 /**
-.Function.getAlignment
+.Function.blast#getAlignment
 ..cat:Blast
 ..summary:Turns a HSP from a Blast search into an Alignment object.
 ..signature:getAlignment(hsp,alignment)
@@ -1019,7 +1019,7 @@ SEQAN_CHECKPOINT
 
 
 /**
-.Function.getAlignment
+.Function.blast#getAlignment
 ..cat:Blast
 ..signature:getAlignment(hsp,alignment,id0,id1)
 ..param.id0:The Id of the query sequence in the StringSet of the Alignment Graph.

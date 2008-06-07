@@ -34,6 +34,15 @@ struct ArrayGaps;
 // Gaps - ArrayGaps Spec
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Spec.ArrayGaps:
+..cat:Alignments
+..general:Class.Gaps
+..summary:Stores gaps sizes in an array.
+..signature:Gaps<TSource, ArrayGaps >
+..param.TSource:Type of the ungapped sequence.
+...metafunction:Metafunction.Source
+*/
 template <typename TSource>
 class Gaps<TSource, ArrayGaps>
 {

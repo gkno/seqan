@@ -227,8 +227,7 @@ namespace seqan
 		return _getHeight( * _getDown( me ) );
 	}
 
-/**
-.Function.key:
+/**.Function.key:
 ..summary:Get the the key of the element.
 ..cat:SkipList
 ..signature:key(element)

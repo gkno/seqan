@@ -885,8 +885,8 @@ SEQAN_CHECKPOINT
 ..returns:Length of the used part of the source.
 ...metafunction:Metafunction.Size
 ..remarks:This function is equivalent to $sourceEndPosition(gaps) - sourceBeginPosition(gaps)$.
-..see:sourceEndPosition
-..see:sourceBeginPosition
+..see:Function.sourceEndPosition
+..see:Function.sourceBeginPosition
 */
 template <typename TSource, typename TSpec>
 inline typename Size<TSource>::Type

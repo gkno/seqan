@@ -34,6 +34,16 @@ struct SumlistGaps;
 // Gaps - SumlistGaps Spec
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Spec.SumlistGaps:
+..cat:Alignments
+..general:Class.Gaps
+..summary:Stores Gaps in a Sumlist.
+..signature:Gaps<TSource, SumlistGaps>
+..param.TSource:Type of the ungapped sequence.
+...metafunction:Metafunction.Source
+*/
+
 template <typename TSource>
 class Gaps<TSource, SumlistGaps>
 {

@@ -28,7 +28,7 @@ namespace SEQAN_NAMESPACE_MAIN
     struct EditEnvironment;
 
 //////////////////////////////////////////////////////////////////////////////
-/**
+/*DUBLICATED DOCUMENTATION, SEE pipe_edit_environment.h
 .Spec.EditEnvironment:
 ..cat:Pipelining
 ..general:Class.Pipe

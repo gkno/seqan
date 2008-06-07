@@ -690,7 +690,7 @@ SEQAN_CHECKPOINT
 ..param.blastReport:A Blast Report.
 ...type:Class.BlastReport
 ..returns:The name (identifier) of the query.
-...type:String<char>
+...type:Shortcut.CharString
 ..see:Function.getQueryName
 ..see:Function.databaseName
 */
@@ -710,7 +710,7 @@ SEQAN_CHECKPOINT
 ..param.blastReport:A Blast Report.
 ...type:Class.BlastReport
 ..returns:The name (identifier) of the query.
-...type:String<char>
+...type:Shortcut.CharString
 ..see:Function.queryName
 ..see:Function.getDatabaseName
 */
@@ -730,7 +730,7 @@ SEQAN_CHECKPOINT
 ..param.blastReport:A Blast Report.
 ...type:Class.BlastReport
 ..returns:The name of the database.
-...type:String<char>
+...type:Shortcut.CharString
 ..see:Function.queryName
 ..see:Function.getDatabaseName
 */
@@ -750,7 +750,7 @@ SEQAN_CHECKPOINT
 ..param.blastReport:A Blast Report.
 ...type:Class.BlastReport
 ..returns:The name of the database.
-...type:String<char>
+...type:Shortcut.CharString
 ..see:Function.queryName
 ..see:Function.getDatabaseName
 */

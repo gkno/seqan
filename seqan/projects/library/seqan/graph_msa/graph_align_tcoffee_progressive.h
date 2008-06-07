@@ -155,7 +155,7 @@ _recursiveProgressiveAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 ..cat:Graph
 ..signature:
 combineGraphs(inputGraph, guideTree, outputGraph [,seqsPerGroup])
-..param.graph:The alignment graph with multiple sequence information.
+..param.inputGraph:The alignment graph with multiple sequence information.
 ...type:Spec.Alignment Graph
 ..param.guideTree:A guide tree.
 ...type:Spec.Tree

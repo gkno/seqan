@@ -615,8 +615,8 @@ Otherwise, a new value that is inserted to $map$.
 ...metafunction:Metafunction.Reference
 ..remarks:
 ...note:Do not change the key of a value in the map.
-..see:map#find
-..see:map#insert
+..see:Function.map#find
+..see:Function.map#insert
 */
 
 template <typename TValue, typename TSpec, typename TKey2>
@@ -661,9 +661,9 @@ value(Map<TValue, Skiplist<TSpec> > & me,
 ..returns:The cargo of the first value in $map$ of the given key, if there is any.
 Otherwise, the cargo of a new value that is inserted to $map$.
 ...metafunction:Metafunction.Cargo
-..see:map#value
-..see:map#find
-..see:map#insert
+..see:Function.map#value
+..see:Function.map#find
+..see:Function.map#insert
 */
 
 template <typename TValue, typename TSpec, typename TKey2>
@@ -692,10 +692,10 @@ cargo(Map<TValue, Skiplist<TSpec> > & me,
 ...metafunction:Metafunction.Cargo
 ..remarks:If $key$ and $cargo$ are specified, a new value of that key and value is added.
 If there is already a value of that key in $map$, the value of this element is changed to $cargo$.
-...text:If $value$ is specified, and there is already a value in map of key @Function.key.key(value)@, than
+...text:If $value$ is specified, and there is already a value in map of that key, than
 the cargo of this value is changed to @Function.cargo.cargo(value)@.
-...text:Use @Function.add@ instead to insert multiple values of the same key
-..see:map#add
+...text:Use @Function.map#add@ instead to insert multiple values of the same key
+..see:Function.map#add
 */
 
 template <typename TValue, typename TSpec, typename TValue2>
@@ -797,8 +797,8 @@ _skiplistUnlinkElement(Map<TValue, Skiplist<TSpec> > & me,
 ...metafunction:Metafunction.Iterator
 ..remarks:Removes the first value in $map$ of the given key, if there is any.
 ...text:Use @Function.map#eraseAll@ to remove all values of the given key in a multi map.
-..see:map#add
-..see:map#insert
+..see:Function.map#add
+..see:Function.map#insert
 */
 
 template <typename TValue, typename TSpec, typename TMap2>
@@ -835,12 +835,10 @@ erase(Map<TValue, Skiplist<TSpec> > & me,
 ...type:Spec.Skiplist
 ..param.key:The key of a value in $map$.
 ...metafunction:Metafunction.Key
-..param.iterator:An iterator to a value in $map$.
-...metafunction:Metafunction.Iterator
-..remarks:Removes the first value in $map$ of the given key, if there is any.
-...text:Use @Function.map#eraseAll@ to remove all values of the given key in a multi map.
-..see:map#add
-..see:map#insert
+..remarks:Removes all values in $map$ of the given key, if there is any.
+..see:Function.map#add
+..see:Function.map#insert
+..see:Function.map#erase
 */
 
 template <typename TValue, typename TSpec, typename TToRemove>

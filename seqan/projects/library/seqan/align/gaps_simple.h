@@ -49,6 +49,15 @@ struct SequenceGaps;
 //////////////////////////////////////////////////////////////////////////////
 // Gaps - SequenceGaps Spec
 //////////////////////////////////////////////////////////////////////////////
+/**
+.Spec.SequenceGaps:
+..cat:Alignments
+..general:Class.Gaps
+..summary:Stores gapped sequences as sequences including blank signs.
+..signature:Gaps<TSource, SequenceGaps>
+..param.TSource:Type of the ungapped sequence.
+...metafunction:Metafunction.Source
+*/
 
 template <typename TSource>
 class Gaps<TSource, SequenceGaps>
@@ -473,7 +482,7 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 
-///.Function.setSourceBeginPosition.remarks.note: 
+//DISABLED/.Function.setSourceBeginPosition.remarks.note: 
 ///Since @Spec.SequenceGaps@ stores the source implicitely,  
 ///setting the source begin or source end position has no effect for that specialization.
 template <typename TSource, typename TPosition>
@@ -487,7 +496,7 @@ setSourceBeginPosition(Gaps<TSource, SequenceGaps> & ,
 
 //////////////////////////////////////////////////////////////////////////////
 
-///.Function.setSourceEndPosition.remarks.note: 
+//DISABLED/.Function.setSourceEndPosition.remarks.note: 
 ///Since @Spec.SequenceGaps@ stores the source implicitely,  
 ///setting the source begin or source end position has no effect for that specialization.
 template <typename TSource, typename TPosition>

@@ -390,7 +390,7 @@ addOption(CommandLineParser & me,CommandLineOption const & opt){
 ..signature:hasOption(parser,optionIdentifier)
 ..param.parser:The @Class.CommandLineParser@ object.
 ...type:Class.CommandLineParser
-..param.optionIdentifier:A $char$ or a @ShortCut.CharString@ that identifies the option.
+..param.optionIdentifier:A $char$ or a @Shortcut.CharString@ that identifies the option.
 */
 bool 
 hasOption(CommandLineParser & me, CharString const & _long)
@@ -573,7 +573,7 @@ help(CommandLineParser & me)
 ..signature:isSet(parser,optionIdentifier)
 ..param.parser:The @Class.CommandLineParser@ object.
 ...type:Class.CommandLineParser
-..param.optionIdentifier:A $char$ or a @ShortCut.CharString@ that identifies the option.
+..param.optionIdentifier:A $char$ or a @Shortcut.CharString@ that identifies the option.
 */
 inline bool
 isSet(CommandLineParser & me,char const & shortName)
@@ -863,7 +863,7 @@ parse(CommandLineParser & me,int argc, const char *argv[])
 ..signature:getOptionValue(parser,optionIdentifier,value)
 ..param.parser:The @Class.CommandLineParser@ object.
 ...type:Class.CommandLineParser
-..param.optionIdentifier:A $char$ or a @ShortCut.CharString@ that identifies the option.
+..param.optionIdentifier:A $char$ or a @Shortcut.CharString@ that identifies the option.
 ..param.value:The variable where the value is stored.
 ...remarks: The variable type ($int$, $double$, $bool$ or @Shortcut.CharString@) depends on the OptionTyp.
 ..returns: $true$ if the requested option is set and has the requested type, $false$ otherwise.
