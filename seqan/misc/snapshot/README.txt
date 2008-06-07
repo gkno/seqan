@@ -2,7 +2,7 @@ This is SeqAn, the C++ template library for sequence analysis
 
 See http://www.seqan.de for more information
 
-Read "docs/Page_Installation.html" for detailled installation instructions.
+Read "docs/Page_Installation.html" for detailed installation instructions.
 
 
 Folders:
