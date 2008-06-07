@@ -36,20 +36,26 @@ namespace SEQAN_NAMESPACE_MAIN
 		TText const &r,				// text to compare with
 		TCountArray &c,				// temp. counter array
 		unsigned K)					// alphabet size
-	{ // count occurrences
-		typedef typename Value<TCountArray>::Type	TSize;
-		typedef typename Value<TText>::Type			TValue;
+	{
+		typedef typename Value<TCountArray>::Type TSize;
 
-		TSize i, sum = 0, n = length(a);								// for (i = 0;  i < K;  i++) c[i] = 0;
+		TSize i, sum = 0, n = length(a);
 		arrayFill(begin(c, Standard()), begin(c, Standard()) + K, 0);	// reset counters
+		
 		for (i = 0;  i < n;  i++)										// count occurences
-			c[ordValue(r[a[i]])]++;
-		for (i = 0;  i < K;  i++) {										// exclusive prefix sums
-			TSize t = c[i];  c[i] = sum;  sum += t;
+			c[ordValue(getValue(r,getValue(a,i)))]++;
+			
+		for (i = 0;  i < K;  i++)
+		{																// exclusive prefix sums
+			TSize t = getValue(c,i);
+			c[i] = sum;
+			sum += t;
 		}
-		for (i = 0;  i < n;  i++) {
-			TSize j = a[i];												// sort
-			b[c[ordValue(r[j])]++] = j;
+		
+		for (i = 0;  i < n;  i++)
+		{
+			TSize j = getValue(a,i);									// sort
+			b[c[ordValue(getValue(r,j))]++] = j;
 		}
 	}
 
@@ -66,24 +72,34 @@ namespace SEQAN_NAMESPACE_MAIN
 		TCountArray &c,				// temp. counter array
 		unsigned K,					// alphabet size
 		TShift shift)				// shift value
-	{ // count occurrences
-		typedef typename Value<TCountArray>::Type	TSize;
-		typedef typename Value<TText>::Type			TValue;
+	{
+		typedef typename Value<TCountArray>::Type TSize;
 
 		TSize i, sum = 0, n = length(a), sn = length(r);
 		arrayFill(begin(c, Standard()), begin(c, Standard()) + K, 0);	// reset counters
-		for (i = 0;  i < n;  i++) {
-			TSize j = a[i] + shift;										// count occurences
-			if (j < sn) c[ordValue(r[j])]++;
+		
+		for (i = 0;  i < n;  i++)
+		{
+			TSize j = getValue(a,i) + shift;							// count occurences
+			if (j < sn) c[ordValue(getValue(r,j))]++;
 			else        sum++;
 		}
-		for (i = 0;  i < K;  i++) {										// exclusive prefix sums
-			TSize t = c[i];  c[i] = sum;  sum += t;
+		
+		for (i = 0;  i < K;  i++)
+		{																// exclusive prefix sums
+			TSize t = getValue(c,i);
+			c[i] = sum;
+			sum += t;
 		}
-		for (i = 0, sum = 0;  i < n;  i++) {							// sort
-			TSize j = a[i] + shift;
-			if (j < sn) b[c[ordValue(r[j])]++] = a[i];	// On Exception: Make sure, you have resized your sufarray
-			else        b[sum++    ] = a[i];		// before calling createSuffixArray(..) to length(text)?
+		
+		for (i = 0, sum = 0;  i < n;  i++)
+		{																// sort
+			TSize j = getValue(a,i);
+			TSize k = j + shift;
+			if (k < sn) 
+				b[c[ordValue(getValue(r,k))]++] = j;	// On Exception: Make sure, you have resized your sufarray
+			else
+				b[sum++] = j;							// before calling createSuffixArray(..) to length(text)?
 		}
 	}
 
@@ -99,21 +115,26 @@ namespace SEQAN_NAMESPACE_MAIN
 		TText const &r,				// text to compare with
 		TCountArray &c,				// temp. counter array
 		unsigned K)					// alphabet size
-	{ // count occurrences
-		typedef typename Value<TCountArray>::Type	TSize;
-		typedef typename Value<TText>::Type			TValue;
+	{
+		typedef typename Value<TCountArray>::Type TSize;
 
-		const TValue *rp = begin(r, Standard()) - 1;
-		TSize i, sum = 0, n = length(a);								// for (i = 0;  i < K;  i++) c[i] = 0;
+		TSize i, sum = 0, n = length(a);
 		arrayFill(begin(c, Standard()), begin(c, Standard()) + K, 0);	// reset counters
+		
 		for (i = 0;  i < n;  i++)										// count occurences
-			c[ordValue(rp[a[i]])]++;
-		for (i = 0;  i < K;  i++) {										// exclusive prefix sums
-			TSize t = c[i];  c[i] = sum;  sum += t;
+			c[ordValue(getValue(r,getValue(a,i)-1))]++;
+			
+		for (i = 0;  i < K;  i++) 
+		{																// exclusive prefix sums
+			TSize t = getValue(c,i);
+			c[i] = sum;
+			sum += t;
 		}
-		for (i = 0;  i < n;  i++) {
-			TSize j = a[i];												// sort
-			b[c[ordValue(rp[j])]++] = j - 1;
+		
+		for (i = 0;  i < n;  i++)
+		{
+			TSize j = getValue(a,i);									// sort
+			b[c[ordValue(getValue(r,j-1))]++] = j - 1;
 		}
 	}
 
@@ -129,23 +150,29 @@ namespace SEQAN_NAMESPACE_MAIN
 		TText const &r,				// text to compare with
 		TCountArray &c,				// temp. counter array
 		unsigned K)					// alphabet size
-	{ // count occurrences
-		typedef typename Value<TCountArray>::Type	TSize;
-		typedef typename Value<TText>::Type			TValue;
+	{
+		typedef typename Value<TCountArray>::Type TSize;
 
-		const TValue *rp = begin(r, Standard()) - 1;
-        TSize i, sum = 0, n = length(a);								// for (i = 0;  i < K;  i++) c[i] = 0;
+		TSize i, sum = 0, n = length(a);
 		arrayFill(begin(c, Standard()), begin(c, Standard()) + K, 0);	// reset counters
-		for (i = 0;  i < n;  i++) {										// count occurences
-	        TSize j = a[i];
-			if (j > 0) c[ordValue(rp[j])]++;
+		
+		for (i = 0;  i < n;  i++)
+		{																// count occurences
+	        TSize j = getValue(a,i);
+			if (j > 0) c[ordValue(getValue(r,j-1))]++;
 		}
-		for (i = 0;  i < K;  i++) {										// exclusive prefix sums
-			TSize t = c[i];  c[i] = sum;  sum += t;
+		
+		for (i = 0;  i < K;  i++)
+		{																// exclusive prefix sums
+			TSize t = getValue(c,i);
+			c[i] = sum;
+			sum += t;
 		}
-		for (i = 0;  i < n;  i++) {
-			TSize j = a[i];												// sort
-			if (j > 0) b[c[ordValue(rp[j])]++] = j - 1;
+		
+		for (i = 0;  i < n;  i++)
+		{
+			TSize j = getValue(a,i);									// sort
+			if (j > 0) b[c[ordValue(getValue(r,j-1))]++] = j - 1;
 		}
 	}
 
