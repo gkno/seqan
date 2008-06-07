@@ -11,7 +11,7 @@ void read_blast_report(TFile & strm)
 
 /// First the type of Blast report needs to specified: 
 /// In this case, a BlastN report is parsed and for each alignment in the report (i.e. each HSP) we choose to parse 
-/// all the possible information delivered with the alignment (e.g. scores, percentage of gaps, orientation... see @Class.Hsp@)
+/// all the possible information delivered with the alignment (e.g. scores, percentage of gaps, orientation... see @Class.BlastHsp@)
 
 	typedef BlastHsp<BlastN, FullInfo> TBlastHsp;
 

@@ -1436,7 +1436,7 @@ SEQAN_CHECKPOINT
 }
 
 /**
-.Function.getScore:
+.Function.Blast#getScore:
 ..cat:Blast
 ..summary:The Smith-Waterman score associated with a Blast HSP.
 ..signature:getScore(object);
