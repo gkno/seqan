@@ -18,8 +18,13 @@ Table of Contents
 RazerS is a tool for mapping millions of short genomic reads against a 
 reference genome. It was designed with focus on mapping next-generation 
 sequencing reads against whole DNA genomes. RazerS searches for matches of 
-reads with minimum percent identity, whereby it detects matches with 
-mismatches as well as gaps.
+reads with a percent identity above a given threshold, whereby it detects
+matches with mismatches as well as gaps.
+RazerS uses a k-mer index of all reads and counts common k-mers of reads
+and the reference genome in parallelograms. Each parallelogram with a k-mer
+count above a certain threshold triggers a verification. On success, the 
+genomic subsequence and the read number are stored and written in the 
+output file.
 
 ---------------------------------------------------------------------------
 2. Installation
@@ -96,7 +101,7 @@ Options:
   ids of the genome sequences are used (default). If NUM is 1, the genome
   sequences are enumerated beginning with 1.
 
-  [ -RN NUM ], [ --read-naming NUM ]
+  [ -RN NUM ],  [ --read-naming NUM ]
   
   Select how reads are named in the output file. If NUM is 0, the Fasta ids 
   of the reads are used (default). If NUM is 1, the reads are enumerated
@@ -119,7 +124,7 @@ Options:
   
   Verbose. Print extra information and running times.
 
-  [ -vv ], [ --vverbose ]
+  [ -vv ],  [ --vverbose ]
 
   Very verbose. Like -v, but also print filtering statistics like true and
   false positives (TP/FP).
@@ -157,8 +162,8 @@ related forward strand.
 
 There are example read and genome files in the folder in snapshot/apps/
 razers/ containing 2 27bp reads and a short genome sequence. The 2 reads 
-and their reverse-complements were planted with errors into the genome. To 
-see map the example reads against the genome do the following:
+and their reverse-complements were implanted with errors into the genome.
+To see map the example reads against the genome do the following:
 
   1)  cd snapshot
   2)  cd apps
