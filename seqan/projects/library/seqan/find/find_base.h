@@ -85,6 +85,16 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Host<TPattern>::Type Type;
 	};
 
+	template <typename THost, typename TSpec>
+	struct Needle<Segment<THost, TSpec> > {
+		typedef Segment<THost, TSpec> Type;
+	};
+
+	template <typename THost, typename TSpec>
+	struct Needle<Segment<THost, TSpec> const> {
+		typedef Segment<THost, TSpec> const Type;
+	};
+
 //////////////////////////////////////////////////////////////////////////////
 
 /**
