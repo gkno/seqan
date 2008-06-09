@@ -62,4 +62,9 @@
 #include <seqan/sequence/sequence_multiple.h>
 #include <seqan/sequence/sequence_shortcuts.h>
 
+//____________________________________________________________________________
+// Adaptions
+
+#include <seqan/sequence/adapt_std_list.h>
+
 #endif //#ifndef SEQAN_HEADER_...
