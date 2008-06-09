@@ -1454,7 +1454,7 @@ delete_everything(SeedSet<TValue, TSeedSpec, const Tag<Scoring_Scheme<TQualityFa
 {
 	typedef typename Size<SeedSet<TValue, TSeedSpec, const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, void> >, void> >::Type TSize;
 	typedef multimap<TValue, TSize > TMap;
-	typedef typename set<TSize>::iterator TSetIterator;
+	typedef typename std::set<TSize>::iterator TSetIterator;
 	TSetIterator set_end = deletionTarget.result.end();
 	typename TMap::iterator it_end = deletionTarget.fragmentMap.end();
 	TSize pos;
