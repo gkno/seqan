@@ -181,7 +181,7 @@ __getAlignmentStatistics(Graph<Undirected<TCargo, TSpec> >& dist,
 template<typename TStringSet, typename TCargo, typename TSpec, typename TPair, typename TPairSpec, typename TDistance, typename TScore>
 inline void 
 generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-					   String<TPair, TPairSpec> const& pList,
+					   String<TPair, TPairSpec> const& begEndPos,
 					   TDistance& dist,
 					   TScore const& score_type,
 					   Overlap_Library)
@@ -190,7 +190,7 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename Size<TGraph>::Type TSize;
 	typedef typename Id<TGraph>::Type TId;
-	typedef typename Iterator<String<TPair, TPairSpec> >::Type TPairIter;
+	typedef typename Iterator<String<TPair, TPairSpec> >::Type TBegEndIter;
 
 	// Clear library
 	clearVertices(g);
@@ -207,51 +207,120 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	TFragmentString matches;
 
 	// All pairwise alignments
-	TPairIter pairIt = begin(pList);
-	TPairIter pairItEnd = end(pList);
-	for(;pairIt != pairItEnd; ++pairIt) {
-		// Make a pairwise string-set
-		TStringSet pairSet;
-		TId id1 = (value(pairIt)).i1;
-		TId id2 = (value(pairIt)).i2;
-		assignValueById(pairSet, str, id1);
-		assignValueById(pairSet, str, id2);
-		
-		// Overlap alignment
-		TSize from = length(matches);
-		globalAlignment(matches, pairSet, score_type, AlignConfig<true,true,true,true>(), Gotoh() );
+	TBegEndIter beIt = begin(begEndPos);
+	TBegEndIter beItEnd = end(begEndPos);
+	TSize index1 = 0;
+	for(;beIt != beItEnd; ++beIt, ++index1) {
+		int posIi1 = (value(beIt)).i1;
+		int posIi2 = (value(beIt)).i2;
+		TBegEndIter beIt2 = beIt;
+		++beIt2;
+		TSize index2 = index1 + 1;
+		for(;beIt2 != beItEnd; ++beIt2, ++index2) {
+			int posJi1 = (value(beIt2)).i1;
+			int posJi2 = (value(beIt2)).i2;
 
-		// Determine a sequence weight
-		TSize matchLen = 0;
-		TSize overlapLen = 0;
-		TSize alignLen = 0;
-		getAlignmentStatistics(matches, pairSet, from, matchLen, overlapLen, alignLen);
-		double quality = (double) matchLen / (double) overlapLen;
+			// Diagonal boundaries of the band
+			// Initialization values are used if one read is contained in the other 
+			int diagLow = -1 * (posJi2 - posJi1);
+			if (posJi2 < posJi1) diagLow = -1 * (posJi1 - posJi2);
+			int diagHigh = posIi2 - posIi1;
+			if (posIi2 < posIi1) diagHigh = posIi1 - posIi2;
+			int radius = 10;
 
-		// Get only the good overlap alignments
-		if (((quality >= 1) && (matchLen >= 8)) ||
-			((quality >= 0.8) && (matchLen >= 15))) {
+			// Read orientations
+			if (posIi1 < posIi2) {
+				// 1) Forward - Forward
+				if (posJi1 < posJi2) {
+					if ((posJi1 >= posIi2) || (posJi2 <= posIi1)) continue;
+					if ((posJi2 < posIi2) && (posJi1 < posIi1)) {
+						if (-1 * (posIi1 - posJi1) - radius > diagLow) diagLow = -1 * (posIi1 - posJi1) - radius;
+						if (-1 * (posIi1 - posJi1) + radius < diagHigh) diagHigh = -1 * (posIi1 - posJi1) + radius;
+					} else if ((posJi1 > posIi1) && (posJi2 > posIi2)) {
+						if ((posJi1 - posIi1) + radius < diagHigh) diagHigh = (posJi1 - posIi1) + radius;
+						if ((posJi1 - posIi1) - radius > diagLow) diagLow = (posJi1 - posIi1) - radius;
+					}
+				} else { // 2) Forward - Reverse
+					if ((posJi2 >= posIi2) || (posJi1 <= posIi1)) continue;
+					if ((posJi1 < posIi2) && (posJi2 < posIi1)) {
+						if (-1 * (posIi1 - posJi2) - radius > diagLow) diagLow = -1 * (posIi1 - posJi2) - radius;
+						if (-1 * (posIi1 - posJi2) + radius < diagHigh) diagHigh = -1 * (posIi1 - posJi2) + radius;
+					} else if ((posJi2 > posIi1) && (posJi1 > posIi2)) {
+						if ((posJi2 - posIi1) + radius < diagHigh) diagHigh = (posJi2 - posIi1) + radius;
+						if ((posJi2 - posIi1) - radius > diagLow) diagLow = (posJi2 - posIi1) - radius;
+					} 
+				}
+			} else { 
+				// 3) Reverse - Forward
+				if (posJi1 < posJi2) {
+					if ((posJi1 >= posIi1) || (posJi2 <= posIi2)) continue;
+					if ((posIi1 > posJi2) && (posIi2 > posJi1)) {
+						if (-1 * (posIi2 - posJi1) - radius > diagLow) diagLow = -1 * (posIi2 - posJi1) - radius;
+						if (-1 * (posIi2 - posJi1) + radius < diagHigh) diagHigh = -1 * (posIi2 - posJi1) + radius;
+					} else if ((posJi1 > posIi2) && (posJi2 > posIi1)) {
+						if ((posJi1 - posIi2) + radius < diagHigh) diagHigh = (posJi1 - posIi2) + radius;
+						if ((posJi1 - posIi2) - radius > diagLow) diagLow = (posJi1 - posIi2) - radius;
+					}
+				} else { // 4) Reverse - Reverse
+					if ((posJi2 >= posIi1) || (posJi1 <= posIi2)) continue;
+					if ((posJi1 < posIi1) && (posJi2 < posIi2)) {
+						if (-1 * (posIi2 - posJi2) - radius > diagLow) diagLow = -1 * (posIi2 - posJi2) - radius;
+						if (-1 * (posIi2 - posJi2) + radius < diagHigh) diagHigh = -1 * (posIi2 - posJi2) + radius;
+					} else if ((posJi2 > posIi2) && (posJi1 > posIi1)) {
+						if ((posJi2 - posIi2) + radius < diagHigh) diagHigh = (posJi2 - posIi2) + radius;
+						if ((posJi2 - posIi2) - radius > diagLow) diagLow = (posJi2 - posIi2) - radius;
+					}
+				}
+			}
 
-			// Create a corresponding edge
-			TSize i = idToPosition(str, id1);
-			TSize j = idToPosition(str, id2);
 
-			if (i<j) __getAlignmentStatistics(dist, i, j, nseq, matchLen, quality);
-			else __getAlignmentStatistics(dist, j, i, nseq, matchLen, quality);
-		} else {
-			resize(matches, from);
+			// Make a pairwise string-set
+			TStringSet pairSet;
+			TId id1 = positionToId(str, index1);
+			TId id2 = positionToId(str, index2);
+			assignValueById(pairSet, str, id1);
+			assignValueById(pairSet, str, id2);
+
+			// Overlap alignment
+			TSize from = length(matches);
+			globalAlignment(matches, pairSet, score_type, AlignConfig<true,true,true,true>(), diagLow, diagHigh, BandedGotoh() );
+			//globalAlignment(matches, pairSet, score_type, AlignConfig<true,true,true,true>(), Gotoh() );
+
+			// Determine a sequence weight
+			TSize matchLen = 0;
+			TSize overlapLen = 0;
+			TSize alignLen = 0;
+			getAlignmentStatistics(matches, pairSet, from, matchLen, overlapLen, alignLen);
+			double quality = (double) matchLen / (double) overlapLen;
+
+			// Get only the good overlap alignments
+			if (((quality >= 1) && (matchLen >= 8)) ||
+				((quality >= 0.8) && (matchLen >= 15))) {
+
+				// Create a corresponding edge
+				TSize i = idToPosition(str, id1);
+				TSize j = idToPosition(str, id2);
+
+				if (i<j) __getAlignmentStatistics(dist, i, j, nseq, matchLen, quality);
+				else __getAlignmentStatistics(dist, j, i, nseq, matchLen, quality);
+			} else {
+				resize(matches, from);
 			
-			//// Debug Code
-			//TGraph tmp(pairSet);
-			//Score<int> st = Score<int>(5,-2,-4,-14);
-			//globalAlignment(tmp, pairSet, st, Gotoh() );
-			//std::cout << "Match length: " << matchLen << std::endl;
-			//std::cout << "Overlap length: " << overlapLen << std::endl;
-			//std::cout << "Align length: " << alignLen << std::endl;
-			//std::cout << "Quality: " << quality << std::endl;
-			//std::cout << tmp << std::endl;
+				//// Debug Code
+				//TGraph tmp(pairSet);
+				//Score<int> st = Score<int>(5,-2,-4,-14);
+				//globalAlignment(tmp, pairSet, st, Gotoh() );
+				//std::cout << "Match length: " << matchLen << std::endl;
+				//std::cout << "Overlap length: " << overlapLen << std::endl;
+				//std::cout << "Align length: " << alignLen << std::endl;
+				//std::cout << "Quality: " << quality << std::endl;
+				//std::cout << tmp << std::endl;
+			}
 		}
 	}
+
+	//_debugMatches(str, matches);
+	//std::cout << "finished" << std::endl;
 
 	// Refine all matches, rescore the matches and create multiple alignment
 	matchRefinement(matches,str,const_cast<TScore&>(score_type),g);

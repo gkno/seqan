@@ -133,6 +133,82 @@ globalAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 }
 
 
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec, typename TScoreValue, typename TSpec2, typename TAlignConfig, typename TDiagonal>
+inline TScoreValue
+globalAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+				Score<TScoreValue, TSpec2> const& sc,
+				TAlignConfig const,
+				TDiagonal diag1,
+				TDiagonal diag2,
+				BandedGotoh)
+{
+	SEQAN_CHECKPOINT
+	clearVertices(g);
+	return _globalAlignment(g,stringSet(g),sc, TAlignConfig(), diag1, diag2, BandedGotoh());
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec, typename TScoreValue, typename TSpec2, typename TDiagonal>
+inline TScoreValue
+globalAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+				Score<TScoreValue, TSpec2> const& sc,
+				TDiagonal diag1,
+				TDiagonal diag2,
+				BandedGotoh)
+{
+	SEQAN_CHECKPOINT
+	return globalAlignment(g,sc, AlignConfig<>(), diag1, diag2, BandedGotoh());
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TScoreValue, typename TSpec, typename TAlignConfig, typename TDiagonal>
+inline TScoreValue
+globalAlignment(TStringSet const& str,
+				Score<TScoreValue, TSpec> const& sc,
+				TAlignConfig const,
+				TDiagonal diag1,
+				TDiagonal diag2,
+				BandedGotoh)
+{
+	SEQAN_CHECKPOINT
+	return _globalAlignment(str,sc, TAlignConfig(), diag1, diag2, BandedGotoh());
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TAlign, typename TStringSet, typename TScoreValue, typename TSpec, typename TDiagonal>
+inline TScoreValue
+globalAlignment(TAlign& file,
+				TStringSet const& str,
+				Score<TScoreValue, TSpec> const& sc,
+				TDiagonal diag1,
+				TDiagonal diag2,
+				BandedGotoh)
+{
+	SEQAN_CHECKPOINT
+	return globalAlignment(file,str,sc, AlignConfig<>(), diag1, diag2, BandedGotoh());
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TAlign, typename TStringSet, typename TScoreValue, typename TSpec, typename TAlignConfig, typename TDiagonal>
+inline TScoreValue
+globalAlignment(TAlign& file,
+				TStringSet const& str,
+				Score<TScoreValue, TSpec> const& sc,
+				TAlignConfig const,
+				TDiagonal diag1,
+				TDiagonal diag2,
+				BandedGotoh)
+{
+	SEQAN_CHECKPOINT
+	return _globalAlignment(file,str,sc, TAlignConfig(), diag1, diag2, BandedGotoh());
+}
 
 
 //////////////////////////////////////////////////////////////////////////////

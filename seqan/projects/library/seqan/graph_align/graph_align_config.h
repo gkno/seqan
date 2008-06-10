@@ -231,7 +231,6 @@ _processLastRow(AlignConfig<TTop, TLeft, TRight, true, TSpec> const,
 	}
 }
 
-
 //////////////////////////////////////////////////////////////////////////////
 
 template<bool TTop, bool TLeft, bool TBottom, typename TSpec, typename TValue1, typename TIndex1, typename TColumn>

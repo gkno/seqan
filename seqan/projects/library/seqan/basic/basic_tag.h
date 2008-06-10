@@ -93,6 +93,15 @@ typedef Tag<Gotoh_> const Gotoh;
 //////////////////////////////////////////////////////////////////////////////
 
 /**
+.Tag.Global Alignment Algorithms.value.BandedGotoh:
+	Gotoh's affine gap cost alignment algorithm in a banded version.
+*/
+struct BandedGotoh_;
+typedef Tag<BandedGotoh_> const BandedGotoh;
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
 .Tag.Global Alignment Algorithms.value.MyersBitVector:
 	Myers' bit vector alignment algorithm for edit distance.
 	Note that this algorithm does not returns the alignment itself, but only computes the score.
