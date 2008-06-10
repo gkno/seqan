@@ -164,14 +164,24 @@ void Test_Gotoh() {
 	SEQAN_TASSERT(numVertices(g) == 5)
 	int score2 = globalAlignment(stringSet(g), score_type, AlignConfig<true,false,false,false>(), Gotoh() );
 	SEQAN_TASSERT(score == score2)
+	int score3 = globalAlignment(stringSet(g), score_type, AlignConfig<true,false,false,false>(), -1 * length(stringSet(g)[1]), length(stringSet(g)[0]), BandedGotoh());
+	SEQAN_TASSERT(score2 == score3)
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,true,false,false>(), Gotoh() );
 	SEQAN_TASSERT(score == score2)
+	score3 = globalAlignment(stringSet(g), score_type, AlignConfig<false,true,false,false>(), -1 * length(stringSet(g)[1]), length(stringSet(g)[0]), BandedGotoh());
+	SEQAN_TASSERT(score2 == score3)
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,false>(), Gotoh() );
 	SEQAN_TASSERT(score == score2)
+	score3 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,false>(), -1 * length(stringSet(g)[1]), length(stringSet(g)[0]), BandedGotoh());
+	SEQAN_TASSERT(score2 == score3)
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,false,true>(), Gotoh() );
 	SEQAN_TASSERT(score == score2)
+	score3 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,false,true>(), -1 * length(stringSet(g)[1]), length(stringSet(g)[0]), BandedGotoh());
+	SEQAN_TASSERT(score2 == score3)
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,true>(), Gotoh() );
 	SEQAN_TASSERT(score == score2)
+	score3 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,true>(), -1 * length(stringSet(g)[1]), length(stringSet(g)[0]), BandedGotoh());
+	SEQAN_TASSERT(score2 == score3)
 	std::cout << g << std::endl;
 
 	str[0] = "ttgt";
