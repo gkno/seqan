@@ -32,6 +32,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..cat:Alignments
 ..signature:globalAlignment(align, score [, align_config], tag)
 ..signature:globalAlignment(result, strings, score [, align_config], tag)
+..signature:globalAlignment(result, strings, score [, align_config], diagLow, diagHigh, BandedGotoh() )
 ..param.align:An alignment data structure containing two sequences.
 ...type:Spec.Alignment Graph
 ...type:Class.Align

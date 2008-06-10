@@ -387,10 +387,10 @@ _globalAlignment(TAlign& align,
 	typedef typename Value<TScore>::Type TScoreValue;
 	typedef String<TScoreValue> TColumn;
 	TColumn mat; TColumn horizontal; TColumn vertical;
-	TScoreValue maxScore = _align_banded_gotoh(mat, horizontal, vertical, str, sc, overallMaxValue, overallMaxIndex, diag1, diag2, TAlignConfig());
+	TScoreValue maxScore = _align_banded_gotoh(mat, horizontal, vertical, str, sc, overallMaxValue, overallMaxIndex, (int) diag1, (int) diag2, TAlignConfig());
 	
 	// Follow the trace and create the graph
-	_align_banded_gotoh_trace(align, str, sc, mat, horizontal, vertical, overallMaxValue, overallMaxIndex, diag1, diag2);
+	_align_banded_gotoh_trace(align, str, sc, mat, horizontal, vertical, overallMaxValue, overallMaxIndex, (int) diag1, (int) diag2);
 
 	return maxScore;
 }
@@ -418,7 +418,7 @@ _globalAlignment(TStringSet const& str,
 	typedef typename Value<TScore>::Type TScoreValue;
 	typedef String<TScoreValue> TColumn;
 	TColumn mat; TColumn horizontal; TColumn vertical;
-	return _align_banded_gotoh(mat, horizontal, vertical, str, sc, overallMaxValue, overallMaxIndex, diag1, diag2, TAlignConfig());
+	return _align_banded_gotoh(mat, horizontal, vertical, str, sc, overallMaxValue, overallMaxIndex, (int) diag1, (int) diag2, TAlignConfig());
 }
 
 
