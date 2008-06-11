@@ -226,7 +226,7 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 			if (posJi2 < posJi1) diagLow = -1 * (posJi1 - posJi2);
 			int diagHigh = posIi2 - posIi1;
 			if (posIi2 < posIi1) diagHigh = posIi1 - posIi2;
-			int radius = 10;
+			int radius = 10;		// Band width
 
 			// Read orientations
 			if (posIi1 < posIi2) {
@@ -318,9 +318,6 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 			}
 		}
 	}
-
-	//_debugMatches(str, matches);
-	//std::cout << "finished" << std::endl;
 
 	// Refine all matches, rescore the matches and create multiple alignment
 	matchRefinement(matches,str,const_cast<TScore&>(score_type),g);
