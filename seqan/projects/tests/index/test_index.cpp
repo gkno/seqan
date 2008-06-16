@@ -127,6 +127,7 @@ void testMultiIndex()
 		{
 			cout << endl << "TopDown preorder without empty edges" << endl;
 			Iter<Index<TMulti>, VSTree< TopDown<ParentLinks<Preorder> > > > it(esa);
+			goDown(it,'c');
 			while (!atEnd(it)) {
 				_printNode(it);
 				goNext(it);
