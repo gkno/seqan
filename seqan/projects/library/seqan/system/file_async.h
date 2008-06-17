@@ -631,7 +631,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			}
 
 			if (Base::_getOFlag(openMode | OPEN_ASYNC) & O_DIRECT) {
-				handleAsync = ::open(fileName, Base::_getOFlag(openMode | OPEN_ASYNC & ~OPEN_CREATE), S_IREAD | S_IWRITE);
+				handleAsync = ::open(fileName, Base::_getOFlag(openMode | (OPEN_ASYNC & ~OPEN_CREATE)), S_IREAD | S_IWRITE);
 				if (handleAsync == -1 || errno == EINVAL) {	// fall back to cached access
 					#ifdef SEQAN_DEBUG_OR_TEST_
 						if (!(openMode & OPEN_QUIET))
@@ -922,12 +922,14 @@ namespace SEQAN_NAMESPACE_MAIN
 			 TagAllocateAligned const)
 	{
 		data = (TValue *) valloc(count * sizeof(TValue));
+#ifdef SEQAN_PROFILE 
         if (data)
 			SEQAN_PROADD(SEQAN_PROMEMORY, count * sizeof(TValue));
 		else
 			::std::cerr << "AlignAllocator: Could not allocate memory of size " << ::std::hex << 
 				count * sizeof(TValue) << " with page alignment. (ErrNo=" << ::std::dec <<
 				errno << ")" << ::std::endl;
+#endif
 	}
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -936,12 +938,18 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename T, typename TValue, typename TSize>
 	inline void 
 	deallocate( T const & /*me*/,
-				TValue * data, 
-				TSize count,
+				TValue * data,
+				TSize
+#ifdef SEQAN_PROFILE 
+					count
+#endif
+					,
 				TagAllocateAligned const)
 	{
+#ifdef SEQAN_PROFILE 
         if (data && count)	// .. to use count if SEQAN_PROFILE is not defined
 			SEQAN_PROSUB(SEQAN_PROMEMORY, count * sizeof(TValue));
+#endif
 		free(data);
 	}
 

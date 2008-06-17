@@ -301,8 +301,8 @@ namespace SEQAN_NAMESPACE_MAIN
     {
         typedef typename TPool::Type		Type;
         typedef typename TPool::Buffer		Buffer;
-        typedef PageBucket<Type>            PageBucket;
-        typedef ::std::vector<PageBucket>	Cache;
+        typedef PageBucket<Type>            TPageBucket;
+        typedef ::std::vector<TPageBucket>	Cache;
 
         TPool   &pool;
         Buffer	bucketBuffer;
@@ -315,11 +315,11 @@ namespace SEQAN_NAMESPACE_MAIN
             cancel();
         }
         
-		struct insertBucket : public ::std::unary_function<PageBucket,void> {
+		struct insertBucket : public ::std::unary_function<TPageBucket,void> {
 			Handler &me;
 			insertBucket(Handler &_me): me(_me) {}
 
-			inline void operator() (PageBucket const &cb) const {
+			inline void operator() (TPageBucket const &cb) const {
                 me.cache.push_back(cb);
 			}
 		};
@@ -341,7 +341,7 @@ namespace SEQAN_NAMESPACE_MAIN
                 }
 			#endif
     		SEQAN_ASSERT(pageNo < cache.size());
-			PageBucket &cb = cache[pageNo];
+			TPageBucket &cb = cache[pageNo];
 
 			*cb.cur = item;
 			if (++cb.cur == cb.end)
@@ -393,14 +393,14 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef typename TPool::File                File;
 
         typedef SimpleBuffer<Type>					Buffer;
-        typedef PageFrame<Type, File, Dynamic<> >   PageFrame;
-        typedef PageBucket<Type>                    PageBucket;
-        typedef ::std::vector<PageBucket>	        Cache;
-        typedef PageChain<PageFrame>	            PageChain;
+        typedef PageFrame<Type, File, Dynamic<> >   TPageFrame;
+        typedef PageBucket<Type>                    TPageBucket;
+        typedef ::std::vector<TPageBucket>	        Cache;
+        typedef PageChain<TPageFrame>	            TPageChain;
 
         TPool       &pool;
         Buffer		bucketBuffer;
-        PageChain	chain;
+        TPageChain	chain;
         Buffer		writeCache;
         Cache       cache;
         unsigned    clusterSize;
@@ -417,11 +417,11 @@ namespace SEQAN_NAMESPACE_MAIN
             cancel();
         }
         
-		struct insertBucket : public ::std::unary_function<PageBucket,void> {
+		struct insertBucket : public ::std::unary_function<TPageBucket,void> {
 			Handler &me;
 			insertBucket(Handler &_me): me(_me) {}
 
-			inline void operator() (PageBucket const &cb) const {
+			inline void operator() (TPageBucket const &cb) const {
                 me.cache.push_back(cb);
 			}
 		};
@@ -451,7 +451,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
             // distribute write back buffers
             Type *cur = writeCache.begin;
-            PageFrame *p = chain.first;
+            TPageFrame *p = chain.first;
             while (p) {
                 p->begin = cur; cur += clusterSize;
                 p->end = cur;
@@ -472,7 +472,7 @@ namespace SEQAN_NAMESPACE_MAIN
                 }
 			#endif
             SEQAN_ASSERT(pageNo < cache.size());
-			PageBucket &cb = cache[pageNo];
+			TPageBucket &cb = cache[pageNo];
 
 			*cb.cur = item;
 			if (++cb.cur == cb.end)
@@ -516,7 +516,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
     protected:
 
-        inline void _swap(PageFrame &pf, PageBucket &pb) {
+        inline void _swap(TPageFrame &pf, TPageBucket &pb) {
             Type *tmp = pf.begin;
             pf.begin = pb.begin;
             pf.end   = pb.cur;
@@ -526,11 +526,11 @@ namespace SEQAN_NAMESPACE_MAIN
             pb.end   = tmp + clusterSize;
         }
 
-        bool _writeBucket(PageBucket &cb, unsigned pageNo) {
+        bool _writeBucket(TPageBucket &cb, unsigned pageNo) {
             if ((unsigned)(cb.cur - cb.begin) != clusterSize)
                 return writeBucket(cb, pageNo, pool.pageSize, pool.file);
 
-            PageFrame *pf = chain.getReadyPage();
+            TPageFrame *pf = chain.getReadyPage();
             _swap(*pf, cb);
             pf->pageNo = pageNo;
             return writeBucket(*pf, cb.pageOfs, pool.file);

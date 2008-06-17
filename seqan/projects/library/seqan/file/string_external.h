@@ -916,9 +916,9 @@ you should think of using @Tag.ExternalConfig@.
         typedef typename TConfig::SizeType  SizeType;
 
 		typedef ::std::vector<int>						        PageTable;
-		typedef PageFrame<TValue, TFile, Fixed<_PageSize> >  	PageFrame;
-		typedef PageContainer<PageFrame, _Frames>		        Cache;
-		typedef PageFrame&								        PageFrameRef;
+		typedef PageFrame<TValue, TFile, Fixed<_PageSize> >  	TPageFrame;
+		typedef PageContainer<TPageFrame, _Frames>		        Cache;
+		typedef TPageFrame&								        PageFrameRef;
 
     public: // debug
 		PageTable			pager;
@@ -939,13 +939,13 @@ you should think of using @Tag.ExternalConfig@.
         friend struct VectorFwdIterator<String>;
         friend struct VectorFwdConstIterator<String>;
 
-		typedef VectorIterator<String>					VectorIterator;
-		typedef VectorConstIterator<String>		        VectorConstIterator;
-		typedef VectorFwdIterator<String>				VectorFwdIterator;
-		typedef VectorFwdConstIterator<String>	        VectorFwdConstIterator;
+		typedef VectorIterator<String>					TVectorIterator;
+		typedef VectorConstIterator<String>		        TVectorConstIterator;
+		typedef VectorFwdIterator<String>				TVectorFwdIterator;
+		typedef VectorFwdConstIterator<String>	        TVectorFwdConstIterator;
 
-		typedef VectorFwdIterator		iterator;
-		typedef VectorFwdConstIterator	const_iterator;
+		typedef TVectorFwdIterator		iterator;
+		typedef TVectorFwdConstIterator	const_iterator;
 		typedef Type					value_type;
 		typedef Type&					reference;
 		typedef Type const &			const_reference;
@@ -1025,7 +1025,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 		}
 
 		inline void resize(size_type _newSize) {
-			pager.resize(enclosingBlocks(_newSize, (unsigned)_PageSize), PageFrame::UNINITIALIZED);
+			pager.resize(enclosingBlocks(_newSize, (unsigned)_PageSize), TPageFrame::UNINITIALIZED);
             if (_newSize < _size && file) {
                 waitForAll();                                       // wait for all pending transfers
                 ::seqan::resize(file, (size_type)_newSize * (size_type)sizeof(TValue));   // before shrinking the file size
@@ -1132,7 +1132,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
                 else
                     ::std::cerr << " ";
 
-                if (pf.status == PageFrame::READY)
+                if (pf.status == TPageFrame::READY)
                     ::std::cerr << "   ";
                 else
                     ::std::cerr << ".  ";
@@ -1141,20 +1141,20 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
         }
 
         // return a priority for a page frame (the higher is more persistent)
-        inline typename PageFrame::Priority getPriority(int /*pageNo*/) const {
+        inline typename TPageFrame::Priority getPriority(int /*pageNo*/) const {
 /*            if (keepFirst && pageNo < (int)(cache.size()) - 10) // save 1 for random access
-                return PageFrame::PERMANENT_LEVEL;
+                return TPageFrame::PERMANENT_LEVEL;
             else*/
-                return PageFrame::NORMAL_LEVEL;
+                return TPageFrame::NORMAL_LEVEL;
         }
 
 		// write page to disk if dirty and remove from page table now or after finishing IO
 		inline void flush(PageFrameRef pf) {
-            if (pf.status == PageFrame::READY && pf.dirty) {    // write if dirty and not i/o transferring
+            if (pf.status == TPageFrame::READY && pf.dirty) {    // write if dirty and not i/o transferring
 				nukeCopies(pf.begin);				            // proceeding writes should wait and set dirty bit
 
-                if (pf.priority > PageFrame::NORMAL_LEVEL && pf.priority <= PageFrame::ITERATOR_LEVEL)
-					cache.upgrade(pf, PageFrame::PREFETCH_LEVEL);
+                if (pf.priority > TPageFrame::NORMAL_LEVEL && pf.priority <= TPageFrame::ITERATOR_LEVEL)
+					cache.upgrade(pf, TPageFrame::PREFETCH_LEVEL);
 
 				_ensureFileIsOpen();
 				if (pf.pageNo != (int)(_size / (SizeType)_PageSize))
@@ -1164,7 +1164,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
                     lastDiskPageSize = _size % _PageSize;;
 				    writeLastPage(pf, pf.pageNo, file, lastDiskPageSize);
                 }
-                pf.dataStatus = PageFrame::ON_DISK;
+                pf.dataStatus = TPageFrame::ON_DISK;
 			}
 		}
 
@@ -1172,8 +1172,8 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 		inline void swapOutAndWait(PageFrameRef pf) {
 			nukeCopies(pf.begin);      				// proceeding writes should wait and set dirty bit
 
-            if (pf.status != PageFrame::READY) {            
-				pager[pf.pageNo] = PageFrame::ON_DISK;		// page is not dirty and on disk
+            if (pf.status != TPageFrame::READY) {            
+				pager[pf.pageNo] = TPageFrame::ON_DISK;		// page is not dirty and on disk
 				waitFor(pf);                                // after finishing i/o transfer
                 pf.pageNo = -1;                             // cut back link
                 return;
@@ -1190,7 +1190,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
                     lastDiskPage = _size / _PageSize;
                     lastDiskPageSize = _size % _PageSize;;
                 }
-				pager[pf.pageNo] = PageFrame::ON_DISK;		// page is marked to be on disk
+				pager[pf.pageNo] = TPageFrame::ON_DISK;		// page is marked to be on disk
 				waitFor(pf);
 			} else
 				pager[pf.pageNo] = pf.dataStatus;			// restore original data status
@@ -1220,8 +1220,8 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 
         inline PageFrameRef getPage(
             int pageNo, 
-            typename PageFrame::Priority maxLevel = PageFrame::NORMAL_LEVEL, 
-            typename PageFrame::Priority newLevel = PageFrame::NORMAL_LEVEL,
+            typename TPageFrame::Priority maxLevel = TPageFrame::NORMAL_LEVEL, 
+            typename TPageFrame::Priority newLevel = TPageFrame::NORMAL_LEVEL,
             int prefetchPages = 0)
         {
 			int frameNo = pager[pageNo];
@@ -1244,7 +1244,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 
 			} else {							// cache miss
 
-				typename PageFrame::DataStatus dataStatus = static_cast<typename PageFrame::DataStatus>(frameNo);
+				typename TPageFrame::DataStatus dataStatus = static_cast<typename TPageFrame::DataStatus>(frameNo);
 				frameNo = cache.mru(testIODone(*this), maxLevel);   // try to get an undirty and READY pageframe
 				if (frameNo < 0)							// if there is none,
 					frameNo = cache.mruDirty();				// get the most recently used dirty frame
@@ -1260,12 +1260,13 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 				// *** frame is free now ***
 
 				pf.dataStatus = dataStatus;
-				if (dataStatus == PageFrame::ON_DISK)
+				if (dataStatus == TPageFrame::ON_DISK)
+				{
                     if (pageNo != lastDiskPage)
 					    readPage(pageNo, pf, file);
                     else
                         readLastPage(pageNo, pf, file, lastDiskPageSize);
-				
+				}
 				pager[pageNo] = frameNo;					// assign new page to page table
 				pf.pageNo = pageNo;							// set back link
 				cache.upgrade(
@@ -1289,13 +1290,13 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
             if (pageEnd >= (int)pager.size())	pageEnd = (int)pager.size() - 1;
             for(int pageNo = pageBegin; pageNo < pageEnd; ++pageNo) {
 			    int frameNo = pager[pageNo];
-				typename PageFrame::DataStatus dataStatus = static_cast<typename PageFrame::DataStatus>(frameNo);
-                if (dataStatus == PageFrame::ON_DISK &&             // prefetch only if page is on disk
+				typename TPageFrame::DataStatus dataStatus = static_cast<typename TPageFrame::DataStatus>(frameNo);
+                if (dataStatus == TPageFrame::ON_DISK &&             // prefetch only if page is on disk
                     pageNo != lastDiskPage)                         // reading the last page is blocking
                 {   
 				    frameNo = cache.mru(
                         testIODone(*this),
-                        PageFrame::NORMAL_LEVEL);                   // choose undirty and ready page
+                        TPageFrame::NORMAL_LEVEL);                   // choose undirty and ready page
 
                     if (frameNo < 0 || frameNo == except) return;   // no lowlevel-page left for prefetching
 				    PageFrameRef pf = cache[frameNo];
@@ -1316,7 +1317,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
                     readPage(pageNo, pf, file);
 				    pager[pageNo] = frameNo;					    // assign new page to page table
     				pf.pageNo = pageNo;							    // set back link
-                    cache.upgrade(pf, PageFrame::PREFETCH_LEVEL);   // update lru order
+                    cache.upgrade(pf, TPageFrame::PREFETCH_LEVEL);   // update lru order
                 }
             }
 		}
@@ -1334,8 +1335,8 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 		inline PageFrameRef getSharedPage(int pageNo, int prefetchPages = 0) {
 			return getPage(
                 pageNo, 
-                PageFrame::PREFETCH_LEVEL, 
-                PageFrame::ITERATOR_LEVEL,
+                TPageFrame::PREFETCH_LEVEL, 
+                TPageFrame::ITERATOR_LEVEL,
                 _prefetchIffAsync(prefetchPages, file));
 		}
 
@@ -1345,8 +1346,8 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 			int frameNo = pager[pageNo];
 			if (frameNo >= 0) {								        // release only cached pages
 				PageFrameRef pf = cache[frameNo];
-				if (pf.begin.isLonely() && pf.priority <= PageFrame::ITERATOR_LEVEL) {
-					cache.upgrade(pf, _max(getPriority(pageNo), PageFrame::NORMAL_LEVEL));
+				if (pf.begin.isLonely() && pf.priority <= TPageFrame::ITERATOR_LEVEL) {
+					cache.upgrade(pf, _max(getPriority(pageNo), TPageFrame::NORMAL_LEVEL));
                     if (writeThrough) {
                         #ifdef SEQAN_VERBOSE
                             if (pf.dirty)
@@ -1380,7 +1381,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
             for(typename Cache::iterator I = cache.begin(); I != cache.end(); ++I) {
 				if (I->pageNo >= 0) {
                     pager[I->pageNo] = I->dataStatus;
-					I->pageNo = PageFrame::UNINITIALIZED;
+					I->pageNo = TPageFrame::UNINITIALIZED;
 				}
 //                ::std::cerr << *I << ::std::endl;
                 if (I->begin) freePage(*I, file);
@@ -1389,11 +1390,11 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 
 		inline bool open(const char *fileName, int openMode = DefaultOpenMode<TFile>::VALUE) {
             _temporary = false;
-			if (_ownFile = ::seqan::open(file, fileName, openMode))
+			if ((_ownFile = ::seqan::open(file, fileName, openMode)))
                 _size = size(file) / sizeof(TValue);
             else
                 _size = 0;
-			pager.resize(enclosingBlocks(_size, (unsigned)_PageSize), (_size)? PageFrame::ON_DISK: PageFrame::UNINITIALIZED);
+			pager.resize(enclosingBlocks(_size, (unsigned)_PageSize), (_size)? TPageFrame::ON_DISK: TPageFrame::UNINITIALIZED);
             lastDiskPage = _size / _PageSize;
             lastDiskPageSize = _size % _PageSize;
 			return _ownFile;
@@ -1407,7 +1408,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
                 _size = size(file) / sizeof(TValue);
             else
                 _size = 0;
-            pager.resize(enclosingBlocks(_size, (unsigned)_PageSize), (_size)? PageFrame::ON_DISK: PageFrame::UNINITIALIZED);
+            pager.resize(enclosingBlocks(_size, (unsigned)_PageSize), (_size)? TPageFrame::ON_DISK: TPageFrame::UNINITIALIZED);
             lastDiskPage = _size / _PageSize;
             lastDiskPageSize = _size % _PageSize;
 			return _file;
@@ -1936,7 +1937,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 		Tag<TExpand> const) 
 	{
         typedef typename Iterator<TSource const, Standard>::Type                ISource;
-        typedef typename String<TValue, External<TConfig> >::VectorFwdIterator  ITarget;
+        typedef typename String<TValue, External<TConfig> >::TVectorFwdIterator ITarget;
 
         resize(target, length(source));
 

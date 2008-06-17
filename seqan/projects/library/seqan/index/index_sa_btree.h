@@ -41,7 +41,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		unsigned treeLevels = 1;
 		TSize _xSize;
-		for(_xSize = 1; _xSize * BlockSize <= size; _xSize *= BlockSize, ++treeLevels);
+		for(_xSize = 1; _xSize * BlockSize <= size; _xSize *= BlockSize, ++treeLevels) ;
 	
 		// get output iterators for every level in the flat tree
 		FlatOutIt *level = new FlatOutIt[treeLevels];
@@ -102,7 +102,7 @@ namespace SEQAN_NAMESPACE_MAIN
     inline unsigned treeLevelsSAB(TSize saSize, unsigned BlockSize)
 	{
 		unsigned treeLevels = 1;
-		for(TSize _xSize = 1; _xSize <= saSize; _xSize *= BlockSize, ++treeLevels);
+		for(TSize _xSize = 1; _xSize <= saSize; _xSize *= BlockSize, ++treeLevels) ;
         return treeLevels;
     }
 

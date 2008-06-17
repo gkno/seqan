@@ -974,7 +974,7 @@ _assignValue_packed_string_iterator(TIter & me,
 	THostValue val_ = _value;
 	val_ <<= _bitpos(me);
 
-	assignValue(hostIterator(me), getValue(hostIterator(me)) & ~(mask_) | val_);
+	assignValue(hostIterator(me), (getValue(hostIterator(me)) & ~(mask_)) | val_);
 }
 
 

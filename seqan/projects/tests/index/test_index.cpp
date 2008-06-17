@@ -105,7 +105,7 @@ void testMultiIndex()
 		{
 			cout << endl << "TopDown postorder without empty edges" << endl;
 			Iter<Index<TMulti>, VSTree< TopDown<ParentLinks<Postorder> > > > it(esa);
-			while (goDown(it));
+			while (goDown(it)) ;
 			while (!atEnd(it)) {
 				_printNode(it);
 				goNext(it);
@@ -116,7 +116,7 @@ void testMultiIndex()
 		{
 			cout << endl << "TopDown postorder with empty edges" << endl;
 			Iter<Index<TMulti>, VSTree< TopDown<ParentLinks<PostorderEmptyEdges> > > > it(esa);
-			while (goDown(it));
+			while (goDown(it)) ;
 			while (!atEnd(it)) {
 				_printNode(it);
 				goNext(it);

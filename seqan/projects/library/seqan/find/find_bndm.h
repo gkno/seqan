@@ -169,7 +169,7 @@ inline bool _findBndm_SmallNeedle(TFinder & finder, Pattern<TNeedle, BndmAlgo> &
 			TWord pos = convert<TWord>(*(finder+j-1));
 			me.activeFactors[0] = (me.activeFactors[0] & me.table[me.blockCount*pos]);
 			j--;
-			if (me.activeFactors[0] & 1 != 0) {
+			if ((me.activeFactors[0] & 1) != 0) {
 				if (j>0) me.last=j;
 				else return true;
 			}
@@ -206,7 +206,7 @@ inline bool _findBndm_LargeNeedle(TFinder & finder, Pattern<TNeedle, BndmAlgo> &
 
 			for(TWord block=0;block<me.blockCount;++block) me.activeFactors[block] &= me.table[me.blockCount*pos+block];
 			j--;
-			if (me.activeFactors[0] & 1 != 0) {
+			if ((me.activeFactors[0] & 1) != 0) {
 				if (j>0) me.last=j;
 				else return true;
 			}

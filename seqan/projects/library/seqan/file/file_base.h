@@ -120,12 +120,12 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 
 	template <typename T>
 	struct DefaultOpenMode {
-		enum { VALUE = OPEN_RDWR + OPEN_CREATE | OPEN_APPEND };
+		enum { VALUE = OPEN_RDWR | OPEN_CREATE | OPEN_APPEND };
 	};
 
 	template <typename T>
 	struct DefaultOpenTempMode {
-		enum { VALUE = OPEN_RDWR + OPEN_CREATE };
+		enum { VALUE = OPEN_RDWR | OPEN_CREATE };
 	};
 
     enum FileSeekMode {

@@ -579,7 +579,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		// outer enumeration
 		inline bool _outerStep() {
-			while (!((_atEnd = !_outerStepNoCheck()) || _isLeftMaximal()));
+			while (!((_atEnd = !_outerStepNoCheck()) || _isLeftMaximal())) ;
 			return !_atEnd;
 		}
 
@@ -608,7 +608,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			}
 
 			_atEnd = false;
-			while (!(_isLeftMaximal() || (_atEnd = !_outerStep())));
+			while (!(_isLeftMaximal() || (_atEnd = !_outerStep()))) ;
 		}
 	};
 

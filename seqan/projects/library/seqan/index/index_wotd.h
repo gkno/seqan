@@ -1402,6 +1402,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		TValue occ;
 		if (index.sentinelOcc != 0)
+		{
 			if (index.sentinelOcc > 1) { // occurs on multiseqs
 				itPrev = itDir;
 				*itDir = index.sentinelBound - index.sentinelOcc;	++itDir;
@@ -1411,7 +1412,7 @@ namespace SEQAN_NAMESPACE_MAIN
 				*itDir = saAt(index.sentinelBound - index.sentinelOcc, index) | index.LEAF;
 				++itDir;
 			}
-
+		}
 		for (; it != itEnd; ++it, ++bit)
 		{
 			if ((occ = *it) == 0) continue;
@@ -1459,6 +1460,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		TValue occ;
 		if (index.sentinelOcc != 0)
+		{
 			if (index.sentinelOcc > 1) { // occurs on multiseqs
 				itPrev = itDir;
 				*itDir = index.sentinelBound - index.sentinelOcc;	++itDir;
@@ -1468,7 +1470,7 @@ namespace SEQAN_NAMESPACE_MAIN
 				*itDir = (index.sentinelBound - index.sentinelOcc) | index.LEAF;
 				++itDir;
 			}
-
+		}
 		for (; it != itEnd; ++it, ++bit)
 		{
 			if ((occ = *it) == 0) continue;

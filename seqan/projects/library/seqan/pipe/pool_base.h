@@ -218,13 +218,13 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef typename TPool::File                File;
 
         typedef SimpleBuffer<Type>					Buffer;
-        typedef PageFrame<Type, File, Dynamic<> >   PageFrame;
-		typedef PageFrame&                          PageFrameRef;
+        typedef PageFrame<Type, File, Dynamic<> >   TPageFrame;
+		typedef TPageFrame&                         PageFrameRef;
         typedef Buffer&								BufferRef;
-        typedef PageChain<PageFrame>	            PageChain;
+        typedef PageChain<TPageFrame>	            TPageChain;
 
         TPool       &pool;
-        PageChain   chain;
+        TPageChain   chain;
         unsigned    pageSize;
         unsigned    readPageNo, _pages;
         Buffer	    empty;
@@ -257,7 +257,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
             // enqueue reading of the <readAheadBuffers> first blocks
             readPageNo = 0;
-            PageFrame *p = chain.first;
+            TPageFrame *p = chain.first;
             while (p) {
                 p->pageNo = readPageNo++;
                 _read(*p);
@@ -287,7 +287,7 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 
         inline void cancel() {
-            PageFrame *p = chain.first;
+            TPageFrame *p = chain.first;
             while (p) {
 				::seqan::cancel(*p, pool.file);
                 freePage(*p, pool.file);
@@ -303,7 +303,7 @@ namespace SEQAN_NAMESPACE_MAIN
             return true;
         }
 
-        inline bool _read(PageFrame &pf) {
+        inline bool _read(TPageFrame &pf) {
             if (pf.pageNo < _pages) {
                 // alloc if empty
                 if (!pf.begin)
@@ -336,13 +336,13 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef typename TPool::File                File;
 
         typedef SimpleBuffer<Type>					Buffer;
-        typedef PageFrame<Type, File, Dynamic<> >   PageFrame;
-		typedef PageFrame&                          PageFrameRef;
+        typedef PageFrame<Type, File, Dynamic<> >   TPageFrame;
+		typedef TPageFrame&                          PageFrameRef;
         typedef Buffer&								BufferRef;
-        typedef PageChain<PageFrame>	            PageChain;
+        typedef PageChain<TPageFrame>	            TPageChain;
 
         TPool       &pool;
-        PageChain   chain;
+        TPageChain   chain;
         unsigned    pageSize;
         unsigned    writePageNo, _pages;
         Buffer	    empty;
@@ -399,7 +399,7 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 
         inline void flush() {
-            PageFrame *p = chain.first;
+            TPageFrame *p = chain.first;
             while (p) {
                 waitFor(*p);
                 freePage(*p, pool.file);
@@ -409,7 +409,7 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 
         inline void cancel() {
-            PageFrame *p = chain.first;
+            TPageFrame *p = chain.first;
             while (p) {
                 ::seqan::cancel(*p, pool.file);
                 freePage(*p, pool.file);
@@ -426,7 +426,7 @@ namespace SEQAN_NAMESPACE_MAIN
             return true;
         }
 
-        bool _write(PageFrame &pf) {
+        bool _write(TPageFrame &pf) {
             if (pf.pageNo < _pages) {
                 // write asynchronously (if possible) to disk
                 return writePage(pf, pool.file) || _error();

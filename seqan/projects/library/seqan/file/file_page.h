@@ -197,7 +197,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		typedef	TValue&							TypeRef;
 		typedef TValue*           	            TypePtr;
-        typedef PageChain<PageFrame>		    PageChain;
+        typedef PageChain<PageFrame>		    TPageChain;
 		typedef SimpleBuffer<TValue>	        Base;
         typedef typename aRequest<TFile>::Type  aRequest;
 

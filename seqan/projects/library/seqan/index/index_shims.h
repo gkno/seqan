@@ -453,8 +453,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		public ::std::binary_function< Pair<T1,T2,TCompression>, Pair<T1,T2,TCompression>, bool> 
 	{
 		inline bool operator()(Pair<T1,T2,TCompression> const &a, Pair<T1,T2,TCompression> const &b) const {
-			return	getValueI1(a) < getValueI1(b) ||
-					getValueI1(a) == getValueI1(b) && getValueI2(a) < getValueI2(b);
+			return	(getValueI1(a) < getValueI1(b)) ||
+					((getValueI1(a) == getValueI1(b)) && (getValueI2(a) < getValueI2(b)));
 		}
 	};
 

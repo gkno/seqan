@@ -892,7 +892,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 		goRoot(it);
 
 		if (TYPECMP<typename TTraits::DFSOrder, _Postorder>::VALUE) {
-			while (goDown(it));
+			while (goDown(it)) ;
 			return;
 		}
 
@@ -1406,7 +1406,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 		// preorder dfs
 		do {
 			if (!goDown(it) && !goRight(it))
-				while (goUp(it) && !goRight(it));
+				while (goUp(it) && !goRight(it)) ;
 			if (isRoot(it)) {
 				clear(it);
 				return;
@@ -1422,7 +1422,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 		// postorder dfs
 		do {
 			if (goRight(it))
-				while (goDown(it));
+				while (goDown(it)) ;
 			else
 				if (!goUp(it)) {
 					clear(it);

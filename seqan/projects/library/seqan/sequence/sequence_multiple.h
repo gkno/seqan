@@ -993,10 +993,12 @@ a single integer value between 0 and the sum of string lengths minus 1.
 
 		for(; it != itEnd; ++it)
 			if (*it) 
+			{
 				if (i)
 					--i;
 				else
 					return position(it, me);
+			}
 		return length(me);
 	}
 

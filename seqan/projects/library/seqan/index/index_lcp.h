@@ -278,7 +278,7 @@ namespace SEQAN_NAMESPACE_MAIN
         for(TSize i = 0, h = 0, j, isa; i < n; ++i) {
 			if ((isa = ISA[i])) {
 				J = Ibegin + h + (j = SA[isa - 1]);
-                for(TSize hMax = _min(n - i, n - j); h < hMax && *I == *J; ++I, ++J, ++h);
+                for(TSize hMax = _min(n - i, n - j); h < hMax && *I == *J; ++I, ++J, ++h) ;
 				LCP[isa - 1] = h;
                 #ifdef SEQAN_DEBUG_INDEX
                     if ((lcpNumer += h) > n) {
@@ -343,7 +343,7 @@ namespace SEQAN_NAMESPACE_MAIN
         for(TSize i = 0, h = 0, j, isa; i < n; ++i) {
 			if ((isa = LCP[i] + 1) < n) {
 				J = Ibegin + h + (j = SA[isa]);
-                for(TSize hMax = _min(n - i, n - j); h < hMax && *I == *J; ++I, ++J, ++h);
+                for(TSize hMax = _min(n - i, n - j); h < hMax && *I == *J; ++I, ++J, ++h) ;
 				LCP[i] = h | mark;
                 #ifdef SEQAN_DEBUG_INDEX
                     if ((lcpNumer += h) > n) {
@@ -440,7 +440,7 @@ namespace SEQAN_NAMESPACE_MAIN
 				j = posGlobalize(SA[isa], limits);
 				J = Ibegin + h + j;
 
-                for(TSize hMax = _min(getValueI2((TPair)dec), n - j); h < hMax && *I == *J; ++I, ++J, ++h);
+                for(TSize hMax = _min(getValueI2((TPair)dec), n - j); h < hMax && *I == *J; ++I, ++J, ++h) ;
 				LCP[i] = h | mark;
                 #ifdef SEQAN_DEBUG_INDEX
                     if ((lcpNumer += h) > n) {

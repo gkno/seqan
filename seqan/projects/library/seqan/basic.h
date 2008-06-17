@@ -36,7 +36,7 @@
 #include <ctime>
 #include <iterator>
 #include <algorithm>
-#include <memory.h> // memset
+#include <cstring>  // memset, memcpy
 #include <string>	// basic_profile
 
 #define SEQAN_NAMESPACE_MAIN seqan

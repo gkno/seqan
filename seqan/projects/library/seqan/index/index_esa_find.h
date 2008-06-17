@@ -169,7 +169,7 @@ for @Class.Index@ based substring searches.
 			_left = 0;
 			_lSize = 1;
             _iSize = size;
-			for(_xSize = 1; _xSize < size; _xSize <<= 1);
+			for(_xSize = 1; _xSize < size; _xSize <<= 1) ;
             if (!size) _xSize = 0;
 		}
 
@@ -339,7 +339,7 @@ for @Class.Index@ based substring searches.
 			}
 			
 			_stepSizeLow >>= 1;
-			for(_xSizeHigh = 1; _xSizeHigh * BlockSize <= size; _xSizeHigh *= BlockSize);
+			for(_xSizeHigh = 1; _xSizeHigh * BlockSize <= size; _xSizeHigh *= BlockSize) ;
 
 			_leftLow = (_stepSizeLow << 1) - 1;		// point to the middle
 			_leftHigh = 0;
@@ -1099,7 +1099,7 @@ for @Class.Index@ based substring searches.
 			goFurther(q, lcp);
 			for(TDiff i = _min(difference(t, tEnd), difference(q, qEnd)); 
 				i && *t == *q;
-				--i, ++t, ++q, ++lcp);
+				--i, ++t, ++q, ++lcp) ;
 
             // is text < query ?
 			if (q != qEnd && (t == tEnd || *t < *q)) 
@@ -1138,7 +1138,7 @@ for @Class.Index@ based substring searches.
 			goFurther(t, lcp);
 			for(TDiff i = _min(difference(t, tEnd), difference(q, qEnd)); 
             	i && *t == *q;
-            	 --i, ++t, ++q);
+            	 --i, ++t, ++q) ;
 
             // is text < query ?
 			if (q != qEnd && (t == tEnd || *t < *q)) {
@@ -1276,7 +1276,7 @@ for @Class.Index@ based substring searches.
 			goFurther(q, lcp);
 			TDiff max = _min(difference(t, tEnd), difference(q, qEnd));
             TDiff i = max;
-			for(; i && *t == *q; --i, ++t, ++q);
+			for(; i && *t == *q; --i, ++t, ++q) ;
 			lcp += max - i;
 
             // is text <= query ?
@@ -1311,7 +1311,7 @@ for @Class.Index@ based substring searches.
 
 			goFurther(t, lcp);
 			TDiff i = _min(difference(t, tEnd), difference(q, qEnd));
-            for(; i && *t == *q; --i, ++t, ++q);
+            for(; i && *t == *q; --i, ++t, ++q) ;
 
             // is text <= query ?
 			if (q == qEnd || t == tEnd || !(*q < *t)) {
@@ -1449,7 +1449,7 @@ for @Class.Index@ based substring searches.
 			goFurther(q, lcp);
 			TDiff max = _min(difference(t, tEnd), difference(q, qEnd));
             TDiff i = max;
-			for(; i && *t == *q; --i, ++t, ++q);
+			for(; i && *t == *q; --i, ++t, ++q) ;
 			lcp += max - i;
 
             // is text < query ?

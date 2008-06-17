@@ -576,7 +576,7 @@ SEQAN_CHECKPOINT
 
 		/* additional bit operations */
 		me.df[0] = me.prefSufMatch[0] | me.f_table[0];
-		me.prefSufMatch[0] |= (me.a_table[0] & (~(me.df[0] - me.i_table[0])) ^ me.df[0]);
+		me.prefSufMatch[0] |= ((me.a_table[0] & (~(me.df[0] - me.i_table[0]))) ^ me.df[0]);
 		if ((me.prefSufMatch[0] & compare) != 0) {
 SEQAN_CHECKPOINT
 			return true; 

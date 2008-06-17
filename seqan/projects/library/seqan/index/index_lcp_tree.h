@@ -41,7 +41,7 @@ namespace SEQAN_NAMESPACE_MAIN
         // calculate the depth of the lcp tree
 		unsigned treeLevels = 1;
 		TSize _xSize = 1;
-		for(; size > _xSize; _xSize *= 2, ++treeLevels);
+		for(; size > _xSize; _xSize *= 2, ++treeLevels) ;
 	
 		// get output iterators for every level in the flat tree
 		FlatOutIt *level = new FlatOutIt[treeLevels];
@@ -147,7 +147,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		unsigned treeLevels = 1;
 		--lcpSize;
 		TSize _xSize = 1;
-		for(; lcpSize > _xSize; _xSize *= 2, ++treeLevels);
+		for(; lcpSize > _xSize; _xSize *= 2, ++treeLevels) ;
         return treeLevels;
     }
 

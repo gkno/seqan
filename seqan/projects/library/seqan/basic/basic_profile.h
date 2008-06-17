@@ -254,15 +254,15 @@
         }
 
         inline void syncTime(_proTStates &dst) {
-            memcpy(dst, _proData<>::_proValue, 2 * sizeof(_proTValue));
+			::std::memcpy(dst, _proData<>::_proValue, 2 * sizeof(_proTValue));
         }
 
         inline void sync(_proTStates &dst) {
-            memcpy(&(dst[2]), &(_proData<>::_proValue[2]), sizeof(_proTStates) - 2 * sizeof(_proTValue));
+            ::std::memcpy(&(dst[2]), &(_proData<>::_proValue[2]), sizeof(_proTStates) - 2 * sizeof(_proTValue));
         }
 
         inline void syncAll(_proTStates &dst) {
-            memcpy(dst, _proData<>::_proValue, sizeof(_proTStates));
+            ::std::memcpy(dst, _proData<>::_proValue, sizeof(_proTStates));
         }
 
 		inline static void setTime(_proTStates &dst) {
