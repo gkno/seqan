@@ -262,6 +262,18 @@ SEQAN_CHECKPOINT
 //todo??? setSource? setContainer?
 //////////////////////////////////////////////////////////////////////////////
 
+template <typename TGaps, typename TSpec, typename TSize>
+inline void
+goFurther(Iter<TGaps, GapsIterator<TSpec> > & me,
+		  TSize steps)
+{
+SEQAN_CHECKPOINT
+	while (steps)
+	{
+		goNext(me);
+		--steps;
+	}
+}
 
 //////////////////////////////////////////////////////////////////////////////
 

@@ -518,6 +518,46 @@ SEQAN_CHECKPOINT
 	}
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TSource, typename TSpec>
+inline void
+clearGaps(Align<TSource, TSpec> & me)
+{
+	typedef Align<TSource, TSpec> TAlign;
+	typedef typename Rows<TAlign>::Type TRows;
+	typedef typename Iterator<TRows>::Type TRowsIterator;
+	
+	for (TRowsIterator it = begin(rows(me)); it != end(rows(me)); goNext(it))
+	{
+		clearGaps(*it);
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+.Function.align#stringSet
+*/
+template <typename TSource, typename TSpec>
+inline StringSet<TSource, Dependent<Tight> >
+stringSet(Align<TSource, TSpec> & me)
+{
+SEQAN_CHECKPOINT
+	typedef Align<TSource, TSpec> TAlign;
+	typedef StringSet<TSource, Dependent<Tight> > TStringSet;
+
+	typedef typename Rows<TAlign>::Type TRows;
+	typedef typename Iterator<TRows>::Type TRowsIterator;
+
+	TStringSet ss;
+
+	TRowsIterator it = begin(rows(me));
+	for (TRowsIterator it = begin(rows(me)); it != end(rows(me)); goNext(it))
+	{
+		appendValue(ss, source(*it));
+	}
+	return ss;
+}
 
 //////////////////////////////////////////////////////////////////////////////
 

@@ -267,7 +267,7 @@ void testGotohAlign()
 	score = globalAlignment(ali,score_type1);
 
 	SEQAN_TASSERT(score == -2);
-	SEQAN_TASSERT(row(ali,0) == "atg--t" );
+	SEQAN_TASSERT((row(ali,0) == "at--gt") || (row(ali,0) == "atg--t" ));
 	SEQAN_TASSERT(row(ali,1) == "atagat" );
 	
 	
@@ -297,18 +297,20 @@ void Main_TestAlign()
 {
 	SEQAN_TREPORT("TEST ALIGN BEGIN")
 
+//*
 	testAlignBasics<Align<String<char>, ArrayGaps> >();
 	testAlignBasics2<Align<String<char>, ArrayGaps> >();
 	testAlignColsBase<Align<String<char>, ArrayGaps> >();
 	testGotohAlign<Align< String<char>, ArrayGaps> >();
-/*
+/*/
+
 	typedef Align< String<char>, ArrayGaps> TAlign;
 	TAlign a;
-	resize(a, 2);
-	assignSource(row(a, 0), "ACATTTTCACTTTTTTTA");
-	assignSource(row(a, 1), "AGGGGGGGCACACA");
+	resize(rows(a), 2);
+	assignSource(row(a, 0), "CAACTTAC");
+	assignSource(row(a, 1), "GAATTA");
 
-	int score = globalAlignment(a, SimpleScore() );
+	int score = globalAlignment(a, SimpleScore(), NeedlemanWunsch() );
 
 	cout << a;
 */
@@ -317,7 +319,7 @@ void Main_TestAlign()
 	debug::verifyCheckpoints("projects/library/seqan/align/align_base.h");
 	debug::verifyCheckpoints("projects/library/seqan/align/align_cols_base.h");
 	debug::verifyCheckpoints("projects/library/seqan/align/align_iterator_base.h");
-	debug::verifyCheckpoints("projects/library/seqan/align/align_dynprog.h");
+	//debug::verifyCheckpoints("projects/library/seqan/align/align_dynprog.h");
 	debug::verifyCheckpoints("projects/library/seqan/align/align_trace.h");
 	debug::verifyCheckpoints("projects/library/seqan/align/matrix_base.h");
 

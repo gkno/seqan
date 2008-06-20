@@ -31,6 +31,7 @@
 #include <seqan/score.h>
 
 #include <seqan/map.h>
+#include <seqan/graph_align.h>
 
 //____________________________________________________________________________
 
@@ -53,7 +54,7 @@
 #include <seqan/misc/priority_type_base.h>
 #include <seqan/misc/priority_type_heap.h>
 
-#include <seqan/align/align_dynprog.h>
+#include <seqan/align/align_algorithms.h>
 #include <seqan/align/align_local_dynprog.h>
 #include <seqan/align/hirschberg_set.h>
 #include <seqan/align/align_myers.h>

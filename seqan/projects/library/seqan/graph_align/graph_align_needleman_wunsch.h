@@ -249,7 +249,8 @@ _globalAlignment(TAlign& align,
 	typedef typename Size<TStringSet>::Type TSize;
 
 	// Gap extension score is taken as the constant gap score!!!
-	SEQAN_TASSERT(scoreGapOpen(sc) == 0)
+	//SEQAN_TASSERT(scoreGapOpen(sc) == 0) 
+	//testing for 0 does not make sense, it must be: SEQAN_TASSERT(scoreGapOpen(sc) == scoreGapExtend(sc))
 
 	// Create the trace
 	String<TraceBack> trace;
@@ -278,7 +279,9 @@ _globalAlignment(TStringSet const& str,
 	typedef typename Size<TStringSet>::Type TSize;
 	
 	// Gap extension score is taken as the constant gap score!!!
-	SEQAN_TASSERT(scoreGapOpen(sc) == 0)
+	//SEQAN_TASSERT(scoreGapOpen(sc) == 0)
+	//testing for 0 does not make sense, it must be: SEQAN_TASSERT(scoreGapOpen(sc) == scoreGapExtend(sc))
+
 	String<TraceBack> trace;
 	std::pair<TScoreValue, TScoreValue> overallMaxValue;
 	std::pair<TSize, TSize> overallMaxIndex;
