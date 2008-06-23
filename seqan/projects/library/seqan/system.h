@@ -52,8 +52,10 @@
 #endif //#ifdef PLATFORM_WINDOWS
 
 #ifdef SEQAN_SWITCH_USE_FORWARDS
-#include <seqan/system/system_manual_forwards.h>
-#include <seqan/system/file_manual_forwards.h>
+# include <seqan/system/system_manual_forwards.h>
+# ifndef PLATFORM_WINDOWS
+#  include <seqan/system/file_manual_forwards.h>
+# endif
 #endif
 
 //____________________________________________________________________________
