@@ -49,7 +49,7 @@ struct Swift {
 #else
 	enum { QGRAM_ERRORS = 0 };		// allow 0 error per q-gram
 #endif
-	enum { HAMMING_ONLY = 1 };
+	enum { HAMMING_ONLY = 0 };
 	enum { PARAMS_BY_LENGTH = 1 };	// params are determined only by seq.length
 };
 
@@ -403,7 +403,7 @@ inline void _patternInit(Pattern<TIndex, Swift<TSpec> > &pattern, TFloat errorRa
 			else
 				bucketParams.threshold = pattern.params.minThreshold;
 			
-			if (Swift<TSpec>::HAMMING_ONLY == 0)
+			if (Swift<TSpec>::HAMMING_ONLY != 0)
 				errors = 0;			
 
 			// a bucket has distanceCut different positions of q-grams

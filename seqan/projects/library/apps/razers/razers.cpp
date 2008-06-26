@@ -310,8 +310,8 @@ void findReads(
 		//		unsigned hstkPos = (*swiftFinder.curHit).hstkPos;
 		//		unsigned bucketWidth = (*swiftFinder.curHit).bucketWidth;
 
-		//		TGenomeInfix inf(genome, hstkPos, hstkPos + bucketWidth);
-				TGenomeInfix inf(range(swiftFinder, genome));
+		//		TGenomeInfix inf(genomeInf, hstkPos, hstkPos + bucketWidth);
+				TGenomeInfix inf(range(swiftFinder, genomeInf));
 				TMyersFinder myersFinder(inf);
 				TMyersPattern myersPattern(indexText(readIndex)[ndlSeqNo]);
 
@@ -336,8 +336,8 @@ void findReads(
 					TMatch m = {
 						hstkSeqNo,
 						ndlSeqNo,
-						beginPosition(swiftFinder),
-						beginPosition(swiftFinder) + position(maxPos) + 1,
+						beginPosition(genomeInf) + beginPosition(swiftFinder),
+						beginPosition(genomeInf) + beginPosition(swiftFinder) + position(maxPos) + 1,
 						-maxScore
 					};
 					if (m.gBegin < 0) m.gBegin = 0;
@@ -367,12 +367,12 @@ void findReads(
 #endif
 
 					++TP;
-		/*			cerr << "\"" << range(swiftFinder, genome) << "\"  ";
+		/*			cerr << "\"" << range(swiftFinder, genomeInf) << "\"  ";
 					cerr << hstkPos << " + ";
 					cerr << endl;
 		*/		} else {
 					++FP;
-		/*			cerr << "\"" << range(swiftFinder, genome) << "\"   \"" << range(swiftPattern) << "\"  ";
+		/*			cerr << "\"" << range(swiftFinder, genomeInf) << "\"   \"" << range(swiftPattern) << "\"  ";
 					cerr << ndlSeqNo << " : ";
 					cerr << hstkPos << " + ";
 					cerr << bucketWidth << "  " << TP << endl;
