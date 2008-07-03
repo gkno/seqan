@@ -66,6 +66,8 @@ using namespace seqan;
 	static double		optionErrorRate = 0.2;				// Criteria 1 threshold
 	static bool			optionDumpAlignment = false;		// compute and dump the match alignments in the result files
 	static const char	*optionOutput = "";					// prefix of output files (e.g. "results/run02.", default: "")
+	static unsigned		optionOutputFormat = 0;				// 0..Razer format
+															// 1..enhanced Fasta
 	static unsigned		optionGenomeNaming = 0;				// 0..use Fasta id
 															// 1..enumerate reads beginning with 1
 	static unsigned		optionReadNaming = 0;				// 0..use Fasta id
@@ -95,7 +97,15 @@ using namespace seqan;
 	struct ReadMatchLess : public binary_function < TReadMatch, TReadMatch, bool >
 	{
 		inline bool operator() (TReadMatch const &a, TReadMatch const &b) const {
-			return (a.gBegin < b.gBegin) || (a.gBegin == b.gBegin && a.gEnd > b.gEnd);
+			return (a.gBegin < b.gBegin) || (a.gBegin == b.gBegin && a.gEnd < b.gEnd);
+		}
+	};
+
+	template <typename TReadMatch>
+	struct ReadMatchGreater : public binary_function < TReadMatch, TReadMatch, bool >
+	{
+		inline bool operator() (TReadMatch const &a, TReadMatch const &b) const {
+			return (a.gBegin > b.gBegin) || (a.gBegin == b.gBegin && a.gEnd > b.gEnd);
 		}
 	};
 
@@ -493,94 +503,137 @@ void dumpMatches(
 		return;
 	}
 
+	sort(
+		begin(matches[0], Standard()),
+		end(matches[0], Standard()), 
+		ReadMatchLess<TMatch>());
+
+	sort(
+		begin(matches[1], Standard()),
+		end(matches[1], Standard()), 
+		ReadMatchGreater<TMatch>());
+
 	for(unsigned orientation = 0; orientation < 2; ++orientation)
 	{
-		sort(
-			begin(matches[orientation], Standard()),
-			end(matches[orientation], Standard()), 
-			ReadMatchLess<TMatch>());
-
 		typename Iterator<TMatches, Standard>::Type it = begin(matches[orientation], Standard());
 		typename Iterator<TMatches, Standard>::Type itEnd = end(matches[orientation], Standard());
 
 		typename TMatch::TGPos lastBegin = -1;
 		typename TMatch::TGPos gBegin, gEnd;
 
-		for(; it != itEnd; ++it) {
-			if (lastBegin != (*it).gBegin) 
-			{
-				unsigned	gseqNo = (*it).gseqNo;
-				unsigned	readNo = (*it).rseqNo;
-				TGPos		gLength = length(genomes[gseqNo]);
-				unsigned	readLen = length(reads[readNo]);
-				lastBegin = (*it).gBegin;
 
-				unsigned	readMatchLen;
-				double		percId;
-
-				if (orientation == 0) {
-					gBegin = lastBegin;
-					gEnd = (*it).gEnd;
-				} else {
-					gBegin = gLength - (*it).gEnd;
-					gEnd = gLength - lastBegin;
-				}
-
-				readMatchLen = readLen;
-				percId = 100.0 * (1.0 - (double)(*it).editDist / (double)readLen);
-
-				switch (optionReadNaming)
+		switch (optionOutputFormat) 
+		{
+			case 0:	// Razer Format
+				for(; it != itEnd; ++it) 
 				{
-					// 0..filename is the read's Fasta id
-					case 0:
-						file << readIDs[readNo];
-						break;
+					if (lastBegin != (*it).gBegin) 
+					{
+						unsigned	gseqNo = (*it).gseqNo;
+						unsigned	readNo = (*it).rseqNo;
+						TGPos		gLength = length(genomes[gseqNo]);
+						unsigned	readLen = length(reads[readNo]);
+						double		percId;
 
-					// 1..filename is the read filename + seqNo
-					case 1:
-						file.fill('0');
-						file << readName << "#" << setw(pzeros) << readNo + 1;
-						break;
+						lastBegin = (*it).gBegin;
 
-					// 2..filename is the read sequence itself
-					case 2:
-						file << reads[readNo];
-				}
+						if (orientation == 0) {
+							gBegin = lastBegin;
+							gEnd = (*it).gEnd;
+						} else {
+							gBegin = gLength - (*it).gEnd;
+							gEnd = gLength - lastBegin;
+						}
 
-				if (orientation == 0)
-					file << ",0," << readMatchLen << ",F,";
-				else
-					file << ",0," << readMatchLen << ",R,";
+						percId = 100.0 * (1.0 - (double)(*it).editDist / (double)readLen);
 
-				switch (optionGenomeNaming)
-				{
-					// 0..filename is the read's Fasta id
-					case 0:
-						file << genomeIDs[gseqNo];
-						break;
+						switch (optionReadNaming)
+						{
+							// 0..filename is the read's Fasta id
+							case 0:
+								file << readIDs[readNo];
+								break;
 
-					// 1..filename is the read filename + seqNo
-					case 1:
-						if (multipleGenomes) {
-							file.fill('0');
-							file << genomeName << "#" << setw(gzeros) << gseqNo + 1;
-						} else
-							file << genomeName;
-				}
+							// 1..filename is the read filename + seqNo
+							case 1:
+								file.fill('0');
+								file << readName << "#" << setw(pzeros) << readNo + 1;
+								break;
 
-				file << "," << gBegin << "," << gEnd << "," << setprecision(5) << percId << endl;
+							// 2..filename is the read sequence itself
+							case 2:
+								file << reads[readNo];
+						}
 
-				if (optionDumpAlignment) {
-					assignSource(row(align, 0), reads[readNo]);
-					assignSource(row(align, 1), infix(genomes[gseqNo], gBegin, gEnd));
+						if (orientation == 0)
+							file << ",0," << readLen << ",F,";
+						else
+							file << ",0," << readLen << ",R,";
+
+						switch (optionGenomeNaming)
+						{
+							// 0..filename is the read's Fasta id
+							case 0:
+								file << genomeIDs[gseqNo];
+								break;
+
+							// 1..filename is the read filename + seqNo
+							case 1:
+								if (multipleGenomes) {
+									file.fill('0');
+									file << genomeName << "#" << setw(gzeros) << gseqNo + 1;
+								} else
+									file << genomeName;
+						}
+
+						file << "," << gBegin << "," << gEnd << "," << setprecision(5) << percId << endl;
+
+						if (optionDumpAlignment) {
+							assignSource(row(align, 0), reads[readNo]);
+							assignSource(row(align, 1), infix(genomes[gseqNo], gBegin, gEnd));
 #ifndef OMIT_REVERSECOMPLEMENT
-					if (orientation == 1)
-						reverseComplementInPlace(source(row(align, 1)));
+							if (orientation == 1)
+								reverseComplementInPlace(source(row(align, 1)));
 #endif
-					globalAlignment(align, scoreType);
-					dumpAlignment(file, align);
+							globalAlignment(align, scoreType);
+							dumpAlignment(file, align);
+						}
+					}
 				}
-			}
+				break;
+
+
+			case 1:	// Enhanced Fasta Format
+				for(; it != itEnd; ++it) 
+				{
+					if (lastBegin != (*it).gBegin) 
+					{
+						unsigned	gseqNo = (*it).gseqNo;
+						unsigned	readNo = (*it).rseqNo;
+						TGPos		gLength = length(genomes[gseqNo]);
+						unsigned	readLen = length(reads[readNo]);
+						double		percId;
+
+						lastBegin = (*it).gBegin;
+
+						if (orientation == 0) {
+							gBegin = lastBegin + 1;
+							gEnd = (*it).gEnd;
+						} else {
+							gBegin = gLength - lastBegin;
+							gEnd = gLength - (*it).gEnd + 1;
+						}
+
+						percId = 100.0 * (1.0 - (double)(*it).editDist / (double)readLen);
+
+						file << ">" << gBegin << "," << gEnd;
+						file << "[id=" << readNo << ",fragId=" << readNo;
+						file << ",errors=" << (*it).editDist << ",percId=" << setprecision(5) << percId << "]" << endl;
+
+						file << reads[readNo] << endl;
+					}
+				}
+				break;
 		}
 	}
 
@@ -608,6 +661,9 @@ void printHelp(int, const char *[], bool longHelp = false)
 		cerr << "                               \t" << "default value is 80" << endl;
 		cerr << "  -a,  --alignment             \t" << "also dump the alignment for each match" << endl;
 		cerr << "  -o,  --output FILE           \t" << "change output filename (default: <READS FILE>.result)" << endl;
+		cerr << "  -of, --output-format NUM     \t" << "change output format" << endl;
+		cerr << "                               \t" << "0 = Razer format (default, see README)" << endl;
+		cerr << "                               \t" << "1 = enhanced Fasta format" << endl;
 		cerr << "  -GN, --genome-naming NUM     \t" << "select how genomes are named" << endl;
 		cerr << "                               \t" << "0 = use Fasta id (default)" << endl;
 		cerr << "                               \t" << "1 = enumerate beginning with 1" << endl;
@@ -672,6 +728,20 @@ int main(int argc, const char *argv[])
 				++arg;
 				optionOutput = argv[arg];
 				continue;
+			}
+			if (strcmp(argv[arg], "-of") == 0 || strcmp(argv[arg], "--output-format") == 0) {
+				if (arg + 1 < argc) {
+					++arg;
+					istringstream istr(argv[arg]);
+					istr >> optionOutputFormat;
+					if (!istr.fail())
+						if (optionOutputFormat > 1)
+							cerr << "Invalid output format option" << endl << endl;
+						else
+							continue;
+				}
+				printHelp(argc, argv);
+				return 0;
 			}
 			if (strcmp(argv[arg], "-GN") == 0 || strcmp(argv[arg], "--genome-naming") == 0) {
 				if (arg + 1 < argc) {
