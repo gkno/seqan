@@ -269,10 +269,9 @@ consensusAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TStringSet, typename TCargo, typename TSpec, typename TPairList, typename TBegEndRowPos, typename TNewLibraryGraph>
+template <typename TStringSet, typename TCargo, typename TSpec, typename TBegEndRowPos, typename TNewLibraryGraph>
 inline unsigned int
 realignLowQualityReads(Graph<Alignment<TStringSet, TCargo, TSpec> > const& gIn,
-					   TPairList const& pList,
 					   TBegEndRowPos const& readBegEndRowPos,
 					   TNewLibraryGraph& gOut)
 {
@@ -283,7 +282,6 @@ realignLowQualityReads(Graph<Alignment<TStringSet, TCargo, TSpec> > const& gIn,
 	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename Iterator<TBegEndRowPos>::Type TBegEndIter;
-	typedef typename Iterator<TPairList>::Type TPairIter;
 
 	// Initialization
 	TStringSet& str = stringSet(gIn);
@@ -301,54 +299,56 @@ realignLowQualityReads(Graph<Alignment<TStringSet, TCargo, TSpec> > const& gIn,
 
 	// Any disrupted reads
 	if (unalignedRead.empty()) return 0;
+	else exit(0);
+
 	
-	// String of fragments to combine all pairwise alignments into a multiple alignment
-	typedef Fragment<> TFragment;
-	typedef String<TFragment> TFragmentString;
-	typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
-	TFragmentString matches;
-	reserve(matches, numEdges(gIn));
+	//// String of fragments to combine all pairwise alignments into a multiple alignment
+	//typedef Fragment<> TFragment;
+	//typedef String<TFragment> TFragmentString;
+	//typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
+	//TFragmentString matches;
+	//reserve(matches, numEdges(gIn));
 
-	// Insert all overlaps from the previous alignment
-	TEdgeIterator it_tmp(gIn);
-	for(;!atEnd(it_tmp);++it_tmp) appendValue(matches, TFragment(sequenceId(gIn, sourceVertex(it_tmp)),fragmentBegin(gIn, sourceVertex(it_tmp)), sequenceId(gIn, targetVertex(it_tmp)), fragmentBegin(gIn, targetVertex(it_tmp)), fragmentLength(gIn, sourceVertex(it_tmp))));
-	
-	// Recompute the overlap of interesting pairs
-	Score<int> score_type = Score<int>(2,-1,-4,-6);
-	TPairIter pairIt = begin(pList);
-	TPairIter pairItEnd = end(pList);
-	for(;pairIt != pairItEnd; ++pairIt) {
-		TId id1 = (value(pairIt)).i1;
-		TId id2 = (value(pairIt)).i2;
+	//// Insert all overlaps from the previous alignment
+	//TEdgeIterator it_tmp(gIn);
+	//for(;!atEnd(it_tmp);++it_tmp) appendValue(matches, TFragment(sequenceId(gIn, sourceVertex(it_tmp)),fragmentBegin(gIn, sourceVertex(it_tmp)), sequenceId(gIn, targetVertex(it_tmp)), fragmentBegin(gIn, targetVertex(it_tmp)), fragmentLength(gIn, sourceVertex(it_tmp))));
+	//
+	//// Recompute the overlap of interesting pairs
+	//Score<int> score_type = Score<int>(2,-1,-4,-6);
+	//TPairIter pairIt = begin(pList);
+	//TPairIter pairItEnd = end(pList);
+	//for(;pairIt != pairItEnd; ++pairIt) {
+	//	TId id1 = (value(pairIt)).i1;
+	//	TId id2 = (value(pairIt)).i2;
 
-		if ((unalignedRead.find(id1) != unalignedRead.end()) || (unalignedRead.find(id2) != unalignedRead.end())) {
-			// Make a pairwise string-set
-			TStringSet pairSet;
-			assignValueById(pairSet, str, id1);
-			assignValueById(pairSet, str, id2);
+	//	if ((unalignedRead.find(id1) != unalignedRead.end()) || (unalignedRead.find(id2) != unalignedRead.end())) {
+	//		// Make a pairwise string-set
+	//		TStringSet pairSet;
+	//		assignValueById(pairSet, str, id1);
+	//		assignValueById(pairSet, str, id2);
 
-			// Overlap alignment with a small mismatch score
-			TSize from = length(matches);
-			globalAlignment(matches, pairSet, score_type, AlignConfig<true,true,true,true>(), Gotoh() );
+	//		// Overlap alignment with a small mismatch score
+	//		TSize from = length(matches);
+	//		globalAlignment(matches, pairSet, score_type, AlignConfig<true,true,true,true>(), Gotoh() );
 
-			// Determine a sequence weight
-			TSize matchLen = 0;
-			TSize overlapLen = 0;
-			TSize alignLen = 0;
-			getAlignmentStatistics(matches, pairSet, from, matchLen, overlapLen, alignLen);
-			double quality = (double) matchLen / (double) overlapLen;
+	//		// Determine a sequence weight
+	//		TSize matchLen = 0;
+	//		TSize overlapLen = 0;
+	//		TSize alignLen = 0;
+	//		getAlignmentStatistics(matches, pairSet, from, matchLen, overlapLen, alignLen);
+	//		double quality = (double) matchLen / (double) overlapLen;
 
-			// Take all overlaps of good quality
-			if ((quality < 0.75) || (matchLen < 8)) {
-				resize(matches, from);
-			}
-		}
-	}
+	//		// Take all overlaps of good quality
+	//		if ((quality < 0.75) || (matchLen < 8)) {
+	//			resize(matches, from);
+	//		}
+	//	}
+	//}
 
-	// Refine all matches
-	matchRefinement(matches,stringSet(gOut),score_type, gOut);
+	//// Refine all matches
+	//matchRefinement(matches,stringSet(gOut),score_type, gOut);
 
-	return unalignedRead.size();
+	//return unalignedRead.size();
 }
 
 

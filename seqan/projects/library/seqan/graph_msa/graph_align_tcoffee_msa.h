@@ -87,7 +87,7 @@ globalAlignment(StringSet<TString, TSpec> const& seqSet,
 	typedef typename Id<TGraph>::Type TId;
 	TSize nSeq = length(seqSet);
 	TSize threshold = 30;
-	
+
 	// Select all pairs
 	TGraph g(seqSet);
 	String<Pair<TId, TId> > pList;

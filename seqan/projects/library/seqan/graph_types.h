@@ -23,8 +23,6 @@
 
 // External / STL
 #include <deque>
-#include <typeinfo> //for write functions in graph_impl_undirected.h and graph_impl_directed.h
-					//note: this bloats the code!
 
 // Seqan
 #include <seqan/basic.h>

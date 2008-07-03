@@ -1808,10 +1808,6 @@ __heaviestCommonSubsequence(std::map<TKey, TValue>& posToSlotMap,
 	typedef typename Iterator<TVertexSet const, Rooted>::Type TVertexSetIter;
 	typedef typename Iterator<TVertexSet, Rooted>::Type TIter;	
 
-	// #Vertex descriptors per node
-	TSize seqsInStr1 = length(str1[0]);	 
-	TSize seqsInStr2 = length(str2[0]);	
-
 	// Reverse the map
 	String<TLargeSize> slotToPos;
 	resize(slotToPos, posToSlotMap.size());
@@ -1825,7 +1821,7 @@ __heaviestCommonSubsequence(std::map<TKey, TValue>& posToSlotMap,
 	TSize numMatches = length(positions);
 	TSize alignLength = numMatches + (n - numMatches) + (m - numMatches);
 	clear(align);
-	resize(align, alignLength);
+	resize(align, alignLength, Exact() );
 	TSIter pointerAlign = begin(align);
 	TSIter pointerAlignEnd = end(align);
 	TStringIter pointerStr1 = begin(str1);
@@ -1841,13 +1837,8 @@ __heaviestCommonSubsequence(std::map<TKey, TValue>& posToSlotMap,
 		// Gaps in seq 2
 		while (i != position(pointerStr1)) {
 			TVertexSet tmp;
-			fill(tmp, (seqsInStr1 + seqsInStr2), nilVertex);
 			TVertexSetIter itVEnd = end(value(pointerStr1));
-			TSize count = 0;
-			for(TVertexSetIter itV = begin(value(pointerStr1));itV != itVEnd;++itV) {
-				tmp[count] = *itV;
-				++count;
-			}
+			for(TVertexSetIter itV = begin(value(pointerStr1));itV != itVEnd;++itV) appendValue(tmp, *itV);
 			value(pointerAlign) = tmp;
 			++pointerAlign;
 			++pointerStr1;
@@ -1855,13 +1846,8 @@ __heaviestCommonSubsequence(std::map<TKey, TValue>& posToSlotMap,
 		// Gaps in seq 1
 		while (j != position(pointerStr2)) {
 			TVertexSet tmp;
-			fill(tmp, (seqsInStr1 + seqsInStr2), nilVertex);
 			TVertexSetIter itVEnd = end(value(pointerStr2));
-			TSize count = 0;
-			for(TVertexSetIter itV = begin(value(pointerStr2));itV != itVEnd;++itV) {
-				tmp[count] = *itV;
-				++count;
-			}
+			for(TVertexSetIter itV = begin(value(pointerStr2));itV != itVEnd;++itV) appendValue(tmp, *itV);
 			value(pointerAlign) = tmp;
 			++pointerAlign;
 			++pointerStr2;
@@ -1869,18 +1855,10 @@ __heaviestCommonSubsequence(std::map<TKey, TValue>& posToSlotMap,
 		if (p>=0) {
 			// Matches
 			TVertexSet tmp;
-			fill(tmp, (seqsInStr1 + seqsInStr2), nilVertex);
 			TVertexSetIter itVEnd = end(value(pointerStr1));
-			TSize count = 0;
-			for(TVertexSetIter itV = begin(value(pointerStr1));itV != itVEnd;++itV) {
-				tmp[count] = *itV;
-				++count;
-			}
+			for(TVertexSetIter itV = begin(value(pointerStr1));itV != itVEnd;++itV) appendValue(tmp, *itV);
 			TVertexSetIter itVEnd2 = end(value(pointerStr2));
-			for(TVertexSetIter itV2 = begin(value(pointerStr2));itV2 != itVEnd2;++itV2) {
-				tmp[count] = *itV2;
-				++count;
-			}
+			for(TVertexSetIter itV2 = begin(value(pointerStr2));itV2 != itVEnd2;++itV2) appendValue(tmp, *itV2);
 			value(pointerAlign) = tmp;
 			++pointerAlign;
 			++pointerStr1;
@@ -1896,17 +1874,18 @@ __heaviestCommonSubsequence(std::map<TKey, TValue>& posToSlotMap,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TStringSet, typename TCargo, typename TSpec, typename TString, typename TOutString>
+template<typename TStringSet, typename TCargo, typename TSpec, typename TString, typename TOutString, typename TSize>
 inline TCargo
 heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 						  TString const& str1, 
+						  TSize str1Mem,
 						  TString const& str2,
+						  TSize str2Mem,
 						  TOutString& align) 
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef __int64 TLargeSize;
-	typedef typename Size<TStringSet>::Type TSize;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
 	typedef typename Value<TString>::Type TVertexSet;
@@ -1916,7 +1895,7 @@ heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 
 	// Size of the sequences
 	// Note for profile alignments every member of the sequence is a String!!! of vertex descriptors
-	TCargo divider = (TCargo) length(str1[0]) * (TCargo) length(str2[0]);
+	TCargo divider = (TCargo) (str1Mem * str2Mem);
 	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
 	
 	// Fill the vertex to position map for str1

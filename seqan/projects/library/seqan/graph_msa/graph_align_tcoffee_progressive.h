@@ -41,23 +41,23 @@ _buildLeafString(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	typedef typename Size<TGraph>::Type TSize;
 	typedef typename Id<TGraph>::Type TId;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
+	typedef typename Value<TSequence>::Type TVertexString;
 
-	//TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
+	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
 	TStringSet& str = stringSet(g);
-	TSize lenRoot = length(str[pos]);
+	TSize lenRoot = length(value(str, pos));
 	TId seqId = positionToId(str, pos);
 	TSize i = 0;
 	while(i<lenRoot) {
 		TVertexDescriptor nextVertex = findVertex(const_cast<TGraph&>(g), seqId, i);
-		SEQAN_TASSERT(nextVertex != getNil<TVertexDescriptor>())
+		SEQAN_TASSERT(nextVertex != nilVertex)
 		if (nextVertex == nilVertex) {
 			std::cout << "Warning: Nil Vertex" << std::endl;
 			TSize j = i + 1;
 			while ((j < lenRoot) && (findVertex(const_cast<TGraph&>(g), seqId, j) == nilVertex)) ++j;
 			nextVertex = addVertex(const_cast<TGraph&>(g), seqId, i, j-i);
 		}
-		appendValue(alignSeq, String<TVertexDescriptor>(nextVertex));
+		appendValue(alignSeq, TVertexString(nextVertex));
 		i += fragmentLength(g, nextVertex);
 	}
 }
@@ -82,7 +82,7 @@ _createAlignmentGraph(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	// Create the alignment graph
 	TSize alignSeqLen = length(alignSeq);
 	for(TSize i = 0; i<alignSeqLen;++i) {
-		TVertexString& alignSeq_i = alignSeq[i];
+		TVertexString& alignSeq_i = value(alignSeq, i);
 		TSize len_i = length(alignSeq_i);
 		for(TSize j=0; j<len_i; ++j) {
 			TVertexDescriptor v = getValue(alignSeq_i, j);
@@ -107,32 +107,34 @@ _createAlignmentGraph(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TStringSet, typename TCargo, typename TSpec, typename TGuideTree, typename TVertexDescriptor, typename TSequence>
+template<typename TStringSet, typename TCargo, typename TSpec, typename TGuideTree, typename TVertexDescriptor, typename TSegmentString, typename TSize>
 inline void 
 _recursiveProgressiveAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 							   TGuideTree& tree,
 							   TVertexDescriptor const root,
-							   TSequence& alignSeq)
+							   TSegmentString& alignSeq,
+							   TSize& alignSeqMem)
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
-	typedef typename Size<TGraph>::Type TSize;
-	typedef typename Id<TGraph>::Type TId;
 	typedef typename Iterator<TGuideTree, AdjacencyIterator>::Type TAdjacencyIterator;
-	typedef typename Iterator<TGuideTree, DfsPreorder>::Type TDfsPreorderIterator;
 
 	if(isLeaf(tree, root)) {
 		_buildLeafString(g, root, alignSeq);
+		alignSeqMem = 1;
 	} else {
 		// Align the two children (Binary tree)
-		typedef String<String<TVertexDescriptor> > TSegmentString;
 		TSegmentString seq1;
+		TSize seq1Mem = 0;
 		TSegmentString seq2;
+		TSize seq2Mem = 0;
 		TAdjacencyIterator adjIt(tree, root);
-		_recursiveProgressiveAlignment(g,tree, *adjIt, seq1);
+		_recursiveProgressiveAlignment(g,tree, *adjIt, seq1, seq1Mem);
 		goNext(adjIt);
-		_recursiveProgressiveAlignment(g,tree, *adjIt, seq2);
-		heaviestCommonSubsequence(g,seq1,seq2,alignSeq);
+		_recursiveProgressiveAlignment(g,tree, *adjIt, seq2, seq2Mem);
+		heaviestCommonSubsequence(g,seq1,seq1Mem,seq2,seq2Mem,alignSeq);
+		alignSeqMem = seq1Mem + seq2Mem;
+		clear(seq1);
+		clear(seq2);
 
 		//// Debug Code
 		//for(TSize i = 0; i<length(alignSeq);++i) {
@@ -182,7 +184,8 @@ progressiveAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 
 	// Perform progressive alignment
 	TSegmentString alignSeq;
-	_recursiveProgressiveAlignment(g,tree,getRoot(tree),alignSeq);
+	TSize alignSeqMem = 0;
+	_recursiveProgressiveAlignment(g,tree,getRoot(tree),alignSeq, alignSeqMem);
 
 	// Create the alignment graph
 	_createAlignmentGraph(g, alignSeq, gOut);
@@ -253,15 +256,19 @@ progressiveAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 
 	// Align the sequence groups and flip the order for profile alignment
 	String<TSegmentString> profileStrings;
+	String<TSize> profileStringsMem;
 	resize(profileStrings, length(sequenceGroups));
+	resize(profileStringsMem, length(sequenceGroups));
 	TSize numGroups = length(sequenceGroups);
 	for(TSize i = 0;i<numGroups;++i) {
 		// Perform progressive alignment
 		TGraph copy_graph(g);
 		if ((sequenceGroups[i]).size() > 1) tripletLibraryExtension(copy_graph, sequenceGroups[i]);
 		TSegmentString alignSeq;
-		_recursiveProgressiveAlignment(copy_graph,tree,sequenceGroupRoots[i],alignSeq);
-		profileStrings[i] = alignSeq;
+		TSize alignSeqMem = 0;
+		_recursiveProgressiveAlignment(copy_graph,tree,sequenceGroupRoots[i],alignSeq, alignSeqMem);
+		value(profileStrings, i) = alignSeq;
+		value(profileStringsMem, i) = alignSeqMem;
 		//std::cout << "One mini tree finished " << (sequenceGroups[i]).size() << std::endl;
 		clear(copy_graph);
 	}
@@ -273,8 +280,9 @@ progressiveAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 		//restrictedTripletLibraryExtension(copy_graph, sequenceGroups[lastIndex], sequenceGroups[lastIndex-y]);
 		TSegmentString alignSeq;
 		//heaviestCommonSubsequence(copy_graph,profileStrings[lastIndex],profileStrings[lastIndex-y],alignSeq);
-		heaviestCommonSubsequence(g,profileStrings[lastIndex],profileStrings[lastIndex-y],alignSeq);
+		heaviestCommonSubsequence(g,profileStrings[lastIndex],value(profileStringsMem, lastIndex),profileStrings[lastIndex-y],value(profileStringsMem, lastIndex - y),alignSeq);
 		profileStrings[lastIndex] = alignSeq;
+		value(profileStringsMem, lastIndex) = value(profileStringsMem, lastIndex) + value(profileStringsMem, lastIndex - y);
 		(sequenceGroups[lastIndex]).insert((sequenceGroups[lastIndex-y]).begin(),(sequenceGroups[lastIndex-y]).end());
 		//std::cout << "Two mini trees joined " << (sequenceGroups[lastIndex]).size() << std::endl;
 		//clear(copy_graph);
