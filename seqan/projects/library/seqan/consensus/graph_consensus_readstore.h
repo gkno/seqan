@@ -193,7 +193,43 @@ loadReadsClr(ReadStore<TAlphabet, TSpec>& readSt,
 	}
 }
 
+//////////////////////////////////////////////////////////////////////////////
 
+template<typename TAlphabet, typename TSpec, typename TAlph2, typename TSpec2, typename TSize, typename TReadClrSet, typename TQualityClrSet, typename TLayoutPos>
+inline void
+loadReadsClr(ReadStore<TAlphabet, TSpec>& readSt,
+             CtgStore<TAlph2, TSpec2>& ctgSt,
+             TSize index,
+             TReadClrSet& readSet,
+             TQualityClrSet& qualitySet,
+             TLayoutPos& startEndPos) 
+{
+    SEQAN_CHECKPOINT
+    typedef typename Value<TLayoutPos>::Type TPair;
+    String<GappedRead<> >& gapReads = value(ctgSt.data_reads, index);
+    TSize numReads = length(gapReads);
+	
+    resize(readSet, numReads);
+    resize(qualitySet, numReads);
+
+    for(TSize i = 0; i<numReads; ++i) {
+        GappedRead<>& gRead = value(gapReads, i);
+        String<TAlphabet> seq;
+        String<char> quality;
+        loadRead(readSt, gRead.data_source , seq);
+        loadQuality(readSt,gRead.data_source, quality);
+        if (gRead.data_clr.i1 < gRead.data_clr.i2) {
+            value(readSet, i) = infix(seq, gRead.data_clr.i1, gRead.data_clr.i2);
+            value(qualitySet, i) = infix(quality, gRead.data_clr.i1, gRead.data_clr.i2);
+        } else {
+            value(readSet, i) = infix(seq, gRead.data_clr.i2, gRead.data_clr.i1);
+            value(qualitySet, i) = infix(quality, gRead.data_clr.i2, gRead.data_clr.i1);
+            reverseComplementInPlace(value(readSet, i));
+            reverseInPlace(value(qualitySet,i) );
+        }
+        appendValue(startEndPos, TPair(gRead.data_clr.i1 + gRead.data_offset, gRead.data_clr.i2 + gRead.data_offset));
+    }
+}
 
 //////////////////////////////////////////////////////////////////////////////
 
