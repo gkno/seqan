@@ -226,6 +226,8 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 			if (posJi2 < posJi1) diagLow = -1 * (posJi1 - posJi2);
 			int diagHigh = posIi2 - posIi1;
 			if (posIi2 < posIi1) diagHigh = posIi1 - posIi2;
+
+			// If you mix long and short reads and short reads are contained in longer ones you have to increase the band because of long "overlaps" (length of the shorter read)
 			int radius = 10;		// Band width
 
 			// Read orientations
