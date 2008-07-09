@@ -94,6 +94,8 @@ struct Row<T const> {
 	typedef typename Row<T>::Type const Type;
 };
 
+
+
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 // Align
@@ -226,6 +228,21 @@ template <typename TSource, typename TSpec>
 struct Rows<Align<TSource, TSpec> const>
 {
 	typedef String<Gaps<TSource, TSpec> > const Type;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
+///.Metafunction.Source.param.T.type:Class.Align
+
+template <typename TSource, typename TSpec>
+struct Source<Align<TSource, TSpec> >
+{
+	typedef TSource Type;
+};
+template <typename TSource, typename TSpec>
+struct Source<Align<TSource, TSpec> const >
+{
+	typedef TSource Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -494,14 +511,14 @@ SEQAN_CHECKPOINT
 The alignment will be dependent from the strings in the stringset; use @Function.detach@ to make $align$ the owner of its strings.
 */
 
-template <typename TSource, typename TSpec, typename TString, typename TSpec2>
+template <typename TSource, typename TSpec, typename TSpec2>
 inline void
 setStrings(Align<TSource, TSpec> & me,
-		   StringSet<TString, TSpec2> & stringset)
+		   StringSet<TSource, TSpec2> & stringset)
 {
 SEQAN_CHECKPOINT
 	typedef Align<TSource, TSpec> TAlign;
-	typedef StringSet<TString, TSpec2> TStringset;
+	typedef StringSet<TSource, TSpec2> TStringset;
 
 	typedef typename Rows<TAlign>::Type TRows;
 	typedef typename Iterator<TRows>::Type TRowsIterator;
@@ -539,19 +556,18 @@ clearGaps(Align<TSource, TSpec> & me)
 .Function.align#stringSet
 */
 template <typename TSource, typename TSpec>
-inline StringSet<TSource, Dependent<Tight> >
+inline StringSet<TSource, Dependent<> >
 stringSet(Align<TSource, TSpec> & me)
 {
 SEQAN_CHECKPOINT
 	typedef Align<TSource, TSpec> TAlign;
-	typedef StringSet<TSource, Dependent<Tight> > TStringSet;
+	typedef StringSet<TSource, Dependent<> > TStringSet;
 
 	typedef typename Rows<TAlign>::Type TRows;
 	typedef typename Iterator<TRows>::Type TRowsIterator;
 
 	TStringSet ss;
 
-	TRowsIterator it = begin(rows(me));
 	for (TRowsIterator it = begin(rows(me)); it != end(rows(me)); goNext(it))
 	{
 		appendValue(ss, source(*it));

@@ -910,18 +910,18 @@ removeValues(Iter<TSumList, MiniSumListIterator > & it)
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TSumList>
+template <typename TSumList, typename TSumList2>
 inline bool
 operator == (Iter<TSumList, MiniSumListIterator> const & left,
-			 Iter<TSumList, MiniSumListIterator> const & right)
+			 Iter<TSumList2, MiniSumListIterator> const & right)
 {
 	return left.here_.data_ptr == right.here_.data_ptr;
 }
 
-template <typename TSumList>
+template <typename TSumList, typename TSumList2>
 inline bool
 operator != (Iter<TSumList, MiniSumListIterator> const & left,
-			 Iter<TSumList, MiniSumListIterator> const & right)
+			 Iter<TSumList2, MiniSumListIterator> const & right)
 {
 	return left.here_.data_ptr != right.here_.data_ptr;
 }

@@ -126,6 +126,7 @@ void testAlignColsBase()
 	const_col_it1 = end(c_cols1);
 	--col_it1;									//operator --
 	--const_col_it1;
+
 	SEQAN_TASSERT(value(col_it1, 0) == row(ali1, 0)[endPosition(cols1) - 1])
 	SEQAN_TASSERT(value(col_it1, 1) == row(ali1, 1)[endPosition(cols1) - 1])
 	SEQAN_TASSERT(value(const_col_it1, 0) == row(ali1, 0)[endPosition(c_cols1) - 1])
@@ -244,10 +245,11 @@ void testAlignColsBase()
 template <typename TAlign>
 void testGotohAlign()
 {
+	typedef typename Value<TAlign>::Type TValue;
 	
 	//align two sequences using Smith-Waterman-algorithm
-	String<char> str0 = "atgt";
-	String<char> str1 = "atagat";
+	String<TValue> str0 = "atgt";
+	String<TValue> str1 = "atagat";
 	
 	TAlign ali;
 	resize(rows(ali), 2);
@@ -279,11 +281,13 @@ void testGotohAlign()
 template <typename TAlign>
 void testAlignBasics2()
 {
-	StringSet<String<char> > ss;
+	typedef typename Source<TAlign>::Type TSource;
+	StringSet<TSource> ss;
 	appendValue(ss, "accagtta");
 	appendValue(ss, "ccactagggg");
 
 	TAlign aa(ss);
+	cout << ss[0]; 
 	SEQAN_TASSERT(row(aa, 0) == "accagtta")
 	SEQAN_TASSERT(id(row(aa, 0)) == id(value(ss, 0)))
 	SEQAN_TASSERT(row(aa, 1) == "ccactagggg")
@@ -293,17 +297,28 @@ void testAlignBasics2()
 
 //////////////////////////////////////////////////////////////////////////////
 
+template <typename TAlign>
+void _TestAlign()
+{
+	testAlignBasics<TAlign>();
+	testAlignBasics2<TAlign>();
+	testAlignColsBase<TAlign>();
+	testGotohAlign<TAlign>();
+}
+
+
 void Main_TestAlign() 
 {
 	SEQAN_TREPORT("TEST ALIGN BEGIN")
 
-//*
-	testAlignBasics<Align<String<char>, ArrayGaps> >();
-	testAlignBasics2<Align<String<char>, ArrayGaps> >();
-	testAlignColsBase<Align<String<char>, ArrayGaps> >();
-	testGotohAlign<Align< String<char>, ArrayGaps> >();
-/*/
+	_TestAlign<Align<String<char>, ArrayGaps> >();
+	_TestAlign<Align<String<Dna>, ArrayGaps> >();
 
+	_TestAlign<Align<String<char>, SumlistGaps> >();
+	_TestAlign<Align<String<Dna>, SumlistGaps> >();
+
+
+/*
 	typedef Align< String<char>, ArrayGaps> TAlign;
 	TAlign a;
 	resize(rows(a), 2);

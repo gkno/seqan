@@ -571,6 +571,21 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TGaps>
+struct Source< Iter<TGaps, GapsIterator<SumlistGaps> > >
+{
+	typedef typename Source<TGaps>::Type TGapsSource;
+	typedef typename Iterator<TGapsSource>::Type Type;
+};
+template <typename TGaps>
+struct Source< Iter<TGaps, GapsIterator<SumlistGaps> > const>
+{
+	typedef typename Source<TGaps>::Type TGapsSource;
+	typedef typename Iterator<TGapsSource>::Type Type;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TGaps>
 inline typename GetValue< Iter<TGaps, GapsIterator<SumlistGaps> > >::Type
 getValue(Iter<TGaps, GapsIterator<SumlistGaps> > & me)
 {
@@ -619,11 +634,28 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TGaps>
+inline typename Source<Iter<TGaps, GapsIterator<SumlistGaps> > >::Type /*returns copy*/
+source(Iter<TGaps, GapsIterator<SumlistGaps> > & me)
+{
+SEQAN_CHECKPOINT
+	return begin(source(*me.data_container)) +  sourcePosition(me);
+}
+template <typename TGaps>
+inline typename Source<Iter<TGaps, GapsIterator<SumlistGaps> > const>::Type /*returns copy*/
+source(Iter<TGaps, GapsIterator<SumlistGaps> > const & me)
+{
+SEQAN_CHECKPOINT
+	return begin(source(*me.data_container)) + sourcePosition(me);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TGaps>
 inline bool 
 isGap(Iter<TGaps, GapsIterator<SumlistGaps> > const & me)
 {
 SEQAN_CHECKPOINT
-	return (me.pos < (getValue(me.iter, 0) - getValue(me.iter, 1)));
+	return (atEnd(me.iter) || (me.pos < (getValue(me.iter, 0) - getValue(me.iter, 1))));
 }
 
 //____________________________________________________________________________
@@ -632,7 +664,7 @@ template <typename TGaps>
 inline typename Size<TGaps>::Type
 countGaps(Iter<TGaps, GapsIterator<SumlistGaps> > const & me)
 {
-	if (isGap(me))
+	if (!atEnd(me) && isGap(me))
 	{
 		return getValue(me.iter, 0) - getValue(me.iter, 1) - me.pos;
 	}
@@ -650,6 +682,8 @@ inline void
 _goNext_sumlistGapsIterator(T & me)
 {
 	++me.pos;
+	if (atEnd(me.iter)) return;
+
 	if (getValue(me.iter, 0) > me.pos) return;
 
 	me.pos = 0;

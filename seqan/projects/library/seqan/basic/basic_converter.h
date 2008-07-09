@@ -74,13 +74,6 @@ It is recommended to use @Function.convert@ rather than $convertImpl$.
 template <typename TTarget, typename T, typename TSource>
 inline typename Convert<TTarget, TSource>::Type
 convertImpl(Convert<TTarget, T> const,
-			TSource & source)
-{
-	return source;
-}
-template <typename TTarget, typename T, typename TSource>
-inline typename Convert<TTarget, TSource const>::Type
-convertImpl(Convert<TTarget, T> const,
 			TSource const & source)
 {
 	return source;

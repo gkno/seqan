@@ -304,7 +304,6 @@ void TestGapManipulation()
 
 	SEQAN_TASSERT(countGaps(gaps5, 0) == 2);
 	SEQAN_TASSERT(countGaps(gaps5, 2) == 0);
-	int x = countGaps(gaps5, 3);
 	SEQAN_TASSERT(countGaps(gaps5, 3) == 4);
 	SEQAN_TASSERT(countGaps(gaps5, 4) == 3);
 	SEQAN_TASSERT(countGaps(gaps5, 6) == 1);

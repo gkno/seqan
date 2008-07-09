@@ -375,18 +375,18 @@ end(String<TValue, FileReader<TFormat, TFile, TSpec> > const & me,
 
 template <typename TValue, typename TFormat, typename TFile, typename TSpec, typename TPosition, typename TIteratorSpec>
 inline typename Iterator< String<TValue, FileReader<TFormat, TFile, TSpec> >, TIteratorSpec >::Type
-iterator(String<TValue, FileReader<TFormat, TFile, TSpec> > & me,
-		 TPosition pos,
-		 Tag<TIteratorSpec> const)
+iter(String<TValue, FileReader<TFormat, TFile, TSpec> > & me,
+	 TPosition pos,
+	 Tag<TIteratorSpec> const)
 {
 	typedef typename Iterator< String<TValue, FileReader<TFormat, TFile, TSpec> >, TIteratorSpec >::Type TIterator;
 	return TIterator(me, pos);
 }
 template <typename TValue, typename TFormat, typename TFile, typename TSpec, typename TPosition, typename TIteratorSpec>
 inline typename Iterator< String<TValue, FileReader<TFormat, TFile, TSpec> > const, TIteratorSpec >::Type
-iterator(String<TValue, FileReader<TFormat, TFile, TSpec> > const & me,
-		 TPosition pos,
-		 Tag<TIteratorSpec> const)
+iter(String<TValue, FileReader<TFormat, TFile, TSpec> > const & me,
+	 TPosition pos,
+	 Tag<TIteratorSpec> const)
 {
 	typedef String<TValue, FileReader<TFormat, TFile, TSpec> > TString;
 	typedef typename Iterator< TString const, TIteratorSpec >::Type TIterator;

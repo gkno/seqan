@@ -32,6 +32,7 @@
 
 #include <seqan/map.h>
 #include <seqan/graph_align.h>
+#include <seqan/modifier.h>
 
 //____________________________________________________________________________
 

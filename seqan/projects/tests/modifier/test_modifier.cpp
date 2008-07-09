@@ -216,6 +216,24 @@ void testReverseString()
 
 }
 
+//____________________________________________________________________________
+
+//////////////////////////////////////////////////////////////////////////////
+
+void testAlphabetModifier()
+{
+	typedef ModifiedAlphabet<Dna, ModExpand<'-'> > TDnaGap;
+	typedef String<TDnaGap> TString;
+
+	TString str = "aCgT-AcGt";
+	SEQAN_TASSERT(str == "aCgT-AcGt");
+	SEQAN_TASSERT(str == "AcGt-aCgT");
+
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+
 int main()
 {
 	SEQAN_TREPORT("TEST BEGIN")
@@ -223,6 +241,7 @@ int main()
 		testViewString();
 		testViewIterator();
 		testReverseString();
+		testAlphabetModifier();
 
 	SEQAN_TREPORT("TEST END")
 		return 0;

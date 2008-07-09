@@ -35,20 +35,62 @@ struct _Align_Traceback
 };
 
 //////////////////////////////////////////////////////////////////////////////
+// _align_trace_print: this function is called by various alignment algorithm
+// to build up the alignment during traceback
 
 template <typename TSize, typename TStringSet, typename TId, typename TPos, typename TTraceValue>
 inline void
 _align_trace_print(_Align_Traceback<TSize> & tb,
-				   TStringSet const & str,
-				   TId const id1,
-				   TPos const pos1,
-				   TId const id2,
-				   TPos const pos2,
+				   TStringSet const &,
+				   TId const,
+				   TPos const,
+				   TId const,
+				   TPos const,
 				   TPos const segLen,
 				   TTraceValue const tv)
 {
 	appendValue(tb.sizes, segLen);
 	appendValue(tb.tvs, tv);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// _pump_trace_2_Align: build alignment accoring to the traceback stored in trace
+// note that the traceback in trace is "reverse" (from back to front)
+
+template <typename TSource, typename TSpec, typename TTrace> 
+void
+_pump_trace_2_Align(Align<TSource, TSpec> & align_,
+					TTrace trace)
+{
+	typedef Align<TSource, TSpec> TAlign;
+	typedef typename Size<TAlign>::Type TSize;
+
+	typedef typename Row<TAlign>::Type TRow;
+	typedef typename Iterator<TRow>::Type TRowIterator;
+
+	//pump trace into align_ (note: this is relatively slow code here. it could be improved if specialized to the Align Specs)
+	clearGaps(align_);
+
+	TSize i = length(trace.sizes); //scan trace backwards
+	TRowIterator it0 = begin(row(align_, 0));
+	TRowIterator it1 = begin(row(align_, 1));
+	while (i > 0)
+	{
+		--i;
+		TSize siz = trace.sizes[i];
+		switch ((int) trace.tvs[i])
+		{
+		case 1: //horizontal:
+			insertGaps(it1, siz);
+			break;
+
+		case 2: //vertical:
+			insertGaps(it0, siz);
+			break;
+		}
+		goFurther(it0, siz);
+		goFurther(it1, siz);
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -88,36 +130,11 @@ SEQAN_CHECKPOINT
 	typedef Align<TSource, TSpec> TAlign;
 	typedef typename Size<TAlign>::Type TSize;
 
-	typedef typename Row<TAlign>::Type TRow;
-	typedef typename Iterator<TRow>::Type TRowIterator;
-
 	_Align_Traceback<TSize> trace;
 
 	TScoreValue ret_score =  _globalAlignment(trace, stringSet(align_), score_, tag_align_config, tag_algorithm);
 
-	//pump trace into align_ (note: this is relatively slow code here. it could be improved if specialized to the Align Specs)
-	clearGaps(align_);
-
-	TSize i = length(trace.sizes); //scan trace backwards
-	TRowIterator it0 = begin(row(align_, 0));
-	TRowIterator it1 = begin(row(align_, 1));
-	while (i > 0)
-	{
-		--i;
-		TSize siz = trace.sizes[i];
-		switch ((int) trace.tvs[i])
-		{
-		case 1: //horizontal:
-			insertGaps(it1, siz);
-			break;
-
-		case 2: //vertical:
-			insertGaps(it0, siz);
-			break;
-		}
-		goFurther(it0, siz);
-		goFurther(it1, siz);
-	}
+	_pump_trace_2_Align(align_, trace);
 
 	return ret_score;
 }

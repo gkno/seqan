@@ -841,6 +841,85 @@ template <typename TValue>
 struct BitsPerValue<TValue const>:
 	public BitsPerValue<TValue> {};
 
+
+//////////////////////////////////////////////////////////////////////////////
+//BytesPerValue
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Metafunction.BytesPerValue:
+..summary:Number of bytes needed to store a value.
+..signature:BytesPerValue<T>::VALUE
+..param.T:A class.
+..returns.param.VALUE:Number of bytes needed to store $T$.
+...default:$BitsPerValue / 8$, rounded up. For built-in types, this is the same as $sizeof(T)$.
+..see:Metafunction.ValueSize
+..see:Metafunction.BitsPerValue
+*/
+
+template <typename TValue>
+struct BytesPerValue
+{
+	enum { VALUE = (BitsPerValue<TValue>::VALUE + 7) / 8 };
+};
+
+//////////////////////////////////////////////////////////////////////////////
+// IntegralPerValue
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Metafunction.IntegralForValue:
+..summary:Returns an itegral type that provides sufficient space to store a value.
+..signature:IntegralForValue<T>::Type
+..param.T:A class.
+..returns.param.Type:An integral type that can store $T$ values.
+..remarks:The type is the smallest unsigned integral type that has a size of at least @Metafunction.BytesPerValue@ bytes.
+...tableheader:bytes|integral type
+...table:1|$unsigned char$
+...table:2|$unsigned short$
+...table:3|$unsigned int$
+...table:4|$unsigned int$
+...table:5 and above|$__int64$
+..remarks:Note that the returned integral type cannot store $T$ values, if $T$ takes more than 8 bytes, 
+	since there exists no integral type that provides sufficient space to store types of this size.
+..see:Metafunction.ValueSize
+..see:Metafunction.BitsPerValue
+..see:Metafunction.BytsPerValue
+*/
+
+
+template <int SIZE>
+struct _IntegralForValue_Impl
+{
+	typedef __int64 Type;
+};
+template <>
+struct _IntegralForValue_Impl<1>
+{
+	typedef unsigned char Type;
+};
+template <>
+struct _IntegralForValue_Impl<2>
+{
+	typedef unsigned short Type;
+};
+template <>
+struct _IntegralForValue_Impl<3>
+{
+	typedef unsigned int Type;
+};
+template <>
+struct _IntegralForValue_Impl<4>
+{
+	typedef unsigned int Type;
+};
+
+template <typename TValue>
+struct IntegralForValue:
+	_IntegralForValue_Impl<BytesPerValue<TValue>::VALUE>
+{
+};
+
 //////////////////////////////////////////////////////////////////////////////
 //ValueSize
 //////////////////////////////////////////////////////////////////////////////
@@ -864,6 +943,9 @@ struct ValueSize<TValue const>:
 	public ValueSize<TValue> {};
 
 
+
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 
 template < typename T >
 struct _SupremumValueUnsigned {	static const T VALUE; };

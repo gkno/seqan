@@ -25,8 +25,43 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 //////////////////////////////////////////////////////////////////////////////
-// Tags
 
+/**.Metafunction.GappedValueType:
+..summary:Returns a value type that contains a blank value '-'.
+..signature:GappedValueType<T>::Type
+..param.T:The value type that should be expanded (if needed) by '-'.
+..returns.param.Type:A value type that can be used to store store values in $T$ and the value '-'.
+*/
+
+template <typename T>
+struct GappedValueType
+{
+	typedef T Type;
+};
+
+template <typename TValue, typename TSpec>
+struct GappedValueType< SimpleType<TValue, TSpec> >
+{
+	typedef SimpleType<TValue, TSpec> THost;
+	typedef ModifiedAlphabet<THost, ModExpand<'-'> > Type;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
+
+template <typename THost, typename TSpec>
+inline ModifiedAlphabet<THost, ModExpand<'-', TSpec> >
+gapValueImpl(ModifiedAlphabet<THost, ModExpand<'-', TSpec> > *)
+{
+SEQAN_CHECKPOINT
+	static ModifiedAlphabet<THost, ModExpand<'-', TSpec> > const _gap = '-';
+	return _gap;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+// Tags
 
 struct ArrayGaps;
 

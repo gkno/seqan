@@ -29,6 +29,7 @@ namespace SEQAN_NAMESPACE_MAIN
 template <typename TLeft, typename TRight>
 struct CompareType;
 
+
 template <typename TLeft, typename TRight>
 struct CompareType<TLeft const, TRight>
 {
@@ -44,6 +45,7 @@ struct CompareType<TLeft const, TRight const>
 {
 	typedef typename CompareType<TLeft, TRight>::Type const Type;
 };
+
 
 //////////////////////////////////////////////////////////////////////////////
 

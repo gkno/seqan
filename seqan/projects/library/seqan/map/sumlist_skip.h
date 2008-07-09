@@ -701,6 +701,7 @@ inline void
 goEnd(Iter<TSumList, SkipSumListIterator> & it)
 {
 	it.element = 0;
+	it.iter.sums_ = it.container->sum;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1039,18 +1040,18 @@ searchSumList(Iter<SumList<DIM, TValue, SkipSumList<TSpec> >, SkipSumListIterato
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TSumList>
+template <typename TSumList, typename TSumList2>
 inline bool
 operator == (Iter<TSumList, SkipSumListIterator> const & left,
-			 Iter<TSumList, SkipSumListIterator> const & right)
+			 Iter<TSumList2, SkipSumListIterator> const & right)
 {
 	return left.iter == right.iter;
 }
 
-template <typename TSumList>
+template <typename TSumList, typename TSumList2>
 inline bool
 operator != (Iter<TSumList, SkipSumListIterator> const & left,
-			 Iter<TSumList, SkipSumListIterator> const & right)
+			 Iter<TSumList2, SkipSumListIterator> const & right)
 {
 	return left.iter != right.iter;
 }

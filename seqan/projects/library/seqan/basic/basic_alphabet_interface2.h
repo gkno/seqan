@@ -65,12 +65,22 @@ Do not specialize $gapValue$, specialize @Function.gapValueImpl@ instead!
 ..see:Function.gapValueImpl
 */
 
+/*
 template <typename T>
 inline T const &
 gapValue()
 {
 SEQAN_CHECKPOINT
-	T * _tag = 0;
+	static T * _tag = 0;
+	return gapValueImpl(_tag);
+}
+*/
+template <typename T>
+inline T
+gapValue()
+{
+SEQAN_CHECKPOINT
+	static T * _tag = 0;
 	return gapValueImpl(_tag);
 }
 

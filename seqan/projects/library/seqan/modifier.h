@@ -33,7 +33,15 @@
 #include <seqan/modifier/modifier_generated_forwards.h>
 #endif
 
-#include <seqan/sequence.h>
+#include <seqan/sequence.h> //also include basic.h
+
+//____________________________________________________________________________
+
+#include <seqan/modifier/modifier_alphabet.h>
+#include <seqan/modifier/modifier_alphabet_expansion.h>
+
+//____________________________________________________________________________
+
 #include <seqan/modifier/modifier_iterator.h>
 #include <seqan/modifier/modifier_string.h>
 
