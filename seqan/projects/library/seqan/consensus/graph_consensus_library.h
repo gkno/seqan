@@ -239,6 +239,14 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 					} else if ((posJi1 > posIi1) && (posJi2 > posIi2)) {
 						if ((posJi1 - posIi1) + radius < diagHigh) diagHigh = (posJi1 - posIi1) + radius;
 						if ((posJi1 - posIi1) - radius > diagLow) diagLow = (posJi1 - posIi1) - radius;
+					} else {
+						if (posIi1 < posJi1) {
+							if ((posJi1 - posIi1) + radius < diagHigh) diagHigh = (posJi1 - posIi1) + radius;
+							if ((posJi1 - posIi1) - radius > diagLow) diagLow = (posJi1 - posIi1) - radius;
+						} else {
+							if (-1 * (posIi1 - posJi1) + radius < diagHigh) diagHigh = -1 * (posIi1 - posJi1) + radius;
+							if (-1 * (posIi1 - posJi1) - radius > diagLow) diagLow = -1 * (posIi1 - posJi1) - radius;
+						}	
 					}
 				} else { // 2) Forward - Reverse
 					if ((posJi2 >= posIi2) || (posJi1 <= posIi1)) continue;
@@ -248,7 +256,15 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 					} else if ((posJi2 > posIi1) && (posJi1 > posIi2)) {
 						if ((posJi2 - posIi1) + radius < diagHigh) diagHigh = (posJi2 - posIi1) + radius;
 						if ((posJi2 - posIi1) - radius > diagLow) diagLow = (posJi2 - posIi1) - radius;
-					} 
+					} else {
+						if (posIi1 < posJi2) {
+							if ((posJi2 - posIi1) + radius < diagHigh) diagHigh = (posJi2 - posIi1) + radius;
+							if ((posJi2 - posIi1) - radius > diagLow) diagLow = (posJi2 - posIi1) - radius;
+						} else {
+							if (-1 * (posIi1 - posJi2) + radius < diagHigh) diagHigh = -1 * (posIi1 - posJi2) + radius;
+							if (-1 * (posIi1 - posJi2) - radius > diagLow) diagLow = -1 * (posIi1 - posJi2) - radius;
+						}	
+					}
 				}
 			} else { 
 				// 3) Reverse - Forward
@@ -260,6 +276,14 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 					} else if ((posJi1 > posIi2) && (posJi2 > posIi1)) {
 						if ((posJi1 - posIi2) + radius < diagHigh) diagHigh = (posJi1 - posIi2) + radius;
 						if ((posJi1 - posIi2) - radius > diagLow) diagLow = (posJi1 - posIi2) - radius;
+					} else {
+						if (posIi2 < posJi1) {
+							if ((posJi1 - posIi2) + radius < diagHigh) diagHigh = (posJi1 - posIi2) + radius;
+							if ((posJi1 - posIi2) - radius > diagLow) diagLow = (posJi1 - posIi2) - radius;
+						} else {
+							if (-1 * (posIi2 - posJi1) + radius < diagHigh) diagHigh = -1 * (posIi2 - posJi1) + radius;
+							if (-1 * (posIi2 - posJi1) - radius > diagLow) diagLow = -1 * (posIi2 - posJi1) - radius;
+						}	
 					}
 				} else { // 4) Reverse - Reverse
 					if ((posJi2 >= posIi1) || (posJi1 <= posIi2)) continue;
@@ -269,10 +293,20 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 					} else if ((posJi2 > posIi2) && (posJi1 > posIi1)) {
 						if ((posJi2 - posIi2) + radius < diagHigh) diagHigh = (posJi2 - posIi2) + radius;
 						if ((posJi2 - posIi2) - radius > diagLow) diagLow = (posJi2 - posIi2) - radius;
+					} else {
+						if (posIi2 < posJi2) {
+							if ((posJi2 - posIi2) + radius < diagHigh) diagHigh = (posJi2 - posIi2) + radius;
+							if ((posJi2 - posIi2) - radius > diagLow) diagLow = (posJi2 - posIi2) - radius;
+						} else {
+							if (-1 * (posIi2 - posJi2) + radius < diagHigh) diagHigh = -1 * (posIi2 - posJi2) + radius;
+							if (-1 * (posIi2 - posJi2) - radius > diagLow) diagLow = -1 * (posIi2 - posJi2) - radius;
+						}
 					}
 				}
 			}
 
+			//std::cout << index1 << ',' << index2 << std::endl;
+			//std::cout << posIi1 << ',' << posIi2 << ',' << posJi1 << ',' << posJi2 << std::endl;
 
 			// Make a pairwise string-set
 			TStringSet pairSet;

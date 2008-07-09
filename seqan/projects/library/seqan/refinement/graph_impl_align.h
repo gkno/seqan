@@ -1053,7 +1053,7 @@ write(TFile & file,
 //////////////////////////////////////////////////////////////////////////////
 
 
-template <typename TFile, typename TStringSet, typename TCargo, typename TSpec, typename TAlignmentMatrix, typename TOldBegEndPos, typename TReadBegEndPos, typename TGappedConsensus>
+template <typename TFile, typename TStringSet, typename TCargo, typename TSpec, typename TAlignmentMatrix, typename TOldBegEndPos, typename TReadBegEndPos, typename TGappedConsensus, typename TCoverage>
 inline void
 write(TFile & file,
 	  Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
@@ -1061,6 +1061,7 @@ write(TFile & file,
 	  TOldBegEndPos const& oldBegEndPos,
 	  TReadBegEndPos const& readBegEndPos,
 	  TGappedConsensus const& gappedConsensus,
+	  TCoverage const& coverage,
 	  FastaReadFormat) 
 {
 	typedef typename Size<TAlignmentMatrix>::Type TSize;
@@ -1115,6 +1116,13 @@ write(TFile & file,
 		for(int i = 0; i<offset; ++i) _streamPut(file,' ');
 		_streamWrite(file,"C: ");
 		for(unsigned int local_col = column; local_col<window_end; ++local_col) _streamPut(file, gappedConsensus[local_col]);
+		_streamPut(file,'\n');
+		for(int i = 0; i<offset-1; ++i) _streamPut(file,' ');
+		_streamWrite(file,">2: ");
+		for(unsigned int local_col = column; local_col<window_end; ++local_col) {
+			if (value(coverage, local_col) > 2) _streamPut(file, gappedConsensus[local_col]);
+			else _streamPut(file, gapChar);
+		}
 		_streamPut(file,'\n');
 		_streamPut(file,'\n');
 		column+=winSize;

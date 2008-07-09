@@ -56,6 +56,9 @@ class LibStore
 		~LibStore() 
 		{
 			SEQAN_CHECKPOINT
+			clear(data_names);
+			clear(data_mean);
+			clear(data_std);
 		}
 
 	private:
@@ -130,6 +133,19 @@ length(LibStore<TSpec>& libSt)
 	SEQAN_CHECKPOINT
 	return libSt.data_pos_count;
 }
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TSpec>
+inline void
+clear(LibStore<TSpec>& libSt) 
+{
+	SEQAN_CHECKPOINT
+	clear(libSt.data_names);
+	clear(libSt.data_mean);
+	clear(libSt.data_std);
+}
+
 
 
 }// namespace SEQAN_NAMESPACE_MAIN
