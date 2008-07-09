@@ -440,7 +440,7 @@ void Test_HeaviestCommonSubsequence() {
 	clear(tmp); appendValue(tmp, 2); appendValue(str1, tmp);
 	clear(tmp); appendValue(tmp, 3); appendValue(str2, tmp);
 	clear(tmp); appendValue(tmp, 4); appendValue(str2, tmp);
-	SEQAN_TASSERT(heaviestCommonSubsequence(g, str1, str2, align) == 20);
+	SEQAN_TASSERT(heaviestCommonSubsequence(g, str1, 1, str2, 1, align) == 20);
 
 	s1 = "aaaaa";
 	s2 = "aaa";
@@ -462,8 +462,7 @@ void Test_HeaviestCommonSubsequence() {
 	clear(tmp); appendValue(tmp, 2); appendValue(str1, tmp);
 	clear(tmp); appendValue(tmp, 3); appendValue(str2, tmp);
 	clear(tmp); appendValue(tmp, 4); appendValue(str2, tmp);
-	heaviestCommonSubsequence(g, str1, str2, align);
-	SEQAN_TASSERT(heaviestCommonSubsequence(g, str1, str2) == heaviestCommonSubsequence(g, str1, str2, align))
+	heaviestCommonSubsequence(g, str1, 1, str2, 1, align);
 }
 
 

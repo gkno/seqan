@@ -1796,13 +1796,12 @@ __heaviestCommonSubsequence(std::map<TKey, TValue>&,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TKey, typename TValue, typename TPositions, typename TSize, typename TVertexDescriptor, typename TString, typename TOutString>
+template<typename TKey, typename TValue, typename TPositions, typename TSize, typename TString, typename TOutString>
 inline void
 __heaviestCommonSubsequence(std::map<TKey, TValue>& posToSlotMap,
 							TPositions const& positions,
 							TSize const m,
 							TSize const n,
-							TVertexDescriptor const nilVertex,
 							TString const& str1, 
 							TString const& str2,
 							TOutString& align) 
@@ -1843,7 +1842,7 @@ __heaviestCommonSubsequence(std::map<TKey, TValue>& posToSlotMap,
 			j = n - 1 - (TSize) (slotToPos[positions[p]] % (TLargeSize) n); // Get the index in str2
 		};
 		// Gaps in seq 2
-		while (i != position(pointerStr1)) {
+		while (i != (TSize) position(pointerStr1)) {
 			TVertexSet tmp;
 			TVertexSetIter itVEnd = end(value(pointerStr1));
 			for(TVertexSetIter itV = begin(value(pointerStr1));itV != itVEnd;++itV) appendValue(tmp, *itV);
@@ -1852,7 +1851,7 @@ __heaviestCommonSubsequence(std::map<TKey, TValue>& posToSlotMap,
 			++pointerStr1;
 		}
 		// Gaps in seq 1
-		while (j != position(pointerStr2)) {
+		while (j != (TSize) position(pointerStr2)) {
 			TVertexSet tmp;
 			TVertexSetIter itVEnd = end(value(pointerStr2));
 			for(TVertexSetIter itV = begin(value(pointerStr2));itV != itVEnd;++itV) appendValue(tmp, *itV);
@@ -1991,7 +1990,7 @@ heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	TCargo score = (TCargo) heaviestIncreasingSubsequence(seq, weights, positions);
 
 	// Retrieve the alignment sequence
-	__heaviestCommonSubsequence(posToSlotMap, positions, m, n, nilVertex, str1, str2, align);
+	__heaviestCommonSubsequence(posToSlotMap, positions, m, n, str1, str2, align);
 
 	return score;
 
