@@ -228,7 +228,8 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 			if (posIi2 < posIi1) diagHigh = posIi1 - posIi2;
 
 			// If you mix long and short reads and short reads are contained in longer ones you have to increase the band because of long "overlaps" (length of the shorter read)
-			int radius = 10;		// Band width
+			int radius = 5;		// Band width
+			int lengthDivider = 40;  // Note: overlap / lengthDivider is added to the radius
 
 			// Read orientations
 			if (posIi1 < posIi2) {
@@ -236,35 +237,53 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 				if (posJi1 < posJi2) {
 					if ((posJi1 >= posIi2) || (posJi2 <= posIi1)) continue;
 					if ((posJi2 < posIi2) && (posJi1 < posIi1)) {
-						if (-1 * (posIi1 - posJi1) - radius > diagLow) diagLow = -1 * (posIi1 - posJi1) - radius;
-						if (-1 * (posIi1 - posJi1) + radius < diagHigh) diagHigh = -1 * (posIi1 - posJi1) + radius;
+						int offset = (posIi1 - posJi1);
+						radius += (posJi2 - posJi1 - offset) / lengthDivider;
+						if (-1 * offset - radius > diagLow) diagLow = -1 * offset - radius;
+						if (-1 * offset + radius < diagHigh) diagHigh = -1 * offset + radius;
 					} else if ((posJi1 > posIi1) && (posJi2 > posIi2)) {
-						if ((posJi1 - posIi1) + radius < diagHigh) diagHigh = (posJi1 - posIi1) + radius;
-						if ((posJi1 - posIi1) - radius > diagLow) diagLow = (posJi1 - posIi1) - radius;
+						int offset = (posJi1 - posIi1);
+						radius += (posIi2 - posIi1 - offset) / lengthDivider;
+						if (offset + radius < diagHigh) diagHigh = offset + radius;
+						if (offset - radius > diagLow) diagLow = offset - radius;
 					} else {
+						radius += 40;  // Why???? ToDo???
 						if (posIi1 < posJi1) {
-							if ((posJi1 - posIi1) + radius < diagHigh) diagHigh = (posJi1 - posIi1) + radius;
-							if ((posJi1 - posIi1) - radius > diagLow) diagLow = (posJi1 - posIi1) - radius;
+							int offset = (posJi1 - posIi1);
+							radius += (posJi2 - posJi1) / lengthDivider;
+							if (offset + radius < diagHigh) diagHigh = offset + radius;
+							if (offset - radius > diagLow) diagLow = offset - radius;
 						} else {
-							if (-1 * (posIi1 - posJi1) + radius < diagHigh) diagHigh = -1 * (posIi1 - posJi1) + radius;
-							if (-1 * (posIi1 - posJi1) - radius > diagLow) diagLow = -1 * (posIi1 - posJi1) - radius;
-						}	
+							int offset = (posIi1 - posJi1);
+							radius += (posIi2 - posIi1) / lengthDivider;
+							if (-1 * offset + radius < diagHigh) diagHigh = -1 * offset + radius;
+							if (-1 * offset - radius > diagLow) diagLow = -1 * offset - radius;
+						}
 					}
 				} else { // 2) Forward - Reverse
 					if ((posJi2 >= posIi2) || (posJi1 <= posIi1)) continue;
 					if ((posJi1 < posIi2) && (posJi2 < posIi1)) {
-						if (-1 * (posIi1 - posJi2) - radius > diagLow) diagLow = -1 * (posIi1 - posJi2) - radius;
-						if (-1 * (posIi1 - posJi2) + radius < diagHigh) diagHigh = -1 * (posIi1 - posJi2) + radius;
+						int offset = (posIi1 - posJi2);
+						radius += (posJi1 - posJi2 - offset) / lengthDivider;
+						if (-1 * offset + radius < diagHigh) diagHigh = -1 * offset + radius;
+						if (-1 * offset - radius > diagLow) diagLow = -1 * offset - radius;
 					} else if ((posJi2 > posIi1) && (posJi1 > posIi2)) {
-						if ((posJi2 - posIi1) + radius < diagHigh) diagHigh = (posJi2 - posIi1) + radius;
-						if ((posJi2 - posIi1) - radius > diagLow) diagLow = (posJi2 - posIi1) - radius;
+						int offset = (posJi2 - posIi1);
+						radius += (posIi2 - posIi1 - offset) / lengthDivider;
+						if (offset + radius < diagHigh) diagHigh = offset + radius;
+						if (offset - radius > diagLow) diagLow = offset - radius;
 					} else {
+						radius += 40;  // Why???? ToDo???
 						if (posIi1 < posJi2) {
-							if ((posJi2 - posIi1) + radius < diagHigh) diagHigh = (posJi2 - posIi1) + radius;
-							if ((posJi2 - posIi1) - radius > diagLow) diagLow = (posJi2 - posIi1) - radius;
+							int offset = (posJi2 - posIi1);
+							radius += (posJi1 - posJi2) / lengthDivider;
+							if (offset + radius < diagHigh) diagHigh = offset + radius;
+							if (offset - radius > diagLow) diagLow = offset - radius;
 						} else {
-							if (-1 * (posIi1 - posJi2) + radius < diagHigh) diagHigh = -1 * (posIi1 - posJi2) + radius;
-							if (-1 * (posIi1 - posJi2) - radius > diagLow) diagLow = -1 * (posIi1 - posJi2) - radius;
+							int offset = (posIi1 - posJi2);
+							radius += (posIi2 - posIi1) / lengthDivider;
+							if (-1 * offset + radius < diagHigh) diagHigh = -1 * offset + radius;
+							if (-1 * offset - radius > diagLow) diagLow = -1 * offset - radius;
 						}	
 					}
 				}
@@ -273,43 +292,65 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 				if (posJi1 < posJi2) {
 					if ((posJi1 >= posIi1) || (posJi2 <= posIi2)) continue;
 					if ((posIi1 > posJi2) && (posIi2 > posJi1)) {
-						if (-1 * (posIi2 - posJi1) - radius > diagLow) diagLow = -1 * (posIi2 - posJi1) - radius;
-						if (-1 * (posIi2 - posJi1) + radius < diagHigh) diagHigh = -1 * (posIi2 - posJi1) + radius;
+						int offset = (posIi2 - posJi1);
+						radius += (posJi2 - posJi1 - offset) / lengthDivider;
+						if (-1 * offset - radius > diagLow) diagLow = -1 * offset - radius;
+						if (-1 * offset + radius < diagHigh) diagHigh = -1 * offset + radius;
 					} else if ((posJi1 > posIi2) && (posJi2 > posIi1)) {
-						if ((posJi1 - posIi2) + radius < diagHigh) diagHigh = (posJi1 - posIi2) + radius;
-						if ((posJi1 - posIi2) - radius > diagLow) diagLow = (posJi1 - posIi2) - radius;
+						int offset = (posJi1 - posIi2);
+						radius += (posIi1 - posIi2 - offset) / lengthDivider;
+						if (offset + radius < diagHigh) diagHigh = offset + radius;
+						if (offset - radius > diagLow) diagLow = offset - radius;
 					} else {
+						radius += 40;  // Why???? ToDo???
 						if (posIi2 < posJi1) {
-							if ((posJi1 - posIi2) + radius < diagHigh) diagHigh = (posJi1 - posIi2) + radius;
-							if ((posJi1 - posIi2) - radius > diagLow) diagLow = (posJi1 - posIi2) - radius;
+							int offset = (posJi1 - posIi2);
+							radius += (posJi2 - posJi1) / lengthDivider;
+							if (offset + radius < diagHigh) diagHigh = offset + radius;
+							if (offset - radius > diagLow) diagLow = offset - radius;
 						} else {
-							if (-1 * (posIi2 - posJi1) + radius < diagHigh) diagHigh = -1 * (posIi2 - posJi1) + radius;
-							if (-1 * (posIi2 - posJi1) - radius > diagLow) diagLow = -1 * (posIi2 - posJi1) - radius;
-						}	
+							int offset = (posIi2 - posJi1);
+							radius += (posIi1 - posIi2) / lengthDivider;
+							if (-1 * offset + radius < diagHigh) diagHigh = -1 * offset + radius;
+							if (-1 * offset - radius > diagLow) diagLow = -1 * offset - radius;
+						}
 					}
 				} else { // 4) Reverse - Reverse
 					if ((posJi2 >= posIi1) || (posJi1 <= posIi2)) continue;
 					if ((posJi1 < posIi1) && (posJi2 < posIi2)) {
-						if (-1 * (posIi2 - posJi2) - radius > diagLow) diagLow = -1 * (posIi2 - posJi2) - radius;
-						if (-1 * (posIi2 - posJi2) + radius < diagHigh) diagHigh = -1 * (posIi2 - posJi2) + radius;
+						int offset = (posIi2 - posJi2);
+						radius += (posJi1 - posJi2 - offset) / lengthDivider;
+						if (-1 * offset + radius < diagHigh) diagHigh = -1 * offset + radius;
+						if (-1 * offset - radius > diagLow) diagLow = -1 * offset - radius;
 					} else if ((posJi2 > posIi2) && (posJi1 > posIi1)) {
-						if ((posJi2 - posIi2) + radius < diagHigh) diagHigh = (posJi2 - posIi2) + radius;
-						if ((posJi2 - posIi2) - radius > diagLow) diagLow = (posJi2 - posIi2) - radius;
+						int offset = (posJi2 - posIi2);
+						radius += (posIi1 - posIi2 - offset) / lengthDivider;
+						if (offset + radius < diagHigh) diagHigh = offset + radius;
+						if (offset - radius > diagLow) diagLow = offset - radius;
 					} else {
+						radius += 40;  // Why???? ToDo???
 						if (posIi2 < posJi2) {
-							if ((posJi2 - posIi2) + radius < diagHigh) diagHigh = (posJi2 - posIi2) + radius;
-							if ((posJi2 - posIi2) - radius > diagLow) diagLow = (posJi2 - posIi2) - radius;
+							int offset = (posJi2 - posIi2);
+							radius += (posJi1 - posJi2) / lengthDivider;
+							if (offset + radius < diagHigh) diagHigh = offset + radius;
+							if (offset - radius > diagLow) diagLow = offset - radius;
 						} else {
-							if (-1 * (posIi2 - posJi2) + radius < diagHigh) diagHigh = -1 * (posIi2 - posJi2) + radius;
-							if (-1 * (posIi2 - posJi2) - radius > diagLow) diagLow = -1 * (posIi2 - posJi2) - radius;
+							int offset = (posIi2 - posJi2);
+							radius += (posIi1 - posIi2) / lengthDivider;
+							if (-1 * offset + radius < diagHigh) diagHigh = -1 * offset + radius;
+							if (-1 * offset - radius > diagLow) diagLow = -1 * offset - radius;
 						}
 					}
 				}
 			}
 
+
+			//// Debug code
+			//std::cout << radius << std::endl;
 			//std::cout << index1 << ',' << index2 << std::endl;
 			//std::cout << posIi1 << ',' << posIi2 << ',' << posJi1 << ',' << posJi2 << std::endl;
-
+			//std::cout << diagLow << ',' << diagHigh << std::endl;
+			
 			// Make a pairwise string-set
 			TStringSet pairSet;
 			TId id1 = positionToId(str, index1);
