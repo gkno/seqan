@@ -343,11 +343,6 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Value<TSA>::Type TSize;
 		typedef typename Value<TText>::Type TValue;
 
-		#ifdef SEQAN_DEBUG_INDEX
-			if (sizeof(TSize) > 4)
-				::std::cerr << "WARNING: TSize is more than 32 bit long (Skew3). This is probably not what you want." << ::std::endl;
-        #endif
-
 		TSize n = length(s);
         if (n < 1) return;
 

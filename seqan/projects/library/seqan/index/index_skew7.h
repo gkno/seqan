@@ -432,7 +432,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	// compares two suffixes of residue classes a and b
     template <typename TTextIter, typename TSize, typename TString> inline
-    bool _leqSkew7(unsigned a, unsigned b,   TTextIter spos[], const TSize tpos[], const bool islast[], const TString &s124, const long adjust[7][7])
+    bool _leqSkew7(unsigned a, unsigned b,   TTextIter spos[], const TSize tpos[], const bool islast[], const TString &s124, const TSize adjust[7][7])
     {
         TTextIter sa = spos[a];
         TTextIter sb = spos[b];
@@ -477,11 +477,6 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		SEQAN_ASSERT(IsContiguous<TText>::VALUE);
 		SEQAN_ASSERT(IsContiguous<TSA>::VALUE);
-
-		#ifdef SEQAN_DEBUG_INDEX
-			if (sizeof(TSize) > 4)
-				::std::cerr << "WARNING: TSize is more than 32 bit long (Skew3). This is probably not what you want." << ::std::endl;
-        #endif
 
 		TSize n = length(s);
         if (n < 1) return;
@@ -631,7 +626,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			// MULTIWAY MERGE all SA_ streams
 			{
 				// a helper matrix to lex-name-compare every combination of suffixes
-				long adjust[7][7] = // we use long instead of TSize because we need a sign
+				TSize adjust[7][7] =
 					//      0               1              2             3             4              5               6
 				   {{0             , _n124-_n[0]   , _n24-_n[0]  , _n124-_n[0] , _n[4]-_n[0] , _n[4]-_n[0]   , _n24-_n[0]    },  // 0
 					{1-_n[1]       , 0             , 0           , 1-_n[1]     , 0           , 1-_n[1]-_n[2] , 1-_n[1]-_n[2] },  // 1*
