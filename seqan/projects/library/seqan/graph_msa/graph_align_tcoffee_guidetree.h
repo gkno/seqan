@@ -648,13 +648,21 @@ upgmaTree(Graph<Undirected<TValue, TSpec1> >& pairGraph,
 	// Find the minimal value
 	TValue infinityVal = _getInfinity<TValue>();
 	TValue minVal = infinityVal;
+	bool found = false;
 	TED best = 0;
 	TEdgeI itE(pairGraph);
 	for(;!atEnd(itE);++itE) {
 		if (minVal > cargo(*itE)) {
 			best = *itE;
 			minVal = cargo(*itE);
+			found = true;
 		}
+	}
+	if ((!found) && (nseq>2)) {
+		TVertexI itV(pairGraph);
+		TVD i1 = *itV;
+		goNext(itV);
+		best = addEdge(pairGraph, i1, *itV, infinityVal);
 	}
 
 	// Property map for sum of weights for each node

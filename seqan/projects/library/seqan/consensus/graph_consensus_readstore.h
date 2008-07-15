@@ -62,12 +62,6 @@ class ReadStore
 		~ReadStore() 
 		{
 			SEQAN_CHECKPOINT
-			clear(data_reads);
-			clear(data_qualities);
-			clear(data_names);
-			clear(data_begin_end);
-			clear(data_clr);
-			clear(data_frg_id);
 		}
 
 
@@ -168,22 +162,6 @@ length(ReadStore<TAlphabet, TSpec>& readSt)
 	SEQAN_CHECKPOINT
 	return readSt.data_pos_count;
 }
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TAlphabet, typename TSpec>
-inline void
-clear(ReadStore<TAlphabet, TSpec>& readSt) 
-{
-	SEQAN_CHECKPOINT
-	clear(readSt.data_reads);
-	clear(readSt.data_qualities);	
-	clear(readSt.data_names);
-	clear(readSt.data_begin_end);
-	clear(readSt.data_clr);
-	clear(readSt.data_frg_id);
-}
-
 
 //////////////////////////////////////////////////////////////////////////////
 

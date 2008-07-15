@@ -56,9 +56,6 @@ class FrgStore
 		~FrgStore() 
 		{
 			SEQAN_CHECKPOINT
-			clear(data_names);
-			clear(data_lib_id);
-			clear(data_rds);
 		}
 
 	private:
@@ -136,21 +133,6 @@ length(FrgStore<TSpec>& frgSt)
 	SEQAN_CHECKPOINT
 	return frgSt.data_pos_count;
 }
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TSpec>
-inline void
-clear(FrgStore<TSpec>& frgSt) 
-{
-	SEQAN_CHECKPOINT
-	clear(frgSt.data_names);
-	clear(frgSt.data_lib_id);
-	clear(frgSt.data_rds);
-}
-
-
-
 
 }// namespace SEQAN_NAMESPACE_MAIN
 

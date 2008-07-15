@@ -178,17 +178,19 @@ __getAlignmentStatistics(Graph<Undirected<TCargo, TSpec> >& dist,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TStringSet, typename TCargo, typename TSpec, typename TPair, typename TPairSpec, typename TDistance, typename TScore>
+template<typename TStringSet, typename TCargo, typename TSpec, typename TPair, typename TPairSpec, typename TDistance, typename TScore, typename TSize>
 inline void 
 generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 					   String<TPair, TPairSpec> const& begEndPos,
 					   TDistance& dist,
 					   TScore const& score_type,
+					   TSize thresholdMatchlength,
+					   TSize thresholdQuality,
+					   TSize bandwidth,
 					   Overlap_Library)
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
-	typedef typename Size<TGraph>::Type TSize;
 	typedef typename Id<TGraph>::Type TId;
 	typedef typename Iterator<String<TPair, TPairSpec> >::Type TBegEndIter;
 
@@ -207,6 +209,12 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	TFragmentString matches;
 
 	// All pairwise alignments
+	double qltThres = (double) thresholdQuality / 100.0;
+	// Debug code
+	std::cout << "Using: " << std::endl;
+	std::cout << "Matchlength: " << thresholdMatchlength << std::endl;
+	std::cout << "Quality: " << qltThres << std::endl;
+	std::cout << "Bandwidth: " << bandwidth << std::endl;
 	TBegEndIter beIt = begin(begEndPos);
 	TBegEndIter beItEnd = end(begEndPos);
 	TSize index1 = 0;
@@ -228,7 +236,7 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 			if (posIi2 < posIi1) diagHigh = posIi1 - posIi2;
 
 			// If you mix long and short reads and short reads are contained in longer ones you have to increase the band because of long "overlaps" (length of the shorter read)
-			int radius = 5;		// Band width
+			int radius = (bandwidth + 1) / 2;		// Band width
 			int lengthDivider = 40;  // Note: overlap / lengthDivider is added to the radius
 
 			// Read orientations
@@ -371,8 +379,7 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 			double quality = (double) matchLen / (double) overlapLen;
 
 			// Get only the good overlap alignments
-			if (((quality >= 1) && (matchLen >= 8)) ||
-				((quality >= 0.8) && (matchLen >= 15))) {
+			if ((quality >= qltThres) && (matchLen >= thresholdMatchlength)) {
 
 				// Create a corresponding edge
 				TSize i = idToPosition(str, id1);
@@ -399,55 +406,6 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	// Refine all matches, rescore the matches and create multiple alignment
 	matchRefinement(matches,str,const_cast<TScore&>(score_type),g);
 }
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TStringSet, typename TCargo, typename TSpec, typename TDistance, typename TScoreValue, typename TScoreSpec>
-inline void 
-generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-					   TDistance& dist,
-					   Score<TScoreValue, TScoreSpec> const& score_type,
-					   Overlap_Library)
-{
-	SEQAN_CHECKPOINT
-	typedef typename Id<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type TId;
-	String<Pair<TId, TId> > pList;
-	selectPairsForLibraryGeneration(g, pList);
-	generatePrimaryLibrary(g, pList, dist, score_type, Overlap_Library());
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TStringSet, typename TCargo, typename TSpec, typename TId, typename TScoreValue, typename TScoreSpec>
-inline void 
-generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-					   String<Pair<TId, TId> >& pList,
-					   Score<TScoreValue, TScoreSpec> const& score_type,
-					   Overlap_Library)
-{
-	SEQAN_CHECKPOINT
-	Nothing noth;
-	generatePrimaryLibrary(g, pList, noth, score_type, Overlap_Library());
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TStringSet, typename TCargo, typename TSpec, typename TScore>
-inline void 
-generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-					   TScore const& score_type,
-					   Overlap_Library)
-{
-	SEQAN_CHECKPOINT
-	typedef typename Id<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type TId;
-	String<Pair<TId, TId> > pList;
-	selectPairsForLibraryGeneration(g, pList);
-	generatePrimaryLibrary(g, pList, score_type, Overlap_Library());
-}
-
-
-
-
 
 }// namespace SEQAN_NAMESPACE_MAIN
 

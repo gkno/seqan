@@ -110,11 +110,6 @@ class CtgStore
 		~CtgStore() 
 		{
 			SEQAN_CHECKPOINT
-			clear(data_contig);
-			clear(data_quality);
-			clear(data_names);
-			clear(data_begin_end);
-			clear(data_reads);
 		}
 
 
@@ -201,23 +196,6 @@ length(CtgStore<TAlphabet, TSpec>& ctgSt)
 	SEQAN_CHECKPOINT
 	return ctgSt.data_pos_count;
 }
-
-
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TAlphabet, typename TSpec>
-inline void
-clear(CtgStore<TAlphabet, TSpec>& ctgSt) 
-{
-	SEQAN_CHECKPOINT
-	clear(ctgSt.data_contig);
-	clear(ctgSt.data_quality);
-	clear(ctgSt.data_names);
-	clear(ctgSt.data_begin_end);
-	clear(ctgSt.data_reads);
-}
-
 
 
 
