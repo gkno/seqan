@@ -1174,8 +1174,6 @@ SEQAN_CHECKPOINT
 		_bitpos(me) = _PackedConsts<TContainer>::MAX_BIT_POS;
 		goPrevious(hostIterator(me));
 	}
-
-	goPrevious(hostIterator(me));
 }
 
 //////////////////////////////////////////////////////////////////////////////
