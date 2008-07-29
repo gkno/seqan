@@ -24,7 +24,7 @@
 //____________________________________________________________________________
 // prerequisites
 
-#include <seqan/platform.h>
+#include <seqan/file.h>
 
 #include <cstdio>
 #include <ctime>
@@ -40,6 +40,7 @@
 # include <errno.h>
 # include <semaphore.h>
 # include <aio.h>
+# include <sys/mman.h>
 
 #ifndef O_LARGEFILE
 #define O_LARGEFILE 0

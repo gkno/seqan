@@ -88,10 +88,11 @@
 #include <seqan/system/file_async.h>
 */
 //____________________________________________________________________________
-// external string
+// external strings
 
 #include <seqan/file/file_page.h>
 #include <seqan/file/file_page_raid0.h>
 #include <seqan/file/string_external.h>
+#include <seqan/file/string_mmap.h>
 
 #endif //#ifndef SEQAN_HEADER_...
