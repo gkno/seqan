@@ -187,6 +187,11 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline void release(FILE*, aRequest &) {
 	}
 
+    template < typename aRequest >
+    inline bool cancel(FILE*, aRequest &) {
+		return true; 
+	}
+
 }
 
 #endif

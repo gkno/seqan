@@ -77,14 +77,14 @@ For a larger size type, use @Tag.ExternalConfigLarge@.
 */
     // standard external string
     // size is uint32
-    template < typename _TFile = File<>,            // default file type
-               unsigned _PageSize = 4 * 1024 * 1024,// 1MTypes per default
-			   unsigned _Frames = 2 >			    // simultanous frames
+    template < typename _TFile = File<>,				// default file type
+               unsigned _PAGE_SIZE = 4 * 1024 * 1024,	// 1MTypes per default
+			   unsigned _FRAMES = 2 >					// simultanous frames
     struct ExternalConfig {
         typedef _TFile TFile;
-        typedef unsigned SizeType;
-        enum { PageSize = _PageSize };
-        enum { Frames = _Frames };
+        typedef unsigned TSize;
+        enum { PAGE_SIZE = _PAGE_SIZE };
+        enum { FRAMES = _FRAMES };
     };
 
 /**
@@ -112,14 +112,14 @@ you should think of using @Tag.ExternalConfig@.
     // ATTENTION:
     // pipes use the size type 
     // uint64 blows up your suffix arrays, lcp-tables, ...
-    template < typename _TFile = File<>,            // default file type
-               unsigned _PageSize = 1 * 1024 * 1024,// 1MTypes per default
-			   unsigned _Frames = 2 >			    // simultanous frames
+    template < typename _TFile = File<>,				// default file type
+               unsigned _PAGE_SIZE = 1 * 1024 * 1024,	// 1MTypes per default
+			   unsigned _FRAMES = 2 >					// simultanous frames
     struct ExternalConfigLarge {
         typedef _TFile TFile;
-        typedef typename Size<_TFile>::Type SizeType;
-        enum { PageSize = _PageSize };
-        enum { Frames = _Frames };
+        typedef typename Size<_TFile>::Type TSize;
+        enum { PAGE_SIZE = _PAGE_SIZE };
+        enum { FRAMES = _FRAMES };
     };
 
 /**
@@ -143,15 +143,15 @@ type of $TFile$. Normally this is a 64bit integer. For a smaller size type, use 
 you should think of using @Tag.ExternalConfig@.
 */
     // custom size type
-    template < typename TSize,
-		       typename _TFile = File<>,            // default file type
-               unsigned _PageSize = 1 * 1024 * 1024,// 1MTypes per default
-			   unsigned _Frames = 2 >			    // simultanous frames {
+    template < typename _TSize,
+		       typename _TFile = File<>,				// default file type
+               unsigned _PAGE_SIZE = 1 * 1024 * 1024,	// 1MTypes per default
+			   unsigned _FRAMES = 2 >					// simultanous frames
     struct ExternalConfigSize {
-		typedef TSize SizeType;
+		typedef _TSize TSize;
         typedef _TFile TFile;
-        enum { PageSize = _PageSize };
-        enum { Frames = _Frames };
+        enum { PAGE_SIZE = _PAGE_SIZE };
+        enum { FRAMES = _FRAMES };
     };
 
     template < typename TConfig = ExternalConfig<> >
@@ -159,331 +159,296 @@ you should think of using @Tag.ExternalConfig@.
 
 
     //////////////////////////////////////////////////////////////////////////////
-	// random vector iterator
-	template < typename _Vector >
-	struct VectorIterator
+	// random External String iterator
+	template < typename TExtString >
+	struct ExtStringIterator
 	{
-		typedef _Vector		                        Vector;
-		typedef VectorIterator				        iterator;
-        typedef typename Vector::Type			    Type;
-		typedef typename Vector::SizeType		    SizeType;
-		typedef typename Vector::const_reference	const_reference;
-		typedef typename Vector::volatile_ptr		volatile_ptr;
-        enum { _PageSize = Vector::PageSize };
+		typedef ExtStringIterator						TIterator;
+        typedef ExtStringIterator						TStdIterator;
 
-		SizeType	offset;
-		Vector		*vector;
+        typedef typename Value<TExtString>::Type		TValue;
+		typedef typename Size<TExtString>::Type			TSize;
+		typedef typename Difference<TExtString>::Type	TDifference;
+		typedef typename TExtString::TVolatilePtr		TVolatilePtr;
 
-        typedef VectorIterator                      std_iterator;
+        enum { PAGE_SIZE = TExtString::PAGE_SIZE };
 
-		//////////////////////////////////////////////////////////////////////////////
-		// public iterator interface
+		TSize		offset;
+		TExtString	*extString;
 
-		typedef ::std::random_access_iterator_tag		iterator_category;
-		typedef typename Vector::value_type			value_type;
-		typedef typename Vector::difference_type	difference_type;
-		typedef typename Vector::pointer			pointer;
-		typedef typename Vector::reference			reference;
-		
-	    VectorIterator():
+
+	    ExtStringIterator():
 			offset(0),
-			vector(NULL) {}
+			extString(NULL) {}
 
-	    explicit VectorIterator(Vector *_vector, SizeType _offset):
-			vector(_vector),
+	    explicit ExtStringIterator(TExtString *_extString, TSize _offset):
+			extString(_extString),
 			offset(_offset) {}
 
 		//////////////////////////////////////////////////////////////////////////////
 		// iterator conversion interface
 
-        VectorIterator(const std_iterator &I):
+        ExtStringIterator(const TStdIterator &I):
 			offset(I.offset),
-			vector(I.vector) {}
+			extString(I.extString) {}
 
 		//////////////////////////////////////////////////////////////////////////////
 		// iterator arithmetic
 
-        inline difference_type operator- (const iterator &I) const {
+        inline TDifference operator- (const TIterator &I) const {
 			return offset - I.offset;
 		};
 		
-		inline iterator operator- (difference_type delta) const {
-			return iterator(vector, offset - delta);
+		inline TIterator operator- (TDifference delta) const {
+			return TIterator(extString, offset - delta);
 		};
 		
-		inline iterator& operator-= (difference_type delta) const {
+		inline TIterator& operator-= (TDifference delta) const {
 			offset -= delta;
 			return *this;
 		};
 		
-		inline iterator operator+ (difference_type delta) const {
-			return iterator(vector, offset + delta);
+		inline TIterator operator+ (TDifference delta) const {
+			return TIterator(extString, offset + delta);
 		};
 		
-		inline iterator& operator+= (difference_type delta) const {
+		inline TIterator& operator+= (TDifference delta) const {
 			offset += delta;
 			return *this;
 		};
 		
-		inline reference operator* () const {
-			return (*vector)[offset];
+		inline TValue & operator* () const {
+			return (*extString)[offset];
 		}
     
-/*		inline const_reference operator* () const {
-			return (*vector)[offset];
+/*		inline TValue const & operator* () const {
+			return (*extString)[offset];
 		}
 */  
-		inline iterator& operator++ () {
+		inline TIterator& operator++ () {
 			++offset; return *this;
 		}
 
-		inline iterator operator++ (int) {
-			iterator before = *this;
+		inline TIterator operator++ (int) {
+			TIterator before = *this;
 			++offset; return before;
 		}
 
-		inline iterator& operator-- () {
+		inline TIterator& operator-- () {
 			--offset; return *this;
 		}
 
-		inline iterator operator-- (int) {
-			iterator before = *this;
+		inline TIterator operator-- (int) {
+			TIterator before = *this;
 			--offset; return before;
 		}
 
-		inline bool operator== (const iterator &I) const {
-			SEQAN_ASSERT(vector == I.vector);
+		inline bool operator== (const TIterator &I) const {
+			SEQAN_ASSERT(extString == I.extString);
 			return offset == I.offset;
 		}
 
-		inline bool operator!= (const iterator &I) const {
-			SEQAN_ASSERT(vector == I.vector);
+		inline bool operator!= (const TIterator &I) const {
+			SEQAN_ASSERT(extString == I.extString);
 			return offset != I.offset;
 		}
 
-		inline bool operator< (const iterator &I) const {
-			SEQAN_ASSERT(vector == I.vector);
+		inline bool operator< (const TIterator &I) const {
+			SEQAN_ASSERT(extString == I.extString);
 			return offset < I.offset;
 		}
 	};
 
 
 	//////////////////////////////////////////////////////////////////////////////
-	// const random vector iterator
-	template < typename _Vector >
-	struct VectorConstIterator
+	// const random External String iterator
+	template < typename TExtString >
+	struct ExtStringConstIterator
 	{
-		typedef _Vector		                        Vector;
-		typedef VectorConstIterator		            iterator;
-        typedef typename Vector::Type			    Type;
-		typedef typename Vector::SizeType		    SizeType;
-		typedef typename Vector::const_reference	const_reference;
-		typedef typename Vector::volatile_ptr	    volatile_ptr;
-        enum { _PageSize = Vector::PageSize };
+		typedef ExtStringConstIterator					TIterator;
+        typedef ExtStringIterator<TExtString>			TStdIterator;
+        typedef ExtStringConstIterator					TStdConstIterator;
 
-		SizeType	offset;
-		Vector		*vector;
+        typedef typename Value<TExtString>::Type		TValue;
+		typedef typename Size<TExtString>::Type			TSize;
+		typedef typename Difference<TExtString>::Type	TDifference;
+		typedef typename TExtString::TVolatilePtr	    TVolatilePtr;
+
+        enum { PAGE_SIZE = TExtString::PAGE_SIZE };
+
+		TSize		offset;
+		TExtString	*extString;
 		
-        friend struct VectorIterator<Vector>;
-        typedef VectorIterator<Vector>              std_iterator;
-        typedef VectorConstIterator                 std_const_iterator;
-
-        //////////////////////////////////////////////////////////////////////////////
-		// public iterator interface
-
-		typedef ::std::random_access_iterator_tag		iterator_category;
-		typedef typename Vector::value_type			value_type;
-		typedef typename Vector::difference_type	difference_type;
-		typedef typename Vector::const_pointer	    pointer;
-		typedef typename Vector::const_reference	reference;
 		
-	    VectorConstIterator():
+	    ExtStringConstIterator():
 			offset(0),
-			vector(NULL) {}
+			extString(NULL) {}
 
-	    explicit VectorConstIterator(Vector *_vector, SizeType _offset):
-			vector(_vector),
+	    explicit ExtStringConstIterator(TExtString *_extString, TSize _offset):
+			extString(_extString),
 			offset(_offset) {}
 
 		//////////////////////////////////////////////////////////////////////////////
 		// iterator conversion interface
 
-		VectorConstIterator(const std_iterator &I):
+		ExtStringConstIterator(const TStdIterator &I):
 			offset(I.offset),
-			vector(I.vector) {}
+			extString(I.extString) {}
 
-		VectorConstIterator(const std_const_iterator &I):
+		ExtStringConstIterator(const TStdConstIterator &I):
 			offset(I.offset),
-			vector(I.vector) {}
+			extString(I.extString) {}
 
 		//////////////////////////////////////////////////////////////////////////////
 		// iterator arithmetic
 
-		inline difference_type operator- (const iterator &I) const {
+		inline TDifference operator- (const TIterator &I) const {
 			return offset - I.offset;
 		};
 		
-		inline iterator operator- (difference_type delta) const {
-			return iterator(vector, offset - delta);
+		inline TIterator operator- (TDifference delta) const {
+			return TIterator(extString, offset - delta);
 		};
 		
-		inline iterator& operator-= (difference_type delta) const {
+		inline TIterator& operator-= (TDifference delta) const {
 			offset -= delta;
 			return *this;
 		};
 		
-		inline iterator operator+ (difference_type delta) const {
-			return iterator(vector, offset + delta);
+		inline TIterator operator+ (TDifference delta) const {
+			return TIterator(extString, offset + delta);
 		};
 		
-		inline iterator& operator+= (difference_type delta) const {
+		inline TIterator& operator+= (TDifference delta) const {
 			offset += delta;
 			return *this;
 		};
 		
-		inline const_reference operator* () const {
-			return (*vector)[offset];
+		inline TValue const & operator* () const {
+			return (*extString)[offset];
 		}
     
-		inline iterator& operator++ () {
+		inline TIterator& operator++ () {
 			++offset; return *this;
 		}
 
-		inline iterator operator++ (int) {
-			iterator before = *this;
+		inline TIterator operator++ (int) {
+			TIterator before = *this;
 			++offset; return before;
 		}
 
-		inline iterator& operator-- () {
+		inline TIterator& operator-- () {
 			--offset; return *this;
 		}
 
-		inline iterator operator-- (int) {
-			iterator before = *this;
+		inline TIterator operator-- (int) {
+			TIterator before = *this;
 			--offset; return before;
 		}
 
-		inline bool operator== (const iterator &I) const {
-			SEQAN_ASSERT(vector == I.vector);
+		inline bool operator== (const TIterator &I) const {
+			SEQAN_ASSERT(extString == I.extString);
 			return offset == I.offset;
 		}
 
-		inline bool operator!= (const iterator &I) const {
-			SEQAN_ASSERT(vector == I.vector);
+		inline bool operator!= (const TIterator &I) const {
+			SEQAN_ASSERT(extString == I.extString);
 			return offset != I.offset;
 		}
 
-		inline bool operator< (const iterator &I) const {
-			SEQAN_ASSERT(vector == I.vector);
+		inline bool operator< (const TIterator &I) const {
+			SEQAN_ASSERT(extString == I.extString);
 			return offset < I.offset;
 		}		
 	};
 
 
 	//////////////////////////////////////////////////////////////////////////////
-	// forward vector iterator
-	template < typename _Vector >
-    struct VectorFwdIterator : public ::std::iterator <
-                                    ::std::bidirectional_iterator_tag,
-                                    typename _Vector::value_type,
-                                    typename _Vector::size_type,
-                                    typename _Vector::pointer,
-                                    typename _Vector::reference >
+	// forward External String iterator
+	template < typename TExtString >
+    struct ExtStringFwdIterator
 	{
-		typedef _Vector		                        Vector;   
-		typedef VectorFwdIterator			        iterator;
-        typedef typename Vector::Type			    Type;
-		typedef typename Vector::SizeType		    SizeType;
-		typedef typename Vector::const_reference	const_reference;
-		typedef typename Vector::volatile_ptr	    volatile_ptr;
-        enum { _PageSize = Vector::PageSize };
+		typedef ExtStringFwdIterator					TIterator;
+        typedef ExtStringIterator<TExtString>			TStdIterator;
+        typedef ExtStringConstIterator<TExtString>		TStdConstIterator;
 
-//        friend class Vector;
-        friend struct VectorIterator<Vector>;
-        typedef VectorIterator<Vector>              std_iterator;
-        typedef VectorConstIterator<Vector>         std_const_iterator;
+		typedef typename Value<TExtString>::Type		TValue;
+		typedef typename Size<TExtString>::Type			TSize;
+		typedef typename Difference<TExtString>::Type	TDifference;
+		typedef typename TExtString::TVolatilePtr	    TVolatilePtr;
 
-		//////////////////////////////////////////////////////////////////////////////
-		// public iterator interface
+        enum { PAGE_SIZE = TExtString::PAGE_SIZE };
 
-		// in fact this is also a random iterator, but you better use
-		// the VectorIterator class for *real* random access
-//		typedef ::std::bidirectional_iterator_tag		iterator_category;
-		typedef ::std::random_access_iterator_tag		iterator_category;
-		typedef typename Vector::value_type			value_type;
-		typedef typename Vector::difference_type	difference_type;
-		typedef typename Vector::pointer			pointer;
-		typedef typename Vector::reference			reference;
-		
-		Vector			*vector;
+
+		TExtString		*extString;
 
         bool            dirty;
 		int     		pageNo;
 		unsigned		pageOfs;
         int             prefetch;   // -n .. prefetch n pages downwards, n .. prefetch n pages upwards, 0 .. disabled
-		volatile_ptr	begin;
+		TVolatilePtr	begin;
 		
-	    VectorFwdIterator():
-			vector(NULL),
+	    ExtStringFwdIterator():
+			extString(NULL),
 			pageNo(0),
 			pageOfs(0),
             prefetch(0),
 			begin(NULL) {}
 
-		VectorFwdIterator(const iterator &I):
-			vector(I.vector),
+		ExtStringFwdIterator(const TIterator &I):
+			extString(I.extString),
 			pageNo(I.pageNo),
 			pageOfs(I.pageOfs),
             prefetch(I.prefetch),
 			begin(NULL) {}
 
-	    explicit VectorFwdIterator(Vector *_vector, SizeType _offset):
-			vector(_vector),
-			pageNo(_offset / _PageSize),
-			pageOfs(_offset % _PageSize),
+	    explicit ExtStringFwdIterator(TExtString *_extString, TSize _offset):
+			extString(_extString),
+			pageNo(_offset / PAGE_SIZE),
+			pageOfs(_offset % PAGE_SIZE),
             prefetch(0),
 			begin(NULL) {}
 
-		explicit VectorFwdIterator(Vector *_vector, SizeType _pageNo, SizeType _pageOfs):
-			vector(_vector),
+		explicit ExtStringFwdIterator(TExtString *_extString, TSize _pageNo, TSize _pageOfs):
+			extString(_extString),
 			pageNo(_pageNo),
 			pageOfs(_pageOfs),
             prefetch(0),
 			begin(NULL) {}
 
-		~VectorFwdIterator() {
+		~ExtStringFwdIterator() {
 			invalidate();
 		}
 
 		//////////////////////////////////////////////////////////////////////////////
 		// iterator conversion interface
 
-		VectorFwdIterator(const std_iterator &I):
-			vector(I.vector),
-			pageNo(I.offset / _PageSize),
-            pageOfs(I.offset % _PageSize),
+		ExtStringFwdIterator(const TStdIterator &I):
+			extString(I.extString),
+			pageNo(I.offset / PAGE_SIZE),
+            pageOfs(I.offset % PAGE_SIZE),
             prefetch(0),
 			begin(NULL) {}
 
-		inline iterator& operator=(std_iterator const & _Right) {
+		inline TIterator& operator=(TStdIterator const & _Right) {
 			invalidate();
-			pageNo = _Right.offset / _PageSize;
-			pageOfs = _Right.offset % _PageSize;
-            vector = _Right.vector;
+			pageNo = _Right.offset / PAGE_SIZE;
+			pageOfs = _Right.offset % PAGE_SIZE;
+            extString = _Right.extString;
 			return *this;
 		}
 
-        inline operator std_iterator() const {
-            return std_iterator(vector, (SizeType)pageNo * (SizeType)_PageSize + pageOfs);
+        inline operator TStdIterator() const {
+            return TStdIterator(extString, (TSize)pageNo * (TSize)PAGE_SIZE + pageOfs);
         }
 
-        inline operator std_const_iterator() const {
-            return std_const_iterator(vector, (SizeType)pageNo * (SizeType)_PageSize + pageOfs);
+        inline operator TStdConstIterator() const {
+            return TStdConstIterator(extString, (TSize)pageNo * (TSize)PAGE_SIZE + pageOfs);
         }
 
-		inline iterator& operator=(iterator const & _Right) {
+		inline TIterator& operator=(TIterator const & _Right) {
 			invalidate();
-			vector = _Right.vector;
+			extString = _Right.extString;
 			pageNo = _Right.pageNo;
 			pageOfs = _Right.pageOfs;
             prefetch = _Right.prefetch;
@@ -493,25 +458,25 @@ you should think of using @Tag.ExternalConfig@.
 		//////////////////////////////////////////////////////////////////////////////
 		// iterator arithmetic
 
-		inline difference_type operator- (const iterator &I) const {
-			return (difference_type)(pageNo - I.pageNo) * (difference_type)_PageSize + (pageOfs - I.pageOfs);
+		inline TDifference operator- (const TIterator &I) const {
+			return (TDifference)(pageNo - I.pageNo) * (TDifference)PAGE_SIZE + (pageOfs - I.pageOfs);
 		};
 		
-		inline iterator operator- (difference_type delta) const {
-			difference_type dPNo  = delta / _PageSize;
-			difference_type dPOfs = delta % _PageSize;
+		inline TIterator operator- (TDifference delta) const {
+			TDifference dPNo  = delta / PAGE_SIZE;
+			TDifference dPOfs = delta % PAGE_SIZE;
 			if (pageOfs >= dPOfs)
-				return iterator(vector, pageNo - dPNo, pageOfs - dPOfs);
+				return TIterator(extString, pageNo - dPNo, pageOfs - dPOfs);
 			else
-				return iterator(vector, pageNo - dPNo - 1, _PageSize + pageOfs - dPOfs);
+				return TIterator(extString, pageNo - dPNo - 1, PAGE_SIZE + pageOfs - dPOfs);
 		};
 		
-		inline iterator& operator-= (difference_type delta) {
-			difference_type dPNo  = delta / _PageSize;
-			difference_type dPOfs = delta % _PageSize;
+		inline TIterator& operator-= (TDifference delta) {
+			TDifference dPNo  = delta / PAGE_SIZE;
+			TDifference dPOfs = delta % PAGE_SIZE;
 			if (pageOfs < dPOfs) {
 				++dPNo;
-				pageOfs = _PageSize + pageOfs - dPOfs;
+				pageOfs = PAGE_SIZE + pageOfs - dPOfs;
 			} else
 				pageOfs -= dPOfs;
 			if (dPNo) invalidate(0);
@@ -519,21 +484,21 @@ you should think of using @Tag.ExternalConfig@.
 			return *this;
 		};
 		
-		inline iterator operator+ (difference_type delta) const {
-			difference_type dPNo  = delta / _PageSize;
-			difference_type nPOfs = pageOfs + delta % _PageSize;
-			if (nPOfs < _PageSize)
-				return iterator(vector, pageNo + dPNo, nPOfs);
+		inline TIterator operator+ (TDifference delta) const {
+			TDifference dPNo  = delta / PAGE_SIZE;
+			TDifference nPOfs = pageOfs + delta % PAGE_SIZE;
+			if (nPOfs < PAGE_SIZE)
+				return TIterator(extString, pageNo + dPNo, nPOfs);
 			else
-				return iterator(vector, pageNo + dPNo + 1, nPOfs - _PageSize);
+				return TIterator(extString, pageNo + dPNo + 1, nPOfs - PAGE_SIZE);
 		};
 		
-		inline iterator& operator+= (difference_type delta) {
-			difference_type dPNo  = delta / _PageSize;
-			difference_type nPOfs = pageOfs + delta % _PageSize;
-			if (nPOfs >= _PageSize) {
+		inline TIterator& operator+= (TDifference delta) {
+			TDifference dPNo  = delta / PAGE_SIZE;
+			TDifference nPOfs = pageOfs + delta % PAGE_SIZE;
+			if (nPOfs >= PAGE_SIZE) {
 				++dPNo;
-				nPOfs -= _PageSize;
+				nPOfs -= PAGE_SIZE;
 			}
 			if (dPNo) invalidate(0);
 			pageNo += dPNo;
@@ -542,36 +507,36 @@ you should think of using @Tag.ExternalConfig@.
 		};
 		
 		inline void validate() const {
-			typename Vector::PageFrameRef pf = vector->getSharedPage(pageNo, prefetch);
-            const_cast<iterator*>(this)->dirty = pf.dirty;
-			const_cast<iterator*>(this)->begin = pf.begin;
+			typename TExtString::TPageFrame &pf = extString->getSharedPage(pageNo, prefetch);
+            const_cast<TIterator*>(this)->dirty = pf.dirty;
+			const_cast<TIterator*>(this)->begin = pf.begin;
 		}
 
         inline void invalidate(int _prefetch = 0) const {
             if (begin) {
-                const_cast<iterator*>(this)->begin = NULL;
-				vector->releasePage(pageNo, (prefetch != 0) || (_prefetch != 0));
-                const_cast<iterator*>(this)->prefetch = _prefetch;
+                const_cast<TIterator*>(this)->begin = NULL;
+				extString->releasePage(pageNo, (prefetch != 0) || (_prefetch != 0));
+                const_cast<TIterator*>(this)->prefetch = _prefetch;
             }
 		}
 
-		inline reference operator* () const {
+		inline TValue & operator* () const {
 			if (!begin) validate();
             // synchronize PageFrame dirty flag on dirty false->true change
             if (!dirty) {
-                const_cast<iterator*>(this)->dirty = true;
-    			vector->getPage(pageNo).dirty = true;
+                const_cast<TIterator*>(this)->dirty = true;
+    			extString->getPage(pageNo).dirty = true;
             }
-			return const_cast<iterator*>(this)->begin[pageOfs];
+			return const_cast<TIterator*>(this)->begin[pageOfs];
 		}
 /*    
-		inline const_reference operator* () const {
+		inline TValue const & operator* () const {
 			if (!begin) validate();
 			return begin[pageOfs];
 		}
 */    
-		inline iterator& operator++ () {
-			if (++pageOfs == _PageSize) {
+		inline TIterator& operator++ () {
+			if (++pageOfs == PAGE_SIZE) {
 				invalidate(1);
 				pageOfs = 0;
 				++pageNo;
@@ -579,9 +544,9 @@ you should think of using @Tag.ExternalConfig@.
 			return *this;
 		}
 
-		inline iterator operator++ (int) {
-			iterator before = *this;
-			if (++pageOfs == _PageSize) {
+		inline TIterator operator++ (int) {
+			TIterator before = *this;
+			if (++pageOfs == PAGE_SIZE) {
 				invalidate(1);
 				pageOfs = 0;
 				++pageNo;
@@ -589,125 +554,106 @@ you should think of using @Tag.ExternalConfig@.
 			return before;
 		}
 
-		inline iterator& operator-- () {
+		inline TIterator& operator-- () {
 			if (pageOfs)
 				--pageOfs;
 			else {
 				invalidate(-1);
-				pageOfs = _PageSize - 1;
+				pageOfs = PAGE_SIZE - 1;
 				--pageNo;
 			}
 			return *this;
 		}
 
-		inline iterator operator-- (int) {
-			iterator before = *this;
+		inline TIterator operator-- (int) {
+			TIterator before = *this;
 			if (pageOfs)
 				--pageOfs;
 			else {
 				invalidate(-1);
-				pageOfs = _PageSize - 1;
+				pageOfs = PAGE_SIZE - 1;
 				--pageNo;
 			}
 			return before;
 		}
 
-		inline bool operator== (const iterator &I) const {
-			SEQAN_ASSERT(vector == I.vector);
+		inline bool operator== (const TIterator &I) const {
+			SEQAN_ASSERT(extString == I.extString);
 			return pageNo == I.pageNo && pageOfs == I.pageOfs;
 		}
 
-		inline bool operator!= (const iterator &I) const {
-			SEQAN_ASSERT(vector == I.vector);
+		inline bool operator!= (const TIterator &I) const {
+			SEQAN_ASSERT(extString == I.extString);
 			return pageNo != I.pageNo || pageOfs != I.pageOfs;
 		}
 
-		inline bool operator< (const iterator &I) const {
-			SEQAN_ASSERT(vector == I.vector);
+		inline bool operator< (const TIterator &I) const {
+			SEQAN_ASSERT(extString == I.extString);
 			return pageNo < I.pageNo || (pageNo == I.pageNo && pageOfs < I.pageOfs);
 		}
     };
 
 
 	//////////////////////////////////////////////////////////////////////////////
-	// const forward vector iterator
-	template < typename _Vector >
-    struct VectorFwdConstIterator : public ::std::iterator <
-                                    ::std::bidirectional_iterator_tag,
-                                    typename _Vector::value_type,
-                                    typename _Vector::size_type,
-                                    typename _Vector::pointer,
-                                    typename _Vector::reference >
+	// const forward External String iterator
+	template < typename TExtString >
+    struct ExtStringFwdConstIterator
 	{
-		typedef _Vector		                        Vector;   
-		typedef VectorFwdConstIterator		        iterator;
-        typedef typename Vector::Type			    Type;
-		typedef typename Vector::SizeType		    SizeType;
-		typedef typename Vector::const_reference	const_reference;
-		typedef typename Vector::volatile_ptr	    volatile_ptr;
-        enum { _PageSize = Vector::PageSize };
+		typedef ExtStringFwdConstIterator				TIterator;
+        typedef ExtStringIterator<TExtString>			TStdIterator;
+        typedef ExtStringConstIterator<TExtString>		TStdConstIterator;
+        typedef ExtStringFwdIterator<TExtString>		TFwdIterator;
 
-//        friend class _Vector;
-        friend struct VectorIterator<Vector>;
-        friend struct VectorConstIterator<Vector>;
-        typedef VectorIterator<Vector>              std_iterator;
-        typedef VectorConstIterator<Vector>         std_const_iterator;
-        typedef VectorFwdIterator<Vector>			fwd_iterator;
+		typedef typename Value<TExtString>::Type		TValue;
+		typedef typename Size<TExtString>::Type			TSize;
+		typedef typename Difference<TExtString>::Type	TDifference;
+		typedef typename TExtString::TVolatilePtr	    TVolatilePtr;
 
-		//////////////////////////////////////////////////////////////////////////////
-		// public iterator interface
+		enum { PAGE_SIZE = TExtString::PAGE_SIZE };
 
-		// in fact this is also a random iterator, but you better use
-		// the VectorIterator class for *real* random access
-//		typedef ::std::bidirectional_iterator_tag		iterator_category;
-		typedef ::std::random_access_iterator_tag		iterator_category;
-		typedef typename Vector::value_type			value_type;
-		typedef typename Vector::difference_type	difference_type;
-		typedef typename Vector::const_pointer		pointer;
-		typedef typename Vector::const_reference	reference;
 		
-		Vector			*vector;
+		TExtString		*extString;
 
 		int     		pageNo;
 		unsigned		pageOfs;
         int             prefetch;   // -n .. prefetch n pages downwards, n .. prefetch n pages upwards, 0 .. disabled
-		volatile_ptr	begin;
+		TVolatilePtr	begin;
 		
 
-        VectorFwdConstIterator():
-			vector(NULL),
+        ExtStringFwdConstIterator():
+			extString(NULL),
 			pageNo(0),
 			pageOfs(0),
             prefetch(0),
 			begin(NULL) {}
 
-		VectorFwdConstIterator(const iterator &I):
-			vector(I.vector),
+		ExtStringFwdConstIterator(const TIterator &I):
+			extString(I.extString),
 			pageNo(I.pageNo),
 			pageOfs(I.pageOfs),
             prefetch(I.prefetch),
 			begin(NULL) {}
 
-		VectorFwdConstIterator(const fwd_iterator &I):
-			vector(I.vector),
+		ExtStringFwdConstIterator(const TFwdIterator &I):
+			extString(I.extString),
 			pageNo(I.pageNo),
 			pageOfs(I.pageOfs),
             prefetch(I.prefetch),
 			begin(NULL) {}
 
-		~VectorFwdConstIterator() {
+		~ExtStringFwdConstIterator() {
 			invalidate();
 		}
 
-	    VectorFwdConstIterator(Vector *_vector, SizeType _offset):
-			vector(_vector),
-			pageNo(_offset / _PageSize),
-			pageOfs(_offset % _PageSize),
+	    ExtStringFwdConstIterator(TExtString *_extString, TSize _offset):
+			extString(_extString),
+			pageNo(_offset / PAGE_SIZE),
+			pageOfs(_offset % PAGE_SIZE),
             prefetch(0),
 			begin(NULL) {}
 
-		VectorFwdConstIterator(Vector *_vector, SizeType _pageNo, SizeType _pageOfs):
-			vector(_vector),
+		ExtStringFwdConstIterator(TExtString *_extString, TSize _pageNo, TSize _pageOfs):
+			extString(_extString),
 			pageNo(_pageNo),
 			pageOfs(_pageOfs),
             prefetch(0),
@@ -716,52 +662,52 @@ you should think of using @Tag.ExternalConfig@.
 		//////////////////////////////////////////////////////////////////////////////
 		// iterator conversion interface
 
-		VectorFwdConstIterator(std_iterator &I):
-			vector(I.vector),
-			pageNo(I.offset / _PageSize),
-            pageOfs(I.offset % _PageSize),
+		ExtStringFwdConstIterator(TStdIterator &I):
+			extString(I.extString),
+			pageNo(I.offset / PAGE_SIZE),
+            pageOfs(I.offset % PAGE_SIZE),
             prefetch(0),
 			begin(NULL) {}
 
-        VectorFwdConstIterator(std_const_iterator const &I):
-			vector(I.vector),
-			pageNo(I.offset / _PageSize),
-            pageOfs(I.offset % _PageSize),
+        ExtStringFwdConstIterator(TStdConstIterator const &I):
+			extString(I.extString),
+			pageNo(I.offset / PAGE_SIZE),
+            pageOfs(I.offset % PAGE_SIZE),
             prefetch(0),
 			begin(NULL) {}
 
-		inline iterator& operator=(std_iterator const & _Right) {
+		inline TIterator& operator=(TStdIterator const & _Right) {
 			invalidate();
-			pageNo = _Right.offset / _PageSize;
-			pageOfs = _Right.offset % _PageSize;
-            vector = _Right.vector;
+			pageNo = _Right.offset / PAGE_SIZE;
+			pageOfs = _Right.offset % PAGE_SIZE;
+            extString = _Right.extString;
 			return *this;
 		}
 
-		inline iterator& operator=(std_const_iterator const & _Right) {
+		inline TIterator& operator=(TStdConstIterator const & _Right) {
 			invalidate();
-			pageNo = _Right.offset / _PageSize;
-			pageOfs = _Right.offset % _PageSize;
-            vector = _Right.vector;
+			pageNo = _Right.offset / PAGE_SIZE;
+			pageOfs = _Right.offset % PAGE_SIZE;
+            extString = _Right.extString;
 			return *this;
 		}
 
-        inline operator std_const_iterator() const {
-            return std_const_iterator(vector, (SizeType)pageNo * (SizeType)_PageSize + pageOfs);
+        inline operator TStdConstIterator() const {
+            return TStdConstIterator(extString, (TSize)pageNo * (TSize)PAGE_SIZE + pageOfs);
         }
 
-		inline iterator& operator=(iterator const & _Right) {
+		inline TIterator& operator=(TIterator const & _Right) {
 			invalidate();
-			vector = _Right.vector;
+			extString = _Right.extString;
 			pageNo = _Right.pageNo;
 			pageOfs = _Right.pageOfs;
             prefetch = _Right.prefetch;
 			return *this;
 		}
 
-		inline iterator& operator=(fwd_iterator const & _Right) {
+		inline TIterator& operator=(TFwdIterator const & _Right) {
 			invalidate();
-			vector = _Right.vector;
+			extString = _Right.extString;
 			pageNo = _Right.pageNo;
 			pageOfs = _Right.pageOfs;
             prefetch = _Right.prefetch;
@@ -771,46 +717,46 @@ you should think of using @Tag.ExternalConfig@.
 		//////////////////////////////////////////////////////////////////////////////
 		// iterator arithmetic
 
-		inline difference_type operator- (const iterator &I) const {
-			return (difference_type)(pageNo - I.pageNo) * (difference_type)_PageSize + (pageOfs - I.pageOfs);
+		inline TDifference operator- (const TIterator &I) const {
+			return (TDifference)(pageNo - I.pageNo) * (TDifference)PAGE_SIZE + (pageOfs - I.pageOfs);
 		};
 		
-		inline iterator operator- (difference_type delta) const {
-			difference_type dPNo  = delta / _PageSize;
-			difference_type dPOfs = delta % _PageSize;
+		inline TIterator operator- (TDifference delta) const {
+			TDifference dPNo  = delta / PAGE_SIZE;
+			TDifference dPOfs = delta % PAGE_SIZE;
 			if (pageOfs >= dPOfs)
-				return iterator(vector, pageNo - dPNo, pageOfs - dPOfs);
+				return TIterator(extString, pageNo - dPNo, pageOfs - dPOfs);
 			else
-				return iterator(vector, pageNo - dPNo - 1, _PageSize + pageOfs - dPOfs);
+				return TIterator(extString, pageNo - dPNo - 1, PAGE_SIZE + pageOfs - dPOfs);
 		};
 		
-		inline iterator& operator-= (difference_type delta) {
-			difference_type dPNo  = delta / _PageSize;
-			difference_type dPOfs = delta % _PageSize;
+		inline TIterator& operator-= (TDifference delta) {
+			TDifference dPNo  = delta / PAGE_SIZE;
+			TDifference dPOfs = delta % PAGE_SIZE;
 			if (pageOfs < dPOfs) {
 				++dPNo;
-				pageOfs = _PageSize + pageOfs - dPOfs;
+				pageOfs = PAGE_SIZE + pageOfs - dPOfs;
 			} else
 				pageOfs -= dPOfs;
 			if (dPNo) invalidate(0);
 			pageNo -= dPNo;
 			return *this;
 		};
-		inline iterator operator+ (difference_type delta) const {
-			difference_type dPNo  = delta / _PageSize;
-			difference_type nPOfs = pageOfs + delta % _PageSize;
-			if (nPOfs < _PageSize)
-				return iterator(vector, pageNo + dPNo, nPOfs);
+		inline TIterator operator+ (TDifference delta) const {
+			TDifference dPNo  = delta / PAGE_SIZE;
+			TDifference nPOfs = pageOfs + delta % PAGE_SIZE;
+			if (nPOfs < PAGE_SIZE)
+				return TIterator(extString, pageNo + dPNo, nPOfs);
 			else
-				return iterator(vector, pageNo + dPNo + 1, nPOfs - _PageSize);
+				return TIterator(extString, pageNo + dPNo + 1, nPOfs - PAGE_SIZE);
 		};
 		
-		inline iterator& operator+= (difference_type delta) {
-			difference_type dPNo  = delta / _PageSize;
-			difference_type nPOfs = pageOfs + delta % _PageSize;
-			if (nPOfs >= _PageSize) {
+		inline TIterator& operator+= (TDifference delta) {
+			TDifference dPNo  = delta / PAGE_SIZE;
+			TDifference nPOfs = pageOfs + delta % PAGE_SIZE;
+			if (nPOfs >= PAGE_SIZE) {
 				++dPNo;
-				nPOfs -= _PageSize;
+				nPOfs -= PAGE_SIZE;
 			}
 			if (dPNo) invalidate(0);
 			pageNo += dPNo;
@@ -819,25 +765,25 @@ you should think of using @Tag.ExternalConfig@.
 		};
 		
 		inline void validate() const {
-			typename Vector::PageFrameRef pf = vector->getSharedPage(pageNo, prefetch);
-			const_cast<iterator*>(this)->begin = pf.begin;
+			typename TExtString::TPageFrame &pf = extString->getSharedPage(pageNo, prefetch);
+			const_cast<TIterator*>(this)->begin = pf.begin;
 		}
 
         inline void invalidate(int _prefetch = 0) const {
             if (begin) {
-                const_cast<iterator*>(this)->begin = NULL;
-				vector->releasePage(pageNo, (prefetch != 0) || (_prefetch != 0));
-                const_cast<iterator*>(this)->prefetch = _prefetch;
+                const_cast<TIterator*>(this)->begin = NULL;
+				extString->releasePage(pageNo, (prefetch != 0) || (_prefetch != 0));
+                const_cast<TIterator*>(this)->prefetch = _prefetch;
             }
 		}
 
-		inline const_reference operator* () const {
+		inline TValue const & operator* () const {
 			if (!begin) validate();
 			return begin[pageOfs];
 		}
     
-		inline iterator& operator++ () {
-			if (++pageOfs == _PageSize) {
+		inline TIterator& operator++ () {
+			if (++pageOfs == PAGE_SIZE) {
 				invalidate(1);
 				pageOfs = 0;
 				++pageNo;
@@ -845,9 +791,9 @@ you should think of using @Tag.ExternalConfig@.
 			return *this;
 		}
 
-		inline iterator operator++ (int) {
-			iterator before = *this;
-			if (++pageOfs == _PageSize) {
+		inline TIterator operator++ (int) {
+			TIterator before = *this;
+			if (++pageOfs == PAGE_SIZE) {
 				invalidate(1);
 				pageOfs = 0;
 				++pageNo;
@@ -855,41 +801,41 @@ you should think of using @Tag.ExternalConfig@.
 			return before;
 		}
 
-		inline iterator& operator-- () {
+		inline TIterator& operator-- () {
 			if (pageOfs)
 				--pageOfs;
 			else {
 				invalidate(-1);
-				pageOfs = _PageSize - 1;
+				pageOfs = PAGE_SIZE - 1;
 				--pageNo;
 			}
 			return *this;
 		}
 
-		inline iterator operator-- (int) {
-			iterator before = *this;
+		inline TIterator operator-- (int) {
+			TIterator before = *this;
 			if (pageOfs)
 				--pageOfs;
 			else {
 				invalidate(-1);
-				pageOfs = _PageSize - 1;
+				pageOfs = PAGE_SIZE - 1;
 				--pageNo;
 			}
 			return before;
 		}
 
-		inline bool operator== (const iterator &I) const {
-			SEQAN_ASSERT(vector == I.vector);
+		inline bool operator== (const TIterator &I) const {
+			SEQAN_ASSERT(extString == I.extString);
 			return pageNo == I.pageNo && pageOfs == I.pageOfs;
 		}
 
-		inline bool operator!= (const iterator &I) const {
-			SEQAN_ASSERT(vector == I.vector);
+		inline bool operator!= (const TIterator &I) const {
+			SEQAN_ASSERT(extString == I.extString);
 			return pageNo != I.pageNo || pageOfs != I.pageOfs;
 		}
 
-		inline bool operator< (const iterator &I) const {
-			SEQAN_ASSERT(vector == I.vector);
+		inline bool operator< (const TIterator &I) const {
+			SEQAN_ASSERT(extString == I.extString);
 			return pageNo < I.pageNo || (pageNo == I.pageNo && pageOfs < I.pageOfs);
 		}
 
@@ -897,8 +843,151 @@ you should think of using @Tag.ExternalConfig@.
 
 
 
-    //////////////////////////////////////////////////////////////////////////////
-    // (Prototypes)
+	//////////////////////////////////////////////////////////////////////////////
+	// iterator metafunctions
+
+	template < typename TString >
+    struct Container< ExtStringIterator<TString> >			{ typedef TString Type; };
+	template < typename TString >
+    struct Container< ExtStringConstIterator<TString> >		{ typedef TString Type; };
+	template < typename TString >
+    struct Container< ExtStringFwdIterator<TString> >		{ typedef TString Type; };
+	template < typename TString >
+    struct Container< ExtStringFwdConstIterator<TString> >	{ typedef TString Type; };
+
+	template < typename TString >
+    struct Value< ExtStringIterator<TString> >				{ typedef typename Value<TString>::Type Type; };
+	template < typename TString >
+    struct Value< ExtStringConstIterator<TString> >			{ typedef typename Value<TString>::Type Type; };
+	template < typename TString >
+    struct Value< ExtStringFwdIterator<TString> >			{ typedef typename Value<TString>::Type Type; };
+	template < typename TString >
+    struct Value< ExtStringFwdConstIterator<TString> >		{ typedef typename Value<TString>::Type Type; };
+
+	template < typename TString >
+	struct Reference< ExtStringConstIterator<TString> >:
+		public Reference<TString const> {};
+
+	template < typename TString >
+	struct Reference< ExtStringFwdConstIterator<TString> >:
+		public Reference<TString const> {};
+
+	template < typename TString >
+    struct Size< ExtStringIterator<TString> >				{ typedef typename Size<TString>::Type Type; };
+	template < typename TString >
+    struct Size< ExtStringConstIterator<TString> >			{ typedef typename Size<TString>::Type Type; };
+	template < typename TString >
+    struct Size< ExtStringFwdIterator<TString> >			{ typedef typename Size<TString>::Type Type; };
+	template < typename TString >
+    struct Size< ExtStringFwdConstIterator<TString> >		{ typedef typename Size<TString>::Type Type; };
+
+	template < typename TString >
+    struct Position< ExtStringIterator<TString> >			{ typedef typename Position<TString>::Type Type; };
+	template < typename TString >
+    struct Position< ExtStringConstIterator<TString> >		{ typedef typename Position<TString>::Type Type; };
+	template < typename TString >
+    struct Position< ExtStringFwdIterator<TString> >		{ typedef typename Position<TString>::Type Type; };
+	template < typename TString >
+    struct Position< ExtStringFwdConstIterator<TString> >	{ typedef typename Position<TString>::Type Type; };
+
+	template < typename TString >
+    struct Difference< ExtStringIterator<TString> >			{ typedef typename Difference<TString>::Type Type; };
+	template < typename TString >
+    struct Difference< ExtStringConstIterator<TString> >	{ typedef typename Difference<TString>::Type Type; };
+	template < typename TString >
+    struct Difference< ExtStringFwdIterator<TString> >		{ typedef typename Difference<TString>::Type Type; };
+	template < typename TString >
+    struct Difference< ExtStringFwdConstIterator<TString> > { typedef typename Difference<TString>::Type Type; };
+
+
+	//////////////////////////////////////////////////////////////////////////////
+    // global interface
+
+	template <typename TExtString>
+	inline TExtString &	container(ExtStringIterator<TExtString> &it) { return *(it.extString); }
+	template <typename TExtString>
+	inline TExtString &	container(ExtStringIterator<TExtString> const &it) { return *(it.extString); }
+
+	template <typename TExtString>
+	inline TExtString &	container(ExtStringConstIterator<TExtString> &it) { return *(it.extString); }
+	template <typename TExtString>
+	inline TExtString &	container(ExtStringConstIterator<TExtString> const &it) { return *(it.extString); }
+
+	template <typename TExtString>
+	inline TExtString &	container(ExtStringFwdIterator<TExtString> &it) { return *(it.extString); }
+	template <typename TExtString>
+	inline TExtString &	container(ExtStringFwdIterator<TExtString> const &it) { return *(it.extString); }
+
+	template <typename TExtString>
+	inline TExtString &	container(ExtStringFwdConstIterator<TExtString> &it) { return *(it.extString); }
+	template <typename TExtString>
+	inline TExtString &	container(ExtStringFwdConstIterator<TExtString> const &it) { return *(it.extString); }
+//____________________________________________________________________________
+
+	template <typename TExtString>
+	inline bool	atBegin(ExtStringIterator<TExtString> &it) { return it.offset == 0; }
+	template <typename TExtString>
+	inline bool	atBegin(ExtStringIterator<TExtString> const &it) { return it.offset == 0; }
+
+	template <typename TExtString>
+	inline bool	atBegin(ExtStringConstIterator<TExtString> &it) { return it.offset == 0; }
+	template <typename TExtString>
+	inline bool	atBegin(ExtStringConstIterator<TExtString> const &it) { return it.offset == 0; }
+
+	template <typename TExtString>
+	inline bool	atBegin(ExtStringFwdIterator<TExtString> &it) { 
+		return it.pageNo == 0 && it.pageOfs == 0;
+	}
+	template <typename TExtString>
+	inline bool	atBegin(ExtStringFwdIterator<TExtString> const &it) {
+		return it.pageNo == 0 && it.pageOfs == 0;
+	}
+
+	template <typename TExtString>
+	inline bool	atBegin(ExtStringFwdConstIterator<TExtString> &it) { 
+		return it.pageNo == 0 && it.pageOfs == 0;
+	}
+	template <typename TExtString>
+	inline bool	atBegin(ExtStringFwdConstIterator<TExtString> const &it) {
+		return it.pageNo == 0 && it.pageOfs == 0;
+	}
+//____________________________________________________________________________
+
+	template <typename TExtString>
+	inline bool	atEnd(ExtStringIterator<TExtString> &it) { return it.offset == it.extString->data_size; }
+	template <typename TExtString>
+	inline bool	atEnd(ExtStringIterator<TExtString> const &it) { return it.offset == it.extString->data_size; }
+
+	template <typename TExtString>
+	inline bool	atEnd(ExtStringConstIterator<TExtString> &it) { return it.offset == it.extString->data_size; }
+	template <typename TExtString>
+	inline bool	atEnd(ExtStringConstIterator<TExtString> const &it) { return it.offset == it.extString->data_size; }
+
+	template <typename TExtString>
+	inline bool	atEnd(ExtStringFwdIterator<TExtString> &it) { 
+		return TExtString::PAGE_SIZE * it.pageNo + it.pageOfs == it.extString->data_size;
+	}
+	template <typename TExtString>
+	inline bool	atEnd(ExtStringFwdIterator<TExtString> const &it) {
+		return TExtString::PAGE_SIZE * it.pageNo + it.pageOfs == it.extString->data_size;
+	}
+
+	template <typename TExtString>
+	inline bool	atEnd(ExtStringFwdConstIterator<TExtString> &it) { 
+		return TExtString::PAGE_SIZE * it.pageNo + it.pageOfs == it.extString->data_size;
+	}
+	template <typename TExtString>
+	inline bool	atEnd(ExtStringFwdConstIterator<TExtString> const &it) {
+		return TExtString::PAGE_SIZE * it.pageNo + it.pageOfs == it.extString->data_size;
+	}
+
+
+	
+	
+	
+	
+	//////////////////////////////////////////////////////////////////////////////
+    // External String
     //////////////////////////////////////////////////////////////////////////////
 
     template < typename TValue,
@@ -907,64 +996,35 @@ you should think of using @Tag.ExternalConfig@.
 	{
 
 	public:
-        enum { _PageSize = TConfig::PageSize,
-               _Frames   = TConfig::Frames,
-               PageSize  = TConfig::PageSize };
+        enum { FRAMES    = TConfig::FRAMES,
+               PAGE_SIZE = TConfig::PAGE_SIZE };
 
-		typedef TValue	                    Type;
-        typedef typename TConfig::TFile     TFile;
-        typedef typename TConfig::SizeType  SizeType;
+        typedef typename TConfig::TFile							TFile;
+        typedef typename TConfig::TSize							TSize;
 
-		typedef ::std::vector<int>						        PageTable;
-		typedef PageFrame<TValue, TFile, Fixed<_PageSize> >  	TPageFrame;
-		typedef PageContainer<TPageFrame, _Frames>		        Cache;
-		typedef TPageFrame&								        PageFrameRef;
+		typedef String<int>										TPageTable;
+		typedef PageFrame<TValue, TFile, Fixed<PAGE_SIZE> >		TPageFrame;
+		typedef PageContainer<TPageFrame, FRAMES>		        TCache;
+		typedef VolatilePtr<TValue>								TVolatilePtr;
 
-    public: // debug
-		PageTable			pager;
-		Cache				cache;
+		TPageTable			pager;
+		TCache				cache;
 		TFile				file;
         bool                _temporary, _ownFile;
-		SizeType			_size;
+		TSize				data_size;
         int                 lastDiskPage;       // the last page on disk and in mem 
-        unsigned            lastDiskPageSize;   // can be smaller than PageSize
+        unsigned            lastDiskPageSize;   // can be smaller than PAGE_SIZE
 
-    public:
-
-		//////////////////////////////////////////////////////////////////////////////
-		// public iterator types
-
-        friend struct VectorIterator<String>;
-        friend struct VectorConstIterator<String>;
-        friend struct VectorFwdIterator<String>;
-        friend struct VectorFwdConstIterator<String>;
-
-		typedef VectorIterator<String>					TVectorIterator;
-		typedef VectorConstIterator<String>		        TVectorConstIterator;
-		typedef VectorFwdIterator<String>				TVectorFwdIterator;
-		typedef VectorFwdConstIterator<String>	        TVectorFwdConstIterator;
-
-		typedef TVectorFwdIterator		iterator;
-		typedef TVectorFwdConstIterator	const_iterator;
-		typedef Type					value_type;
-		typedef Type&					reference;
-		typedef Type const &			const_reference;
-		typedef Type*					pointer;
-		typedef Type const *			const_pointer;
-		typedef SizeType				size_type;
-		typedef SizeType				difference_type;
-		typedef VolatilePtr<Type>       volatile_ptr;
-
-		String(SizeType __size = 0):
+		String(TSize size = 0):
             file(NULL),
-			_size(0)
+			data_size(0)
         {
             _temporary = true;
             _ownFile = false;
             lastDiskPage = 0;       // actually, these values need not to be initialized
             lastDiskPageSize = 0;   // here, because of "write before read"
 
-			resize(__size);
+			resize(*this, size);
         }
 /**
 .Memfunc.ExtString#String:
@@ -991,104 +1051,28 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 */
 		String(TFile &_file)
         {
-			open(_file);
+			open(*this, _file);
         }
 
 		String(const char *fileName, int openMode = DefaultOpenMode<TFile>::VALUE):
 			file(NULL)
         {
-			open(fileName, openMode);
+			open(*this, fileName, openMode);
         }
 
-		~String() {
-			close();
+		~String() 
+		{
+			close(*this);
 		}
 
-		//////////////////////////////////////////////////////////////////////////////
-		// vector interface
-
-        inline void clear() {
-            pager.clear();
-            resize(0);
-        }
-
-		inline size_type length() const {
-			return _size;
-		}
-
-		inline size_type capacity() const {
-			return (size_type)pager.capacity() * (size_type)_PageSize;
-		}
-
-		inline void reserve(size_type _newCapacity) {
-			pager.reserve(enclosingBlocks(_newCapacity, (unsigned)_PageSize));
-		}
-
-		inline void resize(size_type _newSize) {
-			pager.resize(enclosingBlocks(_newSize, (unsigned)_PageSize), TPageFrame::UNINITIALIZED);
-            if (_newSize < _size && file) {
-                waitForAll();                                       // wait for all pending transfers
-                ::seqan::resize(file, (size_type)_newSize * (size_type)sizeof(TValue));   // before shrinking the file size
-                lastDiskPage = _newSize / _PageSize;
-                lastDiskPageSize = _newSize % _PageSize;
-            }
-			_size = _newSize;
-		}
-
-		inline reference operator[] (size_type offset) {
-			PageFrameRef pf = getPage(offset / _PageSize);
+		inline TValue & operator[] (TSize offset) {
+			TPageFrame &pf = getPage(offset / PAGE_SIZE);
 			pf.dirty = true;
-			return pf[offset % _PageSize];
+			return pf[offset % PAGE_SIZE];
 		}
 
-		inline const_reference operator[] (size_type offset) const {
-			return const_cast<String*>(this)->getPage(offset / _PageSize)[offset % _PageSize];
-		}
-
-		inline iterator begin() {
-			return iterator(this, 0);
-		}
-
-		inline const_iterator begin() const {
-			return const_iterator(const_cast<String*>(this), 0);
-		}
-
-		inline iterator end() {
-			return iterator(this, _size);
-		}
-
-		inline const_iterator end() const {
-            return const_iterator(const_cast<String*>(this), _size);
-		}
-
-		inline void push(const_reference obj) {
-			resize(_size + 1);
-			back() = obj;
-		}
-
-		inline void push_back(const_reference obj) {
-			resize(_size + 1);
-			back() = obj;
-		}
-
-		inline void pop_back()	{
-			resize(_size - 1);
-		}
-
-		inline reference front() {
-			return (*this)[0];
-		}
-
-		inline const_reference front() const {
-			return (*this)[0];
-		}
-
-		inline reference back() {
-			return (*this)[_size - 1];
-		}
-
-		inline const_reference back() const {
-			return (*this)[_size - 1];
+		inline TValue const & operator[] (TSize offset) const {
+			return const_cast<String*>(this)->getPage(offset / PAGE_SIZE)[offset % PAGE_SIZE];
 		}
 
 	    template <typename TSource>
@@ -1104,28 +1088,31 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 		    return *this;
 	    }
 
-        inline operator bool() {
+        inline operator bool() 
+		{
             return file;
         }
-
-    protected:
 
 		//////////////////////////////////////////////////////////////////////////////
 		// swapping interface
 
 		// when a page has to be swapped out and file is not open, open a temporary file
-		inline void _ensureFileIsOpen() {
-			if (!file) {
+		inline void _ensureFileIsOpen() 
+		{
+			if (!file) 
+			{
 				_temporary = true;
-				if (!(_ownFile = ::seqan::openTemp(file)))
+				if (!(_ownFile = openTemp(file)))
 					::std::cerr << "External String couldn't open temporary file" << ::std::endl;
 			}
 		}
 
 		// for debugging
-        void _dumpCache() {
-            for(int i = 0; i < cache.size(); ++i) {
-                PageFrameRef pf = cache[i];
+        void _dumpCache() 
+		{
+            for(int i = 0; i < length(cache); ++i) 
+			{
+                TPageFrame &pf = cache[i];
                 ::std::cerr << "[" << pf.pageNo << "]";
                 if (pf.dirty)
                     ::std::cerr << "*";
@@ -1141,15 +1128,17 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
         }
 
         // return a priority for a page frame (the higher is more persistent)
-        inline typename TPageFrame::Priority getPriority(int /*pageNo*/) const {
-/*            if (keepFirst && pageNo < (int)(cache.size()) - 10) // save 1 for random access
+        inline typename TPageFrame::Priority getPriority(int /*pageNo*/) const 
+		{
+/*            if (keepFirst && pageNo < (int)(length(cache)) - 10) // save 1 for random access
                 return TPageFrame::PERMANENT_LEVEL;
             else*/
                 return TPageFrame::NORMAL_LEVEL;
         }
 
 		// write page to disk if dirty and remove from page table now or after finishing IO
-		inline void flush(PageFrameRef pf) {
+		inline void flush(TPageFrame &pf) 
+		{
             if (pf.status == TPageFrame::READY && pf.dirty) {    // write if dirty and not i/o transferring
 				nukeCopies(pf.begin);				            // proceeding writes should wait and set dirty bit
 
@@ -1157,11 +1146,11 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 					cache.upgrade(pf, TPageFrame::PREFETCH_LEVEL);
 
 				_ensureFileIsOpen();
-				if (pf.pageNo != (int)(_size / (SizeType)_PageSize))
+				if (pf.pageNo != (int)(data_size / (TSize)PAGE_SIZE))
     				writePage(pf, pf.pageNo, file);
                 else {
-                    lastDiskPage = _size / _PageSize;
-                    lastDiskPageSize = _size % _PageSize;;
+                    lastDiskPage = data_size / PAGE_SIZE;
+                    lastDiskPageSize = data_size % PAGE_SIZE;;
 				    writeLastPage(pf, pf.pageNo, file, lastDiskPageSize);
                 }
                 pf.dataStatus = TPageFrame::ON_DISK;
@@ -1169,7 +1158,8 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 		}
 
 		// write page synchronously to disk if dirty and remove from page table
-		inline void swapOutAndWait(PageFrameRef pf) {
+		inline void swapOutAndWait(TPageFrame &pf) 
+		{
 			nukeCopies(pf.begin);      				// proceeding writes should wait and set dirty bit
 
             if (pf.status != TPageFrame::READY) {            
@@ -1181,14 +1171,14 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 
 			if (pf.dirty) {                                 // write if dirty
 				_ensureFileIsOpen();
-                if (pf.pageNo != (int)(_size / (SizeType)_PageSize)) {
+                if (pf.pageNo != (int)(data_size / (TSize)PAGE_SIZE)) {
     				writePage(pf, pf.pageNo, file);
                     if (pf.pageNo >= lastDiskPage)
                         lastDiskPage = -1;       			// make lastDiskPage(Size) invalid because file size is aligned
                 } else {
-				    writeLastPage(pf, pf.pageNo, file, _size % _PageSize);
-                    lastDiskPage = _size / _PageSize;
-                    lastDiskPageSize = _size % _PageSize;;
+				    writeLastPage(pf, pf.pageNo, file, data_size % PAGE_SIZE);
+                    lastDiskPage = data_size / PAGE_SIZE;
+                    lastDiskPageSize = data_size % PAGE_SIZE;;
                 }
 				pager[pf.pageNo] = TPageFrame::ON_DISK;		// page is marked to be on disk
 				waitFor(pf);
@@ -1198,17 +1188,12 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
             pf.pageNo = -1;                                 // cut back link
 		}
 
-		// wait until IO of every page is finished
-		void waitForAll() {
-			for(typename Cache::iterator I = cache.begin(); I != cache.end(); ++I)
-                waitFor(*I);
-		}
-
-		struct testIODone : public ::std::unary_function<PageFrameRef,bool> {
+		struct testIODone : public ::std::unary_function<TPageFrame&,bool> 
+		{
 			String &me;
 			testIODone(String &_me): me(_me) {}
 
-			inline bool operator() (PageFrameRef pf) {
+			inline bool operator() (TPageFrame &pf) {
                 if (waitFor(pf, 0)) {
                     if (pf.pageNo >= me.lastDiskPage)
                         me.lastDiskPage = -1;    // make lastDiskPage(Size) invalid because file size is aligned
@@ -1218,7 +1203,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 			}
 		};
 
-        inline PageFrameRef getPage(
+        inline TPageFrame &getPage(
             int pageNo, 
             typename TPageFrame::Priority maxLevel = TPageFrame::NORMAL_LEVEL, 
             typename TPageFrame::Priority newLevel = TPageFrame::NORMAL_LEVEL,
@@ -1227,7 +1212,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 			int frameNo = pager[pageNo];
 			if (frameNo >= 0) {					// cache hit
 
-				PageFrameRef pf = cache[frameNo];
+				TPageFrame &pf = cache[frameNo];
 				cache.upgrade(
                     pf, 
                     _max(pf.priority, newLevel));    		// update lru order
@@ -1248,7 +1233,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 				frameNo = cache.mru(testIODone(*this), maxLevel);   // try to get an undirty and READY pageframe
 				if (frameNo < 0)							// if there is none,
 					frameNo = cache.mruDirty();				// get the most recently used dirty frame
-				PageFrameRef pf = cache[frameNo];
+				TPageFrame &pf = cache[frameNo];
 
 				// *** frame is choosen ***
 
@@ -1281,13 +1266,12 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 			}
 		}
 
-    public:
-
         // prefetch is non-blocking and should speed up swapping
-		inline void prefetch(int pageBegin, int pageEnd, int except = -1) {
+		inline void prefetch(int pageBegin, int pageEnd, int except = -1) 
+		{
             if (!file) return;
             if (pageBegin < 0)					pageBegin = 0;
-            if (pageEnd >= (int)pager.size())	pageEnd = (int)pager.size() - 1;
+            if (pageEnd >= (int)length(pager))	pageEnd = (int)length(pager) - 1;
             for(int pageNo = pageBegin; pageNo < pageEnd; ++pageNo) {
 			    int frameNo = pager[pageNo];
 				typename TPageFrame::DataStatus dataStatus = static_cast<typename TPageFrame::DataStatus>(frameNo);
@@ -1299,7 +1283,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
                         TPageFrame::NORMAL_LEVEL);                   // choose undirty and ready page
 
                     if (frameNo < 0 || frameNo == except) return;   // no lowlevel-page left for prefetching
-				    PageFrameRef pf = cache[frameNo];
+				    TPageFrame &pf = cache[frameNo];
                     #ifdef SEQAN_VERBOSE
 						::std::cerr << "prefetch: page " << pageNo << ::std::endl;
                     #endif
@@ -1317,7 +1301,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
                     readPage(pageNo, pf, file);
 				    pager[pageNo] = frameNo;					    // assign new page to page table
     				pf.pageNo = pageNo;							    // set back link
-                    cache.upgrade(pf, TPageFrame::PREFETCH_LEVEL);   // update lru order
+                    cache.upgrade(pf, TPageFrame::PREFETCH_LEVEL);  // update lru order
                 }
             }
 		}
@@ -1332,7 +1316,8 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 			return prefetchPages;
 		}
 
-		inline PageFrameRef getSharedPage(int pageNo, int prefetchPages = 0) {
+		inline TPageFrame &getSharedPage(int pageNo, int prefetchPages = 0) 
+		{
 			return getPage(
                 pageNo, 
                 TPageFrame::PREFETCH_LEVEL, 
@@ -1340,15 +1325,17 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
                 _prefetchIffAsync(prefetchPages, file));
 		}
 
-		inline void releasePage(int pageNo, bool writeThrough = false) {
-            if (pageNo==4)
-                pageNo=4;
+		inline void releasePage(int pageNo, bool writeThrough = false) 
+		{
 			int frameNo = pager[pageNo];
-			if (frameNo >= 0) {								        // release only cached pages
-				PageFrameRef pf = cache[frameNo];
-				if (pf.begin.isLonely() && pf.priority <= TPageFrame::ITERATOR_LEVEL) {
+			if (frameNo >= 0)							// release only cached pages
+			{								        
+				TPageFrame &pf = cache[frameNo];
+				if (pf.begin.isLonely() && pf.priority <= TPageFrame::ITERATOR_LEVEL) 
+				{
 					cache.upgrade(pf, _max(getPriority(pageNo), TPageFrame::NORMAL_LEVEL));
-                    if (writeThrough) {
+                    if (writeThrough) 
+					{
                         #ifdef SEQAN_VERBOSE
                             if (pf.dirty)
 								::std::cerr << "writeThrough: page " << pageNo << ::std::endl;
@@ -1359,84 +1346,9 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 			}
 		}
         
-		// cancel all transactions
-		inline void cancel() {
-			if (file)
-			    for(typename Cache::iterator I = cache.begin(); I != cache.end(); ++I)
-					if (I->begin) ::seqan::cancel(*I, file);
-		}
-
-		// write all dirty pages to disk
-		inline void flush() {
-			if (file) {
-			    for(typename Cache::iterator I = cache.begin(); I != cache.end(); ++I)
-				    if (I->begin) flush(*I);
-				waitForAll();
-			}
-		}
-
-		// flush and free all allocated pages
-		inline void free() {
-            flush();
-            for(typename Cache::iterator I = cache.begin(); I != cache.end(); ++I) {
-				if (I->pageNo >= 0) {
-                    pager[I->pageNo] = I->dataStatus;
-					I->pageNo = TPageFrame::UNINITIALIZED;
-				}
-//                ::std::cerr << *I << ::std::endl;
-                if (I->begin) freePage(*I, file);
-            }
-		}
-
-		inline bool open(const char *fileName, int openMode = DefaultOpenMode<TFile>::VALUE) {
-            _temporary = false;
-			if ((_ownFile = ::seqan::open(file, fileName, openMode)))
-                _size = size(file) / sizeof(TValue);
-            else
-                _size = 0;
-			pager.resize(enclosingBlocks(_size, (unsigned)_PageSize), (_size)? TPageFrame::ON_DISK: TPageFrame::UNINITIALIZED);
-            lastDiskPage = _size / _PageSize;
-            lastDiskPageSize = _size % _PageSize;
-			return _ownFile;
-		}
-
-		inline bool open(TFile &_file) {
-			file = _file;
-            _temporary = false;
-            _ownFile = false;
-            if (file)
-                _size = size(file) / sizeof(TValue);
-            else
-                _size = 0;
-            pager.resize(enclosingBlocks(_size, (unsigned)_PageSize), (_size)? TPageFrame::ON_DISK: TPageFrame::UNINITIALIZED);
-            lastDiskPage = _size / _PageSize;
-            lastDiskPageSize = _size % _PageSize;
-			return _file;
-        }
-
-		inline bool openTemp() {
-            _temporary = true;
-            lastDiskPage = 0;
-            lastDiskPageSize = 0;
-			pager.clear();
-			return _ownFile = ::seqan::openTemp(file);
-		}
-
-		// close associated file
-		inline bool close() {
-			if (_temporary)	cancel();
-			else			flush();
-			free();
-			pager.clear();
-			if (_ownFile) {
-				_ownFile = false;
-				return ::seqan::close(file);
-			} else
-				return true;
-		}
-
-        inline void rename(unsigned frameNo) {
-			PageFrameRef pf = cache[frameNo];
+        inline void rename(unsigned frameNo) 
+		{
+			TPageFrame &pf = cache[frameNo];
             cache.rename(frameNo);                                  // update lru entry
             if (pf.pageNo >= 0)
                 pager[pf.pageNo] = frameNo;					        // update back link
@@ -1445,16 +1357,17 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
         // change the number of in-mem pageframes
         // more pages mean less swapping, 
         // less pages mean more free mem
-        inline void resizeCache(unsigned newFrames) {
-            unsigned oldFrames = cache.size();
-            if (_size)
-                newFrames = _min(newFrames, (unsigned) enclosingBlocks(_size, (unsigned)_PageSize));
+        inline void resizeCache(unsigned newFrames) 
+		{
+            unsigned oldFrames = length(cache);
+            if (data_size)
+                newFrames = _min(newFrames, (unsigned) enclosingBlocks(data_size, (unsigned)PAGE_SIZE));
             if (newFrames < oldFrames) {
-                flush();
+                flush(*this);
                 for(unsigned i = newFrames; i < oldFrames; ++i) {
     			    int frameNo = cache.mruDirty();             // get the most recently used frame (can be dirty)
                     if (frameNo < 0) break;
-				    PageFrameRef pf = cache[frameNo];
+				    TPageFrame &pf = cache[frameNo];
 
 				    // *** frame is choosen ***
 
@@ -1465,11 +1378,11 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 
                     cache.erase(frameNo);                       // erase page frame from cache
 
-                    for(unsigned j = frameNo; j < cache.size(); ++j)
+                    for(unsigned j = frameNo; j < length(cache); ++j)
                         rename(j);                              // update remaining pages
                 }
             } else if (oldFrames < newFrames) {
-                cache.resize(newFrames);
+                resize(cache, newFrames);
             }
         }
 
@@ -1483,9 +1396,9 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 			   typename TSpec >
 	struct BufferHandler< Pipe< String<TValue, External<TConfig> >, Source<TSpec> > >
     {
-        typedef TValue                                                      Type;
-        typedef typename Size< String<TValue, External<TConfig> > >::Type   SizeType;
-        typedef SimpleBuffer<TValue, SizeType>                              SimpleBuffer;
+        typedef TValue                                                      TValue;
+        typedef typename Size< String<TValue, External<TConfig> > >::Type   TSize;
+        typedef SimpleBuffer<TValue, TSize>									SimpleBuffer;
 
         typedef Pipe< String<TValue, External<TConfig> >, Source<TSpec> > Pipe;
 
@@ -1509,46 +1422,46 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
     };*/
 
 
-
     //////////////////////////////////////////////////////////////////////////////
-    // global interface
-    //////////////////////////////////////////////////////////////////////////////
+    // meta-function interface
 
     template < typename TValue, typename TConfig >
     struct Size< String<TValue, External<TConfig> > >
     {
-        typedef typename String<TValue, External<TConfig> >::SizeType Type;
+        typedef typename String<TValue, External<TConfig> >::TSize Type;
     };
 
     template < typename TValue, typename TConfig >
     struct Difference< String<TValue, External<TConfig> > >
     {
-		typedef typename _MakeSigned<typename String<TValue, External<TConfig> >::SizeType>::Type Type;
+		typedef typename _MakeSigned<typename String<TValue, External<TConfig> >::TSize>::Type Type;
     };
 
-    template < typename TValue, typename TConfig >
-    struct Iterator< String<TValue, External<TConfig> > const, Standard >
+    template < typename TValue, typename TConfig, typename TSpec >
+    struct Iterator< String<TValue, External<TConfig> > const, Tag<TSpec> const >
     {
-        typedef typename String<TValue, External<TConfig> >::const_iterator Type;
+        typedef ExtStringFwdConstIterator< String<TValue, External<TConfig> > > Type;
     };
 
-    template < typename TValue, typename TConfig >
-    struct Iterator< String<TValue, External<TConfig> >, Standard >
+    template < typename TValue, typename TConfig, typename TSpec >
+    struct Iterator< String<TValue, External<TConfig> >, Tag<TSpec> const > 
     {
-        typedef typename String<TValue, External<TConfig> >::iterator Type;
+        typedef ExtStringFwdIterator< String<TValue, External<TConfig> > > Type;
     };
+//____________________________________________________________________________
 
     template < typename TValue, typename TConfig >
-    struct Iterator< String<TValue, External<TConfig> > const, Rooted >
-    {
-        typedef typename String<TValue, External<TConfig> >::const_iterator Type;
-    };
+	struct DefaultOverflowExplicit<String<TValue, External<TConfig> > >
+	{
+		typedef Generous Type;
+	};
 
     template < typename TValue, typename TConfig >
-    struct Iterator< String<TValue, External<TConfig> >, Rooted >
-    {
-        typedef typename String<TValue, External<TConfig> >::iterator Type;
-    };
+	struct DefaultOverflowImplicit<String<TValue, External<TConfig> > >
+	{
+		typedef Generous Type;
+	};
+//____________________________________________________________________________
 
 /*
     template < typename TValue, typename TConfig >
@@ -1570,148 +1483,35 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 	};
 
 
-	// iterator metafunctions
-	template < typename TString >
-    struct Container< VectorIterator<TString> >			{ typedef TString Type; };
-	template < typename TString >
-    struct Container< VectorConstIterator<TString> >	{ typedef TString Type; };
-	template < typename TString >
-    struct Container< VectorFwdIterator<TString> >		{ typedef TString Type; };
-	template < typename TString >
-    struct Container< VectorFwdConstIterator<TString> > { typedef TString Type; };
-
-	template < typename TVector >
-    struct Value< VectorIterator<TVector> >			{ typedef typename Value<TVector>::Type Type; };
-	template < typename TVector >
-    struct Value< VectorConstIterator<TVector> >	{ typedef typename Value<TVector>::Type Type; };
-	template < typename TVector >
-    struct Value< VectorFwdIterator<TVector> >		{ typedef typename Value<TVector>::Type Type; };
-	template < typename TVector >
-    struct Value< VectorFwdConstIterator<TVector> > { typedef typename Value<TVector>::Type Type; };
-
-	template < typename TVector >
-	struct Reference< VectorConstIterator<TVector> >:
-		public Reference<TVector const> {};
-
-	template < typename TVector >
-	struct Reference< VectorFwdConstIterator<TVector> >:
-		public Reference<TVector const> {};
-
-	template < typename TVector >
-    struct Size< VectorIterator<TVector> >			{ typedef typename Size<TVector>::Type Type; };
-	template < typename TVector >
-    struct Size< VectorConstIterator<TVector> >		{ typedef typename Size<TVector>::Type Type; };
-	template < typename TVector >
-    struct Size< VectorFwdIterator<TVector> >		{ typedef typename Size<TVector>::Type Type; };
-	template < typename TVector >
-    struct Size< VectorFwdConstIterator<TVector> >	{ typedef typename Size<TVector>::Type Type; };
-
-	template < typename TVector >
-    struct Position< VectorIterator<TVector> >		{ typedef typename Position<TVector>::Type Type; };
-	template < typename TVector >
-    struct Position< VectorConstIterator<TVector> >	{ typedef typename Position<TVector>::Type Type; };
-	template < typename TVector >
-    struct Position< VectorFwdIterator<TVector> >	{ typedef typename Position<TVector>::Type Type; };
-	template < typename TVector >
-    struct Position< VectorFwdConstIterator<TVector> > { typedef typename Position<TVector>::Type Type; };
-
-	template < typename TVector >
-    struct Difference< VectorIterator<TVector> >		{ typedef typename Difference<TVector>::Type Type; };
-	template < typename TVector >
-    struct Difference< VectorConstIterator<TVector> >	{ typedef typename Difference<TVector>::Type Type; };
-	template < typename TVector >
-    struct Difference< VectorFwdIterator<TVector> >		{ typedef typename Difference<TVector>::Type Type; };
-	template < typename TVector >
-    struct Difference< VectorFwdConstIterator<TVector> > { typedef typename Difference<TVector>::Type Type; };
-
-//____________________________________________________________________________
-
-	template <typename TExtString>
-	inline TExtString &	container(VectorIterator<TExtString> &it) { return *(it.vector); }
-	template <typename TExtString>
-	inline TExtString &	container(VectorIterator<TExtString> const &it) { return *(it.vector); }
-
-	template <typename TExtString>
-	inline TExtString &	container(VectorConstIterator<TExtString> &it) { return *(it.vector); }
-	template <typename TExtString>
-	inline TExtString &	container(VectorConstIterator<TExtString> const &it) { return *(it.vector); }
-
-	template <typename TExtString>
-	inline TExtString &	container(VectorFwdIterator<TExtString> &it) { return *(it.vector); }
-	template <typename TExtString>
-	inline TExtString &	container(VectorFwdIterator<TExtString> const &it) { return *(it.vector); }
-
-	template <typename TExtString>
-	inline TExtString &	container(VectorFwdConstIterator<TExtString> &it) { return *(it.vector); }
-	template <typename TExtString>
-	inline TExtString &	container(VectorFwdConstIterator<TExtString> const &it) { return *(it.vector); }
-//____________________________________________________________________________
-
-	template <typename TExtString>
-	inline bool	atBegin(VectorIterator<TExtString> &it) { return it.offset == 0; }
-	template <typename TExtString>
-	inline bool	atBegin(VectorIterator<TExtString> const &it) { return it.offset == 0; }
-
-	template <typename TExtString>
-	inline bool	atBegin(VectorConstIterator<TExtString> &it) { return it.offset == 0; }
-	template <typename TExtString>
-	inline bool	atBegin(VectorConstIterator<TExtString> const &it) { return it.offset == 0; }
-
-	template <typename TExtString>
-	inline bool	atBegin(VectorFwdIterator<TExtString> &it) { 
-		return it.pageNo == 0 && it.pageOfs == 0;
-	}
-	template <typename TExtString>
-	inline bool	atBegin(VectorFwdIterator<TExtString> const &it) {
-		return it.pageNo == 0 && it.pageOfs == 0;
-	}
-
-	template <typename TExtString>
-	inline bool	atBegin(VectorFwdConstIterator<TExtString> &it) { 
-		return it.pageNo == 0 && it.pageOfs == 0;
-	}
-	template <typename TExtString>
-	inline bool	atBegin(VectorFwdConstIterator<TExtString> const &it) {
-		return it.pageNo == 0 && it.pageOfs == 0;
-	}
-//____________________________________________________________________________
-
-	template <typename TExtString>
-	inline bool	atEnd(VectorIterator<TExtString> &it) { return it.offset == it.vector->_size; }
-	template <typename TExtString>
-	inline bool	atEnd(VectorIterator<TExtString> const &it) { return it.offset == it.vector->_size; }
-
-	template <typename TExtString>
-	inline bool	atEnd(VectorConstIterator<TExtString> &it) { return it.offset == it.vector->_size; }
-	template <typename TExtString>
-	inline bool	atEnd(VectorConstIterator<TExtString> const &it) { return it.offset == it.vector->_size; }
-
-	template <typename TExtString>
-	inline bool	atEnd(VectorFwdIterator<TExtString> &it) { 
-		return TExtString::PageSize * it.pageNo + it.pageOfs == it.vector->_size;
-	}
-	template <typename TExtString>
-	inline bool	atEnd(VectorFwdIterator<TExtString> const &it) {
-		return TExtString::PageSize * it.pageNo + it.pageOfs == it.vector->_size;
-	}
-
-	template <typename TExtString>
-	inline bool	atEnd(VectorFwdConstIterator<TExtString> &it) { 
-		return TExtString::PageSize * it.pageNo + it.pageOfs == it.vector->_size;
-	}
-	template <typename TExtString>
-	inline bool	atEnd(VectorFwdConstIterator<TExtString> const &it) {
-		return TExtString::PageSize * it.pageNo + it.pageOfs == it.vector->_size;
-	}
+	//////////////////////////////////////////////////////////////////////////////
+    // global interface
 
 //____________________________________________________________________________
 
     template < typename TValue, typename TConfig >
     inline void 
-    clear(String<TValue, External<TConfig> > &me) {
-        me.clear();
+    clear(String<TValue, External<TConfig> > &me) 
+	{
+		clear(me.pager);
+        resize(me, 0);
     }
 //____________________________________________________________________________
+
+	// wait until IO of every page is finished
+    template < typename TValue, typename TConfig >
+	inline void 
+	waitForAll(String<TValue, External<TConfig> > &me)
+	{
+		typedef typename String<TValue, External<TConfig> >::TCache	TCache;
+		typedef typename Iterator<TCache, Standard>::Type			TIter;
+
+		TIter f = begin(me.cache, Standard());
+		TIter fEnd = end(me.cache, Standard());
+
+		for(; f != fEnd ; ++f)
+			waitFor(*f);
+	}
+	
 /**
 .Function.flush:
 ..signature:flush(string)
@@ -1720,9 +1520,67 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 */
     template < typename TValue, typename TConfig >
     inline void 
-    flush(String<TValue, External<TConfig> > &me) {
-        me.flush();
+	flush(String<TValue, External<TConfig> > &me) 
+	{
+		typedef typename String<TValue, External<TConfig> >::TCache	TCache;
+		typedef typename Iterator<TCache, Standard>::Type			TIter;
+
+		// write all dirty pages to disk
+		if (me.file)
+		{
+			TIter f = begin(me.cache, Standard());
+			TIter fEnd = end(me.cache, Standard());
+
+			for(; f != fEnd ; ++f)
+				if ((*f).begin) me.flush(*f);
+			waitForAll(me);
+		}
     }
+
+	// cancel all transactions
+    template < typename TValue, typename TConfig >
+	inline void 
+	cancel(String<TValue, External<TConfig> > &me)
+	{
+		typedef typename String<TValue, External<TConfig> >::TCache	TCache;
+		typedef typename Iterator<TCache, Standard>::Type			TIter;
+
+		if (me.file) 
+		{
+			TIter f = begin(me.cache, Standard());
+			TIter fEnd = end(me.cache, Standard());
+
+			for(; f != fEnd ; ++f)
+				if ((*f).begin) cancel(*f, me.file);
+		}
+	}
+
+	// flush and free all allocated pages
+    template < typename TValue, typename TConfig >
+	inline void 
+	free(String<TValue, External<TConfig> > &me)
+	{
+		typedef String<TValue, External<TConfig> >			TExtString;
+		typedef typename TExtString::TPageFrame				TPageFrame;
+		typedef typename TExtString::TCache					TCache;
+		typedef typename Iterator<TCache, Standard>::Type	TIter;
+
+		flush(me);
+
+		TIter f = begin(me.cache, Standard());
+		TIter fEnd = end(me.cache, Standard());
+
+		for(; f != fEnd ; ++f) 
+		{
+			if ((*f).pageNo >= 0) 
+			{
+                me.pager[(*f).pageNo] = (*f).dataStatus;
+				(*f).pageNo = TPageFrame::UNINITIALIZED;
+			}
+//				::std::cerr << *f << ::std::endl;
+            if ((*f).begin) freePage(*f, me.file);
+        }
+	}
 //____________________________________________________________________________
 /**
 .Function.open:
@@ -1730,22 +1588,63 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 ..param.string:An external string.
 ...type:Spec.External String
 */
+
 	template < typename TValue, typename TConfig >
     inline bool 
-    open(String<TValue, External<TConfig> > &me, const char *fileName, int openMode) {
-		return me.open(fileName, openMode);
+    open(String<TValue, External<TConfig> > &me, const char *fileName, int openMode) 
+	{
+		typedef String<TValue, External<TConfig> >			TExtString;
+		typedef typename TExtString::TPageFrame				TPageFrame;
+
+		me._temporary = false;
+		if ((me._ownFile = open(me.file, fileName, openMode)))
+            me.data_size = size(me.file) / sizeof(TValue);
+        else
+            me.data_size = 0;
+
+		fill(me.pager, enclosingBlocks(me.data_size, 
+			(unsigned)me.PAGE_SIZE), (me.data_size)? 
+				TPageFrame::ON_DISK: 
+				TPageFrame::UNINITIALIZED);
+
+        me.lastDiskPage = me.data_size / me.PAGE_SIZE;
+        me.lastDiskPageSize = me.data_size % me.PAGE_SIZE;
+		return me._ownFile;
     }
 
 	template < typename TValue, typename TConfig >
     inline bool 
-    open(String<TValue, External<TConfig> > &me, const char *fileName) {
-		return me.open(fileName);
+    open(String<TValue, External<TConfig> > &me, const char *fileName) 
+	{
+		typedef String<TValue, External<TConfig> >	TExtString;
+		typedef typename TExtString::TFile			TFile;
+
+		return open(me, fileName, DefaultOpenMode<TFile>::VALUE);
     }
 
 	template < typename TValue, typename TConfig >
     inline bool 
-    open(String<TValue, External<TConfig> > &me, typename TConfig::TFile file) {
-		return me.open(file);
+    open(String<TValue, External<TConfig> > &me, typename TConfig::TFile file) 
+	{
+		typedef String<TValue, External<TConfig> >	TExtString;
+		typedef typename TExtString::TPageFrame		TPageFrame;
+
+		me.file = file;
+        me._temporary = false;
+        me._ownFile = false;
+        if (me.file)
+            me.data_size = size(me.file) / sizeof(TValue);
+        else
+            me.data_size = 0;
+
+		fill(me.pager, enclosingBlocks(me.data_size, 
+			(unsigned)me.PAGE_SIZE), (me.data_size)? 
+				TPageFrame::ON_DISK: 
+				TPageFrame::UNINITIALIZED);
+
+        me.lastDiskPage = me.data_size / me.PAGE_SIZE;
+        me.lastDiskPageSize = me.data_size % me.PAGE_SIZE;
+		return me._file;
     }
 
 /**
@@ -1756,8 +1655,13 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 */
 	template < typename TValue, typename TConfig >
     inline bool 
-    openTemp(String<TValue, External<TConfig> > &me) {
-		return me.openTemp();
+    openTemp(String<TValue, External<TConfig> > &me) 
+	{
+        me._temporary = true;
+        me.lastDiskPage = 0;
+        me.lastDiskPageSize = 0;
+		clear(me.pager);
+		return me._ownFile = openTemp(me.file);
     }
 //____________________________________________________________________________
 
@@ -1793,27 +1697,66 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 */
 	template < typename TValue, typename TConfig >
     inline bool 
-    close(String<TValue, External<TConfig> > &me) {
-		return me.close();
+    close(String<TValue, External<TConfig> > &me) 
+	{
+		// close associated file
+		if (me._temporary)
+			cancel(me);
+		else
+			flush(me);
+		free(me);
+		clear(me.pager);
+
+		if (me._ownFile) 
+		{
+			me._ownFile = false;
+			return close(me.file);
+		} 
+		else
+			return true;
     }
 //____________________________________________________________________________
+///.Function.length.param.object.type:Class.Shape
 
-    template < typename TValue, typename TConfig >
+	template < typename TValue, typename TConfig >
     inline typename Size< String<TValue, External<TConfig> > >::Type
     length(String<TValue, External<TConfig> > const &me)
     {
-        return me.length();
+        return me.data_size;
+    }
+
+	template < typename TValue, typename TConfig >
+    inline typename Size< String<TValue, External<TConfig> > >::Type
+    capacity(String<TValue, External<TConfig> > const &me)
+    {
+		typedef typename Size< String<TValue, External<TConfig> > >::Type TSize;
+        return (TSize)capacity(me.pager) * (TSize)me.PAGE_SIZE;
     }
 //____________________________________________________________________________
 
-    template < typename TValue, typename TConfig, typename TSize, typename TExpand >
+    template < typename TValue, typename TConfig, typename TNewSize, typename TExpand >
     inline typename Size< String<TValue, External<TConfig> > >::Type
     resize(
 	    String<TValue, External<TConfig> > &me,
-		TSize new_length,
-		Tag<TExpand> const)
+		TNewSize new_length,
+		Tag<TExpand> const expand)
 	{
-		me.resize(new_length);
+		typedef String<TValue, External<TConfig> >	TString;
+		typedef typename TString::TPageFrame		TPageFrame;
+		typedef typename Size<TString>::Type		TSize;
+
+		fill(me.pager, enclosingBlocks(new_length, (unsigned)me.PAGE_SIZE), TPageFrame::UNINITIALIZED, expand);
+        if (new_length < me.data_size && me.file) 
+		{
+			// wait for all pending transfers
+            waitForAll(me);
+
+			// before shrinking the file size
+            resize(me.file, (TSize)new_length * (TSize)sizeof(TValue));
+            me.lastDiskPage = new_length / me.PAGE_SIZE;
+            me.lastDiskPageSize = new_length % me.PAGE_SIZE;
+        }
+		me.data_size = new_length;
 		return length(me);
 	}
 //____________________________________________________________________________
@@ -1825,34 +1768,41 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 		TSize new_capacity,
 		Tag<TExpand> const)
 	{
-		me.resize(new_capacity);
+		reserve(me.pager, enclosingBlocks(new_capacity, (unsigned)me.PAGE_SIZE));
 		return capacity(me);
 	}
 //____________________________________________________________________________
 
-	template < typename TValue, typename TConfig, typename TSpec >
+    template < typename TValue, typename TConfig, typename TSpec >
     inline typename Iterator<String<TValue, External<TConfig> >, Tag<TSpec> const>::Type
-    begin(String<TValue, External<TConfig> > &me, Tag<TSpec> const) {
-		return me.begin();
+    begin(String<TValue, External<TConfig> > &me, Tag<TSpec> const) 
+	{
+		typedef String<TValue, External<TConfig> > TString;
+		return typename Iterator<TString, Tag<TSpec> const>::Type (&me, 0);
     }
 
     template < typename TValue, typename TConfig, typename TSpec >
     inline typename Iterator<String<TValue, External<TConfig> > const, Tag<TSpec> const>::Type
-    begin(String<TValue, External<TConfig> > const &me, Tag<TSpec> const) {
-		return me.begin();
+    begin(String<TValue, External<TConfig> > const &me, Tag<TSpec> const) 
+	{
+		typedef String<TValue, External<TConfig> > TString;
+		return typename Iterator<TString const, Tag<TSpec> const>::Type (const_cast<TString*>(&me), 0);
     }
 
     template < typename TValue, typename TConfig, typename TSpec >
     inline typename Iterator<String<TValue, External<TConfig> >, Tag<TSpec> const>::Type
-    end(String<TValue, External<TConfig> > &me, Tag<TSpec> const) {
-		return me.end();
+    end(String<TValue, External<TConfig> > &me, Tag<TSpec> const) 
+	{
+		typedef String<TValue, External<TConfig> > TString;
+		return typename Iterator<TString, Tag<TSpec> const>::Type (&me, length(me));
     }
-//____________________________________________________________________________
 
     template < typename TValue, typename TConfig, typename TSpec >
     inline typename Iterator<String<TValue, External<TConfig> > const, Tag<TSpec> const>::Type
-    end(String<TValue, External<TConfig> > const &me, Tag<TSpec> const) {
-		return me.end();
+    end(String<TValue, External<TConfig> > const &me, Tag<TSpec> const) 
+	{
+		typedef String<TValue, External<TConfig> > TString;
+		return typename Iterator<TString const, Tag<TSpec> const>::Type (const_cast<TString*>(&me), length(me));
     }
 //____________________________________________________________________________
 
@@ -1871,33 +1821,107 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
     }
 //____________________________________________________________________________
 
-///.Function.length.param.object.type:Class.Shape
-    template < typename TValue, typename TConfig >
-    inline void
-    push_back(String<TValue, External<TConfig> > &me, TValue const &_Val)
-    {
-	    return me.push_back(_Val);
-    }
-
 	template < typename TValue, typename TConfig, typename TExpand >
 	inline void
 	appendValue(String<TValue, External<TConfig> > &me, 
 				TValue const &_Val,
-				Tag<TExpand> const)
-	{
-		return me.push_back(_Val);
-	}
-
-	template < typename TValue, typename TConfig, typename TString, typename TExpand >
-	inline void
-	append(String<TValue, External<TConfig> > &me, 
-				TString const &string,
 				Tag<TExpand> const expand)
 	{
-		typename Iterator<TString>::Type it = begin(string, Standard());
-		typename Iterator<TString>::Type itEnd = end(string, Standard());
-		for (; it != itEnd; ++it)
-			appendValue(me, *it, expand);
+		resize(me, me.data_size + 1, expand);
+		me.back() = _Val;
+	}
+//____________________________________________________________________________
+// stack interface
+
+    template < typename TValue, typename TConfig >
+    inline void
+    push(String<TValue, External<TConfig> > &me, TValue const &_Val)
+    {
+		appendValue(me, _Val);
+    }
+
+    template < typename TValue, typename TConfig >
+    inline void
+    push_back(String<TValue, External<TConfig> > &me, TValue const &_Val)
+    {
+		appendValue(me, _Val);
+    }
+
+    template < typename TValue, typename TConfig >
+	inline void pop_back(String<TValue, External<TConfig> > &me)
+    {
+		resize(me, me.data_size - 1);
+	}
+
+    template < typename TValue, typename TConfig >
+	inline TValue &
+	front(String<TValue, External<TConfig> > &me)
+    {
+		return me[0];
+	}
+
+    template < typename TValue, typename TConfig >
+	inline TValue const &
+	front(String<TValue, External<TConfig> > const &me)
+    {
+		return me[0];
+	}
+
+    template < typename TValue, typename TConfig >
+	inline TValue &
+	back(String<TValue, External<TConfig> > &me)
+    {
+		return me[me.data_size - 1];
+	}
+
+    template < typename TValue, typename TConfig >
+	inline TValue const &
+	back(String<TValue, External<TConfig> > const &me)
+    {
+		return me[me.data_size - 1];
+	}
+//____________________________________________________________________________
+
+	template < typename TValue, typename TConfig, typename TSource, typename TExpand >
+	inline void
+	append(String<TValue, External<TConfig> > &target, 
+				TSource const &source,
+				Tag<TExpand> const expand)
+	{
+		typedef String<TValue, External<TConfig> >					TTarget;
+        typedef typename Iterator<TSource const, Standard>::Type	ISource;
+        typedef typename Iterator<TTarget, Standard>::Type			ITarget;
+
+        ITarget it_target       = end(target, Standard());
+		
+		resize(target, length(target) + length(source), expand);
+		
+        ISource it_source       = begin(source, Standard());
+        ISource it_source_end   = end(source, Standard());
+		
+		for (; it_source != it_source_end; ++it_source, ++it_target)
+			*it_target = *it_source;
+	}
+
+	template < typename TValue, typename TConfig, typename TSourceValue, typename TExpand >
+	inline void
+	append(String<TValue, External<TConfig> > &target, 
+				TSourceValue * source,
+				Tag<TExpand> const expand)
+	{
+		typedef String<TValue, External<TConfig> >					TTarget;
+        typedef typename Iterator<TSourceValue *, Standard>::Type	ISource;
+        typedef typename Iterator<TTarget, Standard>::Type			ITarget;
+
+        ITarget it_target       = end(target, Standard());
+		
+		resize(target, length(target) + length(source), expand);
+		
+        ISource it_source       = begin(source, Standard());
+        ISource it_source_end   = end(source, Standard());
+		
+		for (; it_source != it_source_end; ++it_source, ++it_target)
+			*it_target = *it_source;
 	}
 
 
@@ -1936,28 +1960,50 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 		TSource const &source, 
 		Tag<TExpand> const) 
 	{
-        typedef typename Iterator<TSource const, Standard>::Type                ISource;
-        typedef typename String<TValue, External<TConfig> >::TVectorFwdIterator ITarget;
+		typedef String<TValue, External<TConfig> >					TTarget;
+        typedef typename Iterator<TSource const, Standard>::Type	ISource;
+        typedef typename Iterator<TTarget, Standard>::Type			ITarget;
 
         resize(target, length(source));
 
-        ISource it_source       = begin(source);
-        ITarget it_target       = begin(target);
-		ITarget it_target_end   = end(target);
-		while (it_target != it_target_end)
-		{
+        ISource it_source       = begin(source, Standard());
+        ISource it_source_end   = end(source, Standard());
+        ITarget it_target       = begin(target, Standard());
+		
+		for (; it_source != it_source_end; ++it_source, ++it_target)
 			*it_target = *it_source;
-			++it_target;
-			++it_source;
-		}
     }
+
+    template < typename TValue,
+               typename TConfig,
+               typename TSourceValue,
+			   typename TExpand >
+    inline void assign(
+		String<TValue, External<TConfig> > &target, 
+		TSourceValue * source,
+		Tag<TExpand> const) 
+	{
+		typedef String<TValue, External<TConfig> >					TTarget;
+        typedef typename Iterator<TSourceValue *, Standard>::Type	ISource;
+        typedef typename Iterator<TTarget, Standard>::Type			ITarget;
+
+        resize(target, length(source));
+
+        ISource it_source       = begin(source, Standard());
+        ISource it_source_end   = end(source, Standard());
+        ITarget it_target       = begin(target, Standard());
+		
+		for (; it_source != it_source_end; ++it_source, ++it_target)
+			*it_target = *it_source;
+    }
+
 //____________________________________________________________________________
 
 	template < typename TValue, typename TConfig >
     inline void const * 
     id(String<TValue, External<TConfig> > const &me)
     {
-        return &(*me.pager.begin());
+        return &(*begin(me.pager));
     }
 
 }

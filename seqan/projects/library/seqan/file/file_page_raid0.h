@@ -31,12 +31,12 @@ namespace SEQAN_NAMESPACE_MAIN
     //////////////////////////////////////////////////////////////////////////////
     // page based read/write for striped files
 
-	template < typename TValue, unsigned _FileCount, typename TFile, typename TSpec >
+	template < typename TValue, unsigned FILE_COUNT, typename TFile, typename TSpec >
 	inline bool 
 	readPage(
 		int pageNo, 
-		PageFrame<TValue, File< Striped<_FileCount, TFile> >, TSpec> &pf, 
-		File< Striped<_FileCount, TFile> > &file)
+		PageFrame<TValue, File< Striped<FILE_COUNT, TFile> >, TSpec> &pf, 
+		File< Striped<FILE_COUNT, TFile> > &file)
 	{
 		typedef typename Position<TFile>::Type pos_t;
 		#ifdef SEQAN_VVERBOSE
@@ -46,19 +46,19 @@ namespace SEQAN_NAMESPACE_MAIN
 		pf.dirty = false;
 		pf.status = pf.READING;
 		return areadAt(
-			file[pageNo % _FileCount], 
+			file[pageNo % FILE_COUNT], 
 			(TValue*)pf.begin, 
 			size(pf), 
-			(pos_t)(pageNo / _FileCount) * (pos_t)pageSize(pf), 
+			(pos_t)(pageNo / FILE_COUNT) * (pos_t)pageSize(pf), 
 			pf.request);
 	}
 
-	template < typename TValue, unsigned _FileCount, typename TFile, typename TSpec >
+	template < typename TValue, unsigned FILE_COUNT, typename TFile, typename TSpec >
 	inline bool 
 	writePage(
-		PageFrame<TValue, File< Striped<_FileCount, TFile> >, TSpec> &pf, 
+		PageFrame<TValue, File< Striped<FILE_COUNT, TFile> >, TSpec> &pf, 
 		int pageNo, 
-		File< Striped<_FileCount, TFile> > &file)
+		File< Striped<FILE_COUNT, TFile> > &file)
 	{
 		typedef typename Position<TFile>::Type pos_t;
 		#ifdef SEQAN_VVERBOSE
@@ -67,19 +67,19 @@ namespace SEQAN_NAMESPACE_MAIN
 		#endif
 		pf.status = pf.WRITING;
 		return awriteAt(
-			file[pageNo % _FileCount], 
+			file[pageNo % FILE_COUNT], 
 			(TValue*)pf.begin, 
 			size(pf), 
-			(pos_t)(pageNo / _FileCount) * (pos_t)pageSize(pf), 
+			(pos_t)(pageNo / FILE_COUNT) * (pos_t)pageSize(pf), 
 			pf.request);
 	}
 
-	template < typename TValue, unsigned _FileCount, typename TFile, typename TSpec, typename TSize >
+	template < typename TValue, unsigned FILE_COUNT, typename TFile, typename TSpec, typename TSize >
 	inline bool 
 	readLastPage(
 		int pageNo, 
-		PageFrame<TValue, File< Striped<_FileCount, TFile> >, TSpec> &pf, 
-		File< Striped<_FileCount, TFile> > &file,
+		PageFrame<TValue, File< Striped<FILE_COUNT, TFile> >, TSpec> &pf, 
+		File< Striped<FILE_COUNT, TFile> > &file,
 		TSize size)
 	{
 		typedef typename Position<TFile>::Type pos_t;
@@ -90,18 +90,18 @@ namespace SEQAN_NAMESPACE_MAIN
 		pf.dirty = false;
 		pf.status = pf.READY;
 		return readAt(
-			file[pageNo % _FileCount], 
+			file[pageNo % FILE_COUNT], 
 			(TValue*)pf.begin, 
 			size, 
-			(pos_t)(pageNo / _FileCount) * (pos_t)pageSize(pf));
+			(pos_t)(pageNo / FILE_COUNT) * (pos_t)pageSize(pf));
 	}
 
-	template < typename TValue, unsigned _FileCount, typename TFile, typename TSpec, typename TSize >
+	template < typename TValue, unsigned FILE_COUNT, typename TFile, typename TSpec, typename TSize >
 	inline bool 
 	writeLastPage(
-		PageFrame<TValue, File< Striped<_FileCount, TFile> >, TSpec> &pf, 
+		PageFrame<TValue, File< Striped<FILE_COUNT, TFile> >, TSpec> &pf, 
 		int pageNo, 
-		File< Striped<_FileCount, TFile> > &file,
+		File< Striped<FILE_COUNT, TFile> > &file,
 		TSize size)
 	{
 		typedef typename Position<TFile>::Type pos_t;
@@ -113,33 +113,33 @@ namespace SEQAN_NAMESPACE_MAIN
 		pf.status = pf.READY;
 //        resize(pf, size);
 		return writeAt(
-			file[pageNo % _FileCount], 
+			file[pageNo % FILE_COUNT], 
 			(TValue*)pf.begin, 
 			size, 
-			(pos_t)(pageNo / _FileCount) * (pos_t)pageSize(pf));
+			(pos_t)(pageNo / FILE_COUNT) * (pos_t)pageSize(pf));
 	}
 
 
 	//////////////////////////////////////////////////////////////////////////////
 	// bucket based read/write methods for striped files
 
-	template < typename TValue, unsigned _FileCount, typename TFile >
+	template < typename TValue, unsigned FILE_COUNT, typename TFile >
 	inline unsigned 
 	readBucket(
 		PageBucket<TValue> &b, 
 		int pageNo, 
 		unsigned pageSize, 
 		unsigned dataSize, 
-		File< Striped<_FileCount, TFile> > &file) 
+		File< Striped<FILE_COUNT, TFile> > &file) 
 	{
 		typedef typename Position<TFile>::Type pos_t;
         unsigned readSize = _min(dataSize - b.pageOfs, (unsigned)(b.end - b.begin));
 		#ifdef SEQAN_VVERBOSE
 			::std::cerr << "readBucket:  " << ::std::hex << b.begin;
-			::std::cerr << " from page " << ::std::dec << pageNo << " at " << (pos_t)(pageNo / _FileCount) * (pos_t)pageSize + b.pageOfs;
+			::std::cerr << " from page " << ::std::dec << pageNo << " at " << (pos_t)(pageNo / FILE_COUNT) * (pos_t)pageSize + b.pageOfs;
 			::std::cerr << " size " << readSize << ::std::endl;
 		#endif
-        if (readSize && readAt(file[pageNo % _FileCount], b.begin, readSize, (pos_t)(pageNo / _FileCount) * (pos_t)pageSize + b.pageOfs)) {
+        if (readSize && readAt(file[pageNo % FILE_COUNT], b.begin, readSize, (pos_t)(pageNo / FILE_COUNT) * (pos_t)pageSize + b.pageOfs)) {
             b.pageOfs += readSize;
             b.cur = b.begin;
             b.end = b.begin + readSize;
@@ -148,21 +148,21 @@ namespace SEQAN_NAMESPACE_MAIN
             return 0;
 	}
 
-	template < typename TValue, unsigned _FileCount, typename TFile >
+	template < typename TValue, unsigned FILE_COUNT, typename TFile >
 	inline bool 
 	writeBucket(
 		PageBucket<TValue> &b,
 		int pageNo, 
 		unsigned pageSize, 
-		File< Striped<_FileCount, TFile> > &file) 
+		File< Striped<FILE_COUNT, TFile> > &file) 
 	{
 		typedef typename Position<TFile>::Type pos_t;
 		#ifdef SEQAN_VVERBOSE
 			::std::cerr << "writeBucket: " << ::std::hex << b.begin;
-			::std::cerr << " from page " << ::std::dec << pageNo << " at " << (pos_t)(pageNo / _FileCount) * (pos_t)pageSize + b.pageOfs;
+			::std::cerr << " from page " << ::std::dec << pageNo << " at " << (pos_t)(pageNo / FILE_COUNT) * (pos_t)pageSize + b.pageOfs;
 			::std::cerr << " size " << b.cur - b.begin << ::std::endl;
 		#endif
-        if ((b.cur == b.begin) || writeAt(file[pageNo % _FileCount], b.begin, b.cur - b.begin, (pos_t)(pageNo / _FileCount) * (pos_t)pageSize + b.pageOfs)) {
+        if ((b.cur == b.begin) || writeAt(file[pageNo % FILE_COUNT], b.begin, b.cur - b.begin, (pos_t)(pageNo / FILE_COUNT) * (pos_t)pageSize + b.pageOfs)) {
             b.pageOfs += b.cur - b.begin;
             b.cur = b.begin;
             return true;
@@ -170,21 +170,21 @@ namespace SEQAN_NAMESPACE_MAIN
             return false;
 	}
 
-	template < typename TValue, unsigned _FileCount, typename TFile, typename TSpec >
+	template < typename TValue, unsigned FILE_COUNT, typename TFile, typename TSpec >
 	inline bool 
 	writeBucket(
-		PageFrame<TValue, File< Striped<_FileCount, TFile> >, Dynamic<TSpec> > &pf, 
+		PageFrame<TValue, File< Striped<FILE_COUNT, TFile> >, Dynamic<TSpec> > &pf, 
 		unsigned &pageOfs, 
-		File< Striped<_FileCount, TFile> > &file) 
+		File< Striped<FILE_COUNT, TFile> > &file) 
 	{
 		typedef typename Position<TFile>::Type pos_t;
 		#ifdef SEQAN_VVERBOSE
 			::std::cerr << "writeBucket: " << ::std::hex << pf.begin;
-			::std::cerr << " from page " << ::std::dec << pf.pageNo << " at " << (pos_t)(pf.pageNo / _FileCount) * (pos_t)pageSize(pf) + pageOfs;
+			::std::cerr << " from page " << ::std::dec << pf.pageNo << " at " << (pos_t)(pf.pageNo / FILE_COUNT) * (pos_t)pageSize(pf) + pageOfs;
 			::std::cerr << " size " << size(pf) << ::std::endl;
 		#endif
         if (pf.end == pf.begin) return true;
-        if (awriteAt(file[pf.pageNo % _FileCount], pf.begin, size(pf), (pos_t)(pf.pageNo / _FileCount) * (pos_t)pageSize(pf) + pageOfs, pf.request)) {
+        if (awriteAt(file[pf.pageNo % FILE_COUNT], pf.begin, size(pf), (pos_t)(pf.pageNo / FILE_COUNT) * (pos_t)pageSize(pf) + pageOfs, pf.request)) {
             pf.status = pf.WRITING;
             pageOfs += size(pf);
             return true;

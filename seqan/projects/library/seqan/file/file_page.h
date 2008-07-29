@@ -32,60 +32,55 @@ namespace SEQAN_NAMESPACE_MAIN
 	// base class for memory buffers
 
 	template < typename TValue >
-	struct SimpleBuffer {
-        typedef TValue      Type;
-        typedef size_t		SizeType;
+	struct SimpleBuffer 
+	{
+		typedef	typename Size<SimpleBuffer>::Type		TSize;
+		typedef	typename Iterator<SimpleBuffer>::Type	TIterator;
 
-		typedef	TValue&		TypeRef;
-		typedef TValue*     TypePtr;
-		typedef TValue*     Iterator;
-
-		Iterator            begin;      // the beginning of the buffer
-        Iterator            end;        // end of valid data
-        SizeType            pageSize;   // size of allocated memory
+		TIterator	begin;      // the beginning of the buffer
+        TIterator	end;        // end of valid data
+        TSize		pageSize;   // size of allocated memory
 
         SimpleBuffer():
             begin(NULL),
             end(NULL) {}
 
-        SimpleBuffer(TypePtr _begin, TypePtr _end):
+        SimpleBuffer(TIterator _begin, TIterator _end):
             begin(_begin),
             end(_end) {}
 
-        SimpleBuffer(TypePtr _begin, SizeType _size):
+        SimpleBuffer(TIterator _begin, TSize _size):
             begin(_begin),
             end(_begin + _size) {}
 
-        SimpleBuffer(SizeType _pageSize):
+        SimpleBuffer(TSize _pageSize):
             begin(NULL),
             end(NULL),
             pageSize(_pageSize) {}
 
-        inline Type& operator[](SizeType i) { return begin[i]; }
-        inline Type const & operator[](SizeType i) const { return begin[i]; }
+        inline TValue       & operator[](TSize i)       { return begin[i]; }
+        inline TValue const & operator[](TSize i) const { return begin[i]; }
 	};
 
-    template < typename TValue >
-    struct Iterator< SimpleBuffer<TValue>, Standard > {
-        typedef TValue* Type;
-    };
+
+	//////////////////////////////////////////////////////////////////////////////
+	// meta-function interface
+
+	template < typename TValue >
+    struct Value< SimpleBuffer<TValue> >	{ typedef TValue Type; };
 
     template < typename TValue >
-    struct Iterator< SimpleBuffer<TValue> const, Standard > {
-        typedef TValue const * Type;
-    };
+	struct Size< SimpleBuffer<TValue> >		{ typedef size_t Type; };
 
     template < typename TValue >
-    struct Value< SimpleBuffer<TValue> >
-    {
-        typedef TValue Type;
-    };
+    struct Iterator< SimpleBuffer<TValue>, Standard >		{ typedef TValue *Type; };
 
     template < typename TValue >
-    struct Size< SimpleBuffer<TValue> >
-    {
-		typedef typename SimpleBuffer<TValue>::SizeType Type;
-    };
+    struct Iterator< SimpleBuffer<TValue> const, Standard >	{ typedef TValue const *Type; };
+
+
+	//////////////////////////////////////////////////////////////////////////////
+	// global interface
 
     template < typename TValue >
     inline typename Size<SimpleBuffer<TValue> >::Type
@@ -151,14 +146,18 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 
+
     //////////////////////////////////////////////////////////////////////////////
 	// a bucket is a structure to represent a small window of a page
     // used by algorithms which need a global view of all pages (merge sort, mapper)
 
 	template < typename TValue >
-    struct PageBucket {
+    struct PageBucket
+	{
+		typedef	typename Iterator<PageBucket>::Type TIterator;
+
         unsigned    pageOfs;                // begin of bucket window with relation to page begin
-        TValue  	*begin, *cur, *end;     // begin/end of buckets memory buffer and a pointer
+        TIterator	begin, cur, end;        // begin/end of buckets memory buffer and a pointer
     };
 
     template < typename TValue >
@@ -174,8 +173,48 @@ namespace SEQAN_NAMESPACE_MAIN
     }
 
 
-    template < typename TValue, typename TFile, typename TSpec >
-    struct PageFrame {};    
+	//////////////////////////////////////////////////////////////////////////////
+	// meta-function interface
+
+	template < typename TValue >
+    struct Value< PageBucket<TValue> >		{ typedef TValue Type; };
+
+    template < typename TValue >
+    struct Size< PageBucket<TValue> >		{ typedef size_t Type; };
+
+    template < typename TValue >
+    struct Iterator< PageBucket<TValue>, Standard >			{ typedef TValue *Type; };
+
+    template < typename TValue >
+    struct Iterator< PageBucket<TValue> const, Standard >	{ typedef TValue const *Type; };
+
+
+	//////////////////////////////////////////////////////////////////////////////
+
+	template < typename TValue, typename TFile, typename TSpec >
+    struct PageFrame;    
+
+	//////////////////////////////////////////////////////////////////////////////
+
+	template < typename TValue, typename TFile, typename TSpec >
+    struct Value< PageFrame< TValue, TFile, TSpec > > {
+        typedef TValue Type;
+    };
+
+	template < typename TValue, typename TFile, typename TSpec >
+    struct Size< PageFrame< TValue, TFile, TSpec > > {
+        typedef size_t Type;
+    };
+
+	template < typename TValue, typename TFile, typename TSpec >
+    struct Iterator< PageFrame< TValue, TFile, TSpec >, Standard > {
+        typedef TValue *Type;
+    };
+
+	template < typename TValue, typename TFile, typename TSpec >
+    struct Iterator< PageFrame< TValue, TFile, TSpec > const, Standard> {
+        typedef TValue const *Type;
+    };
 
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -184,42 +223,29 @@ namespace SEQAN_NAMESPACE_MAIN
     template < typename TSpec = void >
     struct Dynamic;
 
-    // forward declaration
-    template < typename TPageFrame >
-    struct PageChain;
-
     template < typename TValue, typename TFile >
 	struct PageFrame< TValue, TFile, Dynamic<> >: public SimpleBuffer< TValue >
 	{
-        typedef TValue                          Type;
-        typedef unsigned                        SizeType;
 		typedef TFile							File;
-
-		typedef	TValue&							TypeRef;
-		typedef TValue*           	            TypePtr;
-        typedef PageChain<PageFrame>		    TPageChain;
-		typedef SimpleBuffer<TValue>	        Base;
+		typedef SimpleBuffer<TValue>	        TBase;
         typedef typename aRequest<TFile>::Type  aRequest;
+
+        enum Status		{ READY, READING, WRITING };
 
 		bool			dirty;		// data needs to be written to disk before freeing
 		unsigned   		pageNo;		// maps frames to pages (reverse vector mapper)
         aRequest        request;    // request structure of the async io process
-
-        enum Status		{ READY, READING, WRITING };
-		Status status;
-
+		Status			status;
         PageFrame       *next;      // next buffer in a chained list
-//        PageChain       *chain;     // related chain 
 
-        PageFrame(/*BufChain *_chain = NULL*/):
-			Base(),
+        PageFrame():
+			TBase(),
             dirty(false),
             pageNo(-1),
 			status(READY),
-//            chain(_chain) 
 			next(NULL) {}
     };
-    
+
 
 	//////////////////////////////////////////////////////////////////////////////
 	// page frame of static size
@@ -235,27 +261,22 @@ namespace SEQAN_NAMESPACE_MAIN
                unsigned _PageSize >
 	struct PageFrame<TValue, TFile, Fixed<_PageSize> >
 	{
-        typedef TValue                          Type;
-        typedef unsigned                        SizeType;
-		typedef TFile							File;
-		enum { PageSize = _PageSize };
+		typedef TFile								File;
+        typedef typename aRequest<TFile>::Type		aRequest;
+		typedef	typename Size<PageFrame>::Type		TSize;
+		typedef	typename Iterator<PageFrame>::Type	TIterator;
 
-		typedef	TValue&							TypeRef;
-		typedef VolatilePtr<TValue>	            TypePtr;
-        typedef typename aRequest<TFile>::Type	aRequest;
-
-		bool			dirty;		// data needs to be written to disk before freeing
-		int     		pageNo;		// maps frames to pages (reverse vector mapper)
-		TypePtr			begin;	    // start address of page memory
-        aRequest        request;    // request structure of the async io process
-
+		enum            { PageSize = _PageSize };
 		enum Status		{ READY, READING, WRITING };
 		enum DataStatus	{ ON_DISK = -1, UNINITIALIZED = -2 };
 		enum Priority	{ NORMAL_LEVEL = 0, PREFETCH_LEVEL = 1, ITERATOR_LEVEL = 2, PERMANENT_LEVEL = 3 };
 
-		Status status;
-		DataStatus dataStatus;
-
+		bool			dirty;		// data needs to be written to disk before freeing
+		int     		pageNo;		// maps frames to pages (reverse vector mapper)
+		TIterator		begin;	    // start address of page memory
+        aRequest        request;    // request structure of the async io process
+		Status			status;
+		DataStatus		dataStatus;
 		PageLRUEntry	lruEntry;   // priority based lru
         Priority        priority;
 
@@ -264,13 +285,34 @@ namespace SEQAN_NAMESPACE_MAIN
             pageNo(-1),
 			begin(NULL),
 			status(READY),
+			dataStatus(UNINITIALIZED),
             priority(NORMAL_LEVEL) {}
 
-        inline Type& operator[](SizeType i) { return begin[i]; }
-        inline Type const & operator[](SizeType i) const { return begin[i]; }
+		inline TValue       & operator[](TSize i)       { return begin[i]; }
+        inline TValue const & operator[](TSize i) const { return begin[i]; }
 	};
 
-    template < typename TValue, typename TFile, typename TSpec, typename TSize >
+
+	//////////////////////////////////////////////////////////////////////////////
+	// meta-function interface
+
+	template < typename TValue, typename TFile, unsigned _PageSize >
+    struct Iterator< PageFrame< TValue, TFile, Fixed<_PageSize> >, Standard >
+    {
+        typedef VolatilePtr<TValue> Type;
+    };
+
+	template < typename TValue, typename TFile, unsigned _PageSize >
+    struct Iterator< PageFrame< TValue, TFile, Fixed<_PageSize> > const, Standard>
+    {
+        typedef VolatilePtr<TValue> const Type;
+    };
+
+
+	//////////////////////////////////////////////////////////////////////////////
+	// global interface
+
+	template < typename TValue, typename TFile, typename TSpec, typename TSize >
     inline void resize(PageFrame<TValue, TFile, Dynamic<TSpec> > &me, TSize size) {
         me.end = me.begin + size;
     }
@@ -301,7 +343,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	// various page frame methods
 
 	template < typename TValue, typename TFile, typename TSpec >
-    ::std::ostream& operator<<(::std::ostream &out, const PageFrame<TValue, TFile, TSpec > &pf) {
+    ::std::ostream& operator<<(::std::ostream &out, const PageFrame<TValue, TFile, TSpec > &pf) 
+	{
         out << "PageFrame @ " << pf.pageNo;
         if (pf.dirty)
             out << " DIRTY";
@@ -331,7 +374,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	template < typename TValue, typename TFile, typename TSpec, typename T > inline
-	void allocPage(PageFrame<TValue, TFile, TSpec> &pf, T const & me) {
+	void allocPage(PageFrame<TValue, TFile, TSpec> &pf, T const & me) 
+	{
 		TValue* tmp = NULL;
 		allocate(me, tmp, pageSize(pf));
 		pf.begin = tmp;
@@ -341,7 +385,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	template < typename TValue, typename TFile, typename TSpec, typename T > inline
-	void freePage(PageFrame<TValue, TFile, TSpec> &pf, T const & me) {
+	void freePage(PageFrame<TValue, TFile, TSpec> &pf, T const & me) 
+	{
 		#ifdef SEQAN_VVERBOSE
 			if ((TValue*)pf.begin)
 				::std::cerr << "freePage:  " << ::std::hex << (TValue*)pf.begin << ::std::dec << ::std::endl;
@@ -353,7 +398,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	template < typename TValue, typename TFile, typename TSpec > inline
-	bool readPage(int pageNo, PageFrame<TValue, TFile, TSpec> &pf, TFile &file) {
+	bool readPage(int pageNo, PageFrame<TValue, TFile, TSpec> &pf, TFile &file) 
+	{
 		typedef typename Position<TFile>::Type pos_t;
 		#ifdef SEQAN_VVERBOSE
 			::std::cerr << "readPage:  " << ::std::hex << (TValue*)pf.begin;
@@ -366,7 +412,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	template < typename TValue, typename TFile, typename TSpec > inline
-	bool writePage(PageFrame<TValue, TFile, TSpec> &pf, int pageNo, TFile &file) {
+	bool writePage(PageFrame<TValue, TFile, TSpec> &pf, int pageNo, TFile &file) 
+	{
 		typedef typename Position<TFile>::Type pos_t;
 		#ifdef SEQAN_VVERBOSE
 			::std::cerr << "writePage: " << ::std::hex << (TValue*)pf.begin;
@@ -378,7 +425,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	template < typename TValue, typename TFile, typename TSpec, typename TSize> inline
-    bool readLastPage(int pageNo, PageFrame<TValue, TFile, TSpec> &pf, TFile &file, TSize size) {
+    bool readLastPage(int pageNo, PageFrame<TValue, TFile, TSpec> &pf, TFile &file, TSize size) 
+	{
 		typedef typename Position<TFile>::Type pos_t;
 		#ifdef SEQAN_VVERBOSE
 			::std::cerr << "readPage:  " << ::std::hex << (TValue*)pf.begin;
@@ -391,7 +439,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	template < typename TValue, typename TFile, typename TSpec, typename TSize > inline
-	bool writeLastPage(PageFrame<TValue, TFile, TSpec> &pf, int pageNo, TFile &file, TSize size) {
+	bool writeLastPage(PageFrame<TValue, TFile, TSpec> &pf, int pageNo, TFile &file, TSize size) 
+	{
 		typedef typename Position<TFile>::Type pos_t;
 		#ifdef SEQAN_VVERBOSE
 			::std::cerr << "writePage: " << ::std::hex << (TValue*)pf.begin;
@@ -404,8 +453,10 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	template < typename TValue, typename TFile, typename TSpec > inline
-	bool waitFor(PageFrame<TValue, TFile, TSpec> &pf) {
-		if ((pf.status != pf.READY) && waitFor(pf.request)) {
+	bool waitFor(PageFrame<TValue, TFile, TSpec> &pf) 
+	{
+		if ((pf.status != pf.READY) && waitFor(pf.request)) 
+		{
 			pf.status = pf.READY;
 			pf.dirty = false;
             return true;
@@ -414,7 +465,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	template < typename TValue, typename TFile, typename TSpec, typename TTime > inline
-	bool waitFor(PageFrame<TValue, TFile, TSpec> &pf, TTime timeOut) {
+	bool waitFor(PageFrame<TValue, TFile, TSpec> &pf, TTime timeOut) 
+	{
 		if ((pf.status != pf.READY) && waitFor(pf.request, timeOut)) {
 			pf.status = pf.READY;
 			pf.dirty = false;
@@ -424,9 +476,11 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	template < typename TValue, typename TFile, typename TSpec > inline
-	bool cancel(PageFrame<TValue, TFile, TSpec> &pf, TFile &file) {
+	bool cancel(PageFrame<TValue, TFile, TSpec> &pf, TFile &file) 
+	{
         waitFor(pf, 0);
-		if (pf.status != pf.READY) {
+		if (pf.status != pf.READY) 
+		{
             if (!cancel(file, pf.request)) return false;
             pf.status = pf.READY;
         }
@@ -437,7 +491,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	// page based read/write methods used by Pool classes
 
     template < typename TValue, typename TFile, typename TSpec > inline
-	bool readPage(PageFrame<TValue, TFile, Dynamic<TSpec> > &pf, TFile &file) {
+	bool readPage(PageFrame<TValue, TFile, Dynamic<TSpec> > &pf, TFile &file) 
+	{
         if (size(pf) == pageSize(pf))
             return readPage(pf.pageNo, pf, file);
         else
@@ -445,7 +500,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	template < typename TValue, typename TFile, typename TSpec > inline
-	bool writePage(PageFrame<TValue, TFile, Dynamic<TSpec> > &pf, TFile &file) {
+	bool writePage(PageFrame<TValue, TFile, Dynamic<TSpec> > &pf, TFile &file) 
+	{
         if (size(pf) == pageSize(pf))
             return writePage(pf, pf.pageNo, file);
         else
@@ -453,7 +509,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	template < typename TValue, typename TFile > inline
-	unsigned readBucket(PageBucket<TValue> &b, int pageNo, unsigned pageSize, unsigned dataSize, TFile &file) {
+	unsigned readBucket(PageBucket<TValue> &b, int pageNo, unsigned pageSize, unsigned dataSize, TFile &file) 
+	{
 		typedef typename Position<TFile>::Type pos_t;
         unsigned readSize = _min(dataSize - b.pageOfs, (unsigned)(b.end - b.begin));
 		#ifdef SEQAN_VVERBOSE
@@ -471,7 +528,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	template < typename TValue, typename TFile > inline
-	bool writeBucket(PageBucket<TValue> &b, int pageNo, unsigned pageSize, TFile &file) {
+	bool writeBucket(PageBucket<TValue> &b, int pageNo, unsigned pageSize, TFile &file) 
+	{
 		typedef typename Position<TFile>::Type pos_t;
 		#ifdef SEQAN_VVERBOSE
 			::std::cerr << "writeBucket: " << ::std::hex << b.begin;
@@ -487,7 +545,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	template < typename TValue, typename TFile, typename TSpec > inline
-	bool writeBucket(PageFrame<TValue, TFile, Dynamic<TSpec> > &pf, unsigned &pageOfs, TFile &file) {
+	bool writeBucket(PageFrame<TValue, TFile, Dynamic<TSpec> > &pf, unsigned &pageOfs, TFile &file) 
+	{
 		typedef typename Position<TFile>::Type pos_t;
 		#ifdef SEQAN_VVERBOSE
 			::std::cerr << "writeBucket: " << ::std::hex << pf.begin;
@@ -504,34 +563,12 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 
+	//////////////////////////////////////////////////////////////////////////////
 
     template < typename TPageFrame >
-    struct PageChain {
-        typedef typename TPageFrame::Type		Type;
-        typedef typename TPageFrame::SizeType	SizeType;
-
-		typedef	Type&							TypeRef;
-		typedef Type*							TypePtr;
-		typedef TPageFrame						PageFrame;
-
-		//////////////////////////////////////////////////////////////////////////////
-		// public iterator interface
-
-		typedef TPageFrame * 		iterator;
-		typedef TPageFrame const *	const_iterator;
-		typedef TPageFrame      	value_type;
-		typedef TPageFrame &     	reference;
-		typedef TPageFrame const &  const_reference;
-		typedef TPageFrame * 		pointer;
-		typedef TPageFrame const *  const_pointer;
-		typedef unsigned       		size_type;
-		typedef int                 difference_type;
-
-        pointer             first, last;
-/*        pointer             firstFree, lastFree;
-        Semaphore           freeBuffers;
-        Mutex               dataLock;*/
-
+    struct PageChain 
+	{
+        TPageFrame          *first, *last;
         unsigned            frames, maxFrames;
         
         PageChain(unsigned _maxFrames = UINT_MAX):
@@ -539,7 +576,6 @@ namespace SEQAN_NAMESPACE_MAIN
             last(NULL),
             frames(0),
             maxFrames(_maxFrames)
-//            freeBuffers(_buffers)
         {
             for(unsigned i = 0; i < _maxFrames; ++i)
                 pushBack();
@@ -551,25 +587,24 @@ namespace SEQAN_NAMESPACE_MAIN
                 popFront();
         }
         
-        inline reference operator[](int k) {
-            pointer p = first;
-            while (k) {
+        inline TPageFrame & operator[](int k) 
+		{
+            TPageFrame *p = first;
+            for (; k > 0; --k)
                 p = p->next;
-                --k;
-            }
             return *p;
         }
         
-        inline const_reference operator[](int k) const {
-            pointer p = first;
-            while (k) {
+        inline TPageFrame const & operator[](int k) const 
+		{
+            TPageFrame *p = first;
+            for (; k > 0; --k)
                 p = p->next;
-                --k;
-            }
             return *p;
         }
 
-        inline pointer getReadyPage() {
+        inline TPageFrame * getReadyPage() 
+		{
             if (!first || (frames < maxFrames && waitFor(*first, 0)))
                 return pushBack();
             else {
@@ -579,47 +614,24 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 
         template < typename TFile >
-        inline void cancelAll(TFile &file) {
-            pointer p = first;
-            while (p) {
+        inline void cancelAll(TFile &file) 
+		{
+            TPageFrame *p = first;
+            for (; p != NULL; p = p->next)
                 cancel(*p, file);
-                p = p->next;
-            }
         }
 
-        inline void waitForAll() {
-            pointer p = first;
-            while (p) {
+        inline void waitForAll() 
+		{
+            TPageFrame *p = first;
+            for (; p != NULL; p = p->next)
                 waitFor(*p);
-                p = p->next;
-            }
         }
 
-/*        BufHeader* getFreeBuffer() {
-            freeBuffers.lock();
-            dataLock.lock();
-            BufHeader *h = firstFree;
-            if (!(firstFree = firstFree->next)) lastFree = NULL;
-            dataLock.unlock();
-            return h;
-        }
-        
-        void addFreeBuffer(BufHeader *h) {
-            dataLock.lock();
-            if (lastFree) {
-                lastFree->next = h;
-                lastFree = h;
-            } else {
-                firstFree = h;
-                lastFree = h;
-            }
-            dataLock.unlock();
-            freeBuffers.unlock();
-        }*/
-        
     private:
 
-        inline pointer firstToEnd() {
+        inline TPageFrame * firstToEnd() 
+		{
             last->next = first;
             last = first;
             first = first->next;
@@ -627,8 +639,9 @@ namespace SEQAN_NAMESPACE_MAIN
             return last;
         }
 
-        inline pointer pushBack() {
-            pointer p = new PageFrame();
+        inline TPageFrame * pushBack() 
+		{
+            TPageFrame * p = new TPageFrame();
             if (p) {
                 if (last)
                     last->next = p;
@@ -640,8 +653,9 @@ namespace SEQAN_NAMESPACE_MAIN
             return p;
         }
 
-        inline pointer popFront() {
-            pointer p = first;
+        inline TPageFrame * popFront() 
+		{
+            TPageFrame *p = first;
             if (p) {
                 first = first->next;
                 if (!first) last = NULL;
@@ -652,60 +666,32 @@ namespace SEQAN_NAMESPACE_MAIN
         }
     };
 
+	//////////////////////////////////////////////////////////////////////////////
+	// meta-function interface
 
-/*    
-    template < typename ST >
-    struct BufArrayConfig
-    {
-        typedef ST SizeType;
+    template < typename TPageFrame >    
+	struct Value< PageChain<TPageFrame> > 
+	{
+		typedef TPageFrame Type;
+	};
 
-        unsigned int    disks;
-        unsigned int    buffersPerDisk;
-        SizeType        bufferSize;         // prefetch/cache buffer size
-        
-        BufArrayConfig():
-            disks(1),
-            buffersPerDisk(3),
-            bufferSize(2 * 1024 * 1024) { }
-    };
-    
-    template < typename T, typename ST, typename _File >
-    struct BufArray
-    {
-        typedef T Type;
-        typedef ST SizeType;
-        typedef BufChain<T,ST,_File> BufChain;
-        typedef BufArrayConfig<ST> Config;
-        
-        Config		conf;
-        BufChain**	disk;
-        
-        BufArray(const Config &_conf):
-            conf(_conf)
-        {
-            disk = new BufChain*[conf.disks];
-            for(unsigned int i = 0; i < conf.disks; i++)
-                disk[i] = new BufChain(conf.buffersPerDisk, conf.bufferSize, i);
-            BufChain *prev = disk[conf.disks - 1];
-            for(unsigned int i = 0; i < conf.disks; i++)
-                prev = prev->next = disk[i];
-        }
+    template < typename TPageFrame >    
+	struct Size< PageChain<TPageFrame> > 
+	{
+		typedef unsigned Type;
+	};
 
-        ~BufArray() {
-            for(unsigned int i = 0; i < conf.disks; i++)
-                delete disk[i];
-            delete[] disk;
-        }
+    template < typename TPageFrame >    
+	struct Iterator< PageChain<TPageFrame> > 
+	{
+		typedef TPageFrame *Type;
+	};
 
-        BufChain& operator[](const int k) {
-            return *disk[k];
-        }
-
-        const BufChain& operator[](const int k) const {
-            return *disk[k];
-        }
-    };*/
-
+    template < typename TPageFrame >    
+	struct Iterator< PageChain<TPageFrame> const > 
+	{
+		typedef TPageFrame const *Type;
+	};
 
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -717,115 +703,96 @@ namespace SEQAN_NAMESPACE_MAIN
 	// 2..quasi permanent pages
 
     template < typename TPageFrame,
-               unsigned _Frames,
-               unsigned _PriorityLevels = TPageFrame::PERMANENT_LEVEL + 1 >
-	struct PageContainer : public ::std::vector<TPageFrame>
+               unsigned FRAMES,
+               unsigned PRIORITY_LEVELS = TPageFrame::PERMANENT_LEVEL + 1 >
+	struct PageContainer
 	{
-        typedef typename TPageFrame::Type			Type;
-        typedef typename TPageFrame::SizeType		SizeType;
-		typedef typename ::std::vector<TPageFrame>	Base;
+		typedef String<TPageFrame>					TPages;
+		typedef typename Position<TPages>::Type		TPos;
 
-		typedef	Type&							TypeRef;
-		typedef Type*							TypePtr;
-		typedef TPageFrame						PageFrame;
+		enum { PriorityLevels = PRIORITY_LEVELS };
 
-		enum { PriorityLevels = _PriorityLevels };
+		TPages			pages;
+        PageLRUList		lruList[PRIORITY_LEVELS];
 
-		//////////////////////////////////////////////////////////////////////////////
-		// public iterator interface
-
-		typedef typename Base::iterator			iterator;
-		typedef typename Base::const_iterator	const_iterator;
-		typedef TPageFrame      				value_type;
-		typedef TPageFrame &     				reference;
-		typedef TPageFrame const &				const_reference;
-		typedef TPageFrame * 					pointer;
-		typedef TPageFrame const *				const_pointer;
-		typedef unsigned       					size_type;
-		typedef int								difference_type;
-		
-        PageLRUList lruList[_PriorityLevels];
-
-		PageContainer():
-			Base(_Frames)
+		PageContainer()
 		{
-            for(size_type i = 0; i < _Frames; ++i)
-			    (*this)[i].lruEntry = lruList[0].insert(lruList[0].end(), i);
+			resize(pages, FRAMES, Exact());
+            for(TPos i = 0; i < FRAMES; ++i)
+			    pages[i].lruEntry = lruList[0].insert(lruList[0].end(), i);
         }
 
-		inline void reserve(unsigned _Count) {
-			Base::reserve(_Count);
+        inline TPageFrame       & operator[](TPos i)       { return pages[i]; }
+        inline TPageFrame const & operator[](TPos i) const { return pages[i]; }
+
+		inline void push_back() 
+		{
+			TPos last = endPosition(pages);
+			resize(pages, last + 1);
+			pages[last].lruEntry = lruList[0].insert(lruList[0].end(), last);
 		}
 
-		void resize(unsigned _Count) {
-			unsigned _Size = Base::size();
-			if (_Size < _Count)
-                for(unsigned i = _Size; i < _Count; ++i)
-                    push_back();
-			else 
-				if (_Size > _Count)
-					for(unsigned i = _Count; i < _Size; ++i)
-						pop_back();
+		inline void erase(int frameNo) 
+		{
+			lruList[pages[frameNo].priority].erase(pages[frameNo].lruEntry);
+            erase(pages, frameNo);
 		}
 
-		inline void push_back() {
-			Base::push_back(PageFrame());
-			Base::back().lruEntry = lruList[0].insert(lruList[0].end(), Base::size() - 1);
-		}
-
-		inline void erase(int frameNo) {
-			lruList[(*this)[frameNo].priority].erase((*this)[frameNo].lruEntry);
-            Base::erase(Base::begin() + frameNo);
-		}
-
-        inline void rename(int frameNo) {
-            *((*this)[frameNo].lruEntry) = frameNo;
+        inline void rename(int frameNo) 
+		{
+            *(pages[frameNo].lruEntry) = frameNo;
         }
 
-		inline void pop_back() {
-			lruList[Base::back().priority].erase(Base::back().lruEntry);
-			Base::pop_back();
+		inline void pop_back() 
+		{
+			lruList[back(pages).priority].erase(back(pages).lruEntry);
+            erase(pages, endPosition(pages) - 1);
 		}
 
 
 		//////////////////////////////////////////////////////////////////////////////
 		// lru strategy interface
 
-		inline void upgrade(const PageFrame &pf) {
+		inline void upgrade(const TPageFrame &pf) 
+		{
 			lruList[pf.priority].splice(lruList[pf.priority].begin(), lruList[pf.priority], pf.lruEntry);
 			pf.lruEntry = lruList[pf.priority].begin();
 		}
 
-		inline void downgrade(const PageFrame &pf) {
+		inline void downgrade(const TPageFrame &pf) 
+		{
 			lruList[pf.priority].splice(lruList[pf.priority].end(), lruList[pf.priority], pf.lruEntry);
 			pf.lruEntry = lruList[pf.priority].end() - 1;
 		}
 
-		inline void upgrade(PageFrame &pf, int newPriority) {
+		inline void upgrade(TPageFrame &pf, int newPriority) 
+		{
 			lruList[newPriority].splice(lruList[newPriority].begin(), lruList[pf.priority], pf.lruEntry);
 			pf.lruEntry = lruList[newPriority].begin();
-			pf.priority = static_cast<typename PageFrame::Priority> (newPriority);
+			pf.priority = static_cast<typename TPageFrame::Priority> (newPriority);
 		}
 
-		inline void downgrade(PageFrame &pf, int newPriority) {
+		inline void downgrade(TPageFrame &pf, int newPriority) 
+		{
 			lruList[newPriority].splice(lruList[newPriority].end(), lruList[pf.priority], pf.lruEntry);
 			pf.lruEntry = lruList[newPriority].end() - 1;
-			pf.priority = static_cast<typename PageFrame::Priority> (newPriority);
+			pf.priority = static_cast<typename TPageFrame::Priority> (newPriority);
 		}
 
-		inline void _dump() {
-			for(unsigned i = 0; i < _PriorityLevels; ++i) {
+		inline void _dump() 
+		{
+			for(unsigned i = 0; i < PRIORITY_LEVELS; ++i) {
                 ::std::cerr << "|";
                 PageLRUList::const_iterator I = lruList[i].end();
                 PageLRUList::const_iterator first = lruList[i].begin();
 				while (I != first) {
 					--I;
-                    PageFrame &pf = (*this)[*I];
+                    TPageFrame &pf = pages[*I];
                     ::std::cerr << pf.pageNo;
                     if (pf.dirty) ::std::cerr << "*";
                     else          ::std::cerr << " ";
-                    if (pf.status == PageFrame::READY) ::std::cerr << "  ";
-                    else                               ::std::cerr << ". ";
+                    if (pf.status == TPageFrame::READY) ::std::cerr << "  ";
+                    else                                ::std::cerr << ". ";
 				};
             }
             ::std::cerr << ::std::endl;
@@ -834,14 +801,15 @@ namespace SEQAN_NAMESPACE_MAIN
         // Function is a functor which is called with a PageFrame object,
         // that is dirty or not READY (in an IO transfer)
 		template <class Function>
-		inline int mru(Function _Func, unsigned maxLevel = _PriorityLevels - 1) {
+		inline int mru(Function _Func, unsigned maxLevel = PRIORITY_LEVELS - 1) 
+		{
 			for(unsigned i = 0; i <= maxLevel; ++i) {
                 PageLRUList::const_iterator I = lruList[i].end();
                 PageLRUList::const_iterator first = lruList[i].begin();
 				while (I != first) {
 					--I;
-					PageFrame& pf =(*this)[*I];
-					if (pf.status == PageFrame::READY && !pf.dirty)
+					TPageFrame& pf = pages[*I];
+					if (pf.status == TPageFrame::READY && !pf.dirty)
 						return *I;
 					else
 						if (_Func(pf)) return *I;
@@ -853,8 +821,9 @@ namespace SEQAN_NAMESPACE_MAIN
 			return -1;
 		}
 
-		inline int mruDirty() {
-            for(unsigned i = 0; i < _PriorityLevels; ++i)
+		inline int mruDirty() 
+		{
+            for(unsigned i = 0; i < PRIORITY_LEVELS; ++i)
                 if (!lruList[i].empty())
                     return lruList[i].back();
 			return -1;
@@ -862,7 +831,118 @@ namespace SEQAN_NAMESPACE_MAIN
 	};
 
 
+	//////////////////////////////////////////////////////////////////////////////
+	// meta-function interface
 
+	template < typename TPageFrame, unsigned FRAMES, unsigned PRIORITY_LEVELS >
+	struct Host< PageContainer<TPageFrame, FRAMES, PRIORITY_LEVELS> > 
+	{
+		typedef String<TPageFrame> Type;
+	};
+
+	template < typename TPageFrame, unsigned FRAMES, unsigned PRIORITY_LEVELS >
+	struct Host< PageContainer<TPageFrame, FRAMES, PRIORITY_LEVELS> const > 
+	{
+		typedef String<TPageFrame> const Type;
+	};
+
+	template < typename TPageFrame, unsigned FRAMES, unsigned PRIORITY_LEVELS >
+	struct Value< PageContainer<TPageFrame, FRAMES, PRIORITY_LEVELS> > 
+	{
+		typedef TPageFrame Type;
+	};
+
+	template < typename TPageFrame, unsigned FRAMES, unsigned PRIORITY_LEVELS >
+	struct Size< PageContainer<TPageFrame, FRAMES, PRIORITY_LEVELS> >:
+		public Size< typename Host< PageContainer<TPageFrame, FRAMES, PRIORITY_LEVELS> >::Type> {};
+
+	template < typename TPageFrame, unsigned FRAMES, unsigned PRIORITY_LEVELS >
+	struct Position< PageContainer<TPageFrame, FRAMES, PRIORITY_LEVELS> >:
+		public Position< typename Host< PageContainer<TPageFrame, FRAMES, PRIORITY_LEVELS> >::Type> {};
+
+	template < typename TPageFrame, unsigned FRAMES, unsigned PRIORITY_LEVELS >
+	struct Iterator< PageContainer<TPageFrame, FRAMES, PRIORITY_LEVELS> >:
+		public Iterator< typename Host< PageContainer<TPageFrame, FRAMES, PRIORITY_LEVELS> >::Type> {};
+
+	template < typename TPageFrame, unsigned FRAMES, unsigned PRIORITY_LEVELS >
+	struct Iterator< PageContainer<TPageFrame, FRAMES, PRIORITY_LEVELS> const >:
+		public Iterator< typename Host< PageContainer<TPageFrame, FRAMES, PRIORITY_LEVELS> const>::Type> {};
+
+
+	//////////////////////////////////////////////////////////////////////////////
+	// global interface
+
+	template < typename TPageFrame, unsigned FRAMES, unsigned PRIORITY_LEVELS >
+	inline void reserve(
+		PageContainer<TPageFrame, FRAMES, PRIORITY_LEVELS> &pageCont,
+		unsigned _Count) 
+	{
+		reserve(pageCont.pages, _Count);
+	}
+
+    template < typename TPageFrame, unsigned FRAMES, unsigned PRIORITY_LEVELS >
+	inline void resize(
+		PageContainer<TPageFrame, FRAMES, PRIORITY_LEVELS> &pageCont, 
+		unsigned _Count) 
+	{
+		unsigned _Size = length(pageCont.pages);
+		if (_Size < _Count) {
+			reserve(pageCont.pages, _Count);
+            for(unsigned i = _Size; i < _Count; ++i)
+                pageCont.push_back();
+		} else 
+			if (_Size > _Count)
+				for(unsigned i = _Count; i < _Size; ++i)
+					pageCont.pop_back();
+	}
+
+    template < typename TPageFrame, unsigned FRAMES, unsigned PRIORITY_LEVELS >
+	inline typename Size< PageContainer<TPageFrame, FRAMES, PRIORITY_LEVELS> >::Type
+	length(PageContainer<TPageFrame, FRAMES, PRIORITY_LEVELS> const &pageCont) 
+	{
+		return length(pageCont.pages);
+	}
+
+	template < typename TPageFrame, unsigned FRAMES, unsigned PRIORITY_LEVELS >
+	inline typename Iterator< PageContainer<TPageFrame, FRAMES, PRIORITY_LEVELS>, Standard >::Type
+	begin(
+		PageContainer<TPageFrame, FRAMES, PRIORITY_LEVELS> &pageCont,
+		Standard const) 
+	{
+		return begin(pageCont.pages, Standard());
+	}
+
+	template < typename TPageFrame, unsigned FRAMES, unsigned PRIORITY_LEVELS >
+	inline typename Iterator< PageContainer<TPageFrame, FRAMES, PRIORITY_LEVELS> const, Standard >::Type
+	begin(
+		PageContainer<TPageFrame, FRAMES, PRIORITY_LEVELS> const &pageCont,
+		Standard const) 
+	{
+		return begin(pageCont.pages, Standard());
+	}
+
+	template < typename TPageFrame, unsigned FRAMES, unsigned PRIORITY_LEVELS >
+	inline typename Iterator< PageContainer<TPageFrame, FRAMES, PRIORITY_LEVELS>, Standard >::Type
+	end(
+		PageContainer<TPageFrame, FRAMES, PRIORITY_LEVELS> &pageCont,
+		Standard const) 
+	{
+		return end(pageCont.pages, Standard());
+	}
+
+	template < typename TPageFrame, unsigned FRAMES, unsigned PRIORITY_LEVELS >
+	inline typename Iterator< PageContainer<TPageFrame, FRAMES, PRIORITY_LEVELS> const, Standard >::Type
+	end(
+		PageContainer<TPageFrame, FRAMES, PRIORITY_LEVELS> const &pageCont,
+		Standard const) 
+	{
+		return end(pageCont.pages, Standard());
+	}
+
+
+
+
+	//////////////////////////////////////////////////////////////////////////////
 
     template < typename TValue, typename TSize, typename T, class Function >
     inline bool equiDistantDistribution(

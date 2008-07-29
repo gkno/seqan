@@ -30,33 +30,33 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 
-	//template < __int64 _FileSize = 2*1024*1024*1024-1, typename TFile = File<> >
+	//template < __int64 FILE_SIZE = 2*1024*1024*1024-1, typename TFile = File<> >
 	//struct Chained;
 
 	//template < unsigned _FileCount = 2, typename TFile = File<> >
 	//struct Striped;
 
 
-    template < __int64 _FileSize, typename TFile >
-    struct Size< File< Chained<_FileSize, TFile> > >
+    template < __int64 FILE_SIZE, typename TFile >
+    struct Size< File< Chained<FILE_SIZE, TFile> > >
     {
         typedef __int64 Type;
     };
 
-    template < __int64 _FileSize, typename TFile >
-    struct Position< File< Chained<_FileSize, TFile> > >
+    template < __int64 FILE_SIZE, typename TFile >
+    struct Position< File< Chained<FILE_SIZE, TFile> > >
     {
         typedef __int64 Type;
     };
 
-    template < __int64 _FileSize, typename TFile >
-    struct Difference< File< Chained<_FileSize, TFile> > >
+    template < __int64 FILE_SIZE, typename TFile >
+    struct Difference< File< Chained<FILE_SIZE, TFile> > >
     {
         typedef __int64 Type;
     };
 
-    template < __int64 _FileSize, typename TFile >
-    struct aRequest< File< Chained<_FileSize, TFile> > >
+    template < __int64 FILE_SIZE, typename TFile >
+    struct aRequest< File< Chained<FILE_SIZE, TFile> > >
     {
 		typedef typename aRequest<TFile>::Type Type;
     };
@@ -93,8 +93,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		operator bool() const { return (*this)[0]; }
 	};
 
-    template < __int64 _FileSize, typename TFile >
-	class File< Chained<_FileSize, TFile> >: public String< TFile > {
+    template < __int64 FILE_SIZE, typename TFile >
+	class File< Chained<FILE_SIZE, TFile> >: public String< TFile > {
 		typedef String< TFile > Base;
 
 		::std::string	baseName;
@@ -168,11 +168,11 @@ namespace SEQAN_NAMESPACE_MAIN
 			if (_realign) {
 				_alignCeil(fileSize, dummy);
 				_realign = false;
-				if (fileSize < _FileSize)
+				if (fileSize < FILE_SIZE)
 					fileSize = 0;
 			}
 			if (!fileSize) 
-				_alignFloor(_FileSize, dummy);
+				_alignFloor(FILE_SIZE, dummy);
 		}
 
 		template < typename TPos, typename TOffset, typename TValue >
@@ -280,8 +280,8 @@ namespace SEQAN_NAMESPACE_MAIN
     //////////////////////////////////////////////////////////////////////////////
     // standard file array wrappers
 
-    template < __int64 _FileSize, typename TFile >
-	inline unsigned length(File< Chained<_FileSize, TFile> > const &me) {
+    template < __int64 FILE_SIZE, typename TFile >
+	inline unsigned length(File< Chained<FILE_SIZE, TFile> > const &me) {
 		return me.fileCount();
 	}
 
@@ -290,8 +290,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		return _FileCount;
 	}
 
-    template < __int64 _FileSize, typename TFile >
-	inline bool open(File< Chained<_FileSize, TFile> > &me, const char *fileName, int openMode) {
+    template < __int64 FILE_SIZE, typename TFile >
+	inline bool open(File< Chained<FILE_SIZE, TFile> > &me, const char *fileName, int openMode) {
 		me.baseName = fileName;
 		me.openMode = openMode;
 		me.temporary = false;
@@ -299,8 +299,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		return true;
 	}
 
-    template < __int64 _FileSize, typename TFile >
-	inline bool openTemp(File< Chained<_FileSize, TFile> > &me, int openMode) {
+    template < __int64 FILE_SIZE, typename TFile >
+	inline bool openTemp(File< Chained<FILE_SIZE, TFile> > &me, int openMode) {
 		me.openMode = openMode;
 		me.temporary = true;
 		return true;
@@ -311,8 +311,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		return _openTempFArray(me, openMode);
 	}
 
-    template < __int64 _FileSize, typename TFile >
-	inline bool close(File< Chained<_FileSize, TFile> > &me) {
+    template < __int64 FILE_SIZE, typename TFile >
+	inline bool close(File< Chained<FILE_SIZE, TFile> > &me) {
         _closeFArray(me);
         me.clearInternals();
         return true;
@@ -321,8 +321,8 @@ namespace SEQAN_NAMESPACE_MAIN
     template < unsigned _FileCount, typename TFile >
 	inline bool close(File< Striped<_FileCount, TFile> > &me) {	return _closeFArray(me); }
 
-    template < __int64 _FileSize, typename TFile >
-	__int64 size(File< Chained<_FileSize, TFile> > &me) {
+    template < __int64 FILE_SIZE, typename TFile >
+	__int64 size(File< Chained<FILE_SIZE, TFile> > &me) {
 		return _sizeFArray(me);
 	}
 
@@ -331,18 +331,18 @@ namespace SEQAN_NAMESPACE_MAIN
 		return _sizeFArray(me);
 	}
 
-    template < __int64 _FileSize, typename TFile, typename TSize >
-    inline void resize(File< Chained<_FileSize, TFile> > &me, TSize new_length) {
+    template < __int64 FILE_SIZE, typename TFile, typename TSize >
+    inline void resize(File< Chained<FILE_SIZE, TFile> > &me, TSize new_length) {
 		me.resizeArray(new_length);
     }
 
-    template < __int64 _FileSize, typename TFile, typename TValue, typename TSize >
-	inline void allocate(File< Chained<_FileSize, TFile> > const &me, TValue* &data, TSize count) {
+    template < __int64 FILE_SIZE, typename TFile, typename TValue, typename TSize >
+	inline void allocate(File< Chained<FILE_SIZE, TFile> > const &me, TValue* &data, TSize count) {
 		allocate(me[0], data, count);
 	}
 
-    template < __int64 _FileSize, typename TFile, typename TValue, typename TSize >
-	inline void deallocate(File< Chained<_FileSize, TFile> > const &me, TValue* &data, TSize count) {
+    template < __int64 FILE_SIZE, typename TFile, typename TValue, typename TSize >
+	inline void deallocate(File< Chained<FILE_SIZE, TFile> > const &me, TValue* &data, TSize count) {
 		deallocate(me[0], data, count);
 	}
 
@@ -360,8 +360,8 @@ namespace SEQAN_NAMESPACE_MAIN
     //////////////////////////////////////////////////////////////////////////////
     // read/write wrappers
 
-    template < __int64 _FileSize, typename TFile, typename TValue, typename TSize, typename TOffset >
-    inline bool readAt(File< Chained<_FileSize, TFile> > &me, TValue *memPtr, TSize count, TOffset offset) {
+    template < __int64 FILE_SIZE, typename TFile, typename TValue, typename TSize, typename TOffset >
+    inline bool readAt(File< Chained<FILE_SIZE, TFile> > &me, TValue *memPtr, TSize count, TOffset offset) {
 		TOffset fileOfs = 0;
 		while (count) {
 			TFile &file = me.getFileAndOffset(offset, fileOfs, memPtr);
@@ -374,8 +374,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		return true;
     }
     
-    template < __int64 _FileSize, typename TFile, typename TValue, typename TSize, typename TOffset >
-    inline bool writeAt(File< Chained<_FileSize, TFile> > &me, TValue const *memPtr, TSize count, TOffset offset) {
+    template < __int64 FILE_SIZE, typename TFile, typename TValue, typename TSize, typename TOffset >
+    inline bool writeAt(File< Chained<FILE_SIZE, TFile> > &me, TValue const *memPtr, TSize count, TOffset offset) {
 		TOffset fileOfs = 0;
 		while (count) {
 			TFile &file = me.getFileAndOffset(offset, fileOfs, memPtr);
@@ -388,8 +388,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		return true;
     }
 
-    template < __int64 _FileSize, typename TFile, typename TValue, typename TSize, typename TOffset, typename TRequest >
-    inline bool areadAt(File< Chained<_FileSize, TFile> > &me, TValue *memPtr, TSize count, TOffset offset, TRequest &req) {
+    template < __int64 FILE_SIZE, typename TFile, typename TValue, typename TSize, typename TOffset, typename TRequest >
+    inline bool areadAt(File< Chained<FILE_SIZE, TFile> > &me, TValue *memPtr, TSize count, TOffset offset, TRequest &req) {
 		TOffset fileOfs = 0;
 		while (count) {
 			TFile &file = me.getFileAndOffset(offset, fileOfs, memPtr);
@@ -405,8 +405,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		return true;
     }
     
-    template < __int64 _FileSize, typename TFile, typename TValue, typename TSize, typename TOffset, typename TRequest  >
-    inline bool awriteAt(File< Chained<_FileSize, TFile> > &me, TValue const *memPtr, TSize count, TOffset offset, TRequest &req) {
+    template < __int64 FILE_SIZE, typename TFile, typename TValue, typename TSize, typename TOffset, typename TRequest  >
+    inline bool awriteAt(File< Chained<FILE_SIZE, TFile> > &me, TValue const *memPtr, TSize count, TOffset offset, TRequest &req) {
 		TOffset fileOfs = 0;
 		while (count) {
 			TFile &file = me.getFileAndOffset(offset, fileOfs, memPtr);
