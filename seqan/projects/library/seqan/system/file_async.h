@@ -46,19 +46,19 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef DWORD       _SizeType;
         typedef HANDLE      Handle;
 
-		Handle              hFile, hFileAsync;
+		Handle              handle, handleAsync;
         bool                noBuffering;
 
         File():
-            hFile(INVALID_HANDLE_VALUE) {}
+            handle(INVALID_HANDLE_VALUE) {}
 
         File(void *): // to be compatible with the FILE*(NULL) constructor
-            hFile(INVALID_HANDLE_VALUE) {}
+            handle(INVALID_HANDLE_VALUE) {}
 
         bool open(char const *fileName, int openMode = DefaultOpenMode<File>::VALUE) {
 			SEQAN_PROADD(SEQAN_PROOPENFILES, 1);
             noBuffering = getExtraFlags(openMode | OPEN_ASYNC) & (FILE_FLAG_NO_BUFFERING | FILE_FLAG_OVERLAPPED);
-            hFileAsync = CreateFile(fileName,
+            handleAsync = CreateFile(fileName,
                                 getFileAccess(openMode | OPEN_ASYNC),
                                 FILE_SHARE_DELETE | FILE_SHARE_READ | FILE_SHARE_WRITE,
                                 NULL,
@@ -66,35 +66,35 @@ namespace SEQAN_NAMESPACE_MAIN
                                 getExtraFlags(openMode | OPEN_ASYNC),
                                 NULL);
 
-            if (hFileAsync == INVALID_HANDLE_VALUE) {
+            if (handleAsync == INVALID_HANDLE_VALUE) {
 				if (!(openMode & OPEN_QUIET))
 					::std::cerr << "Open failed on file " << fileName << ". (ErrNo=" << GetLastError() << ")" << ::std::endl;
                 return false;
             }
             #ifdef SEQAN_VERBOSE
 				if (!(openMode & OPEN_QUIET))
-	                ::std::cerr << "file opened asynchronously " << fileName << " handle " << ::std::hex << hFileAsync << ::std::dec << ::std::endl;
+	                ::std::cerr << "file opened asynchronously " << fileName << " handle " << ::std::hex << handleAsync << ::std::dec << ::std::endl;
             #endif
 
             if (noBuffering) {
-                hFile = CreateFile(fileName,                // in this case io must be sector aligned
+                handle = CreateFile(fileName,                // in this case io must be sector aligned
                                 getFileAccess(openMode),    // so we open a second file, for unaligned access
                                 FILE_SHARE_DELETE | FILE_SHARE_READ | FILE_SHARE_WRITE,
                                 NULL,
                                 OPEN_EXISTING,
                                 getExtraFlags(openMode & ~OPEN_ASYNC),
                                 NULL);
-                if (hFile == INVALID_HANDLE_VALUE) {
+                if (handle == INVALID_HANDLE_VALUE) {
 					if (!(openMode & OPEN_QUIET))
 	                	::std::cerr << "Open failed on secondary file " << fileName << ". (ErrNo=" << GetLastError() << ")" << ::std::endl;
                     return false;
                 }
 	            #ifdef SEQAN_VERBOSE
 					if (!(openMode & OPEN_QUIET))
-	                	::std::cerr << "async file opened  " << fileName << " handle " << ::std::hex << hFile << ::std::dec << ::std::endl;
+	                	::std::cerr << "async file opened  " << fileName << " handle " << ::std::hex << handle << ::std::dec << ::std::endl;
                 #endif
             } else
-                hFile = hFileAsync;
+                handle = handleAsync;
 
             return true;
         }
@@ -122,13 +122,13 @@ namespace SEQAN_NAMESPACE_MAIN
         inline bool close() {
             BOOL result = true;
             #ifdef SEQAN_VERBOSE
-                ::std::cerr << "files closed handles " << ::std::hex << hFileAsync << " and " << hFile << ::std::dec << ::std::endl;
+                ::std::cerr << "files closed handles " << ::std::hex << handleAsync << " and " << handle << ::std::dec << ::std::endl;
             #endif
-            if (hFile != hFileAsync)
-                result &= CloseHandle(hFileAsync);
-            result &= CloseHandle(hFile);
-            hFileAsync = INVALID_HANDLE_VALUE;
-            hFile = INVALID_HANDLE_VALUE;
+            if (handle != handleAsync)
+                result &= CloseHandle(handleAsync);
+            result &= CloseHandle(handle);
+            handleAsync = INVALID_HANDLE_VALUE;
+            handle = INVALID_HANDLE_VALUE;
 			SEQAN_PROSUB(SEQAN_PROOPENFILES, 1);
             return result;
         }
@@ -136,7 +136,7 @@ namespace SEQAN_NAMESPACE_MAIN
         inline bool read(void *memPtr, _SizeType count) const {
             SEQAN_PROADD(SEQAN_PROIO, (count + SEQAN_PROPAGESIZE - 1) / SEQAN_PROPAGESIZE);
             SEQAN_PROTIMESTART(tw);
-		    bool result = ReadFile(hFile, memPtr, count, &_transferedBytes, NULL);
+		    bool result = ReadFile(handle, memPtr, count, &_transferedBytes, NULL);
             SEQAN_PROADD(SEQAN_PROCWAIT, SEQAN_PROTIMEDIFF(tw));
             return result;
         }
@@ -144,17 +144,17 @@ namespace SEQAN_NAMESPACE_MAIN
         inline bool write(void const *memPtr, _SizeType count) const {
             SEQAN_PROADD(SEQAN_PROIO, (count + SEQAN_PROPAGESIZE - 1) / SEQAN_PROPAGESIZE);
             SEQAN_PROTIMESTART(tw);
-		    bool result = WriteFile(hFile, memPtr, count, &_transferedBytes, NULL);
+		    bool result = WriteFile(handle, memPtr, count, &_transferedBytes, NULL);
             SEQAN_PROADD(SEQAN_PROCWAIT, SEQAN_PROTIMEDIFF(tw));
             return result;
         }
 
 		inline FilePtr seek(FilePtr _pos, DWORD origin = FILE_BEGIN) {
 //          LARGE_INTEGER li = _pos;
-//			return SetFilePointer(hFileAsync, li.LowPart, &li.HighPart, MoveMethod);
+//			return SetFilePointer(handleAsync, li.LowPart, &li.HighPart, MoveMethod);
             LARGE_INTEGER new_pos, pos;
             pos.QuadPart = _pos;
-            SetFilePointerEx(hFile, pos, &new_pos, origin);
+            SetFilePointerEx(handle, pos, &new_pos, origin);
 //            position = new_pos.QuadPart;
             return new_pos.QuadPart;
 		}
@@ -166,7 +166,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		inline FilePtr size() const {
             LARGE_INTEGER result;
             DWORD dwError, high;
-            result.LowPart = GetFileSize(hFile, &high);
+            result.LowPart = GetFileSize(handle, &high);
             result.HighPart = high;
             if (result.LowPart == INVALID_FILE_SIZE && (dwError = GetLastError()) != NO_ERROR) {
 				::std::cerr << "Couldn't get file size. (ErrNo=" << dwError << ")" << ::std::endl;
@@ -176,7 +176,7 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 
         inline bool setEOF() const {
-            return SetEndOfFile(hFile);
+            return SetEndOfFile(handle);
         }
 
 		inline static DWORD error() {
@@ -184,7 +184,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
 
         operator bool () const {
-            return (hFile != INVALID_HANDLE_VALUE) && (hFileAsync != INVALID_HANDLE_VALUE);
+            return (handle != INVALID_HANDLE_VALUE) && (handleAsync != INVALID_HANDLE_VALUE);
         }
 
     protected:
@@ -302,7 +302,7 @@ namespace SEQAN_NAMESPACE_MAIN
         if (!request.xmitDone) open(request.xmitDone);
         request.overlapped.hEvent = request.xmitDone.hEvent;
         if (ReadFile(
-            me.hFileAsync, 
+            me.handleAsync, 
             memPtr, 
             count * sizeof(TValue),
             &ofs.LowPart,
@@ -335,7 +335,7 @@ namespace SEQAN_NAMESPACE_MAIN
         if (!request.xmitDone) open(request.xmitDone);
         request.overlapped.hEvent = request.xmitDone.hEvent;
         if (WriteFile(
-            me.hFileAsync, 
+            me.handleAsync, 
             memPtr, 
             count * sizeof(TValue),
             &ofs.LowPart,
@@ -390,13 +390,13 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <typename TSpec>
     inline bool cancel(File<Async<TSpec> > & me, aiocb_win32 const &request) {
-        return CancelIo(me.hFileAsync);
+        return CancelIo(me.handleAsync);
     }
 
 	template <typename TSpec>
     inline bool flush(File<Async<TSpec> > & me) {
-		if (me.hFile != me.hFileAsync)	// in case of equality no direct access was done -> no flush needed
-        	return FlushFileBuffers(me.hFile);
+		if (me.handle != me.handleAsync)	// in case of equality no direct access was done -> no flush needed
+        	return FlushFileBuffers(me.handle);
         else
             return true;
     }
@@ -418,7 +418,7 @@ namespace SEQAN_NAMESPACE_MAIN
         DWORD bsize = (DWORD)(count * sizeof(TValue));
         typename aRequest<File<Async<TSpec> > >::Type request = 
             me.queue->areadAt(
-                me.hFileAsync,
+                me.handleAsync,
                 me.position,
                 memPtr,
                 bsize,
@@ -438,7 +438,7 @@ namespace SEQAN_NAMESPACE_MAIN
         typename aRequest<File<Async<TSpec> > >::Type request = 
             me.queue->awriteAt(
                 memPtr,
-                me.hFileAsync,
+                me.handleAsync,
                 me.position,
                 bsize,
                 cb,
@@ -455,7 +455,7 @@ namespace SEQAN_NAMESPACE_MAIN
     {
         DWORD bsize = (DWORD)(count * sizeof(TValue));
         return me.queue->areadAt(
-            me.hFileAsync,
+            me.handleAsync,
             fileOfs * sizeof(TValue),
             memPtr,
             bsize,
@@ -472,7 +472,7 @@ namespace SEQAN_NAMESPACE_MAIN
         DWORD bsize = (DWORD)(count * sizeof(TValue));
         return me.queue->awriteAt(
             memPtr,
-            me.hFileAsync,
+            me.handleAsync,
             fileOfs * sizeof(TValue),
             bsize,
             cb,
@@ -492,7 +492,7 @@ namespace SEQAN_NAMESPACE_MAIN
         DWORD bsize = (DWORD)(count * sizeof(TValue));
         typename aRequest<File<Async<TSpec> > >::Type request = 
             me.queue->areadAt(
-                me.hFileAsync,
+                me.handleAsync,
                 me.position,
                 memPtr,
                 bsize,
@@ -511,7 +511,7 @@ namespace SEQAN_NAMESPACE_MAIN
         typename aRequest<File<Async<TSpec> > >::Type request =  
             me.queue->awriteAt(
                 memPtr,
-                me.hFileAsync,
+                me.handleAsync,
                 me.position,
                 bsize,
                 event);
@@ -527,7 +527,7 @@ namespace SEQAN_NAMESPACE_MAIN
     {
         DWORD bsize = (DWORD)(count * sizeof(TValue));
         return me.queue->areadAt(
-            me.hFileAsync,
+            me.handleAsync,
             fileOfs * sizeof(TValue),
             memPtr,
             bsize,
@@ -543,7 +543,7 @@ namespace SEQAN_NAMESPACE_MAIN
         DWORD bsize = (DWORD)(count * sizeof(TValue));
         return me.queue->awriteAt(
             memPtr,
-            me.hFileAsync,
+            me.handleAsync,
             fileOfs * sizeof(TValue),
             bsize,
             event);
@@ -703,10 +703,11 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef void* Type;
     };
 */
+
 	template <typename TSpec>
     struct aRequest<File<Async<TSpec> > >
     {
-        typedef aiocb Type;
+		typedef aiocb Type;
     };
 /*
 	template <typename TSpec>
@@ -755,9 +756,19 @@ namespace SEQAN_NAMESPACE_MAIN
 */      SEQAN_PROADD(SEQAN_PROIO, (request.aio_nbytes + SEQAN_PROPAGESIZE - 1) / SEQAN_PROPAGESIZE);
 		int result = aio_read(&request);
         SEQAN_PROADD(SEQAN_PROIWAIT, SEQAN_PROTIMEDIFF(tw));
-        #ifdef SEQAN_DEBUG
-			if (result) ::std::cerr << "areadAt returned " << result << " and errno is " << ::strerror(errno) << ::std::endl;
-		#endif
+        if (result) 
+		{
+			if (errno == EAGAIN) {  // read synchronoulsy instead
+#ifdef SEQAN_DEBUG_OR_TEST_
+            	::std::cerr << "Warning: Falling back to sync. read. :( " << ::std::endl;
+#endif
+				return readAt(me, memPtr, count, fileOfs);
+			}
+#ifdef SEQAN_DEBUG
+			else
+				::std::cerr << "areadAt returned " << result << " and errno=" << errno << " " << ::strerror(errno) << ::std::endl;
+#endif
+        }
 		return result == 0;
     }
     
@@ -782,9 +793,19 @@ namespace SEQAN_NAMESPACE_MAIN
 */      SEQAN_PROADD(SEQAN_PROIO, (request.aio_nbytes + SEQAN_PROPAGESIZE - 1) / SEQAN_PROPAGESIZE);
 		int result = aio_write(&request);
         SEQAN_PROADD(SEQAN_PROIWAIT, SEQAN_PROTIMEDIFF(tw));
-        #ifdef SEQAN_DEBUG
-			if (result) ::std::cerr << "awriteAt returned " << result << " and errno is " << ::strerror(errno) << ::std::endl;
-		#endif
+        if (result) 
+		{
+			if (errno == EAGAIN) {  // read synchronoulsy instead
+#ifdef SEQAN_DEBUG_OR_TEST_
+            	::std::cerr << "Warning: Falling back to sync. write. :( " << ::std::endl;
+#endif
+				return writeAt(me, memPtr, count, fileOfs);
+			}
+#ifdef SEQAN_DEBUG
+			else
+				::std::cerr << "awriteAt returned " << result << " and errno=" << errno << " " << ::strerror(errno) << ::std::endl;
+#endif
+        }
         return result == 0;
     }
 
@@ -921,7 +942,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			 TSize count,
 			 TagAllocateAligned const)
 	{
-		data = (TValue *) valloc(count * sizeof(TValue));
+		data = (TValue *) ::valloc(count * sizeof(TValue));
 #ifdef SEQAN_PROFILE 
         if (data)
 			SEQAN_PROADD(SEQAN_PROMEMORY, count * sizeof(TValue));
@@ -950,8 +971,14 @@ namespace SEQAN_NAMESPACE_MAIN
         if (data && count)	// .. to use count if SEQAN_PROFILE is not defined
 			SEQAN_PROSUB(SEQAN_PROMEMORY, count * sizeof(TValue));
 #endif
-		free(data);
+		::free(data);
 	}
+
+    template < typename TSpec, typename TSize >
+    inline void resize(File<Async<TSpec> > &me, TSize new_length) {
+		me.resize(new_length);
+    }
+	
 
 #endif
 

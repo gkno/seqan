@@ -235,7 +235,7 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 
         bool openTemp(int openMode = DefaultOpenTempMode<File>::VALUE) {
-			char tmpFileName[] = "/GNDXXXXXXX";
+			char tmpFileName[] = "/SeqAnXXXXXXX";
 			if ((handle = ::mkstemp(tmpFileName)) == -1) {
 				if (!(openMode & OPEN_QUIET))
 					::std::cerr << "Cannot create temporary file " << tmpFileName << ". (" << ::strerror(errno) << ")" << ::std::endl;
@@ -289,6 +289,10 @@ namespace SEQAN_NAMESPACE_MAIN
             return seek(0, SEEK_CUR);
         }
 
+		inline bool resize(SizeType new_length) const {
+			return ftruncate(handle, new_length) == 0;
+		}
+
 		static int error() {
             return errno;
 		}
@@ -306,6 +310,11 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline bool fileUnlink(const char *fileName) {
 		return unlink(fileName) == 0;
 	}
+
+    template < typename TSpec, typename TSize >
+    inline void resize(File<Sync<TSpec> > &me, TSize new_length) {
+		me.resize(new_length);
+    }
 
 #endif
 
