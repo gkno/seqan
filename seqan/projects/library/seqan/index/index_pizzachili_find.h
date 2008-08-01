@@ -49,7 +49,7 @@ struct DefaultFinder<Index<TText, PizzaChili<TSpec> > > {
 // a suffix array but rather a C array of ulong values.
 template <typename TText, typename TSpec>
 struct Fibre<Index<TText, PizzaChili<TSpec> >, Tag<_Fibre_SA> const> {
-    typedef typename impl::ulong_t* Type;
+    typedef impl::ulong_t* Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
