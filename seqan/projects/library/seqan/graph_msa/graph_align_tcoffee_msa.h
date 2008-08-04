@@ -192,6 +192,7 @@ globalAlignment(StringSet<TString, TSpec> const& seqSet,
 		// Triplet only on groups of sequences
 		progressiveAlignment(g, guideTree, gOut, threshold);
 	}
+
 	clear(guideTree);
 	clear(distanceMatrix);
 	clear(g);

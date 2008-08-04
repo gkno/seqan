@@ -89,7 +89,6 @@ buildAlignmentGraph(String<TFragment, TSpec1>& matches,
 	// Segment-match refinement
 	// If there are too many matches just cut the matches into single characters
 	if (((double) totalCount / (double) length(matches)) <= 1.0) {
-		std::cout << "Single Cut" << std::endl;
 		typedef std::set<std::pair<TId, TId> > TSeqPairs;
 		String<TSeqPairs> edgesPerSeqPair;
 		resize(edgesPerSeqPair, nseq * nseq);
@@ -134,7 +133,7 @@ buildAlignmentGraph(String<TFragment, TSpec1>& matches,
 		}
 	}
 
-	// Set all edge-weights to 1
+	// Clear edge-weights
 	typedef typename Iterator<TOutGraph, EdgeIterator>::Type TEdgeIterator;
 	TEdgeIterator itE(outGraph);
 	for(;!atEnd(itE);goNext(itE)) cargo(value(itE)) = 0;
@@ -189,7 +188,6 @@ buildAlignmentGraph(String<TFragment, TSpec1>& matches,
 	// Segment-match refinement
 	// If there are too many matches just cut the matches into single characters
 	if (((double) totalCount / (double) length(matches)) <= 1.0) {
-		std::cout << "Single Cut" << std::endl;
 		typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
 		typedef typename Id<TOutGraph>::Type TId;
 		typedef typename EdgeDescriptor<TOutGraph>::Type TEdgeDescriptor;
@@ -241,12 +239,11 @@ buildAlignmentGraph(String<TFragment, TSpec1>& matches,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TStringSet, typename TCargo, typename TSpec, typename TWeights, typename TLibraries> 
+template<typename TStringSet, typename TCargo, typename TSpec, typename TLibraries, typename TTag> 
 inline void
 combineGraphs(Graph<Alignment<TStringSet, TCargo, TSpec> >& outGraph,
 			  TLibraries& libs,
-			  TWeights& weights,
-			  FractionalScore)
+			  TTag)
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
@@ -257,152 +254,29 @@ combineGraphs(Graph<Alignment<TStringSet, TCargo, TSpec> >& outGraph,
 	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
 	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
 	
-	// Clear out-library
-	clearVertices(outGraph);
-	TSize numLibs = length(libs);	// Number of libraries
-
-	// All the matches with score values
-	typedef Fragment<> TFragment;
-	typedef String<TFragment> TFragmentString;
-	typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
-	TFragmentString matches;
-	String<TCargo> score_values;
-
-	// Max score and index start position for every library
-	String<TCargo> max_scores;
-	String<TCargo> index_start;
-	resize(max_scores, numLibs);
-	resize(index_start, numLibs);
-
-	// Get all matches
-	TSize count = 0;
-	for(TSize i = 0; i<numLibs; ++i) {
-		assignValue(index_start, i, count);
-		TCargo maxCargoLib = 0;
-		TGraph const& lib = *(getValue(libs, i));
-		TEdgeIterator it(lib);
-		for(;!atEnd(it);++it) {
-			TCargo currentCargo = getCargo(*it);
-			if (currentCargo > maxCargoLib) maxCargoLib = currentCargo;
-			TVertexDescriptor sV = sourceVertex(it);
-			TVertexDescriptor tV = targetVertex(it);
-			appendValue(matches, TFragment( (unsigned int) sequenceId(lib, sV), (unsigned int) fragmentBegin(lib,sV), (unsigned int) sequenceId(lib, tV),  (unsigned int)  fragmentBegin(lib,tV),  (unsigned int)  fragmentLength(lib,tV)));
-			appendValue(score_values, currentCargo);
-			++count;
-		}
-		assignValue(max_scores, i, maxCargoLib);
-	}
-
-	// Match refinement
-	TStringSet& str = stringSet(outGraph);	
-	matchRefinement(matches,str,outGraph);  // Don't score matches!
-
-	// Adapt edge weights (fractional weights are used)
-	count = 0;
-	TSize currentLib = 0;
-	double upperBound = 1000 * value(weights, currentLib);
-	double scaling = upperBound / (double) getValue(max_scores, currentLib);
-	TSize nextLibCounter = length(matches);
-	if (currentLib < numLibs - 1) nextLibCounter = (TSize) getValue(index_start, currentLib+1);
-	TFragmentStringIter endIt = end(matches);
-	TSize posit = 0;
-	for(TFragmentStringIter it = begin(matches); it != endIt; ++it, ++posit) {
-		if (count >= nextLibCounter) {
-			++currentLib;
-			upperBound = 1000 * value(weights, currentLib);
-			scaling = upperBound / (double) getValue(max_scores, currentLib);
-			if (currentLib < numLibs - 1) nextLibCounter = (TSize) getValue(index_start, currentLib+1);
-			else nextLibCounter = length(matches);
-		}
-		TId id1 = sequenceId(*it,0);
-		TId id2 = sequenceId(*it,1);
-		TSize pos1 = fragmentBegin(*it, id1);
-		TSize pos2 = fragmentBegin(*it, id2);
-		TSize end1 = pos1 + fragmentLength(*it, id1);
-		TSize oldFragLen = (end1 - pos1);
-		while(pos1 < end1) {
-			TVertexDescriptor p1 = findVertex(outGraph, id1, pos1);
-			TVertexDescriptor p2 = findVertex(outGraph, id2, pos2);
-			TEdgeDescriptor e = findEdge(outGraph, p1, p2);
-			TSize fragLen = fragmentLength(outGraph, p1); 
-			double newVal = (double) (fragLen) / (double) (oldFragLen);
-			newVal *= scaling;
-			newVal *= (double) getValue(score_values, posit);
-			SEQAN_TASSERT(e != 0)  // Refined graph should have all edges (with weight 1)
-			cargo(e) += (TCargo) newVal;
-			pos1 += fragLen;
-			pos2 += fragLen;
-		}
-		++count;
-	}
-}
-
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TStringSet, typename TCargo, typename TSpec, typename TLibraries> 
-inline void
-combineGraphs(Graph<Alignment<TStringSet, TCargo, TSpec> >& outGraph,
-			  TLibraries& libs,
-			  FrequencyCounting)
-{
-	SEQAN_CHECKPOINT
-	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
-	typedef typename Size<TGraph>::Type TSize;
-	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
-	typedef typename Id<TGraph>::Type TId;
-	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
-	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
-	
-	// Clear out-library
-	clearVertices(outGraph);
-	TSize numLibs = length(libs);	// Number of libraries
-
-	// All the matches
+	// Initialization
+	TSize numLibs = length(libs);	
 	typedef Fragment<> TFragment;
 	typedef String<TFragment> TFragmentString;
 	TFragmentString matches;
-
-	// Index start position for every library
-	String<TCargo> index_start;
-	resize(index_start, numLibs);
+	String<TCargo> scores;
 
 	// Get all matches
-	TSize count = 0;
 	for(TSize i = 0; i<numLibs; ++i) {
-		assignValue(index_start, i, count);
 		TGraph const& lib = *(getValue(libs, i));
 		TEdgeIterator it(lib);
 		for(;!atEnd(it);++it) {
 			TVertexDescriptor sV = sourceVertex(it);
 			TVertexDescriptor tV = targetVertex(it);
 			appendValue(matches, TFragment( (unsigned int) sequenceId(lib, sV), (unsigned int) fragmentBegin(lib,sV), (unsigned int) sequenceId(lib, tV),  (unsigned int)  fragmentBegin(lib,tV),  (unsigned int)  fragmentLength(lib,tV)));
-			++count;
+			appendValue(scores, cargo(value(it)));
 		}
 	}
 
-	// Match refinement
-	TStringSet& str = stringSet(outGraph);	
-	matchRefinement(matches,str,outGraph);  // Don't score matches, just count the number of occurrences
+	// Build graph
+	buildAlignmentGraph(matches, scores, outGraph, TTag());
 }
 
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TStringSet, typename TCargo, typename TSpec, typename TLibraries> 
-inline void
-combineGraphs(Graph<Alignment<TStringSet, TCargo, TSpec> >& outGraph,
-			  TLibraries& libs,
-			  FractionalScore)
-{
-	SEQAN_CHECKPOINT
-	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
-	typedef typename Size<TGraph>::Type TSize;
-	String<TSize> weights;
-	fill(weights, length(libs), 1);
-	combineGraphs(outGraph, libs, weights, FractionalScore() );
-}
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -412,12 +286,10 @@ combineGraphs(Graph<Alignment<TStringSet, TCargo, TSpec> >& outGraph,
 ..summary:Combines multiple alignment graphs into one single graph.
 ..cat:Graph
 ..signature:
-combineGraphs(graph, libs [, weights], tag)
+combineGraphs(graph, libs, tag)
 ..param.graph:Out-parameter:The final alignment graph.
 ...type:Spec.Alignment Graph
 ..param.libs:String of pointers to alignment graph data structures.
-..param.weights:String of weights.
-...remarks:Needs to have the same length as the libs string.
 ..param.tag:Combination strategy.
 ...type:Tag.Alignment Graph Combination
 ..returns:void
@@ -757,6 +629,57 @@ tripletLibraryExtension(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	_addNewEdgesFoundByTriplet(g, edges_vertices, edges_cargo);
 }
 
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec>
+inline void 
+reducedTripletLibraryExtension(Graph<Alignment<TStringSet, TCargo, TSpec> >& g)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
+	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
+	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
+
+
+	// Just augment existing edges
+	String<TCargo> newCargoMap;
+	resize(newCargoMap, getIdUpperBound(_getEdgeIdManager(g)), Exact());
+	TEdgeIterator it(g);
+	for(;!atEnd(it);++it) assignProperty(newCargoMap, *it, cargo(*it));
+
+	// Iterate over all vertices
+	for(TVertexIterator itVertex(g);!atEnd(itVertex);++itVertex) {
+		TOutEdgeIterator outIt1(g, *itVertex);
+		while (!atEnd(outIt1)) {
+			TOutEdgeIterator outIt2 = outIt1;
+			goNext(outIt2);
+			// Consider always 2 neighbors
+			while (!atEnd(outIt2)) {
+				TVertexDescriptor tV1 = targetVertex(outIt1);
+				TVertexDescriptor tV2 = targetVertex(outIt2);
+				if (sequenceId(g, tV1) != sequenceId(g,tV2)) {
+					TEdgeDescriptor e = findEdge(g, tV1, tV2);
+					if (e != 0) {
+						// Increase weight of existing edge
+						if (getCargo(*outIt2) > getCargo(*outIt1)) property(newCargoMap, e) += getCargo(*outIt1);
+						else property(newCargoMap, e) += getCargo(*outIt2);	
+					}
+				}
+				goNext(outIt2);
+			}
+			goNext(outIt1);
+		}
+	}
+
+	// Assign the new weights and clean-up the cargo map
+	TEdgeIterator itE(g);
+	for(;!atEnd(itE);goNext(itE)) cargo(value(itE)) = property(newCargoMap, value(itE));
+	clear(newCargoMap);
+}
 
 //////////////////////////////////////////////////////////////////////////////
 // Sum of Pairs Scoring
