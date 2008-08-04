@@ -87,24 +87,24 @@ typedef Tag<Lcs_Library_> const Lcs_Library;
 //////////////////////////////////////////////////////////////////////////////
 
 // Dummy function selecting all pairs
-template<typename TStringSet, typename TCargo, typename TSpec, typename TPairList>
+template<typename TString, typename TSpec, typename TPairList>
 inline void 
-selectPairsForLibraryGeneration(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+selectPairsForLibraryGeneration(StringSet<TString, TSpec> const& str,
 								TPairList& pList)
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
-	typedef typename Size<TGraph>::Type TSize;
+	typedef StringSet<TString, TSpec> TStringSet;
+	typedef typename Size<TStringSet>::Type TSize;
 	typedef typename Value<TPairList>::Type TPair;
+	typedef typename Iterator<TPairList>::Type TPairIter;
 
-	TStringSet& str = stringSet(g);
 	TSize nseq = length(str);
 	resize(pList, nseq * (nseq - 1) / 2);
-	TSize count = 0;
+	TPairIter itPair = begin(pList);
 	for(TSize i=0; i<nseq-1; ++i) {
 		for(TSize j=i+1; j<nseq; ++j) {
-			value(pList, count) = TPair(positionToId(str, i), positionToId(str, j));
-			++count;
+			value(itPair) = TPair(positionToId(str, i), positionToId(str, j));
+			goNext(itPair);
 		}
 	}
 }
@@ -193,40 +193,32 @@ getAlignmentStatistics(String<TFragment, TSpec1>& matches,
 
 //////////////////////////////////////////////////////////////////////////////
 
-
-template<typename TStringSet, typename TCargo, typename TSpec, typename TScore, typename TPairList>
+template<typename TString, typename TSpec, typename TId, typename TSegmentMatches, typename TScores>
 inline void 
-generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-					   TPairList& pList,
-					   TScore const& score_type,
-					   Lcs_Library)
+appendSegmentMatches(StringSet<TString, TSpec> const& str,
+					 String<Pair<TId, TId> > const& pList,
+					 TSegmentMatches& matches,
+					 TScores& scores,
+					 Lcs_Library)
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
-	typedef typename Size<TGraph>::Type TSize;
-	typedef typename Id<TGraph>::Type TId;
-	typedef typename Value<TStringSet>::Type TString;
+	typedef StringSet<TString, Dependent<> > TStringSet;
+	typedef String<Pair<TId, TId> > TPairList;
+	typedef typename Size<TStringSet>::Type TSize;
+	typedef typename Value<TSegmentMatches>::Type TFragment;
+	typedef typename Value<TScores>::Type TScoreValue;
+	typedef typename Iterator<TPairList>::Type TPairIter;
 
-	// Clear graph
-	clearVertices(g);
-
-	// Pairwise alignments for all pairs of sequences
-	TStringSet& str = stringSet(g);	
-
-	// String of fragments to combine all pairwise alignments into a multiple alignment
-	typedef Fragment<> TFragment;
-	typedef String<TFragment > TFragmentString;
-	typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
-	TFragmentString matches;
-
-	TSize amountOfPairs = length(pList);
-	for(TSize k=0; k<amountOfPairs; ++k) {
-		TSize i = idToPosition(str, (pList[k]).i1);
-		TSize j = idToPosition(str, (pList[k]).i2);
+	// Pairwise longest common subsequence
+	TPairIter itPair = begin(pList);
+	TPairIter itPairEnd = end(pList);
+	for(;itPair != itPairEnd; goNext(itPair)) {
+		TSize i = idToPosition(str, (value(itPair)).i1);
+		TSize j = idToPosition(str, (value(itPair)).i2);
 		
 		// Lcs between first and second string
 		String<std::pair<TSize, TSize>, Block<> > pos1;
-		longestCommonSubsequence(str[i], str[j], 1000, pos1);
+		longestCommonSubsequence(value(str, i), value(str, j), 1000, pos1);
 
 		// Extend the matches as long as possible
 		TSize lenMatch = 1;						
@@ -247,6 +239,7 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 				//std::cout << inf2 << std::endl;
 						
 				appendValue(matches, TFragment(positionToId(str, i),iBegin,positionToId(str, j),jBegin,lenMatch));
+				appendValue(scores, (TScoreValue) lenMatch);
 				lenMatch = 1;
 				iBegin = pos1[z].first;
 				jBegin = pos1[z].second;
@@ -254,42 +247,50 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 		}
 		// Process last match
 		appendValue(matches, TFragment(positionToId(str, i),iBegin,positionToId(str, j),jBegin,lenMatch));
+		appendValue(scores, (TScoreValue) lenMatch);
 	}
-
-	// Refine all matches and create multiple alignment
-	matchRefinement(matches,str,const_cast<TScore&>(score_type),g);
 }
+
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TStringSet, typename TCargo, typename TSpec, typename TScore, typename TAlphabet, typename TSize>
+template<typename TString, typename TSpec, typename TSegmentMatches, typename TScores>
 inline void 
-generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-					   TScore const& score_type,
-					   TSize ktup,
-					   TAlphabet,
-					   Kmer_Library)
+appendSegmentMatches(StringSet<TString, TSpec> const& str,
+					 TSegmentMatches& matches,
+					 TScores& scores,
+					 Lcs_Library)
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
-	typedef TSize TWord;
-	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	typedef typename Id<TGraph>::Type TId;
-	typedef String<TWord> TTupelString;
+	typedef typename Id<StringSet<TString, TSpec> >::Type TId;
+	String<Pair<TId, TId> > pList;
+	selectPairsForLibraryGeneration(str, pList);
+	appendSegmentMatches(str, pList, matches, scores, Lcs_Library());
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TString, typename TSpec, typename TSegmentMatches, typename TScores, typename TAlphabet, typename TSize>
+inline void 
+appendSegmentMatches(StringSet<TString, TSpec> const& str,
+					 TSegmentMatches& matches,
+					 TScores& scores,
+					 TSize ktup,
+					 TAlphabet,
+					 Kmer_Library)
+{
+	SEQAN_CHECKPOINT
+	typedef StringSet<TString, Dependent<> > TStringSet;
+	typedef typename Value<TScores>::Type TScoreValue;
+	typedef typename Value<TSegmentMatches>::Type TFragment;
+	typedef typename Id<TStringSet>::Type TId;
+	typedef String<TSize> TTupelString;
 	typedef String<TTupelString> TTupelStringSet;
 	
-	// Clear Graph
-	clearVertices(g);
-
 	// Initialization
-	TStringSet& str = stringSet(g);	
 	TSize nseq = length(str);
-	TWord alphabet_size = ValueSize<TAlphabet>::VALUE;
-
-	// All matching kmers
-	typedef Fragment<> TFragment;
-	typedef String<TFragment> TFragmentString;
-	TFragmentString matches;
+	TSize alphabet_size = ValueSize<TAlphabet>::VALUE;
 
 	// Transform the set of strings into a set of strings of k-tupels
 	TTupelStringSet tupSet;
@@ -299,14 +300,14 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	}
 
 	// Build one q-gram Index for all sequences
-	typedef std::pair<TWord, TWord> TPosSeqPair;
+	typedef std::pair<TSize, TSize> TPosSeqPair;
 	typedef std::set<TPosSeqPair> TQGramOcc;
 	String<TQGramOcc> qIndex;
-	TWord qIndexSize = 1;
-	for(TWord i=0; i<(TWord) ktup;++i) qIndexSize *= alphabet_size;
+	TSize qIndexSize = 1;
+	for(TSize i=0; i<(TSize) ktup;++i) qIndexSize *= alphabet_size;
 	resize(qIndex, qIndexSize);
 	for(TSize k=0;k<nseq;++k) {
-		for(TWord i = 0;i < (TWord) length(tupSet[k]);++i) {
+		for(TSize i = 0;i < (TSize) length(tupSet[k]);++i) {
 			qIndex[ tupSet[k][i] ].insert(std::make_pair(i, k));
 		}
 	}
@@ -319,117 +320,90 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 			while (pos2 != posEnd) {
 				if (pos->second != pos2->second) {
 					appendValue(matches, TFragment(positionToId(str, pos->second), pos->first, positionToId(str, pos2->second), pos2->first, ktup));
+					appendValue(scores, (TScoreValue) ktup);
 				}
 				++pos2;
 			}
 			++pos;
 		}
 	}
-	
-	matchRefinement(matches,str,const_cast<TScore&>(score_type),g);
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TStringSet, typename TCargo, typename TSpec, typename TScore, typename TSize>
+template<typename TString, typename TSpec, typename TSegmentMatches, typename TScores, typename TSize>
 inline void 
-generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-					   TScore const& score_type,
-					   TSize ktup,
-					   Kmer_Library)
+appendSegmentMatches(StringSet<TString, TSpec> const& str,
+					 TSegmentMatches& matches,
+					 TScores& scores,
+					 TSize ktup,
+					 Kmer_Library)
 {
 	SEQAN_CHECKPOINT
-	generatePrimaryLibrary(g, score_type, ktup, typename Value<typename Value<TStringSet>::Type>::Type(), Kmer_Library());
+	appendSegmentMatches(str, matches, scores, ktup,  typename Value<TString>::Type(), Kmer_Library());
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TStringSet, typename TCargo, typename TSpec, typename TScore>
+template<typename TString, typename TSpec, typename TSegmentMatches, typename TScores>
 inline void 
-generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-					   TScore const& score_type,
-					   Kmer_Library)
+appendSegmentMatches(StringSet<TString, TSpec> const& str,
+					 TSegmentMatches& matches,
+					 TScores& scores,
+					 Kmer_Library)
 {
 	SEQAN_CHECKPOINT
-	generatePrimaryLibrary(g, score_type, 3, Kmer_Library());
+	appendSegmentMatches(str, matches, scores, 3, Kmer_Library());
 }
 
 
 //////////////////////////////////////////////////////////////////////////////
 
-
-template<typename TStringSet, typename TCargo, typename TSpec, typename TScore>
+template<typename TString, typename TSpec, typename TId, typename TScore, typename TSegmentMatches, typename TScores>
 inline void 
-generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-					   TScore const& score_type,
-					   Lcs_Library)
+appendSegmentMatches(StringSet<TString, TSpec> const& str,
+					 String<Pair<TId, TId> > const& pList,
+					 TScore const& score_type,
+					 TSegmentMatches& matches,
+					 TScores& scores,
+					 LocalPairwise_Library)
 {
 	SEQAN_CHECKPOINT
-	typedef typename Id<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type TId;
-	String<Pair<TId, TId> > pList;
-	selectPairsForLibraryGeneration(g, pList);
-	generatePrimaryLibrary(g, pList, score_type, Lcs_Library() );
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TStringSet, typename TCargo, typename TSpec, typename TPairList, typename TScore>
-void 
-generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-					   TPairList& pList,
-					   TScore const& score_type,
-					   LocalPairwise_Library)
-{
-	SEQAN_CHECKPOINT
-	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
-	typedef typename Size<TGraph>::Type TSize;
-	typedef typename Id<TGraph>::Type TId;
-	typedef typename Value<TScore>::Type TScoreValue;
-
-	// Clear graph
-	clearVertices(g);
-
-	// Pairwise alignments for all pairs of sequences
-	TStringSet& str = stringSet(g);	
-
-	// String of fragments to combine all pairwise alignments into a multiple alignment
-	typedef Fragment<> TFragment;
-	typedef String<TFragment > TFragmentString;
-	typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
-	TFragmentString matches;
-	typedef String<Pair<TSize, TScoreValue> > TAlignIdAndScore;
-	TAlignIdAndScore alignIdScore;
+	typedef StringSet<TString, Dependent<> > TStringSet;
+	typedef String<Pair<TId, TId> > TPairList;
+	typedef typename Size<TStringSet>::Type TSize;
+	typedef typename Iterator<TPairList>::Type TPairIter;
 
 	// Pairwise alignments
-	TSize amountOfPairs = length(pList);
-	for(TSize k=0; k<amountOfPairs; ++k) {
+	TPairIter itPair = begin(pList);
+	TPairIter itPairEnd = end(pList);
+	for(;itPair != itPairEnd; goNext(itPair)) {
 		// Make a pairwise string-set
 		TStringSet pairSet;
-		TId id1 = (pList[k]).i1;
-		TId id2 = (pList[k]).i2;
-		assignValueById(pairSet, str, id1);
-		assignValueById(pairSet, str, id2);
+		TId id1 = (value(itPair)).i1;
+		TId id2 = (value(itPair)).i2;
+		assignValueById(pairSet, const_cast<StringSet<TString, TSpec>&>(str), id1);
+		assignValueById(pairSet, const_cast<StringSet<TString, TSpec>&>(str), id2);
 
-		multiLocalAlignment(matches, pairSet, alignIdScore, score_type, 4, SmithWatermanClump() );
+		multiLocalAlignment(pairSet, matches, scores, score_type, 4, SmithWatermanClump() );
 	}
-
-	// Refine all matches and create multiple alignment
-	matchRefinement(matches,str,const_cast<TScore&>(score_type),g);
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TStringSet, typename TCargo, typename TSpec, typename TScore>
-void 
-generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-					   TScore const& score_type,
-					   LocalPairwise_Library)
+template<typename TString, typename TSpec, typename TScore, typename TSegmentMatches, typename TScores>
+inline void 
+appendSegmentMatches(StringSet<TString, TSpec> const& str,
+					 TScore const& score_type,
+					 TSegmentMatches& matches,
+					 TScores& scores,
+					 LocalPairwise_Library)
 {
 	SEQAN_CHECKPOINT
-	typedef typename Id<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type TId;
+	typedef typename Id<StringSet<TString, TSpec> >::Type TId;
 	String<Pair<TId, TId> > pList;
-	selectPairsForLibraryGeneration(g, pList);
-	generatePrimaryLibrary(g, pList, score_type, LocalPairwise_Library() );
+	selectPairsForLibraryGeneration(str, pList);
+	appendSegmentMatches(str, pList, score_type, matches, scores, LocalPairwise_Library() );
 }
 
 
@@ -539,190 +513,106 @@ __getAlignmentStatistics(String<TFragment, TSpec>&,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TStringSet, typename TCargo, typename TSpec, typename TPairList, typename TDistance, typename TAlignConfig, typename TScore>
+template<typename TString, typename TSpec, typename TId, typename TScore, typename TSegmentMatches, typename TScoreValues, typename TDistance, typename TAlignConfig>
 inline void 
-generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-					   TPairList& pList,
-					   TDistance& dist,
-					   TScore const& score_type,
-					   TAlignConfig const& ac,
-					   GlobalPairwise_Library)
+appendSegmentMatches(StringSet<TString, TSpec> const& str,
+					 String<Pair<TId, TId> > const& pList,
+					 TScore const& score_type,
+					 TSegmentMatches& matches,
+					 TScoreValues& scores,
+					 TDistance& dist,
+					 TAlignConfig const& ac,
+					 GlobalPairwise_Library)
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
-	typedef typename Size<TGraph>::Type TSize;
-	typedef typename Value<TScore>::Type TScoreValue;
-	typedef typename Id<TGraph>::Type TId;
+	typedef StringSet<TString, Dependent<> > TStringSet;
+	typedef String<Pair<TId, TId> > TPairList;
+	typedef typename Value<TScoreValues>::Type TScoreValue;
+	typedef typename Size<TStringSet>::Type TSize;
+	typedef typename Iterator<TPairList>::Type TPairIter;
 
-	// Clear graph
-	clearVertices(g);
-
-	// Pairwise alignments for all pairs of sequences
-	TStringSet& str = stringSet(g);	
+	// Initialization
 	TSize nseq = length(str);
 	__resizeWithRespectToDistance(dist, nseq);
 	
-	// String of fragments to combine all pairwise alignments into a multiple alignment
-	typedef Fragment<> TFragment;
-	typedef String<TFragment > TFragmentString;
-	typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
-	TFragmentString matches;
-	typedef String<TScoreValue> TScoreValues;
-	TScoreValues scores;
-
 	// Pairwise alignments
-	TScoreValue smallest = 0;
-	TSize amountOfPairs = length(pList);
-	for(TSize k=0; k<amountOfPairs; ++k) {
+	TPairIter itPair = begin(pList);
+	TPairIter itPairEnd = end(pList);
+	for(;itPair != itPairEnd; goNext(itPair)) {
 		// Make a pairwise string-set
 		TStringSet pairSet;
-		TId id1 = (pList[k]).i1;
-		TId id2 = (pList[k]).i2;
-		assignValueById(pairSet, str, id1);
-		assignValueById(pairSet, str, id2);
+		TId id1 = (value(itPair)).i1;
+		TId id2 = (value(itPair)).i2;
+		assignValueById(pairSet, const_cast<StringSet<TString, TSpec>&>(str), id1);
+		assignValueById(pairSet, const_cast<StringSet<TString, TSpec>&>(str), id2);
+				
+		// Alignment
 		TSize from = length(matches);
-		
-		//// Alignment
-		//TGraph bla(pairSet);
-		//globalAlignment(bla, score_type, ac, Gotoh() );
-		//std::cout << bla << std::endl;
-
-
 		TScoreValue myScore = globalAlignment(matches, pairSet, score_type, ac, Gotoh() );
-		if (myScore < smallest) smallest = myScore;
 		TSize to = length(matches);
+
+		// Record the scores
 		resize(scores, to);
-		for(TSize k=from; k<to; ++k) value(scores, k) = myScore;
+		typedef typename Iterator<TScoreValues>::Type TScoreIter;
+		TScoreIter itScore = begin(scores);
+		TScoreIter itScoreEnd = end(scores);
+		goFurther(itScore, from);
+		for(;itScore != itScoreEnd; ++itScore) value(itScore) = myScore;
 			
 		// Get the alignment statistics
 		__getAlignmentStatistics(matches, pairSet, dist, (TSize) idToPosition(str,id1), (TSize) idToPosition(str,id2), (TSize) nseq, (TSize) from);
 	}
-
-	// Refine all matches and create multiple alignment
-	matchRefinement(matches,str,g);
-
-	// Adapt edge weights
-	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
-	typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
-	typedef typename Iterator<TScoreValues>::Type TScoreValuesIter;
-	TFragmentStringIter endIt = end(matches);
-	TScoreValuesIter scoreIt = begin(scores);
-	TScoreValue offset = (-1) * smallest + 1;
-	for(TFragmentStringIter it = begin(matches); it != endIt; ++it, ++scoreIt) {
-		// Some alignment scores might be negative, offset the scores
-		value(scoreIt) += offset;
-		TId id1 = sequenceId(*it,0);
-		TId id2 = sequenceId(*it,1);
-		TSize pos1 = fragmentBegin(*it, id1);
-		TSize pos2 = fragmentBegin(*it, id2);
-		TSize end1 = pos1 + fragmentLength(*it, id1);
-		while(pos1 < end1) {
-			TVertexDescriptor p1 = findVertex(g, id1, pos1);
-			TVertexDescriptor p2 = findVertex(g, id2, pos2);
-			TEdgeDescriptor e = findEdge(g, p1, p2);
-			cargo(e) += (TCargo) value(scoreIt);
-			pos1 += fragmentLength(g, p1);
-			pos2 += fragmentLength(g, p2);
-		}
-	}
-
 }
 
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TStringSet, typename TCargo, typename TSpec, typename TPairList, typename TDistance, typename TScoreValue, typename TScoreSpec>
+template<typename TString, typename TSpec, typename TId, typename TScore, typename TSegmentMatches, typename TScoreValues, typename TDistance>
 inline void 
-generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-					   TPairList& pList,
-					   TDistance& dist,
-					   Score<TScoreValue, TScoreSpec> const& score_type,
-					   GlobalPairwise_Library)
+appendSegmentMatches(StringSet<TString, TSpec> const& str,
+					 String<Pair<TId, TId> > const& pList,
+					 TScore const& score_type,
+					 TSegmentMatches& matches,
+					 TScoreValues& scores,
+					 TDistance& dist,					 
+					 GlobalPairwise_Library)
 {
 	SEQAN_CHECKPOINT
-	generatePrimaryLibrary(g, pList, dist, score_type, AlignConfig<>(), GlobalPairwise_Library()); 
+	appendSegmentMatches(str, pList, score_type, matches, scores, dist, AlignConfig<>(), GlobalPairwise_Library() );
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TStringSet, typename TCargo, typename TSpec, typename TDistance, typename TScoreValue, typename TScoreSpec>
+template<typename TString, typename TSpec, typename TScore, typename TSegmentMatches, typename TScoreValues, typename TDistance>
 inline void 
-generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-					   TDistance& dist,
-					   Score<TScoreValue, TScoreSpec> const& score_type,
-					   GlobalPairwise_Library)
+appendSegmentMatches(StringSet<TString, TSpec> const& str,
+					 TScore const& score_type,
+					 TSegmentMatches& matches,
+					 TScoreValues& scores,
+					 TDistance& dist,					 
+					 GlobalPairwise_Library)
 {
 	SEQAN_CHECKPOINT
-	typedef typename Id<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type TId;
+	typedef typename Id<StringSet<TString, TSpec> >::Type TId;
 	String<Pair<TId, TId> > pList;
-	selectPairsForLibraryGeneration(g, pList);
-	generatePrimaryLibrary(g, pList, dist, score_type, GlobalPairwise_Library()); 
+	selectPairsForLibraryGeneration(str, pList);
+	appendSegmentMatches(str, pList, score_type, matches, scores, dist, GlobalPairwise_Library() );
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TStringSet, typename TCargo, typename TSpec, typename TId, typename TScoreValue, typename TScoreSpec>
+template<typename TString, typename TSpec, typename TScore, typename TSegmentMatches, typename TScoreValues>
 inline void 
-generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-					   String<Pair<TId, TId> >& pList,
-					   Score<TScoreValue, TScoreSpec> const& score_type,
-					   GlobalPairwise_Library)
+appendSegmentMatches(StringSet<TString, TSpec> const& str,
+					 TScore const& score_type,
+					 TSegmentMatches& matches,
+					 TScoreValues& scores, 
+					 GlobalPairwise_Library)
 {
 	SEQAN_CHECKPOINT
 	Nothing noth;
-	generatePrimaryLibrary(g, pList, noth, score_type, GlobalPairwise_Library());
+	appendSegmentMatches(str, score_type, matches, scores, noth, GlobalPairwise_Library() );
 }
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TStringSet, typename TCargo, typename TSpec, typename TScoreValue, typename TScoreSpec>
-inline void 
-generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-					   Score<TScoreValue, TScoreSpec> const& score_type,
-					   GlobalPairwise_Library)
-{
-	SEQAN_CHECKPOINT
-	typedef typename Id<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type TId;
-	String<Pair<TId, TId> > pList;
-	selectPairsForLibraryGeneration(g, pList);
-	generatePrimaryLibrary(g, pList, score_type, GlobalPairwise_Library());
-}
-
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TStringSet, typename TCargo, typename TSpec, typename TPairList, typename TScoreValue, typename TScoreSpec, typename TAlignConfig>
-inline void 
-generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-					   TPairList& pList,
-					   Score<TScoreValue, TScoreSpec> const& score_type,
-					   TAlignConfig const& ac,
-					   GlobalPairwise_Library)
-{
-	SEQAN_CHECKPOINT
-	Nothing noth;
-	generatePrimaryLibrary(g, pList, noth, score_type, ac, GlobalPairwise_Library());
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TStringSet, typename TCargo, typename TSpec, typename TScoreValue, typename TScoreSpec, typename TAlignConfig>
-inline void 
-generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-					   Score<TScoreValue, TScoreSpec> const& score_type,
-					   TAlignConfig const& ac,
-					   GlobalPairwise_Library)
-{
-	SEQAN_CHECKPOINT
-	typedef typename Id<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type TId;
-	String<Pair<TId, TId> > pList;
-	selectPairsForLibraryGeneration(g, pList);
-	generatePrimaryLibrary(g, pList, score_type, ac, GlobalPairwise_Library());
-}
-
-
-
 
 
 

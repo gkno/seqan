@@ -89,26 +89,41 @@ globalAlignment(StringSet<TString, TSpec> const& seqSet,
 	TSize threshold = 30;
 
 	// Select all pairs
-	TGraph g(seqSet);
 	String<Pair<TId, TId> > pList;
-	selectPairsForLibraryGeneration(g, pList);
+	selectPairsForLibraryGeneration(seqSet, pList);
 
-	// Generate a primary library, i.e., all global pairwise alignments
-	TGraph lib1(seqSet);
+	// Set-up a distance matrix
 	typedef String<double> TDistanceMatrix;
 	typedef typename Value<TDistanceMatrix>::Type TDistanceValue;
 	TDistanceMatrix distanceMatrix;
-	Blosum62 score_type_global(-1,-11);
-	generatePrimaryLibrary(lib1, pList, distanceMatrix, score_type_global, GlobalPairwise_Library() );
-	
-	// Select pairs for end-gaps free and local alignments?
+
+	// Set-up alignment scoring matrices
+	typedef Blosum62 TScore;
+	typedef typename Value<TScore>::Type TScoreValue;
+	TScore score_type_global(-1,-11);
+	TScore score_type_local(-2,-8);
+
+	// Containers for segment matches and corresponding scores 
+	typedef String<Fragment<> > TFragmentString;
+	TFragmentString matches;
+	typedef String<TScoreValue> TScoreValues;
+	TScoreValues scores;
+
+	// Compute segment matches from global pairwise alignments
+	appendSegmentMatches(seqSet, pList, score_type_global, matches, scores, distanceMatrix, GlobalPairwise_Library() );
+	//appendSegmentMatches(seqSet, matches, scores, Kmer_Library() );
+
+	// Append segment matches from local pairwise alignments
+	appendSegmentMatches(seqSet, pList, score_type_local, matches, scores, LocalPairwise_Library() );
+
+	// Select a subset of pairs for end-gaps free
 	typedef std::multimap<TDistanceValue, Pair<TId, TId> > TBestPairs;
 	TBestPairs bestPairs;
 	TDistanceValue dist = 0;
 	for(TSize i=0;i<nSeq-1;++i) {
 		for(TSize j=i+1;j<nSeq;++j) {
 			TDistanceValue d = value(distanceMatrix, i*nSeq+j);
-			bestPairs.insert(std::make_pair(d, Pair<TId, TId>(positionToId(stringSet(g), i),positionToId(stringSet(g), j)))); 
+			bestPairs.insert(std::make_pair(d, Pair<TId, TId>(positionToId(seqSet, i),positionToId(seqSet, j)))); 
 			dist+=d;
 		}
 	}
@@ -127,54 +142,33 @@ globalAlignment(StringSet<TString, TSpec> const& seqSet,
 		}
 	}
 
-	// Generate a second and third primary library
-	TGraph lib2(seqSet);
-	TGraph lib3(seqSet);
-	if (length(value(cfgOpt, "matches"))) {
-		// Only a selected list of local alignments
-		Blosum62 score_type_local(-2,-8);
-		generatePrimaryLibrary(lib2, pListLocal, score_type_local, LocalPairwise_Library() );
-
-		// Blast matches
-		std::fstream strm_lib;
-		strm_lib.open(toCString(value(cfgOpt, "matches")), std::ios_base::in | std::ios_base::binary);
-		read(strm_lib, lib3, nameSet, BlastLib());	// Read library
-		strm_lib.close();
-	} else {
-		Blosum62 score_type_local(-2,-8);
-		generatePrimaryLibrary(lib2, pList, score_type_local, LocalPairwise_Library() );
-	}
-
-	// End-gaps free alignments
-	TGraph lib4(seqSet);
+	// Append segment matches from end-gaps free alignments
+	Nothing noth;
 	if (dist > 0.75) {
 		Blosum30 sT(-4,-20);
 		AlignConfig<true,true,true,true> ac;
-		generatePrimaryLibrary(lib4, pListLocal, sT, ac, GlobalPairwise_Library() );
+		appendSegmentMatches(seqSet, pListLocal, sT, matches, scores, noth, ac, GlobalPairwise_Library() );
 	} else if (dist < 0.50) {
 		Blosum80 sT(-2, -12);
 		AlignConfig<true,true,true,true> ac;
-		generatePrimaryLibrary(lib4, pListLocal, sT, ac, GlobalPairwise_Library() );
+		appendSegmentMatches(seqSet, pListLocal, sT, matches, scores, noth, ac, GlobalPairwise_Library() );
 	} else {
 		Blosum62 sT(-3,-14);
 		AlignConfig<true,true,true,true> ac;
-		generatePrimaryLibrary(lib4, pListLocal, sT, ac, GlobalPairwise_Library() );
+		appendSegmentMatches(seqSet, pListLocal, sT, matches, scores, noth, ac, GlobalPairwise_Library() );
 	}
 
+	// Include external segment matches
+	if (length(value(cfgOpt, "matches"))) {
+		std::fstream strm_lib;
+		strm_lib.open(toCString(value(cfgOpt, "matches")), std::ios_base::in | std::ios_base::binary);
+		read(strm_lib, matches, scores, nameSet, BlastLib());
+		strm_lib.close();
+	}
 
-	// Weighting of libraries (Signal addition)
-	String<TGraph*> libs;
-	appendValue(libs, &lib1);
-	appendValue(libs, &lib2);
-	if (!empty(lib3)) appendValue(libs, &lib3);
-	appendValue(libs, &lib4);
-	combineGraphs(g, libs, FrequencyCounting() );
-
-	// Clear the old libraries
-	clear(lib1);
-	clear(lib2);
-	clear(lib3);
-	clear(lib4);
+	// Use these segment matches for the initial alignment graph
+	TGraph g(seqSet);
+	buildAlignmentGraph(matches, scores, g, FrequencyCounting() );
 
 	// Guide tree
 	Graph<Tree<double> > guideTree;
@@ -221,8 +215,17 @@ globalAlignment(StringSet<TString, TSpec> const& seqSet,
 	typedef typename Id<TGraph>::Type TId;
 	TSize nSeq = length(seqSet);
 	TSize threshold = 30;
-	
-	// Read score matrix and gap penalties
+
+	// Select all pairs
+	String<Pair<TId, TId> > pList;
+	selectPairsForLibraryGeneration(seqSet, pList);
+
+	// Set-up a distance matrix
+	typedef String<double> TDistanceMatrix;
+	typedef typename Value<TDistanceMatrix>::Type TDistanceValue;
+	TDistanceMatrix distanceMatrix;
+
+	// Set-up a scoring scheme
 	typedef Score<int, ScoreMatrix<> > TScore;
 	typedef typename Value<TScore>::Type TScoreValue;
 	TScore scType;
@@ -231,44 +234,30 @@ globalAlignment(StringSet<TString, TSpec> const& seqSet,
 	loadScoreMatrix(scType, value(cfgOpt, "matrix"));
 	scType.data_gap_extend = (TScoreValue) (gextend);
 	scType.data_gap_open = (TScoreValue) (gopening);
-	
-	// Select all pairs
-	TGraph g(seqSet);
-	String<Pair<TId, TId> > pList;
-	selectPairsForLibraryGeneration(g, pList);
 
-	// Generate a primary library, i.e., all global pairwise alignments
-	TGraph lib1(seqSet);
-	typedef String<double> TDistanceMatrix;
-	typedef typename Value<TDistanceMatrix>::Type TDistanceValue;
-	TDistanceMatrix distanceMatrix;
-	generatePrimaryLibrary(lib1, pList, distanceMatrix, scType, GlobalPairwise_Library() );
-	
-	// Generate a second library
-	TGraph lib2(seqSet);
-	generatePrimaryLibrary(lib2, pList, scType, LocalPairwise_Library() );
+	// Containers for segment matches and corresponding scores 
+	typedef String<Fragment<> > TFragmentString;
+	TFragmentString matches;
+	typedef String<TScoreValue> TScoreValues;
+	TScoreValues scores;
 
-	// Parse matches
-	TGraph lib3(seqSet);
+	// Compute segment matches from global pairwise alignments
+	appendSegmentMatches(seqSet, pList, scType, matches, scores, distanceMatrix, GlobalPairwise_Library() );
+
+	// Compute segment matches from local pairwise alignments
+	appendSegmentMatches(seqSet, pList, scType, matches, scores, LocalPairwise_Library() );
+
+	// Include external segment matches
 	if (length(value(cfgOpt, "matches"))) {
-		// Blast matches
 		std::fstream strm_lib;
 		strm_lib.open(toCString(value(cfgOpt, "matches")), std::ios_base::in | std::ios_base::binary);
-		read(strm_lib, lib3, nameSet, BlastLib());	// Read library
+		read(strm_lib, matches, scores, nameSet, BlastLib());
 		strm_lib.close();
 	}
 
-	// Weighting of libraries (Signal addition)
-	String<TGraph*> libs;
-	appendValue(libs, &lib1);
-	appendValue(libs, &lib2);
-	if (!empty(lib3)) appendValue(libs, &lib3);
-	combineGraphs(g, libs);
-
-	// Clear the old libraries
-	clear(lib1);
-	clear(lib2);
-	clear(lib3);
+	// Use these segment matches for the initial alignment graph
+	TGraph g(seqSet);
+	buildAlignmentGraph(matches, scores, g, FrequencyCounting() );
 	
 	// Guide tree
 	Graph<Tree<double> > guideTree;
@@ -314,28 +303,34 @@ globalAlignment(StringSet<TString, TSpec> const& seqSet,
 	typedef Graph<Alignment<TStringSet, TSize> > TGraph;
 	typedef typename Id<TGraph>::Type TId;
 
-	// Generate a primary library
-	TGraph lib1(seqSet);
+	// Set-up alignment scoring matrices
+	typedef Score<int> TScore;
+	typedef typename Value<TScore>::Type TScoreValue;
+	TScore scType(5,-4,-4,-14);
+
+	// Containers for segment matches and corresponding scores 
+	typedef Fragment<TSize, ExactReversableFragment<> > TFragment;
+	typedef String<TFragment> TFragmentString;
+	TFragmentString matches;
+	typedef String<TScoreValue> TScoreValues;
+	TScoreValues scores;
+
+
+	// Compute segment matches from the longest common subsequence
+	appendSegmentMatches(seqSet, matches, scores, Lcs_Library() );
+
+	// Include external segment matches
 	if (length(value(cfgOpt, "matches"))) {
 		std::fstream strm_lib;
 		strm_lib.open(toCString(value(cfgOpt, "matches")), std::ios_base::in | std::ios_base::binary);
-		read(strm_lib, lib1, nameSet, BlastLib());	// Read library
+		read(strm_lib, matches, scores, nameSet, BlastLib());
 		strm_lib.close();
 	}
 
-	// Generate a second library
-	TGraph lib2(seqSet);
-	Score<int> score_type = Score<int>(5,-4,-4,-14);
-	generatePrimaryLibrary(lib2, score_type, Lcs_Library() );
-	
-	
-	// Weighting of libraries (Signal addition)
+	// Use these segment matches for the initial alignment graph
 	TGraph g(seqSet);
-	String<TGraph*> libs;
-	if (!empty(lib1)) appendValue(libs, &lib1);
-	if (!empty(lib2)) appendValue(libs, &lib2);
-	combineGraphs(g, libs, FrequencyCounting() );
-
+	buildAlignmentGraph(matches, scores, g, FrequencyCounting() );
+	
 	// Guide tree
 	Graph<Tree<double> > guideTree;
 	if (length(value(cfgOpt, "usetree"))) {
@@ -371,49 +366,50 @@ globalAlignment(StringSet<TString, TSpec> const& seqSet,
 				MSA_Dna)
 {
 	SEQAN_CHECKPOINT
-	
 	typedef StringSet<TString, Dependent<> > TStringSet;
 	typedef typename Size<TStringSet>::Type TSize;
 	typedef Graph<Alignment<TStringSet, TSize> > TGraph;
 	typedef typename Id<TGraph>::Type TId;
 
-	// Score objects
-	Score<int> scType = Score<int>(5,-4,-4,-14);
-	
-	// Select pairs
-	TGraph g(seqSet);
+	// Select all pairs
 	String<Pair<TId, TId> > pList;
-	selectPairsForLibraryGeneration(g, pList);
+	selectPairsForLibraryGeneration(seqSet, pList);
 
-	// Generate a primary library, i.e., all global pairwise alignments
-	TGraph lib1(seqSet);
-	String<double> distanceMatrix;
-	generatePrimaryLibrary(lib1, pList, distanceMatrix, scType, GlobalPairwise_Library() );
-	
-	// Generate a primary library, i.e., all local pairwise alignments
-	TGraph lib2(seqSet);
-	generatePrimaryLibrary(lib2, pList, scType, LocalPairwise_Library() );
-	
-	TGraph lib3(seqSet);
+	// Set-up a distance matrix
+	typedef String<double> TDistanceMatrix;
+	typedef typename Value<TDistanceMatrix>::Type TDistanceValue;
+	TDistanceMatrix distanceMatrix;
+
+	// Set-up alignment scoring matrices
+	typedef Score<int> TScore;
+	typedef typename Value<TScore>::Type TScoreValue;
+	TScore scType(5,-4,-4,-14);
+
+	// Containers for segment matches and corresponding scores 
+	typedef String<Fragment<> > TFragmentString;
+	TFragmentString matches;
+	typedef String<TScoreValue> TScoreValues;
+	TScoreValues scores;
+
+	// Compute segment matches from global pairwise alignments
+	appendSegmentMatches(seqSet, pList, scType, matches, scores, distanceMatrix, GlobalPairwise_Library() );
+
+	// Append segment matches from local pairwise alignments
+	appendSegmentMatches(seqSet, pList, scType, matches, scores, LocalPairwise_Library() );
+
+	// Include external segment matches
 	if (length(value(cfgOpt, "matches"))) {
 		std::fstream strm_lib;
 		strm_lib.open(toCString(value(cfgOpt, "matches")), std::ios_base::in | std::ios_base::binary);
-		read(strm_lib, lib3, nameSet, BlastLib());	// Read library
+		read(strm_lib, matches, scores, nameSet, BlastLib());
 		strm_lib.close();
 	}
 
-	// Weighting of libraries (Signal addition)
-	String<TGraph*> libs;
-	appendValue(libs, &lib1);
-	appendValue(libs, &lib2);
-	if (!empty(lib3)) appendValue(libs, &lib3);
-	combineGraphs(g, libs, FrequencyCounting() );
-	
-	// Clear the old libraries
-	clear(lib1);
-	clear(lib2);
-	clear(lib3);
 
+	// Use these segment matches for the initial alignment graph
+	TGraph g(seqSet);
+	buildAlignmentGraph(matches, scores, g, FrequencyCounting() );
+	
 	// Guide tree
 	Graph<Tree<double> > guideTree;
 	if (length(value(cfgOpt, "usetree"))) {
@@ -424,7 +420,6 @@ globalAlignment(StringSet<TString, TSpec> const& seqSet,
 	} else {
 		slowNjTree(distanceMatrix, guideTree);
 	}
-
 
 	// Triplet Extension and progressive alignment
 	TSize nSeq = length(seqSet);
@@ -443,6 +438,8 @@ globalAlignment(StringSet<TString, TSpec> const& seqSet,
 	clear(distanceMatrix);
 	clear(g);
 }
+
+//////////////////////////////////////////////////////////////////////////////
 
 template<typename TString, typename TSpec, typename TDependentSequenceSet, typename TCargo, typename TSpec2, typename TTag>
 inline void

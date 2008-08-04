@@ -72,20 +72,18 @@ _localAlignment(TAlign& align,
 
 
 //////////////////////////////////////////////////////////////////////////////
-
-template<typename TAlign, typename TStringSet, typename TPropertyMap, typename TScore, typename TSize1>
+template<typename TString, typename TMatches, typename TScores, typename TScore, typename TSize1>
 inline void
-_localAlignment(TAlign& align,
-				TStringSet const& str,
-				TPropertyMap& propMap,
+_localAlignment(StringSet<TString, Dependent<> > const& str,
+				TMatches& matches,
+				TScores& scores,
 				TScore const& sc,
 				TSize1 numAlignments,
 				SmithWatermanClump)
 {
 	SEQAN_CHECKPOINT
-	typedef typename Value<TPropertyMap>::Type TRankScorePair;
 	typedef typename Value<TScore>::Type TScoreValue;
-	typedef typename Size<TStringSet>::Type TSize;
+	typedef typename Size<TMatches>::Type TSize;
   
 	// For clumpping remember the used positions
 	TSize len0 = length(str[0]);
@@ -99,13 +97,13 @@ _localAlignment(TAlign& align,
 	TSize count = 0;
 	do {
 		// Create the local alignment
-		TSize from = length(align);
-		local_score = _localAlignment(align, str, forbidden, sc, SmithWatermanClump());
-		TSize to = length(align);
+		TSize from = length(matches);
+		local_score = _localAlignment(matches, str, forbidden, sc, SmithWatermanClump());
+		TSize to = length(matches);
 		if (local_score > maxScore) maxScore = local_score;
 
-		resize(propMap, to);
-		for(TSize k = from; k<to; ++k) value(propMap, k) = TRankScorePair(count, local_score);
+		resize(scores, to);
+		for(TSize k = from; k<to; ++k) value(scores, k) = local_score;
 		++count;
 	} while ((local_score > 0.5 * maxScore) && (count < (TSize) numAlignments));
 }

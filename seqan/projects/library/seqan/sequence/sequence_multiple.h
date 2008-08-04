@@ -1522,6 +1522,16 @@ a single integer value between 0 and the sum of string lengths minus 1.
 		return pos;
 	}
 
+	template <typename TString, typename TSpec, typename TPos>
+	inline typename Id<StringSet<TString, Owner<TSpec> > >::Type
+	positionToId(StringSet<TString, Owner<TSpec> > const&, 
+				TPos const pos) 
+	{
+	SEQAN_CHECKPOINT
+		return pos;
+	}
+
+
 	template <typename TString, typename TPos>
 	inline typename Id<StringSet<TString, Dependent<Generous> > >::Type
 	positionToId(StringSet<TString, Dependent<Generous> >& me, 
@@ -1575,7 +1585,7 @@ a single integer value between 0 and the sum of string lengths minus 1.
 
 	template <typename TString, typename TSpec, typename TId>
 	inline typename Id<StringSet<TString, Owner<TSpec> > >::Type
-	idToPosition(StringSet<TString, Owner<TSpec> >&, 
+	idToPosition(StringSet<TString, Owner<TSpec> > const&, 
 				TId const id) 
 	{
 	SEQAN_CHECKPOINT
@@ -1584,7 +1594,7 @@ a single integer value between 0 and the sum of string lengths minus 1.
 
 	template <typename TString, typename TId>
 	inline typename Id<StringSet<TString, Dependent<Generous> > >::Type
-	idToPosition(StringSet<TString, Dependent<Generous> >& me, 
+	idToPosition(StringSet<TString, Dependent<Generous> > const& me, 
 				TId const id) 
 	{
 	SEQAN_CHECKPOINT
@@ -1593,7 +1603,7 @@ a single integer value between 0 and the sum of string lengths minus 1.
 
 	template <typename TString, typename TId>
 	inline typename Id<StringSet<TString, Dependent<Tight> > >::Type
-	idToPosition(StringSet<TString, Dependent<Tight> >&me, 
+	idToPosition(StringSet<TString, Dependent<Tight> > const&me, 
 				TId const id) 
 	{
 	SEQAN_CHECKPOINT

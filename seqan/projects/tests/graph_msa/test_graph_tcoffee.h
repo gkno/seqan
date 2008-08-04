@@ -198,13 +198,18 @@ void Test_Distances() {
 
 	clear(distanceMatrix);
 	String<Pair<unsigned int, unsigned int> > pList;
-	selectPairsForLibraryGeneration(g, pList);
+	selectPairsForLibraryGeneration(strSet, pList);
 	Blosum62 score_type(-1,-11);
-	generatePrimaryLibrary(g, pList, score_type, GlobalPairwise_Library() );
+	String<Fragment<> > matches;
+	String<int> scores;
+	String<double> dist;
+	appendSegmentMatches(strSet, pList, score_type, matches, scores, dist, GlobalPairwise_Library() );
+	buildAlignmentGraph(matches, scores, g, FrequencyCounting() );
 	getDistanceMatrix(g,distanceMatrix,LibraryDistance());
 	SEQAN_TASSERT(getValue(distanceMatrix, 0 * length(strSet) + 1) < getValue(distanceMatrix, 2 * length(strSet) + 3))
 	SEQAN_TASSERT(getValue(distanceMatrix, 1 * length(strSet) + 2) < getValue(distanceMatrix, 2 * length(strSet) + 3))
 }
+
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -246,20 +251,39 @@ void Test_Libraries() {
 	assignValueById(strSet, str4);
 	TGraph g(strSet);
 	Blosum62 score_type(-1,-11);
-	generatePrimaryLibrary(g, score_type, Lcs_Library() );
+	String<Fragment<> > matches;
+	String<int> scores;
+	appendSegmentMatches(strSet, matches, scores, Lcs_Library() );
+	buildAlignmentGraph(matches, scores, g, FrequencyCounting() );
 	__testquickAlign(g);
-	generatePrimaryLibrary(g, score_type, Kmer_Library() );
+	clear(matches);
+	clear(scores);
+	appendSegmentMatches(strSet, matches, scores, Kmer_Library() );
+	buildAlignmentGraph(matches, scores, g, FrequencyCounting() );
 	__testquickAlign(g);
-	generatePrimaryLibrary(g, score_type, LocalPairwise_Library() );
+	clear(matches);
+	clear(scores);
+	appendSegmentMatches(strSet, score_type, matches, scores, LocalPairwise_Library() );
+	buildAlignmentGraph(matches, scores, g, FrequencyCounting() );
 	__testquickAlign(g);
-	generatePrimaryLibrary(g, score_type, GlobalPairwise_Library() );
+	clear(matches);
+	clear(scores);
+	appendSegmentMatches(strSet, score_type, matches, scores, GlobalPairwise_Library() );
+	buildAlignmentGraph(matches, scores, g, FrequencyCounting() );
 	__testquickAlign(g);
-	generatePrimaryLibrary(g, score_type, AlignConfig<false,false,false,false>(), GlobalPairwise_Library() );
+	clear(matches);
+	clear(scores);
 	String<double> distanceMatrix;
-	generatePrimaryLibrary(g, distanceMatrix, score_type, GlobalPairwise_Library() );
+	String<Pair<unsigned int, unsigned int> > pList;
+	selectPairsForLibraryGeneration(strSet, pList);
+	appendSegmentMatches(strSet, pList, score_type, matches, scores, distanceMatrix, AlignConfig<false,false,false,false>(), GlobalPairwise_Library() );
+	buildAlignmentGraph(matches, scores, g, FrequencyCounting() );
 	__testquickAlign(g);
 	Graph<Undirected<double> > distGraph;
-	generatePrimaryLibrary(g, distGraph, score_type, GlobalPairwise_Library() );
+	clear(matches);
+	clear(scores);
+	appendSegmentMatches(strSet, pList, score_type, matches, scores, distanceMatrix, AlignConfig<false,false,false,false>(), GlobalPairwise_Library() );
+	buildAlignmentGraph(matches, scores, g, FrequencyCounting() );
 	__testquickAlign(g);
 }
 
@@ -283,7 +307,10 @@ void Test_ExternalLibraries() {
 	typedef Graph<Alignment<StringSet<TSequence, Dependent<> >, unsigned int> > TGraph;
 	TGraph g(seqSet);
 	Blosum62 score_type(-1,-11);
-	generatePrimaryLibrary(g, score_type, GlobalPairwise_Library() );
+	String<Fragment<> > matches;
+	String<int> scores;
+	appendSegmentMatches(seqSet, score_type, matches, scores, GlobalPairwise_Library() );
+	buildAlignmentGraph(matches, scores, g, FrequencyCounting() );
 	std::cout << g << std::endl;
 
 	// T-Coffee lib format
@@ -318,7 +345,10 @@ void Test_ExternalLibraries() {
 	std::fstream strmRead2;
 	strmRead2.open(TEST_PATH "test.blast", std::ios_base::in | std::ios_base::binary);
 	clearVertices(g);
-	read(strmRead2, g, nameSet,BlastLib());
+	clear(matches);
+	clear(scores);
+	read(strmRead2, matches, scores, nameSet,BlastLib());
+	buildAlignmentGraph(matches, scores, g, FrequencyCounting() );
 	strmRead2.close();
 	std::cout << g << std::endl;
 
@@ -335,8 +365,10 @@ void Test_ExternalLibraries() {
 
 	clear(g);
 	assignStringSet(g, seqSet);
-	generatePrimaryLibrary(g, score_type, GlobalPairwise_Library() );
-
+	clear(matches);
+	clear(scores);
+	appendSegmentMatches(seqSet, score_type, matches, scores, GlobalPairwise_Library() );
+	buildAlignmentGraph(matches, scores, g, FrequencyCounting() );
 	// Blast lib format
 
 	// Writing
@@ -352,13 +384,15 @@ void Test_ExternalLibraries() {
 	assignStringSet(g, seqSet);
 	std::fstream strmBlastLib;
 	strmBlastLib.open(TEST_PATH "test.lib", std::ios_base::in | std::ios_base::binary);
-	read(strmBlastLib,g, nameSet, BlastLib());	// Read library
+	clear(matches);
+	clear(scores);
+	read(strmBlastLib, matches, scores, nameSet,BlastLib());
+	buildAlignmentGraph(matches, scores, g, FrequencyCounting() );
 	strmBlastLib.close();
 	//_debugRefinedMatches(g);
 	__testquickAlign(g);
 
 }
-
 
 void Test_GraphCombination() {
 	typedef String<char> TName;
@@ -492,7 +526,6 @@ void Test_TripletExtension() {
 	SEQAN_TASSERT(cargo(findEdge(g, findVertex(g, 1, 8), findVertex(g, 3, 0))) == 20);
 }
 
-
 void Test_SumOfPairsScore() {
 	typedef String<char> TName;
 	typedef StringSet<TName, Owner<> > TNameSet;
@@ -513,7 +546,10 @@ void Test_SumOfPairsScore() {
 	TGraph g(seqSet);
 	Score<int> score_type = Score<int>(5,-4,-2,-10);
 	String<double> distanceMatrix;
-	generatePrimaryLibrary(g, distanceMatrix, score_type, GlobalPairwise_Library() );
+	String<Fragment<> > matches;
+	String<int> scores;
+	appendSegmentMatches(seqSet, score_type, matches, scores, distanceMatrix, GlobalPairwise_Library() );
+	buildAlignmentGraph(matches, scores, g, FractionalScore() );
 	tripletLibraryExtension(g);
 	Graph<Tree<double> > guideTree;
 	slowNjTree(distanceMatrix, guideTree);
@@ -526,7 +562,10 @@ void Test_SumOfPairsScore() {
 	Score<int> scType = Score<int>(5,-4,-1,-2);
 	clear(distanceMatrix);
 	clearVertices(g);
-	generatePrimaryLibrary(g, distanceMatrix, scType, GlobalPairwise_Library() );
+	clear(matches);
+	clear(scores);
+	appendSegmentMatches(seqSet, scType, matches, scores, distanceMatrix, GlobalPairwise_Library() );
+	buildAlignmentGraph(matches, scores, g, FractionalScore() );
 	tripletLibraryExtension(g);
 	clear(guideTree);
 	slowNjTree(distanceMatrix, guideTree);
@@ -541,7 +580,10 @@ void Test_SumOfPairsScore() {
 	clear(distanceMatrix);
 	clear(g);
 	assignStringSet(g, seqSet);
-	generatePrimaryLibrary(g, distanceMatrix, scType, GlobalPairwise_Library() );
+	clear(matches);
+	clear(scores);
+	appendSegmentMatches(seqSet, scType, matches, scores, distanceMatrix, GlobalPairwise_Library() );
+	buildAlignmentGraph(matches, scores, g, FractionalScore() );
 	tripletLibraryExtension(g);
 	clear(guideTree);
 	slowNjTree(distanceMatrix, guideTree);
@@ -554,7 +596,10 @@ void Test_SumOfPairsScore() {
 	seqSet[1] = "AAA";
 	clear(distanceMatrix);
 	clearVertices(g);
-	generatePrimaryLibrary(g, distanceMatrix, scType, GlobalPairwise_Library() );
+	clear(matches);
+	clear(scores);
+	appendSegmentMatches(seqSet, scType, matches, scores, distanceMatrix, GlobalPairwise_Library() );
+	buildAlignmentGraph(matches, scores, g, FractionalScore() );
 	tripletLibraryExtension(g);
 	clear(guideTree);
 	slowNjTree(distanceMatrix, guideTree);
@@ -566,7 +611,10 @@ void Test_SumOfPairsScore() {
 	seqSet[1] = "TTTAAATTTAAATTT";
 	clear(distanceMatrix);
 	clearVertices(g);
-	generatePrimaryLibrary(g, distanceMatrix, scType, GlobalPairwise_Library() );
+	clear(matches);
+	clear(scores);
+	appendSegmentMatches(seqSet, scType, matches, scores, distanceMatrix, GlobalPairwise_Library() );
+	buildAlignmentGraph(matches, scores, g, FractionalScore() );
 	tripletLibraryExtension(g);
 	clear(guideTree);
 	slowNjTree(distanceMatrix, guideTree);
@@ -606,7 +654,10 @@ void Test_Progressive() {
 	TGraph g(seqSet);
 	Blosum62 score_type(-1,-11);
 	String<double> distanceMatrix;
-	generatePrimaryLibrary(g, distanceMatrix, score_type, GlobalPairwise_Library() );
+	String<Fragment<> > matches;
+	String<int> scores;
+	appendSegmentMatches(seqSet, score_type, matches, scores, distanceMatrix, GlobalPairwise_Library() );
+	buildAlignmentGraph(matches, scores, g, FractionalScore() );
 	tripletLibraryExtension(g);
 	Graph<Tree<double> > guideTree;
 	slowNjTree(distanceMatrix, guideTree);

@@ -553,33 +553,55 @@ read(TFile & file,
 
 //////////////////////////////////////////////////////////////////////////////
 
+template<typename TSizeSpec, typename TSpec1, typename TSpec2, typename TSize>
+inline void 
+__includeFragment(String<Fragment<TSizeSpec, ExactReversableFragment<TSpec1> >, TSpec2>& matches, 
+				  TSize seq1Id, 
+				  TSize beg1, 
+				  TSize seq2Id, 
+				  TSize beg2, 
+				  TSize len, 
+				  bool reversed)
+{
+	SEQAN_CHECKPOINT
+	typedef Fragment<TSizeSpec, ExactReversableFragment<TSpec1> > TFragment;
+	appendValue(matches, TFragment(seq1Id, beg1, seq2Id, beg2, len, reversed));
+}
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TFile, typename TStringSet, typename TCargo, typename TSpec, typename TNames, typename TEdgeMap>
-void 
+template<typename TSizeSpec, typename TSpec1, typename TSpec2, typename TSize>
+inline void 
+__includeFragment(String<Fragment<TSizeSpec, ExactFragment<TSpec1> >, TSpec2>& matches, 
+				  TSize seq1Id, 
+				  TSize beg1, 
+				  TSize seq2Id, 
+				  TSize beg2, 
+				  TSize len, 
+				  bool)
+{
+	SEQAN_CHECKPOINT
+	typedef Fragment<TSizeSpec, ExactFragment<TSpec1> > TFragment;
+	appendValue(matches, TFragment(seq1Id, beg1, seq2Id, beg2, len));
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TFile, typename TFragment, typename TSpec1, typename TScoreValue, typename TSpec2, typename TNames>
+inline void 
 read(TFile & file,
-	 Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+	 String<TFragment, TSpec1>& matches,
+	 String<TScoreValue, TSpec2>& scores,
 	 TNames& names,
-	 TEdgeMap& edgeMap,
 	 BlastLib) 
 {
 	SEQAN_CHECKPOINT
 	typedef typename Size<TNames>::Type TSize;
 	typedef typename Value<TFile>::Type TValue;
 	typedef typename Value<TNames>::Type TName;
-	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
-	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
-	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	typedef typename Id<TGraph>::Type TId;
-	
-	// Initialization
-	typedef Fragment<TSize, ExactReversableFragment<> > TFragment;
-	typedef String<TFragment> TFragmentString;
+	typedef String<TFragment, TSpec1> TFragmentString;
 	typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
-	TFragmentString matches;
-	String<TCargo> score_values;
-
+	
 	// Map the names to slots
 	typedef std::map<TName, TSize> TNameToPosition;
 	TNameToPosition namePosMap;
@@ -589,7 +611,6 @@ read(TFile & file,
 	TValue c;
 	if (_streamEOF(file)) return;
 	else c = _streamGet(file);
-	TStringSet& strSet = stringSet(g);
 
 	TName seq1;
 	TName seq2;
@@ -635,52 +656,11 @@ read(TFile & file,
 		//std::cout << seq1Id << ',' << beg1 << ',' << seq2Id << ',' << beg2 << ',' << len << std::endl;
 		//std::cout << infix(strSet[seq1Id], beg1, beg1+len) << std::endl;
 		//std::cout << infix(strSet[seq2Id], beg2, beg2+len) << std::endl;
-		
-		appendValue(matches, TFragment(seq1Id, --beg1, seq2Id, --beg2, len, reversed));
-		appendValue(score_values, (TCargo) len);
+
+		__includeFragment(matches, seq1Id, --beg1, seq2Id, --beg2, len, reversed);
+		appendValue(scores, (TScoreValue) len);
 		_parse_skipLine(file, c);
 	}
-
-	// Refine all matches, rescore matches and create multiple alignment
-	matchRefinement(matches,strSet,g);
-	resizeEdgeMap(g, edgeMap);
-
-	// Adapt edge weights
-	TFragmentStringIter endIt = end(matches);
-	TSize positionIt = 0;
-	for(TFragmentStringIter it = begin(matches); it != endIt; ++it, ++positionIt) {
-		TId id1 = sequenceId(*it,0);
-		TSize pos1 = fragmentBegin(*it, id1);
-		TSize origFragLen = fragmentLength(*it, id1);
-		TSize end1 = pos1 + origFragLen;
-		bool reversed = isReversed(*it);
-		while(pos1 < end1) {
-			TSize pos2 = 0;
-			TId id2 = 0;
-			getProjectedPosition(*it, id1, pos1, id2, pos2);
-			TVertexDescriptor p1 = findVertex(g, id1, pos1);
-			TVertexDescriptor p2 = findVertex(g, id2, pos2);
-			TSize fragLen = fragmentLength(g, p1);
-			TEdgeDescriptor e = findEdge(g, p1, p2);
-			cargo(e) += (TCargo) ( ((double) fragLen / (double) origFragLen) * (double) value(score_values, positionIt));
-			property(edgeMap, e) = reversed;
-			pos1 += fragLen;
-			pos2 += fragLen;
-		}
-	}
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TFile, typename TStringSet, typename TCargo, typename TSpec, typename TNames>
-void 
-read(TFile & file,
-	 Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-	 TNames& names, 
-	 BlastLib) 
-{
-	String<bool> edgeMap;
-	read(file, g, names, edgeMap, BlastLib());
 }
 
 //////////////////////////////////////////////////////////////////////////////

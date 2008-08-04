@@ -64,6 +64,11 @@ class Graph<Hmm<TAlphabet, TCargo, TSpec> >
 
 		//Emission probabilities
 		String<TCargo> data_emission;
+
+		//Silent state map
+		String<bool> data_silent;
+
+		//Begin and end state
 		TVertexDescriptor data_begin;
 		TVertexDescriptor data_end;
 
@@ -144,11 +149,13 @@ _copyGraph(Graph<Hmm<TAlphabet, TCargo, TSpec> > const& source,
 	if (transp) {
 		transpose(source.data_model, dest.data_model);
 		dest.data_emission = source.data_emission;
+		dest.data_silent = source.data_silent;
 		dest.data_begin = source.data_end;
 		dest.data_end = source.data_begin;
 	} else {
 		dest.data_model = source.data_model;
 		dest.data_emission = source.data_emission;
+		dest.data_silent = source.data_silent;
 		dest.data_begin = source.data_begin;
 		dest.data_end = source.data_end;
 	}
@@ -243,6 +250,7 @@ clearVertices(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g)
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 
 	clear(g.data_emission);
+	clear(g.data_silent);
 	clearVertices(g.data_model);
 }
 
@@ -293,7 +301,8 @@ degree(Graph<Hmm<TAlphabet, TCargo, TSpec> > const& g,
 
 template<typename TAlphabet, typename TCargo, typename TSpec> 
 inline typename VertexDescriptor<Graph<Hmm<TAlphabet, TCargo, TSpec> > >::Type 
-addVertex(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g)
+addVertex(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g, 
+		  bool silent)
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<Hmm<TAlphabet, TCargo, TSpec> > TGraph;
@@ -304,6 +313,8 @@ addVertex(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g)
 
 	TVertexDescriptor vd = addVertex(g.data_model);
 	if (length(g.data_emission) / alph_size <= vd) resize(g.data_emission, (vd + 1) * alph_size, Generous());
+	if (length(g.data_silent) <= vd) resize(g.data_silent, (vd + 1), Generous());
+	value(g.data_silent, vd) = silent;
 	TEmisIter it = begin(g.data_emission);
 	goFurther(it, vd * alph_size);
 	for(TSize counter = 0; counter < alph_size; ++counter) {
@@ -315,17 +326,27 @@ addVertex(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g)
 
 //////////////////////////////////////////////////////////////////////////////
 
+template<typename TAlphabet, typename TCargo, typename TSpec> 
+inline typename VertexDescriptor<Graph<Hmm<TAlphabet, TCargo, TSpec> > >::Type 
+addVertex(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g)
+{
+	SEQAN_CHECKPOINT
+	return addVertex(g, false);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 template<typename TAlphabet, typename TCargo, typename TSpec, typename TEmission> 
 inline typename VertexDescriptor<Graph<Hmm<TAlphabet, TCargo, TSpec> > >::Type 
 addVertex(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g,
-		  TEmission const& emis)
+		  String<TEmission> const& emis)
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<Hmm<TAlphabet, TCargo, TSpec> > TGraph;
 	typedef typename Size<TAlphabet>::Type TSize;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename Iterator<String<TCargo>, Rooted>::Type TEmisIter;
-	typedef typename Iterator<TEmission>::Type TInputIter;
+	typedef typename Iterator<String<TEmission> >::Type TInputIter;
 	TSize alph_size = ValueSize<TAlphabet>::VALUE;
 
 	SEQAN_TASSERT(alph_size == length(emis))
@@ -338,6 +359,22 @@ addVertex(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g,
 		value(it) = *itIn;
 		++itIn; ++it;
 	}
+	return vd;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TAlphabet, typename TCargo, typename TSpec, typename TEmission> 
+inline typename VertexDescriptor<Graph<Hmm<TAlphabet, TCargo, TSpec> > >::Type 
+addVertex(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g,
+		  TEmission const& emis,
+		  bool silent)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Hmm<TAlphabet, TCargo, TSpec> > TGraph;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	TVertexDescriptor vd = addVertex(g, emis);
+	value(g.data_silent, vd) = silent;
 	return vd;
 }
 
@@ -510,6 +547,7 @@ write(TFile & target,
 		if (!first) _streamPut(target,',');
 		else first = false;
 		_streamPutInt(target, pos);	
+		if (isSilent(g, pos)) _streamWrite(target," (Silent)");
 	}
 	_streamPut(target,'}');
 	_streamPut(target,'\n');
@@ -552,6 +590,7 @@ write(TFile & target,
 	first = true;
 	for(TSize pos = 0;it!=itEnd;goNext(it), ++pos) {
 		if (!idInUse(_getVertexIdManager(g), pos)) continue;
+		if (isSilent(g, pos)) continue;
 		if (!first) _streamPut(target,'\n');
 		else first = false;
 		_streamPutInt(target, pos);
@@ -594,6 +633,7 @@ assignBeginState(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g,
 	SEQAN_ASSERT(idInUse(_getVertexIdManager(g), vertex) == true)
 
 	g.data_begin = vertex;
+	value(g.data_silent, vertex) = true;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -612,12 +652,13 @@ assignBeginState(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g,
 template<typename TAlphabet, typename TCargo, typename TSpec, typename TVertexDescriptor>
 inline void
 assignEndState(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g,
-				 TVertexDescriptor const vertex)
+			   TVertexDescriptor const vertex)
 {
 	SEQAN_CHECKPOINT
 	SEQAN_ASSERT(idInUse(_getVertexIdManager(g), vertex) == true)
 
 	g.data_end = vertex;
+	value(g.data_silent, vertex) = true;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -913,6 +954,77 @@ assignEmissionProbability(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g,
 	value(g.data_emission, state * alph_size + ordValue(symbol)) = (TCargo) eProb;
 }
 
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.assignSilentStatus:
+..cat:Graph.Hmm
+..summary:Assigns a silent status to a state.
+..signature:assignBeginState(g, vertex, silent)
+..param.g:A HMM.
+...type:Spec.Hmm
+..param.vertex:A state.
+...type:Metafunction.VertexDescriptor
+..param.silent:A boolean value which is true for silent states.
+..returns:void.
+*/
+template<typename TAlphabet, typename TCargo, typename TSpec, typename TVertexDescriptor>
+inline void
+assignSilentStatus(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g,
+				   TVertexDescriptor const vertex,
+				   bool const silent)
+{
+	SEQAN_CHECKPOINT
+	SEQAN_ASSERT(idInUse(_getVertexIdManager(g), vertex) == true)
+	value(g.data_silent, vertex) = silent;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.silentStatus:
+..cat:Graph.Hmm
+..summary:Reference to the silent status of a state.
+..signature:silentStatus(g, vertex)
+..param.g:A HMM.
+...type:Spec.Hmm
+..param.vertex:A state.
+...type:Metafunction.VertexDescriptor
+..returns:Reference to silent status of the given state.
+*/
+template<typename TAlphabet, typename TCargo, typename TSpec, typename TVertexDescriptor>
+inline bool&
+silentStatus(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g,
+			 TVertexDescriptor const vertex)
+{
+	SEQAN_CHECKPOINT
+	return (value(g.data_silent, vertex));
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.isSilent:
+..cat:Graph.Hmm
+..summary:Indicates whether a state is silent or not.
+..signature:isSilent(g, vertex)
+..param.g:A HMM.
+...type:Spec.Hmm
+..param.vertex:A state.
+...type:Metafunction.VertexDescriptor
+..returns:The silent status of that state.
+*/
+template<typename TAlphabet, typename TCargo, typename TSpec, typename TVertexDescriptor>
+inline bool
+isSilent(Graph<Hmm<TAlphabet, TCargo, TSpec> > const& g,
+		 TVertexDescriptor const vertex)
+{
+	SEQAN_CHECKPOINT
+	return (value(g.data_silent, vertex));
+}
 
 
 }// namespace SEQAN_NAMESPACE_MAIN

@@ -278,82 +278,32 @@ localAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 ..summary:Computes multiple local alignments of two sequences.
 ..cat:Alignments
 ..signature:
-multiLocalAlignment(graph, edgeMap, score, numAlign, tag)
-..param.graph:The alignment graph having 2 sequences.
-...type:Spec.Alignment Graph
-..param.edgeMap:An edge map of pairs of integers.
-The first number is the id of the local alignment, the second one the score of the local alignment.
-..param.score:The score values to be used for computing the alignment.
+multiLocalAlignment(strSet, matches, scores, scType, numAlign, tag)
+..param.strSet:A string set of 2 sequences.
+...type:Class.StringSet
+..param.matches:The set of all local alignment matches.
+..param.scores:The respective local alignment score that match was coming from.
+..param.scType:A scoring object.
 ...type:Class.Score
 ..param.numAlign:The desired number of local alignments to compute.
 ..param.tag:A tag indicating the alignment algorithm to use
 ...remarks:SmithWatermanIsland or SmithWatermanClump
 ..returns:void
 */
-template<typename TStringSet, typename TCargo, typename TSpec, typename TPropertyMap, typename TScoreValue, typename TSpec2, typename TSize, typename TTag>
-inline void
-multiLocalAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-					TPropertyMap& edgeMap,
-					Score<TScoreValue, TSpec2> const& sc,
-					TSize numAlignments,
-					TTag)
-{
-	SEQAN_CHECKPOINT
-	clearVertices(g);
-
-	// String of fragments
-	typedef Fragment<> TFragment;
-	typedef String<TFragment > TFragmentString;
-	TFragmentString matches;
-
-	// Collect all local alignments
-	TPropertyMap localMap;
-	_localAlignment(matches,stringSet(g),localMap,sc,numAlignments,TTag());
-
-	// Refine all matches and create multiple alignment
-	matchRefinement(matches,stringSet(g),const_cast<Score<TScoreValue, TSpec2>&>(sc),g);
-	
-	// Adapt edge weights
-	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
-	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
-	typedef typename Id<TGraph>::Type TId;
-	typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
-	typedef typename Iterator<TPropertyMap>::Type TPropertyMapIter;
-	TFragmentStringIter endIt = end(matches);
-	TPropertyMapIter propIt = begin(localMap);
-	resizeEdgeMap(g, edgeMap);
-	for(TFragmentStringIter it = begin(matches); it != endIt; ++it, ++propIt) {
-		TId id1 = sequenceId(*it,0);
-		TId id2 = sequenceId(*it,1);
-		TSize pos1 = fragmentBegin(*it, id1);
-		TSize pos2 = fragmentBegin(*it, id2);
-		TSize end1 = pos1 + fragmentLength(*it, id1);
-		while(pos1 < end1) {
-			TVertexDescriptor p1 = findVertex(g, id1, pos1);
-			TVertexDescriptor p2 = findVertex(g, id2, pos2);
-			TEdgeDescriptor e = findEdge(g, p1, p2);
-			assignProperty(edgeMap, e, value(propIt));
-			pos1 += fragmentLength(g, p1);
-			pos2 += fragmentLength(g, p2);
-		}
-	}
-}
-
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TAlign, typename TStringSet, typename TPropertyMap, typename TScoreValue, typename TSpec2, typename TSize, typename TTag>
+template<typename TString, typename TMatches, typename TScores, typename TScoreValue, typename TSpec2, typename TSize, typename TTag>
 inline void
-multiLocalAlignment(TAlign& file,
-					TStringSet const& str,
-					TPropertyMap& edgeMap,
+multiLocalAlignment(StringSet<TString, Dependent<> > const& str,
+					TMatches& matches,
+					TScores& scores,
 					Score<TScoreValue, TSpec2> const& sc,
 					TSize numAlignments,
 					TTag)
 {
 	// Make a multiple local alignment and get all matches
-	_localAlignment(file,str,edgeMap,sc,numAlignments,TTag());
+	_localAlignment(str,matches,scores,sc,numAlignments,TTag());
 }
 
 

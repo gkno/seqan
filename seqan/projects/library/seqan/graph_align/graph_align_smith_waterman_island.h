@@ -202,19 +202,18 @@ _align_smith_waterman_island(TTrace& trace,
 //////////////////////////////////////////////////////////////////////////////
 
 
-template<typename TAlign, typename TStringSet, typename TPropertyMap, typename TScore, typename TSize1>
+template<typename TString, typename TMatches, typename TScores, typename TScore, typename TSize1>
 inline void
-_localAlignment(TAlign& align,
-				TStringSet const& str,
-				TPropertyMap& propMap,
+_localAlignment(StringSet<TString, Dependent<> > const& str,
+				TMatches& matches,
+				TScores& scoreformatch,
 				TScore const& sc,
 				TSize1 numAlignments,
 				SmithWatermanIsland)
 {
 	SEQAN_CHECKPOINT
 	typedef typename Value<TScore>::Type TScoreValue;
-	typedef typename Size<TStringSet>::Type TSize;
-	typedef typename Value<TPropertyMap>::Type TRankScorePair;
+	typedef typename Size<TMatches>::Type TSize;
 	typedef Pair<TSize, TSize> TIndexPair;
 
 	// Compute the DP Matrix
@@ -236,11 +235,11 @@ _localAlignment(TAlign& align,
 	typename TScoreValueSet::const_iterator scoresIt = scores.begin();
 	typename TScoreValueSet::const_iterator scoresItEnd = scores.end();
 	for(TSize posit = 0;((scoresIt != scoresItEnd) && (posit < numAlignments)); ++scoresIt, ++posit) {
-		TSize from = length(align);
-		_align_smith_waterman_trace(align, str, trace, 0, (value(islandIndex, scoresIt->second)).i1, (value(islandIndex, scoresIt->second)).i2, forbidden);
-		TSize to = length(align);
-		resize(propMap, to);
-		for(TSize walk = from; walk < to; ++walk) value(propMap, walk) = TRankScorePair(posit, value(islandMax, scoresIt->second));
+		TSize from = length(matches);
+		_align_smith_waterman_trace(matches, str, trace, 0, (value(islandIndex, scoresIt->second)).i1, (value(islandIndex, scoresIt->second)).i2, forbidden);
+		TSize to = length(matches);
+		resize(scoreformatch, to);
+		for(TSize walk = from; walk < to; ++walk) value(scoreformatch, walk) = value(islandMax, scoresIt->second);
 	}
 }
 

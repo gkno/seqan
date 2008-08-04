@@ -563,53 +563,10 @@ matchRefinement(TFragmentString & matches,
 				StringSet<TSequence, TSetSpec> & strSet, 
 				TOutGraph & ali_graph)
 {
-SEQAN_CHECKPOINT
-	typedef typename Size<TFragmentString>::Type TSize;
-		
-	TSize totalCount = 0;
-	TSize nseq = length(strSet);
-	for(TSize i = 0; i < nseq;++i) totalCount += length(strSet[i]);
-	// If there are too many matches just cut the matches into single characters
-	if (((double) totalCount / (double) length(matches)) <= 1.0) {
-		typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
-		typedef typename Id<TOutGraph>::Type TId;
-		typedef typename EdgeDescriptor<TOutGraph>::Type TEdgeDescriptor;
-		typedef typename VertexDescriptor<TOutGraph>::Type TVertexDescriptor;
-		typedef std::set<std::pair<TId, TId> > TSeqPairs;
-		String<TSeqPairs> edgesPerSeqPair;
-		resize(edgesPerSeqPair, nseq * nseq);
-
-		// Make a vertex for each character
-		clearVertices(ali_graph);
-		for(TSize i=0;i<nseq;++i) {
-			TId id = positionToId(strSet, i);
-			for(TSize k=0;k<length(strSet[i]);++k) {
-				addVertex(ali_graph, id, k, 1);
-			}
-		}
-
-		// Add the edges
-		TFragmentStringIter endIt = end(matches);
-		for(TFragmentStringIter it = begin(matches); it != endIt; ++it) {
-			TId id1 = sequenceId(*it,0);
-			TSize pos1 = fragmentBegin(*it, id1);
-			TSize len = fragmentLength(*it, id1);
-			for(TSize p = 0; p < len; ++p) {
-				TSize pos2 = 0;
-				TId id2 = 0;
-				getProjectedPosition(*it, id1, pos1 + p, id2, pos2);
-				TVertexDescriptor v1 = findVertex(ali_graph, id1, pos1 + p);
-				TVertexDescriptor v2 = findVertex(ali_graph, id2, pos2);
-				TEdgeDescriptor e = findEdge(ali_graph, v1, v2);
-				if (e == 0) addEdge(ali_graph, v1, v2, 1);
-				else cargo(e) += 1;
-			}
-		}
-	} else {
-		typename Cargo<TOutGraph>::Type fake_score = 1;
-		bool anno = false;
-		matchRefinement(matches,strSet,fake_score,ali_graph,1,anno,ExactRefinement());
-	}
+	SEQAN_CHECKPOINT
+	typename Cargo<TOutGraph>::Type fake_score = 1;
+	bool anno = false;
+	matchRefinement(matches,strSet,fake_score,ali_graph,1,anno,ExactRefinement());
 }
 
 

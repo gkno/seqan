@@ -52,11 +52,192 @@ typedef Tag<FrequencyCounting_> const FrequencyCounting;
 
 
 
+//////////////////////////////////////////////////////////////////////////////
+// Generating an alignment graph from segment matches
+//////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TFragment, typename TSpec1, typename TScoreValue, typename TSpec2, typename TStringSet, typename TCargo, typename TSpec> 
+inline void
+buildAlignmentGraph(String<TFragment, TSpec1>& matches,
+					String<TScoreValue, TSpec2>& scores,
+					Graph<Alignment<TStringSet, TCargo, TSpec> >& outGraph,
+					FractionalScore)
+{
+	SEQAN_CHECKPOINT
+	typedef String<TFragment, TSpec1> TFragmentString;
+	typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
+	typedef String<TScoreValue, TSpec2> TScoreValues;
+	typedef typename Iterator<TScoreValues>::Type TScoreValuesIter;
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TOutGraph;
+	typedef typename Size<TFragmentString>::Type TSize;
+	typedef typename Id<TOutGraph>::Type TId;
+	typedef typename EdgeDescriptor<TOutGraph>::Type TEdgeDescriptor;
+	typedef typename VertexDescriptor<TOutGraph>::Type TVertexDescriptor;
+	
+	// Initialization
+	clearVertices(outGraph);
+	TStringSet& strSet = stringSet(outGraph);
+	TSize nseq = length(strSet);
+
+	// Total sequence length
+	TSize totalCount = 0;
+	for(TSize i = 0; i < nseq;++i) totalCount += length(value(strSet,i));
+	
+	// Segment-match refinement
+	// If there are too many matches just cut the matches into single characters
+	if (((double) totalCount / (double) length(matches)) <= 1.0) {
+		std::cout << "Single Cut" << std::endl;
+		typedef std::set<std::pair<TId, TId> > TSeqPairs;
+		String<TSeqPairs> edgesPerSeqPair;
+		resize(edgesPerSeqPair, nseq * nseq);
+
+		// Make a vertex for each character
+		clearVertices(outGraph);
+		for(TSize i=0;i<nseq;++i) {
+			TId id = positionToId(strSet, i);
+			for(TSize k=0;k<length(value(strSet,i));++k) {
+				addVertex(outGraph, id, k, 1);
+			}
+		}
+
+		// Add the edges
+		TFragmentStringIter endIt = end(matches);
+		for(TFragmentStringIter it = begin(matches); it != endIt; ++it) {
+			TId id1 = sequenceId(*it,0);
+			TSize pos1 = fragmentBegin(*it, id1);
+			TSize len = fragmentLength(*it, id1);
+			for(TSize p = 0; p < len; ++p) {
+				TSize pos2 = 0;
+				TId id2 = 0;
+				getProjectedPosition(*it, id1, pos1 + p, id2, pos2);
+				TVertexDescriptor v1 = findVertex(outGraph, id1, pos1 + p);
+				TVertexDescriptor v2 = findVertex(outGraph, id2, pos2);
+				TEdgeDescriptor e = findEdge(outGraph, v1, v2);
+				if (e == 0) addEdge(outGraph, v1, v2, 1);
+				else cargo(e) += 1;
+			}
+		}
+	} else {
+		matchRefinement(matches,strSet,outGraph);
+	}
+
+	// Find smallest score value
+	TScoreValuesIter scoreIt = begin(scores);
+	TScoreValuesIter scoreItEnd = end(scores);
+	TScoreValue smallest = 0;
+	for(;scoreIt != scoreItEnd; ++scoreIt) {
+		if (value(scoreIt) < smallest) {
+			smallest = value(scoreIt);
+		}
+	}
+
+	// Set all edge-weights to 1
+	typedef typename Iterator<TOutGraph, EdgeIterator>::Type TEdgeIterator;
+	TEdgeIterator itE(outGraph);
+	for(;!atEnd(itE);goNext(itE)) cargo(value(itE)) = 0;
+
+	// Adapt the scores
+	TFragmentStringIter endIt = end(matches);
+	scoreIt = begin(scores);
+	TScoreValue offset = (-1) * smallest + 1;
+	for(TFragmentStringIter it = begin(matches); it != endIt; ++it, ++scoreIt) {
+		// Some alignment scores might be negative, offset the scores
+		value(scoreIt) += offset;
+		TId id1 = sequenceId(*it,0);
+		TId id2 = sequenceId(*it,1);
+		TSize pos1 = fragmentBegin(*it, id1);
+		TSize pos2 = fragmentBegin(*it, id2);
+		TSize end1 = pos1 + fragmentLength(*it, id1);
+		while(pos1 < end1) {
+			TVertexDescriptor p1 = findVertex(outGraph, id1, pos1);
+			TVertexDescriptor p2 = findVertex(outGraph, id2, pos2);
+			TEdgeDescriptor e = findEdge(outGraph, p1, p2);
+			cargo(e) += (TCargo) value(scoreIt);
+			pos1 += fragmentLength(outGraph, p1);
+			pos2 += fragmentLength(outGraph, p2);
+		}
+	}
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TFragment, typename TSpec1, typename TScoreValue, typename TSpec2, typename TStringSet, typename TCargo, typename TSpec> 
+inline void
+buildAlignmentGraph(String<TFragment, TSpec1>& matches,
+					String<TScoreValue, TSpec2>&,
+					Graph<Alignment<TStringSet, TCargo, TSpec> >& outGraph,
+					FrequencyCounting)
+{
+	SEQAN_CHECKPOINT
+	typedef String<TFragment, TSpec1> TFragmentString;
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TOutGraph;
+	typedef typename Size<TFragmentString>::Type TSize;
+	
+	// Initialization
+	clearVertices(outGraph);
+	TStringSet& strSet = stringSet(outGraph);
+	TSize nseq = length(strSet);
+
+	// Total sequence length
+	TSize totalCount = 0;
+	for(TSize i = 0; i < nseq;++i) totalCount += length(value(strSet,i));
+	
+	// Segment-match refinement
+	// If there are too many matches just cut the matches into single characters
+	if (((double) totalCount / (double) length(matches)) <= 1.0) {
+		std::cout << "Single Cut" << std::endl;
+		typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
+		typedef typename Id<TOutGraph>::Type TId;
+		typedef typename EdgeDescriptor<TOutGraph>::Type TEdgeDescriptor;
+		typedef typename VertexDescriptor<TOutGraph>::Type TVertexDescriptor;
+		typedef std::set<std::pair<TId, TId> > TSeqPairs;
+		String<TSeqPairs> edgesPerSeqPair;
+		resize(edgesPerSeqPair, nseq * nseq);
+
+		// Make a vertex for each character
+		clearVertices(outGraph);
+		for(TSize i=0;i<nseq;++i) {
+			TId id = positionToId(strSet, i);
+			for(TSize k=0;k<length(value(strSet,i));++k) {
+				addVertex(outGraph, id, k, 1);
+			}
+		}
+
+		// Add the edges
+		TFragmentStringIter endIt = end(matches);
+		for(TFragmentStringIter it = begin(matches); it != endIt; ++it) {
+			TId id1 = sequenceId(*it,0);
+			TSize pos1 = fragmentBegin(*it, id1);
+			TSize len = fragmentLength(*it, id1);
+			for(TSize p = 0; p < len; ++p) {
+				TSize pos2 = 0;
+				TId id2 = 0;
+				getProjectedPosition(*it, id1, pos1 + p, id2, pos2);
+				TVertexDescriptor v1 = findVertex(outGraph, id1, pos1 + p);
+				TVertexDescriptor v2 = findVertex(outGraph, id2, pos2);
+				TEdgeDescriptor e = findEdge(outGraph, v1, v2);
+				if (e == 0) addEdge(outGraph, v1, v2, 1);
+				else cargo(e) += 1;
+			}
+		}
+	} else {
+		matchRefinement(matches,strSet,outGraph);
+	}
+
+	
+}
+
 
 
 //////////////////////////////////////////////////////////////////////////////
 // Merging of alignment graphs
 //////////////////////////////////////////////////////////////////////////////
+
+
 
 //////////////////////////////////////////////////////////////////////////////
 

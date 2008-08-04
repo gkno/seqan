@@ -67,27 +67,97 @@ viterbiAlgorithm(Graph<Hmm<TAlphabet, TCargo, TSpec> > const& hmm,
 	fill(vMat, numCols * numRows, infVal);
 	reserve(traceback, numCols * numRows);
 	value(vMat, getBeginState(hmm)) = (TCargo) 0;
+	TVertexDescriptor bState = getBeginState(hmm);
 	TVertexDescriptor eState = getEndState(hmm);
 	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
+
+	// Initialization for silent states connected to the begin state
+	TVertexIterator itSilent(hmm);
+	for(;!atEnd(itSilent);++itSilent) {
+		if (!isSilent(hmm, value(itSilent))) continue;
+		if ((value(itSilent) == bState) || (value(itSilent) == eState)) continue;
+		TCargo maxValue = infVal;
+		TVertexDescriptor maxVertex = nilVertex;
+
+		// Find maximum
+		// A vertex iterator guarantees that the vertices are processend in increasing order
+		// That is, the smallest silent states come first!!!
+		TVertexIterator itMax(hmm);
+		for(;!atEnd(itMax);++itMax) {
+			if ((!isSilent(hmm, value(itMax))) ||
+				((isSilent(hmm, value(itMax))) && (value(itMax) < value(itSilent)))) {
+					TCargo local = value(vMat, value(itMax)) + std::log( (double) getTransitionProbability(hmm, *itMax, *itSilent));
+					if (local > maxValue) {
+						maxValue = local;
+						maxVertex = *itMax;
+					}
+			}
+		}
+
+		// Set traceback vertex
+		if (maxVertex != nilVertex) {
+			value(vMat, value(itSilent)) = maxValue;		
+			value(traceback, value(itSilent)) = maxVertex;
+		}
+	}
 
 	// Recurrence
 	TSize len = length(seq);
 	for(TSize i=1; i<=len; ++i) {
+
+		// Iterate over real states
 		TVertexIterator itV(hmm);
 		for(;!atEnd(itV);++itV) {
+			if ((value(itV) == bState) || (value(itV) == eState)) continue;
+			if (isSilent(hmm, value(itV))) continue;
 			TCargo maxValue = infVal;
 			TVertexDescriptor maxVertex = nilVertex;
+
+			// Find maximum
 			TVertexIterator itMax(hmm);
 			for(;!atEnd(itMax);++itMax) {
-				TCargo local = value(vMat, (i-1) * numRows + *itMax) + std::log( (double) getTransitionProbability(hmm, *itMax, *itV));
+				TCargo local = value(vMat, (i-1) * numRows + value(itMax)) + std::log( (double) getTransitionProbability(hmm, *itMax, *itV));
 				if (local > maxValue) {
 					maxValue = local;
 					maxVertex = *itMax;
 				}
 			}
-			value(traceback, i * numRows + *itV) = maxVertex;
-			TCargo emis = std::log( (double) getEmissionProbability(hmm, *itV, seq[i-1]));
-			if ((maxVertex != nilVertex) && (emis > infVal)) value(vMat, i * numRows + *itV) = emis + maxValue;
+
+			// Set traceback vertex
+			TCargo emis = std::log( (double) getEmissionProbability(hmm, *itV, value(seq, i-1)));
+			if ((maxVertex != nilVertex) && (emis > infVal)) {
+				value(vMat, i * numRows + *itV) = emis + maxValue;
+				value(traceback, i * numRows + value(itV)) = maxVertex;
+			}
+		}
+
+		// Iterate over silent states
+		goBegin(itV);
+		for(;!atEnd(itV);++itV) {
+			if ((value(itV) == bState) || (value(itV) == eState)) continue;
+			if (!isSilent(hmm, value(itV))) continue;
+			TCargo maxValue = infVal;
+			TVertexDescriptor maxVertex = nilVertex;
+
+			// Find maximum
+			// A vertex iterator guarantees that the vertices are processend in increasing order
+			// That is, the smallest silent states come first!!!
+			TVertexIterator itMax(hmm);
+			for(;!atEnd(itMax);++itMax) {
+				if ((!isSilent(hmm, value(itMax))) ||
+					((isSilent(hmm, value(itMax))) && (value(itMax) < value(itV)))) {
+						TCargo local = value(vMat, i * numRows + value(itMax)) + std::log( (double) getTransitionProbability(hmm, *itMax, *itV));
+						if (local > maxValue) {
+							maxValue = local;
+							maxVertex = *itMax;
+						}
+				}
+			}
+			// Set traceback vertex
+			if (maxVertex != nilVertex) {
+				value(traceback, i * numRows + value(itV)) = maxVertex;
+				value(vMat, i * numRows + *itV) = maxValue;		
+			}
 		}
 	}
 
@@ -107,14 +177,22 @@ viterbiAlgorithm(Graph<Hmm<TAlphabet, TCargo, TSpec> > const& hmm,
 
 	// Traceback
 	clear(path);
-	resize(path, len + 2);
-	path[len + 1] = eState;
-	for(TSize i = len + 1; i>=1; --i) path[i - 1] = value(traceback, i * numRows + path[i]);
-
+	TVertexDescriptor oldState = eState;
+	appendValue(path, oldState);
+	for(TSize i = len + 1; i>=1; --i) {
+		do {
+			if ((!isSilent(hmm, oldState)) || (oldState == eState)) oldState = value(traceback, i * numRows + oldState);
+			else oldState = value(traceback, (i - 1) * numRows + oldState);
+			appendValue(path, oldState);
+		} while ((isSilent(hmm, oldState)) && (oldState != bState));
+	}
+	std::reverse(begin(path), end(path));
+	
 	//// Debug code
 	//for(TSize i = 0; i<numRows; ++i) {
 	//	for(TSize j=0; j<numCols; ++j) {
 	//		std::cout << value(vMat, j*numRows + i) << ',';
+	//		//std::cout << value(traceback, j*numRows + i) << ',';
 	//	}
 	//	std::cout << std::endl;
 	//}

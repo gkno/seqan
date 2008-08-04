@@ -640,12 +640,11 @@ void Test_SmithWatermanClump() {
 	TStringSet str;
 	TString str0("gctctgcgaata"); assignValueById(str, str0);
 	TString str1("cgttgagatact"); assignValueById(str, str1);
-	TGraph g(str);
 	Score<int> score_type = Score<int>(2,-1,-2,-2);
-	typedef String<Pair<int, int> > TAlignIdAndScore;
-	TAlignIdAndScore alignIdScore;
-	multiLocalAlignment(g, alignIdScore, score_type, 4, SmithWatermanClump() );
-	std::cout << g << std::endl;
+	String<Fragment<> > matches;
+	String<int> scores;
+	multiLocalAlignment(str, matches, scores, score_type, 4, SmithWatermanClump() );
+	std::cout << length(matches) << std::endl;
 }
 
 //////////////////////////////////////////////////////////////////////////////
