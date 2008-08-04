@@ -446,15 +446,6 @@ void Test_GraphCombination() {
 	SEQAN_TASSERT(cargo(findEdge(g, findVertex(g, 0, 2), findVertex(g, 1, 2))) == 2);
 	SEQAN_TASSERT(cargo(findEdge(g, findVertex(g, 0, 4), findVertex(g, 1, 4))) == 3);
 	SEQAN_TASSERT(cargo(findEdge(g, findVertex(g, 0, 4), findVertex(g, 1, 8))) == 1);
-
-	String<unsigned int> weights;
-	fill(weights, length(libs), 1);
-	weights[0] = 10;
-	clearVertices(g);
-	combineGraphs(g, libs, weights, FractionalScore() );
-	//_debugRefinedMatches(g);
-
-	SEQAN_TASSERT(cargo(findEdge(g, findVertex(g, 0, 0), findVertex(g, 1, 0))) > cargo(findEdge(g, findVertex(g, 0, 4), findVertex(g, 1, 8))));
 }
 
 
@@ -571,8 +562,7 @@ void Test_SumOfPairsScore() {
 	slowNjTree(distanceMatrix, guideTree);
 	clearVertices(gOut);
 	progressiveAlignment(g, guideTree, gOut);
-	SEQAN_TASSERT(sumOfPairsScore(gOut, scType) == 13)
-
+	SEQAN_TASSERT(sumOfPairsScore(gOut, scType) == 20)
 
 	resize(seqSet, 2);
 	seqSet[0] = "TTT";

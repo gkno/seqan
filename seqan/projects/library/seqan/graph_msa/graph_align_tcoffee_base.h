@@ -149,12 +149,13 @@ buildAlignmentGraph(String<TFragment, TSpec1>& matches,
 		TId id2 = sequenceId(*it,1);
 		TSize pos1 = fragmentBegin(*it, id1);
 		TSize pos2 = fragmentBegin(*it, id2);
+		TSize fragLen = fragmentLength(*it, id1);
 		TSize end1 = pos1 + fragmentLength(*it, id1);
 		while(pos1 < end1) {
 			TVertexDescriptor p1 = findVertex(outGraph, id1, pos1);
 			TVertexDescriptor p2 = findVertex(outGraph, id2, pos2);
 			TEdgeDescriptor e = findEdge(outGraph, p1, p2);
-			cargo(e) += (TCargo) value(scoreIt);
+			cargo(e) += (TCargo) (((double) fragmentLength(outGraph, p1) / (double) fragLen) * (double) value(scoreIt));
 			pos1 += fragmentLength(outGraph, p1);
 			pos2 += fragmentLength(outGraph, p2);
 		}
