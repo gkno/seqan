@@ -63,7 +63,9 @@ namespace SEQAN_NAMESPACE_MAIN
     };
 
 
-	inline const char * _getCStyleOpenMode(int openMode) {
+	inline const char * 
+	_getCStyleOpenMode(int openMode) 
+	{
 		switch (openMode & OPEN_MASK) {
             case OPEN_WRONLY:
                 if (!(openMode & OPEN_APPEND))
@@ -86,84 +88,110 @@ namespace SEQAN_NAMESPACE_MAIN
         return "r";
     }
 
-    inline bool open(FILE* &me, const char *fileName, int openMode) {
+    inline bool 
+	open(FILE* &me, const char *fileName, int openMode) 
+	{
 		SEQAN_PROADD(SEQAN_PROOPENFILES, 1);
         return (me = fopen(fileName, _getCStyleOpenMode(openMode))) != NULL;
     }
 
-    inline bool open(FILE* &me, const char *fileName) {
+    inline bool 
+	open(FILE* &me, const char *fileName) 
+	{
 		return open(me, fileName, DefaultOpenMode<FILE*>::VALUE);
 	}
 
-    inline bool openTemp(FILE* &me) {
+    inline bool 
+	openTemp(FILE* &me) 
+	{
 		SEQAN_PROSUB(SEQAN_PROOPENFILES, 1);
         return (me = tmpfile()) != NULL;
     }
 
-    inline bool close(FILE* me) {
+    inline bool 
+	close(FILE* me) 
+	{
 		SEQAN_PROSUB(SEQAN_PROOPENFILES, 1);
         return fclose(me) == 0;
     }
 
-    inline unsigned sectorSize(FILE* const &) {
+    inline unsigned 
+	sectorSize(FILE* const &) 
+	{
         return 4096;
     }
 
     template < typename TPos >
-    inline Size<FILE*>::Type seek(FILE* me, TPos const fileOfs, int origin) {
+    inline Size<FILE*>::Type 
+	seek(FILE* me, TPos const fileOfs, int origin) 
+	{
         fseek(me, fileOfs, origin);
 		return ftell(me);
     }
     template < typename TPos >
-    inline Size<FILE*>::Type seek(FILE* me, TPos const fileOfs) {
+    inline Size<FILE*>::Type 
+	seek(FILE* me, TPos const fileOfs) 
+	{
 		return seek(me, fileOfs, SEEK_BEGIN);
     }
 
-    inline Size<FILE*>::Type tell(FILE* me) {
+    inline Size<FILE*>::Type 
+	tell(FILE* me) 
+	{
 		return ftell(me);
     }
 
     template < typename TValue, typename TSize >
-    inline bool read(FILE* me, TValue *memPtr, TSize const count) {
+    inline bool 
+	read(FILE* me, TValue *memPtr, TSize const count) 
+	{
         SEQAN_PROADD(SEQAN_PROIO, (sizeof(TValue) * count + SEQAN_PROPAGESIZE - 1) / SEQAN_PROPAGESIZE);
         SEQAN_PROTIMESTART(tw);
-        bool result = fread(memPtr, sizeof(TValue), count, me) == count;
+        bool result = fread(memPtr, sizeof(TValue), count, me) == (size_t)count;
         SEQAN_PROADD(SEQAN_PROCWAIT, SEQAN_PROTIMEDIFF(tw));
         return result;
     }
 
     template < typename TValue, typename TSize >
-    inline bool write(FILE* me, TValue const *memPtr, TSize const count) {
+    inline bool 
+	write(FILE* me, TValue const *memPtr, TSize const count) 
+	{
         SEQAN_PROADD(SEQAN_PROIO, (sizeof(TValue) * count + SEQAN_PROPAGESIZE - 1) / SEQAN_PROPAGESIZE);
         SEQAN_PROTIMESTART(tw);
-        bool result = fwrite(memPtr, sizeof(TValue), count, me) == count;
+        bool result = fwrite(memPtr, sizeof(TValue), count, me) == (size_t)count;
         SEQAN_PROADD(SEQAN_PROCWAIT, SEQAN_PROTIMEDIFF(tw));
         return result;
     }
 
     template < typename TValue, typename TSize, typename TPos >
-    inline bool readAt(FILE* me, TValue *memPtr, TSize const count, TPos const fileOfs) {
+    inline bool 
+	readAt(FILE* me, TValue *memPtr, TSize const count, TPos const fileOfs) 
+	{
 		typedef typename Position<FILE*>::Type pos_t;
 		seek(me, (pos_t)fileOfs * (pos_t)sizeof(TValue));
         SEQAN_PROADD(SEQAN_PROIO, (sizeof(TValue) * count + SEQAN_PROPAGESIZE - 1) / SEQAN_PROPAGESIZE);
         SEQAN_PROTIMESTART(tw);
-        bool result = fread(memPtr, sizeof(TValue), count, me) == count;
+        bool result = fread(memPtr, sizeof(TValue), count, me) == (size_t)count;
         SEQAN_PROADD(SEQAN_PROCWAIT, SEQAN_PROTIMEDIFF(tw));
         return result;
     }
     
     template < typename TValue, typename TSize, typename TPos >
-    inline bool writeAt(FILE* me, TValue const *memPtr, TSize const count, TPos const fileOfs) {
+    inline bool 
+	writeAt(FILE* me, TValue const *memPtr, TSize const count, TPos const fileOfs) 
+	{
 		typedef typename Position<FILE*>::Type pos_t;
 		seek(me, (pos_t)fileOfs * (pos_t)sizeof(TValue));
         SEQAN_PROADD(SEQAN_PROIO, (sizeof(TValue) * count + SEQAN_PROPAGESIZE - 1) / SEQAN_PROPAGESIZE);
         SEQAN_PROTIMESTART(tw);
-        bool result = fwrite(memPtr, sizeof(TValue), count, me) == count;
+        bool result = fwrite(memPtr, sizeof(TValue), count, me) == (size_t)count;
         SEQAN_PROADD(SEQAN_PROCWAIT, SEQAN_PROTIMEDIFF(tw));
         return result;
     }
 
-    inline Size<FILE*>::Type size(FILE* me) {
+    inline Size<FILE*>::Type 
+	size(FILE* me) 
+	{
         Size<FILE*>::Type old_pos = tell(me);
         Size<FILE*>::Type result = 0;
         if (seek(me, 0, SEEK_END) == 0)
@@ -173,22 +201,30 @@ namespace SEQAN_NAMESPACE_MAIN
     }
 
     template < typename TSize >
-    inline void resize(FILE* me, TSize new_length) {
+    inline void 
+	resize(FILE* me, TSize new_length) 
+	{
         Size<FILE*>::Type old_pos = tell(me);
         seek(me, new_length, SEEK_BEGIN);
         seek(me, old_pos, SEEK_BEGIN);
     }
 
-	inline bool flush(FILE*) {
+	inline bool 
+	flush(FILE*) 
+	{
 		return true; 
 	}
 
     template < typename aRequest >
-	inline void release(FILE*, aRequest &) {
+	inline void 
+	release(FILE*, aRequest &) 
+	{
 	}
 
     template < typename aRequest >
-    inline bool cancel(FILE*, aRequest &) {
+    inline bool 
+	cancel(FILE*, aRequest &) 
+	{
 		return true; 
 	}
 

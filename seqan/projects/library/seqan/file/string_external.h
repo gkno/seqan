@@ -1307,7 +1307,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 		}
 		
 	    template < typename T >
-		inline static int _prefetchIffAsync(int prefetchPages, T const &) {
+		inline static int _prefetchIffAsync(int /*prefetchPages*/, T const &) {
 			return 0;
 		}
 		
@@ -1555,31 +1555,63 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 		}
 	}
 
+	// cancel all transactions and free allocated pages
+    template < typename TValue, typename TConfig >
+	inline void 
+	cancelAndFree(String<TValue, External<TConfig> > &me)
+	{
+		typedef String<TValue, External<TConfig> >					TExtString;
+		typedef typename TExtString::TPageFrame						TPageFrame;
+		typedef typename String<TValue, External<TConfig> >::TCache	TCache;
+		typedef typename Iterator<TCache, Standard>::Type			TIter;
+
+		if (me.file) 
+		{
+			TIter f = begin(me.cache, Standard());
+			TIter fEnd = end(me.cache, Standard());
+
+			for(; f != fEnd ; ++f) 
+			{
+				if ((*f).begin) cancel(*f, me.file);
+				if ((*f).pageNo >= 0) 
+				{
+					me.pager[(*f).pageNo] = (*f).dataStatus;
+					(*f).pageNo = TPageFrame::UNINITIALIZED;
+				}
+//				::std::cerr << *f << ::std::endl;
+				if ((*f).begin) freePage(*f, me.file);
+			}
+		}
+	}
+
 	// flush and free all allocated pages
     template < typename TValue, typename TConfig >
 	inline void 
-	free(String<TValue, External<TConfig> > &me)
+	flushAndFree(String<TValue, External<TConfig> > &me)
 	{
 		typedef String<TValue, External<TConfig> >			TExtString;
 		typedef typename TExtString::TPageFrame				TPageFrame;
 		typedef typename TExtString::TCache					TCache;
 		typedef typename Iterator<TCache, Standard>::Type	TIter;
 
-		flush(me);
-
-		TIter f = begin(me.cache, Standard());
-		TIter fEnd = end(me.cache, Standard());
-
-		for(; f != fEnd ; ++f) 
+		if (me.file) 
 		{
-			if ((*f).pageNo >= 0) 
+			flush(me);
+
+			TIter f = begin(me.cache, Standard());
+			TIter fEnd = end(me.cache, Standard());
+
+			for(; f != fEnd ; ++f) 
 			{
-                me.pager[(*f).pageNo] = (*f).dataStatus;
-				(*f).pageNo = TPageFrame::UNINITIALIZED;
-			}
+				if ((*f).pageNo >= 0) 
+				{
+					me.pager[(*f).pageNo] = (*f).dataStatus;
+					(*f).pageNo = TPageFrame::UNINITIALIZED;
+				}
 //				::std::cerr << *f << ::std::endl;
-            if ((*f).begin) freePage(*f, me.file);
-        }
+				if ((*f).begin) freePage(*f, me.file);
+			}
+		}
 	}
 //____________________________________________________________________________
 /**
@@ -1701,10 +1733,9 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 	{
 		// close associated file
 		if (me._temporary)
-			cancel(me);
+			cancelAndFree(me);
 		else
-			flush(me);
-		free(me);
+			flushAndFree(me);
 		clear(me.pager);
 
 		if (me._ownFile) 
@@ -1766,9 +1797,9 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
     reserve(
 	    String<TValue, External<TConfig> > &me,
 		TSize new_capacity,
-		Tag<TExpand> const)
+		Tag<TExpand> const expand)
 	{
-		reserve(me.pager, enclosingBlocks(new_capacity, (unsigned)me.PAGE_SIZE));
+		reserve(me.pager, enclosingBlocks(new_capacity, (unsigned)me.PAGE_SIZE), expand);
 		return capacity(me);
 	}
 //____________________________________________________________________________

@@ -872,12 +872,13 @@ namespace SEQAN_NAMESPACE_MAIN
 	//////////////////////////////////////////////////////////////////////////////
 	// global interface
 
-	template < typename TPageFrame, unsigned FRAMES, unsigned PRIORITY_LEVELS >
+	template < typename TPageFrame, unsigned FRAMES, unsigned PRIORITY_LEVELS, typename TExpand >
 	inline void reserve(
 		PageContainer<TPageFrame, FRAMES, PRIORITY_LEVELS> &pageCont,
-		unsigned _Count) 
+		unsigned _Count,
+		Tag<TExpand> const expand)
 	{
-		reserve(pageCont.pages, _Count);
+		reserve(pageCont.pages, _Count, expand);
 	}
 
     template < typename TPageFrame, unsigned FRAMES, unsigned PRIORITY_LEVELS >

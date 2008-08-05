@@ -212,12 +212,14 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 */
 
     template < typename TSpec >
-    inline bool open(File<TSpec> &me, const char *fileName, int openMode) {
+    inline bool open(File<TSpec> &me, const char *fileName, int openMode) 
+	{
         return me.open(fileName, openMode);
     }
 
     template < typename TSpec >
-    inline bool open(File<TSpec> &me, const char *fileName) {
+    inline bool open(File<TSpec> &me, const char *fileName) 
+	{
 		return open(me, fileName, DefaultOpenMode<File<TSpec> >::VALUE);
     }
 
@@ -234,17 +236,20 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 */
 
     template < typename TSpec >
-    inline bool openTemp(File<TSpec> &me) {
+    inline bool openTemp(File<TSpec> &me) 
+	{
         return me.openTemp();
     }
 
     template < typename TSpec >
-    inline bool openTemp(File<TSpec> &me, int openMode) {
+    inline bool openTemp(File<TSpec> &me, int openMode) 
+	{
         return me.openTemp(openMode);
     }
 
     template < typename File >
-    inline void reopen(File &, int) {
+    inline void reopen(File &, int) 
+	{
 	}
     
 /**
@@ -258,12 +263,14 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 */
 
     template < typename TSpec >
-    inline bool close(File<TSpec> & me) {
+    inline bool close(File<TSpec> & me) 
+	{
         return me.close();
     }
 
     template < typename TSpec >
-    inline unsigned sectorSize(File<TSpec> const & /*me*/) {
+    inline unsigned sectorSize(File<TSpec> const & /*me*/) 
+	{
         return 4096;
     }
 
@@ -285,7 +292,8 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 */
 
 	template < typename TSpec, typename TValue, typename TSize >
-    inline bool read(File<TSpec> & me, TValue *memPtr, TSize const count) {
+    inline bool read(File<TSpec> & me, TValue *memPtr, TSize const count) 
+	{
 		return me.read(memPtr, count * sizeof(TValue));
     }
     
@@ -303,7 +311,8 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 */
 
 	template < typename TSpec, typename TValue, typename TSize >
-    inline bool write(File<TSpec> & me, TValue const *memPtr, TSize const count) {
+    inline bool write(File<TSpec> & me, TValue const *memPtr, TSize const count) 
+	{
 		return me.write(memPtr, count * sizeof(TValue));
     }
 
@@ -321,7 +330,8 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 */
 
     template < typename TFile, typename TValue, typename TSize, typename TPos >
-    inline bool readAt(TFile & me, TValue *memPtr, TSize const count, TPos const fileOfs) {
+    inline bool readAt(TFile & me, TValue *memPtr, TSize const count, TPos const fileOfs) 
+	{
 		typedef typename Position<TFile>::Type pos_t;
 		seek(me, (pos_t)fileOfs * (pos_t)sizeof(TValue));
 		return read(me, memPtr, count);
@@ -341,7 +351,8 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 */
 
     template < typename TFile, typename TValue, typename TSize, typename TPos >
-    inline bool writeAt(TFile & me, TValue const *memPtr, TSize const count, TPos const fileOfs) {
+    inline bool writeAt(TFile & me, TValue const *memPtr, TSize const count, TPos const fileOfs) 
+	{
 		typedef typename Position<TFile>::Type pos_t;
 		seek(me, (pos_t)fileOfs * (pos_t)sizeof(TValue));
 		return write(me, memPtr, count);
@@ -367,7 +378,8 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 */
 
 	template < typename TSpec, typename TPos >
-    inline typename Position< File<TSpec> >::Type seek(File<TSpec> &me, TPos const fileOfs, int origin) {
+    inline typename Position< File<TSpec> >::Type seek(File<TSpec> &me, TPos const fileOfs, int origin) 
+	{
 		typedef typename Position< File<TSpec> >::Type TFilePos;
 		TFilePos newOfs = me.seek(fileOfs, origin);
         #ifdef SEQAN_DEBUG_OR_TEST_
@@ -379,7 +391,8 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
     }
     
 	template < typename TSpec, typename TPos >
-    inline typename Position< File<TSpec> >::Type seek(File<TSpec> &me, TPos const fileOfs) {
+    inline typename Position< File<TSpec> >::Type seek(File<TSpec> &me, TPos const fileOfs) 
+	{
 		return seek(me, fileOfs, SEEK_BEGIN);
 	}
 /**
@@ -393,7 +406,8 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 */
 
     template < typename TSpec >
-    inline typename Position< File<TSpec> >::Type tell(File<TSpec> &me) {
+    inline typename Position< File<TSpec> >::Type tell(File<TSpec> &me) 
+	{
         return me.tell();
     }
 
@@ -408,7 +422,8 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 */
 
     template < typename File >
-    inline void rewind(File &me) {
+    inline void rewind(File &me) 
+	{
 		seek(me, 0);
     }
     
@@ -423,7 +438,8 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 */
 
     template < typename TSpec >
-    inline typename Size<File<TSpec> >::Type size(File<TSpec> &me) {
+    inline typename Size<File<TSpec> >::Type size(File<TSpec> &me) 
+	{
         typename Size<File<TSpec> >::Type old_pos = tell(me);
         typename Size<File<TSpec> >::Type result = seek(me, 0, SEEK_END);
         seek(me, old_pos, SEEK_BEGIN);
@@ -440,7 +456,8 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 */
 
     template < typename TSpec, typename TSize >
-    inline void resize(File<TSpec> &me, TSize new_length) {
+    inline void resize(File<TSpec> &me, TSize new_length) 
+	{
         typename Size<File<TSpec> >::Type old_pos = tell(me);
         seek(me, new_length, SEEK_BEGIN);
         setEOF(me);
@@ -457,7 +474,8 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 */
 
     template < typename TSpec >
-    inline bool setEOF(File<TSpec> &/*me*/) { 
+    inline bool setEOF(File<TSpec> &/*me*/) 
+	{ 
 		return true; 
 	}
 
@@ -584,7 +602,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
                typename aRequest >
     inline bool 
 	areadAt(File & me, TValue *memPtr, TSize const count, TPos const fileOfs,
-        aRequest &request)
+        aRequest &)
     {
         return readAt(me, memPtr, count, fileOfs);
     }
@@ -608,7 +626,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
                typename aRequest >
     inline bool
 	awriteAt(File & me, TValue const *memPtr, TSize const count, TPos const fileOfs,
-        aRequest &request)
+        aRequest &)
     {
         return writeAt(me, memPtr, count, fileOfs);
     }
@@ -628,7 +646,8 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 */
 
     template < typename TSpec >
-    inline void flush(File<TSpec> &) {
+    inline void flush(File<TSpec> &) 
+	{
 	}
 
 /**
@@ -645,18 +664,21 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 ..remarks:$waitFor$ suspends the calling process until $request$ is completed or after $timeout_millis$ milliseconds.
 */
 
-    inline bool waitFor(aDummyRequest &) { 
+    inline bool waitFor(aDummyRequest &) 
+	{ 
 		return true; 
 	}
 
 	template < typename TTime >
-    inline bool waitFor(aDummyRequest &, TTime) { 
+    inline bool waitFor(aDummyRequest &, TTime) 
+	{ 
 		return true; 
 	}
 
 	// deprecated
 	template < typename TSpec, typename aRequest >
-    inline void release(File<TSpec> &, aRequest &) {
+    inline void release(File<TSpec> &, aRequest &) 
+	{
 	}
 
 /**
@@ -672,7 +694,8 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 */
 
     template < typename TSpec, typename aRequest >
-    inline bool cancel(File<TSpec> &, aRequest &) {
+    inline bool cancel(File<TSpec> &, aRequest &) 
+	{
 		return true; 
 	}
 
@@ -680,12 +703,14 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 	// little helpers
 
 	template <typename T1, typename T2> inline
-	T1 enclosingBlocks(T1 _size, T2 _blockSize) {
+	T1 enclosingBlocks(T1 _size, T2 _blockSize) 
+	{
 		return (_size + _blockSize - 1) / _blockSize;
 	}
 
 	template <typename T1, typename T2> inline
-	T1 alignSize(T1 _size, T2 _aligning) {
+	T1 alignSize(T1 _size, T2 _aligning) 
+	{
         if (_size < _aligning)
             return _aligning;
         else
