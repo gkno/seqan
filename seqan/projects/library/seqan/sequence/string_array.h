@@ -167,6 +167,20 @@ SEQAN_CHECKPOINT
 	}
 //____________________________________________________________________________
 
+	template <typename TExpand>
+	friend inline size_t
+	reserve(
+		String & me, 
+		size_t,
+		Tag<TExpand> const)
+	{
+SEQAN_CHECKPOINT
+		return capacity(me);
+	}
+
+
+//____________________________________________________________________________
+
 /**
 .Internal._setLength.param.object.type:Spec.Array String
 */

@@ -311,13 +311,13 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Size<TBlockString>::Type		TSize;
 		TSize len = length(me);
 
-		if (new_length > len)
+		if ((TSize)new_length > len)
 		{
-			for (; len < new_length; ++len) push(me);
+			for (; len < (TSize)new_length; ++len) push(me);
 		}
-		else if (new_length < len)
+		else if ((TSize)new_length < len)
 		{
-			for (; len > new_length; --len) pop(me);
+			for (; len > (TSize)new_length; --len) pop(me);
 		}
 		return new_length;
 	}

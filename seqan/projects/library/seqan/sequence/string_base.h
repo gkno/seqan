@@ -991,7 +991,7 @@ SEQAN_CHECKPOINT
 		{
 SEQAN_CHECKPOINT
 			typename _TempCopy<TSource>::Type temp(source, length(source));
-			assign(target, temp, TExpand());
+			append(target, temp, TExpand());
 		}
 	}
 
@@ -1343,6 +1343,16 @@ template <typename TValue, typename TSpec>
 inline typename Value<String<TValue, TSpec> >::Type *
 _reallocateStorage(
 	String<TValue, TSpec> & me, 
+	typename Size< String<TValue, TSpec> >::Type new_capacity)
+{
+SEQAN_CHECKPOINT
+	return _allocateStorage(me, new_capacity);
+}
+
+template <typename TValue, typename TSpec>
+inline typename Value<String<TValue, TSpec> >::Type *
+_reallocateStorage(
+	String<TValue, TSpec> & me, 
 	typename Size< String<TValue, TSpec> >::Type new_capacity,
 	Exact)
 {
@@ -1350,7 +1360,7 @@ _reallocateStorage(
 	else
 	{
 SEQAN_CHECKPOINT
-		return _allocateStorage(me, new_capacity);
+		return _reallocateStorage(me, new_capacity);
 	}
 }
 
@@ -1367,7 +1377,7 @@ _reallocateStorage(
 	{
 SEQAN_CHECKPOINT
 		if (new_capacity > limit) new_capacity = limit;
-		return _allocateStorage(me, new_capacity);
+		return _reallocateStorage(me, new_capacity);
 	}
 }
 
@@ -1383,7 +1393,7 @@ _reallocateStorage(
 	{
 SEQAN_CHECKPOINT
 		new_capacity = computeGenerousCapacity(me, new_capacity);
-		return _allocateStorage(me, new_capacity);
+		return _reallocateStorage(me, new_capacity);
 	}
 }
 
@@ -1401,8 +1411,116 @@ _reallocateStorage(
 SEQAN_CHECKPOINT
 		new_capacity = computeGenerousCapacity(me, new_capacity);
 		if (new_capacity > limit) new_capacity = limit;
-		return _allocateStorage(me, new_capacity);
+		return _reallocateStorage(me, new_capacity);
 	}
+}
+
+template <typename TValue, typename TSpec>
+inline typename Value<String<TValue, TSpec> >::Type *
+_reallocateStorage(
+	String<TValue, TSpec> &, 
+	typename Size< String<TValue, TSpec> >::Type, 
+	Insist)
+{
+	return 0;
+}
+
+template <typename TValue, typename TSpec>
+inline typename Value<String<TValue, TSpec> >::Type *
+_reallocateStorage(
+	String<TValue, TSpec> &, 
+	typename Size< String<TValue, TSpec> >::Type,
+	typename Size< String<TValue, TSpec> >::Type,
+	Insist)
+{
+	return 0;
+}
+
+template <typename TValue, typename TSpec>
+inline typename Value<String<TValue, TSpec> >::Type *
+_reallocateStorage(
+	String<TValue, TSpec> &, 
+	typename Size< String<TValue, TSpec> >::Type, 
+	Limit)
+{
+	return 0;
+}
+
+template <typename TValue, typename TSpec>
+inline typename Value<String<TValue, TSpec> >::Type *
+_reallocateStorage(
+	String<TValue, TSpec> &, 
+	typename Size< String<TValue, TSpec> >::Type, 
+	typename Size< String<TValue, TSpec> >::Type,
+	Limit)
+{
+	return 0;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+///.Function.reserve.param.object.type:Spec.String
+
+template <typename TValue, typename TSpec, typename _TSize, typename TExpand>
+inline void
+_reserveStorage(
+	String<TValue, TSpec> & seq, 
+	_TSize new_capacity,
+	Tag<TExpand> const tag)
+{
+	typedef typename Size< String<TValue, TSpec> >::Type TSize;
+
+	TSize old_capacity = capacity(seq);
+	if (old_capacity >= (TSize)new_capacity) return;
+
+	TSize seq_length = length(seq);
+	typename Value< String<TValue, TSpec> >::Type * old_array = _reallocateStorage(seq, new_capacity, tag);
+	if (old_array)
+	{//buffer was replaced, destruct old buffer
+		arrayConstructCopy(old_array, old_array + seq_length, begin(seq, Standard()));
+		arrayDestruct(old_array, old_array + seq_length);
+		_deallocateStorage(seq, old_array, old_capacity);
+		_setLength(seq, seq_length);
+	}
+	else if (!old_capacity)
+	{//new buffer created and the string had no buffer yet
+		_setLength(seq, seq_length);
+	}
+}
+
+template <typename TValue, typename TSpec, typename _TSize, typename TExpand>
+inline typename Size< String<TValue, TSpec> >::Type
+reserve(
+	String<TValue, TSpec> & seq, 
+	_TSize new_capacity,
+	Tag<TExpand> const tag)
+{
+SEQAN_CHECKPOINT
+	_reserveStorage(seq, new_capacity, tag);
+	return _capacityReturned(seq, new_capacity, tag);
+}
+
+template <typename TValue, typename TSpec, typename _TSize>
+inline typename Size< String<TValue, TSpec> >::Type
+reserve(
+	String<TValue, TSpec> & seq, 
+	_TSize new_capacity,
+	Insist)
+{
+SEQAN_CHECKPOINT
+	// do nothing
+	return _capacityReturned(seq, new_capacity, Insist());
+}
+
+template <typename TValue, typename TSpec, typename _TSize>
+inline typename Size< String<TValue, TSpec> >::Type
+reserve(
+	String<TValue, TSpec> & seq, 
+	_TSize new_capacity,
+	Limit)
+{
+SEQAN_CHECKPOINT
+	// do nothing
+	return _capacityReturned(seq, new_capacity, Limit());
 }
 
 //////////////////////////////////////////////////////////////////////////////

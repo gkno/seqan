@@ -732,34 +732,6 @@ SEQAN_CHECKPOINT
 	return ret_value * _PackedConsts<TString>::VALUES_PER_WORD;
 }
 
-template <typename TValue, typename TSpec, typename _TSize>
-inline typename Size< String<TValue, Alloc<TSpec> > >::Type
-reserve(
-	String<TValue, Packed<TSpec> > & me, 
-	_TSize new_capacity,
-	Limit)
-{
-SEQAN_CHECKPOINT
-	typedef typename Size< String<TValue, Alloc<TSpec> > >::Type TSize;
-
-	TSize me_capacity = capacity(me);
-	if (me_capacity < (TSize)new_capacity) return me_capacity;
-	return new_capacity;
-}
-
-template <typename TValue, typename TSpec, typename _TSize>
-inline typename Size< String<TValue, Alloc<TSpec> > >::Type
-reserve(
-	String<TValue, Packed<TSpec> > & me, 
-	_TSize new_capacity,
-	Insist)
-{
-SEQAN_CHECKPOINT
-	typedef typename Size< String<TValue, Alloc<TSpec> > >::Type TSize;
-
-	return new_capacity;
-}
-
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////

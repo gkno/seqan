@@ -621,20 +621,40 @@ replace(::std::basic_string<TChar, TCharTraits, TAlloc> & target,
 
 ///.Function.reserve.param.object.type:Adaption.std::basic_string
 
-template <typename TChar, typename TCharTraits, typename TAlloc, typename TExpand>
+template <typename TChar, typename TCharTraits, typename TAlloc, typename TSize, typename TExpand>
 inline typename Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type 
 reserve(
 	::std::basic_string<TChar, TCharTraits, TAlloc> & seq, 
-	typename Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type new_capacity,
-	Tag<TExpand> const &)
+	TSize new_capacity,
+	Tag<TExpand> const tag)
 {
 SEQAN_CHECKPOINT
     seq.reserve(new_capacity);
-    if (new_capacity < seq.capacity())
-    {
-        return seq.capacity();
-    }
-	return new_capacity;
+	return _capacityReturned(seq, new_capacity, tag);
+}
+
+template <typename TChar, typename TCharTraits, typename TAlloc, typename TSize>
+inline typename Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type 
+reserve(
+	::std::basic_string<TChar, TCharTraits, TAlloc> & seq, 
+	TSize new_capacity,
+	Insist)
+{
+SEQAN_CHECKPOINT
+	// do nothing
+	return _capacityReturned(seq, new_capacity, Insist());
+}
+
+template <typename TChar, typename TCharTraits, typename TAlloc, typename TSize>
+inline typename Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type 
+reserve(
+	::std::basic_string<TChar, TCharTraits, TAlloc> & seq, 
+	TSize new_capacity,
+	Limit)
+{
+SEQAN_CHECKPOINT
+	// do nothing
+	return _capacityReturned(seq, new_capacity, Limit());
 }
 
 //////////////////////////////////////////////////////////////////////////////

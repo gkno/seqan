@@ -399,67 +399,6 @@ move(String<TValue, Alloc<TSpec> > & target,
 
 //////////////////////////////////////////////////////////////////////////////
 
-///.Function.reserve.param.object.type:Spec.Alloc String
-
-template <typename TValue, typename TSpec, typename _TSize, typename TExpand>
-inline typename Size< String<TValue, Alloc<TSpec> > >::Type
-reserve(
-	String<TValue, Alloc<TSpec> > & seq, 
-	_TSize new_capacity,
-	Tag<TExpand> const tag)
-{
-SEQAN_CHECKPOINT
-	typedef typename Size< String<TValue, Alloc<TSpec> > >::Type TSize;
-
-	TSize old_capacity = capacity(seq);
-	if (old_capacity >= (TSize)new_capacity) return new_capacity;
-
-	TSize seq_length = length(seq);
-	typename Value< String<TValue, Alloc<TSpec> > >::Type * old_array = _reallocateStorage(seq, new_capacity, tag);
-	if (old_array)
-	{//buffer was replaced, destruct old buffer
-		arrayConstructCopy(old_array, old_array + seq_length, begin(seq, Standard()));
-		arrayDestruct(old_array, old_array + seq_length);
-		_deallocateStorage(seq, old_array, old_capacity);
-		_setLength(seq, seq_length);
-	}
-	else if (!old_capacity)
-	{//new buffer created and the string had no buffer yet
-		_setLength(seq, seq_length);
-	}
-	return new_capacity;
-}
-
-template <typename TValue, typename TSpec, typename _TSize>
-inline typename Size< String<TValue, Alloc<TSpec> > >::Type
-reserve(
-	String<TValue, Alloc<TSpec> > & me, 
-	_TSize new_capacity,
-	Limit)
-{
-SEQAN_CHECKPOINT
-	typedef typename Size< String<TValue, Alloc<TSpec> > >::Type TSize;
-
-	TSize me_capacity = capacity(me);
-	if (me_capacity < (TSize)new_capacity) return me_capacity;
-	return new_capacity;
-}
-
-template <typename TValue, typename TSpec, typename _TSize>
-inline typename Size< String<TValue, Alloc<TSpec> > >::Type
-reserve(
-	String<TValue, Alloc<TSpec> > & /*me*/, 
-	_TSize new_capacity,
-	Insist)
-{
-SEQAN_CHECKPOINT
-	typedef typename Size< String<TValue, Alloc<TSpec> > >::Type TSize;
-
-	return new_capacity;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
 
 
 } //namespace SEQAN_NAMESPACE_MAIN

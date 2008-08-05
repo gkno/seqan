@@ -87,7 +87,7 @@ e.g. @Function.assign@, @Function.append@, and @Function.replace@.
 template <typename T>
 struct DefaultOverflowImplicit
 {
-	typedef Insist Type;
+	typedef Exact Type;
 };
 
 //____________________________________________________________________________
@@ -1291,28 +1291,35 @@ the operation need not to change the capacity at all.
 ...note:This operation may invalidate iterators of $object$.
 ..see:Function.capacity
 */
-template <typename T, typename TSize>
-inline typename Size<T>::Type 
-reserve(
-	T & /*me*/, 
-	TSize new_capacity,
-	Insist)
+template <typename T, typename TSize, typename TExpand>
+inline typename Size<T>::Type
+_capacityReturned(
+	T & me,
+	TSize,
+	Tag<TExpand> const)
 {
-SEQAN_CHECKPOINT
-	return new_capacity;
+	return capacity(me);
 }
 
 template <typename T, typename TSize>
+inline typename Size<T>::Type
+_capacityReturned(
+	T &,
+	TSize new_capacity,
+	Insist)
+{
+	return new_capacity;
+}
+
+template <typename T, typename TSize, typename TExpand>
 inline typename Size<T>::Type 
 reserve(
-	T & me, 
+	T & me,
 	TSize new_capacity,
-	Limit)
+	Tag<TExpand> const tag)
 {
 SEQAN_CHECKPOINT
-	typename Size<T>::Type me_capacity = capacity(me);
-	if (me_capacity < (typename Size<T>::Type) new_capacity) return me_capacity;
-	return new_capacity;
+	return _capacityReturned(me, new_capacity, tag);
 }
 
 template <typename T, typename TSize>
