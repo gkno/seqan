@@ -472,7 +472,7 @@ inline void _patternInit(Pattern<TIndex, Swift<TSpec> > &pattern, TFloat errorRa
 		TBucketParams &bucketParams = _swiftBucketParams(pattern, seqNo);
 		next = i + bucketParams.reuseMask + 1;
 		for(; i < next; ++i) {
-			pattern.buckets[i].lastIncrement = 0 - bucketParams.distanceCut;
+			pattern.buckets[i].lastIncrement = 0 - bucketParams.tabooLength;
 			pattern.buckets[i].counter = 0;
 		}
 	}
@@ -522,11 +522,10 @@ inline bool _swiftMultiProcessQGram(
 		TBucketIter bkt = bktBegin + (_swiftBucketNo(pattern, bucketParams, getSeqNo(ndlPos)) + bktNo);
 		
 		do {
-			if ((*bkt).lastIncrement + bucketParams.distanceCut <= finder.curPos)
+			if ((__int64)((*bkt).lastIncrement + bktOfs) < diag)
 			{
-				// too far away - could be:
-				// 1. too far to reach the treshold
-				// 2. too far to be in the same bucket (we must ensure that bucketIdx doesn't collide) 
+				// last increment was before the beginning of the current bucket
+				// (we must ensure that bucketIdx doesn't collide)
 				if ((*bkt).counter >= bucketParams.threshold)
 				{
 					// upper bucket no. of lastIncr. q-gram
@@ -545,7 +544,8 @@ inline bool _swiftMultiProcessQGram(
 						::std::cout << ", delta:" << bucketParams.delta << ", overlap:" << bucketParams.overlap << ")" << ::std::endl;
 					}
 #endif
-					if (bktBeginHstk >= 0) {
+					if (bktBeginHstk >= 0) 
+					{
 						THit hit = {
 							bktBeginHstk,							// bucket begin in haystack
 							getSeqNo(ndlPos),						// needle seq. number
@@ -574,23 +574,25 @@ inline bool _swiftMultiProcessQGram(
 				if ((*bkt).lastIncrement + bucketParams.tabooLength > finder.curPos) 
 					break;	// increment only once per sequence			
 				(*bkt).lastIncrement = finder.curPos;
-				if (++(*bkt).counter <= 0)
+				++(*bkt).counter;
+/*				if (++(*bkt).counter <= 0)
 					(*bkt).counter = bucketParams.threshold;
+*/
 #ifdef SEQAN_DEBUG_SWIFT
 				(*bkt)._lastIncDiag = diag;
 #endif
 			}
 
 			if (bktOfs >= bucketParams.overlap) break;
-			
+
 			// repeat with the previous overlapping bucket
-			bktOfs = bucketParams.overlap;
-			if (!bktNo) {
-				bktNo = bucketParams.reuseMask;
-				bkt += bktNo;
-			} else {
+			bktOfs += bucketParams.delta;
+			if (bktNo) {
 				--bktNo;
 				--bkt;
+			} else {
+				bktNo = bucketParams.reuseMask;
+				bkt += bktNo;
 			}
 		} while (true);
 	}
@@ -668,7 +670,7 @@ inline bool _swiftMultiFlushBuckets(
 				}
 
 			}
-			(*bkt).lastIncrement = 0 - bucketParams.distanceCut;
+			(*bkt).lastIncrement = 0 - bucketParams.tabooLength;;
 			(*bkt).counter = 0;
 		}
 	}
