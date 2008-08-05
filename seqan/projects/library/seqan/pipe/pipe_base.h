@@ -573,7 +573,7 @@ SEQAN_CHECKPOINT
     {
         typedef typename TBufferHandler::Type	Type;
         typedef typename TBufferHandler::Buffer	Buffer;
-        typedef typename Buffer::Iterator		Iterator;
+		typedef typename Iterator<Buffer>::Type	Iterator;
 
         TBufferHandler  handler;
         Buffer			buffer;
