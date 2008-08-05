@@ -183,6 +183,19 @@ namespace SEQAN_NAMESPACE_MAIN
 			repString[i] = (*lit).second;
 	}
 
+
+	template <typename TValue>
+	inline bool _repeatMaskValue(TValue) 
+	{
+		return false;
+	}
+
+	template <>
+	inline bool _repeatMaskValue(Dna5 val) 
+	{
+		return val == 'N';
+	}
+
 	// period-1 optimization
 	template <typename TRepeatStore, typename TString, typename TSpec, typename TRepeatSize>
 	void findRepeats(TRepeatStore &repString, StringSet<TString, TSpec> const &text, TRepeatSize minRepeatLen) 
@@ -212,7 +225,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			{
 				if (last != *it)
 				{
-					if ((TRepeatSize)(repRight - repLeft) > minRepeatLen)
+					if (_repeatMaskValue(last) || (TRepeatSize)(repRight - repLeft) > minRepeatLen)
 					{
 						// insert repeat
 						rep.beginPosition.i2 = repLeft;
@@ -224,7 +237,7 @@ namespace SEQAN_NAMESPACE_MAIN
 					last = *it;
 				}
 			}
-			if ((TRepeatSize)(repRight - repLeft) > minRepeatLen)
+			if (_repeatMaskValue(last) || (TRepeatSize)(repRight - repLeft) > minRepeatLen)
 			{
 				// insert repeat
 				rep.beginPosition.i2 = repLeft;
