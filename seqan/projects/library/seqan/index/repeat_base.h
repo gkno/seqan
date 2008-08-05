@@ -196,6 +196,18 @@ namespace SEQAN_NAMESPACE_MAIN
 		return val == 'N';
 	}
 
+	template <>
+	inline bool _repeatMaskValue(Iupac val) 
+	{
+		return val == 'N';
+	}
+
+	template <>
+	inline bool _repeatMaskValue(AminoAcid val) 
+	{
+		return val == 'X';
+	}
+
 	// period-1 optimization
 	template <typename TRepeatStore, typename TString, typename TSpec, typename TRepeatSize>
 	void findRepeats(TRepeatStore &repString, StringSet<TString, TSpec> const &text, TRepeatSize minRepeatLen) 
