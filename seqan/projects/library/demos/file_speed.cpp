@@ -29,7 +29,7 @@ void testThroughput(const char *fileName)
 
 	awriteAt(myFile, toCString(block1), blockSize, 0 * blockSize, req1);
 	awriteAt(myFile, toCString(block2), blockSize, 1 * blockSize, req2);
-	for (unsigned i = 1; i < repeats; ++i) 
+	for (int i = 1; i < repeats; ++i) 
 	{
 		waitFor(req1);
 		awriteAt(myFile, toCString(block1), blockSize,    2*i  * blockSize, req1);
@@ -57,7 +57,7 @@ void testExtString(const char *fileName)
 
 	SEQAN_PROTIMESTART(iotime);
 
-	for (unsigned i = 0; i < repeats; ++i) 
+	for (int i = 0; i < repeats; ++i) 
 	{
 		append(myString, block1);
 		append(myString, block2);
@@ -79,7 +79,7 @@ void testMMapString(const char *fileName)
 
 	SEQAN_PROTIMESTART(iotime);
 
-	for (unsigned i = 0; i < repeats; ++i) 
+	for (int i = 0; i < repeats; ++i) 
 	{
 		append(myString, block1);
 		append(myString, block2);
@@ -99,6 +99,6 @@ int main()
 	cout << "ExtString using FILE*       ";		testExtString< FILE* >				("file_speed4.bin");
 	cout << "ExtString using sync. File  ";		testExtString< File< Sync<> > >		("file_speed5.bin");
 	cout << "ExtString using async. File ";		testExtString< File< Async<> > >	("file_speed6.bin");
-	cout << "Memory Mapped String        ";		testMMapString< File< Sync<> > >	("file_speed7.bin");
+	cout << "Memory Mapped String        ";		testMMapString< File< Async<> > >	("file_speed7.bin");
 	return 0;
 }
