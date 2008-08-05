@@ -236,13 +236,13 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template < typename TTime >
 	inline bool waitFor(Event &e, TTime timeout_millis) {
-        #ifdef SEQAN_PROFILE
-            double begin = sysTime();
-		    bool b = e.wait(timeout_millis);
-            double end = sysTime();
+        #ifdef disabledSEQAN_PROFILE
+			double begin = sysTime();
+			bool b = e.wait(timeout_millis);
+			double end = sysTime();
             if (begin != end)
                 ::std::cerr << "waitTime: " << end - begin << ::std::endl;
-            return b;
+			return b;
         #else
             return e.wait(timeout_millis);
         #endif

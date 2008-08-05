@@ -62,10 +62,11 @@ namespace SEQAN_NAMESPACE_MAIN
 
         Handle handle;
 
-        File(void *dummy = NULL): // to be compatible with the FILE*(NULL) constructor
+        File(void * /*dummy*/ = NULL): // to be compatible with the FILE*(NULL) constructor
             handle(-1) {}
 
-        inline int _getOFlag(int openMode) const {
+        inline int _getOFlag(int openMode) const 
+		{
 			int result;
 
 			switch (openMode & OPEN_MASK) {
@@ -76,6 +77,7 @@ namespace SEQAN_NAMESPACE_MAIN
                     result = _O_WRONLY;
 					break;
                 case OPEN_RDWR:
+				default:
                     result = _O_RDWR;
 					break;
 			}
@@ -86,7 +88,8 @@ namespace SEQAN_NAMESPACE_MAIN
 			return result | _O_BINARY;
         }
 
-        bool open(char const *fileName, int openMode = DefaultOpenMode<File>::VALUE) {
+        bool open(char const *fileName, int openMode = DefaultOpenMode<File>::VALUE) 
+		{
             handle = _open(fileName, _getOFlag(openMode), _S_IREAD | _S_IWRITE);
 			if (handle == -1) {
 				if (!(openMode & OPEN_QUIET))
@@ -97,11 +100,12 @@ namespace SEQAN_NAMESPACE_MAIN
             return true;
         }
 
-        bool openTemp(int openMode = DefaultOpenTempMode<File>::VALUE) {
+        bool openTemp(int openMode = DefaultOpenTempMode<File>::VALUE) 
+		{
 #ifdef SEQAN_DEFAULT_TMPDIR
-			char *fileName = _tempnam(SEQAN_DEFAULT_TMPDIR, "GNDX");
+			char *fileName = _tempnam(SEQAN_DEFAULT_TMPDIR, "SQN");
 #else
-			char *fileName = _tempnam(NULL, "GNDX");
+			char *fileName = _tempnam(NULL, "SQN");
 #endif
 			if (!fileName) {
 				if (!(openMode & OPEN_QUIET))
@@ -113,7 +117,8 @@ namespace SEQAN_NAMESPACE_MAIN
 			return result;
         }
 
-        inline bool close() {
+        inline bool close() 
+		{
             if (_close(handle) != 0)
                 return false;
             handle = -1;
@@ -121,7 +126,8 @@ namespace SEQAN_NAMESPACE_MAIN
             return true;
         }
 
-		inline int read(void *buffer, _SizeType count) const {
+		inline int read(void *buffer, _SizeType count) const 
+		{
             SEQAN_PROADD(SEQAN_PROIO, (count + SEQAN_PROPAGESIZE - 1) / SEQAN_PROPAGESIZE);
             SEQAN_PROTIMESTART(tw);
 		    int result = _read(handle, buffer, count);
@@ -129,7 +135,8 @@ namespace SEQAN_NAMESPACE_MAIN
             return result;
 		}
 
-		inline int write(void const *buffer, _SizeType count) const {
+		inline int write(void const *buffer, _SizeType count) const 
+		{
             SEQAN_PROADD(SEQAN_PROIO, (count + SEQAN_PROPAGESIZE - 1) / SEQAN_PROPAGESIZE);
             SEQAN_PROTIMESTART(tw);
 		    int result = _write(handle, buffer, count);
@@ -137,29 +144,35 @@ namespace SEQAN_NAMESPACE_MAIN
             return result;
 		}
 
-		inline FilePtr seek(FilePtr pos, int origin = SEEK_SET) const {
+		inline FilePtr seek(FilePtr pos, int origin = SEEK_SET) const 
+		{
 			return _lseeki64(handle, pos, origin);
 		}
 
-		inline FilePtr tell() const {
+		inline FilePtr tell() const 
+		{
 			return _telli64(handle);
 		}
 
-		static int error() {
+		static int error() 
+		{
 			return errno;
 		}
 
-        operator bool () const {
+        operator bool () const 
+		{
             return handle != -1;
         }
     };
 
-	inline bool fileExists(const char *fileName) {
+	inline bool fileExists(const char *fileName) 
+	{
 		struct _stat buf;
 		return _stat(fileName, &buf) == 0;
 	}
 
-	inline bool fileUnlink(const char *fileName) {
+	inline bool fileUnlink(const char *fileName) 
+	{
 		return _unlink(fileName) == 0;
 	}
 
@@ -179,7 +192,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
         Handle handle;
 
-        File(void */*dummy*/ = NULL): // to be compatible with the FILE*(NULL) constructor
+        File(void * /*dummy*/ = NULL): // to be compatible with the FILE*(NULL) constructor
             handle(-1) {}
 
         inline int _getOFlag(int openMode) const {
@@ -235,7 +248,7 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 
         bool openTemp(int openMode = DefaultOpenTempMode<File>::VALUE) {
-			char tmpFileName[] = "/SeqAnXXXXXXX";
+			char tmpFileName[] = "/SQNXXXXXXX";
 			if ((handle = ::mkstemp(tmpFileName)) == -1) {
 				if (!(openMode & OPEN_QUIET))
 					::std::cerr << "Cannot create temporary file " << tmpFileName << ". (" << ::strerror(errno) << ")" << ::std::endl;
