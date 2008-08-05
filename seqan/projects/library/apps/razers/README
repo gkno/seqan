@@ -23,7 +23,7 @@ matches with mismatches as well as gaps.
 RazerS uses a k-mer index of all reads and counts common k-mers of reads
 and the reference genome in parallelograms. Each parallelogram with a k-mer
 count above a certain threshold triggers a verification. On success, the 
-genomic subsequence and the read number are stored and written in the 
+genomic subsequence and the read number are stored and written to the 
 output file.
 
 ---------------------------------------------------------------------------

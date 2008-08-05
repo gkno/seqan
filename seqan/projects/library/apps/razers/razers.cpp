@@ -23,6 +23,8 @@
 //#define SEQAN_DEBUG_SWIFT		// test SWIFT correctness and print bucket parameters
 //#define RAZERS_PROFILE		// omit dumping results
 //#define RAZERS_DEBUG			// print verification regions
+#define RAZERS_PRUNE_QGRAM_INDEX
+//#define RAZERS_HAMMINGVERIFY	// 
 //#define WITH_1HULL			// allow 1-error per qgram
 
 #include "seqan/platform.h"
@@ -55,7 +57,9 @@ using namespace seqan;
 */
 	// DNA setup
 	typedef	Dna				TAlphabet;
+#ifndef QGRAM_LEN
 	const int				QGRAM_LEN = 11;
+#endif
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -76,6 +80,7 @@ using namespace seqan;
 	static int			optionThreshold = 1;				// threshold
 	static int			optionTabooLength = 1;				// taboo length
 	static int			_debugLevel = 0;					// level of verbosity
+	static bool			optionPrintVersion = false;			// print version number
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -115,7 +120,7 @@ using namespace seqan;
 //////////////////////////////////////////////////////////////////////////////
 // Definitions
 
-	typedef String<TAlphabet>	TGenome;
+	typedef String<Dna5>		TGenome;
 	typedef StringSet<TGenome>	TGenomeSet;
 	typedef String<TAlphabet>	TRead;
 	typedef StringSet<TRead>	TReadSet;
@@ -140,6 +145,7 @@ namespace seqan
 	typedef ReadMatch<Difference<TGenome>::Type>	TMatch;			// a single match
 	typedef String<TMatch/*, Block<>*/ >			TMatches[2];	// array[orientation][seqNo] of matches
 
+#ifdef RAZERS_PRUNE_QGRAM_INDEX
 namespace seqan 
 {
 	//////////////////////////////////////////////////////////////////////////////
@@ -163,13 +169,14 @@ namespace seqan
 //				String<TAlphabet> qgram;
 //				unhash(qgram, it - begin(dir, Standard()), QGRAM_LEN);
 //				cerr << qgram << " " << *it << endl;
-				*it = -1;
+				*it = (TSize)-1;
 				result = true;
 			}
 
 		return result;
 	}
 }
+#endif
 
 //////////////////////////////////////////////////////////////////////////////
 // Load multi-Fasta sequences
@@ -223,8 +230,8 @@ void findReads(
 	// *** SPECIALIZATION ***
 
 	typedef Pipe< TGenomeInfix, Source<> >							TSource;
-//	typedef Pipe< TSource, Caster<Dna> >							TCaster;
-	typedef Pipe< TSource, Tupler<QGRAM_LEN, true, Compressed> >	TTupler;
+	typedef Pipe< TSource, Caster<Dna> >							TCaster;
+	typedef Pipe< TCaster, Tupler<QGRAM_LEN, true, Compressed> >	TTupler;
 
 #ifdef WITH_1HULL
 	// with 1-hull enumeration
@@ -241,7 +248,12 @@ void findReads(
 
 	// find read match end
 	typedef Finder<TGenomeInfix>						TMyersFinder;
+#ifdef RAZERS_HAMMINGVERIFY
+	typedef Score<int>									TScore;
+	typedef Pattern<TRead, DPSearch<TScore> >			TMyersPattern;
+#else
 	typedef Pattern<TRead, MyersUkkonen>				TMyersPattern;
+#endif
 
 	// find read match begin
 	typedef ModifiedString<TGenomeInfix, ModReverse>	TGenomeInfixRev;
@@ -269,6 +281,10 @@ void findReads(
 	}
 */
 
+#ifdef RAZERS_HAMMINGVERIFY
+	TScore	scoreType = Score<int>(0, -1, -1001, -1000); // levenshtein-score (match, mismatch, gapOpen, gapExtend)
+#endif
+
 	__int64 TP = 0;
 	__int64 FP = 0;
 	SEQAN_PROTIMESTART(find_time);
@@ -276,9 +292,6 @@ void findReads(
 	TRepeatIterator repeatIt = begin(repeats, Standard());
 	TRepeatIterator repeatItEnd = end(repeats, Standard());
 	String<Pair<TSize> > borders;
-
-	for(unsigned i=0;i<length(borders);++i)
-		cout << borders[i] << "  " << endl;
 
 	// iterate all genomic sequences
 	for(unsigned hstkSeqNo = 0; hstkSeqNo < length(genomes); ++hstkSeqNo) 
@@ -304,7 +317,8 @@ void findReads(
 			// 1-HULL
 			TGenomeInfix	genomeInf(genome, borders[segment].i1, borders[segment].i2);
 			TSource			src(genomeInf);
-			TTupler			tupler(src);
+			TCaster			caster(src);
+			TTupler			tupler(caster);
 #ifdef WITH_1HULL
 			TEnumerator		enumerator(tupler);
 			// SWIFT
@@ -323,7 +337,12 @@ void findReads(
 		//		TGenomeInfix inf(genomeInf, hstkPos, hstkPos + bucketWidth);
 				TGenomeInfix inf(range(swiftFinder, genomeInf));
 				TMyersFinder myersFinder(inf);
+#ifdef RAZERS_HAMMINGVERIFY
+				TMyersPattern myersPattern(indexText(readIndex)[ndlSeqNo], scoreType);
+#else
 				TMyersPattern myersPattern(indexText(readIndex)[ndlSeqNo]);
+#endif
+
 
 #ifdef RAZERS_DEBUG
 				cout<<"Verify: "<<endl;
@@ -650,7 +669,7 @@ void printHelp(int, const char *[], bool longHelp = false)
 {
 	cerr << "********************************************" << endl;
 	cerr << "*** RazerS - Fast Mapping of Short Reads ***" << endl;
-	cerr << "*** written by David Weese (c) June 2008 ***" << endl;
+	cerr << "*** written by David Weese (c) Aug 2008  ***" << endl;
 	cerr << "********************************************" << endl << endl;
 	cerr << "Usage: razers [OPTION]... <GENOME FILE> <READS FILE>" << endl;
 	if (longHelp) {
@@ -671,14 +690,20 @@ void printHelp(int, const char *[], bool longHelp = false)
 		cerr << "                               \t" << "0 = use Fasta id (default)" << endl;
 		cerr << "                               \t" << "1 = enumerate beginning with 1" << endl;
 		cerr << "                               \t" << "2 = use the read sequence (only for short reads!)" << endl;
-		cerr << "  -t,  --threshold             \t" << "set minimum threshold (default " << optionThreshold << ")" << endl;
-		cerr << "  -tl, --taboo-length          \t" << "set taboo length (default " << optionTabooLength << ")" << endl;
+		cerr << "  -t,  --threshold NUM         \t" << "set minimum threshold (default " << optionThreshold << ")" << endl;
+		cerr << "  -tl, --taboo-length NUM      \t" << "set taboo length (default " << optionTabooLength << ")" << endl;
 		cerr << "  -v,  --verbose               \t" << "verbose mode" << endl;
 		cerr << "  -vv, --vverbose              \t" << "very verbose mode" << endl;
+		cerr << "  -V,  --version               \t" << "print version number" << endl;
 		cerr << "  -h,  --help                  \t" << "print this help" << endl;
 	} else {
 		cerr << "Try 'razers --help' for more information." << endl;
 	}
+}
+
+void printVersion() 
+{
+	cerr << "RazerS version 1.0 20080805 (prerelease)" << endl;
 }
 
 int main(int argc, const char *argv[]) 
@@ -686,8 +711,9 @@ int main(int argc, const char *argv[])
 	//////////////////////////////////////////////////////////////////////////////
 	// Parse command line
 
-	unsigned	fnameCount = 0;
-	const char	*fname[2] = { "", "" };
+	unsigned			fnameCount = 0;
+	const char			*fname[2] = { "", "" };
+	static const double epsilon = 0.0000001;
 
 	for(int arg = 1; arg < argc; ++arg) {
 		if (argv[arg][0] == '-') {
@@ -812,6 +838,10 @@ int main(int argc, const char *argv[])
 				_debugLevel = 3;
 				continue;
 			}
+			if (strcmp(argv[arg], "-V") == 0 || strcmp(argv[arg], "--version") == 0) {
+				optionPrintVersion = true;
+				continue;
+			}
 		} else {
 			// parse file name
 			if (fnameCount == 2) {
@@ -822,13 +852,19 @@ int main(int argc, const char *argv[])
 		}
 	}
 	if (fnameCount < 2) {
-		printHelp(argc, argv);
+		if (optionPrintVersion)
+			printVersion();
+		else
+			printHelp(argc, argv);
 		return 0;
 	}
 	if (!optionForward && !optionRev) { // enable both per default
 		optionForward = true;
 		optionRev = true;
 	}
+
+	if (optionPrintVersion)
+		printVersion();
 
 	// dump configuration in verbose mode
 	if (_debugLevel >= 1) {
@@ -843,6 +879,9 @@ int main(int argc, const char *argv[])
 		cerr << "Taboo length:                    \t" << optionTabooLength << endl;
 		cerr << endl;
 	}
+
+	// circumvent numerical obstacles
+	optionErrorRate += epsilon;
 
 
 	TGenomeSet				genomeSet;
