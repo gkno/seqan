@@ -1859,7 +1859,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 				Tag<TExpand> const expand)
 	{
 		resize(me, me.data_size + 1, expand);
-		me.back() = _Val;
+		back(me) = _Val;
 	}
 //____________________________________________________________________________
 // stack interface
