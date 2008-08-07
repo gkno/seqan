@@ -25,7 +25,6 @@
 //#define RAZERS_DEBUG			// print verification regions
 #define RAZERS_PRUNE_QGRAM_INDEX
 //#define RAZERS_HAMMINGVERIFY	// 
-//#define WITH_1HULL			// allow 1-error per qgram
 
 #include "seqan/platform.h"
 #ifdef PLATFORM_WINDOWS
@@ -77,6 +76,8 @@ using namespace seqan;
 	static unsigned		optionReadNaming = 0;				// 0..use Fasta id
 															// 1..enumerate reads beginning with 1
 															// 2..use the read sequence (only for short reads!)
+	static unsigned		optionSortOrder = 0;				// 0..sort keys: 1. read number, 2. genome position
+															// 1..           1. genome position, 2. read number
 	static int			optionThreshold = 1;				// threshold
 	static int			optionTabooLength = 1;				// taboo length
 	static int			_debugLevel = 0;					// level of verbosity
@@ -97,24 +98,62 @@ using namespace seqan;
 		short	editDist;	// Levenshtein distance
 	};
 
-	// (to sort and remove duplicates)
+	// less-operators (to sort matches and remove duplicates)
 	template <typename TReadMatch>
-	struct ReadMatchLess : public binary_function < TReadMatch, TReadMatch, bool >
+	struct LessGPosRNo : public binary_function < TReadMatch, TReadMatch, bool >
 	{
-		inline bool operator() (TReadMatch const &a, TReadMatch const &b) const {
-			return (a.gBegin < b.gBegin) || (a.gBegin == b.gBegin && a.gEnd < b.gEnd);
+		inline bool operator() (TReadMatch const &a, TReadMatch const &b) const 
+		{
+			if (a.gseqNo < b.gseqNo) return true;
+			if (a.gseqNo > b.gseqNo) return false;
+			if (a.gBegin < b.gBegin) return true;
+			if (a.gBegin > b.gBegin) return false;
+			if (a.rseqNo < b.rseqNo) return true;
+			return false;
 		}
 	};
 
 	template <typename TReadMatch>
-	struct ReadMatchGreater : public binary_function < TReadMatch, TReadMatch, bool >
+	struct LessGPosRNo_Rev : public binary_function < TReadMatch, TReadMatch, bool >
 	{
-		inline bool operator() (TReadMatch const &a, TReadMatch const &b) const {
-			return (a.gBegin > b.gBegin) || (a.gBegin == b.gBegin && a.gEnd > b.gEnd);
+		inline bool operator() (TReadMatch const &a, TReadMatch const &b) const 
+		{
+			if (a.gseqNo < b.gseqNo) return true;
+			if (a.gseqNo > b.gseqNo) return false;
+			if (a.gBegin > b.gBegin) return true;
+			if (a.gBegin < b.gBegin) return false;
+			if (a.rseqNo < b.rseqNo) return true;
+			return false;
 		}
 	};
 
-	typedef Pair<short,	short, Compressed> PrimerSAValue;
+	template <typename TReadMatch>
+	struct LessRNoGPos : public binary_function < TReadMatch, TReadMatch, bool >
+	{
+		inline bool operator() (TReadMatch const &a, TReadMatch const &b) const 
+		{
+			if (a.rseqNo < b.rseqNo) return true;
+			if (a.rseqNo > b.rseqNo) return false;
+			if (a.gseqNo < b.gseqNo) return true;
+			if (a.gseqNo > b.gseqNo) return false;
+			if (a.gBegin < b.gBegin) return true;
+			return false;
+		}
+	};
+
+	template <typename TReadMatch>
+	struct LessRNoGPos_Rev : public binary_function < TReadMatch, TReadMatch, bool >
+	{
+		inline bool operator() (TReadMatch const &a, TReadMatch const &b) const 
+		{
+			if (a.rseqNo < b.rseqNo) return true;
+			if (a.rseqNo > b.rseqNo) return false;
+			if (a.gseqNo < b.gseqNo) return true;
+			if (a.gseqNo > b.gseqNo) return false;
+			if (a.gBegin > b.gBegin) return true;
+			return false;
+		}
+	};
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -138,9 +177,6 @@ namespace seqan
 		> Type;
 	};
 }
-
-	typedef SAValue<TGenomeSet>::Type				TSAValue;
-	typedef Repeat<TSAValue, unsigned>				TRepeat;
 
 	typedef ReadMatch<Difference<TGenome>::Type>	TMatch;			// a single match
 	typedef String<TMatch/*, Block<>*/ >			TMatches[2];	// array[orientation][seqNo] of matches
@@ -211,12 +247,11 @@ bool loadFasta(TReadSet &reads, TNameSet &fastaIDs, char const *fileName)
 
 //////////////////////////////////////////////////////////////////////////////
 // Find read matches
-template <typename TMatches, typename TGenomeSet, typename TReadIndex, typename TRepeats>
+template <typename TMatches, typename TGenomeSet, typename TReadIndex>
 void findReads(
 	TMatches &matches,			// resulting matches
 	TGenomeSet &genomes,		// Genome
-	TReadIndex &readIndex,		// q-gram index of Reads
-	TRepeats &repeats)
+	TReadIndex &readIndex)		// q-gram index of Reads
 {
 	typedef typename Fibre<TReadIndex, Fibre_Text>::Type	TReadSet;
 	typedef typename Value<TGenomeSet>::Type				TGenome;
@@ -224,25 +259,14 @@ void findReads(
 	typedef typename Infix<TGenome>::Type					TGenomeInfix;
 	typedef typename Value<TReadSet>::Type					TRead;
 	typedef typename Value<TMatches>::Type					TMatch;
-	typedef typename Value<TRepeats>::Type					TRepeat;
-	typedef typename Iterator<TRepeats, Standard>::Type		TRepeatIterator;
 
 	// *** SPECIALIZATION ***
-
+/*
 	typedef Pipe< TGenomeInfix, Source<> >							TSource;
 	typedef Pipe< TSource, Caster<Dna> >							TCaster;
 	typedef Pipe< TCaster, Tupler<QGRAM_LEN, true, Compressed> >	TTupler;
-
-#ifdef WITH_1HULL
-	// with 1-hull enumeration
-	typedef Pipe< TTupler, EditEnvironment<LevenshteinDistance> >	TEnumerator;
-
-	typedef Finder<TEnumerator, Swift<> >				TSwiftFinder;
-#else
-	// without 1-hull enumeration
-	typedef Finder<TTupler, Swift<> >					TSwiftFinder;
-#endif
-
+*/
+	typedef Finder<TGenome, Swift<> >					TSwiftFinder;
 	typedef Pattern<TReadIndex, Swift<> >				TSwiftPattern;
 
 
@@ -289,132 +313,108 @@ void findReads(
 	__int64 FP = 0;
 	SEQAN_PROTIMESTART(find_time);
 
-	TRepeatIterator repeatIt = begin(repeats, Standard());
-	TRepeatIterator repeatItEnd = end(repeats, Standard());
-	String<Pair<TSize> > borders;
-
 	// iterate all genomic sequences
 	for(unsigned hstkSeqNo = 0; hstkSeqNo < length(genomes); ++hstkSeqNo) 
 	{
+		if (_debugLevel >= 1)
+			cerr << endl << "Process genome seq #" << hstkSeqNo;
 		TGenome &genome = genomes[hstkSeqNo];
+		// 1-HULL
+/*		TGenomeInfix	genomeInf(genome, borders[segment].i1, borders[segment].i2);
+		TSource			src(genomeInf);
+		TCaster			caster(src);
+		TTupler			tupler(caster);
+*/
+		TSwiftFinder	swiftFinder(genome, 1000, 1);
 
-		// get intervals of non-repeat regions
-		resize(borders, 0);
-		TSize last = 0;
-		while (repeatIt != repeatItEnd && (*repeatIt).beginPosition.i1 == hstkSeqNo)
+		// iterate all verification regions returned bz SWIFT
+		while (find(swiftFinder, swiftPattern, optionErrorRate, (_debugLevel >= 1))) 
 		{
-			appendValue(borders, Pair<TSize>(last, (*repeatIt).beginPosition.i2));
-			last = (*repeatIt).endPosition.i2;
-			++repeatIt;
-		}
-		appendValue(borders, Pair<TSize>(last, length(genome)));
+			unsigned ndlSeqNo = (*swiftFinder.curHit).ndlSeqNo;
+			unsigned ndlLength = sequenceLength(ndlSeqNo, readIndex);
+	//		unsigned hstkPos = (*swiftFinder.curHit).hstkPos;
+	//		unsigned bucketWidth = (*swiftFinder.curHit).bucketWidth;
 
-		// iterate all non-repeat regions
-		for(unsigned segment = 0; segment < length(borders); ++segment)
-		{
-			if (_debugLevel >= 1)
-				::std::cerr << ::std::endl << "Process genome seq:" << hstkSeqNo << " range:" << borders[segment] << ::std::endl;
-			// 1-HULL
-			TGenomeInfix	genomeInf(genome, borders[segment].i1, borders[segment].i2);
-			TSource			src(genomeInf);
-			TCaster			caster(src);
-			TTupler			tupler(caster);
-#ifdef WITH_1HULL
-			TEnumerator		enumerator(tupler);
-			// SWIFT
-			TSwiftFinder	swiftFinder(enumerator);
-#else
-			TSwiftFinder	swiftFinder(tupler);
-#endif
-			// iterate all verification regions returned bz SWIFT
-			while (find(swiftFinder, swiftPattern, optionErrorRate, (_debugLevel >= 1))) 
-			{
-				unsigned ndlSeqNo = (*swiftFinder.curHit).ndlSeqNo;
-				unsigned ndlLength = sequenceLength(ndlSeqNo, readIndex);
-		//		unsigned hstkPos = (*swiftFinder.curHit).hstkPos;
-		//		unsigned bucketWidth = (*swiftFinder.curHit).bucketWidth;
-
-		//		TGenomeInfix inf(genomeInf, hstkPos, hstkPos + bucketWidth);
-				TGenomeInfix inf(range(swiftFinder, genomeInf));
-				TMyersFinder myersFinder(inf);
+	//		TGenomeInfix inf(genomeInf, hstkPos, hstkPos + bucketWidth);
+			TGenomeInfix inf(range(swiftFinder, genome));
+			TMyersFinder myersFinder(inf);
 #ifdef RAZERS_HAMMINGVERIFY
-				TMyersPattern myersPattern(indexText(readIndex)[ndlSeqNo], scoreType);
+			TMyersPattern myersPattern(indexText(readIndex)[ndlSeqNo], scoreType);
 #else
-				TMyersPattern myersPattern(indexText(readIndex)[ndlSeqNo]);
+			TMyersPattern myersPattern(indexText(readIndex)[ndlSeqNo]);
 #endif
 
 
 #ifdef RAZERS_DEBUG
-				cout<<"Verify: "<<endl;
-				cout<<"Genome: "<<inf<<endl;
-				cout<<"Read:   "<<host(myersPattern)<<endl;
+			cout<<"Verify: "<<endl;
+			cout<<"Genome: "<<inf<<endl;
+			cout<<"Read:   "<<host(myersPattern)<<endl;
 #endif
-				// find end of best semi-global alignment
-				int maxScore = InfimumValue<int>::VALUE;
-				int minScore = -(int)(ndlLength * optionErrorRate);
-				TMyersFinder maxPos;
-				while (find(myersFinder, myersPattern, minScore))
-					if (maxScore < getScore(myersPattern)) 
-					{
-						maxScore = getScore(myersPattern);
-						maxPos = myersFinder;
-					}
-				
-				if (maxScore >= minScore) 
+			// find end of best semi-global alignment
+			int maxScore = InfimumValue<int>::VALUE;
+			int minScore = -(int)(ndlLength * optionErrorRate);
+			TMyersFinder maxPos;
+			while (find(myersFinder, myersPattern, minScore))
+				if (maxScore < getScore(myersPattern)) 
 				{
-					TMatch m = {
-						hstkSeqNo,
-						ndlSeqNo,
-						beginPosition(genomeInf) + beginPosition(swiftFinder),
-						beginPosition(genomeInf) + beginPosition(swiftFinder) + position(maxPos) + 1,
-						-maxScore
-					};
-					if (m.gBegin < 0) m.gBegin = 0;
+					maxScore = getScore(myersPattern);
+					maxPos = myersFinder;
+				}
+			
+			if (maxScore >= minScore) 
+			{
+				TMatch m = {
+					hstkSeqNo,
+					ndlSeqNo,
+					/*beginPosition(genomeInf) +*/ beginPosition(swiftFinder),
+					/*beginPosition(genomeInf) +*/ beginPosition(swiftFinder) + position(maxPos) + 1,
+					-maxScore
+				};
+				if (m.gBegin < 0) m.gBegin = 0;
 
 
-					TGenomeInfixRev		infRev(infix(genome, m.gBegin, m.gEnd));
-					TReadRev			readRev(indexText(readIndex)[ndlSeqNo]);
-					TMyersFinderRev		myersFinderRev(infRev);
-					TMyersPatternRev	myersPatternRev(readRev);
+				TGenomeInfixRev		infRev(infix(genome, m.gBegin, m.gEnd));
+				TReadRev			readRev(indexText(readIndex)[ndlSeqNo]);
+				TMyersFinderRev		myersFinderRev(infRev);
+				TMyersPatternRev	myersPatternRev(readRev);
 
-					// find beginning of best semi-global alignment
-					if (find(myersFinderRev, myersPatternRev, maxScore))
-						m.gBegin = m.gEnd - (position(myersFinderRev) + 1);
-					else {
-						// this case should never occur
-						::std::cerr << "1GENOME: " << host(myersFinder) << ::std::endl;
-						::std::cerr << "1READ:   " << indexText(readIndex)[ndlSeqNo] << ::std::endl;
-						::std::cerr << "2GENOME: " << infix(genome, m.gBegin, m.gEnd) << ::std::endl;
-						::std::cerr << "2READ:   " << indexText(readIndex)[ndlSeqNo] << ::std::endl;
-						::std::cerr << "3GENOME: " << infRev << ::std::endl;
-						::std::cerr << "3READ:   " << readRev << ::std::endl;
-						::std::cerr << "HUH?" << ::std::endl;
-					}
+				// find beginning of best semi-global alignment
+				if (find(myersFinderRev, myersPatternRev, maxScore))
+					m.gBegin = m.gEnd - (position(myersFinderRev) + 1);
+				else {
+					// this case should never occur
+					cerr << "1GENOME: " << host(myersFinder) << endl;
+					cerr << "1READ:   " << indexText(readIndex)[ndlSeqNo] << endl;
+					cerr << "2GENOME: " << infix(genome, m.gBegin, m.gEnd) << endl;
+					cerr << "2READ:   " << indexText(readIndex)[ndlSeqNo] << endl;
+					cerr << "3GENOME: " << infRev << endl;
+					cerr << "3READ:   " << readRev << endl;
+					cerr << "HUH?" << endl;
+				}
 
 #ifndef RAZERS_PROFILE
-					appendValue(matches, m);
+				appendValue(matches, m);
 #endif
 
-					++TP;
-		/*			cerr << "\"" << range(swiftFinder, genomeInf) << "\"  ";
-					cerr << hstkPos << " + ";
-					cerr << endl;
-		*/		} else {
-					++FP;
-		/*			cerr << "\"" << range(swiftFinder, genomeInf) << "\"   \"" << range(swiftPattern) << "\"  ";
-					cerr << ndlSeqNo << " : ";
-					cerr << hstkPos << " + ";
-					cerr << bucketWidth << "  " << TP << endl;
-		*/		}
-			}
+				++TP;
+	/*			cerr << "\"" << range(swiftFinder, genomeInf) << "\"  ";
+				cerr << hstkPos << " + ";
+				cerr << endl;
+	*/		} else {
+				++FP;
+	/*			cerr << "\"" << range(swiftFinder, genomeInf) << "\"   \"" << range(swiftPattern) << "\"  ";
+				cerr << ndlSeqNo << " : ";
+				cerr << hstkPos << " + ";
+				cerr << bucketWidth << "  " << TP << endl;
+	*/		}
 		}
 	}
 	if (_debugLevel >= 1)
-		cerr << endl << "Finding Reads took               \t" << SEQAN_PROTIMEDIFF(find_time) << " seconds" << endl;
+		cerr << endl << "Finding reads took               \t" << SEQAN_PROTIMEDIFF(find_time) << " seconds" << endl;
 
 	if (_debugLevel >= 2) {
 		cerr << endl;
-		cerr << "___Filtration_Stats____" << endl;
+		cerr << "___FILTRATION_STATS____" << endl;
 		cerr << "Swift FP: " << FP << endl;
 		cerr << "Swift TP: " << TP << endl;
 	}
@@ -522,22 +522,40 @@ void dumpMatches(
 		return;
 	}
 
-	sort(
-		begin(matches[0], Standard()),
-		end(matches[0], Standard()), 
-		ReadMatchLess<TMatch>());
+	switch (optionSortOrder) {
+		case 0:
+			sort(
+				begin(matches[0], Standard()),
+				end(matches[0], Standard()), 
+				LessRNoGPos<TMatch>());
 
-	sort(
-		begin(matches[1], Standard()),
-		end(matches[1], Standard()), 
-		ReadMatchGreater<TMatch>());
+			sort(
+				begin(matches[1], Standard()),
+				end(matches[1], Standard()), 
+				LessRNoGPos_Rev<TMatch>());
+			break;
+
+		case 1:
+			sort(
+				begin(matches[0], Standard()),
+				end(matches[0], Standard()), 
+				LessGPosRNo<TMatch>());
+
+			sort(
+				begin(matches[1], Standard()),
+				end(matches[1], Standard()), 
+				LessGPosRNo_Rev<TMatch>());
+			break;
+	}
 
 	for(unsigned orientation = 0; orientation < 2; ++orientation)
 	{
 		typename Iterator<TMatches, Standard>::Type it = begin(matches[orientation], Standard());
 		typename Iterator<TMatches, Standard>::Type itEnd = end(matches[orientation], Standard());
 
-		typename TMatch::TGPos lastBegin = -1;
+		typename TMatch::TGPos _gBegin = -1;
+		unsigned gseqNo = -1;
+		unsigned readNo = -1;
 		typename TMatch::TGPos gBegin, gEnd;
 
 
@@ -546,22 +564,22 @@ void dumpMatches(
 			case 0:	// Razer Format
 				for(; it != itEnd; ++it) 
 				{
-					if (lastBegin != (*it).gBegin) 
+					if (readNo != (*it).rseqNo || _gBegin != (*it).gBegin || gseqNo != (*it).gseqNo)
 					{
-						unsigned	gseqNo = (*it).gseqNo;
-						unsigned	readNo = (*it).rseqNo;
+						readNo = (*it).rseqNo;
+						gseqNo = (*it).gseqNo;
+						_gBegin = (*it).gBegin;
+
 						TGPos		gLength = length(genomes[gseqNo]);
 						unsigned	readLen = length(reads[readNo]);
 						double		percId;
-
-						lastBegin = (*it).gBegin;
-
+				
 						if (orientation == 0) {
-							gBegin = lastBegin;
+							gBegin = _gBegin;
 							gEnd = (*it).gEnd;
 						} else {
 							gBegin = gLength - (*it).gEnd;
-							gEnd = gLength - lastBegin;
+							gEnd = gLength - _gBegin;
 						}
 
 						percId = 100.0 * (1.0 - (double)(*it).editDist / (double)readLen);
@@ -625,21 +643,21 @@ void dumpMatches(
 			case 1:	// Enhanced Fasta Format
 				for(; it != itEnd; ++it) 
 				{
-					if (lastBegin != (*it).gBegin) 
+					if (readNo != (*it).rseqNo || _gBegin != (*it).gBegin || gseqNo != (*it).gseqNo)
 					{
-						unsigned	gseqNo = (*it).gseqNo;
-						unsigned	readNo = (*it).rseqNo;
+						readNo = (*it).rseqNo;
+						gseqNo = (*it).gseqNo;
+						_gBegin = (*it).gBegin;
+
 						TGPos		gLength = length(genomes[gseqNo]);
 						unsigned	readLen = length(reads[readNo]);
 						double		percId;
 
-						lastBegin = (*it).gBegin;
-
 						if (orientation == 0) {
-							gBegin = lastBegin + 1;
+							gBegin = _gBegin + 1;
 							gEnd = (*it).gEnd;
 						} else {
-							gBegin = gLength - lastBegin;
+							gBegin = gLength - _gBegin;
 							gEnd = gLength - (*it).gEnd + 1;
 						}
 
@@ -690,6 +708,9 @@ void printHelp(int, const char *[], bool longHelp = false)
 		cerr << "                               \t" << "0 = use Fasta id (default)" << endl;
 		cerr << "                               \t" << "1 = enumerate beginning with 1" << endl;
 		cerr << "                               \t" << "2 = use the read sequence (only for short reads!)" << endl;
+		cerr << "  -so, --sort-order NUM        \t" << "select how matches are sorted" << endl;
+		cerr << "                               \t" << "0 = 1. read number, 2. genome position (default)" << endl;
+		cerr << "                               \t" << "1 = 1. genome position, 2. read number" << endl;
 		cerr << "  -t,  --threshold NUM         \t" << "set minimum threshold (default " << optionThreshold << ")" << endl;
 		cerr << "  -tl, --taboo-length NUM      \t" << "set taboo length (default " << optionTabooLength << ")" << endl;
 		cerr << "  -v,  --verbose               \t" << "verbose mode" << endl;
@@ -703,7 +724,7 @@ void printHelp(int, const char *[], bool longHelp = false)
 
 void printVersion() 
 {
-	cerr << "RazerS version 1.0 20080805 (prerelease)" << endl;
+	cerr << "RazerS version 0.3 20080807 (prerelease)" << endl;
 }
 
 int main(int argc, const char *argv[]) 
@@ -763,6 +784,20 @@ int main(int argc, const char *argv[])
 					if (!istr.fail())
 						if (optionOutputFormat > 1)
 							cerr << "Invalid output format option" << endl << endl;
+						else
+							continue;
+				}
+				printHelp(argc, argv);
+				return 0;
+			}
+			if (strcmp(argv[arg], "-so") == 0 || strcmp(argv[arg], "--sort-order") == 0) {
+				if (arg + 1 < argc) {
+					++arg;
+					istringstream istr(argv[arg]);
+					istr >> optionSortOrder;
+					if (!istr.fail())
+						if (optionSortOrder > 1)
+							cerr << "Invalid sort order option" << endl << endl;
 						else
 							continue;
 				}
@@ -868,6 +903,7 @@ int main(int argc, const char *argv[])
 
 	// dump configuration in verbose mode
 	if (_debugLevel >= 1) {
+		cerr << "___SETTINGS____________" << endl;
 		cerr << "Compute forward matches:         \t";
 		if (optionForward)	cerr << "YES" << endl;
 		else				cerr << "NO" << endl;
@@ -876,6 +912,7 @@ int main(int argc, const char *argv[])
 		else				cerr << "NO" << endl;
 		cerr << "Error rate:                      \t" << optionErrorRate << endl;
 		cerr << "Minimal threshold:               \t" << optionThreshold << endl;
+		cerr << "k-mer length:                    \t" << QGRAM_LEN << endl;
 		cerr << "Taboo length:                    \t" << optionTabooLength << endl;
 		cerr << endl;
 	}
@@ -896,31 +933,32 @@ int main(int argc, const char *argv[])
 	//////////////////////////////////////////////////////////////////////////////
 	// Step 1: Load fasta files
 	if (!loadFasta(genomeSet, genomeNames, fname[0])) {
-		cerr << "Failed to load Genome" << endl;
+		cerr << "Failed to load genomes" << endl;
 		return 1;
 	}
-	if (_debugLevel >= 1) cerr << lengthSum(genomeSet) << " bps in " << length(genomeSet) << " Genomes loaded." << endl;
-
-	String<TRepeat> repeats;
-	findRepeats(repeats, genomeSet, 1000, 1);
+	if (_debugLevel >= 1) cerr << lengthSum(genomeSet) << " bps of " << length(genomeSet) << " genomes loaded." << endl;
 
 	if (!loadFasta(readSet, readNames, fname[1])) {
-		cerr << "Failed to load Primers" << endl;
+		cerr << "Failed to load reads" << endl;
 		return 1;
 	}
-	if (_debugLevel >= 1) cerr << lengthSum(readSet) << " bps in " << length(readSet) << " Reads loaded." << endl;
+	if (_debugLevel >= 1) cerr << lengthSum(readSet) << " bps of " << length(readSet) << " reads loaded." << endl;
 
 
 	//////////////////////////////////////////////////////////////////////////////
 	// Step 2: Find matches using SWIFT
 	if (optionForward)
-		findReads(matches[0], genomeSet, swiftIndex, repeats);
+		if (_debugLevel >= 1)
+			cerr << endl << "___FORWARD_STRAND______";
+		findReads(matches[0], genomeSet, swiftIndex);
 
 #ifndef OMIT_REVERSECOMPLEMENT
-	if (optionRev) {
+	if (optionRev) 
+	{
+		if (_debugLevel >= 1)
+			cerr << endl << "___BACKWARD_STRAND_____";
 		reverseComplementInPlace(genomeSet);			// build reverse-compl of genome
-		findRepeats(repeats, genomeSet, 1000, 1);
-		findReads(matches[1], genomeSet, swiftIndex, repeats);
+		findReads(matches[1], genomeSet, swiftIndex);
 		reverseComplementInPlace(genomeSet);			// restore original genome seqs
 	}
 #endif
