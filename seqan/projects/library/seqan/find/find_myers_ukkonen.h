@@ -182,7 +182,7 @@ SEQAN_CHECKPOINT
 	me.finalScoreMask = (TWord)1 << ((me.needleSize + me.MACHINE_WORD_SIZE - 1) % me.MACHINE_WORD_SIZE);
 
 	clear(me.bitMasks);
-	fill(me.bitMasks, ValueSize<TValue>::VALUE * me.blockCount, 0, Exact());
+	fill(me.bitMasks, (ValueSize<TValue>::VALUE + 1) * me.blockCount, 0, Exact());
 
 	// encoding the letters as bit-vectors
     for (unsigned j = 0; j < me.needleSize; j++)

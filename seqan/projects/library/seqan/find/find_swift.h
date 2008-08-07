@@ -123,11 +123,15 @@ struct SwiftParameters {
 	class Finder< THaystack, Swift<TSpec> >
 	{
 	public:
-		typedef typename Iterator<THaystack, Rooted>::Type		TIterator;
-		typedef typename Position<THaystack>::Type				THstkPos;
-		typedef _SwiftHit<THstkPos>								TSwiftHit;
-		typedef String<TSwiftHit>								THitString;
-		typedef typename Iterator<THitString, Standard>::Type	THitIterator;
+		typedef typename Iterator<THaystack, Rooted>::Type			TIterator;
+		typedef typename Position<THaystack>::Type					THstkPos;
+		typedef _SwiftHit<THstkPos>									TSwiftHit;
+		typedef String<TSwiftHit>									THitString;
+		typedef typename Iterator<THitString, Standard>::Type		THitIterator;
+		typedef typename SAValue<THaystack>::Type					TSAValue;
+		typedef Repeat<TSAValue, unsigned>							TRepeat;
+		typedef String<TRepeat>										TRepeatString;
+		typedef typename Iterator<TRepeatString, Standard>::Type	TRepeatIterator;
 
 		TIterator		data_iterator;
 		TIterator		haystackEnd;
@@ -135,31 +139,45 @@ struct SwiftParameters {
 		bool			_atEnd;
 		THitString		hits;
 		THitIterator	curHit, endHit;
-		THstkPos		curPos;
+		THstkPos		startPos, curPos, endPos;
+		THstkPos		dotPos, dotPos2;
+		TRepeatString	data_repeats;
+		TRepeatIterator	curRepeat, endRepeat;
 
 		Finder():
-			_needReinit(true) {}
+			_needReinit(true) { }
 
 		Finder(THaystack &haystack):
 			data_iterator(begin(haystack, Rooted())),
-			_needReinit(true) {}
+			_needReinit(true) { }
+
+		template <typename TRepeatSize, typename TPeriodSize>
+		Finder(THaystack &haystack, TRepeatSize minRepeatLen, TPeriodSize maxPeriod):
+			data_iterator(begin(haystack, Rooted())),
+			_needReinit(true) 
+		{
+			findRepeats(data_repeats, haystack, minRepeatLen, maxPeriod);
+		}
 
 		Finder(TIterator &iter):
 			data_iterator(iter),
-			_needReinit(true) {}
+			_needReinit(true) { }
 
 		Finder(TIterator const &iter):
 			data_iterator(iter),
-			_needReinit(true) {}
+			_needReinit(true) { }
 
 		Finder(Finder const &orig):
 			data_iterator(orig.data_iterator),
 			haystackEnd(orig.haystackEnd),
+			_needReinit(orig._needReinit),
 			hits(orig.hits),
-			_needReinit(orig._needReinit) 
+			data_repeats(orig.data_repeats)
 		{
 			curHit = begin(hits, Standard()) + (orig.curHit - begin(orig.hits, Standard()));
 			endHit = end(hits, Standard());
+			curRepeat = begin(data_repeats, Standard()) + (orig.curRepeat - begin(orig.data_repeats, Standard()));
+			endRepeat = end(data_repeats, Standard());
 		};
 
 		inline typename Reference<TIterator>::Type 
@@ -252,6 +270,9 @@ struct SwiftParameters {
 		SwiftParameters			params;
 		unsigned				curSeqNo;
 
+		double					_currentErrorRate;
+		int						_currentMinLengthForAll;
+
 		Holder<TIndex>	data_host;
 
 		Pattern() 
@@ -331,20 +352,30 @@ _swiftBucketNo(Pattern<TIndex, Swift<TSpec> > const &, TParams &bucketParams, TS
 template <typename TIndex, typename TFloat, typename _TSize, typename TSpec>
 inline void _patternInit(Pattern<TIndex, Swift<TSpec> > &pattern, TFloat errorRate, _TSize minLengthForAll) 
 {
-	typedef Pattern<TIndex, Swift<TSpec> >			TPattern;
-	typedef typename Size<TIndex>::Type				TSize;
-	typedef typename Fibre<TIndex, QGram_SA>::Type	TSA;
-	typedef typename Iterator<TSA, Standard>::Type	TSAIter;
-	typedef typename TPattern::TBucket				TBucket;
-	typedef typename TPattern::TBucketParams		TBucketParams;
-	
+	typedef Pattern<TIndex, Swift<TSpec> >						TPattern;
+	typedef typename Size<TIndex>::Type							TSize;
+	typedef typename Fibre<TIndex, QGram_SA>::Type				TSA;
+	typedef typename Iterator<TSA, Standard>::Type				TSAIter;
+	typedef typename TPattern::TBucket							TBucket;
+	typedef typename TPattern::TBucketParams					TBucketParams;
+	typedef typename TPattern::TBucketString					TBucketString;
+	typedef typename Iterator<TBucketString, Standard>::Type	TBucketIterator;
+
+	double _newErrorRate = errorRate;
+	if (pattern._currentErrorRate == _newErrorRate &&
+		pattern._currentMinLengthForAll == minLengthForAll)	return;
+
 	indexRequire(host(pattern), QGram_SADir());
+
 	TIndex const &index = host(pattern);
+	TSize seqCount = countSequences(index);
 	TSize span = length(pattern.shape);
 	TSize count = 0;
-	TSize seqCount = countSequences(index);
 	TSize bucketsPerCol2Max = 0;
 	TSize maxLength = 0;
+
+	pattern._currentErrorRate = _newErrorRate;
+	pattern._currentMinLengthForAll = minLengthForAll;
 	
 	if (Swift<TSpec>::PARAMS_BY_LENGTH) {
 		for(unsigned seqNo = 0; seqNo < seqCount; ++seqNo) {
@@ -465,15 +496,18 @@ inline void _patternInit(Pattern<TIndex, Swift<TSpec> > &pattern, TFloat errorRa
 		for(unsigned i = 0; i < length(pattern.bucketParams); ++i)
 			pattern.bucketParams[i].reuseMask = bucketsPerCol2Max - 1;
 	}
-			
 	resize(pattern.buckets, count);
-	for(unsigned seqNo = 0, i = 0, next = 0; seqNo < seqCount; ++seqNo)
+
+	TBucketIterator	bkt = begin(pattern.buckets, Standard());
+	TBucketIterator	bktEnd;
+	for(unsigned seqNo = 0; seqNo < seqCount; ++seqNo)
 	{
 		TBucketParams &bucketParams = _swiftBucketParams(pattern, seqNo);
-		next = i + bucketParams.reuseMask + 1;
-		for(; i < next; ++i) {
-			pattern.buckets[i].lastIncrement = 0 - bucketParams.tabooLength;
-			pattern.buckets[i].counter = 0;
+		bktEnd = bkt + bucketParams.reuseMask + 1;
+		for(; bkt != bktEnd; ++bkt) 
+		{
+			(*bkt).lastIncrement = 0 - bucketParams.tabooLength;
+			(*bkt).counter = 0;
 		}
 	}
 }
@@ -503,11 +537,11 @@ inline bool _swiftMultiProcessQGram(
 	TIndex const &index = host(pattern);
 	
 	TSAIter saBegin = begin(indexSA(index), Standard());
-	TSAIter occ =  saBegin + indexDir(index)[hash];
+	TSAIter occ = saBegin + indexDir(index)[hash];
 	TSAIter occEnd = saBegin + indexDir(index)[hash + 1];
 	TBucketIter bktBegin = begin(pattern.buckets, Standard());
 	Pair<unsigned> ndlPos;
-
+	
 	for(; occ != occEnd; ++occ) 
 	{
 		posLocalize(ndlPos, *occ, stringSetLimits(index));
@@ -540,8 +574,8 @@ inline bool _swiftMultiProcessQGram(
 						(__int64) (upperBktNo - ((upperBktNo - bktNo) & bucketParams.reuseMask)) << bucketParams.logDelta;
 #ifdef SEQAN_DEBUG_SWIFT
 					if ((*bkt)._lastIncDiag - bktBeginHstk >= bucketParams.delta + bucketParams.overlap || (*bkt)._lastIncDiag < bktBeginHstk) {
-						::std::cout << "qgram stored in wrong bucket (diag:" << (*bkt)._lastIncDiag << ", begin:" << bktBeginHstk;
-						::std::cout << ", delta:" << bucketParams.delta << ", overlap:" << bucketParams.overlap << ")" << ::std::endl;
+						::std::cerr << "qgram stored in wrong bucket (diag:" << (*bkt)._lastIncDiag << ", begin:" << bktBeginHstk;
+						::std::cerr << ", delta:" << bucketParams.delta << ", overlap:" << bucketParams.overlap << ")" << ::std::endl;
 					}
 #endif
 					if (bktBeginHstk >= 0) 
@@ -646,8 +680,8 @@ inline bool _swiftMultiFlushBuckets(
 					(__int64) (upperBktNo - ((upperBktNo - bktNo) & bucketParams.reuseMask)) << bucketParams.logDelta;
 #ifdef SEQAN_DEBUG_SWIFT
 				if ((*bkt)._lastIncDiag - bktBeginHstk >= bucketParams.delta + bucketParams.overlap || (*bkt)._lastIncDiag < bktBeginHstk) {
-					::std::cout << "qgram stored in wrong bucket (diag:" << (*bkt)._lastIncDiag << ", begin:" << bktBeginHstk;
-					::std::cout << ", delta:" << bucketParams.delta << ", overlap:" << bucketParams.overlap << ")" << ::std::endl;
+					::std::cerr << "qgram stored in wrong bucket (diag:" << (*bkt)._lastIncDiag << ", begin:" << bktBeginHstk;
+					::std::cerr << ", delta:" << bucketParams.delta << ", overlap:" << bucketParams.overlap << ")" << ::std::endl;
 				}
 #endif
 
@@ -692,6 +726,8 @@ template <typename TNeedle, typename TIndexSpec, typename TSpec>
 inline void 
 clear(Pattern<Index<TNeedle, TIndexSpec>, Swift<TSpec> > & me) 
 {
+	me._currentErrorRate = -1;
+	me._currentMinLengthForAll = -1;
 	clear(me.bucketParams);
 	clear(me.buckets);
 }
@@ -791,23 +827,90 @@ range(Pattern<Index<TNeedle, TIndexSpec>, Swift<TSpec> > &pattern)
 	return indexText(needle(pattern))[pattern.curSeqNo];
 }
 
+template <typename THaystack, typename TNeedle, typename TIndexSpec, typename TSpec>
+inline bool 
+_nextNonRepeatRange(
+	Finder<THaystack, Swift<TSpec> > &finder,
+	Pattern<Index<TNeedle, TIndexSpec>, Swift<TSpec> > &pattern,
+	bool printDots)
+{
+	typedef typename Finder<THaystack, Swift<TSpec> >::TRepeat	TRepeat;
+	typedef typename Value<TRepeat>::Type						TPos;
+
+	if (finder.curRepeat == finder.endRepeat) return false;
+
+	do 
+	{
+		finder.startPos = (*finder.curRepeat).endPosition;
+		if (++finder.curRepeat == finder.endRepeat) 
+		{
+			finder.endPos = length(host(finder));
+			if (finder.startPos + length(pattern.shape) > finder.endPos)
+				return false;
+			else
+				break;
+		} else
+			finder.endPos = (*finder.curRepeat).beginPosition;
+		// repeat until the shape fits in non-repeat range
+	} while (finder.startPos + length(pattern.shape) > finder.endPos);
+
+	finder.curPos = finder.startPos;
+	hostIterator(finder) = begin(host(finder)) + finder.startPos;
+	finder.haystackEnd = begin(host(finder)) + (finder.endPos - length(pattern.shape) + 1);
+
+	if (printDots)
+		::std::cerr << ::std::endl << "  scan range (" << finder.startPos << ", " << finder.endPos << ") ";
+
+	return true;
+}
+
+template <typename THaystack, typename TNeedle, typename TIndexSpec, typename TSpec>
+inline bool 
+_firstNonRepeatRange(
+	Finder<THaystack, Swift<TSpec> > &finder,
+	Pattern<Index<TNeedle, TIndexSpec>, Swift<TSpec> > &pattern,
+	bool printDots)
+{
+	typedef typename Finder<THaystack, Swift<TSpec> >::TRepeat	TRepeat;
+	typedef typename Value<TRepeat>::Type						TPos;
+
+	finder.curRepeat = begin(finder.data_repeats, Standard());
+	finder.endRepeat = end(finder.data_repeats, Standard());
+
+	if (finder.curRepeat == finder.endRepeat)
+		finder.endPos = length(host(finder));
+	else
+		finder.endPos = (*finder.curRepeat).beginPosition;
+		
+	if (length(pattern.shape) > finder.endPos)
+		return _nextNonRepeatRange(finder, pattern, printDots);
+
+	finder.curPos = finder.startPos = 0;
+	hostIterator(finder) = begin(host(finder));
+	finder.haystackEnd = begin(host(finder)) + (finder.endPos - length(pattern.shape) + 1);
+	
+	if (printDots)
+		::std::cerr << ::std::endl << "  scan range (" << finder.startPos << ", " << finder.endPos << ") ";
+	
+	return true;
+}
 
 template <typename THaystack, typename TNeedle, typename TIndexSpec, typename TSpec>
 inline bool 
 find(
-	 Finder<THaystack, Swift<TSpec> > &finder,
-	 Pattern<Index<TNeedle, TIndexSpec>, Swift<TSpec> > &pattern, 
-	 double errorRate)
+	Finder<THaystack, Swift<TSpec> > &finder,
+	Pattern<Index<TNeedle, TIndexSpec>, Swift<TSpec> > &pattern, 
+	double errorRate,
+	bool printDots)
 {
 	if (empty(finder)) 
 	{
 		_patternInit(pattern, errorRate, 0);
 		_finderSetNonEmpty(finder);
-		finder.haystackEnd =
-			hostIterator(finder) + (length(host(finder)) - length(pattern.shape) + 1);
+		finder.dotPos = 100000;
+		finder.dotPos2 = 10 * finder.dotPos;
 
-		if (atEnd(finder)) return false;
-		finder.curPos = 0;
+		if (!_firstNonRepeatRange(finder, pattern, printDots)) return false;
 		if (_swiftMultiProcessQGram(finder, pattern, hash(pattern.shape, hostIterator(hostIterator(finder)))))
 		{
 			pattern.curSeqNo = (*finder.curHit).ndlSeqNo;
@@ -821,15 +924,47 @@ find(
 		}
 
 	clear(finder.hits);
+	if (atEnd(finder) && finder.curRepeat == finder.endRepeat) return false;
+
 	do {
 		++finder;
+
+		if (printDots)
+			while (finder.curPos >= finder.dotPos) 
+			{
+				finder.dotPos += 100000;
+				if (finder.dotPos >= finder.dotPos2)
+				{
+					::std::cerr << (finder.dotPos2 / 1000000) << "M" << ::std::flush;
+					finder.dotPos2 += 1000000;
+				} else
+					::std::cerr << "." << ::std::flush;
+			}
+
 		if (atEnd(finder)) 
-			if (_swiftMultiFlushBuckets(finder, pattern))
-				break;
-			else
-				return false;
+		{
+			if (_nextNonRepeatRange(finder, pattern, printDots)) 
+			{
+				if (_swiftMultiProcessQGram(finder, pattern, hash(pattern.shape, hostIterator(hostIterator(finder)))))
+					break;
+				else
+					continue;
+			} 
+			else 
+			{
+				if (_swiftMultiFlushBuckets(finder, pattern))
+					break;
+				else
+					return false;
+			}
+		}
+
 		++finder.curPos;
-	} while (!_swiftMultiProcessQGram(finder, pattern, hashNext(pattern.shape, hostIterator(hostIterator(finder)))));
+		
+		if (_swiftMultiProcessQGram(finder, pattern, hashNext(pattern.shape, hostIterator(hostIterator(finder)))))
+			break;
+		
+	} while (true);
 
 	pattern.curSeqNo = (*finder.curHit).ndlSeqNo;
 	return true;
@@ -838,10 +973,10 @@ find(
 template <typename THashes, typename TPipeSpec, typename TNeedle, typename TIndexSpec, typename TSpec>
 inline bool 
 find(
-	 Finder<Pipe<THashes, TPipeSpec>, Swift<TSpec> > &finder,
-	 Pattern<Index<TNeedle, TIndexSpec>, Swift<TSpec> > &pattern, 
-	 double errorRate,
-	 bool printDots)
+	Finder<Pipe<THashes, TPipeSpec>, Swift<TSpec> > &finder,
+	Pattern<Index<TNeedle, TIndexSpec>, Swift<TSpec> > &pattern, 
+	double errorRate,
+	bool printDots)
 {
 	if (empty(finder)) 
 	{
@@ -886,13 +1021,13 @@ find(
 		}
 		finder.curPos = (*finder.in).i1;
 		if (printDots)
-			if (finder.curPos == finder.dotPos) 
+			while (finder.curPos >= finder.dotPos) 
 			{
 				finder.dotPos += 100000;
-				if (finder.curPos == finder.dotPos2)
+				if (finder.dotPos >= finder.dotPos2)
 				{
+					::std::cerr << (finder.dotPos2 / 1000000) << "M" << ::std::flush;
 					finder.dotPos2 += 1000000;
-					::std::cerr << (finder.curPos / 1000000) << "MBp" << ::std::flush;
 				} else
 					::std::cerr << "." << ::std::flush;
 			}
