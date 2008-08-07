@@ -49,7 +49,8 @@
 #include <seqan/refinement/graph_algorithm_refine_aligngraph.h>
 #include <seqan/refinement/graph_algorithm_refine_align.h>
 #include <seqan/refinement/graph_algorithm_refine_annotation.h>
-#include <seqan/refinement/graph_algorithm_refine_exact.h>
+//#include <seqan/refinement/graph_algorithm_refine_exact.h>
+#include <seqan/refinement/graph_algorithm_refine_exact_iterative.h>
 #include <seqan/refinement/graph_algorithm_refine_inexact.h>
 
 #endif //#ifndef SEQAN_HEADER_...
