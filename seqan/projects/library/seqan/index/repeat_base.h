@@ -86,6 +86,128 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
 	};
 
+	template <typename TValue>
+	inline bool _repeatMaskValue(TValue) 
+	{
+		return false;
+	}
+
+	template <>
+	inline bool _repeatMaskValue(Dna5 val) 
+	{
+		return val == 'N';
+	}
+
+	template <>
+	inline bool _repeatMaskValue(Iupac val) 
+	{
+		return val == 'N';
+	}
+
+	template <>
+	inline bool _repeatMaskValue(AminoAcid val) 
+	{
+		return val == 'X';
+	}
+
+	// period-1 optimization
+	template <typename TRepeatStore, typename TString, typename TRepeatSize>
+	inline void findRepeats(TRepeatStore &repString, TString const &text, TRepeatSize minRepeatLen) 
+	{
+		typedef typename Value<TRepeatStore>::Type	TRepeat;
+		typedef typename Iterator<TString>::Type	TIterator;
+		typedef typename Value<TString>::Type		TValue;
+		typedef typename Size<TString>::Type		TSize;
+
+		TRepeat rep;
+		rep.period = 1;
+		clear(repString);
+
+		TIterator it = begin(text, Standard());
+		TIterator itEnd = end(text, Standard());
+		if (it == itEnd) return;
+
+		TValue last = *it;
+		TSize repLeft = 0;
+		TSize repRight = 1;
+
+		for (++it; it != itEnd; ++it, ++repRight) 
+		{
+			if (last != *it)
+			{
+				if (_repeatMaskValue(last) || (TRepeatSize)(repRight - repLeft) > minRepeatLen)
+				{
+					// insert repeat
+					rep.beginPosition = repLeft;
+					rep.endPosition = repRight;
+//					::std::cerr<<"left:"<<rep.beginPosition<<"  right:"<<rep.endPosition<<"  length:"<<posSub(rep.endPosition,rep.beginPosition)<<"  period:"<<rep.period<<::std::endl;
+					appendValue(repString, rep);
+				}
+				repLeft = repRight;
+				last = *it;
+			}
+		}
+		if (_repeatMaskValue(last) || (TRepeatSize)(repRight - repLeft) > minRepeatLen)
+		{
+			// insert repeat
+			rep.beginPosition = repLeft;
+			rep.endPosition = repRight;
+//			::std::cerr<<"left:"<<rep.beginPosition<<"  right:"<<rep.endPosition<<"  length:"<<posSub(rep.endPosition,rep.beginPosition)<<"  period:"<<rep.period<<::std::endl;
+			appendValue(repString, rep);
+		}
+	}
+
+	template <typename TRepeatStore, typename TString, typename TSpec, typename TRepeatSize>
+	inline void findRepeats(TRepeatStore &repString, StringSet<TString, TSpec> const &text, TRepeatSize minRepeatLen) 
+	{
+		typedef typename Value<TRepeatStore>::Type	TRepeat;
+		typedef typename Iterator<TString>::Type	TIterator;
+		typedef typename Value<TString>::Type		TValue;
+		typedef typename Size<TString>::Type		TSize;
+
+		TRepeat rep;
+		rep.period = 1;
+		clear(repString);
+
+		for (unsigned i = 0; i < length(text); ++i)
+		{
+			TIterator it = begin(text[i], Standard());
+			TIterator itEnd = end(text[i], Standard());
+			if (it == itEnd) continue;
+
+			TValue last = *it;
+			TSize repLeft = 0;
+			TSize repRight = 1;
+			rep.beginPosition.i1 = i;
+			rep.endPosition.i1 = i;
+
+			for (++it; it != itEnd; ++it, ++repRight) 
+			{
+				if (last != *it)
+				{
+					if (_repeatMaskValue(last) || (TRepeatSize)(repRight - repLeft) > minRepeatLen)
+					{
+						// insert repeat
+						rep.beginPosition.i2 = repLeft;
+						rep.endPosition.i2 = repRight;
+//						::std::cerr<<"left:"<<rep.beginPosition<<"  right:"<<rep.endPosition<<"  length:"<<posSub(rep.endPosition,rep.beginPosition)<<"  period:"<<rep.period<<::std::endl;
+						appendValue(repString, rep);
+					}
+					repLeft = repRight;
+					last = *it;
+				}
+			}
+			if (_repeatMaskValue(last) || (TRepeatSize)(repRight - repLeft) > minRepeatLen)
+			{
+				// insert repeat
+				rep.beginPosition.i2 = repLeft;
+				rep.endPosition.i2 = repRight;
+//				::std::cerr<<"left:"<<rep.beginPosition<<"  right:"<<rep.endPosition<<"  length:"<<posSub(rep.endPosition,rep.beginPosition)<<"  period:"<<rep.period<<::std::endl;
+				appendValue(repString, rep);
+			}
+		}
+	}
+
 	// main function
 	template <typename TRepeatStore, typename TText, typename TRepeatSize, typename TPeriodSize>
 	void findRepeats(TRepeatStore &repString, TText const &text, TRepeatSize minRepeatLen, TPeriodSize maxPeriod) 
@@ -183,82 +305,6 @@ namespace SEQAN_NAMESPACE_MAIN
 			repString[i] = (*lit).second;
 	}
 
-
-	template <typename TValue>
-	inline bool _repeatMaskValue(TValue) 
-	{
-		return false;
-	}
-
-	template <>
-	inline bool _repeatMaskValue(Dna5 val) 
-	{
-		return val == 'N';
-	}
-
-	template <>
-	inline bool _repeatMaskValue(Iupac val) 
-	{
-		return val == 'N';
-	}
-
-	template <>
-	inline bool _repeatMaskValue(AminoAcid val) 
-	{
-		return val == 'X';
-	}
-
-	// period-1 optimization
-	template <typename TRepeatStore, typename TString, typename TSpec, typename TRepeatSize>
-	void findRepeats(TRepeatStore &repString, StringSet<TString, TSpec> const &text, TRepeatSize minRepeatLen) 
-	{
-		typedef typename Value<TRepeatStore>::Type	TRepeat;
-		typedef typename Iterator<TString>::Type	TIterator;
-		typedef typename Value<TString>::Type		TValue;
-		typedef typename Size<TString>::Type		TSize;
-
-		TRepeat rep;
-		rep.period = 1;
-		clear(repString);
-
-		for( unsigned i = 0; i < length(text); ++i)
-		{
-			TIterator it = begin(text[i], Standard());
-			TIterator itEnd = end(text[i], Standard());
-			if (it == itEnd) continue;
-
-			TValue last = *it;
-			TSize repLeft = 0;
-			TSize repRight = 1;
-			rep.beginPosition.i1 = i;
-			rep.endPosition.i1 = i;
-
-			for (++it; it != itEnd; ++it, ++repRight) 
-			{
-				if (last != *it)
-				{
-					if (_repeatMaskValue(last) || (TRepeatSize)(repRight - repLeft) > minRepeatLen)
-					{
-						// insert repeat
-						rep.beginPosition.i2 = repLeft;
-						rep.endPosition.i2 = repRight;
-//						::std::cerr<<"left:"<<rep.beginPosition<<"  right:"<<rep.endPosition<<"  length:"<<posSub(rep.endPosition,rep.beginPosition)<<"  period:"<<rep.period<<::std::endl;
-						appendValue(repString, rep);
-					}
-					repLeft = repRight;
-					last = *it;
-				}
-			}
-			if (_repeatMaskValue(last) || (TRepeatSize)(repRight - repLeft) > minRepeatLen)
-			{
-				// insert repeat
-				rep.beginPosition.i2 = repLeft;
-				rep.endPosition.i2 = repRight;
-//				::std::cerr<<"left:"<<rep.beginPosition<<"  right:"<<rep.endPosition<<"  length:"<<posSub(rep.endPosition,rep.beginPosition)<<"  period:"<<rep.period<<::std::endl;
-				appendValue(repString, rep);
-			}
-		}
-	}
 
 }	// namespace seqan
 
