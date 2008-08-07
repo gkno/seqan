@@ -37,6 +37,7 @@
 	#define SEQAN_PROGETTIME			0
     #define SEQAN_PROTIMESTART(a)
     #define SEQAN_PROTIMEDIFF(a)		0
+	#define SEQAN_PROTIMEUPDATE(a)		0
 	// replace malloc and free in external tools
 	// with SEQAN_PROMALLOC and SEQAN_PROFREE to profile
 	// their memory usage
@@ -56,6 +57,7 @@
 	#define SEQAN_PROGETTIME			sysTime()
     #define SEQAN_PROTIMESTART(a)		_proFloat a = sysTime()
     #define SEQAN_PROTIMEDIFF(a)		(sysTime() - a)
+	#define SEQAN_PROTIMEUPDATE(a)		(_proUpdate(a))
     #define SEQAN_PROMALLOC(s)			_proMalloc(s)
     #define SEQAN_PROFREE(p)			_proFree(p)
 
@@ -497,6 +499,12 @@
     		_proSub(SEQAN_PROMEMORY, *ptr);
     	}
     	free(ptr);
+    }
+
+	inline _proFloat _proUpdate(_proFloat& a) {
+		_proFloat x = sysTime() - a;
+		a += x;
+		return x;
     }
 
 #endif
