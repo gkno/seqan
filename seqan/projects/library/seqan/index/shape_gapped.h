@@ -386,16 +386,18 @@ You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 	SEQAN_CHECKPOINT
 		typedef typename Value< Shape<TValue, FixedGappedShape<TSpec> > >::Type	THValue;
 
-		TSize iEnd = me.weight;
-		if (iEnd > charsLeft) iEnd = charsLeft;
+		if (charsLeft >= (TSize)me.span) 
+			return hash(me, it);
 
 		TSize i = 0;
-		if (iEnd > 0) {
+		if (charsLeft > 0) {
 			me.hValue = ordValue((TValue)*it);
-			--iEnd;
-			for(; i < iEnd; ++i) {
-				goFurther(it, me.diffs[i]);
+			TSize d;
+			while (charsLeft > (d = me.diffs[i])) {
+				charsLeft -= d;
+				goFurther(it, d);
 				me.hValue = me.hValue * ValueSize<TValue>::VALUE + ordValue((TValue)*it);
+				++i;
 			}
 			++i;
 		} else
@@ -414,21 +416,25 @@ You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 	SEQAN_CHECKPOINT
 		typedef typename Value< Shape<TValue, FixedGappedShape<TSpec> > >::Type	THValue;
 
-		TSize iEnd = me.weight;
-		if (iEnd > charsLeft) iEnd = charsLeft;
+		if (charsLeft >= (TSize)me.span) {
+			hash(me, it);
+			return ++me.hValue;
+		}
 
 		TSize i = 0;
-		if (iEnd > 0) {
+		if (charsLeft > 0) {
 			me.hValue = ordValue((TValue)*it);
-			--iEnd;
-			for(; i < iEnd; ++i) {
-				goFurther(it, me.diffs[i]);
+			TSize d;
+			while (charsLeft > (d = me.diffs[i])) {
+				charsLeft -= d;
+				goFurther(it, d);
 				me.hValue = me.hValue * ValueSize<TValue>::VALUE + ordValue((TValue)*it);
+				++i;
 			}
 			++i;
 			++me.hValue;
 		} else
-			return me.hValue = 1;
+			me.hValue = 1;
 
 		// fill shape with zeros
 		for(; i < (TSize)me.weight; ++i)
@@ -549,7 +555,7 @@ You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 ..param.shape:Shape object that is manipulated.
 ...type:Spec.GappedShape
 ..param.bitmap:A character string of '1' and '0' representing relevant and irrelevant positions (blanks) respectively.
-...remarks:This string must begin with a '1'.
+...remarks:This string must begin with a '1'. Trailing '0's are ignored.
 ...type:Class.String
 */
 
@@ -563,8 +569,6 @@ You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 		typedef typename Iterator<TShapeString const>::Type		TIter;
 		typedef typename Iterator<String<int> >::Type			TShapeIter;
 
-		me.span = length(bitmap);
-
 		unsigned oneCount = 0;
 		TIter it = begin(bitmap, Standard());
 		TIter itEnd = end(bitmap, Standard());
@@ -575,11 +579,19 @@ You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 		me.weight = oneCount;
 		resize(me.diffs, oneCount);
 
-		unsigned diff = 0;
-		it = begin(bitmap, Standard());
+		if ((it = begin(bitmap, Standard())) == itEnd) {
+			me.span = 0;
+			return;
+		}		
+		
+		unsigned diff = 1;
+		me.span = 1;
 		TShapeIter itS = begin(me.diffs, Standard());
-		for(; it != itEnd; ++it) {
-			if (*it == '1') {
+		for(++it; it != itEnd; ++it) 
+		{
+			if (*it == '1') 
+			{
+				me.span += diff;
 				*itS = diff;
 				++itS;
 				diff = 0;
