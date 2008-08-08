@@ -80,48 +80,9 @@ buildAlignmentGraph(String<TFragment, TSpec1>& matches,
 	// Initialization
 	clearVertices(outGraph);
 	TStringSet& strSet = stringSet(outGraph);
-	TSize nseq = length(strSet);
-
-	// Total sequence length
-	TSize totalCount = 0;
-	for(TSize i = 0; i < nseq;++i) totalCount += length(value(strSet,i));
 	
 	// Segment-match refinement
-	// If there are too many matches just cut the matches into single characters
-	if (((double) totalCount / (double) length(matches)) <= 1.0) {
-		typedef std::set<std::pair<TId, TId> > TSeqPairs;
-		String<TSeqPairs> edgesPerSeqPair;
-		resize(edgesPerSeqPair, nseq * nseq);
-
-		// Make a vertex for each character
-		clearVertices(outGraph);
-		for(TSize i=0;i<nseq;++i) {
-			TId id = positionToId(strSet, i);
-			for(TSize k=0;k<length(value(strSet,i));++k) {
-				addVertex(outGraph, id, k, 1);
-			}
-		}
-
-		// Add the edges
-		TFragmentStringIter endIt = end(matches);
-		for(TFragmentStringIter it = begin(matches); it != endIt; ++it) {
-			TId id1 = sequenceId(*it,0);
-			TSize pos1 = fragmentBegin(*it, id1);
-			TSize len = fragmentLength(*it, id1);
-			for(TSize p = 0; p < len; ++p) {
-				TSize pos2 = 0;
-				TId id2 = 0;
-				getProjectedPosition(*it, id1, pos1 + p, id2, pos2);
-				TVertexDescriptor v1 = findVertex(outGraph, id1, pos1 + p);
-				TVertexDescriptor v2 = findVertex(outGraph, id2, pos2);
-				TEdgeDescriptor e = findEdge(outGraph, v1, v2);
-				if (e == 0) addEdge(outGraph, v1, v2, 1);
-				else cargo(e) += 1;
-			}
-		}
-	} else {
-		matchRefinement(matches,strSet,outGraph);
-	}
+	matchRefinement(matches,strSet,outGraph);
 
 	// Find smallest score value
 	TScoreValuesIter scoreIt = begin(scores);
@@ -160,6 +121,7 @@ buildAlignmentGraph(String<TFragment, TSpec1>& matches,
 			pos2 += fragmentLength(outGraph, p2);
 		}
 	}
+
 }
 
 
@@ -180,54 +142,9 @@ buildAlignmentGraph(String<TFragment, TSpec1>& matches,
 	// Initialization
 	clearVertices(outGraph);
 	TStringSet& strSet = stringSet(outGraph);
-	TSize nseq = length(strSet);
-
-	// Total sequence length
-	TSize totalCount = 0;
-	for(TSize i = 0; i < nseq;++i) totalCount += length(value(strSet,i));
 	
 	// Segment-match refinement
-	// If there are too many matches just cut the matches into single characters
-	if (((double) totalCount / (double) length(matches)) <= 1.0) {
-		typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
-		typedef typename Id<TOutGraph>::Type TId;
-		typedef typename EdgeDescriptor<TOutGraph>::Type TEdgeDescriptor;
-		typedef typename VertexDescriptor<TOutGraph>::Type TVertexDescriptor;
-		typedef std::set<std::pair<TId, TId> > TSeqPairs;
-		String<TSeqPairs> edgesPerSeqPair;
-		resize(edgesPerSeqPair, nseq * nseq);
-
-		// Make a vertex for each character
-		clearVertices(outGraph);
-		for(TSize i=0;i<nseq;++i) {
-			TId id = positionToId(strSet, i);
-			for(TSize k=0;k<length(value(strSet,i));++k) {
-				addVertex(outGraph, id, k, 1);
-			}
-		}
-
-		// Add the edges
-		TFragmentStringIter endIt = end(matches);
-		for(TFragmentStringIter it = begin(matches); it != endIt; ++it) {
-			TId id1 = sequenceId(*it,0);
-			TSize pos1 = fragmentBegin(*it, id1);
-			TSize len = fragmentLength(*it, id1);
-			for(TSize p = 0; p < len; ++p) {
-				TSize pos2 = 0;
-				TId id2 = 0;
-				getProjectedPosition(*it, id1, pos1 + p, id2, pos2);
-				TVertexDescriptor v1 = findVertex(outGraph, id1, pos1 + p);
-				TVertexDescriptor v2 = findVertex(outGraph, id2, pos2);
-				TEdgeDescriptor e = findEdge(outGraph, v1, v2);
-				if (e == 0) addEdge(outGraph, v1, v2, 1);
-				else cargo(e) += 1;
-			}
-		}
-	} else {
-		matchRefinement(matches,strSet,outGraph);
-	}
-
-	
+	matchRefinement(matches,strSet,outGraph);
 }
 
 
