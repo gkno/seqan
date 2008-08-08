@@ -87,6 +87,14 @@ typedef Tag<Overlap_Library_> const Overlap_Library;
 struct Majority_Vote_;
 typedef Tag<Majority_Vote_> const Majority_Vote;
 
+/**
+.Tag.Consensus Calling.value.Bayesian:
+	A consensus based on bayesian probability.
+*/
+
+struct Bayesian_;
+typedef Tag<Bayesian_> const Bayesian;
+
 //////////////////////////////////////////////////////////////////////////////
 // Read alignment and Consensus Generation
 //////////////////////////////////////////////////////////////////////////////
@@ -237,17 +245,15 @@ multireadAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	}
 }
 
-
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TValue, typename TSpec, typename TAlphabet, typename TSpec2, typename TGappedConsensus, typename TCoverage, typename TSize>
+template <typename TValue, typename TSpec, typename TCounters, typename TCoverage, typename TSize, typename TAlphabet>
 inline void
-consensusCalling(String<TValue, TSpec> const& mat,
-				 String<TAlphabet, TSpec2>& consensus,
-				 TGappedConsensus& gappedConsensus,
-				 TCoverage& coverage,
-				 TSize alignDepth,
-				 Majority_Vote)
+__countLetters(String<TValue, TSpec> const& mat,
+			   TCounters& counterValues,
+			   TCoverage& coverage,
+			   TSize alignDepth,
+			   TAlphabet)
 {
 	SEQAN_CHECKPOINT
 	typedef String<TValue, TSpec> TMatrix;
@@ -264,14 +270,12 @@ consensusCalling(String<TValue, TSpec> const& mat,
 
 
 	// Set-up counter values
-	typedef String<TSize> TCounter;
-	typedef typename Iterator<TCounter>::Type TCIt;
-	typedef String<TCounter> TCounters;
+	typedef typename Value<TCounters>::Type TCounter;
 	typedef typename Iterator<TCounters>::Type TCounterIt;
-	String<String<TSize> > counterValues;
+	clear(counterValues);
 	resize(counterValues, len);
 	for(TSize i=0;i<len; ++i) {
-		String<TSize> counter;
+		TCounter counter;
 		fill(counter, alphabetSize + 1, 0);
 		value(counterValues, i) = counter;
 	}
@@ -295,15 +299,286 @@ consensusCalling(String<TValue, TSpec> const& mat,
 			else ++value(value(countIt), ordValue(TAlphabet(c)));
 		}
 	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TValue, typename TSpec, typename TAlphabet, typename TSpec2, typename TGappedConsensus, typename TCoverage, typename TSize>
+inline void
+consensusCalling(String<TValue, TSpec> const& mat,
+				 String<TAlphabet, TSpec2>& consensus,
+				 TGappedConsensus& gappedConsensus,
+				 TCoverage& coverage,
+				 TSize alignDepth,
+				 Bayesian)
+{
+	SEQAN_CHECKPOINT
+	typedef double TProbability;
+	typedef String<TProbability> TProbabilityDistribution;
+	typedef String<TProbabilityDistribution> TPositionalPrDist;
+	typedef typename Iterator<TPositionalPrDist>::Type TPosPrDistIter;
+
+	// Initialization
+	TSize len = length(mat) / alignDepth;
+	TValue gapChar = gapValue<TValue>();
+	TValue specialGap = '.';
+	TSize alphabetSize = ValueSize<TAlphabet>::VALUE;
+	TProbabilityDistribution backroundDist;
+	fill(backroundDist, alphabetSize + 1, (1.0 / (TProbability) (alphabetSize + 1)));
+	
+	// Set-up the counters
+	typedef String<TSize> TCounter;
+	typedef String<TCounter> TCounters;
+	TCounters counterValues;
+	__countLetters(mat, counterValues, coverage, alignDepth, TAlphabet() );
+
+	// Get an initial consensus
+	typedef typename Iterator<TCounters>::Type TCounterIt;
+	TCounterIt countIt = begin(counterValues);
+	TCounterIt countItEnd = end(counterValues);
+	TPositionalPrDist posPrDist;
+	for(;countIt != countItEnd; goNext(countIt)) {
+		TSize max = 0;
+		TValue c = TValue();
+		typedef typename Iterator<TCounter>::Type TCIt;
+		TCIt cIt = begin(value(countIt));
+		TCIt cItEnd = end(value(countIt));
+		TSize pos = 0;
+		for(;cIt != cItEnd; goNext(cIt), ++pos) {
+			if (value(cIt) > max) {
+				max = value(cIt);
+				if (pos == alphabetSize) c = gapChar;
+				else c = TAlphabet(pos);
+			}
+		}
+		TProbabilityDistribution prDist;
+		fill(prDist, alphabetSize + 1, 0);
+		if (c == gapChar) value(prDist, alphabetSize) = 1;
+		else value(prDist, ordValue(TAlphabet(c))) = 1;
+		appendValue(posPrDist, prDist);
+	}
+
+	bool run = false;
+	TProbabilityDistribution pI;
+	TProbabilityDistribution pIJ;
+	TProbabilityDistribution pIOld;
+	TProbabilityDistribution pIJOld;
+	std::cout << "Bayesian Consensus";
+	while((run) || (empty(pIOld))) {
+		// Store the values from the last iteration
+		pIOld = pI;
+		pIJOld = pIJ;
+
+		// Count all letters in the consensus
+		TProbabilityDistribution nI;
+		fill(nI, alphabetSize + 1, 0);
+		TPosPrDistIter itPosPrDist = begin(posPrDist);
+		TPosPrDistIter itPosPrDistEnd = end(posPrDist);
+		for(;itPosPrDist!=itPosPrDistEnd; ++itPosPrDist) {
+			for(TSize i = 0; i<(alphabetSize + 1); ++i) {
+				value(nI, i) += value(value(itPosPrDist), i);
+			}
+		}
+	
+		// Composition probabilities
+		clear(pI);
+		resize(pI, alphabetSize + 1);
+		for(TSize i = 0; i<length(pI); ++i) {
+			value(pI, i) = (TProbability) value(nI, i) / (TProbability) length(posPrDist);
+		}
+
+		// Count all letters that agree / disagree with the consensus
+		TProbabilityDistribution nIJ;
+		fill(nIJ, (alphabetSize + 1) * (alphabetSize + 1), 0);
+		typedef String<TValue, TSpec> TMatrix;
+		typedef typename Iterator<TMatrix>::Type TMatIter;
+		TMatIter matIt = begin(mat);
+		TMatIter matItEnd = end(mat);
+		itPosPrDist = begin(posPrDist);
+		TSize pos = 0;
+		for(; matIt != matItEnd; goNext(matIt), goNext(itPosPrDist), ++pos) {
+			if (pos % len == 0) {
+				itPosPrDist = begin(posPrDist);
+			}
+			TValue c = value(matIt);
+			if (c == specialGap) continue;
+			else {
+				TSize fragJ = alphabetSize;
+				if (c != gapChar) fragJ = ordValue(TAlphabet(c));
+				for(TSize consI = 0; consI<(alphabetSize + 1); ++consI) {
+					value(nIJ, consI * (alphabetSize + 1) + fragJ) += 1.0 * value(value(itPosPrDist), consI);
+				}
+			}
+		}
+
+		// Sequencing error probabilities
+		clear(pIJ);
+		resize(pIJ, (alphabetSize + 1) * (alphabetSize + 1));
+		TProbability sumIJ = 0;
+		for(TSize diag = 0; diag<(alphabetSize + 1); ++diag) sumIJ += value(nIJ, diag * (alphabetSize + 1) + diag);
+		for(TSize consI = 0; consI<(alphabetSize + 1); ++consI) {
+			for(TSize fragJ = 0; fragJ<(alphabetSize + 1); ++fragJ) {
+				value(pIJ, consI * (alphabetSize + 1) + fragJ) = value(nIJ, consI * (alphabetSize + 1) + fragJ) / sumIJ;
+			}
+		}
+	
+		//// Debug Code
+		//std::cout << "A " << value(pI, 0) << std::endl;
+		//std::cout << "C " << value(pI, 1) << std::endl;
+		//std::cout << "G " << value(pI, 2) << std::endl;
+		//std::cout << "T " << value(pI, 3) << std::endl;
+		//std::cout << "- " << value(pI, 4) << std::endl;
+		//std::cout << "AA " << value(pIJ, 0) << std::endl;
+		//std::cout << "AC " << value(pIJ, 1) << std::endl;
+		//std::cout << "AG " << value(pIJ, 2) << std::endl;
+		//std::cout << "AT " << value(pIJ, 3) << std::endl;
+		//std::cout << "A- " << value(pIJ, 4) << std::endl;
+		//std::cout << "CA " << value(pIJ, 5) << std::endl;
+		//std::cout << "CC " << value(pIJ, 6) << std::endl;
+		//std::cout << "CG " << value(pIJ, 7) << std::endl;
+		//std::cout << "CT " << value(pIJ, 8) << std::endl;
+		//std::cout << "C- " << value(pIJ, 9) << std::endl;
+		//std::cout << "GA " << value(pIJ, 10) << std::endl;
+		//std::cout << "GC " << value(pIJ, 11) << std::endl;
+		//std::cout << "GG " << value(pIJ, 12) << std::endl;
+		//std::cout << "GT " << value(pIJ, 13) << std::endl;
+		//std::cout << "G- " << value(pIJ, 14) << std::endl;
+		//std::cout << "TA " << value(pIJ, 15) << std::endl;
+		//std::cout << "TC " << value(pIJ, 16) << std::endl;
+		//std::cout << "TG " << value(pIJ, 17) << std::endl;
+		//std::cout << "TT " << value(pIJ, 18) << std::endl;
+		//std::cout << "T- " << value(pIJ, 19) << std::endl;
+		//std::cout << "-A " << value(pIJ, 20) << std::endl;
+		//std::cout << "-C " << value(pIJ, 21) << std::endl;
+		//std::cout << "-G " << value(pIJ, 22) << std::endl;
+		//std::cout << "-T " << value(pIJ, 23) << std::endl;
+		//std::cout << "-- " << value(pIJ, 24) << std::endl;
+
+		// Recompute positional probability distribution
+		itPosPrDist = begin(posPrDist);
+		TSize col = 0;
+		for(;itPosPrDist!=itPosPrDistEnd; goNext(itPosPrDist), ++col) {
+			TProbabilityDistribution prDist;
+			resize(prDist, alphabetSize + 1);
+			for(TSize consI = 0; consI<(alphabetSize + 1); ++consI) {
+				TProbability numerator = value(pI, consI);
+				TProbability denominator = 0;
+				for(TSize allI = 0; allI<(alphabetSize + 1); ++allI) {
+					TProbability denominatorSub = value(pI, allI);
+					for(TSize row = 0; row < alignDepth; ++row) {
+						TValue c = value(mat, row * len + col);
+						if (c == specialGap) continue;
+						TSize fragJ = alphabetSize;
+						if (c != gapChar) fragJ = ordValue(TAlphabet(c));
+						if (allI == consI) {
+							numerator *= value(pIJ, allI * (alphabetSize + 1) + fragJ); 
+						}
+						denominatorSub *= value(pIJ, allI * (alphabetSize + 1) + fragJ); 
+					}
+					denominator += denominatorSub;
+				}
+				value(prDist, consI) = numerator / denominator;
+			}
+			value(itPosPrDist) = prDist;
+		}	
+
+		// Check termination criterion
+		TProbability eps = 0.00001;
+		typedef typename Iterator<TProbabilityDistribution>::Type TProbIter;
+		TProbIter pIter = begin(pIOld);
+		TProbIter pIterCompare = begin(pI);
+		TProbIter pIterEnd = end(pIOld);
+		run = false;
+		for(;pIter != pIterEnd; goNext(pIter), goNext(pIterCompare)) {
+			if (value(pIter) > value(pIterCompare)) {
+				if (value(pIter) - value(pIterCompare) > eps) {
+					run = true;
+					break;
+				}
+			} else {
+				if (value(pIterCompare) - value(pIter) > eps) {
+					run = true;
+					break;
+				}
+			}
+		}
+		if (!run) {
+			pIter = begin(pIJOld);
+			pIterCompare = begin(pIJ);
+			pIterEnd = end(pIJOld);
+			for(;pIter != pIterEnd; goNext(pIter), goNext(pIterCompare)) {
+				if (value(pIter) > value(pIterCompare)) {
+					if (value(pIter) - value(pIterCompare) > eps) {
+						run = true;
+						break;
+					}
+				} else {
+					if (value(pIterCompare) - value(pIter) > eps) {
+						run = true;
+						break;
+					}
+				}
+			}
+		}
+		std::cout << '.';
+	}
+	std::cout << std::endl;
+	
+	// Compute the most likely consensus
+	TPosPrDistIter itPosPrDist = begin(posPrDist);
+	TPosPrDistIter itPosPrDistEnd = end(posPrDist);
+	clear(consensus);
+	clear(gappedConsensus);
+	for(;itPosPrDist!=itPosPrDistEnd; goNext(itPosPrDist)) {
+		TProbability max = 0;
+		TSize ind = 0;
+		for(TSize consI = 0; consI<(alphabetSize + 1); ++consI) {
+			if (value(value(itPosPrDist), consI) > max) {
+				max = value(value(itPosPrDist), consI);
+				ind = consI;
+			}
+		}
+		if (ind == alphabetSize) appendValue(gappedConsensus, gapChar);
+		else {
+			appendValue(consensus, TAlphabet(ind));
+			appendValue(gappedConsensus, TAlphabet(ind));
+		}
+	}
+}
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TValue, typename TSpec, typename TAlphabet, typename TSpec2, typename TGappedConsensus, typename TCoverage, typename TSize>
+inline void
+consensusCalling(String<TValue, TSpec> const& mat,
+				 String<TAlphabet, TSpec2>& consensus,
+				 TGappedConsensus& gappedConsensus,
+				 TCoverage& coverage,
+				 TSize alignDepth,
+				 Majority_Vote)
+{
+	// Initialization
+	TSize alphabetSize = ValueSize<TAlphabet>::VALUE;
+	TValue gapChar = gapValue<TValue>();
+
+	// Set-up the counters
+	typedef String<TSize> TCounter;
+	typedef String<TCounter> TCounters;
+	TCounters counterValues;
+	__countLetters(mat, counterValues, coverage, alignDepth, TAlphabet() );
 
 	// Get the consensus
+	typedef typename Iterator<TCounters>::Type TCounterIt;
+	TCounterIt countIt = begin(counterValues);
 	TCounterIt countItEnd = end(counterValues);
-	countIt = begin(counterValues);
 	clear(consensus);
 	clear(gappedConsensus);
 	for(;countIt != countItEnd; goNext(countIt)) {
 		TSize max = 0;
 		TValue c = TValue();
+		typedef typename Iterator<TCounter>::Type TCIt;
 		TCIt cIt = begin(value(countIt));
 		TCIt cItEnd = end(value(countIt));
 		TSize pos = 0;
