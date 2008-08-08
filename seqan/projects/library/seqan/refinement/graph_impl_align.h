@@ -1053,10 +1053,10 @@ write(TFile & file,
 //////////////////////////////////////////////////////////////////////////////
 
 
-template <typename TFile, typename TStringSet, typename TCargo, typename TSpec, typename TAlignmentMatrix, typename TOldBegEndPos, typename TReadBegEndPos, typename TGappedConsensus, typename TCoverage>
+template <typename TFile, typename TStringSet, typename TAlignmentMatrix, typename TOldBegEndPos, typename TReadBegEndPos, typename TGappedConsensus, typename TCoverage>
 inline void
 write(TFile & file,
-	  Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
+	  TStringSet const& str,
 	  TAlignmentMatrix const& mat,
 	  TOldBegEndPos const& oldBegEndPos,
 	  TReadBegEndPos const& readBegEndPos,
@@ -1068,7 +1068,6 @@ write(TFile & file,
 	typedef typename Value<TAlignmentMatrix>::Type TValue;
 
 	// Initialization
-	TStringSet& str = stringSet(g);
 	TSize nseq = length(str);
 	TSize len = length(gappedConsensus);
 	TSize maxCoverage = length(mat) / len;

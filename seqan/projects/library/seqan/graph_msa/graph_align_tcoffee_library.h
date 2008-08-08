@@ -37,14 +37,14 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Tag.Library Generation:
-..summary:A tag that specifies how to generate alignment graph edges (T-Coffee library).
+.Tag.Segment Match Generation:
+..summary:A tag that specifies how to generate segment matches.
 */
 
 
 /**
-.Tag.Library Generation.value.GlobalPairwise_Library:
-	A primary library of global alignments.
+.Tag.Segment Match Generation.value.GlobalPairwise_Library:
+	Segment matches from pairwise global alignments.
 */
 
 struct GlobalPairwise_Library_;
@@ -52,16 +52,16 @@ typedef Tag<GlobalPairwise_Library_> const GlobalPairwise_Library;
 
 
 /**
-.Tag.Library Generation.value.LocalPairwise_Library:
-	A primary library of local alignments.
+.Tag.Segment Match Generation.value.LocalPairwise_Library:
+	Segment matches from pairwise local alignments.
 */
 
 struct LocalPairwise_Library_;
 typedef Tag<LocalPairwise_Library_> const LocalPairwise_Library;
 
 /**
-.Tag.Library Generation.value.Kmer_Library:
-	A primary library of kmer alignments.
+.Tag.Segment Match Generation.value.Kmer_Library:
+	Segment matches from pairwise kmer alignments.
 */
 
 struct Kmer_Library_;
@@ -69,8 +69,8 @@ typedef Tag<Kmer_Library_> const Kmer_Library;
 
 
 /**
-.Tag.Library Generation.value.Lcs_Library:
-	A primary library generated using the longest common subsequence algorithm.
+.Tag.Segment Match Generation.value.Lcs_Library:
+	Segment matches from pairwise longest common subsequence comparisons.
 */
 
 struct Lcs_Library_;
@@ -187,7 +187,7 @@ getAlignmentStatistics(String<TFragment, TSpec1>& matches,
 
 
 //////////////////////////////////////////////////////////////////////////////
-// Library Generation
+// Segment Match Generation
 //////////////////////////////////////////////////////////////////////////////
 
 
@@ -635,7 +635,7 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 //
 //
 ///**
-//.Tag.Library Generation.value.Interleaved_Library:
+//.Tag.Segment Match Generation.value.Interleaved_Library:
 //	A primary library generated using overlapping kmers.
 //*/
 //
@@ -737,7 +737,7 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 //
 //
 ///**
-//.Tag.Library Generation.value.LocalPairwiseIsland_Library:
+//.Tag.Segment Match Generation.value.LocalPairwiseIsland_Library:
 //	A primary library of local alignments using islands.
 //*/
 //
@@ -827,7 +827,7 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 //}
 //
 ///**
-//.Tag.Library Generation.value.LocalExtendPairwise_Library:
+//.Tag.Segment Match Generation.value.LocalExtendPairwise_Library:
 //	A primary library of extended local alignments.
 //*/
 //
