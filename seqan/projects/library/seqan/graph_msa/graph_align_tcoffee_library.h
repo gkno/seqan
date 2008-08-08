@@ -89,7 +89,7 @@ typedef Tag<Lcs_Library_> const Lcs_Library;
 // Dummy function selecting all pairs
 template<typename TString, typename TSpec, typename TPairList>
 inline void 
-selectPairsForLibraryGeneration(StringSet<TString, TSpec> const& str,
+selectPairs(StringSet<TString, TSpec> const& str,
 								TPairList& pList)
 {
 	SEQAN_CHECKPOINT
@@ -264,7 +264,7 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 	SEQAN_CHECKPOINT
 	typedef typename Id<StringSet<TString, TSpec> >::Type TId;
 	String<Pair<TId, TId> > pList;
-	selectPairsForLibraryGeneration(str, pList);
+	selectPairs(str, pList);
 	appendSegmentMatches(str, pList, matches, scores, Lcs_Library());
 }
 
@@ -402,7 +402,7 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 	SEQAN_CHECKPOINT
 	typedef typename Id<StringSet<TString, TSpec> >::Type TId;
 	String<Pair<TId, TId> > pList;
-	selectPairsForLibraryGeneration(str, pList);
+	selectPairs(str, pList);
 	appendSegmentMatches(str, pList, score_type, matches, scores, LocalPairwise_Library() );
 }
 
@@ -595,7 +595,7 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 	SEQAN_CHECKPOINT
 	typedef typename Id<StringSet<TString, TSpec> >::Type TId;
 	String<Pair<TId, TId> > pList;
-	selectPairsForLibraryGeneration(str, pList);
+	selectPairs(str, pList);
 	appendSegmentMatches(str, pList, score_type, matches, scores, dist, GlobalPairwise_Library() );
 }
 
@@ -822,7 +822,7 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 //{
 //	typedef typename Id<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type TId;
 //	String<Pair<TId, TId> > pList;
-//	selectPairsForLibraryGeneration(g, pList);
+//	selectPairs(g, pList);
 //	generatePrimaryLibrary(g, pList, score_type, Island_Library() );
 //}
 //
@@ -951,7 +951,7 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 //{
 //	typedef typename Id<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type TId;
 //	String<Pair<TId, TId> > pList;
-//	selectPairsForLibraryGeneration(g, pList);
+//	selectPairs(g, pList);
 //	generatePrimaryLibrary(g, pList, score_type, LocalExtendPairwise_Library() );
 //}
 

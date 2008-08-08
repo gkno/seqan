@@ -90,7 +90,7 @@ globalAlignment(StringSet<TString, TSpec> const& seqSet,
 
 	// Select all pairs
 	String<Pair<TId, TId> > pList;
-	selectPairsForLibraryGeneration(seqSet, pList);
+	selectPairs(seqSet, pList);
 
 	// Set-up a distance matrix
 	typedef String<double> TDistanceMatrix;
@@ -219,7 +219,7 @@ globalAlignment(StringSet<TString, TSpec> const& seqSet,
 
 	// Select all pairs
 	String<Pair<TId, TId> > pList;
-	selectPairsForLibraryGeneration(seqSet, pList);
+	selectPairs(seqSet, pList);
 
 	// Set-up a distance matrix
 	typedef String<double> TDistanceMatrix;
@@ -374,7 +374,7 @@ globalAlignment(StringSet<TString, TSpec> const& seqSet,
 
 	// Select all pairs
 	String<Pair<TId, TId> > pList;
-	selectPairsForLibraryGeneration(seqSet, pList);
+	selectPairs(seqSet, pList);
 
 	// Set-up a distance matrix
 	typedef String<double> TDistanceMatrix;
@@ -674,7 +674,7 @@ _debugRefinedMatches(TGraph& g)
 //	// Select informative pairs
 //	TGraph g(seqSet);
 //	String<Pair<TId, TId> > pList;
-//	selectPairsForLibraryGeneration(g, pList);
+//	selectPairs(g, pList);
 //
 //	// Generate a primary library, i.e., all global pairwise alignments
 //	String<double> distanceMatrix;
@@ -739,7 +739,7 @@ _debugRefinedMatches(TGraph& g)
 //	// Select all pairs
 //	TGraph g(seqSet);
 //	String<Pair<TId, TId> > pList;
-//	selectPairsForLibraryGeneration(g, pList);
+//	selectPairs(g, pList);
 //
 //
 //	TGraph lib1(seqSet);

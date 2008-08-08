@@ -198,7 +198,7 @@ void Test_Distances() {
 
 	clear(distanceMatrix);
 	String<Pair<unsigned int, unsigned int> > pList;
-	selectPairsForLibraryGeneration(strSet, pList);
+	selectPairs(strSet, pList);
 	Blosum62 score_type(-1,-11);
 	String<Fragment<> > matches;
 	String<int> scores;
@@ -275,7 +275,7 @@ void Test_Libraries() {
 	clear(scores);
 	String<double> distanceMatrix;
 	String<Pair<unsigned int, unsigned int> > pList;
-	selectPairsForLibraryGeneration(strSet, pList);
+	selectPairs(strSet, pList);
 	appendSegmentMatches(strSet, pList, score_type, matches, scores, distanceMatrix, AlignConfig<false,false,false,false>(), GlobalPairwise_Library() );
 	buildAlignmentGraph(matches, scores, g, FrequencyCounting() );
 	__testquickAlign(g);

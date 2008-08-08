@@ -25,92 +25,6 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TString, typename TSpec, typename TRead, typename TSpec2, typename TBegEndPositions>
-inline void 
-layoutReads(String<TString, TSpec>& names,
-			StringSet<TRead, TSpec2>& strSet,
-			TBegEndPositions& begEndPos)
-{
-	SEQAN_CHECKPOINT
-	typedef typename Size<TString>::Type TSize;
-	typedef typename Value<TBegEndPositions>::Type TPair;
-	typedef typename Iterator<String<TString, TSpec> >::Type TNameIter;
-	typedef typename Iterator<TString>::Type TIter;
-
-	reserve(begEndPos, length(strSet));
-	TNameIter itName = begin(names);
-	TNameIter itNameEnd = end(names);
-	TSize count = 0;
-	for(;itName != itNameEnd; ++itName, ++count) {
-		TSize brPoint = 0;
-		TSize brPoint2 = length(value(itName));
-		TIter nIt = begin(value(itName));
-		TIter nItEnd = end(value(itName));
-		TSize ind = 0;
-		for(;nIt!=nItEnd;++ind, ++nIt) {
-			if (value(nIt) == ',') brPoint = ind;
-			if (value(nIt) == '[') {
-				brPoint2 = ind;
-				break;
-			}
-		}
-		TSize posI = 0;
-		TSize posJ = 0;
-		TString inf1 = infix(value(itName), 0, brPoint);
-		TString inf2 = infix(value(itName), brPoint+1, brPoint2);
-		std::stringstream ssStream1(toCString(inf1));
-		ssStream1 >> posI; 
-		std::stringstream ssStream2(toCString(inf2));
-		ssStream2 >> posJ;
-		appendValue(begEndPos, TPair(posI, posJ));
-		if (posI > posJ) reverseComplementInPlace(value(strSet, count));
-	}
-}
-
-
-//////////////////////////////////////////////////////////////////////////////
-
-// Depending on the read offset
-template<typename TStringSet, typename TCargo, typename TSpec, typename TBegEndPositions, typename TPairList, typename TReadLength>
-inline void 
-selectPairsForLibraryGeneration(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-								TBegEndPositions& begEndPos,
-								TPairList& pList,
-								TReadLength readLen)
-{
-	SEQAN_CHECKPOINT
-	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
-	typedef typename Size<TGraph>::Type TSize;
-	typedef typename Value<TPairList>::Type TPair;
-	typedef typename Iterator<TBegEndPositions>::Type TBegEndIter;
-	
-	TStringSet& str = stringSet(g);
-	int threshold = (int) (1.5 * (double) readLen);
-	TBegEndIter beIt = begin(begEndPos);
-	TBegEndIter beItEnd = end(begEndPos);
-	TSize index1 = 0;
-	for(;beIt != beItEnd; ++beIt, ++index1) {
-		int posI = (value(beIt)).i1;
-		if (posI > (int) (value(beIt)).i2) posI = (value(beIt)).i2;
-		TBegEndIter beIt2 = beIt;
-		++beIt2;
-		TSize index2 = index1 + 1;
-		for(;beIt2 != beItEnd; ++beIt2, ++index2) {
-			int posJ = (value(beIt2)).i1;
-			if (posJ > (int) (value(beIt2)).i2) posJ = (value(beIt2)).i2;
-			if (((posI > posJ) &&
-				(posI - posJ < threshold))) {
-					appendValue(pList, TPair(positionToId(str, index2), positionToId(str, index1)));
-			} else if (((posI <= posJ) &&
-						(posJ - posI < threshold))) {
-					appendValue(pList, TPair(positionToId(str, index1), positionToId(str, index2)));
-			}
-		}
-	}
-}
-
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -175,69 +89,51 @@ __getAlignmentStatistics(Graph<Undirected<TCargo, TSpec> >& dist,
 	addEdge(dist, i, j, 1000 - sim);
 }
 
+//////////////////////////////////////////////////////////////////////////////
+// Layout-based pair selection
+//////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TStringSet, typename TCargo, typename TSpec, typename TPair, typename TPairSpec, typename TDistance, typename TScore, typename TSize>
+template<typename TString, typename TSpec, typename TBegEndPos, typename TSize, typename TPairList, typename TPos, typename TSpec2>
 inline void 
-generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-					   String<TPair, TPairSpec> const& begEndPos,
-					   TDistance& dist,
-					   TScore const& score_type,
-					   TSize thresholdMatchlength,
-					   TSize thresholdQuality,
-					   TSize bandwidth,
-					   Overlap_Library)
+selectPairs(StringSet<TString, TSpec> const& str,
+								TBegEndPos const& begEndPos,
+								TSize bandwidth,							
+								TPairList& pList,
+								String<Pair<TPos, TPos>, TSpec2>& dList)
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
-	typedef typename Id<TGraph>::Type TId;
-	typedef typename Iterator<String<TPair, TPairSpec> >::Type TBegEndIter;
+	typedef StringSet<TString, TSpec> TStringSet;
+	typedef Pair<TPos, TPos> TDiagPair;
+	typedef typename Value<TPairList>::Type TPair;
+	typedef typename Iterator<TPairList>::Type TPairIter;
+	typedef typename Iterator<TBegEndPos>::Type TBegEndIter;
 
-	// Clear library
-	clearVertices(g);
-
-	// Initialization
-	TStringSet& str = stringSet(g);
-	TSize nseq = length(str);
-	__resizeWithRespectToDistance(dist, nseq);
-
-	// String of fragments to combine all pairwise alignments into a multiple alignment
-	typedef Fragment<> TFragment;
-	typedef String<TFragment> TFragmentString;
-	typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
-	TFragmentString matches;
-
-	// All pairwise alignments
-	double qltThres = (double) thresholdQuality / 100.0;
-	// Debug code
-	std::cout << "Using: " << std::endl;
-	std::cout << "Matchlength: " << thresholdMatchlength << std::endl;
-	std::cout << "Quality: " << qltThres << std::endl;
-	std::cout << "Bandwidth: " << bandwidth << std::endl;
+	// Find all overlapping reads
 	TBegEndIter beIt = begin(begEndPos);
 	TBegEndIter beItEnd = end(begEndPos);
 	TSize index1 = 0;
 	for(;beIt != beItEnd; ++beIt, ++index1) {
-		int posIi1 = (value(beIt)).i1;
-		int posIi2 = (value(beIt)).i2;
+		TPos posIi1 = (value(beIt)).i1;
+		TPos posIi2 = (value(beIt)).i2;
 		TBegEndIter beIt2 = beIt;
 		++beIt2;
 		TSize index2 = index1 + 1;
 		for(;beIt2 != beItEnd; ++beIt2, ++index2) {
-			int posJi1 = (value(beIt2)).i1;
-			int posJi2 = (value(beIt2)).i2;
+			TPos posJi1 = (value(beIt2)).i1;
+			TPos posJi2 = (value(beIt2)).i2;
 
 			// Diagonal boundaries of the band
 			// Initialization values are used if one read is contained in the other 
-			int diagLow = -1 * (posJi2 - posJi1);
+			TPos diagLow = -1 * (posJi2 - posJi1);
 			if (posJi2 < posJi1) diagLow = -1 * (posJi1 - posJi2);
-			int diagHigh = posIi2 - posIi1;
+			TPos diagHigh = posIi2 - posIi1;
 			if (posIi2 < posIi1) diagHigh = posIi1 - posIi2;
 
 			// If you mix long and short reads and short reads are contained in longer ones you have to increase the band because of long "overlaps" (length of the shorter read)
-			int radius = (bandwidth + 1) / 2;		// Band width
-			int lengthDivider = 40;  // Note: overlap / lengthDivider is added to the radius
+			TPos radius = (bandwidth + 1) / 2;		// Band width
+			TPos lengthDivider = 40;  // Note: overlap / lengthDivider is added to the radius
 
 			// Read orientations
 			if (posIi1 < posIi2) {
@@ -245,24 +141,24 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 				if (posJi1 < posJi2) {
 					if ((posJi1 >= posIi2) || (posJi2 <= posIi1)) continue;
 					if ((posJi2 < posIi2) && (posJi1 < posIi1)) {
-						int offset = (posIi1 - posJi1);
+						TPos offset = (posIi1 - posJi1);
 						radius += (posJi2 - posJi1 - offset) / lengthDivider;
 						if (-1 * offset - radius > diagLow) diagLow = -1 * offset - radius;
 						if (-1 * offset + radius < diagHigh) diagHigh = -1 * offset + radius;
 					} else if ((posJi1 > posIi1) && (posJi2 > posIi2)) {
-						int offset = (posJi1 - posIi1);
+						TPos offset = (posJi1 - posIi1);
 						radius += (posIi2 - posIi1 - offset) / lengthDivider;
 						if (offset + radius < diagHigh) diagHigh = offset + radius;
 						if (offset - radius > diagLow) diagLow = offset - radius;
 					} else {
 						radius += 40;  // Why???? ToDo???
 						if (posIi1 < posJi1) {
-							int offset = (posJi1 - posIi1);
+							TPos offset = (posJi1 - posIi1);
 							radius += (posJi2 - posJi1) / lengthDivider;
 							if (offset + radius < diagHigh) diagHigh = offset + radius;
 							if (offset - radius > diagLow) diagLow = offset - radius;
 						} else {
-							int offset = (posIi1 - posJi1);
+							TPos offset = (posIi1 - posJi1);
 							radius += (posIi2 - posIi1) / lengthDivider;
 							if (-1 * offset + radius < diagHigh) diagHigh = -1 * offset + radius;
 							if (-1 * offset - radius > diagLow) diagLow = -1 * offset - radius;
@@ -271,24 +167,24 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 				} else { // 2) Forward - Reverse
 					if ((posJi2 >= posIi2) || (posJi1 <= posIi1)) continue;
 					if ((posJi1 < posIi2) && (posJi2 < posIi1)) {
-						int offset = (posIi1 - posJi2);
+						TPos offset = (posIi1 - posJi2);
 						radius += (posJi1 - posJi2 - offset) / lengthDivider;
 						if (-1 * offset + radius < diagHigh) diagHigh = -1 * offset + radius;
 						if (-1 * offset - radius > diagLow) diagLow = -1 * offset - radius;
 					} else if ((posJi2 > posIi1) && (posJi1 > posIi2)) {
-						int offset = (posJi2 - posIi1);
+						TPos offset = (posJi2 - posIi1);
 						radius += (posIi2 - posIi1 - offset) / lengthDivider;
 						if (offset + radius < diagHigh) diagHigh = offset + radius;
 						if (offset - radius > diagLow) diagLow = offset - radius;
 					} else {
 						radius += 40;  // Why???? ToDo???
 						if (posIi1 < posJi2) {
-							int offset = (posJi2 - posIi1);
+							TPos offset = (posJi2 - posIi1);
 							radius += (posJi1 - posJi2) / lengthDivider;
 							if (offset + radius < diagHigh) diagHigh = offset + radius;
 							if (offset - radius > diagLow) diagLow = offset - radius;
 						} else {
-							int offset = (posIi1 - posJi2);
+							TPos offset = (posIi1 - posJi2);
 							radius += (posIi2 - posIi1) / lengthDivider;
 							if (-1 * offset + radius < diagHigh) diagHigh = -1 * offset + radius;
 							if (-1 * offset - radius > diagLow) diagLow = -1 * offset - radius;
@@ -300,24 +196,24 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 				if (posJi1 < posJi2) {
 					if ((posJi1 >= posIi1) || (posJi2 <= posIi2)) continue;
 					if ((posIi1 > posJi2) && (posIi2 > posJi1)) {
-						int offset = (posIi2 - posJi1);
+						TPos offset = (posIi2 - posJi1);
 						radius += (posJi2 - posJi1 - offset) / lengthDivider;
 						if (-1 * offset - radius > diagLow) diagLow = -1 * offset - radius;
 						if (-1 * offset + radius < diagHigh) diagHigh = -1 * offset + radius;
 					} else if ((posJi1 > posIi2) && (posJi2 > posIi1)) {
-						int offset = (posJi1 - posIi2);
+						TPos offset = (posJi1 - posIi2);
 						radius += (posIi1 - posIi2 - offset) / lengthDivider;
 						if (offset + radius < diagHigh) diagHigh = offset + radius;
 						if (offset - radius > diagLow) diagLow = offset - radius;
 					} else {
 						radius += 40;  // Why???? ToDo???
 						if (posIi2 < posJi1) {
-							int offset = (posJi1 - posIi2);
+							TPos offset = (posJi1 - posIi2);
 							radius += (posJi2 - posJi1) / lengthDivider;
 							if (offset + radius < diagHigh) diagHigh = offset + radius;
 							if (offset - radius > diagLow) diagLow = offset - radius;
 						} else {
-							int offset = (posIi2 - posJi1);
+							TPos offset = (posIi2 - posJi1);
 							radius += (posIi1 - posIi2) / lengthDivider;
 							if (-1 * offset + radius < diagHigh) diagHigh = -1 * offset + radius;
 							if (-1 * offset - radius > diagLow) diagLow = -1 * offset - radius;
@@ -326,24 +222,24 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 				} else { // 4) Reverse - Reverse
 					if ((posJi2 >= posIi1) || (posJi1 <= posIi2)) continue;
 					if ((posJi1 < posIi1) && (posJi2 < posIi2)) {
-						int offset = (posIi2 - posJi2);
+						TPos offset = (posIi2 - posJi2);
 						radius += (posJi1 - posJi2 - offset) / lengthDivider;
 						if (-1 * offset + radius < diagHigh) diagHigh = -1 * offset + radius;
 						if (-1 * offset - radius > diagLow) diagLow = -1 * offset - radius;
 					} else if ((posJi2 > posIi2) && (posJi1 > posIi1)) {
-						int offset = (posJi2 - posIi2);
+						TPos offset = (posJi2 - posIi2);
 						radius += (posIi1 - posIi2 - offset) / lengthDivider;
 						if (offset + radius < diagHigh) diagHigh = offset + radius;
 						if (offset - radius > diagLow) diagLow = offset - radius;
 					} else {
 						radius += 40;  // Why???? ToDo???
 						if (posIi2 < posJi2) {
-							int offset = (posJi2 - posIi2);
+							TPos offset = (posJi2 - posIi2);
 							radius += (posJi1 - posJi2) / lengthDivider;
 							if (offset + radius < diagHigh) diagHigh = offset + radius;
 							if (offset - radius > diagLow) diagLow = offset - radius;
 						} else {
-							int offset = (posIi2 - posJi2);
+							TPos offset = (posIi2 - posJi2);
 							radius += (posIi1 - posIi2) / lengthDivider;
 							if (-1 * offset + radius < diagHigh) diagHigh = -1 * offset + radius;
 							if (-1 * offset - radius > diagLow) diagLow = -1 * offset - radius;
@@ -352,60 +248,184 @@ generatePrimaryLibrary(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 				}
 			}
 
+			// Append this pair of reads
+			appendValue(pList, TPair(positionToId(str, index1), positionToId(str, index2)));
+			appendValue(dList, TDiagPair(diagLow, diagHigh));
+		}
+	}
+}
 
-			//// Debug code
-			//std::cout << radius << std::endl;
-			//std::cout << index1 << ',' << index2 << std::endl;
-			//std::cout << posIi1 << ',' << posIi2 << ',' << posJi1 << ',' << posJi2 << std::endl;
-			//std::cout << diagLow << ',' << diagHigh << std::endl;
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TString, typename TSpec, typename TId, typename TDiagList, typename TScore, typename TSize, typename TSegmentMatches, typename TScoreValues, typename TDistance>
+inline void 
+appendSegmentMatches(StringSet<TString, TSpec> const& str,
+					 String<Pair<TId, TId> > const& pList,
+					 TDiagList const& dList,
+					 TScore const& score_type,
+					 TSize thresholdMatchlength,
+					 TSize thresholdQuality,
+					 TSegmentMatches& matches,
+					 TScoreValues& scores,
+					 TDistance& dist,
+					 Overlap_Library)
+{
+	SEQAN_CHECKPOINT
+	typedef StringSet<TString, Dependent<> > TStringSet;
+	typedef String<Pair<TId, TId> > TPairList;
+	typedef typename Value<TScoreValues>::Type TScoreValue;
+	typedef typename Iterator<TPairList>::Type TPairIter;
+	typedef typename Iterator<TDiagList>::Type TDiagIter;
+
+	// Initialization
+	double qltThres = (double) thresholdQuality / 100.0;
+	TSize nseq = length(str);
+	__resizeWithRespectToDistance(dist, nseq);
+
+	// Pairwise alignments
+	TPairIter itPair = begin(pList);
+	TDiagIter itDiag = begin(dList);
+	TPairIter itPairEnd = end(pList);
+	for(;itPair != itPairEnd; goNext(itPair), goNext(itDiag)) {
+		// Make a pairwise string-set
+		TStringSet pairSet;
+		TId id1 = (value(itPair)).i1;
+		TId id2 = (value(itPair)).i2;
+		assignValueById(pairSet, const_cast<StringSet<TString, TSpec>&>(str), id1);
+		assignValueById(pairSet, const_cast<StringSet<TString, TSpec>&>(str), id2);
+
+		// Overlap alignment
+		TSize from = length(matches);
+		TScoreValue myScore = globalAlignment(matches, pairSet, score_type, AlignConfig<true,true,true,true>(), (value(itDiag)).i1, (value(itDiag)).i2, BandedGotoh() );
+		TSize to = length(matches);
+		
+		// Determine a sequence weight
+		TSize matchLen = 0;
+		TSize overlapLen = 0;
+		TSize alignLen = 0;
+		getAlignmentStatistics(matches, pairSet, from, matchLen, overlapLen, alignLen);
+		double quality = (double) matchLen / (double) overlapLen;
+
+		// Get only the good overlap alignments
+		if ((quality >= qltThres) && (matchLen >= thresholdMatchlength)) {
+
+			// Create a corresponding edge
+			TSize i = idToPosition(str, id1);
+			TSize j = idToPosition(str, id2);
+			if (i<j) __getAlignmentStatistics(dist, i, j, nseq, matchLen, quality);
+			else __getAlignmentStatistics(dist, j, i, nseq, matchLen, quality);
+
+			// Record the scores
+			resize(scores, to);
+			typedef typename Iterator<TScoreValues>::Type TScoreIter;
+			TScoreIter itScore = begin(scores);
+			TScoreIter itScoreEnd = end(scores);
+			goFurther(itScore, from);
+			for(;itScore != itScoreEnd; ++itScore) value(itScore) = myScore;
+		} else {
+			resize(matches, from);
 			
-			// Make a pairwise string-set
-			TStringSet pairSet;
-			TId id1 = positionToId(str, index1);
-			TId id2 = positionToId(str, index2);
-			assignValueById(pairSet, str, id1);
-			assignValueById(pairSet, str, id2);
+			//// Debug Code
+			//TGraph tmp(pairSet);
+			//Score<int> st = Score<int>(5,-2,-4,-14);
+			//globalAlignment(tmp, pairSet, st, Gotoh() );
+			//std::cout << "Match length: " << matchLen << std::endl;
+			//std::cout << "Overlap length: " << overlapLen << std::endl;
+			//std::cout << "Align length: " << alignLen << std::endl;
+			//std::cout << "Quality: " << quality << std::endl;
+			//std::cout << tmp << std::endl;
+		}
+	}
+}
 
-			// Overlap alignment
-			TSize from = length(matches);
-			globalAlignment(matches, pairSet, score_type, AlignConfig<true,true,true,true>(), diagLow, diagHigh, BandedGotoh() );
-			//globalAlignment(matches, pairSet, score_type, AlignConfig<true,true,true,true>(), Gotoh() );
+/*
+//////////////////////////////////////////////////////////////////////////////
 
-			// Determine a sequence weight
-			TSize matchLen = 0;
-			TSize overlapLen = 0;
-			TSize alignLen = 0;
-			getAlignmentStatistics(matches, pairSet, from, matchLen, overlapLen, alignLen);
-			double quality = (double) matchLen / (double) overlapLen;
+template<typename TString, typename TSpec, typename TRead, typename TSpec2, typename TBegEndPositions>
+inline void 
+layoutReads(String<TString, TSpec>& names,
+			StringSet<TRead, TSpec2>& strSet,
+			TBegEndPositions& begEndPos)
+{
+	SEQAN_CHECKPOINT
+	typedef typename Size<TString>::Type TSize;
+	typedef typename Value<TBegEndPositions>::Type TPair;
+	typedef typename Iterator<String<TString, TSpec> >::Type TNameIter;
+	typedef typename Iterator<TString>::Type TIter;
 
-			// Get only the good overlap alignments
-			if ((quality >= qltThres) && (matchLen >= thresholdMatchlength)) {
+	reserve(begEndPos, length(strSet));
+	TNameIter itName = begin(names);
+	TNameIter itNameEnd = end(names);
+	TSize count = 0;
+	for(;itName != itNameEnd; ++itName, ++count) {
+		TSize brPoint = 0;
+		TSize brPoint2 = length(value(itName));
+		TIter nIt = begin(value(itName));
+		TIter nItEnd = end(value(itName));
+		TSize ind = 0;
+		for(;nIt!=nItEnd;++ind, ++nIt) {
+			if (value(nIt) == ',') brPoint = ind;
+			if (value(nIt) == '[') {
+				brPoint2 = ind;
+				break;
+			}
+		}
+		TSize posI = 0;
+		TSize posJ = 0;
+		TString inf1 = infix(value(itName), 0, brPoint);
+		TString inf2 = infix(value(itName), brPoint+1, brPoint2);
+		std::stringstream ssStream1(toCString(inf1));
+		ssStream1 >> posI; 
+		std::stringstream ssStream2(toCString(inf2));
+		ssStream2 >> posJ;
+		appendValue(begEndPos, TPair(posI, posJ));
+		if (posI > posJ) reverseComplementInPlace(value(strSet, count));
+	}
+}
 
-				// Create a corresponding edge
-				TSize i = idToPosition(str, id1);
-				TSize j = idToPosition(str, id2);
 
-				if (i<j) __getAlignmentStatistics(dist, i, j, nseq, matchLen, quality);
-				else __getAlignmentStatistics(dist, j, i, nseq, matchLen, quality);
-			} else {
-				resize(matches, from);
-			
-				//// Debug Code
-				//TGraph tmp(pairSet);
-				//Score<int> st = Score<int>(5,-2,-4,-14);
-				//globalAlignment(tmp, pairSet, st, Gotoh() );
-				//std::cout << "Match length: " << matchLen << std::endl;
-				//std::cout << "Overlap length: " << overlapLen << std::endl;
-				//std::cout << "Align length: " << alignLen << std::endl;
-				//std::cout << "Quality: " << quality << std::endl;
-				//std::cout << tmp << std::endl;
+//////////////////////////////////////////////////////////////////////////////
+
+// Depending on the read offset
+template<typename TStringSet, typename TCargo, typename TSpec, typename TBegEndPositions, typename TPairList, typename TReadLength>
+inline void 
+selectPairs(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+								TBegEndPositions& begEndPos,
+								TPairList& pList,
+								TReadLength readLen)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename Value<TPairList>::Type TPair;
+	typedef typename Iterator<TBegEndPositions>::Type TBegEndIter;
+	
+	TStringSet& str = stringSet(g);
+	int threshold = (int) (1.5 * (double) readLen);
+	TBegEndIter beIt = begin(begEndPos);
+	TBegEndIter beItEnd = end(begEndPos);
+	TSize index1 = 0;
+	for(;beIt != beItEnd; ++beIt, ++index1) {
+		int posI = (value(beIt)).i1;
+		if (posI > (int) (value(beIt)).i2) posI = (value(beIt)).i2;
+		TBegEndIter beIt2 = beIt;
+		++beIt2;
+		TSize index2 = index1 + 1;
+		for(;beIt2 != beItEnd; ++beIt2, ++index2) {
+			int posJ = (value(beIt2)).i1;
+			if (posJ > (int) (value(beIt2)).i2) posJ = (value(beIt2)).i2;
+			if (((posI > posJ) &&
+				(posI - posJ < threshold))) {
+					appendValue(pList, TPair(positionToId(str, index2), positionToId(str, index1)));
+			} else if (((posI <= posJ) &&
+						(posJ - posI < threshold))) {
+					appendValue(pList, TPair(positionToId(str, index1), positionToId(str, index2)));
 			}
 		}
 	}
-
-	// Refine all matches, rescore the matches and create multiple alignment
-	matchRefinement(matches,str,const_cast<TScore&>(score_type),g);
 }
+*/
 
 }// namespace SEQAN_NAMESPACE_MAIN
 
