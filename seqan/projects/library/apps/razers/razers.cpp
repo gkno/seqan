@@ -681,7 +681,6 @@ void dumpMatches(
 							fastaID.erase(right);
 							fastaID.erase(0, left + 1);
 							replace(fastaID.begin(), fastaID.end(), ',', ' ');
-							cout << fastaID;
 							size_t pos = fastaID.find("id=");
 							if (pos != fastaID.npos) {
 								istringstream iss(fastaID.substr(pos + 3));
@@ -689,7 +688,6 @@ void dumpMatches(
 							}
 							pos = fastaID.find("fragId=");
 							if (pos != fastaID.npos) {
-								cout << fastaID.substr(pos + 7);
 								istringstream iss(fastaID.substr(pos + 7));
 								iss >> fragId;
 							}
