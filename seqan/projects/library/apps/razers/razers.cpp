@@ -23,8 +23,8 @@
 //#define SEQAN_DEBUG_SWIFT		// test SWIFT correctness and print bucket parameters
 //#define RAZERS_PROFILE		// omit dumping results
 //#define RAZERS_DEBUG			// print verification regions
-#define RAZERS_PRUNE_QGRAM_INDEX
-//#define RAZERS_HAMMINGVERIFY	// 
+//#define RAZERS_PRUNE_QGRAM_INDEX
+//#define RAZERS_HAMMINGVERIFY	// allow only mismatches, no indels
 
 #include "seqan/platform.h"
 #ifdef PLATFORM_WINDOWS
@@ -117,7 +117,7 @@ using namespace seqan;
 	struct LessGPosRNo_Rev : public binary_function < TReadMatch, TReadMatch, bool >
 	{
 		inline bool operator() (TReadMatch const &a, TReadMatch const &b) const 
-		{
+		{ 
 			if (a.gseqNo < b.gseqNo) return true;
 			if (a.gseqNo > b.gseqNo) return false;
 			if (a.gBegin > b.gBegin) return true;
@@ -372,7 +372,9 @@ void findReads(
 				};
 				if (m.gBegin < 0) m.gBegin = 0;
 
-
+#ifdef RAZERS_HAMMINGVERIFY
+				m.gBegin = m.gEnd - ndlLength;
+#else
 				TGenomeInfixRev		infRev(infix(genome, m.gBegin, m.gEnd));
 				TReadRev			readRev(indexText(readIndex)[ndlSeqNo]);
 				TMyersFinderRev		myersFinderRev(infRev);
@@ -391,6 +393,7 @@ void findReads(
 					cerr << "3READ:   " << readRev << endl;
 					cerr << "HUH?" << endl;
 				}
+#endif
 
 #ifndef RAZERS_PROFILE
 				appendValue(matches, m);
@@ -504,7 +507,11 @@ void dumpMatches(
 	
 
 	Align<TRead, ArrayGaps> align;
-	Score<int> scoreType = Score<int>(0, -1000, -1001, -1000); // levenshtein-score (match, mismatch, gapOpen, gapExtend)
+#ifdef RAZERS_HAMMINGVERIFY
+	Score<int> scoreType = Score<int>(0, -1, -1001, -1000);		// levenshtein-score (match, mismatch, gapOpen, gapExtend)
+#else
+	Score<int> scoreType = Score<int>(0, -999, -1001, -1000);	// levenshtein-score (match, mismatch, gapOpen, gapExtend)
+#endif
 	resize(rows(align), 2);
 
 	bool multipleGenomes = countSequences(genomes) > 1;
@@ -661,10 +668,37 @@ void dumpMatches(
 							gEnd = gLength - (*it).gEnd + 1;
 						}
 
+						string fastaID;
+						assign(fastaID, readIDs[readNo]);
+
+						int id = readNo;
+						int fragId = readNo;
+
+						size_t left = fastaID.find_first_of("[");
+						size_t right = fastaID.find_last_of("]");
+						if (left != fastaID.npos && right != fastaID.npos && left < right) 
+						{
+							fastaID.erase(right);
+							fastaID.erase(0, left + 1);
+							replace(fastaID.begin(), fastaID.end(), ',', ' ');
+							cout << fastaID;
+							size_t pos = fastaID.find("id=");
+							if (pos != fastaID.npos) {
+								istringstream iss(fastaID.substr(pos + 3));
+								iss >> id;
+							}
+							pos = fastaID.find("fragId=");
+							if (pos != fastaID.npos) {
+								cout << fastaID.substr(pos + 7);
+								istringstream iss(fastaID.substr(pos + 7));
+								iss >> fragId;
+							}
+						}
+
 						percId = 100.0 * (1.0 - (double)(*it).editDist / (double)readLen);
 
 						file << ">" << gBegin << "," << gEnd;
-						file << "[id=" << readNo << ",fragId=" << readNo;
+						file << "[id=" << id << ",fragId=" << fragId;
 						file << ",errors=" << (*it).editDist << ",percId=" << setprecision(5) << percId << "]" << endl;
 
 						file << reads[readNo] << endl;
