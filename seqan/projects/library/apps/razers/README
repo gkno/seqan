@@ -174,25 +174,25 @@ To see map the example reads against the genome do the following:
 On success, RazerS dumped the resulting matches with their corresponding 
 semi-global alignments into the file example/reads.fa.result:
 
-read1,0,27,F,genome,47,73,92.593
+read1,0,27,F,genome1,47,73,92.593
 #Read:   AATTGAATGAGGTCTTGCAGCCATGGC
-#Genome: AATTGAATGACGTCT-GCAGCCATGGC
-read2,0,27,F,genome,110,134,88.889
+#Genome: AATTGAATGACGTC-TGCAGCCATGGC
+read2,0,27,F,genome1,110,134,88.889
 #Read:   CAGGAGATAAGCTGGATCGTTTACGGT
 #Genome: CAGGAGATAAGCTGGATCGTTTAC---
-read1,0,27,R,genome,260,288,92.593
+read1,0,27,R,genome2,180,208,92.593
 #Read:   AATTGAATGAGGTCTT-GCAGCCATGGC
 #Genome: AATTGAATGAGGTCTTCGCAGTCATGGC
-read2,0,27,R,genome,188,215,96.296
+read2,0,27,R,genome2,108,135,96.296
 #Read:   CAGGAGATAAGCTGGATCGTTTACGGT
 #Genome: CAGGAGATAAGCTGGATCGTTTACAGT
 
 If the alignments are not needed '-a' can be omited resulting in:
 
-read1,0,27,F,genome,47,73,92.593
-read2,0,27,F,genome,110,134,88.889
-read1,0,27,R,genome,260,288,92.593
-read2,0,27,R,genome,188,215,96.296
+read1,0,27,F,genome1,47,73,92.593
+read2,0,27,F,genome1,110,134,88.889
+read1,0,27,R,genome2,180,208,92.593
+read2,0,27,R,genome2,108,135,96.296
 
 ---------------------------------------------------------------------------
 6. Contact
