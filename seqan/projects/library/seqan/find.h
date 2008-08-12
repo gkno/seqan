@@ -29,6 +29,7 @@
 #include <deque>
 
 #include <seqan/sequence.h>
+#include <seqan/modifier.h>
 #include <seqan/score.h>
 #include <seqan/graph_types.h>
 #include <seqan/graph_algorithms.h>

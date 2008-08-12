@@ -449,8 +449,8 @@ set(Segment<THost, InfixSegment> & me,
 {
 SEQAN_CHECKPOINT
 	setHost(me, host_);
-	setBegin(me, begin_);
-	setEnd(me, end_);
+	setBeginPosition(me, begin_);
+	setEndPosition(me, end_);
 }
 //____________________________________________________________________________
 

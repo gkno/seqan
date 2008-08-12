@@ -178,9 +178,48 @@ createTrieOnReverse(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 		typename Iterator<TKeyword const, Rooted>::Type sIt = end(*it);
 		while(!atBegin(sIt)) {
 			goPrevious(sIt);
-			appendValue(tmp,*sIt);
+			appendValue(tmp,getValue(sIt));
 		}
 		_addStringToTrie(g,terminalStateMap,tmp,position(it));
+	}
+}
+
+
+
+/**
+.Function.createSuffixTrie:
+..cat:Graph.Trie
+..summary:Creates a trie of all suffixes of a text.
+..signature:createSuffixTrie(g, terminalStateMap, text)
+..param.g:Out-parameter: An automaton.
+...type:Spec.Trie
+..param.terminalStateMap:Out-parameter: An external property map.
+...type:Class.External Property Map
+...remarks:The external property map must be a String<String<unsigned int> >.
+..param.text:In-parameter: A text.
+...type:Class.String
+..returns:void
+..see:Function.createTrie
+..see:Function.createSuffixTrieOnReverse
+*/
+template <typename TAlphabet, typename TCargo, typename TSpec, typename TTerminalStateMap, typename TText>
+inline void
+createSuffixTrie(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
+				 TTerminalStateMap& terminalStateMap,
+				 TText const& text)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename Position<TText const>::Type TPosition;
+	TVertexDescriptor root = addVertex(g);
+	assignRoot(g,root);
+	resize(terminalStateMap, numVertices(g), Generous());
+	assignProperty(terminalStateMap,root,String<TPosition>());
+
+	for (TPosition i = 0; i < length(text); ++i)
+	{
+		_addStringToTrie(g,terminalStateMap,suffix(text, i),i);
 	}
 }
 

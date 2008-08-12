@@ -87,10 +87,11 @@ SEQAN_CHECKPOINT
 SEQAN_CHECKPOINT
 	}
 	template <typename TContainer2, typename TSpec2>
-	Iter(Iter<TContainer2, TSpec2> const & other_)
+	Iter(Iter<TContainer2, TSpec2> const & other_):
+		data_container(other_.data_container),
+		data_position(other_.data_position)
 	{
 SEQAN_CHECKPOINT
-		assign(*this, other_);
 	}
 	~Iter()
 	{
@@ -439,7 +440,7 @@ assign(Iter<TTargetContainer, PositionIterator> & target,
 	   TSource const & source)
 {
 SEQAN_CHECKPOINT
-	target.data_container = container(source);
+	target.data_container = _toPointer(container(source));
 	target.data_position = position(source);
 }
 

@@ -849,11 +849,21 @@ a single integer value between 0 and the sum of string lengths minus 1.
     struct Value< StringSet< TString, TSpec > > {
         typedef TString Type;
     };
-
 	template < typename TString, typename TSpec >
     struct Value< StringSet< TString, TSpec > const> {
         typedef TString Type;
     };
+
+
+	template < typename TString, typename TSpec, typename TIteratorSpec>
+    struct Iterator< StringSet< TString, TSpec >, TIteratorSpec> {
+		typedef Iter< StringSet< TString, TSpec >, PositionIterator> Type;
+    };
+	template < typename TString, typename TSpec, typename TIteratorSpec >
+    struct Iterator< StringSet< TString, TSpec> const, TIteratorSpec> {
+		typedef Iter< StringSet< TString, TSpec > const, PositionIterator> Type;
+    };
+
 
 	template < typename TString, typename TSpec >
 	struct Size< StringSet< TString, TSpec > >:
@@ -1175,6 +1185,71 @@ a single integer value between 0 and the sum of string lengths minus 1.
 	resize(StringSet< TString, Owner<ConcatDirect<TSpec> > > &me, TSize new_size) {
 		return resize(me.limits, new_size + 1) - 1;
     }
+
+///.Function.iter.param.object.type:Class.StringSet
+//////////////////////////////////////////////////////////////////////////////
+// iter
+
+template <typename TString, typename TSpec, typename TPos, typename TTag>
+inline typename Iterator< StringSet< TString, TSpec >, Tag<TTag> const>::Type
+iter(StringSet< TString, TSpec > & me, 
+	 TPos pos,  
+	 Tag<TTag> const)
+{
+	typedef StringSet< TString, TSpec > TStringSet;
+	typedef typename Iterator<TStringSet, Tag<TTag> const>::Type TIterator;
+	typedef typename Position<TStringSet>::Type TPosition;
+	return TIterator(me, (TPosition) pos);
+}
+template <typename TString, typename TSpec, typename TPos, typename TTag>
+inline typename Iterator< StringSet< TString, TSpec > const, Tag<TTag> const>::Type
+iter(StringSet< TString, TSpec > const & me, 
+	 TPos pos, 
+	 Tag<TTag> const)
+{
+	typedef StringSet< TString, TSpec > const TStringSet;
+	typedef typename Iterator<TStringSet, Tag<TTag> const>::Type TIterator;
+	typedef typename Position<TStringSet>::Type TPosition;
+	return TIterator(me, (TPosition) pos);
+}
+
+///.Function.begin.param.object.type:Class.StringSet
+//////////////////////////////////////////////////////////////////////////////
+// begin
+
+template <typename TString, typename TSpec, typename TTag>
+inline typename Iterator< StringSet< TString, TSpec >, Tag<TTag> const>::Type
+begin(StringSet< TString, TSpec > & me, 
+	  Tag<TTag> const tag)
+{
+	return iter(me, 0, tag);
+}
+template <typename TString, typename TSpec, typename TTag>
+inline typename Iterator< StringSet< TString, TSpec > const, Tag<TTag> const>::Type
+begin(StringSet< TString, TSpec > const & me, 
+	  Tag<TTag> const tag)
+{
+	return iter(me, 0, tag);
+}
+
+///.Function.end.param.object.type:Class.StringSet
+//////////////////////////////////////////////////////////////////////////////
+// end
+
+template <typename TString, typename TSpec, typename TTag>
+inline typename Iterator< StringSet< TString, TSpec >, Tag<TTag> const>::Type
+end(StringSet< TString, TSpec > & me, 
+	Tag<TTag> const tag)
+{
+	return iter(me, length(me), tag);
+}
+template <typename TString, typename TSpec, typename TTag>
+inline typename Iterator< StringSet< TString, TSpec > const, Tag<TTag> const>::Type
+end(StringSet< TString, TSpec > const & me, 
+	Tag<TTag> const tag)
+{
+	return iter(me, length(me), tag);
+}
 
 ///.Function.value.param.object.type:Class.StringSet
 //////////////////////////////////////////////////////////////////////////////
@@ -2290,6 +2365,12 @@ a single integer value between 0 and the sum of string lengths minus 1.
 		return atEndOfSequence(reinterpret_cast<TIterator const &>(me));
 	}
 
-}
+//////////////////////////////////////////////////////////////////////////////
 
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+}
+//////////////////////////////////////////////////////////////////////////////
 #endif

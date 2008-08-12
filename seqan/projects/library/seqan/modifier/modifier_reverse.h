@@ -505,6 +505,17 @@ namespace SEQAN_NAMESPACE_MAIN
 			reverseComplementInPlace(stringSet[seqNo]);
 	}
 
+//////////////////////////////////////////////////////////////////////////////
+// shortcut
+
+template <typename THost>
+inline ModifiedString<THost, ModReverse>
+reverseString(THost const & host)
+{
+	return ModifiedString<THost, ModReverse>(host);
+}
+
+//////////////////////////////////////////////////////////////////////////////
 }
 
 #endif

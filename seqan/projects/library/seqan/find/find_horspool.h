@@ -368,7 +368,10 @@ VALIDATE:
 }
 
 //____________________________________________________________________________
-/* groepl variante
+/* groepl variante 
+(Beruht vermutlich auf einem Missverstehen von Navarro/Raffinot Seite 26:
+Mit "the main loop can be 'unrolled'" ist dort naemlich 
+"the INNER loop can be 'unrolled'" gemeint.)
 
 template <typename TFinder, typename TNeedle2>
 bool

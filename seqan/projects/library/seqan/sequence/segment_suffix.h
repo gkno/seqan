@@ -360,7 +360,7 @@ set(Segment<THost, SuffixSegment> & me,
 {
 SEQAN_CHECKPOINT
 	setHost(me, host_);
-	setBegin(me, begin_);
+	setBeginPosition(me, begin_);
 }
 //____________________________________________________________________________
 
@@ -498,6 +498,13 @@ suffix(T & t, TPosBegin pos_begin)
 {
 SEQAN_CHECKPOINT
 	return typename Suffix<T>::Type(t, pos_begin);
+}
+template <typename T, typename TPosBegin>
+inline typename Suffix<T const>::Type
+suffix(T const & t, TPosBegin pos_begin)
+{
+SEQAN_CHECKPOINT
+	return typename Suffix<T const>::Type(t, pos_begin);
 }
 
 template <typename T, typename TPosBegin>

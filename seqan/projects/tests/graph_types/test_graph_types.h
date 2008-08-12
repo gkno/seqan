@@ -930,6 +930,10 @@ void Test_Automaton() {
 	SEQAN_TASSERT(succ == 1)
 
 	// Now using shortcuts
+	SEQAN_TASSERT(canParseString(automaton, rootVertex, "7262"))
+	SEQAN_TASSERT(!canParseString(automaton, rootVertex, "726C"))
+	SEQAN_TASSERT(canParseString(automaton, "7262"))
+	SEQAN_TASSERT(!canParseString(automaton, "726C"))
 	succ = parseString(automaton,rootVertex,"7262");
 	SEQAN_TASSERT(succ == 1)
 	std::string str = "7262";
@@ -939,6 +943,8 @@ void Test_Automaton() {
 	succ = parseString(automaton,rootVertex, begin(str2), end(str2));
 	SEQAN_TASSERT(succ == 1)
 	String<char> input("7262");
+	SEQAN_TASSERT(canParseString(automaton, rootVertex, input))
+	SEQAN_TASSERT(canParseString(automaton, input))
 	succ = parseString(automaton,rootVertex, input);
 	SEQAN_TASSERT(succ == 1)
 

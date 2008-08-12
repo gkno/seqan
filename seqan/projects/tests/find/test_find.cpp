@@ -864,17 +864,19 @@ int main()
 {
 	SEQAN_TREPORT("TEST BEGIN")
 
+	Test_OnlineAlg<BFA<Trie> >();
+
 	Test_OnlineAlg<Horspool>();	
 	Test_OnlineAlg<ShiftAnd>();
 	Test_OnlineAlg<ShiftOr>();
 	Test_OnlineAlg<BndmAlgo>();
-	Test_OnlineAlg<BomAlgo>();
+	Test_OnlineAlg<BFA<Oracle> >();
 	
 	Test_OnlineAlgWildcards<WildShiftAnd>();
 
 	Test_OnlineAlgMulti<AhoCorasick>();
 	Test_OnlineAlgMulti<MultipleShiftAnd>();
-	Test_OnlineAlgMulti<SetHorspool>();
+//	Test_OnlineAlgMulti<SetHorspool>();
 //	Test_OnlineAlgMulti<WuManber>();
 
 	Test_Approx();

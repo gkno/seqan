@@ -976,7 +976,6 @@ void Test_Assignments_Combinatoric(TTarget & target, TSource source, Tag<TExpand
 	assign(target, source_const, limit, tag);
 	SEQAN_TASSERT(infix(source, 0, length(target)) == target);
 
-
 	typename Size<TTarget>::Type len = length(target);
 
 	append(target, source, tag);
@@ -993,7 +992,7 @@ void Test_Assignments_Combinatoric(TTarget & target, TSource source, Tag<TExpand
 	}
 
 	append(target, source_const, tag);
-	append(target, source_const, limit, tag);
+	append(target, source_const, limit, tag); //p
 
 	assign(target, "my miss is a hippi");
 	replace(target, 9, 11, source, tag);
@@ -1071,25 +1070,22 @@ void Test_Combinatoric()
 	Test_Assignments_Combinatoric(str1, str5, Generous(), 3);
 	Test_Assignments_Combinatoric(str1, str5, Limit(), 3);
 
-//* ???Anti Default Sequences
 	char str6 = 'x';
 	Test_Assignments_Combinatoric(str1, str6, Exact());
 	Test_Assignments_Combinatoric(str1, str6, Generous());
 	Test_Assignments_Combinatoric(str1, str6, Limit());
-//*/
-	char str7[200] = "hello again";
+
+	char str7[800] = "hello again";
 	Test_Assignments_Combinatoric(str1, str7, Insist());
 	Test_Assignments_Combinatoric(str7, str4, Insist());
 	Test_Assignments_Combinatoric(str7, str7, Insist());
 	Test_Assignments_Combinatoric(str7, "sisyphos", Insist());
 
-//* ???Anti Default Sequences
 	Test_Assignments_Combinatoric(str7, 'c', Insist());
-//*/
+
 	Test_Assignments_Combinatoric(str1, str7, Insist(), 3);
 	Test_Assignments_Combinatoric(str7, str4, Insist(), 3);
 	Test_Assignments_Combinatoric(str7, str7, Insist(), 3);
-
 //____________________________________________________________________________
 
 	assign(str7, "begin middle end");
@@ -1142,7 +1138,6 @@ void Test_Combinatoric()
 	String<char, Array<100> > str9;
 	Test_Assignments_Combinatoric(str9, str1, Limit());
 	Test_Assignments_Combinatoric(str9, str1, Limit(), 10);
-
 }
 
 //////////////////////////////////////////////////////////////////////////////

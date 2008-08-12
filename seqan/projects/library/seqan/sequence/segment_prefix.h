@@ -268,15 +268,17 @@ SEQAN_CHECKPOINT
 		me.data_end_position = length(host(me));
 	}
 */
+	template <typename TPosition>
 	friend inline void 
-	setEndPosition(Segment & me, typename Position<Segment>::Type new_end)
+	setEndPosition(Segment & me, TPosition new_end)
 	{
 SEQAN_CHECKPOINT
 		me.data_end_position = new_end;
 	}
 
+	template <typename TIterator>
 	friend inline void 
-	setEnd(Segment & me, typename Iterator<Segment, Standard>::Type new_end)
+	setEnd(Segment & me, TIterator new_end)
 	{
 SEQAN_CHECKPOINT
 		me.data_end_position = new_end - begin(host(me));//, Standard());
@@ -371,7 +373,7 @@ set(Segment<THost, PrefixSegment> & me,
 {
 SEQAN_CHECKPOINT
 	setHost(me, host_);
-	setEnd(me, end_);
+	setEndPosition(me, end_);
 }
 //____________________________________________________________________________
 
@@ -510,6 +512,13 @@ prefix(T & t, TPosEnd pos_end)
 {
 SEQAN_CHECKPOINT
 	return typename Prefix<T>::Type(t, pos_end);
+}
+template <typename T, typename TPosEnd>
+inline typename Prefix<T const>::Type
+prefix(T const & t, TPosEnd pos_end)
+{
+SEQAN_CHECKPOINT
+	return typename Prefix<T const>::Type(t, pos_end);
 }
 
 template <typename T, typename TPosEnd>

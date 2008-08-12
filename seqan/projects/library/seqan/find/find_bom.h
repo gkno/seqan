@@ -41,13 +41,18 @@ namespace SEQAN_NAMESPACE_MAIN
 
 ///.Class.Pattern.param.TSpec.type:Spec.BomAlgo
 
-struct _BomAlgo;
-typedef Tag<_BomAlgo> BomAlgo;
+template <typename TSpec>
+struct BFA; //backward factor automaton searching
+
+struct Oracle; //Oracle Tag => "BOM"
+struct Trie; //Trie Tag => "BTM"
+
+typedef BFA<Oracle> BomAlgo; //for compatibility reasons
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TNeedle>
-class Pattern<TNeedle, BomAlgo> {
+template <typename TNeedle, typename TSpec>
+class Pattern<TNeedle, BFA<TSpec> > {
 //____________________________________________________________________________
 private:
 	Pattern(Pattern const& other);
@@ -61,7 +66,7 @@ public:
 	TSize needleLength;		
 	TSize haystackLength;
 	TSize step;
-	Graph<Automaton<TAlphabet> > oracle;
+	Graph<Automaton<TAlphabet, void, WithoutEdgeId> > oracle;
 
 //____________________________________________________________________________
 
@@ -102,9 +107,10 @@ struct Host< Pattern<TNeedle, BomAlgo> const>
 // Functions
 //////////////////////////////////////////////////////////////////////////////
 
+//BFA<Oracle>: BOM Algorithm
 template <typename TNeedle, typename TNeedle2>
 inline void 
-setHost (Pattern<TNeedle, BomAlgo> & me, TNeedle2 const& needle) 
+setHost (Pattern<TNeedle, BFA<Oracle> > & me, TNeedle2 const& needle) 
 {
 	SEQAN_CHECKPOINT
 	me.needleLength = length(needle);
@@ -113,10 +119,26 @@ setHost (Pattern<TNeedle, BomAlgo> & me, TNeedle2 const& needle)
 	assignRoot(me.oracle,0);
 	setValue(me.data_needle, needle);
 }
-
+//BFA<Trie>: BTM Algorithm (the same as BOM, but with an trie)
 template <typename TNeedle, typename TNeedle2>
 inline void 
-setHost (Pattern<TNeedle, BomAlgo> & me, TNeedle2 & needle)
+setHost (Pattern<TNeedle, BFA<Trie> > & me, TNeedle2 const& needle) 
+{
+	SEQAN_CHECKPOINT
+	me.needleLength = length(needle);
+	clear(me.oracle);
+
+	String<String<unsigned int> > terminal_state_map; //dummy
+	typedef typename Value<TNeedle2 const>::Type TValue;
+	String<TValue> reverse_string = needle;
+	reverseInPlace(reverse_string);
+
+	setValue(me.data_needle, needle);
+}
+
+template <typename TNeedle, typename TNeedle2, typename TSpec>
+inline void 
+setHost (Pattern<TNeedle, BFA<TSpec> > & me, TNeedle2 & needle)
 {
 	setHost(me, reinterpret_cast<TNeedle2 const &>(needle));
 }
@@ -124,8 +146,8 @@ setHost (Pattern<TNeedle, BomAlgo> & me, TNeedle2 & needle)
 //____________________________________________________________________________
 
 
-template <typename TNeedle>
-inline void _patternInit (Pattern<TNeedle, BomAlgo> & me) 
+template <typename TNeedle, typename TSpec>
+inline void _patternInit (Pattern<TNeedle, BFA<TSpec> > & me) 
 {
 SEQAN_CHECKPOINT
 	me.step = 0;
@@ -134,17 +156,17 @@ SEQAN_CHECKPOINT
 
 //____________________________________________________________________________
 
-template <typename TNeedle>
-inline typename Host<Pattern<TNeedle, BomAlgo>const>::Type & 
-host(Pattern<TNeedle, BomAlgo> & me)
+template <typename TNeedle, typename TSpec>
+inline typename Host<Pattern<TNeedle, BFA<TSpec> > const>::Type & 
+host(Pattern<TNeedle, BFA<TSpec> > & me)
 {
 SEQAN_CHECKPOINT
 	return value(me.data_needle);
 }
 
-template <typename TNeedle>
-inline typename Host<Pattern<TNeedle, BomAlgo>const>::Type & 
-host(Pattern<TNeedle, BomAlgo> const & me)
+template <typename TNeedle, typename TSpec>
+inline typename Host<Pattern<TNeedle, BFA<TSpec> > const>::Type & 
+host(Pattern<TNeedle, BFA<TSpec> > const & me)
 {
 SEQAN_CHECKPOINT
 	return value(me.data_needle);
@@ -153,9 +175,9 @@ SEQAN_CHECKPOINT
 //____________________________________________________________________________
 
 
-template <typename TFinder, typename TNeedle>
+template <typename TFinder, typename TNeedle, typename TSpec>
 inline bool 
-find(TFinder & finder, Pattern<TNeedle, BomAlgo> & me) 
+find(TFinder & finder, Pattern<TNeedle, BFA<TSpec> > & me) 
 {
 	SEQAN_CHECKPOINT
 	

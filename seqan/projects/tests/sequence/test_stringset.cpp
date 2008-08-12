@@ -19,7 +19,8 @@ using namespace seqan;
 template <typename TSpec>
 void Test_StringSet()
 {	
-	StringSet<CharString, TSpec> set;
+	typedef StringSet<CharString, TSpec> TStringSet;
+	TStringSet set;
 
 	resize(set, 3);
 	set[0] = "Hallo ";
@@ -39,6 +40,16 @@ void Test_StringSet()
 	infix(set[0], 6, 9) = "du ";
 	SEQAN_TASSERT(isEqual(set[0], "Hallo du "))
 */
+
+	//StringSet iterators
+	typedef typename Iterator<TStringSet>::Type TIterator;
+	int i = 0;
+	for (TIterator it = begin(set); it != end(set); goNext(it))
+	{
+		SEQAN_TASSERT(*it == set[i]);
+		++i;
+	}
+	SEQAN_TASSERT(i == 3)
 }
 
 //____________________________________________________________________________

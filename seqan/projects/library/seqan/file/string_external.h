@@ -1861,6 +1861,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 		resize(me, me.data_size + 1, expand);
 		back(me) = _Val;
 	}
+
 //____________________________________________________________________________
 // stack interface
 

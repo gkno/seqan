@@ -70,6 +70,32 @@ void Test_Trie() {
 	SEQAN_TASSERT(getProperty(pos, 18) == (unsigned int) 2)
 	SEQAN_TASSERT(getProperty(pos, 12) == (unsigned int) 1)
 
+
+	//createSuffixTrie
+	clear(g);
+	clear(pos);
+	char * str = "ABABBA";
+	char * strend = end(str);
+	char * it;
+	typedef VertexDescriptor<Graph<Automaton<char> > >::Type TVertexDescriptor;
+	TVertexDescriptor v;
+
+	createSuffixTrie(g, pos, str);
+	for (int i = 0; i < length(str); ++i)
+	{
+		v = parseString(g, 0, it=str+i, strend);
+		SEQAN_TASSERT(it == strend)
+		SEQAN_TASSERT(getProperty(pos, v) == i)
+	}
+
+	SEQAN_TASSERT(canParseString(g, "ABBA"))
+	SEQAN_TASSERT(canParseString(g, "BAB"))
+
+	SEQAN_TASSERT(!canParseString(g, "AA"))
+	SEQAN_TASSERT(!canParseString(g, "BAC"))
+	SEQAN_TASSERT(!canParseString(g, "C"))
+	SEQAN_TASSERT(canParseString(g, ""))
+
 }
 
 //////////////////////////////////////////////////////////////////////////////

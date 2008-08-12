@@ -749,7 +749,7 @@ assignRoot(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 
 template<typename TAlphabet, typename TCargo, typename TSpec>
 inline typename VertexDescriptor<Graph<Automaton<TAlphabet, TCargo, TSpec> > >::Type&
-root(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g)
+root(Graph<Automaton<TAlphabet, TCargo, TSpec> > & g)
 {
 	SEQAN_CHECKPOINT
 	return g.data_root;
@@ -860,14 +860,18 @@ getSuccessor(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
 ...type:Spec.Word Graph
 ..param.v:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
-..param.beginIt:An iterator to the beginning of the string.
+..param.beginIt:An iterator to the beginning of the string. (Input and Output)
 ...type:Metafunction.Iterator.
 ..param.endIt:An iterator to the end of the string.
 ...type:Metafunction.Iterator.
 ..param.str:A string.
 ...type:Class.String
-..returns:A vertex descriptor.
+..returns:The vertex descriptor of the state that was reached after parsing.
 ...type:Metafunction.VertexDescriptor
+..returns.param.beginIt:Iterator to the first character that could not be parsed, 
+	or $endIt$ if the complete string was parsed.
+..remarks:The parsing stops before @Function.getSuccessor@ reaches the $nil$ state, 
+	or if the the complete sequences is read.
 ..see:Function.getSuccessor
 */
 
@@ -875,7 +879,7 @@ template<typename TAlphabet, typename TCargo, typename TSpec, typename TVertexDe
 inline typename VertexDescriptor<Graph<Automaton<TAlphabet, TCargo, TSpec> > >::Type 
 parseString(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
 			TVertexDescriptor const vertex,
-			TIterator beginIt,
+			TIterator & beginIt,
 			TIterator endIt)
 {
 	SEQAN_CHECKPOINT
@@ -889,6 +893,18 @@ parseString(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
 		++beginIt;
 	}
 	return succ;
+}
+
+template<typename TAlphabet, typename TCargo, typename TSpec, typename TVertexDescriptor, typename TIterator>
+inline typename VertexDescriptor<Graph<Automaton<TAlphabet, TCargo, TSpec> > >::Type 
+parseString(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
+			TVertexDescriptor const vertex,
+			TIterator const & beginIt,
+			TIterator endIt)
+{
+	SEQAN_CHECKPOINT
+	TIterator beginIt2 = beginIt;
+	return parseString(g, vertex, beginIt2, endIt);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -913,6 +929,70 @@ parseString(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
 {
 	SEQAN_CHECKPOINT
 	return parseString(g,vertex,chars,chars+length(chars));
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.canParseString:
+..cat:Graph.Automaton
+..summary:Test whether an automaton can parse a string completely.
+..signature:canParseString(g [, v], str)
+..param.g:An automaton or a word graph.
+...type:Spec.Automaton
+...type:Spec.Word Graph
+..param.v:A vertex descriptor. (optional)
+...type:Metafunction.VertexDescriptor
+...default:The @Function.root@ of $g$.
+..param.str:A string.
+...type:Class.String
+..returns:$true$ if $g$ parses $str$ starting at $v$ completely, $false$ otherwise.
+..see:Function.getSuccessor
+..see:Function.parseString
+*/
+
+template<typename TAlphabet, typename TCargo,  typename TSpec, typename TVertexDescriptor, typename TCharacters>
+inline bool 
+canParseString(Graph<Automaton<TAlphabet, TCargo, TSpec> > const & g,
+			   TVertexDescriptor const vertex,
+			   TCharacters const & chars)
+{
+	SEQAN_CHECKPOINT
+	typedef typename Iterator<TCharacters const, Standard>::Type TIterator;
+	TIterator it = begin(chars, Standard());
+	TIterator it_end = end(chars, Standard());
+	parseString(g, vertex, it, it_end);
+	return (it == it_end);
+}
+template<typename TAlphabet, typename TCargo, typename TSpec, typename TVertexDescriptor, typename TCharacters>
+inline bool
+canParseString(Graph<Automaton<TAlphabet, TCargo, TSpec> > const & g,
+			   TVertexDescriptor const vertex,
+			   TCharacters const * chars)
+{
+	SEQAN_CHECKPOINT
+	typedef TCharacters const * TIterator;
+	TIterator it = begin(chars, Standard());
+	TIterator it_end = end(chars, Standard());
+	parseString(g, vertex, it, it_end);
+	return (it == it_end);
+}
+
+template<typename TAlphabet, typename TCargo,  typename TSpec, typename TCharacters>
+inline bool 
+canParseString(Graph<Automaton<TAlphabet, TCargo, TSpec> > & g,
+			   TCharacters const & chars)
+{
+	SEQAN_CHECKPOINT
+	return canParseString(g, root(g), chars);
+}
+template<typename TAlphabet, typename TCargo,  typename TSpec, typename TCharacters>
+inline bool 
+canParseString(Graph<Automaton<TAlphabet, TCargo, TSpec> > & g,
+			   TCharacters const * chars)
+{
+	SEQAN_CHECKPOINT
+	return canParseString(g, root(g), chars);
 }
 
 
