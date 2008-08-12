@@ -661,11 +661,11 @@ void dumpMatches(
 						double		percId;
 
 						if (orientation == 0) {
-							gBegin = _gBegin + 1;
+							gBegin = _gBegin;
 							gEnd = (*it).gEnd;
 						} else {
 							gBegin = gLength - _gBegin;
-							gEnd = gLength - (*it).gEnd + 1;
+							gEnd = gLength - (*it).gEnd;
 						}
 
 						string fastaID;
