@@ -619,15 +619,26 @@ SEQAN_CHECKPOINT
 		{
 			new_length = wanted_new_length;
 		}
-
+/*
 		//move [end:right_end] to [start + size:..]
 		if (old_size > size)
 		{//move rest to left
-			::std::copy_backward(iter(seq, end, Standard()), iter(seq, old_length, Standard()), iter(seq,  new_length, Standard()));
+			::std::copy(iter(seq, end, Standard()), iter(seq, old_length, Standard()), iter(seq, end + size - old_size, Standard()));
 		}
 		else
 		{//move rest to right
-			::std::copy(iter(seq, end, Standard()), iter(seq, old_length, Standard()), iter(seq, end + size - old_size, Standard()));
+			::std::copy_backward(iter(seq, end, Standard()), iter(seq, old_length, Standard()), iter(seq,  new_length, Standard()));
+		}
+*/
+		if (old_size > size)
+		{
+	SEQAN_CHECKPOINT
+			arrayMoveForward(iter(seq, end, Standard()), iter(seq, old_length, Standard()), iter(seq, end + size - old_size, Standard()));
+		}
+		else
+		{
+	SEQAN_CHECKPOINT
+			arrayMoveBackward(iter(seq, end, Standard()), iter(seq, old_length, Standard()), iter(seq, end + size - old_size, Standard()));
 		}
 FINISH:
 		_setLength(seq, new_length);
