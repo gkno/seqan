@@ -1591,7 +1591,8 @@ struct _Fill_String
 		typename Size<T>::Type new_length,
 		TValue const & val)
 	{
-		typename Size<T>::Type me_length = length(me);
+		typedef typename Size<T>::Type TSize;
+		TSize me_length = length(me);
 		if (new_length < me_length)
 		{
 SEQAN_CHECKPOINT
@@ -1599,11 +1600,15 @@ SEQAN_CHECKPOINT
 		}
 		else
 		{
-			typename Size<T>::Type me_capacity = capacity(me);
+			TSize me_capacity = capacity(me);
 			if (new_length > me_capacity)
 			{
 SEQAN_CHECKPOINT
-				new_length = reserve(me, new_length, TExpand());
+				TSize new_capacity = reserve(me, new_length, TExpand());
+				if (new_capacity < new_length)
+				{
+					new_length = new_capacity;
+				}
 			}
 			if (new_length > me_length)
 			{

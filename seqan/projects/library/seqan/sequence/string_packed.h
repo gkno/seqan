@@ -1193,7 +1193,7 @@ operator - (Iter<TContainer, Packed<THostspec> > const & left,
 			TIntegral right)
 {
 SEQAN_CHECKPOINT
-	return Iter<TContainer, AdaptorIterator<THostspec> >(container(left), position(left) - right);
+	return Iter<TContainer, Packed<THostspec> >(container(left), position(left) - right);
 }
 
 //____________________________________________________________________________

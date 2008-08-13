@@ -111,7 +111,7 @@ SEQAN_CHECKPOINT
 	}
 
 	Proxy const &
-	operator = (Proxy const & _other)
+	operator = (Proxy const & _other) const
 	{
 SEQAN_CHECKPOINT
 		assignValue(data_iterator, getValue(_other.data_iterator));
@@ -119,7 +119,7 @@ SEQAN_CHECKPOINT
 	}
 
 	Proxy const &
-	operator = (TValue const & _value)
+	operator = (TValue const & _value) const
 	{
 SEQAN_CHECKPOINT
 		assignValue(data_iterator, _value);
@@ -127,6 +127,12 @@ SEQAN_CHECKPOINT
 	}
 
 	operator TAccessor_NotConst()
+	{
+SEQAN_CHECKPOINT
+		return getValue(data_iterator);
+	}
+
+	operator const TAccessor_NotConst() const
 	{
 SEQAN_CHECKPOINT
 		return getValue(data_iterator);
