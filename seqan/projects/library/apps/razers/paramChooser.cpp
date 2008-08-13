@@ -153,7 +153,8 @@ parseParams(TFile & file)
         double bestSoFar = 0.0;
         unsigned bestQ = 1;
         unsigned bestT = 1;
-	unsigned qCutoff = 13; //depends on RAM
+	unsigned secondBestT = 0;
+	unsigned qCutoff = 14; //depends on RAM
         //String<double> loss;
         //reserve(loss, 20*readLen);
 
@@ -177,6 +178,10 @@ parseParams(TFile & file)
                                 bestSoFar=val;
                                 bestQ=countQ+1;
                                 bestT=countT;
+				if(bestQ==13)
+				{
+					secondBestT=countT;
+				}
                         }
                         ++countT;
                 }
@@ -191,7 +196,9 @@ parseParams(TFile & file)
 //      std::cout << "insge: Q="<<countQ << " T="<<countT<<"\n";
         qgramLen = bestQ;
         threshold = bestT;
-//      std::cout << "chose: Q="<<bestQ << " T="<<bestT<<"\n";
+	if(bestQ==14)
+		std::cout << "\nIf RAM <= 1GB : Choose q = "<<bestQ-1 << " and t = "<<secondBestT<<"\nelse          : ";
+	else std::cout <<"\n";
         return true;
 }
 
@@ -687,7 +694,8 @@ int main(int argc, const char *argv[])
 	// Parse command line
 	strncpy ( fparams, argv[0], length(argv[0])-12 );
 	strcat(fparams,"params/");
-	
+	static const double epsilon = 0.0000001;	
+
 	for(int arg = 1; arg < argc; ++arg) {
 		if (argv[arg][0] == '-') {
 			// parse option
@@ -783,6 +791,10 @@ int main(int argc, const char *argv[])
 			}
 		}
 	}
+
+	optionErrorRate += epsilon;
+	optionLossRate += epsilon;
+	
 	// compute data specific loss rates
 	if (fnameCount0 || fnameCount1) 
 	{
@@ -842,9 +854,9 @@ int main(int argc, const char *argv[])
 		else paramsfile << fparams<<"results_QE0_N" << totalN << "_E" << totalK << ".dat";
 	}
 
-	std::cout << "\nread length      = " << totalN << "bp\n";
-	std::cout << "max num errors   = " << totalK << "\n";
-	std::cout << "recognition rate = " <<  100.0*(1.0-optionLossRate) << "%\n";
+	std::cout << "\nRead length      = " << totalN << "bp\n";
+	std::cout << "Max num errors   = " << totalK << "\n";
+	std::cout << "Recognition rate = " <<  100.0*(1.0-optionLossRate) << "%\n";
 			
 	// parse loss rate file and find appropriate filter criterium
 	std::cout << "\n--> Reading " <<  paramsfile.str()<<"\n";
@@ -858,7 +870,7 @@ int main(int argc, const char *argv[])
 	else parseParams(file);
 		
 	// suggest a suitable combination of q and t
-	std::cout << "\nChoose q = " << qgramLen << " and t = " << threshold << " to achieve optimal performance for expected recognition rate >= " << (100.0-100.0*optionLossRate) << "% (expected recognition = " << (100.0-chosenLossRate*100.0) <<"%)\n\n";
+	std::cout << "Choose q = " << qgramLen << " and t = " << threshold << " to achieve optimal performance for expected recognition rate >= " << (100.0-100.0*optionLossRate) << "% (expected recognition = " << (100.0-chosenLossRate*100.0) <<"%)\n\n";
 
 	return 0;
 }
