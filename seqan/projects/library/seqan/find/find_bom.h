@@ -29,30 +29,53 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Spec.BomAlgo:
-..summary: Backward Oracle Matching algorithm. Exact string matching using a factor oracle.
+.Spec.BFAM:
+..summary:Backward Factor Automaton Matching algorithm.
 ..general:Class.Pattern
 ..cat:Searching
-..signature:Pattern<TNeedle, BomAlgo>
+..signature:Pattern<TNeedle, BFAM<TAutomaton> >
 ..param.TNeedle:The needle type.
 ...type:Class.String
-..remarks.text:The types of the needle and the haystack have to match.
+..param.TAutomaton:A tag that specifies the used automaton.
+...default:@Spec.BFAM<Oracle>@
+..remarks.text:To be used in combination with the default specialization of @Class.Finder@.
 */
 
-///.Class.Pattern.param.TSpec.type:Spec.BomAlgo
+/**
+.Spec.BFAM<Oracle>:
+..summary:Backward Oracle Matching algorithm.
+..general:Class.BFAM
+..cat:Searching
+..signature:Pattern<TNeedle, BFAM<Oracle> >
+..param.TNeedle:The needle type.
+...type:Class.String
+..remarks.text:To be used in combination with the default specialization of @Class.Finder@.
+*/
+/**
+.Spec.BFAM<Trie>:
+..summary:Backward Suffix Trie Matching algorithm.
+..general:Class.BFAM
+..cat:Searching
+..signature:Pattern<TNeedle, BFAM<Trie> >
+..param.TNeedle:The needle type.
+...type:Class.String
+..remarks.text:To be used in combination with the default specialization of @Class.Finder@.
+*/
 
-template <typename TSpec>
-struct BFA; //backward factor automaton searching
+///.Class.Pattern.param.TSpec.type:Spec.BFAM
 
 struct Oracle; //Oracle Tag => "BOM"
 struct Trie; //Trie Tag => "BTM"
 
-typedef BFA<Oracle> BomAlgo; //for compatibility reasons
+template <typename TSpec = Oracle>
+struct BFAM; //backward factor automaton searching
+
+typedef BFAM<Oracle> BomAlgo; //deprecated, still there for compatibility reasons
 
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TNeedle, typename TSpec>
-class Pattern<TNeedle, BFA<TSpec> > {
+class Pattern<TNeedle, BFAM<TSpec> > {
 //____________________________________________________________________________
 private:
 	Pattern(Pattern const& other);
@@ -66,7 +89,7 @@ public:
 	TSize needleLength;		
 	TSize haystackLength;
 	TSize step;
-	Graph<Automaton<TAlphabet, void, WithoutEdgeId> > oracle;
+	Graph<Automaton<TAlphabet, void, WithoutEdgeId> > automaton;
 
 //____________________________________________________________________________
 
@@ -107,38 +130,39 @@ struct Host< Pattern<TNeedle, BomAlgo> const>
 // Functions
 //////////////////////////////////////////////////////////////////////////////
 
-//BFA<Oracle>: BOM Algorithm
+//BFAM<Oracle>: BOM Algorithm
 template <typename TNeedle, typename TNeedle2>
 inline void 
-setHost (Pattern<TNeedle, BFA<Oracle> > & me, TNeedle2 const& needle) 
+setHost (Pattern<TNeedle, BFAM<Oracle> > & me, TNeedle2 const& needle) 
 {
 	SEQAN_CHECKPOINT
 	me.needleLength = length(needle);
-	clear(me.oracle);
-	createOracleOnReverse(me.oracle,needle);
-	assignRoot(me.oracle,0);
+	clear(me.automaton);
+	createOracleOnReverse(me.automaton,needle);
 	setValue(me.data_needle, needle);
 }
-//BFA<Trie>: BTM Algorithm (the same as BOM, but with an trie)
+//BFAM<Trie>: BTM Algorithm (the same as BOM, but with an trie)
 template <typename TNeedle, typename TNeedle2>
 inline void 
-setHost (Pattern<TNeedle, BFA<Trie> > & me, TNeedle2 const& needle) 
+setHost (Pattern<TNeedle, BFAM<Trie> > & me, TNeedle2 const& needle) 
 {
 	SEQAN_CHECKPOINT
 	me.needleLength = length(needle);
-	clear(me.oracle);
+	clear(me.automaton);
 
 	String<String<unsigned int> > terminal_state_map; //dummy
 	typedef typename Value<TNeedle2 const>::Type TValue;
 	String<TValue> reverse_string = needle;
 	reverseInPlace(reverse_string);
 
+	createSuffixTrie(me.automaton, terminal_state_map, reverse_string);
+
 	setValue(me.data_needle, needle);
 }
 
 template <typename TNeedle, typename TNeedle2, typename TSpec>
 inline void 
-setHost (Pattern<TNeedle, BFA<TSpec> > & me, TNeedle2 & needle)
+setHost (Pattern<TNeedle, BFAM<TSpec> > & me, TNeedle2 & needle)
 {
 	setHost(me, reinterpret_cast<TNeedle2 const &>(needle));
 }
@@ -147,7 +171,7 @@ setHost (Pattern<TNeedle, BFA<TSpec> > & me, TNeedle2 & needle)
 
 
 template <typename TNeedle, typename TSpec>
-inline void _patternInit (Pattern<TNeedle, BFA<TSpec> > & me) 
+inline void _patternInit (Pattern<TNeedle, BFAM<TSpec> > & me) 
 {
 SEQAN_CHECKPOINT
 	me.step = 0;
@@ -157,16 +181,16 @@ SEQAN_CHECKPOINT
 //____________________________________________________________________________
 
 template <typename TNeedle, typename TSpec>
-inline typename Host<Pattern<TNeedle, BFA<TSpec> > const>::Type & 
-host(Pattern<TNeedle, BFA<TSpec> > & me)
+inline typename Host<Pattern<TNeedle, BFAM<TSpec> > const>::Type & 
+host(Pattern<TNeedle, BFAM<TSpec> > & me)
 {
 SEQAN_CHECKPOINT
 	return value(me.data_needle);
 }
 
 template <typename TNeedle, typename TSpec>
-inline typename Host<Pattern<TNeedle, BFA<TSpec> > const>::Type & 
-host(Pattern<TNeedle, BFA<TSpec> > const & me)
+inline typename Host<Pattern<TNeedle, BFAM<TSpec> > const>::Type & 
+host(Pattern<TNeedle, BFAM<TSpec> > const & me)
 {
 SEQAN_CHECKPOINT
 	return value(me.data_needle);
@@ -177,7 +201,7 @@ SEQAN_CHECKPOINT
 
 template <typename TFinder, typename TNeedle, typename TSpec>
 inline bool 
-find(TFinder & finder, Pattern<TNeedle, BFA<TSpec> > & me) 
+find(TFinder & finder, Pattern<TNeedle, BFAM<TSpec> > & me) 
 {
 	SEQAN_CHECKPOINT
 	
@@ -196,13 +220,13 @@ find(TFinder & finder, Pattern<TNeedle, BFA<TSpec> > & me)
 	typedef typename EdgeDescriptor<TOracle>::Type TEdgeDescriptor;
 	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
 	while (position(finder) <= me.haystackLength - me.needleLength) {
-		TVertexDescriptor current = getRoot(me.oracle);
+		TVertexDescriptor current = getRoot(me.automaton);
 		TSize j = me.needleLength;
 		while ((j>0) &&
 				(current != nilVal))
 		{
 			TAlphabet c = *(finder+(j-1));
-			current = targetVertex(me.oracle, findEdge(me.oracle, current, c));
+			current = targetVertex(me.automaton, findEdge(me.automaton, current, c));
 			--j;
 		}
 		if (current != nilVal) {

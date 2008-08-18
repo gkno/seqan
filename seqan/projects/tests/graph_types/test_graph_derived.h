@@ -100,9 +100,36 @@ void Test_Trie() {
 
 //////////////////////////////////////////////////////////////////////////////
 
+void Test_SetOracle() 
+{
+	Graph<Automaton<char> > g;
+	String<String<unsigned int> > pos;
+	String<String<char> > keywords;
+	appendValue(keywords, String<char>("announce"));
+	appendValue(keywords, String<char>("annual"));
+	appendValue(keywords, String<char>("annually"));
+	createSetOracle(g,pos,keywords);
+
+	for (int i = 0; i < length(keywords); ++i)
+	{
+		String<char> & str = keywords[i];
+		for (int j = 0; j < length(str); ++j)
+		{
+			SEQAN_TASSERT(canParseString(g, prefix(str, i)));
+		}
+	}
+
+	SEQAN_TASSERT(!canParseString(g, "d"))
+	SEQAN_TASSERT(!canParseString(g, "annly"))
+	SEQAN_TASSERT(canParseString(g, ""))
+
+}
+//////////////////////////////////////////////////////////////////////////////
+
 void Test_GraphDerivedTypes() {
 	Test_Oracle();
 	Test_Trie();
+	Test_SetOracle();
 
 	debug::verifyCheckpoints("projects/library/seqan/graph_types/graph_impl_oracle.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph_types/graph_impl_trie.h");

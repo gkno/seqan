@@ -50,10 +50,10 @@
 #include <seqan/find/find_shiftand.h>
 #include <seqan/find/find_shiftor.h>
 #include <seqan/find/find_bndm.h>
-#include <seqan/find/find_quasar.h>
+#include <seqan/find/find_bom.h>
 
 //____________________________________________________________________________
-// exact pattern matching
+//complex pattern matching
 #include <seqan/find/find_wild_shiftand.h>
 
 //____________________________________________________________________________
@@ -64,7 +64,8 @@
 #include <seqan/find/find_set_horspool.h>
 
 //#include <seqan/find/find_multi.h> //wegwerfen
-//#include <seqan/find/find_wumanber.h> //todo
+#include <seqan/find/find_wumanber.h> 
+#include <seqan/find/find_multiple_bfam.h>
 
 //____________________________________________________________________________
 // approximate pattern matching
@@ -74,6 +75,10 @@
 #include <seqan/find/find_abndm.h>
 #include <seqan/find/find_pex.h>
 
-#include <seqan/find/find_bom.h>
+//____________________________________________________________________________
+//filtering
+#include <seqan/find/find_quasar.h>
+
+//____________________________________________________________________________
 
 #endif //#ifndef SEQAN_HEADER_...

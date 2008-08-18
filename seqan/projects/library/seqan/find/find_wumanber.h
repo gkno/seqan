@@ -18,8 +18,6 @@
   $Id$
  ==========================================================================*/
 
-//SEQAN_NO_DDDOC: do not generate documentation for this file
-
 #ifndef SEQAN_HEADER_FIND_WUMANBER_H
 #define SEQAN_HEADER_FIND_WUMANBER_H
 
@@ -34,760 +32,434 @@ namespace SEQAN_NAMESPACE_MAIN
 .Spec.WuManber:
 ..general:Class.Pattern
 ..cat:Searching
-..summary:A fast online-algorithm for multi-pattern search
-..signature:Pattern<TNeedle, WuManber<HashType> >
+..summary:Online-algorithm for multi-pattern search.
+..signature:Pattern<TNeedle, WuManber>
 ..param.TNeedle:The needle type.
 ...type:Class.String
-..param.HashType: Defines the used Hashing-Function 
-...default:@Class.DefaultHash@
 */
 
 ///.Class.Pattern.param.TSpec.type:Spec.WuManber
 
+struct _WuManber;
+typedef Tag<_WuManber> WuManber;
+
 //////////////////////////////////////////////////////////////////////////////
 
-/**
-.Class.DefaultHash:
-..cat:Miscellaneous
-..summary:A simple Hash-Object
-..summary:Hashing is based on bit-shift
-..signature:DefaultHash
-..remarks: The shift-width is defined by the used Alphabet
-..remarks: The shift-width could also be set with the ctor 
-..see:Spec.WuManber
-*/
-
-///.Spec.WuManber.param.HashType.type:Class.DefaultHash
-
-class DefaultHash
+template <typename TNeedle>
+class Pattern<TNeedle, WuManber> 
 {
-private:
-	unsigned int shift;
-	Size<String<size_t> >::Type h_size;
-
-	void * _CompareTypeId;
-
+//____________________________________________________________________________
 public:
-	DefaultHash()
-		: shift(0),
-		h_size(0),
-		_CompareTypeId(0)
-	{
-	}
+	typedef typename Value<TNeedle>::Type TKeyword;
+	typedef typename Position<TNeedle>::Type TNeedlePosition;
+	typedef typename Size<TKeyword>::Type TSize;
+	typedef typename Value<TKeyword>::Type TValue;
 
-	DefaultHash(DefaultHash const & _other)
-		: shift(_shift_width(_other)),
-		h_size(_hash_size(_other)),
-		_CompareTypeId(_other._CompareTypeId)
-	{
-	}
+	//searching data: these members are initialized in _patternInit
+	TNeedlePosition position; //last found keyword
+	TNeedlePosition * to_verify_begin; //next entry in verify
+	TNeedlePosition * to_verify_end; //end of list in verify
+			//note: if to_verify_begin == to_verify_end then searching in Haystack must go on
 
-	DefaultHash & 
-	operator = (DefaultHash const & other_)
-	{
-SEQAN_CHECKPOINT
-		shift = other_.shift;
-		h_size = other_.h_size;
-		_CompareTypeId = other_._CompareTypeId;
-		return *this;
-	}
+	//preprocessed data: these members are initialized in setHost
+	Holder<TNeedle> needle;
+	String<TNeedlePosition> verify_tab; //table of keywords to verify depending on the last value (HASH)
+	String<TNeedlePosition *> verify; //directory into verify_tab
+	String<TSize> shift; //table of skip widths (SHIFT)
 
-/**
-.DISABLED.Function.init:
-..summary:Initializes the Hash-Object
-..signature:init(Hash,TNeedle [, _shift_width])
-..param.DefaultHash: Reference to the Hash-Object that should be Initialized
-..param.TNeedle: Needle for which the Hash-Object should work
-..param._shift_width: Specifiers a user defined shift with
-*/
-
-///.DISABLED.Function.init.param.Hash.type:Class.DefaultHash
-
-	template <typename TNeedle>
-	friend inline void
-	init(DefaultHash & me, TNeedle & ndl)
-	{
-SEQAN_CHECKPOINT
-		typedef typename Value<TNeedle>::Type TTargetAlphabet;
-		me._CompareTypeId = _ClassIdentifier<TTargetAlphabet>::getID();
-
-		if(_ClassIdentifier<TTargetAlphabet>::getID() == _ClassIdentifier<char>::getID())
-			_setShift_Width(me,5);
-		else
-			_setShift_Width(me,BitsPerValue<TTargetAlphabet>::VALUE);
-
-		// bestimmen der hash bzw. shift-tabellen größe
-		typename Size<TNeedle>::Type ndl_size = length(ndl);
-
-		int i = 1;
-		size_t lmin;
-		lmin = length(ndl[0]);
-		size_t w_width;
-		while(i < ndl_size)
-		{
-			if(lmin > length(ndl[i]))
-				lmin = length(ndl[i]);
-			++i;
-		}
-		w_width = static_cast<unsigned int>(ceil(std::log(static_cast<double>(2*lmin*ndl_size))/std::log(static_cast<double>(ValueSize<TTargetAlphabet>::VALUE))));
-
-		me.h_size = 1 << me.shift * w_width;
-	}
-
-	template <typename TNeedle,typename THaystack>
-	friend inline void
-	init(DefaultHash & me,TNeedle & ndl,THaystack & finder,unsigned int _shift_width)
-	{
-SEQAN_CHECKPOINT
-		typedef typename Value<TNeedle>::Type TTargetAlphabet;
-		me._CompareTypeId = _ClassIdentifier<TTargetAlphabet>::getID();
-		_setShift_Width(me,_shift_width);
-
-		// bestimmen der hash bzw. shift-tabellen größe
-		typename Size<TNeedle>::Type ndl_size = length(ndl);
-
-		int i = 1;
-		size_t lmin;
-		lmin = length(ndl[0]);
-		size_t w_width;
-		while(i < ndl_size)
-		{
-			if(lmin > length(ndl[i]))
-				lmin = length(ndl[i]);
-			++i;
-		}
-		w_width = static_cast<unsigned int>(ceil(std::log(static_cast<double>(2*lmin*ndl_size))/std::log(static_cast<double>(ValueSize<TTargetAlphabet>::VALUE))));
-
-		me.h_size = 1 << me.shift * w_width;
-	}
-
-/**
-.Internal._shift_width:
-..summary:Returns the Shift-Width that was defined by the Hash-Object used by @Spec.WuManber@ Pattern
-..signature:shift_width(Hash)
-..param.Hash: Reference to the Hash-Object
-*/
-
-///.Internal._shift_width.param.Hash.type:Class.DefaultHash
-	friend inline unsigned int &
-	_shift_width(DefaultHash & me)
-	{
-SEQAN_CHECKPOINT
-		return me.shift;
-	}
-
-	friend inline unsigned int const &
-	_shift_width(DefaultHash const & me)
-	{
-SEQAN_CHECKPOINT
-		return me.shift;
-	}
-
-	friend inline void 
-	_setShift_Width(DefaultHash & me, unsigned int _shift)
-	{
-SEQAN_CHECKPOINT
-		me.shift = _shift;
-	}
-
-/**
-.Internal._hash_size:
-..summary:Returns the Size of the HASH-Tables used by @Spec.WuManber@ Pattern
-..signature:hash_size(Hash)
-..param.Hash: Reference to the Hash-Object
-*/
-
-///.Internal._hash_size.param.Hash.type:Class.DefaultHash
-	friend inline Size<String<size_t> >::Type &
-	_hash_size(DefaultHash & me)
-	{
-SEQAN_CHECKPOINT
-		return me.h_size;
-	}
-
-	friend inline Size<String<size_t> >::Type const &
-	_hash_size(DefaultHash const & me)
-	{
-SEQAN_CHECKPOINT
-		return me.h_size;
-	}
-
-	friend inline Size<String<size_t> >::Type &
-	_shift_size(DefaultHash & me)
-	{
-SEQAN_CHECKPOINT
-		return me.h_size;
-	}
-
-	friend inline Size<String<size_t> >::Type const &
-	_shift_size(DefaultHash const & me)
-	{
-SEQAN_CHECKPOINT
-		return me.h_size;
-	}
-
-};
-
-
-
-
-
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename THash = DefaultHash>
-class WuManber {};
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TNeedle, typename THash>
-class Pattern<TNeedle, WuManber<THash> >
-{
-private:
-	unsigned int			found_in;
-	String<size_t>			SHIFT;
-	String<String<size_t> >	HASH;
-	unsigned int			q;
-	size_t					lmin;
-
-	Holder<TNeedle>			data_needle;
-	Holder<THash>			_hash;
-	bool					_initialized;
-
-public:
+	TSize lmin;	//min length of keyword
+	char q;		//length of hashed q-grams
+//____________________________________________________________________________
 
 	Pattern():
-		_initialized(false)
+		lmin(0)
 	{
-SEQAN_CHECKPOINT
-		// erzeuge neues Hashobjekt
-		THash h;
-		setHash(*this,h);
-		create(_hash);
-
-		q = 0;
-		lmin = 0;
-		found_in = -1;
 	}
-
-	Pattern(Pattern const & other_):
-		found_in(other_.found_in),
-		SHIFT(other_.SHIFT),
-		HASH(other_.HASH),
-		q(window_width(other_)),
-		lmin(minLength(other_)),
-		_initialized(other_._initialized)
-	{
-SEQAN_CHECKPOINT
-		assignHash(*this,hash(other_));
-	}
-
-	~Pattern()
-	{
-		clear(_hash);
-	}
-
-	Pattern & 
-	operator = (Pattern const & other_)
-	{
-SEQAN_CHECKPOINT
-		found_in = needle(other_);
-		SHIFT = other_.SHIFT;
-		HASH = other_.HASH;
-		q = other_.q;
-		lmin = other_.lmin;
-		assignHash(*this,hash(other_));
-		_initialized = other_._initialized;
-		return *this;
-	}
-//____________________________________________________________________________
-
-	friend inline typename Host<Pattern>::Type & 
-	host(Pattern & me)
-	{
-SEQAN_CHECKPOINT
-		return value(me.data_needle);
-	}
-
-	friend inline typename Host<Pattern const>::Type & 
-	host(Pattern const & me)
-	{
-SEQAN_CHECKPOINT
-		return value(me.data_needle);
-	}
-
-//____________________________________________________________________________
-
-	friend inline unsigned int &
-	needle(Pattern & me)
-	{
-SEQAN_CHECKPOINT
-		return me.found_in;
-	}
-
-	friend inline unsigned int const &
-	needle(Pattern const & me)
-	{
-SEQAN_CHECKPOINT
-		return me.found_in;
-	}
-
-/**
-.Function.hash:
-..cat:Searching
-..summary:Returns the Hashobject, that is used by the Finderobject
-..signature:hash(Pattern)
-..param.Pattern: Reference to the Pattern-Object
-*/
-
-///.Function.hash.param.Pattern.type:Spec.WuManber
-
-
-	friend inline THash &
-	hash(Pattern & me)
-	{
-SEQAN_CHECKPOINT
-		return value(me._hash);
-	}
-
-	friend inline THash const &
-	hash(Pattern const & me)
-	{
-SEQAN_CHECKPOINT
-		return value(me._hash);
-	}
-
-
-/**
-.Function.setHash:
-..cat:Searching
-..summary:Sets the Hashobject to a new Value
-..signature:setHash(Pattern,THash)
-..param.Pattern: Reference to the Pattern-Object
-..param.THash: The new Hashobject
-*/
-
-///.Function.setHash.param.Pattern.type:Spec.WuManber
-///.Function.setHash.param.THash.type:Class.DefaultHash
-
-	friend inline void 
-	setHash(Pattern & me,THash & value)
-	{
-SEQAN_CHECKPOINT
-		setValue(me._hash,value);
-	}
-
-/**
-.Function.assignHash:
-..cat:Searching
-..summary: Sets the Hashobject to a new Value which is independent of the original Object
-..signature:assignHash(Pattern,THash)
-..param.Pattern: Reference to the Pattern-Object
-..param.THash: The new Hashobject
-*/
-
-///.Function.assignHash.param.Pattern.type:Spec.WuManber
-///.Function.assignHash.param.THash.type:Class.DefaultHash
-
-
-	friend inline void
-	assignHash(Pattern &  me,THash const & value)
-	{
-SEQAN_CHECKPOINT
-		assignValue(me._hash,value);
-	}
-//____________________________________________________________________________
-
-
-	friend inline void
-	setNeedle(Pattern & me, unsigned int const needleIndex_)
-	{
-SEQAN_CHECKPOINT
-		me.found_in = needleIndex_;
-	}
-
-/**
-.Function.window_with:
-..cat:Searching
-..summary:Returns the window-with which is used to search the Haystack
-..signature:window_with(Pattern)
-..param.Pattern: Reference to the Pattern-Object
-*/
-
-///.Function.window_with.param.Pattern.type:Spec.WuManber
-
-
-	friend inline unsigned int &
-	window_width(Pattern & me)
-	{
-SEQAN_CHECKPOINT
-		return me.q;
-	}	
-
-	friend inline unsigned int const &
-	window_width(Pattern const & me)
-	{
-SEQAN_CHECKPOINT
-		return me.q;
-	}	
-
-/**
-.Function.setWindow_with:
-..cat:Searching
-..summary:Sets the window-with to a new value
-..signature:window_with(Pattern,value_)
-..param.Pattern: Reference to the Pattern-Object
-..param.value_: The new window-with
-*/
-
-///.Function.setWindow_with.param.Pattern.type:Spec.WuManber
-
-	friend inline void
-	setWindow_width(Pattern & me,unsigned int value_)
-	{
-SEQAN_CHECKPOINT
-		me.q = value_;
-	}
-
-/**
-.Function.minLength:
-..cat:Searching
-..summary:Returns the length of the shortest Searchpattern
-..signature:minLength(Pattern,)
-..param.Pattern: Reference to the Pattern-Object
-*/
-
-///.Function.setWindow_with.param.Pattern.type:Spec.WuManber
-
-
-	friend inline size_t &
-	minLength(Pattern & me)
-	{
-SEQAN_CHECKPOINT
-		return me.lmin;
-	}
-
-	friend inline size_t const &
-	minLength(Pattern const & me)
-	{
-SEQAN_CHECKPOINT
-		return me.lmin;
-	}
-
-/**
-.Function.setMinLength:
-..cat:Searching
-..summary:Sets the length of the shortest Searchpattern
-..signature:minLength(Pattern,value_)
-..param.Pattern: Reference to the Pattern-Object
-..param.value_: The new min. Length
-*/
-
-///.Function.setWindow_with.param.Pattern.type:Spec.WuManber
-
-	friend inline void
-	setMinLength(Pattern & me,size_t value_)
-	{
-SEQAN_CHECKPOINT
-		me.lmin = value_;
-	}
-//____________________________________________________________________________
-
-/**
-.Function.setNeedle:
-..signature:setNeedle(pattern, needle[, param_init])
-..param.param_init: For @Spec.WuManber@ only. If true (default) the $window_with$ of the WuManber-Pattern is set by @Function.setNeedle@, otherwise you got to set $window_with$ manually.
-..remarks:If $param_init$ is $false$ the $window_with$ must be defined before @Function.init@ is called, otherwise @Function.find@ won't work.
-*/
 
 	template <typename TNeedle2>
-	friend inline void
-	setHost(Pattern & me, TNeedle2 & ndl, bool param_init = true)
+	Pattern(TNeedle2 const & ndl)
 	{
-SEQAN_CHECKPOINT
-
-		setNeedle(me,0);
-		clear(me.SHIFT);
-		clear(me.HASH);
-
-		typename Size<TNeedle>::Type ndl_size = length(ndl);
-		typedef typename Value<TNeedle>::Type TNdl;
-		typedef typename Value<TNdl>::Type TAlphabet;
-		typedef typename Host<THaystack>::Type THaystackHost;
-		THaystackHost & haystack_host = container(finder);
-
-		// bestimmen von lmin
-		int i = 1;
-		setMinLength(me,length(ndl[0]));
-		while(i < ndl_size)
-		{
-SEQAN_CHECKPOINT
-			if(minLength(me) > length(ndl[i]))
-				setMinLength(me,length(ndl[i]));
-			++i;
-		}
-
-		// wennn param_init gesetzt wird, dann wird die fensterweite angepasst
-		// ist dies nicht der fall muss diese schon vorher gesetzt worden sein
-		if(param_init)
-		{
-SEQAN_CHECKPOINT
-			setWindow_width(me,static_cast<unsigned int>(ceil(std::log(static_cast<double>(minLength(me)*ndl_size))/std::log(static_cast<double>(ValueSize<TAlphabet>::VALUE)))));
-			if(window_width(me) > minLength(me))
-				setWindow_width(me,minLength(me));
-		}
-
-		// SHIFT Tabelle aufbauen
-		resize(me.SHIFT,_shift_size(hash(me)));
-		arrayFill(begin(me.SHIFT),length(me.SHIFT),minLength(me) - window_width(me) + 1);
-
-		// HASH-Tabelle aufbauen
-		resize(me.HASH,_hash_size(hash(me)));
-		i = 0;
-		int j;
-		int h_hash;
-		int s_hash;
-		int n_length;
-
-		while(i < ndl_size)
-		{
-SEQAN_CHECKPOINT
-			// für alle needles
-			j = window_width(me) - 1;
-			n_length = length(ndl[i]);
-
-			while(j < n_length)
-			{
-SEQAN_CHECKPOINT
-				s_hash = _compute_SHIFT_Hash(hash(me),infix(value(ndl,i),j - window_width(me) + 1,j),haystack_host,window_width(me));
-				me.SHIFT[s_hash] = ::std::min(static_cast<size_t>(n_length) - (j + 1),static_cast<size_t>(me.SHIFT[s_hash]));
-				++j;
-			}
-
-			h_hash = _compute_HASH_Hash(hash(me),infix(value(ndl,i),j - window_width(me),j),haystack_host,window_width(me));
-			resize(me.HASH[h_hash],length(me.HASH[h_hash]) + 1);
-			(me.HASH[h_hash])[length(me.HASH[h_hash]) - 1] =  i;
-			++i;
-		}
-
-		data_needle = ndl;
-
-#ifdef SEQAN_DEBUG
-		std::cout << "initialized WuManber with following parameters" << ::std::endl;
-
-		std::cout << "lmin " << minLength(me) << ::std::endl;
-		std::cout << "q " << window_width(me) << ::std::endl;
-		std::cout << "number of needles " << ndl_size << ::std::endl;
-#endif
+		SEQAN_CHECKPOINT
+		setHost(*this, ndl);
 	}
+
+	~Pattern() 
+	{
+	}
+//____________________________________________________________________________
+
+private:
+	Pattern(Pattern const& other);
+	Pattern const & operator=(Pattern const & other);
+
+//____________________________________________________________________________
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
+//forward
+template <typename TNeedle, int Q>
+struct _WuManber_Hash;
+
+
+//////////////////////////////////////////////////////////////////////////////
+//implementation kernel of WuManber 
+
+template <typename TNeedle, int Q>
+struct _WuManber_Imp
+{
+//____________________________________________________________________________
+
+	typedef Pattern<TNeedle, WuManber> TPattern;
+
+	typedef typename Value<TNeedle>::Type TKeyword;
+	typedef typename Position<TNeedle>::Type TNeedlePosition;
+	typedef typename Iterator<TNeedle, Standard>::Type TNeedleIterator;
+
+	typedef typename Size<TKeyword>::Type TSize;
+	typedef typename Value<TKeyword>::Type TValue;
+	typedef typename Iterator<TKeyword, Standard>::Type TIterator;
 
 //____________________________________________________________________________
 
-/**
-
-	template <typename TFinder>
-	friend inline bool find(TFinder & finder, Pattern & me)
+	enum 
 	{
-SEQAN_CHECKPOINT
-SEQAN_ASSERT2(length(ndl) > 0, "need to search for at least one needle in haystack")		
-		// Parameter berechnen
-		typedef typename Host<THaystack>::Type THaystackHost;
-		THaystackHost & haystack_host = container(finder);
+		C = BitsPerValue<TValue>::VALUE, //bits per value
+		W = (C*Q <= 16) ? C*Q : 16,	//bits per hash values
 
-		typename Position<THaystack>::Type pos;
-		typename Size<THaystackHost>::Type hstk_size = length(haystack_host);
-		typename Size<TNeedle>::Type ndl_size = length(ndl);
+		DIR_SIZE = 1 << W,			//size of verify_dir and shift_dir
 
-		// Typ der einzelnen Suchwörter
-		typedef typename Value<TNeedle>::Type TNdl;
-		typedef typename Value<TNdl>::Type TAlphabet;
+		//shift width for Q = 2:
+		SHIFT = (W > 2*C) ? C : W-C,			
 
-		TNdl ndl_support = value(ndl,0);
+		//shift widths for Q = 3:
+		SHIFT_LEFT = (W > 3*C) ? 2*C : W-C,
+		SHIFT_MIDDLE = SHIFT_LEFT / 2
+	};
+//____________________________________________________________________________
 
-		int i = 1;
+	inline static unsigned short
+	hash(TValue * vals)
+	{
+		return _WuManber_Hash<TNeedle, Q>::hash(vals);
+	}
+//____________________________________________________________________________
 
-		// infix wird einmal berechnet und dann zwischengespeichert um nicht
-		// mehrmals die infix()-Function aufzurufen
-		size_t shift = 0;
-		unsigned int h_hash = 0;
-		unsigned int _needle = 0;
-		unsigned int h_length;
-		int infix_start;
+	inline static void
+	initialize(TPattern & me)
+	{
+		//note: me.needle, me.q, and me.lmin were already set in setHost before initialize was called
 
-SEQAN_ASSERT2(hstk_size > minLength(me),"nothing to find haystack is smaller then needle")		
-		// Matchs berechnen
-		if(empty(finder))
+		//some variables
+		TNeedleIterator pit;
+		TNeedleIterator pit_end = end(needle(me));
+
+		TSize k = length(needle(me));
+		TSize gram_count = me.lmin-Q; //number of Q-grams in a sequence of length me.lmin
+
+		//resize and init tables
+		resize(me.verify_tab, k);
+		resize(me.verify, DIR_SIZE+1);
+		resize(me.shift, DIR_SIZE);
+
+		arrayFill(begin(me.shift), begin(me.shift) + DIR_SIZE, me.lmin-Q+1); //maximal shift width is me.lmin-B+1
+
+		//init counters
+		unsigned int verify_count[DIR_SIZE];
+		arrayFill(verify_count, verify_count + DIR_SIZE, 0);
+
+		//1: first scan: fill me.shift and count verify
+		for (pit = begin(needle(me)); pit != pit_end; ++pit)
 		{
-SEQAN_CHECKPOINT
-			goBegin(finder);
-			init(hash(me), host(me), finder);
-			finder += minLength(me);
-			pos = position(finder);
-		}
-		else
-		{
-SEQAN_CHECKPOINT
-			finder += length(host(me)[needle(me)]);
-			pos =  position(finder);
-
-			shift = me.SHIFT[_compute_SHIFT_Hash(hash(me),infix(haystack_host,pos - window_width(me),pos),ndl_support,window_width(me))];
-			if(shift == 0)
+			unsigned short hash;
+			TIterator kit = begin(*pit);
+			for (unsigned int i = 0; i <= me.lmin-Q; ++i)
 			{
-SEQAN_CHECKPOINT
-				h_hash = _compute_HASH_Hash(hash(me),infix(haystack_host,pos - window_width(me),pos),ndl_support,window_width(me));
-				//Überprüfen, ob es noch weitere Funde an dieser Position gibt
-				i = 0;
-				h_length = length(me.HASH[h_hash]);
-				while(i < h_length)
+				hash = _WuManber_Hash<TNeedle, Q>::hash(kit + i);
+				if (me.shift[hash] > me.lmin-Q - i)
 				{
-SEQAN_CHECKPOINT
-					// verhindert doppelte funde
-					_needle = (me.HASH[h_hash])[i];
-					if(_needle > needle(me))
-					{
-SEQAN_CHECKPOINT
-						infix_start = static_cast<int>(pos - length(ndl[_needle]));
-						if(infix_start < 0)
-						{
-							++i;
-							continue;
-						}
-						// TODO: Alternative Lösung
-						if(ndl[_needle] == infix(haystack_host,infix_start,pos))
-						{
-SEQAN_CHECKPOINT
-							setNeedle(me,_needle);
-							// setzt den finder-Iterator auf den Anfang des gefundenen patterns
-							finder -= length(ndl[_needle]);
-							return true;
-						}
-					}
-					++i;
+					me.shift[hash] = me.lmin-Q - i;
 				}
 			}
-			++finder;
-			++pos;
+			++(verify_count[hash]);
 		}
 
-		while(pos <= hstk_size)
+		//2: add up and convert to pointers
+		TNeedlePosition * verify_ptr = begin(me.verify_tab);
+		
+		me.verify[0] = verify_ptr;
+		unsigned int sum = 0;
+		for (unsigned int i = 0; i < DIR_SIZE; ++i)
 		{
-SEQAN_CHECKPOINT
-			shift = me.SHIFT[_compute_SHIFT_Hash(hash(me),infix(haystack_host,pos - window_width(me),pos),ndl_support,window_width(me))];
-			if(shift == 0)
+			me.verify[i+1] = verify_ptr + sum;
+			sum += verify_count[i];
+		}
+
+		//3: second scan: fill verify and shift
+		unsigned int i = 0;
+		for (pit = begin(needle(me)); pit != pit_end; ++pit)
+		{
+			unsigned short hash_plus_1;
+			hash_plus_1 = _WuManber_Hash<TNeedle, Q>::hash(begin(*pit) + me.lmin-Q) + 1;
+
+			//write into verify_tab
+			*(me.verify[hash_plus_1]) = i;
+			++i;			
+
+			//update verify
+			++me.verify[hash_plus_1];
+		}
+	}
+//____________________________________________________________________________
+
+	template <typename TFinder>
+	static inline bool
+	find(TFinder & finder, TPattern & me) 
+	{
+		typedef Haystack<TFinder>::Type THaystack;
+		typedef Iterator<THaystack, Standard>::Type THaystackIterator;
+
+		THaystackIterator tit;
+		THaystackIterator haystack_end = end(haystack(finder));
+		THaystackIterator tit_end = haystack_end - Q + 1;
+
+		if (empty(finder)) 
+		{
+//START
+			_patternInit(me);
+			_finderSetNonEmpty(finder);
+			tit = hostIterator(finder) + me.lmin-Q;
+		} 
+		else 
+		{
+//RESUME
+			tit = hostIterator(finder) + me.lmin-Q;
+			goto VERIFY;
+		}
+
+//SEARCH
+		while (tit < tit_end)
+		{
+			unsigned short hash = _WuManber_Hash<TNeedle, Q>::hash(tit);
+
+			if (me.shift[hash])
 			{
-SEQAN_CHECKPOINT
-				//Überprüfen, ob es sich um einen Fund handelt
-				h_hash = _compute_HASH_Hash(hash(me),infix(haystack_host,pos - window_width(me),pos),ndl_support,window_width(me));
-				i = 0;
-				h_length = length(me.HASH[h_hash]);
-				while(i < h_length)
-				{
-SEQAN_CHECKPOINT
-					_needle = (me.HASH[h_hash])[i];
-					infix_start = static_cast<int>(pos - length(ndl[_needle]));
-					if(infix_start < 0)
-					{
-						++i;
-						continue;
-					}
-					if(ndl[_needle] == infix(haystack_host,infix_start,pos))
-					{
-SEQAN_CHECKPOINT
-						setNeedle(me,_needle);
-						// setzt den finder-Iterator auf den Anfang des gefundenen patterns
-						finder -= length(ndl[_needle]);
-						return true;
-					}
-					++i;
-				}
-				//Falls nichts an dieser Stelle gefunden wird, dann rücke um 1 weiter
-				++finder;
-				++pos;
+//SHIFT
+				tit += me.shift[hash];
 			}
 			else
 			{
-SEQAN_CHECKPOINT
-				finder += shift;
-				pos += shift;
-			}
+				me.to_verify_begin = me.verify[hash];
+				me.to_verify_end = me.verify[hash+1];
+//VERIFY
+VERIFY:
+				while (me.to_verify_begin != me.to_verify_end)
+				{
+					me.position = *me.to_verify_begin;
+					++me.to_verify_begin;
 
+					TKeyword & kw = needle(me)[me.position];
+
+					TIterator pit = begin(kw, Standard());
+					TIterator pit_end = end(kw, Standard());
+					THaystackIterator tit2 = tit - (me.lmin-Q);
+
+					if ((pit_end - pit) > (haystack_end - tit2)) continue; //rest of haystack too short
+
+					while (true)
+					{
+						if (pit == pit_end)
+						{
+//FOUND
+							setPosition(finder, tit - (me.lmin-Q) - begin(haystack(finder), Standard()));
+							return true;
+						}
+						if (*pit != *tit2) break;
+						++pit;
+						++tit2;
+					}
+				}
+
+				++tit;
+			}
 		}
+//END
 		return false;
 	}
+//____________________________________________________________________________
+};
 
 
 //////////////////////////////////////////////////////////////////////////////
-/**
-.Internal._compute_SHIFT_Hash:
-..cat:Functions
-..summary:Calculates a Hash-Value a specific part of the Sequence in the SHIFT-Table.
-..signature:_compute_SHIFT_Hash(Hash & ,Sequence &,start, window_width)
-..param.Hash: Reference to the Pattern-Object that should be Initialized
-..param.Sequence: Needle for which the Pattern-Object should search
-..param.start: Position of the first element of the segment, that should be hashed
-..param.window_width: length of the infix
-..see:Spec.WuManber
-*/
+//implementation of hash function
 
-///.Internal._compute_SHIFT_Hash.param.Hash.type:Class.DefaultHash
-	template <typename TSequence, typename TSupport>
-	friend inline unsigned int
-	_compute_SHIFT_Hash(DefaultHash & me,TSequence const & sequence,TSupport & supp, unsigned int length)
+template <typename TNeedle>
+struct _WuManber_Hash<TNeedle, 1>
+{
+	template <typename TIterator>
+	inline static unsigned short
+	hash(TIterator vals)
 	{
-SEQAN_CHECKPOINT
-		typedef typename CompareType< Value< Host < TSequence >::Type >::Type, Value< Container< TSupport >::Type >::Type >::Type TTargetAlphabet;
+		return ordValue(*vals);
+	}
+};
+template <typename TNeedle>
+struct _WuManber_Hash<TNeedle, 2>
+{
+	template <typename TIterator>
+	inline static unsigned short
+	hash(TIterator vals)
+	{
+		return ordValue(*vals)
+			+ (ordValue(*(vals+1)) << _WuManber_Imp<TNeedle, 2>::SHIFT);
+	}
+};
+template <typename TNeedle>
+struct _WuManber_Hash<TNeedle, 3>
+{
+	template <typename TIterator>
+	inline static unsigned short
+	hash(TIterator vals)
+	{
+		return ordValue(*vals) 
+			+ (ordValue(*(vals+1)) << _WuManber_Imp<TNeedle, 3>::SHIFT_MIDDLE)
+			+ (ordValue(*(vals+2)) << _WuManber_Imp<TNeedle, 3>::SHIFT_LEFT);
+	}
+};
 
-		unsigned int ret = 0;
-		for(int i = 0;i < length;++i)
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TNeedle, typename TNeedle2>
+void _setHost_WuManber(Pattern<TNeedle, WuManber> & me, 
+					   TNeedle2 const & needle_)
+{
+SEQAN_CHECKPOINT
+SEQAN_ASSERT(!empty(needle_));
+
+	typedef typename Iterator<TNeedle, Standard>::Type TNeedleIterator;
+	typedef typename Value<TNeedle>::Type TKeyword;
+	typedef typename Value<TKeyword>::Type TValue;
+	typedef typename Size<TKeyword>::Type TSize;
+
+	//me.needle
+	setValue(me.needle, needle_);
+
+	//determine lmin
+	me.lmin = length(needle(me)[0]);
+	for (TNeedleIterator it = begin(needle(me)) + 1; it != end(needle(me)); ++it)
+	{
+		TSize len = length(*it);
+		if (len < me.lmin)
 		{
-SEQAN_CHECKPOINT
-			ret <<= _shift_width(me);
-			ret += static_cast<unsigned int>(static_cast<TTargetAlphabet>(value(sequence,i)));
+			me.lmin = len;
 		}
-		return ret % _hash_size(me);
 	}
 
-/**
-.Internal._compute_HASH_Hash:
-..cat:Functions
-..summary:Calculates a Hash-Value a specific part of the Sequence in the HASH-Table.
-..signature:_compute_HASH_Hash(Hash & ,Sequence &,start, window_width)
-..param.Hash: Reference to the Pattern-Object that should be Initialized
-..param.Sequence: Needle for which the Pattern-Object should search
-..param.start: Position of the first element of the segment, that should be hashed
-..param.window_width: length of the infix
-..see:Spec.WuManber
-*/
+	if (me.lmin == 0) return;
 
-///.Internal._compute_HASH_Hash.param.Hash.type:Class.DefaultHash
-
-	template <typename TSequence, typename TSupport>
-	friend inline unsigned int
-	_compute_HASH_Hash(DefaultHash & me,TSequence const & sequence,TSupport & supp, unsigned int length)
+	//compute q:
+	int C = BitsPerValue<TValue>::VALUE;
+	if (C > 12)
 	{
-SEQAN_CHECKPOINT
-		return _compute_SHIFT_Hash(me,sequence,supp,length);
+		me.q = 1;
 	}
-////////////////////////////////////////////////////////////////////////////////
+	else 
+	{
+		//according to Wu & Manber: B = log_c(2mk) "is a good value"
+		//i.e. C^B = 2mk
+		//m = lmin
+		//k = length(needle)
+		//our heuristic: take B = 2 if C^2 >= mk, else B = 3
 
-};
+		if (C * C >= me.lmin * length(needle(me)))
+		{
+			me.q = 2;
+		}
+		else
+		{
+			me.q = 3;
+		}
+	}
+	if (me.q > me.lmin) 
+	{
+		me.q = me.lmin;
+	}
 
+	//rest of preprocessing is done in _WuManber_Imp
+	if (me.q == 2) _WuManber_Imp<TNeedle, 2>::initialize(me);
+	else if (me.q == 3) _WuManber_Imp<TNeedle, 3>::initialize(me);
+	else _WuManber_Imp<TNeedle, 1>::initialize(me);
+}
+
+template <typename TNeedle, typename TNeedle2>
+void setHost (Pattern<TNeedle, WuManber> & me, 
+			  TNeedle2 const & needle) 
+{
+	_setHost_WuManber(me, needle);
+}
+
+template <typename TNeedle, typename TNeedle2>
+inline void 
+setHost(Pattern<TNeedle, WuManber> & me, 
+		TNeedle2 & needle)
+{
+	_setHost_WuManber(me, needle);
+}
 
 //////////////////////////////////////////////////////////////////////////////
-// Host
+
+template <typename TNeedle>
+inline typename Host<Pattern<TNeedle, WuManber> >::Type & 
+host(Pattern<TNeedle, WuManber> & me)
+{
+SEQAN_CHECKPOINT
+	return value(me.needle);
+}
+
+template <typename TNeedle>
+inline typename Host<Pattern<TNeedle, WuManber> const>::Type & 
+host(Pattern<TNeedle, WuManber> const & me)
+{
+SEQAN_CHECKPOINT
+	return value(me.needle);
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TNeedle, typename THash>
-struct Host< Pattern<TNeedle, WuManber<THash> > >
+template <typename TNeedle>
+inline typename Size<TNeedle>::Type
+position(Pattern<TNeedle, WuManber> & me)
 {
-	typedef TNeedle Type;
-};
+	return me.position;
+}
 
-template <typename TNeedle, typename THash>
-struct Host< Pattern<TNeedle, WuManber<THash> > const>
+//////////////////////////////////////////////////////////////////////////////
+
+//called when search begins
+template <typename TNeedle>
+inline void _patternInit (Pattern<TNeedle, WuManber> & me) 
 {
-	typedef TNeedle const Type;
-};
+SEQAN_CHECKPOINT
+	me.to_verify_begin = 0;
+	me.to_verify_end = 0;
+}
 
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TFinder, typename TNeedle>
+inline bool find(TFinder & finder, 
+				 Pattern<TNeedle, WuManber> & me) 
+{
+SEQAN_CHECKPOINT
+
+	if (me.lmin == 0) return false;
+
+	if (me.q == 2) return _WuManber_Imp<TNeedle, 2>::find(finder, me);
+	else if (me.q == 3) return _WuManber_Imp<TNeedle, 3>::find(finder, me);
+	else return _WuManber_Imp<TNeedle, 1>::find(finder, me);
+}
+
+//////////////////////////////////////////////////////////////////////////////
 
 }// namespace SEQAN_NAMESPACE_MAIN
 

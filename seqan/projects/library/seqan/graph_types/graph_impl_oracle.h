@@ -120,6 +120,7 @@ createOracle(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 	String<TVertexDescriptor> supplyState;
 	resize(supplyState, len+1);
 	TVertexDescriptor v1 = addVertex(g);
+	assignRoot(g,v1);
 	assignProperty(supplyState, v1, nilVal);
 	for(TSize i = 0; i<len; ++i) _addLetterToOracle(g, supplyState, getValue(text,i));
 }
@@ -152,11 +153,80 @@ createOracleOnReverse(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 	String<TVertexDescriptor> supplyState;
 	resize(supplyState, len+1);
 	TVertexDescriptor v1 = addVertex(g);
+	assignRoot(g,v1);
 	assignProperty(supplyState, v1, nilVal);
 	for(TSize i = len-1; i>0; --i) _addLetterToOracle(g, supplyState, getValue(text,i));
 	_addLetterToOracle(g, supplyState, getValue(text,0));
 }
 
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TAlphabet, typename TCargo, typename TSpec, typename TTerminalStateMap, typename TKeywords>
+inline void
+createSetOracle(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
+				TTerminalStateMap& terminalStateMap,
+				TKeywords const& keywords)
+{
+SEQAN_CHECKPOINT
+	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef typename Position<TKeywords>::Type TPos;
+	typedef typename Value<TKeywords>::Type TKeyword;
+	typedef typename Iterator<TKeyword, Standard>::Type TIterator;
+	typedef typename Value<TKeywords>::Type TValue;
+
+	createTrie(g, terminalStateMap, keywords);
+
+	String<TVertexDescriptor> supplyState;
+	resizeVertexMap(g, supplyState);
+	String<bool> visited;
+	resizeVertexMap(g, visited);
+	arrayFill(begin(visited), end(visited), false);
+
+	TVertexDescriptor nil = getNil<TVertexDescriptor>();
+	assignProperty(supplyState, root(g), nil);
+
+	TPos len = length(keywords);
+	TVertexDescriptor _root = getRoot(g);
+	for (TPos i = 0; i < len; ++i)
+	{
+		TIterator it = begin(keywords[i], Standard());
+		TIterator it_end = end(keywords[i], Standard());
+		TVertexDescriptor _parent = _root;
+		
+		while (it != it_end)
+		{
+			TVertexDescriptor _current = getSuccessor(g, _parent, *it);
+
+			if (!getProperty(visited, _current))
+			{
+				assignProperty(visited, _current, true);
+
+				TVertexDescriptor _down = getProperty(supplyState, _parent);
+				TVertexDescriptor _supply = _root;
+				while (_down != nil)
+				{
+					TVertexDescriptor _next = getSuccessor(g, _down, *it);
+					if (_next != nil)
+					{
+						_supply = _next;
+						break;
+					}
+
+					addEdge(g, _down, _current, *it);
+					_down = getProperty(supplyState, _down);
+				}
+				assignProperty(supplyState, _current, _supply);
+			}
+			_parent = _current;
+			++it;
+		}
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
 
 }// namespace SEQAN_NAMESPACE_MAIN
 

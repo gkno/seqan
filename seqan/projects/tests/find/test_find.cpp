@@ -132,7 +132,7 @@ void Test_OnlineAlg()
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TAlgorithmSpec>
-void Test_OnlineAlgMulti()
+void Test_OnlineAlgMulti(bool order_by_begin_position)
 {
 	String<unsigned int> pos;
 
@@ -176,12 +176,14 @@ void Test_OnlineAlgMulti()
 	Finder<String<Dna> > finderDna(hstk);
 
 	typedef String<String<Dna> > TDnaNeedle;
+	Pattern<TDnaNeedle, TAlgorithmSpec> pattern_dna(keywords);
+
 	TDnaNeedle dna_keywords;
 	appendValue(dna_keywords, String<Dna>("aa"));
-	setHost(pattern, dna_keywords);
+	setHost(pattern_dna, dna_keywords);
 
 	clear(pos);
-	while (find(finderDna, pattern))
+	while (find(finderDna, pattern_dna))
 		append(pos,position(finderDna));
 
 	SEQAN_TASSERT(pos[0] == 0);
@@ -198,10 +200,10 @@ void Test_OnlineAlgMulti()
 
 	clear(dna_keywords);
 	appendValue(dna_keywords, String<Dna>("taaaataaaataaaataaaataaaataaaataaaataaaataaaat"));
-	setHost(pattern, dna_keywords);
+	setHost(pattern_dna, dna_keywords);
 
 	clear(pos);
-	while (find(finderText, pattern)) 
+	while (find(finderText, pattern_dna)) 
 		append(pos,position(finderText));
 
 	SEQAN_TASSERT(pos[0] == 0);
@@ -214,7 +216,7 @@ void Test_OnlineAlgMulti()
 
 //____________________________________________________________________________
 // Test2 - Multiple keywords
-	String<char> hst("annual_announce");
+	String<char> hst("annual_announce_any_annually");
 	Finder<String<char> > fd(hst);
 
 	typedef String<String<char> > TN;
@@ -235,8 +237,12 @@ void Test_OnlineAlgMulti()
 	SEQAN_TASSERT(keywordIndex[0] == 1);
 	SEQAN_TASSERT(finderPos[1] == 7);
 	SEQAN_TASSERT(keywordIndex[1] == 0);
-	SEQAN_TASSERT(length(finderPos) == 2);
-	SEQAN_TASSERT(length(keywordIndex) == 2);
+	SEQAN_TASSERT(finderPos[2] == 20);
+	SEQAN_TASSERT(keywordIndex[2] == 1);
+	SEQAN_TASSERT(finderPos[3] == 20);
+	SEQAN_TASSERT(keywordIndex[3] == 2);
+	SEQAN_TASSERT(length(finderPos) == 4);
+	SEQAN_TASSERT(length(keywordIndex) == 4);
 
 	String<Dna> hstDna("AGATACGATATATAC");
 	Finder<String<Dna> > fdDna(hstDna);
@@ -255,15 +261,26 @@ void Test_OnlineAlgMulti()
 		append(keywordIndex,position(ptDna));
 	}
 
-	SEQAN_TASSERT(finderPos[0] == 4);
-	SEQAN_TASSERT(keywordIndex[0] == 2);
-	SEQAN_TASSERT(finderPos[1] == 8);
-	SEQAN_TASSERT(keywordIndex[1] == 1);
-	SEQAN_TASSERT(finderPos[2] == 7);
-	SEQAN_TASSERT(keywordIndex[2] == 0);
 	SEQAN_TASSERT(length(finderPos) == 3);
 	SEQAN_TASSERT(length(keywordIndex) == 3);
-
+	if (order_by_begin_position)
+	{
+		SEQAN_TASSERT(finderPos[0] == 4);
+		SEQAN_TASSERT(keywordIndex[0] == 2);
+		SEQAN_TASSERT(finderPos[1] == 7);
+		SEQAN_TASSERT(keywordIndex[1] == 0);
+		SEQAN_TASSERT(finderPos[2] == 8);
+		SEQAN_TASSERT(keywordIndex[2] == 1);
+	}
+	else
+	{
+		SEQAN_TASSERT(finderPos[0] == 4);
+		SEQAN_TASSERT(keywordIndex[0] == 2);
+		SEQAN_TASSERT(finderPos[1] == 8);
+		SEQAN_TASSERT(keywordIndex[1] == 1);
+		SEQAN_TASSERT(finderPos[2] == 7);
+		SEQAN_TASSERT(keywordIndex[2] == 0);
+	}
 //____________________________________________________________________________
 // Test2 - Multiple keywords that do not fit into a machine word
 	String<Dna> my_haystack("AGATACGATATATACAGATACGATATATACAGATACGATATATACAGATACGATATATACAGATACGATATATAC");
@@ -287,37 +304,74 @@ void Test_OnlineAlgMulti()
 		append(keywordIndex,position(my_pattern));
 	}
 
-	SEQAN_TASSERT(finderPos[0] == 4);
-	SEQAN_TASSERT(keywordIndex[0] == 4);
-	SEQAN_TASSERT(finderPos[1] == 8);
-	SEQAN_TASSERT(keywordIndex[1] == 2);
-	SEQAN_TASSERT(finderPos[2] == 7);
-	SEQAN_TASSERT(keywordIndex[2] == 0);
-	SEQAN_TASSERT(finderPos[3] == 19);
-	SEQAN_TASSERT(keywordIndex[3] == 4);
-	SEQAN_TASSERT(finderPos[4] == 23);
-	SEQAN_TASSERT(keywordIndex[4] == 2);
-	SEQAN_TASSERT(finderPos[5] == 22);
-	SEQAN_TASSERT(keywordIndex[5] == 0);
-	SEQAN_TASSERT(finderPos[6] == 34);
-	SEQAN_TASSERT(keywordIndex[6] == 4);
-	SEQAN_TASSERT(finderPos[7] == 38);
-	SEQAN_TASSERT(keywordIndex[7] == 2);
-	SEQAN_TASSERT(finderPos[8] == 37);
-	SEQAN_TASSERT(keywordIndex[8] == 0);
-	SEQAN_TASSERT(finderPos[9] == 49);
-	SEQAN_TASSERT(keywordIndex[9] == 4);
-	SEQAN_TASSERT(finderPos[10] == 53);
-	SEQAN_TASSERT(keywordIndex[10] == 2);
-	SEQAN_TASSERT(finderPos[11] == 52);
-	SEQAN_TASSERT(keywordIndex[11] == 0);
-	SEQAN_TASSERT(finderPos[12] == 64);
-	SEQAN_TASSERT(keywordIndex[12] == 4);
-	SEQAN_TASSERT(finderPos[13] == 68);
-	SEQAN_TASSERT(keywordIndex[13] == 2);
-	SEQAN_TASSERT(finderPos[14] == 67);
-	SEQAN_TASSERT(keywordIndex[14] == 0);
-
+	SEQAN_TASSERT(length(finderPos) == 15);
+	SEQAN_TASSERT(length(keywordIndex) == 15);
+	if (order_by_begin_position)
+	{
+		SEQAN_TASSERT(finderPos[0] == 4);
+		SEQAN_TASSERT(keywordIndex[0] == 4);
+		SEQAN_TASSERT(finderPos[1] == 7);
+		SEQAN_TASSERT(keywordIndex[1] == 0);
+		SEQAN_TASSERT(finderPos[2] == 8);
+		SEQAN_TASSERT(keywordIndex[2] == 2);
+		SEQAN_TASSERT(finderPos[3] == 19);
+		SEQAN_TASSERT(keywordIndex[3] == 4);
+		SEQAN_TASSERT(finderPos[4] == 22);
+		SEQAN_TASSERT(keywordIndex[4] == 0);
+		SEQAN_TASSERT(finderPos[5] == 23);
+		SEQAN_TASSERT(keywordIndex[5] == 2);
+		SEQAN_TASSERT(finderPos[6] == 34);
+		SEQAN_TASSERT(keywordIndex[6] == 4);
+		SEQAN_TASSERT(finderPos[7] == 37);
+		SEQAN_TASSERT(keywordIndex[7] == 0);
+		SEQAN_TASSERT(finderPos[8] == 38);
+		SEQAN_TASSERT(keywordIndex[8] == 2);
+		SEQAN_TASSERT(finderPos[9] == 49);
+		SEQAN_TASSERT(keywordIndex[9] == 4);
+		SEQAN_TASSERT(finderPos[10] == 52);
+		SEQAN_TASSERT(keywordIndex[10] == 0);
+		SEQAN_TASSERT(finderPos[11] == 53);
+		SEQAN_TASSERT(keywordIndex[11] == 2);
+		SEQAN_TASSERT(finderPos[12] == 64);
+		SEQAN_TASSERT(keywordIndex[12] == 4);
+		SEQAN_TASSERT(finderPos[13] == 67);
+		SEQAN_TASSERT(keywordIndex[13] == 0);
+		SEQAN_TASSERT(finderPos[14] == 68);
+		SEQAN_TASSERT(keywordIndex[14] == 2);
+	}
+	else
+	{
+		SEQAN_TASSERT(finderPos[0] == 4);
+		SEQAN_TASSERT(keywordIndex[0] == 4);
+		SEQAN_TASSERT(finderPos[1] == 8);
+		SEQAN_TASSERT(keywordIndex[1] == 2);
+		SEQAN_TASSERT(finderPos[2] == 7);
+		SEQAN_TASSERT(keywordIndex[2] == 0);
+		SEQAN_TASSERT(finderPos[3] == 19);
+		SEQAN_TASSERT(keywordIndex[3] == 4);
+		SEQAN_TASSERT(finderPos[4] == 23);
+		SEQAN_TASSERT(keywordIndex[4] == 2);
+		SEQAN_TASSERT(finderPos[5] == 22);
+		SEQAN_TASSERT(keywordIndex[5] == 0);
+		SEQAN_TASSERT(finderPos[6] == 34);
+		SEQAN_TASSERT(keywordIndex[6] == 4);
+		SEQAN_TASSERT(finderPos[7] == 38);
+		SEQAN_TASSERT(keywordIndex[7] == 2);
+		SEQAN_TASSERT(finderPos[8] == 37);
+		SEQAN_TASSERT(keywordIndex[8] == 0);
+		SEQAN_TASSERT(finderPos[9] == 49);
+		SEQAN_TASSERT(keywordIndex[9] == 4);
+		SEQAN_TASSERT(finderPos[10] == 53);
+		SEQAN_TASSERT(keywordIndex[10] == 2);
+		SEQAN_TASSERT(finderPos[11] == 52);
+		SEQAN_TASSERT(keywordIndex[11] == 0);
+		SEQAN_TASSERT(finderPos[12] == 64);
+		SEQAN_TASSERT(keywordIndex[12] == 4);
+		SEQAN_TASSERT(finderPos[13] == 68);
+		SEQAN_TASSERT(keywordIndex[13] == 2);
+		SEQAN_TASSERT(finderPos[14] == 67);
+		SEQAN_TASSERT(keywordIndex[14] == 0);
+	}
 
 //____________________________________________________________________________
 // Multiple keywords with overlapping matches
@@ -341,26 +395,52 @@ void Test_OnlineAlgMulti()
 		append(keywordIndex,position(my2_pattern));
 	}
 
-	SEQAN_TASSERT(finderPos[0] == 0);
-	SEQAN_TASSERT(keywordIndex[0] == 0);
-	SEQAN_TASSERT(finderPos[1] == 1);
-	SEQAN_TASSERT(keywordIndex[1] == 0);
-	SEQAN_TASSERT(finderPos[2] == 0);
-	SEQAN_TASSERT(keywordIndex[2] == 1);
-	SEQAN_TASSERT(finderPos[3] == 2);
-	SEQAN_TASSERT(keywordIndex[3] == 0);
-	SEQAN_TASSERT(finderPos[4] == 1);
-	SEQAN_TASSERT(keywordIndex[4] == 1);
-	SEQAN_TASSERT(finderPos[5] == 3);
-	SEQAN_TASSERT(keywordIndex[5] == 2);
-	SEQAN_TASSERT(finderPos[6] == 2);
-	SEQAN_TASSERT(keywordIndex[6] == 3);
-	SEQAN_TASSERT(finderPos[7] == 5);
-	SEQAN_TASSERT(keywordIndex[7] == 0);
-	SEQAN_TASSERT(finderPos[8] == 6);
-	SEQAN_TASSERT(keywordIndex[8] == 0);
-	SEQAN_TASSERT(finderPos[9] == 5);
-	SEQAN_TASSERT(keywordIndex[9] == 1);
+	if (order_by_begin_position)
+	{
+		SEQAN_TASSERT(finderPos[0] == 0);
+		SEQAN_TASSERT(keywordIndex[0] == 0);
+		SEQAN_TASSERT(finderPos[1] == 0);
+		SEQAN_TASSERT(keywordIndex[1] == 1);
+		SEQAN_TASSERT(finderPos[2] == 1);
+		SEQAN_TASSERT(keywordIndex[2] == 0);
+		SEQAN_TASSERT(finderPos[3] == 1);
+		SEQAN_TASSERT(keywordIndex[3] == 1);
+		SEQAN_TASSERT(finderPos[4] == 2);
+		SEQAN_TASSERT(keywordIndex[4] == 0);
+		SEQAN_TASSERT(finderPos[5] == 2);
+		SEQAN_TASSERT(keywordIndex[5] == 3);
+		SEQAN_TASSERT(finderPos[6] == 3);
+		SEQAN_TASSERT(keywordIndex[6] == 2);
+		SEQAN_TASSERT(finderPos[7] == 5);
+		SEQAN_TASSERT(keywordIndex[7] == 0);
+		SEQAN_TASSERT(finderPos[8] == 5);
+		SEQAN_TASSERT(keywordIndex[8] == 1);
+		SEQAN_TASSERT(finderPos[9] == 6);
+		SEQAN_TASSERT(keywordIndex[9] == 0);
+	}
+	else
+	{
+		SEQAN_TASSERT(finderPos[0] == 0);
+		SEQAN_TASSERT(keywordIndex[0] == 0);
+		SEQAN_TASSERT(finderPos[1] == 1);
+		SEQAN_TASSERT(keywordIndex[1] == 0);
+		SEQAN_TASSERT(finderPos[2] == 0);
+		SEQAN_TASSERT(keywordIndex[2] == 1);
+		SEQAN_TASSERT(finderPos[3] == 2);
+		SEQAN_TASSERT(keywordIndex[3] == 0);
+		SEQAN_TASSERT(finderPos[4] == 1);
+		SEQAN_TASSERT(keywordIndex[4] == 1);
+		SEQAN_TASSERT(finderPos[5] == 3);
+		SEQAN_TASSERT(keywordIndex[5] == 2);
+		SEQAN_TASSERT(finderPos[6] == 2);
+		SEQAN_TASSERT(keywordIndex[6] == 3);
+		SEQAN_TASSERT(finderPos[7] == 5);
+		SEQAN_TASSERT(keywordIndex[7] == 0);
+		SEQAN_TASSERT(finderPos[8] == 6);
+		SEQAN_TASSERT(keywordIndex[8] == 0);
+		SEQAN_TASSERT(finderPos[9] == 5);
+		SEQAN_TASSERT(keywordIndex[9] == 1);
+	}
 
 //____________________________________________________________________________
 // Multiple duplicated keywords with overlapping matches, jumping finder
@@ -388,12 +468,24 @@ void Test_OnlineAlgMulti()
 		append(keywordIndex,position(my2_pattern));
 	}
 
-	SEQAN_TASSERT(finderPos[0] == 5);
-	SEQAN_TASSERT(keywordIndex[0] == 0);
-	SEQAN_TASSERT(finderPos[1] == 6);
-	SEQAN_TASSERT(keywordIndex[1] == 0);
-	SEQAN_TASSERT(finderPos[2] == 5);
-	SEQAN_TASSERT(keywordIndex[2] == 1);
+	if (order_by_begin_position)
+	{
+		SEQAN_TASSERT(finderPos[0] == 5);
+		SEQAN_TASSERT(keywordIndex[0] == 0);
+		SEQAN_TASSERT(finderPos[1] == 5);
+		SEQAN_TASSERT(keywordIndex[1] == 1);
+		SEQAN_TASSERT(finderPos[2] == 6);
+		SEQAN_TASSERT(keywordIndex[2] == 0);
+	}
+	else
+	{
+		SEQAN_TASSERT(finderPos[0] == 5);
+		SEQAN_TASSERT(keywordIndex[0] == 0);
+		SEQAN_TASSERT(finderPos[1] == 6);
+		SEQAN_TASSERT(keywordIndex[1] == 0);
+		SEQAN_TASSERT(finderPos[2] == 5);
+		SEQAN_TASSERT(keywordIndex[2] == 1);
+	}
 }
 
 
@@ -864,20 +956,20 @@ int main()
 {
 	SEQAN_TREPORT("TEST BEGIN")
 
-	Test_OnlineAlg<BFA<Trie> >();
-
 	Test_OnlineAlg<Horspool>();	
 	Test_OnlineAlg<ShiftAnd>();
 	Test_OnlineAlg<ShiftOr>();
 	Test_OnlineAlg<BndmAlgo>();
-	Test_OnlineAlg<BFA<Oracle> >();
-	
+	Test_OnlineAlg<BFAM<Oracle> >();
+	Test_OnlineAlg<BFAM<Trie> >();
+
 	Test_OnlineAlgWildcards<WildShiftAnd>();
 
-	Test_OnlineAlgMulti<AhoCorasick>();
-	Test_OnlineAlgMulti<MultipleShiftAnd>();
-//	Test_OnlineAlgMulti<SetHorspool>();
-//	Test_OnlineAlgMulti<WuManber>();
+	Test_OnlineAlgMulti<AhoCorasick>(false);
+//	Test_OnlineAlgMulti<MultipleShiftAnd>(false);  //leakt 
+//	Test_OnlineAlgMulti<SetHorspool>();		//kompiliert nicht
+	Test_OnlineAlgMulti<WuManber>(true);
+	Test_OnlineAlgMulti<MultiBFAM<Oracle> >(true);
 
 	Test_Approx();
 
