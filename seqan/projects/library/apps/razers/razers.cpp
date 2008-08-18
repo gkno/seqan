@@ -23,7 +23,7 @@
 //#define SEQAN_DEBUG_SWIFT		// test SWIFT correctness and print bucket parameters
 //#define RAZERS_PROFILE		// omit dumping results
 //#define RAZERS_DEBUG			// print verification regions
-//#define RAZERS_PRUNE_QGRAM_INDEX
+#define RAZERS_PRUNE_QGRAM_INDEX
 //#define RAZERS_HAMMINGVERIFY	// allow only mismatches, no indels
 
 #include "seqan/platform.h"
@@ -78,8 +78,12 @@ using namespace seqan;
 															// 2..use the read sequence (only for short reads!)
 	static unsigned		optionSortOrder = 0;				// 0..sort keys: 1. read number, 2. genome position
 															// 1..           1. genome position, 2. read number
+	static unsigned		optionPositionFormat = 0;			// 0..gap space
+															// 1..position space
 	static int			optionThreshold = 1;				// threshold
 	static int			optionTabooLength = 1;				// taboo length
+	static int			optionRepeatLength = 1000;			// repeat length threshold
+	static double		optionAbundanceCut = 1;				// abundance threshold
 	static int			_debugLevel = 0;					// level of verbosity
 	static bool			optionPrintVersion = false;			// print version number
 
@@ -195,7 +199,7 @@ namespace seqan
 
 		TDir &dir    = indexDir(index);
 		bool result  = false;
-		TSize thresh = length(index) / 5000;
+		TSize thresh = length(index) * optionAbundanceCut;
 		if (thresh < 100) thresh = 100;
 
 		TDirIterator it = begin(dir, Standard());
@@ -260,23 +264,20 @@ void findReads(
 	typedef typename Value<TReadSet>::Type					TRead;
 	typedef typename Value<TMatches>::Type					TMatch;
 
-	// *** SPECIALIZATION ***
-/*
-	typedef Pipe< TGenomeInfix, Source<> >							TSource;
-	typedef Pipe< TSource, Caster<Dna> >							TCaster;
-	typedef Pipe< TCaster, Tupler<QGRAM_LEN, true, Compressed> >	TTupler;
-*/
-	typedef Finder<TGenome, Swift<> >					TSwiftFinder;
-	typedef Pattern<TReadIndex, Swift<> >				TSwiftPattern;
+	// FILTRATION
+	
+	typedef Finder<TGenome, Swift<> >						TSwiftFinder;
+	typedef Pattern<TReadIndex, Swift<> >					TSwiftPattern;
 
+	// VERIFICATION
 
 	// find read match end
-	typedef Finder<TGenomeInfix>						TMyersFinder;
+	typedef Finder<TGenomeInfix>							TMyersFinder;
 #ifdef RAZERS_HAMMINGVERIFY
-	typedef Score<int>									TScore;
-	typedef Pattern<TRead, DPSearch<TScore> >			TMyersPattern;
+	typedef Score<int>										TScore;
+	typedef Pattern<TRead, DPSearch<TScore> >				TMyersPattern;
 #else
-	typedef Pattern<TRead, MyersUkkonen>				TMyersPattern;
+	typedef Pattern<TRead, MyersUkkonen>					TMyersPattern;
 #endif
 
 	// find read match begin
@@ -288,22 +289,6 @@ void findReads(
 	TSwiftPattern swiftPattern(readIndex);
 	swiftPattern.params.minThreshold = optionThreshold;
 	swiftPattern.params.tabooLength = optionTabooLength;
-
-	// VERIFICATION
-/*	String<TMyersPattern> myersPattern;
-	resize(myersPattern, countSequences(readIndex));
-	for(unsigned i = 0; i < countSequences(readIndex); ++i)
-		setHost(myersPattern[i], indexText(readIndex)[i]);
-*//*
-	String<char> text2 = "xxgenerationsxx";
-	Finder<String<char> > find2(text2);
-
-	while (find(find2, myersPattern[1], -(int)3)) {
-		cerr << getScore(myersPattern[1]) << ": ";
-		cerr << prefix(text2, position(find2));
-		cerr << endl;
-	}
-*/
 
 #ifdef RAZERS_HAMMINGVERIFY
 	TScore	scoreType = Score<int>(0, -1, -1001, -1000); // levenshtein-score (match, mismatch, gapOpen, gapExtend)
@@ -319,23 +304,14 @@ void findReads(
 		if (_debugLevel >= 1)
 			cerr << endl << "Process genome seq #" << hstkSeqNo;
 		TGenome &genome = genomes[hstkSeqNo];
-		// 1-HULL
-/*		TGenomeInfix	genomeInf(genome, borders[segment].i1, borders[segment].i2);
-		TSource			src(genomeInf);
-		TCaster			caster(src);
-		TTupler			tupler(caster);
-*/
-		TSwiftFinder	swiftFinder(genome, 1000, 1);
+		TSwiftFinder	swiftFinder(genome, optionRepeatLength, 1);
 
-		// iterate all verification regions returned bz SWIFT
+		// iterate all verification regions returned by SWIFT
 		while (find(swiftFinder, swiftPattern, optionErrorRate, (_debugLevel >= 1))) 
 		{
 			unsigned ndlSeqNo = (*swiftFinder.curHit).ndlSeqNo;
 			unsigned ndlLength = sequenceLength(ndlSeqNo, readIndex);
-	//		unsigned hstkPos = (*swiftFinder.curHit).hstkPos;
-	//		unsigned bucketWidth = (*swiftFinder.curHit).bucketWidth;
 
-	//		TGenomeInfix inf(genomeInf, hstkPos, hstkPos + bucketWidth);
 			TGenomeInfix inf(range(swiftFinder, genome));
 			TMyersFinder myersFinder(inf);
 #ifdef RAZERS_HAMMINGVERIFY
@@ -366,8 +342,8 @@ void findReads(
 				TMatch m = {
 					hstkSeqNo,
 					ndlSeqNo,
-					/*beginPosition(genomeInf) +*/ beginPosition(swiftFinder),
-					/*beginPosition(genomeInf) +*/ beginPosition(swiftFinder) + position(maxPos) + 1,
+					beginPosition(swiftFinder),
+					beginPosition(swiftFinder) + position(maxPos) + 1,
 					-maxScore
 				};
 				if (m.gBegin < 0) m.gBegin = 0;
@@ -589,6 +565,9 @@ void dumpMatches(
 							gEnd = gLength - _gBegin;
 						}
 
+						if (optionPositionFormat == 1)
+							++gBegin;
+
 						percId = 100.0 * (1.0 - (double)(*it).editDist / (double)readLen);
 
 						switch (optionReadNaming)
@@ -609,10 +588,12 @@ void dumpMatches(
 								file << reads[readNo];
 						}
 
+						file << "," << optionPositionFormat << "," << readLen;
+
 						if (orientation == 0)
-							file << ",0," << readLen << ",F,";
+							file << ",F,";
 						else
-							file << ",0," << readLen << ",R,";
+							file << ",R,";
 
 						switch (optionGenomeNaming)
 						{
@@ -667,6 +648,9 @@ void dumpMatches(
 							gBegin = gLength - _gBegin;
 							gEnd = gLength - (*it).gEnd;
 						}
+
+						if (optionPositionFormat == 1)
+							++gBegin;
 
 						string fastaID;
 						assign(fastaID, readIDs[readNo]);
@@ -723,32 +707,38 @@ void printHelp(int, const char *[], bool longHelp = false)
 	cerr << "********************************************" << endl << endl;
 	cerr << "Usage: razers [OPTION]... <GENOME FILE> <READS FILE>" << endl;
 	if (longHelp) {
-		cerr << endl << "Options:" << endl;
+		cerr << endl << "Main Options:" << endl;
 		cerr << "  -f,  --forward               \t" << "only compute forward matches" << endl;
 		cerr << "  -r,  --reverse               \t" << "only compute reverse complement matches" << endl;
 		cerr << "  -i,  --percent-identity NUM  \t" << "set the percent identity threshold" << endl;
 		cerr << "                               \t" << "default value is 80" << endl;
-		cerr << "  -a,  --alignment             \t" << "also dump the alignment for each match" << endl;
 		cerr << "  -o,  --output FILE           \t" << "change output filename (default: <READS FILE>.result)" << endl;
-		cerr << "  -of, --output-format NUM     \t" << "change output format" << endl;
+		cerr << "  -v,  --verbose               \t" << "verbose mode" << endl;
+		cerr << "  -vv, --vverbose              \t" << "very verbose mode" << endl;
+		cerr << "  -V,  --version               \t" << "print version number" << endl;
+		cerr << "  -h,  --help                  \t" << "print this help" << endl;
+		cerr << endl << "Output Format Options:" << endl;
+		cerr << "  -a,  --alignment             \t" << "dump the alignment for each match" << endl;
+		cerr << "  -of, --output-format NUM     \t" << "set output format" << endl;
 		cerr << "                               \t" << "0 = Razer format (default, see README)" << endl;
 		cerr << "                               \t" << "1 = enhanced Fasta format" << endl;
-		cerr << "  -GN, --genome-naming NUM     \t" << "select how genomes are named" << endl;
+		cerr << "  -gn, --genome-naming NUM     \t" << "select how genomes are named" << endl;
 		cerr << "                               \t" << "0 = use Fasta id (default)" << endl;
 		cerr << "                               \t" << "1 = enumerate beginning with 1" << endl;
-		cerr << "  -RN, --read-naming NUM       \t" << "select how reads are named" << endl;
+		cerr << "  -rn, --read-naming NUM       \t" << "select how reads are named" << endl;
 		cerr << "                               \t" << "0 = use Fasta id (default)" << endl;
 		cerr << "                               \t" << "1 = enumerate beginning with 1" << endl;
 		cerr << "                               \t" << "2 = use the read sequence (only for short reads!)" << endl;
 		cerr << "  -so, --sort-order NUM        \t" << "select how matches are sorted" << endl;
 		cerr << "                               \t" << "0 = 1. read number, 2. genome position (default)" << endl;
 		cerr << "                               \t" << "1 = 1. genome position, 2. read number" << endl;
-		cerr << "  -t,  --threshold NUM         \t" << "set minimum threshold (default " << optionThreshold << ")" << endl;
+		cerr << "  -pf, --position-format       \t" << "0 = gap space (default)" << endl;
+		cerr << "                               \t" << "1 = position space" << endl;
+		cerr << endl << "Filtration Options:" << endl;
+		cerr << "  -t,  --threshold NUM         \t" << "set minimum k-mer threshold (default " << optionThreshold << ")" << endl;
+		cerr << "  -oc, --overabundance-cut NUM \t" << "set k-mer overabundance cut ratio (default " << optionAbundanceCut << ")" << endl;
+		cerr << "  -rl, --repeat-length NUM     \t" << "set simple-repeat length threshold (default " << optionRepeatLength << ")" << endl;
 		cerr << "  -tl, --taboo-length NUM      \t" << "set taboo length (default " << optionTabooLength << ")" << endl;
-		cerr << "  -v,  --verbose               \t" << "verbose mode" << endl;
-		cerr << "  -vv, --vverbose              \t" << "very verbose mode" << endl;
-		cerr << "  -V,  --version               \t" << "print version number" << endl;
-		cerr << "  -h,  --help                  \t" << "print this help" << endl;
 	} else {
 		cerr << "Try 'razers --help' for more information." << endl;
 	}
@@ -836,7 +826,7 @@ int main(int argc, const char *argv[])
 				printHelp(argc, argv);
 				return 0;
 			}
-			if (strcmp(argv[arg], "-GN") == 0 || strcmp(argv[arg], "--genome-naming") == 0) {
+			if (strcmp(argv[arg], "-gn") == 0 || strcmp(argv[arg], "--genome-naming") == 0) {
 				if (arg + 1 < argc) {
 					++arg;
 					istringstream istr(argv[arg]);
@@ -850,7 +840,7 @@ int main(int argc, const char *argv[])
 				printHelp(argc, argv);
 				return 0;
 			}
-			if (strcmp(argv[arg], "-RN") == 0 || strcmp(argv[arg], "--read-naming") == 0) {
+			if (strcmp(argv[arg], "-rn") == 0 || strcmp(argv[arg], "--read-naming") == 0) {
 				if (arg + 1 < argc) {
 					++arg;
 					istringstream istr(argv[arg]);
@@ -858,6 +848,48 @@ int main(int argc, const char *argv[])
 					if (!istr.fail())
 						if (optionReadNaming > 2)
 							cerr << "Invalid read naming option" << endl << endl;
+						else
+							continue;
+				}
+				printHelp(argc, argv);
+				return 0;
+			}
+			if (strcmp(argv[arg], "-pf") == 0 || strcmp(argv[arg], "--position-format") == 0) {
+				if (arg + 1 < argc) {
+					++arg;
+					istringstream istr(argv[arg]);
+					istr >> optionPositionFormat;
+					if (!istr.fail())
+						if (optionPositionFormat > 1)
+							cerr << "Invalid position format option" << endl << endl;
+						else
+							continue;
+				}
+				printHelp(argc, argv);
+				return 0;
+			}
+			if (strcmp(argv[arg], "-oc") == 0 || strcmp(argv[arg], "--overabundance-cut") == 0) {
+				if (arg + 1 < argc) {
+					++arg;
+					istringstream istr(argv[arg]);
+					istr >> optionAbundanceCut;
+					if (!istr.fail())
+						if (optionAbundanceCut <= 0 || optionAbundanceCut > 1)
+							cerr << "Overabundance cut ratio must be a value >0 and <=1. Set to 1 to disable." << endl << endl;
+						else
+							continue;
+				}
+				printHelp(argc, argv);
+				return 0;
+			}
+			if (strcmp(argv[arg], "-rl") == 0 || strcmp(argv[arg], "--repeat-length") == 0) {
+				if (arg + 1 < argc) {
+					++arg;
+					istringstream istr(argv[arg]);
+					istr >> optionRepeatLength;
+					if (!istr.fail())
+						if (optionRepeatLength <= 1)
+							cerr << "Repeat length must be a value greater than 1" << endl << endl;
 						else
 							continue;
 				}
@@ -885,7 +917,7 @@ int main(int argc, const char *argv[])
 					istr >> optionTabooLength;
 					if (!istr.fail())
 						if (optionTabooLength < 1)
-							cerr << "TabooLength must be a value greater than 0" << endl << endl;
+							cerr << "Taboo length must be a value greater than 0" << endl << endl;
 						else
 							continue;
 				}
