@@ -746,7 +746,7 @@ void printHelp(int, const char *[], bool longHelp = false)
 
 void printVersion() 
 {
-	cerr << "RazerS version 0.3 20080807 (prerelease)" << endl;
+	cerr << "RazerS version 0.3 20080818 (prerelease)" << endl;
 }
 
 int main(int argc, const char *argv[]) 
