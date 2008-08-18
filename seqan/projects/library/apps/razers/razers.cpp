@@ -199,7 +199,7 @@ namespace seqan
 
 		TDir &dir    = indexDir(index);
 		bool result  = false;
-		TSize thresh = length(index) * optionAbundanceCut;
+		TSize thresh = (TSize)(length(index) * optionAbundanceCut);
 		if (thresh < 100) thresh = 100;
 
 		TDirIterator it = begin(dir, Standard());
