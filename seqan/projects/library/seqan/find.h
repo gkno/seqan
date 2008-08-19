@@ -46,6 +46,7 @@
 //____________________________________________________________________________
 // exact pattern matching
 
+#include <seqan/find/find_simple.h>
 #include <seqan/find/find_horspool.h>
 #include <seqan/find/find_shiftand.h>
 #include <seqan/find/find_shiftor.h>
