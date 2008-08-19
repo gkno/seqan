@@ -290,7 +290,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	template <typename THost, typename TSpec>
-	inline ModifiedIterator<THost, TSpec> const &
+	inline ModifiedIterator<THost, TSpec>
 	operator ++ (ModifiedIterator<THost, TSpec> & me, int)
 	{
 	SEQAN_CHECKPOINT
@@ -322,7 +322,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	template <typename THost, typename TSpec>
-	inline ModifiedIterator<THost, TSpec> const &
+	inline ModifiedIterator<THost, TSpec>
 	operator -- (ModifiedIterator<THost, TSpec> & me, int)
 	{
 	SEQAN_CHECKPOINT
