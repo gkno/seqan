@@ -956,6 +956,7 @@ int main()
 {
 	SEQAN_TREPORT("TEST BEGIN")
 
+	Test_OnlineAlg<Simple>();	
 	Test_OnlineAlg<Horspool>();	
 	Test_OnlineAlg<ShiftAnd>();
 	Test_OnlineAlg<ShiftOr>();
