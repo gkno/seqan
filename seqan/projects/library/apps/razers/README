@@ -133,10 +133,10 @@ the command line:
   [ -so NUM ],  [ --sort-order NUM ]
   
   Select how matches are ordered in the output file. 
-  If NUM is 0, matches are sorted primarily after the read number and 
-  secondarily after their position in the genome sequence (default).
-  If NUM is 1, matches are sorted primarily after their position in the 
-  genome sequence and secondarily after the read number.
+  If NUM is 0, matches are sorted primarily by the read number and 
+  secondarily by their position in the genome sequence (default).
+  If NUM is 1, matches are sorted primarily by their position in the genome
+  sequence and secondarily by the read number.
 
   [ -pf NUM ],  [ --position-format NUM ]
   
