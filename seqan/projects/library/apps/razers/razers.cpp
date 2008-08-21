@@ -716,7 +716,7 @@ void printHelp(int, const char *[], bool longHelp = false)
 
 void printVersion() 
 {
-	cerr << "RazerS version 0.3 20080820 (prerelease)" << endl;
+	cerr << "RazerS version 0.3 20080821 (prerelease)" << endl;
 }
 
 int main(int argc, const char *argv[]) 
@@ -958,9 +958,10 @@ int main(int argc, const char *argv[])
 		else				cerr << "NO" << endl;
 		cerr << "Error rate:                      \t" << optionErrorRate << endl;
 		cerr << "Minimal threshold:               \t" << optionThreshold << endl;
-		cerr << "k-mer length:                    \t" << QGRAM_LEN << endl;
-		cerr << "Taboo length:                    \t" << optionTabooLength << endl;
 		cerr << "Shape:                           \t" << bitmap << endl;
+		cerr << "Repeat threshold:                \t" << optionRepeatLength << endl;
+		cerr << "Overabundance threshold:         \t" << optionAbundanceCut << endl;
+		cerr << "Taboo length:                    \t" << optionTabooLength << endl;
 		cerr << endl;
 	}
 
