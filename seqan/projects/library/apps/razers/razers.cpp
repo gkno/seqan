@@ -142,7 +142,12 @@ using namespace seqan;
 	typedef StringSet<TRead>	TReadSet;
 
 	typedef Index<TReadSet, Index_QGram<FixedShape<QGRAM_LEN> > >	TReadIndex;
-
+/*	typedef Index<TReadSet, Index_QGram<
+		FixedGappedShape< 
+			HardwiredShape< 1, 1, 1, 1, 1, 1, 1, 1, 1, 8, 1 > 
+		> 
+	> >	TReadIndex;
+*/
 namespace seqan 
 {
 	template <>
@@ -261,6 +266,8 @@ void findReads(
 	typedef Pattern<TReadRev, MyersUkkonenGlobal>		TMyersPatternRev;
 
 	TSwiftPattern swiftPattern(readIndex);
+	String<TMyersPattern> forwardPatterns;
+
 	swiftPattern.params.minThreshold = optionThreshold;
 	swiftPattern.params.tabooLength = optionTabooLength;
 
@@ -272,6 +279,19 @@ void findReads(
 	__int64 FP = 0;
 	SEQAN_PROTIMESTART(find_time);
 
+	// init forward verifiers
+	unsigned readCount = countSequences(readIndex);
+	resize(forwardPatterns, readCount);
+	for(unsigned i = 0; i < readCount; ++i)
+	{
+#ifdef RAZERS_HAMMINGVERIFY
+		setHost(forwardPatterns[i], indexText(readIndex)[i]);
+		setScoringScheme(forwardPatterns[i], scoreType);
+#else
+		setHost(forwardPatterns[i], indexText(readIndex)[i]);
+#endif
+	}
+
 	// iterate all genomic sequences
 	for(unsigned hstkSeqNo = 0; hstkSeqNo < length(genomes); ++hstkSeqNo) 
 	{
@@ -281,19 +301,14 @@ void findReads(
 		TSwiftFinder swiftFinder(genome, optionRepeatLength, 1);
 
 		// iterate all verification regions returned by SWIFT
-		while (find(swiftFinder, swiftPattern, optionErrorRate, (_debugLevel >= 1))) 
+		while (find(swiftFinder, swiftPattern, optionErrorRate, _debugLevel)) 
 		{
 			unsigned ndlSeqNo = (*swiftFinder.curHit).ndlSeqNo;
 			unsigned ndlLength = sequenceLength(ndlSeqNo, readIndex);
 
 			TGenomeInfix inf(range(swiftFinder, genome));
 			TMyersFinder myersFinder(inf);
-#ifdef RAZERS_HAMMINGVERIFY
-			TMyersPattern myersPattern(indexText(readIndex)[ndlSeqNo], scoreType);
-#else
-			TMyersPattern myersPattern(indexText(readIndex)[ndlSeqNo]);
-#endif
-
+			TMyersPattern &myersPattern = forwardPatterns[ndlSeqNo];
 
 #ifdef RAZERS_DEBUG
 			cout<<"Verify: "<<endl;
@@ -338,7 +353,7 @@ void findReads(
 					// this case should never occur
 					cerr << "1GENOME: " << host(myersFinder) << endl;
 					cerr << "1READ:   " << indexText(readIndex)[ndlSeqNo] << endl;
-					cerr << "2GENOME: " << infix(genome, m.gBegin, m.gEnd) << endl;
+					cerr << "2GENOME: " << infix(genome, m.gBegin, m.gEnd) << '\t' << m.gBegin << ',' << m.gEnd << endl;
 					cerr << "2READ:   " << indexText(readIndex)[ndlSeqNo] << endl;
 					cerr << "3GENOME: " << infRev << endl;
 					cerr << "3READ:   " << readRev << endl;
@@ -527,7 +542,6 @@ void dumpMatches(
 					gEnd = (*it).gEnd;
 					orientation = (*it).orientation;
 
-					TGPos		gLength = length(genomes[gseqNo]);
 					unsigned	readLen = length(reads[readNo]);
 					double		percId;
 			
@@ -921,8 +935,20 @@ int main(int argc, const char *argv[])
 	if (optionPrintVersion)
 		printVersion();
 
+	TGenomeSet				genomeSet;
+	StringSet<CharString>	genomeNames;	// genome names, taken from the Fasta file
+	TReadSet				readSet;
+	StringSet<CharString>	readNames;		// read names, taken from the Fasta file
+	
+	TReadIndex				swiftIndex(readSet);
+	TMatches				matches;		// resulting forward/reverse matches
+
+
 	// dump configuration in verbose mode
-	if (_debugLevel >= 1) {
+	if (_debugLevel >= 1) 
+	{
+		CharString bitmap;
+		shapeToString(bitmap, indexShape(swiftIndex));
 		cerr << "___SETTINGS____________" << endl;
 		cerr << "Compute forward matches:         \t";
 		if (optionForward)	cerr << "YES" << endl;
@@ -934,20 +960,12 @@ int main(int argc, const char *argv[])
 		cerr << "Minimal threshold:               \t" << optionThreshold << endl;
 		cerr << "k-mer length:                    \t" << QGRAM_LEN << endl;
 		cerr << "Taboo length:                    \t" << optionTabooLength << endl;
+		cerr << "Shape:                           \t" << bitmap << endl;
 		cerr << endl;
 	}
 
 	// circumvent numerical obstacles
 	optionErrorRate += epsilon;
-
-
-	TGenomeSet				genomeSet;
-	StringSet<CharString>	genomeNames;	// genome names, taken from the Fasta file
-	TReadSet				readSet;
-	StringSet<CharString>	readNames;		// read names, taken from the Fasta file
-	
-	TReadIndex				swiftIndex(readSet);
-	TMatches				matches;		// resulting forward/reverse matches
 
 
 	//////////////////////////////////////////////////////////////////////////////
