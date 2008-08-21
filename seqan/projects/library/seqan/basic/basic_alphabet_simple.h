@@ -350,6 +350,24 @@ SEQAN_CHECKPOINT
 //note: it is not possible to write a single function here since "assign"
 //must be specialized for the first argument at the first place
 
+//__int64
+template <typename TValue, typename TSpec>
+inline void 
+assign(__int64 & c_target, 
+	   SimpleType<TValue, TSpec> & source)
+{
+SEQAN_CHECKPOINT
+	c_target = source.value;
+}
+template <typename TValue, typename TSpec>
+inline void 
+assign(__int64 & c_target, 
+	   SimpleType<TValue, TSpec> const & source)
+{
+SEQAN_CHECKPOINT
+	c_target = source.value;
+}
+
 //int
 template <typename TValue, typename TSpec>
 inline void 

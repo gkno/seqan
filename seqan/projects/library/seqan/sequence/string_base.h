@@ -1460,6 +1460,26 @@ _reallocateStorage(
 //////////////////////////////////////////////////////////////////////////////
 ///.Function.reserve.param.object.type:Spec.String
 
+template <typename TValue, typename TSpec, typename _TSize>
+inline typename Size< String<TValue, TSpec> >::Type
+_reserveStorage(
+	String<TValue, TSpec> & seq, 
+	_TSize new_capacity,
+	Insist)
+{
+	// do nothing
+}
+
+template <typename TValue, typename TSpec, typename _TSize>
+inline typename Size< String<TValue, TSpec> >::Type
+_reserveStorage(
+	String<TValue, TSpec> & seq, 
+	_TSize new_capacity,
+	Limit)
+{
+	// do nothing
+}
+
 template <typename TValue, typename TSpec, typename _TSize, typename TExpand>
 inline void
 _reserveStorage(
@@ -1497,30 +1517,6 @@ reserve(
 SEQAN_CHECKPOINT
 	_reserveStorage(seq, new_capacity, tag);
 	return _capacityReturned(seq, new_capacity, tag);
-}
-
-template <typename TValue, typename TSpec, typename _TSize>
-inline typename Size< String<TValue, TSpec> >::Type
-reserve(
-	String<TValue, TSpec> & seq, 
-	_TSize new_capacity,
-	Insist)
-{
-SEQAN_CHECKPOINT
-	// do nothing
-	return _capacityReturned(seq, new_capacity, Insist());
-}
-
-template <typename TValue, typename TSpec, typename _TSize>
-inline typename Size< String<TValue, TSpec> >::Type
-reserve(
-	String<TValue, TSpec> & seq, 
-	_TSize new_capacity,
-	Limit)
-{
-SEQAN_CHECKPOINT
-	// do nothing
-	return _capacityReturned(seq, new_capacity, Limit());
 }
 
 //////////////////////////////////////////////////////////////////////////////

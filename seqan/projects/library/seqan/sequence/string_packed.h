@@ -632,12 +632,10 @@ SEQAN_CHECKPOINT
 */
 		if (old_size > size)
 		{
-	SEQAN_CHECKPOINT
 			arrayMoveForward(iter(seq, end, Standard()), iter(seq, old_length, Standard()), iter(seq, end + size - old_size, Standard()));
 		}
 		else
 		{
-	SEQAN_CHECKPOINT
 			arrayMoveBackward(iter(seq, end, Standard()), iter(seq, old_length, Standard()), iter(seq, end + size - old_size, Standard()));
 		}
 FINISH:
@@ -954,7 +952,8 @@ _assignValue_packed_string_iterator(TIter & me,
 	typedef typename Host<TContainer>::Type THost;
 	typedef typename Value<THost>::Type THostValue;
 	THostValue mask_ = _PackedConsts<TContainer>::VALUE_MASK << _bitpos(me);
-	THostValue val_ = _value;
+	THostValue val_;
+	assign(val_, _value);
 	val_ <<= _bitpos(me);
 
 	assignValue(hostIterator(me), (getValue(hostIterator(me)) & ~(mask_)) | val_);
@@ -1213,6 +1212,15 @@ template <typename TContainer, typename THostspec>
 inline typename Difference<Iter<TContainer, Packed<THostspec> > >::Type  
 operator - (Iter<TContainer, Packed<THostspec> > const & left,
 			Iter<TContainer, Packed<THostspec> > const & right)
+{
+SEQAN_CHECKPOINT
+	return position(left) - position(right);
+}
+
+template <typename TContainer, typename THostspec>
+inline typename Difference<Iter<TContainer, Packed<THostspec> > >::Type  
+operator - (Iter<TContainer, Packed<THostspec> > const & left,
+			Iter<TContainer, Packed<THostspec> > & right)
 {
 SEQAN_CHECKPOINT
 	return position(left) - position(right);

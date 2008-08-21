@@ -602,6 +602,18 @@ If $charsLeft$ is smaller than the shape's span, the hash value corresponds to t
 		}
 	}
 
+	template <typename TShapeString, typename TValue, unsigned q>
+	inline void
+	shapeToString(
+		TShapeString &bitmap,
+		Shape<TValue, FixedShape<q> > const &me)
+	{
+	SEQAN_CHECKPOINT
+
+		clear(bitmap);
+		fill(bitmap, length(me), '1');
+	}
+
 }	// namespace seqan
 
 #endif

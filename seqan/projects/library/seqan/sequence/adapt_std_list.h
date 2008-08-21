@@ -55,8 +55,8 @@ begin(std::list<TValue> &list_){
 }
 
 template<typename TValue>
-typename Iterator<std::list<TValue>, Standard >::Type
-inline end(std::list<TValue> &list_){
+inline typename Iterator<std::list<TValue>, Standard >::Type
+end(std::list<TValue> &list_){
 	return list_.end();
 }
 

@@ -600,6 +600,25 @@ You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 		}
 	}
 
+	template <typename TShapeString, typename TValue, typename TSpec>
+	inline void
+	shapeToString(
+		TShapeString &bitmap,
+		Shape<TValue, FixedGappedShape<TSpec> > const &me)
+	{
+	SEQAN_CHECKPOINT
+
+		clear(bitmap);
+		reserve(bitmap, length(me));		
+		appendValue(bitmap, '1');
+		for (unsigned i = 0; i < weight(me) - 1; ++i)
+		{
+			for (int j = 1; j < me.diffs[i]; ++j)
+				appendValue(bitmap, '0');
+			appendValue(bitmap, '1');
+		}
+	}
+
 }	// namespace seqan
 
 #endif
