@@ -88,8 +88,6 @@ namespace SEQAN_NAMESPACE_MAIN
 		bool qgramHit:1;			// is this a q-gram hit? (result of the former delta function)
 	};
 
-	typedef String<ErrorAlphabet> TPattern;
-
 
 #ifdef PLATFORM_WINDOWS
 
