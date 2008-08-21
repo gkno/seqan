@@ -563,7 +563,7 @@ inline bool _swiftMultiProcessQGram(
 				if ((*bkt).counter >= bucketParams.threshold)
 				{
 					// upper bucket no. of lastIncr. q-gram
-					unsigned upperBktNo = (*bkt).lastIncrement >> bucketParams.logDelta;
+					__int64 upperBktNo = (*bkt).lastIncrement >> bucketParams.logDelta;
 
 					TSize height = 0;
 					if (Swift<TSpec>::DIAGONAL == 1)
@@ -571,7 +571,7 @@ inline bool _swiftMultiProcessQGram(
 
 					// we must decrement bucket no. until (no. mod reuse == bktNo)
 					__int64 bktBeginHstk = 
-						(__int64) (upperBktNo - ((upperBktNo - bktNo) & bucketParams.reuseMask)) << bucketParams.logDelta;
+						 (upperBktNo - ((upperBktNo - bktNo) & bucketParams.reuseMask)) << bucketParams.logDelta;
 #ifdef SEQAN_DEBUG_SWIFT
 					if ((*bkt)._lastIncDiag - bktBeginHstk >= bucketParams.delta + bucketParams.overlap || (*bkt)._lastIncDiag < bktBeginHstk) {
 						::std::cerr << "qgram stored in wrong bucket (diag:" << (*bkt)._lastIncDiag << ", begin:" << bktBeginHstk;
@@ -659,7 +659,7 @@ inline bool _swiftMultiFlushBuckets(
 	TBucketIterator	bkt = begin(pattern.buckets, Standard());
 	TBucketIterator	bktEnd;
 	TSize seqCount = countSequences(host(pattern));
-	
+
 	for(TSize ndlSeqNo = 0; ndlSeqNo < seqCount; ++ndlSeqNo) 
 	{
 		TBucketParams &bucketParams = _swiftBucketParams(pattern, ndlSeqNo);
@@ -669,15 +669,15 @@ inline bool _swiftMultiFlushBuckets(
 			if ((*bkt).counter >= bucketParams.threshold)
 			{
 				// upper bucket no. of lastIncr. q-gram
-				unsigned upperBktNo = (*bkt).lastIncrement >> bucketParams.logDelta;
+				__int64 upperBktNo = (*bkt).lastIncrement >> bucketParams.logDelta;
 
 				TSize height = 0;
 				if (Swift<TSpec>::DIAGONAL == 1)
 					height = sequenceLength(ndlSeqNo, host(pattern)) - 1;
 
 				// we must decrement bucket no. until (no. mod reuse == bktNo)
-				__int64 bktBeginHstk = 
-					(__int64) (upperBktNo - ((upperBktNo - bktNo) & bucketParams.reuseMask)) << bucketParams.logDelta;
+				__int64 bktBeginHstk =
+					(upperBktNo - ((upperBktNo - bktNo) & bucketParams.reuseMask)) << bucketParams.logDelta;
 #ifdef SEQAN_DEBUG_SWIFT
 				if ((*bkt)._lastIncDiag - bktBeginHstk >= bucketParams.delta + bucketParams.overlap || (*bkt)._lastIncDiag < bktBeginHstk) {
 					::std::cerr << "qgram stored in wrong bucket (diag:" << (*bkt)._lastIncDiag << ", begin:" << bktBeginHstk;
