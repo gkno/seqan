@@ -300,18 +300,21 @@ _getPatternProb(TLogErrorDistr const &logError, TPattern const &pattern, int rea
 	return prob;
 }
 
+
+
 //////////////////////////////////////////////////////////////////////////////
-// Initialize state string
+// Initialize states-string for edit/hamming-distance filters
 template <
 	typename TStateString,
 	typename TShape,
 	typename TLogErrorDistr >
-void initEditPatterns(
-	TStateString &states,
-	TShape const &bitShape,
-	int maxErrors,
-	TLogErrorDistr const &logError,
-	bool optionMinOutput = true)
+void initPatterns(
+	TStateString &states,				// resulting states-string
+	TShape const &bitShape,				// bit-string of the shape
+	int maxErrors,						// allowed errors per pattern
+	TLogErrorDistr const &logError,		// error distribution
+	bool optionHammingOnly = false,		// enumerate only hamming patterns (disabled by default)
+	bool optionMinOutput = true)		// omit output
 {
 #ifndef DEBUG_RECOG_DP
 //	typedef String<ErrorAlphabet, Packed<ErrorPackedString> >	TPattern;
@@ -320,6 +323,8 @@ void initEditPatterns(
 
 	typedef typename Iterator<TPattern, Standard>::Type			TIter;
 	typedef typename Value<TStateString>::Type					TState;
+	
+	ErrorType lastErrorType = (optionHammingOnly)? SEQAN_MISMATCH: SEQAN_DELETE;
 
 	SEQAN_ASSERT(SEQAN_MATCH == 0);
 	SEQAN_ASSERT((length(logError) % 4) == 0);
@@ -430,7 +435,7 @@ void initEditPatterns(
 		// next state combination
 		for (i = 0; i < maxErrors; ++i)
 		{
-			if (mods[i].i2 == SEQAN_DELETE) continue;
+			if (mods[i].i2 == lastErrorType) continue;
 			mods[i].i2 = (ErrorType)(mods[i].i2 + 1);
 			for(--i; i >= 0; --i)
 				mods[i].i2 = SEQAN_MISMATCH;
@@ -606,12 +611,12 @@ void initEditPatterns(
 
 
 //////////////////////////////////////////////////////////////////////////////
-// DP recursion
+// Compute filtering loss of any q-gram filter (given a states-string)
 template <
 	typename TLossString, 
 	typename TLogErrorDistr, 
 	typename TStateString >
-void doEditDP(
+void computeFilteringLoss(
 	TLossString &found,
 	TStateString const &states,
 	int span,
@@ -768,8 +773,11 @@ void doEditDP(
 				}
 			}
 
+#ifndef COUNT_LOSSES
+			// we can only normalize probs if t==0 contains all k-pattern probs
 			if (t > 0 && !optionAbsolute)
 				recovered = _probDiv(recovered, found[eSum*maxT]);
+#endif
 
 			found[eSum*maxT+t] = recovered;
 		}

@@ -746,11 +746,13 @@ int main(int argc, const char *argv[])
 					istringstream istr(argv[arg]);
 					istr >> optionErrorRate;
 					optionErrorRate = (100.0 - optionErrorRate) / 100.0;
-					if (!istr.fail())
+					if (!istr.fail()) 
+					{
 						if (optionErrorRate < 0 || optionErrorRate > 0.5)
 							cerr << "Percent identity threshold must be a value between 50 and 100" << endl << endl;
 						else
 							continue;
+					}
 				}
 				printHelp(argc, argv);
 				return 0;
@@ -774,10 +776,12 @@ int main(int argc, const char *argv[])
 					istringstream istr(argv[arg]);
 					istr >> optionOutputFormat;
 					if (!istr.fail())
+					{
 						if (optionOutputFormat > 1)
 							cerr << "Invalid output format option" << endl << endl;
 						else
 							continue;
+					}
 				}
 				printHelp(argc, argv);
 				return 0;
@@ -788,10 +792,12 @@ int main(int argc, const char *argv[])
 					istringstream istr(argv[arg]);
 					istr >> optionSortOrder;
 					if (!istr.fail())
+					{
 						if (optionSortOrder > 1)
 							cerr << "Invalid sort order option" << endl << endl;
 						else
 							continue;
+					}
 				}
 				printHelp(argc, argv);
 				return 0;
@@ -802,10 +808,12 @@ int main(int argc, const char *argv[])
 					istringstream istr(argv[arg]);
 					istr >> optionGenomeNaming;
 					if (!istr.fail())
+					{
 						if (optionGenomeNaming > 1)
 							cerr << "Invalid genome naming option" << endl << endl;
 						else
 							continue;
+					}
 				}
 				printHelp(argc, argv);
 				return 0;
@@ -816,10 +824,12 @@ int main(int argc, const char *argv[])
 					istringstream istr(argv[arg]);
 					istr >> optionReadNaming;
 					if (!istr.fail())
+					{
 						if (optionReadNaming > 2)
 							cerr << "Invalid read naming option" << endl << endl;
 						else
 							continue;
+					}
 				}
 				printHelp(argc, argv);
 				return 0;
@@ -830,10 +840,12 @@ int main(int argc, const char *argv[])
 					istringstream istr(argv[arg]);
 					istr >> optionPositionFormat;
 					if (!istr.fail())
+					{
 						if (optionPositionFormat > 1)
 							cerr << "Invalid position format option" << endl << endl;
 						else
 							continue;
+					}
 				}
 				printHelp(argc, argv);
 				return 0;
@@ -844,10 +856,12 @@ int main(int argc, const char *argv[])
 					istringstream istr(argv[arg]);
 					istr >> optionAbundanceCut;
 					if (!istr.fail())
+					{
 						if (optionAbundanceCut <= 0 || optionAbundanceCut > 1)
 							cerr << "Overabundance cut ratio must be a value >0 and <=1. Set to 1 to disable." << endl << endl;
 						else
 							continue;
+					}
 				}
 				printHelp(argc, argv);
 				return 0;
@@ -858,10 +872,12 @@ int main(int argc, const char *argv[])
 					istringstream istr(argv[arg]);
 					istr >> optionRepeatLength;
 					if (!istr.fail())
+					{
 						if (optionRepeatLength <= 1)
 							cerr << "Repeat length must be a value greater than 1" << endl << endl;
 						else
 							continue;
+					}
 				}
 				printHelp(argc, argv);
 				return 0;
@@ -872,10 +888,12 @@ int main(int argc, const char *argv[])
 					istringstream istr(argv[arg]);
 					istr >> optionThreshold;
 					if (!istr.fail())
+					{
 						if (optionThreshold < 1)
 							cerr << "Threshold must be a value greater than 0" << endl << endl;
 						else
 							continue;
+					}
 				}
 				printHelp(argc, argv);
 				return 0;
@@ -886,10 +904,12 @@ int main(int argc, const char *argv[])
 					istringstream istr(argv[arg]);
 					istr >> optionTabooLength;
 					if (!istr.fail())
+					{
 						if (optionTabooLength < 1)
 							cerr << "Taboo length must be a value greater than 0" << endl << endl;
 						else
 							continue;
+					}
 				}
 				printHelp(argc, argv);
 				return 0;

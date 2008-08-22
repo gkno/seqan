@@ -1,3 +1,5 @@
+#define USE_LOGVALUES		// this is recommended when using probability values
+
 #include <sys/types.h>
 #include <dirent.h>
 #include <errno.h>
@@ -7,17 +9,24 @@
 #include <fstream>
 #include <seqan/sequence.h>
 #include <seqan/file.h>
+#include <seqan/find_motif.h>
+
+#include "recognitionRateDP.h"
 
 using namespace seqan;
 using namespace std;
 
+typedef long double TFloat;
 
 // global input parameters
 static unsigned totalN = 32;				// sequence length
-static unsigned totalK = 2;				// errors
-static double optionLossRate = 0.01;		// in
-static double chosenLossRate = 0.0;		// out
-static double optionErrorRate = 0.05;		// 
+static unsigned totalK = 2;					// errors
+static TFloat optionLossRate = 0.01;		// in
+static TFloat chosenLossRate = 0.0;			// out
+static TFloat optionErrorRate = 0.05;		// 
+static bool optionHammingOnly = false;
+static TFloat optionProbINSERT = 0.0;
+static TFloat optionProbDELETE = 0.0;
 
 // output parameters
 unsigned qgramLen = 4;			//
@@ -28,7 +37,7 @@ bool		fnameCount1 = 0;
 bool		prefixCount = 0;
 const char	*fname[2] = { "","" };
 const char	*fprefix[1] = { "" };
-char	fparams[100];
+char		fparams[100];
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -45,14 +54,14 @@ _parse_skipWhitespace(TFile& file, TChar& c)
 
 //////////////////////////////////////////////////////////////////////////////
 template<typename TFile, typename TChar>
-inline double
+inline TFloat
 _parse_readEValue(TFile & file, TChar& c)
 {
 SEQAN_CHECKPOINT
 	// Read number
 	String<char> str(c);
 	bool e = false;
-	double val1;
+	TFloat val1;
 	while (!_streamEOF(file)) {
 		c = _streamGet(file);
 		if(!e && c == 'e'){
@@ -66,17 +75,17 @@ SEQAN_CHECKPOINT
 	}
 	if(e)
 	{
-		return val1 * pow((double)10.0,(double)atof(toCString(str)));
+		return val1 * pow((TFloat)10.0,(TFloat)atof(toCString(str)));
 	}	
  	else 
-		return (double)atof(toCString(str));
+		return (TFloat)atof(toCString(str));
 }
 
 
 
 //////////////////////////////////////////////////////////////////////////////
 template<typename TFile, typename TChar>
-inline double
+inline TFloat
 _parse_readDouble(TFile & file, TChar& c)
 {
 	// Read number
@@ -150,12 +159,12 @@ parseParams(TFile & file)
 {
         unsigned countQ = 0;
         unsigned countT = 0;
-        double bestSoFar = 0.0;
+        TFloat bestSoFar = 0.0;
         unsigned bestQ = 1;
         unsigned bestT = 1;
 	unsigned secondBestT = 0;
 	unsigned qCutoff = 14; //depends on RAM
-        //String<double> loss;
+        //String<TFloat> loss;
         //reserve(loss, 20*readLen);
 
         char c = _streamGet(file);
@@ -163,7 +172,7 @@ parseParams(TFile & file)
 
         while(!_streamEOF(file))
         {
-                double val = _parse_readEValue(file,c);
+                TFloat val = _parse_readEValue(file,c);
  //            std::cout << "\n"<<val;
 //              appendValue(loss,val);  //t=0
                 countT = 1;
@@ -221,17 +230,17 @@ qualityDistributionFromPrbFile(TFile & file, TDistribution & avg)
 	unsigned pos = 0;
 	while(!_streamEOF(file))
 	{
-		qual = (int) _parse_readDouble(file,c);// + (double) 1.0/maxN;
+		qual = (int) _parse_readDouble(file,c);// + (TFloat) 1.0/maxN;
 		_parse_skipWhitespace(file,c);
-		qual1 = (int) _parse_readDouble(file,c);// + (double) 1.0/maxN;
+		qual1 = (int) _parse_readDouble(file,c);// + (TFloat) 1.0/maxN;
 		int ind = (qual > qual1) ? 0 : 1;
 		qual = (qual > qual1) ? qual : qual1;
 		_parse_skipWhitespace(file,c);
-		qual1 = (int) _parse_readDouble(file,c);// + (double) 1.0/maxN;
+		qual1 = (int) _parse_readDouble(file,c);// + (TFloat) 1.0/maxN;
 		ind = (qual > qual1) ? ind : 2;
 		qual = (qual > qual1) ? qual : qual1;
 		_parse_skipWhitespace(file,c);
-		qual1 = (int) _parse_readDouble(file,c);// + (double) 1.0/maxN;
+		qual1 = (int) _parse_readDouble(file,c);// + (TFloat) 1.0/maxN;
 		ind = (qual > qual1) ? ind : 3;
 		qual = (qual > qual1) ? qual : qual1;
 		++countMatrix[totalN * (qual+5) + pos];
@@ -250,17 +259,17 @@ qualityDistributionFromPrbFile(TFile & file, TDistribution & avg)
 
 
 	fill(avg,totalN,0.0);
-//	double sumavg = 0.0;
+//	TFloat sumavg = 0.0;
 	for(unsigned t = 0; t < totalN; ++t)
 	{
 		long sum = 0;
 		for(int q = 0; q<46;++q) 
 			sum += countMatrix[q*totalN + t];
 		for(int q = 0; q<46;++q) 
-			avg[t] += (double) (countMatrix[q*totalN + t] * (q-5)) / sum;
-		avg[t] =  pow((double)10.0,   (double)(avg[t]/-10)) / (1+pow((double)10.0,(double)(avg[t]/-10) ));
+			avg[t] += (TFloat) (countMatrix[q*totalN + t] * (q-5)) / sum;
+		avg[t] =  pow((TFloat)10.0,   (TFloat)(avg[t]/-10)) / (1+pow((TFloat)10.0,(TFloat)(avg[t]/-10) ));
 	}
-	double avgsum = 0.0;
+	TFloat avgsum = 0.0;
 
 	for(unsigned t = 0; t < totalN; ++t)
 		avgsum += avg[t];
@@ -309,7 +318,7 @@ getAvgFromPrbDirectory(TPath prbPath, TError & errorDistribution)
 		}
 	}
 	for(unsigned j=0; j < totalN; ++j)
-		errorDistribution[j] /= (double)countPrbs;
+		errorDistribution[j] /= (TFloat)countPrbs;
 	std::cout << "Writing average error probabilities to " << fprefix[0] << "_errorProb.dat\n";
 	fstream out;
 	stringstream avgOut;
@@ -322,254 +331,6 @@ getAvgFromPrbDirectory(TPath prbPath, TError & errorDistribution)
 	out.close();
 
 	
-}
-
-//////////////////////////////////////////////////////////////////////////////
-// Returns the sum of two probability values in log space
-template<typename TLog>
-TLog
-logAdd (TLog a, TLog b)
-{
-	if(isinf(a)) return b;
-	if(isinf(b)) return a;
-	if(isnan(a+log1p(exp(b-a)))) return a;
-	return (a + log1p(exp(b-a)));
-}
-
-
-
-//////////////////////////////////////////////////////////////////////////////
-// Returns log probability of q-gram-configuration q ending at position pos in sequence
-template<typename TErrDistr>
-typename Value<TErrDistr>::Type getProb(unsigned Q, unsigned q, unsigned pos, TErrDistr & logErrorDistr)
-{
-	typename Value<TErrDistr>::Type prob = 0.0;
-	
-	for(unsigned j = 0; j < Q; ++j)
-	{
-		if (q & 1) prob += (logErrorDistr[pos-Q+j+1]);
-		else prob += (logErrorDistr[length(logErrorDistr)/2 + pos-Q+j+1]);
-		q = q >> 1;
-	}
-	return prob;
-	
-}
-
-
-//////////////////////////////////////////////////////////////////////////////
-// DP recursion
-template <typename TErrorDistr, typename TString>
-void computeFilteringLoss(unsigned maxN, unsigned maxE, unsigned maxT, unsigned Q, TErrorDistr & errorDistr, TString & found)
-{
-////////////////////////////////////////////////
-	//"global parameters"
-	unsigned errorsPerQGram = 0;			// how many errors are allowed per qgram
-	unsigned QPot = 1 << Q;
-	unsigned char countBits[256];
-	//taken from original main function
-
-	// Count 1-bits in a byte
-	for(unsigned i = 0; i < 256; ++i) {
-		unsigned char bits = 0;
-		for(unsigned char b = 0; b < 8; ++b)
-			if ((i >> b) & 1) ++bits;
-		countBits[i] = bits;
-	}
-
-	// Error probabilities
-	// if we didn't get them from a file --> uniform distribution
-	if(length(errorDistr) != maxN)
-		fill(errorDistr,maxN,1.0/(long double) maxN);
-
-	// prepare log error distribution 
-	String<double> logErrorDistr;
-	resize(logErrorDistr,2*maxN);
-
-// 	for(unsigned j = 0; j < maxN; ++j)
-// 		cout << errorDistr[j]<<"\t";
-// 	cout << "\n";
-
-	// log probs for seeing 1s at positions 0...maxN-1
-	for(unsigned j = 0; j < maxN; ++j)
-		logErrorDistr[j] = log(errorDistr[j]);
-
-	// log probs for seeing 0s at positions 0...maxN-1
-	for(unsigned j = 0; j < maxN; ++j)
-		logErrorDistr[maxN+j] = log(1.0 - errorDistr[j]);
-////////////////////////////////////////////////
-
-	typedef String<long double> TMatrixCol;
-	typedef typename Value<TErrorDistr>::Type TProbValue;
-
-	// columns n-1 and n for recursion 
-	TMatrixCol col0;
-	TMatrixCol col1;
-	fill(col0, maxE * QPot * maxT, log(0.0));
-	resize(col1, maxE * QPot * maxT);
-
-	// remembers sum of probabilities of all possible sequences having
-	// exactly e errors (recursively updated during DP)
-	TMatrixCol count_col;
-	fill(count_col, maxE, log(0.0));
-
-	//initialized with first position (can be either 0 or 1)
-	count_col[0] = logErrorDistr[maxN];
-	if(maxE > 1) count_col[1] = logErrorDistr[0];
-	
-	// same thing for last column i.e. sequence length maxN
-	// (last column gets special treatment)
-	TMatrixCol count_colFinal;
-	fill(count_colFinal, maxE, log(0.0));
-
-	// RECURSION BEGIN
-	for(unsigned q = 0; q < QPot; ++q) 
-	{
-		col0[q*maxT] = log(1.0);
-		// every bit in q set to 1 marks an error
-		unsigned errors = 
-			countBits[q & 255] + countBits[(q >> 8) & 255] + 
-			countBits[(q >> 16) & 255] + countBits[(q >> 24) & 255];
-		
-		
-		//for gapped q-grams only count those bits that are relevant positions
-		
-		// for n==0
-		if (errors > errorsPerQGram) {
-			// we miss 1 match for t>0 and q has more than <errorsPerQGram> errors
-			// --> probability for finding the q-gram is 0
-			for(unsigned t = 1; t < maxT; ++t) 
-					col0[q*maxT+t] = log(0.0);
-		} else {
-			// we miss no match if q has no or one error
-			// --> probability is 1.0
-			col0[q*maxT+1] = log(1.0);
-			for(unsigned t = 2; t < maxT; ++t)
-				col0[q*maxT+t] = log(0.0);
-			
-		}
-	}
-//	dump(col0,0);
-
-	// iterate over sequence length n
-	TMatrixCol *col = &col1;
-	TMatrixCol *colPrev = &col0;
-
-	
-/*	cout << "2:0";
-	dump(col0, 0);
-	cout << " :1";
-	dump(col0, 1);
-*/
-	
-	// RECURSION
-	//
-	// found(n,q,t,e) = (1-errorProb[n-Q]) * found(n-1,0|(q>>1),t-delta,e) delta=1/0 <-> q hat 0/>0 fehler
-	//               + errorProb[n-Q] * found(n-1,1|(q>>1),t-delta,e-1)
-	
-	// rekursion (fuer q-gram matches <=1 fehler)
-	// found(n,q,t,e) = (1-errorProb[n-Q]) * found(n-1,0|(q>>1),t-delta,e) delta=1/0 <-> q hat <=1/>1 fehler
-	//               + errorProb[n-Q] * found(n-1,1|(q>>1),t-delta,e-1)
-	
-	for(unsigned n = Q; n < maxN; ++n)
-	{
-		if(n>Q) // if n-Q==0 count_col is already up to date (as this is how it was initialized)
-		{	
-			for(int e = maxE - 1; e > 0; --e)
-			{
-				// update with position n-Q: can be either 0 
-				count_col[e] = ((logErrorDistr[maxN+n-Q]) + count_col[e]);
-				// or 1
-				count_col[e] = logAdd(count_col[e],logErrorDistr[n-Q] + count_col[e-1]);
-				
-			}
-			// for 0 errors, updating with 0 is the only possibility
-			count_col[0] += (logErrorDistr[maxN+n-Q]);
-		}
-		for(unsigned e = 0; e < maxE * QPot; e += QPot)
-		{
-			for(unsigned q = 0; q < QPot; ++q)
-			{
-				unsigned _q = (q << 1) & (QPot - 1);
-				unsigned errors = 
-					countBits[q & 255] + countBits[(q >> 8) & 255] + 
-					countBits[(q >> 16) & 255] + countBits[(q >> 24) & 255];
-				// again only count those bits that are relevant
-
-				for(unsigned t = 0; t < maxT; ++t)
-				{
-					unsigned _t = t;
-					if (_t > 0 && errors <= errorsPerQGram)
-						--_t;
-					
-					long double recovered = ((logErrorDistr[maxN+n-Q]) + (*colPrev)[(e+(_q|0))*maxT+_t]);
-					if (e > 0) recovered = logAdd(recovered,(logErrorDistr[n-Q] + (*colPrev)[((e-QPot)+(_q|1))*maxT+_t]));
-					
-					//if this is the last iteration (i.e. last columnof matrix), add log probability for the whole q gram
-					if(n==maxN-1) recovered += getProb(Q,q,maxN-1,logErrorDistr);
-					
-					(*col)[(e+q)*maxT+t] = recovered;
-				}
-				
-				// if this is the last iteration, add log probability of whole q-gram to the appropriate entry in count_col
-				// könnte man auch erst später machen...
-				if(e ==  ((maxE-1) * QPot) && n == maxN - 1)
-				{
-					long double prob = getProb(Q,q,maxN-1,logErrorDistr);
-					
-					//for gapped q-grams this needs to be changed! all positions are relevant, i.e. all errors must be counted!!!
-					if(errors < maxE) 
-						for(unsigned eSum = errors; eSum < maxE; ++eSum)
-							count_colFinal[eSum] = logAdd(count_colFinal[eSum], (prob + count_col[eSum-errors]));
-				}
-			}
-
-		}
-
-		TMatrixCol *tmp = col;
-		col = colPrev;
-		colPrev = tmp;
-
-/*		cout << n+1<<":0";
-		dump(*colPrev, 0);
-		cout << " :1";
-		dump(*colPrev, 1);
-		cout << " :2";http://news.google.de/
-		dump(*colPrev, 2);
-*/	}
-
-
-
-	//cumulative sum for prob(found | num errors <=e)
-//	for(unsigned eSum = 1; eSum < maxE; ++eSum)
-//		count_colFinal[eSum] = logAdd(count_colFinal[eSum-1],count_colFinal[eSum]);
-
-/*	for(unsigned i = 0; i < maxE; ++i)
-		cout << exp(count_colFinal[i]) << "\t";
-	cout << "\n\n";
-*/
-//0.0278743       0.138543
-
-	// RECURSION END
-	for(unsigned eSum = 0; eSum < maxE; ++eSum)
-		for(unsigned t = 0; t < maxT; ++t) 
-		{
-			long double recovered = log(0.0);
-			for(unsigned q = 0; q < QPot; ++q) 
-			{
-				//again: for gapped q-grams this needs to be changed! all positions are relevant, i.e. all errors must be counted!!!
-				unsigned errors = 
-					countBits[q & 255] + countBits[(q >> 8) & 255] + 
-					countBits[(q >> 16) & 255] + countBits[(q >> 24) & 255];
-				if (errors <= eSum) {
-					unsigned e = eSum - errors;
-					recovered = logAdd(recovered,(*colPrev)[(e*QPot+q)*maxT+t]);
-				}
-			}
-			//divide by probabilitiy of seeing eSum errors
-			found[eSum*maxT+t] = recovered - count_colFinal[eSum];
-		}
-
-
 }
 
 /*
@@ -587,17 +348,17 @@ makeStatsFile(TError & errorDistr)
 		outfile.open(filename.str().c_str(),ios_base::out);
 		for(int qLen = 1; qLen < 16; ++qLen)
 		{
-			String<double> found;
+			String<TFloat> found;
 			resize(found,totalN*(e+1));
-			computeFilteringLoss(totalN,e+1,totalN,qLen,errorDistr,found);
+			computeFilteringLossHamming(found,totalN,qLen,totalN,e+1,errorDistr);
 			for(unsigned t = 0; t < totalN; ++t) 
 			{
 				if (t > 0) outfile << "\t";
 				outfile.precision(8);
-				outfile << (1.0-exp(found[e*totalN+t]));
+				outfile << (1.0-_transformBack(found[e*totalN+t]));
 			//	cout.precision(3);
 			//	if (t > 0) cout << "\t";
-			//	cout << (1.0-exp(found[e*totalN+t]));
+			//	cout << (1.0-_transformBack(found[e*totalN+t]));
 			}
 			outfile << endl;	
 			//cout << endl;	
@@ -612,6 +373,7 @@ void
 makeStatsFile(TError & errorDistr)
 {
 	unsigned maxErrors = (unsigned) totalN / 5;
+	unsigned maxT = totalN;
 //maxErrors = 1;
 /*	vector<FILE*> outfiles;
 	outfiles.resize(maxErrors);
@@ -624,11 +386,34 @@ makeStatsFile(TError & errorDistr)
  		fprintf(outfiles[e],"%c",'t');
 //		outfiles[e].open(filename.str().c_str(),ios_base::out);
 	}*/
+	
+	// prepare log error distribution 
+	String<TFloat> logErrorDistribution;
+	resize(logErrorDistribution, 4*totalN);
+
+	// transformed probs for seeing 1s at positions 0...optionMaxN-1
+	double remainingProb = 1.0 - optionProbINSERT - optionProbDELETE;
+	for(int j = 0; j < totalN; ++j) 
+	{
+		logErrorDistribution[SEQAN_MISMATCH*totalN+j] = _transform(errorDistr[j]);
+		logErrorDistribution[SEQAN_INSERT*totalN+j]   = _transform(optionProbINSERT);
+		logErrorDistribution[SEQAN_DELETE*totalN+j]   = _transform(optionProbDELETE);
+		logErrorDistribution[SEQAN_MATCH*totalN+j]    = _transform(remainingProb - errorDistr[j]);
+	}
+	
+	CharString shape;
 	for(int qLen = 1; qLen < 16; ++qLen)
 	{
-		String<double> found;
-		resize(found,totalN*maxErrors);
-		computeFilteringLoss(totalN,maxErrors,totalN,qLen,errorDistr,found);
+		clear(shape);
+		fill(shape, qLen, '1');
+		
+		String<TFloat> found;
+		resize(found,maxT*maxErrors);
+		
+		String< State<TFloat> > states;
+		initPatterns(states, shape, maxErrors-1, errorDistr, optionHammingOnly);
+		computeFilteringLoss(found, states, length(shape), maxT, maxErrors, errorDistr);
+		
 		for(unsigned e=0; e < maxErrors; ++e)
 		{
 			std::stringstream filename;
@@ -639,16 +424,16 @@ makeStatsFile(TError & errorDistr)
 				std::cout << "Creating file "<<filename.str() << "\n";
 			}
 			else outfile.open(filename.str().c_str(),ios_base::app);
-			for(unsigned t = 0; t < totalN; ++t) 
+			for(unsigned t = 0; t < maxT; ++t) 
 			{
 				if (t > 0) outfile << "\t";
 				outfile.precision(8);
-				//write(outfiles[e],1.0-exp(found[e*totalN+t]));
-				//outfiles[e].write(1.0-exp(found[e*totalN+t]));
-				outfile << (1.0-exp(found[e*totalN+t]));
+				//write(outfiles[e],1.0-_transformBack(found[e*maxT+t]));
+				//outfiles[e].write(1.0-_transformBack(found[e*maxT+t]));
+				outfile << (1.0-_transformBack(found[e*maxT+t]));
 			//	cout.precision(3);
 			//	if (t > 0) cout << "\t";
-			//	cout << (1.0-exp(found[e*totalN+t]));
+			//	cout << (1.0-_transformBack(found[e*maxT+t]));
 			}
 //			fprintf(outfiles[e],"%c",'\n');
 //			outfiles[e].write("\n");
@@ -694,7 +479,7 @@ int main(int argc, const char *argv[])
 	// Parse command line
 	strncpy ( fparams, argv[0], length(argv[0])-12 );
 	strcat(fparams,"params/");
-	static const double epsilon = 0.0000001;	
+	static const TFloat epsilon = 0.0000001;	
 
 	for(int arg = 1; arg < argc; ++arg) {
 		if (argv[arg][0] == '-') {
@@ -803,7 +588,7 @@ int main(int argc, const char *argv[])
 			fprefix[0] = "userdef";
 			std::cout << "\nNo session id given, using prefix 'userdef'\n";
 		}
-		String<double> errorDistribution;
+		String<TFloat> errorDistribution;
 		resize(errorDistribution,totalN);
 		//error distribution given --> read file containing error distr and compute loss rates
 		if(fnameCount1)
@@ -820,7 +605,7 @@ int main(int argc, const char *argv[])
 			while(!_streamEOF(file) && count < totalN)
 			{
 				_parse_skipWhitespace(file,c);
-				errorDistribution[count] = _parse_readEValue(file,c);// + (double) 1.0/maxN;
+				errorDistribution[count] = _parse_readEValue(file,c);// + (TFloat) 1.0/maxN;
 				++count;
 			}
 			file.close();
@@ -839,7 +624,7 @@ int main(int argc, const char *argv[])
 		//if(prefixCount)
 		makeStatsFile(errorDistribution);
 	}
-
+	
 	totalK = (int)(optionErrorRate * totalN);
 	
 	// decide on which loss rate file to parse
