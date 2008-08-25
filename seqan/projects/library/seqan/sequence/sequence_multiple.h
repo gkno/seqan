@@ -46,7 +46,7 @@ namespace SEQAN_NAMESPACE_MAIN
 */
 
 	// Default id holder string set
-	template<typename TSpec = Generous >
+	template<typename TSpec = Tight >
 	struct Dependent;						// holds references of its elements
 
 
@@ -666,13 +666,16 @@ a single integer value between 0 and the sum of string lengths minus 1.
 		public:
 			typedef String<TString*>							TStrings;
 			typedef typename Id<StringSet>::Type				TIdType;
+			typedef typename Position<StringSet>::Type			TPosition;
 			typedef String<TIdType>								TIds;
+			typedef std::map<TIdType, TPosition>				TIdPosMap;
 			typedef typename StringSetLimits<StringSet>::Type	TLimits;
 			typedef typename Concatenator<StringSet>::Type		TConcatenator;
 	//____________________________________________________________________________
 
 			TStrings		strings;
 			TIds			ids;
+			TIdPosMap		id_pos_map;
 			TLimits			limits;
 			bool			limitsValid;		// is true if limits contains the cumulative sum of the sequence lengths
 			TConcatenator	concat;
@@ -1098,8 +1101,11 @@ a single integer value between 0 and the sum of string lengths minus 1.
 		Tag<TExpand> const) 
 	{
 		SEQAN_CHECKPOINT
+		typedef typename Position<StringSet<TString, Dependent<Tight> > >::Type TPos;
 		appendValue(me.strings, const_cast<TString*>(&obj));
-		appendValue(me.ids, length(me.strings) - 1);
+		TPos last = length(me.strings) - 1;
+		appendValue(me.ids, last);
+		me.id_pos_map.insert(std::make_pair(last, last));
         appendValue(me.limits, lengthSum(me) + length(obj));
 	}
   
@@ -1145,6 +1151,7 @@ a single integer value between 0 and the sum of string lengths minus 1.
 	{
 	SEQAN_CHECKPOINT
 		clear(me.strings);
+		me.id_pos_map.clear();
 		resize(me.limits, 1);
 		me.limitsValid = true;
 
@@ -1378,11 +1385,14 @@ end(StringSet< TString, TSpec > const & me,
 				TId const id) 
 	{
 	SEQAN_CHECKPOINT
+		return (value(me, me.id_pos_map.find(id)->second));
+		/*
 		for(unsigned i = 0; i < length(me.strings); ++i)
 			if ((TId) me.ids[i] == id)
 				return value(me, i);
 		static TString tmp = "";
 		return tmp;
+		*/
 	}
 
 
@@ -1490,8 +1500,22 @@ end(StringSet< TString, TSpec > const & me,
 	{
 	SEQAN_CHECKPOINT
 		typedef StringSet<TString, Dependent<Tight> > TStringSet;
+		typedef typename TStringSet::TIdPosMap::const_iterator TIter;
 		typedef typename Size<TStringSet>::Type TSize;
 		
+		TIter pos = me.id_pos_map.find(id);
+		if (pos != me.id_pos_map.end()) {
+			me.strings[pos->second] = &obj;
+			me.limitsValid = false;
+			return id;
+		}
+		appendValue(me.strings, &obj);
+		appendValue(me.ids, id);
+		me.id_pos_map.insert(std::make_pair(id, length(me.strings) - 1));
+        appendValue(me.limits, lengthSum(me) + length(obj));
+		return id;
+		
+		/*
 		for(TSize i = 0; i < length(me.ids); ++i)
 			if ((TId) me.ids[i] == id) {
 				me.strings[i] = &obj;
@@ -1501,6 +1525,7 @@ end(StringSet< TString, TSpec > const & me,
 		appendValue(me.strings, &obj);
 		appendValue(me.ids, id);
 		return id;
+		*/
 	}
 
 	template<typename TString, typename TSpec1, typename TSpec2, typename TId>
@@ -1560,7 +1585,20 @@ end(StringSet< TString, TSpec > const & me,
 	SEQAN_CHECKPOINT
 		typedef StringSet<TString, Dependent<Tight> > TStringSet;
 		typedef typename Size<TStringSet>::Type TSize;
+		typedef typename TStringSet::TIdPosMap::iterator TIter;
 
+		SEQAN_ASSERT(length(me.limits) == length(me) + 1);
+		TIter pos = me.id_pos_map.find(id);
+		if (pos != me.id_pos_map.end()) {
+			erase(me.strings, pos->second);
+			erase(me.ids, pos->second);
+			me.id_pos_map.erase(pos);
+			resize(me.limits, length(me.limits) - 1);
+		}
+		
+			
+		SEQAN_ASSERT(length(me.limits) == length(me) + 1);
+/*
 		SEQAN_ASSERT(length(me.limits) == length(me) + 1);
 		for(TSize i = 0; i < length(me.strings); ++i)
 			if (me.ids[i] == id) {
@@ -1570,6 +1608,8 @@ end(StringSet< TString, TSpec > const & me,
 				me.limitsValid = empty(me);
 			}
 		SEQAN_ASSERT(length(me.limits) == length(me) + 1);
+		*/
+
 	}
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1682,10 +1722,13 @@ end(StringSet< TString, TSpec > const & me,
 				TId const id) 
 	{
 	SEQAN_CHECKPOINT
+		return me.id_pos_map.find(id)->second;
+	/*
 		for(unsigned i = 0; i < length(me.ids); ++i)
 			if ((TId) me.ids[i] == id)
 				return i;
 		return 0;
+		*/
 	}
 
 
