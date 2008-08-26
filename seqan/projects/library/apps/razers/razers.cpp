@@ -644,8 +644,7 @@ void dumpMatches(
 					}
 
 					percId = 100.0 * (1.0 - (double)(*it).editDist / (double)readLen);
-
-					if (orientation == 'F')
+					if ((*it).orientation == 'F')		
 						file << '>' << gBegin << ',' << gEnd;	// forward strand
 					else
 						file << '>' << gEnd << ',' << gBegin;	// reverse strand (switch begin and end)
