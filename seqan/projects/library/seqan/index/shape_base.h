@@ -59,14 +59,14 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename TValue, typename TSpec>
 	struct Value<Shape<TValue,TSpec> >
 	{
-		typedef unsigned Type;
+		typedef unsigned long Type;
 	};
 
 ///.Metafunction.Size.param.T.type:Class.Shape
 	template <typename TValue, typename TSpec>
 	struct Size<Shape<TValue,TSpec> >
 	{
-		typedef unsigned Type;
+		typedef unsigned long Type;
 	};
 
 ///.Metafunction.LENGTH.param.T.type:Class.Shape
@@ -189,7 +189,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		typename Value<Shape>::Type	hValue;		// current hash value
 		typename Value<Shape>::Type	XValue;		// Sum_{i=0..q-1} (x_i + 1)
-		TValue						leftChar;	// left-most character
+		TValue						leftChar;	// leftmost character
 //____________________________________________________________________________
 		
 	};
@@ -245,8 +245,9 @@ For gapped shapes this is the number of '1's.
 	resize(Shape<TValue, SimpleShape> & me, TSize new_length)
 	{
 	SEQAN_CHECKPOINT
-		me.leftFactor = _intPow((unsigned)ValueSize<TValue>::VALUE, new_length - 1);
-		me.leftFactor2 = (_intPow((unsigned)ValueSize<TValue>::VALUE, new_length) - 1) / (ValueSize<TValue>::VALUE - 1);
+		typedef typename Value< Shape<TValue, SimpleShape> >::Type	THValue;
+		me.leftFactor = _intPow((THValue)ValueSize<TValue>::VALUE, new_length - 1);
+		me.leftFactor2 = (_intPow((THValue)ValueSize<TValue>::VALUE, new_length) - 1) / (ValueSize<TValue>::VALUE - 1);
 		return me.span = new_length;
 	}
 
@@ -600,6 +601,30 @@ If $charsLeft$ is smaller than the shape's span, the hash value corresponds to t
 			result[--i] = (TValue)(hash % ValueSize<TValue>::VALUE);
 			hash /= ValueSize<TValue>::VALUE;
 		}
+	}
+
+//____________________________________________________________________________
+
+	template <typename TValue, typename TShapeString>
+	inline bool
+	stringToShape(
+		Shape<TValue, SimpleShape> &me, 
+		TShapeString const &bitmap)
+	{
+	SEQAN_CHECKPOINT
+		typedef typename Iterator<TShapeString const>::Type		TIter;
+		typedef typename Size<TShapeString const>::Type			TSize;
+
+		TIter it = begin(bitmap, Standard());
+		TIter itEnd = end(bitmap, Standard());
+
+		TSize ones = 0;
+		for(; it != itEnd && *it == '1' ; ++it)
+			++ones;
+
+		resize(me, ones);
+
+		return length(bitmap) == ones;
 	}
 
 	template <typename TShapeString, typename TValue, unsigned q>

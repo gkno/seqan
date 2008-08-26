@@ -100,11 +100,19 @@ The number of '1's (relevant positions) in the shape determines $q$ and the size
 	struct Index_QGram;
 
 
+	// use the index value type as shape value type
 	template < typename TObject, typename TShapeSpec, typename TSpec >
 	struct Fibre< Index<TObject, Index_QGram<TShapeSpec, TSpec> >, Fibre_Shape> 
 	{
 		typedef Index< TObject, Index_QGram<TShapeSpec, TSpec> >	TIndex;
 		typedef Shape< typename Value<TIndex>::Type, TShapeSpec >	Type;
+	};
+
+	// allow different value types for the shape
+	template < typename TObject, typename TShapeValue, typename TShapeSpec, typename TSpec >
+	struct Fibre< Index<TObject, Index_QGram<Shape<TShapeValue, TShapeSpec>, TSpec> >, Fibre_Shape> 
+	{
+		typedef Shape<TShapeValue, TShapeSpec>	Type;
 	};
 
 	template < typename TObject, typename TShapeSpec, typename TSpec >
@@ -1458,7 +1466,7 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 		Default const) 
 	{
 		typedef Index<TText, Index_QGram<TShapeSpec, TSpec> >	TIndex;
-		typedef Shape<typename Value<TIndex>::Type, TShapeSpec>	TShape;
+		typedef typename Fibre<TIndex, QGram_Shape>::Type		TShape;
 
 		TShape &shape = indexShape(index);
 
@@ -1486,7 +1494,7 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 		Default const alg)
 	{
 		typedef Index<TText, Index_QGram<TShapeSpec, TSpec> >	TIndex;
-		typedef Shape<typename Value<TIndex>::Type, TShapeSpec>	TShape;
+		typedef typename Fibre<TIndex, QGram_Shape>::Type		TShape;
 
 		TShape &shape = indexShape(index);
 

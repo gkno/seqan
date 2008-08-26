@@ -366,6 +366,7 @@ inline void _patternInit(Pattern<TIndex, Swift<TSpec> > &pattern, TFloat errorRa
 		pattern._currentMinLengthForAll == minLengthForAll)	return;
 
 	indexRequire(host(pattern), QGram_SADir());
+	pattern.shape = indexShape(host(pattern));
 
 	TIndex const &index = host(pattern);
 	TSize seqCount = countSequences(index);

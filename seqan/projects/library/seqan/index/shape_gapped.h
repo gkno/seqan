@@ -538,7 +538,7 @@ You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 
 	template <typename TValue, typename TSpec, typename TIter>
 	inline typename Value< Shape<TValue, FixedGappedShape<TSpec> > >::Type
-	hashNext(Shape<TValue, FixedGappedShape<TSpec> > &me, TIter it)	
+	hashNext(Shape<TValue, FixedGappedShape<TSpec> > &me, TIter &it)
 	{
 	SEQAN_CHECKPOINT
 		return hash(me, it);
@@ -560,7 +560,7 @@ You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 */
 
 	template <typename TValue, typename TSpec, typename TShapeString>
-	inline void
+	inline bool
 	stringToShape(
 		Shape<TValue, FixedGappedShape<TSpec> > &me, 
 		TShapeString const &bitmap)
@@ -581,12 +581,17 @@ You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 
 		if ((it = begin(bitmap, Standard())) == itEnd) {
 			me.span = 0;
-			return;
-		}		
+			return false;
+		}
 		
 		unsigned diff = 1;
 		me.span = 1;
 		TShapeIter itS = begin(me.diffs, Standard());
+
+		// first character must be '1'
+		if (*it != '1')
+			return false;
+
 		for(++it; it != itEnd; ++it) 
 		{
 			if (*it == '1') 
@@ -598,6 +603,8 @@ You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 			}
 			++diff;
 		}
+		// last character must be '1'
+		return diff == 1;
 	}
 
 	template <typename TShapeString, typename TValue, typename TSpec>
