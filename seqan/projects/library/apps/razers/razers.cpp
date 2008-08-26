@@ -80,6 +80,7 @@ using namespace seqan;
 															// 1..           1. genome position, 2. read number
 	static unsigned		optionPositionFormat = 0;			// 0..gap space
 															// 1..position space
+	static string		optionShape = "11111111111";		// shape (e.g. 11111111111)
 	static int			optionThreshold = 1;				// threshold
 	static int			optionTabooLength = 1;				// taboo length
 	static int			optionRepeatLength = 1000;			// repeat length threshold
@@ -141,17 +142,10 @@ using namespace seqan;
 	typedef String<TAlphabet>	TRead;
 	typedef StringSet<TRead>	TReadSet;
 
-	typedef Index<TReadSet, Index_QGram<FixedShape<QGRAM_LEN> > >	TReadIndex;
-/*	typedef Index<TReadSet, Index_QGram<
-		FixedGappedShape< 
-			HardwiredShape< 1, 1, 1, 1, 1, 1, 1, 1, 1, 8, 1 > 
-		> 
-	> >	TReadIndex;
-*/
 namespace seqan 
 {
-	template <>
-	struct SAValue<TReadIndex> {
+	template <typename TShape>
+	struct SAValue< Index<TReadSet, TShape> > {
 		typedef Pair<
 			unsigned,		// many
 			unsigned,		// short reads
@@ -168,12 +162,13 @@ namespace seqan
 {
 	//////////////////////////////////////////////////////////////////////////////
 	// Repeat masker
-	template <>
-	inline bool _qgramDisableBuckets(TReadIndex &index) 
+	template <typename TShape>
+	inline bool _qgramDisableBuckets(Index<TReadSet, Index_QGram<TShape> > &index) 
 	{
-		typedef Fibre<TReadIndex, QGram_Dir>::Type	TDir;
-		typedef Iterator<TDir, Standard>::Type		TDirIterator;
-		typedef Value<TDir>::Type					TSize;
+		typedef Index<TReadSet, Index_QGram<TShape>	>		TReadIndex;
+		typedef typename Fibre<TReadIndex, QGram_Dir>::Type	TDir;
+		typedef typename Iterator<TDir, Standard>::Type		TDirIterator;
+		typedef typename Value<TDir>::Type					TSize;
 
 		TDir &dir    = indexDir(index);
 		bool result  = false;
@@ -650,7 +645,10 @@ void dumpMatches(
 
 					percId = 100.0 * (1.0 - (double)(*it).editDist / (double)readLen);
 
-					file << '>' << gBegin << ',' << gEnd;
+					if (orientation == 'F')
+						file << '>' << gBegin << ',' << gEnd;	// forward strand
+					else
+						file << '>' << gEnd << ',' << gBegin;	// reverse strand (switch begin and end)
 					file << "[id=" << id << ",fragId=" << fragId;
 					file << ",errors=" << (*it).editDist << ",percId=" << setprecision(5) << percId << ']' << endl;
 
@@ -665,6 +663,88 @@ void dumpMatches(
 	if (_debugLevel >= 1)
 		cerr << "Dumping results took             \t" << SEQAN_PROTIMEDIFF(dump_time) << " seconds" << endl;
 }
+
+//////////////////////////////////////////////////////////////////////////////
+// Main Part
+
+template <typename TShape>
+int mapReads(const char *genomeFileName, const char *readFileName, TShape &shape)
+{
+	typedef Index<TReadSet, Index_QGram<TShape> >	TReadIndex;
+
+	TGenomeSet				genomeSet;
+	StringSet<CharString>	genomeNames;	// genome names, taken from the Fasta file
+	TReadSet				readSet;
+	StringSet<CharString>	readNames;		// read names, taken from the Fasta file
+	
+	TReadIndex				swiftIndex(readSet, shape);
+	TMatches				matches;		// resulting forward/reverse matches
+
+	static const double epsilon = 0.0000001;
+
+	// dump configuration in verbose mode
+	if (_debugLevel >= 1) 
+	{
+		CharString bitmap;
+		shapeToString(bitmap, indexShape(swiftIndex));
+		cerr << "___SETTINGS____________" << endl;
+		cerr << "Compute forward matches:         \t";
+		if (optionForward)	cerr << "YES" << endl;
+		else				cerr << "NO" << endl;
+		cerr << "Compute reverse matches:         \t";
+		if (optionRev)		cerr << "YES" << endl;
+		else				cerr << "NO" << endl;
+		cerr << "Error rate:                      \t" << optionErrorRate << endl;
+		cerr << "Minimal threshold:               \t" << optionThreshold << endl;
+		cerr << "Shape:                           \t" << bitmap << " (" << typeid(shape).name() << ')' << endl;
+		cerr << "Repeat threshold:                \t" << optionRepeatLength << endl;
+		cerr << "Overabundance threshold:         \t" << optionAbundanceCut << endl;
+		cerr << "Taboo length:                    \t" << optionTabooLength << endl;
+		cerr << endl;
+	}
+
+	// circumvent numerical obstacles
+	optionErrorRate += epsilon;
+
+
+	//////////////////////////////////////////////////////////////////////////////
+	// Step 1: Load fasta files
+	if (!loadFasta(genomeSet, genomeNames, genomeFileName)) {
+		cerr << "Failed to load genomes" << endl;
+		return 1;
+	}
+	if (_debugLevel >= 1) cerr << lengthSum(genomeSet) << " bps of " << length(genomeSet) << " genomes loaded." << endl;
+
+	if (!loadFasta(readSet, readNames, readFileName)) {
+		cerr << "Failed to load reads" << endl;
+		return 1;
+	}
+	if (_debugLevel >= 1) cerr << lengthSum(readSet) << " bps of " << length(readSet) << " reads loaded." << endl;
+
+
+	//////////////////////////////////////////////////////////////////////////////
+	// Step 2: Find matches using SWIFT
+	if (optionForward)
+		if (_debugLevel >= 1)
+			cerr << endl << "___FORWARD_STRAND______";
+		findReads(matches, genomeSet, swiftIndex, 'F');
+
+#ifndef OMIT_REVERSECOMPLEMENT
+	if (optionRev) 
+	{
+		if (_debugLevel >= 1)
+			cerr << endl << "___BACKWARD_STRAND_____";
+		reverseComplementInPlace(genomeSet);			// build reverse-compl of genome
+		findReads(matches, genomeSet, swiftIndex, 'R');
+		reverseComplementInPlace(genomeSet);			// restore original genome seqs
+	}
+#endif
+
+	//////////////////////////////////////////////////////////////////////////////
+	// Step 3: Remove duplicates and output matches
+	dumpMatches(matches, genomeSet, genomeNames, readSet, readNames, genomeFileName, readFileName);
+	return 0;
+}	
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -705,6 +785,7 @@ void printHelp(int, const char *[], bool longHelp = false)
 		cerr << "  -pf, --position-format       \t" << "0 = gap space (default)" << endl;
 		cerr << "                               \t" << "1 = position space" << endl;
 		cerr << endl << "Filtration Options:" << endl;
+		cerr << "  -s,  --shape                 \t" << "set k-mer shape (binary string, default " << optionShape << ')' << endl;
 		cerr << "  -t,  --threshold NUM         \t" << "set minimum k-mer threshold (default " << optionThreshold << ")" << endl;
 		cerr << "  -oc, --overabundance-cut NUM \t" << "set k-mer overabundance cut ratio (default " << optionAbundanceCut << ")" << endl;
 		cerr << "  -rl, --repeat-length NUM     \t" << "set simple-repeat length threshold (default " << optionRepeatLength << ")" << endl;
@@ -726,7 +807,6 @@ int main(int argc, const char *argv[])
 
 	unsigned			fnameCount = 0;
 	const char			*fname[2] = { "", "" };
-	static const double epsilon = 0.0000001;
 
 	for(int arg = 1; arg < argc; ++arg) {
 		if (argv[arg][0] == '-') {
@@ -850,6 +930,47 @@ int main(int argc, const char *argv[])
 				printHelp(argc, argv);
 				return 0;
 			}
+			if (strcmp(argv[arg], "-s") == 0 || strcmp(argv[arg], "--shape") == 0){
+				if (arg + 1 < argc) {
+					++arg;
+					istringstream istr(argv[arg]);
+					istr >> optionShape;
+					if (istr.fail())
+						cerr << "Could not parse shape" << endl << endl;
+					else
+					{
+						unsigned ones = 0;
+						unsigned zeros = 0;
+						for(unsigned i = 0; i < length(optionShape); ++i)
+							switch (optionShape[i])
+							{
+								case '0':
+									++zeros;
+									break;
+								case '1':
+									++ones;
+									break;
+								default:
+									cerr <<	"Shape must be a binary string" << endl << endl;
+									printHelp(argc, argv);
+									return 0;
+							}
+						if (ones == 0 || ones > 20) 
+						{
+							cerr <<	"Invalid Shape" << endl << endl;
+							printHelp(argc, argv);
+							return 0;
+						}
+
+						if (ones < 7 || ones > 14)
+							cerr <<	"Warning: Shape should contain at least 7 and at most 14 '1's" << endl << endl;
+
+						continue;				
+					}
+				}
+				printHelp(argc, argv);
+				return 0;
+			}
 			if (strcmp(argv[arg], "-oc") == 0 || strcmp(argv[arg], "--overabundance-cut") == 0) {
 				if (arg + 1 < argc) {
 					++arg;
@@ -955,76 +1076,20 @@ int main(int argc, const char *argv[])
 	if (optionPrintVersion)
 		printVersion();
 
-	TGenomeSet				genomeSet;
-	StringSet<CharString>	genomeNames;	// genome names, taken from the Fasta file
-	TReadSet				readSet;
-	StringSet<CharString>	readNames;		// read names, taken from the Fasta file
+	Shape<TAlphabet, SimpleShape>		ungapped;
+	Shape<TAlphabet, OneGappedShape>	onegapped;
+	Shape<TAlphabet, GappedShape>		gapped;
+
+	if (stringToShape(ungapped, optionShape))
+		return mapReads(fname[0], fname[1], ungapped);
 	
-	TReadIndex				swiftIndex(readSet);
-	TMatches				matches;		// resulting forward/reverse matches
+	if (stringToShape(onegapped, optionShape))
+		return mapReads(fname[0], fname[1], onegapped);
 
+	if (stringToShape(gapped, optionShape))
+		return mapReads(fname[0], fname[1], gapped);
 
-	// dump configuration in verbose mode
-	if (_debugLevel >= 1) 
-	{
-		CharString bitmap;
-		shapeToString(bitmap, indexShape(swiftIndex));
-		cerr << "___SETTINGS____________" << endl;
-		cerr << "Compute forward matches:         \t";
-		if (optionForward)	cerr << "YES" << endl;
-		else				cerr << "NO" << endl;
-		cerr << "Compute reverse matches:         \t";
-		if (optionRev)		cerr << "YES" << endl;
-		else				cerr << "NO" << endl;
-		cerr << "Error rate:                      \t" << optionErrorRate << endl;
-		cerr << "Minimal threshold:               \t" << optionThreshold << endl;
-		cerr << "Shape:                           \t" << bitmap << endl;
-		cerr << "Repeat threshold:                \t" << optionRepeatLength << endl;
-		cerr << "Overabundance threshold:         \t" << optionAbundanceCut << endl;
-		cerr << "Taboo length:                    \t" << optionTabooLength << endl;
-		cerr << endl;
-	}
-
-	// circumvent numerical obstacles
-	optionErrorRate += epsilon;
-
-
-	//////////////////////////////////////////////////////////////////////////////
-	// Step 1: Load fasta files
-	if (!loadFasta(genomeSet, genomeNames, fname[0])) {
-		cerr << "Failed to load genomes" << endl;
-		return 1;
-	}
-	if (_debugLevel >= 1) cerr << lengthSum(genomeSet) << " bps of " << length(genomeSet) << " genomes loaded." << endl;
-
-	if (!loadFasta(readSet, readNames, fname[1])) {
-		cerr << "Failed to load reads" << endl;
-		return 1;
-	}
-	if (_debugLevel >= 1) cerr << lengthSum(readSet) << " bps of " << length(readSet) << " reads loaded." << endl;
-
-
-	//////////////////////////////////////////////////////////////////////////////
-	// Step 2: Find matches using SWIFT
-	if (optionForward)
-		if (_debugLevel >= 1)
-			cerr << endl << "___FORWARD_STRAND______";
-		findReads(matches, genomeSet, swiftIndex, 'F');
-
-#ifndef OMIT_REVERSECOMPLEMENT
-	if (optionRev) 
-	{
-		if (_debugLevel >= 1)
-			cerr << endl << "___BACKWARD_STRAND_____";
-		reverseComplementInPlace(genomeSet);			// build reverse-compl of genome
-		findReads(matches, genomeSet, swiftIndex, 'R');
-		reverseComplementInPlace(genomeSet);			// restore original genome seqs
-	}
-#endif
-
-	//////////////////////////////////////////////////////////////////////////////
-	// Step 3: Remove duplicates and output matches
-	dumpMatches(matches, genomeSet, genomeNames, readSet, readNames, fname[0], fname[1]);
-	
+	cerr <<	"Invalid Shape" << endl << endl;
+	printHelp(argc, argv);
 	return 0;
 }
