@@ -115,7 +115,7 @@ using namespace seqan;
 			if (a.gBegin < b.gBegin) return true;
 			if (a.gBegin > b.gBegin) return false;
 			if (a.rseqNo < b.rseqNo) return true;
-			return false;
+			return a.editDist < b.editDist;
 		}
 	};
 
@@ -129,7 +129,7 @@ using namespace seqan;
 			if (a.gseqNo < b.gseqNo) return true;
 			if (a.gseqNo > b.gseqNo) return false;
 			if (a.gBegin < b.gBegin) return true;
-			return false;
+			return a.editDist < b.editDist;
 		}
 	};
 
@@ -172,6 +172,7 @@ namespace seqan
 
 		TDir &dir    = indexDir(index);
 		bool result  = false;
+		unsigned counter = 0;
 		TSize thresh = (TSize)(length(index) * optionAbundanceCut);
 		if (thresh < 100) thresh = 100;
 
@@ -184,7 +185,12 @@ namespace seqan
 //				cerr << qgram << " " << *it << endl;
 				*it = (TSize)-1;
 				result = true;
+				++counter;
 			}
+
+		if (counter > 0 && _debugLevel >= 1)
+			cerr << "Removed " << counter << " k-mers" << endl;
+
 
 		return result;
 	}
@@ -304,10 +310,9 @@ void findReads(
 			TGenomeInfix inf(range(swiftFinder, genome));
 			TMyersFinder myersFinder(inf);
 			TMyersPattern &myersPattern = forwardPatterns[ndlSeqNo];
-
 #ifdef RAZERS_DEBUG
 			cout<<"Verify: "<<endl;
-			cout<<"Genome: "<<inf<<endl;
+			cout<<"Genome: "<<inf<<"\t" << beginPosition(inf) << "," << endPosition(inf) << endl;
 			cout<<"Read:   "<<host(myersPattern)<<endl;
 #endif
 			// find end of best semi-global alignment
@@ -529,72 +534,72 @@ void dumpMatches(
 		case 0:	// Razer Format
 			for(; it != itEnd; ++it) 
 			{
-				if (readNo != (*it).rseqNo || _gBegin != (*it).gBegin || gseqNo != (*it).gseqNo)
+				if (readNo == (*it).rseqNo && _gBegin == (*it).gBegin && gseqNo == (*it).gseqNo)
+					continue;
+
+				readNo = (*it).rseqNo;
+				gseqNo = (*it).gseqNo;
+				_gBegin = (*it).gBegin;
+				gEnd = (*it).gEnd;
+				orientation = (*it).orientation;
+
+				unsigned	readLen = length(reads[readNo]);
+				double		percId;
+		
+				gBegin = _gBegin;
+
+				if (optionPositionFormat == 1)
+					++gBegin;
+
+				percId = 100.0 * (1.0 - (double)(*it).editDist / (double)readLen);
+
+				switch (optionReadNaming)
 				{
-					readNo = (*it).rseqNo;
-					gseqNo = (*it).gseqNo;
-					_gBegin = (*it).gBegin;
-					gEnd = (*it).gEnd;
-					orientation = (*it).orientation;
+					// 0..filename is the read's Fasta id
+					case 0:
+						file << readIDs[readNo];
+						break;
 
-					unsigned	readLen = length(reads[readNo]);
-					double		percId;
-			
-					gBegin = _gBegin;
+					// 1..filename is the read filename + seqNo
+					case 1:
+						file.fill('0');
+						file << readName << '#' << setw(pzeros) << readNo + 1;
+						break;
 
-					if (optionPositionFormat == 1)
-						++gBegin;
+					// 2..filename is the read sequence itself
+					case 2:
+						file << reads[readNo];
+				}
 
-					percId = 100.0 * (1.0 - (double)(*it).editDist / (double)readLen);
+				file << ',' << optionPositionFormat << ',' << readLen << ',' << orientation << ',';
 
-					switch (optionReadNaming)
-					{
-						// 0..filename is the read's Fasta id
-						case 0:
-							file << readIDs[readNo];
-							break;
+				switch (optionGenomeNaming)
+				{
+					// 0..filename is the read's Fasta id
+					case 0:
+						file << genomeIDs[gseqNo];
+						break;
 
-						// 1..filename is the read filename + seqNo
-						case 1:
+					// 1..filename is the read filename + seqNo
+					case 1:
+						if (multipleGenomes) {
 							file.fill('0');
-							file << readName << '#' << setw(pzeros) << readNo + 1;
-							break;
+							file << genomeName << '#' << setw(gzeros) << gseqNo + 1;
+						} else
+							file << genomeName;
+				}
 
-						// 2..filename is the read sequence itself
-						case 2:
-							file << reads[readNo];
-					}
+				file << ',' << gBegin << ',' << gEnd << ',' << setprecision(5) << percId << endl;
 
-					file << ',' << optionPositionFormat << ',' << readLen << ',' << orientation << ',';
-
-					switch (optionGenomeNaming)
-					{
-						// 0..filename is the read's Fasta id
-						case 0:
-							file << genomeIDs[gseqNo];
-							break;
-
-						// 1..filename is the read filename + seqNo
-						case 1:
-							if (multipleGenomes) {
-								file.fill('0');
-								file << genomeName << '#' << setw(gzeros) << gseqNo + 1;
-							} else
-								file << genomeName;
-					}
-
-					file << ',' << gBegin << ',' << gEnd << ',' << setprecision(5) << percId << endl;
-
-					if (optionDumpAlignment) {
-						assignSource(row(align, 0), reads[readNo]);
-						assignSource(row(align, 1), infix(genomes[gseqNo], gBegin, gEnd));
+				if (optionDumpAlignment) {
+					assignSource(row(align, 0), reads[readNo]);
+					assignSource(row(align, 1), infix(genomes[gseqNo], gBegin, gEnd));
 #ifndef OMIT_REVERSECOMPLEMENT
-						if (orientation == 'R')
-							reverseComplementInPlace(source(row(align, 1)));
+					if (orientation == 'R')
+						reverseComplementInPlace(source(row(align, 1)));
 #endif
-						globalAlignment(align, scoreType);
-						dumpAlignment(file, align);
-					}
+					globalAlignment(align, scoreType);
+					dumpAlignment(file, align);
 				}
 			}
 			break;
@@ -603,56 +608,57 @@ void dumpMatches(
 		case 1:	// Enhanced Fasta Format
 			for(; it != itEnd; ++it) 
 			{
-				if (readNo != (*it).rseqNo || _gBegin != (*it).gBegin || gseqNo != (*it).gseqNo)
+				if (readNo == (*it).rseqNo && _gBegin == (*it).gBegin && gseqNo == (*it).gseqNo)
+					continue;
+
+				readNo = (*it).rseqNo;
+				gseqNo = (*it).gseqNo;
+				_gBegin = (*it).gBegin;
+				gEnd = (*it).gEnd;
+
+				unsigned	readLen = length(reads[readNo]);
+				double		percId;
+
+				gBegin = _gBegin;
+
+				if (optionPositionFormat == 1)
+					++gBegin;
+
+				string fastaID;
+				assign(fastaID, readIDs[readNo]);
+
+				int id = readNo;
+				int fragId = readNo;
+
+				size_t left = fastaID.find_first_of('[');
+				size_t right = fastaID.find_last_of(']');
+				if (left != fastaID.npos && right != fastaID.npos && left < right) 
 				{
-					readNo = (*it).rseqNo;
-					gseqNo = (*it).gseqNo;
-					_gBegin = (*it).gBegin;
-					gEnd = (*it).gEnd;
-
-					unsigned	readLen = length(reads[readNo]);
-					double		percId;
-
-					gBegin = _gBegin;
-
-					if (optionPositionFormat == 1)
-						++gBegin;
-
-					string fastaID;
-					assign(fastaID, readIDs[readNo]);
-
-					int id = readNo;
-					int fragId = readNo;
-
-					size_t left = fastaID.find_first_of('[');
-					size_t right = fastaID.find_last_of(']');
-					if (left != fastaID.npos && right != fastaID.npos && left < right) 
-					{
-						fastaID.erase(right);
-						fastaID.erase(0, left + 1);
-						replace(fastaID.begin(), fastaID.end(), ',', ' ');
-						size_t pos = fastaID.find("id=");
-						if (pos != fastaID.npos) {
-							istringstream iss(fastaID.substr(pos + 3));
-							iss >> id;
-						}
-						pos = fastaID.find("fragId=");
-						if (pos != fastaID.npos) {
-							istringstream iss(fastaID.substr(pos + 7));
-							iss >> fragId;
-						}
+					fastaID.erase(right);
+					fastaID.erase(0, left + 1);
+					replace(fastaID.begin(), fastaID.end(), ',', ' ');
+					size_t pos = fastaID.find("id=");
+					if (pos != fastaID.npos) {
+						istringstream iss(fastaID.substr(pos + 3));
+						iss >> id;
 					}
-
-					percId = 100.0 * (1.0 - (double)(*it).editDist / (double)readLen);
-					if ((*it).orientation == 'F')		
-						file << '>' << gBegin << ',' << gEnd;	// forward strand
-					else
-						file << '>' << gEnd << ',' << gBegin;	// reverse strand (switch begin and end)
-					file << "[id=" << id << ",fragId=" << fragId;
-					file << ",errors=" << (*it).editDist << ",percId=" << setprecision(5) << percId << ']' << endl;
-
-					file << reads[readNo] << endl;
+					pos = fastaID.find("fragId=");
+					if (pos != fastaID.npos) {
+						istringstream iss(fastaID.substr(pos + 7));
+						iss >> fragId;
+					}
 				}
+
+				percId = 100.0 * (1.0 - (double)(*it).editDist / (double)readLen);
+
+				if ((*it).orientation == 'F')		
+					file << '>' << gBegin << ',' << gEnd;	// forward strand
+				else
+					file << '>' << gEnd << ',' << gBegin;	// reverse strand (switch begin and end)
+				file << "[id=" << id << ",fragId=" << fragId;
+				file << ",errors=" << (*it).editDist << ",percId=" << setprecision(5) << percId << ']' << endl;
+
+				file << reads[readNo] << endl;
 			}
 			break;
 	}
@@ -695,7 +701,7 @@ int mapReads(const char *genomeFileName, const char *readFileName, TShape &shape
 		else				cerr << "NO" << endl;
 		cerr << "Error rate:                      \t" << optionErrorRate << endl;
 		cerr << "Minimal threshold:               \t" << optionThreshold << endl;
-		cerr << "Shape:                           \t" << bitmap << " (" << typeid(shape).name() << ')' << endl;
+		cerr << "Shape:                           \t" << bitmap << endl;
 		cerr << "Repeat threshold:                \t" << optionRepeatLength << endl;
 		cerr << "Overabundance threshold:         \t" << optionAbundanceCut << endl;
 		cerr << "Taboo length:                    \t" << optionTabooLength << endl;
@@ -724,9 +730,11 @@ int mapReads(const char *genomeFileName, const char *readFileName, TShape &shape
 	//////////////////////////////////////////////////////////////////////////////
 	// Step 2: Find matches using SWIFT
 	if (optionForward)
+	{
 		if (_debugLevel >= 1)
 			cerr << endl << "___FORWARD_STRAND______";
 		findReads(matches, genomeSet, swiftIndex, 'F');
+	}
 
 #ifndef OMIT_REVERSECOMPLEMENT
 	if (optionRev) 
