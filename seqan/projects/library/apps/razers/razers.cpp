@@ -25,6 +25,7 @@
 //#define RAZERS_DEBUG			// print verification regions
 #define RAZERS_PRUNE_QGRAM_INDEX
 //#define RAZERS_HAMMINGVERIFY	// allow only mismatches, no indels
+#define RAZERS_MAXHITS			// drop reads with too many matches
 
 #include "seqan/platform.h"
 #ifdef PLATFORM_WINDOWS
@@ -85,6 +86,7 @@ using namespace seqan;
 	static int			optionTabooLength = 1;				// taboo length
 	static int			optionRepeatLength = 1000;			// repeat length threshold
 	static double		optionAbundanceCut = 1;				// abundance threshold
+	static int			optionMaxHits = 100;				// hit count threshold
 	static int			_debugLevel = 0;					// level of verbosity
 	static bool			optionPrintVersion = false;			// print version number
 
@@ -147,7 +149,6 @@ using namespace seqan;
 			return a.editDist < b.editDist;
 		}
 	};
-
 
 //////////////////////////////////////////////////////////////////////////////
 // Definitions
@@ -245,12 +246,13 @@ bool loadFasta(TReadSet &reads, TNameSet &fastaIDs, char const *fileName)
 
 //////////////////////////////////////////////////////////////////////////////
 // Find read matches
-template <typename TMatches, typename TGenomeSet, typename TReadIndex>
+template <typename TMatches, typename TGenomeSet, typename TReadIndex, typename THitCount>
 void findReads(
 	TMatches &matches,			// resulting matches
 	TGenomeSet &genomes,		// Genome
 	TReadIndex &readIndex,
-	char orientation)			// q-gram index of Reads
+	char orientation,			// q-gram index of reads
+	THitCount &hitCount)		// maximum number of hits for each read
 {
 	typedef typename Fibre<TReadIndex, Fibre_Text>::Type	TReadSet;
 	typedef typename Value<TGenomeSet>::Type				TGenome;
@@ -320,6 +322,9 @@ void findReads(
 		while (find(swiftFinder, swiftPattern, optionErrorRate, _debugLevel)) 
 		{
 			unsigned ndlSeqNo = (*swiftFinder.curHit).ndlSeqNo;
+#ifdef RAZERS_MAXHITS				
+			if (hitCount[ndlSeqNo] == -1) continue;
+#endif			
 			unsigned ndlLength = sequenceLength(ndlSeqNo, readIndex);
 
 			TGenomeInfix inf(range(swiftFinder, genome));
@@ -387,7 +392,9 @@ void findReads(
 				}
 				appendValue(matches, m);
 #endif
-
+#ifdef RAZERS_MAXHITS				
+				--hitCount[ndlSeqNo];
+#endif
 				++TP;
 	/*			cerr << "\"" << range(swiftFinder, genomeInf) << "\"  ";
 				cerr << hstkPos << " + ";
@@ -455,7 +462,8 @@ template <
 	typename TGenome,
 	typename TGenomeNames,
 	typename TReads,
-	typename TReadNames
+	typename TReadNames,
+	typename THitCount
 >
 void dumpMatches(
 	TMatchSet &matches,				// forward/reverse matches
@@ -464,7 +472,8 @@ void dumpMatches(
 	TReads const &reads,			// Read sequences
 	TReadNames const &readIDs,		// Read names (read from Fasta file, currently unused)
 	string const &genomeFName,		// genome name (e.g. "hs_ref_chr1.fa")
-	string const &readFName)		// read name (e.g. "reads.fa")
+	string const &readFName,		// read name (e.g. "reads.fa")
+	THitCount &hitCount)
 {
 	typedef typename Value<TMatchSet>::Type		TMatches;
 	typedef typename Value<TMatches>::Type		TMatch;
@@ -517,6 +526,9 @@ void dumpMatches(
 		cerr << "Failed to open output file" << endl;
 		return;
 	}
+
+	clear(hitCount);
+	fill(hitCount, length(reads), 0);
 
 	//////////////////////////////////////////////////////////////////////////////
 	// remove matches with equal ends
@@ -581,6 +593,7 @@ void dumpMatches(
 
 	for(; it != itEnd; ++it) 
 	{
+		if ((*it).orientation == '-') continue;
 		if (readNo == (*it).rseqNo && orientation == (*it).orientation &&
 			gEnd == (*it).gEnd && gseqNo == (*it).gseqNo)
 		{
@@ -593,6 +606,7 @@ void dumpMatches(
 		gseqNo = (*it).gseqNo;
 		gEnd = (*it).gEnd;
 		orientation = (*it).orientation;
+		++hitCount[readNo];
 	}
 
 	it = begin(matches, Standard());
@@ -611,6 +625,9 @@ void dumpMatches(
 					continue;
 
 				readNo = (*it).rseqNo;
+#ifdef RAZERS_MAXHITS				
+				if (hitCount[readNo] > optionMaxHits) continue;
+#endif
 				gseqNo = (*it).gseqNo;
 				gBegin = (*it).gBegin;
 				gEnd = (*it).gEnd;
@@ -684,6 +701,9 @@ void dumpMatches(
 					continue;
 
 				readNo = (*it).rseqNo;
+#ifdef RAZERS_MAXHITS				
+				if (hitCount[readNo] == -1) continue;
+#endif
 				gseqNo = (*it).gseqNo;
 				gBegin = (*it).gBegin;
 				gEnd = (*it).gEnd;
@@ -752,8 +772,8 @@ int mapReads(const char *genomeFileName, const char *readFileName, TShape &shape
 	TReadSet				readSet;
 	StringSet<CharString>	readNames;		// read names, taken from the Fasta file
 	
-	TReadIndex				swiftIndex(readSet, shape);
 	TMatches				matches;		// resulting forward/reverse matches
+	String<int>				hitCount;
 
 	static const double epsilon = 0.0000001;
 
@@ -761,7 +781,7 @@ int mapReads(const char *genomeFileName, const char *readFileName, TShape &shape
 	if (_debugLevel >= 1) 
 	{
 		CharString bitmap;
-		shapeToString(bitmap, indexShape(swiftIndex));
+		shapeToString(bitmap, shape);
 		cerr << "___SETTINGS____________" << endl;
 		cerr << "Compute forward matches:         \t";
 		if (optionForward)	cerr << "YES" << endl;
@@ -796,30 +816,37 @@ int mapReads(const char *genomeFileName, const char *readFileName, TShape &shape
 	}
 	if (_debugLevel >= 1) cerr << lengthSum(readSet) << " bps of " << length(readSet) << " reads loaded." << endl;
 
-
-	//////////////////////////////////////////////////////////////////////////////
-	// Step 2: Find matches using SWIFT
-	if (optionForward)
-	{
-		if (_debugLevel >= 1)
-			cerr << endl << "___FORWARD_STRAND______";
-		findReads(matches, genomeSet, swiftIndex, 'F');
-	}
-
-#ifndef OMIT_REVERSECOMPLEMENT
-	if (optionRev) 
-	{
-		if (_debugLevel >= 1)
-			cerr << endl << "___BACKWARD_STRAND_____";
-		reverseComplementInPlace(genomeSet);			// build reverse-compl of genome
-		findReads(matches, genomeSet, swiftIndex, 'R');
-		reverseComplementInPlace(genomeSet);			// restore original genome seqs
-	}
+#ifdef RAZERS_MAXHITS	
+	// fill max number of hits per read
+	// at most twice as much potential matches are allowed (overlapping parallelograms)
+	fill(hitCount, length(readSet), 2*optionMaxHits);	
 #endif
 
 	//////////////////////////////////////////////////////////////////////////////
+	// Step 2: Find matches using SWIFT
+	{
+		TReadIndex	swiftIndex(readSet, shape);
+
+		if (optionForward)
+		{
+			if (_debugLevel >= 1)
+				cerr << endl << "___FORWARD_STRAND______";
+			findReads(matches, genomeSet, swiftIndex, 'F', hitCount);
+		}
+
+		if (optionRev) 
+		{
+			if (_debugLevel >= 1)
+				cerr << endl << "___BACKWARD_STRAND_____";
+			reverseComplementInPlace(genomeSet);			// build reverse-compl of genome
+			findReads(matches, genomeSet, swiftIndex, 'R', hitCount);
+			reverseComplementInPlace(genomeSet);			// restore original genome seqs
+		}
+	}
+
+	//////////////////////////////////////////////////////////////////////////////
 	// Step 3: Remove duplicates and output matches
-	dumpMatches(matches, genomeSet, genomeNames, readSet, readNames, genomeFileName, readFileName);
+	dumpMatches(matches, genomeSet, genomeNames, readSet, readNames, genomeFileName, readFileName, hitCount);
 	return 0;
 }	
 
@@ -839,7 +866,9 @@ void printHelp(int, const char *[], bool longHelp = false)
 		cerr << "  -r,  --reverse               \t" << "only compute reverse complement matches" << endl;
 		cerr << "  -i,  --percent-identity NUM  \t" << "set the percent identity threshold" << endl;
 		cerr << "                               \t" << "default value is 80" << endl;
-		cerr << "  -o,  --output FILE           \t" << "change output filename (default: <READS FILE>.result)" << endl;
+		cerr << "  -m,  --max-hits              \t" << "ignore reads with more than a maximum number of hits" << endl;
+		cerr << "                               \t" << "default value is " << optionMaxHits << endl;
+		cerr << "  -o,  --output FILE           \t" << "change output filename (default <READS FILE>.result)" << endl;
 		cerr << "  -v,  --verbose               \t" << "verbose mode" << endl;
 		cerr << "  -vv, --vverbose              \t" << "very verbose mode" << endl;
 		cerr << "  -V,  --version               \t" << "print version number" << endl;
@@ -863,10 +892,10 @@ void printHelp(int, const char *[], bool longHelp = false)
 		cerr << "                               \t" << "1 = position space" << endl;
 		cerr << endl << "Filtration Options:" << endl;
 		cerr << "  -s,  --shape                 \t" << "set k-mer shape (binary string, default " << optionShape << ')' << endl;
-		cerr << "  -t,  --threshold NUM         \t" << "set minimum k-mer threshold (default " << optionThreshold << ")" << endl;
-		cerr << "  -oc, --overabundance-cut NUM \t" << "set k-mer overabundance cut ratio (default " << optionAbundanceCut << ")" << endl;
-		cerr << "  -rl, --repeat-length NUM     \t" << "set simple-repeat length threshold (default " << optionRepeatLength << ")" << endl;
-		cerr << "  -tl, --taboo-length NUM      \t" << "set taboo length (default " << optionTabooLength << ")" << endl;
+		cerr << "  -t,  --threshold NUM         \t" << "set minimum k-mer threshold (default " << optionThreshold << ')' << endl;
+		cerr << "  -oc, --overabundance-cut NUM \t" << "set k-mer overabundance cut ratio (default " << optionAbundanceCut << ')' << endl;
+		cerr << "  -rl, --repeat-length NUM     \t" << "set simple-repeat length threshold (default " << optionRepeatLength << ')' << endl;
+		cerr << "  -tl, --taboo-length NUM      \t" << "set taboo length (default " << optionTabooLength << ')' << endl;
 	} else {
 		cerr << "Try 'razers --help' for more information." << endl;
 	}
@@ -874,7 +903,7 @@ void printHelp(int, const char *[], bool longHelp = false)
 
 void printVersion() 
 {
-	cerr << "RazerS version 0.3 20080821 (prerelease)" << endl;
+	cerr << "RazerS version 0.3 20080828 (prerelease)" << endl;
 }
 
 int main(int argc, const char *argv[]) 
@@ -907,6 +936,22 @@ int main(int argc, const char *argv[])
 					{
 						if (optionErrorRate < 0 || optionErrorRate > 0.5)
 							cerr << "Percent identity threshold must be a value between 50 and 100" << endl << endl;
+						else
+							continue;
+					}
+				}
+				printHelp(argc, argv);
+				return 0;
+			}
+			if (strcmp(argv[arg], "-m") == 0 || strcmp(argv[arg], "--max-hits") == 0) {
+				if (arg + 1 < argc) {
+					++arg;
+					istringstream istr(argv[arg]);
+					istr >> optionMaxHits;
+					if (!istr.fail()) 
+					{
+						if (optionMaxHits < 1)
+							cerr << "Maximum hits threshold must be greater than 0" << endl << endl;
 						else
 							continue;
 					}
