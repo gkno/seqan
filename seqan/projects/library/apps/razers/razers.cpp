@@ -104,7 +104,7 @@ using namespace seqan;
 		char	orientation;	// 'F'..forward strand, 'R'..reverse comp. strand
 	};
 
-	// less-operators (to sort matches and remove duplicates)
+	// less-operators (to sort matches and remove duplicates with equal gBegin)
 	template <typename TReadMatch>
 	struct LessGPosRNo : public binary_function < TReadMatch, TReadMatch, bool >
 	{
@@ -129,6 +129,21 @@ using namespace seqan;
 			if (a.gseqNo < b.gseqNo) return true;
 			if (a.gseqNo > b.gseqNo) return false;
 			if (a.gBegin < b.gBegin) return true;
+			return a.editDist < b.editDist;
+		}
+	};
+
+	// less-operators (to sort matches and remove duplicates with equal gEnd)
+	template <typename TReadMatch>
+	struct LessRNoGEndPos : public binary_function < TReadMatch, TReadMatch, bool >
+	{
+		inline bool operator() (TReadMatch const &a, TReadMatch const &b) const 
+		{
+			if (a.rseqNo < b.rseqNo) return true;
+			if (a.rseqNo > b.rseqNo) return false;
+			if (a.gseqNo < b.gseqNo) return true;
+			if (a.gseqNo > b.gseqNo) return false;
+			if (a.gEnd   < b.gEnd) return true;
 			return a.editDist < b.editDist;
 		}
 	};
@@ -503,6 +518,42 @@ void dumpMatches(
 		return;
 	}
 
+	//////////////////////////////////////////////////////////////////////////////
+	// remove matches with equal ends
+
+	sort(
+		begin(matches, Standard()),
+		end(matches, Standard()), 
+		LessRNoGEndPos<TMatch>());
+
+	typename	TMatch::TGPos gBegin = -1;
+	typename	TMatch::TGPos gEnd = -1;
+	unsigned	gseqNo = -1;
+	unsigned	readNo = -1;
+	char		orientation = '-';
+
+	typename Iterator<TMatches, Standard>::Type it = begin(matches, Standard());
+	typename Iterator<TMatches, Standard>::Type itEnd = end(matches, Standard());
+
+	for(; it != itEnd; ++it) 
+	{
+		if (readNo == (*it).rseqNo && orientation == (*it).orientation &&
+			gEnd == (*it).gEnd && gseqNo == (*it).gseqNo)
+		{
+			(*it).gseqNo = (unsigned)-1;
+			(*it).rseqNo = (unsigned)-1;
+			(*it).orientation = '-';
+			continue;
+		}
+		readNo = (*it).rseqNo;
+		gseqNo = (*it).gseqNo;
+		gEnd = (*it).gEnd;
+		orientation = (*it).orientation;
+	}
+
+	//////////////////////////////////////////////////////////////////////////////
+	// remove matches with equal begins
+
 	switch (optionSortOrder) {
 		case 0:
 			sort(
@@ -519,38 +570,55 @@ void dumpMatches(
 			break;
 	}
 
-	typename Iterator<TMatches, Standard>::Type it = begin(matches, Standard());
-	typename Iterator<TMatches, Standard>::Type itEnd = end(matches, Standard());
+	gBegin = -1;
+	gEnd = -1;
+	gseqNo = -1;
+	readNo = -1;
+	orientation = '-';
 
-	typename TMatch::TGPos _gBegin = -1;
-	unsigned gseqNo = -1;
-	unsigned readNo = -1;
-	char orientation;
-	typename TMatch::TGPos gBegin, gEnd;
+	it = begin(matches, Standard());
+	itEnd = end(matches, Standard());
 
+	for(; it != itEnd; ++it) 
+	{
+		if (readNo == (*it).rseqNo && orientation == (*it).orientation &&
+			gEnd == (*it).gEnd && gseqNo == (*it).gseqNo)
+		{
+			(*it).gseqNo = (unsigned)-1;
+			(*it).rseqNo = (unsigned)-1;
+			(*it).orientation = '-';
+			continue;
+		}
+		readNo = (*it).rseqNo;
+		gseqNo = (*it).gseqNo;
+		gEnd = (*it).gEnd;
+		orientation = (*it).orientation;
+	}
+
+	it = begin(matches, Standard());
+	itEnd = end(matches, Standard());
 
 	switch (optionOutputFormat) 
 	{
 		case 0:	// Razer Format
 			for(; it != itEnd; ++it) 
 			{
-				if (readNo == (*it).rseqNo && _gBegin == (*it).gBegin && gseqNo == (*it).gseqNo)
+				if ((*it).orientation == '-') continue;
+
+				// skip matches with equal beginnings
+				if (readNo == (*it).rseqNo && orientation == (*it).orientation &&
+					gBegin == (*it).gBegin && gseqNo == (*it).gseqNo)
 					continue;
 
 				readNo = (*it).rseqNo;
 				gseqNo = (*it).gseqNo;
-				_gBegin = (*it).gBegin;
+				gBegin = (*it).gBegin;
 				gEnd = (*it).gEnd;
 				orientation = (*it).orientation;
 
 				unsigned	readLen = length(reads[readNo]);
 				double		percId;
 		
-				gBegin = _gBegin;
-
-				if (optionPositionFormat == 1)
-					++gBegin;
-
 				percId = 100.0 * (1.0 - (double)(*it).editDist / (double)readLen);
 
 				switch (optionReadNaming)
@@ -589,7 +657,7 @@ void dumpMatches(
 							file << genomeName;
 				}
 
-				file << ',' << gBegin << ',' << gEnd << ',' << setprecision(5) << percId << endl;
+				file << ',' << gBegin + optionPositionFormat << ',' << gEnd << ',' << setprecision(5) << percId << endl;
 
 				if (optionDumpAlignment) {
 					assignSource(row(align, 0), reads[readNo]);
@@ -608,21 +676,21 @@ void dumpMatches(
 		case 1:	// Enhanced Fasta Format
 			for(; it != itEnd; ++it) 
 			{
-				if (readNo == (*it).rseqNo && _gBegin == (*it).gBegin && gseqNo == (*it).gseqNo)
+				if ((*it).orientation == '-') continue;
+
+				// skip matches with equal beginnings
+				if (readNo == (*it).rseqNo && orientation == (*it).orientation &&
+					gBegin == (*it).gBegin && gseqNo == (*it).gseqNo)
 					continue;
 
 				readNo = (*it).rseqNo;
 				gseqNo = (*it).gseqNo;
-				_gBegin = (*it).gBegin;
+				gBegin = (*it).gBegin;
 				gEnd = (*it).gEnd;
+				orientation = (*it).orientation;
 
 				unsigned	readLen = length(reads[readNo]);
 				double		percId;
-
-				gBegin = _gBegin;
-
-				if (optionPositionFormat == 1)
-					++gBegin;
 
 				string fastaID;
 				assign(fastaID, readIDs[readNo]);
@@ -651,10 +719,12 @@ void dumpMatches(
 
 				percId = 100.0 * (1.0 - (double)(*it).editDist / (double)readLen);
 
-				if ((*it).orientation == 'F')		
-					file << '>' << gBegin << ',' << gEnd;	// forward strand
+				if (orientation == 'F')
+					// forward strand
+					file << '>' << gBegin + optionPositionFormat << ',' << gEnd;
 				else
-					file << '>' << gEnd << ',' << gBegin;	// reverse strand (switch begin and end)
+					// reverse strand (switch begin and end)
+					file << '>' << gEnd << ',' << gBegin + optionPositionFormat;
 				file << "[id=" << id << ",fragId=" << fragId;
 				file << ",errors=" << (*it).editDist << ",percId=" << setprecision(5) << percId << ']' << endl;
 
