@@ -12,6 +12,7 @@
 #include <seqan/find_motif.h>
 
 #include "recognitionRateDP.h"
+#include "bestOneGapped.h"
 
 using namespace seqan;
 using namespace std;
@@ -25,8 +26,11 @@ static TFloat optionLossRate = 0.01;		// in
 static TFloat chosenLossRate = 0.0;			// out
 static TFloat optionErrorRate = 0.05;		// 
 static bool optionHammingOnly = false;
-static TFloat optionProbINSERT = 0.0;
-static TFloat optionProbDELETE = 0.0;
+static bool doUngapped = true;
+static bool doAllOneGapped = false;
+static bool doSelectedGapped = false;
+static TFloat optionProbINSERT = 0.02;
+static TFloat optionProbDELETE = 0.02;
 
 // output parameters
 unsigned qgramLen = 4;			//
@@ -40,6 +44,8 @@ const char	*fprefix[1] = { "" };
 char		fparams[100];
 
 //////////////////////////////////////////////////////////////////////////////
+
+void seqan::initCountBits();
 
 template<typename TFile, typename TChar>
 inline void 
@@ -333,59 +339,13 @@ getAvgFromPrbDirectory(TPath prbPath, TError & errorDistribution)
 	
 }
 
-/*
-template<typename TError>
-void
-makeStatsFile(TError & errorDistr)
-{
-	int maxErrors = (int) totalN / 5;
-	for(int e = 0; e < maxErrors; ++e)
-	{
-		std::fstream outfile;
-		std::stringstream filename;
-		filename << "./params/"<<fprefix[0]<<"_QE0_N" << totalN<< "_E" << e<<".dat";
-		std::cout << "Creating file "<<filename.str() << "\n";
-		outfile.open(filename.str().c_str(),ios_base::out);
-		for(int qLen = 1; qLen < 16; ++qLen)
-		{
-			String<TFloat> found;
-			resize(found,totalN*(e+1));
-			computeFilteringLossHamming(found,totalN,qLen,totalN,e+1,errorDistr);
-			for(unsigned t = 0; t < totalN; ++t) 
-			{
-				if (t > 0) outfile << "\t";
-				outfile.precision(8);
-				outfile << (1.0-_transformBack(found[e*totalN+t]));
-			//	cout.precision(3);
-			//	if (t > 0) cout << "\t";
-			//	cout << (1.0-_transformBack(found[e*totalN+t]));
-			}
-			outfile << endl;	
-			//cout << endl;	
-		}
-	}
-
-}*/
-
 
 template<typename TError>
 void
-makeStatsFile(TError & errorDistr)
+makeUngappedStatsFile(TError & errorDistr)
 {
-	unsigned maxErrors = (unsigned) totalN / 5;
+	unsigned maxErrors = 5;//(unsigned) totalN / 5;
 	unsigned maxT = totalN;
-//maxErrors = 1;
-/*	vector<FILE*> outfiles;
-	outfiles.resize(maxErrors);
-	for(unsigned e=0; e < maxErrors; ++e)
-	{
-		std::stringstream filename;
-		filename << "./params/"<<fprefix[0]<<"_QE0_N" << totalN<< "_E" << e<<".dat";
-		std::cout << "Creating file "<<filename.str() << "\n";
-		outfiles[e] = fopen (filename.str().c_str(),"r");
- 		fprintf(outfiles[e],"%c",'t');
-//		outfiles[e].open(filename.str().c_str(),ios_base::out);
-	}*/
 	
 	// prepare log error distribution 
 	String<TFloat> logErrorDistribution;
@@ -393,7 +353,7 @@ makeStatsFile(TError & errorDistr)
 
 	// transformed probs for seeing 1s at positions 0...optionMaxN-1
 	double remainingProb = 1.0 - optionProbINSERT - optionProbDELETE;
-	for(int j = 0; j < totalN; ++j) 
+	for(unsigned j = 0; j < totalN; ++j) 
 	{
 		logErrorDistribution[SEQAN_MISMATCH*totalN+j] = _transform(errorDistr[j]);
 		logErrorDistribution[SEQAN_INSERT*totalN+j]   = _transform(optionProbINSERT);
@@ -402,7 +362,7 @@ makeStatsFile(TError & errorDistr)
 	}
 	
 	CharString shape;
-	for(int qLen = 1; qLen < 16; ++qLen)
+	for(int qLen = 8; qLen < 15; ++qLen)
 	{
 		clear(shape);
 		fill(shape, qLen, '1');
@@ -411,9 +371,38 @@ makeStatsFile(TError & errorDistr)
 		resize(found,maxT*maxErrors);
 		
 		String< State<TFloat> > states;
-		initPatterns(states, shape, maxErrors-1, errorDistr, optionHammingOnly);
-		computeFilteringLoss(found, states, length(shape), maxT, maxErrors, errorDistr);
+		initPatterns(states, shape, maxErrors-1, logErrorDistribution, optionHammingOnly);
+		computeFilteringLoss(found, states, length(shape), maxT, maxErrors,  logErrorDistribution);
 		
+		//for loss rate sanity check
+//                for(unsigned e=0; e < maxErrors; ++e)
+//                {
+//                        std::stringstream filename;
+//                        filename << fparams <<fprefix[0]<<"_QE0_N" << totalN<< "_E" << e<<".dat";
+//                        ofstream outfile;
+//                        if(qLen==8){
+//                                outfile.open(filename.str().c_str(),ios_base::out);
+//                                std::cout << "Creating file "<<filename.str() << "\n";
+//                        }
+//                        else outfile.open(filename.str().c_str(),ios_base::app);
+//                        for(unsigned t = 20; t > 0; --t)
+//                        {
+//                                outfile.precision(10);
+//                                //write(outfiles[e],1.0-exp(found[e*totalN+t]));
+//                                //outfiles[e].write(1.0-exp(found[e*totalN+t]));
+//                                outfile << (1.0 - _transformBack(found[e*maxT+t]));
+//                                if(t>1)outfile << "\n";
+//                        //      cout.precision(3);
+//                        //      if (t > 0) cout << "\t";
+//                        //      cout << (1.0-exp(found[e*totalN+t]));
+//                        }
+// //                     fprintf(outfiles[e],"%c",'\n');
+// //                     outfiles[e].write("\n");
+//                        outfile << endl;
+//                        outfile.close();
+//                }
+
+		//regular output
 		for(unsigned e=0; e < maxErrors; ++e)
 		{
 			std::stringstream filename;
@@ -442,11 +431,255 @@ makeStatsFile(TError & errorDistr)
 		}
 //		cout << endl;	
 	}
-// 	for(unsigned e=0; e < maxErrors; ++e)
+// 	for(unsigned e=0; e < maxErrors; ++e)optionHammingOnly
 // 	{
 // //		outfiles[e].close();
 // 		fclose(outfiles[e]);
 // 	}
+
+}
+
+template<typename TError>
+void
+makeSelectedStatsFile(TError & errorDistr)
+{
+
+//	unsigned maxE = (unsigned) totalN / 5;
+	unsigned maxErrors = 5;
+	unsigned minQ = 7;
+	unsigned maxT = totalN-minQ+1;
+
+	typedef typename Value<TError>::Type TErrorValue;
+	String<TErrorValue> logErrorDistribution;
+	
+	String<CharString> shapeStrings;
+	//q=7
+	appendValue(shapeStrings,"1111111");
+	appendValue(shapeStrings,"1111100011");
+	appendValue(shapeStrings,"111110000011");
+	//q=8
+	appendValue(shapeStrings,"11111111");
+	appendValue(shapeStrings,"11111000111");
+	appendValue(shapeStrings,"1111110000011");
+	appendValue(shapeStrings,"11111100000011");
+	//q=9
+	appendValue(shapeStrings,"111111111");
+	appendValue(shapeStrings,"111111000111");
+	appendValue(shapeStrings,"1111111000011");
+	appendValue(shapeStrings,"111111000000111");
+	//q=10
+	appendValue(shapeStrings,"1111111111");
+	appendValue(shapeStrings,"111111111001");
+	appendValue(shapeStrings,"1111111100011");
+	appendValue(shapeStrings,"11111110000111");
+	appendValue(shapeStrings,"111111110000011");
+
+	//q=11
+	appendValue(shapeStrings,"11111111111");
+	appendValue(shapeStrings,"11111111000111");
+	appendValue(shapeStrings,"111111111000011");
+	appendValue(shapeStrings,"1111111110000011");
+	appendValue(shapeStrings,"11111111000000111");
+	//q=12
+	appendValue(shapeStrings,"111111111111");
+	appendValue(shapeStrings,"1111111111000011");
+	appendValue(shapeStrings,"11111111110000011");
+	appendValue(shapeStrings,"11111111000001111");
+	//q=13
+	appendValue(shapeStrings,"1111111111111");
+	appendValue(shapeStrings,"111111111100000111");
+	appendValue(shapeStrings,"1111111111000000111");
+	appendValue(shapeStrings,"111111111000001111");
+	appendValue(shapeStrings,"1111111111100000011");
+	//q=14
+	appendValue(shapeStrings,"11111111111111");
+	appendValue(shapeStrings,"1111111111100000111");
+	appendValue(shapeStrings,"1111111111000001111");
+	appendValue(shapeStrings,"11111111110000001111");
+	appendValue(shapeStrings,"11111111111000000111");
+
+	String<unsigned> weights;
+	fill(weights,length(shapeStrings),0);
+	for(unsigned i = 0; i < length(shapeStrings) ; ++i)
+		for(unsigned pos = 0; pos < length(shapeStrings[i]) ; ++pos)
+			if(shapeStrings[i][pos] == '1')
+				++weights[i];
+		
+	// prepare log error distribution 
+	resize(logErrorDistribution, 4*totalN);
+	// transformed probs for seeing 1s at positions 0...optionMaxN-1
+	double remainingProb = 1.0 - optionProbINSERT - optionProbDELETE;
+	for(unsigned j = 0; j < totalN; ++j) 
+	{
+		logErrorDistribution[SEQAN_MISMATCH*totalN+j] = _transform(errorDistr[j]);
+		logErrorDistribution[SEQAN_INSERT*totalN+j]   = _transform(optionProbINSERT);
+		logErrorDistribution[SEQAN_DELETE*totalN+j]   = _transform(optionProbDELETE);
+		logErrorDistribution[SEQAN_MATCH*totalN+j]    = _transform(remainingProb - errorDistr[j]);
+	}
+
+	//loss rate buckets
+	map<TErrorValue, unsigned> lossRateBuckets;
+	String<TErrorValue> lossRatesProbe;
+	resize(lossRatesProbe, 9);
+	lossRatesProbe[0] = 0;
+	lossRatesProbe[1] = 0.00001;
+	lossRatesProbe[2] = 0.0001;
+	lossRatesProbe[3] = 0.001;
+	lossRatesProbe[4] = 0.01;
+	lossRatesProbe[5] = 0.02;
+	lossRatesProbe[6] = 0.05;
+	lossRatesProbe[7] = 0.1;
+	lossRatesProbe[8] = 0.2;
+
+	
+	for(unsigned j = 0; j <= length(lossRatesProbe); ++j){
+		lossRateBuckets.insert ( pair<TErrorValue,unsigned>(lossRatesProbe[j],j) );
+	}
+	
+	String<bool> firstTimeK;
+	fill(firstTimeK,maxErrors*length(lossRatesProbe)+1,true);
+	
+	for(unsigned i = 0; i < length(shapeStrings); ++i)
+	{
+		
+		String<TFloat> found;
+		resize(found,maxT*maxErrors);
+		
+		String< State<TFloat> > states;
+		std::cout << "do DP\n";
+		initPatterns(states, shapeStrings[i], maxErrors-1, logErrorDistribution, optionHammingOnly);
+		computeFilteringLoss(found, states, length(shapeStrings[i]), maxT, maxErrors,  logErrorDistribution);
+		std::cout << "Printing\n";
+		for(unsigned e = 0; e < maxErrors; ++e) {
+			bool highestOptimalFound = false;
+			for(unsigned t = maxT-1; t > 0; --t) {
+				TFloat lossrate = 1.0 - (TFloat) _transformBack(found[e*maxT+t]);
+				typename std::map<TFloat, unsigned>::iterator it, itlow, itup, itend, itbegin;
+				if(lossrate <= 0.0){
+					if(highestOptimalFound) continue;
+					else highestOptimalFound = true;
+				}
+				// points to first item in loss rate file
+				itbegin = lossRateBuckets.begin();
+				if(lossrate < ((*itbegin).first)){ 
+					continue;
+				}
+				itend = lossRateBuckets.end();
+				// points to last item in loss rate file
+				--itend;
+				
+				if(lossrate > ((*itend).first)){ 
+					continue;
+				}
+				
+				TFloat helpLoss = (*itend).first; 
+				if(lossrate > helpLoss){
+					continue;
+				}
+				
+				
+				itup = lossRateBuckets.upper_bound(lossrate);
+				itlow = itup;
+				--itlow;
+
+				unsigned gminCov = getMinCov(weights[i], length(shapeStrings[i]), t);
+
+				unsigned index = unsigned((*itlow).second);	
+			
+				// create the whole file name
+				stringstream datName;
+				if(best_shape_helpFolder) datName << best_shape_folder;
+				else datName << "gapped_params";
+				datName << "/"<<fprefix[0]<<"_" << totalN << "_" << e << "_";
+				if(!optionHammingOnly) datName << "L_";
+				else datName <<"H_";
+				datName << (*itlow).first << "_" << (*itup).first << ".dat";
+				
+			
+				// if datName-file doesnt exist, write the title on it
+				if(firstTimeK[maxErrors*index + e]==true){
+					firstTimeK[maxErrors*index + e] = false;
+					ofstream fout(datName.str().c_str(), ios::out);
+					fout << "shape\t\tt\t\tloss rate\t\tminCoverage\n\n";
+					fout.close();
+				}
+				// write best shape with its properties on the file
+				ofstream fout(datName.str().c_str(), ios::app | ios::out);
+				fout << shapeStrings[i] << "\t\t";
+				fout << t << "\t\t";
+				fout << lossrate << "\t\t";
+				fout << gminCov << endl; 
+				fout.close();
+				
+			} // t-loop
+		}
+
+	
+	}
+
+
+}
+
+
+template<typename TError>
+void
+makeOneGappedStatsFile(TError & errorDistr)
+{
+
+//	unsigned maxE = (unsigned) totalN / 5;
+	unsigned maxE = 5;
+
+	unsigned minE = 0;				
+	unsigned maxQ = 14;				// weights are considered from minQ..maxQ
+	unsigned minQ = 12;
+	unsigned minGap = 4; 
+	unsigned maxGap = 6;				// spans are considered from minQ..maxS
+	unsigned maxT = totalN-minQ+1;
+	
+	typedef typename Value<TError>::Type TErrorValue;
+	String<TErrorValue> logErrorDistribution;
+
+
+	resize(logErrorDistribution, 4*totalN);
+
+	// transformed probs for seeing 1s at positions 0...optionMaxN-1
+	double remainingProb = 1.0 - optionProbINSERT - optionProbDELETE;
+	for(unsigned j = 0; j < totalN; ++j) 
+	{
+		logErrorDistribution[SEQAN_MISMATCH*totalN+j] = _transform(errorDistr[j]);
+		logErrorDistribution[SEQAN_INSERT*totalN+j]   = _transform(optionProbINSERT);
+		logErrorDistribution[SEQAN_DELETE*totalN+j]   = _transform(optionProbDELETE);
+		logErrorDistribution[SEQAN_MATCH*totalN+j]    = _transform(remainingProb - errorDistr[j]);
+	}
+
+	
+		
+	String<TErrorValue> found;
+	resize(found,maxT*maxE);
+
+	initCountBits();
+
+	map<TErrorValue, unsigned> lossRateBuckets;
+	String<TErrorValue> lossRatesProbe;
+	resize(lossRatesProbe, 9);
+	lossRatesProbe[0] = 0;
+	lossRatesProbe[1] = 0.00001;
+	lossRatesProbe[2] = 0.0001;
+	lossRatesProbe[3] = 0.001;
+	lossRatesProbe[4] = 0.01;
+	lossRatesProbe[5] = 0.02;
+	lossRatesProbe[6] = 0.05;
+	lossRatesProbe[7] = 0.1;
+	lossRatesProbe[8] = 0.2;
+
+	
+	for(unsigned j = 0; j <= length(lossRatesProbe); ++j){
+		lossRateBuckets.insert ( pair<TErrorValue,unsigned>(lossRatesProbe[j],j) );
+	}
+
+
+//	best_shape(totalN, found, logErrorDistribution, lossRates, 12, 10, 3, 6, 4, 0, maxT);
+	best_shape(totalN, found, logErrorDistribution, lossRateBuckets, maxQ, minQ, minGap, maxGap, maxE, minE, maxT,optionHammingOnly);
 
 }
 
@@ -464,8 +697,11 @@ void printHelp(int, const char *[], bool longHelp = false)
 		cerr << "  -n,  --length NUM            \t" << "sequence length (32)" << endl;
 		cerr << "  -i,  --percent-identity NUM  \t" << "set the percent identity threshold (95)" << endl;
 		cerr << "  -r,  --recognition-rate NUM  \t" << "set the percent recognition rate (99.0)" << endl;
-		cerr << "  -pd, --prb-directory STR     \t" << "directory of _prb.txt files containing qualtiy values (optional)" << endl;
-		cerr << "  -d,  --distribution-file STR \t" << "file containing user-defined (or precomputed) error probabilities" << endl;
+		cerr << "  -pf, --prb-folder STR        \t" << "directory of _prb.txt files containing qualtiy values (optional)" << endl;
+		cerr << "  -d,  --error-distribution    \t" << "file containing mismatch probabilities (must contain at least n values, one value per line)" << endl;
+		cerr << "  -pi, --prob-insert           \t" << "probability of an insertion (" << optionProbINSERT << ")" << endl;
+		cerr << "  -pd, --prob-delete           \t" << "probability of a deletion (" << optionProbDELETE << ")" << endl;
+		cerr << "                               \t" << "(for hamming-only filters use -pi 0 -pd 0)" << endl;
 		cerr << "  -p,  --prefix STR            \t" << "session identifier (prefix of computed files);\n\t\t\t\tif also option d or pd is specified the prefix will be used for file naming\n\t\t\t\tuserspecific settings can be accessed in later session without recomputing loss rates\n\t\t\t\tby specifying the session id, i.e. prefix" << endl;
 		cerr << "  -h,  --help                  \t" << "print this help" << endl;
 	} else {
@@ -529,7 +765,38 @@ int main(int argc, const char *argv[])
 				printHelp(argc, argv);
 				return 0;
 			}
-			if (strcmp(argv[arg], "-pd") == 0 || strcmp(argv[arg], "--prb-directory") == 0) { //should also support fastq files
+			if (strcmp(argv[arg], "-pi") == 0 || strcmp(argv[arg], "--prob-insert") == 0) {
+				if (arg + 1 < argc) {
+					++arg;
+					istringstream istr(argv[arg]);
+					istr >> optionProbINSERT;
+					if (!istr.fail())
+						if (optionProbINSERT < 0 || optionProbINSERT > 1)
+							cerr << "Insert probability must be a value between 0 and 1" << endl << endl;
+						else
+							continue;
+				}
+				printHelp(argc, argv);
+				return 0;
+			}
+
+			if (strcmp(argv[arg], "-pd") == 0 || strcmp(argv[arg], "--prob-delete") == 0) {
+				if (arg + 1 < argc) {
+					++arg;
+					istringstream istr(argv[arg]);
+					istr >> optionProbDELETE;
+					if (!istr.fail())
+						if (optionProbDELETE < 0 || optionProbDELETE > 1)
+							cerr << "Delete probability must be a value between 0 and 1" << endl << endl;
+						else
+							continue;
+				}
+				printHelp(argc, argv);
+				return 0;
+			}
+
+
+			if (strcmp(argv[arg], "-pf") == 0 || strcmp(argv[arg], "--prb-folder") == 0) { //should also support fastq files
 				if (arg + 1 < argc) {
 					++arg;
 					fnameCount0 = true;
@@ -569,6 +836,11 @@ int main(int argc, const char *argv[])
 					return 0;
 				}
 			}
+			if (strcmp(argv[arg], "-ha") == 0 || strcmp(argv[arg], "--hamming") == 0) {
+				optionHammingOnly = true;
+				continue;
+			}
+
 			if (strcmp(argv[arg], "-h") == 0 || strcmp(argv[arg], "--help") == 0) {
 				// print help
 				printHelp(argc, argv, true);
@@ -580,6 +852,11 @@ int main(int argc, const char *argv[])
 	optionErrorRate += epsilon;
 	optionLossRate += epsilon;
 	
+	if(optionProbINSERT <= epsilon && optionProbDELETE <= epsilon)
+	{
+		optionHammingOnly=true;
+		cout << "hier";	
+	}
 	// compute data specific loss rates
 	if (fnameCount0 || fnameCount1) 
 	{
@@ -622,7 +899,9 @@ int main(int argc, const char *argv[])
 
 		std::fstream file;
 		//if(prefixCount)
-		makeStatsFile(errorDistribution);
+		if(doAllOneGapped) makeOneGappedStatsFile(errorDistribution);
+		if(doSelectedGapped) makeSelectedStatsFile(errorDistribution);
+		if(doUngapped) makeUngappedStatsFile(errorDistribution);
 	}
 	
 	totalK = (int)(optionErrorRate * totalN);
