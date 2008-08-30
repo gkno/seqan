@@ -232,24 +232,6 @@ SEQAN_CHECKPOINT
 
 //____________________________________________________________________________
 
-template <typename TNeedle>
-inline typename Host<Pattern<TNeedle, AhoCorasick>const>::Type & 
-host(Pattern<TNeedle, AhoCorasick> & me)
-{
-SEQAN_CHECKPOINT
-	return value(me.data_needle);
-}
-
-template <typename TNeedle>
-inline typename Host<Pattern<TNeedle, AhoCorasick>const>::Type & 
-host(Pattern<TNeedle, AhoCorasick> const & me)
-{
-SEQAN_CHECKPOINT
-	return value(me.data_needle);
-}
-
-//____________________________________________________________________________
-
 
 template <typename TNeedle>
 inline typename Size<TNeedle>::Type
@@ -280,14 +262,14 @@ inline bool find(TFinder & finder, Pattern<TNeedle, AhoCorasick> & me) {
 	if (!empty(me.data_endPositions)) {
 		--finder; // Set back the finder
 		me.data_keywordIndex = me.data_endPositions[length(me.data_endPositions)-1];
-		me.data_needleLength = length(getValue(host(me), me.data_keywordIndex))-1;
+		me.data_needleLength = length(value(host(me), me.data_keywordIndex))-1;
 		if (length(me.data_endPositions) > 1) resize(me.data_endPositions, (length(me.data_endPositions)-1));
 		else clear(me.data_endPositions);
 		finder -= me.data_needleLength;
+		_setFinderLength(finder, me.data_needleLength+1);
+		_setFinderEnd(finder, position(finder)+length(finder));
 		return true;
 	}
-
-
 
 	TVertexDescriptor current = me.data_lastState;
 	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
@@ -306,11 +288,13 @@ inline bool find(TFinder & finder, Pattern<TNeedle, AhoCorasick> & me) {
 		me.data_endPositions = getProperty(me.data_terminalStateMap,current);
 		if (!empty(me.data_endPositions)) {
 			me.data_keywordIndex = me.data_endPositions[length(me.data_endPositions)-1];
-			me.data_needleLength = length(getValue(host(me), me.data_keywordIndex))-1;
+			me.data_needleLength = length(value(host(me), me.data_keywordIndex))-1;
 			if (length(me.data_endPositions) > 1) resize(me.data_endPositions, length(me.data_endPositions)-1);
 			else clear(me.data_endPositions);
 			me.data_lastState = current;
 			finder -= me.data_needleLength;
+			_setFinderLength(finder, me.data_needleLength+1);
+			_setFinderEnd(finder, position(finder)+length(finder));
 			return true;
 		}
 		++finder;

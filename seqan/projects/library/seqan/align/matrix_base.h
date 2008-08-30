@@ -142,6 +142,23 @@ public:
 	{
 		moveValue(me.data_host, value_);
 	}
+//____________________________________________________________________________
+
+	inline TValue & 
+	operator () (TSize x1, TSize x2)
+	{
+		return value(*this, x1, x2);
+	}
+	inline TValue & 
+	operator () (TSize x1, TSize x2, TSize x3)
+	{
+		return value(*this, x1, x2, x3);
+	}
+	inline TValue & 
+	operator () (TSize x1, TSize x2, TSize x3, TSize x4)
+	{
+		return value(*this, x1, x2, x3, x4);
+	}
 
 //____________________________________________________________________________
 };
@@ -330,6 +347,46 @@ value(Matrix<TValue, NDimensional> & me,
 	return value(host(me), position_);
 }
 
+//____________________________________________________________________________
+
+//two dimensional value access
+template <typename TValue, typename TOrdinate1, typename TOrdinate2>
+inline typename Reference<Matrix<TValue, NDimensional> >::Type
+value(Matrix<TValue, NDimensional> & me,
+	  TOrdinate1 i1,
+	  TOrdinate2 i2)
+{
+	return value(host(me), i1 + i2 * _dataFactors(me)[1]);
+}
+
+//____________________________________________________________________________
+
+//3 dimensional value access
+
+template <typename TValue, typename TOrdinate1, typename TOrdinate2, typename TOrdinate3>
+inline typename Reference<Matrix<TValue, NDimensional> >::Type
+value(Matrix<TValue, NDimensional> & me,
+	  TOrdinate1 i1, 
+	  TOrdinate2 i2,
+	  TOrdinate3 i3)
+{
+	return value(host(me), i1 + i2 * _dataFactors(me)[1] + i3 * _dataFactors(me)[2]);
+}
+
+//____________________________________________________________________________
+
+//4 dimensional value access
+
+template <typename TValue, typename TOrdinate1, typename TOrdinate2, typename TOrdinate3, typename TOrdinate4>
+inline typename Reference<Matrix<TValue, NDimensional> >::Type
+value(Matrix<TValue, NDimensional> & me,
+	  TOrdinate1 i1, 
+	  TOrdinate2 i2,
+	  TOrdinate3 i3,
+	  TOrdinate4 i4)
+{
+	return value(host(me), i1 + i2 * _dataFactors(me)[1] + i3 * _dataFactors(me)[2] + i4 * _dataFactors(me)[3]);
+}
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////

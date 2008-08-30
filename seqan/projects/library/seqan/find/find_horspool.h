@@ -124,23 +124,6 @@ setHost(Pattern<TNeedle, Horspool> & horsp, TNeedle2 & ndl)
 template <typename TNeedle>
 inline void _patternInit (Pattern<TNeedle, Horspool> &) {}
 
-//____________________________________________________________________________
-
-template <typename TNeedle>
-inline typename Host<Pattern<TNeedle, Horspool> >::Type & 
-host(Pattern<TNeedle, Horspool> & me)
-{
-SEQAN_CHECKPOINT
-	return value(me.data_needle);
-}
-
-template <typename TNeedle>
-inline typename Host<Pattern<TNeedle, Horspool> const>::Type & 
-host(Pattern<TNeedle, Horspool> const & me)
-{
-SEQAN_CHECKPOINT
-	return value(me.data_needle);
-}
 
 //____________________________________________________________________________
 
@@ -202,7 +185,8 @@ VALIDATE:
 	}
 
 	//valid! return hit
-	setPosition(finder, it - begin(hayst, Standard()) - ndl_size + 1);
+	_setFinderEnd(finder, it - begin(hayst, Standard()) + 1);
+	setPosition(finder, beginPosition(finder));
 	return true;
 }
 
@@ -454,6 +438,7 @@ SEQAN_CHECKPOINT
 	if (find_first)
 	{
 		_patternInit(me);
+		_setFinderLength(finder, length(needle(me)));
 		_finderSetNonEmpty(finder);
 	}
 

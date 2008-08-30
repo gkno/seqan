@@ -45,6 +45,8 @@ typedef Tag<DotDrawing_> const DotDrawing;
 /**
 .Tag.LevenshteinDistance
 ..summary:Switch to trigger Levenshtein distance, which is a measure of edit operations (character substitutions, deletions or insertions).
+..remarks:$EditDistance$ is a synonym for $LevenshteinDistance$.
+..see:Spec.EditDistance
 */
 
 struct _HammingDistance;
@@ -52,7 +54,7 @@ struct _LevenshteinDistance;
 
 typedef Tag<_HammingDistance>		HammingDistance;
 typedef Tag<_LevenshteinDistance>	LevenshteinDistance;
-typedef Tag<_LevenshteinDistance>	EditDistance;
+typedef Tag<_LevenshteinDistance>	EditDistance; 
 
 
 //////////////////////////////////////////////////////////////////////////////

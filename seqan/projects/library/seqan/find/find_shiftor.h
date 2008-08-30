@@ -136,25 +136,6 @@ SEQAN_CHECKPOINT
 
 //____________________________________________________________________________
 
-
-template <typename TNeedle>
-inline typename Host<Pattern<TNeedle, ShiftOr>const>::Type & 
-host(Pattern<TNeedle, ShiftOr> & me)
-{
-SEQAN_CHECKPOINT
-	return value(me.data_needle);
-}
-
-template <typename TNeedle>
-inline typename Host<Pattern<TNeedle, ShiftOr>const>::Type & 
-host(Pattern<TNeedle, ShiftOr> const & me)
-{
-SEQAN_CHECKPOINT
-	return value(me.data_needle);
-}
-
-//____________________________________________________________________________
-
 /*
 template <typename TFinder, typename TNeedle>
 bool _findShiftOr_SmallNeedle(TFinder & finder, Pattern<TNeedle, ShiftOr> & me) {
@@ -200,7 +181,8 @@ SEQAN_CHECKPOINT
 
 		//found a hit!
 		//set finder to start position
-		setPosition(finder, (hayit - begin(hstk, Standard())) - me.needleLength + 1); 
+		_setFinderEnd(finder, (hayit - begin(hstk, Standard())) + 1);
+		setPosition(finder,  beginPosition(finder)); 
 		//save machine state
 		me.prefSufMatch[0] = pref_suf_match; 
 		return true;
@@ -224,7 +206,9 @@ bool _findShiftOr_LargeNeedle(TFinder & finder, Pattern<TNeedle, ShiftOr> & me) 
 			carry=newCarry;
 		}
 		for(TWord block=0;block<me.blockCount;++block) me.prefSufMatch[block] |= me.table[me.blockCount*pos+block];
-		if ((me.prefSufMatch[me.blockCount-1] | compare) != (TWord) ~0) {
+		if ((me.prefSufMatch[me.blockCount-1] | compare) != (TWord) ~0) 
+		{
+			_setFinderEnd(finder);
 			finder-=(me.needleLength-1);
 			return true;  
 		}
@@ -250,6 +234,7 @@ inline bool find(TFinder & finder, Pattern<TNeedle, ShiftOr> & me) {
 
 	if (empty(finder)) {
 		_patternInit(me);
+		_setFinderLength(finder, length(needle(me)));
 		_finderSetNonEmpty(finder);
 	} else
 		finder += me.needleLength;

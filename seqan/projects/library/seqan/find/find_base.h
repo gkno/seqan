@@ -26,6 +26,11 @@
 
 namespace SEQAN_NAMESPACE_MAIN
 {
+//////////////////////////////////////////////////////////////////////////////
+// Tags
+
+struct FindInfix; //find needle as a substring of haystack. This is the default
+struct FindPrefix; //find needle as a prefix of haystack. (prefix search)
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -37,10 +42,11 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.THaystack:The given haystack type.
 ..returns:Is $void$ by default and @Tag.Index Find Algorithm.ESA_FIND_MLR@ if $THaystack$ is an @Class.Index@.
 */
-	template < typename TObject >
-	struct DefaultFinder {
-		typedef void Type;
-	};
+template < typename TObject >
+struct DefaultFinder 
+{
+	typedef void Type;
+};
 
 /**
 .Metafunction.DefaultPattern:
@@ -50,10 +56,11 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TNeedle:The given needle type.
 ..returns:Is $void$ by default.
 */
-	template < typename TObject >
-	struct DefaultPattern {
-		typedef void Type;
-	};
+template < typename TObject >
+struct DefaultPattern 
+{
+	typedef void Type;
+};
 
 /**
 .Metafunction.Haystack:
@@ -65,10 +72,11 @@ namespace SEQAN_NAMESPACE_MAIN
 ..returns:The haystack type of $TFinder$, i.e. $THaystack$ for $Finder<THaystack, TSpec>$.
 */
 
-	template <typename TFinder>
-	struct Haystack {
-		typedef typename Container<TFinder>::Type Type;
-	};
+template <typename TFinder>
+struct Haystack 
+{
+	typedef typename Container<TFinder>::Type Type;
+};
 
 /**
 .Metafunction.Needle:
@@ -80,219 +88,23 @@ namespace SEQAN_NAMESPACE_MAIN
 ..returns:The needle type of $TPattern$, i.e. $TNeedle$ for $Pattern<TNeedle, TSpec>$.
 */
 
-	template <typename TPattern>
-	struct Needle {
-		typedef typename Host<TPattern>::Type Type;
-	};
-
-	template <typename THost, typename TSpec>
-	struct Needle<Segment<THost, TSpec> > {
-		typedef Segment<THost, TSpec> Type;
-	};
-
-	template <typename THost, typename TSpec>
-	struct Needle<Segment<THost, TSpec> const> {
-		typedef Segment<THost, TSpec> const Type;
-	};
-
-//////////////////////////////////////////////////////////////////////////////
-
-/**
-.Class.Pattern:
-..summary:Holds the needle and preprocessing data (depends on algorithm).
-..cat:Searching
-..signature:Pattern<TNeedle[, TSpec]>
-..param.TNeedle:The needle type.
-...type:Class.String
-..param.TSpec:The online-algorithm to search with.
-...remarks:Leave empty for index-based pattern matching (see @Class.Index@).
-...default:The result of @Metafunction.DefaultPattern@
-..remarks:If $TNeedle$ is a set of strings, then $position(pattern)$ returns the index of the currently matching needle.
-*/
-
-template < typename TNeedle, typename TSpec = typename DefaultPattern<TNeedle>::Type >
-class Pattern;
-
-//default implementation
-template < typename TNeedle >
-class Pattern<TNeedle, void>
+template <typename TPattern>
+struct Needle 
 {
-public:
-	typedef typename Position<TNeedle>::Type TNeedlePosition;
-
-	Holder<TNeedle> data_host;
-	TNeedlePosition data_begin_position;
-	TNeedlePosition data_end_position;
-
-	Pattern() {}
-
-	template <typename _TNeedle>
-	Pattern(_TNeedle & ndl):
-		data_host(ndl) {}
-
-	template <typename _TNeedle>
-	Pattern(_TNeedle const & ndl):
-		data_host(ndl) {}
-
+	typedef typename Host<TPattern>::Type Type;
 };
-//////////////////////////////////////////////////////////////////////////////
 
-template <typename TNeedle, typename TSpec>
-inline Holder<TNeedle> & 
-_dataHost(Pattern<TNeedle, TSpec> & me) 
-{ 
-	return me.data_host;
-}
-template <typename TNeedle, typename TSpec>
-inline Holder<TNeedle> & 
-_dataHost(Pattern<TNeedle, TSpec> const & me) 
+template <typename THost, typename TSpec>
+struct Needle<Segment<THost, TSpec> > 
 {
-	return const_cast<Holder<TNeedle> &>(me.data_host);
-}
+	typedef Segment<THost, TSpec> Type;
+};
 
-//host access: see basic_host.h
-
-
-//???TODO: Diese Funktion entfernen! (sobald setHost bei anderen pattern nicht mehr eine Art "assignHost" ist)
-template <typename TNeedle, typename TSpec, typename TNeedle2>
-inline void 
-setHost(Pattern<TNeedle, TSpec> & me,
-		TNeedle2 const & ndl) 
+template <typename THost, typename TSpec>
+struct Needle<Segment<THost, TSpec> const> 
 {
-	 me.data_host = ndl; //assign => Pattern haelt eine Kopie => doof!
-}
-template <typename TNeedle, typename TSpec, typename TNeedle2>
-inline void 
-setHost(Pattern<TNeedle, TSpec> & me,
-		TNeedle2 & ndl) 
-{ 
-	 me.data_host = ndl; //assign => Pattern haelt eine Kopie => doof!
-}
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename TNeedle, typename TSpec>
-inline typename Position<Pattern<TNeedle, TSpec> >::Type & 
-beginPosition(Pattern<TNeedle, TSpec> & me) 
-{
-	return me.data_begin_position;
-}
-template <typename TNeedle, typename TSpec>
-inline typename Position<Pattern<TNeedle, TSpec> const >::Type & 
-beginPosition(Pattern<TNeedle, TSpec> const & me) 
-{
-	return me.data_begin_position;
-}
-
-
-template <typename TNeedle, typename TSpec, typename TPosition>
-inline void
-setBeginPosition(Pattern<TNeedle, TSpec> & me, 
-				 TPosition _pos) 
-{
-	me.data_begin_position = _pos;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename TNeedle, typename TSpec>
-inline typename Position<Pattern<TNeedle, TSpec> >::Type & 
-endPosition(Pattern<TNeedle, TSpec> & me) 
-{
-	return me.data_end_position;
-}
-template <typename TNeedle, typename TSpec>
-inline typename Position<Pattern<TNeedle, TSpec> const >::Type & 
-endPosition(Pattern<TNeedle, TSpec> const & me) 
-{
-	return me.data_end_position;
-}
-
-template <typename TNeedle, typename TSpec, typename TPosition>
-inline void
-setEndPosition(Pattern<TNeedle, TSpec> & me, 
-			   TPosition _pos) 
-{
-	me.data_end_position = _pos;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename TNeedle, typename TSpec>
-inline typename Infix<TNeedle>::Type 
-segment(Pattern<TNeedle, TSpec> & me) 
-{
-	typedef typename Infix<TNeedle>::Type TInfix;
-	return TInfix(host(me), me.data_begin_position, me.data_end_position);
-}
-template <typename TNeedle, typename TSpec>
-inline typename Infix<TNeedle>::Type 
-segment(Pattern<TNeedle, TSpec> const & me) 
-{
-	typedef typename Infix<TNeedle>::Type TInfix;
-	return TInfix(host(me), me.data_begin_position, me.data_end_position);
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-
-/**
-.Function.needle:
-..summary:Returns the needle of a @Class.Pattern@ object (not implemented for some online-algorithms).
-..cat:Searching
-..signature:needle(pattern)
-..param.pattern:The @Class.Pattern@ object to search with.
-...type:Class.Pattern
-..returns:The needle object to search for.
-..remarks:The result type is @Metafunction.Needle@$<TPattern>::Type$ for pattern of type $TPattern$.
-*/
-
-template < typename TObject >
-inline typename Needle<TObject>::Type &
-needle(TObject &obj) 
-{
-	return obj;
-}
-
-template < typename TObject >
-inline typename Needle<TObject const>::Type &
-needle(TObject const &obj) 
-{
-	return obj;
-}
-
-
-///.Function.position.param.iterator.type:Class.Pattern
-
-template < typename TNeedle, typename TSpec >
-inline typename Needle< Pattern<TNeedle, TSpec> >::Type &
-needle(Pattern<TNeedle, TSpec> & obj) 
-{
-	return host(obj);
-}
-
-template < typename TNeedle, typename TSpec >
-inline typename Needle< Pattern<TNeedle, TSpec> const>::Type &
-needle(Pattern<TNeedle, TSpec> const & obj) 
-{
-	return host(obj);
-}
-
-/**
-.Function.setNeedle:
-..summary:Sets the needle of a @Class.Pattern@ object and optionally induces preprocessing.
-..cat:Searching
-..signature:setNeedle(pattern, needle)
-..param.pattern:The @Class.Pattern@ object to search with.
-...type:Class.Pattern
-..param.needle:The needle object to search for.
-...type:Class.String
-*/
-
-	template < typename TNeedle, typename TSpec >
-	inline void
-	setNeedle(Pattern<TNeedle, TSpec> &obj, TNeedle const &ndl) {
-		setHost(obj, ndl);
-	}
+	typedef Segment<THost, TSpec> const Type;
+};
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -338,230 +150,417 @@ in which $hayNo$ is the haystack index and $pos$ the local position of the hit.
 ///.Function.clear.param.object.type:Class.Finder
 ///.Function.position.param.iterator.type:Class.Finder
 
-	template < typename THaystack, typename TSpec = typename DefaultFinder<THaystack>::Type >
-	class Finder
-	{
-		typedef typename Iterator<THaystack, Rooted>::Type TIterator;
+template < typename THaystack, typename TSpec = typename DefaultFinder<THaystack>::Type >
+class Finder
+{
+	typedef typename Iterator<THaystack, Rooted>::Type TIterator;
+	typedef typename Position<THaystack>::Type TPosition;
+	typedef typename Size<THaystack>::Type TSize;
 
-	public:
-		TIterator data_iterator;
-		bool _needReinit;					// if true, the Pattern needs to be reinitialized
+public:
+	TIterator data_iterator;
+	TPosition data_endPos; //note: we need this since iterator could point to begin or end (depending on pattern type)
+	TSize data_length;
+	bool _needReinit;					// if true, the Pattern needs to be reinitialized
+	bool _beginFind_called;					// if false, then findBegin was not yet called for this match position (see findBegin default implementation)
 
-		Finder():
-			_needReinit(true) {}
+	Finder()
+		: _needReinit(true) 
+		, _beginFind_called(false)
+	{}
 
-		Finder(THaystack &haystack):
-			data_iterator(begin(haystack, Rooted())),
-			_needReinit(true) {}
+	Finder(THaystack & haystack)
+		: data_iterator(begin(haystack, Rooted()))
+		, _needReinit(true) 
+		, _beginFind_called(false)
+	{}
 
-		Finder(TIterator &iter):
-			data_iterator(iter),
-			_needReinit(true) {}
+	Finder(TIterator &iter)
+		: data_iterator(iter)
+		, _needReinit(true) 
+		, _beginFind_called(false)
+	{}
 
-		Finder(TIterator const &iter):
-			data_iterator(iter),
-			_needReinit(true) {}
+	Finder(TIterator const &iter)
+		: data_iterator(iter)
+		, _needReinit(true) 
+		, _beginFind_called(false)
+	{}
 
-		Finder(Finder const &orig):
-			data_iterator(orig.data_iterator),
-			_needReinit(orig._needReinit) {};
+	Finder(Finder const &orig)
+		: data_iterator(orig.data_iterator)
+		, data_endPos(orig.data_endPos)
+		, data_length(orig.data_length)
+		, _needReinit(orig._needReinit) 
+		, _beginFind_called(orig._beginFind_called)
+	{}
 
-//____________________________________________________________________________
-
-		inline typename Reference<TIterator>::Type 
-		operator* () 
-		{
-SEQAN_CHECKPOINT
-			return value(hostIterator(*this));
-		}
-
-		inline typename Reference<TIterator const>::Type 
-		operator* () const
-		{
-SEQAN_CHECKPOINT
-			return value(hostIterator(*this));
-		}
-
-//____________________________________________________________________________
-
-		operator TIterator () const
-		{
-SEQAN_CHECKPOINT
-			return data_iterator;
-		}
+	~Finder() {}
 
 //____________________________________________________________________________
 
-	};
-
-
-
-//____________________________________________________________________________
-
-	template <typename THaystack, typename TSpec>
-	inline typename _Parameter<THaystack>::Type 
-	host(Finder<THaystack, TSpec> & me)
+	Finder const &
+	operator = (Finder const & other)
 	{
-SEQAN_CHECKPOINT
-		return container(hostIterator(me));
-	}
-
-	template <typename THaystack, typename TSpec>
-	inline typename _Parameter<THaystack>::Type 
-	host(Finder<THaystack, TSpec> const & me)
-	{
-SEQAN_CHECKPOINT
-		return container(hostIterator(me));
-	}
-
-	template <typename THaystack, typename TSpec>
-	inline typename _Parameter<THaystack>::Type 
-	container(Finder<THaystack, TSpec> & me)
-	{
-SEQAN_CHECKPOINT
-		return container(hostIterator(me));
-	}
-
-	template <typename THaystack, typename TSpec>
-	inline typename _Parameter<THaystack>::Type 
-	container(Finder<THaystack, TSpec> const & me)
-	{
-SEQAN_CHECKPOINT
-		return container(hostIterator(me));
+		data_iterator = other->data_iterator;
+		data_endPos = other->data_endPos;
+		data_length = other->data_length;
+		_needReinit = other->_needReinit;
+		_beginFind_called = other->_beginFind_called;
 	}
 
 //____________________________________________________________________________
 
-	template <typename THaystack, typename TSpec>
-	inline void
-	setHost(Finder<THaystack, TSpec> & me, typename _Parameter<THaystack>::Type container_)
+	inline typename Reference<TIterator>::Type 
+	operator* () 
 	{
 SEQAN_CHECKPOINT
-		setContainer(hostIterator(me), container_);
-		goBegin(me);
+		return value(hostIterator(*this));
 	}
 
-	template <typename THaystack, typename TSpec>
-	inline void
-	setContainer(Finder<THaystack, TSpec> & me, typename _Parameter<THaystack>::Type container_)
+	inline typename Reference<TIterator const>::Type 
+	operator* () const
 	{
 SEQAN_CHECKPOINT
-		setContainer(hostIterator(me), container_);
-		goBegin(me);
+		return value(hostIterator(*this));
 	}
 
 //____________________________________________________________________________
 
-	template <typename THaystack, typename TSpec>
-	inline typename Iterator<THaystack, Rooted>::Type &
-	hostIterator(Finder<THaystack, TSpec> & me)
+	operator TIterator () const
 	{
 SEQAN_CHECKPOINT
-		return me.data_iterator;
-	}
-
-	template <typename THaystack, typename TSpec>
-	inline typename Iterator<THaystack, Rooted>::Type const &
-	hostIterator(Finder<THaystack, TSpec> const & me)
-	{
-SEQAN_CHECKPOINT
-		return me.data_iterator;
+		return data_iterator;
 	}
 
 //____________________________________________________________________________
 
-	template <typename THaystack, typename TSpec>
-	inline bool
-	empty(Finder<THaystack, TSpec> & me)
-	{
-SEQAN_CHECKPOINT
-		return me._needReinit;
-	}
+};
 
-	template <typename THaystack, typename TSpec>
-	inline void
-	clear(Finder<THaystack, TSpec> & me)
-	{
-SEQAN_CHECKPOINT
-		me._needReinit = true;
-	}
+//////////////////////////////////////////////////////////////////////////////
 
-//____________________________________________________________________________
-
-	template <typename T>
-	inline void
-	_finderSetNonEmpty(T & me)
-	{
-SEQAN_CHECKPOINT
-		goBegin(me);
-	}
-
-
-	template <typename THaystack, typename TSpec>
-	inline void
-	_finderSetNonEmpty(Finder<THaystack, TSpec> & me)
-	{
-SEQAN_CHECKPOINT
-		me._needReinit = false;
-	}
+template <typename THaystack, typename TSpec>
+inline void
+_setFinderEnd(Finder<THaystack, TSpec> & me)
+{//shortcut: move end position to iterator position +1
+	me._beginFind_called = false;
+	me.data_endPos = position(me)+1;
+}
+template <typename THaystack, typename TSpec, typename TPosition>
+inline void
+_setFinderEnd(Finder<THaystack, TSpec> & me,
+			  TPosition end_pos)
+{
+	me._beginFind_called = false;
+	me.data_endPos = end_pos;
+}
 
 //____________________________________________________________________________
 
-	template <typename THaystack, typename TSpec>
-	inline bool
-	atBegin(Finder<THaystack, TSpec> & me)
-	{
-SEQAN_CHECKPOINT
-		return (!empty(me) && atBegin(hostIterator(me)));
-	}
+template <typename THaystack, typename TSpec, typename TSize>
+inline void
+_setFinderLength(Finder<THaystack, TSpec> & me,
+				 TSize _length)
+{
+	me.data_length = _length;
+}
 
-	template <typename THaystack, typename TSpec>
-	inline bool
-	atEnd(Finder<THaystack, TSpec> & me)
-	{
+//////////////////////////////////////////////////////////////////////////////
+///.Function.beginPosition.param.object.type:Class.Finder
+
+template <typename THaystack, typename TSpec>
+inline typename Position<THaystack>::Type 
+beginPosition(Finder<THaystack, TSpec> & me)
+{
 SEQAN_CHECKPOINT
-		return (!empty(me) && atEnd(hostIterator(me)));
-	}
+	return me.data_endPos - me.data_length;
+}
+
+template <typename THaystack, typename TSpec>
+inline typename Position<THaystack const>::Type
+beginPosition(Finder<THaystack, TSpec> const & me)
+{
+SEQAN_CHECKPOINT
+	return me.data_endPos - me.data_length;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+///.Function.begin.param.object.type:Class.Finder
+
+template <typename THaystack, typename TSpec, typename TTag>
+inline typename Iterator<THaystack, Tag<TTag> const>::Type
+begin(Finder<THaystack, TSpec> & me,
+	  Tag<TTag> const tag)
+{
+SEQAN_CHECKPOINT
+	return iter(haystack(me), beginPosition(me), tag);
+}
+
+template <typename THaystack, typename TSpec, typename TTag>
+inline typename Iterator<THaystack const, Tag<TTag> const>::Type
+begin(Finder<THaystack, TSpec> const & me,
+	  Tag<TTag> const tag)
+{
+SEQAN_CHECKPOINT
+	return iter(haystack(me), beginPosition(me), tag);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+///.Function.endPosition.param.object.type:Class.Finder
+
+template <typename THaystack, typename TSpec>
+inline typename Position<THaystack>::Type 
+endPosition(Finder<THaystack, TSpec> & me)
+{
+SEQAN_CHECKPOINT
+	return me.data_endPos;
+}
+
+template <typename THaystack, typename TSpec>
+inline typename Position<THaystack const>::Type
+endPosition(Finder<THaystack, TSpec> const & me)
+{
+SEQAN_CHECKPOINT
+	return me.data_endPos;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+///.Function.end.param.object.type:Class.Finder
+
+template <typename THaystack, typename TSpec, typename TTag>
+inline typename Iterator<THaystack, Tag<TTag> const>::Type
+end(Finder<THaystack, TSpec> & me,
+	Tag<TTag> const tag)
+{
+SEQAN_CHECKPOINT
+	return iter(haystack(me), endPosition(me), tag);
+}
+
+template <typename THaystack, typename TSpec, typename TTag>
+inline typename Iterator<THaystack const, Tag<TTag> const>::Type
+end(Finder<THaystack, TSpec> const & me,
+	Tag<TTag> const tag)
+{
+SEQAN_CHECKPOINT
+	return iter(haystack(me), endPosition(me), tag);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+///.Function.length.param.object.type:Class.Finder
+
+template <typename THaystack, typename TSpec>
+inline typename Size<THaystack>::Type 
+length(Finder<THaystack, TSpec> & me)
+{
+SEQAN_CHECKPOINT
+	return me.data_length;
+}
+template <typename THaystack, typename TSpec>
+inline typename Size<THaystack const>::Type 
+length(Finder<THaystack, TSpec> const & me)
+{
+SEQAN_CHECKPOINT
+	return me.data_length;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**.Function.finder#infix:
+..description:Segment of the last found match in haystack.
+..signature:Infix infix(finder)
+..param.finder:An online finder.
+...type:Class.Finder
+..returns:An @Metafunction.Infix.infix@ of the @Metafunction.Haystack.haystack@.
+...metafunction:Metafunction.Infix
+..remarks:This function works only correct if the begin position of the match was already found,
+see @Function.findBegin@.
+*/
+template <typename THaystack, typename TSpec>
+inline typename Infix<THaystack>::Type
+infix(Finder<THaystack, TSpec> & me)
+{
+SEQAN_CHECKPOINT
+	typedef typename Infix<THaystack>::Type TInfix;
+	return TInfix(haystack(me), beginPosition(me), endPosition(me));
+}
+
+template <typename THaystack, typename TSpec>
+inline typename Infix<THaystack const>::Type
+infix(Finder<THaystack, TSpec> const & me)
+{
+SEQAN_CHECKPOINT
+	typedef typename Infix<THaystack const>::Type TInfix;
+	return TInfix(haystack(me), beginPosition(me), endPosition(me));
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename THaystack, typename TSpec>
+inline typename _Parameter<THaystack>::Type 
+host(Finder<THaystack, TSpec> & me)
+{
+SEQAN_CHECKPOINT
+	return container(hostIterator(me));
+}
+
+template <typename THaystack, typename TSpec>
+inline typename _Parameter<THaystack>::Type 
+host(Finder<THaystack, TSpec> const & me)
+{
+SEQAN_CHECKPOINT
+	return container(hostIterator(me));
+}
+
+template <typename THaystack, typename TSpec>
+inline typename _Parameter<THaystack>::Type 
+container(Finder<THaystack, TSpec> & me)
+{
+SEQAN_CHECKPOINT
+	return container(hostIterator(me));
+}
+
+template <typename THaystack, typename TSpec>
+inline typename _Parameter<THaystack>::Type 
+container(Finder<THaystack, TSpec> const & me)
+{
+SEQAN_CHECKPOINT
+	return container(hostIterator(me));
+}
 
 //____________________________________________________________________________
 
-	template <typename THaystack, typename TSpec>
-	inline void
-	goBegin(Finder<THaystack, TSpec> & me)
-	{
+template <typename THaystack, typename TSpec>
+inline void
+setHost(Finder<THaystack, TSpec> & me, 
+		typename _Parameter<THaystack>::Type container_)
+{
 SEQAN_CHECKPOINT
-		//_finderSetNonEmpty(me);
-		goBegin(hostIterator(me));
-	}
+	setContainer(hostIterator(me), container_);
+	goBegin(me);
+}
 
-	template <typename THaystack, typename TSpec>
-	inline void
-	goEnd(Finder<THaystack, TSpec> & me)
-	{
+template <typename THaystack, typename TSpec>
+inline void
+setContainer(Finder<THaystack, TSpec> & me, 
+			 typename _Parameter<THaystack>::Type container_)
+{
 SEQAN_CHECKPOINT
-		//_finderSetNonEmpty(me);
-		goEnd(hostIterator(me));
-	}
+	setContainer(hostIterator(me), container_);
+	goBegin(me);
+}
 
 //____________________________________________________________________________
 
-	template <typename THaystack, typename TSpec>
-	inline typename Position<Finder<THaystack, TSpec> >::Type
-	position(Finder<THaystack, TSpec> & me)
-	{
+template <typename THaystack, typename TSpec>
+inline typename Iterator<THaystack, Rooted>::Type &
+hostIterator(Finder<THaystack, TSpec> & me)
+{
 SEQAN_CHECKPOINT
-		if (empty(me)) return 0;
-		return position(hostIterator(me));
-	}
+	return me.data_iterator;
+}
 
-	template <typename THaystack, typename TSpec>
-	inline typename Position<Finder<THaystack, TSpec> >::Type
-	position(Finder<THaystack, TSpec> const & me)
-	{
+template <typename THaystack, typename TSpec>
+inline typename Iterator<THaystack, Rooted>::Type const &
+hostIterator(Finder<THaystack, TSpec> const & me)
+{
 SEQAN_CHECKPOINT
-		if (empty(me)) return 0;
-		return position(hostIterator(me));
-	}
+	return me.data_iterator;
+}
+
+//____________________________________________________________________________
+
+template <typename THaystack, typename TSpec>
+inline bool
+empty(Finder<THaystack, TSpec> const & me)
+{
+SEQAN_CHECKPOINT
+	return me._needReinit;
+}
+
+template <typename THaystack, typename TSpec>
+inline void
+clear(Finder<THaystack, TSpec> & me)
+{
+SEQAN_CHECKPOINT
+	me._needReinit = true;
+}
+
+//____________________________________________________________________________
+
+template <typename T>
+inline void
+_finderSetNonEmpty(T & me)
+{
+SEQAN_CHECKPOINT
+	goBegin(me);
+}
+
+
+template <typename THaystack, typename TSpec>
+inline void
+_finderSetNonEmpty(Finder<THaystack, TSpec> & me)
+{
+SEQAN_CHECKPOINT
+	me._needReinit = false;
+}
+
+//____________________________________________________________________________
+
+template <typename THaystack, typename TSpec>
+inline bool
+atBegin(Finder<THaystack, TSpec> & me)
+{
+SEQAN_CHECKPOINT
+	return (!empty(me) && atBegin(hostIterator(me)));
+}
+
+template <typename THaystack, typename TSpec>
+inline bool
+atEnd(Finder<THaystack, TSpec> & me)
+{
+SEQAN_CHECKPOINT
+	return (!empty(me) && atEnd(hostIterator(me)));
+}
+
+//____________________________________________________________________________
+
+template <typename THaystack, typename TSpec>
+inline void
+goBegin(Finder<THaystack, TSpec> & me)
+{
+SEQAN_CHECKPOINT
+	//_finderSetNonEmpty(me);
+	goBegin(hostIterator(me));
+}
+
+template <typename THaystack, typename TSpec>
+inline void
+goEnd(Finder<THaystack, TSpec> & me)
+{
+SEQAN_CHECKPOINT
+	//_finderSetNonEmpty(me);
+	goEnd(hostIterator(me));
+}
+
+//____________________________________________________________________________
+
+template <typename THaystack, typename TSpec>
+inline typename Position<Finder<THaystack, TSpec> >::Type
+position(Finder<THaystack, TSpec> & me)
+{
+SEQAN_CHECKPOINT
+	if (empty(me)) return 0;
+	return position(hostIterator(me));
+}
+
+template <typename THaystack, typename TSpec>
+inline typename Position<Finder<THaystack, TSpec> >::Type
+position(Finder<THaystack, TSpec> const & me)
+{
+SEQAN_CHECKPOINT
+	if (empty(me)) return 0;
+	return position(hostIterator(me));
+}
 
 //____________________________________________________________________________
 /**
@@ -576,96 +575,96 @@ SEQAN_CHECKPOINT
 ..see:Function.position
 */
 
-	template <typename THaystack, typename TSpec, typename TPosition>
-	inline void 
-	setPosition(Finder<THaystack, TSpec> & me, TPosition pos_)
-	{
+template <typename THaystack, typename TSpec, typename TPosition>
+inline void 
+setPosition(Finder<THaystack, TSpec> & me, TPosition pos_)
+{
 SEQAN_CHECKPOINT
-		setPosition(hostIterator(me), pos_);
-	}
+	setPosition(hostIterator(me), pos_);
+}
 
 //____________________________________________________________________________
 
-	template <typename THaystack, typename TSpec>
-	inline Finder<THaystack, TSpec> &
-	operator--(Finder<THaystack, TSpec> & me)
-	{
+template <typename THaystack, typename TSpec>
+inline Finder<THaystack, TSpec> &
+operator--(Finder<THaystack, TSpec> & me)
+{
 SEQAN_CHECKPOINT
-		--hostIterator(me);
-		return me;
-	}
+	--hostIterator(me);
+	return me;
+}
 
-	template <typename THaystack, typename TSpec>
-	inline Finder<THaystack, TSpec> &
-	operator++(Finder<THaystack, TSpec> & me)
-	{
+template <typename THaystack, typename TSpec>
+inline Finder<THaystack, TSpec> &
+operator++(Finder<THaystack, TSpec> & me)
+{
 SEQAN_CHECKPOINT
 /*			if (beforeBegin()) {
-			goBegin(hostIterator(me));
-		} else*/
-			++hostIterator(me);
-		return me;
-	}
+		goBegin(hostIterator(me));
+	} else*/
+		++hostIterator(me);
+	return me;
+}
 
 //////////////////////////////////////////////////////////////////////////////
 // operator +
 //////////////////////////////////////////////////////////////////////////////
 
-	template <typename THaystack, typename TSpec, typename TIntegral>
-	inline Finder<THaystack, TSpec> const
-	operator + (Finder<THaystack, TSpec> const & left, TIntegral right)
-	{
+template <typename THaystack, typename TSpec, typename TIntegral>
+inline Finder<THaystack, TSpec> const
+operator + (Finder<THaystack, TSpec> const & left, TIntegral right)
+{
 SEQAN_CHECKPOINT
-		return Finder<THaystack, TSpec>(hostIterator(left) + right);
-	}
+	return Finder<THaystack, TSpec>(hostIterator(left) + right);
+}
 
 //////////////////////////////////////////////////////////////////////////////
 // operator +=
 //////////////////////////////////////////////////////////////////////////////
 
-	template <typename THaystack, typename TSpec, typename TIntegral>
-	inline Finder<THaystack, TSpec> &
-	operator += (Finder<THaystack, TSpec> & left,
-					TIntegral right)
-	{
+template <typename THaystack, typename TSpec, typename TIntegral>
+inline Finder<THaystack, TSpec> &
+operator += (Finder<THaystack, TSpec> & left,
+				TIntegral right)
+{
 SEQAN_CHECKPOINT
-		hostIterator(left) += right;
-		return left;
-	}
+	hostIterator(left) += right;
+	return left;
+}
 
 //////////////////////////////////////////////////////////////////////////////
 // operator -
 //////////////////////////////////////////////////////////////////////////////
 
-	template <typename THaystack, typename TSpec, typename TIntegral>
-	inline Finder<THaystack, TSpec> const
-	operator - (Finder<THaystack, TSpec> const & left, TIntegral right)
-	{
+template <typename THaystack, typename TSpec, typename TIntegral>
+inline Finder<THaystack, TSpec> const
+operator - (Finder<THaystack, TSpec> const & left, TIntegral right)
+{
 SEQAN_CHECKPOINT
-		return Finder<THaystack, TSpec>(hostIterator(left) - right);
-	}
+	return Finder<THaystack, TSpec>(hostIterator(left) - right);
+}
 
-	template <typename THaystack, typename TSpec, typename TIntegral>
-	inline typename Difference<Finder<THaystack, TSpec> const>::Type
-	operator - (Finder<THaystack, TSpec> const & left, Finder<THaystack, TSpec> const & right)
-	{
+template <typename THaystack, typename TSpec, typename TIntegral>
+inline typename Difference<Finder<THaystack, TSpec> const>::Type
+operator - (Finder<THaystack, TSpec> const & left, Finder<THaystack, TSpec> const & right)
+{
 SEQAN_CHECKPOINT
-		return hostIterator(left) - hostIterator(right);
-	}
+	return hostIterator(left) - hostIterator(right);
+}
 
 //////////////////////////////////////////////////////////////////////////////
 // operator -=
 //////////////////////////////////////////////////////////////////////////////
 
-	template <typename THaystack, typename TSpec, typename TIntegral>
-	inline Finder<THaystack, TSpec> &
-	operator -= (Finder<THaystack, TSpec> & left,
-					TIntegral right)
-	{
+template <typename THaystack, typename TSpec, typename TIntegral>
+inline Finder<THaystack, TSpec> &
+operator -= (Finder<THaystack, TSpec> & left,
+				TIntegral right)
+{
 SEQAN_CHECKPOINT
-		hostIterator(left) -= right;
-		return left;
-	}
+	hostIterator(left) -= right;
+	return left;
+}
 
 //____________________________________________________________________________
 
@@ -681,11 +680,11 @@ SEQAN_CHECKPOINT
 ...type:Class.String
 */
 
-	template < typename THaystack, typename TSpec >
-	inline void
-	setHaystack(Finder<THaystack, TSpec> &obj, THaystack const &hstk) {
-		setHost(obj, hstk);
-	}
+template < typename THaystack, typename TSpec >
+inline void
+setHaystack(Finder<THaystack, TSpec> &obj, THaystack const &hstk) {
+	setHost(obj, hstk);
+}
 
 /**
 .Function.haystack:
@@ -698,106 +697,85 @@ SEQAN_CHECKPOINT
 ..remarks:The result type is @Metafunction.Haystack@$<TFinder>::Type$ for finder of type $TFinder$.
 */
 
-	template < typename TObject >
-	inline typename Haystack<TObject>::Type &
-	haystack(TObject &obj) {
-		return container(obj);
-	}
+template < typename TObject >
+inline typename Haystack<TObject>::Type &
+haystack(TObject &obj) {
+	return container(obj);
+}
 
-	template < typename TObject >
-	inline typename Haystack<TObject const>::Type &
-	haystack(TObject const &obj) {
-		return container(obj);
-	}
+template < typename TObject >
+inline typename Haystack<TObject const>::Type &
+haystack(TObject const &obj) {
+	return container(obj);
+}
+
 
 
 //////////////////////////////////////////////////////////////////////////////
 
 
-	template <typename THaystack, typename TSpec>
-	struct Container< Finder<THaystack, TSpec> > {
-		typedef THaystack Type;
-	};
+template <typename THaystack, typename TSpec>
+struct Container< Finder<THaystack, TSpec> > {
+	typedef THaystack Type;
+};
 
-	template <typename THaystack, typename TSpec>
-	struct Container< Finder<THaystack, TSpec> const> {
-		typedef THaystack const Type;
-	};
+template <typename THaystack, typename TSpec>
+struct Container< Finder<THaystack, TSpec> const> {
+	typedef THaystack const Type;
+};
 
-	template <typename THaystack, typename TSpec>
-	struct Host< Finder<THaystack, TSpec> > {
-		typedef THaystack Type;
-	};
+template <typename THaystack, typename TSpec>
+struct Host< Finder<THaystack, TSpec> > {
+	typedef THaystack Type;
+};
 
-	template <typename THaystack, typename TSpec>
-	struct Host< Finder<THaystack, TSpec> const> {
-		typedef THaystack const Type;
-	};
-
-
-	template <typename THaystack, typename TSpec>
-	struct Value< Finder<THaystack, TSpec> > {
-		typedef typename Value<THaystack>::Type Type;
-	};
-
-	template <typename THaystack, typename TSpec>
-	struct Position< Finder<THaystack, TSpec> >:
-		Position<THaystack> {};
-
-	template <typename THaystack, typename TSpec>
-	struct Difference< Finder<THaystack, TSpec> > {
-		typedef typename Difference<THaystack>::Type Type;
-	};
-
-	template <typename THaystack, typename TSpec>
-	struct Size< Finder<THaystack, TSpec> > {
-		typedef typename Size<THaystack>::Type Type;
-	};
-
-//____________________________________________________________________________
+template <typename THaystack, typename TSpec>
+struct Host< Finder<THaystack, TSpec> const> {
+	typedef THaystack const Type;
+};
 
 
-	template <typename TNeedle, typename TSpec>
-	struct Container< Pattern<TNeedle, TSpec> > {
-		typedef TNeedle Type;
-	};
+template <typename THaystack, typename TSpec>
+struct Value< Finder<THaystack, TSpec> > {
+	typedef typename Value<THaystack>::Type Type;
+};
 
-	template <typename TNeedle, typename TSpec>
-	struct Container< Pattern<TNeedle, TSpec> const > {
-		typedef TNeedle const Type;
-	};
+template <typename THaystack, typename TSpec>
+struct Position< Finder<THaystack, TSpec> >:
+	Position<THaystack> {};
 
-	template <typename TNeedle, typename TSpec>
-	struct Host< Pattern<TNeedle, TSpec> > {
-		typedef TNeedle Type;
-	};
+template <typename THaystack, typename TSpec>
+struct Difference< Finder<THaystack, TSpec> > {
+	typedef typename Difference<THaystack>::Type Type;
+};
 
-	template <typename TNeedle, typename TSpec>
-	struct Host< Pattern<TNeedle, TSpec> const > {
-		typedef TNeedle const Type;
-	};
+template <typename THaystack, typename TSpec>
+struct Size< Finder<THaystack, TSpec> > {
+	typedef typename Size<THaystack>::Type Type;
+};
+
+template <typename THaystack, typename TSpec, typename TIteratorSpec>
+struct Iterator< Finder<THaystack, TSpec>, TIteratorSpec >
+{
+	typedef typename Iterator<THaystack>::Type Type;
+};
+template <typename THaystack, typename TSpec, typename TIteratorSpec>
+struct Iterator< Finder<THaystack, TSpec> const, TIteratorSpec >
+{
+	typedef typename Iterator<THaystack>::Type const Type;
+};
 
 
-	template <typename TPattern, typename TSpec>
-	struct Value< Pattern<TPattern, TSpec> > {
-		typedef typename Value<TPattern>::Type Type;
-	};
-
-	template <typename TPattern, typename TSpec>
-	struct Position< Pattern<TPattern, TSpec> > {
-		typedef typename Position<TPattern>::Type Type;
-	};
-
-	template <typename TPattern, typename TSpec>
-	struct Difference< Pattern<TPattern, TSpec> > {
-		typedef typename Difference<TPattern>::Type Type;
-	};
-
-	template <typename TPattern, typename TSpec>
-	struct Size< Pattern<TPattern, TSpec> > {
-		typedef typename Size<TPattern>::Type Type;
-	};
-
+template <typename THaystack, typename TSpec>
+struct DefaultGetIteratorSpec< Finder<THaystack, TSpec> >:
+	DefaultGetIteratorSpec< THaystack >
+{
+};
+template <typename THaystack, typename TSpec>
+struct DefaultGetIteratorSpec< Finder<THaystack, TSpec> const>:
+	DefaultGetIteratorSpec< THaystack const>
+{
+};
 
 //////////////////////////////////////////////////////////////////////////////
 

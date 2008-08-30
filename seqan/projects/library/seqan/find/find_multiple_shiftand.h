@@ -301,6 +301,8 @@ bool _findShiftAnd_SmallNeedle(TFinder & finder, Pattern<TNeedle, MultipleShiftA
 			me.data_keywordIndex = (me.data_keyword.front()).i1;
 			me.data_needleLength = (me.data_keyword.front()).i2;
 			me.data_keyword.pop_front();
+			_setFinderEnd(finder);
+			_setFinderLength(finder, me.data_needleLength);
 			finder -= (me.data_needleLength - 1);
 			return true;
 		}
@@ -374,6 +376,8 @@ bool _findShiftAnd_LargeNeedle(TFinder & finder, Pattern<TNeedle, MultipleShiftA
 			me.data_keywordIndex = (me.data_keyword.front()).i1;
 			me.data_needleLength = (me.data_keyword.front()).i2;
 			me.data_keyword.pop_front();
+			_setFinderEnd(finder);
+			_setFinderLength(finder, me.data_needleLength);
 			finder -= (me.data_needleLength - 1);
 			return true;
 		}

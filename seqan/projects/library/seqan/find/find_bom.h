@@ -180,24 +180,6 @@ SEQAN_CHECKPOINT
 
 //____________________________________________________________________________
 
-template <typename TNeedle, typename TSpec>
-inline typename Host<Pattern<TNeedle, BFAM<TSpec> > const>::Type & 
-host(Pattern<TNeedle, BFAM<TSpec> > & me)
-{
-SEQAN_CHECKPOINT
-	return value(me.data_needle);
-}
-
-template <typename TNeedle, typename TSpec>
-inline typename Host<Pattern<TNeedle, BFAM<TSpec> > const>::Type & 
-host(Pattern<TNeedle, BFAM<TSpec> > const & me)
-{
-SEQAN_CHECKPOINT
-	return value(me.data_needle);
-}
-
-//____________________________________________________________________________
-
 
 template <typename TFinder, typename TNeedle, typename TSpec>
 inline bool 
@@ -207,6 +189,7 @@ find(TFinder & finder, Pattern<TNeedle, BFAM<TSpec> > & me)
 	
 	if (empty(finder)) {
 		_patternInit(me);
+		_setFinderLength(finder, length(needle(me)));
 		_finderSetNonEmpty(finder);
 		me.haystackLength = length(container(finder));
 	} else
@@ -222,8 +205,7 @@ find(TFinder & finder, Pattern<TNeedle, BFAM<TSpec> > & me)
 	while (position(finder) <= me.haystackLength - me.needleLength) {
 		TVertexDescriptor current = getRoot(me.automaton);
 		TSize j = me.needleLength;
-		while ((j>0) &&
-				(current != nilVal))
+		while ((j>0) &&	(current != nilVal))
 		{
 			TAlphabet c = *(finder+(j-1));
 			current = targetVertex(me.automaton, findEdge(me.automaton, current, c));
@@ -231,6 +213,7 @@ find(TFinder & finder, Pattern<TNeedle, BFAM<TSpec> > & me)
 		}
 		if (current != nilVal) {
 			me.step = j + 1;
+			_setFinderEnd(finder, position(finder) + me.needleLength);
 			return true;
 		}
 		finder += j + 1;

@@ -29,28 +29,37 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Spec.MyersUkkonen:
+.Spec.Myers:
 ..cat:Pattern Matching
 ..general:Class.Pattern
 ..summary:Provides fast approximate searching of one string in another using Myer's fast bit-parallel algorithm with application of the Ukkonen-trick.
-..signature:Pattern<TNeedle, MyersUkkonen>
+..signature:Pattern<TNeedle, Myers< [TSpec [, TFindBeginPatternSpec] ]> >
 ..param.TNeedle:The needle type.
 ...type:Class.String
+..param.TSpec:Specialization tag.
+...default:$FindInfix$
+...remarks:This could be $FindInfix$ for infix search or $FindPrefix$ for prefix search.
+..param.TFindBeginPatternSpec:Specialization of @Class.Pattern@ used to find the begin of matches.
+...default:@Metafunction.DefaultFindBeginPatternSpec@
+...metafunctin:@Metafunction.FindBeginPatternSpec@
+...remarks:This must be a finder for prefix search, e.g. @DPSearch<TScore, FindPrefix>@ or @Myers<FindPrefix>@.
+Specify $void$ to suppress prefix searching.
 ..remarks.text:The needle-length must be smaller than the highest number that can be stored in an unsigned int.
 */
 
 ///.Class.Pattern.param.TSpec.type:Spec.MyersUkkonen
 
-struct AlignTextLocal;			// search semi-global (query-global, text-local)
-struct AlignTextGlobal;			// search global (query-global, text-global)
-struct AlignTextBanded;			// search query in a parallelogram
+template <typename TSpec = FindInfix, typename TFindBeginPatternSpec = typename DefaultFindBeginPatternSpec<>::Type>
+struct Myers;
 
-template <typename TSpec>
-struct _MyersUkkonen;
+//FindInfix and FindPrefix are defined int find_base.h
+struct AlignTextBanded; // search query in a parallelogram
 
-typedef Tag<_MyersUkkonen<AlignTextLocal> >			MyersUkkonen;
-typedef Tag<_MyersUkkonen<AlignTextGlobal> >		MyersUkkonenGlobal;
-typedef Tag<_MyersUkkonen<AlignTextBanded> >		MyersUkkonenBanded;
+//deprecated shortcuts:
+typedef Myers<FindInfix, void>  MyersUkkonen;		// search semi-global (query-global, text-local)
+typedef Myers<FindPrefix, void> MyersUkkonenGlobal;	// search global (query-global, text-global)
+typedef Myers<AlignTextBanded, void> MyersUkkonenBanded;		// search query in a parallelogram
+
 
 
 //____________________________________________________________________________
@@ -64,15 +73,17 @@ struct _MyersUkkonenHP0 {
 };
 
 template <>
-struct _MyersUkkonenHP0<AlignTextGlobal> {
+struct _MyersUkkonenHP0<FindPrefix> {
 	enum { VALUE = 1 };
 };
 
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TNeedle, typename TSpec>
-class Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > > {
+template <typename TNeedle, typename TSpec, typename TFindBeginPatternSpec>
+class Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> >: 
+	public _FindBegin<Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > >
+{
 //____________________________________________________________________________
 public:
 	typedef unsigned long TWord;
@@ -119,8 +130,8 @@ public:
 };
 
 
-template <typename TNeedle>
-class Pattern<TNeedle, Tag<_MyersUkkonen<AlignTextBanded> > > {
+template <typename TNeedle, typename TFindBeginPatternSpec>
+class Pattern<TNeedle, Myers<AlignTextBanded, TFindBeginPatternSpec> > {
 //____________________________________________________________________________
 public:
 	typedef unsigned long TWord;
@@ -164,17 +175,33 @@ public:
 //____________________________________________________________________________
 };
 
+
+//////////////////////////////////////////////////////////////////////////////
+// Metafunctions
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TNeedle, typename TSpec, typename TFindBeginPatternSpec>
+struct FindBeginPatternSpec <Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > > 
+{
+	typedef TFindBeginPatternSpec Type;
+};
+template <typename TNeedle, typename TFindBeginPatternSpec>
+struct FindBeginPatternSpec <Pattern<TNeedle, Myers<FindPrefix, TFindBeginPatternSpec> > >
+{// no find begin for FindPrefix
+	typedef void Type;
+};
+
 //////////////////////////////////////////////////////////////////////////////
 // Functions
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TNeedle, typename TSpec, typename TNeedle2>
-inline void _patternFirstInit(Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > > & me, 
-					   TNeedle2 & needle)
+template <typename TNeedle, typename TSpec, typename TFindBeginPatternSpec, typename TNeedle2>
+inline void _patternFirstInit(Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > & me, 
+							  TNeedle2 & needle)
 {
 SEQAN_CHECKPOINT
 
-	typedef typename Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > >::TWord TWord;
+	typedef typename Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> >::TWord TWord;
 	typedef typename Value<TNeedle>::Type TValue;
 
 	me.needleSize = length(needle);
@@ -191,28 +218,32 @@ SEQAN_CHECKPOINT
 			+ j / me.MACHINE_WORD_SIZE
 		] |= (TWord)1 << (j % me.MACHINE_WORD_SIZE);
 		//me.bitMasks[me.blockCount * ordValue((CompareType< Value< TNeedle >::Type, Value< Container< THaystack >::Type >::Type >::Type) needle[j]) + j/me.MACHINE_WORD_SIZE] = me.bitMasks[me.blockCount * ordValue((CompareType< Value< TNeedle >::Type, Value< Container< THaystack >::Type >::Type >::Type) needle[j]) + j/MACHINE_WORD_SIZE] | ((TWord)1 << (j%MACHINE_WORD_SIZE));
+
+	_findBeginInit(me);
 }
 
-template <typename TNeedle, typename TNeedle2>
-inline void _patternFirstInit(Pattern<TNeedle, Tag<_MyersUkkonen<AlignTextBanded> > > & me, 
-					   TNeedle2 & ndl)
+template <typename TNeedle, typename TFindBeginPatternSpec, typename TNeedle2>
+inline void _patternFirstInit(Pattern<TNeedle, Myers<AlignTextBanded, TFindBeginPatternSpec> > & me, 
+							  TNeedle2 & ndl)
 {
 SEQAN_CHECKPOINT
-	typedef typename Pattern<TNeedle, Tag<_MyersUkkonen<AlignTextBanded> > >::TWord TWord;
+	typedef typename Pattern<TNeedle, Myers<AlignTextBanded, TFindBeginPatternSpec> >::TWord TWord;
 	me.needleSize = length(ndl);
 	me.finalScoreMask = (TWord)1 << (me.MACHINE_WORD_SIZE - 1);
+
+	_findBeginInit(me);
 }
 
-template <typename TNeedle, typename TSpec, typename TNeedle2>
-void setHost(Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > > & me, 
+template <typename TNeedle, typename TSpec, typename TFindBeginPatternSpec, typename TNeedle2>
+void setHost(Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > & me, 
 			 TNeedle2 & ndl)
 {
 SEQAN_CHECKPOINT
 	setValue(me.data_needle, ndl);
 	_patternFirstInit(me, ndl);
 }
-template <typename TNeedle, typename TSpec, typename TNeedle2>
-void setHost(Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > > & me, 
+template <typename TNeedle, typename TSpec, typename TFindBeginPatternSpec, typename TNeedle2>
+void setHost(Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > & me, 
 			 TNeedle2 const & ndl) 
 {
 	setValue(me.data_needle, ndl);
@@ -221,17 +252,17 @@ void setHost(Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > > & me,
 
 //____________________________________________________________________________
 
-template <typename TNeedle, typename TSpec>
-inline typename Host<Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > > >::Type & 
-host(Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > > & me)
+template <typename TNeedle, typename TSpec, typename TFindBeginPatternSpec>
+inline typename Host<Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > >::Type & 
+host(Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > & me)
 {
 SEQAN_CHECKPOINT
 	return value(me.data_needle);
 }
 
-template <typename TNeedle, typename TSpec>
-inline typename Host<Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > > const>::Type & 
-host(Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > >  const & me)
+template <typename TNeedle, typename TSpec, typename TFindBeginPatternSpec>
+inline typename Host<Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > const>::Type & 
+host(Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> >  const & me)
 {
 SEQAN_CHECKPOINT
 	return value(me.data_needle);
@@ -241,9 +272,9 @@ SEQAN_CHECKPOINT
 
 ///.Function.scoreLimit.param.pattern.type:Spec.MyersUkkonen
 
-template <typename TNeedle, typename TSpec>
+template <typename TNeedle, typename TSpec, typename TFindBeginPatternSpec>
 inline int 
-scoreLimit(Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > > const & me)
+scoreLimit(Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > const & me)
 {
 SEQAN_CHECKPOINT
 	return - (int) me.k;
@@ -253,9 +284,9 @@ SEQAN_CHECKPOINT
 
 ///.Function.scoreLimit.param.pattern.type:Spec.MyersUkkonen
 
-template <typename TNeedle, typename TSpec, typename TScoreValue>
+template <typename TNeedle, typename TSpec, typename TFindBeginPatternSpec, typename TScoreValue>
 inline void 
-setScoreLimit(Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > > & me, 
+setScoreLimit(Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > & me, 
 			  TScoreValue _limit)
 {
 SEQAN_CHECKPOINT
@@ -266,8 +297,8 @@ SEQAN_CHECKPOINT
 
 ///.Function.getScore.param.pattern.type:Spec.MyersUkkonen
 
-template <typename TNeedle, typename TSpec>
-int getScore(Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > > & me) 
+template <typename TNeedle, typename TSpec, typename TFindBeginPatternSpec>
+int getScore(Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > & me) 
 {
 	return -(int)me.score;
 }
@@ -279,11 +310,11 @@ int getScore(Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > > & me)
 //____________________________________________________________________________
 
 
-template <typename TNeedle, typename TSpec, typename TFinder>
-void _patternInit(Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > > &me, TFinder &)
+template <typename TNeedle, typename TSpec, typename TFindBeginPatternSpec, typename TFinder>
+void _patternInit(Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > &me, TFinder &)
 {
 SEQAN_CHECKPOINT
-	typedef typename Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > >::TWord TWord;
+	typedef typename Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> >::TWord TWord;
 	if (me.blockCount == 1) 
 	{
 		me.score = me.needleSize;
@@ -307,11 +338,11 @@ SEQAN_CHECKPOINT
 }
 
 
-template <typename TNeedle, typename TFinder>
-void _patternInit(Pattern<TNeedle, Tag<_MyersUkkonen<AlignTextBanded> > > &me, TFinder &finder)
+template <typename TNeedle, typename TFinder, typename TFindBeginPatternSpec>
+void _patternInit(Pattern<TNeedle, Myers<AlignTextBanded, TFindBeginPatternSpec> > &me, TFinder &finder)
 {
 SEQAN_CHECKPOINT
-	typedef typename Pattern<TNeedle, Tag<_MyersUkkonen<AlignTextBanded> > >::TWord TWord;
+	typedef typename Pattern<TNeedle, Myers<AlignTextBanded, TFindBeginPatternSpec> >::TWord TWord;
 	typedef typename Value<TNeedle>::Type TValue;
 
 	me.ndlIter = begin(host(me), Standard());
@@ -357,17 +388,19 @@ SEQAN_CHECKPOINT
 
 
 
-template <typename TFinder, typename TNeedle, typename TSpec>
-inline bool _findMyersLargePatterns (TFinder & finder, Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > > & me) 
+template <typename TFinder, typename TNeedle, typename TSpec, typename TFindBeginPatternSpec, typename TSize>
+inline bool _findMyersLargePatterns (TFinder & finder, 
+									 Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > & me,
+									 TSize haystack_length) 
 {
 SEQAN_CHECKPOINT
-	typedef typename Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > >::TWord TWord;
+	typedef typename Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> >::TWord TWord;
 
 	TWord X, D0, HN, HP, temp;
 	TWord carryD0, carryHP, carryHN;
 	unsigned shift, limit, currentBlock;
 
-	while (!atEnd(finder)) {
+	while (position(finder) < haystack_length) {
 		carryD0 = carryHN = 0;
 		carryHP = _MyersUkkonenHP0<TSpec>::VALUE;
 
@@ -427,7 +460,14 @@ SEQAN_CHECKPOINT
 		}
 
 		if ((me.lastBlock == me.blockCount-1) && (me.scoreMask == me.finalScoreMask))
+		{
+			_setFinderEnd(finder);
+			if (TYPECMP<TSpec, FindPrefix>::VALUE)
+			{
+				_setFinderLength(finder, endPosition(finder));
+			}
 			return true;
+		}
 		else {
 			me.scoreMask <<= 1;
 			if (!me.scoreMask) {
@@ -452,17 +492,19 @@ SEQAN_CHECKPOINT
 //____________________________________________________________________________
 // version for needles not longer than one machineword
 
-template <typename TFinder, typename TNeedle, typename TSpec>
-inline bool _findMyersSmallPatterns (TFinder & finder, Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > > & me) 
+template <typename TFinder, typename TNeedle, typename TSpec, typename TFindBeginPatternSpec, typename TSize>
+inline bool _findMyersSmallPatterns (TFinder & finder, 
+									 Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > & me,
+									 TSize haystack_length) 
 {
 SEQAN_CHECKPOINT
 
-	typedef typename Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > >::TWord TWord;
+	typedef typename Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> >::TWord TWord;
 
 	TWord X, D0, HN, HP;
 
 	// computing the blocks
-	while (!atEnd(finder)) {
+	while (position(finder) < haystack_length) {
 		X = me.bitMasks[ordValue((typename Value<TNeedle>::Type) *finder)] | me.VN0;
 		
 		D0 = ((me.VP0 + (X & me.VP0)) ^ me.VP0) | X;
@@ -478,7 +520,19 @@ SEQAN_CHECKPOINT
 			me.score--;
 
 		if (me.score <= me.k)
+		{
+			_setFinderEnd(finder);
+			if (TYPECMP<TSpec, FindPrefix>::VALUE)
+			{
+				_setFinderLength(finder, endPosition(finder));
+			}
 			return true;
+		}
+
+		if (TYPECMP<TSpec, FindPrefix>::VALUE)
+		{//limit haystack length during prefix search
+
+		}
 		
 		goNext(finder);
 	}
@@ -497,14 +551,15 @@ SEQAN_CHECKPOINT
 
 
 
-template <typename TFinder, typename TNeedle, typename TSpec>
+template <typename TFinder, typename TNeedle, typename TFindBeginPatternSpec, typename TSize>
 inline bool 
 _findMyersLargePatterns(
 	TFinder & finder, 
-	Pattern<TNeedle, Tag<_MyersUkkonen<AlignTextBanded> > > & me) 
+	Pattern<TNeedle, Myers<AlignTextBanded, TFindBeginPatternSpec> > & me,
+	TSize) 
 {
 SEQAN_CHECKPOINT
-	typedef typename Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > >::TWord TWord;
+	typedef typename Pattern<TNeedle, Myers<AlignTextBanded, TFindBeginPatternSpec> >::TWord TWord;
 	typedef typename Value<TNeedle>::Type TValue;
 
 	TWord X, D0, HN, HP, temp;
@@ -545,7 +600,7 @@ SEQAN_CHECKPOINT
 		}
 
 		carryD0 = carryHN = 0;
-		carryHP = _MyersUkkonenHP0<TSpec>::VALUE;
+		carryHP = _MyersUkkonenHP0<AlignTextBanded>::VALUE;
 
 		// if the active cell is the last of it's block, one additional block has to be calculated
 		limit = me.lastBlock + (me.scoreMask >> (me.MACHINE_WORD_SIZE - 1));
@@ -629,10 +684,10 @@ template <typename TFinder, typename TNeedle>
 inline bool 
 _findMyersSmallPatterns(
 	TFinder & finder, 
-	Pattern<TNeedle, Tag<_MyersUkkonen<AlignTextBanded> > > & me)
+	Pattern<TNeedle, Myers<AlignTextBanded> > & me)
 {
 SEQAN_CHECKPOINT
-	typedef typename Pattern<TNeedle, Tag<_MyersUkkonen<AlignTextBanded> > >::TWord TWord;
+	typedef typename Pattern<TNeedle, Myers<AlignTextBanded> >::TWord TWord;
 
 	TWord X, D0, HN, HP;
 #ifdef SEQAN_DEBUG_MYERSBITVECTOR
@@ -737,9 +792,9 @@ SEQAN_CHECKPOINT
 }
 */
 
-template <typename TWord, typename TAlignSpec>
+template <typename TWord, typename TAlignSpec, typename TFindBeginPatternSpec>
 inline int
-_myersCoreSmall(TWord &VP, TWord &VN, TWord const &bitmap, int scoreBit, Tag<_MyersUkkonen<TAlignSpec> >) 
+_myersCoreSmall(TWord &VP, TWord &VN, TWord const &bitmap, int scoreBit, Myers<TAlignSpec, TFindBeginPatternSpec> ) 
 {
 	// Myers core
 	TWord X = bitmap | VN;
@@ -752,9 +807,9 @@ _myersCoreSmall(TWord &VP, TWord &VN, TWord const &bitmap, int scoreBit, Tag<_My
 	return (int)((HP >> scoreBit) & 1) - (int)((HN >> scoreBit) & 1);
 }
 
-template <typename TWord, typename TAlignSpec>
+template <typename TWord, typename TAlignSpec, typename TFindBeginPatternSpec>
 inline int
-_myersCoreSmallDiag(TWord &VP, TWord &VN, TWord const &bitmap, int scoreBit, Tag<_MyersUkkonen<TAlignSpec> >) 
+_myersCoreSmallDiag(TWord &VP, TWord &VN, TWord const &bitmap, int scoreBit, Myers<TAlignSpec, TFindBeginPatternSpec> ) 
 {
 	// Myers core
 	TWord X = bitmap | VN;
@@ -767,14 +822,15 @@ _myersCoreSmallDiag(TWord &VP, TWord &VN, TWord const &bitmap, int scoreBit, Tag
 	return (!D0 >> scoreBit) & 1;
 }
 
-template <typename TFinder, typename TNeedle>
+template <typename TFinder, typename TNeedle, typename TFindBeginPatternSpec, typename TSize>
 inline bool 
 _findMyersSmallPatterns(
 	TFinder & finder, 
-	Pattern<TNeedle, Tag<_MyersUkkonen<AlignTextBanded> > > & me)
+	Pattern<TNeedle, Myers<AlignTextBanded, TFindBeginPatternSpec> > & me,
+	TSize)
 {
 SEQAN_CHECKPOINT
-	typedef Pattern<TNeedle, Tag<_MyersUkkonen<AlignTextBanded> > > TPattern;
+	typedef Pattern<TNeedle, Myers<AlignTextBanded, TFindBeginPatternSpec> > TPattern;
 	typedef typename TPattern::TWord TWord;
 	typedef typename TPattern::TIter TIter;
 
@@ -800,7 +856,7 @@ SEQAN_CHECKPOINT
 			me.bitMasks[ordValue(*me.ndlIter)] |= me.scoreMask;
 			me.score += _myersCoreSmallDiag(
 				me.VP0, me.VN0, me.bitMasks[ordValue((typename Value<TNeedle>::Type) *finder)],
-				me.scoreBit, Tag<_MyersUkkonen<AlignTextBanded> >());
+				me.scoreBit, Myers<AlignTextBanded, TFindBeginPatternSpec>());
 
 #ifdef SEQAN_DEBUG_MYERSBITVECTOR_DUMP
 			--SHIFT;
@@ -855,7 +911,7 @@ SEQAN_CHECKPOINT
 			me.bitMasks[ordValue(*me.ndlIter)] |= me.scoreMask;
 			me.score += _myersCoreSmallDiag(
 				me.VP0, me.VN0, me.bitMasks[ordValue((typename Value<TNeedle>::Type) *finder)],
-				me.scoreBit, Tag<_MyersUkkonen<AlignTextBanded> >());
+				me.scoreBit, Myers<AlignTextBanded, TFindBeginPatternSpec>());
 
 #ifdef SEQAN_DEBUG_MYERSBITVECTOR_DUMP
 			--SHIFT;
@@ -911,7 +967,7 @@ SEQAN_CHECKPOINT
 		{
 			me.score += _myersCoreSmall(
 				me.VP0, me.VN0, me.bitMasks[ordValue((typename Value<TNeedle>::Type) *finder)],
-				--me.scoreBit, Tag<_MyersUkkonen<AlignTextBanded> >());
+				--me.scoreBit, Myers<AlignTextBanded, TFindBeginPatternSpec>());
 
 			// shift bitmasks and states
 #ifdef SEQAN_DEBUG_MYERSBITVECTOR_DUMP
@@ -955,12 +1011,17 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 // find
-template <typename TFinder, typename TNeedle, typename TSpec>
+template <typename TFinder, typename TNeedle, typename TSpec, typename TFindBeginPatternSpec>
 inline bool find (TFinder & finder, 
-				  Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > > & me)
+				  Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > & me)
 {
 SEQAN_CHECKPOINT
+	typedef typename Haystack<TFinder>::Type THaystack;
+	typedef typename Size<THaystack>::Type TSize;
+
 	int k = scoreLimit(me);
+
+	TSize prefix_begin_position; //for prefix search: the position where the prefix begins
 
 	if (empty(finder))
 	{
@@ -970,29 +1031,39 @@ SEQAN_CHECKPOINT
 		_patternInit(me, finder);
 		_finderSetNonEmpty(finder);
 
-		//TODO: adapt myers-ukkonnen to dynamically change k
+		prefix_begin_position = position(finder);
 
-		// distinguish between the version for needles not longer than one machineword and the version for longer needles
-		if (me.blockCount == 1) 
-			return _findMyersSmallPatterns(finder, me);
-		else 
-			return _findMyersLargePatterns(finder, me);
+		//TODO: adapt myers-ukkonnen to dynamically change k
 	}
 	else
 	{
 		if (atEnd(finder)) return false;
 		goNext(finder);
-		// distinguish between the version for needles not longer than one machineword and the version for longer needles
-		if (me.blockCount == 1) 
-			return _findMyersSmallPatterns(finder, me);
-		else
-			return _findMyersLargePatterns(finder, me);
+
+		prefix_begin_position = beginPosition(finder);
 	}
+
+	//limit search width for prefix search
+	TSize haystack_length = length(container(hostIterator(finder)));
+	if (TYPECMP<TSpec, FindPrefix>::VALUE)
+	{
+		TSize maxlen = prefix_begin_position + length(needle(me)) - k + 1;
+		if (haystack_length > maxlen)
+		{
+			haystack_length = maxlen;
+		}
+	}
+
+	// distinguish between the version for needles not longer than one machineword and the version for longer needles
+	if (me.blockCount == 1) 
+		return _findMyersSmallPatterns(finder, me, haystack_length);
+	else
+		return _findMyersLargePatterns(finder, me, haystack_length);
 }
 
-template <typename TFinder, typename TNeedle, typename TSpec>
+template <typename TFinder, typename TNeedle, typename TSpec, typename TFindBeginPatternSpec>
 inline bool find (TFinder & finder, 
-				  Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > > & me, 
+				  Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > & me, 
 				  int const k)
 {
 	setScoreLimit(me, k);

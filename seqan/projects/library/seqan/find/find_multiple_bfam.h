@@ -81,7 +81,7 @@ public:
 	//preprocessed data: these members are initialized in setHost
 	Holder<TNeedle> needle;
 	TGraph automaton; //automaton of the reverse lmin-prefixes of the keywords
-	String<String<unsigned int> > terminals; //map of terminal states in automaton
+	String<String<TNeedlePosition> > terminals; //map of terminal states in automaton
 
 	TSize lmin;	//min length of keyword
 
@@ -161,7 +161,7 @@ SEQAN_CHECKPOINT
 	//collect reverse prefixes for automaton
 	String<String<TValue> > strs;
 	resize(strs, len);
-	for (int i = 0; i < len; ++i)
+	for (unsigned int i = 0; i < len; ++i)
 	{
 		strs[i] = prefix(ndl[i], me.lmin);
 		reverseInPlace(strs[i]);
@@ -291,6 +291,8 @@ SEQAN_CHECKPOINT
 	TKeywordIterator kit;
 	TKeywordIterator kit_end;
 	THaystackIterator tit;
+	TKeyword * p_keyword;
+	TSize len;
 
 	if (empty(finder)) 
 	{
@@ -324,22 +326,21 @@ SEQAN_CHECKPOINT
 			if (it1 == it2)
 			{
 //VERIFY
-				String<unsigned int> const & verify_list = property(me.terminals, current);
-				me.position = begin(verify_list, Standard());
-				me.position_end = end(verify_list, Standard());
+				me.position = begin(property(me.terminals, current), Standard());
+				me.position_end = end(property(me.terminals, current), Standard());
 				SEQAN_ASSERT(me.position != me.position_end)
 
 				if (_startVerify_MultiBFAM(me, it1)) //this returns true if the lmin-length prefixe matches
 				{
 					while (me.position != me.position_end)
 					{
-						TKeyword & keyword = needle(me)[*me.position];
-						TSize len = length(keyword);
+						p_keyword = & needle(me)[*me.position];
+						len = length(*p_keyword);
 						if ((it1 + len) <= haystack_end)
 						{
 							//compare rest
-							kit = begin(keyword) + me.lmin;
-							kit_end = end(keyword);
+							kit = begin(*p_keyword) + me.lmin;
+							kit_end = end(*p_keyword);
 							tit = it1 + me.lmin;
 							while (true)
 							{
@@ -347,6 +348,8 @@ SEQAN_CHECKPOINT
 								{
 //MATCH FOUND
 									setPosition(finder, it1 - begin(haystack(finder), Standard()));
+									_setFinderLength(finder, length(needle(*p_keyword)));
+									_setFinderEnd(finder, position(finder) + length(finder));
 									return true;
 								}
 								if (*kit != *tit) break;

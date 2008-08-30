@@ -28,16 +28,16 @@ namespace SEQAN_NAMESPACE_MAIN
 // DPSearch
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TScore>
+//template <typename TScore, typename TSpec = FindInfix, typename TFindBeginPatternSpec = DPSearch<TScore, FindPrefix, void> >
+template <typename TScore, typename TSpec = FindInfix, typename TFindBeginPatternSpec = typename DefaultFindBeginPatternSpec<TScore>::Type>
 struct DPSearch;
 
-
-/**
+/*
 .Spec.DPSearch:
 ..cat:Searching
 ..general:Class.Pattern
 ..summary:A dynamic programming algorithm for approximate string-matching with a user-definable scoring function.
-..signature:Pattern<TNeedle, DPSearch<TScore> >
+..signature:Pattern<TNeedle, DPSearch<TScore [, TSpec [, TFindBeginPatternSpec] ]> >
 ..param.TNeedle:The needle type.
 ...type:Class.String
 ..param.TScore:The scoring function.
@@ -50,8 +50,9 @@ The $Pattern$ object only contains the right-most column of the dynamic programm
 ///.Class.Pattern.param.TSpec.type:Class.Score
 
 
-template <typename TNeedle, typename TScore>
-class Pattern<TNeedle, DPSearch<TScore> >
+template <typename TNeedle, typename TScore, typename TSpec, typename TFindBeginPatternSpec>
+class Pattern<TNeedle, DPSearch<TScore, TSpec, TFindBeginPatternSpec> >:
+	public _FindBegin<Pattern<TNeedle, DPSearch<TScore, TSpec, TFindBeginPatternSpec> > >
 {
 public:
 	typedef typename Value<TScore>::Type TScoreValue;
@@ -60,6 +61,7 @@ public:
 	TScore				data_score;
 	TScoreValue			data_limit;
 	String<TScoreValue>	data_tab;
+	TScoreValue			data_maxscore;  //score of the needle matching itself (needed for banding FindPrefix)
 
 public: 
 	Pattern(): 
@@ -97,7 +99,8 @@ SEQAN_CHECKPOINT
 		data_needle( other.data_needle ),
 		data_score( other.data_score ), 
 		data_limit( other.data_limit ),
-		data_tab( other.data_tab )
+		data_tab( other.data_tab ),
+		data_maxscore( other.data_maxscore)
 	{
 SEQAN_CHECKPOINT
 	}
@@ -110,45 +113,57 @@ SEQAN_CHECKPOINT
 		this->data_score = other.data_score;
 		this->data_limit = other.data_limit;
 		this->data_tab = other.data_tab;
+		this->data_maxscore = other.data_maxscore;
 
 		return *this;
 	}
 };
 
-
-//////////////////////////////////////////////////////////////////////////////
-// Host
 //////////////////////////////////////////////////////////////////////////////
 
-/* //see find_base.h
-
-template <typename TNeedle, typename TScore>
-struct Host< Pattern<TNeedle, DPSearch<TScore> > >
+template <typename TNeedle, typename TScore, typename TSpec, typename TFindBeginPatternSpec>
+struct ScoringScheme <Pattern<TNeedle, DPSearch<TScore, TSpec, TFindBeginPatternSpec> > >
 {
-	typedef TNeedle Type;
+	typedef TScore Type;
 };
 
-template <typename TNeedle, typename TScore>
-struct Host< Pattern<TNeedle, DPSearch<TScore> > const>
+
+//DEPRECATED
+//.Metafunction.ScoreValue.param.T.type:Spec.DPSearch
+//template <typename TNeedle, typename TScore, typename TSpec, typename TFindBeginPatternSpec>
+//struct ScoreValue <Pattern<TNeedle, DPSearch<TScore, TSpec, TFindBeginPatternSpec> > >:
+//	Value<TScore>
+//{
+//};
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TNeedle, typename TScore, typename TSpec, typename TFindBeginPatternSpec>
+struct FindBeginPatternSpec <Pattern<TNeedle, DPSearch<TScore, TSpec, TFindBeginPatternSpec> > > 
 {
-	typedef TNeedle const Type;
+	typedef TFindBeginPatternSpec Type;
 };
-*/
+template <typename TNeedle, typename TScore, typename TFindBeginPatternSpec>
+struct FindBeginPatternSpec <Pattern<TNeedle, DPSearch<TScore, FindPrefix, TFindBeginPatternSpec> > >
+{// no find begin for FindPrefix
+	typedef void Type;
+};
 
 //////////////////////////////////////////////////////////////////////////////
 
 
-template <typename TNeedle, typename TScore>
-inline typename Host<Pattern<TNeedle, DPSearch<TScore> > >::Type & 
-host(Pattern<TNeedle, DPSearch<TScore> > & me)
+template <typename TNeedle, typename TScore, typename TSpec, typename TFindBeginPatternSpec>
+inline typename Host<Pattern<TNeedle, DPSearch<TScore, TSpec, TFindBeginPatternSpec> > >::Type & 
+host(Pattern<TNeedle, DPSearch<TScore, TSpec, TFindBeginPatternSpec> > & me)
 {
 SEQAN_CHECKPOINT
 	return value(me.data_needle);
 }
 
-template <typename TNeedle, typename TScore>
-inline typename Host<Pattern<TNeedle, DPSearch<TScore> > const>::Type & 
-host(Pattern<TNeedle, DPSearch<TScore> >  const & me)
+template <typename TNeedle, typename TScore, typename TSpec, typename TFindBeginPatternSpec>
+inline typename Host<Pattern<TNeedle, DPSearch<TScore, TSpec, TFindBeginPatternSpec> > const>::Type & 
+host(Pattern<TNeedle, DPSearch<TScore, TSpec, TFindBeginPatternSpec> >  const & me)
 {
 SEQAN_CHECKPOINT
 	return value(me.data_needle);
@@ -157,17 +172,17 @@ SEQAN_CHECKPOINT
 
 //____________________________________________________________________________
 
-template <typename TNeedle, typename TScore, typename TNeedle2>
+template <typename TNeedle, typename TScore, typename TSpec, typename TFindBeginPatternSpec, typename TNeedle2>
 void 
-setHost(Pattern<TNeedle, DPSearch<TScore> > & me, 
+setHost(Pattern<TNeedle, DPSearch<TScore, TSpec, TFindBeginPatternSpec> > & me, 
 		TNeedle2 & ndl)
 {
 	me.data_needle = ndl;
 	clear(me.data_tab);
 }
-template <typename TNeedle, typename TScore, typename TNeedle2>
+template <typename TNeedle, typename TScore, typename TSpec, typename TFindBeginPatternSpec, typename TNeedle2>
 void 
-setHost(Pattern<TNeedle, DPSearch<TScore> > & me, 
+setHost(Pattern<TNeedle, DPSearch<TScore, TSpec, TFindBeginPatternSpec> > & me, 
 		TNeedle2 const & ndl)
 {
 	me.data_needle = ndl;
@@ -177,19 +192,10 @@ setHost(Pattern<TNeedle, DPSearch<TScore> > & me,
 
 //____________________________________________________________________________
 
-/**.Function.scoringScheme
-..cat:Searching
-..summary:The @glos:scoring scheme@ used for finding or aligning.
-..signature:scoringScheme(obj)
-..param.obj:Object that holds a @glos:scoring scheme@
-...type:Spec.DPSearch
-..returns:The @glos:scoring scheme@ used in $obj$
-..see:glos:scoring scheme
-*/
 
-template <typename TNeedle, typename TScore>
+template <typename TNeedle, typename TScore, typename TSpec, typename TFindBeginPatternSpec>
 inline TScore const & 
-scoringScheme(Pattern<TNeedle, DPSearch<TScore> > & me)
+scoringScheme(Pattern<TNeedle, DPSearch<TScore, TSpec, TFindBeginPatternSpec> > & me)
 {
 SEQAN_CHECKPOINT
 	return me.data_score;
@@ -197,29 +203,19 @@ SEQAN_CHECKPOINT
 
 //____________________________________________________________________________
 
-/**.Function.setScoringScheme
-..cat:Searching
-..summary:Sets the @glos:scoring scheme@ used for finding or aligning.
-..signature:setScoringScheme(obj, score)
-..param.obj:Object that holds a @glos:scoring scheme@.
-...type:Spec.DPSearch
-..param.score:The new @glos:scoring scheme@ used by $obj$.
-..see:glos:scoring scheme
-..see:Function.scoringScheme
-*/
 
-template <typename TNeedle, typename TScore, typename TScore2>
+template <typename TNeedle, typename TScore, typename TSpec, typename TFindBeginPatternSpec, typename TScore2>
 inline void
-setScoringScheme(Pattern<TNeedle, DPSearch<TScore> > & me, 
+setScoringScheme(Pattern<TNeedle, DPSearch<TScore, TSpec, TFindBeginPatternSpec> > & me, 
 				 TScore2 & score)
 {
 SEQAN_CHECKPOINT
 	me.data_score = score;
 	clear(me.data_tab);
 }
-template <typename TNeedle, typename TScore, typename TScore2>
+template <typename TNeedle, typename TScore, typename TSpec, typename TFindBeginPatternSpec, typename TScore2>
 inline void
-setScoringScheme(Pattern<TNeedle, DPSearch<TScore> > & me, 
+setScoringScheme(Pattern<TNeedle, DPSearch<TScore, TSpec, TFindBeginPatternSpec> > & me, 
 				 TScore2 const & score)
 {
 SEQAN_CHECKPOINT
@@ -239,9 +235,9 @@ SEQAN_CHECKPOINT
 ..returns:The current score limit of $pattern$.
 */
 
-template <typename TNeedle, typename TScore>
+template <typename TNeedle, typename TScore, typename TSpec, typename TFindBeginPatternSpec>
 inline typename Value<TScore>::Type 
-scoreLimit(Pattern<TNeedle, DPSearch<TScore> > const & me)
+scoreLimit(Pattern<TNeedle, DPSearch<TScore, TSpec, TFindBeginPatternSpec> > const & me)
 {
 SEQAN_CHECKPOINT
 	return me.data_limit;
@@ -259,9 +255,9 @@ SEQAN_CHECKPOINT
 ..see:Function.scoreLimit
 */
 
-template <typename TNeedle, typename TScore, typename TScoreValue>
+template <typename TNeedle, typename TScore, typename TSpec, typename TFindBeginPatternSpec, typename TScoreValue>
 inline void 
-setScoreLimit(Pattern<TNeedle, DPSearch<TScore> > & me, 
+setScoreLimit(Pattern<TNeedle, DPSearch<TScore, TSpec, TFindBeginPatternSpec> > & me, 
 			  TScoreValue _limit)
 {
 SEQAN_CHECKPOINT
@@ -284,9 +280,9 @@ SEQAN_CHECKPOINT
 ..see:Function.find
 */
 
-template <typename TNeedle, typename TScore>
+template <typename TNeedle, typename TScore, typename TSpec, typename TFindBeginPatternSpec>
 inline typename Value<TScore>::Type
-getScore(Pattern<TNeedle, DPSearch<TScore> > & me)
+getScore(Pattern<TNeedle, DPSearch<TScore, TSpec, TFindBeginPatternSpec> > & me)
 {
 	return front(me.data_tab);
 }
@@ -294,18 +290,18 @@ getScore(Pattern<TNeedle, DPSearch<TScore> > & me)
 //////////////////////////////////////////////////////////////////////////////
 
 
-template <typename TNeedle, typename TScore>
-inline void _patternInit (Pattern<TNeedle, DPSearch<TScore> > & me) 
+template <typename TNeedle, typename TScore, typename TSpec, typename TFindBeginPatternSpec>
+inline void _patternInit (Pattern<TNeedle, DPSearch<TScore, TSpec, TFindBeginPatternSpec> > & me) 
 {
-	typedef Pattern<TNeedle, DPSearch<TScore> > TPattern;
+	typedef Pattern<TNeedle, DPSearch<TScore, TSpec, TFindBeginPatternSpec> > TPattern;
 	typedef typename Value<TScore>::Type TScoreValue;
-
 	typedef typename Size<TPattern>::Type TSize;
-
 	typedef String<TScoreValue> TTab;
 	typedef typename Iterator<TTab, Standard>::Type TIterator;
+	typedef typename Iterator<TNeedle, Standard>::Type TNeedleIterator;
 
-	TScoreValue score_gap = scoreGapExtend(scoringScheme(me));
+	TScore const & scoring = scoringScheme(me);
+	TScoreValue score_gap = scoreGapExtend(scoring);
 
 	TTab & string_tab = me.data_tab;
 
@@ -331,6 +327,20 @@ inline void _patternInit (Pattern<TNeedle, DPSearch<TScore> > & me)
 		*tab = x;
 		x += score_gap;
 	}
+
+	if (TYPECMP<TSpec, FindPrefix>::VALUE)
+	{//compute data_maxscore
+		me.data_maxscore = 0;
+		TNeedleIterator it = begin(needle(me), Standard());
+		TNeedleIterator it_end = end(needle(me), Standard());
+		for (; it != it_end; ++it)
+		{
+			me.data_maxscore += score(scoring, *it, *it);
+		}
+
+	}
+
+	_findBeginInit(me);
 }
 
 
@@ -344,47 +354,63 @@ inline void _patternInit (Pattern<TNeedle, DPSearch<TScore> > & me)
 //???TODO: Ukkonen trick?
 //???TODO: Finder for affine gap costs?
 
-template <typename TFinder, typename TNeedle, typename TScore>
+template <typename TFinder, typename TNeedle, typename TScore, typename TSpec, typename TFindBeginPatternSpec>
 bool 
-_find_score_simple_proportional(TFinder & finder, Pattern<TNeedle, DPSearch<TScore> > & me)
+_find_score_simple_proportional(TFinder & finder, Pattern<TNeedle, DPSearch<TScore, TSpec, TFindBeginPatternSpec> > & me)
 {
 	typedef typename Value<TScore>::Type TScoreValue;
 	typedef String<TScoreValue> TTab;
 	typedef typename Iterator<TTab, Standard>::Type TTabIterator;
 	typedef typename Iterator<TNeedle const, Standard>::Type TNeedleIterator;
 	typedef typename Value<typename Haystack<TFinder>::Type>::Type THaystackValue;
+	typedef typename Haystack<TFinder>::Type THaystack;
+	typedef typename Size<THaystack>::Type TSize;
 
 	String<TScoreValue> & string_tab = me.data_tab;
+	TScore const & scoring = scoringScheme(me);
 
-	TScoreValue score_gap = scoreGapExtend(scoringScheme(me));
-	TScoreValue score_match = scoreMatch(scoringScheme(me));
-	TScoreValue score_mismatch = scoreMismatch(scoringScheme(me));
+	TScoreValue score_gap = scoreGapExtend(scoring);
+//	TScoreValue score_match = scoreMatch(scoringScheme(me));
+//	TScoreValue score_mismatch = scoreMismatch(scoringScheme(me));
 
-	//init table
+	TSize prefix_begin_position;	
 
 	if (empty(finder))
 	{
 		clear(me.data_tab);
+		_patternInit(me);
 		_finderSetNonEmpty(finder);
+		prefix_begin_position = position(finder);
 	}
 	else
 	{
 		goNext(finder);
+		prefix_begin_position = beginPosition(finder);
 	}
 
-	if (! length(me.data_tab))
+	
+	TSize haystack_length = length(container(hostIterator(finder)));
+
+	//limit search width for prefix search
+	if (TYPECMP<TSpec, FindPrefix>::VALUE && (score_gap < 0))
 	{
-		_patternInit(me);
+		TSize maxlen = prefix_begin_position + length(needle(me)) + ((scoreLimit(me) - me.data_maxscore) / score_gap) + 1;
+		if (haystack_length > maxlen)
+		{
+			haystack_length = maxlen;
+		}
 	}
+
 	//start searching
 
 	TTabIterator tab_begin = end(string_tab, Standard());
 
-	TNeedleIterator it_begin = begin(host(me), Standard());
-	TNeedleIterator it_end = end(host(me), Standard());
+	TNeedle const & ndl = needle(me);
+	TNeedleIterator it_begin = begin(ndl, Standard());
+	TNeedleIterator it_end = end(ndl, Standard());
 
 	//for each character in haystack, do...
-	for (; !atEnd(finder); ++finder)
+	for (; position(finder) < haystack_length; ++finder)
 	{
 		//get character
 		THaystackValue c = *finder;
@@ -392,15 +418,17 @@ _find_score_simple_proportional(TFinder & finder, Pattern<TNeedle, DPSearch<TSco
 		//init some variables
 		TNeedleIterator it = it_begin;
 		TScoreValue * tab = tab_begin;
-		TScoreValue h = 0;
-		TScoreValue v = 0;
+		TScoreValue h = (TYPECMP<TSpec, FindPrefix>::VALUE) ? score_gap * (position(finder)-prefix_begin_position) : 0;
+		TScoreValue v = (TYPECMP<TSpec, FindPrefix>::VALUE) ? h + score_gap : 0;
 
 		//fill the column
 		while (it < it_end)
 		{
 			--tab; //note: the column is stored in "reverse order"
 
-			TScoreValue m2 = (c == *it) ? h + score_match : h + score_mismatch;
+//			TScoreValue m2 = (c == *it) ? h + score_match : h + score_mismatch;
+//char d = *it;
+			TScoreValue m2 = h + score(scoring, c, *it);
 			h = *tab;
 			TScoreValue m1 = (h > v) ? h + score_gap : v + score_gap;
 
@@ -412,6 +440,11 @@ _find_score_simple_proportional(TFinder & finder, Pattern<TNeedle, DPSearch<TSco
 
 		if (*tab >= scoreLimit(me) )
 		{//found a hit
+			_setFinderEnd(finder);
+			if (TYPECMP<TSpec, FindPrefix>::VALUE)
+			{
+				_setFinderLength(finder, endPosition(finder));
+			}
 			return true;
 		}
 
@@ -423,19 +456,19 @@ _find_score_simple_proportional(TFinder & finder, Pattern<TNeedle, DPSearch<TSco
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TFinder, typename TNeedle, typename TScore>
+template <typename TFinder, typename TNeedle, typename TScore, typename TSpec, typename TFindBeginPatternSpec>
 inline bool 
 find(TFinder & finder, 
-	 Pattern<TNeedle, DPSearch<TScore> > & me)
+	 Pattern<TNeedle, DPSearch<TScore, TSpec, TFindBeginPatternSpec> > & me)
 {
 	SEQAN_ASSERT(scoreGapOpen(scoringScheme(me)) == scoreGapExtend(scoringScheme(me))) //this finder is only defined for linear gap costs
 	return _find_score_simple_proportional(finder, me);
 }
 
-template <typename TFinder, typename TNeedle, typename TScore>
+template <typename TFinder, typename TNeedle, typename TScore, typename TSpec, typename TFindBeginPatternSpec>
 inline bool 
 find(TFinder & finder, 
-	 Pattern<TNeedle, DPSearch<TScore> > & me,
+	 Pattern<TNeedle, DPSearch<TScore, TSpec, TFindBeginPatternSpec> > & me,
 	 int const limit_)
 {
 	SEQAN_ASSERT(scoreGapOpen(scoringScheme(me)) == scoreGapExtend(scoringScheme(me))) //this finder is only defined for linear gap costs

@@ -54,6 +54,30 @@ struct Value< Score<TValue, TSpec> >
 
 //////////////////////////////////////////////////////////////////////////////
 
+//DEPRECATED
+///*
+//.Metafunction.ScoreValue:
+//..summary:The ScoreValue type of a scoring scheme.
+//..signature:Key<T>::Type
+//..param.T:A type that holds a scoring scheme.
+//...type:Class.Score
+//..returns.param.Type:The value type of the scoring scheme.
+//...default:$int$.
+//*/
+//
+//template <typename T>
+//struct ScoreValue
+//{
+//	typedef int Type;
+//};
+//template <typename TValue, typename TSpec>
+//struct ScoreValue< Score<TValue, TSpec> >
+//{
+//	typedef TValue Type;
+//};
+
+//////////////////////////////////////////////////////////////////////////////
+
 }// namespace SEQAN_NAMESPACE_MAIN
 
 #endif //#ifndef SEQAN_HEADER_...

@@ -126,15 +126,15 @@ public:
 
 // compute score of aligning two characters
 
-template <typename TValue, typename T>
-inline TValue
-score(Score<TValue, Manhattan> const & me,
-	  T const & left,
-	  T const & right)
-{
-	if (left == right) return scoreMatch(me);
-	else return scoreMismatch(me);
-}
+//template <typename TValue, typename T>
+//inline TValue
+//score(Score<TValue, Manhattan> const & me,
+//	  T const & left,
+//	  T const & right)
+//{
+//	if (left == right) return scoreMatch(me);
+//	else return scoreMismatch(me);
+//}
 
 //////////////////////////////////////////////////////////////////////////////
 //compute score for chaining two fragments 

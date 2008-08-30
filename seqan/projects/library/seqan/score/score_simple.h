@@ -29,6 +29,9 @@ namespace SEQAN_NAMESPACE_MAIN
 /**
 .Spec.Simple Score
 ..cat:Scoring
+..signature:Score<TValue, Simple>
+..param.TValue:The value type.
+...default:int
 ..general:Class.Score
 ..summary:Simple scoring scheme that has scores for matches, mismatches, opening gaps and extending gaps.
 */
@@ -109,7 +112,15 @@ public:
 };
 //////////////////////////////////////////////////////////////////////////////
 
-//Shortcut:
+/**
+.Shortcut.SimpleScore:
+..cat:scoring
+..summary:Simple scoring scheme.
+..signature:SimpleScore
+..shortcutfor:Spec.Simple Score
+...signature:Score<int, Simple>
+..see:Spec.Simple Score
+*/
 
 typedef Score<int, Simple> SimpleScore;
 
@@ -255,14 +266,14 @@ scoreGap(Score<TValue, TSpec> const & me)
 ..returns:The score for comparing the two values.
 */
 
-template <typename TValue, typename T>
+template <typename TValue, typename TSpec, typename T>
 inline TValue
-score(Score<TValue, Simple> const & me,
+score(Score<TValue, TSpec> const & me,
 	  T const & left,
 	  T const & right)
 {
-	if (left == right) return me.data_match; //scoreMatch(me);
-	else return me.data_mismatch; //scoreMismatch(me);
+	if (left == right) return scoreMatch(me);
+	else return scoreMismatch(me);
 }
 
 

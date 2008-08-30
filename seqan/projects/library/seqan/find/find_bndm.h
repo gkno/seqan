@@ -135,43 +135,34 @@ SEQAN_CHECKPOINT
 	me.last = 0;
 }
 
-//____________________________________________________________________________
-
-template <typename TNeedle>
-inline typename Host<Pattern<TNeedle, BndmAlgo>const>::Type & 
-host(Pattern<TNeedle, BndmAlgo> & me)
-{
-SEQAN_CHECKPOINT
-	return value(me.data_needle);
-}
-
-template <typename TNeedle>
-inline typename Host<Pattern<TNeedle, BndmAlgo>const>::Type & 
-host(Pattern<TNeedle, BndmAlgo> const & me)
-{
-SEQAN_CHECKPOINT
-	return value(me.data_needle);
-}
 
 //____________________________________________________________________________
 
 
 template <typename TFinder, typename TNeedle>
-inline bool _findBndm_SmallNeedle(TFinder & finder, Pattern<TNeedle, BndmAlgo> & me) {
+inline bool _findBndm_SmallNeedle(TFinder & finder, 
+								  Pattern<TNeedle, BndmAlgo> & me) {
 	SEQAN_CHECKPOINT
 	typedef unsigned int TWord;
 	if (me.haystackLength < me.needleLength) return false;
-	while (position(finder) <= me.haystackLength - me.needleLength) {
+	while (position(finder) <= me.haystackLength - me.needleLength) 
+	{
 		me.last=me.needleLength;
 		TWord j=me.needleLength;
 		me.activeFactors[0]=~0;
-		while (me.activeFactors[0]!=0) {
+		while (me.activeFactors[0]!=0) 
+		{
 			TWord pos = convert<TWord>(*(finder+j-1));
 			me.activeFactors[0] = (me.activeFactors[0] & me.table[me.blockCount*pos]);
 			j--;
-			if ((me.activeFactors[0] & 1) != 0) {
+			if ((me.activeFactors[0] & 1) != 0) 
+			{
 				if (j>0) me.last=j;
-				else return true;
+				else
+				{
+					_setFinderEnd(finder, position(finder) + me.needleLength);
+					return true;
+				}
 			}
 			me.activeFactors[0] = me.activeFactors[0] >> 1;
 		}
@@ -206,9 +197,14 @@ inline bool _findBndm_LargeNeedle(TFinder & finder, Pattern<TNeedle, BndmAlgo> &
 
 			for(TWord block=0;block<me.blockCount;++block) me.activeFactors[block] &= me.table[me.blockCount*pos+block];
 			j--;
-			if ((me.activeFactors[0] & 1) != 0) {
+			if ((me.activeFactors[0] & 1) != 0) 
+			{
 				if (j>0) me.last=j;
-				else return true;
+				else 
+				{
+					_setFinderEnd(finder, position(finder) + me.needleLength);
+					return true;
+				}
 			}
 			bool carry=0;
 			zeroPrefSufMatch=true;
@@ -231,6 +227,7 @@ inline bool find(TFinder & finder, Pattern<TNeedle, BndmAlgo> & me) {
 
 	if (empty(finder)) {
 		_patternInit(me);
+		_setFinderLength(finder, length(needle(me)));
 		_finderSetNonEmpty(finder);
 		me.haystackLength = length(container(finder));
 	} else

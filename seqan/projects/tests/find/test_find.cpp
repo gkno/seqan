@@ -34,7 +34,15 @@ void Test_OnlineAlg()
 	Pattern<String<char>, TAlgorithmSpec> pattern(needle);
 
 	while (find(finder, pattern))
+	{
 		append(pos,position(finder));
+		SEQAN_TASSERT(position(finder) == beginPosition(finder))
+		SEQAN_TASSERT(endPosition(finder) == beginPosition(finder) + length(finder))
+		SEQAN_TASSERT(length(finder) == length(needle))
+		SEQAN_TASSERT(begin(finder) == begin(haystack) + beginPosition(finder))
+		SEQAN_TASSERT(end(finder) == begin(haystack) + endPosition(finder))
+		SEQAN_TASSERT(infix(finder) == needle)
+	}
 
 	SEQAN_TASSERT(host(pattern) == needle);
 	SEQAN_TASSERT(host(reinterpret_cast<Pattern<String<char>, TAlgorithmSpec> const &>(pattern)) == needle);
@@ -54,7 +62,15 @@ void Test_OnlineAlg()
 
 	clear(pos);
 	while (find(finder, pattern))
+	{
 		append(pos,position(finder));
+		SEQAN_TASSERT(position(finder) == beginPosition(finder))
+		SEQAN_TASSERT(endPosition(finder) == beginPosition(finder) + length(finder))
+		SEQAN_TASSERT(length(finder) == length(needle))
+		SEQAN_TASSERT(begin(finder) == begin(haystack) + beginPosition(finder))
+		SEQAN_TASSERT(end(finder) == begin(haystack) + endPosition(finder))
+		SEQAN_TASSERT(infix(finder) == needle)
+	}
 
 	SEQAN_TASSERT(pos[0] == 0);
 	SEQAN_TASSERT(pos[1] == 26);
@@ -71,7 +87,15 @@ void Test_OnlineAlg()
 
 	clear(pos);
 	while (find(finderDna, pattern))
+	{
 		append(pos,position(finderDna));
+		SEQAN_TASSERT(position(finderDna) == beginPosition(finderDna))
+		SEQAN_TASSERT(endPosition(finderDna) == beginPosition(finderDna) + length(finderDna))
+		SEQAN_TASSERT(length(finderDna) == length(ndl))
+		SEQAN_TASSERT(begin(finderDna) == begin(hstk) + beginPosition(finderDna))
+		SEQAN_TASSERT(end(finderDna) == begin(hstk) + endPosition(finderDna))
+		SEQAN_TASSERT(infix(finderDna) == ndl)
+	}
 
 	SEQAN_TASSERT(pos[0] == 0);
 	SEQAN_TASSERT(pos[1] == 1);
@@ -117,8 +141,16 @@ void Test_OnlineAlg()
 	setHost(pattern, query);
 
 	clear(pos);
-	while (find(finderText, pattern)) 
+	while (find(finderText, pattern))
+	{
 		append(pos,position(finderText));
+		SEQAN_TASSERT(position(finderText) == beginPosition(finderText))
+		SEQAN_TASSERT(endPosition(finderText) == beginPosition(finderText) + length(finderText))
+		SEQAN_TASSERT(length(finderText) == length(query))
+		SEQAN_TASSERT(begin(finderText) == begin(text) + beginPosition(finderText))
+		SEQAN_TASSERT(end(finderText) == begin(text) + endPosition(finderText))
+		SEQAN_TASSERT(infix(finderText) == query)
+	}
 
 	SEQAN_TASSERT(pos[0] == 0);
 	SEQAN_TASSERT(pos[1] == 5);
@@ -147,7 +179,15 @@ void Test_OnlineAlgMulti(bool order_by_begin_position)
 	Pattern<TNeedle, TAlgorithmSpec> pattern(keywords);
 
 	while (find(finder, pattern))
+	{
 		append(pos,position(finder));
+		SEQAN_TASSERT(position(finder) == beginPosition(finder))
+		SEQAN_TASSERT(endPosition(finder) == beginPosition(finder) + length(finder))
+		SEQAN_TASSERT(length(finder) == length(keywords[position(pattern)]))
+		SEQAN_TASSERT(begin(finder) == begin(haystack) + beginPosition(finder))
+		SEQAN_TASSERT(end(finder) == begin(haystack) + endPosition(finder))
+		SEQAN_TASSERT(infix(finder) == keywords[position(pattern)])
+	}
 
 	SEQAN_TASSERT(host(pattern) == keywords);
 	SEQAN_TASSERT(host(reinterpret_cast<Pattern<TNeedle, TAlgorithmSpec> const &>(pattern)) == keywords);
@@ -165,7 +205,15 @@ void Test_OnlineAlgMulti(bool order_by_begin_position)
 	clear(pos);
 
 	while (find(finder, pattern))
+	{
 		append(pos,position(finder));
+		SEQAN_TASSERT(position(finder) == beginPosition(finder))
+		SEQAN_TASSERT(endPosition(finder) == beginPosition(finder) + length(finder))
+		SEQAN_TASSERT(length(finder) == length(keywords[position(pattern)]))
+		SEQAN_TASSERT(begin(finder) == begin(haystack) + beginPosition(finder))
+		SEQAN_TASSERT(end(finder) == begin(haystack) + endPosition(finder))
+		SEQAN_TASSERT(infix(finder) == keywords[position(pattern)])
+	}
 
 	SEQAN_TASSERT(pos[0] == 0);
 	SEQAN_TASSERT(pos[1] == 26);
@@ -184,7 +232,15 @@ void Test_OnlineAlgMulti(bool order_by_begin_position)
 
 	clear(pos);
 	while (find(finderDna, pattern_dna))
+	{
 		append(pos,position(finderDna));
+		SEQAN_TASSERT(position(finderDna) == beginPosition(finderDna))
+		SEQAN_TASSERT(endPosition(finderDna) == beginPosition(finderDna) + length(finderDna))
+		SEQAN_TASSERT(length(finderDna) == length(dna_keywords[position(pattern_dna)]))
+		SEQAN_TASSERT(begin(finderDna) == begin(hstk) + beginPosition(finderDna))
+		SEQAN_TASSERT(end(finderDna) == begin(hstk) + endPosition(finderDna))
+		SEQAN_TASSERT(infix(finderDna) == dna_keywords[position(pattern_dna)])
+	}
 
 	SEQAN_TASSERT(pos[0] == 0);
 	SEQAN_TASSERT(pos[1] == 1);
@@ -204,7 +260,15 @@ void Test_OnlineAlgMulti(bool order_by_begin_position)
 
 	clear(pos);
 	while (find(finderText, pattern_dna)) 
+	{
 		append(pos,position(finderText));
+		SEQAN_TASSERT(position(finderText) == beginPosition(finderText))
+		SEQAN_TASSERT(endPosition(finderText) == beginPosition(finderText) + length(finderText))
+		SEQAN_TASSERT(length(finderText) == length(dna_keywords[position(pattern_dna)]))
+		SEQAN_TASSERT(begin(finderText) == begin(text) + beginPosition(finderText))
+		SEQAN_TASSERT(end(finderText) == begin(text) + endPosition(finderText))
+		SEQAN_TASSERT(infix(finderText) == dna_keywords[position(pattern_dna)])
+	}
 
 	SEQAN_TASSERT(pos[0] == 0);
 	SEQAN_TASSERT(pos[1] == 5);
@@ -228,9 +292,16 @@ void Test_OnlineAlgMulti(bool order_by_begin_position)
 
 	String<unsigned int> finderPos;
 	String<unsigned int> keywordIndex;
-	while (find(fd, pt)) {
+	while (find(fd, pt)) 
+	{
 		append(finderPos,position(fd));
 		append(keywordIndex,position(pt));
+		SEQAN_TASSERT(position(fd) == beginPosition(fd))
+		SEQAN_TASSERT(endPosition(fd) == beginPosition(fd) + length(fd))
+		SEQAN_TASSERT(length(fd) == length(kyw[position(pt)]))
+		SEQAN_TASSERT(begin(fd) == begin(hst) + beginPosition(fd))
+		SEQAN_TASSERT(end(fd) == begin(hst) + endPosition(fd))
+		SEQAN_TASSERT(infix(fd) == kyw[position(pt)])
 	}
 
 	SEQAN_TASSERT(finderPos[0] == 0);
@@ -256,9 +327,16 @@ void Test_OnlineAlgMulti(bool order_by_begin_position)
 
 	clear(finderPos);
 	clear(keywordIndex);
-	while (find(fdDna, ptDna)) {
+	while (find(fdDna, ptDna)) 
+	{
 		append(finderPos,position(fdDna));
 		append(keywordIndex,position(ptDna));
+		SEQAN_TASSERT(position(fdDna) == beginPosition(fdDna))
+		SEQAN_TASSERT(endPosition(fdDna) == beginPosition(fdDna) + length(fdDna))
+		SEQAN_TASSERT(length(fdDna) == length(kywDna[position(ptDna)]))
+		SEQAN_TASSERT(begin(fdDna) == begin(hstDna) + beginPosition(fdDna))
+		SEQAN_TASSERT(end(fdDna) == begin(hstDna) + endPosition(fdDna))
+		SEQAN_TASSERT(infix(fdDna) == kywDna[position(ptDna)])
 	}
 
 	SEQAN_TASSERT(length(finderPos) == 3);
@@ -302,6 +380,12 @@ void Test_OnlineAlgMulti(bool order_by_begin_position)
 		//std::cout << position(my_finder) << "-" << position(my_pattern) << ::std::endl;
 		append(finderPos,position(my_finder));
 		append(keywordIndex,position(my_pattern));
+		SEQAN_TASSERT(position(my_finder) == beginPosition(my_finder))
+		SEQAN_TASSERT(endPosition(my_finder) == beginPosition(my_finder) + length(my_finder))
+		SEQAN_TASSERT(length(my_finder) == length(my_keywords[position(my_pattern)]))
+		SEQAN_TASSERT(begin(my_finder) == begin(my_haystack) + beginPosition(my_finder))
+		SEQAN_TASSERT(end(my_finder) == begin(my_haystack) + endPosition(my_finder))
+		SEQAN_TASSERT(infix(my_finder) == my_keywords[position(my_pattern)])
 	}
 
 	SEQAN_TASSERT(length(finderPos) == 15);
@@ -393,6 +477,12 @@ void Test_OnlineAlgMulti(bool order_by_begin_position)
 		//std::cout << position(my2_finder) << ":" << position(my2_pattern) << ::std::endl;
 		append(finderPos,position(my2_finder));
 		append(keywordIndex,position(my2_pattern));
+		SEQAN_TASSERT(position(my2_finder) == beginPosition(my2_finder))
+		SEQAN_TASSERT(endPosition(my2_finder) == beginPosition(my2_finder) + length(my2_finder))
+		SEQAN_TASSERT(length(my2_finder) == length(my2_keywords[position(my2_pattern)]))
+		SEQAN_TASSERT(begin(my2_finder) == begin(my2_haystack) + beginPosition(my2_finder))
+		SEQAN_TASSERT(end(my2_finder) == begin(my2_haystack) + endPosition(my2_finder))
+		SEQAN_TASSERT(infix(my2_finder) == my2_keywords[position(my2_pattern)])
 	}
 
 	if (order_by_begin_position)
@@ -807,6 +897,7 @@ void Test_OnlineAlgWildcards()
 template <typename TPatternSpec>
 void Test_Approx_EditDist()
 {
+/*DEBUG!!!!
 //test DPSearch
   	String<char> hstk("any_annealing");
 	String<char> nl("annual");
@@ -906,15 +997,111 @@ void Test_Approx_EditDist()
 	SEQAN_TASSERT(getScore(long_pat) == -2)
 
 	SEQAN_TASSERT(!find(long_fnd,long_pat))
+*/
+//____________________________________________________________________________
+
+	String<char> haystack_1 = "123XXXabaXXX45aba123";
+	String<char> needle_1 = "XXXaba";
+	Finder<String<char> > finder_1(haystack_1);
+	Pattern<String<char>, TPatternSpec> pattern_1(needle_1, -2);
+
+	SEQAN_TASSERT(find(finder_1, pattern_1))
+	SEQAN_TASSERT(endPosition(finder_1) == 7)
+	SEQAN_TASSERT(getScore(pattern_1) == -2)
+	SEQAN_TASSERT(findBegin(finder_1, pattern_1))
+	SEQAN_TASSERT(infix(finder_1) == "XXXa")
+	SEQAN_TASSERT(getBeginScore(pattern_1) == -2)
+	SEQAN_TASSERT(!findBegin(finder_1, pattern_1))
+
+	SEQAN_TASSERT(find(finder_1, pattern_1))
+	SEQAN_TASSERT(endPosition(finder_1) == 8)
+	SEQAN_TASSERT(getScore(pattern_1) == -1)
+	SEQAN_TASSERT(findBegin(finder_1, pattern_1))
+	SEQAN_TASSERT(infix(finder_1) == "XXab")
+	SEQAN_TASSERT(getBeginScore(pattern_1) == -2)
+	SEQAN_TASSERT(findBegin(finder_1, pattern_1))
+	SEQAN_TASSERT(infix(finder_1) == "XXXab")
+	SEQAN_TASSERT(getBeginScore(pattern_1) == -1)
+	SEQAN_TASSERT(findBegin(finder_1, pattern_1))
+	SEQAN_TASSERT(infix(finder_1) == "3XXXab")
+	SEQAN_TASSERT(getBeginScore(pattern_1) == -2)
+	SEQAN_TASSERT(!findBegin(finder_1, pattern_1))
+
+	SEQAN_TASSERT(find(finder_1, pattern_1))
+	SEQAN_TASSERT(endPosition(finder_1) == 9)
+	SEQAN_TASSERT(getScore(pattern_1) == 0)
+	SEQAN_TASSERT(findBegin(finder_1, pattern_1))
+	SEQAN_TASSERT(infix(finder_1) == "Xaba")
+	SEQAN_TASSERT(getBeginScore(pattern_1) == -2)
+	SEQAN_TASSERT(findBegin(finder_1, pattern_1))
+	SEQAN_TASSERT(infix(finder_1) == "XXaba")
+	SEQAN_TASSERT(getBeginScore(pattern_1) == -1)
+	SEQAN_TASSERT(findBegin(finder_1, pattern_1))
+	SEQAN_TASSERT(infix(finder_1) == "XXXaba")
+	SEQAN_TASSERT(getBeginScore(pattern_1) == 0)
+	SEQAN_TASSERT(findBegin(finder_1, pattern_1))
+	SEQAN_TASSERT(infix(finder_1) == "3XXXaba")
+	SEQAN_TASSERT(getBeginScore(pattern_1) == -1)
+	SEQAN_TASSERT(findBegin(finder_1, pattern_1))
+	SEQAN_TASSERT(infix(finder_1) == "23XXXaba")
+	SEQAN_TASSERT(getBeginScore(pattern_1) == -2)
+	SEQAN_TASSERT(!findBegin(finder_1, pattern_1))
+
+	SEQAN_TASSERT(find(finder_1, pattern_1))
+	SEQAN_TASSERT(endPosition(finder_1) == 10)
+	SEQAN_TASSERT(getScore(pattern_1) == -1)
+	SEQAN_TASSERT(findBegin(finder_1, pattern_1))
+	SEQAN_TASSERT(infix(finder_1) == "XXabaX")
+	SEQAN_TASSERT(getBeginScore(pattern_1) == -2)
+	SEQAN_TASSERT(findBegin(finder_1, pattern_1))
+	SEQAN_TASSERT(infix(finder_1) == "XXXabaX")
+	SEQAN_TASSERT(getBeginScore(pattern_1) == -1)
+	SEQAN_TASSERT(findBegin(finder_1, pattern_1))
+	SEQAN_TASSERT(infix(finder_1) == "3XXXabaX")
+	SEQAN_TASSERT(getBeginScore(pattern_1) == -2)
+	SEQAN_TASSERT(!findBegin(finder_1, pattern_1))
+
+	SEQAN_TASSERT(find(finder_1, pattern_1))
+	SEQAN_TASSERT(endPosition(finder_1) == 11)
+	SEQAN_TASSERT(getScore(pattern_1) == -2)
+	SEQAN_TASSERT(findBegin(finder_1, pattern_1))
+	SEQAN_TASSERT(infix(finder_1) == "XXXabaXX")
+	SEQAN_TASSERT(getBeginScore(pattern_1) == -2)
+	SEQAN_TASSERT(!findBegin(finder_1, pattern_1))
+
+	SEQAN_TASSERT(find(finder_1, pattern_1))
+	SEQAN_TASSERT(endPosition(finder_1) == 15)
+	SEQAN_TASSERT(getScore(pattern_1) == -2)
+	SEQAN_TASSERT(findBegin(finder_1, pattern_1))
+	SEQAN_TASSERT(infix(finder_1) == "XXX45a")
+	SEQAN_TASSERT(getBeginScore(pattern_1) == -2)
+	SEQAN_TASSERT(!findBegin(finder_1, pattern_1))
+
+	SEQAN_TASSERT(find(finder_1, pattern_1))
+	SEQAN_TASSERT(endPosition(finder_1) == 17)
+	SEQAN_TASSERT(getScore(pattern_1) == -2)
+	SEQAN_TASSERT(findBegin(finder_1, pattern_1))
+	SEQAN_TASSERT(infix(finder_1) == "X45aba")
+	SEQAN_TASSERT(getBeginScore(pattern_1) == -2)
+	SEQAN_TASSERT(findBegin(finder_1, pattern_1))
+	SEQAN_TASSERT(infix(finder_1) == "XX45aba")
+	SEQAN_TASSERT(getBeginScore(pattern_1) == -2)
+	SEQAN_TASSERT(findBegin(finder_1, pattern_1))
+	SEQAN_TASSERT(infix(finder_1) == "XXX45aba")
+	SEQAN_TASSERT(getBeginScore(pattern_1) == -2)
+	SEQAN_TASSERT(!findBegin(finder_1, pattern_1))
+
+	SEQAN_TASSERT(!find(finder_1, pattern_1))
+//____________________________________________________________________________
 
 }
-//____________________________________________________________________________
+
+//////////////////////////////////////////////////////////////////////////////
 
 void Test_Approx()
 {
 //test DPSearch
 	Test_Approx_EditDist<DPSearch<SimpleScore> >();
-
 	Pattern<String<char>, DPSearch<SimpleScore> > pat1	;
 
 	SimpleScore sc;
@@ -928,8 +1115,9 @@ void Test_Approx()
 	SEQAN_TASSERT(scoreGap(scoringScheme(pat1)) == -1);
 
 
-//test MyersUkkonen
-	Test_Approx_EditDist<MyersUkkonen>();
+//test other edit distance algorithm
+	Test_Approx_EditDist<Myers<> >();
+return; //DEBUG!!!!
 	Test_Approx_EditDist<AbndmAlgo>();
 	Test_Approx_EditDist<PexNonHierarchical>();
 	Test_Approx_EditDist<PexHierarchical>();
@@ -951,10 +1139,98 @@ void Test_Approx()
 }
 
 //////////////////////////////////////////////////////////////////////////////
+//test prefix search
+
+template <typename TPatternSpec>
+void Test_Approx_Prefix_EditDist()
+{
+	String<char> haystack_1 = "mississippi";
+	String<char> needle_1 = "misssi";
+	Finder<String<char> > finder_1(haystack_1);
+	Pattern<String<char>, TPatternSpec> pattern_1(needle_1, -2);
+	SEQAN_TASSERT(find(finder_1, pattern_1))
+	SEQAN_TASSERT(position(finder_1) == 3)
+	SEQAN_TASSERT(length(finder_1) == 4)
+	SEQAN_TASSERT(beginPosition(finder_1) == 0)
+	SEQAN_TASSERT(endPosition(finder_1) == 4)
+	SEQAN_TASSERT(infix(finder_1) == "miss");
+	SEQAN_TASSERT(find(finder_1, pattern_1))
+	SEQAN_TASSERT(position(finder_1) == 4)
+	SEQAN_TASSERT(infix(finder_1) == "missi");
+	SEQAN_TASSERT(find(finder_1, pattern_1))
+	SEQAN_TASSERT(position(finder_1) == 5)
+	SEQAN_TASSERT(infix(finder_1) == "missis");
+	SEQAN_TASSERT(find(finder_1, pattern_1))
+	SEQAN_TASSERT(position(finder_1) == 6)
+	SEQAN_TASSERT(find(finder_1, pattern_1))
+	SEQAN_TASSERT(position(finder_1) == 7)
+	SEQAN_TASSERT(!find(finder_1, pattern_1))
+
+
+	String<char> haystack_2 = "yyyXXaba";
+	String<char> needle_2 = "yyyaba";
+	Finder<String<char> > finder_2(haystack_2);
+	Pattern<String<char>, TPatternSpec> pattern_2(needle_2, -2);
+	SEQAN_TASSERT(find(finder_2, pattern_2))
+	SEQAN_TASSERT(position(finder_2) == 5)
+	SEQAN_TASSERT(infix(finder_2) == "yyyXXa");
+	SEQAN_TASSERT(find(finder_2, pattern_2))
+	SEQAN_TASSERT(position(finder_2) == 7)
+	SEQAN_TASSERT(infix(finder_2) == "yyyXXaba");
+	SEQAN_TASSERT(!find(finder_2, pattern_2))
+
+
+	String<char> haystack_3 = "testtexttext";
+	String<char> needle_3 = "mismatch";
+	Finder<String<char> > finder_3(haystack_3);
+	Pattern<String<char>, TPatternSpec> pattern_3(needle_3, -2);
+	SEQAN_TASSERT(!find(finder_3, pattern_3))
+
+
+	String<char> haystack_4 = "testtext";
+	String<char> needle_4 = "a longer mismatch";
+	Finder<String<char> > finder_4(haystack_4);
+	Pattern<String<char>, TPatternSpec> pattern_4(needle_4, -2);
+	SEQAN_TASSERT(!find(finder_4, pattern_4))
+
+
+	String<char> haystack_5 = "exactmatching";
+	String<char> needle_5 = "exact";
+	Finder<String<char> > finder_5(haystack_5);
+	Pattern<String<char>, TPatternSpec> pattern_5(needle_5, 0);
+	SEQAN_TASSERT(find(finder_5, pattern_5))
+	SEQAN_TASSERT(position(finder_5) == 4)
+	SEQAN_TASSERT(!find(finder_5, pattern_5))
+
+
+	String<char> haystack_6 = "this is a text that is a bit longer than one machine word of 32 or 64 bits. AAXYX";
+	String<char> needle_6 =   "this is a text that is a bit longer than one machine word of 32 or 64 bits. XYX";
+	Finder<String<char> > finder_6(haystack_6);
+	Pattern<String<char>, TPatternSpec> pattern_6(needle_6, -2);
+	SEQAN_TASSERT(find(finder_6, pattern_6))
+	SEQAN_TASSERT(infix(finder_6) == "this is a text that is a bit longer than one machine word of 32 or 64 bits. AAX");
+	SEQAN_TASSERT(find(finder_6, pattern_6))
+	SEQAN_TASSERT(infix(finder_6) == "this is a text that is a bit longer than one machine word of 32 or 64 bits. AAXYX");
+	SEQAN_TASSERT(!find(finder_6, pattern_6))
+
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
 
 int main() 
 {
 	SEQAN_TREPORT("TEST BEGIN")
+
+//	String<char> str = "hallo";
+//	typedef ModifiedString<String<char>, ModReverse> TReverseString;
+//	TReverseString revstr(str);
+//	cout << revstr;
+//	typedef Iterator<TReverseString, Rooted>::Type TReverseIterator;
+//	TReverseIterator revit;
+//	setContainer(host(revit), str);
+//
+//return 0;
 
 	Test_OnlineAlg<Simple>();	
 	Test_OnlineAlg<Horspool>();	
@@ -973,6 +1249,10 @@ int main()
 	Test_OnlineAlgMulti<MultiBFAM<Oracle> >(true);
 
 	Test_Approx();
+
+	Test_Approx_Prefix_EditDist<DPSearch<Score<>, FindPrefix> >();
+	Test_Approx_Prefix_EditDist<Myers<FindPrefix> >();
+
 
 //	testMyersUkkonen("accagaatatggagatctagggatcca", "agata", -2);
 //	testMyersUkkonen("actacctttatctatcatcggattcgcgatctctcgcgatcgatggcttcgagtacgtcacacagtgcatctagccggattcgcgatctctcgcgatcgatggcttcgtgtacgtcac", 

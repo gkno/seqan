@@ -149,14 +149,29 @@ namespace SEQAN_NAMESPACE_MAIN
 	};
 
 
-	template < typename THost, typename TSpec >
-	struct Container< ModifiedIterator<THost, TSpec> >:
-		Container<THost> {};
+	//template < typename THost, typename TSpec >
+	//struct Container< ModifiedIterator<THost, TSpec> >:
+	//	Container<THost> {};
 
-	template < typename THost, typename TSpec >
-	struct Container< ModifiedIterator<THost, TSpec> const >:
-		Container< ModifiedIterator<THost, TSpec> > {};
+	//template < typename THost, typename TSpec >
+	//struct Container< ModifiedIterator<THost, TSpec> const >:
+	//	Container< ModifiedIterator<THost, TSpec> > {};
 
+	template <typename THost, typename TSpec>
+	class ModifiedString;
+
+	template <typename THost, typename TSpec >
+	struct Container< ModifiedIterator<THost, TSpec> >
+	{
+		typedef typename Container<THost>::Type THostContainer;
+		typedef ModifiedString<THostContainer, TSpec> Type;
+	};
+	template <typename THost, typename TSpec >
+	struct Container< ModifiedIterator<THost, TSpec> const>
+	{
+		typedef typename Container<THost const>::Type THostContainer;
+		typedef ModifiedString<THostContainer, TSpec> Type;
+	};
 
 	//////////////////////////////////////////////////////////////////////////////
 	// host interface
@@ -192,6 +207,51 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 	SEQAN_CHECKPOINT
 		return me.data_cargo;
+	}
+
+	//////////////////////////////////////////////////////////////////////////////
+	// container/setContainer interface
+	//////////////////////////////////////////////////////////////////////////////
+
+	template <typename THost, typename TSpec>
+	inline typename Container<ModifiedIterator<THost, TSpec> >::Type //no reference
+	container(ModifiedIterator<THost, TSpec> & me) 
+	{
+	SEQAN_CHECKPOINT
+		typedef typename Container<ModifiedIterator<THost, TSpec> >::Type TContainer;
+		TContainer temp_(container(host(me)));
+		_copyCargo(temp_, me);
+		return temp_;
+	}
+
+	template <typename THost, typename TSpec>
+	inline typename Container<ModifiedIterator<THost, TSpec> const>::Type //no reference
+	container(ModifiedIterator<THost, TSpec> const & me) 
+	{
+	SEQAN_CHECKPOINT
+		typedef typename Container<ModifiedIterator<THost, TSpec> const>::Type TContainer;
+		TContainer temp_(container(host(me)));
+		_copyCargo(temp_, me);
+		return temp_;
+	}
+
+	//////////////////////////////////////////////////////////////////////////////
+
+	template <typename THost, typename TSpec, typename TContainer>
+	inline void
+	setContainer(ModifiedIterator<THost, TSpec> & me, TContainer & cont) 
+	{
+	SEQAN_CHECKPOINT
+		THost & host = host(me);
+		setContainer(host, host(cont));
+	}
+	template <typename THost, typename TSpec, typename TContainer>
+	inline void
+	setContainer(ModifiedIterator<THost, TSpec> & me, TContainer const & cont) 
+	{
+	SEQAN_CHECKPOINT
+		THost & host = host(me);
+		setContainer(host, host(cont));
 	}
 
 	//////////////////////////////////////////////////////////////////////////////

@@ -62,6 +62,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		Holder<THost, Simple>					data_host;
 		typename Cargo<ModifiedIterator>::Type	data_cargo;
 
+		ModifiedIterator() {}
 		ModifiedIterator(ModifiedIterator &_origin):
 			data_host(_origin.data_host),
 			data_cargo(_origin.data_cargo) {}
@@ -217,6 +218,18 @@ namespace SEQAN_NAMESPACE_MAIN
 			return length(cont);
 		else
 			return length(cont) - 1 - position(host(me), cont);
+	}
+
+	//////////////////////////////////////////////////////////////////////////////
+	// setPosition
+	//////////////////////////////////////////////////////////////////////////////
+
+	template <typename THost, typename TPosition>
+	inline void
+	setPosition(ModifiedIterator<THost, ModReverse> const & me, TPosition pos)
+	{
+	SEQAN_CHECKPOINT
+		setPosition(host(me), length(container(host(me))) - 1 - pos);
 	}
 
 	//////////////////////////////////////////////////////////////////////////////

@@ -68,7 +68,7 @@ public:
 	String<TSize> shift; //table of skip widths (SHIFT)
 
 	TSize lmin;	//min length of keyword
-	char q;		//length of hashed q-grams
+	unsigned char q; //length of hashed q-grams
 //____________________________________________________________________________
 
 	Pattern():
@@ -155,12 +155,11 @@ struct _WuManber_Imp
 		TNeedleIterator pit_end = end(needle(me));
 
 		TSize k = length(needle(me));
-		TSize gram_count = me.lmin-Q; //number of Q-grams in a sequence of length me.lmin
 
 		//resize and init tables
-		resize(me.verify_tab, k);
-		resize(me.verify, DIR_SIZE+1);
-		resize(me.shift, DIR_SIZE);
+		resize(me.verify_tab, (unsigned) k);
+		resize(me.verify, (unsigned) DIR_SIZE+1);
+		resize(me.shift, (unsigned) DIR_SIZE);
 
 		arrayFill(begin(me.shift), begin(me.shift) + DIR_SIZE, me.lmin-Q+1); //maximal shift width is me.lmin-B+1
 
@@ -216,12 +215,13 @@ struct _WuManber_Imp
 	static inline bool
 	find(TFinder & finder, TPattern & me) 
 	{
-		typedef Haystack<TFinder>::Type THaystack;
-		typedef Iterator<THaystack, Standard>::Type THaystackIterator;
+		typedef typename Haystack<TFinder>::Type THaystack;
+		typedef typename Iterator<THaystack, Standard>::Type THaystackIterator;
 
 		THaystackIterator tit;
 		THaystackIterator haystack_end = end(haystack(finder));
 		THaystackIterator tit_end = haystack_end - Q + 1;
+		unsigned short hash;
 
 		if (empty(finder)) 
 		{
@@ -240,7 +240,7 @@ struct _WuManber_Imp
 //SEARCH
 		while (tit < tit_end)
 		{
-			unsigned short hash = _WuManber_Hash<TNeedle, Q>::hash(tit);
+			hash = _WuManber_Hash<TNeedle, Q>::hash(tit);
 
 			if (me.shift[hash])
 			{
@@ -272,6 +272,8 @@ VERIFY:
 						{
 //FOUND
 							setPosition(finder, tit - (me.lmin-Q) - begin(haystack(finder), Standard()));
+							_setFinderLength(finder, length(kw));
+							_setFinderEnd(finder, position(finder) + length(finder));
 							return true;
 						}
 						if (*pit != *tit2) break;
@@ -358,7 +360,7 @@ SEQAN_ASSERT(!empty(needle_));
 	if (me.lmin == 0) return;
 
 	//compute q:
-	int C = BitsPerValue<TValue>::VALUE;
+	unsigned int C = BitsPerValue<TValue>::VALUE;
 	if (C > 12)
 	{
 		me.q = 1;

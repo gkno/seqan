@@ -42,10 +42,10 @@
 #endif
 
 #include <seqan/find/find_base.h>
+#include <seqan/find/find_pattern_base.h>
 
 //____________________________________________________________________________
 // exact pattern matching
-
 #include <seqan/find/find_simple.h>
 #include <seqan/find/find_horspool.h>
 #include <seqan/find/find_shiftand.h>
@@ -59,22 +59,24 @@
 
 //____________________________________________________________________________
 //multiple pattern search
-
 #include <seqan/find/find_ahocorasick.h>
 #include <seqan/find/find_multiple_shiftand.h>
 #include <seqan/find/find_set_horspool.h>
 
 //#include <seqan/find/find_multi.h> //wegwerfen
-//#include <seqan/find/find_wumanber.h> 
-//#include <seqan/find/find_multiple_bfam.h>
+#include <seqan/find/find_wumanber.h> 
+#include <seqan/find/find_multiple_bfam.h>
 
 //____________________________________________________________________________
 // approximate pattern matching
+#include <seqan/find/find_begin.h>
 
 #include <seqan/find/find_score.h>
 #include <seqan/find/find_myers_ukkonen.h>
 #include <seqan/find/find_abndm.h>
 #include <seqan/find/find_pex.h>
+
+//#include <seqan/find/find_hamming_horspool.h>
 
 //____________________________________________________________________________
 //filtering

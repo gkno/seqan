@@ -96,22 +96,6 @@ void setHost (Pattern<TNeedle, Simple> & me,
 
 //____________________________________________________________________________
 
-template <typename TNeedle>
-inline typename Host<Pattern<TNeedle, Simple> >::Type & 
-host(Pattern<TNeedle, Simple> & me)
-{
-	return value(me.data_needle);
-}
-
-template <typename TNeedle>
-inline typename Host<Pattern<TNeedle, Simple> const>::Type & 
-host(Pattern<TNeedle, Simple> const & me)
-{
-	return value(me.data_needle);
-}
-
-//____________________________________________________________________________
-
 
 template <typename TFinder, typename TNeedle>
 inline bool find(TFinder & finder, 
@@ -121,7 +105,11 @@ SEQAN_CHECKPOINT
 	typedef typename Haystack<TFinder>::Type THaystack;
 	typedef typename Size<THaystack>::Type TSize;
 
-	if (empty(finder)) _finderSetNonEmpty(finder);
+	if (empty(finder))
+	{
+		_setFinderLength(finder, length(needle(me)));
+		_finderSetNonEmpty(finder);
+	}
 	else ++finder;
 
 	THaystack const & hstk = haystack(finder);
@@ -131,7 +119,11 @@ SEQAN_CHECKPOINT
 	TSize m = length(ndl);
 	while (position(finder)+m <= n)
 	{
-		if (ndl == infix(hstk, position(finder), position(finder)+m)) return true; 
+		if (ndl == infix(hstk, position(finder), position(finder)+m))
+		{
+			_setFinderEnd(finder, position(finder)+m);
+			return true; 
+		}
 		++finder;
 	}
 	return false;
