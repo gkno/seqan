@@ -4,7 +4,7 @@
 using namespace seqan;
 using namespace std;
 
-///This program finds all occurrences of $CCT$ in $AACTTAACCTAA$ with $\leq 1$ error using the @Spec.MyersUkkonen@ approximate search algorithm.
+///Example 1: This program finds all occurrences of $CCT$ in $AACTTAACCTAA$ with $\leq 1$ error using the @Spec.MyersUkkonen@ approximate search algorithm.
 int main() 
 {
 	String<char> haystk("AACTTAACCTAA");
@@ -19,7 +19,28 @@ int main()
 	while (find(fnd, pat))
 	{
 		cout << position(fnd) << ": " << getScore(pat) << "\n";
-///Note that @Function.position@ returns the end position of the found occurrence.
+///Note that @Function.position@ returns the last position of the found occurrence.
+	}
+
+///Example 2: Finding all start and endpositions
+	String<char> t = "babybanana";
+	String<char> p = "babana";
+	Finder<String<char> > finder(t);
+	Pattern<String<char>, Myers<FindInfix> > pattern(p);
+///Instead of using @Function.setScoreLimit@, we pass the score limit $-2$ as a third argument to find
+	while (find(finder, pattern, -2)) 
+	{
+		std::cout << "end: " << endPosition(finder) << std::endl;
+///In order to find the begin position, we have to call @Function.findBegin@.
+///Note that the third argument of @Function.findBegin@ is optional;
+///the default is the score limit that was used during the last call of @Function.find@ (i.e. -2 in this example).
+		while (findBegin(finder, pattern, getScore(pattern)))
+		{
+			std::cout << "begin: " << beginPosition(finder) << std::endl;
+			std::cout << infix(finder) 
+				<< " matches with score " << getBeginScore(pattern) 
+				<< std::endl;
+		}
 	}
 
 	return 0;
