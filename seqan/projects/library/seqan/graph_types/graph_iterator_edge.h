@@ -66,14 +66,13 @@ public:
 		data_edge_it(_graph, getIdLowerBound(_getVertexIdManager(_graph)))  
 	{
 		SEQAN_CHECKPOINT
-		while((!atEnd(data_vertex_it)) && 
-				(atEnd(data_edge_it))) 
+		while((atEnd(data_edge_it)) && (!atEnd(data_vertex_it))) 
 		{
-				++data_vertex_it;
+				goNext(data_vertex_it);
 				typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
-				data_edge_it = TOutEdgeIterator(hostGraph(*this), getValue(data_vertex_it));			
+				data_edge_it = TOutEdgeIterator(hostGraph(*this), value(data_vertex_it));			
 		}
-		data_first_slot = getValue(data_vertex_it);
+		data_first_slot = value(data_vertex_it);
 	}
 
 	~Iter() {
@@ -270,12 +269,11 @@ _goNextInternal(Iter<TGraph, GraphIterator<InternalEdgeIterator<TSpec> > >& it)
 {
 	SEQAN_CHECKPOINT
 	if (!atEnd(it)) {
-		++it.data_edge_it;
+		goNext(it.data_edge_it);
 		if(!atEnd(it.data_edge_it)) return;
 		else {
-			while((!atEnd(it.data_vertex_it)) && 
-					(atEnd(it.data_edge_it))) {
-				++it.data_vertex_it;
+			while ((atEnd(it.data_edge_it)) && (!atEnd(it.data_vertex_it))) {
+				goNext(it.data_vertex_it);
 				if ((atEnd(it.data_vertex_it)) ||
 					(!idInUse(_getVertexIdManager(hostGraph(it)), getValue(it.data_vertex_it)))) continue;
 				typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;

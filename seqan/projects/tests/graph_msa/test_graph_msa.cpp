@@ -13,6 +13,7 @@
 
 //SeqAn
 #include <seqan/graph_msa.h>
+#include <seqan/misc/misc_random.h>
 
 // Test files
 #include "test_graph_tcoffee.h"

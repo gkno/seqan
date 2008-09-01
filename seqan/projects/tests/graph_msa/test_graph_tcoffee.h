@@ -1,11 +1,86 @@
 #ifndef SEQAN_HEADER_TEST_GRAPH_TCOFFEE_H
 #define SEQAN_HEADER_TEST_GRAPH_TCOFFEE_H
 
-using namespace std;
 using namespace seqan;
 
 namespace SEQAN_NAMESPACE_MAIN
 {
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TTag>
+void 
+Test_UpgmaGuideTree() {
+	typedef unsigned int TSize;
+	
+	mtRandInit();
+	for(TSize i = 0; i < 10; ++i) {
+		// Set-up a sparse distance matrix
+		TSize n = mtRand() % 10 + 2;
+		Graph<Undirected<double> > distGraph;
+		String<double> distMatrix;
+		fill(distMatrix, n * n, 0);
+		TSize all = (n * (n - 1)) / 2;
+		typedef std::set<double> TDistanceSet;
+		typedef TDistanceSet::iterator TSetIt;
+		TDistanceSet distances;
+		String<double> myDist;
+		typedef Iterator<String<double> >::Type TStringIter;
+		while (distances.size() < all) {
+			double newVal = mtRand() % 1000000;
+			//double newVal = mtRand() % 100;
+			if (distances.insert(newVal).second) {
+				appendValue(myDist, newVal);
+			}
+		}
+		double infCargo = _getInfinity<double>();
+		//clear(myDist); appendValue(myDist, infCargo); appendValue(myDist, infCargo); appendValue(myDist, 84);
+		TStringIter strIt = begin(myDist);
+		for(TSize row = 0; row < n; ++row) addVertex(distGraph);
+		for(TSize row = 0; row < n; ++row) {
+			for(TSize col = n - 1; col > row; --col) {
+				addEdge(distGraph, row, col, value(strIt));
+				value(distMatrix, row * n + col) = value(strIt);
+				goNext(strIt);
+			}
+		}
+		//removeEdge(distGraph, 0, 1);removeEdge(distGraph, 0, 2);
+		for(TSize row = 0; row < n; ++row) {
+			for(TSize col = n - 1; col > row; --col) {
+				if (mtRand() % 100 < 50) {
+					value(distMatrix, row * n + col) = infCargo;
+					removeEdge(distGraph, row, col);
+				}
+			}
+		}
+		// Guide Tree
+		Graph<Tree<double> > guideTreeGraph;
+		upgmaTree(distGraph, guideTreeGraph, TTag() );
+		Graph<Tree<double> > guideTreeMat;
+		upgmaTree(distMatrix, guideTreeMat, TTag() );
+		typedef Iterator<Graph<Tree<double> >, BfsIterator>::Type TBfsIterator;
+		String<TSize> set1;
+		TBfsIterator itBfs(guideTreeGraph, getRoot(guideTreeGraph));
+		for(;!atEnd(itBfs);goNext(itBfs)) appendValue(set1, value(itBfs));
+		String<TSize> set2;
+		TBfsIterator itBfs2(guideTreeMat, getRoot(guideTreeMat));
+		for(;!atEnd(itBfs2);goNext(itBfs2)) appendValue(set2, value(itBfs2));
+		if (set1 != set2) {
+			std::cout << "Randomized test failed:" << std::endl;
+			std::cout << "Upgma Guide Trees:" << std::endl;
+			std::cout << guideTreeMat << std::endl;
+			std::cout << guideTreeGraph << std::endl;
+			for(TSize i=0;i<n;++i) {
+				for(TSize j=i+1;j<n;++j) {
+					std::cout << value(distMatrix, i*n+j) << ",";
+				}
+				std::cout << std::endl;
+			}
+			std::cout << std::endl;
+			exit(0);
+		}
+	}
+}
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -50,125 +125,9 @@ void Test_GuideTree() {
 
 //____________________________________________________________________________
 // UPGMA
-	Graph<Undirected<double> > sparse_mat;
-	for(unsigned int i = 0; i<8; ++i) addVertex(sparse_mat);
-	clear(mat);
-	fill(mat, 8*8, 0);
-	addEdge(sparse_mat,0,1,32);addEdge(sparse_mat,0,2,48);addEdge(sparse_mat,0,3,51);addEdge(sparse_mat,0,4,50);addEdge(sparse_mat,0,5,48);addEdge(sparse_mat,0,6,98);addEdge(sparse_mat,0,7,148);
-	assignValue(mat, 0*8+1, 32);assignValue(mat, 0*8+2, 48);assignValue(mat, 0*8+3, 51);assignValue(mat, 0*8+4, 50);assignValue(mat, 0*8+5, 48);assignValue(mat, 0*8+6, 98);assignValue(mat, 0*8+7, 148);
-	addEdge(sparse_mat,1,2,26);addEdge(sparse_mat,1,3,34);addEdge(sparse_mat,1,4,29);addEdge(sparse_mat,1,5,33);addEdge(sparse_mat,1,6,84);addEdge(sparse_mat,1,7,136);
-	assignValue(mat, 1*8+2, 26);assignValue(mat, 1*8+3, 34);assignValue(mat, 1*8+4, 29);assignValue(mat, 1*8+5, 33);assignValue(mat, 1*8+6, 84);assignValue(mat, 1*8+7, 136);
-	addEdge(sparse_mat,2,3,42);addEdge(sparse_mat,2,4,44);addEdge(sparse_mat,2,5,44);addEdge(sparse_mat,2,6,92);addEdge(sparse_mat,2,7,152);
-	assignValue(mat, 2*8+3, 42);assignValue(mat, 2*8+4, 44);assignValue(mat, 2*8+5, 44);assignValue(mat, 2*8+6, 92);assignValue(mat, 2*8+7, 152);
-	addEdge(sparse_mat,3,4,44);addEdge(sparse_mat,3,5,38);addEdge(sparse_mat,3,6,86);addEdge(sparse_mat,3,7,142);
-	assignValue(mat, 3*8+4, 44);assignValue(mat, 3*8+5, 38);assignValue(mat, 3*8+6, 86);assignValue(mat, 3*8+7, 142);
-	addEdge(sparse_mat,4,5,24);addEdge(sparse_mat,4,6,89);addEdge(sparse_mat,4,7,142);
-	assignValue(mat, 4*8+5, 24);assignValue(mat, 4*8+6, 89);assignValue(mat, 4*8+7, 142);
-	addEdge(sparse_mat,5,6,90);addEdge(sparse_mat,5,7,142);
-	assignValue(mat, 5*8+6, 90);assignValue(mat, 5*8+7, 142);
-	addEdge(sparse_mat,6,7,148);
-	assignValue(mat, 6*8+7, 148);
-	clear(guideTreeOut);
-	String<double> mat2;
-	mat2 = mat;
-	upgmaTree(mat, guideTreeOut);
-	mat = mat2;
-	//std::cout << guideTreeOut << std::endl;
-	SEQAN_TASSERT(numVertices(guideTreeOut) == 15)
-	SEQAN_TASSERT(findEdge(guideTreeOut, 8, 4) != 0)
-	SEQAN_TASSERT(findEdge(guideTreeOut, 8, 5) != 0)
-	SEQAN_TASSERT(findEdge(guideTreeOut, 9, 1) != 0)
-	SEQAN_TASSERT(findEdge(guideTreeOut, 9, 2) != 0)
-	SEQAN_TASSERT(findEdge(guideTreeOut, 10, 8) != 0)
-	SEQAN_TASSERT(findEdge(guideTreeOut, 10, 9) != 0)
-	SEQAN_TASSERT(findEdge(guideTreeOut, 11, 3) != 0)
-	SEQAN_TASSERT(findEdge(guideTreeOut, 11, 10) != 0)
-	SEQAN_TASSERT(findEdge(guideTreeOut, 12, 11) != 0)
-	SEQAN_TASSERT(findEdge(guideTreeOut, 12, 0) != 0)
-	SEQAN_TASSERT(findEdge(guideTreeOut, 13, 6) != 0)
-	SEQAN_TASSERT(findEdge(guideTreeOut, 13, 12) != 0)
-	SEQAN_TASSERT(findEdge(guideTreeOut, 14, 7) != 0)
-	SEQAN_TASSERT(findEdge(guideTreeOut, 14, 13) != 0)
-	SEQAN_TASSERT(getRoot(guideTreeOut) == 14)
-
-	typedef Iterator<TGraph, BfsIterator>::Type TBfsIter;
-	String< VertexDescriptor<TGraph>::Type > vertices1;
-	for(TBfsIter it(guideTreeOut, getRoot(guideTreeOut)); !atEnd(it); ++it) {
-		appendValue(vertices1, *it);
-	}
-	clear(guideTreeOut);
-	Graph<Undirected<double> > sparse_mat2;
-	sparse_mat2 = sparse_mat;
-	upgmaTree(sparse_mat, guideTreeOut);
-	sparse_mat = sparse_mat2;
-	String< VertexDescriptor<TGraph>::Type > vertices2;
-	for(TBfsIter it(guideTreeOut, getRoot(guideTreeOut)); !atEnd(it); ++it) {
-		appendValue(vertices2, *it);
-	}
-	SEQAN_TASSERT(vertices1 == vertices2)
-
-
-	clear(vertices1);
-	clear(guideTreeOut);
-	mat2 = mat;
-	upgmaTree(mat, guideTreeOut, UpgmaMin());
-	mat = mat2;
-	for(TBfsIter it(guideTreeOut, getRoot(guideTreeOut)); !atEnd(it); ++it) appendValue(vertices1, *it);
-	clear(vertices2);
-	clear(guideTreeOut);
-	sparse_mat2 = sparse_mat;
-	upgmaTree(sparse_mat, guideTreeOut, UpgmaMin());
-	sparse_mat = sparse_mat2;
-	//std::cout << guideTreeOut << std::endl;
-	for(TBfsIter it(guideTreeOut, getRoot(guideTreeOut)); !atEnd(it); ++it) {
-		appendValue(vertices2, *it);
-	}
-	SEQAN_TASSERT(vertices1 == vertices2)
-
-	clear(vertices1);
-	clear(guideTreeOut);
-	mat2 = mat;
-	upgmaTree(mat, guideTreeOut, UpgmaMax());
-	mat = mat2;
-	for(TBfsIter it(guideTreeOut, getRoot(guideTreeOut)); !atEnd(it); ++it) {
-		appendValue(vertices1, *it);
-	}
-	clear(vertices2);
-	clear(guideTreeOut);
-	sparse_mat2 = sparse_mat;
-	upgmaTree(sparse_mat, guideTreeOut, UpgmaMax());
-	sparse_mat = sparse_mat2;
-	for(TBfsIter it(guideTreeOut, getRoot(guideTreeOut)); !atEnd(it); ++it) {
-		appendValue(vertices2, *it);
-	}
-	SEQAN_TASSERT(vertices1 == vertices2)
-
-//____________________________________________________________________________
-// UpgmaMin vs. UpgmaAvg
-	clear(mat);
-	fill(mat, 4*4, 0);
-	assignValue(mat, 0*4+1, 30);assignValue(mat, 0*4+2, 80);assignValue(mat, 0*4+3, 60);
-	assignValue(mat, 1*4+2, 20);assignValue(mat, 1*4+3, 40);
-	assignValue(mat, 2*4+3, 40);
-	clear(guideTreeOut);
-	upgmaTree(mat, guideTreeOut, UpgmaAvg());
-	//std::cout << guideTreeOut << std::endl;
-	SEQAN_TASSERT(findEdge(guideTreeOut, 1, 4) != 0)
-	SEQAN_TASSERT(findEdge(guideTreeOut, 2, 4) != 0)
-	SEQAN_TASSERT(findEdge(guideTreeOut, 3, 5) != 0)
-	SEQAN_TASSERT(findEdge(guideTreeOut, 0, 6) != 0)
-	clear(mat);
-	fill(mat, 4*4, 0);
-	assignValue(mat, 0*4+1, 30);assignValue(mat, 0*4+2, 80);assignValue(mat, 0*4+3, 60);
-	assignValue(mat, 1*4+2, 20);assignValue(mat, 1*4+3, 40);
-	assignValue(mat, 2*4+3, 40);
-	clear(guideTreeOut);
-	upgmaTree(mat, guideTreeOut, UpgmaMin());
-	//std::cout << guideTreeOut << std::endl;
-	SEQAN_TASSERT(findEdge(guideTreeOut, 1, 4) != 0)
-	SEQAN_TASSERT(findEdge(guideTreeOut, 2, 4) != 0)
-	SEQAN_TASSERT(findEdge(guideTreeOut, 0, 5) != 0)
-	SEQAN_TASSERT(findEdge(guideTreeOut, 3, 6) != 0)
+	Test_UpgmaGuideTree<UpgmaAvg>();
+	Test_UpgmaGuideTree<UpgmaMin>();
+	Test_UpgmaGuideTree<UpgmaMax>();
 }
 
 
@@ -317,7 +276,7 @@ void Test_ExternalLibraries() {
 
 	// Writing
 	std::fstream strm;
-	strm.open(TEST_PATH "test.lib", ios_base::out | ios_base::trunc);
+	strm.open(TEST_PATH "test.lib", std::ios_base::out | std::ios_base::trunc);
 	write(strm, g, nameSet, TCoffeeLib());
 	strm.close();
 	//_debugRefinedMatches(g);
@@ -337,7 +296,7 @@ void Test_ExternalLibraries() {
 
 	// Writing
 	std::fstream strm2;
-	strm2.open(TEST_PATH "test.blast", ios_base::out | ios_base::trunc);
+	strm2.open(TEST_PATH "test.blast", std::ios_base::out | std::ios_base::trunc);
 	write(strm2, g, nameSet, BlastLib());
 	strm2.close();
 
@@ -373,7 +332,7 @@ void Test_ExternalLibraries() {
 
 	// Writing
 	std::fstream strmBlast;
-	strmBlast.open(TEST_PATH "test.lib", ios_base::out | ios_base::trunc);
+	strmBlast.open(TEST_PATH "test.lib", std::ios_base::out | std::ios_base::trunc);
 	write(strmBlast, g, nameSet, BlastLib());
 	strmBlast.close();
 	//_debugRefinedMatches(g);
@@ -724,7 +683,7 @@ void Test_Alignments2() {
 
 	// Writing
 	std::fstream strm3;
-	strm3.open(TEST_PATH "align.fasta", ios_base::out | ios_base::trunc);
+	strm3.open(TEST_PATH "align.fasta", std::ios_base::out | std::ios_base::trunc);
 	write(strm3,gOut,nameSet,FastaFormat());
 	strm3.close();
 

@@ -304,36 +304,39 @@ typedef Tag<UpgmaAvg_> const UpgmaAvg;
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TMatrix, typename TActive, typename TSize>
-inline typename Value<TMatrix>::Type
-_upgmaTreeMerge(TMatrix const& mat, 
-				TActive const& active,
+inline void
+_upgmaTreeMerge(TMatrix& mat, 
+				TActive& active,
 				TSize index_i,
 				TSize index_j,
-				TSize i,
 				TSize nseq,
 				UpgmaAvg) 
 {
 	SEQAN_CHECKPOINT
-	typedef typename Value<TMatrix>::Type TValue;
-
 	// Average
-	double returnVal = 0;
-	if (index_i < i) returnVal = ((double) active[index_i] / (double) (active[index_i] + active[index_j])) * getValue(mat, index_i * nseq + i);
-	else returnVal = ((double) active[index_i] / (double) (active[index_i] + active[index_j])) * getValue(mat, i * nseq + index_i);
-	if (index_j < i) returnVal += ((double) active[index_j] / (double) (active[index_i] + active[index_j])) * getValue(mat, index_j * nseq + i);
-	else returnVal += ((double) active[index_j] / (double) (active[index_i] + active[index_j])) * getValue(mat, i * nseq + index_j);
-	return (TValue) returnVal;
+	for(TSize i=0;i<nseq;++i) {
+		if ((i == index_i) || (i == index_j) || (value(active,i) == 0)) continue;
+		if (index_i < i) {
+			value(mat, index_i*nseq + i) = ((double) active[index_i] / (double) (active[index_i] + active[index_j])) * value(mat, index_i * nseq + i);
+			if (index_j < i) value(mat, index_i*nseq + i) += ((double) active[index_j] / (double) (active[index_i] + active[index_j])) * value(mat, index_j * nseq + i);
+			else value(mat, index_i*nseq + i) += ((double) active[index_j] / (double) (active[index_i] + active[index_j])) * getValue(mat, i * nseq + index_j);
+		} else {
+			value(mat, i*nseq + index_i) = ((double) active[index_i] / (double) (active[index_i] + active[index_j])) * value(mat, i * nseq + index_i);
+			if (index_j < i) value(mat, i*nseq + index_i) += ((double) active[index_j] / (double) (active[index_i] + active[index_j])) * value(mat, index_j * nseq + i);
+			else value(mat, i*nseq + index_i) += ((double) active[index_j] / (double) (active[index_i] + active[index_j])) * getValue(mat, i * nseq + index_j);
+		}
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
+
 template<typename TMatrix, typename TActive, typename TSize>
-inline typename Value<TMatrix>::Type
-_upgmaTreeMerge(TMatrix const& mat, 
-				TActive const&,
+inline void
+_upgmaTreeMerge(TMatrix& mat, 
+				TActive& active,
 				TSize index_i,
 				TSize index_j,
-				TSize i,
 				TSize nseq,
 				UpgmaMin) 
 {
@@ -341,25 +344,34 @@ _upgmaTreeMerge(TMatrix const& mat,
 	typedef typename Value<TMatrix>::Type TValue;
 
 	// Minimum
-	TValue newDist = 0;
-	if (index_i < i) newDist = getValue(mat, index_i * nseq + i);
-	else newDist = getValue(mat, i * nseq + index_i);
-	TValue newDist2 = 0;
-	if (index_j < i) newDist2 = getValue(mat, index_j * nseq + i);
-	else newDist2 = getValue(mat, i * nseq + index_j);
-	if (newDist2 < newDist) return newDist2;
-	else return newDist;
+	for(TSize i=0;i<nseq;++i) {
+		if ((i == index_i) || (i == index_j) || (value(active,i) == 0)) continue;
+		TValue newDist = 0;
+		TValue newDist2 = 0;
+		if (index_i < i) {
+			newDist = value(mat, index_i * nseq + i);
+			if (index_j < i) newDist2 = value(mat, index_j * nseq + i);
+			else newDist2 = value(mat, i * nseq + index_j);
+			if (newDist2 < newDist) value(mat, index_i * nseq + i) = newDist2;
+			else value(mat, index_i * nseq + i) = newDist;
+		} else {
+			newDist = value(mat, i * nseq + index_i);
+			if (index_j < i) newDist2 = value(mat, index_j * nseq + i);
+			else newDist2 = value(mat, i * nseq + index_j);
+			if (newDist2 < newDist) value(mat, i * nseq + index_i) = newDist2;
+			else value(mat, i * nseq + index_i) = newDist;
+		}
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TMatrix, typename TActive, typename TSize>
-inline typename Value<TMatrix>::Type
-_upgmaTreeMerge(TMatrix const& mat, 
-				TActive const&,
+inline void
+_upgmaTreeMerge(TMatrix& mat, 
+				TActive& active,
 				TSize index_i,
 				TSize index_j,
-				TSize i,
 				TSize nseq,
 				UpgmaMax) 
 {
@@ -367,14 +379,24 @@ _upgmaTreeMerge(TMatrix const& mat,
 	typedef typename Value<TMatrix>::Type TValue;
 
 	// Maximum
-	TValue newDist = 0;
-	if (index_i < i) newDist = getValue(mat, index_i * nseq + i);
-	else newDist = getValue(mat, i * nseq + index_i);
-	TValue newDist2 = 0;
-	if (index_j < i) newDist2 = getValue(mat, index_j * nseq + i);
-	else newDist2 = getValue(mat, i * nseq + index_j);
-	if (newDist2 < newDist) return newDist;
-	else return newDist2;
+	for(TSize i=0;i<nseq;++i) {
+		if ((i == index_i) || (i == index_j) || (value(active,i) == 0)) continue;
+		TValue newDist = 0;
+		TValue newDist2 = 0;
+		if (index_i < i) {
+			newDist = value(mat, index_i * nseq + i);
+			if (index_j < i) newDist2 = value(mat, index_j * nseq + i);
+			else newDist2 = value(mat, i * nseq + index_j);
+			if (newDist2 < newDist) value(mat, index_i * nseq + i) = newDist;
+			else value(mat, index_i * nseq + i) = newDist2;
+		} else {
+			newDist = value(mat, i * nseq + index_i);
+			if (index_j < i) newDist2 = value(mat, index_j * nseq + i);
+			else newDist2 = value(mat, i * nseq + index_j);
+			if (newDist2 < newDist) value(mat, i * nseq + index_i) = newDist;
+			else value(mat, i * nseq + index_i) = newDist2;
+		}
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -392,16 +414,22 @@ _upgmaTreeMerge(Graph<Undirected<TCargo, TSpec> >& pairGraph,
 	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
 	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
 
-	TCargo infCargo = _getInfinity<TCargo>();
 	TVertexDescriptor s = sourceVertex(pairGraph,best);
 	TVertexDescriptor t = targetVertex(pairGraph,best);
-	
+	typedef String<TEdgeDescriptor> TEdgeString;
+	typedef typename Iterator<TEdgeString>::Type TEdgeIter;
+	TEdgeString removeEdges;
 	for(TOutEdgeIterator outIt(pairGraph, s);!atEnd(outIt);goNext(outIt)) {
 		if (targetVertex(outIt) == t) continue;
 		TEdgeDescriptor e = findEdge(pairGraph, targetVertex(outIt), t);
-		if (e == 0) cargo(*outIt) = infCargo;
-		else if (cargo(e) > cargo(*outIt)) cargo(*outIt) = cargo(e);
+		if (e == 0) appendValue(removeEdges, value(outIt));
+		else {
+			if (cargo(e) > cargo(value(outIt))) cargo(value(outIt)) = cargo(e);
+		}
 	}
+	TEdgeIter eIt = begin(removeEdges);
+	TEdgeIter eItEnd = end(removeEdges);
+	for(;eIt != eItEnd; goNext(eIt)) removeEdge(pairGraph, value(eIt));
 	removeVertex(pairGraph, t);
 }
 
@@ -422,20 +450,17 @@ _upgmaTreeMerge(Graph<Undirected<TCargo, TSpec> >& pairGraph,
 
 	TVertexDescriptor s = sourceVertex(pairGraph,best);
 	TVertexDescriptor t = targetVertex(pairGraph,best);
-	
 	for(TOutEdgeIterator outIt(pairGraph, s);!atEnd(outIt);goNext(outIt)) {
 		if (targetVertex(outIt) == t) continue;
 		TEdgeDescriptor e = findEdge(pairGraph, targetVertex(outIt), t);
 		if (e != 0) {
-			if (cargo(e) < cargo(*outIt)) cargo(*outIt) = cargo(e);
+			if (cargo(e) < cargo(value(outIt))) cargo(value(outIt)) = cargo(e);
 		}
 	}
 	for(TOutEdgeIterator outIt(pairGraph, t);!atEnd(outIt);goNext(outIt)) {
 		if (targetVertex(outIt) == s) continue;
 		TEdgeDescriptor e = findEdge(pairGraph, targetVertex(outIt), s);
-		if (e == 0)  {
-			addEdge(pairGraph, s, targetVertex(outIt), cargo(*outIt));
-		}
+		if (e == 0)  addEdge(pairGraph, s, targetVertex(outIt), cargo(value(outIt)));
 	}
 	removeVertex(pairGraph, t);
 }
@@ -462,20 +487,19 @@ _upgmaTreeMerge(Graph<Undirected<TCargo, TSpec> >& pairGraph,
 	
 	for(TOutEdgeIterator outIt(pairGraph, s);!atEnd(outIt);goNext(outIt)) {
 		if (targetVertex(outIt) == t) continue;
-		TEdgeDescriptor e = findEdge(pairGraph, targetVertex(outIt), t);
-		if (e != 0) {
-			cargo(*outIt) = ((double) active[s] / (double) (active[s] + active[t])) * cargo(*outIt) + ((double) active[t] / (double) (active[s] + active[t])) * cargo(e);
+		TEdgeDescriptor e1 = value(outIt);
+		TEdgeDescriptor e2 = findEdge(pairGraph, targetVertex(outIt), t);
+		if (e2 != 0) {
+			cargo(e1) = ((double) value(active,s) / (double) (value(active,s) + value(active,t))) * cargo(e1) + ((double) value(active,t) / (double) (value(active,s) + value(active,t))) * cargo(e2);
 		} else {
-			cargo(*outIt) = ((double) active[s] / (double) (active[s] + active[t])) * cargo(*outIt) + ((double) active[t] / (double) (active[s] + active[t])) * infCargo;
+			cargo(e1) = ((double) value(active,s) / (double) (value(active,s) + value(active,t))) * cargo(e1) + ((double) value(active,t) / (double) (value(active,s) + value(active,t))) * infCargo;
 		}
 	}
 	for(TOutEdgeIterator outIt(pairGraph, t);!atEnd(outIt);goNext(outIt)) {
 		if (targetVertex(outIt) == s) continue;
 		TEdgeDescriptor e = findEdge(pairGraph, targetVertex(outIt), s);
-		if (e == 0)  {
-			TCargo c = ((double) active[s] / (double) (active[s] + active[t])) * infCargo + ((double) active[t] / (double) (active[s] + active[t])) * cargo(*outIt);
-			addEdge(pairGraph, s, targetVertex(outIt), c);
-		}
+		TCargo c = ((double) value(active,s) / (double) (value(active,s) + value(active,t))) * infCargo + ((double) value(active,t) / (double) (value(active,s) + value(active,t))) * cargo(value(outIt));
+		if (e == 0)  addEdge(pairGraph, s, targetVertex(outIt), c);
 	}
 	removeVertex(pairGraph, t);
 }
@@ -493,9 +517,13 @@ upgmaTree(String<TStringValue, TStringSpec>& mat,
 	typedef Graph<Tree<TCargo, TSpec> > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename Size<TGraph>::Type TSize;
-	typedef typename Value<String<TStringValue, TStringSpec> >::Type TValue;
+	typedef String<TStringValue, TStringSpec> TMatrix;
+	typedef typename Value<TMatrix>::Type TValue;
+	typedef typename Iterator<TMatrix>::Type TMatrixIter;
+	
 	
 	// First initialization
+	TValue const maxVal = supremumValue<TValue>();
 	TSize nseq = (TSize) std::sqrt((double)length(mat));
 	clearVertices(g);
 
@@ -522,17 +550,15 @@ upgmaTree(String<TStringValue, TStringSpec>& mat,
 
 
 	// Find the minimal value
-	TValue infinityVal = _getInfinity<TValue>();
-	TValue minVal = infinityVal;
+	TValue minVal = maxVal;
 	TSize index_i = 0;
 	TSize index_j = 1;
-	TValue tmp;
-	for(TSize i=0;i<nseq;++i) {
-		for(TSize j=i+1;j<nseq;++j) {
-			if (minVal > (tmp = getValue(mat, i*nseq + j))) {
-				minVal = tmp;
-				index_i = i;
-				index_j = j;
+	for(TSize row=0;row<nseq;++row) {
+		for(TSize col=row+1;col<nseq;++col) {
+			if (minVal > value(mat, row*nseq + col)) {
+				minVal = value(mat, row*nseq + col);
+				index_i = row;
+				index_j = col;
 			}
 		}
 		appendValue(nodes, addVertex(g));	// For each sequence one vertex
@@ -551,10 +577,10 @@ upgmaTree(String<TStringValue, TStringSpec>& mat,
 
 		//// Debug code
 		//for(TSize i=0;i<nseq;++i) {
-		//	if (!active[i]) continue;
+		//	if (value(active,i)==0) continue;
 		//	for(TSize j=i+1;j<nseq;++j) {
-		//		if (!active[j]) continue;
-		//		std::cout << getValue(mat, i*nseq+j) << ",";
+		//		if (value(active,j)==0) continue;
+		//		std::cout << value(mat, i*nseq+j) << ",";
 		//	}
 		//	std::cout << std::endl;
 		//}
@@ -563,34 +589,28 @@ upgmaTree(String<TStringValue, TStringSpec>& mat,
 		//std::cout << std::endl;
 
 		TCargo w = (TCargo) (minVal / 2);
-		addEdge(g, internalNode, nodes[index_i], w - getProperty(weights, nodes[index_i]));
-		addEdge(g, internalNode, nodes[index_j], w - getProperty(weights, nodes[index_j]));
+		addEdge(g, internalNode, value(nodes,index_i), w - property(weights, value(nodes,index_i)));
+		addEdge(g, internalNode, value(nodes,index_j), w - property(weights, value(nodes,index_j)));
 		appendValue(weights, w);		
 
 		// Get the new distance values
-		for(TSize i=0;i<nseq;++i) {
-			if ((i == index_i) ||
-				(i == index_j) ||
-				(!active[i])) continue;
-			if (index_i < i) value(mat, index_i*nseq + i) = _upgmaTreeMerge(mat, active, index_i, index_j, i, nseq, TTag());
-			else value(mat, i*nseq + index_i) = _upgmaTreeMerge(mat, active, index_i, index_j, i, nseq, TTag());
-		}
+		_upgmaTreeMerge(mat, active, index_i, index_j, nseq, TTag());
+
 		// Inactivate one group, adjust the member count for the other one
-		active[index_i] += active[index_j];
-		active[index_j] = 0;
-		nodes[index_i] = internalNode;
+		value(active,index_i) += value(active,index_j);
+		value(active,index_j) = 0;
+		value(nodes,index_i) = internalNode;
 		
 		// Find new minimum
-		minVal = infinityVal;
+		minVal = maxVal;
 		bool found = false;
 		for(TSize i=0;i<nseq;++i) {
-			if (!active[i]) continue;
+			if (value(active,i) == 0) continue;
 			for(TSize j=i+1;j<nseq;++j) {
-				if (!active[j]) continue;
-				if ((minVal > (tmp = value(mat, i*nseq + j))) ||
-					(!found)) {
+				if (value(active,j) == 0) continue;
+				if ((minVal > value(mat, i*nseq + j)) || (!found)) {
 					found = true;
-					minVal = tmp;
+					minVal = value(mat, i*nseq + j);
 					index_i = i;
 					index_j = j;
 				}
@@ -613,14 +633,17 @@ upgmaTree(Graph<Undirected<TValue, TSpec1> >& pairGraph,
 	typedef Graph<Undirected<TValue, TSpec1> > TPairGraph;
 	typedef Graph<Tree<TCargo, TSpec2> > TGuideTree;
 	typedef typename VertexDescriptor<TGuideTree>::Type TVertexDescriptor;
-	typedef typename VertexDescriptor<TGuideTree>::Type TVD;
+	typedef typename VertexDescriptor<TPairGraph>::Type TVD;
 	typedef typename EdgeDescriptor<TPairGraph>::Type TED;
 	typedef typename Iterator<TPairGraph, EdgeIterator>::Type TEdgeI;
+	typedef typename Iterator<TPairGraph, OutEdgeIterator>::Type TEdgeOutI;
 	typedef typename Iterator<TPairGraph, VertexIterator>::Type TVertexI;
 	typedef typename Size<TPairGraph>::Type TSize;
 
 	// First initialization
 	TSize nseq = numVertices(pairGraph);
+	TValue const maxVal = supremumValue<TValue>();
+	TCargo infCargo = _getInfinity<TCargo>();
 	clearVertices(g);
 
 	// Is it possible to make a guide tree?
@@ -641,30 +664,51 @@ upgmaTree(Graph<Undirected<TValue, TSpec1> >& pairGraph,
 	String<TSize> active;
 	fill(active, nseq, 1);
 	// Vertex descriptor that represents that entry
-	String<TVertexDescriptor> nodes;
-	reserve(nodes, nseq);
-	for(TSize i=0;i<nseq;++i) appendValue(nodes, addVertex(g));	// For each sequence one vertex
+	typedef String<TVertexDescriptor> TNodeString;
+	typedef typename Iterator<TNodeString>::Type TNodeIter;
+	TNodeString nodes;
+	resize(nodes, nseq);
+	TNodeIter nodeIt = begin(nodes);
+	TNodeIter nodeItEnd = end(nodes);
+	for(;nodeIt<nodeItEnd;goNext(nodeIt)) value(nodeIt) = addVertex(g);	// For each sequence one vertex
 
-	// Find the minimal value
-	TValue infinityVal = _getInfinity<TValue>();
-	TValue minVal = infinityVal;
-	bool found = false;
-	TED best = 0;
+	// Find the minimal value for all vertices (with respect to all greater vertices)
+	typedef Pair<TValue, TVD> TWeightEdgePair;
+	typedef String<TWeightEdgePair> TMinValues;
+	TMinValues minValues;
+	fill(minValues, nseq, TWeightEdgePair(maxVal, 0));
 	TEdgeI itE(pairGraph);
-	for(;!atEnd(itE);++itE) {
-		if (minVal > cargo(*itE)) {
-			best = *itE;
-			minVal = cargo(*itE);
-			found = true;
+	for(;!atEnd(itE);goNext(itE)) {
+		TVD s = sourceVertex(itE);
+		TVD t = targetVertex(itE);
+		if (cargo(value(itE)) < (value(minValues, s).i1)) value(minValues, s) = TWeightEdgePair(cargo(value(itE)), t);
+		//if (cargo(value(itE)) < (value(minValues, t).i1)) value(minValues, t) = TWeightEdgePair(cargo(value(itE)), s);
+	}
+	// Find the overall minimum
+	typedef typename Iterator<TMinValues>::Type TMinIter;
+	TMinIter itMin = begin(minValues);
+	TMinIter itMinEnd = end(minValues);
+	TValue minVal = maxVal;
+	TVD sourceBest = 0;
+	TVD targetBest = 0;
+	for(TVD index=0;itMin != itMinEnd; goNext(itMin), ++index) {
+		if (value(itMin).i1 < minVal) {
+			minVal = value(itMin).i1;
+			sourceBest = index;
+			targetBest = value(itMin).i2;
 		}
 	}
-	if ((!found) && (nseq>2)) {
+	TED best = 0;
+	if (sourceBest == targetBest) { // If none is found we have to insert a new edge
 		TVertexI itV(pairGraph);
-		TVD i1 = *itV;
+		sourceBest = value(itV);
 		goNext(itV);
-		best = addEdge(pairGraph, i1, *itV, infinityVal);
+		targetBest = value(itV);
+		best = addEdge(pairGraph, sourceBest, targetBest, infCargo);
+	} else {
+		best = findEdge(pairGraph, sourceBest, targetBest);
 	}
-
+	
 	// Property map for sum of weights for each node
 	String<TCargo> weights;
 	fill(weights, nseq, (TCargo) 0);
@@ -675,42 +719,63 @@ upgmaTree(Graph<Undirected<TValue, TSpec1> >& pairGraph,
 	while (m>1) {
 		// Merge nodes
 		TVertexDescriptor internalNode = addVertex(g);
-		TVD s = sourceVertex(pairGraph, best);
-		TVD t = targetVertex(pairGraph, best);
-
-		//// Debug code
-		//std::cout << s << ',' << t << ':' << minVal << std::endl;
-
-
+		
+		// Set the weights
 		TCargo w = (TCargo) (minVal / 2);
-		addEdge(g, internalNode, nodes[s], w - getProperty(weights, nodes[s]));
-		addEdge(g, internalNode, nodes[t], w - getProperty(weights, nodes[t]));
+		addEdge(g, internalNode, value(nodes,sourceBest), w - property(weights, value(nodes,sourceBest)));
+		addEdge(g, internalNode, value(nodes,targetBest), w - property(weights, value(nodes,targetBest)));
 		appendValue(weights, w);		
 
 		// Get the new distance values
 		_upgmaTreeMerge(pairGraph, active, best, TTag());
 		
 		// Inactivate one group, adjust the member count for the other one
-		active[s] += active[t];
-		active[t] = 0;
-		nodes[s] = internalNode;
-		
-		// Find new minimum
-		minVal = infinityVal;
-		TEdgeI it(pairGraph);
-		bool found = false;
-		for(;!atEnd(it);++it) {
-			if (minVal > cargo(*it)) {
-				found = true;
-				best = *it;
-				minVal = cargo(*it);
+		value(active,sourceBest) += value(active,targetBest);
+		value(active,targetBest) = 0;
+		value(nodes,sourceBest) = internalNode;
+	
+		// Update the minimum values
+		value(minValues, sourceBest) = TWeightEdgePair(maxVal, 0);
+		TEdgeOutI itOutE(pairGraph, sourceBest);
+		for(;!atEnd(itOutE);goNext(itOutE)) {
+			if (sourceBest < targetVertex(itOutE)) {
+				if (cargo(value(itOutE)) < (value(minValues, sourceBest).i1)) value(minValues, sourceBest) = TWeightEdgePair(cargo(value(itOutE)), targetVertex(itOutE));
 			}
 		}
-		if ((!found) && (m>2)) {
+		// Find the new minimum value
+		itMin = begin(minValues);
+		itMinEnd = end(minValues);
+		minVal = maxVal;
+		TVD oldSourceBest = sourceBest;
+		sourceBest = 0;
+		targetBest = 0;
+		for(TVD index= 0;itMin != itMinEnd; goNext(itMin), ++index) {
+			if (value(active, index) == 0) continue;
+			if ((value(itMin).i2 == oldSourceBest) || (value(active, value(itMin).i2) == 0)) {
+				// Update the values
+				value(itMin).i1 = maxVal;
+				TEdgeOutI itOutLocal(pairGraph, index);
+				for(;!atEnd(itOutLocal);goNext(itOutLocal)) {
+					TVD targ = targetVertex(itOutLocal);
+					if (targ < index) continue;
+					if (cargo(value(itOutLocal)) < value(itMin).i1) value(itMin) = TWeightEdgePair(cargo(value(itOutLocal)), targ);
+				}
+			}
+			if (value(itMin).i1 < minVal) {
+				minVal = value(itMin).i1;
+				sourceBest = index;
+				targetBest = value(itMin).i2;
+			}
+		}
+		// If none is found we have to insert a new edge
+		if ((sourceBest == targetBest) && (m>2)) {
 			TVertexI itV(pairGraph);
-			TVD i1 = *itV;
+			sourceBest = value(itV);
 			goNext(itV);
-			best = addEdge(pairGraph, i1, *itV, infinityVal);
+			targetBest = value(itV);
+			best = addEdge(pairGraph, sourceBest, targetBest, infCargo);
+		} else {
+			best = findEdge(pairGraph, sourceBest, targetBest);
 		}
 		--m;
 	}

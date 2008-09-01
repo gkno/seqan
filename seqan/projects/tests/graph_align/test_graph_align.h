@@ -408,6 +408,7 @@ void Test_Gotoh() {
 	SEQAN_TASSERT(numVertices(g) == 6)
 	std::cout << g << std::endl;
 
+
 	// Note: Depending on the used recursion formula, the gotoh algorithms can differ !!!
 	// Gotoh: Vertical gap and subsequent horizontal gap allowed
 	// Gotoh3: Vertical gap and subsequent horizontal gap is not allowed
