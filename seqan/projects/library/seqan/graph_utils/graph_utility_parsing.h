@@ -151,6 +151,21 @@ _parse_readIdentifier(TFile & file, TChar& c)
 
 //////////////////////////////////////////////////////////////////////////////
 
+template<typename TFile, typename TString, typename TChar>
+inline void
+_parse_readIdentifier(TFile & file, TString& str, TChar& c)
+{
+	// Read identifier
+	append(str, c);
+	while (!_streamEOF(file)) {
+		c = _streamGet(file);
+		if (!_parse_isAlphanumericChar(c)) break;
+		append(str, c);
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 template<typename TFile, typename TChar>
 inline String<char>
 _parse_readWord(TFile & file, TChar& c)
