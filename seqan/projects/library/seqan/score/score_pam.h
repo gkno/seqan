@@ -177,23 +177,6 @@ public:
 
 */
 
-	friend inline TValue &
-		score(Score & _score, int as_1, int as_2)
-	{
-		TValue * data_pam = _getDataPam(_score);
-		TValue & pairscore = *(data_pam+(as_1*dim)+as_2);
-		return pairscore;
-
-	}
-	friend inline TValue const &
-		score(Score const & _score, int as_1, int as_2)
-	{
-		const TValue * data_pam = _getDataPam(_score);
-		//return _score.data_pam[as_1][as_2];
-		const TValue & pairscore = *(data_pam+(as_1*dim)+as_2);
-		return pairscore;
-	}
-
 /*
 	friend inline TValue &
 		scoreGapExtend(Score & _score)
@@ -894,6 +877,33 @@ write(TFile & fl,
 	sprintf(meta, " PAM %i substitution matrix\n\n Scaling: %f\n Entropy: %f\n\n", getDist(sc), getScale(sc), getEntropy(sc));
 	write(fl, sc, meta);
 }
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TValue, typename TSequenceValue, typename TSource, typename TVal1, typename TVal2> 
+inline TValue &
+score(Score<TValue, Pam<TSequenceValue, TSource> > & _score, 
+	  TVal1 as_1, 
+	  TVal2 as_2)
+{
+	TValue * data_pam = _getDataPam(_score);
+	TValue & pairscore = *(data_pam+(ordValue(as_1)*_score.dim)+ordValue(as_2));
+	return pairscore;
+
+}
+template <typename TValue, typename TSequenceValue, typename TSource, typename TVal1, typename TVal2> 
+inline TValue const &
+score(Score<TValue, Pam<TSequenceValue, TSource> > const & _score, 
+	  TVal1 as_1, 
+	  TVal2 as_2)
+{
+	const TValue * data_pam = _getDataPam(_score);
+	//return _score.data_pam[as_1][as_2];
+	const TValue & pairscore = *(data_pam+(ordValue(as_1)*_score.dim)+ordValue(as_2));
+	return pairscore;
+}
+
 
 //////////////////////////////////////////////////////////////////////////////
 

@@ -266,11 +266,11 @@ scoreGap(Score<TValue, TSpec> const & me)
 ..returns:The score for comparing the two values.
 */
 
-template <typename TValue, typename TSpec, typename T>
+template <typename TValue, typename TSpec, typename TVal1, typename TVal2>
 inline TValue
 score(Score<TValue, TSpec> const & me,
-	  T const & left,
-	  T const & right)
+	  TVal1 left,
+	  TVal2 right)
 {
 	if (left == right) return scoreMatch(me);
 	else return scoreMismatch(me);
