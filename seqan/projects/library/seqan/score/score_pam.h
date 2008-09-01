@@ -819,7 +819,7 @@ void _computePamScale(Score<TValue, Pam<TSequenceValue, TSource> > & _score) {
 	//////////////////////////////////////////////////////////////////////////////		
 	SEQAN_CHECKPOINT
 
-	double 	numerator;
+	double 	numerator = 1.;
 	int dist = getDist(_score);
 	if (dist >= 470) {numerator = 7.;}
 	else if (dist >= 409) {numerator = 6.;}
