@@ -19,7 +19,8 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ==========================================================================*/
 
-#include "seqan/platform.h"
+#ifndef SEQAN_HEADER_RAZERS_H
+#define SEQAN_HEADER_RAZERS_H
 
 #include <iostream>
 #include <fstream>
@@ -39,21 +40,27 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < bool _DONT_VERIFY = false, bool _DONT_DUMP_RESULTS = false >
 	struct RazerSSpec 
 	{
-		enum { DONT_VERIFY = _DONT_VERIFY };
-		enum { DONT_DUMP_RESULTS = _DONT_DUMP_RESULTS };
+		enum { DONT_VERIFY = _DONT_VERIFY };				// omit verifying potential matches
+		enum { DONT_DUMP_RESULTS = _DONT_DUMP_RESULTS };	// omit dumping results
 	};
 
 	template < typename TSpec = RazerSSpec<> >
 	struct RazerSOptions
 	{
+	// main options
 		TSpec		spec;
 		bool		forward;			// compute forward oriented read matches
 		bool		reverse;			// compute reverse oriented read matches
 		double		errorRate;			// Criteria 1 threshold
-		bool		dumpAlignment;		// compute and dump the match alignments in the result files
-		const char	*output;			// prefix of output files (e.g. "results/run02.", default: "")
+		int			maxHits;			// hit count threshold
+		const char	*output;			// name of result file
+		int			_debugLevel;		// level of verbosity
+		bool		printVersion;		// print version number
+
+	// output format options
 		unsigned	outputFormat;		// 0..Razer format
 										// 1..enhanced Fasta
+		bool		dumpAlignment;		// compute and dump the match alignments in the result files
 		unsigned	genomeNaming;		// 0..use Fasta id
 										// 1..enumerate reads beginning with 1
 		unsigned	readNaming;			// 0..use Fasta id
@@ -63,15 +70,15 @@ namespace SEQAN_NAMESPACE_MAIN
 										// 1..           1. genome pos50ition, 2. read number
 		unsigned	positionFormat;		// 0..gap space
 										// 1..position space
+
+	// filtration parameters
 		::std::string shape;			// shape (e.g. 11111111111)
 		int			threshold;			// threshold
 		int			tabooLength;		// taboo length
 		int			repeatLength;		// repeat length threshold
 		double		abundanceCut;		// abundance threshold
-		int			maxHits;			// hit count threshold
-		int			_debugLevel;		// level of verbosity
-		bool		printVersion;		// print version number
 
+	// statistics
 		__int64		FP;					// false positives (threshold reached, no match)
 		__int64		TP;					// true positives (threshold reached, match)
 		double		timeLoadFiles;		// time for loading input files
@@ -107,14 +114,16 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	// definition of a Read match
 	template <typename _TGPos>
-	struct ReadMatch {
-		typedef _TGPos TGPos;
-		unsigned gseqNo;		// genome seqNo
-		unsigned rseqNo;		// read seqNo
-		TGPos	gBegin;			// begin position of the match in the genome
-		TGPos	gEnd;			// end position of the match in the genome
-		short	editDist;		// Levenshtein distance
-		char	orientation;	// 'F'..forward strand, 'R'..reverse comp. strand
+	struct ReadMatch 
+	{
+		typedef _TGPos	TGPos;
+
+		unsigned		gseqNo;			// genome seqNo
+		unsigned		rseqNo;			// read seqNo
+		TGPos			gBegin;			// begin position of the match in the genome
+		TGPos			gEnd;			// end position of the match in the genome
+		short			editDist;		// Levenshtein distance
+		char			orientation;	// 'F'..forward strand, 'R'..reverse comp. strand
 	};
 
 	// less-operators (to sort matches and remove duplicates with equal gBegin)
@@ -164,12 +173,11 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 // Definitions
 
-	typedef	Dna					TAlphabet;
-
-	typedef String<Dna5>		TGenome;
-	typedef StringSet<TGenome>	TGenomeSet;
-	typedef String<TAlphabet>	TRead;
-	typedef StringSet<TRead>	TReadSet;
+	typedef	Dna							TRazerSAlphabet;
+	typedef String<Dna5>				TGenome;
+	typedef StringSet<TGenome>			TGenomeSet;
+	typedef String<TRazerSAlphabet>		TRead;
+	typedef StringSet<TRead>			TReadSet;
 
 
 	template <typename TShape>
@@ -191,7 +199,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 	typedef ReadMatch<Difference<TGenome>::Type>	TMatch;			// a single match
-	typedef String<TMatch/*, Block<>*/ >			TMatches;		// array of matches
+	typedef String<TMatch/*, MMap<>*/ >				TMatches;		// array of matches
 
 #ifdef RAZERS_PRUNE_QGRAM_INDEX
 
@@ -398,7 +406,6 @@ void findReads(
 				}
 #endif
 
-#ifndef RAZERS_PROFILE
 				// transform coordinates to the forward strand
 				if (orientation == 'R') 
 				{
@@ -409,7 +416,6 @@ void findReads(
 				}
 				if (!options.spec.DONT_DUMP_RESULTS)
 					appendValue(matches, m);
-#endif
 #ifdef RAZERS_MAXHITS				
 				--hitCount[ndlSeqNo];
 #endif
@@ -449,7 +455,6 @@ template <typename TFile, typename TSource, typename TSpec>
 inline void
 dumpAlignment(TFile & target, Align<TSource, TSpec> const & source)
 {
-SEQAN_CHECKPOINT
 	typedef Align<TSource, TSpec> const TAlign;
 	typedef typename Row<TAlign>::Type TRow;
 	typedef typename Position<typename Rows<TAlign>::Type>::Type TRowsPosition;
@@ -486,7 +491,6 @@ template <
 	typename TGenomeNames,
 	typename TReads,
 	typename TReadNames,
-	typename THitCount,
 	typename TSpec
 >
 void dumpMatches(
@@ -497,7 +501,6 @@ void dumpMatches(
 	TReadNames const &readIDs,			// Read names (read from Fasta file, currently unused)
 	::std::string const &genomeFName,	// genome name (e.g. "hs_ref_chr1.fa")
 	::std::string const &readFName,		// read name (e.g. "reads.fa")
-	THitCount &hitCount,
 	RazerSOptions<TSpec> &options)
 {
 	typedef typename Value<TMatchSet>::Type		TMatches;
@@ -552,7 +555,7 @@ void dumpMatches(
 		return;
 	}
 
-	clear(hitCount);
+	String<int> hitCount;
 	fill(hitCount, length(reads), 0);
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -704,10 +707,8 @@ void dumpMatches(
 				if (options.dumpAlignment) {
 					assignSource(row(align, 0), reads[readNo]);
 					assignSource(row(align, 1), infix(genomes[gseqNo], gBegin, gEnd));
-#ifndef OMIT_REVERSECOMPLEMENT
 					if (orientation == 'R')
 						reverseComplementInPlace(source(row(align, 1)));
-#endif
 					globalAlignment(align, scoreType);
 					dumpAlignment(file, align);
 				}
@@ -789,30 +790,103 @@ void dumpMatches(
 //////////////////////////////////////////////////////////////////////////////
 // Main Part
 
-template <typename TShape, typename TSpec>
+template <
+	typename TMatches, 
+	typename TGenomeSet, 
+	typename TReadSet, 
+	typename TSpec, 
+	typename TShape >
+void mapReads(
+	TMatches &matches, 
+	TGenomeSet &genomeSet, 
+	TReadSet const &readSet, 
+	RazerSOptions<TSpec> &options,
+	TShape const &shape)
+{
+	Index<TReadSet, Index_QGram<TShape> > swiftIndex(readSet, shape);
+	String<int> hitCount;
+
+	// clear stats
+	options.FP = 0;
+	options.TP = 0;
+	options.timeLoadFiles = 0;
+	options.timeMapReads = 0;
+	options.timeDumpResults = 0;
+
+#ifdef RAZERS_MAXHITS	
+	// fill max number of hits per read
+	// at most twice as much potential matches are allowed (overlapping parallelograms)
+	fill(hitCount, length(readSet), 2*options.maxHits);	
+#endif
+
+	cargo(swiftIndex).abundanceCut = options.abundanceCut;
+	cargo(swiftIndex)._debugLevel = options._debugLevel;
+
+	if (options.forward)
+	{
+		if (options._debugLevel >= 1)
+			::std::cerr << ::std::endl << "___FORWARD_STRAND______";
+		findReads(matches, genomeSet, swiftIndex, 'F', hitCount, options);
+	}
+
+	if (options.reverse) 
+	{
+		if (options._debugLevel >= 1)
+			::std::cerr << ::std::endl << "___BACKWARD_STRAND_____";
+		reverseComplementInPlace(genomeSet);			// build reverse-compl of genome
+		findReads(matches, genomeSet, swiftIndex, 'R', hitCount, options);
+		reverseComplementInPlace(genomeSet);			// restore original genome seqs
+	}
+}
+
+template <typename TMatches, typename TGenomeSet, typename TReadSet, typename TSpec>
+bool mapReads(
+	TMatches &matches,
+	TGenomeSet &genomeSet, 
+	TReadSet const &readSet, 
+	RazerSOptions<TSpec> &options)
+{
+	Shape<TRazerSAlphabet, SimpleShape>		ungapped;
+	Shape<TRazerSAlphabet, OneGappedShape>	onegapped;
+	Shape<TRazerSAlphabet, GappedShape>		gapped;
+
+	// select best-fitting shape
+
+	if (stringToShape(ungapped, options.shape)) {
+		mapReads(matches, genomeSet, readSet, options, ungapped);
+		return true;
+	}
+	
+	if (stringToShape(onegapped, options.shape)) {
+		mapReads(matches, genomeSet, readSet, options, onegapped);
+		return true;
+	}
+
+	if (stringToShape(gapped, options.shape)) {
+		mapReads(matches, genomeSet, readSet, options, gapped);
+		return true;
+	}
+
+	return false;
+}
+
+template <typename TSpec>
 int mapReads(
 	const char *genomeFileName,
 	const char *readFileName,
-	TShape &shape,
 	RazerSOptions<TSpec> &options)
 {
-	typedef Index<TReadSet, Index_QGram<TShape> >	TReadIndex;
-
 	TGenomeSet				genomeSet;
-	StringSet<CharString>	genomeNames;	// genome names, taken from the Fasta file
 	TReadSet				readSet;
+	StringSet<CharString>	genomeNames;	// genome names, taken from the Fasta file
 	StringSet<CharString>	readNames;		// read names, taken from the Fasta file
-	
 	TMatches				matches;		// resulting forward/reverse matches
-	String<int>				hitCount;
-
-	static const double epsilon = 0.0000001;
 
 	// dump configuration in verbose mode
 	if (options._debugLevel >= 1) 
 	{
-		CharString bitmap;
-		shapeToString(bitmap, shape);
+//		CharString bitmap;
+//		shapeToString(bitmap, shape);
 		::std::cerr << "___SETTINGS____________" << ::std::endl;
 		::std::cerr << "Compute forward matches:         \t";
 		if (options.forward)	::std::cerr << "YES" << ::std::endl;
@@ -822,7 +896,7 @@ int mapReads(
 		else				::std::cerr << "NO" << ::std::endl;
 		::std::cerr << "Error rate:                      \t" << options.errorRate << ::std::endl;
 		::std::cerr << "Minimal threshold:               \t" << options.threshold << ::std::endl;
-		::std::cerr << "Shape:                           \t" << bitmap << ::std::endl;
+		::std::cerr << "Shape:                           \t" << options.shape << ::std::endl;
 		::std::cerr << "Repeat threshold:                \t" << options.repeatLength << ::std::endl;
 		::std::cerr << "Overabundance threshold:         \t" << options.abundanceCut << ::std::endl;
 		::std::cerr << "Taboo length:                    \t" << options.tabooLength << ::std::endl;
@@ -830,14 +904,7 @@ int mapReads(
 	}
 
 	// circumvent numerical obstacles
-	options.errorRate += epsilon;
-
-	// clear stats
-	options.FP = 0;
-	options.TP = 0;
-	options.timeLoadFiles = 0;
-	options.timeMapReads = 0;
-	options.timeDumpResults = 0;
+	options.errorRate += 0.0000001;
 
 	//////////////////////////////////////////////////////////////////////////////
 	// Step 1: Load fasta files
@@ -855,61 +922,19 @@ int mapReads(
 	if (options._debugLevel >= 1) ::std::cerr << lengthSum(readSet) << " bps of " << length(readSet) << " reads loaded." << ::std::endl;
 	options.timeLoadFiles = SEQAN_PROTIMEDIFF(load_time);
 
-#ifdef RAZERS_MAXHITS	
-	// fill max number of hits per read
-	// at most twice as much potential matches are allowed (overlapping parallelograms)
-	fill(hitCount, length(readSet), 2*options.maxHits);	
-#endif
-
 	//////////////////////////////////////////////////////////////////////////////
 	// Step 2: Find matches using SWIFT
-	{
-		TReadIndex	swiftIndex(readSet, shape);
-		cargo(swiftIndex).abundanceCut = options.abundanceCut;
-		cargo(swiftIndex)._debugLevel = options._debugLevel;
-
-		if (options.forward)
-		{
-			if (options._debugLevel >= 1)
-				::std::cerr << ::std::endl << "___FORWARD_STRAND______";
-			findReads(matches, genomeSet, swiftIndex, 'F', hitCount, options);
-		}
-
-		if (options.reverse) 
-		{
-			if (options._debugLevel >= 1)
-				::std::cerr << ::std::endl << "___BACKWARD_STRAND_____";
-			reverseComplementInPlace(genomeSet);			// build reverse-compl of genome
-			findReads(matches, genomeSet, swiftIndex, 'R', hitCount, options);
-			reverseComplementInPlace(genomeSet);			// restore original genome seqs
-		}
-	}
+	if (!mapReads(matches, genomeSet, readSet, options))
+		return 2;
 
 	//////////////////////////////////////////////////////////////////////////////
 	// Step 3: Remove duplicates and output matches
 	if (!options.spec.DONT_DUMP_RESULTS)
-		dumpMatches(matches, genomeSet, genomeNames, readSet, readNames, genomeFileName, readFileName, hitCount, options);
+		dumpMatches(matches, genomeSet, genomeNames, readSet, readNames, genomeFileName, readFileName, options);
 
 	return 0;
 }	
 
-template <typename TSpec>
-int mapReads(const char *genomeFileName, const char *readFileName, RazerSOptions<TSpec> &options)
-{
-	Shape<TAlphabet, SimpleShape>		ungapped;
-	Shape<TAlphabet, OneGappedShape>	onegapped;
-	Shape<TAlphabet, GappedShape>		gapped;
-
-	if (stringToShape(ungapped, options.shape))
-		return mapReads(genomeFileName, readFileName, ungapped, options);
-	
-	if (stringToShape(onegapped, options.shape))
-		return mapReads(genomeFileName, readFileName, onegapped, options);
-
-	if (stringToShape(gapped, options.shape))
-		return mapReads(genomeFileName, readFileName, gapped, options);
-
-	return -1;
 }
 
-}
+#endif

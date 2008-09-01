@@ -78,8 +78,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename TFloat>
 	struct State
 	{
-		int transition[4];			// returns previous state
 		TFloat prob;				// probability of this state
+		int transition[4];			// returns previous state
 		unsigned char errors;		// errors in this state
 		unsigned char len;			// length of this pattern (shapeSpan-errors <= this value <= shapeSpan+errors)
 		bool skipFirst:1;			// skip this pattern if it is the first

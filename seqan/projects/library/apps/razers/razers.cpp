@@ -21,7 +21,6 @@
 
 #define SEQAN_PROFILE			// enable time measuring
 //#define SEQAN_DEBUG_SWIFT		// test SWIFT correctness and print bucket parameters
-//#define RAZERS_PROFILE		// omit dumping results
 //#define RAZERS_DEBUG			// print verification regions
 #define RAZERS_PRUNE_QGRAM_INDEX
 //#define RAZERS_HAMMINGVERIFY	// allow only mismatches, no indels
@@ -392,7 +391,7 @@ int main(int argc, const char *argv[])
 		printVersion();
 
 	int result = mapReads(fname[0], fname[1], options);
-	if (result == -1) 
+	if (result == 2) 
 	{
 		cerr <<	"Invalid Shape" << endl << endl;
 		printHelp(argc, argv, options);
