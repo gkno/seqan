@@ -68,7 +68,7 @@ SEQAN_CHECKPOINT
 	// Read number
 	String<char> str(c);
 	bool e = false;
-	TFloat val1;
+	TFloat val1 = 0;
 	while (!_streamEOF(file)) {
 		c = _streamGet(file);
 		if(!e && c == 'e'){

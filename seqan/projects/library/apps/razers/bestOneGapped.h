@@ -18,10 +18,10 @@ unsigned char shape_countBits[256];
 
 //////////////////////////////////////////////////////////////////////////////
 // Returns the estimated minimum coverage of a shape with weight q, span s at threshold t
-template<typename TValue>
-typename Value<TValue>::Type getMinCov(TValue q, TValue s, TValue t){
-
-	typename Value<TValue>::Type mincov;
+template<typename TValueQ, typename TValueS, typename TValueT>
+inline TValueS getMinCov(TValueQ q, TValueS s, TValueT t)
+{
+	TValueS mincov;
 	if(t > s - q + 1){
 		mincov = q + 2 * (t - 1) - (t - (s - q + 1));
 	}
