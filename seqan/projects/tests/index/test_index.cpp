@@ -8,8 +8,8 @@
 
 #include "test_index_creation.h"
 #include <seqan/align.h>
+#include <seqan/find.h>
 #include <seqan/index.h>
-#include <seqan/index/index_wotd.h>
 
 
 using namespace std;
