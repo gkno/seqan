@@ -1,4 +1,5 @@
 #define USE_LOGVALUES		// this is recommended when using probability values
+#define RUN_RAZERS
 
 #include <sys/types.h>
 #include <dirent.h>
@@ -14,6 +15,9 @@
 #include "recognitionRateDP.h"
 #include "bestOneGapped.h"
 
+#include "readSimulator.h"
+#include "razers.h"
+
 
 using namespace seqan;
 using namespace std;
@@ -27,9 +31,9 @@ static TFloat optionLossRate = 0.01;		// in
 static TFloat chosenLossRate = 0.0;			// out
 static TFloat optionErrorRate = 0.05;		// 
 static bool optionHammingOnly = false;
-static bool doUngapped = true;
+static bool doUngapped = false;
 static bool doAllOneGapped = false;
-static bool doSelectedGapped = false;
+static bool doSelectedGapped = true;
 static TFloat optionProbINSERT = 0.02;
 static TFloat optionProbDELETE = 0.02;
 
@@ -45,8 +49,6 @@ const char	*fprefix[1] = { "" };
 char		fparams[100];
 
 //////////////////////////////////////////////////////////////////////////////
-
-void seqan::initCountBits();
 
 template<typename TFile, typename TChar>
 inline void 
@@ -150,7 +152,7 @@ getDir(TPath dir, TFilenameString &files)
     while ((dirp = readdir(dp)) != NULL) {
 	TFilename name = (string(dirp->d_name)).c_str();
         appendValue(files,name);
-//	std::cout <<  files[length(files)-1] << " ?\n";
+//	cout <<  files[length(files)-1] << " ?\n";
     }
     closedir(dp);
     return 0;
@@ -175,19 +177,19 @@ parseParams(TFile & file)
         //reserve(loss, 20*readLen);
 
         char c = _streamGet(file);
-	if(_streamEOF(file)) std::cout << "Loss rate file is empty!\n";
+	if(_streamEOF(file)) cout << "Loss rate file is empty!\n";
 
         while(!_streamEOF(file))
         {
                 TFloat val = _parse_readEValue(file,c);
- //            std::cout << "\n"<<val;
+ //            cout << "\n"<<val;
 //              appendValue(loss,val);  //t=0
                 countT = 1;
                 while(!_streamEOF(file) && !(c == '\n' || (c == '\r' && _streamPeek(file) != '\n')))
                 {
                         _parse_skipWhitespace(file,c);
                         val = _parse_readEValue(file,c);
-  //                  std::cout << " " << val;
+  //                  cout << " " << val;
 //                      appendValue(loss,val);
                         if(countT > 1 && val <= optionLossRate /*&& val > bestSoFar*/)
                         {
@@ -206,15 +208,15 @@ parseParams(TFile & file)
 			break;
                 _parse_skipWhitespace(file,c);
         }
-	if(bestT<2) std::cout << "\n!!! Something wrong with file? !!!\n";
+	if(bestT<2) cout << "\n!!! Something wrong with file? !!!\n";
 	chosenLossRate = bestSoFar;
 //      countT = length(loss)/countQ;
-//      std::cout << "insge: Q="<<countQ << " T="<<countT<<"\n";
+//      cout << "insge: Q="<<countQ << " T="<<countT<<"\n";
         qgramLen = bestQ;
         threshold = bestT;
 	if(bestQ==14)
-		std::cout << "\nIf RAM <= 1GB : Choose q = "<<bestQ-1 << " and t = "<<secondBestT<<"\nelse          : ";
-	else std::cout <<"\n";
+		cout << "\nIf RAM <= 1GB : Choose q = "<<bestQ-1 << " and t = "<<secondBestT<<"\nelse          : ";
+	else cout <<"\n";
         return true;
 }
 
@@ -254,14 +256,14 @@ qualityDistributionFromPrbFile(TFile & file, TDistribution & avg)
 		++pos;
 		if(pos==totalN) pos = 0;
 		_parse_skipWhitespace(file,c);
-		//std::cout << ind;
+		//cout << ind;
 		if(pos==0) {
-		//	std::cout << endl;
+		//	cout << endl;
 			++read_count;
 		}
 	}
-//	std::cout <<"\nNumber of reads: "<< read_count << "\n";
-	std::cout << " Readcount = "<< read_count << "\n";
+//	cout <<"\nNumber of reads: "<< read_count << "\n";
+	cout << " Readcount = "<< read_count << "\n";
 
 
 
@@ -284,10 +286,10 @@ qualityDistributionFromPrbFile(TFile & file, TDistribution & avg)
 /*	for(unsigned t = 0; t < totalN; ++t)
 	{
 		cout.precision(10);
-		//std::cout << avg[t]/avgsum << "\t";
-		std::cout << avg[t] << "\t";
+		//cout << avg[t]/avgsum << "\t";
+		cout << avg[t] << "\t";
 	}
-	std::cout << "\n";
+	cout << "\n";
 */
 }
 
@@ -307,10 +309,10 @@ getAvgFromPrbDirectory(TPath prbPath, TError & errorDistribution)
 	{
 		if(suffix(files[i],length(files[i])-8) == "_prb.txt")
 		{
-			std::cout << "Processing "<< files[i] << "...\n";
+			cout << "Processing "<< files[i] << "...\n";
 			TError avg_act;
 			resize(avg_act,totalN);
-			std::fstream filestrm;
+			fstream filestrm;
 			stringstream sstrm;
 			sstrm << prbPath << files[i];
 			filestrm.open(sstrm.str().c_str(),ios_base::in);
@@ -318,7 +320,7 @@ getAvgFromPrbDirectory(TPath prbPath, TError & errorDistribution)
 			filestrm.close();
 			for(unsigned j=0; j < totalN; ++j)
 			{
-//				std::cout << " " << avg_act[j];
+//				cout << " " << avg_act[j];
 				errorDistribution[j] += avg_act[j];
 			}
 			++countPrbs;
@@ -326,12 +328,12 @@ getAvgFromPrbDirectory(TPath prbPath, TError & errorDistribution)
 	}
 	for(unsigned j=0; j < totalN; ++j)
 		errorDistribution[j] /= (TFloat)countPrbs;
-	std::cout << "Writing average error probabilities to " << fprefix[0] << "_errorProb.dat\n";
+	cout << "Writing average error probabilities to " << fprefix[0] << "_errorProb.dat\n";
 	fstream out;
 	stringstream avgOut;
 	avgOut << fprefix[0] << "_errorProb.dat";
 	out.open(avgOut.str().c_str(),ios_base::out);
-	if(!out.is_open()) std::cout << "Couldn't write to file "<<avgOut.str()<<"\n";
+	if(!out.is_open()) cout << "Couldn't write to file "<<avgOut.str()<<"\n";
 	else
 		for(unsigned j=0; j < totalN; ++j)
 			out << errorDistribution[j] << "\n";
@@ -378,12 +380,12 @@ makeUngappedStatsFile(TError & errorDistr)
 		//for loss rate sanity check
 //                for(unsigned e=0; e < maxErrors; ++e)
 //                {
-//                        std::stringstream filename;
+//                        stringstream filename;
 //                        filename << fparams <<fprefix[0]<<"_QE0_N" << totalN<< "_E" << e<<".dat";
 //                        ofstream outfile;
 //                        if(qLen==8){
 //                                outfile.open(filename.str().c_str(),ios_base::out);
-//                                std::cout << "Creating file "<<filename.str() << "\n";
+//                                cout << "Creating file "<<filename.str() << "\n";
 //                        }
 //                        else outfile.open(filename.str().c_str(),ios_base::app);
 //                        for(unsigned t = 20; t > 0; --t)
@@ -406,12 +408,12 @@ makeUngappedStatsFile(TError & errorDistr)
 		//regular output
 		for(unsigned e=0; e < maxErrors; ++e)
 		{
-			std::stringstream filename;
+			stringstream filename;
 			filename << fparams <<fprefix[0]<<"_QE0_N" << totalN<< "_E" << e<<".dat";
 			ofstream outfile;
 			if(qLen==1){
 				outfile.open(filename.str().c_str(),ios_base::out);
-				std::cout << "Creating file "<<filename.str() << "\n";
+				cout << "Creating file "<<filename.str() << "\n";
 			}
 			else outfile.open(filename.str().c_str(),ios_base::app);
 			for(unsigned t = 0; t < maxT; ++t) 
@@ -518,6 +520,18 @@ makeSelectedStatsFile(TError & errorDistr)
 		logErrorDistribution[SEQAN_MATCH*totalN+j]    = _transform(remainingProb - errorDistr[j]);
 	}
 
+#ifdef RUN_RAZERS
+	// generate genome and reads
+	StringSet<DnaString> testGenome;
+	StringSet<DnaString> testReads;
+	StringSet<CharString> dummyIDs;
+	resize(testGenome, 1);
+	simulateGenome(testGenome[0], 1000000);					// generate 1Mbp genomic sequence
+	simulateReads(
+		testReads, dummyIDs, testGenome, 
+		10000000, maxErrors, logErrorDistribution, 0.5);	// generate 10M reads
+#endif
+
 	//loss rate buckets
 	map<TErrorValue, unsigned> lossRateBuckets;
 	String<TErrorValue> lossRatesProbe;
@@ -542,20 +556,19 @@ makeSelectedStatsFile(TError & errorDistr)
 	
 	for(unsigned i = 0; i < length(shapeStrings); ++i)
 	{
-		
 		String<TFloat> found;
 		resize(found,maxT*maxErrors);
 		
 		String< State<TFloat> > states;
-		std::cout << "do DP\n";
+		cout << "do DP\n";
 		initPatterns(states, shapeStrings[i], maxErrors-1, logErrorDistribution, optionHammingOnly);
 		computeFilteringLoss(found, states, length(shapeStrings[i]), maxT, maxErrors,  logErrorDistribution);
-		std::cout << "Printing\n";
+		cout << "Printing\n";
 		for(unsigned e = 0; e < maxErrors; ++e) {
 			bool highestOptimalFound = false;
 			for(unsigned t = maxT-1; t > 0; --t) {
 				TFloat lossrate = 1.0 - (TFloat) _transformBack(found[e*maxT+t]);
-				typename std::map<TFloat, unsigned>::iterator it, itlow, itup, itend, itbegin;
+				typename map<TFloat, unsigned>::iterator it, itlow, itup, itend, itbegin;
 				if(lossrate <= 0.0){
 					if(highestOptimalFound) continue;
 					else highestOptimalFound = true;
@@ -601,15 +614,35 @@ makeSelectedStatsFile(TError & errorDistr)
 				if(firstTimeK[maxErrors*index + e]==true){
 					firstTimeK[maxErrors*index + e] = false;
 					ofstream fout(datName.str().c_str(), ios::out);
-					fout << "shape\t\tt\t\tloss rate\t\tminCoverage\n\n";
+					fout << "shape\t\tt\t\tloss rate\t\tminCoverage";
+#ifdef RUN_RAZERS
+					fout << "\tFP\t\truntime";
+#endif
+					fout << endl << endl;
 					fout.close();
 				}
+				
+#ifdef RUN_RAZERS
+				// count verifications
+				String<ReadMatch<unsigned> > matches;
+				RazerSOptions<RazerSSpec<true, true> > razersOptions;
+				razersOptions.errorRate = (double)e / (double)totalN;
+				razersOptions.threshold = t;
+				assign(razersOptions.shape, shapeStrings[i]);
+				mapReads(matches, testGenome, testReads, razersOptions);
+#endif
+
 				// write best shape with its properties on the file
 				ofstream fout(datName.str().c_str(), ios::app | ios::out);
 				fout << shapeStrings[i] << "\t\t";
 				fout << t << "\t\t";
 				fout << lossrate << "\t\t";
-				fout << gminCov << endl; 
+				fout << gminCov;
+#ifdef RUN_RAZERS				
+				fout << "\t\t" << razersOptions.FP;
+				fout << "\t\t" << razersOptions.timeMapReads;
+#endif
+				fout << endl;
 				fout.close();
 				
 			} // t-loop
@@ -801,7 +834,7 @@ int main(int argc, const char *argv[])
 				if (arg + 1 < argc) {
 					++arg;
 					fnameCount0 = true;
-					std::fstream file;
+					fstream file;
 					fname[0] = argv[arg];
 				}
 				else 
@@ -814,9 +847,9 @@ int main(int argc, const char *argv[])
 				if (arg + 1 < argc) {
 					++arg;
 					prefixCount = true;
-					std::fstream file;
+					fstream file;
 					fprefix[0] = argv[arg];
-//					std::cout << "Session id prefix specified\n";
+//					cout << "Session id prefix specified\n";
 				}
 				else 
 				{
@@ -828,7 +861,7 @@ int main(int argc, const char *argv[])
 				if (arg + 1 < argc) {
 					++arg;
 					fnameCount1 = true;
-					std::fstream file;
+					fstream file;
 					fname[1] = argv[arg];
 				}
 				else 
@@ -864,18 +897,18 @@ int main(int argc, const char *argv[])
 		if(!prefixCount)
 		{
 			fprefix[0] = "userdef";
-			std::cout << "\nNo session id given, using prefix 'userdef'\n";
+			cout << "\nNo session id given, using prefix 'userdef'\n";
 		}
 		String<TFloat> errorDistribution;
 		resize(errorDistribution,totalN);
 		//error distribution given --> read file containing error distr and compute loss rates
 		if(fnameCount1)
 		{
-			std::fstream file;
-			file.open(fname[1],std::ios_base::in | std::ios_base::binary);
+			fstream file;
+			file.open(fname[1],ios_base::in | ios_base::binary);
 			if(!file.is_open())
 			{
-				std::cout << "Couldn't open file "<<fname[1]<<"\n";
+				cout << "Couldn't open file "<<fname[1]<<"\n";
 				return 0;
 			}
 			unsigned count = 0;
@@ -898,7 +931,7 @@ int main(int argc, const char *argv[])
 			getAvgFromPrbDirectory(fname[0],errorDistribution);
 		}
 
-		std::fstream file;
+		fstream file;
 		//if(prefixCount)
 		if(doAllOneGapped) makeOneGappedStatsFile(errorDistribution);
 		if(doSelectedGapped) makeSelectedStatsFile(errorDistribution);
@@ -908,7 +941,7 @@ int main(int argc, const char *argv[])
 	totalK = (int)(optionErrorRate * totalN);
 	
 	// decide on which loss rate file to parse
-	std::stringstream paramsfile;
+	stringstream paramsfile;
 	if (fnameCount0 > 0 || fnameCount1 > 0)
 	{
 		if(prefixCount) paramsfile << fparams<< fprefix[0]<<"_QE0_N" << totalN << "_E" << totalK << ".dat";
@@ -919,23 +952,23 @@ int main(int argc, const char *argv[])
 		else paramsfile << fparams<<"results_QE0_N" << totalN << "_E" << totalK << ".dat";
 	}
 
-	std::cout << "\nRead length      = " << totalN << "bp\n";
-	std::cout << "Max num errors   = " << totalK << "\n";
-	std::cout << "Recognition rate = " <<  100.0*(1.0-optionLossRate) << "%\n";
+	cout << "\nRead length      = " << totalN << "bp\n";
+	cout << "Max num errors   = " << totalK << "\n";
+	cout << "Recognition rate = " <<  100.0*(1.0-optionLossRate) << "%\n";
 			
 	// parse loss rate file and find appropriate filter criterium
-	std::cout << "\n--> Reading " <<  paramsfile.str()<<"\n";
+	cout << "\n--> Reading " <<  paramsfile.str()<<"\n";
 	fstream file;
 	file.open(paramsfile.str().c_str(),ios_base::in | ios_base::binary);
 	if(!file.is_open())
 	{
-		std::cout << "Couldn't open file "<<paramsfile.str()<<"\n";
+		cout << "Couldn't open file "<<paramsfile.str()<<"\n";
 		return 0;
 	}
 	else parseParams(file);
 		
 	// suggest a suitable combination of q and t
-	std::cout << "Choose q = " << qgramLen << " and t = " << threshold << " to achieve optimal performance for expected recognition rate >= " << (100.0-100.0*optionLossRate) << "% (expected recognition = " << (100.0-chosenLossRate*100.0) <<"%)\n\n";
+	cout << "Choose q = " << qgramLen << " and t = " << threshold << " to achieve optimal performance for expected recognition rate >= " << (100.0-100.0*optionLossRate) << "% (expected recognition = " << (100.0-chosenLossRate*100.0) <<"%)\n\n";
 
 	return 0;
 }

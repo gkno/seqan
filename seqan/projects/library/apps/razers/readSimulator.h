@@ -1,5 +1,5 @@
-#ifndef SEQAN_HEADER_RAZERS_H
-#define SEQAN_HEADER_RAZERS_H
+#ifndef SEQAN_HEADER_READ_SIMULATOR_H
+#define SEQAN_HEADER_READ_SIMULATOR_H
 
 #include <iostream>
 #include <fstream>
@@ -10,16 +10,10 @@
 #include <seqan/find.h>
 #include <seqan/modifier.h>
 
+#include "recognitionRateDP.h"
+
 namespace SEQAN_NAMESPACE_MAIN
 {
-
-enum ErrorType {
-	SEQAN_MATCH    = 0,
-	SEQAN_MISMATCH = 1,
-	SEQAN_INSERT   = 2,
-	SEQAN_DELETE   = 3
-};
-
 
 template <typename TOperation, typename TAlphabet>
 inline TAlphabet
@@ -27,9 +21,17 @@ sample(TOperation m, TAlphabet base)
 {
 	Dna ret;
 	do
-		ret = (TAlphabet)(rand() % ValueSize<TAlphabet>::VALUE);
+		ret = (TAlphabet)(int)((double)ValueSize<TAlphabet>::VALUE * (double)rand() / (RAND_MAX+1.0));
 	while (ret == base && m == SEQAN_MISMATCH);
 	return ret;
+}
+
+template < typename TGenome >
+void simulateGenome(TGenome &genome, int size)
+{
+	resize(genome, size);
+	for(int i = 0; i < size; ++i)
+		genome[i] = sample(0, (Dna)0);
 }
 
 //////////
@@ -47,7 +49,8 @@ void simulateReads(
 	int numReads,			// how many reads should be generated
 	int maxErrors,			// how many errors they may have
 	TDistr &errorDist,		// error probability distribution
-	double forwardProb)
+	double forwardProb,
+	bool verbose = false)
 {
 	typedef typename Value<TReadSet>::Type				TRead;
 	typedef typename Value<TGenomeSet>::Type			TGenome;
@@ -82,7 +85,8 @@ void simulateReads(
 //		numOfReads  = numOfReads / 2
 //	}
 
-	std::cout << "\nSimulating...";
+	if (verbose)
+		std::cout << "\nSimulating...";
 
 	String<int> modificationPattern;
 	reserve(modificationPattern, readLength + maxErrors);
@@ -95,7 +99,7 @@ void simulateReads(
 	String<int> sortedStartPos;
 	resize(sortedStartPos,numReads);
 	while (readCounter < numReads) {
-		sortedStartPos[readCounter] = rand() % (seqLength - readLength - maxErrors + 1);
+		sortedStartPos[readCounter] = (int)((seqLength - readLength - maxErrors + 1.0) * rand() / (RAND_MAX+1.0));
 		++readCounter;
 	}
 	std::sort(begin(sortedStartPos),end(sortedStartPos));
@@ -114,13 +118,12 @@ void simulateReads(
 		int startPos = 0;
 		
 		while(invalidMatePair) {
-// 			startPos = rand() % (seqLength - readLength - maxErrors + 1);
 			startPos = sortedStartPos[readCounter];
 			
 
 			// Reverse complement this read
 			revComp = false;
-			if ((double)(rand() % 10000)/10000 > forwardProb) {
+			if ((double)rand()/(RAND_MAX+1.0) > forwardProb) {
 				revComp = true;
 			}
 				
@@ -173,17 +176,20 @@ void simulateReads(
 
 		while(pos < maxEnd) {
 			lastOp = currOp;
-			double prob = rand()% 10000;
-			prob /= 10000;
-		//	std::cout << "prob = " << prob << "\t";
-			for(int m = 0; m < 4; ++m)
+			double prob = (double)rand()/(RAND_MAX+1.0);
+			//	std::cout << "prob = " << prob << "\t";
+			int m;
+			for(m = 0; m < 4; ++m)
 			{
-				if(prob < errorDist[m*readLength + trueLength])
+				double modProb = _transformBack(errorDist[m*readLength + trueLength]);
+				if (prob < modProb)
 				{
 					currOp = m;
 					break;
 				}
+				prob -= modProb;
 			}
+			if (m == 4) std::cout << "HUH?";
 		//	std::cout << "operation = " << operation << "\t";
 			if(pos==0 && (currOp==SEQAN_DELETE || currOp == SEQAN_INSERT))
 			{
@@ -197,9 +203,7 @@ void simulateReads(
 			{
 				++countErrors;
 				if(currOp != SEQAN_DELETE)
-				{
 					read[trueLength] = sample(currOp,readTemplate[pos]);
-				}
 			}
 			if(currOp != SEQAN_DELETE) ++trueLength; //if read nucleotide is not deleted
 			if(currOp != SEQAN_INSERT) ++pos; //if read nucleotide is not an insert
@@ -279,7 +283,7 @@ void simulateReads(
 /*		countMateErrors = 0
 		if (simulateMatePairs == 1) {
 			for(pos in 1:length(readMate)) {
-				if (runif(1) <= errorDist[pos]) {
+				if (runif(1) <= _transformBack(errorDist[pos])) {
 					readMate[pos] = sample(alphabet[alphabet!= readMate[pos]], 1)
 					countMateErrors = countMateErrors + 1
 				}
@@ -347,7 +351,7 @@ void simulateReads(
 				resize(read,trueLength);
 				++bucketCounter[countErrors];
 				++readCounter;
-				if(readCounter%100 == 0)std::cout << readCounter<<"..." << std::flush;
+				if(verbose && readCounter%100 == 0)std::cout << readCounter<<"..." << std::flush;
 				//Add read to readSet
 				if(!revComp) id << '>' << startPos << ',' << startPos+pos;
 				else id << '>' << maxEnd << ',' << maxEnd-pos;
@@ -364,23 +368,22 @@ void simulateReads(
 //	if (simulateMatePairs == 1) {
 //		print(bucketCounter / (2* numOfReads))
 //	} else {
-	std::cout << "\n\nBucket frequencies:\n";
-	for(unsigned i = 0; i < length(bucketCounter); ++i)
-		std::cout << (double) bucketCounter[i] / numReads << std::endl;
-//	}
-	std::cout << std::endl;
-
-
-	std::cout << "\nBucket kickout count:\n";
-	for(unsigned i = 0; i < length(kickOutCount); ++i)
+	if (verbose)
 	{
-		if((kickOutCount[i] + bucketCounter[i]) > 0) std::cout << (double) kickOutCount[i] / (kickOutCount[i] + bucketCounter[i]) << std::endl;
-		else std::cout << "0\n";
+		std::cout << "\n\nBucket frequencies:\n";
+		for(unsigned i = 0; i < length(bucketCounter); ++i)
+			std::cout << (double) bucketCounter[i] / numReads << std::endl;
+		std::cout << std::endl;
+		std::cout << "\nBucket kickout count:\n";
+		for(unsigned i = 0; i < length(kickOutCount); ++i)
+		{
+			if((kickOutCount[i] + bucketCounter[i]) > 0) std::cout << (double) kickOutCount[i] / (kickOutCount[i] + bucketCounter[i]) << std::endl;
+			else std::cout << "0\n";
+		}
+		std::cout << std::endl;
+		
+		std::cout << "\nInvalid modification pattern count: "<<inValidModPat<<std::endl;
 	}
-	std::cout << std::endl;
-	
-	std::cout << "\nInvalid modification pattern count: "<<inValidModPat<<std::endl;
-					
 
 //	if (simulateMatePairs == 1) {
 //		write(scan(tmpPath, what = 'character'), file=readPath, sep=std::endl, append = TRUE)

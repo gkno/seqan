@@ -116,7 +116,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename _TGPos>
 	struct ReadMatch 
 	{
-		typedef _TGPos	TGPos;
+		typedef typename _MakeSigned<_TGPos>::Type TGPos;
 
 		unsigned		gseqNo;			// genome seqNo
 		unsigned		rseqNo;			// read seqNo
@@ -276,7 +276,11 @@ void findReads(
 	TGenomeSet &genomes,		// Genome
 	TReadIndex &readIndex,
 	char orientation,			// q-gram index of reads
+#ifdef RAZERS_MAXHITS
 	THitCount &hitCount,		// maximum number of hits for each read
+#else
+	THitCount &,
+#endif
 	RazerSOptions<TSpec> &options)
 {
 	typedef typename Fibre<TReadIndex, Fibre_Text>::Type	TReadSet;
@@ -347,7 +351,7 @@ void findReads(
 		while (find(swiftFinder, swiftPattern, options.errorRate, options._debugLevel)) 
 		{
 			unsigned ndlSeqNo = (*swiftFinder.curHit).ndlSeqNo;
-#ifdef RAZERS_MAXHITS				
+#ifdef RAZERS_MAXHITS
 			if (hitCount[ndlSeqNo] == -1) continue;
 #endif			
 			unsigned ndlLength = sequenceLength(ndlSeqNo, readIndex);
