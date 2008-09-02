@@ -237,7 +237,7 @@ void testQGramFind()
 
 //////////////////////////////////////////////////////////////////////////////
 
-void Main_TestQGram()
+void testQGramIndex()
 {
 	SEQAN_TREPORT("TEST QGRAM BEGIN")
 

@@ -475,8 +475,9 @@ void dumpStatus(bool status) {
 	}
 
 
+void testShapes();
+void testQGramIndex();
 bool testIndexCreation();
-void Main_TestQGram();
 
 int main()
 {
@@ -513,7 +514,12 @@ int main()
 
 	cout << "===================================" << endl;
 	cout << "----QGram Index--------------------" << endl;
-	Main_TestQGram();
+	testQGramIndex();
+	cout << "===================================" << endl;
+	cout << "----Shapes-------------------------" << endl;
+	testShapes();
+	cout << "===================================" << endl;
+	cout << endl;
 
 	cout << "===================================" << endl;
 	cout << "----SA, LCP, and ChildTab test-----" << endl;
