@@ -441,7 +441,7 @@ void testFind()
 		Finder<Index< String<char> >, TAlgorithmSpec> finder(index);
 
 		String<char> needle1("ist");
-		Pattern<String<char>,void > pattern(needle1);
+		Pattern<String<char> > pattern(needle1);
 
 		while (find(finder, pattern))
 			append(pos,position(finder));
