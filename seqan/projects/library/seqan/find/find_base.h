@@ -202,11 +202,11 @@ public:
 	Finder const &
 	operator = (Finder const & other)
 	{
-		data_iterator = other->data_iterator;
-		data_endPos = other->data_endPos;
-		data_length = other->data_length;
-		_needReinit = other->_needReinit;
-		_beginFind_called = other->_beginFind_called;
+		data_iterator = other.data_iterator;
+		data_endPos = other.data_endPos;
+		data_length = other.data_length;
+		_needReinit = other._needReinit;
+		_beginFind_called = other._beginFind_called;
 	}
 
 //____________________________________________________________________________
