@@ -57,7 +57,7 @@ void printHelp(int, const char *[], RazerSOptions<TSpec> &options, bool longHelp
 		cerr << "  -r,  --reverse               \t" << "only compute reverse complement matches" << endl;
 		cerr << "  -i,  --percent-identity NUM  \t" << "set the percent identity threshold" << endl;
 		cerr << "                               \t" << "default value is 80" << endl;
-		cerr << "  -m,  --max-hits              \t" << "ignore reads with more than a maximum number of hits" << endl;
+		cerr << "  -m,  --max-hits NUM          \t" << "ignore reads with more than a maximum number of hits" << endl;
 		cerr << "                               \t" << "default value is " << options.maxHits << endl;
 		cerr << "  -o,  --output FILE           \t" << "change output filename (default <READS FILE>.result)" << endl;
 		cerr << "  -v,  --verbose               \t" << "verbose mode" << endl;
@@ -82,7 +82,7 @@ void printHelp(int, const char *[], RazerSOptions<TSpec> &options, bool longHelp
 		cerr << "  -pf, --position-format       \t" << "0 = gap space (default)" << endl;
 		cerr << "                               \t" << "1 = position space" << endl;
 		cerr << endl << "Filtration Options:" << endl;
-		cerr << "  -s,  --shape                 \t" << "set k-mer shape (binary string, default " << options.shape << ')' << endl;
+		cerr << "  -s,  --shape BITSTRING       \t" << "set k-mer shape (binary string, default " << options.shape << ')' << endl;
 		cerr << "  -t,  --threshold NUM         \t" << "set minimum k-mer threshold (default " << options.threshold << ')' << endl;
 		cerr << "  -oc, --overabundance-cut NUM \t" << "set k-mer overabundance cut ratio (default " << options.abundanceCut << ')' << endl;
 		cerr << "  -rl, --repeat-length NUM     \t" << "set simple-repeat length threshold (default " << options.repeatLength << ')' << endl;
