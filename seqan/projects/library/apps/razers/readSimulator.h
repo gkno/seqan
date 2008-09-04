@@ -357,8 +357,8 @@ void simulateReads(
 				++readCounter;
 				if(verbose && readCounter%100 == 0)std::cout << readCounter<<"..." << std::flush;
 				//Add read to readSet
-				if(!revComp) id << '>' << startPos << ',' << startPos+pos;
-				else id << '>' << maxEnd << ',' << maxEnd-pos;
+				if(!revComp) id << startPos << ',' << startPos+pos;
+				else id << maxEnd << ',' << maxEnd-pos;
 				id << "[id=" << readCounter << ",fragId=" << readCounter;
 				id << ",repeatId=" << 0 <<",errors=" << countErrors << ']';
 
