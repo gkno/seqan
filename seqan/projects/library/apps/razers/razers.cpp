@@ -23,7 +23,7 @@
 //#define SEQAN_DEBUG_SWIFT		// test SWIFT correctness and print bucket parameters
 //#define RAZERS_DEBUG			// print verification regions
 #define RAZERS_PRUNE_QGRAM_INDEX
-//#define RAZERS_HAMMINGVERIFY	// allow only mismatches, no indels
+#define RAZERS_HAMMINGVERIFY	// allow only mismatches, no indels
 #define RAZERS_MAXHITS			// drop reads with too many matches
 
 #include "seqan/platform.h"
@@ -105,6 +105,9 @@ int main(int argc, const char *argv[])
 	RazerSOptions<>		options;
 	unsigned			fnameCount = 0;
 	const char			*fname[2] = { "", "" };
+
+	options.forward = false;
+	options.reverse = false;
 
 	for(int arg = 1; arg < argc; ++arg) {
 		if (argv[arg][0] == '-') {
