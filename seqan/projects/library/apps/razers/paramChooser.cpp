@@ -1,5 +1,6 @@
 #define USE_LOGVALUES		// this is recommended when using probability values
 #define RUN_RAZERS
+#define SEQAN_PROFILE
 
 #include <sys/types.h>
 #include <dirent.h>
@@ -34,8 +35,8 @@ static bool optionHammingOnly = false;
 static bool doUngapped = false;
 static bool doAllOneGapped = false;
 static bool doSelectedGapped = true;
-static TFloat optionProbINSERT = 0.02;
-static TFloat optionProbDELETE = 0.02;
+static TFloat optionProbINSERT = 0.0;
+static TFloat optionProbDELETE = 0.0;
 
 // output parameters
 unsigned qgramLen = 4;			//
@@ -47,6 +48,7 @@ bool		prefixCount = 0;
 const char	*fname[2] = { "","" };
 const char	*fprefix[1] = { "" };
 char		fparams[100];
+char		fgparams[100];
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -60,6 +62,8 @@ _parse_skipWhitespace(TFile& file, TChar& c)
 		if ((c!=' ') && (c != '\t') && (c != '\n') && (c != '\r')) break;
 	}
 }
+
+
 
 //////////////////////////////////////////////////////////////////////////////
 template<typename TFile, typename TChar>
@@ -120,6 +124,22 @@ _parse_isDigit(TChar const c)
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TFile, typename TChar>
+inline int
+_parse_readNumber(TFile & file, TChar& c)
+{
+	// Read number
+	String<char> str(c);
+	while (!_streamEOF(file)) {
+		c = _streamGet(file);
+		if (!_parse_isDigit(c)) break;
+		append(str, c);
+	}
+ 	return atoi(toCString(str));
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TFile, typename TChar>
 inline void 
 _parse_skipLine(TFile& file, TChar& c)
 {
@@ -132,6 +152,21 @@ _parse_skipLine(TFile& file, TChar& c)
 		if (c == '\n' || (c == '\r' && _streamPeek(file) != '\n')) break;
 	}
 	c = _streamGet(file);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TFile, typename TChar>
+inline void
+_parse_readShape(TFile & file, TChar& c, CharString & str)
+{
+	// Read word
+	append(str, c);
+	while (!_streamEOF(file)) {
+		c = _streamGet(file);
+		if (!(c == '1' || c == '0')) break;
+		append(str, c);
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -158,6 +193,96 @@ getDir(TPath dir, TFilenameString &files)
     return 0;
 }
 
+
+//////////////////////////////////////////////////////////////////////////////
+// Get parameters q and t optimal for given loss rate
+template<typename TFile>
+bool
+parseGappedParams(TFile & file)
+{
+
+
+	String<CharString> shapes;
+	resize(shapes,14); //best shape for each possible value of q
+	String<unsigned> thresholds;
+	resize(thresholds,14); //corresponding t
+	String<unsigned> pms;
+	resize(pms,14); //potential matches
+	String<float> runtimes;
+	resize(runtimes,14); //required runtime
+	String<float> mincovs;
+	resize(mincovs,14); //required runtime
+	String<TFloat> lossrates;
+	resize(lossrates,14); //required runtime
+	
+	char c = _streamGet(file);
+	if(_streamEOF(file)) cout << "Loss rate file is empty!\n";
+	else
+	{
+		_parse_skipLine(file,c);
+		_parse_skipLine(file,c);
+	}
+
+	bool atLeastOneFound = false;
+        while(!_streamEOF(file))
+        {
+		CharString currShape;
+		_parse_readShape(file, c, currShape);
+                _parse_skipWhitespace(file,c);
+                unsigned currThreshold = _parse_readNumber(file,c);
+        	_parse_skipWhitespace(file,c);
+                TFloat currLossrate = _parse_readEValue(file,c);
+		_parse_skipWhitespace(file,c);
+                unsigned currMinCov = _parse_readNumber(file,c);
+		_parse_skipWhitespace(file,c);
+                unsigned currPotM = _parse_readNumber(file,c);
+		_parse_skipWhitespace(file,c);
+		TFloat currRuntime = _parse_readEValue(file,c);
+		if(currThreshold > 1 && currLossrate <= optionLossRate /*&& val > bestSoFar*/)
+		{
+		
+			unsigned weight = 0;
+			for(unsigned pos = 0; pos < length(currShape) ; ++pos)
+				if(currShape[pos] == '1')
+					++weight;
+			if(length(shapes[weight-1]) > 0)  // if this is not the first shape with weight weight
+			{				  // compare currShape to the best one found so far
+				if(currPotM < pms[weight-1])
+				{
+					shapes[weight-1] = currShape;
+					pms[weight-1] = currPotM;
+					thresholds[weight-1] = currThreshold;
+					lossrates[weight-1] = currLossrate;
+					runtimes[weight-1] = currRuntime;
+					mincovs[weight-1] = currMinCov;
+					atLeastOneFound = true;
+				}
+				
+			}
+			else
+			{
+				shapes[weight-1] = currShape;
+				pms[weight-1] = currPotM;
+				thresholds[weight-1] = currThreshold;
+				lossrates[weight-1] = currLossrate;
+				runtimes[weight-1] = currRuntime;
+				mincovs[weight-1] = currMinCov;
+				atLeastOneFound = true;
+			
+			}
+                }
+                _parse_skipWhitespace(file,c);
+        }
+	if(!atLeastOneFound) cout << "\n!!! Something wrong with file? !!!\n";
+	int i;
+	for(i = 13; i >= 0; --i )
+		if(length(shapes[i]) > 0)  // if a shape of weight i+1 has been found
+			break;
+	chosenLossRate = lossrates[i];
+	cout << "Choose s = " << shapes[i] << " and t = " << thresholds[i]<< " to achieve optimal performance for expected recognition rate >= " << (100.0-100.0*optionLossRate) << "% (expected recognition = " << (100.0-chosenLossRate*100.0) <<"%)\n\n";
+
+        return true;
+}
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -217,9 +342,9 @@ parseParams(TFile & file)
 	if(bestQ==14)
 		cout << "\nIf RAM <= 1GB : Choose q = "<<bestQ-1 << " and t = "<<secondBestT<<"\nelse          : ";
 	else cout <<"\n";
+	cout << "Choose q = " << qgramLen << " and t = " << threshold << " to achieve optimal performance for expected recognition rate >= " << (100.0-100.0*optionLossRate) << "% (expected recognition = " << (100.0-chosenLossRate*100.0) <<"%)\n\n";
         return true;
 }
-
 //compute average position dependent error distribution (assumes solexa qualtiy values in prb.txt format)
 template<typename TFile, typename TDistribution>
 void
@@ -444,24 +569,26 @@ makeUngappedStatsFile(TError & errorDistr)
 
 template<typename TError>
 void
-makeSelectedStatsFile(TError & errorDistr)
+makeSelectedStatsFile(TError & errorDistr, map<TFloat, unsigned> & lossRateBuckets)
 {
 
 //	unsigned maxE = (unsigned) totalN / 5;
-	unsigned maxErrors = 5;
+	unsigned maxErrors = 2;
 	unsigned minQ = 7;
-	unsigned maxT = totalN-minQ+1;
+	unsigned maxT = 10;//totalN-minQ+1;
+	unsigned minT = 1;//totalN-minQ+1;
 
 	typedef typename Value<TError>::Type TErrorValue;
 	String<TErrorValue> logErrorDistribution;
 	
 	String<CharString> shapeStrings;
+
 	//q=7
-	appendValue(shapeStrings,"1111111");
-	appendValue(shapeStrings,"1111100011");
-	appendValue(shapeStrings,"111110000011");
+//	appendValue(shapeStrings,"1111111");
+//	appendValue(shapeStrings,"1111100011");
+//	appendValue(shapeStrings,"111110000011");
 	//q=8
-	appendValue(shapeStrings,"11111111");
+/*	appendValue(shapeStrings,"11111111");
 	appendValue(shapeStrings,"11111000111");
 	appendValue(shapeStrings,"1111110000011");
 	appendValue(shapeStrings,"11111100000011");
@@ -487,19 +614,29 @@ makeSelectedStatsFile(TError & errorDistr)
 	appendValue(shapeStrings,"111111111111");
 	appendValue(shapeStrings,"1111111111000011");
 	appendValue(shapeStrings,"11111111110000011");
-	appendValue(shapeStrings,"11111111000001111");
+	appendValue(shapeStrings,"11111111000001111");*/
+/* 	appendValue(shapeStrings,"11111111111");
+ 	appendValue(shapeStrings,"1111111111");
+ 	appendValue(shapeStrings,"111111111111");*/
 	//q=13
-	appendValue(shapeStrings,"1111111111111");
-	appendValue(shapeStrings,"111111111100000111");
-	appendValue(shapeStrings,"1111111111000000111");
-	appendValue(shapeStrings,"111111111000001111");
-	appendValue(shapeStrings,"1111111111100000011");
+ 	appendValue(shapeStrings,"111111111100000111");
+// 	appendValue(shapeStrings,"1111111111000000111");
+// 	appendValue(shapeStrings,"111111111000001111");
+// 	appendValue(shapeStrings,"1111111111100000011");
+	appendValue(shapeStrings,"110101111001100010111");
+
+/*	appendValue(shapeStrings,"111011100100000111");
+	appendValue(shapeStrings,"111111110000000011");
+	appendValue(shapeStrings,"1111111000111");
+	appendValue(shapeStrings,"1011110111000001001");
+	appendValue(shapeStrings,"111110010010111");
+	appendValue(shapeStrings,"11111111011");*/
 	//q=14
-	appendValue(shapeStrings,"11111111111111");
-	appendValue(shapeStrings,"1111111111100000111");
-	appendValue(shapeStrings,"1111111111000001111");
-	appendValue(shapeStrings,"11111111110000001111");
-	appendValue(shapeStrings,"11111111111000000111");
+ 	appendValue(shapeStrings,"11111111111111");
+ 	appendValue(shapeStrings,"1111111111100000111");
+// 	appendValue(shapeStrings,"1111111111000001111");
+// 	appendValue(shapeStrings,"11111111110000001111");
+// 	appendValue(shapeStrings,"11111111111000000111");
 
 	String<unsigned> weights;
 	fill(weights,length(shapeStrings),0);
@@ -529,32 +666,14 @@ makeSelectedStatsFile(TError & errorDistr)
 	simulateGenome(testGenome[0], 1000000);					// generate 1Mbp genomic sequence
 	simulateReads(
 		testReads, dummyIDs, testGenome, 
-		10000000, maxErrors, logErrorDistribution, 0.5);	// generate 10M reads
+		50000, maxErrors-1, logErrorDistribution, 0.5);	// generate 10M reads
 #endif
 
-	//loss rate buckets
-	map<TErrorValue, unsigned> lossRateBuckets;
-	String<TErrorValue> lossRatesProbe;
-	resize(lossRatesProbe, 9);
-	lossRatesProbe[0] = 0;
-	lossRatesProbe[1] = 0.00001;
-	lossRatesProbe[2] = 0.0001;
-	lossRatesProbe[3] = 0.001;
-	lossRatesProbe[4] = 0.01;
-	lossRatesProbe[5] = 0.02;
-	lossRatesProbe[6] = 0.05;
-	lossRatesProbe[7] = 0.1;
-	lossRatesProbe[8] = 0.2;
 
-	
-	for(unsigned j = 0; j <= length(lossRatesProbe); ++j){
-		lossRateBuckets.insert ( pair<TErrorValue,unsigned>(lossRatesProbe[j],j) );
-	}
-	
 	String<bool> firstTimeK;
-	fill(firstTimeK,maxErrors*length(lossRatesProbe)+1,true);
+	fill(firstTimeK,maxErrors*lossRateBuckets.size(),true);
 	
-	for(unsigned i = 0; i < length(shapeStrings); ++i)
+	for(int i = length(shapeStrings)-1; i >= 0 ; --i)
 	{
 		String<TFloat> found;
 		resize(found,maxT*maxErrors);
@@ -564,9 +683,9 @@ makeSelectedStatsFile(TError & errorDistr)
 		initPatterns(states, shapeStrings[i], maxErrors-1, logErrorDistribution, optionHammingOnly);
 		computeFilteringLoss(found, states, length(shapeStrings[i]), maxT, maxErrors,  logErrorDistribution);
 		cout << "Printing\n";
-		for(unsigned e = 0; e < maxErrors; ++e) {
+		for(unsigned e = 1; e < maxErrors; ++e) {
 			bool highestOptimalFound = false;
-			for(unsigned t = maxT-1; t > 0; --t) {
+			for(unsigned t = maxT-1; t > minT; --t) {
 				TFloat lossrate = 1.0 - (TFloat) _transformBack(found[e*maxT+t]);
 				typename map<TFloat, unsigned>::iterator it, itlow, itup, itend, itbegin;
 				if(lossrate <= 0.0){
@@ -604,9 +723,10 @@ makeSelectedStatsFile(TError & errorDistr)
 				stringstream datName;
 				if(best_shape_helpFolder) datName << best_shape_folder;
 				else datName << "gapped_params";
-				datName << "/"<<fprefix[0]<<"_" << totalN << "_" << e << "_";
+				datName << "/"<<fprefix[0]<<"_N" << totalN << "_E" << e << "_";
 				if(!optionHammingOnly) datName << "L_";
 				else datName <<"H_";
+				datName.precision(8);
 				datName << (*itlow).first << "_" << (*itup).first << ".dat";
 				
 			
@@ -616,7 +736,7 @@ makeSelectedStatsFile(TError & errorDistr)
 					ofstream fout(datName.str().c_str(), ios::out);
 					fout << "shape\t\tt\t\tloss rate\t\tminCoverage";
 #ifdef RUN_RAZERS
-					fout << "\tFP\t\truntime";
+					fout << "\tPM\t\truntime";
 #endif
 					fout << endl << endl;
 					fout.close();
@@ -625,9 +745,12 @@ makeSelectedStatsFile(TError & errorDistr)
 #ifdef RUN_RAZERS
 				// count verifications
 				String<ReadMatch<unsigned> > matches;
-				RazerSOptions<RazerSSpec<true, true> > razersOptions;
+				RazerSOptions<RazerSSpec<false, true> > razersOptions;
 				razersOptions.errorRate = (double)e / (double)totalN;
+				razersOptions.errorRate += 0.0000001;
 				razersOptions.threshold = t;
+				razersOptions._debugLevel = 2;
+
 				assign(razersOptions.shape, shapeStrings[i]);
 				mapReads(matches, testGenome, testReads, razersOptions);
 #endif
@@ -639,7 +762,7 @@ makeSelectedStatsFile(TError & errorDistr)
 				fout << lossrate << "\t\t";
 				fout << gminCov;
 #ifdef RUN_RAZERS				
-				fout << "\t\t" << razersOptions.FP;
+				fout << "\t\t" << razersOptions.FP + razersOptions.TP;
 				fout << "\t\t" << razersOptions.timeMapReads;
 #endif
 				fout << endl;
@@ -657,7 +780,7 @@ makeSelectedStatsFile(TError & errorDistr)
 
 template<typename TError>
 void
-makeOneGappedStatsFile(TError & errorDistr)
+makeOneGappedStatsFile(TError & errorDistr, map<TFloat, unsigned> & lossRateBuckets)
 {
 
 //	unsigned maxE = (unsigned) totalN / 5;
@@ -693,28 +816,48 @@ makeOneGappedStatsFile(TError & errorDistr)
 
 	initCountBits();
 
-	map<TErrorValue, unsigned> lossRateBuckets;
-	String<TErrorValue> lossRatesProbe;
-	resize(lossRatesProbe, 9);
-	lossRatesProbe[0] = 0;
-	lossRatesProbe[1] = 0.00001;
-	lossRatesProbe[2] = 0.0001;
-	lossRatesProbe[3] = 0.001;
-	lossRatesProbe[4] = 0.01;
-	lossRatesProbe[5] = 0.02;
-	lossRatesProbe[6] = 0.05;
-	lossRatesProbe[7] = 0.1;
-	lossRatesProbe[8] = 0.2;
-
-	
-	for(unsigned j = 0; j <= length(lossRatesProbe); ++j){
-		lossRateBuckets.insert ( pair<TErrorValue,unsigned>(lossRatesProbe[j],j) );
-	}
 
 
 //	best_shape(totalN, found, logErrorDistribution, lossRates, 12, 10, 3, 6, 4, 0, maxT);
 	best_shape(totalN, found, logErrorDistribution, lossRateBuckets, maxQ, minQ, minGap, maxGap, maxE, minE, maxT,optionHammingOnly);
 
+}
+
+template<typename TSStr>
+void
+getParamsFilename(TSStr & paramsfile, map<TFloat, unsigned> & lossRateBuckets)
+{
+	if(doSelectedGapped || doAllOneGapped)
+	{
+
+		typename map<TFloat, unsigned>::iterator itbegin, itend, itlow, itup;
+		// points to first item in loss rate file
+		itbegin = lossRateBuckets.begin();
+		itend = lossRateBuckets.end();
+		// points to last item in loss rate file
+		--itend;
+		if(optionLossRate > itend->first)
+		{
+			optionLossRate = itend->first;
+			itup = itend;
+		}
+		else itup = lossRateBuckets.upper_bound(optionLossRate);
+		itlow = itup;
+		--itlow;
+		
+		paramsfile.precision(8);
+		if(prefixCount) paramsfile << fgparams<< fprefix[0]<<"_N" << totalN << "_E" << totalK;
+		else paramsfile << fgparams<<"userdef_N" << totalN << "_E" << totalK;
+		if(optionHammingOnly) paramsfile << "_H_";
+		else paramsfile << "_L_";
+		paramsfile << itlow->first << "_" << itup->first << ".dat";
+		
+	}
+	else
+	{
+		if(prefixCount) paramsfile << fparams<< fprefix[0]<<"_QE0_N" << totalN << "_E" << totalK << ".dat";
+		else paramsfile << fparams<<"userdef_QE0_N" << totalN << "_E" << totalK << ".dat";
+	}
 }
 
 
@@ -749,6 +892,8 @@ int main(int argc, const char *argv[])
 	// Parse command line
 	strncpy ( fparams, argv[0], length(argv[0])-12 );
 	strcat(fparams,"params/");
+	strncpy ( fgparams, argv[0], length(argv[0])-12 );
+	strcat(fgparams,"gapped_params/");
 	static const TFloat epsilon = 0.0000001;	
 
 	for(int arg = 1; arg < argc; ++arg) {
@@ -887,9 +1032,29 @@ int main(int argc, const char *argv[])
 	optionLossRate += epsilon;
 	
 	if(optionProbINSERT <= epsilon && optionProbDELETE <= epsilon)
-	{
 		optionHammingOnly=true;
-		cout << "hier";	
+
+
+	//loss rate buckets
+	map<TFloat, unsigned> lossRateBuckets;
+	if(doAllOneGapped || doSelectedGapped)
+	{
+		String<TFloat> lossRatesProbe;
+		resize(lossRatesProbe, 9);
+		lossRatesProbe[0] = 0;
+		lossRatesProbe[1] = 0.00001;
+		lossRatesProbe[2] = 0.0001;
+		lossRatesProbe[3] = 0.001;
+		lossRatesProbe[4] = 0.01;
+		lossRatesProbe[5] = 0.02;
+		lossRatesProbe[6] = 0.05;
+		lossRatesProbe[7] = 0.1;
+		lossRatesProbe[8] = 0.2;
+	
+		
+		for(unsigned j = 0; j <= length(lossRatesProbe); ++j){
+			lossRateBuckets.insert ( pair<TFloat,unsigned>(lossRatesProbe[j],j) );
+		}
 	}
 	// compute data specific loss rates
 	if (fnameCount0 || fnameCount1) 
@@ -933,8 +1098,8 @@ int main(int argc, const char *argv[])
 
 		fstream file;
 		//if(prefixCount)
-		if(doAllOneGapped) makeOneGappedStatsFile(errorDistribution);
-		if(doSelectedGapped) makeSelectedStatsFile(errorDistribution);
+		if(doAllOneGapped) makeOneGappedStatsFile(errorDistribution,lossRateBuckets);
+		if(doSelectedGapped) makeSelectedStatsFile(errorDistribution,lossRateBuckets);
 		if(doUngapped) makeUngappedStatsFile(errorDistribution);
 	}
 	
@@ -942,15 +1107,7 @@ int main(int argc, const char *argv[])
 	
 	// decide on which loss rate file to parse
 	stringstream paramsfile;
-	if (fnameCount0 > 0 || fnameCount1 > 0)
-	{
-		if(prefixCount) paramsfile << fparams<< fprefix[0]<<"_QE0_N" << totalN << "_E" << totalK << ".dat";
-		else paramsfile << fparams<<"userdef_QE0_N" << totalN << "_E" << totalK << ".dat";
-	}
-	else{
-		if(prefixCount) paramsfile << fparams<< fprefix[0]<<"_QE0_N" << totalN << "_E" << totalK << ".dat";
-		else paramsfile << fparams<<"results_QE0_N" << totalN << "_E" << totalK << ".dat";
-	}
+	getParamsFilename(paramsfile,lossRateBuckets);
 
 	cout << "\nRead length      = " << totalN << "bp\n";
 	cout << "Max num errors   = " << totalK << "\n";
@@ -965,10 +1122,12 @@ int main(int argc, const char *argv[])
 		cout << "Couldn't open file "<<paramsfile.str()<<"\n";
 		return 0;
 	}
-	else parseParams(file);
-		
+	else
+	{
+		if(doSelectedGapped || doAllOneGapped) parseGappedParams(file);
+		else parseParams(file);
+	}
 	// suggest a suitable combination of q and t
-	cout << "Choose q = " << qgramLen << " and t = " << threshold << " to achieve optimal performance for expected recognition rate >= " << (100.0-100.0*optionLossRate) << "% (expected recognition = " << (100.0-chosenLossRate*100.0) <<"%)\n\n";
 
 	return 0;
 }
