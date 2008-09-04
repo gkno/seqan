@@ -85,6 +85,11 @@ the command line:
   of 100*(1 - e/|R|), whereby |R| is the read length. In other words, a
   read is allowed to have not more than |R|*(100-NUM)/100 errors.
 
+  [ -m NUM ],  [ --max-hits NUM ]
+  
+  Ignore reads with more the NUM hits. If, for example, NUM is 1, RazerS
+  searches for unique matches only.
+
   [ -o FILE ],  [ --output FILE ]
 
   Change the output filename to FILE. By default, this is the read file
@@ -155,6 +160,13 @@ the command line:
 3.3. Filtration Options
 ---------------------------------------------------------------------------
 
+  [ -s BITSTRING ],  [ --shape BITSTRING ]
+  
+  Define the k-mer shape. BITSTRING must be a sequence of bits beginning
+  and ending with 1, e.g. 1111111001101. A '1' defines a relevant and a
+  '0' an irrelevant position. Two k-mers are equal, if all characters at 
+  relevant postitions are equal.  
+  
   [ -t NUM ],  [ --threshold NUM ]
 
   Depending on the percent identity and the length, for each read a
