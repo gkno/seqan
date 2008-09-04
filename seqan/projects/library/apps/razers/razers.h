@@ -87,8 +87,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		RazerSOptions() 
 		{
-			forward = false;
-			reverse = false;
+			forward = true;
+			reverse = true;
 			errorRate = 0.2;
 			dumpAlignment = false;
 			output = "";
@@ -429,11 +429,14 @@ void findReads(
 				::std::cerr << ::std::endl;
 	*/		} else {
 				++FP;
-	/*			::std::cerr << "\"" << range(swiftFinder, genomeInf) << "\"   \"" << range(swiftPattern) << "\"  ";
+			//	::std::cerr << "GENOME: " << host(myersFinder) << ::std::endl;
+			//	::std::cerr << "READ:   " << indexText(readIndex)[ndlSeqNo] << ::std::endl;
+
+/*				::std::cerr << "\"" << range(swiftFinder, genomeInf) << "\"   \"" << range(swiftPattern) << "\"  ";
 				::std::cerr << ndlSeqNo << " : ";
 				::std::cerr << hstkPos << " + ";
 				::std::cerr << bucketWidth << "  " << TP << ::std::endl;
-	*/		}
+*/			}
 		}
 	}
 
@@ -825,7 +828,7 @@ void mapReads(
 
 	cargo(swiftIndex).abundanceCut = options.abundanceCut;
 	cargo(swiftIndex)._debugLevel = options._debugLevel;
-
+	
 	if (options.forward)
 	{
 		if (options._debugLevel >= 1)

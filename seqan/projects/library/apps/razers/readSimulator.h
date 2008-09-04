@@ -12,8 +12,11 @@
 
 #include "recognitionRateDP.h"
 
+
 namespace SEQAN_NAMESPACE_MAIN
 {
+
+static const unsigned long TEMP_RAND_MAX = 0xFFFFFFFFl;
 
 template <typename TOperation, typename TAlphabet>
 inline TAlphabet
@@ -21,7 +24,7 @@ sample(TOperation m, TAlphabet base)
 {
 	Dna ret;
 	do
-		ret = (TAlphabet)(int)((double)ValueSize<TAlphabet>::VALUE * (double)rand() / (RAND_MAX+1.0));
+		ret = (TAlphabet)(int)((double)ValueSize<TAlphabet>::VALUE * (double)mtRand() / (TEMP_RAND_MAX));
 	while (ret == base && m == SEQAN_MISMATCH);
 	return ret;
 }
@@ -29,6 +32,7 @@ sample(TOperation m, TAlphabet base)
 template < typename TGenome >
 void simulateGenome(TGenome &genome, int size)
 {
+	mtRandInit(); 
 	resize(genome, size);
 	for(int i = 0; i < size; ++i)
 		genome[i] = sample(0, (Dna)0);
@@ -65,7 +69,7 @@ void simulateReads(
 	typedef Finder<TGenomeInfixRev>						TMyersFinderRev;
 	typedef Pattern<TReadRev, MyersUkkonenGlobal>		TMyersPatternRev;
 
-
+	mtRandInit();
 //	typedef TGenome TRevComp;
 
 	int readCounter = 0;
@@ -99,7 +103,7 @@ void simulateReads(
 	String<int> sortedStartPos;
 	resize(sortedStartPos,numReads);
 	while (readCounter < numReads) {
-		sortedStartPos[readCounter] = (int)((seqLength - readLength - maxErrors + 1.0) * rand() / (RAND_MAX+1.0));
+		sortedStartPos[readCounter] = (int)((seqLength - readLength - maxErrors + 1.0) * mtRand() / (TEMP_RAND_MAX));
 		++readCounter;
 	}
 	std::sort(begin(sortedStartPos),end(sortedStartPos));
@@ -123,7 +127,7 @@ void simulateReads(
 
 			// Reverse complement this read
 			revComp = false;
-			if ((double)rand()/(RAND_MAX+1.0) > forwardProb) {
+			if ((double)mtRand()/(TEMP_RAND_MAX) > forwardProb) {
 				revComp = true;
 			}
 				
@@ -176,7 +180,7 @@ void simulateReads(
 
 		while(pos < maxEnd) {
 			lastOp = currOp;
-			double prob = (double)rand()/(RAND_MAX+1.0);
+			double prob = (double)mtRand()/(TEMP_RAND_MAX);
 			//	std::cout << "prob = " << prob << "\t";
 			int m;
 			for(m = 0; m < 4; ++m)
