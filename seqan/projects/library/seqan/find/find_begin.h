@@ -109,9 +109,9 @@ struct _FindBegin_Impl
 	}
 //____________________________________________________________________________
 
-	template <typename TFinder, typename TPattern>
+	template <typename TFinder, typename TPattern, typename TLimit>
 	static inline bool
-	findBegin(TFinder & finder, TPattern & pattern)
+	findBegin(TFinder & finder, TPattern & pattern, TLimit limit)
 	{
 		typedef typename FindBeginPattern<TPattern>::Type TFindBeginPattern;
 		typedef typename Haystack<TFinder>::Type THaystack;
@@ -120,6 +120,7 @@ struct _FindBegin_Impl
 		typedef typename Position<THaystack>::Type TPosition;
 
 		TFindBeginPattern & find_begin_pattern = pattern.data_findBeginPattern;
+		setScoreLimit(find_begin_pattern, limit);
 
 		//build begin_finder
 		TBeginFinder begin_finder;
@@ -145,9 +146,6 @@ struct _FindBegin_Impl
 		_setFinderEnd(begin_finder);
 		_setFinderLength(begin_finder, length(finder));
 
-		//score limit of pattern could have been changed since the last call
-		setScoreLimit(find_begin_pattern, scoreLimit(pattern));
-
 		bool begin_found = find(begin_finder, find_begin_pattern);
 		if (begin_found)
 		{//new begin found: report in finder
@@ -155,6 +153,13 @@ struct _FindBegin_Impl
 		}
 		return begin_found;
 	}
+	template <typename TFinder, typename TPattern>
+	static inline bool
+	findBegin(TFinder & finder, TPattern & pattern)
+	{
+		return findBegin(finder, pattern, scoreLimit(pattern));
+	}
+
 //____________________________________________________________________________
 
 	template <typename TPattern>
@@ -182,9 +187,9 @@ struct _FindBegin_Impl<void>
 	{
 	}
 
-	template <typename TFinder, typename TPattern>
+	template <typename TFinder, typename TPattern, typename TLimit>
 	static inline bool
-	findBegin(TFinder & finder, TPattern &)
+	findBegin(TFinder & finder, TPattern &, TLimit)
 	{
 		if (!finder._beginFind_called)
 		{
@@ -192,6 +197,12 @@ struct _FindBegin_Impl<void>
 			return true;
 		}
 		return false;
+	}
+	template <typename TFinder, typename TPattern>
+	static inline bool
+	findBegin(TFinder & finder, TPattern & pattern)
+	{
+		return findBegin(finder, pattern, 0);
 	}
 
 	template <typename TPattern>
@@ -222,6 +233,15 @@ findBegin(TFinder & finder,
 {
 	typedef typename FindBeginPatternSpec<TPattern>::Type TFindBeginPatternSpec;
 	return _FindBegin_Impl<TFindBeginPatternSpec>::findBegin(finder, pattern);
+}
+template <typename TFinder, typename TPattern, typename TLimit>
+inline bool
+findBegin(TFinder & finder,
+		  TPattern & pattern,
+		  TLimit limit)
+{
+	typedef typename FindBeginPatternSpec<TPattern>::Type TFindBeginPatternSpec;
+	return _FindBegin_Impl<TFindBeginPatternSpec>::findBegin(finder, pattern, limit);
 }
 
 template <typename TPattern>
