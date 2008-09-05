@@ -56,6 +56,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		const char	*output;			// name of result file
 		int			_debugLevel;		// level of verbosity
 		bool		printVersion;		// print version number
+		bool		hammingOnly;		// no indels
 
 	// output format options
 		unsigned	outputFormat;		// 0..Razer format
@@ -90,21 +91,24 @@ namespace SEQAN_NAMESPACE_MAIN
 			forward = true;
 			reverse = true;
 			errorRate = 0.2;
-			dumpAlignment = false;
+			maxHits = 100;
 			output = "";
+			_debugLevel = 0;
+			printVersion = false;
+			hammingOnly = false;
+
 			outputFormat = 0;
+			dumpAlignment = false;
 			genomeNaming = 0;
 			readNaming = 0;
 			sortOrder = 0;
 			positionFormat = 0;
+
 			shape = "11111111111";
 			threshold = 1;
 			tabooLength = 1;
 			repeatLength = 1000;
 			abundanceCut = 1;
-			maxHits = 100;
-			_debugLevel = 0;
-			printVersion = false;
 		}
 	};
 
@@ -269,8 +273,13 @@ bool loadFasta(TReadSet &reads, TNameSet &fastaIDs, char const *fileName)
 
 
 //////////////////////////////////////////////////////////////////////////////
-// Find read matches
-template <typename TMatches, typename TGenomeSet, typename TReadIndex, typename THitCount, typename TSpec>
+// Find read matches (hamming only)
+template <
+	typename TMatches, 
+	typename TGenomeSet, 
+	typename TReadIndex, 
+	typename THitCount, 
+	typename TSpec >
 void findReads(
 	TMatches &matches,			// resulting matches
 	TGenomeSet &genomes,		// Genome
@@ -281,7 +290,159 @@ void findReads(
 #else
 	THitCount &,
 #endif
-	RazerSOptions<TSpec> &options)
+	RazerSOptions<TSpec> &options,
+	Swift<SwiftSemiGlobalHamming> )
+{
+	typedef typename Fibre<TReadIndex, Fibre_Text>::Type	TReadSet;
+	typedef typename Value<TGenomeSet>::Type				TGenome;
+	typedef typename Size<TGenome>::Type					TSize;
+	typedef typename Infix<TGenome>::Type					TGenomeInfix;
+	typedef typename Value<TReadSet>::Type					TRead;
+	typedef typename Iterator<TGenomeInfix, Standard>::Type	TGenomeIterator;
+	typedef typename Iterator<TRead, Standard>::Type		TReadIterator;
+	typedef typename Value<TMatches>::Type					TMatch;
+
+	// FILTRATION
+	
+	typedef Finder<TGenome, Swift<SwiftSemiGlobalHamming> >		TSwiftFinder;
+	typedef Pattern<TReadIndex, Swift<SwiftSemiGlobalHamming> >	TSwiftPattern;
+
+	TSwiftPattern swiftPattern(readIndex);
+
+	swiftPattern.params.minThreshold = options.threshold;
+	swiftPattern.params.tabooLength = options.tabooLength;
+	swiftPattern.params.minLog2Delta = 0;
+
+	__int64 TP = 0;
+	__int64 FP = 0;
+	SEQAN_PROTIMESTART(find_time);
+
+	// iterate all genomic sequences
+	for(unsigned hstkSeqNo = 0; hstkSeqNo < length(genomes); ++hstkSeqNo) 
+	{
+		if (options._debugLevel >= 1)
+			::std::cerr << ::std::endl << "Process genome seq #" << hstkSeqNo;
+		TGenome &genome = genomes[hstkSeqNo];
+		TSwiftFinder swiftFinder(genome, options.repeatLength, 1);
+
+		// iterate all verification regions returned by SWIFT
+		while (find(swiftFinder, swiftPattern, options.errorRate, options._debugLevel)) 
+		{
+			unsigned ndlSeqNo = (*swiftFinder.curHit).ndlSeqNo;
+#ifdef RAZERS_MAXHITS
+			if (hitCount[ndlSeqNo] == -1) continue;
+#endif			
+			unsigned ndlLength = sequenceLength(ndlSeqNo, readIndex);
+
+			TGenomeInfix inf(range(swiftFinder, genome));
+#ifdef RAZERS_DEBUG
+			cout<<"Verify: "<<::std::endl;
+			cout<<"Genome: "<<inf<<"\t" << beginPosition(inf) << "," << endPosition(inf) << ::std::endl;
+			cout<<"Read:   "<<host(myersPattern)<<::std::endl;
+#endif
+			if (options.spec.DONT_VERIFY) 
+			{
+				++FP;
+				continue;
+			}
+
+			// verify
+			TMatch m = {
+				hstkSeqNo,
+				ndlSeqNo,
+				beginPosition(swiftFinder),
+				endPosition(swiftFinder),
+				0,
+				orientation
+			};
+
+			int errors = ndlLength - (m.gEnd - m.gBegin);
+			int maxErrors = (int)(ndlLength * options.errorRate);
+			TReadIterator rit = begin(indexText(readIndex)[ndlSeqNo], Standard()) + errors;
+			TGenomeIterator git = begin(genome, Standard()) + m.gBegin;
+			TGenomeIterator gitEnd;
+
+			if ((TSize)m.gEnd > length(genome))
+			{
+				gitEnd = end(genome, Standard());
+				errors += m.gEnd - length(genome);
+				m.gEnd = length(genome);
+			} else
+				gitEnd = begin(genome, Standard()) + m.gEnd;
+
+			if (errors <= maxErrors)
+				for(; git != gitEnd; ++git, ++rit)
+					if (*git != *rit)
+						if (++errors > maxErrors)
+							break;
+
+			if (errors <= maxErrors)
+			{
+				m.editDist = errors;
+				// transform coordinates to the forward strand
+				if (orientation == 'R') 
+				{
+					TSize gLength = length(genome);
+					TSize temp = m.gBegin;
+					m.gBegin = gLength - m.gEnd;
+					m.gEnd = gLength - temp;
+				}
+				if (!options.spec.DONT_DUMP_RESULTS)
+					appendValue(matches, m);
+#ifdef RAZERS_MAXHITS				
+				--hitCount[ndlSeqNo];
+#endif
+				++TP;
+	/*			::std::cerr << "\"" << range(swiftFinder, genomeInf) << "\"  ";
+				::std::cerr << hstkPos << " + ";
+				::std::cerr << ::std::endl;
+	*/		} else {
+				++FP;
+	/*			::std::cerr << "\"" << range(swiftFinder, genomeInf) << "\"   \"" << range(swiftPattern) << "\"  ";
+				::std::cerr << ndlSeqNo << " : ";
+				::std::cerr << hstkPos << " + ";
+				::std::cerr << bucketWidth << "  " << TP << ::std::endl;
+	*/		}
+		}
+	}
+
+	options.timeMapReads += SEQAN_PROTIMEDIFF(find_time);
+
+	if (options._debugLevel >= 1)
+		::std::cerr << ::std::endl << "Finding reads took               \t" << options.timeMapReads << " seconds" << ::std::endl;
+
+	if (options._debugLevel >= 2) {
+		::std::cerr << ::std::endl;
+		::std::cerr << "___FILTRATION_STATS____" << ::std::endl;
+		::std::cerr << "Swift FP: " << FP << ::std::endl;
+		::std::cerr << "Swift TP: " << TP << ::std::endl;
+	}
+	options.FP += FP;
+	options.TP += TP;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+// Find read matches
+template <
+	typename TMatches, 
+	typename TGenomeSet, 
+	typename TReadIndex, 
+	typename THitCount, 
+	typename TSpec,
+	typename TSwiftSpec >
+void findReads(
+	TMatches &matches,			// resulting matches
+	TGenomeSet &genomes,		// Genome
+	TReadIndex &readIndex,
+	char orientation,			// q-gram index of reads
+#ifdef RAZERS_MAXHITS
+	THitCount &hitCount,		// maximum number of hits for each read
+#else
+	THitCount &,
+#endif
+	RazerSOptions<TSpec> &options,
+	Swift<TSwiftSpec> )
 {
 	typedef typename Fibre<TReadIndex, Fibre_Text>::Type	TReadSet;
 	typedef typename Value<TGenomeSet>::Type				TGenome;
@@ -292,8 +453,8 @@ void findReads(
 
 	// FILTRATION
 	
-	typedef Finder<TGenome, Swift<> >						TSwiftFinder;
-	typedef Pattern<TReadIndex, Swift<> >					TSwiftPattern;
+	typedef Finder<TGenome, Swift<TSwiftSpec> >				TSwiftFinder;
+	typedef Pattern<TReadIndex, Swift<TSwiftSpec> >			TSwiftPattern;
 
 	// VERIFICATION
 
@@ -429,14 +590,11 @@ void findReads(
 				::std::cerr << ::std::endl;
 	*/		} else {
 				++FP;
-			//	::std::cerr << "GENOME: " << host(myersFinder) << ::std::endl;
-			//	::std::cerr << "READ:   " << indexText(readIndex)[ndlSeqNo] << ::std::endl;
-
-/*				::std::cerr << "\"" << range(swiftFinder, genomeInf) << "\"   \"" << range(swiftPattern) << "\"  ";
+	/*			::std::cerr << "\"" << range(swiftFinder, genomeInf) << "\"   \"" << range(swiftPattern) << "\"  ";
 				::std::cerr << ndlSeqNo << " : ";
 				::std::cerr << hstkPos << " + ";
 				::std::cerr << bucketWidth << "  " << TP << ::std::endl;
-*/			}
+	*/		}
 		}
 	}
 
@@ -545,6 +703,8 @@ void dumpMatches(
 #else
 	Score<int> scoreType = Score<int>(0, -999, -1001, -1000);	// levenshtein-score (match, mismatch, gapOpen, gapExtend)
 #endif
+	if (options.hammingOnly)
+		scoreType.data_mismatch = -1;
 	resize(rows(align), 2);
 
 	bool multipleGenomes = countSequences(genomes) > 1;
@@ -828,12 +988,15 @@ void mapReads(
 
 	cargo(swiftIndex).abundanceCut = options.abundanceCut;
 	cargo(swiftIndex)._debugLevel = options._debugLevel;
-	
+
 	if (options.forward)
 	{
 		if (options._debugLevel >= 1)
 			::std::cerr << ::std::endl << "___FORWARD_STRAND______";
-		findReads(matches, genomeSet, swiftIndex, 'F', hitCount, options);
+		if (options.hammingOnly)
+			findReads(matches, genomeSet, swiftIndex, 'F', hitCount, options, Swift<SwiftSemiGlobalHamming>());
+		else
+			findReads(matches, genomeSet, swiftIndex, 'F', hitCount, options, Swift<SwiftSemiGlobal>());
 	}
 
 	if (options.reverse) 
@@ -841,7 +1004,10 @@ void mapReads(
 		if (options._debugLevel >= 1)
 			::std::cerr << ::std::endl << "___BACKWARD_STRAND_____";
 		reverseComplementInPlace(genomeSet);			// build reverse-compl of genome
-		findReads(matches, genomeSet, swiftIndex, 'R', hitCount, options);
+		if (options.hammingOnly)
+			findReads(matches, genomeSet, swiftIndex, 'R', hitCount, options, Swift<SwiftSemiGlobalHamming>());
+		else
+			findReads(matches, genomeSet, swiftIndex, 'R', hitCount, options, Swift<SwiftSemiGlobal>());
 		reverseComplementInPlace(genomeSet);			// restore original genome seqs
 	}
 }
