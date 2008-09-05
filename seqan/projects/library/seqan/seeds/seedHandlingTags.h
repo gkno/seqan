@@ -138,11 +138,13 @@ struct ScoreType<const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, TScore> > >
 	typedef  TScore Type;
 };
 
+/* see find_pattern_base.h
 template <typename T>
 struct ScoringScheme
 {
 	typedef T Type;
 };
+*/
 
 } //namespace Seqan
 
