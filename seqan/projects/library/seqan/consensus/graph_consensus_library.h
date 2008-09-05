@@ -94,17 +94,26 @@ __getAlignmentStatistics(Graph<Undirected<TCargo, TSpec> >& dist,
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TSize>
-inline bool 
-_pairLess(Pair<TSize, TSize> const& a1, Pair<TSize, TSize> const& a2) {
-	if (a1.i1 == a2.i1) return (a1.i2 < a2.i2);
-	else return (a1.i1 < a2.i1);
-}
+struct _LessPair :
+	public ::std::unary_function<Pair<TSize, TSize>, bool>
+{
+	inline bool 
+	operator() (Pair<TSize, TSize> const& a1, Pair<TSize, TSize> const& a2) const {
+		if (a1.i1 == a2.i1) return (a1.i2 < a2.i2);
+		else return (a1.i1 < a2.i1);
+	}
+};
 
 template<typename TSize>
-inline bool 
-_tripleLess(Pair<TSize, Triple<TSize, TSize, TSize> > const& a1, Pair<TSize, Triple<TSize, TSize, TSize> > const& a2) {
-	return (a1.i1 < a2.i1);
-}
+struct _LessTripel :
+	public ::std::unary_function<Pair<TSize, Triple<TSize, TSize, TSize> >, bool>
+{
+	inline bool 
+	operator() (Pair<TSize, Triple<TSize, TSize, TSize> > const& a1, Pair<TSize, Triple<TSize, TSize, TSize> > const& a2) {
+		return (a1.i1 < a2.i1);
+	}
+};
+
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -147,7 +156,7 @@ selectPairs(StringSet<TString, TSpec> const& str,
 		if (pos1 < pos2) value(posIndexIt) = Pair<TSize, TInfo>(pos1,TInfo(index, pos1, pos2));
 		else value(posIndexIt) = Pair<TSize, TInfo>(pos2,TInfo(index, pos1, pos2));
 	}
-	std::sort(begin(posIndex), end(posIndex), _tripleLess<TSize>);
+	std::sort(begin(posIndex, Standard() ), end(posIndex, Standard() ), _LessTripel<TSize>() );
 
 	// The expected overlap by a pair of reads (represented by its index)
 	typedef String<Pair<TSize, TSize> > TOverlapIndexList;
@@ -322,10 +331,8 @@ selectPairs(StringSet<TString, TSpec> const& str,
 		}
 	}
 
-	//typedef Map<Pair<unsigned int, unsigned int> > TIdPosMap;
-
 	// Sort the pairs, better expected overlaps come first
-	std::sort(begin(ovlIndex), end(ovlIndex), _pairLess<TSize>);
+	std::sort(begin(ovlIndex, Standard() ), end(ovlIndex, Standard() ), _LessPair<TSize>() );
 	typedef typename Iterator<TOverlapIndexList>::Type TOVLIter;
 	TOVLIter itOvl = begin(ovlIndex);
 	TOVLIter itOvlEnd = end(ovlIndex);

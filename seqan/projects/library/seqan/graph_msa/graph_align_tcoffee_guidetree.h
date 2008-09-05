@@ -668,8 +668,8 @@ upgmaTree(Graph<Undirected<TValue, TSpec1> >& pairGraph,
 	typedef typename Iterator<TNodeString>::Type TNodeIter;
 	TNodeString nodes;
 	resize(nodes, nseq);
-	TNodeIter nodeIt = begin(nodes);
-	TNodeIter nodeItEnd = end(nodes);
+	TNodeIter nodeIt = begin(nodes, Standard() );
+	TNodeIter nodeItEnd = end(nodes, Standard() );
 	for(;nodeIt<nodeItEnd;goNext(nodeIt)) value(nodeIt) = addVertex(g);	// For each sequence one vertex
 
 	// Find the minimal value for all vertices (with respect to all greater vertices)
@@ -681,13 +681,12 @@ upgmaTree(Graph<Undirected<TValue, TSpec1> >& pairGraph,
 	for(;!atEnd(itE);goNext(itE)) {
 		TVD s = sourceVertex(itE);
 		TVD t = targetVertex(itE);
-		if (cargo(value(itE)) < (value(minValues, s).i1)) value(minValues, s) = TWeightEdgePair(cargo(value(itE)), t);
-		//if (cargo(value(itE)) < (value(minValues, t).i1)) value(minValues, t) = TWeightEdgePair(cargo(value(itE)), s);
+		if (cargo(value(itE)) < (value(minValues, s).i1)) value(minValues, s) = TWeightEdgePair(cargo(value(itE)), t);		
 	}
 	// Find the overall minimum
 	typedef typename Iterator<TMinValues>::Type TMinIter;
-	TMinIter itMin = begin(minValues);
-	TMinIter itMinEnd = end(minValues);
+	TMinIter itMin = begin(minValues, Standard() );
+	TMinIter itMinEnd = end(minValues, Standard() );
 	TValue minVal = maxVal;
 	TVD sourceBest = 0;
 	TVD targetBest = 0;
@@ -736,15 +735,15 @@ upgmaTree(Graph<Undirected<TValue, TSpec1> >& pairGraph,
 	
 		// Update the minimum values
 		value(minValues, sourceBest) = TWeightEdgePair(maxVal, 0);
-		TEdgeOutI itOutE(pairGraph, sourceBest);
-		for(;!atEnd(itOutE);goNext(itOutE)) {
-			if (sourceBest < targetVertex(itOutE)) {
-				if (cargo(value(itOutE)) < (value(minValues, sourceBest).i1)) value(minValues, sourceBest) = TWeightEdgePair(cargo(value(itOutE)), targetVertex(itOutE));
+		for(TEdgeOutI itOutE(pairGraph, sourceBest);!atEnd(itOutE);goNext(itOutE)) {
+			TVD localTVD = targetVertex(itOutE);
+			if (sourceBest < localTVD) {
+				if (cargo(value(itOutE)) < (value(minValues, sourceBest).i1)) value(minValues, sourceBest) = TWeightEdgePair(cargo(value(itOutE)), localTVD);
 			}
 		}
 		// Find the new minimum value
-		itMin = begin(minValues);
-		itMinEnd = end(minValues);
+		itMin = begin(minValues, Standard() );
+		itMinEnd = end(minValues, Standard() );
 		minVal = maxVal;
 		TVD oldSourceBest = sourceBest;
 		sourceBest = 0;
