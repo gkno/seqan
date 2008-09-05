@@ -16,7 +16,7 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 
-#define TEMP_RAND_MAX = (double)(RAND_MAX-1);
+#define TEMP_RAND_MAX = (double)(RAND_MAX-1)
 
 template <typename TOperation, typename TAlphabet>
 inline TAlphabet
