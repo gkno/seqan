@@ -52,7 +52,7 @@ class Pattern<TNeedle, BndmAlgo> {
 public:
 	typedef unsigned int TWord;
 
-	Holder<TNeedle> data_needle;
+	Holder<TNeedle> data_host;
 	String<TWord> table;			// Look up table for each character in the alphabet (called B in "Navarro")
 	String<TWord> activeFactors;	// The active factors in the pattern (called D in "Navarro")
 	TWord needleLength;				// e.g., needleLength=33 --> blockCount=2 (iff w=32 bits)
@@ -97,7 +97,7 @@ void setHost (Pattern<TNeedle, BndmAlgo> & me, TNeedle2 const& needle) {
 		me.table[me.blockCount*pos + j / BitsPerValue<TWord>::VALUE] |= (1<<(j%BitsPerValue<TWord>::VALUE));
 	}
 
-	setValue(me.data_needle, needle);
+	setValue(me.data_host, needle);
 	/*
 	// Debug code
 	std::cout << "Alphabet size: " << ValueSize<TValue>::VALUE << ::std::endl;

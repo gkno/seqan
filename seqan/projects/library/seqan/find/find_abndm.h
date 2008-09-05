@@ -82,7 +82,7 @@ class Pattern<TNeedle, AbndmAlgo> {
 //////////////////////////////////////////////////////////////////////////////
 public:
     typedef unsigned int TWord;
-    Holder<TNeedle> data_needle;
+    Holder<TNeedle> data_host;
 
     String<TWord>       b_table;    // called B in Navarro
     String<TWord>       r_table;    // called R in Navarro
@@ -179,7 +179,7 @@ void setHost (Pattern<TNeedle, AbndmAlgo> & me, TNeedle2 const& needle)
 #endif
     clear(me.r_table); // init is only possible if we know the the error count
 
-    me.data_needle = needle;
+    me.data_host = needle;
     setHost(me.verifier,needle);
 }
 
@@ -208,7 +208,7 @@ inline typename Host<Pattern<TNeedle, AbndmAlgo>const>::Type &
 host(Pattern<TNeedle, AbndmAlgo> & me)
 {
     SEQAN_CHECKPOINT
-	return value(me.data_needle);
+	return value(me.data_host);
 }
 
 template <typename TNeedle>
@@ -216,7 +216,7 @@ inline typename Host<Pattern<TNeedle, AbndmAlgo>const>::Type &
 host(Pattern<TNeedle, AbndmAlgo> const & me)
 {
     SEQAN_CHECKPOINT
-	return value(me.data_needle);
+	return value(me.data_host);
 }
 
 //////////////////////////////////////////////////////////////////////////////

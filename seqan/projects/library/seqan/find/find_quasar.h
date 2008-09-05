@@ -44,7 +44,7 @@ private:
 
 //____________________________________________________________________________
 public:
-	Holder<TNeedle> data_needle;
+	Holder<TNeedle> data_host;
 
 
 //____________________________________________________________________________
@@ -91,7 +91,7 @@ inline void
 setHost (Pattern<TNeedle, Quasar> & me, TNeedle2 const& needle) 
 {
 	SEQAN_CHECKPOINT
-	setValue(me.data_needle, needle);
+	setValue(me.data_host, needle);
 }
 
 template <typename TNeedle, typename TNeedle2>
@@ -118,7 +118,7 @@ inline typename Host<Pattern<TNeedle, Quasar>const>::Type &
 host(Pattern<TNeedle, Quasar> & me)
 {
 SEQAN_CHECKPOINT
-	return value(me.data_needle);
+	return value(me.data_host);
 }
 
 template <typename TNeedle>
@@ -126,7 +126,7 @@ inline typename Host<Pattern<TNeedle, Quasar>const>::Type &
 host(Pattern<TNeedle, Quasar> const & me)
 {
 SEQAN_CHECKPOINT
-	return value(me.data_needle);
+	return value(me.data_host);
 }
 
 //____________________________________________________________________________

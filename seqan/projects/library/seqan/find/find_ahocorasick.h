@@ -63,7 +63,7 @@ public:
 	typedef Graph<Automaton<TAlphabet> > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	
-	Holder<TNeedle> data_needle;
+	Holder<TNeedle> data_host;
 	String<TVertexDescriptor> data_supplyMap;
 	String<String<TSize> > data_terminalStateMap;
 	TGraph data_graph;
@@ -187,7 +187,7 @@ template <typename TNeedle, typename TNeedle2>
 void setHost (Pattern<TNeedle, AhoCorasick> & me, TNeedle2 const & needle) {
 	SEQAN_CHECKPOINT
 	SEQAN_ASSERT(!empty(needle));
-	setValue(me.data_needle, needle);
+	setValue(me.data_host, needle);
 	clear(me.data_graph);
 	clear(me.data_supplyMap);
 	clear(me.data_endPositions);

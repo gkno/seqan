@@ -57,7 +57,7 @@ class Pattern<TNeedle, DPSearch<TScore, TSpec, TFindBeginPatternSpec> >:
 public:
 	typedef typename Value<TScore>::Type TScoreValue;
 
-	Holder<TNeedle>		data_needle;
+	Holder<TNeedle>		data_host;
 	TScore				data_score;
 	TScoreValue			data_limit;
 	String<TScoreValue>	data_tab;
@@ -96,7 +96,7 @@ SEQAN_CHECKPOINT
 	}
 
 	Pattern(Pattern const & other): 
-		data_needle( other.data_needle ),
+		data_host( other.data_host ),
 		data_score( other.data_score ), 
 		data_limit( other.data_limit ),
 		data_tab( other.data_tab ),
@@ -109,7 +109,7 @@ SEQAN_CHECKPOINT
 	operator = (Pattern const & other) 
 	{ 
 SEQAN_CHECKPOINT
-		this->data_needle = other.data_needle;
+		this->data_host = other.data_host;
 		this->data_score = other.data_score;
 		this->data_limit = other.data_limit;
 		this->data_tab = other.data_tab;
@@ -158,7 +158,7 @@ inline typename Host<Pattern<TNeedle, DPSearch<TScore, TSpec, TFindBeginPatternS
 host(Pattern<TNeedle, DPSearch<TScore, TSpec, TFindBeginPatternSpec> > & me)
 {
 SEQAN_CHECKPOINT
-	return value(me.data_needle);
+	return value(me.data_host);
 }
 
 template <typename TNeedle, typename TScore, typename TSpec, typename TFindBeginPatternSpec>
@@ -166,7 +166,7 @@ inline typename Host<Pattern<TNeedle, DPSearch<TScore, TSpec, TFindBeginPatternS
 host(Pattern<TNeedle, DPSearch<TScore, TSpec, TFindBeginPatternSpec> >  const & me)
 {
 SEQAN_CHECKPOINT
-	return value(me.data_needle);
+	return value(me.data_host);
 }
 
 
@@ -177,7 +177,7 @@ void
 setHost(Pattern<TNeedle, DPSearch<TScore, TSpec, TFindBeginPatternSpec> > & me, 
 		TNeedle2 & ndl)
 {
-	me.data_needle = ndl;
+	me.data_host = ndl;
 	clear(me.data_tab);
 }
 template <typename TNeedle, typename TScore, typename TSpec, typename TFindBeginPatternSpec, typename TNeedle2>
@@ -185,7 +185,7 @@ void
 setHost(Pattern<TNeedle, DPSearch<TScore, TSpec, TFindBeginPatternSpec> > & me, 
 		TNeedle2 const & ndl)
 {
-	me.data_needle = ndl;
+	me.data_host = ndl;
 	clear(me.data_tab);
 }
 

@@ -47,14 +47,14 @@ template <typename TNeedle>
 class Pattern<TNeedle, Simple> {
 //____________________________________________________________________________
 public:
-	Holder<TNeedle> data_needle;
+	Holder<TNeedle> data_host;
 
 //____________________________________________________________________________
 
 	Pattern() {}
 
 	Pattern(Pattern const & other):
-		data_needle(other.data_needle)
+		data_host(other.data_host)
 	{
 	}
 
@@ -69,7 +69,7 @@ public:
 	Pattern const & 
 	operator = (Pattern const & other)
 	{
-		data_needle = other.data_needle;
+		data_host = other.data_host;
 		return *this;
 	}
 
@@ -85,13 +85,13 @@ template <typename TNeedle, typename TNeedle2>
 void setHost (Pattern<TNeedle, Simple> & me, 
 			  TNeedle2 & needle) 
 {
-	setValue(me.data_needle, needle);
+	setValue(me.data_host, needle);
 }
 template <typename TNeedle, typename TNeedle2>
 void setHost (Pattern<TNeedle, Simple> & me, 
 			  TNeedle2 const & needle) 
 {
-	setValue(me.data_needle, needle);
+	setValue(me.data_host, needle);
 }
 
 //____________________________________________________________________________

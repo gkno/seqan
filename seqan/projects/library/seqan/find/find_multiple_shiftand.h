@@ -57,7 +57,7 @@ private:
 public:
 	typedef unsigned int TWord;
 	typedef typename Size<TNeedle>::Type TSize;
-	Holder<TNeedle> data_needle;
+	Holder<TNeedle> data_host;
 	TWord* table;			// Look up table for each character in the alphabet (called B in "Navarro")
 	TWord* prefSufMatch;	// Set of all the prefixes of needle that match a suffix of haystack (called D in "Navarro")
 	TWord* di;				// Initialization word
@@ -162,7 +162,7 @@ void setHost (Pattern<TNeedle, MultipleShiftAnd> & me, TNeedle2 const & needle) 
 		}
 		me.df[(j - 1) / BitsPerValue<TWord>::VALUE] |= (1<<((j-1)%BitsPerValue<TWord>::VALUE));
 	}
-	setValue(me.data_needle, needle);
+	setValue(me.data_host, needle);
 
 	/*
 	// Debug code
@@ -235,7 +235,7 @@ inline typename Host<Pattern<TNeedle, MultipleShiftAnd>const>::Type &
 host(Pattern<TNeedle, MultipleShiftAnd> & me)
 {
 SEQAN_CHECKPOINT
-	return value(me.data_needle);
+	return value(me.data_host);
 }
 
 template <typename TNeedle>
@@ -243,7 +243,7 @@ inline typename Host<Pattern<TNeedle, MultipleShiftAnd>const>::Type &
 host(Pattern<TNeedle, MultipleShiftAnd> const & me)
 {
 SEQAN_CHECKPOINT
-	return value(me.data_needle);
+	return value(me.data_host);
 }
 
 //____________________________________________________________________________
@@ -279,7 +279,7 @@ bool _findShiftAnd_SmallNeedle(TFinder & finder, Pattern<TNeedle, MultipleShiftA
 
 		if ((me.prefSufMatch[0] & me.df[0]) != 0) {
 			// Check which pattern has matched
-			typename Iterator<TNeedle, Rooted>::Type it = begin(value(me.data_needle));
+			typename Iterator<TNeedle, Rooted>::Type it = begin(value(me.data_host));
 			TWord j = 0;
 			for(;!atEnd(it);goNext(it)) {
 				j += length(*it);
@@ -348,7 +348,7 @@ bool _findShiftAnd_LargeNeedle(TFinder & finder, Pattern<TNeedle, MultipleShiftA
 		}
 		if (match) {
 			// Check which pattern has matched
-			typename Iterator<TNeedle, Rooted>::Type it = begin(value(me.data_needle));
+			typename Iterator<TNeedle, Rooted>::Type it = begin(value(me.data_host));
 			TWord j = 0;
 			for(;!atEnd(it);goNext(it)) {
 				j += length(*it);

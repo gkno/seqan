@@ -52,7 +52,7 @@ class Pattern<TNeedle, ShiftAnd> {
 public:
 	typedef unsigned int TWord;
 
-	Holder<TNeedle> data_needle;
+	Holder<TNeedle> data_host;
 	String<TWord> table;			// Look up table for each character in the alphabet (called B in "Navarro")
 	String<TWord> prefSufMatch;		// Set of all the prefixes of needle that match a suffix of haystack (called D in "Navarro")
 	TWord needleLength;				// e.g., needleLength=33 --> blockCount=2 (iff w=32 bits)
@@ -95,7 +95,7 @@ void setHost (Pattern<TNeedle, ShiftAnd> & me, TNeedle2 const & needle) {
 		me.table[me.blockCount*pos + j / BitsPerValue<TWord>::VALUE] |= (1<<(j%BitsPerValue<TWord>::VALUE));
 	}
 
-	setValue(me.data_needle, needle);
+	setValue(me.data_host, needle);
 
 	/*
 	// Debug code

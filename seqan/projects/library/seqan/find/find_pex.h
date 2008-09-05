@@ -124,7 +124,7 @@ class Pattern<TNeedle, Pex<TVerification,TMultiFinder > >
    // the maximal accepted error
    TScore limit;
    // reference to the needle
-   Holder<TNeedle> data_needle;
+   Holder<TNeedle> data_host;
    // pattern object for the multi pattern search
    TMFinder multiPattern;
    // needles for the multi pattern search
@@ -176,7 +176,7 @@ void setHost (Pattern<TNeedle, Pex<TVerification,TMultiFinder > > & me, TNeedle2
 {
   // initialisation of the find-tree etc. will be done when patternInit
   // is called to assure that we already know the scoreLimit
-  me.data_needle = needle;
+  me.data_host = needle;
   me.needleLength = length(needle);
   me.findNext = false;
   me.patternNeedsInit = true;
@@ -195,7 +195,7 @@ inline typename Host<Pattern<TNeedle, Pex<TVerification,TMultiFinder > > const>:
 host(Pattern<TNeedle, Pex<TVerification,TMultiFinder > > & me)
 {
 SEQAN_CHECKPOINT
-  return value(me.data_needle);
+  return value(me.data_host);
 }
 
 template <typename TNeedle, typename TVerification, typename TMultiFinder>
@@ -203,7 +203,7 @@ inline typename Host<Pattern<TNeedle, Pex<TVerification,TMultiFinder > > const>:
 host(Pattern<TNeedle, Pex<TVerification,TMultiFinder > > const & me)
 {
 SEQAN_CHECKPOINT
-  return value(me.data_needle);
+  return value(me.data_host);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -288,7 +288,7 @@ SEQAN_CHECKPOINT
     pr.error = 0;
 
     insert(me.range_table,i,pr);
-    appendValue(me.splitted_needles,infix(value(me.data_needle),pr.start,pr.end));
+    appendValue(me.splitted_needles,infix(value(me.data_host),pr.start,pr.end));
     s += (c == me.limit ? me.needleLength : seg_len);
     ++c;
     ++i;
@@ -298,7 +298,7 @@ SEQAN_CHECKPOINT
   me.lastFNdl = 0;
 
   // insert complete needle in range table to use the verifier
-  appendValue(me.segment_store,infix(value(me.data_needle),0,me.needleLength));
+  appendValue(me.segment_store,infix(value(me.data_host),0,me.needleLength));
   _PexRange<TPosition,TScore,TVerifier,TNeedle> pr;
   pr.start = 0;
   pr.end = me.needleLength;
@@ -316,7 +316,7 @@ SEQAN_CHECKPOINT
 #ifdef SEQAN_DEBUG_PEX
   ::std::cout << " -------------------------------------------------  " << ::std::endl;
   ::std::cout << "                   PATTERN INIT                     " << ::std::endl;
-  ::std::cout << "Needle:   " << value(me.data_needle) << ::std::endl;
+  ::std::cout << "Needle:   " << value(me.data_host) << ::std::endl;
   ::std::cout << "|Needle|: " << me.needleLength << ::std::endl;
   ::std::cout << "seg_len:  " << seg_len << ::std::endl;
   ::std::cout << "limit:    " << me.limit << ::std::endl;
@@ -430,7 +430,7 @@ void _createTree(Pattern<TNeedle, Pex<Hierarchical, TMultiFinder > > &me, unsign
   ::std::cout << "called _createTree:" << ::std::endl;
   ::std::cout << "  start: " << start << ::std::endl;
   ::std::cout << "  end  : " << end << ::std::endl;
-  ::std::cout << "  seq  : " << infix(value(me.data_needle),start,end + 1) << ::std::endl;
+  ::std::cout << "  seq  : " << infix(value(me.data_host),start,end + 1) << ::std::endl;
   ::std::cout << "  k    : " << k << ::std::endl;
   ::std::cout << "  paren: " << parent << ::std::endl;
   ::std::cout << "  direc: " << direction << ::std::endl;
@@ -447,7 +447,7 @@ void _createTree(Pattern<TNeedle, Pex<Hierarchical, TMultiFinder > > &me, unsign
   pr.end = end;
   pr.error = k;
 
-  appendValue(me.segment_store,infix(value(me.data_needle),pr.start,pr.end + 1));
+  appendValue(me.segment_store,infix(value(me.data_host),pr.start,pr.end + 1));
   setScoreLimit(pr.verifier, - static_cast<int>(pr.error));
   setHost(pr.verifier, me.segment_store[length(me.segment_store) - 1]);
   
@@ -458,7 +458,7 @@ void _createTree(Pattern<TNeedle, Pex<Hierarchical, TMultiFinder > > &me, unsign
   insert(me.range_table,cur_idx,pr);
   
   if(k == 0){
-    appendValue(me.splitted_needles,infix(value(me.data_needle),pr.start,pr.end + 1));
+    appendValue(me.splitted_needles,infix(value(me.data_host),pr.start,pr.end + 1));
 #ifdef SEQAN_DEBUG_PEX
     ::std::cout << "inserted : " << me.splitted_needles[length(me.splitted_needles) - 1] << " into splitted needles" << ::std::endl;
     ::std::cout << "assign to leaf_map " << length(me.splitted_needles) - 1 << " value " << cur_idx << ::std::endl;
@@ -503,7 +503,7 @@ SEQAN_CHECKPOINT
 #ifdef SEQAN_DEBUG_PEX
   ::std::cout << " -------------------------------------------------  " << ::std::endl;
   ::std::cout << "                   PATTERN INIT                     " << ::std::endl;
-  ::std::cout << "Needle:   " << value(me.data_needle) << ::std::endl;
+  ::std::cout << "Needle:   " << value(me.data_host) << ::std::endl;
   ::std::cout << "|Needle|: " << me.needleLength << ::std::endl;
   ::std::cout << "limit:    " << me.limit << ::std::endl;
   ::std::cout << "k:        " << k << ::std::endl;

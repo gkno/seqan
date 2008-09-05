@@ -53,7 +53,7 @@ class Pattern<TNeedle, Horspool>
 public:
 	typedef typename Size<TNeedle>::Type TSize;
 
-	Holder<TNeedle>		data_needle;
+	Holder<TNeedle>		data_host;
 	String<TSize>		data_map;
 
 //____________________________________________________________________________
@@ -108,7 +108,7 @@ setHost(Pattern<TNeedle, Horspool> & me, TNeedle2 const & ndl)
 		++it;
 	}
 
-	me.data_needle = ndl;
+	me.data_host = ndl;
 }
 
 template <typename TNeedle, typename TNeedle2>

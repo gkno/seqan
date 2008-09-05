@@ -39,7 +39,7 @@ class Pattern<TNeedle, WildShiftAnd> {
 public:
 	typedef unsigned TWord;
 
-	Holder<TNeedle> data_needle;
+	Holder<TNeedle> data_host;
 	String<TWord> table;			// Look up table for each character in the alphabet (called B in "Navarro")
 	
 	String<TWord> s_table;			// marks all positions, that can remain active, after reading a specific character (called S in "Navarro")
@@ -474,7 +474,7 @@ SEQAN_CHECKPOINT
 		}
 	}
 
-	setValue(me.data_needle, needle);
+	setValue(me.data_host, needle);
 
 #ifdef SEQAN_WILD_SHIFTAND_DEBUG	
 	// Debug code
@@ -549,7 +549,7 @@ inline typename Host<Pattern<TNeedle, WildShiftAnd>const>::Type &
 host(Pattern<TNeedle, WildShiftAnd> & me)
 {
 SEQAN_CHECKPOINT
-	return value(me.data_needle);
+	return value(me.data_host);
 }
 
 template <typename TNeedle>
@@ -557,7 +557,7 @@ inline typename Host<Pattern<TNeedle, WildShiftAnd>const>::Type &
 host(Pattern<TNeedle, WildShiftAnd> const & me)
 {
 SEQAN_CHECKPOINT
-	return value(me.data_needle);
+	return value(me.data_host);
 }
 
 //____________________________________________________________________________

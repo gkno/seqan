@@ -28,7 +28,7 @@
 #include <seqan/pipe.h>
 #include <seqan/modifier.h>
 
-#include <seqan/find/find_base.h>
+#include <seqan/find.h>
 #include <seqan/misc/misc_set.h>
 
 #include <climits>

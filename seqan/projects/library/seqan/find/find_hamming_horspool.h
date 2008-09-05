@@ -54,7 +54,7 @@ class Pattern<TNeedle, HammingHorspool>
 public:
 	typedef typename Size<TNeedle>::Type TSize;
 
-	Holder<TNeedle>	data_needle; 
+	Holder<TNeedle>	data_host; 
 	String<TSize>	shift_table; 	// c x (k+1) shift table (c = alphabet size)   
 	TSize			shift;			// current shift
 	unsigned int	k;				// maximal number of allowed mismatches
@@ -120,7 +120,7 @@ setHost(Pattern<TNeedle, HammingHorspool> & me,
 
 	}
 
-	me.data_needle = ndl;
+	me.data_host = ndl;
 }
 
 
@@ -147,7 +147,7 @@ inline typename Host<Pattern<TNeedle, HammingHorspool>const>::Type &
 host(Pattern<TNeedle, HammingHorspool> & me)
 {
 SEQAN_CHECKPOINT
-	return value(me.data_needle);
+	return value(me.data_host);
 }
 
 template <typename TNeedle>
@@ -155,7 +155,7 @@ inline typename Host<Pattern<TNeedle, HammingHorspool>const>::Type &
 host(Pattern<TNeedle, HammingHorspool> const & me)
 {
 SEQAN_CHECKPOINT
-	return value(me.data_needle);
+	return value(me.data_host);
 }
 
 //____________________________________________________________________________

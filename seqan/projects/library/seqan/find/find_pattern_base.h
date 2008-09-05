@@ -242,7 +242,7 @@ inline typename Host<Pattern<TNeedle, TSpec> >::Type &
 host(Pattern<TNeedle, TSpec> & me)
 {
 SEQAN_CHECKPOINT
-	return value(me.data_needle);
+	return value(me.data_host);
 }
 
 template <typename TNeedle, typename TSpec>
@@ -250,7 +250,7 @@ inline typename Host<Pattern<TNeedle, TSpec> const>::Type &
 host(Pattern<TNeedle, TSpec> const & me)
 {
 SEQAN_CHECKPOINT
-	return value(me.data_needle);
+	return value(me.data_host);
 }
 
 

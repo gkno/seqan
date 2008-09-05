@@ -85,7 +85,7 @@ private:
 public:
 	typedef typename Value<TNeedle>::Type TAlphabet;
 	typedef typename Size<TNeedle>::Type TSize;
-	Holder<TNeedle> data_needle;
+	Holder<TNeedle> data_host;
 	TSize needleLength;		
 	TSize haystackLength;
 	TSize step;
@@ -139,7 +139,7 @@ setHost (Pattern<TNeedle, BFAM<Oracle> > & me, TNeedle2 const& needle)
 	me.needleLength = length(needle);
 	clear(me.automaton);
 	createOracleOnReverse(me.automaton,needle);
-	setValue(me.data_needle, needle);
+	setValue(me.data_host, needle);
 }
 //BFAM<Trie>: BTM Algorithm (the same as BOM, but with an trie)
 template <typename TNeedle, typename TNeedle2>
@@ -157,7 +157,7 @@ setHost (Pattern<TNeedle, BFAM<Trie> > & me, TNeedle2 const& needle)
 
 	createSuffixTrie(me.automaton, terminal_state_map, reverse_string);
 
-	setValue(me.data_needle, needle);
+	setValue(me.data_host, needle);
 }
 
 template <typename TNeedle, typename TNeedle2, typename TSpec>

@@ -95,7 +95,7 @@ public:
 	unsigned k;					// the maximal number of differences allowed
 	unsigned lastBlock;			// the block containing the last active cell
 
-	Holder<TNeedle>		data_needle;
+	Holder<TNeedle>		data_host;
 
 	TWord VP0;					// VP[0] (saves one dereferentiation)
 	TWord VN0;					// VN[0]
@@ -148,7 +148,7 @@ public:
 	TWord VN0;					// VN[0]
 	int scoreBit;
 
-	Holder<TNeedle>		data_needle;
+	Holder<TNeedle>		data_host;
 
 //	String<int> mat;
 
@@ -239,14 +239,14 @@ void setHost(Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > & me,
 			 TNeedle2 & ndl)
 {
 SEQAN_CHECKPOINT
-	setValue(me.data_needle, ndl);
+	setValue(me.data_host, ndl);
 	_patternFirstInit(me, ndl);
 }
 template <typename TNeedle, typename TSpec, typename TFindBeginPatternSpec, typename TNeedle2>
 void setHost(Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > & me, 
 			 TNeedle2 const & ndl) 
 {
-	setValue(me.data_needle, ndl);
+	setValue(me.data_host, ndl);
 	_patternFirstInit(me, ndl);
 }
 
@@ -257,7 +257,7 @@ inline typename Host<Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > >::T
 host(Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > & me)
 {
 SEQAN_CHECKPOINT
-	return value(me.data_needle);
+	return value(me.data_host);
 }
 
 template <typename TNeedle, typename TSpec, typename TFindBeginPatternSpec>
@@ -265,7 +265,7 @@ inline typename Host<Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > cons
 host(Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> >  const & me)
 {
 SEQAN_CHECKPOINT
-	return value(me.data_needle);
+	return value(me.data_host);
 }
 
 //____________________________________________________________________________

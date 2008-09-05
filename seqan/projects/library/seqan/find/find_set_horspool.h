@@ -61,7 +61,7 @@ public:
 	typedef Graph<Automaton<TAlphabet> > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	
-	Holder<TNeedle> data_needle;
+	Holder<TNeedle> data_host;
 	Graph<Automaton<TAlphabet> > data_reverseTrie;  // Search trie
 	String<String<TSize> > data_terminalStateMap;
 	String<TSize> data_dMap;	// Jump table
@@ -125,7 +125,7 @@ void setHost (Pattern<TNeedle, SetHorspool> & me, TNeedle2 const & needle) {
 	// Create Trie
 	createTrieOnReverse(me.data_reverseTrie,me.data_terminalStateMap,needle);
 	assignRoot(me.data_reverseTrie,0);
-	setValue(me.data_needle, needle);
+	setValue(me.data_host, needle);
 
 	// Create jump map
 	TSize alphabet_size = ValueSize<TAlphabet>::VALUE;
@@ -187,7 +187,7 @@ inline typename Host<Pattern<TNeedle, SetHorspool>const>::Type &
 host(Pattern<TNeedle, SetHorspool> & me)
 {
 SEQAN_CHECKPOINT
-	return value(me.data_needle);
+	return value(me.data_host);
 }
 
 template <typename TNeedle>
@@ -195,7 +195,7 @@ inline typename Host<Pattern<TNeedle, SetHorspool>const>::Type &
 host(Pattern<TNeedle, SetHorspool> const & me)
 {
 SEQAN_CHECKPOINT
-	return value(me.data_needle);
+	return value(me.data_host);
 }
 
 //____________________________________________________________________________
