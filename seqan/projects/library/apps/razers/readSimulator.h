@@ -195,7 +195,7 @@ void simulateReads(
 			}
 			if (m == 4) std::cout << "HUH?";
 		//	std::cout << "operation = " << operation << "\t";
-			if(pos==0 && (currOp==SEQAN_DELETE || currOp == SEQAN_INSERT))
+			if(pos==0 &&  currOp == SEQAN_INSERT)// (currOp==SEQAN_DELETE || currOp == SEQAN_INSERT))
 			{
 				currOp = 0;
 				continue;
@@ -206,11 +206,11 @@ void simulateReads(
 			else
 			{
 				++countErrors;
-				if(currOp != SEQAN_DELETE)
+				if(currOp != SEQAN_INSERT)
 					read[trueLength] = sample(currOp,readTemplate[pos]);
 			}
-			if(currOp != SEQAN_DELETE) ++trueLength; //if read nucleotide is not deleted
-			if(currOp != SEQAN_INSERT) ++pos; //if read nucleotide is not an insert
+			if(currOp != SEQAN_INSERT) ++trueLength; //if read nucleotide is not deleted
+			if(currOp != SEQAN_DELETE) ++pos; //if read nucleotide is not an insert
 //			if((lastOp==SEQAN_DELETE && currOp==SEQAN_INSERT) || (currOp==SEQAN_DELETE && lastOp==SEQAN_INSERT))
 //			{
 //				--countErrors;
@@ -220,13 +220,13 @@ void simulateReads(
 		//	std::cout << "true len = " << trueLength << std::endl;
 			if(trueLength == readLength || countErrors >= maxErrors)
 			{
-				if(countErrors < maxErrors && currOp != SEQAN_INSERT)
+				if(countErrors < maxErrors)// && currOp != SEQAN_INSERT)
 					successful = true;
 				break;
 			}
 		}
 		
-	
+	/*
 		if(successful)
 		{
 			int patLen = length(modificationPattern);
@@ -282,7 +282,7 @@ void simulateReads(
 				}
 			}
 		}
-		
+		*/
 		
 /*		countMateErrors = 0
 		if (simulateMatePairs == 1) {
@@ -298,7 +298,7 @@ void simulateReads(
 		{
 			//verify that number of errors is correct
 			bool kickOut = false;
-			int start1 = startPos;
+/*			int start1 = startPos;
 			int maxEnd1 = maxEnd;
 			while(start1 > 0 && (startPos - start1) < countErrors) --start1;
 			while(maxEnd1 > 0 && (maxEnd1 - maxEnd) < countErrors) ++maxEnd1;
@@ -348,7 +348,7 @@ void simulateReads(
 			if(revComp) reverseComplementInPlace(read);
 			SEQAN_TASSERT(maxScore >= -(int)countErrors)
 			if(maxScore != -(int)countErrors)
-				kickOut = true;
+				kickOut = true;*/
 			if(!kickOut)
 			{
 				std::stringstream id;
