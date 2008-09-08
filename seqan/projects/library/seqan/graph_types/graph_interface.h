@@ -313,7 +313,7 @@ Useful for various graph algorithms, e.g., missing predecessors, vertices that h
 ..returns:Pseudo nil value for type T.
 */
 template <typename T>
-inline T const
+inline T
 getNil(T *)
 {
 	return ~0;
@@ -322,7 +322,7 @@ getNil(T *)
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-inline T const
+inline T
 getNil()
 {
 SEQAN_CHECKPOINT
@@ -337,7 +337,7 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-inline T const
+inline T
 _getInfinity()
 {
 	T * _tag = 0;
@@ -347,7 +347,7 @@ _getInfinity()
 //////////////////////////////////////////////////////////////////////////////
 
 template <>
-inline double const
+inline double
 _getInfinity()
 {
 	return 1000000000;
@@ -366,7 +366,7 @@ _getInfinityDistance(TWeightMap const&)
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-inline T const
+inline T
 _getInfinityDistance()
 {
 	return (_getInfinity<T>() / 2);
@@ -416,7 +416,7 @@ For a tree the root must be the first vertex in this array and the enumeration i
 template<typename TSpec, typename TEdgeArray, typename TSize>
 inline void
 addEdges(Graph<TSpec>& dest,
-		 TEdgeArray const edges,
+		 TEdgeArray const & edges,
 		 TSize const size) 
 {
 	typedef typename VertexDescriptor<Graph<TSpec> >::Type TVertexDescriptor;
