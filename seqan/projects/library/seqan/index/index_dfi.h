@@ -39,11 +39,11 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 // constant frequency predicate
 
-	template <bool RESULT>
+	template <bool Result>
 	struct _DFIPredDefault 
 	{
         inline bool operator()(_DFIEntry const &) const {
-			return RESULT;
+			return Result;
 		}
     };
 
