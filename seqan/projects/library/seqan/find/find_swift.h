@@ -39,17 +39,25 @@ typedef Tag<_SwiftLocal> SwiftLocal;
 struct _SwiftSemiGlobal;
 typedef Tag<_SwiftSemiGlobal> SwiftSemiGlobal;
 
+struct _SwiftSemiGlobalHamming;
+typedef Tag<_SwiftSemiGlobalHamming> SwiftSemiGlobalHamming;
+
 
 template <typename TSpec = SwiftSemiGlobal>
 struct Swift {
 	enum { SEMIGLOBAL = 1 };		// 0..match eps-match of min.length n0; 1..match the whole read
 	enum { DIAGONAL = 1 };			// 0..use rectangular buckets (QUASAR); 1..use diagonal buckets (SWIFT)
-#ifdef WITH_1HULL
-	enum { QGRAM_ERRORS = 1 };		// allow 1 error per q-gram
-#else
-	enum { QGRAM_ERRORS = 0 };		// allow 0 error per q-gram
-#endif
-	enum { HAMMING_ONLY = 0 };
+	enum { QGRAM_ERRORS = 0 };		// q-gram must match exactly
+	enum { HAMMING_ONLY = 0 };		// 0..no indels; 1..allow indels
+	enum { PARAMS_BY_LENGTH = 1 };	// params are determined only by seq.length
+};
+
+template <>
+struct Swift<SwiftSemiGlobalHamming> {
+	enum { SEMIGLOBAL = 1 };		// 0..match eps-match of min.length n0; 1..match the whole read
+	enum { DIAGONAL = 1 };			// 0..use rectangular buckets (QUASAR); 1..use diagonal buckets (SWIFT)
+	enum { QGRAM_ERRORS = 0 };		// q-gram must match exactly
+	enum { HAMMING_ONLY = 1 };		// 0..no indels; 1..allow indels
 	enum { PARAMS_BY_LENGTH = 1 };	// params are determined only by seq.length
 };
 
@@ -58,7 +66,7 @@ struct Swift<SwiftLocal> {
 	enum { SEMIGLOBAL = 0 };	// 0..match eps-match of min.length n0; 1..match the whole read
 	enum { DIAGONAL = 1 };		// 0..use rectangular buckets (QUASAR); 1..use diagonal buckets (SWIFT)
 	enum { QGRAM_ERRORS = 0 };	// allow 0 errors per q-gram
-	enum { HAMMING_ONLY = 0 };
+	enum { HAMMING_ONLY = 0 };	// 0..no indels; 1..allow indels
 	enum { PARAMS_BY_LENGTH = 0 };
 };
 
@@ -98,7 +106,7 @@ struct SwiftParameters {
 	struct _SwiftBucketParams {
 		TSize			firstBucket;	// first _SwiftBucket entry in pattern.buckets
 		TSize			reuseMask;		// 2^ceil(log2(x)) reuse every x-th bucket)
-		TShortSize		distanceCut;	// if lastIncrement is this far or farer away, threshold can't be reached
+//		TShortSize		distanceCut;	// if lastIncrement is this far or farer away, threshold can't be reached
 		TShortSize		delta;			// buckets begin at multiples of delta
 		TShortSize		threshold;		// at least threshold q-gram hits induce an approx match
 		TShortSize		overlap;		// number of diagonals/columns a bucket shares with its neighbor
@@ -297,7 +305,7 @@ inline void _printSwiftParams(TParams &bucketParams)
 {
 	::std::cout << "  firstBucket: " << bucketParams.firstBucket << ::std::endl;
 	::std::cout << "  reuseMask:   " << bucketParams.reuseMask << ::std::endl;
-	::std::cout << "  distanceCut: " << bucketParams.distanceCut << ::std::endl;
+//	::std::cout << "  distanceCut: " << bucketParams.distanceCut << ::std::endl;
 	::std::cout << "  delta:       " << bucketParams.delta << ::std::endl;
 	::std::cout << "  threshold:   " << bucketParams.threshold << ::std::endl;
 	::std::cout << "  overlap:     " << bucketParams.overlap << ::std::endl;
@@ -410,7 +418,7 @@ inline void _patternInit(Pattern<TIndex, Swift<TSpec> > &pattern, TFloat errorRa
 
 			TSize errors = (TSize) floor((2 * bucketParams.threshold + span - 3) / (1 / errorRate - span));
 			bucketParams.overlap = errors;
-			bucketParams.distanceCut = (bucketParams.threshold - 1) + span * (errors + span);
+//			bucketParams.distanceCut = (bucketParams.threshold - 1) + span * (errors + span);
 			bucketParams.logDelta = (TSize) ceil(log((double)errors) / log(2.0));
 			if (bucketParams.logDelta < pattern.params.minLog2Delta) 
 				bucketParams.logDelta = pattern.params.minLog2Delta;
@@ -441,7 +449,7 @@ inline void _patternInit(Pattern<TIndex, Swift<TSpec> > &pattern, TFloat errorRa
 			// a bucket has distanceCut different positions of q-grams
 			// if a q-gram is this far or farer away it can't belong to the
 			// same bucket
-			bucketParams.distanceCut = length - (span - 1) + errors;
+//			bucketParams.distanceCut = length - (span - 1) + errors;
 
 			TSize bucketsPerCol2;
 			if (Swift<TSpec>::DIAGONAL == 1)
@@ -475,7 +483,7 @@ inline void _patternInit(Pattern<TIndex, Swift<TSpec> > &pattern, TFloat errorRa
 				bucketsPerCol2 = 2;
 			}
 
-			SEQAN_ASSERT(distanceCut <= bucketsPerCol * (TSize) delta);
+//			SEQAN_ASSERT(distanceCut <= bucketsPerCol * (TSize) delta);
 
 			bucketParams.firstBucket = count;
 			bucketParams.reuseMask = bucketsPerCol2 - 1;
