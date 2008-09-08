@@ -42,6 +42,8 @@ static TFloat optionProbDELETE = 0.0;
 unsigned qgramLen = 4;			//
 unsigned threshold = 2;			//
 
+TFloat currLossBucketUpper = -1.0;
+
 bool		fnameCount0 = 0;
 bool		fnameCount1 = 0;
 bool		prefixCount = 0;
@@ -233,7 +235,7 @@ parseGappedParams(TFile & file)
         	_parse_skipWhitespace(file,c);
                 TFloat currLossrate = _parse_readEValue(file,c);
 		_parse_skipWhitespace(file,c);
-                unsigned currMinCov = _parse_readNumber(file,c);
+                /*unsigned currMinCov =*/ _parse_readNumber(file,c);
 		_parse_skipWhitespace(file,c);
                 unsigned currPotM = _parse_readNumber(file,c);
 		_parse_skipWhitespace(file,c);
@@ -254,7 +256,7 @@ parseGappedParams(TFile & file)
 					thresholds[weight-1] = currThreshold;
 					lossrates[weight-1] = currLossrate;
 					runtimes[weight-1] = currRuntime;
-					mincovs[weight-1] = currMinCov;
+			//		mincovs[weight-1] = currMinCov;
 					atLeastOneFound = true;
 				}
 				
@@ -266,22 +268,29 @@ parseGappedParams(TFile & file)
 				thresholds[weight-1] = currThreshold;
 				lossrates[weight-1] = currLossrate;
 				runtimes[weight-1] = currRuntime;
-				mincovs[weight-1] = currMinCov;
+			//	mincovs[weight-1] = currMinCov;
 				atLeastOneFound = true;
 			
 			}
                 }
                 _parse_skipWhitespace(file,c);
         }
-	if(!atLeastOneFound) cout << "\n!!! Something wrong with file? !!!\n";
+	if(!atLeastOneFound)
+	{
+//		cout << "\n!!! Something wrong with file? !!!\n";
+		return false;
+	}
 	int i;
 	for(i = 13; i >= 0; --i )
 		if(length(shapes[i]) > 0)  // if a shape of weight i+1 has been found
 			break;
 	chosenLossRate = lossrates[i];
+	
+	// suggest a suitable combination of q and t
 	cout << "Choose s = " << shapes[i] << " and t = " << thresholds[i]<< " to achieve optimal performance for expected recognition rate >= " << (100.0-100.0*optionLossRate) << "% (expected recognition = " << (100.0-chosenLossRate*100.0) <<"%)\n\n";
 
         return true;
+//        return false;
 }
 
 
@@ -297,7 +306,7 @@ parseParams(TFile & file)
         unsigned bestQ = 1;
         unsigned bestT = 1;
 	unsigned secondBestT = 0;
-	unsigned qCutoff = 14; //depends on RAM
+	unsigned qCutoff = 14; 
         //String<TFloat> loss;
         //reserve(loss, 20*readLen);
 
@@ -339,9 +348,6 @@ parseParams(TFile & file)
 //      cout << "insge: Q="<<countQ << " T="<<countT<<"\n";
         qgramLen = bestQ;
         threshold = bestT;
-	if(bestQ==14)
-		cout << "\nIf RAM <= 1GB : Choose q = "<<bestQ-1 << " and t = "<<secondBestT<<"\nelse          : ";
-	else cout <<"\n";
 	cout << "Choose q = " << qgramLen << " and t = " << threshold << " to achieve optimal performance for expected recognition rate >= " << (100.0-100.0*optionLossRate) << "% (expected recognition = " << (100.0-chosenLossRate*100.0) <<"%)\n\n";
         return true;
 }
@@ -573,9 +579,9 @@ makeSelectedStatsFile(TError & errorDistr, map<TFloat, unsigned> & lossRateBucke
 {
 
 //	unsigned maxE = (unsigned) totalN / 5;
-	unsigned maxErrors = 2;
+	unsigned maxErrors = 5;
 	unsigned minQ = 7;
-	unsigned maxT = 10;//totalN-minQ+1;
+	unsigned maxT = totalN-minQ+1;
 	unsigned minT = 1;//totalN-minQ+1;
 
 	typedef typename Value<TError>::Type TErrorValue;
@@ -585,36 +591,43 @@ makeSelectedStatsFile(TError & errorDistr, map<TFloat, unsigned> & lossRateBucke
 
 	//q=7
 //	appendValue(shapeStrings,"1111111");
-//	appendValue(shapeStrings,"1111100011");
+	appendValue(shapeStrings,"1111100011");
 //	appendValue(shapeStrings,"111110000011");
 	//q=8
-/*	appendValue(shapeStrings,"11111111");
-	appendValue(shapeStrings,"11111000111");
+//	appendValue(shapeStrings,"11111111");
+//	appendValue(shapeStrings,"11111000111");
 	appendValue(shapeStrings,"1111110000011");
-	appendValue(shapeStrings,"11111100000011");
+//	appendValue(shapeStrings,"11111100000011");
 	//q=9
-	appendValue(shapeStrings,"111111111");
-	appendValue(shapeStrings,"111111000111");
+//	appendValue(shapeStrings,"111111111");
+//	appendValue(shapeStrings,"111111000111");
 	appendValue(shapeStrings,"1111111000011");
-	appendValue(shapeStrings,"111111000000111");
+//	appendValue(shapeStrings,"111111000000111");
 	//q=10
-	appendValue(shapeStrings,"1111111111");
-	appendValue(shapeStrings,"111111111001");
+//	appendValue(shapeStrings,"1111111111");
+//	appendValue(shapeStrings,"111111111001");
 	appendValue(shapeStrings,"1111111100011");
-	appendValue(shapeStrings,"11111110000111");
-	appendValue(shapeStrings,"111111110000011");
+//	appendValue(shapeStrings,"11111110000111");
+//	appendValue(shapeStrings,"111111110000011");
+
+/*	appendValue(shapeStrings,"111011100100000111");
+	appendValue(shapeStrings,"111111110000000011");
+	appendValue(shapeStrings,"1111111000111");
+	appendValue(shapeStrings,"1011110111000001001");
+	appendValue(shapeStrings,"111110010010111");
+	appendValue(shapeStrings,"11111111011");*/
 
 	//q=11
-	appendValue(shapeStrings,"11111111111");
-	appendValue(shapeStrings,"11111111000111");
-	appendValue(shapeStrings,"111111111000011");
+//	appendValue(shapeStrings,"11111111111");
+//	appendValue(shapeStrings,"11111111000111");
+//	appendValue(shapeStrings,"111111111000011");
 	appendValue(shapeStrings,"1111111110000011");
-	appendValue(shapeStrings,"11111111000000111");
+//	appendValue(shapeStrings,"11111111000000111");
 	//q=12
-	appendValue(shapeStrings,"111111111111");
-	appendValue(shapeStrings,"1111111111000011");
+//	appendValue(shapeStrings,"111111111111");
+//	appendValue(shapeStrings,"1111111111000011");
 	appendValue(shapeStrings,"11111111110000011");
-	appendValue(shapeStrings,"11111111000001111");*/
+//	appendValue(shapeStrings,"11111111000001111");
 /* 	appendValue(shapeStrings,"11111111111");
  	appendValue(shapeStrings,"1111111111");
  	appendValue(shapeStrings,"111111111111");*/
@@ -625,15 +638,9 @@ makeSelectedStatsFile(TError & errorDistr, map<TFloat, unsigned> & lossRateBucke
 // 	appendValue(shapeStrings,"1111111111100000011");
 	appendValue(shapeStrings,"110101111001100010111");
 
-/*	appendValue(shapeStrings,"111011100100000111");
-	appendValue(shapeStrings,"111111110000000011");
-	appendValue(shapeStrings,"1111111000111");
-	appendValue(shapeStrings,"1011110111000001001");
-	appendValue(shapeStrings,"111110010010111");
-	appendValue(shapeStrings,"11111111011");*/
 	//q=14
- 	appendValue(shapeStrings,"11111111111111");
- 	appendValue(shapeStrings,"1111111111100000111");
+// 	appendValue(shapeStrings,"11111111111111");
+ //	appendValue(shapeStrings,"1111111111100000111");
 // 	appendValue(shapeStrings,"1111111111000001111");
 // 	appendValue(shapeStrings,"11111111110000001111");
 // 	appendValue(shapeStrings,"11111111111000000111");
@@ -666,7 +673,7 @@ makeSelectedStatsFile(TError & errorDistr, map<TFloat, unsigned> & lossRateBucke
 	simulateGenome(testGenome[0], 1000000);					// generate 1Mbp genomic sequence
 	simulateReads(
 		testReads, dummyIDs, testGenome, 
-		50000, maxErrors-1, logErrorDistribution, 0.5);	// generate 10M reads
+		100000, maxErrors-1, logErrorDistribution, 0.5);	// generate 10M reads
 #endif
 
 
@@ -715,7 +722,7 @@ makeSelectedStatsFile(TError & errorDistr, map<TFloat, unsigned> & lossRateBucke
 				itlow = itup;
 				--itlow;
 
-				unsigned gminCov = getMinCov(weights[i], length(shapeStrings[i]), t);
+			//	unsigned gminCov = getMinCov(weights[i], length(shapeStrings[i]), t);
 
 				unsigned index = unsigned((*itlow).second);	
 			
@@ -734,7 +741,7 @@ makeSelectedStatsFile(TError & errorDistr, map<TFloat, unsigned> & lossRateBucke
 				if(firstTimeK[maxErrors*index + e]==true){
 					firstTimeK[maxErrors*index + e] = false;
 					ofstream fout(datName.str().c_str(), ios::out);
-					fout << "shape\t\tt\t\tloss rate\t\tminCoverage";
+					fout << "shape\t\tt\t\tloss rate";//\t\tminCoverage";
 #ifdef RUN_RAZERS
 					fout << "\tPM\t\truntime";
 #endif
@@ -759,8 +766,8 @@ makeSelectedStatsFile(TError & errorDistr, map<TFloat, unsigned> & lossRateBucke
 				ofstream fout(datName.str().c_str(), ios::app | ios::out);
 				fout << shapeStrings[i] << "\t\t";
 				fout << t << "\t\t";
-				fout << lossrate << "\t\t";
-				fout << gminCov;
+				fout << lossrate;// << "\t\t";
+				//fout << gminCov;
 #ifdef RUN_RAZERS				
 				fout << "\t\t" << razersOptions.FP + razersOptions.TP;
 				fout << "\t\t" << razersOptions.timeMapReads;
@@ -851,6 +858,9 @@ getParamsFilename(TSStr & paramsfile, map<TFloat, unsigned> & lossRateBuckets)
 		if(optionHammingOnly) paramsfile << "_H_";
 		else paramsfile << "_L_";
 		paramsfile << itlow->first << "_" << itup->first << ".dat";
+		
+		static const TFloat epsilon = 0.0000001;	
+		currLossBucketUpper = itlow->first-epsilon;
 		
 	}
 	else
@@ -1124,10 +1134,27 @@ int main(int argc, const char *argv[])
 	}
 	else
 	{
-		if(doSelectedGapped || doAllOneGapped) parseGappedParams(file);
+		if(doSelectedGapped || doAllOneGapped)
+		{
+			while(!parseGappedParams(file) && currLossBucketUpper>0)
+			{
+				optionLossRate = currLossBucketUpper;		// in
+				file.close();	
+				paramsfile.str("");
+				getParamsFilename(paramsfile,lossRateBuckets);
+					// parse loss rate file and find appropriate filter criterium
+				cout << "\n--> Reading " <<  paramsfile.str()<<"\n";
+				file.open(paramsfile.str().c_str(),ios_base::in | ios_base::binary);
+				if(!file.is_open())
+				{
+					cout << "Couldn't open file "<<paramsfile.str()<<"\n";
+					return 0;
+				}
+			}
+		}
 		else parseParams(file);
+		file.close();
 	}
-	// suggest a suitable combination of q and t
 
 	return 0;
 }
