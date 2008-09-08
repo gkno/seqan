@@ -1777,7 +1777,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 		typedef typename Size<TString>::Type		TSize;
 
 		fill(me.pager, enclosingBlocks(new_length, (unsigned)me.PAGE_SIZE), TPageFrame::UNINITIALIZED, expand);
-        if (new_length < me.data_size && me.file) 
+        if ((TSize)new_length < me.data_size && me.file) 
 		{
 			// wait for all pending transfers
             waitForAll(me);
