@@ -734,9 +734,9 @@ write(TFile & target,
 					_streamPut(target, ' ');
 					_streamWrite(target,"(Id: ");
 					_streamPutInt(target, _getId(current));
-					_streamPut(target, ',');
-					_streamWrite(target," Cargo-Type: ");
-					_streamWrite(target, typeid(getCargo(current)).name());
+					//_streamPut(target, ',');
+					//_streamWrite(target," Cargo-Type: ");
+					//_streamWrite(target, typeid(getCargo(current)).name());
 					_streamPut(target, ')');
 					_streamPut(target, '\n');
 					current=getNextS(current);
