@@ -169,7 +169,7 @@ globalAlignment(StringSet<TString, TSpec> const& seqSet,
 
 	// Use these segment matches for the initial alignment graph
 	TGraph g(seqSet);
-	buildAlignmentGraph(matches, scores, g, FrequencyCounting() );
+	buildAlignmentGraph(matches, g, FrequencyCounting() );
 
 	// Guide tree
 	Graph<Tree<double> > guideTree;
@@ -259,7 +259,7 @@ globalAlignment(StringSet<TString, TSpec> const& seqSet,
 
 	// Use these segment matches for the initial alignment graph
 	TGraph g(seqSet);
-	buildAlignmentGraph(matches, scores, g, FrequencyCounting() );
+	buildAlignmentGraph(matches, g, FrequencyCounting() );
 	
 	// Guide tree
 	Graph<Tree<double> > guideTree;
@@ -331,7 +331,7 @@ globalAlignment(StringSet<TString, TSpec> const& seqSet,
 
 	// Use these segment matches for the initial alignment graph
 	TGraph g(seqSet);
-	buildAlignmentGraph(matches, scores, g, FrequencyCounting() );
+	buildAlignmentGraph(matches, g, FrequencyCounting() );
 	
 	// Guide tree
 	Graph<Tree<double> > guideTree;
@@ -410,7 +410,7 @@ globalAlignment(StringSet<TString, TSpec> const& seqSet,
 
 	// Use these segment matches for the initial alignment graph
 	TGraph g(seqSet);
-	buildAlignmentGraph(matches, scores, g, FrequencyCounting() );
+	buildAlignmentGraph(matches, g, FrequencyCounting() );
 	
 	// Guide tree
 	Graph<Tree<double> > guideTree;
@@ -475,30 +475,36 @@ metaGlobalAlignment(StringSet<TString, TSpec> const& seqSet,
 	typedef Graph<Alignment<TStringSet, TSize> > TGraph;
 	typedef typename Id<TGraph>::Type TId;
 	
-	// Read all alignments
-	String<TGraph*> libs;
+	// Parse all alignments and generate segment matches
+	typedef String<Fragment<> > TFragmentString;
+	TFragmentString matches;
 	String<char> alnFiles = value(cfgOpt, "aln");
 	String<char> alignmentFile;
 	for(TSize i = 0; i<=length(alnFiles); ++i) {
-		if ((i == length(alnFiles) || (value(alnFiles, i) == ','))) {
-			TGraph* g = new TGraph(seqSet);
+		if ((i == length(alnFiles) || (value(alnFiles, i) == ','))) {		
 			std::stringstream input;
 			input << alignmentFile;
 			std::ifstream strm_lib;
 			strm_lib.open(input.str().c_str(), std::ios_base::in | std::ios_base::binary);
-			read(strm_lib, *g, nameSet, scType, FastaAlign());
+			read(strm_lib, matches, nameSet, FastaAlign());
 			strm_lib.close();
-			appendValue(libs, g);
 			clear(alignmentFile);
 		} else {
-			appendValue(alignmentFile, value(alnFiles, i));
+			if ((value(alnFiles, i) != ' ') && (value(alnFiles, i) != '\t')) appendValue(alignmentFile, value(alnFiles, i));
 		}
 	}
 
-	// Combine all alignments
-	TGraph alignGraph(seqSet);
-	combineGraphs(alignGraph, libs, FrequencyCounting() );
+	// Score the segment matches
+	typedef typename Value<TScore>::Type TScoreValue;
+	typedef String<TScoreValue> TScoreValues;
+	TScoreValues scores;
+	scoreMatches(seqSet, scType, matches, scores);
 
+	// Use these segment matches to generate a graph
+	TGraph alignGraph(seqSet);
+	//buildAlignmentGraph(matches, scores, alignGraph, FrequencyCounting() );
+	buildAlignmentGraph(matches, scores, alignGraph, FractionalScore() );
+	
 	// Get a guide tree
 	Graph<Tree<double> > guideTree;
 	if (length(value(cfgOpt, "usetree"))) {
@@ -530,7 +536,6 @@ metaGlobalAlignment(StringSet<TString, TSpec> const& seqSet,
 	// Clean-up
 	clear(guideTree);
 	clear(alignGraph);
-	for(TSize i = 0; i<length(libs); ++i) delete (value(libs,i));
 }
 
 //////////////////////////////////////////////////////////////////////////////

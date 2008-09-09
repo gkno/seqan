@@ -353,6 +353,7 @@ valueHelp(ConfigOptions<TKey, TValue>& cfgOpt)
 template<typename TKey, typename TValue>
 inline bool
 parseCmdLine(int argc, const char *argv[], ConfigOptions<TKey, TValue>& cfgOpt) {
+	TKey lastKey = "";
 	for(int i = 1; i < argc; ++i) {
 		if (argv[i][0] == '-') {
 			TKey key = &argv[i][1];
@@ -363,7 +364,17 @@ parseCmdLine(int argc, const char *argv[], ConfigOptions<TKey, TValue>& cfgOpt) 
 				}
 				++i;
 				cfgOpt.option[key] = argv[i];
+				lastKey = key;
 				continue;
+			} else {
+				std::cerr << valueHelp(cfgOpt) << std::endl;
+				return false;
+			}
+		} else {
+			if (length(lastKey)) {
+				TValue tmp = cfgOpt.option[lastKey];
+				append(tmp, &argv[i][0]);
+				cfgOpt.option[lastKey] = tmp;
 			} else {
 				std::cerr << valueHelp(cfgOpt) << std::endl;
 				return false;

@@ -686,20 +686,6 @@ void Test_Alignments2() {
 	strm3.open(TEST_PATH "align.fasta", std::ios_base::out | std::ios_base::trunc);
 	write(strm3,gOut,nameSet,FastaFormat());
 	strm3.close();
-
-	// Reading
-	clear(seqSet);
-	clear(nameSet);
-	std::fstream strmRead3a;
-	strmRead3a.open(TEST_PATH "align.fasta", std::ios_base::in | std::ios_base::binary);
-	read(strmRead3a,seqSet,nameSet,FastaAlign()); 
-	strmRead3a.close();
-	std::fstream strmRead3;
-	strmRead3.open(TEST_PATH "align.fasta", std::ios_base::in | std::ios_base::binary);
-	clearVertices(gOut);
-	read(strmRead3, gOut, nameSet, score_type, FastaAlign());
-	strmRead3.close();
-	std::cout << gOut << std::endl;
 }
 
 

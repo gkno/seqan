@@ -127,10 +127,9 @@ buildAlignmentGraph(String<TFragment, TSpec1>& matches,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TFragment, typename TSpec1, typename TScoreValue, typename TSpec2, typename TStringSet, typename TCargo, typename TSpec> 
+template<typename TFragment, typename TSpec1, typename TStringSet, typename TCargo, typename TSpec> 
 inline void
 buildAlignmentGraph(String<TFragment, TSpec1>& matches,
-					String<TScoreValue, TSpec2>&,
 					Graph<Alignment<TStringSet, TCargo, TSpec> >& outGraph,
 					FrequencyCounting)
 {
@@ -179,6 +178,17 @@ buildAlignmentGraph(String<TFragment, TSpec1>& matches,
 	matchRefinement(matches,strSet,outGraph);
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TFragment, typename TSpec1, typename TScoreValue, typename TSpec2, typename TStringSet, typename TCargo, typename TSpec> 
+inline void
+buildAlignmentGraph(String<TFragment, TSpec1>& matches,
+					String<TScoreValue, TSpec2>&,
+					Graph<Alignment<TStringSet, TCargo, TSpec> >& outGraph,
+					FrequencyCounting)
+{
+	buildAlignmentGraph(matches, outGraph, FrequencyCounting() );
+}
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -256,12 +266,56 @@ combineGraphs(Graph<Alignment<TStringSet, TCargo, TSpec> >& outGraph,
 
 
 
+template<typename TString, typename TSpec, typename TScoreType, typename TSize, typename TSpec2, typename TScoreString, typename TScoreValue> 
+inline void
+scoreMatches(StringSet<TString, TSpec> const& seqSet,
+			 TScoreType const& scType,
+			 String<Fragment<TSize, ExactFragment<> >, TSpec2> const& matches,
+			 TScoreString& scores,
+			 TScoreValue offset)
+{
+	SEQAN_CHECKPOINT
+	clear(scores);
+	resize(scores, length(matches));
 
+	// Get the scores
+	typedef String<Fragment<TSize, ExactFragment<> >, TSpec2> TFragmentString;
+	typedef typename Value<TFragmentString>::Type TFragment;
+	typedef typename Id<TFragment>::Type TId;
+	typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
+	TFragmentStringIter itF = begin(matches, Standard() );
+	TFragmentStringIter itFEnd = end(matches, Standard() );
+	typedef typename Iterator<TScoreString>::Type TScoreStringIter;
+	TScoreStringIter itSc = begin(scores, Standard() );
+	for(; itF != itFEnd; goNext(itF), goNext(itSc)) {
+		// Some alignment scores might be negative, offset the scores
+		TId id1 = sequenceId(value(itF),0);
+		TId id2 = sequenceId(value(itF),1);
+		TSize pos1 = fragmentBegin(value(itF), id1);
+		TSize pos2 = fragmentBegin(value(itF), id2);
+		TSize fragLen = fragmentLength(value(itF), id1);
+		typedef typename Iterator<TString>::Type TStringIter;
+		TStringIter itS1 = begin(value(seqSet, idToPosition(seqSet, id1)), Standard() );
+		goFurther(itS1, pos1);
+		TStringIter itS2 = begin(value(seqSet, idToPosition(seqSet, id2)), Standard() );
+		goFurther(itS2, pos2);
+		value(itSc) = offset;
+		for(TSize i = pos1; i<pos1+fragLen; ++i, goNext(itS1), goNext(itS2)) {
+			value(itSc) += score(scType, value(itS1), value(itS2));
+		}
+	}
+}
 
-
-
-
-
+template<typename TString, typename TSpec, typename TScoreType, typename TFragment, typename TSpec2, typename TScoreString> 
+inline void
+scoreMatches(StringSet<TString, TSpec> const& seqSet,
+			 TScoreType const& scType,
+			 String<TFragment, TSpec2> const& matches,
+			 TScoreString& scores)
+{
+	SEQAN_CHECKPOINT
+	scoreMatches(seqSet, scType, matches, scores, (typename Value<TScoreString>::Type) 10000);
+}
 
 //////////////////////////////////////////////////////////////////////////////
 // Consistency: Triplet extension

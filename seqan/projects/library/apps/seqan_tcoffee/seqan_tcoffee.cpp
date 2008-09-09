@@ -93,12 +93,16 @@ evaluateAlignment(TConfigOptions& cfgOpt) {
 	}
 
 	// Read the alignment
-	typedef Graph<Alignment<TDepSequenceSet, TSize> > TGraph;
-	TGraph g(strSet);
+	typedef String<Fragment<> > TFragmentString;
+	TFragmentString matches;
 	std::fstream strm_lib;
 	strm_lib.open(toCString(value(cfgOpt, "infile")), std::ios_base::in | std::ios_base::binary);
-	read(strm_lib,g,names,scType,FastaAlign());	
+	read(strm_lib,matches, names, FastaAlign());	
 	strm_lib.close();
+
+	typedef Graph<Alignment<TDepSequenceSet, TSize> > TGraph;
+	TGraph g(strSet);
+	buildAlignmentGraph(matches, g, FrequencyCounting() );
 
 	//// Debug code
 	//std::cout << g << std::endl;
@@ -175,7 +179,7 @@ int main(int argc, const char *argv[]) {
 	append(helpMsg, "\tSpecifies the type of sequence data, default is protein.\n");
 	append(helpMsg, "-matches <File with Segment Matches>\n");
 	append(helpMsg, "\tA file with gapless segment matches in BLAST Tabular Format (-m 8).\n");
-	append(helpMsg, "-aln <FASTA Alignment File>,<FASTA Alignment File>,<FASTA Alignment File>\n");
+	append(helpMsg, "-aln <FASTA Alignment File>, <FASTA Alignment File>, <FASTA Alignment File>\n");
 	append(helpMsg, "\tTriggers a meta-alignment of all given alignment files.\n");
 	append(helpMsg, "-infile <FASTA Alignment File>\n");
 	append(helpMsg, "\tSwitch to evaluate a given multiple alignment file in FASTA format.\n");
@@ -204,8 +208,8 @@ int main(int argc, const char *argv[]) {
 	append(helpMsg, "seqan_tcoffee -seq seq.fasta -method genome -output fasta -outfile genomeAlign.fasta\n");
 	append(helpMsg, "seqan_tcoffee -seq seq.fasta -matches blastHit.tab -method genome\n");
 	append(helpMsg, "\nMeta-Alignment:\n");
-	append(helpMsg, "seqan_tcoffee -seq seq.fasta -aln sub1.fasta,sub2.fasta\n");
-	append(helpMsg, "seqan_tcoffee -seq seq.fasta -usetree guideTree.dnd -aln sub1.fasta,sub2.fasta -output msf -outfile final.msf\n");
+	append(helpMsg, "seqan_tcoffee -seq seq.fasta -aln sub1.fasta, sub2.fasta\n");
+	append(helpMsg, "seqan_tcoffee -seq seq.fasta -usetree guideTree.dnd -aln sub1.fasta, sub2.fasta -output msf -outfile final.msf\n");
 	append(helpMsg, "\nAlignment Evaluation:\n");
 	append(helpMsg, "seqan_tcoffee -infile align.fasta\n");
 	append(helpMsg, "seqan_tcoffee -infile align.fasta -gop 2 -gex 1 -matrix BLOSUM45\n");

@@ -427,25 +427,19 @@ read(TFile & file,
 }
 
 
-template<typename TValue, typename TScore, typename TStringSet, typename TCargo, typename TSpec>
+template<typename TValue, typename TSpec2, typename TFragment, typename TSpec, typename TSize>
 void 
-_buildAlignmentGraph(String<TValue> const& mat,
-					 TScore const& scType,
-					 Graph<Alignment<TStringSet, TCargo, TSpec> >& g) 
+_collectSegmentMatches(String<TValue, TSpec2> const& mat,
+					   String<TFragment, TSpec>& matches,
+					   TSize nseq) 
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
-	typedef typename Size<TGraph>::Type TSize;
-	TSize nseq = length(stringSet(g));
 	TSize len = length(mat) / nseq;
 	TValue gapChar = gapValue<TValue>();
 
 	// Create the anchor graph
-	typedef Fragment<> TFragment;
-	typedef String<TFragment> TFragmentString;
+	typedef String<TFragment, TSpec> TFragmentString;
 	typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
-	TFragmentString matches;
-
 	typedef std::pair<TSize, TSize> TResiduePair;
 	typedef std::set<TResiduePair> TResiduePairSet;
 	String<TResiduePairSet> resPair;
@@ -488,24 +482,22 @@ _buildAlignmentGraph(String<TValue> const& mat,
 		}
 		appendValue(matches, TFragment(seq1, startMatch1, seq2, startMatch2, len));
 	}
-	clearVertices(g);
-	matchRefinement(matches,stringSet(g),const_cast<TScore&>(scType),g);
 }
 
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TFile, typename TStringSet, typename TCargo, typename TSpec, typename TNames, typename TScoreType>
+template<typename TFile, typename TFragment, typename TSpec, typename TNames>
 void 
 read(TFile & file,
-	 Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+	 String<TFragment, TSpec>& matches,
 	 TNames const& origNames,
-	 TScoreType const& scType,
 	 FastaAlign) 
 {
 	SEQAN_CHECKPOINT
 	typedef typename Size<TNames>::Type TSize;
 	typedef typename Value<TFile>::Type TValue;
+	typedef typename Value<TNames>::Type TName;
 	
 	TValue c;
 	if (_streamEOF(file)) return;
@@ -514,12 +506,15 @@ read(TFile & file,
 	// Read sequences
 	String<TValue> mat;
 	TNames names;
+	TName nextSeq;
 	while(!_streamEOF(file)) {
 		_parse_skipWhitespace(file, c);
 		if (_streamEOF(file)) break;
 		if (c == '>') {
 			c = _streamGet(file);
-			appendValue(names, _parse_readIdentifier(file, c));
+			clear(nextSeq);
+			_parse_readIdentifier(file, nextSeq, c);
+			appendValue(names, nextSeq);
 			_parse_skipLine(file, c);
 		} else if ((c == '\n') || (c == '\r')) {
 			c = _streamGet(file);
@@ -530,21 +525,23 @@ read(TFile & file,
 	}
 	// Reorder rows according to names order
 	String<TValue> finalMat = mat;
-	TSize nseq = length(stringSet(g));
+	TSize nseq = length(names);
 	TSize len = length(mat) / nseq;
-	for(TSize i = 0; i<length(names); ++i) {
+	for(TSize i = 0; i<nseq; ++i) {
 		if (value(names, i) == value(origNames, i)) continue;
 		else {
 			for(TSize j = 0; j<length(origNames); ++j) {
 				if (value(names, i) != value(origNames, j)) continue;
-				for(TSize k = 0; k<len; ++k) {
-					value(finalMat, j * len + k) = value(mat, i * len + k);
-				}
+				// Copy the whole row
+				infix(finalMat, j * len, j * len + len) = infix(mat, i * len, i*len + len);
+				break;
 			}
 		}
 	}
 	clear(mat);
-	_buildAlignmentGraph(finalMat, scType, g); 
+
+	// Collect the segment matches
+	_collectSegmentMatches(finalMat, matches, nseq); 
 }
 
 /////////////////////////////////////////////////////////////////////////////
