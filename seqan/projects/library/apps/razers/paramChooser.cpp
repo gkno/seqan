@@ -14,8 +14,6 @@
 #include <seqan/find_motif.h>
 
 #include "recognitionRateDP.h"
-#include "bestOneGapped.h"
-
 #include "readSimulator.h"
 #include "razers.h"
 
@@ -33,16 +31,15 @@ static TFloat chosenLossRate = 0.0;			// out
 static TFloat optionErrorRate = 0.05;		// 
 static bool optionHammingOnly = false;
 static bool doUngapped = false;
-static bool doAllOneGapped = false;
-static bool doSelectedGapped = true;
+static bool doAllOneGapped = true;
+static bool doSelectedGapped = false;
 static TFloat optionProbINSERT = 0.0;
 static TFloat optionProbDELETE = 0.0;
 
 // output parameters
-unsigned qgramLen = 4;			//
-unsigned threshold = 2;			//
-
-TFloat currLossBucketUpper = -1.0;
+unsigned chosenQ = 4;			//
+unsigned chosenThreshold = 2;			//
+CharString chosenShape;			//
 
 bool		fnameCount0 = 0;
 bool		fnameCount1 = 0;
@@ -51,6 +48,10 @@ const char	*fname[2] = { "","" };
 const char	*fprefix[1] = { "" };
 char		fparams[100];
 char		fgparams[100];
+bool		verbose = true;
+char 		best_shape_folder[200];
+bool 		best_shape_helpFolder = false;
+String<bool> firstTimeK;
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -208,12 +209,8 @@ parseGappedParams(TFile & file)
 	resize(shapes,14); //best shape for each possible value of q
 	String<unsigned> thresholds;
 	resize(thresholds,14); //corresponding t
-	String<unsigned> pms;
-	resize(pms,14); //potential matches
-	String<float> runtimes;
-	resize(runtimes,14); //required runtime
-	String<float> mincovs;
-	resize(mincovs,14); //required runtime
+	String<unsigned> measure;
+	resize(measure,14); //potential matches
 	String<TFloat> lossrates;
 	resize(lossrates,14); //required runtime
 	
@@ -235,11 +232,15 @@ parseGappedParams(TFile & file)
         	_parse_skipWhitespace(file,c);
                 TFloat currLossrate = _parse_readEValue(file,c);
 		_parse_skipWhitespace(file,c);
-                /*unsigned currMinCov =*/ _parse_readNumber(file,c);
-		_parse_skipWhitespace(file,c);
-                unsigned currPotM = _parse_readNumber(file,c);
-		_parse_skipWhitespace(file,c);
-		TFloat currRuntime = _parse_readEValue(file,c);
+		unsigned currMeasure = _parse_readNumber(file,c); //minCov in the case of oneGapped
+
+#ifdef RUN_RAZERS
+		if(!doAllOneGapped) 
+		{
+			_parse_skipWhitespace(file,c);
+			currMeasure = _parse_readNumber(file,c); //PM in the case of selectedGapped
+		}
+#endif
 		if(currThreshold > 1 && currLossrate <= optionLossRate /*&& val > bestSoFar*/)
 		{
 		
@@ -249,14 +250,13 @@ parseGappedParams(TFile & file)
 					++weight;
 			if(length(shapes[weight-1]) > 0)  // if this is not the first shape with weight weight
 			{				  // compare currShape to the best one found so far
-				if(currPotM < pms[weight-1])
+				if((doAllOneGapped && currMeasure >= measure[weight-1]) || (!doAllOneGapped && currMeasure <= measure[weight-1]))
 				{
+					//if(currMeasure == measure[weight-1] && lossrates[weight-1] < currLossrate) continue;
 					shapes[weight-1] = currShape;
-					pms[weight-1] = currPotM;
+					measure[weight-1] = currMeasure;
 					thresholds[weight-1] = currThreshold;
 					lossrates[weight-1] = currLossrate;
-					runtimes[weight-1] = currRuntime;
-			//		mincovs[weight-1] = currMinCov;
 					atLeastOneFound = true;
 				}
 				
@@ -264,20 +264,19 @@ parseGappedParams(TFile & file)
 			else
 			{
 				shapes[weight-1] = currShape;
-				pms[weight-1] = currPotM;
+				measure[weight-1] = currMeasure;
 				thresholds[weight-1] = currThreshold;
 				lossrates[weight-1] = currLossrate;
-				runtimes[weight-1] = currRuntime;
-			//	mincovs[weight-1] = currMinCov;
 				atLeastOneFound = true;
 			
 			}
                 }
-                _parse_skipWhitespace(file,c);
+		_parse_skipLine(file,c);
+
         }
 	if(!atLeastOneFound)
 	{
-//		cout << "\n!!! Something wrong with file? !!!\n";
+		if(verbose) cout << "\n!!! Something wrong with file? !!!\n";
 		return false;
 	}
 	int i;
@@ -285,9 +284,9 @@ parseGappedParams(TFile & file)
 		if(length(shapes[i]) > 0)  // if a shape of weight i+1 has been found
 			break;
 	chosenLossRate = lossrates[i];
-	
+	chosenShape = shapes[i];
+	chosenThreshold = thresholds[i];
 	// suggest a suitable combination of q and t
-	cout << "Choose s = " << shapes[i] << " and t = " << thresholds[i]<< " to achieve optimal performance for expected recognition rate >= " << (100.0-100.0*optionLossRate) << "% (expected recognition = " << (100.0-chosenLossRate*100.0) <<"%)\n\n";
 
         return true;
 //        return false;
@@ -344,11 +343,9 @@ parseParams(TFile & file)
         }
 	if(bestT<2) cout << "\n!!! Something wrong with file? !!!\n";
 	chosenLossRate = bestSoFar;
-//      countT = length(loss)/countQ;
-//      cout << "insge: Q="<<countQ << " T="<<countT<<"\n";
-        qgramLen = bestQ;
-        threshold = bestT;
-	cout << "Choose q = " << qgramLen << " and t = " << threshold << " to achieve optimal performance for expected recognition rate >= " << (100.0-100.0*optionLossRate) << "% (expected recognition = " << (100.0-chosenLossRate*100.0) <<"%)\n\n";
+        chosenQ = bestQ;
+        chosenThreshold = bestT;
+
         return true;
 }
 //compute average position dependent error distribution (assumes solexa qualtiy values in prb.txt format)
@@ -575,7 +572,7 @@ makeUngappedStatsFile(TError & errorDistr)
 
 template<typename TError>
 void
-makeSelectedStatsFile(TError & errorDistr, map<TFloat, unsigned> & lossRateBuckets)
+makeSelectedStatsFile(TError & errorDistr)
 {
 
 //	unsigned maxE = (unsigned) totalN / 5;
@@ -677,8 +674,6 @@ makeSelectedStatsFile(TError & errorDistr, map<TFloat, unsigned> & lossRateBucke
 #endif
 
 
-	String<bool> firstTimeK;
-	fill(firstTimeK,maxErrors*lossRateBuckets.size(),true);
 	
 	for(int i = length(shapeStrings)-1; i >= 0 ; --i)
 	{
@@ -686,60 +681,35 @@ makeSelectedStatsFile(TError & errorDistr, map<TFloat, unsigned> & lossRateBucke
 		resize(found,maxT*maxErrors);
 		
 		String< State<TFloat> > states;
-		cout << "do DP\n";
+		if(verbose)cout << "do DP\n";
 		initPatterns(states, shapeStrings[i], maxErrors-1, logErrorDistribution, optionHammingOnly);
 		computeFilteringLoss(found, states, length(shapeStrings[i]), maxT, maxErrors,  logErrorDistribution);
-		cout << "Printing\n";
+		
 		for(unsigned e = 1; e < maxErrors; ++e) {
 			bool highestOptimalFound = false;
 			for(unsigned t = maxT-1; t > minT; --t) {
 				TFloat lossrate = 1.0 - (TFloat) _transformBack(found[e*maxT+t]);
 				typename map<TFloat, unsigned>::iterator it, itlow, itup, itend, itbegin;
 				if(lossrate <= 0.0){
-					if(highestOptimalFound) continue;
+					if(highestOptimalFound) break;
 					else highestOptimalFound = true;
 				}
-				// points to first item in loss rate file
-				itbegin = lossRateBuckets.begin();
-				if(lossrate < ((*itbegin).first)){ 
-					continue;
-				}
-				itend = lossRateBuckets.end();
-				// points to last item in loss rate file
-				--itend;
-				
-				if(lossrate > ((*itend).first)){ 
-					continue;
-				}
-				
-				TFloat helpLoss = (*itend).first; 
-				if(lossrate > helpLoss){
-					continue;
-				}
-				
-				
-				itup = lossRateBuckets.upper_bound(lossrate);
-				itlow = itup;
-				--itlow;
+				if(lossrate > 0.2) continue;
 
 			//	unsigned gminCov = getMinCov(weights[i], length(shapeStrings[i]), t);
 
-				unsigned index = unsigned((*itlow).second);	
-			
 				// create the whole file name
 				stringstream datName;
 				if(best_shape_helpFolder) datName << best_shape_folder;
 				else datName << "gapped_params";
 				datName << "/"<<fprefix[0]<<"_N" << totalN << "_E" << e << "_";
-				if(!optionHammingOnly) datName << "L_";
-				else datName <<"H_";
-				datName.precision(8);
-				datName << (*itlow).first << "_" << (*itup).first << ".dat";
+				if(!optionHammingOnly) datName << "L.dat";
+				else datName <<"H.dat";
 				
 			
 				// if datName-file doesnt exist, write the title on it
-				if(firstTimeK[maxErrors*index + e]==true){
-					firstTimeK[maxErrors*index + e] = false;
+				if(firstTimeK[e]==true){
+					firstTimeK[e] = false;
 					ofstream fout(datName.str().c_str(), ios::out);
 					fout << "shape\t\tt\t\tloss rate";//\t\tminCoverage";
 #ifdef RUN_RAZERS
@@ -784,20 +754,34 @@ makeSelectedStatsFile(TError & errorDistr, map<TFloat, unsigned> & lossRateBucke
 
 }
 
+//////////////////////////////////////////////////////////////////////////////
+// Returns the estimated minimum coverage of a shape with weight q, span s at threshold t
+template<typename TValueQ, typename TValueS, typename TValueT>
+inline TValueS getMinCov(TValueQ q, TValueS s, TValueT t)
+{
+	TValueS mincov;
+	if(t > s - q + 1){
+		mincov = q + 2 * (t - 1) - (t - (s - q + 1));
+	}
+	else mincov = q + 2 * (t - 1);
+
+	return mincov;
+}
+
+
 
 template<typename TError>
 void
-makeOneGappedStatsFile(TError & errorDistr, map<TFloat, unsigned> & lossRateBuckets)
+makeOneGappedStatsFile(TError & errorDistr)
 {
 
 //	unsigned maxE = (unsigned) totalN / 5;
 	unsigned maxE = 5;
-
 	unsigned minE = 0;				
 	unsigned maxQ = 14;				// weights are considered from minQ..maxQ
-	unsigned minQ = 12;
-	unsigned minGap = 4; 
-	unsigned maxGap = 6;				// spans are considered from minQ..maxS
+	unsigned minQ = 10;
+	unsigned minGap = 2; 
+	unsigned maxGap = 3;				// spans are considered from minQ..maxS
 	unsigned maxT = totalN-minQ+1;
 	
 	typedef typename Value<TError>::Type TErrorValue;
@@ -815,53 +799,100 @@ makeOneGappedStatsFile(TError & errorDistr, map<TFloat, unsigned> & lossRateBuck
 		logErrorDistribution[SEQAN_DELETE*totalN+j]   = _transform(optionProbDELETE);
 		logErrorDistribution[SEQAN_MATCH*totalN+j]    = _transform(remainingProb - errorDistr[j]);
 	}
-
 	
-		
 	String<TErrorValue> found;
 	resize(found,maxT*maxE);
 
-	initCountBits();
+	// for each weight q...
+	for(unsigned q = minQ; q <= maxQ; ++q){
 
+		// j = span of shape
+		for(unsigned j = q+minGap; j <= q+maxGap /*|| j < q+q-1 */; ++j){
 
+			// k = position of gap
+			for(unsigned k = (q/2); k < q; ++k){
+				
+				CharString shapeString;
+				fill(shapeString,j,'0');
+				for(unsigned pos = 0; pos < k; ++pos)
+					shapeString[pos] = '1';
+				for(unsigned pos = 0; pos < j-q; ++pos)
+					shapeString[k+pos] = '0';
+				for(unsigned pos = k+j-q; pos < j; ++pos)
+					shapeString[pos] = '1';
+				
+				if(verbose) cout << "doDP...\n";
+				String< State<long double> > states;
+				initPatterns(states, shapeString, maxE-1, logErrorDistribution, optionHammingOnly, true);
+				computeFilteringLoss(found, states, j, maxT, maxE, logErrorDistribution, false, true);
 
-//	best_shape(totalN, found, logErrorDistribution, lossRates, 12, 10, 3, 6, 4, 0, maxT);
-	best_shape(totalN, found, logErrorDistribution, lossRateBuckets, maxQ, minQ, minGap, maxGap, maxE, minE, maxT,optionHammingOnly);
+				// go through found and find loss rate
+				for(unsigned e = minE; e < maxE; ++e) {
+					bool highestOptimalFound = false;
+					for(unsigned t = maxT-1; t > 0; --t) {
+						TFloat lossrate = 1.0 - (TFloat) _transformBack(found[e*maxT+t]);
+						
+						if(lossrate <= 0.0){
+							if(highestOptimalFound) break;
+							else highestOptimalFound = true;
+						}
+						if(lossrate > 0.2)
+							continue;
+						
+						unsigned gminCov = getMinCov(q, j, t);
+	
+						// create the whole file name
+						stringstream datName;
+						if(best_shape_helpFolder) datName << best_shape_folder;
+						else datName << "gapped_params";
+						datName << "/"<<fprefix[0]<<"_N" << totalN << "_E" << e << "_";
+						if(!optionHammingOnly) datName << "L_";
+						else datName <<"H_";
+						datName << "onegapped.dat";
+					
+						// if datName-file doesnt exist, write the title on it
+						if(firstTimeK[e]==true){
+							firstTimeK[e] = false;
+							ofstream fout(datName.str().c_str(), ios::out);
+							fout << "shape\t\tt\t\tloss rate\t\tminCoverage";
+							fout << endl << endl;
+							fout.close();
+						}
+						
+						// write shape with its properties into file
+						ofstream fout(datName.str().c_str(), ios::app | ios::out);
+						fout << shapeString << "\t\t";
+						fout << t << "\t\t";
+						fout << lossrate << "\t\t";
+						fout << gminCov;
+						fout << endl;
+						fout.close();
+									//}
+						
+					} // t-loop
+				} //e-loop
+					
+			}// k-loop
+
+		} // j-loop
+				
+	}// q-loop
 
 }
 
 template<typename TSStr>
 void
-getParamsFilename(TSStr & paramsfile, map<TFloat, unsigned> & lossRateBuckets)
+getParamsFilename(TSStr & paramsfile)
 {
+	paramsfile.str("");
 	if(doSelectedGapped || doAllOneGapped)
 	{
-
-		typename map<TFloat, unsigned>::iterator itbegin, itend, itlow, itup;
-		// points to first item in loss rate file
-		itbegin = lossRateBuckets.begin();
-		itend = lossRateBuckets.end();
-		// points to last item in loss rate file
-		--itend;
-		if(optionLossRate > itend->first)
-		{
-			optionLossRate = itend->first;
-			itup = itend;
-		}
-		else itup = lossRateBuckets.upper_bound(optionLossRate);
-		itlow = itup;
-		--itlow;
-		
-		paramsfile.precision(8);
 		if(prefixCount) paramsfile << fgparams<< fprefix[0]<<"_N" << totalN << "_E" << totalK;
 		else paramsfile << fgparams<<"userdef_N" << totalN << "_E" << totalK;
-		if(optionHammingOnly) paramsfile << "_H_";
-		else paramsfile << "_L_";
-		paramsfile << itlow->first << "_" << itup->first << ".dat";
-		
-		static const TFloat epsilon = 0.0000001;	
-		currLossBucketUpper = itlow->first-epsilon;
-		
+		if(optionHammingOnly) paramsfile << "_H";
+		else paramsfile << "_L";
+		if(doAllOneGapped) paramsfile << "_onegapped.dat";
+		else paramsfile << ".dat";
 	}
 	else
 	{
@@ -1044,29 +1075,9 @@ int main(int argc, const char *argv[])
 	if(optionProbINSERT <= epsilon && optionProbDELETE <= epsilon)
 		optionHammingOnly=true;
 
+	fill(firstTimeK,10,true);//set maximal number of errors considered in parameter computation to <10
 
-	//loss rate buckets
-	map<TFloat, unsigned> lossRateBuckets;
-	if(doAllOneGapped || doSelectedGapped)
-	{
-		String<TFloat> lossRatesProbe;
-		resize(lossRatesProbe, 9);
-		lossRatesProbe[0] = 0;
-		lossRatesProbe[1] = 0.00001;
-		lossRatesProbe[2] = 0.0001;
-		lossRatesProbe[3] = 0.001;
-		lossRatesProbe[4] = 0.01;
-		lossRatesProbe[5] = 0.02;
-		lossRatesProbe[6] = 0.05;
-		lossRatesProbe[7] = 0.1;
-		lossRatesProbe[8] = 0.2;
-	
-		
-		for(unsigned j = 0; j <= length(lossRatesProbe); ++j){
-			lossRateBuckets.insert ( pair<TFloat,unsigned>(lossRatesProbe[j],j) );
-		}
-	}
-	// compute data specific loss rates
+// compute data specific loss rates
 	if (fnameCount0 || fnameCount1) 
 	{
 		if(!prefixCount)
@@ -1108,23 +1119,31 @@ int main(int argc, const char *argv[])
 
 		fstream file;
 		//if(prefixCount)
-		if(doAllOneGapped) makeOneGappedStatsFile(errorDistribution,lossRateBuckets);
-		if(doSelectedGapped) makeSelectedStatsFile(errorDistribution,lossRateBuckets);
+		if(doAllOneGapped) makeOneGappedStatsFile(errorDistribution);
+		if(doSelectedGapped) makeSelectedStatsFile(errorDistribution);
 		if(doUngapped) makeUngappedStatsFile(errorDistribution);
 	}
 	
 	totalK = (int)(optionErrorRate * totalN);
 	
+	//prioritize
+	if(doSelectedGapped)
+	{
+		doAllOneGapped = false;
+		doUngapped = false;
+	}
+	if(doAllOneGapped) doUngapped = false;
+	
 	// decide on which loss rate file to parse
 	stringstream paramsfile;
-	getParamsFilename(paramsfile,lossRateBuckets);
+	getParamsFilename(paramsfile);
 
 	cout << "\nRead length      = " << totalN << "bp\n";
 	cout << "Max num errors   = " << totalK << "\n";
 	cout << "Recognition rate = " <<  100.0*(1.0-optionLossRate) << "%\n";
 			
 	// parse loss rate file and find appropriate filter criterium
-	cout << "\n--> Reading " <<  paramsfile.str()<<"\n";
+	if(verbose)cout << "\n--> Reading " <<  paramsfile.str()<<"\n";
 	fstream file;
 	file.open(paramsfile.str().c_str(),ios_base::in | ios_base::binary);
 	if(!file.is_open())
@@ -1136,23 +1155,14 @@ int main(int argc, const char *argv[])
 	{
 		if(doSelectedGapped || doAllOneGapped)
 		{
-			while(!parseGappedParams(file) && currLossBucketUpper>0)
-			{
-				optionLossRate = currLossBucketUpper;		// in
-				file.close();	
-				paramsfile.str("");
-				getParamsFilename(paramsfile,lossRateBuckets);
-					// parse loss rate file and find appropriate filter criterium
-				cout << "\n--> Reading " <<  paramsfile.str()<<"\n";
-				file.open(paramsfile.str().c_str(),ios_base::in | ios_base::binary);
-				if(!file.is_open())
-				{
-					cout << "Couldn't open file "<<paramsfile.str()<<"\n";
-					return 0;
-				}
-			}
+			parseGappedParams(file);
+			cout << "\nChoose s = " << chosenShape << " and t = " << chosenThreshold<< " to achieve optimal performance for expected recognition rate >= " << (100.0-100.0*optionLossRate) << "% (expected recognition = " << (100.0-chosenLossRate*100.0) <<"%)\n\n";
 		}
-		else parseParams(file);
+		else
+		{
+			parseParams(file);
+			cout << "Choose q = " << chosenQ << " and t = " << chosenThreshold << " to achieve optimal performance for expected recognition rate >= " << (100.0-100.0*optionLossRate) << "% (expected recognition = " << (100.0-chosenLossRate*100.0) <<"%)\n\n";
+		}
 		file.close();
 	}
 
