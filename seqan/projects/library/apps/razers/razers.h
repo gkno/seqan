@@ -79,6 +79,9 @@ namespace SEQAN_NAMESPACE_MAIN
 		int			repeatLength;		// repeat length threshold
 		double		abundanceCut;		// abundance threshold
 
+	// verification parameters
+		bool		matchN;				// false..N is always a mismatch, true..N matches with all
+
 	// statistics
 		__int64		FP;					// false positives (threshold reached, no match)
 		__int64		TP;					// true positives (threshold reached, match)
@@ -103,6 +106,8 @@ namespace SEQAN_NAMESPACE_MAIN
 			readNaming = 0;
 			sortOrder = 0;
 			positionFormat = 0;
+
+			matchN = false;
 
 			shape = "11111111111";
 			threshold = 1;
@@ -136,11 +141,19 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 		inline bool operator() (TReadMatch const &a, TReadMatch const &b) const 
 		{
+			// genome position and orientation
 			if (a.gseqNo < b.gseqNo) return true;
 			if (a.gseqNo > b.gseqNo) return false;
 			if (a.gBegin < b.gBegin) return true;
 			if (a.gBegin > b.gBegin) return false;
+			if (a.orientation < b.orientation) return true;
+			if (a.orientation > b.orientation) return false;
+
+			// read number
 			if (a.rseqNo < b.rseqNo) return true;
+			if (a.rseqNo > b.rseqNo) return false;
+
+			// quality
 			return a.editDist < b.editDist;
 		}
 	};
@@ -150,11 +163,19 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 		inline bool operator() (TReadMatch const &a, TReadMatch const &b) const 
 		{
+			// read number
 			if (a.rseqNo < b.rseqNo) return true;
 			if (a.rseqNo > b.rseqNo) return false;
+
+			// genome position and orientation
 			if (a.gseqNo < b.gseqNo) return true;
 			if (a.gseqNo > b.gseqNo) return false;
 			if (a.gBegin < b.gBegin) return true;
+			if (a.gBegin > b.gBegin) return false;
+			if (a.orientation < b.orientation) return true;
+			if (a.orientation > b.orientation) return false;
+
+			// quality
 			return a.editDist < b.editDist;
 		}
 	};
@@ -165,11 +186,19 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 		inline bool operator() (TReadMatch const &a, TReadMatch const &b) const 
 		{
+			// read number
 			if (a.rseqNo < b.rseqNo) return true;
 			if (a.rseqNo > b.rseqNo) return false;
+
+			// genome position and orientation
 			if (a.gseqNo < b.gseqNo) return true;
 			if (a.gseqNo > b.gseqNo) return false;
 			if (a.gEnd   < b.gEnd) return true;
+			if (a.gEnd   > b.gEnd) return false;
+			if (a.orientation < b.orientation) return true;
+			if (a.orientation > b.orientation) return false;
+
+			// quality
 			return a.editDist < b.editDist;
 		}
 	};
@@ -177,11 +206,10 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 // Definitions
 
-	typedef	Dna							TRazerSAlphabet;
-	typedef String<Dna5>				TGenome;
-	typedef StringSet<TGenome>			TGenomeSet;
-	typedef String<TRazerSAlphabet>		TRead;
-	typedef StringSet<TRead>			TReadSet;
+	typedef Dna5String			TGenome;
+	typedef StringSet<TGenome>	TGenomeSet;
+	typedef Dna5String			TRead;
+	typedef StringSet<TRead>	TReadSet;
 
 
 	template <typename TShape>
@@ -371,10 +399,20 @@ void findReads(
 				gitEnd = begin(genome, Standard()) + m.gEnd;
 
 			if (errors <= maxErrors)
-				for(; git != gitEnd; ++git, ++rit)
-					if (*git != *rit)
-						if (++errors > maxErrors)
-							break;
+			{
+				if (options.matchN)
+				{
+					for(; git != gitEnd; ++git, ++rit)
+						if (*git != *rit && *git != 'N' && *rit != 'N')
+							if (++errors > maxErrors)
+								break;
+				} else {
+					for(; git != gitEnd; ++git, ++rit)
+						if (*git != *rit)
+							if (++errors > maxErrors)
+								break;
+				}
+			}
 
 			if (errors <= maxErrors)
 			{
@@ -393,15 +431,14 @@ void findReads(
 				--hitCount[ndlSeqNo];
 #endif
 				++TP;
-	/*			::std::cerr << "\"" << range(swiftFinder, genomeInf) << "\"  ";
+	/*			::std::cerr << "\"" << inf << "\"  ";
 				::std::cerr << hstkPos << " + ";
 				::std::cerr << ::std::endl;
 	*/		} else {
 				++FP;
-	/*			::std::cerr << "\"" << range(swiftFinder, genomeInf) << "\"   \"" << range(swiftPattern) << "\"  ";
-				::std::cerr << ndlSeqNo << " : ";
-				::std::cerr << hstkPos << " + ";
-				::std::cerr << bucketWidth << "  " << TP << ::std::endl;
+	/*			::std::cerr << "\"" << inf << "\"   \"" << range(swiftPattern) << "\"  ";
+				::std::cerr << 'R' << ndlSeqNo << ", G";
+				::std::cerr << beginPosition(swiftFinder) << ':' << endPosition(swiftFinder) << ::std::endl;
 	*/		}
 		}
 	}
@@ -497,6 +534,11 @@ void findReads(
 		setScoringScheme(forwardPatterns[i], scoreType);
 #else
 		setHost(forwardPatterns[i], indexText(readIndex)[i]);
+		if (options.matchN)
+		{
+			_patternMatchNOfPattern(forwardPatterns[i]);
+			_patternMatchNOfFinder(forwardPatterns[i]);
+		}
 #endif
 	}
 
@@ -556,6 +598,11 @@ void findReads(
 				TMyersFinderRev		myersFinderRev(infRev);
 				TMyersPatternRev	myersPatternRev(readRev);
 
+				if (options.matchN)
+				{
+					_patternMatchNOfPattern(myersPatternRev);
+					_patternMatchNOfFinder(myersPatternRev);
+				}
 				// find beginning of best semi-global alignment
 				if (find(myersFinderRev, myersPatternRev, maxScore))
 					m.gBegin = m.gEnd - (position(myersFinderRev) + 1);
@@ -744,8 +791,8 @@ void dumpMatches(
 
 	for(; it != itEnd; ++it) 
 	{
-		if (readNo == (*it).rseqNo && orientation == (*it).orientation &&
-			gEnd == (*it).gEnd && gseqNo == (*it).gseqNo)
+		if (gEnd == (*it).gEnd && orientation == (*it).orientation &&
+			gseqNo == (*it).gseqNo && readNo == (*it).rseqNo) 
 		{
 			(*it).gseqNo = (unsigned)-1;
 			(*it).rseqNo = (unsigned)-1;
@@ -789,8 +836,8 @@ void dumpMatches(
 	for(; it != itEnd; ++it) 
 	{
 		if ((*it).orientation == '-') continue;
-		if (readNo == (*it).rseqNo && orientation == (*it).orientation &&
-			gEnd == (*it).gEnd && gseqNo == (*it).gseqNo)
+		if (gBegin == (*it).gBegin && readNo == (*it).rseqNo &&
+			gseqNo == (*it).gseqNo && orientation == (*it).orientation) 
 		{
 			(*it).gseqNo = (unsigned)-1;
 			(*it).rseqNo = (unsigned)-1;
@@ -799,7 +846,7 @@ void dumpMatches(
 		}
 		readNo = (*it).rseqNo;
 		gseqNo = (*it).gseqNo;
-		gEnd = (*it).gEnd;
+		gBegin = (*it).gBegin;
 		orientation = (*it).orientation;
 		++hitCount[readNo];
 	}
@@ -813,11 +860,6 @@ void dumpMatches(
 			for(; it != itEnd; ++it) 
 			{
 				if ((*it).orientation == '-') continue;
-
-				// skip matches with equal beginnings
-				if (readNo == (*it).rseqNo && orientation == (*it).orientation &&
-					gBegin == (*it).gBegin && gseqNo == (*it).gseqNo)
-					continue;
 
 				readNo = (*it).rseqNo;
 #ifdef RAZERS_MAXHITS				
@@ -888,14 +930,9 @@ void dumpMatches(
 			{
 				if ((*it).orientation == '-') continue;
 
-				// skip matches with equal beginnings
-				if (readNo == (*it).rseqNo && orientation == (*it).orientation &&
-					gBegin == (*it).gBegin && gseqNo == (*it).gseqNo)
-					continue;
-
 				readNo = (*it).rseqNo;
 #ifdef RAZERS_MAXHITS				
-				if (hitCount[readNo] == -1) continue;
+				if (hitCount[readNo] > options.maxHits) continue;
 #endif
 				gseqNo = (*it).gseqNo;
 				gBegin = (*it).gBegin;
@@ -939,7 +976,8 @@ void dumpMatches(
 					// reverse strand (switch begin and end)
 					file << '>' << gEnd << ',' << gBegin + options.positionFormat;
 				file << "[id=" << id << ",fragId=" << fragId;
-				file << ",errors=" << (*it).editDist << ",percId=" << ::std::setprecision(5) << percId << ']' << ::std::endl;
+				file << ",errors=" << (*it).editDist << ",percId=" << ::std::setprecision(5) << percId;
+				file << ",ambiguity=" << hitCount[readNo] << ']' << ::std::endl;
 
 				file << reads[readNo] << ::std::endl;
 			}
@@ -1019,9 +1057,9 @@ bool mapReads(
 	TReadSet const &readSet, 
 	RazerSOptions<TSpec> &options)
 {
-	Shape<TRazerSAlphabet, SimpleShape>		ungapped;
-	Shape<TRazerSAlphabet, OneGappedShape>	onegapped;
-	Shape<TRazerSAlphabet, GappedShape>		gapped;
+	Shape<Dna, SimpleShape>		ungapped;
+	Shape<Dna, OneGappedShape>	onegapped;
+	Shape<Dna, GappedShape>		gapped;
 
 	// select best-fitting shape
 

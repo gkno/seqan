@@ -88,6 +88,8 @@ void printHelp(int, const char *[], RazerSOptions<TSpec> &options, bool longHelp
 		cerr << "  -oc, --overabundance-cut NUM \t" << "set k-mer overabundance cut ratio (default " << options.abundanceCut << ')' << endl;
 		cerr << "  -rl, --repeat-length NUM     \t" << "set simple-repeat length threshold (default " << options.repeatLength << ')' << endl;
 		cerr << "  -tl, --taboo-length NUM      \t" << "set taboo length (default " << options.tabooLength << ')' << endl;
+		cerr << endl << "Verification Options:" << endl;
+		cerr << "  -mN, --match-N               \t" << "N matches with all other characters" << endl;
 	} else {
 		cerr << "Try 'razers --help' for more information." << endl;
 	}
@@ -95,7 +97,7 @@ void printHelp(int, const char *[], RazerSOptions<TSpec> &options, bool longHelp
 
 void printVersion() 
 {
-	cerr << "RazerS version 0.3 20080904 (prerelease)" << endl;
+	cerr << "RazerS version 0.3 $LastChangedRevision (prerelease)" << endl;
 }
 
 int main(int argc, const char *argv[]) 
@@ -372,6 +374,10 @@ int main(int argc, const char *argv[])
 			}
 			if (strcmp(argv[arg], "-V") == 0 || strcmp(argv[arg], "--version") == 0) {
 				options.printVersion = true;
+				continue;
+			}
+			if (strcmp(argv[arg], "-mN") == 0 || strcmp(argv[arg], "--match-N") == 0) {
+				options.matchN = true;
 				continue;
 			}
 		} else {
