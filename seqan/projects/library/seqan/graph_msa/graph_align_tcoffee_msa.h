@@ -166,6 +166,7 @@ globalAlignment(StringSet<TString, TSpec> const& seqSet,
 		strm_lib.close();
 	}
 
+
 	// Use these segment matches for the initial alignment graph
 	TGraph g(seqSet);
 	buildAlignmentGraph(matches, scores, g, FrequencyCounting() );

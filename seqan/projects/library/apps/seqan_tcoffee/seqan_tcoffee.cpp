@@ -1,7 +1,10 @@
+#define SEQAN_PROFILE
+
+#include <seqan/graph_msa.h>
+
 #include <iostream>
 #include <fstream>
 #include <cstdio>
-#include <seqan/graph_msa.h>
 
 using namespace seqan;
 
@@ -239,6 +242,10 @@ int main(int argc, const char *argv[]) {
 	StringSet<TSequence, Owner<> > origStrSet;
 	StringSet<TName> names;
 
+	// Profiling
+	SEQAN_PROTIMESTART(profileTime);
+
+
 	// Read the sequences from a T-Coffee library file or a regular sequence file in FASTA format
 	if ((!length(value(cfgOpt, "seq"))) && (length(value(cfgOpt, "lib")))) {
 		std::fstream strm;
@@ -253,6 +260,9 @@ int main(int argc, const char *argv[]) {
 	}
 	typedef StringSet<TSequence, Dependent<> > TDepSequenceSet;
 	TDepSequenceSet strSet(origStrSet);
+	std::cout << "Number of sequences: " << length(strSet) << std::endl;
+	std::cout << "Import sequences done: " << SEQAN_PROTIMEUPDATE(profileTime) << " seconds" << std::endl;
+	
 
 	//////////////////////////////////////////////////////////////////////////////
 	// Alignment of the sequences
@@ -306,7 +316,7 @@ int main(int argc, const char *argv[]) {
 		// Custom Alignment
 		else globalAlignment(strSet, names, cfgOpt, gOut, MSA_ProteinCustom() );
 	}
-
+	std::cout << "Alignment done: " << SEQAN_PROTIMEUPDATE(profileTime) << " seconds" << std::endl;
 
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -325,6 +335,7 @@ int main(int argc, const char *argv[]) {
 		write(strm,gOut,names,MsfFormat());
 		strm.close();
 	}
+	std::cout << "Output done: " << SEQAN_PROTIMEUPDATE(profileTime) << " seconds" << std::endl;
 
 	return 0;
 }
