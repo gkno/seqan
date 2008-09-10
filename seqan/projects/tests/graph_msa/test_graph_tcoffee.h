@@ -353,61 +353,6 @@ void Test_ExternalLibraries() {
 
 }
 
-void Test_GraphCombination() {
-	typedef String<char> TName;
-	typedef StringSet<TName, Owner<> > TNameSet;
-	typedef String<AminoAcid> TSequence;
-	typedef StringSet<TSequence, Owner<> > TSequenceSet;
-	typedef StringSet<TSequence, Dependent<> > TDependentSequenceSet;
-	
-	TSequenceSet seqSet;
-	appendValue(seqSet, "GARFIELD");
-	appendValue(seqSet, "GARFIELDIELD");
-	TNameSet nameSet;
-	appendValue(nameSet, "seq1");
-	appendValue(nameSet, "seq2");
-	
-	typedef Graph<Alignment<TDependentSequenceSet, unsigned int> > TGraph;
-	TGraph lib1(seqSet);
-	addEdge(lib1, addVertex(lib1, 0, 0, 8), addVertex(lib1, 1, 0, 8), 40);
-	addVertex(lib1, 1, 8, 4);
-	//_debugRefinedMatches(lib1);
-	TGraph lib2(seqSet);
-	addEdge(lib2, addVertex(lib2, 0, 4, 4), addVertex(lib2, 1, 4, 4), 20);
-	addEdge(lib2, findVertex(lib2, 0, 4), addVertex(lib2, 1, 8, 4), 40);
-	addVertex(lib2, 0, 0, 4);
-	addVertex(lib2, 1, 0, 4);
-	//_debugRefinedMatches(lib2);
-	TGraph lib3(seqSet);
-	addEdge(lib3, addVertex(lib3, 0, 2, 6), addVertex(lib3, 1, 2, 6), 30);
-	addVertex(lib3, 0, 0, 2);
-	addVertex(lib3, 1, 0, 2);
-	addVertex(lib3, 1, 8, 4);
-	//_debugRefinedMatches(lib3);
-	TGraph g(seqSet);
-	String<TGraph*> libs;
-	appendValue(libs, &lib1);
-	appendValue(libs, &lib2);
-	appendValue(libs, &lib3);
-	combineGraphs(g, libs);
-	//_debugRefinedMatches(g);
-
-	SEQAN_TASSERT(cargo(findEdge(g, findVertex(g, 0, 0), findVertex(g, 1, 0))) < cargo(findEdge(g, findVertex(g, 0, 2), findVertex(g, 1, 2))));
-	SEQAN_TASSERT(cargo(findEdge(g, findVertex(g, 0, 2), findVertex(g, 1, 2))) < cargo(findEdge(g, findVertex(g, 0, 4), findVertex(g, 1, 4))));
-	SEQAN_TASSERT(cargo(findEdge(g, findVertex(g, 0, 2), findVertex(g, 1, 2))) < cargo(findEdge(g, findVertex(g, 0, 4), findVertex(g, 1, 8))));
-	SEQAN_TASSERT(cargo(findEdge(g, findVertex(g, 0, 4), findVertex(g, 1, 8))) < cargo(findEdge(g, findVertex(g, 0, 4), findVertex(g, 1, 4))));
-
-	clearVertices(g);
-	combineGraphs(g, libs, FrequencyCounting() );
-	//_debugRefinedMatches(g);
-	
-	SEQAN_TASSERT(cargo(findEdge(g, findVertex(g, 0, 0), findVertex(g, 1, 0))) == 1);
-	SEQAN_TASSERT(cargo(findEdge(g, findVertex(g, 0, 2), findVertex(g, 1, 2))) == 2);
-	SEQAN_TASSERT(cargo(findEdge(g, findVertex(g, 0, 4), findVertex(g, 1, 4))) == 3);
-	SEQAN_TASSERT(cargo(findEdge(g, findVertex(g, 0, 4), findVertex(g, 1, 8))) == 1);
-}
-
-
 void Test_TripletExtension() {
 	typedef String<char> TName;
 	typedef StringSet<TName, Owner<> > TNameSet;
@@ -725,7 +670,6 @@ void Test_GraphTCoffee() {
 	Test_Distances();
 	Test_Libraries();
 	Test_ExternalLibraries();
-	Test_GraphCombination();
 	Test_TripletExtension();
 	Test_SumOfPairsScore();
 	Test_Progressive();

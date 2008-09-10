@@ -191,10 +191,10 @@ buildAlignmentGraph(String<TFragment, TSpec1>& matches,
 }
 
 
+/*
 //////////////////////////////////////////////////////////////////////////////
 // Merging of alignment graphs
 //////////////////////////////////////////////////////////////////////////////
-
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -241,19 +241,6 @@ combineGraphs(Graph<Alignment<TStringSet, TCargo, TSpec> >& outGraph,
 //////////////////////////////////////////////////////////////////////////////
 
 
-/**
-.Function.combineGraphs:
-..summary:Combines multiple alignment graphs into one single graph.
-..cat:Graph
-..signature:
-combineGraphs(graph, libs, tag)
-..param.graph:Out-parameter:The final alignment graph.
-...type:Spec.Alignment Graph
-..param.libs:String of pointers to alignment graph data structures.
-..param.tag:Combination strategy.
-...type:Tag.Alignment Graph Combination
-..returns:void
-*/
 template<typename TStringSet, typename TCargo, typename TSpec, typename TLibraries> 
 inline void
 combineGraphs(Graph<Alignment<TStringSet, TCargo, TSpec> >& outGraph,
@@ -262,9 +249,14 @@ combineGraphs(Graph<Alignment<TStringSet, TCargo, TSpec> >& outGraph,
 	SEQAN_CHECKPOINT
 	combineGraphs(outGraph, libs, FractionalScore() );
 }
+*/
 
 
+//////////////////////////////////////////////////////////////////////////////
+// Scoring of matches
+//////////////////////////////////////////////////////////////////////////////
 
+//////////////////////////////////////////////////////////////////////////////
 
 template<typename TString, typename TSpec, typename TScoreType, typename TSize, typename TSpec2, typename TScoreString, typename TScoreValue> 
 inline void
@@ -306,6 +298,8 @@ scoreMatches(StringSet<TString, TSpec> const& seqSet,
 	}
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
 template<typename TString, typename TSpec, typename TScoreType, typename TFragment, typename TSpec2, typename TScoreString> 
 inline void
 scoreMatches(StringSet<TString, TSpec> const& seqSet,
@@ -316,6 +310,7 @@ scoreMatches(StringSet<TString, TSpec> const& seqSet,
 	SEQAN_CHECKPOINT
 	scoreMatches(seqSet, scType, matches, scores, (typename Value<TScoreString>::Type) 10000);
 }
+
 
 //////////////////////////////////////////////////////////////////////////////
 // Consistency: Triplet extension
