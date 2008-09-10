@@ -1,5 +1,6 @@
 #define USE_LOGVALUES		// this is recommended when using probability values
 #define RUN_RAZERS
+#define RUN_RAZERS_ONEGAPPED	
 #define SEQAN_PROFILE
 
 #include <sys/types.h>
@@ -800,6 +801,19 @@ makeOneGappedStatsFile(TError & errorDistr)
 		logErrorDistribution[SEQAN_MATCH*totalN+j]    = _transform(remainingProb - errorDistr[j]);
 	}
 	
+#ifdef RUN_RAZERS_ONEGAPPED
+	// generate genome and reads
+	StringSet<DnaString> testGenome;
+	StringSet<DnaString> testReads;
+	StringSet<CharString> dummyIDs;
+	resize(testGenome, 1);
+	simulateGenome(testGenome[0], 10000000);					// generate 1Mbp genomic sequence
+	simulateReads(
+		testReads, dummyIDs, testGenome, 
+		200000, maxE-1, logErrorDistribution, 0.5);	// generate 10M reads
+#endif
+
+
 	String<TErrorValue> found;
 	resize(found,maxT*maxE);
 
@@ -841,6 +855,7 @@ makeOneGappedStatsFile(TError & errorDistr)
 						
 						unsigned gminCov = getMinCov(q, j, t);
 	
+
 						// create the whole file name
 						stringstream datName;
 						if(best_shape_helpFolder) datName << best_shape_folder;
@@ -855,16 +870,36 @@ makeOneGappedStatsFile(TError & errorDistr)
 							firstTimeK[e] = false;
 							ofstream fout(datName.str().c_str(), ios::out);
 							fout << "shape\t\tt\t\tloss rate\t\tminCoverage";
+#ifdef RUN_RAZERS_ONEGAPPED
+							fout << "\t\tPM\t\truntime";
+#endif
 							fout << endl << endl;
 							fout.close();
 						}
 						
+				
+#ifdef RUN_RAZERS_ONEGAPPED
+						// count verifications
+						String<ReadMatch<unsigned> > matches;
+						RazerSOptions<RazerSSpec<false, true> > razersOptions;
+						razersOptions.errorRate = (double)e / (double)totalN;
+						razersOptions.errorRate += 0.0000001;
+						razersOptions.threshold = t;
+						razersOptions._debugLevel = 2;
+		
+						assign(razersOptions.shape, shapeString);
+						mapReads(matches, testGenome, testReads, razersOptions);
+#endif
 						// write shape with its properties into file
 						ofstream fout(datName.str().c_str(), ios::app | ios::out);
 						fout << shapeString << "\t\t";
 						fout << t << "\t\t";
 						fout << lossrate << "\t\t";
 						fout << gminCov;
+#ifdef RUN_RAZERS_ONEGAPPED				
+						fout << "\t\t" << razersOptions.FP + razersOptions.TP;
+						fout << "\t\t" << razersOptions.timeMapReads;
+#endif
 						fout << endl;
 						fout.close();
 									//}
