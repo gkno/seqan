@@ -74,7 +74,7 @@ void simulateReads(
 
 	int readCounter = 0;
 	int readLength = length(errorDist)/4;
-	int KJ = 2*maxErrors;
+	//int KJ = 2*maxErrors;
 	
 	srand ( time(NULL) );
 	
@@ -355,7 +355,7 @@ void simulateReads(
 				resize(read,trueLength);
 				++bucketCounter[countErrors];
 				++readCounter;
-				if(verbose && readCounter%100 == 0)std::cout << readCounter<<"..." << std::flush;
+				if(verbose && readCounter%10000 == 0)std::cout << readCounter<<"..." << std::flush;
 				//Add read to readSet
 				if(!revComp) id << startPos << ',' << startPos+pos;
 				else id << maxEnd << ',' << maxEnd-pos;
