@@ -343,10 +343,15 @@ void findReads(
 
 	__int64 TP = 0;
 	__int64 FP = 0;
+	unsigned char compMask[5] = { 1, 2, 4, 8, 0 };
+
+	if (options.matchN)
+		compMask[4] = 15;
+
 	SEQAN_PROTIMESTART(find_time);
 
 	// iterate all genomic sequences
-	for(unsigned hstkSeqNo = 0; hstkSeqNo < length(genomes); ++hstkSeqNo) 
+	for (unsigned hstkSeqNo = 0; hstkSeqNo < length(genomes); ++hstkSeqNo) 
 	{
 		if (options._debugLevel >= 1)
 			::std::cerr << ::std::endl << "Process genome seq #" << hstkSeqNo;
@@ -399,20 +404,10 @@ void findReads(
 				gitEnd = begin(genome, Standard()) + m.gEnd;
 
 			if (errors <= maxErrors)
-			{
-				if (options.matchN)
-				{
-					for(; git != gitEnd; ++git, ++rit)
-						if (*git != *rit && *git != 'N' && *rit != 'N')
-							if (++errors > maxErrors)
-								break;
-				} else {
-					for(; git != gitEnd; ++git, ++rit)
-						if (*git != *rit)
-							if (++errors > maxErrors)
-								break;
-				}
-			}
+				for(; git != gitEnd; ++git, ++rit)
+					if ((compMask[ordValue(*git)] & compMask[ordValue(*rit)]) == 0)
+						if (++errors > maxErrors)
+							break;
 
 			if (errors <= maxErrors)
 			{
@@ -534,11 +529,8 @@ void findReads(
 		setScoringScheme(forwardPatterns[i], scoreType);
 #else
 		setHost(forwardPatterns[i], indexText(readIndex)[i]);
-		if (options.matchN)
-		{
-			_patternMatchNOfPattern(forwardPatterns[i]);
-			_patternMatchNOfFinder(forwardPatterns[i]);
-		}
+		_patternMatchNOfPattern(forwardPatterns[i], options.matchN);
+		_patternMatchNOfFinder(forwardPatterns[i], options.matchN);
 #endif
 	}
 

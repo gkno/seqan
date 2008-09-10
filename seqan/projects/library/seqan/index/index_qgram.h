@@ -329,19 +329,19 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 	inline int _fullDirLength(TIndex const &index) 
 	{
 		typedef typename Fibre<TIndex, Fibre_Shape>::Type	TShape;
-		typedef typename Value<TIndex>::Type							TValue;
-		return _intPow((unsigned)ValueSize<TValue>::VALUE, weight(indexShape(index))) + 1;
+		typedef typename Host<TShape>::Type					TTextValue;
+		return _intPow((unsigned)ValueSize<TTextValue>::VALUE, weight(indexShape(index))) + 1;
 	}
 
 	template <typename TIndex>
 	inline int _fullDir2Length(TIndex const &index) 
 	{
 		typedef typename Fibre<TIndex, Fibre_Shape>::Type	TShape;
-		typedef typename Value<TIndex>::Type							TValue;
+		typedef typename Host<TShape>::Type					TTextValue;
 		return (_intPow(
-					(unsigned)ValueSize<TValue>::VALUE,
+					(unsigned)ValueSize<TTextValue>::VALUE,
 					weight(indexShape(index)) + 1) - 1)
-				/ ((unsigned)ValueSize<TValue>::VALUE - 1) + 1;
+				/ ((unsigned)ValueSize<TTextValue>::VALUE - 1) + 1;
 	}
 
 
@@ -757,7 +757,7 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 	SEQAN_CHECKPOINT
 		typedef typename Iterator<TText const, Standard>::Type	TIterator;
 		typedef typename Value<TDir>::Type						TSize;
-		typedef typename Value<TShape>::Type					THash;
+		typedef typename Host<TShape>::Type						THash;
 
 		TSize num_qgrams = length(text) - length(shape) + 1;
 		TIterator itText = begin(text, Standard());
@@ -799,7 +799,7 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 	SEQAN_CHECKPOINT
 		typedef typename Iterator<TString const, Standard>::Type	TIterator;
 		typedef typename Value<TDir>::Type							TSize;
-		typedef typename Value<TShape>::Type						THash;
+		typedef typename Host<TShape>::Type							THash;
 
 		for(unsigned seqNo = 0; seqNo < length(stringSet); ++seqNo) 
 		{
@@ -1296,7 +1296,7 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
         // signed characters behave different than unsigned when compared
         // to get the same index with signed or unsigned chars we simply cast them to unsigned
         // before feeding them into the pipeline
-        typedef typename _MakeUnsigned< typename Value<TText>::Type >::Type TUValue;
+        typedef typename _MakeUnsigned< typename Host<TShape>::Type >::Type TUValue;
 
         // *** SPECIALIZATION ***
 
@@ -1384,7 +1384,7 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
         // to get the same index with signed or unsigned chars we simply cast them to unsigned
         // before feeding them into the pipeline
 		typedef typename Concatenator<StringSet<TString, TSpec> >::Type			TConcat;
-        typedef typename _MakeUnsigned< typename Value<TConcat>::Type >::Type	TUValue;
+        typedef typename _MakeUnsigned< typename Host<TShape>::Type >::Type		TUValue;
 		typedef Multi<
 			Tupler<7, true, Compressed>, 
 			typename Value<TSA>::Type,

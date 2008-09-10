@@ -234,6 +234,48 @@ SEQAN_CHECKPOINT
 	_findBeginInit(me);
 }
 
+template <typename TNeedle, typename TSpec, typename TFindBeginPatternSpec>
+inline void _patternMatchNOfPattern(Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > & me, bool match = true)
+{
+SEQAN_CHECKPOINT
+
+	typedef typename Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > >::TWord TWord;
+	typedef typename Value<TNeedle>::Type TValue;
+	TNeedle const &needle = host(me);
+
+	// encoding the letters as bit-vectors
+	if (match)
+	{
+		for (unsigned j = 0; j < me.needleSize; j++)
+			if (getValue(needle, j) == 'N')
+				for (unsigned i = 0; i < length(me.bitMasks); i += me.blockCount)
+					me.bitMasks[i + j / me.MACHINE_WORD_SIZE] |= (TWord)1 << (j % me.MACHINE_WORD_SIZE);
+	} else {
+		for (unsigned j = 0; j < me.needleSize; j++)
+			if (getValue(needle, j) == 'N')
+				for (unsigned i = 0; i < length(me.bitMasks); i += me.blockCount)
+					me.bitMasks[i + j / me.MACHINE_WORD_SIZE] &= ~((TWord)1 << (j % me.MACHINE_WORD_SIZE));
+	}
+}
+
+template <typename TNeedle, typename TSpec, typename TFindBeginPatternSpec>
+inline void _patternMatchNOfFinder(Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > & me, bool match = true)
+{
+SEQAN_CHECKPOINT
+
+	typedef typename Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > >::TWord TWord;
+
+	// encoding the letters as bit-vectors
+	if (match)
+	{
+		for (unsigned j = 0; j < me.needleSize; j++)
+			me.bitMasks[me.blockCount * 4 + j / me.MACHINE_WORD_SIZE] |= (TWord)1 << (j % me.MACHINE_WORD_SIZE);
+	} else {
+		for (unsigned j = 0; j < me.needleSize; j++)
+			me.bitMasks[me.blockCount * 4 + j / me.MACHINE_WORD_SIZE] &= ~((TWord)1 << (j % me.MACHINE_WORD_SIZE));
+	}
+}
+
 template <typename TNeedle, typename TSpec, typename TFindBeginPatternSpec, typename TNeedle2>
 void setHost(Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > & me, 
 			 TNeedle2 & ndl)

@@ -89,7 +89,7 @@ void printHelp(int, const char *[], RazerSOptions<TSpec> &options, bool longHelp
 		cerr << "  -rl, --repeat-length NUM     \t" << "set simple-repeat length threshold (default " << options.repeatLength << ')' << endl;
 		cerr << "  -tl, --taboo-length NUM      \t" << "set taboo length (default " << options.tabooLength << ')' << endl;
 		cerr << endl << "Verification Options:" << endl;
-		cerr << "  -mN, --match-N               \t" << "N matches with all other characters" << endl;
+		cerr << "  -mN, --match-N               \t" << "\'N\' matches with all other characters" << endl;
 	} else {
 		cerr << "Try 'razers --help' for more information." << endl;
 	}

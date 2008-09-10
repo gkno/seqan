@@ -91,6 +91,13 @@ namespace SEQAN_NAMESPACE_MAIN
 						WEIGHT< Shape<TValue, TSpec> >::VALUE >::VALUE };
 	};
 
+///.Metafunction.Host.param.T.type:Class.Shape
+	template <typename TValue, typename TSpec>
+	struct Host<Shape<TValue,TSpec> >
+	{
+		typedef TValue Type;
+	};
+
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -465,9 +472,10 @@ If $charsLeft$ is smaller than the shape's span, the hash value corresponds to t
 	SEQAN_CHECKPOINT
 		// remove first, shift left, and add next character
 		typedef typename Value< Shape<TValue, TSpec> >::Type	THValue;
+		typedef typename Size< Shape<TValue, TSpec> >::Type		TSize;
 		me.hValue = 
 			(me.hValue - ordValue(me.leftChar) * (THValue)me.leftFactor) * ValueSize<TValue>::VALUE
-			+ ordValue((TValue)*(it + (THValue)me.span - 1));
+			+ ordValue((TValue)*(it + (TSize)me.span - 1));
 		me.leftChar = *it;
 		return me.hValue;
 	}
