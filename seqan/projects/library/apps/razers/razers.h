@@ -590,11 +590,9 @@ void findReads(
 				TMyersFinderRev		myersFinderRev(infRev);
 				TMyersPatternRev	myersPatternRev(readRev);
 
-				if (options.matchN)
-				{
-					_patternMatchNOfPattern(myersPatternRev);
-					_patternMatchNOfFinder(myersPatternRev);
-				}
+				_patternMatchNOfPattern(myersPatternRev, options.matchN);
+				_patternMatchNOfFinder(myersPatternRev, options.matchN);
+
 				// find beginning of best semi-global alignment
 				if (find(myersFinderRev, myersPatternRev, maxScore))
 					m.gBegin = m.gEnd - (position(myersFinderRev) + 1);

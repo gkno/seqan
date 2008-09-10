@@ -235,11 +235,11 @@ SEQAN_CHECKPOINT
 }
 
 template <typename TNeedle, typename TSpec, typename TFindBeginPatternSpec>
-inline void _patternMatchNOfPattern(Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > & me, bool match = true)
+inline void _patternMatchNOfPattern(Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > & me, bool match)
 {
 SEQAN_CHECKPOINT
 
-	typedef typename Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > >::TWord TWord;
+	typedef typename Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> >::TWord TWord;
 	typedef typename Value<TNeedle>::Type TValue;
 	TNeedle const &needle = host(me);
 
@@ -259,11 +259,11 @@ SEQAN_CHECKPOINT
 }
 
 template <typename TNeedle, typename TSpec, typename TFindBeginPatternSpec>
-inline void _patternMatchNOfFinder(Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > & me, bool match = true)
+inline void _patternMatchNOfFinder(Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > & me, bool match)
 {
 SEQAN_CHECKPOINT
 
-	typedef typename Pattern<TNeedle, Tag<_MyersUkkonen<TSpec> > >::TWord TWord;
+	typedef typename Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> >::TWord TWord;
 
 	// encoding the letters as bit-vectors
 	if (match)
