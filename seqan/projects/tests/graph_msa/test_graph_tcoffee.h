@@ -311,17 +311,6 @@ void Test_ExternalLibraries() {
 	strmRead2.close();
 	std::cout << g << std::endl;
 
-
-	// Re-read everything
-	clear(g);
-	assignStringSet(g, seqSet);
-	std::fstream strm_lib;
-	strm_lib.open(TEST_PATH "test.lib", std::ios_base::in | std::ios_base::binary);
-	read(strm_lib,g,TCoffeeLib());	// Read library
-	strm_lib.close();
-	//_debugRefinedMatches(g);
-	__testquickAlign(g);
-
 	clear(g);
 	assignStringSet(g, seqSet);
 	clear(matches);

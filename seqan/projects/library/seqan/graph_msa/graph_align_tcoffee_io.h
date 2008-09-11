@@ -102,26 +102,54 @@ _parse_readSequenceData(TFile & file,
 }
 
 
-template<typename TFile, typename TStringSet, typename TCargo, typename TSpec>
-inline void
-_readLibrary(TFile & file,
-			 Graph<Alignment<TStringSet, TCargo, TSpec> >& g)
+
+//////////////////////////////////////////////////////////////////////////////
+
+
+
+template<typename TFile, typename TFragment, typename TSpec, typename TScoreValue, typename TSpec2, typename TNames>
+void 
+read(TFile & file,
+	 String<TFragment, TSpec>& matches,
+	 String<TScoreValue, TSpec2>& scores,
+	 TNames const& names,
+	 TCoffeeLib) 
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
-	typedef typename Size<TGraph>::Type TSize;
+	typedef typename Size<TFragment>::Type TSize;
 	typedef typename Value<TFile>::Type TValue;
-	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
-	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	typedef typename Id<TGraph>::Type TId;
+	typedef typename Value<TNames>::Type TName;
+	
+	
+	// Map the names to slots
+	typedef std::map<TName, TSize> TNameToPosition;
+	TNameToPosition namePosMap;
+	for(TSize i = 0;i<length(names);++i) namePosMap.insert(std::make_pair(names[i], i));
+	
+	// Remember the correct spots
+	TValue c;
+	if (_streamEOF(file)) return;
+	else c = _streamGet(file);
+	_parse_skipLine(file, c);
+	TSize nseq = (TSize) _parse_readNumber(file, c);
+	_parse_skipLine(file, c);
 
-	TValue c = '#';
+	// Read sequences
+	typedef String<TSize> TMapping;
+	TMapping posMap;
+	resize(posMap, nseq);
+	for(TSize i=0; i<nseq; ++i) {
+		TName myName;
+		_parse_readIdentifier(file, myName, c);
+		value(posMap, i) = namePosMap.find(myName)->second;
+		_parse_skipLine(file, c);
+	}
+
 	bool seq1ToN = false;
 	if (_streamEOF(file)) return;
 	
-	typedef std::pair<std::pair<TSize, TSize>, TCargo> TResiduePair;
+	typedef std::pair<std::pair<TSize, TSize>, TScoreValue> TResiduePair;
 	typedef std::set<TResiduePair> TResiduePairSet;
-	TSize nseq = length(stringSet(g));
 	String<TResiduePairSet> resPair;
 	resize(resPair, nseq * nseq);	
 	TSize seq1 = 0;
@@ -144,6 +172,8 @@ _readLibrary(TFile & file,
 				--seq1;
 				--seq2;
 			}
+			seq1 = value(posMap, seq1);
+			seq2 = value(posMap, seq2);
 		} else if (c == '!') {
 			_parse_skipLine(file, c);
 		} else {
@@ -163,13 +193,6 @@ _readLibrary(TFile & file,
 			}		
 		}
 	}
-
-	typedef Fragment<> TFragment;
-	typedef String<TFragment> TFragmentString;
-	typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
-	TFragmentString matches;
-	String<TCargo> score_values;
-
 	for(TSize i = 0; i<length(resPair); ++i) {
 		if (resPair[i].empty()) continue;
 		TSize seq1 = i / nseq;
@@ -179,19 +202,19 @@ _readLibrary(TFile & file,
 		typename TResiduePairSet::const_iterator posEnd = resPair[i].end();
 		TSize startMatch1 = pos->first.first;
 		TSize startMatch2 = pos->first.second;
-		TCargo carg = pos->second;
+		TScoreValue carg = pos->second;
 		TSize len = 1;
 		//std::cout << pos->first.first << ',' << pos->first.second << ',' << pos->second << std::endl;
 		++pos;
 		while(pos != posEnd) {
 			if ((startMatch1 + len == pos->first.first) &&
 				(startMatch2 + len == pos->first.second) &&
-				(carg / len == pos->second)) {
+				(carg / (TScoreValue) len == pos->second)) {
 					carg += pos->second;
 					++len;
 			} else {
 				appendValue(matches, TFragment(seq1, startMatch1, seq2, startMatch2, len));
-				appendValue(score_values, carg);
+				appendValue(scores, carg);
 				startMatch1 = pos->first.first;
 				startMatch2 = pos->first.second;
 				carg = pos->second;
@@ -201,68 +224,8 @@ _readLibrary(TFile & file,
 			++pos;
 		}
 		appendValue(matches, TFragment(seq1, startMatch1, seq2, startMatch2, len));
-		appendValue(score_values, carg);
+		appendValue(scores, carg);
 	}
-
-	// Refine all matches, rescore matches and create multiple alignment
-	matchRefinement(matches,stringSet(g),g);
-
-	// Adapt edge weights
-	TFragmentStringIter endIt = end(matches);
-	TSize positionIt = 0;
-	for(TFragmentStringIter it = begin(matches); it != endIt; ++it, ++positionIt) {
-		TId id1 = sequenceId(*it,0);
-		TId id2 = sequenceId(*it,1);
-		TSize pos1 = fragmentBegin(*it, id1);
-		TSize pos2 = fragmentBegin(*it, id2);
-		TSize origFragLen = fragmentLength(*it, id1);
-		TSize end1 = pos1 + origFragLen;
-		while(pos1 < end1) {
-			TVertexDescriptor p1 = findVertex(g, id1, pos1);
-			TVertexDescriptor p2 = findVertex(g, id2, pos2);
-			TSize fragLen = fragmentLength(g, p1);
-			TEdgeDescriptor e = findEdge(g, p1, p2);
-			cargo(e) += (TCargo) ( (double) fragLen / (double) origFragLen * (double) getValue(score_values, positionIt));
-			pos1 += fragLen;
-			pos2 += fragLen;
-		}
-	}
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TFile, typename TStringSet, typename TCargo, typename TSpec>
-void 
-read(TFile & file,
-	 Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-	 TCoffeeLib) 
-{
-	SEQAN_CHECKPOINT
-	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
-	typedef typename Size<TGraph>::Type TSize;
-	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	typedef typename Position<TFile>::Type TPosition;
-	typedef typename Value<TFile>::Type TValue;
-	typedef typename Id<TGraph>::Type TIdType;
-	typedef typename Value<TStringSet>::Type TString;
-
-	TValue c;
-	if (_streamEOF(file)) return;
-	else c = _streamGet(file);
-
-	// Ignore first line
-	_parse_skipLine(file, c);
-		
-	// Read number of sequences
-	TSize nSeq = (TSize) _parse_readNumber(file, c);
-	_parse_skipLine(file, c);
-	
-	// Skip header
-	for(TSize i=0; i<nSeq; ++i) _parse_skipLine(file, c);
-
-	// Read library
-	clearVertices(g);
-	_readLibrary(file,g);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -427,10 +390,11 @@ read(TFile & file,
 }
 
 
-template<typename TValue, typename TSpec2, typename TFragment, typename TSpec, typename TSize>
+template<typename TValue, typename TSpec2, typename TFragment, typename TSpec, typename TScores, typename TSize>
 void 
 _collectSegmentMatches(String<TValue, TSpec2> const& mat,
 					   String<TFragment, TSpec>& matches,
+					   TScores& scores,
 					   TSize nseq) 
 {
 	SEQAN_CHECKPOINT
@@ -474,6 +438,7 @@ _collectSegmentMatches(String<TValue, TSpec2> const& mat,
 			if ((startMatch1 + len == pos->first) && (startMatch2 + len == pos->second)) ++len;
 			else {
 				appendValue(matches, TFragment(seq1, startMatch1, seq2, startMatch2, len));
+				appendValue(scores, len);
 				startMatch1 = pos->first;
 				startMatch2 = pos->second;
 				len = 1;
@@ -481,16 +446,18 @@ _collectSegmentMatches(String<TValue, TSpec2> const& mat,
 			++pos;
 		}
 		appendValue(matches, TFragment(seq1, startMatch1, seq2, startMatch2, len));
+		appendValue(scores, len);
 	}
 }
 
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TFile, typename TFragment, typename TSpec, typename TNames>
+template<typename TFile, typename TFragment, typename TSpec, typename TScoreValue, typename TSpec2, typename TNames>
 void 
 read(TFile & file,
 	 String<TFragment, TSpec>& matches,
+	 String<TScoreValue, TSpec2>& scores,
 	 TNames const& origNames,
 	 FastaAlign) 
 {
@@ -541,7 +508,7 @@ read(TFile & file,
 	clear(mat);
 
 	// Collect the segment matches
-	_collectSegmentMatches(finalMat, matches, nseq); 
+	_collectSegmentMatches(finalMat, matches, scores, nseq); 
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -575,11 +542,11 @@ __includeFragment(String<Fragment<TSizeSpec, ExactFragment<TSpec1> >, TSpec2>& m
 				  TSize seq2Id, 
 				  TSize beg2, 
 				  TSize len, 
-				  bool)
+				  bool reversed)
 {
 	SEQAN_CHECKPOINT
 	typedef Fragment<TSizeSpec, ExactFragment<TSpec1> > TFragment;
-	appendValue(matches, TFragment(seq1Id, beg1, seq2Id, beg2, len));
+	if (!reversed) appendValue(matches, TFragment(seq1Id, beg1, seq2Id, beg2, len));
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -596,8 +563,6 @@ read(TFile & file,
 	typedef typename Size<TNames>::Type TSize;
 	typedef typename Value<TFile>::Type TValue;
 	typedef typename Value<TNames>::Type TName;
-	typedef String<TFragment, TSpec1> TFragmentString;
-	typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
 	
 	// Map the names to slots
 	typedef std::map<TName, TSize> TNameToPosition;
@@ -751,43 +716,67 @@ void write(TFile & file,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TFile, typename TStringSet, typename TCargo, typename TSpec, typename TNames, typename TEdgeMap>
-void 
+template<typename TPos, typename TSpec2, typename TSpec1, typename TScores, typename TId, typename TSize>
+inline void 
+__appendNewMatch(String<Fragment<TPos, ExactReversableFragment<TSpec2> >, TSpec1>& matches,
+				 TScores& scores,
+				 TId seq1Id,
+				 TId seq2Id,
+				 TSize beg1,
+				 TSize beg2,
+				 TSize len,
+				 bool) 
+{
+	typedef Fragment<TPos, ExactReversableFragment<TSpec2> > TFragment;
+	appendValue(matches, TFragment(seq1Id, beg1, seq2Id, beg2, len));
+	appendValue(scores, len);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TPos, typename TSpec2, typename TSpec1, typename TScores, typename TId, typename TSize>
+inline void 
+__appendNewMatch(String<Fragment<TPos, ExactFragment<TSpec2> >, TSpec1>& matches,
+				 TScores& scores,
+				 TId seq1Id,
+				 TId seq2Id,
+				 TSize beg1,
+				 TSize beg2,
+				 TSize len,
+				 bool reversed) 
+{
+	typedef Fragment<TPos, ExactFragment<TSpec2> > TFragment;
+	if (!reversed) {
+		appendValue(matches, TFragment(seq1Id, beg1, seq2Id, beg2, len));
+		appendValue(scores, len);
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TFile, typename TFragment, typename TSpec1, typename TScoreValue, typename TSpec2, typename TStringSet, typename TNames>
+inline void 
 read(TFile & file,
-	 Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-	 TNames& names, 
-	 TEdgeMap& edgeMap,
+	 String<TFragment, TSpec1>& matches,
+	 String<TScoreValue, TSpec2>& scores,
+	 TStringSet const& strSet,
+	 TNames const& names,
 	 MummerLib) 
 {
 	SEQAN_CHECKPOINT
 	typedef typename Size<TNames>::Type TSize;
 	typedef typename Value<TFile>::Type TValue;
 	typedef typename Value<TNames>::Type TName;
-	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
-	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
-	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	typedef typename Id<TGraph>::Type TId;
 	
-	// Initialization
-	typedef Fragment<TSize, ExactReversableFragment<> > TFragment;
-	typedef String<TFragment> TFragmentString;
-	typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
-	TFragmentString matches;
-	String<TCargo> score_values;
-
 	// Map the names to slots
 	typedef std::map<TName, TSize> TNameToPosition;
 	TNameToPosition namePosMap;
-	for(TSize i = 0;i<length(names);++i) {
-		namePosMap.insert(std::make_pair(names[i], i));
-	}
+	for(TSize i = 0;i<length(names);++i) namePosMap.insert(std::make_pair(value(names, i), i));
 	
 	// Read the Mummer file
 	TValue c;
 	if (_streamEOF(file)) return;
 	else c = _streamGet(file);
-	TStringSet& strSet = stringSet(g);
-
 	TName seq1;
 	TName seq2;
 	TSize seq1Id = 0;
@@ -820,54 +809,11 @@ read(TFile & file,
 			_parse_skipLine(file, c);
 			if (seq1Id == seq2Id) continue;
 			
-			if (!reversed) appendValue(matches, TFragment(seq1Id, --beg1, seq2Id,  --beg2, len, reversed));
-			else appendValue(matches, TFragment(seq1Id, (length(value(strSet, seq1Id)) - (--beg1 + len)), seq2Id,  --beg2, len, reversed));
-			appendValue(score_values, (TCargo) len);
-		}
-	}
-
-	// Refine all matches, rescore matches and create multiple alignment
-	matchRefinement(matches,strSet,g);
-	resizeEdgeMap(g, edgeMap);
-
-	// Adapt edge weights
-	TFragmentStringIter endIt = end(matches);
-	TSize positionIt = 0;
-	for(TFragmentStringIter it = begin(matches); it != endIt; ++it, ++positionIt) {
-		TId id1 = sequenceId(*it,0);
-		TSize pos1 = fragmentBegin(*it, id1);
-		TSize origFragLen = fragmentLength(*it, id1);
-		TSize end1 = pos1 + origFragLen;
-		bool reversed = isReversed(*it);
-		while(pos1 < end1) {
-			TSize pos2 = 0;
-			TId id2 = 0;
-			getProjectedPosition(*it, id1, pos1, id2, pos2);
-			TVertexDescriptor p1 = findVertex(g, id1, pos1);
-			TVertexDescriptor p2 = findVertex(g, id2, pos2);
-			TSize fragLen = fragmentLength(g, p1);
-			TEdgeDescriptor e = findEdge(g, p1, p2);
-			cargo(e) += (TCargo) ( ((double) fragLen / (double) origFragLen) * (double) value(score_values, positionIt));
-			property(edgeMap, e) = reversed;
-			pos1 += fragLen;
-			pos2 += fragLen;
+			if (!reversed) __appendNewMatch(matches, scores, seq1Id, seq2Id, --beg1, --beg2, len, reversed);
+			else __appendNewMatch(matches, scores, seq1Id, seq2Id, (length(value(strSet, seq1Id)) - (--beg1 + len)), --beg2, len, reversed);
 		}
 	}
 }
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TFile, typename TStringSet, typename TCargo, typename TSpec, typename TNames>
-inline void 
-read(TFile & file,
-	 Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-	 TNames& names, 
-	 MummerLib) 
-{
-	String<bool> edgeMap;
-	read(file, g, names, edgeMap, MummerLib() );
-}
-
 
 /////////////////////////////////////////////////////////////////////////////
 // Newick Format

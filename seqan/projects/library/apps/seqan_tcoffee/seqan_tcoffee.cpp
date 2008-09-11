@@ -37,10 +37,11 @@ evaluateAlignment(TConfigOptions const& cfgOpt, TScore const& scType, TAlphabet)
 	
 	// Read the alignment
 	typedef String<Fragment<> > TFragmentString;
+	String<TScoreValue> scores;
 	TFragmentString matches;
 	std::fstream strm_lib;
 	strm_lib.open(toCString(value(cfgOpt, "infile")), std::ios_base::in | std::ios_base::binary);
-	read(strm_lib,matches, names, FastaAlign());	
+	read(strm_lib,matches, scores, names, FastaAlign());	
 	strm_lib.close();
 
 	// Build the alignment graph
@@ -311,18 +312,15 @@ globalAlignment(StringSet<TString, TSpec> const& seqSet,
 				input << alignmentFile;
 				std::ifstream strm_lib;
 				strm_lib.open(input.str().c_str(), std::ios_base::in | std::ios_base::binary);
-				read(strm_lib, matches, nameSet, FastaAlign());
+				read(strm_lib, matches, scores, nameSet, FastaAlign());
 				strm_lib.close();
 				clear(alignmentFile);
 			} else {
 				if ((value(alnFiles, i) != ' ') && (value(alnFiles, i) != '\t')) appendValue(alignmentFile, value(alnFiles, i));
 			}
 		}	
-		// Score the matches
-		scoreMatches(seqSet, scType, matches, scores);
 		std::cout << "External segment matches done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
 	}
-	
 
 	// Include computed segment matches
 	if (length(value(cfgOpt, "method"))) {
@@ -341,7 +339,7 @@ globalAlignment(StringSet<TString, TSpec> const& seqSet,
 				} else if (currentMethod == "overlap") {
 					// Compute segment matches from overlap alignments
 					Nothing noth;
-					AlignConfig<true,true,true,true> ac;
+					AlignConfig<true,true,false,false> ac;
 					appendSegmentMatches(seqSet, pList, scType, matches, scores, noth, ac, GlobalPairwise_Library() );
 				} else if (currentMethod == "lcs") {
 					// Compute segment matches from the longest common subsequence
@@ -360,30 +358,76 @@ globalAlignment(StringSet<TString, TSpec> const& seqSet,
 	// Include a T-Coffee library
 	if (length(value(cfgOpt, "lib"))) {
 		std::cout << "Parsing a T-Coffee Library:" << std::endl;
-		// ToDo!!!
-		//TGraph g(strSet);
-		//std::fstream strm_lib;
-		//strm_lib.open(toCString(value(cfgOpt, "lib")), std::ios_base::in | std::ios_base::binary);
-		//read(strm_lib,g,TCoffeeLib());	// Read library
-		//strm_lib.close();
+		String<char> libNames = value(cfgOpt, "lib");
+		String<char> currentLib;
+		for(TSize i = 0; i<=length(libNames); ++i) {
+			if ((i == length(libNames) || (value(libNames, i) == ','))) {
+				std::cout << "*T-Coffee library: " << currentLib << std::endl;
+				std::stringstream input;
+				input << currentLib;
+				std::ifstream strm_lib;
+				strm_lib.open(input.str().c_str(), std::ios_base::in | std::ios_base::binary);
+				read(strm_lib, matches, scores, nameSet, TCoffeeLib());
+				strm_lib.close();
+				clear(currentLib);
+			} else {
+				if ((value(libNames, i) != ' ') && (value(libNames, i) != '\t')) appendValue(currentLib, value(libNames, i));
+			}
+		}
 		std::cout << "Parsing done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
 	}
 	
-	// Include external segment matches
-	if (length(value(cfgOpt, "blast"))) {
-		std::cout << "Parsing a blast file:" << std::endl;
-		std::fstream strm_lib;
-		strm_lib.open(toCString(value(cfgOpt, "blast")), std::ios_base::in | std::ios_base::binary);
-		read(strm_lib, matches, scores, nameSet, BlastLib());
-		strm_lib.close();
+	// Include MUMmer segment matches
+	if (length(value(cfgOpt, "mummer"))) {
+		std::cout << "Parsing MUMmer segment matches:" << std::endl;
+		String<char> mummerFiles = value(cfgOpt, "mummer");
+		String<char> currentMumFile;
+		for(TSize i = 0; i<=length(mummerFiles); ++i) {
+			if ((i == length(mummerFiles) || (value(mummerFiles, i) == ','))) {		
+				std::cout << "*MUMmer file: " << currentMumFile << std::endl;
+				std::stringstream input;
+				input << currentMumFile;
+				std::ifstream strm_lib;
+				strm_lib.open(input.str().c_str(), std::ios_base::in | std::ios_base::binary);
+				read(strm_lib, matches, scores, seqSet, nameSet, MummerLib());		
+				strm_lib.close();
+				clear(currentMumFile);
+			} else {
+				if ((value(mummerFiles, i) != ' ') && (value(mummerFiles, i) != '\t')) appendValue(currentMumFile, value(mummerFiles, i));
+			}
+		}	
 		std::cout << "Parsing done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
 	}
 
-	// Score the matches
+	// Include BLAST segment matches
+	if (length(value(cfgOpt, "blast"))) {
+		std::cout << "Parsing BLAST segment matches:" << std::endl;
+		String<char> blastFiles = value(cfgOpt, "blast");
+		String<char> currentBlastFile;
+		for(TSize i = 0; i<=length(blastFiles); ++i) {
+			if ((i == length(blastFiles) || (value(blastFiles, i) == ','))) {		
+				std::cout << "*BLAST file: " << currentBlastFile << std::endl;
+				std::stringstream input;
+				input << currentBlastFile;
+				std::ifstream strm_lib;
+				strm_lib.open(input.str().c_str(), std::ios_base::in | std::ios_base::binary);
+				read(strm_lib, matches, scores, nameSet, BlastLib());
+				strm_lib.close();
+				clear(currentBlastFile);
+			} else {
+				if ((value(blastFiles, i) != ' ') && (value(blastFiles, i) != '\t')) appendValue(currentBlastFile, value(blastFiles, i));
+			}
+		}
+		std::cout << "Parsing done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
+	}
+
 	std::cout << "Total number of segment matches: " << length(matches) << std::endl;
-	std::cout << "Scoring method: Re-Score" << std::endl;
-	scoreMatches(seqSet, scType, matches, scores);
-	std::cout << "Scoring done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
+	// Score the matches
+	if (length(value(cfgOpt, "seq"))) {
+		std::cout << "Scoring method: Re-Score" << std::endl;
+		scoreMatches(seqSet, scType, matches, scores);
+		std::cout << "Scoring done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;\
+	}
 	
 	// Use these segment matches for the initial alignment graph
 	TGraph g(seqSet);
@@ -597,7 +641,7 @@ int main(int argc, const char *argv[]) {
 	append(helpMsg, "-method [global], [local], [overlap], [lcs]\n");
 	append(helpMsg, "\tMethods to generate segment matches, default is global, local.\n\n");
 	append(helpMsg, "-blast <BLAST matches>, <BLAST matches>, ...\n");
-	append(helpMsg, "\tFiles with gapless segment matches in BLAST tabular format (-m 8).\n\n");
+	append(helpMsg, "\tFiles with gapless segment matches in BLAST tabular format (-m 8 -g F).\n\n");
 	append(helpMsg, "-mummer <MUMmer matches>, <MUMmer matches>, ...\n");
 	append(helpMsg, "\tFiles with gapless segment matches in MUMmer format.\n\n");
 	append(helpMsg, "-aln <FASTA Alignment File>, <FASTA Alignment File>, ...\n");
@@ -634,7 +678,7 @@ int main(int argc, const char *argv[]) {
 	append(helpMsg, "\t./seqan_tcoffee -seq seq.fasta -alphabet dna\n");
 	append(helpMsg, "\nGenome Alignment:\n");
 	append(helpMsg, "\t./seqan_tcoffee -seq seq.fasta -method lcs -alphabet dna\n");
-	append(helpMsg, "\t./seqan_tcoffee -seq seq.fasta -blast matches.tab -alphabet dna\n");
+	append(helpMsg, "\t./seqan_tcoffee -seq seq.fasta -mummer my.mums -blast my1, my2 -alphabet dna\n");
 	append(helpMsg, "\nMeta-Alignment:\n");
 	append(helpMsg, "\t./seqan_tcoffee -seq seq.fasta -aln sub1.fasta, sub2.fasta\n");
 	append(helpMsg, "\nAlignment Evaluation:\n");
