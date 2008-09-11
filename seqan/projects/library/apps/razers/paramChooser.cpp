@@ -2,6 +2,7 @@
 #define RUN_RAZERS
 #define RUN_RAZERS_ONEGAPPED	
 #define SEQAN_PROFILE
+#define LOSSRATE_VALIDATION	//generates output for loss rate validation (empirical vs computed), only for ungapped
 
 #include <sys/types.h>
 #include <dirent.h>
@@ -24,6 +25,8 @@ using namespace std;
 
 typedef long double TFloat;
 
+
+
 // global input parameters
 static unsigned totalN = 32;				// sequence length
 static unsigned totalK = 2;					// errors
@@ -31,9 +34,16 @@ static TFloat optionLossRate = 0.01;		// in
 static TFloat chosenLossRate = 0.0;			// out
 static TFloat optionErrorRate = 0.05;		// 
 static bool optionHammingOnly = false;
-static bool doUngapped = false;
-static bool doAllOneGapped = true;
+#ifdef LOSSRATE_VALIDATION
+static bool doUngapped = true;
+static bool doAllOneGapped = false;
 static bool doSelectedGapped = false;
+#else
+static bool doUngapped = false;
+static bool doAllOneGapped = false;
+static bool doSelectedGapped = true;
+#endif
+
 static TFloat optionProbINSERT = 0.0;
 static TFloat optionProbDELETE = 0.0;
 
@@ -506,34 +516,39 @@ makeUngappedStatsFile(TError & errorDistr)
 		initPatterns(states, shape, maxErrors-1, logErrorDistribution, optionHammingOnly);
 		computeFilteringLoss(found, states, length(shape), maxT, maxErrors,  logErrorDistribution);
 		
-		//for loss rate sanity check
-//                for(unsigned e=0; e < maxErrors; ++e)
-//                {
-//                        stringstream filename;
-//                        filename << fparams <<fprefix[0]<<"_QE0_N" << totalN<< "_E" << e<<".dat";
-//                        ofstream outfile;
-//                        if(qLen==8){
-//                                outfile.open(filename.str().c_str(),ios_base::out);
-//                                cout << "Creating file "<<filename.str() << "\n";
-//                        }
-//                        else outfile.open(filename.str().c_str(),ios_base::app);
-//                        for(unsigned t = 20; t > 0; --t)
-//                        {
-//                                outfile.precision(10);
-//                                //write(outfiles[e],1.0-exp(found[e*totalN+t]));
-//                                //outfiles[e].write(1.0-exp(found[e*totalN+t]));
-//                                outfile << (1.0 - _transformBack(found[e*maxT+t]));
-//                                if(t>1)outfile << "\n";
-//                        //      cout.precision(3);
-//                        //      if (t > 0) cout << "\t";
-//                        //      cout << (1.0-exp(found[e*totalN+t]));
-//                        }
-// //                     fprintf(outfiles[e],"%c",'\n');
-// //                     outfiles[e].write("\n");
-//                        outfile << endl;
-//                        outfile.close();
-//                }
-
+#ifdef LOSSRATE_VALIDATION	
+	//for loss rate sanity check
+		if(qLen > 7)
+		{
+			for(unsigned e=0; e < maxErrors; ++e)
+			{
+				stringstream filename;
+				filename << fparams <<fprefix[0]<<"_QE0_N" << totalN<< "_E" << e<<".dat";
+				ofstream outfile;
+				if(qLen==8){
+					outfile.open(filename.str().c_str(),ios_base::out);
+					cout << "Creating file "<<filename.str() << "\n";
+				}
+				else outfile.open(filename.str().c_str(),ios_base::app);
+				for(unsigned t = 20; t > 0; --t)
+				{
+					outfile.precision(10);
+					//write(outfiles[e],1.0-exp(found[e*totalN+t]));
+					//outfiles[e].write(1.0-exp(found[e*totalN+t]));
+					outfile << (1.0 - _transformBack(found[e*maxT+t]));
+					if(t>1)outfile << "\n";
+				//      cout.precision(3);
+				//      if (t > 0) cout << "\t";
+				//      cout << (1.0-exp(found[e*totalN+t]));
+				}
+	//                     fprintf(outfiles[e],"%c",'\n');
+	//      		               outfiles[e].write("\n");
+				outfile << endl;
+				outfile.close();
+			}
+		}
+#endif
+#ifndef LOSSRATE_VALIDATION	
 		//regular output
 		for(unsigned e=0; e < maxErrors; ++e)
 		{
@@ -562,6 +577,7 @@ makeUngappedStatsFile(TError & errorDistr)
 			outfile.close();
 		}
 //		cout << endl;	
+#endif
 	}
 // 	for(unsigned e=0; e < maxErrors; ++e)optionHammingOnly
 // 	{
@@ -967,8 +983,13 @@ int main(int argc, const char *argv[])
 {
 	//////////////////////////////////////////////////////////////////////////////
 	// Parse command line
+#ifdef LOSSRATE_VALIDATION	
+	strncpy ( fparams, argv[0], length(argv[0])-12 );
+	strcat(fparams,"./");
+#else
 	strncpy ( fparams, argv[0], length(argv[0])-12 );
 	strcat(fparams,"params/");
+#endif
 	strncpy ( fgparams, argv[0], length(argv[0])-12 );
 	strcat(fgparams,"gapped_params/");
 	static const TFloat epsilon = 0.0000001;	
