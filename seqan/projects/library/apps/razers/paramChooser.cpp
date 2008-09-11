@@ -664,8 +664,8 @@ makeSelectedStatsFile(TError & errorDistr)
 
 #ifdef RUN_RAZERS
 	// generate genome and reads
-	StringSet<DnaString> testGenome;
-	StringSet<DnaString> testReads;
+	StringSet<Dna5String> testGenome;
+	StringSet<Dna5String> testReads;
 	StringSet<CharString> dummyIDs;
 	resize(testGenome, 1);
 	simulateGenome(testGenome[0], 1000000);					// generate 1Mbp genomic sequence
@@ -803,14 +803,14 @@ makeOneGappedStatsFile(TError & errorDistr)
 	
 #ifdef RUN_RAZERS_ONEGAPPED
 	// generate genome and reads
-	StringSet<DnaString> testGenome;
-	StringSet<DnaString> testReads;
+	StringSet<Dna5String> testGenome;
+	StringSet<Dna5String> testReads;
 	StringSet<CharString> dummyIDs;
 	resize(testGenome, 1);
 	simulateGenome(testGenome[0], 10000000);					// generate 1Mbp genomic sequence
 	simulateReads(
 		testReads, dummyIDs, testGenome, 
-		200000, maxE-1, logErrorDistribution, 0.5);	// generate 10M reads
+		100000, maxE-1, logErrorDistribution, 0.5);	// generate 10M reads
 #endif
 
 
@@ -863,7 +863,8 @@ makeOneGappedStatsFile(TError & errorDistr)
 						datName << "/"<<fprefix[0]<<"_N" << totalN << "_E" << e << "_";
 						if(!optionHammingOnly) datName << "L_";
 						else datName <<"H_";
-						datName << "onegapped.dat";
+						//datName << "onegapped.dat";
+						datName << q<<"_onegapped.dat";
 					
 						// if datName-file doesnt exist, write the title on it
 						if(firstTimeK[e]==true){

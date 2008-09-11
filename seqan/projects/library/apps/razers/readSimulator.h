@@ -24,7 +24,7 @@ sample(TOperation m, TAlphabet base)
 {
 	Dna ret;
 	do
-		ret = (TAlphabet)(int)((double)ValueSize<TAlphabet>::VALUE * (double)rand() / TEMP_RAND_MAX);
+		ret = (Dna)(int)((double)ValueSize<Dna>::VALUE * (double)rand() / TEMP_RAND_MAX);
 	while (ret == base && m == SEQAN_MISMATCH);
 	return ret;
 }
