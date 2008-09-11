@@ -390,7 +390,8 @@ void initPatterns(
 			for (++it; (it != itEnd) && !skip; ++it, left = right) 
 			{
 				right = getValue(it);
-				
+
+#ifdef NON_REDUNDANT
 				if (left == SEQAN_MISMATCH && right == SEQAN_DELETE) 
 					skip = true;	// MISMATCH before DELETE is DELETE before MISMATCH (already enumerated)
 
@@ -402,6 +403,7 @@ void initPatterns(
 				
 				if (left == SEQAN_DELETE && right == SEQAN_INSERT) 
 					skip = true;	// DELETE before INSERT is one MISMATCH (already enumerated)
+#endif
 			}
 			if (left == SEQAN_INSERT)
 				skip = true;		// no trailing INSERT allowed
@@ -484,6 +486,7 @@ void initPatterns(
 		state.skipFirst = false;
 		state.skipLast = false;
 
+#ifdef NON_REDUNDANT
 		int err = 0, del = 0;
 		for (int j = 0; j < (int)length(pattern); ++j)
 		{
@@ -524,7 +527,9 @@ void initPatterns(
 			if (del > 0 && del <= err)
 				state.skipLast = true;
 		}
-
+#else
+		state.skipFirst = ((int)getValue(pattern, 0) == SEQAN_INSERT);
+#endif
 		// apply pattern to read q-gram
 		// and check if shape is recognized in the genome
 		state.qgramHit = false;
