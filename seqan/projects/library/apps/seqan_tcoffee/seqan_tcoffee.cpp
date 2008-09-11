@@ -236,7 +236,7 @@ predefinedGlobalAlignment(StringSet<TString, TSpec> const& seqSet,
 	
 	// Use these segment matches for the initial alignment graph
 	TGraph g(seqSet);
-	buildAlignmentGraph(matches, scores, g, FractionalScore() );
+	buildAlignmentGraph(matches, scores, g, FrequencyCounting() );
 	
 	// Guide tree
 	Graph<Tree<double> > guideTree;
@@ -433,6 +433,8 @@ globalAlignment(StringSet<TString, TSpec> const& seqSet,
 	TGraph g(seqSet);
 	std::cout << "Construction of alignment graph: FractionalScore" << std::endl;
 	buildAlignmentGraph(matches, scores, g, FractionalScore() );
+	clear(matches);
+	clear(scores);
 	std::cout << "Alignment graph construction done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
 
 	// Guide tree
