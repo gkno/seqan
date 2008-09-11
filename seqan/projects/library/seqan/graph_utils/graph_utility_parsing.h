@@ -258,13 +258,27 @@ assign(ConfigOptions<TKey, TValue>& cfgOpt,
 template<typename TKey, typename TValue, typename TKey1>
 inline TValue&
 value(ConfigOptions<TKey, TValue>& cfgOpt,
-	  TKey1& key1)
+	  TKey1 const& key1)
 {
 	if (cfgOpt.option.find(key1) == cfgOpt.option.end()) {
 		static TValue tmp;
 		return tmp;
 	}
 	else return (cfgOpt.option.find(key1))->second;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TKey, typename TValue, typename TKey1>
+inline TValue&
+value(ConfigOptions<TKey, TValue> const& cfgOpt,
+	  TKey1 const& key1)
+{
+	if (cfgOpt.option.find(key1) == cfgOpt.option.end()) {
+		static TValue tmp;
+		return tmp;
+	}
+	else return ((const_cast<ConfigOptions<TKey, TValue>&>(cfgOpt)).option.find(key1))->second;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -341,6 +355,15 @@ assignHelp(ConfigOptions<TKey, TValue>& cfgOpt,
 
 template<typename TKey, typename TValue>
 inline TValue&
+valueHelp(ConfigOptions<TKey, TValue> const& cfgOpt)
+{
+	return (const_cast<ConfigOptions<TKey, TValue>&>(cfgOpt)).help;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TKey, typename TValue>
+inline TValue&
 valueHelp(ConfigOptions<TKey, TValue>& cfgOpt)
 {
 	return cfgOpt.help;
@@ -386,7 +409,7 @@ parseCmdLine(int argc, const char *argv[], ConfigOptions<TKey, TValue>& cfgOpt) 
 
 
 template <typename T, typename TString>
-inline T const
+inline T
 _stringToNumber(TString& str)
 {
 	T val = 0;

@@ -81,7 +81,7 @@ void Test_Trie() {
 	TVertexDescriptor v;
 
 	createSuffixTrie(g, pos, str);
-	for (int i = 0; i < length(str); ++i)
+	for (unsigned int i = 0; i < length(str); ++i)
 	{
 		v = parseString(g, 0, it=str+i, strend);
 		SEQAN_TASSERT(it == strend)
@@ -110,10 +110,10 @@ void Test_SetOracle()
 	appendValue(keywords, String<char>("annually"));
 	createSetOracle(g,pos,keywords);
 
-	for (int i = 0; i < length(keywords); ++i)
+	for (unsigned int i = 0; i < length(keywords); ++i)
 	{
 		String<char> & str = keywords[i];
-		for (int j = 0; j < length(str); ++j)
+		for (unsigned int j = 0; j < length(str); ++j)
 		{
 			SEQAN_TASSERT(canParseString(g, prefix(str, i)));
 		}

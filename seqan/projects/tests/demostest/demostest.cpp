@@ -197,10 +197,6 @@
 	#include "../../library/demos/graph_align_sw.cpp"
 	#undef main
 
-	#define main runGraphMsa
-	#include "../../library/demos/graph_align_msa.cpp"
-	#undef main
-
 	#define main runGraphHmm
 	#include "../../library/demos/graph_hmm.cpp"
 	#undef main
@@ -267,7 +263,6 @@ int main(int argc, const char *argv[])
 	runGraphGotoh();
 	runGraphHirschberg();
 	runGraphSw();
-	runGraphMsa();
 	runGraphHmm();
 #endif
 

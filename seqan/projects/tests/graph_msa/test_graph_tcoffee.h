@@ -565,76 +565,6 @@ void Test_Progressive() {
 }
 
 
-void Test_Alignments1() {
-	typedef unsigned int TSize;
-	typedef String<AminoAcid> TSequence;
-	typedef StringSet<TSequence, Owner<> > TSequenceSet;
-	typedef StringSet<TSequence, Dependent<> > TDependentSequenceSet;
-	
-	TSequenceSet seqSet;
-	appendValue(seqSet, "GARFIELDTHELASTFATCAT");
-	appendValue(seqSet, "GARFIELDTHEFASTCAT");
-	appendValue(seqSet, "GARFIELDTHEVERYFASTCAT");
-	appendValue(seqSet, "THEFATCAT");
-
-	typedef Graph<Alignment<TDependentSequenceSet, unsigned int> > TGraph;
-	TGraph gOut(seqSet);
-	globalAlignment(seqSet, gOut, MSA_Protein());
-	Blosum62 score_type(-2,-8);
-	SEQAN_TASSERT(sumOfPairsScore(gOut, score_type) == 273)
-
-
-	TSize gapExCount;
-	TSize gapCount;
-	TSize pairCount;
-	String<TSize> numPairs;
-	TSize len;
-	alignmentEvaluation(gOut, score_type, gapExCount, gapCount, pairCount, numPairs, len);
-	std::cout << gOut << std::endl;
-	SEQAN_TASSERT(gapExCount == 33)
-	SEQAN_TASSERT(gapCount == 11)
-	SEQAN_TASSERT(pairCount == 83)
-	SEQAN_TASSERT(len == 22)
-}
-
-void Test_Alignments2() {
-	typedef String<Dna> TSequence;
-	typedef StringSet<String<char>, Owner<> > TNameSet;
-	typedef StringSet<TSequence, Owner<> > TSequenceSet;
-	typedef StringSet<TSequence, Dependent<> > TDependentSequenceSet;
-	
-	TSequenceSet seqSet;
-	TNameSet nameSet;
-	appendValue(seqSet, "AACCTTGGAA");
-	appendValue(nameSet, "seq1");
-	appendValue(seqSet, "ACCTGAA");
-	appendValue(nameSet, "seq2");
-	appendValue(seqSet, "TTGG");
-	appendValue(nameSet, "seq3");
-	appendValue(seqSet, "AACCTT");
-	appendValue(nameSet, "seq4");
-
-	typedef Graph<Alignment<TDependentSequenceSet, unsigned int> > TGraph;
-	TGraph gOut(seqSet);
-	globalAlignment(seqSet, gOut, MSA_Dna());
-	Score<int> score_type = Score<int>(5,-4,-2,-6);
-	SEQAN_TASSERT(sumOfPairsScore(gOut, score_type) == 5)
-	clearVertices(gOut);
-	globalAlignment(seqSet, gOut, MSA_Genome());
-	SEQAN_TASSERT(sumOfPairsScore(gOut, score_type) == 11)
-	std::cout << gOut << std::endl;
-	
-	// Fasta format
-
-	// Writing
-	std::fstream strm3;
-	strm3.open(TEST_PATH "align.fasta", std::ios_base::out | std::ios_base::trunc);
-	write(strm3,gOut,nameSet,FastaFormat());
-	strm3.close();
-}
-
-
-
 void Test_ReversableFragments() {
 	typedef unsigned int TSize;
 	typedef String<Dna> TSequence;
@@ -673,8 +603,6 @@ void Test_GraphTCoffee() {
 	Test_TripletExtension();
 	Test_SumOfPairsScore();
 	Test_Progressive();
-	Test_Alignments1();
-	Test_Alignments2();
 	Test_ReversableFragments();
 	
 	

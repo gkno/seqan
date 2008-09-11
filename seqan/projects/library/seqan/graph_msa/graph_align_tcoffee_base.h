@@ -84,34 +84,22 @@ buildAlignmentGraph(String<TFragment, TSpec1>& matches,
 	// Segment-match refinement
 	matchRefinement(matches,strSet,outGraph);
 
-	// Find smallest score value
-	TScoreValuesIter scoreIt = begin(scores);
-	TScoreValuesIter scoreItEnd = end(scores);
-	TScoreValue smallest = 0;
-	for(;scoreIt != scoreItEnd; ++scoreIt) {
-		if (value(scoreIt) < smallest) {
-			smallest = value(scoreIt);
-		}
-	}
-
 	// Clear edge-weights
 	typedef typename Iterator<TOutGraph, EdgeIterator>::Type TEdgeIterator;
 	TEdgeIterator itE(outGraph);
 	for(;!atEnd(itE);goNext(itE)) cargo(value(itE)) = 0;
 
 	// Adapt the scores
-	TFragmentStringIter endIt = end(matches);
-	scoreIt = begin(scores);
-	TScoreValue offset = (-1) * smallest + 1;
-	for(TFragmentStringIter it = begin(matches); it != endIt; ++it, ++scoreIt) {
-		// Some alignment scores might be negative, offset the scores
-		value(scoreIt) += offset;
-		TId id1 = sequenceId(*it,0);
-		TId id2 = sequenceId(*it,1);
-		TSize pos1 = fragmentBegin(*it, id1);
-		TSize pos2 = fragmentBegin(*it, id2);
-		TSize fragLen = fragmentLength(*it, id1);
-		TSize end1 = pos1 + fragmentLength(*it, id1);
+	TFragmentStringIter it = begin(matches, Standard() );
+	TFragmentStringIter endIt = end(matches, Standard() );
+	TScoreValuesIter scoreIt = begin(scores, Standard() );
+	for(; it != endIt; goNext(it), goNext(scoreIt)) {
+		TId id1 = sequenceId(value(it),0);
+		TId id2 = sequenceId(value(it),1);
+		TSize pos1 = fragmentBegin(value(it), id1);
+		TSize pos2 = fragmentBegin(value(it), id2);
+		TSize fragLen = fragmentLength(value(it), id1);
+		TSize end1 = pos1 + fragmentLength(value(it), id1);
 		while(pos1 < end1) {
 			TVertexDescriptor p1 = findVertex(outGraph, id1, pos1);
 			TVertexDescriptor p2 = findVertex(outGraph, id2, pos2);
@@ -280,7 +268,6 @@ scoreMatches(StringSet<TString, TSpec> const& seqSet,
 	typedef typename Iterator<TScoreString>::Type TScoreStringIter;
 	TScoreStringIter itSc = begin(scores, Standard() );
 	for(; itF != itFEnd; goNext(itF), goNext(itSc)) {
-		// Some alignment scores might be negative, offset the scores
 		TId id1 = sequenceId(value(itF),0);
 		TId id2 = sequenceId(value(itF),1);
 		TSize pos1 = fragmentBegin(value(itF), id1);
@@ -291,9 +278,9 @@ scoreMatches(StringSet<TString, TSpec> const& seqSet,
 		goFurther(itS1, pos1);
 		TStringIter itS2 = begin(value(seqSet, idToPosition(seqSet, id2)), Standard() );
 		goFurther(itS2, pos2);
-		value(itSc) = offset;
+		value(itSc) = 0;
 		for(TSize i = pos1; i<pos1+fragLen; ++i, goNext(itS1), goNext(itS2)) {
-			value(itSc) += score(scType, value(itS1), value(itS2));
+			value(itSc) += offset + score(scType, value(itS1), value(itS2));
 		}
 	}
 }
@@ -308,7 +295,7 @@ scoreMatches(StringSet<TString, TSpec> const& seqSet,
 			 TScoreString& scores)
 {
 	SEQAN_CHECKPOINT
-	scoreMatches(seqSet, scType, matches, scores, (typename Value<TScoreString>::Type) 10000);
+	scoreMatches(seqSet, scType, matches, scores, (typename Value<TScoreString>::Type) 10);
 }
 
 
