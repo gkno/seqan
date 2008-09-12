@@ -710,6 +710,14 @@ void dumpMatches(
 	typedef typename Value<TReads>::Type		TRead;
 	typedef typename TMatch::TGPos				TGPos;
 
+	unsigned maxReadLength = 0;
+	for (unsigned i = 0; i < length(reads); ++i)
+		if (maxReadLength < length(reads[i]))
+			maxReadLength = length(reads[i]);
+
+	String<int> posError;
+	fill(posError, maxReadLength, 0);
+
 	SEQAN_PROTIMESTART(dump_time);
 
 	// how many 0's should be padded?
@@ -853,7 +861,11 @@ void dumpMatches(
 
 				readNo = (*it).rseqNo;
 #ifdef RAZERS_MAXHITS				
-				if (hitCount[readNo] > options.maxHits) continue;
+				if (hitCount[readNo] > options.maxHits) 
+				{
+					(*it).orientation = '-';
+					continue;
+				}
 #endif
 				gseqNo = (*it).gseqNo;
 				gBegin = (*it).gBegin;
@@ -922,7 +934,11 @@ void dumpMatches(
 
 				readNo = (*it).rseqNo;
 #ifdef RAZERS_MAXHITS				
-				if (hitCount[readNo] > options.maxHits) continue;
+				if (hitCount[readNo] > options.maxHits)
+				{
+					(*it).orientation = '-';
+					continue;
+				}
 #endif
 				gseqNo = (*it).gseqNo;
 				gBegin = (*it).gBegin;
@@ -975,6 +991,42 @@ void dumpMatches(
 	}
 
 	file.close();
+
+	// get empirical error distribution
+	{
+		it = begin(matches, Standard());
+		itEnd = end(matches, Standard());
+
+		unsigned unique = 0;
+		for (; it != itEnd; ++it) 
+		{
+			if ((*it).orientation == '-') continue;
+
+			Dna5String const &read = reads[(*it).rseqNo];
+			Dna5String genome = infix(genomes[(*it).gseqNo], (*it).gBegin, (*it).gEnd);
+			if ((*it).orientation == 'R')
+				reverseComplementInPlace(genome);
+
+			for (unsigned i = 0; i < length(read); ++i)
+				if (genome[i] != read[i])
+				{
+					if (!(genome[i] == 'N' && read[i] != 'N'))
+						++posError[i];
+				}
+			++unique;
+		}
+		::std::ostringstream distrFileName;
+		distrFileName << "experimentalErrorDistribution" << maxReadLength;
+		file.open(distrFileName.str().c_str(), ::std::ios_base::out | ::std::ios_base::trunc);
+		if (!file.is_open()) {
+			::std::cerr << "Failed to open distribution file" << ::std::endl;
+			return;
+		}
+		for (unsigned i = 0; i < length(posError); ++i)
+			file << (double)posError[i] / unique << ::std::endl;
+		file.close();
+	}
+
 
 	options.timeDumpResults = SEQAN_PROTIMEDIFF(dump_time);
 

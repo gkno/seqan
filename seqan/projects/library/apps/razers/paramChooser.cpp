@@ -77,6 +77,19 @@ _parse_skipWhitespace(TFile& file, TChar& c)
 	}
 }
 
+template<typename TFile, typename TChar>
+inline void 
+_parse_skipLine2(TFile& file, TChar& c)
+{
+	if (c != '\n' && c != '\r')
+		while (!_streamEOF(file)) {
+			c = _streamGet(file);
+			if (c == '\n' || c == '\r') break;
+		}
+	if (!_streamEOF(file))
+		c = _streamGet(file);
+}
+
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -444,13 +457,67 @@ qualityDistributionFromPrbFile(TFile & file, TDistribution & avg)
 			sum += countMatrix[q*totalN + t];
 		for(int q = 0; q<46;++q) 
 			avg[t] += (TFloat) (countMatrix[q*totalN + t] * (q-5)) / sum;
-		avg[t] =  pow((TFloat)10.0,   (TFloat)(avg[t]/-10)) / (1+pow((TFloat)10.0,(TFloat)(avg[t]/-10) ));
+		avg[t] =  pow((TFloat)10.0, (TFloat)(avg[t]/-10.0)) / (1+pow((TFloat)10.0,(TFloat)(avg[t]/-10.0)));
 	}
 	TFloat avgsum = 0.0;
 
 	for(unsigned t = 0; t < totalN; ++t)
 		avgsum += avg[t];
 
+/*	for(unsigned t = 0; t < totalN; ++t)
+	{
+		cout.precision(10);
+		//cout << avg[t]/avgsum << "\t";
+		cout << avg[t] << "\t";
+	}
+	cout << "\n";
+*/
+}
+
+
+template<typename TFile, typename TDistribution>
+void
+qualityDistributionFromFastQFile(TFile & file, TDistribution & avg)
+{
+	String<int> qualitySum;
+	fill(qualitySum,totalN,0);
+	unsigned read_count = 0;
+
+	if (_streamEOF(file)) return;
+
+	signed char c = _streamGet(file);
+	while (!_streamEOF(file))
+	{
+		_parse_skipLine2(file, c);
+		if (_streamEOF(file) || c != '+') continue;
+
+		_parse_skipLine2(file, c);
+		unsigned i = 0;
+		while (!(_streamEOF(file) || c == '\n' || c == '\r'))
+		{
+			qualitySum[i] += c - 33;
+			c = _streamGet(file);
+			if (++i == totalN) break;
+		};
+
+		if (i > 0) ++read_count;
+	}
+
+//	cout <<"\nNumber of reads: "<< read_count << "\n";
+	cout << " Readcount = "<< read_count << "\n";
+
+	fill(avg,totalN,0.0);
+//	TFloat sumavg = 0.0;
+	for(unsigned t = 0; t < totalN; ++t)
+	{
+		avg[t] = (TFloat) qualitySum[t] / (TFloat)read_count;
+		avg[t] = pow((TFloat)10.0,(TFloat)(avg[t]/-10.0)) / (1+pow((TFloat)10.0,(TFloat)(avg[t]/-10.0)));
+	}
+/*	TFloat avgsum = 0.0;
+
+	for(unsigned t = 0; t < totalN; ++t)
+		avgsum += avg[t];
+*/
 /*	for(unsigned t = 0; t < totalN; ++t)
 	{
 		cout.precision(10);
@@ -475,6 +542,24 @@ getAvgFromPrbDirectory(TPath prbPath, TError & errorDistribution)
 	unsigned countPrbs = 0;
 	for (unsigned int i = 0;i < length(files);i++) 
 	{
+		if(suffix(files[i],length(files[i])-6) == ".fastq")
+		{
+			cout << "Processing "<< files[i] << "...\n";
+			TError avg_act;
+			resize(avg_act,totalN);
+			fstream filestrm;
+			stringstream sstrm;
+			sstrm << prbPath << files[i];
+			filestrm.open(sstrm.str().c_str(),ios_base::in);
+			qualityDistributionFromFastQFile(filestrm,avg_act);
+			filestrm.close();
+			for(unsigned j=0; j < totalN; ++j)
+			{
+//				cout << " " << avg_act[j];
+				errorDistribution[j] += avg_act[j];
+			}
+			++countPrbs;
+		}
 		if(suffix(files[i],length(files[i])-8) == "_prb.txt")
 		{
 			cout << "Processing "<< files[i] << "...\n";
@@ -1109,7 +1194,7 @@ int main(int argc, const char *argv[])
 			}
 
 
-			if (strcmp(argv[arg], "-pf") == 0 || strcmp(argv[arg], "--prb-folder") == 0) { //should also support fastq files
+			if (strcmp(argv[arg], "-pf") == 0 || strcmp(argv[arg], "--prb-folder") == 0) {
 				if (arg + 1 < argc) {
 					++arg;
 					fnameCount0 = true;
