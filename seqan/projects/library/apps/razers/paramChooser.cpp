@@ -2,7 +2,7 @@
 #define RUN_RAZERS
 #define RUN_RAZERS_ONEGAPPED	
 #define SEQAN_PROFILE
-#define LOSSRATE_VALIDATION	//generates output for loss rate validation (empirical vs computed), only for ungapped
+//#define LOSSRATE_VALIDATION	//generates output for loss rate validation (empirical vs computed), only for ungapped
 
 #include <sys/types.h>
 #include <dirent.h>
@@ -49,7 +49,7 @@ static TFloat optionProbDELETE = 0.0;
 
 // output parameters
 unsigned chosenQ = 4;			//
-unsigned chosenThreshold = 2;			//
+unsigned chosenThreshold = 2;		//
 CharString chosenShape;			//
 
 bool		fnameCount0 = 0;
@@ -221,9 +221,9 @@ parseGappedParams(TFile & file)
 	String<unsigned> thresholds;
 	resize(thresholds,14); //corresponding t
 	String<unsigned> measure;
-	resize(measure,14); //potential matches
+	resize(measure,14); //potential matches (or mincov if doAllOneGapped==true)
 	String<TFloat> lossrates;
-	resize(lossrates,14); //required runtime
+	resize(lossrates,14); //lossrates
 	
 	char c = _streamGet(file);
 	if(_streamEOF(file)) cout << "Loss rate file is empty!\n";
@@ -234,8 +234,8 @@ parseGappedParams(TFile & file)
 	}
 
 	bool atLeastOneFound = false;
-        while(!_streamEOF(file))
-        {
+	while(!_streamEOF(file))
+	{
 		CharString currShape;
 		_parse_readShape(file, c, currShape);
                 _parse_skipWhitespace(file,c);
@@ -261,9 +261,39 @@ parseGappedParams(TFile & file)
 					++weight;
 			if(length(shapes[weight-1]) > 0)  // if this is not the first shape with weight weight
 			{				  // compare currShape to the best one found so far
+#ifndef RUN_RAZERS
+				if(currMeasure >= measure[weight-1]) //if neither pm nor runtime available -> use mincov (approximation)
+#else
 				if((doAllOneGapped && currMeasure >= measure[weight-1]) || (!doAllOneGapped && currMeasure <= measure[weight-1]))
+#endif
 				{
-					//if(currMeasure == measure[weight-1] && lossrates[weight-1] < currLossrate) continue;
+					if(currMeasure == measure[weight-1])
+					{
+						bool oldOneBetter = false;
+						bool undecided = false;
+						//next measure: threshold
+						if(thresholds[weight-1] > currThreshold) 
+						{
+							_parse_skipLine(file,c); 
+							continue;
+						}
+						else if(thresholds[weight-1] == currThreshold) undecided = true;
+
+						//if still undecided: next measure: span
+						if(undecided && length(shapes[weight-1]) > length(currShape))
+						{
+							_parse_skipLine(file,c); 
+							continue;
+						}
+						else if(undecided && length(shapes[weight-1]) < length(currShape)) undecided = false;
+
+						//if still undecided: next measure: lossrate
+						if(undecided && lossrates[weight-1] < currLossrate)
+						{
+							_parse_skipLine(file,c); 
+							continue;
+						}
+					}
 					shapes[weight-1] = currShape;
 					measure[weight-1] = currMeasure;
 					thresholds[weight-1] = currThreshold;
@@ -587,6 +617,22 @@ makeUngappedStatsFile(TError & errorDistr)
 
 }
 
+//////////////////////////////////////////////////////////////////////////////
+// Returns the estimated minimum coverage of a shape with weight q, span s at threshold t
+template<typename TValueQ, typename TValueS, typename TValueT>
+inline TValueS getMinCov(TValueQ q, TValueS s, TValueT t)
+{
+	TValueS mincov;
+	if(t > s - q + 1){
+		mincov = q + 2 * (t - 1) - (t - (s - q + 1));
+	}
+	else mincov = q + 2 * (t - 1);
+
+	return mincov;
+}
+
+
+
 template<typename TError>
 void
 makeSelectedStatsFile(TError & errorDistr)
@@ -596,7 +642,7 @@ makeSelectedStatsFile(TError & errorDistr)
 	unsigned maxErrors = 5;
 	unsigned minQ = 7;
 	unsigned maxT = totalN-minQ+1;
-	unsigned minT = 1;//totalN-minQ+1;
+	unsigned minT = 0;//totalN-minQ+1;
 
 	typedef typename Value<TError>::Type TErrorValue;
 	String<TErrorValue> logErrorDistribution;
@@ -605,17 +651,17 @@ makeSelectedStatsFile(TError & errorDistr)
 
 	//q=7
 //	appendValue(shapeStrings,"1111111");
-	appendValue(shapeStrings,"1111100011");
+//	appendValue(shapeStrings,"1111100011");
 //	appendValue(shapeStrings,"111110000011");
 	//q=8
 //	appendValue(shapeStrings,"11111111");
 //	appendValue(shapeStrings,"11111000111");
-	appendValue(shapeStrings,"1111110000011");
+//	appendValue(shapeStrings,"1111110000011");
 //	appendValue(shapeStrings,"11111100000011");
 	//q=9
 //	appendValue(shapeStrings,"111111111");
 //	appendValue(shapeStrings,"111111000111");
-	appendValue(shapeStrings,"1111111000011");
+//	appendValue(shapeStrings,"1111111000011");
 //	appendValue(shapeStrings,"111111000000111");
 	//q=10
 //	appendValue(shapeStrings,"1111111111");
@@ -687,7 +733,7 @@ makeSelectedStatsFile(TError & errorDistr)
 	simulateGenome(testGenome[0], 1000000);					// generate 1Mbp genomic sequence
 	simulateReads(
 		testReads, dummyIDs, testGenome, 
-		100000, maxErrors-1, logErrorDistribution, 0.5);	// generate 10M reads
+		50000, maxErrors-1, logErrorDistribution, 0.5);	// generate 10M reads
 #endif
 
 
@@ -713,7 +759,7 @@ makeSelectedStatsFile(TError & errorDistr)
 				}
 				if(lossrate > 0.2) continue;
 
-			//	unsigned gminCov = getMinCov(weights[i], length(shapeStrings[i]), t);
+				unsigned gminCov = getMinCov(weights[i], length(shapeStrings[i]), t);
 
 				// create the whole file name
 				stringstream datName;
@@ -728,10 +774,8 @@ makeSelectedStatsFile(TError & errorDistr)
 				if(firstTimeK[e]==true){
 					firstTimeK[e] = false;
 					ofstream fout(datName.str().c_str(), ios::out);
-					fout << "shape\t\tt\t\tloss rate";//\t\tminCoverage";
-#ifdef RUN_RAZERS
+					fout << "shape\t\tt\t\tloss ratet\tminCoverage";
 					fout << "\tPM\t\truntime";
-#endif
 					fout << endl << endl;
 					fout.close();
 				}
@@ -753,11 +797,13 @@ makeSelectedStatsFile(TError & errorDistr)
 				ofstream fout(datName.str().c_str(), ios::app | ios::out);
 				fout << shapeStrings[i] << "\t\t";
 				fout << t << "\t\t";
-				fout << lossrate;// << "\t\t";
-				//fout << gminCov;
-#ifdef RUN_RAZERS				
+				fout << lossrate << "\t\t";
+				fout << gminCov;
+#ifdef RUN_RAZERS
 				fout << "\t\t" << razersOptions.FP + razersOptions.TP;
 				fout << "\t\t" << razersOptions.timeMapReads;
+#else
+				fout << "\t\t0\t\t0";
 #endif
 				fout << endl;
 				fout.close();
@@ -769,20 +815,6 @@ makeSelectedStatsFile(TError & errorDistr)
 	}
 
 
-}
-
-//////////////////////////////////////////////////////////////////////////////
-// Returns the estimated minimum coverage of a shape with weight q, span s at threshold t
-template<typename TValueQ, typename TValueS, typename TValueT>
-inline TValueS getMinCov(TValueQ q, TValueS s, TValueT t)
-{
-	TValueS mincov;
-	if(t > s - q + 1){
-		mincov = q + 2 * (t - 1) - (t - (s - q + 1));
-	}
-	else mincov = q + 2 * (t - 1);
-
-	return mincov;
 }
 
 
@@ -879,17 +911,15 @@ makeOneGappedStatsFile(TError & errorDistr)
 						datName << "/"<<fprefix[0]<<"_N" << totalN << "_E" << e << "_";
 						if(!optionHammingOnly) datName << "L_";
 						else datName <<"H_";
-						//datName << "onegapped.dat";
-						datName << q<<"_onegapped.dat";
+						datName << "onegapped.dat";
+						//datName << q<<"_onegapped.dat";
 					
 						// if datName-file doesnt exist, write the title on it
 						if(firstTimeK[e]==true){
 							firstTimeK[e] = false;
 							ofstream fout(datName.str().c_str(), ios::out);
 							fout << "shape\t\tt\t\tloss rate\t\tminCoverage";
-#ifdef RUN_RAZERS_ONEGAPPED
 							fout << "\t\tPM\t\truntime";
-#endif
 							fout << endl << endl;
 							fout.close();
 						}
@@ -916,6 +946,8 @@ makeOneGappedStatsFile(TError & errorDistr)
 #ifdef RUN_RAZERS_ONEGAPPED				
 						fout << "\t\t" << razersOptions.FP + razersOptions.TP;
 						fout << "\t\t" << razersOptions.timeMapReads;
+#else
+						fout << "\t\t0\t\t0";
 #endif
 						fout << endl;
 						fout.close();
