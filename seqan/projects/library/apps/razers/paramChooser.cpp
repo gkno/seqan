@@ -252,7 +252,7 @@ parseGappedParams(TFile & file)
 			currMeasure = _parse_readNumber(file,c); //PM in the case of selectedGapped
 		}
 #endif
-		if(currThreshold > 1 && currLossrate <= optionLossRate /*&& val > bestSoFar*/)
+		if(currLossrate <= optionLossRate /*&& val > bestSoFar*/)
 		{
 		
 			unsigned weight = 0;
@@ -269,7 +269,6 @@ parseGappedParams(TFile & file)
 				{
 					if(currMeasure == measure[weight-1])
 					{
-						bool oldOneBetter = false;
 						bool undecided = false;
 						//next measure: threshold
 						if(thresholds[weight-1] > currThreshold) 
@@ -344,7 +343,7 @@ parseParams(TFile & file)
         unsigned countT = 0;
         TFloat bestSoFar = 0.0;
         unsigned bestQ = 1;
-        unsigned bestT = 1;
+        unsigned bestT = 0;
 	unsigned secondBestT = 0;
 	unsigned qCutoff = 14; 
         //String<TFloat> loss;
@@ -365,7 +364,7 @@ parseParams(TFile & file)
                         val = _parse_readEValue(file,c);
   //                  cout << " " << val;
 //                      appendValue(loss,val);
-                        if(countT > 1 && val <= optionLossRate /*&& val > bestSoFar*/)
+                        if( val <= optionLossRate /*&& val > bestSoFar*/)
                         {
                                 bestSoFar=val;
                                 bestQ=countQ+1;
@@ -382,7 +381,7 @@ parseParams(TFile & file)
 			break;
                 _parse_skipWhitespace(file,c);
         }
-	if(bestT<2) cout << "\n!!! Something wrong with file? !!!\n";
+	if(bestT<1) cout << "\n!!! Something wrong with file? !!!\n";
 	chosenLossRate = bestSoFar;
         chosenQ = bestQ;
         chosenThreshold = bestT;
@@ -516,7 +515,8 @@ template<typename TError>
 void
 makeUngappedStatsFile(TError & errorDistr)
 {
-	unsigned maxErrors = 5;//(unsigned) totalN / 5;
+	unsigned maxErrors = (unsigned) totalN / 10;
+	if(maxErrors<5)maxErrors=5;
 	unsigned maxT = totalN;
 	
 	// prepare log error distribution 
@@ -638,8 +638,8 @@ void
 makeSelectedStatsFile(TError & errorDistr)
 {
 
-//	unsigned maxE = (unsigned) totalN / 5;
-	unsigned maxErrors = 5;
+	unsigned maxErrors = (unsigned) totalN / 10;
+	if(maxErrors<5) maxErrors = 5;
 	unsigned minQ = 7;
 	unsigned maxT = totalN-minQ+1;
 	unsigned minT = 0;//totalN-minQ+1;
@@ -733,7 +733,7 @@ makeSelectedStatsFile(TError & errorDistr)
 	simulateGenome(testGenome[0], 1000000);					// generate 1Mbp genomic sequence
 	simulateReads(
 		testReads, dummyIDs, testGenome, 
-		50000, maxErrors-1, logErrorDistribution, 0.5);	// generate 10M reads
+		50000, maxErrors-1, logErrorDistribution, 0.5);	// generate 50K reads
 #endif
 
 
@@ -824,13 +824,13 @@ void
 makeOneGappedStatsFile(TError & errorDistr)
 {
 
-//	unsigned maxE = (unsigned) totalN / 5;
-	unsigned maxE = 5;
+	unsigned maxE = (unsigned) totalN / 10;
+	if(maxE<5) maxE = 5;
 	unsigned minE = 0;				
 	unsigned maxQ = 14;				// weights are considered from minQ..maxQ
 	unsigned minQ = 10;
-	unsigned minGap = 2; 
-	unsigned maxGap = 3;				// spans are considered from minQ..maxS
+	unsigned minGap = 1; 
+	unsigned maxGap = 6;				// spans are considered from minQ..maxS
 	unsigned maxT = totalN-minQ+1;
 	
 	typedef typename Value<TError>::Type TErrorValue;
@@ -855,10 +855,10 @@ makeOneGappedStatsFile(TError & errorDistr)
 	StringSet<Dna5String> testReads;
 	StringSet<CharString> dummyIDs;
 	resize(testGenome, 1);
-	simulateGenome(testGenome[0], 10000000);					// generate 1Mbp genomic sequence
+	simulateGenome(testGenome[0], 25000000);					// generate 1Mbp genomic sequence
 	simulateReads(
 		testReads, dummyIDs, testGenome, 
-		100000, maxE-1, logErrorDistribution, 0.5);	// generate 10M reads
+		200000, maxE-1, logErrorDistribution, 0.5);	// generate 10M reads
 #endif
 
 
@@ -872,7 +872,8 @@ makeOneGappedStatsFile(TError & errorDistr)
 		for(unsigned j = q+minGap; j <= q+maxGap /*|| j < q+q-1 */; ++j){
 
 			// k = position of gap
-			for(unsigned k = (q/2); k < q; ++k){
+//			for(unsigned k = (q/2); k < q; ++k){
+			for(unsigned k = q-3; k < q-2; ++k){
 				
 				CharString shapeString;
 				fill(shapeString,j,'0');
@@ -899,6 +900,7 @@ makeOneGappedStatsFile(TError & errorDistr)
 							else highestOptimalFound = true;
 						}
 						if(lossrate > 0.2)
+						//if(lossrate > 0.1)
 							continue;
 						
 						unsigned gminCov = getMinCov(q, j, t);
@@ -971,8 +973,9 @@ getParamsFilename(TSStr & paramsfile)
 	paramsfile.str("");
 	if(doSelectedGapped || doAllOneGapped)
 	{
-		if(prefixCount) paramsfile << fgparams<< fprefix[0]<<"_N" << totalN << "_E" << totalK;
-		else paramsfile << fgparams<<"userdef_N" << totalN << "_E" << totalK;
+		paramsfile << fgparams<< fprefix[0]<<"_N" << totalN << "_E" << totalK;
+		//if(prefixCount) paramsfile << fgparams<< fprefix[0]<<"_N" << totalN << "_E" << totalK;
+		//else paramsfile << fgparams<<"userdef_N" << totalN << "_E" << totalK;
 		if(optionHammingOnly) paramsfile << "_H";
 		else paramsfile << "_L";
 		if(doAllOneGapped) paramsfile << "_onegapped.dat";
@@ -980,8 +983,9 @@ getParamsFilename(TSStr & paramsfile)
 	}
 	else
 	{
-		if(prefixCount) paramsfile << fparams<< fprefix[0]<<"_QE0_N" << totalN << "_E" << totalK << ".dat";
-		else paramsfile << fparams<<"userdef_QE0_N" << totalN << "_E" << totalK << ".dat";
+		paramsfile << fparams<< fprefix[0]<<"_QE0_N" << totalN << "_E" << totalK << ".dat";
+		//if(prefixCount) paramsfile << fparams<< fprefix[0]<<"_QE0_N" << totalN << "_E" << totalK << ".dat";
+		//else paramsfile << fparams<<"userdef_QE0_N" << totalN << "_E" << totalK << ".dat";
 	}
 }
 
@@ -1212,7 +1216,8 @@ int main(int argc, const char *argv[])
 		if(doSelectedGapped) makeSelectedStatsFile(errorDistribution);
 		if(doUngapped) makeUngappedStatsFile(errorDistribution);
 	}
-	
+	else if(!prefixCount) fprefix[0] = "results";
+
 	totalK = (int)(optionErrorRate * totalN);
 	
 	//prioritize
