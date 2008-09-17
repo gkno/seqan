@@ -433,6 +433,7 @@ qualityDistributionFromPrbFile(TFile & file, TDistribution & avg)
 		qual1 = (int) _parse_readDouble(file,c);// + (TFloat) 1.0/maxN;
 		ind = (qual > qual1) ? ind : 3;
 		qual = (qual > qual1) ? qual : qual1;
+                if(qual < -5) cout << "kleiner\n";
 		++countMatrix[totalN * (qual+5) + pos];
 		++pos;
 		if(pos==totalN) pos = 0;
@@ -724,7 +725,7 @@ makeSelectedStatsFile(TError & errorDistr)
 {
 
 	unsigned maxErrors = (unsigned) totalN / 10;
-	if(maxErrors<5) maxErrors = 5;
+	if(maxErrors<5 && totalN > 30) maxErrors = 5;
 	unsigned minQ = 7;
 	unsigned maxT = totalN-minQ+1;
 	unsigned minT = 0;//totalN-minQ+1;
@@ -734,61 +735,64 @@ makeSelectedStatsFile(TError & errorDistr)
 	
 	String<CharString> shapeStrings;
 
+	if(totalN < 32)
+	{
+	//q=6
+	appendValue(shapeStrings,"111111");
+	appendValue(shapeStrings,"1111100001");
+	appendValue(shapeStrings,"11000000100100101");
+	}
+	
+	if(totalN < 36)
+	{
 	//q=7
-//	appendValue(shapeStrings,"1111111");
-//	appendValue(shapeStrings,"1111100011");
-//	appendValue(shapeStrings,"111110000011");
-	//q=8
-//	appendValue(shapeStrings,"11111111");
-//	appendValue(shapeStrings,"11111000111");
-//	appendValue(shapeStrings,"1111110000011");
-//	appendValue(shapeStrings,"11111100000011");
-	//q=9
-//	appendValue(shapeStrings,"111111111");
-//	appendValue(shapeStrings,"111111000111");
-//	appendValue(shapeStrings,"1111111000011");
-//	appendValue(shapeStrings,"111111000000111");
-	//q=10
-//	appendValue(shapeStrings,"1111111111");
-//	appendValue(shapeStrings,"111111111001");
-	appendValue(shapeStrings,"1111111100011");
-//	appendValue(shapeStrings,"11111110000111");
-//	appendValue(shapeStrings,"111111110000011");
+	appendValue(shapeStrings,"1111111");
+	appendValue(shapeStrings,"1111100011");
+	appendValue(shapeStrings,"10110000001100101");
+	}
 
-/*	appendValue(shapeStrings,"111011100100000111");
-	appendValue(shapeStrings,"111111110000000011");
+	if(totalN < 40)
+	{
+	//q=8
+	appendValue(shapeStrings,"11111111");
+	appendValue(shapeStrings,"11111100011");
+	appendValue(shapeStrings,"101001111000101");  //median shape
+	}
+	
+	if(totalN < 50)
+	{
+	//q=9
+	appendValue(shapeStrings,"111111111");
+	appendValue(shapeStrings,"111111100011");
+	appendValue(shapeStrings,"111001001010001011");
+	}
+
+	//q=10
+	appendValue(shapeStrings,"1111111111");
 	appendValue(shapeStrings,"1111111000111");
-	appendValue(shapeStrings,"1011110111000001001");
-	appendValue(shapeStrings,"111110010010111");
-	appendValue(shapeStrings,"11111111011");*/
+	appendValue(shapeStrings,"111001001010011101");
 
 	//q=11
-//	appendValue(shapeStrings,"11111111111");
-//	appendValue(shapeStrings,"11111111000111");
-//	appendValue(shapeStrings,"111111111000011");
-	appendValue(shapeStrings,"1111111110000011");
-//	appendValue(shapeStrings,"11111111000000111");
+	appendValue(shapeStrings,"11111111111");
+	appendValue(shapeStrings,"1111111001111");
+	appendValue(shapeStrings,"11111101110101");  //median shape
+	
 	//q=12
-//	appendValue(shapeStrings,"111111111111");
-//	appendValue(shapeStrings,"1111111111000011");
-	appendValue(shapeStrings,"11111111110000011");
-//	appendValue(shapeStrings,"11111111000001111");
-/* 	appendValue(shapeStrings,"11111111111");
- 	appendValue(shapeStrings,"1111111111");
- 	appendValue(shapeStrings,"111111111111");*/
+	appendValue(shapeStrings,"111111111111");
+	appendValue(shapeStrings,"11111111100111");
+	appendValue(shapeStrings,"1110100111010011101");
+	
 	//q=13
- 	appendValue(shapeStrings,"111111111100000111");
-// 	appendValue(shapeStrings,"1111111111000000111");
-// 	appendValue(shapeStrings,"111111111000001111");
-// 	appendValue(shapeStrings,"1111111111100000011");
-	appendValue(shapeStrings,"110101111001100010111");
+ 	appendValue(shapeStrings,"1111111111111");
+ 	appendValue(shapeStrings,"11111111110000111");
+	appendValue(shapeStrings,"110101111001100010111");  //made this one up
 
 	//q=14
-// 	appendValue(shapeStrings,"11111111111111");
- //	appendValue(shapeStrings,"1111111111100000111");
-// 	appendValue(shapeStrings,"1111111111000001111");
-// 	appendValue(shapeStrings,"11111111110000001111");
-// 	appendValue(shapeStrings,"11111111111000000111");
+ 	appendValue(shapeStrings,"11111111111111");
+	appendValue(shapeStrings,"1111111111100000111");
+ 	appendValue(shapeStrings,"11101110110001110110001");
+ 	appendValue(shapeStrings,"1111011010001110011011"); //all made up
+
 
 	String<unsigned> weights;
 	fill(weights,length(shapeStrings),0);
@@ -823,7 +827,7 @@ makeSelectedStatsFile(TError & errorDistr)
 
 
 	
-	for(int i = length(shapeStrings)-1; i >= 0 ; --i)
+	for(int i = length(shapeStrings)-1; i >= 0; --i)
 	{
 		String<TFloat> found;
 		resize(found,maxT*maxErrors);
@@ -859,7 +863,7 @@ makeSelectedStatsFile(TError & errorDistr)
 				if(firstTimeK[e]==true){
 					firstTimeK[e] = false;
 					ofstream fout(datName.str().c_str(), ios::out);
-					fout << "shape\t\tt\t\tloss ratet\tminCoverage";
+					fout << "shape\t\tt\t\tlossrate\t\tminCoverage";
 					fout << "\tPM\t\truntime";
 					fout << endl << endl;
 					fout.close();
@@ -914,7 +918,7 @@ makeOneGappedStatsFile(TError & errorDistr)
 	unsigned minE = 0;				
 	unsigned maxQ = 14;				// weights are considered from minQ..maxQ
 	unsigned minQ = 10;
-	unsigned minGap = 1; 
+	unsigned minGap = 0; 
 	unsigned maxGap = 6;				// spans are considered from minQ..maxS
 	unsigned maxT = totalN-minQ+1;
 	
@@ -940,10 +944,10 @@ makeOneGappedStatsFile(TError & errorDistr)
 	StringSet<Dna5String> testReads;
 	StringSet<CharString> dummyIDs;
 	resize(testGenome, 1);
-	simulateGenome(testGenome[0], 25000000);					// generate 1Mbp genomic sequence
+	simulateGenome(testGenome[0], 1000000);					// generate 1Mbp genomic sequence
 	simulateReads(
 		testReads, dummyIDs, testGenome, 
-		200000, maxE-1, logErrorDistribution, 0.5);	// generate 10M reads
+		50000, maxE-1, logErrorDistribution, 0.5);	// generate 10M reads
 #endif
 
 
@@ -1005,7 +1009,7 @@ makeOneGappedStatsFile(TError & errorDistr)
 						if(firstTimeK[e]==true){
 							firstTimeK[e] = false;
 							ofstream fout(datName.str().c_str(), ios::out);
-							fout << "shape\t\tt\t\tloss rate\t\tminCoverage";
+							fout << "shape\t\tt\t\tlossrate\t\tminCoverage";
 							fout << "\t\tPM\t\truntime";
 							fout << endl << endl;
 							fout.close();
@@ -1335,12 +1339,12 @@ int main(int argc, const char *argv[])
 		if(doSelectedGapped || doAllOneGapped)
 		{
 			parseGappedParams(file);
-			cout << "\nChoose s = " << chosenShape << " and t = " << chosenThreshold<< " to achieve optimal performance for expected recognition rate >= " << (100.0-100.0*optionLossRate) << "% (expected recognition = " << (100.0-chosenLossRate*100.0) <<"%)\n\n";
+			cout << "\n Choose \nshape: " << chosenShape << "\n and \nthreshold: " << chosenThreshold<< "\n to achieve optimal performance for expected recognition rate >= " << (100.0-100.0*optionLossRate) << "% (expected recognition = " << (100.0-chosenLossRate*100.0) <<"%)\n\n";
 		}
 		else
 		{
 			parseParams(file);
-			cout << "Choose q = " << chosenQ << " and t = " << chosenThreshold << " to achieve optimal performance for expected recognition rate >= " << (100.0-100.0*optionLossRate) << "% (expected recognition = " << (100.0-chosenLossRate*100.0) <<"%)\n\n";
+			cout << " Choose \nq: " << chosenQ << "\n and \nthreshold: " << chosenThreshold << "\n to achieve optimal performance for expected recognition rate >= " << (100.0-100.0*optionLossRate) << "% (expected recognition = " << (100.0-chosenLossRate*100.0) <<"%)\n\n";
 		}
 		file.close();
 	}
