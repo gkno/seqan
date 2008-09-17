@@ -703,6 +703,7 @@ void dumpMatches(
 	TReadNames const &readIDs,			// Read names (read from Fasta file, currently unused)
 	::std::string const &genomeFName,	// genome name (e.g. "hs_ref_chr1.fa")
 	::std::string const &readFName,		// read name (e.g. "reads.fa")
+	::std::string const &errorPrbFileName,
 	RazerSOptions<TSpec> &options)
 {
 	typedef typename Value<TMatchSet>::Type		TMatches;
@@ -913,7 +914,7 @@ void dumpMatches(
 							file << genomeName;
 				}
 
-				file << ',' << gBegin + options.positionFormat << ',' << gEnd << ',' << ::std::setprecision(5) << percId << ::std::endl;
+				file << ',' << (gBegin + options.positionFormat) << ',' << gEnd << ',' << ::std::setprecision(5) << percId << ::std::endl;
 
 				if (options.dumpAlignment) {
 					assignSource(row(align, 0), reads[readNo]);
@@ -977,10 +978,10 @@ void dumpMatches(
 
 				if (orientation == 'F')
 					// forward strand
-					file << '>' << gBegin + options.positionFormat << ',' << gEnd;
+					file << '>' << (gBegin + options.positionFormat) << ',' << gEnd;
 				else
 					// reverse strand (switch begin and end)
-					file << '>' << gEnd << ',' << gBegin + options.positionFormat;
+					file << '>' << gEnd << ',' << (gBegin + options.positionFormat);
 				file << "[id=" << id << ",fragId=" << fragId;
 				file << ",errors=" << (*it).editDist << ",percId=" << ::std::setprecision(5) << percId;
 				file << ",ambiguity=" << hitCount[readNo] << ']' << ::std::endl;
@@ -993,6 +994,7 @@ void dumpMatches(
 	file.close();
 
 	// get empirical error distribution
+	if (!errorPrbFileName.empty())
 	{
 		it = begin(matches, Standard());
 		itEnd = end(matches, Standard());
@@ -1015,11 +1017,9 @@ void dumpMatches(
 				}
 			++unique;
 		}
-		::std::ostringstream distrFileName;
-		distrFileName << "experimentalErrorDistribution" << maxReadLength;
-		file.open(distrFileName.str().c_str(), ::std::ios_base::out | ::std::ios_base::trunc);
+		file.open(errorPrbFileName.c_str(), ::std::ios_base::out | ::std::ios_base::trunc);
 		if (!file.is_open()) {
-			::std::cerr << "Failed to open distribution file" << ::std::endl;
+			::std::cerr << "Failed to open error distribution file" << ::std::endl;
 			return;
 		}
 		for (unsigned i = 0; i < length(posError); ++i)
@@ -1127,6 +1127,7 @@ template <typename TSpec>
 int mapReads(
 	const char *genomeFileName,
 	const char *readFileName,
+	const char *errorPrbFileName,
 	RazerSOptions<TSpec> &options)
 {
 	TGenomeSet				genomeSet;
@@ -1183,7 +1184,7 @@ int mapReads(
 	//////////////////////////////////////////////////////////////////////////////
 	// Step 3: Remove duplicates and output matches
 	if (!options.spec.DONT_DUMP_RESULTS)
-		dumpMatches(matches, genomeSet, genomeNames, readSet, readNames, genomeFileName, readFileName, options);
+		dumpMatches(matches, genomeSet, genomeNames, readSet, readNames, genomeFileName, readFileName, errorPrbFileName, options);
 
 	return 0;
 }	

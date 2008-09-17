@@ -90,6 +90,7 @@ void printHelp(int, const char *[], RazerSOptions<TSpec> &options, bool longHelp
 		cerr << "  -tl, --taboo-length NUM      \t" << "set taboo length (default " << options.tabooLength << ')' << endl;
 		cerr << endl << "Verification Options:" << endl;
 		cerr << "  -mN, --match-N               \t" << "\'N\' matches with all other characters" << endl;
+		cerr << "  -ed, --error-distr FILE      \t" << "write error distribution to FILE" << endl;
 	} else {
 		cerr << "Try 'razers --help' for more information." << endl;
 	}
@@ -108,6 +109,7 @@ int main(int argc, const char *argv[])
 	RazerSOptions<>		options;
 	unsigned			fnameCount = 0;
 	const char			*fname[2] = { "", "" };
+	string				errorPrbFileName;
 
 	options.forward = false;
 	options.reverse = false;
@@ -380,6 +382,15 @@ int main(int argc, const char *argv[])
 				options.matchN = true;
 				continue;
 			}
+			if (strcmp(argv[arg], "-ed") == 0 || strcmp(argv[arg], "--error-distr") == 0) {
+				if (arg + 1 == argc) {
+					printHelp(argc, argv, options);
+					return 0;
+				}
+				++arg;
+				errorPrbFileName = argv[arg];
+				continue;
+			}
 		} else {
 			// parse file name
 			if (fnameCount == 2) {
@@ -404,7 +415,7 @@ int main(int argc, const char *argv[])
 	if (options.printVersion)
 		printVersion();
 
-	int result = mapReads(fname[0], fname[1], options);
+	int result = mapReads(fname[0], fname[1], errorPrbFileName.c_str(), options);
 	if (result == 2) 
 	{
 		cerr <<	"Invalid Shape" << endl << endl;
