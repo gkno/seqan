@@ -85,6 +85,11 @@ the command line:
   of 100*(1 - e/|R|), whereby |R| is the read length. In other words, a
   read is allowed to have not more than |R|*(100-NUM)/100 errors.
 
+  [ -ho ],  [ --hamming-only ]
+  
+  Only consider mismatches as errors. Inserts or deletions are not 
+  recognized.
+  
   [ -m NUM ],  [ --max-hits NUM ]
   
   Ignore reads with more the NUM hits. If, for example, NUM is 1, RazerS
@@ -196,6 +201,24 @@ the command line:
   The taboo length is the minimal distance two k-mer must have in the
   reference genome when counting common k-mers between reads and reference
   genome (default is 1).
+  
+---------------------------------------------------------------------------
+3.4. Verification Options
+---------------------------------------------------------------------------
+
+  [ -mN ],  [ --match-N ]
+  
+  By default, 'N' characters in read or genome sequences equal to nothing, 
+  not even to another 'N'. They are considered as errors. By activating this 
+  option, 'N' equals to every other character and produces no mismatch in 
+  the verification process. The filtration is not affected by this option.
+
+  [ -ed FILE ],  [ --error-distr FILE ]
+  
+  Together with the --hamming-only option this option produces an error 
+  distribution file containing the relative frequencies of mismatches for 
+  each read position.
+
 
 ---------------------------------------------------------------------------
 4. Output Format
