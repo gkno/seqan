@@ -149,6 +149,20 @@ loadQuality(ReadStore<TAlphabet, TSpec>& readSt,
 
 //////////////////////////////////////////////////////////////////////////////
 
+template<typename TAlphabet, typename TSpec, typename TSpec2, typename TSize, typename TRead>
+inline void 
+loadQuality(ReadStore<TAlphabet, TSpec>& readSt,
+			String<char, TSpec2>& qualityString, 
+			TSize index,
+			TRead& seq) 
+{
+	SEQAN_CHECKPOINT
+	clear(seq);
+	seq = infix(qualityString, (value(readSt.data_begin_end, index)).i1, (value(readSt.data_begin_end, index)).i2);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 template<typename TAlphabet, typename TSpec, typename TSize, typename TName>
 inline void 
 loadExtId(ReadStore<TAlphabet, TSpec>& readSt,
@@ -599,11 +613,11 @@ write(TFile& target,
 		_streamWrite(target, value(frgSt.data_names, i));
 		_streamPut(target, '\n');
 		_streamWrite(target,"lib:");
-		_streamPutInt(target, value(frgSt.data_lib_id, i) + 1);
+		_streamPutInt(target, (value(frgSt.data_lib_id, i) + 1));
 		_streamPut(target, '\n');
 		TId id1 = (value(frgSt.data_rds, i)).i1;
 		TId id2 = (value(frgSt.data_rds, i)).i2;
-		if (id1 != id2) {
+		if (id1 != id2) {	// Just print if this is a proper mate pair
 			_streamWrite(target,"rds:");
 			_streamPutInt(target, id1 + 1);
 			_streamPut(target, ',');
@@ -614,6 +628,8 @@ write(TFile& target,
 	}
 
 	// Write Reads
+	String<TAlphabet> all = readSt.data_reads;
+	String<char> allQuality = readSt.data_qualities;
 	for(TSize i = 0; i<length(readSt); ++i) {
 		_streamWrite(target,"{RED\n");
 		_streamWrite(target,"iid:");
@@ -624,7 +640,7 @@ write(TFile& target,
 		_streamPut(target, '\n');
 		_streamWrite(target,"seq:\n");
 		String<TAlphabet> read;
-		loadRead(readSt, i, read);
+		loadRead(readSt, all, i, read);
 		for(TSize k = 0;k<length(read); k+=60) {
 			TSize endK = k + 60;
 			if (endK > length(read)) endK = length(read);
@@ -634,7 +650,7 @@ write(TFile& target,
 		_streamWrite(target, ".\n");
 		_streamWrite(target,"qlt:\n");
 		String<char> qlt;
-		loadQuality(readSt, i, qlt);
+		loadQuality(readSt, allQuality, i, qlt);
 		for(TSize k = 0;k<length(qlt); k+=60) {
 			TSize endK = k + 60;
 			if (endK > length(qlt)) endK = length(qlt);
@@ -652,6 +668,8 @@ write(TFile& target,
 		_streamPut(target, '\n');
 		_streamWrite(target,"}\n");
 	}
+	clear(all);
+	clear(allQuality);
 
 	// Write Contigs
 	for(TSize i = 0; i<length(ctgSt); ++i) {
