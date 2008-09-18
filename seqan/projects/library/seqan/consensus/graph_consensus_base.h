@@ -547,6 +547,144 @@ consensusCalling(String<TValue, TSpec> const& mat,
 }
 
 
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TValue, typename TSpec, typename TStringSet, typename TScore, typename TBegEndRow, typename TSize>
+inline TSize
+fixDisruptedReads(String<TValue, TSpec>& mat,
+				  TStringSet const& str,
+				  TScore& scType,
+				  TBegEndRow& begER,
+				  TSize alignDepth)
+{
+	typedef typename Value< typename Value<TStringSet>::Type >::Type TAlphabet;
+
+	// The limit expand threshold (the lower the more reads will be realigned)
+	TSize limitExpand = 60;
+	TValue gapChar = gapValue<TValue>();
+	TValue specialGap = '.';
+	TSize len = length(mat) / alignDepth;
+
+	// Find all bad reads
+	typedef typename Iterator<TBegEndRow>::Type TBEIter;
+	typedef typename Iterator<TStringSet const>::Type TStrIter;
+	TStrIter strIt = begin(str);
+	TStrIter strItEnd = end(str);
+	TBEIter itBE = begin(begER);
+	TBEIter itBEEnd = end(begER);
+	typedef String<TSize> TBadReads;
+	TBadReads badReads;
+	TSize counter = 0;
+	for(;strIt != strItEnd; goNext(strIt), goNext(itBE), ++counter) {
+		TSize b = value(itBE).i1;
+		TSize e = value(itBE).i2;
+		TSize diff = e - b;
+		if (b > e) diff = b - e;
+		if (length(value(strIt)) + limitExpand <= diff) {
+			appendValue(badReads, counter);
+		}
+	}
+
+	// Call the consensus
+	String<unsigned int> coverage;
+	String<char> gappedConsensus;
+	String<Dna> consensusSequence;
+	consensusCalling(mat, consensusSequence, gappedConsensus, coverage, alignDepth, Majority_Vote() );
+	
+	// Realign to the consensus
+	typedef typename Iterator<TBadReads>::Type TBadIter;
+	TBadIter badIt = begin(badReads);
+	TBadIter badItEnd = end(badReads);
+	for(;badIt != badItEnd; goNext(badIt)) {
+		TSize b = value(begER, value(badIt)).i1;
+		TSize e = value(begER, value(badIt)).i2;
+		if (b > e) { TSize tmp = b; b = e; e = tmp; }
+		String<char> cons = infix(gappedConsensus, b, e);
+		String<TAlphabet> noGapCons;
+		typedef typename Iterator<String<char> >::Type TCharIter;
+		TCharIter charIt = begin(cons);
+		TCharIter charItEnd = end(cons);
+		for(;charIt != charItEnd; goNext(charIt)) {
+			if (value(charIt) != gapChar) appendValue(noGapCons, value(charIt));
+		}
+		
+		// Make a pairwise string-set
+		TStringSet pairSet;
+		//std::cout << noGapCons << std::endl;
+		//std::cout << value(str, value(badIt)) << std::endl;
+		appendValue(pairSet, noGapCons);
+		appendValue(pairSet, value(str, value(badIt)));
+		
+		// Re-align
+		// Maybe LCS is better???
+		Graph<Alignment<TStringSet, TSize> > tmp(pairSet);
+		globalAlignment(tmp, pairSet, scType, AlignConfig<true,true,true,true>(), Gotoh() );
+		//std::cout << tmp << std::endl;		
+
+		// Walk through all 3 sequences in parallel
+		String<char> localAlign;
+		convertAlignment(tmp, localAlign);
+		String<char> consAlign = infix(localAlign, 0, length(localAlign) / 2);
+		String<char> seqAlign = infix(localAlign, length(localAlign) / 2, length(localAlign));
+		
+		//std::cout << cons << std::endl;
+		//std::cout << consAlign << std::endl;
+		//std::cout << seqAlign << std::endl;
+		TCharIter consIt = begin(cons);
+		TCharIter consItEnd = end(cons);
+		TCharIter consAlignIt = begin(consAlign);
+		TCharIter seqAlignIt = begin(seqAlign);
+		TSize row = value(begER, value(badIt)).i3;
+		TSize col = b;
+		while(consIt != consItEnd) {
+			//std::cout << value(consIt) << ',' << value(consAlignIt) << ',' << value(seqAlignIt) << std::endl;
+			if (value(consIt) == value(consAlignIt)) {
+				// Both consensi have a gap
+				value(mat, row * len + col) = value(seqAlignIt);
+				goNext(consIt);
+				goNext(consAlignIt);
+				goNext(seqAlignIt);
+				++col;
+			} else {
+				if (value(consIt) == gapChar) {
+					while ((consIt != consItEnd) && (value(consIt) != value(consAlignIt))) {
+						value(mat, row * len + col) = gapChar;
+						goNext(consIt);
+						++col;
+					}
+				} else {
+					// This kind of read should be deleted
+					while (value(consIt) != value(consAlignIt)) {
+						goNext(consAlignIt);
+					}
+				}
+			}
+		}	
+	}
+
+	// Fix begin and end gaps
+	itBE = begin(begER);
+	itBEEnd = end(begER);
+	for(;itBE!=itBEEnd; goNext(itBE)) {
+		TSize b = value(itBE).i1;
+		TSize e = value(itBE).i2;
+		TSize row = value(itBE).i3;
+		while (value(mat, row * len + b) == gapChar) {
+			value(mat, row * len + b) = specialGap;
+			++b;
+		}
+		while (value(mat, row * len + (e-1)) == gapChar) {
+			value(mat, row * len + (e-1)) = specialGap;
+			--e;
+		}
+		value(itBE).i1 = b;
+		value(itBE).i2 = e;
+	}
+
+
+	return (length(badReads));
+}
+
 
 //////////////////////////////////////////////////////////////////////////////
 

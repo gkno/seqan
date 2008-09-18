@@ -479,7 +479,8 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 		double quality = (double) matchLen / (double) overlapLen;
 
 		// Get only the good overlap alignments
-		if ((quality >= qltThres) && (matchLen >= thresholdMatchlength)) {
+		if (((quality >= qltThres) && (matchLen >= thresholdMatchlength)) ||
+			((quality >= 1) && (matchLen >= 5))) {
 
 			//// Debug Code
 			//Graph<Alignment<TStringSet, TSize> > tmp(pairSet);
