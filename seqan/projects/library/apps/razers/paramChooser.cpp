@@ -60,9 +60,34 @@ const char	*fprefix[1] = { "" };
 char		fparams[100];
 char		fgparams[100];
 bool		verbose = true;
+bool		solexaQual = true;
 char 		best_shape_folder[200];
 bool 		best_shape_helpFolder = false;
 String<bool> firstTimeK;
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TValue>
+inline TValue
+_convertSolexaQual2ErrProb(TValue sq)
+{
+	return pow((TValue)10, sq / (TValue)-10) / ((TValue)1 + pow((TValue)10, sq / (TValue)-10));
+}
+
+template<typename TValue>
+inline TValue
+_convertPhredQual2ErrProb(TValue sq)
+{
+	return pow((TValue)10, sq / (TValue)-10);
+}
+
+template<typename TValue>
+inline TValue
+_convertSolexaQual2PhredQual(TValue sq)
+{
+	return (TValue)10 * log((TValue)1 + pow((TValue)10, sq / (TValue)10)) / log((TValue)10);
+}
+
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -74,6 +99,17 @@ _parse_skipWhitespace(TFile& file, TChar& c)
 	while (!_streamEOF(file)) {
 		c = _streamGet(file);
 		if ((c!=' ') && (c != '\t') && (c != '\n') && (c != '\r')) break;
+	}
+}
+
+template<typename TFile, typename TChar>
+inline void 
+_parse_skipBlanks(TFile& file, TChar& c)
+{
+	if ((c != ' ') && (c != '\t')) return;
+	while (!_streamEOF(file)) {
+		c = _streamGet(file);
+		if ((c != ' ') && (c != '\t')) break;
 	}
 }
 
@@ -143,9 +179,7 @@ template<typename TChar>
 inline bool
 _parse_isDigit(TChar const c)
 {
-	//return (((unsigned) c >=  48) && ((unsigned) c <=  57));
-	return ((c == '0') || (c == '1') || (c == '2') || (c == '3') || (c == '4') || 
-		    (c == '5') || (c == '6') || (c == '7') || (c == '8') || (c == '9'));
+	return (c >= '0') && (c <= '9');
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -227,8 +261,6 @@ template<typename TFile>
 bool
 parseGappedParams(TFile & file)
 {
-
-
 	String<CharString> shapes;
 	resize(shapes,14); //best shape for each possible value of q
 	String<unsigned> thresholds;
@@ -406,73 +438,49 @@ template<typename TFile, typename TDistribution>
 void
 qualityDistributionFromPrbFile(TFile & file, TDistribution & avg)
 {
-	String<int> countMatrix;
-	fill(countMatrix,totalN*46,0);
+	String<TFloat> qualitySum;
+	String<int> count;
+	fill(qualitySum,totalN,0);
+	fill(count,totalN,0);
 
-	char c;
-	if(!_streamEOF(file))
+	if (_streamEOF(file)) return;
+
+	char c = _streamGet(file);
+	_parse_skipWhitespace(file, c);
+
+	while (!_streamEOF(file))
 	{
-		c = _streamGet(file);
-		_parse_skipWhitespace(file,c);
-	}
-	int read_count = 0;
-	int qual,qual1;
-	unsigned pos = 0;
-	while(!_streamEOF(file))
-	{
-		qual = (int) _parse_readDouble(file,c);// + (TFloat) 1.0/maxN;
-		_parse_skipWhitespace(file,c);
-		qual1 = (int) _parse_readDouble(file,c);// + (TFloat) 1.0/maxN;
-		int ind = (qual > qual1) ? 0 : 1;
-		qual = (qual > qual1) ? qual : qual1;
-		_parse_skipWhitespace(file,c);
-		qual1 = (int) _parse_readDouble(file,c);// + (TFloat) 1.0/maxN;
-		ind = (qual > qual1) ? ind : 2;
-		qual = (qual > qual1) ? qual : qual1;
-		_parse_skipWhitespace(file,c);
-		qual1 = (int) _parse_readDouble(file,c);// + (TFloat) 1.0/maxN;
-		ind = (qual > qual1) ? ind : 3;
-		qual = (qual > qual1) ? qual : qual1;
-                if(qual < -5) cout << "kleiner\n";
-		++countMatrix[totalN * (qual+5) + pos];
-		++pos;
-		if(pos==totalN) pos = 0;
-		_parse_skipWhitespace(file,c);
-		//cout << ind;
-		if(pos==0) {
-		//	cout << endl;
-			++read_count;
+		for (unsigned pos = 0; (!_streamEOF(file)) && (pos < totalN); ++pos)
+		{
+			_parse_skipBlanks(file,c);
+			int qualA = (int) _parse_readDouble(file,c);
+			_parse_skipBlanks(file,c);
+			int qualC = (int) _parse_readDouble(file,c);
+			_parse_skipBlanks(file,c);
+			int qualG = (int) _parse_readDouble(file,c);
+			_parse_skipBlanks(file,c);
+			int qualT = (int) _parse_readDouble(file,c);
+			int qual = max(max(qualA, qualC), max(qualG, qualT));
+
+//			cout << qual << " ";
+//			f = _convertSolexaQual2ErrProb(f);
+
+			qualitySum[pos] += _convertSolexaQual2ErrProb((TFloat)qual);
+			++count[pos];
 		}
+//		cout << endl;
+			
+		_parse_skipLine2(file, c);
 	}
-//	cout <<"\nNumber of reads: "<< read_count << "\n";
-	cout << " Readcount = "<< read_count << "\n";
-
-
+	cout << " Readcount = " << count[0] << "\n";
 
 	fill(avg,totalN,0.0);
-//	TFloat sumavg = 0.0;
 	for(unsigned t = 0; t < totalN; ++t)
 	{
-		long sum = 0;
-		for(int q = 0; q<46;++q) 
-			sum += countMatrix[q*totalN + t];
-		for(int q = 0; q<46;++q) 
-			avg[t] += (TFloat) (countMatrix[q*totalN + t] * (q-5)) / sum;
-		avg[t] =  pow((TFloat)10.0, (TFloat)(avg[t]/-10.0)) / (1+pow((TFloat)10.0,(TFloat)(avg[t]/-10.0)));
+		TFloat f = (TFloat) qualitySum[t] / (TFloat)count[t];
+//		f = _convertSolexaQual2ErrProb(f);
+		avg[t] = f;
 	}
-	TFloat avgsum = 0.0;
-
-	for(unsigned t = 0; t < totalN; ++t)
-		avgsum += avg[t];
-
-/*	for(unsigned t = 0; t < totalN; ++t)
-	{
-		cout.precision(10);
-		//cout << avg[t]/avgsum << "\t";
-		cout << avg[t] << "\t";
-	}
-	cout << "\n";
-*/
 }
 
 
@@ -480,53 +488,83 @@ template<typename TFile, typename TDistribution>
 void
 qualityDistributionFromFastQFile(TFile & file, TDistribution & avg)
 {
-	String<int> qualitySum;
+	String<int> qualitySum, count;
 	fill(qualitySum,totalN,0);
-	unsigned read_count = 0;
+	fill(count,totalN,0);
 
 	if (_streamEOF(file)) return;
 
 	signed char c = _streamGet(file);
+	_parse_skipWhitespace(file, c);
+
 	while (!_streamEOF(file))
 	{
 		_parse_skipLine2(file, c);
 		if (_streamEOF(file) || c != '+') continue;
 
 		_parse_skipLine2(file, c);
+
 		unsigned i = 0;
 		while (!(_streamEOF(file) || c == '\n' || c == '\r'))
 		{
 			qualitySum[i] += c - 33;
 			c = _streamGet(file);
+			++count[i];
 			if (++i == totalN) break;
 		};
-
-		if (i > 0) ++read_count;
 	}
-
-//	cout <<"\nNumber of reads: "<< read_count << "\n";
-	cout << " Readcount = "<< read_count << "\n";
+	cout << " Readcount = " << count[0] << "\n";
 
 	fill(avg,totalN,0.0);
-//	TFloat sumavg = 0.0;
 	for(unsigned t = 0; t < totalN; ++t)
 	{
-		avg[t] = (TFloat) qualitySum[t] / (TFloat)read_count;
-		avg[t] = pow((TFloat)10.0,(TFloat)(avg[t]/-10.0)) / (1+pow((TFloat)10.0,(TFloat)(avg[t]/-10.0)));
+		TFloat f = (TFloat) qualitySum[t] / (TFloat)count[t];
+		if (solexaQual)	f = _convertSolexaQual2PhredQual(f);
+		f = _convertPhredQual2ErrProb(f);
+		avg[t] = f;
 	}
-/*	TFloat avgsum = 0.0;
+}
 
-	for(unsigned t = 0; t < totalN; ++t)
-		avgsum += avg[t];
-*/
-/*	for(unsigned t = 0; t < totalN; ++t)
+template<typename TFile, typename TDistribution>
+void
+qualityDistributionFromFastQIntFile(TFile & file, TDistribution & avg)
+{
+	String<int> qualitySum, count;
+	fill(qualitySum,totalN,0);
+	fill(count,totalN,0);
+
+	if (_streamEOF(file)) return;
+
+	signed char c = _streamGet(file);
+	_parse_skipWhitespace(file, c);
+
+	while (!_streamEOF(file))
 	{
-		cout.precision(10);
-		//cout << avg[t]/avgsum << "\t";
-		cout << avg[t] << "\t";
+		_parse_skipLine2(file, c);
+		if (_streamEOF(file) || c != '+') continue;
+
+		_parse_skipLine2(file, c);
+
+		unsigned i = 0;
+		while (!(_streamEOF(file) || c == '\n' || c == '\r'))
+		{
+			int num = _parse_readNumber(file, c);
+			qualitySum[i] += num;
+			++count[i];
+			_parse_skipBlanks(file,c);
+			if (++i == totalN) break;
+		};
 	}
-	cout << "\n";
-*/
+	cout << " Readcount = " << count[0] << "\n";
+
+	fill(avg,totalN,0.0);
+	for(unsigned t = 0; t < totalN; ++t)
+	{
+		TFloat f = (TFloat) qualitySum[t] / (TFloat)count[t];
+		if (solexaQual)	f = _convertSolexaQual2PhredQual(f);
+		f = _convertPhredQual2ErrProb(f);
+		avg[t] = f;
+	}
 }
 
 
@@ -560,6 +598,26 @@ getAvgFromPrbDirectory(TPath prbPath, TError & errorDistribution)
 				errorDistribution[j] += avg_act[j];
 			}
 			++countPrbs;
+			continue;
+		}
+		if(suffix(files[i],length(files[i])-9) == ".fastqint")
+		{
+			cout << "Processing "<< files[i] << "...\n";
+			TError avg_act;
+			resize(avg_act,totalN);
+			fstream filestrm;
+			stringstream sstrm;
+			sstrm << prbPath << files[i];
+			filestrm.open(sstrm.str().c_str(),ios_base::in);
+			qualityDistributionFromFastQIntFile(filestrm,avg_act);
+			filestrm.close();
+			for(unsigned j=0; j < totalN; ++j)
+			{
+				cout << " " << avg_act[j];
+				errorDistribution[j] += avg_act[j];
+			}
+			++countPrbs;
+			continue;
 		}
 		if(suffix(files[i],length(files[i])-8) == "_prb.txt")
 		{
@@ -578,6 +636,7 @@ getAvgFromPrbDirectory(TPath prbPath, TError & errorDistribution)
 				errorDistribution[j] += avg_act[j];
 			}
 			++countPrbs;
+			continue;
 		}
 	}
 	for(unsigned j=0; j < totalN; ++j)
@@ -1092,7 +1151,8 @@ void printHelp(int, const char *[], bool longHelp = false)
 		cerr << "  -n,  --length NUM            \t" << "sequence length (32)" << endl;
 		cerr << "  -i,  --percent-identity NUM  \t" << "set the percent identity threshold (95)" << endl;
 		cerr << "  -r,  --recognition-rate NUM  \t" << "set the percent recognition rate (99.0)" << endl;
-		cerr << "  -pf, --prb-folder STR        \t" << "directory of _prb.txt files containing qualtiy values (optional)" << endl;
+		cerr << "  -pf, --prb-folder STR        \t" << "directory of [_prb.txt|.fastq|fastqint] files containing qualitiy values (optional)" << endl;
+		cerr << "  -pq, --phred-qualities       \t" << "fastq files contain Phred qualities (default: Solexa qualities)" << endl;
 		cerr << "  -d,  --error-distribution    \t" << "file containing mismatch probabilities (must contain at least n values, one value per line)" << endl;
 		cerr << "  -pi, --prob-insert           \t" << "probability of an insertion (" << optionProbINSERT << ")" << endl;
 		cerr << "  -pd, --prob-delete           \t" << "probability of a deletion (" << optionProbDELETE << ")" << endl;
@@ -1242,6 +1302,12 @@ int main(int argc, const char *argv[])
 				optionHammingOnly = true;
 				continue;
 			}
+
+			if (strcmp(argv[arg], "-pq") == 0 || strcmp(argv[arg], "--phred-qualities") == 0) {
+				solexaQual = false;
+				continue;
+			}
+
 
 			if (strcmp(argv[arg], "-h") == 0 || strcmp(argv[arg], "--help") == 0) {
 				// print help
