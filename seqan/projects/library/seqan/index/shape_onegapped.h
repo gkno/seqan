@@ -244,15 +244,15 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		// add emerging character
 		goFurther(it, me.blockLen1 - 1);
-		me.hValue += ordValue(*it) * me.factor2;
+		me.hValue += ordValue((TValue)*it) * me.factor2;
 
 		// subtract vanishing character
 		goFurther(it, me.gapLen);
-		me.hValue -= ordValue(*it) * me.factor2;
+		me.hValue -= ordValue((TValue)*it) * me.factor2;
 
 		// add rightmost emerging character
 		goFurther(it, me.blockLen2);
-		me.hValue += ordValue(*it);
+		me.hValue += ordValue((TValue)*it);
 
 		return me.hValue;
 	}
