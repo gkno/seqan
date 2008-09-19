@@ -207,6 +207,7 @@ public:
 		data_length = other.data_length;
 		_needReinit = other._needReinit;
 		_beginFind_called = other._beginFind_called;
+		return *this;
 	}
 
 //____________________________________________________________________________
