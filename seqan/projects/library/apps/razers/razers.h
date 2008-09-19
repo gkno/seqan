@@ -271,6 +271,56 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //////////////////////////////////////////////////////////////////////////////
 // Load multi-Fasta sequences
+template <typename TReadSet, typename TNameSet, typename TRazerSOptions>
+bool loadFasta(TReadSet & reads, TNameSet & fastaIDs, char const *fileName, TRazerSOptions &options)
+{
+	if(options.matchN || options.outputFormat == 1) return loadFasta(reads,fastaIDs,fileName);
+
+	// count sequences
+	unsigned seqCount = 0;
+
+	::std::ifstream file;
+	file.open(fileName, ::std::ios_base::in | ::std::ios_base::binary);
+	if (!file.is_open()) return false;
+	while (!_streamEOF(file)) {
+		goNext(file, Fasta());
+		++seqCount;
+	}
+
+	// import sequences
+	file.clear();
+	file.seekg(0, ::std::ios_base::beg);
+	resize(fastaIDs, seqCount);
+	resize(reads, seqCount);
+	int kickoutcount = 0;
+	for(int i = 0; (i < (int)seqCount) && !_streamEOF(file); ++i) 
+	{
+		readID(file, fastaIDs[i], Fasta());		// read Fasta id
+		read(file, reads[i], Fasta());			// read Read sequence
+		int count = 0;
+		unsigned j = 0;
+		int cutoffCount = (int)(options.errorRate*length(reads[i]));
+		while(j < length(reads[i]) /*&& count <= cutoffCount*/)
+		{
+			if(reads[i][j]=='N') ++count;
+			++j;
+		}
+		if(count > cutoffCount)	
+		{
+			--i; --seqCount;
+			 ++kickoutcount;
+		}
+
+	}
+	file.close();
+	resize(reads,seqCount);
+	if (options._debugLevel >= 1) 
+		::std::cerr << "Kicked out " << kickoutcount << " low quality reads.\n";
+	return (seqCount > 0);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// Load multi-Fasta sequences
 template <typename TReadSet, typename TNameSet>
 bool loadFasta(TReadSet &reads, TNameSet &fastaIDs, char const *fileName)
 {
@@ -1169,7 +1219,7 @@ int mapReads(
 	}
 	if (options._debugLevel >= 1) ::std::cerr << lengthSum(genomeSet) << " bps of " << length(genomeSet) << " genomes loaded." << ::std::endl;
 
-	if (!loadFasta(readSet, readNames, readFileName)) {
+	if (!loadFasta(readSet, readNames, readFileName, options)) {
 		::std::cerr << "Failed to load reads" << ::std::endl;
 		return 1;
 	}
