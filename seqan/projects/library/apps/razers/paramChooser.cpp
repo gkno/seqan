@@ -25,6 +25,9 @@ using namespace std;
 
 typedef long double TFloat;
 
+static unsigned minThreshold = 1;					// minimum value for threshold parameter 
+static unsigned maxWeight = 14;                                           // maximum value of q
+static bool optionChooseOneGappedOnly = false;      // choose onegapped (or ungapped) shape (discard all other gapped shapes)
 
 
 // global input parameters
@@ -255,6 +258,30 @@ getDir(TPath dir, TFilenameString &files)
 }
 
 
+template<typename TShape>
+inline int
+numGaps(TShape & currShape)
+{
+    int count = 0;
+    unsigned j=0;
+    bool ingap = false;
+    while(j<length(currShape))
+    {
+        if (currShape[j]=='0')
+        {
+            if(ingap) ++j;
+            else ++count;
+            ingap = true;
+        }
+        else ingap = false;
+        ++j;
+    }
+
+    return count;
+
+}
+
+
 //////////////////////////////////////////////////////////////////////////////
 // Get parameters q and t optimal for given loss rate
 template<typename TFile>
@@ -283,6 +310,11 @@ parseGappedParams(TFile & file)
 	{
 		CharString currShape;
 		_parse_readShape(file, c, currShape);
+                if(optionChooseOneGappedOnly && numGaps(currShape)>1)
+                {
+                    _parse_skipLine(file,c); 
+                    continue;
+                }
                 _parse_skipWhitespace(file,c);
                 unsigned currThreshold = _parse_readNumber(file,c);
         	_parse_skipWhitespace(file,c);
@@ -297,7 +329,7 @@ parseGappedParams(TFile & file)
 			currMeasure = _parse_readNumber(file,c); //PM in the case of selectedGapped
 		}
 #endif
-		if(currLossrate <= optionLossRate /*&& val > bestSoFar*/)
+		if(currThreshold >= minThreshold && currLossrate <= optionLossRate /*&& val > bestSoFar*/)
 		{
 		
 			unsigned weight = 0;
@@ -365,7 +397,7 @@ parseGappedParams(TFile & file)
 		return false;
 	}
 	int i;
-	for(i = 13; i >= 0; --i )
+	for(i = maxWeight-1; i >= 0; --i )
 		if(length(shapes[i]) > 0)  // if a shape of weight i+1 has been found
 			break;
 	chosenLossRate = lossrates[i];
@@ -390,7 +422,6 @@ parseParams(TFile & file)
         unsigned bestQ = 1;
         unsigned bestT = 0;
 	unsigned secondBestT = 0;
-	unsigned qCutoff = 14; 
         //String<TFloat> loss;
         //reserve(loss, 20*readLen);
 
@@ -409,7 +440,7 @@ parseParams(TFile & file)
                         val = _parse_readEValue(file,c);
   //                  cout << " " << val;
 //                      appendValue(loss,val);
-                        if( val <= optionLossRate /*&& val > bestSoFar*/)
+                        if( countT >= minThreshold && val <= optionLossRate /*&& val > bestSoFar*/)
                         {
                                 bestSoFar=val;
                                 bestQ=countQ+1;
@@ -422,13 +453,13 @@ parseParams(TFile & file)
                         ++countT;
                 }
                 ++countQ;
-		if(countQ>=qCutoff)
+		if(countQ>=maxWeight)
 			break;
                 _parse_skipWhitespace(file,c);
         }
 	if(bestT<1) cout << "\n!!! Something wrong with file? !!!\n";
 	chosenLossRate = bestSoFar;
-        chosenQ = bestQ;
+        fill(chosenShape, bestQ, '1');
         chosenThreshold = bestT;
 
         return true;
@@ -1142,9 +1173,9 @@ getParamsFilename(TSStr & paramsfile)
 // Print usage
 void printHelp(int, const char *[], bool longHelp = false) 
 {
-	cerr << "*****************************************************" << endl;
-	cerr << "*** Calculate efficient filter parameters q and t ***" << endl;
-	cerr << "*****************************************************" << endl << endl;
+	cerr << "*******************************************************************" << endl;
+	cerr << "*** Calculate efficient filter parameters (shape and threshold) ***" << endl;
+	cerr << "*******************************************************************" << endl << endl;
 	cerr << "Usage: paramChooser [OPTIONS]... " << endl;
 	if (longHelp) {
 		cerr << endl << "Options:" << endl;
@@ -1158,6 +1189,8 @@ void printHelp(int, const char *[], bool longHelp = false)
 		cerr << "  -pd, --prob-delete           \t" << "probability of a deletion (" << optionProbDELETE << ")" << endl;
 		cerr << "                               \t" << "(for hamming-only filters use -pi 0 -pd 0)" << endl;
 		cerr << "  -p,  --prefix STR            \t" << "session identifier (prefix of computed files);\n\t\t\t\tif also option d or pd is specified the prefix will be used for file naming\n\t\t\t\tuserspecific settings can be accessed in later session without recomputing loss rates\n\t\t\t\tby specifying the session id, i.e. prefix" << endl;
+		cerr << "  -ug, --ungapped              \t" << "only consider ungapped shapes (off)" << endl;
+		cerr << "  -og, --one-gapped            \t" << "only consider shapes containing at most one gap (of arbitrary length)" << endl;
 		cerr << "  -h,  --help                  \t" << "print this help" << endl;
 	} else {
 		cerr << "Try 'chooseFilteringParameters --help' for more information." << endl;
@@ -1308,6 +1341,45 @@ int main(int argc, const char *argv[])
 				continue;
 			}
 
+			if (strcmp(argv[arg], "-og") == 0 || strcmp(argv[arg], "--one-gapped") == 0) {
+				optionChooseOneGappedOnly = true;
+				continue;
+			}
+
+			if (strcmp(argv[arg], "-ug") == 0 || strcmp(argv[arg], "--ungapped") == 0) {
+                                doUngapped = true;
+                                doAllOneGapped = false;
+                                doSelectedGapped = false;
+				continue;
+			}
+			if (strcmp(argv[arg], "-mt") == 0 || strcmp(argv[arg], "--min-threshold") == 0) {
+				if (arg + 1 < argc) {
+					++arg;
+					istringstream istr(argv[arg]);
+					istr >> minThreshold;
+					if (!istr.fail())
+						if (minThreshold < 1 || minThreshold > 3)
+							cerr << "minimum threshold should be a value between 1 and 3" << endl << endl;
+						else
+							continue;
+				}
+				printHelp(argc, argv);
+				return 0;
+			}
+			if (strcmp(argv[arg], "-mq") == 0 || strcmp(argv[arg], "--max-weight") == 0) {
+				if (arg + 1 < argc) {
+					++arg;
+					istringstream istr(argv[arg]);
+					istr >> maxWeight;
+					if (!istr.fail())
+						if (maxWeight < 6 || maxWeight > 14)
+							cerr << "maximum weight should be a value between 6 and 14" << endl << endl;
+						else
+							continue;
+				}
+				printHelp(argc, argv);
+				return 0;
+			}
 
 			if (strcmp(argv[arg], "-h") == 0 || strcmp(argv[arg], "--help") == 0) {
 				// print help
@@ -1402,16 +1474,9 @@ int main(int argc, const char *argv[])
 	}
 	else
 	{
-		if(doSelectedGapped || doAllOneGapped)
-		{
-			parseGappedParams(file);
-			cout << "\n Choose \nshape: " << chosenShape << "\n and \nthreshold: " << chosenThreshold<< "\n to achieve optimal performance for expected recognition rate >= " << (100.0-100.0*optionLossRate) << "% (expected recognition = " << (100.0-chosenLossRate*100.0) <<"%)\n\n";
-		}
-		else
-		{
-			parseParams(file);
-			cout << " Choose \nq: " << chosenQ << "\n and \nthreshold: " << chosenThreshold << "\n to achieve optimal performance for expected recognition rate >= " << (100.0-100.0*optionLossRate) << "% (expected recognition = " << (100.0-chosenLossRate*100.0) <<"%)\n\n";
-		}
+		if(doSelectedGapped || doAllOneGapped) parseGappedParams(file);
+		else parseParams(file);
+		cout << "\n Choose \nshape: " << chosenShape << "\n and \nthreshold: " << chosenThreshold<< "\n to achieve optimal performance for expected recognition rate >= " << (100.0-100.0*optionLossRate) << "% (expected recognition = " << (100.0-chosenLossRate*100.0) <<"%)\n\n";
 		file.close();
 	}
 
