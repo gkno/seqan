@@ -1342,11 +1342,15 @@ int main(int argc, const char *argv[])
 			}
 
 			if (strcmp(argv[arg], "-og") == 0 || strcmp(argv[arg], "--one-gapped") == 0) {
-				optionChooseOneGappedOnly = true;
+				optionChooseOneGappedOnly = true;       //optionChooseOneGappedOnly chooses shape with at most one gap
+                                doUngapped = true;
+                                doAllOneGapped = true;
+                                doSelectedGapped = false;
 				continue;
 			}
 
 			if (strcmp(argv[arg], "-ug") == 0 || strcmp(argv[arg], "--ungapped") == 0) {
+                                if(optionChooseOneGappedOnly) continue;     //if both ungapped and onegapped specified --> optionChooseOneGappedOnly 
                                 doUngapped = true;
                                 doAllOneGapped = false;
                                 doSelectedGapped = false;
