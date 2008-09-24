@@ -1194,6 +1194,8 @@ int mapReads(
 //		CharString bitmap;
 //		shapeToString(bitmap, shape);
 		::std::cerr << "___SETTINGS____________" << ::std::endl;
+		::std::cerr << "Genome file:                     \t" << genomeFileName << ::std::endl;
+		::std::cerr << "Read file:                       \t" << readFileName << ::std::endl;
 		::std::cerr << "Compute forward matches:         \t";
 		if (options.forward)	::std::cerr << "YES" << ::std::endl;
 		else				::std::cerr << "NO" << ::std::endl;

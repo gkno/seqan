@@ -45,7 +45,7 @@ using namespace seqan;
 //////////////////////////////////////////////////////////////////////////////
 // Print usage
 template <typename TSpec>
-void printHelp(int, const char *[], RazerSOptions<TSpec> &options, bool longHelp = false) 
+void printHelp(int, const char *[], RazerSOptions<TSpec> &options, ParamChooserOptions &pm_options, bool longHelp = false) 
 {
 	cerr << "********************************************" << endl;
 	cerr << "*** RazerS - Fast Mapping of Short Reads ***" << endl;
@@ -56,12 +56,10 @@ void printHelp(int, const char *[], RazerSOptions<TSpec> &options, bool longHelp
 		cerr << endl << "Main Options:" << endl;
 		cerr << "  -f,  --forward               \t" << "only compute forward matches" << endl;
 		cerr << "  -r,  --reverse               \t" << "only compute reverse complement matches" << endl;
-		cerr << "  -i,  --percent-identity NUM  \t" << "set the percent identity threshold" << endl;
-		cerr << "                               \t" << "default value is 80" << endl;
-		cerr << "  -rr, --recognition-rate NUM  \t" << "set the percent recognition rate (99.0)" << endl;
+		cerr << "  -i,  --percent-identity NUM  \t" << "set the percent identity threshold (default " << 100 - (100.0 * options.errorRate) << ')' << endl;
+		cerr << "  -rr, --recognition-rate NUM  \t" << "set the percent recognition rate (default " << 100 - (100.0 * pm_options.optionLossRate) << ')' << endl;
 		cerr << "  -ho, --hamming-only          \t" << "consider only mismatches, no indels" << endl;
-		cerr << "  -m,  --max-hits              \t" << "ignore reads with more than a maximum number of hits" << endl;
-		cerr << "                               \t" << "default value is " << options.maxHits << endl;
+		cerr << "  -m,  --max-hits NUM          \t" << "ignore reads with more than NUM hits (default " << options.maxHits << ')' << endl;
 		cerr << "  -o,  --output FILE           \t" << "change output filename (default <READS FILE>.result)" << endl;
 		cerr << "  -v,  --verbose               \t" << "verbose mode" << endl;
 		cerr << "  -vv, --vverbose              \t" << "very verbose mode" << endl;
@@ -85,7 +83,7 @@ void printHelp(int, const char *[], RazerSOptions<TSpec> &options, bool longHelp
 		cerr << "  -pf, --position-format       \t" << "0 = gap space (default)" << endl;
 		cerr << "                               \t" << "1 = position space" << endl;
 		cerr << endl << "Filtration Options:" << endl;
-		cerr << "  -s,  --shape                 \t" << "set k-mer shape (binary string, default " << options.shape << ')' << endl;
+		cerr << "  -s,  --shape BITSTRING       \t" << "set k-mer shape (binary string, default " << options.shape << ')' << endl;
 		cerr << "  -t,  --threshold NUM         \t" << "set minimum k-mer threshold (default " << options.threshold << ')' << endl;
 		cerr << "  -oc, --overabundance-cut NUM \t" << "set k-mer overabundance cut ratio (default " << options.abundanceCut << ')' << endl;
 		cerr << "  -rl, --repeat-length NUM     \t" << "set simple-repeat length threshold (default " << options.repeatLength << ')' << endl;
@@ -100,19 +98,19 @@ void printHelp(int, const char *[], RazerSOptions<TSpec> &options, bool longHelp
 
 void printVersion() 
 {
-	cerr << "RazerS version 0.3 20080918 (prerelease)" << endl;
+	cerr << "RazerS version 0.3 20080924 (prerelease)" << endl;
 }
 
 //////////////////////////////////////////////////////////////////////////////
 // Load multi-Fasta sequences
 int estimateReadLength(char const *fileName)
 {
-        Dna5String dummy;
-
+	Dna5String dummy;
+	
 	::std::ifstream file;
 	file.open(fileName, ::std::ios_base::in | ::std::ios_base::binary);
 	if (!file.is_open() || _streamEOF(file)) return -1;
-	read(file, dummy, Fasta());			// read Read sequence
+	read(file, dummy, Fasta());			// read first Read sequence
 	file.close();
         return length(dummy);
 }
@@ -124,11 +122,12 @@ int main(int argc, const char *argv[])
 	// Parse command line
 
 	RazerSOptions<>		options;
+	ParamChooserOptions	pm_options;
+
+	bool				paramChoosing = true;
 	unsigned			fnameCount = 0;
 	const char			*fname[2] = { "", "" };
 	string				errorPrbFileName;
-	ParamChooserOptions		pm_options;
-        bool noParamChoosing = false;
 
 	options.forward = false;
 	options.reverse = false;
@@ -159,7 +158,7 @@ int main(int argc, const char *argv[])
 							continue;
 					}
 				}
-				printHelp(argc, argv, options);
+				printHelp(argc, argv, options, pm_options);
 				return 0;
 			}
 			if (strcmp(argv[arg], "-ho") == 0 || strcmp(argv[arg], "--hamming-only") == 0) {
@@ -179,7 +178,7 @@ int main(int argc, const char *argv[])
 							continue;
 					}
 				}
-				printHelp(argc, argv, options);
+				printHelp(argc, argv, options, pm_options);
 				return 0;
 			}
 			if (strcmp(argv[arg], "-a") == 0 || strcmp(argv[arg], "--alignment") == 0) {
@@ -188,7 +187,7 @@ int main(int argc, const char *argv[])
 			}
 			if (strcmp(argv[arg], "-o") == 0 || strcmp(argv[arg], "--output") == 0) {
 				if (arg + 1 == argc) {
-					printHelp(argc, argv, options);
+					printHelp(argc, argv, options, pm_options);
 					return 0;
 				}
 				++arg;
@@ -208,7 +207,7 @@ int main(int argc, const char *argv[])
 							continue;
 					}
 				}
-				printHelp(argc, argv, options);
+				printHelp(argc, argv, options, pm_options);
 				return 0;
 			}
 			if (strcmp(argv[arg], "-so") == 0 || strcmp(argv[arg], "--sort-order") == 0) {
@@ -224,7 +223,7 @@ int main(int argc, const char *argv[])
 							continue;
 					}
 				}
-				printHelp(argc, argv, options);
+				printHelp(argc, argv, options, pm_options);
 				return 0;
 			}
 			if (strcmp(argv[arg], "-gn") == 0 || strcmp(argv[arg], "--genome-naming") == 0) {
@@ -240,7 +239,7 @@ int main(int argc, const char *argv[])
 							continue;
 					}
 				}
-				printHelp(argc, argv, options);
+				printHelp(argc, argv, options, pm_options);
 				return 0;
 			}
 			if (strcmp(argv[arg], "-rn") == 0 || strcmp(argv[arg], "--read-naming") == 0) {
@@ -256,7 +255,7 @@ int main(int argc, const char *argv[])
 							continue;
 					}
 				}
-				printHelp(argc, argv, options);
+				printHelp(argc, argv, options, pm_options);
 				return 0;
 			}
 			if (strcmp(argv[arg], "-pf") == 0 || strcmp(argv[arg], "--position-format") == 0) {
@@ -272,14 +271,14 @@ int main(int argc, const char *argv[])
 							continue;
 					}
 				}
-				printHelp(argc, argv, options);
+				printHelp(argc, argv, options, pm_options);
 				return 0;
 			}
 			if (strcmp(argv[arg], "-s") == 0 || strcmp(argv[arg], "--shape") == 0){
 				if (arg + 1 < argc) {
 					++arg;
 					istringstream istr(argv[arg]);
-                                        noParamChoosing = true;
+					paramChoosing = false;
 					istr >> options.shape;
 					if (istr.fail())
 						cerr << "Could not parse shape" << endl << endl;
@@ -298,13 +297,13 @@ int main(int argc, const char *argv[])
 									break;
 								default:
 									cerr <<	"Shape must be a binary string" << endl << endl;
-									printHelp(argc, argv, options);
+									printHelp(argc, argv, options, pm_options);
 									return 0;
 							}
 						if (ones == 0 || ones > 20) 
 						{
 							cerr <<	"Invalid Shape" << endl << endl;
-							printHelp(argc, argv, options);
+							printHelp(argc, argv, options, pm_options);
 							return 0;
 						}
 
@@ -314,7 +313,7 @@ int main(int argc, const char *argv[])
 						continue;				
 					}
 				}
-				printHelp(argc, argv, options);
+				printHelp(argc, argv, options, pm_options);
 				return 0;
 			}
 			if (strcmp(argv[arg], "-oc") == 0 || strcmp(argv[arg], "--overabundance-cut") == 0) {
@@ -330,7 +329,7 @@ int main(int argc, const char *argv[])
 							continue;
 					}
 				}
-				printHelp(argc, argv, options);
+				printHelp(argc, argv, options, pm_options);
 				return 0;
 			}
 			if (strcmp(argv[arg], "-rl") == 0 || strcmp(argv[arg], "--repeat-length") == 0) {
@@ -346,13 +345,13 @@ int main(int argc, const char *argv[])
 							continue;
 					}
 				}
-				printHelp(argc, argv, options);
+				printHelp(argc, argv, options, pm_options);
 				return 0;
 			}
 			if (strcmp(argv[arg], "-t") == 0 || strcmp(argv[arg], "--threshold") == 0) {
 				if (arg + 1 < argc) {
 					++arg;
-                                        noParamChoosing = true;
+					paramChoosing = false;
 					istringstream istr(argv[arg]);
 					istr >> options.threshold;
 					if (!istr.fail())
@@ -363,10 +362,10 @@ int main(int argc, const char *argv[])
 							continue;
 					}
 				}
-				printHelp(argc, argv, options);
+				printHelp(argc, argv, options, pm_options);
 				return 0;
 			}
-                        if (strcmp(argv[arg], "-rr") == 0 || strcmp(argv[arg], "--recognition-rate") == 0) {
+			if (strcmp(argv[arg], "-rr") == 0 || strcmp(argv[arg], "--recognition-rate") == 0) {
 				if (arg + 1 < argc) {
 					++arg;
 					istringstream istr(argv[arg]);
@@ -374,17 +373,17 @@ int main(int argc, const char *argv[])
 					if (!istr.fail())
 						if (pm_options.optionLossRate < 80 || pm_options.optionLossRate > 100)
 							cerr << "Recognition rate must be a value between 80 and 100" << endl << endl;
-    						else
-	           			        {
-                                                	pm_options.optionLossRate = 100.0-pm_options.optionLossRate;
-					                pm_options.optionLossRate /= 100.0;
+						else
+						{
+							pm_options.optionLossRate = 100.0-pm_options.optionLossRate;
+							pm_options.optionLossRate /= 100.0;
 							continue;
-                                                }
+						}
 				}
-				printHelp(argc, argv, options);
+				printHelp(argc, argv, options, pm_options);
 				return 0;
 			}
-                        if (strcmp(argv[arg], "-tl") == 0 || strcmp(argv[arg], "--taboo-length") == 0) {
+			if (strcmp(argv[arg], "-tl") == 0 || strcmp(argv[arg], "--taboo-length") == 0) {
 				if (arg + 1 < argc) {
 					++arg;
 					istringstream istr(argv[arg]);
@@ -397,12 +396,12 @@ int main(int argc, const char *argv[])
 							continue;
 					}
 				}
-				printHelp(argc, argv, options);
+				printHelp(argc, argv, options, pm_options);
 				return 0;
 			}
 			if (strcmp(argv[arg], "-h") == 0 || strcmp(argv[arg], "--help") == 0) {
 				// print help
-				printHelp(argc, argv, options, true);
+				printHelp(argc, argv, options, pm_options, true);
 				return 0;
 			}
 			if (strcmp(argv[arg], "-v") == 0 || strcmp(argv[arg], "--verbose") == 0) {
@@ -423,7 +422,7 @@ int main(int argc, const char *argv[])
 			}
 			if (strcmp(argv[arg], "-ed") == 0 || strcmp(argv[arg], "--error-distr") == 0) {
 				if (arg + 1 == argc) {
-					printHelp(argc, argv, options);
+					printHelp(argc, argv, options, pm_options);
 					return 0;
 				}
 				++arg;
@@ -433,7 +432,7 @@ int main(int argc, const char *argv[])
 		} else {
 			// parse file name
 			if (fnameCount == 2) {
-				printHelp(argc, argv, options);
+				printHelp(argc, argv, options, pm_options);
 				return 0;
 			}
 			fname[fnameCount++] = argv[arg];
@@ -443,53 +442,58 @@ int main(int argc, const char *argv[])
 		if (options.printVersion)
 			printVersion();
 		else
-			printHelp(argc, argv, options);
+			printHelp(argc, argv, options, pm_options);
 		return 0;
 	}
 	if (!options.forward && !options.reverse) { // enable both per default
 		options.forward = true;
 		options.reverse = true;
 	}
-        if (options.printVersion)
+	
+	if (options.printVersion)
 		printVersion();
 
-        if (!noParamChoosing)
-        {
-            pm_options.verbose = (options._debugLevel >= 1);
-            pm_options.optionErrorRate = options.errorRate;
-            if (options.hammingOnly)
-            {
-                pm_options.optionProbINSERT = 0.0;
-                pm_options.optionProbDELETE = 0.0;
-            }
-    
-            pm_options.paramFolderPath = argv[0];
-            size_t lastPos = pm_options.paramFolderPath.find_last_of('/') + 1;
-            if (lastPos == pm_options.paramFolderPath.npos +1) lastPos = pm_options.paramFolderPath.find_last_of('\\') + 1;
-            if (lastPos == pm_options.paramFolderPath.npos +1) lastPos = 0;
-            pm_options.paramFolderPath.erase(lastPos); 
-    
-            int rLength = estimateReadLength(fname[1]);
-            if (rLength > 0)
-            {
-                pm_options.totalN = rLength;
-                if (!chooseParams(options,pm_options))
-                {
-                    if(pm_options.verbose) cout << "Couldn't find preprocessed parameter files. Please configure manually (options --shape and --threshold)." << endl;
-                    cout << "Using default configurations (shape = " << options.shape << " and threshold = "<<options.threshold <<")" << endl;
-                }
-            } else
-            {
-		cerr << "Failed to load reads" << endl;
-		return 0;
-            }
-        }
+	if (paramChoosing)
+	{
+		pm_options.verbose = (options._debugLevel >= 1);
+		pm_options.optionErrorRate = options.errorRate;
+		if (options.hammingOnly)
+		{
+			pm_options.optionProbINSERT = 0.0;
+			pm_options.optionProbDELETE = 0.0;
+		}
+
+		pm_options.paramFolderPath = argv[0];
+		size_t lastPos = pm_options.paramFolderPath.find_last_of('/') + 1;
+		if (lastPos == pm_options.paramFolderPath.npos + 1) lastPos = pm_options.paramFolderPath.find_last_of('\\') + 1;
+		if (lastPos == pm_options.paramFolderPath.npos + 1) lastPos = 0;
+		pm_options.paramFolderPath.erase(lastPos); 
+
+		int rLength = estimateReadLength(fname[1]);
+		if (rLength > 0)
+		{
+			pm_options.totalN = rLength;
+			if (options._debugLevel >= 1)
+				cerr << "___PARAMETER_CHOOSING__" << endl;
+			if (!chooseParams(options,pm_options))
+			{
+				if (pm_options.verbose) 
+					cerr << "Couldn't find preprocessed parameter files. Please configure manually (options --shape and --threshold)." << endl;
+				cerr << "Using default configurations (shape = " << options.shape << " and q-gram lemma)." << endl;
+			}
+			cerr << endl;
+		} else
+		{
+			cerr << "Failed to load reads" << endl;
+			return 0;
+		}
+	}
 	
 	int result = mapReads(fname[0], fname[1], errorPrbFileName.c_str(), options);
 	if (result == 2) 
 	{
 		cerr <<	"Invalid Shape" << endl << endl;
-		printHelp(argc, argv, options);
+		printHelp(argc, argv, options, pm_options);
 		return 0;
 	}
 	return result;

@@ -1248,7 +1248,7 @@ parseGappedParams(RazerSOptions<TSpec> & r_options,TFile & file, ParamChooserOpt
         }
 	if(!atLeastOneFound)
 	{
-		if(pm_options.verbose) ::std::cout << "\n!!! Something wrong with file? !!!" << ::std::endl;
+		if(pm_options.verbose) ::std::cerr << "\n!!! Something wrong with file? !!!" << ::std::endl;
 		return false;
 	}
 	int i;
@@ -1295,7 +1295,7 @@ chooseParams(RazerSOptions<TSpec> & r_options, ParamChooserOptions & pm_options)
 		if(!pm_options.prefixCount)
 		{
 			pm_options.fprefix[0] = "userdef";
-			::std::cout << "\nNo session id given, using prefix 'userdef'"<<::std::endl;
+			::std::cerr << "\nNo session id given, using prefix 'userdef'"<<::std::endl;
 		}
 		String<TFloat> errorDistribution;
 		resize(errorDistribution,pm_options.totalN);
@@ -1350,26 +1350,27 @@ chooseParams(RazerSOptions<TSpec> & r_options, ParamChooserOptions & pm_options)
 	// decide on which loss rate file to parse
 	::std::stringstream paramsfile;
 	getParamsFilename(paramsfile,pm_options);
-        if(pm_options.verbose)
-        {
-	   ::std::cout << "\nRead length      = " << pm_options.totalN << "bp\n";
-	   ::std::cout << "Max num errors   = " << pm_options.totalK << "\n";
-	   ::std::cout << "Recognition rate = " <<  100.0*(1.0-pm_options.optionLossRate) << "%\n";
+	if (pm_options.verbose)
+	{
+		::std::cerr << ::std::endl;
+		::std::cerr << "Read length      = " << pm_options.totalN << "bp\n";
+		::std::cerr << "Max num errors   = " << pm_options.totalK << "\n";
+		::std::cerr << "Recognition rate = " << 100.0*(1.0-pm_options.optionLossRate) << "%\n";
 	}		
 	// parse loss rate file and find appropriate filter criterium
-	if(pm_options.verbose) ::std::cout << "\n--> Reading " <<  paramsfile.str()<<"\n";
+	if(pm_options.verbose) ::std::cerr << "\n--> Reading " <<  paramsfile.str()<<"\n";
 	::std::fstream file;
 	file.open(paramsfile.str().c_str(),::std::ios_base::in | ::std::ios_base::binary);
 	if(!file.is_open())
 	{
-		if(pm_options.verbose)::std::cout << "Couldn't open file "<<paramsfile.str()<<"\n";
+		if(pm_options.verbose)::std::cerr << "Couldn't open file "<<paramsfile.str()<<"\n";
 		return false;
 	}
 	else
 	{
 		if(pm_options.doSelectedGapped || pm_options.doAllOneGapped) parseGappedParams(r_options,file,pm_options);
 		else parseParams(r_options,file,pm_options);
-		if(pm_options.verbose) ::std::cout << "\n Choose \nshape: " << r_options.shape << "\n and \nthreshold: " << r_options.threshold<< "\n to achieve optimal performance for expected recognition rate >= " << (100.0-100.0*pm_options.optionLossRate) << "% (expected recognition = " << (100.0-pm_options.chosenLossRate*100.0) <<"%)\n\n";
+		if(pm_options.verbose) ::std::cerr << "\n Choose \nshape: " << r_options.shape << "\n and \nthreshold: " << r_options.threshold<< "\n to achieve optimal performance for expected recognition rate >= " << (100.0-100.0*pm_options.optionLossRate) << "% (expected recognition = " << (100.0-pm_options.chosenLossRate*100.0) <<"%)\n\n";
 		file.close();
 	}
 
