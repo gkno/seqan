@@ -34,6 +34,7 @@
 #endif
 
 #include "razers.h"
+#include "paramChooser.h"
 
 #include <iostream>
 #include <sstream>
@@ -57,6 +58,7 @@ void printHelp(int, const char *[], RazerSOptions<TSpec> &options, bool longHelp
 		cerr << "  -r,  --reverse               \t" << "only compute reverse complement matches" << endl;
 		cerr << "  -i,  --percent-identity NUM  \t" << "set the percent identity threshold" << endl;
 		cerr << "                               \t" << "default value is 80" << endl;
+		cerr << "  -rr, --recognition-rate NUM  \t" << "set the percent recognition rate (99.0)" << endl;
 		cerr << "  -ho, --hamming-only          \t" << "consider only mismatches, no indels" << endl;
 		cerr << "  -m,  --max-hits              \t" << "ignore reads with more than a maximum number of hits" << endl;
 		cerr << "                               \t" << "default value is " << options.maxHits << endl;
@@ -101,6 +103,21 @@ void printVersion()
 	cerr << "RazerS version 0.3 20080918 (prerelease)" << endl;
 }
 
+//////////////////////////////////////////////////////////////////////////////
+// Load multi-Fasta sequences
+int estimateReadLength(char const *fileName)
+{
+        Dna5String dummy;
+
+	::std::ifstream file;
+	file.open(fileName, ::std::ios_base::in | ::std::ios_base::binary);
+	if (!file.is_open() || _streamEOF(file)) return -1;
+	read(file, dummy, Fasta());			// read Read sequence
+	file.close();
+        return length(dummy);
+}
+
+
 int main(int argc, const char *argv[]) 
 {
 	//////////////////////////////////////////////////////////////////////////////
@@ -110,6 +127,8 @@ int main(int argc, const char *argv[])
 	unsigned			fnameCount = 0;
 	const char			*fname[2] = { "", "" };
 	string				errorPrbFileName;
+	ParamChooserOptions		pm_options;
+        bool noParamChoosing = false;
 
 	options.forward = false;
 	options.reverse = false;
@@ -260,6 +279,7 @@ int main(int argc, const char *argv[])
 				if (arg + 1 < argc) {
 					++arg;
 					istringstream istr(argv[arg]);
+                                        noParamChoosing = true;
 					istr >> options.shape;
 					if (istr.fail())
 						cerr << "Could not parse shape" << endl << endl;
@@ -332,6 +352,7 @@ int main(int argc, const char *argv[])
 			if (strcmp(argv[arg], "-t") == 0 || strcmp(argv[arg], "--threshold") == 0) {
 				if (arg + 1 < argc) {
 					++arg;
+                                        noParamChoosing = true;
 					istringstream istr(argv[arg]);
 					istr >> options.threshold;
 					if (!istr.fail())
@@ -345,7 +366,25 @@ int main(int argc, const char *argv[])
 				printHelp(argc, argv, options);
 				return 0;
 			}
-			if (strcmp(argv[arg], "-tl") == 0 || strcmp(argv[arg], "--taboo-length") == 0) {
+                        if (strcmp(argv[arg], "-rr") == 0 || strcmp(argv[arg], "--recognition-rate") == 0) {
+				if (arg + 1 < argc) {
+					++arg;
+					istringstream istr(argv[arg]);
+					istr >> pm_options.optionLossRate;
+					if (!istr.fail())
+						if (pm_options.optionLossRate < 80 || pm_options.optionLossRate > 100)
+							cerr << "Recognition rate must be a value between 80 and 100" << endl << endl;
+    						else
+	           			        {
+                                                	pm_options.optionLossRate = 100.0-pm_options.optionLossRate;
+					                pm_options.optionLossRate /= 100.0;
+							continue;
+                                                }
+				}
+				printHelp(argc, argv, options);
+				return 0;
+			}
+                        if (strcmp(argv[arg], "-tl") == 0 || strcmp(argv[arg], "--taboo-length") == 0) {
 				if (arg + 1 < argc) {
 					++arg;
 					istringstream istr(argv[arg]);
@@ -411,10 +450,41 @@ int main(int argc, const char *argv[])
 		options.forward = true;
 		options.reverse = true;
 	}
-
-	if (options.printVersion)
+        if (options.printVersion)
 		printVersion();
 
+        if (!noParamChoosing)
+        {
+            pm_options.verbose = (options._debugLevel >= 1);
+            pm_options.optionErrorRate = options.errorRate;
+            if (options.hammingOnly)
+            {
+                pm_options.optionProbINSERT = 0.0;
+                pm_options.optionProbDELETE = 0.0;
+            }
+    
+            pm_options.paramFolderPath = argv[0];
+            size_t lastPos = pm_options.paramFolderPath.find_last_of('/') + 1;
+            if (lastPos == pm_options.paramFolderPath.npos +1) lastPos = pm_options.paramFolderPath.find_last_of('\\') + 1;
+            if (lastPos == pm_options.paramFolderPath.npos +1) lastPos = 0;
+            pm_options.paramFolderPath.erase(lastPos); 
+    
+            int rLength = estimateReadLength(fname[1]);
+            if (rLength > 0)
+            {
+                pm_options.totalN = rLength;
+                if (!chooseParams(options,pm_options))
+                {
+                    if(pm_options.verbose) cout << "Couldn't find preprocessed parameter files. Please configure manually (options --shape and --threshold)." << endl;
+                    cout << "Using default configurations (shape = " << options.shape << " and threshold = "<<options.threshold <<")" << endl;
+                }
+            } else
+            {
+		cerr << "Failed to load reads" << endl;
+		return 0;
+            }
+        }
+	
 	int result = mapReads(fname[0], fname[1], errorPrbFileName.c_str(), options);
 	if (result == 2) 
 	{

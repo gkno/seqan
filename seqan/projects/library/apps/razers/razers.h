@@ -93,7 +93,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		{
 			forward = true;
 			reverse = true;
-			errorRate = 0.2;
+			errorRate = 0.08;
 			maxHits = 100;
 			output = "";
 			_debugLevel = 0;
@@ -116,6 +116,8 @@ namespace SEQAN_NAMESPACE_MAIN
 			abundanceCut = 1;
 		}
 	};
+
+
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -314,7 +316,7 @@ bool loadFasta(TReadSet & reads, TNameSet & fastaIDs, char const *fileName, TRaz
 	}
 	file.close();
 	resize(reads,seqCount);
-	if (options._debugLevel >= 1) 
+	if (options._debugLevel > 1) 
 		::std::cerr << "Kicked out " << kickoutcount << " low quality reads.\n";
 	return (seqCount > 0);
 }
