@@ -1174,6 +1174,11 @@ parseGappedParams(RazerSOptions<TSpec> & r_options,TFile & file, ParamChooserOpt
                     _parse_skipLine(file,c); 
                     continue;
                 }
+                if(!r_options.hammingOnly && numGaps(currShape)>0)
+                {
+                    _parse_skipLine(file,c); 
+                    continue;
+                }
                 _parse_skipWhitespace(file,c);
                 unsigned currThreshold = _parse_readNumber(file,c);
         	_parse_skipWhitespace(file,c);
