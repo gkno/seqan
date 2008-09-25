@@ -113,7 +113,7 @@ getDir(TPath dir, TFilenameString &files)
             ParamChooserOptions()
             {
                 minThreshold = 1;					// minimum value for threshold parameter 
-                maxWeight = 14;                                           // maximum value of q
+                maxWeight = 13;                                           // maximum value of q
                 optionChooseOneGappedOnly = false;      // choose onegapped (or ungapped) shape (discard all other gapped shapes)
                 
                 
@@ -231,7 +231,8 @@ parseParams(RazerSOptions<TSpec> & r_options, TFile & file, ParamChooserOptions 
 			break;
                 _parse_skipWhitespace(file,c);
         }
-	if(bestT<1) ::std::cout << "\n!!! Something wrong with file? !!!\n";
+	if(bestT<1)
+        { ::std::cerr << "\n!!! Something wrong with file? !!!\n"; return false;}
 	pm_options.chosenLossRate = bestSoFar;
         CharString chosenShape;
         fill(chosenShape, bestQ, '1');
@@ -602,7 +603,8 @@ makeSelectedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 
         typedef typename Value<TError>::Type TFloat;
 	unsigned maxErrors = (unsigned) 1 + pm_options.totalN / 10;
-	if(maxErrors<5 && pm_options.totalN > 30) maxErrors = 5;
+	unsigned minErrors = 0;
+        if(maxErrors<5 && pm_options.totalN > 30) maxErrors = 5;
 	unsigned minQ = 7;
 	unsigned maxT = pm_options.totalN-minQ+1;
 	unsigned minT = 0;//totalN-minQ+1;
@@ -699,13 +701,14 @@ makeSelectedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 	simulateGenome(testGenome[0], 1000000);					// generate 1Mbp genomic sequence
 	simulateReads(
 		testReads, dummyIDs, testGenome, 
-		50000, maxErrors-1, logErrorDistribution, 0.5);	// generate 50K reads
+		50000, maxErrors, logErrorDistribution, 0.5);	// generate 50K reads
 #endif
 
 
 	
 	for(int i = length(shapeStrings)-1; i >= 0; --i)
 	{
+                if(length(shapeStrings[i])>pm_options.totalN) continue;
 		String<TFloat> found;
 		resize(found,maxT*maxErrors);
 		
@@ -714,7 +717,7 @@ makeSelectedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 		initPatterns(states, shapeStrings[i], maxErrors-1, logErrorDistribution, pm_options.optionHammingOnly);
 		computeFilteringLoss(found, states, length(shapeStrings[i]), maxT, maxErrors,  logErrorDistribution);
 		
-		for(unsigned e = 1; e < maxErrors; ++e) {
+		for(unsigned e = minErrors; e < maxErrors; ++e) {
 			bool highestOptimalFound = false;
 			for(unsigned t = maxT-1; t > minT; --t) {
 				TFloat lossrate = 1.0 - (TFloat) _transformBack(found[e*maxT+t]);
@@ -825,7 +828,7 @@ makeOneGappedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 	simulateGenome(testGenome[0], 1000000);					// generate 1Mbp genomic sequence
 	simulateReads(
 		testReads, dummyIDs, testGenome, 
-		50000, maxE-1, logErrorDistribution, 0.5);	// generate 10M reads
+		50000, maxE, logErrorDistribution, 0.5);	// generate 10M reads
 #endif
 
 
@@ -838,6 +841,7 @@ makeOneGappedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 		// j = span of shape
 		for(unsigned j = q+minGap; j <= q+maxGap /*|| j < q+q-1 */; ++j){
 
+                        if(j > pm_options.totalN) continue;
 			// k = position of gap
 //			for(unsigned k = (q/2); k < q; ++k){
 			for(unsigned k = q-3; k < q-2; ++k){
@@ -1255,6 +1259,11 @@ parseGappedParams(RazerSOptions<TSpec> & r_options,TFile & file, ParamChooserOpt
 	for(i = pm_options.maxWeight-1; i >= 0; --i )
 		if(length(shapes[i]) > 0)  // if a shape of weight i+1 has been found
 			break;
+	if(i<0)
+	{
+		if(pm_options.verbose) ::std::cerr << "\n!!! Something wrong with file? !!!" << ::std::endl;
+		return false;
+	}
 	pm_options.chosenLossRate = lossrates[i];
 	assign(r_options.shape, shapes[i]);
 	r_options.threshold = thresholds[i];
@@ -1350,20 +1359,20 @@ chooseParams(RazerSOptions<TSpec> & r_options, ParamChooserOptions & pm_options)
 	// decide on which loss rate file to parse
 	::std::stringstream paramsfile;
 	getParamsFilename(paramsfile,pm_options);
-	if (pm_options.verbose)
-	{
-		::std::cerr << ::std::endl;
-		::std::cerr << "Read length      = " << pm_options.totalN << "bp\n";
-		::std::cerr << "Max num errors   = " << pm_options.totalK << "\n";
-		::std::cerr << "Recognition rate = " << 100.0*(1.0-pm_options.optionLossRate) << "%\n";
-	}		
+        if (pm_options.verbose)
+        {
+               ::std::cerr << ::std::endl;
+               ::std::cerr << "Read length      = " << pm_options.totalN << "bp\n";
+               ::std::cerr << "Max num errors   = " << pm_options.totalK << "\n";
+               ::std::cerr << "Recognition rate = " << 100.0*(1.0-pm_options.optionLossRate) << "%\n";
+        }
 	// parse loss rate file and find appropriate filter criterium
-	if(pm_options.verbose) ::std::cerr << "\n--> Reading " <<  paramsfile.str()<<"\n";
+	if(pm_options.verbose) ::std::cerr << "\n--> Reading " <<  paramsfile.str()<<::std::endl;
 	::std::fstream file;
 	file.open(paramsfile.str().c_str(),::std::ios_base::in | ::std::ios_base::binary);
 	if(!file.is_open())
 	{
-		if(pm_options.verbose)::std::cerr << "Couldn't open file "<<paramsfile.str()<<"\n";
+		if(pm_options.verbose)::std::cerr << "Couldn't open file "<<paramsfile.str()<<::std::endl;
 		return false;
 	}
 	else
