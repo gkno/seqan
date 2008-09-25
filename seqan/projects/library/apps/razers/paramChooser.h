@@ -757,6 +757,7 @@ makeSelectedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 				razersOptions.errorRate += 0.0000001;
 				razersOptions.threshold = t;
 				razersOptions._debugLevel = 2;
+				razersOptions.hammingOnly = pm_options.optionHammingOnly;
 
 				assign(razersOptions.shape, shapeStrings[i]);
 				mapReads(matches, testGenome, testReads, razersOptions);
@@ -871,7 +872,6 @@ makeOneGappedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 							else highestOptimalFound = true;
 						}
 						if(lossrate > 0.2)
-						//if(lossrate > 0.1)
 							continue;
 						
 						unsigned gminCov = getMinCov(q, j, t);
@@ -906,6 +906,7 @@ makeOneGappedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 						razersOptions.errorRate += 0.0000001;
 						razersOptions.threshold = t;
 						razersOptions._debugLevel = 2;
+						razersOptions.hammingOnly = pm_options.optionHammingOnly;
 		
 						assign(razersOptions.shape, shapeString);
 						mapReads(matches, testGenome, testReads, razersOptions);

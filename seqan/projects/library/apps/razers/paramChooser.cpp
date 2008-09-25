@@ -67,7 +67,7 @@ void printHelp(int, const char *[], ParamChooserOptions & pm_options, bool longH
 		cerr << endl << "Options:" << endl;
 		cerr << "  -n,  --length NUM            \t" << "sequence length ("<<pm_options.totalN<<")" << endl;
 		cerr << "  -i,  --percent-identity NUM  \t" << "set the percent identity threshold (95)" << endl;
-		cerr << "  -r,  --recognition-rate NUM  \t" << "set the percent recognition rate (99.0)" << endl;
+		cerr << "  -rr,  --recognition-rate NUM  \t" << "set the percent recognition rate (99.0)" << endl;
 		cerr << "  -pf, --prb-folder STR        \t" << "directory of [_prb.txt|.fastq|fastqint] files containing qualitiy values (optional)" << endl;
 		cerr << "  -pq, --phred-qualities       \t" << "fastq files contain Phred qualities (default: Solexa qualities)" << endl;
 		cerr << "  -d,  --error-distribution    \t" << "file containing mismatch probabilities (must contain at least n values, one value per line)" << endl;
@@ -124,18 +124,20 @@ int main(int argc, const char *argv[])
 				printHelp(argc, argv, pm_options);
 				return 0;
 			}
-			if (strcmp(argv[arg], "-r") == 0 || strcmp(argv[arg], "--recognition-rate") == 0) {
+			if (strcmp(argv[arg], "-rr") == 0 || strcmp(argv[arg], "--recognition-rate") == 0) {
 				if (arg + 1 < argc) {
 					++arg;
 					istringstream istr(argv[arg]);
 					istr >> pm_options.optionLossRate;
-					pm_options.optionLossRate = 100.0 - pm_options.optionLossRate;
-					pm_options.optionLossRate /= 100.0;
 					if (!istr.fail())
-						if (pm_options.optionLossRate < 0.0 || pm_options.optionLossRate > 1.0)
+						if (pm_options.optionLossRate < 80.0 || pm_options.optionLossRate > 100.0)
 							cerr << "Loss rate must be a value between 0 and 100" << endl << endl;
 						else
+						{
+							pm_options.optionLossRate = 100.0 - pm_options.optionLossRate;
+							pm_options.optionLossRate /= 100.0;
 							continue;
+						}
 				}
 				printHelp(argc, argv, pm_options);
 				return 0;
