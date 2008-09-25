@@ -98,7 +98,7 @@ void printHelp(int, const char *[], RazerSOptions<TSpec> &options, ParamChooserO
 
 void printVersion() 
 {
-	cerr << "RazerS version 0.3 20080924 (prerelease)" << endl;
+	cerr << "RazerS version 0.3 20080925 (prerelease)" << endl;
 }
 
 //////////////////////////////////////////////////////////////////////////////
