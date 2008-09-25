@@ -87,13 +87,21 @@ the command line:
 
   [ -rr NUM ],  [ --recognition-rate NUM ]
   
-  Set the percent recognition rate. NUM must be a value between 80 and 100 (default is 99). The recognition rate controls the sensitivity of RazerS.
-  The higher the recognition rate the more sensitive is RazerS. The lower the recognition rate the faster runs RazerS. A value of 100 corresponds to a lossless read mapping. The recognition rate corresponds to the expected fraction of matches RazerS will find compared to a lossless mapping. Depending on the desired recogition rate, the percent identity and the read length the filter is configured to run as fast as possible. Therefore it needs access to files with precomputed filtration settings in a 'gapped_params' subfolder which resides in the razers folder.
+  Set the percent recognition rate. NUM must be a value between 80 and 100
+  (default is 99). The recognition rate controls the sensitivity of RazerS.
+  The higher the recognition rate the more sensitive is RazerS. The lower
+  the recognition rate the faster runs RazerS. A value of 100 corresponds
+  to a lossless read mapping. The recognition rate corresponds to the
+  expected fraction of matches RazerS will find compared to a lossless
+  mapping. Depending on the desired recogition rate, the percent identity
+  and the read length the filter is configured to run as fast as possible.
+  Therefore it needs access to files with precomputed filtration settings
+  in a 'gapped_params' subfolder which resides in the razers folder.
   
-  [ -ho ],  [ --hamming-only ]
+  [ -id ],  [ --indels ]
   
-  Only consider mismatches as errors. Inserts or deletions are not 
-  recognized.
+  Consider insertions, deletions and mismatches as errors. By default, only 
+  mismatches are recognized.
   
   [ -m NUM ],  [ --max-hits NUM ]
   
@@ -260,7 +268,7 @@ To see map the example reads against the genome do the following:
   1)  cd snapshot
   2)  cd apps
   3)  cd razers
-  4)  ./razers example/genome.fa example/reads.fa -i 80 -a -v
+  4)  ./razers example/genome.fa example/reads.fa -id -a -mN -v
   5)  less example/reads.fa.result
 
 On success, RazerS dumped the resulting matches with their corresponding 
@@ -272,23 +280,19 @@ read1,0,27,F,genome1,47,73,92.593
 read1,0,27,R,genome2,180,208,92.593
 #Read:   AATTGAATGAGGTCTT-GCAGCCATGGC
 #Genome: AATTGAATGAGGTCTTCGCAGTCATGGC
-read2,0,27,F,genome1,110,134,88.889
-#Read:   CAGGAGATAAGCTGGATCGTTTACGGT
-#Genome: CAGGAGATAAGCTGGATCGTTTAC---
 read2,0,27,R,genome2,108,135,96.296
 #Read:   CAGGAGATAAGCTGGATCGTTTACGGT
 #Genome: CAGGAGATAAGCTGGATCGTTTACAGT
-read3,0,27,F,genome2,215,238,85.185
+read3,0,27,F,genome2,215,242,100
 #Read:   GCCATTAGAGGCCACCACACCAGACGT
-#Genome: GCCATTAGAGGCCACCACACC--A-G-
+#Genome: GCCATTAGAGGCCACCACACCAGNNNN
 
-If the alignments are not needed '-a' can be omited resulting in:
+If alignments are not needed '-a' can be omited resulting in:
 
 read1,0,27,F,genome1,47,73,92.593
 read1,0,27,R,genome2,180,208,92.593
-read2,0,27,F,genome1,110,134,88.889
 read2,0,27,R,genome2,108,135,96.296
-read3,0,27,F,genome2,215,238,85.185
+read3,0,27,F,genome2,215,242,100
 
 ---------------------------------------------------------------------------
 6. Contact

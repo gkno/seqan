@@ -58,7 +58,7 @@ void printHelp(int, const char *[], RazerSOptions<TSpec> &options, ParamChooserO
 		cerr << "  -r,  --reverse               \t" << "only compute reverse complement matches" << endl;
 		cerr << "  -i,  --percent-identity NUM  \t" << "set the percent identity threshold (default " << 100 - (100.0 * options.errorRate) << ')' << endl;
 		cerr << "  -rr, --recognition-rate NUM  \t" << "set the percent recognition rate (default " << 100 - (100.0 * pm_options.optionLossRate) << ')' << endl;
-		cerr << "  -ho, --hamming-only          \t" << "consider only mismatches, no indels" << endl;
+		cerr << "  -id, --indels                \t" << "allow indels (default: mismatches only)" << endl;
 		cerr << "  -m,  --max-hits NUM          \t" << "ignore reads with more than NUM hits (default " << options.maxHits << ')' << endl;
 		cerr << "  -o,  --output FILE           \t" << "change output filename (default <READS FILE>.result)" << endl;
 		cerr << "  -v,  --verbose               \t" << "verbose mode" << endl;
@@ -131,6 +131,8 @@ int main(int argc, const char *argv[])
 
 	options.forward = false;
 	options.reverse = false;
+	options.hammingOnly = true;
+
 
 	for(int arg = 1; arg < argc; ++arg) {
 		if (argv[arg][0] == '-') {
@@ -161,8 +163,26 @@ int main(int argc, const char *argv[])
 				printHelp(argc, argv, options, pm_options);
 				return 0;
 			}
-			if (strcmp(argv[arg], "-ho") == 0 || strcmp(argv[arg], "--hamming-only") == 0) {
-				options.hammingOnly = true;
+			if (strcmp(argv[arg], "-rr") == 0 || strcmp(argv[arg], "--recognition-rate") == 0) {
+				if (arg + 1 < argc) {
+					++arg;
+					istringstream istr(argv[arg]);
+					istr >> pm_options.optionLossRate;
+					if (!istr.fail())
+						if (pm_options.optionLossRate < 80 || pm_options.optionLossRate > 100)
+							cerr << "Recognition rate must be a value between 80 and 100" << endl << endl;
+						else
+						{
+							pm_options.optionLossRate = 100.0-pm_options.optionLossRate;
+							pm_options.optionLossRate /= 100.0;
+							continue;
+						}
+				}
+				printHelp(argc, argv, options, pm_options);
+				return 0;
+			}
+			if (strcmp(argv[arg], "-id") == 0 || strcmp(argv[arg], "--indels") == 0) {
+				options.hammingOnly = false;
 				continue;
 			}
 			if (strcmp(argv[arg], "-m") == 0 || strcmp(argv[arg], "--max-hits") == 0) {
@@ -361,24 +381,6 @@ int main(int argc, const char *argv[])
 						else
 							continue;
 					}
-				}
-				printHelp(argc, argv, options, pm_options);
-				return 0;
-			}
-			if (strcmp(argv[arg], "-rr") == 0 || strcmp(argv[arg], "--recognition-rate") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					istringstream istr(argv[arg]);
-					istr >> pm_options.optionLossRate;
-					if (!istr.fail())
-						if (pm_options.optionLossRate < 80 || pm_options.optionLossRate > 100)
-							cerr << "Recognition rate must be a value between 80 and 100" << endl << endl;
-						else
-						{
-							pm_options.optionLossRate = 100.0-pm_options.optionLossRate;
-							pm_options.optionLossRate /= 100.0;
-							continue;
-						}
 				}
 				printHelp(argc, argv, options, pm_options);
 				return 0;
