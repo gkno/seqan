@@ -409,11 +409,12 @@ selectPairsIndel(StringSet<TString, TSpec> const& str,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TString, typename TSpec, typename TId, typename TDiagList, typename TScore, typename TSize, typename TSegmentMatches, typename TScoreValues, typename TDistance>
+template<typename TString, typename TSpec, typename TId, typename TDiagList, typename TBegEndPos, typename TScore, typename TSize, typename TSegmentMatches, typename TScoreValues, typename TDistance>
 inline void 
 appendSegmentMatches(StringSet<TString, TSpec> const& str,
 					 String<Pair<TId, TId> > const& pList,
 					 TDiagList const& dList,
+					 TBegEndPos const& begEndPos,
 					 TScore const& score_type,
 					 TSize thresholdMatchlength,
 					 TSize thresholdQuality,
@@ -467,8 +468,7 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 		
 		// Overlap alignment
 		TSize from = length(matches);
-		//TScoreValue myScore = globalAlignment(matches, pairSet, score_type, AlignConfig<true,true,true,true>(), (value(itDiag)).i1, (value(itDiag)).i2, BandedGotoh() );
-		TScoreValue myScore = globalAlignment(matches, pairSet, score_type, AlignConfig<true,true,true,true>(), Gotoh() );
+		TScoreValue myScore = globalAlignment(matches, pairSet, score_type, AlignConfig<true,true,true,true>(), (value(itDiag)).i1, (value(itDiag)).i2, BandedGotoh() );
 		TSize to = length(matches);
 
 		// Determine a sequence weight
@@ -479,8 +479,7 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 		double quality = (double) matchLen / (double) overlapLen;
 
 		// Get only the good overlap alignments
-		if (((quality >= qltThres) && (matchLen >= thresholdMatchlength)) ||
-			((quality >= 1) && (matchLen >= 5))) {
+		if ((quality >= qltThres) && (matchLen >= thresholdMatchlength)) {
 
 			//// Debug Code
 			//Graph<Alignment<TStringSet, TSize> > tmp(pairSet);
@@ -517,6 +516,100 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 		}
 	}
 	std::cout << "Filtration ration: " << (double) dropCount / (double) length(pList) << std::endl;
+
+	// Find sequences that have no overlap in the front or back
+	String<TSize> noFront;
+	String<TSize> noBack;
+	for(TSize seqI = 0; seqI < nseq; ++seqI) {
+		if (value(frontOvl, seqI) == 0) appendValue(noFront, seqI);
+		else if (value(backOvl, seqI) == 0) appendValue(noBack, seqI);
+	}
+	// Drop the first and the last sequence
+	typedef typename Iterator<TBegEndPos>::Type TBegEndIter;
+	TBegEndIter begEndIt = begin(begEndPos);
+	TBegEndIter begEndItEnd = end(begEndPos);
+	TSize minVal = supremumValue<TSize>();
+	TSize maxVal = 0;
+	for(;begEndIt != begEndItEnd; goNext(begEndIt)) {
+		TSize pos1 = (value(begEndIt)).i1;
+		TSize pos2 = (value(begEndIt)).i2;
+		if (pos1 > pos2) { TSize tmp = pos1; pos1 = pos2; pos2 = tmp;}
+		if (pos1 < minVal) minVal = pos1;
+		if (pos2 > maxVal) maxVal = pos2;
+	}
+	// Insert all remaining sequences into a set
+	std::set<TSize> unalignedReads;
+	for(TSize i = 0; i < length(noFront); ++i) {
+		TSize p1 = value(begEndPos, value(noFront, i)).i1;
+		TSize p2 = value(begEndPos, value(noFront, i)).i2;
+		if (p1 > p2) {TSize tmp = p1; p1 = p2; p2 = tmp; }
+		if (p1 != minVal) unalignedReads.insert(value(noFront, i));
+	}
+	for(TSize i = 0; i < length(noBack); ++i) {
+		TSize p1 = value(begEndPos, value(noBack, i)).i1;
+		TSize p2 = value(begEndPos, value(noBack, i)).i2;
+		if (p1 > p2) {TSize tmp = p1; p1 = p2; p2 = tmp; }
+		if (p2 != maxVal) unalignedReads.insert(value(noBack, i));
+	}
+	TSize countUnalignedReads = unalignedReads.size();
+	std::cout << "Unaligned reads: " << countUnalignedReads << std::endl;
+	if (countUnalignedReads > 0) {
+		// Realign all unaligned sequences
+		itPair = begin(pList);
+		itDiag = begin(dList);
+		for(;itPair != itPairEnd; goNext(itPair), goNext(itDiag)) {
+			TId id1 = (value(itPair)).i1;
+			TId id2 = (value(itPair)).i2;
+			TSize seq1 = idToPosition(str, id1);
+			TSize seq2 = idToPosition(str, id2);
+			if ((unalignedReads.find(seq1) == unalignedReads.end()) &&
+				(unalignedReads.find(seq2) == unalignedReads.end())) continue;
+			if ((value(frontOvl, seq1) > maxOvl) &&
+				(value(backOvl, seq1) > maxOvl) &&
+				(value(frontOvl, seq2) > maxOvl) &&
+				(value(backOvl, seq2) > maxOvl)) {
+					continue;
+			}
+
+			// Make a pairwise string-set
+			TStringSet pairSet;
+			assignValueById(pairSet, const_cast<StringSet<TString, TSpec>&>(str), id1);
+			assignValueById(pairSet, const_cast<StringSet<TString, TSpec>&>(str), id2);
+		
+			// Overlap alignment
+			TSize from = length(matches);
+			TScoreValue myScore = globalAlignment(matches, pairSet, score_type, AlignConfig<true,true,true,true>(), (value(itDiag)).i1, (value(itDiag)).i2, BandedGotoh() );
+			TSize to = length(matches);
+
+			// Determine a sequence weight
+			TSize matchLen = 0;
+			TSize overlapLen = 0;
+			TSize alignLen = 0;
+			getAlignmentStatistics(matches, pairSet, from, matchLen, overlapLen, alignLen);
+			double quality = (double) matchLen / (double) overlapLen;
+
+			// Create a corresponding edge
+			TSize i = idToPosition(str, id1);
+			TSize j = idToPosition(str, id2);
+			if (i<j) __getAlignmentStatistics(dist, i, j, nseq, matchLen, quality);
+			else __getAlignmentStatistics(dist, j, i, nseq, matchLen, quality);
+
+			// Record the scores
+			resize(scores, to);
+			typedef typename Iterator<TScoreValues>::Type TScoreIter;
+			TScoreIter itScore = begin(scores);
+			TScoreIter itScoreEnd = end(scores);
+			goFurther(itScore, from);
+			for(;itScore != itScoreEnd; ++itScore) value(itScore) = myScore;
+
+			// Update the overlap counter
+			TSize lenLast = (value(matches, from)).len; 
+			if ((value(matches, to - 1)).begin1 == 0) ++value(frontOvl, seq1);
+			if ((value(matches, to - 1)).begin2 == 0) ++value(frontOvl, seq2);
+			if ((value(matches, from)).begin1 + lenLast == length(value(pairSet, 0))) ++value(backOvl, seq1);
+			if ((value(matches, from)).begin2 + lenLast == length(value(pairSet, 1))) ++value(backOvl, seq2);
+		}
+	}
 }
 
 }// namespace SEQAN_NAMESPACE_MAIN
