@@ -588,7 +588,7 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 			getAlignmentStatistics(matches, pairSet, from, matchLen, overlapLen, alignLen);
 			double quality = (double) matchLen / (double) overlapLen;
 
-			if (quality >= qltThres) {
+			if ((quality >= qltThres) && (matchLen >= 5)) {
 				//// Create a corresponding edge
 				TSize i = idToPosition(str, id1);
 				TSize j = idToPosition(str, id2);
@@ -614,7 +614,6 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 			}
 		}
 	}
-
 }
 
 }// namespace SEQAN_NAMESPACE_MAIN
