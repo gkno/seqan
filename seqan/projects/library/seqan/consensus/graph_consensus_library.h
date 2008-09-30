@@ -588,28 +588,33 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 			getAlignmentStatistics(matches, pairSet, from, matchLen, overlapLen, alignLen);
 			double quality = (double) matchLen / (double) overlapLen;
 
-			// Create a corresponding edge
-			TSize i = idToPosition(str, id1);
-			TSize j = idToPosition(str, id2);
-			if (i<j) __getAlignmentStatistics(dist, i, j, nseq, matchLen, quality);
-			else __getAlignmentStatistics(dist, j, i, nseq, matchLen, quality);
+			if (quality >= qltThres) {
+				//// Create a corresponding edge
+				TSize i = idToPosition(str, id1);
+				TSize j = idToPosition(str, id2);
+				if (i<j) __getAlignmentStatistics(dist, i, j, nseq, matchLen, quality);
+				else __getAlignmentStatistics(dist, j, i, nseq, matchLen, quality);
 
-			// Record the scores
-			resize(scores, to);
-			typedef typename Iterator<TScoreValues>::Type TScoreIter;
-			TScoreIter itScore = begin(scores);
-			TScoreIter itScoreEnd = end(scores);
-			goFurther(itScore, from);
-			for(;itScore != itScoreEnd; ++itScore) value(itScore) = myScore;
+				// Record the scores
+				resize(scores, to);
+				typedef typename Iterator<TScoreValues>::Type TScoreIter;
+				TScoreIter itScore = begin(scores);
+				TScoreIter itScoreEnd = end(scores);
+				goFurther(itScore, from);
+				for(;itScore != itScoreEnd; ++itScore) value(itScore) = myScore;
 
-			// Update the overlap counter
-			TSize lenLast = (value(matches, from)).len; 
-			if ((value(matches, to - 1)).begin1 == 0) ++value(frontOvl, seq1);
-			if ((value(matches, to - 1)).begin2 == 0) ++value(frontOvl, seq2);
-			if ((value(matches, from)).begin1 + lenLast == length(value(pairSet, 0))) ++value(backOvl, seq1);
-			if ((value(matches, from)).begin2 + lenLast == length(value(pairSet, 1))) ++value(backOvl, seq2);
+				// Update the overlap counter
+				TSize lenLast = (value(matches, from)).len; 
+				if ((value(matches, to - 1)).begin1 == 0) ++value(frontOvl, seq1);
+				if ((value(matches, to - 1)).begin2 == 0) ++value(frontOvl, seq2);
+				if ((value(matches, from)).begin1 + lenLast == length(value(pairSet, 0))) ++value(backOvl, seq1);
+				if ((value(matches, from)).begin2 + lenLast == length(value(pairSet, 1))) ++value(backOvl, seq2);
+			} else {
+				resize(matches, from);
+			}
 		}
 	}
+
 }
 
 }// namespace SEQAN_NAMESPACE_MAIN
