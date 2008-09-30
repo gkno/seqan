@@ -113,7 +113,7 @@ getDir(TPath dir, TFilenameString &files)
             ParamChooserOptions()
             {
                 minThreshold = 1;					// minimum value for threshold parameter 
-                maxWeight = 13;                                           // maximum value of q
+                maxWeight = 14;                                           // maximum value of q
                 optionChooseOneGappedOnly = false;      // choose onegapped (or ungapped) shape (discard all other gapped shapes)
                 
                 
@@ -1302,9 +1302,11 @@ chooseParams(RazerSOptions<TSpec> & r_options, ParamChooserOptions & pm_options)
 	if(pm_options.optionProbINSERT <= epsilon && pm_options.optionProbDELETE <= epsilon)
 		pm_options.optionHammingOnly=true;
 
-	fill(pm_options.firstTimeK,20,true);//set maximal number of errors considered in parameter computation to <10
+	fill(pm_options.firstTimeK,20,true);//set maximal number of errors considered in parameter computation to <20
 
-// compute data specific loss rates
+	if(!pm_options.optionHamminOnly) pm_options.minThreshold = 2;
+
+	// compute data specific loss rates
 	if (pm_options.fnameCount0 || pm_options.fnameCount1) 
 	{
 		if(!pm_options.prefixCount)

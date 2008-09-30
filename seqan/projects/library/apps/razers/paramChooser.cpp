@@ -285,8 +285,11 @@ int main(int argc, const char *argv[])
 	if(pm_options.optionProbINSERT <= epsilon && pm_options.optionProbDELETE <= epsilon)
 		pm_options.optionHammingOnly=true;
 
+	r_options.hammingOnly = pm_options.optionHammingOnly;
+
 	fill(pm_options.firstTimeK,20,true);//set maximal number of errors considered in parameter computation to <10
 
+	std::cout << "choose..." << std::endl;
         chooseParams(r_options, pm_options);
 /*
 // compute data specific loss rates
