@@ -107,32 +107,27 @@ _createAlignmentGraph(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TStringSet, typename TCargo, typename TSpec, typename TGuideTree, typename TVertexDescriptor, typename TSegmentString, typename TSize>
+template<typename TStringSet, typename TCargo, typename TSpec, typename TGuideTree, typename TVertexDescriptor, typename TSegmentString>
 inline void 
 _recursiveProgressiveAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 							   TGuideTree& tree,
 							   TVertexDescriptor const root,
-							   TSegmentString& alignSeq,
-							   TSize& alignSeqMem)
+							   TSegmentString& alignSeq)
 {
 	SEQAN_CHECKPOINT
 	typedef typename Iterator<TGuideTree, AdjacencyIterator>::Type TAdjacencyIterator;
 
 	if(isLeaf(tree, root)) {
 		_buildLeafString(g, root, alignSeq);
-		alignSeqMem = 1;
 	} else {
 		// Align the two children (Binary tree)
 		TSegmentString seq1;
-		TSize seq1Mem = 0;
 		TSegmentString seq2;
-		TSize seq2Mem = 0;
 		TAdjacencyIterator adjIt(tree, root);
-		_recursiveProgressiveAlignment(g,tree, *adjIt, seq1, seq1Mem);
+		_recursiveProgressiveAlignment(g,tree, *adjIt, seq1);
 		goNext(adjIt);
-		_recursiveProgressiveAlignment(g,tree, *adjIt, seq2, seq2Mem);
-		heaviestCommonSubsequence(g,seq1,seq1Mem,seq2,seq2Mem,alignSeq);
-		alignSeqMem = seq1Mem + seq2Mem;
+		_recursiveProgressiveAlignment(g,tree, *adjIt, seq2);
+		heaviestCommonSubsequence(g,seq1,seq2,alignSeq);
 		clear(seq1);
 		clear(seq2);
 
@@ -184,8 +179,7 @@ progressiveAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 
 	// Perform progressive alignment
 	TSegmentString alignSeq;
-	TSize alignSeqMem = 0;
-	_recursiveProgressiveAlignment(g,tree,getRoot(tree),alignSeq, alignSeqMem);
+	_recursiveProgressiveAlignment(g,tree,getRoot(tree),alignSeq);
 
 /*
 	// Collect all profile / column positions for each sequence
@@ -345,19 +339,15 @@ progressiveAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 
 	// Align the sequence groups and flip the order for profile alignment
 	String<TSegmentString> profileStrings;
-	String<TSize> profileStringsMem;
 	resize(profileStrings, length(sequenceGroups));
-	resize(profileStringsMem, length(sequenceGroups));
 	TSize numGroups = length(sequenceGroups);
 	for(TSize i = 0;i<numGroups;++i) {
 		// Perform progressive alignment
 		TGraph copy_graph(g);
 		if ((sequenceGroups[i]).size() > 1) tripletLibraryExtension(copy_graph, sequenceGroups[i]);
 		TSegmentString alignSeq;
-		TSize alignSeqMem = 0;
-		_recursiveProgressiveAlignment(copy_graph,tree,sequenceGroupRoots[i],alignSeq, alignSeqMem);
+		_recursiveProgressiveAlignment(copy_graph,tree,sequenceGroupRoots[i],alignSeq);
 		value(profileStrings, i) = alignSeq;
-		value(profileStringsMem, i) = alignSeqMem;
 		//std::cout << "One mini tree finished " << (sequenceGroups[i]).size() << std::endl;
 		clear(copy_graph);
 	}
@@ -369,9 +359,8 @@ progressiveAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 		//restrictedTripletLibraryExtension(copy_graph, sequenceGroups[lastIndex], sequenceGroups[lastIndex-y]);
 		TSegmentString alignSeq;
 		//heaviestCommonSubsequence(copy_graph,profileStrings[lastIndex],profileStrings[lastIndex-y],alignSeq);
-		heaviestCommonSubsequence(g,profileStrings[lastIndex],value(profileStringsMem, lastIndex),profileStrings[lastIndex-y],value(profileStringsMem, lastIndex - y),alignSeq);
+		heaviestCommonSubsequence(g,profileStrings[lastIndex],profileStrings[lastIndex-y],alignSeq);
 		profileStrings[lastIndex] = alignSeq;
-		value(profileStringsMem, lastIndex) = value(profileStringsMem, lastIndex) + value(profileStringsMem, lastIndex - y);
 		(sequenceGroups[lastIndex]).insert((sequenceGroups[lastIndex-y]).begin(),(sequenceGroups[lastIndex-y]).end());
 		//std::cout << "Two mini trees joined " << (sequenceGroups[lastIndex]).size() << std::endl;
 		//clear(copy_graph);

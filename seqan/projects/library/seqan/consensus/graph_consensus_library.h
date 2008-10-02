@@ -589,12 +589,6 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 			double quality = (double) matchLen / (double) overlapLen;
 
 			if ((quality >= qltThres) && (matchLen >= 5)) {
-				//// Create a corresponding edge
-				TSize i = idToPosition(str, id1);
-				TSize j = idToPosition(str, id2);
-				if (i<j) __getAlignmentStatistics(dist, i, j, nseq, matchLen, quality);
-				else __getAlignmentStatistics(dist, j, i, nseq, matchLen, quality);
-
 				// Record the scores
 				resize(scores, to);
 				typedef typename Iterator<TScoreValues>::Type TScoreIter;

@@ -87,7 +87,7 @@ buildAlignmentGraph(String<TFragment, TSpec1>& matches,
 	// Clear edge-weights
 	typedef typename Iterator<TOutGraph, EdgeIterator>::Type TEdgeIterator;
 	TEdgeIterator itE(outGraph);
-	for(;!atEnd(itE);goNext(itE)) cargo(value(itE)) = 0;
+	for(;!atEnd(itE);goNext(itE)) cargo(value(itE)) = 1;
 
 	// Adapt the scores
 	TFragmentStringIter it = begin(matches, Standard() );

@@ -86,17 +86,15 @@ getDistanceMatrix(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	TValue maxScore = 0;
 	for(TSize i=0; i<nseq; ++i) {
 		TSegmentString seq1;
-		TSize seq1Mem = 1;
 		TSize len1 = length(str[i]);
 		_buildLeafString(g, i, seq1);
 		for(TSize j=i+1; j<nseq; ++j) {
 			// Align the 2 strings
 			TSegmentString seq2;
-			TSize seq2Mem = 1;
 			TSize len2 = length(str[j]);
 			_buildLeafString(g, j, seq2);
 			TSegmentString alignSeq;
-			TValue score = heaviestCommonSubsequence(g,seq1,seq1Mem,seq2,seq2Mem,alignSeq);
+			TValue score = heaviestCommonSubsequence(g,seq1,seq2,alignSeq);
 			
 			// Normalize by distance
 			if (len1 > len2) score /= len1;
