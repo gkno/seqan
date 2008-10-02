@@ -1187,13 +1187,13 @@ parseGappedParams(RazerSOptions<TSpec> & r_options,TFile & file, ParamChooserOpt
 		_parse_skipWhitespace(file,c);
 		unsigned currMeasure = _parse_readNumber(file,c); //minCov in the case of oneGapped
 
-#ifdef RUN_RAZERS
+//#ifdef RUN_RAZERS
 		if(!pm_options.doAllOneGapped) 
 		{
 			_parse_skipWhitespace(file,c);
 			currMeasure = _parse_readNumber(file,c); //PM in the case of selectedGapped
 		}
-#endif
+//#endif
 		if(currThreshold >= pm_options.minThreshold && currLossrate <= pm_options.optionLossRate /*&& val > bestSoFar*/)
 		{
 		
@@ -1203,11 +1203,11 @@ parseGappedParams(RazerSOptions<TSpec> & r_options,TFile & file, ParamChooserOpt
 					++weight;
 			if(length(shapes[weight-1]) > 0)  // if this is not the first shape with weight weight
 			{				  // compare currShape to the best one found so far
-#ifndef RUN_RAZERS
-				if(currMeasure >= measure[weight-1]) //if neither pm nor runtime available -> use mincov (approximation)
-#else
+//#ifndef RUN_RAZERS
+//				if(currMeasure >= measure[weight-1]) //if neither pm nor runtime available -> use mincov (approximation)
+//#else
 				if((pm_options.doAllOneGapped && currMeasure >= measure[weight-1]) || (!pm_options.doAllOneGapped && currMeasure <= measure[weight-1]))
-#endif
+//#endif
 				{
 					if(currMeasure == measure[weight-1])
 					{
@@ -1304,7 +1304,7 @@ chooseParams(RazerSOptions<TSpec> & r_options, ParamChooserOptions & pm_options)
 
 	fill(pm_options.firstTimeK,20,true);//set maximal number of errors considered in parameter computation to <20
 
-	if(!pm_options.optionHamminOnly) pm_options.minThreshold = 2;
+	if(!pm_options.optionHammingOnly && pm_options.minThreshold == 1) pm_options.minThreshold = 2;
 
 	// compute data specific loss rates
 	if (pm_options.fnameCount0 || pm_options.fnameCount1) 
@@ -1387,7 +1387,7 @@ chooseParams(RazerSOptions<TSpec> & r_options, ParamChooserOptions & pm_options)
 	{
 		if(pm_options.doSelectedGapped || pm_options.doAllOneGapped) parseGappedParams(r_options,file,pm_options);
 		else parseParams(r_options,file,pm_options);
-		if(pm_options.verbose) ::std::cerr << "\n Choose \nshape: " << r_options.shape << "\n and \nthreshold: " << r_options.threshold<< "\n to achieve optimal performance for expected recognition rate >= " << (100.0-100.0*pm_options.optionLossRate) << "% (expected recognition = " << (100.0-pm_options.chosenLossRate*100.0) <<"%)\n\n";
+		if(pm_options.verbose) ::std::cout << "\n Choose \nshape: " << r_options.shape << "\n and \nthreshold: " << r_options.threshold<< "\n to achieve optimal performance for expected recognition rate >= " << (100.0-100.0*pm_options.optionLossRate) << "% (expected recognition = " << (100.0-pm_options.chosenLossRate*100.0) <<"%)\n\n";
 		file.close();
 	}
 

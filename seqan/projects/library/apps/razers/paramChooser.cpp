@@ -87,7 +87,8 @@ int main(int argc, const char *argv[])
 {
 	//////////////////////////////////////////////////////////////////////////////
 	// Parse command line
-	static const TFloat epsilon = 0.0000001;	
+//	static const TFloat epsilon = 0.0000001;	
+	static const TFloat epsilon = 0.0000000000001;	
 
         RazerSOptions<> r_options;
         ParamChooserOptions pm_options;
@@ -277,9 +278,17 @@ int main(int argc, const char *argv[])
         pm_options.optionErrorRate += epsilon;
 	pm_options.optionLossRate += epsilon;
 	
-	pm_options.verbose = true;
+//	pm_options.verbose = true;
 	r_options._debugLevel = 1;
 	r_options.errorRate = pm_options.optionErrorRate;
+
+	pm_options.paramFolderPath = argv[0];
+	size_t lastPos = pm_options.paramFolderPath.find_last_of('/') + 1;
+	if (lastPos == pm_options.paramFolderPath.npos + 1) lastPos = pm_options.paramFolderPath.find_last_of('\\') + 1;
+	if (lastPos == pm_options.paramFolderPath.npos + 1) lastPos = 0;
+        pm_options.paramFolderPath.erase(lastPos);
+        
+	pm_options.verbose = true;
 
 	
 	if(pm_options.optionProbINSERT <= epsilon && pm_options.optionProbDELETE <= epsilon)
