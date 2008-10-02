@@ -464,6 +464,12 @@ int main(int argc, const char *argv[])
 			pm_options.optionProbINSERT = 0.0;
 			pm_options.optionProbDELETE = 0.0;
 		}
+		else
+		{
+			pm_options.optionProbINSERT = 0.01;	//this number is basically without meaning, any value > 0 will lead to
+			pm_options.optionProbDELETE = 0.01;	//edit distance parameter choosing
+		}
+
 
 		pm_options.paramFolderPath = argv[0];
 		size_t lastPos = pm_options.paramFolderPath.find_last_of('/') + 1;
