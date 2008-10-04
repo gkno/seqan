@@ -810,7 +810,8 @@ extendSeed(Seed<TPosition,SimpleSeed> &seed,
 				(*antiDiag3)[0] = (*antiDiag2)[0]+ gapCost;
 			if ((*antiDiag2)[(*antiDiag2).size()-1]+ gapCost >=tmpMax1-scoreDropOff)
 				(*antiDiag3)[(*antiDiag3).size()-1]=(*antiDiag2)[(*antiDiag2).size()-1]+ gapCost;
-				tmpMax1 = tmpMax2;
+				
+			tmpMax1 = tmpMax2;
 		}
 		
 		//Calculate upper/lower bound for diagonals

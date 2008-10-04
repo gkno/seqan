@@ -53,8 +53,8 @@ _findPrev(Map<TValue, Skiplist<TSpec> > & me,
 .Function.globalChaining
 ..summary: Calculates the best global chain using the Gusfield-Algorithm with scores (ManhattanDistance) and without.
 ..cat:Seed Handling
-..signature:globalChainingManhattan(source, result)
-..signature:globalChainingManhattan(source, result, gapCost, xLength, yLength)
+..signature:globalChaining(source, result)
+..signature:globalChaining(source, result, gapCost, xLength, yLength)
 ..param.source: The set of seeds to chain.
 ...type:Spec.Scored SeedSet
 ..param.result: Container in which the result should be stored. The chain is in reversed order.
