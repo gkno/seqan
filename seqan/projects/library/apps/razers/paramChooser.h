@@ -105,6 +105,7 @@ getDir(TPath dir, TFilenameString &files)
             ::std::string		fgparams;
             bool		verbose;
 
+            int qualityCutoff;
             bool		solexaQual;
             char 		best_shape_folder[200];
            bool 		best_shape_helpFolder;
@@ -132,6 +133,9 @@ getDir(TPath dir, TFilenameString &files)
                 doUngapped = false;
                 doAllOneGapped = false;
                 doSelectedGapped = true;
+                //doUngapped = false;
+                //doAllOneGapped = true;
+                //doSelectedGapped = false;
 #endif
                 
                 optionProbINSERT = 0.0;
@@ -142,6 +146,8 @@ getDir(TPath dir, TFilenameString &files)
                // unsigned chosenThreshold = 2;		//
                // CharString chosenShape;			//
                 
+//                qualityCutoff = 0;
+                qualityCutoff = 20;
                 paramFolderPath = "";
                 fnameCount0 = 0;
                 fnameCount1 = 0;
@@ -258,8 +264,13 @@ qualityDistributionFromPrbFile(TFile & file, TDistribution & avg, ParamChooserOp
 	char c = _streamGet(file);
 	_parse_skipWhitespace(file, c);
 
+	int kickout = 0;
+	String<int> tempReadQual;
+	resize(tempReadQual,pm_options.totalN);
+
 	while (!_streamEOF(file))
 	{
+		int avgReadQual = 0;
 		for (unsigned pos = 0; (!_streamEOF(file)) && (pos < pm_options.totalN); ++pos)
 		{
 			_parse_skipBlanks(file,c);
@@ -272,23 +283,41 @@ qualityDistributionFromPrbFile(TFile & file, TDistribution & avg, ParamChooserOp
 			int qualT = (int) _parse_readDouble(file,c);
 			int qual = ::std::max(::std::max(qualA, qualC), ::std::max(qualG, qualT));
 
+			avgReadQual += qual;
+			tempReadQual[pos] = qual;
+
 //			::std::cout << qual << " ";
 //			f = _convertSolexaQual2ErrProb(f);
 
-			qualitySum[pos] += _convertSolexaQual2ErrProb((TFloat)qual);
-			++count[pos];
+//			qualitySum[pos] += _convertSolexaQual2ErrProb((TFloat)qual);
+//			++count[pos];
+		}
+		if((int)(avgReadQual/pm_options.totalN) < pm_options.qualityCutoff) 
+		{
+			++kickout;
+			_parse_skipLine2(file, c);
+			continue;
+		}
+		else{
+			for (unsigned pos = 0; (pos < pm_options.totalN); ++pos)
+			{
+	//			qualitySum[pos] += _convertSolexaQual2ErrProb((TFloat)qual);
+				qualitySum[pos] += tempReadQual[pos];
+				++count[pos];
+			}
 		}
 //		::std::cout << ::std::endl;
 			
 		_parse_skipLine2(file, c);
 	}
-	::std::cout << " Readcount = " << count[0] << "\n";
+	::std::cout << " Readcount = " << count[0] << "\t";
+	::std::cout << " kicked out " << kickout << " low quality reads.\n";
 
 	fill(avg,pm_options.totalN,0.0);
 	for(unsigned t = 0; t < pm_options.totalN; ++t)
 	{
 		TFloat f = (TFloat) qualitySum[t] / (TFloat)count[t];
-//		f = _convertSolexaQual2ErrProb(f);
+ 		f = _convertSolexaQual2ErrProb(f);
 		avg[t] = f;
 	}
 }
@@ -801,7 +830,7 @@ makeOneGappedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 	unsigned maxQ = 14;				// weights are considered from minQ..maxQ
 	unsigned minQ = 10;
 	unsigned minGap = 0; 
-	unsigned maxGap = 6;				// spans are considered from minQ..maxS
+	unsigned maxGap = 2;				// spans are considered from minQ..maxS
 	unsigned maxT = pm_options.totalN-minQ+1;
 	
 	typedef typename Value<TError>::Type TErrorValue;
@@ -845,16 +874,12 @@ makeOneGappedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
                         if(j > pm_options.totalN) continue;
 			// k = position of gap
 //			for(unsigned k = (q/2); k < q; ++k){
-			for(unsigned k = q-3; k < q-2; ++k){
+			for(unsigned k = q-3; k < q-1; ++k){
 				
 				CharString shapeString;
-				fill(shapeString,j,'0');
-				for(unsigned pos = 0; pos < k; ++pos)
-					shapeString[pos] = '1';
-				for(unsigned pos = 0; pos < j-q; ++pos)
-					shapeString[k+pos] = '0';
-				for(unsigned pos = k+j-q; pos < j; ++pos)
-					shapeString[pos] = '1';
+				fill(shapeString,j,'1');
+				for(unsigned pos = k; pos < k+j-q; ++pos)
+					shapeString[pos] = '0';
 				
 				if(pm_options.verbose) ::std::cout << "doDP...\n";
 				String< State<TFloat> > states;
@@ -882,10 +907,12 @@ makeOneGappedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 						if(pm_options.best_shape_helpFolder) datName << pm_options.best_shape_folder;
 						else datName << "gapped_params";
 						datName << "/"<<pm_options.fprefix[0]<<"_N" << pm_options.totalN << "_E" << e << "_";
-						if(!pm_options.optionHammingOnly) datName << "L_";
-						else datName <<"H_";
-						datName << "onegapped.dat";
-						//datName << q<<"_onegapped.dat";
+						if(!pm_options.optionHammingOnly) datName << "L";
+						else datName <<"H";
+						datName << ".dat";
+				//		if(!pm_options.optionHammingOnly) datName << "L_";
+				//		else datName <<"H_";
+				//		datName << "onegapped.dat";
 					
 						// if datName-file doesnt exist, write the title on it
 						if(pm_options.firstTimeK[e]==true){
@@ -1170,16 +1197,16 @@ parseGappedParams(RazerSOptions<TSpec> & r_options,TFile & file, ParamChooserOpt
 	{
 		CharString currShape;
 		_parse_readShape(file, c, currShape);
-                if(pm_options.optionChooseOneGappedOnly && numGaps(currShape)>1)
+                if((pm_options.doUngapped && numGaps(currShape)>0) || (pm_options.optionChooseOneGappedOnly && numGaps(currShape)>1))
                 {
                     _parse_skipLine(file,c); 
                     continue;
                 }
-                if(!r_options.hammingOnly && numGaps(currShape)>0)
-                {
-                    _parse_skipLine(file,c); 
-                    continue;
-                }
+    //            if(!r_options.hammingOnly && numGaps(currShape)>0)
+    //            {
+    //                _parse_skipLine(file,c); 
+    //                continue;
+    //            }
                 _parse_skipWhitespace(file,c);
                 unsigned currThreshold = _parse_readNumber(file,c);
         	_parse_skipWhitespace(file,c);
@@ -1286,7 +1313,7 @@ bool
 chooseParams(RazerSOptions<TSpec> & r_options, ParamChooserOptions & pm_options)
 {
         typedef double TFloat;
-	static const TFloat epsilon = 0.0000001;	
+	static const TFloat epsilon = 0.00000000001;	
 	pm_options.optionLossRate += epsilon;
 
 #ifdef LOSSRATE_VALIDATION	
