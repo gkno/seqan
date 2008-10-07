@@ -443,11 +443,15 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 	fill(backOvl, nseq, 0);
 	
 	// Pairwise alignments
+	String<bool> aligned;
+	fill(aligned, length(pList), true);
+	typedef Iterator<String<bool> >::Type TBoolIter;
+	TBoolIter itAligned = begin(aligned);
 	TPairIter itPair = begin(pList);
 	TDiagIter itDiag = begin(dList);
 	TPairIter itPairEnd = end(pList);
 	TSize dropCount = 0;
-	for(;itPair != itPairEnd; goNext(itPair), goNext(itDiag)) {
+	for(;itPair != itPairEnd; goNext(itPair), goNext(itDiag), goNext(itAligned)) {
 		TId id1 = (value(itPair)).i1;
 		TId id2 = (value(itPair)).i2;
 		TSize seq1 = idToPosition(str, id1);
@@ -513,10 +517,14 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 			if ((value(matches, from)).begin2 + lenLast == length(value(pairSet, 1))) ++value(backOvl, seq2);
 		} else {
 			resize(matches, from);
+			value(itAligned) = false;
 		}
 	}
 	std::cout << "Filtration ration: " << (double) dropCount / (double) length(pList) << std::endl;
 
+#ifdef CELERA_OFFSET
+	// Nothing
+#else
 	// Find sequences that have no overlap in the front or back
 	String<TSize> noFront;
 	String<TSize> noBack;
@@ -557,7 +565,9 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 		// Realign all unaligned sequences
 		itPair = begin(pList);
 		itDiag = begin(dList);
-		for(;itPair != itPairEnd; goNext(itPair), goNext(itDiag)) {
+		itAligned = begin(aligned);
+		for(;itPair != itPairEnd; goNext(itPair), goNext(itDiag), goNext(itAligned)) {
+			if (value(itAligned) == true) continue;
 			TId id1 = (value(itPair)).i1;
 			TId id2 = (value(itPair)).i2;
 			TSize seq1 = idToPosition(str, id1);
@@ -614,6 +624,8 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 			}
 		}
 	}
+#endif
+
 }
 
 }// namespace SEQAN_NAMESPACE_MAIN

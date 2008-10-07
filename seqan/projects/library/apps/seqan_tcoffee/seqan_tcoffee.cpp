@@ -423,7 +423,7 @@ globalAlignment(StringSet<TString, TSpec> const& seqSet,
 
 	std::cout << "Total number of segment matches: " << length(matches) << std::endl;
 	// Score the matches
-	if (length(value(cfgOpt, "seq"))) {
+	if ((value(cfgOpt, "rescore") == "true") && (length(value(cfgOpt, "seq")))) {
 		std::cout << "Scoring method: Re-Score" << std::endl;
 		scoreMatches(seqSet, scType, matches, scores);
 		std::cout << "Scoring done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;\
@@ -612,10 +612,11 @@ int main(int argc, const char *argv[]) {
 	typedef String<char> TValue;
 	typedef Size<TKey>::Type TSize;
 	ConfigOptions<TKey, TValue> cfgOpt;
-	TKey keys[] = {"seq", "alphabet", "aln", "lib","blast","mummer", "usetree","outfile","method","output","gop", "gex", "matrix", "infile", "msc", "mmsc"};
-	assignKeys(cfgOpt, keys, 16);
+	TKey keys[] = {"seq", "alphabet", "aln", "lib","blast","mummer", "usetree","outfile","method","output","gop", "gex", "matrix", "infile", "msc", "mmsc", "rescore"};
+	assignKeys(cfgOpt, keys, 17);
 
 	// Set default options
+	assign(cfgOpt, "rescore", "true");
 	assign(cfgOpt, "output", "fasta");
 	assign(cfgOpt, "outfile", "out.fasta");
 	assign(cfgOpt, "alphabet", "protein");
@@ -662,6 +663,8 @@ int main(int argc, const char *argv[]) {
 	append(helpMsg, "\tMatch score for Dna alphabet, default is 5.\n\n");
 	append(helpMsg, "-mmsc <Number>\n");
 	append(helpMsg, "\tMismatch penalty for Dna alphabet, default is 4.\n\n");
+	append(helpMsg, "-rescore [ true | false ]\n");
+	append(helpMsg, "\tRe-score all segment-matches, default is true.\n\n");
 	// Guide Tree
 	append(helpMsg, "Guide Tree Options\n------------\n");
 	append(helpMsg, "-usetree <Newick Guide Tree>\n");

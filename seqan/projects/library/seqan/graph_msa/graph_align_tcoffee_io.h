@@ -729,7 +729,7 @@ __appendNewMatch(String<Fragment<TPos, ExactReversableFragment<TSpec2> >, TSpec1
 {
 	typedef Fragment<TPos, ExactReversableFragment<TSpec2> > TFragment;
 	appendValue(matches, TFragment(seq1Id, beg1, seq2Id, beg2, len));
-	appendValue(scores, len);
+	appendValue(scores, len * len);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -748,7 +748,7 @@ __appendNewMatch(String<Fragment<TPos, ExactFragment<TSpec2> >, TSpec1>& matches
 	typedef Fragment<TPos, ExactFragment<TSpec2> > TFragment;
 	if (!reversed) {
 		appendValue(matches, TFragment(seq1Id, beg1, seq2Id, beg2, len));
-		appendValue(scores, len);
+		appendValue(scores, len * len);
 	}
 }
 
