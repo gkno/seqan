@@ -522,9 +522,6 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 	}
 	std::cout << "Filtration ration: " << (double) dropCount / (double) length(pList) << std::endl;
 
-#ifdef CELERA_OFFSET
-	// Nothing
-#else
 	// Find sequences that have no overlap in the front or back
 	String<TSize> noFront;
 	String<TSize> noBack;
@@ -588,7 +585,8 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 		
 			// Overlap alignment
 			TSize from = length(matches);
-			TScoreValue myScore = globalAlignment(matches, pairSet, score_type, AlignConfig<true,true,true,true>(), (value(itDiag)).i1, (value(itDiag)).i2, BandedGotoh() );
+			// So we don't trust the band
+			TScoreValue myScore = globalAlignment(matches, pairSet, score_type, AlignConfig<true,true,true,true>(), Gotoh() );
 			TSize to = length(matches);
 
 			// Determine a sequence weight
@@ -624,8 +622,6 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 			}
 		}
 	}
-#endif
-
 }
 
 }// namespace SEQAN_NAMESPACE_MAIN
