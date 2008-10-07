@@ -135,7 +135,7 @@ selectPairs(StringSet<TString, TSpec> const& str,
 
 	// Workaround for strange celera behaviour (just for contained reads)
 #ifdef CELERA_OFFSET
-	TSize contained_offset=1000;
+	TSize contained_offset=200;
 #else
 	TSize contained_offset=0;
 #endif
