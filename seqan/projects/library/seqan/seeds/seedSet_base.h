@@ -1575,10 +1575,10 @@ _findSeedsMerge(SeedSet<TValue, TSeedSpec, const Tag<Scoring_Scheme<TQualityFact
 .Function.extendSeeds
 ..summary: Extenstion of seeds.
 ..cat:Seed Handling
-..Signature:extendSeed(container, query, database, direction, MatchExtend)
-..Signature:extendSeed(begin, end, query, database, direction, MatchExtend)
-..Signature:extendSeed(container, scoreDropOff, scoreMatrix, query, database, direction, tag)
-..Signature:extendSeed(begin, end, scoreDropOff, scoreMatrix, query, database, direction, tag)
+..signature:extendSeeds(container, query, database, direction, MatchExtend)
+..signature:extendSeeds(begin, end, query, database, direction, MatchExtend)
+..signature:extendSeeds(container, scoreDropOff, scoreMatrix, query, database, direction, tag)
+..signature:extendSeeds(begin, end, scoreDropOff, scoreMatrix, query, database, direction, tag)
 ..param.seed: The container with the @Class.Seed@ objects to extend.
 ...type:Concept.Container
 ..param.begin: Iterator pointing to the first value to add.

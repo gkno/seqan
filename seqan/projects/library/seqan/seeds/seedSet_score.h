@@ -1624,7 +1624,8 @@ addSeedSet(SeedSet<TValue, TSeedSpec, TScoringSpec, TSpec> &target,
 
 template<typename TValue, typename TSeedSpec, typename TQualityFactor, typename TGapCosts, typename TScore>
 void
-delete_everything(SeedSet<TValue, TSeedSpec, const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, TScore> >, void> &deletionTarget, TValue currentPos)
+delete_everything(SeedSet<TValue, TSeedSpec, const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, TScore> >, void> &deletionTarget, 
+				  TValue currentPos)
 {
 	typedef typename Size<SeedSet<TValue, TSeedSpec, const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, TScore> >, void> >::Type TSize;
 	typedef multimap<TValue, TSize > TMap;

@@ -591,10 +591,10 @@ _mergeTwoSeedsScore(Seed<TPosition, SimpleSeed> &firstSeed,
 
 /**
 .Function.extendSeed
-..summary: Extends a seed.
+..summary:Extends a seed.
 ..cat:Seed Handling
-..Signature:extendSeed(seed, query, database, direction, MatchExtend)
-..Signature:extendSeed(seed, scoreDropOff, scoreMatrix, query, database, direction, tag)
+..signature:extendSeed(seed, query, database, direction, tag)
+..signature:extendSeed(seed, scoreDropOff, scoreMatrix, query, database, direction, tag)
 ..param.seed: The seed to extend.
 ...type:Class.Seed
 ..param.query: The query sequence.
@@ -603,11 +603,14 @@ _mergeTwoSeedsScore(Seed<TPosition, SimpleSeed> &firstSeed,
 ...type:Class.String
 ..param.direction: Defines the direction in which the seed should be extended. 0 = left, 1 = right, 2 = both
 ..param.scoreDropOff: The score drop after which the extension should stop.
-..param.scoreMatrix: The scoring sheme.
+...remarks:Only used for the algorithms @Tag.Seed Extension.UngappedXDrop@ and @Tag.Seed Extension.GappedXDrop@
+..param.scoreMatrix: The scoring scheme.
 ...type:Spec.Simple Score
+...remarks:Only used for the algorithms @Tag.Seed Extension.UngappedXDrop@ and @Tag.Seed Extension.GappedXDrop@
 ..param.tag: The algorithm to use.
-...type:Tag.Seed Extension.tag.UngappedXDrop
-...type:Tag.Seed Extension.tag.GappedXDrop
+...type:Tag.Seed Extension.MatchExtend
+...type:Tag.Seed Extension.UngappedXDrop
+...type:Tag.Seed Extension.GappedXDrop
 */
 
 
