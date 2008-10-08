@@ -472,11 +472,8 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 		
 		// Overlap alignment
 		TSize from = length(matches);
-#ifdef CELERA_OFFSET
-		TScoreValue myScore = globalAlignment(matches, pairSet, score_type, AlignConfig<true,true,true,true>(), Gotoh() );
-#else
+		//TScoreValue myScore = globalAlignment(matches, pairSet, score_type, AlignConfig<true,true,true,true>(), Gotoh() );
 		TScoreValue myScore = globalAlignment(matches, pairSet, score_type, AlignConfig<true,true,true,true>(), (value(itDiag)).i1, (value(itDiag)).i2, BandedGotoh() );
-#endif
 		TSize to = length(matches);
 
 		// Determine a sequence weight
@@ -502,8 +499,8 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 			// Create a corresponding edge
 			TSize i = idToPosition(str, id1);
 			TSize j = idToPosition(str, id2);
-			if (i<j) __getAlignmentStatistics(dist, i, j, nseq, matchLen, quality);
-			else __getAlignmentStatistics(dist, j, i, nseq, matchLen, quality);
+			if (i<j) __getAlignmentStatistics(dist, i, j, nseq, 1, 1);
+			else __getAlignmentStatistics(dist, j, i, nseq, 1, 1);
 
 			// Record the scores
 			resize(scores, to);
