@@ -472,7 +472,11 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 		
 		// Overlap alignment
 		TSize from = length(matches);
+#ifdef CELERA_OFFSET
+		TScoreValue myScore = globalAlignment(matches, pairSet, score_type, AlignConfig<true,true,true,true>(), Gotoh() );
+#else
 		TScoreValue myScore = globalAlignment(matches, pairSet, score_type, AlignConfig<true,true,true,true>(), (value(itDiag)).i1, (value(itDiag)).i2, BandedGotoh() );
+#endif
 		TSize to = length(matches);
 
 		// Determine a sequence weight
