@@ -24,7 +24,10 @@
 //#define RAZERS_DEBUG			// print verification regions
 #define RAZERS_PRUNE_QGRAM_INDEX
 //#define RAZERS_HAMMINGVERIFY	// allow only mismatches, no indels
-#define RAZERS_MAXHITS			// drop reads with too many matches
+//#define RAZERS_MAXHITS		// drop reads with too many matches
+#define RAZERS_CONCATREADS		// use <ConcatDirect> StringSet to store reads
+#define RAZERS_MEMOPT			// optimize memory consumption
+//#define NO_PARAM_CHOOSER
 
 #include "seqan/platform.h"
 #ifdef PLATFORM_WINDOWS
@@ -57,9 +60,13 @@ void printHelp(int, const char *[], RazerSOptions<TSpec> &options, ParamChooserO
 		cerr << "  -f,  --forward               \t" << "only compute forward matches" << endl;
 		cerr << "  -r,  --reverse               \t" << "only compute reverse complement matches" << endl;
 		cerr << "  -i,  --percent-identity NUM  \t" << "set the percent identity threshold (default " << 100 - (100.0 * options.errorRate) << ')' << endl;
+#ifndef NO_PARAM_CHOOSER
 		cerr << "  -rr, --recognition-rate NUM  \t" << "set the percent recognition rate (default " << 100 - (100.0 * pm_options.optionLossRate) << ')' << endl;
+#endif
 		cerr << "  -id, --indels                \t" << "allow indels (default: mismatches only)" << endl;
+#ifdef RAZERS_MAXHITS
 		cerr << "  -m,  --max-hits NUM          \t" << "ignore reads with more than NUM hits (default " << options.maxHits << ')' << endl;
+#endif
 		cerr << "  -o,  --output FILE           \t" << "change output filename (default <READS FILE>.result)" << endl;
 		cerr << "  -v,  --verbose               \t" << "verbose mode" << endl;
 		cerr << "  -vv, --vverbose              \t" << "very verbose mode" << endl;
@@ -112,7 +119,7 @@ int estimateReadLength(char const *fileName)
 	if (!file.is_open() || _streamEOF(file)) return -1;
 	read(file, dummy, Fasta());			// read first Read sequence
 	file.close();
-        return length(dummy);
+	return length(dummy);
 }
 
 
@@ -455,6 +462,7 @@ int main(int argc, const char *argv[])
 	if (options.printVersion)
 		printVersion();
 
+#ifndef NO_PARAM_CHOOSER
 	if (paramChoosing)
 	{
 		pm_options.verbose = (options._debugLevel >= 1);
@@ -496,7 +504,8 @@ int main(int argc, const char *argv[])
 			return 0;
 		}
 	}
-	
+#endif	
+
 	int result = mapReads(fname[0], fname[1], errorPrbFileName.c_str(), options);
 	if (result == 2) 
 	{

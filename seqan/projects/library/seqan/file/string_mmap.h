@@ -573,10 +573,13 @@ namespace SEQAN_NAMESPACE_MAIN
 		return NULL;
 	}
 
-	template < typename TValue, typename TConfig, typename TSize >
+	template < typename TValue, typename TConfig >
     inline typename Value<String<TValue, MMap<TConfig> > >::Type * 
-    _reallocateStorage(String<TValue, MMap<TConfig> > &me, TSize new_capacity) 
+    _reallocateStorage(
+		String<TValue, MMap<TConfig> > &me,
+		typename Size< String<TValue, MMap<TConfig> > >::Type new_capacity) 
 	{
+		typedef typename Size< String<TValue, MMap<TConfig> > >::Type TSize;
 		TSize size = _computeSize4Capacity(me, new_capacity);
 		_remap(me, size);
 		return NULL;
@@ -609,7 +612,7 @@ namespace SEQAN_NAMESPACE_MAIN
     inline bool 
     open(String<TValue, MMap<TConfig> > &me, const char *fileName) 
 	{
-		typedef typename String<TValue, MMap<TConfig> >::Type TFile;
+		typedef typename String<TValue, MMap<TConfig> >::TFile	TFile;
 		return open(me, fileName, DefaultOpenMode<TFile>::VALUE);
     }
 

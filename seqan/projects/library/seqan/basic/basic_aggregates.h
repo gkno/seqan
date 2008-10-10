@@ -37,6 +37,9 @@ namespace SEQAN_NAMESPACE_MAIN
 		enum { bitSizeI1 = Log2<valueSizeI1>::VALUE };
 	};
 
+	template <unsigned BITSIZE1 = 16, unsigned BITSIZE2 = 16>
+	struct BitCompressed;
+
 /**
 .Class.Pair:
 ..cat:Aggregates
@@ -141,6 +144,23 @@ namespace SEQAN_NAMESPACE_MAIN
 #ifdef PLATFORM_WINDOWS
     #pragma pack(pop)
 #endif
+
+
+
+    template <typename _T1, typename _T2, unsigned BITSIZE1, unsigned BITSIZE2>
+    struct Pair<_T1, _T2, BitCompressed<BITSIZE1, BITSIZE2> > {
+        typedef _T1 T1;
+        typedef _T2 T2;
+	    _T1 i1:BITSIZE1;
+	    _T2 i2:BITSIZE2;
+		inline Pair() {}
+		inline Pair(Pair const &_p): i1(_p.i1), i2(_p.i2) {}
+		inline Pair(_T1 const &_i1, _T2 const &_i2): i1(_i1), i2(_i2) {}
+
+		template <typename __T1, typename __T2, typename __TCompression>
+		inline Pair(Pair<__T1, __T2, __TCompression> const &_p):
+			i1(getValueI1(_p)), i2(getValueI2(_p)) {}
+	};
 
 
 

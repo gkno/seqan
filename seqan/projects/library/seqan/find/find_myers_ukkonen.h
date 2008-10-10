@@ -77,8 +77,18 @@ struct _MyersUkkonenHP0<FindPrefix> {
 	enum { VALUE = 1 };
 };
 
-
 //////////////////////////////////////////////////////////////////////////////
+
+struct _MyersLargePattern
+{
+	typedef unsigned long TWord;
+	String<TWord> VP;
+	String<TWord> VN;
+	TWord scoreMask;			// the mask with a bit set at the position of the last active cell
+	TWord finalScoreMask;		// a mask with a bit set on the position of the last row
+	unsigned blockCount;		// the number of blocks
+	unsigned lastBlock;			// the block containing the last active cell	
+};
 
 template <typename TNeedle, typename TSpec, typename TFindBeginPatternSpec>
 class Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> >: 
@@ -91,39 +101,41 @@ public:
 
 	unsigned needleSize;
 	unsigned score;				// the current score
-	unsigned blockCount;		// the number of blocks
 	unsigned k;					// the maximal number of differences allowed
-	unsigned lastBlock;			// the block containing the last active cell
-
-	Holder<TNeedle>		data_host;
 
 	TWord VP0;					// VP[0] (saves one dereferentiation)
 	TWord VN0;					// VN[0]
-
-	String<TWord> VP;
-	String<TWord> VN;
 	String<TWord> bitMasks;		// encoding the alphabet as bit-masks
-	TWord scoreMask;			// the mask with a bit set at the position of the last active cell
-	TWord finalScoreMask;		// a mask with a bit set on the position of the last row
-	
+
+//	Holder<TNeedle>		data_host;	// by now, this holder is not needed, would waste mem
+	_MyersLargePattern	*large;	// extra preprocessing info for large patterns
+
 //____________________________________________________________________________
 
 	Pattern(int _limit = -1):
-		k(- _limit)
+		k(- _limit),
+		large(NULL)
 	{}
 
 	template <typename TNeedle2>
 	Pattern(TNeedle2 & ndl, int _limit = -1):
-		k(- _limit)
+		k(- _limit),
+		large(NULL)
 	{
 		setHost(*this, ndl);
 	}
 
 	template <typename TNeedle2>
 	Pattern(TNeedle2 const & ndl, int _limit = -1):
-		k(- _limit)
+		k(- _limit),
+		large(NULL)
 	{
 		setHost(*this, ndl);
+	}
+
+	~Pattern()
+	{
+		delete large;
 	}
 
 //____________________________________________________________________________
@@ -205,16 +217,29 @@ SEQAN_CHECKPOINT
 	typedef typename Value<TNeedle>::Type TValue;
 
 	me.needleSize = length(needle);
-	me.blockCount = (me.needleSize + me.MACHINE_WORD_SIZE - 1) / me.MACHINE_WORD_SIZE;
-	me.finalScoreMask = (TWord)1 << ((me.needleSize + me.MACHINE_WORD_SIZE - 1) % me.MACHINE_WORD_SIZE);
+	unsigned blockCount = (me.needleSize + me.MACHINE_WORD_SIZE - 1) / me.MACHINE_WORD_SIZE;
+
+	if (blockCount > 1) 
+	{
+		if (me.large == NULL)
+			me.large = new _MyersLargePattern();
+
+		me.large->blockCount = blockCount;
+		me.large->finalScoreMask = (TWord)1 << ((me.needleSize + me.MACHINE_WORD_SIZE - 1) % me.MACHINE_WORD_SIZE);
+	} 
+	else 
+	{
+		delete me.large;
+		me.large = NULL;
+	}
 
 	clear(me.bitMasks);
-	fill(me.bitMasks, (ValueSize<TValue>::VALUE + 1) * me.blockCount, 0, Exact());
+	fill(me.bitMasks, (ValueSize<TValue>::VALUE + 1) * blockCount, 0, Exact());
 
 	// encoding the letters as bit-vectors
     for (unsigned j = 0; j < me.needleSize; j++)
 		me.bitMasks[
-			me.blockCount * ordValue((typename Value<TNeedle>::Type) value(needle, j))
+			blockCount * ordValue((typename Value<TNeedle>::Type) value(needle, j))
 			+ j / me.MACHINE_WORD_SIZE
 		] |= (TWord)1 << (j % me.MACHINE_WORD_SIZE);
 		//me.bitMasks[me.blockCount * ordValue((CompareType< Value< TNeedle >::Type, Value< Container< THaystack >::Type >::Type >::Type) needle[j]) + j/me.MACHINE_WORD_SIZE] = me.bitMasks[me.blockCount * ordValue((CompareType< Value< TNeedle >::Type, Value< Container< THaystack >::Type >::Type >::Type) needle[j]) + j/MACHINE_WORD_SIZE] | ((TWord)1 << (j%MACHINE_WORD_SIZE));
@@ -241,20 +266,30 @@ SEQAN_CHECKPOINT
 
 	typedef typename Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> >::TWord TWord;
 	typedef typename Value<TNeedle>::Type TValue;
-	TNeedle const &needle = host(me);
+	unsigned blockCount = (me.large == NULL)? 1: me.large->blockCount;
 
-	// encoding the letters as bit-vectors
-	if (match)
+	// letters are encoded as bit-vectors
+	for (unsigned j = 0; j < me.needleSize; j++)
 	{
-		for (unsigned j = 0; j < me.needleSize; j++)
-			if (getValue(needle, j) == 'N')
-				for (unsigned i = 0; i < length(me.bitMasks); i += me.blockCount)
-					me.bitMasks[i + j / me.MACHINE_WORD_SIZE] |= (TWord)1 << (j % me.MACHINE_WORD_SIZE);
-	} else {
-		for (unsigned j = 0; j < me.needleSize; j++)
-			if (getValue(needle, j) == 'N')
-				for (unsigned i = 0; i < length(me.bitMasks); i += me.blockCount)
-					me.bitMasks[i + j / me.MACHINE_WORD_SIZE] &= ~((TWord)1 << (j % me.MACHINE_WORD_SIZE));
+		TWord bit = (TWord)1 << (j % me.MACHINE_WORD_SIZE);
+		bool allNull = true;
+		int idx = j / me.MACHINE_WORD_SIZE;
+
+		for (int i = 0; i < 4; ++i, idx += blockCount)
+			allNull &= (me.bitMasks[idx] & bit) == 0;
+
+		if (allNull)
+		{	// all bits are 0 => this letter must be 'N'
+			if (match)
+			{
+				for (; idx >= 0; idx -= blockCount)
+					me.bitMasks[idx] |= bit;
+			} else
+			{
+				for (; idx >= 0; idx -= blockCount)
+					me.bitMasks[idx] &= ~bit;
+			}
+		}
 	}
 }
 
@@ -264,15 +299,16 @@ inline void _patternMatchNOfFinder(Pattern<TNeedle, Myers<TSpec, TFindBeginPatte
 SEQAN_CHECKPOINT
 
 	typedef typename Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> >::TWord TWord;
+	unsigned blockCount = (me.large == NULL)? 1: me.large->blockCount;
 
-	// encoding the letters as bit-vectors
+	// letters are encoded as bit-vectors
 	if (match)
 	{
 		for (unsigned j = 0; j < me.needleSize; j++)
-			me.bitMasks[me.blockCount * 4 + j / me.MACHINE_WORD_SIZE] |= (TWord)1 << (j % me.MACHINE_WORD_SIZE);
+			me.bitMasks[blockCount * 4 + j / me.MACHINE_WORD_SIZE] |= (TWord)1 << (j % me.MACHINE_WORD_SIZE);
 	} else {
 		for (unsigned j = 0; j < me.needleSize; j++)
-			me.bitMasks[me.blockCount * 4 + j / me.MACHINE_WORD_SIZE] &= ~((TWord)1 << (j % me.MACHINE_WORD_SIZE));
+			me.bitMasks[blockCount * 4 + j / me.MACHINE_WORD_SIZE] &= ~((TWord)1 << (j % me.MACHINE_WORD_SIZE));
 	}
 }
 
@@ -281,14 +317,14 @@ void setHost(Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > & me,
 			 TNeedle2 & ndl)
 {
 SEQAN_CHECKPOINT
-	setValue(me.data_host, ndl);
+//	setValue(me.data_host, ndl);
 	_patternFirstInit(me, ndl);
 }
 template <typename TNeedle, typename TSpec, typename TFindBeginPatternSpec, typename TNeedle2>
 void setHost(Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > & me, 
 			 TNeedle2 const & ndl) 
 {
-	setValue(me.data_host, ndl);
+//	setValue(me.data_host, ndl);
 	_patternFirstInit(me, ndl);
 }
 
@@ -357,7 +393,8 @@ void _patternInit(Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > &me, TF
 {
 SEQAN_CHECKPOINT
 	typedef typename Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> >::TWord TWord;
-	if (me.blockCount == 1) 
+
+	if (me.large == NULL)
 	{
 		me.score = me.needleSize;
 		me.VP0 = ~0;
@@ -365,17 +402,18 @@ SEQAN_CHECKPOINT
 	} 
 	else 
 	{
+		_MyersLargePattern &large = *me.large;
 		me.score = me.k + 1;
-		me.scoreMask = (TWord)1 << (me.k % me.MACHINE_WORD_SIZE);
-		me.lastBlock = me.k / me.MACHINE_WORD_SIZE; 
-		if (me.lastBlock >= me.blockCount)
-			me.lastBlock = me.blockCount - 1;
+		large.scoreMask = (TWord)1 << (me.k % me.MACHINE_WORD_SIZE);
+		large.lastBlock = me.k / me.MACHINE_WORD_SIZE; 
+		if (large.lastBlock >= large.blockCount)
+			large.lastBlock = large.blockCount - 1;
 
-		clear(me.VP);
-		fill(me.VP, me.blockCount, (TWord) ~0, Exact());
+		clear(large.VP);
+		fill(large.VP, large.blockCount, (TWord) ~0, Exact());
 
-		clear(me.VN);
-		fill(me.VN, me.blockCount, 0, Exact());
+		clear(large.VN);
+		fill(large.VN, large.blockCount, 0, Exact());
 	}
 }
 
@@ -396,7 +434,7 @@ SEQAN_CHECKPOINT
 	clear(me.bitMasks);
 	fill(me.bitMasks, ValueSize<TValue>::VALUE * me.blockCount, 0, Exact());
 
-	if (me.blockCount == 1) 
+	if (me.blockCount == 1)
 	{
 		me.score = 0;
 		me.scoreMask = 1;
@@ -441,67 +479,70 @@ SEQAN_CHECKPOINT
 	TWord X, D0, HN, HP, temp;
 	TWord carryD0, carryHP, carryHN;
 	unsigned shift, limit, currentBlock;
+	_MyersLargePattern &large = *me.large;
 
-	while (position(finder) < haystack_length) {
+	while (position(finder) < haystack_length) 
+	{
 		carryD0 = carryHN = 0;
 		carryHP = _MyersUkkonenHP0<TSpec>::VALUE;
 
 		// if the active cell is the last of it's block, one additional block has to be calculated
-		limit = me.lastBlock + (me.scoreMask >> (me.MACHINE_WORD_SIZE - 1));
+		limit = large.lastBlock + (large.scoreMask >> (me.MACHINE_WORD_SIZE - 1));
 
-		if (limit == me.blockCount)
+		if (limit == large.blockCount)
 			limit--;
 
-		shift = me.blockCount * ordValue((typename Value< TNeedle >::Type) *finder);
+		shift = large.blockCount * ordValue((typename Value< TNeedle >::Type) *finder);
 
 		// computing the necessary blocks, carries between blocks following one another are stored
-		for (currentBlock = 0; currentBlock <= limit; currentBlock++) {
-			X = me.bitMasks[shift + currentBlock] | me.VN[currentBlock];
+		for (currentBlock = 0; currentBlock <= limit; currentBlock++) 
+		{
+			X = me.bitMasks[shift + currentBlock] | large.VN[currentBlock];
 	
-			temp = me.VP[currentBlock] + (X & me.VP[currentBlock]) + carryD0;
+			temp = large.VP[currentBlock] + (X & large.VP[currentBlock]) + carryD0;
 			if (carryD0)
-				carryD0 = temp <= me.VP[currentBlock];
+				carryD0 = temp <= large.VP[currentBlock];
 			else
-				carryD0 = temp < me.VP[currentBlock];
+				carryD0 = temp < large.VP[currentBlock];
 			
-			D0 = (temp ^ me.VP[currentBlock]) | X;
-			HN = me.VP[currentBlock] & D0;
-			HP = me.VN[currentBlock] | ~(me.VP[currentBlock] | D0);
+			D0 = (temp ^ large.VP[currentBlock]) | X;
+			HN = large.VP[currentBlock] & D0;
+			HP = large.VN[currentBlock] | ~(large.VP[currentBlock] | D0);
 			
 			X = (HP << 1) | carryHP;
 			carryHP = HP >> (me.MACHINE_WORD_SIZE - 1);
 			
-			me.VN[currentBlock] = X & D0;
+			large.VN[currentBlock] = X & D0;
 
 			temp = (HN << 1) | carryHN;
 			carryHN = HN >> (me.MACHINE_WORD_SIZE - 1);
 								
-		 	me.VP[currentBlock] = temp | ~(X | D0);
+		 	large.VP[currentBlock] = temp | ~(X | D0);
 
 			//if the current block is the one containing the last active cell the new score is computed
-			if (currentBlock == me.lastBlock) {
-				if (HP & me.scoreMask)
+			if (currentBlock == large.lastBlock) {
+				if (HP & large.scoreMask)
 					me.score++;
-				else if (HN & me.scoreMask)
+				else if (HN & large.scoreMask)
 					me.score--;
 			}
 		}
 
 		// updating the last active cell
 		while (me.score > me.k) {
-			if (me.VP[me.lastBlock] & me.scoreMask)
+			if (large.VP[large.lastBlock] & large.scoreMask)
 				me.score--;
-			else if (me.VN[me.lastBlock] & me.scoreMask)
+			else if (large.VN[large.lastBlock] & large.scoreMask)
 				me.score++;
 
-			me.scoreMask >>= 1;
-			if (!me.scoreMask) {
-				me.scoreMask = (TWord)1 << (me.MACHINE_WORD_SIZE - 1);
-				me.lastBlock--;
+			large.scoreMask >>= 1;
+			if (!large.scoreMask) {
+				large.scoreMask = (TWord)1 << (me.MACHINE_WORD_SIZE - 1);
+				large.lastBlock--;
 			}
 		}
 
-		if ((me.lastBlock == me.blockCount-1) && (me.scoreMask == me.finalScoreMask))
+		if ((large.lastBlock == large.blockCount-1) && (large.scoreMask == large.finalScoreMask))
 		{
 			_setFinderEnd(finder);
 			if (TYPECMP<TSpec, FindPrefix>::VALUE)
@@ -511,15 +552,15 @@ SEQAN_CHECKPOINT
 			return true;
 		}
 		else {
-			me.scoreMask <<= 1;
-			if (!me.scoreMask) {
-				me.scoreMask = 1;
-				me.lastBlock++;
+			large.scoreMask <<= 1;
+			if (!large.scoreMask) {
+				large.scoreMask = 1;
+				large.lastBlock++;
 			}
 			
-			if (me.VP[me.lastBlock] & me.scoreMask)
+			if (large.VP[large.lastBlock] & large.scoreMask)
 				me.score++;
-			else if (me.VN[me.lastBlock] & me.scoreMask)
+			else if (large.VN[large.lastBlock] & large.scoreMask)
 				me.score--;
 		}
 
@@ -544,9 +585,11 @@ SEQAN_CHECKPOINT
 	typedef typename Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> >::TWord TWord;
 
 	TWord X, D0, HN, HP;
+	TWord lastBit = (TWord)1 << (me.needleSize - 1);
 
 	// computing the blocks
-	while (position(finder) < haystack_length) {
+	while (position(finder) < haystack_length) 
+	{
 		X = me.bitMasks[ordValue((typename Value<TNeedle>::Type) *finder)] | me.VN0;
 		
 		D0 = ((me.VP0 + (X & me.VP0)) ^ me.VP0) | X;
@@ -556,9 +599,9 @@ SEQAN_CHECKPOINT
 		me.VN0 = X & D0;
 		me.VP0 = (HN << 1) | ~(X | D0);
 
-		if (HP & ((TWord)1 << (me.needleSize-1)))
+		if (HP & lastBit)
 			me.score++;
-		else if (HN & ((TWord)1 << (me.needleSize-1)))
+		else if (HN & lastBit)
 			me.score--;
 
 		if (me.score <= me.k)
@@ -570,12 +613,12 @@ SEQAN_CHECKPOINT
 			}
 			return true;
 		}
-
+/*
 		if (TYPECMP<TSpec, FindPrefix>::VALUE)
 		{//limit haystack length during prefix search
 
 		}
-		
+*/		
 		goNext(finder);
 	}
 
@@ -1089,7 +1132,7 @@ SEQAN_CHECKPOINT
 	TSize haystack_length = length(container(hostIterator(finder)));
 	if (TYPECMP<TSpec, FindPrefix>::VALUE)
 	{
-		TSize maxlen = prefix_begin_position + length(needle(me)) - k + 1;
+		TSize maxlen = prefix_begin_position + me.needleSize - k + 1;
 		if (haystack_length > maxlen)
 		{
 			haystack_length = maxlen;
@@ -1097,7 +1140,7 @@ SEQAN_CHECKPOINT
 	}
 
 	// distinguish between the version for needles not longer than one machineword and the version for longer needles
-	if (me.blockCount == 1) 
+	if (me.large == NULL) 
 		return _findMyersSmallPatterns(finder, me, haystack_length);
 	else
 		return _findMyersLargePatterns(finder, me, haystack_length);

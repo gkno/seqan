@@ -56,8 +56,8 @@ Usage: razers [OPTION]... <GENOME FILE> <READS FILE>
 RazerS expects the names of two DNA (multi-)Fasta files. The first contains 
 a reference genome and the second contains genomic reads that should be 
 mapped against the reference. Without any additional parameters RazerS 
-would map all reads against both strands of the reference genome with 80% 
-identity (i.e. 20% errors per read) and dump all found matches in an output  
+would map all reads against both strands of the reference genome with 92% 
+identity (i.e. 8% errors per read) and dump all found matches in an output  
 file. The output file name is the read file name extended by the suffix 
 ".result".
 The default behaviour can be modified by adding the following options to 
@@ -80,7 +80,7 @@ the command line:
   [ -i NUM ],  [ --percent-identity NUM ]
 
   Set the percent identity threshold. NUM must be a value between 50 and
-  100 (default is 80). RazerS searches for matches with a percent identity
+  100 (default is 92). RazerS searches for matches with a percent identity
   of at least NUM. A match of a read R with e errors has percent identity
   of 100*(1 - e/|R|), whereby |R| is the read length. In other words, a
   read is allowed to have not more than |R|*(100-NUM)/100 errors.

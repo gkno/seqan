@@ -84,7 +84,8 @@ struct SwiftParameters {
 //////////////////////////////////////////////////////////////////////////////
 
 	template <typename TSpec, typename TSize, typename TShortSize = unsigned short>
-	struct _SwiftBucket {
+	struct _SwiftBucket 
+	{
 		TSize			firstIncrement;
 		TSize			lastIncrement;
 		TShortSize		counter;
@@ -94,7 +95,8 @@ struct SwiftParameters {
 	};
 
 	template <typename TSize, typename TShortSize>
-	struct _SwiftBucket<SwiftSemiGlobal, TSize, TShortSize> {
+	struct _SwiftBucket<SwiftSemiGlobal, TSize, TShortSize> 
+	{
 		TSize			lastIncrement;
 		TShortSize		counter;
 #ifdef SEQAN_DEBUG_SWIFT
@@ -103,7 +105,8 @@ struct SwiftParameters {
 	};
 
 	template <typename TSpec, typename TSize, typename TShortSize = unsigned short>
-	struct _SwiftBucketParams {
+	struct _SwiftBucketParams 
+	{
 		TSize			firstBucket;	// first _SwiftBucket entry in pattern.buckets
 		TSize			reuseMask;		// 2^ceil(log2(x)) reuse every x-th bucket)
 //		TShortSize		distanceCut;	// if lastIncrement is this far or farer away, threshold can't be reached
@@ -118,7 +121,8 @@ struct SwiftParameters {
 
 
 	template <typename THstkPos>
-	struct _SwiftHit {
+	struct _SwiftHit 
+	{
 		THstkPos	hstkPos;			// parallelogram begin in haystack 
 		unsigned	ndlSeqNo;			// needle sequence number
 		unsigned	bucketWidth;		// (non-diagonal) bucket width (bktHeight + delta + overlap (for diagonals))
@@ -133,7 +137,7 @@ struct SwiftParameters {
 	public:
 		typedef typename Iterator<THaystack, Rooted>::Type			TIterator;
 		typedef typename Position<THaystack>::Type					THstkPos;
-		typedef _SwiftHit<THstkPos>									TSwiftHit;
+		typedef _SwiftHit<__int64>									TSwiftHit;
 		typedef String<TSwiftHit>									THitString;
 		typedef typename Iterator<THitString, Standard>::Type		THitIterator;
 		typedef typename SAValue<THaystack>::Type					TSAValue;
@@ -210,7 +214,7 @@ struct SwiftParameters {
 	public:
 		typedef Pipe<TTuples, TPipeSpec>						TInput;
 		typedef typename Size<TInput>::Type						THstkPos;
-		typedef _SwiftHit<THstkPos>								TSwiftHit;
+		typedef _SwiftHit<__int64>								TSwiftHit;
 		typedef String<TSwiftHit>								THitString;
 		typedef typename Iterator<THitString, Standard>::Type	THitIterator;
 
@@ -262,7 +266,7 @@ struct SwiftParameters {
 	public:
 		typedef Index<TNeedle, TIndexSpec>								TIndex;
 		typedef typename Size<TIndex>::Type								TSize;
-		typedef unsigned short											TShortSize;
+		typedef unsigned												TShortSize;
 		typedef typename Fibre<TIndex, Tag<_Fibre_SA> const >::Type		TSA;
 		typedef typename Fibre<TIndex, Tag<_Fibre_Shape> const >::Type	TShape;
 		typedef typename Iterator<TSA const, Standard>::Type			TIterator;
@@ -587,24 +591,24 @@ inline bool _swiftMultiProcessQGram(
 						::std::cerr << ", delta:" << bucketParams.delta << ", overlap:" << bucketParams.overlap << ")" << ::std::endl;
 					}
 #endif
-					if (bktBeginHstk >= 0) 
-					{
+//					if (bktBeginHstk >= 0) 
+//					{
 						THit hit = {
 							bktBeginHstk,							// bucket begin in haystack
 							getSeqNo(ndlPos),						// needle seq. number
 							height + bucketParams.delta + bucketParams.overlap	// bucket width (non-diagonal)
 						};
 						appendValue(finder.hits, hit);
-					} else {
-						// match begins left of haystack begin
-						THit hit = {
-							0,										// bucket begin in haystack
-							getSeqNo(ndlPos),						// needle seq. number
-							height + bucketParams.delta + bucketParams.overlap	// bucket width (non-diagonal)
-							+ bktBeginHstk
-						};
-						appendValue(finder.hits, hit);
-					}
+//					} else {
+//						// match begins left of haystack begin
+//						THit hit = {
+//							0,										// bucket begin in haystack
+//							getSeqNo(ndlPos),						// needle seq. number
+//							height + bucketParams.delta + bucketParams.overlap	// bucket width (non-diagonal)
+//							+ bktBeginHstk
+//						};
+//						appendValue(finder.hits, hit);
+//					}
 				}
 				(*bkt).lastIncrement = finder.curPos;
 				(*bkt).counter = 1;
@@ -694,23 +698,24 @@ inline bool _swiftMultiFlushBuckets(
 				}
 #endif
 
-				if (bktBeginHstk >= 0) {
+//				if (bktBeginHstk >= 0) 
+//				{
 					THit hit = {
 						bktBeginHstk,							// bucket begin in haystack
 						ndlSeqNo,								// needle seq. number
 						height + bucketParams.delta + bucketParams.overlap	// bucket width (non-diagonal)
 					};
 					appendValue(finder.hits, hit);
-				} else {
-					// match begins left of haystack begin
-					THit hit = {
-						0,										// bucket begin in haystack
-						ndlSeqNo,								// needle seq. number
-						height + bucketParams.delta + bucketParams.overlap	// bucket width (non-diagonal)
-						+ bktBeginHstk
-					};
-					appendValue(finder.hits, hit);
-				}
+//				} else {
+//					// match begins left of haystack begin
+//					THit hit = {
+//						0,										// bucket begin in haystack
+//						ndlSeqNo,								// needle seq. number
+//						height + bucketParams.delta + bucketParams.overlap	// bucket width (non-diagonal)
+//						+ bktBeginHstk
+//					};
+//					appendValue(finder.hits, hit);
+//				}
 
 			}
 			(*bkt).lastIncrement = 0 - bucketParams.tabooLength;;
@@ -841,7 +846,7 @@ inline bool
 _nextNonRepeatRange(
 	Finder<THaystack, Swift<TSpec> > &finder,
 	Pattern<Index<TNeedle, TIndexSpec>, Swift<TSpec> > &pattern,
-	bool printDots)
+	bool /*printDots*/)
 {
 	typedef typename Finder<THaystack, Swift<TSpec> >::TRepeat	TRepeat;
 	typedef typename Value<TRepeat>::Type						TPos;
@@ -867,8 +872,8 @@ _nextNonRepeatRange(
 	hostIterator(finder) = begin(host(finder)) + finder.startPos;
 	finder.haystackEnd = begin(host(finder)) + (finder.endPos - length(pattern.shape) + 1);
 
-	if (printDots)
-		::std::cerr << ::std::endl << "  scan range (" << finder.startPos << ", " << finder.endPos << ") ";
+//	if (printDots)
+//		::std::cerr << ::std::endl << "  scan range (" << finder.startPos << ", " << finder.endPos << ") ";
 
 	return true;
 }
@@ -898,8 +903,8 @@ _firstNonRepeatRange(
 	hostIterator(finder) = begin(host(finder));
 	finder.haystackEnd = begin(host(finder)) + (finder.endPos - length(pattern.shape) + 1);
 	
-	if (printDots)
-		::std::cerr << ::std::endl << "  scan range (" << finder.startPos << ", " << finder.endPos << ") ";
+//	if (printDots)
+//		::std::cerr << ::std::endl << "  scan range (" << finder.startPos << ", " << finder.endPos << ") ";
 	
 	return true;
 }

@@ -985,7 +985,7 @@ a single integer value between 0 and the sum of string lengths minus 1.
 		typename Size<TStringSet>::Type	i = 0;
 
 //		SEQAN_ASSERT(length(me.limits) == len + 1);
-//		resize(me.limits, len + 1);
+		resize(me.limits, len + 1);
 		for(; i < len; ++i) {
 			me.limits[i] = sum;
 			sum += length(me[i]);
@@ -1040,7 +1040,10 @@ a single integer value between 0 and the sum of string lengths minus 1.
     }
 
 	template < typename TString, typename TSpec >
-    inline typename Size<TString>::Type lengthSum(StringSet< TString, TSpec > const &me) {
+    inline typename Size<TString>::Type lengthSum(StringSet< TString, TSpec > const &me) 
+	{
+		if (!_validStringSetLimits(me))
+			_refreshStringSetLimits(me);
         return back(stringSetLimits(me));
     }
 
@@ -1053,10 +1056,10 @@ a single integer value between 0 and the sum of string lengths minus 1.
     inline void appendValue(
 		StringSet< TString, Owner<Default> > &me, 
 		TString2 const &obj,
-		Tag<TExpand> const) 
+		Tag<TExpand> const &tag) 
 	{
-        appendValue(me.strings, obj);
-        appendValue(me.limits, lengthSum(me) + length(obj));
+        appendValue(me.strings, obj, tag);
+        appendValue(me.limits, lengthSum(me) + length(obj), tag);
     }
 
 	// ConcatDirect
@@ -1064,10 +1067,10 @@ a single integer value between 0 and the sum of string lengths minus 1.
     inline void appendValue(
 		StringSet< TString, Owner<ConcatDirect<void> > > &me, 
 		TString2 const &obj,
-		Tag<TExpand> const) 
+		Tag<TExpand> const &tag) 
 	{
-        append(me.concat, obj);
-        appendValue(me.limits, lengthSum(me) + length(obj));
+        append(me.concat, obj, tag);
+        appendValue(me.limits, lengthSum(me) + length(obj), tag);
     }
 
     template < typename TString, typename TDelimiter, typename TString2, typename TExpand >
@@ -1184,6 +1187,7 @@ a single integer value between 0 and the sum of string lengths minus 1.
 	resize(StringSet< TString, TSpec > &me, TSize new_size) {
 		resize(me.limits, new_size + 1);
 		me.limitsValid = (new_size == 0);
+//		me.limitsValid = (new_size == length(me.limits));
 		return resize(me.strings, new_size);
     }
 

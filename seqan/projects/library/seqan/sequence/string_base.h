@@ -1356,7 +1356,7 @@ _reallocateStorage(
 	typename Size< String<TValue, TSpec> >::Type new_capacity,
 	Exact)
 {
-	if (new_capacity <= capacity(me)) return 0;
+	if (new_capacity == capacity(me)) return 0;
 	else
 	{
 SEQAN_CHECKPOINT
@@ -1372,7 +1372,7 @@ _reallocateStorage(
 	typename Size< String<TValue, TSpec> >::Type limit,
 	Exact)
 {
-	if (new_capacity <= capacity(me)) return 0;
+	if (new_capacity == capacity(me)) return 0;
 	else
 	{
 SEQAN_CHECKPOINT
@@ -1490,7 +1490,8 @@ _reserveStorage(
 	typedef typename Size< String<TValue, TSpec> >::Type TSize;
 
 	TSize old_capacity = capacity(seq);
-	if (old_capacity >= (TSize)new_capacity) return;
+	if (old_capacity == (TSize)new_capacity) return;
+	if (!TYPECMP<TExpand,TagExact_>::VALUE && old_capacity > (TSize)new_capacity) return;
 
 	TSize seq_length = length(seq);
 	typename Value< String<TValue, TSpec> >::Type * old_array = _reallocateStorage(seq, new_capacity, tag);

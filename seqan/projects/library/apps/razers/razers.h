@@ -30,6 +30,7 @@
 #include <seqan/align.h>
 #include <seqan/index.h>
 #include <seqan/find/find_swift.h>
+#include "mmap_fasta.h"
 
 namespace SEQAN_NAMESPACE_MAIN
 {
@@ -208,20 +209,18 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 // Definitions
 
-	typedef Dna5String			TGenome;
-	typedef StringSet<TGenome>	TGenomeSet;
-	typedef Dna5String			TRead;
-	typedef StringSet<TRead>	TReadSet;
+	typedef Dna5String									TGenome;
+	typedef StringSet<TGenome>							TGenomeSet;
+	typedef Dna5String									TRead;
+#ifdef RAZERS_CONCATREADS
+	typedef StringSet<TRead, Owner<ConcatDirect<> > >	TReadSet;
+#else
+	typedef StringSet<TRead>							TReadSet;
+#endif
 
+	typedef ReadMatch<Difference<TGenome>::Type>		TMatch;		// a single match
+	typedef String<TMatch/*, MMap<>*/ >					TMatches;	// array of matches
 
-	template <typename TShape>
-	struct SAValue< Index<TReadSet, TShape> > {
-		typedef Pair<
-			unsigned,		// many
-			unsigned,		// short reads
-			Compressed
-		> Type;
-	};
 
 	template <typename TShape>
 	struct Cargo< Index<TReadSet, TShape> > {
@@ -231,9 +230,44 @@ namespace SEQAN_NAMESPACE_MAIN
 		} Type;
 	};
 
+//////////////////////////////////////////////////////////////////////////////
+// Memory tuning
 
-	typedef ReadMatch<Difference<TGenome>::Type>	TMatch;			// a single match
-	typedef String<TMatch/*, MMap<>*/ >				TMatches;		// array of matches
+#ifdef RAZERS_MEMOPT
+
+	template <typename TShape>
+	struct SAValue< Index<TReadSet, TShape> > {
+		typedef Pair<
+			unsigned,				
+			unsigned,
+			BitCompressed<25, 7>	// max. 32M reads of length < 128
+		> Type;
+	};
+	
+	template <>
+	struct Size<Dna5String>
+	{
+		typedef unsigned Type;
+	};
+
+	template <typename TShape>
+	struct Size< Index<TReadSet, Index_QGram<TShape> > >
+	{
+		typedef unsigned Type;
+	};
+	
+#else
+
+	template <typename TShape>
+	struct SAValue< Index<TReadSet, TShape> > {
+		typedef Pair<
+			unsigned,			// many reads
+			unsigned,			// of arbitrary length
+			Compressed
+		> Type;
+	};
+	
+#endif
 
 #ifdef RAZERS_PRUNE_QGRAM_INDEX
 
@@ -276,7 +310,7 @@ namespace SEQAN_NAMESPACE_MAIN
 template <typename TReadSet, typename TNameSet, typename TRazerSOptions>
 bool loadFasta(TReadSet & reads, TNameSet & fastaIDs, char const *fileName, TRazerSOptions &options)
 {
-	if(options.matchN || options.outputFormat == 1) return loadFasta(reads,fastaIDs,fileName);
+	if (options.matchN || options.outputFormat == 1) return loadFasta(reads,fastaIDs,fileName);
 
 	// count sequences
 	unsigned seqCount = 0;
@@ -292,32 +326,48 @@ bool loadFasta(TReadSet & reads, TNameSet & fastaIDs, char const *fileName, TRaz
 	// import sequences
 	file.clear();
 	file.seekg(0, ::std::ios_base::beg);
-	resize(fastaIDs, seqCount);
+	if (options.readNaming == 0)
+		resize(fastaIDs, seqCount);
+#ifndef RAZERS_CONCATREADS
 	resize(reads, seqCount);
+#endif
 	int kickoutcount = 0;
-	for(int i = 0; (i < (int)seqCount) && !_streamEOF(file); ++i) 
+	Dna5String seq;
+	for (int i = 0; (i < (int)seqCount) && !_streamEOF(file); ++i) 
 	{
-		readID(file, fastaIDs[i], Fasta());		// read Fasta id
-		read(file, reads[i], Fasta());			// read Read sequence
-		int count = 0;
-		unsigned j = 0;
-		int cutoffCount = (int)(options.errorRate*length(reads[i]));
-		while(j < length(reads[i]) /*&& count <= cutoffCount*/)
-		{
-			if(reads[i][j]=='N') ++count;
-			++j;
-		}
-		if(count > cutoffCount)	
-		{
-			--i; --seqCount;
-			 ++kickoutcount;
-		}
+		if (options.readNaming == 0)
+			readID(file, fastaIDs[i], Fasta());	// read Fasta id
+		read(file, seq, Fasta());				// read Read sequence
 
+		int count = 0;
+		int cutoffCount = (int)(options.errorRate * length(seq));
+		for (unsigned j = 0; j < length(seq); ++j)
+			if (getValue(seq, j) == 'N')
+				if (++count > cutoffCount)
+					break;
+		
+		if (count < cutoffCount)
+		{
+#ifdef RAZERS_CONCATREADS
+			appendValue(reads, seq, Generous());
+#else
+			assign(reads[i], seq, Exact());
+#endif
+		} else
+		{
+			++kickoutcount;
+			--i;
+			--seqCount;
+		}
 	}
 	file.close();
-	resize(reads,seqCount);
-	if (options._debugLevel > 1) 
-		::std::cerr << "Kicked out " << kickoutcount << " low quality reads.\n";
+#ifdef RAZERS_CONCATREADS
+	reserve(reads.concat, length(reads.concat), Exact());
+#else
+	resize(reads, seqCount);
+#endif
+	if (options._debugLevel > 1 && kickoutcount > 0) 
+		::std::cerr << "Ignoring " << kickoutcount << " low quality reads.\n";
 	return (seqCount > 0);
 }
 
@@ -341,13 +391,111 @@ bool loadFasta(TReadSet &reads, TNameSet &fastaIDs, char const *fileName)
 	file.clear();
 	file.seekg(0, ::std::ios_base::beg);
 	resize(fastaIDs, seqCount);
+#ifdef RAZERS_CONCATREADS
+	Dna5String seq;
+#else
 	resize(reads, seqCount);
+#endif
 	for(unsigned i = 0; (i < seqCount) && !_streamEOF(file); ++i) 
 	{
 		readID(file, fastaIDs[i], Fasta());		// read Fasta id
+#ifdef RAZERS_CONCATREADS
+		read(file, seq, Fasta());				// read Read sequence
+		appendValue(reads, seq, Generous());
+#else
 		read(file, reads[i], Fasta());			// read Read sequence
+#endif
 	}
 	file.close();
+#ifdef RAZERS_CONCATREADS
+	reserve(reads.concat, length(reads.concat), Exact());
+#endif
+
+	return (seqCount > 0);
+}
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+// Load multi-Fasta sequences
+template <typename TReadSet, typename TNameSet, typename TRazerSOptions>
+bool fast_loadFasta(TReadSet &reads, TNameSet &fastaIDs, char const *fileName, TRazerSOptions &options)
+{
+	if (options.matchN || options.outputFormat == 1) return fast_loadFasta(reads,fastaIDs,fileName);
+
+	MultiFasta multiFasta;
+	if (!open(multiFasta.concat, fileName, OPEN_RDONLY)) return false;
+	split(multiFasta, Fasta());
+
+	unsigned seqCount = length(multiFasta);
+	unsigned kickoutcount = 0;
+	Dna5String seq;
+#ifndef RAZERS_CONCATREADS
+	resize(reads, seqCount);
+#endif
+	resize(fastaIDs, seqCount);
+	for(unsigned i = 0; i < seqCount; ++i) 
+	{
+		assignSeqId(fastaIDs[i], multiFasta[i], Fasta());	// read Fasta id
+		assignSeq(seq, multiFasta[i], Fasta());				// read Read sequence
+		
+		int count = 0;
+		int cutoffCount = (int)(options.errorRate * length(seq));
+		for (unsigned j = 0; j < length(seq); ++j)
+			if (getValue(seq, j) == 'N')
+				if (++count > cutoffCount)
+				{
+					clear(seq);
+					++kickoutcount;
+					break;
+				}
+#ifdef RAZERS_CONCATREADS
+		appendValue(reads, seq, Generous());
+#else
+		assign(reads[i], seq, Exact());
+#endif
+	}
+#ifdef RAZERS_CONCATREADS
+	reserve(reads.concat, length(reads.concat), Exact());
+#endif
+
+	if (options._debugLevel > 1 && kickoutcount > 0) 
+		::std::cerr << "Ignoring " << kickoutcount << " low quality reads.\n";
+	return (seqCount > 0);
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+// Load multi-Fasta sequences
+template <typename TReadSet, typename TNameSet>
+bool fast_loadFasta(TReadSet &reads, TNameSet &fastaIDs, char const *fileName)
+{
+	MultiFasta multiFasta;
+	if (!open(multiFasta.concat, fileName, OPEN_RDONLY)) return false;
+	split(multiFasta, Fasta());
+
+	unsigned seqCount = length(multiFasta);
+#ifdef RAZERS_CONCATREADS
+	Dna5String seq;
+#else
+	resize(reads, seqCount);
+#endif
+	resize(fastaIDs, seqCount);
+	for(unsigned i = 0; i < seqCount; ++i) 
+	{
+		assignSeqId(fastaIDs[i], multiFasta[i], Fasta());	// read Fasta id
+#ifdef RAZERS_CONCATREADS
+		assignSeq(seq, multiFasta[i], Fasta());				// read Read sequence
+		appendValue(reads, seq, Generous());
+#else
+		assignSeq(reads[i], multiFasta[i], Fasta());		// read Read sequence
+#endif
+	}
+#ifdef RAZERS_CONCATREADS
+	reserve(reads.concat, length(reads.concat), Exact());
+#endif
+
 	return (seqCount > 0);
 }
 
@@ -377,7 +525,7 @@ void findReads(
 	typedef typename Value<TGenomeSet>::Type				TGenome;
 	typedef typename Size<TGenome>::Type					TSize;
 	typedef typename Infix<TGenome>::Type					TGenomeInfix;
-	typedef typename Value<TReadSet>::Type					TRead;
+	typedef typename Value<TReadSet>::Type const			TRead;
 	typedef typename Iterator<TGenomeInfix, Standard>::Type	TGenomeIterator;
 	typedef typename Iterator<TRead, Standard>::Type		TReadIterator;
 	typedef typename Value<TMatches>::Type					TMatch;
@@ -391,7 +539,7 @@ void findReads(
 
 	swiftPattern.params.minThreshold = options.threshold;
 	swiftPattern.params.tabooLength = options.tabooLength;
-	swiftPattern.params.minLog2Delta = 0;
+//	swiftPattern.params.minLog2Delta = 0;	// parallelogram width shall be 1
 
 	__int64 TP = 0;
 	__int64 FP = 0;
@@ -431,43 +579,56 @@ void findReads(
 				continue;
 			}
 
+			TSize gLength = length(genome);
+			__int64 gBegin = beginPosition(swiftFinder);
+			__int64 gEnd = endPosition(swiftFinder);
+
+			// clip ends
+			if (gBegin < 0)
+				gBegin = 0;
+
+			if (gEnd > (__int64)gLength)
+				gEnd = gLength;
+
+			if (gBegin + ndlLength > gEnd) continue;
+
 			// verify
-			TMatch m = {
-				hstkSeqNo,
-				ndlSeqNo,
-				beginPosition(swiftFinder),
-				endPosition(swiftFinder),
-				0,
-				orientation
-			};
+			TMatch m;
+			TRead &read				= indexText(readIndex)[ndlSeqNo];
+			TReadIterator ritBeg	= begin(read, Standard());
+			TReadIterator ritEnd	= end(read, Standard());
+			TGenomeIterator git		= begin(genome, Standard());
+			TGenomeIterator gitEnd	= git + (gEnd - ndlLength + 1);
 
-			int errors = ndlLength - (m.gEnd - m.gBegin);
+			m.gBegin = 0; // to suppress uninitialized warnings
 			int maxErrors = (int)(ndlLength * options.errorRate);
-			TReadIterator rit = begin(indexText(readIndex)[ndlSeqNo], Standard()) + errors;
-			TGenomeIterator git = begin(genome, Standard()) + m.gBegin;
-			TGenomeIterator gitEnd;
+			int minErrors = maxErrors + 1;
 
-			if ((TSize)m.gEnd > length(genome))
+			for (git += gBegin; git < gitEnd; ++git)
 			{
-				gitEnd = end(genome, Standard());
-				errors += m.gEnd - length(genome);
-				m.gEnd = length(genome);
-			} else
-				gitEnd = begin(genome, Standard()) + m.gEnd;
-
-			if (errors <= maxErrors)
-				for(; git != gitEnd; ++git, ++rit)
-					if ((compMask[ordValue(*git)] & compMask[ordValue(*rit)]) == 0)
+				int errors = 0;
+				TGenomeIterator g = git;
+				for(TReadIterator r = ritBeg; r != ritEnd; ++r, ++g)
+					if ((compMask[ordValue(*g)] & compMask[ordValue(*r)]) == 0)
 						if (++errors > maxErrors)
 							break;
+				if (minErrors > errors)
+				{
+					minErrors = errors;
+					m.gBegin = git - begin(genome, Standard());
+				}
+			}
 
-			if (errors <= maxErrors)
+			if (minErrors <= maxErrors)
 			{
-				m.editDist = errors;
+				m.gseqNo = hstkSeqNo;
+				m.rseqNo = ndlSeqNo;
+				m.gEnd = m.gBegin + ndlLength;
+				m.editDist = minErrors;
+				m.orientation = orientation;
 				// transform coordinates to the forward strand
 				if (orientation == 'R') 
 				{
-					TSize gLength = length(genome);
 					TSize temp = m.gBegin;
 					m.gBegin = gLength - m.gEnd;
 					m.gEnd = gLength - temp;
@@ -490,11 +651,11 @@ void findReads(
 		}
 	}
 
-	options.timeMapReads += SEQAN_PROTIMEDIFF(find_time);
+	_proFloat timeMapReads = SEQAN_PROTIMEDIFF(find_time);
+	options.timeMapReads += timeMapReads;
 
 	if (options._debugLevel >= 1)
-		::std::cerr << ::std::endl << "Finding reads took               \t" << options.timeMapReads << " seconds" << ::std::endl;
-
+		::std::cerr << ::std::endl << "Finding reads took               \t" << timeMapReads << " seconds" << ::std::endl;
 	if (options._debugLevel >= 2) {
 		::std::cerr << ::std::endl;
 		::std::cerr << "___FILTRATION_STATS____" << ::std::endl;
@@ -570,7 +731,7 @@ void findReads(
 	__int64 TP = 0;
 	__int64 FP = 0;
 	SEQAN_PROTIMESTART(find_time);
-
+	
 	// init forward verifiers
 	unsigned readCount = countSequences(readIndex);
 	resize(forwardPatterns, readCount);
@@ -795,7 +956,7 @@ void dumpMatches(
 	::std::string readName = readFName.substr(lastPos);
 	
 
-	Align<TRead, ArrayGaps> align;
+	Align<String<Dna5>, ArrayGaps> align;
 #ifdef RAZERS_HAMMINGVERIFY
 	Score<int> scoreType = Score<int>(0, -1, -1001, -1000);		// levenshtein-score (match, mismatch, gapOpen, gapExtend)
 #else
@@ -1102,8 +1263,12 @@ void mapReads(
 	RazerSOptions<TSpec> &options,
 	TShape const &shape)
 {
-	Index<TReadSet, Index_QGram<TShape> > swiftIndex(readSet, shape);
-	String<int> hitCount;
+	typedef Index<TReadSet, Index_QGram<TShape> >	TIndex;
+	typedef typename Value<typename Fibre<TIndex,QGram_SA>::Type>::Type TSA;
+	typedef typename Value<typename Fibre<TIndex,QGram_Dir>::Type>::Type TDir;
+	
+	TIndex		swiftIndex(readSet, shape);
+	String<int>	hitCount;
 
 	// clear stats
 	options.FP = 0;
@@ -1210,25 +1375,28 @@ int mapReads(
 		::std::cerr << "Taboo length:                    \t" << options.tabooLength << ::std::endl;
 		::std::cerr << ::std::endl;
 	}
-
+	
 	// circumvent numerical obstacles
 	options.errorRate += 0.0000001;
 
 	//////////////////////////////////////////////////////////////////////////////
 	// Step 1: Load fasta files
 	SEQAN_PROTIMESTART(load_time);
-	if (!loadFasta(genomeSet, genomeNames, genomeFileName)) {
+	if (!fast_loadFasta(genomeSet, genomeNames, genomeFileName)) {
 		::std::cerr << "Failed to load genomes" << ::std::endl;
 		return 1;
 	}
 	if (options._debugLevel >= 1) ::std::cerr << lengthSum(genomeSet) << " bps of " << length(genomeSet) << " genomes loaded." << ::std::endl;
 
-	if (!loadFasta(readSet, readNames, readFileName, options)) {
+	if (!fast_loadFasta(readSet, readNames, readFileName, options)) {
 		::std::cerr << "Failed to load reads" << ::std::endl;
 		return 1;
 	}
 	if (options._debugLevel >= 1) ::std::cerr << lengthSum(readSet) << " bps of " << length(readSet) << " reads loaded." << ::std::endl;
 	options.timeLoadFiles = SEQAN_PROTIMEDIFF(load_time);
+
+	if (options._debugLevel >= 1)
+		::std::cerr << "Loading files took               \t" << options.timeLoadFiles << " seconds" << ::std::endl;
 
 	//////////////////////////////////////////////////////////////////////////////
 	// Step 2: Find matches using SWIFT
