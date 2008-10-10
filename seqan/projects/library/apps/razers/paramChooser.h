@@ -26,8 +26,10 @@
 #include <fstream>
 #include <sstream>
 #include <sys/types.h>
-#include <dirent.h>
 #include <errno.h>
+#ifndef NO_PARAM_CHOOSER
+  #include <dirent.h>
+#endif
 
 #include <seqan/sequence.h>
 #include "razers.h"
@@ -47,6 +49,9 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 // ls in directory dir, store filenames in files
+
+#ifndef NO_PARAM_CHOOSER
+
 template<typename TPath, typename TFilenameString>
 int 
 getDir(TPath dir, TFilenameString &files)
@@ -68,6 +73,7 @@ getDir(TPath dir, TFilenameString &files)
     return 0;
 }
 
+#endif
 	struct ParamChooserOptions
 	{
              typedef double TFloat;
