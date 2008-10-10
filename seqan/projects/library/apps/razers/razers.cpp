@@ -23,7 +23,6 @@
 //#define SEQAN_DEBUG_SWIFT		// test SWIFT correctness and print bucket parameters
 //#define RAZERS_DEBUG			// print verification regions
 #define RAZERS_PRUNE_QGRAM_INDEX
-//#define RAZERS_HAMMINGVERIFY	// allow only mismatches, no indels
 //#define RAZERS_MAXHITS		// drop reads with too many matches
 #define RAZERS_CONCATREADS		// use <ConcatDirect> StringSet to store reads
 #define RAZERS_MEMOPT			// optimize memory consumption

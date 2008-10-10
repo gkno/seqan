@@ -806,32 +806,30 @@ template <typename THaystack, typename TSpec>
 inline typename Infix<THaystack>::Type
 range(Finder<THaystack, Swift<TSpec> > &finder)
 {
-	typedef typename Size<THaystack>::Type TSize;
-
 	typename Finder<THaystack, Swift<TSpec> >::TSwiftHit &hit = *finder.curHit;
-	TSize hitEnd = hit.hstkPos + hit.bucketWidth;
-	TSize textEnd = length(haystack(finder));
 
-	if (hitEnd > textEnd)
-		return infix(haystack(finder), hit.hstkPos, textEnd);
-	else
-		return infix(haystack(finder), hit.hstkPos, hitEnd);
+	__int64 hitBegin = hit.hstkPos;
+	__int64 hitEnd = hit.hstkPos + hit.bucketWidth;
+	__int64 textEnd = length(haystack(finder));
+
+	if (hitBegin < 0) hitBegin = 0;
+	if (hitEnd > textEnd) hitEnd = textEnd;
+	return infix(haystack(finder), hitBegin, hitEnd);
 }
 
 template <typename THaystack, typename TSpec, typename TText>
 inline typename Infix<TText>::Type
 range(Finder<THaystack, Swift<TSpec> > &finder, TText &text)
 {
-	typedef  typename Size<TText>::Type TSize;
-
 	typename Finder<THaystack, Swift<TSpec> >::TSwiftHit &hit = *finder.curHit;
-	TSize hitEnd = hit.hstkPos + hit.bucketWidth;
-	TSize textEnd = length(text);
 
-	if (hitEnd > textEnd)
-		return infix(text, hit.hstkPos, textEnd);
-	else
-		return infix(text, hit.hstkPos, hitEnd);
+	__int64 hitBegin = hit.hstkPos;
+	__int64 hitEnd = hit.hstkPos + hit.bucketWidth;
+	__int64 textEnd = length(text);
+
+	if (hitBegin < 0) hitBegin = 0;
+	if (hitEnd > textEnd) hitEnd = textEnd;
+	return infix(text, hit.hstkPos, hitEnd);
 }
 
 template <typename TNeedle, typename TIndexSpec, typename TSpec>

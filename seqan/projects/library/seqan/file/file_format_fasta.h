@@ -266,7 +266,7 @@ SEQAN_CHECKPOINT
 	{
 		count = limit;
 	}
-	resize(data, count, Exact());
+	resize(data, count);
 	if (length(data) < count)
 	{
 		count = length(data);
@@ -344,7 +344,7 @@ SEQAN_CHECKPOINT
 		}
 		else
 		{
-			resize(id, count_valid, Exact());
+			resize(id, count_valid);
 			if (length(id) < count_valid)
 			{
 				count_valid = length(id);
