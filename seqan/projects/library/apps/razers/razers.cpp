@@ -23,7 +23,6 @@
 //#define SEQAN_DEBUG_SWIFT		// test SWIFT correctness and print bucket parameters
 //#define RAZERS_DEBUG			// print verification regions
 #define RAZERS_PRUNE_QGRAM_INDEX
-//#define RAZERS_MAXHITS		// drop reads with too many matches
 #define RAZERS_CONCATREADS		// use <ConcatDirect> StringSet to store reads
 #define RAZERS_MEMOPT			// optimize memory consumption
 //#define NO_PARAM_CHOOSER
@@ -36,6 +35,7 @@
 #endif
 
 #include "razers.h"
+#include "outputFormat.h"
 #include "paramChooser.h"
 
 #include <iostream>
@@ -43,6 +43,89 @@
 
 using namespace std;
 using namespace seqan;
+
+
+//////////////////////////////////////////////////////////////////////////////
+// Main read mapper function
+template <typename TSpec>
+int mapReads(
+	const char *genomeFileName,
+	const char *readFileName,
+	const char *errorPrbFileName,
+	RazerSOptions<TSpec> &options)
+{
+	MultiFasta				genomeSet;
+	TReadSet				readSet;
+	StringSet<CharString>	genomeNames;	// genome names, taken from the Fasta file
+	StringSet<CharString>	readNames;		// read names, taken from the Fasta file
+	TMatches				matches;		// resulting forward/reverse matches
+
+	// dump configuration in verbose mode
+	if (options._debugLevel >= 1) 
+	{
+//		CharString bitmap;
+//		shapeToString(bitmap, shape);
+		::std::cerr << "___SETTINGS____________" << ::std::endl;
+		::std::cerr << "Genome file:                     \t" << genomeFileName << ::std::endl;
+		::std::cerr << "Read file:                       \t" << readFileName << ::std::endl;
+		::std::cerr << "Compute forward matches:         \t";
+		if (options.forward)	::std::cerr << "YES" << ::std::endl;
+		else				::std::cerr << "NO" << ::std::endl;
+		::std::cerr << "Compute reverse matches:         \t";
+		if (options.reverse)		::std::cerr << "YES" << ::std::endl;
+		else				::std::cerr << "NO" << ::std::endl;
+		::std::cerr << "Error rate:                      \t" << options.errorRate << ::std::endl;
+		::std::cerr << "Minimal threshold:               \t" << options.threshold << ::std::endl;
+		::std::cerr << "Shape:                           \t" << options.shape << ::std::endl;
+		::std::cerr << "Repeat threshold:                \t" << options.repeatLength << ::std::endl;
+		::std::cerr << "Overabundance threshold:         \t" << options.abundanceCut << ::std::endl;
+		::std::cerr << "Taboo length:                    \t" << options.tabooLength << ::std::endl;
+		::std::cerr << ::std::endl;
+	}
+	
+	// circumvent numerical obstacles
+	options.errorRate += 0.0000001;
+
+	//////////////////////////////////////////////////////////////////////////////
+	// Step 1: Load fasta files
+	SEQAN_PROTIMESTART(load_time);
+
+	if (!loadReads(readSet, readNames, readFileName, options)) {
+		::std::cerr << "Failed to load reads" << ::std::endl;
+		return RAZERS_READS_FAILED;
+	}
+	if (options._debugLevel >= 1) ::std::cerr << lengthSum(readSet) << " bps of " << length(readSet) << " reads loaded." << ::std::endl;
+	options.timeLoadFiles = SEQAN_PROTIMEDIFF(load_time);
+
+	if (options._debugLevel >= 1)
+		::std::cerr << "Loading reads took               \t" << options.timeLoadFiles << " seconds" << ::std::endl;
+
+	//////////////////////////////////////////////////////////////////////////////
+	// Step 2: Find matches using SWIFT
+	int error = mapReads(matches, genomeFileName, genomeNames, readSet, options);
+	if (error != 0)
+	{
+		switch (error)
+		{
+			case RAZERS_GENOME_FAILED:
+				::std::cerr << "Failed to load genomes" << ::std::endl;
+				break;
+			
+			case RAZERS_INVALID_SHAPE:
+				::std::cerr <<	"Invalid Shape" << endl << endl;
+				break;
+		}
+		return error;
+	}
+
+	//////////////////////////////////////////////////////////////////////////////
+	// Step 3: Remove duplicates and output matches
+	if (!options.spec.DONT_DUMP_RESULTS)
+		dumpMatches(matches, genomeNames, genomeFileName, readSet, readNames, readFileName, errorPrbFileName, options);
+
+	return 0;
+}	
+
 
 //////////////////////////////////////////////////////////////////////////////
 // Print usage
@@ -63,9 +146,7 @@ void printHelp(int, const char *[], RazerSOptions<TSpec> &options, ParamChooserO
 		cerr << "  -rr, --recognition-rate NUM  \t" << "set the percent recognition rate (default " << 100 - (100.0 * pm_options.optionLossRate) << ')' << endl;
 #endif
 		cerr << "  -id, --indels                \t" << "allow indels (default: mismatches only)" << endl;
-#ifdef RAZERS_MAXHITS
-		cerr << "  -m,  --max-hits NUM          \t" << "ignore reads with more than NUM hits (default " << options.maxHits << ')' << endl;
-#endif
+		cerr << "  -m,  --max-hits NUM          \t" << "output only NUM of the best hits (default " << options.maxHits << ')' << endl;
 		cerr << "  -o,  --output FILE           \t" << "change output filename (default <READS FILE>.result)" << endl;
 		cerr << "  -v,  --verbose               \t" << "verbose mode" << endl;
 		cerr << "  -vv, --vverbose              \t" << "very verbose mode" << endl;
@@ -76,6 +157,7 @@ void printHelp(int, const char *[], RazerSOptions<TSpec> &options, ParamChooserO
 		cerr << "  -of, --output-format NUM     \t" << "set output format" << endl;
 		cerr << "                               \t" << "0 = Razer format (default, see README)" << endl;
 		cerr << "                               \t" << "1 = enhanced Fasta format" << endl;
+		cerr << "                               \t" << "2 = Eland format" << endl;
 		cerr << "  -gn, --genome-naming NUM     \t" << "select how genomes are named" << endl;
 		cerr << "                               \t" << "0 = use Fasta id (default)" << endl;
 		cerr << "                               \t" << "1 = enumerate beginning with 1" << endl;
@@ -104,7 +186,7 @@ void printHelp(int, const char *[], RazerSOptions<TSpec> &options, ParamChooserO
 
 void printVersion() 
 {
-	cerr << "RazerS version 0.3 20080925 (prerelease)" << endl;
+	cerr << "RazerS version 0.3 20081011 (prerelease)" << endl;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -115,7 +197,7 @@ int estimateReadLength(char const *fileName)
 	
 	::std::ifstream file;
 	file.open(fileName, ::std::ios_base::in | ::std::ios_base::binary);
-	if (!file.is_open() || _streamEOF(file)) return -1;
+	if (!file.is_open() || _streamEOF(file)) return RAZERS_READS_FAILED;
 	read(file, dummy, Fasta());			// read first Read sequence
 	file.close();
 	return length(dummy);
@@ -227,7 +309,7 @@ int main(int argc, const char *argv[])
 					istr >> options.outputFormat;
 					if (!istr.fail())
 					{
-						if (options.outputFormat > 1)
+						if (options.outputFormat > 2)
 							cerr << "Invalid output format options." << endl << endl;
 						else
 							continue;
@@ -506,9 +588,8 @@ int main(int argc, const char *argv[])
 #endif	
 
 	int result = mapReads(fname[0], fname[1], errorPrbFileName.c_str(), options);
-	if (result == 2) 
+	if (result == RAZERS_INVALID_SHAPE) 
 	{
-		cerr <<	"Invalid Shape" << endl << endl;
 		printHelp(argc, argv, options, pm_options);
 		return 0;
 	}

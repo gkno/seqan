@@ -24,10 +24,8 @@
 
 #include <iostream>
 #include <fstream>
-#include <sstream>
 
 #include <seqan/find.h>
-#include <seqan/align.h>
 #include <seqan/index.h>
 #include <seqan/find/find_swift.h>
 #include "mmap_fasta.h"
@@ -53,7 +51,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		bool		forward;			// compute forward oriented read matches
 		bool		reverse;			// compute reverse oriented read matches
 		double		errorRate;			// Criteria 1 threshold
-		int			maxHits;			// hit count threshold
+		unsigned	maxHits;			// output at most maxHits many matches
+		unsigned	distanceRange;		// output only the best, second best, ..., distanceRange best matches
 		const char	*output;			// name of result file
 		int			_debugLevel;		// level of verbosity
 		bool		printVersion;		// print version number
@@ -97,6 +96,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			reverse = true;
 			errorRate = 0.08;
 			maxHits = 100;
+			distanceRange = 0;	// disabled
 			output = "";
 			_debugLevel = 0;
 			printVersion = false;
@@ -123,9 +123,6 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
 	};
 
-
-
-
 //////////////////////////////////////////////////////////////////////////////
 // Typedefs
 
@@ -139,76 +136,14 @@ namespace SEQAN_NAMESPACE_MAIN
 		unsigned		rseqNo;			// read seqNo
 		TGPos			gBegin;			// begin position of the match in the genome
 		TGPos			gEnd;			// end position of the match in the genome
-		short			editDist;		// Levenshtein distance
+		unsigned short	editDist;		// Levenshtein distance
 		char			orientation;	// 'F'..forward strand, 'R'..reverse comp. strand
 	};
-
-	// less-operators (to sort matches and remove duplicates with equal gBegin)
-	template <typename TReadMatch>
-	struct LessGPosRNo : public ::std::binary_function < TReadMatch, TReadMatch, bool >
-	{
-		inline bool operator() (TReadMatch const &a, TReadMatch const &b) const 
-		{
-			// genome position and orientation
-			if (a.gseqNo < b.gseqNo) return true;
-			if (a.gseqNo > b.gseqNo) return false;
-			if (a.gBegin < b.gBegin) return true;
-			if (a.gBegin > b.gBegin) return false;
-			if (a.orientation < b.orientation) return true;
-			if (a.orientation > b.orientation) return false;
-
-			// read number
-			if (a.rseqNo < b.rseqNo) return true;
-			if (a.rseqNo > b.rseqNo) return false;
-
-			// quality
-			return a.editDist < b.editDist;
-		}
-	};
-
-	template <typename TReadMatch>
-	struct LessRNoGPos : public ::std::binary_function < TReadMatch, TReadMatch, bool >
-	{
-		inline bool operator() (TReadMatch const &a, TReadMatch const &b) const 
-		{
-			// read number
-			if (a.rseqNo < b.rseqNo) return true;
-			if (a.rseqNo > b.rseqNo) return false;
-
-			// genome position and orientation
-			if (a.gseqNo < b.gseqNo) return true;
-			if (a.gseqNo > b.gseqNo) return false;
-			if (a.gBegin < b.gBegin) return true;
-			if (a.gBegin > b.gBegin) return false;
-			if (a.orientation < b.orientation) return true;
-			if (a.orientation > b.orientation) return false;
-
-			// quality
-			return a.editDist < b.editDist;
-		}
-	};
-
-	// less-operators (to sort matches and remove duplicates with equal gEnd)
-	template <typename TReadMatch>
-	struct LessRNoGEndPos : public ::std::binary_function < TReadMatch, TReadMatch, bool >
-	{
-		inline bool operator() (TReadMatch const &a, TReadMatch const &b) const 
-		{
-			// read number
-			if (a.rseqNo < b.rseqNo) return true;
-			if (a.rseqNo > b.rseqNo) return false;
-
-			// genome position and orientation
-			if (a.gseqNo < b.gseqNo) return true;
-			if (a.gseqNo > b.gseqNo) return false;
-			if (a.gEnd   < b.gEnd) return true;
-			if (a.gEnd   > b.gEnd) return false;
-			if (a.orientation < b.orientation) return true;
-			if (a.orientation > b.orientation) return false;
-
-			// quality
-			return a.editDist < b.editDist;
-		}
+	
+	enum RAZERS_ERROR {
+		RAZERS_READS_FAILED = 1,
+		RAZERS_GENOME_FAILED = 2,
+		RAZERS_INVALID_SHAPE = 3
 	};
 
 //////////////////////////////////////////////////////////////////////////////
@@ -424,12 +359,12 @@ matchVerify(
 	TGenomeIterator git		= begin(inf, Standard());
 	TGenomeIterator gitEnd	= end(inf, Standard()) - (ndlLength - 1);
 
-	int maxErrors = (int)(ndlLength * options.errorRate);
-	int minErrors = maxErrors + 1;
+	unsigned maxErrors = (unsigned)(ndlLength * options.errorRate);
+	unsigned minErrors = maxErrors + 1;
 
 	for (; git < gitEnd; ++git)
 	{
-		int errors = 0;
+		unsigned errors = 0;
 		TGenomeIterator g = git;
 		for(TReadIterator r = ritBeg; r != ritEnd; ++r, ++g)
 			if ((options.compMask[ordValue(*g)] & options.compMask[ordValue(*r)]) == 0)
@@ -505,7 +440,7 @@ matchVerify(
 		}
 	
 	if (maxScore < minScore) return false;
-	m.editDist	= -maxScore;
+	m.editDist	= (unsigned)-maxScore;
 
 	setEndPosition(inf, beginPosition(inf) + position(maxPos) + 1);
 	
@@ -543,7 +478,6 @@ template <
 	typename TReadIndex, 
 	typename TSwiftSpec, 
 	typename TVerifier,
-	typename THitCount, 
 	typename TSpec >
 void findReads(
 	TMatches &matches,			// resulting matches
@@ -552,16 +486,10 @@ void findReads(
 	Pattern<TReadIndex, Swift<TSwiftSpec> > &swiftPattern,
 	TVerifier &forwardPatterns,
 	char orientation,			// q-gram index of reads
-#ifdef RAZERS_MAXHITS
-	THitCount &hitCount,		// maximum number of hits for each read
-#else
-	THitCount &,
-#endif
 	RazerSOptions<TSpec> &options)
 {
 	typedef typename Fibre<TReadIndex, Fibre_Text>::Type	TReadSet;
 	typedef typename Size<TGenome>::Type					TSize;
-	typedef typename Value<TReadSet>::Type					TRead;
 	typedef typename Value<TMatches>::Type					TMatch;
 
 	// FILTRATION
@@ -579,15 +507,12 @@ void findReads(
 	TSwiftFinder swiftFinder(genome, options.repeatLength, 1);
 
 	TMatch m;
-	m.gBegin = 0;
+	m.gBegin = 0;	// to supress uninitialized warnings
 	
 	// iterate all verification regions returned by SWIFT
 	while (find(swiftFinder, swiftPattern, options.errorRate, options._debugLevel)) 
 	{
 		unsigned rseqNo = (*swiftFinder.curHit).ndlSeqNo;
-#ifdef RAZERS_MAXHITS
-		if (hitCount[rseqNo] == -1) continue;
-#endif			
 		if (!options.spec.DONT_VERIFY && 
 			matchVerify(m, range(swiftFinder, genome), rseqNo, readIndex, forwardPatterns, options, TSwiftSpec()))
 		{
@@ -605,9 +530,7 @@ void findReads(
 
 			if (!options.spec.DONT_DUMP_RESULTS)
 				appendValue(matches, m);
-#ifdef RAZERS_MAXHITS				
-			--hitCount[rseqNo];
-#endif
+
 			++options.TP;
 /*			::std::cerr << "\"" << range(swiftFinder, genomeInf) << "\"  ";
 			::std::cerr << hstkPos << " + ";
@@ -631,7 +554,7 @@ template <
 	typename TSpec, 
 	typename TShape,
 	typename TSwiftSpec >
-bool mapReads(
+int mapReads(
 	TMatches &				matches,
 	const char *			genomeFileName,
 	StringSet<CharString> &	genomeNames,	// genome names, taken from the Fasta file
@@ -648,10 +571,8 @@ bool mapReads(
 	// open genome file	
 	::std::ifstream file;
 	file.open(genomeFileName, ::std::ios_base::in | ::std::ios_base::binary);
-	if (!file.is_open()) {
-		::std::cerr << "Failed to load genomes" << ::std::endl;
-		return false;
-	}
+	if (!file.is_open())
+		return RAZERS_GENOME_FAILED;
 
 	// configure q-gram index
 	TIndex swiftIndex(readSet, shape);
@@ -685,13 +606,6 @@ bool mapReads(
 	options.timeMapReads = 0;
 	options.timeDumpResults = 0;
 
-	String<int>	hitCount;
-#ifdef RAZERS_MAXHITS	
-	// fill max number of hits per read
-	// at most twice as much potential matches are allowed (overlapping parallelograms)
-	fill(hitCount, length(readSet), 2*options.maxHits);	
-#endif
-
 	CharString	id;
 	Dna5String	genome;
 
@@ -707,12 +621,12 @@ bool mapReads(
 		read(file, genome, Fasta());			// read Fasta sequence
 
 		if (options.forward)
-			findReads(matches, genome, gseqNo, swiftPattern, forwardPatterns, 'F', hitCount, options);
+			findReads(matches, genome, gseqNo, swiftPattern, forwardPatterns, 'F', options);
 
 		if (options.reverse)
 		{
 			reverseComplementInPlace(genome);
-			findReads(matches, genome, gseqNo, swiftPattern, forwardPatterns, 'R', hitCount, options);
+			findReads(matches, genome, gseqNo, swiftPattern, forwardPatterns, 'R', options);
 		}
 
 	}
@@ -727,14 +641,14 @@ bool mapReads(
 		::std::cerr << "Swift FP: " << options.FP << ::std::endl;
 		::std::cerr << "Swift TP: " << options.TP << ::std::endl;
 	}
-	return true;
+	return 0;
 }
 
 
 //////////////////////////////////////////////////////////////////////////////
 // Wrapper for different template specializations
 template <typename TMatches, typename TReadSet, typename TSpec>
-bool mapReads(
+int mapReads(
 	TMatches &				matches,
 	const char *			genomeFileName,
 	StringSet<CharString> &	genomeNames,	// genome names, taken from the Fasta file
@@ -771,458 +685,7 @@ bool mapReads(
 			return mapReads(matches, genomeFileName, genomeNames, readSet, options, gapped, Swift<SwiftSemiGlobal>());
 	}
 
-	return false;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-// Main read mapper function
-template <typename TSpec>
-int mapReads(
-	const char *genomeFileName,
-	const char *readFileName,
-	const char *errorPrbFileName,
-	RazerSOptions<TSpec> &options)
-{
-	MultiFasta				genomeSet;
-	TReadSet				readSet;
-	StringSet<CharString>	genomeNames;	// genome names, taken from the Fasta file
-	StringSet<CharString>	readNames;		// read names, taken from the Fasta file
-	TMatches				matches;		// resulting forward/reverse matches
-
-	// dump configuration in verbose mode
-	if (options._debugLevel >= 1) 
-	{
-//		CharString bitmap;
-//		shapeToString(bitmap, shape);
-		::std::cerr << "___SETTINGS____________" << ::std::endl;
-		::std::cerr << "Genome file:                     \t" << genomeFileName << ::std::endl;
-		::std::cerr << "Read file:                       \t" << readFileName << ::std::endl;
-		::std::cerr << "Compute forward matches:         \t";
-		if (options.forward)	::std::cerr << "YES" << ::std::endl;
-		else				::std::cerr << "NO" << ::std::endl;
-		::std::cerr << "Compute reverse matches:         \t";
-		if (options.reverse)		::std::cerr << "YES" << ::std::endl;
-		else				::std::cerr << "NO" << ::std::endl;
-		::std::cerr << "Error rate:                      \t" << options.errorRate << ::std::endl;
-		::std::cerr << "Minimal threshold:               \t" << options.threshold << ::std::endl;
-		::std::cerr << "Shape:                           \t" << options.shape << ::std::endl;
-		::std::cerr << "Repeat threshold:                \t" << options.repeatLength << ::std::endl;
-		::std::cerr << "Overabundance threshold:         \t" << options.abundanceCut << ::std::endl;
-		::std::cerr << "Taboo length:                    \t" << options.tabooLength << ::std::endl;
-		::std::cerr << ::std::endl;
-	}
-	
-	// circumvent numerical obstacles
-	options.errorRate += 0.0000001;
-
-	//////////////////////////////////////////////////////////////////////////////
-	// Step 1: Load fasta files
-	SEQAN_PROTIMESTART(load_time);
-
-	if (!loadReads(readSet, readNames, readFileName, options)) {
-		::std::cerr << "Failed to load reads" << ::std::endl;
-		return 1;
-	}
-	if (options._debugLevel >= 1) ::std::cerr << lengthSum(readSet) << " bps of " << length(readSet) << " reads loaded." << ::std::endl;
-	options.timeLoadFiles = SEQAN_PROTIMEDIFF(load_time);
-
-	if (options._debugLevel >= 1)
-		::std::cerr << "Loading files took               \t" << options.timeLoadFiles << " seconds" << ::std::endl;
-
-	//////////////////////////////////////////////////////////////////////////////
-	// Step 2: Find matches using SWIFT
-	if (!mapReads(matches, genomeFileName, genomeNames, readSet, options))
-		return 2;
-
-	//////////////////////////////////////////////////////////////////////////////
-	// Step 3: Remove duplicates and output matches
-	if (!options.spec.DONT_DUMP_RESULTS)
-		dumpMatches(matches, genomeNames, genomeFileName, readSet, readNames, readFileName, errorPrbFileName, options);
-
-	return 0;
-}	
-
-
-//////////////////////////////////////////////////////////////////////////////
-// Dump an alignment
-template <typename TFile, typename TSource, typename TSpec>
-inline void
-dumpAlignment(TFile & target, Align<TSource, TSpec> const & source)
-{
-	typedef Align<TSource, TSpec> const TAlign;
-	typedef typename Row<TAlign>::Type TRow;
-	typedef typename Position<typename Rows<TAlign>::Type>::Type TRowsPosition;
-	typedef typename Position<TAlign>::Type TPosition;
-
-	TRowsPosition row_count = length(rows(source));
-	TPosition begin_ = beginPosition(cols(source));
-	TPosition end_ = endPosition(cols(source));
-	
-	// Print sequences
-	for(TRowsPosition i=0;i<row_count;++i) {
-		if (i == 0)
-			_streamWrite(target, "#Read:   ");
-		else
-			_streamWrite(target, "#Genome: ");
-		TRow& row_ = row(source, i);
-		typedef typename Iterator<typename Row<TAlign>::Type const>::Type TIter;
-		TIter begin1_ = iter(row_, begin_);
-		TIter end1_ = iter(row_, end_);
-		for (; begin1_ != end1_; ++begin1_) {
-			if (isGap(begin1_)) _streamPut(target, gapValue<char>());
-			else _streamPut(target, *begin1_);
-		}
-		_streamPut(target, '\n');
-	}
-}
-
-
-//////////////////////////////////////////////////////////////////////////////
-// Output matches
-template <
-	typename TMatchSet,
-	typename TGenomeNames,
-	typename TReads,
-	typename TReadNames,
-	typename TSpec
->
-void dumpMatches(
-	TMatchSet &matches,					// forward/reverse matches
-	TGenomeNames const &genomeIDs,		// Read names (read from Fasta file, currently unused)
-	::std::string const &genomeFName,	// genome name (e.g. "hs_ref_chr1.fa")
-	TReads const &reads,				// Read sequences
-	TReadNames const &readIDs,			// Read names (read from Fasta file, currently unused)
-	::std::string const &readFName,		// read name (e.g. "reads.fa")
-	::std::string const &errorPrbFileName,
-	RazerSOptions<TSpec> &options)
-{
-	typedef typename Value<TMatchSet>::Type		TMatches;
-	typedef typename Value<TMatches>::Type		TMatch;
-	typedef typename Value<TReads>::Type		TRead;
-	typedef typename TMatch::TGPos				TGPos;
-
-	unsigned maxReadLength = 0;
-	for (unsigned i = 0; i < length(reads); ++i)
-		if (maxReadLength < length(reads[i]))
-			maxReadLength = length(reads[i]);
-
-	String<int> posError;
-	fill(posError, maxReadLength, 0);
-
-	SEQAN_PROTIMESTART(dump_time);
-
-	// load Genome sequences for alignment dumps
-	TGenomeSet genomes;
-	if (options.dumpAlignment || (!errorPrbFileName.empty() && options.hammingOnly))
-
-		if (!loadGenomes(genomes, toCString(genomeFName))) {
-			::std::cerr << "Failed to load genomes" << ::std::endl;
-			options.dumpAlignment = false;
-		}
-
-	// how many 0's should be padded?
-	int pzeros = 0;
-	for (unsigned l = length(reads); l > 9; l = l / 10)
-		++pzeros;
-
-	int gzeros = 0;
-	for (unsigned l = length(genomes); l > 9; l = l / 10)
-		++gzeros;
-
-
-	// remove the directory prefix of genomeFName and readFName
-	size_t lastPos = genomeFName.find_last_of('/') + 1;
-	if (lastPos == genomeFName.npos) lastPos = genomeFName.find_last_of('\\') + 1;
-	if (lastPos == genomeFName.npos) lastPos = 0;
-	::std::string genomeName = genomeFName.substr(lastPos);
-
-	lastPos = readFName.find_last_of('/') + 1;
-	if (lastPos == readFName.npos) lastPos = readFName.find_last_of('\\') + 1;
-	if (lastPos == readFName.npos) lastPos = 0;
-	::std::string readName = readFName.substr(lastPos);
-	
-
-	Align<String<Dna5>, ArrayGaps> align;
-	Score<int> scoreType = Score<int>(0, -999, -1001, -1000);	// levenshtein-score (match, mismatch, gapOpen, gapExtend)
-
-	if (options.hammingOnly)
-		scoreType.data_mismatch = -1;
-	resize(rows(align), 2);
-
-	::std::ofstream file;
-	::std::ostringstream fileName;
-	if (*options.output != 0)
-		fileName << options.output;
-	else
-		fileName << readFName << ".result";
-
-	file.open(fileName.str().c_str(), ::std::ios_base::out | ::std::ios_base::trunc);
-	if (!file.is_open()) {
-		::std::cerr << "Failed to open output file" << ::std::endl;
-		return;
-	}
-
-	String<int> hitCount;
-	fill(hitCount, length(reads), 0);
-
-	//////////////////////////////////////////////////////////////////////////////
-	// remove matches with equal ends
-
-	::std::sort(
-		begin(matches, Standard()),
-		end(matches, Standard()), 
-		LessRNoGEndPos<TMatch>());
-
-	typename	TMatch::TGPos gBegin = -1;
-	typename	TMatch::TGPos gEnd = -1;
-	unsigned	gseqNo = -1;
-	unsigned	readNo = -1;
-	char		orientation = '-';
-
-	typename Iterator<TMatches, Standard>::Type it = begin(matches, Standard());
-	typename Iterator<TMatches, Standard>::Type itEnd = end(matches, Standard());
-
-	for(; it != itEnd; ++it) 
-	{
-		if (gEnd == (*it).gEnd && orientation == (*it).orientation &&
-			gseqNo == (*it).gseqNo && readNo == (*it).rseqNo) 
-		{
-			(*it).gseqNo = (unsigned)-1;
-			(*it).rseqNo = (unsigned)-1;
-			(*it).orientation = '-';
-			continue;
-		}
-		readNo = (*it).rseqNo;
-		gseqNo = (*it).gseqNo;
-		gEnd = (*it).gEnd;
-		orientation = (*it).orientation;
-	}
-
-	//////////////////////////////////////////////////////////////////////////////
-	// remove matches with equal begins
-
-	switch (options.sortOrder) {
-		case 0:
-			::std::sort(
-				begin(matches, Standard()),
-				end(matches, Standard()), 
-				LessRNoGPos<TMatch>());
-			break;
-
-		case 1:
-			::std::sort(
-				begin(matches, Standard()),
-				end(matches, Standard()), 
-				LessGPosRNo<TMatch>());
-			break;
-	}
-
-	gBegin = -1;
-	gEnd = -1;
-	gseqNo = -1;
-	readNo = -1;
-	orientation = '-';
-
-	it = begin(matches, Standard());
-	itEnd = end(matches, Standard());
-
-	for(; it != itEnd; ++it) 
-	{
-		if ((*it).orientation == '-') continue;
-		if (gBegin == (*it).gBegin && readNo == (*it).rseqNo &&
-			gseqNo == (*it).gseqNo && orientation == (*it).orientation) 
-		{
-			(*it).gseqNo = (unsigned)-1;
-			(*it).rseqNo = (unsigned)-1;
-			(*it).orientation = '-';
-			continue;
-		}
-		readNo = (*it).rseqNo;
-		gseqNo = (*it).gseqNo;
-		gBegin = (*it).gBegin;
-		orientation = (*it).orientation;
-		++hitCount[readNo];
-	}
-
-	it = begin(matches, Standard());
-	itEnd = end(matches, Standard());
-
-	switch (options.outputFormat) 
-	{
-		case 0:	// Razer Format
-			for(; it != itEnd; ++it) 
-			{
-				if ((*it).orientation == '-') continue;
-
-				readNo = (*it).rseqNo;
-#ifdef RAZERS_MAXHITS				
-				if (hitCount[readNo] > options.maxHits) 
-				{
-					(*it).orientation = '-';
-					continue;
-				}
-#endif
-				gseqNo = (*it).gseqNo;
-				gBegin = (*it).gBegin;
-				gEnd = (*it).gEnd;
-				orientation = (*it).orientation;
-
-				unsigned	readLen = length(reads[readNo]);
-				double		percId;
-		
-				percId = 100.0 * (1.0 - (double)(*it).editDist / (double)readLen);
-
-				switch (options.readNaming)
-				{
-					// 0..filename is the read's Fasta id
-					case 0:
-						file << readIDs[readNo];
-						break;
-
-					// 1..filename is the read filename + seqNo
-					case 1:
-						file.fill('0');
-						file << readName << '#' << ::std::setw(pzeros) << readNo + 1;
-						break;
-
-					// 2..filename is the read sequence itself
-					case 2:
-						file << reads[readNo];
-				}
-
-				file << ',' << options.positionFormat << ',' << readLen << ',' << orientation << ',';
-
-				switch (options.genomeNaming)
-				{
-					// 0..filename is the read's Fasta id
-					case 0:
-						file << genomeIDs[gseqNo];
-						break;
-
-					// 1..filename is the read filename + seqNo
-					case 1:
-						file.fill('0');
-						file << genomeName << '#' << ::std::setw(gzeros) << gseqNo + 1;
-				}
-
-				file << ',' << (gBegin + options.positionFormat) << ',' << gEnd << ',' << ::std::setprecision(5) << percId << ::std::endl;
-
-				if (options.dumpAlignment) {
-					assignSource(row(align, 0), reads[readNo]);
-					assignSource(row(align, 1), infix(genomes[gseqNo], gBegin, gEnd));
-					if (orientation == 'R')
-						reverseComplementInPlace(source(row(align, 1)));
-					globalAlignment(align, scoreType);
-					dumpAlignment(file, align);
-				}
-			}
-			break;
-
-
-		case 1:	// Enhanced Fasta Format
-			for(; it != itEnd; ++it) 
-			{
-				if ((*it).orientation == '-') continue;
-
-				readNo = (*it).rseqNo;
-#ifdef RAZERS_MAXHITS				
-				if (hitCount[readNo] > options.maxHits)
-				{
-					(*it).orientation = '-';
-					continue;
-				}
-#endif
-				gseqNo = (*it).gseqNo;
-				gBegin = (*it).gBegin;
-				gEnd = (*it).gEnd;
-				orientation = (*it).orientation;
-
-				unsigned	readLen = length(reads[readNo]);
-				double		percId;
-
-				::std::string fastaID;
-				assign(fastaID, readIDs[readNo]);
-
-				int id = readNo;
-				int fragId = readNo;
-
-				size_t left = fastaID.find_first_of('[');
-				size_t right = fastaID.find_last_of(']');
-				if (left != fastaID.npos && right != fastaID.npos && left < right) 
-				{
-					fastaID.erase(right);
-					fastaID.erase(0, left + 1);
-					replace(fastaID.begin(), fastaID.end(), ',', ' ');
-					size_t pos = fastaID.find("id=");
-					if (pos != fastaID.npos) {
-						::std::istringstream iss(fastaID.substr(pos + 3));
-						iss >> id;
-					}
-					pos = fastaID.find("fragId=");
-					if (pos != fastaID.npos) {
-						::std::istringstream iss(fastaID.substr(pos + 7));
-						iss >> fragId;
-					}
-				}
-
-				percId = 100.0 * (1.0 - (double)(*it).editDist / (double)readLen);
-
-				if (orientation == 'F')
-					// forward strand
-					file << '>' << (gBegin + options.positionFormat) << ',' << gEnd;
-				else
-					// reverse strand (switch begin and end)
-					file << '>' << gEnd << ',' << (gBegin + options.positionFormat);
-				file << "[id=" << id << ",fragId=" << fragId;
-				file << ",errors=" << (*it).editDist << ",percId=" << ::std::setprecision(5) << percId;
-				file << ",ambiguity=" << hitCount[readNo] << ']' << ::std::endl;
-
-				file << reads[readNo] << ::std::endl;
-			}
-			break;
-	}
-
-	file.close();
-
-	// get empirical error distribution
-	if (!errorPrbFileName.empty() && options.hammingOnly)
-	{
-		it = begin(matches, Standard());
-		itEnd = end(matches, Standard());
-
-		unsigned unique = 0;
-		for (; it != itEnd; ++it) 
-		{
-			if ((*it).orientation == '-') continue;
-
-			Dna5String const &read = reads[(*it).rseqNo];
-			Dna5String genome = infix(genomes[(*it).gseqNo], (*it).gBegin, (*it).gEnd);
-			if ((*it).orientation == 'R')
-				reverseComplementInPlace(genome);
-
-			for (unsigned i = 0; i < length(read); ++i)
-				if (genome[i] != read[i])
-				{
-					if (!(genome[i] == 'N' && read[i] != 'N'))
-						++posError[i];
-				}
-			++unique;
-		}
-		file.open(errorPrbFileName.c_str(), ::std::ios_base::out | ::std::ios_base::trunc);
-		if (!file.is_open()) {
-			::std::cerr << "Failed to open error distribution file" << ::std::endl;
-			return;
-		}
-		for (unsigned i = 0; i < length(posError); ++i)
-			file << (double)posError[i] / unique << ::std::endl;
-		file.close();
-	}
-
-
-	options.timeDumpResults = SEQAN_PROTIMEDIFF(dump_time);
-
-	if (options._debugLevel >= 1)
-		::std::cerr << "Dumping results took             \t" << options.timeDumpResults << " seconds" << ::std::endl;
+	return RAZERS_INVALID_SHAPE;
 }
 
 }
