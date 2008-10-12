@@ -829,7 +829,7 @@ range(Finder<THaystack, Swift<TSpec> > &finder, TText &text)
 
 	if (hitBegin < 0) hitBegin = 0;
 	if (hitEnd > textEnd) hitEnd = textEnd;
-	return infix(text, hit.hstkPos, hitEnd);
+	return infix(text, hitBegin, hitEnd);
 }
 
 template <typename TNeedle, typename TIndexSpec, typename TSpec>
