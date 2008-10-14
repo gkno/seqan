@@ -600,9 +600,12 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 				// Create a corresponding edge
 				TSize i = idToPosition(str, id1);
 				TSize j = idToPosition(str, id2);
-				if (i<j) __getAlignmentStatistics(dist, i, j, nseq, matchLen, quality);
-				else __getAlignmentStatistics(dist, j, i, nseq, matchLen, quality);
-				
+				//if (i<j) __getAlignmentStatistics(dist, i, j, nseq, matchLen, quality);
+				//else __getAlignmentStatistics(dist, j, i, nseq, matchLen, quality);
+				if (i<j) __getAlignmentStatistics(dist, i, j, nseq, 1, 1);
+				else __getAlignmentStatistics(dist, j, i, nseq, 1, 1);
+
+
 				// Record the scores
 				resize(scores, to);
 				typedef typename Iterator<TScoreValues>::Type TScoreIter;
