@@ -67,9 +67,9 @@ __getAlignmentStatistics(String<TValue, TSpec>& dist,
 						 double quality)
 {
 	SEQAN_CHECKPOINT
-	TValue sim = matchLen * quality;
-	if (sim > 1000) sim = 1000;
-	assignValue(dist, i*nseq + j, 1000 - sim);
+	TValue sim = matchLen * matchLen * quality;
+	if (sim > 10000) sim = 10000;
+	assignValue(dist, i*nseq + j, 10000 - sim);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -84,9 +84,9 @@ __getAlignmentStatistics(Graph<Undirected<TCargo, TSpec> >& dist,
 						 double quality)
 {
 	SEQAN_CHECKPOINT
-	TCargo sim = matchLen * quality;
-	if (sim > 1000) sim = 1000;
-	addEdge(dist, i, j, 1000 - sim);
+	TCargo sim = matchLen * matchLen * quality;
+	if (sim > 10000) sim = 10000;
+	addEdge(dist, i, j, 10000 - sim);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -586,8 +586,7 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 		
 			// Overlap alignment
 			TSize from = length(matches);
-			// So we don't trust the band
-			TScoreValue myScore = globalAlignment(matches, pairSet, score_type, AlignConfig<true,true,true,true>(), Gotoh() );
+			TScoreValue myScore = globalAlignment(matches, pairSet, score_type, AlignConfig<true,true,true,true>(), (value(itDiag)).i1, (value(itDiag)).i2, BandedGotoh() );
 			TSize to = length(matches);
 
 			// Determine a sequence weight
@@ -597,12 +596,12 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 			getAlignmentStatistics(matches, pairSet, from, matchLen, overlapLen, alignLen);
 			double quality = (double) matchLen / (double) overlapLen;
 
-			if ((quality >= qltThres) && (matchLen >= 5)) {
+			if ((quality >= 0.8) && (matchLen >= 5)) {
 				// Create a corresponding edge
 				TSize i = idToPosition(str, id1);
 				TSize j = idToPosition(str, id2);
-				if (i<j) __getAlignmentStatistics(dist, i, j, nseq, 1, 1);
-				else __getAlignmentStatistics(dist, j, i, nseq, 1, 1);
+				if (i<j) __getAlignmentStatistics(dist, i, j, nseq, matchLen, quality);
+				else __getAlignmentStatistics(dist, j, i, nseq, matchLen, quality);
 				
 				// Record the scores
 				resize(scores, to);
