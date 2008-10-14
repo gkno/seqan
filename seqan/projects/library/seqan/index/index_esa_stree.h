@@ -252,6 +252,8 @@ This interval is the @Function.value@ of the iterator.
 	}
 
 
+//////////////////////////////////////////////////////////////////////////////
+
 	template < typename TIndex, typename TSpec >
 	inline bool _dfsReversedOrder(Iter<TIndex, VSTree< BottomUp<TSpec> > > &it) {
         return lcpAt(_dfsRange(it).i2 - 1, container(it)) > top(it.history).i2;
@@ -276,7 +278,9 @@ This interval is the @Function.value@ of the iterator.
 	}
 
 
-	// postorder bottom up iterator (dfs)
+//////////////////////////////////////////////////////////////////////////////
+// postorder bottom up iterator (dfs)
+
 	template < typename TIndex, typename TSpec, typename THideEmptyEdges >
 	inline void goNextImpl(
 		Iter<TIndex, VSTree< BottomUp<TSpec> > > &it, 
@@ -338,6 +342,7 @@ This interval is the @Function.value@ of the iterator.
 		} while (true);
 	}
 
+//////////////////////////////////////////////////////////////////////////////
 /**
 .Function.repLength:
 ..summary:Returns the length of the substring representing the path from root to $iterator$ node.
@@ -384,6 +389,8 @@ This interval is the @Function.value@ of the iterator.
 		return repLength(container(it), value(it));
 	}
 
+//////////////////////////////////////////////////////////////////////////////
+
 	template < typename TIndex, typename TSpec >
 	inline typename Size<TIndex>::Type
 	nodeDepth(Iter< TIndex, VSTree<TopDown<ParentLinks<TSpec> > > > const &it) 
@@ -391,6 +398,7 @@ This interval is the @Function.value@ of the iterator.
 		return length(it.history);
 	}
 
+//////////////////////////////////////////////////////////////////////////////
 /**
 .Function.parentRepLength:
 ..summary:Returns the length of the substring representing the path from root to $iterator$'s parent node.
@@ -410,6 +418,7 @@ This interval is the @Function.value@ of the iterator.
 	}
 
 
+//////////////////////////////////////////////////////////////////////////////
 /**
 .Function.emptyParentEdge:
 ..summary:Returns $true$ iff the edge label from the $iterator$ node to its parent is empty.
@@ -434,6 +443,7 @@ This interval is the @Function.value@ of the iterator.
 	}
 
 
+//////////////////////////////////////////////////////////////////////////////
 /**
 .Function.lca:
 ..summary:Returns the last common ancestor of two tree nodes.
@@ -487,6 +497,7 @@ This interval is the @Function.value@ of the iterator.
 		return i0;
 	}
 
+//////////////////////////////////////////////////////////////////////////////
 /**
 .Function.lcp:
 ..summary:Returns the length of the longest-common-prefix of two Suffix Tree nodes.
@@ -537,6 +548,7 @@ This interval is the @Function.value@ of the iterator.
 		return _lcp;
 	}
 
+//////////////////////////////////////////////////////////////////////////////
 ///.Function.container.param.iterator.type:Spec.VSTree Iterator
 
 	template < typename TIndex, class TSpec >
@@ -550,6 +562,7 @@ This interval is the @Function.value@ of the iterator.
 	}
 
 
+//////////////////////////////////////////////////////////////////////////////
 ///.Function.value.param.object.type:Spec.VSTree Iterator
 
 	template < typename TIndex, class TSpec >
@@ -564,7 +577,39 @@ This interval is the @Function.value@ of the iterator.
 		return it.vDesc;
 	}
 
+//////////////////////////////////////////////////////////////////////////////
+// property map interface
 
+	template < typename TSpec, typename TPropertyMap >
+	inline void
+	resizeVertexMap(Index<TSpec> const& index, TPropertyMap& pm)
+	{
+		resize(pm, 2 * length(index), Generous());
+	}
+
+	template < typename TSize >
+	inline typename Id< VertexESA<TSize> const >::Type
+	_getId(VertexESA<TSize> const &desc) 
+	{
+		TSize i2 = getValueI2(desc.range);
+		if (_isSizeInval(i2) || i2 == desc.parentRight)
+			// desc is the right-most child -> use left interval border
+			return 2 * getValueI1(desc.range);
+		else
+			// desc is not the right-most child -> use right interval border
+			// ensure that it doesn't collide with the left borders
+			return 2 * getValueI2(desc.range) - 1;
+	}
+
+	template < typename TSize >
+	inline typename Id< VertexESA<TSize> >::Type
+	_getId(VertexESA<TSize> &desc) 
+	{
+		return _getId(const_cast<VertexESA<TSize> const &>(desc));
+	}
+
+
+//////////////////////////////////////////////////////////////////////////////
 /**
 .Function.getOccurrence:
 ..summary:Returns an occurence of the @Function.representative@ substring in the index text.
@@ -583,6 +628,7 @@ This interval is the @Function.value@ of the iterator.
 	}
 
 
+//////////////////////////////////////////////////////////////////////////////
 /**
 .Function.countOccurrences:
 ..summary:Returns the number of occurences of @Function.representative@ in the index text.
@@ -604,6 +650,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Size<TIndex>::Typ
 			return value(it).range.i2 - value(it).range.i1;
 	}
 
+//////////////////////////////////////////////////////////////////////////////
 /**
 .Function.getOccurrences:
 ..summary:Returns all occurences of the @Function.representative@ substring in the index text.
@@ -625,6 +672,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 			return infix(indexSA(container(it)), value(it).range.i1, value(it).range.i2);
 	}
 
+//////////////////////////////////////////////////////////////////////////////
 /**
 .Function.alignment:
 ..summary:Returns an alignment of the occurences of the @Function.representative@ substring in the index text.
@@ -706,6 +754,7 @@ otherwise the seed returned is one many.
 		return align;
 	}
 
+//////////////////////////////////////////////////////////////////////////////
 /**
 .Function.getOccurrencesBWT:
 ..summary:Returns the characters left beside all occurence of the @Function.representative@ substring in the index text.
@@ -727,6 +776,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 			return infix(indexBWT(container(it)), value(it).range.i1, value(it).range.i2);
 	}
 
+//////////////////////////////////////////////////////////////////////////////
 /**
 .Function.representative:
 ..summary:Returns a substring representing the path from root to $iterator$ node.
@@ -746,6 +796,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 	}
 
 
+//////////////////////////////////////////////////////////////////////////////
 /**
 .Function.countChildren:
 ..summary:Count the number of children of a tree node.
