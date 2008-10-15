@@ -326,8 +326,6 @@ _align_banded_gotoh(TColumn& mat,
 				} else {
 					value(vertical, row * diagonalWidth + col) = (value(vertical, (row - 1) * diagonalWidth + (col + 1)) + gap);
 				}
-			} else {
-				value(vertical, row * diagonalWidth + col) = value(mat, (row - 1) * diagonalWidth + (col + 1)) + gapOpen;
 			}
 
 			// Get the new maximum for horizontal
