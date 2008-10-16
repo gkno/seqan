@@ -580,9 +580,9 @@ This interval is the @Function.value@ of the iterator.
 //////////////////////////////////////////////////////////////////////////////
 // property map interface
 
-	template < typename TSpec, typename TPropertyMap >
+	template < typename TText, typename TSpec, typename TPropertyMap >
 	inline void
-	resizeVertexMap(Index<TSpec> const& index, TPropertyMap& pm)
+	resizeVertexMap(Index<TText, TSpec> const& index, TPropertyMap& pm)
 	{
 		resize(pm, 2 * length(index), Generous());
 	}
