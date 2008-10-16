@@ -401,13 +401,13 @@ int main(int argc, const char *argv[]) {
 	assign(cfgOpt, "overlaps", "3");
 #endif
 	assign(cfgOpt, "window", "0");
-	assign(cfgOpt, "snp", "majority");
+	assign(cfgOpt, "call", "majority");
 	assign(cfgOpt, "output", "seqan");
 	assign(cfgOpt, "outfile", "readAlign.txt");
 
 	// Help Message
 	String<char> helpMsg;
-	append(helpMsg, "Usage: ./consensus -reads <FASTA File with Reads> [Options]\n");
+	append(helpMsg, "Usage: ./seqcons -reads <FASTA File with Reads> [Options]\n");
 	append(helpMsg, "\nOptions\n");
 
 	// Main options
@@ -421,9 +421,11 @@ int main(int argc, const char *argv[]) {
 	append(helpMsg, "-quality <Number>\n");
 	append(helpMsg, "\tMinimum quality of an overlap, default is 80 (for 80% identity).\n\n");
 	append(helpMsg, "-overlaps <Number>\n");
-	append(helpMsg, "\tNumber of overlaps that are computed per read, default is 5.\n\n");
+	append(helpMsg, "\tNumber of overlaps that are computed per read, default is 3.\n\n");
 	append(helpMsg, "-bandwidth <Number>\n");
-	append(helpMsg, "\tSpecifies the bandwidth, default is 10.\n\n");
+	append(helpMsg, "\tSpecifies the bandwidth, default is 8.\n\n");
+	append(helpMsg, "-call [majority | bayesian]\n");
+	append(helpMsg, "\tHow to call consensus bases, default is majority.\n\n");
 	append(helpMsg, "-outfile <Alignment Filename>\n");
 	append(helpMsg, "\tThe name of the output file, default is readAlign.txt.\n\n");
 	append(helpMsg, "-output [seqan | afg]\n");
@@ -450,8 +452,8 @@ int main(int argc, const char *argv[]) {
 	std::cout << "**************************************************" << std::endl;
 	std::cout << "* Consensus Computation                          *" << std::endl;
 	std::cout << "*                                                *" << std::endl;
-	std::cout << "* SeqAn::Consensus                               *" << std::endl;
-	std::cout << "* Version: 0.201 (14. October 2008)              *" << std::endl;
+	std::cout << "* SeqCons                                        *" << std::endl;
+	std::cout << "* Version: 0.202 (17. October 2008)              *" << std::endl;
 	std::cout << "**************************************************" << std::endl;
 	std::cout << std::endl;
 
@@ -642,7 +644,7 @@ int main(int argc, const char *argv[]) {
 		String<unsigned int> coverage;
 		String<char> gappedConsensus;
 		String<Dna> consensusSequence;
-		if (value(cfgOpt, "snp") == "majority") consensusCalling(alignmentMatrix, consensusSequence, gappedConsensus, coverage, alignDepth, Majority_Vote() );
+		if (value(cfgOpt, "call") == "majority") consensusCalling(alignmentMatrix, consensusSequence, gappedConsensus, coverage, alignDepth, Majority_Vote() );
 		else consensusCalling(alignmentMatrix, consensusSequence, gappedConsensus, coverage, alignDepth, Bayesian() );
 		std::cout << "Consensus done: " << SEQAN_PROTIMEUPDATE(profileTime) << " seconds" << std::endl;
 
