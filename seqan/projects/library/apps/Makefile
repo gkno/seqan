@@ -18,7 +18,7 @@ CXXFLAGS += -O9
 CXXFLAGS += -pedantic -W -Wall
 CXXFLAGS += -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
 
-TARGETS = razers/razers seqan_tcoffee/seqan_tcoffee razers/paramChooser
+TARGETS = razers/razers seqan_tcoffee/seqan_tcoffee seqcons/seqcons razers/paramChooser
 
 all: check_seqan_base $(TARGETS)
 razers: check_seqan_base razers/razers 

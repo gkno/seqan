@@ -389,7 +389,7 @@ read(TFile & file,
 				TSize clr2 = 0;
 				String<char> fieldIdentifier;
 				String<char> eid;
-				TSize begRead;
+				TSize begRead = 0;
 				while (c != '}') {
 					clear(fieldIdentifier);
 					_parse_readIdentifier(file, fieldIdentifier, c);
@@ -448,7 +448,7 @@ read(TFile & file,
 				String<char> fieldIdentifier;
 				String<char> eid;
 				appendValue(ctgSt.data_reads, String<GappedRead<> >());
-				TSize begContig;
+				TSize begContig = 0;
 				while (c != '}') {
 					// Are we entering a TLE block
 					if (c == '{') {
