@@ -1610,6 +1610,83 @@ void Test_Hmm() {
 	SEQAN_TASSERT(isSilent(hmm, testState1) != isSilent(hmm, testState2))
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
+void Test_LogProb() {
+	LogProb<> zero;
+	SEQAN_TASSERT(zero == 0.0)
+	LogProb<> lv(2.0);
+	SEQAN_TASSERT(lv == 2.0)
+	LogProb<float> lv2(lv);
+	SEQAN_TASSERT(lv2 == (float) 2.0)
+	lv2 = lv = 10.0;
+	SEQAN_TASSERT(lv == 10.0)
+	SEQAN_TASSERT(lv2 == (float) 10.0)
+	lv2 *= lv;
+	SEQAN_TASSERT(lv == 10.0)
+	SEQAN_TASSERT(lv2 == (float) 100.0)
+	lv2 *= 2.0;
+	SEQAN_TASSERT(lv == 10.0)
+	SEQAN_TASSERT(lv2 == (float) 200.0)
+	lv2 /= 2.0;
+	SEQAN_TASSERT(lv == 10.0)
+	SEQAN_TASSERT(lv2 == (float) 100.0)
+	lv2 /= lv;
+	SEQAN_TASSERT(lv == 10.0)
+	SEQAN_TASSERT(lv2 == (float) 10.0)
+	lv2 += 5.0;
+	SEQAN_TASSERT(lv == 10.0)
+	SEQAN_TASSERT(lv2 == (float) 15.0)
+	lv2 += lv;
+	SEQAN_TASSERT(lv == 10.0)
+	SEQAN_TASSERT(lv2 == (float) 25.0)
+	lv2 -= 5.0;
+	SEQAN_TASSERT(lv == 10.0)
+	SEQAN_TASSERT(lv2 == (float) 20.0)
+	lv2 -= lv;
+	SEQAN_TASSERT(lv == 10.0)
+	SEQAN_TASSERT(lv2 == (float) 10.0)
+	lv *= 2.0;
+	zero = lv + lv2;
+	SEQAN_TASSERT((int) lv == (int) 20.0)
+	SEQAN_TASSERT((int) zero == (int) 30.0)
+	zero = zero + 5.0;
+	SEQAN_TASSERT(zero == LogProb<>(35.0))
+	zero = lv - lv2;
+	SEQAN_TASSERT((int) zero == (int) 10.0)
+	zero = zero - 5.0;
+	SEQAN_TASSERT((int) zero == (int) 5.0)
+	lv = 20.0;
+	lv2 = 5.0;
+	zero = lv * lv2;
+	SEQAN_TASSERT((int) zero == (int) 100.0)
+	zero = zero * 5.0;
+	SEQAN_TASSERT((int) zero == (int) 500.0)
+	zero = lv / lv2;
+	zero = lv / 5.0;
+	lv = 1.0;
+	int intI = lv;
+	float floatI = lv;
+	double doubleI = lv;
+	SEQAN_TASSERT(intI == 1)
+	SEQAN_TASSERT(floatI == 1)
+	SEQAN_TASSERT(doubleI == 1.0)
+	lv = 10.0;
+	zero = 10.0;
+	SEQAN_TASSERT(lv == zero)
+	SEQAN_TASSERT(lv == 10.0)
+	SEQAN_TASSERT(!(lv != zero))
+	SEQAN_TASSERT(!(lv != 10.0))
+	SEQAN_TASSERT(lv < (zero + 2.0))
+	SEQAN_TASSERT(lv < 12.0)
+	SEQAN_TASSERT(lv > (zero - 2.0))
+	SEQAN_TASSERT(lv > 8.0)
+	SEQAN_TASSERT(lv >= (zero - 2.0))
+	SEQAN_TASSERT(lv >= 8.0)
+	SEQAN_TASSERT(lv <= (zero + 2.0))
+	SEQAN_TASSERT(lv <= 12.0)
+	std::cout << lv << std::endl;
+}
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -1621,6 +1698,7 @@ void Test_GraphTypes() {
 	Test_Tree();		// Trees
 	Test_Fragment();	// Fragment
 	Test_Hmm();			// Hmm
+	Test_LogProb();		// Test Logarithmic Probabilities
 
 	debug::verifyCheckpoints("projects/library/seqan/graph_types/graph_impl_directed.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph_types/graph_impl_undirected.h");

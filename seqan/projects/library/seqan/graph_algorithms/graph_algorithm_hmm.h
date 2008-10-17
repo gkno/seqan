@@ -46,27 +46,26 @@ namespace SEQAN_NAMESPACE_MAIN
 ..see:Function.forwardAlgorithm
 ..see:Function.backwardAlgorithm
 */
-template<typename TAlphabet, typename TCargo, typename TSpec, typename TSequence, typename TPath>
-inline TCargo
-viterbiAlgorithm(Graph<Hmm<TAlphabet, TCargo, TSpec> > const& hmm,
+template<typename TAlphabet, typename TProbability, typename TSpec, typename TSequence, typename TPath>
+inline TProbability
+viterbiAlgorithm(Graph<Hmm<TAlphabet, TProbability, TSpec> > const& hmm,
 				 TSequence const& seq,
 				 TPath& path)
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<Hmm<TAlphabet, TCargo, TSpec> > TGraph;
+	typedef Graph<Hmm<TAlphabet, TProbability, TSpec> > TGraph;
 	typedef typename Size<TGraph>::Type TSize;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
 
 	// Initialization
-	String<TCargo> vMat;
+	String<TProbability> vMat;
 	String<TSize> traceback;
 	TSize numCols = length(seq) + 2;
 	TSize numRows = getIdUpperBound(_getVertexIdManager(hmm));
-	TCargo infVal = infimumValue<TCargo>();
-	fill(vMat, numCols * numRows, infVal);
-	reserve(traceback, numCols * numRows);
-	value(vMat, getBeginState(hmm)) = (TCargo) 0;
+	fill(vMat, numCols * numRows, 0.0);
+	resize(traceback, numCols * numRows);
+	value(vMat, getBeginState(hmm)) = 1.0;
 	TVertexDescriptor bState = getBeginState(hmm);
 	TVertexDescriptor eState = getEndState(hmm);
 	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
@@ -76,7 +75,7 @@ viterbiAlgorithm(Graph<Hmm<TAlphabet, TCargo, TSpec> > const& hmm,
 	for(;!atEnd(itSilent);++itSilent) {
 		if (!isSilent(hmm, value(itSilent))) continue;
 		if ((value(itSilent) == bState) || (value(itSilent) == eState)) continue;
-		TCargo maxValue = infVal;
+		TProbability maxValue = 0.0;
 		TVertexDescriptor maxVertex = nilVertex;
 
 		// Find maximum
@@ -86,7 +85,7 @@ viterbiAlgorithm(Graph<Hmm<TAlphabet, TCargo, TSpec> > const& hmm,
 		for(;!atEnd(itMax);++itMax) {
 			if ((!isSilent(hmm, value(itMax))) ||
 				((isSilent(hmm, value(itMax))) && (value(itMax) < value(itSilent)))) {
-					TCargo local = value(vMat, value(itMax)) + std::log( (double) getTransitionProbability(hmm, *itMax, *itSilent));
+					TProbability local = value(vMat, value(itMax)) * getTransitionProbability(hmm, value(itMax), value(itSilent));
 					if (local > maxValue) {
 						maxValue = local;
 						maxVertex = *itMax;
@@ -110,13 +109,13 @@ viterbiAlgorithm(Graph<Hmm<TAlphabet, TCargo, TSpec> > const& hmm,
 		for(;!atEnd(itV);++itV) {
 			if ((value(itV) == bState) || (value(itV) == eState)) continue;
 			if (isSilent(hmm, value(itV))) continue;
-			TCargo maxValue = infVal;
+			TProbability maxValue = 0.0;
 			TVertexDescriptor maxVertex = nilVertex;
 
 			// Find maximum
 			TVertexIterator itMax(hmm);
 			for(;!atEnd(itMax);++itMax) {
-				TCargo local = value(vMat, (i-1) * numRows + value(itMax)) + std::log( (double) getTransitionProbability(hmm, *itMax, *itV));
+				TProbability local = value(vMat, (i-1) * numRows + value(itMax)) * getTransitionProbability(hmm, value(itMax), value(itV));
 				if (local > maxValue) {
 					maxValue = local;
 					maxVertex = *itMax;
@@ -124,9 +123,8 @@ viterbiAlgorithm(Graph<Hmm<TAlphabet, TCargo, TSpec> > const& hmm,
 			}
 
 			// Set traceback vertex
-			TCargo emis = std::log( (double) getEmissionProbability(hmm, *itV, value(seq, i-1)));
-			if ((maxVertex != nilVertex) && (emis > infVal)) {
-				value(vMat, i * numRows + *itV) = emis + maxValue;
+			if (maxVertex != nilVertex) {
+				value(vMat, i * numRows + *itV) = maxValue * getEmissionProbability(hmm, value(itV), value(seq, i-1));;
 				value(traceback, i * numRows + value(itV)) = maxVertex;
 			}
 		}
@@ -136,7 +134,7 @@ viterbiAlgorithm(Graph<Hmm<TAlphabet, TCargo, TSpec> > const& hmm,
 		for(;!atEnd(itV);++itV) {
 			if ((value(itV) == bState) || (value(itV) == eState)) continue;
 			if (!isSilent(hmm, value(itV))) continue;
-			TCargo maxValue = infVal;
+			TProbability maxValue = 0.0;
 			TVertexDescriptor maxVertex = nilVertex;
 
 			// Find maximum
@@ -146,7 +144,7 @@ viterbiAlgorithm(Graph<Hmm<TAlphabet, TCargo, TSpec> > const& hmm,
 			for(;!atEnd(itMax);++itMax) {
 				if ((!isSilent(hmm, value(itMax))) ||
 					((isSilent(hmm, value(itMax))) && (value(itMax) < value(itV)))) {
-						TCargo local = value(vMat, i * numRows + value(itMax)) + std::log( (double) getTransitionProbability(hmm, *itMax, *itV));
+						TProbability local = value(vMat, i * numRows + value(itMax)) * getTransitionProbability(hmm, value(itMax), value(itV));
 						if (local > maxValue) {
 							maxValue = local;
 							maxVertex = *itMax;
@@ -162,14 +160,14 @@ viterbiAlgorithm(Graph<Hmm<TAlphabet, TCargo, TSpec> > const& hmm,
 	}
 
 	// Termination
-	TCargo maxValue = infVal;
+	TProbability maxValue = 0.0;
 	TVertexDescriptor maxVertex = 0;
 	TVertexIterator itMax(hmm);
 	for(;!atEnd(itMax);++itMax) {
-		TCargo local = value(vMat, len * numRows + *itMax) + std::log( (double) getTransitionProbability(hmm, *itMax, eState));
+		TProbability local = value(vMat, len * numRows + *itMax) * getTransitionProbability(hmm, value(itMax), eState);
 		if (local > maxValue) {
 			maxValue = local;
-			maxVertex = *itMax;
+			maxVertex = value(itMax);
 		}
 	}
 	value(traceback, (len + 1) * numRows + eState) = maxVertex;
@@ -201,7 +199,7 @@ viterbiAlgorithm(Graph<Hmm<TAlphabet, TCargo, TSpec> > const& hmm,
 	//}
 	//std::cout << std::endl;
 
-	return (TCargo) value(vMat, (len+1) * numRows + eState);
+	return value(vMat, (len+1) * numRows + eState);
 }
 
 
@@ -215,48 +213,47 @@ viterbiAlgorithm(Graph<Hmm<TAlphabet, TCargo, TSpec> > const& hmm,
 ..param.hmm:In-parameter:Input HMM.
 ...type:Spec.Hmm
 ..param.seq:In-parameter:Input sequence.
-..returns:TCargo
+..returns:TProbability
 ...remarks:Probability of the sequence.
 ..see:Function.viterbiAlgorithm
 ..see:Function.backwardAlgorithm
 */
-template<typename TAlphabet, typename TCargo, typename TSpec, typename TSequence>
-inline TCargo
-forwardAlgorithm(Graph<Hmm<TAlphabet, TCargo, TSpec> > const& hmm,
+template<typename TAlphabet, typename TProbability, typename TSpec, typename TSequence>
+inline TProbability
+forwardAlgorithm(Graph<Hmm<TAlphabet, TProbability, TSpec> > const& hmm,
 				 TSequence const& seq)
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<Hmm<TAlphabet, TCargo, TSpec> > TGraph;
+	typedef Graph<Hmm<TAlphabet, TProbability, TSpec> > TGraph;
 	typedef typename Size<TGraph>::Type TSize;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
 
 	// Initialization
-	String<TCargo> fMat;
+	String<TProbability> fMat;
 	TSize numCols = length(seq) + 2;
 	TSize numRows = getIdUpperBound(_getVertexIdManager(hmm));
-	fill(fMat, numCols * numRows, 0);
-	value(fMat, getBeginState(hmm)) = (TCargo) 1;
+	fill(fMat, numCols * numRows, 0.0);
+	value(fMat, getBeginState(hmm)) = 1.0;
 	TVertexDescriptor eState = getEndState(hmm);
-	TSize scaling = 10;
 
 	// Recurrence
 	TSize len = length(seq);
 	for(TSize i=1; i<=len; ++i) {
 		TVertexIterator itV(hmm);
 		for(;!atEnd(itV);++itV) {
-			TCargo sum = 0;
+			TProbability sum = 0.0;
 			TVertexIterator itAll(hmm);
-			for(;!atEnd(itAll);++itAll) sum += value(fMat, (i-1) * numRows + *itAll) * getTransitionProbability(hmm, *itAll, *itV);
-			value(fMat, i * numRows + *itV) = getEmissionProbability(hmm, *itV, seq[i-1]) * sum * scaling;
+			for(;!atEnd(itAll);++itAll) sum += value(fMat, (i-1) * numRows + value(itAll)) * getTransitionProbability(hmm, value(itAll), value(itV));
+			value(fMat, i * numRows + value(itV)) = getEmissionProbability(hmm, value(itV), seq[i-1]) * sum;
 		}
 	}
 
 	// Termination
-	TCargo sum = 0;
+	TProbability sum = 0.0;
 	TVertexIterator itAll(hmm);
 	for(;!atEnd(itAll);++itAll) {
-		sum += value(fMat, len * numRows + *itAll) * getTransitionProbability(hmm, *itAll, eState);
+		sum += value(fMat, len * numRows + value(itAll)) * getTransitionProbability(hmm, value(itAll), eState);
 	}
 	value(fMat, (len+1) * numRows + eState) = sum;
 
@@ -268,7 +265,7 @@ forwardAlgorithm(Graph<Hmm<TAlphabet, TCargo, TSpec> > const& hmm,
 	//	std::cout << std::endl;
 	//}
 
-	return (TCargo) (value(fMat, (len+1) * numRows + eState) / ( (double) std::pow( (double) scaling, (double) len)));
+	return value(fMat, (len+1) * numRows + eState);
 }
 
 
@@ -282,50 +279,49 @@ forwardAlgorithm(Graph<Hmm<TAlphabet, TCargo, TSpec> > const& hmm,
 ..param.hmm:In-parameter:Input HMM.
 ...type:Spec.Hmm
 ..param.seq:In-parameter:Input sequence.
-..returns:TCargo
+..returns:TProbability
 ...remarks:Probability of the sequence.
 ..see:Function.viterbiAlgorithm
 ..see:Function.forwardAlgorithm
 */
-template<typename TAlphabet, typename TCargo, typename TSpec, typename TSequence>
-inline TCargo
-backwardAlgorithm(Graph<Hmm<TAlphabet, TCargo, TSpec> > const& hmm,
+template<typename TAlphabet, typename TProbability, typename TSpec, typename TSequence>
+inline TProbability
+backwardAlgorithm(Graph<Hmm<TAlphabet, TProbability, TSpec> > const& hmm,
 				  TSequence const& seq)
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<Hmm<TAlphabet, TCargo, TSpec> > TGraph;
+	typedef Graph<Hmm<TAlphabet, TProbability, TSpec> > TGraph;
 	typedef typename Size<TGraph>::Type TSize;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
 
 	// Initialization
-	String<TCargo> bMat;
+	String<TProbability> bMat;
 	TSize numCols = length(seq) + 1;
 	TSize numRows = getIdUpperBound(_getVertexIdManager(hmm));
-	fill(bMat, numCols * numRows, 0);
+	fill(bMat, numCols * numRows, 0.0);
 	TVertexDescriptor bState = getBeginState(hmm);
 	TVertexDescriptor eState = getEndState(hmm);
 	TSize len = length(seq);
 	TVertexIterator itAll(hmm);
-	TSize scaling = 10;
-	for(;!atEnd(itAll);++itAll) value(bMat, len * numRows + *itAll) = getTransitionProbability(hmm, *itAll, eState) * scaling;
+	for(;!atEnd(itAll);++itAll) value(bMat, len * numRows + value(itAll)) = getTransitionProbability(hmm, value(itAll), eState);
 	
 	// Recurrence
 	for(TSize i=len - 1; i>0; --i) {
 		TVertexIterator itV(hmm);
 		for(;!atEnd(itV);++itV) {
-			TCargo sum = 0;
+			TProbability sum = 0.0;
 			TVertexIterator itAll(hmm);
-			for(;!atEnd(itAll);++itAll) sum += value(bMat, (i+1) * numRows + *itAll) * getTransitionProbability(hmm, *itV, *itAll) * getEmissionProbability(hmm, *itAll, seq[i]);
-			value(bMat, i * numRows + *itV) =  sum * scaling;
+			for(;!atEnd(itAll);++itAll) sum += value(bMat, (i+1) * numRows + value(itAll)) * getTransitionProbability(hmm, value(itV), value(itAll)) * getEmissionProbability(hmm, value(itAll), value(seq, i));
+			value(bMat, i * numRows + value(itV)) =  sum;
 		}
 	}
 
 	// Termination
-	TCargo sum = 0;
+	TProbability sum = 0.0;
 	goBegin(itAll);
 	for(;!atEnd(itAll);++itAll) {
-		sum += value(bMat, 1 * numRows + *itAll) * getTransitionProbability(hmm, bState, *itAll) * getEmissionProbability(hmm, *itAll, seq[0]);
+		sum += value(bMat, 1 * numRows + value(itAll)) * getTransitionProbability(hmm, bState, value(itAll)) * getEmissionProbability(hmm, value(itAll), value(seq, 0));
 	}
 	value(bMat, bState) = sum;
 
@@ -337,7 +333,7 @@ backwardAlgorithm(Graph<Hmm<TAlphabet, TCargo, TSpec> > const& hmm,
 	//	std::cout << std::endl;
 	//}
 
-	return (TCargo) (value(bMat, bState) / ( (double) std::pow( (double) scaling, (double) len)));
+	return value(bMat, bState);
 }
 
 }// namespace SEQAN_NAMESPACE_MAIN

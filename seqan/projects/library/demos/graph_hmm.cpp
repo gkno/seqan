@@ -5,11 +5,11 @@
 using namespace seqan;
 
 int main() {
-
-	typedef double TProbability;
+	typedef LogProb<> TProbability;
+	//typedef double TProbability;
 	typedef Dna TAlphabet;
 	typedef Size<TAlphabet>::Type TSize;
-	typedef Graph<Hmm<TAlphabet, TProbability> > THmm;
+	typedef Graph<Hmm<TAlphabet, TProbability, Default()> > THmm;
 	typedef VertexDescriptor<THmm>::Type TVertexDescriptor;
 	typedef EdgeDescriptor<THmm>::Type TEdgeDescriptor;
 	
@@ -37,7 +37,7 @@ int main() {
 	emissionProbability(hmm, spliceState, dnaA) = 0.05;
 	emissionProbability(hmm, spliceState, dnaC) = 0.0;
 	emissionProbability(hmm, spliceState, dnaG) = 0.95;
-	emissionProbability(hmm, spliceState, dnaT) = 0;
+	emissionProbability(hmm, spliceState, dnaT) = 0.0;
 
 	// Add intron state
 	TVertexDescriptor intronState = addVertex(hmm);
@@ -67,8 +67,8 @@ int main() {
 	String<TVertexDescriptor> path;
 	TProbability p = viterbiAlgorithm(hmm, sequence, path);
 	std::cout << "Viterbi algorithm" << std::endl;
-	std::cout << "Log probability of best path: " << p << std::endl;
-	std::cout << "Best path: " << std::endl;
+	std::cout << "Probability of best path: " << p << std::endl;
+	std::cout << "Sequence: " << std::endl;
 	for(TSize i = 0; i<length(sequence); ++i) std::cout << sequence[i] << ',';
 	std::cout << std::endl;
 	std::cout << "State path: " << std::endl;
@@ -95,8 +95,8 @@ int main() {
 
 	//// HMM with silent states
 	//// Silent states must be numbered in increasing order from left to right!
-
-	//typedef double TProbability;
+	//typedef LogProb<> TProbability;
+	////typedef double TProbability;
 	//typedef Dna TAlphabet;
 	//typedef Size<TAlphabet>::Type TSize;
 	//typedef Graph<Hmm<TAlphabet, TProbability> > THmm;
@@ -169,8 +169,8 @@ int main() {
 	//String<TVertexDescriptor> path;
 	//TProbability p = viterbiAlgorithm(hmm, sequence, path);
 	//std::cout << "Viterbi algorithm" << std::endl;
-	//std::cout << "Log probability of best path: " << p << std::endl;
-	//std::cout << "Best path: " << std::endl;
+	//std::cout << "Probability of the best path: " << p << std::endl;
+	//std::cout << "Sequence: " << std::endl;
 	//for(TSize i = 0; i<length(sequence); ++i) std::cout << sequence[i] << ',';
 	//std::cout << std::endl;
 	//std::cout << "State path: " << std::endl;
@@ -181,15 +181,15 @@ int main() {
 	//}
 	//std::cout << std::endl;
 
-	//// Forward algorithm
-	//std::cout << "Forward algorithm" << std::endl;
-	//p = forwardAlgorithm(hmm, sequence);
-	//std::cout << "Probability that the HMM generated the sequence: " << p << std::endl;
+	////// Forward algorithm
+	////std::cout << "Forward algorithm" << std::endl;
+	////p = forwardAlgorithm(hmm, sequence);
+	////std::cout << "Probability that the HMM generated the sequence: " << p << std::endl;
 
-	//// Backward algorithm
-	//std::cout << "Backward algorithm" << std::endl;
-	//p = backwardAlgorithm(hmm, sequence);
-	//std::cout << "Probability that the HMM generated the sequence: " << p << std::endl;
+	////// Backward algorithm
+	////std::cout << "Backward algorithm" << std::endl;
+	////p = backwardAlgorithm(hmm, sequence);
+	////std::cout << "Probability that the HMM generated the sequence: " << p << std::endl;
 
 
 	return 0;
