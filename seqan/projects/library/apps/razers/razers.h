@@ -586,9 +586,8 @@ int mapReads(
 
 	// init edit distance verifiers
 	String<TMyersPattern> forwardPatterns;
-	if (options.hammingOnly)
-		options.compMask[4] = (options.matchN)? 15: 0;
-	else
+	options.compMask[4] = (options.matchN)? 15: 0;
+	if (!options.hammingOnly)
 	{
 		unsigned readCount = countSequences(swiftIndex);
 		resize(forwardPatterns, readCount);
@@ -644,6 +643,104 @@ int mapReads(
 	return 0;
 }
 
+/*
+//////////////////////////////////////////////////////////////////////////////
+// Find read matches in many genome sequences
+template <
+	typename TMatches, 
+	typename TReadSet, 
+	typename TSpec, 
+	typename TShape,
+	typename TSwiftSpec >
+int mapReads(
+	TMatches &				matches,
+	const char *			genomeFileName,
+	StringSet<CharString> &	genomeNames,	// genome names, taken from the Fasta file
+	TReadSet const &		readSet,
+	RazerSOptions<TSpec> &	options,
+	TShape const &			shape,
+	Swift<TSwiftSpec> const)
+{
+	typedef typename Value<TReadSet>::Type				TRead;
+	typedef Index<TReadSet, Index_QGram<TShape> >		TIndex;			// q-gram index
+	typedef Pattern<TIndex, Swift<TSwiftSpec> >			TSwiftPattern;	// filter
+	typedef Pattern<TRead, MyersUkkonen>				TMyersPattern;	// verifier
+
+	// open genome file	
+	::std::ifstream file;
+	file.open(genomeFileName, ::std::ios_base::in | ::std::ios_base::binary);
+	if (!file.is_open())
+		return RAZERS_GENOME_FAILED;
+
+	// configure q-gram index
+	TIndex swiftIndex(readSet, shape);
+	cargo(swiftIndex).abundanceCut = options.abundanceCut;
+	cargo(swiftIndex)._debugLevel = options._debugLevel;
+
+	// configure Swift
+	TSwiftPattern swiftPattern(swiftIndex);
+	swiftPattern.params.minThreshold = options.threshold;
+	swiftPattern.params.tabooLength = options.tabooLength;
+
+	// init edit distance verifiers
+	String<TMyersPattern> forwardPatterns;
+	options.compMask[4] = (options.matchN)? 15: 0;
+	if (!options.hammingOnly)
+	{
+		unsigned readCount = countSequences(swiftIndex);
+		resize(forwardPatterns, readCount);
+		for(unsigned i = 0; i < readCount; ++i)
+		{
+			setHost(forwardPatterns[i], indexText(swiftIndex)[i]);
+			_patternMatchNOfPattern(forwardPatterns[i], options.matchN);
+			_patternMatchNOfFinder(forwardPatterns[i], options.matchN);
+		}
+	}
+
+	// clear stats
+	options.FP = 0;
+	options.TP = 0;
+	options.timeMapReads = 0;
+	options.timeDumpResults = 0;
+
+	CharString	id;
+	Dna5String	genome;
+
+	// iterate over genome sequences
+	SEQAN_PROTIMESTART(find_time);
+	for(unsigned gseqNo = 0; !_streamEOF(file); ++gseqNo)
+	{
+		if (options.genomeNaming == 0)
+		{
+			readID(file, id, Fasta());			// read Fasta id
+			appendValue(genomeNames, id, Generous());
+		}
+		read(file, genome, Fasta());			// read Fasta sequence
+
+		if (options.forward)
+			findReads(matches, genome, gseqNo, swiftPattern, forwardPatterns, 'F', options);
+
+		if (options.reverse)
+		{
+			reverseComplementInPlace(genome);
+			findReads(matches, genome, gseqNo, swiftPattern, forwardPatterns, 'R', options);
+		}
+
+	}
+	options.timeMapReads += SEQAN_PROTIMEDIFF(find_time);
+	file.close();
+
+	if (options._debugLevel >= 1)
+		::std::cerr << ::std::endl << "Finding reads took               \t" << options.timeMapReads << " seconds" << ::std::endl;
+	if (options._debugLevel >= 2) {
+		::std::cerr << ::std::endl;
+		::std::cerr << "___FILTRATION_STATS____" << ::std::endl;
+		::std::cerr << "Swift FP: " << options.FP << ::std::endl;
+		::std::cerr << "Swift TP: " << options.TP << ::std::endl;
+	}
+	return 0;
+}
+*/
 
 //////////////////////////////////////////////////////////////////////////////
 // Wrapper for different template specializations

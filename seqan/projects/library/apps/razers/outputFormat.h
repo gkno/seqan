@@ -117,6 +117,107 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
 	};
 
+//////////////////////////////////////////////////////////////////////////////
+// Determine error distribution
+template <typename TErrDistr, typename TMatches, typename TReads, typename TGenomes, typename TSpec>
+inline unsigned
+getErrorDistribution(
+	TErrDistr &posError, 
+	TMatches &matches, 
+	TReads &reads, 
+	TGenomes &genomes, 
+	RazerSOptions<TSpec> &options)
+{
+	typename Iterator<TMatches, Standard>::Type	it = begin(matches, Standard());
+	typename Iterator<TMatches, Standard>::Type	itEnd = end(matches, Standard());
+
+	Dna5String genome;
+	unsigned unique = 0;
+	for (; it != itEnd; ++it) 
+	{
+		if ((*it).orientation == '-') continue;
+
+		Dna5String const &read = reads[(*it).rseqNo];
+		genome = infix(genomes[(*it).gseqNo], (*it).gBegin, (*it).gEnd);
+		if ((*it).orientation == 'R')
+			reverseComplementInPlace(genome);
+
+		for (unsigned i = 0; i < length(posError) && i < length(read); ++i)
+			if ((options.compMask[ordValue(genome[i])] & options.compMask[ordValue(read[i])]) == 0)
+				++posError[i];
+		++unique;
+	}
+	return unique;
+}
+
+template <typename TErrDistr, typename TCount, typename TMatches, typename TReads, typename TGenomes, typename TSpec>
+inline unsigned
+getErrorDistribution(
+	TErrDistr &posError,
+	TCount &insertions,
+	TCount &deletions,
+	TMatches &matches, 
+	TReads &reads, 
+	TGenomes &genomes, 
+	RazerSOptions<TSpec> &options)
+{
+	typedef Align<String<Dna5>, ArrayGaps> TAlign;
+	typedef typename Row<TAlign>::Type TRow;
+	typedef typename Iterator<TRow>::Type TIter;
+
+	typedef typename Position<typename Rows<TAlign>::Type>::Type TRowsPosition;
+	typedef typename Position<TAlign>::Type TPosition;
+
+	typename Iterator<TMatches, Standard>::Type	it = begin(matches, Standard());
+	typename Iterator<TMatches, Standard>::Type	itEnd = end(matches, Standard());
+
+	Align<Dna5String, ArrayGaps> align;
+	Score<int> scoreType = Score<int>(0, -999, -1001, -1000);	// levenshtein-score (match, mismatch, gapOpen, gapExtend)
+	if (options.hammingOnly)
+		scoreType.data_mismatch = -1;
+	resize(rows(align), 2);
+
+	unsigned unique = 0;
+	for (; it != itEnd; ++it) 
+	{
+		if ((*it).orientation == '-') continue;
+
+		assignSource(row(align, 0), reads[(*it).rseqNo]);
+		assignSource(row(align, 1), infix(genomes[(*it).gseqNo], (*it).gBegin, (*it).gEnd));
+		if ((*it).orientation == 'R')
+			reverseComplementInPlace(source(row(align, 1)));
+		globalAlignment(align, scoreType);
+		
+		TRow& row0 = row(align, 0);
+		TRow& row1 = row(align, 1);
+		
+		TPosition begin = beginPosition(cols(align));
+		TPosition end = endPosition(cols(align));
+		
+		TIter it0 = iter(row0, begin);
+		TIter it1 = iter(row1, begin);
+		TIter end0 = iter(row0, end);
+		
+		unsigned pos = 0;
+		for (; it0 != end0 && pos < length(posError); ++it0, ++it1)
+		{
+			if (isGap(it0))
+				++insertions;
+			else
+			{
+				if (isGap(it1))
+					++deletions;
+				else
+					if ((options.compMask[ordValue(getValue(it0))] & options.compMask[ordValue(getValue(it1))]) == 0)
+						++posError[pos];
+				++pos;
+			}
+		}
+		++unique;
+	}
+	return unique;
+}
+
 
 //////////////////////////////////////////////////////////////////////////////
 // Dump an alignment
@@ -336,8 +437,6 @@ void dumpMatches(
 	for (unsigned i = 0; i < length(reads); ++i)
 		if (maxReadLength < length(reads[i]))
 			maxReadLength = length(reads[i]);
-	String<int> posError;
-	fill(posError, maxReadLength, 0);
 
 	// match statistics
 	unsigned maxErrors = (int)(options.errorRate * maxReadLength);
@@ -611,39 +710,32 @@ void dumpMatches(
 	file.close();
 
 	// get empirical error distribution
-	if (!errorPrbFileName.empty() && options.hammingOnly)
+	if (!errorPrbFileName.empty())
 	{
-		it = begin(matches, Standard());
-		itEnd = end(matches, Standard());
-
-		unsigned unique = 0;
-		for (; it != itEnd; ++it) 
-		{
-			if ((*it).orientation == '-') continue;
-
-			Dna5String const &read = reads[(*it).rseqNo];
-			Dna5String genome = infix(genomes[(*it).gseqNo], (*it).gBegin, (*it).gEnd);
-			if ((*it).orientation == 'R')
-				reverseComplementInPlace(genome);
-
-			for (unsigned i = 0; i < length(read); ++i)
-				if (genome[i] != read[i])
-				{
-					if (!(genome[i] == 'N' && read[i] != 'N'))
-						++posError[i];
-				}
-			++unique;
-		}
 		file.open(errorPrbFileName.c_str(), ::std::ios_base::out | ::std::ios_base::trunc);
-		if (!file.is_open()) {
-			::std::cerr << "Failed to open error distribution file" << ::std::endl;
-			return;
-		}
-		for (unsigned i = 0; i < length(posError); ++i)
-			file << (double)posError[i] / unique << ::std::endl;
-		file.close();
-	}
+		if (file.is_open())
+		{
+			String<long double> posError;
+			unsigned unique = 0;
+			unsigned insertions = 0;
+			unsigned deletions = 0;
+			fill(posError, maxReadLength, 0);
+			
+			if (options.hammingOnly)
+				unique = getErrorDistribution(posError, matches, reads, genomes, options);
+			else
+			{
+				unique = getErrorDistribution(posError, insertions, deletions, matches, reads, genomes, options);
+				::std::cerr << "insertProb: " << (double)insertions / ((double)length(posError) * (double)unique) << ::std::endl;
+				::std::cerr << "deleteProb: " << (double)deletions / ((double)length(posError) * (double)unique) << ::std::endl;
+			}
 
+			for (unsigned i = 0; i < length(posError); ++i)
+				file << (double)posError[i] / (double)unique << ::std::endl;
+			file.close();
+		} else
+			::std::cerr << "Failed to open error distribution file" << ::std::endl;
+	}
 
 	options.timeDumpResults = SEQAN_PROTIMEDIFF(dump_time);
 
