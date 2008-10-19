@@ -475,17 +475,18 @@ matchVerify(
 // Find read matches in one genome sequence
 template <
 	typename TMatches, 
+	typename TGenome,
 	typename TReadIndex, 
 	typename TSwiftSpec, 
 	typename TVerifier,
 	typename TSpec >
 void findReads(
-	TMatches &matches,			// resulting matches
-	TGenome &genome,			// genome ...
-	unsigned gseqNo,			// ... and its sequence number
+	TMatches &matches,				// resulting matches
+	TGenome &genome,				// genome ...
+	unsigned gseqNo,				// ... and its sequence number
 	Pattern<TReadIndex, Swift<TSwiftSpec> > &swiftPattern,
 	TVerifier &forwardPatterns,
-	char orientation,			// q-gram index of reads
+	char orientation,				// q-gram index of reads
 	RazerSOptions<TSpec> &options)
 {
 	typedef typename Fibre<TReadIndex, Fibre_Text>::Type	TReadSet;
@@ -547,7 +548,7 @@ void findReads(
 
 
 //////////////////////////////////////////////////////////////////////////////
-// Find read matches in many genome sequences
+// Find read matches in many genome sequences (import from Fasta)
 template <
 	typename TMatches, 
 	typename TReadSet, 
@@ -643,19 +644,19 @@ int mapReads(
 	return 0;
 }
 
-/*
+
 //////////////////////////////////////////////////////////////////////////////
-// Find read matches in many genome sequences
+// Find read matches in many genome sequences (given as StringSet)
 template <
 	typename TMatches, 
+	typename TGenomeSet,
 	typename TReadSet, 
 	typename TSpec, 
 	typename TShape,
 	typename TSwiftSpec >
 int mapReads(
 	TMatches &				matches,
-	const char *			genomeFileName,
-	StringSet<CharString> &	genomeNames,	// genome names, taken from the Fasta file
+	TGenomeSet &			genomeSet,
 	TReadSet const &		readSet,
 	RazerSOptions<TSpec> &	options,
 	TShape const &			shape,
@@ -665,12 +666,6 @@ int mapReads(
 	typedef Index<TReadSet, Index_QGram<TShape> >		TIndex;			// q-gram index
 	typedef Pattern<TIndex, Swift<TSwiftSpec> >			TSwiftPattern;	// filter
 	typedef Pattern<TRead, MyersUkkonen>				TMyersPattern;	// verifier
-
-	// open genome file	
-	::std::ifstream file;
-	file.open(genomeFileName, ::std::ios_base::in | ::std::ios_base::binary);
-	if (!file.is_open())
-		return RAZERS_GENOME_FAILED;
 
 	// configure q-gram index
 	TIndex swiftIndex(readSet, shape);
@@ -704,31 +699,23 @@ int mapReads(
 	options.timeDumpResults = 0;
 
 	CharString	id;
-	Dna5String	genome;
-
+	
 	// iterate over genome sequences
 	SEQAN_PROTIMESTART(find_time);
-	for(unsigned gseqNo = 0; !_streamEOF(file); ++gseqNo)
+	for(unsigned gseqNo = 0; gseqNo < length(genomeSet); ++gseqNo)
 	{
-		if (options.genomeNaming == 0)
-		{
-			readID(file, id, Fasta());			// read Fasta id
-			appendValue(genomeNames, id, Generous());
-		}
-		read(file, genome, Fasta());			// read Fasta sequence
-
 		if (options.forward)
-			findReads(matches, genome, gseqNo, swiftPattern, forwardPatterns, 'F', options);
+			findReads(matches, genomeSet[gseqNo], gseqNo, swiftPattern, forwardPatterns, 'F', options);
 
 		if (options.reverse)
 		{
-			reverseComplementInPlace(genome);
-			findReads(matches, genome, gseqNo, swiftPattern, forwardPatterns, 'R', options);
+			reverseComplementInPlace(genomeSet[gseqNo]);
+			findReads(matches, genomeSet[gseqNo], gseqNo, swiftPattern, forwardPatterns, 'R', options);
+			reverseComplementInPlace(genomeSet[gseqNo]);
 		}
 
 	}
 	options.timeMapReads += SEQAN_PROTIMEDIFF(find_time);
-	file.close();
 
 	if (options._debugLevel >= 1)
 		::std::cerr << ::std::endl << "Finding reads took               \t" << options.timeMapReads << " seconds" << ::std::endl;
@@ -740,7 +727,7 @@ int mapReads(
 	}
 	return 0;
 }
-*/
+
 
 //////////////////////////////////////////////////////////////////////////////
 // Wrapper for different template specializations
@@ -780,6 +767,46 @@ int mapReads(
 
 		if (stringToShape(gapped, options.shape))
 			return mapReads(matches, genomeFileName, genomeNames, readSet, options, gapped, Swift<SwiftSemiGlobal>());
+	}
+
+	return RAZERS_INVALID_SHAPE;
+}
+
+template <typename TMatches, typename TGenomeSet, typename TReadSet, typename TSpec>
+int mapReads(
+	TMatches &				matches,
+	TGenomeSet &			genomeSet,
+	TReadSet const &		readSet, 
+	RazerSOptions<TSpec> &	options)
+{
+	Shape<Dna, SimpleShape>		ungapped;
+	Shape<Dna, OneGappedShape>	onegapped;
+	Shape<Dna, GappedShape>		gapped;
+
+	// 2x3 SPECIALIZATION
+
+	if (options.hammingOnly)
+	{
+		// select best-fitting shape
+		if (stringToShape(ungapped, options.shape))
+			return mapReads(matches, genomeSet, readSet, options, ungapped, Swift<SwiftSemiGlobalHamming>());
+		
+		if (stringToShape(onegapped, options.shape))
+			return mapReads(matches, genomeSet, readSet, options, onegapped, Swift<SwiftSemiGlobalHamming>());
+
+		if (stringToShape(gapped, options.shape))
+			return mapReads(matches, genomeSet, readSet, options, gapped, Swift<SwiftSemiGlobalHamming>());
+	} 
+	else 
+	{
+		if (stringToShape(ungapped, options.shape))
+			return mapReads(matches, genomeSet, readSet, options, ungapped, Swift<SwiftSemiGlobal>());
+		
+		if (stringToShape(onegapped, options.shape))
+			return mapReads(matches, genomeSet, readSet, options, onegapped, Swift<SwiftSemiGlobal>());
+
+		if (stringToShape(gapped, options.shape))
+			return mapReads(matches, genomeSet, readSet, options, gapped, Swift<SwiftSemiGlobal>());
 	}
 
 	return RAZERS_INVALID_SHAPE;
