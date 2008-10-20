@@ -181,8 +181,16 @@ public:
 	template<typename TValue2, typename TSpec2>
 	LogProb& operator+=(LogProb<TValue2, TSpec2> const& rhs) {
 		SEQAN_CHECKPOINT
-		// ToDo: Table Look-Up
-		data_value = std::log(std::exp(data_value) + std::exp(rhs.data_value));
+		if (data_value > rhs.data_value) {
+			if ((rhs.data_value == std::log(0.0)) || (data_value - rhs.data_value > 100)) return *this;
+			data_value = data_value + std::log(1 + std::exp(rhs.data_value - data_value));
+		} else {
+			if ((data_value == std::log(0.0)) || (rhs.data_value - data_value > 100)) {
+				data_value = rhs.data_value;
+				return *this;
+			}
+			data_value = rhs.data_value + std::log(1 + std::exp(data_value - rhs.data_value));
+		}
 		return *this;
 	}
 
@@ -216,8 +224,16 @@ public:
 	template<typename TValue2, typename TSpec2>
 	LogProb& operator-=(LogProb<TValue2, TSpec2> const& rhs) {
 		SEQAN_CHECKPOINT
-		// ToDo: Table Look-Up
-		data_value = std::log(std::exp(data_value) - std::exp(rhs.data_value));
+		if (data_value > rhs.data_value) {
+			if ((rhs.data_value == std::log(0.0)) || (data_value - rhs.data_value > 100)) return *this;
+			data_value = data_value + std::log(1 - std::exp(rhs.data_value - data_value));
+		} else {
+			if ((data_value == std::log(0.0)) || (rhs.data_value - data_value > 100)) {
+				data_value = rhs.data_value;
+				return *this;
+			}
+			data_value = rhs.data_value + std::log(1 - std::exp(data_value - rhs.data_value));
+		}
 		return *this;
 	}
 
