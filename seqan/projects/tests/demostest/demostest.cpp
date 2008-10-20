@@ -201,6 +201,10 @@
 	#include "../../library/demos/graph_hmm.cpp"
 	#undef main
 
+	#define main runGraphHmmSilent
+	#include "../../library/demos/graph_hmm_silent.cpp"
+	#undef main
+
 #endif
 
 
@@ -264,6 +268,7 @@ int main(int argc, const char *argv[])
 	runGraphHirschberg();
 	runGraphSw();
 	runGraphHmm();
+	runGraphHmmSilent();
 #endif
 
 	return 0;

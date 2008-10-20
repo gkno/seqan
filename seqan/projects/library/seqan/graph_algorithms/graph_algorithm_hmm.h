@@ -70,91 +70,93 @@ viterbiAlgorithm(Graph<Hmm<TAlphabet, TProbability, TSpec> > const& hmm,
 	TVertexDescriptor eState = getEndState(hmm);
 	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
 
+	// Distinct between silent states and real states
+	typedef String<TVertexDescriptor> TStateSet;
+	typedef typename Iterator<TStateSet>::Type TStateIter;
+	TStateSet silentStates;
+	TStateSet realStates;
+	TVertexIterator itVertex(hmm);
+	for(;!atEnd(itVertex);goNext(itVertex)) {
+		if (isSilent(hmm, value(itVertex))) { 
+			appendValue(silentStates, value(itVertex));
+		} else {
+			appendValue(realStates, value(itVertex));
+		}
+	}
+
 	// Initialization for silent states connected to the begin state
-	TVertexIterator itSilent(hmm);
-	for(;!atEnd(itSilent);++itSilent) {
-		if (!isSilent(hmm, value(itSilent))) continue;
-		if ((value(itSilent) == bState) || (value(itSilent) == eState)) continue;
+	TStateIter itSilentStateEnd = end(silentStates);
+	for(TStateIter itSilentState = begin(silentStates); itSilentState != itSilentStateEnd; goNext(itSilentState)) {
+		if ((value(itSilentState) == bState) || (value(itSilentState) == eState)) continue;
 		TProbability maxValue = 0.0;
 		TVertexDescriptor maxVertex = nilVertex;
 
-		// Find maximum
-		// A vertex iterator guarantees that the vertices are processend in increasing order
-		// That is, the smallest silent states come first!!!
-		TVertexIterator itMax(hmm);
-		for(;!atEnd(itMax);++itMax) {
-			if ((!isSilent(hmm, value(itMax))) ||
-				((isSilent(hmm, value(itMax))) && (value(itMax) < value(itSilent)))) {
-					TProbability local = value(vMat, value(itMax)) * getTransitionProbability(hmm, value(itMax), value(itSilent));
-					if (local > maxValue) {
-						maxValue = local;
-						maxVertex = *itMax;
-					}
+		for(TStateIter itBelow = begin(silentStates); itBelow != itSilentState; goNext(itBelow)) {
+			TProbability local = value(vMat, value(itBelow)) * getTransitionProbability(hmm, value(itBelow), value(itSilentState));
+			if (local > maxValue) {
+				maxValue = local;
+				maxVertex = value(itBelow);
 			}
 		}
 
 		// Set traceback vertex
 		if (maxVertex != nilVertex) {
-			value(vMat, value(itSilent)) = maxValue;		
-			value(traceback, value(itSilent)) = maxVertex;
+			value(vMat, value(itSilentState)) = maxValue;		
+			value(traceback, value(itSilentState)) = maxVertex;
 		}
 	}
 
 	// Recurrence
 	TSize len = length(seq);
 	for(TSize i=1; i<=len; ++i) {
-
 		// Iterate over real states
-		TVertexIterator itV(hmm);
-		for(;!atEnd(itV);++itV) {
-			if ((value(itV) == bState) || (value(itV) == eState)) continue;
-			if (isSilent(hmm, value(itV))) continue;
+		TStateIter itRealStateEnd = end(realStates);
+		for(TStateIter itRealState = begin(realStates); itRealState != itRealStateEnd; goNext(itRealState)) {
+			// Find maximum
 			TProbability maxValue = 0.0;
 			TVertexDescriptor maxVertex = nilVertex;
-
-			// Find maximum
 			TVertexIterator itMax(hmm);
 			for(;!atEnd(itMax);++itMax) {
-				TProbability local = value(vMat, (i-1) * numRows + value(itMax)) * getTransitionProbability(hmm, value(itMax), value(itV));
+				TProbability local = value(vMat, (i-1) * numRows + value(itMax)) * getTransitionProbability(hmm, value(itMax), value(itRealState));
 				if (local > maxValue) {
 					maxValue = local;
 					maxVertex = *itMax;
 				}
 			}
-
 			// Set traceback vertex
 			if (maxVertex != nilVertex) {
-				value(vMat, i * numRows + *itV) = maxValue * getEmissionProbability(hmm, value(itV), value(seq, i-1));;
-				value(traceback, i * numRows + value(itV)) = maxVertex;
+				value(vMat, i * numRows + value(itRealState)) = maxValue * getEmissionProbability(hmm, value(itRealState), value(seq, i-1));;
+				value(traceback, i * numRows + value(itRealState)) = maxVertex;
 			}
 		}
 
 		// Iterate over silent states
-		goBegin(itV);
-		for(;!atEnd(itV);++itV) {
-			if ((value(itV) == bState) || (value(itV) == eState)) continue;
-			if (!isSilent(hmm, value(itV))) continue;
+		for(TStateIter itSilentState = begin(silentStates); itSilentState != itSilentStateEnd; goNext(itSilentState)) {
+			if ((value(itSilentState) == bState) || (value(itSilentState) == eState)) continue;
+			// Find maximum
 			TProbability maxValue = 0.0;
 			TVertexDescriptor maxVertex = nilVertex;
-
-			// Find maximum
-			// A vertex iterator guarantees that the vertices are processend in increasing order
-			// That is, the smallest silent states come first!!!
-			TVertexIterator itMax(hmm);
-			for(;!atEnd(itMax);++itMax) {
-				if ((!isSilent(hmm, value(itMax))) ||
-					((isSilent(hmm, value(itMax))) && (value(itMax) < value(itV)))) {
-						TProbability local = value(vMat, i * numRows + value(itMax)) * getTransitionProbability(hmm, value(itMax), value(itV));
-						if (local > maxValue) {
-							maxValue = local;
-							maxVertex = *itMax;
-						}
+	
+			// Iterate over real states
+			for(TStateIter itRealState = begin(realStates); itRealState != itRealStateEnd; goNext(itRealState)) {
+				TProbability local = value(vMat, i * numRows + value(itRealState)) * getTransitionProbability(hmm, value(itRealState), value(itSilentState));
+				if (local > maxValue) {
+					maxValue = local;
+					maxVertex = value(itRealState);
+				}
+			}
+			// Iterate over silent states in increasing order
+			for(TStateIter itBelow = begin(silentStates); itBelow != itSilentState; goNext(itBelow)) {
+				TProbability local = value(vMat, i * numRows + value(itBelow)) * getTransitionProbability(hmm, value(itBelow), value(itSilentState));
+				if (local > maxValue) {
+					maxValue = local;
+					maxVertex = value(itBelow);
 				}
 			}
 			// Set traceback vertex
 			if (maxVertex != nilVertex) {
-				value(traceback, i * numRows + value(itV)) = maxVertex;
-				value(vMat, i * numRows + *itV) = maxValue;		
+				value(traceback, i * numRows + value(itSilentState)) = maxVertex;
+				value(vMat, i * numRows + value(itSilentState)) = maxValue;		
 			}
 		}
 	}
@@ -174,17 +176,19 @@ viterbiAlgorithm(Graph<Hmm<TAlphabet, TProbability, TSpec> > const& hmm,
 	if (maxVertex != nilVertex) value(vMat, (len+1) * numRows + eState) = maxValue;
 
 	// Traceback
-	clear(path);
-	TVertexDescriptor oldState = eState;
-	appendValue(path, oldState);
-	for(TSize i = len + 1; i>=1; --i) {
-		do {
-			if ((!isSilent(hmm, oldState)) || (oldState == eState)) oldState = value(traceback, i * numRows + oldState);
-			else oldState = value(traceback, (i - 1) * numRows + oldState);
-			appendValue(path, oldState);
-		} while ((isSilent(hmm, oldState)) && (oldState != bState));
+	if (maxValue > 0.0) {
+		clear(path);
+		TVertexDescriptor oldState = eState;
+		appendValue(path, oldState);
+		for(TSize i = len + 1; i>=1; --i) {
+			do {
+				if ((!isSilent(hmm, oldState)) || (oldState == eState)) oldState = value(traceback, i * numRows + oldState);
+				else oldState = value(traceback, (i - 1) * numRows + oldState);
+				appendValue(path, oldState);
+			} while ((isSilent(hmm, oldState)) && (oldState != bState));
+		}
+		std::reverse(begin(path), end(path));
 	}
-	std::reverse(begin(path), end(path));
 	
 	//// Debug code
 	//for(TSize i = 0; i<numRows; ++i) {
@@ -238,54 +242,56 @@ forwardAlgorithm(Graph<Hmm<TAlphabet, TProbability, TSpec> > const& hmm,
 	TVertexDescriptor bState = getBeginState(hmm);
 	TVertexDescriptor eState = getEndState(hmm);
 
-	// Initialization for silent states connected to the begin state
-	TVertexIterator itSilent(hmm);
-	for(;!atEnd(itSilent);++itSilent) {
-		if (!isSilent(hmm, value(itSilent))) continue;
-		if ((value(itSilent) == bState) || (value(itSilent) == eState)) continue;
-		TProbability sumValue = 0.0;
-		
-		// Add up all real states and silent states with lower number in increasing order		
-		TVertexIterator itMax(hmm);
-		for(;!atEnd(itMax);++itMax) {
-			if ((!isSilent(hmm, value(itMax))) ||
-				((isSilent(hmm, value(itMax))) && (value(itMax) < value(itSilent)))) {
-					sumValue += value(fMat, value(itMax)) * getTransitionProbability(hmm, value(itMax), value(itSilent));
-			}
+	// Distinct between silent states and real states
+	typedef String<TVertexDescriptor> TStateSet;
+	typedef typename Iterator<TStateSet>::Type TStateIter;
+	TStateSet silentStates;
+	TStateSet realStates;
+	TVertexIterator itVertex(hmm);
+	for(;!atEnd(itVertex);goNext(itVertex)) {
+		if (isSilent(hmm, value(itVertex))) { 
+			appendValue(silentStates, value(itVertex));
+		} else {
+			appendValue(realStates, value(itVertex));
 		}
-		value(fMat, value(itSilent)) = sumValue;		
+	}
+
+	// Initialization for silent states connected to the begin state
+	TStateIter itSilentStateEnd = end(silentStates);
+	for(TStateIter itSilentState = begin(silentStates); itSilentState != itSilentStateEnd; goNext(itSilentState)) {
+		if ((value(itSilentState) == bState) || (value(itSilentState) == eState)) continue;
+		TProbability sumValue = 0.0;
+		for(TStateIter itBelow = begin(silentStates); itBelow != itSilentState; goNext(itBelow)) {
+			sumValue += value(fMat, value(itBelow)) * getTransitionProbability(hmm, value(itBelow), value(itSilentState));
+		}
+		value(fMat, value(itSilentState)) = sumValue;		
 	}
 
 	// Recurrence
 	TSize len = length(seq);
 	for(TSize i=1; i<=len; ++i) {
 		// Iterate over real states
-		TVertexIterator itV(hmm);
-		for(;!atEnd(itV);++itV) {
-			if ((value(itV) == bState) || (value(itV) == eState)) continue;
-			if (isSilent(hmm, value(itV))) continue;
+		TStateIter itRealStateEnd = end(realStates);
+		for(TStateIter itRealState = begin(realStates); itRealState != itRealStateEnd; goNext(itRealState)) {
 			TProbability sum = 0.0;
 			TVertexIterator itAll(hmm);
-			for(;!atEnd(itAll);++itAll) sum += value(fMat, (i-1) * numRows + value(itAll)) * getTransitionProbability(hmm, value(itAll), value(itV));
-			value(fMat, i * numRows + value(itV)) = getEmissionProbability(hmm, value(itV), seq[i-1]) * sum;
+			for(;!atEnd(itAll);++itAll) sum += value(fMat, (i-1) * numRows + value(itAll)) * getTransitionProbability(hmm, value(itAll), value(itRealState));
+			value(fMat, i * numRows + value(itRealState)) = getEmissionProbability(hmm, value(itRealState), seq[i-1]) * sum;
 		}
 
 		// Iterate over silent states
-		goBegin(itV);
-		for(;!atEnd(itV);++itV) {
-			if ((value(itV) == bState) || (value(itV) == eState)) continue;
-			if (!isSilent(hmm, value(itV))) continue;
+		for(TStateIter itSilentState = begin(silentStates); itSilentState != itSilentStateEnd; goNext(itSilentState)) {
+			if ((value(itSilentState) == bState) || (value(itSilentState) == eState)) continue;
 			TProbability sumValue = 0.0;
-
-			// Add up all real states and silent states with lower number in increasing order		
-			TVertexIterator itMax(hmm);
-			for(;!atEnd(itMax);++itMax) {
-				if ((!isSilent(hmm, value(itMax))) ||
-					((isSilent(hmm, value(itMax))) && (value(itMax) < value(itV)))) {
-						sumValue += value(fMat, i * numRows + value(itMax)) * getTransitionProbability(hmm, value(itMax), value(itV));
-				}
+			// Iterate over real states
+			for(TStateIter itRealState = begin(realStates); itRealState != itRealStateEnd; goNext(itRealState)) {
+				sumValue += value(fMat, i * numRows + value(itRealState)) * getTransitionProbability(hmm, value(itRealState), value(itSilentState));
 			}
-			value(fMat, i * numRows + value(itV)) = sumValue;
+			// Iterate over silent states in increasing order
+			for(TStateIter itBelow = begin(silentStates); itBelow != itSilentState; goNext(itBelow)) {
+				sumValue += value(fMat, i * numRows + value(itBelow)) * getTransitionProbability(hmm, value(itBelow), value(itSilentState));
+			}
+			value(fMat, i * numRows + value(itSilentState)) = sumValue;
 		}
 	}
 
@@ -337,33 +343,114 @@ backwardAlgorithm(Graph<Hmm<TAlphabet, TProbability, TSpec> > const& hmm,
 
 	// Initialization
 	String<TProbability> bMat;
-	TSize numCols = length(seq) + 1;
+	TSize numCols = length(seq) + 2;
 	TSize numRows = getIdUpperBound(_getVertexIdManager(hmm));
 	fill(bMat, numCols * numRows, 0.0);
 	TVertexDescriptor bState = getBeginState(hmm);
 	TVertexDescriptor eState = getEndState(hmm);
 	TSize len = length(seq);
-	TVertexIterator itAll(hmm);
-	for(;!atEnd(itAll);++itAll) value(bMat, len * numRows + value(itAll)) = getTransitionProbability(hmm, value(itAll), eState);
+	value(bMat, (len + 1) * numRows + eState) = 1.0;
 	
-	// Recurrence
-	for(TSize i=len - 1; i>0; --i) {
-		TVertexIterator itV(hmm);
-		for(;!atEnd(itV);++itV) {
-			TProbability sum = 0.0;
-			TVertexIterator itAll(hmm);
-			for(;!atEnd(itAll);++itAll) sum += value(bMat, (i+1) * numRows + value(itAll)) * getTransitionProbability(hmm, value(itV), value(itAll)) * getEmissionProbability(hmm, value(itAll), value(seq, i));
-			value(bMat, i * numRows + value(itV)) =  sum;
+	// Distinct between silent states and real states
+	typedef String<TVertexDescriptor> TStateSet;
+	typedef typename Iterator<TStateSet>::Type TStateIter;
+	TStateSet silentStates;
+	TStateSet realStates;
+	TVertexIterator itVertex(hmm);
+	for(;!atEnd(itVertex);goNext(itVertex)) {
+		if (isSilent(hmm, value(itVertex))) { 
+			appendValue(silentStates, value(itVertex));
+		} else {
+			appendValue(realStates, value(itVertex));
 		}
 	}
+	// Reverse the silent states order
+	std::reverse(begin(silentStates), end(silentStates));
 
-	// Termination
-	TProbability sum = 0.0;
-	goBegin(itAll);
-	for(;!atEnd(itAll);++itAll) {
-		sum += value(bMat, 1 * numRows + value(itAll)) * getTransitionProbability(hmm, bState, value(itAll)) * getEmissionProbability(hmm, value(itAll), value(seq, 0));
+	// Initialization for silent states connected to the end state
+	TStateIter itSilentStateEnd = end(silentStates);
+	for(TStateIter itSilentState = begin(silentStates); itSilentState != itSilentStateEnd; goNext(itSilentState)) {
+		if (value(itSilentState) == eState) continue;
+		TProbability sumValue = getTransitionProbability(hmm, value(itSilentState), eState);
+		for(TStateIter itAbove = begin(silentStates); itAbove != itSilentState; goNext(itAbove)) {
+			sumValue += value(bMat, len * numRows + value(itAbove)) * getTransitionProbability(hmm, value(itSilentState), value(itAbove));
+		}
+		value(bMat, len * numRows + value(itSilentState)) = sumValue;
 	}
-	value(bMat, bState) = sum;
+
+	// Initialization for real states
+	TStateIter itRealStateEnd = end(realStates);
+	for(TStateIter itRealState = begin(realStates); itRealState != itRealStateEnd; goNext(itRealState)) {
+		TProbability sumValue = getTransitionProbability(hmm, value(itRealState), eState);
+		for(TStateIter itSilentState = begin(silentStates); itSilentState != itSilentStateEnd; goNext(itSilentState)) {
+			sumValue += value(bMat, len * numRows + value(itSilentState)) * getTransitionProbability(hmm, value(itRealState), value(itSilentState));
+		}
+		value(bMat, len * numRows + value(itRealState)) = sumValue;
+	}
+
+	
+	// Recurrence
+	if (len > 0) {
+		for(TSize i=len - 1; i>0; --i) {
+			// Iterate over silent states
+			for(TStateIter itSilentState = begin(silentStates); itSilentState != itSilentStateEnd; goNext(itSilentState)) {
+				if ((value(itSilentState) == bState) || (value(itSilentState) == eState)) continue;
+				TProbability sumValue = 0.0;
+				// Iterate over real states
+				for(TStateIter itRealState = begin(realStates); itRealState != itRealStateEnd; goNext(itRealState)) {
+					sumValue += value(bMat, (i+1) * numRows + value(itRealState)) * getTransitionProbability(hmm, value(itSilentState), value(itRealState))* getEmissionProbability(hmm, value(itRealState), value(seq, i));
+				}
+				// Iterate over silent states in decreasing order
+				for(TStateIter itAbove = begin(silentStates); itAbove != itSilentState; goNext(itAbove)) {
+					if ((value(itAbove) == bState) || (value(itAbove) == eState)) continue;
+					sumValue += value(bMat, i * numRows + value(itAbove)) * getTransitionProbability(hmm, value(itSilentState), value(itAbove));
+				}
+				value(bMat, i * numRows + value(itSilentState)) = sumValue;
+			}
+
+			// Iteration over real states
+			for(TStateIter itRealState = begin(realStates); itRealState != itRealStateEnd; goNext(itRealState)) {
+				TProbability sumValue = 0.0;
+				// Iterate over silent states
+				for(TStateIter itSilentState = begin(silentStates); itSilentState != itSilentStateEnd; goNext(itSilentState)) {
+					if ((value(itSilentState) == bState) || (value(itSilentState) == eState)) continue;
+					sumValue += value(bMat, i * numRows + value(itSilentState)) * getTransitionProbability(hmm, value(itRealState), value(itSilentState));
+				}
+				// Iterate over real states
+				for(TStateIter itR = begin(realStates); itR != itRealStateEnd; goNext(itR)) {
+					sumValue += value(bMat, (i+1) * numRows + value(itR)) * getTransitionProbability(hmm, value(itRealState), value(itR)) * getEmissionProbability(hmm, value(itR), value(seq, i));
+				}
+				value(bMat, i * numRows + value(itRealState)) =  sumValue;
+			}
+		}
+	
+		// Termination
+		// Iterate over silent states
+		for(TStateIter itSilentState = begin(silentStates); itSilentState != itSilentStateEnd; goNext(itSilentState)) {
+			if ((value(itSilentState) == bState) || (value(itSilentState) == eState)) continue;
+			TProbability sumValue = 0.0;
+			// Iterate over real states
+			for(TStateIter itRealState = begin(realStates); itRealState != itRealStateEnd; goNext(itRealState)) {
+				sumValue += value(bMat, 1 * numRows + value(itRealState)) * getTransitionProbability(hmm, value(itSilentState), value(itRealState))* getEmissionProbability(hmm, value(itRealState), value(seq, 0));
+			}
+			// Iterate over silent states in decreasing order
+			for(TStateIter itAbove = begin(silentStates); itAbove != itSilentState; goNext(itAbove)) {
+				if ((value(itAbove) == bState) || (value(itAbove) == eState)) continue;
+				sumValue += value(bMat, value(itAbove)) * getTransitionProbability(hmm, value(itSilentState), value(itAbove));
+			}
+			value(bMat, value(itSilentState)) = sumValue;
+		}
+		// Sum up all values
+		TProbability sumValue = 0.0;
+		for(TStateIter itSilentState = begin(silentStates); itSilentState != itSilentStateEnd; goNext(itSilentState)) {
+			if ((value(itSilentState) == bState) || (value(itSilentState) == eState)) continue;
+			sumValue += value(bMat, value(itSilentState)) * getTransitionProbability(hmm, bState, value(itSilentState));
+		}
+		for(TStateIter itRealState = begin(realStates); itRealState != itRealStateEnd; goNext(itRealState)) {
+			sumValue += value(bMat, 1 * numRows + value(itRealState)) * getTransitionProbability(hmm, bState, value(itRealState)) * getEmissionProbability(hmm, value(itRealState), value(seq, 0));
+		}
+		value(bMat, bState) = sumValue;
+	}
 
 	//// Debug code
 	//for(TSize i = 0; i<numRows; ++i) {
