@@ -235,17 +235,57 @@ forwardAlgorithm(Graph<Hmm<TAlphabet, TProbability, TSpec> > const& hmm,
 	TSize numRows = getIdUpperBound(_getVertexIdManager(hmm));
 	fill(fMat, numCols * numRows, 0.0);
 	value(fMat, getBeginState(hmm)) = 1.0;
+	TVertexDescriptor bState = getBeginState(hmm);
 	TVertexDescriptor eState = getEndState(hmm);
+
+	// Initialization for silent states connected to the begin state
+	TVertexIterator itSilent(hmm);
+	for(;!atEnd(itSilent);++itSilent) {
+		if (!isSilent(hmm, value(itSilent))) continue;
+		if ((value(itSilent) == bState) || (value(itSilent) == eState)) continue;
+		TProbability sumValue = 0.0;
+		
+		// Add up all real states and silent states with lower number in increasing order		
+		TVertexIterator itMax(hmm);
+		for(;!atEnd(itMax);++itMax) {
+			if ((!isSilent(hmm, value(itMax))) ||
+				((isSilent(hmm, value(itMax))) && (value(itMax) < value(itSilent)))) {
+					sumValue += value(fMat, value(itMax)) * getTransitionProbability(hmm, value(itMax), value(itSilent));
+			}
+		}
+		value(fMat, value(itSilent)) = sumValue;		
+	}
 
 	// Recurrence
 	TSize len = length(seq);
 	for(TSize i=1; i<=len; ++i) {
+		// Iterate over real states
 		TVertexIterator itV(hmm);
 		for(;!atEnd(itV);++itV) {
+			if ((value(itV) == bState) || (value(itV) == eState)) continue;
+			if (isSilent(hmm, value(itV))) continue;
 			TProbability sum = 0.0;
 			TVertexIterator itAll(hmm);
 			for(;!atEnd(itAll);++itAll) sum += value(fMat, (i-1) * numRows + value(itAll)) * getTransitionProbability(hmm, value(itAll), value(itV));
 			value(fMat, i * numRows + value(itV)) = getEmissionProbability(hmm, value(itV), seq[i-1]) * sum;
+		}
+
+		// Iterate over silent states
+		goBegin(itV);
+		for(;!atEnd(itV);++itV) {
+			if ((value(itV) == bState) || (value(itV) == eState)) continue;
+			if (!isSilent(hmm, value(itV))) continue;
+			TProbability sumValue = 0.0;
+
+			// Add up all real states and silent states with lower number in increasing order		
+			TVertexIterator itMax(hmm);
+			for(;!atEnd(itMax);++itMax) {
+				if ((!isSilent(hmm, value(itMax))) ||
+					((isSilent(hmm, value(itMax))) && (value(itMax) < value(itV)))) {
+						sumValue += value(fMat, i * numRows + value(itMax)) * getTransitionProbability(hmm, value(itMax), value(itV));
+				}
+			}
+			value(fMat, i * numRows + value(itV)) = sumValue;
 		}
 	}
 
