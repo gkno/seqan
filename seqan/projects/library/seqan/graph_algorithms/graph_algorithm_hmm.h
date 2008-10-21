@@ -208,23 +208,11 @@ viterbiAlgorithm(Graph<Hmm<TAlphabet, TProbability, TSpec> > const& hmm,
 
 //////////////////////////////////////////////////////////////////////////////
 
-/**
-.Function.forwardAlgorithm:
-..cat:Graph.Hmm
-..summary:Implements the forward algorithm.
-..signature:forwardAlgorithm(hmm, seq)
-..param.hmm:In-parameter:Input HMM.
-...type:Spec.Hmm
-..param.seq:In-parameter:Input sequence.
-..returns:TProbability
-...remarks:Probability of the sequence.
-..see:Function.viterbiAlgorithm
-..see:Function.backwardAlgorithm
-*/
-template<typename TAlphabet, typename TProbability, typename TSpec, typename TSequence>
+template<typename TAlphabet, typename TProbability, typename TSpec, typename TSequence, typename TForwardMatrix>
 inline TProbability
-forwardAlgorithm(Graph<Hmm<TAlphabet, TProbability, TSpec> > const& hmm,
-				 TSequence const& seq)
+__forwardAlgorithm(Graph<Hmm<TAlphabet, TProbability, TSpec> > const& hmm,
+				   TSequence const& seq,
+				   TForwardMatrix& fMat)
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<Hmm<TAlphabet, TProbability, TSpec> > TGraph;
@@ -233,7 +221,6 @@ forwardAlgorithm(Graph<Hmm<TAlphabet, TProbability, TSpec> > const& hmm,
 	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
 
 	// Initialization
-	String<TProbability> fMat;
 	TSize numCols = length(seq) + 2;
 	TSize numRows = getIdUpperBound(_getVertexIdManager(hmm));
 	fill(fMat, numCols * numRows, 0.0);
@@ -313,26 +300,38 @@ forwardAlgorithm(Graph<Hmm<TAlphabet, TProbability, TSpec> > const& hmm,
 	return value(fMat, (len+1) * numRows + eState);
 }
 
-
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.backwardAlgorithm:
+.Function.forwardAlgorithm:
 ..cat:Graph.Hmm
-..summary:Implements the backward algorithm.
-..signature:backwardAlgorithm(hmm, seq)
+..summary:Implements the forward algorithm.
+..signature:forwardAlgorithm(hmm, seq)
 ..param.hmm:In-parameter:Input HMM.
 ...type:Spec.Hmm
 ..param.seq:In-parameter:Input sequence.
 ..returns:TProbability
 ...remarks:Probability of the sequence.
 ..see:Function.viterbiAlgorithm
-..see:Function.forwardAlgorithm
+..see:Function.backwardAlgorithm
 */
 template<typename TAlphabet, typename TProbability, typename TSpec, typename TSequence>
 inline TProbability
-backwardAlgorithm(Graph<Hmm<TAlphabet, TProbability, TSpec> > const& hmm,
-				  TSequence const& seq)
+forwardAlgorithm(Graph<Hmm<TAlphabet, TProbability, TSpec> > const& hmm,
+				 TSequence const& seq)
+{
+	SEQAN_CHECKPOINT
+	String<TProbability> fMat;
+	return __forwardAlgorithm(hmm, seq, fMat);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TAlphabet, typename TProbability, typename TSpec, typename TSequence, typename TBackwardMatrix>
+inline TProbability
+__backwardAlgorithm(Graph<Hmm<TAlphabet, TProbability, TSpec> > const& hmm,
+					TSequence const& seq,
+					TBackwardMatrix& bMat)
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<Hmm<TAlphabet, TProbability, TSpec> > TGraph;
@@ -341,7 +340,6 @@ backwardAlgorithm(Graph<Hmm<TAlphabet, TProbability, TSpec> > const& hmm,
 	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
 
 	// Initialization
-	String<TProbability> bMat;
 	TSize numCols = length(seq) + 2;
 	TSize numRows = getIdUpperBound(_getVertexIdManager(hmm));
 	fill(bMat, numCols * numRows, 0.0);
@@ -461,7 +459,33 @@ backwardAlgorithm(Graph<Hmm<TAlphabet, TProbability, TSpec> > const& hmm,
 
 	return value(bMat, bState);
 }
+	
 
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.backwardAlgorithm:
+..cat:Graph.Hmm
+..summary:Implements the backward algorithm.
+..signature:backwardAlgorithm(hmm, seq)
+..param.hmm:In-parameter:Input HMM.
+...type:Spec.Hmm
+..param.seq:In-parameter:Input sequence.
+..returns:TProbability
+...remarks:Probability of the sequence.
+..see:Function.viterbiAlgorithm
+..see:Function.forwardAlgorithm
+*/
+template<typename TAlphabet, typename TProbability, typename TSpec, typename TSequence>
+inline TProbability
+backwardAlgorithm(Graph<Hmm<TAlphabet, TProbability, TSpec> > const& hmm,
+				  TSequence const& seq)
+{
+	SEQAN_CHECKPOINT
+	String<TProbability> bMat;
+	return __backwardAlgorithm(hmm, seq, bMat);
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
@@ -553,6 +577,24 @@ generateSequence(Graph<Hmm<TAlphabet, TProbability, TSpec> > const& hmm,
 	}
 }
 
+///////////////////////////////////////////////////////////////////////////////////////
+
+template<typename TAlphabet, typename TProbability, typename TSpec,typename TSequenceSet, typename TSize>
+inline void
+generateSequence(Graph<Hmm<TAlphabet, TProbability, TSpec> > const& hmm,
+				 TSequenceSet& sequences,
+				 TSize numSeq,
+				 TSize maxLength) 
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Hmm<TAlphabet, TProbability, TSpec> > TGraph;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	StringSet<String<TVertexDescriptor> > states;
+	generateSequence(hmm, sequences, states, numSeq, maxLength);
+}
+	
+
+///////////////////////////////////////////////////////////////////////////////////////
 
 template<typename TAlphabet, typename TProbability, typename TSpec,typename TEmissionCounter, typename TTransitionCounter>
 inline void 
@@ -567,28 +609,29 @@ __parameterEstimator(Graph<Hmm<TAlphabet, TProbability, TSpec> >& hmm,
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
 	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
+	typedef typename Value<TTransitionCounter>::Type TCounterValue;
 	
 	// Initialization
 	TSize alphSize = ValueSize<TAlphabet>::VALUE;
-	TSize pseudoCount = 1;
+	TCounterValue pseudoCount = (TCounterValue) 1.0;
 
 	// Estimate the parameters from the counter values
 	TVertexIterator itAll(hmm);
 	for(;!atEnd(itAll);++itAll){
 		if (!isSilent(hmm, value(itAll))) {
-			TSize summedCount =0;
-			for(TSize i=0; i<alphSize;++i) summedCount += (value(value(emission, value(itAll)),i) + pseudoCount);
-			for(TSize i=0; i<alphSize;++i) emissionProbability(hmm,value(itAll),TAlphabet(i)) = ((double) (value(value(emission, value(itAll)),i) + pseudoCount) / (double) summedCount);
+			TCounterValue summedCount = (TCounterValue) (0.0);
+			for(TSize i=0; i<alphSize;++i) summedCount += (pseudoCount + value(value(emission, value(itAll)),i));
+			for(TSize i=0; i<alphSize;++i) emissionProbability(hmm,value(itAll),TAlphabet(i)) = (pseudoCount + value(value(emission, value(itAll)),i)) / summedCount;
 		}
-		TSize summedCount =0;
+		TCounterValue summedCount = (TCounterValue) (0.0);
 		TOutEdgeIterator itOutSum(hmm,value(itAll));
-		for(;!atEnd(itOutSum);++itOutSum) summedCount += getProperty(transition, value(itOutSum)) + pseudoCount;
+		for(;!atEnd(itOutSum);++itOutSum) summedCount += (pseudoCount + getProperty(transition, value(itOutSum)));
 		TOutEdgeIterator itOut(hmm, value(itAll));
-		for(;!atEnd(itOut);++itOut) transitionProbability(hmm, value(itOut)) = ((double) (getProperty(transition, value(itOut)) + pseudoCount) / (double) (summedCount));
+		for(;!atEnd(itOut);++itOut) transitionProbability(hmm, value(itOut)) = (pseudoCount + getProperty(transition, value(itOut))) / summedCount;
 	}
 }
 
-
+///////////////////////////////////////////////////////////////////////////////////////
 
 template<typename TAlphabet, typename TProbability, typename TSpec, typename TSequenceSet, typename TStateSeqSet>
 inline void 
@@ -649,6 +692,7 @@ estimationWithStates(Graph<Hmm<TAlphabet, TProbability, TSpec> >& hmm,
 	__parameterEstimator(hmm,emissionCounter, transitionCounter);
 }
 
+///////////////////////////////////////////////////////////////////////////////////////
 
 template<typename TAlphabet, typename TProbability, typename TSpec>
 inline void
@@ -677,6 +721,7 @@ __fillHmmUniform(Graph<Hmm<TAlphabet, TProbability, TSpec> >& hmm)
 	}
 }
 
+///////////////////////////////////////////////////////////////////////////////////////
 
 template<typename TAlphabet, typename TProbability, typename TSpec>
 inline void
@@ -721,6 +766,8 @@ __fillHmmRandom(Graph<Hmm<TAlphabet, TProbability, TSpec> >& hmm)
 	}
 }
 
+///////////////////////////////////////////////////////////////////////////////////////
+
 template<typename TAlphabet, typename TProbability, typename TSpec>
 inline void
 randomizeHmm(Graph<Hmm<TAlphabet, TProbability, TSpec> >& hmm)
@@ -729,162 +776,108 @@ randomizeHmm(Graph<Hmm<TAlphabet, TProbability, TSpec> >& hmm)
 	//__fillHmmUniform(hmm);
 }
 
+///////////////////////////////////////////////////////////////////////////////////////
 
-/*
-template <typename TAlphabet, typename TCargo, typename TSpec, typename TSequence, typename TTag>
+template <typename TAlphabet, typename TProbability, typename TSpec, typename TSequence, typename TSize>
 inline void 
-__baumWelchAlgorithmMain(Graph<Hmm<TAlphabet, TCargo, TSpec > >& hmm,
-				   StringSet<TSequence> const& seqSet,
-				   TCargo border,
-				   TCargo scalingFactor,
-				   TTag const scalingTag)
+__baumWelchAlgorithm(Graph<Hmm<TAlphabet, TProbability, TSpec > >& hmm,
+					 StringSet<TSequence> const& seqSet,
+					 TSize maxIter,
+					 TProbability epsilon)
 {
 	
 	SEQAN_CHECKPOINT
-	typedef Graph<Hmm<TAlphabet, TCargo, TSpec> > TGraph;
-	typedef typename Size<TGraph>::Type TSize;
+	typedef Graph<Hmm<TAlphabet, TProbability, TSpec> > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
 	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
 	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
-	
-	std::fstream fstrm3;
-	std::fstream fstrm4;
-	std::fstream fstrm;
-	std::fstream fstrm1;
-	std::fstream fstrm2;
-	fstrm.open("D:/Visio Profesional/Visio standard/Projects/Seqan_release_1.1/Test/hmms.txt", std::ios_base::out | std::ios_base::binary);
-	fstrm1.open("D:/Visio Profesional/Visio standard/Projects/Seqan_release_1.1/Test/Emission.txt", std::ios_base::out | std::ios_base::binary);
-	fstrm2.open("D:/Visio Profesional/Visio standard/Projects/Seqan_release_1.1/Test/Transition.txt", std::ios_base::out | std::ios_base::binary);
-	fstrm3.open("D:/Visio Profesional/Visio standard/Projects/Seqan_release_1.1/Test/forw.txt", std::ios_base::out | std::ios_base::trunc);
-	fstrm4.open("D:/Visio Profesional/Visio standard/Projects/Seqan_release_1.1/Test/backw.txt", std::ios_base::out | std::ios_base::trunc);
-	//Initialization
-	TSize alphSize = ValueSize<TAlphabet>::VALUE;
-	String<TCargo> fMat;
-	String<TCargo> bMat;
-	TCargo fValue, em, tm;
-	TCargo pseudo=1;
-	TCargo localMax=0, oldLocalMax =0;
-	String<TCargo> transProb;
-	String<TCargo> estimatedEmission;
-	StringSet<String<TCargo>> estimatedEmissionSet;
-	TSize numRows = getIdUpperBound(_getVertexIdManager(hmm));
-	for(TSize i =0; i<numRows;++i) appendValue(estimatedEmissionSet,estimatedEmission);
-	TGraph backupHmm;
+	typedef String<TProbability> TCountString;
 
-	for(TSize iter=0;iter<200;++iter){ //if no local maximum is found by the BW, it stops after it reached a certain iterationstep
-		__logHmm(hmm, backupHmm, scalingFactor,TTag());
-		fill(estimatedEmission,alphSize,0);
-		for(TSize i =0; i<numRows;++i) value(estimatedEmissionSet,i)= estimatedEmission;	
-		clear(transProb);
-		fill(transProb, getIdUpperBound(_getEdgeIdManager(hmm)), 0);
-				
-		//MaximationStep
-		//determine new contributions
-		for (TSize i=0; i < length(seqSet);++i){		//sequences
+	// Initialization
+	std::cout << "Baum-Welch Algorithm";
+	TSize alphSize = ValueSize<TAlphabet>::VALUE;
+	TProbability lastTotalModelProb = 0.0;
+
+	// Randomize current HMM so only topology is preserved
+	randomizeHmm(hmm);
+	
+	// Iterative Optimization
+	for(TSize iter=0; iter<maxIter; ++iter){
+		TCountString transitionCounter;
+		fill(transitionCounter, getIdUpperBound(_getEdgeIdManager(hmm)), 0.0);
+		StringSet<TCountString> emissionCounter;
+		TSize numRows = getIdUpperBound(_getVertexIdManager(hmm));
+		for(TSize i =0; i<numRows;++i) {
+			TCountString emisCount;
+			fill(emisCount,alphSize, 0.0);
+			appendValue(emissionCounter,emisCount);
+		}
+						
+		// MaximationStep
+		// Determine new contributions
+		TProbability totalModelLogProb = 0.0;
+		for (TSize i=0; i <length(seqSet);++i){		//sequences
+			// Forward algorithm
+			String<TProbability> fMat;
+			TProbability modelLogProb = __forwardAlgorithm(hmm, value(seqSet,i), fMat);
+			totalModelLogProb += modelLogProb;
 			
-			//compute forward und backward Algorithm
-			fValue = __forwardAlgorithm(hmm, value(seqSet,i),fMat,border,scalingFactor, TTag());
-			__backwardAlgorithm(hmm, value(seqSet,i),bMat,border ,scalingFactor, TTag());
-		
-			//compute logLikelihood of the current hmm
-			__baumWelchTermination(hmm,fValue,scalingFactor,(TCargo)length(value(seqSet,i)), localMax, TTag());
-			for (TSize j=0;j<length(value(seqSet,i));j++){  //passing through sequence
+			// Backward algorithm
+			String<TProbability> bMat;
+			__backwardAlgorithm(hmm, value(seqSet,i), bMat);
+			
+			// Use the posterior probabilities to estimate counter values
+			for (TSize j=0;j<length(value(seqSet,i));++j){  
+				
+				// Iterate over all states
 				TVertexIterator itAll(hmm);		
-				for(;!atEnd(itAll);++itAll){	//all states
+				for(;!atEnd(itAll);++itAll) {
+					TAlphabet c = value(value(seqSet,i),j);
 					
-					//determine emission expactation values
-					value(value(estimatedEmissionSet, *itAll),ordValue(value(value(seqSet,i),j)) ) += __baumWelchExpectedEmission(hmm,  fValue, scalingFactor, value(fMat, (j+1) * numRows + *itAll ), value(bMat, (j+1) * numRows + *itAll ),TTag());
+					// Determine emission expectation values
+					value(value(emissionCounter, value(itAll)),ordValue(c)) += ((value(fMat, (j+1) * numRows + value(itAll)) * value(bMat, (j+1) * numRows + value(itAll))) / modelLogProb);
 					
-					//determine transition expactation values
-					TOutEdgeIterator itOut(hmm,*itAll);
-					for(;!atEnd(itOut);++itOut){
-						if (j==length(value(seqSet,i))-1){
-							if (targetVertex(itOut)==endState(hmm)) {
-								TCargo val = __baumWelchExpTransEState(hmm, fValue, scalingFactor, value(fMat, (j+1) * numRows + *itAll), getTransitionProbability(hmm,*itAll,endState(hmm)),TTag());
-								assignProperty(transProb,*itOut,val);
-							}
-						}
-						else { 
-							TCargo val = getProperty(transProb,*itOut) + __baumWelchExpectedTransition(hmm, fValue, scalingFactor, value(fMat, j * numRows + *itAll), value(bMat, (j+1) * numRows + targetVertex(itOut) ), getTransitionProbability(hmm,*itOut), getEmissionProbability(hmm, targetVertex(itOut),value(value(seqSet,i),j) ),TTag());
-							assignProperty(transProb,*itOut,val);
-						}
+					// Determine transition expectation values
+					TOutEdgeIterator itOut(hmm, value(itAll));
+					for(;!atEnd(itOut); goNext(itOut)) {
+						if (!isSilent(hmm, targetVertex(itOut))) property(transitionCounter, value(itOut)) += (value(fMat, j * numRows + value(itAll)) * getTransitionProbability(hmm, value(itOut)) * getEmissionProbability(hmm, targetVertex(itOut),c) * value(bMat, (j+1) * numRows + targetVertex(itOut)) / modelLogProb);
+						else property(transitionCounter, value(itOut)) += (value(fMat, j * numRows + value(itAll)) * getTransitionProbability(hmm, value(itOut)) * value(bMat, j * numRows + targetVertex(itOut)) / modelLogProb);
 					}
 				}
 			}	 
 		}
+
+		// Expectation step
+		__parameterEstimator(hmm,emissionCounter, transitionCounter);
 		
 
-
-		// Debug code
-
-		//for(TSize i = 0; i<numRows; ++i) {
-		//	for(TSize j=0; j<(4); ++j) {
-		//		fstrm3 << value(fMat, j*numRows + i) << "	 ";
-		//	}
-		//	fstrm3<< std::endl;
-		//}
-
-		//for(TSize i = 0; i<numRows; ++i) {
-		//	for(TSize j=0; j<3; ++j) {
-		//		fstrm4 << value(bMat, j*numRows + i) << "	";
-		//	}
-		//	fstrm4 << std::endl;
-		//}
-		//
-		////DEBUG
-		//TVertexIterator itVert(hmm);
-		//for(;!atEnd(itVert);++itVert){	
-		//	for(TSize i = 0; i< alphSize;++i) fstrm1 << value(value(estimatedEmissionSet,*itVert),i)<<" ";
-		//	fstrm1 <<std::endl;
-		//	TOutEdgeIterator itVO(hmm,*itVert);
-		//	for(;!atEnd(itVO);++itVO)fstrm2 << *itVert <<" -- " << targetVertex(itVO)<< " : " << getProperty(transProb, *itVO) << std::endl;
-		//	fstrm2 << std::endl;
-		//}
-		//fstrm2 << std::endl;
-		//fstrm1 << std::endl;
-		//fstrm3 << std::endl;
-		//fstrm4 << std::endl;
-		//Compute new HMM parameters
-
-		//retransfer the HMM
-		hmm = backupHmm;
-
-		//Estimation step 
-		//calculate new model parameters
-		parameterEstimator(hmm,estimatedEmissionSet, transProb);
-		
-		//DEBUG
-		//std::cout << oldLocalMax  << std::endl;
-		//std::cout << '(' <<localMax <<')';
-		//std::cout << (localMax - oldLocalMax)  << std::endl;
-		//std::cout << hmm << std::endl;
-	
-		write(fstrm,hmm);
-		write(fstrm,"\n");
-		
-		std::cout<<".";
-		//if ( (localMax - oldLocalMax)<0) std::cout << '(' << (localMax - oldLocalMax) << ") :"<<iter;
-		
-		
-		//Termination by identical log likelihood of the models
-		localMax /= length(seqSet);
-		if ((iter != 0) && ((localMax - oldLocalMax) < 0.1) ) break; 
-		else{
-			oldLocalMax=localMax;
-			localMax=0;
+		// Termination?
+		if ((iter > 0) && ((totalModelLogProb - lastTotalModelProb) < epsilon)) break;
+		else {
+			std::cout << '.';
+			lastTotalModelProb = totalModelLogProb;
 		}
-		
 	}
-	fstrm.close();
-	fstrm1.close();
-	fstrm2.close();
-	fstrm3.close();
-	fstrm4.close();
-	std::cout<<std::endl;
+	std::cout << std::endl;
 }
-*/
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+template <typename TAlphabet, typename TProbability, typename TSpec, typename TSequence>
+inline void 
+baumWelchAlgorithm(Graph<Hmm<TAlphabet, TProbability, TSpec > >& hmm,
+				   StringSet<TSequence> const& seqSet)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Hmm<TAlphabet, TProbability, TSpec> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	TSize maxIter = 200;
+	TProbability epsilon = 0.0001;
+	__baumWelchAlgorithm(hmm, seqSet, maxIter, epsilon);
+}
+
 
 }// namespace SEQAN_NAMESPACE_MAIN
 
