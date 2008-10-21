@@ -729,6 +729,7 @@ randomizeHmm(Graph<Hmm<TAlphabet, TProbability, TSpec> >& hmm)
 	//__fillHmmUniform(hmm);
 }
 
+
 /*
 template <typename TAlphabet, typename TCargo, typename TSpec, typename TSequence, typename TTag>
 inline void 
