@@ -27,7 +27,7 @@
 
 // Seqan
 #include <seqan/graph_types.h>
-
+#include <seqan/misc/misc_random.h>
 
 #ifdef SEQAN_SWITCH_USE_FORWARDS
 #include <seqan/graph_algorithms/graph_algorithms_generated_forwards.h>

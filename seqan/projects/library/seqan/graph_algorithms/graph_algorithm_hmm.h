@@ -18,7 +18,6 @@
   $Id: graph_algorithm_hmm.h 1811 2008-03-31 15:38:54Z rausch@PCPOOL.MI.FU-BERLIN.DE $
  ==========================================================================*/
 
-
 #ifndef SEQAN_HEADER_GRAPH_ALGORITHM_HMM_H
 #define SEQAN_HEADER_GRAPH_ALGORITHM_HMM_H
 
@@ -462,6 +461,194 @@ backwardAlgorithm(Graph<Hmm<TAlphabet, TProbability, TSpec> > const& hmm,
 
 	return value(bMat, bState);
 }
+
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.generateSequence:
+..cat:Graph.Hmm
+..summary:Generates random state and alphabet sequences of a given HMM.
+...remarks:Because of silent states, generated alphabet and state sequences might have different length.
+..signature:generateSequence(hmm, sequences, states, numSeq, maxLength)
+..param.hmm:In-parameter:Input HMM.
+...type:Spec.Hmm
+..param.sequences:The StringSet of alphabet sequences.
+...type:Class.StringSet
+..param.sequences:The StringSet of state sequences.
+...type:Class.StringSet
+..param.numSeq:The number of sequences to generate.
+..param.maxLength:The maximum length of the sequences.
+...remarks:Sequences might be shorter if the end state is reached prior to maxLength.
+..returns:void
+*/
+template<typename TAlphabet, typename TProbability, typename TSpec,typename TSequenceSet, typename TStateSeqSet, typename TSize>
+inline void
+generateSequence(Graph<Hmm<TAlphabet, TProbability, TSpec> > const& hmm,
+				 TSequenceSet& sequences,
+				 TStateSeqSet& states,
+				 TSize numSeq,
+				 TSize maxLength) 
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Hmm<TAlphabet, TProbability, TSpec> > TGraph;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
+	typedef typename Value<TSequenceSet>::Type TSequence;
+	typedef typename Value<TStateSeqSet>::Type TStateSeq;
+	
+	// Initialization
+	mtRandInit();
+	clear(sequences);
+	clear(states);
+	TSize alphSize = ValueSize<TAlphabet>::VALUE;
+	
+	// Simulate sequences
+	TVertexDescriptor currentState;
+	TVertexDescriptor endState = getEndState(hmm);
+	for(TSize i=0;i<numSeq;++i){
+		currentState = getBeginState(hmm);
+		TSequence seq;
+		TStateSeq stat;
+		appendValue(stat, getBeginState(hmm));
+		bool stop = false;
+		TSize pos = 0; 
+		while (pos < maxLength) {
+			TProbability prob = (double) (mtRand() % 100) / (double) (100);
+			TProbability compareProb = 0.0;
+			TOutEdgeIterator itState(hmm, currentState);
+			// Determine the next state
+			for(;!atEnd(itState);++itState) {
+				// Probability of the next transition
+				compareProb += getTransitionProbability(hmm, value(itState));
+				// Compare with random probability
+				if (prob <= compareProb){
+					TVertexDescriptor nextState = targetVertex(hmm, value(itState));
+					if (nextState == endState) {
+						stop = true;
+						break;
+					}
+					appendValue(stat, nextState);
+					if (!isSilent(hmm, nextState)) {
+						compareProb =0.0;
+						prob = (double) (mtRand() % 100) / (double) (100);
+						for (TSize c=0;c<alphSize;++c){
+							compareProb += getEmissionProbability(hmm,targetVertex(hmm, value(itState)), TAlphabet(c));
+							if (prob <= compareProb) {
+								appendValue(seq, TAlphabet(c));
+								++pos;
+								break;
+							}
+						}
+					}
+					currentState = nextState;
+					break;
+				}
+			}
+			if (stop==true) break;
+		}
+		appendValue(stat, getEndState(hmm));
+		appendValue(sequences, seq);
+		appendValue(states, stat);
+	}
+}
+
+
+template<typename TAlphabet, typename TProbability, typename TSpec,typename TEmissionCounter, typename TTransitionCounter>
+inline void 
+__parameterEstimator(Graph<Hmm<TAlphabet, TProbability, TSpec> >& hmm,
+					 TEmissionCounter const& emission,
+					 TTransitionCounter const& transition)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Hmm<TAlphabet, TProbability, TSpec> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
+	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
+	
+	// Initialization
+	TSize alphSize = ValueSize<TAlphabet>::VALUE;
+	TSize pseudoCount = 1;
+
+	// Estimate the parameters from the counter values
+	TVertexIterator itAll(hmm);
+	for(;!atEnd(itAll);++itAll){
+		if (!isSilent(hmm, value(itAll))) {
+			TSize summedCount =0;
+			for(TSize i=0; i<alphSize;++i) summedCount += (value(value(emission, value(itAll)),i) + pseudoCount);
+			for(TSize i=0; i<alphSize;++i) emissionProbability(hmm,value(itAll),TAlphabet(i)) = ((double) (value(value(emission, value(itAll)),i) + pseudoCount) / (double) summedCount);
+		}
+		TSize summedCount =0;
+		TOutEdgeIterator itOutSum(hmm,value(itAll));
+		for(;!atEnd(itOutSum);++itOutSum) summedCount += getProperty(transition, value(itOutSum)) + pseudoCount;
+		TOutEdgeIterator itOut(hmm, value(itAll));
+		for(;!atEnd(itOut);++itOut) transitionProbability(hmm, value(itOut)) = ((double) (getProperty(transition, value(itOut)) + pseudoCount) / (double) (summedCount));
+	}
+}
+
+
+
+template<typename TAlphabet, typename TProbability, typename TSpec, typename TSequenceSet, typename TStateSeqSet>
+inline void 
+estimationWithStates(Graph<Hmm<TAlphabet, TProbability, TSpec> >& hmm,
+					 TSequenceSet& sequences,
+					 TStateSeqSet& states)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Hmm<TAlphabet, TProbability, TSpec> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename Value<TStateSeqSet>::Type TStateSeq;
+	typedef typename Value<TStateSeq>::Type TState;
+	typedef typename Value<TSequenceSet>::Type TSequence;
+	typedef typename Value<TSequence>::Type TChar;
+	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+
+	// Initialization
+	TSize alphSize = ValueSize<TAlphabet>::VALUE;
+	typedef String<TSize> TCountString;
+	TCountString transitionCounter;
+	fill(transitionCounter, getIdUpperBound(_getEdgeIdManager(hmm)), 0);
+	StringSet<TCountString> emissionCounter;
+	TSize numRows = getIdUpperBound(_getVertexIdManager(hmm));
+	for(TSize i =0; i<numRows;++i) {
+		TCountString emisCount;
+		fill(emisCount,alphSize,0);
+		appendValue(emissionCounter,emisCount);
+	}
+	
+	// Iterate over all sequences
+	for (TSize j=0;j<length(states);++j) {
+		TSize posSeq = 0;
+		for (TSize i = 0;i<length(value(states,j));++i) {
+			TState s = value(value(states,j),i);
+			if (!isSilent(hmm, s)) {
+				TAlphabet c = value(value(sequences,j),posSeq);
+				value(value(emissionCounter, s), ordValue(c)) += 1;
+				++posSeq;
+			}
+			if (i<(length(value(states,j))-1)) {
+				TEdgeDescriptor currEdge = findEdge(hmm, s, value(value(states,j), (i+1)));
+				property(transitionCounter, currEdge) += 1;
+			}
+		}
+	}
+
+	//// Debug Code
+	//typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
+	//TEdgeIterator itE(hmm);
+	//for(;!atEnd(itE);goNext(itE)) std::cout << sourceVertex(itE) << ',' << targetVertex(itE) << ':' << property(transitionCounter, value(itE)) << std::endl;
+	//for(TSize j=0; j<length(emissionCounter); ++j) {
+	//	for(TSize i=0;i<length(value(emissionCounter, j));++i) {
+	//		std::cout << j << ":" << TAlphabet(i) << '=' << value(value(emissionCounter, j), i) << std::endl;
+	//	}
+	//}
+
+	// Estimate Parameters
+	__parameterEstimator(hmm,emissionCounter, transitionCounter);
+}
+
 
 }// namespace SEQAN_NAMESPACE_MAIN
 
