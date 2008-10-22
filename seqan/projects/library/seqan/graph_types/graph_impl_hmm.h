@@ -581,6 +581,8 @@ clearVertices(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g)
 	typedef typename Size<TGraph>::Type TSize;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 
+	g.data_begin = 0;
+	g.data_end = 0;
 	clear(g.data_emission);
 	clear(g.data_silent);
 	clearVertices(g.data_model);

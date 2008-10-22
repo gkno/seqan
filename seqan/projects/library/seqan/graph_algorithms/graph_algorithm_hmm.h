@@ -592,9 +592,15 @@ generateSequence(Graph<Hmm<TAlphabet, TProbability, TSpec> > const& hmm,
 	StringSet<String<TVertexDescriptor> > states;
 	generateSequence(hmm, sequences, states, numSeq, maxLength);
 }
-	
 
-///////////////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////////
+// Training algorithms
+//////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////////
 
 template<typename TAlphabet, typename TProbability, typename TSpec,typename TEmissionCounter, typename TTransitionCounter>
 inline void 
@@ -907,6 +913,230 @@ baumWelchAlgorithm(Graph<Hmm<TAlphabet, TProbability, TSpec > >& hmm,
 	TProbability epsilon = 0.00001;
 	return __baumWelchAlgorithm(hmm, seqSet, maxIter, epsilon);
 }
+
+/*
+//////////////////////////////////////////////////////////////////////////////
+// Profile HMMs
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+
+
+template < typename TAlphabet, typename TProbability, typename TSpec, typename TMat, typename TConsensus, typename TSize>
+inline void
+__profileHmmCounter(Graph<Hmm<TAlphabet, TProbability, TSpec> >& pHmm,
+					TMat const& matr,
+					TConsensus const& consensus,
+					TSize const& numRows,
+					TSize const& numCols)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Hmm<TAlphabet, TProbability, TSpec> > TGraph;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
+	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
+	typedef typename Value<TConsensus>::Type TValue;
+
+	// Initialization
+	TSize alphSize = ValueSize<TAlphabet>::VALUE;
+	TValue gapChar = gapValue<TValue>();
+	TVertexDescriptor begState = beginState(pHmm);
+	TVertexDescriptor eState = endState(pHmm);
+	TVertexDescriptor matchState = 1;
+	TVertexDescriptor insertState = 2;
+	TVertexDescriptor deleteState = 3;
+
+	typedef String<TProbability> TCountString;
+	TCountString transitionCounter;
+	fill(transitionCounter, getIdUpperBound(_getEdgeIdManager(pHmm)), 0.0);
+	StringSet<TCountString> emissionCounter;
+	TSize nR = getIdUpperBound(_getVertexIdManager(pHmm));
+	for(TSize i =0; i<nR;++i) {
+		TCountString emisCount;
+		fill(emisCount,alphSize, 0.0);
+		appendValue(emissionCounter,emisCount);
+	}
+
+
+	String<TVertexDescriptor> oldCol;
+	String<TVertexDescriptor> currCol;
+	fill(oldCol, numRows, begState);
+	fill(currCol, numRows, 0);
+	TEdgeDescriptor currEdge;
+	
+	for(TSize i = 0; i<length(consensus); ++i) {
+		//transitionvalues
+		
+		//being in insertState
+		if (value(consensus, i)==gapChar){
+			for(TSize j = 0; j<numRows; ++j){
+				if ((value(matr, j * numCols + i)!=gapChar)){
+					value(currCol,j) = insertState; 
+					currEdge = findEdge(pHmm, value(oldCol,j), value(currCol,j));
+					property(transitionCounter, currEdge) += 1;
+					value(oldCol,j) = value(currCol,j);
+				}
+				else if ((value(matr, j * numCols + i)==gapChar) ){
+					value(currCol,j) = value(oldCol,j);
+				}
+			}
+		}
+		//being in normal State
+		else{
+			for(TSize j = 0; j<numRows; ++j){
+				if(value(matr, j * numCols + i)!=gapChar) value(currCol,j) = matchState; 
+				else value(currCol,j) = deleteState;
+				currEdge = findEdge(pHmm, value(oldCol,j), value(currCol,j));
+				property(transitionCounter, currEdge) += 1;
+				value(oldCol,j)=value(currCol,j);
+			}
+		}
+		//emissionvalues
+		if (value(consensus, i)==gapChar) {
+			for(TSize j = 0; j<numRows; ++j) 
+				if(value(matr, j * numCols + i)!=gapChar) 
+					value(value(emissionCounter, insertState), ordValue( (TAlphabet)  value(matr, j * numCols + i) ) ) += 1;
+			
+			continue;
+		}
+		else 
+			for(TSize j = 0; j<numRows; ++j) 
+				if(value(matr, j * numCols + i)!=gapChar) 
+					value(value(emissionCounter, matchState), ordValue( (TAlphabet)  value(matr, j * numCols + i) ) ) += 1;
+		
+		matchState+=3;
+		if ((insertState+3)==eState) insertState+=2;
+		else insertState+=3;
+		deleteState+=3;
+	}
+	
+	//transition in endState
+	for(TSize j = 0; j<numRows; ++j){
+		currEdge = findEdge(pHmm,value(currCol,j),eState);
+		property(transitionCounter, currEdge) += 1;
+	}
+	
+	__parameterEstimator(pHmm, emissionCounter, transitionCounter);
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TAlphabet, typename TCargo, typename TSpec, typename TConsensus>
+inline void
+__createProfileHmm(Graph<Hmm<TAlphabet, TCargo, TSpec> >& pHmm,
+				   TConsensus const& consensus)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Hmm<TAlphabet, TCargo, TSpec> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+	typedef typename Value<TConsensus>::Type TValue;
+	
+	// Initialization
+	TSize alphSize = ValueSize<TAlphabet>::VALUE;
+	TValue gapChar = gapValue<TValue>();
+	clear(pHmm);
+	
+	// Add begin state
+	TVertexDescriptor begState = addVertex(pHmm);
+	assignBeginState(pHmm, begState);
+	
+	// Add for each consensus letter 3 states
+	for (TSize i=0;i<length(consensus);++i){
+		if (value(consensus,i) == gapChar) continue;
+		addVertex(pHmm); addVertex(pHmm); addVertex(pHmm, true);
+	}
+	
+	// Add last insertion state
+	TVertexDescriptor lastIState = addVertex(pHmm);
+	
+	// Add end state
+	TVertexDescriptor endState = addVertex(pHmm);
+	assignEndState(pHmm, endState);
+	
+	// Is there no consensus letter?
+	if (lastIState == 1) {
+		clear(pHmm);
+		return;
+	}
+
+	// Remember the kind of state
+	TVertexDescriptor mState = 1;
+	TVertexDescriptor iState = 2;
+	TVertexDescriptor dState = 3;
+
+	// Add tranistions from begin state
+	addEdge(pHmm, begState, mState);
+	addEdge(pHmm, begState, iState);
+	addEdge(pHmm, begState, dState);
+
+	// Add all remaining transitions
+	for (TSize i=0;i<length(consensus);++i){	
+		if (value(consensus,i) == gapChar) continue;
+		else if ((mState + 3) == lastIState) {
+			addEdge(pHmm, iState, mState);	
+			addEdge(pHmm, iState, iState);
+			addEdge(pHmm, iState, dState);
+			break;
+		}
+		else{
+			addEdge(pHmm, mState, (mState+3));
+			addEdge(pHmm, iState, mState);
+			addEdge(pHmm, dState, (mState+3));
+			addEdge(pHmm, mState, (iState+3));
+			addEdge(pHmm, iState, iState);
+			addEdge(pHmm, dState, (iState+3));
+			addEdge(pHmm, mState, (dState+3));
+			addEdge(pHmm, iState, dState);
+			addEdge(pHmm, dState, (dState+3));
+			mState+=3;
+			iState+=3;
+			dState+=3;
+		}
+	}
+
+	// Transitions to the endState and the last I-state
+	addEdge(pHmm, mState, endState);
+	addEdge(pHmm, mState, lastIState);
+	addEdge(pHmm, lastIState, endState);
+	addEdge(pHmm, lastIState, lastIState);
+	addEdge(pHmm, dState, endState);
+	addEdge(pHmm, dState, lastIState);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+//e.g.
+//String<char> matr = "-AT---GAG-G-AG-CT-C--A--GT-G-CT---G";
+//msaToProfileHmm(matr, hmm, 5);
+
+template<typename TAlignmentChar, typename TAlphabet, typename TProbability, typename TSpec, typename TSize>
+inline void 
+msaToProfileHmm(String<TAlignmentChar> const& matr,
+				Graph<Hmm<TAlphabet, TProbability, TSpec> >& pHmm,
+				TSize nSeq)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Hmm<TAlphabet, TProbability, TSpec> > THmm;
+	
+	// Consensus 
+	String<unsigned int> coverage;
+	String<char> gappedConsensus;
+	String<Dna> consensusSequence;
+	consensusCalling(matr, consensusSequence, gappedConsensus, coverage, nSeq, Majority_Vote() );
+
+	// Build the HMM topology
+	__createProfileHmm(pHmm,gappedConsensus);
+
+	// Parameterize the pHmm
+	TSize numCols = length(matr) / nSeq;
+	__profileHmmCounter(pHmm, matr, gappedConsensus, nSeq, numCols);
+}
+
+*/
 
 
 }// namespace SEQAN_NAMESPACE_MAIN
