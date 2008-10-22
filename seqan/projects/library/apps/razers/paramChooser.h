@@ -1295,14 +1295,16 @@ parseGappedParams(RazerSOptions<TSpec> & r_options,TFile & file, ParamChooserOpt
 		return false;
 	}
 	int i;
-	for(i = pm_options.maxWeight-1; i >= 0; --i )
+	for(i = pm_options.maxWeight-1; i > 0; --i )
 		if(length(shapes[i]) > 0)  // if a shape of weight i+1 has been found
 			break;
-	if(i<0)
+	if(i==0)
 	{
 		if(pm_options.verbose) ::std::cerr << "\n!!! Something wrong with file? !!!" << ::std::endl;
 		return false;
 	}
+	if (thresholds[i] == 1 && length(shapes[i-1])>0 && thresholds[i-1] > 2)
+		--i; 
 	pm_options.chosenLossRate = lossrates[i];
 	assign(r_options.shape, shapes[i]);
 	r_options.threshold = thresholds[i];
@@ -1337,7 +1339,6 @@ chooseParams(RazerSOptions<TSpec> & r_options, ParamChooserOptions & pm_options)
 
 	fill(pm_options.firstTimeK,20,true);//set maximal number of errors considered in parameter computation to <20
 
-	if(!pm_options.optionHammingOnly && pm_options.minThreshold == 1) pm_options.minThreshold = 2;
 
 	// compute data specific loss rates
 	if (pm_options.fnameCount0 || pm_options.fnameCount1) 
