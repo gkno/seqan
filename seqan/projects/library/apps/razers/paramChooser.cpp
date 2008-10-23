@@ -2,6 +2,7 @@
 #define RUN_RAZERS
 #define RUN_RAZERS_ONEGAPPED	
 #define SEQAN_PROFILE
+#define NON_REDUNDANT
 //#define LOSSRATE_VALIDATION	//generates output for loss rate validation (empirical vs computed), only for ungapped
 
 #include <sys/types.h>
@@ -25,7 +26,7 @@
 using namespace seqan;
 using namespace std;
 
-typedef double TFloat;
+typedef float TFloat;
 
 
 

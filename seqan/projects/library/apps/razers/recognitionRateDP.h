@@ -80,13 +80,13 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 		TFloat prob;				// probability of this state
 		int transition[4];			// returns previous state
-		unsigned char errors;		// errors in this state
 		unsigned char len;			// length of this pattern (shapeSpan-errors <= this value <= shapeSpan+errors)
+		unsigned char errors:4;		// errors in this state
 		bool skipFirst:1;			// skip this pattern if it is the first
 		bool skipLast:1;			// skip this pattern if it is the last
 		bool intermediate:1;		// this is an intermediate result (beginning with INSERT)
 		bool qgramHit:1;			// is this a q-gram hit? (result of the former delta function)
-	};
+	} __attribute__((packed));
 
 
 #ifdef PLATFORM_WINDOWS
@@ -346,7 +346,7 @@ void initPatterns(
 	if (maxErrors == 0) 
 	{
 		fill(pattern, span, (ErrorAlphabet)SEQAN_MATCH);
-		appendValue(patternStore, pattern);
+		appendValue(patternStore, pattern, Generous());
 	}
 	else
 	do 
@@ -411,7 +411,7 @@ void initPatterns(
 
 		if (!skip)
 		{
-			appendValue(patternStore, pattern);
+			appendValue(patternStore, pattern, Generous());
 //			::std::cout << pattern << ::std::endl;
 		}
 
@@ -451,6 +451,7 @@ void initPatterns(
 	if (!optionMinOutput) 
 		::std::cout << "Stored " << length(patternStore) << " modification patterns" << ::std::flush;
 
+	reserve(patternStore, length(patternStore), Exact());
 	::std::sort(begin(patternStore, Standard()), end(patternStore, Standard()), ErrorPatternLess());
 	for (int p = 1; p < (int)length(patternStore); ++p)
 	{
