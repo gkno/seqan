@@ -58,64 +58,6 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
 	};
 
-	template <typename TReadMatch>
-	struct LessRNoGPos : public ::std::binary_function < TReadMatch, TReadMatch, bool >
-	{
-		inline bool operator() (TReadMatch const &a, TReadMatch const &b) const 
-		{
-			// read number
-			if (a.rseqNo < b.rseqNo) return true;
-			if (a.rseqNo > b.rseqNo) return false;
-
-			// genome position and orientation
-			if (a.gseqNo < b.gseqNo) return true;
-			if (a.gseqNo > b.gseqNo) return false;
-			if (a.gBegin < b.gBegin) return true;
-			if (a.gBegin > b.gBegin) return false;
-			if (a.orientation < b.orientation) return true;
-			if (a.orientation > b.orientation) return false;
-
-			// quality
-			return a.editDist < b.editDist;
-		}
-	};
-
-	// ... to sort matches and remove duplicates with equal gEnd
-	template <typename TReadMatch>
-	struct LessRNoGEndPos : public ::std::binary_function < TReadMatch, TReadMatch, bool >
-	{
-		inline bool operator() (TReadMatch const &a, TReadMatch const &b) const 
-		{
-			// read number
-			if (a.rseqNo < b.rseqNo) return true;
-			if (a.rseqNo > b.rseqNo) return false;
-
-			// genome position and orientation
-			if (a.gseqNo < b.gseqNo) return true;
-			if (a.gseqNo > b.gseqNo) return false;
-			if (a.gEnd   < b.gEnd) return true;
-			if (a.gEnd   > b.gEnd) return false;
-			if (a.orientation < b.orientation) return true;
-			if (a.orientation > b.orientation) return false;
-
-			// quality
-			return a.editDist < b.editDist;
-		}
-	};
-
-	template <typename TReadMatch>
-	struct LessErrors : public ::std::binary_function < TReadMatch, TReadMatch, bool >
-	{
-		inline bool operator() (TReadMatch const &a, TReadMatch const &b) const 
-		{
-			// read number
-			if (a.rseqNo < b.rseqNo) return true;
-			if (a.rseqNo > b.rseqNo) return false;
-
-			// quality
-			return a.editDist < b.editDist;
-		}
-	};
 
 //////////////////////////////////////////////////////////////////////////////
 // Determine error distribution
@@ -150,12 +92,12 @@ getErrorDistribution(
 	return unique;
 }
 
-template <typename TErrDistr, typename TCount, typename TMatches, typename TReads, typename TGenomes, typename TSpec>
+template <typename TErrDistr, typename TCount1, typename TCount2, typename TMatches, typename TReads, typename TGenomes, typename TSpec>
 inline unsigned
 getErrorDistribution(
 	TErrDistr &posError,
-	TCount &insertions,
-	TCount &deletions,
+	TCount1 &insertions,
+	TCount2 &deletions,
 	TMatches &matches, 
 	TReads &reads, 
 	TGenomes &genomes, 
@@ -254,153 +196,6 @@ dumpAlignment(TFile & target, Align<TSource, TSpec> const & source)
 
 
 //////////////////////////////////////////////////////////////////////////////
-// Remove duplicate matches and leave at most maxHits many distanceRange
-// best matches per read
-template < typename TMatches >
-void maskDuplicates(TMatches &matches)
-{
-	typedef typename Value<TMatches>::Type					TMatch;
-	typedef typename Iterator<TMatches, Standard>::Type		TIterator;
-	
-	//////////////////////////////////////////////////////////////////////////////
-	// remove matches with equal ends
-
-	::std::sort(
-		begin(matches, Standard()),
-		end(matches, Standard()), 
-		LessRNoGEndPos<TMatch>());
-
-	typename	TMatch::TGPos gBegin = -1;
-	typename	TMatch::TGPos gEnd = -1;
-	unsigned	gseqNo = -1;
-	unsigned	readNo = -1;
-	char		orientation = '-';
-
-	TIterator it = begin(matches, Standard());
-	TIterator itEnd = end(matches, Standard());
-
-	for (; it != itEnd; ++it) 
-	{
-		if (gEnd == (*it).gEnd && orientation == (*it).orientation &&
-			gseqNo == (*it).gseqNo && readNo == (*it).rseqNo) 
-		{
-			(*it).orientation = '-';
-			continue;
-		}
-		readNo = (*it).rseqNo;
-		gseqNo = (*it).gseqNo;
-		gEnd = (*it).gEnd;
-		orientation = (*it).orientation;
-	}
-
-	//////////////////////////////////////////////////////////////////////////////
-	// remove matches with equal begins
-
-	::std::sort(
-		begin(matches, Standard()),
-		end(matches, Standard()), 
-		LessRNoGPos<TMatch>());
-
-	orientation = '-';
-
-	it = begin(matches, Standard());
-	itEnd = end(matches, Standard());
-
-	for (; it != itEnd; ++it) 
-	{
-		if ((*it).orientation == '-') continue;
-		if (gBegin == (*it).gBegin && readNo == (*it).rseqNo &&
-			gseqNo == (*it).gseqNo && orientation == (*it).orientation) 
-		{
-			(*it).orientation = '-';
-			continue;
-		}
-		readNo = (*it).rseqNo;
-		gseqNo = (*it).gseqNo;
-		gBegin = (*it).gBegin;
-		orientation = (*it).orientation;
-	}
-	
-	//////////////////////////////////////////////////////////////////////////////
-	// remove low quality matches
-
-	::std::sort(
-		begin(matches, Standard()),
-		end(matches, Standard()), 
-		LessErrors<TMatch>());
-}
-
-template < typename TMatches, typename TCounts >
-void countMatches(TMatches &matches, TCounts &cnt)
-{
-	typedef typename Value<TMatches>::Type					TMatch;
-	typedef typename Iterator<TMatches, Standard>::Type		TIterator;
-	typedef typename Value<TCounts>::Type					TRow;
-	typedef typename Value<TRow>::Type						TValue;
-	
-	TIterator it = begin(matches, Standard());
-	TIterator itEnd = end(matches, Standard());
-	
-	unsigned readNo = -1;
-	short editDist = -1;
-	__int64 count = 0;
-	__int64 maxVal = SupremumValue<TValue>::VALUE;
-
-	for (; it != itEnd; ++it) 
-	{
-		if ((*it).orientation == '-') continue;
-		if (readNo == (*it).rseqNo && editDist == (*it).editDist)
-			++count;
-		else
-		{
-			if (readNo != (unsigned)-1 && (unsigned)editDist < length(cnt))
-				cnt[editDist][readNo] = (maxVal < count)? maxVal : count;
-			readNo = (*it).rseqNo;
-			editDist = (*it).editDist;
-			count = 1;
-		}
-	}
-	if (readNo != (unsigned)-1)
-		cnt[editDist][readNo] = count;
-}	
-
-template < typename TMatches, typename TSpec >
-void compactMatches(TMatches &matches, RazerSOptions<TSpec> &options)
-{
-	typedef typename Value<TMatches>::Type					TMatch;
-	typedef typename Iterator<TMatches, Standard>::Type		TIterator;
-	
-	unsigned readNo = -1;
-	unsigned hitCount = 0;
-	unsigned hitCountCutOff = options.maxHits;
-	int editDistCutOff = SupremumValue<int>::VALUE;
-
-	TIterator it = begin(matches, Standard());
-	TIterator itEnd = end(matches, Standard());
-	TIterator dit = it;
-
-	for (; it != itEnd; ++it) 
-	{
-		if ((*it).orientation == '-') continue;
-		if (readNo == (*it).rseqNo)
-		{ 
-			if ((*it).editDist >= editDistCutOff || ++hitCount >= hitCountCutOff)
-				continue;
-		} else
-		{
-			readNo = (*it).rseqNo;
-			hitCount = 0;
-			if (options.distanceRange > 0)
-				editDistCutOff = (*it).editDist + options.distanceRange;
-		}
-		*dit = *it;
-		++dit;
-	}
-	resize(matches, dit - begin(matches, Standard()));
-}
-
-
-//////////////////////////////////////////////////////////////////////////////
 // Output matches
 template <
 	typename TMatches,
@@ -450,7 +245,7 @@ void dumpMatches(
 
 	// load Genome sequences for alignment dumps
 	TGenomeSet genomes;
-	if (options.dumpAlignment || (!errorPrbFileName.empty() && options.hammingOnly))
+	if (options.dumpAlignment || !errorPrbFileName.empty())
 		if (!loadGenomes(genomes, genomeFName.c_str())) {
 			::std::cerr << "Failed to load genomes" << ::std::endl;
 			options.dumpAlignment = false;
@@ -710,7 +505,7 @@ void dumpMatches(
 	file.close();
 
 	// get empirical error distribution
-	if (!errorPrbFileName.empty())
+	if (!errorPrbFileName.empty() && maxReadLength > 0)
 	{
 		file.open(errorPrbFileName.c_str(), ::std::ios_base::out | ::std::ios_base::trunc);
 		if (file.is_open())
@@ -730,8 +525,10 @@ void dumpMatches(
 				::std::cerr << "deleteProb: " << (double)deletions / ((double)length(posError) * (double)unique) << ::std::endl;
 			}
 
-			for (unsigned i = 0; i < length(posError); ++i)
-				file << (double)posError[i] / (double)unique << ::std::endl;
+			file << (double)posError[0] / (double)unique;
+			for (unsigned i = 1; i < length(posError); ++i)
+				file << '\t' << (double)posError[i] / (double)unique;
+			file << ::std::endl;
 			file.close();
 		} else
 			::std::cerr << "Failed to open error distribution file" << ::std::endl;

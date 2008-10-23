@@ -25,6 +25,7 @@
 #define RAZERS_PRUNE_QGRAM_INDEX
 #define RAZERS_CONCATREADS		// use <ConcatDirect> StringSet to store reads
 #define RAZERS_MEMOPT			// optimize memory consumption
+#define RAZERS_MASK_READS		// remove matches with max-hits optimal hits on-the-fly
 //#define NO_PARAM_CHOOSER
 
 #include "seqan/platform.h"
@@ -154,6 +155,10 @@ void printHelp(int, const char *[], RazerSOptions<TSpec> &options, ParamChooserO
 		cerr << "  -h,  --help                  \t" << "print this help" << endl;
 		cerr << endl << "Output Format Options:" << endl;
 		cerr << "  -a,  --alignment             \t" << "dump the alignment for each match" << endl;
+#ifdef RAZERS_MASK_READS
+		cerr << "  -pa, --purge-ambiguous       \t" << "purge reads with more than max-hits best matches" << endl;
+#endif
+		cerr << "  -dr, --distance-range        \t" << "output only the best, second best, ..., distanceRange best matches (default output all)" << endl;
 		cerr << "  -of, --output-format NUM     \t" << "set output format" << endl;
 		cerr << "                               \t" << "0 = Razer format (default, see README)" << endl;
 		cerr << "                               \t" << "1 = enhanced Fasta format" << endl;
@@ -186,7 +191,7 @@ void printHelp(int, const char *[], RazerSOptions<TSpec> &options, ParamChooserO
 
 void printVersion() 
 {
-	cerr << "RazerS version 0.3 20081011 (prerelease)" << endl;
+	cerr << "RazerS version 0.3 20081022 (prerelease)" << endl;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -269,8 +274,8 @@ int main(int argc, const char *argv[])
 				printHelp(argc, argv, options, pm_options);
 				return 0;
 			}
-			if (strcmp(argv[arg], "-id") == 0 || strcmp(argv[arg], "--indels") == 0) {
-				options.hammingOnly = false;
+			if (strcmp(argv[arg], "-pa") == 0 || strcmp(argv[arg], "--purge-ambiguous") == 0) {
+				options.purgeAmbiguous = true;
 				continue;
 			}
 			if (strcmp(argv[arg], "-m") == 0 || strcmp(argv[arg], "--max-hits") == 0) {
@@ -288,6 +293,10 @@ int main(int argc, const char *argv[])
 				}
 				printHelp(argc, argv, options, pm_options);
 				return 0;
+			}
+			if (strcmp(argv[arg], "-id") == 0 || strcmp(argv[arg], "--indels") == 0) {
+				options.hammingOnly = false;
+				continue;
 			}
 			if (strcmp(argv[arg], "-a") == 0 || strcmp(argv[arg], "--alignment") == 0) {
 				options.dumpAlignment = true;

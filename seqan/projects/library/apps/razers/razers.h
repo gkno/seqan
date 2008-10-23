@@ -53,6 +53,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		double		errorRate;			// Criteria 1 threshold
 		unsigned	maxHits;			// output at most maxHits many matches
 		unsigned	distanceRange;		// output only the best, second best, ..., distanceRange best matches
+		bool		purgeAmbiguous;		// true..remove reads with more than maxHits best matches, false..keep them
 		const char	*output;			// name of result file
 		int			_debugLevel;		// level of verbosity
 		bool		printVersion;		// print version number
@@ -90,6 +91,13 @@ namespace SEQAN_NAMESPACE_MAIN
 		double		timeMapReads;		// time for mapping reads
 		double		timeDumpResults;	// time for dumping the results
 
+	// misc
+		unsigned	compactThresh;		// compact match array if larger than compactThresh
+#ifdef RAZERS_MASK_READS
+		String<unsigned long> readMask;	// bit-string of bool (1..verify read, 0..ignore read)
+		enum { WORD_SIZE = BitsPerValue<unsigned long>::VALUE };
+#endif
+
 		RazerSOptions() 
 		{
 			forward = true;
@@ -97,6 +105,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			errorRate = 0.08;
 			maxHits = 100;
 			distanceRange = 0;	// disabled
+			purgeAmbiguous = false;
 			output = "";
 			_debugLevel = 0;
 			printVersion = false;
@@ -120,6 +129,8 @@ namespace SEQAN_NAMESPACE_MAIN
 			for (unsigned i = 0; i < 4; ++i)
 				compMask[i] = 1 << i;
 			compMask[4] = 0;
+
+			compactThresh = 1024;
 		}
 	};
 
@@ -319,6 +330,236 @@ bool loadGenomes(TGenomeSet &genomes, const char *fileName)
 }
 
 
+	template <typename TReadMatch>
+	struct LessRNoGPos : public ::std::binary_function < TReadMatch, TReadMatch, bool >
+	{
+		inline bool operator() (TReadMatch const &a, TReadMatch const &b) const 
+		{
+			// read number
+			if (a.rseqNo < b.rseqNo) return true;
+			if (a.rseqNo > b.rseqNo) return false;
+
+			// genome position and orientation
+			if (a.gseqNo < b.gseqNo) return true;
+			if (a.gseqNo > b.gseqNo) return false;
+			if (a.gBegin < b.gBegin) return true;
+			if (a.gBegin > b.gBegin) return false;
+			if (a.orientation < b.orientation) return true;
+			if (a.orientation > b.orientation) return false;
+
+			// quality
+			return a.editDist < b.editDist;
+		}
+	};
+
+	// ... to sort matches and remove duplicates with equal gEnd
+	template <typename TReadMatch>
+	struct LessRNoGEndPos : public ::std::binary_function < TReadMatch, TReadMatch, bool >
+	{
+		inline bool operator() (TReadMatch const &a, TReadMatch const &b) const 
+		{
+			// read number
+			if (a.rseqNo < b.rseqNo) return true;
+			if (a.rseqNo > b.rseqNo) return false;
+
+			// genome position and orientation
+			if (a.gseqNo < b.gseqNo) return true;
+			if (a.gseqNo > b.gseqNo) return false;
+			if (a.gEnd   < b.gEnd) return true;
+			if (a.gEnd   > b.gEnd) return false;
+			if (a.orientation < b.orientation) return true;
+			if (a.orientation > b.orientation) return false;
+
+			// quality
+			return a.editDist < b.editDist;
+		}
+	};
+
+	template <typename TReadMatch>
+	struct LessErrors : public ::std::binary_function < TReadMatch, TReadMatch, bool >
+	{
+		inline bool operator() (TReadMatch const &a, TReadMatch const &b) const 
+		{
+			// read number
+			if (a.rseqNo < b.rseqNo) return true;
+			if (a.rseqNo > b.rseqNo) return false;
+
+			// quality
+			return a.editDist < b.editDist;
+		}
+	};
+	
+//////////////////////////////////////////////////////////////////////////////
+// Remove duplicate matches and leave at most maxHits many distanceRange
+// best matches per read
+template < typename TMatches >
+void maskDuplicates(TMatches &matches)
+{
+	typedef typename Value<TMatches>::Type					TMatch;
+	typedef typename Iterator<TMatches, Standard>::Type		TIterator;
+	
+	//////////////////////////////////////////////////////////////////////////////
+	// remove matches with equal ends
+
+	::std::sort(
+		begin(matches, Standard()),
+		end(matches, Standard()), 
+		LessRNoGEndPos<TMatch>());
+
+	typename	TMatch::TGPos gBegin = -1;
+	typename	TMatch::TGPos gEnd = -1;
+	unsigned	gseqNo = -1;
+	unsigned	readNo = -1;
+	char		orientation = '-';
+
+	TIterator it = begin(matches, Standard());
+	TIterator itEnd = end(matches, Standard());
+
+	for (; it != itEnd; ++it) 
+	{
+		if (gEnd == (*it).gEnd && orientation == (*it).orientation &&
+			gseqNo == (*it).gseqNo && readNo == (*it).rseqNo) 
+		{
+			(*it).orientation = '-';
+			continue;
+		}
+		readNo = (*it).rseqNo;
+		gseqNo = (*it).gseqNo;
+		gEnd = (*it).gEnd;
+		orientation = (*it).orientation;
+	}
+
+	//////////////////////////////////////////////////////////////////////////////
+	// remove matches with equal begins
+
+	::std::sort(
+		begin(matches, Standard()),
+		end(matches, Standard()), 
+		LessRNoGPos<TMatch>());
+
+	orientation = '-';
+
+	it = begin(matches, Standard());
+	itEnd = end(matches, Standard());
+
+	for (; it != itEnd; ++it) 
+	{
+		if ((*it).orientation == '-') continue;
+		if (gBegin == (*it).gBegin && readNo == (*it).rseqNo &&
+			gseqNo == (*it).gseqNo && orientation == (*it).orientation) 
+		{
+			(*it).orientation = '-';
+			continue;
+		}
+		readNo = (*it).rseqNo;
+		gseqNo = (*it).gseqNo;
+		gBegin = (*it).gBegin;
+		orientation = (*it).orientation;
+	}
+	
+	::std::sort(
+		begin(matches, Standard()),
+		end(matches, Standard()), 
+		LessErrors<TMatch>());
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// Count matches for each number of errors
+template < typename TMatches, typename TCounts >
+void countMatches(TMatches &matches, TCounts &cnt)
+{
+	typedef typename Value<TMatches>::Type					TMatch;
+	typedef typename Iterator<TMatches, Standard>::Type		TIterator;
+	typedef typename Value<TCounts>::Type					TRow;
+	typedef typename Value<TRow>::Type						TValue;
+	
+	TIterator it = begin(matches, Standard());
+	TIterator itEnd = end(matches, Standard());
+	
+	unsigned readNo = -1;
+	short editDist = -1;
+	__int64 count = 0;
+	__int64 maxVal = SupremumValue<TValue>::VALUE;
+
+	for (; it != itEnd; ++it) 
+	{
+		if ((*it).orientation == '-') continue;
+		if (readNo == (*it).rseqNo && editDist == (*it).editDist)
+			++count;
+		else
+		{
+			if (readNo != (unsigned)-1 && (unsigned)editDist < length(cnt))
+				cnt[editDist][readNo] = (maxVal < count)? maxVal : count;
+			readNo = (*it).rseqNo;
+			editDist = (*it).editDist;
+			count = 1;
+		}
+	}
+	if (readNo != (unsigned)-1)
+		cnt[editDist][readNo] = count;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// Remove low quality matches
+template < typename TMatches, typename TSpec >
+void compactMatches(TMatches &matches, RazerSOptions<TSpec> &options)
+{
+	typedef typename Value<TMatches>::Type					TMatch;
+	typedef typename Iterator<TMatches, Standard>::Type		TIterator;
+	
+	unsigned readNo = -1;
+	unsigned hitCount = 0;
+	unsigned hitCountCutOff = options.maxHits;
+	int editDistCutOff = SupremumValue<int>::VALUE;
+
+	TIterator it = begin(matches, Standard());
+	TIterator itEnd = end(matches, Standard());
+	TIterator dit = it;
+	TIterator ditBeg = it;
+
+	for (; it != itEnd; ++it) 
+	{
+		if ((*it).orientation == '-') continue;
+		if (readNo == (*it).rseqNo)
+		{ 
+			if ((*it).editDist >= editDistCutOff) continue;
+			if (++hitCount >= hitCountCutOff)
+			{
+				if (hitCount == hitCountCutOff)
+				{
+#ifdef RAZERS_MASK_READS
+					if (options.purgeAmbiguous)
+					{
+						dit = ditBeg;
+						if (options._debugLevel >= 2)
+							::std::cerr << "(read #" << readNo << " disabled)";
+						options.readMask[readNo / options.WORD_SIZE] &= ~(1ul << (readNo % options.WORD_SIZE));
+					} else
+						if ((*it).editDist == 0)
+						{
+							if (options._debugLevel >= 2)
+								::std::cerr << "(read #" << readNo << " disabled)";
+							options.readMask[readNo / options.WORD_SIZE] &= ~(1ul << (readNo % options.WORD_SIZE));
+						}
+#endif
+				}
+				continue;
+			}
+		} else
+		{
+			readNo = (*it).rseqNo;
+			hitCount = 0;
+			if (options.distanceRange > 0)
+				editDistCutOff = (*it).editDist + options.distanceRange;
+			ditBeg = dit;
+		}
+		*dit = *it;
+		++dit;
+	}
+	resize(matches, dit - begin(matches, Standard()));
+}
+
+
 //////////////////////////////////////////////////////////////////////////////
 // Hamming verification
 template <
@@ -433,7 +674,7 @@ matchVerify(
 
 	// find end of best semi-global alignment
 	while (find(myersFinder, myersPattern, minScore))
-		if (maxScore < getScore(myersPattern)) 
+		if (maxScore <= getScore(myersPattern)) 
 		{
 			maxScore = getScore(myersPattern);
 			maxPos = myersFinder;
@@ -441,9 +682,12 @@ matchVerify(
 	
 	if (maxScore < minScore) return false;
 	m.editDist	= (unsigned)-maxScore;
+	setEndPosition(inf, m.gEnd = (beginPosition(inf) + position(maxPos) + 1));
 
-	setEndPosition(inf, beginPosition(inf) + position(maxPos) + 1);
+	if (length(inf) > ndlLength - maxScore)
+		setBeginPosition(inf, endPosition(inf) - ndlLength + maxScore);
 	
+	// find beginning of best semi-global alignment
 	TGenomeInfixRev		infRev(inf);
 	TReadRev			readRev(indexText(readIndex)[rseqNo]);
 	TMyersFinderRev		myersFinderRev(infRev);
@@ -451,22 +695,9 @@ matchVerify(
 
 	_patternMatchNOfPattern(myersPatternRev, options.matchN);
 	_patternMatchNOfFinder(myersPatternRev, options.matchN);
-
-	// find beginning of best semi-global alignment
-	if (find(myersFinderRev, myersPatternRev, maxScore))
-	{
-		m.gEnd = endPosition(inf);
+	while (find(myersFinderRev, myersPatternRev, maxScore))
 		m.gBegin = m.gEnd - (position(myersFinderRev) + 1);
-	} else {
-		// this case should never occur
-		::std::cerr << "1GENOME: " << host(myersFinder) << ::std::endl;
-		::std::cerr << "1READ:   " << indexText(readIndex)[rseqNo] << ::std::endl;
-		::std::cerr << "2GENOME: " << inf << '\t' << m.gBegin << ',' << m.gEnd << ::std::endl;
-		::std::cerr << "2READ:   " << indexText(readIndex)[rseqNo] << ::std::endl;
-		::std::cerr << "3GENOME: " << infRev << ::std::endl;
-		::std::cerr << "3READ:   " << readRev << ::std::endl;
-		::std::cerr << "HUH?" << ::std::endl;
-	}
+
 	return true;
 }
 
@@ -507,14 +738,16 @@ void findReads(
 	TReadIndex &readIndex = host(swiftPattern);
 	TSwiftFinder swiftFinder(genome, options.repeatLength, 1);
 
-	TMatch m;
-	m.gBegin = 0;	// to supress uninitialized warnings
+	TMatch m = { 0, 0, 0, 0, 0, 0 };	// to supress uninitialized warnings
 	
 	// iterate all verification regions returned by SWIFT
 	while (find(swiftFinder, swiftPattern, options.errorRate, options._debugLevel)) 
 	{
 		unsigned rseqNo = (*swiftFinder.curHit).ndlSeqNo;
 		if (!options.spec.DONT_VERIFY && 
+#ifdef RAZERS_MASK_READS
+			((options.readMask[rseqNo / options.WORD_SIZE] & (1ul << (rseqNo % options.WORD_SIZE))) != 0) &&
+#endif
 			matchVerify(m, range(swiftFinder, genome), rseqNo, readIndex, forwardPatterns, options, TSwiftSpec()))
 		{
 			// transform coordinates to the forward strand
@@ -530,7 +763,18 @@ void findReads(
 			m.orientation = orientation;
 
 			if (!options.spec.DONT_DUMP_RESULTS)
+			{
 				appendValue(matches, m);
+				if (length(matches) > options.compactThresh)
+				{
+					typename Size<TMatches>::Type oldSize = length(matches);
+					maskDuplicates(matches);
+					compactMatches(matches, options);
+					options.compactThresh += (options.compactThresh >> 1);
+					if (options._debugLevel >= 2)
+						::std::cerr << '(' << oldSize - length(matches) << " matches removed)";
+				}
+			}
 
 			++options.TP;
 /*			::std::cerr << "\"" << range(swiftFinder, genomeInf) << "\"  ";
@@ -586,11 +830,11 @@ int mapReads(
 	swiftPattern.params.tabooLength = options.tabooLength;
 
 	// init edit distance verifiers
+	unsigned readCount = countSequences(swiftIndex);
 	String<TMyersPattern> forwardPatterns;
 	options.compMask[4] = (options.matchN)? 15: 0;
 	if (!options.hammingOnly)
 	{
-		unsigned readCount = countSequences(swiftIndex);
 		resize(forwardPatterns, readCount);
 		for(unsigned i = 0; i < readCount; ++i)
 		{
@@ -599,6 +843,12 @@ int mapReads(
 			_patternMatchNOfFinder(forwardPatterns[i], options.matchN);
 		}
 	}
+
+#ifdef RAZERS_MASK_READS
+	// init read mask
+	clear(options.readMask);
+	fill(options.readMask, (readCount + options.WORD_SIZE - 1) / options.WORD_SIZE, -1ul);
+#endif
 
 	// clear stats
 	options.FP = 0;
