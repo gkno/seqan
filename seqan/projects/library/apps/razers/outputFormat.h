@@ -233,14 +233,6 @@ void dumpMatches(
 		if (maxReadLength < length(reads[i]))
 			maxReadLength = length(reads[i]);
 
-	// match statistics
-	unsigned maxErrors = (int)(options.errorRate * maxReadLength);
-	if (maxErrors > 10) maxErrors = 10;
-	String<String<unsigned> > stats;
-	resize(stats, maxErrors + 1);
-	for (unsigned i = 0; i <= maxErrors; ++i)
-		fill(stats[i], length(reads), 0);
-
 	SEQAN_PROTIMESTART(dump_time);
 
 	// load Genome sequences for alignment dumps
@@ -293,8 +285,19 @@ void dumpMatches(
 		return;
 	}
 
+	String<String<unsigned> > stats;
+
 	maskDuplicates(matches);
-	countMatches(matches, stats);
+	if (options.outputFormat > 0)
+	{
+		// match statistics
+		unsigned maxErrors = (int)(options.errorRate * maxReadLength);
+		if (maxErrors > 10) maxErrors = 10;
+		resize(stats, maxErrors + 1);
+		for (unsigned i = 0; i <= maxErrors; ++i)
+			fill(stats[i], length(reads), 0);
+		countMatches(matches, stats);
+	}
 	compactMatches(matches, options);
 
 	switch (options.sortOrder) {
@@ -410,7 +413,7 @@ void dumpMatches(
 					file << '>' << (*it).gEnd << ',' << ((*it).gBegin + options.positionFormat);
 					
 				unsigned ambig = 0;
-				for (int i = 0; i <= (*it).editDist; ++i)
+				for (unsigned i = 0; i <= (*it).editDist && i < length(stats); ++i)
 					ambig += stats[i][(*it).rseqNo];
 				
 				file << "[id=" << id << ",fragId=" << fragId;

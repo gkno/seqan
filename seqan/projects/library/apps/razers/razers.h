@@ -495,7 +495,7 @@ void countMatches(TMatches &matches, TCounts &cnt)
 			count = 1;
 		}
 	}
-	if (readNo != (unsigned)-1)
+	if (readNo != (unsigned)-1 && (unsigned)editDist < length(cnt))
 		cnt[editDist][readNo] = count;
 }
 
@@ -729,11 +729,13 @@ void findReads(
 
 	// iterate all genomic sequences
 	if (options._debugLevel >= 1)
+	{
 		::std::cerr << ::std::endl << "Process genome seq #" << gseqNo;
-	if (orientation == 'F')
-		::std::cerr << "[fwd]";
-	else
-		::std::cerr << "[rev]";
+		if (orientation == 'F')
+			::std::cerr << "[fwd]";
+		else
+			::std::cerr << "[rev]";
+	}
 
 	TReadIndex &readIndex = host(swiftPattern);
 	TSwiftFinder swiftFinder(genome, options.repeatLength, 1);
