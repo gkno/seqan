@@ -169,7 +169,7 @@ void printHelp(int, const char *[], RazerSOptions<TSpec> &options, ParamChooserO
 #ifdef RAZERS_MASK_READS
 		cerr << "  -pa, --purge-ambiguous       \t" << "purge reads with more than max-hits best matches" << endl;
 #endif
-		cerr << "  -dr, --distance-range        \t" << "output only the best, second best, ..., distanceRange best matches (default output all)" << endl;
+		cerr << "  -dr, --distance-range NUM    \t" << "only consider matches with at most NUM more errors compared to the best (default output all)" << endl;
 		cerr << "  -of, --output-format NUM     \t" << "set output format" << endl;
 		cerr << "                               \t" << "0 = Razer format (default, see README)" << endl;
 		cerr << "                               \t" << "1 = enhanced Fasta format" << endl;
@@ -295,6 +295,20 @@ int main(int argc, const char *argv[])
 							cerr << "Maximum hits threshold must be greater than 0" << endl << endl;
 						else
 							continue;
+					}
+				}
+				printHelp(argc, argv, options, pm_options);
+				return 0;
+			}
+			if (strcmp(argv[arg], "-dr") == 0 || strcmp(argv[arg], "--distance-range") == 0) {
+				if (arg + 1 < argc) {
+					++arg;
+					istringstream istr(argv[arg]);
+					istr >> options.distanceRange;
+					if (!istr.fail()) 
+					{
+						options.distanceRange++;
+						continue;
 					}
 				}
 				printHelp(argc, argv, options, pm_options);

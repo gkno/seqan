@@ -147,7 +147,7 @@ the command line:
   [ -dr NUM ], [ --distance-range NUM ]
   
   If the best match of a read has E errors, only consider hits with 
-  E <= X < E+NUM errors as matches.
+  E <= X <= E+NUM errors as matches.
 
   [ -gn NUM ],  [ --genome-naming NUM ]
 
