@@ -536,13 +536,16 @@ SEQAN_CHECKPOINT
 				me.score++;
 
 			large.scoreMask >>= 1;
-			if (!large.scoreMask) {
-				large.scoreMask = (TWord)1 << (me.MACHINE_WORD_SIZE - 1);
+			if (!large.scoreMask) 
+			{
 				large.lastBlock--;
+				if (TYPECMP<TSpec, FindPrefix>::VALUE && large.lastBlock == (unsigned)-1)
+					break;
+				large.scoreMask = (TWord)1 << (me.MACHINE_WORD_SIZE - 1);
 			}
 		}
 
-		if ((large.lastBlock == large.blockCount-1) && (large.scoreMask == large.finalScoreMask))
+		if ((large.scoreMask == large.finalScoreMask) && (large.lastBlock == large.blockCount - 1))
 		{
 			_setFinderEnd(finder);
 			if (TYPECMP<TSpec, FindPrefix>::VALUE)
