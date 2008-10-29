@@ -86,7 +86,11 @@ namespace SEQAN_NAMESPACE_MAIN
 		bool skipLast:1;			// skip this pattern if it is the last
 		bool intermediate:1;		// this is an intermediate result (beginning with INSERT)
 		bool qgramHit:1;			// is this a q-gram hit? (result of the former delta function)
-	} __attribute__((packed));
+	}
+#ifndef PLATFORM_WINDOWS
+	__attribute__((packed))
+#endif
+	;
 
 
 #ifdef PLATFORM_WINDOWS

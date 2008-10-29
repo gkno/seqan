@@ -684,6 +684,7 @@ matchVerify(
 	m.editDist	= (unsigned)-maxScore;
 	setEndPosition(inf, m.gEnd = (beginPosition(inf) + position(maxPos) + 1));
 
+	// limit the beginning to needle length plus errors (== -maxScore)
 	if (length(inf) > ndlLength - maxScore)
 		setBeginPosition(inf, endPosition(inf) - ndlLength + maxScore);
 	
@@ -693,6 +694,13 @@ matchVerify(
 	TMyersFinderRev		myersFinderRev(infRev);
 	TMyersPatternRev	myersPatternRev(readRev);
 
+/*	cout<<"Verify: "<<::std::endl;
+	cout<<"Genome: "<<inf<<"\t" << beginPosition(inf) << "," << endPosition(inf) << ::std::endl;
+	cout<<"Read:   "<<indexText(readIndex)[rseqNo]<<::std::endl;
+
+	cout<<"Genome: "<<infRev << ::std::endl;
+	cout<<"Read:   "<<readRev<<::std::endl;
+*/
 	_patternMatchNOfPattern(myersPatternRev, options.matchN);
 	_patternMatchNOfFinder(myersPatternRev, options.matchN);
 	while (find(myersFinderRev, myersPatternRev, maxScore))
@@ -849,7 +857,7 @@ int mapReads(
 #ifdef RAZERS_MASK_READS
 	// init read mask
 	clear(options.readMask);
-	fill(options.readMask, (readCount + options.WORD_SIZE - 1) / options.WORD_SIZE, -1ul);
+	fill(options.readMask, (readCount + options.WORD_SIZE - 1) / options.WORD_SIZE, (unsigned long)-1);
 #endif
 
 	// clear stats
