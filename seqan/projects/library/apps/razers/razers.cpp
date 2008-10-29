@@ -139,7 +139,10 @@ template <typename TSpec>
 void printHelp(int, const char *[], RazerSOptions<TSpec> &options, ParamChooserOptions &pm_options, bool longHelp = false) 
 {
 	if (options.printVersion)
+	{
 		printVersion();
+		return;
+	}
 
 	cerr << "********************************************" << endl;
 	cerr << "*** RazerS - Fast Mapping of Short Reads ***" << endl;
@@ -153,12 +156,10 @@ void printHelp(int, const char *[], RazerSOptions<TSpec> &options, ParamChooserO
 		cerr << "  -i,  --percent-identity NUM  \t" << "set the percent identity threshold (default " << 100 - (100.0 * options.errorRate) << ')' << endl;
 #ifndef NO_PARAM_CHOOSER
 		cerr << "  -rr, --recognition-rate NUM  \t" << "set the percent recognition rate (default " << 100 - (100.0 * pm_options.optionLossRate) << ')' << endl;
-		cerr << "  -ri, --recognition-id NUM    \t" << "set the percent identity level for which filtering parameters are chosen and sensitivity level is guaranteed (default " << 100 - (100.0 * pm_options.optionErrorRate) << ')' << endl;
 #endif
 		cerr << "  -id, --indels                \t" << "allow indels (default: mismatches only)" << endl;
 		cerr << "  -m,  --max-hits NUM          \t" << "output only NUM of the best hits (default " << options.maxHits << ')' << endl;
 		cerr << "  -o,  --output FILE           \t" << "change output filename (default <READS FILE>.result)" << endl;
-		cerr << "  -sm, --save-memory           \t" << "save memory mode (restricting q-gram length to a maximum of 13)" << endl;
 		cerr << "  -v,  --verbose               \t" << "verbose mode" << endl;
 		cerr << "  -vv, --vverbose              \t" << "very verbose mode" << endl;
 		cerr << "  -V,  --version               \t" << "print version number" << endl;
@@ -222,9 +223,6 @@ int main(int argc, const char *argv[])
 	RazerSOptions<>		options;
 	ParamChooserOptions	pm_options;
 
-	pm_options.optionErrorRate = 0.06; //options.errorRate;
-
-
 	bool				paramChoosing = true;
 	unsigned			fnameCount = 0;
 	const char			*fname[2] = { "", "" };
@@ -257,23 +255,6 @@ int main(int argc, const char *argv[])
 					{
 						if (options.errorRate < 0 || options.errorRate > 0.5)
 							cerr << "Percent identity threshold must be a value between 50 and 100" << endl << endl;
-						else
-							continue;
-					}
-				}
-				printHelp(argc, argv, options, pm_options);
-				return 0;
-			}
-			if (strcmp(argv[arg], "-ri") == 0 || strcmp(argv[arg], "--recognition-id") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					istringstream istr(argv[arg]);
-					istr >> pm_options.optionErrorRate;
-					pm_options.optionErrorRate = (100.0 - pm_options.optionErrorRate) / 100.0;
-					if (!istr.fail()) 
-					{
-						if (pm_options.optionErrorRate < 0 || pm_options.optionErrorRate > 0.1)
-							cerr << "Percent identity threshold must be a value between 90 and 100" << endl << endl;
 						else
 							continue;
 					}
@@ -528,10 +509,6 @@ int main(int argc, const char *argv[])
 				printHelp(argc, argv, options, pm_options, true);
 				return 0;
 			}
-			if (strcmp(argv[arg], "-sm") == 0 || strcmp(argv[arg], "--save-memory") == 0) {
-				pm_options.maxWeight = 13;
-				continue;
-			}
 			if (strcmp(argv[arg], "-v") == 0 || strcmp(argv[arg], "--verbose") == 0) {
 				options._debugLevel = max(options._debugLevel, 1);
 				continue;
@@ -571,7 +548,7 @@ int main(int argc, const char *argv[])
 		}
 	}
 	if (fnameCount < 2) {
-		if (argc > 1)
+		if (argc > 1 && !options.printVersion)
 			cerr << "Less than 2 input files specified." << endl << endl;
 		printHelp(argc, argv, options, pm_options);
 		return 0;
@@ -588,6 +565,7 @@ int main(int argc, const char *argv[])
 	if (paramChoosing)
 	{
 		pm_options.verbose = (options._debugLevel >= 1);
+		pm_options.optionErrorRate = options.errorRate;
 		if (options.hammingOnly)
 		{
 			pm_options.optionProbINSERT = 0.0;
