@@ -130,9 +130,17 @@ int mapReads(
 
 //////////////////////////////////////////////////////////////////////////////
 // Print usage
+void printVersion() 
+{
+	cerr << "RazerS version 0.3 20081029 (prerelease)" << endl;
+}
+
 template <typename TSpec>
 void printHelp(int, const char *[], RazerSOptions<TSpec> &options, ParamChooserOptions &pm_options, bool longHelp = false) 
 {
+	if (options.printVersion)
+		printVersion();
+
 	cerr << "********************************************" << endl;
 	cerr << "*** RazerS - Fast Mapping of Short Reads ***" << endl;
 	cerr << "*** written by David Weese (c) Aug 2008  ***" << endl;
@@ -189,11 +197,6 @@ void printHelp(int, const char *[], RazerSOptions<TSpec> &options, ParamChooserO
 	} else {
 		cerr << "Try 'razers --help' for more information." << endl;
 	}
-}
-
-void printVersion() 
-{
-	cerr << "RazerS version 0.3 20081022 (prerelease)" << endl;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -554,9 +557,13 @@ int main(int argc, const char *argv[])
 				errorPrbFileName = argv[arg];
 				continue;
 			}
+			cerr << "Unknown option: " << argv[arg] << endl << endl;
+			printHelp(argc, argv, options, pm_options);
+			return 0;
 		} else {
 			// parse file name
 			if (fnameCount == 2) {
+				cerr << "More than 2 input files specified." << endl << endl;
 				printHelp(argc, argv, options, pm_options);
 				return 0;
 			}
@@ -564,10 +571,9 @@ int main(int argc, const char *argv[])
 		}
 	}
 	if (fnameCount < 2) {
-		if (options.printVersion)
-			printVersion();
-		else
-			printHelp(argc, argv, options, pm_options);
+		if (argc > 1)
+			cerr << "Less than 2 input files specified." << endl << endl;
+		printHelp(argc, argv, options, pm_options);
 		return 0;
 	}
 	if (!options.forward && !options.reverse) { // enable both per default

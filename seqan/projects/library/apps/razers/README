@@ -105,8 +105,7 @@ the command line:
   
   [ -m NUM ],  [ --max-hits NUM ]
   
-  Ignore reads with more the NUM hits. If, for example, NUM is 1, RazerS
-  searches for unique matches only.
+  Output at most NUM of the best matches.
 
   [ -o FILE ],  [ --output FILE ]
 
@@ -140,6 +139,15 @@ the command line:
   written directly after the match and has the following format:
   #Read:   CAGGAGATAAGCTGGATCGTTTACGGT
   #Genome: CAGGAGATAAGC-GGATCTTTTACG--
+
+  [ -pa ],  [ --purge-ambiguous ]
+  
+  Omit reads with more than #max-hits many matches.
+  
+  [ -dr NUM ], [ --distance-range NUM ]
+  
+  If the best match of a read has E errors, only consider hits with 
+  E <= X < E+NUM errors as matches.
 
   [ -gn NUM ],  [ --genome-naming NUM ]
 
