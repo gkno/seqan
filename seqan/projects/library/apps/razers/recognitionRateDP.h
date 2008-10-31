@@ -118,14 +118,14 @@ namespace SEQAN_NAMESPACE_MAIN
 #ifdef USE_LOGVALUES
 
 	template <typename TValue>
-	inline TValue
+	inline long double
 	_transform(TValue a)
 	{
 		return log(a);
 	}
 
 	template <typename TValue>
-	inline TValue
+	inline long double
 	_transformBack(TValue a)
 	{
 		return exp(a);
@@ -240,12 +240,15 @@ _getErrorPatternIndex(TPatternStore const &patternStore, TPattern const &pattern
 {
 	typedef typename Iterator<TPatternStore const>::Type TIter;
 	TIter lb = lower_bound(begin(patternStore, Standard()), end(patternStore, Standard()), pattern, ErrorPatternLess());
-	if (*lb == pattern) {
+	TIter invalid = end(patternStore, Standard());
+	if (lb != invalid && *lb == pattern) {
 //		::std::cout << pattern;
 		return lb - begin(patternStore, Standard());
 	} else {
-//		::std::cerr << "  !Pattern Not Found! " << pattern << "\tnext is " << *lb << ::std::endl;
-		return -1;
+/*		::std::cerr << "  !Pattern Not Found! " << pattern;
+		if (lb != invalid) ::std::cerr << "\tnext is " << *lb;
+		::std::cerr << ::std::endl;
+*/		return -1;
 	}
 }
 
