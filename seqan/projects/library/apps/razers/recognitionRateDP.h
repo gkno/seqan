@@ -1,21 +1,22 @@
  /*==========================================================================
-                SeqAn - The Library for Sequence Analysis
-                          http://www.seqan.de 
- ============================================================================
-  Copyright (C) 2007
+             RazerS - Fast Read Mapping with Controlled Loss Rate
+                   http://www.seqan.de/projects/razers.html
 
-  This library is free software; you can redistribute it and/or
+ ============================================================================
+  Copyright (C) 2008 by David Weese
+
+  This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
-  version 3 of the License, or (at your option) any later version.
+  version 3 of the License, or (at your options) any later version.
 
-  This library is distributed in the hope that it will be useful,
+  This program is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
   Lesser General Public License for more details.
 
- ============================================================================
-  $Id$
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ==========================================================================*/
 
 #ifndef SEQAN_HEADER_RECOGNITION_RATE_DP_H

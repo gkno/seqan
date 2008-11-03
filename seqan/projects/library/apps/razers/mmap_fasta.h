@@ -1,5 +1,5 @@
  /*==========================================================================
-                     RazerS - Fast Mapping of Short Reads
+             RazerS - Fast Read Mapping with Controlled Loss Rate
                    http://www.seqan.de/projects/razers.html
 
  ============================================================================

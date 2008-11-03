@@ -1,9 +1,9 @@
  /*==========================================================================
-                     RazerS - Fast Mapping of Short Reads
+             RazerS - Fast Read Mapping with Controlled Loss Rate
                    http://www.seqan.de/projects/razers.html
 
  ============================================================================
-  Copyright (C) 2008 by David Weese
+  Copyright (C) 2008 by Anne-Katrin Emde
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
