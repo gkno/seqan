@@ -149,6 +149,10 @@ the command line:
   If the best match of a read has E errors, only consider hits with 
   E <= X <= E+NUM errors as matches.
 
+  [ -of NUM ], [ --output-format NUM ]
+  
+  Select the output format the matches should be stored in. See section 4.
+
   [ -gn NUM ],  [ --genome-naming NUM ]
 
   Select how genomes are named in the output file. If NUM is 0, the Fasta
@@ -236,33 +240,89 @@ the command line:
 
   [ -ed FILE ],  [ --error-distr FILE ]
   
-  Together with the --hamming-only option this option produces an error 
-  distribution file containing the relative frequencies of mismatches for 
-  each read position.
+  Produce an error distribution file containing the relative frequencies of
+  mismatches for each read position. If the "--indels" option is given, the
+  relative frequencies of insertions and deletions are also recorded.
 
 
 ---------------------------------------------------------------------------
-4. Output Format
+4. Output Formats
+---------------------------------------------------------------------------
+
+RazerS supports currently 3 different output formats selectable via the
+"--output-format NUM" option. The following values for NUM are possible:
+
+  0 = Razer Format
+  1 = Enhanced Fasta Format
+  2 = Eland Format
+ 
+---------------------------------------------------------------------------
+4.1. Razer Format
 ---------------------------------------------------------------------------
 
 The output file is a text file whose lines represent matches. A line 
-consists of different comma-separated match values. In the following 
+consists of different comma separated match values in the following 
 format:
 
-RName,0,RLength,GStrand,GName,GBegin,GEnd,PercID
+RNAME,RBEGIN,REND,GSTRAND,GNAME,GBEGIN,GEND,PERCID
 
 Match value description:
 
-  RName        Name of the read sequence (see --read-naming)
-  RLength      Length of the read
-  GStrand      'F'=forward strand or 'R'=reverse strand
-  GName        Name of the genome sequence (see --genome-naming)
-  GBegin       Beginning position in the genome sequence
-  GEnd         End position in the genome sequence
-  PercID       Percent identity (see --percent-identity)
+  RNAME        Name of the read sequence (see --read-naming)
+  RBEGIN       Beginning position in the read sequence (0/1 see -pf option)
+  REND         End position in the read sequence (length of the read)
+  GSTRAND      'F'=forward strand or 'R'=reverse strand
+  GNAME        Name of the genome sequence (see --genome-naming)
+  GBEGIN       Beginning position in the genome sequence
+  GEND         End position in the genome sequence
+  PERCID       Percent identity (see --percent-identity)
 
-For matches on the reverse strand, GBegin and GEnd are positions on the 
-related forward strand.
+For matches on the reverse strand, GBEGIN and GEND are positions on the 
+related forward strand. It holds GBEGIN < GEND, regardless of GSTRAND.
+
+---------------------------------------------------------------------------
+4.2. Enhanced Fasta Format
+---------------------------------------------------------------------------
+
+The matches are stored in the same order as in the Razer format. Each match
+is stored in two lines:
+
+>GBEGIN,GEND[id=ID,fragId=FRAGID,errors=ERRORS,percId=PERCID,ambiguity=AMB]
+READSEQ
+
+Additional value description:
+
+  ID           ID value of the input file Fasta header (>..[id=ID,..]..)
+  FRAGID       Fragment ID value (>..[..,fragId=FRAGID,..]..)
+  ERRORS       Absolute numbers of errors in this match
+  AMB          Number of matches of this read as good as this.
+  READSEQ      Read sequence.
+
+If the ID or fragment ID values of a read couldn't be found in the reads file
+the read number (beginning with 0) is used instead. For matches on the
+reverse strand, GBegin and GEnd are positions on the related forward strand
+and GBEGIN > GEND.
+
+---------------------------------------------------------------------------
+4.3. Eland Format
+---------------------------------------------------------------------------
+
+Each line of the output file corresponds to a read appearing in the same 
+order as they are stored in the reads file. A line consists of the following
+tab separated values:
+
+>RNAME READSEQ TYPE N0 N1 N2 GNAME GBEGIN* GSTRAND '..' SUBST1 SUBST2 ...
+
+Additional value description:
+
+  TYPE         NM = No match found
+               QC = No matching done (too many Ns in read sequence)
+               Ux = Best match found was unique with x errors
+               Rx = Multiple best matches found having x errors
+  N0 N1 N2     Number of exact, 1-error, and 2-error matches
+  GBEGIN*      Minimum of GBEGIN and GEND
+  SUBSTx       Position and type of the x'th mismatch (not for --indels)
+               (e.g. 12A: 12'th base was A in the genome)
 
 ---------------------------------------------------------------------------
 5. Example
