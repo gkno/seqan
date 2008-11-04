@@ -4,6 +4,29 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 
+template<typename TGraph>
+inline void 
+_createRandomGraph(TGraph& g) {
+	clear(g);
+	unsigned int nVertices = (mtRand() % 50) + 10;
+	for(unsigned int i=0; i<nVertices; ++i) addVertex(g);
+	unsigned int maxEdges = (mtRand() % 100) + 2 * nVertices;
+	unsigned int nEdges = 0;
+	for(unsigned int i=0; i<maxEdges; ++i) {
+		unsigned int source = 0;
+		unsigned int target = 0;
+		do {
+			source = (mtRand() % nVertices);
+			target = (mtRand() % nVertices);
+		} while (source == target);
+		if (findEdge(g, source, target) == 0) {
+			++nEdges;
+			addEdge(g, source, target);
+		}
+	}
+}
+
+
 //////////////////////////////////////////////////////////////////////////////
 void Test_HeapTree() {
 	// Keyless heap
@@ -125,7 +148,6 @@ void Test_HeapTree() {
 	SEQAN_TASSERT(heapExtractRoot(firstKeyedHeap).i2 == 200)
 
 	// Test Heap Sort
-	mtRandInit();
 	typedef int TValue;
 	String<TValue> result1;
 	String<TValue> result2;
@@ -147,7 +169,6 @@ void Test_HeapTree() {
 	}
 
 	// Test Heap Sort
-	mtRandInit();
 	typedef int TValue;
 	clear(result1);
 	clear(result2);
@@ -443,6 +464,56 @@ void Test_KruskalsAlgorithm() {
 	SEQAN_TASSERT(getValue(treeEdges, 13) == 6)
 	SEQAN_TASSERT(getValue(treeEdges, 14) == 3)
 	SEQAN_TASSERT(getValue(treeEdges, 15) == 5)
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+void Test_MST_All() {
+	//while (true) {
+		Graph<Undirected<> > myGraph;
+		_createRandomGraph(myGraph);
+		String<unsigned int> initialWeights;
+		for(unsigned int i = 0; i<numEdges(myGraph); ++i) appendValue(initialWeights, (mtRand() % 1000));
+		String<unsigned int> weightMapInput;
+		resizeEdgeMap(myGraph, weightMapInput, initialWeights);
+		clear(initialWeights);
+	
+		// Prim1
+		String<unsigned int> predMapOut;
+		prims_algorithm_spaceEfficient(myGraph, 0, weightMapInput, predMapOut);
+		typedef std::set<EdgeDescriptor<Graph<Undirected<> > >::Type> TEdgeSet;
+		TEdgeSet edgeSet1;
+		_collect_Edges(myGraph,predMapOut,0,edgeSet1);
+		unsigned int sum1 = 0;
+		for(TEdgeSet::const_iterator pos = edgeSet1.begin(); pos != edgeSet1.end(); ++pos) {
+			sum1 += getProperty(weightMapInput, *pos);
+		}
+
+		// Prim2
+		String<unsigned int> predMapOut2;
+		prims_algorithm(myGraph, 0, weightMapInput, predMapOut2);
+		TEdgeSet edgeSet2;
+		_collect_Edges(myGraph,predMapOut2,0,edgeSet2);
+		unsigned int sum2 = 0;
+		for(TEdgeSet::const_iterator pos = edgeSet2.begin(); pos != edgeSet2.end(); ++pos) {
+			sum2 += getProperty(weightMapInput, *pos);
+		}
+
+		unsigned int sum3 = 0;
+		if (sum1 != 0) {
+			// Kruskal
+			String<unsigned int> treeEdges;
+			kruskals_algorithm(myGraph, 0, weightMapInput, treeEdges);
+			for(unsigned int i = 0; i < length(treeEdges); i = i + 2) {
+				sum3 += getProperty(weightMapInput, findEdge(myGraph, value(treeEdges, i), value(treeEdges, i + 1)));
+			}
+		}
+
+	//	std::cout << sum1 << ',';
+		SEQAN_TASSERT(sum1 == sum2)
+		SEQAN_TASSERT(sum2 == sum3)
+	//}
+
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1009,6 +1080,7 @@ void Test_HmmAlgorithms() {
 //////////////////////////////////////////////////////////////////////////////
 
 void Test_GraphAlgorithms() {
+	mtRandInit();
 //____________________________________________________________________________
 // Graph Algorithms
 	// Test HeapTree
@@ -1024,6 +1096,7 @@ void Test_GraphAlgorithms() {
 	// Minimum Spanning Trees
 	Test_PrimsAlgorithm();
 	Test_KruskalsAlgorithm();
+	Test_MST_All();
 
 	// Single-Source shortest paths
 	Test_DagShortestPath();

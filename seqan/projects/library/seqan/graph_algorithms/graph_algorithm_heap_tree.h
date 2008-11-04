@@ -184,7 +184,7 @@ heapInsert(HeapTree<TValue, TPredicate, TSpec>& mHeap,
 	typedef typename Size<THeapTree>::Type TSize;
 	
 	++mHeap.data_heap_size;
-	resize(mHeap.data_value, mHeap.data_heap_size + 1);
+	resize(mHeap.data_value, mHeap.data_heap_size + 1, Generous() );
 	TSize i = mHeap.data_heap_size;
 	_insertObject(mHeap, i, object);
 	while ((i>1) && (!(mHeap.data_predicate(value(mHeap.data_value, _parent(i)), value(mHeap.data_value, i))))) {
@@ -468,6 +468,20 @@ heapChangeValue(HeapTree<Pair<TKey, TValue>, TPredicate, KeyedHeap<TSpec> >& mHe
 			i = _parent(i);
 		}
 	}
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+template<typename TKey, typename TValue, typename TPredicate, typename TSpec, typename TKey1>
+inline TValue 
+heapGetValue(HeapTree<Pair<TKey, TValue>, TPredicate, KeyedHeap<TSpec> >& mHeap,
+			 TKey1 key) 
+{
+	SEQAN_CHECKPOINT
+	typedef HeapTree<Pair<TKey, TValue>, TPredicate, TSpec> THeapTree;
+	typedef typename Size<THeapTree>::Type TSize;
+	TSize i = mHeap.data_map.find(key)->second;
+	return value(mHeap.data_value, i).i2;
 }
 
 //////////////////////////////////////////////////////////////////////////////

@@ -533,6 +533,60 @@ prims_algorithm(Graph<TSpec> const& g,
 	}
 }
 
+template<typename TSpec, typename TVertexDescriptor, typename TWeightMap, typename TPredecessorMap>
+void
+prims_algorithm_spaceEfficient(Graph<TSpec> const& g,
+							   TVertexDescriptor const source,
+							   TWeightMap const& weight,
+							   TPredecessorMap& predecessor)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<TSpec> TGraph;
+	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
+	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
+	typedef typename Value<TPredecessorMap>::Type TPred;
+	typedef typename Value<TWeightMap>::Type TWeight;
+
+	// Set-up the priority queue
+	typedef Pair<TVertexDescriptor, TWeight> TKeyValue;
+	typedef HeapTree<TKeyValue, std::less<TWeight>, KeyedHeap<> > TKeyedHeap;
+	TKeyedHeap priorityQueue;
+	
+	// Initialization
+	String<bool> tokenMap;
+	TPred nilPred = getNil<typename VertexDescriptor<TGraph>::Type>();
+	TWeight infWeight = _getInfinityDistance(weight);
+	resizeVertexMap(g,predecessor);
+	resizeVertexMap(g,tokenMap);
+
+	TVertexIterator it(g);
+	for(;!atEnd(it);goNext(it)) {
+		TVertexDescriptor u = value(it);
+		heapInsert(priorityQueue, TKeyValue(u, infWeight));
+		assignProperty(predecessor, u, nilPred);
+		assignProperty(tokenMap, u, false);
+	}
+	heapChangeValue(priorityQueue, source, 0);
+
+	// Iterate until queue is empty
+	while(!empty(priorityQueue)) {
+		TKeyValue kv = heapExtractRoot(priorityQueue);
+		TVertexDescriptor u = kv.i1;
+		assignProperty(tokenMap, u, true);
+		if (kv.i2 == infWeight) continue;
+		TOutEdgeIterator itOut(g,u);
+		for(;!atEnd(itOut);goNext(itOut)) {
+			TVertexDescriptor v = targetVertex(itOut);
+			if (getProperty(tokenMap, v)) continue;
+			TWeight w = getProperty(weight, getValue(itOut));
+			if (w < heapGetValue(priorityQueue, v)) {
+				assignProperty(predecessor, v, u);
+				heapChangeValue(priorityQueue, v, w);
+			}
+		}
+	}
+}
+
 
 //////////////////////////////////////////////////////////////////////////////
 // Kruskal's algorithm
@@ -674,6 +728,47 @@ _print_path(Graph<TSpec> const& g,
 		std::cout << "," << v;
 	}
 }
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TSpec, typename TPredecessorMap, typename TVertexDescriptor1, typename TVertexDescriptor2, typename TEdgeSet>
+inline bool
+_collect_Edges(Graph<TSpec> const& g,
+			   TPredecessorMap const& predecessor,
+			   TVertexDescriptor1 const source,
+			   TVertexDescriptor2 const v,
+			   TEdgeSet& edgeSet)
+{
+	if ((TVertexDescriptor1) source == (TVertexDescriptor1) v) {
+		return true;
+	} else if (getProperty(predecessor, v) == getNil<typename VertexDescriptor<Graph<TSpec> >::Type>()) {
+		return false;
+	} else {
+		edgeSet.insert(findEdge(g, getProperty(predecessor, v), v));
+		return _collect_Edges(g,predecessor, source, getProperty(predecessor, v), edgeSet);
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TSpec, typename TPredecessorMap, typename TVertexDescriptor, typename TEdgeSet>
+inline bool
+_collect_Edges(Graph<TSpec> const& g,
+			   TPredecessorMap const& predecessor,
+			   TVertexDescriptor const source,
+			   TEdgeSet& edgeSet)
+{
+	typedef Iterator<Graph<Undirected<> >, VertexIterator>::Type TVertexIterator;
+	TVertexIterator it(g);
+	for(;!atEnd(it); goNext(it)) {
+		if (!_collect_Edges(g, predecessor, source, value(it), edgeSet)) {
+			edgeSet.clear();
+			return false;
+		}
+	}
+	return true;
+}
+
 
 //////////////////////////////////////////////////////////////////////////////
 
