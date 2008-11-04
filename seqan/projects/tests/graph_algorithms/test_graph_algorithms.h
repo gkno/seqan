@@ -509,7 +509,7 @@ void Test_MST_All() {
 			}
 		}
 
-	//	std::cout << sum1 << ',';
+		//std::cout << sum1 << ',';
 		SEQAN_TASSERT(sum1 == sum2)
 		SEQAN_TASSERT(sum2 == sum3)
 	//}

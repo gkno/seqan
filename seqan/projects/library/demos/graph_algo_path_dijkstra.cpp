@@ -14,7 +14,6 @@ int main() {
 	TVertexDescriptor edges[] = {0,1, 0,3, 1,2, 1,3, 2,4, 3,1, 3,2, 3,4, 4,0, 4,2};
 	TGraph g;
 	addEdges(g, edges, numEdges);
-	std::cout << g << ::std::endl;
 /// One external property map: Weight map	
 	unsigned int weights[] =    {10,  5,   1,   2,   4,   3,   9,   2,   7,   6};
 	String<unsigned int> weightMap;
@@ -41,7 +40,6 @@ int main() {
 /// Graph creation
 	TCargoGraph cargo_g;
 	addEdges(cargo_g, edges, numEdges);
-	std::cout << cargo_g << ::std::endl;
 /// One internal property map: Weight map	
 	InternalMap<TEdgeCargo> intMap;
 	resizeEdgeMap(cargo_g,intMap, weights);

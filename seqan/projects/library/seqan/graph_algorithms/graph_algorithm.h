@@ -593,6 +593,16 @@ prims_algorithm_spaceEfficient(Graph<TSpec> const& g,
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
+template<typename TWeight, typename TPair>
+struct __callLessPair :
+	public ::std::unary_function<Pair<TWeight, TPair>, bool>
+{
+	inline bool 
+	operator() (Pair<TWeight, TPair> const& a1, Pair<TWeight, TPair> const& a2) const {
+		return (a1.i1 < a2.i1);
+	}
+};
+
 /**
 .Function.kruskals_algorithm:
 ..cat:Graph
@@ -622,10 +632,13 @@ kruskals_algorithm(Graph<TSpec> const& g,
 	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
 	typedef typename Value<TWeightMap>::Type TWeight;
 
-	typedef ::std::pair<TWeight, std::pair<TVertexDescriptor, TVertexDescriptor> > TWeightEdgePair;
-	std::priority_queue<TWeightEdgePair, std::vector<TWeightEdgePair>, std::greater<TWeightEdgePair> > q;
+	typedef Pair<TVertexDescriptor, TVertexDescriptor> TVertexPair;
+	typedef Pair<TWeight, TVertexPair> TWeightEdgePair;
+	typedef String<TWeightEdgePair>  TEdgeList;
+	typedef typename Iterator<TEdgeList>::Type TEdgeListIter;
+	TEdgeList edgeList;
 
-
+	// Initialization
 	resize(edges, 2 * (numVertices(g) - 1));
 	String<String<TVertexDescriptor> > set;
 	String<TVertexDescriptor> id;
@@ -643,25 +656,20 @@ kruskals_algorithm(Graph<TSpec> const& g,
 
 	// Sort the edges
 	TEdgeIterator itE(g);
-	while(!atEnd(itE)) {
-		TVertexDescriptor x = sourceVertex(itE);
-		TVertexDescriptor y = targetVertex(itE);
-		TWeight w = getProperty(weight, getValue(itE));
-		q.push(std::make_pair(w, std::make_pair(x,y)));
-		goNext(itE);
-	}
+	for(;!atEnd(itE);goNext(itE)) appendValue(edgeList, TWeightEdgePair(getProperty(weight, getValue(itE)), TVertexPair(sourceVertex(itE),targetVertex(itE))));
+	std::sort(begin(edgeList, Standard() ), end(edgeList, Standard() ), __callLessPair<TWeight, TVertexPair>() );
 
 	// Process each edge
 	TSize index = 0;
-	while(!q.empty()) {
-		TVertexDescriptor x = q.top().second.first;
-		TVertexDescriptor y = q.top().second.second;
-		q.pop();
+	TEdgeListIter itEdgeList = begin(edgeList, Standard());
+	TEdgeListIter itEdgeListEnd = end(edgeList, Standard());
+	for(;itEdgeList!=itEdgeListEnd; goNext(itEdgeList)) {
+		TVertexDescriptor x = value(itEdgeList).i2.i1;
+		TVertexDescriptor y = value(itEdgeList).i2.i2;
 		if (getProperty(id, x) != getProperty(id,y)) {
 			TVertexDescriptor owner = getProperty(id, x);
-			assignValue(edges, index, x);
-			assignValue(edges, index+1, y);
-			index = index + 2;
+			assignValue(edges, index++, x);
+			assignValue(edges, index++, y);
 			typedef typename Iterator<String<TVertexDescriptor> >::Type TStrIterator;
 			TStrIterator strIt = begin(property(set,getProperty(id, y)));
 			TStrIterator strItEnd = end(property(set,getProperty(id, y)));
@@ -669,8 +677,7 @@ kruskals_algorithm(Graph<TSpec> const& g,
 				TVertexDescriptor setMember = getValue(strIt);
 				appendValue(property(set, owner), setMember);
 				assignProperty(id, setMember, owner);
-			}
-		
+			}		
 		}
 	}
 }
@@ -788,10 +795,9 @@ _initialize_single_source(Graph<TSpec> const& g,
 	TDistVal infDist = _getInfinityDistance(weight);
 	
 	TVertexIterator it(g);
-	while(!atEnd(it)) {
+	for(;!atEnd(it);goNext(it)) {
 		assignProperty(distance, getValue(it), infDist);
 		assignProperty(predecessor, getValue(it), nilPred);
-		goNext(it);
 	}
 	assignProperty(distance, source, 0);
 }
@@ -995,43 +1001,96 @@ dijkstra(Graph<TSpec> const& g,
 	resizeVertexMap(g,predecessor);
 	resizeVertexMap(g,distance);
 
-	_initialize_single_source(g, source, weight, predecessor, distance);
-	
+	// S is initially empty
 	String<bool> setS;
-	resizeVertexMap(g, setS);
-	TVertexIterator it(g);
-	for(;!atEnd(it);++it) {
-		assignProperty(setS, getValue(it), false);
-	}
+	fill(setS, getIdUpperBound(_getVertexIdManager(g)), false);
+
+	// Set-up the priority queue
+	typedef Pair<TVertexDescriptor, TDistVal> TKeyValue;
+	typedef HeapTree<TKeyValue, std::less<TDistVal>, KeyedHeap<> > TKeyedHeap;
+	TKeyedHeap priorityQueue;
 	TDistVal infDist = _getInfinityDistance(weight);
 	TVertexDescriptor nilVertex = getNil<typename VertexDescriptor<TGraph>::Type>();
+	TVertexIterator it(g);
+	for(;!atEnd(it);goNext(it)) {
+		assignProperty(predecessor, value(it), nilVertex);
+		assignProperty(distance, value(it), infDist);
+		heapInsert(priorityQueue, TKeyValue(value(it), infDist));
+	}
+	assignProperty(distance, source, 0);
+	heapChangeValue(priorityQueue, source, 0);
 
 	// Run Dijkstra
-	TSize count = numVertices(g);
-	while (count > 0) {
+	while (!empty(priorityQueue)) {
 		// Extract min
-		TDistVal min = infDist;
-		TVertexDescriptor u = nilVertex;
-		TVertexIterator it_find(g);
-		for(;!atEnd(it_find);++it_find) {
-			if(getProperty(setS,getValue(it_find))==true) continue;
-			if ((u == nilVertex) ||
-				(getProperty(distance,getValue(it_find))<getProperty(distance,u))) {
-					u = getValue(it_find);
-					min = getProperty(distance,getValue(it_find));
-			}
-		}
+		TVertexDescriptor u = heapExtractRoot(priorityQueue).i1;
 		assignProperty(setS, u, true);
 		TOutEdgeIterator itout(g, u);
 		for(;!atEnd(itout);++itout) {
-			_relax(g,weight,predecessor, distance, u, getValue(itout));
+			TVertexDescriptor v = targetVertex(itout);
+			if (property(setS, v) == true) continue;
+			if (getProperty(distance, v) > getProperty(distance,u) + getProperty(weight,value(itout))) {
+				assignProperty(distance, v, getProperty(distance,u) + getProperty(weight,value(itout)));
+				assignProperty(predecessor, v, u);
+				heapChangeValue(priorityQueue, v, getProperty(distance,u) + getProperty(weight,value(itout)));
+			}
 		}
-		--count;
 	}
 }
 
-
-
+//template<typename TSpec, typename TVertexDescriptor, typename TWeightMap, typename TPredecessorMap, typename TDistanceMap>
+//void 
+//dijkstra(Graph<TSpec> const& g,
+//		 TVertexDescriptor const source,
+//		 TWeightMap const& weight,
+//		 TPredecessorMap& predecessor, 
+//		 TDistanceMap& distance)
+//{
+//	SEQAN_CHECKPOINT
+//	typedef Graph<TSpec> TGraph;
+//	typedef typename Size<TGraph>::Type TSize;
+//	typedef typename Value<TDistanceMap>::Type TDistVal;
+//	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
+//	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
+//	
+//	// Initialization
+//	resizeVertexMap(g,predecessor);
+//	resizeVertexMap(g,distance);
+//
+//	_initialize_single_source(g, source, weight, predecessor, distance);
+//	
+//	String<bool> setS;
+//	resizeVertexMap(g, setS);
+//	TVertexIterator it(g);
+//	for(;!atEnd(it);++it) {
+//		assignProperty(setS, getValue(it), false);
+//	}
+//	TDistVal infDist = _getInfinityDistance(weight);
+//	TVertexDescriptor nilVertex = getNil<typename VertexDescriptor<TGraph>::Type>();
+//
+//	// Run Dijkstra
+//	TSize count = numVertices(g);
+//	while (count > 0) {
+//		// Extract min
+//		TDistVal min = infDist;
+//		TVertexDescriptor u = nilVertex;
+//		TVertexIterator it_find(g);
+//		for(;!atEnd(it_find);++it_find) {
+//			if(getProperty(setS,getValue(it_find))==true) continue;
+//			if ((u == nilVertex) ||
+//				(getProperty(distance,getValue(it_find))<getProperty(distance,u))) {
+//					u = getValue(it_find);
+//					min = getProperty(distance,getValue(it_find));
+//			}
+//		}
+//		assignProperty(setS, u, true);
+//		TOutEdgeIterator itout(g, u);
+//		for(;!atEnd(itout);++itout) {
+//			_relax(g,weight,predecessor, distance, u, getValue(itout));
+//		}
+//		--count;
+//	}
+//}
 
 
 
