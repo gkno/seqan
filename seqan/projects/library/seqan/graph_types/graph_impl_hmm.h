@@ -43,44 +43,35 @@ public:
 
 	//////////////////////////////////////////////////////////////////////////////
 
-	LogProb() : data_value(std::log(0.0)) {
-		SEQAN_CHECKPOINT
-	}
+	LogProb() : data_value(std::log(0.0)) {	}
 
 	//////////////////////////////////////////////////////////////////////////////
 
 	template<typename TOtherValue>
 	LogProb(TOtherValue const& _other) {
-		SEQAN_CHECKPOINT
 		data_value = std::log(_other);
 	}
 
 	template<typename TValue2, typename TSpec2>
 	LogProb(LogProb<TValue2, TSpec2> const & _other) {
-		SEQAN_CHECKPOINT
 		data_value = _other.data_value;
 	}
 
 	//////////////////////////////////////////////////////////////////////////////
 
-	~LogProb() {
-		SEQAN_CHECKPOINT
-	}
+	~LogProb() {}
 
 	//////////////////////////////////////////////////////////////////////////////
 
 	operator int() const {
-		SEQAN_CHECKPOINT
 		return (int) std::exp(data_value);
 	}
 
 	operator float() const {
-		SEQAN_CHECKPOINT
 		return (float) std::exp(data_value);
 	}
 
 	operator double() const {
-		SEQAN_CHECKPOINT
 		return (double) std::exp(data_value);
 	}
 
@@ -89,14 +80,12 @@ public:
 
 	template<typename TOtherValue>
 	LogProb& operator=(TOtherValue const& rhs) {
-		SEQAN_CHECKPOINT
 		data_value = std::log(rhs);
 		return *this;
 	}
 
 	template<typename TValue2, typename TSpec2>
 	LogProb& operator=(LogProb<TValue2, TSpec2> const& rhs) {
-		SEQAN_CHECKPOINT
 		data_value = rhs.data_value;
 		return *this;
 	}
@@ -105,14 +94,12 @@ public:
 	
 	template<typename TOtherValue>
 	LogProb& operator*=(TOtherValue const& rhs) {
-		SEQAN_CHECKPOINT
 		data_value += std::log(rhs);
 		return *this;
 	}
 
 	template<typename TValue2, typename TSpec2>
 	LogProb& operator*=(LogProb<TValue2, TSpec2> const& rhs) {
-		SEQAN_CHECKPOINT
 		data_value += rhs.data_value;
 		return *this;
 	}
@@ -121,7 +108,6 @@ public:
 
 	template<typename TOtherValue>
 	LogProb operator*(TOtherValue const& other) {
-		SEQAN_CHECKPOINT
 		LogProb result = *this;
 		result *= LogProb(other);
 		return result;
@@ -129,7 +115,6 @@ public:
 
 	template<typename TValue2, typename TSpec2>
 	LogProb operator*(LogProb<TValue2, TSpec2> const& other) {
-		SEQAN_CHECKPOINT
 		LogProb result = *this;
 		result *= other;
 		return result;
@@ -139,14 +124,12 @@ public:
 	
 	template<typename TOtherValue>
 	LogProb& operator/=(TOtherValue const& rhs) {
-		SEQAN_CHECKPOINT
 		data_value -= std::log(rhs);
 		return *this;
 	}
 
 	template<typename TValue2, typename TSpec2>
 	LogProb& operator/=(LogProb<TValue2, TSpec2> const& rhs) {
-		SEQAN_CHECKPOINT
 		data_value -= rhs.data_value;
 		return *this;
 	}
@@ -155,7 +138,6 @@ public:
 
 	template<typename TOtherValue>
 	LogProb operator/(TOtherValue const& other) {
-		SEQAN_CHECKPOINT
 		LogProb result = *this;
 		result /= LogProb(other);
 		return result;
@@ -163,7 +145,6 @@ public:
 
 	template<typename TValue2, typename TSpec2>
 	LogProb operator/(LogProb<TValue2, TSpec2> const& other) {
-		SEQAN_CHECKPOINT
 		LogProb result = *this;
 		result /= other;
 		return result;
@@ -173,14 +154,12 @@ public:
 	
 	template<typename TOtherValue>
 	LogProb& operator+=(TOtherValue const& rhs) {
-		SEQAN_CHECKPOINT
 		data_value = std::log(std::exp(data_value) + rhs);
 		return *this;
 	}
 
 	template<typename TValue2, typename TSpec2>
 	LogProb& operator+=(LogProb<TValue2, TSpec2> const& rhs) {
-		SEQAN_CHECKPOINT
 		if (data_value > rhs.data_value) {
 			if ((rhs.data_value == std::log(0.0)) || (data_value - rhs.data_value > 100)) return *this;
 			data_value = data_value + std::log(1 + std::exp(rhs.data_value - data_value));
@@ -198,7 +177,6 @@ public:
 
 	template<typename TOtherValue>
 	LogProb operator+(TOtherValue const& other) {
-		SEQAN_CHECKPOINT
 		LogProb result = *this;
 		result += LogProb(other);
 		return result;
@@ -206,7 +184,6 @@ public:
 
 	template<typename TValue2, typename TSpec2>
 	LogProb operator+(LogProb<TValue2, TSpec2> const& other) {
-		SEQAN_CHECKPOINT
 		LogProb result = *this;
 		result += other;
 		return result;
@@ -216,14 +193,12 @@ public:
 	
 	template<typename TOtherValue>
 	LogProb& operator-=(TOtherValue const& rhs) {
-		SEQAN_CHECKPOINT
 		data_value = std::log(std::exp(data_value) - rhs);
 		return *this;
 	}
 
 	template<typename TValue2, typename TSpec2>
 	LogProb& operator-=(LogProb<TValue2, TSpec2> const& rhs) {
-		SEQAN_CHECKPOINT
 		if (data_value > rhs.data_value) {
 			if ((rhs.data_value == std::log(0.0)) || (data_value - rhs.data_value > 100)) return *this;
 			data_value = data_value + std::log(1 - std::exp(rhs.data_value - data_value));
@@ -241,7 +216,6 @@ public:
 
 	template<typename TOtherValue>
 	LogProb operator-(TOtherValue const& other) {
-		SEQAN_CHECKPOINT
 		LogProb result = *this;
 		result -= LogProb(other);
 		return result;
@@ -249,7 +223,6 @@ public:
 
 	template<typename TValue2, typename TSpec2>
 	LogProb operator-(LogProb<TValue2, TSpec2> const& other) {
-		SEQAN_CHECKPOINT
 		LogProb result = *this;
 		result -= other;
 		return result;
@@ -259,13 +232,11 @@ public:
 
 	template<typename TOtherValue>
 	bool operator==(TOtherValue const& other) const {
-		SEQAN_CHECKPOINT
 		return data_value == std::log(other);
 	}
 
 	template<typename TValue2, typename TSpec2>
 	bool operator==(LogProb<TValue2, TSpec2> const& other) const {
-		SEQAN_CHECKPOINT
 		return data_value == other.data_value;
 	}
 
@@ -273,13 +244,11 @@ public:
 
 	template<typename TOtherValue>
 	bool operator!=(TOtherValue const& other) const {
-		SEQAN_CHECKPOINT
 		return data_value != std::log(other);
 	}
 
 	template<typename TValue2, typename TSpec2>
 	bool operator!=(LogProb<TValue2, TSpec2> const& other) const {
-		SEQAN_CHECKPOINT
 		return data_value != other.data_value;
 	}
 
@@ -287,13 +256,11 @@ public:
 
 	template<typename TOtherValue>
 	bool operator<(TOtherValue const& other) const {
-		SEQAN_CHECKPOINT
 		return data_value < std::log(other);
 	}
 
 	template<typename TValue2, typename TSpec2>
 	bool operator<(LogProb<TValue2, TSpec2> const& other) const {
-		SEQAN_CHECKPOINT
 		return data_value < other.data_value;
 	}
 
@@ -301,13 +268,11 @@ public:
 
 	template<typename TOtherValue>
 	bool operator>(TOtherValue const& other) const {
-		SEQAN_CHECKPOINT
 		return data_value > std::log(other);
 	}
 
 	template<typename TValue2, typename TSpec2>
 	bool operator>(LogProb<TValue2, TSpec2> const& other) const {
-		SEQAN_CHECKPOINT
 		return data_value > other.data_value;
 	}
 
@@ -315,13 +280,11 @@ public:
 
 	template<typename TOtherValue>
 	bool operator<=(TOtherValue const& other) const {
-		SEQAN_CHECKPOINT
 		return data_value <= std::log(other);
 	}
 
 	template<typename TValue2, typename TSpec2>
 	bool operator<=(LogProb<TValue2, TSpec2> const& other) const {
-		SEQAN_CHECKPOINT
 		return data_value <= other.data_value;
 	}
 
@@ -329,13 +292,11 @@ public:
 
 	template<typename TOtherValue>
 	bool operator>=(TOtherValue const& other) const {
-		SEQAN_CHECKPOINT
 		return data_value >= std::log(other);
 	}
 
 	template<typename TValue2, typename TSpec2>
 	bool operator>=(LogProb<TValue2, TSpec2> const& other) const {
-		SEQAN_CHECKPOINT
 		return data_value >= other.data_value;
 	}
 
@@ -346,7 +307,6 @@ public:
 
 template<typename TStream, typename TValue, typename TSpec>
 TStream& operator<<(TStream& os, LogProb<TValue, TSpec> const& rhs) {
-	SEQAN_CHECKPOINT
 	return os << std::exp(rhs.data_value);
 }
 
