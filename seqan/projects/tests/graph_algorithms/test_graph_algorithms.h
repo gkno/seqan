@@ -5,6 +5,171 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 //////////////////////////////////////////////////////////////////////////////
+void Test_HeapTree() {
+	// Keyless heap
+	String<int> test;
+	appendValue(test, 4);appendValue(test, 1);appendValue(test, 3);
+	appendValue(test, 2);appendValue(test, 16);appendValue(test, 9);
+	appendValue(test, 10);appendValue(test, 14);
+	appendValue(test, 8);appendValue(test, 7);
+
+	HeapTree<int, std::greater<int> > firstHeap;
+	SEQAN_TASSERT(empty(firstHeap) == true)
+	SEQAN_TASSERT(length(firstHeap) == 0)
+	buildHeap(firstHeap, begin(test), end(test));
+	HeapTree<int, std::greater<int> > firstHeapTest(firstHeap);
+	SEQAN_TASSERT(length(firstHeapTest) == length(firstHeap))
+	clear(firstHeapTest);
+	firstHeapTest = firstHeap;
+	SEQAN_TASSERT(length(firstHeapTest) == length(firstHeap))
+	SEQAN_TASSERT(empty(firstHeap) == false)
+	SEQAN_TASSERT(length(firstHeap) == 10)
+	clear(firstHeap);
+	SEQAN_TASSERT(empty(firstHeap) == true)
+	SEQAN_TASSERT(length(firstHeap) == 0)
+	buildHeap(firstHeap, begin(test), end(test));
+	SEQAN_TASSERT(empty(firstHeap) == false)
+	SEQAN_TASSERT(length(firstHeap) == 10)
+	SEQAN_TASSERT(heapRoot(firstHeap) == 16)
+	SEQAN_TASSERT(heapExtractRoot(firstHeap) == 16)
+	SEQAN_TASSERT(heapRoot(firstHeap) == 14)
+	SEQAN_TASSERT(heapExtractRoot(firstHeap) == 14)
+	SEQAN_TASSERT(heapRoot(firstHeap) == 10)
+	SEQAN_TASSERT(heapExtractRoot(firstHeap) == 10)
+	SEQAN_TASSERT(heapRoot(firstHeap) == 9)
+	SEQAN_TASSERT(heapExtractRoot(firstHeap) == 9)
+	SEQAN_TASSERT(heapRoot(firstHeap) == 8)
+	SEQAN_TASSERT(heapExtractRoot(firstHeap) == 8)
+	SEQAN_TASSERT(heapRoot(firstHeap) == 7)
+	SEQAN_TASSERT(heapExtractRoot(firstHeap) == 7)
+	SEQAN_TASSERT(heapRoot(firstHeap) == 4)
+	SEQAN_TASSERT(heapExtractRoot(firstHeap) == 4)
+	SEQAN_TASSERT(heapRoot(firstHeap) == 3)
+	SEQAN_TASSERT(heapExtractRoot(firstHeap) == 3)
+	SEQAN_TASSERT(heapRoot(firstHeap) == 2)
+	SEQAN_TASSERT(heapExtractRoot(firstHeap) == 2)
+	SEQAN_TASSERT(heapRoot(firstHeap) == 1)
+	SEQAN_TASSERT(heapExtractRoot(firstHeap) == 1)
+	SEQAN_TASSERT(empty(firstHeap) == true)
+	SEQAN_TASSERT(length(firstHeap) == 0)
+
+
+	// Keyed Heap
+	typedef Pair<char, int> TKeyValue;
+	typedef HeapTree<TKeyValue, std::greater<int>, KeyedHeap<> > TKeyedHeap;
+	TKeyedHeap keyedHeap;
+	String<TKeyValue> keyedTest;
+	appendValue(keyedTest, TKeyValue('i', 4));appendValue(keyedTest, TKeyValue('a', 1));
+	appendValue(keyedTest, TKeyValue('b', 3));appendValue(keyedTest, TKeyValue('c', 2));
+	appendValue(keyedTest, TKeyValue('j', 16));appendValue(keyedTest, TKeyValue('m', 9));
+	appendValue(keyedTest, TKeyValue('o', 10));appendValue(keyedTest, TKeyValue('p', 14));
+	appendValue(keyedTest, TKeyValue('h', 8));appendValue(keyedTest, TKeyValue('z', 7));
+
+	TKeyedHeap firstKeyedHeap;
+	SEQAN_TASSERT(empty(firstKeyedHeap) == true)
+	SEQAN_TASSERT(length(firstKeyedHeap) == 0)
+	buildHeap(firstKeyedHeap, begin(keyedTest), end(keyedTest));
+	TKeyedHeap firstKeyedHeapTest(firstKeyedHeap);
+	SEQAN_TASSERT(length(firstKeyedHeapTest) == length(firstKeyedHeap))
+	clear(firstKeyedHeapTest);
+	firstKeyedHeapTest = firstKeyedHeap;
+	SEQAN_TASSERT(length(firstKeyedHeapTest) == length(firstKeyedHeap))
+
+	SEQAN_TASSERT(empty(firstKeyedHeap) == false)
+	SEQAN_TASSERT(length(firstKeyedHeap) == 10)
+	clear(firstKeyedHeap);
+	SEQAN_TASSERT(empty(firstKeyedHeap) == true)
+	SEQAN_TASSERT(length(firstKeyedHeap) == 0)
+	buildHeap(firstKeyedHeap, begin(keyedTest), end(keyedTest));
+	SEQAN_TASSERT(empty(firstKeyedHeap) == false)
+	SEQAN_TASSERT(length(firstKeyedHeap) == 10)
+	SEQAN_TASSERT(heapRoot(firstKeyedHeap).i1 == 'j')
+	SEQAN_TASSERT(heapRoot(firstKeyedHeap).i2 == 16)
+	SEQAN_TASSERT(heapExtractRoot(firstKeyedHeap).i2 == 16)
+	SEQAN_TASSERT(heapRoot(firstKeyedHeap).i1 == 'p')
+	SEQAN_TASSERT(heapRoot(firstKeyedHeap).i2 == 14)
+	SEQAN_TASSERT(heapExtractRoot(firstKeyedHeap).i2 == 14)
+	SEQAN_TASSERT(heapRoot(firstKeyedHeap).i1 == 'o')
+	SEQAN_TASSERT(heapRoot(firstKeyedHeap).i2 == 10)
+	SEQAN_TASSERT(heapExtractRoot(firstKeyedHeap).i2 == 10)
+	SEQAN_TASSERT(heapRoot(firstKeyedHeap).i2 == 9)
+	SEQAN_TASSERT(heapExtractRoot(firstKeyedHeap).i2 == 9)
+	SEQAN_TASSERT(heapRoot(firstKeyedHeap).i2 == 8)
+	SEQAN_TASSERT(heapExtractRoot(firstKeyedHeap).i2 == 8)
+	SEQAN_TASSERT(heapRoot(firstKeyedHeap).i2 == 7)
+	SEQAN_TASSERT(heapExtractRoot(firstKeyedHeap).i2 == 7)
+	SEQAN_TASSERT(heapRoot(firstKeyedHeap).i2 == 4)
+	SEQAN_TASSERT(heapExtractRoot(firstKeyedHeap).i2 == 4)
+	SEQAN_TASSERT(heapRoot(firstKeyedHeap).i2 == 3)
+	SEQAN_TASSERT(heapExtractRoot(firstKeyedHeap).i2 == 3)
+	SEQAN_TASSERT(heapRoot(firstKeyedHeap).i2 == 2)
+	SEQAN_TASSERT(heapExtractRoot(firstKeyedHeap).i2 == 2)
+	SEQAN_TASSERT(heapRoot(firstKeyedHeap).i2 == 1)
+	SEQAN_TASSERT(heapExtractRoot(firstKeyedHeap).i2 == 1)
+	SEQAN_TASSERT(empty(firstKeyedHeap) == true)
+	SEQAN_TASSERT(length(firstKeyedHeap) == 0)
+	
+	// Change value only for keyed heaps
+	buildHeap(firstKeyedHeap, begin(keyedTest), end(keyedTest));
+	heapChangeValue(firstKeyedHeap, 'c', 20);
+	SEQAN_TASSERT(heapRoot(firstKeyedHeap).i1 == 'c')
+	SEQAN_TASSERT(heapRoot(firstKeyedHeap).i2 == 20)
+	heapChangeValue(firstKeyedHeap, 'c', 2);
+	SEQAN_TASSERT(heapRoot(firstKeyedHeap).i1 == 'j')
+	SEQAN_TASSERT(heapRoot(firstKeyedHeap).i2 == 16)
+	heapInsert(firstKeyedHeap, TKeyValue('x', 100));
+	SEQAN_TASSERT(heapRoot(firstKeyedHeap).i1 == 'x')
+	SEQAN_TASSERT(heapRoot(firstKeyedHeap).i2 == 100)
+	heapChangeValue(firstKeyedHeap, 'c', 200);
+	SEQAN_TASSERT(heapRoot(firstKeyedHeap).i1 == 'c')
+	SEQAN_TASSERT(heapExtractRoot(firstKeyedHeap).i2 == 200)
+
+	// Test Heap Sort
+	mtRandInit();
+	typedef int TValue;
+	String<TValue> result1;
+	String<TValue> result2;
+	
+	for(unsigned int i=0; i<1000; ++i) {
+		TValue val = (mtRand() % 10000) - 5000;
+		appendValue(result1, val);
+		appendValue(result2, val);
+	}
+	std::sort(begin(result1, Standard()), end(result1, Standard()));
+	heapSort(begin(result2, Standard()), end(result2, Standard()));
+	if (result1 != result2) {
+		for(unsigned int i=0; i<length(result1);++i) std::cout << value(result1, i) << ',';
+		std::cout << std::endl;
+		for(unsigned int i=0; i<length(result2);++i) std::cout << value(result2, i) << ',';
+		std::cout << std::endl;
+		std::cout << "Error" << std::endl;
+		exit(0);
+	}
+
+	// Test Heap Sort
+	mtRandInit();
+	typedef int TValue;
+	clear(result1);
+	clear(result2);
+	
+	for(unsigned int i=0; i<1000; ++i) {
+		TValue val = (mtRand() % 10000) - 5000;
+		appendValue(result1, val);
+		appendValue(result2, val);
+	}
+	std::sort(begin(result1, Standard()), end(result1, Standard()), std::greater<TValue>());
+	heapSort(begin(result2, Standard()), end(result2, Standard()), std::greater<TValue>());
+	if (result1 != result2) {
+		for(unsigned int i=0; i<length(result1);++i) std::cout << value(result1, i) << ',';
+		std::cout << std::endl;
+		for(unsigned int i=0; i<length(result2);++i) std::cout << value(result2, i) << ',';
+		std::cout << std::endl;
+		std::cout << "Error" << std::endl;
+		exit(0);
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
 void Test_BreadthFirstSearch() {
 //____________________________________________________________________________
 // Breadth-First Search
@@ -835,12 +1000,9 @@ void Test_HmmAlgorithms() {
 	// Algorithms
 	String<Dna> sequence = "AC";
 	String<TVertexDescriptor> path;
-	TProbability p = viterbiAlgorithm(hmm, sequence, path);
-	TProbability p1 = forwardAlgorithm(hmm, sequence);
-	TProbability p2 = backwardAlgorithm(hmm, sequence);
-	p = std::pow(std::exp((double)1), (double)p);
-	SEQAN_TASSERT( (int) (p1 * 100000.0) == (int) (p2 * 100000.0))
-	SEQAN_TASSERT( (int) (p * 100000.0) == (int) (p2 * 100000.0))
+	viterbiAlgorithm(hmm, sequence, path);
+	forwardAlgorithm(hmm, sequence);
+	backwardAlgorithm(hmm, sequence);
 }
 
 
@@ -849,6 +1011,9 @@ void Test_HmmAlgorithms() {
 void Test_GraphAlgorithms() {
 //____________________________________________________________________________
 // Graph Algorithms
+	// Test HeapTree
+	Test_HeapTree();
+
 	// Elementary graph algorithms
 	Test_BreadthFirstSearch();
 	Test_DepthFirstSearch();

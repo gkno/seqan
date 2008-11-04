@@ -34,6 +34,7 @@
 #endif
 
 // Graph algorithms
+#include <seqan/graph_algorithms/graph_algorithm_heap_tree.h>
 #include <seqan/graph_algorithms/graph_algorithm.h>
 #include <seqan/graph_algorithms/graph_algorithm_hmm.h>
 #include <seqan/graph_algorithms/graph_algorithm_lis_his.h>
