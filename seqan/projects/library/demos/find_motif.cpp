@@ -1,14 +1,20 @@
-#define SEQAN_DEBUG
-#define SEQAN_TEST
-
+#include <iostream>
 #include "seqan/find_motif.h"
 
 using namespace seqan;
+using namespace std;
+
+template <typename TMotifFinder>
+void printMotifs(TMotifFinder & finder)
+{
+	for (int i = 0; i < motifCount(finder); ++i)
+	{
+		cout << i << ": " << getMotif(finder, i) << endl;
+	}
+}
 
 int main() 
 {
-	SEQAN_TREPORT("TEST BEGIN")
-
 	srand((unsigned) time(NULL));
 
 ///Motif search on a small set of nucleotide sequences.
@@ -27,45 +33,44 @@ int main()
 ///Application of ePatternBranching (h=0)
 	MotifFinder<Dna, EPatternBranching> finder_epb1(t,l,d,is_exact,h);
 	findMotif(finder_epb1,dataset,OMOPS());
-	displayResult(finder_epb1); 
+	cout << getMotif(finder_epb1) << endl;
 
 ///Application of ePatternBranching (h=0)
 	MotifFinder<Dna, EPatternBranching> finder_epb2(t,l,d,is_exact,h);
 	findMotif(finder_epb2,dataset,OOPS());
-	displayResult(finder_epb2); 
+	cout << getMotif(finder_epb2) << endl;
 
 ///Application of PMS1-ZOOPS 
 	MotifFinder<Dna, PMS1> finder_pms1(l,d,is_exact);
 	findMotif(finder_pms1,dataset,ZOOPS());
-	displayResult(finder_pms1); 
+	printMotifs(finder_pms1); 
 
 ///Application of PMSP-TCM
 	MotifFinder<Dna, PMSP> finder_pmsp(l,d,is_exact);
 	findMotif(finder_pmsp,dataset,TCM());
-	displayResult(finder_pmsp); 
+	printMotifs(finder_pmsp); 
 	
 ///Application of PROJECTION-OOPS
 	unsigned int m = t*(n-l+1);
     MotifFinder<Dna, Projection> finder_proj(t,l,m,d,is_exact);
 	findMotif(finder_proj, dataset, OOPS());
-	displayResult(finder_proj);
+	printMotifs(finder_proj);
 
 ///Application of PROJECTION-OMOPS
     MotifFinder<Dna, Projection> finder_proj_omops(t,l,m,d,is_exact);
 	findMotif(finder_proj_omops, dataset, OMOPS());
-	displayResult(finder_proj_omops);
+	printMotifs(finder_proj_omops);
 
 ///Application of PROJECTION-ZOOPS
 	MotifFinder<Dna, Projection> finder_proj_zoops(t,l,m,d,is_exact);
 	findMotif(finder_proj_zoops, dataset, ZOOPS());
-	displayResult(finder_proj_zoops);
+	printMotifs(finder_proj_zoops);
 	
 ///Application of PROJECTION-TCM
     MotifFinder<Dna, Projection> finder_proj_tcm(t,l,m,d,is_exact);
 	findMotif(finder_proj_tcm, dataset, TCM());
-	displayResult(finder_proj_tcm);
+	printMotifs(finder_proj_tcm);
 
-	SEQAN_TREPORT("TEST END")
 	return 0;
 }
 

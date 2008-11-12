@@ -2,6 +2,9 @@
 #include <seqan/file.h>
 #include <fstream>
 
+using namespace seqan;
+using namespace std;
+
 template<typename TText, typename TScore, typename TValue, typename TChain>
 void
 chaos(int ktup,
