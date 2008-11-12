@@ -39,9 +39,9 @@ namespace seqan
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 		
-		// basic data structure for fragments
-	template< typename TBorder, typename TSpec = Default >
-	struct Fragment;
+		// basic data structure for fragments (see seed_base.h)
+	//template< typename TBorder, typename TSpec = Default >
+	//struct Seed;
 
 		// wrapper data structure for point in the RMT
 	template< typename T, typename TSpec >
@@ -98,11 +98,11 @@ namespace seqan
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 // sizes
 
-	template< typename TBorder, typename TSpec >
-	struct Size< Fragment< TBorder, TSpec > >
-	{
-		typedef size_t Type;
-	};
+	//template< typename TBorder, typename TSpec >
+	//struct Size< Seed< TBorder, TSpec > >
+	//{
+	//	typedef size_t Type;
+	//};
 
 	template< typename T, typename TSpec >
 	struct Size< _ChainPoint< T, TSpec > >
@@ -126,11 +126,11 @@ namespace seqan
 //////////////////////////////////////////////////////////////////////////
 // key types
 
-	template< typename TBorder, typename TSpec >
-	struct Key< Fragment< TBorder, TSpec > >
-	{
-		typedef TBorder Type;
-	};
+	//template< typename TBorder, typename TSpec >
+	//struct Key< Seed< TBorder, TSpec > >
+	//{
+	//	typedef TBorder Type;
+	//};
 
 	template< typename T, typename TSpec >
 	struct Key< _ChainPoint< T, TSpec > >
@@ -245,7 +245,7 @@ namespace seqan
 
 template< typename TSource, typename TDest, typename TScoring>
 inline typename Value<TScoring>::Type
-chain(TSource & source,
+globalChaining(TSource & source,
 	  TDest & dest,
 	  TScoring const & scoring,
 	  RangetreeChaining)
@@ -298,71 +298,57 @@ chain(TSource & source,
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/**
-.Function.chain:
-..summary:Computes the chain on a set of fragments.
-..cat:Chaining
-..signature:chain(source, dest, score [, algorithm])
-..param.source:The set of fragments
-..param.dest:A destination container.
-..param.score:The penalties for gaps between fragments.
-...remarks:Values should be positive integers.
-..param.algorithm:A tag that identifies the algorithm which is used for chaining.
-...default:$Default$
-...value:$Default$: Compiler selects best algorithm.
-...value:$GenericChaining$: A simple generic chaining algorithm.
-...value:$RangetreeChaining$: An elaborated chaining algorithm for @Spec.Score Zero@, @Spec.Score Manhattan@, and @Spec.Score ChainSoP@ scoring schemes.
-*/
+
 
 
 
 //implementation for Default
 template< typename TSource, typename TDest, typename TScoring>
 inline typename Value<TScoring>::Type
-chain(TSource & source, 
+globalChaining(TSource & source, 
 	  TDest & dest, 
 	  TScoring const & scoring,
 	  Default)
 {
-	return chain(source, dest, scoring, GenericChaining()); //default is GenericChaining
+	return globalChaining(source, dest, scoring, GenericChaining()); //default is GenericChaining
 }
 template< typename TSource, typename TDest, typename TValue>
 inline TValue
-chain(TSource & source, 
+globalChaining(TSource & source, 
 	  TDest & dest, 
 	  Score<TValue, Zero> const & scoring,
 	  Default)
 {
-	return chain(source, dest, scoring, RangetreeChaining());
+	return globalChaining(source, dest, scoring, RangetreeChaining());
 }
 template< typename TSource, typename TDest, typename TValue>
 inline TValue
-chain(TSource & source, 
+globalChaining(TSource & source, 
 	  TDest & dest, 
 	  Score<TValue, Manhattan> const & scoring,
 	  Default)
 {
-	return chain(source, dest, scoring, RangetreeChaining());
+	return globalChaining(source, dest, scoring, RangetreeChaining());
 }
 template< typename TSource, typename TDest, typename TValue>
 inline TValue
-chain(TSource & source, 
+globalChaining(TSource & source, 
 	  TDest & dest, 
 	  Score<TValue, ChainSoP> const & scoring,
 	  Default)
 {
-	return chain(source, dest, scoring, RangetreeChaining());
+	return globalChaining(source, dest, scoring, RangetreeChaining());
 }
 
 
 //chain(3) => chain(4)
 template< typename TSource, typename TDest, typename TScoring>
 inline typename Value<TScoring>::Type
-chain(TSource & source, 
+globalChaining(TSource & source, 
 	  TDest & dest, 
 	  TScoring const & scoring)
 {
-	return chain(source, dest, scoring, Default());
+	return globalChaining(source, dest, scoring, Default());
 }
 
 

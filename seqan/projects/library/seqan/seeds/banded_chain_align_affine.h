@@ -21,7 +21,6 @@
 #ifndef SEQAN_HEADER_BANDED_CHAIN_ALIGN_AFFINE_H
 #define SEQAN_HEADER_BANDED_CHAIN_ALIGN_AFFINE_H
 
-using namespace std;
 namespace SEQAN_NAMESPACE_MAIN
 {
 
@@ -41,8 +40,8 @@ chain_to_alignment_gotoh(TContainer const &seedChain,
 	typedef String<TScore> TScoreString;
 	typedef Matrix<TScore> TMatrix;
 	typedef Iter<TMatrix, PositionIterator > TMatrixIterator;
-	typedef vector<map<TValue,Pair<TValue, TAlign> > > TAlignVector;
-	typedef typename map<TValue, Pair<TValue, TAlign> >::iterator TMapIterator;
+	typedef ::std::vector<::std::map<TValue,Pair<TValue, TAlign> > > TAlignVector;
+	typedef typename ::std::map<TValue, Pair<TValue, TAlign> >::iterator TMapIterator;
 	
 	TScoreString score_str_diag;
 	TScoreString score_str_vert;
@@ -521,10 +520,10 @@ _calculateBandedSeedGotoh(TSeed const &seed,
 					 TScoreString &score_str_vert,
 					 TScoreString &score_str_hori,
 					 TValue &score_length,
-					 vector<map<TValue,Pair<TValue, TAlign> > > &alignmentVector,
+					 ::std::vector<::std::map<TValue,Pair<TValue, TAlign> > > &alignmentVector,
 					 TScoreMatrix const &scoreMatrix)
 {
-	typedef typename map<TValue,Pair<TValue, TAlign> >::iterator TMapIterator;
+	typedef typename ::std::map<TValue,Pair<TValue, TAlign> >::iterator TMapIterator;
 	typedef Iter<TMatrix, PositionIterator> TMatrixIterator;
 	Segment<TString, InfixSegment> seg1_align(*p_seq1, leftDim0(seed), rightDim0(seed)+1);
 	Segment<TString, InfixSegment> seg2_align(*p_seq2, leftDim1(seed), rightDim1(seed)+1);
@@ -542,7 +541,7 @@ _calculateBandedSeedGotoh(TSeed const &seed,
 	TMatrixIterator matr_it = begin(matrix_diag);
 	setPosition(matr_it, length(matrix_diag,0)-2);
 
-	alignmentVector.push_back(map<TValue,Pair<TValue, TAlign> >());
+	alignmentVector.push_back(::std::map<TValue,Pair<TValue, TAlign> >());
 	TValue width_align = leftDim0(seed) + width_diag;
 	TValue height_align = leftDim1(seed);
 
@@ -616,10 +615,10 @@ _calculateFirstRectangleGotoh(TSeed const &seed,
 						 TScoreString &score_str_vert,
 						 TScoreString &score_str_hori,
 						 TValue &score_length,
-						 vector<map<TValue,Pair<TValue, TAlign> > > &alignmentVector,
+						 ::std::vector<::std::map<TValue,Pair<TValue, TAlign> > > &alignmentVector,
 						 TScoreMatrix const &scoreMatrix)
 {
-	typedef typename map<TValue,Pair<TValue, TAlign> >::iterator TMapIterator;
+	typedef typename ::std::map<TValue,Pair<TValue, TAlign> >::iterator TMapIterator;
 	typedef Iter<TMatrix, PositionIterator> TMatrixIterator;
 	TValue new_connect;
 	Segment<TString, InfixSegment> seg1b_align(*p_seq1, 0, leftDim0(seed) + startDiagonal(seed) - rightDiagonal(seed) + k);
@@ -636,7 +635,7 @@ _calculateFirstRectangleGotoh(TSeed const &seed,
 
 	TMatrixIterator matr_it = begin(matrix_diag);
 
-	alignmentVector.push_back(map<TValue,Pair<TValue, TAlign> >());
+	alignmentVector.push_back(::std::map<TValue,Pair<TValue, TAlign> >());
 
 	TValue width_stop = leftDim0(seed);
 	TValue height_stop = leftDim1(seed);
@@ -671,10 +670,10 @@ _calculateLastRectangleGotoh(TSeed const &seed,
 						TScoreString & score_str_vert,
 						TScoreString & score_str_hori,
 						TValue &score_length,
-						vector<map<TValue,Pair<TValue, TAlign> > > &alignmentVector,
+						::std::vector<::std::map<TValue,Pair<TValue, TAlign> > > &alignmentVector,
 						TScoreMatrix const &scoreMatrix)
 {
-	typedef typename map<TValue,Pair<TValue, TAlign> >::iterator TMapIterator;
+	typedef typename ::std::map<TValue,Pair<TValue, TAlign> >::iterator TMapIterator;
 	typedef Iter<TMatrix, PositionIterator> TMatrixIterator;
 
 	TValue seq1_length = length(*p_seq1);
@@ -702,7 +701,7 @@ _calculateLastRectangleGotoh(TSeed const &seed,
 	TMatrixIterator iter_ = begin(matrix_diag);
 
 	TValue x = width_diag;
-	alignmentVector.push_back(map<TValue,Pair<TValue, TAlign> >());
+	alignmentVector.push_back(::std::map<TValue,Pair<TValue, TAlign> >());
 	
 	//last rectangle
 	for(TValue i = 0; i<height_diag; ++i)
@@ -763,10 +762,10 @@ _calculateRectangleGotoh(TSeed const &seed,
 					TScoreString &score_str_vert,
 					TScoreString &score_str_hori,
 					TValue &score_length,
-					vector<map<TValue,Pair<TValue, TAlign> > > & alignmentVector,
+					::std::vector<::std::map<TValue,Pair<TValue, TAlign> > > & alignmentVector,
 					TScoreMatrix const &scoreMatrix)
 {
-	typedef typename map<TValue,Pair<TValue, TAlign> >::iterator TMapIterator;
+	typedef typename ::std::map<TValue,Pair<TValue, TAlign> >::iterator TMapIterator;
 	typedef Iter<TMatrix, PositionIterator> TMatrixIterator;
 	Segment<TString, InfixSegment> seg1b_align(*p_seq1, rightDim0(seed2)-(leftDiagonal(seed2) - endDiagonal(seed2)   + k_end) + 1, leftDim0(seed) + startDiagonal(seed) - rightDiagonal(seed) + k_begin);
 	Segment<TString, InfixSegment> seg2b_align(*p_seq2, rightDim1(seed2)-(endDiagonal(seed2) -  rightDiagonal(seed2) + k_end) + 1, leftDim1(seed) + leftDiagonal(seed)  - startDiagonal(seed) + k_begin);
@@ -791,7 +790,7 @@ _calculateRectangleGotoh(TSeed const &seed,
 	TMatrixIterator matr_it = begin(matrix_diag);
 	setPosition(matr_it, width_diag);
 
-	alignmentVector.push_back(map<TValue,Pair<TValue, TAlign> >());
+	alignmentVector.push_back(::std::map<TValue,Pair<TValue, TAlign> >());
 	TValue width_align = rightDim0(seed2)+1;
 	TValue height_align = rightDim1(seed2) - height_diag + 1;
 

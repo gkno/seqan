@@ -22,14 +22,13 @@
 #ifndef SEQAN_HEADER_SEED_H
 #define SEQAN_HEADER_SEED_H
 
-using namespace seqan;
-
 namespace SEQAN_NAMESPACE_MAIN
 {
 
 
 struct _Seed_simple;
 typedef Tag<_Seed_simple> const SimpleSeed;
+
 
 
 /**
@@ -98,7 +97,7 @@ typedef Tag<_extendSeed_GappedXDrop> const GappedXDrop;
 ..param.dEndPos: End in database sequence.
 ..param.length: Length of the seed.
 */
-template<typename TPosition, typename TSpecSeed> 
+template<typename TPosition = int, typename TSpecSeed = SimpleSeed> 
 class Seed{
 public:
 	TPosition leftDim0;
@@ -149,6 +148,20 @@ struct Value<Seed<TPosition,TSpecSeed> >
 	typedef TPosition Type;
 };
 
+
+
+template< typename TBorder, typename TSpec >
+struct Size< Seed< TBorder, TSpec > >
+{
+	typedef size_t Type;
+};
+
+template< typename TPosition, typename TSpec >
+struct Key< Seed< TPosition, TSpec > >
+{
+	typedef TPosition Type;
+};
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //                                       Standard Functions                                                       //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -189,6 +202,16 @@ endDiagonal(Seed<TPosition, TSpecSeed> const &me)
 
 
 
+/**.Function.leftPosition:
+..summary:The begin position of segment in a seed.
+..cat:Seed Handling
+..signature:leftPosition(seed, dim)
+..param.seed:A seed.
+...type:Class.Seed
+..param.dim:Number of segment.
+...remarks:$dim <$ @Function.dimension.dimension(seed)@
+..returns:Begin position of the $dim$-th segment in $seed$.
+*/
 template< typename TPosition, typename TSpecSeed, typename TSize> 
 inline TPosition 
 leftPosition(Seed<TPosition, TSpecSeed>  & me, 
@@ -198,6 +221,40 @@ leftPosition(Seed<TPosition, TSpecSeed>  & me,
 	return (dim)? me.leftDim1 : me.leftDim0;
 }
 
+/**.Function.setLeftPosition:
+..summary:Sets begin position of segment in a seed.
+..cat:Seed Handling
+..signature:setLeftPosition(seed, dim, new_pos)
+..param.seed:A seed.
+...type:Class.Seed
+..param.dim:Number of segment.
+...remarks:$dim <$ @Function.dimension.dimension(seed)@
+..param.new_pos:The new begin position of the $dim$-th segment in $seed$.
+..see:Function.leftPosition
+*/
+template< typename TPosition, typename TSpecSeed, typename TSize, typename TPosition2> 
+inline TPosition 
+setLeftPosition(Seed<TPosition, TSpecSeed>  & me, 
+				TSize dim,
+				TPosition2 new_pos)
+{
+	SEQAN_CHECKPOINT
+	if (dim) me.leftDim1 = new_pos;
+	else me.leftDim0 = new_pos;
+}
+
+/**.Function.rightPosition:
+..summary:The end position of segment in a seed.
+..cat:Seed Handling
+..signature:rightPosition(seed, dim)
+..param.seed:A seed.
+...type:Class.Seed
+..param.dim:Number of segment.
+...remarks:$dim <$ @Function.dimension.dimension(seed)@
+..returns:End position of the $dim$-th segment in $seed$.
+..see:Function.leftPosition
+*/
+
 template< typename TPosition, typename TSpecSeed, typename TSize> 
 inline TPosition 
 rightPosition(Seed<TPosition, TSpecSeed>  & me, 
@@ -205,6 +262,44 @@ rightPosition(Seed<TPosition, TSpecSeed>  & me,
 {
 	SEQAN_CHECKPOINT
 	return (dim)? me.rightDim1 : me.rightDim0;
+}
+
+/**.Function.setRightPosition:
+..summary:Sets end position of segment in a seed.
+..cat:Seed Handling
+..signature:setRightPosition(seed, dim, new_pos)
+..param.seed:A seed.
+...type:Class.Seed
+..param.dim:Number of segment.
+...remarks:$dim <$ @Function.dimension.dimension(seed)@
+..param.new_pos:The new end position of the $dim$-th segment in $seed$.
+..see:Function.rightPosition
+..see:Function.setLeftPosition
+*/
+template< typename TPosition, typename TSpecSeed, typename TSize, typename TPosition2> 
+inline TPosition 
+setRightPosition(Seed<TPosition, TSpecSeed>  & me, 
+				TSize dim,
+				TPosition2 new_pos)
+{
+	SEQAN_CHECKPOINT
+	if (dim) me.rightDim1 = new_pos;
+	else me.rightDim0 = new_pos;
+}
+
+/**.Function.dimension:
+..summary:Dimension of a seed.
+..cat:Seed Handling
+..signature:dimension(seed)
+..param.seed:A seed.
+...type:Class.Seed
+..returns:The number of segments in $seed$.
+*/
+template< typename TPosition, typename TSpec > inline
+typename Size< Seed< TPosition, TSpec > >::Type
+dimension( Seed< TPosition, TSpec > & me )
+{
+	return 2;
 }
 
 /**
@@ -738,8 +833,8 @@ extendSeed(Seed<TPosition,SimpleSeed> &seed,
 	if ((direction != 1)&&(leftDim0(seed)!=0)&&(leftDim1(seed)!=0)){
 		TPosition upperBound = 0;
 		TPosition lowerBound = 0;
-		Segment<String<Dna>,PrefixSegment> dataSeg(database,leftDim1(seed));
-		Segment<String<Dna>,PrefixSegment> querySeg(query,leftDim0(seed));
+		Segment<String<TText>,PrefixSegment> dataSeg(database,leftDim1(seed));
+		Segment<String<TText>,PrefixSegment> querySeg(query,leftDim0(seed));
 		TPosition xLength = length(querySeg);
 		TPosition yLength = length(dataSeg);
 
@@ -860,8 +955,8 @@ extendSeed(Seed<TPosition,SimpleSeed> &seed,
 	if ((direction != 0)&&(rightDim0(seed)<static_cast<TPosition>(length(query))-1)&&(rightDim1(seed)<static_cast<TPosition>(length(database))-1)){
 		TPosition upperBound = 0;
 		TPosition lowerBound = 0;
-		Segment<String<Dna>,SuffixSegment> dataSeg(database,rightDim1(seed)+1);
-		Segment<String<Dna>,SuffixSegment> querySeg(query,rightDim0(seed)+1);
+		Segment<String<TText>,SuffixSegment> dataSeg(database,rightDim1(seed)+1);
+		Segment<String<TText>,SuffixSegment> querySeg(query,rightDim0(seed)+1);
 		TPosition xLength = length(querySeg);
 		TPosition yLength = length(dataSeg);
 

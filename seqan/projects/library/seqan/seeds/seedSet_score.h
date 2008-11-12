@@ -24,7 +24,6 @@
 
 namespace SEQAN_NAMESPACE_MAIN
 {
-using namespace std;
 
 template<typename TValue, typename TScore>
 inline TScore
@@ -185,14 +184,14 @@ public:
 
 //Only difference is the destructor.
 template<typename TValue, typename TSpec, typename TScoringSpec> 
-class SeedSet<TValue, MultiSeed, TScoringSpec, TSpec>
+class SeedSet<TValue, ChainedSeed, TScoringSpec, TSpec>
 {
 
 public:
 	TValue last;
-    static const unsigned int BLOCKSIZE = BLOCK_SIZE<SeedSet<TValue, MultiSeed, TScoringSpec, void> >::Value;
+    static const unsigned int BLOCKSIZE = BLOCK_SIZE<SeedSet<TValue, ChainedSeed, TScoringSpec, void> >::Value;
     typedef typename Size<String<TValue, Block<BLOCKSIZE> > >::Type TSize;
-    MemoryManager<Seed<TValue, MultiSeed>, Block<BLOCKSIZE>, FreeMemoryInt > manager;
+    MemoryManager<Seed<TValue, ChainedSeed>, Block<BLOCKSIZE>, FreeMemoryInt > manager;
     std::multimap<TValue, TSize> fragmentMap;
     std::set<TSize> result;
     TValue maxDistance;
@@ -221,7 +220,7 @@ SeedSet(TValue maxDistance, TValue qualityValue, Score<int,Simple> matrix):maxDi
 	for (TIterator it = fragmentMap.begin(); it != it_end;++it)
 	{
 		TSize id = it->second;
-		manager[id].~Seed<TValue, MultiSeed>();
+		manager[id].~Seed<TValue, ChainedSeed>();
 		result.erase(id);
 	}
 
@@ -229,7 +228,7 @@ SeedSet(TValue maxDistance, TValue qualityValue, Score<int,Simple> matrix):maxDi
 	TIterator2 it_end2 = result.end();
 	for (TIterator2 it = result.begin(); it != it_end2;++it)
 	{
-		manager[*it].~Seed<TValue, MultiSeed>();
+		manager[*it].~Seed<TValue, ChainedSeed>();
 	}
 	
 	clear(scoreMap);
@@ -432,13 +431,13 @@ addSeed(SeedSet<TValue, SimpleSeed, TScoringSpec, TSpec> &set,
 
 template<typename TValue, typename TSpec, typename TScoringSpec, typename TScore>
 bool
-addSeed(SeedSet<TValue, MultiSeed, TScoringSpec, TSpec> &set, 
-	Seed<TValue, MultiSeed> const &seed, 
+addSeed(SeedSet<TValue, ChainedSeed, TScoringSpec, TSpec> &set, 
+	Seed<TValue, ChainedSeed> const &seed, 
 	TScore score, 
 	Single)
 {
     SEQAN_CHECKPOINT
-    typedef typename Size<String<TValue, Block<BLOCK_SIZE<SeedSet<TValue, MultiSeed, TScoringSpec, TSpec> >::Value> > >::Type TSize;
+    typedef typename Size<String<TValue, Block<BLOCK_SIZE<SeedSet<TValue, ChainedSeed, TScoringSpec, TSpec> >::Value> > >::Type TSize;
     typedef typename QualityFactor<TScoringSpec>::Type TQuality;
     typedef typename std::list<Triple<TValue, TValue, TValue> >::const_iterator TIterator;
 	
@@ -446,7 +445,7 @@ addSeed(SeedSet<TValue, MultiSeed, TScoringSpec, TSpec> &set,
     if (set.manager.change)
 		raiseMemory(set.scoreMap);
 
-    new (&set.manager[position]) Seed<TValue, MultiSeed>();
+    new (&set.manager[position]) Seed<TValue, ChainedSeed>();
     set.scoreMap[position] = score;
 	TIterator it_end = _getDiagSet(seed).end();
     for (TIterator it = _getDiagSet(seed).begin(); it != it_end ; ++it)
@@ -603,7 +602,7 @@ addSeed(SeedSet<TValue, TSeedSpec, TScoringSpec, TSpec> &set,
 	SimpleChain)
 {
 	SEQAN_CHECKPOINT
-	typedef typename Size<String<TValue, Block<BLOCK_SIZE<SeedSet<TValue, MultiSeed, TScoringSpec, TSpec> >::Value> > >::Type TSize;
+	typedef typename Size<String<TValue, Block<BLOCK_SIZE<SeedSet<TValue, ChainedSeed, TScoringSpec, TSpec> >::Value> > >::Type TSize;
 	typedef typename GapCosts<TScoringSpec>::Type TGapCosts;
 	typedef typename QualityFactor<TScoringSpec>::Type TQualityFactor;
 
@@ -709,14 +708,14 @@ addSeed(SeedSet<TValue, TSeedSpec, TScoringSpec, TSpec> &set,
 
 template<typename TValue, typename TSpec, typename TScoringSpec>
 bool 
-addSeed(SeedSet<TValue, MultiSeed, TScoringSpec, TSpec> &set, 
-		Seed<TValue, MultiSeed> const &seed, 
+addSeed(SeedSet<TValue, ChainedSeed, TScoringSpec, TSpec> &set, 
+		Seed<TValue, ChainedSeed> const &seed, 
 		typename ScoreType<TScoringSpec>::Type score, 
 		int gapDistance, 
 		SimpleChain)
 {
 	SEQAN_CHECKPOINT
-	typedef typename Size<String<TValue, Block<BLOCK_SIZE<SeedSet<TValue, MultiSeed, TScoringSpec, TSpec> >::Value> > >::Type TSize;
+	typedef typename Size<String<TValue, Block<BLOCK_SIZE<SeedSet<TValue, ChainedSeed, TScoringSpec, TSpec> >::Value> > >::Type TSize;
 	typedef typename std::multimap<TValue,TSize >::iterator TIterator;
 	typedef typename GapCosts<TScoringSpec>::Type TGapCosts;
 	typedef typename QualityFactor<TScoringSpec>::Type TQualityFactor;
@@ -806,7 +805,7 @@ addSeed(SeedSet<TValue, TSpecSeed, TScoringSpec, TSpec> &set,
 		Chaos)
 {
 	SEQAN_CHECKPOINT
-	typedef typename Size<String<TValue, Block<BLOCK_SIZE<SeedSet<TValue, MultiSeed, TScoringSpec, TSpec> >::Value> > >::Type TSize;
+	typedef typename Size<String<TValue, Block<BLOCK_SIZE<SeedSet<TValue, ChainedSeed, TScoringSpec, TSpec> >::Value> > >::Type TSize;
 	typedef typename std::multimap<TValue,TSize >::iterator TIterator;
 	typedef typename GapCosts<TScoringSpec>::Type TGapCosts;
 	typedef typename QualityFactor<TScoringSpec>::Type TQualityFactor;
@@ -848,8 +847,8 @@ addSeed(SeedSet<TValue, TSpecSeed, TScoringSpec, TSpec> &set,
 
 template<typename TValue, typename TText, typename TSpec, typename TScoringSpec>
 bool
-addSeed(SeedSet<TValue, MultiSeed, TScoringSpec, TSpec> &set, 
-		Seed<TValue, MultiSeed> const &seed, 
+addSeed(SeedSet<TValue, ChainedSeed, TScoringSpec, TSpec> &set, 
+		Seed<TValue, ChainedSeed> const &seed, 
 		typename ScoreType<TScoringSpec>::Type score, 
 		String<TText> const &query, 
 		String<TText> const &database, 
@@ -857,7 +856,7 @@ addSeed(SeedSet<TValue, MultiSeed, TScoringSpec, TSpec> &set,
 		Chaos)
 {
 	SEQAN_CHECKPOINT
-	typedef typename Size<String<TValue, Block<BLOCK_SIZE<SeedSet<TValue, MultiSeed, TScoringSpec, TSpec> >::Value> > >::Type TSize;
+	typedef typename Size<String<TValue, Block<BLOCK_SIZE<SeedSet<TValue, ChainedSeed, TScoringSpec, TSpec> >::Value> > >::Type TSize;
 	typedef typename std::multimap<TValue,TSize >::iterator TIterator;
 	typedef typename GapCosts<TScoringSpec>::Type TGapCosts;
 	typedef typename QualityFactor<TScoringSpec>::Type TQualityFactor;
@@ -985,10 +984,10 @@ _mergeTwoSeedsScore(Seed<TValue, SimpleSeed>  &firstSeed,
 }
 
 
-//MultiSeed
+//ChainedSeed
 template<typename TValue, typename TScore, typename TText, typename TGapCost>
 TValue
-_mergeTwoSeedsScore(Seed<TValue, MultiSeed>  &firstSeed, 
+_mergeTwoSeedsScore(Seed<TValue, ChainedSeed>  &firstSeed, 
 					TValue qPos, 
 					TValue dPos, 
 					TValue length,
@@ -1070,7 +1069,7 @@ addSeed(SeedSet<TValue, TSpecSeed, TScoringSpec, TSpec> &set,
 		Blat)
 {
 	SEQAN_CHECKPOINT
-	typedef typename  Size<String<TValue, Block<BLOCK_SIZE<SeedSet<TValue, MultiSeed, TScoringSpec, TSpec> >::Value> > >::Type TSize;
+	typedef typename  Size<String<TValue, Block<BLOCK_SIZE<SeedSet<TValue, ChainedSeed, TScoringSpec, TSpec> >::Value> > >::Type TSize;
 	typedef typename GapCosts<TScoringSpec>::Type TGapCosts;
 	typename std::multimap<TValue,TSize >::iterator it = _findSeedsChain(set, qPos, dPos, score, length, gapDistance);
 	typedef typename QualityFactor<TScoringSpec>::Type TQualityFactor;
@@ -1120,8 +1119,8 @@ addSeed(SeedSet<TValue, TSpecSeed, TScoringSpec, TSpec> &set,
 
 template<typename TValue, typename TText, typename TSpec, typename TScoringSpec>
 bool 
-addSeed(SeedSet<TValue, MultiSeed, TScoringSpec, TSpec> &set,
-		Seed<TValue, MultiSeed> const &seed,
+addSeed(SeedSet<TValue, ChainedSeed, TScoringSpec, TSpec> &set,
+		Seed<TValue, ChainedSeed> const &seed,
 		typename ScoreType<TScoringSpec>::Type score,
 		String<TText> const &query, 
 		String<TText> const &database,
@@ -1129,7 +1128,7 @@ addSeed(SeedSet<TValue, MultiSeed, TScoringSpec, TSpec> &set,
 		Blat)
 {
 	SEQAN_CHECKPOINT
-	typedef typename  Size<String<TValue, Block<BLOCK_SIZE<SeedSet<TValue, MultiSeed, TScoringSpec, TSpec> >::Value> > >::Type TSize;
+	typedef typename  Size<String<TValue, Block<BLOCK_SIZE<SeedSet<TValue, ChainedSeed, TScoringSpec, TSpec> >::Value> > >::Type TSize;
 	typedef typename std::multimap<TValue,TSize >::iterator TIterator;
 	typedef typename ScoreType<TScoringSpec>::Type TScore;
 	typedef typename GapCosts<TScoringSpec>::Type TGapCosts;
@@ -1294,7 +1293,7 @@ _mergeTwoSeedsScore(Seed<TValue, SimpleSeed>  &firstSeed,
 
 template<typename TValue, typename TText, typename TScore, typename TGapCosts>
 TScore
-_mergeTwoSeedsScore(Seed<TValue, MultiSeed>  &firstSeed, 
+_mergeTwoSeedsScore(Seed<TValue, ChainedSeed>  &firstSeed, 
 					TValue qPos, 
 					TValue dPos, 
 					TValue length, 
@@ -1854,7 +1853,7 @@ extendSeedsScore(SeedSet<TValue, SimpleSeed, TScoringSpec, TSpec> &seedSet,
 
 template<typename TText, typename TExtendSeedSpec, typename TValue, typename TSpec, typename TScoringSpec>
 void
-extendSeedsScore(SeedSet<TValue, MultiSeed, TScoringSpec, TSpec> &seedSet,
+extendSeedsScore(SeedSet<TValue, ChainedSeed, TScoringSpec, TSpec> &seedSet,
 				 TValue scoreDropOff, 
 				 String<TText> const &query,
 				 String<TText> const &database,
@@ -1862,7 +1861,7 @@ extendSeedsScore(SeedSet<TValue, MultiSeed, TScoringSpec, TSpec> &seedSet,
 				 TExtendSeedSpec tag)
 {
 	SEQAN_CHECKPOINT
-	typedef SeedSet<TValue, MultiSeed, TScoringSpec, TSpec> TSeedSet;
+	typedef SeedSet<TValue, ChainedSeed, TScoringSpec, TSpec> TSeedSet;
 	typedef typename Iterator<TSeedSet,Standard>::Type TIterator;
 	
 	TIterator it_end = end(seedSet);
@@ -2277,7 +2276,7 @@ extendSeedScore(Seed<TValue,SimpleSeed> &seed,
 
 template<typename TValue, typename TText, typename TScore>
 void 
-extendSeedScore(Seed<TValue,MultiSeed> &seed, 
+extendSeedScore(Seed<TValue,ChainedSeed> &seed, 
 				TScore &currentScore, 
 				TScore scoreDropOff, 
 				Score<TScore, Simple> const &scoreMatrix,

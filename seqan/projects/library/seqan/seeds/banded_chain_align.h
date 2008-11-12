@@ -21,7 +21,6 @@
 #ifndef SEQAN_HEADER_BANDED_CHAIN_ALIGN_H
 #define SEQAN_HEADER_BANDED_CHAIN_ALIGN_H
 
-using namespace std;
 namespace SEQAN_NAMESPACE_MAIN
 {
 
@@ -69,8 +68,8 @@ chain_to_alignment_needlemanwunsch(TContainer const &seedChain,
 	typedef String<TScore> TScoreString;
 	typedef Matrix<TScore> TMatrix;
 	typedef Iter<TMatrix, PositionIterator > TMatrixIterator;
-	typedef vector<map<TValue,Pair<TValue, TAlign> > > TAlignVector;
-	typedef typename map<TValue, Pair<TValue, TAlign> >::iterator TMapIterator;
+	typedef ::std::vector<::std::map<TValue,Pair<TValue, TAlign> > > TAlignVector;
+	typedef typename ::std::map<TValue, Pair<TValue, TAlign> >::iterator TMapIterator;
 	
 	TScoreString score_str;
 	TAlignVector alignmentVector;
@@ -116,10 +115,10 @@ chain_to_alignment_needlemanwunsch(TContainer const &seedChain,
 //"Glues" single alignments together
 template<typename TValue, typename TAlign, typename TAlign2>
 void
-_constructAlignment(vector<map<TValue,Pair<TValue, TAlign> > >const &me,
+_constructAlignment(::std::vector<::std::map<TValue,Pair<TValue, TAlign> > >const &me,
 					TAlign2 &wholeAlignment)
 {
-	typedef typename map<TValue,Pair<TValue, TAlign> >::const_iterator TIterator;
+	typedef typename ::std::map<TValue,Pair<TValue, TAlign> >::const_iterator TIterator;
 	typedef typename Row<TAlign>::Type TRow;
 	typedef typename Iterator<TRow, Standard>::Type TTargetIterator;
 	typedef typename Row<TAlign2>::Type TRow2;
@@ -503,13 +502,13 @@ SEQAN_CHECKPOINT
 
 template<typename TAlign, typename TValue>
 void
-_rec_delete(vector<map<TValue,Pair<TValue, TAlign> > > &vec,	//alignment vector
+_rec_delete(::std::vector<::std::map<TValue,Pair<TValue, TAlign> > > &vec,	//alignment vector
 		   TValue index,										//position im vector
 		   TValue position)										//alignment to delete
 {
 	if (position != -1)
 	{
-		typename map<TValue,Pair<TValue, TAlign> >::iterator it, it1, it2;
+		typename ::std::map<TValue,Pair<TValue, TAlign> >::iterator it, it1, it2;
 		it = vec[index].find(position);
 		bool x = true; //true = successor of it can be deleted
 		if (it != vec[index].begin())
@@ -532,13 +531,13 @@ _rec_delete(vector<map<TValue,Pair<TValue, TAlign> > > &vec,	//alignment vector
 
 template<typename TValue, typename TAlign, typename TSize>
 void
-_deleteAlignment(vector<map<TValue,Pair<TValue, TAlign> > > &me,
+_deleteAlignment(::std::vector<::std::map<TValue,Pair<TValue, TAlign> > > &me,
 				TSize old_end,
 				TSize new_end)
 {
 	//cout << "me: " << me[0].size() << endl;
 	int length = me.size()-2;
-	typename map<TValue,Pair<TValue, TAlign> >::iterator it, it1, it2;
+	typename ::std::map<TValue,Pair<TValue, TAlign> >::iterator it, it1, it2;
 	for(TSize i = old_end+1; i < new_end; ++i)
 	{
 	
@@ -574,10 +573,10 @@ _calculateBandedSeed(TSeed const &seed,
 					 TString *p_seq2,
 					 TScoreString &score_str,
 					 TValue &score_length,
-					 vector<map<TValue,Pair<TValue, TAlign> > > &alignmentVector,
+					 ::std::vector<::std::map<TValue,Pair<TValue, TAlign> > > &alignmentVector,
 					 TScoreMatrix const &scoreMatrix)
 {
-	typedef typename map<TValue,Pair<TValue, TAlign> >::iterator TMapIterator;
+	typedef typename ::std::map<TValue,Pair<TValue, TAlign> >::iterator TMapIterator;
 	typedef Iter<TMatrix, PositionIterator> TMatrixIterator;
 	Segment<TString, InfixSegment> seg1_align(*p_seq1, leftDim0(seed), rightDim0(seed)+1);
 	Segment<TString, InfixSegment> seg2_align(*p_seq2, leftDim1(seed), rightDim1(seed)+1);
@@ -591,7 +590,7 @@ _calculateBandedSeed(TSeed const &seed,
 	TMatrixIterator matr_it = begin(matrix_);
 	setPosition(matr_it, length(matrix_,0)-2);
 
-	alignmentVector.push_back(map<TValue,Pair<TValue, TAlign> >());
+	alignmentVector.push_back(::std::map<TValue,Pair<TValue, TAlign> >());
 	TValue width_align = leftDim0(seed) + width_diag;
 	TValue height_align = leftDim1(seed);
 
@@ -653,10 +652,10 @@ _calculateFirstRectangle(TSeed const &seed,
 						 TString *p_seq2,
 						 TScoreString &score_str,
 						 TValue &score_length,
-						 vector<map<TValue,Pair<TValue, TAlign> > > &alignmentVector,
+						 ::std::vector<::std::map<TValue,Pair<TValue, TAlign> > > &alignmentVector,
 						 TScoreMatrix const &scoreMatrix)
 {
-	typedef typename map<TValue,Pair<TValue, TAlign> >::iterator TMapIterator;
+	typedef typename ::std::map<TValue,Pair<TValue, TAlign> >::iterator TMapIterator;
 	typedef Iter<TMatrix, PositionIterator> TMatrixIterator;
 	TValue new_connect;
 	Segment<TString, InfixSegment> seg1b_align(*p_seq1, 0, leftDim0(seed) + startDiagonal(seed) - rightDiagonal(seed) + k);
@@ -671,7 +670,7 @@ _calculateFirstRectangle(TSeed const &seed,
 
 	TMatrixIterator matr_it = begin(matrix_);
 
-	alignmentVector.push_back(map<TValue,Pair<TValue, TAlign> >());
+	alignmentVector.push_back(::std::map<TValue,Pair<TValue, TAlign> >());
 
 	TValue width_stop = leftDim0(seed);
 	TValue height_stop = leftDim1(seed);
@@ -701,10 +700,10 @@ _calculateLastRectangle(TSeed const &seed,
 						TString *p_seq2,
 						TScoreString &score_str,
 						TValue &score_length,
-						vector<map<TValue,Pair<TValue, TAlign> > > &alignmentVector,
+						::std::vector<::std::map<TValue,Pair<TValue, TAlign> > > &alignmentVector,
 						TScoreMatrix const &scoreMatrix)
 {
-	typedef typename map<TValue,Pair<TValue, TAlign> >::iterator TMapIterator;
+	typedef typename ::std::map<TValue,Pair<TValue, TAlign> >::iterator TMapIterator;
 	typedef Iter<TMatrix, PositionIterator> TMatrixIterator;
 
 	TValue seq1_length = length(*p_seq1);
@@ -727,7 +726,7 @@ _calculateLastRectangle(TSeed const &seed,
 	TMatrixIterator iter_ = begin(matrix_);
 
 	TValue x = width_diag;
-	alignmentVector.push_back(map<TValue,Pair<TValue, TAlign> >());
+	alignmentVector.push_back(::std::map<TValue,Pair<TValue, TAlign> >());
 	
 	//last rectangle
 	for(TValue i = 0; i<height_diag; ++i)
@@ -779,10 +778,10 @@ _calculateRectangle(TSeed const &seed,
 					TString *p_seq2,
 					TScoreString &score_str,
 					TValue &score_length,
-					vector<map<TValue,Pair<TValue, TAlign> > > &alignmentVector,
+					::std::vector<::std::map<TValue,Pair<TValue, TAlign> > > &alignmentVector,
 					TScoreMatrix const &scoreMatrix)
 {
-	typedef typename map<TValue,Pair<TValue, TAlign> >::iterator TMapIterator;
+	typedef typename ::std::map<TValue,Pair<TValue, TAlign> >::iterator TMapIterator;
 	typedef Iter<TMatrix, PositionIterator> TMatrixIterator;
 	Segment<TString, InfixSegment> seg1b_align(*p_seq1, rightDim0(seed2)-(leftDiagonal(seed2) - endDiagonal(seed2)   + k_end) + 1, leftDim0(seed) + startDiagonal(seed) - rightDiagonal(seed) + k_begin);
 	Segment<TString, InfixSegment> seg2b_align(*p_seq2, rightDim1(seed2)-(endDiagonal(seed2) -  rightDiagonal(seed2) + k_end) + 1, leftDim1(seed) + leftDiagonal(seed)  - startDiagonal(seed) + k_begin);
@@ -801,7 +800,7 @@ _calculateRectangle(TSeed const &seed,
 	TMatrixIterator matr_it = begin(matrix_);
 	setPosition(matr_it, width_diag);
 
-	alignmentVector.push_back(map<TValue,Pair<TValue, TAlign> >());
+	alignmentVector.push_back(::std::map<TValue,Pair<TValue, TAlign> >());
 	TValue width_align = rightDim0(seed2)+1;
 	TValue height_align = rightDim1(seed2) - height_diag + 1;
 

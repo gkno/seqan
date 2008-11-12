@@ -26,5 +26,7 @@
 #include <seqan/seeds/banded_chain_align_affine.h>
 #include <seqan/seeds/banded_chain_align.h>
 
+#include <seqan/chaining.h>
+
 
 #endif //#ifndef SEQAN_HEADER_...

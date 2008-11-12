@@ -21,7 +21,6 @@
 #ifndef SEQAN_HEADER_BANDED_ALIGN_H
 #define SEQAN_HEADER_BANDED_ALIGN_H
 
-using namespace std;
 namespace SEQAN_NAMESPACE_MAIN
 {
 

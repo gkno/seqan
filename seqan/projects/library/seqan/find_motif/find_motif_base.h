@@ -262,6 +262,49 @@ displayResult(MotifFinder<TValue, TAlgorithm> & finder)
 }
 
 /////////////////////////////////////////////////////////////////////////
+/**.Metafunction.Motif:
+*/
+
+template <typename T>
+struct Motif;
+
+template <typename TValue, typename TSpec>
+struct Motif< MotifFinder<TValue,TSpec> >
+{
+	typedef String<TValue> Type;
+};
+
+/////////////////////////////////////////////////////////////////////////
+/**.Function.getMotif:
+*/
+
+template <typename TValue, typename TSpec, typename TPosition>
+inline typename Motif<MotifFinder<TValue, TSpec> >::Type &
+getMotif(MotifFinder<TValue, TSpec> & me,
+		 TPosition pos)
+{
+	return me.set_of_motifs[pos];
+}
+template <typename TValue, typename TSpec>
+inline typename Motif<MotifFinder<TValue, TSpec> >::Type &
+getMotif(MotifFinder<TValue, TSpec> & me)
+{
+	return me.set_of_motifs[0];
+}
+
+/////////////////////////////////////////////////////////////////////////
+/**.Function.motifCount:
+*/
+
+template <typename TValue, typename TSpec>
+inline size_t
+motifCount(MotifFinder<TValue, TSpec> const & me)
+{
+	return length(me.set_of_motifs);
+}
+
+
+/////////////////////////////////////////////////////////////////////////
 
 }// namespace SEQAN_NAMESPACE_MAIN
 

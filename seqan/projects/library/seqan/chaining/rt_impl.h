@@ -48,6 +48,7 @@ namespace seqan
 template< typename TObject, typename TModus, typename TSpec, typename TStructuring >
 class RangeTree< TObject, TModus, RT< TSpec >, TStructuring >
 {
+public:
 	SkipList< TObject, TModus, RT< TSpec >, TStructuring > * _list;
 
 	TObject _RBorderObj;
@@ -66,7 +67,7 @@ class RangeTree< TObject, TModus, RT< TSpec >, TStructuring >
 		SEQAN_CHECKPOINT
 		return me._numOfElems;
 	}
-
+/*
 	friend
 	Allocator< ClassPool< SkipElement< TObject, TModus, RT< TSpec >, TStructuring >, Limited > > &
 	_getElementAlloc<>( RangeTree< TObject, TModus, RT< TSpec >, TStructuring > & me );
@@ -90,7 +91,7 @@ class RangeTree< TObject, TModus, RT< TSpec >, TStructuring >
 	friend
 	SkipList< TObject, TModus, RT< TSpec >, TStructuring > *
 	_getList<>( RangeTree< TObject, TModus, RT< TSpec >, TStructuring > & me );
-
+*/
 	template< typename TSize > friend inline
 	SkipElement< TObject, TModus, RT< TSpec >, TStructuring > **
 	_getSearchPath( RangeTree< TObject, TModus, RT< TSpec >, TStructuring > & me,

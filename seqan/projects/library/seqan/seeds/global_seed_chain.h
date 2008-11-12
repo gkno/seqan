@@ -21,7 +21,6 @@
 #ifndef SEQAN_HEADER_GLOBAL_SEED_CHAIN_H
 #define SEQAN_HEADER_GLOBAL_SEED_CHAIN_H
 
-using namespace std;
 namespace SEQAN_NAMESPACE_MAIN
 {
 
@@ -49,10 +48,11 @@ _findPrev(Map<TValue, Skiplist<TSpec> > & me,
 	return _findPrev(me, _find, path);
 }
 
-/**
+/*DISABLED
 .Function.globalChaining
-..summary: Calculates the best global chain using the Gusfield-Algorithm with scores (ManhattanDistance) and without.
+..summary:Global chaining of a set of seeds.
 ..cat:Seed Handling
+..cat:Chaining
 ..signature:globalChaining(source, result)
 ..signature:globalChaining(source, result, gapCost, xLength, yLength)
 ..param.source: The set of seeds to chain.
@@ -62,6 +62,26 @@ _findPrev(Map<TValue, Skiplist<TSpec> > & me,
 ..param.xLength: Length of the first sequence.
 ..param.yLength: Length of the second sequence.
 ..returns: The score of the chain.
+*/
+
+/**
+.Function.globalChaining:
+..summary:Computes the chain on a set of fragments.
+..cat:Chaining
+..signature:globalChaining(source, dest [, score] [, algorithm])
+..param.source:The set of fragments.
+...remarks:This could be either a container of seeds or a @Class.SeedSet@ object.
+..param.dest:Container in which the result should be stored.
+..param.score:The gap scoring scheme.
+...default:@Spec.Score Zero@
+...class:Spec.Score Manhattan
+...class:Spec.Score Zero
+...class:Spec.Score ChainSoP
+..param.algorithm:A tag that identifies the algorithm which is used for chaining.
+...default:$Default$
+...value:$Default$: Compiler selects best algorithm.
+...value:$GenericChaining$: A simple generic chaining algorithm.
+...value:$RangetreeChaining$: An elaborated chaining algorithm for @Spec.Score Zero@, @Spec.Score Manhattan@, and @Spec.Score ChainSoP@ scoring schemes.
 */
 template<typename TValue, typename TSeedSpec, typename TScoreSpec, typename TSpec, typename TTargetContainer>
 typename ScoreType<TScoreSpec>::Type
@@ -135,11 +155,11 @@ globalChaining(SeedSet<TValue, TSeedSpec, TScoreSpec, TSpec> const &source,	//Se
 
 template<typename TValue, typename TValue2, typename TSeedSpec, typename TScoreSpec, typename TSpec, typename TTargetContainer, typename TScore>
 TScore
-globalChaining(SeedSet<TValue, TSeedSpec, TScoreSpec, TSpec> const &source, //Seedset containing the seeds
-			   TTargetContainer &result,	//container for the result chain
-			   TScore gapCost,				//Value for gap costs
-			   TValue2 xLength,				//length of the first sequence
-			   TValue2 yLength)				//length of the second sequence
+_globalChaining(SeedSet<TValue, TSeedSpec, TScoreSpec, TSpec> const &source, //Seedset containing the seeds
+				TTargetContainer &result,	//container for the result chain
+				TScore gapCost,				//Value for gap costs
+				TValue2 xLength,				//length of the first sequence
+				TValue2 yLength)				//length of the second sequence
 {
 	SEQAN_CHECKPOINT
 	gapCost *= -1;
@@ -205,6 +225,29 @@ globalChaining(SeedSet<TValue, TSeedSpec, TScoreSpec, TSpec> const &source, //Se
 
 	return best;
 }
+
+template<typename TValue, typename TSeedSpec, typename TScoreSpec, typename TSpec, typename TTargetContainer, typename TScore>
+TScore
+globalChaining(SeedSet<TValue, TSeedSpec, TScoreSpec, TSpec> const &source, //Seedset containing the seeds
+				TTargetContainer &result,	//container for the result chain
+				TScore gapCost)				//Value for gap costs
+{
+	typedef SeedSet<TValue, TSeedSpec, TScoreSpec, TSpec> TSeedSet;
+	typedef typename Iterator<TSeedSet const, Standard>::Type TSeedSetIterator;
+	TSeedSetIterator it_end = end(source);
+	TValue x_length = 0;
+	TValue y_length = 0;
+	for (TSeedSetIterator it = begin(source); it != it_end; ++it)
+	{
+		TValue right = rightPosition(*it, 0);
+		if (right > x_length) x_length = right;
+
+		right = rightPosition(*it, 1);
+		if (right > y_length) y_length = right;
+	}
+	return _globalChaining(source, result, gapCost, x_length, y_length);
+}
+
 
 template<typename TValue, typename TChainElement>
 void

@@ -21,8 +21,6 @@
 #ifndef SEQAN_HEADER_SEEDSET_BASE_H
 #define SEQAN_HEADER_SEEDSET_BASE_H
 
-using namespace std;
-
 namespace SEQAN_NAMESPACE_MAIN
 {
 
@@ -154,13 +152,13 @@ public:
 
 // Only difference is the destructor.
 template<typename TValue, typename TQualityFactor, typename TGapCosts> 
-class SeedSet<TValue, MultiSeed, const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, void> >, void>
+class SeedSet<TValue, ChainedSeed, const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, void> >, void>
 {
 
 public:
-	static const unsigned int BLOCKSIZE = BLOCK_SIZE<SeedSet<TValue, MultiSeed, const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, void> >, void> >::Value;
+	static const unsigned int BLOCKSIZE = BLOCK_SIZE<SeedSet<TValue, ChainedSeed, const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, void> >, void> >::Value;
 	typedef typename Size<String<TValue, Block<BLOCKSIZE> > >::Type TSize;
-	MemoryManager<Seed<TValue, MultiSeed>, Block<BLOCKSIZE>, FreeMemoryInt > manager;
+	MemoryManager<Seed<TValue, ChainedSeed>, Block<BLOCKSIZE>, FreeMemoryInt > manager;
 	std::multimap<TValue, TSize> fragmentMap;
 	std::set<TSize> result;
 	TValue maxDistance;
@@ -188,7 +186,7 @@ public:
 	for (TIterator it = fragmentMap.begin(); it != it_end;++it)
 	{
 		TSize id = it->second;
-		manager[id].~Seed<TValue, MultiSeed>();
+		manager[id].~Seed<TValue, ChainedSeed>();
 		result.erase(id);
 	}
 
@@ -196,7 +194,7 @@ public:
 	TIterator2 it_end2 = result.end();
 	for (TIterator2 it = result.begin(); it != it_end2;++it)
 	{
-		manager[*it].~Seed<TValue, MultiSeed>();
+		manager[*it].~Seed<TValue, ChainedSeed>();
 	}
 	clear(manager);
 	}
@@ -486,7 +484,7 @@ addSeed(SeedSet<TValue, TSeedSpec, const Tag<Scoring_Scheme<TQualityFactor, TGap
 		Single)
 {
 	SEQAN_CHECKPOINT
-	typedef typename Size<String<TValue, Block<BLOCK_SIZE<SeedSet<TValue, MultiSeed, const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, void> >, TSpec> >::Value> > >::Type TSize;
+	typedef typename Size<String<TValue, Block<BLOCK_SIZE<SeedSet<TValue, ChainedSeed, const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, void> >, TSpec> >::Value> > >::Type TSize;
 	TSize position = obtainID(set.manager);
 	new (&set.manager[position]) Seed<TValue, TSeedSpec>(qPos,dPos,length);
 	if (_qualityReached(set.manager[position],0,qualityValue(set), TQualityFactor()))           
@@ -506,7 +504,7 @@ addSeed(SeedSet<TValue, SimpleSeed, const Tag<Scoring_Scheme<TQualityFactor, TGa
 		Single)
 {
 	SEQAN_CHECKPOINT
-	typedef typename Size<String<TValue, Block<BLOCK_SIZE<SeedSet<TValue, MultiSeed, const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, void> >, TSpec> >::Value> > >::Type TSize;
+	typedef typename Size<String<TValue, Block<BLOCK_SIZE<SeedSet<TValue, ChainedSeed, const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, void> >, TSpec> >::Value> > >::Type TSize;
 	//Seed<TValue, SimpleSeed>* pSeed;
 	TSize position = obtainID(set.manager);
 	new (&set.manager[position]) Seed<TValue, SimpleSeed>(qBeginPos,dBeginPos,qEndPos,dEndPos);
@@ -524,7 +522,7 @@ addSeed(SeedSet<TValue, SimpleSeed, const Tag<Scoring_Scheme<TQualityFactor, TGa
 		Single)
 {
 	SEQAN_CHECKPOINT
-	typedef typename Size<String<TValue, Block<BLOCK_SIZE<SeedSet<TValue, MultiSeed, const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, void> >, TSpec> >::Value> > >::Type TSize;
+	typedef typename Size<String<TValue, Block<BLOCK_SIZE<SeedSet<TValue, ChainedSeed, const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, void> >, TSpec> >::Value> > >::Type TSize;
 	TSize position = obtainID(set.manager);
 	new (&set.manager[position]) Seed<TValue, SimpleSeed>(leftDim0(seed), leftDim1(seed), rightDim0(seed), rightDim1(seed));
 	if (_qualityReached(set.manager[position],0,qualityValue(set), TQualityFactor()))
@@ -538,15 +536,15 @@ addSeed(SeedSet<TValue, SimpleSeed, const Tag<Scoring_Scheme<TQualityFactor, TGa
 
 template<typename TValue, typename TSpec, typename TQualityFactor, typename TGapCosts>
 bool
-addSeed(SeedSet<TValue, MultiSeed, const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, void> >, TSpec> &set, 
-		Seed<TValue, MultiSeed> const &seed, 
+addSeed(SeedSet<TValue, ChainedSeed, const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, void> >, TSpec> &set, 
+		Seed<TValue, ChainedSeed> const &seed, 
 		Single)
 {
 	SEQAN_CHECKPOINT
-	typedef typename Size<String<TValue, Block<BLOCK_SIZE<SeedSet<TValue, MultiSeed, const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, void> >, TSpec> >::Value> > >::Type TSize;
+	typedef typename Size<String<TValue, Block<BLOCK_SIZE<SeedSet<TValue, ChainedSeed, const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, void> >, TSpec> >::Value> > >::Type TSize;
 	typedef typename std::list<Triple<TValue, TValue, TValue> >::const_iterator TIterator;
 	TSize position = obtainID(set.manager);
-	new (&set.manager[position]) Seed<TValue, MultiSeed>();
+	new (&set.manager[position]) Seed<TValue, ChainedSeed>();
 	TIterator it_end = _getDiagSet(seed).end();
 	for (TIterator it = _getDiagSet(seed).begin(); it != it_end; ++it)
 		appendDiag(set.manager[position],*it);
@@ -944,13 +942,13 @@ addSeed(SeedSet<TValue, TSeedSpec, const Tag<Scoring_Scheme<TQualityFactor, TGap
 
 template<typename TValue, typename TSpec, typename TQualityFactor, typename TGapCosts>
 bool 
-addSeed(SeedSet<TValue, MultiSeed, const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, void> >, TSpec> &set, 
-		Seed<TValue, MultiSeed> const &seed, 
+addSeed(SeedSet<TValue, ChainedSeed, const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, void> >, TSpec> &set, 
+		Seed<TValue, ChainedSeed> const &seed, 
 		int gapDistance, 
 		SimpleChain)
 {
 	SEQAN_CHECKPOINT
-	typedef typename Size<String<TValue, Block<BLOCK_SIZE<SeedSet<TValue, MultiSeed, const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, void> >, TSpec> >::Value> > >::Type TSize;
+	typedef typename Size<String<TValue, Block<BLOCK_SIZE<SeedSet<TValue, ChainedSeed, const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, void> >, TSpec> >::Value> > >::Type TSize;
 	typename std::multimap<TValue,TSize >::iterator it = _findSeedsChain(set, leftDim0(seed), leftDim1(seed), length(seed), gapDistance);
 	if (it != set.fragmentMap.end())
 	{
@@ -1022,7 +1020,7 @@ _mergeTwoSeeds(Seed<TValue, SimpleSeed> &firstSeed,
 
 template<typename TValue>
 void
-_mergeTwoSeeds(Seed<TValue, MultiSeed> &firstSeed, 
+_mergeTwoSeeds(Seed<TValue, ChainedSeed> &firstSeed, 
 			   TValue qPos, 
 			   TValue dPos, 
 			   TValue length, 
@@ -1055,7 +1053,7 @@ addSeed(SeedSet<TValue, TSeedSpec, const Tag<Scoring_Scheme<TQualityFactor, TGap
 		Chaos)
 {
 	SEQAN_CHECKPOINT
-	typedef typename Size<String<TValue, Block<BLOCK_SIZE<SeedSet<TValue, MultiSeed, const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, void> >, TSpec> >::Value> > >::Type TSize;
+	typedef typename Size<String<TValue, Block<BLOCK_SIZE<SeedSet<TValue, ChainedSeed, const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, void> >, TSpec> >::Value> > >::Type TSize;
 	typename std::multimap<TValue,TSize >::iterator it = _findSeedsChain(set, qPos, dPos, length, gapDistance);
 	if (it != set.fragmentMap.end())
 	{
@@ -1079,8 +1077,8 @@ addSeed(SeedSet<TValue, TSeedSpec, const Tag<Scoring_Scheme<TQualityFactor, TGap
 
 template<typename TValue, typename TValue2, typename TText, typename TSpec, typename TQualityFactor, typename TGapCosts>
 bool 
-addSeed(SeedSet<TValue, MultiSeed, const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, void> >, TSpec> &set, 
-		Seed<TValue, MultiSeed> const &seed, 
+addSeed(SeedSet<TValue, ChainedSeed, const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, void> >, TSpec> &set, 
+		Seed<TValue, ChainedSeed> const &seed, 
 		Score<TValue2, Simple> const &scoreMatrix, 
 		String<TText> const &query, 
 		String<TText> const &database, 
@@ -1088,7 +1086,7 @@ addSeed(SeedSet<TValue, MultiSeed, const Tag<Scoring_Scheme<TQualityFactor, TGap
 		Chaos)
 {
 	SEQAN_CHECKPOINT
-	typedef typename Size<String<TValue, Block<BLOCK_SIZE<SeedSet<TValue, MultiSeed, const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, void> >, TSpec> >::Value> > >::Type TSize;
+	typedef typename Size<String<TValue, Block<BLOCK_SIZE<SeedSet<TValue, ChainedSeed, const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, void> >, TSpec> >::Value> > >::Type TSize;
 	typename std::multimap<TValue,TSize >::iterator it = _findSeedsChain(set, leftDim0(seed), leftDim1(seed),length(seed), gapDistance);
 	if (it != set.fragmentMap.end())
 	{
@@ -1116,7 +1114,7 @@ addSeed(SeedSet<TValue, MultiSeed, const Tag<Scoring_Scheme<TQualityFactor, TGap
 
 template<typename TValue, typename TText, typename TValue2>
 void
-_mergeTwoSeeds(Seed<TValue, MultiSeed>  &firstSeed, 
+_mergeTwoSeeds(Seed<TValue, ChainedSeed>  &firstSeed, 
 			   TValue qPos, 
 			   TValue dPos, 
 			   TValue length, 
@@ -1172,7 +1170,7 @@ _mergeTwoSeeds(Seed<TValue, MultiSeed>  &firstSeed,
 
 template<typename TValue, typename TText, typename TSpec, typename TQualityFactor, typename TGapCosts>
 bool 
-addSeed(SeedSet<TValue, MultiSeed, const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, void> >, TSpec> &set, 
+addSeed(SeedSet<TValue, ChainedSeed, const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, void> >, TSpec> &set, 
 		TValue qPos, 
 		TValue dPos, 
 		TValue length, 
@@ -1182,7 +1180,7 @@ addSeed(SeedSet<TValue, MultiSeed, const Tag<Scoring_Scheme<TQualityFactor, TGap
 		Blat)
 {
 	SEQAN_CHECKPOINT
-	typedef  typename Size<String<TValue, Block<BLOCK_SIZE<SeedSet<TValue, MultiSeed, const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, void> >, TSpec> >::Value> > >::Type TSize;
+	typedef  typename Size<String<TValue, Block<BLOCK_SIZE<SeedSet<TValue, ChainedSeed, const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, void> >, TSpec> >::Value> > >::Type TSize;
 	typename std::multimap<TValue,TSize >::iterator it = _findSeedsChain(set, qPos, dPos, length, gapDistance);
 	if (it != set.fragmentMap.end())
 	{
@@ -1214,8 +1212,8 @@ addSeed(SeedSet<TValue, MultiSeed, const Tag<Scoring_Scheme<TQualityFactor, TGap
 
 template<typename TValue, typename TText, typename TSpec, typename TQualityFactor, typename TGapCosts>
 bool 
-addSeed(SeedSet<TValue, MultiSeed, const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, void> >, TSpec> &set, 
-		Seed<TValue, MultiSeed> const &seed, 
+addSeed(SeedSet<TValue, ChainedSeed, const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, void> >, TSpec> &set, 
+		Seed<TValue, ChainedSeed> const &seed, 
 		String<TText> const &query, 
 		String<TText> const &database, 
 		int gapDistance, 
@@ -1225,7 +1223,7 @@ addSeed(SeedSet<TValue, MultiSeed, const Tag<Scoring_Scheme<TQualityFactor, TGap
 	TValue qPos = leftDim0(seed);
 	TValue dPos = leftDim1(seed);
 	TValue length_ = _getFirstDiag(seed).i3;
-	typedef  typename Size<String<TValue, Block<BLOCK_SIZE<SeedSet<TValue, MultiSeed, const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, void> >, TSpec> >::Value> > >::Type TSize;
+	typedef  typename Size<String<TValue, Block<BLOCK_SIZE<SeedSet<TValue, ChainedSeed, const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, void> >, TSpec> >::Value> > >::Type TSize;
 	typename std::multimap<TValue,TSize >::iterator it = _findSeedsChain(set, qPos, dPos, length(seed),  gapDistance);
 	if (it != set.fragmentMap.end())
 	{
@@ -1262,7 +1260,7 @@ addSeed(SeedSet<TValue, MultiSeed, const Tag<Scoring_Scheme<TQualityFactor, TGap
 
 template<typename TValue, typename TText>
 void
-_mergeTwoSeeds(Seed<TValue, MultiSeed>  &firstSeed, 
+_mergeTwoSeeds(Seed<TValue, ChainedSeed>  &firstSeed, 
 			   TValue qPos,
 			   TValue dPos, 
 			   TValue length, 
@@ -1482,7 +1480,7 @@ delete_everything(SeedSet<TValue, TSeedSpec, const Tag<Scoring_Scheme<TQualityFa
 
 
 template<typename TValue, typename TSeedSpec, typename TSpec, typename TQualityFactor, typename TGapCosts>
-typename std::multimap<TValue, 	typename Size<String<TValue, Block<BLOCK_SIZE<SeedSet<TValue, MultiSeed, const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, void> >, TSpec> >::Value> > >::Type >::iterator
+typename std::multimap<TValue, 	typename Size<String<TValue, Block<BLOCK_SIZE<SeedSet<TValue, ChainedSeed, const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, void> >, TSpec> >::Value> > >::Type >::iterator
 _findSeedsChain(SeedSet<TValue, TSeedSpec, const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, void> >, TSpec> &set, 
 				TValue qPos, 
 				TValue dPos, 

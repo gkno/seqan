@@ -188,7 +188,7 @@ _chain_generic_Backtrace(TSource & source,
 //spec for GenericChaining
 template< typename TSource, typename TDest, typename TScoring>
 inline typename Value<TScoring>::Type
-chain(TSource & source, 
+globalChaining(TSource & source, 
 	  TDest & dest, 
 	  TScoring const & scoring, 
 	  GenericChaining)

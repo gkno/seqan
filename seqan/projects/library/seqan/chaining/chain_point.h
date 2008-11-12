@@ -325,7 +325,7 @@ SEQAN_ASSERT( me._meta != NULL )
 		dump( _ChainPoint & me )
 		{
 			std::cout << "[ ";
-			typename Size< Fragment< TFragType > >::Type dim = 0;
+			typename Size< Seed< TFragType > >::Type dim = 0;
 			std::cout << key( me, dim );
 			++dim;
 			while( dim != me._dim )
@@ -464,7 +464,7 @@ SEQAN_ASSERT( me._meta != NULL )
 		dump( _ChainPoint & me )
 		{
 			std::cout << "[ ";
-			typename Size< Fragment< TFragType > >::Type dim = 0;
+			typename Size< Seed< TFragType > >::Type dim = 0;
 			std::cout << key( me, dim );
 			++dim;
 			while( dim != ISize )

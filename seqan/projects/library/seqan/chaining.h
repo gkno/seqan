@@ -24,6 +24,7 @@
 #include <seqan/basic.h>
 #include <seqan/score.h>
 #include <seqan/sequence.h>
+#include <seqan/seeds.h>
 
 #include <seqan/misc/misc_random.h>
 

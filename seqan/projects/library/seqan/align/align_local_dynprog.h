@@ -107,7 +107,7 @@ public:
 
 	typedef Iter<TMatrix,PositionIterator> TMatrixIterator;
 	typedef PriorityType<TPQEntry> TPriorityQ;
-	typedef String<bool> TBoolMatrix;	
+	typedef String<bool> TBoolMatrix;
 
 //____________________________________________________________________________
 	
@@ -120,7 +120,9 @@ public:
 	//position of maximum score (where traceback is started from) 
 	TMatrixPosition best_end_pos_;
 	//position where traceback ended and where declumping begins
-	TMatrixPosition best_begin_pos_; 
+	TMatrixPosition best_begin_pos_;
+
+	bool _needReinit; //true: call "smithWaterman", false: call "smithWatermanGetNext" 
 
 
 //____________________________________________________________________________
@@ -132,7 +134,8 @@ public:
 	//}
 
 	template <typename TSource,typename TSpec>
-	LocalAlignmentFinder(Align<TSource,TSpec> & align_)
+	LocalAlignmentFinder(Align<TSource,TSpec> & align_):
+		_needReinit(true)
 	{
 SEQAN_CHECKPOINT
 
@@ -158,19 +161,36 @@ SEQAN_CHECKPOINT
 };
 //////////////////////////////////////////////////////////////////////////////
 
+template <typename TScoreValue>
+void clear(LocalAlignmentFinder<TScoreValue> & sw_finder)
+{
+	sw_finder._needReinit = true;
+}
 
+//////////////////////////////////////////////////////////////////////////////
 
-
+template <typename TScoreValue>
+TScoreValue getScore(LocalAlignmentFinder<TScoreValue> & sw)
+{
+	if(!empty(sw.pq_))
+	{
+		return getValue(sw.matrix_, sw.best_end_pos_);
+	}
+	else 
+	{
+		return 0;
+	}
+}
 
 //////////////////////////////////////////////////////////////////////////////
 //Smith-Waterman algorithm
 template <typename TScoreValue, typename TString>
 TScoreValue
 smith_waterman_get_matrix(LocalAlignmentFinder<TScoreValue> & sw,
-				 TString const & str1_,
-				 TString const & str2_,
-				 Score<TScoreValue, Simple> const & score_,
-				 TScoreValue cutoff)
+						  TString const & str1_,
+						  TString const & str2_,
+						  Score<TScoreValue, Simple> const & score_,
+						  TScoreValue cutoff)
 {
 SEQAN_CHECKPOINT
 
@@ -484,8 +504,8 @@ template <typename TTargetSource, typename TTargetSpec, typename TScoreValue, ty
 typename Iterator<Matrix<TScoreValue, TSourceSpec>, Standard >::Type
 smith_waterman_trace(Align<TTargetSource, TTargetSpec> & target_,
 					 typename LocalAlignmentFinder<TScoreValue>::TBoolMatrix & fb_matrix, 
-					   Iter< Matrix<TScoreValue, TSourceSpec>, PositionIterator > source_,
-					   Score<TScoreValue, Simple> const &)
+					 Iter< Matrix<TScoreValue, TSourceSpec>, PositionIterator > source_,
+					 Score<TScoreValue, Simple> const &)
 {
 SEQAN_CHECKPOINT
 
@@ -614,7 +634,10 @@ SEQAN_CHECKPOINT
 	}
 
 	if(empty(sw.pq_))//||top(sw.pq_).value_<cutoff)
+	{
+		sw._needReinit = true;
 		return 0;
+	}
 
 	typename LocalAlignmentFinder<TScoreValue>::TMatrixPosition ret_pos = top(sw.pq_).id_;
 	sw.best_end_pos_ = ret_pos;
@@ -664,6 +687,8 @@ SEQAN_CHECKPOINT
 	
 	if(ret==0)
 		return ret;
+
+	sw_finder._needReinit = false;
 
 	typedef Iter<typename LocalAlignmentFinder<TScoreValue>::TMatrix,PositionIterator > TMatrixIterator;
 	TMatrixIterator best_begin;
@@ -731,6 +756,8 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 //interface for Function.localAlignment
 
+//1. only Align object
+
 template <typename TSource, typename TSpec, typename TScoreValue>
 inline TScoreValue
 localAlignment(Align<TSource, TSpec> & align_,
@@ -741,7 +768,43 @@ localAlignment(Align<TSource, TSpec> & align_,
 
 	return smithWaterman(align_, sw_finder, score_, 0);
 }
+template <typename TSource, typename TSpec, typename TScoreValue>
+inline TScoreValue
+localAlignment(Align<TSource, TSpec> & align_,
+			   Score<TScoreValue, Simple> const & score_)
+{
+	return localAlignment(align_, score_, SmithWaterman());
+}
 
+
+//2. Align, LocalAlignmentFinder, and cutoff arguments
+
+template <typename TSource, typename TSpec, typename TScoreValue1, typename TScoreValue2, typename TScoreValue3>
+inline TScoreValue1
+localAlignment(Align<TSource, TSpec> & align_,
+			   LocalAlignmentFinder<TScoreValue1> & sw_finder,
+			   Score<TScoreValue2, Simple> const & score_, 
+			   TScoreValue3 cutoff,
+			   WatermanEggert)
+{
+	if (sw_finder._needReinit)
+	{
+		return smithWaterman(align_, sw_finder, score_, cutoff);
+	}
+	else
+	{
+		return smithWatermanGetNext(align_, sw_finder, score_, cutoff);
+	}
+}
+template <typename TSource, typename TSpec, typename TScoreValue1, typename TScoreValue2, typename TScoreValue3>
+inline TScoreValue1
+localAlignment(Align<TSource, TSpec> & align_,
+			   LocalAlignmentFinder<TScoreValue1> & sw_finder,
+			   Score<TScoreValue2, Simple> const & score_, 
+			   TScoreValue3 cutoff)
+{
+	return localAlignment(align_, sw_finder, score_, cutoff, WatermanEggert());
+}
 
 //////////////////////////////////////////////////////////////////////////////
 

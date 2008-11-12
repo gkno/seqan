@@ -236,7 +236,7 @@ namespace seqan
 */
 
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring > __inline 
-	typename Key< TObject >::Type 
+	typename Key< TObject >::Type
 	key( SkipElement< TObject, TModus, TSpec, TStructuring > & me )
 	{
 		return me._key;
@@ -349,6 +349,7 @@ Can be used to perform operation s
 template< typename TObject, typename TModus, typename TSpec, typename TStructuring >
 struct SkipElement
 {
+public:
 
 	union{
 			// pointer to the SkipElement on the level of the tower on the right of this tower
@@ -387,7 +388,7 @@ struct SkipElement
 	{
 		me._cargo = cargo;
 	}
-
+/*
 	friend 
 	void 
 	dump<>( SkipElement< TObject, TModus, TSpec, TStructuring > & me );
@@ -396,7 +397,7 @@ struct SkipElement
 	void 
 	printElementValue<>( SkipElement< TObject, TModus, TSpec, TStructuring > & me );
 
-
+*/
 public:
 
 	SkipElement( void )

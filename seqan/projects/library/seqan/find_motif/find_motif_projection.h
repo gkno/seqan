@@ -88,7 +88,7 @@ public:
 	TSize projection_size;
 	TSize bucket_threshold;
 	TSize num_of_trials;
-	TString consensus_pattern;
+	TStrings set_of_motifs;
 	int score;
 
 //____________________________________________________________________________________________
@@ -381,9 +381,9 @@ findMotif(MotifFinder<TSeqType, Projection> & finder,
 	//std::set< String<int> > occurred_positions;
 	for(unsigned int trial=0; trial<finder.num_of_trials; ++trial)
 	{
-		///
-		std::cout << " . ";
-		///
+		//
+		//std::cout << " . ";
+		//
 
 		TArray count_ar;
 		resize(count_ar, ar_size);
@@ -449,7 +449,8 @@ findMotif(MotifFinder<TSeqType, Projection> & finder,
 				if(score>finder.score)
 				{
 					finder.score = score;
-					finder.consensus_pattern = consensus_pat;
+					if (!length(finder.set_of_motifs)) appendValue(finder.set_of_motifs, consensus_pat);
+					else finder.set_of_motifs[0] = consensus_pat;
 
 					if((TStringsSize) finder.score==t)
 					{
@@ -462,9 +463,9 @@ findMotif(MotifFinder<TSeqType, Projection> & finder,
 		}// end while( (j<num_of_relevant_buckets) & (i<ar_size) )
 	}// end for(unsigned int trial=0; trial<finder.num_of_trials; ++trial)
 	
-	///
-	std::cout << "\n";
-	///
+	//
+	//std::cout << "\n";
+	//
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1163,15 +1164,27 @@ template<typename TValue>
 void
 displayResult(MotifFinder<TValue, Projection> & projection)
 {
-	if(length(projection.consensus_pattern)!=0)
+	if(length(projection.set_of_motifs)!=0)
 	{
-		std::cout << projection.consensus_pattern << "\n";
+		std::cout << projection.set_of_motifs[0] << "\n";
 	}
 	else
 	{
 		std::cout << "NO MOTIF HAS BEEN FOUND!!!\n";
 	}
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+// Access Functions
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+template <typename TValue>
+inline int
+getScore(MotifFinder<TValue, Projection> & me)
+{
+	return me.score;
+}
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 

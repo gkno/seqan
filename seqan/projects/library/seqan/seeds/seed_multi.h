@@ -25,18 +25,18 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 struct _Seed_multi;
-typedef Tag<_Seed_multi> const MultiSeed;
+typedef Tag<_Seed_multi> const ChainedSeed;
 
 /**
-..Spec.MultiSeed
+..Spec.ChainedSeed
 ..summary:Describes a seed with start and end position2 and diagonal upper and lower bounds. Additionaly diagonal segments
 between start and end position2 are stored.
 ..cat:Seed Handling
 ..general:Class.Seed
-..signature:Seed<TPosition, MultiSeed>
+..signature:Seed<TPosition, ChainedSeed>
 ..param.TPosition:The type of number that schuld be used. Must have negative numbers (e.g. int/long).
-.Memfunc.MultiSeed#Seed:
-..class:Spec.MultiSeed
+.Memfunc.ChainedSeed#Seed:
+..class:Spec.ChainedSeed
 ..summary:Constructor
 ..signature: Seed<TPosition, SimpleSeed> ()
 ..signature: Seed<TPosition, SimpleSeed> (qStartPos, dStartPos, length)
@@ -46,7 +46,7 @@ between start and end position2 are stored.
 */
 
 template<typename TPosition> 
-class Seed<TPosition, MultiSeed> {
+class Seed<TPosition, ChainedSeed> {
 	
 public:
 	std::list<Triple<TPosition, TPosition, TPosition> > seedSet;
@@ -78,14 +78,14 @@ public:
 
 template<typename TPosition>
 inline TPosition 
-startDiagonal(Seed<TPosition, MultiSeed> const &seed)
+startDiagonal(Seed<TPosition, ChainedSeed> const &seed)
 {
 	return seed.seedSet.front().i2-seed.seedSet.front().i1;
 }
 
 template<typename TPosition>
 inline TPosition 
-endDiagonal(Seed<TPosition, MultiSeed> const &seed)
+endDiagonal(Seed<TPosition, ChainedSeed> const &seed)
 {
 	return seed.seedSet.back().i2-seed.seedSet.back().i1;
 }
@@ -93,7 +93,7 @@ endDiagonal(Seed<TPosition, MultiSeed> const &seed)
 
 template<typename TPosition>
 inline TPosition 
-leftDim0(Seed<TPosition, MultiSeed> const &seed)
+leftDim0(Seed<TPosition, ChainedSeed> const &seed)
 {
 	return seed.seedSet.front().i1;
 }
@@ -101,7 +101,7 @@ leftDim0(Seed<TPosition, MultiSeed> const &seed)
 
 template<typename TPosition>
 inline TPosition 
-rightDim0(Seed<TPosition, MultiSeed> const & seed)
+rightDim0(Seed<TPosition, ChainedSeed> const & seed)
 {
 	return seed.seedSet.back().i1+seed.seedSet.back().i3-1;
 }
@@ -109,14 +109,14 @@ rightDim0(Seed<TPosition, MultiSeed> const & seed)
 
 template<typename TPosition>
 inline TPosition 
-leftDim1(Seed<TPosition, MultiSeed> const &seed)
+leftDim1(Seed<TPosition, ChainedSeed> const &seed)
 {
 	return seed.seedSet.front().i2;
 }
 
 template<typename TPosition>
 inline TPosition 
-rightDim1(Seed<TPosition, MultiSeed> const & seed)
+rightDim1(Seed<TPosition, ChainedSeed> const & seed)
 {
 	return seed.seedSet.back().i2+seed.seedSet.back().i3-1;
 }
@@ -124,7 +124,7 @@ rightDim1(Seed<TPosition, MultiSeed> const & seed)
 
 template<typename TPosition>
 inline TPosition 
-length(Seed<TPosition, MultiSeed> const & seed)
+length(Seed<TPosition, ChainedSeed> const & seed)
 {
 	SEQAN_CHECKPOINT
 	return seed.seedSet.back().i1 + seed.seedSet.back().i3 - seed.seedSet.front().i1;	
@@ -134,7 +134,7 @@ length(Seed<TPosition, MultiSeed> const & seed)
 
 template<typename TPosition>
 inline void 
-setLeftDim0(Seed<TPosition, MultiSeed> &seed, 
+setLeftDim0(Seed<TPosition, ChainedSeed> &seed, 
 			  TPosition start)
 {
 	SEQAN_CHECKPOINT
@@ -147,7 +147,7 @@ setLeftDim0(Seed<TPosition, MultiSeed> &seed,
 
 template<typename TPosition>
 inline void 
-setRightDim0(Seed<TPosition,MultiSeed> & seed, 
+setRightDim0(Seed<TPosition,ChainedSeed> & seed, 
 			TPosition end)
 {
 	SEQAN_CHECKPOINT
@@ -157,7 +157,7 @@ setRightDim0(Seed<TPosition,MultiSeed> & seed,
 
 template<typename TPosition>
 inline void 
-setLeftDim1(Seed<TPosition, MultiSeed> &seed, 
+setLeftDim1(Seed<TPosition, ChainedSeed> &seed, 
 				 TPosition start)
 {
 	SEQAN_CHECKPOINT
@@ -170,7 +170,7 @@ setLeftDim1(Seed<TPosition, MultiSeed> &seed,
 
 template<typename TPosition>
 inline void 
-setRightDim1(Seed<TPosition,MultiSeed> & seed, 
+setRightDim1(Seed<TPosition,ChainedSeed> & seed, 
 			   TPosition end)
 {
 	SEQAN_CHECKPOINT
@@ -183,19 +183,19 @@ setRightDim1(Seed<TPosition,MultiSeed> & seed,
 ..cat:Seed Handling
 ..signature:setRightDim1(seed)
 ..param.seed: The seed whose end position2 should be updated.
-...type:Spec.MultiSeed
+...type:Spec.ChainedSeed
 ..returns: A reference to the list of seed diagonals.
 */
 template<typename TPosition>
 inline const std::list<Triple<TPosition, TPosition, TPosition> >&
-_getDiagSet(Seed<TPosition,MultiSeed> const & seed){
+_getDiagSet(Seed<TPosition,ChainedSeed> const & seed){
 	SEQAN_CHECKPOINT
 	return seed.seedSet;
 }
 
 template<typename TPosition>
 inline std::list<Triple<TPosition, TPosition, TPosition> >&
-_getDiagSet(Seed<TPosition,MultiSeed> & seed){
+_getDiagSet(Seed<TPosition,ChainedSeed> & seed){
 	SEQAN_CHECKPOINT
 	return seed.seedSet;
 }
@@ -206,14 +206,14 @@ _getDiagSet(Seed<TPosition,MultiSeed> & seed){
 ..cat:Seed Handling
 ..signature:appendDiag(seed, diagonal)
 ..param.seed: The seed to which the diagonal should be added.
-...type:Spec.MultiSeed
+...type:Spec.ChainedSeed
 ..param.diag: The diagonal to add.
 ...type:Class.Triple
 ...remarks: A diagonal consists of three values: 1: start in 1. sequence, 2: start in 2. sequence, 3: length of match
 */
 template<typename TPosition>
 void
-appendDiag(Seed<TPosition,MultiSeed> & seed, 
+appendDiag(Seed<TPosition,ChainedSeed> & seed, 
 		   Triple<TPosition, TPosition, TPosition> diag)
 {
 	SEQAN_CHECKPOINT
@@ -222,28 +222,28 @@ appendDiag(Seed<TPosition,MultiSeed> & seed,
 
 template<typename TPosition>
 Triple<TPosition, TPosition, TPosition>&
-_getFirstDiag(Seed<TPosition,MultiSeed> & seed){
+_getFirstDiag(Seed<TPosition,ChainedSeed> & seed){
 	SEQAN_CHECKPOINT
 	return seed.seedSet.front();
 }
 
 template<typename TPosition>
 const Triple<TPosition, TPosition, TPosition>&
-_getFirstDiag(Seed<TPosition,MultiSeed> const & seed){
+_getFirstDiag(Seed<TPosition,ChainedSeed> const & seed){
 	SEQAN_CHECKPOINT
 	return seed.seedSet.front();
 }
 
 template<typename TPosition>
 Triple<TPosition, TPosition, TPosition>&
-_getLastDiag(Seed<TPosition,MultiSeed> & seed){
+_getLastDiag(Seed<TPosition,ChainedSeed> & seed){
 	SEQAN_CHECKPOINT
 	return seed.seedSet.back();
 }
 
 template<typename TPosition>
 const Triple<TPosition, TPosition, TPosition>&
-_getLastDiag(Seed<TPosition,MultiSeed> const & seed){
+_getLastDiag(Seed<TPosition,ChainedSeed> const & seed){
 	SEQAN_CHECKPOINT
 	return seed.seedSet.back();
 }
@@ -256,7 +256,7 @@ _getLastDiag(Seed<TPosition,MultiSeed> const & seed){
 
 template<typename TPosition>
 void
-_mergeTwoSeeds(Seed<TPosition, MultiSeed> &firstSeed,
+_mergeTwoSeeds(Seed<TPosition, ChainedSeed> &firstSeed,
 			   TPosition qPos,
 			   TPosition dPos,
 			   TPosition length,
@@ -307,8 +307,8 @@ _mergeTwoSeeds(Seed<TPosition, MultiSeed> &firstSeed,
 
 template<typename TPosition>
 void
-_mergeTwoSeeds(Seed<TPosition, MultiSeed> &firstSeed, 
-			   Seed<TPosition, MultiSeed> const &secondSeed, 
+_mergeTwoSeeds(Seed<TPosition, ChainedSeed> &firstSeed, 
+			   Seed<TPosition, ChainedSeed> const &secondSeed, 
 			   Merge)
 {
 	SEQAN_CHECKPOINT
@@ -368,7 +368,7 @@ _mergeTwoSeeds(Seed<TPosition, MultiSeed> &firstSeed,
 
 template<typename TPosition, typename TPosition2, typename TPosition3, typename TGapCost>
 void
-_mergeTwoSeedsScore(Seed<TPosition, MultiSeed> &firstSeed,
+_mergeTwoSeedsScore(Seed<TPosition, ChainedSeed> &firstSeed,
 					TPosition3 &score1,
 					TPosition qPos,
 					TPosition dPos,
@@ -439,9 +439,9 @@ _mergeTwoSeedsScore(Seed<TPosition, MultiSeed> &firstSeed,
 
 template<typename TPosition, typename TPosition2, typename TPosition3, typename TGapCost>
 void
-_mergeTwoSeedsScore(Seed<TPosition, MultiSeed> &firstSeed,
+_mergeTwoSeedsScore(Seed<TPosition, ChainedSeed> &firstSeed,
 					TPosition3 &score1,
-					Seed<TPosition, MultiSeed> const &secondSeed,
+					Seed<TPosition, ChainedSeed> const &secondSeed,
 					TPosition3 score2,
 					Score<TPosition2,Simple> const &scoreMatrix,
 					TGapCost &,
@@ -511,7 +511,7 @@ _mergeTwoSeedsScore(Seed<TPosition, MultiSeed> &firstSeed,
 
 template<typename TPosition, typename TText, typename TTPosition>
 void 
-extendSeed(Seed<TPosition,MultiSeed> &seed, TPosition scoreDropOff, Score<TTPosition, Simple> const &scoreMatrix, String<TText> &query, String<TText> &database, TPosition direction, GappedXDrop){
+extendSeed(Seed<TPosition,ChainedSeed> &seed, TPosition scoreDropOff, Score<TTPosition, Simple> const &scoreMatrix, String<TText> &query, String<TText> &database, TPosition direction, GappedXDrop){
 	SEQAN_CHECKPOINT
 	TPosition gapCost = scoreGap(scoreMatrix);
 	//TPosition tmpScore = 0;
@@ -766,11 +766,11 @@ extendSeed(Seed<TPosition,MultiSeed> &seed, TPosition scoreDropOff, Score<TTPosi
 
 /**
 .Function.getAlignment:
-..summary: Constructs a alignment from a @Spec.MultiSeed@.
+..summary: Constructs a alignment from a @Spec.ChainedSeed@.
 ..cat:Seed Handling
 ..signature:getAlignment(seed, align, query, database, scoreMatrix)
 ..param.seed: The alignment foundation.
-...type:Spec.MultiSeed
+...type:Spec.ChainedSeed
 ..param.align: An emtpy alignment object, that stores the constructed alignment.
 ...type:Class.Align
 ..param.query:The Query sequence.
@@ -783,7 +783,7 @@ extendSeed(Seed<TPosition,MultiSeed> &seed, TPosition scoreDropOff, Score<TTPosi
 */
 template<typename TPosition, typename TText, typename TPosition2>
 int
-getAlignment(Seed<TPosition,MultiSeed> &seed,
+getAlignment(Seed<TPosition,ChainedSeed> &seed,
 			 Align<String<TText>, ArrayGaps> &aligned, 
 			 String<TText> &query, 
 			 String<TText> &database, 
@@ -901,7 +901,7 @@ getAlignment(Seed<TPosition,MultiSeed> &seed,
 ..cat:Seed Handling
 ..signature:scoreSeed(seed, query, database, scoreMatrix)
 ..param.seed: A seed.
-...type:Spec.MultiSeed
+...type:Spec.ChainedSeed
 ..param.query:The Query sequence.
 ...type:Class.String
 ..param.database:The database sequence.
@@ -913,7 +913,7 @@ getAlignment(Seed<TPosition,MultiSeed> &seed,
 */
 template<typename TPosition, typename TText, typename TScore>
 TScore
-scoreSeed(Seed<TPosition, MultiSeed> &seed, String<TText> &query, String<TText> &database, Score<TScore, Simple> &matrix){
+scoreSeed(Seed<TPosition, ChainedSeed> &seed, String<TText> &query, String<TText> &database, Score<TScore, Simple> &matrix){
 	SEQAN_CHECKPOINT
 	typedef typename std::list<Triple< TPosition, TPosition, TPosition> >::iterator TIterator;
 	int tmpScore =0;

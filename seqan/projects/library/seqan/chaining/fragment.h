@@ -28,103 +28,310 @@ namespace seqan
 
 
 /**
-.Class.Fragment:
-..summary:Data structure which represents an fragment
+.Spec.MultiSeed:
+..summary:Data structure which represents a seed of multiple sequences.
 ..cat:Chaining
-..signature:Fragment<TBorder, TSpec>
-..param.TBorder:Type of the class which represents the limits (multidimensional point) of an fragment.
-..param.TSpec:Specialization tag
+..cat:Seed Handling
+..general:Class.Seed
+..signature:Seed<TPosition, MultiSeed>
+..param.TPosition:Type of the class which represents the limits (multidimensional point) of a seed.
 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-//			Class Fragment implementation
+//			Class Seed implementation
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+struct MultiSeed;
 
-	template< typename TBorder, typename TSpec > inline
-	typename Size< Fragment< TBorder, TSpec > >::Type
-	dimension( Fragment< TBorder, TSpec > & me )
+template <typename TBorder>
+struct Seed <TBorder, MultiSeed>
+{
+	typedef MultiSeed TSpec;
+	typename Key< Seed< TBorder, TSpec > >::Type * _left;
+	typename Key< Seed< TBorder, TSpec > >::Type * _right;
+	typename Size< Seed< TBorder, TSpec > >::Type _dim;
+	typename Weight< Seed< TBorder, TSpec > >::Type _weight;
+
+/*
+#ifdef _SEQAN_CHAIN_DEBUG // some debugging variables to identify fragments while debugging
+	char _id;
+
+	friend inline 
+	char 
+	_getID( Seed & me )
 	{
-		return me._dim;
+		return me._id;
 	}
+
+	friend inline 
+	char 
+	_getID( const Seed & me )
+	{
+		return me._id;
+	}
+
+#endif // _SEQAN_CHAIN_DEBUG
+
+
+#ifdef _SEQAN_CHAIN_DEBUG
+	static int _frag_counter;
+#endif // _SEQAN_CHAIN_DEBUG
+*/
+
+	Seed( )
+		: _left( NULL )
+		, _right( NULL )
+		, _dim( 0 )
+		, _weight( 0 )
+	{}
+
+	Seed( typename Size< Seed< TBorder, TSpec > >::Type dim )
+		: _left( NULL )
+		, _right( NULL )
+		, _dim( dim )
+		, _weight( 0 )
+	{
+		allocate( *this, _left, _dim );
+		allocate( *this, _right, _dim );
+	}
+
+	Seed( TBorder * left,
+				TBorder * right,
+				typename Size< Seed< TBorder, TSpec > >::Type dim )
+		: _left( NULL )
+		, _right( NULL )
+		, _dim( dim )
+		, _weight( 0 )
+	{
+		allocate( *this, _left, _dim );
+		allocate( *this, _right, _dim );
+		_weight = 0;
+		for( typename Size< Seed< TBorder, TSpec > >::Type i = 0; i < dim; ++i )
+		{
+			_left[ i ] = left[ i ];
+			_right[ i ] = right[ i ];
+		}
+	}
+
+	Seed( TBorder * left,
+				TBorder * right,
+				typename Size< Seed< TBorder, TSpec > >::Type dim,
+				typename Weight< Seed< TBorder, TSpec > >::Type weight )
+		: _left( NULL )
+		, _right( NULL )
+		, _dim( dim )
+		, _weight( weight )
+	{
+		allocate( *this, _left, _dim );
+		allocate( *this, _right, _dim );
+		for( typename Size< Seed< TBorder, TSpec > >::Type i = 0; i < dim; ++i )
+		{
+			_left[ i ] = left[ i ];
+			_right[ i ] = right[ i ];
+		}
+	}
+
 	
-	template< typename TBorder, typename TSpec, typename TSize > inline 
-	TBorder 
-	leftPosition( Fragment< TBorder, TSpec >  & me, 
-					TSize dim )
+	Seed & operator=( const Seed & old )
 	{
-		return me._left[ dim ];
+		if( this == &old) 
+			return *this;
+		if( _left )
+			deallocate( *this, _left, _dim );
+		if( _right )
+			deallocate( *this, _right, _dim );
+		_dim = old._dim;
+		_weight =  old._weight;
+		allocate( *this, _left, _dim );
+		allocate( *this, _right, _dim );
+		for( typename Size< Seed< TBorder, TSpec > >::Type i = 0; i < _dim; ++i )
+		{
+			_left[ i ] = old._left[ i ];
+			_right[ i ] = old._right[ i ];
+		}			
+	#ifdef _SEQAN_CHAIN_DEBUG
+		_id = old._id;
+	#endif
+		return *this;
 	}
 
-	template< typename TBorder, typename TSpec, typename TSize > inline 
-	TBorder 
-	leftPosition( const Fragment< TBorder, TSpec >  & me, 
-					TSize dim )
+	Seed( const Seed & old )
 	{
-		return me._left[ dim ];
+		_dim = old._dim;
+		_weight =  old._weight;
+		allocate( *this, _left, _dim );
+		allocate( *this, _right, _dim );
+		for( typename Size< Seed< TBorder, TSpec > >::Type i = 0; i < _dim; ++i )
+		{
+			_left[ i ] = old._left[ i ];
+			_right[ i ] = old._right[ i ];
+		}			
+	#ifdef _SEQAN_CHAIN_DEBUG
+		_id = old._id;
+	#endif
 	}
 
-	template< typename TBorder, typename TSpec, typename TSize > inline 
-	TBorder 
-	rightPosition( Fragment< TBorder, TSpec >  & me, 
-					TSize dim )
+	~Seed()
 	{
-		return me._right[dim];
+		deallocate( *this, _left, _dim );
+		deallocate( *this, _right, _dim );
+		_dim = 0;
+		_weight = 0;
 	}
 
-	template< typename TBorder, typename TSpec, typename TSize > inline 
-	TBorder 
-	rightPosition( const Fragment< TBorder, TSpec >  & me,
-					TSize dim )
+	friend inline
+	void 
+	dump( Seed & me )
 	{
+		if( me._left != NULL )
+		{
+			std::cout << "[ ";
+			typename Size< Seed< TBorder, TSpec > >::Type dim = 0;
+			std::cout << leftPosition( me, dim );
+			++dim;
+			while( dim != me._dim )
+			{
+				std::cout << " , " << leftPosition( me, dim );
+				++dim;
+			}
+			std::cout << " ] * [ ";
+			dim = 0;
+			std::cout << rightPosition( me, dim );
+			++dim;
+			while( dim != me._dim )
+			{
+				std::cout << " , "<< rightPosition( me, dim );
+				++dim;
+			}
+			std::cout << " ] "  << weight( me ) << std::endl;
+		}
+	}
+
+	#ifdef _SEQAN_CHAIN_DEBUG
+	friend inline
+	void 
+	dump( Seed & me, std::ostream & os )
+	{
+		if( me._left != NULL )
+		{
+			typename Size< Seed< TBorder, TSpec > >::Type dim = 0;
+			os << "# " << weight( me )/10 << std::endl;
+			while( dim != me._dim )
+			{
+				os << "[" << leftPosition( me, dim ) << "," << rightPosition( me, dim ) << "]";
+				++dim;
+			}
+			os << std::endl;
+		}
+	}
+	#endif // _SEQAN_CHAIN_DEBUG
+
+};
+
+template< typename TBorder > inline
+typename Size< Seed< TBorder, MultiSeed > >::Type
+dimension( Seed< TBorder, MultiSeed > & me )
+{
+	return me._dim;
+}
+
+template< typename TBorder, typename TSize > inline 
+TBorder 
+leftPosition( Seed< TBorder, MultiSeed >  & me, 
+				TSize dim )
+{
+	return me._left[ dim ];
+}
+
+template< typename TBorder, typename TSize > inline 
+TBorder 
+leftPosition( const Seed< TBorder, MultiSeed >  & me, 
+				TSize dim )
+{
+	return me._left[ dim ];
+}
+
+template< typename TBorder, typename TSize > inline 
+TBorder 
+rightPosition( Seed< TBorder, MultiSeed >  & me, 
+				TSize dim )
+{
+	return me._right[dim];
+}
+
+template< typename TBorder, typename TSize > inline 
+TBorder 
+rightPosition( const Seed< TBorder, MultiSeed >  & me,
+				TSize dim )
+{
 SEQAN_ASSERT( me._left->size() == me._right->size() )
-		return me._right[dim];
-	}
-
-	template< typename TBorder, typename TSpec > inline 
-	typename Weight< Fragment< TBorder, TSpec > >::Type 
-	weight( Fragment< TBorder, TSpec > & me )
-	{
-		return me._weight;
-	}
-
-	template< typename TBorder, typename TSpec > inline 
-	typename Weight< Fragment< TBorder, TSpec > >::Type 
-	weight( const Fragment< TBorder, TSpec > & me )
-	{
-		return me._weight;
-	}
+	return me._right[dim];
+}
 
 
-	template< typename TBorder, typename TSpec, typename TWeight > inline 
-	typename Weight< Fragment< TBorder, TSpec > >::Type 
-	setWeight( Fragment< TBorder, TSpec > & me,
-				TWeight weight )
-	{
-		return me._weight = weight;;
-	}
 
-	template< typename TBorder, typename TSpec, typename TSize, typename TPosition > inline 
-	void 
-	_setLeftPosition( Fragment< TBorder, TSpec > & me,
-						TSize dim,
-						TPosition value )
-	{
-		SEQAN_CHECK2( dim >= 0 && dim < me._dim, "Dimension index out of bounds" );
-		me._left[ dim ] = value;
-	}
+template< typename TBorder, typename TSpec > inline 
+typename Weight< Seed< TBorder, TSpec > >::Type 
+weight( Seed< TBorder, TSpec > & me )
+{
+	return me._weight;
+}
 
-	template< typename TBorder, typename TSpec, typename TSize, typename TPosition > inline 
-	void 
-	_setRightPosition( Fragment< TBorder, TSpec > & me,
-						TSize dim, 
-						TPosition value )
-	{
-		SEQAN_CHECK2( dim >= 0 && dim < me._dim, "Dimension index out of bounds" );
-		me._right[ dim ] = value;
-	}
+template< typename TBorder, typename TSpec > inline 
+typename Weight< Seed< TBorder, TSpec > >::Type 
+weight( const Seed< TBorder, TSpec > & me )
+{
+	return me._weight;
+}
+
+
+template< typename TBorder, typename TSpec, typename TWeight > 
+inline void 
+setWeight( Seed< TBorder, TSpec > & me,
+			TWeight weight )
+{
+	me._weight = weight;
+}
+
+template< typename TBorder, typename TSpec, typename TSize, typename TPosition > 
+inline void 
+_setLeftPosition( Seed< TBorder, TSpec > & me,
+					TSize dim,
+					TPosition value )
+{
+	SEQAN_CHECK2( dim >= 0 && dim < me._dim, "Dimension index out of bounds" );
+	me._left[ dim ] = value;
+}
+template< typename TPosition, typename TSize, typename TPosition2> 
+inline void
+setLeftPosition(Seed<TPosition, MultiSeed>  & me, 
+				TSize dim,
+				TPosition2 new_pos)
+{
+	_setLeftPosition(me, dim, new_pos);
+}
+
+template< typename TBorder, typename TSpec, typename TSize, typename TPosition > 
+inline void 
+_setRightPosition( Seed< TBorder, TSpec > & me,
+					TSize dim, 
+					TPosition value )
+{
+	SEQAN_CHECK2( dim >= 0 && dim < me._dim, "Dimension index out of bounds" );
+	me._right[ dim ] = value;
+}
+template< typename TPosition, typename TSize, typename TPosition2> 
+inline void 
+setRightPosition(Seed<TPosition, MultiSeed>  & me, 
+				 TSize dim,
+				 TPosition2 new_pos)
+{
+	_setRightPosition(me, dim, new_pos);
+}
+
+
 
 
 //set a fragment to "top" position, that is the starting fragment of a global chain
@@ -173,189 +380,6 @@ makeEndFragment(TFragment & me,
 }
 
 
-	template< typename TBorder, typename TSpec >
-	struct Fragment
-	{
-		typename Key< Fragment< TBorder, TSpec > >::Type * _left;
-		typename Key< Fragment< TBorder, TSpec > >::Type * _right;
-		typename Size< Fragment< TBorder, TSpec > >::Type _dim;
-		typename Weight< Fragment< TBorder, TSpec > >::Type _weight;
-
-/*
-	#ifdef _SEQAN_CHAIN_DEBUG // some debugging variables to identify fragments while debugging
-		char _id;
-
-		friend inline 
-		char 
-		_getID( Fragment & me )
-		{
-			return me._id;
-		}
-
-		friend inline 
-		char 
-		_getID( const Fragment & me )
-		{
-			return me._id;
-		}
-
-	#endif // _SEQAN_CHAIN_DEBUG
-
-
-	#ifdef _SEQAN_CHAIN_DEBUG
-		static int _frag_counter;
-	#endif // _SEQAN_CHAIN_DEBUG
-*/
-
-		Fragment( )
-			: _left( NULL )
-			, _right( NULL )
-			, _dim( 0 )
-			, _weight( 0 )
-		{}
-
-		Fragment( typename Size< Fragment< TBorder, TSpec > >::Type dim )
-			: _left( NULL )
-			, _right( NULL )
-			, _dim( dim )
-			, _weight( 0 )
-		{
-			allocate( *this, _left, _dim );
-			allocate( *this, _right, _dim );
-		}
-
-		Fragment( TBorder * left,
-					TBorder * right,
-					typename Size< Fragment< TBorder, TSpec > >::Type dim )
-			: _left( NULL )
-			, _right( NULL )
-			, _dim( dim )
-			, _weight( 0 )
-		{
-			allocate( *this, _left, _dim );
-			allocate( *this, _right, _dim );
-			_weight = 0;
-			for( typename Size< Fragment< TBorder, TSpec > >::Type i = 0; i < dim; ++i )
-			{
-				_left[ i ] = left[ i ];
-				_right[ i ] = right[ i ];
-			}
-		}
-
-		Fragment( TBorder * left,
-					TBorder * right,
-					typename Size< Fragment< TBorder, TSpec > >::Type dim,
-					typename Weight< Fragment< TBorder, TSpec > >::Type weight )
-			: _left( NULL )
-			, _right( NULL )
-			, _dim( dim )
-			, _weight( weight )
-		{
-			allocate( *this, _left, _dim );
-			allocate( *this, _right, _dim );
-			for( typename Size< Fragment< TBorder, TSpec > >::Type i = 0; i < dim; ++i )
-			{
-				_left[ i ] = left[ i ];
-				_right[ i ] = right[ i ];
-			}
-		}
-
-		
-		Fragment & operator=( const Fragment & old )
-		{
-			if( this == &old) 
-				return *this;
-			if( _left )
-				deallocate( *this, _left, _dim );
-			if( _right )
-				deallocate( *this, _right, _dim );
-			_dim = old._dim;
-			_weight =  old._weight;
-			allocate( *this, _left, _dim );
-			allocate( *this, _right, _dim );
-			for( typename Size< Fragment< TBorder, TSpec > >::Type i = 0; i < _dim; ++i )
-			{
-				_left[ i ] = old._left[ i ];
-				_right[ i ] = old._right[ i ];
-			}			
-		#ifdef _SEQAN_CHAIN_DEBUG
-			_id = old._id;
-		#endif
-			return *this;
-		}
-
-		Fragment( const Fragment & old )
-		{
-			_dim = old._dim;
-			_weight =  old._weight;
-			allocate( *this, _left, _dim );
-			allocate( *this, _right, _dim );
-			for( typename Size< Fragment< TBorder, TSpec > >::Type i = 0; i < _dim; ++i )
-			{
-				_left[ i ] = old._left[ i ];
-				_right[ i ] = old._right[ i ];
-			}			
-		#ifdef _SEQAN_CHAIN_DEBUG
-			_id = old._id;
-		#endif
-		}
-
-		~Fragment()
-		{
-			deallocate( *this, _left, _dim );
-			deallocate( *this, _right, _dim );
-			_dim = 0;
-			_weight = 0;
-		}
-
-		friend inline
-		void 
-		dump( Fragment & me )
-		{
-			if( me._left != NULL )
-			{
-				std::cout << "[ ";
-				typename Size< Fragment< TBorder, TSpec > >::Type dim = 0;
-				std::cout << leftPosition( me, dim );
-				++dim;
-				while( dim != me._dim )
-				{
-					std::cout << " , " << leftPosition( me, dim );
-					++dim;
-				}
-				std::cout << " ] * [ ";
-				dim = 0;
-				std::cout << rightPosition( me, dim );
-				++dim;
-				while( dim != me._dim )
-				{
-					std::cout << " , "<< rightPosition( me, dim );
-					++dim;
-				}
-				std::cout << " ] "  << weight( me ) << std::endl;
-			}
-		}
-
-		#ifdef _SEQAN_CHAIN_DEBUG
-		friend inline
-		void 
-		dump( Fragment & me, std::ostream & os )
-		{
-			if( me._left != NULL )
-			{
-				typename Size< Fragment< TBorder, TSpec > >::Type dim = 0;
-				os << "# " << weight( me )/10 << std::endl;
-				while( dim != me._dim )
-				{
-					os << "[" << leftPosition( me, dim ) << "," << rightPosition( me, dim ) << "]";
-					++dim;
-				}
-				os << std::endl;
-			}
-		}
-		#endif // _SEQAN_CHAIN_DEBUG
-
-	};
 
 
 } // namespace seqan
