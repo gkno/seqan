@@ -101,18 +101,18 @@ void testChainer(int count,
 				 int dim,
 				 TScoring scoring)
 {
-	String< Fragment<int> > fragments;
+	String< Seed<int, MultiSeed> > fragments;
 	reserve(fragments, count);
 	
 	_generateRandomFrags(fragments, count, 1, 3 * count, 10, 20, dim);
 //_showChain(fragments, scoring);
 
-	String< Fragment<int> > ch;
+	String< Seed<int, MultiSeed> > ch;
 	reserve(ch, count+2);
 
 
 	//build chain
-	int chain_score = chain(fragments, ch, scoring);
+	int chain_score = globalChaining(fragments, ch, scoring);
 std::cout << chain_score << "\n";
 //_showChain(ch, scoring);
 
@@ -128,7 +128,7 @@ std::cout << chain_score << "\n";
 	SEQAN_TASSERT(sum == chain_score)
 
 	//build generic chain
-	int chain_score2 = chain(fragments, ch, scoring, GenericChaining());
+	int chain_score2 = globalChaining(fragments, ch, scoring, GenericChaining());
 std::cout << chain_score2 << "\n";
 //_showChain(ch, scoring);
 

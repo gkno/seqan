@@ -343,7 +343,7 @@ void Test_approximationAlgorithms()
 	//check whether found motif is really an OOPS motif
 	SEQAN_TASSERT(isOOPSMotif(begin(dataset1),
 				  end(dataset1),
-				  motif_finder1.consensus_pattern,
+				  getMotif(motif_finder1,0),
 				  d,
 				  is_exact)==true);
 
@@ -374,8 +374,9 @@ void Test_approximationAlgorithms()
 	//check whether found motif is really an OMOPS motif
 	SEQAN_TASSERT(isOMOPSMotif(begin(dataset1),
 				  end(dataset1),
-				  motif_finder3.consensus_pattern,
+				  getMotif(motif_finder3, 0),
 				  d,
+				  
 				  is_exact)==true);
 
 //____________________________________________________________________________
@@ -403,7 +404,7 @@ void Test_approximationAlgorithms()
 	//check whether found motif is really a ZOOPS motif
 	SEQAN_TASSERT(isZOOPSMotif(begin(dataset1),
 				  end(dataset1),
-				  motif_finder5.consensus_pattern,
+				  getMotif(motif_finder5, 0),
 				  d,
 				  is_exact)==true);
 
@@ -419,7 +420,7 @@ void Test_approximationAlgorithms()
 	//check whether found motif is really a TCM motif
 	SEQAN_TASSERT(isTCMMotif(begin(dataset1),
 				  end(dataset1),
-				  motif_finder6.consensus_pattern,
+				  getMotif(motif_finder6),
 				  d,
 				  is_exact)==true);
 }

@@ -166,6 +166,36 @@ void testLocalAlign(){
 }
 
 
+void testLocalAlign2()
+{
+
+//new interface
+
+	String<char> str0 = "ataagcgtctcg";
+	String<char> str1 = "tcatagagttgc";
+	
+	Align< String<char>, ArrayGaps> ali;
+	resize(rows(ali), 2);
+	setSource(row(ali, 0), str0);
+	setSource(row(ali, 1), str1);
+
+	Score<int> score_type = Score<int>(2,-1,-2,0) ;
+	LocalAlignmentFinder<int> sw_finder = LocalAlignmentFinder<int>(ali);
+	
+	int score = localAlignment(ali, sw_finder, score_type, 4);
+	SEQAN_TASSERT(score == 9);
+	SEQAN_TASSERT(row(ali,0) == "ataagcgt");
+	SEQAN_TASSERT(row(ali,1) == "ata-gagt");
+	
+	score = localAlignment(ali, sw_finder, score_type, 4);
+	SEQAN_TASSERT(score == 5);
+	SEQAN_TASSERT(row(ali,0) == "tc-tcg");
+	SEQAN_TASSERT(row(ali,1) == "tcatag");
+
+	score = localAlignment(ali, sw_finder, score_type, 4, SmithWaterman());
+	SEQAN_TASSERT(score == 0);
+}
+
 
 
 void Main_TestLocalAlign() 
@@ -174,6 +204,7 @@ void Main_TestLocalAlign()
 	SEQAN_TREPORT("TEST LOCAL ALIGN BEGIN")
 
 	testLocalAlign();
+	testLocalAlign2();
 
 
 

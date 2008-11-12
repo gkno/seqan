@@ -152,8 +152,8 @@ void Test_MultiSeeds(){
 
 //____________________________________________________________________________
 // Standard Functions
-	Seed<int,MultiSeed> seed;
-	Seed<int, MultiSeed> seed1(4,5,7);
+	Seed<int,ChainedSeed> seed;
+	Seed<int, ChainedSeed> seed1(4,5,7);
 	SEQAN_TASSERT(startDiagonal(seed1)==1);
 	SEQAN_TASSERT(endDiagonal(seed1)==1);
 	SEQAN_TASSERT(leftDim0(seed1)==4);
@@ -165,12 +165,12 @@ void Test_MultiSeeds(){
 	SEQAN_TASSERT(length(seed1) == 7);
 	SEQAN_TASSERT(_getFirstDiag(seed1).i2 == 5);
 
-	Seed<int, MultiSeed> const seed132(4,5,7);
+	Seed<int, ChainedSeed> const seed132(4,5,7);
 	SEQAN_TASSERT(_getLastDiag(seed132).i1 == 4);
 
 
 	
-	Seed<int,MultiSeed> seed2(0,0,0);
+	Seed<int,ChainedSeed> seed2(0,0,0);
 	setLeftDim0(seed2,3);
 	setRightDim0(seed2,9);
 	setLeftDim1(seed2,2);
@@ -186,8 +186,8 @@ void Test_MultiSeeds(){
 
 //____________________________________________________________________________
 // Merge Algorithms
-	Seed<int, MultiSeed> seed3(0,0,7);
-	Seed<int, MultiSeed> seed4(4,5,7);
+	Seed<int, ChainedSeed> seed3(0,0,7);
+	Seed<int, ChainedSeed> seed4(4,5,7);
 	_mergeTwoSeeds(seed3,seed4,Merge());
 	SEQAN_TASSERT(startDiagonal(seed3)==0);
 	SEQAN_TASSERT(endDiagonal(seed3)==1);
@@ -202,7 +202,7 @@ void Test_MultiSeeds(){
 	SEQAN_TASSERT(length(seed3) == 11);
 
 	
-	Seed<int, MultiSeed> seed5(0,0,7);
+	Seed<int, ChainedSeed> seed5(0,0,7);
 	_mergeTwoSeeds(seed5,4,5,7,Merge());
 	SEQAN_TASSERT(startDiagonal(seed5)==0);
 	SEQAN_TASSERT(endDiagonal(seed5)==1);
@@ -219,11 +219,11 @@ void Test_MultiSeeds(){
 
 	Score<int,Simple> matrix(2,-1,-1);
 
-    Seed<int, MultiSeed> seed10(0,0,7);
+    Seed<int, ChainedSeed> seed10(0,0,7);
 	int score10 = 14;
-	Seed<int, MultiSeed> seed11(0,0,7);
+	Seed<int, ChainedSeed> seed11(0,0,7);
 	int score11 = 14;
-	Seed<int, MultiSeed> seed12(4,5,7);
+	Seed<int, ChainedSeed> seed12(4,5,7);
 	int score12 = 14;
 
 
@@ -243,21 +243,21 @@ void Test_MultiSeeds(){
 
 	String<Dna> query =	   "AAACCCTTTGGGTTTTT";
 	String<Dna> database = "AACCCCTTTGGTGAAAAA";
-	Seed<int, MultiSeed> seed7(4,4,3);
+	Seed<int, ChainedSeed> seed7(4,4,3);
 	extendSeed(seed7, query, database, 2, MatchExtend());
 	SEQAN_TASSERT(leftDim0(seed7)==3);
 	SEQAN_TASSERT(rightDim0(seed7)==10);
 	SEQAN_TASSERT(leftDim1(seed7)==3);
 	SEQAN_TASSERT(rightDim1(seed7)==10);
 
-	Seed<int, MultiSeed> seed8(4,4,3);
+	Seed<int, ChainedSeed> seed8(4,4,3);
 	extendSeed(seed8, 2, matrix, query, database, 2, UngappedXDrop());
 	SEQAN_TASSERT(leftDim0(seed8)==0);
 	SEQAN_TASSERT(rightDim0(seed8)==10);
 	SEQAN_TASSERT(leftDim1(seed8)==0);
 	SEQAN_TASSERT(rightDim1(seed8)==10);
 
-	Seed<int, MultiSeed> seed9(4,4,3);
+	Seed<int, ChainedSeed> seed9(4,4,3);
 	extendSeed(seed9, 1, matrix, query, database, 2, GappedXDrop());
 	SEQAN_TASSERT(leftDim0(seed9)==0);
 	SEQAN_TASSERT(rightDim0(seed9)==12);

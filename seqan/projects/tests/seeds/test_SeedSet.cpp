@@ -14,9 +14,9 @@ using namespace seqan;
 void Test_SeedSet_base()
 {
 	SeedSet<int,SimpleSeed, DefaultNoScore> set1;
-	SeedSet<int,MultiSeed, DefaultNoScore> set2;
+	SeedSet<int,ChainedSeed, DefaultNoScore> set2;
 	SeedSet<int,SimpleSeed, DefaultNoScore> set3(100,0);
-	SeedSet<int,MultiSeed, DefaultNoScore> set4(100,0);
+	SeedSet<int,ChainedSeed, DefaultNoScore> set4(100,0);
 
 	SEQAN_TASSERT(qualityValue(set3)==0);
 	SEQAN_TASSERT(maximumDistance(set3)==100);
@@ -42,17 +42,17 @@ void Test_SeedSet_base()
 	addSeed(set6,15,15,18,18,Single());
 	SEQAN_TASSERT(length(set6)==2);	
 
-	Seed<int,MultiSeed> seed3(0,0,7);
-	SeedSet<int,MultiSeed, DefaultNoScore, void> set7(100,0);
+	Seed<int,ChainedSeed> seed3(0,0,7);
+	SeedSet<int,ChainedSeed, DefaultNoScore, void> set7(100,0);
 	addSeed(set7,seed3,Single());
 	SEQAN_TASSERT(length(set7)==1);	
 	
-	SeedSet<int,MultiSeed, DefaultNoScore, void> set8(100,0);
+	SeedSet<int,ChainedSeed, DefaultNoScore, void> set8(100,0);
 	addSeedsIt(set8,begin(set7),end(set7),Single());
 	addSeed(set8,15,15,6,Single());
 	SEQAN_TASSERT(length(set8)==2);
 
-	SeedSet<int,MultiSeed, DefaultNoScore, void> set9(100,0);
+	SeedSet<int,ChainedSeed, DefaultNoScore, void> set9(100,0);
 	addSeeds(set9, begin(set8), end(set8), 5, SimpleChain());
 	SEQAN_TASSERT(length(set9)==1);
 
@@ -67,7 +67,7 @@ void Test_SeedSet_base()
 	SEQAN_TASSERT(length(*begin(set9)) == 21);
 	
 
-	SeedSet<int,MultiSeed, DefaultNoScore, void> set10(100,0);
+	SeedSet<int,ChainedSeed, DefaultNoScore, void> set10(100,0);
 	addSeed(set10,27,28,6,Single());
 	Score<int,Simple> matrix(2,-1,-1);
 	String<Dna> query =		"AAAAAAAAAAAAAAAAAAAAAACATCGCTTACGCTAT";
@@ -85,10 +85,10 @@ void Test_SeedSet_base()
 	SEQAN_TASSERT(rightDiagonal(*begin(set9))==0);
 	SEQAN_TASSERT(length(*begin(set9)) == 33);
 
-	SeedSet<int,MultiSeed, DefaultNoScore, void> set11(100,0);
+	SeedSet<int,ChainedSeed, DefaultNoScore, void> set11(100,0);
 	addSeed(set11,0,0,3,Single());
 
-	SeedSet<int,MultiSeed, DefaultNoScore, void> set12(100,0);
+	SeedSet<int,ChainedSeed, DefaultNoScore, void> set12(100,0);
 	addSeed(set12,15,15,3,Single());
 				//0123456789012345678
 	query	 =	 "AAATTTGTTTTGTTTAAA";
@@ -143,7 +143,7 @@ void Test_SeedSet_base()
 
 	clear(set11);
 	addSeed(set11,0,0,7,Single());
-	addSeed(set11, Seed<int,MultiSeed>(4,5,7), 4, Merge());
+	addSeed(set11, Seed<int,ChainedSeed>(4,5,7), 4, Merge());
 	SEQAN_TASSERT(length(set11)==1);
 	SEQAN_TASSERT(rightDim0(*begin(set11))==10);
 	SEQAN_TASSERT(leftDim0(*begin(set11))==0);
@@ -212,7 +212,7 @@ void Test_SeedSet_base()
 	SEQAN_TASSERT(rightDim0(*begin(set11))==10);
 	SEQAN_TASSERT(leftDim0(*begin(set11))==0);
 
-	SeedSet<int,MultiSeed, DefaultNoScore, void> set15(100,0);
+	SeedSet<int,ChainedSeed, DefaultNoScore, void> set15(100,0);
 	addSeed(set15,5,5,3,Single());
 	extendSeeds(begin(set15), end(set15), 1, matrix, query, database, 2, UngappedXDrop());
 	SEQAN_TASSERT(rightDim0(*begin(set15))==10);
@@ -226,11 +226,11 @@ void Test_SeedSet_seedScore()
 	SeedSet<int,SimpleSeed,DefaultScore, void> set1;
 	setScoreMatrix(set1,matrix);
 	matrix = getScoreMatrix(set1);
-	SeedSet<int,MultiSeed,DefaultScore, void> set2;
+	SeedSet<int,ChainedSeed,DefaultScore, void> set2;
 	SeedSet<int,SimpleSeed,DefaultScore, void> set3(100,0,matrix);
-	SeedSet<int,MultiSeed,DefaultScore, void> set4(100,0,matrix);
+	SeedSet<int,ChainedSeed,DefaultScore, void> set4(100,0,matrix);
 	
-	Iterator<SeedSet<int,MultiSeed,DefaultScore, void>, Standard>::Type it_multi;
+	Iterator<SeedSet<int,ChainedSeed,DefaultScore, void>, Standard>::Type it_multi;
 	Iterator<SeedSet<int,SimpleSeed,DefaultScore, void>, Standard>::Type it_simple;
 	SEQAN_TASSERT(qualityValue(set3)==0);
 	SEQAN_TASSERT(maximumDistance(set3)==100);
@@ -271,13 +271,13 @@ void Test_SeedSet_seedScore()
 
 	clear(set6);
 
-	Seed<int,MultiSeed> seed3(0,0,7);
-	SeedSet<int,MultiSeed,DefaultScore, void> set7(100,0,matrix);
+	Seed<int,ChainedSeed> seed3(0,0,7);
+	SeedSet<int,ChainedSeed,DefaultScore, void> set7(100,0,matrix);
 	addSeed(set7,seed3,7,Single());
 	SEQAN_TASSERT(length(set7)==1);	
 	SEQAN_TASSERT(seedScore(begin(set7))==7);
 	
-	SeedSet<int,MultiSeed,DefaultScore, void> set8(100,0,matrix);
+	SeedSet<int,ChainedSeed,DefaultScore, void> set8(100,0,matrix);
 	addSeeds(set8,begin(set7),end(set7), begin(seedScores), Single());
 	addSeed(set8,10,10,6,7,Single());
 	SEQAN_TASSERT(length(set8)==2);
@@ -297,7 +297,7 @@ void Test_SeedSet_seedScore()
         SEQAN_TASSERT(seedScore(++it_multi)==7);
 	SEQAN_TASSERT(rightDim0(*it_multi)==15);
 
-	SeedSet<int,MultiSeed,DefaultScore, void> set9(100,0,matrix);
+	SeedSet<int,ChainedSeed,DefaultScore, void> set9(100,0,matrix);
 	addSeeds(set9, begin(set8), end(set8), begin(seedScores), 5, SimpleChain());
 	SEQAN_TASSERT(length(set9)==1);
 	SEQAN_TASSERT(seedScore(begin(set9))==3);
@@ -312,7 +312,7 @@ void Test_SeedSet_seedScore()
 	SEQAN_TASSERT(rightDiagonal(*begin(set9))==0);
 	SEQAN_TASSERT(length(*begin(set9)) == 16);
 	
-	SeedSet<int,MultiSeed,DefaultScore, void> set10(100,0,matrix);
+	SeedSet<int,ChainedSeed,DefaultScore, void> set10(100,0,matrix);
 	addSeed(set10,27,28,6,5,Single());
 	
 			       //0123456789012345678901234567890123456
@@ -332,10 +332,10 @@ void Test_SeedSet_seedScore()
 	SEQAN_TASSERT(rightDiagonal(*begin(set9))==0);
 	SEQAN_TASSERT(length(*begin(set9)) == 33);
 
-	SeedSet<int,MultiSeed,DefaultScore, void> set11(100,0,matrix);
+	SeedSet<int,ChainedSeed,DefaultScore, void> set11(100,0,matrix);
 	addSeed(set11,0,0,3,5,Single());
 
-	SeedSet<int,MultiSeed,DefaultScore, void> set12(100,0,matrix);
+	SeedSet<int,ChainedSeed,DefaultScore, void> set12(100,0,matrix);
 	addSeed(set12,15,15,3,5,Single());
 
 	SeedSet<int,SimpleSeed,DefaultScore, void> set11a(100,0,matrix);
@@ -352,8 +352,8 @@ void Test_SeedSet_seedScore()
 
 	SEQAN_TASSERT(seedScore(begin(set11))==25);
 
-	String<Seed<int,MultiSeed> > seedString;
-	appendValue(seedString,Seed<int, MultiSeed>(15,15,3));
+	String<Seed<int,ChainedSeed> > seedString;
+	appendValue(seedString,Seed<int, ChainedSeed>(15,15,3));
 
 	clear(set11);
 	SEQAN_TASSERT(length(set11)==0);
@@ -490,7 +490,7 @@ void Test_SeedSet_seedScore()
 	clear(set11);
 	addSeed(set11,0,0,7,14,Single());
 	addSeed(set11,4,5,7,14,2,Merge());
-	addSeed(set11, Seed<int,MultiSeed>(3,4,10), 20, 5,Merge());
+	addSeed(set11, Seed<int,ChainedSeed>(3,4,10), 20, 5,Merge());
 	SEQAN_TASSERT(length(set11)==1);
         it_multi = begin(set11);
 	//SEQAN_TASSERT(rightDim0(*++it_multi)==12);
@@ -501,7 +501,7 @@ void Test_SeedSet_seedScore()
 	clear(set11);
 	addSeed(set11,0,0,7,Single());
 	addSeed(set11,4,5,7,2,Merge());
-	addSeed(set11, Seed<int,MultiSeed>(3,4,10), 20, 5,Merge());
+	addSeed(set11, Seed<int,ChainedSeed>(3,4,10), 20, 5,Merge());
 	SEQAN_TASSERT(length(set11)==1);
         it_multi =begin(set11);
 	SEQAN_TASSERT(leftDim0(*it_multi)==0);
@@ -611,7 +611,7 @@ void Test_SeedSet_seedScore()
 	SEQAN_TASSERT(seedScores[0]==20);
 
 	seedScores[0] = 5;
-	SeedSet<int,MultiSeed,DefaultScore, void> setSimple3(100,0,matrix);
+	SeedSet<int,ChainedSeed,DefaultScore, void> setSimple3(100,0,matrix);
 	addSeed(setSimple3,5,5,3,5,Single());
 	extendSeedsScore(begin(setSimple3), end(setSimple3), begin(seedScores), 1, matrix, query, database, 2, GappedXDrop());
 	SEQAN_TASSERT(seedScores[0]==20);
