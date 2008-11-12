@@ -757,7 +757,7 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 	SEQAN_CHECKPOINT
 		typedef typename Iterator<TText const, Standard>::Type	TIterator;
 		typedef typename Value<TDir>::Type						TSize;
-		typedef typename Host<TShape>::Type						THash;
+		typedef typename Value<TShape>::Type					THash;
 
 		TSize num_qgrams = length(text) - length(shape) + 1;
 		TIterator itText = begin(text, Standard());
@@ -799,7 +799,7 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 	SEQAN_CHECKPOINT
 		typedef typename Iterator<TString const, Standard>::Type	TIterator;
 		typedef typename Value<TDir>::Type							TSize;
-		typedef typename Host<TShape>::Type							THash;
+		typedef typename Value<TShape>::Type						THash;
 
 		for(unsigned seqNo = 0; seqNo < length(stringSet); ++seqNo) 
 		{

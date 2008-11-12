@@ -103,13 +103,13 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 		return val == 'N';
 	}
-
+/*
 	template <>
 	inline bool _repeatMaskValue(AminoAcid val) 
 	{
 		return val == 'X';
 	}
-
+*/
 	// period-1 optimization
 	template <typename TRepeatStore, typename TString, typename TRepeatSize>
 	inline void findRepeats(TRepeatStore &repString, TString const &text, TRepeatSize minRepeatLen) 
