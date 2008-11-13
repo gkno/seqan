@@ -1076,6 +1076,7 @@ void Test_Combinatoric()
 	Test_Assignments_Combinatoric(str1, str6, Limit());
 
 	char str7[800] = "hello again";
+	reserve(str1, 10000);
 	Test_Assignments_Combinatoric(str1, str7, Insist());
 	Test_Assignments_Combinatoric(str7, str4, Insist());
 	Test_Assignments_Combinatoric(str7, str7, Insist());
@@ -1098,7 +1099,6 @@ void Test_Combinatoric()
 	SEQAN_TASSERT(infix(str7, 0, 6) == "begin ")
 
 	Test_Assignments_Combinatoric(infix_1, str1, Insist(), 10);
-
 	str4 = "begin middle end";
 	Infix<String<char> >::Type infix_2(str4, 6, 12);
 	SEQAN_TASSERT(infix_2 == "middle");
