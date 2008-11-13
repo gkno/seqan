@@ -927,7 +927,7 @@ computeGenerousCapacity(T const & /*me*/,
 						 TSize capacity)
 {
 SEQAN_CHECKPOINT
-	if (capacity <= 32) return 32;
+	if (capacity < 32) return 32;		// returned value is implicitly >= capacity + 1
 	return capacity + (capacity >> 1);
 }
 
