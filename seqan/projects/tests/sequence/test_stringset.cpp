@@ -126,7 +126,6 @@ void Test_StringSetIdHolder() {
 	SEQAN_TASSERT(getValueById(str, id3) == "d")
 	removeValueById(str,id1);
 	SEQAN_TASSERT(getValueById(str, id0) == "a")
-	String<char> ssss(getValueById(str, id2));
 	SEQAN_TASSERT(getValueById(str, id2) == "c")
 	SEQAN_TASSERT(getValueById(str, id3) == "d")
 	SEQAN_TASSERT(length(str) == 3)
@@ -134,48 +133,37 @@ void Test_StringSetIdHolder() {
 	SEQAN_TASSERT(getValueById(str, id0) == "a")
 	SEQAN_TASSERT(getValueById(str, id3) == "d")
 	SEQAN_TASSERT(length(str) == 2)
+	String<char> bla4("e");
+	TId id4 = assignValueById(str, bla4, 100);
+	SEQAN_TASSERT(id4 == 100)
+	SEQAN_TASSERT(getValueById(str, id4) == "e")
+	SEQAN_TASSERT(getValueById(str, id0) == "a")
+	SEQAN_TASSERT(getValueById(str, id3) == "d")
 	removeValueById(str,id3);
 	SEQAN_TASSERT(getValueById(str, id0) == "a")
-	SEQAN_TASSERT(length(str) == 1)
+	SEQAN_TASSERT(getValueById(str, id4) == "e")
+	SEQAN_TASSERT(length(str) == 2)
+	String<char> bla5("f");
+	TId id5 = assignValueById(str, bla5); 
+	SEQAN_TASSERT(getValueById(str, id0) == "a")
+	SEQAN_TASSERT(getValueById(str, id4) == "e")
+	SEQAN_TASSERT(getValueById(str, id5) == "f")
+	assignValueById(str, bla5, id4); 
+	SEQAN_TASSERT(getValueById(str, id0) == "a")
+	SEQAN_TASSERT(getValueById(str, id4) == "f")
+	SEQAN_TASSERT(getValueById(str, id5) == "f")
+	removeValueById(str,id4);
+	SEQAN_TASSERT(getValueById(str, id0) == "a")
+	SEQAN_TASSERT(getValueById(str, id5) == "f")
+	SEQAN_TASSERT(length(str) == 2)
+	clear(str);
 	id1 = assignValueById(str, bla1);
 	id2 = assignValueById(str, bla2);
 	id3 = assignValueById(str, bla3);	
-	SEQAN_TASSERT(getValueById(str, id0) == "a")
 	SEQAN_TASSERT(getValueById(str, id1) == "b")
 	SEQAN_TASSERT(getValueById(str, id2) == "c")
 	SEQAN_TASSERT(getValueById(str, id3) == "d")
-	SEQAN_TASSERT(length(str) == 4)
-	TStringSet subSet;
-	String<unsigned int> ids;
-	appendValue(ids, id1);
-	appendValue(ids, id3);
-	subset(str, subSet, ids);
-	SEQAN_TASSERT(getValueById(subSet, id1) == "b")
-	SEQAN_TASSERT(getValueById(subSet, id3) == "d")
-	SEQAN_TASSERT(subSet[0] == "b")
-	SEQAN_TASSERT(subSet[1] == "d")
-	SEQAN_TASSERT(length(subSet) == 2)
-	TStringSet subSet2;
-	String<unsigned int> ids2;
-	appendValue(ids2, id3);
-	subset(subSet, subSet2, ids2);
-	SEQAN_TASSERT(getValueById(subSet2, id3) == "d")
-	SEQAN_TASSERT(length(subSet2) == 1)
-	clear(subSet);
-	assignValueById(subSet,subSet2, id3);
-	SEQAN_TASSERT(idToPosition(subSet, id3) == 0)
-	SEQAN_TASSERT(positionToId(subSet, 0) == id3)
-	assignValueById(subSet,str, id0);
-	SEQAN_TASSERT(valueById(subSet, id0) == "a")
-	SEQAN_TASSERT(valueById(subSet, id3) == "d")
-	SEQAN_TASSERT(length(subSet) == 2)
-	String<char> bla5("f");
-	assignValueById(subSet, bla5, id3);
-	SEQAN_TASSERT(getValueById(subSet, id3) == "f")
-	SEQAN_TASSERT(length(subSet) == 2)
-	assignValueById(subSet, bla3, 20);
-	SEQAN_TASSERT(getValueById(subSet, 20) == "d")
-	SEQAN_TASSERT(length(subSet) == 3)
+	SEQAN_TASSERT(length(str) == 3)
 }
 
 //____________________________________________________________________________

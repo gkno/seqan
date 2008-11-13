@@ -673,6 +673,7 @@ a single integer value between 0 and the sum of string lengths minus 1.
 			typedef typename Concatenator<StringSet>::Type		TConcatenator;
 	//____________________________________________________________________________
 
+			TIdType			lastId;
 			TStrings		strings;
 			TIds			ids;
 			TIdPosMap		id_pos_map;
@@ -682,7 +683,7 @@ a single integer value between 0 and the sum of string lengths minus 1.
 	//____________________________________________________________________________
 
 			StringSet():
-				limitsValid(true)
+				lastId(0), limitsValid(true)
 			{
 			SEQAN_CHECKPOINT
 				appendValue(limits, 0);
@@ -691,7 +692,7 @@ a single integer value between 0 and the sum of string lengths minus 1.
 
 			template <typename TDefault>
 			StringSet(StringSet<TString, Owner<TDefault> > const& _other) :
-				limitsValid(true)
+				lastId(0), limitsValid(true)
 			{
 				SEQAN_CHECKPOINT
 				appendValue(limits, 0);
@@ -1106,9 +1107,9 @@ a single integer value between 0 and the sum of string lengths minus 1.
 		SEQAN_CHECKPOINT
 		typedef typename Position<StringSet<TString, Dependent<Tight> > >::Type TPos;
 		appendValue(me.strings, const_cast<TString*>(&obj));
-		TPos last = length(me.strings) - 1;
+		TPos last = me.lastId++;
 		appendValue(me.ids, last);
-		me.id_pos_map.insert(std::make_pair(last, last));
+		me.id_pos_map.insert(std::make_pair(last, length(me.strings) - 1));
         appendValue(me.limits, lengthSum(me) + length(obj));
 	}
   
@@ -1159,6 +1160,7 @@ a single integer value between 0 and the sum of string lengths minus 1.
 		me.limitsValid = true;
 
 		clear(me.ids);
+		me.lastId = 0;
 	}
 
 ///.Function.length.param.object.type:Class.StringSet
@@ -1301,21 +1303,15 @@ end(StringSet< TString, TSpec > const & me,
 	inline typename Reference<StringSet< TString, Dependent<Tight> > >::Type
 	value(StringSet< TString, Dependent<Tight> >& me, TPos pos)
 	{
-	SEQAN_CHECKPOINT
-		if (me.strings[pos])
-			return *me.strings[pos];
-		static TString tmp = "";
-		return tmp;
+		SEQAN_CHECKPOINT
+		return *me.strings[pos];
 	}
 
 	template < typename TString, typename TPos >
 	inline typename Reference<StringSet< TString, Dependent<Tight> > const >::Type
 	value(StringSet< TString, Dependent<Tight> >const & me, TPos pos)
 	{
-		if (me.strings[pos])
-			return *me.strings[pos];
-		static TString tmp = "";
-		return tmp;
+		return *me.strings[pos];
 	}
 
 	// Generous
@@ -1390,13 +1386,6 @@ end(StringSet< TString, TSpec > const & me,
 	{
 	SEQAN_CHECKPOINT
 		return (value(me, me.id_pos_map.find(id)->second));
-		/*
-		for(unsigned i = 0; i < length(me.strings); ++i)
-			if ((TId) me.ids[i] == id)
-				return value(me, i);
-		static TString tmp = "";
-		return tmp;
-		*/
 	}
 
 
@@ -1461,6 +1450,18 @@ end(StringSet< TString, TSpec > const & me,
 		return length(me.strings) - 1;
 	}
 
+	template<typename TString, typename TString2>
+	inline typename Id<StringSet<TString, Dependent<Tight> > >::Type 
+	assignValueById(StringSet<TString, Dependent<Tight> >& me,
+					TString2& obj) 
+	{
+	SEQAN_CHECKPOINT
+		appendValue(me, obj);
+		SEQAN_ASSERT(length(me.limits) == length(me) + 1);
+		return positionToId(me, length(me.strings) - 1);
+	}
+
+
 	template <typename TString, typename TSpec, typename TId>
 	inline typename Id<StringSet<TString, Owner<TSpec> > >::Type 
 	assignValueById(StringSet<TString, Owner<TSpec> >& me, 
@@ -1496,16 +1497,19 @@ end(StringSet< TString, TSpec > const & me,
 
 	//////////////////////////////////////////////////////////////////////////////
 
-	template<typename TString, typename TId>
+	template<typename TString, typename TId1>
 	inline typename Id<StringSet<TString, Dependent<Tight> > >::Type 
 	assignValueById(StringSet<TString, Dependent<Tight> >& me, 
 					TString& obj,
-					TId id) 
+					TId1 id) 
 	{
 	SEQAN_CHECKPOINT
 		typedef StringSet<TString, Dependent<Tight> > TStringSet;
 		typedef typename TStringSet::TIdPosMap::const_iterator TIter;
 		typedef typename Size<TStringSet>::Type TSize;
+		typedef typename Id<TStringSet>::Type TId;
+
+		if (me.lastId < (TId) id) me.lastId = (TId) (id + 1);
 		
 		TIter pos = me.id_pos_map.find(id);
 		if (pos != me.id_pos_map.end()) {
@@ -1518,18 +1522,6 @@ end(StringSet< TString, TSpec > const & me,
 		me.id_pos_map.insert(std::make_pair(id, length(me.strings) - 1));
         appendValue(me.limits, lengthSum(me) + length(obj));
 		return id;
-		
-		/*
-		for(TSize i = 0; i < length(me.ids); ++i)
-			if ((TId) me.ids[i] == id) {
-				me.strings[i] = &obj;
-				me.limitsValid = false;
-				return id;
-			}
-		appendValue(me.strings, &obj);
-		appendValue(me.ids, id);
-		return id;
-		*/
 	}
 
 	template<typename TString, typename TSpec1, typename TSpec2, typename TId>
@@ -1594,26 +1586,17 @@ end(StringSet< TString, TSpec > const & me,
 		SEQAN_ASSERT(length(me.limits) == length(me) + 1);
 		TIter pos = me.id_pos_map.find(id);
 		if (pos != me.id_pos_map.end()) {
-			erase(me.strings, pos->second);
-			erase(me.ids, pos->second);
+			TSize remPos = pos->second;
+			erase(me.strings, remPos);
+			erase(me.ids, remPos);
 			me.id_pos_map.erase(pos);
 			resize(me.limits, length(me.limits) - 1);
-		}
-		
-			
-		SEQAN_ASSERT(length(me.limits) == length(me) + 1);
-/*
-		SEQAN_ASSERT(length(me.limits) == length(me) + 1);
-		for(TSize i = 0; i < length(me.strings); ++i)
-			if (me.ids[i] == id) {
-				erase(me.strings, i);
-				erase(me.ids, i);
-				resize(me.limits, length(me.limits) - 1);
-				me.limitsValid = empty(me);
-			}
-		SEQAN_ASSERT(length(me.limits) == length(me) + 1);
-		*/
 
+			for(TIter itChange = me.id_pos_map.begin(); itChange != me.id_pos_map.end(); ++itChange) {
+				if (itChange->second > remPos) --(itChange->second);
+			}
+		}	
+		SEQAN_ASSERT(length(me.limits) == length(me) + 1);
 	}
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1738,99 +1721,82 @@ end(StringSet< TString, TSpec > const & me,
 
 
 
-//////////////////////////////////////////////////////////////////////////////
-// subset
+	//template <typename TString, typename TSpec, typename TDestSpec, typename TIds, typename TLength>
+	//inline void
+	//subset(StringSet<TString, Owner<TSpec> >& source,
+	//	StringSet<TString, TDestSpec>& dest,
+	//	TIds ids,
+	//	TLength len)
+	//{
+	//SEQAN_CHECKPOINT
+	//}
 
-/**
-.Function.subset:
-..cat:Sequences
-..summary:Creates a subset of a given StringSet.
-..signature:subset(source, dest, id_array [, len])
-..param.source:In-parameter:The source StringSet.
-...type:Class.StringSet
-..param.dest:Out-parameter:The destination StringSet (the subset).
-...type:Class.StringSet
-..param.id_array:In-parameter:An array of ids. Each id corresponds to a sequence that is supposed to be in the subset.
-..param.len:In-parameter:Optional length of the id array.
-...remarks:If len is not defined the length function must be valid for this array or string type.
-..returns:void
-*/
+	//template <typename TString, typename TIds, typename TLength>
+	//inline void
+	//subset(StringSet<TString, Dependent<Generous> >& source,
+	//	StringSet<TString, Dependent<Generous> >& dest,
+	//	TIds ids,
+	//	TLength len)
+	//{
+	//SEQAN_CHECKPOINT
+	//	typedef StringSet<TString, Dependent<Generous> > TStringSet;
+	//	typedef typename Id<TStringSet>::Type TId;
+	//	typedef typename Size<TStringSet>::Type TSize;
 
-	template <typename TString, typename TSpec, typename TDestSpec, typename TIds, typename TLength>
-	inline void
-	subset(StringSet<TString, Owner<TSpec> >& source,
-		StringSet<TString, TDestSpec>& dest,
-		TIds ids,
-		TLength len)
-	{
-	SEQAN_CHECKPOINT
-	}
+	//	clear(dest);
+	//	resize(dest.limits, len + 1);
+	//	dest.limitsValid = (len == 0);
+	//	fill(dest.strings, length(source.strings), (TString*) 0);
+	//	for(TSize i = 0; i < len; ++i)
+	//		dest.strings[ids[i]] = source.strings[ids[i]];
+	//}
 
-	template <typename TString, typename TIds, typename TLength>
-	inline void
-	subset(StringSet<TString, Dependent<Generous> >& source,
-		StringSet<TString, Dependent<Generous> >& dest,
-		TIds ids,
-		TLength len)
-	{
-	SEQAN_CHECKPOINT
-		typedef StringSet<TString, Dependent<Generous> > TStringSet;
-		typedef typename Id<TStringSet>::Type TId;
-		typedef typename Size<TStringSet>::Type TSize;
+	//template <typename TString, typename TIds, typename TLength>
+	//inline void
+	//subset(StringSet<TString, Dependent<Tight> >& source,
+	//	StringSet<TString, Dependent<Tight> >& dest,
+	//	TIds ids,
+	//	TLength len)
+	//{
+	//SEQAN_CHECKPOINT
+	//	typedef StringSet<TString, Dependent<Tight> > TStringSet;
+	//	typedef typename Id<TStringSet>::Type TId;
+	//	typedef typename Size<TStringSet>::Type TSize;
 
-		clear(dest);
-		resize(dest.limits, len + 1);
-		dest.limitsValid = (len == 0);
-		fill(dest.strings, length(source.strings), (TString*) 0);
-		for(TSize i = 0; i < len; ++i)
-			dest.strings[ids[i]] = source.strings[ids[i]];
-	}
+	//	clear(dest);
+	//	resize(dest.limits, len + 1);
+	//	dest.limitsValid = (len == 0);
+	//	TLength upperBound = length(source.ids);
+	//	for(TSize i=0;i<len;++i) {
+	//		TId id = ids[i];
+	//		if ((upperBound > id) &&
+	//			(source.ids[id] == id)) {
+	//				appendValue(dest.strings, source.strings[id]);
+	//				appendValue(dest.ids, id);
+	//		} else {
+	//			typedef String<TId> TIdString;
+	//			typedef typename Iterator<TIdString, Rooted>::Type TIter;
+	//			TIter it = begin(source.ids);
+	//			for(;!atEnd(it);goNext(it)) {
+	//				if (*it == id) {
+	//					appendValue(dest.strings, source.strings[position(it)]);
+	//					appendValue(dest.ids, id);
+	//				}
+	//			}
+	//		}
+	//	}
+	//}
 
-	template <typename TString, typename TIds, typename TLength>
-	inline void
-	subset(StringSet<TString, Dependent<Tight> >& source,
-		StringSet<TString, Dependent<Tight> >& dest,
-		TIds ids,
-		TLength len)
-	{
-	SEQAN_CHECKPOINT
-		typedef StringSet<TString, Dependent<Tight> > TStringSet;
-		typedef typename Id<TStringSet>::Type TId;
-		typedef typename Size<TStringSet>::Type TSize;
+	//template <typename TString, typename TSpec, typename TIds>
+	//inline void
+	//subset(StringSet<TString, TSpec>& source,
+	//	StringSet<TString, TSpec>& dest,
+	//	TIds ids)
+	//{
+	//SEQAN_CHECKPOINT
+	//	subset(source, dest, ids, length(ids));
+	//}
 
-		clear(dest);
-		resize(dest.limits, len + 1);
-		dest.limitsValid = (len == 0);
-		TLength upperBound = length(source.ids);
-		for(TSize i=0;i<len;++i) {
-			TId id = ids[i];
-			if ((upperBound > id) &&
-				(source.ids[id] == id)) {
-					appendValue(dest.strings, source.strings[id]);
-					appendValue(dest.ids, id);
-			} else {
-				typedef String<TId> TIdString;
-				typedef typename Iterator<TIdString, Rooted>::Type TIter;
-				TIter it = begin(source.ids);
-				for(;!atEnd(it);goNext(it)) {
-					if (*it == id) {
-						appendValue(dest.strings, source.strings[position(it)]);
-						appendValue(dest.ids, id);
-					}
-				}
-			}
-		}
-	}
-
-	template <typename TString, typename TSpec, typename TIds>
-	inline void
-	subset(StringSet<TString, TSpec>& source,
-		StringSet<TString, TSpec>& dest,
-		TIds ids)
-	{
-	SEQAN_CHECKPOINT
-		subset(source, dest, ids, length(ids));
-	}
 
 //////////////////////////////////////////////////////////////////////////////
 
