@@ -163,13 +163,13 @@ struct Size<Segment<THost, TSpec> const >
 template <typename THost, typename TSpec>
 struct Position<Segment<THost, TSpec> >
 {
-	typedef typename Position<THost>::Type Type;
+	typedef typename Difference<THost>::Type Type;
 };
 
 template <typename THost, typename TSpec>
 struct Position<Segment<THost, TSpec> const >
 {
-	typedef typename Position<THost>::Type Type;
+	typedef typename Difference<THost>::Type Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
