@@ -413,7 +413,7 @@ inline T
 _stringToNumber(TString& str)
 {
 	T val = 0;
-	reserve(str, length(str) + 1);
+	//reserve(str, length(str) + 1);
 	std::stringstream ssStream1(toCString(str));
 	ssStream1 >> val; 
 	return val;
