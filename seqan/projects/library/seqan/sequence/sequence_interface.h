@@ -899,7 +899,8 @@ _computeSize4Capacity(T const & /*me*/,
 					  TSize capacity)
 {
 SEQAN_CHECKPOINT
-	if (sizeof(T) <= 2) return capacity + 1;
+	typedef typename Value<T>::Type TValue;
+	if (sizeof(TValue) <= 2) return capacity + 1;
 	else return capacity;
 }
 
