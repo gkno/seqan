@@ -529,8 +529,8 @@ SEQAN_CHECKPOINT
 
 		if (old_array)
 		{//new buffer allocated
-		 //so old_length < limit, so start <= limit
-			arrayConstructMove(old_array, old_array + start, seq_array);
+			typename Size<T>::Type keep_start_length = (start > new_length) ? new_length : start;
+			arrayConstructMove(old_array, old_array + keep_start_length, seq_array);
 			if (keep_second_part)
 			{
 				arrayConstructMove(old_array + end, old_array + length_to_copy, seq_array + start + size);
@@ -1356,7 +1356,8 @@ _reallocateStorage(
 	typename Size< String<TValue, TSpec> >::Type new_capacity,
 	Exact)
 {
-	if (new_capacity == capacity(me)) return 0;
+//	if (new_capacity == capacity(me)) return 0;
+	if (new_capacity <= capacity(me)) return 0;
 	else
 	{
 SEQAN_CHECKPOINT
@@ -1372,7 +1373,8 @@ _reallocateStorage(
 	typename Size< String<TValue, TSpec> >::Type limit,
 	Exact)
 {
-	if (new_capacity == capacity(me)) return 0;
+//	if (new_capacity == capacity(me)) return 0;
+	if (new_capacity <= capacity(me)) return 0;
 	else
 	{
 SEQAN_CHECKPOINT
@@ -1461,7 +1463,7 @@ _reallocateStorage(
 ///.Function.reserve.param.object.type:Spec.String
 
 template <typename TValue, typename TSpec, typename _TSize>
-inline typename Size< String<TValue, TSpec> >::Type
+inline void
 _reserveStorage(
 	String<TValue, TSpec> & seq, 
 	_TSize new_capacity,
@@ -1471,7 +1473,7 @@ _reserveStorage(
 }
 
 template <typename TValue, typename TSpec, typename _TSize>
-inline typename Size< String<TValue, TSpec> >::Type
+inline void
 _reserveStorage(
 	String<TValue, TSpec> & seq, 
 	_TSize new_capacity,
@@ -1490,8 +1492,10 @@ _reserveStorage(
 	typedef typename Size< String<TValue, TSpec> >::Type TSize;
 
 	TSize old_capacity = capacity(seq);
-	if (old_capacity == (TSize)new_capacity) return;
-	if (!TYPECMP<TExpand,TagExact_>::VALUE && old_capacity > (TSize)new_capacity) return;
+
+//	if (old_capacity == (TSize)new_capacity) return;
+//	if (!TYPECMP<TExpand,TagExact_>::VALUE && old_capacity > (TSize)new_capacity) return;
+	if (old_capacity >= (TSize)new_capacity) return;
 
 	TSize seq_length = length(seq);
 	typename Value< String<TValue, TSpec> >::Type * old_array = _reallocateStorage(seq, new_capacity, tag);
