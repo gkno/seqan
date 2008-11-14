@@ -687,7 +687,6 @@ a single integer value between 0 and the sum of string lengths minus 1.
 			{
 			SEQAN_CHECKPOINT
 				appendValue(limits, 0);
-				concat.set = this;
 			}
 
 			template <typename TDefault>
@@ -696,7 +695,6 @@ a single integer value between 0 and the sum of string lengths minus 1.
 			{
 				SEQAN_CHECKPOINT
 				appendValue(limits, 0);
-				concat.set = this;
 				for(unsigned int i = 0; i<length(_other); ++i) appendValue(*this, _other[i]);
 			}
 
@@ -739,7 +737,6 @@ a single integer value between 0 and the sum of string lengths minus 1.
 			{
 			SEQAN_CHECKPOINT
 				appendValue(limits, 0);
-				concat.set = this;
 			}
 
 			template <typename TDefault>
@@ -748,7 +745,6 @@ a single integer value between 0 and the sum of string lengths minus 1.
 			{
 				SEQAN_CHECKPOINT
 				appendValue(limits, 0);
-				concat.set = this;
 				for(unsigned int i = 0; i<length(_other); ++i) appendValue(*this, _other[i]);
 			}
 
@@ -789,7 +785,6 @@ a single integer value between 0 and the sum of string lengths minus 1.
 			limitsValid(true)
 		{
 			appendValue(limits, 0);
-			concat.set = this;
 		};
 //____________________________________________________________________________
 
@@ -1952,12 +1947,26 @@ end(StringSet< TString, TSpec > const & me,
 	template <typename TString, typename TSpec>
 	inline typename Concatenator< StringSet<TString, TSpec> >::Type &
 	concat(StringSet<TString, TSpec> &set) {
+		set.concat.set = &set;
 		return set.concat;
 	}
 
 	template <typename TString, typename TSpec>
 	inline typename Concatenator< StringSet<TString, TSpec> const>::Type &
 	concat(StringSet<TString, TSpec> const &set) {
+		set.concat.set = &set;
+ 		return set.concat;
+	}
+
+	template <typename TString, typename TSpec>
+	inline typename Concatenator< StringSet<TString, ConcatDirect<TSpec> > >::Type &
+	concat(StringSet<TString, ConcatDirect<TSpec> > &set) {
+		return set.concat;
+	}
+
+	template <typename TString, typename TSpec>
+	inline typename Concatenator< StringSet<TString, ConcatDirect<TSpec> > const>::Type &
+	concat(StringSet<TString, ConcatDirect<TSpec> > const &set) {
  		return set.concat;
 	}
 
