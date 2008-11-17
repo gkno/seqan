@@ -150,11 +150,14 @@ typedef Tag<SmithWaterman_> const SmithWaterman;
 //////////////////////////////////////////////////////////////////////////////
 
 /**
+.Tag.Local Alignment Algorithms.value.WatermanEggert:
+	Local alignment algorithm by Waterman and Eggert with "declumping" (i.e. only non-overlapping local alignments are computed).
 .Tag.Local Alignment Algorithms.value.SmithWatermanClump:
-	Local alignment algorithm with "declumping" by Waterman and Eggert.
+	Same as $WatermanEggert$.
 */
 struct SmithWatermanClump_;
 typedef Tag<SmithWatermanClump_> const SmithWatermanClump;
+typedef Tag<SmithWatermanClump_> const WatermanEggert;
 
 //////////////////////////////////////////////////////////////////////////////
 
