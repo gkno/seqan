@@ -282,10 +282,15 @@ SEQAN_CHECKPOINT
 // transforms source- to view-position
 template <typename TSource>
 inline typename Position< Gaps<TSource, SumlistGaps> >::Type
-toViewPosition(Gaps<TSource, SumlistGaps> const & gaps,
+toViewPosition(Gaps<TSource, SumlistGaps> const & gaps_,
 			   typename Position<TSource>::Type pos)
 {
 SEQAN_CHECKPOINT
+	typedef Gaps<TSource, SumlistGaps> TGaps;
+	typedef typename Size<TGaps>::Type TSize;
+	typedef SumList<2, TSize> TSumlist;
+	typedef typename Iterator<TSumlist>::Type TSumlistIterator;
+	TGaps & gaps = const_cast<TGaps &>(gaps_);
 
 	SEQAN_ASSERT(pos >= sourceBeginPosition(gaps))
 	pos -= sourceBeginPosition(gaps);
@@ -295,10 +300,6 @@ SEQAN_CHECKPOINT
 		return endPosition(gaps);
 	}
 
-	typedef Gaps<TSource, SumlistGaps> const TGaps;
-	typedef typename Size<TGaps>::Type TSize;
-	typedef SumList<2, TSize> const TSumlist;
-	typedef typename Iterator<TSumlist>::Type TSumlistIterator;
 	TSumlistIterator it(gaps.data_sumlist);
 	searchSumList(it, pos, 1);
 	return getSum(it, 0) + getValue(it, 0) - (getSum(it, 1) + getValue(it, 1)) + pos;

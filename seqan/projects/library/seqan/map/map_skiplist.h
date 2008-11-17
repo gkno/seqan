@@ -640,7 +640,7 @@ value(Map<TValue, Skiplist<TSpec> > & me,
 	{// insert new value
 		unsigned char height = _skiplistCreateHeight(me, path);
 		TValue2 val_temp;
-		key(val_temp) = _key;
+		setKey(val_temp, _key);
 		TElement & el = _skiplistConstructElement(me, height, val_temp);
 		_skiplistInsertElement(me, el, path, height);
 		return el.data_value;
@@ -753,8 +753,8 @@ add(Map<TValue, Skiplist<TSpec> > & me,
 	TCargo2 const & _cargo)
 {
 	TValue temp_val;
-	key(temp_val) = _key;
-	cargo(temp_val) = _cargo;
+	setKey(temp_val, _key);
+	setCargo(temp_val, _cargo);
 
 	add(me, temp_val);
 }

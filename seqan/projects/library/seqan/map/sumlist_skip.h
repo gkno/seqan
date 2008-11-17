@@ -1011,11 +1011,16 @@ removeValues(Iter<SumList<DIM, TValue, SkipSumList<TSpec> >, SkipSumListIterator
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <unsigned int DIM, typename TValue, typename TSpec, typename TValue2>
+//template <unsigned int DIM, typename TValue, typename TSpec, typename TValue2>
+//inline void 
+//searchSumList(Iter<SumList<DIM, TValue, SkipSumList<TSpec> >, SkipSumListIterator > & it,
+//			  TValue2 const & val,
+//			  int dim)
+template <unsigned int DIM, typename TValue, typename TSpec, typename TSumList, typename TValue2>
 inline void 
-searchSumList(Iter<SumList<DIM, TValue, SkipSumList<TSpec> >, SkipSumListIterator > & it,
-			  TValue2 const & val,
-			  int dim)
+_searchSumList_Skip(Iter<TSumList, SkipSumListIterator > & it,
+					TValue2 const & val,
+					int dim)
 {
 	typedef SkiplistPath<TValue, _SkipSumList<DIM, TSpec> > TPath;
 //	typedef SkiplistElement<TValue, _SkipSumList<DIM, TSpec> > TElement;
@@ -1037,6 +1042,23 @@ searchSumList(Iter<SumList<DIM, TValue, SkipSumList<TSpec> >, SkipSumListIterato
 	searchSumList(it.iter, val - path.sums[0][dim], dim);
 	it.iter.sums_ += path.sums[0];
 }
+
+template <unsigned int DIM, typename TValue, typename TSpec, typename TValue2>
+inline void 
+searchSumList(Iter<SumList<DIM, TValue, SkipSumList<TSpec> >, SkipSumListIterator > & it,
+			  TValue2 const & val,
+			  int dim)
+{
+	_searchSumList_Skip<DIM, TValue, TSpec>(it, val, dim);
+}
+//template <unsigned int DIM, typename TValue, typename TSpec, typename TValue2>
+//inline void 
+//searchSumList(Iter<SumList<DIM, TValue, SkipSumList<TSpec> > const, SkipSumListIterator > & it,
+//			  TValue2 const & val,
+//			  int dim)
+//{
+//	_searchSumList_Skip<DIM, TValue, TSpec>(it, val, dim);
+//}
 
 //////////////////////////////////////////////////////////////////////////////
 

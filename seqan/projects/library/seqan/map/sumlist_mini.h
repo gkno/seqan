@@ -147,7 +147,7 @@ const unsigned char _MiniListEntry<TValue>::SIZES [4] = {1, 2, 4, 1 + sizeof(TVa
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <unsigned short SIZE = 0x0100, typename TSpec = Default>
+template <unsigned short SIZE = 0x0020, typename TSpec = Default>
 struct MiniSumList;
 
 struct _MiniSumListValueIterator;
@@ -485,19 +485,7 @@ splitSumList(SumList<DIM, TValue, MiniSumList<SIZE, TSpec> > & me,
 //		it = it_next;
 //	}
 //}
-
-template <typename TIt, typename TValue>
-inline void
-searchSumList(TIt & it,
-			  TValue const & val,
-			  int dim)
-{
-	goBegin(it);
-	while (!atEnd(it) && ((getSum(it, dim) + getValue(it, dim))<= val)) // SEARCH SEMANTICS
-	{
-		goNext(it);
-	}
-}
+//
 
 //////////////////////////////////////////////////////////////////////////////
 // Iterator for MiniSumList
@@ -586,7 +574,6 @@ public:
 		return *this;
 	}
 };
-
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -804,6 +791,21 @@ getSum(Iter<TSumList, MiniSumListIterator > & it,
 		 int dim)
 {
 	return it.sums_[dim];
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TSumList, typename TValue>
+inline void
+searchSumList(Iter< TSumList, MiniSumListIterator > & it,
+			  TValue const & val,
+			  int dim)
+{
+	goBegin(it);
+	while (!atEnd(it) && ((getSum(it, dim) + getValue(it, dim))<= val)) // SEARCH SEMANTICS
+	{
+		goNext(it);
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////

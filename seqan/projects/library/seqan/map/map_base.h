@@ -178,6 +178,23 @@ key(Pair<TKey, TObject, TSpec> const & element)
 }
 
 //////////////////////////////////////////////////////////////////////////////
+
+template <typename TElement, typename TSource>
+inline void
+setKey(TElement & element,
+	   TSource const & source) 
+{
+	element = source;
+}
+template <typename TKey, typename TObject, typename TSpec, typename TSource>
+inline void 
+setKey(Pair<TKey, TObject, TSpec> & element,
+	   TSource const & source) 
+{
+	element.i1 = source;
+}
+
+//////////////////////////////////////////////////////////////////////////////
 //no default cargo function
 
 template <typename TKey, typename TObject, typename TSpec>
@@ -191,6 +208,16 @@ inline TObject const &
 cargo(Pair<TKey, TObject, TSpec> const & element) 
 {
 	return element.i2;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TKey, typename TObject, typename TSpec, typename TSource>
+inline void 
+setCargo(Pair<TKey, TObject, TSpec> & element,
+	   TSource const & source) 
+{
+	element.i2 = source;
 }
 
 //////////////////////////////////////////////////////////////////////////////
