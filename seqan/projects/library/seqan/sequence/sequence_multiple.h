@@ -1954,7 +1954,7 @@ end(StringSet< TString, TSpec > const & me,
 	template <typename TString, typename TSpec>
 	inline typename Concatenator< StringSet<TString, TSpec> const>::Type &
 	concat(StringSet<TString, TSpec> const &set) {
-		set.concat.set = &set;
+		const_cast<StringSet<TString, TSpec>&>(set).concat.set = &set;
  		return set.concat;
 	}
 
