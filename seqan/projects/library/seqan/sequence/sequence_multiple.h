@@ -1944,31 +1944,37 @@ end(StringSet< TString, TSpec > const & me,
 		return string;
 	}
 
+	template <typename TString>
+	inline typename Concatenator<TString const>::Type & 
+	concat(TString const &string) {
+		return string;
+	}
+
 	template <typename TString, typename TSpec>
 	inline typename Concatenator< StringSet<TString, TSpec> >::Type &
-	concat(StringSet<TString, TSpec> &set) {
-		set.concat.set = &set;
-		return set.concat;
+	concat(StringSet<TString, TSpec> &me) {
+		me.concat.set = &me;
+		return me.concat;
 	}
 
 	template <typename TString, typename TSpec>
 	inline typename Concatenator< StringSet<TString, TSpec> const>::Type &
-	concat(StringSet<TString, TSpec> const &set) {
-		StringSet<TString, TSpec> &_set = const_cast<StringSet<TString, TSpec> &>(set);
-		_set.concat.set = &_set;
- 		return set.concat;
+	concat(StringSet<TString, TSpec> const &const_me) {
+		StringSet<TString, TSpec> &me = const_cast<StringSet<TString, TSpec> &>(const_me);
+		me.concat.set = &me;
+ 		return me.concat;
 	}
 
 	template <typename TString, typename TSpec>
-	inline typename Concatenator< StringSet<TString, ConcatDirect<TSpec> > >::Type &
-	concat(StringSet<TString, ConcatDirect<TSpec> > &set) {
-		return set.concat;
+	inline typename Concatenator< StringSet<TString, Owner<ConcatDirect<TSpec> > > >::Type &
+	concat(StringSet<TString, Owner<ConcatDirect<TSpec> > > &me) {
+		return me.concat;
 	}
 
 	template <typename TString, typename TSpec>
-	inline typename Concatenator< StringSet<TString, ConcatDirect<TSpec> > const>::Type &
-	concat(StringSet<TString, ConcatDirect<TSpec> > const &set) {
- 		return set.concat;
+	inline typename Concatenator< StringSet<TString, Owner<ConcatDirect<TSpec> > > const>::Type &
+	concat(StringSet<TString, Owner<ConcatDirect<TSpec> > > const &me) {
+ 		return me.concat;
 	}
 
 
