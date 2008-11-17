@@ -31,7 +31,7 @@ void testPizzaChili() {
     typename Fibre<index_t, PizzaChili_Text>::Type text = indexText(index_pc);
     cout << "infix(text, 12, 21): " << infix(text, 12, 21) << endl;
 
-///We can save the index structure on disc and load it again.
+///We can save the index structure on disk and load it again.
 ///Notice, however, that not all Pizza & Chili libraries support saving
 ///and loading at the moment. Please refer to the documentation of the
 ///different @Tag.Pizza & Chili Index Tags@ for details.

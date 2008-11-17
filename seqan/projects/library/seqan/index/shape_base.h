@@ -467,7 +467,7 @@ If $charsLeft$ is smaller than the shape's span, the hash value corresponds to t
 
 	template <typename TValue, typename TSpec, typename TIter>
 	inline typename Value< Shape<TValue, TSpec> >::Type
-	hashNext(Shape<TValue, TSpec> &me, TIter &it)
+	hashNext(Shape<TValue, TSpec> &me, TIter const &it)
 	{
 	SEQAN_CHECKPOINT
 		// remove first, shift left, and add next character
