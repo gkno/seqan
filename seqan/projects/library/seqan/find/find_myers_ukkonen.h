@@ -329,6 +329,51 @@ void setHost(Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > & me,
 }
 
 //____________________________________________________________________________
+/*
+template <typename TNeedle, typename TSpec, typename TFindBeginPatternSpec>
+inline TNeedle
+host(Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > & me)
+{
+SEQAN_CHECKPOINT
+
+	typedef typename Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> >::TWord TWord;
+	typedef typename Value<TNeedle>::Type TValue;
+
+	TNeedle temp;
+	resize(temp, me.needleSize, Exact());
+
+	TValue v = TValue();
+	for (unsigned i = 0; i < length(me.bitMasks); i += me.blockCount)
+	{
+		for (unsigned j = 0; j < me.needleSize; j++)
+			if (me.bitMasks[i + j / me.MACHINE_WORD_SIZE] & (TWord)1 << (j % me.MACHINE_WORD_SIZE))
+				temp[j] = v;
+		++v;
+	}
+}
+
+template <typename TNeedle, typename TSpec, typename TFindBeginPatternSpec>
+inline TNeedle
+host(Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> >  const & me)
+{
+SEQAN_CHECKPOINT
+
+	typedef typename Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> >::TWord TWord;
+	typedef typename Value<TNeedle>::Type TValue;
+
+	TNeedle temp;
+	resize(temp, me.needleSize, Exact());
+
+	TValue v = TValue();
+	for (unsigned i = 0; i < length(me.bitMasks); i += me.blockCount)
+	{
+		for (unsigned j = 0; j < me.needleSize; j++)
+			if (me.bitMasks[i + j / me.MACHINE_WORD_SIZE] & (TWord)1 << (j % me.MACHINE_WORD_SIZE))
+				temp[j] = v;
+		++v;
+	}
+}
+*/
 
 template <typename TNeedle, typename TSpec, typename TFindBeginPatternSpec>
 inline typename Host<Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > >::Type & 
