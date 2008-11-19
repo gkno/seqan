@@ -136,6 +136,24 @@ The number of '1's (relevant positions) in the shape determines $q$ and the size
 
 		Index() {}
 
+		Index(Index &other):
+			text(other.text),
+			sa(other.sa),
+			dir(other.dir),
+			counts(other.counts),
+			countsDir(other.countsDir),
+			shape(other.shape),
+			cargo(other.cargo) {}
+
+		Index(Index const &other):
+			text(other.text),
+			sa(other.sa),
+			dir(other.dir),
+			counts(other.counts),
+			countsDir(other.countsDir),
+			shape(other.shape),
+			cargo(other.cargo) {}
+
 		template <typename _TText>
 		Index(_TText &_text):
 			text(_text) {}

@@ -274,6 +274,24 @@ The entries are the characters left of the corresponding suffix in the suffix ar
 
 		Index() {}
 
+		Index(Index &other):
+			text(other.text),
+			sa(other.sa),
+			lcp(other.lcp),
+			lcpe(other.lcpe),
+			childtab(other.childtab),
+			bwt(other.bwt),
+			cargo(other.cargo) {}
+
+		Index(Index const &other):
+			text(other.text),
+			sa(other.sa),
+			lcp(other.lcp),
+			lcpe(other.lcpe),
+			childtab(other.childtab),
+			bwt(other.bwt),
+			cargo(other.cargo) {}
+
 		template <typename _TText>
 		Index(_TText &_text):
 			text(_text) {}
@@ -338,7 +356,7 @@ The entries are the characters left of the corresponding suffix in the suffix ar
 		Index< TObject, Index_ESA<TSpec> > &index, 
 		const char *fileName) 
 	{
-		return open(index, fileName, OPEN_RDONLY);
+		return open(index, fileName, DefaultOpenMode<Index< TObject, Index_ESA<TSpec> > >::VALUE);
 	}
 
 
@@ -367,7 +385,7 @@ The entries are the characters left of the corresponding suffix in the suffix ar
 		Index< TObject, Index_ESA<TSpec> > &index, 
 		const char *fileName)
 	{
-		return save(index, fileName, OPEN_WRONLY | OPEN_CREATE);
+		return save(index, fileName, DefaultOpenMode<Index< TObject, Index_ESA<TSpec> > >::VALUE);
 	}
 
 }

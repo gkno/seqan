@@ -328,19 +328,19 @@ namespace SEQAN_NAMESPACE_MAIN
     template < typename TInput, typename TSpec >
     struct BufReadHandler< Pipe<TInput, TSpec> > {
 		typedef			
-			typename IF< 
+			typename IF<
 				AllowsFastRandomAccess<TInput>::VALUE,
-				BufferHandler< Pipe<TInput, TSpec>, SourceNonCachingSpec>,
-//				BufferHandler< Pipe<TInput, TSpec>, SourceCachingSpec>
-				BufferHandler< Pipe<TInput, TSpec>, ExtStringSourceCachingSpec>
-			>::Type Type;
+				SourceNonCachingSpec,
+//				SourceCachingSpec>
+				ExtStringSourceCachingSpec >::Type			TTag;
+		typedef BufferHandler< Pipe<TInput, TSpec>, TTag>	Type;
     };
 
 
     template < typename TValue, typename TConfig, typename TSpec >
     struct BufReadHandler< Pipe< String<TValue, External<TConfig> >, TSpec > > {
 		typedef BufferHandler< 
-			Pipe< String<TValue, External<TConfig> > const, TSpec >, 
+			Pipe< String<TValue, External<TConfig> >, TSpec >, 
 			ExtStringSourceCachingSpec 
 		> Type;
     };

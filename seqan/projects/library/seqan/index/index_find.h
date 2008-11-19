@@ -135,7 +135,7 @@ SEQAN_CHECKPOINT
 //____________________________________________________________________________
 
 	template < typename TText, typename TSpec, typename TSpecFinder >
-	inline typename Iterator< typename Fibre<Index<TText, TSpec>, Fibre_SA>::Type, Standard>::Type &
+	inline typename Iterator< typename Fibre<Index<TText, TSpec>, Fibre_SA>::Type const, Standard>::Type &
 	hostIterator(Finder< Index<TText, TSpec>, TSpecFinder > & me)
 	{
 SEQAN_CHECKPOINT
@@ -143,7 +143,7 @@ SEQAN_CHECKPOINT
 	}
 
 	template < typename TText, typename TSpec, typename TSpecFinder >
-	inline typename Iterator< typename Fibre<Index<TText, TSpec>, Fibre_SA>::Type, Standard>::Type const &
+	inline typename Iterator< typename Fibre<Index<TText, TSpec>, Fibre_SA>::Type const, Standard>::Type const &
 	hostIterator(Finder< Index<TText, TSpec>, TSpecFinder > const & me)
 	{
 SEQAN_CHECKPOINT
@@ -166,9 +166,9 @@ SEQAN_CHECKPOINT
 	clear(Finder< Index<TText, TSpec>, TSpecFinder > & me)
 	{
 SEQAN_CHECKPOINT
-		typedef Index<TText, TSpec>						TIndex;
-		typedef typename Fibre<TIndex, Fibre_SA>::Type	TSA;
-		typedef typename Iterator<TSA, Standard>::Type	TIterator;
+		typedef Index<TText, TSpec>								TIndex;
+		typedef typename Fibre<TIndex, Fibre_SA>::Type			TSA;
+		typedef typename Iterator<TSA const, Standard>::Type	TIterator;
 		me.range.i1 = me.range.i2 = TIterator();
 	}
 

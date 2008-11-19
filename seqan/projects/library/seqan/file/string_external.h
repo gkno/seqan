@@ -994,7 +994,6 @@ you should think of using @Tag.ExternalConfig@.
                typename TConfig >
 	class String<TValue, External<TConfig> >
 	{
-
 	public:
         enum { FRAMES    = TConfig::FRAMES,
                PAGE_SIZE = TConfig::PAGE_SIZE };
@@ -1026,6 +1025,17 @@ you should think of using @Tag.ExternalConfig@.
 
 			resize(*this, size);
         }
+
+/*
+	private:	// making these C'tors private clashes with Holder<external String>
+		String(String &) {}
+		String(String const &) {}
+
+	public:
+*/
+		String(String &) { SEQAN_ABORT("Aborted attempt to copy a String<..,External<..> >") }
+		String(String const &) { SEQAN_ABORT("Aborted attempt to copy a String<..,External<..> >") }
+
 /**
 .Memfunc.ExtString#String:
 ..class:Spec.External String

@@ -140,7 +140,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	value(ModifiedIterator<THost, ModView<TFunctor> > & me)
 	{
 	SEQAN_CHECKPOINT
-		me.tmp_value = cargo(me).func(value(host(me)));
+		me.tmp_value = cargo(me).func(getValue(host(me)));
 		return me.tmp_value;
 	}
 
@@ -149,9 +149,31 @@ namespace SEQAN_NAMESPACE_MAIN
 	value(ModifiedIterator<THost, ModView<TFunctor> > const & me)
 	{
 	SEQAN_CHECKPOINT
-		me.tmp_value = cargo(me).func(value(host(me)));
+		me.tmp_value = cargo(me).func(getValue(host(me)));
 		return me.tmp_value;
 	}
+
+
+	//////////////////////////////////////////////////////////////////////////////
+	// getValue
+	//////////////////////////////////////////////////////////////////////////////
+
+	template <typename THost, typename TFunctor>
+	inline typename GetValue<ModifiedIterator<THost, ModView<TFunctor> > >::Type 
+	getValue(ModifiedIterator<THost, ModView<TFunctor> > & me)
+	{
+	SEQAN_CHECKPOINT
+		return cargo(me).func(getValue(host(me)));
+	}
+
+	template <typename THost, typename TFunctor>
+	inline typename GetValue<ModifiedIterator<THost, ModView<TFunctor> > const>::Type 
+	getValue(ModifiedIterator<THost, ModView<TFunctor> > const & me)
+	{
+	SEQAN_CHECKPOINT
+		return cargo(me).func(getValue(host(me)));
+	}
+
 
 	//////////////////////////////////////////////////////////////////////////////
 	// assignModViewFunctor
@@ -259,7 +281,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	value(ModifiedString<THost, ModView<TFunctor> > & me, TPos pos)
 	{
 	SEQAN_CHECKPOINT
-		me.tmp_value = cargo(me).func(value(host(me), pos));
+		me.tmp_value = cargo(me).func(getValue(host(me), pos));
 		return me.tmp_value;
 	}
 
@@ -268,9 +290,31 @@ namespace SEQAN_NAMESPACE_MAIN
 	value(ModifiedString<THost, ModView<TFunctor> > const & me, TPos pos)
 	{
 	SEQAN_CHECKPOINT
-		me.tmp_value = cargo(me).func(value(host(me), pos));
+		me.tmp_value = cargo(me).func(getValue(host(me), pos));
 		return me.tmp_value;
 	}
+
+
+	//////////////////////////////////////////////////////////////////////////////
+	// getValue
+	//////////////////////////////////////////////////////////////////////////////
+
+	template <typename THost, typename TFunctor, typename TPos>
+	inline typename GetValue<ModifiedString<THost, ModView<TFunctor> > >::Type 
+	getValue(ModifiedString<THost, ModView<TFunctor> > & me, TPos pos)
+	{
+	SEQAN_CHECKPOINT
+		return cargo(me).func(getValue(host(me), pos));
+	}
+
+	template <typename THost, typename TFunctor, typename TPos>
+	inline typename GetValue<ModifiedString<THost, ModView<TFunctor> > const>::Type 
+	getValue(ModifiedString<THost, ModView<TFunctor> > const & me, TPos pos)
+	{
+	SEQAN_CHECKPOINT
+		return cargo(me).func(getValue(host(me), pos));
+	}
+
 
 	//////////////////////////////////////////////////////////////////////////////
 	// assignModViewFunctor

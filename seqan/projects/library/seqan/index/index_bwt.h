@@ -245,22 +245,20 @@ namespace SEQAN_NAMESPACE_MAIN
 		TText const &s,
 		TSA const &SA)
 	{
-		typedef typename Value<TSA>::Type	TValue;
-		typedef typename Size<TSA>::Type	TSize;
-
-		#ifdef SEQAN_DEBUG_INDEX
-			if (sizeof(TSize) > 4)
-				::std::cerr << "WARNING: TSize size is greater 4 (BWT)" << ::std::endl;
-        #endif
+		typedef typename Value<TBWT>::Type		TValue;
+		typedef typename GetValue<TSA>::Type	TSAValue;
+		typedef typename Size<TSA>::Type		TSize;
 
 		TSize n = length(s);
 
-		for(TSize i = 0; i < n; ++i) {
-			TValue sa = SA[i];
-			if (sa)
-				bwt[i] = s[sa - 1];
+		for (TSize i = 0; i < n; ++i)
+		{
+			TSAValue sa = getValue(SA, i);
+			if (sa != 0)
+				bwt[i] = getValue(s, sa - 1);
 			else
-				bwt[i] = TSize();
+				bwt[i] = TValue();
+//				bwt[i] = getValue(s, n - 1);
 		}
 	}
 
@@ -273,26 +271,24 @@ namespace SEQAN_NAMESPACE_MAIN
 		StringSet<TString, TSpec> const &s,
 		TSA const &SA)
 	{
-		typedef typename Value<TSA>::Type	TValue;
-		typedef typename Size<TSA>::Type	TSize;
-
-		#ifdef SEQAN_DEBUG_INDEX
-			if (sizeof(TSize) > 4)
-				::std::cerr << "WARNING: TSize size is greater 4 (BWT)" << ::std::endl;
-        #endif
+		typedef typename Value<TBWT>::Type		TValue;
+		typedef typename GetValue<TSA>::Type	TSAValue;
+		typedef typename Size<TSA>::Type		TSize;
 
 		TSize n = length(s);
 		Pair<unsigned, typename Size<TString>::Type> loc;
 
-		for(TSize i = 0; i < n; ++i) {
-			posLocalize(loc, SA[i], stringSetLimits(s));
+		for (TSize i = 0; i < n; ++i)
+		{
+			posLocalize(loc, getValue(SA, i), stringSetLimits(s));
 			if (loc.i2 != 0)
 				bwt[i] = s[loc.i1][loc.i2 - 1];
 			else
 				if (loc.i1 != 0)
 					bwt[i] = s[loc.i1 - 1][length(s[loc.i1 - 1]) - 1];
 				else
-					bwt[i] = TSize();
+					bwt[i] = TValue();
+//					bwt[i] = getValue(s, n - 1);
 		}
 	}
 

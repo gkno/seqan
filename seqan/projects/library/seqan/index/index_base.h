@@ -383,19 +383,36 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 // globalize functor
 
 	template <typename InType, typename TLimitsString, typename Result = typename Value<TLimitsString>::Type>
-	struct FunctorGlobalize : public ::std::unary_function<InType,Result> {
+	struct FunctorGlobalize : public ::std::unary_function<InType,Result>
+	{
 		TLimitsString const *limits;
-
 		FunctorGlobalize() {}
 		FunctorGlobalize(TLimitsString const &_limits) : limits(&_limits) {}
-        inline Result operator()(const InType& x) const
-        {
+
+		inline Result operator()(InType const &x) const
+		{
 			return posGlobalize(x, *limits);
+		}
+    };
+
+	template <typename InType, typename Result>
+	struct FunctorGlobalize<InType, Nothing, Result> : public ::std::unary_function<InType,InType>
+	{
+		FunctorGlobalize() {}
+		FunctorGlobalize(Nothing const &) {}
+
+        inline InType operator()(InType const &x) const
+        {
+			return x;
 		}
     };
 
 //////////////////////////////////////////////////////////////////////////////
 // raw suffix array contains integer offsets relative to raw text
+/*
+	template < typename TString, typename TSpec >
+	struct Fibre< Index<TString, TSpec>, Fibre_RawSA>:
+		public Fibre< Index<TString, TSpec> const, Fibre_SA> {};
 
 	template < typename TString, typename TSSetSpec, typename TSpec >
 	struct Fibre< Index<StringSet<TString, TSSetSpec>, TSpec>, Fibre_RawSA> 
@@ -405,7 +422,20 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 			typename Fibre<TIndex, Fibre_SA>::Type,
 			ModView< FunctorGlobalize< 
 				typename Value< typename Fibre<TIndex, Fibre_SA>::Type >::Type,
-				typename StringSetLimits<StringSet<TString, TSSetSpec> >::Type >
+				typename StringSetLimits<TString>::Type >
+			>
+		> Type;
+	};
+*/
+	template < typename TText, typename TSpec >
+	struct Fibre< Index<TText, TSpec>, Fibre_RawSA> 
+	{
+		typedef Index<TText, TSpec> TIndex;
+		typedef ModifiedString<
+			typename Fibre<TIndex, Fibre_SA>::Type,
+			ModView< FunctorGlobalize< 
+				typename Value< typename Fibre<TIndex, Fibre_SA>::Type >::Type,
+				typename StringSetLimits<TText>::Type >
 			>
 		> Type;
 	};
@@ -509,19 +539,13 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 	}
 
 //////////////////////////////////////////////////////////////////////////////
-
+/*
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, Fibre_SA>::Type & 
+	inline typename Fibre<Index<TText, TSpec>, Fibre_RawSA>::Type const & 
 	getFibre(Index<TText, TSpec> &index, Fibre_RawSA) {
 		return indexSA(index);
 	}
-/*
-	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, Fibre_SA>::Type & 
-	getFibre(Index<TText, TSpec> const &index, Fibre_RawSA) {
-		return indexSA(index);
-	}
-*/
+
 	template <typename TString, typename TSSetSpec, typename TSpec>
 	inline typename Fibre<Index<StringSet<TString, TSSetSpec>, TSpec>, Fibre_RawSA>::Type
 	getFibre(Index<StringSet<TString, TSSetSpec>, TSpec> &index, Fibre_RawSA) 
@@ -540,7 +564,26 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 
 		return ModString(indexSA(index), TFunctor(stringSetLimits(indexText(index))));
 	}
+*/
 
+	template <typename TText, typename TSpec>
+	inline typename Fibre<Index<TText, TSpec>, Fibre_RawSA>::Type
+	getFibre(Index<TText, TSpec> &index, Fibre_RawSA) 
+	{
+		typedef Index<TText, TSpec> TIndex;
+		
+		typedef FunctorGlobalize<
+			typename Value< typename Fibre<TIndex, Fibre_SA>::Type >::Type,
+			typename StringSetLimits<TText>::Type
+		> TFunctor;
+		
+		typedef ModifiedString<
+			typename Fibre<Index<TText, TSpec>, Fibre_SA>::Type,
+			ModView< TFunctor >
+		> ModString;
+
+		return ModString(indexSA(index), TFunctor(stringSetLimits(indexText(index))));
+	}
 //////////////////////////////////////////////////////////////////////////////
 
 	template <typename TText, typename TSpec>
@@ -879,7 +922,12 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 ...type:Spec.Index_ESA
 ..returns:A reference to the @Tag.ESA Index Fibres.ESA_RawSA@ fibre (suffix array).
 */
-
+/*
+	template <typename TText, typename TSpec>
+	inline typename Fibre<Index<TText, TSpec>, Fibre_RawSA>::Type const & indexRawSA(Index<TText, TSpec> &index) { return getFibre(index, Fibre_RawSA()); }
+	template <typename TText, typename TSpec>
+	inline typename Fibre<Index<TText, TSpec> const, Fibre_RawSA>::Type const & indexRawSA(Index<TText, TSpec> const &index) { return getFibre(index, Fibre_RawSA()); }
+*/
 	template <typename TText, typename TSpec>
 	inline typename Fibre<Index<TText, TSpec>, Fibre_RawSA>::Type indexRawSA(Index<TText, TSpec> &index) { return getFibre(index, Fibre_RawSA()); }
 	template <typename TText, typename TSpec>

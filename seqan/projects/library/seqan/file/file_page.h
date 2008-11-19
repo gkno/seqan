@@ -713,14 +713,20 @@ namespace SEQAN_NAMESPACE_MAIN
 		enum { PriorityLevels = PRIORITY_LEVELS };
 
 		TPages			pages;
-        PageLRUList		lruList[PRIORITY_LEVELS];
+        PageLRUList		*lruList;
 
 		PageContainer()
 		{
+			lruList = new PageLRUList[PRIORITY_LEVELS];
 			resize(pages, FRAMES, Exact());
             for(TPos i = 0; i < FRAMES; ++i)
 			    pages[i].lruEntry = lruList[0].insert(lruList[0].end(), i);
         }
+
+		~PageContainer()
+		{
+			delete[] lruList;
+		}
 
         inline TPageFrame       & operator[](TPos i)       { return pages[i]; }
         inline TPageFrame const & operator[](TPos i) const { return pages[i]; }
@@ -762,7 +768,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		inline void downgrade(const TPageFrame &pf) 
 		{
 			lruList[pf.priority].splice(lruList[pf.priority].end(), lruList[pf.priority], pf.lruEntry);
-			pf.lruEntry = lruList[pf.priority].end() - 1;
+			pf.lruEntry = lruList[pf.priority].end();
+			--pf.lruEntry;
 		}
 
 		inline void upgrade(TPageFrame &pf, int newPriority) 
@@ -775,7 +782,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		inline void downgrade(TPageFrame &pf, int newPriority) 
 		{
 			lruList[newPriority].splice(lruList[newPriority].end(), lruList[pf.priority], pf.lruEntry);
-			pf.lruEntry = lruList[newPriority].end() - 1;
+			pf.lruEntry = lruList[newPriority].end();
+			--pf.lruEntry;
 			pf.priority = static_cast<typename TPageFrame::Priority> (newPriority);
 		}
 
