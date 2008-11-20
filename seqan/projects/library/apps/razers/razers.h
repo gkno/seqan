@@ -30,6 +30,10 @@
 #include <seqan/find/find_swift.h>
 #include "mmap_fasta.h"
 
+#ifdef RAZERS_PARALLEL
+#include "tbb/spin_mutex.h"
+#endif
+
 namespace SEQAN_NAMESPACE_MAIN
 {
 
@@ -96,6 +100,16 @@ namespace SEQAN_NAMESPACE_MAIN
 #ifdef RAZERS_MASK_READS
 		String<unsigned long> readMask;	// bit-string of bool (1..verify read, 0..ignore read)
 		enum { WORD_SIZE = BitsPerValue<unsigned long>::VALUE };
+#endif
+
+	// multi-threading
+
+#ifdef RAZERS_PARALLEL
+		typedef ::tbb::spin_mutex	TMutex;
+
+		TMutex		*patternMutex;
+		TMutex		optionsMutex;
+		TMutex		matchMutex;
 #endif
 
 		RazerSOptions() 
@@ -565,7 +579,7 @@ void compactMatches(TMatches &matches, RazerSOptions<TSpec> &options)
 template <
 	typename TMatch, 
 	typename TGenome, 
-	typename TReadIndex, 
+	typename TReadSet, 
 	typename TMyersPatterns,
 	typename TSpec >
 inline bool
@@ -573,13 +587,12 @@ matchVerify(
 	TMatch &m,								// resulting match
 	Segment<TGenome, InfixSegment> inf,		// potential match genome region
 	unsigned rseqNo,						// read number
-	TReadIndex &readIndex,					// q-gram index
+	TReadSet &readSet,					    // reads
 	TMyersPatterns const &,					// MyersBitVector preprocessing data
 	RazerSOptions<TSpec> const &options,	// RazerS options
 	SwiftSemiGlobalHamming)					// Hamming only
 {
 	typedef Segment<TGenome, InfixSegment>					TGenomeInfix;
-	typedef typename Fibre<TReadIndex, Fibre_Text>::Type	TReadSet;
 	typedef typename Value<TReadSet>::Type const			TRead;
 	typedef typename Iterator<TGenomeInfix, Standard>::Type	TGenomeIterator;
 	typedef typename Iterator<TRead, Standard>::Type		TReadIterator;
@@ -590,11 +603,11 @@ matchVerify(
 	cout<<"Read:   "<<host(myersPattern)<<::std::endl;
 #endif
 
-	unsigned ndlLength = sequenceLength(rseqNo, readIndex);
+	unsigned ndlLength = sequenceLength(rseqNo, readSet);
 	if (length(inf) < ndlLength) return false;
 
 	// verify
-	TRead &read				= indexText(readIndex)[rseqNo];
+	TRead &read				= readSet[rseqNo];
 	TReadIterator ritBeg	= begin(read, Standard());
 	TReadIterator ritEnd	= end(read, Standard());
 	TGenomeIterator git		= begin(inf, Standard());
@@ -631,7 +644,7 @@ matchVerify(
 template <
 	typename TMatch, 
 	typename TGenome, 
-	typename TReadIndex, 
+	typename TReadSet, 
 	typename TMyersPatterns,
 	typename TSpec >
 inline bool
@@ -639,13 +652,12 @@ matchVerify(
 	TMatch &m,								// resulting match
 	Segment<TGenome, InfixSegment> inf,		// potential match genome region
 	unsigned rseqNo,						// read number
-	TReadIndex &readIndex,					// q-gram index
+	TReadSet &readSet,	    				// reads
 	TMyersPatterns &forwardPatterns,		// MyersBitVector preprocessing data
 	RazerSOptions<TSpec> const &options,	// RazerS options
 	SwiftSemiGlobal)						// Swift specialization
 {
 	typedef Segment<TGenome, InfixSegment>					TGenomeInfix;
-	typedef typename Fibre<TReadIndex, Fibre_Text>::Type	TReadSet;
 	typedef typename Value<TReadSet>::Type					TRead;
 
 	// find read match end
@@ -667,7 +679,7 @@ matchVerify(
 	cout<<"Read:   "<<host(myersPattern)<<::std::endl;
 #endif
 
-	unsigned ndlLength = sequenceLength(rseqNo, readIndex);
+    unsigned ndlLength = sequenceLength(rseqNo, readSet);
 	int maxScore = InfimumValue<int>::VALUE;
 	int minScore = -(int)(ndlLength * options.errorRate);
 	TMyersFinder maxPos;
@@ -690,17 +702,10 @@ matchVerify(
 	
 	// find beginning of best semi-global alignment
 	TGenomeInfixRev		infRev(inf);
-	TReadRev			readRev(indexText(readIndex)[rseqNo]);
+	TReadRev			readRev(readSet[rseqNo]);
 	TMyersFinderRev		myersFinderRev(infRev);
 	TMyersPatternRev	myersPatternRev(readRev);
 
-/*	cout<<"Verify: "<<::std::endl;
-	cout<<"Genome: "<<inf<<"\t" << beginPosition(inf) << "," << endPosition(inf) << ::std::endl;
-	cout<<"Read:   "<<indexText(readIndex)[rseqNo]<<::std::endl;
-
-	cout<<"Genome: "<<infRev << ::std::endl;
-	cout<<"Read:   "<<readRev<<::std::endl;
-*/
 	_patternMatchNOfPattern(myersPatternRev, options.matchN);
 	_patternMatchNOfFinder(myersPatternRev, options.matchN);
 	while (find(myersFinderRev, myersPatternRev, maxScore))
@@ -709,7 +714,7 @@ matchVerify(
 	return true;
 }
 
-
+#ifndef RAZERS_PARALLEL
 //////////////////////////////////////////////////////////////////////////////
 // Find read matches in one genome sequence
 template <
@@ -734,6 +739,7 @@ void findReads(
 
 	// FILTRATION
 	typedef Finder<TGenome, Swift<TSwiftSpec> >				TSwiftFinder;
+	typedef Pattern<TReadIndex, Swift<TSwiftSpec> >			TSwiftPattern;
 
 	// iterate all genomic sequences
 	if (options._debugLevel >= 1)
@@ -745,11 +751,10 @@ void findReads(
 			::std::cerr << "[rev]";
 	}
 
-	TReadIndex &readIndex = host(swiftPattern);
+	TReadSet &readSet = host(host(swiftPattern));
 	TSwiftFinder swiftFinder(genome, options.repeatLength, 1);
 
 	TMatch m = { 0, 0, 0, 0, 0, 0 };	// to supress uninitialized warnings
-	
 	// iterate all verification regions returned by SWIFT
 	while (find(swiftFinder, swiftPattern, options.errorRate, options._debugLevel)) 
 	{
@@ -758,7 +763,7 @@ void findReads(
 #ifdef RAZERS_MASK_READS
 			((options.readMask[rseqNo / options.WORD_SIZE] & (1ul << (rseqNo % options.WORD_SIZE))) != 0) &&
 #endif
-			matchVerify(m, range(swiftFinder, genome), rseqNo, readIndex, forwardPatterns, options, TSwiftSpec()))
+			matchVerify(m, range(swiftFinder, genome), rseqNo, readSet, forwardPatterns, options, TSwiftSpec()))
 		{
 			// transform coordinates to the forward strand
 			if (orientation == 'R') 
@@ -787,19 +792,19 @@ void findReads(
 			}
 
 			++options.TP;
-/*			::std::cerr << "\"" << range(swiftFinder, genomeInf) << "\"  ";
-			::std::cerr << hstkPos << " + ";
-			::std::cerr << ::std::endl;
-*/		} else {
+//			::std::cerr << "\"" << range(swiftFinder, genomeInf) << "\"  ";
+//			::std::cerr << hstkPos << " + ";
+//			::std::cerr << ::std::endl;
+		} else {
 			++options.FP;
-/*			::std::cerr << "\"" << range(swiftFinder, genomeInf) << "\"   \"" << range(swiftPattern) << "\"  ";
-			::std::cerr << rseqNo << " : ";
-			::std::cerr << hstkPos << " + ";
-			::std::cerr << bucketWidth << "  " << TP << ::std::endl;
-*/		}
+//			::std::cerr << "\"" << range(swiftFinder, genomeInf) << "\"   \"" << range(swiftPattern) << "\"  ";
+//			::std::cerr << rseqNo << " : ";
+//			::std::cerr << hstkPos << " + ";
+//			::std::cerr << bucketWidth << "  " << TP << ::std::endl;
+		}
 	}
 }
-
+#endif
 
 //////////////////////////////////////////////////////////////////////////////
 // Find read matches in many genome sequences (import from Fasta)
@@ -853,6 +858,7 @@ int mapReads(
 			_patternMatchNOfFinder(forwardPatterns[i], options.matchN);
 		}
 	}
+
 
 #ifdef RAZERS_MASK_READS
 	// init read mask

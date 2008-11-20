@@ -27,6 +27,7 @@
 #define RAZERS_MEMOPT			// optimize memory consumption
 #define RAZERS_MASK_READS		// remove matches with max-hits optimal hits on-the-fly
 //#define NO_PARAM_CHOOSER
+//#define RAZERS_PARALLEL			// parallelize using Intel's Threading Building Blocks
 
 #include "seqan/platform.h"
 #ifdef PLATFORM_WINDOWS
@@ -38,6 +39,10 @@
 #include "razers.h"
 #include "outputFormat.h"
 #include "paramChooser.h"
+
+#ifdef RAZERS_PARALLEL
+#include "razers_parallel.h"
+#endif
 
 #include <iostream>
 #include <sstream>
@@ -103,6 +108,11 @@ int mapReads(
 
 	//////////////////////////////////////////////////////////////////////////////
 	// Step 2: Find matches using SWIFT
+#ifdef RAZERS_PARALLEL
+    typedef typename RazerSOptions<TSpec>::TMutex TMutex;
+    options.patternMutex = new TMutex[length(readSet)];
+#endif
+
 	int error = mapReads(matches, genomeFileName, genomeNames, readSet, options);
 	if (error != 0)
 	{
@@ -118,6 +128,10 @@ int mapReads(
 		}
 		return error;
 	}
+
+#ifdef RAZERS_PARALLEL
+    delete[] options.patternMutex;
+#endif
 
 	//////////////////////////////////////////////////////////////////////////////
 	// Step 3: Remove duplicates and output matches
@@ -618,6 +632,10 @@ int main(int argc, const char *argv[])
 		}
 	}
 #endif	
+
+#ifdef RAZERS_PARALLEL
+	tbb::task_scheduler_init scheduler;
+#endif
 
 	int result = mapReads(fname[0], fname[1], errorPrbFileName.c_str(), options);
 	if (result == RAZERS_INVALID_SHAPE) 
