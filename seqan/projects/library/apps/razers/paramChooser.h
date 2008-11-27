@@ -36,7 +36,7 @@
 #include "recognitionRateDP.h"
 #include "readSimulator.h"
 
-
+#include <seqan/graph_utils.h>
 
 
 
@@ -56,118 +56,104 @@ template<typename TPath, typename TFilenameString>
 int 
 getDir(TPath dir, TFilenameString &files)
 {
-    typedef typename Value<TFilenameString>::Type TFilename;
-    DIR *dp;
-    struct dirent *dirp;
-    if((dp  = opendir(toCString(dir))) == NULL) {
-        ::std::cout << "Error(" << errno << ") opening " << dir << ::std::endl;
-        return errno;
-    }
+	typedef typename Value<TFilenameString>::Type TFilename;
+	DIR *dp;
+	struct dirent *dirp;
+	if((dp  = opendir(toCString(dir))) == NULL) {
+		::std::cout << "Error(" << errno << ") opening " << dir << ::std::endl;
+		return errno;
+	}
 
-    while ((dirp = readdir(dp)) != NULL) {
-	TFilename name = (::std::string(dirp->d_name)).c_str();
-        appendValue(files,name);
-//	cout <<  files[length(files)-1] << " ?\n";
-    }
-    closedir(dp);
-    return 0;
+	while ((dirp = readdir(dp)) != NULL) {
+		TFilename name = (::std::string(dirp->d_name)).c_str();
+		appendValue(files,name);
+		//cout <<  files[length(files)-1] << " ?\n";
+	}
+	closedir(dp);
+	return 0;
 }
 
 #endif
-	struct ParamChooserOptions
-	{
-             typedef double TFloat;
-            unsigned minThreshold;					// minimum value for threshold parameter 
-            unsigned maxWeight;                                           // maximum value of q
-            bool optionChooseOneGappedOnly;      // choose onegapped (or ungapped) shape (discard all other gapped shapes)
-            
-            
-            // global input parameters
-            unsigned totalN;				// sequence length
-            unsigned totalK;					// errors
-            TFloat optionLossRate;		// in
-            TFloat chosenLossRate;			// out
-            TFloat optionErrorRate;		// 
-            bool optionHammingOnly;
-            bool doUngapped;
-            bool doAllOneGapped;
-            bool doSelectedGapped;
-            
-            TFloat optionProbINSERT;
-            TFloat optionProbDELETE;
-            
-            // output parameters
-//            unsigned chosenQ;			//
-//            unsigned chosenThreshold;		//
-//            CharString chosenShape;			//
-            
-            ::std::string       paramFolderPath;
-            bool		fnameCount0;
-            bool		fnameCount1;
-            bool		prefixCount;
-            const char	*fname[2];
-            const char	*fprefix[1];
-            ::std::string		fparams;
-            ::std::string		fgparams;
-            bool		verbose;
 
-            int qualityCutoff;
-            bool		solexaQual;
-            char 		best_shape_folder[200];
-           bool 		best_shape_helpFolder;
-            String<bool> firstTimeK;
-            
-            ParamChooserOptions()
-            {
-                minThreshold = 1;					// minimum value for threshold parameter 
-                maxWeight = 14;                                           // maximum value of q
-                optionChooseOneGappedOnly = false;      // choose onegapped (or ungapped) shape (discard all other gapped shapes)
-                
-                
-                // global input parameters
-                totalN = 32;				// sequence length
-                totalK = 2;					// errors
-                optionLossRate = 0.01;		// in
-                chosenLossRate = 0.0;			// out
-                optionErrorRate = 0.05;		// 
-                optionHammingOnly = false;
+struct ParamChooserOptions
+{
+	typedef float TFloat;
+	unsigned minThreshold;					// minimum value for threshold parameter 
+	unsigned maxWeight;                                           // maximum value of q
+	bool optionChooseOneGappedOnly;      // choose onegapped (or ungapped) shape (discard all other gapped shapes)
+
+	// global input parameters
+	unsigned totalN;				// sequence length
+	unsigned totalK;					// errors
+	TFloat optionLossRate;		// in
+	TFloat chosenLossRate;			// out
+	TFloat optionErrorRate;		// 
+	bool optionHammingOnly;
+	bool doUngapped;
+	bool doAllOneGapped;
+	bool doSelectedGapped;
+
+	TFloat optionProbINSERT;
+	TFloat optionProbDELETE;
+
+	::std::string paramFolderPath;
+	bool fnameCount0;
+	bool fnameCount1;
+	bool prefixCount;
+	const char *fname[2];
+	const char *fprefix[1];
+	::std::string fparams;
+	::std::string fgparams;
+	bool verbose;
+
+	int qualityCutoff;
+	bool solexaQual;
+	char best_shape_folder[200];
+	bool best_shape_helpFolder;
+	String<bool> firstTimeK;
+
+	ParamChooserOptions()
+	{
+		minThreshold = 1;					// minimum value for threshold parameter 
+		maxWeight = 14;                                           // maximum value of q
+		optionChooseOneGappedOnly = false;      // choose onegapped (or ungapped) shape (discard all other gapped shapes)
+
+		// global input parameters
+		totalN = 32;				// sequence length
+		totalK = 2;					// errors
+		optionLossRate = 0.01;		// in
+		chosenLossRate = 0.0;			// out
+		optionErrorRate = 0.05;		// 
+		optionHammingOnly = false;
 #ifdef LOSSRATE_VALIDATION
-                doUngapped = true;
-                doAllOneGapped = false;
-                doSelectedGapped = false;
+		doUngapped = true;
+		doAllOneGapped = false;
+		doSelectedGapped = false;
 #else
-                doUngapped = false;
-                doAllOneGapped = false;
-                doSelectedGapped = true;
-                //doUngapped = false;
-                //doAllOneGapped = true;
-                //doSelectedGapped = false;
+		doUngapped = false;
+		doAllOneGapped = false;
+		doSelectedGapped = true;
+		//doUngapped = false;
+		//doAllOneGapped = true;
+		//doSelectedGapped = false;
 #endif
-                
-                optionProbINSERT = 0.0;
-                optionProbDELETE = 0.0;
-                
-                // output parameters
-               // unsigned chosenQ = 4;			//
-               // unsigned chosenThreshold = 2;		//
-               // CharString chosenShape;			//
-                
-//                qualityCutoff = 0;
-                qualityCutoff = 20;
-                paramFolderPath = "";
-                fnameCount0 = 0;
-                fnameCount1 = 0;
-                prefixCount = 0;
-                fname[0] = "";
-                fname[1] = "";
-                fprefix[0] =  "" ;
-                verbose = true;
-                solexaQual = true;
-                best_shape_helpFolder = false;
-            }
-            
-	// main options
-	};
+
+		optionProbINSERT = 0.0;
+		optionProbDELETE = 0.0;
+
+		qualityCutoff = 20;
+		paramFolderPath = "";
+		fnameCount0 = 0;
+		fnameCount1 = 0;
+		prefixCount = 0;
+		fname[0] = "";
+		fname[1] = "";
+		fprefix[0] =  "" ;
+		verbose = true;
+		solexaQual = true;
+		best_shape_helpFolder = false;
+	}
+};
 
 
 
@@ -194,71 +180,68 @@ _convertSolexaQual2PhredQual(TValue sq)
 }
 
 
-
 //////////////////////////////////////////////////////////////////////////////
 // Get parameters q and t optimal for given loss rate
 template<typename TFile, typename TSpec>
 bool
 parseParams(RazerSOptions<TSpec> & r_options, TFile & file, ParamChooserOptions & pm_options)
 {
-        typedef double TFloat;
-        unsigned countQ = 0;
-        unsigned countT = 0;
-        TFloat bestSoFar = 0.0;
-        unsigned bestQ = 1;
-        unsigned bestT = 0;
+	typedef float TFloat;
+	unsigned countQ = 0;
+	unsigned countT = 0;
+	TFloat bestSoFar = 0.0;
+	unsigned bestQ = 1;
+	unsigned bestT = 0;
 	unsigned secondBestT = 0;
-        //String<TFloat> loss;
-        //reserve(loss, 20*readLen);
 
-        char c = _streamGet(file);
+	char c = _streamGet(file);
 	if(_streamEOF(file)) ::std::cout << "Loss rate file is empty!\n";
 
-        while(!_streamEOF(file))
-        {
-                TFloat val = _parse_readEValue(file,c);
- //            ::std::cout << "\n"<<val;
-//              appendValue(loss,val);  //t=0
-                countT = 1;
-                while(!_streamEOF(file) && !(c == '\n' || (c == '\r' && _streamPeek(file) != '\n')))
-                {
-                        _parse_skipWhitespace(file,c);
-                        val = _parse_readEValue(file,c);
-  //                  ::std::cout << " " << val;
-//                      appendValue(loss,val);
-                        if( countT >= pm_options.minThreshold && val <= pm_options.optionLossRate /*&& val > bestSoFar*/)
-                        {
-                                bestSoFar=val;
-                                bestQ=countQ+1;
-                                bestT=countT;
-				if(bestQ==13)
-				{
-					secondBestT=countT;
-				}
-                        }
-                        ++countT;
-                }
-                ++countQ;
-		if(countQ>=pm_options.maxWeight)
-			break;
-                _parse_skipWhitespace(file,c);
-        }
-	if(bestT<1)
-        { ::std::cerr << "\n!!! Something wrong with file? !!!\n"; return false;}
-	pm_options.chosenLossRate = bestSoFar;
-        CharString chosenShape;
-        fill(chosenShape, bestQ, '1');
-        assign(r_options.shape,chosenShape);
-        r_options.threshold = bestT;
+	while(!_streamEOF(file))
+	{
+		TFloat val = _parse_readEValue(file,c);
+		countT = 1;
+		while(!_streamEOF(file) && !(c == '\n' || (c == '\r' && _streamPeek(file) != '\n')))
+		{
+			_parse_skipWhitespace(file,c);
+			val = _parse_readEValue(file,c);
+			
+			if( countT >= pm_options.minThreshold && val <= pm_options.optionLossRate /*&& val > bestSoFar*/)
+			{
+				bestSoFar=val;
+				bestQ=countQ+1;
+				bestT=countT;
+				if(bestQ==13) secondBestT=countT;
+				
+			}
+			++countT;
+		}
+		++countQ;
+		if(countQ>=pm_options.maxWeight) break;
+		_parse_skipWhitespace(file,c);
+	}
 
-        return true;
+	if(bestT<1)
+	{
+		::std::cerr << "\n!!! Something wrong with file? !!!\n";
+		return false;
+	}
+	pm_options.chosenLossRate = bestSoFar;
+	CharString chosenShape;
+	fill(chosenShape, bestQ, '1');
+	assign(r_options.shape,chosenShape);
+	r_options.threshold = bestT;
+
+	return true;
 }
+
+
 //compute average position dependent error distribution (assumes solexa qualtiy values in prb.txt format)
 template<typename TFile, typename TDistribution>
 void
 qualityDistributionFromPrbFile(TFile & file, TDistribution & avg, ParamChooserOptions & pm_options)
 {
-        typedef typename Value<TDistribution>::Type TFloat;
+	typedef typename Value<TDistribution>::Type TFloat;
 
 	String<TFloat> qualitySum;
 	String<int> count;
@@ -333,7 +316,7 @@ template<typename TFile, typename TDistribution>
 void
 qualityDistributionFromFastQFile(TFile & file, TDistribution & avg, ParamChooserOptions & pm_options)
 {
-        typedef typename Value<TDistribution>::Type TFloat;
+	typedef typename Value<TDistribution>::Type TFloat;
 
 	String<int> qualitySum, count;
 	fill(qualitySum,pm_options.totalN,0);
@@ -376,7 +359,7 @@ template<typename TFile, typename TDistribution>
 void
 qualityDistributionFromFastQIntFile(TFile & file, TDistribution & avg, ParamChooserOptions & pm_options)
 {
-        typedef typename Value<TDistribution>::Type TFloat;
+	typedef typename Value<TDistribution>::Type TFloat;
 
 	String<int> qualitySum, count;
 	fill(qualitySum,pm_options.totalN,0);
@@ -423,7 +406,7 @@ template<typename TPath, typename TError>
 void
 getAvgFromPrbDirectory(TPath prbPath, TError & errorDistribution, ParamChooserOptions & pm_options)
 {
-        typedef typename Value<TError>::Type TFloat;
+	typedef typename Value<TError>::Type TFloat;
 
 	fill(errorDistribution,pm_options.totalN,0.0);
 	
@@ -511,7 +494,7 @@ template<typename TError>
 void
 makeUngappedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 {
-        typedef typename Value<TError>::Type TFloat;
+	typedef typename Value<TError>::Type TFloat;
 
 	unsigned maxErrors = (unsigned) pm_options.totalN / 10;
 	if(maxErrors<5)maxErrors=5;
@@ -616,7 +599,7 @@ makeUngappedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// Returns the estimated minimum coverage of a shape with weight q, span s at threshold t
+// Returns the approximated minimum coverage of a one-gapped shape with weight q, span s at threshold t
 template<typename TValueQ, typename TValueS, typename TValueT>
 inline TValueS getMinCov(TValueQ q, TValueS s, TValueT t)
 {
@@ -636,77 +619,84 @@ void
 makeSelectedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 {
 
-        typedef typename Value<TError>::Type TFloat;
-	unsigned maxErrors = (unsigned) 1 + pm_options.totalN / 10;
-	unsigned minErrors = 0;
-        if(maxErrors<5 && pm_options.totalN > 30) maxErrors = 5;
-	unsigned minQ = 7;
-	unsigned maxT = pm_options.totalN-minQ+1;
-	unsigned minT = 0;//totalN-minQ+1;
+	typedef typename Value<TError>::Type TFloat;
+	unsigned maxErrors =  2 + (unsigned) pm_options.totalN / 10;
+	unsigned minErrors = (unsigned) pm_options.totalN / 10;
+	if(maxErrors<5 && pm_options.totalN >= 30) maxErrors = 5;
+	
+	unsigned minQ;
 
 	typedef typename Value<TError>::Type TErrorValue;
 	String<TErrorValue> logErrorDistribution;
 	
 	String<CharString> shapeStrings;
 
-	if(pm_options.totalN < 32)
-	{
-	//q=6
-	appendValue(shapeStrings,"111111");
-	appendValue(shapeStrings,"1111100001");
-	appendValue(shapeStrings,"11000000100100101");
-	}
+	//q=14
+	appendValue(shapeStrings,"11111111111111");
+	appendValue(shapeStrings,"1111111111100000111");
+	appendValue(shapeStrings,"11101110110001110110001");
+	appendValue(shapeStrings,"1111011010001110011011"); //all made up
 	
-	if(pm_options.totalN < 36)
-	{
-	//q=7
-	appendValue(shapeStrings,"1111111");
-	appendValue(shapeStrings,"1111100011");
-	appendValue(shapeStrings,"10110000001100101");
-	}
+	//q=13
+	appendValue(shapeStrings,"1111111111111");
+	appendValue(shapeStrings,"11111111110000111");
+	appendValue(shapeStrings,"110101111001100010111");  //made this one up -> find a better one!
 
-	if(pm_options.totalN < 40)
-	{
-	//q=8
-	appendValue(shapeStrings,"11111111");
-	appendValue(shapeStrings,"11111100011");
-	appendValue(shapeStrings,"101001111000101");  //median shape
-	}
-	
-	if(pm_options.totalN < 50)
-	{
-	//q=9
-	appendValue(shapeStrings,"111111111");
-	appendValue(shapeStrings,"111111100011");
-	appendValue(shapeStrings,"111001001010001011");
-	}
-
-	//q=10
-	appendValue(shapeStrings,"1111111111");
-	appendValue(shapeStrings,"1111111000111");
-	appendValue(shapeStrings,"111001001010011101");
+	//q=12
+	appendValue(shapeStrings,"111111111111");
+	appendValue(shapeStrings,"11111111100111");
+	appendValue(shapeStrings,"1110100111010011101");
 
 	//q=11
 	appendValue(shapeStrings,"11111111111");
 	appendValue(shapeStrings,"1111111001111");
 	appendValue(shapeStrings,"11111101110101");  //median shape
-	
-	//q=12
-	appendValue(shapeStrings,"111111111111");
-	appendValue(shapeStrings,"11111111100111");
-	appendValue(shapeStrings,"1110100111010011101");
-	
-	//q=13
- 	appendValue(shapeStrings,"1111111111111");
- 	appendValue(shapeStrings,"11111111110000111");
-	appendValue(shapeStrings,"110101111001100010111");  //made this one up
 
-	//q=14
- 	appendValue(shapeStrings,"11111111111111");
-	appendValue(shapeStrings,"1111111111100000111");
- 	appendValue(shapeStrings,"11101110110001110110001");
- 	appendValue(shapeStrings,"1111011010001110011011"); //all made up
-
+	//q=10
+	appendValue(shapeStrings,"1111111111");
+	appendValue(shapeStrings,"1111111000111");
+	appendValue(shapeStrings,"111001001010011101");
+	
+	minQ=10;
+	
+	if(pm_options.totalN < 50)
+	{
+		//q=9
+		appendValue(shapeStrings,"111111111");
+		appendValue(shapeStrings,"111111100011");
+		appendValue(shapeStrings,"111001001010001011");
+		minQ=9;
+	}
+	
+	if(pm_options.totalN < 40)
+	{
+		//q=8
+		appendValue(shapeStrings,"11111111");
+		appendValue(shapeStrings,"11111100011");
+		appendValue(shapeStrings,"101001111000101");  //median shape
+		minQ=8;
+	}
+	
+	if(pm_options.totalN < 36)
+	{
+		//q=7
+		appendValue(shapeStrings,"1111111");
+		appendValue(shapeStrings,"1111100011");
+		appendValue(shapeStrings,"10110000001100101");
+		minQ=7;
+	}
+	
+	if(pm_options.totalN < 32)
+	{
+		//q=6
+		appendValue(shapeStrings,"111111");
+		appendValue(shapeStrings,"1111100001");
+		appendValue(shapeStrings,"11000000100100101");
+		minQ=6;
+	}
+	
+	unsigned maxT = pm_options.totalN-minQ+1;
+	unsigned minT = 0;
 
 	String<unsigned> weights;
 	fill(weights,length(shapeStrings),0);
@@ -736,14 +726,14 @@ makeSelectedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 	simulateGenome(testGenome[0], 1000000);					// generate 1Mbp genomic sequence
 	simulateReads(
 		testReads, dummyIDs, testGenome, 
-		50000, maxErrors, logErrorDistribution, 0.5);	// generate 50K reads
+		50000, maxErrors+1, logErrorDistribution, 0.5);	// generate 50K reads
 #endif
 
 
 	
 	for(int i = length(shapeStrings)-1; i >= 0; --i)
 	{
-                if(length(shapeStrings[i])>pm_options.totalN) continue;
+		if(length(shapeStrings[i])>pm_options.totalN) continue;
 		String<TFloat> found;
 		resize(found,maxT*maxErrors);
 		
@@ -756,7 +746,6 @@ makeSelectedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 			bool highestOptimalFound = false;
 			for(unsigned t = maxT-1; t > minT; --t) {
 				TFloat lossrate = 1.0 - (TFloat) _transformBack(found[e*maxT+t]);
-			//	typename ::std::map<TFloat, unsigned>::iterator it, itlow, itup, itend, itbegin;
 				if(lossrate <= 0.0){
 					if(highestOptimalFound) break;
 					else highestOptimalFound = true;
@@ -815,11 +804,7 @@ makeSelectedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 				
 			} // t-loop
 		}
-
-	
 	}
-
-
 }
 
 
@@ -828,9 +813,9 @@ template<typename TError>
 void
 makeOneGappedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 {
-        typedef typename Value<TError>::Type TFloat;
+	typedef typename Value<TError>::Type TFloat;
 
-	unsigned maxE = (unsigned) pm_options.totalN / 10;
+	unsigned maxE = 2 + (unsigned) pm_options.totalN / 10;
 	if(maxE<5) maxE = 5;
 	unsigned minE = 0;				
 	unsigned maxQ = 14;				// weights are considered from minQ..maxQ
@@ -1002,7 +987,7 @@ getParamsFilename(TSStr & paramsfile, ParamChooserOptions & pm_options)
 
 
 //////////////////////////////////////////////////////////////////////////////
-
+/*
 template<typename TFile, typename TChar>
 inline void 
 _parse_skipWhitespace(TFile& file, TChar& c)
@@ -1012,7 +997,7 @@ _parse_skipWhitespace(TFile& file, TChar& c)
 		c = _streamGet(file);
 		if ((c!=' ') && (c != '\t') && (c != '\n') && (c != '\r')) break;
 	}
-}
+}*/
 
 template<typename TFile, typename TChar>
 inline void 
@@ -1046,11 +1031,11 @@ inline double
 _parse_readEValue(TFile & file, TChar& c)
 {
 SEQAN_CHECKPOINT
-        typedef double TFloat;
+
 	// Read number
 	String<char> str(c);
 	bool e = false;
-	TFloat val1 = 0;
+	double val1 = 0;
 	while (!_streamEOF(file)) {
 		c = _streamGet(file);
 		if(!e && c == 'e'){
@@ -1064,14 +1049,14 @@ SEQAN_CHECKPOINT
 	}
 	if(e)
 	{
-		return val1 * pow((TFloat)10.0,(TFloat)atof(toCString(str)));
+		return val1 * pow((double)10.0,(double)atof(toCString(str)));
 	}	
  	else 
-		return (TFloat)atof(toCString(str));
+		return (double)atof(toCString(str));
 }
 
 
-
+/*
 //////////////////////////////////////////////////////////////////////////////
 template<typename TFile, typename TChar>
 inline double
@@ -1127,7 +1112,7 @@ _parse_skipLine(TFile& file, TChar& c)
 	}
 	c = _streamGet(file);
 }
-
+*/
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TFile, typename TChar>
@@ -1176,7 +1161,7 @@ template<typename TFile, typename TSpec>
 bool
 parseGappedParams(RazerSOptions<TSpec> & r_options,TFile & file, ParamChooserOptions & pm_options)
 {
-        typedef double TFloat;
+	typedef float TFloat;
 	String<CharString> shapes;
 	resize(shapes,14); //best shape for each possible value of q
 	String<unsigned> thresholds;
@@ -1188,9 +1173,9 @@ parseGappedParams(RazerSOptions<TSpec> & r_options,TFile & file, ParamChooserOpt
 	
 	char c = _streamGet(file);
 	if(_streamEOF(file))
-        { 
-            if(pm_options.verbose) ::std::cerr << "Loss rate file is empty!" << ::std::endl;
-            return false;
+	{
+		if(pm_options.verbose) ::std::cerr << "Loss rate file is empty!" << ::std::endl;
+		return false;
         }
 	else
 	{
@@ -1203,20 +1188,20 @@ parseGappedParams(RazerSOptions<TSpec> & r_options,TFile & file, ParamChooserOpt
 	{
 		CharString currShape;
 		_parse_readShape(file, c, currShape);
-                if((pm_options.doUngapped && numGaps(currShape)>0) || (pm_options.optionChooseOneGappedOnly && numGaps(currShape)>1))
-                {
-                    _parse_skipLine(file,c); 
-                    continue;
-                }
-    //            if(!r_options.hammingOnly && numGaps(currShape)>0)
-    //            {
-    //                _parse_skipLine(file,c); 
-    //                continue;
-    //            }
-                _parse_skipWhitespace(file,c);
-                unsigned currThreshold = _parse_readNumber(file,c);
-        	_parse_skipWhitespace(file,c);
-                TFloat currLossrate = _parse_readEValue(file,c);
+		if((pm_options.doUngapped && numGaps(currShape)>0) || (pm_options.optionChooseOneGappedOnly && numGaps(currShape)>1))
+		{
+			_parse_skipLine(file,c); 
+			continue;
+		}
+	//            if(!r_options.hammingOnly && numGaps(currShape)>0)
+	//            {
+	//                _parse_skipLine(file,c); 
+	//                continue;
+	//            }
+		_parse_skipWhitespace(file,c);
+		unsigned currThreshold = _parse_readNumber(file,c);
+		_parse_skipWhitespace(file,c);
+		TFloat currLossrate = _parse_readEValue(file,c);
 		_parse_skipWhitespace(file,c);
 		unsigned currMeasure = _parse_readNumber(file,c); //minCov in the case of oneGapped
 
@@ -1229,7 +1214,7 @@ parseGappedParams(RazerSOptions<TSpec> & r_options,TFile & file, ParamChooserOpt
 //#endif
 		if(currThreshold >= pm_options.minThreshold && currLossrate <= pm_options.optionLossRate /*&& val > bestSoFar*/)
 		{
-		
+			
 			unsigned weight = 0;
 			for(unsigned pos = 0; pos < length(currShape) ; ++pos)
 				if(currShape[pos] == '1')
@@ -1309,9 +1294,8 @@ parseGappedParams(RazerSOptions<TSpec> & r_options,TFile & file, ParamChooserOpt
 	assign(r_options.shape, shapes[i]);
 	r_options.threshold = thresholds[i];
 	// suggest a suitable combination of q and t
-
-        return true;
-//        return false;
+	
+	return true;
 }
 
 
@@ -1320,7 +1304,7 @@ template<typename TSpec>
 bool
 chooseParams(RazerSOptions<TSpec> & r_options, ParamChooserOptions & pm_options)
 {
-        typedef double TFloat;
+	typedef float TFloat;
 	static const TFloat epsilon = 0.00000000001;	
 	pm_options.optionLossRate += epsilon;
 
