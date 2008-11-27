@@ -633,38 +633,85 @@ makeSelectedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 
 	//q=14
 	appendValue(shapeStrings,"11111111111111");
-	appendValue(shapeStrings,"1111111111100000111");
-	appendValue(shapeStrings,"11101110110001110110001");
-	appendValue(shapeStrings,"1111011010001110011011"); //all made up
-	
+	if(pm_options.optionHammingOnly)
+	{
+		appendValue(shapeStrings,"1111111111100000111");
+		appendValue(shapeStrings,"11101110110001110110001");
+		appendValue(shapeStrings,"1111011010001110011011"); //all made up
+	}
+	else
+	{
+		appendValue(shapeStrings,"1111111111100111");
+		appendValue(shapeStrings,"111111111111101");
+	}
+
 	//q=13
 	appendValue(shapeStrings,"1111111111111");
-	appendValue(shapeStrings,"11111111110000111");
-	appendValue(shapeStrings,"110101111001100010111");  //made this one up -> find a better one!
+	if(pm_options.optionHammingOnly)
+	{
+		appendValue(shapeStrings,"11111111110000111");
+		appendValue(shapeStrings,"110101111001100010111");  //made this one up -> find a better one!
+	}
+	else
+	{
+		appendValue(shapeStrings,"111111111100111");
+		appendValue(shapeStrings,"11111111111101");
+	}
 
 	//q=12
 	appendValue(shapeStrings,"111111111111");
-	appendValue(shapeStrings,"11111111100111");
-	appendValue(shapeStrings,"1110100111010011101");
+	if(pm_options.optionHammingOnly)
+	{
+		appendValue(shapeStrings,"111111111000111");
+		appendValue(shapeStrings,"1110100111010011101");
+	}
+	else
+	{
+		appendValue(shapeStrings,"11111111100111");
+		appendValue(shapeStrings,"1111111111101");
+	}
 
 	//q=11
 	appendValue(shapeStrings,"11111111111");
-	appendValue(shapeStrings,"1111111001111");
-	appendValue(shapeStrings,"11111101110101");  //median shape
-
+	if(pm_options.optionHammingOnly)
+	{
+		appendValue(shapeStrings,"11111110001111");
+		appendValue(shapeStrings,"11111101110101");  //median shape
+	}
+	else
+	{
+		appendValue(shapeStrings,"1111111100111");
+		appendValue(shapeStrings,"111111111101");
+	}
 	//q=10
 	appendValue(shapeStrings,"1111111111");
-	appendValue(shapeStrings,"1111111000111");
-	appendValue(shapeStrings,"111001001010011101");
-	
+	if(pm_options.optionHammingOnly)
+	{
+		appendValue(shapeStrings,"1111111000111");
+		appendValue(shapeStrings,"111001001010011101");
+	}
+	else
+	{
+		appendValue(shapeStrings,"111111100111");
+		appendValue(shapeStrings,"11111111101");
+	}
+
 	minQ=10;
 	
 	if(pm_options.totalN < 50)
 	{
 		//q=9
 		appendValue(shapeStrings,"111111111");
-		appendValue(shapeStrings,"111111100011");
-		appendValue(shapeStrings,"111001001010001011");
+		if(pm_options.optionHammingOnly)
+		{
+			appendValue(shapeStrings,"111111100011");
+			appendValue(shapeStrings,"111001001010001011");
+		}
+		else
+		{
+			appendValue(shapeStrings,"11111110011");
+			appendValue(shapeStrings,"1111111101");
+		}
 		minQ=9;
 	}
 	
@@ -672,8 +719,16 @@ makeSelectedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 	{
 		//q=8
 		appendValue(shapeStrings,"11111111");
-		appendValue(shapeStrings,"11111100011");
-		appendValue(shapeStrings,"101001111000101");  //median shape
+		if(pm_options.optionHammingOnly)
+		{
+			appendValue(shapeStrings,"11111100011");
+			appendValue(shapeStrings,"101001111000101");  //median shape
+		}
+		else
+		{
+			appendValue(shapeStrings,"1111110011");
+			appendValue(shapeStrings,"111111101");
+		}
 		minQ=8;
 	}
 	
@@ -681,8 +736,16 @@ makeSelectedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 	{
 		//q=7
 		appendValue(shapeStrings,"1111111");
-		appendValue(shapeStrings,"1111100011");
-		appendValue(shapeStrings,"10110000001100101");
+		if(pm_options.optionHammingOnly)
+		{
+			appendValue(shapeStrings,"1111100011");
+			appendValue(shapeStrings,"10110000001100101");
+		}
+		else
+		{
+			appendValue(shapeStrings,"111110011");
+			appendValue(shapeStrings,"11111101");
+		}
 		minQ=7;
 	}
 	
@@ -690,8 +753,16 @@ makeSelectedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 	{
 		//q=6
 		appendValue(shapeStrings,"111111");
-		appendValue(shapeStrings,"1111100001");
-		appendValue(shapeStrings,"11000000100100101");
+		if(pm_options.optionHammingOnly)
+		{
+			appendValue(shapeStrings,"1111100001");
+			appendValue(shapeStrings,"11000000100100101");
+		}
+		else
+		{
+			appendValue(shapeStrings,"11111001");
+			appendValue(shapeStrings,"1111101");
+		}
 		minQ=6;
 	}
 	
