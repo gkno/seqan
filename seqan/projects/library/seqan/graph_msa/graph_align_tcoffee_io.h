@@ -609,7 +609,7 @@ read(TFile & file,
 		_parse_skipWhitespace(file, c);
 		_parse_readIdentifier(file, c);
 		_parse_skipWhitespace(file, c);
-		_parse_readDouble(file, c);
+		TScoreValue rawScore = (TScoreValue) _parse_readDouble(file, c);
 
 		bool reversed = false;
 		if (beg1 > end1) { TSize tmp = beg1; beg1 = end1; end1 = tmp; reversed = !reversed; }
@@ -620,7 +620,7 @@ read(TFile & file,
 		//std::cout << infix(strSet[seq2Id], beg2, beg2+len) << std::endl;
 
 		__includeFragment(matches, seq1Id, --beg1, seq2Id, --beg2, len, reversed);
-		appendValue(scores, (TScoreValue) len);
+		appendValue(scores, rawScore);
 		_parse_skipLine(file, c);
 	}
 }
