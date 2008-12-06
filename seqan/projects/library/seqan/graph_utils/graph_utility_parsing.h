@@ -181,6 +181,35 @@ _parse_readWord(TFile & file, TChar& c)
 }
 
 
+//read filename (read line and trim trailing whitespaces)
+template<typename TFile, typename TChar>
+inline String<char>
+_parse_readFilepath(TFile& file, TChar& c)
+{
+	String<char> str(c);
+	if (c == '\n' || (c == '\r' && _streamPeek(file) != '\n')) {
+		c = _streamGet(file);
+		return str;
+	}
+	while (!_streamEOF(file)) {
+		c = _streamGet(file);
+		if (c == '\n' || (c == '\r' && _streamPeek(file) != '\n')) break;
+		append(str, c);
+	}
+	typename Iterator<String<char>,Rooted >::Type str_it = end(str);	
+	while(str_it != begin(str)) {
+		--str_it;
+		if(*str_it != ' ' && *str_it != '\t'){
+		++str_it;
+		break;
+		}
+	}
+	resize(str,position(str_it));
+	return str;
+}
+
+
+
 
 
 
