@@ -205,12 +205,13 @@ template <
 	typename TSpec
 >
 void dumpMatches(
-	TMatches &matches,					// forward/reverse matches
-	TGenomeNames const &genomeIDs,		// Read names (read from Fasta file, currently unused)
-	::std::string genomeFName,			// genome name (e.g. "hs_ref_chr1.fa")
-	TReads const &reads,				// Read sequences
-	TReadNames const &readIDs,			// Read names (read from Fasta file, currently unused)
-	::std::string readFName,			// read name (e.g. "reads.fa")
+	TMatches &matches,							// forward/reverse matches
+	TGenomeNames const &genomeIDs,				// Read names (read from Fasta file, currently unused)
+	StringSet<CharString> &genomeFileNameList,	// list of genome names (e.g. {"hs_ref_chr1.fa","hs_ref_chr2.fa"})
+	::std::map<unsigned,::std::pair< ::std::string,unsigned> > gnoToFileMap, //map to retrieve genome filename and sequence number within that file
+	TReads const &reads,						// Read sequences
+	TReadNames const &readIDs,					// Read names (read from Fasta file, currently unused)
+	::std::string readFName,					// read name (e.g. "reads.fa")
 	::std::string errorPrbFileName,
 	RazerSOptions<TSpec> &options)
 {
@@ -238,7 +239,7 @@ void dumpMatches(
 	// load Genome sequences for alignment dumps
 	TGenomeSet genomes;
 	if (options.dumpAlignment || !errorPrbFileName.empty())
-		if (!loadGenomes(genomes, genomeFName.c_str())) {
+		if (!loadGenomes(genomes, genomeFileNameList)) {
 			::std::cerr << "Failed to load genomes" << ::std::endl;
 			options.dumpAlignment = false;
 		}
@@ -252,14 +253,8 @@ void dumpMatches(
 	for (unsigned l = length(genomes); l > 9; l = l / 10)
 		++gzeros;
 
-
-	// remove the directory prefix of genomeFName and readFName
-	size_t lastPos = genomeFName.find_last_of('/') + 1;
-	if (lastPos == genomeFName.npos) lastPos = genomeFName.find_last_of('\\') + 1;
-	if (lastPos == genomeFName.npos) lastPos = 0;
-	::std::string genomeName = genomeFName.substr(lastPos);
-
-	lastPos = readFName.find_last_of('/') + 1;
+	// remove the directory prefix of readFName
+	size_t lastPos = readFName.find_last_of('/') + 1;
 	if (lastPos == readFName.npos) lastPos = readFName.find_last_of('\\') + 1;
 	if (lastPos == readFName.npos) lastPos = 0;
 	::std::string readName = readFName.substr(lastPos);
@@ -357,7 +352,7 @@ void dumpMatches(
 					// 1..filename is the read filename + seqNo
 					case 1:
 						file.fill('0');
-						file << genomeName << '#' << ::std::setw(gzeros) << (*it).gseqNo + 1;
+						file << gnoToFileMap[(*it).gseqNo].first << '#' << ::std::setw(gzeros) << gnoToFileMap[(*it).gseqNo].second + 1;
 				}
 
 				file << ',' << ((*it).gBegin + options.positionFormat) << ',' << (*it).gEnd << ',' << ::std::setprecision(5) << percId << ::std::endl;
@@ -479,7 +474,7 @@ void dumpMatches(
 							// 1..filename is the read filename + seqNo
 							case 1:
 								file.fill('0');
-								file << genomeName << '#' << ::std::setw(gzeros) << (*it).gseqNo + 1;
+								file << gnoToFileMap[(*it).gseqNo].first << '#' << ::std::setw(gzeros) << gnoToFileMap[(*it).gseqNo].second + 1;
 						}
 						
 						if ((*it).orientation == 'F')

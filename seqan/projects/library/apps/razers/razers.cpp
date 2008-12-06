@@ -93,7 +93,7 @@ int mapReads(
 	options.errorRate += 0.0000001;
 
 	//////////////////////////////////////////////////////////////////////////////
-	// Step 1: Load fasta files
+	// Step 1: Load fasta files and determine genome file type
 	SEQAN_PROTIMESTART(load_time);
 
 	if (!loadReads(readSet, readNames, readFileName, options)) {
@@ -106,6 +106,15 @@ int mapReads(
 	if (options._debugLevel >= 1)
 		::std::cerr << "Loading reads took               \t" << options.timeLoadFiles << " seconds" << ::std::endl;
 
+	StringSet<CharString> genomeFileNameList;
+	int result = getGenomeFileNameList(genomeFileName, genomeFileNameList, options);
+	if(result == RAZERS_GENOME_FAILED)
+	{
+		::std::cerr << "Failed to open genome file " << genomeFileName << ::std::endl;
+		return result;
+	}
+
+
 	//////////////////////////////////////////////////////////////////////////////
 	// Step 2: Find matches using SWIFT
 #ifdef RAZERS_PARALLEL
@@ -113,7 +122,8 @@ int mapReads(
     options.patternMutex = new TMutex[length(readSet)];
 #endif
 
-	int error = mapReads(matches, genomeFileName, genomeNames, readSet, options);
+	::std::map<unsigned,::std::pair< ::std::string,unsigned> > gnoToFileMap; //map to retrieve genome filename and sequence number within that file
+	int error = mapReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, options);
 	if (error != 0)
 	{
 		switch (error)
@@ -136,7 +146,7 @@ int mapReads(
 	//////////////////////////////////////////////////////////////////////////////
 	// Step 3: Remove duplicates and output matches
 	if (!options.spec.DONT_DUMP_RESULTS)
-		dumpMatches(matches, genomeNames, genomeFileName, readSet, readNames, readFileName, errorPrbFileName, options);
+		dumpMatches(matches, genomeNames, genomeFileNameList, gnoToFileMap, readSet, readNames, readFileName, errorPrbFileName, options);
 
 	return 0;
 }	
@@ -226,6 +236,48 @@ int estimateReadLength(char const *fileName)
 	read(file, dummy, Fasta());			// read first Read sequence
 	file.close();
 	return length(dummy);
+}
+
+template<typename TSpec>
+int getGenomeFileNameList(char const * filename, StringSet<CharString> & genomeFileNames, RazerSOptions<TSpec> &options)
+{
+	::std::ifstream file;
+	file.open(filename,::std::ios_base::in | ::std::ios_base::binary);
+	if(!file.is_open())
+		return RAZERS_GENOME_FAILED;
+
+	char c = _streamGet(file);
+	if (c != '>')			//if file does not start with a fasta header --> list of multiple reference genome files
+	{
+		if(options._debugLevel >=1)
+			::std::cout << ::std::endl << "Reading multiple genome files:" <<::std::endl;
+		
+		//locations of genome files are relative to list file's location
+		::std::string tempGenomeFile(filename);
+		size_t lastPos = tempGenomeFile.find_last_of('/') + 1;
+		if (lastPos == tempGenomeFile.npos) lastPos = tempGenomeFile.find_last_of('\\') + 1;
+		if (lastPos == tempGenomeFile.npos) lastPos = 0;
+		::std::string filePrefix = tempGenomeFile.substr(0,lastPos);
+		unsigned i = 1;
+		while(!_streamEOF(file))
+		{ 
+			_parse_skipWhitespace(file, c);
+			CharString currentGenomeFile(filePrefix);
+			append(currentGenomeFile,_parse_readFilepath(file,c));
+			appendValue(genomeFileNames,currentGenomeFile);
+			if(options._debugLevel >=2)
+				::std::cout <<"Genome file #"<< i <<": " << genomeFileNames[length(genomeFileNames)-1] << ::std::endl;
+			++i;
+			_parse_skipWhitespace(file, c);
+		}
+		if(options._debugLevel >=1)
+			::std::cout << i-1 << " genome files total." <<::std::endl;
+	}
+	else		//if file starts with a fasta header --> regular one-genome-file input
+		appendValue(genomeFileNames,filename);
+	file.close();
+	return 0;
+
 }
 
 

@@ -325,7 +325,7 @@ bool loadReads(TReadSet &reads, TNameSet &fastaIDs, const char *fileName, TRazer
 	return (seqCount > 0);
 }
 
-
+/*
 //////////////////////////////////////////////////////////////////////////////
 // Load multi-Fasta sequences
 template <typename TGenomeSet>
@@ -341,8 +341,32 @@ bool loadGenomes(TGenomeSet &genomes, const char *fileName)
 		assignSeq(genomes[i], multiFasta[i], Fasta());		// read Genome sequence
 
 	return (seqCount > 0);
-}
+}*/
 
+//////////////////////////////////////////////////////////////////////////////
+// Load multi-Fasta sequences from multiple files
+template <typename TGenomeSet>
+bool loadGenomes(TGenomeSet &genomes, StringSet<CharString> &fileNameList)
+{
+	unsigned gSeqNo = 0;
+	unsigned filecount = 0;
+	while(filecount < length(fileNameList))
+	{
+		MultiFasta multiFasta;
+		if (!open(multiFasta.concat, toCString(fileNameList[filecount]), OPEN_RDONLY)) return false;
+		split(multiFasta, Fasta());
+
+		unsigned seqCount = length(multiFasta);
+		if(length(genomes) < gSeqNo+seqCount) 
+			resize(genomes,gSeqNo+seqCount);
+		for(unsigned i = 0; i < seqCount; ++i)
+			assignSeq(genomes[gSeqNo+i], multiFasta[i], Fasta());		// read Genome sequence
+		gSeqNo += seqCount;
+		++filecount;
+	}
+	resize(genomes,gSeqNo);
+	return (gSeqNo > 0);
+}
 
 	template <typename TReadMatch>
 	struct LessRNoGPos : public ::std::binary_function < TReadMatch, TReadMatch, bool >
@@ -816,8 +840,9 @@ template <
 	typename TSwiftSpec >
 int mapReads(
 	TMatches &				matches,
-	const char *			genomeFileName,
+	StringSet<CharString> &	genomeFileNameList,
 	StringSet<CharString> &	genomeNames,	// genome names, taken from the Fasta file
+	::std::map<unsigned,::std::pair< ::std::string,unsigned> > & gnoToFileMap,
 	TReadSet const &		readSet,
 	RazerSOptions<TSpec> &	options,
 	TShape const &			shape,
@@ -828,11 +853,19 @@ int mapReads(
 	typedef Pattern<TIndex, Swift<TSwiftSpec> >			TSwiftPattern;	// filter
 	typedef Pattern<TRead, MyersUkkonen>				TMyersPattern;	// verifier
 
-	// open genome file	
-	::std::ifstream file;
-	file.open(genomeFileName, ::std::ios_base::in | ::std::ios_base::binary);
-	if (!file.is_open())
-		return RAZERS_GENOME_FAILED;
+/*	// try opening each genome file once before running the whole mapping procedure
+	int filecount = 0;
+	int numFiles = length(genomeFileNameList);
+	while(filecount < numFiles)
+	{
+		::std::ifstream file;
+		file.open(toCString(genomeFileNameList[filecount]), ::std::ios_base::in | ::std::ios_base::binary);
+		if (!file.is_open())
+			return RAZERS_GENOME_FAILED;
+		file.close();
+		++filecount;
+	}
+	*/
 
 	// configure q-gram index
 	TIndex swiftIndex(readSet, shape);
@@ -859,7 +892,6 @@ int mapReads(
 		}
 	}
 
-
 #ifdef RAZERS_MASK_READS
 	// init read mask
 	clear(options.readMask);
@@ -872,32 +904,58 @@ int mapReads(
 	options.timeMapReads = 0;
 	options.timeDumpResults = 0;
 
-	CharString	id;
-	Dna5String	genome;
+	unsigned filecount = 0;
+	unsigned numFiles = length(genomeFileNameList);
+	unsigned gseqNo = 0;
 
-	// iterate over genome sequences
-	SEQAN_PROTIMESTART(find_time);
-	for(unsigned gseqNo = 0; !_streamEOF(file); ++gseqNo)
+	// open genome files, one by one	
+	while (filecount < numFiles)
 	{
-		if (options.genomeNaming == 0)
+		// open genome file	
+		::std::ifstream file;
+		file.open(toCString(genomeFileNameList[filecount]), ::std::ios_base::in | ::std::ios_base::binary);
+		if (!file.is_open())
+			return RAZERS_GENOME_FAILED;
+
+		// remove the directory prefix of current genome file
+		::std::string genomeFile(toCString(genomeFileNameList[filecount]));
+		size_t lastPos = genomeFile.find_last_of('/') + 1;
+		if (lastPos == genomeFile.npos) lastPos = genomeFile.find_last_of('\\') + 1;
+		if (lastPos == genomeFile.npos) lastPos = 0;
+		::std::string genomeName = genomeFile.substr(lastPos);
+		
+
+		CharString	id;
+		Dna5String	genome;
+		unsigned gseqNoWithinFile = 0;
+		// iterate over genome sequences
+		SEQAN_PROTIMESTART(find_time);
+		for(; !_streamEOF(file); ++gseqNo)
 		{
-			readID(file, id, Fasta());			// read Fasta id
-			appendValue(genomeNames, id, Generous());
+			if (options.genomeNaming == 0)
+			{
+				readID(file, id, Fasta());			// read Fasta id
+				appendValue(genomeNames, id, Generous());
+			}
+			read(file, genome, Fasta());			// read Fasta sequence
+			
+			gnoToFileMap.insert(::std::make_pair<unsigned,::std::pair< ::std::string,unsigned> >(gseqNo,::std::make_pair< ::std::string,unsigned>(genomeName,gseqNoWithinFile)));
+			
+			if (options.forward)
+				findReads(matches, genome, gseqNo, swiftPattern, forwardPatterns, 'F', options);
+
+			if (options.reverse)
+			{
+				reverseComplementInPlace(genome);
+				findReads(matches, genome, gseqNo, swiftPattern, forwardPatterns, 'R', options);
+			}
+			++gseqNoWithinFile;
+
 		}
-		read(file, genome, Fasta());			// read Fasta sequence
-
-		if (options.forward)
-			findReads(matches, genome, gseqNo, swiftPattern, forwardPatterns, 'F', options);
-
-		if (options.reverse)
-		{
-			reverseComplementInPlace(genome);
-			findReads(matches, genome, gseqNo, swiftPattern, forwardPatterns, 'R', options);
-		}
-
+		options.timeMapReads += SEQAN_PROTIMEDIFF(find_time);
+		file.close();
+		++filecount;
 	}
-	options.timeMapReads += SEQAN_PROTIMEDIFF(find_time);
-	file.close();
 
 	if (options._debugLevel >= 1)
 		::std::cerr << ::std::endl << "Finding reads took               \t" << options.timeMapReads << " seconds" << ::std::endl;
@@ -1000,8 +1058,9 @@ int mapReads(
 template <typename TMatches, typename TReadSet, typename TSpec>
 int mapReads(
 	TMatches &				matches,
-	const char *			genomeFileName,
+	StringSet<CharString> &	genomeFileNameList,
 	StringSet<CharString> &	genomeNames,	// genome names, taken from the Fasta file
+	::std::map<unsigned,::std::pair< ::std::string,unsigned> > & gnoToFileMap,
 	TReadSet const &		readSet, 
 	RazerSOptions<TSpec> &	options)
 {
@@ -1015,24 +1074,24 @@ int mapReads(
 	{
 		// select best-fitting shape
 		if (stringToShape(ungapped, options.shape))
-			return mapReads(matches, genomeFileName, genomeNames, readSet, options, ungapped, Swift<SwiftSemiGlobalHamming>());
+			return mapReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, options, ungapped, Swift<SwiftSemiGlobalHamming>());
 		
 		if (stringToShape(onegapped, options.shape))
-			return mapReads(matches, genomeFileName, genomeNames, readSet, options, onegapped, Swift<SwiftSemiGlobalHamming>());
+			return mapReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, options, onegapped, Swift<SwiftSemiGlobalHamming>());
 
 		if (stringToShape(gapped, options.shape))
-			return mapReads(matches, genomeFileName, genomeNames, readSet, options, gapped, Swift<SwiftSemiGlobalHamming>());
+			return mapReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, options, gapped, Swift<SwiftSemiGlobalHamming>());
 	} 
 	else 
 	{
 		if (stringToShape(ungapped, options.shape))
-			return mapReads(matches, genomeFileName, genomeNames, readSet, options, ungapped, Swift<SwiftSemiGlobal>());
+			return mapReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, options, ungapped, Swift<SwiftSemiGlobal>());
 		
 		if (stringToShape(onegapped, options.shape))
-			return mapReads(matches, genomeFileName, genomeNames, readSet, options, onegapped, Swift<SwiftSemiGlobal>());
+			return mapReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, options, onegapped, Swift<SwiftSemiGlobal>());
 
 		if (stringToShape(gapped, options.shape))
-			return mapReads(matches, genomeFileName, genomeNames, readSet, options, gapped, Swift<SwiftSemiGlobal>());
+			return mapReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, options, gapped, Swift<SwiftSemiGlobal>());
 	}
 
 	return RAZERS_INVALID_SHAPE;
