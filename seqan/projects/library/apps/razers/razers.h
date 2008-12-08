@@ -95,6 +95,12 @@ namespace SEQAN_NAMESPACE_MAIN
 		double		timeMapReads;		// time for mapping reads
 		double		timeDumpResults;	// time for dumping the results
 
+#ifdef RAZERS_DUMP_SNPS
+		bool bayesian;
+		double testLevel;
+		const char	*outputSNP;			// name of result file
+#endif
+
 	// misc
 		unsigned	compactThresh;		// compact match array if larger than compactThresh
 #ifdef RAZERS_MASK_READS
@@ -145,6 +151,13 @@ namespace SEQAN_NAMESPACE_MAIN
 			compMask[4] = 0;
 
 			compactThresh = 1024;
+
+#ifdef RAZERS_DUMP_SNPS
+			bayesian = true;
+			testLevel = 0.05;
+			outputSNP = "";
+#endif
+
 		}
 	};
 

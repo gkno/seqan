@@ -208,7 +208,7 @@ void dumpMatches(
 	TMatches &matches,							// forward/reverse matches
 	TGenomeNames const &genomeIDs,				// Read names (read from Fasta file, currently unused)
 	StringSet<CharString> &genomeFileNameList,	// list of genome names (e.g. {"hs_ref_chr1.fa","hs_ref_chr2.fa"})
-	::std::map<unsigned,::std::pair< ::std::string,unsigned> > gnoToFileMap, //map to retrieve genome filename and sequence number within that file
+	::std::map<unsigned,::std::pair< ::std::string,unsigned> > &gnoToFileMap, //map to retrieve genome filename and sequence number within that file
 	TReads const &reads,						// Read sequences
 	TReadNames const &readIDs,					// Read names (read from Fasta file, currently unused)
 	::std::string readFName,					// read name (e.g. "reads.fa")
@@ -227,6 +227,7 @@ void dumpMatches(
 		options.positionFormat = 1;	// bases in file are numbered starting at 1
 		options.dumpAlignment = options.hammingOnly;
 	}
+
 
 	// error profile
 	unsigned maxReadLength = 0;
@@ -365,6 +366,7 @@ void dumpMatches(
 					globalAlignment(align, scoreType);
 					dumpAlignment(file, align);
 				}
+
 			}
 			break;
 
@@ -538,7 +540,169 @@ void dumpMatches(
 		::std::cerr << "Dumping results took             \t" << options.timeDumpResults << " seconds" << ::std::endl;
 }
 
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+// Output SNPs
+// Simple SNP calling, under construction
+template <
+	typename TMatches,
+	typename TGenomeNames,
+	typename TReads,
+	typename TReadNames,
+	typename TSpec
+>
+void dumpSNPs(
+	TMatches &matches,							// forward/reverse matches
+	TGenomeNames const &genomeIDs,				// Read names (read from Fasta file, currently unused)
+	StringSet<CharString> &genomeFileNameList,	// list of genome names (e.g. {"hs_ref_chr1.fa","hs_ref_chr2.fa"})
+	::std::map<unsigned,::std::pair< ::std::string,unsigned> > &, //map to retrieve genome filename and sequence number within that file
+	TReads const &reads,						// Read sequences
+	TReadNames const &readIDs,					// Read names (read from Fasta file, currently unused)
+	::std::string readFName,					// read name (e.g. "reads.fa")
+	RazerSOptions<TSpec> &options)
+{
+	typedef typename Value<TMatches>::Type		TMatch;
+	typedef typename Value<TReads>::Type		TRead;
+	typedef typename Value<TGenomeSet>::Type	TGenome;
+	typedef typename TMatch::TGPos				TGPos;
+
+	if(!options.hammingOnly)
+	{
+		::std::cout << "SNP calling only implemented for Hamming distance mapping." << ::std::endl;
+		return;
+	}
+
+	// matches need to be ordered accordign to genome position
+	if(options.sortOrder != 1) 
+		::std::sort(begin(matches, Standard()),	end(matches, Standard()), LessGPosRNo<TMatch>());		
+
+	//	options.maxHits = 1;		// only take into account best unique matches
+
+	SEQAN_PROTIMESTART(dump_time);
+
+	// load Genome sequences for alignment dumps
+	TGenomeSet genomes;
+	if (!loadGenomes(genomes, genomeFileNameList)) 
+	{
+		::std::cerr << "Failed to load genomes" << ::std::endl;
+		return;
+	}
+
+	// remove the directory prefix of readFName
+	size_t lastPos = readFName.find_last_of('/') + 1;
+	if (lastPos == readFName.npos) lastPos = readFName.find_last_of('\\') + 1;
+	if (lastPos == readFName.npos) lastPos = 0;
+	::std::string readName = readFName.substr(lastPos);
+
+	Align<String<Dna5>, ArrayGaps> align;
+	Score<int> scoreType = Score<int>(0, -999, -1001, -1000);	// levenshtein-score (match, mismatch, gapOpen, gapExtend)
+	scoreType.data_mismatch = -1;
+	resize(rows(align), 2);
+
+	::std::ofstream file;
+	::std::ostringstream fileName;
+	if (*options.outputSNP != 0)
+		fileName << options.outputSNP;
+	else
+		fileName << readFName << ".snp";
+
+	file.open(fileName.str().c_str(), ::std::ios_base::out | ::std::ios_base::trunc);
+	if (!file.is_open()) 
+	{
+		::std::cerr << "Failed to open output file" << ::std::endl;
+		return;
+	}
+
+//	maskDuplicates(matches);
+//	compactMatches(matches, options);
+
+	typedef typename Iterator<TMatches, Standard>::Type TMatchIterator;
+
+	TMatchIterator matchIt = begin(matches, Standard());
+	TMatchIterator matchItEnd = end(matches, Standard());	
+	
+	//collect candidate SNP positions   //TODO: consider multiple genomes!!!
+	::std::set<unsigned> candidates;
+	for(; matchIt != matchItEnd; ++matchIt) 
+	{
+		if ((*matchIt).editDist > 0) 
+		{
+			::std::cout << "dist > 0" << ::std::endl;
+			Dna5String gInf = infix(genomes[(*matchIt).gseqNo], (*matchIt).gBegin, (*matchIt).gEnd);
+			if ((*matchIt).orientation == 'R')
+				reverseComplementInPlace(gInf);
+			
+			for (unsigned i = 0; i < length(gInf); ++i)
+			{
+				if ((options.compMask[ordValue(reads[(*matchIt).rseqNo][i])] & options.compMask[ordValue(gInf[i])]) == 0)
+					if ((*matchIt).orientation == 'R')
+						candidates.insert((*matchIt).gEnd-i-1);
+					else
+						candidates.insert((*matchIt).gBegin+i);
+			}
+		}
+	}
+
+
+	typename ::std::set<unsigned>::iterator candidateIt = candidates.begin();
+	typename ::std::set<unsigned>::iterator candidateItEnd = candidates.end();
+	matchIt = begin(matches, Standard());
+	
+	for(; candidateIt != candidateItEnd; ++candidateIt)
+	{
+		//candidate SNP position
+		unsigned candidatePos = *candidateIt;
+		::std::cout << "CandidateSNP: " << candidatePos << ::std::endl;
+
+		String<unsigned> count;
+		fill(count,5,0);
+
+		//find range of relevant read matches
+		while(matchIt != matchItEnd && (*matchIt).gEnd < candidatePos) ++matchIt;	
+		TMatchIterator matchRangeBegin = matchIt;
+		while(matchIt != matchItEnd && (*matchIt).gBegin <= candidatePos) ++matchIt;	
+		TMatchIterator matchRangeEnd = matchIt;
+
+		unsigned coverage = matchRangeEnd-matchRangeBegin;
+		::std::cout << "SNP covered by " << coverage << " matches." << ::std::endl;
+		//reference sequence nucleotide
+		Dna5 refBase = genomes[(*matchRangeBegin).gseqNo][candidatePos];
+		for(matchIt = matchRangeBegin; matchIt != matchRangeEnd; ++matchIt)
+		{
+			Dna5 candidateBase;
+			if ((*matchIt).orientation == 'R')
+			{
+				candidateBase = reads[(*matchIt).rseqNo][(*matchIt).gEnd - candidatePos - 1];
+				::std::cout << "Position on read " << readIDs[(*matchIt).rseqNo]<< ": " << (*matchIt).gEnd - candidatePos - 1 << ::std::endl;
+				Dna5String temp;
+				appendValue(temp,candidateBase);
+				reverseComplementInPlace(temp);
+				candidateBase = temp[0];
+				//                              reverseComplementInPlace(candidateBase);
+			}
+			else
+				candidateBase = reads[(*matchIt).rseqNo][candidatePos - (*matchIt).gBegin];
+			++count[ordValue(candidateBase)];
+		}
+		//do statistics and output snp
+		::std::cout << count[0] << ::std::endl;
+		::std::cout << count[1] << ::std::endl;
+		::std::cout << count[2] << ::std::endl;
+		::std::cout << count[3] << ::std::endl;
+		::std::cout << count[4] << ::std::endl;
+		matchIt = matchRangeBegin;
+		
+	}
+	::std::cout << "Detecting SNPs took " << SEQAN_PROTIMEDIFF(dump_time) << " seconds." << ::std::endl;
+	return;
+
 }
 
+
+
+}
 #endif
 
