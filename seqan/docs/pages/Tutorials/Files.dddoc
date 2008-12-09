@@ -41,8 +41,9 @@ For loading all records repeat calling @Function.read@, for example:
 fstream fstrm;
 fstrm.open("ests.fa", ios_base::in | ios_base::binary);
 String<Dna> est;
-while (read(fstrm, est, Fasta())
+while (! strm.eof())
 {
+    read(fstrm, est, Fasta());
     //use sequence data in est
 }
 
