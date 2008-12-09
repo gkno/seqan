@@ -230,7 +230,7 @@ SEQAN_CHECKPOINT
 	if ((c_first == '>') || _streamEOF(file)) 
 	{//another id line = empty entry
 		_streamSeekG(file, begin_pos);
-		_read_n_chars_from_file(file, count_all);
+		_read_n_chars_from_file(file, count_all-1);
 		return;
 	}
 

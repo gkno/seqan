@@ -545,6 +545,10 @@ void Test_Fasta_Read(char * path)
 	SEQAN_TASSERT(str_1 == "ACGT");
 
 	String<char> str_2;
+
+	read(file_1, str_2, Fasta());
+	SEQAN_TASSERT(length(str_2) == 0);
+
 	read(file_1, str_2, Fasta());
 	SEQAN_TASSERT(length(str_2) == 1065);
 
@@ -571,6 +575,7 @@ void Test_Fasta_Write()
 	FILE * file_3 = fopen(TEST_PATH "my_fasta.txt", "wb");
 	String<Dna> str_3("acgtufacgtufacgtufacgtufacgtufacgtufacgtufacgtufaaaaaaaaaauuuuuuuuucccccccccccggggg"); 
 	write(file_3, str_3, "Identifier1", Fasta());
+	write(file_3, "", "Empty Entry", Fasta());
 	write(file_3, str_3, "Identifier2", Fasta());
 	fclose(file_3);
 
@@ -583,6 +588,13 @@ void Test_Fasta_Write()
 	SEQAN_TASSERT(str_4 == "Identifier1");
 
 	String<Dna> str_4a;
+	read(file_4, str_4a, Fasta());
+	SEQAN_TASSERT(str_4a == str_3);
+
+	String<Dna> str_empty;
+	read(file_4, str_empty, Fasta());
+	SEQAN_TASSERT(length(str_empty) == 0)
+
 	read(file_4, str_4a, Fasta());
 	SEQAN_TASSERT(str_4a == str_3);
 
