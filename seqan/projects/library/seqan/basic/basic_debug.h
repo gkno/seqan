@@ -146,33 +146,36 @@ End:
 //____________________________________________________________________________
 
 //one line break is either \r, \n, or \r\n.
+//a single line break is skipped.
+//the second line break is transformed into \n
 inline void 
-_compareTextFiles_readChar(FILE * fl, char & c, bool & is_lb, bool & is_eof)
+_compareTextFiles_readChar(FILE * fl, char & c, int & num_lb, bool & is_eof)
 {
-	is_lb = false;
+	num_lb = 0;
 	is_eof = false;
 
 	c = fgetc(fl);
-	if (c == '\r')
+	while ((c == '\r') || (c == '\n'))
 	{
-		is_lb = true;
-		char c_help = fgetc(fl);
-		if (feof(fl)) is_eof = true;
-		else
+		++num_lb;
+		if (c == '\r')
 		{
-			if (c_help == '\n')
+			c = fgetc(fl);
+			if (feof(fl)) is_eof = true;
+			else
 			{
-				c = fgetc(fl);
-				if (feof(fl)) is_eof = true;
+				if (c == '\n')
+				{
+					c = fgetc(fl);
+					if (feof(fl)) is_eof = true;
+				}
 			}
-			else c = c_help;
 		}
-	}
-	if (c == '\n')
-	{
-		is_lb = true;
-		c = fgetc(fl);
-		if (feof(fl)) is_eof = true;
+		else if (c == '\n')
+		{
+			c = fgetc(fl);
+			if (feof(fl)) is_eof = true;
+		}
 	}
 }
 
@@ -192,15 +195,16 @@ _compareTextFiles(char * file1, char * file2)
 
 	bool ret = false;
 
-	bool is_lb1, is_lb2, is_eof1, is_eof2;
+	int num_lb1, num_lb2;
+	bool is_eof1, is_eof2;
 	char c1, c2;
 
 	while (!feof(fl1) && !feof(fl2))
 	{
-		_compareTextFiles_readChar(fl1, c1, is_lb1, is_eof1);
-		_compareTextFiles_readChar(fl2, c2, is_lb2, is_eof2);
+		_compareTextFiles_readChar(fl1, c1, num_lb1, is_eof1);
+		_compareTextFiles_readChar(fl2, c2, num_lb2, is_eof2);
 
-		if (is_lb1 ^ is_lb2)
+		if (num_lb1 != num_lb2)
 		{
 			goto End;
 		}

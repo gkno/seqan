@@ -163,13 +163,13 @@ struct Size<Segment<THost, TSpec> const >
 template <typename THost, typename TSpec>
 struct Position<Segment<THost, TSpec> >
 {
-	typedef typename Difference<THost>::Type Type;
+	typedef typename Position<THost>::Type Type;
 };
 
 template <typename THost, typename TSpec>
 struct Position<Segment<THost, TSpec> const >
 {
-	typedef typename Difference<THost>::Type Type;
+	typedef typename Position<THost>::Type Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -273,6 +273,107 @@ SEQAN_CHECKPOINT
 }
 
 //////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename THost, typename TSpec>
+inline bool 
+hasNoHost(Segment<THost, TSpec> const & target)
+{
+	return !_toPointer(host(target));
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+// operation_2_set testet, ob statt einer assign/append-Funktion 
+// eine set Funktion aufgerufen werden soll. Das ist nur dann der Fall,
+// wenn target keinen Host hat und source einen kompatiblen Host
+// anbietet.
+// returns true:  set Funktion verwendet, 
+//                wurde bereits von test_operation_2_set gemacht
+// returns false: keine set Funktion verwenden 
+//                muss noch assign/append gemacht werden.
+template <typename THost, typename TSpec, typename TSource>
+inline bool 
+operation_2_set(Segment<THost, TSpec> & target, 
+				TSource & source)
+{
+	return false;
+}
+template <typename THost, typename TSpec, typename TSpec2>
+inline bool 
+operation_2_set(Segment<THost, TSpec> & target, 
+				Segment<THost, TSpec2> & source)
+{
+	if (hasNoHost(target))
+	{
+		set(target, host(source), beginPosition(source), endPosition(source));
+		return true;
+	}
+	return false;
+}
+template <typename THost, typename TSpec>
+inline bool 
+operation_2_set(Segment<THost, TSpec> & target, 
+				THost & source)
+{
+	if (hasNoHost(target))
+	{
+		set(target, source);
+		return true;
+	}
+	return false;
+}
+
+
+template <typename THost, typename TSpec, typename TSource, typename TSize>
+inline bool 
+operation_2_set(Segment<THost, TSpec> & target, 
+				TSource & source,
+				TSize)
+{
+	return false;
+}
+template <typename THost, typename TSpec, typename TSpec2, typename TSize>
+inline bool 
+operation_2_set(Segment<THost, TSpec> & target, 
+				Segment<THost, TSpec2> & source,
+				TSize limit)
+{
+	if (hasNoHost(target))
+	{
+		TSize beginpos = beginPosition(source);
+		TSize endpos = endPosition(source);
+		if (endpos - beginpos > limit)
+		{
+			endpos = beginpos + limit;
+		}
+		set(target, host(source), beginpos, endpos);
+		return true;
+	}
+	return false;
+}
+template <typename THost, typename TSpec, typename TSize>
+inline bool 
+operation_2_set(Segment<THost, TSpec> & target, 
+				THost & source,
+				TSize limit)
+{
+	if (hasNoHost(target))
+	{
+		TSize size = length(source);
+		if (size > limit)
+		{
+			size = limit;
+		}
+		set(target, source, 0, size);
+		return true;
+	}
+	return false;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
 // assign
 //////////////////////////////////////////////////////////////////////////////
 
@@ -340,14 +441,17 @@ struct _Assign_Segment
 SEQAN_CHECKPOINT
 		if ((void *) &target == (void *) &source) return;
 
-		typedef Segment<THost, TSpec> Target;
+		if (!operation_2_set(target, source))
+		{
+			typedef Segment<THost, TSpec> Target;
 
-		replace(host(target), beginPosition(target), endPosition(target), source, TExpand());
+			replace(host(target), beginPosition(target), endPosition(target), source, TExpand());
 
-		typename Iterator<Target, Standard>::Type new_end = begin(target, Standard()) + length(source);
-		typename Iterator<THost, Standard>::Type host_end = end(host(target), Standard());
-		if (new_end > host_end) new_end = host_end;
-		setEnd(target, new_end);
+			typename Iterator<Target, Standard>::Type new_end = begin(target, Standard()) + length(source);
+			typename Iterator<THost, Standard>::Type host_end = end(host(target), Standard());
+			if (new_end > host_end) new_end = host_end;
+			setEnd(target, new_end);
+		}
 	}
 
 	template <typename THost, typename TSpec, typename TSource>
@@ -360,15 +464,18 @@ SEQAN_CHECKPOINT
 SEQAN_CHECKPOINT
 		if ((void *) &target == (void *) &source) return;
 
-		typedef Segment<THost, TSpec> Target;
+		if (!operation_2_set(target, source))
+		{
+			typedef Segment<THost, TSpec> Target;
 
-		replace(host(target), beginPosition(target), endPosition(target), source, limit, TExpand());
+			replace(host(target), beginPosition(target), endPosition(target), source, limit, TExpand());
 
-		typename Iterator<Target, Standard>::Type new_end = begin(target, Standard()) + length(source);
-		typename Iterator<THost, Standard>::Type host_end = end(host(target), Standard());
-		if (begin(target, Standard()) > host_end) setBegin(target, host_end);
-		if (new_end > host_end) new_end = host_end;
-		setEnd(target, new_end);
+			typename Iterator<Target, Standard>::Type new_end = begin(target, Standard()) + length(source);
+			typename Iterator<THost, Standard>::Type host_end = end(host(target), Standard());
+			if (begin(target, Standard()) > host_end) setBegin(target, host_end);
+			if (new_end > host_end) new_end = host_end;
+			setEnd(target, new_end);
+		}
 	}
 
 	template <typename THost, typename TSpec, typename TSource>
@@ -378,6 +485,7 @@ SEQAN_CHECKPOINT
 		TSource & source)
 	{
 SEQAN_CHECKPOINT
+		SEQAN_ASSERT(!hasNoHost(target))
 		replace(host(target), beginPosition(target), endPosition(target), source, TExpand());
 	}
 
@@ -389,6 +497,7 @@ SEQAN_CHECKPOINT
 		typename Size< Segment<THost, TSpec> >::Type limit)
 	{
 SEQAN_CHECKPOINT
+		SEQAN_ASSERT(!hasNoHost(target))
 		replace(host(target), beginPosition(target), endPosition(target), source, limit, TExpand());
 	}
 };
@@ -550,12 +659,15 @@ struct _Append_Sequence_2_Segment
 SEQAN_CHECKPOINT
 		typedef Segment<THost, TSpec> Target;
 
-		replace(host(target), endPosition(target), endPosition(target), source, TExpand());
+		if (!operation_2_set(target, source))
+		{
+			replace(host(target), endPosition(target), endPosition(target), source, TExpand());
 
-		typename Iterator<Target, Standard>::Type new_end = end(target, Standard()) + length(source);
-		typename Iterator<THost, Standard>::Type host_end = end(host(target), Standard());
-		if (new_end > host_end) new_end = host_end;
-		setEnd(target, new_end);
+			typename Iterator<Target, Standard>::Type new_end = end(target, Standard()) + length(source);
+			typename Iterator<THost, Standard>::Type host_end = end(host(target), Standard());
+			if (new_end > host_end) new_end = host_end;
+			setEnd(target, new_end);
+		}
 	}
 
 	template <typename THost, typename TSpec, typename TSource>
@@ -568,12 +680,15 @@ SEQAN_CHECKPOINT
 SEQAN_CHECKPOINT
 		typedef Segment<THost, TSpec> Target;
 
-		replace(host(target), endPosition(target), endPosition(target), source, limit, TExpand());
-		typename Iterator<Target, Standard>::Type new_end = end(target, Standard()) + length(source);
-		typename Iterator<THost, Standard>::Type host_end = end(host(target), Standard());
-		if (begin(target) > host_end) setBegin(target, host_end);
-		if (new_end > host_end) new_end = host_end;
-		setEnd(target, new_end);
+		if (!operation_2_set(target, source))
+		{
+			replace(host(target), endPosition(target), endPosition(target), source, limit, TExpand());
+			typename Iterator<Target, Standard>::Type new_end = end(target, Standard()) + length(source);
+			typename Iterator<THost, Standard>::Type host_end = end(host(target), Standard());
+			if (begin(target) > host_end) setBegin(target, host_end);
+			if (new_end > host_end) new_end = host_end;
+			setEnd(target, new_end);
+		}
 	}
 
 	template <typename THost, typename TSpec, typename TSource>
@@ -583,6 +698,7 @@ SEQAN_CHECKPOINT
 		TSource & source)
 	{
 SEQAN_CHECKPOINT
+		SEQAN_ASSERT(!hasNoHost(target))
 		replace(host(target), endPosition(target), endPosition(target), source, TExpand());
 	}
 
@@ -594,6 +710,7 @@ SEQAN_CHECKPOINT
 		typename Size< Segment<THost, TSpec> >::Type limit)
 	{
 SEQAN_CHECKPOINT
+		SEQAN_ASSERT(!hasNoHost(target))
 		replace(host(target), endPosition(target), endPosition(target), source, limit, TExpand()); //??? INSERT
 	}
 };
@@ -799,6 +916,8 @@ struct _Replace_Sequence_2_Segment
 		TSource & source)
 	{
 SEQAN_CHECKPOINT
+		SEQAN_ASSERT(!hasNoHost(target))
+
 		typedef Segment<THost, TSpec> Target;
 
 		replace(host(target), beginPosition(target) + pos_begin, beginPosition(target) + pos_end, source, TExpand());
@@ -819,6 +938,8 @@ SEQAN_CHECKPOINT
 		typename Size< Segment<THost, TSpec> >::Type limit)
 	{
 SEQAN_CHECKPOINT
+		SEQAN_ASSERT(!hasNoHost(target))
+
 		typedef Segment<THost, TSpec> Target;
 
 		replace(host(target), beginPosition(target) + pos_begin, beginPosition(target) + pos_end, source, limit, TExpand());
@@ -839,6 +960,8 @@ SEQAN_CHECKPOINT
 		TSource & source)
 	{
 SEQAN_CHECKPOINT
+		SEQAN_ASSERT(!hasNoHost(target))
+
 		replace(host(target), beginPosition(target) + pos_begin, beginPosition(target) + pos_end, source, TExpand());
 	}
 
@@ -852,6 +975,8 @@ SEQAN_CHECKPOINT
 		typename Size< Segment<THost, TSpec> >::Type limit)
 	{
 SEQAN_CHECKPOINT
+		SEQAN_ASSERT(!hasNoHost(target))
+
 		replace(host(target), beginPosition(target) + pos_begin, beginPosition(target) + pos_end, source, limit, TExpand()); //??? INSERT
 	}
 };
