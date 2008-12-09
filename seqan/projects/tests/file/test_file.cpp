@@ -893,6 +893,12 @@ void Test_Genbank(char * fl_path, char * fl_out_path)
 
 	SEQAN_TASSERT(data == "ACGT")
 
+	readMeta(fl, meta, Embl());
+	read(fl, data, Genbank());
+	write(fl_out, data, meta, Genbank());
+
+	SEQAN_TASSERT(data == "CATAGAT")
+
 	fclose(fl_out);
 	fclose(fl);
 

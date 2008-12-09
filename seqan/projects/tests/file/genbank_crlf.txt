@@ -167,3 +167,10 @@ LOCUS       test record 2
 ORIGIN
         1 ACGT
 //
+
+LOCUS       test record 3 with empty line to the last entry
+
+ORIGIN
+
+        1 CATAGAT
+//
