@@ -1002,6 +1002,7 @@ class Iter< TSkiplist, SkiplistIterator>
 {
 public:
 	typedef typename _SkiplistElement<TSkiplist>::Type TElement;
+	typedef typename Value<TSkiplist>::Type TValue;
 
 	TElement * data_pointer;
 
@@ -1034,6 +1035,12 @@ public:
 	operator bool () const
 	{
 		return data_pointer;
+	}
+
+	TValue *
+	operator -> () const
+	{
+		return & data_pointer->data_value;
 	}
 
 };

@@ -170,6 +170,7 @@ public:
 	typedef typename Size<TMap>::Type TSize;
 	typedef typename _VectorSetElements<TMap>::Type TElements;
 	typedef typename Iterator<TElements, Rooted>::Type TElementsIterator;
+	typedef typename Value<TElementsIterator>::Type TValue;
 
 	TElementsIterator data_iterator;
 
@@ -199,6 +200,13 @@ public:
 	{
 		return data_iterator;
 	}
+
+	TValue *
+	operator -> () const
+	{
+		return & value(data_iterator);
+	}
+
 };
 
 //////////////////////////////////////////////////////////////////////////////
