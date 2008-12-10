@@ -541,7 +541,10 @@ void dumpMatches(
 }
 
 
+
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
+#ifdef RAZERS_DUMP_SNPS
 
 double cumulated_normal(const double x)
 {
@@ -615,7 +618,7 @@ void dumpSNPs(
 	StringSet<CharString> &genomeFileNameList,	// list of genome names (e.g. {"hs_ref_chr1.fa","hs_ref_chr2.fa"})
 	::std::map<unsigned,::std::pair< ::std::string,unsigned> > & gnoToFileMap, //map to retrieve genome filename and sequence number within that file
 	TReads const &reads,						// Read sequences
-	TReadNames const &readIDs,					// Read names (read from Fasta file, currently unused)
+	TReadNames const &,					// Read names (read from Fasta file, currently unused)
 	::std::string readFName,					// read name (e.g. "reads.fa")
 	RazerSOptions<TSpec> &options)
 {
@@ -740,12 +743,8 @@ void dumpSNPs(
 				Dna5 candidateBase;
 				if ((*matchIt).orientation == 'R')
 				{
-					candidateBase = reads[(*matchIt).rseqNo][(*matchIt).gEnd - candidatePos - 1];
-					Dna5String temp;
-					appendValue(temp,candidateBase);
-					reverseComplementInPlace(temp);
-					candidateBase = temp[0];
-					//                              reverseComplementInPlace(candidateBase);
+					FunctorComplement<Dna5> f;
+					candidateBase = f((Dna5)reads[(*matchIt).rseqNo][(*matchIt).gEnd - candidatePos - 1]);
 				}
 				else
 					candidateBase = reads[(*matchIt).rseqNo][candidatePos - (*matchIt).gBegin];
@@ -759,15 +758,17 @@ void dumpSNPs(
 			{
 				if(count[k] > maxCount)
 				{
-				maxCount = count[k];
-				allele1 = k;
+					maxCount = count[k];
+					allele1 = k;
 				}
-				maxCount = 0;
-				for(unsigned k=0; k < 5; ++k)
+			}
+			maxCount = 0;
+			for(unsigned k=0; k < 5; ++k)
+			{
 				if(k != allele1 && count[k] > maxCount)
 				{
-				maxCount = count[k];
-				allele2 = k;
+					maxCount = count[k];
+					allele2 = k;
 				}
 			}
 			if(allele2 < 0) // reads all vote for one nucleotide (non-ref)
@@ -822,8 +823,7 @@ void dumpSNPs(
 
 }
 
-
-
+#endif
 }
 #endif
 
