@@ -154,7 +154,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 #ifdef RAZERS_DUMP_SNPS
 			bayesian = true;
-			testLevel = 0.05;
+			testLevel = 0.01;
 			outputSNP = "";
 #endif
 
@@ -948,6 +948,7 @@ int mapReads(
 			if (options.genomeNaming == 0)
 			{
 				readID(file, id, Fasta());			// read Fasta id
+				//readShortID(file, id, Fasta());			// read Fasta id up to first whitespace
 				appendValue(genomeNames, id, Generous());
 			}
 			read(file, genome, Fasta());			// read Fasta sequence

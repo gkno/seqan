@@ -26,8 +26,8 @@
 #define RAZERS_CONCATREADS		// use <ConcatDirect> StringSet to store reads
 #define RAZERS_MEMOPT			// optimize memory consumption
 #define RAZERS_MASK_READS		// remove matches with max-hits optimal hits on-the-fly
-#define NO_PARAM_CHOOSER
-//#define RAZERS_PARALL<EL			// parallelize using Intel's Threading Building Blocks
+//#define NO_PARAM_CHOOSER
+//#define RAZERS_PARALLEL			// parallelize using Intel's Threading Building Blocks
 //#define RAZERS_DUMP_SNPS
 
 #include "seqan/platform.h"
