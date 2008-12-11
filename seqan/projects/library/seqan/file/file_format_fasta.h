@@ -362,6 +362,59 @@ SEQAN_CHECKPOINT
 	_streamSeekG(file, start_pos);
 }
 
+//short ID, read fasta header up to first whitespace
+template <typename TFile, typename TString>
+void
+readShortID(TFile & file,
+	   TString & id,
+	   Fasta)
+{
+SEQAN_CHECKPOINT
+	SEQAN_ASSERT(!_streamEOF(file))
+
+	typename Position<TFile>::Type start_pos = _streamTellG(file);
+
+	typename Value<TFile>::Type c = _streamGet(file);
+	if (c != '>')
+	{
+		clear(id);
+	}
+	else
+	{
+		typename Size<TString>::Type count_valid = 0;
+		typename Size<TString>::Type count_all = 0;
+		_fasta_scan_line(file, count_valid, count_all);
+
+		if (! count_valid)
+		{
+			clear(id);
+		}
+		else
+		{
+			resize(id, count_valid);
+			if (length(id) < count_valid)
+			{
+				count_valid = length(id);
+			}
+
+			_streamSeekG(file, start_pos);
+			c = _streamGet(file); //pop the '>' character
+			for (typename Position<TString>::Type pos = 0; count_valid; --count_valid)
+			{
+				id[pos] = _streamGet(file);
+				if(id[pos]=='\t' || id[pos]=='\b' || id[pos]==' ')
+				{
+					resize(id,pos);
+					break;
+				}
+				++pos;
+			}
+		}
+	}
+	_streamSeekG(file, start_pos);
+}
+
+
 //////////////////////////////////////////////////////////////////////////////
 // readMeta
 //////////////////////////////////////////////////////////////////////////////
