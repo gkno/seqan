@@ -947,8 +947,8 @@ int mapReads(
 		{
 			if (options.genomeNaming == 0)
 			{
-				readID(file, id, Fasta());			// read Fasta id
-				//readShortID(file, id, Fasta());			// read Fasta id up to first whitespace
+				//readID(file, id, Fasta());			// read Fasta id
+				readShortID(file, id, Fasta());			// read Fasta id up to first whitespace
 				appendValue(genomeNames, id, Generous());
 			}
 			read(file, genome, Fasta());			// read Fasta sequence
