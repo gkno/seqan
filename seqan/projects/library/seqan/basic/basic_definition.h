@@ -32,6 +32,47 @@ struct Tag
 };
 
 //////////////////////////////////////////////////////////////////////////////
+
+template <typename T>
+struct Length;
+
+template <>
+struct Length<void>
+{
+	enum { VALUE = 0 };
+};
+
+template <typename TTag = void, typename TSubList = void>
+struct TagList
+{
+	typedef TTag Type;
+};
+
+template <typename TTag>
+struct Length< TagList<TTag, void> > {
+	enum { VALUE = 1 };
+};
+
+template <typename TTag, typename TSubList>
+struct Length< TagList<TTag, TSubList> > {
+	enum { VALUE = Length<TSubList>::VALUE + 1 };
+};
+
+template <typename TTagList = void>
+struct TagSelector
+{
+	int tagId;
+};
+
+template <typename TTag, typename TSubList>
+struct TagSelector< TagList<TTag, TSubList> >:
+	TagSelector<TSubList>
+{
+	typedef TTag					Type;
+	typedef TagSelector<TSubList>	Base;
+};
+
+//////////////////////////////////////////////////////////////////////////////
 /**
 .Tag.Default:
 ..summary:Tag that specifies default behavior.

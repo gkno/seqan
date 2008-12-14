@@ -59,6 +59,16 @@ namespace SEQAN_NAMESPACE_MAIN
 // File Formats - Fasta
 //////////////////////////////////////////////////////////////////////////////
 
+	// test for Fasta format
+	template < typename TSeq >
+	inline bool
+	guessFormat(
+		TSeq const & seq,
+		Fasta)
+	{
+		return seq[0] == '>';
+	}
+	
 	// split stringset into single Fasta sequences
 	template < typename TValue, typename TConfig, typename TDelimiter >
 	inline void
@@ -155,6 +165,16 @@ namespace SEQAN_NAMESPACE_MAIN
 struct TagFastq_;
 typedef Tag<TagFastq_> const Fastq;
 
+	// test for Fastq format
+	template < typename TSeq >
+	inline bool
+	guessFormat(
+		TSeq const & seq,
+		Fastq)
+	{
+		return seq[0] == '@';
+	}
+	
 	// split stringset into single Fasta sequences
 	template < typename TValue, typename TConfig, typename TDelimiter >
 	inline void
@@ -310,6 +330,162 @@ typedef Tag<TagFastq_> const Fastq;
 			_seekLineBreak(it2, itEnd);
 			assign(dst, infix(fasta, (it1 - itBeg) + 1, it2 - itBeg));
 		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////
+// File Formats - Auto-Format
+//////////////////////////////////////////////////////////////////////////////
+
+	typedef TagSelector< TagList<Fastq, TagList<Fasta> > >	AutoSeqFormat;
+
+//____________________________________________________________________________
+// guess file format
+
+	template < typename TFileSeq >
+	inline bool
+	guessFormat(
+		TFileSeq const &,
+		TagSelector<> &format)
+	{
+		format.tagId = 0;
+		return false;
+	}
+	
+	template < typename TFileSeq, typename TTagList >
+	inline bool
+	guessFormat(
+		TFileSeq const & seq,
+		TagSelector<TTagList> &format)
+	{
+		if (guessFormat(seq, typename TTagList::Type()))
+		{
+			format.tagId = Length<TTagList>::VALUE;
+			return true;
+		}
+		return guessFormat(seq, static_cast<typename TagSelector<TTagList>::Base &>(format));
+	}
+	
+//____________________________________________________________________________
+// split stringset into single sequences
+
+	template < typename TValue, typename TConfig, typename TDelimiter >
+	inline void
+	split(
+		StringSet<String<TValue, MMap<TConfig> >, Owner<ConcatDirect<TDelimiter> > > &, 
+		TagSelector<void> const &)
+	{
+	}
+	
+	template < typename TValue, typename TConfig, typename TDelimiter, typename TTagList >
+	inline void
+	split(
+		StringSet<String<TValue, MMap<TConfig> >, Owner<ConcatDirect<TDelimiter> > > &me, 
+		TagSelector<TTagList> const &format)
+	{
+		if (format.tagId == Length<TTagList>::VALUE)
+			split(me, typename TTagList::Type());
+		else
+			split(me, static_cast<typename TagSelector<TTagList>::Base const &>(format));
+	}
+	
+//____________________________________________________________________________
+// assignSeq
+
+	template <typename TSeq, typename TFileSeq>
+	inline void
+	assignSeq(
+		TSeq &,
+		TFileSeq const &,
+		TagSelector<> const &)
+	{
+	}
+
+	template <typename TSeq, typename TFileSeq, typename TTagList>
+	inline void
+	assignSeq(
+		TSeq & dst,
+		TFileSeq const & seq,
+		TagSelector<TTagList> const &format)
+	{
+		if (format.tagId == Length<TTagList>::VALUE)
+			assignSeq(dst, seq, typename TTagList::Type());
+		else
+			assignSeq(dst, seq, static_cast<typename TagSelector<TTagList>::Base const &>(format));
+	}
+
+//____________________________________________________________________________
+// assignSeqId
+
+	template <typename TSeqId, typename TFileSeq>
+	inline void
+	assignSeqId(
+		TSeqId &,
+		TFileSeq const &,
+		TagSelector<> const &)
+	{
+	}
+
+	template <typename TSeqId, typename TFileSeq, typename TTagList>
+	inline void
+	assignSeqId(
+		TSeqId & dst,
+		TFileSeq const & seq,
+		TagSelector<TTagList> const &format)
+	{
+		if (format.tagId == Length<TTagList>::VALUE)
+			assignSeqId(dst, seq, typename TTagList::Type());
+		else
+			assignSeqId(dst, seq, static_cast<typename TagSelector<TTagList>::Base const &>(format));
+	}
+
+//____________________________________________________________________________
+// assignQual
+
+	template <typename TSeq, typename TFileSeq>
+	inline void
+	assignQual(
+		TSeq &,
+		TFileSeq const &,
+		TagSelector<> const &)
+	{
+	}
+	
+	template <typename TSeq, typename TFileSeq, typename TTagList>
+	inline void
+	assignQual(
+		TSeq & dst,
+		TFileSeq const & seq,
+		TagSelector<TTagList> const &format)
+	{
+		if (format.tagId == Length<TTagList>::VALUE)
+			assignQual(dst, seq, typename TTagList::Type());
+		else
+			assignQual(dst, seq, static_cast<typename TagSelector<TTagList>::Base const &>(format));
+	}
+
+//____________________________________________________________________________
+// assignQualId
+
+	template <typename TSeq, typename TFileSeq>
+	inline void
+	assignQualId(
+		TSeq &,
+		TFileSeq const &,
+		TagSelector<> const &)
+	{
+	}
+	
+	template <typename TSeq, typename TFileSeq, typename TTagList>
+	inline void
+	assignQualId(
+		TSeq & dst,
+		TFileSeq const & seq,
+		TagSelector<TTagList> const &format)
+	{
+		if (format.tagId == Length<TTagList>::VALUE)
+			assignQualId(dst, seq, typename TTagList::Type());
+		else
+			assignQualId(dst, seq, static_cast<typename TagSelector<TTagList>::Base const &>(format));
 	}
 
 }

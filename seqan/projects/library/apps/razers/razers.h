@@ -293,7 +293,10 @@ bool loadReads(TReadSet &reads, TNameSet &fastaIDs, const char *fileName, TRazer
 
 	MultiFasta multiFasta;
 	if (!open(multiFasta.concat, fileName, OPEN_RDONLY)) return false;
-	split(multiFasta, Fasta());
+
+	AutoSeqFormat format;
+	guessFormat(multiFasta.concat, format);	
+	split(multiFasta, format);
 
 	unsigned seqCount = length(multiFasta);
 #ifndef RAZERS_CONCATREADS
@@ -307,8 +310,8 @@ bool loadReads(TReadSet &reads, TNameSet &fastaIDs, const char *fileName, TRazer
 	for(unsigned i = 0; i < seqCount; ++i) 
 	{
 		if (options.readNaming == 0)
-			assignSeqId(fastaIDs[i], multiFasta[i], Fasta());	// read Fasta id
-		assignSeq(seq, multiFasta[i], Fasta());					// read Read sequence
+			assignSeqId(fastaIDs[i], multiFasta[i], format);	// read Fasta id
+		assignSeq(seq, multiFasta[i], format);					// read Read sequence
 		
 		if (countN)
 		{
