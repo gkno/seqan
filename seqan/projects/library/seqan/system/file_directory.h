@@ -35,10 +35,119 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 
-
 #ifdef PLATFORM_WINDOWS
 
+    class Directory
+    {
+	protected:
+	
+		intptr_t			handle;
+		struct _finddata_t	entry;
+		bool				_atEnd;
+
+		friend inline bool open(Directory &dir, char const *dirName);
+		friend inline bool close(Directory &dir);
+		friend inline char const * value(Directory &dir);
+		friend inline char const * value(Directory const &dir);
+		friend inline Directory & goNext(Directory &dir);
+		friend inline bool atEnd(Directory &dir);
+		friend inline bool atEnd(Directory const &dir);
+
+	public:
+
+		Directory()
+		{
+			handle = NULL;
+			_atEnd = true;
+		}
+		
+		Directory(char const *dirName)
+		{
+			open(*this, dirName);
+		}
+		
+		~Directory()
+		{
+			close(*this);
+		}
+		
+		inline char const * operator* () const
+		{
+			return value(*this);
+		}
+
+		inline Directory & operator++ ()
+		{
+			return goNext(*this);
+		}
+		
+		inline operator bool () const
+		{
+			return !_atEnd;
+		}
+	};
+
+//////////////////////////////////////////////////////////////////////////////	
+
+	inline bool
+	open(Directory &dir, char const *dirName)
+	{
+		CharString selection = dirName;
+		append(selection, "\\*");
+		dir._atEnd = ((dir.handle = _findfirst(toCString(selection), &dir.entry)) == NULL);
+		return !dir._atEnd;
+	}
+
+	inline bool
+	close(Directory &dir)
+	{
+		int result = 0;
+		if (dir.handle != NULL)
+			result = _findclose(dir.handle);
+
+		dir._atEnd = true;
+		dir.handle = NULL;
+		return result == 0;
+	}
+
+	inline char const *
+	value(Directory &dir)
+	{
+		return dir.entry.name;
+	}
+
+	inline char const *
+	value(Directory const &dir)
+	{
+		return dir.entry.name;
+	}
+
+	inline Directory &
+	goNext(Directory &dir)
+	{
+		dir._atEnd = (_findnext(dir.handle, &dir.entry) != 0);
+		return dir;
+	}
+
+	inline bool
+	atEnd(Directory &dir)
+	{
+		return dir._atEnd;
+	}
+	
+	inline bool
+	atEnd(Directory const &dir)
+	{
+		return dir._atEnd;
+	}
+	
+//////////////////////////////////////////////////////////////////////////////	
+	
+	
 #else
+
+
+//////////////////////////////////////////////////////////////////////////////	
 
     class Directory
     {

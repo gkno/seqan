@@ -73,5 +73,6 @@
 
 #include <seqan/system/file_sync.h>
 #include <seqan/system/file_async.h>
+#include <seqan/system/file_directory.h>
 
 #endif //#ifndef SEQAN_HEADER_...
