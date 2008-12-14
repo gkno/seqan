@@ -336,7 +336,8 @@ typedef Tag<TagFastq_> const Fastq;
 // File Formats - Auto-Format
 //////////////////////////////////////////////////////////////////////////////
 
-	typedef TagSelector< TagList<Fastq, TagList<Fasta> > >	AutoSeqFormat;
+	typedef TagList<Fastq, TagList<Fasta> >		SeqFormats;
+	typedef TagSelector<SeqFormats>				AutoSeqFormat;
 
 //____________________________________________________________________________
 // guess file format
