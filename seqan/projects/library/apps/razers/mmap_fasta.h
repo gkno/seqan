@@ -54,6 +54,15 @@ namespace SEQAN_NAMESPACE_MAIN
 		return true;
 	}
 
+	template <typename TIterator>
+	inline bool
+	_seekTab(TIterator& it, TIterator itEnd)
+	{
+		for (; it != itEnd; ++it)
+			if (*it == '\t') return true;
+		return false;
+	}
+
 
 //////////////////////////////////////////////////////////////////////////////
 // File Formats - Fasta
@@ -333,10 +342,157 @@ typedef Tag<TagFastq_> const Fastq;
 	}
 
 //////////////////////////////////////////////////////////////////////////////
+// File Formats - QSeq (used by Illumina for most of their read files)
+//////////////////////////////////////////////////////////////////////////////
+
+	struct _QSeq;
+	typedef Tag<_QSeq> const QSeq;
+
+	// FIXME The following enum is more or less arbitrary since the information
+	// in a QSeq file may differ depending on where they come from. Not sure if
+	// this is something that needs to be fixed here, rather than in the Illu-
+	// mina pipeline itself.
+	struct QSeqEntry {
+		enum {
+			MachineName,
+			Run,
+			Lane,
+			Tile,
+			X,
+			Y,
+			Index,
+			Read,
+			Sequence,
+			Quality,
+			Filter
+		};
+	};
+
+
+	// test for Fastq format
+	template < typename TSeq >
+	inline bool
+	guessFormat(
+		TSeq const & seq,
+		QSeq)
+	{
+		typedef typename Iterator<TSeq const>::Type TIter;
+		TIter front = begin(seq);
+		TIter const back = end(seq);
+		if (!_seekTab(front, back)) return false;
+		::std::string token_base;
+		assign(token_base, seq);
+		::std::istringstream os(token_base);
+		::std::string mname;
+		unsigned int numval;
+		// Actual information encoded in qseq file may vary. Take a few guesses:
+		//     machine name   run number      lane number     tile number
+		return os >> mname && os >> numval && os >> numval && os >> numval;
+	}
+	
+	// split stringset into single Fasta sequences
+	template < typename TValue, typename TConfig, typename TDelimiter >
+	inline void
+	split(
+		StringSet<String<TValue, MMap<TConfig> >, Owner<ConcatDirect<TDelimiter> > > &me, 
+		QSeq)
+	{
+		typedef String<TValue, MMap<TConfig> >						TString;
+		typedef StringSet<TString, ConcatDirect<TDelimiter> >		TStringSet;
+		typedef typename Iterator<TString const, Standard>::Type	TIterator;
+
+		clear(me.limits);
+
+		TIterator const front = begin(me.concat, Standard());
+		TIterator const back = end(me.concat, Standard());
+
+		appendValue(me.limits, 0, Generous());
+		for (TIterator i = front; i != back; ++i)
+			if (_isLineBreak(*i))
+				appendValue(me.limits, i - front, Generous());
+
+		if (!_isLineBreak(*(back - 1))) // Ignore final line break.
+			appendValue(me.limits, back - front);
+	}
+
+	template <typename TSequence, typename TSource>
+	void assignQSeqEntry(
+		TSequence& destination,
+		TSource const& source,
+		unsigned int entry
+	) {
+		typedef typename Iterator<TSource const>::Type TIterator;
+
+		TIterator const front = begin(source, Standard());
+		TIterator const back = end(source, Standard());
+
+		TIterator infixStart = front;
+
+		for (unsigned int i = QSeqEntry::MachineName; i < entry; ++i) {
+			_seekTab(infixStart, back);
+			++infixStart;
+		}
+
+		SEQAN_ASSERT(infixStart != back);
+
+		TIterator infixEnd = infixStart + 1;
+		_seekTab(infixEnd, back);
+
+		assign(destination, infix(source, infixStart - front, infixEnd - front));
+	}
+
+	template <typename TSeq, typename TFastaSeq>
+	inline void
+	assignSeq(
+		TSeq & dst,
+		TFastaSeq const & fasta,
+		QSeq)
+	{
+		assignQSeqEntry(dst, fasta, QSeqEntry::Sequence);
+	}
+
+	template <typename TSeq, typename TFastaSeq>
+	inline void
+	assignSeqId(
+		TSeq & dst,
+		TFastaSeq const & fasta,
+		QSeq)
+	{
+		// For now: just return the whole line.
+		typename seqan::Position<TFastaSeq const>::Type front = 0;
+		while (_isLineBreak(fasta[front]))
+			++front;
+		assign(dst, infix(fasta, front, length(fasta)));
+	}
+
+	template <typename TSeq, typename TFastaSeq>
+	inline void
+	assignQual(
+		TSeq & dst,
+		TFastaSeq const & fasta,
+		QSeq)
+	{
+		assignQSeqEntry(dst, fasta, QSeqEntry::Quality);
+	}
+
+	template <typename TSeq, typename TFastaSeq>
+	inline void
+	assignQualId(
+		TSeq & dst,
+		TFastaSeq const & fasta,
+		QSeq)
+	{
+		assignSeqId(dst, fasta, QSeq());
+	}
+
+//////////////////////////////////////////////////////////////////////////////
 // File Formats - Auto-Format
 //////////////////////////////////////////////////////////////////////////////
 
-	typedef TagList<Fastq, TagList<Fasta> >		SeqFormats;
+	typedef
+		TagList<Fastq,
+		TagList<Fasta,
+		TagList<QSeq> > > 						SeqFormats;
 	typedef TagSelector<SeqFormats>				AutoSeqFormat;
 
 //____________________________________________________________________________
