@@ -601,6 +601,25 @@ double p_value(const unsigned n_u, const double lambda)
 	return (1 - p);
 }
 
+double over(const int n, const int k)
+{
+	return ((double)factorial(n)/(factorial(n-k)*factorial(k)));
+}
+
+double over2(int n, int k)
+{
+    double cnk = 1.0;
+    
+    if (k * 2 > n) 
+        k = n - k;
+    
+    for (int i = 1; i <= k; n--, i++)
+    {
+        cnk /= i;
+        cnk *= n;
+    }
+    return cnk;
+}
 
 //////////////////////////////////////////////////////////////////////////////
 // Output SNPs
@@ -609,6 +628,7 @@ template <
 	typename TMatches,
 	typename TGenomeNames,
 	typename TReads,
+	typename TReadQualities,
 	typename TReadNames,
 	typename TSpec
 >
@@ -618,6 +638,7 @@ void dumpSNPs(
 	StringSet<CharString> &genomeFileNameList,	// list of genome names (e.g. {"hs_ref_chr1.fa","hs_ref_chr2.fa"})
 	::std::map<unsigned,::std::pair< ::std::string,unsigned> > & gnoToFileMap, //map to retrieve genome filename and sequence number within that file
 	TReads const &reads,						// Read sequences
+	TReadQualities const &readQualities,				// Read quality values sequences
 	TReadNames const &,					// Read names (read from Fasta file, currently unused)
 	::std::string readFName,					// read name (e.g. "reads.fa")
 	RazerSOptions<TSpec> &options)
@@ -685,7 +706,10 @@ void dumpSNPs(
 	TMatchIterator matchIt = begin(matches, Standard());
 	TMatchIterator matchItEnd = end(matches, Standard());	
 	
-	//collect candidate SNP positions   //TODO: consider multiple genomes!!!
+	double priorHet = 0.001;
+	double priorHomo = (1.0 - priorHet)/2.0;
+
+	//collect candidate SNP positions  
 	::std::set<unsigned> candidates;
 	while(matchIt != matchItEnd) 
 	{
@@ -753,8 +777,9 @@ void dumpSNPs(
 			//do statistics and output snp
 			int allele1 = -1;
 			int allele2 = -1;
+			int refAllele = ordValue(genomes[(*matchIt).gseqNo][candidatePos]);
 			unsigned maxCount=0;
-			for(unsigned k=0; k < 5; ++k)
+			for(int k=0; k < 5; ++k)
 			{
 				if(count[k] > maxCount)
 				{
@@ -763,7 +788,7 @@ void dumpSNPs(
 				}
 			}
 			maxCount = 0;
-			for(unsigned k=0; k < 5; ++k)
+			for(int k=0; k < 5; ++k)
 			{
 				if(k != allele1 && count[k] > maxCount)
 				{
@@ -772,18 +797,64 @@ void dumpSNPs(
 				}
 			}
 			if(allele2 < 0) // reads all vote for one nucleotide (non-ref)
-				allele2 = ordValue(genomes[(*matchIt).gseqNo][candidatePos]);
+				allele2 = refAllele;
 
-			double lambda = coverage * 0.05;//=avg_err_prob;  // TODO: quality based error probs
-			double pVal = p_value(count[allele2],lambda);
 
+			double avgErrProb = 0.05;
+			int n = count[allele1] + count[allele2]; // ignore all but the two most common bases
+			// TODO: minimum coverage??
+			if(n<10)
+			{
+				matchIt = matchRangeBegin;
+				continue;
+			
+			}
+			// 
+			// argmax P(g|D)=P(D|g)*P(g)/P(D)
+			//    g
+			// 
+			//todo: alphas so wie in maq
+	
+			double pHet = over2(n,count[allele2])/(1 << n); //vorsicht!
+			//double pHomoAllele1 = alpha_n_k;
+			//double pHomoAllele1 = binomial(n,count[allele2],avgErrProb);//uniform and independent
+			double pHomoAllele1 = over2(n,count[allele2]) * pow(avgErrProb,(double)count[allele2]) * pow(1.0-avgErrProb,(double)count[allele1]) ;//uniform and independent
+			//double pHomoAllele2 = alpha_n_nk;
+			//double pHomoAllele2 = binomial(n,count[allele1],avgErrProb);//uniform and independent
+			double pHomoAllele2 = over2(n,count[allele1]) * pow(avgErrProb,(double)count[allele1]) * pow(1.0-avgErrProb,(double)count[allele2]);//uniform and independent
+
+			pHet *= priorHet; 
+			pHomoAllele1 *= priorHomo;
+			pHomoAllele2 *= priorHomo;
+	
 			bool hetSNP = false;
 			bool homoSNP = false;
-														  // TODO: minimum coverage??
-			if(coverage > 4 && pVal <= options.testLevel) // heterozygote SNP
-				hetSNP = true;
-			if(coverage > 4 && pVal > options.testLevel && allele1 != ordValue(genomes[(*matchIt).gseqNo][candidatePos])) // homozygote SNP
-				homoSNP = true;
+			
+			if(pHomoAllele1 > pHomoAllele2)
+			{
+				if(pHet > pHomoAllele1)
+					hetSNP = true;
+				else
+					if(allele1 != refAllele)
+						homoSNP = true;
+			}
+			else
+			{
+				if(pHet > pHomoAllele2)
+					hetSNP = true;
+				else
+					if(allele2 != refAllele)
+						homoSNP = true;
+				if(homoSNP) ::std::cout << "Vorsicht! HomoSnp auf allele2!\n";
+			}
+			if(allele1 != refAllele && allele2 != refAllele)
+				::std::cout <<"+";
+			//double lambda = coverage * 0.05;//=avg_err_prob;  
+			//double pHet = p_value(count[allele2],lambda);
+			//if(coverage > 4 && pValHet <= options.testLevel) // heterozygote SNP
+			//	hetSNP = true;
+			//if(coverage > 4 && pValHet > options.testLevel && (unsigned)allele1 != ordValue(genomes[(*matchIt).gseqNo][candidatePos])) // homozygote SNP
+			//	homoSNP = true;
 
 			if(hetSNP || homoSNP)
 			{
@@ -800,17 +871,17 @@ void dumpSNPs(
 						file << gnoToFileMap[currSeqNo].first << '#' << ::std::setw(gzeros) << gnoToFileMap[currSeqNo].second + 1 << " ";
 				}
 				file << candidatePos << " " << genomes[(*matchIt).gseqNo][candidatePos] <<" ";
-				file << count[0] << " " << count[1] << " " << count[2] << " " << count[3] << " " << count[4] << " "<< pVal;
-				if(homoSNP) file <<  " <" << Dna(allele1) << "," << Dna(allele1) << ">" << ::std::endl;
-				else file <<  " <" << Dna(allele1) << "," << Dna(allele2) << ">" << ::std::endl;
+				file << count[0] << " " << count[1] << " " << count[2] << " " << count[3] << " " << count[4];
+				if(homoSNP) file <<  " <" << Dna(allele1) << "," << Dna(allele1) << "> "  << pHomoAllele1<< ::std::endl; //vorsicht!
+				else file <<  " <" << Dna(allele1) << "," << Dna(allele2) << "> "<< pHet << ::std::endl; 
 
 				if(options._debugLevel > 0) 
 				{
 					::std::cout << "CandidateSNP: " << candidatePos << " (covered by " << coverage << " matches):" << ::std::endl;
 					::std::cout << "Genome is " << genomes[(*matchIt).gseqNo][candidatePos];
-					::std::cout << "\treads are "<<count[0] << "," << count[1] << "," << count[2] << "," << count[3] << "," << count[4] << " " << pVal;
-					if(homoSNP) ::std::cout <<  " <" << Dna(allele1) << "," << Dna(allele1) << ">" << ::std::endl;
-					else ::std::cout <<  " <" << Dna(allele1) << "," << Dna(allele2) << ">" << ::std::endl;
+					::std::cout << "\treads are "<<count[0] << "," << count[1] << "," << count[2] << "," << count[3] << "," << count[4];
+					if(homoSNP) ::std::cout <<  " <" << Dna(allele1) << "," << Dna(allele1) << "> " << pHomoAllele1 << ::std::endl; //vorsicht!
+					else ::std::cout <<  " <" << Dna(allele1) << "," << Dna(allele2) << "> " << pHet << ::std::endl;
 				}
 			}
 			matchIt = matchRangeBegin;

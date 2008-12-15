@@ -192,8 +192,10 @@ namespace SEQAN_NAMESPACE_MAIN
 	typedef Dna5String									TRead;
 #ifdef RAZERS_CONCATREADS
 	typedef StringSet<TRead, Owner<ConcatDirect<> > >	TReadSet;
+	typedef StringSet<CharString, Owner<ConcatDirect<> > >	TReadQualities;
 #else
 	typedef StringSet<TRead>							TReadSet;
+	typedef StringSet<CharString>							TReadQualities;
 #endif
 
 	typedef ReadMatch<Difference<TGenome>::Type>		TMatch;		// a single match
@@ -283,7 +285,6 @@ namespace SEQAN_NAMESPACE_MAIN
 
 #endif
 
-
 //////////////////////////////////////////////////////////////////////////////
 // Load multi-Fasta sequences
 template <typename TReadSet, typename TNameSet, typename TRazerSOptions>
@@ -312,7 +313,7 @@ bool loadReads(TReadSet &reads, TNameSet &fastaIDs, const char *fileName, TRazer
 		if (options.readNaming == 0)
 			assignSeqId(fastaIDs[i], multiFasta[i], format);	// read Fasta id
 		assignSeq(seq, multiFasta[i], format);					// read Read sequence
-		
+
 		if (countN)
 		{
 			int count = 0;
@@ -334,6 +335,69 @@ bool loadReads(TReadSet &reads, TNameSet &fastaIDs, const char *fileName, TRazer
 	}
 #ifdef RAZERS_CONCATREADS
 	reserve(reads.concat, length(reads.concat), Exact());
+#endif
+
+	if (options._debugLevel > 1 && kickoutcount > 0) 
+		::std::cerr << "Ignoring " << kickoutcount << " low quality reads.\n";
+	return (seqCount > 0);
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+// Load multi-Fasta sequences
+template <typename TReadSet, typename TReadQualities, typename TNameSet, typename TRazerSOptions>
+bool loadReads(TReadSet &reads, TReadQualities &readQualities, TNameSet &fastaIDs, const char *fileName, TRazerSOptions &options)
+{
+	bool countN = !(options.matchN || options.outputFormat == 1);
+
+	MultiFasta multiFasta;
+	if (!open(multiFasta.concat, fileName, OPEN_RDONLY)) return false;
+	split(multiFasta, Fastq());
+
+	unsigned seqCount = length(multiFasta);
+#ifndef RAZERS_CONCATREADS
+	resize(reads, seqCount);
+	resize(readsQualities, seqCount);
+#endif
+	if (options.readNaming == 0)
+		resize(fastaIDs, seqCount);
+	
+	Dna5String seq;
+	CharString qual;
+
+	unsigned kickoutcount = 0;
+	for(unsigned i = 0; i < seqCount; ++i) 
+	{
+		if (options.readNaming == 0)
+			assignSeqId(fastaIDs[i], multiFasta[i], Fastq());	// read Fasta id
+		assignSeq(seq, multiFasta[i], Fastq());				// read Read sequence
+		assignQual(qual, multiFasta[i], Fastq());			// read ascii quality values  
+
+		if (countN)
+		{
+			int count = 0;
+			int cutoffCount = (int)(options.errorRate * length(seq));
+			for (unsigned j = 0; j < length(seq); ++j)
+				if (getValue(seq, j) == 'N')
+					if (++count > cutoffCount)
+					{
+						clear(seq);
+						clear(qual);
+						++kickoutcount;
+						break;
+					}
+		}
+#ifdef RAZERS_CONCATREADS
+		appendValue(reads, seq, Generous());
+		appendValue(readQualities, qual, Generous());
+#else
+		assign(reads[i], seq, Exact());
+		assign(readQualities[i], qual, Exact());
+#endif
+	}
+#ifdef RAZERS_CONCATREADS
+	reserve(reads.concat, length(reads.concat), Exact());
+	reserve(readQualities.concat, length(readQualities.concat), Exact());
 #endif
 
 	if (options._debugLevel > 1 && kickoutcount > 0) 

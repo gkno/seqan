@@ -63,6 +63,7 @@ int mapReads(
 {
 	MultiFasta				genomeSet;
 	TReadSet				readSet;
+	TReadQualities				readQualities;
 	StringSet<CharString>	genomeNames;	// genome names, taken from the Fasta file
 	StringSet<CharString>	readNames;		// read names, taken from the Fasta file
 	TMatches				matches;		// resulting forward/reverse matches
@@ -98,6 +99,7 @@ int mapReads(
 	SEQAN_PROTIMESTART(load_time);
 
 	if (!loadReads(readSet, readNames, readFileName, options)) {
+	//if (!loadReads(readSet, readQualities, readNames, readFileName, options)) {
 		::std::cerr << "Failed to load reads" << ::std::endl;
 		return RAZERS_READS_FAILED;
 	}
@@ -152,7 +154,7 @@ int mapReads(
 #ifdef RAZERS_DUMP_SNPS
 	//////////////////////////////////////////////////////////////////////////////
 	// Step 4: Do simple SNP calling
-		dumpSNPs(matches, genomeNames, genomeFileNameList, gnoToFileMap, readSet, readNames, readFileName, options);
+		dumpSNPs(matches, genomeNames, genomeFileNameList, gnoToFileMap, readSet, readQualities, readNames, readFileName, options);
 #endif
 
 
@@ -260,19 +262,20 @@ int getGenomeFileNameList(char const * filename, StringSet<CharString> & genomeF
 		if(options._debugLevel >=1)
 			::std::cout << ::std::endl << "Reading multiple genome files:" <<::std::endl;
 		
-		//locations of genome files are relative to list file's location
+/*		//locations of genome files are relative to list file's location
 		::std::string tempGenomeFile(filename);
 		size_t lastPos = tempGenomeFile.find_last_of('/') + 1;
 		if (lastPos == tempGenomeFile.npos) lastPos = tempGenomeFile.find_last_of('\\') + 1;
 		if (lastPos == tempGenomeFile.npos) lastPos = 0;
-		::std::string filePrefix = tempGenomeFile.substr(0,lastPos);
+		::std::string filePrefix = tempGenomeFile.substr(0,lastPos);*/
 		unsigned i = 1;
 		while(!_streamEOF(file))
 		{ 
 			_parse_skipWhitespace(file, c);
-			CharString currentGenomeFile(filePrefix);
-			append(currentGenomeFile,_parse_readFilepath(file,c));
-			appendValue(genomeFileNames,currentGenomeFile);
+			appendValue(genomeFileNames,_parse_readFilepath(file,c));
+			//CharString currentGenomeFile(filePrefix);
+			//append(currentGenomeFile,_parse_readFilepath(file,c));
+			//appendValue(genomeFileNames,currentGenomeFile);
 			if(options._debugLevel >=2)
 				::std::cout <<"Genome file #"<< i <<": " << genomeFileNames[length(genomeFileNames)-1] << ::std::endl;
 			++i;
