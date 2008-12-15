@@ -1,0 +1,4 @@
+shape		t		lossrate		minCoverage	PM		runtime
+
+1111111111		53		0.196881		62		49412		3.16464
+1111111111		52		0		61		51609		3.20682
