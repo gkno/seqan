@@ -312,6 +312,7 @@ inline size_t
 length(TValue * me)
 {
 SEQAN_CHECKPOINT
+	if (!me) return 0;
 	TValue * it = me;
 	TValue zero = TValue();
 	while ( *it != zero) ++it;
@@ -323,6 +324,7 @@ inline size_t
 length(TValue const * me)
 {
 SEQAN_CHECKPOINT
+	if (!me) return 0;
 	TValue const * it = me;
 	TValue const zero = TValue();
 	while ( *it != zero) ++it;

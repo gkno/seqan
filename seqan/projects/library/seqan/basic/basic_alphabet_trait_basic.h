@@ -91,34 +91,45 @@ SEQAN_CHECKPOINT
 //arrayConstructCopy
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TValue>
+template<typename TValueSource, typename TValueTarget>
 inline void 
-_arrayConstructCopy_Pointer(TValue * source_begin, 
-							TValue * source_end, 
-							TValue * target_begin,
+_arrayConstructCopy_Pointer(TValueSource * source_begin, 
+							TValueSource * source_end, 
+							TValueTarget * target_begin,
 							True)
 {
 SEQAN_CHECKPOINT
 	arrayCopyForward(source_begin, source_end, target_begin);
 }
-template<typename TValue>
+template<typename TValueSource, typename TValueTarget>
 inline void 
-_arrayConstructCopy_Pointer(TValue * source_begin, 
-							TValue * source_end, 
-							TValue * target_begin,
+_arrayConstructCopy_Pointer(TValueSource * source_begin, 
+							TValueSource * source_end, 
+							TValueTarget const* target_begin,
+							True)
+{
+SEQAN_CHECKPOINT
+	arrayCopyForward(source_begin, source_end, const_cast<TValueTarget *>(target_begin));
+}
+
+template<typename TValueSource, typename TValueTarget>
+inline void 
+_arrayConstructCopy_Pointer(TValueSource * source_begin, 
+							TValueSource * source_end, 
+							TValueTarget * target_begin,
 							False)
 {
 SEQAN_CHECKPOINT
 	_arrayConstructCopy_Default(source_begin, source_end, target_begin);
 }
-template<typename TValue>
+template<typename TValueSource, typename TValueTarget>
 inline void 
-arrayConstructCopy(TValue * source_begin, 
-				   TValue * source_end, 
-				   TValue * target_begin)
+arrayConstructCopy(TValueSource * source_begin, 
+				   TValueSource * source_end, 
+				   TValueTarget * target_begin)
 {
 SEQAN_CHECKPOINT
-	_arrayConstructCopy_Pointer(source_begin, source_end, target_begin, typename IsSimple<TValue>::Type() );
+	_arrayConstructCopy_Pointer(source_begin, source_end, target_begin, typename IsSimple<TValueTarget>::Type() );
 }
 
 //////////////////////////////////////////////////////////////////////////////
