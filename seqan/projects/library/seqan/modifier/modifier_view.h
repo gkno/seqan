@@ -118,7 +118,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <typename THost, typename TFunctor>
 	struct Value< ModifiedIterator<THost, ModView<TFunctor> > > {
-		typedef typename TFunctor::result_type	Type;
+		typedef typename TFunctor::result_type			TResult;
+		typedef typename _RemoveConst<TResult>::Type	Type;
 	};
 
 	template <typename THost, typename TFunctor>

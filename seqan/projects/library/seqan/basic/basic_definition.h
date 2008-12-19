@@ -62,6 +62,11 @@ template <typename TTagList = void>
 struct TagSelector
 {
 	int tagId;
+	
+	TagSelector()
+	{
+		tagId = 0;
+	}
 };
 
 template <typename TTag, typename TSubList>

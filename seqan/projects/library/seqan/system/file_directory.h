@@ -94,7 +94,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 		CharString selection = dirName;
 		append(selection, "\\*");
-		dir._atEnd = ((dir.handle = _findfirst(toCString(selection), &dir.entry)) == NULL);
+		dir._atEnd = ((dir.handle = _findfirst(toCString(selection), &dir.entry)) == -1L);
 		return !dir._atEnd;
 	}
 
