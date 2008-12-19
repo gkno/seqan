@@ -612,7 +612,12 @@ typedef Tag<TagFastq_> const Fastq;
 	{
 		if (guessFormatFromFilename(fname, typename TTagList::Type()))
 		{
-			format.tagId = Length<TTagList>::VALUE;
+			if (format.tagId == 0)
+			{
+				format.tagId = Length<TTagList>::VALUE;			// if tagId == 0 then store detected format
+				return true;
+			} else
+				return format.tagId == Length<TTagList>::VALUE;	// if tagId != 0 then compare detected format with tagId
 			return true;
 		}
 		return guessFormatFromFilename(fname, static_cast<typename TagSelector<TTagList>::Base &>(format));
@@ -749,31 +754,32 @@ typedef Tag<TagFastq_> const Fastq;
 	inline void
 	appendSeqs(
 		TSeqSet &seqSet,
-		TFilename const &dirname,
+		TFilename &dirname,
 		TSeqFormat format)
 	{
 		typedef typename Value<TSeqSet>::Type TSeq;
 		
 		Directory		dir(dirname);
-		CharString		fname;
 		TSeq			seq;
 		MultiSeqFile	multiSeqFile;
 		
 		if (!atEnd(dir))
 		{
 			// dirname is path of a directory
+			CharString fname = dirname;
+#ifdef PLATFORM_WINDOWS
+			appendValue(fname, '\\');
+#else
+			appendValue(fname, '/');
+#endif
+			size_t len = length(fname);
+
 			for (; !atEnd(dir); goNext(dir))
 			{
-				if (guessFormatFromFilename(value(dir), format))
+				assign(suffix(fname, len), value(dir));
+				if (guessFormatFromFilename(fname, format))
 				{
-					assign(fname, dirname);
-#ifdef PLATFORM_WINDOWS
-					appendValue(fname, '\\');
-#else
-					appendValue(fname, '/');
-#endif
-					append(fname, value(dir));
-
+				std::cout << fname<<std::endl;
 					if (!open(multiSeqFile.concat, toCString(fname), OPEN_RDONLY)) continue;
 
 					split(multiSeqFile, format);
@@ -792,7 +798,7 @@ typedef Tag<TagFastq_> const Fastq;
 		else
 		{
 			// dirname is path of a file
-			if (guessFormatFromFilename(value(dir), format))
+			if (guessFormatFromFilename(dirname, format))
 			{
 				if (!open(multiSeqFile.concat, toCString(dirname), OPEN_RDONLY)) return;
 
