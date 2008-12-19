@@ -26,7 +26,8 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 	// define memory mapped stringset
-	typedef StringSet<String<char, MMap<> >, Owner<ConcatDirect<> > >	MultiFasta;
+	typedef StringSet<String<char, MMap<> >, Owner<ConcatDirect<> > >	MultiFasta;	//deprecated
+	typedef StringSet<String<char, MMap<> >, Owner<ConcatDirect<> > >	MultiSeqFile;
 
 
 	template <typename TValue>
@@ -76,6 +77,37 @@ namespace SEQAN_NAMESPACE_MAIN
 		Fasta)
 	{
 		return seq[0] == '>';
+	}
+	
+	template < typename TFilename >
+	inline bool
+	guessFormatFromFilename(
+		TFilename const & fname,
+		Fasta)
+	{
+		typedef typename Value<TFilename>::Type									TValue;
+		typedef ModifiedString<TFilename, ModView<FunctorLowcase<TValue> > >	TLowcase;
+		
+		typename Size<TFilename>::Type len = length(fname);
+		TLowcase lowcaseFname(fname);
+
+		if (len >= 3)
+		{
+			if (suffix(lowcaseFname, len - 3) == ".fa") return true;
+		}
+		if (len >= 4)
+		{
+			if (suffix(lowcaseFname, len - 4) == ".fas") return true;
+			if (suffix(lowcaseFname, len - 4) == ".faa") return true;	// FASTA Amino Acid file 
+			if (suffix(lowcaseFname, len - 4) == ".ffn") return true;	// FASTA nucleotide coding regions file
+			if (suffix(lowcaseFname, len - 4) == ".fna") return true;	// FASTA Nucleic Acid file
+			if (suffix(lowcaseFname, len - 4) == ".frn") return true;
+		}
+		if (len >= 6)
+		{
+			if (suffix(lowcaseFname, len - 6) == ".fasta") return true;
+		}
+		return false;
 	}
 	
 	// split stringset into single Fasta sequences
@@ -182,6 +214,29 @@ typedef Tag<TagFastq_> const Fastq;
 		Fastq)
 	{
 		return seq[0] == '@';
+	}
+	
+	template < typename TFilename >
+	inline bool
+	guessFormatFromFilename(
+		TFilename const & fname,
+		Fastq)
+	{
+		typedef typename Value<TFilename>::Type									TValue;
+		typedef ModifiedString<TFilename, ModView<FunctorLowcase<TValue> > >	TLowcase;
+		
+		typename Size<TFilename>::Type len = length(fname);
+		TLowcase lowcaseFname(fname);
+
+		if (len >= 3)
+		{
+			if (suffix(lowcaseFname, len - 3) == ".fq") return true;
+		}
+		if (len >= 6)
+		{
+			if (suffix(lowcaseFname, len - 6) == ".fastq") return true;
+		}
+		return false;
 	}
 	
 	// split stringset into single Fasta sequences
@@ -369,7 +424,7 @@ typedef Tag<TagFastq_> const Fastq;
 	};
 
 
-	// test for Fastq format
+	// test for QSeq format
 	template < typename TSeq >
 	inline bool
 	guessFormat(
@@ -390,7 +445,17 @@ typedef Tag<TagFastq_> const Fastq;
 		return os >> mname && os >> numval && os >> numval && os >> numval;
 	}
 	
-	// split stringset into single Fasta sequences
+	template < typename TFilename >
+	inline bool
+	guessFormatFromFilename(
+		TFilename const & fname,
+		QSeq)
+	{
+		return false;
+		// TODO: format aus filename erkennen
+	}
+
+	// split stringset into single QSeq sequences
 	template < typename TValue, typename TConfig, typename TDelimiter >
 	inline void
 	split(
@@ -441,45 +506,45 @@ typedef Tag<TagFastq_> const Fastq;
 		assign(destination, infix(source, infixStart - front, infixEnd - front));
 	}
 
-	template <typename TSeq, typename TFastaSeq>
+	template <typename TSeq, typename TQSeqSeq>
 	inline void
 	assignSeq(
 		TSeq & dst,
-		TFastaSeq const & fasta,
+		TQSeqSeq const & fasta,
 		QSeq)
 	{
 		assignQSeqEntry(dst, fasta, QSeqEntry::Sequence);
 	}
 
-	template <typename TSeq, typename TFastaSeq>
+	template <typename TSeq, typename TQSeqSeq>
 	inline void
 	assignSeqId(
 		TSeq & dst,
-		TFastaSeq const & fasta,
+		TQSeqSeq const & fasta,
 		QSeq)
 	{
 		// For now: just return the whole line.
-		typename seqan::Position<TFastaSeq const>::Type front = 0;
+		typename Position<TQSeqSeq const>::Type front = 0;
 		while (_isLineBreak(fasta[front]))
 			++front;
 		assign(dst, infix(fasta, front, length(fasta)));
 	}
 
-	template <typename TSeq, typename TFastaSeq>
+	template <typename TSeq, typename TQSeqSeq>
 	inline void
 	assignQual(
 		TSeq & dst,
-		TFastaSeq const & fasta,
+		TQSeqSeq const & fasta,
 		QSeq)
 	{
 		assignQSeqEntry(dst, fasta, QSeqEntry::Quality);
 	}
 
-	template <typename TSeq, typename TFastaSeq>
+	template <typename TSeq, typename TQSeqSeq>
 	inline void
 	assignQualId(
 		TSeq & dst,
-		TFastaSeq const & fasta,
+		TQSeqSeq const & fasta,
 		QSeq)
 	{
 		assignSeqId(dst, fasta, QSeq());
@@ -516,12 +581,43 @@ typedef Tag<TagFastq_> const Fastq;
 	{
 		if (guessFormat(seq, typename TTagList::Type()))
 		{
-			format.tagId = Length<TTagList>::VALUE;
-			return true;
+			if (format.tagId == 0)
+			{
+				format.tagId = Length<TTagList>::VALUE;			// if tagId == 0 then store detected format
+				return true;
+			} else
+				return format.tagId == Length<TTagList>::VALUE;	// if tagId != 0 then compare detected format with tagId
 		}
 		return guessFormat(seq, static_cast<typename TagSelector<TTagList>::Base &>(format));
 	}
 	
+//____________________________________________________________________________
+// guess file format from filename
+
+	template < typename TFilename >
+	inline bool
+	guessFormatFromFilename(
+		TFilename const &,
+		TagSelector<> &format)
+	{
+		format.tagId = 0;
+		return false;
+	}
+	
+	template < typename TFilename, typename TTagList >
+	inline bool
+	guessFormatFromFilename(
+		TFilename const & fname,
+		TagSelector<TTagList> &format)
+	{
+		if (guessFormatFromFilename(fname, typename TTagList::Type()))
+		{
+			format.tagId = Length<TTagList>::VALUE;
+			return true;
+		}
+		return guessFormatFromFilename(fname, static_cast<typename TagSelector<TTagList>::Base &>(format));
+	}
+
 //____________________________________________________________________________
 // split stringset into single sequences
 
@@ -645,6 +741,75 @@ typedef Tag<TagFastq_> const Fastq;
 			assignQualId(dst, seq, static_cast<typename TagSelector<TTagList>::Base const &>(format));
 	}
 
+//////////////////////////////////////////////////////////////////////////////
+// Directory import
+//////////////////////////////////////////////////////////////////////////////
+
+	template <typename TSeqSet, typename TFilename, typename TSeqFormat>
+	inline void
+	appendSeqs(
+		TSeqSet &seqSet,
+		TFilename const &dirname,
+		TSeqFormat format)
+	{
+		typedef typename Value<TSeqSet>::Type TSeq;
+		
+		Directory		dir(dirname);
+		CharString		fname;
+		TSeq			seq;
+		MultiSeqFile	multiSeqFile;
+		
+		if (!atEnd(dir))
+		{
+			// dirname is path of a directory
+			for (; !atEnd(dir); goNext(dir))
+			{
+				if (guessFormatFromFilename(value(dir), format))
+				{
+					assign(fname, dirname);
+#ifdef PLATFORM_WINDOWS
+					appendValue(fname, '\\');
+#else
+					appendValue(fname, '/');
+#endif
+					append(fname, value(dir));
+
+					if (!open(multiSeqFile.concat, toCString(fname), OPEN_RDONLY)) continue;
+
+					split(multiSeqFile, format);
+					unsigned seqCount = length(multiSeqFile);
+					
+					reserve(seqSet, length(seqSet) + seqCount, Generous());					
+					for(unsigned i = 0; i < seqCount; ++i)
+					{
+						assignSeq(seq, multiSeqFile[i], format);
+						appendValue(seqSet, seq, Generous());
+					}
+					close(multiSeqFile.concat);
+				}
+			}
+		} 
+		else
+		{
+			// dirname is path of a file
+			if (guessFormatFromFilename(value(dir), format))
+			{
+				if (!open(multiSeqFile.concat, toCString(dirname), OPEN_RDONLY)) return;
+
+				split(multiSeqFile, format);
+				unsigned seqCount = length(multiSeqFile);
+				
+				reserve(seqSet, length(seqSet) + seqCount, Generous());					
+				for(unsigned i = 0; i < seqCount; ++i)
+				{
+					assignSeq(seq, multiSeqFile[i], format);
+					appendValue(seqSet, seq, Generous());
+				}
+				close(multiSeqFile.concat);
+			}
+		}
+	}
+	
 }
 
 #endif
