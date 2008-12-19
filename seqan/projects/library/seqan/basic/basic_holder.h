@@ -730,10 +730,10 @@ SEQAN_CHECKPOINT
 ..see:Class.Holder
 */
 
-template <typename TValue, typename TValue2>
+template <typename TValue>
 inline void
 setValue(Holder<TValue, Tristate> & me,
-		 TValue2 & value_)
+		 TValue & value_)
 {
 SEQAN_CHECKPOINT
 	clear(me);
@@ -742,10 +742,26 @@ SEQAN_CHECKPOINT
 	addRef(_dataValue(me));
 }
 
-template <typename TValue, typename TValue2>
+//____________________________________________________________________________
+
+template <typename TValue>
+inline void
+setValue(Holder<TValue const, Tristate> & me,
+		 TValue & value_)
+{
+SEQAN_CHECKPOINT
+	clear(me);
+	me.data_value = & value_;
+	me.data_state = Holder<TValue const, Tristate>::DEPENDENT;
+	addRef(_dataValue(me));
+}
+
+//____________________________________________________________________________
+
+template <typename TValue>
 inline void
 setValue(Holder<TValue *, Tristate> & me,
-		 TValue2 & value_)
+		 TValue * & value_)
 {
 SEQAN_CHECKPOINT
 	clear(me);
@@ -753,16 +769,54 @@ SEQAN_CHECKPOINT
 	me.data_state = Holder<TValue *, Tristate>::DEPENDENT;
 	addRef(_dataValue(me));
 }
-template <typename TValue, typename TValue2>
+
+template <typename TValue>
 inline void
 setValue(Holder<TValue *, Tristate> & me,
-		 TValue2 const & value_)
+		 TValue * const & value_)
 {
 SEQAN_CHECKPOINT
 	clear(me);
 	me.data_value = value_;
 	me.data_state = Holder<TValue *, Tristate>::DEPENDENT;
 	addRef(_dataValue(me));
+}
+
+//____________________________________________________________________________
+
+template <typename TValue, size_t I>
+inline void
+setValue(Holder<TValue *, Tristate> & me,
+		 TValue (& value_)[I])
+{
+SEQAN_CHECKPOINT
+	clear(me);
+	me.data_value = value_;
+	me.data_state = Holder<TValue *, Tristate>::DEPENDENT;
+	addRef(_dataValue(me));
+}
+
+template <typename TValue, size_t I>
+inline void
+setValue(Holder<TValue *, Tristate> & me,
+		 TValue const (& value_)[I])
+{
+SEQAN_CHECKPOINT
+	clear(me);
+	me.data_value = value_;
+	me.data_state = Holder<TValue *, Tristate>::DEPENDENT;
+	addRef(_dataValue(me));
+}
+
+//____________________________________________________________________________
+
+template <typename TValue, typename TValue2>
+inline void
+setValue(Holder<TValue, Tristate> & me,
+		 TValue2 & value_)
+{
+SEQAN_CHECKPOINT
+	set(value(me), value_);
 }
 
 template <typename TValue, typename TValue2>
