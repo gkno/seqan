@@ -1465,8 +1465,8 @@ _reallocateStorage(
 template <typename TValue, typename TSpec, typename _TSize>
 inline void
 _reserveStorage(
-	String<TValue, TSpec> & seq, 
-	_TSize new_capacity,
+	String<TValue, TSpec> & /*seq*/, 
+	_TSize /*new_capacity*/,
 	Insist)
 {
 	// do nothing
@@ -1475,8 +1475,8 @@ _reserveStorage(
 template <typename TValue, typename TSpec, typename _TSize>
 inline void
 _reserveStorage(
-	String<TValue, TSpec> & seq, 
-	_TSize new_capacity,
+	String<TValue, TSpec> & /*seq*/, 
+	_TSize /*new_capacity*/,
 	Limit)
 {
 	// do nothing

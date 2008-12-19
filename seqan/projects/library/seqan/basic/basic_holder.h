@@ -284,6 +284,84 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TValue>
+struct Holder<TValue const, Tristate>
+{
+public:
+	enum EHolderState
+	{
+		EMPTY = 0,
+		OWNER = 1,
+		DEPENDENT = ~0
+	};
+
+	typedef typename Value<Holder>::Type THostValue;
+
+	THostValue * data_value;
+	EHolderState data_state;
+
+//____________________________________________________________________________
+
+	Holder():
+		data_state(EMPTY)
+	{
+SEQAN_CHECKPOINT
+	}
+	Holder(Holder const & source_):
+		data_state(EMPTY)
+	{
+SEQAN_CHECKPOINT
+		assign(*this, source_);
+	}
+	Holder(TValue & value_):
+		data_state(EMPTY)
+	{
+SEQAN_CHECKPOINT
+		setValue(*this, value_);
+	}
+	Holder(TValue const & value_):
+		data_state(EMPTY)
+	{
+SEQAN_CHECKPOINT
+		setValue(*this, value_);
+	}
+
+	~Holder()
+	{
+SEQAN_CHECKPOINT
+		clear(*this);
+	}
+
+//____________________________________________________________________________
+
+	inline Holder const &
+	operator = (Holder const & source_)
+	{
+SEQAN_CHECKPOINT
+		assign(*this, source_);
+		return *this;
+	}
+
+	inline Holder const &
+	operator = (THostValue const & value_)
+	{
+SEQAN_CHECKPOINT
+		assignValue(*this, value_);
+		return *this;
+	}
+
+	inline operator THostValue()
+	{
+SEQAN_CHECKPOINT
+		return _dataValue(*this);
+	}
+//____________________________________________________________________________
+
+};
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TValue>
 struct Holder<TValue *, Tristate>
 {
 public:
@@ -586,6 +664,18 @@ SEQAN_CHECKPOINT
 	clear(me);
 	me.data_value = _holderAllocate(me, value_);
 	me.data_state = Holder<TValue, Tristate>::OWNER;
+}
+
+template <typename TValue, typename TValue2>
+inline void
+create(Holder<TValue const, Tristate> & me,
+	   TValue2 & value_)
+{
+SEQAN_CHECKPOINT
+
+	clear(me);
+	me.data_value = _holderAllocate(me, value_);
+	me.data_state = Holder<TValue const, Tristate>::OWNER;
 }
 
 template <typename TValue, typename TValue2>

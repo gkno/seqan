@@ -83,8 +83,9 @@ struct _ValueConstructor
 	static inline void
 	construct(TIterator it)
 	{
-		typedef typename Value<TIterator>::Type TValue;
-		new( & value(it) ) TValue;
+		typedef typename Value<TIterator>::Type		TValue;
+		typedef typename _RemoveConst<TValue>::Type	TNonConstValue;
+		new( (void*) & value(it) ) TNonConstValue;
 	}
 
 	template <typename TIterator, typename TParam>
@@ -92,8 +93,9 @@ struct _ValueConstructor
 	construct(TIterator it,
 			  TParam const & param_)
 	{
-		typedef typename Value<TIterator>::Type TValue;
-		new( & value(it) ) TValue(param_);
+		typedef typename Value<TIterator>::Type		TValue;
+		typedef typename _RemoveConst<TValue>::Type	TNonConstValue;
+		new( (void*) & value(it) ) TNonConstValue(param_);
 	}
 
 	template <typename TIterator, typename TParam>
@@ -102,8 +104,9 @@ struct _ValueConstructor
 			  TParam const & param_,
 			  Move tag)
 	{
-		typedef typename Value<TIterator>::Type TValue;
-		new( & value(it) ) TValue(param_, tag);
+		typedef typename Value<TIterator>::Type		TValue;
+		typedef typename _RemoveConst<TValue>::Type	TNonConstValue;
+		new( (void*) & value(it) ) TNonConstValue(param_, tag);
 	}
 };
 

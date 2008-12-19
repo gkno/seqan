@@ -295,8 +295,8 @@ hasNoHost(Segment<THost, TSpec> const & target)
 //                muss noch assign/append gemacht werden.
 template <typename THost, typename TSpec, typename TSource>
 inline bool 
-operation_2_set(Segment<THost, TSpec> & target, 
-				TSource & source)
+operation_2_set(Segment<THost, TSpec> &, 
+				TSource &)
 {
 	return false;
 }
