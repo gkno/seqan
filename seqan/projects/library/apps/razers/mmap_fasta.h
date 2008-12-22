@@ -429,8 +429,11 @@ typedef Tag<TagFastq_> const Fastq;
 	template < typename TString >
 	inline bool _isQSeqFile(TString const& filename)
 	{
+        unsigned int const namelen = 19;
+        unsigned int const pathlen = length(filename);
+        if (pathlen < namelen) return false;
 		::std::string str;
-		assign(str, filename);
+		assign(str, suffix(filename, pathlen - namelen));
 		::std::istringstream is(str);
 		unsigned int num;
 		// Format (as regex): /^s_\d_\d_\d{4}_qseq.txt$/
