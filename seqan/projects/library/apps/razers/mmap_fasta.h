@@ -407,6 +407,9 @@ typedef Tag<TagFastq_> const Fastq;
 	// in a QSeq file may differ depending on where they come from. Not sure if
 	// this is something that needs to be fixed here, rather than in the Illu-
 	// mina pipeline itself.
+	//
+	// Also, this enum is quite convoluted but I don't feel like spilling a lot
+	// of common symbols (e.g. 'X', 'Y') into the SeqAn namespace.
 	struct QSeqEntry {
 		enum {
 			MachineName,
@@ -423,6 +426,49 @@ typedef Tag<TagFastq_> const Fastq;
 		};
 	};
 
+	template < typename TString >
+	inline bool _isQSeqFile(TString const& filename)
+	{
+		::std::string str;
+		assign(str, filename);
+		::std::istringstream is(str);
+		unsigned int num;
+		// Format (as regex): /^s_\d_\d_\d{4}_qseq.txt$/
+		return is.get() == 's' && is.get() == '_' &&
+			isdigit(is.get()) && is.get() == '_' &&
+			isdigit(is.get()) && is.get() == '_' &&
+			is >> num &&
+			getline(is, str) && str == "_qseq.txt" && is.eof();
+	}
+
+//	// Needed?
+//	template < typename TString >
+//	inline TString _getFirstFile(
+//		char const* dirname,
+//		QSeq)
+//	{
+//		Directory dir(dirname);
+//		
+//		for ( ; dir; ++dir)
+//			if (_isQSeqFile(*dir))
+//				return *dir;
+//	}
+//
+//	template < typename TString >
+//	inline String< TString >
+//	_getAllFiles(
+//		char const* dirname,
+//		QSeq)
+//	{
+//		String< TString > ret;
+//		Directory dir(dirname);
+//
+//		for (; dir; ++dir)
+//			if (_isQSeqFile(*dir))
+//				appendValue(ret, *dir);
+//
+//		return ret;
+//	}
 
 	// test for QSeq format
 	template < typename TSeq >
@@ -437,12 +483,12 @@ typedef Tag<TagFastq_> const Fastq;
 		if (!_seekTab(front, back)) return false;
 		::std::string token_base;
 		assign(token_base, seq);
-		::std::istringstream os(token_base);
+		::std::istringstream is(token_base);
 		::std::string mname;
 		unsigned int numval;
 		// Actual information encoded in qseq file may vary. Take a few guesses:
-		//     machine name   run number      lane number     tile number
-		return os >> mname && os >> numval && os >> numval && os >> numval;
+		//     machine name, run number, lane number, tile number
+		return is >> mname >> numval >> numval >> numval;
 	}
 	
 	template < typename TFilename >
@@ -451,8 +497,14 @@ typedef Tag<TagFastq_> const Fastq;
 		TFilename const & fname,
 		QSeq)
 	{
-		return false;
-		// TODO: format aus filename erkennen
+		// QSeq files come in a variety of ways throughout the Gerald pipeline.
+		// In this simplest case, "sorted.txt" is a file in a fragment genome
+		// directory, each corresponding to 10MB worth of DNA.
+		static CharString const standalone_name = "sorted.txt";
+		typename Size<TFilename>::Type len = length(fname);
+		return len >= length(standalone_name) &&
+			suffix(fname, len - length(standalone_name)) == standalone_name ||
+			_isQSeqFile(fname);
 	}
 
 	// split stringset into single QSeq sequences
