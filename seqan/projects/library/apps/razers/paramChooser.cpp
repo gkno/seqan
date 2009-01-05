@@ -26,9 +26,6 @@
 #define NON_REDUNDANT
 //#define LOSSRATE_VALIDATION	//generates output for loss rate validation (empirical vs computed), only for ungapped
 
-#include <sys/types.h>
-#include <dirent.h>
-#include <errno.h>
 #include <iostream>
 #include <sstream>
 #include <string>

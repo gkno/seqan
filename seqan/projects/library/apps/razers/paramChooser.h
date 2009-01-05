@@ -25,11 +25,8 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <sys/types.h>
+//#include <sys/types.h>
 #include <errno.h>
-#ifndef NO_PARAM_CHOOSER
-  #include <dirent.h>
-#endif
 
 #include <seqan/sequence.h>
 #include "razers.h"
@@ -50,7 +47,9 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 // ls in directory dir, store filenames in files
 
-#ifndef NO_PARAM_CHOOSER
+/* 
+
+// The following lines won't work under Windows.
 
 template<typename TPath, typename TFilenameString>
 int 
@@ -72,8 +71,23 @@ getDir(TPath dir, TFilenameString &files)
 	closedir(dp);
 	return 0;
 }
+*/
 
-#endif
+template<typename TPath, typename TFilenameString>
+int getDir(TPath path, TFilenameString &files)
+{
+	Directory dir(path);
+	if (!dir)
+	{
+		::std::cout << "Error(" << errno << ") opening " << dir << ::std::endl;
+		return errno;
+	}
+
+	for (; !atEnd(dir); goNext(dir))
+		appendValue(files, value(dir));
+	return 0;
+}
+
 
 struct ParamChooserOptions
 {
@@ -270,7 +284,7 @@ qualityDistributionFromPrbFile(TFile & file, TDistribution & avg, ParamChooserOp
 			int qualG = (int) _parse_readDouble(file,c);
 			_parse_skipBlanks(file,c);
 			int qualT = (int) _parse_readDouble(file,c);
-			int qual = ::std::max(::std::max(qualA, qualC), ::std::max(qualG, qualT));
+			int qual = _max( _max(qualA, qualC), _max(qualG, qualT) );
 
 			avgReadQual += qual;
 			tempReadQual[pos] = qual;

@@ -357,7 +357,7 @@ bool loadReads(TReadSet &reads, TReadQualities &readQualities, TNameSet &fastaID
 	unsigned seqCount = length(multiFasta);
 #ifndef RAZERS_CONCATREADS
 	resize(reads, seqCount);
-	resize(readsQualities, seqCount);
+	resize(readQualities, seqCount);
 #endif
 	if (options.readNaming == 0)
 		resize(fastaIDs, seqCount);
