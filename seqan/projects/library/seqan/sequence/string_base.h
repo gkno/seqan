@@ -1686,6 +1686,15 @@ SEQAN_CHECKPOINT
 	typename Comparator<String<TLeftValue, TLeftSpec> >::Type _lex(left, right);
     return isEqual(_lex);
 }
+template <typename TLeftValue, typename TRightValue, typename TRightSpec >
+inline bool
+operator == (TLeftValue * left,
+			 String<TRightValue, TRightSpec> const & right)
+{
+SEQAN_CHECKPOINT
+	typename Comparator<String<TRightValue, TRightSpec> >::Type _lex(left, right);
+    return isEqual(_lex);
+}
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -1696,6 +1705,15 @@ operator !=(String<TLeftValue, TLeftSpec> const & left,
 {
 SEQAN_CHECKPOINT
 	typename Comparator<String<TLeftValue, TLeftSpec> >::Type _lex(left, right);
+    return isNotEqual(_lex);
+}
+template <typename TLeftValue, typename TRightValue, typename TRightSpec >
+inline bool
+operator != (TLeftValue * left,
+			 String<TRightValue, TRightSpec> const & right)
+{
+SEQAN_CHECKPOINT
+	typename Comparator<String<TRightValue, TRightSpec> >::Type _lex(left, right);
     return isNotEqual(_lex);
 }
 
@@ -1709,6 +1727,14 @@ operator < (String<TLeftValue, TLeftSpec> const & left,
 SEQAN_CHECKPOINT
 	return isLess(left, right, typename DefaultPrefixOrder<String<TLeftValue, TLeftSpec> >::Type());
 }
+template <typename TLeftValue, typename TRightValue, typename TRightSpec >
+inline bool
+operator < (TLeftValue * left,
+			 String<TRightValue, TRightSpec> const & right)
+{
+SEQAN_CHECKPOINT
+	return isLess(left, right, typename DefaultPrefixOrder<TLeftValue *>::Type());
+}
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -1720,6 +1746,15 @@ operator <= (String<TLeftValue, TLeftSpec> const & left,
 SEQAN_CHECKPOINT
 	return isLessOrEqual(left, right, typename DefaultPrefixOrder<String<TLeftValue, TLeftSpec> >::Type());
 }
+template <typename TLeftValue, typename TRightValue, typename TRightSpec >
+inline bool
+operator <= (TLeftValue * left,
+			 String<TRightValue, TRightSpec> const & right)
+{
+SEQAN_CHECKPOINT
+	return isLessOrEqual(left, right, typename DefaultPrefixOrder<TLeftValue *>::Type());
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TLeftValue, typename TLeftSpec, typename TRight>
@@ -1729,6 +1764,14 @@ operator > (String<TLeftValue, TLeftSpec> const & left,
 {
 SEQAN_CHECKPOINT
 	return isGreater(left, right, typename DefaultPrefixOrder<String<TLeftValue, TLeftSpec> >::Type());
+}
+template <typename TLeftValue, typename TRightValue, typename TRightSpec >
+inline bool
+operator > (TLeftValue * left,
+			 String<TRightValue, TRightSpec> const & right)
+{
+SEQAN_CHECKPOINT
+	return isGreater(left, right, typename DefaultPrefixOrder<TLeftValue *>::Type());
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1740,6 +1783,14 @@ operator >= (String<TLeftValue, TLeftSpec> const & left,
 {
 SEQAN_CHECKPOINT
 	return isGreaterOrEqual(left, right, typename DefaultPrefixOrder<String<TLeftValue, TLeftSpec> >::Type());
+}
+template <typename TLeftValue, typename TRightValue, typename TRightSpec >
+inline bool
+operator >= (TLeftValue * left,
+			 String<TRightValue, TRightSpec> const & right)
+{
+SEQAN_CHECKPOINT
+	return isGreaterOrEqual(left, right, typename DefaultPrefixOrder<TLeftValue *>::Type());
 }
 
 //////////////////////////////////////////////////////////////////////////////
