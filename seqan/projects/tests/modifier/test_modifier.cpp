@@ -50,9 +50,11 @@ void testViewIterator()
 	// Test1 - no modification (default)
 	{
 
-		typedef ModifiedIterator< Iterator<String<char> >::Type > TModIterDefault;
+		typedef ModifiedIterator< Iterator<String<char>, Rooted>::Type > TModIterDefault;
 
 		TModIterDefault it, itEnd(end(origin));
+
+		setContainer(it, container(itEnd));		// test setContainer
 
 		cout << "*** Iterator Test: Caesar chiffre ***" << endl;
 		cout << "chiffre:  ";
@@ -70,10 +72,12 @@ void testViewIterator()
 	{
 
 		typedef CaesarChiffre<char> TEncode;
-		typedef ModifiedIterator< Iterator<String<char> >::Type, ModView<TEncode> > TModIterCaesar;
+		typedef ModifiedIterator< Iterator<String<char>, Rooted>::Type, ModView<TEncode> > TModIterCaesar;
 
 		TEncode encode(-2);
 		TModIterCaesar it(encode), itEnd(end(origin));
+
+		setContainer(it, container(itEnd));		// test setContainer
 
 		cout << "original: ";
 

@@ -169,7 +169,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename THost, typename TSpec >
 	struct Container< ModifiedIterator<THost, TSpec> const>
 	{
-		typedef typename Container<THost const>::Type THostContainer;
+		typedef typename Container<THost>::Type THostContainer;
 		typedef ModifiedString<THostContainer, TSpec> Type;
 	};
 
@@ -237,23 +237,43 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	//////////////////////////////////////////////////////////////////////////////
 
+	template <typename TIteratorHost, typename TSpec, typename TStringHost>
+	inline void
+	setContainer(
+		ModifiedIterator<TIteratorHost, TSpec> & me, 
+		ModifiedString<TStringHost, TSpec> & cont) 
+	{
+	SEQAN_CHECKPOINT
+		setContainer(host(me), host(cont));
+		_copyCargo(me, cont);
+	}
+	template <typename TIteratorHost, typename TSpec, typename TStringHost>
+	inline void
+	setContainer(
+		ModifiedIterator<TIteratorHost, TSpec> & me, 
+		ModifiedString<TStringHost, TSpec> const & cont) 
+	{
+	SEQAN_CHECKPOINT
+		setContainer(host(me), host(const_cast<ModifiedString<TStringHost, TSpec> &>(cont)));
+		_copyCargo(me, cont);
+	}
 	template <typename THost, typename TSpec, typename TContainer>
 	inline void
 	setContainer(ModifiedIterator<THost, TSpec> & me, TContainer & cont) 
 	{
 	SEQAN_CHECKPOINT
-		THost & host = host(me);
-		setContainer(host, host(cont));
+		setContainer(host(me), cont);
 	}
-	template <typename THost, typename TSpec, typename TContainer>
+/*	template <typename THost, typename TSpec, typename TContainer>
 	inline void
 	setContainer(ModifiedIterator<THost, TSpec> & me, TContainer const & cont) 
 	{
 	SEQAN_CHECKPOINT
-		THost & host = host(me);
-		setContainer(host, host(cont));
+		THost &_host = host(me);
+		setContainer(_host, host(cont));
+		_copyCargo(me, cont);
 	}
-
+*/
 	//////////////////////////////////////////////////////////////////////////////
 	// assign
 	//////////////////////////////////////////////////////////////////////////////
