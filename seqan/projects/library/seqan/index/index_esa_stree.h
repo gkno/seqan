@@ -76,34 +76,48 @@ This interval is the @Function.value@ of the iterator.
 		typedef typename VertexDescriptor<TIndex>::Type	TVertexDesc;
 		typedef Iter									iterator;
 
-		TIndex const	&index;		// container of all necessary tables
+		TIndex const	*index;		// container of all necessary tables
 		TVertexDesc		vDesc;		// current interval in suffix array and
 									// right border of parent interval (needed in goRight)
 
 		// pseudo history stack (to go up at most one node)
 		TVertexDesc		_parentDesc;
 
+//____________________________________________________________________________
+
 		Iter(TIndex &_index):
-			index(_index)
+			index(&_index)
 		{
 			_indexRequireTopDownIteration(_index);
 			goRoot(*this);
 		}
 
 		Iter(TIndex &_index, MinimalCtor):
-			index(_index),
+			index(&_index),
 			vDesc(MinimalCtor()) {}
 
 		Iter(TIndex &_index, TVertexDesc const &_vDesc):
-			index(_index),
+			index(&_index),
 			vDesc(_vDesc)
 		{
 			_indexRequireTopDownIteration(_index);
 		}
 
 		Iter(Iter const &_origin):
-			index(container(_origin)),
-			vDesc(value(_origin)) {}
+			index(&container(_origin)),
+			vDesc(value(_origin)),
+			_parentDesc(_origin._parentDesc) {}
+
+//____________________________________________________________________________
+
+		inline Iter const &
+		operator = (Iter const &_origin)
+		{
+			index = &container(_origin);
+			vDesc = _origin.vDesc;
+			_parentDesc = _origin._parentDesc;
+			return *this;
+		}
 	};
 
 
@@ -143,6 +157,8 @@ This interval is the @Function.value@ of the iterator.
 
 		TStack			history;	// contains all previously visited intervals (allows to go up)
 
+//____________________________________________________________________________
+
 		Iter(TIndex &_index):
 			TBase(_index) {}
 
@@ -152,6 +168,16 @@ This interval is the @Function.value@ of the iterator.
 		Iter(Iter const &_origin):
 			TBase((TBase const &)_origin),
 			history(_origin.history) {}
+
+//____________________________________________________________________________
+
+		inline Iter const &
+		operator = (Iter const &_origin)
+		{
+			*(TBase*)(this) = _origin;
+			history = _origin.history;
+			return *this;
+		}
 	};
 
 
@@ -180,14 +206,16 @@ This interval is the @Function.value@ of the iterator.
 		typedef String<TStackEntry, Block<> >			TStack;
 		typedef Iter									iterator;
 
-		TIndex	const	&index;			// container of all necessary tables
+		TIndex	const	*index;			// container of all necessary tables
 		TVertexDesc		vDesc;			// current interval in suffix array and
 										// right border of parent interval (unused here)
 		TSize			lValue;			// current l-value
 		TStack			history;		// contains all left borders of current l-intervals (== left borders of history intervals)
 
+//____________________________________________________________________________
+
 		Iter(TIndex &_index):
-			index(_index),
+			index(&_index),
 			vDesc(MinimalCtor()),
 			lValue(0)
 		{
@@ -196,15 +224,27 @@ This interval is the @Function.value@ of the iterator.
 		}
 
 		Iter(TIndex &_index, MinimalCtor):
-			index(_index),
+			index(&_index),
 			vDesc(MinimalCtor()),
 			lValue(0) {}
 
 		Iter(Iter const &_origin):
-			index(container(_origin)),
+			index(&container(_origin)),
 			vDesc(value(_origin)),
 			lValue(_dfsLCP(_origin)),
 			history(_origin.history) {}
+
+//____________________________________________________________________________
+
+		inline Iter const &
+		operator = (Iter const &_origin)
+		{
+			index = &container(_origin);
+			vDesc = _origin.vDesc;
+			lValue = _origin.lValue;
+			history = _origin.history;
+			return *this;
+		}
 	};
 
 
@@ -553,12 +593,12 @@ This interval is the @Function.value@ of the iterator.
 
 	template < typename TIndex, class TSpec >
 	inline TIndex const & container(Iter< TIndex, VSTree<TSpec> > const &it) { 
-		return it.index; 
+		return *it.index; 
 	}
 
 	template < typename TIndex, class TSpec >
 	inline TIndex & container(Iter< TIndex, VSTree<TSpec> > &it) { 
-		return const_cast<TIndex&>(it.index); 
+		return *const_cast<TIndex*>(it.index); 
 	}
 
 

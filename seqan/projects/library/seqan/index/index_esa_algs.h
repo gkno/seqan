@@ -152,8 +152,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		{
 			this->vDesc.range = Pair<TSize>(0,0);
 			indexRequire(_index, ESA_BWT());
-			lIter = begin(indexLCP(this->index));
-			lEnd  = end(indexLCP(this->index));
+			lIter = begin(indexLCP(container(*this)));
+			lEnd  = end(indexLCP(container(*this)));
 			goNext(*this);
 		}
 
@@ -168,8 +168,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		{
 			this->vDesc.i1 = Pair<TSize>(0,0);
 			indexRequire(_index, ESA_BWT());
-			lIter = begin(indexLCP(this->index));
-			lEnd  = end(indexLCP(this->index));
+			lIter = begin(indexLCP(container(*this)));
+			lEnd  = end(indexLCP(container(*this)));
 			goNext(*this);
 		}
 
