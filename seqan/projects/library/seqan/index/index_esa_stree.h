@@ -659,7 +659,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Size<TIndex>::Typ
 ..param.iterator:An iterator of a Suffix Tree.
 ...type:Spec.VSTree Iterator
 ..returns:All positions where the @Function.representative@ of $iterator$ occurs in the text (see @Tag.ESA Index Fibres.ESA_Text@).
-If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TIndex, ESA_SA>::Type>::Type$.
+If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TIndex, ESA_SA>::Type const>::Type$.
 */
 
 	template < typename TIndex, class TSpec >
@@ -763,7 +763,7 @@ otherwise the seed returned is one many.
 ..param.iterator:An iterator of a Suffix Tree.
 ...type:Spec.VSTree Iterator
 ..returns:All positions where the @Function.representative@ of $iterator$ occurs in the text (see @Tag.ESA Index Fibres.ESA_Text@).
-If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TIndex, ESA_BWT>::Type>::Type$.
+If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TIndex, ESA_BWT>::Type const>::Type$.
 */
 
 	template < typename TIndex, class TSpec >
@@ -784,8 +784,8 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 ..signature:representative(iterator)
 ..param.iterator:An iterator of a Suffix Tree.
 ...type:Spec.VSTree Iterator
-..returns:An @Spec.InfixSegment@ of the raw text of an index (see @Tag.ESA Index Fibres.ESA_Text@).
-If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TIndex, ESA_RawText>::Type>::Type$.
+..returns:An @Spec.InfixSegment@ of the text of an index (see @Tag.ESA Index Fibres.ESA_Text@).
+If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TIndex, ESA_Text>::Type const>::Type$.
 */
 
 	template < typename TIndex, class TSpec >
@@ -1398,8 +1398,8 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 ..signature:parentEdgeLabel(iterator)
 ..param.iterator:An iterator of a Suffix Tree.
 ...type:Spec.TopDownHistory Iterator
-..returns:An @Spec.InfixSegment@ of the raw text of an index (see @Tag.ESA Index Fibres.ESA_RawText@).
-If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TIndex, ESA_RawText>::Type>::Type$.
+..returns:An @Spec.InfixSegment@ of the text of an index (see @Tag.ESA Index Fibres.ESA_Text@).
+If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TIndex, ESA_Text>::Type const>::Type$.
 */
 
 	template < typename TIndex, class TSpec >
