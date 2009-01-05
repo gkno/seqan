@@ -582,7 +582,7 @@ template <typename TValue> inline size_t length(TValue * me);
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename THolder, typename TValue>
-inline typename Value<THolder>::Type *
+inline typename Value<THolder, 0>::Type *
 _holderAllocateObject(THolder & me, TValue const & data)
 {	
 	typename Value<THolder>::Type * ret;
@@ -592,7 +592,7 @@ _holderAllocateObject(THolder & me, TValue const & data)
 }
 
 template <typename THolder, typename TValue>
-inline typename Value<THolder>::Type
+inline typename Value<THolder, 0>::Type
 _holderAllocatePointer(THolder & me, TValue * data)
 {
 	typename Value<THolder>::Type ret;
