@@ -591,6 +591,115 @@ void Test_Hirschberg() {
 
 //////////////////////////////////////////////////////////////////////////////
 
+template<typename TStringSet, typename TCargo, typename TSpec, typename TScore> 
+inline typename Value<TScore>::Type
+__sumOfPairsScore(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
+				TScore const& score_type)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename Value<TScore>::Type TScoreValue;
+	typedef typename Value<typename Value<TStringSet>::Type>::Type TAlphabet;
+
+	// Convert the graph
+	String<char> mat;
+	convertAlignment(g, mat);
+	char gapChar = gapValue<char>();
+
+	TScoreValue gap = scoreGapExtend(score_type);
+	TScoreValue gapOpen = scoreGapOpen(score_type);
+	TSize nseq = length(stringSet(g));
+	TSize len = length(mat) / nseq;
+	
+	bool gapOpeni = false;
+	bool gapOpenj = false;
+	TScoreValue totalScore = 0;
+	for(TSize i = 0; i<nseq-1; ++i) {
+		for(TSize j=i+1; j<nseq; ++j) {
+			for(TSize k=0;k<len; ++k) {
+				if (value(mat, i*len+k) != gapChar) {
+					if (value(mat, j*len + k) != gapChar) {
+						gapOpeni = false;
+						gapOpenj = false;
+						totalScore += score(const_cast<TScore&>(score_type), TAlphabet(value(mat, i*len+k)), TAlphabet(value(mat, j*len + k)));
+					} else {
+						if (gapOpenj) {
+							totalScore += gap;
+						} else {
+							gapOpenj = true;
+							totalScore += gapOpen;
+						}
+					}
+				} else if (value(mat, j*len + k) != gapChar) {
+						if (gapOpeni) {
+							totalScore += gap;
+						} else {
+							gapOpeni = true;
+							totalScore += gapOpen;
+						}
+				}
+			}
+		}
+	}
+	return totalScore;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<bool TTop, bool TLeft, bool TRight, bool TBottom>
+void _Test_AllAgainstAll(AlignConfig<TTop, TLeft, TRight, TBottom> ac) {
+	typedef unsigned int TSize;
+	typedef int TScore;
+
+	mtRandInit();
+	for(TSize i = 0; i < 10; ++i) {
+		typedef String<Dna> TDnaString;
+		typedef StringSet<TDnaString, Dependent<> > TStringSet;
+		typedef Graph<Alignment<TStringSet, void> > TGraph;
+		TSize lenN = mtRand() % 20 + 1;
+		TSize lenM = mtRand() % 20 + 1;
+		TDnaString dna1;
+		TDnaString dna2;
+		for(TSize i = 0; i<lenN; ++i) appendValue(dna1, mtRand() % 4);
+		for(TSize j = 0; j<lenM; ++j) appendValue(dna2, mtRand() % 4);
+		//dna1 = "TCG";
+		//dna2 = "GCGGAG";
+		TStringSet str;
+		appendValue(str, dna1);
+		appendValue(str, dna2);
+		Score<int> score_type = Score<int>(4,-3,-2,-2);
+		TGraph g(str);
+		globalAlignment(g, score_type, ac, Gotoh() );
+		// sumOfPairsScore with AlignConfig is missing!!!
+		TScore sc1 = __sumOfPairsScore(g, score_type);
+		//std::cerr << sc1 << std::endl;
+		//std::cerr << g << std::endl;
+		clear(g);
+		assignStringSet(g, str);
+		globalAlignment(g, score_type, ac, NeedlemanWunsch() );
+		// sumOfPairsScore with AlignConfig is missing!!!
+		TScore sc2 = __sumOfPairsScore(g, score_type);
+		//std::cerr << sc2 << std::endl;
+		//std::cerr << g << std::endl;
+		if (sc1 != sc2) {
+			std::cerr << "Randomized test failed:" << std::endl;
+			std::cerr << "Seq1: " << dna1 << std::endl;
+			std::cerr << "Seq2: " << dna2 << std::endl;
+			std::cerr << "AlignConfig: " << TTop << ',' << TLeft << ',' << TRight << ',' << TBottom << std::endl;
+			exit(0);
+		}
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+void Test_AllAgainstAll() {
+	_Test_AllAgainstAll(AlignConfig<false,false,false,false>() );
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 void Test_SmithWaterman() {
 	typedef String<Dna> TString;
 	typedef StringSet<TString, Dependent<> > TStringSet;
@@ -655,6 +764,7 @@ void Test_GraphAlignment() {
 	Test_NeedlemanWunsch();
 	Test_Gotoh();	
 	Test_Hirschberg();
+	Test_AllAgainstAll();
 
 	// Local alignments
 	Test_SmithWaterman();

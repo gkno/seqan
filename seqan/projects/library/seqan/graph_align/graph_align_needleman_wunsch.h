@@ -74,30 +74,32 @@ _align_needleman_wunsch_trace(TAlign& align,
 	else if (tv == Vertical) --len2;
 
 	// Now follow the trace
-	do {
-		tv = getValue(trace, (len1-1)*numRows + (len2-1));
-		if (tv == Diagonal) {
-			if (tv != tvOld) {
-				_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
-				tvOld = tv; segLen = 1;
-			} else ++segLen;
-			--len1; --len2;
-		} else if (tv == Horizontal) {
-			//std::cout << '(' << ((*str)[0])[len1 - 1] << ',' << '-' << ')' << std::endl;
-			if (tv != tvOld) {
-				_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
-				tvOld = tv; segLen = 1;
-			} else ++segLen;
-			--len1;
-		} else if (tv == Vertical) {
-			//std::cout << '(' << '-' << ',' << ((*str)[1])[len2-1] << ')' << std::endl;
-			if (tv != tvOld) {
-				_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
-				tvOld = tv; segLen = 1;
-			} else ++segLen;
-			--len2;
-		}
-	} while ((len1 != 0) && (len2 !=0));
+	if ((len1 != 0) && (len2 !=0)) {
+		do {
+			tv = getValue(trace, (len1-1)*numRows + (len2-1));
+			if (tv == Diagonal) {
+				if (tv != tvOld) {
+					_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
+					tvOld = tv; segLen = 1;
+				} else ++segLen;
+				--len1; --len2;
+			} else if (tv == Horizontal) {
+				//std::cout << '(' << ((*str)[0])[len1 - 1] << ',' << '-' << ')' << std::endl;
+				if (tv != tvOld) {
+					_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
+					tvOld = tv; segLen = 1;
+				} else ++segLen;
+				--len1;
+			} else if (tv == Vertical) {
+				//std::cout << '(' << '-' << ',' << ((*str)[1])[len2-1] << ')' << std::endl;
+				if (tv != tvOld) {
+					_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
+					tvOld = tv; segLen = 1;
+				} else ++segLen;
+				--len2;
+			}
+		} while ((len1 != 0) && (len2 !=0));
+	}
 	// Process left-overs
 	_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
 
@@ -120,7 +122,7 @@ _align_needleman_wunsch(TTrace & trace,
 						TAlignConfig const) 
 {
 	SEQAN_CHECKPOINT
-	typedef typename Value<TScore>::Type TScoreValue;
+	typedef typename Value<TStringSet>::Type TString;
 	typedef typename Value<TTrace>::Type TTraceValue;
 
 	// TraceBack values
@@ -131,12 +133,12 @@ _align_needleman_wunsch(TTrace & trace,
 	TScore const & _sc = sc;
 
 	// One DP Matrix column
+	typedef typename Value<TScore>::Type TScoreValue;
 	typedef String<TScoreValue> TColumn;
 	typedef typename Size<TColumn>::Type TSize;
 	TColumn column;
 
 	// Initialization
-	typedef typename Value<TStringSet>::Type TString;
 	TString const& str1 = str[0];
 	TString const& str2 = str[1];
 	TSize len1 = length(str1);
@@ -144,20 +146,20 @@ _align_needleman_wunsch(TTrace & trace,
 	TScoreValue gap = scoreGapExtend(sc);
 	resize(column, len2 + 1);  
 	resize(trace, len1*len2);
-	for(TSize row = 0; row <= len2; ++row) _initFirstColumn(TAlignConfig(), value(column, row), row*gap);
-
-	typedef typename Iterator<TColumn, Standard>::Type TColIterator;
-	TColIterator col_end = end(column, Standard());
-
+	for(TSize row = 1; row <= len2; ++row) _initFirstColumn(TAlignConfig(), value(column, row), row*gap);
+	assignValue(column, 0, 0);
+	
 	// Classical DP
 	typedef typename Iterator<TTrace, Standard>::Type TTraceIter;
 	TTraceIter it = begin(trace, Standard() );
-	// Max values: overall.first = last column, overall.second = last row
-	TScoreValue infValue = -1 * (_getInfinity<TScoreValue>() / 2);
+	TScoreValue infValue = -1 * _getInfinityDistance<TScoreValue>();
 	overallMaxValue = std::make_pair(infValue, infValue);
-	//overallMaxValue = std::make_pair(InfimumValue<TScoreValue>::VALUE, InfimumValue<TScoreValue>::VALUE);
 	overallMaxIndex = std::make_pair(len1, len2);
 
+
+	typedef typename Iterator<TColumn, Standard>::Type TColIterator;
+	TColIterator col_end = end(column, Standard());
+	
 	for(TSize col = 1; col <= len1; ++col) 
 	{
 		TScoreValue diagVal = getValue(column, 0);
