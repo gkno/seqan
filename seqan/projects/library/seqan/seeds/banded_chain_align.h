@@ -68,7 +68,7 @@ chain_to_alignment_needlemanwunsch(TContainer const &seedChain,
 	typedef String<TScore> TScoreString;
 	typedef Matrix<TScore> TMatrix;
 	typedef Iter<TMatrix, PositionIterator > TMatrixIterator;
-	typedef ::std::vector<::std::map<TValue,Pair<TValue, TAlign> > > TAlignVector;
+	typedef ::std::vector< ::std::map<TValue,Pair<TValue, TAlign> > > TAlignVector;
 	typedef typename ::std::map<TValue, Pair<TValue, TAlign> >::iterator TMapIterator;
 	
 	TScoreString score_str;
@@ -115,7 +115,7 @@ chain_to_alignment_needlemanwunsch(TContainer const &seedChain,
 //"Glues" single alignments together
 template<typename TValue, typename TAlign, typename TAlign2>
 void
-_constructAlignment(::std::vector<::std::map<TValue,Pair<TValue, TAlign> > >const &me,
+_constructAlignment(::std::vector< ::std::map<TValue,Pair<TValue, TAlign> > >const &me,
 					TAlign2 &wholeAlignment)
 {
 	typedef typename ::std::map<TValue,Pair<TValue, TAlign> >::const_iterator TIterator;
@@ -502,7 +502,7 @@ SEQAN_CHECKPOINT
 
 template<typename TAlign, typename TValue>
 void
-_rec_delete(::std::vector<::std::map<TValue,Pair<TValue, TAlign> > > &vec,	//alignment vector
+_rec_delete(::std::vector< ::std::map<TValue,Pair<TValue, TAlign> > > &vec,	//alignment vector
 		   TValue index,										//position im vector
 		   TValue position)										//alignment to delete
 {
@@ -531,7 +531,7 @@ _rec_delete(::std::vector<::std::map<TValue,Pair<TValue, TAlign> > > &vec,	//ali
 
 template<typename TValue, typename TAlign, typename TSize>
 void
-_deleteAlignment(::std::vector<::std::map<TValue,Pair<TValue, TAlign> > > &me,
+_deleteAlignment(::std::vector< ::std::map<TValue,Pair<TValue, TAlign> > > &me,
 				TSize old_end,
 				TSize new_end)
 {
@@ -573,7 +573,7 @@ _calculateBandedSeed(TSeed const &seed,
 					 TString *p_seq2,
 					 TScoreString &score_str,
 					 TValue &score_length,
-					 ::std::vector<::std::map<TValue,Pair<TValue, TAlign> > > &alignmentVector,
+					 ::std::vector< ::std::map<TValue,Pair<TValue, TAlign> > > &alignmentVector,
 					 TScoreMatrix const &scoreMatrix)
 {
 	typedef typename ::std::map<TValue,Pair<TValue, TAlign> >::iterator TMapIterator;
@@ -652,7 +652,7 @@ _calculateFirstRectangle(TSeed const &seed,
 						 TString *p_seq2,
 						 TScoreString &score_str,
 						 TValue &score_length,
-						 ::std::vector<::std::map<TValue,Pair<TValue, TAlign> > > &alignmentVector,
+						 ::std::vector< ::std::map<TValue,Pair<TValue, TAlign> > > &alignmentVector,
 						 TScoreMatrix const &scoreMatrix)
 {
 	typedef typename ::std::map<TValue,Pair<TValue, TAlign> >::iterator TMapIterator;
@@ -700,7 +700,7 @@ _calculateLastRectangle(TSeed const &seed,
 						TString *p_seq2,
 						TScoreString &score_str,
 						TValue &score_length,
-						::std::vector<::std::map<TValue,Pair<TValue, TAlign> > > &alignmentVector,
+						::std::vector< ::std::map<TValue,Pair<TValue, TAlign> > > &alignmentVector,
 						TScoreMatrix const &scoreMatrix)
 {
 	typedef typename ::std::map<TValue,Pair<TValue, TAlign> >::iterator TMapIterator;
@@ -778,7 +778,7 @@ _calculateRectangle(TSeed const &seed,
 					TString *p_seq2,
 					TScoreString &score_str,
 					TValue &score_length,
-					::std::vector<::std::map<TValue,Pair<TValue, TAlign> > > &alignmentVector,
+					::std::vector< ::std::map<TValue,Pair<TValue, TAlign> > > &alignmentVector,
 					TScoreMatrix const &scoreMatrix)
 {
 	typedef typename ::std::map<TValue,Pair<TValue, TAlign> >::iterator TMapIterator;

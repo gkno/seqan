@@ -84,8 +84,10 @@ SEQAN_CHECKPOINT
 
 	template <typename TSource2>
 	Gaps(TSource2 const & source_):
-		data_source_begin_position(beginPosition(source_)),
-		data_source_end_position(endPosition(source_))
+		data_source_begin_position(0),
+		data_source_end_position(length(source_))
+		//data_source_begin_position(beginPosition(source_)),
+		//data_source_end_position(endPosition(source_))
 	{
 SEQAN_CHECKPOINT
 		data_source = source_;

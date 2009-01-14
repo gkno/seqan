@@ -240,6 +240,16 @@ _skipsumlistFind(Map<TValue, Skiplist<_SkipSumList<DIM, TSpec> > > & me,
 		path.sums[i] = sum;
 	}
 }
+template <typename TValue, unsigned int DIM, typename TSpec, typename TFind>
+inline void
+_skipsumlistFind(Map<TValue, Skiplist<_SkipSumList<DIM, TSpec> > > const & me,
+				 TFind const & find,
+				 unsigned int dim,
+				 /*OUT*/ SkiplistPath<TValue, _SkipSumList<DIM, TSpec> > & path)
+{//destroy const
+	typedef Map<TValue, Skiplist<_SkipSumList<DIM, TSpec> > > TMap;
+	_skipsumlistFind(const_cast<TMap &>(me), find, dim, path);
+}
 
 
 template <typename TValue, unsigned int DIM, typename TSpec>
@@ -1046,6 +1056,14 @@ _searchSumList_Skip(Iter<TSumList, SkipSumListIterator > & it,
 template <unsigned int DIM, typename TValue, typename TSpec, typename TValue2>
 inline void 
 searchSumList(Iter<SumList<DIM, TValue, SkipSumList<TSpec> >, SkipSumListIterator > & it,
+			  TValue2 const & val,
+			  int dim)
+{
+	_searchSumList_Skip<DIM, TValue, TSpec>(it, val, dim);
+}
+template <unsigned int DIM, typename TValue, typename TSpec, typename TValue2>
+inline void 
+searchSumList(Iter<SumList<DIM, TValue, SkipSumList<TSpec> > const, SkipSumListIterator > & it,
 			  TValue2 const & val,
 			  int dim)
 {

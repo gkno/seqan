@@ -40,7 +40,7 @@ chain_to_alignment_gotoh(TContainer const &seedChain,
 	typedef String<TScore> TScoreString;
 	typedef Matrix<TScore> TMatrix;
 	typedef Iter<TMatrix, PositionIterator > TMatrixIterator;
-	typedef ::std::vector<::std::map<TValue,Pair<TValue, TAlign> > > TAlignVector;
+	typedef ::std::vector< ::std::map<TValue,Pair<TValue, TAlign> > > TAlignVector;
 	typedef typename ::std::map<TValue, Pair<TValue, TAlign> >::iterator TMapIterator;
 	
 	TScoreString score_str_diag;
@@ -520,7 +520,7 @@ _calculateBandedSeedGotoh(TSeed const &seed,
 					 TScoreString &score_str_vert,
 					 TScoreString &score_str_hori,
 					 TValue &score_length,
-					 ::std::vector<::std::map<TValue,Pair<TValue, TAlign> > > &alignmentVector,
+					 ::std::vector< ::std::map<TValue,Pair<TValue, TAlign> > > &alignmentVector,
 					 TScoreMatrix const &scoreMatrix)
 {
 	typedef typename ::std::map<TValue,Pair<TValue, TAlign> >::iterator TMapIterator;
@@ -615,7 +615,7 @@ _calculateFirstRectangleGotoh(TSeed const &seed,
 						 TScoreString &score_str_vert,
 						 TScoreString &score_str_hori,
 						 TValue &score_length,
-						 ::std::vector<::std::map<TValue,Pair<TValue, TAlign> > > &alignmentVector,
+						 ::std::vector< ::std::map<TValue,Pair<TValue, TAlign> > > &alignmentVector,
 						 TScoreMatrix const &scoreMatrix)
 {
 	typedef typename ::std::map<TValue,Pair<TValue, TAlign> >::iterator TMapIterator;
@@ -670,7 +670,7 @@ _calculateLastRectangleGotoh(TSeed const &seed,
 						TScoreString & score_str_vert,
 						TScoreString & score_str_hori,
 						TValue &score_length,
-						::std::vector<::std::map<TValue,Pair<TValue, TAlign> > > &alignmentVector,
+						::std::vector< ::std::map<TValue,Pair<TValue, TAlign> > > &alignmentVector,
 						TScoreMatrix const &scoreMatrix)
 {
 	typedef typename ::std::map<TValue,Pair<TValue, TAlign> >::iterator TMapIterator;
@@ -762,7 +762,7 @@ _calculateRectangleGotoh(TSeed const &seed,
 					TScoreString &score_str_vert,
 					TScoreString &score_str_hori,
 					TValue &score_length,
-					::std::vector<::std::map<TValue,Pair<TValue, TAlign> > > & alignmentVector,
+					::std::vector< ::std::map<TValue,Pair<TValue, TAlign> > > & alignmentVector,
 					TScoreMatrix const &scoreMatrix)
 {
 	typedef typename ::std::map<TValue,Pair<TValue, TAlign> >::iterator TMapIterator;
