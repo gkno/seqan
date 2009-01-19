@@ -439,14 +439,14 @@ int main(int argc, const char *argv[]) {
 	// Examples
 	append(helpMsg, "\n\n\nExamples\n");
 	append(helpMsg, "\nMulti-Read Alignment:\n");
-	append(helpMsg, "\t./consensus -reads reads.fasta\n");
-	append(helpMsg, "\t./consensus -reads reads.fasta -matchlength 15 -quality 80 -outfile align.txt\n");
+	append(helpMsg, "\t./seqcons -reads reads.fasta\n");
+	append(helpMsg, "\t./seqcons -reads reads.fasta -matchlength 15 -quality 80 -outfile align.txt\n");
 	append(helpMsg, "\nInsert Sequencing (Reads of length 35):\n");
-	append(helpMsg, "\t./consensus -reads reads.fasta -window 200 -overlaps 100\n");
+	append(helpMsg, "\t./seqcons -reads reads.fasta -window 200 -overlaps 100\n");
 	append(helpMsg, "\nInsert Sequencing (Reads of length 200):\n");
-	append(helpMsg, "\t./consensus -reads reads.fasta -window 300 -overlaps 100\n");
+	append(helpMsg, "\t./seqcons -reads reads.fasta -window 300 -overlaps 100\n");
 	append(helpMsg, "\nInsert Sequencing (Reads of length 800):\n");
-	append(helpMsg, "\t./consensus -reads reads.fasta -window 1000 -overlaps 100\n");
+	append(helpMsg, "\t./seqcons -reads reads.fasta -window 1000 -overlaps 100\n");
 	assignHelp(cfgOpt, helpMsg);
 
 	std::cout << "**************************************************" << std::endl;
