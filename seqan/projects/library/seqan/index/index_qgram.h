@@ -1018,15 +1018,17 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 		
 		// 1. Fill suffix array with a permutation (the identity)
 		TIter it = begin(sa, Standard());
-		TIter itEnd = end(sa, Standard());
 		TValue pair;
+		unsigned int const q1 = length(shape) - 1;
 		for(unsigned seqNo = 0; seqNo < length(stringSet); ++seqNo) 
 		{
-			assignValueI1(pair, seqNo);
-			TSize i = 0;
-			for(; it != itEnd; ++it, ++i) {
-				assignValueI2(pair, i);
-				*it = pair;
+			unsigned int const strlen = length(stringSet[seqNo]);
+			if (strlen > q1) {
+				assignValueI1(pair, seqNo);
+				for (TSize i = 0; i < strlen - q1; ++it, ++i) {
+					assignValueI2(pair, i);
+					*it = pair;
+				}
 			}
 		}
 
