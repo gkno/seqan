@@ -670,7 +670,7 @@ int main(int argc, const char *argv[]) {
 			//}
 			//std::fstream strm3;
 			//strm3.open(toCString(fileTmp2), std::ios_base::out | std::ios_base::trunc);
-			//for(int i = 0;i<length(origStrSet); ++i) {
+			//for(int i = 0;i<(int) length(origStrSet); ++i) {
 			//	std::stringstream name;
 			//	name << value(begEndPos, i).i1 << "," << value(begEndPos, i).i2;
 			//	String<char> myTitle = name.str();
