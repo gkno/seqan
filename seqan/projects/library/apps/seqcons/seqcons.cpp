@@ -455,7 +455,7 @@ int main(int argc, const char *argv[]) {
 	std::cout << "* Consensus Computation                          *" << std::endl;
 	std::cout << "*                                                *" << std::endl;
 	std::cout << "* SeqCons                                        *" << std::endl;
-	std::cout << "* Version: 0.202 (17. October 2008)              *" << std::endl;
+	std::cout << "* Version: 0.203 (26. January 2009)              *" << std::endl;
 	std::cout << "**************************************************" << std::endl;
 	std::cout << std::endl;
 
