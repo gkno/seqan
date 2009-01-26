@@ -1070,7 +1070,7 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 			::std::sort(
 				begin(sa, Standard()), 
 				end(sa, Standard()), 
-				_QGramLessOffset<typename Value<TSA>::Type, TText const>(text, newQ - oldQ, oldQ));
+				_QGramLess<typename Value<TSA>::Type, TText const>(text, newQ));
 			return;
 		}
 
