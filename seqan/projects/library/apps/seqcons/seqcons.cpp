@@ -174,13 +174,15 @@ convertSimpleReadFile(ReadStore<TAlphabet, TSpec>& readSt,
 			
 			// Build eid string
 			std::stringstream input;
-			input << "R" << i;
+			clear(valKey);
+			__findThis(value(names, i), "id=", valKey);
+			if (empty(valKey)) input << "R" << i;
+			else input << valKey;
 
 			// Possibly append repeatId
 			clear(valKey);
 			__findThis(value(names, i), "repeatId=", valKey);
-			if (empty(valKey)) valKey = "0";
-			input << "-" << valKey;
+			if (!empty(valKey)) input << "-" << valKey;
 			String<char> tmp(input.str().c_str());
 			appendValue(readSt.data_names, tmp);
 
