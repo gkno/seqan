@@ -259,20 +259,6 @@ SEQAN_CHECKPOINT
 
 //____________________________________________________________________________
 
-	friend inline void
-	clear(String & me)
-	{
-		if (me.data_size)
-		{
-SEQAN_CHECKPOINT
-//			arrayDestruct(me, length(me)); 
-			deallocate(me, me.data_begin, me.data_size);
-			me.data_size = 0;
-		}
-		me.data_begin = me.data_end = &EMPTY_STRING;
-	}
-//____________________________________________________________________________
-
 //??? TODO: reserve
 
 //____________________________________________________________________________
@@ -522,7 +508,24 @@ assign(String<TValue, CStyle> & target,
 	_Assign_String_2_StringArray<Tag<TExpand> const, IsContiguous<TSource>::VALUE>::assign_(target, source);
 }
 
+//////////////////////////////////////////////////////////////////////////////
+// clear
+//////////////////////////////////////////////////////////////////////////////
 
+template <typename TValue>
+inline void
+clear(String<TValue, CStyle> & me)
+{
+	if (me.data_size)
+	{
+		SEQAN_CHECKPOINT
+		//			arrayDestruct(me, length(me)); 
+		deallocate(me, me.data_begin, me.data_size);
+		me.data_size = 0;
+	}
+	me.data_begin = me.data_end = &EMPTY_STRING;
+}
+	
 //////////////////////////////////////////////////////////////////////////////
 // create
 //////////////////////////////////////////////////////////////////////////////
