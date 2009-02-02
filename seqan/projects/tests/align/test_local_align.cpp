@@ -192,7 +192,7 @@ void testLocalAlign2()
 	SEQAN_TASSERT(row(ali,0) == "tc-tcg");
 	SEQAN_TASSERT(row(ali,1) == "tcatag");
 
-	score = localAlignment(ali, sw_finder, score_type, 4, SmithWaterman());
+	score = localAlignment(ali, sw_finder, score_type, 4, WatermanEggert());
 	SEQAN_TASSERT(score == 0);
 }
 
