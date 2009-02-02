@@ -25,12 +25,12 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 	template <unsigned q>
-	struct FixedShape {};
-	typedef FixedShape<0> SimpleShape;
+	struct UngappedShape {};
+	typedef UngappedShape<0> SimpleShape;
 
 	template <typename TSpec>
-	struct FixedGappedShape {};
-	typedef FixedGappedShape<Default> GappedShape;
+	struct GappedShape {};
+	typedef GappedShape<Default> GenericShape;
 
 
 /**
@@ -71,14 +71,14 @@ namespace SEQAN_NAMESPACE_MAIN
 
 ///.Metafunction.LENGTH.param.T.type:Class.Shape
     template <typename TValue, unsigned q>
-	struct LENGTH< Shape<TValue, FixedShape<q> > >
+	struct LENGTH< Shape<TValue, UngappedShape<q> > >
 	{
 		enum { VALUE = q };
 	};
 
 ///.Metafunction.WEIGHT.param.T.type:Class.Shape
     template <typename TValue, unsigned q>
-	struct WEIGHT< Shape<TValue, FixedShape<q> > >
+	struct WEIGHT< Shape<TValue, UngappedShape<q> > >
 	{
 		enum { VALUE = q };
 	};
@@ -109,7 +109,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..signature:Shape<TValue, SimpleShape>
 ..param.TValue:The @Metafunction.Value@ type of the string the shape is applied to (e.g. $Dna$).
 ..remarks:A SimpleShape must be resized first to a valid length. To do so, call @Function.resize@.
-..see:Spec.FixedShape
+..see:Spec.UngappedShape
 */
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -148,7 +148,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
 
 		template <unsigned q>
-		Shape(Shape<TValue, FixedShape<q> > const &other)
+		Shape(Shape<TValue, UngappedShape<q> > const &other)
 		{
 			*this = other;
 		}	
@@ -157,7 +157,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		template <unsigned q>
 		inline Shape &
-		operator=(Shape<TValue, FixedShape<q> > const &other)
+		operator=(Shape<TValue, UngappedShape<q> > const &other)
 		{
 			span = other.span;
 			hValue = other.hValue;
@@ -174,17 +174,17 @@ namespace SEQAN_NAMESPACE_MAIN
 	//////////////////////////////////////////////////////////////////////////////
 
 /**
-.Spec.FixedShape:
+.Spec.UngappedShape:
 ..cat:Index
 ..summary:A fixed length ungapped shape (also called q-gram or k-mer).
 ..general:Class.Shape
-..signature:Shape<TValue, FixedShape<q> >
+..signature:Shape<TValue, UngappedShape<q> >
 ..param.TValue:The @Metafunction.Value@ type of the sequence the shape is applied to (e.g. $Dna$).
 ..param.q:The length of the shape.
 */
 
 	template <typename TValue, unsigned q>
-	class Shape<TValue, FixedShape<q> >
+	class Shape<TValue, UngappedShape<q> >
 	{
 	public:
 //____________________________________________________________________________
@@ -295,30 +295,30 @@ If $charsLeft$ is smaller than the shape's span, the hash value corresponds to t
 	// loop unrolling ...
 	template <typename THValue, typename TValue, typename TIter>
 	inline THValue
-	_hashFixedShape(THValue hash, TIter &, TValue const, FixedShape<1> const) {
+	_hashFixedShape(THValue hash, TIter &, TValue const, UngappedShape<1> const) {
 		return hash;
 	}
 
 	template <typename THValue, typename TValue, typename TIter, unsigned q>
 	inline THValue
-	_hashFixedShape(THValue hash, TIter &it, TValue const, FixedShape<q> const) {
+	_hashFixedShape(THValue hash, TIter &it, TValue const, UngappedShape<q> const) {
 		++it;
 		return _hashFixedShape(
 			hash * ValueSize<TValue>::VALUE + ordValue((TValue)*it),
-			it, TValue(), FixedShape<q - 1>());
+			it, TValue(), UngappedShape<q - 1>());
 	}
 
 	// ... for fixed ungapped shapes
 	template <typename TValue, unsigned q, typename TIter>
-	inline typename Value< Shape<TValue, FixedShape<q> > >::Type
-	hash(Shape<TValue, FixedShape<q> > &me, TIter it)
+	inline typename Value< Shape<TValue, UngappedShape<q> > >::Type
+	hash(Shape<TValue, UngappedShape<q> > &me, TIter it)
 	{
 	SEQAN_CHECKPOINT
-		typedef typename Value< Shape<TValue, FixedShape<q> > >::Type	THValue;
-		typedef typename Size< Shape<TValue, FixedShape<q> > >::Type	TSize;
+		typedef typename Value< Shape<TValue, UngappedShape<q> > >::Type	THValue;
+		typedef typename Size< Shape<TValue, UngappedShape<q> > >::Type	TSize;
 
 		me.hValue = ordValue(me.leftChar = *it);
-		return me.hValue = _hashFixedShape(me.hValue, it, TValue(), FixedShape<q>());
+		return me.hValue = _hashFixedShape(me.hValue, it, TValue(), UngappedShape<q>());
 	}
 
 
@@ -357,7 +357,7 @@ If $charsLeft$ is smaller than the shape's span, the hash value corresponds to t
 		THValue const, 
 		Tuple<TTValue, SIZE, TCompressed> const &tuple,
 		TValue const,
-		FixedShape<1> const) 
+		UngappedShape<1> const) 
 	{
 		return ordValue(tuple[0]);
 	}
@@ -368,9 +368,9 @@ If $charsLeft$ is smaller than the shape's span, the hash value corresponds to t
 		THValue const, 
 		Tuple<TTValue, SIZE, TCompressed> const &tuple,
 		TValue const,
-		FixedShape<q> const) 
+		UngappedShape<q> const) 
 	{
-		return _hashTuple2FixedShape(THValue(), tuple, TValue(), FixedShape<q - 1>()) 
+		return _hashTuple2FixedShape(THValue(), tuple, TValue(), UngappedShape<q - 1>()) 
 			* ValueSize<TValue>::VALUE + ordValue(tuple[q-1]);
 	}
 
@@ -380,9 +380,9 @@ If $charsLeft$ is smaller than the shape's span, the hash value corresponds to t
 		typename TTValue, 
 		unsigned SIZE, 
 		unsigned q>
-	typename Value< Shape<TValue, FixedShape<q> > >::Type
+	typename Value< Shape<TValue, UngappedShape<q> > >::Type
 	hash(
-		Shape<TValue, FixedShape<q> > &me, 
+		Shape<TValue, UngappedShape<q> > &me, 
 		Tuple<TTValue, SIZE, Compressed> const &tuple)
 	{
 	SEQAN_CHECKPOINT
@@ -392,7 +392,7 @@ If $charsLeft$ is smaller than the shape's span, the hash value corresponds to t
 			else
 				return tuple >> (q - SIZE);
 		else
-			return me.hValue = _hashTuple2FixedShape(me.hValue, tuple, TValue(), FixedShape<q>());
+			return me.hValue = _hashTuple2FixedShape(me.hValue, tuple, TValue(), UngappedShape<q>());
 	}
 
 	template <
@@ -401,13 +401,13 @@ If $charsLeft$ is smaller than the shape's span, the hash value corresponds to t
 		unsigned SIZE, 
 		typename TCompressed, 
 		unsigned q>
-	typename Value< Shape<TValue, FixedShape<q> > >::Type
+	typename Value< Shape<TValue, UngappedShape<q> > >::Type
 	hash(
-		Shape<TValue, FixedShape<q> > &me, 
+		Shape<TValue, UngappedShape<q> > &me, 
 		Tuple<TTValue, SIZE, TCompressed> const &tuple)
 	{
 	SEQAN_CHECKPOINT
-		return me.hValue = _hashTuple2FixedShape(me.hValue, tuple, TValue(), FixedShape<q>());
+		return me.hValue = _hashTuple2FixedShape(me.hValue, tuple, TValue(), UngappedShape<q>());
 	}
 
 //____________________________________________________________________________
@@ -639,7 +639,7 @@ If $charsLeft$ is smaller than the shape's span, the hash value corresponds to t
 	inline void
 	shapeToString(
 		TShapeString &bitmap,
-		Shape<TValue, FixedShape<q> > const &me)
+		Shape<TValue, UngappedShape<q> > const &me)
 	{
 	SEQAN_CHECKPOINT
 

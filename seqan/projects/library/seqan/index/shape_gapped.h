@@ -34,7 +34,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..signature:HardwiredShape<P1, P2, ..., Pn>
 ..param.P1, P2, ..., Pn:Px is the distance of the x'th '1' to the next '1' in the shape.
 ...remarks:At most 20 parameters are allowed, so the maximal shape weight is 21.
-..remarks:You can use this structure to define your one gapped shapes in conjunction with @Spec.FixedGappedShape@.
+..remarks:You can use this structure to define your one gapped shapes in conjunction with @Spec.GappedShape@.
 ..note:The shape $1100101$ corresponds to $HardwiredShape<1,3,2>$.
 ..note:The following predefined shapes are already available in $seqan/index/shape_predefined.h$:
 ..file:../projects/library/seqan/index/shape_predefined.h
@@ -109,7 +109,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		int P10, int P11, int P12, int P13, int P14,
 		int P15, int P16, int P17, int P18, int P19	
 	>
-	struct LENGTH< Shape<TValue, FixedGappedShape< HardwiredShape<
+	struct LENGTH< Shape<TValue, GappedShape< HardwiredShape<
 		P00,P01,P02,P03,P04,
 		P05,P06,P07,P08,P09,
 		P10,P11,P12,P13,P14,
@@ -162,7 +162,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		int P10, int P11, int P12, int P13, int P14,
 		int P15, int P16, int P17, int P18, int P19	
 	>
-	struct WEIGHT< Shape<TValue, FixedGappedShape< HardwiredShape<
+	struct WEIGHT< Shape<TValue, GappedShape< HardwiredShape<
 		P00,P01,P02,P03,P04,
 		P05,P06,P07,P08,P09,
 		P10,P11,P12,P13,P14,
@@ -179,14 +179,14 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Spec.GappedShape:
+.Spec.GenericShape:
 ..cat:Index
 ..summary:A variable gapped shape.
 ..general:Class.Shape
-..signature:Shape<TValue, GappedShape>
+..signature:Shape<TValue, GenericShape>
 ..param.TValue:The @Metafunction.Value@ type of the string the shape is applied to (e.g. $Dna$).
-..remarks:A GappedShape must be initialized first with a valid shape. To do so, call @Function.stringToShape@.
-..see:Spec.FixedGappedShape
+..remarks:A GenericShape must be initialized first with a valid shape. To do so, call @Function.stringToShape@.
+..see:Spec.GappedShape
 */
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -194,7 +194,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	//////////////////////////////////////////////////////////////////////////////
 
 	template <typename TValue>
-	class Shape<TValue, GappedShape>
+	class Shape<TValue, GenericShape>
 	{
 	public:
 //____________________________________________________________________________
@@ -207,13 +207,13 @@ namespace SEQAN_NAMESPACE_MAIN
 //____________________________________________________________________________
 
 /**
-.Memfunc.GappedShape#Shape:
-..class:Spec.GappedShape
+.Memfunc.GenericShape#Shape:
+..class:Spec.GenericShape
 ..summary:Constructor
-..signature:Shape<TValue, GappedShape> ()
-..signature:Shape<TValue, GappedShape> (q)
-..signature:Shape<TValue, GappedShape> (shape)
-..signature:Shape<TValue, GappedShape> (predefined)
+..signature:Shape<TValue, GenericShape> ()
+..signature:Shape<TValue, GenericShape> (q)
+..signature:Shape<TValue, GenericShape> (shape)
+..signature:Shape<TValue, GenericShape> (predefined)
 ..param.q:Creates an ungapped q-gram.
 ..param.shape:Any other gapped/ungapped shape.
 ..param.predefined:Any instance of a predefined shape spec (e.g. $ShapePatternHunter$).
@@ -245,7 +245,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		}	
 
 		template <typename TSpec>
-		Shape(FixedGappedShape<TSpec> const &other)
+		Shape(GappedShape<TSpec> const &other)
 		{
 			*this = other;
 		}
@@ -260,7 +260,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		template <unsigned q>
 		inline Shape &
-		operator=(Shape<TValue, FixedShape<q> > const &other)
+		operator=(Shape<TValue, UngappedShape<q> > const &other)
 		{
 			span = length(other);
 			weight = weight(other);
@@ -273,7 +273,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		template <typename TSpec>
 		inline Shape &
-		operator=(Shape<TValue, FixedGappedShape<TSpec> > const &other)
+		operator=(Shape<TValue, GappedShape<TSpec> > const &other)
 		{
 			span = other.span;
 			weight = other.weight;
@@ -284,9 +284,9 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		template <typename TSpec>
 		inline Shape &
-		operator=(FixedGappedShape<TSpec> const)
+		operator=(GappedShape<TSpec> const)
 		{
-			typedef Shape<TValue, FixedGappedShape<TSpec> > TShape;
+			typedef Shape<TValue, GappedShape<TSpec> > TShape;
 			return *this = TShape();
 		}
 
@@ -303,11 +303,11 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Spec.FixedGappedShape:
+.Spec.GappedShape:
 ..cat:Index
 ..summary:A fixed gapped shape.
 ..general:Class.Shape
-..signature:Shape<TValue, FixedGappedShape<TSpec> >
+..signature:Shape<TValue, GappedShape<TSpec> >
 ..param.TValue:The @Metafunction.Value@ type of the string the shape is applied to (e.g. $Dna$).
 ..param.TSpec:A structure to store the shape at compile-time.
 ...type:Class.HardwiredShape
@@ -321,12 +321,12 @@ You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 	//////////////////////////////////////////////////////////////////////////////
 
 	template <typename TValue, typename TSpec>
-	class Shape<TValue, FixedGappedShape<TSpec> >
+	class Shape<TValue, GappedShape<TSpec> >
 	{
 	public:
 //____________________________________________________________________________
 
-		typedef FixedGappedShape<TSpec>	TShapeSpec;
+		typedef GappedShape<TSpec>	TShapeSpec;
 
 		enum { span = LENGTH<Shape>::VALUE };
 		enum { weight = WEIGHT<Shape>::VALUE };
@@ -353,8 +353,8 @@ You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 //////////////////////////////////////////////////////////////////////////////
 
 	template <typename TValue, typename TSpec>
-	inline typename Size< Shape<TValue, FixedGappedShape<TSpec> > >::Type
-	weight(Shape<TValue, FixedGappedShape<TSpec> > const & me)
+	inline typename Size< Shape<TValue, GappedShape<TSpec> > >::Type
+	weight(Shape<TValue, GappedShape<TSpec> > const & me)
 	{
 	SEQAN_CHECKPOINT
 		return me.weight;
@@ -363,12 +363,12 @@ You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 //____________________________________________________________________________
 
 	template <typename TValue, typename TIter>
-	inline typename Value< Shape<TValue, GappedShape> >::Type
-	hash(Shape<TValue, GappedShape> &me, TIter it)	
+	inline typename Value< Shape<TValue, GenericShape> >::Type
+	hash(Shape<TValue, GenericShape> &me, TIter it)	
 	{
 	SEQAN_CHECKPOINT
-		typedef typename Value< Shape<TValue, GappedShape> >::Type	THValue;
-		typedef typename Size< Shape<TValue, GappedShape> >::Type	TSize;
+		typedef typename Value< Shape<TValue, GenericShape> >::Type	THValue;
+		typedef typename Size< Shape<TValue, GenericShape> >::Type	TSize;
 
 		me.hValue = ordValue((TValue)*it);
 		TSize iEnd = me.weight - 1;
@@ -380,11 +380,11 @@ You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 	}
 
 	template <typename TValue, typename TSpec, typename TIter, typename TSize>
-	inline typename Value< Shape<TValue, FixedGappedShape<TSpec> > >::Type
-	hash(Shape<TValue, FixedGappedShape<TSpec> > &me, TIter it, TSize charsLeft)
+	inline typename Value< Shape<TValue, GappedShape<TSpec> > >::Type
+	hash(Shape<TValue, GappedShape<TSpec> > &me, TIter it, TSize charsLeft)
 	{
 	SEQAN_CHECKPOINT
-		typedef typename Value< Shape<TValue, FixedGappedShape<TSpec> > >::Type	THValue;
+		typedef typename Value< Shape<TValue, GappedShape<TSpec> > >::Type	THValue;
 
 		if (charsLeft >= (TSize)me.span) 
 			return hash(me, it);
@@ -410,11 +410,11 @@ You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 	}
 
 	template <typename TValue, typename TSpec, typename TIter, typename TSize>
-	inline typename Value< Shape<TValue, FixedGappedShape<TSpec> > >::Type
-	hashUpper(Shape<TValue, FixedGappedShape<TSpec> > &me, TIter it, TSize charsLeft)
+	inline typename Value< Shape<TValue, GappedShape<TSpec> > >::Type
+	hashUpper(Shape<TValue, GappedShape<TSpec> > &me, TIter it, TSize charsLeft)
 	{
 	SEQAN_CHECKPOINT
-		typedef typename Value< Shape<TValue, FixedGappedShape<TSpec> > >::Type	THValue;
+		typedef typename Value< Shape<TValue, GappedShape<TSpec> > >::Type	THValue;
 
 		if (charsLeft >= (TSize)me.span) {
 			hash(me, it);
@@ -508,13 +508,13 @@ You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 		int P15, int P16, int P17, int P18, int P19,
 		typename TValue, typename TIter
 	>
-	inline typename Value< Shape<TValue, FixedGappedShape< HardwiredShape<
+	inline typename Value< Shape<TValue, GappedShape< HardwiredShape<
 		P00,P01,P02,P03,P04,
 		P05,P06,P07,P08,P09,
 		P10,P11,P12,P13,P14,
 		P15,P16,P17,P18,P19 
 	> > > >::Type
-	hash(Shape<TValue, FixedGappedShape< HardwiredShape<
+	hash(Shape<TValue, GappedShape< HardwiredShape<
 		P00,P01,P02,P03,P04,
 		P05,P06,P07,P08,P09,
 		P10,P11,P12,P13,P14,
@@ -527,7 +527,7 @@ You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 			P05,P06,P07,P08,P09,
 			P10,P11,P12,P13,P14,
 			P15,P16,P17,P18,P19 >								TSpec;
-		typedef FixedGappedShape<TSpec>							TShape;
+		typedef GappedShape<TSpec>							TShape;
 		typedef typename Value< Shape<TValue, TShape> >::Type	THValue;
 
 		me.hValue = (THValue)ordValue((TValue)*it);
@@ -537,8 +537,8 @@ You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 //____________________________________________________________________________
 
 	template <typename TValue, typename TSpec, typename TIter>
-	inline typename Value< Shape<TValue, FixedGappedShape<TSpec> > >::Type
-	hashNext(Shape<TValue, FixedGappedShape<TSpec> > &me, TIter &it)
+	inline typename Value< Shape<TValue, GappedShape<TSpec> > >::Type
+	hashNext(Shape<TValue, GappedShape<TSpec> > &me, TIter &it)
 	{
 	SEQAN_CHECKPOINT
 		return hash(me, it);
@@ -553,7 +553,7 @@ You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 (irrelevant position) and converts it into a Shape object.
 ..signature:stringToShape(shape, bitmap)
 ..param.shape:Shape object that is manipulated.
-...type:Spec.GappedShape
+...type:Spec.GenericShape
 ..param.bitmap:A character string of '1' and '0' representing relevant and irrelevant positions (blanks) respectively.
 ...remarks:This string must begin with a '1'. Trailing '0's are ignored.
 ...type:Class.String
@@ -562,7 +562,7 @@ You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 	template <typename TValue, typename TSpec, typename TShapeString>
 	inline bool
 	stringToShape(
-		Shape<TValue, FixedGappedShape<TSpec> > &me, 
+		Shape<TValue, GappedShape<TSpec> > &me, 
 		TShapeString const &bitmap)
 	{
 	SEQAN_CHECKPOINT
@@ -611,7 +611,7 @@ You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 	inline void
 	shapeToString(
 		TShapeString &bitmap,
-		Shape<TValue, FixedGappedShape<TSpec> > const &me)
+		Shape<TValue, GappedShape<TSpec> > const &me)
 	{
 	SEQAN_CHECKPOINT
 

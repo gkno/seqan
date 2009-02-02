@@ -20,9 +20,9 @@ using namespace seqan;
 void testGappedShapes()
 {
 	String<char> shape_string = "0010011011101";
-	Shape<Dna,GappedShape> shape1;
+	Shape<Dna,GenericShape> shape1;
 	stringToShape(shape1, shape_string);
-	Shape<Dna,GappedShape> shape2 = Shape<Dna,GappedShape>(shape1);
+	Shape<Dna,GenericShape> shape2 = Shape<Dna,GenericShape>(shape1);
 
 	SEQAN_ASSERT(shape1.weight == shape2.weight);
 	SEQAN_ASSERT(shape1.span == shape2.span);
@@ -30,7 +30,7 @@ void testGappedShapes()
 	SEQAN_ASSERT(length(shape1) == length(shape2));
 	SEQAN_ASSERT(weight(shape1) == weight(shape2));
 /*
-	Shape<Dna,GappedShape> shape3 = Shape<Dna,GappedShape>(5, 13);
+	Shape<Dna,GenericShape> shape3 = Shape<Dna,GenericShape>(5, 13);
 	shape3[0]=2;
 	shape3[1]=2;
 	shape3[2]=1;
@@ -85,7 +85,7 @@ void testQGramIndexSchnell()
 
 	String<char> shape_string = "1000100100001110011";
 	int q = length(shape_string);
-	Shape<Dna,GappedShape> shape;
+	Shape<Dna,GenericShape> shape;
 	stringToShape(shape, shape_string);
 
 	typedef Position<String<Dna> >::Type TPosition;
@@ -112,7 +112,7 @@ void testGappedQGramIndex()
 	String<Dna> text = "CTGAACCCTAAACCCT";
 	String<char> shape_string = "101";
 	int q = length(shape_string);
-	Shape<Dna,GappedShape> shape;
+	Shape<Dna,GenericShape> shape;
 	stringToShape(shape, shape_string);
 
 	typedef Position<String<Dna> >::Type TPosition;
@@ -218,7 +218,7 @@ void testUngappedQGramIndex()
 
 void testQGramFind()
 {
-	typedef Index<String<char>, Index_QGram<FixedShape<2> > > TQGramIndex;
+	typedef Index<String<char>, Index_QGram<UngappedShape<2> > > TQGramIndex;
 	TQGramIndex idx("to be or not to be");
 	Finder<TQGramIndex> finder(idx);
 

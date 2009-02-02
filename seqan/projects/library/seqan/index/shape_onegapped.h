@@ -79,7 +79,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		}	
 
 		template <typename TSpec>
-		Shape(FixedGappedShape<TSpec> const &other)
+		Shape(GappedShape<TSpec> const &other)
 		{
 			*this = other;
 		}

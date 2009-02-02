@@ -1147,7 +1147,7 @@ int mapReads(
 {
 	Shape<Dna, SimpleShape>		ungapped;
 	Shape<Dna, OneGappedShape>	onegapped;
-	Shape<Dna, GappedShape>		gapped;
+	Shape<Dna, GenericShape>		gapped;
 
 	// 2x3 SPECIALIZATION
 
@@ -1187,7 +1187,7 @@ int mapReads(
 {
 	Shape<Dna, SimpleShape>		ungapped;
 	Shape<Dna, OneGappedShape>	onegapped;
-	Shape<Dna, GappedShape>		gapped;
+	Shape<Dna, GenericShape>		gapped;
 
 	// 2x3 SPECIALIZATION
 

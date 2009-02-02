@@ -42,7 +42,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	// shape:
 	// 111010010100110111
 
-	typedef FixedGappedShape< 
+	typedef GappedShape< 
 		HardwiredShape< 1, 1, 2, 3, 2, 3, 1, 2, 1, 1 > 
 	> ShapePatternHunter;
 
@@ -65,15 +65,15 @@ namespace SEQAN_NAMESPACE_MAIN
 	// 65% 0.747975		70% 0.897741
 	// 75% 0.973134		80% 0.996226
 
-	typedef FixedGappedShape< 
+	typedef GappedShape< 
 		HardwiredShape< 1, 1, 2, 2, 3, 3, 1, 1 > 
 	> ShapeIlie_9_15_1;
 
-	typedef FixedGappedShape< 
+	typedef GappedShape< 
 		HardwiredShape< 1, 2, 3, 1, 3, 1, 1, 2 > 
 	> ShapeIlie_9_15_2;
 
-	typedef FixedGappedShape< 
+	typedef GappedShape< 
 		HardwiredShape< 1, 1, 2, 4, 2, 1, 2, 1 > 
 	> ShapeIlie_9_15_3;
 
@@ -96,15 +96,15 @@ namespace SEQAN_NAMESPACE_MAIN
 	// 65% 0.767413		70% 0.910949
 	// 75% 0.978558		80% 0.997357
 
-	typedef FixedGappedShape< 
+	typedef GappedShape< 
 		HardwiredShape< 1, 1, 2, 1, 2, 3, 1, 1 > 
 	> ShapeIlie_9_1323_1;
 
-	typedef FixedGappedShape< 
+	typedef GappedShape< 
 		HardwiredShape< 1, 2, 5, 1, 3, 2, 1, 1 > 
 	> ShapeIlie_9_1323_2;
 
-	typedef FixedGappedShape< 
+	typedef GappedShape< 
 		HardwiredShape< 1, 1, 4, 3, 5, 2, 2, 1 > 
 	> ShapeIlie_9_1323_3;
 
