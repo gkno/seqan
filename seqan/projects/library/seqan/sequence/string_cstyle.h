@@ -69,7 +69,7 @@ struct CStyle;
 template <typename TValue>
 class String <TValue, CStyle >
 {
-protected:
+public:
 	TValue * data_begin;
 	TValue * data_end;
 	size_t data_size; //if data_size > 0, then the buffer is owned by me and must be deallocated
@@ -523,7 +523,7 @@ clear(String<TValue, CStyle> & me)
 		deallocate(me, me.data_begin, me.data_size);
 		me.data_size = 0;
 	}
-	me.data_begin = me.data_end = &EMPTY_STRING;
+	me.data_begin = me.data_end = &me.EMPTY_STRING;
 }
 	
 //////////////////////////////////////////////////////////////////////////////
