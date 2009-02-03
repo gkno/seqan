@@ -332,17 +332,19 @@ _scoreMap(SeedSet<TValue, TSeedSpec, TScoringSpec, TSpec> &set)
 //                                    Addition of a Single new Seed                                               //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template<typename TValue, typename TSpec, typename TScoringSpec, typename TScore, typename TSeedSpec>
+template<typename TValue, typename TSpec, typename TScoringSpec, typename TPosition, typename TSize2, typename TScore, typename TSeedSpec>
 bool
 addSeed(SeedSet<TValue, TSeedSpec, TScoringSpec, TSpec> &set, 
-	TValue qPos, 
-	TValue dPos, 
-	TValue length, 
+	TPosition qPos, 
+	TPosition dPos, 
+	TSize2 length, 
 	TScore score, 
 	Single)
 {
     SEQAN_CHECKPOINT
-    typedef typename Size<String<TValue, Block<BLOCK_SIZE<SeedSet<TValue, TSeedSpec, TScoringSpec, TSpec> >::Value> > >::Type TSize;
+	typedef SeedSet<TValue, TSeedSpec, TScoringSpec, TSpec> TSeedSet;
+	typedef String<TValue, Block< BLOCK_SIZE<TSeedSet>::Value> > TBlockString;
+    typedef typename Size<TBlockString>::Type TSize;
     typedef typename QualityFactor<TScoringSpec>::Type TQuality;
 
 	TSize position = obtainID(set.manager);
@@ -360,12 +362,12 @@ addSeed(SeedSet<TValue, TSeedSpec, TScoringSpec, TSpec> &set,
 
 
 //Score calculation
-template<typename TValue, typename TSpec, typename TScoringSpec, typename TSeedSpec>
+template<typename TValue, typename TSpec, typename TScoringSpec, typename TPosition, typename TSize, typename TSeedSpec>
 inline bool
 addSeed(SeedSet<TValue, TSeedSpec, TScoringSpec, TSpec> &set, 
-    TValue qPos, 
-    TValue dPos, 
-    TValue length, 
+    TPosition qPos, 
+    TPosition dPos, 
+    TSize length, 
     Single)
 {
 	SEQAN_CHECKPOINT
@@ -373,13 +375,13 @@ addSeed(SeedSet<TValue, TSeedSpec, TScoringSpec, TSpec> &set,
 }
 
 
-template<typename TValue, typename TSpec, typename TScoringSpec, typename TScore>
+template<typename TValue, typename TSpec, typename TScoringSpec, typename TPosition, typename TScore>
 bool
 addSeed(SeedSet<TValue, SimpleSeed, TScoringSpec, TSpec> &set, 
-	TValue qBeginPos, 
-	TValue dBeginPos, 
-	TValue qEndPos, 
-	TValue dEndPos, 
+	TPosition qBeginPos, 
+	TPosition dBeginPos, 
+	TPosition qEndPos, 
+	TPosition dEndPos, 
 	TScore score, 
 	Single)
 {
@@ -466,12 +468,12 @@ addSeed(SeedSet<TValue, ChainedSeed, TScoringSpec, TSpec> &set,
 //										       Merging												              //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template<typename TValue, typename TSeedSpec, typename TSpec, typename TScoringSpec>
+template<typename TValue, typename TSeedSpec, typename TSpec, typename TPosition, typename TSize2, typename TScoringSpec>
 bool 
 addSeed(SeedSet<TValue, TSeedSpec, TScoringSpec, TSpec> &set,
-	TValue qPos,
-	TValue dPos,
-	TValue length,
+	TPosition qPos,
+	TPosition dPos,
+	TSize2 length,
 	typename ScoreType<TScoringSpec>::Type score,
 	int gapDistance,
 	Merge)
@@ -482,29 +484,29 @@ addSeed(SeedSet<TValue, TSeedSpec, TScoringSpec, TSpec> &set,
     typedef typename std::multimap<TValue,TSize >::iterator TIterator;
     typedef typename GapCosts<TScoringSpec>::Type TGapCosts;
     typedef typename QualityFactor<TScoringSpec>::Type TQualityFactor;
-	TIterator tmpIt = _findSeedsMerge(set, qPos, dPos, length, score, gapDistance);
+	TIterator tmpIt = _findSeedsMerge(set, (TValue) qPos, (TValue) dPos, (TValue) length, score, gapDistance);
     if (tmpIt != set.fragmentMap.end())
 	{
 		TSize position = tmpIt->second;
 		set.fragmentMap.erase(tmpIt);
 
-		_mergeTwoSeedsScore(set.manager[position], set.scoreMap[position], qPos, dPos, length, score, getScoreMatrix(set), TGapCosts(), Merge());
+		_mergeTwoSeedsScore(set.manager[position], set.scoreMap[position], (TValue)qPos, (TValue)dPos, (TValue)length, score, getScoreMatrix(set), TGapCosts(), Merge());
 		if (_qualityReached(set.manager[position],set.scoreMap[position], set.qualityValue, TQualityFactor()))
 			set.result.insert(position);
 
-		set.fragmentMap.insert( pair<TValue, TSize>( endDiagonal(set.manager[position]),position));
+		set.fragmentMap.insert(std::pair<TValue, TSize>( endDiagonal(set.manager[position]),position));
 		return true;
     }
     return false;
 }
 
 //Score calculation
-template<typename TValue, typename TSeedSpec, typename TSpec, typename TScoringSpec>
+template<typename TValue, typename TSeedSpec, typename TSpec, typename TPosition, typename TSize, typename TScoringSpec>
 inline bool 
 addSeed(SeedSet<TValue, TSeedSpec, TScoringSpec, TSpec> &set, 
-	TValue qPos, 
-	TValue dPos, 
-	TValue length, 
+	TPosition qPos, 
+	TPosition dPos, 
+	TSize length, 
 	int gapDistance, 
 	Merge)
 {
@@ -534,7 +536,7 @@ addSeed(SeedSet<TValue, TSeedSpec, TScoringSpec, TSpec> &set,
 		if (_qualityReached(set.manager[position], set.scoreMap[position], set.qualityValue, TQualityFactor()))
 			set.result.insert(position);
 
-		set.fragmentMap.insert( pair<TValue, TSize>( endDiagonal(set.manager[position]),position));
+		set.fragmentMap.insert( std::pair<TValue, TSize>( endDiagonal(set.manager[position]),position));
 		return true;
     }
     return false;
@@ -570,9 +572,9 @@ addSeed(SeedSet<TValue, SimpleSeed, TScoringSpec, TSpec> &set,
 		if(x != drPos-qrPos)
 		{
 			set.fragmentMap.erase(tmpIt);
-			set.fragmentMap.insert(pair<TValue, TSize>( endDiagonal(set.manager[position]),position));
+			set.fragmentMap.insert(std::pair<TValue, TSize>( endDiagonal(set.manager[position]),position));
 		}
-		set.fragmentMap.insert( pair<TValue, TSize>( endDiagonal(set.manager[position]),position));
+		set.fragmentMap.insert( std::pair<TValue, TSize>( endDiagonal(set.manager[position]),position));
 		return true;
     }
     return false;
@@ -620,7 +622,7 @@ addSeed(SeedSet<TValue, TSeedSpec, TScoringSpec, TSpec> &set,
 		if(x != dPos-qPos)
 		{
 			set.fragmentMap.erase(it);
-			set.fragmentMap.insert( pair<TValue, TSize>(endDiagonal(set.manager[id]),id));		
+			set.fragmentMap.insert( std::pair<TValue, TSize>(endDiagonal(set.manager[id]),id));		
 		}
 		return true;
 	}
@@ -668,7 +670,7 @@ addSeed(SeedSet<TValue, SimpleSeed, TScoringSpec, TSpec> &set,
 			set.result.insert(id);
 		if(x != drPos-qrPos){
 			set.fragmentMap.erase(it);
-			set.fragmentMap.insert(pair<TValue, TSize>( endDiagonal(set.manager[id]),id));
+			set.fragmentMap.insert(std::pair<TValue, TSize>( endDiagonal(set.manager[id]),id));
 		}
 		return true;
 	}
@@ -698,7 +700,7 @@ addSeed(SeedSet<TValue, TSeedSpec, TScoringSpec, TSpec> &set,
 			set.result.insert(id);
 		if(x != endDiagonal(seed)){
 			set.fragmentMap.erase(id);
-			set.fragmentMap.insert( pair<TValue, TSize>( endDiagonal(set.manager[id]),id));
+			set.fragmentMap.insert( std::pair<TValue, TSize>( endDiagonal(set.manager[id]),id));
 		}
 		return true;
 	}
@@ -735,7 +737,7 @@ addSeed(SeedSet<TValue, ChainedSeed, TScoringSpec, TSpec> &set,
 
 		if(x != endDiagonal(seed)){
 			set.fragmentMap.erase(it);
-			set.fragmentMap.insert( pair<TValue, TSize>( endDiagonal(set.manager[id]),id));
+			set.fragmentMap.insert( std::pair<TValue, TSize>( endDiagonal(set.manager[id]),id));
 		}
 		return true;
 	}
@@ -792,12 +794,12 @@ _mergeTwoSeedsScore(Seed<TValue, SimpleSeed> &firstSeed,
 								////////////////////////////////////
 
 
-template<typename TValue, typename TText, typename TSpec, typename TScoringSpec, typename TSpecSeed>
+template<typename TValue, typename TText, typename TSpec, typename TPosition, typename TSize2, typename TScoringSpec, typename TSpecSeed>
 bool 
 addSeed(SeedSet<TValue, TSpecSeed, TScoringSpec, TSpec> &set, 
-		TValue qPos, 
-		TValue dPos, 
-		TValue length, 
+		TPosition qPos, 
+		TPosition dPos, 
+		TSize2 length, 
 		typename ScoreType<TScoringSpec>::Type score, 
 		String<TText> const &query, 
 		String<TText> const &database, 
@@ -810,31 +812,31 @@ addSeed(SeedSet<TValue, TSpecSeed, TScoringSpec, TSpec> &set,
 	typedef typename GapCosts<TScoringSpec>::Type TGapCosts;
 	typedef typename QualityFactor<TScoringSpec>::Type TQualityFactor;
 
-	TIterator it = _findSeedsChain(set, qPos, dPos, length, score, gapDistance);
+	TIterator it = _findSeedsChain(set, (TValue)qPos, (TValue)dPos, (TValue)length, score, gapDistance);
 	if (it != set.fragmentMap.end())
 	{
 		TSize id = it->second;
 		TValue x = endDiagonal(set.manager[id]);
-		typename ScoreType<TScoringSpec>::Type tmpScore = _mergeTwoSeedsScore(set.manager[id], qPos, dPos, length, query, database, getScoreMatrix(set), TGapCosts(), Chaos());
+		typename ScoreType<TScoringSpec>::Type tmpScore = _mergeTwoSeedsScore(set.manager[id], (TValue)qPos, (TValue)dPos, (TValue)length, query, database, getScoreMatrix(set), TGapCosts(), Chaos());
 		set.scoreMap[id] += score + tmpScore;
 		if (_qualityReached(set.manager[id],set.scoreMap[id], set.qualityValue ,TQualityFactor()))
 			set.result.insert(id);
 
 		if(x != dPos-qPos){
 			set.fragmentMap.erase(it);
-			set.fragmentMap.insert(pair<TValue, TSize>(endDiagonal(set.manager[id]),id));
+			set.fragmentMap.insert(std::pair<TValue, TSize>(endDiagonal(set.manager[id]),id));
 		}
 		return true;
 	}
 	return false;
 }
 
-template<typename TValue, typename TText, typename TSpec, typename TScoringSpec, typename TSpecSeed>
+template<typename TValue, typename TText, typename TSpec, typename TPosition, typename TSize, typename TScoringSpec, typename TSpecSeed>
 inline bool 
 addSeed(SeedSet<TValue, TSpecSeed, TScoringSpec, TSpec> &set, 
-		TValue qPos, 
-		TValue dPos, 
-		TValue length,
+		TPosition qPos, 
+		TPosition dPos, 
+		TSize length,
 		String<TText> const &query, 
 		String<TText> const &database, 
 		int gapDistance, 
@@ -878,7 +880,7 @@ addSeed(SeedSet<TValue, ChainedSeed, TScoringSpec, TSpec> &set,
 
 		if(x != endDiagonal(seed)){
 			set.fragmentMap.erase(it);
-			set.fragmentMap.insert( pair<TValue, TSize>( endDiagonal(set.manager[id]),id));
+			set.fragmentMap.insert( std::pair<TValue, TSize>( endDiagonal(set.manager[id]),id));
 		}
 		return true;
 	}
@@ -913,7 +915,7 @@ addSeed(SeedSet<TValue, SimpleSeed, TScoringSpec, TSpec> &set,
 
 		if(x == endDiagonal(seed)){
 			set.fragmentMap.erase(it);
-			set.fragmentMap.insert( pair<TValue, TSize>( endDiagonal(set.manager[id]),id));
+			set.fragmentMap.insert( std::pair<TValue, TSize>( endDiagonal(set.manager[id]),id));
 		}
 		setRightDim0(set.manager[id], rightDim0(seed));
 		setRightDim1(set.manager[id], rightDim1(seed));
@@ -940,7 +942,7 @@ _mergeTwoSeedsScore(Seed<TValue, SimpleSeed>  &firstSeed,
 	TValue databaseGap = dPos - rightDim1(firstSeed)-1;
 	TValue queryGap = qPos - rightDim0(firstSeed)-1;
 
-	TValue gap = abs(databaseGap-queryGap);
+	TValue gap = abs((TScore)(databaseGap-queryGap));
 	TValue currentScore = 0;
 	if (gap == 0)
 	{
@@ -954,7 +956,7 @@ _mergeTwoSeedsScore(Seed<TValue, SimpleSeed>  &firstSeed,
 		TValue rPositionQuery = qPos;
 		TValue rPositionDatabase = dPos;
 
-		TValue gap = min(databaseGap,queryGap);
+		TValue gap = (databaseGap < queryGap) ? databaseGap : queryGap;
 		for (int i = 0; i <gap;++i){
 			currentScore += score(scoreMatrix,query[--rPositionQuery],database[--rPositionDatabase]);
 		}
@@ -1018,7 +1020,7 @@ _mergeTwoSeedsScore(Seed<TValue, ChainedSeed>  &firstSeed,
 		TValue rPositionQuery = qPos;
 		TValue rPositionDatabase = dPos;
 
-		TValue gap = min(databaseGap,queryGap);
+		TValue gap = std::min(databaseGap,queryGap);
 		for (int i = 0; i <gap;++i){
 			currentScore += score(scoreMatrix,query[--rPositionQuery],database[--rPositionDatabase]);
 		}
@@ -1081,11 +1083,11 @@ addSeed(SeedSet<TValue, TSpecSeed, TScoringSpec, TSpec> &set,
 		int dLog = (int) ceil(log((double)dLength));
 		int qLog = (int) ceil(log((double)qLength));
 		int k;
-		int maxValue = max(dLog, qLog);
+		int maxValue = std::max(dLog, qLog);
 		if ((maxValue < dLength) && (maxValue < qLength))
 			k = maxValue;
 		else 
-		    k = min(dLog, qLog);
+		    k = std::min(dLog, qLog);
 		typename ScoreType<TScoringSpec>::Type tmpScore = _mergeTwoSeedsScore(set.manager[id], qPos, dPos, length, getScoreMatrix(set), query, database, k, TGapCosts(), Blat());
 		set.scoreMap[id] += score + tmpScore;
 		if (_qualityReached(set.manager[id],set.scoreMap[id], set.qualityValue ,TQualityFactor()))
@@ -1093,7 +1095,7 @@ addSeed(SeedSet<TValue, TSpecSeed, TScoringSpec, TSpec> &set,
 
 		if(endDiagonal(set.manager[id]) != dPos-qPos){
 			set.fragmentMap.erase(it);
-			set.fragmentMap.insert( pair<TValue, TSize>( endDiagonal(set.manager[id]),id));
+			set.fragmentMap.insert( std::pair<TValue, TSize>( endDiagonal(set.manager[id]),id));
 		}
 		return true;
 	}
@@ -1144,11 +1146,11 @@ addSeed(SeedSet<TValue, ChainedSeed, TScoringSpec, TSpec> &set,
 		int dLog = (int) ceil(log((double)dLength));
 		int qLog = (int) ceil(log((double)qLength));
 		int k;
-		int maxValue = max(dLog, qLog);
+		int maxValue = std::max(dLog, qLog);
 		if ((maxValue < dLength) && (maxValue < qLength))
 			k = maxValue;
 		else 
-			k = min(dLog, qLog);
+			k = std::min(dLog, qLog);
 		TScore tmpScore = _mergeTwoSeedsScore(set.manager[id], qPos, dPos, length_, getScoreMatrix(set), query, database, k, TGapCosts(), Blat());
 		set.scoreMap[id] += score + tmpScore;
 		typename std::list<Triple<TValue,TValue,TValue> >::const_iterator seedIt = _getDiagSet(seed).begin();
@@ -1168,7 +1170,7 @@ addSeed(SeedSet<TValue, ChainedSeed, TScoringSpec, TSpec> &set,
 
 		if(endDiagonal(set.manager[id]) != endDiagonal(seed)){
 			set.fragmentMap.erase(it);
-			set.fragmentMap.insert( pair<TValue, TSize>( endDiagonal(set.manager[id]),id));
+			set.fragmentMap.insert( std::pair<TValue, TSize>( endDiagonal(set.manager[id]),id));
 		}
 		return true;
 	} 
@@ -1201,11 +1203,11 @@ addSeed(SeedSet<TValue, SimpleSeed, TScoringSpec, TSpec> &set,
 		int dLog = (int) ceil(log((double)dLength));
 		int qLog = (int) ceil(log((double)qLength));
 		int k;
-		int maxValue = max(dLog, qLog);
+		int maxValue = std::max(dLog, qLog);
 		if ((maxValue < dLength) && (maxValue < qLength))
 			k = maxValue;
 		else 
-			k = min(dLog, qLog);
+			k = std::min(dLog, qLog);
 		TScore tmpScore = _mergeTwoSeedsScore(set.manager[id], qPos, dPos, 1, getScoreMatrix(set), query, database, k, TGapCosts(), Blat());
 		set.scoreMap[id] += score + tmpScore;
 	
@@ -1223,7 +1225,7 @@ addSeed(SeedSet<TValue, SimpleSeed, TScoringSpec, TSpec> &set,
 
 		if(endDiagonal(set.manager[id]) != endDiagonal(seed)){
 			set.fragmentMap.erase(it);
-			set.fragmentMap.insert( pair<TValue, TSize>( endDiagonal(set.manager[id]),id));
+			set.fragmentMap.insert( std::pair<TValue, TSize>( endDiagonal(set.manager[id]),id));
 		}
 		return true;
 	} 
@@ -1379,14 +1381,14 @@ addSeeds(SeedSet<TValue, TSeedSpec, TScoringSpec, TSpec> &set,
 		 TAlgoSpec tag)
 {
 	SEQAN_CHECKPOINT
-	std::multimap<TValue, pair<TIterator, TIterator2> > tmpMap; //zum sortieren
+	std::multimap<TValue, std::pair<TIterator, TIterator2> > tmpMap; //zum sortieren
 	for(TIterator it = begin; it !=end; ++it)
 	{
-		tmpMap.insert(pair<TValue, pair<TIterator, TIterator2> >(leftDim0(*it),pair<TIterator, TIterator2>(it,scoreBegin)));
+		tmpMap.insert(std::pair<TValue, std::pair<TIterator, TIterator2> >(leftDim0(*it),std::pair<TIterator, TIterator2>(it,scoreBegin)));
 		++scoreBegin;
 	}
 	
-	typedef typename std::multimap<TValue, pair<TIterator, TIterator2> >::iterator TIterator3;
+	typedef typename std::multimap<TValue, std::pair<TIterator, TIterator2> >::iterator TIterator3;
 	TIterator3 it_end = tmpMap.end();
 	for (TIterator3 it = tmpMap.begin(); it != it_end; ++it)
 		if (!addSeed(set, *it->second.first, *it->second.second, gapDistance, tag))
@@ -1425,12 +1427,12 @@ addSeeds(SeedSet<TValue, TSeedSpec, TScoringSpec, TSpec> &set,
 		 Chaos)
 {
 	SEQAN_CHECKPOINT
-	std::multimap<TValue, pair<TIterator, TIterator2> > tmpMap;
+	std::multimap<TValue, std::pair<TIterator, TIterator2> > tmpMap;
 	while(begin!= end){
-		tmpMap.insert(pair<TValue, pair<TIterator, TIterator2> >(leftDim0(*begin),pair<TIterator, TIterator2>(begin,scoreBegin)));
+		tmpMap.insert(std::pair<TValue, std::pair<TIterator, TIterator2> >(leftDim0(*begin),std::pair<TIterator, TIterator2>(begin,scoreBegin)));
 		++begin;
 	}
-	typedef typename std::multimap<TValue, pair<TIterator, TIterator2> >::iterator TIterator3;
+	typedef typename std::multimap<TValue, std::pair<TIterator, TIterator2> >::iterator TIterator3;
 	TIterator3 it_end = tmpMap.end();
 	for (TIterator3 it = tmpMap.begin(); it != it_end; ++it)
 		if (!addSeed(set, *it->second.first, *it->second.second, query, database, gapDistance, Chaos()))
@@ -1452,12 +1454,12 @@ addSeeds(SeedSet<TValue, TSeedSpec, TScoringSpec, TSpec> &set,
 		 Blat)
 {
 	SEQAN_CHECKPOINT
-	typename std::multimap<TValue, pair<TIterator, TIterator2 > > tmpMap; //zum sortieren
+	typename std::multimap<TValue, std::pair<TIterator, TIterator2 > > tmpMap; //zum sortieren
 	while(begin!=end){
-		tmpMap.insert(pair<TValue, pair<TIterator, TIterator2> >(leftDim0(*begin),pair<TIterator, TIterator2>(begin,scoreBegin)));
+		tmpMap.insert(std::pair<TValue, std::pair<TIterator, TIterator2> >(leftDim0(*begin),std::pair<TIterator, TIterator2>(begin,scoreBegin)));
 		++begin;
 	}
-	typename std::multimap<TValue, pair<TIterator, TIterator2> >::iterator tmpIt;
+	typename std::multimap<TValue, std::pair<TIterator, TIterator2> >::iterator tmpIt;
 	for (tmpIt = tmpMap.begin(); tmpIt != tmpMap.end(); ++tmpIt){
 		if (!addSeed(set, *tmpIt->second.first, *tmpIt->second.second, query, database, gapDistance, Blat()))
 			addSeed(set, *tmpIt->second.first, *tmpIt->second.second, Single());
@@ -1480,11 +1482,11 @@ addSeeds(SeedSet<TValue, TSeedSpec, TScoringSpec, TSpec> &set,
     TIterator it2 = end(source);
 	TIterator2 scoreBegin = begin(scoreSource);
 
-	typename std::multimap<TValue, pair<TIterator, TIterator2> > tmpMap; //zum sortieren
+	typename std::multimap<TValue, std::pair<TIterator, TIterator2> > tmpMap; //zum sortieren
 	for (typename Iterator<TContainer const,Standard>::Type it1 = begin(source); it1 != it2; ++it1)
-		tmpMap.insert(pair<TValue, pair<TIterator, TIterator2> >(leftDim0(*it1),pair<TIterator, TIterator2>(it1,scoreBegin)));
+		tmpMap.insert(std::pair<TValue, std::pair<TIterator, TIterator2> >(leftDim0(*it1),std::pair<TIterator, TIterator2>(it1,scoreBegin)));
 	
-	typedef typename std::multimap<TValue, pair<TIterator, TIterator2> >::iterator TIterator3;
+	typedef typename std::multimap<TValue, std::pair<TIterator, TIterator2> >::iterator TIterator3;
 	TIterator3 it_end = tmpMap.end();
 	for (TIterator3 it = tmpMap.begin(); it != it_end; ++it)
 		if (!addSeed(set, *it->second.first, *it->second.second, gapDistance, tag))
@@ -1525,11 +1527,11 @@ addSeeds(SeedSet<TValue, TSeedSpec, TScoringSpec, TSpec> &set,
         typedef typename Iterator<TContainer2 const, Standard>::Type TIterator2;
 	TIterator it2 =end(source);
 	TIterator2 itScore = begin(scoreSource);
-	typename std::multimap<TValue, pair<TIterator, TIterator2> > tmpMap; //zum sortieren
+	typename std::multimap<TValue, std::pair<TIterator, TIterator2> > tmpMap; //zum sortieren
 	for (TIterator it1 = begin(source); it1 !=it2; ++it1)
-		tmpMap.insert(pair<TValue, pair<TIterator, TIterator2> >(leftDim0(*it1),pair<TIterator, TIterator2>(it1,itScore)));
+		tmpMap.insert(std::pair<TValue, std::pair<TIterator, TIterator2> >(leftDim0(*it1),std::pair<TIterator, TIterator2>(it1,itScore)));
 	
-	typedef typename std::multimap<TValue, pair<TIterator, TIterator2> >::iterator TIterator3;
+	typedef typename std::multimap<TValue, std::pair<TIterator, TIterator2> >::iterator TIterator3;
 	TIterator3 it_end = tmpMap.end();
 	for (TIterator3 it = tmpMap.begin(); it != it_end; ++it)
 		if (!addSeed(set, *it->second.first, *it->second.second, query, database, gapDistance, algoSpec))
@@ -1575,7 +1577,7 @@ addSeedSet(SeedSet<TValue, TSeedSpec, TScoringSpec, TSpec> &target,
 	std::multimap<TValue,TIterator> tmpMap;
 	TIterator it1_end = end(source);
 	for (TIterator it1 = begin(source); it1 != it1_end; ++it1)
-		tmpMap.insert(pair<TValue, TIterator>(leftDim0(*it1),it1));
+		tmpMap.insert(std::pair<TValue, TIterator>(leftDim0(*it1),it1));
 
 	TIterator2 it2_end = tmpMap.end();
 	for (TIterator2 it2 = tmpMap.begin(); it2 != it2_end; ++it2)
@@ -1603,7 +1605,7 @@ addSeedSet(SeedSet<TValue, TSeedSpec, TScoringSpec, TSpec> &target,
 	std::multimap<TValue, TIterator > tmpMap; //zum sortieren
 	TIterator it1_end = end(source);
 	for (TIterator it1 = begin(source); it1 !=it1_end; ++it1)
-		tmpMap.insert(pair<TValue, TIterator>(leftDim0(*it1),it1));
+		tmpMap.insert(std::pair<TValue, TIterator>(leftDim0(*it1),it1));
 	
 	TIterator2 it2_end = tmpMap.end();
 	for (TIterator2 it2 = tmpMap.begin(); it2 != it2_end; ++it2)
@@ -1627,7 +1629,7 @@ delete_everything(SeedSet<TValue, TSeedSpec, const Tag<Scoring_Scheme<TQualityFa
 				  TValue currentPos)
 {
 	typedef typename Size<SeedSet<TValue, TSeedSpec, const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, TScore> >, void> >::Type TSize;
-	typedef multimap<TValue, TSize > TMap;
+	typedef std::multimap<TValue, TSize > TMap;
 	typename TMap::iterator it_end = deletionTarget.fragmentMap.end();
 	TSize pos;
 	typedef typename std::set<TSize>::iterator TSetIterator;
@@ -1635,7 +1637,7 @@ delete_everything(SeedSet<TValue, TSeedSpec, const Tag<Scoring_Scheme<TQualityFa
 	for (typename TMap::iterator it = deletionTarget.fragmentMap.begin(); it != it_end;)
 	{
 		pos = it->second;
-		if (currentPos - rightDim0(deletionTarget.manager[pos]) > deletionTarget.maxDistance)
+		if (currentPos > (deletionTarget.maxDistance + rightDim0(deletionTarget.manager[pos])))
 		{
 			deletionTarget.fragmentMap.erase(it++);
 			if (set_end == deletionTarget.result.find(pos))
@@ -1722,7 +1724,7 @@ _findSeedsMerge(SeedSet<TValue, TSeedSpec, TScoringSpec, TSpec> &set,
 	{
 		if (dPos <= rightDim1(set.manager[it->second]))
 		{
-			tmpScore = set.scoreMap[it->second] + score - (rightDim1(set.manager[it->second]) - dPos) * scoreMatch(set.scoreMatrix) +abs(endDiagonal(set.manager[it->second])-diag)*scoreGap(set.scoreMatrix);
+			tmpScore = set.scoreMap[it->second] + score - (rightDim1(set.manager[it->second]) - dPos) * scoreMatch(set.scoreMatrix) +abs((TScore)(endDiagonal(set.manager[it->second])-diag))*scoreGap(set.scoreMatrix);
 			if (tmpScore > maxScore)// &&(tmpScore > set.scoreMap[it->second]))
 			{
 				tmpIt = it;
@@ -1737,7 +1739,7 @@ _findSeedsMerge(SeedSet<TValue, TSeedSpec, TScoringSpec, TSpec> &set,
 	{
 		if (qPos <= rightDim0(set.manager[it->second]))
 		{
-			tmpScore = set.scoreMap[it->second] + score- (rightDim0(set.manager[it->second]) - qPos) * scoreMatch(set.scoreMatrix) +abs(endDiagonal(set.manager[it->second])-diag)*scoreGapExtend(set.scoreMatrix);
+			tmpScore = set.scoreMap[it->second] + score- (rightDim0(set.manager[it->second]) - qPos) * scoreMatch(set.scoreMatrix) +abs((TScore)(endDiagonal(set.manager[it->second])-diag))*scoreGapExtend(set.scoreMatrix);
 			if (tmpScore > maxScore)//&&(tmpScore > set.scoreMap[it->second]))
 			{
 				tmpIt = it;
@@ -2065,9 +2067,9 @@ extendSeedScore(Seed<TValue,SimpleSeed> &seed,
 			for (int i = b; i<= (u+1);++i){
 				tmp = infimum;
 
-				tmp = max((*antiDiag2)[i-1],(*antiDiag2)[i])+gapCost;
-				tmp = max(tmp,(*antiDiag1)[i-1]+ score(scoreMatrix,querySeg[xLength-i],dataSeg[yLength-(k-i)]));
-				tmpMax2 = max(tmpMax2,tmp);
+				tmp = std::max((*antiDiag2)[i-1],(*antiDiag2)[i])+gapCost;
+				tmp = std::max(tmp,(*antiDiag1)[i-1]+ score(scoreMatrix,querySeg[xLength-i],dataSeg[yLength-(k-i)]));
+				tmpMax2 = std::max(tmpMax2,tmp);
 				if (tmp < tmpMax1-scoreDropOff)
 					(*antiDiag3)[i] = infimum;
 				else
@@ -2081,8 +2083,8 @@ extendSeedScore(Seed<TValue,SimpleSeed> &seed,
 				--u;}
 			
 			//borders for lower triangle of edit matrix
-			b = max(b,k-yLength+1);
-			u = min(u, xLength-1);
+			b = std::max(b,k-yLength+1);
+			u = std::min(u, xLength-1);
 			
 			if ((b < (k+1)/2)&&((k+1)/2-b>lowerBound))
 				lowerBound = (k+1)/2-b;
@@ -2186,9 +2188,9 @@ extendSeedScore(Seed<TValue,SimpleSeed> &seed,
 			++k;
 			for (int i = b; i<= (u+1);++i){
 				tmp = infimum;
-				tmp = max((*antiDiag2)[i-1],(*antiDiag2)[i])+gapCost;
-				tmp = max(tmp,(*antiDiag1)[i-1]+ score(scoreMatrix,querySeg[i-1],dataSeg[k-i-1]));
-				tmpMax2 = max(tmpMax2,tmp);
+				tmp = std::max((*antiDiag2)[i-1],(*antiDiag2)[i])+gapCost;
+				tmp = std::max(tmp,(*antiDiag1)[i-1]+ score(scoreMatrix,querySeg[i-1],dataSeg[k-i-1]));
+				tmpMax2 = std::max(tmpMax2,tmp);
 				if (tmp < tmpMax1-scoreDropOff)
 					(*antiDiag3)[i] = infimum;
 				else
@@ -2204,8 +2206,8 @@ extendSeedScore(Seed<TValue,SimpleSeed> &seed,
 			}
 			
 			//borders for lower triangle of edit matrix
-			b = max(b,k-yLength+1);
-			u = min(u, xLength-1);
+			b = std::max(b,k-yLength+1);
+			u = std::min(u, xLength-1);
 			
 
 			if ((b < (k+1)/2)&&((k+1)/2-b>lowerBound)){
@@ -2326,9 +2328,9 @@ extendSeedScore(Seed<TValue,ChainedSeed> &seed,
 			++k;
 			for (int i = b; i<= (u+1);++i){
 				tmp = infimum;
-				tmp = max((*antiDiag2)[i-1],(*antiDiag2)[i])+gapCost;
-				tmp = max(tmp,(*antiDiag1)[i-1]+ score(scoreMatrix,querySeg[xLength-i],dataSeg[yLength-(k-i)]));
-				tmpMax2 = max(tmpMax2,tmp);
+				tmp = std::max((*antiDiag2)[i-1],(*antiDiag2)[i])+gapCost;
+				tmp = std::max(tmp,(*antiDiag1)[i-1]+ score(scoreMatrix,querySeg[xLength-i],dataSeg[yLength-(k-i)]));
+				tmpMax2 = std::max(tmpMax2,tmp);
 				if (tmp < tmpMax1-scoreDropOff)
 					(*antiDiag3)[i] = infimum;
 				else
@@ -2345,8 +2347,8 @@ extendSeedScore(Seed<TValue,ChainedSeed> &seed,
 			}
 			
 			//borders for lower triangle of edit matrix
-			b = max(b,k-yLength+1);
-			u = min(u, xLength-1);
+			b = std::max(b,k-yLength+1);
+			u = std::min(u, xLength-1);
 			
 			if ((b < (k+1)/2)&&((k+1)/2-b>lowerBound))
 				lowerBound = (k+1)/2-b;
@@ -2449,9 +2451,9 @@ extendSeedScore(Seed<TValue,ChainedSeed> &seed,
 			++k;
 			for (int i = b; i<= (u+1);++i){
 				tmp = infimum;
-				tmp = max((*antiDiag2)[i-1],(*antiDiag2)[i])+gapCost;
-				tmp = max(tmp,(*antiDiag1)[i-1]+ score(scoreMatrix,querySeg[i-1],dataSeg[k-i-1]));
-				tmpMax2 = max(tmpMax2,tmp);
+				tmp = std::max((*antiDiag2)[i-1],(*antiDiag2)[i])+gapCost;
+				tmp = std::max(tmp,(*antiDiag1)[i-1]+ score(scoreMatrix,querySeg[i-1],dataSeg[k-i-1]));
+				tmpMax2 = std::max(tmpMax2,tmp);
 				if (tmp < tmpMax1-scoreDropOff)
 					(*antiDiag3)[i] = infimum;
 				else
@@ -2467,8 +2469,8 @@ extendSeedScore(Seed<TValue,ChainedSeed> &seed,
 			}
 			
 			//borders for lower triangle of edit matrix
-			b = max(b,k-yLength+1);
-			u = min(u, xLength-1);
+			b = std::max(b,k-yLength+1);
+			u = std::min(u, xLength-1);
 			
 
 			if ((b < (k+1)/2)&&((k+1)/2-b>lowerBound)){

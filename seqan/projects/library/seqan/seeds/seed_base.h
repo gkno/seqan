@@ -634,8 +634,8 @@ _mergeTwoSeedsScore(Seed<TPosition, TSpecSeed> &firstSeed,
 {
 	SEQAN_CHECKPOINT
 	score1 += score2;
-	score1 += abs(endDiagonal(firstSeed) - d + q)*scoreGap(scoreMatrix);
-	score1 -= (max(abs(rightDim0(firstSeed)- q),abs(rightDim1(firstSeed)-d))+1)*scoreMatch(scoreMatrix);
+	score1 += abs((TPosition2)(endDiagonal(firstSeed) - d + q))*scoreGap(scoreMatrix);
+	score1 -= (max(abs((TPosition2)(rightDim0(firstSeed)- q)),abs((TPosition2)(rightDim1(firstSeed)-d)))+1)*scoreMatch(scoreMatrix);
 	setRightDim0(firstSeed,q+l-1);
 	setRightDim1(firstSeed,d+l-1);
 	if (leftDiagonal(firstSeed) < d-q)

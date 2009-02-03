@@ -96,7 +96,7 @@ globalChaining(SeedSet<TValue, TSeedSpec, TScoreSpec, TSpec> const &source,	//Se
 	typedef Map<Pair<TValue, TChainElement*> > TSkiplist; //sorted by y-coordinate
 	typedef typename Iterator<TSkiplist, Standard>::Type TSkiplistIterator;
 
-	typedef multimap<TValue, Pair<bool, TChainElement*> > TMultiMap;
+	typedef std::multimap<TValue, Pair<bool, TChainElement*> > TMultiMap;
 	typedef typename TMultiMap::iterator TMapIterator;
 	TSkiplist list;
 	TChainElement* pElement =0;
@@ -168,7 +168,7 @@ _globalChaining(SeedSet<TValue, TSeedSpec, TScoreSpec, TSpec> const &source, //S
 	typedef Triple<TSeedSetIterator, TScore, void*> TChainElement;
 	typedef Map<Pair<TValue, TChainElement*> > TSkiplist; //sorted by y-coordinate
 	typedef typename Iterator<TSkiplist, Standard>::Type TSkiplistIterator;
-	typedef multimap<TValue, Pair<bool, TChainElement*> > TMultiMap;
+	typedef std::multimap<TValue, Pair<bool, TChainElement*> > TMultiMap;
 	typedef typename TMultiMap::iterator TMapIterator;
 
 	TValue total = xLength + yLength;

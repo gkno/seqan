@@ -570,7 +570,7 @@ addSeeds(SeedSet<TValue, TSeedSpec, const Tag<Scoring_Scheme<TQualityFactor, TGa
 	SEQAN_CHECKPOINT
 	std::multimap<TValue, TIterator> tmpMap; //zum sortieren
 	for (TIterator it = begin; it!=end; ++it)
-		tmpMap.insert(pair<TValue, TIterator>(leftDim0(*it),it));
+		tmpMap.insert(std::pair<TValue, TIterator>(leftDim0(*it),it));
 
 	typedef typename std::multimap<TValue, TIterator>::iterator TIterator2;
 	TIterator2 it_end = tmpMap.end();
@@ -610,7 +610,7 @@ addSeeds(SeedSet<TValue, TSeedSpec, const Tag<Scoring_Scheme<TQualityFactor, TGa
 	SEQAN_CHECKPOINT
 	std::multimap<TValue, TIterator> tmpMap; 
 	for(TIterator it = begin; it != end; ++it){
-		tmpMap.insert(pair<TValue, TIterator>(leftDim0(*it), it));
+		tmpMap.insert(std::pair<TValue, TIterator>(leftDim0(*it), it));
 		++begin;
 	}
 	typedef typename std::multimap<TValue, TIterator>::iterator TIterator2;
@@ -636,7 +636,7 @@ addSeeds(SeedSet<TValue, TSeedSpec, const Tag<Scoring_Scheme<TQualityFactor, TGa
 	SEQAN_CHECKPOINT
 	std::multimap<TValue, TIterator> tmpMap; //zum sortieren
 	for(TIterator it = begin; it != end; ++it){
-		tmpMap.insert(pair<TValue, TIterator>(leftDim0(*it), it));
+		tmpMap.insert(std::pair<TValue, TIterator>(leftDim0(*it), it));
 		++begin;
 	}
 	typedef typename std::multimap<TValue, TIterator>::iterator TIterator2;
@@ -662,7 +662,7 @@ addSeeds(SeedSet<TValue, TSeedSpec, const Tag<Scoring_Scheme<TQualityFactor, TGa
     TIterator it_end = end(source);
 	std::multimap<TValue, TIterator> tmpMap; //zum sortieren
 	for (TIterator it = begin(source); it != it_end; ++it)
-		tmpMap.insert(pair<TValue, TIterator>(leftDim0(*it),it));
+		tmpMap.insert(std::pair<TValue, TIterator>(leftDim0(*it),it));
 	
 	TIterator2 it_end2 = tmpMap.end();
 	for (TIterator2 it = tmpMap.begin(); it != it_end2; ++it)
@@ -705,7 +705,7 @@ addSeeds(SeedSet<TValue, TSeedSpec, const Tag<Scoring_Scheme<TQualityFactor, TGa
     TIterator it1, it2 = end(source);
 	std::multimap<TValue, TIterator> tmpMap; //zum sortieren
 	for (TIterator it1 = begin(source); it1 != it2; ++it1)
-		tmpMap.insert(pair<TValue, TIterator>(leftDim0(*it1),it1));
+		tmpMap.insert(std::pair<TValue, TIterator>(leftDim0(*it1),it1));
 	
 	typedef typename std::multimap<TValue, TIterator>::iterator TIterator2;
 	TIterator2 it_end = tmpMap.end();
@@ -732,7 +732,7 @@ addSeeds(SeedSet<TValue, TSeedSpec,
 	TIterator it2 = end(source);
 	std::multimap<TValue, TIterator> tmpMap; //zum sortieren
 	for (TIterator it1 = begin(source); it1 !=it2; ++it1)
-		tmpMap.insert(pair<TValue, TIterator>(leftDim0(*it1),it1));
+		tmpMap.insert(std::pair<TValue, TIterator>(leftDim0(*it1),it1));
 	
 	typedef typename std::multimap<TValue, TIterator>::iterator TIterator2;
 	TIterator2 it_end = tmpMap.end();
@@ -775,7 +775,7 @@ addSeed(SeedSet<TValue, TSeedSpec, const Tag<Scoring_Scheme<TQualityFactor, TGap
 		if (_qualityReached(set.manager[position],0,qualityValue(set), TQualityFactor()))
 			set.result.insert(position);
 
-		set.fragmentMap.insert( pair<TValue, TSize>( endDiagonal(set.manager[position]),position));
+		set.fragmentMap.insert( std::pair<TValue, TSize>( endDiagonal(set.manager[position]),position));
 		change = true;
 	}
 	return change;
@@ -804,7 +804,7 @@ addSeed(SeedSet<TValue, TSeedSpec, const Tag<Scoring_Scheme<TQualityFactor, TGap
 		_mergeTwoSeeds(set.manager[position], seed, Merge());
 		if (_qualityReached(set.manager[position],0,qualityValue(set), TQualityFactor()))
 			set.result.insert(position);
-		set.fragmentMap.insert( pair<TValue, TSize>( endDiagonal(set.manager[position]),position));
+		set.fragmentMap.insert( std::pair<TValue, TSize>( endDiagonal(set.manager[position]),position));
 		change = true;
 	}
 	return change;
@@ -836,7 +836,7 @@ addSeed(SeedSet<TValue, SimpleSeed, const Tag<Scoring_Scheme<TQualityFactor, TGa
 		if (_qualityReached(set.manager[position],0, qualityValue(set), TQualityFactor()))
 			set.result.insert(position);
 
-		set.fragmentMap.insert( pair<TValue, TSize>( endDiagonal(set.manager[position]),position));
+		set.fragmentMap.insert( std::pair<TValue, TSize>( endDiagonal(set.manager[position]),position));
 		change = true;
 	}
 	return change;
@@ -877,7 +877,7 @@ addSeed(SeedSet<TValue, TSeedSpec, const Tag<Scoring_Scheme<TQualityFactor, TGap
 		//new endDiagonal
 		if(x!= dPos-qPos){
 			set.fragmentMap.erase(it);
-			set.fragmentMap.insert(pair<TValue, TSize>( endDiagonal(set.manager[id]),id));
+			set.fragmentMap.insert(std::pair<TValue, TSize>( endDiagonal(set.manager[id]),id));
 		}
 		return true;
 	} else
@@ -906,7 +906,7 @@ addSeed(SeedSet<TValue, SimpleSeed, const Tag<Scoring_Scheme<TQualityFactor, TGa
 			set.result.insert(id);
 		if(x != drPos-qrPos){
 			set.fragmentMap.erase(it);
-			set.fragmentMap.insert( pair<TValue, TSize>( endDiagonal(set.manager[id]),id));
+			set.fragmentMap.insert( std::pair<TValue, TSize>( endDiagonal(set.manager[id]),id));
 		}
 		return true;
 	} else
@@ -933,7 +933,7 @@ addSeed(SeedSet<TValue, TSeedSpec, const Tag<Scoring_Scheme<TQualityFactor, TGap
 		if(x != endDiagonal(seed))
 		{
 			set.fragmentMap.erase(it);
-			set.fragmentMap.insert( pair<TValue, TSize>( endDiagonal(set.manager[id]),id));
+			set.fragmentMap.insert( std::pair<TValue, TSize>( endDiagonal(set.manager[id]),id));
 		}
 		return true;
 	} else
@@ -967,7 +967,7 @@ addSeed(SeedSet<TValue, ChainedSeed, const Tag<Scoring_Scheme<TQualityFactor, TG
 		if(x != endDiagonal(seed))
 		{
 			set.fragmentMap.erase(it);
-			set.fragmentMap.insert( pair<TValue, TSize>( endDiagonal(set.manager[id]),id));
+			set.fragmentMap.insert( std::pair<TValue, TSize>( endDiagonal(set.manager[id]),id));
 		}
 		return true;
 	} else
@@ -1068,7 +1068,7 @@ addSeed(SeedSet<TValue, TSeedSpec, const Tag<Scoring_Scheme<TQualityFactor, TGap
 		if(x != dPos-qPos)
 		{
 			set.fragmentMap.erase(it);
-			set.fragmentMap.insert( pair<TValue, TSize>( endDiagonal(set.manager[id]),id));
+			set.fragmentMap.insert( std::pair<TValue, TSize>( endDiagonal(set.manager[id]),id));
 		}
 		return true;
 	} else
@@ -1105,7 +1105,7 @@ addSeed(SeedSet<TValue, ChainedSeed, const Tag<Scoring_Scheme<TQualityFactor, TG
 		if(x != endDiagonal(seed))
 		{
 			set.fragmentMap.erase(it);
-			set.fragmentMap.insert( pair<TValue, TSize>( endDiagonal(set.manager[id]),id));
+			set.fragmentMap.insert( std::pair<TValue, TSize>( endDiagonal(set.manager[id]),id));
 		}
 		return true;
 	} else
@@ -1139,7 +1139,7 @@ _mergeTwoSeeds(Seed<TValue, ChainedSeed>  &firstSeed,
 		TValue rPositionQuery = qPos;
 		TValue rPositionDatabase = dPos;
 
-		TValue gap = min(databaseGap,queryGap);
+		TValue gap = std::min(databaseGap,queryGap);
 		for (int i = 0; i <gap;++i)
 			currenvoid += score(scoreMatrix,query[--rPositionQuery],database[--rPositionDatabase]);
 		tmpScore = currenvoid;
@@ -1191,11 +1191,11 @@ addSeed(SeedSet<TValue, ChainedSeed, const Tag<Scoring_Scheme<TQualityFactor, TG
 		int dLog = (int) ceil(log((double)dLength));
 		int qLog = (int) ceil(log((double)qLength));
 		int k;
-		int maxValue = max(dLog, qLog);
+		int maxValue = std::max(dLog, qLog);
 		if ((maxValue < dLength) && (maxValue < qLength))
 			k = maxValue;
 		else 
-			k = min(dLog, qLog);
+			k = std::min(dLog, qLog);
 		_mergeTwoSeeds(set.manager[id], qPos, dPos, length, query, database, k, Blat());
 		if (_qualityReached(set.manager[id],0,qualityValue(set), TQualityFactor()))
 			set.result.insert(id);
@@ -1203,7 +1203,7 @@ addSeed(SeedSet<TValue, ChainedSeed, const Tag<Scoring_Scheme<TQualityFactor, TG
 		if(x != dPos-qPos)
 		{
 			set.fragmentMap.erase(it);
-			set.fragmentMap.insert( pair<TValue, TSize>( endDiagonal(set.manager[id]),id));
+			set.fragmentMap.insert( std::pair<TValue, TSize>( endDiagonal(set.manager[id]),id));
 		}
 		return true;
 	} else
@@ -1234,11 +1234,11 @@ addSeed(SeedSet<TValue, ChainedSeed, const Tag<Scoring_Scheme<TQualityFactor, TG
 		int dLog = (int) ceil(log((double)dLength));
 		int qLog = (int) ceil(log((double)qLength));
 		int k;
-		int maxValue = max(dLog, qLog);
+		int maxValue = std::max(dLog, qLog);
 		if ((maxValue < dLength) && (maxValue < qLength))
 			k = maxValue;
 		else 
-			k = min(dLog, qLog);
+			k = std::min(dLog, qLog);
 		_mergeTwoSeeds(set.manager[id], qPos, dPos, length_, query, database, k, Blat());
 		typedef typename std::list<Triple<TValue,TValue,TValue> >::const_iterator TIterator; 
 		TIterator it2_end = _getDiagSet(seed).end();
@@ -1251,7 +1251,7 @@ addSeed(SeedSet<TValue, ChainedSeed, const Tag<Scoring_Scheme<TQualityFactor, TG
 		if(x != endDiagonal(seed))
 		{
 			set.fragmentMap.erase(it);
-			set.fragmentMap.insert( pair<TValue, TSize>( endDiagonal(set.manager[id]),id));
+			set.fragmentMap.insert( std::pair<TValue, TSize>( endDiagonal(set.manager[id]),id));
 		}
 		return true;
 	} else
@@ -1451,7 +1451,7 @@ delete_everything(SeedSet<TValue, TSeedSpec, const Tag<Scoring_Scheme<TQualityFa
 				  TValue currentPos)
 {
 	typedef typename Size<SeedSet<TValue, TSeedSpec, const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, void> >, void> >::Type TSize;
-	typedef multimap<TValue, TSize > TMap;
+	typedef std::multimap<TValue, TSize > TMap;
 	typedef typename std::set<TSize>::iterator TSetIterator;
 	TSetIterator set_end = deletionTarget.result.end();
 	typename TMap::iterator it_end = deletionTarget.fragmentMap.end();

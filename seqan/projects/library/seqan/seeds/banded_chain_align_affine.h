@@ -103,19 +103,19 @@ chain_to_alignment_gotoh(TContainer const &seedChain,
 	return score_str_diag[0];
 }
 
-template <typename TScoreValue, typename TMatrixSpec, typename TString, typename TValue, typename TSpecSeed>
+template <typename TScoreValue, typename TMatrixSpec, typename TString, typename TValue, typename TValue2, typename TSpecSeed>
 TScoreValue
 _banded_gotoh(Matrix<TScoreValue, TMatrixSpec> & matrix_diag,
-						 Matrix<TScoreValue, TMatrixSpec> & matrix_vert,
-						 Matrix<TScoreValue, TMatrixSpec> & matrix_hori,
-						 Seed<TValue, TSpecSeed> const &seed,
-						 TValue k,
-						 TString const & str1_,
-						 TString const & str2_,
-						 Score<TScoreValue, Simple> const & score_,
-						 String<TScoreValue> & init_diag,
-						 String<TScoreValue> & init_vert,
-						 String<TScoreValue> & init_hori)
+			  Matrix<TScoreValue, TMatrixSpec> & matrix_vert,
+			  Matrix<TScoreValue, TMatrixSpec> & matrix_hori,
+			  Seed<TValue, TSpecSeed> const &seed,
+			  TValue2 k,
+			  TString const & str1_,
+			  TString const & str2_,
+			  Score<TScoreValue, Simple> const & score_,
+			  String<TScoreValue> & init_diag,
+			  String<TScoreValue> & init_vert,
+			  String<TScoreValue> & init_hori)
 {
 	typedef Matrix<TScoreValue, TMatrixSpec> TMatrix;
 
@@ -852,15 +852,15 @@ _calculateRectangleGotoh(TSeed const &seed,
 
 
 //Rectangle calculation between two seeds
-template <typename TScoreValue, typename TMatrixSpec, typename TString, typename TValue, typename TSpecSeed>
+template <typename TScoreValue, typename TMatrixSpec, typename TString, typename TValue, typename TValue2, typename TSpecSeed>
 void
 _gotoh_rectangle(Matrix<TScoreValue, TMatrixSpec> & matrix_diag,
 				 Matrix<TScoreValue, TMatrixSpec> & matrix_vert,
 				 Matrix<TScoreValue, TMatrixSpec> & matrix_hori,	//edit matrix
 				 Seed<TValue, TSpecSeed> const &seed1,				//Seed nearer to the end
 				 Seed<TValue, TSpecSeed> const &seed2,				//Seed nearer to the start
-				 TValue k_begin,									//upper diagonal extension
-				 TValue k_end,										//lower diagonal extension
+				 TValue2 k_begin,									//upper diagonal extension
+				 TValue2 k_end,										//lower diagonal extension
 				 TString const & str1_,								//first sequence
 				 TString const & str2_,								//secondSequence
 				 Score<TScoreValue, Simple> const & score_,			//score matrix
@@ -1403,13 +1403,13 @@ _gotoh_trace_rectangle(Align<TTargetSource, TTargetSpec> & target_,
 
 
 //Rectangle calculation between two seeds
-template <typename TScoreValue, typename TMatrixSpec, typename TString, typename TValue, typename TSpecSeed>
+template <typename TScoreValue, typename TMatrixSpec, typename TString, typename TValue, typename TValue2, typename TSpecSeed>
 void
 _banded_gotoh_rectangle_first(Matrix<TScoreValue, TMatrixSpec> & matrix_diag,	//edit matrix
 							  Matrix<TScoreValue, TMatrixSpec> & matrix_vert,
 							  Matrix<TScoreValue, TMatrixSpec> & matrix_hori,
 							  Seed<TValue, TSpecSeed> const &seed,				//Seed
-							  TValue k,											//diagonal extension
+							  TValue2 k,											//diagonal extension
 							  TString const & str1_,							//first sequence
 							  TString const & str2_,							//secondSequence
 							  Score<TScoreValue, Simple> const & score_,		//score matrix

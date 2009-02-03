@@ -51,13 +51,13 @@ namespace SEQAN_NAMESPACE_MAIN
 		// SkipList
 		// Specialized for std::pair
 	template< typename TKey, typename TVal > inline
-	TKey key( Pair<TKey, TVal> & p )
+	TKey & key( Pair<TKey, TVal> & p )
 	{
 		return p.i1;
 	}
 
-	template< typename TKey, typename TVal >
-	TVal getValue( Pair<TKey, TVal> & p )
+	template< typename TKey, typename TVal > inline
+	TVal & getValue( Pair<TKey, TVal> & p )
 	{
 		return p.i2;
 	}

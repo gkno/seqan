@@ -74,10 +74,10 @@ end(const std::list<TValue> &list_){
 
 template <typename T, typename T2>
 inline void
-appendValue(std::list<T> &chain, 
+appendValue(std::list<T> & list, 
 			T2 value)
 {
-	chain.push_back(value);
+	list.push_back(value);
 }
 
 }

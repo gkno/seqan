@@ -153,11 +153,11 @@ _constructAlignment(::std::vector< ::std::map<TValue,Pair<TValue, TAlign> > >con
 	}
 }
 
-template <typename TScoreValue, typename TMatrixSpec, typename TString, typename TValue, typename TSpecSeed>
+template <typename TScoreValue, typename TMatrixSpec, typename TString, typename TValue, typename TValue2, typename TSpecSeed>
 TScoreValue
 _banded_needleman_wunsch(Matrix<TScoreValue, TMatrixSpec> & matrix_,
 						 Seed<TValue, TSpecSeed> const &seed,
-						 TValue k,
+						 TValue2 k,
 						 TString const & str1_,
 						 TString const & str2_,
 						 Score<TScoreValue, Simple> const & score_,
@@ -860,17 +860,17 @@ _calculateRectangle(TSeed const &seed,
 
 
 //Rectangle calculation between two seeds
-template <typename TScoreValue, typename TMatrixSpec, typename TString, typename TValue, typename TSpecSeed>
+template <typename TScoreValue, typename TMatrixSpec, typename TString, typename TValue, typename TValue2, typename TSpecSeed>
 void
 _needleman_wunsch_rectangle(Matrix<TScoreValue, TMatrixSpec> & matrix_,			//edit matrix
 							Seed<TValue, TSpecSeed> const &seed1,		//Seed nearer to the end
-								   Seed<TValue, TSpecSeed> const &seed2,		//Seed nearer to the start
-								   TValue k_begin,								//upper diagonal extension
-								   TValue k_end,								//lower diagonal extension
-								   TString const & str1_,						//first sequence
-								   TString const & str2_,						//secondSequence
-								   Score<TScoreValue, Simple> const & score_,	//score matrix
-								   String<TScoreValue> init)//Values for initialisation
+							Seed<TValue, TSpecSeed> const &seed2,		//Seed nearer to the start
+							TValue2 k_begin,							//upper diagonal extension
+							TValue2 k_end,								//lower diagonal extension
+							TString const & str1_,						//first sequence
+							TString const & str2_,						//secondSequence
+							Score<TScoreValue, Simple> const & score_,	//score matrix
+							String<TScoreValue> init)//Values for initialisation
 {
 SEQAN_CHECKPOINT
 	typedef Matrix<TScoreValue, TMatrixSpec> TMatrix;
@@ -1127,11 +1127,11 @@ SEQAN_CHECKPOINT
 
 
 //Rectangle calculation between two seeds
-template <typename TScoreValue, typename TMatrixSpec, typename TString, typename TValue, typename TSpecSeed>
+template <typename TScoreValue, typename TMatrixSpec, typename TString, typename TValue, typename TValue2, typename TSpecSeed>
 void
 _banded_needleman_wunsch_rectangle_first(Matrix<TScoreValue, TMatrixSpec> & matrix_,	//edit matrix
 								   Seed<TValue, TSpecSeed> const &seed,		//Seed
-								   TValue k,									//diagonal extension
+								   TValue2 k,									//diagonal extension
 								   TString const & str1_,						//first sequence
 								   TString const & str2_,						//secondSequence
 								   Score<TScoreValue, Simple> const & score_,	//score matrix
