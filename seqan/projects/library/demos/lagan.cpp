@@ -13,6 +13,8 @@ findSeeds(TSeedSet & seedset,
 		  TSize q,
 		  TSize q_min)
 {
+	//add all common q-grams into seetset
+
 	typedef Index< TSegment, Index_QGram<SimpleShape > > TQGramIndex;
 	TQGramIndex index_qgram(seg_1);
 
@@ -53,7 +55,7 @@ lagan(list<TSeed> & chain,
 	  TScoring scoring_scheme,
 	  TScore score_min)
 {
-	if ((length(seg_0) <= gaps_max) && (length(seg_1) <= gaps_max)) return;
+	if (((TSize)length(seg_0) <= gaps_max) && ((TSize)length(seg_1) <= gaps_max)) return;
 
 	//Step 1: find seeds
 	typedef typename Value<TSeed>::Type TPosition;
@@ -77,19 +79,17 @@ lagan(list<TSeed> & chain,
 		++it2;
 
 		lagan(subchain, 
-			infix(host(seg_0), rightDim0(*it), endPosition(seg_0)), 
-			infix(host(seg_1), rightDim1(*it), endPosition(seg_1)),
-			q, q_min, limit, gaps_max,
-			scoring_scheme,	score_min);
+			infix(host(seg_0), beginPosition(seg_0), leftDim0(*it)), 
+			infix(host(seg_1), beginPosition(seg_1), leftDim1(*it)), 
+			q, q_min, limit, gaps_max, scoring_scheme, score_min);
 		chain.splice(it, subchain);
 
 		while(it2 != chain.end())
 		{
 			lagan(subchain, 
-				infix(host(seg_0), rightDim0(*it2), leftDim0(*it)), 
-				infix(host(seg_1), rightDim1(*it2), leftDim1(*it)), 
-				q, q_min, limit, gaps_max,
-				scoring_scheme,	score_min);
+				infix(host(seg_0), rightDim0(*it), leftDim0(*it2)), 
+				infix(host(seg_1), rightDim1(*it), leftDim1(*it2)), 
+				q, q_min, limit, gaps_max, scoring_scheme, score_min);
 			chain.splice(it2, subchain);
 
 			it = it2;
@@ -97,10 +97,9 @@ lagan(list<TSeed> & chain,
 		}
 
 		lagan(subchain, 
-			infix(host(seg_0), beginPosition(seg_0), leftDim0(*it)), 
-			infix(host(seg_1), beginPosition(seg_1), leftDim1(*it)), 
-			q, q_min, limit, gaps_max,
-			scoring_scheme,	score_min);
+			infix(host(seg_0), rightDim0(*it), endPosition(seg_0)), 
+			infix(host(seg_1), rightDim1(*it), endPosition(seg_1)),
+			q, q_min, limit, gaps_max, scoring_scheme, score_min);
 		chain.splice(it2, subchain);
 	}
 }
@@ -110,6 +109,7 @@ void
 loadFile(char const * filename,
 		 TString & str)
 {
+	//load file into str
 	fstream fstrm;
 	fstrm.open(filename, ios_base::in | ios_base::binary);
 	if (fstrm.fail())
@@ -141,8 +141,7 @@ main()
 		lagan(chain, 
 			infix(str_0, 0, length(str_0)), 
 			infix(str_1, 0, length(str_1)),
-			13, 8, 6, 200,
-			SimpleScore(3,-2,-1,-3), 30);
+			13, 8, 6, 200, SimpleScore(3,-2,-1,-3), 30);
 
 		//Step 4: banded alignment
 		Align<TString, ArrayGaps> alignment;

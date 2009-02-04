@@ -149,13 +149,14 @@ globalChaining(SeedSet<TValue, TSeedSpec, TScoreSpec, TSpec> const &source,	//Se
 		pElement = (TChainElement*)pElement->i3;
 		delete(delete_pointer);
 	}
-
+	
+	::std::reverse(begin(result), end(result));
 	return best;
 }
 
 template<typename TValue, typename TValue2, typename TSeedSpec, typename TScoreSpec, typename TSpec, typename TTargetContainer, typename TScore>
 TScore
-_globalChaining(SeedSet<TValue, TSeedSpec, TScoreSpec, TSpec> const &source, //Seedset containing the seeds
+globalChaining(SeedSet<TValue, TSeedSpec, TScoreSpec, TSpec> const &source, //Seedset containing the seeds
 				TTargetContainer &result,	//container for the result chain
 				TScore gapCost,				//Value for gap costs
 				TValue2 xLength,				//length of the first sequence
@@ -223,6 +224,7 @@ _globalChaining(SeedSet<TValue, TSeedSpec, TScoreSpec, TSpec> const &source, //S
 		delete(delete_pointer);
 	}
 
+	::std::reverse(begin(result), end(result));
 	return best;
 }
 
@@ -245,7 +247,7 @@ globalChaining(SeedSet<TValue, TSeedSpec, TScoreSpec, TSpec> const &source, //Se
 		right = rightPosition(*it, 1);
 		if (right > y_length) y_length = right;
 	}
-	return _globalChaining(source, result, gapCost, x_length, y_length);
+	return globalChaining(source, result, gapCost, x_length, y_length);
 }
 
 

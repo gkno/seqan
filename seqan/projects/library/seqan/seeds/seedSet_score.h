@@ -25,6 +25,13 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 
+template <typename T1, typename T2>
+inline T1 
+_maxim(T1 const &v1, T2 const &v2)
+{
+	return (v1 > v2) ? v1 : v2;
+}
+
 template<typename TValue, typename TScore>
 inline TScore
 _calculateScoringValue(TValue qPos1, 
@@ -822,7 +829,7 @@ addSeed(SeedSet<TValue, TSpecSeed, TScoringSpec, TSpec> &set,
 		if (_qualityReached(set.manager[id],set.scoreMap[id], set.qualityValue ,TQualityFactor()))
 			set.result.insert(id);
 
-		if(x != dPos-qPos){
+		if(x+qPos != dPos){
 			set.fragmentMap.erase(it);
 			set.fragmentMap.insert(std::pair<TValue, TSize>(endDiagonal(set.manager[id]),id));
 		}
@@ -1020,7 +1027,7 @@ _mergeTwoSeedsScore(Seed<TValue, ChainedSeed>  &firstSeed,
 		TValue rPositionQuery = qPos;
 		TValue rPositionDatabase = dPos;
 
-		TValue gap = std::min(databaseGap,queryGap);
+		TValue gap = (databaseGap < queryGap)? databaseGap : queryGap;
 		for (int i = 0; i <gap;++i){
 			currentScore += score(scoreMatrix,query[--rPositionQuery],database[--rPositionDatabase]);
 		}
@@ -1083,11 +1090,11 @@ addSeed(SeedSet<TValue, TSpecSeed, TScoringSpec, TSpec> &set,
 		int dLog = (int) ceil(log((double)dLength));
 		int qLog = (int) ceil(log((double)qLength));
 		int k;
-		int maxValue = std::max(dLog, qLog);
+		int maxValue = (dLog > qLog) ? dLog : qLog;
 		if ((maxValue < dLength) && (maxValue < qLength))
 			k = maxValue;
 		else 
-		    k = std::min(dLog, qLog);
+		    k = (dLog < qLog) ? dLog : qLog;
 		typename ScoreType<TScoringSpec>::Type tmpScore = _mergeTwoSeedsScore(set.manager[id], qPos, dPos, length, getScoreMatrix(set), query, database, k, TGapCosts(), Blat());
 		set.scoreMap[id] += score + tmpScore;
 		if (_qualityReached(set.manager[id],set.scoreMap[id], set.qualityValue ,TQualityFactor()))
@@ -1146,11 +1153,11 @@ addSeed(SeedSet<TValue, ChainedSeed, TScoringSpec, TSpec> &set,
 		int dLog = (int) ceil(log((double)dLength));
 		int qLog = (int) ceil(log((double)qLength));
 		int k;
-		int maxValue = std::max(dLog, qLog);
+		int maxValue = (dLog > qLog) ? dLog : qLog;
 		if ((maxValue < dLength) && (maxValue < qLength))
 			k = maxValue;
 		else 
-			k = std::min(dLog, qLog);
+			k = (dLog < qLog) ? dLog : qLog;
 		TScore tmpScore = _mergeTwoSeedsScore(set.manager[id], qPos, dPos, length_, getScoreMatrix(set), query, database, k, TGapCosts(), Blat());
 		set.scoreMap[id] += score + tmpScore;
 		typename std::list<Triple<TValue,TValue,TValue> >::const_iterator seedIt = _getDiagSet(seed).begin();
@@ -1203,11 +1210,11 @@ addSeed(SeedSet<TValue, SimpleSeed, TScoringSpec, TSpec> &set,
 		int dLog = (int) ceil(log((double)dLength));
 		int qLog = (int) ceil(log((double)qLength));
 		int k;
-		int maxValue = std::max(dLog, qLog);
+		int maxValue = (dLog > qLog) ? dLog : qLog;
 		if ((maxValue < dLength) && (maxValue < qLength))
 			k = maxValue;
 		else 
-			k = std::min(dLog, qLog);
+			k = (dLog < qLog) ? dLog : qLog;
 		TScore tmpScore = _mergeTwoSeedsScore(set.manager[id], qPos, dPos, 1, getScoreMatrix(set), query, database, k, TGapCosts(), Blat());
 		set.scoreMap[id] += score + tmpScore;
 	
@@ -1666,10 +1673,10 @@ _findSeedsChain(SeedSet<TValue, TSeedSpec, TScoringSpec, TSpec> &set,
 				typename ScoreType<TScoringSpec>::Type score, 
 				int gapDistance)
 {
-	if(set.last != qPos){
-		delete_everything(set, qPos);
-		set.last = qPos;
-	}
+//	if(set.last != qPos){
+//		delete_everything(set, qPos);
+//		set.last = qPos;
+//	}
 	SEQAN_CHECKPOINT
 	typedef typename Size<String<TValue, Block<BLOCK_SIZE<SeedSet<TValue, TSeedSpec, TScoringSpec, TSpec> >::Value> > >::Type TSize;
 	typedef typename std::multimap<TValue,TSize >::iterator TIterator;
@@ -1677,10 +1684,19 @@ _findSeedsChain(SeedSet<TValue, TSeedSpec, TScoringSpec, TSpec> &set,
 	TIterator tmp = set.fragmentMap.end();
 	typename ScoreType<TScoringSpec>::Type maxScore = infimumValue<TValue>();
 	typename ScoreType<TScoringSpec>::Type tmpScore;
-	for (TIterator it = set.fragmentMap.lower_bound(dPos-qPos-gapDistance); it != itUp; it++)
+	for (TIterator it = set.fragmentMap.lower_bound(dPos-qPos-gapDistance); it != itUp; ++it)
 	{
 		TSize id = it-> second;
-		if ((qPos > rightDim0(set.manager[id])) && (dPos > rightDim1(set.manager[id])))
+		if (qPos > set.maxDistance + rightDim0(set.manager[id]))
+		{//delete it
+			set.fragmentMap.erase(it);
+			if (set.result.end() == set.result.find(id))
+			{
+				valueDestruct(&set.manager[id]);
+				releaseID(set.manager,id);
+			}
+		}
+		else if ((qPos > rightDim0(set.manager[id])) && (dPos > rightDim1(set.manager[id])))
 		{
 			tmpScore = _calculateScoringValue(set.manager[id], qPos, dPos, length, score, typename GapCosts<TScoringSpec>::Type());
 			if (tmpScore > maxScore)
@@ -2067,9 +2083,9 @@ extendSeedScore(Seed<TValue,SimpleSeed> &seed,
 			for (int i = b; i<= (u+1);++i){
 				tmp = infimum;
 
-				tmp = std::max((*antiDiag2)[i-1],(*antiDiag2)[i])+gapCost;
-				tmp = std::max(tmp,(*antiDiag1)[i-1]+ score(scoreMatrix,querySeg[xLength-i],dataSeg[yLength-(k-i)]));
-				tmpMax2 = std::max(tmpMax2,tmp);
+				tmp = _maxim((*antiDiag2)[i-1],(*antiDiag2)[i])+gapCost;
+				tmp = _maxim(tmp,(*antiDiag1)[i-1]+ score(scoreMatrix,querySeg[xLength-i],dataSeg[yLength-(k-i)]));
+				tmpMax2 = _maxim(tmpMax2,tmp);
 				if (tmp < tmpMax1-scoreDropOff)
 					(*antiDiag3)[i] = infimum;
 				else
@@ -2083,8 +2099,8 @@ extendSeedScore(Seed<TValue,SimpleSeed> &seed,
 				--u;}
 			
 			//borders for lower triangle of edit matrix
-			b = std::max(b,k-yLength+1);
-			u = std::min(u, xLength-1);
+			b = (b > k-yLength+1) ? b : k-yLength+1;
+			u = (u < xLength-1) ? u : xLength-1;
 			
 			if ((b < (k+1)/2)&&((k+1)/2-b>lowerBound))
 				lowerBound = (k+1)/2-b;
@@ -2188,9 +2204,9 @@ extendSeedScore(Seed<TValue,SimpleSeed> &seed,
 			++k;
 			for (int i = b; i<= (u+1);++i){
 				tmp = infimum;
-				tmp = std::max((*antiDiag2)[i-1],(*antiDiag2)[i])+gapCost;
-				tmp = std::max(tmp,(*antiDiag1)[i-1]+ score(scoreMatrix,querySeg[i-1],dataSeg[k-i-1]));
-				tmpMax2 = std::max(tmpMax2,tmp);
+				tmp = _maxim((*antiDiag2)[i-1],(*antiDiag2)[i])+gapCost;
+				tmp = _maxim(tmp,(*antiDiag1)[i-1]+ score(scoreMatrix,querySeg[i-1],dataSeg[k-i-1]));
+				tmpMax2 = _maxim(tmpMax2,tmp);
 				if (tmp < tmpMax1-scoreDropOff)
 					(*antiDiag3)[i] = infimum;
 				else
@@ -2206,9 +2222,9 @@ extendSeedScore(Seed<TValue,SimpleSeed> &seed,
 			}
 			
 			//borders for lower triangle of edit matrix
-			b = std::max(b,k-yLength+1);
-			u = std::min(u, xLength-1);
-			
+			b = (b > k-yLength+1) ? b : k-yLength+1;
+			u = (u < xLength-1) ? u : xLength-1;
+		
 
 			if ((b < (k+1)/2)&&((k+1)/2-b>lowerBound)){
 				lowerBound = (k+1)/2-b;
@@ -2328,9 +2344,9 @@ extendSeedScore(Seed<TValue,ChainedSeed> &seed,
 			++k;
 			for (int i = b; i<= (u+1);++i){
 				tmp = infimum;
-				tmp = std::max((*antiDiag2)[i-1],(*antiDiag2)[i])+gapCost;
-				tmp = std::max(tmp,(*antiDiag1)[i-1]+ score(scoreMatrix,querySeg[xLength-i],dataSeg[yLength-(k-i)]));
-				tmpMax2 = std::max(tmpMax2,tmp);
+				tmp = _maxim((*antiDiag2)[i-1],(*antiDiag2)[i])+gapCost;
+				tmp = _maxim(tmp,(*antiDiag1)[i-1]+ score(scoreMatrix,querySeg[xLength-i],dataSeg[yLength-(k-i)]));
+				tmpMax2 = _maxim(tmpMax2,tmp);
 				if (tmp < tmpMax1-scoreDropOff)
 					(*antiDiag3)[i] = infimum;
 				else
@@ -2347,8 +2363,8 @@ extendSeedScore(Seed<TValue,ChainedSeed> &seed,
 			}
 			
 			//borders for lower triangle of edit matrix
-			b = std::max(b,k-yLength+1);
-			u = std::min(u, xLength-1);
+			b = (b > k-yLength+1) ? b : k-yLength+1;
+			u = (u < xLength-1) ? u : xLength-1;
 			
 			if ((b < (k+1)/2)&&((k+1)/2-b>lowerBound))
 				lowerBound = (k+1)/2-b;
@@ -2451,9 +2467,9 @@ extendSeedScore(Seed<TValue,ChainedSeed> &seed,
 			++k;
 			for (int i = b; i<= (u+1);++i){
 				tmp = infimum;
-				tmp = std::max((*antiDiag2)[i-1],(*antiDiag2)[i])+gapCost;
-				tmp = std::max(tmp,(*antiDiag1)[i-1]+ score(scoreMatrix,querySeg[i-1],dataSeg[k-i-1]));
-				tmpMax2 = std::max(tmpMax2,tmp);
+				tmp = _maxim((*antiDiag2)[i-1],(*antiDiag2)[i])+gapCost;
+				tmp = _maxim(tmp,(*antiDiag1)[i-1]+ score(scoreMatrix,querySeg[i-1],dataSeg[k-i-1]));
+				tmpMax2 = _maxim(tmpMax2,tmp);
 				if (tmp < tmpMax1-scoreDropOff)
 					(*antiDiag3)[i] = infimum;
 				else
@@ -2469,9 +2485,8 @@ extendSeedScore(Seed<TValue,ChainedSeed> &seed,
 			}
 			
 			//borders for lower triangle of edit matrix
-			b = std::max(b,k-yLength+1);
-			u = std::min(u, xLength-1);
-			
+			b = (b > k-yLength+1) ? b : k-yLength+1;
+			u = (u < xLength-1) ? u : xLength-1;
 
 			if ((b < (k+1)/2)&&((k+1)/2-b>lowerBound)){
 				lowerBound = (k+1)/2-b;

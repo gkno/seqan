@@ -45,7 +45,29 @@ bandedChainAlignment(TContainer const &seedChain,
 					 TValue k,
 					 TAlign &whole_alignment, 
 					 Score< TScore, Simple> const &scoreMatrix)
-{	
+{
+
+	//teste die Reihenfolge der seeds und erstelle gegebenenfalls eine die rueckwaerts laeuft
+	typedef typename Iterator<const TContainer, Standard>::Type TIterator;	//Iterator for the seed chain
+	TIterator it = begin(seedChain);
+	if (it != end(seedChain))
+	{
+		TIterator it2 = it; ++it2;
+		if (it2 != end(seedChain))
+		{
+			if (leftDim0(*it) < leftDim0(*it2))
+			{
+				TContainer copyChain(seedChain);
+				std::reverse(begin(copyChain), end(copyChain));
+
+				if(scoreGapOpen(scoreMatrix)==scoreGapExtend(scoreMatrix))
+					return chain_to_alignment_needlemanwunsch(copyChain, k, whole_alignment, scoreMatrix);
+				else
+					return chain_to_alignment_gotoh(copyChain, k, whole_alignment, scoreMatrix);
+			}
+		}
+	}
+
 	if(scoreGapOpen(scoreMatrix)==scoreGapExtend(scoreMatrix))
 		return chain_to_alignment_needlemanwunsch(seedChain, k, whole_alignment, scoreMatrix);
 	else

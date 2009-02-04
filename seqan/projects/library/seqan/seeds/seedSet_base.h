@@ -1139,7 +1139,7 @@ _mergeTwoSeeds(Seed<TValue, ChainedSeed>  &firstSeed,
 		TValue rPositionQuery = qPos;
 		TValue rPositionDatabase = dPos;
 
-		TValue gap = std::min(databaseGap,queryGap);
+		TValue gap = (databaseGap < queryGap)? databaseGap : queryGap;
 		for (int i = 0; i <gap;++i)
 			currenvoid += score(scoreMatrix,query[--rPositionQuery],database[--rPositionDatabase]);
 		tmpScore = currenvoid;
@@ -1191,11 +1191,11 @@ addSeed(SeedSet<TValue, ChainedSeed, const Tag<Scoring_Scheme<TQualityFactor, TG
 		int dLog = (int) ceil(log((double)dLength));
 		int qLog = (int) ceil(log((double)qLength));
 		int k;
-		int maxValue = std::max(dLog, qLog);
+		int maxValue = (dLog > qLog) ? dLog : qLog;
 		if ((maxValue < dLength) && (maxValue < qLength))
 			k = maxValue;
 		else 
-			k = std::min(dLog, qLog);
+			k = (dLog < qLog)? dLog : qLog;
 		_mergeTwoSeeds(set.manager[id], qPos, dPos, length, query, database, k, Blat());
 		if (_qualityReached(set.manager[id],0,qualityValue(set), TQualityFactor()))
 			set.result.insert(id);
@@ -1234,11 +1234,11 @@ addSeed(SeedSet<TValue, ChainedSeed, const Tag<Scoring_Scheme<TQualityFactor, TG
 		int dLog = (int) ceil(log((double)dLength));
 		int qLog = (int) ceil(log((double)qLength));
 		int k;
-		int maxValue = std::max(dLog, qLog);
+		int maxValue = (dLog > qLog) ? dLog : qLog;
 		if ((maxValue < dLength) && (maxValue < qLength))
 			k = maxValue;
 		else 
-			k = std::min(dLog, qLog);
+			k = (dLog < qLog) ? dLog : qLog;
 		_mergeTwoSeeds(set.manager[id], qPos, dPos, length_, query, database, k, Blat());
 		typedef typename std::list<Triple<TValue,TValue,TValue> >::const_iterator TIterator; 
 		TIterator it2_end = _getDiagSet(seed).end();
