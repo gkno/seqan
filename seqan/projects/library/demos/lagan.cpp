@@ -1,19 +1,30 @@
-#include <fstream>
+#include <iostream>
 #include <seqan/seeds.h>
 #include <seqan/file.h>
 
 using namespace seqan;
 
-template <typename TSeed, typename TSegment, typename TSize, typename TScoring, typename TScore>
-void laganChaining(std::list<TSeed> & chain,
+//input files
+char const * file_a = "lagan1.fasta";
+char const * file_b = "lagan2.fasta";
+
+//define some constants
+int const gaps_max = 200; //minimal sequence length for chaining
+int const q_max = 13;     //start value for q
+int const q_min = 9;      //minimal q
+int const limit = 20;     //local seed chaining limit
+int const bandwidth = 5;  //local seed chaining bandwidth
+int const score_min = 30; //minimal score for local seed chaining
+SimpleScore const scoring_scheme(3, -2, -1, -3); //scoring scheme
+int const B = 7;          //width for banded alignment
+
+
+//function laganChaining
+template <typename TSeed, typename TSegment, typename TSize>
+void laganChaining(std::list<TSeed> & chain, 
 				   TSegment const & a,
 				   TSegment const & b,
-				   TSize q,
-				   TSize q_min,
-				   TSize limit,
-				   TSize gaps_max,
-				   TScoring scoring_scheme,
-				   TScore score_min)
+				   TSize q)
 {
 	if (((TSize)length(a) <= gaps_max) && ((TSize)length(b) <= gaps_max)) return;
 
@@ -41,7 +52,7 @@ void laganChaining(std::list<TSeed> & chain,
 				TPosition a_pos = beginPosition(a)+i;
 				TPosition b_pos = beginPosition(b)+position(finder);
 				if (!addSeed(seedset, a_pos, b_pos, q, 0, Merge()))
-				if (!addSeed(seedset, a_pos, b_pos, q, host(a), host(b), 5, Chaos()))
+				if (!addSeed(seedset, a_pos, b_pos, q, host(a), host(b), bandwidth, Chaos()))
 					 addSeed(seedset, a_pos, b_pos, q, Single());
 			}
 			clear(finder);
@@ -65,16 +76,14 @@ void laganChaining(std::list<TSeed> & chain,
 
 		laganChaining(subchain, 
 			infix(host(a), beginPosition(a), leftDim0(*it)), 
-			infix(host(b), beginPosition(b), leftDim1(*it)), 
-			q, q_min, limit, gaps_max, scoring_scheme, score_min);
+			infix(host(b), beginPosition(b), leftDim1(*it)), q);
 		chain.splice(it, subchain);
 
 		while(it2 != chain.end())
 		{
 			laganChaining(subchain, 
 				infix(host(a), rightDim0(*it), leftDim0(*it2)), 
-				infix(host(b), rightDim1(*it), leftDim1(*it2)), 
-				q, q_min, limit, gaps_max, scoring_scheme, score_min);
+				infix(host(b), rightDim1(*it), leftDim1(*it2)), q);
 			chain.splice(it2, subchain);
 
 			it = it2;
@@ -83,8 +92,7 @@ void laganChaining(std::list<TSeed> & chain,
 
 		laganChaining(subchain, 
 			infix(host(a), rightDim0(*it), endPosition(a)), 
-			infix(host(b), rightDim1(*it), endPosition(b)),
-			q, q_min, limit, gaps_max, scoring_scheme, score_min);
+			infix(host(b), rightDim1(*it), endPosition(b)), q);
 		chain.splice(it2, subchain);
 	}
 }
@@ -93,35 +101,30 @@ int main()
 {
 	//load sequences
 	typedef String<Dna> TString;
-	TString a = String<Dna, FileReader<Fasta> >("lagan1.fasta");
-	TString b = String<Dna, FileReader<Fasta> >("lagan2.fasta");
-
-	//call lagan
-	if ((length(a) > 0) && (length(b) > 0))
+	TString a = String<Dna, FileReader<Fasta> >(file_a);
+	TString b = String<Dna, FileReader<Fasta> >(file_b);
+	if ((length(a) == 0) || (length(b) == 0))
 	{
-		typedef Seed<int, SimpleSeed> TSeed;
-		std::list<TSeed> chain;
-
-		SimpleScore sc(3,-2,-1,-3);
-
-		//Step 1 to 3
-		laganChaining(chain, 
-			infix(a, 0, length(a)), infix(b, 0, length(b)),
-			13, 8, 6, 200, sc, 30);
-
-		//Step 4: banded alignment
-		Align<TString, ArrayGaps> alignment;
-		resize(rows(alignment), 2);
-		setSource(row(alignment, 0), a);
-		setSource(row(alignment, 1), b);
-		int score = bandedChainAlignment(chain, 7, alignment, sc);
-
-		std::cout << "Score: " << score << std::endl;
-		std::cout << alignment << std::endl;
+		std::cout << "Error - file problem" << std::endl;
+		return 1;
 	}
-	else
-	{
-		std::cout << "Error - File problem" << std::endl;
-	}
+
+	//do LAGAN
+	typedef Seed<int, SimpleSeed> TSeed;
+	std::list<TSeed> chain;
+
+	//Step 1 to 3
+	laganChaining(chain, infix(a, 0, length(a)), infix(b, 0, length(b)), q_max);
+
+	//Step 4: banded alignment
+	Align<TString, ArrayGaps> alignment;
+	resize(rows(alignment), 2);
+	setSource(row(alignment, 0), a);
+	setSource(row(alignment, 1), b);
+	int score = bandedChainAlignment(chain, B, alignment, scoring_scheme);
+
+	std::cout << "Score: " << score << std::endl;
+	std::cout << alignment << std::endl;
+
 	return 0;
 }
