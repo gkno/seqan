@@ -551,7 +551,7 @@ _calculateBandedSeedGotoh(TSeed const &seed,
 
 	for(TValue j = 0; j<=width_diag; ++j)
 	{
-		alignmentVector.back().insert(make_pair(j,Pair<TValue, TAlign> ()));
+		alignmentVector.back().insert(std::make_pair(j,Pair<TValue, TAlign> ()));
 		TMapIterator mapIt = --(alignmentVector.back().end());
 		Segment<TString, InfixSegment> seg1_align(*p_seq1, width_align, rightDim0(seed)+1);
 		Segment<TString, InfixSegment> seg2_align(*p_seq2, height_align,rightDim1(seed)+1);
@@ -576,7 +576,7 @@ _calculateBandedSeedGotoh(TSeed const &seed,
 	for(TValue j = width_diag+1; j < overall; ++j)
 	{
 		goNext(matr_it,1);
-		alignmentVector.back().insert(make_pair(j,Pair<TValue, TAlign> ()));
+		alignmentVector.back().insert(std::make_pair(j,Pair<TValue, TAlign> ()));
 		TMapIterator mapIt = --(alignmentVector.back().end());
 		Segment<TString, InfixSegment> seg1_align(*p_seq1, width_align, rightDim0(seed)+1);
 		Segment<TString, InfixSegment> seg2_align(*p_seq2, height_align,rightDim1(seed)+1);
@@ -640,7 +640,7 @@ _calculateFirstRectangleGotoh(TSeed const &seed,
 	TValue width_stop = leftDim0(seed);
 	TValue height_stop = leftDim1(seed);
 
-	alignmentVector.back().insert(make_pair(0,Pair<TValue, TAlign> ()));
+	alignmentVector.back().insert(std::make_pair(0,Pair<TValue, TAlign> ()));
 	TMapIterator mapIt = --(alignmentVector.back().end());
 	Segment<TString, InfixSegment> seg1_align(*p_seq1, 0, leftDim0(seed) + w_d2);
 	Segment<TString, InfixSegment> seg2_align(*p_seq2, 0, leftDim1(seed)+ h_d2);
@@ -706,7 +706,7 @@ _calculateLastRectangleGotoh(TSeed const &seed,
 	//last rectangle
 	for(TValue i = 0; i<height_diag; ++i)
 	{
-		alignmentVector[0].insert(make_pair(i,Pair<TValue, TAlign> ()));
+		alignmentVector[0].insert(std::make_pair(i,Pair<TValue, TAlign> ()));
 		TMapIterator mapIt = --alignmentVector[0].end();
 		Segment<TString, InfixSegment> seg1_align(*p_seq1, width_align, seq1_length);
 		Segment<TString, InfixSegment> seg2_align(*p_seq2, height_align, seq2_length);
@@ -727,7 +727,7 @@ _calculateLastRectangleGotoh(TSeed const &seed,
 	
 	for(TValue i = height_diag; i<a; ++i)
 	{
-		alignmentVector[0].insert(make_pair(i,Pair<TValue, TAlign> ()));
+		alignmentVector[0].insert(std::make_pair(i,Pair<TValue, TAlign> ()));
 		TMapIterator mapIt = --alignmentVector[0].end();
 		Segment<TString, InfixSegment> seg1_align(*p_seq1, width_align, seq1_length);
 		Segment<TString, InfixSegment> seg2_align(*p_seq2, height_align, seq2_length);
@@ -801,7 +801,7 @@ _calculateRectangleGotoh(TSeed const &seed,
 	TValue new_connect;
 	for(TValue j = 0; j<height_diag; ++j)
 	{
-		alignmentVector.back().insert(make_pair(j,Pair<TValue, TAlign> ()));
+		alignmentVector.back().insert(std::make_pair(j,Pair<TValue, TAlign> ()));
 		TMapIterator mapIt = --(alignmentVector.back().end());
 		Segment<TString, InfixSegment> seg1_align(*p_seq1, width_align, leftDim0(seed) + w_d2);
 		Segment<TString, InfixSegment> seg2_align(*p_seq2, height_align, leftDim1(seed)+ h_d2);
@@ -826,7 +826,7 @@ _calculateRectangleGotoh(TSeed const &seed,
 	}
 	for(TValue j = height_diag; j < overall; ++j)
 	{
-		alignmentVector.back().insert(make_pair(j,Pair<TValue, TAlign> ()));
+		alignmentVector.back().insert(std::make_pair(j,Pair<TValue, TAlign> ()));
 		TMapIterator mapIt = --(alignmentVector.back().end());
 		Segment<TString, InfixSegment> seg1_align(*p_seq1, width_align, leftDim0(seed) + w_d2);
 		Segment<TString, InfixSegment> seg2_align(*p_seq2, height_align, leftDim1(seed)+ h_d2);

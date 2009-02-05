@@ -113,6 +113,7 @@ void testChainer(int count,
 
 	//build chain
 	int chain_score = globalChaining(fragments, ch, scoring);
+
 std::cout << chain_score << "\n";
 //_showChain(ch, scoring);
 

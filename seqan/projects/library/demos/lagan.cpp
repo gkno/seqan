@@ -3,10 +3,9 @@
 #include <seqan/file.h>
 
 using namespace seqan;
-using namespace std;
 
 template <typename TSeed, typename TSegment, typename TSize, typename TScoring, typename TScore>
-void laganChaining(list<TSeed> & chain,
+void laganChaining(std::list<TSeed> & chain,
 				   TSegment const & a,
 				   TSegment const & b,
 				   TSize q,
@@ -57,8 +56,8 @@ void laganChaining(list<TSeed> & chain,
 	//Step 3: recursively fill gaps
 	if (q > q_min)
 	{
-		list<TSeed> subchain;
-		typedef typename list<TSeed>::iterator TIterator;
+		std::list<TSeed> subchain;
+		typedef typename std::list<TSeed>::iterator TIterator;
 
 		TIterator it = chain.begin();
 		TIterator it2 = it; 
@@ -101,27 +100,28 @@ int main()
 	if ((length(a) > 0) && (length(b) > 0))
 	{
 		typedef Seed<int, SimpleSeed> TSeed;
-		list<TSeed> chain;
+		std::list<TSeed> chain;
+
+		SimpleScore sc(3,-2,-1,-3);
 
 		//Step 1 to 3
 		laganChaining(chain, 
-			infix(a, 0, length(a)), 
-			infix(b, 0, length(b)),
-			13, 8, 6, 200, SimpleScore(3,-2,-1,-3), 30);
+			infix(a, 0, length(a)), infix(b, 0, length(b)),
+			13, 8, 6, 200, sc, 30);
 
 		//Step 4: banded alignment
 		Align<TString, ArrayGaps> alignment;
 		resize(rows(alignment), 2);
 		setSource(row(alignment, 0), a);
 		setSource(row(alignment, 1), b);
-		int score = bandedChainAlignment(chain, 7, alignment, SimpleScore(3,-2,-1,-3));
+		int score = bandedChainAlignment(chain, 7, alignment, sc);
 
-		cout << "Score: " << score << endl;
-		cout << alignment << endl;
+		std::cout << "Score: " << score << std::endl;
+		std::cout << alignment << std::endl;
 	}
 	else
 	{
-		cout << "Error - File problem" << endl;
+		std::cout << "Error - File problem" << std::endl;
 	}
 	return 0;
 }

@@ -96,7 +96,10 @@ public:
 		{
 			clear(data_file);
 		}
-		_FileReaderString_construct(*this);
+		else
+		{
+			_FileReaderString_construct(*this);
+		}
 	}
 	~String()
 	{
