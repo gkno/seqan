@@ -41,7 +41,7 @@ void laganChaining(std::list<TSeed> & chain,
 
 	while (length(seedset) == 0)
 	{
-		if (q <= q_min) return;
+		if (q < q_min) return;
 
 		resize(indexShape(index_qgram), q);
 		for (int i = 0; i < length(a)-q+1; ++i)
