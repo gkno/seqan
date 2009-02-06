@@ -29,6 +29,8 @@
 //#define NO_PARAM_CHOOSER
 //#define RAZERS_PARALLEL			// parallelize using Intel's Threading Building Blocks
 //#define RAZERS_DUMP_SNPS
+#define RAZERS_DIRECT_MAQ_MAPPING
+
 
 #include "seqan/platform.h"
 #ifdef PLATFORM_WINDOWS
@@ -63,10 +65,10 @@ int mapReads(
 {
 	MultiFasta				genomeSet;
 	TReadSet				readSet;
-	TReadQualities				readQualities;
-	StringSet<CharString>	genomeNames;	// genome names, taken from the Fasta file
-	StringSet<CharString>	readNames;		// read names, taken from the Fasta file
+	StringSet<CharString>			genomeNames;	// genome names, taken from the Fasta file
+	StringSet<CharString>			readNames;		// read names, taken from the Fasta file
 	TMatches				matches;		// resulting forward/reverse matches
+	String<String<unsigned short> > 	stats;		// needed for mapping quality calculation 
 
 	// dump configuration in verbose mode
 	if (options._debugLevel >= 1) 
@@ -99,7 +101,6 @@ int mapReads(
 	SEQAN_PROTIMESTART(load_time);
 
 	if (!loadReads(readSet, readNames, readFileName, options)) {
-	//if (!loadReads(readSet, readQualities, readNames, readFileName, options)) {
 		::std::cerr << "Failed to load reads" << ::std::endl;
 		return RAZERS_READS_FAILED;
 	}
@@ -126,7 +127,7 @@ int mapReads(
 #endif
 
 	::std::map<unsigned,::std::pair< ::std::string,unsigned> > gnoToFileMap; //map to retrieve genome filename and sequence number within that file
-	int error = mapReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, options);
+	int error = mapReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, stats, options);
 	if (error != 0)
 	{
 		switch (error)
@@ -149,12 +150,12 @@ int mapReads(
 	//////////////////////////////////////////////////////////////////////////////
 	// Step 3: Remove duplicates and output matches
 	if (!options.spec.DONT_DUMP_RESULTS)
-		dumpMatches(matches, genomeNames, genomeFileNameList, gnoToFileMap, readSet, readNames, readFileName, errorPrbFileName, options);
+		dumpMatches(matches, genomeNames, genomeFileNameList, gnoToFileMap, readSet, stats, readNames, readFileName, errorPrbFileName, options);
 
 #ifdef RAZERS_DUMP_SNPS
 	//////////////////////////////////////////////////////////////////////////////
 	// Step 4: Do simple SNP calling
-		dumpSNPs(matches, genomeNames, genomeFileNameList, gnoToFileMap, readSet, readQualities, readNames, readFileName, options);
+		dumpSNPs(matches, genomeNames, genomeFileNameList, gnoToFileMap, readSet, readNames, readFileName, options);
 #endif
 
 
@@ -193,6 +194,10 @@ void printHelp(int, const char *[], RazerSOptions<TSpec> &options, ParamChooserO
 #endif
 		cerr << "  -id, --indels                \t" << "allow indels (default: mismatches only)" << endl;
 		cerr << "  -m,  --max-hits NUM          \t" << "output only NUM of the best hits (default " << options.maxHits << ')' << endl;
+		cerr << "  -tr, --trim-reads NUM        \t" << "trim reads to length NUM (default off)" << endl;
+#ifdef RAZERS_DIRECT_MAQ_MAPPING
+		cerr << "  -mq, --mapping-quality       \t" << "assign mapping quality values to matches" << endl;
+#endif
 		cerr << "  -o,  --output FILE           \t" << "change output filename (default <READS FILE>.result)" << endl;
 		cerr << "  -v,  --verbose               \t" << "verbose mode" << endl;
 		cerr << "  -vv, --vverbose              \t" << "very verbose mode" << endl;
@@ -236,17 +241,29 @@ void printHelp(int, const char *[], RazerSOptions<TSpec> &options, ParamChooserO
 
 //////////////////////////////////////////////////////////////////////////////
 // Load multi-Fasta sequences
-int estimateReadLength(char const *fileName)
+template<typename TSpec>
+int estimateReadLength(char const *fileName, RazerSOptions<TSpec> &options)
 {
 	Dna5String dummy;
 	
 	::std::ifstream file;
 	file.open(fileName, ::std::ios_base::in | ::std::ios_base::binary);
 	if (!file.is_open() || _streamEOF(file)) return RAZERS_READS_FAILED;
-	read(file, dummy, Fasta());			// read first Read sequence
+	char c = _streamGet(file);
+	if(c=='@')
+	{
+		options.inputFormat = 1;	
+		_parse_skipLine(file,c);
+		dummy = _parse_readWord(file,c);
+	}
+	if(c=='>')
+		read(file, dummy, Fasta());			// read first Read sequence
 	file.close();
 	return length(dummy);
 }
+
+
+
 
 template<typename TSpec>
 int getGenomeFileNameList(char const * filename, StringSet<CharString> & genomeFileNames, RazerSOptions<TSpec> &options)
@@ -579,6 +596,29 @@ int main(int argc, const char *argv[])
 				printHelp(argc, argv, options, pm_options);
 				return 0;
 			}
+#ifdef RAZERS_DIRECT_MAQ_MAPPING
+			if (strcmp(argv[arg], "-mq") == 0 || strcmp(argv[arg], "--mapping-quality") == 0) {
+				options.maqMapping = true;
+				continue;
+			}
+#endif
+			if (strcmp(argv[arg], "-tr") == 0 || strcmp(argv[arg], "--trim-reads") == 0) {
+				if (arg + 1 < argc) {
+					++arg;
+					istringstream istr(argv[arg]);
+					istr >> options.trimLength;
+					if (!istr.fail()) 
+					{
+						if (options.trimLength < 14)
+							cerr << "Minimum read length is 14" << endl << endl;
+						else
+							continue;
+					}
+				}
+				printHelp(argc, argv, options, pm_options);
+				return 0;
+			}
+
 			if (strcmp(argv[arg], "-tl") == 0 || strcmp(argv[arg], "--taboo-length") == 0) {
 				if (arg + 1 < argc) {
 					++arg;
@@ -651,7 +691,10 @@ int main(int argc, const char *argv[])
 	
 	if (options.printVersion)
 		printVersion();
-
+		
+	// get read length and read file format! (fasta or fastq)
+	unsigned rLength = estimateReadLength(fname[1],options);
+	if (options.trimLength > 0 && rLength < options.trimLength) options.trimLength = rLength;
 #ifndef NO_PARAM_CHOOSER
 	if (paramChoosing)
 	{
@@ -668,17 +711,18 @@ int main(int argc, const char *argv[])
 			pm_options.optionProbDELETE = 0.01;	//edit distance parameter choosing
 		}
 
-
 		pm_options.paramFolderPath = argv[0];
 		size_t lastPos = pm_options.paramFolderPath.find_last_of('/') + 1;
 		if (lastPos == pm_options.paramFolderPath.npos + 1) lastPos = pm_options.paramFolderPath.find_last_of('\\') + 1;
 		if (lastPos == pm_options.paramFolderPath.npos + 1) lastPos = 0;
 		pm_options.paramFolderPath.erase(lastPos); 
-
-		int rLength = estimateReadLength(fname[1]);
+		if (options.trimLength > 0) rLength = options.trimLength;
 		if (rLength > 0)
 		{
-			pm_options.totalN = rLength;
+/*			if(options.maqMapping && rLength != options.artSeedLength)
+				pm_options.totalN = options.artSeedLength;
+			else*/
+				pm_options.totalN = rLength;
 			if (options._debugLevel >= 1)
 				cerr << "___PARAMETER_CHOOSING__" << endl;
 			if (!chooseParams(options,pm_options))

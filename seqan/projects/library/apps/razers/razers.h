@@ -62,7 +62,9 @@ namespace SEQAN_NAMESPACE_MAIN
 		int			_debugLevel;		// level of verbosity
 		bool		printVersion;		// print version number
 		bool		hammingOnly;		// no indels
-
+		unsigned	inputFormat;		// 0 = fasta, 1 = fastq format
+		unsigned	trimLength;
+		
 	// output format options
 		unsigned	outputFormat;		// 0..Razer format
 										// 1..enhanced Fasta
@@ -76,6 +78,7 @@ namespace SEQAN_NAMESPACE_MAIN
 										// 1..           1. genome pos50ition, 2. read number
 		unsigned	positionFormat;		// 0..gap space
 										// 1..position space
+		const char	*runID;			// runID needed for gff output
 
 	// filtration parameters
 		::std::string shape;			// shape (e.g. 11111111111)
@@ -94,6 +97,13 @@ namespace SEQAN_NAMESPACE_MAIN
 		double		timeLoadFiles;		// time for loading input files
 		double		timeMapReads;		// time for mapping reads
 		double		timeDumpResults;	// time for dumping the results
+		
+#ifdef RAZERS_DIRECT_MAQ_MAPPING
+		bool maqMapping;
+		int maxMismatchQualSum;
+		int mutationRateQual;
+		unsigned artSeedLength;
+#endif
 
 #ifdef RAZERS_DUMP_SNPS
 		bool bayesian;
@@ -130,13 +140,16 @@ namespace SEQAN_NAMESPACE_MAIN
 			_debugLevel = 0;
 			printVersion = false;
 			hammingOnly = false;
-
+			trimLength = 0;
+			inputFormat = 0;
+			
 			outputFormat = 0;
 			dumpAlignment = false;
 			genomeNaming = 0;
 			readNaming = 0;
 			sortOrder = 0;
 			positionFormat = 0;
+			runID = "s"; 	//
 
 			matchN = false;
 
@@ -151,6 +164,13 @@ namespace SEQAN_NAMESPACE_MAIN
 			compMask[4] = 0;
 
 			compactThresh = 1024;
+#ifdef RAZERS_DIRECT_MAQ_MAPPING
+			maqMapping = false;
+			maxMismatchQualSum = 70;
+			mutationRateQual = 30;
+			artSeedLength = 28;	// the "artificial" seed length that is used for mapping quality assignment 
+						// (28bp is maq default)
+#endif
 
 #ifdef RAZERS_DUMP_SNPS
 			bayesian = true;
@@ -170,11 +190,15 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 		typedef typename _MakeSigned<_TGPos>::Type TGPos;
 
+#ifdef RAZERS_DIRECT_MAQ_MAPPING
+		short	 		mScore;
+		short			seedEditDist;
+#endif
 		unsigned		gseqNo;			// genome seqNo
 		unsigned		rseqNo;			// read seqNo
 		TGPos			gBegin;			// begin position of the match in the genome
 		TGPos			gEnd;			// end position of the match in the genome
-		unsigned short	editDist;		// Levenshtein distance
+		unsigned short		editDist;		// Levenshtein distance
 		char			orientation;	// 'F'..forward strand, 'R'..reverse comp. strand
 	};
 	
@@ -187,9 +211,10 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 // Definitions
 
-	typedef Dna5String									TGenome;
+	typedef Dna5String								TGenome;
 	typedef StringSet<TGenome>							TGenomeSet;
-	typedef Dna5String									TRead;
+//	typedef Dna5String								TRead;
+	typedef String<Dna5Q>								TRead;
 #ifdef RAZERS_CONCATREADS
 	typedef StringSet<TRead, Owner<ConcatDirect<> > >	TReadSet;
 	typedef StringSet<CharString, Owner<ConcatDirect<> > >	TReadQualities;
@@ -290,6 +315,8 @@ namespace SEQAN_NAMESPACE_MAIN
 template <typename TReadSet, typename TNameSet, typename TRazerSOptions>
 bool loadReads(TReadSet &reads, TNameSet &fastaIDs, const char *fileName, TRazerSOptions &options)
 {
+	if(options.inputFormat==1) return loadReads(reads, fastaIDs, fileName, options, Fastq());
+	
 	bool countN = !(options.matchN || options.outputFormat == 1);
 
 	MultiFasta multiFasta;
@@ -345,8 +372,8 @@ bool loadReads(TReadSet &reads, TNameSet &fastaIDs, const char *fileName, TRazer
 
 //////////////////////////////////////////////////////////////////////////////
 // Load multi-Fasta sequences
-template <typename TReadSet, typename TReadQualities, typename TNameSet, typename TRazerSOptions>
-bool loadReads(TReadSet &reads, TReadQualities &readQualities, TNameSet &fastaIDs, const char *fileName, TRazerSOptions &options)
+template <typename TReadSet, typename TNameSet, typename TRazerSOptions>
+bool loadReads(TReadSet &reads, TNameSet &fastaIDs, const char *fileName, TRazerSOptions &options, Fastq)
 {
 	bool countN = !(options.matchN || options.outputFormat == 1);
 
@@ -357,53 +384,74 @@ bool loadReads(TReadSet &reads, TReadQualities &readQualities, TNameSet &fastaID
 	unsigned seqCount = length(multiFasta);
 #ifndef RAZERS_CONCATREADS
 	resize(reads, seqCount);
-	resize(readQualities, seqCount);
 #endif
 	if (options.readNaming == 0)
 		resize(fastaIDs, seqCount);
 	
-	Dna5String seq;
+	if(options._debugLevel>1)::std::cerr << "Reading Fastq read file."<< std::endl;
+	String<Dna5Q> seq;
 	CharString qual;
-
+	Dna5String helpString;
+	
 	unsigned kickoutcount = 0;
 	for(unsigned i = 0; i < seqCount; ++i) 
 	{
 		if (options.readNaming == 0)
 			assignSeqId(fastaIDs[i], multiFasta[i], Fastq());	// read Fasta id
-		assignSeq(seq, multiFasta[i], Fastq());				// read Read sequence
+		assignSeq(helpString, multiFasta[i], Fastq());			// read Read sequence
 		assignQual(qual, multiFasta[i], Fastq());			// read ascii quality values  
-
 		if (countN)
 		{
 			int count = 0;
-			int cutoffCount = (int)(options.errorRate * length(seq));
-			for (unsigned j = 0; j < length(seq); ++j)
-				if (getValue(seq, j) == 'N')
+			int cutoffCount = (int)(options.errorRate * length(helpString));
+			for (unsigned j = 0; j < length(helpString); ++j)
+				if (getValue(helpString, j) == 'N')
 					if (++count > cutoffCount)
 					{
-						clear(seq);
+						clear(helpString);
 						clear(qual);
 						++kickoutcount;
 						break;
 					}
+			if (count > cutoffCount) continue;
 		}
+		resize(seq,length(helpString));
+		for (unsigned j = 0; j < length(helpString); ++j)
+		{
+			//store dna and quality together
+			seq[j] = ((unsigned char) helpString[j] & (unsigned char)0x07);
+			//(bisschen bloed)
+			unsigned char helpQual = (unsigned char)((int)qual[j]-33);
+			if((int)helpQual > 31) helpQual = (unsigned char)31;
+			helpQual = helpQual << 3;
+			seq[j] = (unsigned char)seq[j] | helpQual;
+		}
+/*		std::cout << "read = " << (Dna5)((unsigned char)seq[0]& (unsigned char)0x07)<< (Dna5)((unsigned char)seq[1]& (unsigned char)0x07)<< "... ";
+		unsigned char check = seq[0];
+		unsigned intQual = (check>>3);
+		std::cout << "qual = " <<  (int)intQual << ::std::endl;*/
 #ifdef RAZERS_CONCATREADS
-		appendValue(reads, seq, Generous());
-		appendValue(readQualities, qual, Generous());
+		if(options.trimLength>0)
+			appendValue(reads, prefix(seq,options.trimLength), Generous());
+		else
+			appendValue(reads, seq, Generous());
 #else
-		assign(reads[i], seq, Exact());
-		assign(readQualities[i], qual, Exact());
+		if(options.trimLength>0)
+			assign(reads[i], prefix(seq,options.trimLength), Exact());
+		else
+			assign(reads[i], seq, Exact());
 #endif
 	}
 #ifdef RAZERS_CONCATREADS
 	reserve(reads.concat, length(reads.concat), Exact());
-	reserve(readQualities.concat, length(readQualities.concat), Exact());
 #endif
 
 	if (options._debugLevel > 1 && kickoutcount > 0) 
 		::std::cerr << "Ignoring " << kickoutcount << " low quality reads.\n";
 	return (seqCount > 0);
 }
+
+
 
 /*
 //////////////////////////////////////////////////////////////////////////////
@@ -507,6 +555,31 @@ bool loadGenomes(TGenomeSet &genomes, StringSet<CharString> &fileNameList)
 		}
 	};
 	
+#ifdef RAZERS_DIRECT_MAQ_MAPPING
+	template <typename TReadMatch>
+	struct LessRNoMQ : public ::std::binary_function < TReadMatch, TReadMatch, bool >
+	{
+		inline bool operator() (TReadMatch const &a, TReadMatch const &b) const 
+		{
+			// read number
+			if (a.rseqNo < b.rseqNo) return true;
+			if (a.rseqNo > b.rseqNo) return false;
+			
+			// quality
+			return a.mScore < b.mScore; // sum of quality values of mismatches (the smaller the better)
+			
+			// genome position and orientation
+	/*		if (a.gseqNo < b.gseqNo) return true;
+			if (a.gseqNo > b.gseqNo) return false;
+			if (a.gBegin < b.gBegin) return true;
+			if (a.gBegin > b.gBegin) return false;
+			if (a.orientation < b.orientation) return true;
+			if (a.orientation > b.orientation) return false;
+	*/		
+		}
+	};
+#endif
+
 //////////////////////////////////////////////////////////////////////////////
 // Remove duplicate matches and leave at most maxHits many distanceRange
 // best matches per read
@@ -619,9 +692,12 @@ void countMatches(TMatches &matches, TCounts &cnt)
 
 //////////////////////////////////////////////////////////////////////////////
 // Remove low quality matches
-template < typename TMatches, typename TSpec >
-void compactMatches(TMatches &matches, RazerSOptions<TSpec> &options)
+template < typename TMatches, typename TCounts, typename TSpec >
+void compactMatches(TMatches &matches, TCounts & cnts, RazerSOptions<TSpec> &options)
 {
+#ifdef RAZERS_DIRECT_MAQ_MAPPING
+	if(options.maqMapping) compactMatches(matches, cnts,options,true);
+#endif
 	typedef typename Value<TMatches>::Type					TMatch;
 	typedef typename Iterator<TMatches, Standard>::Type		TIterator;
 	
@@ -677,6 +753,58 @@ void compactMatches(TMatches &matches, RazerSOptions<TSpec> &options)
 	resize(matches, dit - begin(matches, Standard()));
 }
 
+#ifdef RAZERS_DIRECT_MAQ_MAPPING
+//////////////////////////////////////////////////////////////////////////////
+// Remove low quality matches
+template < typename TMatches, typename TCounts, typename TSpec >
+void compactMatches(TMatches &matches, TCounts &cnts, RazerSOptions<TSpec> &, bool dontCountFirstTwo)
+{
+	typedef typename Value<TMatches>::Type				TMatch;
+	typedef typename Iterator<TMatches, Standard>::Type		TIterator;
+	
+	::std::sort(
+		begin(matches, Standard()),
+		end(matches, Standard()), 
+		LessRNoMQ<TMatch>());
+	
+	unsigned readNo = -1;
+	
+	TIterator it = begin(matches, Standard());
+	TIterator itEnd = end(matches, Standard());
+	TIterator dit = it;
+
+	bool second = true;
+	for (; it != itEnd; ++it) 
+	{
+		if ((*it).orientation == '-') continue;
+		if (readNo == (*it).rseqNo)
+		{
+			//second best match
+			if (second)
+			{
+				second = false;
+				if(!dontCountFirstTwo) 
+					++cnts[(*it).editDist][(*it).rseqNo];
+			}
+			else
+			{
+				if ((*it).editDist < length(cnts)-1)
+					++cnts[(*it).editDist][(*it).rseqNo];
+				continue;
+			}
+		} else
+		{	//best match
+			second = true;
+			readNo = (*it).rseqNo;
+			if(!dontCountFirstTwo) 
+				++cnts[(*it).editDist][(*it).rseqNo];
+		}
+		*dit = *it;
+		++dit;
+	}
+	resize(matches, dit - begin(matches, Standard()));
+}
+#endif
 
 //////////////////////////////////////////////////////////////////////////////
 // Hamming verification
@@ -692,10 +820,15 @@ matchVerify(
 	Segment<TGenome, InfixSegment> inf,		// potential match genome region
 	unsigned rseqNo,						// read number
 	TReadSet &readSet,					    // reads
-	TMyersPatterns const &,					// MyersBitVector preprocessing data
+	TMyersPatterns const & pat,					// MyersBitVector preprocessing data
 	RazerSOptions<TSpec> const &options,	// RazerS options
-	SwiftSemiGlobalHamming)					// Hamming only
+	SwiftSemiGlobalHamming swiftsemi)					// Hamming only
 {
+#ifdef RAZERS_DIRECT_MAQ_MAPPING
+	if(options.maqMapping) 
+		return matchVerify(m,inf,rseqNo,readSet,pat,options,SwiftSemiGlobalHamming(),true);
+#endif
+
 	typedef Segment<TGenome, InfixSegment>					TGenomeInfix;
 	typedef typename Value<TReadSet>::Type const			TRead;
 	typedef typename Iterator<TGenomeInfix, Standard>::Type	TGenomeIterator;
@@ -818,6 +951,152 @@ matchVerify(
 	return true;
 }
 
+
+#ifdef RAZERS_DIRECT_MAQ_MAPPING
+//////////////////////////////////////////////////////////////////////////////
+// Hamming verification recording sum of mismatching qualities in m.mScore
+template <
+	typename TMatch, 
+	typename TGenome, 
+	typename TReadSet, 
+	typename TMyersPatterns,
+	typename TSpec >
+inline bool
+matchVerify(
+	TMatch &m,					// resulting match
+	Segment<TGenome, InfixSegment> inf,		// potential match genome region
+	unsigned rseqNo,				// read number
+	TReadSet &readSet,				// reads
+	TMyersPatterns const & pat,				// MyersBitVector preprocessing data
+	RazerSOptions<TSpec> const &options,		// RazerS options
+	SwiftSemiGlobalHamming const &swiftsemi,				// Hamming only
+	bool)					// MaqMapping
+{
+	if(!options.maqMapping) 
+		return matchVerify(m,inf,rseqNo,readSet,pat,options,swiftsemi);
+	
+	typedef Segment<TGenome, InfixSegment>					TGenomeInfix;
+	typedef typename Value<TReadSet>::Type const			TRead;
+	typedef typename Iterator<TGenomeInfix, Standard>::Type	TGenomeIterator;
+	typedef typename Iterator<TRead, Standard>::Type		TReadIterator;
+
+// #ifdef RAZERS_DEBUG
+// 	cout<<"Verify: "<<::std::endl;
+// 	cout<<"Genome: "<<inf<<"\t" << beginPosition(inf) << "," << endPosition(inf) << ::std::endl;
+// 	cout<<"Read:   "<<host(myersPattern)<<::std::endl;
+// #endif
+
+//	bool derBesgte = false;
+	//if(rseqNo == 2) derBesgte = true;
+//	if(derBesgte) ::std::cout << "der besagte\n";
+	unsigned ndlLength = sequenceLength(rseqNo, readSet);
+	if (length(inf) < ndlLength) return false;
+
+	// verify
+	TRead &read				= readSet[rseqNo];
+	TReadIterator ritBeg	= begin(read, Standard());
+	TReadIterator ritEnd	= end(read, Standard());
+	TGenomeIterator git		= begin(inf, Standard());
+	TGenomeIterator gitEnd	= end(inf, Standard()) - (ndlLength - 1);
+	TGenomeIterator bestIt		= begin(inf, Standard());
+
+	// this is max number of errors the 28bp 'seed' should have
+	//assuming that maxErrors-1 matches can be found with 100% SN 
+	unsigned maxErrorsSeed = (unsigned)(options.artSeedLength * options.errorRate) + 1;	
+	unsigned maxErrorsTotal = (unsigned)(ndlLength * 0.25); //options.maxErrorRate);
+	unsigned minErrors = maxErrorsTotal + 1;
+
+	for (; git < gitEnd; ++git)
+	{
+		unsigned errors = 0;
+		TGenomeIterator g = git;	//maq would count errors in the first 28bp only (at least initially. not for output)
+		for(TReadIterator r = ritBeg; r != ritEnd; ++r, ++g)
+		{
+			if ((options.compMask[ordValue(*g)] & options.compMask[ordValue((Dna5)*r)]) == 0)
+			{
+				if (++errors > maxErrorsTotal)
+					break;
+			}
+		}
+		if (minErrors > errors)
+		{
+			minErrors = errors;
+			m.gBegin = git - begin(host(inf), Standard());
+			bestIt = git;
+		}
+	}
+
+//	if(derBesgte) ::std::cout << minErrors <<"minErrors\n";
+	if (minErrors > maxErrorsTotal) return false;
+	
+// 	std::cout << "read = " << (Dna5)((unsigned char)read[0]& (unsigned char)0x07)<< (Dna5)((unsigned char)read[1]& (unsigned char)0x07)<< "... ";
+// 	unsigned char check = read[0];
+// 	unsigned intQual = (check>>3);
+// 	std::cout << "qual = " <<  (int)intQual << ::std::endl;
+
+	//compute sum of qualities of errors
+	int qualSumErrors = 0;
+	unsigned errors = 0; 	// count errors in the artSeedLength first bp again
+	if(minErrors > 0)
+	{
+		TGenomeIterator g = bestIt;
+		unsigned count = 0;
+		//for(TReadIterator r = ritBeg; r != ritEnd; ++r, ++g, ++rq)
+		for(TReadIterator r = ritBeg; r != ritEnd; ++r, ++g, ++count)
+			if ((options.compMask[ordValue(*g)] & options.compMask[ordValue((Dna5)*r)]) == 0)
+			{
+				int q = (int)((unsigned char)(*r)>>3);
+				if(q>options.mutationRateQual) q = options.mutationRateQual;
+				qualSumErrors+=q;
+				if (count < options.artSeedLength)		// the maq (28bp-)seed
+				{
+					if(qualSumErrors > options.maxMismatchQualSum || ++errors > maxErrorsSeed)
+						return false;							
+					// discard match, if 'seed' is bad (later calculations are done with the quality sum over the whole read)
+				}
+			}
+	}
+//	if(derBesgte) ::std::cout << qualSumErrors <<"qualSumErrors\n";
+
+
+	m.gEnd = m.gBegin + ndlLength;
+	m.editDist = minErrors;			// errors in seed or total number of errors?
+	m.mScore = qualSumErrors;
+	m.seedEditDist = errors;
+	return true;
+}	
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+// Edit distance verification
+template <
+	typename TMatch, 
+	typename TGenome, 
+	typename TReadSet,
+	typename TMyersPatterns,
+	typename TSpec >
+inline bool
+matchVerify(
+	TMatch &m,								// resulting match
+	Segment<TGenome, InfixSegment> inf,		// potential match genome region
+	unsigned rseqNo,						// read number
+	TReadSet &readSet,	    				// reads
+	TMyersPatterns const & pat,				// MyersBitVector preprocessing data
+	RazerSOptions<TSpec> const &options,		// RazerS options
+	SwiftSemiGlobal const &swiftsemi,				// Hamming only
+	bool maqMap)						// Swift specialization
+{
+	//if(!options.maqMapping) 
+		return matchVerify(m,inf,rseqNo,readSet,pat,options,swiftsemi);
+	//else
+	//	return matchVerify(m,inf,rseqNo,readSet,pat,options,swiftsemi); // todo!
+}
+#endif
+
+
+
+
 #ifndef RAZERS_PARALLEL
 //////////////////////////////////////////////////////////////////////////////
 // Find read matches in one genome sequence
@@ -827,6 +1106,7 @@ template <
 	typename TReadIndex, 
 	typename TSwiftSpec, 
 	typename TVerifier,
+	typename TCounts,
 	typename TSpec >
 void findReads(
 	TMatches &matches,				// resulting matches
@@ -834,6 +1114,7 @@ void findReads(
 	unsigned gseqNo,				// ... and its sequence number
 	Pattern<TReadIndex, Swift<TSwiftSpec> > &swiftPattern,
 	TVerifier &forwardPatterns,
+	TCounts & cnts,
 	char orientation,				// q-gram index of reads
 	RazerSOptions<TSpec> &options)
 {
@@ -841,8 +1122,9 @@ void findReads(
 	typedef typename Size<TGenome>::Type					TSize;
 	typedef typename Value<TMatches>::Type					TMatch;
 
+	
 	// FILTRATION
-	typedef Finder<TGenome, Swift<TSwiftSpec> >				TSwiftFinder;
+	typedef Finder<TGenome, Swift<TSwiftSpec> >			TSwiftFinder;
 	typedef Pattern<TReadIndex, Swift<TSwiftSpec> >			TSwiftPattern;
 
 	// iterate all genomic sequences
@@ -857,8 +1139,12 @@ void findReads(
 
 	TReadSet &readSet = host(host(swiftPattern));
 	TSwiftFinder swiftFinder(genome, options.repeatLength, 1);
-
+	
+#ifdef RAZERS_DIRECT_MAQ_MAPPING
+	TMatch m = { 0, 0, 0, 0, 0, 0, 0, 0 };	// extra value for sum of mismatching qualities
+#else
 	TMatch m = { 0, 0, 0, 0, 0, 0 };	// to supress uninitialized warnings
+#endif
 	// iterate all verification regions returned by SWIFT
 	while (find(swiftFinder, swiftPattern, options.errorRate, options._debugLevel)) 
 	{
@@ -888,7 +1174,12 @@ void findReads(
 				{
 					typename Size<TMatches>::Type oldSize = length(matches);
 					maskDuplicates(matches);
-					compactMatches(matches, options);
+#ifdef RAZERS_DIRECT_MAQ_MAPPING
+				if(options.maqMapping)
+					compactMatches(matches, cnts, options, true);
+				else	
+#endif
+					compactMatches(matches, cnts, options);
 					options.compactThresh += (options.compactThresh >> 1);
 					if (options._debugLevel >= 2)
 						::std::cerr << '(' << oldSize - length(matches) << " matches removed)";
@@ -915,6 +1206,7 @@ void findReads(
 template <
 	typename TMatches, 
 	typename TReadSet, 
+	typename TCounts,
 	typename TSpec, 
 	typename TShape,
 	typename TSwiftSpec >
@@ -924,12 +1216,13 @@ int mapReads(
 	StringSet<CharString> &	genomeNames,	// genome names, taken from the Fasta file
 	::std::map<unsigned,::std::pair< ::std::string,unsigned> > & gnoToFileMap,
 	TReadSet const &		readSet,
+	TCounts & cnts,
 	RazerSOptions<TSpec> &	options,
 	TShape const &			shape,
 	Swift<TSwiftSpec> const)
 {
 	typedef typename Value<TReadSet>::Type				TRead;
-	typedef Index<TReadSet, Index_QGram<TShape> >		TIndex;			// q-gram index
+	typedef Index<TReadSet, Index_QGram<TShape> >			TIndex;			// q-gram index
 	typedef Pattern<TIndex, Swift<TSwiftSpec> >			TSwiftPattern;	// filter
 	typedef Pattern<TRead, MyersUkkonen>				TMyersPattern;	// verifier
 
@@ -978,6 +1271,15 @@ int mapReads(
 	fill(options.readMask, (readCount + options.WORD_SIZE - 1) / options.WORD_SIZE, (unsigned long)-1);
 #endif
 
+#ifdef RAZERS_DIRECT_MAQ_MAPPING
+ 	if(options.maqMapping)
+ 	{
+ 		resize(cnts, ((int)(0.25*length(readSet[0])))+1);
+ 		for (unsigned i = 0; i < length(cnts); ++i)
+ 			fill(cnts[i], readCount, 0);
+ 	}
+#endif
+
 	// clear stats
 	options.FP = 0;
 	options.TP = 0;
@@ -1023,12 +1325,12 @@ int mapReads(
 			gnoToFileMap.insert(::std::make_pair<unsigned,::std::pair< ::std::string,unsigned> >(gseqNo,::std::make_pair< ::std::string,unsigned>(genomeName,gseqNoWithinFile)));
 			
 			if (options.forward)
-				findReads(matches, genome, gseqNo, swiftPattern, forwardPatterns, 'F', options);
+				findReads(matches, genome, gseqNo, swiftPattern, forwardPatterns, cnts, 'F', options);
 
 			if (options.reverse)
 			{
 				reverseComplementInPlace(genome);
-				findReads(matches, genome, gseqNo, swiftPattern, forwardPatterns, 'R', options);
+				findReads(matches, genome, gseqNo, swiftPattern, forwardPatterns, cnts, 'R', options);
 			}
 			++gseqNoWithinFile;
 
@@ -1055,7 +1357,8 @@ int mapReads(
 template <
 	typename TMatches, 
 	typename TGenomeSet,
-	typename TReadSet, 
+	typename TReadSet,
+	typename TCounts, 
 	typename TSpec, 
 	typename TShape,
 	typename TSwiftSpec >
@@ -1063,12 +1366,13 @@ int mapReads(
 	TMatches &				matches,
 	TGenomeSet &			genomeSet,
 	TReadSet const &		readSet,
+	TCounts & cnts,
 	RazerSOptions<TSpec> &	options,
 	TShape const &			shape,
 	Swift<TSwiftSpec> const)
 {
 	typedef typename Value<TReadSet>::Type				TRead;
-	typedef Index<TReadSet, Index_QGram<TShape> >		TIndex;			// q-gram index
+	typedef Index<TReadSet, Index_QGram<TShape> >			TIndex;			// q-gram index
 	typedef Pattern<TIndex, Swift<TSwiftSpec> >			TSwiftPattern;	// filter
 	typedef Pattern<TRead, MyersUkkonen>				TMyersPattern;	// verifier
 
@@ -1104,18 +1408,28 @@ int mapReads(
 	options.timeDumpResults = 0;
 
 	CharString	id;
+#ifdef RAZERS_DIRECT_MAQ_MAPPING
+ 	if(options.maqMapping)
+ 	{
+ 		resize(cnts, ((int)(0.25*length(readSet[0])))+1);
+ 		for (unsigned i = 0; i < length(cnts); ++i)
+ 			fill(cnts[i], length(readSet), 0);
+ 	}
+#endif
+	
+	
 	
 	// iterate over genome sequences
 	SEQAN_PROTIMESTART(find_time);
 	for(unsigned gseqNo = 0; gseqNo < length(genomeSet); ++gseqNo)
 	{
 		if (options.forward)
-			findReads(matches, genomeSet[gseqNo], gseqNo, swiftPattern, forwardPatterns, 'F', options);
+			findReads(matches, genomeSet[gseqNo], gseqNo, swiftPattern, forwardPatterns, cnts, 'F', options);
 
 		if (options.reverse)
 		{
 			reverseComplementInPlace(genomeSet[gseqNo]);
-			findReads(matches, genomeSet[gseqNo], gseqNo, swiftPattern, forwardPatterns, 'R', options);
+			findReads(matches, genomeSet[gseqNo], gseqNo, swiftPattern, forwardPatterns, cnts, 'R', options);
 			reverseComplementInPlace(genomeSet[gseqNo]);
 		}
 
@@ -1136,18 +1450,19 @@ int mapReads(
 
 //////////////////////////////////////////////////////////////////////////////
 // Wrapper for different template specializations
-template <typename TMatches, typename TReadSet, typename TSpec>
+template <typename TMatches, typename TReadSet, typename TCounts, typename TSpec>
 int mapReads(
 	TMatches &				matches,
 	StringSet<CharString> &	genomeFileNameList,
 	StringSet<CharString> &	genomeNames,	// genome names, taken from the Fasta file
 	::std::map<unsigned,::std::pair< ::std::string,unsigned> > & gnoToFileMap,
 	TReadSet const &		readSet, 
+	TCounts & cnts,
 	RazerSOptions<TSpec> &	options)
 {
 	Shape<Dna, SimpleShape>		ungapped;
 	Shape<Dna, OneGappedShape>	onegapped;
-	Shape<Dna, GenericShape>		gapped;
+	Shape<Dna, GenericShape>	gapped;
 
 	// 2x3 SPECIALIZATION
 
@@ -1155,34 +1470,35 @@ int mapReads(
 	{
 		// select best-fitting shape
 		if (stringToShape(ungapped, options.shape))
-			return mapReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, options, ungapped, Swift<SwiftSemiGlobalHamming>());
+			return mapReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, cnts, options, ungapped, Swift<SwiftSemiGlobalHamming>());
 		
 		if (stringToShape(onegapped, options.shape))
-			return mapReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, options, onegapped, Swift<SwiftSemiGlobalHamming>());
+			return mapReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, cnts, options, onegapped, Swift<SwiftSemiGlobalHamming>());
 
 		if (stringToShape(gapped, options.shape))
-			return mapReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, options, gapped, Swift<SwiftSemiGlobalHamming>());
+			return mapReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, cnts, options, gapped, Swift<SwiftSemiGlobalHamming>());
 	} 
 	else 
 	{
 		if (stringToShape(ungapped, options.shape))
-			return mapReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, options, ungapped, Swift<SwiftSemiGlobal>());
+			return mapReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, cnts, options, ungapped, Swift<SwiftSemiGlobal>());
 		
 		if (stringToShape(onegapped, options.shape))
-			return mapReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, options, onegapped, Swift<SwiftSemiGlobal>());
+			return mapReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, cnts, options, onegapped, Swift<SwiftSemiGlobal>());
 
 		if (stringToShape(gapped, options.shape))
-			return mapReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, options, gapped, Swift<SwiftSemiGlobal>());
+			return mapReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, cnts, options, gapped, Swift<SwiftSemiGlobal>());
 	}
 
 	return RAZERS_INVALID_SHAPE;
 }
 
-template <typename TMatches, typename TGenomeSet, typename TReadSet, typename TSpec>
+template <typename TMatches, typename TGenomeSet, typename TReadSet, typename TCounts, typename TSpec>
 int mapReads(
 	TMatches &				matches,
 	TGenomeSet &			genomeSet,
 	TReadSet const &		readSet, 
+	TCounts &			cnts,
 	RazerSOptions<TSpec> &	options)
 {
 	Shape<Dna, SimpleShape>		ungapped;
@@ -1195,24 +1511,24 @@ int mapReads(
 	{
 		// select best-fitting shape
 		if (stringToShape(ungapped, options.shape))
-			return mapReads(matches, genomeSet, readSet, options, ungapped, Swift<SwiftSemiGlobalHamming>());
+			return mapReads(matches, genomeSet, readSet, cnts, options, ungapped, Swift<SwiftSemiGlobalHamming>());
 		
 		if (stringToShape(onegapped, options.shape))
-			return mapReads(matches, genomeSet, readSet, options, onegapped, Swift<SwiftSemiGlobalHamming>());
+			return mapReads(matches, genomeSet, readSet, cnts, options, onegapped, Swift<SwiftSemiGlobalHamming>());
 
 		if (stringToShape(gapped, options.shape))
-			return mapReads(matches, genomeSet, readSet, options, gapped, Swift<SwiftSemiGlobalHamming>());
+			return mapReads(matches, genomeSet, readSet, cnts, options, gapped, Swift<SwiftSemiGlobalHamming>());
 	} 
 	else 
 	{
 		if (stringToShape(ungapped, options.shape))
-			return mapReads(matches, genomeSet, readSet, options, ungapped, Swift<SwiftSemiGlobal>());
+			return mapReads(matches, genomeSet, readSet, cnts, options, ungapped, Swift<SwiftSemiGlobal>());
 		
 		if (stringToShape(onegapped, options.shape))
-			return mapReads(matches, genomeSet, readSet, options, onegapped, Swift<SwiftSemiGlobal>());
+			return mapReads(matches, genomeSet, readSet, cnts, options, onegapped, Swift<SwiftSemiGlobal>());
 
 		if (stringToShape(gapped, options.shape))
-			return mapReads(matches, genomeSet, readSet, options, gapped, Swift<SwiftSemiGlobal>());
+			return mapReads(matches, genomeSet, readSet, cnts, options, gapped, Swift<SwiftSemiGlobal>());
 	}
 
 	return RAZERS_INVALID_SHAPE;

@@ -21,7 +21,10 @@
 
 #define USE_LOGVALUES		// this is recommended when using probability values
 #define RUN_RAZERS
-#define RUN_RAZERS_ONEGAPPED	
+//#define RUN_RAZERS_ONEGAPPED	
+#define RAZERS_CONCATREADS		// use <ConcatDirect> StringSet to store reads
+#define RAZERS_MEMOPT			// optimize memory consumption
+#define RAZERS_PRUNE_QGRAM_INDEX
 #define SEQAN_PROFILE
 #define NON_REDUNDANT
 //#define LOSSRATE_VALIDATION	//generates output for loss rate validation (empirical vs computed), only for ungapped
@@ -34,9 +37,9 @@
 #include <seqan/file.h>
 #include <seqan/find_motif.h>
 
-#include "recognitionRateDP.h"
-#include "readSimulator.h"
-#include "razers.h"
+//#include "recognitionRateDP.h"
+//#include "readSimulator.h"
+//#include "razers.h"
 #include "paramChooser.h"
 
 

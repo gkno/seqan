@@ -1307,6 +1307,281 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 
+//////////////////////////////////////////////////////////////////////////////
+
+// //DnaQ and Dna5Q
+// 
+// /**
+// .Spec.DnaQ:
+// ..cat:Alphabets
+// ..summary:Alphabet for DNA plus phred quality.
+// ..general:Class.SimpleType
+// ..signature:DnaQ
+// ..remarks:
+// ...text:The @Metafunction.ValueSize@ of $DnaQ$ is 4. 
+// The nucleotides are enumerated this way: $'A' = 0, 'C' = 1, 'G' = 2, 'T' = 3$.
+// ...text:Objects of type $DnaQ$ can be converted to various other types and vice versa. 
+// ...text:$DnaQ$ is typedef for $SimpleType<char,_DnaQ>$, while $_DnaQ$ is a helper
+// specialization tag class.
+// ..see:Metafunction.ValueSize
+// ..see:Spec.Dna5Q
+// */
+struct _DnaQ {};
+typedef SimpleType <unsigned char, _DnaQ> DnaQ;
+
+template <> struct ValueSize< DnaQ > { enum { VALUE = 4 }; };	// considering only the nucleotide
+template <> struct BitsPerValue< DnaQ > { enum { VALUE = 8 }; };
+
+//____________________________________________________________________________
+ 
+// /**
+// .Spec.Dna5Q:
+// ..cat:Alphabets
+// ..summary:Alphabet for DNA plus phred quality including 'N' character.
+// ..general:Class.SimpleType
+// ..signature:Dna5Q
+// ..remarks:
+// ...text:The @Metafunction.ValueSize@ of $Dna5Q$ is 5. 
+// The nucleotides are enumerated this way: $'A' = 0, 'C' = 1, 'G' = 2, 'T' = 3$. 
+// The 'N' character ("unkown nucleotide") is encoded by 4.
+// ...text:Objects of type $Dna5$ can be converted to various other types and vice versa. 
+// ...text:$Dna5Q$ is typedef for $SimpleType<char,_Dna5Q>$, while $_Dna5Q$ is a helper
+// specialization tag class.
+// ..see:Metafunction.ValueSize
+// */
+struct _Dna5Q {};
+typedef SimpleType <unsigned char, _Dna5Q> Dna5Q;
+
+template <> struct ValueSize< Dna5Q > { enum { VALUE = 5 }; };
+template <> struct BitsPerValue< Dna5Q > { enum { VALUE = 8 }; };
+
+
+
+
+
+
+// template <typename TValue, typename TValue2>
+// struct CompareType<SimpleType<TValue,_DnaQ>, SimpleType<TValue2,_Dna> >
+// {
+// 	typedef SimpleType<TValue2,_Dna> Type;
+// };
+// 
+// template <typename TValue, typename TValue2>
+// struct CompareType<SimpleType<TValue,_Dna>, SimpleType<TValue2,_DnaQ> >
+// {
+// 	typedef SimpleType<TValue,_Dna> Type;
+// };
+// 
+// 
+// 
+// template <typename TValue, typename TValue2>
+// struct CompareType<SimpleType<TValue,_Dna5Q>, SimpleType<TValue2,_Dna5> >
+// {
+// 	typedef SimpleType<TValue2,_Dna5> Type;
+// };
+// 
+// template <typename TValue, typename TValue2>
+// struct CompareType<SimpleType<TValue,_Dna5>, SimpleType<TValue2,_Dna5Q> >
+// {
+// 	typedef SimpleType<TValue,_Dna5> Type;
+// };
+
+
+template <>
+struct CompareType<Dna5Q, Dna5Q> { typedef Dna5 Type; };
+template <>
+struct CompareType<DnaQ, DnaQ> { typedef Dna Type; };
+
+//////////////////////////////////////////////////////////////////////////////
+//ASCII
+
+inline void assign(Ascii & c_target, 
+				   DnaQ const & source)
+{
+SEQAN_CHECKPOINT
+	c_target = source.value;
+}
+//____________________________________________________________________________
+
+inline void assign(Ascii & c_target, 
+				   Dna5Q const & source)
+{
+SEQAN_CHECKPOINT
+	c_target = source.value;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//DNA (4 letters)
+
+template <>
+struct CompareType<DnaQ, Byte> { typedef Dna Type; };
+inline void assign(DnaQ & target, Byte c_source)
+{
+SEQAN_CHECKPOINT
+	target.value = c_source;	//quality 0 at each position
+}
+//____________________________________________________________________________
+
+template <>
+struct CompareType<DnaQ, Ascii> { typedef Dna Type; };
+inline void assign(DnaQ & target, Ascii c_source)
+{
+SEQAN_CHECKPOINT
+	target.value = c_source;
+}
+//____________________________________________________________________________
+
+template <>
+struct CompareType<DnaQ, Unicode> { typedef Dna Type; };
+inline void assign(DnaQ & target, Unicode c_source)
+{
+SEQAN_CHECKPOINT
+	target.value = c_source;
+}
+//____________________________________________________________________________
+
+template <>
+struct CompareType<DnaQ, Dna5Q> { typedef Dna Type; };
+inline void assign(DnaQ & target, Dna5Q const & c_source)
+{
+SEQAN_CHECKPOINT
+	target.value = c_source.value; // (c_source.value & 0x03) | ((c_source.value >> 3) << 3); //doof
+}
+//____________________________________________________________________________
+
+template <>
+struct CompareType<DnaQ, Iupac> { typedef Dna Type; };
+inline void assign(DnaQ & target, Iupac const & source)
+{
+SEQAN_CHECKPOINT
+	target.value = _Translate_Table_Iupac_2_Dna<>::VALUE[source.value];
+}
+//____________________________________________________________________________
+
+template <>
+struct CompareType<DnaQ, Dna> { typedef Dna Type; };
+inline void assign(DnaQ & target, Dna const & c_source)
+{
+SEQAN_CHECKPOINT
+	target.value = c_source.value;
+}
+//____________________________________________________________________________
+
+template <>
+struct CompareType<DnaQ, Dna5> { typedef Dna Type; };
+inline void assign(DnaQ & target, Dna5 const & c_source)
+{
+SEQAN_CHECKPOINT
+	target.value = c_source.value;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+//DNA (5 letters)
+
+template <>
+struct CompareType<Dna5Q, Byte> { typedef Dna5 Type; };
+inline void assign(Dna5Q & target, Byte c_source)
+{
+SEQAN_CHECKPOINT
+	target.value = c_source;
+}
+//____________________________________________________________________________
+
+template <>
+struct CompareType<Dna5Q, Ascii> { typedef Dna5 Type; };
+inline void assign(Dna5Q & target, Ascii c_source)
+{
+SEQAN_CHECKPOINT
+	target.value = c_source;
+}
+//____________________________________________________________________________
+
+template <>
+struct CompareType<Dna5Q, Unicode> { typedef Dna5 Type; };
+inline void assign(Dna5Q & target, Unicode c_source)
+{
+SEQAN_CHECKPOINT
+	target.value = c_source;
+}
+//____________________________________________________________________________
+
+template <>
+struct CompareType<Dna5Q, Iupac> { typedef Dna5 Type; };
+inline void assign(Dna5Q & target, Iupac const & source)
+{
+SEQAN_CHECKPOINT
+	target.value = _Translate_Table_Iupac_2_Dna5<>::VALUE[source.value];
+}
+
+//____________________________________________________________________________
+
+template <>
+struct CompareType<Dna5Q, DnaQ> { typedef Dna Type; };
+inline void assign(Dna5Q & target, DnaQ const & c_source)
+{
+SEQAN_CHECKPOINT
+	target.value = c_source.value;
+}
+//____________________________________________________________________________
+
+template <>
+struct CompareType<Dna5Q, Dna5> { typedef Dna5 Type; };
+inline void assign(Dna5Q & target, Dna5 const & c_source)
+{
+SEQAN_CHECKPOINT
+	target.value = c_source.value;
+}
+
+//____________________________________________________________________________
+
+template <>
+struct CompareType<Dna5Q, Dna> { typedef Dna Type; };
+inline void assign(Dna5Q & target, Dna const & c_source)
+{
+SEQAN_CHECKPOINT
+	target.value = c_source.value;
+}
+//____________________________________________________________________________
+
+
+
+
+
+template <>
+struct CompareType<Dna5, Dna5Q> { typedef Dna5 Type; };
+inline void assign(Dna5 & target, Dna5Q const & c_source)
+{
+SEQAN_CHECKPOINT
+	target.value = c_source.value & 0x07;
+}
+//____________________________________________________________________________
+
+template <>
+struct CompareType<Dna, Dna5Q> { typedef Dna Type; };
+inline void assign(Dna & target, Dna5Q const & c_source)
+{
+SEQAN_CHECKPOINT
+	target.value = c_source.value & 0x03;
+}
+
+//____________________________________________________________________________
+template <>
+struct CompareType<Dna5, DnaQ> { typedef Dna5 Type; };
+inline void assign(Dna5 & target, DnaQ const & c_source)
+{
+SEQAN_CHECKPOINT
+	target.value = c_source.value & 0x03;
+}
+//____________________________________________________________________________
+
+template <>
+struct CompareType<Dna, DnaQ> { typedef Dna Type; };
+inline void assign(Dna & target, DnaQ const & c_source)
+{
+SEQAN_CHECKPOINT
+	target.value = c_source.value & 0x03;
+}
 
 //////////////////////////////////////////////////////////////////////////////
 }// namespace SEQAN_NAMESPACE_MAIN

@@ -634,19 +634,18 @@ makeSelectedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 {
 
 	typedef typename Value<TError>::Type TFloat;
-	unsigned maxErrors =  2 + (unsigned) pm_options.totalN / 10;
-	unsigned minErrors = (unsigned) pm_options.totalN / 10;
+	//unsigned maxErrors =  2 + (unsigned) pm_options.totalN / 10;
+	unsigned maxErrors =  (unsigned) pm_options.totalN / 10;
+	unsigned minErrors = 0;// (unsigned) pm_options.totalN / 10;
 	if(maxErrors<5 && pm_options.totalN >= 30) maxErrors = 5;
-	
 	unsigned minQ;
 
 	typedef typename Value<TError>::Type TErrorValue;
 	String<TErrorValue> logErrorDistribution;
 	
 	String<CharString> shapeStrings;
-
+	
 	//q=14
-	appendValue(shapeStrings,"11111111111111");
 	if(pm_options.optionHammingOnly)
 	{
 		appendValue(shapeStrings,"1111111111100000111");
@@ -658,9 +657,9 @@ makeSelectedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 		appendValue(shapeStrings,"1111111111100111");
 		appendValue(shapeStrings,"111111111111101");
 	}
+	appendValue(shapeStrings,"11111111111111");
 
 	//q=13
-	appendValue(shapeStrings,"1111111111111");
 	if(pm_options.optionHammingOnly)
 	{
 		appendValue(shapeStrings,"11111111110000111");
@@ -671,9 +670,9 @@ makeSelectedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 		appendValue(shapeStrings,"111111111100111");
 		appendValue(shapeStrings,"11111111111101");
 	}
+	appendValue(shapeStrings,"1111111111111");
 
 	//q=12
-	appendValue(shapeStrings,"111111111111");
 	if(pm_options.optionHammingOnly)
 	{
 		appendValue(shapeStrings,"111111111000111");
@@ -684,9 +683,9 @@ makeSelectedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 		appendValue(shapeStrings,"11111111100111");
 		appendValue(shapeStrings,"1111111111101");
 	}
+	appendValue(shapeStrings,"111111111111");
 
 	//q=11
-	appendValue(shapeStrings,"11111111111");
 	if(pm_options.optionHammingOnly)
 	{
 		appendValue(shapeStrings,"11111110001111");
@@ -697,8 +696,9 @@ makeSelectedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 		appendValue(shapeStrings,"1111111100111");
 		appendValue(shapeStrings,"111111111101");
 	}
+	appendValue(shapeStrings,"11111111111");
+	
 	//q=10
-	appendValue(shapeStrings,"1111111111");
 	if(pm_options.optionHammingOnly)
 	{
 		appendValue(shapeStrings,"1111111000111");
@@ -709,6 +709,7 @@ makeSelectedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 		appendValue(shapeStrings,"111111100111");
 		appendValue(shapeStrings,"11111111101");
 	}
+	appendValue(shapeStrings,"1111111111");
 
 	minQ=10;
 	
@@ -804,14 +805,17 @@ makeSelectedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 
 #ifdef RUN_RAZERS
 	// generate genome and reads
+	::std::cout << "Simulate reads..."<<::std::endl;
+	TReadSet testReads;
 	StringSet<Dna5String> testGenome;
-	StringSet<Dna5String> testReads;
+	//StringSet<Dna5String> testReads;
 	StringSet<CharString> dummyIDs;
 	resize(testGenome, 1);
 	simulateGenome(testGenome[0], 1000000);					// generate 1Mbp genomic sequence
 	simulateReads(
 		testReads, dummyIDs, testGenome, 
-		50000, maxErrors+1, logErrorDistribution, 0.5);	// generate 50K reads
+		50000, maxErrors+1, logErrorDistribution, 0.5, true);	// generate 50K reads
+
 #endif
 
 
@@ -823,10 +827,19 @@ makeSelectedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 		resize(found,maxT*maxErrors);
 		
 		String< State<TFloat> > states;
-		if(pm_options.verbose)::std::cout << "do DP\n";
-		initPatterns(states, shapeStrings[i], maxErrors-1, logErrorDistribution, pm_options.optionHammingOnly);
-		computeFilteringLoss(found, states, length(shapeStrings[i]), maxT, maxErrors,  logErrorDistribution);
-		
+		//if(pm_options.verbose)::std::cout << "do DP\n";
+		::std::cout << "do DP\n";
+		try 
+		{ 
+		 	initPatterns(states, shapeStrings[i], maxErrors-1, logErrorDistribution, pm_options.optionHammingOnly);
+			computeFilteringLoss(found, states, length(shapeStrings[i]), maxT, maxErrors,  logErrorDistribution);
+		} 
+		catch (std::bad_alloc&) 
+		{
+			std::cout << shapeStrings[i] << "threw bad_alloc exception\n";
+			continue;
+		}
+	
 		for(unsigned e = minErrors; e < maxErrors; ++e) {
 			bool highestOptimalFound = false;
 			for(unsigned t = maxT-1; t > minT; --t) {
@@ -860,19 +873,19 @@ makeSelectedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 				
 #ifdef RUN_RAZERS
 				// count verifications
-				String<ReadMatch<unsigned> > matches;
+				String<ReadMatch<int> > matches;
 				RazerSOptions<RazerSSpec<false, true> > razersOptions;
 				razersOptions.errorRate = (double)e / (double)pm_options.totalN;
 				razersOptions.errorRate += 0.0000001;
 				razersOptions.threshold = t;
 				razersOptions._debugLevel = 2;
 				razersOptions.hammingOnly = pm_options.optionHammingOnly;
-
+				int dummy=0;
 				assign(razersOptions.shape, shapeStrings[i]);
-				mapReads(matches, testGenome, testReads, razersOptions);
+				mapReads(matches, testGenome, testReads, dummy, razersOptions);
 #endif
 
-				// write best shape with its properties on the file
+				// write shape with its properties into file
 				::std::ofstream fout(datName.str().c_str(), ::std::ios::app | ::std::ios::out);
 				fout << shapeStrings[i] << "\t\t";
 				fout << t << "\t\t";
@@ -1010,9 +1023,9 @@ makeOneGappedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 						razersOptions.threshold = t;
 						razersOptions._debugLevel = 2;
 						razersOptions.hammingOnly = pm_options.optionHammingOnly;
-		
+						int dummy=0;
 						assign(razersOptions.shape, shapeString);
-						mapReads(matches, testGenome, testReads, razersOptions);
+						mapReads(matches, testGenome, testReads,dummy, razersOptions);
 #endif
 						// write shape with its properties into file
 						::std::ofstream fout(datName.str().c_str(), ::std::ios::app | ::std::ios::out);
