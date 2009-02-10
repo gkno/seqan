@@ -104,6 +104,7 @@ inline bool find(TFinder & finder,
 SEQAN_CHECKPOINT
 	typedef typename Haystack<TFinder>::Type THaystack;
 	typedef typename Size<THaystack>::Type TSize;
+	typedef typename Iterator<THaystack, Standard>::Type THaystackIterator;
 
 	if (empty(finder))
 	{
@@ -115,6 +116,14 @@ SEQAN_CHECKPOINT
 	THaystack const & hstk = haystack(finder);
 	TNeedle const & ndl = needle(me);
 
+	THaystackIterator res = ::std::search(begin(hstk, Standard())+position(finder), end(hstk, Standard()), begin(ndl, Standard()), end(ndl, Standard()));
+
+	if (res == end(hstk)) return false;
+
+	_setFinderEnd(finder, (res - begin(hstk, Standard())) + length(ndl));
+	return true; 
+
+/*
 	TSize n = length(hstk);
 	TSize m = length(ndl);
 	while (position(finder)+m <= n)
@@ -127,6 +136,7 @@ SEQAN_CHECKPOINT
 		++finder;
 	}
 	return false;
+*/
 }
 
 //____________________________________________________________________________

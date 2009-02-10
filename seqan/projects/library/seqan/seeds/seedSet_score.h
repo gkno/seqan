@@ -1684,26 +1684,32 @@ _findSeedsChain(SeedSet<TValue, TSeedSpec, TScoringSpec, TSpec> &set,
 	TIterator tmp = set.fragmentMap.end();
 	typename ScoreType<TScoringSpec>::Type maxScore = infimumValue<TValue>();
 	typename ScoreType<TScoringSpec>::Type tmpScore;
-	for (TIterator it = set.fragmentMap.lower_bound(dPos-qPos-gapDistance); it != itUp; ++it)
+	for (TIterator it = set.fragmentMap.lower_bound(dPos-qPos-gapDistance); it != itUp; )
 	{
 		TSize id = it-> second;
 		if (qPos > set.maxDistance + rightDim0(set.manager[id]))
 		{//delete it
-			set.fragmentMap.erase(it);
+			TIterator itdelete = it;
+			++it;
+			set.fragmentMap.erase(itdelete);
 			if (set.result.end() == set.result.find(id))
 			{
 				valueDestruct(&set.manager[id]);
 				releaseID(set.manager,id);
 			}
 		}
-		else if ((qPos > rightDim0(set.manager[id])) && (dPos > rightDim1(set.manager[id])))
+		else
 		{
-			tmpScore = _calculateScoringValue(set.manager[id], qPos, dPos, length, score, typename GapCosts<TScoringSpec>::Type());
-			if (tmpScore > maxScore)
+			if ((qPos > rightDim0(set.manager[id])) && (dPos > rightDim1(set.manager[id])))
 			{
-				maxScore = tmpScore;
-				tmp = it;
+				tmpScore = _calculateScoringValue(set.manager[id], qPos, dPos, length, score, typename GapCosts<TScoringSpec>::Type());
+				if (tmpScore > maxScore)
+				{
+					maxScore = tmpScore;
+					tmp = it;
+				}
 			}
+			++it;
 		}
 	}
 	return tmp;

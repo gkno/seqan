@@ -64,7 +64,7 @@ public:
 
 	typedef String<TValue> TBuf;
 
-	Holder<TFile, Tristate2> data_file;
+	Holder<TFile, Tristate> data_file;
 	TFilePosition data_file_begin;		//file pointer to begin of data in file
 	TABL data_abl;						//accumulated block lengths
 	TABLPosition data_active_block;		//number of active block

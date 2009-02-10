@@ -1106,6 +1106,28 @@ typedef SimpleType<unsigned char, _AminoAcid> AminoAcid;
 template <> struct ValueSize< AminoAcid > { enum { VALUE = 24 }; };
 template <> struct BitsPerValue< AminoAcid > { enum { VALUE = 5 }; };
 
+//____________________________________________________________________________
+
+/**
+.Spec.Finite:
+..cat:Alphabets
+..summary:A finite alphabet of a fixed size.
+..general:Class.SimpleType
+..signature:SimpleType<TValue, Finite<SIZE> >
+..param.TValue:The type that is use to store the values.
+...default:$char$
+..param.SIZE:The @Metafunction.ValueSize@ of the alphabet.
+..see:Metafunction.ValueSize
+*/
+template <unsigned SIZE>
+struct Finite;
+
+template <typename TValue, unsigned SIZE> 
+struct ValueSize< SimpleType<TValue, Finite<SIZE> > > { enum { VALUE = SIZE }; };
+
+template <typename TValue, unsigned SIZE> 
+struct BitsPerValue< SimpleType<TValue, Finite<SIZE> > >: Log2<SIZE> {};
+
 //////////////////////////////////////////////////////////////////////////////
 //ASCII
 
