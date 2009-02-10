@@ -122,6 +122,17 @@ _buildAutomaton_MultiBFAM(Pattern<TNeedle, MultiBFAM<Oracle> > & me,
 	createSetOracle(me.automaton, me.terminals, strs);
 }
 
+template <typename TNeedle, typename TStrs>
+inline void
+_buildAutomaton_MultiBFAM(Pattern<TNeedle, MultiBFAM<Trie> > & me, 
+						  TStrs const & strs)
+{
+	for (int i = 0; i < length(strs); ++i)
+	{
+		createSuffixTrie(me.automaton, me.terminals, strs[i]);
+	}
+}
+
 //____________________________________________________________________________
 
 template <typename TNeedle, typename TAutomaton, typename TNeedle2>
