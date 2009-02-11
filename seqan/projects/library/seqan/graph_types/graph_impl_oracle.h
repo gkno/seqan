@@ -188,40 +188,57 @@ SEQAN_CHECKPOINT
 	TVertexDescriptor nil = getNil<TVertexDescriptor>();
 	assignProperty(supplyState, root(g), nil);
 
-	TPos len = length(keywords);
 	TVertexDescriptor _root = getRoot(g);
+
+	TPos len = length(keywords);
+	String<TVertexDescriptor> _here_v;
+	fill(_here_v, len, _root);
+	String<TIterator> _here_it;
+	resize(_here_it, len);
 	for (TPos i = 0; i < len; ++i)
 	{
-		TIterator it = begin(keywords[i], Standard());
-		TIterator it_end = end(keywords[i], Standard());
-		TVertexDescriptor _parent = _root;
-		
-		while (it != it_end)
+		_here_it[i] = begin(keywords[i], Standard());
+	}
+	TPos _active_count = len;
+	while (_active_count)
+	{
+		for (TPos i = 0; i < len; ++i)
 		{
-			TVertexDescriptor _current = getSuccessor(g, _parent, *it);
-
-			if (!getProperty(visited, _current))
+			TIterator & it = _here_it[i];
+			TIterator it_end = end(keywords[i], Standard());
+			TVertexDescriptor & _parent = _here_v[i];
+			
+			if (it != it_end)
 			{
-				assignProperty(visited, _current, true);
+				TVertexDescriptor _current = getSuccessor(g, _parent, *it);
 
-				TVertexDescriptor _down = getProperty(supplyState, _parent);
-				TVertexDescriptor _supply = _root;
-				while (_down != nil)
+				if (!getProperty(visited, _current))
 				{
-					TVertexDescriptor _next = getSuccessor(g, _down, *it);
-					if (_next != nil)
-					{
-						_supply = _next;
-						break;
-					}
+					assignProperty(visited, _current, true);
 
-					addEdge(g, _down, _current, *it);
-					_down = getProperty(supplyState, _down);
+					TVertexDescriptor _down = getProperty(supplyState, _parent);
+					TVertexDescriptor _supply = _root;
+					while (_down != nil)
+					{
+						TVertexDescriptor _next = getSuccessor(g, _down, *it);
+						if (_next != nil)
+						{
+							_supply = _next;
+							break;
+						}
+
+						addEdge(g, _down, _current, *it);
+						_down = getProperty(supplyState, _down);
+					}
+					assignProperty(supplyState, _current, _supply);
 				}
-				assignProperty(supplyState, _current, _supply);
+				_parent = _current;
+				++it;
+				if (it == it_end)
+				{
+					--_active_count;
+				}
 			}
-			_parent = _current;
-			++it;
 		}
 	}
 }

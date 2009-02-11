@@ -127,10 +127,7 @@ inline void
 _buildAutomaton_MultiBFAM(Pattern<TNeedle, MultiBFAM<Trie> > & me, 
 						  TStrs const & strs)
 {
-	for (int i = 0; i < length(strs); ++i)
-	{
-		createSuffixTrie(me.automaton, me.terminals, strs[i]);
-	}
+	createSetSuffixTrie(me.automaton, me.terminals, strs);
 }
 
 //____________________________________________________________________________

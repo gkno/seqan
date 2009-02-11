@@ -121,6 +121,7 @@ SEQAN_CHECKPOINT
 	if (res == end(hstk)) return false;
 
 	_setFinderEnd(finder, (res - begin(hstk, Standard())) + length(ndl));
+	setPosition(finder, beginPosition(finder));
 	return true; 
 
 /*

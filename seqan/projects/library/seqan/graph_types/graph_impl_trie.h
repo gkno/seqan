@@ -223,6 +223,37 @@ createSuffixTrie(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 	}
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
+
+template <typename TAlphabet, typename TCargo, typename TSpec, typename TTerminalStateMap, typename TTexts>
+inline void
+createSetSuffixTrie(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
+					TTerminalStateMap& terminalStateMap,
+					TTexts const& texts)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename Position<TTexts const>::Type TTextsPosition;
+	typedef typename Value<TTexts const>::Type TText;
+	typedef typename Position<TText const>::Type TPosition;
+
+	TVertexDescriptor root = addVertex(g);
+	assignRoot(g,root);
+	resize(terminalStateMap, numVertices(g), Generous());
+	assignProperty(terminalStateMap,root,String<TPosition>());
+
+	for (TTextsPosition j = 0; j < length(texts); ++j)
+	{
+		TText const & text = texts[j];
+		for (TPosition i = 0; i < length(text); ++i)
+		{
+			_addStringToTrie(g,terminalStateMap,suffix(text, i),j);
+		}
+	}
+}
+
 }// namespace SEQAN_NAMESPACE_MAIN
 
 #endif //#ifndef SEQAN_HEADER_...
