@@ -294,6 +294,96 @@ progressiveAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 
 
 
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TGuideTree, typename TVertexSets, typename TGroupRoot, typename TSize>
+inline void 
+__subTreeSearch(TGuideTree& guideTree, 
+				TVertexSets& vertexSets,
+				TGroupRoot& groupRoot,
+				TSize minMembers) 
+{
+	typedef typename Value<TVertexSets>::Type TVertexSet;
+	typedef typename VertexDescriptor<TGuideTree>::Type TVertexDescriptor;
+	TVertexDescriptor rootVertex = getRoot(guideTree);
+
+	// Number of subsequent leaves for each node
+	typedef typename Iterator<Graph<Tree<double> >, BfsIterator>::Type TBfsIterator;
+	String<TSize> numLeaves;
+	resizeVertexMap(guideTree, numLeaves);
+
+	// All vertices in reversed bfs order
+	typedef String<TVertexDescriptor> TVertexString;
+	TVertexString vertices;
+	resize(vertices, numVertices(guideTree));
+	
+	// Walk through the tree in bfs order	
+	TBfsIterator bfsIt(guideTree, getRoot(guideTree));
+	TSize pos = length(vertices) - 1;
+	for(;!atEnd(bfsIt);goNext(bfsIt), --pos) {
+		if (isLeaf(guideTree, *bfsIt)) property(numLeaves, *bfsIt) = 1;
+		else property(numLeaves, *bfsIt) = 0;
+		value(vertices, pos) = *bfsIt;
+	}
+
+	// Count the number of leaves for each internal node
+	typedef typename Iterator<TVertexString, Standard>::Type TVertexIter;
+	TVertexIter itVert = begin(vertices, Standard());
+	TVertexIter itVertEnd = end(vertices, Standard());
+	for(;itVert != itVertEnd; ++itVert) {
+		if (!isLeaf(guideTree, *itVert)) {
+			typedef typename Iterator<TGuideTree, AdjacencyIterator>::Type TAdjacencyIterator;
+			TAdjacencyIterator adjIt(guideTree, *itVert);
+			for(;!atEnd(adjIt);goNext(adjIt)) property(numLeaves, *itVert) += property(numLeaves, *adjIt);
+		}	
+	}
+
+	// Delineate the groups
+	itVert = begin(vertices, Standard());
+	for(;itVert != itVertEnd; ++itVert) {
+		if (property(numLeaves, *itVert) >= minMembers) {
+			appendValue(vertexSets, TVertexSet());
+			appendValue(groupRoot, *itVert);
+			TSize elem = length(vertexSets) - 1;
+			collectLeaves(guideTree, *itVert, value(vertexSets, elem));
+			property(numLeaves, *itVert) = 0;
+			// Do not take any parent of the group root
+			if (*itVert != rootVertex) {
+				TVertexDescriptor pVert = parentVertex(guideTree, *itVert);
+				while(pVert != rootVertex) {
+					property(numLeaves, pVert) = 0;
+					pVert = parentVertex(guideTree, pVert);
+				}
+				property(numLeaves, pVert) = 0;
+			}
+		}
+	}
+}
+
+
+		//typedef unsigned int TVertexDescriptor;
+		//typedef std::set<TVertexDescriptor> TVertexSet;
+		//String<TVertexSet> vertexSets;
+		//typedef String<TVertexDescriptor> TGroupRoot;
+		//TGroupRoot groupRoot;
+		//__subTreeSearch(guideTreeGraph, vertexSets, groupRoot, 5);
+
+		//
+		//std::cout << guideTreeGraph << std::endl;
+		//for(TSize i=0; i<length(vertexSets); ++i) {
+		//	std::cout << value(groupRoot, i) << std::endl;
+		//	TVertexSet& thisSet = value(vertexSets, i);
+		//	for(TVertexSet::const_iterator itSet = thisSet.begin(); itSet != thisSet.end(); ++itSet) {
+		//		std::cout << *itSet << ',';
+		//	}
+		//	std::cout << std::endl;
+		//}
+		//std::cout << std::endl;
+
+
+
+
+
 
 
 
