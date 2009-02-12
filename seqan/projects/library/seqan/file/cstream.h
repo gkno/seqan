@@ -221,9 +221,26 @@ SEQAN_CHECKPOINT
 	_streamSeek2G(stream, -1);
 }
 
+
+//////////////////////////////////////////////////////////////////////////////
+// holder<FILE *>
+
+template <typename THolder>
+inline void
+_holderDeallocate(THolder & me, FILE *)
+{
+}
+template <typename THolder>
+inline FILE *
+_holderAllocatePointer(THolder & me, FILE * data)
+{
+	return data;
+}
+
 //////////////////////////////////////////////////////////////////////////////
 // Stream operators for FILE *
 //////////////////////////////////////////////////////////////////////////////
+
 
 // ISO C++ operators are only allowed for classes, not for pointers
 
