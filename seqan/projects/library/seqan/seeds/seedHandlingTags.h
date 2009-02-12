@@ -45,9 +45,12 @@ namespace SEQAN_NAMESPACE_MAIN
 struct _addSeeding_Single;
 typedef Tag<_addSeeding_Single> const Single;
 
+//also defined in blast_base.h (103)
+//moved to basic_tag
+/*
 struct _Chain_Blat;
 typedef Tag<_Chain_Blat> const Blat;
-
+*/
 
 struct _Chain_Chaos;
 typedef Tag<_Chain_Chaos> const Chaos;

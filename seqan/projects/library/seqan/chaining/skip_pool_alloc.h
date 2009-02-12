@@ -18,8 +18,7 @@
   $Id$
  ==========================================================================*/
 
-/*	Copyright (c) 2006 Hendrik Woehrle
-*	All rights reserved.
+/*	Hendrik Woehrle
 *
 *	Deferred Skip List Datastructure
 *
