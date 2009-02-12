@@ -545,21 +545,73 @@ tripletLibraryExtension(Graph<Alignment<TStringSet, TCargo, TSpec> >& g)
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-
-	// Two tasks:
-	// 1) Add edges for the case that a and c is aligned, b and c is aligned, but a and b are not, give these edges the appropriate weight
-	// 2) Augment all existing edges
-	String<TCargo> newCargoMap;
-	typedef String<TVertexDescriptor> TVertexString;
-	typedef String<TCargo> TCargoString;
-	TVertexString edges_vertices;
-	TCargoString edges_cargo;
+	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
 	
-	_performTripletExtension(g, newCargoMap, edges_vertices, edges_cargo);
-	_assignNewCargos(g, newCargoMap);
-	_addNewEdgesFoundByTriplet(g, edges_vertices, edges_cargo);
+	// Store all edges
+	typedef std::pair<TVertexDescriptor, TVertexDescriptor> TEdge;
+	typedef std::map<TEdge, TCargo> TEdgeMap;
+	TEdgeMap eMap;
+	TEdgeIterator itE(g);
+	for(;!atEnd(itE);goNext(itE)) eMap.insert(std::make_pair(TEdge(sourceVertex(itE), targetVertex(itE)), cargo(*itE)));
+	clearEdges(g);
+	
+	// Perform triplet extension
+	TEdgeMap newEMap = eMap;
+	typedef typename TEdgeMap::iterator TEdgeMapIter;
+	for(TEdgeMapIter itE = newEMap.begin(); itE != newEMap.end(); ++itE) {
+		eMap.insert(std::make_pair(TEdge((*itE).first.second, (*itE).first.first), (*itE).second));
+	}
+	for(TEdgeMapIter it1 = eMap.begin(); it1 != eMap.end(); ++it1) {
+		for(TEdgeMapIter it2 = it1; ++it2 != eMap.end();) {
+			if ((*it1).first.first != (*it2).first.first) break;
+			if (sequenceId(g, (*it1).first.second) == sequenceId(g, (*it2).first.second)) continue;
+			TCargo weight = (*it2).second;
+			if ((*it1).second < weight) weight = (*it1).second;
+			if ((*it1).first.second < (*it2).first.second) {
+				TEdgeMapIter pos = newEMap.find(TEdge((*it1).first.second, (*it2).first.second));
+				if (pos != newEMap.end()) (*pos).second += weight;
+				else newEMap.insert(std::make_pair(TEdge((*it1).first.second, (*it2).first.second), weight));
+			} else {
+				TEdgeMapIter pos = newEMap.find(TEdge((*it2).first.second, (*it1).first.second));
+				if (pos != newEMap.end()) (*pos).second += weight;
+				else newEMap.insert(std::make_pair(TEdge((*it2).first.second, (*it1).first.second), weight));
+			}
+		}
+	}
+	eMap.clear();
+
+	// Insert edges
+	for(TEdgeMapIter itE = newEMap.begin(); itE != newEMap.end(); ++itE) {
+		addEdge(g, (*itE).first.first, (*itE).first.second, (*itE).second);
+	}
 }
+
+//// Old version
+//template<typename TStringSet, typename TCargo, typename TSpec>
+//inline void 
+//tripletLibraryExtension(Graph<Alignment<TStringSet, TCargo, TSpec> >& g)
+//{
+//	SEQAN_CHECKPOINT
+//	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+//	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+//
+//	// Two tasks:
+//	// 1) Add edges for the case that a and c is aligned, b and c is aligned, but a and b are not, give these edges the appropriate weight
+//	// 2) Augment all existing edges
+//	String<TCargo> newCargoMap;
+//	typedef String<TVertexDescriptor> TVertexString;
+//	typedef String<TCargo> TCargoString;
+//	TVertexString edges_vertices;
+//	TCargoString edges_cargo;
+//	
+//	_performTripletExtension(g, newCargoMap, edges_vertices, edges_cargo);
+//	_assignNewCargos(g, newCargoMap);
+//	_addNewEdgesFoundByTriplet(g, edges_vertices, edges_cargo);
+//}
+
+
 
 
 //////////////////////////////////////////////////////////////////////////////
