@@ -73,12 +73,23 @@ inline void _printMask(String <unsigned> const &  mask,unsigned start, unsigned 
 
 ///.Class.Pattern.param.TSpec.type:Spec.AbndmAlgo
 
-struct AbndmAlgo;
+
+struct AbndmAlgo; 
 
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TNeedle>
-class Pattern<TNeedle, AbndmAlgo> {
+struct FindBeginPatternSpec< Pattern<TNeedle, AbndmAlgo> >:
+	DefaultFindBeginPatternSpec<>
+{
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TNeedle>
+class Pattern<TNeedle, AbndmAlgo>:
+	public _FindBegin<Pattern<TNeedle, AbndmAlgo> >
+{
 //////////////////////////////////////////////////////////////////////////////
 public:
     typedef unsigned int TWord;
@@ -138,7 +149,7 @@ void _printR(Pattern<TNeedle, AbndmAlgo> & me)
 template <typename TNeedle, typename TNeedle2>
 void setHost (Pattern<TNeedle, AbndmAlgo> & me, TNeedle2 const& needle) 
 {
-    SEQAN_CHECKPOINT
+SEQAN_CHECKPOINT
 	typedef unsigned int TWord;
     typedef typename Value<TNeedle>::Type TValue;
 
@@ -199,12 +210,13 @@ inline void _patternInit (Pattern<TNeedle, AbndmAlgo> & me)
     fill(me.r_table, me.blockCount * (me.limit + 1), 0, Exact());
     me.findNext = false;
     me.last = 0;
+	_findBeginInit(me);
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TNeedle>
-inline typename Host<Pattern<TNeedle, AbndmAlgo>const>::Type & 
+inline typename Host<Pattern<TNeedle, AbndmAlgo> >::Type & 
 host(Pattern<TNeedle, AbndmAlgo> & me)
 {
     SEQAN_CHECKPOINT
@@ -212,7 +224,7 @@ host(Pattern<TNeedle, AbndmAlgo> & me)
 }
 
 template <typename TNeedle>
-inline typename Host<Pattern<TNeedle, AbndmAlgo>const>::Type & 
+inline typename Host<Pattern<TNeedle, AbndmAlgo> const>::Type & 
 host(Pattern<TNeedle, AbndmAlgo> const & me)
 {
     SEQAN_CHECKPOINT
@@ -580,11 +592,18 @@ inline bool find (TFinder & finder,
             me.haystackLength = length(container(finder));
 	} 
 
+	bool ret;
     if (me.blockCount == 1) {
-        return _findAbndm_SmallNeedle(finder, me);
+        ret = _findAbndm_SmallNeedle(finder, me);
     } else {
-        return _findAbndm_LargeNeedle(finder, me);
+        ret = _findAbndm_LargeNeedle(finder, me);
     }
+	if (ret) 
+	{
+		_setFinderEnd(finder);
+	}
+	return ret;
+
 }
 
 template <typename TFinder, typename TNeedle>

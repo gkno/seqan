@@ -30,11 +30,20 @@ namespace SEQAN_NAMESPACE_MAIN
 struct Hierarchical;			
 struct NonHierarchical;
 
-template <typename TVerification, typename TMultiFinder = AhoCorasick>
+
+template <typename TVerification, typename TMultiFinder = WuManber>
 struct Pex;
 
 typedef Pex<Hierarchical,AhoCorasick>      PexHierarchical;
 typedef Pex<NonHierarchical,AhoCorasick>   PexNonHierarchical;
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TNeedle, typename TVerification, typename TMultiFinder>
+struct FindBeginPatternSpec< Pattern<TNeedle, Pex<TVerification , TMultiFinder > > >:
+	DefaultFindBeginPatternSpec<>
+{
+};
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -52,7 +61,7 @@ typedef Pex<NonHierarchical,AhoCorasick>   PexNonHierarchical;
 template<typename T>
 struct PexMultiFinder;
 
-template<typename TNeedle,typename TVerification, typename TMultiFinder>
+template<typename TNeedle, typename TVerification, typename TMultiFinder>
 struct PexMultiFinder< Pattern<TNeedle, Pex<TVerification , TMultiFinder > > >
 {
   typedef Pattern<String<Segment<TNeedle> > , TMultiFinder> Type;
@@ -65,9 +74,6 @@ struct _PexRange{
   TPosition start,end;
   TScore error;
   TVerifier verifier;
-  
-  _PexRange()
-  {}
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -111,12 +117,13 @@ struct _PexRange{
 ///.Spec.Pex.param.TVerification.type:Spec.NonHierarchical
 
 template <typename TNeedle, typename TVerification, typename TMultiFinder>
-class Pattern<TNeedle, Pex<TVerification,TMultiFinder > > 
+class Pattern<TNeedle, Pex<TVerification, TMultiFinder > >:
+	public _FindBegin<Pattern<TNeedle, Pex<TVerification, TMultiFinder > > >
 {
  public:
    typedef typename Position<TNeedle>::Type TPosition;
    typedef unsigned TScore;
-   typedef Pattern<TNeedle,MyersUkkonen> TVerifier;
+   typedef Pattern<TNeedle, MyersUkkonen > TVerifier;
    typedef typename PexMultiFinder< 
                        Pattern<TNeedle, Pex<TVerification,TMultiFinder > > 
                                   >::Type TMFinder; 
@@ -191,7 +198,7 @@ void setHost (Pattern<TNeedle, Pex<TVerification,TMultiFinder > > & me, TNeedle2
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TNeedle, typename TVerification, typename TMultiFinder>
-inline typename Host<Pattern<TNeedle, Pex<TVerification,TMultiFinder > > const>::Type & 
+inline typename Host<Pattern<TNeedle, Pex<TVerification,TMultiFinder > > >::Type & 
 host(Pattern<TNeedle, Pex<TVerification,TMultiFinder > > & me)
 {
 SEQAN_CHECKPOINT
@@ -271,7 +278,7 @@ SEQAN_CHECKPOINT
 
   // split pattern
   unsigned k = me.limit + 1;
-  unsigned seg_len = me.needleLength / k; //::std::floor(me.needleLength/k); //Wer hat den floor-Quatsch hier programmiert?
+  unsigned seg_len = me.needleLength / k; //::std::floor(me.needleLength/k); 
   
   // 
   clear(me.splitted_needles);
@@ -287,7 +294,7 @@ SEQAN_CHECKPOINT
     pr.end = (c == me.limit ? me.needleLength : s + seg_len);
     pr.error = 0;
 
-    insert(me.range_table,i,pr);
+	insert(me.range_table,i,pr);
     appendValue(me.splitted_needles,infix(value(me.data_host),pr.start,pr.end));
     s += (c == me.limit ? me.needleLength : seg_len);
     ++c;
@@ -312,6 +319,8 @@ SEQAN_CHECKPOINT
   
   me.patternNeedsInit = false;
   me.findNext = false;
+  
+  _findBeginInit(me);
 
 #ifdef SEQAN_DEBUG_PEX
   ::std::cout << " -------------------------------------------------  " << ::std::endl;
@@ -370,6 +379,7 @@ SEQAN_CHECKPOINT
 	unsigned offset = nP - position(finder);
 	finder += offset;
 	me.findNext = true;
+	_setFinderEnd(finder);
 	return true;
       }
     }
@@ -400,7 +410,8 @@ SEQAN_CHECKPOINT
 	finder += offset;
 	me.lastFPos = position(mf);
 	me.lastFNdl = position(me.multiPattern);
-	me.findNext = true;
+	me.findNext = true;	  
+	_setFinderEnd(finder);
 	return true;
       }
     }
@@ -500,6 +511,8 @@ SEQAN_CHECKPOINT
   me.patternNeedsInit = false;
   me.findNext = false;
 
+  _findBeginInit(me);
+
 #ifdef SEQAN_DEBUG_PEX
   ::std::cout << " -------------------------------------------------  " << ::std::endl;
   ::std::cout << "                   PATTERN INIT                     " << ::std::endl;
@@ -558,6 +571,7 @@ SEQAN_CHECKPOINT
 	  unsigned offset = nP - position(finder);
 	  finder += offset;
 	  me.findNext = true;
+	  _setFinderEnd(finder);
 	  return true;
 	}      
     }
@@ -612,6 +626,7 @@ SEQAN_CHECKPOINT
 	  me.lastFPos = position(mf);
 	  me.lastFNdl = position(me.multiPattern);
 	  me.findNext = true;
+	  _setFinderEnd(finder);
 	  return true;
 	}      
       }

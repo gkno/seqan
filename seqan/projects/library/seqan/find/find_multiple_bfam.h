@@ -239,8 +239,8 @@ SEQAN_CHECKPOINT
 //default implementation: it is assumed that if me.automaton parses a me.lmin-length string S, then S is a pattern
 template <typename TNeedle, typename TAutomaton, typename THaystackIterator>
 inline bool 
-_startVerify_MultiBFAM(Pattern<TNeedle, MultiBFAM<TAutomaton> > & me, 
-					   THaystackIterator tit) 
+_startVerify_MultiBFAM(Pattern<TNeedle, MultiBFAM<TAutomaton> > &, 
+					   THaystackIterator) 
 {
 	return true;
 }

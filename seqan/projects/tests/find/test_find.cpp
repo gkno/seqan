@@ -304,6 +304,8 @@ void Test_OnlineAlgMulti(bool order_by_begin_position)
 		SEQAN_TASSERT(infix(fd) == kyw[position(pt)])
 	}
 
+	SEQAN_TASSERT(length(finderPos) == 4);
+	SEQAN_TASSERT(length(keywordIndex) == 4);
 	SEQAN_TASSERT(finderPos[0] == 0);
 	SEQAN_TASSERT(keywordIndex[0] == 1);
 	SEQAN_TASSERT(finderPos[1] == 7);
@@ -312,8 +314,6 @@ void Test_OnlineAlgMulti(bool order_by_begin_position)
 	SEQAN_TASSERT(keywordIndex[2] == 1);
 	SEQAN_TASSERT(finderPos[3] == 20);
 	SEQAN_TASSERT(keywordIndex[3] == 2);
-	SEQAN_TASSERT(length(finderPos) == 4);
-	SEQAN_TASSERT(length(keywordIndex) == 4);
 
 	String<Dna> hstDna("AGATACGATATATAC");
 	Finder<String<Dna> > fdDna(hstDna);
@@ -897,7 +897,6 @@ void Test_OnlineAlgWildcards()
 template <typename TPatternSpec>
 void Test_Approx_EditDist()
 {
-/*DEBUG!!!!
 //test DPSearch
   	String<char> hstk("any_annealing");
 	String<char> nl("annual");
@@ -997,7 +996,7 @@ void Test_Approx_EditDist()
 	SEQAN_TASSERT(getScore(long_pat) == -2)
 
 	SEQAN_TASSERT(!find(long_fnd,long_pat))
-*/
+
 //____________________________________________________________________________
 
 	String<char> haystack_1 = "123XXXabaXXX45aba123";
@@ -1117,16 +1116,15 @@ void Test_Approx()
 
 //test other edit distance algorithm
 	Test_Approx_EditDist<Myers<> >();
-return; //DEBUG!!!!
-	Test_Approx_EditDist<AbndmAlgo>();
+	Test_Approx_EditDist<AbndmAlgo >();
 	Test_Approx_EditDist<PexNonHierarchical>();
 	Test_Approx_EditDist<PexHierarchical>();
 	// test with different multifinder
-	Test_Approx_EditDist< Pex<NonHierarchical,MultipleShiftAnd > >();
+	Test_Approx_EditDist< Pex<NonHierarchical,AhoCorasick > >();
+	Test_Approx_EditDist< Pex<NonHierarchical,MultiBFAM<> > >();
 
-	/*
 //____________________________________________________________________________
-
+/*
 	Pattern<String<char> > patrn(ndl);
 	setBeginPosition(patrn, 0);
 	SEQAN_TASSERT(beginPosition(patrn) == 0);
@@ -1222,16 +1220,6 @@ int main()
 {
 	SEQAN_TREPORT("TEST BEGIN")
 
-//	String<char> str = "hallo";
-//	typedef ModifiedString<String<char>, ModReverse> TReverseString;
-//	TReverseString revstr(str);
-//	cout << revstr;
-//	typedef Iterator<TReverseString, Rooted>::Type TReverseIterator;
-//	TReverseIterator revit;
-//	setContainer(host(revit), str);
-//
-//return 0;
-
 	Test_OnlineAlg<Simple>();	
 	Test_OnlineAlg<Horspool>();	
 	Test_OnlineAlg<ShiftAnd>();
@@ -1243,24 +1231,22 @@ int main()
 	Test_OnlineAlgWildcards<WildShiftAnd>();
 
 	Test_OnlineAlgMulti<AhoCorasick>(false);
-//	Test_OnlineAlgMulti<MultipleShiftAnd>(false);  //leakt 
-//	Test_OnlineAlgMulti<SetHorspool>();		//kompiliert nicht
+	//Test_OnlineAlgMulti<MultipleShiftAnd>(false);  //leakt 
+	//Test_OnlineAlgMulti<SetHorspool>();		//kompiliert nicht
 	Test_OnlineAlgMulti<WuManber>(true);
 	Test_OnlineAlgMulti<MultiBFAM<Oracle> >(true);
-
-	Test_Approx();
+	Test_OnlineAlgMulti<MultiBFAM<Trie> >(true);
 
 	Test_Approx_Prefix_EditDist<DPSearch<Score<>, FindPrefix> >();
 	Test_Approx_Prefix_EditDist<Myers<FindPrefix> >();
 
+	Test_Approx();
 
-//	testMyersUkkonen("accagaatatggagatctagggatcca", "agata", -2);
-//	testMyersUkkonen("actacctttatctatcatcggattcgcgatctctcgcgatcgatggcttcgagtacgtcacacagtgcatctagccggattcgcgatctctcgcgatcgatggcttcgtgtacgtcac", 
-//		"cggattcgcgatctctcgcgatcgatggcttcgtgtacgtcacacagtgcatctagc", -1);
+
 
 	
 //	debug::verifyCheckpoints("projects/library/seqan/find/find_myers_ukkonen.h");
-	
+
 	debug::verifyCheckpoints("projects/library/seqan/find/find_wild_shiftand.h");
 	debug::verifyCheckpoints("projects/library/seqan/find/find_horspool.h");
 	debug::verifyCheckpoints("projects/library/seqan/find/find_base.h");

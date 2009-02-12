@@ -77,6 +77,30 @@ struct _MyersUkkonenHP0<FindPrefix> {
 	enum { VALUE = 1 };
 };
 
+
+//////////////////////////////////////////////////////////////////////////////
+//overwrite _FindBegin to define host member if find begin is switched on
+
+template <typename TNeedle, typename TSpec, typename TFindBeginPatternSpec, typename TFindBeginPatternSpec2>
+struct _FindBegin< Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> >, TFindBeginPatternSpec2>
+{
+private:
+	typedef Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > TPattern;
+	typedef typename FindBeginPattern<TPattern>::Type TFindBeginPattern;
+
+public:
+	TFindBeginPattern data_findBeginPattern;
+	Holder<TNeedle>	data_host;	//defines the 
+	typedef True HasHost;
+};
+
+template <typename TNeedle, typename TSpec, typename TFindBeginPatternSpec>
+struct _FindBegin< Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> >, void>
+{
+	typedef False HasHost;
+//need no findBegin if FindBeginPatternSpec is void
+};
+
 //////////////////////////////////////////////////////////////////////////////
 
 struct _MyersLargePattern
@@ -107,7 +131,8 @@ public:
 	TWord VN0;					// VN[0]
 	String<TWord> bitMasks;		// encoding the alphabet as bit-masks
 
-//	Holder<TNeedle>		data_host;	// by now, this holder is not needed, would waste mem
+//	Holder<TNeedle>		data_host;	// by now, this holder is not needed, would waste mem.
+									// but is is added again via _FindBegin base class if TFindBeginPatternSpec is not void
 	_MyersLargePattern	*large;	// extra preprocessing info for large patterns
 
 //____________________________________________________________________________
@@ -116,6 +141,22 @@ public:
 		k(- _limit),
 		large(NULL)
 	{}
+
+	Pattern(Pattern const & other)
+		: needleSize(other.needleSize)
+		, score(other.score)
+		, k(other.k)
+		, VP0(other.VP0)
+		, VN0(other.VN0)
+		, bitMasks(other.bitMasks)
+		, large(NULL)
+	{
+		if (other.large)
+		{
+			large = new _MyersLargePattern;
+			(*large) = *(other.large);
+		}
+	}
 
 	template <typename TNeedle2>
 	Pattern(TNeedle2 & ndl, int _limit = -1):
@@ -133,9 +174,29 @@ public:
 		setHost(*this, ndl);
 	}
 
+
 	~Pattern()
 	{
 		delete large;
+	}
+
+
+	Pattern &
+	operator = (Pattern const & other)
+	{
+		needleSize = other.needleSize;
+		score = other.score;
+		k = other.k;
+		VP0 = other.VP0;
+		VN0 = other.VN0;
+		bitMasks = other.bitMasks;
+		large = NULL;
+		if (other.large)
+		{
+			large = new _MyersLargePattern;
+			(*large) = *(other.large);
+		}
+		return *this;
 	}
 
 //____________________________________________________________________________
@@ -312,19 +373,38 @@ SEQAN_CHECKPOINT
 	}
 }
 
+
+
+template <typename TNeedle, typename TSpec, typename TFindBeginPatternSpec, typename TNeedle2>
+void _myersSetHost(Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > & me, 
+				   TNeedle2 const & ndl,
+				   True) 
+{
+	setValue(me.data_host, ndl);
+}
+template <typename TNeedle, typename TSpec, typename TFindBeginPatternSpec, typename TNeedle2>
+void _myersSetHost(Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > &, 
+				   TNeedle2 const &,
+				   False) 
+{
+}
+
+
 template <typename TNeedle, typename TSpec, typename TFindBeginPatternSpec, typename TNeedle2>
 void setHost(Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > & me, 
 			 TNeedle2 & ndl)
 {
 SEQAN_CHECKPOINT
-//	setValue(me.data_host, ndl);
+	typedef Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > TPattern;
+	_myersSetHost(me, ndl, typename TPattern::HasHost());
 	_patternFirstInit(me, ndl);
 }
 template <typename TNeedle, typename TSpec, typename TFindBeginPatternSpec, typename TNeedle2>
 void setHost(Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > & me, 
 			 TNeedle2 const & ndl) 
 {
-//	setValue(me.data_host, ndl);
+	typedef Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > TPattern;
+	_myersSetHost(me, ndl, typename TPattern::HasHost());
 	_patternFirstInit(me, ndl);
 }
 

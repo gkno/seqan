@@ -46,12 +46,13 @@ struct DefaultFindBeginPatternSpec
 {
 	typedef DPSearch<TScore, FindPrefix, void> Type;
 };
-//template <>
-//struct DefaultFindBeginPatternSpec <EditDistanceScore>
-//{
-//	typedef Myers<FindPrefix, void> Type;
-//};
-
+/*
+template <>
+struct DefaultFindBeginPatternSpec <EditDistanceScore>
+{
+	typedef Myers<FindPrefix, void> Type;
+};
+*/
 //____________________________________________________________________________
 //must be implemented for all patterns that do approximate infix finding
 
