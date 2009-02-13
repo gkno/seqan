@@ -45,8 +45,8 @@ _buildLeafString(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 
 	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
 	TStringSet& str = stringSet(g);
-	TSize lenRoot = length(value(str, pos));
 	TId seqId = positionToId(str, pos);
+	TSize lenRoot = length(value(str, pos));
 	TSize i = 0;
 	while(i<lenRoot) {
 		TVertexDescriptor nextVertex = findVertex(const_cast<TGraph&>(g), seqId, i);
@@ -282,110 +282,113 @@ progressiveAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
+/*
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TGuideTree, typename TVertexSets, typename TGroupRoot, typename TSize>
+template<typename TString, typename TSpec, typename TGuideTree, typename TMatches, typename TScores, typename TSize>
 inline void 
-__subTreeSearch(TGuideTree& guideTree, 
-				TVertexSets& vertexSets,
-				TGroupRoot& groupRoot,
-				TSize minMembers) 
+__subTreeAlignment(StringSet<TString, TSpec> const& seqSet,
+				   TGuideTree& guideTree, 
+				   TMatches& matches,
+				   TScores& scores,
+				   TSize minMembers)
 {
-	typedef typename Value<TVertexSets>::Type TVertexSet;
 	typedef typename VertexDescriptor<TGuideTree>::Type TVertexDescriptor;
-	TVertexDescriptor rootVertex = getRoot(guideTree);
+	typedef typename Value<TMatches>::Type TFragmentMatch;
+	typedef std::set<TVertexDescriptor> TVertexSet;
 
-	// Number of subsequent leaves for each node
-	typedef typename Iterator<Graph<Tree<double> >, BfsIterator>::Type TBfsIterator;
-	String<TSize> numLeaves;
-	resizeVertexMap(guideTree, numLeaves);
+	// Identifie large subtrees
+	String<TVertexSet> vertexSets;
+	typedef String<TVertexDescriptor> TGroupRoot;
+	TGroupRoot groupRoot;
+	__subTreeSearch(guideTree, vertexSets, groupRoot, minMembers);
 
-	// All vertices in reversed bfs order
-	typedef String<TVertexDescriptor> TVertexString;
-	TVertexString vertices;
-	resize(vertices, numVertices(guideTree));
-	
-	// Walk through the tree in bfs order	
-	TBfsIterator bfsIt(guideTree, getRoot(guideTree));
-	TSize pos = length(vertices) - 1;
-	for(;!atEnd(bfsIt);goNext(bfsIt), --pos) {
-		if (isLeaf(guideTree, *bfsIt)) property(numLeaves, *bfsIt) = 1;
-		else property(numLeaves, *bfsIt) = 0;
-		value(vertices, pos) = *bfsIt;
-	}
+	// Align each subtree
+	TMatches newMatches;
+	TScores newScores;
+	typedef StringSet<TString, Dependent<> > TStringSet;
+	typedef Graph<Alignment<TStringSet, TSize> > TGraph;
+	typedef typename Id<TGraph>::Type TId;
+	std::set<TId> allIds;
+	for(TSize i=0; i< (TSize) length(vertexSets); ++i) {
+		TVertexSet& thisSet = value(vertexSets, i);
+		std::set<TId> ids;
+		for(typename TVertexSet::iterator itSet = thisSet.begin(); itSet != thisSet.end(); ++itSet) {
+			ids.insert(positionToId(seqSet, *itSet));
+			allIds.insert(positionToId(seqSet, *itSet));
+		}
+		TGraph g(seqSet);
+		TMatches localMatches;
+		TScores localScores;
+		typedef typename Iterator<TMatches, Standard>::Type TMatchIter;
+		typedef typename Iterator<TScores, Standard>::Type TScoreIter;
+		TMatchIter itMatch = begin(matches, Standard());
+		TMatchIter itMatchEnd = end(matches, Standard());
+		TScoreIter itScore = begin(scores);
+		for(;itMatch!=itMatchEnd;goNext(itMatch), goNext(itScore)) {
+			if ((ids.find(sequenceId(*itMatch,0)) != ids.end()) && 
+				(ids.find(sequenceId(*itMatch,1)) != ids.end())) {
+					appendValue(localMatches, *itMatch);
+					appendValue(localScores, *itScore);
+			}
+		}
+		buildAlignmentGraph(localMatches, localScores, g, FractionalScore() );
+		clear(localMatches);
+		clear(localScores);
+		tripletLibraryExtension(g);
+		typedef String<TVertexDescriptor> TVertexString;
+		typedef String<TVertexString> TSegmentString;
+		TSegmentString alignSeq;
+		_recursiveProgressiveAlignment(g,guideTree,value(groupRoot,i),alignSeq);
+		
 
-	// Count the number of leaves for each internal node
-	typedef typename Iterator<TVertexString, Standard>::Type TVertexIter;
-	TVertexIter itVert = begin(vertices, Standard());
-	TVertexIter itVertEnd = end(vertices, Standard());
-	for(;itVert != itVertEnd; ++itVert) {
-		if (!isLeaf(guideTree, *itVert)) {
-			typedef typename Iterator<TGuideTree, AdjacencyIterator>::Type TAdjacencyIterator;
-			TAdjacencyIterator adjIt(guideTree, *itVert);
-			for(;!atEnd(adjIt);goNext(adjIt)) property(numLeaves, *itVert) += property(numLeaves, *adjIt);
-		}	
-	}
-
-	// Delineate the groups
-	itVert = begin(vertices, Standard());
-	for(;itVert != itVertEnd; ++itVert) {
-		if (property(numLeaves, *itVert) >= minMembers) {
-			appendValue(vertexSets, TVertexSet());
-			appendValue(groupRoot, *itVert);
-			TSize elem = length(vertexSets) - 1;
-			collectLeaves(guideTree, *itVert, value(vertexSets, elem));
-			property(numLeaves, *itVert) = 0;
-			// Do not take any parent of the group root
-			if (*itVert != rootVertex) {
-				TVertexDescriptor pVert = parentVertex(guideTree, *itVert);
-				while(pVert != rootVertex) {
-					property(numLeaves, pVert) = 0;
-					pVert = parentVertex(guideTree, pVert);
-				}
-				property(numLeaves, pVert) = 0;
+		TSize alignSeqLen = length(alignSeq);
+		for(TSize i = 0; i<alignSeqLen;++i) {
+			TVertexString& alignSeq_i = value(alignSeq, i);
+			TSize len_i = length(alignSeq_i);
+			TVertexDescriptor v1 = getValue(alignSeq_i, 0);
+			for(TSize j=1; j<len_i; ++j) {
+				TVertexDescriptor v2 = getValue(alignSeq_i, j);
+				appendValue(newMatches, TFragmentMatch(sequenceId(g, v1), fragmentBegin(g,v1), sequenceId(g, v2), fragmentBegin(g,v2), fragmentLength(g,v1)));
+				appendValue(newScores, 1);
+				v1 = v2;
 			}
 		}
 	}
+	std::cout << allIds.size() << ',' << length(seqSet) << std::endl;
+
+	// Do the triplet extension for the remaining matches
+	//TMatches localMatches;
+	//TScores localScores;
+	//TGraph g(seqSet);
+	typedef typename Iterator<TMatches, Standard>::Type TMatchIter;
+	typedef typename Iterator<TScores, Standard>::Type TScoreIter;
+	TMatchIter itMatch = begin(matches, Standard());
+	TMatchIter itMatchEnd = end(matches, Standard());
+	TScoreIter itScore = begin(scores);
+	for(;itMatch!=itMatchEnd;goNext(itMatch), goNext(itScore)) {
+		if ((allIds.find(sequenceId(*itMatch,0)) == allIds.end()) || 
+			(allIds.find(sequenceId(*itMatch,1)) == allIds.end())) {
+				//appendValue(localMatches, *itMatch);
+				//appendValue(localScores, *itScore);
+				appendValue(newMatches, *itMatch);
+				appendValue(newScores, *itScore);
+		}
+	}
+	//buildAlignmentGraph(localMatches, localScores, g, FractionalScore() );
+	//tripletLibraryExtension(g);
+	//typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
+	//TEdgeIterator it_tmp(g);
+	//for(;!atEnd(it_tmp);++it_tmp) {
+	//	appendValue(newMatches, TFragmentMatch(sequenceId(g,sourceVertex(it_tmp)), fragmentBegin(g,sourceVertex(it_tmp)), sequenceId(g,targetVertex(it_tmp)), fragmentBegin(g,targetVertex(it_tmp)), fragmentLength(g,sourceVertex(it_tmp))));
+	//	appendValue(newScores, 1);
+	//}
+
+	matches = newMatches;
+	scores = newScores;
 }
 
-
-		//typedef unsigned int TVertexDescriptor;
-		//typedef std::set<TVertexDescriptor> TVertexSet;
-		//String<TVertexSet> vertexSets;
-		//typedef String<TVertexDescriptor> TGroupRoot;
-		//TGroupRoot groupRoot;
-		//__subTreeSearch(guideTreeGraph, vertexSets, groupRoot, 5);
-
-		//
-		//std::cout << guideTreeGraph << std::endl;
-		//for(TSize i=0; i<length(vertexSets); ++i) {
-		//	std::cout << value(groupRoot, i) << std::endl;
-		//	TVertexSet& thisSet = value(vertexSets, i);
-		//	for(TVertexSet::const_iterator itSet = thisSet.begin(); itSet != thisSet.end(); ++itSet) {
-		//		std::cout << *itSet << ',';
-		//	}
-		//	std::cout << std::endl;
-		//}
-		//std::cout << std::endl;
-
-
-
-
-
-
-
+*/
 
 
 

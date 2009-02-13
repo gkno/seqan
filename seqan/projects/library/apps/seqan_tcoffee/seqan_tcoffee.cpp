@@ -426,7 +426,7 @@ globalAlignment(StringSet<TString, TSpec> const& seqSet,
 	if ((value(cfgOpt, "rescore") == "true") && (length(value(cfgOpt, "seq")))) {
 		std::cout << "Scoring method: Re-Score" << std::endl;
 		scoreMatches(seqSet, scType, matches, scores);
-		std::cout << "Scoring done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;\
+		std::cout << "Scoring done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
 	}
 	
 	// Use these segment matches for the initial alignment graph
@@ -452,27 +452,21 @@ globalAlignment(StringSet<TString, TSpec> const& seqSet,
 		slowNjTree(distanceMatrix, guideTree);
 	}
 	std::cout << "Guide tree done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
+	
+	// Triplet extension
+	if (nSeq < threshold) tripletLibraryExtension(g);
+	else groupBasedTripletExtension(g, guideTree, threshold / 2);
+	std::cout << "Triplet extension done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
 
-	// Triplet extension and progressive alignment
-	if (nSeq < threshold) {
-		std::cout << "Progressive Alignment: Default" << std::endl;
-		// Full triplet...
-		tripletLibraryExtension(g);
-
-		// ... and normal progressive alignment with guide tree
-		progressiveAlignment(g, guideTree, gOut);
-	} else {
-		std::cout << "Progressive Alignment: Group-based" << std::endl;
-		// Triplet only on groups of sequences
-		progressiveAlignment(g, guideTree, gOut, threshold);
-	}
+	// Progressive Alignment
+	progressiveAlignment(g, guideTree, gOut);
 	std::cout << "Progressive alignment done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
+
 	clear(guideTree);
 	clear(distanceMatrix);
 	clear(g);
 	std::cout << "Clean-up done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
 }
-
 
 //////////////////////////////////////////////////////////////////////////////
 
