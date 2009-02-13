@@ -136,6 +136,17 @@ evaluateAlignment(TConfigOptions const& cfgOpt, Dna)
 	return evaluateAlignment(cfgOpt, scType, Dna() );
 }
 
+//////////////////////////////////////////////////////////////////////////////////
+
+template<typename TConfigOptions>
+inline int
+evaluateAlignment(TConfigOptions const& cfgOpt, Rna5) 
+{
+	typedef Score<int> TScore;
+	typedef typename Value<TScore>::Type TScoreValue;
+	TScore scType(_stringToNumber<TScoreValue>(value(cfgOpt, "msc")),_stringToNumber<TScoreValue>(value(cfgOpt, "mmsc")),-1 * _stringToNumber<TScoreValue>(value(cfgOpt, "gex")),-1 * _stringToNumber<TScoreValue>(value(cfgOpt, "gop")));
+	return evaluateAlignment(cfgOpt, scType, Rna5() );
+}
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -529,7 +540,30 @@ customizedMsaAlignment(StringSet<TString, TSpec> const& seqSet,
 	globalAlignment(seqSet, nameSet, cfgOpt, scType, gOut);
 }
 
+//////////////////////////////////////////////////////////////////////////////
 
+template<typename TString, typename TSpec, typename TName, typename TSpec2, typename TConfigOptions, typename TAlignmentGraph>
+inline void
+customizedMsaAlignment(StringSet<TString, TSpec> const& seqSet,
+					   StringSet<TName, TSpec2> const& nameSet,
+					   TConfigOptions& cfgOpt,
+					   TAlignmentGraph& gOut,
+					   Rna5)
+{
+	typedef Score<int> TScore;
+	typedef typename Value<TScore>::Type TScoreValue;
+	TScoreValue gop = -1 * _stringToNumber<TScoreValue>(value(cfgOpt, "gop")); 
+	TScoreValue gex = -1 * _stringToNumber<TScoreValue>(value(cfgOpt, "gex")); 
+	TScoreValue match = _stringToNumber<TScoreValue>(value(cfgOpt, "msc")); 
+	TScoreValue mismatch = _stringToNumber<TScoreValue>(value(cfgOpt, "mmsc")); 
+	std::cout << "Scoring: " << std::endl;
+	std::cout << "*Gap open penalty: " << gop << std::endl;
+	std::cout << "*Gap extension penalty: " << gex << std::endl;
+	std::cout << "*Match score: " << match << std::endl;
+	std::cout << "*Mismatch score: " << mismatch << std::endl;
+	TScore scType(match,mismatch,gex,gop);
+	globalAlignment(seqSet, nameSet, cfgOpt, scType, gOut);
+}
 
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -627,7 +661,7 @@ int main(int argc, const char *argv[]) {
 	append(helpMsg, "\nMain Options\n------------\n");
 	append(helpMsg, "-seq <FASTA Sequence File>\n");
 	append(helpMsg, "\tFile with multiple sequences in FASTA format.\n\n");
-	append(helpMsg, "-alphabet [protein | dna ]\n");
+	append(helpMsg, "-alphabet [protein | dna | rna]\n");
 	append(helpMsg, "\tSequence alphabet, default is protein.\n\n");
 	append(helpMsg, "-outfile <Alignment Filename>\n");
 	append(helpMsg, "\tName of the output file, default is out.fasta.\n\n");
@@ -654,9 +688,9 @@ int main(int argc, const char *argv[]) {
 	append(helpMsg, "-matrix <Score-Matrix File>\n");
 	append(helpMsg, "\tSpecifies a score-matrix file, default is Blosum62.\n\n");
 	append(helpMsg, "-msc <Number>\n");
-	append(helpMsg, "\tMatch score for Dna alphabet, default is 5.\n\n");
+	append(helpMsg, "\tMatch score for Dna / Rna alphabet, default is 5.\n\n");
 	append(helpMsg, "-mmsc <Number>\n");
-	append(helpMsg, "\tMismatch penalty for Dna alphabet, default is 4.\n\n");
+	append(helpMsg, "\tMismatch penalty for Dna / Rna alphabet, default is 4.\n\n");
 	append(helpMsg, "-rescore [ true | false ]\n");
 	append(helpMsg, "\tRe-score all segment-matches, default is true.\n\n");
 	// Guide Tree
@@ -711,6 +745,9 @@ int main(int argc, const char *argv[]) {
 		if ((value(cfgOpt, "alphabet") == "dna")) {
 			std::cout << "Alignment evaluation for Dna sequences" << std::endl;
 			return evaluateAlignment(cfgOpt, Dna() );
+		} else if ((value(cfgOpt, "alphabet") == "rna")) {
+			std::cout << "Alignment evaluation for Rna sequences" << std::endl;
+			return evaluateAlignment(cfgOpt, Rna5() );
 		} else {
 			std::cout << "Alignment evaluation for AminoAcid sequences" << std::endl;
 			return evaluateAlignment(cfgOpt, AminoAcid() );
@@ -718,7 +755,7 @@ int main(int argc, const char *argv[]) {
 	}
 
 	//////////////////////////////////////////////////////////////////////////////
-	// Alignment of Dna or Amino Acid Sequences
+	// Alignment of Dna, Rna or Amino Acid Sequences
 	//////////////////////////////////////////////////////////////////////////////
 
 	if ((value(cfgOpt, "alphabet") == "dna")) {
@@ -727,6 +764,8 @@ int main(int argc, const char *argv[]) {
 	} else if ((value(cfgOpt, "alphabet") == "protein")) {
 		std::cout << "Multiple Sequence Alignment of AminoAcid sequences" << std::endl;
 		return customizedMsaAlignment(cfgOpt, AminoAcid() );
-	}
-	else {	std::cerr << valueHelp(cfgOpt) << std::endl; return -1; }
+	} else if ((value(cfgOpt, "alphabet") == "rna")) {
+		std::cout << "Multiple Sequence Alignment of Rna sequences" << std::endl;
+		return customizedMsaAlignment(cfgOpt, Rna5() );
+	} else {	std::cerr << valueHelp(cfgOpt) << std::endl; return -1; }
 }

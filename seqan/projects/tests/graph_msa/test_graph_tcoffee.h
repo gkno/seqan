@@ -374,40 +374,6 @@ void Test_TripletExtension() {
 	SEQAN_TASSERT(cargo(findEdge(g, findVertex(g, 0, 8), findVertex(g, 3, 0))) == 20);
 	SEQAN_TASSERT(cargo(findEdge(g, findVertex(g, 0, 8), findVertex(g, 2, 8))) == 30);
 	SEQAN_TASSERT(cargo(findEdge(g, findVertex(g, 2, 8), findVertex(g, 3, 0))) == 60);
-
-	// Triplet extension confined on a set of sequences
-	clearVertices(g);
-	addEdge(g, addVertex(g, 0, 0, 8), addVertex(g, 1, 0, 8), 40);
-	addEdge(g, findVertex(g, 0, 0), addVertex(g, 2, 0, 8), 30);
-	addEdge(g, addVertex(g, 1, 8, 3), addVertex(g, 0, 8, 3), 40);
-	addEdge(g, findVertex(g, 1, 8), addVertex(g, 2, 8, 3), 30);
-	addEdge(g, findVertex(g, 1, 8), addVertex(g, 3, 0, 3), 20);
-	addEdge(g, findVertex(g, 2, 8), findVertex(g, 3, 0), 40);
-	std::set<VertexDescriptor<TGraph>::Type> seqs;
-	seqs.insert(1);seqs.insert(2);seqs.insert(3);
-	tripletLibraryExtension(g, seqs);
-	SEQAN_TASSERT(cargo(findEdge(g, findVertex(g, 1, 0), findVertex(g, 2, 0))) == 30);
-	SEQAN_TASSERT(findEdge(g, findVertex(g, 0, 8), findVertex(g, 3, 0)) == 0);
-	SEQAN_TASSERT(cargo(findEdge(g, findVertex(g, 2, 8), findVertex(g, 3, 0))) == 60);
-
-	// Triplet extension between 2 sets of sequences
-	clearVertices(g);
-	addEdge(g, addVertex(g, 0, 0, 8), addVertex(g, 1, 0, 8), 40);
-	addEdge(g, findVertex(g, 0, 0), addVertex(g, 2, 0, 8), 30);
-	addEdge(g, addVertex(g, 1, 8, 3), addVertex(g, 0, 8, 3), 40);
-	addEdge(g, findVertex(g, 1, 8), addVertex(g, 2, 8, 3), 30);
-	addEdge(g, findVertex(g, 1, 8), addVertex(g, 3, 0, 3), 20);
-	addEdge(g, findVertex(g, 2, 8), findVertex(g, 3, 0), 40);
-	std::set<VertexDescriptor<TGraph>::Type> seqs1;
-	std::set<VertexDescriptor<TGraph>::Type> seqs2;
-	seqs1.insert(0);seqs1.insert(1);seqs1.insert(3);
-	seqs2.insert(2);
-	//_debugRefinedMatches(g);
-	tripletLibraryExtension(g, seqs1, seqs2);
-	//_debugRefinedMatches(g);
-	SEQAN_TASSERT(cargo(findEdge(g, findVertex(g, 1, 0), findVertex(g, 2, 0))) == 30);
-	SEQAN_TASSERT(findEdge(g, findVertex(g, 0, 8), findVertex(g, 3, 0)) == 0);
-	SEQAN_TASSERT(cargo(findEdge(g, findVertex(g, 1, 8), findVertex(g, 3, 0))) == 20);
 }
 
 void Test_SumOfPairsScore() {
