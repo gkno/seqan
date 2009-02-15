@@ -276,11 +276,11 @@ SEQAN_CHECKPOINT
   typedef unsigned TScore;
   typedef Pattern<TNeedle,MyersUkkonen> TVerifier;
 
+/*
   // split pattern
   unsigned k = me.limit + 1;
   unsigned seg_len = me.needleLength / k; //::std::floor(me.needleLength/k); 
   
-  // 
   clear(me.splitted_needles);
   clear(me.range_table);
   clear(me.segment_store);
@@ -300,6 +300,26 @@ SEQAN_CHECKPOINT
     ++c;
     ++i;
   }
+/*/
+  //split pattern (improved)
+  unsigned k = me.limit + 1;
+
+  clear(me.splitted_needles);
+  clear(me.range_table);
+  clear(me.segment_store);
+  unsigned int pos = 0;
+  for (unsigned int i = 0; i < k; ++i)
+  {
+    _PexRange<TPosition,TScore,TVerifier,TNeedle> pr;
+    pr.start = pos;
+	pos = me.needleLength * (i+1) / k;
+    pr.end = pos;
+    pr.error = 0;
+
+	insert(me.range_table,i,pr);
+    appendValue(me.splitted_needles,infix(value(me.data_host),pr.start,pr.end));
+  }
+//*/
 
   me.lastFPos = 0;
   me.lastFNdl = 0;

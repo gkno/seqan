@@ -120,10 +120,12 @@ public:
 	}
 
     template <typename TNeedle2>
-    Pattern(TNeedle2 const & ndl, int _limit = -1):
-        limit(- _limit),cP(0),verifier(ndl,_limit)
+    Pattern(TNeedle2 const & ndl, int _limit = -1)
+		: limit(- _limit)
+		, cP(0)
+		, verifier(ndl,_limit)
 	{
-            SEQAN_CHECKPOINT
+		SEQAN_CHECKPOINT
 		setHost(*this, ndl);
 	}
 
