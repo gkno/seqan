@@ -448,7 +448,7 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 //   PexHierarchical -- functions
 //////////////////////////////////////////////////////////////////////////////
-
+/*
 template <typename TNeedle, typename TMultiFinder>
 void _createTree(Pattern<TNeedle, Pex<Hierarchical, TMultiFinder > > &me, unsigned start, unsigned end,
 		 unsigned k, unsigned parent, unsigned direction ,unsigned idx, unsigned plen)
@@ -502,6 +502,50 @@ void _createTree(Pattern<TNeedle, Pex<Hierarchical, TMultiFinder > > &me, unsign
     _createTree(me, start, start + left * plen - 1, left * k / (k+1),cur_idx,0,idx,plen);
 //    _createTree(me,  start + left * plen, end, ::std::floor(static_cast<double>((k + 1 - left)*k)/ static_cast<double>(k + 1)),cur_idx,1,idx + left,plen);
     _createTree(me,  start + left * plen, end, (k + 1 - left)*k / (k+1),cur_idx,1,idx + left,plen);
+  }
+}
+*/
+template <typename TNeedle, typename TMultiFinder>
+void _createTree(Pattern<TNeedle, Pex<Hierarchical, TMultiFinder > > &me, 
+				 unsigned start, unsigned end,
+				 unsigned k, 
+				 unsigned parent, 
+				 unsigned direction,
+				 unsigned idx, 
+				 unsigned plen)
+{
+  typedef typename Position<TNeedle>::Type TPosition;
+  typedef unsigned TScore;
+  typedef Pattern<TNeedle,MyersUkkonen> TVerifier; 
+
+  _PexRange<TPosition,TScore,TVerifier,TNeedle> pr;
+  pr.start = start;
+  pr.end = end;
+  pr.error = k;
+
+  appendValue(me.segment_store,infix(value(me.data_host),pr.start,pr.end + 1));
+  setScoreLimit(pr.verifier, - static_cast<int>(pr.error));
+  setHost(pr.verifier, me.segment_store[length(me.segment_store) - 1]);
+  
+  unsigned cur_idx = (parent << 1) + direction;
+
+  // insert pr into the tree
+  insert(me.range_table,cur_idx,pr);
+  
+  if(k == 0)
+  {
+    appendValue(me.splitted_needles,infix(value(me.data_host),pr.start,pr.end + 1));
+    me.leaf_map[length(me.splitted_needles) - 1] = cur_idx;
+  }
+  else
+  {
+	  unsigned int lower_2power = 1 << log2(k+1);
+	  unsigned int len = end - start+1;
+	  unsigned int right_k = lower_2power/2-1;
+	  unsigned int left_k = k - right_k-1;
+	  unsigned int left_len = len * (left_k+1) / (k+1);
+	  _createTree(me, start, start + left_len-1, left_k, cur_idx, 0, idx,plen);
+	  _createTree(me, start + left_len, end, right_k, cur_idx, 1, idx + (left_k+1),plen);
   }
 }
 
