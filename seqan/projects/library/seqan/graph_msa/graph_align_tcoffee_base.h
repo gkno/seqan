@@ -880,6 +880,110 @@ alignmentEvaluation(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 
 
 
+
+////// Edge Clique Cover
+////////////////////////////////////////////////////////////////////////////////
+//
+//template<typename TGraph, typename TCliqueString>
+//inline void
+//__edgeCliqueCover(TGraph& g,
+//				  TCliqueString& cS) 
+//{
+//	typedef typename Value<TCliqueString>::Type TClique;
+//
+//	::std::ofstream file;
+//	::std::ostringstream fileName;
+//	fileName << "match.graph";
+//	file.open(fileName.str().c_str(), ::std::ios_base::out | ::std::ios_base::trunc);
+//	if (!file.is_open()) {
+//		::std::cerr << "Failed to open output file" << ::std::endl;
+//		return;
+//	}
+//	typedef typename Iterator<TGraph, EdgeIterator>::Type TEIterator;
+//	for(TEIterator itE(g);!atEnd(itE);goNext(itE)) {
+//		file << sourceVertex(itE) << ' ' << targetVertex(itE) << ::std::endl;
+//	}
+//	file.close();
+//
+//	::std::ostringstream systemCall;
+//	systemCall << "cat match.graph | ~/software/ecc/ecc-1.1/ecc -k > match.graph.out";
+//	system(systemCall.str().c_str());
+//
+//	
+//	::std::ostringstream fileNameIn;
+//	fileNameIn << "match.graph.out";
+//	::std::ifstream fileIn(fileNameIn.str().c_str());
+//	if (!fileIn.is_open()) {
+//		::std::cerr << "Failed to open input file" << ::std::endl;
+//		return;
+//	}
+//
+//	char c = _streamGet(fileIn);
+//	while (!_streamEOF(fileIn)) {
+//		TClique cliq;
+//		while (c != '\n') {
+//			_parse_skipWhitespace(fileIn, c);
+//			appendValue(cliq, _parse_readNumber(fileIn, c));
+//		}
+//		_parse_skipWhitespace(fileIn, c);
+//		if (!empty(cliq)) appendValue(cS, cliq);
+//	}	
+//	fileIn.close();
+//
+//	::std::remove(fileName.str().c_str());
+//	::std::remove(fileNameIn.str().c_str());
+//}
+//
+//
+////////////////////////////////////////////////////////////////////////////////
+//
+//template<typename TGraph>
+//inline void
+//edgeCliqueCover(TGraph& g) 
+//{
+//	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+//	typedef typename Cargo<TGraph>::Type TCargo;
+//	typedef typename Size<TGraph>::Type TSize;
+//	typedef String<TVertexDescriptor> TClique;
+//	typedef String<TClique> TCliqueString;
+//
+//	TCliqueString cS;
+//	__edgeCliqueCover(g, cS);
+//
+//
+//	typedef std::pair<TVertexDescriptor, TVertexDescriptor> TEdge;
+//	typedef std::map<TEdge, TCargo> TEdgeMap;
+//	TEdgeMap eMap;
+//
+//	typedef typename Iterator<TCliqueString, Standard>::Type TCliStrIter;
+//	TCliStrIter itCliStr = begin(cS, Standard() );
+//	TCliStrIter itCliStrEnd = end(cS, Standard() );
+//	for(; itCliStr != itCliStrEnd; goNext(itCliStr)) {
+//		TCargo carg = length(value(itCliStr));
+//		typedef typename Iterator<TClique, Standard>::Type TCliIter;
+//		TCliIter itCli = begin(value(itCliStr), Standard());
+//		TCliIter itCliEnd = end(value(itCliStr), Standard());
+//		for(; itCli != itCliEnd; goNext(itCli)) {
+//			TCliIter itCliNext = itCli;
+//			for(; ++itCliNext != itCliEnd; ) {
+//				TVertexDescriptor sV = value(itCli);
+//				TVertexDescriptor tV = value(itCliNext);
+//				if (sV > tV) { TVertexDescriptor tmp = sV; sV = tV; tV = tmp; }
+//				eMap.insert(std::make_pair(TEdge(sV, tV), carg));
+//				//std::cout << sV << ',' << tV << " - " << carg << ';';
+//			}
+//			
+//		}
+//		//std::cout << std::endl;
+//	}
+//
+//	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
+//	for(TEdgeIterator itE(g);!atEnd(itE);goNext(itE)) {
+//		cargo(value(itE)) *= (eMap.find(TEdge(sourceVertex(itE), targetVertex(itE))))->second;
+//	}
+//}
+//
+//
 ////// Old version
 //
 ////////////////////////////////////////////////////////////////////////////////
