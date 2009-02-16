@@ -881,8 +881,8 @@ alignmentEvaluation(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 
 
 
-////// Edge Clique Cover
-////////////////////////////////////////////////////////////////////////////////
+//// Edge Clique Cover
+//////////////////////////////////////////////////////////////////////////////
 //
 //template<typename TGraph, typename TCliqueString>
 //inline void
@@ -959,7 +959,7 @@ alignmentEvaluation(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 //	TCliStrIter itCliStr = begin(cS, Standard() );
 //	TCliStrIter itCliStrEnd = end(cS, Standard() );
 //	for(; itCliStr != itCliStrEnd; goNext(itCliStr)) {
-//		TCargo carg = length(value(itCliStr));
+//		TCargo carg = (length(value(itCliStr)) - 1);
 //		typedef typename Iterator<TClique, Standard>::Type TCliIter;
 //		TCliIter itCli = begin(value(itCliStr), Standard());
 //		TCliIter itCliEnd = end(value(itCliStr), Standard());
