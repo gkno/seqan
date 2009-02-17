@@ -612,16 +612,16 @@ int main(int argc, const char *argv[]) {
 		clear(scores);
 		std::cout << "Construction of Alignment Graph done: " << SEQAN_PROTIMEUPDATE(profileTime) << " seconds" << std::endl;
 		
-		// Triplet library extension
-		if ( ((2 * numEdges(g)) / numVertices(g) ) < 50 ) tripletLibraryExtension(g);
-		else reducedTripletLibraryExtension(g);
-		std::cout << "Triplet done: " << SEQAN_PROTIMEUPDATE(profileTime) << " seconds" << std::endl;
-	
 		// Guide Tree
 		Graph<Tree<double> > guideTree;
 		upgmaTree(pairGraph, guideTree);
 		std::cout << "Guide tree done: " << SEQAN_PROTIMEUPDATE(profileTime) << " seconds" << std::endl;
 		clear(pairGraph);
+
+		// Triplet library extension
+		if ( ((2 * numEdges(g)) / numVertices(g) ) < 50 ) graphBasedTripletLibraryExtension(g);
+		else reducedTripletLibraryExtension(g);
+		std::cout << "Triplet done: " << SEQAN_PROTIMEUPDATE(profileTime) << " seconds" << std::endl;
 
 		// Perform a progressive alignment
 		Graph<Alignment<TStringSet, void, WithoutEdgeId> > gOut(seqSet);
