@@ -23,7 +23,7 @@
 
 // External / STL
 #include <deque>
-#include <fstream>
+
 
 // Seqan
 #include <seqan/basic.h>

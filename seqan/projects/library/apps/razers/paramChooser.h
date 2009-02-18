@@ -33,7 +33,7 @@
 #include "recognitionRateDP.h"
 #include "readSimulator.h"
 
-#include <seqan/graph_utils.h>
+#include <seqan/graph_types/graph_utility_parsing.h>
 
 
 

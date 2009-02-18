@@ -21,6 +21,9 @@
 #ifndef SEQAN_HEADER_GRAPH_UTILITY_PARSING_H
 #define SEQAN_HEADER_GRAPH_UTILITY_PARSING_H
 
+
+#include <fstream>
+
 namespace SEQAN_NAMESPACE_MAIN
 {
 
