@@ -10,7 +10,6 @@
 #include <seqan/align.h>
 #include <seqan/graph_types.h>
 #include <seqan/graph_algorithms.h>
-#include <seqan/graph_utils.h>
 
 
 #ifdef SEQAN_SWITCH_USE_FORWARDS

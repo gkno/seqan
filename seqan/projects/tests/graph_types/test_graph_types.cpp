@@ -21,6 +21,7 @@
 #include "test_graph_iterators.h"
 #include "test_graph_properties.h"
 #include "test_graph_derived.h"
+#include "test_graph_utils.h"
 
 
 using namespace seqan;
@@ -42,6 +43,7 @@ int main()
 	Test_GraphIterators();		// Test Graph Iterators
 	Test_GraphProperties();		// Test internal and external property maps
 	Test_GraphDerivedTypes();	// Test Additional graph types, e.g., oracle, trie,...
+	Test_GraphUtils();			// Test the graph drawing, etc.
 
 	// Restore std::cout
 	std::cout.rdbuf(strm_puffer);

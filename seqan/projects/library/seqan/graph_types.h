@@ -23,6 +23,7 @@
 
 // External / STL
 #include <deque>
+#include <fstream>
 
 // Seqan
 #include <seqan/basic.h>
@@ -68,5 +69,8 @@
 #include <seqan/graph_types/graph_iterator_bfs.h>
 #include <seqan/graph_types/graph_iterator_dfs.h>
 
+// Graph drawing and some file parsing
+#include <seqan/graph_types/graph_drawing.h>
+#include <seqan/graph_types/graph_utility_parsing.h>
 
 #endif //#ifndef SEQAN_HEADER_...

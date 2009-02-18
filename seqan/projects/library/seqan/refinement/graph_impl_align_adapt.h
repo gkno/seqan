@@ -270,6 +270,143 @@ goNext(Iter<Graph<Alignment<TStringSet, TCargo, TGraphSpec> >, GraphIterator<Int
 }
 
 
+
+
+//////////////////////////////////////////////////////////////////////////////
+// Graph drawing adaptations
+//////////////////////////////////////////////////////////////////////////////
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TStringSet, typename TCargo, typename TSpec, typename TNodeAttributes>
+inline void
+_createNodeAttributes(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
+					  TNodeAttributes& nodeMap)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename Id<TGraph>::Type TIdType;
+	resizeVertexMap(g, nodeMap);
+
+	unsigned int scaling = 20 / length(value(g.data_sequence));
+	if (scaling == 0) scaling = 1;
+
+	typedef typename Iterator<TGraph, VertexIterator>::Type TConstIter;
+	TConstIter it(g);
+	for(;!atEnd(it);++it) {
+		TIdType id = sequenceId(g, *it);
+		std::ostringstream outs; 
+		outs << "label = \"";
+		outs << label(g, *it);
+		outs << "\", group = \"";
+		outs << id;
+		outs << "\"";
+		append(property(nodeMap, *it), outs.str().c_str());		
+		//std::cout << property(nodeMap, *it) << std::endl;
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TStringSet, typename TSpec, typename TEdgeAttributes>
+inline void
+_createEdgeAttributes(Graph<Alignment<TStringSet, void, TSpec> > const& g,
+					  TEdgeAttributes& edgeMap)
+{
+	SEQAN_CHECKPOINT
+	_createEmptyEdgeAttributes(g.data_align,edgeMap);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TStringSet, typename TCargo, typename TSpec, typename TEdgeAttributes>
+inline void
+_createEdgeAttributes(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
+					  TEdgeAttributes& edgeMap)
+{
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	resizeEdgeMap(g, edgeMap);
+
+	typedef typename Iterator<TGraph, EdgeIterator>::Type TConstEdIter;
+	TConstEdIter itEd(g);
+	for(;!atEnd(itEd);++itEd) {
+		TCargo c = getCargo(*itEd);
+		std::ostringstream outs; 
+		outs << "label = \"";
+		outs << (TCargo) c;
+		outs << "\"";
+		append(property(edgeMap, *itEd), outs.str().c_str());
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TFile, typename TStringSet, typename TCargo, typename TSpec>
+inline void
+_writeGraphFooter(TFile & file,
+				  Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
+				  DotDrawing)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename Id<TGraph>::Type TId;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+
+	TStringSet& str = stringSet(g);
+	TSize len = length(str);
+	for(TSize i = 0; i<len; ++i) {
+		TId seqId = positionToId(str, i);
+		TSize j = 0;
+		TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();	
+		TVertexDescriptor previousVertex = nilVertex;
+		while(j<length(str[i])) {
+			TVertexDescriptor nextVertex = findVertex(const_cast<TGraph&>(g), seqId, j);
+			if (nextVertex == nilVertex) {
+				++j;
+				continue;
+			}
+			if (previousVertex != nilVertex) {
+				_streamPutInt(file, previousVertex);
+				_streamWrite(file, " -- ");
+				_streamPutInt(file, nextVertex);
+				_streamWrite(file, " [");
+				_streamWrite(file, "weight=100.0, len=4.0, arrowhead=vee");
+				_streamWrite(file, "];\n");
+			}
+			previousVertex = nextVertex;
+			j += fragmentLength(g, nextVertex);
+		}
+	}
+	_streamPut(file, '\n');
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TFile, typename TStringSet, typename TCargo, typename TSpec>
+inline void
+_writeGraphType(TFile & file,
+				Graph<Alignment<TStringSet, TCargo, TSpec> > const&,
+				DotDrawing)
+{
+	SEQAN_CHECKPOINT
+	_streamWrite(file, "graph");
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TFile, typename TStringSet, typename TCargo, typename TSpec>
+inline void
+_writeEdgeType(TFile & file,
+			   Graph<Alignment<TStringSet, TCargo, TSpec> > const&,
+			   DotDrawing)
+{
+	SEQAN_CHECKPOINT
+	_streamWrite(file, " -- ");
+}
+
 }// namespace SEQAN_NAMESPACE_MAIN
 
 #endif //#ifndef SEQAN_HEADER_...
