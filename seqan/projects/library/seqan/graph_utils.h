@@ -36,7 +36,6 @@
 #include <seqan/graph_utils/graph_drawing.h>
 
 // Utilities
-#include <seqan/graph_utils/graph_utility_alphabets.h>
 #include <seqan/graph_utils/graph_utility_parsing.h>
 
 
