@@ -230,9 +230,10 @@ void testAlphabetModifier()
 	typedef String<TDnaGap> TString;
 
 	TString str = "aCgT-AcGt";
+	cout << str << endl;
+
 	SEQAN_TASSERT(str == "aCgT-AcGt");
 	SEQAN_TASSERT(str == "AcGt-aCgT");
-
 }
 
 //////////////////////////////////////////////////////////////////////////////
