@@ -21,6 +21,8 @@
 #ifndef SEQAN_HEADER_BASIC_SSE2_H
 #define SEQAN_HEADER_BASIC_SSE2_H
 
+//SEQAN_NO_GENERATED_FORWARDS: no forwards are generated for this file
+
 //#ifdef __SSE2__
 #if 1
 #include <emmintrin.h>
