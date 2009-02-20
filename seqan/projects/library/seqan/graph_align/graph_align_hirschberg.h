@@ -57,10 +57,10 @@ _align_hirschberg_trace(TAlign& align,
 	do {
 		// Diagonal walk
 		if (((currentPointer - movePointer) == 1)  &&
-			(scoreGapOpen(sc) + scoreGapOpen(sc) <= score(const_cast<Score<TScoreValue, TSpec>&>(sc), str[0][len1-1], str[1][movePointer]))) {
+			(scoreGapOpen(sc) + scoreGapOpen(sc) <= score(const_cast<Score<TScoreValue, TSpec>&>(sc), len1-1, movePointer, str[0], str[1]))) {
 			TSize segLen = 0;
 			while (((currentPointer - movePointer) == 1)   &&
-					(scoreGapOpen(sc) + scoreGapOpen(sc) <= score(const_cast<Score<TScoreValue, TSpec>&>(sc), str[0][len1-1], str[1][movePointer]))) {
+					(scoreGapOpen(sc) + scoreGapOpen(sc) <= score(const_cast<Score<TScoreValue, TSpec>&>(sc), len1-1, movePointer, str[0], str[1]))) {
 				++segLen;
 				--len1;
 				--currentPointer;
@@ -71,7 +71,7 @@ _align_hirschberg_trace(TAlign& align,
 		} // Diagonal walk, but gapOpen and gapOpen yields a higher score
 		// Note: The case gapExtension + gapOpen cannot occur because then we would have gotten a different trace point!!!
 		else if (((currentPointer - movePointer) == 1)  &&
-			(scoreGapOpen(sc) + scoreGapOpen(sc) > score(const_cast<Score<TScoreValue, TSpec>&>(sc), str[0][len1-1], str[1][movePointer]))) {
+			(scoreGapOpen(sc) + scoreGapOpen(sc) > score(const_cast<Score<TScoreValue, TSpec>&>(sc), len1-1, movePointer, str[0], str[1]))) {
 				_align_trace_print(align, str, id1, (TSize) 0, id2, --currentPointer, (TSize) 1, Vertical);
 				_align_trace_print(align, str, id1, --len1, id2,(TSize) 0, (TSize) 1, Horizontal);
 				if (len1>0) movePointer = getValue(trace, len1 - 1);
@@ -90,11 +90,11 @@ _align_hirschberg_trace(TAlign& align,
 			// Vertical walk finishes with a horizontal vs. vertical gap
 			if ((len1 > 2) && 
 				(movePointer - getValue(trace, len1 - 2) == 0) &&
-				(scoreGapExtend(sc) + scoreGapExtend(sc) > score(const_cast<Score<TScoreValue, TSpec>&>(sc), str[0][len1-1], str[1][movePointer]))) {
+				(scoreGapExtend(sc) + scoreGapExtend(sc) > score(const_cast<Score<TScoreValue, TSpec>&>(sc), len1-1, movePointer, str[0], str[1]))) {
 					_align_trace_print(align, str, id1, (TSize) 0, id2, (TSize) movePointer, (TSize) currentPointer - movePointer, Vertical);
 					currentPointer = movePointer;
 			} // Vertical walk that finishes with a diagonal, but gapOpen + gapOpen is better
-			else if ((scoreGapOpen(sc) + scoreGapOpen(sc) > score(const_cast<Score<TScoreValue, TSpec>&>(sc), str[0][len1-1], str[1][movePointer]))) {
+			else if ((scoreGapOpen(sc) + scoreGapOpen(sc) > score(const_cast<Score<TScoreValue, TSpec>&>(sc), len1-1, movePointer, str[0], str[1]))) {
 					_align_trace_print(align, str, id1, (TSize) 0, id2, (TSize) movePointer, (TSize) currentPointer - movePointer, Vertical);
 					currentPointer = movePointer;
 			} // Normal vertical walk that continues with a diagonal walk
@@ -255,9 +255,9 @@ _align_hirschberg(TTrace& trace,
 				assignValue(diagonalPointer, row, std::make_pair(0, Vertical));
 			}
 			// Now traverse all columns
-			TStringIter strIter0 = begin(str[0]);
-			strIter0 += x1;
-			for(TSize col = 1; col <= inf_len1; ++col) {
+//			TStringIter strIter0 = begin(str[0]);
+//			strIter0 += x1;
+			for(TSize col = 1, posX = x1; col <= inf_len1; ++col, ++posX) {
 				//if ((x1+col) % 10 == 0) std::cout << x1+col << '-' << std::flush;
 
 				TScoreValue diagValMat = getValue(mat, 0);
@@ -283,11 +283,11 @@ _align_hirschberg(TTrace& trace,
 					assignValue(diagonalPointer, 0, std::make_pair(0, Horizontal));
 					assignValue(verticalPointer, 0, std::make_pair(0, Horizontal));
 				}
-				TCharacter charTop = getValue(strIter0);
-				goNext(strIter0);
-				TStringIter strIter1 = begin(str[1]);
-				strIter1 += y1;
-				for(TSize row = 1; row <= inf_len2; ++row) {
+//				TCharacter charTop = getValue(strIter0);
+//				goNext(strIter0);
+//				TStringIter strIter1 = begin(str[1]);
+//				strIter1 += y1;
+				for(TSize row = 1, posY = y1; row <= inf_len2; ++row, ++posY) {
 					// Get the new maximum for vertical
 					if ((tmp = getValue(mat, row - 1) + gapOpen) > vert + gap) {
 						vert = tmp;
@@ -309,8 +309,9 @@ _align_hirschberg(TTrace& trace,
 					// Get the new maximum for diagonal
 					//TScoreValue sc_ = score(const_cast<Score<TScoreValue, Simple>&>(sc), charTop, getValue(str[1],y1+row-1));
 					//tmp = diagValMat + sc_;
-					tmp = diagValMat + score(const_cast<Score<TScoreValue, TSpec>&>(sc), charTop, getValue(strIter1));
-					goNext(strIter1);
+//					tmp = diagValMat + score(const_cast<Score<TScoreValue, TSpec>&>(sc), charTop, getValue(strIter1));	// deprecated
+//					goNext(strIter1);
+					tmp = diagValMat + score(const_cast<Score<TScoreValue, TSpec>&>(sc), posX, posY, str[0], str[1]);
 					tvMat = Diagonal;
 					if (vert > tmp) {
 						tmp = vert;
@@ -447,12 +448,12 @@ _align_hirschberg(TTrace& trace,
 	else if ((!midpoints.empty()) && (it->second == Horizontal)) assignValue(traceIter, it->first.second); 
 	else if ((!midpoints.empty()) && (it->second == Vertical)) {
 		// Where is the best exit
-		TScoreValue best = score(const_cast<Score<TScoreValue, TSpec>&>(sc), str[0][0], str[1][0]);
+		TScoreValue best = score(const_cast<Score<TScoreValue, TSpec>&>(sc), 0, 0, str[0], str[1]);
 		TSize index = 0;
 		if (it->first.second > 1) best += gapOpen;
 		if (it->first.second > 2) best += gap * (it->first.second - 2);
 		for(TSize row = 2; row < it->first.second;++row) {
-			TScoreValue newBest = gapOpen + score(const_cast<Score<TScoreValue, TSpec>&>(sc), str[0][0], str[1][row-1]) + gapOpen;
+			TScoreValue newBest = gapOpen + score(const_cast<Score<TScoreValue, TSpec>&>(sc), 0, row-1, str[0], str[1]) + gapOpen;
 			newBest += gap * (it->first.second - 3);
 			if (newBest > best) {
 				best = newBest;
