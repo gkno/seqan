@@ -160,19 +160,20 @@ _align_needleman_wunsch(TTrace & trace,
 	typedef typename Iterator<TColumn, Standard>::Type TColIterator;
 	TColIterator col_end = end(column, Standard());
 	
-	for(TSize col = 1; col <= len1; ++col) 
+	for(TSize col = 0; col < len1; ++col) 
 	{
 		TScoreValue diagVal = getValue(column, 0);
-		_initFirstRow(TAlignConfig(), value(column, 0), col * gap);
+		_initFirstRow(TAlignConfig(), value(column, 0), (col+1) * gap);
 		TScoreValue vertiVal = getValue(column, 0);
 
-		typedef typename Value<TString>::Type TStringValue;
-		TStringValue char1 = str1[col-1];
+//		typedef typename Value<TString>::Type TStringValue;
+//		TStringValue char1 = str1[col];
 
 		TColIterator coit = begin(column, Standard());
 
-		typedef typename Iterator<TString, Standard>::Type TStringIterator;
-		TStringIterator s2_it = begin(str2, Standard());
+//		typedef typename Iterator<TString, Standard>::Type TStringIterator;
+//		TStringIterator s2_it = begin(str2, Standard());
+		TSize col2 = 0;
 
 		while (true)
 		{
@@ -193,8 +194,13 @@ _align_needleman_wunsch(TTrace & trace,
 			}
 			max_hori_verti += gap;
 
-			vertiVal = diagVal + score(_sc, char1, *s2_it); //compute the maximum in vertiVal 
-			++s2_it;
+			// (deprecated scoring)
+//			vertiVal = diagVal + score(_sc, char1, *s2_it); //compute the maximum in vertiVal 
+//			++s2_it;
+			
+			// better: use position dependent scoring
+			vertiVal = diagVal + score(_sc, col, col2, str1, str2); //compute the maximum in vertiVal 
+			++col2;
 
 			if (vertiVal >= max_hori_verti)
 			{
@@ -212,7 +218,7 @@ _align_needleman_wunsch(TTrace & trace,
 			diagVal = *coit;
 			*coit = vertiVal;
 		}
-		_processLastRow(TAlignConfig(), overallMaxValue, overallMaxIndex, vertiVal, col);
+		_processLastRow(TAlignConfig(), overallMaxValue, overallMaxIndex, vertiVal, col+1);
 	}
 	_processLastColumn(TAlignConfig(), overallMaxValue, overallMaxIndex, column);
 
