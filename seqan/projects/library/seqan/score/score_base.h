@@ -78,6 +78,21 @@ struct Value< Score<TValue, TSpec> >
 
 //////////////////////////////////////////////////////////////////////////////
 
+// ATTENTION: score(TScore, TVal1, TVal2) is deprecated
+// Better use the following function:
+
+template <typename TValue, typename TSpec, typename TPos1, typename TPos2, typename TSeq1, typename TSeq2>
+inline TValue
+score(Score<TValue, TSpec> const & me,
+	  TPos1 pos1,
+	  TPos2 pos2,
+	  TSeq1 const &seq1,
+	  TSeq2 const &seq2)
+{
+	return score(me, seq1[pos1], seq2[pos2]);
+}
+
+
 }// namespace SEQAN_NAMESPACE_MAIN
 
 #endif //#ifndef SEQAN_HEADER_...
