@@ -124,10 +124,12 @@ int main(int argc, const char *argv[])
 					istringstream istr(argv[arg]);
 					istr >> pm_options.totalN;
 					if (!istr.fail())
+					{
 						if (pm_options.totalN < 1 || pm_options.totalN > 100)
 							cerr << "sequence length must be a value between 1 and 100" << endl << endl;
 						else
 							continue;
+					}
 				}
 				printHelp(argc, argv, pm_options);
 				return 0;
@@ -139,10 +141,12 @@ int main(int argc, const char *argv[])
 					istr >> pm_options.optionErrorRate;
 					pm_options.optionErrorRate = (100.0 - pm_options.optionErrorRate) / 100.0;
 					if (!istr.fail())
+					{
 						if (pm_options.optionErrorRate < 0 || pm_options.optionErrorRate > 0.1)
 							cerr << "Percent identity threshold must be a value between 90 and 100" << endl << endl;
 						else
 							continue;
+					}
 				}
 				printHelp(argc, argv, pm_options);
 				return 0;
@@ -153,6 +157,7 @@ int main(int argc, const char *argv[])
 					istringstream istr(argv[arg]);
 					istr >> pm_options.optionLossRate;
 					if (!istr.fail())
+					{
 						if (pm_options.optionLossRate < 80.0 || pm_options.optionLossRate > 100.0)
 							cerr << "Loss rate must be a value between 0 and 100" << endl << endl;
 						else
@@ -161,6 +166,7 @@ int main(int argc, const char *argv[])
 							pm_options.optionLossRate /= 100.0;
 							continue;
 						}
+					}
 				}
 				printHelp(argc, argv, pm_options);
 				return 0;
@@ -171,10 +177,12 @@ int main(int argc, const char *argv[])
 					istringstream istr(argv[arg]);
 					istr >> pm_options.optionProbINSERT;
 					if (!istr.fail())
+					{
 						if (pm_options.optionProbINSERT < 0 || pm_options.optionProbINSERT > 1)
 							cerr << "Insert probability must be a value between 0 and 1" << endl << endl;
 						else
 							continue;
+					}
 				}
 				printHelp(argc, argv, pm_options);
 				return 0;
@@ -186,10 +194,12 @@ int main(int argc, const char *argv[])
 					istringstream istr(argv[arg]);
 					istr >> pm_options.optionProbDELETE;
 					if (!istr.fail())
+					{
 						if (pm_options.optionProbDELETE < 0 || pm_options.optionProbDELETE > 1)
 							cerr << "Delete probability must be a value between 0 and 1" << endl << endl;
 						else
 							continue;
+					}
 				}
 				printHelp(argc, argv, pm_options);
 				return 0;
@@ -267,10 +277,12 @@ int main(int argc, const char *argv[])
 					istringstream istr(argv[arg]);
 					istr >> pm_options.minThreshold;
 					if (!istr.fail())
+					{
 						if (pm_options.minThreshold < 1 || pm_options.minThreshold > 3)
 							cerr << "minimum threshold should be a value between 1 and 3" << endl << endl;
 						else
 							continue;
+					}
 				}
 				printHelp(argc, argv, pm_options);
 				return 0;
@@ -281,10 +293,12 @@ int main(int argc, const char *argv[])
 					istringstream istr(argv[arg]);
 					istr >> pm_options.maxWeight;
 					if (!istr.fail())
+					{
 						if (pm_options.maxWeight < 6 || pm_options.maxWeight > 14)
 							cerr << "maximum weight should be a value between 6 and 14" << endl << endl;
 						else
 							continue;
+					}
 				}
 				printHelp(argc, argv, pm_options);
 				return 0;
