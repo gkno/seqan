@@ -1677,11 +1677,13 @@ convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 			}
 			++compIndex;
 		}
-		String<TValue> str = label(g,it->second);
-		//std::cout << str;
-		for(TSize i=0;i<length(str);++i) {
-			assignValue(mat, row*len + col, (TValue) getValue(str, i));
-			++col;
+		typedef typename Value<TStringSet>::Type TStringSetStr;
+		TStringSetStr str = label(g,it->second);
+		typedef typename Iterator<TStringSetStr, Standard>::Type TStringSetStrIter;
+		TStringSetStrIter itStr = begin(str, Standard());
+		TStringSetStrIter itStrEnd = end(str, Standard());
+		for(;itStr != itStrEnd; goNext(itStr), ++col) {
+			value(mat, row*len + col) = (TValue) (value(itStr));
 		}
 		++compIndex;
 	}
