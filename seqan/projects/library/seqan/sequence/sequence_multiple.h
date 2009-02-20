@@ -1179,19 +1179,19 @@ a single integer value between 0 and the sum of string lengths minus 1.
 //////////////////////////////////////////////////////////////////////////////
 // resize
 
-	template < typename TString, typename TSpec, typename TSize >
+	template < typename TString, typename TSpec, typename TSize, typename TExpand >
     inline typename Size< StringSet< TString, TSpec > >::Type 
-	resize(StringSet< TString, TSpec > &me, TSize new_size) {
+	resize(StringSet< TString, TSpec > &me, TSize new_size, Tag<TExpand> const tag) {
 		resize(me.limits, new_size + 1);
 		me.limitsValid = (new_size == 0);
 //		me.limitsValid = (new_size == length(me.limits));
-		return resize(me.strings, new_size);
+		return resize(me.strings, new_size, tag);
     }
 
-	template < typename TString, typename TSpec, typename TSize >
+	template < typename TString, typename TSpec, typename TSize, typename TExpand >
     inline typename Size< StringSet< TString, Owner<ConcatDirect<TSpec> > > >::Type 
-	resize(StringSet< TString, Owner<ConcatDirect<TSpec> > > &me, TSize new_size) {
-		return resize(me.limits, new_size + 1) - 1;
+	resize(StringSet< TString, Owner<ConcatDirect<TSpec> > > &me, TSize new_size, Tag<TExpand> const tag) {
+		return resize(me.limits, new_size + 1, tag) - 1;
     }
 
 ///.Function.iter.param.object.type:Class.StringSet
