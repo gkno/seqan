@@ -105,6 +105,8 @@
 #include <seqan/basic/basic_alphabet_simple_tabs.h>
 #include <seqan/basic/basic_alphabet_simple.h>
 
+#include <seqan/basic/basic_sse2.h>
+
 //____________________________________________________________________________
 
 #include <seqan/basic/basic_holder_dynamic.h>
