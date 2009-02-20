@@ -57,7 +57,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		Directory()
 		{
-			handle = NULL;
+			handle = 0;
 			_atEnd = true;
 		}
 		
@@ -102,11 +102,11 @@ namespace SEQAN_NAMESPACE_MAIN
 	close(Directory &dir)
 	{
 		int result = 0;
-		if (dir.handle != NULL)
+		if (dir.handle)
 			result = _findclose(dir.handle);
 
 		dir._atEnd = true;
-		dir.handle = NULL;
+		dir.handle = 0;
 		return result == 0;
 	}
 
