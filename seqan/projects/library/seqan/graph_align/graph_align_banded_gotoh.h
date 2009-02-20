@@ -338,7 +338,7 @@ _align_banded_gotoh(TColumn& mat,
 			}
 
 			// Get the new maximum for mat
-			TScoreValue sc_ = score(const_cast<TScore&>(sc), value(str1, actualCol-1), value(str2, actualRow-1));
+			TScoreValue sc_ = score(const_cast<TScore&>(sc), actualCol-1, actualRow-1, str1, str2);
 			tmp = value(mat, (row - 1) * diagonalWidth + col) + sc_;
 			if (value(vertical, row * diagonalWidth + col) > tmp) {
 				tmp = value(vertical, row * diagonalWidth + col);

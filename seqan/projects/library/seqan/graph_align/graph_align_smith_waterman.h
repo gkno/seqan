@@ -235,7 +235,7 @@ _align_smith_waterman(TTrace& trace,
 				}
 	
 				// Get the new maximum for mat
-				TScoreValue sc_ = score(const_cast<TScore&>(sc), str1[col-1], str2[row-1]);
+				TScoreValue sc_ = score(const_cast<TScore&>(sc), col-1, row-1, str1, str2);
 				tmp = diagValMat + sc_;
 				tvMat =  Diagonal;
 				if (vert > tmp) {

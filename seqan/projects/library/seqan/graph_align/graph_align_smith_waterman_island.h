@@ -117,7 +117,7 @@ _align_smith_waterman_island(TTrace& trace,
 	
 			// Get the new maximum for mat
 			
-			TScoreValue tmp = diagValMat + score(const_cast<TScore&>(sc), str1[col-1], str2[row-1]);
+			TScoreValue tmp = diagValMat + score(const_cast<TScore&>(sc), col-1, row-1, str1, str2);
 			tvMat =  Diagonal;
 			if (0 >= tmp) {
 				tmp = 0;
