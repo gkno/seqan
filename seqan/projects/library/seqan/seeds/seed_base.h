@@ -771,11 +771,11 @@ extendSeed(Seed<TPosition,TSpecSeed> &seed,
 		while ((tmpScore > scoreDropOff) && (xPos >= 0) && (yPos>=0)){
 			if (query[xPos] == database[yPos]){
 				last = 0;
-				tmpScore += score(scoreMatrix, query[xPos], database[yPos]);
+				tmpScore += score(scoreMatrix, xPos, yPos, query, database);
 				if (tmpScore > 0)
 					tmpScore = 0;
 			} else{
-				tmpScore += score(scoreMatrix, query[xPos], database[yPos]);
+				tmpScore += score(scoreMatrix, xPos, yPos, query, database);
 				++last;
 			}
 		--xPos;
@@ -798,11 +798,11 @@ extendSeed(Seed<TPosition,TSpecSeed> &seed,
 		while ((tmpScore > scoreDropOff) && (xPos < xLength) && (yPos < yLength)){
 			if (query[xPos] == database[yPos]){
 				last = 0;
-				tmpScore += score(scoreMatrix, query[xPos], database[yPos]);
+				tmpScore += score(scoreMatrix, xPos, yPos, query, database);
 				if (tmpScore > 0)
 					tmpScore = 0;
 			}else{
-				tmpScore += score(scoreMatrix, query[xPos], database[yPos]);
+				tmpScore += score(scoreMatrix, xPos, yPos, query, database);
 				++last;
 			}
 			++xPos;
@@ -867,7 +867,7 @@ extendSeed(Seed<TPosition,SimpleSeed> &seed,
 				tmp = infimum;
 
 				tmp = max((*antiDiag2)[i-1],(*antiDiag2)[i])+gapCost;
-				tmp = max(tmp,(*antiDiag1)[i-1]+ score(scoreMatrix,querySeg[xLength-i],dataSeg[yLength-(k-i)]));
+				tmp = max(tmp,(*antiDiag1)[i-1]+ score(scoreMatrix, xLength-i, yLength-(k-i), querySeg, dataSeg));
 				tmpMax2 = max(tmpMax2,tmp);
 				if (tmp < tmpMax1-scoreDropOff)
 					(*antiDiag3)[i] = infimum;
@@ -988,7 +988,7 @@ extendSeed(Seed<TPosition,SimpleSeed> &seed,
 			for (int i = b; i<= (u+1);++i){
 				tmp = infimum;
 				tmp = max((*antiDiag2)[i-1],(*antiDiag2)[i])+gapCost;
-				tmp = max(tmp,(*antiDiag1)[i-1]+ score(scoreMatrix,querySeg[i-1],dataSeg[k-i-1]));
+				tmp = max(tmp,(*antiDiag1)[i-1]+ score(scoreMatrix,i-1,k-i-1,querySeg,dataSeg));
 				tmpMax2 = max(tmpMax2,tmp);
 				if (tmp < tmpMax1-scoreDropOff)
 					(*antiDiag3)[i] = infimum;

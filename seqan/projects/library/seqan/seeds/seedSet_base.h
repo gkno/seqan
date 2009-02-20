@@ -1141,12 +1141,12 @@ _mergeTwoSeeds(Seed<TValue, ChainedSeed>  &firstSeed,
 
 		TValue gap = (databaseGap < queryGap)? databaseGap : queryGap;
 		for (int i = 0; i <gap;++i)
-			currenvoid += score(scoreMatrix,query[--rPositionQuery],database[--rPositionDatabase]);
+			currenvoid += score(scoreMatrix,--rPositionQuery,--rPositionDatabase,query,database);
 		tmpScore = currenvoid;
 		tmpLength = 0;
 		for (int i = 0; i < gap ; ++i)
 		{
-			currenvoid += score(scoreMatrix,query[++lPositionQuery], database[++lPositionDatabase]) - score(scoreMatrix,query[rPositionQuery++],database[rPositionDatabase++]);
+			currenvoid += score(scoreMatrix,++lPositionQuery,++lPositionDatabase,query,database) - score(scoreMatrix,rPositionQuery++,rPositionDatabase++,query,database);
 			if (currenvoid > tmpScore)
 			{
 				tmpScore = currenvoid;

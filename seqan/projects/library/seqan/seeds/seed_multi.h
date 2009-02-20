@@ -555,7 +555,7 @@ extendSeed(Seed<TPosition,ChainedSeed> &seed, TPosition scoreDropOff, Score<TTPo
 				tmp = infimum;
 
 				tmp = max((*antiDiag2)[i-1],(*antiDiag2)[i])+gapCost;
-				tmp = max(tmp,(*antiDiag1)[i-1]+ score(scoreMatrix,querySeg[xLength-i],dataSeg[yLength-(k-i)]));
+				tmp = max(tmp,(*antiDiag1)[i-1]+ score(scoreMatrix,xLength-i,yLength-(k-i),querySeg,dataSeg));
 				tmpMax2 = max(tmpMax2,tmp);
 				if (tmp < tmpMax1-scoreDropOff)
 					(*antiDiag3)[i] = infimum;
@@ -674,7 +674,7 @@ extendSeed(Seed<TPosition,ChainedSeed> &seed, TPosition scoreDropOff, Score<TTPo
 			for (int i = b; i<= (u+1);++i){
 				tmp = infimum;
 				tmp = max((*antiDiag2)[i-1],(*antiDiag2)[i])+gapCost;
-				tmp = max(tmp,(*antiDiag1)[i-1]+ score(scoreMatrix,querySeg[i-1],dataSeg[k-i-1]));
+				tmp = max(tmp,(*antiDiag1)[i-1]+ score(scoreMatrix,i-1,k-i-1,querySeg,dataSeg));
 				tmpMax2 = max(tmpMax2,tmp);
 				if (tmp < tmpMax1-scoreDropOff)
 					(*antiDiag3)[i] = infimum;
@@ -801,7 +801,7 @@ getAlignment(Seed<TPosition,ChainedSeed> &seed,
 	TIterator it2 = ++seedList.begin();
 	
 	for (int i =0; i<(*it1).i3;++i){
-		seedScore += score(scoreMatrix,query[(*it1).i1+i], database[(*it1).i2+i]); 
+		seedScore += score(scoreMatrix,(*it1).i1+i, (*it1).i2+i, query, database); 
 	}
 	
 	if (seedList.size()>=2){
@@ -885,7 +885,7 @@ getAlignment(Seed<TPosition,ChainedSeed> &seed,
 				position1+= it2->i3;
 				position2 += it2->i3;
 				for (int i =0; i<it2->i3;++i)
-					seedScore += score(scoreMatrix,query[it2->i1+i], database[it2->i2+i]);	
+					seedScore += score(scoreMatrix, it2->i1+i, it2->i2+i, query, database);
 
 				++it1;
 				++it2;
@@ -919,14 +919,14 @@ scoreSeed(Seed<TPosition, ChainedSeed> &seed, String<TText> &query, String<TText
 	int tmpScore =0;
 	TIterator it = _getDiagSet(seed).begin();
 	for (int i = 0; i < it->i3; ++i){
-		tmpScore+=score(matrix, query[it->i1+i], database[it->i2+i]);
+		tmpScore+=score(matrix, it->i1+i, it->i2+i, query, database);
 	}
 
 	if (_getDiagSet(seed).size()>=2){
 		TIterator it_end = _getDiagSet(seed).end();
 		for (TIterator it2 = ++_getDiagSet(seed).begin(); it2!= it_end; it2++){
 			for (int i = 0; i < it2->i3; ++i){
-				tmpScore+=score(matrix, query[it2->i1+i], database[it2->i2+i]);
+				tmpScore+=score(matrix, it2->i1+i, it2->i2+i, query, database);
 			}
 			tmpScore += scoreGap(matrix)*(it2->i2-(it->i2+it->i3)+it2->i1-(it->i1+it->i3));
 			++it;
