@@ -739,10 +739,12 @@ void computeFilteringLoss(
 						{
 							int prevState = state.transition[m];
 							if (prevState >= 0)
+							{
 								if (m == SEQAN_INSERT)
 									_probAdd(recovered, _probMul(_getProb(logError,m,n-span), (*col)[((e-statesCount)+prevState)*maxT+t]));
 								else
 									_probAdd(recovered, _probMul(_getProb(logError,m,n-span), (*colPrev)[((e-statesCount)+prevState)*maxT+_t]));
+							}
 						}
 					(*col)[(e+s)*maxT+t] = recovered;
 				}
