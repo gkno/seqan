@@ -18,7 +18,7 @@ SEQAN := ../..
 # Tools and command line arguments.
 #
 
-MACHINE := -m32
+#MACHINE := -m32
 OBJCOPY := objcopy
 LDINC := $(LD) -r
 GET := ./get.sh
