@@ -401,6 +401,7 @@ template <> struct _IsSimple< long double > { typedef True Type; };
 // user defined types (re-specializations are allowed here)
 template <> struct IsSimple< wchar_t > { typedef True Type; };
 template <> struct IsSimple< __int64 > { typedef True Type; };
+template <> struct IsSimple< __uint64 > { typedef True Type; };
 
 //////////////////////////////////////////////////////////////////////////////
 // gapValue

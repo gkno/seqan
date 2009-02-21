@@ -23,6 +23,7 @@
 
 //SEQAN_NO_GENERATED_FORWARDS: no forwards are generated for this file
 
+#ifdef SEQAN_USE_SSE2_WORDS
 #ifdef __SSE2__
 
 #include <emmintrin.h>
@@ -31,6 +32,16 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 	
 //	#define __int128 SSE2_int128
+	
+	#ifndef SEQAN_SSE2_INT128
+	#define SEQAN_SSE2_INT128
+	#endif
+		
+	// ATTENTION:
+	// The SSE2_int128 struct must be 16-byte aligned. Some allocators
+	// don't ensure the correct alignment, e.g. the STL allocators.
+	// Either avoid STL classes holding SSE2_int128 structs (maps in find_pex.h)
+	// or avoid the SEQAN_USE_SSE2_WORDS define above.
 
 	// may become obsolete when 128-bit integers will be introduced
 	struct SSE2_int128
@@ -41,7 +52,6 @@ namespace SEQAN_NAMESPACE_MAIN
 			__uint64 v64[2];
 			unsigned v32[4];
 		}						data;
-		static const __m128i    overflow;
 
 //____________________________________________________________________________
 
@@ -65,7 +75,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		operator __m128i () const;
 		operator __int64 () const;
-/*		operator __uint64 ();
+/*		operator bool () const;
+		operator __uint64 ();
 		operator int ();
 		operator unsigned int ();
 		operator short ();
@@ -74,8 +85,9 @@ namespace SEQAN_NAMESPACE_MAIN
 		operator signed char ();
 		operator unsigned char ();
 */	};
-
-	const __m128i SSE2_int128::overflow = SSE2_int128(0, 1, 0, 0);
+	
+	template <> struct _IsSimple<__m128i> { typedef True Type; };
+	template <> struct _IsSimple<SSE2_int128> { typedef True Type; };
 
 //____________________________________________________________________________
 // clear
@@ -204,7 +216,12 @@ inline SSE2_int128::operator unsigned char ()
 {
 	return _mm_extract_epi16(data.v, 0);
 }
-*/	
+	
+inline SSE2_int128::operator bool () const
+{
+	return (__int64)(SSE2_int128)_mm_or_si128(data.v, _mm_unpackhi_epi64(data.v, data.v));
+}
+*/
 //____________________________________________________________________________
 // constructors
 
@@ -302,7 +319,8 @@ operator ^= (SSE2_int128 &a, SSE2_int128 const &b)
 inline SSE2_int128
 operator ~ (SSE2_int128 const &a)
 {
-	return _mm_andnot_si128((__m128i)a, (__m128i)a);
+	__m128i _a = (__m128i)a;
+	return _mm_xor_si128(_a, _mm_cmpeq_epi32(_a, _a));
 }
 
 //____________________________________________________________________________
@@ -415,6 +433,8 @@ operator >>= (SSE2_int128 &a, unsigned int n)
 inline SSE2_int128
 operator + (SSE2_int128 const &a, SSE2_int128 const &b)
 {
+	static const __m128i carry = SSE2_int128(0, 1, 0, 0);
+
 	union {
 		__uint64 v64[2];
 		__m128i v;
@@ -424,13 +444,15 @@ operator + (SSE2_int128 const &a, SSE2_int128 const &b)
 	if (_sum.v64[0] >= a.data.v64[0])
 		return _sum.v;
 	else
-		return _mm_add_epi64(_sum.v, SSE2_int128::overflow);
+		return _mm_add_epi64(_sum.v, carry);
 }
 
 //template <typename T>
 inline SSE2_int128
 operator - (SSE2_int128 const &a, SSE2_int128 const &b)
 {
+	static const __m128i carry = SSE2_int128(0, 1, 0, 0);
+
 	union {
 		__uint64 v64[2];
 		__m128i v;
@@ -440,15 +462,33 @@ operator - (SSE2_int128 const &a, SSE2_int128 const &b)
 	if (_diff.v64[0] <= a.data.v64[0])
 		return _diff.v;
 	else
-		return _mm_sub_epi64(_diff.v, SSE2_int128::overflow);
+		return _mm_sub_epi64(_diff.v, carry);
 }
+
+// TODO: operator *, /
 
 //____________________________________________________________________________
 // compares
 
+inline bool
+operator == (SSE2_int128 const &a, SSE2_int128 const &b)
+{
+	__m128i _e = _mm_cmpeq_epi32((__m128i)a, (__m128i)b);
+	return ((__int64)(SSE2_int128)_mm_and_si128(_e, _mm_unpackhi_epi64(_e, _e))) == ~(__int64)0;
+}
+
+inline bool
+operator != (SSE2_int128 const &a, SSE2_int128 const &b)
+{
+	__m128i _e = _mm_cmpeq_epi32((__m128i)a, (__m128i)b);
+	return ((__int64)(SSE2_int128)_mm_and_si128(_e, _mm_unpackhi_epi64(_e, _e))) != ~(__int64)0;
+}
+	
+// TODO: operator <, <=, >, >=
 
 } //namespace SEQAN_NAMESPACE_MAIN
 
 #endif //#ifdef __SSE2__
+#endif //#ifdef SEQAN_USE_SSE2_WORDS
 
 #endif //#ifndef SEQAN_HEADER_...

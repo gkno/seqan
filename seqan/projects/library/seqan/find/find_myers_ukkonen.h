@@ -105,7 +105,11 @@ struct _FindBegin< Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> >, void>
 
 struct _MyersLargePattern
 {
+#ifdef SEQAN_SSE2_INT128
+	typedef SSE2_int128 TWord;
+#else
 	typedef unsigned long TWord;
+#endif
 	String<TWord> VP;
 	String<TWord> VN;
 	TWord scoreMask;			// the mask with a bit set at the position of the last active cell
@@ -120,7 +124,12 @@ class Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> >:
 {
 //____________________________________________________________________________
 public:
+
+#ifdef SEQAN_SSE2_INT128
+	typedef SSE2_int128 TWord;
+#else
 	typedef unsigned long TWord;
+#endif
 	enum { MACHINE_WORD_SIZE = sizeof(TWord) * 8 };
 
 	unsigned needleSize;
@@ -207,7 +216,12 @@ template <typename TNeedle, typename TFindBeginPatternSpec>
 class Pattern<TNeedle, Myers<AlignTextBanded, TFindBeginPatternSpec> > {
 //____________________________________________________________________________
 public:
+#ifdef SEQAN_SSE2_INT128
+	typedef SSE2_int128 TWord;
+#else
 	typedef unsigned long TWord;
+#endif
+
 	typedef typename Iterator<TNeedle, Standard>::Type TIter;
 	enum { MACHINE_WORD_SIZE = sizeof(TWord) * 8 };
 
@@ -426,7 +440,7 @@ SEQAN_CHECKPOINT
 	for (unsigned i = 0; i < length(me.bitMasks); i += me.blockCount)
 	{
 		for (unsigned j = 0; j < me.needleSize; j++)
-			if (me.bitMasks[i + j / me.MACHINE_WORD_SIZE] & (TWord)1 << (j % me.MACHINE_WORD_SIZE))
+			if ((me.bitMasks[i + j / me.MACHINE_WORD_SIZE] & (TWord)1 << (j % me.MACHINE_WORD_SIZE)) != (TWord)0)
 				temp[j] = v;
 		++v;
 	}
@@ -448,7 +462,7 @@ SEQAN_CHECKPOINT
 	for (unsigned i = 0; i < length(me.bitMasks); i += me.blockCount)
 	{
 		for (unsigned j = 0; j < me.needleSize; j++)
-			if (me.bitMasks[i + j / me.MACHINE_WORD_SIZE] & (TWord)1 << (j % me.MACHINE_WORD_SIZE))
+			if ((me.bitMasks[i + j / me.MACHINE_WORD_SIZE] & (TWord)1 << (j % me.MACHINE_WORD_SIZE)) != (TWord)0)
 				temp[j] = v;
 		++v;
 	}
@@ -522,7 +536,7 @@ SEQAN_CHECKPOINT
 	if (me.large == NULL)
 	{
 		me.score = me.needleSize;
-		me.VP0 = ~0;
+		me.VP0 = ~(TWord)0;
 		me.VN0 = 0;
 	} 
 	else 
@@ -535,7 +549,7 @@ SEQAN_CHECKPOINT
 			large.lastBlock = large.blockCount - 1;
 
 		clear(large.VP);
-		fill(large.VP, large.blockCount, (TWord) ~0, Exact());
+		fill(large.VP, large.blockCount, ~(TWord)0, Exact());
 
 		clear(large.VN);
 		fill(large.VN, large.blockCount, 0, Exact());
@@ -609,10 +623,10 @@ SEQAN_CHECKPOINT
 	while (position(finder) < haystack_length) 
 	{
 		carryD0 = carryHN = 0;
-		carryHP = _MyersUkkonenHP0<TSpec>::VALUE;
+		carryHP = (int)_MyersUkkonenHP0<TSpec>::VALUE;
 
 		// if the active cell is the last of it's block, one additional block has to be calculated
-		limit = large.lastBlock + (large.scoreMask >> (me.MACHINE_WORD_SIZE - 1));
+		limit = large.lastBlock + (unsigned)(large.scoreMask >> (me.MACHINE_WORD_SIZE - 1));
 
 		if (limit == large.blockCount)
 			limit--;
@@ -625,7 +639,7 @@ SEQAN_CHECKPOINT
 			X = me.bitMasks[shift + currentBlock] | large.VN[currentBlock];
 	
 			temp = large.VP[currentBlock] + (X & large.VP[currentBlock]) + carryD0;
-			if (carryD0)
+			if (carryD0 != (TWord)0)
 				carryD0 = temp <= large.VP[currentBlock];
 			else
 				carryD0 = temp < large.VP[currentBlock];
@@ -646,22 +660,22 @@ SEQAN_CHECKPOINT
 
 			//if the current block is the one containing the last active cell the new score is computed
 			if (currentBlock == large.lastBlock) {
-				if (HP & large.scoreMask)
+				if ((HP & large.scoreMask) != (TWord)0)
 					me.score++;
-				else if (HN & large.scoreMask)
+				else if ((HN & large.scoreMask) != (TWord)0)
 					me.score--;
 			}
 		}
 
 		// updating the last active cell
 		while (me.score > me.k) {
-			if (large.VP[large.lastBlock] & large.scoreMask)
+			if ((large.VP[large.lastBlock] & large.scoreMask) != (TWord)0)
 				me.score--;
-			else if (large.VN[large.lastBlock] & large.scoreMask)
+			else if ((large.VN[large.lastBlock] & large.scoreMask) != (TWord)0)
 				me.score++;
 
 			large.scoreMask >>= 1;
-			if (!large.scoreMask) 
+			if (large.scoreMask == (TWord)0) 
 			{
 				large.lastBlock--;
 				if (TYPECMP<TSpec, FindPrefix>::VALUE && large.lastBlock == (unsigned)-1)
@@ -686,9 +700,9 @@ SEQAN_CHECKPOINT
 				large.lastBlock++;
 			}
 			
-			if (large.VP[large.lastBlock] & large.scoreMask)
+			if ((large.VP[large.lastBlock] & large.scoreMask) != (TWord)0)
 				me.score++;
-			else if (large.VN[large.lastBlock] & large.scoreMask)
+			else if ((large.VN[large.lastBlock] & large.scoreMask) != (TWord)0)
 				me.score--;
 		}
 
@@ -723,13 +737,13 @@ SEQAN_CHECKPOINT
 		D0 = ((me.VP0 + (X & me.VP0)) ^ me.VP0) | X;
 		HN = me.VP0 & D0;
 		HP = me.VN0 | ~(me.VP0 | D0);
-		X = (HP << 1) | _MyersUkkonenHP0<TSpec>::VALUE;
+		X = (HP << 1) | (TWord)(int)_MyersUkkonenHP0<TSpec>::VALUE;
 		me.VN0 = X & D0;
 		me.VP0 = (HN << 1) | ~(X | D0);
 
-		if (HP & lastBit)
+		if ((HP & lastBit) != (TWord)0)
 			me.score++;
-		else if (HN & lastBit)
+		else if ((HN & lastBit) != (TWord)0)
 			me.score--;
 
 		if (me.score <= me.k)
@@ -828,7 +842,7 @@ SEQAN_CHECKPOINT
 			X = me.bitMasks[shift + currentBlock] | me.VN[currentBlock];
 	
 			temp = me.VP[currentBlock] + (X & me.VP[currentBlock]) + carryD0;
-			if (carryD0)
+			if (carryD0 != (TWord)0)
 				carryD0 = temp <= me.VP[currentBlock];
 			else
 				carryD0 = temp < me.VP[currentBlock];
@@ -849,22 +863,22 @@ SEQAN_CHECKPOINT
 
 			//if the current block is the one containing the last active cell the new score is computed
 			if (currentBlock == me.lastBlock) {
-				if (HP & me.scoreMask)
+				if ((HP & me.scoreMask) != (TWord)0)
 					me.score++;
-				else if (HN & me.scoreMask)
+				else if ((HN & me.scoreMask) != (TWord)0)
 					me.score--;
 			}
 		}
 
 		// updating the last active cell
 		while (me.score > me.k) {
-			if (me.VP[me.lastBlock] & me.scoreMask)
+			if ((me.VP[me.lastBlock] & me.scoreMask) != (TWord)0)
 				me.score--;
-			else if (me.VN[me.lastBlock] & me.scoreMask)
+			else if ((me.VN[me.lastBlock] & me.scoreMask) != (TWord)0)
 				me.score++;
 
 			me.scoreMask >>= 1;
-			if (!me.scoreMask) {
+			if (me.scoreMask == (TWord)0) {
 				me.scoreMask = (TWord)1 << (me.MACHINE_WORD_SIZE - 1);
 				me.lastBlock--;
 			}
@@ -874,14 +888,14 @@ SEQAN_CHECKPOINT
 			return true;
 		else {
 			me.scoreMask <<= 1;
-			if (!me.scoreMask) {
+			if (me.scoreMask == (TWord)0) {
 				me.scoreMask = 1;
 				me.lastBlock++;
 			}
 			
-			if (me.VP[me.lastBlock] & me.scoreMask)
+			if ((me.VP[me.lastBlock] & me.scoreMask) != (TWord)0)
 				me.score++;
-			else if (me.VN[me.lastBlock] & me.scoreMask)
+			else if ((me.VN[me.lastBlock] & me.scoreMask) != (TWord)0)
 				me.score--;
 		}
 
@@ -936,14 +950,14 @@ SEQAN_CHECKPOINT
 			for(int i=me.MACHINE_WORD_SIZE-1; i>=0 ;--i) 
 			{
 				CharString vd = " 1 ";
-				if (D0 & ((TWord)1 << i)) vd = " 0 ";
+				if ((D0 & ((TWord)1 << i)) != (TWord)0) vd = " 0 ";
 				::std::cerr << vd;
 			}
 			::std::cerr << "   ";
 			::std::cerr << *finder;
 #endif
 
-			if (!(D0 & ((TWord)1 << (me.MACHINE_WORD_SIZE - 1))))
+			if ((D0 & ((TWord)1 << (me.MACHINE_WORD_SIZE - 1))) == (TWord)0)
 				++me.score;
 
 #ifdef SEQAN_DEBUG_MYERSBITVECTOR
@@ -980,17 +994,17 @@ SEQAN_CHECKPOINT
 		for(int i=me.MACHINE_WORD_SIZE-1; i>=0 ;--i) 
 		{
 			CharString hd = " 0 ";
-			if (HP & ((TWord)1 << i)) hd = " 1 ";
-			if (HN & ((TWord)1 << i)) hd = "-1 ";
+			if ((HP & ((TWord)1 << i)) != (TWord)0) hd = " 1 ";
+			if ((HN & ((TWord)1 << i)) != (TWord)0) hd = "-1 ";
 			::std::cerr << hd;
 		}
 		::std::cerr << "   ";
 		::std::cerr << *finder;
 #endif
 
-		if (HP & ((TWord)1 << (me.MACHINE_WORD_SIZE - 1)))
+		if ((HP & ((TWord)1 << (me.MACHINE_WORD_SIZE - 1))) != (TWord)0)
 			++me.score;
-		else if (HN & ((TWord)1 << (me.MACHINE_WORD_SIZE - 1)))
+		else if ((HN & ((TWord)1 << (me.MACHINE_WORD_SIZE - 1))) != (TWord)0)
 			--me.score;
 
 #ifdef SEQAN_DEBUG_MYERSBITVECTOR
@@ -1079,10 +1093,10 @@ SEQAN_CHECKPOINT
 			for(int i=me.scoreMask; i>0 ;i>>=1) 
 			{
 /*				char const *vd = "  1  ";
-				if (D0 & i) vd = "  0  ";
+				if ((D0 & i) != (TWord)0) vd = "  0  ";
 */				char const *vd = "  0  ";
-				if (me.VP0 & i) vd = "  1  ";
-				if (me.VN0 & i) vd = " -1  ";
+				if ((me.VP0 & i) != (TWord)0) vd = "  1  ";
+				if ((me.VN0 & i) != (TWord)0) vd = " -1  ";
 				::std::cerr << vd;
 			}
 			::std::cerr << "   ";
@@ -1134,10 +1148,10 @@ SEQAN_CHECKPOINT
 			for(int i=me.scoreMask; i>0 ;i>>=1) 
 			{
 /*				char const *vd = "  0  ";
-				if (me.VP0 & i) vd = "  1  ";
-				if (me.VN0 & i) vd = " -1  ";
+				if ((me.VP0 & i) != (TWord)0) vd = "  1  ";
+				if ((me.VN0 & i) != (TWord)0) vd = " -1  ";
 */				char const *vd = "  1  ";
-				if (D0 & i) vd = "  0  ";
+				if ((D0 & i) != (TWord)0) vd = "  0  ";
 				::std::cerr << vd;
 			}
 			::std::cerr << "   ";
@@ -1188,10 +1202,10 @@ SEQAN_CHECKPOINT
 			for(int i=me.scoreMask; i>0 ;i>>=1) 
 			{
 				char const *vd = "  0  ";
-/*				if (HP & i) vd = "  1  ";
-				if (HN & i) vd = " -1  ";
-*/				if (me.VP0 & i) vd = "  1  ";
-				if (me.VN0 & i) vd = " -1  ";
+/*				if ((HP & i) != (TWord)0) vd = "  1  ";
+				if ((HN & i) != (TWord)0) vd = " -1  ";
+*/				if ((me.VP0 & i) != (TWord)0) vd = "  1  ";
+				if ((me.VN0 & i) != (TWord)0) vd = " -1  ";
 				::std::cerr << vd;
 			}
 			::std::cerr << "   ";
