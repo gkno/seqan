@@ -145,7 +145,18 @@ allocate(T const &,
 		 TSize count,
 		 Tag<TUsage> const)
 {
-	data = (TValue *) operator new(count * sizeof(TValue));
+//	data = (TValue *) operator new(count * sizeof(TValue));
+#ifdef PLATFORM_WINDOWS
+	data = (TValue *) _aligned_malloc(count * sizeof(TValue), __alignof(TValue));
+#else
+#if _POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600
+	const size_t align = (__alignof__(TValue) < sizeof(void*))? sizeof(void*): __alignof__(TValue);
+	if (posix_memalign(&(void* &)data, align, count * sizeof(TValue)))
+		data = NULL;
+#else
+	data = (TValue *) malloc(count * sizeof(TValue));
+#endif
+#endif
 
 #ifdef SEQAN_PROFILE
 	if (data)
@@ -159,7 +170,18 @@ allocate(T &,
 		 TSize count,
 		 Tag<TUsage> const)
 {
-	data = (TValue *) operator new(count * sizeof(TValue));
+//	data = (TValue *) operator new(count * sizeof(TValue));
+#ifdef PLATFORM_WINDOWS
+	data = (TValue *) _aligned_malloc(count * sizeof(TValue), __alignof(TValue));
+#else
+#if _POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600
+	const size_t align = (__alignof__(TValue) < sizeof(void*))? sizeof(void*): __alignof__(TValue);
+	if (posix_memalign(&(void* &)data, align, count * sizeof(TValue)))
+		data = NULL;
+#else
+	data = (TValue *) malloc(count * sizeof(TValue));
+#endif
+#endif
 
 #ifdef SEQAN_PROFILE
 	if (data)
@@ -214,38 +236,50 @@ deallocate(T & me,
 }
 
 template <typename T, typename TValue, typename TSize, typename TUsage>
-inline void 
-deallocate(T const & /*me*/,
-		   TValue * data, 
-		   TSize 
+inline void
+deallocate(
+	T const & /*me*/,
+	TValue * data,
 #ifdef SEQAN_PROFILE 
-					count
+	TSize count,
+#else
+	TSize,
 #endif
-					,
-		   Tag<TUsage> const)
+	Tag<TUsage> const)
 {
 #ifdef SEQAN_PROFILE
 	if (data && count)	// .. to use count if SEQAN_PROFILE is not defined
 	    SEQAN_PROSUB(SEQAN_PROMEMORY, count * sizeof(TValue));
 #endif
-	operator delete ((void *) data);
+//	operator delete ((void *) data);
+#ifdef PLATFORM_WINDOWS
+	_aligned_free((void *) data);
+#else
+	free((void *) data);
+#endif
 }
 template <typename T, typename TValue, typename TSize, typename TUsage>
 inline void 
-deallocate(T & /*me*/,
-		   TValue * data, 
-		   TSize
+deallocate(
+	T & /*me*/,
+	TValue * data,
 #ifdef SEQAN_PROFILE 
-					count
+	TSize count,
+#else
+	TSize,
 #endif
-					,
-		   Tag<TUsage> const)
+	Tag<TUsage> const)
 {
 #ifdef SEQAN_PROFILE
 	if (data && count)	// .. to use count if SEQAN_PROFILE is not defined
 	    SEQAN_PROSUB(SEQAN_PROMEMORY, count * sizeof(TValue));
 #endif
-	operator delete ((void *) data);
+//	operator delete ((void *) data);
+#ifdef PLATFORM_WINDOWS
+	_aligned_free((void *) data);
+#else
+	free((void *) data);
+#endif
 }
 //////////////////////////////////////////////////////////////////////////////
 
