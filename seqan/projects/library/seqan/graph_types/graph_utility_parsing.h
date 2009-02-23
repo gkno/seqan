@@ -212,6 +212,24 @@ _parse_readFilepath(TFile& file, TChar& c)
 }
 
 
+//read filename (read line and trim trailing whitespaces)
+template<typename TFile, typename TChar>
+inline String<char>
+_parse_readWordUntilWhitespace(TFile& file, TChar& c)
+{
+	String<char> str(c);
+	if (c == '\n' || (c == '\r' && _streamPeek(file) != '\n')) {
+		c = _streamGet(file);
+		return str;
+	}
+	while (!_streamEOF(file)) {
+		c = _streamGet(file);
+		if (c== ' ' || c== '\t' || c == '\n' || (c == '\r' && _streamPeek(file) != '\n')) break;
+		append(str, c);
+	}
+	return str;
+}
+
 
 
 

@@ -31,7 +31,7 @@
 #include "seqan/platform.h"
 #include <seqan/sequence.h>
 #include <seqan/file.h>
-#include <seqan/graph_utils.h>
+#include <seqan/graph_types/graph_utility_parsing.h>
 
 #ifdef PLATFORM_WINDOWS
 	#define SEQAN_DEFAULT_TMPDIR "C:\\TEMP\\"
