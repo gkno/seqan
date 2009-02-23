@@ -61,14 +61,14 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //////////////////////////////////////////////////////////////////////////////
 // Determine error distribution
-template <typename TErrDistr, typename TMatches, typename TReads, typename TGenomes, typename TSpec>
+template <typename TErrDistr, typename TMatches, typename TReads, typename TGenomes, typename TOptions>
 inline unsigned
 getErrorDistribution(
 	TErrDistr &posError, 
 	TMatches &matches, 
 	TReads &reads, 
 	TGenomes &genomes, 
-	RazerSOptions<TSpec> &options)
+	TOptions &options)
 {
 	typename Iterator<TMatches, Standard>::Type	it = begin(matches, Standard());
 	typename Iterator<TMatches, Standard>::Type	itEnd = end(matches, Standard());
@@ -83,10 +83,9 @@ getErrorDistribution(
 		genome = infix(genomes[(*it).gseqNo], (*it).gBegin, (*it).gEnd);
 		if ((*it).orientation == 'R')
 			reverseComplementInPlace(genome);
-
 		for (unsigned i = 0; i < length(posError) && i < length(read); ++i)
 			if ((options.compMask[ordValue(genome[i])] & options.compMask[ordValue(read[i])]) == 0)
-				++posError[i];
+				++posError[i]; 
 		++unique;
 	}
 	return unique;
@@ -723,10 +722,12 @@ void dumpMatches(
 						for (unsigned i = 0; i < length(gInf); ++i)
 							if ((options.compMask[ordValue((Dna5)reads[readNo][i])] & 
 								options.compMask[ordValue(gInf[i])]) == 0)
+							{
 		//						if(first){ file << i + 1 << gInf[i]; first = false;}
 		//						else file <<','<< i + 1 << gInf[i];
 								if(first){ file << i + 1 << (Dna5)reads[readNo][i]; first = false;}
 								else file <<','<< i + 1 << (Dna5)reads[readNo][i];
+							}
 					}
 					else
 					{
@@ -799,7 +800,7 @@ void dumpMatches(
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 #ifdef RAZERS_DUMP_SNPS
-
+/*
 double cumulated_normal(const double x)
 {
 	const double b1 =  0.319381530;
@@ -1147,7 +1148,7 @@ void dumpSNPs(
 	return;
 
 }
-
+*/
 #endif
 }
 #endif
