@@ -190,17 +190,17 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 		typedef typename _MakeSigned<_TGPos>::Type TGPos;
 
-#ifdef RAZERS_DIRECT_MAQ_MAPPING
-		short	 		mScore;
-		short			seedEditDist;
-#endif
 		unsigned		gseqNo;			// genome seqNo
 		unsigned		rseqNo;			// read seqNo
 		TGPos			gBegin;			// begin position of the match in the genome
 		TGPos			gEnd;			// end position of the match in the genome
 		unsigned short		editDist;		// Levenshtein distance
+#ifdef RAZERS_DIRECT_MAQ_MAPPING
+		short	 		mScore;
+		short			seedEditDist;
+#endif
 		char			orientation;	// 'F'..forward strand, 'R'..reverse comp. strand
-	};
+};
 	
 	enum RAZERS_ERROR {
 		RAZERS_READS_FAILED = 1,
@@ -419,12 +419,13 @@ bool loadReads(TReadSet &reads, TNameSet &fastaIDs, const char *fileName, TRazer
 		for (unsigned j = 0; j < length(helpString); ++j)
 		{
 			//store dna and quality together
-			seq[j] = ((unsigned char) helpString[j] & (unsigned char)0x07);
+/*			seq[j] = ((unsigned char) helpString[j] & (unsigned char)0x07);
 			//(bisschen bloed)
 			unsigned char helpQual = (unsigned char)((int)qual[j]-33);
 			if((int)helpQual > 31) helpQual = (unsigned char)31;
 			helpQual = helpQual << 3;
 			seq[j] = (unsigned char)seq[j] | helpQual;
+*/			seq[j] = (unsigned int) ((((ordValue(qual[j])<=64)? ordValue(qual[j])-33: 31) << 3) | ordValue(seq[j]));
 		}
 /*		std::cout << "read = " << (Dna5)((unsigned char)seq[0]& (unsigned char)0x07)<< (Dna5)((unsigned char)seq[1]& (unsigned char)0x07)<< "... ";
 		unsigned char check = seq[0];
