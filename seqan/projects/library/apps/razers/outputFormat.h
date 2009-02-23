@@ -33,6 +33,92 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 //////////////////////////////////////////////////////////////////////////////
+// Quality-based score
+
+	template <typename TQualityString = CharString>
+	struct Quality;
+
+	template <typename TValue, typename TQualityString>
+	class Score<TValue, Quality<TQualityString> >
+	{
+	public:
+		TValue data_match;
+		TValue data_mismatch;
+		TValue data_gap_extend;
+		TValue data_gap_open;
+
+		TQualityString const *data_qual;
+
+	public:
+		Score():
+			data_match(0),
+			data_mismatch(-1),
+			data_gap_extend(-1),
+			data_gap_open(-1),
+			data_qual(NULL)
+		{
+		}
+		Score(TValue _match, TValue _mismatch, TValue _gap):
+			data_match(_match),
+			data_mismatch(_mismatch),
+			data_gap_extend(_gap),
+			data_gap_open(_gap),
+			data_qual(NULL)
+		{
+		}
+		Score(TValue _match, TValue _mismatch, TValue _gap_extend, TValue _gap_open, TQualityString const &_qual):
+			data_match(_match),
+			data_mismatch(_mismatch),
+			data_gap_extend(_gap_extend),
+			data_gap_open(_gap_open),
+			data_qual(&_qual)
+		{
+		}
+
+		Score(Score const & other):
+			data_match(other.data_match),
+			data_mismatch(other.data_mismatch),
+			data_gap_extend(other.data_gap_extend),
+			data_gap_open(other.data_gap_open),
+			data_qual(other.data_qual)
+		{
+		}
+		~Score()
+		{
+		}
+
+		Score & operator = (Score const & other)
+		{
+			data_match = other.data_match;
+			data_mismatch = other.data_mismatch;
+			data_gap_extend = other.data_gap_extend;
+			data_gap_open = other.data_gap_open;
+			data_qual = other.data_qual;
+			return *this;
+		}
+	};
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TValue, typename TQualityString, typename TPos1, typename TPos2, typename TSeq1, typename TSeq2>
+inline TValue
+score(Score<TValue, Quality<TQualityString> > const & me,
+	  TPos1 pos1,
+	  TPos2 pos2,
+	  TSeq1 const &seq1,
+	  TSeq2 const &seq2)
+{
+	if (seq1[pos1] != seq2[pos2])
+		if (me.data_qual)
+			return (*me.data_qual)[pos2];
+		else
+			return scoreMismatch(me);
+	else
+		return scoreMatch(me);
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
 // Less-operators ...
 
 	// ... to sort matches and remove duplicates with equal gBegin
@@ -57,7 +143,6 @@ namespace SEQAN_NAMESPACE_MAIN
 			return a.editDist < b.editDist;
 		}
 	};
-
 
 //////////////////////////////////////////////////////////////////////////////
 // Determine error distribution
@@ -262,7 +347,7 @@ void dumpMatches(
 	TReads const &reads,
 	TCounts & stats,						// Match statistics (possibly empty)
 	TReadNames const &readIDs,					// Read names (read from Fasta file, currently unused)
-	::std::string readFName,					// read name (e.g. "reads.fa")
+	::std::string readFName,					// read name (e.g. "reads.fa"), used for file/read naming
 	::std::string errorPrbFileName,
 	RazerSOptions<TSpec> &options)
 {
@@ -270,6 +355,11 @@ void dumpMatches(
 	typedef typename Value<TReads>::Type		TRead;
 	typedef typename Value<TGenomeSet>::Type	TGenome;
 	typedef typename TMatch::TGPos				TGPos;
+
+	if (options.outputFormat == 2)
+	{
+		options.sortOrder = 0;		// ... to count multiple matches
+	}
 
 	if (options.outputFormat == 2)
 	{
@@ -460,16 +550,24 @@ void dumpMatches(
 
 
 		case 1:	// Enhanced Fasta Format
-			for(; it != itEnd; ++it) 
+			for(unsigned matchReadNo = -1, matchReadCount = 0; it != itEnd; ++it) 
 			{
 				unsigned	readLen = length(reads[(*it).rseqNo]);
 				double		percId = 100.0 * (1.0 - (double)(*it).editDist / (double)readLen);
 
+				if (matchReadNo != (*it).rseqNo)
+				{
+					matchReadNo = (*it).rseqNo;
+					matchReadCount = 0;
+				} else
+					++matchReadCount;
+
 				::std::string fastaID;
 				assign(fastaID, readIDs[(*it).rseqNo]);
 
-				int id = (*it).rseqNo;
-				int fragId = id;
+				::std::string id = fastaID;
+				int fragId = (*it).rseqNo;
+				bool appendMatchId = options.maxHits > 1;
 
 				size_t left = fastaID.find_first_of('[');
 				size_t right = fastaID.find_last_of(']');
@@ -482,6 +580,7 @@ void dumpMatches(
 					if (pos != fastaID.npos) {
 						::std::istringstream iss(fastaID.substr(pos + 3));
 						iss >> id;
+						appendMatchId = false;
 					}
 					pos = fastaID.find("fragId=");
 					if (pos != fastaID.npos) {
@@ -501,7 +600,10 @@ void dumpMatches(
 				for (unsigned i = 0; i <= (*it).editDist && i < length(stats); ++i)
 					ambig += stats[i][(*it).rseqNo];
 				
-				file << "[id=" << id << ",fragId=" << fragId;
+				file << "[id=" << id;
+				if (appendMatchId) file << "_" << matchReadCount;
+				file << ",fragId=" << fragId;
+				file << ",contigId=" << genomeIDs[(*it).gseqNo];
 				file << ",errors=" << (*it).editDist << ",percId=" << ::std::setprecision(5) << percId;
 				file << ",ambiguity=" << ambig << ']' << ::std::endl;
 
@@ -631,7 +733,7 @@ void dumpMatches(
 						if(secondBestDist == -1) qualTerm1 = 99;
 						else
 						{
-							qualTerm1 = secondBestQualSum - bestQualSum - 4.343 * log(secondBestMatches);
+							qualTerm1 = secondBestQualSum - bestQualSum - 4.343 * log((double)secondBestMatches);
 							if (secondBestDist - bestDist <= 1 && qualTerm1 > options.mutationRateQual) qualTerm1 = options.mutationRateQual;
 						}
 						float avgSeedQual = 0.0;

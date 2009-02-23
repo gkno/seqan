@@ -29,8 +29,9 @@
 //#define NO_PARAM_CHOOSER
 //#define RAZERS_PARALLEL			// parallelize using Intel's Threading Building Blocks
 //#define RAZERS_DUMP_SNPS
-#define RAZERS_DIRECT_MAQ_MAPPING
-
+//#define RAZERS_MATEPAIRS
+//#define RAZERS_DIRECT_MAQ_MAPPING
+//#define SEQAN_USE_SSE2_WORDS	// use SSE2 128-bit integers for MyersBitVector
 
 #include "seqan/platform.h"
 #ifdef PLATFORM_WINDOWS
@@ -47,6 +48,11 @@
 #include "razers_parallel.h"
 #endif
 
+#ifdef RAZERS_MATEPAIRS
+#include "razers_matepairs.h"
+#endif
+
+
 #include <iostream>
 #include <sstream>
 
@@ -59,14 +65,14 @@ using namespace seqan;
 template <typename TSpec>
 int mapReads(
 	const char *genomeFileName,
-	const char *readFileName,
+	const char *readFileNames[],	// NULL terminated list of one/two read files (single/mate-pairs)
 	const char *errorPrbFileName,
 	RazerSOptions<TSpec> &options)
 {
 	MultiFasta				genomeSet;
 	TReadSet				readSet;
-	StringSet<CharString>			genomeNames;	// genome names, taken from the Fasta file
-	StringSet<CharString>			readNames;		// read names, taken from the Fasta file
+	StringSet<CharString>	genomeNames;	// genome names, taken from the Fasta file
+	StringSet<CharString>	readNames;		// read names, taken from the Fasta file
 	TMatches				matches;		// resulting forward/reverse matches
 	String<String<unsigned short> > 	stats;		// needed for mapping quality calculation 
 
@@ -77,7 +83,14 @@ int mapReads(
 //		shapeToString(bitmap, shape);
 		::std::cerr << "___SETTINGS____________" << ::std::endl;
 		::std::cerr << "Genome file:                     \t" << genomeFileName << ::std::endl;
-		::std::cerr << "Read file:                       \t" << readFileName << ::std::endl;
+		if (empty(readFileNames[1]))
+			::std::cerr << "Read file:                       \t" << readFileNames[0] << ::std::endl;
+		else
+		{
+			::std::cerr << "Read files:                      \t" << readFileNames[0] << ::std::endl;
+			for (const char **i = readFileNames + 1; !empty(*i); ++i)
+				::std::cerr << "                                 \t" << *i << ::std::endl;
+		}
 		::std::cerr << "Compute forward matches:         \t";
 		if (options.forward)	::std::cerr << "YES" << ::std::endl;
 		else				::std::cerr << "NO" << ::std::endl;
@@ -100,10 +113,25 @@ int mapReads(
 	// Step 1: Load fasta files and determine genome file type
 	SEQAN_PROTIMESTART(load_time);
 
-	if (!loadReads(readSet, readNames, readFileName, options)) {
-		::std::cerr << "Failed to load reads" << ::std::endl;
-		return RAZERS_READS_FAILED;
+#ifdef SEQAN_MATEPAIRS
+	if (!empty(readFileNames[1]))
+	{
+		if (!loadReads(readSet, readNames, readFileNames[0], readFileName[1], options)) {
+		//if (!loadReads(readSet, readQualities, readNames, readFileNames[0], readFileNames[1], options)) {
+			::std::cerr << "Failed to load reads" << ::std::endl;
+			return RAZERS_READS_FAILED;
+		}
 	}
+	else
+#endif
+	{
+		if (!loadReads(readSet, readNames, readFileNames[0], options)) {
+		//if (!loadReads(readSet, readQualities, readNames, readFileNames[0], readFileNames[1], options)) {
+			::std::cerr << "Failed to load reads" << ::std::endl;
+			return RAZERS_READS_FAILED;
+		}
+	} 
+
 	if (options._debugLevel >= 1) ::std::cerr << lengthSum(readSet) << " bps of " << length(readSet) << " reads loaded." << ::std::endl;
 	options.timeLoadFiles = SEQAN_PROTIMEDIFF(load_time);
 
@@ -112,7 +140,7 @@ int mapReads(
 
 	StringSet<CharString> genomeFileNameList;
 	int result = getGenomeFileNameList(genomeFileName, genomeFileNameList, options);
-	if(result == RAZERS_GENOME_FAILED)
+	if (result == RAZERS_GENOME_FAILED)
 	{
 		::std::cerr << "Failed to open genome file " << genomeFileName << ::std::endl;
 		return result;
@@ -150,7 +178,7 @@ int mapReads(
 	//////////////////////////////////////////////////////////////////////////////
 	// Step 3: Remove duplicates and output matches
 	if (!options.spec.DONT_DUMP_RESULTS)
-		dumpMatches(matches, genomeNames, genomeFileNameList, gnoToFileMap, readSet, stats, readNames, readFileName, errorPrbFileName, options);
+		dumpMatches(matches, genomeNames, genomeFileNameList, gnoToFileMap, readSet, stats, readNames, readFileNames[0], errorPrbFileName, options);
 
 #ifdef RAZERS_DUMP_SNPS
 	//////////////////////////////////////////////////////////////////////////////
@@ -167,7 +195,7 @@ int mapReads(
 // Print usage
 void printVersion() 
 {
-	cerr << "RazerS version 0.3 20081029 (prerelease)" << endl;
+	cerr << "RazerS version 0.3 20090223 (prerelease)" << endl;
 }
 
 template <typename TSpec>
@@ -184,6 +212,9 @@ void printHelp(int, const char *[], RazerSOptions<TSpec> &options, ParamChooserO
 	cerr << "*** written by David Weese (c) Aug 2008  ***" << endl;
 	cerr << "********************************************" << endl << endl;
 	cerr << "Usage: razers [OPTION]... <GENOME FILE> <READS FILE>" << endl;
+#ifdef RAZERS_MATEPAIRS
+	cerr << "       razers [OPTION]... <GENOME FILE> <MP-READS FILE1> <MP-READS FILE2>" << endl;
+#endif
 	if (longHelp) {
 		cerr << endl << "Main Options:" << endl;
 		cerr << "  -f,  --forward               \t" << "only compute forward matches" << endl;
@@ -193,6 +224,10 @@ void printHelp(int, const char *[], RazerSOptions<TSpec> &options, ParamChooserO
 		cerr << "  -rr, --recognition-rate NUM  \t" << "set the percent recognition rate (default " << 100 - (100.0 * pm_options.optionLossRate) << ')' << endl;
 #endif
 		cerr << "  -id, --indels                \t" << "allow indels (default: mismatches only)" << endl;
+#ifdef RAZERS_MATEPAIRS
+		cerr << "  -ll, --library-length NUM    \t" << "mate-pair library length (default " << options.libraryLength << ')' << endl;
+		cerr << "  -le, --library-error NUM     \t" << "mate-pair library length tolerance (defaukt " << options.libraryError << ')' << endl;
+#endif
 		cerr << "  -m,  --max-hits NUM          \t" << "output only NUM of the best hits (default " << options.maxHits << ')' << endl;
 		cerr << "  -tr, --trim-reads NUM        \t" << "trim reads to length NUM (default off)" << endl;
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
@@ -238,31 +273,6 @@ void printHelp(int, const char *[], RazerSOptions<TSpec> &options, ParamChooserO
 		cerr << "Try 'razers --help' for more information." << endl;
 	}
 }
-
-//////////////////////////////////////////////////////////////////////////////
-// Load multi-Fasta sequences
-template<typename TSpec>
-int estimateReadLength(char const *fileName, RazerSOptions<TSpec> &options)
-{
-	Dna5String dummy;
-	
-	::std::ifstream file;
-	file.open(fileName, ::std::ios_base::in | ::std::ios_base::binary);
-	if (!file.is_open() || _streamEOF(file)) return RAZERS_READS_FAILED;
-	char c = _streamGet(file);
-	if(c=='@')
-	{
-		options.inputFormat = 1;	
-		_parse_skipLine(file,c);
-		dummy = _parse_readWord(file,c);
-	}
-	if(c=='>')
-		read(file, dummy, Fasta());			// read first Read sequence
-	file.close();
-	return length(dummy);
-}
-
-
 
 
 template<typename TSpec>
@@ -319,8 +329,13 @@ int main(int argc, const char *argv[])
 
 	bool				paramChoosing = true;
 	unsigned			fnameCount = 0;
-	const char			*fname[2] = { "", "" };
 	string				errorPrbFileName;
+#ifdef RAZERS_MATEPAIRS
+	const unsigned		maxFiles = 3;
+#else
+	const unsigned		maxFiles = 2;
+#endif
+	const char			*fname[maxFiles + 1] = { NULL, };
 
 	options.forward = false;
 	options.reverse = false;
@@ -362,6 +377,7 @@ int main(int argc, const char *argv[])
 					istringstream istr(argv[arg]);
 					istr >> pm_options.optionLossRate;
 					if (!istr.fail())
+					{
 						if (pm_options.optionLossRate < 80 || pm_options.optionLossRate > 100)
 							cerr << "Recognition rate must be a value between 80 and 100" << endl << endl;
 						else
@@ -370,6 +386,7 @@ int main(int argc, const char *argv[])
 							pm_options.optionLossRate /= 100.0;
 							continue;
 						}
+					}
 				}
 				printHelp(argc, argv, options, pm_options);
 				return 0;
@@ -670,8 +687,8 @@ int main(int argc, const char *argv[])
 			return 0;
 		} else {
 			// parse file name
-			if (fnameCount == 2) {
-				cerr << "More than 2 input files specified." << endl << endl;
+			if (fnameCount == maxFiles) {
+				cerr << "More than " << maxFiles << " input files specified." << endl << endl;
 				printHelp(argc, argv, options, pm_options);
 				return 0;
 			}
@@ -688,13 +705,28 @@ int main(int argc, const char *argv[])
 		options.forward = true;
 		options.reverse = true;
 	}
+
+	if (fnameCount == 2)
+		options.libraryLength = -1;	// only 1 readset -> disable mate-pair mapping
 	
 	if (options.printVersion)
 		printVersion();
 		
-	// get read length and read file format! (fasta or fastq)
-	unsigned rLength = estimateReadLength(fname[1],options);
-	if (options.trimLength > 0 && rLength < options.trimLength) options.trimLength = rLength;
+	// get read length
+	int readLength = estimateReadLength(fname[1]);
+	if (readLength == RAZERS_READS_FAILED)
+	{
+		::std::cerr << "Failed to open reads file " << fname[1] << ::std::endl;
+		return 0;
+	}
+	if (readLength == 0) {
+		::std::cerr << "Failed to read the first read sequence.";
+		return 0;
+	}
+
+	if (options.trimLength > readLength)
+		options.trimLength = readLength;
+	
 #ifndef NO_PARAM_CHOOSER
 	if (paramChoosing)
 	{
@@ -716,13 +748,13 @@ int main(int argc, const char *argv[])
 		if (lastPos == pm_options.paramFolderPath.npos + 1) lastPos = pm_options.paramFolderPath.find_last_of('\\') + 1;
 		if (lastPos == pm_options.paramFolderPath.npos + 1) lastPos = 0;
 		pm_options.paramFolderPath.erase(lastPos); 
-		if (options.trimLength > 0) rLength = options.trimLength;
-		if (rLength > 0)
+		if (options.trimLength > 0) readLength = options.trimLength;
+		if (readLength > 0)
 		{
-/*			if(options.maqMapping && rLength != options.artSeedLength)
+/*			if(options.maqMapping && readLength != options.artSeedLength)
 				pm_options.totalN = options.artSeedLength;
 			else*/
-				pm_options.totalN = rLength;
+				pm_options.totalN = readLength;
 			if (options._debugLevel >= 1)
 				cerr << "___PARAMETER_CHOOSING__" << endl;
 			if (!chooseParams(options,pm_options))
@@ -744,7 +776,7 @@ int main(int argc, const char *argv[])
 	tbb::task_scheduler_init scheduler;
 #endif
 
-	int result = mapReads(fname[0], fname[1], errorPrbFileName.c_str(), options);
+	int result = mapReads(fname[0], fname + 1, errorPrbFileName.c_str(), options);
 	if (result == RAZERS_INVALID_SHAPE) 
 	{
 		printHelp(argc, argv, options, pm_options);

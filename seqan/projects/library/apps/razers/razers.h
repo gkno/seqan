@@ -62,12 +62,12 @@ namespace SEQAN_NAMESPACE_MAIN
 		int			_debugLevel;		// level of verbosity
 		bool		printVersion;		// print version number
 		bool		hammingOnly;		// no indels
-		unsigned	inputFormat;		// 0 = fasta, 1 = fastq format
-		unsigned	trimLength;
+		int			trimLength;			// if >0, cut reads to #trimLength characters
 		
 	// output format options
 		unsigned	outputFormat;		// 0..Razer format
 										// 1..enhanced Fasta
+										// 2..ELAND format
 		bool		dumpAlignment;		// compute and dump the match alignments in the result files
 		unsigned	genomeNaming;		// 0..use Fasta id
 										// 1..enumerate reads beginning with 1
@@ -78,7 +78,7 @@ namespace SEQAN_NAMESPACE_MAIN
 										// 1..           1. genome pos50ition, 2. read number
 		unsigned	positionFormat;		// 0..gap space
 										// 1..position space
-		const char	*runID;			// runID needed for gff output
+		const char	*runID;				// runID needed for gff output
 
 	// filtration parameters
 		::std::string shape;			// shape (e.g. 11111111111)
@@ -86,6 +86,10 @@ namespace SEQAN_NAMESPACE_MAIN
 		int			tabooLength;		// taboo length
 		int			repeatLength;		// repeat length threshold
 		double		abundanceCut;		// abundance threshold
+
+	// mate-pair parameters
+		int			libraryLength;		// offset between two mates
+		int			libraryError;		// offset tolerance
 
 	// verification parameters
 		bool		matchN;				// false..N is always a mismatch, true..N matches with all
@@ -99,15 +103,15 @@ namespace SEQAN_NAMESPACE_MAIN
 		double		timeDumpResults;	// time for dumping the results
 		
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
-		bool maqMapping;
-		int maxMismatchQualSum;
-		int mutationRateQual;
-		unsigned artSeedLength;
+		bool		maqMapping;
+		int			maxMismatchQualSum;
+		int			mutationRateQual;
+		unsigned	artSeedLength;
 #endif
 
 #ifdef RAZERS_DUMP_SNPS
-		bool bayesian;
-		double testLevel;
+		bool		bayesian;
+		double		testLevel;
 		const char	*outputSNP;			// name of result file
 #endif
 
@@ -141,7 +145,6 @@ namespace SEQAN_NAMESPACE_MAIN
 			printVersion = false;
 			hammingOnly = false;
 			trimLength = 0;
-			inputFormat = 0;
 			
 			outputFormat = 0;
 			dumpAlignment = false;
@@ -158,6 +161,9 @@ namespace SEQAN_NAMESPACE_MAIN
 			tabooLength = 1;
 			repeatLength = 1000;
 			abundanceCut = 1;
+
+			libraryLength = 250;
+			libraryError = 20;
 			
 			for (unsigned i = 0; i < 4; ++i)
 				compMask[i] = 1 << i;
@@ -203,24 +209,22 @@ namespace SEQAN_NAMESPACE_MAIN
 };
 	
 	enum RAZERS_ERROR {
-		RAZERS_READS_FAILED = 1,
-		RAZERS_GENOME_FAILED = 2,
-		RAZERS_INVALID_SHAPE = 3
+		RAZERS_READS_FAILED = -1,
+		RAZERS_GENOME_FAILED = -2,
+		RAZERS_INVALID_SHAPE = -3
 	};
 
 //////////////////////////////////////////////////////////////////////////////
 // Definitions
 
-	typedef Dna5String								TGenome;
+	typedef Dna5String									TGenome;
 	typedef StringSet<TGenome>							TGenomeSet;
-//	typedef Dna5String								TRead;
+//	typedef Dna5String									TRead;
 	typedef String<Dna5Q>								TRead;
 #ifdef RAZERS_CONCATREADS
 	typedef StringSet<TRead, Owner<ConcatDirect<> > >	TReadSet;
-	typedef StringSet<CharString, Owner<ConcatDirect<> > >	TReadQualities;
 #else
 	typedef StringSet<TRead>							TReadSet;
-	typedef StringSet<CharString>							TReadQualities;
 #endif
 
 	typedef ReadMatch<Difference<TGenome>::Type>		TMatch;		// a single match
@@ -311,12 +315,14 @@ namespace SEQAN_NAMESPACE_MAIN
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
-// Load multi-Fasta sequences
+// Load multi-Fasta sequences with or w/o quality values
 template <typename TReadSet, typename TNameSet, typename TRazerSOptions>
-bool loadReads(TReadSet &reads, TNameSet &fastaIDs, const char *fileName, TRazerSOptions &options)
+bool loadReads(
+	TReadSet &reads, 
+	TNameSet &fastaIDs, 
+	const char *fileName, 
+	TRazerSOptions &options)
 {
-	if(options.inputFormat==1) return loadReads(reads, fastaIDs, fileName, options, Fastq());
-	
 	bool countN = !(options.matchN || options.outputFormat == 1);
 
 	MultiFasta multiFasta;
@@ -328,67 +334,11 @@ bool loadReads(TReadSet &reads, TNameSet &fastaIDs, const char *fileName, TRazer
 
 	unsigned seqCount = length(multiFasta);
 #ifndef RAZERS_CONCATREADS
-	resize(reads, seqCount);
+	resize(reads, seqCount, Exact());
 #endif
 	if (options.readNaming == 0)
-		resize(fastaIDs, seqCount);
+		resize(fastaIDs, seqCount, Exact());
 	
-	Dna5String seq;
-	unsigned kickoutcount = 0;
-	for(unsigned i = 0; i < seqCount; ++i) 
-	{
-		if (options.readNaming == 0)
-			assignSeqId(fastaIDs[i], multiFasta[i], format);	// read Fasta id
-		assignSeq(seq, multiFasta[i], format);					// read Read sequence
-
-		if (countN)
-		{
-			int count = 0;
-			int cutoffCount = (int)(options.errorRate * length(seq));
-			for (unsigned j = 0; j < length(seq); ++j)
-				if (getValue(seq, j) == 'N')
-					if (++count > cutoffCount)
-					{
-						clear(seq);
-						++kickoutcount;
-						break;
-					}
-		}
-#ifdef RAZERS_CONCATREADS
-		appendValue(reads, seq, Generous());
-#else
-		assign(reads[i], seq, Exact());
-#endif
-	}
-#ifdef RAZERS_CONCATREADS
-	reserve(reads.concat, length(reads.concat), Exact());
-#endif
-
-	if (options._debugLevel > 1 && kickoutcount > 0) 
-		::std::cerr << "Ignoring " << kickoutcount << " low quality reads.\n";
-	return (seqCount > 0);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////
-// Load multi-Fasta sequences
-template <typename TReadSet, typename TNameSet, typename TRazerSOptions>
-bool loadReads(TReadSet &reads, TNameSet &fastaIDs, const char *fileName, TRazerSOptions &options, Fastq)
-{
-	bool countN = !(options.matchN || options.outputFormat == 1);
-
-	MultiFasta multiFasta;
-	if (!open(multiFasta.concat, fileName, OPEN_RDONLY)) return false;
-	split(multiFasta, Fastq());
-
-	unsigned seqCount = length(multiFasta);
-#ifndef RAZERS_CONCATREADS
-	resize(reads, seqCount);
-#endif
-	if (options.readNaming == 0)
-		resize(fastaIDs, seqCount);
-	
-	if(options._debugLevel>1)::std::cerr << "Reading Fastq read file."<< std::endl;
 	String<Dna5Q> seq;
 	CharString qual;
 	Dna5String helpString;
@@ -397,9 +347,9 @@ bool loadReads(TReadSet &reads, TNameSet &fastaIDs, const char *fileName, TRazer
 	for(unsigned i = 0; i < seqCount; ++i) 
 	{
 		if (options.readNaming == 0)
-			assignSeqId(fastaIDs[i], multiFasta[i], Fastq());	// read Fasta id
-		assignSeq(helpString, multiFasta[i], Fastq());			// read Read sequence
-		assignQual(qual, multiFasta[i], Fastq());			// read ascii quality values  
+			assignSeqId(fastaIDs[i], multiFasta[i], format);	// read Fasta id
+		assignSeq(helpString, multiFasta[i], format);			// read Read sequence
+		assignQual(qual, multiFasta[i], format);			// read ascii quality values  
 		if (countN)
 		{
 			int count = 0;
@@ -415,32 +365,32 @@ bool loadReads(TReadSet &reads, TNameSet &fastaIDs, const char *fileName, TRazer
 					}
 			if (count > cutoffCount) continue;
 		}
-		resize(seq,length(helpString));
-		for (unsigned j = 0; j < length(helpString); ++j)
-		{
-			//store dna and quality together
-/*			seq[j] = ((unsigned char) helpString[j] & (unsigned char)0x07);
-			//(bisschen bloed)
-			unsigned char helpQual = (unsigned char)((int)qual[j]-33);
-			if((int)helpQual > 31) helpQual = (unsigned char)31;
-			helpQual = helpQual << 3;
-			seq[j] = (unsigned char)seq[j] | helpQual;
-*/			seq[j] = (unsigned int) ((((ordValue(qual[j])<=64)? ordValue(qual[j])-33: 31) << 3) | ordValue(seq[j]));
-		}
+
+		resize(seq, length(helpString));
+		unsigned j = 0;
+
+		// store dna and quality together
+		for (; j < length(qual) && j < length(helpString); ++j)
+			seq[j] = (unsigned int) (
+				(((ordValue(qual[j]) <= 64)? ordValue(qual[j]) - 33: 31) << 3) 
+				| ordValue(helpString[j]));
+
+		// fill non-existent qualities with q40
+		for (; j < length(helpString); ++j)
+			seq[j] = (unsigned int) ((80 << 3) | ordValue(helpString[j]));
+
 /*		std::cout << "read = " << (Dna5)((unsigned char)seq[0]& (unsigned char)0x07)<< (Dna5)((unsigned char)seq[1]& (unsigned char)0x07)<< "... ";
 		unsigned char check = seq[0];
 		unsigned intQual = (check>>3);
 		std::cout << "qual = " <<  (int)intQual << ::std::endl;*/
+
+		if (options.trimLength > 0 && length(seq) > (unsigned)options.trimLength)
+			resize(seq, options.trimLength);
+
 #ifdef RAZERS_CONCATREADS
-		if(options.trimLength>0)
-			appendValue(reads, prefix(seq,options.trimLength), Generous());
-		else
-			appendValue(reads, seq, Generous());
+		appendValue(reads, seq, Generous());
 #else
-		if(options.trimLength>0)
-			assign(reads[i], prefix(seq,options.trimLength), Exact());
-		else
-			assign(reads[i], seq, Exact());
+		assign(reads[i], seq, Exact());
 #endif
 	}
 #ifdef RAZERS_CONCATREADS
@@ -452,6 +402,26 @@ bool loadReads(TReadSet &reads, TNameSet &fastaIDs, const char *fileName, TRazer
 	return (seqCount > 0);
 }
 
+//////////////////////////////////////////////////////////////////////////////
+// Read the first sequence of a multi-sequence file
+// and return its length
+inline int estimateReadLength(char const *fileName)
+{
+	MultiFasta multiFasta;
+	if (!open(multiFasta.concat, fileName, OPEN_RDONLY))	// open the whole file
+		return RAZERS_READS_FAILED;
+
+	AutoSeqFormat format;
+	guessFormat(multiFasta.concat, format);					// guess file format
+	split(multiFasta, format);								// divide into single sequences
+
+	if (length(multiFasta) == 0)
+		return 0;
+
+	Dna5String firstRead;
+	assignSeq(firstRead, multiFasta[0], format);			// read the first sequence
+	return length(firstRead);
+}
 
 
 /*
@@ -465,7 +435,7 @@ bool loadGenomes(TGenomeSet &genomes, const char *fileName)
 	split(multiFasta, Fasta());
 
 	unsigned seqCount = length(multiFasta);
-	resize(genomes, seqCount);
+	resize(genomes, seqCount, Exact());
 	for(unsigned i = 0; i < seqCount; ++i)
 		assignSeq(genomes[i], multiFasta[i], Fasta());		// read Genome sequence
 
@@ -1109,7 +1079,7 @@ template <
 	typename TVerifier,
 	typename TCounts,
 	typename TSpec >
-void findReads(
+void mapSingleReads(
 	TMatches &matches,				// resulting matches
 	TGenome &genome,				// genome ...
 	unsigned gseqNo,				// ... and its sequence number
@@ -1211,7 +1181,7 @@ template <
 	typename TSpec, 
 	typename TShape,
 	typename TSwiftSpec >
-int mapReads(
+int mapSingleReads(
 	TMatches &				matches,
 	StringSet<CharString> &	genomeFileNameList,
 	StringSet<CharString> &	genomeNames,	// genome names, taken from the Fasta file
@@ -1223,7 +1193,7 @@ int mapReads(
 	Swift<TSwiftSpec> const)
 {
 	typedef typename Value<TReadSet>::Type				TRead;
-	typedef Index<TReadSet, Index_QGram<TShape> >			TIndex;			// q-gram index
+	typedef Index<TReadSet, Index_QGram<TShape> >		TIndex;			// q-gram index
 	typedef Pattern<TIndex, Swift<TSwiftSpec> >			TSwiftPattern;	// filter
 	typedef Pattern<TRead, MyersUkkonen>				TMyersPattern;	// verifier
 
@@ -1257,7 +1227,7 @@ int mapReads(
 	options.compMask[4] = (options.matchN)? 15: 0;
 	if (!options.hammingOnly)
 	{
-		resize(forwardPatterns, readCount);
+		resize(forwardPatterns, readCount, Exact());
 		for(unsigned i = 0; i < readCount; ++i)
 		{
 			setHost(forwardPatterns[i], indexText(swiftIndex)[i]);
@@ -1326,12 +1296,12 @@ int mapReads(
 			gnoToFileMap.insert(::std::make_pair<unsigned,::std::pair< ::std::string,unsigned> >(gseqNo,::std::make_pair< ::std::string,unsigned>(genomeName,gseqNoWithinFile)));
 			
 			if (options.forward)
-				findReads(matches, genome, gseqNo, swiftPattern, forwardPatterns, cnts, 'F', options);
+				mapSingleReads(matches, genome, gseqNo, swiftPattern, forwardPatterns, cnts, 'F', options);
 
 			if (options.reverse)
 			{
 				reverseComplementInPlace(genome);
-				findReads(matches, genome, gseqNo, swiftPattern, forwardPatterns, cnts, 'R', options);
+				mapSingleReads(matches, genome, gseqNo, swiftPattern, forwardPatterns, cnts, 'R', options);
 			}
 			++gseqNoWithinFile;
 
@@ -1363,11 +1333,11 @@ template <
 	typename TSpec, 
 	typename TShape,
 	typename TSwiftSpec >
-int mapReads(
+int mapSingleReads(
 	TMatches &				matches,
 	TGenomeSet &			genomeSet,
 	TReadSet const &		readSet,
-	TCounts & cnts,
+	TCounts &				cnts,
 	RazerSOptions<TSpec> &	options,
 	TShape const &			shape,
 	Swift<TSwiftSpec> const)
@@ -1393,7 +1363,7 @@ int mapReads(
 	if (!options.hammingOnly)
 	{
 		unsigned readCount = countSequences(swiftIndex);
-		resize(forwardPatterns, readCount);
+		resize(forwardPatterns, readCount, Exact());
 		for(unsigned i = 0; i < readCount; ++i)
 		{
 			setHost(forwardPatterns[i], indexText(swiftIndex)[i]);
@@ -1425,12 +1395,12 @@ int mapReads(
 	for(unsigned gseqNo = 0; gseqNo < length(genomeSet); ++gseqNo)
 	{
 		if (options.forward)
-			findReads(matches, genomeSet[gseqNo], gseqNo, swiftPattern, forwardPatterns, cnts, 'F', options);
+			mapSingleReads(matches, genomeSet[gseqNo], gseqNo, swiftPattern, forwardPatterns, cnts, 'F', options);
 
 		if (options.reverse)
 		{
 			reverseComplementInPlace(genomeSet[gseqNo]);
-			findReads(matches, genomeSet[gseqNo], gseqNo, swiftPattern, forwardPatterns, cnts, 'R', options);
+			mapSingleReads(matches, genomeSet[gseqNo], gseqNo, swiftPattern, forwardPatterns, cnts, 'R', options);
 			reverseComplementInPlace(genomeSet[gseqNo]);
 		}
 
@@ -1448,6 +1418,58 @@ int mapReads(
 	return 0;
 }
 
+//////////////////////////////////////////////////////////////////////////////
+// Wrapper for single/mate-pair mapping
+template <
+	typename TMatches, 
+	typename TReadSet,
+	typename TCounts,
+	typename TSpec,
+	typename TShape,
+	typename TSwiftSpec >
+int mapReads(
+	TMatches &				matches,
+	StringSet<CharString> &	genomeFileNameList,
+	StringSet<CharString> &	genomeNames,	// genome names, taken from the Fasta file
+	::std::map<unsigned,::std::pair< ::std::string,unsigned> > & gnoToFileMap,
+	TReadSet const &		readSet, 
+	TCounts &				cnts,
+	RazerSOptions<TSpec> &	options,
+	TShape const &			shape,
+	Swift<TSwiftSpec> const)
+{
+#ifdef RAZERS_MATEPAIRS
+	if (options.libraryLength >= 0)
+		return mapMatePairReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, cnts, options, shape, Swift<TSwiftSpec>());
+	else
+#endif
+		return mapSingleReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, cnts, options, shape, Swift<TSwiftSpec>());
+}
+
+template <
+	typename TMatches, 
+	typename TGenomeSet,
+	typename TReadSet, 
+	typename TCounts,
+	typename TSpec, 
+	typename TShape,
+	typename TSwiftSpec >
+int mapReads(
+	TMatches &				matches,
+	TGenomeSet &			genomeSet,
+	TReadSet const &		readSet,
+	TCounts &				cnts,
+	RazerSOptions<TSpec> &	options,
+	TShape const &			shape,
+	Swift<TSwiftSpec> const)
+{
+#ifdef RAZERS_MATEPAIRS
+	if (options.libraryLength >= 0)
+		return mapMatePairReads(matches, genomeSet, readSet, cnts, options, shape, Swift<TSwiftSpec>());
+	else
+#endif
+		return mapSingleReads(matches, genomeSet, readSet, cnts, options, shape, Swift<TSwiftSpec>());
+}
 
 //////////////////////////////////////////////////////////////////////////////
 // Wrapper for different template specializations
@@ -1458,7 +1480,7 @@ int mapReads(
 	StringSet<CharString> &	genomeNames,	// genome names, taken from the Fasta file
 	::std::map<unsigned,::std::pair< ::std::string,unsigned> > & gnoToFileMap,
 	TReadSet const &		readSet, 
-	TCounts & cnts,
+	TCounts &				cnts,
 	RazerSOptions<TSpec> &	options)
 {
 	Shape<Dna, SimpleShape>		ungapped;
@@ -1499,12 +1521,12 @@ int mapReads(
 	TMatches &				matches,
 	TGenomeSet &			genomeSet,
 	TReadSet const &		readSet, 
-	TCounts &			cnts,
+	TCounts &				cnts,
 	RazerSOptions<TSpec> &	options)
 {
 	Shape<Dna, SimpleShape>		ungapped;
 	Shape<Dna, OneGappedShape>	onegapped;
-	Shape<Dna, GenericShape>		gapped;
+	Shape<Dna, GenericShape>	gapped;
 
 	// 2x3 SPECIALIZATION
 

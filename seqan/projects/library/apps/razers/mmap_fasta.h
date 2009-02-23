@@ -131,7 +131,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			TValue c = *it;
 			if (newLine && c == '>')
 				appendValue(me.limits, it - itBeg, Generous());
-			newLine = (c == '\n' || c == '\r');
+			newLine = _isLineBreak(c);
 		}
 		if (empty(me.limits))
 			appendValue(me.limits, 0);
@@ -193,6 +193,26 @@ namespace SEQAN_NAMESPACE_MAIN
 			_seekLineBreak(it, itEnd);
 			assign(dst, infix(fasta, 1, it - itBeg));
 		}
+	}
+
+	template <typename TSeq, typename TFastaSeq>
+	inline void
+	assignQual(
+		TSeq & dst,
+		TFastaSeq const & fasta,
+		Fasta)
+	{
+		clear(dst);
+	}
+
+	template <typename TSeq, typename TFastaSeq>
+	inline void
+	assignQualId(
+		TSeq & dst,
+		TFastaSeq const & fasta,
+		Fasta)
+	{
+		clear(dst);
 	}
 
 //////////////////////////////////////////////////////////////////////////////
