@@ -195,7 +195,7 @@ int mapReads(
 // Print usage
 void printVersion() 
 {
-	cerr << "RazerS version 0.3 20090223 (prerelease)" << endl;
+	cerr << "RazerS version 0.3 20090223 (prerelease) $Revision$" << endl;
 }
 
 template <typename TSpec>
