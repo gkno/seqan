@@ -39,7 +39,7 @@ public:
 
 	String<TValue, TSpec> data_string;
 
-	TIter data_begin;	// string begin
+	TIter data_begin;	// string beginning
 	TIter data_end;		// string end
 
 	TIter data_front;	// front fifo character
@@ -355,6 +355,14 @@ void mapMatePairReads(
 	typedef Finder<TGenomeInf, Swift<TSwiftSpec> >			TSwiftFinderR;
 	typedef Pattern<TReadIndex, Swift<TSwiftSpec> >			TSwiftPattern;
 
+	// MATE-PAIR FILTRATION
+//	typedef Pair<unsigned, Pair<TGPos> >					TDequeueValue;
+	typedef TMatch											TDequeueValue;
+	typedef Dequeue<TDequeueValue>							TDequeue;
+	typedef typename Iterator<TDequeue, Standard>::Type		TDequeueIterator;
+
+	const unsigned NOT_VERIFIED = 1u << (sizeof(unsigned)-1);
+
 	// iterate all genomic sequences
 	if (options._debugLevel >= 1)
 	{
@@ -365,41 +373,125 @@ void mapMatePairReads(
 			::std::cerr << "[rev]";
 	}
 
-	// Mate-Pair parameters
-	TGPos firstPosR = options.libraryLength;
-	if (firstPosR >= options.libraryError)
-		firstPosR -= options.libraryError;
-	else
-		firstPosR = 0;
+	if (empty(readSetL))
+		return;
 
-	TSize distanceCutOff = options.libraryLength + options.libraryError;
-	
+	TSize readLength = length(readSetL[0]);
+	// <= libLen + libErr + 2*(parWidth-readLen) - shapeLen
+	int maxDistance = options.libraryLength + options.libraryError - 2 * (int)readLength - (int)length(indexShape(host(swiftPatternL)));
+	// >= libLen - libErr - 2*parWidth + shapeLen
+	int minDistance = options.libraryLength - options.libraryError + (int)length(indexShape(host(swiftPatternL)));
+	TGPos firstPosR = (minDistance < 0) 0: minDistance;
 
 	// exit if contig is shorter than library size
-	if (length(genome) < firstPosR)
+	if (length(genome) <= firstPosR)
 		return;
 
 	TGenomeInf genomeInf = infix(genome, firstPosR, length(genome));
-	TReadSet &readSet = host(host(swiftPatternL));
+	TReadSet &readSetL = host(host(swiftPatternL));
+	TReadSet &readSetR = host(host(swiftPatternR));
 	TSwiftFinderL swiftFinderL(genome, options.repeatLength, 1);
 	TSwiftFinderR swiftFinderR(genomeInf, options.repeatLength, 1);
 
-	typedef Pair<unsigned, Pair<TGPos> >	TDequeueValue;
-	Dequeue<TDequeueValue>					fifo;		// stores left-mate potential matches
-	String<unsigned>						potMatches;	// counts pot. matches in fifo
+	TDequeue fifo;						// stores left-mate potential matches
+	String<TGPos> lastSeen;				// last position the left-mate was seen
+	Pair<TGPos> gPair;
 
-	resize(potMatches, length(host(swiftPatternL)), Exact());
+	fill(lastSeen, length(host(swiftPatternL)), -((TGPos)maxDistance+1), Exact());
 
-	TMatch m = { 0, 0, 0, 0, 0, 0 };	// to supress uninitialized warnings
+	TSize gLength = length(genome);
+	TMatch m = { 0, };	// to supress uninitialized warnings
+	m.gseqNo = gseqNo;
+	m.orientation = gseqNo;
+
 	// iterate all verification regions returned by SWIFT
 	while (find(swiftFinderR, swiftPatternR, options.errorRate, options._debugLevel)) 
 	{
-		unsigned rseqNo = (*swiftFinderR.curHit).ndlSeqNo;
+		unsigned rseqNo = swiftPatternR.curSeqNo;
+		TGPos rEndPos = endPosition(swiftFinderR);
+		int doubleParWidth = 2 * (*swiftFinderR.curHit).bucketWidth;
 
-		// remove left mates pot. matches too distant to have a right mate
-		while (front(fifo).i2.i1 + distanceCutOff < beginPosition(swiftFinderR))
-			pop(fifo);
+		// remove out-of-window left mates from fifo
+		while (front(fifo).gEnd + maxDistance + doubleParWidth < rEndPos)
+			popFront(fifo);
 
+		// add within-window left mates to fifo
+		while (back(fifo).gEnd + minDistance < rEndPos + doubleParWidth)
+		{
+			if (find(swiftFinderL, swiftPatternL, options.errorRate, options._debugLevel))
+			{
+				m.rseqNo = swiftPatternL.curSeqNo | NOT_VERIFIED;
+				gPair = positionRange(swiftFinderL);
+				m.gBegin = gPair.i1;
+				m.gEnd = gPair.i2;
+				lastSeen[swiftPatternL.curSeqNo] = m.gEnd;
+				pushBack(fifo, m);
+			} else
+				break;
+		}
+
+		if (lastSeen[swiftPatternR.curSeqNo] + maxDistance + doubleParWidth >= rEndPos)
+		{
+			// both mates have potential matches within window
+			
+			TDequeueIterator it = fifo.data_front;
+			// iterate over fifo, if not empty
+			// ignore the last element (is not within correct distance)
+			while (it != fifo.data_back)
+			{
+				if (((*it).rseqNo & ~NOT_VERIFIED) == swiftPatternR.curSeqNo)
+				{
+					// verify left mate (equal seqNo), if not done already
+					if ((*it).rseqNo & NOT_VERIFIED)
+						if (matchVerify(
+							*it, infix(genome, (*it).gBegin, (*it).gEnd), 
+							swiftPatternR.curSeqNo, readSetL, forwardPatternsL, 
+							options, TSwiftSpec()))
+						{
+							// transform coordinates to the forward strand
+							if (orientation == 'R') 
+							{
+								TSize temp = (*it).gBegin;
+								(*it).gBegin = gLength - (*it).gEnd;
+								(*it).gEnd = gLength - temp;
+							}
+							(*it).rseqNo &= ~NOT_VERIFIED;		// has been verified positively
+						} else
+							(*it).rseqNo = -1u & ~NOT_VERIFIED;	// has been verified negatively
+
+					// verify right mate, if left mate matches
+					if ((*it).rseqNo == swiftPatternR.curSeqNo)
+						if (matchVerify(
+							*it, range(swiftFinderR, genome), 
+							swiftPatternR.curSeqNo, readSetR, forwardPatternsR,
+							options, TSwiftSpec()))
+						{
+							// transform coordinates to the forward strand
+							if (orientation == 'R') 
+							{
+								TSize temp = m.gBegin;
+								m.gBegin = gLength - m.gEnd;
+								m.gEnd = gLength - temp;
+							}
+							m.rseqNo = swiftPatternR.curSeqNo;
+							
+							// distance between left mate beginning and right mate end
+							__int64 dist = (__int64)(*it).gBegin - (__int64)m.gEnd;
+							if (dist < 0) dist = -dist;
+							if (dist <= options.libraryLength + options.libraryError &&
+								options.libraryLength <= dist + options.libraryError)
+							{
+								// both mates match with correct library size
+
+							}
+						}
+				}
+
+
+				if (++it == fifo.data_end)
+					it = fifo.data_begin;
+			}
+		}
 	}
 }
 #endif
