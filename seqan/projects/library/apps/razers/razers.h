@@ -537,8 +537,10 @@ bool loadGenomes(TGenomeSet &genomes, StringSet<CharString> &fileNameList)
 			if (a.rseqNo > b.rseqNo) return false;
 			
 			// quality
-			return a.mScore < b.mScore; // sum of quality values of mismatches (the smaller the better)
+			if (a.mScore < b.mScore) return true; // sum of quality values of mismatches (the smaller the better)
+			if (a.mScore > b.mScore) return false;
 			
+			return (a.editDist < b.editDist); // seedEditDist?
 			// genome position and orientation
 	/*		if (a.gseqNo < b.gseqNo) return true;
 			if (a.gseqNo > b.gseqNo) return false;
@@ -787,13 +789,13 @@ template <
 	typename TSpec >
 inline bool
 matchVerify(
-	TMatch &m,								// resulting match
+	TMatch &m,					// resulting match
 	Segment<TGenome, InfixSegment> inf,		// potential match genome region
-	unsigned rseqNo,						// read number
-	TReadSet &readSet,					    // reads
-	TMyersPatterns const & pat,					// MyersBitVector preprocessing data
-	RazerSOptions<TSpec> const &options,	// RazerS options
-	SwiftSemiGlobalHamming swiftsemi)					// Hamming only
+	unsigned rseqNo,				// read number
+	TReadSet &readSet,				// reads
+	TMyersPatterns const & pat,			// MyersBitVector preprocessing data
+	RazerSOptions<TSpec> const &options,		// RazerS options
+	SwiftSemiGlobalHamming swiftsemi)		// Hamming only
 {
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 	if(options.maqMapping) 
