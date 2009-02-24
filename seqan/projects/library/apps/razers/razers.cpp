@@ -195,7 +195,9 @@ int mapReads(
 // Print usage
 void printVersion() 
 {
-	cerr << "RazerS version 0.3 20090223 (prerelease) $Revision$" << endl;
+	string rev = "$Revision$";
+	rev.replace(rev.begin(), rev.end(), '$', ' ');
+	cerr << "RazerS version 0.3 20090223 (prerelease)" << rev << endl;
 }
 
 template <typename TSpec>
