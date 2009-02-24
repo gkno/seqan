@@ -781,12 +781,12 @@ inline unsigned ordValue(SimpleType<TValue,TSpec> const &c)
 template <typename TValue>
 inline unsigned ordValue(SimpleType<TValue,_DnaQ> const &c) 
 {
-	return (ordValue(c) & 0x03);
+	return ((unsigned)c) & 0x03;
 }
 template <typename TValue>
 inline unsigned ordValue(SimpleType<TValue,_Dna5Q> const &c) 
 {
-	return (ordValue(c) & 0x07);
+	return ((unsigned)c) & 0x07;
 }
 
 

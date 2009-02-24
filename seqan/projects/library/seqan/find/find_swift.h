@@ -83,24 +83,30 @@ struct SwiftParameters {
 
 //////////////////////////////////////////////////////////////////////////////
 
-	template <typename TSpec, typename TSize, typename TShortSize = unsigned short>
+	template <typename TSpec, typename _TSize, typename _TShortSize = unsigned short>
 	struct _SwiftBucket 
 	{
-		TSize			firstIncrement;
-		TSize			lastIncrement;
-		TShortSize		counter;
+		typedef _TSize			TSize;
+		typedef _TShortSize		TShortSize;
+
+		TSize					firstIncrement;
+		TSize					lastIncrement;
+		TShortSize				counter;
 #ifdef SEQAN_DEBUG_SWIFT
-		TSize			_lastIncDiag;
+		TSize					_lastIncDiag;
 #endif
 	};
 
-	template <typename TSize, typename TShortSize>
-	struct _SwiftBucket<SwiftSemiGlobal, TSize, TShortSize> 
+	template <typename _TSize, typename _TShortSize>
+	struct _SwiftBucket<SwiftSemiGlobal, _TSize, _TShortSize> 
 	{
-		TSize			lastIncrement;
-		TShortSize		counter;
+		typedef _TSize			TSize;
+		typedef _TShortSize		TShortSize;
+
+		TSize					lastIncrement;
+		TShortSize				counter;
 #ifdef SEQAN_DEBUG_SWIFT
-		int				_lastIncDiag;
+		int						_lastIncDiag;
 #endif
 	};
 
@@ -148,7 +154,6 @@ struct SwiftParameters {
 		TIterator		data_iterator;
 		TIterator		haystackEnd;
 		bool			_needReinit;	// if true, the Pattern needs to be reinitialized
-		bool			_atEnd;
 		THitString		hits;
 		THitIterator	curHit, endHit;
 		THstkPos		startPos, curPos, endPos;
@@ -184,6 +189,11 @@ struct SwiftParameters {
 			haystackEnd(orig.haystackEnd),
 			_needReinit(orig._needReinit),
 			hits(orig.hits),
+            startPos(orig.startPos),
+            curPos(orig.curPos),
+            endPos(orig.endPos),
+            dotPos(orig.dotPos),
+            dotPos2(orig.dotPos2),
 			data_repeats(orig.data_repeats)
 		{
 			curHit = begin(hits, Standard()) + (orig.curHit - begin(orig.hits, Standard()));
@@ -199,7 +209,26 @@ struct SwiftParameters {
 		operator* () const { return value(hostIterator(*this)); }
 
 		operator TIterator () const	{ return data_iterator;	}
-	};
+        
+        Finder & operator = (Finder const &orig) const 
+        {
+            data_iterator = orig.data_iterator;
+            haystackEnd = orig.haystackEnd;
+            _needReinit = orig._needReinit;
+            hits = orig.hits;
+            startPos = orig.startPos;
+            curPos = orig.curPos;
+            endPos = orig.endPos;
+            dotPos = orig.dotPos;
+            dotPos2 = orig.dotPos2;
+            data_repeats = orig.data_repeats;
+            curHit = begin(hits, Standard()) + (orig.curHit - begin(orig.hits, Standard()));
+            endHit = end(hits, Standard());
+            curRepeat = begin(data_repeats, Standard()) + (orig.curRepeat - begin(orig.data_repeats, Standard()));
+            endRepeat = end(data_repeats, Standard());
+            return *this;
+        }
+    };
 
 
 //____________________________________________________________________________
@@ -544,6 +573,8 @@ inline bool _swiftMultiProcessQGram(
 	typedef typename Iterator<TSA, Standard>::Type				TSAIter;
 	typedef typename TPattern::TBucketString					TBucketString;
 	typedef typename Iterator<TBucketString, Standard>::Type	TBucketIter;
+	typedef typename Value<TBucketString>::Type					TBucket;
+	typedef typename TBucket::TShortSize						TShortSize;
 	typedef typename TPattern::TBucketParams					TBucketParams;
 	typedef typename TFinder::TSwiftHit							THit;
 	
@@ -566,69 +597,70 @@ inline bool _swiftMultiProcessQGram(
 		unsigned bktNo = (diag >> bucketParams.logDelta) & bucketParams.reuseMask;
 		unsigned bktOfs = diag & (bucketParams.delta - 1);
 
-		TBucketIter bkt = bktBegin + (_swiftBucketNo(pattern, bucketParams, getSeqNo(ndlPos)) + bktNo);
-		
-		do {
+		TBucketIter bkt = bktBegin + (_swiftBucketNo(pattern, bucketParams, getSeqNo(ndlPos)) + bktNo);		
+		TShortSize hitCount;
+
+		do 
+		{
 			if ((__int64)((*bkt).lastIncrement + bktOfs) < diag)
 			{
 				// last increment was before the beginning of the current bucket
 				// (we must ensure that bucketIdx doesn't collide)
-				if ((*bkt).counter >= bucketParams.threshold)
-				{
-					// upper bucket no. of lastIncr. q-gram
-					__int64 upperBktNo = (*bkt).lastIncrement >> bucketParams.logDelta;
-
-					TSize height = 0;
-					if (Swift<TSpec>::DIAGONAL == 1)
-						height = sequenceLength(getSeqNo(ndlPos), host(pattern)) - 1;
-
-					// we must decrement bucket no. until (no. mod reuse == bktNo)
-					__int64 bktBeginHstk = 
-						 (upperBktNo - ((upperBktNo - bktNo) & bucketParams.reuseMask)) << bucketParams.logDelta;
-#ifdef SEQAN_DEBUG_SWIFT
-					if ((*bkt)._lastIncDiag - bktBeginHstk >= bucketParams.delta + bucketParams.overlap || (*bkt)._lastIncDiag < bktBeginHstk) {
-						::std::cerr << "qgram stored in wrong bucket (diag:" << (*bkt)._lastIncDiag << ", begin:" << bktBeginHstk;
-						::std::cerr << ", delta:" << bucketParams.delta << ", overlap:" << bucketParams.overlap << ")" << ::std::endl;
-					}
-#endif
-//					if (bktBeginHstk >= 0) 
-//					{
-						THit hit = {
-							bktBeginHstk,							// bucket begin in haystack
-							getSeqNo(ndlPos),						// needle seq. number
-							height + bucketParams.delta + bucketParams.overlap	// bucket width (non-diagonal)
-						};
-						appendValue(finder.hits, hit);
-//					} else {
-//						// match begins left of haystack begin
-//						THit hit = {
-//							0,										// bucket begin in haystack
-//							getSeqNo(ndlPos),						// needle seq. number
-//							height + bucketParams.delta + bucketParams.overlap	// bucket width (non-diagonal)
-//							+ bktBeginHstk
-//						};
-//						appendValue(finder.hits, hit);
-//					}
-				}
-				(*bkt).lastIncrement = finder.curPos;
-				(*bkt).counter = 1;
-#ifdef SEQAN_DEBUG_SWIFT
-				(*bkt)._lastIncDiag = diag;
-#endif
+				hitCount = 1;
 			}
 			else
 			{
 				if ((*bkt).lastIncrement + bucketParams.tabooLength > finder.curPos) 
 					break;	// increment only once per sequence			
-				(*bkt).lastIncrement = finder.curPos;
-				++(*bkt).counter;
-/*				if (++(*bkt).counter <= 0)
-					(*bkt).counter = bucketParams.threshold;
-*/
-#ifdef SEQAN_DEBUG_SWIFT
-				(*bkt)._lastIncDiag = diag;
-#endif
+				hitCount = (*bkt).counter + 1;
 			}
+
+			(*bkt).lastIncrement = finder.curPos;
+			(*bkt).counter = hitCount;
+#ifdef SEQAN_DEBUG_SWIFT
+			(*bkt)._lastIncDiag = diag;
+#endif
+
+			if (hitCount == bucketParams.threshold)
+			{
+
+				TSize height = 0;
+				if (Swift<TSpec>::DIAGONAL == 1)
+					height = sequenceLength(getSeqNo(ndlPos), host(pattern)) - 1;
+
+#ifdef SEQAN_DEBUG_SWIFT
+				// upper bucket no. of lastIncr. q-gram
+				__int64 upperBktNo = (*bkt).lastIncrement >> bucketParams.logDelta;
+
+				// we must decrement bucket no. until (no. mod reuse == bktNo)
+				__int64 bktBeginHstk = 
+					 (upperBktNo - ((upperBktNo - bktNo) & bucketParams.reuseMask)) << bucketParams.logDelta;
+
+				if ((*bkt)._lastIncDiag - bktBeginHstk >= bucketParams.delta + bucketParams.overlap || (*bkt)._lastIncDiag < bktBeginHstk) {
+					::std::cerr << "qgram stored in wrong bucket (diag:" << (*bkt)._lastIncDiag << ", begin:" << bktBeginHstk;
+					::std::cerr << ", delta:" << bucketParams.delta << ", overlap:" << bucketParams.overlap << ")" << ::std::endl;
+				}
+#endif
+//				if (bktBeginHstk >= 0) 
+//				{
+					THit hit = {
+						diag & ~(__int64)(bucketParams.delta - 1),			// bucket begin in haystack
+						getSeqNo(ndlPos),									// needle seq. number
+						height + bucketParams.delta + bucketParams.overlap	// bucket width (non-diagonal)
+					};
+					appendValue(finder.hits, hit);
+//				} else {
+//					// match begins left of haystack begin
+//					THit hit = {
+//						0,													// bucket begin in haystack
+//						getSeqNo(ndlPos),									// needle seq. number
+//						height + bucketParams.delta + bucketParams.overlap	// bucket width (non-diagonal)
+//						+ (diag & ~(__int64)(bucketParams.delta - 1))
+//					};
+//					appendValue(finder.hits, hit);
+//				}
+			}
+
 
 			if (bktOfs >= bucketParams.overlap) break;
 
@@ -651,15 +683,11 @@ inline bool _swiftMultiProcessQGram(
 }
 
 template <
-	typename THaystack,
 	typename TIndex, 
 	typename TSpec
 >
-inline bool _swiftMultiFlushBuckets(
-	Finder<THaystack, Swift<TSpec> > &finder, 
-	Pattern<TIndex, Swift<TSpec> > &pattern)
+inline void _swiftMultiFlushBuckets(Pattern<TIndex, Swift<TSpec> > &pattern)
 {
-	typedef Finder<THaystack, Swift<TSpec> >					TFinder;
 	typedef Pattern<TIndex, Swift<TSpec> >						TPattern;
 
 	typedef typename TPattern::TBucketString					TBucketString;
@@ -667,8 +695,7 @@ inline bool _swiftMultiFlushBuckets(
 	typedef typename TPattern::TBucketParams					TBucketParams;
 
 	typedef typename Size<TIndex>::Type							TSize;
-	typedef typename TFinder::TSwiftHit							THit;
-	
+
 	TBucketIterator	bkt = begin(pattern.buckets, Standard());
 	TBucketIterator	bktEnd;
 	TSize seqCount = countSequences(host(pattern));
@@ -679,54 +706,10 @@ inline bool _swiftMultiFlushBuckets(
 		bktEnd = bkt + (bucketParams.reuseMask + 1);
 		for(unsigned bktNo = 0; bkt != bktEnd; ++bkt, ++bktNo)
 		{
-			if ((*bkt).counter >= bucketParams.threshold)
-			{
-				// upper bucket no. of lastIncr. q-gram
-				__int64 upperBktNo = (*bkt).lastIncrement >> bucketParams.logDelta;
-
-				TSize height = 0;
-				if (Swift<TSpec>::DIAGONAL == 1)
-					height = sequenceLength(ndlSeqNo, host(pattern)) - 1;
-
-				// we must decrement bucket no. until (no. mod reuse == bktNo)
-				__int64 bktBeginHstk =
-					(upperBktNo - ((upperBktNo - bktNo) & bucketParams.reuseMask)) << bucketParams.logDelta;
-#ifdef SEQAN_DEBUG_SWIFT
-				if ((*bkt)._lastIncDiag - bktBeginHstk >= bucketParams.delta + bucketParams.overlap || (*bkt)._lastIncDiag < bktBeginHstk) {
-					::std::cerr << "qgram stored in wrong bucket (diag:" << (*bkt)._lastIncDiag << ", begin:" << bktBeginHstk;
-					::std::cerr << ", delta:" << bucketParams.delta << ", overlap:" << bucketParams.overlap << ")" << ::std::endl;
-				}
-#endif
-
-//				if (bktBeginHstk >= 0) 
-//				{
-					THit hit = {
-						bktBeginHstk,							// bucket begin in haystack
-						ndlSeqNo,								// needle seq. number
-						height + bucketParams.delta + bucketParams.overlap	// bucket width (non-diagonal)
-					};
-					appendValue(finder.hits, hit);
-//				} else {
-//					// match begins left of haystack begin
-//					THit hit = {
-//						0,										// bucket begin in haystack
-//						ndlSeqNo,								// needle seq. number
-//						height + bucketParams.delta + bucketParams.overlap	// bucket width (non-diagonal)
-//						+ bktBeginHstk
-//					};
-//					appendValue(finder.hits, hit);
-//				}
-
-			}
 			(*bkt).lastIncrement = 0 - bucketParams.tabooLength;;
 			(*bkt).counter = 0;
 		}
 	}
-
-	finder.curHit = begin(finder.hits, Standard());
-	finder.endHit = end(finder.hits, Standard());
-
-	return !empty(finder.hits);
 }
 
 template <typename TNeedle, typename TIndexSpec, typename TSpec>
@@ -915,6 +898,10 @@ find(
 	double errorRate,
 	bool printDots)
 {
+	typedef Index<TNeedle, TIndexSpec>					TIndex;
+	typedef typename Fibre<TIndex, QGram_Shape>::Type	TShape;
+	typedef	typename Value<TShape>::Type				THashValue;
+
 	if (empty(finder)) 
 	{
 		_patternInit(pattern, errorRate, 0);
@@ -939,7 +926,6 @@ find(
 	if (atEnd(finder) && finder.curRepeat == finder.endRepeat) return false;
 
 	do {
-		++finder;
 
 		if (printDots)
 			while (finder.curPos >= finder.dotPos) 
@@ -953,33 +939,28 @@ find(
 					::std::cerr << "." << ::std::flush;
 			}
 
-		if (atEnd(finder)) 
+		if (atEnd(++finder)) 
 		{
-			if (_nextNonRepeatRange(finder, pattern, printDots)) 
+			if (!_nextNonRepeatRange(finder, pattern, printDots)) 
 			{
-				if (_swiftMultiProcessQGram(finder, pattern, hash(pattern.shape, hostIterator(hostIterator(finder)))))
-					break;
-				else
-					continue;
-			} 
-			else 
-			{
-				if (_swiftMultiFlushBuckets(finder, pattern))
-					break;
-				else
-					return false;
+				_swiftMultiFlushBuckets(pattern);
+				return false;
 			}
+			hash(pattern.shape, hostIterator(hostIterator(finder)));
+		}
+		else
+		{
+			++finder.curPos;
+			hashNext(pattern.shape, hostIterator(hostIterator(finder)));
+		}
+		
+		if (_swiftMultiProcessQGram(finder, pattern, value(pattern.shape)))
+		{
+			pattern.curSeqNo = (*finder.curHit).ndlSeqNo;
+			return true;
 		}
 
-		++finder.curPos;
-		
-		if (_swiftMultiProcessQGram(finder, pattern, hashNext(pattern.shape, hostIterator(hostIterator(finder)))))
-			break;
-		
 	} while (true);
-
-	pattern.curSeqNo = (*finder.curHit).ndlSeqNo;
-	return true;
 }
 
 template <typename THashes, typename TPipeSpec, typename TNeedle, typename TIndexSpec, typename TSpec>
@@ -1026,10 +1007,8 @@ find(
 #ifdef SEQAN_DEBUG_SWIFT
 			_printSwiftBuckets(pattern);
 #endif
-			if (_swiftMultiFlushBuckets(finder, pattern))
-				break;
-			else
-				return false;
+			_swiftMultiFlushBuckets(pattern);
+			return false;
 		}
 		finder.curPos = (*finder.in).i1;
 		if (printDots)

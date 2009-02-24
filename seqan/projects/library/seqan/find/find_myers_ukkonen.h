@@ -351,7 +351,7 @@ SEQAN_CHECKPOINT
 		int idx = j / me.MACHINE_WORD_SIZE;
 
 		for (int i = 0; i < 4; ++i, idx += blockCount)
-			allNull &= (me.bitMasks[idx] & bit) == 0;
+			allNull &= (me.bitMasks[idx] & bit) == (TWord)0;
 
 		if (allNull)
 		{	// all bits are 0 => this letter must be 'N'
