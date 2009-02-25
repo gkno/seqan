@@ -280,7 +280,7 @@ typedef Tag<TagFastq_> const Fastq;
 			TValue c = *it;
 			if (newLine && c == '@')
 				appendValue(me.limits, it - itBeg, Generous());
-			newLine = (c == '\n' || c == '\r');
+			newLine = _isLineBreak(c);
 		}
 		if (empty(me.limits))
 			appendValue(me.limits, 0);

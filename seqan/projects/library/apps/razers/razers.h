@@ -162,8 +162,8 @@ namespace SEQAN_NAMESPACE_MAIN
 			repeatLength = 1000;
 			abundanceCut = 1;
 
-			libraryLength = 250;
-			libraryError = 20;
+			libraryLength = 2000;
+			libraryError = 100;
 			
 			for (unsigned i = 0; i < 4; ++i)
 				compMask[i] = 1 << i;
@@ -200,13 +200,13 @@ namespace SEQAN_NAMESPACE_MAIN
 		unsigned		rseqNo;			// read seqNo
 		TGPos			gBegin;			// begin position of the match in the genome
 		TGPos			gEnd;			// end position of the match in the genome
-		unsigned short		editDist;		// Levenshtein distance
+		unsigned short	editDist;		// Levenshtein distance
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 		short	 		mScore;
 		short			seedEditDist;
 #endif
 		char			orientation;	// 'F'..forward strand, 'R'..reverse comp. strand
-};
+	};
 	
 	enum RAZERS_ERROR {
 		RAZERS_READS_FAILED = -1,
@@ -243,7 +243,7 @@ namespace SEQAN_NAMESPACE_MAIN
 // Memory tuning
 
 #ifdef RAZERS_MEMOPT
-
+/*
 	template <typename TShape>
 	struct SAValue< Index<TReadSet, TShape> > {
 		typedef Pair<
@@ -252,7 +252,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			BitCompressed<25, 7>	// max. 32M reads of length < 128
 		> Type;
 	};
-	
+*/	
 	template <>
 	struct Size<Dna5String>
 	{
@@ -265,7 +265,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef unsigned Type;
 	};
 	
-#else
+#endif
 
 	template <typename TShape>
 	struct SAValue< Index<TReadSet, TShape> > {
@@ -276,7 +276,6 @@ namespace SEQAN_NAMESPACE_MAIN
 		> Type;
 	};
 	
-#endif
 
 #ifdef RAZERS_PRUNE_QGRAM_INDEX
 

@@ -62,7 +62,7 @@ template <typename TValue, typename TSpec>
 inline bool
 empty(Dequeue<TValue, TSpec> const &me)
 {
-	return me.empty;
+	return me.data_empty;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -150,15 +150,31 @@ template <typename TValue, typename TSpec>
 inline void
 pushFront(Dequeue<TValue, TSpec> &me, TValue const & _value)
 {
+	typedef typename Dequeue<TValue, TSpec>::TIter TIter;
+
 	if (me.data_empty) 
+	{
+		if (me.data_begin == me.data_end)
+			reserve(me, length(me.data_string) + 1, Generous());
 		me.data_empty = false;
+	}
 	else 
 	{
-		if (me.data_front == me.data_begin)
-			me.data_front = me.data_end;
-		--me.data_front;
-	}
+		TIter new_front = me.data_front;
+		if (new_front == me.data_begin)
+			new_front = me.data_end;
+		--new_front;
 
+		if (new_front == me.data_back)
+		{
+			reserve(me, length(me.data_string) + 1, Generous());
+
+			if (me.data_front == me.data_begin)
+				me.data_front = me.data_end;
+			--me.data_front;
+		} else
+			me.data_front = new_front;
+	}
 	assign(*me.data_front, _value);
 }
 
@@ -166,14 +182,28 @@ template <typename TValue, typename TSpec>
 inline void
 pushBack(Dequeue<TValue, TSpec> &me, TValue const & _value)
 {
+	typedef typename Dequeue<TValue, TSpec>::TIter TIter;
+
 	if (me.data_empty) 
+	{
+		if (me.data_begin == me.data_end)
+			reserve(me, length(me.data_string) + 1, Generous());
 		me.data_empty = false;
+	}
 	else 
 	{
-		if (++me.data_back == me.data_end)
-			me.data_back = me.data_begin;
-	}
+		TIter new_back = me.data_back;
+		if (++new_back == me.data_end)
+			new_back = me.data_begin;
 
+		if (new_back == me.data_front)
+		{
+			reserve(me, length(me.data_string) + 1, Generous());
+			// in this case reserve adds new space behind data_back
+			++me.data_back;
+		} else
+			me.data_back = new_back;
+	}
 	assign(*me.data_back, _value);
 }
 
@@ -185,7 +215,7 @@ length(Dequeue<TValue, TSpec> const &me)
 {
 	if (empty(me)) return 0;
 
-	if (me.data_front < me.data_back)
+	if (me.data_front <= me.data_back)
 		return (me.data_back - me.data_front) + 1;
 	else
 		return (me.data_end - me.data_begin) - (me.data_front - me.data_back) + 1;
@@ -200,42 +230,88 @@ reserve(Dequeue<TValue, TSpec> &me, TSize_ new_capacity, Tag<TExpand> const tag)
 	typedef typename Size<Dequeue<TValue, TSpec> >::Type TSize;
 	
 	TSize len = length(me);
-	if (len < new_capacity && capacity(me.data_string) != new_capacity)
+	if (len < new_capacity && length(me.data_string) != new_capacity)
 	{
 		TSize pos_front = me.data_front - me.data_begin;
 		TSize pos_back  = me.data_back  - me.data_begin;
 		TSize new_freeSpace = new_capacity - len;
 
-		if (pos_front < pos_back)
+		if (pos_front <= pos_back)
 		{
-			TSize freeSpace = capacity(me.data_string) - len;
+			TSize freeSpace = length(me.data_string) - len;
 			if (new_freeSpace > freeSpace)
-				reserve(me.data_string, new_capacity, tag);
+				resize(me.data_string, new_capacity, tag);
 			else
 			{
 				freeSpace -= new_freeSpace;	// reduce the free space by <freeSpace>
 				if (freeSpace <= pos_front)
-					_clearSpace(me, freeSpace, 0, pos_front + 1, tag);
+					resizeSpace(me.data_string, freeSpace, (TSize)0, pos_front + 1, tag);
 				else
 				{
 					freeSpace -= pos_front;
-					_clearSpace(me, 0, 0, pos_front + 1, tag);
-					_clearSpace(me, freeSpace, pos_back + 1, capacity(me.data_string), tag);
+					resizeSpace(me.data_string, (TSize)0, (TSize)0, pos_front + 1, tag);
+					resizeSpace(me.data_string, freeSpace, pos_back + 1, length(me.data_string), tag);
 				}
 			}
 		} else
-			_clearSpace(me, new_freeSpace, pos_back, pos_front + 1, tag);
+			resizeSpace(me.data_string, new_freeSpace, pos_back + 1, pos_front, tag);
 
 		me.data_begin = begin(me.data_string, Standard());
 		me.data_end = end(me.data_string, Standard());
 		me.data_front = me.data_begin + pos_front;
 		me.data_back = me.data_begin + pos_back;
 	}
+	return length(me);
 }
 
 //////////////////////////////////////////////////////////////////////////////
+// Definitions
 
+typedef StringSet<TRead const, Dependent<> >	TMPReadSet;
 
+template <typename TShape>
+struct Cargo< Index<TMPReadSet const, TShape> > {
+	typedef struct {
+		double		abundanceCut;
+		int			_debugLevel;
+	} Type;
+};
+
+#ifdef RAZERS_PRUNE_QGRAM_INDEX
+
+//////////////////////////////////////////////////////////////////////////////
+// Repeat masker
+template <typename TShape>
+inline bool _qgramDisableBuckets(Index<TMPReadSet, Index_QGram<TShape> > &index) 
+{
+	typedef Index<TReadSet, Index_QGram<TShape>	>		TReadIndex;
+	typedef typename Fibre<TReadIndex, QGram_Dir>::Type	TDir;
+	typedef typename Iterator<TDir, Standard>::Type		TDirIterator;
+	typedef typename Value<TDir>::Type					TSize;
+	
+	TDir &dir    = indexDir(index);
+	bool result  = false;
+	unsigned counter = 0;
+	TSize thresh = (TSize)(length(index) * cargo(index).abundanceCut);
+	if (thresh < 100) thresh = 100;
+	
+	TDirIterator it = begin(dir, Standard());
+	TDirIterator itEnd = end(dir, Standard());
+	for (; it != itEnd; ++it)
+		if (*it > thresh) 
+		{
+			*it = (TSize)-1;
+			result = true;
+			++counter;
+		}
+	
+	if (counter > 0 && cargo(index)._debugLevel >= 1)
+		::std::cerr << "Removed " << counter << " k-mers" << ::std::endl;
+	
+	return result;
+}
+
+#endif
 
 //////////////////////////////////////////////////////////////////////////////
 // Load multi-Fasta sequences
@@ -332,6 +408,7 @@ template <
 	typename TReadIndex, 
 	typename TSwiftSpec, 
 	typename TVerifier,
+	typename TCounts,
 	typename TSpec >
 void mapMatePairReads(
 	TMatches &matches,				// resulting matches
@@ -341,6 +418,7 @@ void mapMatePairReads(
 	Pattern<TReadIndex, Swift<TSwiftSpec> > &swiftPatternR,
 	TVerifier &forwardPatternsL,
 	TVerifier &forwardPatternsR,
+	TCounts & cnts,
 	char orientation,				// q-gram index of reads
 	RazerSOptions<TSpec> &options)
 {
@@ -359,7 +437,7 @@ void mapMatePairReads(
 //	typedef Pair<unsigned, Pair<TGPos> >					TDequeueValue;
 	typedef TMatch											TDequeueValue;
 	typedef Dequeue<TDequeueValue>							TDequeue;
-	typedef typename Iterator<TDequeue, Standard>::Type		TDequeueIterator;
+	typedef typename TDequeue::TIter						TDequeueIterator;
 
 	const unsigned NOT_VERIFIED = 1u << (sizeof(unsigned)-1);
 
@@ -373,23 +451,24 @@ void mapMatePairReads(
 			::std::cerr << "[rev]";
 	}
 
+	TReadSet &readSetL = host(host(swiftPatternL));
+	TReadSet &readSetR = host(host(swiftPatternR));
+
 	if (empty(readSetL))
 		return;
 
+	// distance <= libLen + libErr + 2*(parWidth-readLen) - shapeLen
+	// distance >= libLen - libErr - 2*parWidth + shapeLen
 	TSize readLength = length(readSetL[0]);
-	// <= libLen + libErr + 2*(parWidth-readLen) - shapeLen
 	int maxDistance = options.libraryLength + options.libraryError - 2 * (int)readLength - (int)length(indexShape(host(swiftPatternL)));
-	// >= libLen - libErr - 2*parWidth + shapeLen
 	int minDistance = options.libraryLength - options.libraryError + (int)length(indexShape(host(swiftPatternL)));
-	TGPos firstPosR = (minDistance < 0) 0: minDistance;
+	TGPos firstPosR = (minDistance < 0)? 0: minDistance;
 
 	// exit if contig is shorter than library size
 	if (length(genome) <= firstPosR)
 		return;
 
 	TGenomeInf genomeInf = infix(genome, firstPosR, length(genome));
-	TReadSet &readSetL = host(host(swiftPatternL));
-	TReadSet &readSetR = host(host(swiftPatternR));
 	TSwiftFinderL swiftFinderL(genome, options.repeatLength, 1);
 	TSwiftFinderR swiftFinderR(genomeInf, options.repeatLength, 1);
 
@@ -397,7 +476,7 @@ void mapMatePairReads(
 	String<TGPos> lastSeen;				// last position the left-mate was seen
 	Pair<TGPos> gPair;
 
-	fill(lastSeen, length(host(swiftPatternL)), -((TGPos)maxDistance+1), Exact());
+	fill(lastSeen, length(host(swiftPatternL)), ~(TGPos)maxDistance, Exact());
 
 	TSize gLength = length(genome);
 	TMatch m = { 0, };	// to supress uninitialized warnings
@@ -412,11 +491,11 @@ void mapMatePairReads(
 		int doubleParWidth = 2 * (*swiftFinderR.curHit).bucketWidth;
 
 		// remove out-of-window left mates from fifo
-		while (front(fifo).gEnd + maxDistance + doubleParWidth < rEndPos)
+		while (!empty(fifo) && front(fifo).gEnd + maxDistance + doubleParWidth < rEndPos)
 			popFront(fifo);
 
 		// add within-window left mates to fifo
-		while (back(fifo).gEnd + minDistance < rEndPos + doubleParWidth)
+		while (empty(fifo) || back(fifo).gEnd + minDistance < rEndPos + doubleParWidth)
 		{
 			if (find(swiftFinderL, swiftPatternL, options.errorRate, options._debugLevel))
 			{
@@ -430,7 +509,7 @@ void mapMatePairReads(
 				break;
 		}
 
-		if (lastSeen[swiftPatternR.curSeqNo] + maxDistance + doubleParWidth >= rEndPos)
+		if (lastSeen[rseqNo] + maxDistance + doubleParWidth >= rEndPos)
 		{
 			// both mates have potential matches within window
 			
@@ -439,13 +518,14 @@ void mapMatePairReads(
 			// ignore the last element (is not within correct distance)
 			while (it != fifo.data_back)
 			{
-				if (((*it).rseqNo & ~NOT_VERIFIED) == swiftPatternR.curSeqNo)
+				if (((*it).rseqNo & ~NOT_VERIFIED) == rseqNo)
 				{
 					// verify left mate (equal seqNo), if not done already
 					if ((*it).rseqNo & NOT_VERIFIED)
+					{
 						if (matchVerify(
 							*it, infix(genome, (*it).gBegin, (*it).gEnd), 
-							swiftPatternR.curSeqNo, readSetL, forwardPatternsL, 
+							rseqNo, readSetL, forwardPatternsL, 
 							options, TSwiftSpec()))
 						{
 							// transform coordinates to the forward strand
@@ -457,13 +537,14 @@ void mapMatePairReads(
 							}
 							(*it).rseqNo &= ~NOT_VERIFIED;		// has been verified positively
 						} else
-							(*it).rseqNo = -1u & ~NOT_VERIFIED;	// has been verified negatively
+							(*it).rseqNo = ~NOT_VERIFIED;		// has been verified negatively
+					}
 
 					// verify right mate, if left mate matches
-					if ((*it).rseqNo == swiftPatternR.curSeqNo)
+					if ((*it).rseqNo == rseqNo)
 						if (matchVerify(
 							*it, range(swiftFinderR, genome), 
-							swiftPatternR.curSeqNo, readSetR, forwardPatternsR,
+							rseqNo, readSetR, forwardPatternsR,
 							options, TSwiftSpec()))
 						{
 							// transform coordinates to the forward strand
@@ -473,7 +554,7 @@ void mapMatePairReads(
 								m.gBegin = gLength - m.gEnd;
 								m.gEnd = gLength - temp;
 							}
-							m.rseqNo = swiftPatternR.curSeqNo;
+							m.rseqNo = rseqNo;
 							
 							// distance between left mate beginning and right mate end
 							__int64 dist = (__int64)(*it).gBegin - (__int64)m.gEnd;
@@ -482,7 +563,10 @@ void mapMatePairReads(
 								options.libraryLength <= dist + options.libraryError)
 							{
 								// both mates match with correct library size
-
+								std::cout << "found " << rseqNo << " on " << orientation << gseqNo;
+								std::cout << " 1@ " << (*it).gBegin << "_" << (*it).gEnd;
+								std::cout << " 2@ " << m.gBegin << "_" << m.gEnd;
+								std::cout << std::endl;
 							}
 						}
 				}
@@ -502,6 +586,7 @@ void mapMatePairReads(
 template <
 	typename TMatches, 
 	typename TReadSet_, 
+	typename TCounts,
 	typename TSpec, 
 	typename TShape,
 	typename TSwiftSpec >
@@ -511,12 +596,18 @@ int mapMatePairReads(
 	StringSet<CharString> &	genomeNames,	// genome names, taken from the Fasta file
 	::std::map<unsigned,::std::pair< ::std::string,unsigned> > & gnoToFileMap,
 	TReadSet_ const &		readSet,
+	TCounts &				cnts,
 	RazerSOptions<TSpec> &	options,
 	TShape const &			shape,
 	Swift<TSwiftSpec> const)
 {
-	typedef typename Value<TReadSet_>::Type				TRead;
+	typedef typename Value<TReadSet_ const>::Type		TRead;
+//	typedef typename Infix<TRead const>::Type			TReadInfix;
+#ifdef RAZERS_CONCATREADS
+	typedef StringSet<TRead>							TReadSet;
+#else
 	typedef StringSet<TRead, Dependent<> >				TReadSet;
+#endif
 	typedef Index<TReadSet, Index_QGram<TShape> >		TIndex;			// q-gram index
 	typedef Pattern<TIndex, Swift<TSwiftSpec> >			TSwiftPattern;	// filter
 	typedef Pattern<TRead, MyersUkkonen>				TMyersPattern;	// verifier
@@ -536,11 +627,11 @@ int mapMatePairReads(
 	// configure q-gram index
 	TIndex swiftIndexL(readSetL, shape);
 	TIndex swiftIndexR(readSetR, shape);
-	cargo(swiftIndexL).abundanceCut = options.abundanceCut;
+/*	cargo(swiftIndexL).abundanceCut = options.abundanceCut;
 	cargo(swiftIndexR).abundanceCut = options.abundanceCut;
 	cargo(swiftIndexL)._debugLevel = options._debugLevel;
 	cargo(swiftIndexR)._debugLevel = options._debugLevel;
-
+*/
 	// configure Swift
 	TSwiftPattern swiftPatternL(swiftIndexL);
 	TSwiftPattern swiftPatternR(swiftIndexR);
@@ -619,12 +710,12 @@ int mapMatePairReads(
 			gnoToFileMap.insert(::std::make_pair<unsigned,::std::pair< ::std::string,unsigned> >(gseqNo,::std::make_pair< ::std::string,unsigned>(genomeName,gseqNoWithinFile)));
 			
 			if (options.forward)
-				findReads(matches, genome, gseqNo, swiftPatternL, swiftPatternR, forwardPatternsL, forwardPatternsR, 'F', options);
+				mapMatePairReads(matches, genome, gseqNo, swiftPatternL, swiftPatternR, forwardPatternsL, forwardPatternsR, cnts, 'F', options);
 
 			if (options.reverse)
 			{
 				reverseComplementInPlace(genome);
-				findReads(matches, genome, gseqNo, swiftPatternL, swiftPatternR, forwardPatternsL, forwardPatternsR, 'R', options);
+				mapMatePairReads(matches, genome, gseqNo, swiftPatternL, swiftPatternR, forwardPatternsL, forwardPatternsR, cnts, 'R', options);
 			}
 			++gseqNoWithinFile;
 
@@ -644,7 +735,6 @@ int mapMatePairReads(
 	}
 	return 0;
 }
-
 
 
 }
