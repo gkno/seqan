@@ -25,7 +25,7 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 
-// We expect mate-pairs to be stored together in one read string.
+// We require mate-pairs to be stored together in one read string.
 // Pair i has mates at positions 2*i and 2*i+1 in the read string.
 
 
@@ -347,7 +347,6 @@ bool loadReads(
 		return false;
 	}
 
-
 #ifndef RAZERS_CONCATREADS
 	resize(reads, 2*seqCount, Exact());
 #endif
@@ -355,17 +354,26 @@ bool loadReads(
 		resize(fastaIDs, 2*seqCount, Exact());
 	
 	Dna5String seq[2];
+	CharString qual[2];
+	String<Dna5Q> hybridSeq[2];
+	
 	unsigned kickoutcount = 0;
-	for (unsigned i = 0; i < seqCount; ++i) 
+	for(unsigned i = 0; i < seqCount; ++i) 
 	{
 		if (options.readNaming == 0)
 		{
-			assignSeqId(fastaIDs[2*i], leftMates[i], formatL);		// read Fasta id
-			assignSeqId(fastaIDs[2*i+1], rightMates[i], formatR);	// read Fasta id
+			assignSeqId(fastaIDs[2*i], leftMates[i], formatL);		// read left Fasta id
+			assignSeqId(fastaIDs[2*i+1], rightMates[i], formatR);	// read right Fasta id
 		}
-		assignSeq(seq[0], leftMates[i], formatL);					// read Read sequence
-		assignSeq(seq[1], rightMates[i], formatR);					// read Read sequence
+		
+		assignSeq(seq[0], leftMates[i], formatL);					// read left Read sequence
+		assignSeq(seq[1], rightMates[i], formatR);					// read right Read sequence
+		reverseComplementInPlace(seq[1]);
 
+		assignQual(qual[0], leftMates[i], formatL);					// read left ascii quality values  
+		assignQual(qual[1], rightMates[i], formatR);				// read right ascii quality values  
+		reverseInPlace(qual[1]);
+		
 		if (countN)
 		{
 			for (int j = 0; j < 2; ++j)
@@ -382,12 +390,36 @@ bool loadReads(
 						}
 			}
 		}
+		
+		for (int j = 0; j < 2; ++j)
+		{
+			resize(hybridSeq[j], length(seq[j]));
+			unsigned p = 0;
+		
+			// store dna and quality together
+			for (; p < length(qual[j]) && p < length(seq[j]); ++p)
+				hybridSeq[j][p] = (unsigned int) (
+					(((ordValue(qual[j][p]) <= 64)? ordValue(qual[j][p]) - 33: 31) << 3) 
+					| ordValue(seq[j][p]));
+		
+			// fill non-existent qualities with q40
+			for (; p < length(seq[j]); ++p)
+				hybridSeq[j][p] = (unsigned int) ((80 << 3) | ordValue(seq[j][p]));
+		
+			/*		std::cout << "read = " << (Dna5)((unsigned char)seq[0]& (unsigned char)0x07)<< (Dna5)((unsigned char)seq[1]& (unsigned char)0x07)<< "... ";
+			 unsigned char check = seq[0];
+			 unsigned intQual = (check>>3);
+			 std::cout << "qual = " <<  (int)intQual << ::std::endl;*/
+			
+			if (options.trimLength > 0 && length(hybridSeq[j]) > (unsigned)options.trimLength)
+				resize(hybridSeq[j], options.trimLength);
+		}
 #ifdef RAZERS_CONCATREADS
-		appendValue(reads, seq[0], Generous());
-		appendValue(reads, seq[1], Generous());
+		appendValue(reads, hybridSeq[0], Generous());
+		appendValue(reads, hybridSeq[1], Generous());
 #else
-		assign(reads[2*i], seq[0], Exact());
-		assign(reads[2*i+1], seq[1], Exact());
+		assign(reads[2*i], hybridSeq[0], Exact());
+		assign(reads[2*i+1], hybridSeq[1], Exact());
 #endif
 	}
 #ifdef RAZERS_CONCATREADS
@@ -425,6 +457,7 @@ void mapMatePairReads(
 	typedef typename Fibre<TReadIndex, Fibre_Text>::Type	TReadSet;
 	typedef typename Size<TGenome>::Type					TSize;
 	typedef typename Position<TGenome>::Type				TGPos;
+	typedef typename _MakeSigned<TGPos>::Type				TSignedGPos;
 	typedef typename Value<TMatches>::Type					TMatch;
 	typedef typename Infix<TGenome>::Type					TGenomeInf;
 
@@ -439,7 +472,7 @@ void mapMatePairReads(
 	typedef Dequeue<TDequeueValue>							TDequeue;
 	typedef typename TDequeue::TIter						TDequeueIterator;
 
-	const unsigned NOT_VERIFIED = 1u << (sizeof(unsigned)-1);
+	const unsigned NOT_VERIFIED = 1u << (8*sizeof(unsigned)-1);
 
 	// iterate all genomic sequences
 	if (options._debugLevel >= 1)
@@ -460,15 +493,15 @@ void mapMatePairReads(
 	// distance <= libLen + libErr + 2*(parWidth-readLen) - shapeLen
 	// distance >= libLen - libErr - 2*parWidth + shapeLen
 	TSize readLength = length(readSetL[0]);
-	int maxDistance = options.libraryLength + options.libraryError - 2 * (int)readLength - (int)length(indexShape(host(swiftPatternL)));
-	int minDistance = options.libraryLength - options.libraryError + (int)length(indexShape(host(swiftPatternL)));
-	TGPos firstPosR = (minDistance < 0)? 0: minDistance;
+	TSignedGPos maxDistance = options.libraryLength + options.libraryError - 2 * (int)readLength - (int)length(indexShape(host(swiftPatternL)));
+	TSignedGPos minDistance = options.libraryLength - options.libraryError + (int)length(indexShape(host(swiftPatternL)));
+	TGPos scanShift = (minDistance < 0)? 0: minDistance;
 
 	// exit if contig is shorter than library size
-	if (length(genome) <= firstPosR)
+	if (length(genome) <= scanShift)
 		return;
 
-	TGenomeInf genomeInf = infix(genome, firstPosR, length(genome));
+	TGenomeInf genomeInf = infix(genome, scanShift, length(genome));
 	TSwiftFinderL swiftFinderL(genome, options.repeatLength, 1);
 	TSwiftFinderR swiftFinderR(genomeInf, options.repeatLength, 1);
 
@@ -481,14 +514,14 @@ void mapMatePairReads(
 	TSize gLength = length(genome);
 	TMatch m = { 0, };	// to supress uninitialized warnings
 	m.gseqNo = gseqNo;
-	m.orientation = gseqNo;
+	m.orientation = orientation;
 
 	// iterate all verification regions returned by SWIFT
 	while (find(swiftFinderR, swiftPatternR, options.errorRate, options._debugLevel)) 
 	{
 		unsigned rseqNo = swiftPatternR.curSeqNo;
-		TGPos rEndPos = endPosition(swiftFinderR);
-		int doubleParWidth = 2 * (*swiftFinderR.curHit).bucketWidth;
+		TGPos rEndPos = endPosition(swiftFinderR) + scanShift;
+		TGPos doubleParWidth = 2 * (*swiftFinderR.curHit).bucketWidth;
 
 		// remove out-of-window left mates from fifo
 		while (!empty(fifo) && front(fifo).gEnd + maxDistance + doubleParWidth < rEndPos)
@@ -543,7 +576,7 @@ void mapMatePairReads(
 					// verify right mate, if left mate matches
 					if ((*it).rseqNo == rseqNo)
 						if (matchVerify(
-							*it, range(swiftFinderR, genome), 
+							m, range(swiftFinderR, genomeInf),
 							rseqNo, readSetR, forwardPatternsR,
 							options, TSwiftSpec()))
 						{
@@ -559,8 +592,8 @@ void mapMatePairReads(
 							// distance between left mate beginning and right mate end
 							__int64 dist = (__int64)(*it).gBegin - (__int64)m.gEnd;
 							if (dist < 0) dist = -dist;
-							if (dist <= options.libraryLength + options.libraryError &&
-								options.libraryLength <= dist + options.libraryError)
+//							if (dist <= options.libraryLength + options.libraryError &&
+//								options.libraryLength <= dist + options.libraryError)
 							{
 								// both mates match with correct library size
 								std::cout << "found " << rseqNo << " on " << orientation << gseqNo;
@@ -570,7 +603,6 @@ void mapMatePairReads(
 							}
 						}
 				}
-
 
 				if (++it == fifo.data_end)
 					it = fifo.data_begin;
@@ -691,7 +723,6 @@ int mapMatePairReads(
 		if (lastPos == genomeFile.npos) lastPos = 0;
 		::std::string genomeName = genomeFile.substr(lastPos);
 		
-
 		CharString	id;
 		Dna5String	genome;
 		unsigned gseqNoWithinFile = 0;

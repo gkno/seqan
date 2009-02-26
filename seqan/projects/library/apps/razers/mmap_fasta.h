@@ -50,8 +50,18 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline bool
 	_seekNonLineBreak(TIterator &it, TIterator itEnd)
 	{
-		while (_isLineBreak(*it))
+		if (*it == '\n')
+		{
 			if (++it == itEnd) return false;
+			if (*it == '\r')
+				if (++it == itEnd) return false;
+		} else
+			if (*it == '\r')
+			{
+				if (++it == itEnd) return false;
+				if (*it == '\n')
+					if (++it == itEnd) return false;
+			}
 		return true;
 	}
 
@@ -277,10 +287,17 @@ typedef Tag<TagFastq_> const Fastq;
 		bool newLine = true;
 		for (TIterator it = itBeg; it != itEnd; ++it)
 		{
-			TValue c = *it;
-			if (newLine && c == '@')
+			if (newLine && *it == '@')
 				appendValue(me.limits, it - itBeg, Generous());
-			newLine = _isLineBreak(c);
+			if (newLine && *it == '+')
+			{
+				// skip qualitity fasta id
+				if (!_seekLineBreak(it, itEnd)) break;
+				if (!_seekNonLineBreak(it, itEnd)) break;
+				// skip qualitity values
+				if (!_seekLineBreak(it, itEnd)) break;
+			}
+			newLine = _isLineBreak(*it);
 		}
 		if (empty(me.limits))
 			appendValue(me.limits, 0);
