@@ -121,9 +121,11 @@ popFront(Dequeue<TValue, TSpec> &me)
 
 	if (me.data_front == me.data_back)
 		me.data_empty = true;
-
-	if (++me.data_front == me.data_end)
-		me.data_front = me.data_begin;
+	else
+	{
+		if (++me.data_front == me.data_end)
+			me.data_front = me.data_begin;
+	}
 
 	return true;
 }
@@ -136,10 +138,12 @@ popBack(Dequeue<TValue, TSpec> &me)
 
 	if (me.data_front == me.data_back)
 		me.data_empty = true;
-
-	if (me.data_back == me.data_begin)
-		me.data_back = me.data_end;
-	--me.data_back;
+	else
+	{
+		if (me.data_back == me.data_begin)
+			me.data_back = me.data_end;
+		--me.data_back;
+	}
 
 	return true;
 }
@@ -155,7 +159,7 @@ pushFront(Dequeue<TValue, TSpec> &me, TValue const & _value)
 	if (me.data_empty) 
 	{
 		if (me.data_begin == me.data_end)
-			reserve(me, length(me.data_string) + 1, Generous());
+			reserve(me, computeGenerousCapacity(me, length(me.data_string) + 1), Generous());
 		me.data_empty = false;
 	}
 	else 
@@ -167,7 +171,7 @@ pushFront(Dequeue<TValue, TSpec> &me, TValue const & _value)
 
 		if (new_front == me.data_back)
 		{
-			reserve(me, length(me.data_string) + 1, Generous());
+			reserve(me, computeGenerousCapacity(me, length(me.data_string) + 1), Generous());
 
 			if (me.data_front == me.data_begin)
 				me.data_front = me.data_end;
@@ -187,7 +191,7 @@ pushBack(Dequeue<TValue, TSpec> &me, TValue const & _value)
 	if (me.data_empty) 
 	{
 		if (me.data_begin == me.data_end)
-			reserve(me, length(me.data_string) + 1, Generous());
+			reserve(me, computeGenerousCapacity(me, length(me.data_string) + 1), Generous());
 		me.data_empty = false;
 	}
 	else 
@@ -198,7 +202,7 @@ pushBack(Dequeue<TValue, TSpec> &me, TValue const & _value)
 
 		if (new_back == me.data_front)
 		{
-			reserve(me, length(me.data_string) + 1, Generous());
+			reserve(me, computeGenerousCapacity(me, length(me.data_string) + 1), Generous());
 			// in this case reserve adds new space behind data_back
 			++me.data_back;
 		} else
@@ -228,7 +232,7 @@ inline typename Size<Dequeue<TValue, TSpec> >::Type
 reserve(Dequeue<TValue, TSpec> &me, TSize_ new_capacity, Tag<TExpand> const tag)
 {
 	typedef typename Size<Dequeue<TValue, TSpec> >::Type TSize;
-	
+	::std::cout << "resize to "<<new_capacity<<::std::endl;
 	TSize len = length(me);
 	if (len < new_capacity && length(me.data_string) != new_capacity)
 	{
@@ -238,30 +242,44 @@ reserve(Dequeue<TValue, TSpec> &me, TSize_ new_capacity, Tag<TExpand> const tag)
 
 		if (pos_front <= pos_back)
 		{
+			// |empty|data|empty|
+			// 0
 			TSize freeSpace = length(me.data_string) - len;
 			if (new_freeSpace > freeSpace)
 				resize(me.data_string, new_capacity, tag);
 			else
 			{
 				freeSpace -= new_freeSpace;	// reduce the free space by <freeSpace>
-				if (freeSpace <= pos_front)
-					resizeSpace(me.data_string, freeSpace, (TSize)0, pos_front + 1, tag);
+				if (pos_front >= freeSpace)
+				{
+					resizeSpace(me.data_string, pos_front - freeSpace, (TSize)0, pos_front, tag);
+					pos_back -= freeSpace;
+					pos_front -= freeSpace;
+				}
 				else
 				{
 					freeSpace -= pos_front;
-					resizeSpace(me.data_string, (TSize)0, (TSize)0, pos_front + 1, tag);
-					resizeSpace(me.data_string, freeSpace, pos_back + 1, length(me.data_string), tag);
+					resizeSpace(me.data_string, length(me.data_string) - freeSpace, pos_back + 1, length(me.data_string), tag);
+					resizeSpace(me.data_string, (TSize)0, (TSize)0, pos_front, tag);
+					pos_back -= pos_front;
+					pos_front = 0;
 				}
 			}
-		} else
+		}
+		else
+		{
+			// |data|empty|data|
+			// 0
 			resizeSpace(me.data_string, new_freeSpace, pos_back + 1, pos_front, tag);
+			pos_front += new_freeSpace;
+		}
 
 		me.data_begin = begin(me.data_string, Standard());
 		me.data_end = end(me.data_string, Standard());
 		me.data_front = me.data_begin + pos_front;
 		me.data_back = me.data_begin + pos_back;
 	}
-	return length(me);
+	return length(me.data_string);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -512,9 +530,9 @@ void mapMatePairReads(
 	fill(lastSeen, length(host(swiftPatternL)), ~(TGPos)maxDistance, Exact());
 
 	TSize gLength = length(genome);
-	TMatch m = { 0, };	// to supress uninitialized warnings
-	m.gseqNo = gseqNo;
-	m.orientation = orientation;
+	TMatch mL, mR = { 0, };	// to supress uninitialized warnings
+	mR.gseqNo = gseqNo;
+	mR.orientation = orientation;
 
 	// iterate all verification regions returned by SWIFT
 	while (find(swiftFinderR, swiftPatternR, options.errorRate, options._debugLevel)) 
@@ -532,12 +550,12 @@ void mapMatePairReads(
 		{
 			if (find(swiftFinderL, swiftPatternL, options.errorRate, options._debugLevel))
 			{
-				m.rseqNo = swiftPatternL.curSeqNo | NOT_VERIFIED;
+				mR.rseqNo = swiftPatternL.curSeqNo | NOT_VERIFIED;
 				gPair = positionRange(swiftFinderL);
-				m.gBegin = gPair.i1;
-				m.gEnd = gPair.i2;
-				lastSeen[swiftPatternL.curSeqNo] = m.gEnd;
-				pushBack(fifo, m);
+				mR.gBegin = gPair.i1;
+				mR.gEnd = gPair.i2;
+				lastSeen[swiftPatternL.curSeqNo] = mR.gEnd;
+				pushBack(fifo, mR);
 			} else
 				break;
 		}
@@ -561,13 +579,6 @@ void mapMatePairReads(
 							rseqNo, readSetL, forwardPatternsL, 
 							options, TSwiftSpec()))
 						{
-							// transform coordinates to the forward strand
-							if (orientation == 'R') 
-							{
-								TSize temp = (*it).gBegin;
-								(*it).gBegin = gLength - (*it).gEnd;
-								(*it).gEnd = gLength - temp;
-							}
 							(*it).rseqNo &= ~NOT_VERIFIED;		// has been verified positively
 						} else
 							(*it).rseqNo = ~NOT_VERIFIED;		// has been verified negatively
@@ -576,31 +587,39 @@ void mapMatePairReads(
 					// verify right mate, if left mate matches
 					if ((*it).rseqNo == rseqNo)
 						if (matchVerify(
-							m, range(swiftFinderR, genomeInf),
+							mR, range(swiftFinderR, genomeInf),
 							rseqNo, readSetR, forwardPatternsR,
 							options, TSwiftSpec()))
 						{
+							// distance between left mate beginning and right mate end
+							__int64 dist = (__int64)mR.gEnd - (__int64)(*it).gBegin;
+//							if (dist > options.libraryLength + options.libraryError ||
+//								options.libraryLength > dist + options.libraryError) continue;
+							
+							mL = *it;
+							mR.rseqNo = rseqNo;
+
 							// transform coordinates to the forward strand
 							if (orientation == 'R') 
 							{
-								TSize temp = m.gBegin;
-								m.gBegin = gLength - m.gEnd;
-								m.gEnd = gLength - temp;
+								TSize temp = mL.gBegin;
+								mL.gBegin = gLength - mL.gEnd;
+								mL.gEnd = gLength - temp;
+								temp = mR.gBegin;
+								mR.gBegin = gLength - mR.gEnd;
+								mR.gEnd = gLength - temp;
 							}
-							m.rseqNo = rseqNo;
-							
-							// distance between left mate beginning and right mate end
-							__int64 dist = (__int64)(*it).gBegin - (__int64)m.gEnd;
-							if (dist < 0) dist = -dist;
-//							if (dist <= options.libraryLength + options.libraryError &&
-//								options.libraryLength <= dist + options.libraryError)
-							{
-								// both mates match with correct library size
-								std::cout << "found " << rseqNo << " on " << orientation << gseqNo;
-								std::cout << " 1@ " << (*it).gBegin << "_" << (*it).gEnd;
-								std::cout << " 2@ " << m.gBegin << "_" << m.gEnd;
-								std::cout << std::endl;
-							}
+
+							// both mates match with correct library size
+							std::cout << "found " << rseqNo << " on " << orientation << gseqNo;
+							std::cout << " dist:" << dist;
+							if (orientation=='F')
+								std::cout << " \t_" << mL.gBegin+1 << "_" << mR.gEnd;
+							else
+								std::cout << " \t_" << mR.gBegin+1 << "_" << mL.gEnd;
+//							std::cout << " L_" << (*it).gBegin << "_" << (*it).gEnd << "_" << (*it).editDist;
+//							std::cout << " R_" << mR.gBegin << "_" << mR.gEnd << "_" << mR.editDist;
+							std::cout << std::endl;
 						}
 				}
 
