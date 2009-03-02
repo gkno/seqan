@@ -434,7 +434,7 @@ namespace SEQAN_NAMESPACE_MAIN
     inline void 
 	flush(String<TValue, MMap<TConfig> > &me) 
 	{
-		::msync(me.data_begin, length(me) * sizeof(TValue), MS_SYNC);
+		msync(me.data_begin, length(me) * sizeof(TValue), MS_SYNC);
     }
 
 	// cancel all transactions
@@ -442,7 +442,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline void 
 	cancel(String<TValue, MMap<TConfig> > &me)
 	{
-		::msync(me.data_begin, capacity(me) * sizeof(TValue), MS_INVALIDATE);
+		msync(me.data_begin, capacity(me) * sizeof(TValue), MS_INVALIDATE);
 	}
 
 	// flush and free all allocated pages
@@ -450,7 +450,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline void 
 	flushAndFree(String<TValue, MMap<TConfig> > &me)
 	{
-		::madvise(me.data_begin, capacity(me) * sizeof(TValue), MADV_DONTNEED);
+		madvise(me.data_begin, capacity(me) * sizeof(TValue), MADV_DONTNEED);
 	}
 //____________________________________________________________________________
 
@@ -464,7 +464,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			int prot = 0;
 			if (me._openMode & OPEN_RDONLY) prot |= PROT_READ;
 			if (me._openMode & OPEN_WRONLY) prot |= PROT_WRITE;
-			void *addr = ::mmap(NULL, new_capacity * sizeof(TValue), prot, MAP_SHARED, me.file.handle, 0);
+			void *addr = mmap(NULL, new_capacity * sizeof(TValue), prot, MAP_SHARED, me.file.handle, 0);
 			
 			if (addr == MAP_FAILED)
 			{
@@ -487,7 +487,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 		if (me.data_begin) 
 		{
-			int error = ::munmap(me.data_begin, capacity(me) * sizeof(TValue));
+			int error = munmap(me.data_begin, capacity(me) * sizeof(TValue));
 			if (error != 0)
 			{
 			#ifdef SEQAN_DEBUG
@@ -520,15 +520,15 @@ namespace SEQAN_NAMESPACE_MAIN
 					resize(me.file, new_capacity * sizeof(TValue));
 
 #ifdef MREMAP_MAYMOVE
-				void *addr = ::mremap(me.data_begin, capacity(me) * sizeof(TValue), new_capacity * sizeof(TValue), MREMAP_MAYMOVE);
+				void *addr = mremap(me.data_begin, capacity(me) * sizeof(TValue), new_capacity * sizeof(TValue), MREMAP_MAYMOVE);
 #else
 				// for BSD systems without mremap(..) like Mac OS X ...
 				int prot = 0;
 				if (me._openMode & OPEN_RDONLY) prot |= PROT_READ;
 				if (me._openMode & OPEN_WRONLY) prot |= PROT_WRITE;
-	//			void *addr = ::mmap(me.data_begin, new_capacity * sizeof(TValue), prot, MAP_SHARED | MAP_FIXED, me.file.handle, 0);
-				::munmap(me.data_begin, capacity(me) * sizeof(TValue));
-				void *addr = ::mmap(NULL, new_capacity * sizeof(TValue), prot, MAP_SHARED, me.file.handle, 0);
+	//			void *addr = mmap(me.data_begin, new_capacity * sizeof(TValue), prot, MAP_SHARED | MAP_FIXED, me.file.handle, 0);
+				munmap(me.data_begin, capacity(me) * sizeof(TValue));
+				void *addr = mmap(NULL, new_capacity * sizeof(TValue), prot, MAP_SHARED, me.file.handle, 0);
 #endif
 
 				if (addr == MAP_FAILED) 
