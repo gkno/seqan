@@ -30,7 +30,7 @@ namespace SEQAN_NAMESPACE_MAIN
 														       bool>
     {
         Compare C;
-        MergeStreamComparer(Compare &_C): C(_C) { }
+        MergeStreamComparer(Compare &tmpC): C(tmpC) { }
         inline bool operator()(const PageBucket<TValue> &a,
 			                   const PageBucket<TValue> &b) const {
             return C(static_cast<const TValue&>(*(a.cur)),
@@ -46,7 +46,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			bool >
     {
         TCompare C;
-        AdaptorCompare2Less(TCompare &_C): C(_C) { }
+        AdaptorCompare2Less(TCompare &tmpC): C(tmpC) { }
         inline bool operator() (
 			typename TCompare::first_argument_type const &a, 
 			typename TCompare::second_argument_type const &b) const 

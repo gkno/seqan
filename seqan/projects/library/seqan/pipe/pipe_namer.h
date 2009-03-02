@@ -76,9 +76,9 @@ namespace SEQAN_NAMESPACE_MAIN
         Pipe(TInput& _in):
             in(_in) {}
         
-        Pipe(TInput& _in, const TCompare& _C) :
+        Pipe(TInput& _in, const TCompare& tmpC) :
             in(_in),
-            C(_C) {}
+            C(tmpC) {}
         
         inline typename Value<Pipe>::Type const & operator*() {
             tmp.i1 = getValueI1(*in);

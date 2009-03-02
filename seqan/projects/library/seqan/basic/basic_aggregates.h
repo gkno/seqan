@@ -349,8 +349,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		inline const _T* operator&() const { return i; }
 
 		// has to be inline because elements (like this tuple) of packed structs can't be arguments
-		template <typename TPos, typename _S>
-		inline _S const assignValueAt(TPos k, _S const source) {
+		template <typename TPos, typename tmpS>
+		inline tmpS const assignValueAt(TPos k, tmpS const source) {
 			return i[k] = source;
 		}
     };
@@ -424,8 +424,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		inline const CT* operator&() const { return &i; }
 
 		// has to be inline because elements (like this tuple) of packed structs can't be arguments
-		template <typename TPos, typename _S>
-		inline _S const assignValueAt(TPos k, _S const source) {
+		template <typename TPos, typename tmpS>
+		inline tmpS const assignValueAt(TPos k, tmpS const source) {
 			typedef Tuple<_T, _size, Compressed> Tup;
 			typename Tup::CT mask = Tup::bitMask << ((_size - 1 - k) * bitSize);
 			i = (i & ~mask) | ((CT)source << ((_size - 1 - k) * bitSize));
@@ -471,21 +471,21 @@ namespace SEQAN_NAMESPACE_MAIN
 		return source;
     }
 
-    template <typename _T, unsigned _size, typename _S, typename TPos>
-    inline _S const assignValueAt(Tuple<_T, _size, void> &me, TPos k, _S const source) {
+    template <typename _T, unsigned _size, typename tmpS, typename TPos>
+    inline tmpS const assignValueAt(Tuple<_T, _size, void> &me, TPos k, tmpS const source) {
         return me.i[k] = source;
     }
 
-    template <typename _T, unsigned _size, typename _S, typename TPos>
-    inline _S const assignValueAt(Tuple<_T, _size, Compressed> &me, TPos k, _S const source) {
+    template <typename _T, unsigned _size, typename tmpS, typename TPos>
+    inline tmpS const assignValueAt(Tuple<_T, _size, Compressed> &me, TPos k, tmpS const source) {
         typedef Tuple<_T, _size, Compressed> Tup;
         typename Tup::CT mask = Tup::bitMask << ((_size - 1 - k) * me.bitSize);
         me.i = (me.i & ~mask) | source << ((_size - 1 - k) * me.bitSize);
         return source;
     }
 
-    template <typename _T, typename _S, typename _Spec, unsigned _size, typename TPos>
-    inline SimpleType<_S, _Spec> const & assignValueAt(Tuple<_T, _size, Compressed> &me, TPos k, SimpleType<_S, _Spec> const &source) {
+    template <typename _T, typename tmpS, typename _Spec, unsigned _size, typename TPos>
+    inline SimpleType<tmpS, _Spec> const & assignValueAt(Tuple<_T, _size, Compressed> &me, TPos k, SimpleType<tmpS, _Spec> const &source) {
         typedef Tuple<_T, _size, Compressed> Tup;
         typename Tup::CT mask = Tup::bitMask << ((_size - 1 - k) * me.bitSize);
         me.i = (me.i & ~mask) | source.value << ((_size - 1 - k) * me.bitSize);
