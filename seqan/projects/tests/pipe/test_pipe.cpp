@@ -32,7 +32,7 @@ using namespace seqan;
 			Pipe<SimpleBuffer<unsigned>, Source<> > src(buf);
 			vector << src;
 
-			TIter I = vector.begin();
+			TIter I = begin(vector);
             for(unsigned *cur = buf.begin; cur != buf.end; ++cur) {
                 if (*cur != *I) {
                     ::std::cout << ::std::endl << "testExternalString failed at position " << (cur - buf.begin) << " ";
