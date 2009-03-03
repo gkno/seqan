@@ -57,7 +57,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		// sort the first character (h=1)
 		{
-			resize(count, max(K, length(s)), Exact());
+			resize(count, _max((TSize)K, n), Exact());
 			TIter it = begin(ISA, Standard());
 			for(TSize i = 0; i < n; ++i, ++it)
 				*it = i;
