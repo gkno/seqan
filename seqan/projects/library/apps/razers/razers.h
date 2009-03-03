@@ -90,6 +90,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	// mate-pair parameters
 		int			libraryLength;		// offset between two mates
 		int			libraryError;		// offset tolerance
+		unsigned	nextMatePairId;		// use this id for the next mate-pair
 
 	// verification parameters
 		bool		matchN;				// false..N is always a mismatch, true..N matches with all
@@ -163,7 +164,8 @@ namespace SEQAN_NAMESPACE_MAIN
 			abundanceCut = 1;
 
 			libraryLength = 2000;
-			libraryError = 100;
+			libraryError = 200;
+			nextMatePairId = 1;
 			
 			for (unsigned i = 0; i < 4; ++i)
 				compMask[i] = 1 << i;
@@ -200,6 +202,11 @@ namespace SEQAN_NAMESPACE_MAIN
 		unsigned		rseqNo;			// read seqNo
 		TGPos			gBegin;			// begin position of the match in the genome
 		TGPos			gEnd;			// end position of the match in the genome
+#ifdef RAZERS_MATEPAIRS
+		unsigned		pairId;			// unique id for the two mate-pair matches (0 if unpaired)
+		int				mateDelta:24;	// outer coordinate delta to the other mate 
+		int				pairScore:8;	// combined score of both mates
+#endif
 		unsigned short	editDist;		// Levenshtein distance
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 		short	 		mScore;
@@ -338,26 +345,26 @@ bool loadReads(
 	if (options.readNaming == 0)
 		resize(fastaIDs, seqCount, Exact());
 	
-	String<Dna5Q> seq;
+	Dna5String seq;
 	CharString qual;
-	Dna5String helpString;
+	String<Dna5Q> hybridSeq;
 	
 	unsigned kickoutcount = 0;
 	for(unsigned i = 0; i < seqCount; ++i) 
 	{
 		if (options.readNaming == 0)
 			assignSeqId(fastaIDs[i], multiFasta[i], format);	// read Fasta id
-		assignSeq(helpString, multiFasta[i], format);			// read Read sequence
-		assignQual(qual, multiFasta[i], format);			// read ascii quality values  
+		assignSeq(seq, multiFasta[i], format);					// read Read sequence
+		assignQual(qual, multiFasta[i], format);				// read ascii quality values  
 		if (countN)
 		{
 			int count = 0;
-			int cutoffCount = (int)(options.errorRate * length(helpString));
-			for (unsigned j = 0; j < length(helpString); ++j)
-				if (getValue(helpString, j) == 'N')
+			int cutoffCount = (int)(options.errorRate * length(seq));
+			for (unsigned j = 0; j < length(seq); ++j)
+				if (getValue(seq, j) == 'N')
 					if (++count > cutoffCount)
 					{
-						clear(helpString);
+						clear(seq);
 						clear(qual);
 						++kickoutcount;
 						break;
@@ -365,31 +372,31 @@ bool loadReads(
 			if (count > cutoffCount) continue;
 		}
 
-		resize(seq, length(helpString));
+		resize(hybridSeq, length(seq));
 		unsigned j = 0;
 
 		// store dna and quality together
-		for (; j < length(qual) && j < length(helpString); ++j)
-			seq[j] = (unsigned int) (
+		for (; j < length(qual) && j < length(seq); ++j)
+			hybridSeq[j] = (unsigned int) (
 				(((ordValue(qual[j]) <= 64)? ordValue(qual[j]) - 33: 31) << 3) 
-				| ordValue(helpString[j]));
+				| ordValue(seq[j]));
 
 		// fill non-existent qualities with q40
-		for (; j < length(helpString); ++j)
-			seq[j] = (unsigned int) ((80 << 3) | ordValue(helpString[j]));
+		for (; j < length(seq); ++j)
+			hybridSeq[j] = (unsigned int) ((80 << 3) | ordValue(seq[j]));
 
 /*		std::cout << "read = " << (Dna5)((unsigned char)seq[0]& (unsigned char)0x07)<< (Dna5)((unsigned char)seq[1]& (unsigned char)0x07)<< "... ";
 		unsigned char check = seq[0];
 		unsigned intQual = (check>>3);
 		std::cout << "qual = " <<  (int)intQual << ::std::endl;*/
 
-		if (options.trimLength > 0 && length(seq) > (unsigned)options.trimLength)
-			resize(seq, options.trimLength);
+		if (options.trimLength > 0 && length(hybridSeq) > (unsigned)options.trimLength)
+			resize(hybridSeq, options.trimLength);
 
 #ifdef RAZERS_CONCATREADS
-		appendValue(reads, seq, Generous());
+		appendValue(reads, hybridSeq, Generous());
 #else
-		assign(reads[i], seq, Exact());
+		assign(reads[i], hybridSeq, Exact());
 #endif
 	}
 #ifdef RAZERS_CONCATREADS
@@ -484,7 +491,11 @@ bool loadGenomes(TGenomeSet &genomes, StringSet<CharString> &fileNameList)
 			if (a.orientation > b.orientation) return false;
 
 			// quality
+#ifdef RAZERS_MATEPAIRS
+			return a.pairScore > b.pairScore;
+#else
 			return a.editDist < b.editDist;
+#endif
 		}
 	};
 
@@ -507,7 +518,11 @@ bool loadGenomes(TGenomeSet &genomes, StringSet<CharString> &fileNameList)
 			if (a.orientation > b.orientation) return false;
 
 			// quality
+#ifdef RAZERS_MATEPAIRS
+			return a.pairScore > b.pairScore;
+#else
 			return a.editDist < b.editDist;
+#endif
 		}
 	};
 
@@ -521,7 +536,11 @@ bool loadGenomes(TGenomeSet &genomes, StringSet<CharString> &fileNameList)
 			if (a.rseqNo > b.rseqNo) return false;
 
 			// quality
+#ifdef RAZERS_MATEPAIRS
+			return a.pairScore > b.pairScore;
+#else
 			return a.editDist < b.editDist;
+#endif
 		}
 	};
 	
@@ -807,9 +826,9 @@ matchVerify(
 	typedef typename Iterator<TRead, Standard>::Type		TReadIterator;
 
 #ifdef RAZERS_DEBUG
-	cout<<"Verify: "<<::std::endl;
-	cout<<"Genome: "<<inf<<"\t" << beginPosition(inf) << "," << endPosition(inf) << ::std::endl;
-	cout<<"Read:   "<<host(myersPattern)<<::std::endl;
+	::std::cout<<"Verify: "<<::std::endl;
+	::std::cout<<"Genome: "<<inf<<"\t" << beginPosition(inf) << "," << endPosition(inf) << ::std::endl;
+	::std::cout<<"Read:   "<<readSet[rseqNo] << ::std::endl;
 #endif
 
 	unsigned ndlLength = sequenceLength(rseqNo, readSet);
@@ -883,9 +902,9 @@ matchVerify(
 	TMyersPattern &myersPattern = forwardPatterns[rseqNo];
 
 #ifdef RAZERS_DEBUG
-	cout<<"Verify: "<<::std::endl;
-	cout<<"Genome: "<<inf<<"\t" << beginPosition(inf) << "," << endPosition(inf) << ::std::endl;
-	cout<<"Read:   "<<host(myersPattern)<<::std::endl;
+	::std::cout<<"Verify: "<<::std::endl;
+	::std::cout<<"Genome: "<<inf<<"\t" << beginPosition(inf) << "," << endPosition(inf) << ::std::endl;
+	::std::cout<<"Read:   "<<readSet[rseqNo]<<::std::endl;
 #endif
 
     unsigned ndlLength = sequenceLength(rseqNo, readSet);
@@ -1138,6 +1157,10 @@ void mapSingleReads(
 			m.gseqNo = gseqNo;
 			m.rseqNo = rseqNo;
 			m.orientation = orientation;
+#ifdef RAZERS_MATEPAIRS
+			m.pairId = 0;
+			m.pairScore = 0 - m.editDist;
+#endif
 
 			if (!options.spec.DONT_DUMP_RESULTS)
 			{
@@ -1145,7 +1168,7 @@ void mapSingleReads(
 				if (length(matches) > options.compactThresh)
 				{
 					typename Size<TMatches>::Type oldSize = length(matches);
-					maskDuplicates(matches);
+					maskDuplicates(matches);	// overlapping parallelograms cause duplicates
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 				if(options.maqMapping)
 					compactMatches(matches, cnts, options, true);

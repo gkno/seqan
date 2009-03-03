@@ -29,7 +29,7 @@
 //#define NO_PARAM_CHOOSER
 //#define RAZERS_PARALLEL			// parallelize using Intel's Threading Building Blocks
 //#define RAZERS_DUMP_SNPS
-//#define RAZERS_MATEPAIRS
+#define RAZERS_MATEPAIRS
 //#define RAZERS_DIRECT_MAQ_MAPPING
 //#define SEQAN_USE_SSE2_WORDS	// use SSE2 128-bit integers for MyersBitVector
 
@@ -113,10 +113,10 @@ int mapReads(
 	// Step 1: Load fasta files and determine genome file type
 	SEQAN_PROTIMESTART(load_time);
 
-#ifdef SEQAN_MATEPAIRS
+#ifdef RAZERS_MATEPAIRS
 	if (!empty(readFileNames[1]))
 	{
-		if (!loadReads(readSet, readNames, readFileNames[0], readFileName[1], options)) {
+		if (!loadReads(readSet, readNames, readFileNames[0], readFileNames[1], options)) {
 		//if (!loadReads(readSet, readQualities, readNames, readFileNames[0], readFileNames[1], options)) {
 			::std::cerr << "Failed to load reads" << ::std::endl;
 			return RAZERS_READS_FAILED;
@@ -196,8 +196,7 @@ int mapReads(
 void printVersion() 
 {
 	string rev = "$Revision$";
-	rev.replace(rev.begin(), rev.end(), '$', ' ');
-	cerr << "RazerS version 0.3 20090223 (prerelease)" << rev << endl;
+	cerr << "RazerS version 0.3 20090223 [" << rev.substr(11, 4) << "] (prerelease)" << endl;
 }
 
 template <typename TSpec>
@@ -228,7 +227,7 @@ void printHelp(int, const char *[], RazerSOptions<TSpec> &options, ParamChooserO
 		cerr << "  -id, --indels                \t" << "allow indels (default: mismatches only)" << endl;
 #ifdef RAZERS_MATEPAIRS
 		cerr << "  -ll, --library-length NUM    \t" << "mate-pair library length (default " << options.libraryLength << ')' << endl;
-		cerr << "  -le, --library-error NUM     \t" << "mate-pair library length tolerance (defaukt " << options.libraryError << ')' << endl;
+		cerr << "  -le, --library-error NUM     \t" << "mate-pair library length tolerance (default " << options.libraryError << ')' << endl;
 #endif
 		cerr << "  -m,  --max-hits NUM          \t" << "output only NUM of the best hits (default " << options.maxHits << ')' << endl;
 		cerr << "  -tr, --trim-reads NUM        \t" << "trim reads to length NUM (default off)" << endl;
@@ -393,6 +392,42 @@ int main(int argc, const char *argv[])
 				printHelp(argc, argv, options, pm_options);
 				return 0;
 			}
+
+#ifdef RAZERS_MATEPAIRS
+			if (strcmp(argv[arg], "-ll") == 0 || strcmp(argv[arg], "--library-length") == 0) {
+				if (arg + 1 < argc) {
+					++arg;
+					istringstream istr(argv[arg]);
+					istr >> options.libraryLength;
+					if (!istr.fail())
+					{
+						if (options.libraryLength <= 0)
+							cerr << "Library length must be a value greater 0" << endl << endl;
+						else
+							continue;
+					}
+				}
+				printHelp(argc, argv, options, pm_options);
+				return 0;
+			}
+			if (strcmp(argv[arg], "-le") == 0 || strcmp(argv[arg], "--library-error") == 0) {
+				if (arg + 1 < argc) {
+					++arg;
+					istringstream istr(argv[arg]);
+					istr >> options.libraryError;
+					if (!istr.fail())
+					{
+						if (options.libraryError <= 0)
+							cerr << "Library error must be a value greater or equal 0" << endl << endl;
+						else
+							continue;
+					}
+				}
+				printHelp(argc, argv, options, pm_options);
+				return 0;
+			}
+#endif
+
 			if (strcmp(argv[arg], "-pa") == 0 || strcmp(argv[arg], "--purge-ambiguous") == 0) {
 				options.purgeAmbiguous = true;
 				continue;

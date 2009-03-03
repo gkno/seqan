@@ -491,11 +491,12 @@ void dumpMatches(
 #endif
 	
 	Dna5String gInf;
-	
+	char _sep_ = '\t';
 
 	switch (options.outputFormat) 
 	{
 		case 0:	// Razer Format
+//			_sep_ = ',';
 			for(; it != itEnd; ++it) 
 			{
 				unsigned	readLen = length(reads[(*it).rseqNo]);
@@ -519,7 +520,7 @@ void dumpMatches(
 						file << reads[(*it).rseqNo];
 				}
 
-				file << ',' << options.positionFormat << ',' << readLen << ',' << (*it).orientation << ',';
+				file << _sep_ << options.positionFormat << _sep_ << readLen << _sep_ << (*it).orientation << _sep_;
 
 				switch (options.genomeNaming)
 				{
@@ -534,7 +535,12 @@ void dumpMatches(
 						file << gnoToFileMap[(*it).gseqNo].first << '#' << ::std::setw(gzeros) << gnoToFileMap[(*it).gseqNo].second + 1;
 				}
 
-				file << ',' << ((*it).gBegin + options.positionFormat) << ',' << (*it).gEnd << ',' << ::std::setprecision(5) << percId << ::std::endl;
+				file << _sep_ << ((*it).gBegin + options.positionFormat) << _sep_ << (*it).gEnd << _sep_ << ::std::setprecision(5) << percId;
+#ifdef RAZERS_MATEPAIRS
+				if ((*it).pairId != 0)
+					file << _sep_ << (*it).pairId << _sep_ << (*it).pairScore << _sep_ << (*it).mateDelta;
+#endif
+				file << ::std::endl;
 
 				if (options.dumpAlignment) {
 					assignSource(row(align, 0), reads[(*it).rseqNo]);
@@ -550,6 +556,7 @@ void dumpMatches(
 
 
 		case 1:	// Enhanced Fasta Format
+			_sep_ = ',';
 			for(unsigned matchReadNo = -1, matchReadCount = 0; it != itEnd; ++it) 
 			{
 				unsigned	readLen = length(reads[(*it).rseqNo]);
@@ -591,10 +598,10 @@ void dumpMatches(
 
 				if ((*it).orientation == 'F')
 					// forward strand
-					file << '>' << ((*it).gBegin + options.positionFormat) << ',' << (*it).gEnd;
+					file << '>' << ((*it).gBegin + options.positionFormat) << _sep_ << (*it).gEnd;
 				else
 					// reverse strand (switch begin and end)
-					file << '>' << (*it).gEnd << ',' << ((*it).gBegin + options.positionFormat);
+					file << '>' << (*it).gEnd << _sep_ << ((*it).gBegin + options.positionFormat);
 					
 				unsigned ambig = 0;
 				for (unsigned i = 0; i <= (*it).editDist && i < length(stats); ++i)
@@ -613,35 +620,36 @@ void dumpMatches(
 
 
 		case 2:	// Eland Format
+			_sep_ = '\t';
 			for(unsigned readNo = 0; readNo < length(reads); ++readNo)
 			{
 				switch (options.readNaming)
 				{
 					// 0..filename is the read's Fasta id
 					case 0:
-						file << '>' << readIDs[readNo] << '\t';
+						file << '>' << readIDs[readNo] << _sep_;
 						break;
 
 					// 1..filename is the read filename + seqNo
 					case 1:
 						file.fill('0');
-						file << readName << '#' << ::std::setw(pzeros) << readNo + 1  << '\t';
+						file << readName << '#' << ::std::setw(pzeros) << readNo + 1  << _sep_;
 						break;
 				}
 
 				if (it == itEnd || readNo < (*it).rseqNo)
 				{
 					if (!empty(reads[readNo]))
-						file << reads[readNo] << "\tNM\t0\t0\t0" << ::std::endl;
+						file << reads[readNo] << _sep_ << "NM" << _sep_ << '0' << _sep_ << '0' << _sep_ << '0' << ::std::endl;
 					else
 					{
 						for (unsigned i = 0; i < maxReadLength; ++i)
 							file << '.';
-						file << "\tQC\t0\t0\t0" << ::std::endl;
+						file << _sep_ << "QC" << _sep_ << '0' << _sep_ << '0' << _sep_ << '0' << ::std::endl;
 					}
 				} else
 				{
-					file << reads[readNo] << '\t';
+					file << reads[readNo] << _sep_;
 					unsigned bestMatches = 1;
 					if ((unsigned)(*it).editDist < length(stats))
 						bestMatches = stats[(*it).editDist][readNo];
@@ -650,11 +658,11 @@ void dumpMatches(
 					if (bestMatches == 1) file << 'U';	// unique best match
 					if (bestMatches >  1) file << 'R';	// non-unique best matches
 					
-					file << (*it).editDist << '\t' << stats[0][readNo] << '\t' << stats[1][readNo] << '\t' << stats[2][readNo];
+					file << (*it).editDist << _sep_ << stats[0][readNo] << _sep_ << stats[1][readNo] << _sep_ << stats[2][readNo];
 					
 					if (bestMatches == 1)
 					{
-						file << '\t';
+						file << _sep_;
 						switch (options.genomeNaming)
 						{
 							// 0..filename is the read's Fasta id
@@ -669,9 +677,9 @@ void dumpMatches(
 						}
 						
 						if ((*it).orientation == 'F')
-							file << '\t' << ((*it).gBegin + options.positionFormat) << "\tF\t..";
+							file << _sep_ << ((*it).gBegin + options.positionFormat) << _sep_ << 'F' << _sep_ << "..";
 						else
-							file << '\t' << (*it).gEnd << "\tR\t..";
+							file << _sep_ << (*it).gEnd << _sep_ << 'R' << _sep_ << "..";
 
 						if ((*it).editDist > 0 && options.dumpAlignment && options.hammingOnly) 
 						{
@@ -681,7 +689,7 @@ void dumpMatches(
 							for (unsigned i = 0; i < length(gInf); ++i)
 								if ((options.compMask[ordValue(reads[readNo][i])] & 
 									options.compMask[ordValue(gInf[i])]) == 0)
-									file << '\t' << i + 1 << gInf[i];
+									file << _sep_ << i + 1 << gInf[i];
 						}
 					}
 					file << ::std::endl;

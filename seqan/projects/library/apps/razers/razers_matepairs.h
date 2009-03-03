@@ -55,6 +55,36 @@ public:
 	}
 };
 
+//////////////////////////////////////////////////////////////////////////////
+// Iterators
+//////////////////////////////////////////////////////////////////////////////
+
+///.Metafunction.Iterator.param.T.type:Spec.Dequeue
+
+template<typename TValue, typename TSpec>
+struct Iterator<Dequeue<TValue, TSpec>, Standard> 
+{
+	typedef Iter<Dequeue<TValue, TSpec>, PositionIterator> Type;
+};
+
+template<typename TValue, typename TSpec>
+struct Iterator<Dequeue<TValue, TSpec> const, Standard> 
+{
+	typedef Iter<Dequeue<TValue, TSpec> const, PositionIterator> Type;
+};
+
+template<typename TValue, typename TSpec>
+struct Iterator<Dequeue<TValue, TSpec>, Rooted> 
+{
+	typedef Iter<Dequeue<TValue, TSpec>, PositionIterator> Type;
+};
+
+template<typename TValue, typename TSpec>
+struct Iterator<Dequeue<TValue, TSpec> const, Rooted> 
+{
+	typedef Iter<Dequeue<TValue, TSpec> const, PositionIterator> Type;
+};
+
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -77,6 +107,34 @@ clear(Dequeue<TValue, TSpec> &me)
 
 	me.data_front = me.data_back = me.data_begin;
 	me.data_empty = true;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TValue, typename TSpec, typename TPos>
+inline TValue &
+value(Dequeue<TValue, TSpec> &me, TPos pos)
+{
+	typedef typename Size<Dequeue<TValue, TSpec> >::Type TSize;
+	TSize wrap = length(me) - (me.data_front - me.data_begin);
+	
+	if (pos < wrap)
+		return value(me.data_front + pos);
+	else
+		return value(me.data_front + (pos - wrap));
+}
+
+template <typename TValue, typename TSpec, typename TPos>
+inline TValue const &
+value(Dequeue<TValue, TSpec> const &me, TPos pos)
+{
+	typedef typename Size<Dequeue<TValue, TSpec> >::Type TSize;
+	TSize wrap = length(me) - (me.data_front - me.data_begin);
+	
+	if (pos < wrap)
+		return value(me.data_front + pos);
+	else
+		return value(me.data_front + (pos - wrap));
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -382,6 +440,8 @@ bool loadReads(
 		{
 			assignSeqId(fastaIDs[2*i], leftMates[i], formatL);		// read left Fasta id
 			assignSeqId(fastaIDs[2*i+1], rightMates[i], formatR);	// read right Fasta id
+			append(fastaIDs[2*i], "/L");
+			append(fastaIDs[2*i+1], "/R");
 		}
 		
 		assignSeq(seq[0], leftMates[i], formatL);					// read left Read sequence
@@ -448,6 +508,99 @@ bool loadReads(
 		::std::cerr << "Ignoring " << kickoutcount << " low quality mate-pairs.\n";
 	return (seqCount > 0);
 }
+
+	template <typename TReadMatch>
+	struct LessPairErrors : public ::std::binary_function < TReadMatch, TReadMatch, bool >
+	{
+		inline bool operator() (TReadMatch const &a, TReadMatch const &b) const 
+		{
+			// read number
+			if ((a.rseqNo >> 1) < (b.rseqNo >> 1)) return true;
+			if ((a.rseqNo >> 1) > (b.rseqNo >> 1)) return false;
+
+			// quality
+#ifdef RAZERS_MATEPAIRS
+			if (a.pairScore > b.pairScore) return true;
+			if (a.pairScore < b.pairScore) return false;
+			return a.pairId < b.pairId;
+#else
+			return a.editDist < b.editDist;
+#endif
+		}
+	};
+	
+
+
+//////////////////////////////////////////////////////////////////////////////
+// Remove low quality matches
+template < typename TMatches, typename TCounts, typename TSpec >
+void compactPairMatches(TMatches &matches, TCounts & cnts, RazerSOptions<TSpec> &options)
+{
+	typedef typename Value<TMatches>::Type					TMatch;
+	typedef typename Iterator<TMatches, Standard>::Type		TIterator;
+	
+	unsigned readNo = -1;
+	unsigned pairId = -1;
+	unsigned hitCount = 0;
+	unsigned hitCountCutOff = options.maxHits;
+	int scoreDistCutOff = InfimumValue<int>::VALUE;
+
+	TIterator it = begin(matches, Standard());
+	TIterator itEnd = end(matches, Standard());
+	TIterator dit = it;
+	TIterator ditBeg = it;
+
+	// sort 
+	::std::sort(it, itEnd, LessPairErrors<TMatch>());
+
+	for (; it != itEnd; ++it) 
+	{
+		if ((*it).orientation == '-') continue;
+		if (readNo == ((*it).rseqNo >> 1))
+		{ 
+			if ((*it).pairScore <= scoreDistCutOff) continue;
+
+			if (pairId != (*it).pairId)
+			{
+				pairId = (*it).pairId;
+				if (++hitCount == hitCountCutOff)
+				{
+#ifdef RAZERS_MASK_READS
+					if (options.purgeAmbiguous)
+					{
+						dit = ditBeg;
+						if (options._debugLevel >= 2)
+							::std::cerr << "(read #" << readNo << " disabled)";
+						options.readMask[readNo / options.WORD_SIZE] &= ~(1ul << (readNo % options.WORD_SIZE));
+					} else
+						if ((*it).editDist == 0)
+						{
+							if (options._debugLevel >= 2)
+								::std::cerr << "(read #" << readNo << " disabled)";
+							options.readMask[readNo / options.WORD_SIZE] &= ~(1ul << (readNo % options.WORD_SIZE));
+						}
+#endif
+				}
+			}
+
+			if (hitCount >= hitCountCutOff)
+				continue;
+		}
+		else
+		{
+			readNo = (*it).rseqNo >> 1;
+			hitCount = 0;
+			if (options.distanceRange > 0)
+				scoreDistCutOff = (*it).pairScore - options.distanceRange;
+			ditBeg = dit;
+		}
+		*dit = *it;
+		++dit;
+	}
+	resize(matches, dit - begin(matches, Standard()));
+}
+
+
 
 #ifndef RAZERS_PARALLEL
 //////////////////////////////////////////////////////////////////////////////
@@ -530,14 +683,22 @@ void mapMatePairReads(
 	fill(lastSeen, length(host(swiftPatternL)), ~(TGPos)maxDistance, Exact());
 
 	TSize gLength = length(genome);
-	TMatch mL, mR = { 0, };	// to supress uninitialized warnings
+	TMatch mL = { 0, };	// to supress uninitialized warnings
+	TMatch mR = { 0, };	// to supress uninitialized warnings
+	mL.gseqNo = gseqNo;
 	mR.gseqNo = gseqNo;
-	mR.orientation = orientation;
+	mL.orientation = orientation;
+	mR.orientation = (orientation == 'F')? 'R': 'F';
 
 	// iterate all verification regions returned by SWIFT
 	while (find(swiftFinderR, swiftPatternR, options.errorRate, options._debugLevel)) 
 	{
 		unsigned rseqNo = swiftPatternR.curSeqNo;
+#ifdef RAZERS_MASK_READS
+		if ((options.readMask[rseqNo / options.WORD_SIZE] & (1ul << (rseqNo % options.WORD_SIZE))) == 0)
+			continue;
+#endif
+
 		TGPos rEndPos = endPosition(swiftFinderR) + scanShift;
 		TGPos doubleParWidth = 2 * (*swiftFinderR.curHit).bucketWidth;
 
@@ -548,14 +709,14 @@ void mapMatePairReads(
 		// add within-window left mates to fifo
 		while (empty(fifo) || back(fifo).gEnd + minDistance < rEndPos + doubleParWidth)
 		{
-			if (find(swiftFinderL, swiftPatternL, options.errorRate, options._debugLevel))
+			if (find(swiftFinderL, swiftPatternL, options.errorRate, false))
 			{
-				mR.rseqNo = swiftPatternL.curSeqNo | NOT_VERIFIED;
+				mL.rseqNo = swiftPatternL.curSeqNo | NOT_VERIFIED;
 				gPair = positionRange(swiftFinderL);
-				mR.gBegin = gPair.i1;
-				mR.gEnd = gPair.i2;
-				lastSeen[swiftPatternL.curSeqNo] = mR.gEnd;
-				pushBack(fifo, mR);
+				mL.gBegin = gPair.i1;
+				mL.gEnd = gPair.i2;
+				lastSeen[swiftPatternL.curSeqNo] = mL.gEnd;
+				pushBack(fifo, mL);
 			} else
 				break;
 		}
@@ -569,15 +730,16 @@ void mapMatePairReads(
 			// ignore the last element (is not within correct distance)
 			while (it != fifo.data_back)
 			{
+				// search left mate
 				if (((*it).rseqNo & ~NOT_VERIFIED) == rseqNo)
 				{
 					// verify left mate (equal seqNo), if not done already
 					if ((*it).rseqNo & NOT_VERIFIED)
 					{
 						if (matchVerify(
-							*it, infix(genome, (*it).gBegin, (*it).gEnd), 
-							rseqNo, readSetL, forwardPatternsL, 
-							options, TSwiftSpec()))
+								*it, infix(genome, (*it).gBegin, (*it).gEnd), 
+								rseqNo, readSetL, forwardPatternsL, 
+								options, TSwiftSpec()))
 						{
 							(*it).rseqNo &= ~NOT_VERIFIED;		// has been verified positively
 						} else
@@ -587,39 +749,72 @@ void mapMatePairReads(
 					// verify right mate, if left mate matches
 					if ((*it).rseqNo == rseqNo)
 						if (matchVerify(
-							mR, range(swiftFinderR, genomeInf),
-							rseqNo, readSetR, forwardPatternsR,
-							options, TSwiftSpec()))
+								mR, range(swiftFinderR, genomeInf),
+								rseqNo, readSetR, forwardPatternsR,
+								options, TSwiftSpec()))
 						{
 							// distance between left mate beginning and right mate end
 							__int64 dist = (__int64)mR.gEnd - (__int64)(*it).gBegin;
-//							if (dist > options.libraryLength + options.libraryError ||
-//								options.libraryLength > dist + options.libraryError) continue;
-							
-							mL = *it;
-							mR.rseqNo = rseqNo;
-
-							// transform coordinates to the forward strand
-							if (orientation == 'R') 
+							if (dist < options.libraryLength + options.libraryError &&
+								options.libraryLength < dist + options.libraryError)
 							{
-								TSize temp = mL.gBegin;
-								mL.gBegin = gLength - mL.gEnd;
-								mL.gEnd = gLength - temp;
-								temp = mR.gBegin;
-								mR.gBegin = gLength - mR.gEnd;
-								mR.gEnd = gLength - temp;
-							}
+								
+								mL = *it;
 
-							// both mates match with correct library size
-							std::cout << "found " << rseqNo << " on " << orientation << gseqNo;
-							std::cout << " dist:" << dist;
-							if (orientation=='F')
-								std::cout << " \t_" << mL.gBegin+1 << "_" << mR.gEnd;
-							else
-								std::cout << " \t_" << mR.gBegin+1 << "_" << mL.gEnd;
-//							std::cout << " L_" << (*it).gBegin << "_" << (*it).gEnd << "_" << (*it).editDist;
-//							std::cout << " R_" << mR.gBegin << "_" << mR.gEnd << "_" << mR.editDist;
-							std::cout << std::endl;
+								// transform mate readNo to global readNo
+								mL.rseqNo = (rseqNo << 1);
+								mR.rseqNo = (rseqNo << 1) + 1;
+
+								// transform coordinates to the forward strand
+								if (orientation == 'R') 
+								{
+									TSize temp = mL.gBegin;
+									mL.gBegin = gLength - mL.gEnd;
+									mL.gEnd = gLength - temp;
+									temp = mR.gBegin;
+									mR.gBegin = gLength - mR.gEnd;
+									mR.gEnd = gLength - temp;
+									dist = -dist;
+								}
+
+								// set a unique pair id
+								mL.pairId = mR.pairId = options.nextMatePairId;
+								if (++options.nextMatePairId == 0)
+									options.nextMatePairId = 1;
+
+								// score the whole match pair
+								mL.pairScore = mR.pairScore = 0 - mL.editDist - mR.editDist;
+
+								// relative positions
+								mL.mateDelta = dist;
+								mR.mateDelta = -dist;
+
+								// both mates match with correct library size
+								std::cout << "found " << rseqNo << " on " << orientation << gseqNo;
+								std::cout << " dist:" << dist;
+								if (orientation=='F')
+									std::cout << " \t_" << mL.gBegin+1 << "_" << mR.gEnd;
+								else
+									std::cout << " \t_" << mR.gBegin+1 << "_" << mL.gEnd;
+	//							std::cout << " L_" << (*it).gBegin << "_" << (*it).gEnd << "_" << (*it).editDist;
+	//							std::cout << " R_" << mR.gBegin << "_" << mR.gEnd << "_" << mR.editDist;
+								std::cout << std::endl;
+
+								if (!options.spec.DONT_DUMP_RESULTS)
+								{
+									appendValue(matches, mL);
+									appendValue(matches, mR);
+									if (length(matches) > options.compactThresh)
+									{
+										typename Size<TMatches>::Type oldSize = length(matches);
+	//									maskDuplicates(matches);	// overlapping parallelograms cause duplicates
+										compactPairMatches(matches, cnts, options);
+										options.compactThresh += (options.compactThresh >> 1);
+										if (options._debugLevel >= 2)
+											::std::cerr << '(' << oldSize - length(matches) << " matches removed)";
+									}
+								}
+							}
 						}
 				}
 
