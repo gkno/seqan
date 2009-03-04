@@ -37,7 +37,7 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 
-#define TEMP_RAND_MAX (double)(RAND_MAX-1)
+#define TEMP_RAND_MAX (RAND_MAX + 1.0)
 
 template <typename TOperation, typename TAlphabet>
 inline TAlphabet
@@ -74,6 +74,8 @@ void simulateReads(
 	int numReads,			// how many reads should be generated
 	int maxErrors,			// how many errors they may have
 	TDistr &errorDist,		// error probability distribution
+	int libSize,			// library size, 0 disables mate-pair simulation
+	int libError,			// maximal library size deviation
 	double forwardProb,
 	bool verbose = false)
 {
@@ -93,8 +95,8 @@ void simulateReads(
 //	mtRandInit();
 //	typedef TGenome TRevComp;
 
-	int readCounter = 0;
 	int readLength = length(errorDist)/4;
+	const int REVCOMP = 1 << (sizeof(int)*8-1);
 	//int KJ = 2*maxErrors;
 	
 	srand ( time(NULL) );
@@ -104,11 +106,6 @@ void simulateReads(
 	
 	String<int> kickOutCount;
 	fill(kickOutCount,maxErrors,0);
-
-//	if (simulateMatePairs == 1) {
-//		if (numOfReads %% 2 != 0) numOfReads = numOfReads +1
-//		numOfReads  = numOfReads / 2
-//	}
 
 	if (verbose)
 		std::cout << "\nSimulating...";
@@ -121,44 +118,49 @@ void simulateReads(
 	TGenome& currentSource = genomeSet[0];
 	int seqLength = length(currentSource);
 
+	int fragmentSize = readLength;
+	if (libSize > 0)
+		fragmentSize = libSize + libError;
+
 	String<int> sortedStartPos;
-	resize(sortedStartPos,numReads);
-	while (readCounter < numReads) {
-		sortedStartPos[readCounter] = (int)((seqLength - readLength - maxErrors + 1.0) * (double)rand() / TEMP_RAND_MAX);
-		++readCounter;
-	}
+	resize(sortedStartPos, numReads);
+
+	// sample positions
+	for (int i = 0; i < numReads; ++i)
+		sortedStartPos[i] = (int)((seqLength - fragmentSize - maxErrors + 1.0) * rand() / TEMP_RAND_MAX);
+
 	std::sort(begin(sortedStartPos),end(sortedStartPos));
 
-	readCounter = 0;
+	// sample orientations
+	for (int i = 0; i < numReads; ++i)
+		if ((double)rand() / TEMP_RAND_MAX >= forwardProb)
+			sortedStartPos[i] |= REVCOMP;
 
-	while (readCounter < numReads) {
-		clear(modificationPattern);
-		//# Pick a haplotype
-		//currentHaplotype = sample(1:(length(haplotypes)), 1)
-
-
-		// Sample a read
-		bool invalidMatePair = true;
-		bool revComp = false;
-		int startPos = 0;
-		
-		while(invalidMatePair) {
-			startPos = sortedStartPos[readCounter];
-			
-
-			// Reverse complement this read
-			revComp = false;
-			if ((double)rand()/TEMP_RAND_MAX > forwardProb) {
-				revComp = true;
+	int realNumReads = numReads;
+	if (libSize > 0)
+	{
+		resize(sortedStartPos,2*numReads);
+		// sample mate-pair positions and inverse orientations
+		for(int i=0;i<numReads;++i)
+		{
+			int leftPos = sortedStartPos[i] & ~REVCOMP;
+			int lSize = fragmentSize - (int)((2.0 * libError + 1.0) * (double)rand() / TEMP_RAND_MAX);
+			int rightPos = leftPos + lSize - readLength;
+			if ((sortedStartPos[i] & REVCOMP) == 0)
+			{
+				sortedStartPos[i+numReads] = rightPos | REVCOMP;
 			}
-				
-			if (true/*!simulateMatePairs*/) {
-				//currentLibrary = true;
-				invalidMatePair = false;
-			} else {
+			else
+			{
+				sortedStartPos[i] = rightPos;
+				sortedStartPos[i+numReads] = leftPos | REVCOMP;
+			}
+		}
+		numReads*=2;
+	}
 /*				# Pick a library size
 				currentLibrary = sample(1:(length(librarySizes)), 1)
-				libSize = round(rnorm(1, mean=librarySizes[currentLibrary], sd=librarySd[currentLibrary]))
+				lSize = round(rnorm(1, mean=librarySizes[currentLibrary], sd=librarySd[currentLibrary]))
 				if (start < end) {
 					if (start + libSize <= seqLength) {
 						startMatePair = start + libSize - readLength + 1 
@@ -178,9 +180,17 @@ void simulateReads(
 						invalidMatePair = 0
 					}
 				}*/
-			}
-		}
-		int maxEnd = startPos + readLength + maxErrors - 1;
+
+	int readCounter = 0;
+	while (readCounter < numReads) {
+		clear(modificationPattern);
+		//# Pick a haplotype
+		//currentHaplotype = sample(1:(length(haplotypes)), 1)
+
+		// Sample a read
+		int  startPos = sortedStartPos[readCounter] & ~REVCOMP;
+		bool revComp  = sortedStartPos[readCounter] & REVCOMP;
+		int  maxEnd   = startPos + readLength + maxErrors - 1;
 	
 		TGenome read;
 		resize(read,readLength);
@@ -380,8 +390,10 @@ void simulateReads(
 				//Add read to readSet
 				if(!revComp) id << startPos << ',' << startPos+pos;
 				else id << maxEnd << ',' << maxEnd-pos;
-				id << "[id=" << readCounter << ",fragId=" << readCounter;
-				id << ",repeatId=" << 0 <<",errors=" << countErrors << ']';
+				id << "[id=" << readCounter << ",fragId=" << readCounter % realNumReads;
+				id << ",repeatId=" << 0 <<",errors=" << countErrors;
+				if (revComp) id << ",orientation=R]";
+				else id << ",orientation=F]";
 
 				appendValue(readIDs, id.str());
 				appendValue(readSet, read);
