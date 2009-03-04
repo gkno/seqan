@@ -152,8 +152,8 @@ void simulateReads(
 			}
 			else
 			{
-				sortedStartPos[i] = rightPos;
-				sortedStartPos[i+numReads] = leftPos | REVCOMP;
+				sortedStartPos[i] = rightPos | REVCOMP;
+				sortedStartPos[i+numReads] = leftPos;
 			}
 		}
 		numReads*=2;
