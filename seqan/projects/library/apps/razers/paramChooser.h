@@ -814,7 +814,7 @@ makeSelectedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 	simulateGenome(testGenome[0], 1000000);					// generate 1Mbp genomic sequence
 	simulateReads(
 		testReads, dummyIDs, testGenome, 
-		50000, maxErrors+1, logErrorDistribution, 0.5, true);	// generate 50K reads
+		50000, maxErrors+1, logErrorDistribution, 0, 0, 0.5, true);	// generate 50K reads
 
 #endif
 
@@ -947,7 +947,7 @@ makeOneGappedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 	simulateGenome(testGenome[0], 1000000);					// generate 1Mbp genomic sequence
 	simulateReads(
 		testReads, dummyIDs, testGenome, 
-		50000, maxE, logErrorDistribution, 0.5);	// generate 10M reads
+		50000, maxE, logErrorDistribution, 0, 0, 0.5);	// generate 10M reads
 #endif
 
 
