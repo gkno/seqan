@@ -1131,11 +1131,8 @@ void mapSingleReads(
 	TReadSet &readSet = host(host(swiftPattern));
 	TSwiftFinder swiftFinder(genome, options.repeatLength, 1);
 	
-#ifdef RAZERS_DIRECT_MAQ_MAPPING
-	TMatch m = { 0, 0, 0, 0, 0, 0, 0, 0 };	// extra value for sum of mismatching qualities
-#else
-	TMatch m = { 0, 0, 0, 0, 0, 0 };	// to supress uninitialized warnings
-#endif
+	TMatch m = { 0, };	// to supress uninitialized warnings
+
 	// iterate all verification regions returned by SWIFT
 	while (find(swiftFinder, swiftPattern, options.errorRate, options._debugLevel)) 
 	{
