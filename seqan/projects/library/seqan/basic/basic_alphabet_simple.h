@@ -1421,7 +1421,7 @@ inline void assign(Ascii & c_target,
 				   DnaQ const & source)
 {
 SEQAN_CHECKPOINT
-	c_target = source.value;
+	c_target = _Translate_Table_Dna5_2_Ascii<>::VALUE[source.value & 3];
 }
 //____________________________________________________________________________
 
@@ -1429,11 +1429,11 @@ inline void assign(Ascii & c_target,
 				   Dna5Q const & source)
 {
 SEQAN_CHECKPOINT
-	c_target = source.value;
+	c_target = _Translate_Table_Dna5_2_Ascii<>::VALUE[source.value & 7];
 }
 
 //////////////////////////////////////////////////////////////////////////////
-//DNA (4 letters)
+//DNA (4 letters) with Qualities (0..80)
 
 template <>
 struct CompareType<DnaQ, Byte> { typedef Dna Type; };

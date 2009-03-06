@@ -138,6 +138,21 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
     };
 
+	template <>
+	struct FunctorComplement<DnaQ> : public ::std::unary_function<Dna5,Dna5> 
+	{
+		inline DnaQ operator()(DnaQ x) const {
+			return (x.value & ~3) | _Translate_Table_Dna5_2_Dna5Complement<>::VALUE[x.value & 3];
+		}
+	};
+	template <>
+
+	struct FunctorComplement<Dna5Q> : public ::std::unary_function<Dna5,Dna5> 
+	{
+		inline Dna5Q operator()(Dna5Q x) const {
+			return (x.value & ~7) | _Translate_Table_Dna5_2_Dna5Complement<>::VALUE[x.value & 7];
+		}
+	};
 
 }
 

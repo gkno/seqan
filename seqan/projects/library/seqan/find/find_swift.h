@@ -110,9 +110,12 @@ struct SwiftParameters {
 #endif
 	};
 
-	template <typename TSpec, typename TSize, typename TShortSize = unsigned short>
+	template <typename TSpec, typename _TSize, typename _TShortSize = unsigned short>
 	struct _SwiftBucketParams 
 	{
+		typedef _TSize			TSize;
+		typedef _TShortSize		TShortSize;
+
 		TSize			firstBucket;	// first _SwiftBucket entry in pattern.buckets
 		TSize			reuseMask;		// 2^ceil(log2(x)) reuse every x-th bucket)
 //		TShortSize		distanceCut;	// if lastIncrement is this far or farer away, threshold can't be reached
@@ -398,6 +401,7 @@ inline void _patternInit(Pattern<TIndex, Swift<TSpec> > &pattern, TFloat errorRa
 	typedef typename Fibre<TIndex, QGram_SA>::Type				TSA;
 	typedef typename Iterator<TSA, Standard>::Type				TSAIter;
 	typedef typename TPattern::TBucket							TBucket;
+	typedef typename TBucket::TSize								TBucketSize;
 	typedef typename TPattern::TBucketParams					TBucketParams;
 	typedef typename TPattern::TBucketString					TBucketString;
 	typedef typename Iterator<TBucketString, Standard>::Type	TBucketIterator;
@@ -548,7 +552,7 @@ inline void _patternInit(Pattern<TIndex, Swift<TSpec> > &pattern, TFloat errorRa
 		bktEnd = bkt + bucketParams.reuseMask + 1;
 		for(; bkt != bktEnd; ++bkt) 
 		{
-			(*bkt).lastIncrement = 0 - bucketParams.tabooLength;
+			(*bkt).lastIncrement = (TBucketSize)0 - (TBucketSize)bucketParams.tabooLength;
 			(*bkt).counter = 0;
 		}
 	}
@@ -690,6 +694,8 @@ inline void _swiftMultiFlushBuckets(Pattern<TIndex, Swift<TSpec> > &pattern)
 {
 	typedef Pattern<TIndex, Swift<TSpec> >						TPattern;
 
+	typedef typename TPattern::TBucket							TBucket;
+	typedef typename TBucket::TSize								TBucketSize;
 	typedef typename TPattern::TBucketString					TBucketString;
 	typedef typename Iterator<TBucketString, Standard>::Type	TBucketIterator;
 	typedef typename TPattern::TBucketParams					TBucketParams;
@@ -706,7 +712,7 @@ inline void _swiftMultiFlushBuckets(Pattern<TIndex, Swift<TSpec> > &pattern)
 		bktEnd = bkt + (bucketParams.reuseMask + 1);
 		for(unsigned bktNo = 0; bkt != bktEnd; ++bkt, ++bktNo)
 		{
-			(*bkt).lastIncrement = 0 - bucketParams.tabooLength;;
+			(*bkt).lastIncrement = (TBucketSize)0 - (TBucketSize)bucketParams.tabooLength;
 			(*bkt).counter = 0;
 		}
 	}
@@ -781,6 +787,40 @@ endPosition(Finder<THaystack, Swift<TSpec> > const & finder)
 {
 	typename Finder<THaystack, Swift<TSpec> >::TSwiftHit &hit = *finder.curHit;
 	return hit.hstkPos + hit.bucketWidth;
+}
+
+//____________________________________________________________________________
+
+template <typename THaystack, typename TSpec>
+inline Pair<typename Position<Finder<THaystack, Swift<TSpec> > >::Type>
+positionRange(Finder<THaystack, Swift<TSpec> > &finder)
+{
+	typedef Pair<typename Position<Finder<THaystack, Swift<TSpec> > >::Type> TPair;
+	typename Finder<THaystack, Swift<TSpec> >::TSwiftHit &hit = *finder.curHit;
+
+	__int64 hitBegin = hit.hstkPos;
+	__int64 hitEnd = hit.hstkPos + hit.bucketWidth;
+	__int64 textEnd = length(haystack(finder));
+
+	if (hitBegin < 0) hitBegin = 0;
+	if (hitEnd > textEnd) hitEnd = textEnd;
+	return TPair(hitBegin, hitEnd);
+}
+
+template <typename THaystack, typename TSpec>
+inline Pair<typename Position<Finder<THaystack, Swift<TSpec> > >::Type>
+positionRange(Finder<THaystack, Swift<TSpec> > const &finder)
+{
+	typedef Pair<typename Position<Finder<THaystack, Swift<TSpec> > >::Type> TPair;
+	typename Finder<THaystack, Swift<TSpec> >::TSwiftHit &hit = *finder.curHit;
+
+	__int64 hitBegin = hit.hstkPos;
+	__int64 hitEnd = hit.hstkPos + hit.bucketWidth;
+	__int64 textEnd = length(haystack(finder));
+
+	if (hitBegin < 0) hitBegin = 0;
+	if (hitEnd > textEnd) hitEnd = textEnd;
+	return TPair(hitBegin, hitEnd);
 }
 
 //____________________________________________________________________________
@@ -916,14 +956,21 @@ find(
 			return true;
 		}
 	} else
-		if (++finder.curHit != finder.endHit) 
+		if (++finder.curHit < finder.endHit) 
 		{
 			pattern.curSeqNo = (*finder.curHit).ndlSeqNo;
 			return true;
 		}
 
+	// all previous matches reported -> search new ones
 	clear(finder.hits);
-	if (atEnd(finder) && finder.curRepeat == finder.endRepeat) return false;
+
+	// are we at the end of the text?
+	if (atEnd(finder) && finder.curRepeat == finder.endRepeat) 
+	{
+		finder.curHit = finder.endHit;
+		return false;
+	}
 
 	do {
 
