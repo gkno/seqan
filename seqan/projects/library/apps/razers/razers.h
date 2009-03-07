@@ -684,7 +684,7 @@ void countMatches(TMatches &matches, TCounts &cnt)
 //////////////////////////////////////////////////////////////////////////////
 // Remove low quality matches
 template < typename TMatches, typename TCounts, typename TSpec >
-void compactMatches(TMatches &matches, TCounts & cnts, RazerSOptions<TSpec> &options)
+void compactMatches(TMatches &matches, TCounts & /*cnts*/, RazerSOptions<TSpec> &options)
 {
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 	if(options.maqMapping) compactMatches(matches, cnts,options,true);
@@ -807,13 +807,13 @@ template <
 	typename TSpec >
 inline bool
 matchVerify(
-	TMatch &m,					// resulting match
+	TMatch &m,								// resulting match
 	Segment<TGenome, InfixSegment> inf,		// potential match genome region
-	unsigned rseqNo,				// read number
-	TReadSet &readSet,				// reads
-	TMyersPatterns const & pat,			// MyersBitVector preprocessing data
-	RazerSOptions<TSpec> const &options,		// RazerS options
-	SwiftSemiGlobalHamming swiftsemi)		// Hamming only
+	unsigned rseqNo,						// read number
+	TReadSet &readSet,						// reads
+	TMyersPatterns const &,					// MyersBitVector preprocessing data
+	RazerSOptions<TSpec> const &options,	// RazerS options
+	SwiftSemiGlobalHamming)					// Hamming only
 {
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 	if(options.maqMapping) 
@@ -1131,7 +1131,17 @@ void mapSingleReads(
 	TReadSet &readSet = host(host(swiftPattern));
 	TSwiftFinder swiftFinder(genome, options.repeatLength, 1);
 	
-	TMatch m = { 0, };	// to supress uninitialized warnings
+	TMatch m = {	// to supress uninitialized warnings
+		0, 0, 0, 0,
+#ifdef RAZERS_MATEPAIRS
+		0, 0, 0,
+#endif
+		0,
+#ifdef RAZERS_DIRECT_MAQ_MAPPING
+		0, 0,
+#endif
+		0
+	};
 
 	// iterate all verification regions returned by SWIFT
 	while (find(swiftFinder, swiftPattern, options.errorRate, options._debugLevel)) 

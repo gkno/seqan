@@ -209,7 +209,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline void
 	assignQual(
 		TSeq & dst,
-		TFastaSeq const & fasta,
+		TFastaSeq const &,
 		Fasta)
 	{
 		clear(dst);
@@ -219,7 +219,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline void
 	assignQualId(
 		TSeq & dst,
-		TFastaSeq const & fasta,
+		TFastaSeq const &,
 		Fasta)
 	{
 		clear(dst);

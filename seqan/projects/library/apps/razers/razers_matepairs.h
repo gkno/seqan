@@ -534,7 +534,7 @@ bool loadReads(
 //////////////////////////////////////////////////////////////////////////////
 // Remove low quality matches
 template < typename TMatches, typename TCounts, typename TSpec >
-void compactPairMatches(TMatches &matches, TCounts & cnts, RazerSOptions<TSpec> &options)
+void compactPairMatches(TMatches &matches, TCounts & /*cnts*/, RazerSOptions<TSpec> &options)
 {
 	typedef typename Value<TMatches>::Type					TMatch;
 	typedef typename Iterator<TMatches, Standard>::Type		TIterator;
@@ -683,8 +683,18 @@ void mapMatePairReads(
 	fill(lastSeen, length(host(swiftPatternL)), ~(TGPos)maxDistance, Exact());
 
 	TSize gLength = length(genome);
-	TMatch mL = { 0, };	// to supress uninitialized warnings
-	TMatch mR = { 0, };	// to supress uninitialized warnings
+	TMatch mL = {	// to supress uninitialized warnings
+		0, 0, 0, 0,
+#ifdef RAZERS_MATEPAIRS
+		0, 0, 0,
+#endif
+		0,
+#ifdef RAZERS_DIRECT_MAQ_MAPPING
+		0, 0,
+#endif
+		0
+	};
+	TMatch mR = mL;	// to supress uninitialized warnings
 	mL.gseqNo = gseqNo;
 	mR.gseqNo = gseqNo;
 	mL.orientation = orientation;
@@ -703,11 +713,11 @@ void mapMatePairReads(
 		TGPos doubleParWidth = 2 * (*swiftFinderR.curHit).bucketWidth;
 
 		// remove out-of-window left mates from fifo
-		while (!empty(fifo) && front(fifo).gEnd + maxDistance + doubleParWidth < rEndPos)
+		while (!empty(fifo) && front(fifo).gEnd + maxDistance + (TSignedGPos)(doubleParWidth < rEndPos))
 			popFront(fifo);
 
 		// add within-window left mates to fifo
-		while (empty(fifo) || back(fifo).gEnd + minDistance < rEndPos + doubleParWidth)
+		while (empty(fifo) || back(fifo).gEnd + minDistance < (TSignedGPos)(rEndPos + doubleParWidth))
 		{
 			if (find(swiftFinderL, swiftPatternL, options.errorRate, false))
 			{
