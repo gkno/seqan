@@ -16,10 +16,11 @@ using namespace seqan;
 //____________________________________________________________________________
 // Global Parameters
 
-	int optionSeqNo = 0;
-	int optionInfStart = -1;
-	int optionInfEnd = -1;
-	bool optionRevComp = false;
+	int			optionSeqNo = 0;
+	int			optionInfStart = -1;
+	int			optionInfEnd = -1;
+	bool		optionRevComp = false;
+	const char	*optionOutput = NULL;					
 
 	typedef Dna5 TAlphabet;
 	typedef String<TAlphabet> TSeqString;
@@ -66,8 +67,8 @@ parse_skipWhitespace(TFile& file, TChar& c)
 
 //////////////////////////////////////////////////////////////////////////////
 // Load multi-Fasta sequences
-template <typename TSeqSet>
-bool loadSeqs(TSeqSet &seqs, const char *fileName)
+template <typename TSeqSet, typename TIDs>
+bool loadSeqs(TSeqSet &seqs, TIDs &ids, const char *fileName)
 {
 	MultiFasta multiFasta;
 	if (!open(multiFasta.concat, fileName, OPEN_RDONLY)) return false;
@@ -75,12 +76,16 @@ bool loadSeqs(TSeqSet &seqs, const char *fileName)
 
 	unsigned seqCount = length(multiFasta);
 	resize(seqs, seqCount, Exact());
+	resize(ids, seqCount, Exact());
 	for(unsigned i = 0; i < seqCount; ++i)
+	{
 		assignSeq(seqs[i], multiFasta[i], Fasta());		// read Genome sequence
+		assignSeqId(ids[i], multiFasta[i], Fasta());	// read Genome ids
+	}
 
 	return (seqCount > 0);
 }
-/*
+
 template < 
 	typename TReadSet, 
 	typename TReadIDs >
@@ -117,7 +122,7 @@ void saveFasta(
 	}
 	file.close();
 }
-
+/*
 //temporary fake fastq output each base has quality 25
 template < 
 	typename TReadSet, 
@@ -183,9 +188,10 @@ void printHelp(int, const char *[], bool longHelp = false)
 	cerr << "\n";
 	if (longHelp) {
 		cerr << endl << "Main Options:" << endl;
-//		cerr << "  -sn, --seq-number NUM         \t" << "sequence number" << endl;
+		cerr << "  -o,  --output FILE            \t" << "set output filename (default: use stdout)" << endl;
 		cerr << "  -h,  --help                   \t" << "print this help" << endl;
 		cerr << endl << "Extract Options:" << endl;
+		cerr << "  -sn, --seqno NUM              \t" << "select a sequence (default: select all)" << endl;
 		cerr << "  -i,  --infix START END        \t" << "extract infix" << endl;
 		cerr << "  -rc, --revcomp                \t" << "reverse complement" << endl;
 	} else {
@@ -206,7 +212,7 @@ int main(int argc, const char *argv[])
 		if (argv[arg][0] == '-') {
 			// parse option
 
-			if (strcmp(argv[arg], "-n") == 0 || strcmp(argv[arg], "--length") == 0) {
+			if (strcmp(argv[arg], "-sn") == 0 || strcmp(argv[arg], "--seqno") == 0) {
 				if (arg + 1 < argc) {
 					++arg;
 					istringstream istr(argv[arg]);
@@ -256,6 +262,16 @@ int main(int argc, const char *argv[])
 				continue;
 			}
 
+			if (strcmp(argv[arg], "-o") == 0 || strcmp(argv[arg], "--output") == 0) {
+				if (arg + 1 == argc) {
+					printHelp(argc, argv);
+					return 0;
+				}
+				++arg;
+				optionOutput = argv[arg];
+				continue;
+			}
+
 			if (strcmp(argv[arg], "-h") == 0 || strcmp(argv[arg], "--help") == 0) {
 				// print help
 				printHelp(argc, argv, true);
@@ -277,25 +293,48 @@ int main(int argc, const char *argv[])
 	}
 	
 
-	StringSet<TSeqString>	seqs;
-	StringSet<CharString>	seqNames;	// genome names, taken from the Fasta file
+	StringSet<TSeqString>	seqsIn, seqsOut;
+	StringSet<CharString>	seqNamesIn, seqNamesOut;	// genome names, taken from the Fasta file
 
-		
-	if (!loadSeqs(seqs, fname[0]))
+	if (!loadSeqs(seqsIn, seqNamesIn, fname[0]))
 	{
 		cerr << "Failed to open file" << fname[0] << endl;
 		return 0;
 	}
 
-	cout << "\n"<<lengthSum(seqs) << " bps of " << length(seqs) << " source sequence loaded." << endl;
+	cout << "\n"<<lengthSum(seqsIn) << " bps of " << length(seqsIn) << " source sequence loaded." << endl;
 
 //____________________________________________________________________________
 
-	TSeqString seq = infix(seqs[optionSeqNo], optionInfStart, optionInfEnd);
-	if (optionRevComp)
-		reverseComplementInPlace(seq);
+	if (optionSeqNo >= 0)
+	{
+		TSeqString tempSeq = seqsIn[optionSeqNo];
+		CharString tempSeqName = seqNamesIn[optionSeqNo];
+		clear(seqsIn);
+		clear(seqNamesIn);
+		appendValue(seqsIn, tempSeq);
+		appendValue(seqNamesIn, tempSeqName);
+	}
 
-	cout << seq << endl;
+	resize(seqsOut, length(seqsIn));
+	seqNamesOut = seqNamesIn;
+
+	for (unsigned i = 0; i < length(seqsOut); ++i)
+	{
+		seqsOut[i] = infix(seqsIn[i], optionInfStart, optionInfEnd);
+		if (optionRevComp)
+			reverseComplementInPlace(seqsOut[i]);
+	}
+
+//____________________________________________________________________________
+
+	if (optionOutput == NULL)
+	{
+		for (unsigned i = 0; i < length(seqsOut); ++i)
+			cout << seqsOut[i] << endl;
+	}
+	else
+		saveFasta(seqsOut, seqNamesOut, optionOutput);
 	
 //____________________________________________________________________________
 
