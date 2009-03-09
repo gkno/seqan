@@ -11,8 +11,6 @@
 using namespace std;
 using namespace seqan;
 
-
-
 //____________________________________________________________________________
 // Global Parameters
 
@@ -28,43 +26,6 @@ using namespace seqan;
 //____________________________________________________________________________
 
 
-template<typename TChar>
-inline bool
-parse_isDigit(TChar const c)
-{
-	//return (((int ) c >=  48) && ((int) c <=  57));
-	return ((c == '0') || (c == '1') || (c == '2') || (c == '3') || (c == '4') || 
-		    (c == '5') || (c == '6') || (c == '7') || (c == '8') || (c == '9'));
-}
-
-
-template<typename TFile, typename TChar>
-inline long double
-parse_readDouble(TFile & file, TChar& c)
-{
-	// Read number
-	String<char> str(c);
-	while (!_streamEOF(file)) {
-		c = _streamGet(file);
-		if (!parse_isDigit(c) && (c != '.')) break;
-		append(str, c);
-	}
- 	return atof(toCString(str));
-}
-
-template<typename TFile, typename TChar>
-inline void 
-parse_skipWhitespace(TFile& file, TChar& c)
-{
-	if ((c!=' ') && (c != '\t') && (c != '\n') && (c != '\r')) return;
-	while (!_streamEOF(file)) {
-		c = _streamGet(file);
-		if ((c!=' ') && (c != '\t') && (c != '\n') && (c != '\r')) break;
-	}
-}
-
-
-
 //////////////////////////////////////////////////////////////////////////////
 // Load multi-Fasta sequences
 template <typename TSeqSet, typename TIDs>
@@ -74,13 +35,25 @@ bool loadSeqs(TSeqSet &seqs, TIDs &ids, const char *fileName)
 	if (!open(multiFasta.concat, fileName, OPEN_RDONLY)) return false;
 	split(multiFasta, Fasta());
 
-	unsigned seqCount = length(multiFasta);
-	resize(seqs, seqCount, Exact());
-	resize(ids, seqCount, Exact());
-	for(unsigned i = 0; i < seqCount; ++i)
+	int seqCount = length(multiFasta);
+
+	if (optionSeqNo >= seqCount) optionSeqNo = seqCount - 1;
+	if (optionSeqNo < 0)
 	{
-		assignSeq(seqs[i], multiFasta[i], Fasta());		// read Genome sequence
-		assignSeqId(ids[i], multiFasta[i], Fasta());	// read Genome ids
+		resize(seqs, seqCount, Exact());
+		resize(ids, seqCount, Exact());
+		for(int i = 0; i < seqCount; ++i)
+		{
+			assignSeq(seqs[i], multiFasta[i], Fasta());		// read Genome sequence
+			assignSeqId(ids[i], multiFasta[i], Fasta());	// read Genome ids
+		}
+	}
+	else
+	{
+		resize(seqs, 1, Exact());
+		resize(ids, 1, Exact());
+		assignSeq(seqs[0], multiFasta[optionSeqNo], Fasta());		// read Genome sequence
+		assignSeqId(ids[0], multiFasta[optionSeqNo], Fasta());	// read Genome ids
 	}
 
 	return (seqCount > 0);
@@ -292,6 +265,8 @@ int main(int argc, const char *argv[])
 		return 0;
 	}
 	
+//____________________________________________________________________________
+// input
 
 	StringSet<TSeqString>	seqsIn, seqsOut;
 	StringSet<CharString>	seqNamesIn, seqNamesOut;	// genome names, taken from the Fasta file
@@ -301,32 +276,29 @@ int main(int argc, const char *argv[])
 		cerr << "Failed to open file" << fname[0] << endl;
 		return 0;
 	}
-
-	cout << "\n"<<lengthSum(seqsIn) << " bps of " << length(seqsIn) << " source sequence loaded." << endl;
+	cout << lengthSum(seqsIn) << " bps of " << length(seqsIn) << " source sequence loaded." << endl;
 
 //____________________________________________________________________________
-
-	if (optionSeqNo >= 0)
-	{
-		TSeqString tempSeq = seqsIn[optionSeqNo];
-		CharString tempSeqName = seqNamesIn[optionSeqNo];
-		clear(seqsIn);
-		clear(seqNamesIn);
-		appendValue(seqsIn, tempSeq);
-		appendValue(seqNamesIn, tempSeqName);
-	}
+// data processing
 
 	resize(seqsOut, length(seqsIn));
+	for (unsigned i = 0; i < length(seqsIn); ++i)
+	{
+		int end = optionInfEnd;
+		if (end > length(seqsIn[i])
+			end = seqsIn[i];
+
+		if (optionInfStart < length(seqsIn[i])
+		{
+			seqsOut[i] = infix(seqsIn[i], optionInfStart, end);
+			if (optionRevComp)
+				reverseComplementInPlace(seqsOut[i]);
+		}
+	}
 	seqNamesOut = seqNamesIn;
 
-	for (unsigned i = 0; i < length(seqsOut); ++i)
-	{
-		seqsOut[i] = infix(seqsIn[i], optionInfStart, optionInfEnd);
-		if (optionRevComp)
-			reverseComplementInPlace(seqsOut[i]);
-	}
-
 //____________________________________________________________________________
+// output
 
 	if (optionOutput == NULL)
 	{
