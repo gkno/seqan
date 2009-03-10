@@ -14,7 +14,8 @@ using namespace seqan;
 //____________________________________________________________________________
 // Global Parameters
 
-	int			optionSeqNo = 0;
+	int			optionSeqStart = 0;
+	int			optionSeqEnd = SupremumValue<int>::VALUE;
 	int			optionInfStart = -1;
 	int			optionInfEnd = -1;
 	bool		optionRevComp = false;
@@ -37,23 +38,18 @@ bool loadSeqs(TSeqSet &seqs, TIDs &ids, const char *fileName)
 
 	int seqCount = length(multiFasta);
 
-	if (optionSeqNo >= seqCount) optionSeqNo = seqCount - 1;
-	if (optionSeqNo < 0)
+	if (optionSeqEnd > seqCount) optionSeqEnd = seqCount;
+	if (optionSeqStart < 0) optionSeqStart = 0;
+		
+	if (optionSeqStart < optionSeqEnd)
 	{
-		resize(seqs, seqCount, Exact());
-		resize(ids, seqCount, Exact());
-		for(int i = 0; i < seqCount; ++i)
+		resize(seqs, optionSeqEnd - optionSeqStart, Exact());
+		resize(ids, optionSeqEnd - optionSeqStart, Exact());
+		for(int i = 0, j = optionSeqStart; j < optionSeqEnd; ++i, ++j)
 		{
-			assignSeq(seqs[i], multiFasta[i], Fasta());		// read Genome sequence
-			assignSeqId(ids[i], multiFasta[i], Fasta());	// read Genome ids
+			assignSeq(seqs[i], multiFasta[j], Fasta());		// read Genome sequence
+			assignSeqId(ids[i], multiFasta[j], Fasta());	// read Genome ids
 		}
-	}
-	else
-	{
-		resize(seqs, 1, Exact());
-		resize(ids, 1, Exact());
-		assignSeq(seqs[0], multiFasta[optionSeqNo], Fasta());		// read Genome sequence
-		assignSeqId(ids[0], multiFasta[optionSeqNo], Fasta());	// read Genome ids
 	}
 
 	return (seqCount > 0);
@@ -64,35 +60,34 @@ template <
 	typename TReadIDs >
 void saveFasta(
 	TReadSet const &readSet,		// generated read sequences
-	TReadIDs const &readIDs,		// corresponding Fasta ids
-	string const &readFName)
+	TReadIDs const &readIDs)		// corresponding Fasta ids
 {
-	ostringstream fileName;
-	if (*optionOutput != 0)
-		fileName << optionOutput;
-	else
-		fileName << readFName << ".reads";
-
+	ostream *out = &cout;
 	ofstream file;
 	
-	file.open(fileName.str().c_str(), ios_base::out | ios_base::trunc);
-	if (!file.is_open()) {
-		cerr << "\nFailed to open output file" << endl;
-		return;
+	if (optionOutput != NULL)
+	{
+		file.open(optionOutput, ios_base::out | ios_base::trunc);
+		if (!file.is_open()) {
+			cerr << "\nFailed to open output file" << endl;
+			return;
+		}
+		else
+			cout << "\nWriting reads to " << optionOutput << "\n";
+		out = &file;
 	}
-	else
-		cout << "\nWriting reads to " << fileName.str() << "\n";
 
 	unsigned reads = length(readSet);
 	unsigned ids = length(readIDs);
 	for(unsigned i = 0; i < reads; ++i)
 	{
 		if (i < ids)
-			file << '>' << readIDs[i] << std::endl;
+			(*out) << '>' << readIDs[i] << std::endl;
 		else
-			file << '>' << std::endl;
-		file << readSet[i] << std::endl;
+			(*out) << '>' << std::endl;
+		(*out) << readSet[i] << std::endl;
 	}
+	
 	file.close();
 }
 /*
@@ -164,7 +159,8 @@ void printHelp(int, const char *[], bool longHelp = false)
 		cerr << "  -o,  --output FILE            \t" << "set output filename (default: use stdout)" << endl;
 		cerr << "  -h,  --help                   \t" << "print this help" << endl;
 		cerr << endl << "Extract Options:" << endl;
-		cerr << "  -sn, --seqno NUM              \t" << "select a sequence (default: select all)" << endl;
+		cerr << "  -s,  --sequence NUM           \t" << "select a single sequence" << endl;
+		cerr << "  -ss, --sequences START END    \t" << "select sequences (default: select all)" << endl;
 		cerr << "  -i,  --infix START END        \t" << "extract infix" << endl;
 		cerr << "  -rc, --revcomp                \t" << "reverse complement" << endl;
 	} else {
@@ -185,17 +181,51 @@ int main(int argc, const char *argv[])
 		if (argv[arg][0] == '-') {
 			// parse option
 
-			if (strcmp(argv[arg], "-sn") == 0 || strcmp(argv[arg], "--seqno") == 0) {
+			if (strcmp(argv[arg], "-s") == 0 || strcmp(argv[arg], "--sequence") == 0) {
 				if (arg + 1 < argc) {
 					++arg;
 					istringstream istr(argv[arg]);
-					istr >> optionSeqNo;
+					istr >> optionSeqStart;
 					if (!istr.fail())
 					{
-						if (optionSeqNo < 0)
+						if (optionSeqStart < 0)
 							cerr << "sequence number must be a value >=0" << endl << endl;
 						else
+						{
+							optionSeqEnd = optionSeqStart + 1;
 							continue;
+						}
+					}
+				}
+				printHelp(argc, argv);
+				return 0;
+			}
+
+			if (strcmp(argv[arg], "-ss") == 0 || strcmp(argv[arg], "--sequences") == 0) {
+				if (arg + 2 < argc) {
+					++arg;
+					istringstream istr(argv[arg]);
+					istr >> optionSeqStart;
+					++arg;
+					if (!istr.fail())
+					{
+						if (optionSeqStart < 0)
+							cerr << "first sequence number must be a value >=0" << endl << endl;
+						else
+						{
+							istringstream istr(argv[arg]);
+							if (!istr.fail())
+							{
+								istr >> optionSeqEnd;
+								if (optionSeqEnd < 0)
+									cerr << "last sequence number must be a value >=0" << endl << endl;
+								else
+								{
+									++optionSeqEnd;
+									continue;
+								}
+							}
+						}
 					}
 				}
 				printHelp(argc, argv);
@@ -276,7 +306,7 @@ int main(int argc, const char *argv[])
 		cerr << "Failed to open file" << fname[0] << endl;
 		return 0;
 	}
-	cout << lengthSum(seqsIn) << " bps of " << length(seqsIn) << " source sequence loaded." << endl;
+//	cout << lengthSum(seqsIn) << " bps of " << length(seqsIn) << " source sequence loaded." << endl;
 
 //____________________________________________________________________________
 // data processing
@@ -300,13 +330,7 @@ int main(int argc, const char *argv[])
 //____________________________________________________________________________
 // output
 
-	if (optionOutput == NULL)
-	{
-		for (unsigned i = 0; i < length(seqsOut); ++i)
-			cout << seqsOut[i] << endl;
-	}
-	else
-		saveFasta(seqsOut, seqNamesOut, optionOutput);
+	saveFasta(seqsOut, seqNamesOut);
 	
 //____________________________________________________________________________
 
