@@ -284,11 +284,11 @@ int main(int argc, const char *argv[])
 	resize(seqsOut, length(seqsIn));
 	for (unsigned i = 0; i < length(seqsIn); ++i)
 	{
-		int end = optionInfEnd;
-		if (end > length(seqsIn[i])
-			end = seqsIn[i];
+		unsigned end = optionInfEnd;
+		if (end > length(seqsIn[i]))
+			end = length(seqsIn[i]);
 
-		if (optionInfStart < length(seqsIn[i])
+		if (optionInfStart < (int)length(seqsIn[i]))
 		{
 			seqsOut[i] = infix(seqsIn[i], optionInfStart, end);
 			if (optionRevComp)
