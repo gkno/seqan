@@ -64,6 +64,23 @@ bool loadSeqs(TSeqSet &seqs, TQuals &quals, TIDs &ids, const char *fileName)
 
 template < 
 	typename TStream, 
+	typename TId >
+void dumpFastaId(
+	TStream &out,
+	TId &id)
+{
+	unsigned size = length(id);
+	for (unsigned i = 0; i < size; ++i)
+		if (id[i] == ' ')
+		{
+			size = i;
+			break;
+		}
+	out << infix(id, 0, size) << endl;
+}
+
+template < 
+	typename TStream, 
 	typename TSeq >
 void dumpFastaSeq(
 	TStream &out,
@@ -102,7 +119,8 @@ void saveFasta(
 	unsigned reads = length(readSet);
 	for(unsigned i = 0; i < reads; ++i)
 	{
-		(*out) << '>' << readIDs[i] << std::endl;
+		(*out) << '>';
+		dumpFastaId(*out, readIDs[i]);
 		dumpFastaSeq(*out, readSet[i]);
 	}
 	
@@ -136,9 +154,11 @@ void saveFastq(
 	unsigned reads = length(readSet);
 	for(unsigned i = 0; i < reads; ++i)
 	{
-		(*out) << '@' << readIDs[i] << std::endl;
+		(*out) << '@';
+		dumpFastaId(*out, readIDs[i]);
 		dumpFastaSeq(*out, readSet[i]);
-		(*out) << '+' << readIDs[i] << std::endl;
+		(*out) << '+';
+		dumpFastaId(*out, readIDs[i]);
 		dumpFastaSeq(*out, qualSet[i]);
 	}
 	
