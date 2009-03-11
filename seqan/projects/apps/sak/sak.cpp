@@ -16,10 +16,11 @@ using namespace seqan;
 
 	int			optionSeqStart = 0;
 	int			optionSeqEnd = SupremumValue<int>::VALUE;
-	int			optionInfStart = -1;
+	int			optionInfStart = 0;
 	int			optionInfEnd = -1;
 	bool		optionRevComp = false;
-	const char	*optionOutput = NULL;					
+	const char	*optionOutput = NULL;
+	bool		optionFastQ = false;
 
 	typedef Dna5 TAlphabet;
 	typedef String<TAlphabet> TSeqString;
@@ -29,12 +30,15 @@ using namespace seqan;
 
 //////////////////////////////////////////////////////////////////////////////
 // Load multi-Fasta sequences
-template <typename TSeqSet, typename TIDs>
-bool loadSeqs(TSeqSet &seqs, TIDs &ids, const char *fileName)
+template <typename TSeqSet, typename TQuals, typename TIDs>
+bool loadSeqs(TSeqSet &seqs, TQuals &quals, TIDs &ids, const char *fileName)
 {
 	MultiFasta multiFasta;
 	if (!open(multiFasta.concat, fileName, OPEN_RDONLY)) return false;
-	split(multiFasta, Fasta());
+
+	AutoSeqFormat format;
+	guessFormat(multiFasta.concat, format);	
+	split(multiFasta, format);
 
 	int seqCount = length(multiFasta);
 
@@ -45,15 +49,33 @@ bool loadSeqs(TSeqSet &seqs, TIDs &ids, const char *fileName)
 	{
 		resize(seqs, optionSeqEnd - optionSeqStart, Exact());
 		resize(ids, optionSeqEnd - optionSeqStart, Exact());
+		resize(quals, optionSeqEnd - optionSeqStart, Exact());
 		for(int i = 0, j = optionSeqStart; j < optionSeqEnd; ++i, ++j)
 		{
-			assignSeq(seqs[i], multiFasta[j], Fasta());		// read Genome sequence
-			assignSeqId(ids[i], multiFasta[j], Fasta());	// read Genome ids
+			assignSeq(seqs[i], multiFasta[j], format);		// read Genome sequence
+			assignSeqId(ids[i], multiFasta[j], format);		// read Genome ids
+			assignQual(quals[i], multiFasta[j], format);	// read qualities
+			fill(quals[i], length(seqs[i]), 33 + 80);
 		}
 	}
 
 	return (seqCount > 0);
 }
+
+template < 
+	typename TStream, 
+	typename TSeq >
+void dumpFastaSeq(
+	TStream &out,
+	TSeq &seq)
+{
+	unsigned size = length(seq);
+	unsigned i;
+	for (i = 0; i + 60 < size; i += 60)
+		out << infix(seq, i, i + 60) << endl;
+	out << infix(seq, i, size) << endl;
+}
+
 
 template < 
 	typename TReadSet, 
@@ -69,81 +91,59 @@ void saveFasta(
 	{
 		file.open(optionOutput, ios_base::out | ios_base::trunc);
 		if (!file.is_open()) {
-			cerr << "\nFailed to open output file" << endl;
+			cerr << "Failed to open output file" << endl;
 			return;
 		}
 		else
-			cout << "\nWriting reads to " << optionOutput << "\n";
+			cout << "Writing reads to " << optionOutput << "\n";
 		out = &file;
 	}
 
 	unsigned reads = length(readSet);
-	unsigned ids = length(readIDs);
 	for(unsigned i = 0; i < reads; ++i)
 	{
-		if (i < ids)
-			(*out) << '>' << readIDs[i] << std::endl;
-		else
-			(*out) << '>' << std::endl;
-		(*out) << readSet[i] << std::endl;
+		(*out) << '>' << readIDs[i] << std::endl;
+		dumpFastaSeq(*out, readSet[i]);
 	}
 	
 	file.close();
 }
-/*
-//temporary fake fastq output each base has quality 25
+
 template < 
-	typename TReadSet, 
+	typename TReadSet,
+	typename TQualSet,
 	typename TReadIDs >
 void saveFastq(
 	TReadSet const &readSet,		// generated read sequences
-	TReadIDs const &readIDs,		// corresponding Fasta ids
-	string const &readFName)
+	TQualSet const &qualSet,		// qualities
+	TReadIDs const &readIDs)		// corresponding Fasta ids
 {
-	ostringstream fileName;
-	if (*optionOutputFastq != 0)
-		fileName << optionOutputFastq;
-	else
-		fileName << readFName << ".reads.fq";
-
+	ostream *out = &cout;
 	ofstream file;
 	
-	file.open(fileName.str().c_str(), ios_base::out | ios_base::trunc);
-	if (!file.is_open()) {
-		cerr << "\nFailed to open output file" << endl;
-		return;
-	}
-	else
-		cout << "\nWriting reads to " << fileName.str() << "\n";
-
-	CharString toAscii;
-	resize(toAscii,200);
-	for (int i = -100; i < 100; i++) 
+	if (optionOutput != NULL)
 	{
-	    	////convert to phred
-        	////int q = (int) (10.0 * log(1.0 + pow(10.0,(double) (i / 10.0))) / log(10.0));
-		int q = i;
-		//get ascii character
-	        toAscii[i+100] = (char)((q <= 93? q : 93) + 33);
+		file.open(optionOutput, ios_base::out | ios_base::trunc);
+		if (!file.is_open()) {
+			cerr << "Failed to open output file" << endl;
+			return;
+		}
+		else
+			cout << "Writing reads to " << optionOutput << "\n";
+		out = &file;
 	}
 
 	unsigned reads = length(readSet);
-	unsigned ids = length(readIDs);
 	for(unsigned i = 0; i < reads; ++i)
 	{
-		if (i < ids)
-			file << '@' << readIDs[i] << std::endl;
-		else
-			file << '@' << std::endl;
-		file << readSet[i] << std::endl;
-		file << "+" << std::endl;
-		for(unsigned j=0; j<length(readSet[i]); ++j) file << toAscii[25+100];
-		file << std::endl;
+		(*out) << '@' << readIDs[i] << std::endl;
+		dumpFastaSeq(*out, readSet[i]);
+		(*out) << '+' << readIDs[i] << std::endl;
+		dumpFastaSeq(*out, qualSet[i]);
 	}
+	
 	file.close();
 }
-
-*/
 
 //////////////////////////////////////////////////////////////////////////////
 // Print usage
@@ -157,6 +157,7 @@ void printHelp(int, const char *[], bool longHelp = false)
 	if (longHelp) {
 		cerr << endl << "Main Options:" << endl;
 		cerr << "  -o,  --output FILE            \t" << "set output filename (default: use stdout)" << endl;
+		cerr << "  -q,  --qual                   \t" << "enable Fastq output (default: Fasta)" << endl;
 		cerr << "  -h,  --help                   \t" << "print this help" << endl;
 		cerr << endl << "Extract Options:" << endl;
 		cerr << "  -s,  --sequence NUM           \t" << "select a single sequence" << endl;
@@ -265,6 +266,11 @@ int main(int argc, const char *argv[])
 				continue;
 			}
 
+			if (strcmp(argv[arg], "-q") == 0 || strcmp(argv[arg], "--qual") == 0) {
+				optionFastQ = true;
+				continue;
+			}
+
 			if (strcmp(argv[arg], "-o") == 0 || strcmp(argv[arg], "--output") == 0) {
 				if (arg + 1 == argc) {
 					printHelp(argc, argv);
@@ -299,9 +305,10 @@ int main(int argc, const char *argv[])
 // input
 
 	StringSet<TSeqString>	seqsIn, seqsOut;
+	StringSet<CharString>	qualsIn, qualsOut;
 	StringSet<CharString>	seqNamesIn, seqNamesOut;	// genome names, taken from the Fasta file
 
-	if (!loadSeqs(seqsIn, seqNamesIn, fname[0]))
+	if (!loadSeqs(seqsIn, qualsIn, seqNamesIn, fname[0]))
 	{
 		cerr << "Failed to open file" << fname[0] << endl;
 		return 0;
@@ -326,11 +333,15 @@ int main(int argc, const char *argv[])
 		}
 	}
 	seqNamesOut = seqNamesIn;
+	qualsOut = qualsIn;
 
 //____________________________________________________________________________
 // output
 
-	saveFasta(seqsOut, seqNamesOut);
+	if (optionFastQ)
+		saveFastq(seqsOut, qualsOut, seqNamesOut);
+	else
+		saveFasta(seqsOut, seqNamesOut);
 	
 //____________________________________________________________________________
 
