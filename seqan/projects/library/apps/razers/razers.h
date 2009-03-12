@@ -250,7 +250,7 @@ namespace SEQAN_NAMESPACE_MAIN
 // Memory tuning
 
 #ifdef RAZERS_MEMOPT
-/*
+
 	template <typename TShape>
 	struct SAValue< Index<TReadSet, TShape> > {
 		typedef Pair<
@@ -259,7 +259,20 @@ namespace SEQAN_NAMESPACE_MAIN
 			BitCompressed<25, 7>	// max. 32M reads of length < 128
 		> Type;
 	};
-*/	
+	
+#else
+
+	template <typename TShape>
+	struct SAValue< Index<TReadSet, TShape> > {
+		typedef Pair<
+			unsigned,			// many reads
+			unsigned,			// of arbitrary length
+			Compressed
+		> Type;
+	};
+
+#endif
+
 	template <>
 	struct Size<Dna5String>
 	{
@@ -270,17 +283,6 @@ namespace SEQAN_NAMESPACE_MAIN
 	struct Size< Index<TReadSet, Index_QGram<TShape> > >
 	{
 		typedef unsigned Type;
-	};
-	
-#endif
-
-	template <typename TShape>
-	struct SAValue< Index<TReadSet, TShape> > {
-		typedef Pair<
-			unsigned,			// many reads
-			unsigned,			// of arbitrary length
-			Compressed
-		> Type;
 	};
 	
 

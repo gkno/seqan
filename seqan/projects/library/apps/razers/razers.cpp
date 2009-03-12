@@ -165,7 +165,7 @@ int mapReads(
 				break;
 			
 			case RAZERS_INVALID_SHAPE:
-				::std::cerr <<	"Invalid Shape" << endl << endl;
+				::std::cerr << "Invalid Shape" << endl << endl;
 				break;
 		}
 		return error;

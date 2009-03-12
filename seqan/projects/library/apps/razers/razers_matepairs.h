@@ -345,8 +345,33 @@ reserve(Dequeue<TValue, TSpec> &me, TSize_ new_capacity, Tag<TExpand> const tag)
 
 typedef StringSet<TRead const, Dependent<> >	TMPReadSet;
 
+#ifdef RAZERS_MEMOPT
+
+	template <typename TShape>
+	struct SAValue< Index<TMPReadSet, TShape> > {
+		typedef Pair<
+			unsigned,				
+			unsigned,
+			BitCompressed<25, 7>	// max. 32M reads of length < 128
+		> Type;
+	};
+	
+#else
+
+	template <typename TShape>
+	struct SAValue< Index<TMPReadSet, TShape> > {
+		typedef Pair<
+			unsigned,			// many reads
+			unsigned,			// of arbitrary length
+			Compressed
+		> Type;
+	};
+
+#endif
+
+	
 template <typename TShape>
-struct Cargo< Index<TMPReadSet const, TShape> > {
+struct Cargo< Index<TMPReadSet, TShape> > {
 	typedef struct {
 		double		abundanceCut;
 		int			_debugLevel;
@@ -860,16 +885,17 @@ int mapMatePairReads(
 	TShape const &			shape,
 	Swift<TSwiftSpec> const)
 {
-	typedef typename Value<TReadSet_ const>::Type		TRead;
-//	typedef typename Infix<TRead const>::Type			TReadInfix;
 #ifdef RAZERS_CONCATREADS
-	typedef StringSet<TRead, Owner<ConcatDirect<> > >	TReadSet;
+	typedef TReadSet_									TReadSet;
 #else
+	typedef typename Value<TReadSet_ const>::Type		TRead;
 	typedef StringSet<TRead, Dependent<> >				TReadSet;
 #endif
 	typedef Index<TReadSet, Index_QGram<TShape> >		TIndex;			// q-gram index
 	typedef Pattern<TIndex, Swift<TSwiftSpec> >			TSwiftPattern;	// filter
 	typedef Pattern<TRead, MyersUkkonen>				TMyersPattern;	// verifier
+
+	std::cout << "SIYE:" <<sizeof(typename SAValue<TIndex>::Type)<<std::endl;
 
 	// split mate-pairs over two indices
 	TReadSet readSetL, readSetR;
@@ -883,8 +909,8 @@ int mapMatePairReads(
 		appendValue(readSetL, readSet[2*i], Generous());
 		appendValue(readSetR, readSet[2*i+1], Generous());
 #else
-		assign(readSetL[i], readSet[2*i]);
-		assign(readSetR[i], readSet[2*i+1]);
+		assign(readSetL[i], readSet[2*i], Exact());
+		assign(readSetR[i], readSet[2*i+1], Exact());
 #endif
 	}
 
