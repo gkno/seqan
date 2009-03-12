@@ -600,6 +600,7 @@ void maskDuplicates(TMatches &matches)
 
 	for (; it != itEnd; ++it) 
 	{
+		if ((*it).pairId != 0) continue;
 		if (gEnd == (*it).gEnd && orientation == (*it).orientation &&
 			gseqNo == (*it).gseqNo && readNo == (*it).rseqNo) 
 		{
@@ -627,7 +628,7 @@ void maskDuplicates(TMatches &matches)
 
 	for (; it != itEnd; ++it) 
 	{
-		if ((*it).orientation == '-') continue;
+		if ((*it).orientation == '-' || ((*it).pairId != 0)) continue;
 		if (gBegin == (*it).gBegin && readNo == (*it).rseqNo &&
 			gseqNo == (*it).gseqNo && orientation == (*it).orientation) 
 		{
@@ -711,9 +712,9 @@ void compactMatches(TMatches &matches, TCounts & /*cnts*/, RazerSOptions<TSpec> 
 			if ((*it).editDist >= editDistCutOff) continue;
 			if (++hitCount >= hitCountCutOff)
 			{
+#ifdef RAZERS_MASK_READS
 				if (hitCount == hitCountCutOff)
 				{
-#ifdef RAZERS_MASK_READS
 					if (options.purgeAmbiguous)
 					{
 						dit = ditBeg;
@@ -727,11 +728,12 @@ void compactMatches(TMatches &matches, TCounts & /*cnts*/, RazerSOptions<TSpec> 
 								::std::cerr << "(read #" << readNo << " disabled)";
 							options.readMask[readNo / options.WORD_SIZE] &= ~(1ul << (readNo % options.WORD_SIZE));
 						}
-#endif
 				}
+#endif
 				continue;
 			}
-		} else
+		}
+		else
 		{
 			readNo = (*it).rseqNo;
 			hitCount = 0;

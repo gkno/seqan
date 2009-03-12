@@ -540,7 +540,6 @@ void compactPairMatches(TMatches &matches, TCounts & /*cnts*/, RazerSOptions<TSp
 	typedef typename Iterator<TMatches, Standard>::Type		TIterator;
 	
 	unsigned readNo = -1;
-	unsigned pairId = -1;
 	unsigned hitCount = 0;
 	unsigned hitCountCutOff = options.maxHits;
 	int scoreDistCutOff = InfimumValue<int>::VALUE;
@@ -559,13 +558,11 @@ void compactPairMatches(TMatches &matches, TCounts & /*cnts*/, RazerSOptions<TSp
 		if (readNo == ((*it).rseqNo >> 1))
 		{ 
 			if ((*it).pairScore <= scoreDistCutOff) continue;
-
-			if (pairId != (*it).pairId)
+			if (++hitCount >= hitCountCutOff)
 			{
-				pairId = (*it).pairId;
-				if (++hitCount == hitCountCutOff)
-				{
 #ifdef RAZERS_MASK_READS
+				if (hitCount == hitCountCutOff)
+				{
 					if (options.purgeAmbiguous)
 					{
 						dit = ditBeg;
@@ -579,12 +576,10 @@ void compactPairMatches(TMatches &matches, TCounts & /*cnts*/, RazerSOptions<TSp
 								::std::cerr << "(read #" << readNo << " disabled)";
 							options.readMask[readNo / options.WORD_SIZE] &= ~(1ul << (readNo % options.WORD_SIZE));
 						}
-#endif
 				}
-			}
-
-			if (hitCount >= hitCountCutOff)
+#endif
 				continue;
+			}
 		}
 		else
 		{
@@ -594,8 +589,8 @@ void compactPairMatches(TMatches &matches, TCounts & /*cnts*/, RazerSOptions<TSp
 				scoreDistCutOff = (*it).pairScore - options.distanceRange;
 			ditBeg = dit;
 		}
-		*dit = *it;
-		++dit;
+		*dit = *it;	++dit; ++it;
+		*dit = *it;	++dit;
 	}
 	resize(matches, dit - begin(matches, Standard()));
 }
