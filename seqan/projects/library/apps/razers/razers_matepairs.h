@@ -713,7 +713,7 @@ void mapMatePairReads(
 		TGPos doubleParWidth = 2 * (*swiftFinderR.curHit).bucketWidth;
 
 		// remove out-of-window left mates from fifo
-		while (!empty(fifo) && front(fifo).gEnd + maxDistance + (TSignedGPos)(doubleParWidth < rEndPos))
+		while (!empty(fifo) && front(fifo).gEnd + maxDistance + (TSignedGPos)doubleParWidth < (TSignedGPos)rEndPos)
 			popFront(fifo);
 
 		// add within-window left mates to fifo
@@ -735,10 +735,13 @@ void mapMatePairReads(
 		{
 			// both mates have potential matches within window
 			
+			if (empty(fifo))
+				continue;
+
 			TDequeueIterator it = fifo.data_front;
 			// iterate over fifo, if not empty
 			// ignore the last element (is not within correct distance)
-			while (it != fifo.data_back)
+			do
 			{
 				// search left mate
 				if (((*it).rseqNo & ~NOT_VERIFIED) == rseqNo)
@@ -750,9 +753,8 @@ void mapMatePairReads(
 								*it, infix(genome, (*it).gBegin, (*it).gEnd), 
 								rseqNo, readSetL, forwardPatternsL, 
 								options, TSwiftSpec()))
-						{
 							(*it).rseqNo &= ~NOT_VERIFIED;		// has been verified positively
-						} else
+						else
 							(*it).rseqNo = ~NOT_VERIFIED;		// has been verified negatively
 					}
 
@@ -765,10 +767,9 @@ void mapMatePairReads(
 						{
 							// distance between left mate beginning and right mate end
 							__int64 dist = (__int64)mR.gEnd - (__int64)(*it).gBegin;
-							if (dist < options.libraryLength + options.libraryError &&
-								options.libraryLength < dist + options.libraryError)
+							if (dist <= options.libraryLength + options.libraryError &&
+								options.libraryLength <= dist + options.libraryError)
 							{
-								
 								mL = *it;
 
 								// transform mate readNo to global readNo
@@ -800,7 +801,7 @@ void mapMatePairReads(
 								mR.mateDelta = -dist;
 
 								// both mates match with correct library size
-								std::cout << "found " << rseqNo << " on " << orientation << gseqNo;
+/*								std::cout << "found " << rseqNo << " on " << orientation << gseqNo;
 								std::cout << " dist:" << dist;
 								if (orientation=='F')
 									std::cout << " \t_" << mL.gBegin+1 << "_" << mR.gEnd;
@@ -809,11 +810,11 @@ void mapMatePairReads(
 	//							std::cout << " L_" << (*it).gBegin << "_" << (*it).gEnd << "_" << (*it).editDist;
 	//							std::cout << " R_" << mR.gBegin << "_" << mR.gEnd << "_" << mR.editDist;
 								std::cout << std::endl;
-
+*/
 								if (!options.spec.DONT_DUMP_RESULTS)
 								{
-									appendValue(matches, mL);
-									appendValue(matches, mR);
+									appendValue(matches, mL, Generous());
+									appendValue(matches, mR, Generous());
 									if (length(matches) > options.compactThresh)
 									{
 										typename Size<TMatches>::Type oldSize = length(matches);
@@ -824,13 +825,20 @@ void mapMatePairReads(
 											::std::cerr << '(' << oldSize - length(matches) << " matches removed)";
 									}
 								}
+								++options.TP;
 							}
+							else
+								++options.FP;
 						}
 				}
 
+				if (it == fifo.data_back)
+					break;
+
 				if (++it == fifo.data_end)
 					it = fifo.data_begin;
-			}
+
+			} while (true);
 		}
 	}
 }
@@ -860,7 +868,7 @@ int mapMatePairReads(
 	typedef typename Value<TReadSet_ const>::Type		TRead;
 //	typedef typename Infix<TRead const>::Type			TReadInfix;
 #ifdef RAZERS_CONCATREADS
-	typedef StringSet<TRead>							TReadSet;
+	typedef StringSet<TRead, Owner<ConcatDirect<> > >	TReadSet;
 #else
 	typedef StringSet<TRead, Dependent<> >				TReadSet;
 #endif
@@ -876,8 +884,13 @@ int mapMatePairReads(
 
 	for (unsigned i = 0; i < readCount; ++i)
 	{
-		appendValue(readSetL, readSet[2*i]);
-		appendValue(readSetR, readSet[2*i+1]);
+#ifdef RAZERS_CONCATREADS
+		appendValue(readSetL, readSet[2*i], Generous());
+		appendValue(readSetR, readSet[2*i+1], Generous());
+#else
+		assign(readSetL[i], readSet[2*i]);
+		assign(readSetR[i], readSet[2*i+1]);
+#endif
 	}
 
 	// configure q-gram index

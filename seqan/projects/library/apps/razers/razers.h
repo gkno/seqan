@@ -369,7 +369,8 @@ bool loadReads(
 						++kickoutcount;
 						break;
 					}
-			if (count > cutoffCount) continue;
+// low qual. reads are empty to output them and their id later as LQ reads
+//			if (count > cutoffCount) continue;
 		}
 
 		resize(hybridSeq, length(seq));
@@ -1171,7 +1172,7 @@ void mapSingleReads(
 
 			if (!options.spec.DONT_DUMP_RESULTS)
 			{
-				appendValue(matches, m);
+				appendValue(matches, m, Generous());
 				if (length(matches) > options.compactThresh)
 				{
 					typename Size<TMatches>::Type oldSize = length(matches);
