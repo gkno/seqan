@@ -227,12 +227,12 @@ SEQAN_CHECKPOINT
 
 template <typename THolder>
 inline void
-_holderDeallocate(THolder & me, FILE *)
+_holderDeallocate(THolder &, FILE *)
 {
 }
 template <typename THolder>
 inline FILE *
-_holderAllocatePointer(THolder & me, FILE * data)
+_holderAllocatePointer(THolder &, FILE * data)
 {
 	return data;
 }
