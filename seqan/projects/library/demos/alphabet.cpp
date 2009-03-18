@@ -1,3 +1,4 @@
+///A tutorial about the use of alphabets.
 #include <iostream>
 #include <seqan/basic.h>
 using namespace seqan;
@@ -5,19 +6,20 @@ using namespace seqan;
 int main()
 {
 ///The typical alphabet is convertible to $char$.
-///Note that a conversion of a $char$ into another alphabet and back can change the value of the $char$.
+///A conversion of a $char$ back and forth into another alphabet can, however, change the value of the $char$.
 	Dna a = 'a';
-	std::cout << a; //output: 'A'
+	::std::cout << a << ::std::endl; 
 
-	Dna5 b = 'f'; //'f' is unknown character
-	std::cout << b; //output: 'N'
+///'f' is not in Dna5 and hence $b$ is set to 'N'.
+	Dna5 b = 'f'; 
+	::std::cout << b << ::std::endl; 
 
 ///Many SeqAn alphabet classes can be converted into each other.
 	b = a;
-	std::cout << b; //output: 'A'
+	::std::cout << b << ::std::endl; 
 
 	Iupac c = b;
-	std::cout << c; //output: 'A'
+	::std::cout << c << ::std::endl; 
 
 	return 0;
 }
