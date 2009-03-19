@@ -656,6 +656,11 @@ int main(int argc, const char *argv[])
 				continue;
 			}
 #endif
+			if (strcmp(argv[arg], "-lm") == 0 || strcmp(argv[arg], "--low-memory") == 0) {
+				options.lowMemory = true;
+				continue;
+			}
+	
 			if (strcmp(argv[arg], "-tr") == 0 || strcmp(argv[arg], "--trim-reads") == 0) {
 				if (arg + 1 < argc) {
 					++arg;
@@ -767,6 +772,7 @@ int main(int argc, const char *argv[])
 #ifndef NO_PARAM_CHOOSER
 	if (paramChoosing)
 	{
+		if(options.lowMemory) pm_options.maxWeight = 13;
 		pm_options.verbose = (options._debugLevel >= 1);
 		pm_options.optionErrorRate = options.errorRate;
 		if (options.hammingOnly)

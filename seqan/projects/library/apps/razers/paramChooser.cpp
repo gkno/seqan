@@ -20,7 +20,7 @@
  ==========================================================================*/
 
 #define USE_LOGVALUES		// this is recommended when using probability values
-#define RUN_RAZERS
+//#define RUN_RAZERS
 //#define RUN_RAZERS_ONEGAPPED	
 #define RAZERS_CONCATREADS		// use <ConcatDirect> StringSet to store reads
 #define RAZERS_MEMOPT			// optimize memory consumption

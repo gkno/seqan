@@ -109,6 +109,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		int			mutationRateQual;
 		unsigned	artSeedLength;
 #endif
+		bool		lowMemory;		// set maximum shape weight to 13 to limit size of q-gram index
 
 #ifdef RAZERS_DUMP_SNPS
 		bool		bayesian;
@@ -179,6 +180,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			artSeedLength = 28;	// the "artificial" seed length that is used for mapping quality assignment 
 						// (28bp is maq default)
 #endif
+			lowMemory = false;		// set maximum shape weight to 13 to limit size of q-gram index
 
 #ifdef RAZERS_DUMP_SNPS
 			bayesian = true;
@@ -386,7 +388,7 @@ bool loadReads(
 
 		// fill non-existent qualities with q40
 		for (; j < length(seq); ++j)
-			hybridSeq[j] = (unsigned int) ((80 << 3) | ordValue(seq[j]));
+			hybridSeq[j] = (unsigned int) ((40 << 3) | ordValue(seq[j]));
 
 /*		std::cout << "read = " << (Dna5)((unsigned char)seq[0]& (unsigned char)0x07)<< (Dna5)((unsigned char)seq[1]& (unsigned char)0x07)<< "... ";
 		unsigned char check = seq[0];
@@ -630,7 +632,11 @@ void maskDuplicates(TMatches &matches)
 
 	for (; it != itEnd; ++it) 
 	{
-		if ((*it).orientation == '-' || ((*it).pairId != 0)) continue;
+		if ((*it).orientation == '-'
+#ifdef RAZERS_MATEPAIRS
+			|| ((*it).pairId != 0)
+#endif
+			) continue;
 		if (gBegin == (*it).gBegin && readNo == (*it).rseqNo &&
 			gseqNo == (*it).gseqNo && orientation == (*it).orientation) 
 		{

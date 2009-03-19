@@ -231,7 +231,7 @@ void simulateReads(
 				currOp = 0;
 				continue;
 			}
-			appendValue(modificationPattern,currOp);
+			appendValue(modificationPattern,currOp,Generous());
 			// Insert Delete is the same as Delete Insert and both are the same as Mismatch (or match)
 			if(currOp == SEQAN_MATCH) read[trueLength] = readTemplate[pos];
 			else
@@ -395,8 +395,8 @@ void simulateReads(
 				if (revComp) id << ",orientation=R]";
 				else id << ",orientation=F]";
 
-				appendValue(readIDs, id.str());
-				appendValue(readSet, read);
+				appendValue(readIDs, id.str(),Generous());
+				appendValue(readSet, read, Generous());
 			}
 			else ++kickOutCount[countErrors];
 		}
