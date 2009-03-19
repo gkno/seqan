@@ -386,9 +386,9 @@ bool loadReads(
 				(((ordValue(qual[j]) <= 64)? ordValue(qual[j]) - 33: 31) << 3) 
 				| ordValue(seq[j]));
 
-		// fill non-existent qualities with q40
+		// fill non-existent qualities with q31
 		for (; j < length(seq); ++j)
-			hybridSeq[j] = (unsigned int) ((40 << 3) | ordValue(seq[j]));
+			hybridSeq[j] = (unsigned int) ((31 << 3) | ordValue(seq[j]));
 
 /*		std::cout << "read = " << (Dna5)((unsigned char)seq[0]& (unsigned char)0x07)<< (Dna5)((unsigned char)seq[1]& (unsigned char)0x07)<< "... ";
 		unsigned char check = seq[0];
