@@ -7,6 +7,7 @@
 ..demofor:Class.Align
 ..demofor:Spec.Alignment Graph
 ..demofor:Class.Score
+.
 
 .Demo.Local Alignments:
 ..cat:Basics
@@ -16,7 +17,7 @@
 ..demofor:Function.localAlignment
 ..demofor:Class.Align
 ..demofor:Class.Score
-
+.
 
 .Demo.Allocators:
 ..cat:Basics
@@ -34,7 +35,6 @@
 ..demofor:Function.arrayDestruct
 .
 
-
 .Demo.Alphabets:
 ..cat:Basics
 ..summary:Examples for common alphabets.
@@ -46,7 +46,6 @@
 ..demofor:Spec.Iupac
 ..demofor:Spec.AminoAcid
 .
-
 
 .Demo.Iterator Basics:
 ..cat:Basics
@@ -66,7 +65,6 @@
 ..demofor:Function.goPrevious
 .
 
-
 .Demo.Rooted Iterators:
 ..cat:Basics
 ..summary:Example for some functions for handling (rooted) iterators.
@@ -79,7 +77,6 @@
 ..see:Demo.Iterator Basics
 .
 
-
 .Demo.Exact Searching
 ..order:Searching, 1
 ..cat:Searching
@@ -87,7 +84,6 @@
 ..file:../projects/library/demos/find_exact.cpp
 ..see:Page.Searching
 .
-
 
 .Demo.Approximate Searching
 ..order:Searching, 2
@@ -124,7 +120,6 @@ banana matches with score -1
 ..demofor:Function.getBeginScore
 .
 
-
 .Demo.Wildcard Searching
 ..order:Searching, 3
 ..cat:Searching
@@ -144,7 +139,6 @@ banana matches with score -1
 ..demofor:Spec.WildShiftAnd
 .
 
-
 .Demo.ModReverse:
 ..cat:Modifier
 ..summary:Modifier example for reverse strings.
@@ -163,7 +157,6 @@ weese@tanne:~/seqan/demos$
 ..demofor:Spec.ModReverse
 ..demofor:Class.ModifiedString
 .
-
 
 .Demo.ModView:
 ..cat:Modifier
@@ -185,7 +178,6 @@ weese@tanne:~/seqan/demos$
 ..demofor:Class.ModifiedString
 .
 
-
 .Demo.Nested Modifiers:
 ..cat:Modifier
 ..summary:How to combine modifiers.
@@ -206,11 +198,6 @@ weese@tanne:~/seqan/demos$
 ..demofor:Spec.ModReverse
 ..demofor:Class.ModifiedString
 .
-
-
-
-
-
 
 .Demo.Suffix Array:
 ..cat:Index
@@ -239,7 +226,6 @@ weese@tanne:~/seqan/demos$
 ..demofor:Function.createSuffixArray
 .
 
-
 .Demo.Index Finder:
 ..cat:Index
 ..summary:Example for using a @Class.Finder@ of an @Class.Index@.
@@ -257,7 +243,6 @@ weese@tanne:~/seqan/demos$
 ..demofor:Class.Finder
 ..demofor:Function.find
 .
-
 
 .Demo.Index Finder StringSet:
 ..cat:Index
@@ -277,7 +262,6 @@ weese@tanne:~/seqan/demos$
 ..demofor:Class.StringSet
 ..demofor:Function.find
 .
-
 
 .Demo.Maximal Unique Matches:
 ..cat:Index
@@ -307,7 +291,6 @@ weese@tanne:~/seqan/demos$
 ..seealso:Demo.Mummy
 .
 
-
 .Demo.Supermaximal Repeats:
 ..cat:Index
 ..summary:Example for using the @Spec.SuperMaxRepeats Iterator@.
@@ -334,7 +317,6 @@ weese@tanne:~/seqan/demos$
 ..demofor:Function.getOccurrences
 ..demofor:Function.countOccurrences
 .
-
 
 .Demo.Maximal Repeats:
 ..cat:Index
@@ -363,7 +345,6 @@ weese@tanne:~/seqan/demos$
 ..demofor:Function.representative
 ..demofor:Function.orderOccurrences
 .
-
 
 .Demo.Mummy:
 ..cat:Index
@@ -421,7 +402,6 @@ weese@tanne:~/seqan/demos$
 ..demofor:Function.orderOccurrences
 .
 
-
 .Demo.Constraint Iterator:
 ..cat:Index
 ..summary:Example for using node predicates on a deferred suffix tree.
@@ -467,10 +447,7 @@ weese@tanne:~/seqan/demos$
 ..demofor:Function.nodeHullPredicate
 ..demofor:Function.representative
 ..demofor:Function.countOccurrences.
-
-
-
-
+.
 
 .Demo.Pizza & Chili Index
 ..cat:Index
@@ -505,10 +482,6 @@ This is the best test with a bast jest.
 ..demofor:Spec.Pizza & Chili Index
 ..demofor:Spec.Pizza & Chili String
 .
-
-
-
-
 
 .Demo.Breadth-First Search
 ..cat:Graph
@@ -546,7 +519,6 @@ This is the best test with a bast jest.
 ..demofor:Function.topological_sort
 .
 
-
 .Demo.Prim's Algorithm
 ..cat:Graph
 ..order:Graph Minimum Spanning Tree Prim's algorithm
@@ -564,7 +536,6 @@ This is the best test with a bast jest.
 ..demofor:Class.Graph
 ..demofor:Function.kruskals_algorithm
 .
-
 
 .Demo.Shortest Path in DAGs
 ..cat:Graph
@@ -692,16 +663,6 @@ This is the best test with a bast jest.
 ..demofor:Function.localAlignment
 .
 
-
-.Demo.T-Coffee
-..cat:Graph
-..order:Graph Multiple Sequence Alignment 3 T-Coffee
-..summary:T-Coffee code example
-..file:../projects/library/demos/graph_align_msa.cpp
-..demofor:Class.Graph
-..DISABLEDdemofor:Function.tCoffeeProteinAlignment
-.
-
 .Demo.File Format I/O:
 ..cat:System
 ..summary:Accessing sequence data in files.
@@ -711,7 +672,6 @@ This is the best test with a bast jest.
 ..demofor:Function.readMeta
 ..demofor:Spec.File Reader String
 .
-
 
 .Demo.Motif Finder:
 ..cat:Motif Search
@@ -819,9 +779,6 @@ projects/tests/find_motif/test_find_motif.cpp(82): TEST END
 ..demofor:Class.MotifFinder
 ..demofor:Function.findMotif
 .
-
-
-
 
 .Demo.Blast Reports:
 ..cat:Miscellaneous

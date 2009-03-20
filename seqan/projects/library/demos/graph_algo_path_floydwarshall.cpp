@@ -1,4 +1,4 @@
-///A tutorial about the Floyd-Warshall algorithm
+///A tutorial about the Floyd-Warshall algorithm.
 #include <iostream>
 #include <seqan/graph_algorithms.h>
 

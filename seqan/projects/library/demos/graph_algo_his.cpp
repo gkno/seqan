@@ -1,29 +1,29 @@
-/// This code example illustrates the heaviest increasing subsequence algorithm
-#include <seqan/graph_algorithms.h>
+///A tutorial about the heaviest increasing subsequence algorithm.
 #include <iostream>
+#include <seqan/graph_algorithms.h>
 
 using namespace seqan;
 
 
 int main() {
-/// Creation of a simple sequence and corresponding weights
+///Creation of a simple sequence and corresponding weights
 	String<char> seq("zeitgeist");
 	String<unsigned int> weights;
 	fill(weights, length(seq), 1);
 	assignProperty(weights, 2, 10);
-/// Out-parameter: A string of positions belonging to the heaviest increasing subsequence
+///Out-parameter: A string of positions belonging to the heaviest increasing subsequence
 	String<unsigned int> pos;
-/// Heaviest increasing subsequence and the corresponding weight
+///Heaviest increasing subsequence and the corresponding weight
 	unsigned int w = heaviestIncreasingSubsequence(seq, weights, pos);
-/// Console Output
+///Console Output
 	for(int i = 0; i< (int) length(seq); ++i) {
-		std::cout << seq[i] << "(Weight=" << getProperty(weights, i) << "),";
+		::std::cout << seq[i] << "(Weight=" << getProperty(weights, i) << "),";
 	}
-	std::cout << std::endl;
-	std::cout << "His: " << std::endl;
+	::std::cout << ::std::endl;
+	::std::cout << "His: " << ::std::endl;
 	for(int i = length(pos)-1; i>=0; --i) {
-		std::cout << seq[pos[i]] <<  ',';
+		::std::cout << seq[pos[i]] <<  ',';
 	}
-	std::cout << "(Weight=" << w << ')' << std::endl;
+	::std::cout << "(Weight=" << w << ')' << ::std::endl;
 	return 0;
 }
