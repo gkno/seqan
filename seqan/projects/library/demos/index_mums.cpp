@@ -1,7 +1,7 @@
+///A tutorial about finding MUMs.
 #include <iostream>
 #include <seqan/index.h>
 
-using namespace std;
 using namespace seqan;
 
 int main ()
@@ -22,9 +22,8 @@ int main ()
 	Iterator< TMyIndex, MUMs >::Type myMUMiterator(myIndex, 3);
 	String< SAValue<TMyIndex>::Type > occs;
 
-	while (!atEnd(myMUMiterator)) 
-	{
-///A multiple match can be represented by positions it occurs at in every sequence
+	while (!atEnd(myMUMiterator)) {
+///A multiple match can be represented by the positions it occurs at in every sequence
 ///and its length. @Function.getOccurrences@ returns an unordered sequence of pairs
 ///(seqNo,seqOfs) the match occurs at.
 		occs = getOccurrences(myMUMiterator);
@@ -32,13 +31,13 @@ int main ()
 		orderOccurrences(occs);
 		
 		for(unsigned i = 0; i < length(occs); ++i)
-			cout << getValueI2(occs[i]) << ", ";
+			::std::cout << getValueI2(occs[i]) << ", ";
 
 ///@Function.repLength@ returns the length of the match.
-		cout << repLength(myMUMiterator) << "   ";
+		::std::cout << repLength(myMUMiterator) << "   ";
 
 ///The match string itself can be determined with @Function.representative@.
-		cout << "\t\"" << representative(myMUMiterator) << '\"' << endl;
+		::std::cout << "\t\"" << representative(myMUMiterator) << '\"' << ::std::endl;
 
 		++myMUMiterator;
 	}
