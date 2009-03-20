@@ -1,11 +1,12 @@
+///A tutorial about the use of a user-defined modifier.
 #include <iostream>
 #include <seqan/file.h>
 #include <seqan/modifier.h>
 
-using namespace std;
 using namespace seqan;
 
-struct MyFunctor : public unary_function<char,char> 
+///A user-defined modifier that transforms all characters to upper case.
+struct MyFunctor : public ::std::unary_function<char,char> 
 {
 	inline char operator()(char x) const 
 	{
@@ -17,16 +18,15 @@ struct MyFunctor : public unary_function<char,char>
 
 int main ()
 {
+///The modifier is applied to a string.
 	String<char> myString = "A man, a plan, a canal-Panama";
 	ModifiedString< String<char>, ModView<MyFunctor> > myModifier(myString);
 
-	cout << myString << endl;
-	cout << myModifier << endl;
-
+	::std::cout << myString << ::std::endl;
+	::std::cout << myModifier << ::std::endl;
 	infix(myString, 9, 9) = "master ";
-
-	cout << myString << endl;
-	cout << myModifier << endl;
+	::std::cout << myString << ::std::endl;
+	::std::cout << myModifier << ::std::endl;
 
 	return 0;
 }
