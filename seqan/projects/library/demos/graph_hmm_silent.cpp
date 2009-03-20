@@ -1,12 +1,13 @@
-/// This code example illustrates HMMs with silent states
+///A tutorial about HMMs with silent states
 #include <iostream>
 #include <fstream>
+#include <seqan/basic/basic_logvalue.h>
 #include <seqan/graph_algorithms.h>
 
 using namespace seqan;
 
 int main() {
-/// HMM creation
+///HMM creation
 	typedef LogProb<> TProbability;
 	typedef Dna TAlphabet;
 	typedef Size<TAlphabet>::Type TSize;
@@ -21,11 +22,11 @@ int main() {
 
 	THmm hmm;
 
-/// Begin state
+///Begin state
 	TVertexDescriptor begState = addVertex(hmm);
 	assignBeginState(hmm, begState);
 
-/// Emission states
+///Emission states
 	TVertexDescriptor emitState1 = addVertex(hmm);
 	emissionProbability(hmm, emitState1, dnaA) = 0.0;
 	emissionProbability(hmm, emitState1, dnaC) = 0.8;
@@ -50,17 +51,17 @@ int main() {
 	emissionProbability(hmm, emitState4, dnaG) = 0.25;
 	emissionProbability(hmm, emitState4, dnaT) = 0.25;
 
-/// Silent states (deletion states)
+///Silent states (deletion states)
 	TVertexDescriptor delState1 = addVertex(hmm, true);
 	TVertexDescriptor delState2 = addVertex(hmm, true);
 	TVertexDescriptor delState3 = addVertex(hmm, true);
 	TVertexDescriptor delState4 = addVertex(hmm, true);
 
-/// End state
+///End state
 	TVertexDescriptor eState = addVertex(hmm);
 	assignEndState(hmm, eState);
 
-/// Transitions
+///Transitions
 	addEdge(hmm, begState, emitState1, 0.5);
 	addEdge(hmm, begState, delState1, 0.5);
 	addEdge(hmm, emitState1, emitState2, 0.5);
@@ -78,35 +79,35 @@ int main() {
 	addEdge(hmm, emitState4, eState, 1.0);
 	addEdge(hmm, delState4, eState, 1.0);
 
-/// Print the whole model
-	std::cout << hmm << std::endl;
+///Print the whole model
+	::std::cout << hmm << ::std::endl;
 
-/// Viterbi algorithm
+///Viterbi algorithm
 	String<Dna> sequence = "CA";
 	String<TVertexDescriptor> path;
 	TProbability p = viterbiAlgorithm(hmm, sequence, path);
-	std::cout << "Viterbi algorithm" << std::endl;
-	std::cout << "Probability of the best path: " << p << std::endl;
-	std::cout << "Sequence: " << std::endl;
-	for(TSize i = 0; i<length(sequence); ++i) std::cout << sequence[i] << ',';
-	std::cout << std::endl;
-	std::cout << "State path: " << std::endl;
+	::std::cout << "Viterbi algorithm" << ::std::endl;
+	::std::cout << "Probability of the best path: " << p << ::std::endl;
+	::std::cout << "Sequence: " << ::std::endl;
+	for(TSize i = 0; i<length(sequence); ++i) ::std::cout << sequence[i] << ',';
+	::std::cout << ::std::endl;
+	::std::cout << "State path: " << ::std::endl;
 	for(TSize i = 0; i<length(path); ++i) {
-		std::cout << path[i];
-		if (isSilent(hmm, path[i])) std::cout << " (Silent)";
-		if (i < length(path) - 1) std::cout << ',';
+		::std::cout << path[i];
+		if (isSilent(hmm, path[i])) ::std::cout << " (Silent)";
+		if (i < length(path) - 1) ::std::cout << ',';
 	}
-	std::cout << std::endl;
+	::std::cout << ::std::endl;
 
-/// Forward algorithm
-	std::cout << "Forward algorithm" << std::endl;
+///Forward algorithm
+	::std::cout << "Forward algorithm" << ::std::endl;
 	p = forwardAlgorithm(hmm, sequence);
-	std::cout << "Probability that the HMM generated the sequence: " << p << std::endl;
+	::std::cout << "Probability that the HMM generated the sequence: " << p << ::std::endl;
 
-/// Backward algorithm
-	std::cout << "Backward algorithm" << std::endl;
+///Backward algorithm
+	::std::cout << "Backward algorithm" << ::std::endl;
 	p = backwardAlgorithm(hmm, sequence);
-	std::cout << "Probability that the HMM generated the sequence: " << p << std::endl;
+	::std::cout << "Probability that the HMM generated the sequence: " << p << ::std::endl;
 
 	return 0;
 }

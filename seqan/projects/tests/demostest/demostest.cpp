@@ -176,22 +176,6 @@
 	#include "../../library/demos/graph_algo_lcs.cpp"
 	#undef main
 
-	#define main runGraphNw
-	#include "../../library/demos/graph_align_nw.cpp"
-	#undef main
-
-	#define main runGraphGotoh
-	#include "../../library/demos/graph_align_gotoh.cpp"
-	#undef main
-
-	#define main runGraphHirschberg
-	#include "../../library/demos/graph_align_hirschberg.cpp"
-	#undef main
-
-	#define main runGraphSw
-	#include "../../library/demos/graph_align_sw.cpp"
-	#undef main
-
 	#define main runGraphHmm
 	#include "../../library/demos/graph_hmm.cpp"
 	#undef main
@@ -257,10 +241,6 @@ int main(int argc, const char *argv[])
 	runGraphLis();
 	runGraphHis();
 	runGraphLcs();
-	runGraphNw();
-	runGraphGotoh();
-	runGraphHirschberg();
-	runGraphSw();
 	runGraphHmm();
 	runGraphHmmSilent();
 #endif
