@@ -28,11 +28,6 @@
 	#include "../../library/demos/rooted_iterator.cpp"
 	#undef main
 
-	#define main runString1
-	#include "../../library/demos/string_1.cpp"
-	#undef main
-
-
 	#define main runFileFormat
 	#include "../../library/demos/file_format.cpp"
 	#undef main
@@ -215,7 +210,6 @@ int main(int argc, const char *argv[])
 	runAlphabet();
 	runIterator();
 	runRootedIterator();
-	runString1();
 	runFileFormat();
 #endif
 
