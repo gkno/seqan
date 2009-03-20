@@ -1,7 +1,7 @@
+///A tutorial about suffix arrays.
 #include <iostream>
 #include <seqan/index.h>
 
-using namespace std;
 using namespace seqan;
 
 int main ()
@@ -10,18 +10,18 @@ int main ()
 	String<char> pattern = "l";
 	String<unsigned> sa;
 
-///Build a suffix array using the Skew7 algorithm
+///Build a suffix array using the Skew7 algorithm.
 	resize(sa, length(text));
 	createSuffixArray(sa, text, Skew7());
 
-///Search the interval of suffices beginning with the pattern
+///Search the interval of suffices beginning with the pattern.
 	Pair<unsigned> hitRange;
 	hitRange = equalRangeSA(text, sa, pattern);
 
-///Output the suffix indices, i.e. the occurrences of the pattern
+///Output the suffix indices, i.e. the occurrences of the pattern.
 	for(unsigned i = hitRange.i1; i < hitRange.i2; ++i)
-		cout << sa[i] << " ";
-	cout << endl;
+		::std::cout << sa[i] << " ";
+	::std::cout << ::std::endl;
  
 	return 0;
 }
