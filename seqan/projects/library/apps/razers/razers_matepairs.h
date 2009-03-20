@@ -593,13 +593,13 @@ void compactPairMatches(TMatches &matches, TCounts & /*cnts*/, RazerSOptions<TSp
 						dit = ditBeg;
 						if (options._debugLevel >= 2)
 							::std::cerr << "(read #" << readNo << " disabled)";
-						options.readMask[readNo / options.WORD_SIZE] &= ~(1ul << (readNo % options.WORD_SIZE));
+						options.readMask[(2*readNo) / options.WORD_SIZE] &= ~(3ul << ((2*readNo) % options.WORD_SIZE));
 					} else
 						if ((*it).editDist == 0)
 						{
 							if (options._debugLevel >= 2)
 								::std::cerr << "(read #" << readNo << " disabled)";
-							options.readMask[readNo / options.WORD_SIZE] &= ~(1ul << (readNo % options.WORD_SIZE));
+							options.readMask[(2*readNo) / options.WORD_SIZE] &= ~(3ul << ((2*readNo) % options.WORD_SIZE));
 						}
 				}
 #endif
@@ -725,7 +725,8 @@ void mapMatePairReads(
 	{
 		unsigned rseqNo = swiftPatternR.curSeqNo;
 #ifdef RAZERS_MASK_READS
-		if ((options.readMask[rseqNo / options.WORD_SIZE] & (1ul << (rseqNo % options.WORD_SIZE))) == 0)
+		unsigned rseqNoR = 2*rseqNo + 1;
+		if ((options.readMask[rseqNoR / options.WORD_SIZE] & (1ul << (rseqNoR % options.WORD_SIZE))) == 0)
 			continue;
 #endif
 
@@ -793,8 +794,8 @@ void mapMatePairReads(
 								mL = *it;
 
 								// transform mate readNo to global readNo
-								mL.rseqNo = (rseqNo << 1);
-								mR.rseqNo = (rseqNo << 1) + 1;
+								mL.rseqNo = 2*rseqNo;
+								mR.rseqNo = 2*rseqNo + 1;
 
 								// transform coordinates to the forward strand
 								if (orientation == 'R') 
@@ -954,7 +955,7 @@ int mapMatePairReads(
 #ifdef RAZERS_MASK_READS
 	// init read mask
 	clear(options.readMask);
-	fill(options.readMask, (readCount + options.WORD_SIZE - 1) / options.WORD_SIZE, (unsigned long)-1);
+	fill(options.readMask, (2*readCount + options.WORD_SIZE - 1) / options.WORD_SIZE, (unsigned long)-1);
 #endif
 
 	// clear stats
