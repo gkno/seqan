@@ -309,8 +309,8 @@ inline void _patternInit (Pattern<TNeedle, DPSearch<TScore, TSpec, TFindBeginPat
 	TSize need_length = length(needle(me));
 	SEQAN_ASSERT(need_length);
 
-	TSize got_length = resize(string_tab, need_length);
-	SEQAN_ASSERT(got_length >= need_length);
+	resize(string_tab, need_length);
+	SEQAN_ASSERT(length(string_tab) >= need_length);
 
 //	if (length(_dataNeedle(me)) < got_length) throw(0); //???TODO: Throw "not enough memory" exception
 

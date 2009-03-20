@@ -1,11 +1,11 @@
+///A tutorial about the use of exact find algorithms.
 #include <iostream>
 #include <seqan/find.h>
 
 using namespace seqan;
-using namespace std;
 
-///This function prints the positions all occurrences of $needle$ within $haystack$.
-///It uses the Algorithm specified by $TAlgorithm$ that is passed as @glos:Specialization@ to @Class.Pattern@.
+///This function prints the positions of all occurrences of $needle$ within $haystack$.
+///It uses the algorithm specified by $TAlgorithm$ that is passed as a @glos:Specialization@ to @Class.Pattern@.
 template <typename TAlgorithm>
 void printAllOccs(String<char>& haystack, 
 				  String<char>& needle)
@@ -14,9 +14,9 @@ void printAllOccs(String<char>& haystack,
 	Pattern<String<char>, TAlgorithm> pattern(needle);
 	while (find(finder, pattern)) 
 	{
-		std::cout << position(finder) << ", ";
+		::std::cout << position(finder) << ", ";
 	}
-	std::cout << std::endl;
+	::std::cout << ::std::endl;
 }
 
 ///The main function calls $printAllOccs$ for different exact string matching algorithms.
