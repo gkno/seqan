@@ -627,42 +627,6 @@ This is the best test with a bast jest.
 ..demofor:Function.longestCommonSubsequence
 .
 
-.Demo.Needleman-Wunsch Algorithm
-..cat:Graph
-..order:Graph Alignment 1 Needleman-Wunsch
-..summary:Needleman-Wunsch alignment code example
-..file:../projects/library/demos/graph_align_nw.cpp
-..demofor:Class.Graph
-..demofor:Function.globalAlignment
-.
-
-.Demo.Gotoh's Algorithm
-..cat:Graph
-..order:Graph Alignment 2 Gotoh
-..summary:Gotoh alignment code example
-..file:../projects/library/demos/graph_align_gotoh.cpp
-..demofor:Class.Graph
-..demofor:Function.globalAlignment
-.
-
-.Demo.Hirschberg's Algorithm
-..cat:Graph
-..order:Graph Alignment 3 Hirschberg
-..summary:Hirschberg with Gotoh alignment code example
-..file:../projects/library/demos/graph_align_hirschberg.cpp
-..demofor:Class.Graph
-..demofor:Function.globalAlignment
-.
-
-.Demo.Smith-Waterman Algorithm
-..cat:Graph
-..order:Graph Alignment 4 Smith-Waterman
-..summary:Smith-Waterman local alignment code example.
-..file:../projects/library/demos/graph_align_sw.cpp
-..demofor:Class.Graph
-..demofor:Function.localAlignment
-.
-
 .Demo.File Format I/O:
 ..cat:System
 ..summary:Accessing sequence data in files.
