@@ -80,14 +80,6 @@
 .
 
 
-.Demo.String Basics:
-..cat:Basics
-..summary:Basic string class handling.
-..file:../projects/library/demos/string_1.cpp
-..demofor:Class.String
-.
-
-
 .Demo.Exact Searching
 ..order:Searching, 1
 ..cat:Searching
