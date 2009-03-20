@@ -600,6 +600,22 @@ This is the best test with a bast jest.
 ..demofor:Function.ford_fulkerson
 .
 
+.Demo.HMM
+..cat:Graph
+..order:Graph Hidden Markov Model
+..summary:Hidden Markov Model code example
+..file:../projects/library/demos/graph_hmm.cpp
+..demofor:Class.Graph
+.
+
+.Demo.HMM Silent States
+..cat:Graph
+..order:Graph Hidden Markov Model Silent States
+..summary:Hidden Markov Model with silent states code example
+..file:../projects/library/demos/graph_hmm_silent.cpp
+..demofor:Class.Graph
+.
+
 .Demo.Longest Increasing Subsequence
 ..cat:Graph
 ..order:Graph Sequence 1 Longest Increasing Subsequence
