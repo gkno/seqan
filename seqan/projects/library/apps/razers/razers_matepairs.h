@@ -917,6 +917,8 @@ int mapMatePairReads(
 	// configure q-gram index
 	TIndex swiftIndexL(readSetL, shape);
 	TIndex swiftIndexR(readSetR, shape);
+	reverse(indexShape(swiftIndexR));		// right mate qualities are reversed -> reverse right shape
+	
 /*	cargo(swiftIndexL).abundanceCut = options.abundanceCut;
 	cargo(swiftIndexR).abundanceCut = options.abundanceCut;
 	cargo(swiftIndexL)._debugLevel = options._debugLevel;
