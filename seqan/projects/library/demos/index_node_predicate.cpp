@@ -1,7 +1,7 @@
+///A tutorial showing how to extent an index with a node predicate.
 #include <iostream>
 #include <seqan/index.h>
 
-using namespace std;
 using namespace seqan;
 
 /// constraint parameters
@@ -65,7 +65,7 @@ int main ()
 	cargo(myIndex).p_min = 0.05;
 
 ///To find all strings that fulfill our constraints,
-///we simply do a dfs-traversal via @Function.goBegin@ and @Function.goNext@
+///we simply do a dfs-traversal via @Function.goBegin@ and @Function.goNext@.
 	typedef Iterator< TMyIndex, TopDown<ParentLinks<> > >::Type TConstrainedIterator;
 	TConstrainedIterator myConstrainedIterator(myIndex);
 
@@ -74,10 +74,10 @@ int main ()
 	{
 
 ///@Function.countOccurrences@ returns the number of hits of the representative.
-		cout << countOccurrences(myConstrainedIterator) << "x  ";
+		::std::cout << countOccurrences(myConstrainedIterator) << "x  ";
 
 ///The representative string can be determined with @Function.representative@
-		cout << "\t\"" << representative(myConstrainedIterator) << '\"' << endl;
+		::std::cout << "\t\"" << representative(myConstrainedIterator) << '\"' << ::std::endl;
 
 		goNext(myConstrainedIterator);
 	}

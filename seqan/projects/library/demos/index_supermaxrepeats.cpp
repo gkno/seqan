@@ -1,7 +1,7 @@
+///A tutorial about finding supermaximal repeats.
 #include <iostream>
 #include <seqan/index.h>
 
-using namespace std;
 using namespace seqan;
 
 int main ()
@@ -9,7 +9,7 @@ int main ()
 ///We begin with a @Class.String@ to store our sequence.
 	String<char> myString = "How many wood would a woodchuck chuck.";
 
-///Then we create an @Class.Index@ of this @Class.StringSet@
+///Then we create an @Class.Index@ of this @Class.StringSet@.
 	typedef Index< String<char> > TMyIndex;
 	TMyIndex myIndex(myString);
 
@@ -24,13 +24,13 @@ int main ()
 ///The length of this sequence, i.e. the repeat abundance can be obtained 
 ///from @Function.countOccurrences@.
 		for(unsigned i = 0; i < countOccurrences(myRepeatIterator); ++i)
-			cout << getOccurrences(myRepeatIterator)[i] << ", ";
+			::std::cout << getOccurrences(myRepeatIterator)[i] << ", ";
 
 ///@Function.repLength@ returns the length of the repeat string.
-		cout << repLength(myRepeatIterator) << "   ";
+		::std::cout << repLength(myRepeatIterator) << "   ";
 
-///The repeat string itself can be determined with @Function.representative@
-		cout << "\t\"" << representative(myRepeatIterator) << '\"' << endl;
+///The repeat string itself can be determined with @Function.representative@.
+		::std::cout << "\t\"" << representative(myRepeatIterator) << '\"' << ::std::endl;
 
 		++myRepeatIterator;
 	}
