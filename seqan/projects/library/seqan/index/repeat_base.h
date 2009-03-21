@@ -42,7 +42,6 @@ namespace SEQAN_NAMESPACE_MAIN
 	};
 
 
-
 	template <typename TSize>
 	struct RepeatFinderParams {
 		TSize minRepeatLen;
@@ -95,13 +94,14 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <>
 	inline bool _repeatMaskValue(Dna5 val) 
 	{
-		return val == 'N';
+		return val.value == 4; // 'N'
 	}
 
 	template <>
 	inline bool _repeatMaskValue(Iupac val) 
 	{
-		return val == 'N';
+		static const Iupac n = 'N';
+		return val.value == n.value;
 	}
 /*
 	template <>
