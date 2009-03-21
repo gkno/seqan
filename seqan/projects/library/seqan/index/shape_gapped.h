@@ -577,13 +577,13 @@ You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 				++oneCount;
 
 		me.weight = oneCount;
-		resize(me.diffs, oneCount);
-
 		if ((it = begin(bitmap, Standard())) == itEnd) {
 			me.span = 0;
 			return false;
 		}
 		
+		resize(me.diffs, oneCount - 1);
+
 		unsigned diff = 1;
 		me.span = 1;
 		TShapeIter itS = begin(me.diffs, Standard());
@@ -624,6 +624,16 @@ You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 				appendValue(bitmap, '0');
 			appendValue(bitmap, '1');
 		}
+	}
+
+//____________________________________________________________________________
+
+	template <typename TValue, typename TSpec>
+	inline void
+	reverse(Shape<TValue, GappedShape<TSpec> > &me)
+	{
+	SEQAN_CHECKPOINT
+		reverseInPlace(me.diffs);
 	}
 
 }	// namespace seqan

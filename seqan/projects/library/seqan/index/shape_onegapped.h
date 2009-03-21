@@ -306,6 +306,18 @@ namespace SEQAN_NAMESPACE_MAIN
 		fill(bitmap, me.blockLen1 + me.gapLen + me.blockLen2, '1');
 	}
 
+//____________________________________________________________________________
+	
+	template <typename TValue>
+	inline void
+	reverse(Shape<TValue, OneGappedShape> &me)
+	{
+	SEQAN_CHECKPOINT
+		unsigned temp = me.blockLen1;
+		me.blockLen1 = me.blockLen2;
+		me.blockLen2 = temp;
+	}
+	
 }	// namespace seqan
 
 #endif

@@ -647,6 +647,14 @@ If $charsLeft$ is smaller than the shape's span, the hash value corresponds to t
 		fill(bitmap, length(me), '1');
 	}
 
+//____________________________________________________________________________
+	
+	template <typename TValue, typename TSpec>
+	inline void
+	reverse(Shape<TValue, TSpec> &)
+	{
+	}
+	
 }	// namespace seqan
 
 #endif
