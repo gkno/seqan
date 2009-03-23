@@ -232,6 +232,11 @@ void simulateReads(
 				continue;
 			}
 			appendValue(modificationPattern,currOp,Generous());
+
+			// ignore reads with Ns
+			if (currOp != SEQAN_INSERT && readTemplate[pos] == 'N')
+				continue;
+
 			// Insert Delete is the same as Delete Insert and both are the same as Mismatch (or match)
 			if(currOp == SEQAN_MATCH) read[trueLength] = readTemplate[pos];
 			else
