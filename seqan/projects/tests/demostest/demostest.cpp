@@ -6,6 +6,7 @@
 #define TEST_MODIFIERS
 #define TEST_INDEX
 #define TEST_GRAPH
+#define TEST_MISCELLANEOUS
 
 
 #ifdef TEST_BASICS
@@ -48,6 +49,10 @@
 	#include "../../library/demos/find_wild.cpp"
 	#undef main
 
+	#define main runFindMotif
+	#include "../../library/demos/find_motif.cpp"
+	#undef main
+
 #endif
 
 #ifdef TEST_ALIGNMENT
@@ -86,6 +91,10 @@
 
 	#define main runIndexFind
 	#include "../../library/demos/index_find.cpp"
+	#undef main
+
+	#define main runIndexFindStringSet
+	#include "../../library/demos/index_find_stringset.cpp"
 	#undef main
 
 	#define main runIndexMUMs
@@ -186,6 +195,21 @@
 
 #endif
 
+#ifdef TEST_MISCELLANEOUS
+
+	#define main runBlastReport
+	#include "../../library/demos/blast_report.cpp"
+	#undef main
+
+	#define main runSeeds
+	#include "../../library/demos/seeds.cpp"
+	#undef main
+
+	#define main runLagan
+	#include "../../library/demos/lagan.cpp"
+	#undef main
+
+#endif
 
 int main(int argc, const char *argv[]) 
 {
@@ -201,6 +225,7 @@ int main(int argc, const char *argv[])
 	runFindExact();
 	runFindApprox();
 	runFindWild();
+	runFindMotif();
 #endif
 
 #ifdef TEST_ALIGNMENT
@@ -217,6 +242,7 @@ int main(int argc, const char *argv[])
 #ifdef TEST_INDEX
 	runIndexSA();
 	runIndexFind();
+	runIndexFindStringSet();
 	runIndexMUMs();
 	runIndexSuperMaxRepeats();
 	runIndexMaxRepeats();
@@ -243,6 +269,12 @@ int main(int argc, const char *argv[])
 	runGraphLcs();
 	runGraphHmm();
 	runGraphHmmSilent();
+#endif
+
+#ifdef TEST_MISCELLANEOUS
+	runBlastReport();
+	runSeeds();
+	runLagan();
 #endif
 
 	return 0;

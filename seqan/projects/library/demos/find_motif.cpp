@@ -8,7 +8,7 @@ using namespace seqan;
 template <typename TMotifFinder>
 void printMotifs(TMotifFinder & finder)
 {
-	for (int i = 0; i < motifCount(finder); ++i)
+	for (int i = 0; i < (int) motifCount(finder); ++i)
 	{
 		::std::cout << i << ": " << getMotif(finder, i) << ::std::endl;
 	}

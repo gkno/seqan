@@ -44,7 +44,7 @@ void laganChaining(std::list<TSeed> & chain,
 		if (q < q_min) return;
 
 		resize(indexShape(index_qgram), q);
-		for (int i = 0; i < length(a)-q+1; ++i)
+		for (int i = 0; i < (int) length(a)-q+1; ++i)
 		{
 			while (find(finder, infix(a, i, i+q)))
 			{
@@ -99,9 +99,14 @@ void laganChaining(std::list<TSeed> & chain,
 
 int main()
 {
+	if ((!::std::ifstream(file_a)) || (!::std::ifstream(file_b))) {
+		std::cout << "Error - file problem" << std::endl;
+		return 1;
+	}
+
 	//load sequences
 	typedef String<Dna> TString;
-	TString a = String<Dna, FileReader<Fasta> >(file_a);
+	TString a = String<Dna, FileReader<Fasta> >(file_a); // Crashes if file does not exist
 	TString b = String<Dna, FileReader<Fasta> >(file_b);
 	if ((length(a) == 0) || (length(b) == 0))
 	{

@@ -594,7 +594,7 @@ bestNeighbors(TIntSet & neighbors,
 				unsigned int counter2 = 0;
 				unsigned int counter3 = 0;
 				seq_pos = 0;
-				while(seq_iter!=seq_end & counter1<1)
+				while( (seq_iter!=seq_end) && (counter1<1))
 				{
 					if( (hd_mat[seq_nr][seq_pos]==dist_x) &
 						(letter_in_y==*(seq_iter+mismatch_pos)) )
@@ -708,7 +708,7 @@ hasAtLeastOneOccurrence(TStringIter l_mer_begin,
 {
 	bool result = false;
 	TType counter = 0;
-	while( (seq_begin!=(seq_end-l+1)) &  counter<1)
+	while( (seq_begin!=(seq_end-l+1)) &&  (counter<1))
 	{
 		if(is_exact)
 		{

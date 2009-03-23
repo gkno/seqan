@@ -624,20 +624,20 @@ pmsp(TStrings & result,
 					{
 						typename Iterator< String<TPos2> >::Type L_iter = begin(L[i]);
 						typename Iterator< String<TPos2> >::Type L_end = end(L[i]);
-						while(L_iter!=L_end & number<1)
+						while((L_iter!=L_end) && (number<1))
 						{
 							TPos2 pos = *L_iter;
-							if(is_exact & 
-								hammingDistance<TType>(begin(dataset[relevant_pos_vect[i]])+pos, 
+							if((is_exact) && 
+								(hammingDistance<TType>(begin(dataset[relevant_pos_vect[i]])+pos, 
 												begin(dataset[relevant_pos_vect[i]])+pos+l, 
-												begin(l_mer))==d)
+												begin(l_mer))==d))
 							{
 								++number;
 							}
-							else if((!is_exact) & 
-								hammingDistance<TType>(begin(dataset[relevant_pos_vect[i]])+pos, 
+							else if((!is_exact) && 
+								(hammingDistance<TType>(begin(dataset[relevant_pos_vect[i]])+pos, 
 												begin(dataset[relevant_pos_vect[i]])+pos+l, 
-												begin(l_mer))<=d)
+												begin(l_mer))<=d))
 							{
 								++number;
 							}
