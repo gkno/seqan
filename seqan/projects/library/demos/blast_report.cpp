@@ -1,7 +1,7 @@
+///A tutorial about parsing a blast report.
 #include <iostream>
 #include <seqan/blast.h>
 
-using namespace std;
 using namespace seqan;
 
 
@@ -9,45 +9,43 @@ template <typename TFile>
 void read_blast_report(TFile & strm)
 {
 
-/// First the type of Blast report needs to specified: 
-/// In this case, a BlastN report is parsed and for each alignment in the report (i.e. each HSP) we choose to parse 
-/// all the possible information delivered with the alignment (e.g. scores, percentage of gaps, orientation... see @Class.BlastHsp@)
+///First the type of Blast report needs to be specified.
+///In this case, a BlastN report is parsed and for each alignment in the report (i.e. each HSP) we choose to parse 
+///all the possible information delivered with the alignment (e.g. scores, percentage of gaps, orientation... see @Class.BlastHsp@).
 
 	typedef BlastHsp<BlastN, FullInfo> TBlastHsp;
 
-/// The @Spec.StreamReport@ specialization determines that the alignments are parsed when iterating over them (i.e. only 
-/// one alignment is stored at a time, as opposed to the @Spec.StoreReport@ specialization)
+///The @Spec.StreamReport@ specialization determines that the alignments are parsed when iterating over them (i.e. only 
+///one alignment is stored at a time, as opposed to the @Spec.StoreReport@ specialization).
 
 	typedef BlastReport<TBlastHsp, StreamReport<TFile> > TBlastReport;
-
-/// some more types that will be needed
 	typedef typename Hit<TBlastReport>::Type TBlastHit;
 	typedef typename Iterator<TBlastReport,HitIterator>::Type THitIterator;
 	typedef typename Iterator<TBlastHit,HspIterator>::Type THspIterator;
 
 	
-/// our Blast report oject
+///Our Blast report object
 	TBlastReport blast;
 
-// counters
+///Counters
 	unsigned hspcount = 0;
 	unsigned hitcount = 0;
 	unsigned highsignif = 0;
 
 	while(!atEnd(strm,blast)) 
 	{
-		/// get the current Blast report (there can be multiple reports in one file)
+///Get the current Blast report (there can be multiple reports in one file).
 		read(strm,blast,Blast());
-		std::cout << "Query: "<<getQueryName(blast) <<"\n";
-		std::cout << "Database: "<<getDatabaseName(blast) <<"\n\n";
+		::std::cout << "Query: "<<getQueryName(blast) <<"\n";
+		::std::cout << "Database: "<<getDatabaseName(blast) <<"\n\n";
 
-		/// iterate over hits
+///Iterate over hits
 		THitIterator hit_it(blast); 
 		for(; !atEnd(strm,hit_it); goNext(strm,hit_it)) 
 		{
 			++hitcount;
 			TBlastHit hit = getValue(strm,hit_it);
-			std::cout << " Hit: " <<name(hit) <<"\n\n";
+			::std::cout << " Hit: " <<name(hit) <<"\n\n";
 
 			/// iterate over alignments (HSPs)
 			THspIterator hsp_it(hit);
@@ -56,30 +54,28 @@ void read_blast_report(TFile & strm)
 				++hspcount;
  				TBlastHsp hsp = getValue(strm,hsp_it);
 				
-				/// do something with the alignment, e.g.
-				/// output score and length of alignment
-				std::cout << "  Score  = " << getBitScore(hsp) << "\n";
-				std::cout << "  Length = " << length(hsp) << "\n\n";
-				/// and count alignments with highly significant e-values
+///Do something with the alignment, e.g.
+///output score and length of alignment.
+				::std::cout << "  Score  = " << getBitScore(hsp) << "\n";
+				::std::cout << "  Length = " << length(hsp) << "\n\n";
+///Count alignments with highly significant e-values.
 				if(getEValue(hsp)<0.01)
 					++highsignif;
 
 			}
 		}
 	}
-	std::cout <<"Total number of Hits: "<< hitcount<<std::endl;
-	std::cout <<"Total number of HSPs: "<< hspcount<<std::endl;
-	std::cout <<"Number of highly significant HSPs: "<< highsignif<<std::endl;
+	::std::cout <<"Total number of Hits: "<< hitcount<<::std::endl;
+	::std::cout <<"Total number of HSPs: "<< hspcount<<::std::endl;
+	::std::cout <<"Number of highly significant HSPs: "<< highsignif<<::std::endl;
 
 }
 
 
 int main()
 {
-
-	std::fstream strm;
-	strm.open("ecoln.out",ios_base::in | ios_base::binary);
+	::std::fstream strm;
+	strm.open("ecoln.out", ::std::ios_base::in | ::std::ios_base::binary);
 	read_blast_report(strm);
-
 	return 0;
 }

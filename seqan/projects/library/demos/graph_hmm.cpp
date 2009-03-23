@@ -1,4 +1,4 @@
-///A tutorial about HMMs
+///A tutorial about HMMs.
 #include <iostream>
 #include <fstream>
 #include <seqan/basic/basic_logvalue.h>
