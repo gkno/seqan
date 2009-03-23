@@ -1,21 +1,22 @@
+///A tutorial about motif search.
 #include <iostream>
 #include "seqan/find_motif.h"
 
 using namespace seqan;
-using namespace std;
 
+///Function to output found motifs.
 template <typename TMotifFinder>
 void printMotifs(TMotifFinder & finder)
 {
 	for (int i = 0; i < motifCount(finder); ++i)
 	{
-		cout << i << ": " << getMotif(finder, i) << endl;
+		::std::cout << i << ": " << getMotif(finder, i) << ::std::endl;
 	}
 }
 
 int main() 
 {
-	srand((unsigned) time(NULL));
+	::std::srand((unsigned) time(NULL));
 
 ///Motif search on a small set of nucleotide sequences.
 	unsigned int t = 3;		//number of input sequences
@@ -33,12 +34,12 @@ int main()
 ///Application of ePatternBranching (h=0)
 	MotifFinder<Dna, EPatternBranching> finder_epb1(t,l,d,is_exact,h);
 	findMotif(finder_epb1,dataset,OMOPS());
-	cout << getMotif(finder_epb1) << endl;
+	::std::cout << getMotif(finder_epb1) << ::std::endl;
 
 ///Application of ePatternBranching (h=0)
 	MotifFinder<Dna, EPatternBranching> finder_epb2(t,l,d,is_exact,h);
 	findMotif(finder_epb2,dataset,OOPS());
-	cout << getMotif(finder_epb2) << endl;
+	::std::cout << getMotif(finder_epb2) << ::std::endl;
 
 ///Application of PMS1-ZOOPS 
 	MotifFinder<Dna, PMS1> finder_pms1(l,d,is_exact);

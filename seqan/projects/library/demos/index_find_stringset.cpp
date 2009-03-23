@@ -1,7 +1,7 @@
+///A tutorial about an index based finder for a StringSet.
 #include <iostream>
 #include <seqan/index.h>
 
-using namespace std;
 using namespace seqan;
 
 int main ()
@@ -19,10 +19,10 @@ int main ()
 	Finder< Index<StringSet<String<char> > > > myFinder(myIndex);
 
 ///Finally we search for the string $"be"$ and output all occurences
-	cout << "hit at ";
+	::std::cout << "hit at ";
 	while (find(myFinder, "be")) 
-		cout << position(myFinder) << "  ";
-	cout << endl;
+		::std::cout << position(myFinder) << "  ";
+	::std::cout << ::std::endl;
 	
 	return 0;
 }
