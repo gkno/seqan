@@ -27,29 +27,10 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //////////////////////////////////////////////////////////////////////////////
 
-/**
-.Internal._HirschbergSet:
-..cat:Classes
-..summary:Represents a part of the Dynamic-Programming Matrix, defined by the start and end position in the two sequences
-..signature:_HirschbergSet()
-..signature:_HirschbergSet(begin1,end1,begin2,end2)
-..remarks:This class is used to define the part of the sequences, that need to be inspected during in the alignment. It is
-used of @Tag.MyersHirschberg@ and @Tag.Hirschberg@ 
-..memfunc:Internal._begin1
-..memfunc:Internal._begin2
-..memfunc:Internal._setBegin1
-..memfunc:Internal._setBegin2
-..memfunc:Internal._end1
-..memfunc:Internal._end2
-..memfunc:Internal._setEnd1
-..memfunc:Internal._setEnd2
-..memfunc:Internal._score
-..memfunc:Internal._setScore
-*/
 class _HirschbergSet
 {
 
-private:
+public:
 	int x1,x2,y1,y2;
 	int score;
 
@@ -72,213 +53,148 @@ SEQAN_CHECKPOINT
 	operator = (_HirschbergSet const & other_)
 	{
 SEQAN_CHECKPOINT
-		_setBegin1(*this,_begin1(other_));
-		_setEnd1(*this,_end1(other_));
-		_setBegin2(*this,_begin2(other_));
-		_setEnd2(*this,_end2(other_));
-		_setScore(*this,_score(other_));
+		x1 = other_.x1;
+		x2 = other_.x2;
+		y1 = other_.y1;
+		y2 = other_.y2;
+		score = other_.score;
 		return *this;
 	}
 
-	// //////////////////////////////////////////////////////////////////////////////////////////////
-	// Accessor Methods
-	// //////////////////////////////////////////////////////////////////////////////////////////////
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+// Accessor Methods
+////////////////////////////////////////////////////////////////////////////////////////////////
 
 	// Sequence 1
-/**
-.Internal.begin1:
-..cat:Functions
-..summary:Returns the begin position of the _HirschberSet in the first sequence
-..signature:begin1(_HirschbergSet)
-..param._HirschbergSet: Reference to the _HirschbergSet
-..param._HirschbergSet.type:Internal._HirschbergSet
-*/
-/**
-.Internal.setBegin1:
-..cat:Functions
-..summary:Sets the begin position of the _HirschberSet in the first sequence
-..signature:setBegin1(_HirschbergSet,new_begin)
-..param._HirschbergSet: Reference to the _HirschbergSet
-..param.new_begin: The new begin position in the first sequence
-*/
-
-///.Internal.setBegin1.param._HirschbergSet.type:Internal._HirschbergSet
-
-/**
-.Internal.end1:
-..cat:Functions
-..summary:Returns the end position of the _HirschberSet in the first sequence
-..signature:end1(_HirschbergSet)
-..param._HirschbergSet: Reference to the _HirschbergSet
-..param._HirschbergSet.type:Internal._HirschbergSet
-*/
-/**
-.Internal.setEnd1:
-..cat:Functions
-..summary:Sets the end position of the _HirschberSet in the first sequence
-..signature:setEnd1(_HirschbergSet,new_end)
-..param._HirschbergSet: Reference to the _HirschbergSet
-..param._HirschbergSet.type:Internal._HirschbergSet
-..param.new_begin: The new end position in the first sequence
-*/
-	friend inline int &
-	_begin1(_HirschbergSet & me)
-	{
-SEQAN_CHECKPOINT
-		return me.x1;
-	}
 
 
-	friend inline int const & 
-	_begin1(_HirschbergSet const & me)
-	{
-SEQAN_CHECKPOINT
-		return me.x1;
-	}
+inline 
+int& 
+_begin1(_HirschbergSet & me) {
+	SEQAN_CHECKPOINT
+	return me.x1;
+}
 
-	friend inline void
-	_setBegin1(_HirschbergSet & me, int const & new_begin)
-	{
-SEQAN_CHECKPOINT
-		me.x1 = new_begin;
-	}
 
-	friend inline int &
-	_end1(_HirschbergSet & me)
-	{
-SEQAN_CHECKPOINT
-		return me.x2;
-	}
+inline 
+int const& 
+_begin1(_HirschbergSet const & me) {
+	SEQAN_CHECKPOINT
+	return me.x1;
+}
 
-	friend inline int const & 
-	_end1(_HirschbergSet const & me)
-	{
-SEQAN_CHECKPOINT
-		return me.x2;
-	}
+inline 
+void
+_setBegin1(_HirschbergSet & me, int const & new_begin) {
+	SEQAN_CHECKPOINT
+	me.x1 = new_begin;
+}
 
-	friend inline void
-	_setEnd1(_HirschbergSet & me, int const & new_end)
-	{
-SEQAN_CHECKPOINT
-		me.x2 = new_end;
-	}
-	// Sequence 2
-/**
-.Internal.begin2:
-..cat:Functions
-..summary:Returns the begin position of the _HirschberSet in the second sequence
-..signature:begin2(_HirschbergSet)
-..param._HirschbergSet: Reference to the _HirschbergSet
-..param._HirschbergSet.type:Internal._HirschbergSet
-*/
-/**
-.Internal.setBegin2:
-..cat:Functions
-..summary:Sets the begin position of the _HirschberSet in the second sequence
-..signature:setBegin2(_HirschbergSet,new_begin)
-..param._HirschbergSet: Reference to the _HirschbergSet
-..param._HirschbergSet.type:Internal._HirschbergSet
-..param.new_begin: The new begin position in the first sequence
-*/
-/**
-.Internal.end2:
-..cat:Functions
-..summary:Returns the end position of the _HirschberSet in the second sequence
-..signature:end2(_HirschbergSet)
-..param._HirschbergSet: Reference to the _HirschbergSet
-..param._HirschbergSet.type:Internal._HirschbergSet
-*/
-/**
-.Internal.setEnd2:
-..cat:Functions
-..summary:Sets the end position of the _HirschberSet in the second sequence
-..signature:setEnd2(_HirschbergSet,new_end)
-..param._HirschbergSet: Reference to the _HirschbergSet
-..param._HirschbergSet.type:Internal._HirschbergSet
-..param.new_begin: The new end position in the second sequence
-*/
-	friend inline int &
-	_begin2(_HirschbergSet & me)
-	{
-SEQAN_CHECKPOINT
-		return me.y1;
-	}
+inline 
+int&
+_end1(_HirschbergSet & me) {
+	SEQAN_CHECKPOINT
+	return me.x2;
+}
 
-	friend inline int const &
-	_begin2(_HirschbergSet const & me)
-	{
-SEQAN_CHECKPOINT
-		return me.y1;
-	}
+inline 
+int const& 
+_end1(_HirschbergSet const & me) {
+	SEQAN_CHECKPOINT
+	return me.x2;
+}
 
-	friend inline void
-	_setBegin2(_HirschbergSet & me, int const & new_begin)
-	{
-SEQAN_CHECKPOINT
-		me.y1 = new_begin;
-	}
+inline 
+void
+_setEnd1(_HirschbergSet & me, int const & new_end) {
+	SEQAN_CHECKPOINT
+	me.x2 = new_end;
+}
 
-	friend inline int &
-	_end2(_HirschbergSet & me)
-	{
-SEQAN_CHECKPOINT
-		return me.y2;
-	}
+// Sequence 2
 
-	friend inline int const &
-	_end2(_HirschbergSet const & me)
-	{
-SEQAN_CHECKPOINT
-		return me.y2;
-	}
+inline int&
+_begin2(_HirschbergSet & me) {
+	SEQAN_CHECKPOINT
+	return me.y1;
+}
 
-	friend inline void
-	_setEnd2(_HirschbergSet & me, int const & new_end)
-	{
-SEQAN_CHECKPOINT
-		me.y2 = new_end;
-	}
+inline 
+int const&
+_begin2(_HirschbergSet const & me) {
+	SEQAN_CHECKPOINT
+	return me.y1;
+}
 
-	// //////////////////////////////////////////////////////////////////////////////////////////////
-	// Score Methods
-	// //////////////////////////////////////////////////////////////////////////////////////////////
+inline 
+void
+_setBegin2(_HirschbergSet & me, int const & new_begin) {
+	SEQAN_CHECKPOINT
+	me.y1 = new_begin;
+}
 
-	friend inline int &
-	_score(_HirschbergSet & me)
-	{
-SEQAN_CHECKPOINT
-		return me.score;
-	}
+inline 
+int&
+_end2(_HirschbergSet & me) {
+	SEQAN_CHECKPOINT
+	return me.y2;
+}
 
-	friend inline int const &
-	_score(_HirschbergSet const & me)
-	{
-SEQAN_CHECKPOINT
-		return me.score;
-	}
+inline 
+int const&
+_end2(_HirschbergSet const & me) {
+	SEQAN_CHECKPOINT
+	return me.y2;
+}
 
-	friend inline void
-	_setScore(_HirschbergSet & me,int new_score)
-	{
-SEQAN_CHECKPOINT
-		me.score = new_score;
-	}
+inline 
+void
+_setEnd2(_HirschbergSet & me, int const & new_end) {
+	SEQAN_CHECKPOINT
+	me.y2 = new_end;
+}
 
-	// //////////////////////////////////////////////////////////////////////////////////////////////
-	//  Debug Methods
-	//		functions are only used for debugging or verbose output, therefore they
-	//      are only active in SEQAN_DEBUG
-	// //////////////////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////////////////////
+// Score Methods
+// //////////////////////////////////////////////////////////////////////////////////////////////
+
+inline 
+int&
+_score(_HirschbergSet & me)	{
+	SEQAN_CHECKPOINT
+	return me.score;
+}
+
+inline 
+int const&
+_score(_HirschbergSet const & me) {
+	SEQAN_CHECKPOINT
+	return me.score;
+}
+
+inline 
+void
+_setScore(_HirschbergSet & me,int new_score) {
+	SEQAN_CHECKPOINT
+	me.score = new_score;
+}
+
+// //////////////////////////////////////////////////////////////////////////////////////////////
+//  Debug Methods
+//		functions are only used for debugging or verbose output, therefore they
+//      are only active in SEQAN_DEBUG
+// //////////////////////////////////////////////////////////////////////////////////////////////
 #ifdef SEQAN_DEBUG
 	
-	friend inline void
-	print(_HirschbergSet const & me)
-	{
-		std::cout << me.x1 << " " << me.x2 << "\t" << me.y1 << " " << me.y2 << std::endl;
-	}
+inline 
+void
+print(_HirschbergSet const & me) {
+	std::cout << me.x1 << " " << me.x2 << "\t" << me.y1 << " " << me.y2 << std::endl;
+}
 #endif
-};
+
 
 
 inline bool
