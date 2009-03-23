@@ -824,7 +824,7 @@ SEQAN_CHECKPOINT
 
 //* ???Anti Default Sequences
 template <typename T> 
-inline typename Size<T const>::Type
+inline typename Size<T>::Type
 length(T const & /*me*/)
 {
 SEQAN_CHECKPOINT

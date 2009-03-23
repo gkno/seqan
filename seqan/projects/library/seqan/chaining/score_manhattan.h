@@ -84,7 +84,7 @@ public:
 	{
 		return me.data_match;
 	}
-	friend inline TValue const 
+	friend inline TValue
 	scoreMatch(Score const & me)
 	{
 		return me.data_match;
@@ -95,7 +95,7 @@ public:
 	{
 		return me.data_mismatch;
 	}
-	friend inline TValue const 
+	friend inline TValue
 	scoreMismatch(Score const & me)
 	{
 		return me.data_mismatch;

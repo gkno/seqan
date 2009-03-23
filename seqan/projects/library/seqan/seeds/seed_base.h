@@ -866,9 +866,9 @@ extendSeed(Seed<TPosition,SimpleSeed> &seed,
 			for (int i = b; i<= (u+1);++i){
 				tmp = infimum;
 
-				tmp = max((*antiDiag2)[i-1],(*antiDiag2)[i])+gapCost;
-				tmp = max(tmp,(*antiDiag1)[i-1]+ score(scoreMatrix, xLength-i, yLength-(k-i), querySeg, dataSeg));
-				tmpMax2 = max(tmpMax2,tmp);
+				tmp = ::std::max<TPosition>((*antiDiag2)[i-1],(*antiDiag2)[i])+gapCost;
+				tmp = ::std::max<TPosition>(tmp,(*antiDiag1)[i-1]+ score(scoreMatrix, xLength-i, yLength-(k-i), querySeg, dataSeg));
+				tmpMax2 = ::std::max<TPosition>(tmpMax2,tmp);
 				if (tmp < tmpMax1-scoreDropOff)
 					(*antiDiag3)[i] = infimum;
 				else
@@ -883,8 +883,8 @@ extendSeed(Seed<TPosition,SimpleSeed> &seed,
 				--u;}
 			
 			//borders for lower triangle of edit matrix
-			b = max(b,k-yLength+1);
-			u = min(u, xLength-1);
+			b = ::std::max<TPosition>(b,k-yLength+1);
+			u = ::std::min<TPosition>(u, xLength-1);
 			
 			if ((b < (k+1)/2)&&((k+1)/2-b>lowerBound))
 				lowerBound = (k+1)/2-b;
@@ -987,9 +987,9 @@ extendSeed(Seed<TPosition,SimpleSeed> &seed,
 			++k;
 			for (int i = b; i<= (u+1);++i){
 				tmp = infimum;
-				tmp = max((*antiDiag2)[i-1],(*antiDiag2)[i])+gapCost;
-				tmp = max(tmp,(*antiDiag1)[i-1]+ score(scoreMatrix,i-1,k-i-1,querySeg,dataSeg));
-				tmpMax2 = max(tmpMax2,tmp);
+				tmp = ::std::max<TPosition>((*antiDiag2)[i-1],(*antiDiag2)[i])+gapCost;
+				tmp = ::std::max<TPosition>(tmp,(*antiDiag1)[i-1]+ score(scoreMatrix,i-1,k-i-1,querySeg,dataSeg));
+				tmpMax2 = ::std::max<TPosition>(tmpMax2,tmp);
 				if (tmp < tmpMax1-scoreDropOff)
 					(*antiDiag3)[i] = infimum;
 				else
@@ -1004,8 +1004,8 @@ extendSeed(Seed<TPosition,SimpleSeed> &seed,
 				--u;}
 			
 			//borders for lower triangle of edit matrix
-			b = max(b,k-yLength+1);
-			u = min(u, xLength-1);
+			b = ::std::max<TPosition>(b,k-yLength+1);
+			u = ::std::min<TPosition>(u, xLength-1);
 			
 
 			if ((b < (k+1)/2)&&((k+1)/2-b>lowerBound)){
