@@ -600,6 +600,7 @@ inline bool _swiftMultiProcessQGram(
 		
 		unsigned bktNo = (diag >> bucketParams.logDelta) & bucketParams.reuseMask;
 		unsigned bktOfs = diag & (bucketParams.delta - 1);
+		__int64  bktBeginHstk = diag & ~(__int64)(bucketParams.delta - 1);
 
 		TBucketIter bkt = bktBegin + (_swiftBucketNo(pattern, bucketParams, getSeqNo(ndlPos)) + bktNo);		
 		TShortSize hitCount;
@@ -615,7 +616,7 @@ inline bool _swiftMultiProcessQGram(
 			else
 			{
 				if ((*bkt).lastIncrement + bucketParams.tabooLength > finder.curPos) 
-					break;	// increment only once per sequence			
+					goto checkOverlap;	// increment only once per sequence			
 				hitCount = (*bkt).counter + 1;
 			}
 
@@ -637,18 +638,18 @@ inline bool _swiftMultiProcessQGram(
 				__int64 upperBktNo = (*bkt).lastIncrement >> bucketParams.logDelta;
 
 				// we must decrement bucket no. until (no. mod reuse == bktNo)
-				__int64 bktBeginHstk = 
+				__int64 _bktBeginHstk = 
 					 (upperBktNo - ((upperBktNo - bktNo) & bucketParams.reuseMask)) << bucketParams.logDelta;
 
-				if ((*bkt)._lastIncDiag - bktBeginHstk >= bucketParams.delta + bucketParams.overlap || (*bkt)._lastIncDiag < bktBeginHstk) {
-					::std::cerr << "qgram stored in wrong bucket (diag:" << (*bkt)._lastIncDiag << ", begin:" << bktBeginHstk;
+				if ((*bkt)._lastIncDiag - _bktBeginHstk >= bucketParams.delta + bucketParams.overlap || (*bkt)._lastIncDiag < _bktBeginHstk) {
+					::std::cerr << "qgram stored in wrong bucket (diag:" << (*bkt)._lastIncDiag << ", begin:" << _bktBeginHstk;
 					::std::cerr << ", delta:" << bucketParams.delta << ", overlap:" << bucketParams.overlap << ")" << ::std::endl;
 				}
 #endif
 //				if (bktBeginHstk >= 0) 
 //				{
 					THit hit = {
-						diag & ~(__int64)(bucketParams.delta - 1),			// bucket begin in haystack
+						bktBeginHstk,										// bucket begin in haystack
 						getSeqNo(ndlPos),									// needle seq. number
 						height + bucketParams.delta + bucketParams.overlap	// bucket width (non-diagonal)
 					};
@@ -665,10 +666,11 @@ inline bool _swiftMultiProcessQGram(
 //				}
 			}
 
-
+		checkOverlap:
 			if (bktOfs >= bucketParams.overlap) break;
 
 			// repeat with the previous overlapping bucket
+			bktBeginHstk -= bucketParams.delta;
 			bktOfs += bucketParams.delta;
 			if (bktNo) {
 				--bktNo;
