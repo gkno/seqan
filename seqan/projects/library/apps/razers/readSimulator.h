@@ -59,6 +59,65 @@ void simulateGenome(TGenome &genome, int size)
 		genome[i] = sample(0, (Dna)0);
 }
 
+
+template<typename TPosString>
+void
+fillupStartpos(TPosString & sortedStartPos, 
+	int numReads,
+	int readLength,
+	int maxErrors,			// how many errors they may have
+	int libSize,			// library size, 0 disables mate-pair simulation
+	int libError,
+	int seqLength,			// maximal library size deviation
+	double forwardProb)
+{	
+	
+	const int REVCOMP = 1 << (sizeof(int)*8-1);
+	resize(sortedStartPos, numReads);
+
+	int fragmentSize = readLength;
+	if (libSize > 0)
+		fragmentSize = libSize + libError;
+
+
+	// sample positions
+	for (int i = 0; i < numReads; ++i)
+		sortedStartPos[i] = (int)((seqLength - fragmentSize - maxErrors + 1.0) * rand() / TEMP_RAND_MAX);
+
+	std::sort(begin(sortedStartPos),end(sortedStartPos));
+
+	// sample orientations
+	for (int i = 0; i < numReads; ++i)
+		if ((double)rand() / TEMP_RAND_MAX >= forwardProb)
+			sortedStartPos[i] |= REVCOMP;
+
+	if (libSize > 0)
+	{
+		resize(sortedStartPos,2*numReads);
+		// sample mate-pair positions and inverse orientations
+		for(int i=0;i<numReads;++i)
+		{
+			int leftPos = sortedStartPos[i] & ~REVCOMP;
+			int lSize = fragmentSize - (int)((2.0 * libError + 1.0) * (double)rand() / TEMP_RAND_MAX);
+			int rightPos = leftPos + lSize - readLength;
+			if ((sortedStartPos[i] & REVCOMP) == 0)
+			{
+				sortedStartPos[i+numReads] = rightPos | REVCOMP;
+			}
+			else
+			{
+				sortedStartPos[i] = rightPos | REVCOMP;
+				sortedStartPos[i+numReads] = leftPos;
+			}
+		}
+		numReads*=2;
+	}
+
+	
+}
+
+
+
 //////////
 // Simulates a set of reads from a set of haplotypes with a certain error distribution
 //////////
@@ -123,41 +182,6 @@ void simulateReads(
 		fragmentSize = libSize + libError;
 
 	String<int> sortedStartPos;
-	resize(sortedStartPos, numReads);
-
-	// sample positions
-	for (int i = 0; i < numReads; ++i)
-		sortedStartPos[i] = (int)((seqLength - fragmentSize - maxErrors + 1.0) * rand() / TEMP_RAND_MAX);
-
-	std::sort(begin(sortedStartPos),end(sortedStartPos));
-
-	// sample orientations
-	for (int i = 0; i < numReads; ++i)
-		if ((double)rand() / TEMP_RAND_MAX >= forwardProb)
-			sortedStartPos[i] |= REVCOMP;
-
-	int realNumReads = numReads;
-	if (libSize > 0)
-	{
-		resize(sortedStartPos,2*numReads);
-		// sample mate-pair positions and inverse orientations
-		for(int i=0;i<numReads;++i)
-		{
-			int leftPos = sortedStartPos[i] & ~REVCOMP;
-			int lSize = fragmentSize - (int)((2.0 * libError + 1.0) * (double)rand() / TEMP_RAND_MAX);
-			int rightPos = leftPos + lSize - readLength;
-			if ((sortedStartPos[i] & REVCOMP) == 0)
-			{
-				sortedStartPos[i+numReads] = rightPos | REVCOMP;
-			}
-			else
-			{
-				sortedStartPos[i] = rightPos | REVCOMP;
-				sortedStartPos[i+numReads] = leftPos;
-			}
-		}
-		numReads*=2;
-	}
 /*				# Pick a library size
 				currentLibrary = sample(1:(length(librarySizes)), 1)
 				lSize = round(rnorm(1, mean=librarySizes[currentLibrary], sd=librarySd[currentLibrary]))
@@ -181,6 +205,8 @@ void simulateReads(
 					}
 				}*/
 
+	int realNumReads = numReads;
+	int samplePosCounter = 0;
 	int readCounter = 0;
 	while (readCounter < numReads) {
 		clear(modificationPattern);
@@ -188,8 +214,13 @@ void simulateReads(
 		//currentHaplotype = sample(1:(length(haplotypes)), 1)
 
 		// Sample a read
-		int  startPos = sortedStartPos[readCounter] & ~REVCOMP;
-		bool revComp  = sortedStartPos[readCounter] & REVCOMP;
+		if(samplePosCounter >= length(sortedStartPos))//get new start positions
+		{
+			fillupStartpos(sortedStartPos, numReads, readLength, maxErrors,	libSize, libError, seqLength, forwardProb);
+			samplePosCounter = 0;
+		}
+		int  startPos = sortedStartPos[samplePosCounter] & ~REVCOMP;
+		bool revComp  = sortedStartPos[samplePosCounter] & REVCOMP;
 		int  maxEnd   = startPos + readLength + maxErrors - 1;
 	
 		TGenome read;
@@ -235,7 +266,7 @@ void simulateReads(
 
 			// ignore reads with Ns
 			if (currOp != SEQAN_INSERT && readTemplate[pos] == 'N')
-				continue;
+				countErrors = maxErrors + 1;
 
 			// Insert Delete is the same as Delete Insert and both are the same as Mismatch (or match)
 			if(currOp == SEQAN_MATCH) read[trueLength] = readTemplate[pos];
@@ -261,7 +292,7 @@ void simulateReads(
 				break;
 			}
 		}
-		
+	
 	/*
 		if(successful)
 		{
@@ -404,7 +435,9 @@ void simulateReads(
 				appendValue(readSet, read, Generous());
 			}
 			else ++kickOutCount[countErrors];
+
 		}
+		++samplePosCounter;
 //		else std::cout << "Not successful\n";
 	}
 //	if (simulateMatePairs == 1) {
