@@ -457,7 +457,7 @@ getProperty(InternalMap<Pair<T1, T2>, 2>&,
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename T, typename TEdgeDescriptor>
-inline typename Value<InternalMap<T, 0> const>::Type
+inline typename Value<InternalMap<T, 0> >::Type
 getProperty(InternalMap<T, 0> const&,
 			TEdgeDescriptor e)
 {

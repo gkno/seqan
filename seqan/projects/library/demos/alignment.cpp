@@ -30,7 +30,7 @@ int main()
 	::std::cout << "Score = " << globalAlignment(align, score, MyersHirschberg()) << ::std::endl;
 	::std::cout << align << ::std::endl;
 ///Example 3: We now do the same as in case 1, but now we use an @Spec.Alignment Graph@ for storing the alignment.
-///Here we use @Tag.Global Alignment Algorithms|Hirschberg's algorithm@.
+///Here we use @Tag.Global Alignment Algorithms|Gotoh's algorithm@.
 	typedef StringSet<TSequence, Dependent<> > TStringSet;
 	typedef Graph<Alignment<TStringSet, void> > TAlignmentGraph;
 
@@ -39,7 +39,7 @@ int main()
 	appendValue(string_set, seq2);
 	TAlignmentGraph alignment_graph(string_set);
 
-	::std::cout << "Score = " << globalAlignment(alignment_graph, score, Hirschberg()) << ::std::endl;
+	::std::cout << "Score = " << globalAlignment(alignment_graph, score, Gotoh()) << ::std::endl;
 	::std::cout << alignment_graph << ::std::endl;
 	return 0;
 }
