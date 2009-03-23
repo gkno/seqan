@@ -1,8 +1,8 @@
 ///A tutorial about HMMs with silent states
 #include <iostream>
 #include <fstream>
-#include <seqan/basic/basic_logvalue.h>
 #include <seqan/graph_algorithms.h>
+#include <seqan/basic/basic_logvalue.h>
 
 using namespace seqan;
 
