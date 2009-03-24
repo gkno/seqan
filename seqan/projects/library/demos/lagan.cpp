@@ -1,6 +1,5 @@
 #include <iostream>
-#include <seqan/seeds.h>
-#include <seqan/file.h>
+#include <seqan.h>
 
 using namespace seqan;
 
