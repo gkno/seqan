@@ -604,7 +604,9 @@ void maskDuplicates(TMatches &matches)
 
 	for (; it != itEnd; ++it) 
 	{
+#ifdef RAZERS_MATEPAIRS
 		if ((*it).pairId != 0) continue;
+#endif
 		if (gEnd == (*it).gEnd && orientation == (*it).orientation &&
 			gseqNo == (*it).gseqNo && readNo == (*it).rseqNo) 
 		{
@@ -648,7 +650,7 @@ void maskDuplicates(TMatches &matches)
 		gBegin = (*it).gBegin;
 		orientation = (*it).orientation;
 	}
-	
+
 	::std::sort(
 		begin(matches, Standard()),
 		end(matches, Standard()), 
@@ -715,7 +717,11 @@ void compactMatches(TMatches &matches, TCounts & /*cnts*/, RazerSOptions<TSpec> 
 	for (; it != itEnd; ++it) 
 	{
 		if ((*it).orientation == '-') continue;
-		if (readNo == (*it).rseqNo)
+		if (readNo == (*it).rseqNo
+#ifdef RAZERS_MATEPAIRS
+			&& (*it).pairId == 0
+#endif
+			)
 		{ 
 			if ((*it).editDist >= editDistCutOff) continue;
 			if (++hitCount >= hitCountCutOff)
@@ -779,7 +785,11 @@ void compactMatches(TMatches &matches, TCounts &cnts, RazerSOptions<TSpec> &, bo
 	for (; it != itEnd; ++it) 
 	{
 		if ((*it).orientation == '-') continue;
-		if (readNo == (*it).rseqNo)
+		if (readNo == (*it).rseqNo
+#ifdef RAZERS_MATEPAIRS
+			&& (*it).pairId == 0
+#endif
+			)
 		{
 			//second best match
 			if (second)

@@ -1017,6 +1017,8 @@ int mapMatePairReads(
 		++filecount;
 	}
 
+	compactPairMatches(matches, cnts, options);
+
 	if (options._debugLevel >= 1)
 		::std::cerr << ::std::endl << "Finding reads took               \t" << options.timeMapReads << " seconds" << ::std::endl;
 	if (options._debugLevel >= 2) {
