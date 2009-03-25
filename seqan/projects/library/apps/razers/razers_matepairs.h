@@ -595,7 +595,7 @@ void compactPairMatches(TMatches &matches, TCounts & /*cnts*/, RazerSOptions<TSp
 							::std::cerr << "(read #" << readNo << " disabled)";
 						options.readMask[(2*readNo) / options.WORD_SIZE] &= ~(3ul << ((2*readNo) % options.WORD_SIZE));
 					} else
-						if ((*it).editDist == 0)
+						if ((*it).pairScore == 0)
 						{
 							if (options._debugLevel >= 2)
 								::std::cerr << "(read #" << readNo << " disabled)";
@@ -752,6 +752,12 @@ void mapMatePairReads(
 				break;
 		}
 
+#ifdef RAZERS_MATEPAIRS_WEIGHTPAIRS
+		int	bestLeftErrors = SupremumValue<int>::VALUE;
+		int bestLibSizeError = SupremumValue<int>::VALUE;
+		TDequeueIterator bestLeft;
+#endif
+
 		if (lastSeen[rseqNo] + maxDistance + doubleParWidth >= rEndPos)
 		{
 			// both mates have potential matches within window
@@ -779,6 +785,27 @@ void mapMatePairReads(
 							(*it).rseqNo = ~NOT_VERIFIED;		// has been verified negatively
 					}
 
+#ifdef RAZERS_MATEPAIRS_WEIGHTPAIRS
+					if ((*it).rseqNo == rseqNo)
+						if (bestLeftErrors >= (*it).editDist)
+						{
+							int libSizeError = options.libraryLength - (int)((__int64)mR.gEnd - (__int64)(*it).gBegin);
+							if (bestLeftErrors == (*it).editDist)
+							{
+								if (bestLibSizeError > libSizeError)
+								{
+									bestLibSizeError = libSizeError;
+									bestLeft = it;
+								}
+							}
+							else
+							{
+								bestLeftErrors = (*it).editDist;
+								bestLibSizeError = libSizeError;
+								bestLeft = it;
+							}
+						}
+#else
 					// verify right mate, if left mate matches
 					if ((*it).rseqNo == rseqNo)
 						if (matchVerify(
@@ -851,6 +878,7 @@ void mapMatePairReads(
 							else
 								++options.FP;
 						}
+#endif
 				}
 
 				if (it == fifo.data_back)
@@ -860,6 +888,80 @@ void mapMatePairReads(
 					it = fifo.data_begin;
 
 			} while (true);
+
+#ifdef RAZERS_MATEPAIRS_WEIGHTPAIRS
+			// verify right mate, if left mate matches
+			if (bestLeftErrors != SupremumValue<int>::VALUE)
+				if (matchVerify(
+						mR, range(swiftFinderR, genomeInf),
+						rseqNo, readSetR, forwardPatternsR,
+						options, TSwiftSpec()))
+				{
+					// distance between left mate beginning and right mate end
+					__int64 dist = (__int64)mR.gEnd - (__int64)(*bestLeft).gBegin;
+					if (dist <= options.libraryLength + options.libraryError &&
+						options.libraryLength <= dist + options.libraryError)
+					{
+						mL = *bestLeft;
+
+						// transform mate readNo to global readNo
+						mL.rseqNo = 2*rseqNo;
+						mR.rseqNo = 2*rseqNo + 1;
+
+						// transform coordinates to the forward strand
+						if (orientation == 'R') 
+						{
+							TSize temp = mL.gBegin;
+							mL.gBegin = gLength - mL.gEnd;
+							mL.gEnd = gLength - temp;
+							temp = mR.gBegin;
+							mR.gBegin = gLength - mR.gEnd;
+							mR.gEnd = gLength - temp;
+							dist = -dist;
+						}
+
+						// set a unique pair id
+						mL.pairId = mR.pairId = options.nextMatePairId;
+						if (++options.nextMatePairId == 0)
+							options.nextMatePairId = 1;
+
+						// score the whole match pair
+						mL.pairScore = mR.pairScore = 0 - mL.editDist - mR.editDist;
+
+						// relative positions
+						mL.mateDelta = dist;
+						mR.mateDelta = -dist;
+
+						// both mates match with correct library size
+/*								std::cout << "found " << rseqNo << " on " << orientation << gseqNo;
+						std::cout << " dist:" << dist;
+						if (orientation=='F')
+							std::cout << " \t_" << mL.gBegin+1 << "_" << mR.gEnd;
+						else
+							std::cout << " \t_" << mR.gBegin+1 << "_" << mL.gEnd;
+//							std::cout << " L_" << (*bestLeft).gBegin << "_" << (*bestLeft).gEnd << "_" << (*bestLeft).editDist;
+//							std::cout << " R_" << mR.gBegin << "_" << mR.gEnd << "_" << mR.editDist;
+						std::cout << std::endl;
+*/
+						if (!options.spec.DONT_DUMP_RESULTS)
+						{
+							appendValue(matches, mL, Generous());
+							appendValue(matches, mR, Generous());
+							if (length(matches) > options.compactThresh)
+							{
+								typename Size<TMatches>::Type oldSize = length(matches);
+//									maskDuplicates(matches);	// overlapping parallelograms cause duplicates
+								compactPairMatches(matches, cnts, options);
+								options.compactThresh += (options.compactThresh >> 1);
+								if (options._debugLevel >= 2)
+									::std::cerr << '(' << oldSize - length(matches) << " matches removed)";
+							}
+						}
+						++options.TP;
+					}
+					else
+						++options.FP;
+#endif
 		}
 	}
 }
@@ -920,11 +1022,11 @@ int mapMatePairReads(
 	TIndex swiftIndexR(readSetR, shape);
 	reverse(indexShape(swiftIndexR));		// right mate qualities are reversed -> reverse right shape
 	
-/*	cargo(swiftIndexL).abundanceCut = options.abundanceCut;
+	cargo(swiftIndexL).abundanceCut = options.abundanceCut;
 	cargo(swiftIndexR).abundanceCut = options.abundanceCut;
 	cargo(swiftIndexL)._debugLevel = options._debugLevel;
 	cargo(swiftIndexR)._debugLevel = options._debugLevel;
-*/
+
 	// configure Swift
 	TSwiftPattern swiftPatternL(swiftIndexL);
 	TSwiftPattern swiftPatternR(swiftIndexR);
