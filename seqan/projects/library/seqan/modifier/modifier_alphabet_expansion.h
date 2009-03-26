@@ -203,8 +203,9 @@ struct _ConvertImpl_ModExpand
 {
 	//default implementation for large source types
 	template <typename THost, char CHAR, typename TSpec, typename T, typename TSource>
-	inline typename Convert<ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> >, TSource>::Type
-	static _convertImpl(Convert<ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> >, T> const,
+	inline 
+	static typename Convert<ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> >, TSource>::Type
+	_convertImpl(Convert<ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> >, T> const,
 		TSource const & source_)
 	{
 		typedef ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> > TTarget;
@@ -221,8 +222,9 @@ template <>
 struct _ConvertImpl_ModExpand<1>
 {
 	template <typename THost, char CHAR, typename TSpec, typename T, typename TSource>
-	inline typename Convert<ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> >, TSource>::Type
-	static _convertImpl(Convert<ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> >, T> const,
+	inline 
+	static typename Convert<ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> >, TSource>::Type
+	_convertImpl(Convert<ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> >, T> const,
 		TSource const & source_)
 	{
 		typedef ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> > TTarget;
