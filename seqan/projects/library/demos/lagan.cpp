@@ -4,10 +4,6 @@
 
 using namespace seqan;
 
-//input files
-char const * file_a = "lagan1.fasta";
-char const * file_b = "lagan2.fasta";
-
 //define some constants
 int const gaps_max = 200; //minimal sequence length for chaining
 int const q_max = 13;     //start value for q
@@ -97,22 +93,30 @@ void laganChaining(std::list<TSeed> & chain,
 	}
 }
 
-int main()
+int main(int argc, const char *argv[])
 {
-/*	if ((!::std::ifstream(file_a)) || (!::std::ifstream(file_b))) {
-		std::cout << "Error - file problem" << std::endl;
-		return 1;
+	if (argc < 3) {	
+		::std::cerr << "Usage: ./lagan lagan1.fasta lagan2.fasta" << std::endl; 
+		return -1; 
 	}
-*/
+
 	//load sequences
 	typedef String<Dna> TString;
-	TString a = String<Dna, FileReader<Fasta> >("dudu"); // Crashes if file does not exist
-	TString b = String<Dna, FileReader<Fasta> >(file_b);
-	if ((length(a) == 0) || (length(b) == 0))
-	{
-		std::cout << "Error - file problem" << std::endl;
-		return 1;
-	}
+	TString a;
+	TString b;
+	::std::fstream fstrm1;
+	fstrm1.open(argv[1], ::std::ios_base::in | ::std::ios_base::binary);
+	read(fstrm1, a, Fasta());
+	fstrm1.close();
+	::std::fstream fstrm2;
+	fstrm2.open(argv[2], ::std::ios_base::in | ::std::ios_base::binary);
+	read(fstrm2, b, Fasta());
+	fstrm2.close();
+
+	////Doesn't work on Mac
+	//TString a = String<Dna, FileReader<Fasta> >(file_a); // Crashes if file does not exist
+	//TString b = String<Dna, FileReader<Fasta> >(file_b);
+
 
 	//do LAGAN
 	typedef Seed<int, SimpleSeed> TSeed;

@@ -274,7 +274,7 @@ int main(int argc, const char *argv[])
 #ifdef TEST_MISCELLANEOUS
 	runBlastReport();
 	runSeeds();
-	runLagan();
+	runLagan(argc, argv);
 #endif
 
 	return 0;
