@@ -21,6 +21,5 @@ graph: $(basename $(wildcard graph_*.cpp))
 modifier: $(basename $(wildcard modifier_*.cpp))
 file: $(basename $(wildcard file_*.cpp))
 find: $(basename $(wildcard find_*.cpp))
-lagan: $(basename lagan.cpp)
 clean:
 	rm -f $(basename $(wildcard *.cpp))
