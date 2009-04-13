@@ -46,10 +46,6 @@ URL_msufsort       := http://www.michael-maniscalco.com/downloads/MSufSort.$(VER
 URL_deepshallow    := http://www.mfn.unipmn.it/~manzini/lightweight/ds.tgz
 URL_qsufsort       := http://www.larsson.dogma.net/suftest.c
 
-# The following line is for the SVN repository
-# You can remove it, if you use the release/snapshot
-CXXFLAGS += -I$(SEQAN)/../../platforms/gcc
-
 #
 # Lists of files to generate.
 #

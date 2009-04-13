@@ -1,9 +1,5 @@
 SEQAN = ..
 
-# The following line is for the SVN repository
-# You can remove it, if you use the release/snapshot
-CPPFLAGS += -I$(SEQAN)/../../platforms/gcc
-
 # Link against runtime library on Linux systems
 OS_NAME=$(shell uname)
 ifeq ($(OS_NAME),Linux)

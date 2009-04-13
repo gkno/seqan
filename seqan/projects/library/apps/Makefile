@@ -1,9 +1,5 @@
 SEQAN_BASE = ..
 
-# The following line is for the SVN repository
-# You can remove it, if you use the release/snapshot
-CXXFLAGS += -I$(SEQAN_BASE)/../../platforms/gcc
-
 # Link against runtime library on Linux systems
 OS_NAME=$(shell uname)
 ifeq ($(OS_NAME),Linux)

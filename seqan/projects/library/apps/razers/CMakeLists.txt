@@ -3,13 +3,12 @@ project (razers)
 
 # Set path variables
 set (SEQAN_BASE ../..)
-set (SEQAN_BASE_PLATFORM ${SEQAN_BASE}/../../platforms/gcc)
 set (TBB_BASE ${SEQAN_BASE}/extra/tbb)
 
 set (CMAKE_BUILD_TYPE Debug)
 
 # Make sure the compiler can find include files from the SeqAn and TBB library. 
-include_directories (${SEQAN_BASE} ${SEQAN_BASE_PLATFORM} ${TBB_BASE}/include)
+include_directories (${SEQAN_BASE} ${TBB_BASE}/include)
 
 # Make sure the compiler can find object files from the TBB library. 
 link_directories (${TBB_BASE}/projects/library/lib)
