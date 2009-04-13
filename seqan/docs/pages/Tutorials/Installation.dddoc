@@ -17,21 +17,11 @@ weese@tanne:~$ mkdir seqan
 weese@tanne:~/seqan$ cd seqan
 weese@tanne:~/seqan$ unzip path_to_SeqAn_XY.zip
 
-..text:
-After that, you have to copy the platform-specific header (for Unix-like systems with an installed GCC compiler)
-$platform_linux_gcc.h$ to $platform.h$ with the following:
-..output:
-weese@tanne:~/seqan$ cp platform_linux_gcc.h seqan/platform.h
-
-
 ..subsection:#.# Windows
 ..text:
 SeqAn was successfully tested under Windows using MS Visual Studio 2003 or 2005 as well as 
 MinGW (Minimalist GNU for Windows) compiler.
 To install SeqAn, you have to download a current snapshot from @http://www.seqan.de@ and extract the files.
-..text:
-If you are working with Visual Studio, copy and rename the file $platform_windows_vs.h$ to $platform.h$ in the subfolder $seqan$.
-For MinGW copy and rename the file $platform_windows_mingw.h$ to $platform.h$.
 
 ..section:# Using Demos
 ..text:SeqAn comes with many small example programs that demonstrate the application of the library.
