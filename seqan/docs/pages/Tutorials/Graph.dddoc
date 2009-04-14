@@ -14,14 +14,16 @@ graph data structures, SeqAn provides the most well-known graph algorithms, e.g.
 path algorithm. The fundamental graph algorithms are supplemented with some specialized alignment algorithms.
 All graphs can be exported in dot format for visualization.
 
-...section:# Directed Graph
+...section:# Graphs
+...subsection:#.# Directed graph
 
 ...image:directedGraph|A directed graph.
 
 ...text:
-A @Spec.Directed graph@ expects 2 optional arguments, a cargo and a specification. 
-Cargos are attached to edges in the graph. A typical example are distances for flight networks represented as a graph.
-The basic principle is simple: If you add an edge you have to provide a cargo, 
+A @Spec.Directed graph@ has an optional cargo template argument. 
+A cargo is some kind of object attached to the edges of the graph. 
+A typical example are distances in flight network graphs.
+Cargos and edges are handled as one unit: If you add an edge you have to provide a cargo, 
 if you remove an edge you also remove the cargo. If you do not want to use cargos, you
 can leave out the $TCargo$ parameter or you can use $void$, which is the default. 
 All edges are directed that is, they have a distinct source
@@ -32,41 +34,41 @@ $TCargo$ is any kind of data type, e.g. a double.
 
 
 
-
-...section:# Undirected Graph
+...subsection:#.# Undirected graph
 
 ...image:undirectedGraph|An undirected graph with multiple components.
 
 ...text:
-An @Spec.Undirected graph@ has, of course, undirected edges but in all other respects, 
+An @Spec.Undirected graph@ has, of course, undirected edges. In all other respects, 
 it can be used in the same way as a directed graph.
 ...code:Graph<Undirected<void> > undirectedGraph;
 ...text:
 In this example, the edges have no cargo.
 
 
-
-...section:# Other graphs
+...subsection:#.# Other graphs
 
 ...image:otherGraphs|Alignment graph, tree, and trie.
 
 ...text:
-SeqAn is not a new library for graph data structures and algorithms. It focusses on sequence analysis. 
-Hence we introduced graphs as helper classes for string matching or alignment algorithms. 
-Besides directed and undirected graphs, those algorithms make use of special graphs 
-like a @Spec.Tree@, an @Spec.Automaton@, a @Spec.Trie@ or an @Spec.Alignment Graph@.
-These graphs are therefore predefined in SeqAn.
+SeqAn is a library for sequence analysis and hence, it makes use of graphs as helper classes 
+for string matching, alignment algorithms or phylogenetic trees. Because of that, SeqAn provides
+,besides directed and undirected graphs, specialized graphs like a @Spec.Tree@, an @Spec.Automaton@, 
+a @Spec.Trie@ or an @Spec.Alignment Graph@.
 
 ...section:# Graph functions
 
 ...text:
-All graphs support a couple of common functions, including @Function.numEdges@, @Function.numVertices@, 
+All graphs support a set of common functions, including @Function.numEdges@, @Function.numVertices@, 
 @Function.addVertex@, @Function.removeVertex@, @Function.addEdge@ etc. The functions are listed and explained in the @Class.Graph@
-section but the function names should be self-explanatory. Besides this core set of function, some graphs
-have special methods, e.g., trees support @Function.childVertex@, @Function.addChild@, and the like. See the documentation
-of these graphs for details. The following code snippet illustrates the use of these functions to create the directed
-graph in the first figure.
+section. Besides this core set of functions, some graphs
+have specialized methods, e.g., trees support @Function.childVertex@, @Function.addChild@ and the like. See the documentation
+of these graphs for details. The following code snippet illustrates the use of some of these functions to create a directed
+graph.
 ...code:
+typedef Graph<Directed<> > TGraph;
+typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
+typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 Graph<Directed<> > g;
 TVertexDescriptor v0 = addVertex(g);
 TVertexDescriptor v1 = addVertex(g);
@@ -75,10 +77,14 @@ TVertexDescriptor v2 = addVertex(g);
 TVertexDescriptor v3 = addVertex(g);
 TVertexDescriptor v4 = addVertex(g);
 addEdge(g,v3,v4);
+addEdge(g,v3,v2);
+addEdge(g,v2,v2);
 addEdge(g,v3,v0);
 addEdge(g,v3,v1);
 addEdge(g,v4,v3);
+::std::cout << g << ::std::endl;
 removeVertex(g, v2);
+::std::cout << g << ::std::endl;
 ...text:
 As you can see in this example, all vertices are represented by vertex descriptors and all edges are represented
 by edge descriptors. Both types can be accessed by the corresponding metafunction, namely @Metafunction.VertexDescriptor@
