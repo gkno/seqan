@@ -8,48 +8,47 @@
 
 ..image:sequences
 
-..text:Sequences are the core of SeqAn.
-This tutorial gives an overview of the variety of sequences types in SeqAn and basic manipulation algorithm.
+..text:Sequences are at the core of SeqAn.
+This tutorial gives an overview of the sequence types available in SeqAn. 
+Algorithms to process and manipulate sequences are briefly presented.
 
 
 ..section:# Sequence Classes
 ..subsection:#.# Strings
-..text:@Class.String.Strings@ are @Concept.Container.containers@ that store sequences of values, for example of $char$, @Spec.Dna.nucleotides@, or @Spec.AminoAcid.amino acids@. 
-The user of SeqAn can choose between several kinds of strings (see below for the different string implementations SeqAn offers)
- and different values (i.e. alphabets). There is no restriction for the use of any combination of values and kinds of strings.
+..text:@Class.String.Strings@ are @Concept.Container.containers@ that store a sequence of values, for example 
+a sequence of $char$, @Spec.Dna.nucleotides@, or @Spec.AminoAcid.amino acids@. 
+The user of SeqAn can choose between several kinds of strings that are presented and discussed below.
+All strings support different value types (i.e. alphabets). It is important to note that the string type
+does not restrict the use of any value type.
 
-Typically, the value type is qualified as the first template argument, i.e. in angled brackets:
+Typically, the value type is specified as the first template argument.
 ..code:String<AminoAcid> myProteine;
 
-..text:SeqAn predefines @Shortcut|shortcuts@ for some usual value types, so we can also write:
-..code:Peptide myProteine;
-
 ..text:SeqAn offers many functions and operators for initializing, converting, manipulating, and printing strings.
-For example:
 ..code:
 String<char> str = "this is ";
 str += "a test.";
-cout << str;                    //output: "this is a test."
-cout << length(str);            //output: 15
+::std::cout << str;
+::std::cout << length(str);
 ..text:
-For more examples see @Demo.String Basics.this demo program@.
+More examples can be found in the @Demo.String Basics.String demo@.
 
 ..text:The user can specify the kind of string that should be used in an optional second template argument of @Class.String@.
-There are the following kinds of string:
+There are the following specializations of @Class.String@ available.
 
 ..tableheader:Specialization|Description|Applications|Limitations
 ..table:@Spec.Alloc String@
-|Expandable string that is stored on heap.
+|Expandable string that is stored on the heap.
 |The default string implementation that can be used for general purposes.
 |Changing the @Function.capacity@ can be very costly since all values must be copied.
 ..table:@Spec.Array String@
 |Fast but non-expandable string.
-|Fast storing of small sequences.
+|Fast storing of fixed-size sequences.
 |@Function.capacity|Capacity@ must already be known at runtime. Not suitable for storing large sequences.
 ..table:@Spec.Block String@
-|String that stores its content in blocks
+|String that stores its sequence characters in blocks
 |The @Function.capacity@ of the string can quickly be increased.
-Good choice for growing strings and for stacks.
+Good choice for growing strings or stacks.
 |Iteration and random access to values is slightly slower than for @Spec.Alloc String|Alloc Strings@.
 ..table:@Spec.Packed String@
 |A string that stores as many values in one machine word as possible.
@@ -58,45 +57,47 @@ Good choice for growing strings and for stacks.
 ..table:@Spec.External String@
 |String that is stored in secondary memory.
 |Suitable for storing very large strings (>2GB).
-Parts of the string are automatically loaded from secondary memory when needed.
+Parts of the string are automatically loaded from secondary memory on demand.
 |Slower than other string classes.
 ..table:@Spec.CStyle String@
 |Allows adaption of strings to C-style strings.
 |Used for transforming other String classes into C-style strings (i.e. null terminated $char$ arrays).
-Could be usefull for calling functions of C-libraries.
+Could be useful for calling functions of C-libraries.
 |Only reasonable if value type is $char$ or $wchar_t$.
 
-..text:For example:
+..text:Examples.
 ..code:
-String<char, Array<100> > myArrayString;    //string with maximum length 100
-String<Dna, Packed<> > myPackedString;      //string that takes only 2 bits per nucleotide
+//String with maximum length 100.
+String<char, Array<100> > myArrayString;
+//String that takes only 2 bits per nucleotide.
+String<Dna, Packed<> > myPackedString;
 
 
 ..subsection:#.# Sequence Adaptions
 ..text:SeqAn offers an interface for accessing @Adaption.std::basic_string|standard library strings@ and @Adaption.char array|c-style $char$ arrays@. Hence those built-in types can be handled in the same way as @Class.String|SeqAn strings@.
-For example:
 ..code:
-std::basic_string str1 = "a standard library string";
-cout << length(str1);           //output: 25
+::std::string str1 = "a standard library string";
+::std::cout << length(str1);
 
 char str2[] = "this is a char array";
-cout << length(str2);           //output: 20
+::std::cout << length(str2);
 
 
 ..subsection:#.# Segments
-..text: Segments are sequences that represent parts of other sequences.
+..text: Segments are continuous subsequences that represent parts of other sequences.
 There are three kinds of segments in SeqAn: @Function.infix.infixes@, @Function.prefix.prefixes@, and @Function.suffix.suffixes@.
-The metafunctions @Metafunction.Infix@, @Metafunction.Prefix@, and @Metafunction.Suffix@, respectively, return for a given sequence  an appropriate data type for storing the segment. For example:
+The metafunctions @Metafunction.Infix@, @Metafunction.Prefix@, and @Metafunction.Suffix@, respectively, return for a given sequence type the appropriate segment data type.
 ..code:
-Peptide prot = "AAADDDEEE";
-Suffix<Peptide>::Type suf = suffix(prot, 3);
-cout << suf;                                    //output: "DDDEEE"
+String<AminoAcid> prot = "AAADDDEEE";
+Suffix<String<AminoAcid> >::Type suf = suffix(prot, 3);
+::std::cout << suf;
 
-..text: The segment does not create a copy of the sequence. Changing the segment also changes its host sequence, for example:
+..text: The segment is NOT a copy of the sequence segment. That is, changing the segment implies changing the host sequence.
 ..code:
-CharString str = "start_middle_end";
-infix(str, 6, 12) = "overwrite";                //overwrites "middle"
-cout << str;                                    //output: "start_overwrite_end";
+String<char> str = "start_middle_end";
+//We overwrite "middle"
+infix(str, 6, 12) = "overwrite";
+::std::cout << str;
 
 ..text: If this effect is undesirable, one has to explicitely make a copy of the string.
 
