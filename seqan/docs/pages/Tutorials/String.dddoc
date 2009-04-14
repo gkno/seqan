@@ -103,41 +103,42 @@ infix(str, 6, 12) = "overwrite";
 
 ..section:# Working with Sequences
 ..subsection:#.# Iterators
-..text:@Concept.Iterator|Iterators@ are objects that are used to scan through @Concept.Container|containers@ like @Class.String|strings@ or @Class.Segment|segments@.
-For a given container class the metafunction @Metafunction.Iterator@ returns an appropriate iterator.
-An iterator always points to one value in the container.
-The function @Function.value@ (which does the same as the operator $*$) can be used to access this value.
-Functions like @Function.goNext@ or @Function.goPrevious@ (which do the same as $++$ and $--$, respectively)
+..text:@Concept.Iterator|Iterators@ are objects that can be used to iterate over @Concept.Container|containers@ such as @Class.String|strings@ or @Class.Segment|segments@.
+For a given container class, the metafunction @Metafunction.Iterator@ returns the appropriate iterator type.
+An iterator always points to one value of the container.
+The function @Function.value@, which is equivalent to the operator $*$, can be used to access this value.
+Functions like @Function.goNext@ or @Function.goPrevious@, which are equivalent to $++$ and $--$ respectively,
 can be used to move the iterator to other values within the container.
-..text:The functions @Function.begin@ and @Function.end@ applied to a container return iterators to the begin and the end of the container.
-Note that, similar to C++ standard library iterators, the iterator returned by @Function.end@ does not points to the last value of the container but to the value that would come next.
-So if $s$ is empty, then $end(s) == begin(s)$.
+..text:The functions @Function.begin@ and @Function.end@ applied to a container return iterators to the begin and to the end of the container.
+Note that similar to C++ standard library iterators, the iterator returned by @Function.end@ does not point to the last value of the container but to the value behind the last one.
+If $s$ is empty then $end(s) == begin(s)$.
 ..text:
-The following code that prints out a sequence demonstrates a typical iteration through a string:
+The following code prints out a sequence and demonstrates how to iterate over a string.
 ..code:
 String<char> str = "acgt";
 typedef Iterator<String<char> >::Type TIterator;
 for (TIterator it = begin(str); it != end(str); ++it)
 {
-    cout << value(it);
+    ::std::cout << value(it);
 }
 ..text:
-See @Demo.Iterator Basics|this demo program@ for more examples.
+More examples can be found in the @Demo.Iterator Basics.Iterator demo@.
 
 
 ..subsection:#.# Comparisons
 ..text:
-Two sequences can be lexicographically compared using usual operators like $<$ or $>=$, for example:
+Two sequences can be lexicographically compared using standard operators such as $<$ or $>=$.
 ..code:
 String<char> a      = "beta";
 String<char> b      = "alpha";
 
-bool a_not_equals_b = (a != b);     //true
-bool a_less_b       = (a < b);      //false
+::std::cout << (a != b);
+::std::cout << (a < b);
+::std::cout << (a > b);
 
 ..text:
 Each comparison involves a scan of the two sequences for searching the first mismatch between the strings. This could be costly if the two sequences share a long common prefix.
-Suppose we want to branch in a program depending on whether $a < b$, $a == b$, or $a > b$, for example:
+Suppose we want to branch in a program depending on whether $a < b$, $a == b$, or $a > b$.
 ..code:
 if (a < b)      { /* code for case "a < b"  */ }
 else if (a > b) { /* code for case "a > b"  */ }
@@ -147,7 +148,8 @@ In this case, although only one scan would be enough to decide what case is to b
 SeqAn offers @Class.Lexical.lexicals@ to avoid unnecessary sequence scans.
 Lexicals can store the result of a comparison, for example:
 ..code:
-Lexical<> comp(a, b);   //compare a and b and store the result in comp
+//Compare a and b and store the result in comp
+Lexical<> comp(a, b);   
 
 if (isLess(comp))           { /* code for case "a < b"  */ }
 else if (isGreater(comp))   { /* code for case "a > b"  */ }
@@ -158,56 +160,58 @@ else                        { /* code for case "a == b" */ }
 Each sequence object has a @Function.capacity@, i.e. the maximum @Function.length@ of a sequence that can be stored in this object.
 While some sequence types like @Spec.Array String@ or @Adaption.char array@ have a fixed capacity,
 the capacity of other sequence classes like @Spec.Alloc String@ or @Adaption.std::basic_string@ can be changed at runtime.
-Capacity can either be set explicitly by functions like @Function.reserve@ or @Function.resize@, or implicitly changed
-if a function like @Function.append@ or @Function.replace@ has a result that would be too long for the target string.
+The capacity can either be set explicitly by functions such as @Function.reserve@ or @Function.resize@ or implicitly by
+functions like @Function.append@ or @Function.replace@, if the operation's result exceeds the length of the target string.
 There are several @Tag.Overflow Strategy.overflow strategies@ that determine what actually happens when a string should be expanded beyond its capacity.
 If no @Tag.Overflow Strategy.overflow strategy@ is specified for a function call, a default overflow strategy is selected depending on the type of the sequence.
-..text:Example:
 ..code:
 String<char> str;
-resize(str, 5, Exact());                    //sets capacity of str to 5
-assign(str, "abcdefghijklmn", Limit());     //only "abcde" is assigned to str, since str is limited to 5
-append(str, "ABCDEFG");                     //Use default expansion strategy: now str == "abcdeABCDEFG"
+//Sets the capacity of str to 5.
+resize(str, 5, Exact());
+//Only "abcde" is assigned to str, since str is limited to 5.
+assign(str, "abcdefghijklmn", Limit());
+::std::cout << str << ::std::endl;
+//Use the default expansion strategy.
+append(str, "ABCDEFG");
+::std::cout << str;
 
 ..subsection:#.# Conversion
 ..text:
-A sequence of type $A$ values can be converted into a sequence of type $B$ value, if $A$ can be converted into $B$.
-SeqAn offers three different ways for conversion:
+A sequence of type $A$ values can be converted into a sequence of type $B$ values, if $A$ can be converted into $B$.
+SeqAn offers three different conversion alternatives.
 ..text:
-1. Copy conversion. The source sequence is copied into the target sequence. This can be done by assignment (operator $=$) or using the function @Function.assign@, for example:
+1. Copy conversion. The source sequence is copied into the target sequence. This can be done by assignment (operator $=$) or using the function @Function.assign@.
 ..code:
 String<Dna> source = "acgtgcat";
 String<char> target;
-assign(target, source);     //copy conversion is done here
+assign(target, source);
+::std::cout << target;
 
 ..text:
 2. Move conversion. If the source sequence is not needed any more after the conversion, it is always advisable to use @Function.move@ instead of @Function.assign@.
-@Function.move@ need not to make a copy but can re-use the source sequence storage.
-In some cases, @Function.move@ can also perform an in-place conversion, for example: 
+@Function.move@ does not make a copy but can re-use the source sequence storage.
+In some cases, @Function.move@ can also perform an in-place conversion.
 ..code:
-String<Dna> source = "acgtgcat";
-String<char> target;
-move(target, source);       //the in-place move conversion is done here
+String<char> source = "acgtgcat";
+String<Dna> target;
+//The in-place move conversion.
+move(target, source);
+::std::cout << target;
 
 ..text:
 3. Modifier conversion. Instead of creating an actual target sequence, use a @Page.Modifiers|modifier (see the tutorial)@ to 'emulate' a sequence with a different value type, 
 i.e. the modifier $target$ in the following example behaves exactly like a $char$ sequence:
 ..code:
-String<Dna> source = "acgtgcat";
-typedef Modifier<String<Dna>, ModView<FunctorConvert<Dna, char> > > TDnaToCharModifier;
-TDnaToCharModifier target(source);      //this is a sequence of char that contains "acgtgcat"
-Value<TDnaToCharModifier>::Type c;      //defines a variable of type char
+String<char> source = "acgtXgcat";
+typedef ModifiedString<String<char>, ModView<FunctorConvert<char, Dna5> > > TCharToDna5Modifier;
+//Create a sequence of dna5 characters that contains "acgtngcat".
+TCharToDna5Modifier target(source);
+::std::cout << target;
+//Define a variable of type Dna5.
+Value<TCharToDna5Modifier>::Type c;
 
-..subsection:#.# Input/Output
-..text:SeqAn offers several Ways for loading and saving sequences in many formats.
-For more information, see @Page.Files|here@.
-
-
-..section:# Gapped Sequences
-..text:
-SeqAn contains a special class @Class.Gaps@ for storing sequences that contain gaps, e.g. lines in sequence alignments. See @Page.Alignments|here@ for more information. 
-
-..XXXXtext:For simplification, SeqAn predefines several string for usual value types:
-..XXXtable:@Shortcut.CharString@|A string for storing text. The value type is $char$. If unicode characters are needed, @Shortcut.UnicodeString@ could be used.
-..XXXtable:@Shortcut.DnaString@|A string for storing DNA. The value type is @Spec.Dna@, that can store the four values 'A', 'C', 'G', and 'T'. If a fifth value 'N' (for 'not known') should also be allowed, you can use @Shortcut.Dna5String@.
-..XXXtable:@Shortcut.Peptide@|A string for storing proteine sequences. The value type is @Spec.AminoAcid@.
+..subsection:#.# Others
+..text:SeqAn offers several ways for loading and saving sequences in different formats.
+For more information, see @Page.Files|here@. SeqAn also contains a special class 
+@Class.Gaps@ for storing sequences that contain gaps, e.g. lines in sequence alignments. 
+See @Page.Alignments|here@ for more information. 
