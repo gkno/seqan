@@ -95,12 +95,13 @@ on graphs.
 ...section:# Graph iterators
 
 ...text:
-@Concept.Iterator.Iterators@ are used to traverse a graph. The @Function.value@ of vertex and edge iterators always
-returns a vertex or edge descriptor, respectively. These descriptors are a kind of handle to deal with vertices and edges, e.g. an
-edge descriptor can be used to access the @Function.cargo@ of an edge. @Spec.Vertex Iterator@, @Spec.Adjacency Iterator@, 
-@Spec.Bfs Iterator@ and @Spec.Dfs Preorder Iterator@ are the basic vertex iterators. Exemplary, the following
-code snippet shows how the adjacency iterator is initialized on vertex 3 and then traverses all
-the adjacent neighbors.
+@Concept.Iterator.Iterators@ are used to traverse a graph. The @Function.value@ type of vertex and edge iterators 
+are always vertex or edge descriptors, respectively. These descriptors are a kind of handle to deal with vertices and edges, 
+e.g. an edge descriptor can be used to access the @Function.cargo@ of an edge. 
+@Spec.Vertex Iterator@, @Spec.Adjacency Iterator@, 
+@Spec.Bfs Iterator@ and @Spec.Dfs Preorder Iterator@ are the basic vertex iterators. The following
+code snippet shows how to use the adjacency iterator on vertex 3 to traverse all
+adjacent neighbors of that vertex.
 ...code:
 typedef typename Iterator<TGraph, AdjacencyIterator>::Type TAdjacencyIterator;
 TAdjacencyIterator it(g,3);
