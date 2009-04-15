@@ -39,8 +39,8 @@ We create the modifier and link it with $myString$ with:
 ..text:
 The result is:
 ..code:
-cout << myString << endl;
-cout << myModifier << endl;
+::std::cout << myString << ::std::endl;
+::std::cout << myModifier << ::std::endl;
 ..output:
 A man, a plan, a canal-Panama
 amanaP-lanac a ,nalp a ,nam A
@@ -50,8 +50,8 @@ To verify that we didn't copy $myString$, we replace an infix of the original st
 ..code:
 infix(myString, 9, 9) = "master ";
 
-cout << myString << endl;
-cout << myModifier << endl;
+::std::cout << myString << ::std::endl;
+::std::cout << myModifier << ::std::endl;
 ..output:
 A man, a master plan, a canal-Panama
 amanaP-lanac a ,nalp retsam a ,nam A
@@ -66,13 +66,13 @@ $myString$ to be in upper case without copying $myString$. In SeqAn you first cr
 which converts a character to its upper-case character:
 
 ..code:
-struct MyFunctor : public unary_function<char,char> 
+struct MyFunctor : public ::std::unary_function<char,char> 
 {
-	inline char operator()(char x) const 
-	{
-		if (('a' <= x) && (x <= 'z')) return (x + ('A' - 'a'));
-		return x; 
-	}
+    inline char operator()(char x) const 
+    {
+        if (('a' <= x) && (x <= 'z')) return (x + ('A' - 'a'));
+        return x; 
+    }
 };
 ..text:
 and then create a @Class.ModifiedString@ specialized with $ModView<MyFunctor>$:
@@ -81,15 +81,15 @@ and then create a @Class.ModifiedString@ specialized with $ModView<MyFunctor>$:
 ..text:
 The result is:
 ..code:
-cout << myString << endl;
-cout << myModifier << endl;
+::std::cout << myString << ::std::endl;
+::std::cout << myModifier << ::std::endl;
 ..output:
 A man, a plan, a canal-Panama
 A MAN, A PLAN, A CANAL-PANAMA
 
 ..text:
 The upper-case functor and some other predefined functors are part of SeqAn (in seqan/modifier/modifier_functors.h) already.
-The following functors can be used as argument for @Spec.ModView@:
+The following functors can be used as an argument of @Spec.ModView@:
 ..tableheader:Functor|Description
 ..table:$FunctorUpcase<TValue>$|Converts each character of type $TValue$ to its upper-case character
 ..table:$FunctorLowcase<TValue>$|Converts each character to type $TValue$ to its lower-case character
@@ -98,7 +98,7 @@ The following functors can be used as argument for @Spec.ModView@:
 ..table:$FunctorConvert<TInValue,TOutValue>$|Converts the type of each character from $TInValue$ to $TOutValue$
 
 ..text:
-So instead of defining our own functor we could have used a predefined one:
+So instead of defining your own functor we could have used a predefined one:
 ..code:ModifiedString< String<char>, ModView<FunctorUpcase<char> > > myModifier(myString);
 
 ..text:
@@ -150,13 +150,13 @@ This modifier now should be reversed from left to right:
 ..text:
 The result is:
 ..code:
-cout << myString << endl;
-cout << myReverseComplement << endl;
+::std::cout << myString << ::std::endl;
+::std::cout << myReverseComplement << ::std::endl;
 
 infix(myString, 1, 1) = "cgt";
 
-cout << myString << endl;
-cout << myReverseComplement << endl;
+::std::cout << myString << ::std::endl;
+::std::cout << myReverseComplement << ::std::endl;
 
 ..output:
 ATTACGG
@@ -168,8 +168,8 @@ CCGTAAACGT
 Using a predefined shortcut, the whole example could be reduced to:
 ..code:
 String<Dna> myString = "attacgg";
-cout << myString << endl;
-cout << DnaStringReverseComplement(myString) << endl;
+::std::cout << myString << ::std::endl;
+::std::cout << DnaStringReverseComplement(myString) << ::std::endl;
 
 ..text:
 @Demo.Nested Modifiers|Click here@ to see the complete source code of the nested modifiers example.
