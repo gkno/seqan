@@ -11,14 +11,14 @@ Given an alignment between two sequences and a scoring scheme,
     the score of the alignment can be computed as the sum of the scores for aligned character pairs
     plus the sum of the scores for all gaps.
 ..text:
-An example for a scoring scheme is the levenshtein distance, for which each mismatch between two aligned characters costs and
+An example for a scoring scheme is the levenshtein distance, for which each mismatch between two aligned characters costs 1 and
 each character that is aligned with a gap costs 1. 
 Translated into scores instead of costs, misalignments get a score of -1 and gaps a score of -1 per character.
 This scoring scheme is the default for @Spec.Simple Score@.
 
 ..section:# Character Pair Scores
 ..text:SeqAn offers two kinds of scoring scheme:
-..table:@Spec.Simple Score@|This scoring scheme differentiate only between "match" (the two aligned characters are the same) and "mismatch" (the two aligned characters are different).
+..table:@Spec.Simple Score@|This scoring scheme differentiates only between "match" (the two aligned characters are the same) and "mismatch" (the two aligned characters are different).
 The functions @Function.scoreMatch@ and @Function.scoreMismatch@ access these two values.
 ..table:Scoring matrices|These scoring schemes store a score value for each pair of characters. 
 This value can be accessed using @Function.score@.
