@@ -12,7 +12,7 @@
 SeqAn uses a special kind of hierarchical structure that we call 'template argument subclassing', which
 means that different specializations of a given class template are specified by template arguments. For
 example, the array string @Spec.Array String|String<char, Array<100> >@ is a subclass of @Class.String|String<char>@ 
-    in the sense that all @glos:functions@ and @glos:metafunctions@ which are
+in the sense that all functions and @glos:metafunctions@ which are
 applicable to $String<char>$ can also be applied to $String<char, Array<100> >$, while it is possible to overload some
 functions especially for $String<char, Array<100> >$. The rules of C++ overload resolution guarantee that the
 compiler always applies the most specific variant out of all existing implementations when an algorithm or

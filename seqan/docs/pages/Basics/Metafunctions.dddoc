@@ -15,7 +15,7 @@ on strings may need to know which type of characters are stored in the string, o
 be used to browse it. SeqAn uses @Metafunction|Metafunctions@ (also known as "traits") for that purpose. 
 
 ..text:For example: Assuming that we define a @Class.String|string@ of @Spec.AminoAcid|amino acids@:
-..code:String<AminoAcid> str;
+..code:String<AminoAcid> str = "ARN";
 ..text:Now lets define a function that exchanges the first two values in a string:
 ..code:
 void exchangeFirstValues(String<AminoAcid> & str)
@@ -74,7 +74,7 @@ String<char> str = "I am a string";
 Iterator<String<char> >::Type it = begin(str);
 while (! atEnd(it, str)) 
 {
-    cout << *it;
+    ::std::cout << *it;
     ++it;
 }
 
@@ -86,14 +86,15 @@ while (! atEnd(it, str))
 ..table:$T1$, $T2$, ..., $TN$|Arguments (types or constants)
 ..table:$VALUE$|The resulting constant value
 
-..text:Example:The following function prints the length of a fixed sized using the value metafunction @Metafunction.LENGTH@:
+..text:Example:The following function prints the length of a fixed sized string using the value metafunction @Metafunction.LENGTH@:
 ..code:
 template <typename T>
 void printLenOfFixedSizeString(T const &)
 {
-    cout << LENGTH<T>::VALUE;
+    ::std::cout << LENGTH<T>::VALUE;
 }
 
 String<char, Array<100> > my_str;
-printLenOfFixedSizeString(my_str);      //output: 100
+printLenOfFixedSizeString(my_str);
+..output:100
 
