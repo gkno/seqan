@@ -69,7 +69,7 @@ graph.
 typedef Graph<Directed<> > TGraph;
 typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
 typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
-Graph<Directed<> > g;
+TGraph g;
 TVertexDescriptor v0 = addVertex(g);
 TVertexDescriptor v1 = addVertex(g);
 TEdgeDescriptor e1 =addEdge(g,v0,v1);
@@ -103,31 +103,32 @@ e.g. an edge descriptor can be used to access the @Function.cargo@ of an edge.
 code snippet shows how to use the adjacency iterator on vertex 3 to traverse all
 adjacent neighbors of that vertex.
 ...code:
-typedef typename Iterator<TGraph, AdjacencyIterator>::Type TAdjacencyIterator;
+typedef Iterator<TGraph, AdjacencyIterator>::Type TAdjacencyIterator;
 TAdjacencyIterator it(g,3);
 for(;!atEnd(it);goNext(it)) {
 	std::cout << *it << std::endl;
 }
 ...text:
-In this example, you can see how the metafunction @Metafunction.Iterator@ is used to get the correct iterator
-type for $TGraph$. We simply output all adjacent vertices. In respect to edge iterators, SeqAn provides a simple @Spec.Edge Iterator@
-and an @Spec.Out-Edge Iterator@. The use of the latter is showed in the next figure.
+Notice how the metafunction @Metafunction.Iterator@ is used to get the correct iterator
+type for $TGraph$. We simply output all adjacent vertices. Besides vertex iterators, 
+SeqAn provides a simple @Spec.Edge Iterator@
+and an @Spec.Out-Edge Iterator@.
 ...code:
-typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
+typedef Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
 TOutEdgeIterator it(g, v0);
 for(;!atEnd(it);goNext(it)) {
 	std::cout << cargo(*it) << std::endl;
 }
 ...text:
-In this example, we traverse all out-edges of vertex 0 and print their cargo.
+In this example, we traverse all out-edges of vertex 0 and print their cargos.
 
 
 ...section:# Graph property maps
 
 ...text:
 Property maps are a fundamental abstraction mechanism to attach auxiliary information to the vertices and
-edges of a graph. A typical example are the city names and flight distances of a graph representing
-a flight network. In most scenarios, users should use an external property map to attach this information
+edges of a graph. A typical example are the city names and flight distances of a flight network graph.
+In most scenarios, users should use an external property map to attach this information
 to the graph but other mechanisms do exist (e.g., the possibility to use a @Metafunction.Cargo@).
 Be aware that the word external is a hint that the information is stored independent of the graph 
 and functions like @Function.removeVertex@ do not affect the property map. Property maps are indexed
@@ -136,7 +137,10 @@ vertex iterator to traverse the graph and access the properties on the fly. Most
 make heavily use of this concept and therefore it is illustrated below. 
 First, let us create a simple graph.
 ...code:
-Graph<Directed<> > g;
+typedef Graph<Directed<> > TGraph;
+typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
+typedef EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+TGraph g;
 TVertexDescriptor v0 = addVertex(g);
 TVertexDescriptor v1 = addVertex(g);
 TEdgeDescriptor e1 =addEdge(g,v0,v1);
@@ -154,10 +158,10 @@ assignProperty(distanceMap, e1, 10);
 Note how the edge descriptor is used to access the property map. An algorithm can now traverse
 all edges and access the distances.
 ...code:
-typedef typename Iterator<Graph<Directed<> >, EdgeIterator>::Type TEdgeIterator;
+typedef Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
 TEdgeIterator it(g);
 for(;!atEnd(it);goNext(it)) {
-	std::cout << getProperty(distanceMap, *it) << std::endl;
+    std::cout << getProperty(distanceMap, *it) << std::endl;
 }
 
 
@@ -167,25 +171,26 @@ for(;!atEnd(it);goNext(it)) {
 
 ...text:
 The above figure gives an overview of the graph algorithms currently available in SeqAn. The biological algorithms
-use heavily the alignment graph, all others use the appropriate standard graph. All algorithm require some kind
-of additional input, e.g., the Dijkstra algorithm requires a distance map, alignment algorithms sequences and a score
-type, or the network flow algorithm capacities on edges. The basic usage can be found in the documentation but
+use heavily the alignment graph, all others use the appropriate standard graph. All algorithms require some kind
+of additional input, e.g., the Dijkstra algorithm requires a distance property map, alignment algorithms sequences and a score
+type and the network flow algorithm capacities on the edges. The basic usage can be found in the documentation but
 a simple example is given here. The following code snippet aligns two sequences.
 ...code:
 typedef String<char> TString;
 typedef StringSet<TString, Dependent<> > TStringSet;
 typedef Graph<Alignment<TStringSet, void> > TGraph;
-	
+    
 TStringSet str;
-TString str0("annual");	
-assignValueById(str, str0);
+TString str0("annual");    
+appendValue(str, str0);
 TString str1("annealing"); 
-assignValueById(str, str1);
+appendValue(str, str1);
 TGraph g(str);
 Score<int> score_type = Score<int>(0,-1,-1,0);
 int score = globalAlignment(g, score_type, NeedlemanWunsch() );
+::std::cout << g << ::std::endl;
 ...text:
 We first assign the sequences annual and annealing to a string set. 
 Based on this string set an alignment graph is created. A score object is
 used to configure the Needleman Wunsch algorithm and the @Function.globalAlignment@ call
-creates the alignment.
+computes the alignment.

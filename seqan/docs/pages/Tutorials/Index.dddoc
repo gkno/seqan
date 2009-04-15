@@ -65,7 +65,7 @@ The following example shows, how to use the @Class.Finder@ class specialized for
 ...code:
 Finder< Index<String<char> > > myFinder(myIndex);
 while (find(myFinder, "be"))
-	cout << position(myFinder) << " ";
+	::std::cout << position(myFinder) << " ";
 ...output:11 2
 
 ...text:
@@ -75,13 +75,13 @@ The function @Function.find@ searches the next occurence of $"be"$ and returns $
 The positition of an occurrence in the text is returned by the function @Function.position@ called with the @Class.Finder@ object.
 
 Please note that in contrast to online-search algorithms (see @Page.Searching.searching tutorial@) the returned occurrence positions are not ascending.
-As you can see in the code example above, the pattern $"be"$ was passed directly to the function @Function.find@ function.
+As you can see in the code example above, the pattern $"be"$ was passed directly to the @Function.find@ function.
 This is a shortcut for indices and could be also written in a longer way (already known from the @Page.Searching.searching tutorial@):
 ...code:
 Finder< Index<String<char> > > myFinder(myIndex);
 Pattern< String<char> >        myPattern("be");
 while (find(myFinder, myPattern))
-	cout << position(myFinder) << " ";
+	::std::cout << position(myFinder) << " ";
 ...output:11 2
 
 ...text:
@@ -156,7 +156,7 @@ The order of the dfs traversal can be specified with an optional template argume
 
 ...code:
 // preorder dfs
-Iterator< Index<String<char> >, TopDown<ParentLink<Preorder> > >::Type myIterator(myIndex);
+Iterator< Index<String<char> >, TopDown<ParentLinks<Preorder> > >::Type myIterator(myIndex);
 for (; !atEnd(myIterator); goNext(myIterator)) 
 	// do something with myIterator
 
@@ -164,7 +164,7 @@ for (; !atEnd(myIterator); goNext(myIterator))
 
 ...code:
 // postorder dfs
-Iterator< Index<String<char> >, TopDown<ParentLink<Postorder> > >::Type myIterator(myIndex);
+Iterator< Index<String<char> >, TopDown<ParentLinks<Postorder> > >::Type myIterator(myIndex);
 while (goDown(myIterator));
 for (; !atEnd(myIterator); goNext(myIterator)) 
 	// do something with myIterator
@@ -265,7 +265,7 @@ mySet[2] = "beingjohnmalkovich";
 Index< StringSet<String<char> > > myIndex(mySet);
 Finder< Index<StringSet<String<char> > > > myFinder(myIndex);
 while (find(myFinder, "be"))
-	cout << position(myFinder) << "  ";
+	::std::cout << position(myFinder) << "  ";
 	
 ...output:< 0 , 11 >  < 1 , 3 >  < 2 , 0 >  < 0 , 2 >
 
@@ -286,5 +286,5 @@ The following index implementations are currently part of SeqAn:
 ...table:Index_QGram_Nested|Nested q-gram index (work in progress)|
 
 ...text:
-A simple example for specializing a suffix array based index and a q-gram index for the same pattern matching problem the @Demo.Index Finder@ demo.
+A simple example for specializing a suffix array based index and a q-gram index for the same pattern matching problem can be found in the @Demo.Index Finder@ demo.
 
