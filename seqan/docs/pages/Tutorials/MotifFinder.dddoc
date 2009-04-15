@@ -11,14 +11,13 @@ The characterization and localization of motifs is a fundamental approach to a b
 function and evolutionary relationships of the corresponding genes or proteins.
 
 ...text:
-The tutorial will focus on the implemented Motif Finder which was integrated in SeqAn. 
-The Motif Finder, consisting of the class template @Class.MotifFinder@ and the function template @Function.findMotif@, 
+The Motif Finder, consisting of the class @Class.MotifFinder@ and the function @Function.findMotif@, 
 provides four different motif finding algorithms, the two heuristic algorithms, @Spec.Projection|PROJECTION@ and 
 @Spec.EPatternBranching|ePatternBranching@, and the two exact algorithms, @Spec.PMS1|PMS1@ and @Spec.PMSP|PMSP@. 
 In the following, the tutorial will shortly explain the structure of @Class.MotifFinder@ and @Function.findMotif@ and 
 give some instructions on how to apply them in order to start a motif search. 
 
-...section:# Class template MotifFinder
+...section:# MotifFinder class
 ...text:
 The @Class.MotifFinder@ class template holds the parameters used for running the appropriate motif search algorithm, 
 and furthermore serves to store some useful information about each of the motifs discovered by the algorithm, 
@@ -194,29 +193,14 @@ sequences of co-regulated genes which are controlled by the same regulatory mech
 short sequences, the easiest way is the explicit definition of the sample sequences which must be all of the same sequence 
 type. For example:
 ...code:
-String<DnaString> dataset;
-appendValue(dataset, DnaString("TCTCATCCGGTGGGAATCACTGCCGCATTTGGAGCATAAACAATGGGGGG"));
-appendValue(dataset, DnaString("TACGAAGGACAAACACTTTAGAGGTAATGGAAACACAACCGGCGCATAAA"));
-appendValue(dataset, DnaString("ATACAAACGAAAGCGAGAAGCTCGCAGAAGCATGGGAGTGTAAATAAGTG"));
-appendValue(dataset, DnaString("GGCGCCTCATTCTCGGTTTATAAGCCAAAACCTTGTCGAGGCAACTGTCA"));
-appendValue(dataset, DnaString("TCAAATGATGCTAGCCGTCGGAATCTGGCGAGTGCATAAAAAGAGTCAAC"));
+String<String<Dna> > dataset;
+appendValue(dataset, String<Dna>("TCTCATCCGGTGGGAATCACTGCCGCATTTGGAGCATAAACAATGGGGGG"));
+appendValue(dataset, String<Dna>("TACGAAGGACAAACACTTTAGAGGTAATGGAAACACAACCGGCGCATAAA"));
+appendValue(dataset, String<Dna>("ATACAAACGAAAGCGAGAAGCTCGCAGAAGCATGGGAGTGTAAATAAGTG"));
+appendValue(dataset, String<Dna>("GGCGCCTCATTCTCGGTTTATAAGCCAAAACCTTGTCGAGGCAACTGTCA"));
+appendValue(dataset, String<Dna>("TCAAATGATGCTAGCCGTCGGAATCTGGCGAGTGCATAAAAAGAGTCAAC"));
 
-...text:Another possibility is to read the input sequences from a data file. For example:
-
-...code:
-//Assume that the sample sequences from the above motif finding example 
-//are stored in the data file "motif_finding_example.fa". 
-unsigned int t = 5;
-String<DnaString> dataset;
-FILE * file1 = fopen("motif_finding_example.fa", "r");
-Align<DnaString, ArrayGaps> align;
-read(file1, align, FastaAlign());
-fclose(file1);
-//Converting Align object into a StringSet object!
-for(unsigned int i=0; i<t; ++i)
-{
-	appendValue(dataset,source(row(align,i)));
-}
+...text:Alternatively, the input sequences can be read from a file.
 
 ...text:
 Step 2: Choosing the appropriate @Class.MotifFinder|Motif Finder@
@@ -265,9 +249,7 @@ appropriate algorithm. The function only has one parameter which must be of type
 ...text: Syntax:
 ...code:
 displayResult(motif_finder);
-
-//Output(motif_finder):
-//[0] GGTGTATAAA
+...output:[0] GGTGTATAAA
 
 ...text:
 For more examples see @Demo.Motif Finder.this demo program@.
