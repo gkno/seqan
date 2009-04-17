@@ -1358,12 +1358,12 @@ fragmentLength(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 .Function.findVertex:
 ..cat:Graph.Alignment Graph
 ..summary:Finds a vertex given a sequence id and a position.
-..signature:fragmentLength(g, v)
+..signature:findVertex(g, id, pos)
 ..param.g:An alignment graph.
 ...type:Spec.Alignment Graph
-..param.v:A vertex descriptor.
-...type:Metafunction.VertexDescriptor
-..returns:The length of the fragment represented by this vertex descriptor.
+..param.id:A sequence id.
+..param.pos:A position.
+..returns:The vertex covering the given position on the specified sequence.
 */
 template<typename TStringSet, typename TCargo, typename TSpec, typename TSeqId, typename TPos> 
 inline typename VertexDescriptor<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type 
