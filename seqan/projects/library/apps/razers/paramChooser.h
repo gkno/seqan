@@ -103,6 +103,13 @@ struct ParamChooserOptions
 	TFloat chosenLossRate;			// out
 	TFloat optionErrorRate;		// 
 	bool optionHammingOnly;
+
+	bool extrapolate;
+	unsigned extrapolN;
+	unsigned extrapolK;
+	unsigned maxComputedEditN;
+	unsigned maxComputedHammingN;
+
 	bool doUngapped;
 	bool doAllOneGapped;
 	bool doSelectedGapped;
@@ -139,6 +146,15 @@ struct ParamChooserOptions
 		chosenLossRate = 0.0;			// out
 		optionErrorRate = 0.05;		// 
 		optionHammingOnly = false;
+
+
+		extrapolate = false;
+		extrapolN = 65;
+		extrapolK = 4;
+		maxComputedEditN = 65;
+		maxComputedHammingN = 75;
+		
+
 #ifdef LOSSRATE_VALIDATION
 		doUngapped = true;
 		doAllOneGapped = false;
@@ -1060,11 +1076,18 @@ template<typename TSStr>
 void
 getParamsFilename(TSStr & paramsfile, ParamChooserOptions & pm_options)
 {
-
+	int N = pm_options.totalN;
+	int K = pm_options.totalK;
+	if(pm_options.extrapolate)
+	{
+		N = pm_options.extrapolN;
+		K = pm_options.extrapolK;
+	}
 	paramsfile.str("");
 	if(pm_options.doSelectedGapped || pm_options.doAllOneGapped)
 	{
-		paramsfile << pm_options.fgparams<< pm_options.fprefix[0]<<"_N" << pm_options.totalN << "_E" << pm_options.totalK;
+		paramsfile << pm_options.fgparams<< pm_options.fprefix[0];
+		paramsfile << "_N" << N << "_E" << K;
 		//if(prefixCount) paramsfile << fgparams<< fprefix[0]<<"_N" << totalN << "_E" << totalK;
 		//else paramsfile << fgparams<<"userdef_N" << totalN << "_E" << totalK;
 		if(pm_options.optionHammingOnly) paramsfile << "_H";
@@ -1074,7 +1097,7 @@ getParamsFilename(TSStr & paramsfile, ParamChooserOptions & pm_options)
 	}
 	else
 	{
-		paramsfile << pm_options.fparams<< pm_options.fprefix[0]<<"_QE0_N" << pm_options.totalN << "_E" << pm_options.totalK << ".dat";
+		paramsfile << pm_options.fparams<< pm_options.fprefix[0]<<"_QE0_N" << N << "_E" << K << ".dat";
 		//if(prefixCount) paramsfile << fparams<< fprefix[0]<<"_QE0_N" << totalN << "_E" << totalK << ".dat";
 		//else paramsfile << fparams<<"userdef_QE0_N" << totalN << "_E" << totalK << ".dat";
 	}
@@ -1268,6 +1291,8 @@ parseGappedParams(RazerSOptions<TSpec> & r_options,TFile & file, ParamChooserOpt
 	resize(measure,14); //potential matches (or mincov if doAllOneGapped==true)
 	String<TFloat> lossrates;
 	resize(lossrates,14); //lossrates
+	double extrapolFactor = 1.0; // no extrapolation
+	if(pm_options.extrapolate) extrapolFactor = (double)pm_options.totalN/pm_options.extrapolN;
 	
 	char c = _streamGet(file);
 	if(_streamEOF(file))
@@ -1297,7 +1322,8 @@ parseGappedParams(RazerSOptions<TSpec> & r_options,TFile & file, ParamChooserOpt
 	//                continue;
 	//            }
 		_parse_skipWhitespace(file,c);
-		unsigned currThreshold = _parse_readNumber(file,c);
+//		unsigned currThreshold = _parse_readNumber(file,c);
+		unsigned currThreshold = (unsigned)(_parse_readNumber(file,c) * extrapolFactor); //when extrapolating from shorter read lengths, threshold can be at least linearly increased
 		_parse_skipWhitespace(file,c);
 		TFloat currLossrate = _parse_readEValue(file,c);
 		_parse_skipWhitespace(file,c);
@@ -1368,7 +1394,7 @@ parseGappedParams(RazerSOptions<TSpec> & r_options,TFile & file, ParamChooserOpt
 				atLeastOneFound = true;
 			
 			}
-                }
+		}
 		_parse_skipLine(file,c);
 
         }
@@ -1419,7 +1445,7 @@ chooseParams(RazerSOptions<TSpec> & r_options, ParamChooserOptions & pm_options)
 	if(pm_options.optionProbINSERT <= epsilon && pm_options.optionProbDELETE <= epsilon)
 		pm_options.optionHammingOnly=true;
 
-	fill(pm_options.firstTimeK,20,true);//set maximal number of errors considered in parameter computation to <20
+	fill(pm_options.firstTimeK,20,true);//maximal number of errors considered in parameter computation is always <20
 
 
 	// compute data specific loss rates
@@ -1480,7 +1506,48 @@ chooseParams(RazerSOptions<TSpec> & r_options, ParamChooserOptions & pm_options)
 	}
 	if(pm_options.doAllOneGapped) pm_options.doUngapped = false;
 	
-	// decide on which loss rate file to parse
+
+
+	// decide on which loss rate file to parse, extrapolate if n is large
+	if(pm_options.optionHammingOnly && pm_options.totalN > pm_options.maxComputedHammingN )
+	{
+		pm_options.extrapolate = true;
+
+		double recErrorRatio = (double)pm_options.totalN/pm_options.totalK;
+		int bestN = pm_options.maxComputedHammingN;
+
+		for(int currN = pm_options.maxComputedHammingN; currN > 49; --currN)
+		{
+			double bestRecErrorRatio = (double)bestN/(ceil((double)bestN * 1.0/recErrorRatio));
+			double currRecErrorRatio = (double)currN/(ceil((double)currN * 1.0/recErrorRatio));
+			if(currRecErrorRatio > bestRecErrorRatio)
+				bestN = currN;
+		}
+		pm_options.extrapolN = bestN;
+		pm_options.extrapolK = ceil(((double)bestN * 1.0/recErrorRatio)-0.00001);
+		
+	}
+	if(!pm_options.optionHammingOnly && pm_options.totalN > pm_options.maxComputedEditN )
+	{
+		pm_options.extrapolate = true;
+
+		double recErrorRatio = (double)pm_options.totalN/pm_options.totalK;
+		int bestN = pm_options.maxComputedEditN;
+
+		for(int currN = pm_options.maxComputedEditN; currN > 49; --currN)
+		{
+			double bestRecErrorRatio = (double)bestN/(ceil((double)bestN * 1.0/recErrorRatio));
+			double currRecErrorRatio = (double)currN/(ceil((double)currN * 1.0/recErrorRatio));
+			if(currRecErrorRatio > bestRecErrorRatio)
+				bestN = currN;
+		}
+		
+		pm_options.extrapolN = bestN;
+		pm_options.extrapolK = ceil((double)bestN * 1.0/recErrorRatio);
+		
+	}
+
+	// get name of loss rate file
 	::std::stringstream paramsfile;
 	getParamsFilename(paramsfile,pm_options);
         if (pm_options.verbose)
@@ -1489,7 +1556,9 @@ chooseParams(RazerSOptions<TSpec> & r_options, ParamChooserOptions & pm_options)
                ::std::cerr << "Read length      = " << pm_options.totalN << "bp\n";
                ::std::cerr << "Max num errors   = " << pm_options.totalK << "\n";
                ::std::cerr << "Recognition rate = " << 100.0*(1.0-pm_options.optionLossRate) << "%\n";
+		if(pm_options.extrapolate) ::std::cerr << "Extrapolating from read length " << pm_options.extrapolN << " and " << pm_options.extrapolK << "errors.\n";
         }
+	
 	// parse loss rate file and find appropriate filter criterium
 	if(pm_options.verbose) ::std::cerr << "\n--> Reading " <<  paramsfile.str()<<::std::endl;
 	::std::fstream file;
