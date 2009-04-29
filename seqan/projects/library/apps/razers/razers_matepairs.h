@@ -121,7 +121,7 @@ value(Dequeue<TValue, TSpec> &me, TPos pos)
 	if (pos < wrap)
 		return value(me.data_front + pos);
 	else
-		return value(me.data_front + (pos - wrap));
+		return value(me.data_begin + (pos - wrap));
 }
 
 template <typename TValue, typename TSpec, typename TPos>
@@ -134,7 +134,7 @@ value(Dequeue<TValue, TSpec> const &me, TPos pos)
 	if (pos < wrap)
 		return value(me.data_front + pos);
 	else
-		return value(me.data_front + (pos - wrap));
+		return value(me.data_begin + (pos - wrap));
 }
 
 //////////////////////////////////////////////////////////////////////////////
