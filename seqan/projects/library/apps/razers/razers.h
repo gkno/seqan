@@ -105,11 +105,15 @@ namespace SEQAN_NAMESPACE_MAIN
 		
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 		bool		maqMapping;
-		int			maxMismatchQualSum;
-		int			mutationRateQual;
+		int		maxMismatchQualSum;
+		int		mutationRateQual;
+		int		absMaxQualSumErrors;
 		unsigned	artSeedLength;
+		bool		noBelowIdentity;
 #endif
+
 		bool		lowMemory;		// set maximum shape weight to 13 to limit size of q-gram index
+		bool		fastaIdQual;		// hidden option for special fasta+quality format we use
 
 #ifdef RAZERS_DUMP_SNPS
 		bool		bayesian;
@@ -179,9 +183,11 @@ namespace SEQAN_NAMESPACE_MAIN
 			mutationRateQual = 30;
 			artSeedLength = 28;	// the "artificial" seed length that is used for mapping quality assignment 
 						// (28bp is maq default)
+			absMaxQualSumErrors = 100; // maximum for sum of mism qualities in total readlength
+			noBelowIdentity = false;
 #endif
 			lowMemory = false;		// set maximum shape weight to 13 to limit size of q-gram index
-
+			fastaIdQual = false;
 #ifdef RAZERS_DUMP_SNPS
 			bayesian = true;
 			testLevel = 0.01;
@@ -550,6 +556,9 @@ bool loadGenomes(TGenomeSet &genomes, StringSet<CharString> &fileNameList)
 	};
 	
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
+
+	struct QualityBasedScoring{};
+
 	template <typename TReadMatch>
 	struct LessRNoMQ : public ::std::binary_function < TReadMatch, TReadMatch, bool >
 	{
@@ -696,7 +705,12 @@ void countMatches(TMatches &matches, TCounts &cnt)
 //////////////////////////////////////////////////////////////////////////////
 // Remove low quality matches
 template < typename TMatches, typename TCounts, typename TSpec >
-void compactMatches(TMatches &matches, TCounts & /*cnts*/, RazerSOptions<TSpec> &options)
+void compactMatches(TMatches &matches, 
+		TCounts & 
+#ifdef RAZERS_DIRECT_MAQ_MAPPING
+		cnts
+#endif
+		, RazerSOptions<TSpec> &options)
 {
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 	if(options.maqMapping) compactMatches(matches, cnts,options,true);
@@ -761,6 +775,7 @@ void compactMatches(TMatches &matches, TCounts & /*cnts*/, RazerSOptions<TSpec> 
 	resize(matches, dit - begin(matches, Standard()));
 }
 
+
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 //////////////////////////////////////////////////////////////////////////////
 // Remove low quality matches
@@ -781,39 +796,56 @@ void compactMatches(TMatches &matches, TCounts &cnts, RazerSOptions<TSpec> &, bo
 	TIterator itEnd = end(matches, Standard());
 	TIterator dit = it;
 
+	//number of errors may not exceed 31!
 	bool second = true;
 	for (; it != itEnd; ++it) 
 	{
 		if ((*it).orientation == '-') continue;
-		if (readNo == (*it).rseqNo
-#ifdef RAZERS_MATEPAIRS
-			&& (*it).pairId == 0
-#endif
-			)
+		if (readNo == (*it).rseqNo)
 		{
 			//second best match
 			if (second)
 			{
 				second = false;
+				if((cnts[1][(*it).rseqNo] & 31)  > (*it).editDist)
+				{
+					//this second best match is better than any second best match before
+					cnts[1][(*it).rseqNo] = (*it).editDist; // second best dist is this editDist
+										// count is 0 (will be updated if countFirstTwo)
+				}
 				if(!dontCountFirstTwo) 
-					++cnts[(*it).editDist][(*it).rseqNo];
+					if((cnts[1][(*it).rseqNo]>>5) != 2047) cnts[1][(*it).rseqNo] += 32;
 			}
 			else
 			{
-				if ((*it).editDist < length(cnts)-1)
-					++cnts[(*it).editDist][(*it).rseqNo];
+				if ((*it).editDist <= (cnts[0][(*it).rseqNo] & 31) )
+					if(cnts[0][(*it).rseqNo]>>5 != 2047)
+						cnts[0][(*it).rseqNo] +=32;
+				if ((*it).editDist <= (cnts[1][(*it).rseqNo] & 31) )
+					if((cnts[1][(*it).rseqNo]>>5) != 2047)
+						cnts[1][(*it).rseqNo] +=32;
 				continue;
 			}
 		} else
 		{	//best match
 			second = true;
 			readNo = (*it).rseqNo;
+			//cnts has 16bits, 11:5 for count:dist
+			if((cnts[0][(*it).rseqNo] & 31)  > (*it).editDist)
+			{
+				//this match is better than any match before
+				cnts[1][(*it).rseqNo] = cnts[0][(*it).rseqNo]; // best before is now second best 
+									       // (count will be updated when match is removed)
+				cnts[0][(*it).rseqNo] = (*it).editDist; // best dist is this editDist
+									// count is 0 (will be updated if countFirstTwo)
+			}
 			if(!dontCountFirstTwo) 
-				++cnts[(*it).editDist][(*it).rseqNo];
+				if((cnts[0][(*it).rseqNo]>>5) != 2047) cnts[0][(*it).rseqNo] += 32;	// shift 5 to the right, add 1, shift 5 to the left, and keep count
 		}
 		*dit = *it;
 		++dit;
 	}
+
 	resize(matches, dit - begin(matches, Standard()));
 }
 #endif
@@ -838,7 +870,7 @@ matchVerify(
 {
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 	if(options.maqMapping) 
-		return matchVerify(m,inf,rseqNo,readSet,pat,options,SwiftSemiGlobalHamming(),true);
+		return matchVerify(m,inf,rseqNo,readSet,readSet /*pseudoparamter*/,options,SwiftSemiGlobalHamming(),QualityBasedScoring());
 #endif
 
 	typedef Segment<TGenome, InfixSegment>					TGenomeInfix;
@@ -979,15 +1011,13 @@ matchVerify(
 	Segment<TGenome, InfixSegment> inf,		// potential match genome region
 	unsigned rseqNo,				// read number
 	TReadSet &readSet,				// reads
-	TMyersPatterns const & pat,				// MyersBitVector preprocessing data
+	TMyersPatterns const &,				// MyersBitVector preprocessing data
 	RazerSOptions<TSpec> const &options,		// RazerS options
-	SwiftSemiGlobalHamming const &swiftsemi,				// Hamming only
-	bool)					// MaqMapping
+	SwiftSemiGlobalHamming const &,				// Hamming only
+	QualityBasedScoring)					// MaqMapping
 {
-	if(!options.maqMapping) 
-		return matchVerify(m,inf,rseqNo,readSet,pat,options,swiftsemi);
 	
-	typedef Segment<TGenome, InfixSegment>					TGenomeInfix;
+	typedef Segment<TGenome, InfixSegment>				TGenomeInfix;
 	typedef typename Value<TReadSet>::Type const			TRead;
 	typedef typename Iterator<TGenomeInfix, Standard>::Type	TGenomeIterator;
 	typedef typename Iterator<TRead, Standard>::Type		TReadIterator;
@@ -1005,79 +1035,83 @@ matchVerify(
 	if (length(inf) < ndlLength) return false;
 
 	// verify
-	TRead &read				= readSet[rseqNo];
+	TRead &read		= readSet[rseqNo];
 	TReadIterator ritBeg	= begin(read, Standard());
 	TReadIterator ritEnd	= end(read, Standard());
-	TGenomeIterator git		= begin(inf, Standard());
+	TGenomeIterator git	= begin(inf, Standard());
 	TGenomeIterator gitEnd	= end(inf, Standard()) - (ndlLength - 1);
-	TGenomeIterator bestIt		= begin(inf, Standard());
+	TGenomeIterator bestIt	= begin(inf, Standard());
 
 	// this is max number of errors the 28bp 'seed' should have
 	//assuming that maxErrors-1 matches can be found with 100% SN 
 	unsigned maxErrorsSeed = (unsigned)(options.artSeedLength * options.errorRate) + 1;	
 	unsigned maxErrorsTotal = (unsigned)(ndlLength * 0.25); //options.maxErrorRate);
 	unsigned minErrors = maxErrorsTotal + 1;
+	int minQualSumErrors = options.absMaxQualSumErrors + 10;
+	unsigned minSeedErrors = maxErrorsSeed + 1;
 
 	for (; git < gitEnd; ++git)
 	{
+		bool hit = true;
 		unsigned errors = 0;
+		unsigned count = 0;
+		unsigned seedErrors = 0;
+		int qualSumErrors = 0;
 		TGenomeIterator g = git;	//maq would count errors in the first 28bp only (at least initially. not for output)
 		for(TReadIterator r = ritBeg; r != ritEnd; ++r, ++g)
 		{
-			if ((options.compMask[ordValue(*g)] & options.compMask[ordValue((Dna5)*r)]) == 0)
+			if ((options.compMask[ordValue(*g)] & options.compMask[ordValue(*r)]) == 0)
 			{
+			//	::std::cout << count << "<-";
 				if (++errors > maxErrorsTotal)
+				{
+					hit = false;
 					break;
+				}
+				int qualityValue = (int)((unsigned char)*r >> 3);
+				qualSumErrors += (qualityValue < options.mutationRateQual) ? qualityValue : options.mutationRateQual;
+//				qualSumErrors += (qualityValue(*r) < options.mutationRateQual) ? qualityValue(*r) : options.mutationRateQual;
+				if(qualSumErrors > options.absMaxQualSumErrors || qualSumErrors > minQualSumErrors)
+				{
+					hit = false;
+					break;
+				}
+				if (count < options.artSeedLength)		// the maq (28bp-)seed
+				{
+					if(++seedErrors > maxErrorsSeed)
+					{
+						hit = false;
+						break;
+					}
+					if(qualSumErrors > options.maxMismatchQualSum)
+					{
+						hit = false;
+						break;							
+					}// discard match, if 'seed' is bad (later calculations are done with the quality sum over the whole read)
+				}
 			}
+			++count;
 		}
-		if (minErrors > errors)
+		if (hit && (qualSumErrors < minQualSumErrors /*&& seedErrors <=maxErrorsSeed*/) ) //oder (seedErrors < minSeedErrors)
 		{
 			minErrors = errors;
+			minSeedErrors = seedErrors;
+			minQualSumErrors = qualSumErrors;
 			m.gBegin = git - begin(host(inf), Standard());
 			bestIt = git;
 		}
 	}
-
+//	std::cout  << "options.absMaxQualSumErrors" << options.absMaxQualSumErrors << std::endl;
+//	std::cout  << "maxSeedErrors" << maxErrorsSeed << std::endl;
 //	if(derBesgte) ::std::cout << minErrors <<"minErrors\n";
-	if (minErrors > maxErrorsTotal) return false;
+	if (minQualSumErrors > options.absMaxQualSumErrors || minSeedErrors > maxErrorsSeed || minErrors > maxErrorsTotal) return false;
 	
-// 	std::cout << "read = " << (Dna5)((unsigned char)read[0]& (unsigned char)0x07)<< (Dna5)((unsigned char)read[1]& (unsigned char)0x07)<< "... ";
-// 	unsigned char check = read[0];
-// 	unsigned intQual = (check>>3);
-// 	std::cout << "qual = " <<  (int)intQual << ::std::endl;
-
-	//compute sum of qualities of errors
-	int qualSumErrors = 0;
-	unsigned errors = 0; 	// count errors in the artSeedLength first bp again
-	if(minErrors > 0)
-	{
-		TGenomeIterator g = bestIt;
-		unsigned count = 0;
-		//for(TReadIterator r = ritBeg; r != ritEnd; ++r, ++g, ++rq)
-		for(TReadIterator r = ritBeg; r != ritEnd; ++r, ++g, ++count)
-			if ((options.compMask[ordValue(*g)] & options.compMask[ordValue((Dna5)*r)]) == 0)
-			{
-				int q = (int)((unsigned char)(*r)>>3);
-				if(q>options.mutationRateQual) q = options.mutationRateQual;
-				qualSumErrors+=q;
-				if (count < options.artSeedLength)		// the maq (28bp-)seed
-				{
-					if(qualSumErrors > options.maxMismatchQualSum || ++errors > maxErrorsSeed)
-						return false;							
-					// discard match, if 'seed' is bad (later calculations are done with the quality sum over the whole read)
-				}
-			}
-	}
-//	if(derBesgte) ::std::cout << qualSumErrors <<"qualSumErrors\n";
-
-
 	m.gEnd = m.gBegin + ndlLength;
 	m.editDist = minErrors;			// errors in seed or total number of errors?
-	m.mScore = qualSumErrors;
-	m.seedEditDist = errors;
+	m.mScore = minQualSumErrors;
+	m.seedEditDist = minSeedErrors;
 	return true;
 }	
-
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1097,7 +1131,7 @@ matchVerify(
 	TMyersPatterns const & pat,				// MyersBitVector preprocessing data
 	RazerSOptions<TSpec> const &options,		// RazerS options
 	SwiftSemiGlobal const &swiftsemi,				// Hamming only
-	bool maqMap)						// Swift specialization
+	QualityBasedScoring)						// Swift specialization
 {
 	//if(!options.maqMapping) 
 		return matchVerify(m,inf,rseqNo,readSet,pat,options,swiftsemi);
@@ -1295,12 +1329,12 @@ int mapSingleReads(
 #endif
 
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
- 	if(options.maqMapping)
- 	{
- 		resize(cnts, ((int)(0.25*length(readSet[0])))+1);
- 		for (unsigned i = 0; i < length(cnts); ++i)
- 			fill(cnts[i], readCount, 0);
- 	}
+	if(options.maqMapping)
+	{
+		resize(cnts, 2);
+		for (unsigned i = 0; i < length(cnts); ++i)
+			fill(cnts[i], readCount, 31); //initialize with maxeditDist, 11:5 for count:dist
+	}
 #endif
 
 	// clear stats
@@ -1434,10 +1468,10 @@ int mapSingleReads(
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
  	if(options.maqMapping)
  	{
- 		resize(cnts, ((int)(0.25*length(readSet[0])))+1);
- 		for (unsigned i = 0; i < length(cnts); ++i)
- 			fill(cnts[i], length(readSet), 0);
- 	}
+		resize(cnts, 2);
+		for (unsigned i = 0; i < length(cnts); ++i)
+			fill(cnts[i], length(readSet), 31);
+	}
 #endif
 	
 	

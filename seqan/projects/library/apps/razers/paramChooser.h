@@ -1432,6 +1432,40 @@ chooseParams(RazerSOptions<TSpec> & r_options, ParamChooserOptions & pm_options)
 	static const TFloat epsilon = 0.00000000001;	
 	pm_options.optionLossRate += epsilon;
 
+
+#ifdef RAZERS_DIRECT_MAQ_MAPPING
+	if(r_options.maqMapping)
+	{
+		//artSeedLength denotes the length of the 3' end of the read for which 2-error matches are found with 100% sensitvity
+		if(r_options.artSeedLength==28) r_options.shape = "1101001110100111010011";//q13
+		if(r_options.artSeedLength==29) r_options.shape = "11101001110100111010011";//q14
+		if(r_options.artSeedLength==30) r_options.shape = "111010011101001110100101";//q14
+		if(r_options.artSeedLength==31) r_options.shape = "111010011101001110100101";//q14
+		if(r_options.lowMemory & r_options.artSeedLength==29) r_options.shape = "10101001110100111010011";
+		r_options.threshold = 1; 
+		if(r_options.lowMemory & r_options.artSeedLength==30)		
+		{
+			r_options.shape = "111110101000011111";
+			r_options.threshold = 2;		
+		}
+		if(r_options.lowMemory & r_options.artSeedLength==31)		
+		{
+			r_options.shape = "1101000110100011010001101";
+			r_options.threshold = 2;		
+		}  
+		if(r_options.artSeedLength==32)		//perfect setting for queueing system
+		{
+			r_options.shape = "11110010001111001000111";
+			r_options.threshold = 2;		
+		}
+		
+		if(r_options.artSeedLength<28 || r_options.artSeedLength> 32)
+			::std::cerr << "Warning: This Version of RazerS nly supports quality-seed-lengths of 28 to 32. Using default filter parameters." << ::std::endl;
+		else return true;
+	}
+#endif
+
+
 #ifdef LOSSRATE_VALIDATION	
 	pm_options.fparams = pm_options.paramFolderPath;
 	//pm_options.fparams = 

@@ -231,14 +231,18 @@ void printHelp(int, const char *[], RazerSOptions<TSpec> &options, ParamChooserO
 #endif
 		cerr << "  -m,  --max-hits NUM          \t" << "output only NUM of the best hits (default " << options.maxHits << ')' << endl;
 		cerr << "  -tr, --trim-reads NUM        \t" << "trim reads to length NUM (default off)" << endl;
-#ifdef RAZERS_DIRECT_MAQ_MAPPING
-		cerr << "  -mq, --mapping-quality       \t" << "assign mapping quality values to matches" << endl;
-#endif
 		cerr << "  -o,  --output FILE           \t" << "change output filename (default <READS FILE>.result)" << endl;
 		cerr << "  -v,  --verbose               \t" << "verbose mode" << endl;
 		cerr << "  -vv, --vverbose              \t" << "very verbose mode" << endl;
 		cerr << "  -V,  --version               \t" << "print version number" << endl;
 		cerr << "  -h,  --help                  \t" << "print this help" << endl;
+#ifdef RAZERS_DIRECT_MAQ_MAPPING
+		cerr << "  -lm, --low-memory            \t" << "decrease memory usage at the expense of runtime" << endl;
+		cerr << endl << "Mapping Quality Options:" << endl;
+		cerr << "  -mq, --mapping-quality       \t" << "switch on mapping quality mode" << endl;
+		cerr << "  -nbi,--no-below-id           \t" << "do not report matches with seed identity < percent id (default off)" << endl;
+		cerr << "  -qsl,--mq-seed-length NUM    \t" << "seed length used for mapping quality assignment ("<<options.artSeedLength<<')' << endl;
+#endif
 		cerr << endl << "Output Format Options:" << endl;
 		cerr << "  -a,  --alignment             \t" << "dump the alignment for each match" << endl;
 #ifdef RAZERS_MASK_READS
@@ -249,6 +253,7 @@ void printHelp(int, const char *[], RazerSOptions<TSpec> &options, ParamChooserO
 		cerr << "                               \t" << "0 = Razer format (default, see README)" << endl;
 		cerr << "                               \t" << "1 = enhanced Fasta format" << endl;
 		cerr << "                               \t" << "2 = Eland format" << endl;
+		cerr << "                               \t" << "3 = GFF format" << endl;
 		cerr << "  -gn, --genome-naming NUM     \t" << "select how genomes are named" << endl;
 		cerr << "                               \t" << "0 = use Fasta id (default)" << endl;
 		cerr << "                               \t" << "1 = enumerate beginning with 1" << endl;
@@ -486,7 +491,7 @@ int main(int argc, const char *argv[])
 					istr >> options.outputFormat;
 					if (!istr.fail())
 					{
-						if (options.outputFormat > 2)
+						if (options.outputFormat > 3)
 							cerr << "Invalid output format options." << endl << endl;
 						else
 							continue;
@@ -651,9 +656,65 @@ int main(int argc, const char *argv[])
 				return 0;
 			}
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
+			if (strcmp(argv[arg], "--quality-in-header") == 0) {
+				options.fastaIdQual = true;
+				continue;
+			}
 			if (strcmp(argv[arg], "-mq") == 0 || strcmp(argv[arg], "--mapping-quality") == 0) {
 				options.maqMapping = true;
 				continue;
+			}
+			if (strcmp(argv[arg], "-nbi") == 0 || strcmp(argv[arg], "--no-below-id") == 0) {
+				options.noBelowIdentity = true;
+				continue;
+			}
+			if (strcmp(argv[arg], "-qsl") == 0 || strcmp(argv[arg], "--mq-seed-length") == 0) {
+				if (arg + 1 < argc) {
+					++arg;
+					istringstream istr(argv[arg]);
+					istr >> options.artSeedLength;
+					if (!istr.fail()) 
+					{
+						if (options.artSeedLength < 24)
+							cerr << "Minimum seed length is 24" << endl << endl;
+						else
+							continue;
+					}
+				}
+				printHelp(argc, argv, options, pm_options);
+				return 0;
+			}
+			if (strcmp(argv[arg], "-smq") == 0 || strcmp(argv[arg], "--seed-mism-quality") == 0) {
+				if (arg + 1 < argc) {
+					++arg;
+					istringstream istr(argv[arg]);
+					istr >> options.maxMismatchQualSum;
+					if (!istr.fail()) 
+					{
+						if (options.maxMismatchQualSum < 0  )
+							cerr << "Max seed mismatch quality needs to be 0 or a positive value" << endl << endl;
+						else
+							continue;
+					}
+				}
+				printHelp(argc, argv, options, pm_options);
+				return 0;
+			}
+			if (strcmp(argv[arg], "-tmq") == 0 || strcmp(argv[arg], "--total-mism-quality") == 0) {
+				if (arg + 1 < argc) {
+					++arg;
+					istringstream istr(argv[arg]);
+					istr >> options.absMaxQualSumErrors;
+					if (!istr.fail()) 
+					{
+						if (options.absMaxQualSumErrors < 0  )
+							cerr << "Max total mismatch quality needs to be 0 or a positive value" << endl << endl;
+						else
+							continue;
+					}
+				}
+				printHelp(argc, argv, options, pm_options);
+				return 0;
 			}
 #endif
 			if (strcmp(argv[arg], "-lm") == 0 || strcmp(argv[arg], "--low-memory") == 0) {

@@ -329,6 +329,161 @@ countCoocurrences(TMatches & matches, TCounts & cooc, TOptions & options)
 }
 
 
+template<typename TAlign, typename TString>
+void
+getCigarLine(TAlign & align, TString & cigar, TString & mutations)
+{
+	
+	typedef typename Source<TAlign>::Type TSource;
+	typedef typename Iterator<TSource, Rooted>::Type TStringIterator;
+
+	typedef typename Row<TAlign>::Type TRow;
+	typedef typename Iterator<TRow, Rooted>::Type TAlignIterator;
+
+	TAlignIterator ali_it0_stop = iter(row(align,0),endPosition(row(align,0)));
+	TAlignIterator ali_it1_stop = iter(row(align,1),endPosition(row(align,1)));
+	TAlignIterator ali_it0 = iter(row(align,0),beginPosition(row(align,0)));
+	TAlignIterator ali_it1 = iter(row(align,1),beginPosition(row(align,1)));					
+	TStringIterator readBase = begin(source(row(align,0))); 
+	
+	//std::cout << "getting cigar line\n";//ali0 len = " <<ali_it0_stop-ali_it0 << " \t ali1 len = "<<ali_it1_stop-ali_it1<<"\n";
+	int readPos = 0;
+	bool first = true;
+	while(ali_it0 != ali_it0_stop && ali_it1 != ali_it1_stop)
+	{
+		int matched = 0;
+		int inserted = 0;
+		int deleted = 0;
+		while(ali_it0!=ali_it0_stop && ali_it1!=ali_it1_stop && !isGap(ali_it0)&& !isGap(ali_it1))
+		{
+			++readPos;
+			++readBase;
+			if(*ali_it1 != *ali_it0)
+			{
+				if(first) first = false;
+				else mutations << ",";
+				mutations << readPos <<*readBase;
+			}
+			++ali_it0;
+			++ali_it1;
+			++matched;
+		}
+		if(matched>0) cigar << matched<< "M" ;
+		while(ali_it0!=ali_it0_stop && isGap(ali_it0))
+		{
+			++ali_it0;
+			++ali_it1;
+			++deleted;
+		}
+		if(deleted>0) cigar << deleted << "D";
+		while(isGap(ali_it1)&& ali_it1!=ali_it1_stop)
+		{
+			++ali_it0;
+			++ali_it1;
+			++readPos;
+			++readBase;
+			++inserted;
+		}
+		if(inserted>0) cigar << inserted << "I";
+	}
+	
+}
+
+
+#ifdef RAZERS_DIRECT_MAQ_MAPPING
+//////////////////////////////////////////////////////////////////////////////
+// Assign mapping quality and remove suboptimal matches
+template < typename TMatches, typename TReads, typename TCooc, typename TCounts, typename TSpec >
+void assignMappingQuality(TMatches &matches, TReads & reads, TCooc & cooc, TCounts &cnts, RazerSOptions<TSpec> & options)
+{
+	typedef typename Value<TMatches>::Type				TMatch;
+	typedef typename Iterator<TMatches, Standard>::Type		TIterator;
+
+	//matches are already sorted	
+	//::std::sort(
+	//	begin(matches, Standard()),
+	//	end(matches, Standard()), 
+	//	LessRNoMQ<TMatch>());
+	
+	
+	int maxSeedErrors = (int)(options.errorRate*options.artSeedLength)+1;
+	unsigned readNo = -1;
+	
+	TIterator it = begin(matches, Standard());
+	TIterator itEnd = end(matches, Standard());
+	TIterator dit = it;
+
+	int bestQualSum, secondBestQualSum;
+	int secondBestDist = -1 ,secondBestMatches = -1;
+	for (; it != itEnd; ++it) 
+	{
+		if ((*it).orientation == '-') continue;
+		bool mappingQualityFound = false;
+		int mappingQuality = 0;
+		int qualTerm1,qualTerm2;
+
+		readNo = (*it).rseqNo;
+		bestQualSum = (*it).mScore;
+		
+		if(++it!=itEnd && (*it).rseqNo==readNo)
+		{
+			secondBestQualSum = (*it).mScore;
+			secondBestDist = (*it).editDist;
+			secondBestDist = (*it).editDist;
+			secondBestMatches = cnts[1][readNo] >> 5;
+//CHECKcnts		secondBestMatches = cnts[secondBestDist][readNo];
+//			secondBestMatches = cnts[secondBestDist][readNo];
+			(*it).orientation = '-';
+		//	if(secondBestDist<=bestDist) unique=0;
+		}
+		else secondBestQualSum = -1000;
+		--it; //it is now at best match of current rseqNo
+
+		int bestDist = (*it).editDist;
+		int kPrime = (*it).seedEditDist;
+		if((bestQualSum==secondBestQualSum) || (kPrime>maxSeedErrors))
+			mappingQualityFound = true;   //mq=0
+		else{
+			if(secondBestQualSum == -1000) qualTerm1 = 99;
+			else
+			{
+				qualTerm1 = secondBestQualSum - bestQualSum - 4.343 * log((double)secondBestMatches);
+				//if (secondBestKPrime - kPrime <= 1 && qualTerm1 > options.mutationRateQual) qualTerm1 = options.mutationRateQual; //TODO abchecken was mehr sinn macht
+				if (secondBestDist - bestDist <= 1 && qualTerm1 > options.mutationRateQual) qualTerm1 = options.mutationRateQual;
+			}
+			float avgSeedQual = 0.0;
+			if(!mappingQualityFound)
+			{
+				//TODO!!! generalize and adapt to razers lossrates
+				// lossrate 0.42 => -10 log10(0.42) = 4
+				int kPrimeLoss = 4; // options.kPrimeLoss; // bezieht sich auf 3 fehler in 28bp
+				qualTerm2 = kPrimeLoss + cooc[maxSeedErrors-kPrime];
+				
+				for(unsigned j = 0; j<options.artSeedLength; ++j)
+				{
+					int q = /*qualityValue(reads[readNo][j]);//*/(int)((unsigned char)(reads[readNo][j])>>3);
+					if(q>options.mutationRateQual) q = options.mutationRateQual;
+					avgSeedQual+=q;
+				}
+				avgSeedQual/=options.artSeedLength;
+				//-10 log10(28-2) = 14;
+				//generalize to -10 log10(artSeedLength - maxSeedErrors +1 ) // 14 fits for seedlength 28 to 32 with 2 errors
+				if((avgSeedQual-=14)>0) qualTerm2 += ((maxSeedErrors-kPrime)*(avgSeedQual));
+			}
+		}
+		if (!mappingQualityFound) mappingQuality = (qualTerm1<qualTerm2) ? qualTerm1:qualTerm2;
+		if (mappingQuality < 0) mappingQuality = 0;
+		(*it).mScore = mappingQuality;
+		
+		*dit = *it;
+	//	if(secondBestQualSum != -1000) ++it;
+		++dit;
+	}
+	resize(matches, dit - begin(matches, Standard()));
+}
+#endif
+
+
 //////////////////////////////////////////////////////////////////////////////
 // Output matches
 template <
@@ -370,17 +525,15 @@ void dumpMatches(
 	}
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 	if (options.maqMapping) options.outputFormat = 3;
+	int maxSeedErrors = (int)(options.errorRate * options.artSeedLength); //without + 1 here, used to check whether match should be supported if noBelowIdentity option is switched on
 #endif
 	if (options.outputFormat == 3)
 	{
-		options.sortOrder = 0;		// read numbers are increasing
+		options.sortOrder = 1;		//  sort according to gPos
 		options.positionFormat = 1;	// bases in file are numbered starting at 1
-		options.dumpAlignment = options.hammingOnly;
-	}
-#ifdef RAZERS_DIRECT_MAQ_MAPPING
-	if(options.maqMapping) 
 		options.dumpAlignment = false;
-#endif
+	}
+
 
 	// error profile
 	unsigned maxReadLength = 0;
@@ -450,9 +603,16 @@ void dumpMatches(
 			fill(stats[i], length(reads), 0);
 		countMatches(matches, stats);
 	}
+
+	unsigned currSeqNo = 0;
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 	if(options.maqMapping)
-		compactMatches(matches, stats, options, false);
+	{
+		String<int> cooc;
+		compactMatches(matches, stats, options, false); //only best two matches per read are kept
+		countCoocurrences(matches,cooc,options);	//coocurrence statistics are filled
+		assignMappingQuality(matches,reads,cooc,stats,options);//mapping qualities are assigned and only one match per read is kept
+	}
 	else	 
 #endif
 	compactMatches(matches, stats, options);
@@ -476,19 +636,7 @@ void dumpMatches(
 	
 	typename Iterator<TMatches, Standard>::Type	it = begin(matches, Standard());
 	typename Iterator<TMatches, Standard>::Type	itEnd = end(matches, Standard());
-
 	
-
-#ifdef RAZERS_DIRECT_MAQ_MAPPING
-	typename Iterator<TMatches, Standard>::Type     bestIt;
-	typename Iterator<TMatches, Standard>::Type     endIt;
-
-	int maxSeedErrors = (int)(options.errorRate*options.artSeedLength)+1;
-	String<int> cooc;
-	if(options.maqMapping)
-		countCoocurrences(matches,cooc,options);
-
-#endif
 	
 	Dna5String gInf;
 	char _sep_ = '\t';
@@ -698,171 +846,199 @@ void dumpMatches(
 			}
 			break;
 		case 3: // GFF:  printf "$chr $name_$format read $pos %ld . $dir . ID=$col[0]$unique$rest\n",$pos+$len-1;
-			for(unsigned readNo = 0; readNo < length(reads); ++readNo)
+			for (unsigned filecount = 0; filecount < length(genomeFileNameList); ++filecount)
 			{
-				if (it == itEnd || readNo < (*it).rseqNo)
+				// open genome file	
+				::std::ifstream gFile;
+				gFile.open(toCString(genomeFileNameList[filecount]), ::std::ios_base::in | ::std::ios_base::binary);
+				if (!gFile.is_open())
 				{
-					continue; //no matches
+					std::cerr << "Couldn't open genoem file." << std::endl;
+					break;
 				}
-				int unique = 1;
-#ifdef RAZERS_DIRECT_MAQ_MAPPING
-				int mappingQuality = 0;
-				bestIt = it;
-				endIt = it;
-				int bestQualSum = (*it).mScore;
+
+				Dna5String	currGenome;
 				
-				if(options.maqMapping)
+				// iterate over genome sequences
+				for(; !_streamEOF(gFile); ++currSeqNo)
 				{
-					bool mappingQualityFound = false;
-					double qualTerm1 = 1000.0,qualTerm2 = 1000.0;
-					
-					
-					int bestDist = (*it).editDist;
-					int kPrime = (*it).seedEditDist;
-					
-					int secondBestDist = -1;
-					int secondBestQualSum = 1000;
-					unsigned secondBestMatches = 0;
-					
-					++it;
-					if(it != itEnd && (*it).rseqNo == readNo)
+					read(gFile, currGenome, Fasta());			// read Fasta sequence
+					while(it != itEnd && (*it).gseqNo == currSeqNo)
 					{
-						secondBestQualSum = (*it).mScore;
-						secondBestDist = (*it).editDist;
-						secondBestMatches = stats[secondBestDist][readNo];
-						if(secondBestDist<=bestDist) unique=0;
-						endIt = it;
-					}
-					else --it;
+#ifdef RAZERS_DIRECT_MAQ_MAPPING
+						if(options.maqMapping && options.noBelowIdentity && (*it).seedEditDist > maxSeedErrors)
+						{
+							++it;
+							continue;
+						}
+#else
+						file << (*it).editDist << "\t";
+#endif
 
-					if((bestQualSum==secondBestQualSum) || (kPrime>maxSeedErrors))
-						mappingQualityFound = true;   //mq=0
-					else{
-						if(secondBestDist == -1) qualTerm1 = 99;
+						unsigned currReadNo = (*it).rseqNo;
+						int unique = 1;
+						unsigned bestMatches = 0;
+						//would seedEditDist make more sense here?
+//CHECKcnts					if ((unsigned)(*it).editDist < length(stats))
+//							bestMatches = stats[(*it).editDist][currReadNo];
+#ifdef RAZERS_DIRECT_MAQ_MAPPING
+						if(options.maqMapping)
+							bestMatches = stats[0][currReadNo] >> 5;
 						else
-						{
-							qualTerm1 = secondBestQualSum - bestQualSum - 4.343 * log((double)secondBestMatches);
-							if (secondBestDist - bestDist <= 1 && qualTerm1 > options.mutationRateQual) qualTerm1 = options.mutationRateQual;
-						}
-						float avgSeedQual = 0.0;
-						if(!mappingQualityFound)
-						{
-							//TODO!!! generalize and adapt to razers lossrates
-							int kPrimeLoss = 4;
-							qualTerm2 = kPrimeLoss + cooc[maxSeedErrors-kPrime];
-							
-							for(unsigned j = 0; j<options.artSeedLength; ++j)
-							{
-								int q = (int)((unsigned char)(reads[readNo][j])>>3);
-								if(q>options.mutationRateQual) q = options.mutationRateQual;
-								avgSeedQual+=q;
-							}
-							avgSeedQual/=options.artSeedLength;
-							if((avgSeedQual-=13)>0) qualTerm2 += ((maxSeedErrors-kPrime)*(avgSeedQual));
-						}
-					}
-					if (!mappingQualityFound)
-						mappingQuality = (qualTerm1<qualTerm2) ? qualTerm1:qualTerm2;
-					if (mappingQuality < 0) mappingQuality = 0;
-				}
-				it=bestIt;
-#else
-				unsigned bestMatches = 1;
-				if ((unsigned)(*it).editDist < length(stats))
-					bestMatches = stats[(*it).editDist][readNo];
-				if (bestMatches !=  1)
-				{
-					++it;
-					continue; // TODO: output non-unique matches
-				}
-				unsigned readLen = length(reads[(*it).rseqNo]);
-				double percId = 100.0 * (1.0 - (double)(*it).editDist / (double)readLen);
 #endif
-				switch (options.genomeNaming)
-				{
-					// 0..filename is the read's Fasta id
-					case 0:
-						file << genomeIDs[(*it).gseqNo] <<'\t';
-						break;
-					// 1..filename is the read filename + seqNo
-					case 1:
-						file.fill('0');
-						file << gnoToFileMap[(*it).gseqNo].first << '#' << ::std::setw(gzeros) << gnoToFileMap[(*it).gseqNo].second + 1 << '\t';
-						break;
-				}
-				file <<  options.runID << "_razers\tread\t";
-				file << '\t' << ((*it).gBegin + options.positionFormat) << '\t' << (*it).gEnd << '\t';
-//				if ((*it).orientation == 'F')
-//					file << '\t' << ((*it).gBegin + options.positionFormat) << '\t' << (*it).gEnd <<'\t';
-//				else
-//					file << '\t' << (*it).gEnd << '\t'<<((*it).gBegin + options.positionFormat)<< '\t';
-#ifdef RAZERS_DIRECT_MAQ_MAPPING
-				file << mappingQuality << "\t";
-#else
-				file << percId << "\t";
-#endif
-				if ((*it).orientation == 'F')
-					file << '+' << '\t' << '.' <<'\t';
-				else
-					file << '-' << '\t' << '.' <<'\t';
+							if (bestMatches == 0 && (unsigned)(*it).editDist < length(stats))
+								bestMatches = stats[(*it).editDist][currReadNo];
 
-				switch (options.readNaming)
-				{
-					// 0..filename is the read's Fasta id
-					case 0:
-						file << "ID=" <<readIDs[readNo];
-						break;
-					
-					// 1..filename is the read filename + seqNo
-					case 1:
-						file.fill('0');
-						file << "ID=" << readName << '#' << ::std::setw(pzeros) << readNo + 1;
-						break;
-				}
-				file << ";unique=" << unique; 
-				if ((*it).editDist > 0) 
-				{
-					file << ";mutations=";
-					if (options.dumpAlignment && options.hammingOnly)
-					{
-						gInf = infix(genomes[(*it).gseqNo], (*it).gBegin, (*it).gEnd);
-						if ((*it).orientation == 'R')
-							reverseComplementInPlace(gInf);
-						bool first = true;
-						for (unsigned i = 0; i < length(gInf); ++i)
-							if ((options.compMask[ordValue((Dna5)reads[readNo][i])] & 
-								options.compMask[ordValue(gInf[i])]) == 0)
-							{
-		//						if(first){ file << i + 1 << gInf[i]; first = false;}
-		//						else file <<','<< i + 1 << gInf[i];
-								if(first){ file << i + 1 << (Dna5)reads[readNo][i]; first = false;}
-								else file <<','<< i + 1 << (Dna5)reads[readNo][i];
-							}
-					}
-					else
-					{
-						file << (*it).editDist;
-					}
-				}
+						bool suboptimal = false;
+						if (
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
-				if(options.maqMapping)
-				{
-					file << ";mqs=" << bestQualSum;
-					file << ";read=";
-					for(unsigned j=0;j<length(reads[readNo]);++j)
-					{
-						file << (Dna5)reads[readNo][j];
-					}
-					file << ";quality=";
-					for(unsigned j=0;j<length(reads[readNo]);++j)
-					{
-						file << (char) ((int)((unsigned char)reads[readNo][j] >> 3) + 33);
-					}
-				}	
-				it = endIt;
+							!options.maqMapping && 
 #endif
-				file << ::std::endl;
-				++it;
+							(unsigned)(*it).editDist > 0)
+						{
+							for(unsigned d = 0; d < (unsigned)(*it).editDist; ++d)
+								if (stats[d][currReadNo]>0) suboptimal=true;
+						}
+						//std::cout << (stats[0][currReadNo] & 31) <<"<-dist "<< (stats[0][currReadNo] >> 5) <<"<-count\n";
+					//	std::cout << "hier1\n";
+						if (bestMatches !=  1)
+						{
+							unique = 0;
+							if(options.purgeAmbiguous)
+							{
+								++it;
+								continue;
+							}
+							
+//							if((*it).mScore > 0) std::cout << (*it).mScore << "<-non uniq but score > 0\n";
+//							++it;
+//							continue; // TODO: output non-unique matches
+						}
+					//	std::cout << "hier2\n";
+						unsigned readLen = length(reads[currReadNo]);
+		
+						switch (options.genomeNaming)
+						{
+							// 0..filename is the read's Fasta id
+							case 0:
+								file << genomeIDs[(*it).gseqNo] <<'\t';
+								break;
+							// 1..filename is the read filename + seqNo
+							case 1:
+								file.fill('0');
+								file << gnoToFileMap[(*it).gseqNo].first << '#' << ::std::setw(gzeros) << gnoToFileMap[(*it).gseqNo].second + 1 << '\t';
+								break;
+						}
+					//	std::cout << "hier3\n";
+						file <<  options.runID << "_razers\tread";
+						file << '\t' << ((*it).gBegin + options.positionFormat) << '\t' << (*it).gEnd << '\t';
+		//				if ((*it).orientation == 'F')
+		//					file << '\t' << ((*it).gBegin + options.positionFormat) << '\t' << (*it).gEnd <<'\t';
+		//				else
+		//					file << '\t' << (*it).gEnd << '\t'<<((*it).gBegin + options.positionFormat)<< '\t';
+						double percId = 100.0 * (1.0 - (double)(*it).editDist / (double)readLen);
+#ifdef RAZERS_DIRECT_MAQ_MAPPING
+						if(options.maqMapping)
+							file << (*it).mScore << "\t";
+						else
+#endif
+							file << percId << "\t";
+					//	std::cout << "hier4\n";
+
+						if ((*it).orientation == 'F')
+							file << '+' << '\t' << '.' <<'\t';
+						else
+							file << '-' << '\t' << '.' <<'\t';
+		
+						switch (options.readNaming)
+						{
+							// 0..filename is the read's Fasta id
+							case 0:
+								if(options.fastaIdQual)
+									file << "ID=" <<prefix(readIDs[currReadNo],length(readIDs[currReadNo])-readLen);
+								else
+									file << "ID=" <<readIDs[currReadNo];
+								break;
+							
+							// 1..filename is the read filename + seqNo
+							case 1:
+								file.fill('0');
+								file << "ID=" << readName << '#' << ::std::setw(pzeros) << currReadNo + 1;
+								break;
+						}
+					//	std::cout << "hier5\n";
+						if(suboptimal) file << ";suboptimal";
+						else 
+						{
+							if(unique==1) file << ";unique";
+							if(unique==0) file << ";multi";
+						}
+						if ((*it).editDist > 0)
+						{
+							if (options.hammingOnly)
+							{
+								gInf = infix(currGenome, (*it).gBegin, (*it).gEnd);
+								if ((*it).orientation == 'R')
+									reverseComplementInPlace(gInf);
+								bool first = true;
+								file << ";cigar=" << length(gInf) << "M";
+								file << ";mutations=";
+								for (unsigned i = 0; i < length(gInf); ++i)
+									if ((options.compMask[ordValue(reads[currReadNo][i])] & 
+										options.compMask[ordValue(gInf[i])]) == 0)
+									{
+				//						if(first){ file << i + 1 << gInf[i]; first = false;}
+				//						else file <<','<< i + 1 << gInf[i];
+										if(first){ file << i + 1 << (Dna5)reads[currReadNo][i]; first = false;}
+										else file <<','<< i + 1 << (Dna5)reads[currReadNo][i];
+									}
+							}
+							else
+							{
+								assignSource(row(align, 0), reads[currReadNo]);
+								assignSource(row(align, 1), infix(currGenome, (*it).gBegin, (*it).gEnd));
+								if ((*it).orientation == 'R')
+									reverseComplementInPlace(source(row(align, 1)));
+								globalAlignment(align, scoreType);
+
+								std::stringstream cigar, mutations;
+								getCigarLine(align,cigar,mutations);
+								file << ";cigar="<<cigar.str();
+
+								if(length(mutations.str())>0)
+									file << ";mutations=" << mutations.str();
+								
+							}
+						}
+#ifdef RAZERS_DIRECT_MAQ_MAPPING
+						if(options.maqMapping || options.fastaIdQual)
+						{
+		//					file << ";read=";
+		//					for(unsigned j=0;j<length(reads[currReadNo]);++j)
+		//					{
+		//						file << (Dna5)reads[currReadNo][j];
+		//					}
+							file << ";quality=";
+							if(options.fastaIdQual)
+								file << suffix(readIDs[currReadNo],length(readIDs[currReadNo])-readLen);
+							else
+							{
+								for(unsigned j=0;j<readLen;++j)
+								{
+									//TODO need to output the original quality here!
+									file << (char) ((int)((unsigned char)reads[currReadNo][j] >> 3) + 33);
+									//file << (char)(qualityValue(reads[currReadNo][j])+ 33);
+								}
+							}
+						}
+#endif
+						//std::cout << "hier6\n";
+						file << ::std::endl;
+						++it;
+					}
+				}
+				gFile.close();
+				++filecount;
 			}
 			break;
 	}
