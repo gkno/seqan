@@ -781,12 +781,12 @@ inline unsigned ordValue(SimpleType<TValue,TSpec> const &c)
 template <typename TValue>
 inline unsigned ordValue(SimpleType<TValue,_DnaQ> const &c) 
 {
-	return ((unsigned)c) & 0x03;
+	return _Translate_Table_DnaQ_2_Dna<>::VALUE[(unsigned char)c];
 }
 template <typename TValue>
 inline unsigned ordValue(SimpleType<TValue,_Dna5Q> const &c) 
 {
-	return ((unsigned)c) & 0x07;
+	return _Translate_Table_Dna5Q_2_Dna5<>::VALUE[(unsigned char)c];
 }
 
 

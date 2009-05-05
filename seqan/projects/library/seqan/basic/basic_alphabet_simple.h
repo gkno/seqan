@@ -1421,7 +1421,7 @@ inline void assign(Ascii & c_target,
 				   DnaQ const & source)
 {
 SEQAN_CHECKPOINT
-	c_target = _Translate_Table_Dna5_2_Ascii<>::VALUE[source.value & 3];
+	c_target = _Translate_Table_Dna5_2_Ascii<>::VALUE[(unsigned char)_Translate_Table_DnaQ_2_Dna<>::VALUE[(unsigned char)source.value]];
 }
 //____________________________________________________________________________
 
@@ -1429,18 +1429,18 @@ inline void assign(Ascii & c_target,
 				   Dna5Q const & source)
 {
 SEQAN_CHECKPOINT
-	c_target = _Translate_Table_Dna5_2_Ascii<>::VALUE[source.value & 7];
+	c_target = _Translate_Table_Dna5_2_Ascii<>::VALUE[(unsigned char)_Translate_Table_Dna5Q_2_Dna5<>::VALUE[(unsigned char)source.value]];
 }
 
 //////////////////////////////////////////////////////////////////////////////
-//DNA (4 letters) with Qualities (0..80)
+//DNA (4 letters) with Qualities (0..40)
 
 template <>
 struct CompareType<DnaQ, Byte> { typedef Dna Type; };
 inline void assign(DnaQ & target, Byte c_source)
 {
 SEQAN_CHECKPOINT
-	target.value = c_source;	//quality 0 at each position
+	target.value = _Translate_Table_Dna5_2_DnaQ5<>::VALUE[(unsigned char)_Translate_Table_Byte_2_Dna<>::VALUE[(unsigned char)c_source]];
 }
 //____________________________________________________________________________
 
@@ -1449,7 +1449,7 @@ struct CompareType<DnaQ, Ascii> { typedef Dna Type; };
 inline void assign(DnaQ & target, Ascii c_source)
 {
 SEQAN_CHECKPOINT
-	target.value = c_source;
+	target.value = _Translate_Table_Dna5_2_DnaQ5<>::VALUE[(unsigned char)_Translate_Table_Ascii_2_Dna<>::VALUE[(unsigned char)c_source]];
 }
 //____________________________________________________________________________
 
@@ -1458,7 +1458,7 @@ struct CompareType<DnaQ, Unicode> { typedef Dna Type; };
 inline void assign(DnaQ & target, Unicode c_source)
 {
 SEQAN_CHECKPOINT
-	target.value = c_source;
+	target.value = _Translate_Table_Dna5_2_DnaQ5<>::VALUE[(unsigned char)_Translate_Table_Ascii_2_Dna<>::VALUE[(unsigned char)c_source]];
 }
 //____________________________________________________________________________
 
@@ -1476,7 +1476,7 @@ struct CompareType<DnaQ, Iupac> { typedef Dna Type; };
 inline void assign(DnaQ & target, Iupac const & source)
 {
 SEQAN_CHECKPOINT
-	target.value = _Translate_Table_Iupac_2_Dna<>::VALUE[source.value];
+	target.value = _Translate_Table_Dna5_2_DnaQ5<>::VALUE[(unsigned char)_Translate_Table_Iupac_2_Dna<>::VALUE[(unsigned char)source.value]];
 }
 //____________________________________________________________________________
 
@@ -1485,7 +1485,7 @@ struct CompareType<DnaQ, Dna> { typedef Dna Type; };
 inline void assign(DnaQ & target, Dna const & c_source)
 {
 SEQAN_CHECKPOINT
-	target.value = c_source.value;
+	target.value = _Translate_Table_Dna5_2_DnaQ5<>::VALUE[c_source.value & 3];
 }
 //____________________________________________________________________________
 
@@ -1494,7 +1494,7 @@ struct CompareType<DnaQ, Dna5> { typedef Dna Type; };
 inline void assign(DnaQ & target, Dna5 const & c_source)
 {
 SEQAN_CHECKPOINT
-	target.value = c_source.value;
+	target.value = _Translate_Table_Dna5_2_DnaQ5<>::VALUE[c_source.value & 3];
 }
 
 
@@ -1506,7 +1506,7 @@ struct CompareType<Dna5Q, Byte> { typedef Dna5 Type; };
 inline void assign(Dna5Q & target, Byte c_source)
 {
 SEQAN_CHECKPOINT
-	target.value = c_source;
+	target.value = _Translate_Table_Dna5_2_DnaQ5<>::VALUE[(unsigned char)_Translate_Table_Byte_2_Dna5<>::VALUE[(unsigned char)c_source]];
 }
 //____________________________________________________________________________
 
@@ -1515,7 +1515,7 @@ struct CompareType<Dna5Q, Ascii> { typedef Dna5 Type; };
 inline void assign(Dna5Q & target, Ascii c_source)
 {
 SEQAN_CHECKPOINT
-	target.value = c_source;
+	target.value = _Translate_Table_Dna5_2_DnaQ5<>::VALUE[(unsigned char)_Translate_Table_Ascii_2_Dna5<>::VALUE[(unsigned char)c_source]];
 }
 //____________________________________________________________________________
 
@@ -1524,7 +1524,7 @@ struct CompareType<Dna5Q, Unicode> { typedef Dna5 Type; };
 inline void assign(Dna5Q & target, Unicode c_source)
 {
 SEQAN_CHECKPOINT
-	target.value = c_source;
+	target.value = _Translate_Table_Dna5_2_DnaQ5<>::VALUE[(unsigned char)_Translate_Table_Ascii_2_Dna5<>::VALUE[(unsigned char)c_source]];
 }
 //____________________________________________________________________________
 
@@ -1533,7 +1533,7 @@ struct CompareType<Dna5Q, Iupac> { typedef Dna5 Type; };
 inline void assign(Dna5Q & target, Iupac const & source)
 {
 SEQAN_CHECKPOINT
-	target.value = _Translate_Table_Iupac_2_Dna5<>::VALUE[source.value];
+	target.value = _Translate_Table_Dna5_2_DnaQ5<>::VALUE[(unsigned char)_Translate_Table_Iupac_2_Dna5<>::VALUE[(unsigned char)source.value]];
 }
 
 //____________________________________________________________________________
@@ -1543,7 +1543,7 @@ struct CompareType<Dna5Q, DnaQ> { typedef Dna Type; };
 inline void assign(Dna5Q & target, DnaQ const & c_source)
 {
 SEQAN_CHECKPOINT
-	target.value = c_source.value;
+	target.value = c_source.value & 3;
 }
 //____________________________________________________________________________
 
@@ -1552,7 +1552,7 @@ struct CompareType<Dna5Q, Dna5> { typedef Dna5 Type; };
 inline void assign(Dna5Q & target, Dna5 const & c_source)
 {
 SEQAN_CHECKPOINT
-	target.value = c_source.value;
+	target.value = _Translate_Table_Dna5_2_DnaQ5<>::VALUE[(unsigned char)c_source&7];
 }
 
 //____________________________________________________________________________
@@ -1562,7 +1562,7 @@ struct CompareType<Dna5Q, Dna> { typedef Dna Type; };
 inline void assign(Dna5Q & target, Dna const & c_source)
 {
 SEQAN_CHECKPOINT
-	target.value = c_source.value;
+	target.value = _Translate_Table_Dna5_2_DnaQ5<>::VALUE[(unsigned char)c_source&3];
 }
 //____________________________________________________________________________
 
@@ -1575,7 +1575,7 @@ struct CompareType<Dna5, Dna5Q> { typedef Dna5 Type; };
 inline void assign(Dna5 & target, Dna5Q const & c_source)
 {
 SEQAN_CHECKPOINT
-	target.value = c_source.value & 0x07;
+	target.value = _Translate_Table_Dna5Q_2_Dna5<>::VALUE[(unsigned char)c_source.value];
 }
 //____________________________________________________________________________
 
@@ -1584,7 +1584,7 @@ struct CompareType<Dna, Dna5Q> { typedef Dna Type; };
 inline void assign(Dna & target, Dna5Q const & c_source)
 {
 SEQAN_CHECKPOINT
-	target.value = c_source.value & 0x03;
+	target.value = _Translate_Table_DnaQ_2_Dna<>::VALUE[(unsigned char)c_source.value];
 }
 
 //____________________________________________________________________________
@@ -1593,7 +1593,7 @@ struct CompareType<Dna5, DnaQ> { typedef Dna5 Type; };
 inline void assign(Dna5 & target, DnaQ const & c_source)
 {
 SEQAN_CHECKPOINT
-	target.value = c_source.value & 0x03;
+	target.value = _Translate_Table_DnaQ_2_Dna<>::VALUE[(unsigned char)c_source.value];
 }
 //____________________________________________________________________________
 
@@ -1602,8 +1602,52 @@ struct CompareType<Dna, DnaQ> { typedef Dna Type; };
 inline void assign(Dna & target, DnaQ const & c_source)
 {
 SEQAN_CHECKPOINT
-	target.value = c_source.value & 0x03;
+	target.value = _Translate_Table_DnaQ_2_Dna<>::VALUE[(unsigned char)c_source.value];
 }
+
+//get quality value
+template <typename TValue>
+inline int getQualityValue(SimpleType<TValue,_DnaQ> const &c) 
+{
+	return _Translate_Table_Ascii_2_Quality<>::VALUE[(unsigned)c.value];
+//	return ((unsigned)c) & 0x03;
+}
+template <typename TValue>
+inline int getQualityValue(SimpleType<TValue,_Dna5Q> const &c) 
+{
+	return _Translate_Table_Ascii_2_Quality<>::VALUE[(unsigned)c.value];
+//	if((unsigned)c > 163) return 0;
+//	else return ((unsigned)c) & 0x03;
+}
+
+//set dna+quality
+template <typename TValue, typename TAscii>
+inline void setValue(SimpleType<TValue,_DnaQ> &c, TAscii s)
+{
+	c.value = s;
+}
+
+template <typename TValue, typename TAscii>
+inline void setValue(SimpleType<TValue,_Dna5Q> &c, TAscii s) 
+{
+	c.value = s;
+}
+
+//set quality value
+template <typename TValue, typename TQualityValue>
+inline void setQualityValue(SimpleType<TValue,_DnaQ> &c, TQualityValue q)
+{
+	setValue(c,((unsigned)(c.value & 3)| ((unsigned)q << 2)));
+}
+template <typename TValue, typename TQualityValue>
+inline void setQualityValue(SimpleType<TValue,_Dna5Q> &c, TQualityValue q) 
+{
+	if(_Translate_Table_Dna5Q_2_Dna5<>::VALUE[(unsigned char)c] < 4)
+		setValue(c,((unsigned)(c.value & 3) | ((unsigned)q << 2)));
+	else
+		setValue(c,(unsigned)164);
+}
+
 
 //////////////////////////////////////////////////////////////////////////////
 }// namespace SEQAN_NAMESPACE_MAIN

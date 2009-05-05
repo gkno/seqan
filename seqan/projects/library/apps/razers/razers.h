@@ -362,10 +362,23 @@ bool loadReads(
 	unsigned kickoutcount = 0;
 	for(unsigned i = 0; i < seqCount; ++i) 
 	{
-		if (options.readNaming == 0)
+		if (options.readNaming == 0
+#ifdef RAZERS_DIRECT_MAQ_MAPPING
+			|| options.fastaIdQual
+#endif
+			)
 			assignSeqId(fastaIDs[i], multiFasta[i], format);	// read Fasta id
 		assignSeq(seq, multiFasta[i], format);					// read Read sequence
 		assignQual(qual, multiFasta[i], format);				// read ascii quality values  
+#ifdef RAZERS_DIRECT_MAQ_MAPPING
+		if(options.fastaIdQual)
+		{
+			qual = suffix(fastaIDs[i],length(fastaIDs[i])-length(seq));
+			if(options.readNaming == 0)
+				fastaIDs[i] = prefix(fastaIDs[i],length(fastaIDs[i])-length(seq));
+			else clear(fastaIDs[i]);
+		}
+#endif
 		if (countN)
 		{
 			int count = 0;
@@ -388,18 +401,33 @@ bool loadReads(
 
 		// store dna and quality together
 		for (; j < length(qual) && j < length(seq); ++j)
-			hybridSeq[j] = (unsigned int) (
-				(((ordValue(qual[j]) <= 64)? ordValue(qual[j]) - 33: 31) << 3) 
-				| ordValue(seq[j]));
+		{
+			if(ordValue(seq[j])>3)
+				setValue(hybridSeq[j],(unsigned int)164); //N=164 such that &3 == 0
+			else
+				setValue(hybridSeq[j],(unsigned int)((ordValue(qual[j]) - 33) * 4 + ordValue(seq[j])));
+		}
 
-		// fill non-existent qualities with q31
+		// fill non-existent qualities with q40
 		for (; j < length(seq); ++j)
-			hybridSeq[j] = (unsigned int) ((31 << 3) | ordValue(seq[j]));
+		{
+			if(ordValue(seq[j])>3)
+				setValue(hybridSeq[j],(unsigned int)164); //N=164 such that &3 == 0
+			else
+				setValue(hybridSeq[j],(unsigned int) (160 + ordValue(seq[j])));
+		//	seq[j] = (unsigned int) ((40 << 2) | ordValue(helpString[j]));
+		}
 
-/*		std::cout << "read = " << (Dna5)((unsigned char)seq[0]& (unsigned char)0x07)<< (Dna5)((unsigned char)seq[1]& (unsigned char)0x07)<< "... ";
-		unsigned char check = seq[0];
-		unsigned intQual = (check>>3);
-		std::cout << "qual = " <<  (int)intQual << ::std::endl;*/
+// 		// store dna and quality together
+// 		for (; j < length(qual) && j < length(seq); ++j)
+// 			hybridSeq[j] = (unsigned int) (
+// 				(((ordValue(qual[j]) <= 64)? ordValue(qual[j]) - 33: 31) << 3) 
+// 				| ordValue(seq[j]));
+// 
+// 		// fill non-existent qualities with q31
+// 		for (; j < length(seq); ++j)
+// 			hybridSeq[j] = (unsigned int) ((31 << 3) | ordValue(seq[j]));
+
 
 		if (options.trimLength > 0 && length(hybridSeq) > (unsigned)options.trimLength)
 			resize(hybridSeq, options.trimLength);
@@ -1068,9 +1096,9 @@ matchVerify(
 					hit = false;
 					break;
 				}
-				int qualityValue = (int)((unsigned char)*r >> 3);
-				qualSumErrors += (qualityValue < options.mutationRateQual) ? qualityValue : options.mutationRateQual;
-//				qualSumErrors += (qualityValue(*r) < options.mutationRateQual) ? qualityValue(*r) : options.mutationRateQual;
+				//int qualityValue = (int)((unsigned char)*r >> 3);
+				//qualSumErrors += (qualityValue < options.mutationRateQual) ? qualityValue : options.mutationRateQual;
+				qualSumErrors += (getQualityValue(*r) < options.mutationRateQual) ? getQualityValue(*r) : options.mutationRateQual;
 				if(qualSumErrors > options.absMaxQualSumErrors || qualSumErrors > minQualSumErrors)
 				{
 					hit = false;
@@ -1101,9 +1129,6 @@ matchVerify(
 			bestIt = git;
 		}
 	}
-//	std::cout  << "options.absMaxQualSumErrors" << options.absMaxQualSumErrors << std::endl;
-//	std::cout  << "maxSeedErrors" << maxErrorsSeed << std::endl;
-//	if(derBesgte) ::std::cout << minErrors <<"minErrors\n";
 	if (minQualSumErrors > options.absMaxQualSumErrors || minSeedErrors > maxErrorsSeed || minErrors > maxErrorsTotal) return false;
 	
 	m.gEnd = m.gBegin + ndlLength;
