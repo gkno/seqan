@@ -82,24 +82,28 @@ typedef float TFloat;
 void printHelp(int, const char *[], ParamChooserOptions & pm_options, bool longHelp = false) 
 {
 	cerr << "*******************************************************************" << endl;
-	cerr << "*** Calculate efficient filter parameters (shape and threshold) ***" << endl;
+	cerr << "**** Compute efficient filter parameters (shape and threshold) ****" << endl;
 	cerr << "*******************************************************************" << endl << endl;
 	cerr << "Usage: paramChooser [OPTIONS]... " << endl;
 	if (longHelp) {
 		cerr << endl << "Options:" << endl;
-		cerr << "  -n,  --length NUM            \t" << "sequence length ("<<pm_options.totalN<<")" << endl;
-		cerr << "  -i,  --percent-identity NUM  \t" << "set the percent identity threshold (95)" << endl;
+		cerr << std::endl << " Parameter choosing options: " << std::endl;
+		cerr << "  -n,   --length NUM            \t" << "sequence length ("<<pm_options.totalN<<")" << endl;
+		cerr << "  -i,   --percent-identity NUM  \t" << "set the percent identity threshold (95)" << endl;
 		cerr << "  -rr,  --recognition-rate NUM  \t" << "set the percent recognition rate (99.0)" << endl;
-		cerr << "  -pf, --prb-folder STR        \t" << "directory of [_prb.txt|.fastq|fastqint] files containing qualitiy values (optional)" << endl;
-		cerr << "  -pq, --phred-qualities       \t" << "fastq files contain Phred qualities (default: Solexa qualities)" << endl;
-		cerr << "  -d,  --error-distribution    \t" << "file containing mismatch probabilities (must contain at least n values, one value per line)" << endl;
-		cerr << "  -pi, --prob-insert           \t" << "probability of an insertion (" << pm_options.optionProbINSERT << ")" << endl;
-		cerr << "  -pd, --prob-delete           \t" << "probability of a deletion (" << pm_options.optionProbDELETE << ")" << endl;
-		cerr << "                               \t" << "(for hamming-only filters use -pi 0 -pd 0)" << endl;
-		cerr << "  -p,  --prefix STR            \t" << "session identifier (prefix of computed files);\n\t\t\t\tif also option d or pd is specified the prefix will be used for file naming\n\t\t\t\tuserspecific settings can be accessed in later session without recomputing loss rates\n\t\t\t\tby specifying the session id, i.e. prefix" << endl;
-		cerr << "  -ug, --ungapped              \t" << "only consider ungapped shapes (off)" << endl;
-		cerr << "  -og, --one-gapped            \t" << "only consider shapes containing at most one gap (of arbitrary length)" << endl;
-		cerr << "  -h,  --help                  \t" << "print this help" << endl;
+		cerr << "  -ug,  --ungapped              \t" << "only consider ungapped shapes (off)" << endl;
+		cerr << "  -og,  --one-gapped            \t" << "only consider shapes containing at most one gap (of arbitrary length)" << endl;
+		cerr << std::endl << " Parameter computing options: " << std::endl;
+		cerr << "  -pf,  --param-folder STR      \t" << "output directory where filter parameter files will be stored" << endl;
+		cerr << "  -sf,  --shape-file STR        \t" << "file containing additional shapes (optional)" << endl;
+		cerr << "  -ap,  --append                \t" << "append parameters to previously computed files (default: off)" << endl;
+		cerr << "  -d,   --error-distribution    \t" << "file containing mismatch probabilities (must contain at least n values, one value per line)" << endl;
+		cerr << "  -pi,  --prob-insert           \t" << "probability of an insertion (" << pm_options.optionProbINSERT << ")" << endl;
+		cerr << "  -pd,  --prob-delete           \t" << "probability of a deletion (" << pm_options.optionProbDELETE << ")" << endl;
+		cerr << "                                \t" << "(for hamming-only filters use -pi 0 -pd 0)" << endl;
+		cerr << "  -prbf,--prb-folder STR        \t" << "directory of [_prb.txt|.fastq|fastqint] files containing qualitiy values (optional)" << endl;
+		cerr << "  -pq,  --phred-qualities       \t" << "fastq files contain Phred qualities (default: Solexa qualities)" << endl;
+		cerr << "  -h,   --help                  \t" << "print this help" << endl << endl;
 	} else {
 		cerr << "Try 'chooseFilteringParameters --help' for more information." << endl;
 	}
@@ -204,14 +208,36 @@ int main(int argc, const char *argv[])
 				printHelp(argc, argv, pm_options);
 				return 0;
 			}
-
-
-			if (strcmp(argv[arg], "-pf") == 0 || strcmp(argv[arg], "--prb-folder") == 0) {
+			if (strcmp(argv[arg], "-prbf") == 0 || strcmp(argv[arg], "--prb-folder") == 0) {
 				if (arg + 1 < argc) {
 					++arg;
 					pm_options.fnameCount0 = true;
 					fstream file;
 					pm_options.fname[0] = argv[arg];
+				}
+				else 
+				{
+					printHelp(argc, argv, pm_options);
+					return 0;
+				}
+			}
+			if (strcmp(argv[arg], "-pf") == 0 || strcmp(argv[arg], "--param-folder") == 0) { //prefix for previously computed param files
+				if (arg + 1 < argc) {
+					++arg;
+					pm_options.paramFolder = argv[arg];
+//					cout << "Session id prefix specified\n";
+				}
+				else 
+				{
+					printHelp(argc, argv, pm_options);
+					return 0;
+				}
+			}
+			if (strcmp(argv[arg], "-sf") == 0 || strcmp(argv[arg], "--shape-file") == 0) { //prefix for previously computed param files
+				if (arg + 1 < argc) {
+					++arg;
+					pm_options.shapeFile = argv[arg];
+//					cout << "Session id prefix specified\n";
 				}
 				else 
 				{
@@ -250,6 +276,10 @@ int main(int argc, const char *argv[])
 				pm_options.optionHammingOnly = true;
 				continue;
 			}
+			if (strcmp(argv[arg], "-ap") == 0 || strcmp(argv[arg], "--append") == 0) {
+				pm_options.appendToPrevious = true;
+				continue;
+			}
 
 			if (strcmp(argv[arg], "-pq") == 0 || strcmp(argv[arg], "--phred-qualities") == 0) {
 				pm_options.solexaQual = false;
@@ -257,18 +287,14 @@ int main(int argc, const char *argv[])
 			}
 
 			if (strcmp(argv[arg], "-og") == 0 || strcmp(argv[arg], "--one-gapped") == 0) {
-				pm_options.optionChooseOneGappedOnly = true;       //optionChooseOneGappedOnly chooses shape with at most one gap
-                                pm_options.doUngapped = true;
-                                pm_options.doAllOneGapped = true;
-                                pm_options.doSelectedGapped = false;
+				pm_options.chooseOneGappedOnly = true;       //optionChooseOneGappedOnly chooses shape with at most one gap
+                                pm_options.chooseUngappedOnly = false;
 				continue;
 			}
 
 			if (strcmp(argv[arg], "-ug") == 0 || strcmp(argv[arg], "--ungapped") == 0) {
-                                if(pm_options.optionChooseOneGappedOnly) continue;     //if both ungapped and onegapped specified --> optionChooseOneGappedOnly 
-                                pm_options.doUngapped = true;
-                                pm_options.doAllOneGapped = false;
-                                pm_options.doSelectedGapped = false;
+                                if(pm_options.chooseOneGappedOnly) continue;     //if both ungapped and onegapped specified --> optionChooseOneGappedOnly 
+                                pm_options.chooseUngappedOnly = true;
 				continue;
 			}
 			if (strcmp(argv[arg], "-mt") == 0 || strcmp(argv[arg], "--min-threshold") == 0) {
@@ -278,8 +304,8 @@ int main(int argc, const char *argv[])
 					istr >> pm_options.minThreshold;
 					if (!istr.fail())
 					{
-						if (pm_options.minThreshold < 1 || pm_options.minThreshold > 3)
-							cerr << "minimum threshold should be a value between 1 and 3" << endl << endl;
+						if (pm_options.minThreshold < 1 || pm_options.minThreshold > 20)
+							cerr << "minimum threshold should be a value between 1 and 20" << endl << endl;
 						else
 							continue;
 					}
@@ -318,12 +344,15 @@ int main(int argc, const char *argv[])
 	r_options._debugLevel = 1;
 	r_options.errorRate = pm_options.optionErrorRate;
 
-	pm_options.paramFolderPath = argv[0];
-	size_t lastPos = pm_options.paramFolderPath.find_last_of('/') + 1;
-	if (lastPos == pm_options.paramFolderPath.npos + 1) lastPos = pm_options.paramFolderPath.find_last_of('\\') + 1;
-	if (lastPos == pm_options.paramFolderPath.npos + 1) lastPos = 0;
-        pm_options.paramFolderPath.erase(lastPos);
-        
+	if(length(pm_options.paramFolder) == 0) 
+	{
+		pm_options.paramFolderPath = argv[0];
+		size_t lastPos = pm_options.paramFolderPath.find_last_of('/') + 1;
+		if (lastPos == pm_options.paramFolderPath.npos + 1) lastPos = pm_options.paramFolderPath.find_last_of('\\') + 1;
+		if (lastPos == pm_options.paramFolderPath.npos + 1) lastPos = 0;
+		pm_options.paramFolderPath.erase(lastPos);
+	}
+
 	pm_options.verbose = true;
 
 	
@@ -334,7 +363,6 @@ int main(int argc, const char *argv[])
 
 	fill(pm_options.firstTimeK,20,true);//set maximal number of errors considered in parameter computation to <10
 
-	std::cout << "choose..." << std::endl;
         chooseParams(r_options, pm_options);
 /*
 // compute data specific loss rates

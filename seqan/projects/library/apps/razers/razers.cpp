@@ -272,6 +272,7 @@ void printHelp(int, const char *[], RazerSOptions<TSpec> &options, ParamChooserO
 		cerr << "  -oc, --overabundance-cut NUM \t" << "set k-mer overabundance cut ratio (default " << options.abundanceCut << ')' << endl;
 		cerr << "  -rl, --repeat-length NUM     \t" << "set simple-repeat length threshold (default " << options.repeatLength << ')' << endl;
 		cerr << "  -tl, --taboo-length NUM      \t" << "set taboo length (default " << options.tabooLength << ')' << endl;
+		cerr << "  -pd, --param-dir STR         \t" << "folder containing user-computed parameter files (optional)" << endl;
 		cerr << endl << "Verification Options:" << endl;
 		cerr << "  -mN, --match-N               \t" << "\'N\' matches with all other characters" << endl;
 		cerr << "  -ed, --error-distr FILE      \t" << "write error distribution to FILE" << endl;
@@ -467,6 +468,20 @@ int main(int argc, const char *argv[])
 				printHelp(argc, argv, options, pm_options);
 				return 0;
 			}
+			if (strcmp(argv[arg], "-pd") == 0 || strcmp(argv[arg], "--param-dir") == 0) { //prefix for previously computed param files
+				if (arg + 1 < argc) {
+					++arg;
+					pm_options.paramFolder = argv[arg];
+					continue;
+//					cout << "Session id prefix specified\n";
+				}
+				else 
+				{
+					printHelp(argc, argv, options, pm_options);
+					return 0;
+				}
+			}
+
 			if (strcmp(argv[arg], "-id") == 0 || strcmp(argv[arg], "--indels") == 0) {
 				options.hammingOnly = false;
 				continue;
@@ -847,11 +862,14 @@ int main(int argc, const char *argv[])
 			pm_options.optionProbDELETE = 0.01;	//edit distance parameter choosing
 		}
 
-		pm_options.paramFolderPath = argv[0];
-		size_t lastPos = pm_options.paramFolderPath.find_last_of('/') + 1;
-		if (lastPos == pm_options.paramFolderPath.npos + 1) lastPos = pm_options.paramFolderPath.find_last_of('\\') + 1;
-		if (lastPos == pm_options.paramFolderPath.npos + 1) lastPos = 0;
-		pm_options.paramFolderPath.erase(lastPos); 
+		if(length(pm_options.paramFolder) == 0) 
+		{
+			pm_options.paramFolderPath = argv[0];
+			size_t lastPos = pm_options.paramFolderPath.find_last_of('/') + 1;
+			if (lastPos == pm_options.paramFolderPath.npos + 1) lastPos = pm_options.paramFolderPath.find_last_of('\\') + 1;
+			if (lastPos == pm_options.paramFolderPath.npos + 1) lastPos = 0;
+			pm_options.paramFolderPath.erase(lastPos); 
+		}
 		if (options.trimLength > 0) readLength = options.trimLength;
 		if (readLength > 0)
 		{
