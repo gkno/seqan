@@ -357,13 +357,13 @@ getCigarLine(TAlign & align, TString & cigar, TString & mutations)
 		while(ali_it0!=ali_it0_stop && ali_it1!=ali_it1_stop && !isGap(ali_it0)&& !isGap(ali_it1))
 		{
 			++readPos;
-			++readBase;
 			if(*ali_it1 != *ali_it0)
 			{
 				if(first) first = false;
 				else mutations << ",";
 				mutations << readPos <<*readBase;
 			}
+			++readBase;
 			++ali_it0;
 			++ali_it1;
 			++matched;
@@ -381,6 +381,9 @@ getCigarLine(TAlign & align, TString & cigar, TString & mutations)
 			++ali_it0;
 			++ali_it1;
 			++readPos;
+			if(first) first = false;
+			else mutations << ",";
+			mutations << readPos << *readBase;
 			++readBase;
 			++inserted;
 		}
@@ -461,7 +464,7 @@ void assignMappingQuality(TMatches &matches, TReads & reads, TCooc & cooc, TCoun
 				
 				for(unsigned j = 0; j<options.artSeedLength; ++j)
 				{
-					int q = /*qualityValue(reads[readNo][j]);//*/(int)((unsigned char)(reads[readNo][j])>>3);
+					int q = getQualityValue(reads[readNo][j]);//(int)((unsigned char)(reads[readNo][j])>>3);
 					if(q>options.mutationRateQual) q = options.mutationRateQual;
 					avgSeedQual+=q;
 				}
@@ -954,10 +957,7 @@ void dumpMatches(
 						{
 							// 0..filename is the read's Fasta id
 							case 0:
-								if(options.fastaIdQual)
-									file << "ID=" <<prefix(readIDs[currReadNo],length(readIDs[currReadNo])-readLen);
-								else
-									file << "ID=" <<readIDs[currReadNo];
+								file << "ID=" <<readIDs[currReadNo];
 								break;
 							
 							// 1..filename is the read filename + seqNo
@@ -1019,16 +1019,11 @@ void dumpMatches(
 		//						file << (Dna5)reads[currReadNo][j];
 		//					}
 							file << ";quality=";
-							if(options.fastaIdQual)
-								file << suffix(readIDs[currReadNo],length(readIDs[currReadNo])-readLen);
-							else
+							for(unsigned j=0;j<readLen;++j)
 							{
-								for(unsigned j=0;j<readLen;++j)
-								{
-									//TODO need to output the original quality here!
-									file << (char) ((int)((unsigned char)reads[currReadNo][j] >> 3) + 33);
-									//file << (char)(qualityValue(reads[currReadNo][j])+ 33);
-								}
+								//TODO need to output the original quality here!
+								//file << (char) ((int)((unsigned char)reads[currReadNo][j] >> 3) + 33);
+								file << (char)(getQualityValue(reads[currReadNo][j])+ 33);
 							}
 						}
 #endif
