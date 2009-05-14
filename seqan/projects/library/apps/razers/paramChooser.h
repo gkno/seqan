@@ -470,14 +470,55 @@ parseShapesFromFile(TShapes & shapeStrings,
 
 template<typename TError>
 void
+interpolateErrorDistr(TError & errorDistr, ParamChooserOptions & pm_options)
+{
+	if(!pm_options.extrapolate) return;
+
+	unsigned totalN = pm_options.extrapolN;
+	unsigned totalLargeN = pm_options.totalN;
+	
+	// prepare log error distribution 
+	TError shorterErrorDistr;
+	resize(shorterErrorDistr, totalN);
+	float x =(float) (totalLargeN-2)/(totalN-2);
+	// transformed probs for seeing 1s at positions 0...optionMaxN-1
+	for(unsigned j = 0; j < totalN; ++j) 
+	{
+		typename Value<TError>::Type newVal;
+		float index = j * x;
+		float add = index - (int)index;
+		if(j<totalN-1)
+			newVal = errorDistr[(int)index] + add * (errorDistr[(int)index+1] - errorDistr[(int)index]) ;
+		else newVal = errorDistr[totalLargeN-1];
+//		std::cout << newVal << "\n";
+		shorterErrorDistr[j] = newVal;
+	}
+	clear(errorDistr);
+	errorDistr = shorterErrorDistr;
+
+}
+
+template<typename TError>
+void
 makeSelectedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 {
 
 	typedef typename Value<TError>::Type TFloat;
-	unsigned maxErrors =  2 + (unsigned) pm_options.totalN / 10;
-	//unsigned maxErrors = 1 + (unsigned) pm_options.totalN / 10;
-	unsigned minErrors = 0;// (unsigned) pm_options.totalN / 10;
-	if(maxErrors<5 && pm_options.totalN >= 30) maxErrors = 5;
+	
+	unsigned totalN = pm_options.totalN;
+	unsigned totalK = pm_options.totalK;
+	if(pm_options.extrapolate == true)
+	{
+		totalN = pm_options.extrapolN;
+		totalK = pm_options.extrapolK;
+		if(totalN != length(errorDistr)/4)
+			interpolateErrorDistr(errorDistr,pm_options);
+	}
+
+	unsigned maxErrors =  2 + (unsigned) totalN / 10;
+	//unsigned maxErrors = 1 + (unsigned) totalN / 10;
+	unsigned minErrors = 0;// (unsigned) totalN / 10;
+	if(maxErrors<5 && totalN >= 30) maxErrors = 5;
 	
 	typedef typename Value<TError>::Type TErrorValue;
 	String<TErrorValue> logErrorDistribution;
@@ -562,7 +603,7 @@ makeSelectedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 		appendValue(shapeStrings,"1111111111");
 		
 		
-		if(pm_options.totalN < 50)
+		if(totalN < 50)
 		{
 			//q=9
 			appendValue(shapeStrings,"111111111");
@@ -578,7 +619,7 @@ makeSelectedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 			}
 		}
 		
-		if(pm_options.totalN < 40)
+		if(totalN < 40)
 		{
 			//q=8
 			appendValue(shapeStrings,"11111111");
@@ -594,7 +635,7 @@ makeSelectedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 			}
 		}
 		
-		if(pm_options.totalN < 36)
+		if(totalN < 36)
 		{
 			//q=7
 			appendValue(shapeStrings,"1111111");
@@ -610,7 +651,7 @@ makeSelectedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 			}
 		}
 		
-		if(pm_options.totalN < 32)
+		if(totalN < 32)
 		{
 			//q=6
 			appendValue(shapeStrings,"111111");
@@ -637,15 +678,15 @@ makeSelectedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 				++weights[i];
 		
 	// prepare log error distribution 
-	resize(logErrorDistribution, 4*pm_options.totalN);
+	resize(logErrorDistribution, 4*totalN);
 	// transformed probs for seeing 1s at positions 0...optionMaxN-1
 	double remainingProb = 1.0 - pm_options.optionProbINSERT - pm_options.optionProbDELETE;
-	for(unsigned j = 0; j < pm_options.totalN; ++j) 
+	for(unsigned j = 0; j < totalN; ++j) 
 	{
-		logErrorDistribution[SEQAN_MISMATCH*pm_options.totalN+j] = _transform(errorDistr[j]);
-		logErrorDistribution[SEQAN_INSERT*pm_options.totalN+j]   = _transform(pm_options.optionProbINSERT);
-		logErrorDistribution[SEQAN_DELETE*pm_options.totalN+j]   = _transform(pm_options.optionProbDELETE);
-		logErrorDistribution[SEQAN_MATCH*pm_options.totalN+j]    = _transform(remainingProb - errorDistr[j]);
+		logErrorDistribution[SEQAN_MISMATCH*totalN+j] = _transform(errorDistr[j]);
+		logErrorDistribution[SEQAN_INSERT*totalN+j]   = _transform(pm_options.optionProbINSERT);
+		logErrorDistribution[SEQAN_DELETE*totalN+j]   = _transform(pm_options.optionProbDELETE);
+		logErrorDistribution[SEQAN_MATCH*totalN+j]    = _transform(remainingProb - errorDistr[j]);
 	}
 
 #ifdef RUN_RAZERS
@@ -667,9 +708,9 @@ makeSelectedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 	
 	for(int i = length(shapeStrings)-1; i >= 0; --i)
 	{
-		if(length(shapeStrings[i])>pm_options.totalN) continue;
+		if(length(shapeStrings[i])>totalN) continue;
 		
-		unsigned maxT = pm_options.totalN-length(shapeStrings[i])+1;
+		unsigned maxT = totalN-length(shapeStrings[i])+1;
 		
 		String<TFloat> found;
 		resize(found,maxT*maxErrors);
@@ -703,7 +744,7 @@ makeSelectedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 				// create the whole file name
 				::std::stringstream datName;
 				datName << pm_options.fgparams;
-				datName << "/"<<pm_options.fprefix[0]<<"_N" << pm_options.totalN << "_E" << e << "_";
+				datName << "/"<<pm_options.fprefix[0]<<"_N" << totalN << "_E" << e << "_";
 				if(!pm_options.optionHammingOnly) datName << "L.dat";
 				else datName <<"H.dat";
 				
@@ -722,7 +763,7 @@ makeSelectedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 				// count verifications
 				String<ReadMatch<int> > matches;
 				RazerSOptions<RazerSSpec<false, true> > razersOptions;
-				razersOptions.errorRate = (double)e / (double)pm_options.totalN;
+				razersOptions.errorRate = (double)e / (double)totalN;
 				razersOptions.errorRate += 0.0000001;
 				razersOptions.threshold = t;
 				razersOptions._debugLevel = 2;
@@ -1019,6 +1060,34 @@ parseGappedParams(RazerSOptions<TSpec> & r_options,TFile & file, ParamChooserOpt
 
 
 
+// extrapolate if n is large
+template <typename TOptions>
+void
+extrapolateNK(TOptions & pm_options)
+{
+	
+	pm_options.extrapolate = true;
+
+	double recErrorRatio = (double)pm_options.totalN/pm_options.totalK;
+	int bestN, currN;
+	if(pm_options.optionHammingOnly) bestN = pm_options.maxComputedHammingN;
+	else bestN = pm_options.maxComputedEditN;
+	currN = bestN;
+
+	for(; currN > 49; --currN)
+	{
+		double bestRecErrorRatio = (double)bestN/(ceil((double)bestN * 1.0/recErrorRatio));
+		double currRecErrorRatio = (double)currN/(ceil((double)currN * 1.0/recErrorRatio));
+		if(currRecErrorRatio > bestRecErrorRatio)
+			bestN = currN;
+	}
+	pm_options.extrapolN = bestN;
+	pm_options.extrapolK = ceil(((double)bestN * 1.0/recErrorRatio)-0.00001);
+	
+
+}
+
+
 template<typename TSpec>
 bool
 chooseParams(RazerSOptions<TSpec> & r_options, ParamChooserOptions & pm_options)
@@ -1072,6 +1141,13 @@ chooseParams(RazerSOptions<TSpec> & r_options, ParamChooserOptions & pm_options)
 	fill(pm_options.firstTimeK,20,true);//maximal number of errors considered in parameter computation is always <20
 
 
+	pm_options.totalK = (int)(pm_options.optionErrorRate * pm_options.totalN);
+	
+	if ((pm_options.optionHammingOnly && pm_options.totalN > pm_options.maxComputedHammingN )
+		|| (!pm_options.optionHammingOnly && pm_options.totalN > pm_options.maxComputedEditN ))
+		extrapolateNK(pm_options);
+	
+
 	// compute data specific loss rates
 	if (pm_options.fnameCount0 || pm_options.fnameCount1) 
 	{
@@ -1119,46 +1195,6 @@ chooseParams(RazerSOptions<TSpec> & r_options, ParamChooserOptions & pm_options)
 	}
 	else if(!pm_options.prefixCount) pm_options.fprefix[0] = "results";
 
-	pm_options.totalK = (int)(pm_options.optionErrorRate * pm_options.totalN);
-	
-	// decide on which loss rate file to parse, extrapolate if n is large
-	if(pm_options.optionHammingOnly && pm_options.totalN > pm_options.maxComputedHammingN )
-	{
-		pm_options.extrapolate = true;
-
-		double recErrorRatio = (double)pm_options.totalN/pm_options.totalK;
-		int bestN = pm_options.maxComputedHammingN;
-
-		for(int currN = pm_options.maxComputedHammingN; currN > 49; --currN)
-		{
-			double bestRecErrorRatio = (double)bestN/(ceil((double)bestN * 1.0/recErrorRatio));
-			double currRecErrorRatio = (double)currN/(ceil((double)currN * 1.0/recErrorRatio));
-			if(currRecErrorRatio > bestRecErrorRatio)
-				bestN = currN;
-		}
-		pm_options.extrapolN = bestN;
-		pm_options.extrapolK = ceil(((double)bestN * 1.0/recErrorRatio)-0.00001);
-		
-	}
-	if(!pm_options.optionHammingOnly && pm_options.totalN > pm_options.maxComputedEditN )
-	{
-		pm_options.extrapolate = true;
-
-		double recErrorRatio = (double)pm_options.totalN/pm_options.totalK;
-		int bestN = pm_options.maxComputedEditN;
-
-		for(int currN = pm_options.maxComputedEditN; currN > 49; --currN)
-		{
-			double bestRecErrorRatio = (double)bestN/(ceil((double)bestN * 1.0/recErrorRatio));
-			double currRecErrorRatio = (double)currN/(ceil((double)currN * 1.0/recErrorRatio));
-			if(currRecErrorRatio > bestRecErrorRatio)
-				bestN = currN;
-		}
-		
-		pm_options.extrapolN = bestN;
-		pm_options.extrapolK = ceil((double)bestN * 1.0/recErrorRatio);
-		
-	}
 
 	// get name of loss rate file
 	::std::stringstream paramsfile;
