@@ -413,7 +413,7 @@ property(InternalMap<T, 0> const&,
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename T1, typename T2, typename TEdgeDescriptor>
-inline typename Value<InternalMap<Pair<T1, T2>, 1> const>::Type
+inline typename Value<InternalMap<Pair<T1, T2>, 1> >::Type
 getProperty(InternalMap<Pair<T1, T2>, 1> const&,
 			TEdgeDescriptor e)
 {
@@ -435,7 +435,7 @@ getProperty(InternalMap<Pair<T1, T2>, 1>&,
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename T1, typename T2, typename TEdgeDescriptor>
-inline typename Value<InternalMap<Pair<T1, T2>, 2> const>::Type
+inline typename Value<InternalMap<Pair<T1, T2>, 2> >::Type
 getProperty(InternalMap<Pair<T1, T2>, 2> const&,
 			TEdgeDescriptor e)
 {
@@ -577,7 +577,7 @@ property(InternalPointerMap<TValue TClass::*, TPMember> const&,
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TClass, typename TValue, TValue TClass:: * TPMember, typename TEdgeDescriptor>
-inline typename Value<InternalPointerMap<TValue TClass::*, TPMember> const>::Type
+inline typename Value<InternalPointerMap<TValue TClass::*, TPMember> >::Type
 getProperty(InternalPointerMap<TValue TClass::*, TPMember> const&,
 			TEdgeDescriptor const e)
 {

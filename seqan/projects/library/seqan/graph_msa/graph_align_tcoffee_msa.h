@@ -24,6 +24,388 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 
+template<typename TAlphabet, typename TScore>
+struct MsaOptions {
+public:
+	// Rescore segment matches after refinement
+	bool rescore;
+
+	// Output format
+	// 0: Fasta
+	// 1: Msf
+	unsigned int outputFormat;
+
+	// Scoring object
+	TScore sc;
+
+	// All methods to compute segment matches
+	// 0: global alignment
+	// 1: local alignments
+	// 2: overlap alignments
+	// 3: longest common subsequence
+	String<unsigned int> method;
+	
+	// Various input and output file names
+	String<std::string> alnfiles;		// External alignment files
+	String<std::string> libfiles;		// T-Coffee library files
+	String<std::string> blastfiles;		// Blast match files
+	String<std::string> mummerfiles;	// MUMmer files
+	std::string outfile;				// Output file name
+	std::string seqfile;				// Sequence file name
+	std::string infile;					// Alignment file for alignment evaluation
+	std::string treefile;				// Guide tree file
+	
+	// Initialization
+	MsaOptions() : rescore(true), outputFormat(0) {}
+};
+
+//////////////////////////////////////////////////////////////////////////////////
+
+template<typename TAlphabet, typename TScore>
+inline void
+evaluateAlignment(MsaOptions<TAlphabet, TScore> const& msaOpt) {
+	typedef typename Value<TScore>::Type TScoreValue;
+	typedef String<TAlphabet> TSequence;
+	typedef typename Size<TSequence>::Type TSize;
+	StringSet<TSequence, Owner<> > origStrSet;
+	StringSet<String<char> > names;
+
+	// Read the sequences
+	std::fstream strm;
+	strm.open(msaOpt.infile.c_str(), ::std::ios_base::in | ::std::ios_base::binary);
+	read(strm,origStrSet,names,FastaAlign());	
+	strm.close();
+
+	// Make a dependent StringSet
+	typedef StringSet<TSequence, Dependent<> > TDepSequenceSet;
+	TDepSequenceSet strSet(origStrSet);
+	
+	// Read the alignment
+	typedef String<Fragment<> > TFragmentString;
+	String<TScoreValue> scores;
+	TFragmentString matches;
+	std::fstream strm_lib;
+	strm_lib.open(msaOpt.infile.c_str(), ::std::ios_base::in | ::std::ios_base::binary);
+	read(strm_lib,matches, scores, names, FastaAlign());	
+	strm_lib.close();
+
+	// Build the alignment graph
+	typedef Graph<Alignment<TDepSequenceSet, TSize> > TGraph;
+	TGraph g(strSet);
+	buildAlignmentGraph(matches, g, FrequencyCounting() );
+
+	// Print the scoring information
+	TScoreValue gop = msaOpt.sc.data_gap_open;
+	TScoreValue gex = msaOpt.sc.data_gap_extend;
+	std::cout << "Scoring parameters:" << std::endl;
+	std::cout << "*Gap opening: " << gop << std::endl;
+	std::cout << "*Gap extension: " << gex << std::endl;
+	std::cout << "*Scoring matrix: " << std::endl;
+	TSize alphSize = ValueSize<TAlphabet>::VALUE;
+	std::cout << "   ";
+	for(TSize col = 0; col<alphSize; ++col) std::cout << TAlphabet(col) << ',';
+	std::cout << std::endl;
+	for(TSize row = 0; row<alphSize; ++row) {
+		for(TSize col = 0; col<alphSize; ++col) {
+			if (col == 0) std::cout << TAlphabet(row) << ": ";
+			std::cout << score(msaOpt.sc, TAlphabet(row), TAlphabet(col));
+			if (col < alphSize - 1) std::cout << ',';
+		}
+		std::cout << std::endl;
+	}
+	std::cout << std::endl;
+
+	// Print the alignment information
+	TSize numGapEx = 0;
+	TSize numGap = 0;
+	TSize numPairs = 0;
+	TSize alignLen = 0;
+	String<TSize> pairCount;
+	String<char> mat;
+	if (convertAlignment(g, mat)) {
+		TScoreValue alignScore = alignmentEvaluation(g, msaOpt.sc, numGapEx, numGap, numPairs, pairCount, alignLen);
+		std::cout << "Alignment Score: " << alignScore << std::endl;
+		std::cout << "Alignment Length: " << alignLen << std::endl;
+		std::cout << "#Match-Mismatch pairs: " << numPairs << std::endl;
+		std::cout << "Score contribution by match-mismatch pairs: " << (alignScore - (((TScoreValue) numGap * gop) + ((TScoreValue) numGapEx * gex))) << std::endl;
+		std::cout << "#Gap extensions: " << numGapEx << std::endl;
+		std::cout << "Score contribution by gap extensions: " << ((TScoreValue) numGapEx * gex) << std::endl;
+		std::cout << "#Gap openings: " << numGap << std::endl;
+		std::cout << "Score contribution by gap openings: " << ((TScoreValue) numGap * gop) << std::endl;
+		std::cout << std::endl;
+		std::cout << "#Pairs: " << std::endl;
+		std::cout << "   ";
+		for(TSize col = 0; col<alphSize; ++col) std::cout << TAlphabet(col) << ',';
+		std::cout << std::endl;
+		for(TSize row = 0; row<alphSize; ++row) {
+			for(TSize col = 0; col<alphSize; ++col) {
+				if (col == 0) std::cout << TAlphabet(row) << ": ";
+				std::cout << value(pairCount, row * alphSize + col);
+				if (col < alphSize - 1) std::cout << ',';
+			}
+			std::cout << std::endl;
+		}
+	} else {
+		std::cout << "No valid alignment!" << std::endl;
+	}
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+
+template<typename TStringSet, typename TCargo, typename TSpec, typename TStringSet1, typename TNames, typename TAlphabet, typename TScore>
+inline void
+globalMsaAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& gAlign, 
+				   TStringSet1& sequenceSet,
+				   TNames& sequenceNames,
+				   MsaOptions<TAlphabet, TScore> const& msaOpt)
+{
+	typedef typename Value<TScore>::Type TScoreValue;
+	typedef typename Size<TStringSet>::Type TSize;
+	typedef Graph<Alignment<TStringSet, TSize> > TGraph;
+	typedef typename Id<TGraph>::Type TId;
+	
+	// Initialize alignment object
+	clear(gAlign);
+	assignStringSet(gAlign, sequenceSet);
+
+#ifdef SEQAN_PROFILE
+	std::cout << "Scoring parameters:" << std::endl;
+	std::cout << "*Gap opening: " << msaOpt.sc.data_gap_open << std::endl;
+	std::cout << "*Gap extension: " << msaOpt.sc.data_gap_extend << std::endl;
+	//std::cout << "*Scoring matrix: " << std::endl;
+	//TSize alphSize = ValueSize<TAlphabet>::VALUE;
+	//std::cout << "   ";
+	//for(TSize col = 0; col<alphSize; ++col) std::cout << TAlphabet(col) << ',';
+	//std::cout << std::endl;
+	//for(TSize row = 0; row<alphSize; ++row) {
+	//	for(TSize col = 0; col<alphSize; ++col) {
+	//		if (col == 0) std::cout << TAlphabet(row) << ": ";
+	//		std::cout << score(msaOpt.sc, TAlphabet(row), TAlphabet(col));
+	//		if (col < alphSize - 1) std::cout << ',';
+	//	}
+	//	std::cout << std::endl;
+	//}
+	//std::cout << std::endl;
+#endif
+
+	// Some alignment constants
+	TStringSet& seqSet = stringSet(gAlign);
+	TSize nSeq = length(seqSet);
+	TSize threshold = 30;
+
+	// Select all possible pairs for global and local alignments
+	String<Pair<TId, TId> > pList;
+	selectPairs(seqSet, pList);
+
+	// Set-up a distance matrix
+	typedef String<double> TDistanceMatrix;
+	typedef typename Value<TDistanceMatrix>::Type TDistanceValue;
+	TDistanceMatrix distanceMatrix;
+
+	// Containers for segment matches and corresponding scores 
+	typedef String<Fragment<> > TFragmentString;
+	TFragmentString matches;
+	typedef String<TScoreValue> TScoreValues;
+	TScoreValues scores;
+
+	// Include segment matches from subalignments
+	if (!empty(msaOpt.alnfiles)) {
+#ifdef SEQAN_PROFILE
+		std::cout << "Parsing external alignment files:" << std::endl;
+#endif
+		typedef typename Iterator<String<std::string>, Standard>::Type TIter;
+		TIter begIt = begin(msaOpt.alnfiles, Standard() );
+		TIter begItEnd = end(msaOpt.alnfiles, Standard() );
+		for(;begIt != begItEnd; goNext(begIt)) {
+#ifdef SEQAN_PROFILE
+			std::cout << "*External file " << (*begIt) << std::endl;
+#endif
+			std::ifstream strm_lib;
+			strm_lib.open((*begIt).c_str(), ::std::ios_base::in | ::std::ios_base::binary);
+			read(strm_lib, matches, scores, sequenceNames, FastaAlign());
+			strm_lib.close();
+		}
+#ifdef SEQAN_PROFILE
+		std::cout << "External segment matches done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
+#endif
+	}
+
+	// Include computed segment matches
+	if (!empty(msaOpt.method)) {
+#ifdef SEQAN_PROFILE
+		std::cout << "Computing segment matches:" << std::endl;
+#endif
+		typedef typename Iterator<String<unsigned int>, Standard>::Type TIter;
+		TIter begIt = begin(msaOpt.method, Standard() );
+		TIter begItEnd = end(msaOpt.method, Standard() );
+		for(;begIt != begItEnd; goNext(begIt)) {
+#ifdef SEQAN_PROFILE
+			if (*begIt == 0) std::cout << "*Method: global" << std::endl;
+			else if (*begIt == 1) std::cout << "*Method: local" << std::endl;
+			else if (*begIt == 2) std::cout << "*Method: overlap" << std::endl;
+			else if (*begIt == 3) std::cout << "*Method: lcs" << std::endl;
+#endif
+			if (*begIt == 0) appendSegmentMatches(seqSet, pList, msaOpt.sc, matches, scores, distanceMatrix, GlobalPairwise_Library() );
+			else if (*begIt == 1) appendSegmentMatches(seqSet, pList, msaOpt.sc, matches, scores, LocalPairwise_Library() );
+			else if (*begIt == 2) {
+				Nothing noth;
+				AlignConfig<true,true,true, true> ac;
+				appendSegmentMatches(seqSet, pList, msaOpt.sc, matches, scores, noth, ac, GlobalPairwise_Library() );
+			} 
+			else if (*begIt == 3) appendSegmentMatches(seqSet, matches, scores, Lcs_Library() );
+			else {
+#ifdef SEQAN_PROFILE
+				std::cout << "*Unknown method!!!" << std::endl;
+#endif
+			}
+#ifdef SEQAN_PROFILE
+			std::cout << "*Done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
+#endif
+		}	
+	}
+
+	// Include a T-Coffee library
+	if (!empty(msaOpt.libfiles)) {
+#ifdef SEQAN_PROFILE
+		std::cout << "Parsing a T-Coffee Library:" << std::endl;
+#endif
+		typedef typename Iterator<String<std::string>, Standard>::Type TIter;
+		TIter begIt = begin(msaOpt.libfiles, Standard() );
+		TIter begItEnd = end(msaOpt.libfiles, Standard() );
+		for(;begIt != begItEnd; goNext(begIt)) {
+#ifdef SEQAN_PROFILE
+			std::cout << "*T-Coffee library: " << (*begIt) << std::endl;
+#endif
+			std::ifstream strm_lib;
+			strm_lib.open((*begIt).c_str(), std::ios_base::in | std::ios_base::binary);
+			read(strm_lib, matches, scores, sequenceNames, TCoffeeLib());
+			strm_lib.close();
+		}
+#ifdef SEQAN_PROFILE
+		std::cout << "Parsing done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
+#endif
+	}
+
+	// Include MUMmer segment matches
+	if (!empty(msaOpt.mummerfiles)) {
+#ifdef SEQAN_PROFILE
+		std::cout << "Parsing MUMmer segment matches:" << std::endl;
+#endif
+		typedef typename Iterator<String<std::string>, Standard>::Type TIter;
+		TIter begIt = begin(msaOpt.mummerfiles, Standard() );
+		TIter begItEnd = end(msaOpt.mummerfiles, Standard() );
+		for(;begIt != begItEnd; goNext(begIt)) {
+#ifdef SEQAN_PROFILE
+			std::cout << "*MUMmer file: " << (*begIt) << std::endl;
+#endif
+			std::ifstream strm_lib;
+			strm_lib.open((*begIt).c_str(), std::ios_base::in | std::ios_base::binary);
+			read(strm_lib, matches, scores, seqSet, sequenceNames, MummerLib());		
+			strm_lib.close();
+		}
+#ifdef SEQAN_PROFILE
+		std::cout << "Parsing done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
+#endif
+	}
+
+	// Include BLAST segment matches
+	if (!empty(msaOpt.blastfiles)) {
+#ifdef SEQAN_PROFILE
+		std::cout << "Parsing BLAST segment matches:" << std::endl;
+#endif
+		typedef typename Iterator<String<std::string>, Standard>::Type TIter;
+		TIter begIt = begin(msaOpt.blastfiles, Standard() );
+		TIter begItEnd = end(msaOpt.blastfiles, Standard() );
+		for(;begIt != begItEnd; goNext(begIt)) {
+#ifdef SEQAN_PROFILE
+			std::cout << "*BLAST file: " << (*begIt) << std::endl;
+#endif
+			std::ifstream strm_lib;
+			strm_lib.open((*begIt).c_str(), std::ios_base::in | std::ios_base::binary);
+			read(strm_lib, matches, scores, sequenceNames, BlastLib());
+			strm_lib.close();
+		}
+#ifdef SEQAN_PROFILE
+		std::cout << "Parsing done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
+#endif
+	}
+
+#ifdef SEQAN_PROFILE
+	std::cout << "Total number of segment matches: " << length(matches) << std::endl;
+#endif
+	// Score the matches
+	if (msaOpt.rescore) {
+#ifdef SEQAN_PROFILE	
+		std::cout << "Scoring method: Re-Score" << std::endl;
+#endif
+		scoreMatches(seqSet, msaOpt.sc, matches, scores);
+#ifdef SEQAN_PROFILE
+		std::cout << "Scoring done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
+#endif
+	}
+
+
+	// Use these segment matches for the initial alignment graph
+	TGraph g(seqSet);
+#ifdef SEQAN_PROFILE
+	std::cout << "Construction of alignment graph: FractionalScore" << std::endl;
+#endif
+	buildAlignmentGraph(matches, scores, g, FractionalScore() );
+	clear(matches);
+	clear(scores);
+#ifdef SEQAN_PROFILE
+	std::cout << "Alignment graph construction done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
+#endif
+
+	// Guide tree
+	Graph<Tree<double> > guideTree;
+	if (!msaOpt.treefile.empty()) {
+#ifdef SEQAN_PROFILE
+		std::cout << "Guide Tree: " << msaOpt.treefile << std::endl;
+#endif
+		std::fstream strm_tree;
+		strm_tree.open(msaOpt.treefile.c_str(), ::std::ios_base::in | ::std::ios_base::binary);
+		read(strm_tree,guideTree,sequenceNames,NewickFormat());	// Read newick tree
+		strm_tree.close();
+	} else {
+#ifdef SEQAN_PROFILE
+		std::cout << "Guide Tree: Neighbor Joining" << std::endl;
+#endif
+		// Check if we have a valid distance matrix
+		if (empty(distanceMatrix)) getDistanceMatrix(g, distanceMatrix, LibraryDistance());
+		slowNjTree(distanceMatrix, guideTree);
+	}
+#ifdef SEQAN_PROFILE
+	std::cout << "Guide tree done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
+#endif
+		
+	// Triplet extension
+	if (nSeq < threshold) tripletLibraryExtension(g);
+	else groupBasedTripletExtension(g, guideTree, threshold / 2);
+#ifdef SEQAN_PROFILE
+	std::cout << "Triplet extension done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
+#endif
+
+	// Progressive Alignment
+	progressiveAlignment(g, guideTree, gAlign);
+#ifdef SEQAN_PROFILE
+	std::cout << "Progressive alignment done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
+#endif
+
+	clear(guideTree);
+	clear(distanceMatrix);
+	clear(g);
+#ifdef SEQAN_PROFILE
+	std::cout << "Clean-up done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
+#endif
+
+}
+
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 // The 2 most useful functions in SeqAn!!!
 //////////////////////////////////////////////////////////////////////////////

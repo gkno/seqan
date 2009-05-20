@@ -74,7 +74,7 @@ void Test_Trie() {
 	//createSuffixTrie
 	clear(g);
 	clear(pos);
-	char * str = "ABABBA";
+	char * str = (char*) "ABABBA";
 	char * strend = end(str);
 	char * it;
 	typedef VertexDescriptor<Graph<Automaton<char> > >::Type TVertexDescriptor;

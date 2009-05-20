@@ -482,9 +482,9 @@ _stringToNumber(TString& str)
 
 template<typename TPath, typename TStringSet, typename TNames>
 inline unsigned int
-_loadSequences(TPath const& in_path, 
-					  TStringSet& origStrSet,
-					  TNames& names)
+_loadSequences(TPath const& in_path,
+			   TStringSet& origStrSet,
+			   TNames& names)
 {
 	typedef typename Size<TStringSet>::Type TSize;
 	
