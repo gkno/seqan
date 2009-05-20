@@ -61,6 +61,10 @@
 	#include "../../library/demos/alignment.cpp"
 	#undef main
 
+	#define main runMsaAlignment
+	#include "../../library/demos/alignment_msa.cpp"
+	#undef main
+
 	#define main runAlignmentLocal
 	#include "../../library/demos/alignment_local.cpp"
 	#undef main
@@ -230,6 +234,7 @@ int main(int argc, const char *argv[])
 
 #ifdef TEST_ALIGNMENT
 	runAlignment();
+	runMsaAlignment();
 	runAlignmentLocal();
 #endif
 

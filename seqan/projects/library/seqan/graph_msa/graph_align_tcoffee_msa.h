@@ -404,6 +404,73 @@ globalMsaAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& gAlign,
 }
 
 
+//////////////////////////////////////////////////////////////////////////////
+
+
+template<typename TStringSet, typename TCargo, typename TSpec, typename TScore>
+inline void
+globalMsaAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& gAlign,
+				   TScore const& scoreObject)
+{
+	typedef typename Value<TStringSet>::Type TString;
+	typedef typename Value<TString>::Type TAlphabet;
+	TStringSet sequenceSet = stringSet(gAlign);
+	String<String<char> > sequenceNames;
+	fill(sequenceNames, length(sequenceSet), String<char>("tmpName"));
+	MsaOptions<AminoAcid, TScore> msaOpt;
+	msaOpt.sc = scoreObject;
+	appendValue(msaOpt.method, 0);  // Global pairwise
+	appendValue(msaOpt.method, 1);	// Local pairwise
+	globalMsaAlignment(gAlign, sequenceSet, sequenceNames, msaOpt);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+
+template<typename TSource, typename TSpec, typename TScore>
+inline void
+globalMsaAlignment(Align<TSource, TSpec>& align,
+				   TScore const& scoreObject)
+{
+	typedef StringSet<TSource, Dependent<> > TStringSet;
+	TStringSet sequenceSet = stringSet(align);
+	Graph<Alignment<TStringSet, void, WithoutEdgeId> > gAlign(sequenceSet);
+	globalMsaAlignment(gAlign, scoreObject);
+	
+	// Pipe into Align data structure
+	String<char> mat;
+	convertAlignment(gAlign, mat);
+	typedef Align<TSource, TSpec> TAlign;
+	typedef typename Size<TAlign>::Type TSize;
+	typedef typename Row<TAlign>::Type TRow;
+	typedef typename Iterator<TRow>::Type TRowIterator;
+	clearGaps(align);
+	TSize nseq = length(sequenceSet);
+	String<TRowIterator> rowIter;
+	resize(rowIter, nseq);
+	for(TSize i = 0; i<nseq; ++i) value(rowIter, i) = begin(row(align, i));
+	TSize lenMat = length(mat);
+	TSize colLen = lenMat / nseq;
+	TSize gapCount = 0;
+	char gapChar = gapValue<char>();
+	for(TSize alignRow = 0; alignRow < nseq; ++alignRow) {
+		for(TSize pos = alignRow * colLen; pos < (alignRow + 1) * colLen; ++pos) {
+			if (value(mat, pos) != gapChar) {
+				if (gapCount) {
+					insertGaps(value(rowIter, alignRow), gapCount);
+					goFurther(value(rowIter, alignRow), gapCount);
+					gapCount = 0;
+				}
+				goNext(value(rowIter,alignRow));
+			} else ++gapCount;
+		}
+		if (gapCount) {
+			insertGaps(value(rowIter, alignRow), gapCount);
+			goFurther(value(rowIter, alignRow), gapCount);
+			gapCount = 0;
+		}
+	}
+}
 
 
 //////////////////////////////////////////////////////////////////////////////
