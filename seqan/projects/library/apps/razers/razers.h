@@ -115,11 +115,6 @@ namespace SEQAN_NAMESPACE_MAIN
 		bool		lowMemory;		// set maximum shape weight to 13 to limit size of q-gram index
 		bool		fastaIdQual;		// hidden option for special fasta+quality format we use
 
-#ifdef RAZERS_DUMP_SNPS
-		bool		bayesian;
-		double		testLevel;
-		const char	*outputSNP;			// name of result file
-#endif
 
 	// misc
 		unsigned	compactThresh;		// compact match array if larger than compactThresh
@@ -188,11 +183,6 @@ namespace SEQAN_NAMESPACE_MAIN
 #endif
 			lowMemory = false;		// set maximum shape weight to 13 to limit size of q-gram index
 			fastaIdQual = false;
-#ifdef RAZERS_DUMP_SNPS
-			bayesian = true;
-			testLevel = 0.01;
-			outputSNP = "";
-#endif
 
 		}
 	};

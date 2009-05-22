@@ -28,7 +28,6 @@
 #define RAZERS_MASK_READS		// remove matches with max-hits optimal hits on-the-fly
 //#define NO_PARAM_CHOOSER
 //#define RAZERS_PARALLEL			// parallelize using Intel's Threading Building Blocks
-//#define RAZERS_DUMP_SNPS
 #define RAZERS_MATEPAIRS
 //#define RAZERS_DIRECT_MAQ_MAPPING
 //#define SEQAN_USE_SSE2_WORDS	// use SSE2 128-bit integers for MyersBitVector
@@ -180,11 +179,6 @@ int mapReads(
 	if (!options.spec.DONT_DUMP_RESULTS)
 		dumpMatches(matches, genomeNames, genomeFileNameList, gnoToFileMap, readSet, stats, readNames, readFileNames[0], errorPrbFileName, options);
 
-#ifdef RAZERS_DUMP_SNPS
-	//////////////////////////////////////////////////////////////////////////////
-	// Step 4: Do simple SNP calling
-		dumpSNPs(matches, genomeNames, genomeFileNameList, gnoToFileMap, readSet, readNames, readFileName, options);
-#endif
 
 
 	return 0;
