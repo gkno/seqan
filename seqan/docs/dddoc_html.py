@@ -99,28 +99,39 @@ def copyFile(path, filename):
 #######################################################################
 
 def escapeFiles(text):
-    text = text.replace("!", "-21")
-    text = text.replace("\"", "-22")
-    text = text.replace("#", "-23")
-    text = text.replace("$", "-24")
-    text = text.replace("%", "-25")
-    text = text.replace("&", "-26")
-    text = text.replace("'", "-27")
-    text = text.replace("(", "-28")
-    text = text.replace(")", "-29")
-    text = text.replace("*", "-2A")
-    text = text.replace("+", "-2B")
-    text = text.replace(",", "-2C")
-    text = text.replace("/", "-2F")
-    text = text.replace(":", "-3A")
-    text = text.replace("<", "-3C")
-    text = text.replace(">", "-3E")
-    text = text.replace("?", "-3F")
-    text = text.replace("\\", "-5C")
-    text = text.replace("|", "-7C")
-    text = text.replace("\n", "")
+    text = text.replace("_", "__")
+
+    ret = ""
+    for i in range(len(text)):
+    	if (text[i] >= 'A') and (text[i] <= 'Z'):
+    		ret += "_"
+    	ret += text[i]
+
+    ret = ret.replace("\t", "_09")
+    ret = ret.replace("\n", "_0a")
+    ret = ret.replace("!", "_21")
+    ret = ret.replace("\"", "_22")
+    ret = ret.replace("#", "_23")
+    ret = ret.replace("$", "_24")
+    ret = ret.replace("%", "_25")
+    ret = ret.replace("&", "_26")
+    ret = ret.replace("'", "_27")
+    ret = ret.replace("(", "_28")
+    ret = ret.replace(")", "_29")
+    ret = ret.replace("*", "_2a")
+    ret = ret.replace("+", "_2b")
+    ret = ret.replace("/", "_2f")
+    ret = ret.replace(":", "_3a")
+    ret = ret.replace(",", "_2c")
+    ret = ret.replace("<", "_3c")
+    ret = ret.replace(">", "_3e")
+    ret = ret.replace("?", "_3f")
+    ret = ret.replace("\\", "_5c")
+    ret = ret.replace("|", "_7c")
+    ret = ret.replace(" ", "+")
     
-    return text
+    if (len(ret) == 0) or (ret[0] == '_'): return ret
+    else: return '.'+ret
 
 ################################################################################
 
@@ -149,7 +160,7 @@ def escapeJavaScript(text):
 ################################################################################
 
 def getFilename(cat, item):
-    return escapeFiles(cat + "_" + item) + ".html"
+    return cat.upper() + escapeFiles(item) + ".html"
 
 def getIndexpage(cat):
     s = dddoc.DATA["globals.project.indexcategory"].text()
@@ -157,16 +168,18 @@ def getIndexpage(cat):
     if (s[0:(len(cat))] == cat): 
     	return "index.html"
     else:
-    	return escapeFiles("INDEXPAGE_" + cat) + ".html"
+    	return "INDEXPAGE" + escapeFiles(cat) + ".html"
 
 def getIndexname(cat, subcat = ""):
-    return escapeFiles("INDEX_" + cat + "__" + subcat) + ".html"
+    if len(subcat) == 0: return "INDEX" + escapeFiles(cat) + ".html"
+    else: return "INDEX" + escapeFiles(cat) + escapeFiles(subcat) + ".html"
 
 def getIndexnameLink(cat, item, subcat = ""):
-    return escapeFiles("INDEX_" + cat + "__" + subcat) + ".html#" + item
+    if len(subcat) == 0: return "INDEX" + escapeFiles(cat) + ".html#" + item
+    else: return "INDEX" + escapeFiles(cat) + escapeFiles(subcat) + ".html#" + item
 
 def getDemoFilename(sourcefile):
-    return escapeFiles("DEMO_" + sourcefile + ".html")
+    return "DEMO" + escapeFiles(sourcefile) + ".html"
 
     
 ################################################################################
@@ -1065,7 +1078,7 @@ def printGlossary(fl, data, category):
         if len(keys) > 0:         
             for key in keys:
                 fl.write('<div class=glossary_entry>')
-                fl.write('<a name="Glossary_' + escapeFiles(key) + '"></a>')
+                fl.write('<a name="GLOSSARY' + escapeFiles(key) + '"></a>')
                 fl.write('<div class=glossary_title>' + translateText(key) + '</div>')
                 fl.write('<div class=glossary_content>')
                 subprintText(fl, lines[key])
@@ -1559,7 +1572,7 @@ def gatherGlossary():
                 got_it[fname] = 1
                 print ".",
                
-                href = getFilename(line.name(0), line.name(1)) + '#Glossary_' + escapeFiles(key)
+                href = getFilename(line.name(0), line.name(1)) + '#GLOSSARY' + escapeFiles(key)
                 link = 'href="' + href + '" title="' + escapeJavaScript(dddoc.DATA[fname].text()) + '">'
                 
                 if not globalGlossary.has_key(key):  globalGlossary[key] = []
