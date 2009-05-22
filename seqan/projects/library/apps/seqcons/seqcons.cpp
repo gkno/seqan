@@ -1,7 +1,30 @@
+/*==========================================================================
+               SeqAn - The Library for Sequence Analysis
+                         http://www.seqan.de 
+============================================================================
+Copyright (C) 2007
+
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 3 of the License, or (at your option) any later version.
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+Lesser General Public License for more details.
+==========================================================================*/
+
 #define SEQAN_PROFILE
 
+#include <seqan/basic.h>
+
+// Profiling
+#ifdef SEQAN_PROFILE
+		SEQAN_PROTIMESTART(__myProfileTime); 
+#endif
+
 #include <seqan/consensus.h>
-//#include <seqan/misc/misc_random.h>
 
 #include <iostream>
 #include <fstream>
@@ -9,93 +32,126 @@
 
 using namespace seqan;
 
-/*
+//////////////////////////////////////////////////////////////////////////////////
 
-template <typename TOptions>
-inline void 
-evaluationOfConsensusAlignment(TOptions& cfgOpt) 
-{
-	typedef typename Size<TOptions>::Type TSize;
-	typedef String<Dna> TSequence;
-	typedef String<char> TName;
-	StringSet<TSequence, Owner<> > origStrSet;
-	StringSet<TName> names;
+struct ConsensusOptions {
+public:
+	// Bandwidth of overlap alignment
+	int bandwidth;
 
-	// Read the sequences
-	std::fstream strm;
-	strm.open(toCString(value(cfgOpt, "evaluation")), std::ios_base::in | std::ios_base::binary);
-	read(strm,origStrSet,names,FastaAlign());	
-	strm.close();
+	// Number of computed overlaps per read (at the beginning and end of a read)
+	int overlaps;
 
-	// Make a dependent StringSet
-	typedef StringSet<TSequence, Dependent<> > TDepSequenceSet;
-	TDepSequenceSet strSet(origStrSet);
+	// Minimum match length of a computed overlap
+	int matchlength;
+
+	// Minimum quality (in percent identity) of a computed overlap
+	int quality;
+
+	// Window size, only relevant for insert sequencing
+	// If window == 0, no insert sequencing is assumed
+	int window;
 	
-	// Score the alignment
-	typedef Score<int> TScore;
-	typedef Value<TScore>::Type TScoreValue;
-	TScore scType = Score<int>(2,-6,-4,-9);
+	// SNP calling
+	// 0: majority
+	// 1: bayesian
+	int snp;
 
-	// Read the alignment
-	typedef Graph<Alignment<TDepSequenceSet, TSize> > TGraph;
-	TGraph g(strSet);
-	std::fstream strm_lib;
-	strm_lib.open(toCString(value(cfgOpt, "evaluation")), std::ios_base::in | std::ios_base::binary);
-	read(strm_lib,g,names,scType,FastaAlign());	
-	strm_lib.close();
+	// Output
+	// 0: seqan style
+	// 1: afg output format
+	int output;
 
-	// Get the alignment matrix
-	typedef char TValue;
-	typedef String<TValue> TAlignmentMatrix;
-	TAlignmentMatrix alignmentMatrix;
-	if (convertAlignment(g, alignmentMatrix)) {
+	// Conversion option
+	// 0: No conversion, regular consensus computation
+	// 1: Creates an afg file
+	// 2: Creates a Celera frg file
+	// 3: Creates a Celera cgb file
+	int convert;
 
-		// Find all differences
-		TSize nseq = length(stringSet(g));
-		TSize len = length(alignmentMatrix) / nseq;
-		String<bool> diff;
-		fill(diff, len, false);
-		TSize countDiff = 0;
-		for(TSize col = 0; col<len; ++col) {
-			TValue c = value(alignmentMatrix, col);
-			for(TSize row = 1; row<nseq; ++row) {
-				if (value(alignmentMatrix, row * len + col) != c) {
-					value(diff, col) = true;
-					break;
-				}
-			}
-		}
+	// Offset all reads, so the first read starts at position 0
+	bool moveToFront;
 
-		// Output differences
-		TSize col = 0;
-		while(col < len) {
-			// New diff?
-			if (value(diff, col)) {
-				// Extend diff
-				TSize stopCol = col + 1;
-				while (((stopCol < len) && (value(diff, stopCol)))) ++stopCol;
+	// Scoring object for overlap alignments
+	Score<int> sc;
 
-				// Output diff
-				std::cout << "Difference: " << std::endl;
-				TSize from = 0;
-				TSize windowSize = 10;
-				if (col > windowSize) from = col - windowSize;
-				TSize to = len;
-				if (stopCol + windowSize < len) to = stopCol + windowSize;
-				for(TSize localRow = 0; localRow<nseq; ++localRow) {
-					for(TSize localCol = from; localCol<to; ++localCol) {
-						std::cout << value(alignmentMatrix, localRow * len + localCol);
-					}
-					std::cout << "  <<" << value(names, localRow) << std::endl;
-				}
-				col = stopCol;
-			} else {
-				++col;
-			}
-		}
+	// Various input and output files
+	std::string readsfile;				// File of reads in FASTA format
+	std::string afgfile;				// AMOS afg file input
+	std::string source;					// Reference genome
+	std::string outfile;				// Output file name
+	
+	// Initialization
+	ConsensusOptions() : bandwidth(8), overlaps(3), matchlength(15), quality(80), window(0), snp(0), output(0), convert(0), moveToFront(false), outfile("readAlign.txt") 
+	{
+		sc = Score<int>(2,-6,-4,-9);
 	}
+};
+
+
+//////////////////////////////////////////////////////////////////////////////////
+
+void
+printVersion() {
+	::std::cerr << "**************************************************" << ::std::endl;
+	::std::cerr << "* Consensus Computation                          *" << ::std::endl;
+	::std::cerr << "*                                                *" << ::std::endl;
+	::std::cerr << "* SeqCons                                        *" << ::std::endl;
+	::std::cerr << "* Version: 0.204 (22. May 2009)                  *" << ::std::endl;
+	::std::cerr << "**************************************************" << ::std::endl;
+	::std::cerr << ::std::endl;
 }
-*/
+
+//////////////////////////////////////////////////////////////////////////////////
+
+
+void 
+printHelp() {
+	::std::cerr <<  "Usage: ./seqcons -reads <FASTA File with Reads> [Options]\n" << ::std::endl;
+	::std::cerr <<  "\nOptions\n" << ::std::endl;
+
+	// Main options
+	::std::cerr <<  "\nMain Options\n------------\n" << ::std::endl;
+	::std::cerr <<  "-reads <FASTA File with Reads>\n" << ::std::endl;
+	::std::cerr <<  "\tReads in FASTA format and approximate layout positions.\n\n" << ::std::endl;
+	::std::cerr <<  "-afg <AMOS message file>\n" << ::std::endl;
+	::std::cerr <<  "\tInput is read from an AMOS message file instead of a fasta file.\n\n" << ::std::endl;
+	::std::cerr <<  "-matchlength <Length>\n" << ::std::endl;
+	::std::cerr <<  "\tMinimum match-length for an overlap, default is 15.\n\n" << ::std::endl;
+	::std::cerr <<  "-quality <Number>\n" << ::std::endl;
+	::std::cerr <<  "\tMinimum quality of an overlap, default is 80 (for 80% identity).\n\n" << ::std::endl;
+	::std::cerr <<  "-overlaps <Number>\n" << ::std::endl;
+	::std::cerr <<  "\tNumber of overlaps that are computed per read, default is 3.\n\n" << ::std::endl;
+	::std::cerr <<  "-bandwidth <Number>\n" << ::std::endl;
+	::std::cerr <<  "\tSpecifies the bandwidth, default is 8.\n\n" << ::std::endl;
+	::std::cerr <<  "-snp [majority | bayesian]\n" << ::std::endl;
+	::std::cerr <<  "\tHow to call consensus bases, default is majority.\n\n" << ::std::endl;
+	::std::cerr <<  "-outfile <Alignment Filename>\n" << ::std::endl;
+	::std::cerr <<  "\tThe name of the output file, default is readAlign.txt.\n\n" << ::std::endl;
+	::std::cerr <<  "-output [seqan | afg]\n" << ::std::endl;
+	::std::cerr <<  "\tThe output format, default is seqan.\n\n" << ::std::endl;
+	::std::cerr <<  "-h\n" << ::std::endl;
+	::std::cerr <<  "\tThis help screen.\n\n" << ::std::endl;
+
+	// Insert Sequencing
+	::std::cerr <<  "\nInsert Sequencing\n------------\n" << ::std::endl;	
+	::std::cerr <<  "-window <Window-Size>\n" << ::std::endl;
+	::std::cerr <<  "\tIf this parameter is given all overlaps within a given window are computed (no banded alignment).\n\n" << ::std::endl;
+
+	// Examples
+	::std::cerr <<  "\n\n\nExamples\n" << ::std::endl;
+	::std::cerr <<  "\nMulti-Read Alignment:\n" << ::std::endl;
+	::std::cerr <<  "\t./seqcons -reads reads.fasta\n" << ::std::endl;
+	::std::cerr <<  "\t./seqcons -reads reads.fasta -matchlength 15 -quality 80 -outfile align.txt\n" << ::std::endl;
+	::std::cerr <<  "\nInsert Sequencing (Reads of length 35):\n" << ::std::endl;
+	::std::cerr <<  "\t./seqcons -reads reads.fasta -window 200 -overlaps 100\n" << ::std::endl;
+	::std::cerr <<  "\nInsert Sequencing (Reads of length 200):\n" << ::std::endl;
+	::std::cerr <<  "\t./seqcons -reads reads.fasta -window 300 -overlaps 100\n" << ::std::endl;
+	::std::cerr <<  "\nInsert Sequencing (Reads of length 800):\n" << ::std::endl;
+	::std::cerr <<  "\t./seqcons -reads reads.fasta -window 1000 -overlaps 100\n" << ::std::endl;
+}
+
+//////////////////////////////////////////////////////////////////////////////////
 
 template <typename TName, typename TKey>
 inline void
@@ -131,7 +187,7 @@ convertSimpleReadFile(ReadStore<TAlphabet, TSpec>& readSt,
 					  TFragmentStore& frgSt,
 					  TLibraryStore& libSt,
 					  TContigStore& ctgSt,
-					  TOptions& cfgOpt,
+					  TOptions& consOpt,
 					  bool moveToFront)
 {
 	typedef typename Size<TFragmentStore>::Type TSize;
@@ -144,7 +200,7 @@ convertSimpleReadFile(ReadStore<TAlphabet, TSpec>& readSt,
 	StringSet<String<TAlphabet>, Owner<> > origStrSet;
 	String<TName> names;
 	String<char>  filePath;
-	filePath = value(cfgOpt, "reads");
+	filePath = consOpt.readsfile;
 	TSize count = _loadSequences(filePath, origStrSet, names);
 	if (count == 0) return false;
 	else {
@@ -240,10 +296,10 @@ convertSimpleReadFile(ReadStore<TAlphabet, TSpec>& readSt,
 	StringSet<String<char>, Owner<> > seqSet;
 	String<TName> seqNames;
 	clear(filePath);
-	if (length(value(cfgOpt, "source"))) {
-		filePath = value(cfgOpt, "source");
+	if (!consOpt.source.empty()) {
+		filePath = consOpt.source;
 	} else {
-		filePath = value(cfgOpt, "reads");
+		filePath = consOpt.readsfile;
 		appendValue(filePath, 'S');
 	}
 	count = _loadSequences(filePath, seqSet, seqNames);
@@ -266,7 +322,7 @@ convertSimpleReadFile(ReadStore<TAlphabet, TSpec>& readSt,
 
 	// Convert Libraries
 	clear(filePath);
-	filePath = value(cfgOpt, "reads");
+	filePath = consOpt.readsfile;
 	appendValue(filePath, 'L');
 	StringSet<String<char>, Owner<> > libSet;
 	String<TName> libIds;
@@ -308,7 +364,7 @@ convertSimpleReadFile(ReadStore<TAlphabet, TSpec>& readSt,
 
 
 	// Convert Fragments
-	filePath = value(cfgOpt, "reads");
+	filePath = consOpt.readsfile;
 	appendValue(filePath, 'F');
 	StringSet<String<char>, Owner<> > fragSet;
 	String<TName> fragIds;
@@ -381,164 +437,201 @@ convertSimpleReadFile(ReadStore<TAlphabet, TSpec>& readSt,
 
 
 int main(int argc, const char *argv[]) {
-	//////////////////////////////////////////////////////////////////////////////
-	// Command line parsing
-	//////////////////////////////////////////////////////////////////////////////
 	
-	// Set the keys
-	typedef String<char> TKey;
-	typedef String<char> TValue;
-	typedef Size<TValue>::Type TSize;
-	ConfigOptions<TKey, TValue> cfgOpt;
-	TKey keys[] = {"afg", "reads", "bandwidth", "matchlength", "quality", "overlaps", "window", "snp", "evaluation","outfile", "output", "convert", "moveToFront", "source"};
-	assignKeys(cfgOpt, keys, 14);
-	assign(cfgOpt, "moveToFront", "false");
-	assign(cfgOpt, "matchlength", "15");
-	assign(cfgOpt, "quality", "80");
-#ifdef CELERA_OFFSET
-	assign(cfgOpt, "bandwidth", "15");
-	assign(cfgOpt, "overlaps", "5");
-#else
-	assign(cfgOpt, "bandwidth", "8");
-	assign(cfgOpt, "overlaps", "3");
+	typedef unsigned int TSize;
+
+	// Version
+#ifdef SEQAN_PROFILE
+	printVersion();
 #endif
-	assign(cfgOpt, "window", "0");
-	assign(cfgOpt, "call", "majority");
-	assign(cfgOpt, "output", "seqan");
-	assign(cfgOpt, "outfile", "readAlign.txt");
 
-	// Help Message
-	String<char> helpMsg;
-	append(helpMsg, "Usage: ./seqcons -reads <FASTA File with Reads> [Options]\n");
-	append(helpMsg, "\nOptions\n");
+	// At least two arguments
+	if (argc < 2) {	printHelp(); return 1; }
 
-	// Main options
-	append(helpMsg, "\nMain Options\n------------\n");
-	append(helpMsg, "-reads <FASTA File with Reads>\n");
-	append(helpMsg, "\tReads in FASTA format and approximate layout positions.\n\n");
-	append(helpMsg, "-afg <AMOS message file>\n");
-	append(helpMsg, "\tInput is read from an AMOS message file instead of a fasta file.\n\n");
-	append(helpMsg, "-matchlength <Length>\n");
-	append(helpMsg, "\tMinimum match-length for an overlap, default is 15.\n\n");
-	append(helpMsg, "-quality <Number>\n");
-	append(helpMsg, "\tMinimum quality of an overlap, default is 80 (for 80% identity).\n\n");
-	append(helpMsg, "-overlaps <Number>\n");
-	append(helpMsg, "\tNumber of overlaps that are computed per read, default is 3.\n\n");
-	append(helpMsg, "-bandwidth <Number>\n");
-	append(helpMsg, "\tSpecifies the bandwidth, default is 8.\n\n");
-	append(helpMsg, "-call [majority | bayesian]\n");
-	append(helpMsg, "\tHow to call consensus bases, default is majority.\n\n");
-	append(helpMsg, "-outfile <Alignment Filename>\n");
-	append(helpMsg, "\tThe name of the output file, default is readAlign.txt.\n\n");
-	append(helpMsg, "-output [seqan | afg]\n");
-	append(helpMsg, "\tThe output format, default is seqan.\n\n");
+	// Set default consensus options
+	ConsensusOptions consOpt;
+#ifdef CELERA_OFFSET
+	consOpt.bandwidth = 15;
+	consOpt.overlaps = 5;
+#else
+	consOpt.bandwidth = 8;
+	consOpt.overlaps = 3;
+#endif
 
-	// Insert Sequencing
-	append(helpMsg, "\nInsert Sequencing\n------------\n");	
-	append(helpMsg, "-window <Window-Size>\n");
-	append(helpMsg, "\tIf this parameter is given all overlaps within a given window are computed (no banded alignment).\n\n");
-
-	// Examples
-	append(helpMsg, "\n\n\nExamples\n");
-	append(helpMsg, "\nMulti-Read Alignment:\n");
-	append(helpMsg, "\t./seqcons -reads reads.fasta\n");
-	append(helpMsg, "\t./seqcons -reads reads.fasta -matchlength 15 -quality 80 -outfile align.txt\n");
-	append(helpMsg, "\nInsert Sequencing (Reads of length 35):\n");
-	append(helpMsg, "\t./seqcons -reads reads.fasta -window 200 -overlaps 100\n");
-	append(helpMsg, "\nInsert Sequencing (Reads of length 200):\n");
-	append(helpMsg, "\t./seqcons -reads reads.fasta -window 300 -overlaps 100\n");
-	append(helpMsg, "\nInsert Sequencing (Reads of length 800):\n");
-	append(helpMsg, "\t./seqcons -reads reads.fasta -window 1000 -overlaps 100\n");
-	assignHelp(cfgOpt, helpMsg);
-
-	std::cout << "**************************************************" << std::endl;
-	std::cout << "* Consensus Computation                          *" << std::endl;
-	std::cout << "*                                                *" << std::endl;
-	std::cout << "* SeqCons                                        *" << std::endl;
-	std::cout << "* Version: 0.203 (26. January 2009)              *" << std::endl;
-	std::cout << "**************************************************" << std::endl;
-	std::cout << std::endl;
-
-	if (argc < 2) {
-		std::cerr << valueHelp(cfgOpt) << std::endl;
-		return -1;
+	// Command line parsing
+	for(int arg = 1; arg < argc; ++arg) {
+		if (argv[arg][0] == '-') {
+			if (strcmp(argv[arg], "-reads") == 0) {
+				if (arg + 1 < argc) {
+					++arg;
+					consOpt.readsfile = argv[arg];
+				}
+			}
+			else if (strcmp(argv[arg], "-afg") == 0) {
+				if (arg + 1 < argc) {
+					++arg;
+					consOpt.afgfile = argv[arg];
+				}
+			}
+			else if (strcmp(argv[arg], "-bandwidth") == 0) {
+				if (arg + 1 < argc) {
+					++arg;
+					::std::istringstream istr(argv[arg]);
+					istr >> consOpt.bandwidth;
+					if (istr.fail()) { printHelp(); exit(1); }
+				}
+			}
+			else if (strcmp(argv[arg], "-overlaps") == 0) {
+				if (arg + 1 < argc) {
+					++arg;
+					::std::istringstream istr(argv[arg]);
+					istr >> consOpt.overlaps;
+					if (istr.fail()) { printHelp(); exit(1); }
+				}
+			}
+			else if (strcmp(argv[arg], "-matchlength") == 0) {
+				if (arg + 1 < argc) {
+					++arg;
+					::std::istringstream istr(argv[arg]);
+					istr >> consOpt.matchlength;
+					if (istr.fail()) { printHelp(); exit(1); }
+				}
+			}
+			else if (strcmp(argv[arg], "-quality") == 0) {
+				if (arg + 1 < argc) {
+					++arg;
+					::std::istringstream istr(argv[arg]);
+					istr >> consOpt.quality;
+					if (istr.fail()) { printHelp(); exit(1); }
+				}
+			}
+			else if (strcmp(argv[arg], "-window") == 0) {
+				if (arg + 1 < argc) {
+					++arg;
+					::std::istringstream istr(argv[arg]);
+					istr >> consOpt.window;
+					if (istr.fail()) { printHelp(); exit(1); }
+				}
+			}
+			else if (strcmp(argv[arg], "-snp") == 0) {
+				if (arg + 1 < argc) {
+					++arg;
+					if (strcmp(argv[arg], "bayesian") == 0) {
+						consOpt.snp = 1;
+					} 
+					else if (strcmp(argv[arg], "majority") == 0) {
+						consOpt.snp = 0;
+					}
+				}
+			}
+			else if (strcmp(argv[arg], "-output") == 0) {
+				if (arg + 1 < argc) {
+					++arg;
+					if (strcmp(argv[arg], "afg") == 0) {
+						consOpt.output = 1;
+					} 
+					else if (strcmp(argv[arg], "seqan") == 0) {
+						consOpt.output = 0;
+					}
+				}
+			}
+			else if (strcmp(argv[arg], "-outfile") == 0) {
+				if (arg + 1 < argc) {
+					++arg;
+					consOpt.outfile = argv[arg];
+				}
+			}
+			else if (strcmp(argv[arg], "-convert") == 0) {
+				if (arg + 1 < argc) {
+					++arg;
+					if (strcmp(argv[arg], "afg") == 0) {
+						consOpt.convert = 1;
+					} 
+					else if (strcmp(argv[arg], "frg") == 0) {
+						consOpt.convert = 2;
+					}
+					else if (strcmp(argv[arg], "cgb") == 0) {
+						consOpt.convert = 3;
+					}
+				}
+			}
+			else if (strcmp(argv[arg], "-moveToFront") == 0) {
+				if (arg + 1 < argc) {
+					++arg;
+					if (strcmp(argv[arg], "false") == 0) {
+						consOpt.moveToFront = false;
+					} 
+					else if (strcmp(argv[arg], "true") == 0) {
+						consOpt.moveToFront = true;
+					}
+				}
+			}
+			else if (strcmp(argv[arg], "-source") == 0) {
+				if (arg + 1 < argc) {
+					++arg;
+					consOpt.source = argv[arg];
+				}
+			}
+			else if ((strcmp(argv[arg], "-h") == 0) || (strcmp(argv[arg], "-help") == 0) || (strcmp(argv[arg], "-?") == 0)) {
+				printHelp(); 
+				return 0; 
+			}
+		}
 	}
-	if (!parseCmdLine(argc, argv, cfgOpt)) return -1;
-	if (!empty(value(cfgOpt, "evaluation"))) {
-		//evaluationOfConsensusAlignment(cfgOpt);
-		return 0;
-	}
 
-	//////////////////////////////////////////////////////////////////////////////
-	// Read simulation file, afg file or celera consensus file
-	//////////////////////////////////////////////////////////////////////////////
+	// Load simulation file, afg file or celera consensus file
 	ReadStore<> readSt;
 	FrgStore<> frgSt;
 	LibStore<> libSt;
 	CtgStore<> ctgSt;
 
 	TSize numberOfContigs = 0;
-	if (!empty(value(cfgOpt, "reads"))) {
-		bool success;
-		if (value(cfgOpt, "moveToFront") == "false") success = convertSimpleReadFile(readSt, frgSt, libSt, ctgSt, cfgOpt, false);
-		else success = convertSimpleReadFile(readSt, frgSt, libSt, ctgSt, cfgOpt, true);
-		if (!success) { std::cerr << valueHelp(cfgOpt) << std::endl; return -1; }
+	if (!consOpt.readsfile.empty()) {
+		bool success = convertSimpleReadFile(readSt, frgSt, libSt, ctgSt, consOpt, consOpt.moveToFront);
+		if (!success) { printHelp(); exit(1); }
 		numberOfContigs = 1;
-	} else if (!empty(value(cfgOpt, "afg"))) {
+	} else if (!consOpt.afgfile.empty()) {
 		// Read Amos
 		std::fstream strmReads;
-		strmReads.open(toCString(value(cfgOpt, "afg")), std::ios_base::in | std::ios_base::binary);
-		read(strmReads,readSt,frgSt,libSt,ctgSt,Amos());	
+		strmReads.open(consOpt.afgfile.c_str(), ::std::ios_base::in | ::std::ios_base::binary);
+		read(strmReads, readSt, frgSt, libSt, ctgSt, Amos());	
 		strmReads.close();
 		numberOfContigs = length(ctgSt);
 	} else {
-		return -1;
+		printHelp();
+		exit(1);
 	}
 
-	//////////////////////////////////////////////////////////////////////////////
 	// Just convert the input file
-	//////////////////////////////////////////////////////////////////////////////
-	if (!empty(value(cfgOpt, "convert"))) {
-		if (value(cfgOpt, "convert") == "afg") {
+	if (consOpt.convert != 0) {
+		if (consOpt.convert == 1) {
 			std::fstream strmWrite;
-			strmWrite.open(toCString(value(cfgOpt, "outfile")), std::ios_base::out | std::ios_base::trunc);
+			strmWrite.open(consOpt.outfile.c_str(), ::std::ios_base::out | ::std::ios_base::trunc);
 			write(strmWrite,readSt,frgSt,libSt,ctgSt,Amos());	
 			strmWrite.close();
-		} else if (value(cfgOpt, "convert") == "frg") {
+		} else if (consOpt.convert == 2) {
 			std::fstream strmWrite;
-			strmWrite.open(toCString(value(cfgOpt, "outfile")), std::ios_base::out | std::ios_base::trunc);
+			strmWrite.open(consOpt.outfile.c_str(), ::std::ios_base::out | ::std::ios_base::trunc);
 			write(strmWrite,readSt,frgSt,libSt,ctgSt,CeleraFrg());	
 			strmWrite.close();
-		} else if (value(cfgOpt, "convert") == "cgb") {
+		} else if (consOpt.convert == 3) {
 			std::fstream strmWrite;
-			strmWrite.open(toCString(value(cfgOpt, "outfile")), std::ios_base::out | std::ios_base::trunc);
+			strmWrite.open(consOpt.outfile.c_str(), ::std::ios_base::out | ::std::ios_base::trunc);
 			write(strmWrite,readSt,frgSt,libSt,ctgSt,CeleraCgb());	
 			strmWrite.close();
 		}
 		return 0;
 	}
 
-	// Initialize alignment parameters
-	TSize matchlength = _stringToNumber<TSize>(value(cfgOpt, "matchlength"));
-	TSize quality = _stringToNumber<TSize>(value(cfgOpt, "quality"));
-	TSize bandwidth = _stringToNumber<TSize>(value(cfgOpt, "bandwidth"));
-	TSize overlaps = _stringToNumber<TSize>(value(cfgOpt, "overlaps"));
-	TSize window = _stringToNumber<TSize>(value(cfgOpt, "window"));
-
-	//////////////////////////////////////////////////////////////////////////////
 	// Iterate over all contigs
-	//////////////////////////////////////////////////////////////////////////////	
-
 	for(TSize currentContig = 0; currentContig < numberOfContigs; ++currentContig) {
 	
-		// Profiling
-		SEQAN_PROTIMESTART(profileTime);
+// Profiling
+#ifdef SEQAN_PROFILE
+		SEQAN_PROTIMEUPDATE(__myProfileTime); 
+#endif
 
-
-		//////////////////////////////////////////////////////////////////////////////
 		// Import all reads of the given contig
-		//////////////////////////////////////////////////////////////////////////////
-		
 		typedef String<Dna> TSequence;
 		typedef Id<TSequence>::Type TId;
 		StringSet<TSequence, Owner<> > origStrSet;
@@ -546,63 +639,62 @@ int main(int argc, const char *argv[]) {
 		loadReadsClr(readSt, ctgSt, currentContig, origStrSet, begEndPos);
 		TSize nseq = length(origStrSet);
 		if (nseq == 0) continue;
-		std::cout << "Import sequences done: " << SEQAN_PROTIMEUPDATE(profileTime) << " seconds" << std::endl;
+#ifdef SEQAN_PROFILE
+		::std::cout << "Import sequences done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << ::std::endl;
+#endif
 
 		// Make a dependent StringSet
 		typedef StringSet<TSequence, Dependent<> > TStringSet;
 		TStringSet seqSet = origStrSet;
 
-		//////////////////////////////////////////////////////////////////////////////
 		// Align the reads
-		//////////////////////////////////////////////////////////////////////////////
-
+		
 		// Get the average read length and estimate a bandwidth
 		TSize avgReadLength = 0;
 		for(TSize i = 0; i<length(origStrSet);++i) avgReadLength += length(value(origStrSet,i));
 		avgReadLength /= nseq;
-		//if (avgReadLength < 50) overlaps += 3;
-						
+								
 		// Select all overlapping reads and record the diagonals of the band
 		String<Pair<TId, TId> > pList;
 		String<Pair<int, int> > diagList;
-		if (window == 0) selectPairs(seqSet, begEndPos, bandwidth, pList, diagList);
-		else selectPairsIndel(seqSet, begEndPos, window, pList, diagList);
+		if (consOpt.window == 0) selectPairs(seqSet, begEndPos, consOpt.bandwidth, pList, diagList);
+		else selectPairsIndel(seqSet, begEndPos, consOpt.window, pList, diagList);
 
 		// Estimate the number of overlaps we want to compute
-		if (window == 0) std::cout << "Matchlength: " << matchlength << ", " << "Quality: " << quality << ", " << "Bandwidth: " << bandwidth << ", " << "Overlaps: " << overlaps << std::endl;
-		else std::cout << "Matchlength: " << matchlength << ", " << "Quality: " << quality << ", " << "Window: " << window << ", " << "Overlaps: " << overlaps << std::endl;
+#ifdef SEQAN_PROFILE
+		if (consOpt.window == 0) ::std::cout << "Matchlength: " << consOpt.matchlength << ", " << "Quality: " << consOpt.quality << ", " << "Bandwidth: " << consOpt.bandwidth << ", " << "Overlaps: " << consOpt.overlaps << ::std::endl;
+		else ::std::cout << "Matchlength: " << consOpt.matchlength << ", " << "Quality: " << consOpt.quality << ", " << "Window: " << consOpt.window << ", " << "Overlaps: " << consOpt.overlaps << ::std::endl;
 		std::cout << "Number of reads: " << nseq << std::endl;
 		std::cout << "Average read length: " << avgReadLength << std::endl;
-		if (window == 0) {
+		if (consOpt.window == 0) {
 			TSize covEstim = length(pList) / nseq;
 			std::cout << "Estimated coverage: " << covEstim << std::endl;
 		}
-		std::cout << "Pair selection done: " << SEQAN_PROTIMEUPDATE(profileTime) << " seconds" << std::endl;
+		std::cout << "Pair selection done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
+#endif
 
 		// Set-up a sparse distance matrix
 		Graph<Undirected<double> > pairGraph;
 		
-		// Set-up alignment scoring matrices
-		typedef Score<int> TScore;
-		typedef Value<TScore>::Type TScoreValue;
-		TScore scType = Score<int>(2,-6,-4,-9);
-		//TScore scType = Score<int>(1,-2,-1,-2);
-
 		// Containers for segment matches and corresponding scores 
 		typedef String<Fragment<> > TFragmentString;
 		TFragmentString matches;
-		typedef String<TScoreValue> TScoreValues;
+		typedef String<int> TScoreValues;
 		TScoreValues scores;
 
 		// Compute segment matches from global pairwise alignments
-		appendSegmentMatches(seqSet, pList, diagList, begEndPos, scType, matchlength, quality, overlaps, matches, scores, pairGraph, Overlap_Library() );
+		appendSegmentMatches(seqSet, pList, diagList, begEndPos, consOpt.sc, consOpt.matchlength, consOpt.quality, consOpt.overlaps, matches, scores, pairGraph, Overlap_Library() );
 		clear(pList);
 		clear(diagList);
-		std::cout << "Overlap done: " << SEQAN_PROTIMEUPDATE(profileTime) << " seconds" << std::endl;
-	
+#ifdef SEQAN_PROFILE
+		std::cout << "Overlap done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
+#endif
+
 		// Re-Score the matches
-		scoreMatches(seqSet, scType, matches, scores);
-		std::cout << "Re-scoring done: " << SEQAN_PROTIMEUPDATE(profileTime) << " seconds" << std::endl;
+		scoreMatches(seqSet, consOpt.sc, matches, scores);
+#ifdef SEQAN_PROFILE
+		std::cout << "Re-scoring done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
+#endif
 
 		// Use these segment matches for the initial alignment graph
 		typedef Graph<Alignment<TStringSet, TSize> > TGraph;
@@ -610,54 +702,59 @@ int main(int argc, const char *argv[]) {
 		buildAlignmentGraph(matches, scores, g, FractionalScore() );
 		clear(matches);
 		clear(scores);
-		std::cout << "Construction of Alignment Graph done: " << SEQAN_PROTIMEUPDATE(profileTime) << " seconds" << std::endl;
-		
+#ifdef SEQAN_PROFILE
+		std::cout << "Construction of Alignment Graph done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
+#endif
+
 		// Guide Tree
 		Graph<Tree<double> > guideTree;
 		upgmaTree(pairGraph, guideTree);
-		std::cout << "Guide tree done: " << SEQAN_PROTIMEUPDATE(profileTime) << " seconds" << std::endl;
+#ifdef SEQAN_PROFILE
+		std::cout << "Guide tree done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
+#endif
 		clear(pairGraph);
 
 		// Triplet library extension
 		if ( ((2 * numEdges(g)) / numVertices(g) ) < 50 ) graphBasedTripletLibraryExtension(g);
 		else reducedTripletLibraryExtension(g);
-		std::cout << "Triplet done: " << SEQAN_PROTIMEUPDATE(profileTime) << " seconds" << std::endl;
+#ifdef SEQAN_PROFILE
+		std::cout << "Triplet done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
+#endif
 
 		// Perform a progressive alignment
 		Graph<Alignment<TStringSet, void, WithoutEdgeId> > gOut(seqSet);
 		progressiveAlignment(g, guideTree, gOut);
 		clear(g);
 		clear(guideTree);
-		std::cout << "Progressive alignment done: " << SEQAN_PROTIMEUPDATE(profileTime) << " seconds" << std::endl;
-	
+#ifdef SEQAN_PROFILE
+		std::cout << "Progressive alignment done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
+#endif
+
 		// Build the read alignment matrix
 		TSize alignDepth;
 		String<char> alignmentMatrix;
 		String<Triple<unsigned int, unsigned int, unsigned int> > readBegEndRowPos;
 		multireadAlignment(gOut, alignmentMatrix, readBegEndRowPos, alignDepth);
 		clear(gOut);
-		std::cout << "Multi-read Alignment done: " << SEQAN_PROTIMEUPDATE(profileTime) << " seconds" << std::endl;
+#ifdef SEQAN_PROFILE
+		std::cout << "Multi-read Alignment done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
+#endif
 
-		// Find disrupted reads
-		//TSize badReads = fixDisruptedReads(alignmentMatrix, seqSet, scType, readBegEndRowPos, alignDepth);
-		//std::cout << "Bad reads: " << badReads << std::endl;
-		
 		// Call the consensus
 		String<unsigned int> coverage;
 		String<char> gappedConsensus;
 		String<Dna> consensusSequence;
-		if (value(cfgOpt, "call") == "majority") consensusCalling(alignmentMatrix, consensusSequence, gappedConsensus, coverage, alignDepth, Majority_Vote() );
+		if (consOpt.snp == 0) consensusCalling(alignmentMatrix, consensusSequence, gappedConsensus, coverage, alignDepth, Majority_Vote() );
 		else consensusCalling(alignmentMatrix, consensusSequence, gappedConsensus, coverage, alignDepth, Bayesian() );
-		std::cout << "Consensus done: " << SEQAN_PROTIMEUPDATE(profileTime) << " seconds" << std::endl;
+#ifdef SEQAN_PROFILE		
+		std::cout << "Consensus done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
+#endif
 
-		//////////////////////////////////////////////////////////////////////////////
 		// Output of aligned reads
-		//////////////////////////////////////////////////////////////////////////////
-
-		if (value(cfgOpt, "output") == "seqan") {
+		if (consOpt.output == 0) {
 			std::fstream strm;
-			if (currentContig == 0) strm.open(toCString(value(cfgOpt, "outfile")), std::ios_base::out | std::ios_base::trunc);
-			else strm.open(toCString(value(cfgOpt, "outfile")), std::ios_base::out | std::ios_base::app);
+			if (currentContig == 0) strm.open(consOpt.outfile.c_str(), ::std::ios_base::out | ::std::ios_base::trunc);
+			else strm.open(consOpt.outfile.c_str(), ::std::ios_base::out | ::std::ios_base::app);
 			write(strm, seqSet, alignmentMatrix, begEndPos, readBegEndRowPos, gappedConsensus, coverage, FastaReadFormat());
 			strm.close();
 
@@ -684,7 +781,8 @@ int main(int argc, const char *argv[]) {
 			//strm2.open(toCString(fileTmp1), std::ios_base::out | std::ios_base::trunc);
 			//write(strm2, seqSet, alignmentMatrix, begEndPos, readBegEndRowPos, gappedConsensus, coverage, FastaReadFormat());
 			//strm2.close();
-		} else if (value(cfgOpt, "output") == "afg") {
+		} 
+		else if (consOpt.output == 1) {
 			TSize len = length(gappedConsensus);
 			TSize begContig = (value(ctgSt.data_begin_end, ctgSt.data_pos_count - 1)).i2;
 			TSize endContig = begContig + length(gappedConsensus);
@@ -705,15 +803,16 @@ int main(int argc, const char *argv[]) {
 				value(value(ctgSt.data_reads, currentContig), i).data_offset = (readBegEndRowPos[i]).i1;
 			}
 		}
-
-		std::cout << "Output done: " << SEQAN_PROTIMEUPDATE(profileTime) << " seconds" << std::endl;
+#ifdef SEQAN_PROFILE
+		std::cout << "Output done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
+#endif
 	}
 	
 	// Write the AMOS message file
-	if (value(cfgOpt, "output") == "afg") {
+	if (consOpt.output == 1) {
 		// Write Amos
 		std::fstream strmWrite;
-		strmWrite.open(toCString(value(cfgOpt, "outfile")), std::ios_base::out | std::ios_base::trunc);
+		strmWrite.open(consOpt.outfile.c_str(), ::std::ios_base::out | ::std::ios_base::trunc);
 		write(strmWrite,readSt,frgSt,libSt,ctgSt,Amos());	
 		strmWrite.close();
 	}

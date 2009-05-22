@@ -521,7 +521,7 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 			value(itAligned) = false;
 		}
 	}
-	std::cout << "Filtration ration: " << (double) dropCount / (double) length(pList) << std::endl;
+	//std::cout << "Filtration ration: " << (double) dropCount / (double) length(pList) << std::endl;
 
 	// Find sequences that have no overlap in the front or back
 	String<TSize> noFront;
@@ -545,20 +545,20 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 	}
 	// Insert all remaining sequences into a set
 	std::set<TSize> unalignedReads;
-	for(TSize i = 0; i < length(noFront); ++i) {
+	for(TSize i = 0; i < (TSize) length(noFront); ++i) {
 		TSize p1 = value(begEndPos, value(noFront, i)).i1;
 		TSize p2 = value(begEndPos, value(noFront, i)).i2;
 		if (p1 > p2) {TSize tmp = p1; p1 = p2; p2 = tmp; }
 		if (p1 != minVal) unalignedReads.insert(value(noFront, i));
 	}
-	for(TSize i = 0; i < length(noBack); ++i) {
+	for(TSize i = 0; i < (TSize) length(noBack); ++i) {
 		TSize p1 = value(begEndPos, value(noBack, i)).i1;
 		TSize p2 = value(begEndPos, value(noBack, i)).i2;
 		if (p1 > p2) {TSize tmp = p1; p1 = p2; p2 = tmp; }
 		if (p2 != maxVal) unalignedReads.insert(value(noBack, i));
 	}
 	TSize countUnalignedReads = unalignedReads.size();
-	std::cout << "Unaligned reads: " << countUnalignedReads << std::endl;
+	//std::cout << "Unaligned reads: " << countUnalignedReads << std::endl;
 	if (countUnalignedReads > 0) {
 		// Realign all unaligned sequences
 		itPair = begin(pList);

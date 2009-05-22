@@ -27,6 +27,10 @@ SEQAN_PROTIMESTART(__myProfileTime);
 #include <seqan/graph_msa.h>
 #include "rna_alphabet.h"
 
+#include <iostream>
+#include <fstream>
+
+
 using namespace seqan;
 
 

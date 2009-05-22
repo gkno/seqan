@@ -146,7 +146,7 @@ getAlignmentStatistics(String<TFragment, TSpec1> const& matches,
 	TSize maxId2 = 0;
 	TSize matchMismatch_length = 0;
 
-	for(TSize i = from;i<to;++i) {
+	for(TSize i = (TSize) from; i < (TSize) to; ++i) {
 		TId id1 = sequenceId(matches[i], 0);
 		TId id2 = sequenceId(matches[i], 1);
 		if (fragmentBegin(matches[i], id1) < minId1) minId1 = fragmentBegin(matches[i], id1);
