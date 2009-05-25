@@ -103,7 +103,7 @@ _addStringToTrie(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 
 /**
 .Function.createTrie:
-..cat:Graph.Trie
+..cat:Graph
 ..summary:Creates a trie.
 ..signature:createTrie(g, terminalStateMap, keywords)
 ..param.g:Out-parameter: An automaton.
@@ -141,7 +141,7 @@ createTrie(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 
 /**
 .Function.createTrieOnReverse:
-..cat:Graph.Trie
+..cat:Graph
 ..summary:Creates a trie for all reversed keywords.
 ..signature:createTrieOnReverse(g, terminalStateMap, keywords)
 ..returns.param.g:Out-parameter: An automaton.
@@ -188,7 +188,7 @@ createTrieOnReverse(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 
 /**
 .Function.createSuffixTrie:
-..cat:Graph.Trie
+..cat:Graph
 ..summary:Creates a trie of all suffixes of a text.
 ..signature:createSuffixTrie(g, terminalStateMap, text)
 ..param.g:Out-parameter: An automaton.

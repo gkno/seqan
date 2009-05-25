@@ -783,7 +783,7 @@ isRoot(Graph<Tree<TCargo, TSpec> > const& g,
 
 /**
 .Function.Graph#isLeaf:
-..cat:Graph.Tree
+..cat:Graph
 ..summary:Tests whether a given vertex is a leaf or not.
 ..signature:isLeaf(g, v)
 ..param.g:A tree.
@@ -810,7 +810,7 @@ isLeaf(Graph<Tree<TCargo, TSpec> > const& g,
 
 /**
 .Function.numTreeEdges:
-..cat:Graph.Tree
+..cat:Graph
 ..summary:Number of tree edges.
 ..signature:numTreeEdges(g)
 ..param.g:A tree.
@@ -831,7 +831,7 @@ numTreeEdges(Graph<Tree<TCargo, TSpec> > const& g)
 
 /**
 .Function.numChildren:
-..cat:Graph.Tree
+..cat:Graph
 ..summary:Number of children of a given tree vertex.
 ..signature:numChildren(g, v)
 ..param.g:A tree.
@@ -855,7 +855,7 @@ numChildren(Graph<Tree<TCargo, TSpec> > const& g,
 
 /**
 .Function.addChild:
-..cat:Graph.Tree
+..cat:Graph
 ..summary:Adds a new child vertex to a parent vertex.
 Optionally a cargo can be attached to the parent-child edge.
 ..signature:addChild(g, parent [, cargo])
@@ -902,7 +902,7 @@ addChild(Graph<Tree<TCargo, TSpec> >& g,
 
 /**
 .Function.removeChild:
-..cat:Graph.Tree
+..cat:Graph
 ..summary:Removes a child from the tree given a parent.
 ..signature:removeChild(g, parent, child)
 ..param.g:A tree.
@@ -932,7 +932,7 @@ removeChild(Graph<Tree<TCargo, TSpec> >& g,
 
 /**
 .Function.removeAllChildren:
-..cat:Graph.Tree
+..cat:Graph
 ..summary:Removes all children from the tree given a parent.
 ..signature:removeChild(g, parent)
 ..param.g:A tree.
@@ -966,7 +966,7 @@ removeAllChildren(Graph<Tree<TCargo, TSpec> >& g,
 
 /**
 .Function.childVertex:
-..cat:Graph.Tree
+..cat:Graph
 ..summary:Returns the child vertex of an edge.
 ..signature:childVertex(g, e)
 ..param.g:A tree.
@@ -990,7 +990,7 @@ childVertex(Graph<Tree<TCargo, TSpec> > const&,
 
 /**
 .Function.parentVertex:
-..cat:Graph.Tree
+..cat:Graph
 ..summary:Returns the parent vertex of an edge.
 ..signature:parentVertex(g, e)
 ..param.g:A tree.
@@ -1026,7 +1026,7 @@ parentVertex(Graph<Tree<TCargo, TSpec> > const& g,
 
 /**
 .Function.collectLeaves:
-..cat:Graph.Tree
+..cat:Graph
 ..summary:Returns all leaves underneath a given vertex.
 ..signature:collectLeaves(g, subtree_root, set)
 ..param.g:A tree.

@@ -69,7 +69,8 @@ namespace SEQAN_NAMESPACE_MAIN
 vertices. It also produces a breath-first tree where each node has a predecessor / parent.
 ..signature:breadth_first_search(g, source, predecessor, distance)
 ..param.g:In-parameter:A graph.
-...type:Class.Graph
+...type:Spec.Undirected graph
+...type:Spec.Directed graph
 ..param.source:In-parameter:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
 ...remarks:The breadth-first search is started from this vertex.
@@ -466,8 +467,8 @@ connected_components(Graph<TSpec> const& g_source,
 ..cat:Graph
 ..summary:Computes a minimum spanning tree on a graph.
 ..signature:prims_algorithm(g, source, weight, predecessor)
-..param.g:In-parameter:A graph.
-...type:Class.Graph
+..param.g:In-parameter:An undirected graph.
+...type:Spec.Undirected graph
 ..param.source:In-parameter:A source vertex.
 ...type:Metafunction.VertexDescriptor
 ..param.weight:In-parameter:Edge weights.
@@ -608,8 +609,8 @@ struct __callLessPair :
 ..cat:Graph
 ..summary:Computes a minimum spanning tree on a graph.
 ..signature:kruskals_algorithm(g, source, weight, edges)
-..param.g:In-parameter:A graph.
-...type:Class.Graph
+..param.g:In-parameter:An undirected graph.
+...type:Spec.Undirected graph
 ..param.source:In-parameter:A source vertex.
 ...type:Metafunction.VertexDescriptor
 ..param.weight:In-parameter:Edge weights.

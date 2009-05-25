@@ -681,8 +681,7 @@ write(TFile & target,
 
 /**
 .Function.createRoot:
-..cat:Graph.Automaton
-..cat:Graph.Tree
+..cat:Graph
 ..summary:Creates the root in a tree or an automaton.
 ..signature:createRoot(g)
 ..param.g:A tree or an automaton.
@@ -706,12 +705,12 @@ createRoot(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g)
 
 /**
 .Function.assignRoot:
-..cat:Graph.Automaton
-..cat:Graph.Tree
-..summary:Assigns a new root vertex to the automaton.
+..cat:Graph
+..summary:Assigns a new root vertex to the graph.
 ..signature:assignRoot(g, vertex)
-..param.g:A automaton.
+..param.g:A tree or automaton.
 ...type:Spec.Automaton
+...type:Spec.Tree
 ..param.vertex:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
 ..returns:void
@@ -733,8 +732,7 @@ assignRoot(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 
 /**
 .Function.root:
-..cat:Graph.Automaton
-..cat:Graph.Tree
+..cat:Graph
 ..summary:Gets a reference to the root of the tree.
 ..signature:root(g)
 ..param.g:A tree or an automaton.
@@ -759,8 +757,7 @@ root(Graph<Automaton<TAlphabet, TCargo, TSpec> > & g)
 
 /**
 .Function.getRoot:
-..cat:Graph.Automaton
-..cat:Graph.Tree
+..cat:Graph
 ..summary:Get method for the root of a tree or an automaton.
 ..signature:getRoot(g)
 ..param.g:An automaton or a tree.
@@ -785,8 +782,7 @@ getRoot(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g)
 
 /**
 .Function.Graph#isRoot:
-..cat:Graph.Automaton
-..cat:Graph.Tree
+..cat:Graph
 ..summary:Tests whether a given vertex is the root or not.
 ..signature:isRoot(g, v)
 ..param.g:An automaton or a tree.
@@ -814,8 +810,7 @@ isRoot(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
 
 /**
 .Function.getSuccessor:
-..cat:Graph.Automaton
-..cat:Graph.Word Graph
+..cat:Graph
 ..summary:Gets the successor for a given vertex and an edge label.
 For an automaton a single character is required whereas for a word graph getSuccessor takes a string.
 ..signature:getSuccessor(g, v, c)
@@ -850,8 +845,7 @@ getSuccessor(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
 
 /**
 .Function.parseString:
-..cat:Graph.Automaton
-..cat:Graph.Word Graph
+..cat:Graph
 ..summary:Parses a string one character at a time and moves accordingly in the automaton.
 ..signature:parseString(g, v, beginIt, endIt)
 ..signature:parseString(g, v, str)
@@ -935,7 +929,7 @@ parseString(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
 
 /**
 .Function.canParseString:
-..cat:Graph.Automaton
+..cat:Graph
 ..summary:Test whether an automaton can parse a string completely.
 ..signature:canParseString(g [, v], str)
 ..param.g:An automaton or a word graph.

@@ -33,7 +33,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 /**
 .Function.viterbiAlgorithm:
-..cat:Graph.Hmm
+..cat:Graph
 ..summary:Implements the viterbi algorithm.
 ..signature:viterbiAlgorithm(hmm, seq, path)
 ..param.hmm:In-parameter:Input HMM.
@@ -304,7 +304,7 @@ __forwardAlgorithm(Graph<Hmm<TAlphabet, TProbability, TSpec> > const& hmm,
 
 /**
 .Function.forwardAlgorithm:
-..cat:Graph.Hmm
+..cat:Graph
 ..summary:Implements the forward algorithm.
 ..signature:forwardAlgorithm(hmm, seq)
 ..param.hmm:In-parameter:Input HMM.
@@ -466,7 +466,7 @@ __backwardAlgorithm(Graph<Hmm<TAlphabet, TProbability, TSpec> > const& hmm,
 
 /**
 .Function.backwardAlgorithm:
-..cat:Graph.Hmm
+..cat:Graph
 ..summary:Implements the backward algorithm.
 ..signature:backwardAlgorithm(hmm, seq)
 ..param.hmm:In-parameter:Input HMM.
@@ -491,7 +491,7 @@ backwardAlgorithm(Graph<Hmm<TAlphabet, TProbability, TSpec> > const& hmm,
 
 /**
 .Function.generateSequence:
-..cat:Graph.Hmm
+..cat:Graph
 ..summary:Generates random state and alphabet sequences of a given HMM.
 ...remarks:Because of silent states, generated alphabet and state sequences might have different length.
 ..signature:generateSequence(hmm, sequences, states, numSeq, maxLength)
