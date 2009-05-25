@@ -200,7 +200,7 @@ createTrieOnReverse(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 ...type:Class.String
 ..returns:void
 ..see:Function.createTrie
-..see:Function.createSuffixTrieOnReverse
+..see:Function.createTrieOnReverse
 */
 template <typename TAlphabet, typename TCargo, typename TSpec, typename TTerminalStateMap, typename TText>
 inline void

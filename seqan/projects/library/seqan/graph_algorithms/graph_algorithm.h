@@ -181,7 +181,8 @@ Hence, depth-first search produces a depth-first forest. To ensure each vertex e
 discovery and finishing time.
 ..signature:depth_first_search(g, predecessor, discovery, finish)
 ..param.g:In-parameter:A graph.
-...type:Class.Graph
+...type:Spec.Undirected graph
+...type:Spec.Directed graph
 ..param.predecessor:Out-parameter:A property map.
 ...remarks:Predecessor subgraph produced by the depth-first search.
 ..param.discovery:Out-parameter:A property map.
@@ -893,12 +894,12 @@ dag_shortest_path(Graph<TSpec> const& g,
 /**
 .Function.bellman_ford_algorithm:
 ..cat:Graph
-..summary:Computes shortest paths from a single source in a graph.
+..summary:Computes shortest paths from a single source in a directed graph.
 ..remarks:Edge weights may be negative in the Bellman-Ford algorithm.
 The out parameters are only valid if the algorithm returns true.
 ..signature:bellman_ford_algorithm(g, source, weight, predecessor, distance)
-..param.g:In-parameter:A graph.
-...type:Class.Graph
+..param.g:In-parameter:A directed graph.
+...type:Spec.Directed graph
 ..param.source:In-parameter:A source vertex.
 ...type:Metafunction.VertexDescriptor
 ..param.weight:In-parameter:A weight map.
@@ -970,7 +971,7 @@ bellman_ford_algorithm(Graph<TSpec> const& g,
 ..remarks:Edge weights have to be nonnegative.
 ..signature:dijkstra(g, source, weight, predecessor, distance)
 ..param.g:In-parameter:A graph.
-...type:Class.Graph
+...type:Spec.Directed graph
 ..param.source:In-parameter:A source vertex.
 ...type:Metafunction.VertexDescriptor
 ..param.weight:In-parameter:A weight map.
@@ -1220,8 +1221,8 @@ _extend_shortest_paths(TMatrix& local,
 ..cat:Graph
 ..summary:Finds shortest paths between all pairs of vertices in a graph.
 ..signature:all_pairs_shortest_path(g, weight, distance, predecessor)
-..param.g:In-parameter:A graph.
-...type:Class.Graph
+..param.g:In-parameter:A directed graph.
+...type:Spec.Directed graph
 ..param.weight:In-parameter:A weight map.
 ...remarks:A property map with edge weights. Edge weights may be negative.
 ..param.distance:Out-parameter:A matrix with distances.
@@ -1269,8 +1270,8 @@ all_pairs_shortest_path(Graph<TSpec> const& g,
 ..summary:Finds shortest paths between all pairs of vertices in a graph.
 ..signature:floyd_warshall(g, weight, distance, predecessor)
 ..remarks:The graph must be free of negative-weight cycles.
-..param.g:In-parameter:A graph.
-...type:Class.Graph
+..param.g:In-parameter:A directed graph.
+...type:Spec.Directed graph
 ..param.weight:In-parameter:A weight map.
 ...remarks:A property map with edge weights. Edge weights may be negative.
 ..param.distance:Out-parameter:A matrix with distances.
@@ -1328,8 +1329,8 @@ floyd_warshall(Graph<TSpec> const& g,
 ..cat:Graph
 ..summary:Determines whether there is a path between any two given vertices or not.
 ..signature:transitive_closure(g, closure)
-..param.g:In-parameter:A graph.
-...type:Class.Graph
+..param.g:In-parameter:A directed graph.
+...type:Spec.Directed graph
 ..param.closure:Out-parameter:A matrix which indicates the closure.
 ...type:Class.Matrix
 ...remarks:Entry (i,j) in this matrix indicates whether there is a path from i to j in the graph or not.
@@ -1467,7 +1468,7 @@ _get_minimum_aug(Graph<TSpec> const& rG,
 ..cat:Graph
 ..summary:Computes a maximum flow in a directed graph.
 ..signature:ford_fulkerson(g, source, sink, capacity, flow)
-..param.g:In-parameter:A graph.
+..param.g:In-parameter:A directed graph.
 ...type:Spec.Directed graph
 ..param.source:In-parameter:A source vertex.
 ...type:Metafunction.VertexDescriptor

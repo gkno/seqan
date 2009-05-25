@@ -493,7 +493,6 @@ backwardAlgorithm(Graph<Hmm<TAlphabet, TProbability, TSpec> > const& hmm,
 .Function.generateSequence:
 ..cat:Graph
 ..summary:Generates random state and alphabet sequences of a given HMM.
-...remarks:Because of silent states, generated alphabet and state sequences might have different length.
 ..signature:generateSequence(hmm, sequences, states, numSeq, maxLength)
 ..param.hmm:In-parameter:Input HMM.
 ...type:Spec.Hmm
@@ -503,7 +502,8 @@ backwardAlgorithm(Graph<Hmm<TAlphabet, TProbability, TSpec> > const& hmm,
 ...type:Class.StringSet
 ..param.numSeq:The number of sequences to generate.
 ..param.maxLength:The maximum length of the sequences.
-...remarks:Sequences might be shorter if the end state is reached prior to maxLength.
+...remarks:Sequences might be shorter if the end state is reached prior to maxLength. 
+..remarks: Because of silent states, generated alphabet and state sequences might have different length.
 ..returns:void
 */
 template<typename TAlphabet, typename TProbability, typename TSpec,typename TSequenceSet, typename TStateSeqSet, typename TSize>
