@@ -217,6 +217,7 @@ void printHelp(int, const char *[], RazerSOptions<TSpec> &options, ParamChooserO
 		cerr << "  -i,  --percent-identity NUM  \t" << "set the percent identity threshold (default " << 100 - (100.0 * options.errorRate) << ')' << endl;
 #ifndef NO_PARAM_CHOOSER
 		cerr << "  -rr, --recognition-rate NUM  \t" << "set the percent recognition rate (default " << 100 - (100.0 * pm_options.optionLossRate) << ')' << endl;
+		cerr << "  -pd, --param-dir STR         \t" << "folder containing user-computed parameter files (optional)" << endl;
 #endif
 		cerr << "  -id, --indels                \t" << "allow indels (default: mismatches only)" << endl;
 #ifdef RAZERS_MATEPAIRS
@@ -266,7 +267,6 @@ void printHelp(int, const char *[], RazerSOptions<TSpec> &options, ParamChooserO
 		cerr << "  -oc, --overabundance-cut NUM \t" << "set k-mer overabundance cut ratio (default " << options.abundanceCut << ')' << endl;
 		cerr << "  -rl, --repeat-length NUM     \t" << "set simple-repeat length threshold (default " << options.repeatLength << ')' << endl;
 		cerr << "  -tl, --taboo-length NUM      \t" << "set taboo length (default " << options.tabooLength << ')' << endl;
-		cerr << "  -pd, --param-dir STR         \t" << "folder containing user-computed parameter files (optional)" << endl;
 		cerr << endl << "Verification Options:" << endl;
 		cerr << "  -mN, --match-N               \t" << "\'N\' matches with all other characters" << endl;
 		cerr << "  -ed, --error-distr FILE      \t" << "write error distribution to FILE" << endl;

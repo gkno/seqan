@@ -241,7 +241,7 @@ qualityDistributionFromPrbFile(TFile & file, TDistribution & avg, ParamChooserOp
 		_parse_skipLine2(file, c);
 	}
 	::std::cout << " Readcount = " << count[0] << "\t";
-	::std::cout << " kicked out " << kickout << " low quality reads.\n";
+	::std::cout << " kicked out " << kickout << " low quality reads." << std::endl;
 
 	fill(avg,pm_options.totalN,0.0);
 	for(unsigned t = 0; t < pm_options.totalN; ++t)
@@ -284,7 +284,7 @@ qualityDistributionFromFastQFile(TFile & file, TDistribution & avg, ParamChooser
 			if (++i == pm_options.totalN) break;
 		};
 	}
-	::std::cout << " Readcount = " << count[0] << "\n";
+	if(pm_options.verbose)::std::cout << " Readcount = " << count[0] << std::endl;
 
 	fill(avg,pm_options.totalN,0.0);
 	for(unsigned t = 0; t < pm_options.totalN; ++t)
@@ -328,7 +328,7 @@ qualityDistributionFromFastQIntFile(TFile & file, TDistribution & avg, ParamChoo
 			if (++i == pm_options.totalN) break;
 		};
 	}
-	::std::cout << " Readcount = " << count[0] << "\n";
+	::std::cout << " Readcount = " << count[0] << std::endl;
 
 	fill(avg,pm_options.totalN,0.0);
 	for(unsigned t = 0; t < pm_options.totalN; ++t)
@@ -358,7 +358,7 @@ getAvgFromPrbDirectory(TPath prbPath, TError & errorDistribution, ParamChooserOp
 	{
 		if(suffix(files[i],length(files[i])-6) == ".fastq")
 		{
-			::std::cout << "Processing "<< files[i] << "...\n";
+			::std::cout << "Processing "<< files[i] << "..." << std::endl;
 			TError avg_act;
 			resize(avg_act,pm_options.totalN);
 			::std::fstream filestrm;
@@ -377,7 +377,7 @@ getAvgFromPrbDirectory(TPath prbPath, TError & errorDistribution, ParamChooserOp
 		}
 		if(suffix(files[i],length(files[i])-9) == ".fastqint")
 		{
-			::std::cout << "Processing "<< files[i] << "...\n";
+			::std::cout << "Processing "<< files[i] << "..." << std::endl;
 			TError avg_act;
 			resize(avg_act,pm_options.totalN);
 			::std::fstream filestrm;
@@ -396,7 +396,7 @@ getAvgFromPrbDirectory(TPath prbPath, TError & errorDistribution, ParamChooserOp
 		}
 		if(suffix(files[i],length(files[i])-8) == "_prb.txt")
 		{
-			::std::cout << "Processing "<< files[i] << "...\n";
+			::std::cout << "Processing "<< files[i] << "..." << std::endl;
 			TError avg_act;
 			resize(avg_act,pm_options.totalN);
 			::std::fstream filestrm;
@@ -416,15 +416,15 @@ getAvgFromPrbDirectory(TPath prbPath, TError & errorDistribution, ParamChooserOp
 	}
 	for(unsigned j=0; j < pm_options.totalN; ++j)
 		errorDistribution[j] /= (TFloat)countPrbs;
-	::std::cout << "Writing average error probabilities to " << pm_options.fprefix[0] << "_errorProb.dat\n";
+	::std::cout << "Writing average error probabilities to " << pm_options.fprefix[0] << "_errorProb.dat" << std::endl;
 	::std::fstream out;
 	::std::stringstream avgOut;
 	avgOut << pm_options.fprefix[0] << "_errorProb.dat";
 	out.open(avgOut.str().c_str(),::std::ios_base::out);
-	if(!out.is_open()) ::std::cout << "Couldn't write to file "<<avgOut.str()<<"\n";
+	if(!out.is_open()) ::std::cout << "Couldn't write to file "<<avgOut.str()<<std::endl;
 	else
 		for(unsigned j=0; j < pm_options.totalN; ++j)
-			out << errorDistribution[j] << "\n";
+			out << errorDistribution[j] << std::endl;
 	out.close();
 
 	
@@ -490,7 +490,7 @@ interpolateErrorDistr(TError & errorDistr, ParamChooserOptions & pm_options)
 		if(j<totalN-1)
 			newVal = errorDistr[(int)index] + add * (errorDistr[(int)index+1] - errorDistr[(int)index]) ;
 		else newVal = errorDistr[totalLargeN-1];
-//		std::cout << newVal << "\n";
+//		std::cout << newVal << std::endl;
 		shorterErrorDistr[j] = newVal;
 	}
 	clear(errorDistr);
@@ -530,8 +530,8 @@ makeSelectedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 		::std::fstream filestrm;
 		filestrm.open(pm_options.shapeFile,::std::ios_base::in);
 		int result = parseShapesFromFile(shapeStrings,filestrm,pm_options);
-		if(result == 0) std::cerr << "0 shapes parsed.\n";
-		else if(pm_options.verbose) std::cout << result <<" shapes parsed.\n";
+		if(result == 0) std::cerr << "0 shapes parsed." << std::endl;
+		else if(pm_options.verbose) std::cerr << result <<" shapes parsed." << std::endl;
 		filestrm.close();
 	}
 	if(pm_options.useDefaultShapes)
@@ -717,7 +717,7 @@ makeSelectedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 		
 		String< State<TFloat> > states;
 		//if(pm_options.verbose)::std::cout << "do DP\n";
-		::std::cout << "do DP\n";
+		if(pm_options.verbose)::std::cerr << "do DP";
 		try 
 		{
 			initPatterns(states, shapeStrings[i], maxErrors-1, logErrorDistribution, pm_options.optionHammingOnly);
@@ -725,7 +725,7 @@ makeSelectedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 		}
 		catch (std::bad_alloc&) 
 		{
-			std::cout << shapeStrings[i] << " threw bad_alloc exception\n";
+			std::cout << shapeStrings[i] << " threw bad_alloc exception, skipping this shape." << std::endl;
 			continue;
 		}
 	
@@ -744,11 +744,10 @@ makeSelectedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 				// create the whole file name
 				::std::stringstream datName;
 				datName << pm_options.fgparams;
-				datName << "/"<<pm_options.fprefix[0]<<"_N" << totalN << "_E" << e << "_";
+				datName << "/" <<pm_options.fprefix[0]<<"_N" << totalN << "_E" << e << "_";
 				if(!pm_options.optionHammingOnly) datName << "L.dat";
 				else datName <<"H.dat";
 				
-			
 				// if datName-file doesnt exist, write the title on it
 				if(!pm_options.appendToPrevious && pm_options.firstTimeK[e]==true){
 					pm_options.firstTimeK[e] = false;
@@ -806,7 +805,8 @@ getParamsFilename(TSStr & paramsfile, ParamChooserOptions & pm_options)
 		K = pm_options.extrapolK;
 	}
 	paramsfile.str("");
-	paramsfile << pm_options.fgparams<< pm_options.fprefix[0];
+//	paramsfile << pm_options.fgparams << pm_options.fprefix[0];
+	paramsfile << pm_options.fgparams << pm_options.fprefix[0];
 
 	paramsfile << "_N" << N << "_E" << K;
 	//if(prefixCount) paramsfile << fgparams<< fprefix[0]<<"_N" << totalN << "_E" << totalK;
@@ -1036,7 +1036,7 @@ parseGappedParams(RazerSOptions<TSpec> & r_options,TFile & file, ParamChooserOpt
         }
 	if(!atLeastOneFound)
 	{
-		if(pm_options.verbose) ::std::cerr << "\n!!! Something wrong with file? !!!" << ::std::endl;
+		if(pm_options.verbose) ::std::cerr << ::std::endl <<"!!! Something wrong with file? !!!" << ::std::endl;
 		return false;
 	}
 	int i;
@@ -1045,7 +1045,7 @@ parseGappedParams(RazerSOptions<TSpec> & r_options,TFile & file, ParamChooserOpt
 			break;
 	if(i==0)
 	{
-		if(pm_options.verbose) ::std::cerr << "\n!!! Something wrong with file? !!!" << ::std::endl;
+		if(pm_options.verbose) ::std::cerr << ::std::endl << "!!! Something wrong with file? !!!" << ::std::endl;
 		return false;
 	}
 	if (thresholds[i] == 1 && length(shapes[i-1])>0 && thresholds[i-1] > 2)
@@ -1166,7 +1166,7 @@ chooseParams(RazerSOptions<TSpec> & r_options, ParamChooserOptions & pm_options)
 			file.open(pm_options.fname[1],::std::ios_base::in | ::std::ios_base::binary);
 			if(!file.is_open())
 			{
-				::std::cerr << "Couldn't open file "<<pm_options.fname[1]<<"\n";
+				::std::cerr << "Couldn't open file "<<pm_options.fname[1]<<std::endl;
 				return false;
 			}
 			unsigned count = 0;
@@ -1180,7 +1180,7 @@ chooseParams(RazerSOptions<TSpec> & r_options, ParamChooserOptions & pm_options)
 			file.close();
 			if(count != pm_options.totalN)
 			{
-				::std::cerr << "Error distribution file must contain at least " << pm_options.totalN << " probability values (one value per line).\n";
+				::std::cerr << "Error distribution file must contain at least " << pm_options.totalN << " probability values (one value per line)." << std::endl;
 				return false;
 			}
 		}
@@ -1202,14 +1202,14 @@ chooseParams(RazerSOptions<TSpec> & r_options, ParamChooserOptions & pm_options)
         if (pm_options.verbose)
         {
                ::std::cerr << ::std::endl;
-               ::std::cerr << "Read length      = " << pm_options.totalN << "bp\n";
-               ::std::cerr << "Max num errors   = " << pm_options.totalK << "\n";
-               ::std::cerr << "Recognition rate = " << 100.0*(1.0-pm_options.optionLossRate) << "%\n";
-		if(pm_options.extrapolate) ::std::cerr << "Extrapolating from read length " << pm_options.extrapolN << " and " << pm_options.extrapolK << "errors.\n";
+               ::std::cerr << "Read length      = " << pm_options.totalN << "bp" << std::endl;
+               ::std::cerr << "Max num errors   = " << pm_options.totalK << std::endl;
+               ::std::cerr << "Recognition rate = " << 100.0*(1.0-pm_options.optionLossRate) << "%" << std::endl;
+		if(pm_options.extrapolate) ::std::cerr << "Extrapolating from read length " << pm_options.extrapolN << " and " << pm_options.extrapolK << "errors." << std::endl;
         }
 	
 	// parse loss rate file and find appropriate filter criterium
-	if(pm_options.verbose) ::std::cerr << "\n--> Reading " <<  paramsfile.str()<<::std::endl;
+	if(pm_options.verbose) ::std::cerr << std::endl << "--> Reading " <<  paramsfile.str()<<::std::endl;
 	::std::fstream file;
 	file.open(paramsfile.str().c_str(),::std::ios_base::in | ::std::ios_base::binary);
 	if(!file.is_open())
@@ -1220,7 +1220,7 @@ chooseParams(RazerSOptions<TSpec> & r_options, ParamChooserOptions & pm_options)
 	else
 	{
 		parseGappedParams(r_options,file,pm_options);
-		if(pm_options.verbose) ::std::cout << "\n Choose \nshape: " << r_options.shape << "\n and \nthreshold: " << r_options.threshold<< "\n to achieve optimal performance for expected recognition rate >= " << (100.0-100.0*pm_options.optionLossRate) << "% (expected recognition = " << (100.0-pm_options.chosenLossRate*100.0) <<"%)\n\n";
+		if(pm_options.verbose) ::std::cout << std::endl << " Choose "<< std::endl << "shape: " << r_options.shape << std::endl << " and " << std::endl << "threshold: " << r_options.threshold << std::endl <<" to achieve optimal performance for expected recognition rate >= " << (100.0-100.0*pm_options.optionLossRate) << "% (expected recognition = " << (100.0-pm_options.chosenLossRate*100.0) <<"%)" <<std::endl << std::endl;
 		file.close();
 	}
 
