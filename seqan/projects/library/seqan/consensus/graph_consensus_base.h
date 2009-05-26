@@ -95,9 +95,172 @@ typedef Tag<Majority_Vote_> const Majority_Vote;
 struct Bayesian_;
 typedef Tag<Bayesian_> const Bayesian;
 
+
+
 //////////////////////////////////////////////////////////////////////////////
 // Read alignment and Consensus Generation
 //////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////////////
+
+struct ConsensusOptions {
+public:
+	// Bandwidth of overlap alignment
+	int bandwidth;
+
+	// Number of computed overlaps per read (at the beginning and end of a read)
+	int overlaps;
+
+	// Minimum match length of a computed overlap
+	int matchlength;
+
+	// Minimum quality (in percent identity) of a computed overlap
+	int quality;
+
+	// Window size, only relevant for insert sequencing
+	// If window == 0, no insert sequencing is assumed
+	int window;
+	
+	// SNP calling
+	// 0: majority
+	// 1: bayesian
+	int snp;
+
+	// Output
+	// 0: seqan style
+	// 1: afg output format
+	int output;
+
+	// Conversion option
+	// 0: No conversion, regular consensus computation
+	// 1: Creates an afg file
+	// 2: Creates a Celera frg file
+	// 3: Creates a Celera cgb file
+	int convert;
+
+	// Offset all reads, so the first read starts at position 0
+	bool moveToFront;
+
+	// Scoring object for overlap alignments
+	Score<int> sc;
+
+	// Various input and output files
+	std::string readsfile;				// File of reads in FASTA format
+	std::string afgfile;				// AMOS afg file input
+	std::string source;					// Reference genome
+	std::string outfile;				// Output file name
+	
+	// Initialization
+	ConsensusOptions() : bandwidth(8), overlaps(3), matchlength(15), quality(80), window(0), snp(0), output(0), convert(0), moveToFront(false), outfile("readAlign.txt") 
+	{
+		sc = Score<int>(2,-6,-4,-9);
+	}
+};
+
+
+//////////////////////////////////////////////////////////////////////////////////
+
+
+template<typename TStringSet, typename TCargo, typename TSpec, typename TSize, typename TConfigOptions>
+inline void
+consensusAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& gOut,
+				   String<Pair<TSize, TSize> >& begEndPos,
+				   TConfigOptions const& consOpt) 
+{
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TOutGraph;
+	typedef typename Id<TOutGraph>::Type TId;
+
+	// Initialization
+	TStringSet& seqSet = stringSet(gOut);
+	TSize nseq = length(seqSet);
+
+	// Select all overlapping reads and record the diagonals of the band
+	String<Pair<TId, TId> > pList;
+	String<Pair<int, int> > diagList;
+	if (consOpt.window == 0) selectPairs(seqSet, begEndPos, consOpt.bandwidth, pList, diagList);
+	else selectPairsIndel(seqSet, begEndPos, consOpt.window, pList, diagList);
+
+	// Estimate the number of overlaps we want to compute
+#ifdef SEQAN_PROFILE
+	if (consOpt.window == 0) ::std::cout << "Matchlength: " << consOpt.matchlength << ", " << "Quality: " << consOpt.quality << ", " << "Bandwidth: " << consOpt.bandwidth << ", " << "Overlaps: " << consOpt.overlaps << ::std::endl;
+	else ::std::cout << "Matchlength: " << consOpt.matchlength << ", " << "Quality: " << consOpt.quality << ", " << "Window: " << consOpt.window << ", " << "Overlaps: " << consOpt.overlaps << ::std::endl;
+	std::cout << "Number of reads: " << nseq << std::endl;
+	if (consOpt.window == 0) {
+		TSize covEstim = length(pList) / nseq;
+		std::cout << "Estimated coverage: " << covEstim << std::endl;
+	}
+	std::cout << "Pair selection done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
+#endif
+
+	// Set-up a sparse distance matrix
+	Graph<Undirected<double> > pairGraph;
+	
+	// Containers for segment matches and corresponding scores 
+	typedef String<Fragment<> > TFragmentString;
+	TFragmentString matches;
+	typedef String<int> TScoreValues;
+	TScoreValues scores;
+
+	// Compute segment matches from global pairwise alignments
+	appendSegmentMatches(seqSet, pList, diagList, begEndPos, consOpt.sc, consOpt.matchlength, consOpt.quality, consOpt.overlaps, matches, scores, pairGraph, Overlap_Library() );
+	clear(pList);
+	clear(diagList);
+#ifdef SEQAN_PROFILE
+	std::cout << "Overlap done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
+#endif
+
+	// Re-Score the matches
+	scoreMatches(seqSet, consOpt.sc, matches, scores);
+#ifdef SEQAN_PROFILE
+	std::cout << "Re-scoring done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
+#endif
+
+	// Use these segment matches for the initial alignment graph
+	typedef Graph<Alignment<TStringSet, TSize> > TGraph;
+	TGraph g(seqSet);
+	buildAlignmentGraph(matches, scores, g, FractionalScore() );
+	clear(matches);
+	clear(scores);
+#ifdef SEQAN_PROFILE
+	std::cout << "Construction of Alignment Graph done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
+#endif
+
+	// Guide Tree
+	Graph<Tree<double> > guideTree;
+	upgmaTree(pairGraph, guideTree);
+#ifdef SEQAN_PROFILE
+	std::cout << "Guide tree done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
+#endif
+	clear(pairGraph);
+
+	// Triplet library extension
+	if ( ((2 * numEdges(g)) / numVertices(g) ) < 50 ) graphBasedTripletLibraryExtension(g);
+	else reducedTripletLibraryExtension(g);
+#ifdef SEQAN_PROFILE
+	std::cout << "Triplet done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
+#endif
+
+	// Perform a progressive alignment
+	progressiveAlignment(g, guideTree, gOut);
+	clear(g);
+	clear(guideTree);
+#ifdef SEQAN_PROFILE
+	std::cout << "Progressive alignment done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
+#endif
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+
+
+template<typename TStringSet, typename TCargo, typename TSpec, typename TSize>
+inline void
+consensusAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& gOut,
+				   String<Pair<TSize, TSize> >& begEndPos) 
+{
+	ConsensusOptions consOpt;
+	consensusAlignment(gOut, begEndPos, consOpt);
+}
 
 
 //////////////////////////////////////////////////////////////////////////////
