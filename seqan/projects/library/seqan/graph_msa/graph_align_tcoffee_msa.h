@@ -374,7 +374,7 @@ globalMsaAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& gAlign,
 		std::cout << "Guide Tree: Neighbor Joining" << std::endl;
 #endif
 		// Check if we have a valid distance matrix
-		if (empty(distanceMatrix)) getDistanceMatrix(g, distanceMatrix, LibraryDistance());
+		if (empty(distanceMatrix)) getDistanceMatrix(g, distanceMatrix, KmerDistance());
 		slowNjTree(distanceMatrix, guideTree);
 	}
 #ifdef SEQAN_PROFILE
