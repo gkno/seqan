@@ -1267,7 +1267,7 @@ SEQAN_CHECKPOINT
 ..param.object:A Blast HSP object.
 ...type:Class.BlastHsp
 ..returns:The begin position.
-...type:unsigned
+...type:nolink:unsigned
 */
 template<typename TBlastSpec, typename TInfoSpec>
 inline unsigned int
@@ -1295,7 +1295,7 @@ SEQAN_CHECKPOINT
 ..param.object:A Blast HSP object.
 ...type:Class.BlastHsp
 ..returns:The begin position.
-...type:unsigned
+...type:nolink:unsigned
 */
 template<typename TBlastSpec, typename TInfoSpec>
 inline unsigned int
@@ -1323,7 +1323,7 @@ SEQAN_CHECKPOINT
 ..param.object:A Blast HSP object.
 ...type:Class.BlastHsp
 ..returns:The end position.
-...type:unsigned
+...type:nolink:unsigned
 */
 template<typename TBlastSpec, typename TInfoSpec>
 inline unsigned int
@@ -1343,7 +1343,7 @@ SEQAN_CHECKPOINT
 ..param.object:A Blast HSP object.
 ...type:Class.BlastHsp
 ..returns:The end position.
-...type:unsigned
+...type:nolink:unsigned
 */
 template<typename TBlastSpec, typename TInfoSpec>
 inline unsigned int &
@@ -1414,7 +1414,7 @@ SEQAN_CHECKPOINT
 ..param.object:A Blast HSP object.
 ...type:Class.BlastHsp
 ..returns:The e-value.
-...type:double
+...type:nolink:double
 */
 template<typename TBlastSpec, typename TInfoSpec>
 inline double
@@ -1443,7 +1443,7 @@ SEQAN_CHECKPOINT
 ..param.object:A Blast HSP object.
 ...type:Spec.FullInfo
 ..returns:The score.
-...type:float
+...type:nolink:float
 */
 template<typename TBlastSpec>
 inline float 
@@ -1470,7 +1470,7 @@ SEQAN_CHECKPOINT
 ..param.object:A Blast HSP object.
 ...type:Spec.FullInfo
 ..returns:The bit score.
-...type:float
+...type:nolink:float
 */
 template<typename TBlastSpec>
 inline float 
@@ -1533,7 +1533,7 @@ SEQAN_CHECKPOINT
 ..param.object:A Blast HSP object.
 ...type:Spec.FullInfo
 ..returns:The number of gaps.
-...type:unsigned
+...type:nolink:unsigned
 */
 template<typename TBlastSpec>
 inline unsigned int
@@ -1553,7 +1553,7 @@ SEQAN_CHECKPOINT
 ..param.object:A Blast HSP object.
 ...type:Spec.FullInfo
 ..returns:True if the query is in forward orientation.
-...type:bool
+...type:nolink:bool
 */
 template<typename TBlastSpec>
 inline bool
@@ -1571,7 +1571,7 @@ SEQAN_CHECKPOINT
 ..param.object:A Blast HSP object.
 ...type:Spec.FullInfo
 ..returns:True if the database sequence is in forward orientation.
-...type:bool
+...type:nolink:bool
 */
 template<typename TBlastSpec>
 inline bool

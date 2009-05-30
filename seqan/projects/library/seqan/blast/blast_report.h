@@ -835,7 +835,7 @@ SEQAN_CHECKPOINT
 ..param.blastReport:A Blast Report.
 ...type:Spec.StoreReport
 ..returns:The E-value cutoff (read from the Blast report file).
-...type:double
+...type:nolink:double
 */
 template<typename TBlastHsp>
 inline double
@@ -877,7 +877,7 @@ SEQAN_CHECKPOINT
 ..param.blastReport:A Blast Report.
 ...type:Spec.StoreReport
 ..returns:The gap open penalty.
-...type:float
+...type:nolink:float
 */
 template<typename TBlastHsp>
 inline float 
@@ -904,7 +904,7 @@ SEQAN_CHECKPOINT
 ..param.blastReport:A Blast Report.
 ...type:Spec.StoreReport
 ..returns:The gap open penalty.
-...type:float
+...type:nolink:float
 */
 template<typename TBlastHsp>
 inline float 
@@ -940,7 +940,7 @@ SEQAN_CHECKPOINT
 ..param.blastReport:A Blast Report.
 ...type:Spec.StoreReport
 ..returns:The lambda value.
-...type:float
+...type:nolink:float
 */
 template<typename TBlastHsp>
 inline float
@@ -967,7 +967,7 @@ SEQAN_CHECKPOINT
 ..param.blastReport:A Blast Report.
 ...type:Spec.StoreReport
 ..returns:The gapped lambda value.
-...type:float
+...type:nolink:float
 */
 template<typename TBlastHsp>
 inline float
@@ -996,7 +996,7 @@ SEQAN_CHECKPOINT
 ..param.blastReport:A Blast Report.
 ...type:Spec.StoreReport
 ..returns:The kappa value.
-...type:float
+...type:nolink:float
 */
 template<typename TBlastHsp>
 inline float
@@ -1023,7 +1023,7 @@ SEQAN_CHECKPOINT
 ..param.blastReport:A Blast Report.
 ...type:Spec.StoreReport
 ..returns:The gapped kappa value.
-...type:float
+...type:nolink:float
 */
 template<typename TBlastHsp>
 inline float

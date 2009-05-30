@@ -36,9 +36,9 @@ void _numOccurrences(TFloat &nW, String<TAlphabet>& haystack, TStringSet& needle
 ..param.TAlphabet:The type of the alphabet.
 ..param.TAlgorithm:The algorithm to exploit to compute the number of occurrences of patterns in the text strings.
 ..param.W:The set of patterns.
-...type:@Class.StringSet@
+...type:Class.StringSet
 ..param.X:The text strings.
-...type:@Class.StringSet@
+...type:Class.StringSet
 ..param.M:The @MarkovModel@ object.
 ...type:Class.MarkovModel
 ..returns:The z-score for W w.r.t. X and M.
@@ -80,9 +80,9 @@ TFloat _zscore( TStringSet& W,  TStringSet& X, MarkovModel<TAlphabet, TFloat, TS
 ..param.TStringSet:A set of strings.
 ..param.TAlphabet:The type of the alphabet.
 ..param.W:The set of patterns.
-...type:TStringSet
+...type:nolink:TStringSet
 ..param.X:The text strings.
-...type:TStringSet
+...type:nolink:TStringSet
 ..param.M:The @MarkovModel@ object.
 ...type:Class.MarkovModel
 ..returns:The variance for W w.r.t. X and M.
@@ -186,9 +186,9 @@ TFloat _computeVariance( TStringSet& W,  TStringSet& X, MarkovModel<TAlphabet, T
 ..param.TStringSet:A set of strings.
 ..param.TAlphabet:The type of the alphabet.
 ..param.W:The set of patterns.
-...type:@Class.StringSet@
+...type:Class.StringSet
 ..param.X:The text strings.
-...type:@Class.StringSet@
+...type:Class.StringSet
 ..param.M:The @MarkovModel@ object.
 ...type:Class.MarkovModel
 ..returns:A value of overlapping for the expectation.
@@ -235,9 +235,9 @@ TFloat _overlapExpectation(TStringSet& W, MarkovModel<TAlphabet, TFloat, TSpec> 
 ..param.TAlphabet:The type of the alphabet.
 ..param.TStringSet:A set of strings.
 ..param.W:The set of patterns.
-...type:@Class.StringSet@
+...type:Class.StringSet
 ..param.haystack:The text strings.
-...type:@Metafunction.Haystack@
+...type:Metafunction.Haystack
 ..param.needle:The sequence that is searched in the @Metafunction.Haystack@.
 */
 
@@ -280,9 +280,9 @@ void _addReveseComplements(TStringSet& needle)
 ..param.mm:The @MarkovModel@ object.
 ...type:Class.MarkovModel
 ..param.W:The set of patterns.
-...type:@Class.StringSet@
+...type:Class.StringSet
 ..param.n:The length of the string.
-...type:unsigned int
+...type:nolink:unsigned int
 
 ..returns:The expectation for W w.r.t. a string and M.
 */

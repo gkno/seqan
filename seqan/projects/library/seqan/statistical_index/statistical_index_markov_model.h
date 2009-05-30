@@ -39,15 +39,15 @@ unsigned int _getStringIndexFromMatrix(unsigned int ri, unsigned int ci, unsigne
 .Memvar.MarkovModel#order:
 ..class:Class.MarkovModel
 ..summary:The MarkovModel order
-...type:int
+...type:nolink:int
 .Memvar.MarkovModel#transition:
 ..class:Class.MarkovModel
 ..summary:The transition matrix
-...type:@Class.String@
+...type:Class.String
 .Memvar.MarkovModel#stationaryDistribution:
 ..class:Class.MarkovModel
 ..summary:The vector of character distribution
-...type:@Class.String@
+...type:Class.String
 .Memfunc.MarkovModel#MarkovModel:
 ..class:Class.MarkovModel
 ..summary:Constructor
@@ -417,9 +417,9 @@ public:
 ..summary:Gets the row index of a matrix stored as a string, given a string position
 ..signature:_getMatrixRowFromString(stringPosition, ncol)
 ..param.stringPosition:The string position.
-...type:unsigned int
+...type:nolink:unsigned int
 ..param.ncol:The number of columns of the matrix.
-...type:unsigned int
+...type:nolink:unsigned int
 ..returns:The matrix row index.
 */
 
@@ -434,9 +434,9 @@ public:
 ..summary:Gets the column index of a matrix stored as a string, given a string position
 ..signature:_getMatrixRowFromString(stringPosition, ncol)
 ..param.stringPosition:The string position.
-...type:unsigned int
+...type:nolink:unsigned int
 ..param.ncol:The number of columns of the matrix.
-...type:unsigned int
+...type:nolink:unsigned int
 ..returns:The matrix row index.
 */
 
@@ -452,11 +452,11 @@ public:
 ..summary:Gets the string index of a matrix stored as a string, given the row and column indexes
 ..signature:_getStringIndexFromMatrix(ri, ci, ncol)
 ..param.ri:The row index.
-...type:unsigned int
+...type:nolink:unsigned int
 ..param.ci:The column index.
-...type:unsigned int
+...type:nolink:unsigned int
 ..param.ncol:The number of columns of the matrix.
-...type:unsigned int
+...type:nolink:unsigned int
 ..returns:The string index of the matrix.
 */
 
@@ -475,7 +475,7 @@ public:
 ..param.matrix2:The second matrix.
 ...type:String<TAlphabet, TSpec1>&
 ..param.n:The number of rows and columns of the first and of the second matrix, resp..
-...type:unsigned int
+...type:nolink:unsigned int
 ..returns:The products of the two matrices (another matrix).
 ..remarks:The number of rows of matrix1 must be equal to the number of columns of matrix2.
 */
@@ -511,7 +511,7 @@ String<TAlphabet> _matricialProduct(String<TAlphabet, TSpec1>& matrix1,
 ..param.matrix2:The second matrix.
 ...type:String<TAlphabet, TSpec1>&
 ..param.ncol:The number of columns of both the matrices.
-...type:unsigned int
+...type:nolink:unsigned int
 ..returns:The sum of the two matrices (another matrix).
 ..remarks:The number of rows and columns of matrix1 must be equal to the number of rows and columns of matrix2.
 */
@@ -546,7 +546,7 @@ String<TAlphabet> _matricialSum(String<TAlphabet, TSpec1>& matrix1,
 ..param.matrix2:The second matrix.
 ...type:String<TAlphabet, TSpec1>&
 ..param.ncol:The number of columns of both the matrices.
-...type:unsigned int
+...type:nolink:unsigned int
 ..returns:The difference of the two matrices (another matrix).
 ..remarks:The number of rows and columns of matrix1 must be equal to the number of rows and columns of matrix2.
 */
@@ -580,7 +580,7 @@ String<TAlphabet> _matricialDifference(String<TAlphabet, TSpec1>& matrix1,
 ..param.matrix:The matrix in input.
 ...type:String<TAlphabet, TSpec1>&
 ..param.n:The number of columns of the matrix.
-...type:unsigned int
+...type:nolink:unsigned int
 ..returns:The inverse matrix of the matrix.
 */
 
