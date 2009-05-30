@@ -245,7 +245,10 @@ Consider to use a link to that item instead.
 ...subsection:#.# Tables of text subfields
 ...table:"param"|list of parameters. Is used in conjunction with "returns" to list different return values.
 
-...subsection:#.# link subfields
+...subsection:#.# Link subfields
+Link subfields link to other pages. 
+To disable linking, use "nolink:" as a prefix.
+For example, write "..type:nolink:unsinged int" to state that the type for a given param or return field is $unsigned int$.
 ...table:"metafunktion"|link to a meta function. For "param" or "return" fields e.g. to the meta function 
 that yields the typ of the arguments or of the return values.
 ...table:"type"|link to a type (class, spec oder adapter). For "param" or "return" fields for example
@@ -277,6 +280,8 @@ If C++ code should be displayed within a text field or subfield, it should be pl
  Links to glossary entries start with "glos:", e.g. "glos:Concept" gives: "@glos:Concept@". 
  Note that if there is no glossary entry that matches exact to the given string, an inexact search is performed, e.g. "glos:Concepts" and "glos:concept" will both 
  refer to the entry "glos:Concept".
+...text:
+ A link can also be turned back into a non-link by writing "nolink:" in front of it, e.g. "type:nolink:unsigned int".
 ...text:
  If another text should be displayed fr the link it can be appended using the "\pipe" character, 
  e.g. "Class.String\pipethe string classe" erzeugt: @Class.String|the string class@. 

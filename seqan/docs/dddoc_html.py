@@ -307,6 +307,9 @@ def translateLinkDisplaytext(text):
         if len(arr) == 1: return arr[0]
         return arr[1]
         
+    if (protocol == 'nolink'):
+        return translateID(rest)
+
     arr = dddoc.splitName(text)
     if len(arr) == 0: return brokenLinkText(text)
 
@@ -349,7 +352,11 @@ def translateLink(text, attribs = ""):
         if len(arr) == 1: t = arr[0]
         else: t = arr[1]
         return '<a class=glossary_link ' + glos[2] + t + '</a>'
-    
+
+    #no link    
+    if (protocol == 'nolink'):
+        return translateID(rest)
+
 
     arr = dddoc.splitName(text)
     if len(arr) == 0: return brokenLink(text)
