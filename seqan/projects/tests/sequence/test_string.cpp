@@ -633,7 +633,7 @@ void Test_String_CStyle()
 	String<Dna, CStyle> str9(str_dna);
 	SEQAN_TASSERT(str2 == str_dna)
 
-	char * strp = "this is a long array of chars";
+	char * strp = (char *) "this is a long array of chars";
 	create(str2, strp);
 	SEQAN_TASSERT(str2 == strp)
 	SEQAN_TASSERT(id(str2) != id(strp))

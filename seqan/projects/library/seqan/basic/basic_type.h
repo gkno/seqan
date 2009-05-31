@@ -537,6 +537,19 @@ struct _Pointer<T [I]>
 	typedef T * Type;
 };
 
+//non const version of _Pointer for return values
+
+template <typename T>
+struct _NonConstPointer:
+	_Pointer<T>
+{
+};
+template <typename T>
+struct _NonConstPointer<T * const>
+{
+	typedef T * Type;
+};
+
 /**
 .Internal._toPointer:
 ..cat:Functions
@@ -548,14 +561,14 @@ struct _Pointer<T [I]>
 ..see:Internal._Pointer
 */
 template <typename T>
-typename _Pointer<T>::Type
+typename _NonConstPointer<T>::Type
 _toPointer(T & _object)
 {
 SEQAN_CHECKPOINT
 	return & _object;
 }
 template <typename T>
-typename _Pointer<T const>::Type
+typename _NonConstPointer<T const>::Type
 _toPointer(T const & _object)
 {
 SEQAN_CHECKPOINT
@@ -563,7 +576,7 @@ SEQAN_CHECKPOINT
 }
 
 template <typename T>
-typename _Pointer<T *>::Type
+typename _NonConstPointer<T *>::Type
 _toPointer(T * _object)
 {
 SEQAN_CHECKPOINT
