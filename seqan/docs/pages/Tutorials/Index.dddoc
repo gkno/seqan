@@ -148,11 +148,11 @@ while (goRight(myIterator))
 
 ...text:
 To go back to upper nodes you can either save copies of the @Spec.TopDown Iterator@ or use the heavier @Spec.TopDownHistory Iterator@ which stores the way back to the root and can @Function.goUp@.
-This is a specialization of the @Spec.TopDown Iterator@ and can be instantiated with $Iterator< Index<String<char> >, TopDown<ParentLink<> > >::Type myIterator(myIndex);$.
+This is a specialization of the @Spec.TopDown Iterator@ and can be instantiated with $Iterator< Index<String<char> >, TopDown<ParentLinks<> > >::Type myIterator(myIndex);$.
 
 As this iterator can randomly walk through the suffix tree it can easily be used to do a preorder or postorder dfs.
 Therefore this iterator also implements the functions @Function.goNext@ and @Function.atEnd@.
-The order of the dfs traversal can be specified with an optional template argument of $ParentLink<..>$ which can be @Tag.Preorder@ (default) \ldots
+The order of the dfs traversal can be specified with an optional template argument of $ParentLinks<..>$ which can be @Tag.Preorder@ (default) \ldots
 
 ...code:
 // preorder dfs
