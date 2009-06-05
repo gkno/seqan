@@ -30,6 +30,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //////////////////////////////////////////////////////////////////////////////
 
+// We store gap anchors only for the first text character behind a gap or a clipped sequence character
+
 template <typename TPos>
 struct GapAnchor {
 	TPos	seqPos;			// sequence character position in the ungapped sequence
@@ -38,11 +40,6 @@ struct GapAnchor {
 	GapAnchor() : seqPos(0), gapPos(0) {}
 	GapAnchor(TPos sP, TPos gP) : seqPos(sP), gapPos(gP) {}
 };
-
-// We store gap anchors
-//  * of the first text character
-//  * of the last text character before a gap
-//  * of the last alignment character
 
 //////////////////////////////////////////////////////////////////////////////
 

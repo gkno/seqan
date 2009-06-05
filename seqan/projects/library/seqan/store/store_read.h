@@ -39,11 +39,6 @@ struct ReadStoreElement
 	TId matePairId;				// refers to the mate-pair, INVALID_ID if not part of a mate-pair
 	TReadSeq seq;
 
-	//Clear range, currently disabled
-	//TPos leftClr;				// Number of characters to the left that are clipped
-	//TPos rightClr;				// Number of characters to the right that are clipped
-	//ReadStoreElement() : matePairId(INVALID_ID), leftClr(0), rightClr(0) {}
-	
 	ReadStoreElement() : matePairId(INVALID_ID) {}
 };
 
