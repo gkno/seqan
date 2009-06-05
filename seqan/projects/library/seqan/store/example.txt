@@ -1,5 +1,6 @@
 example1.afg: Single contig, clipped reads, no mate pairs
 example2.afg: Single contig, no clipped reads, mate pairs
+example3.afg: Multiple contigs, clipped reads, mate pairs
 
 
 Viewing:
