@@ -96,294 +96,6 @@ printHelp() {
 
 //////////////////////////////////////////////////////////////////////////////////
 
-template <typename TName, typename TKey>
-inline void
-__findThis(TName const& searchText,
-		   TKey const& keyText,
-		   TName& result) 
-{
-	typedef typename Iterator<TName>::Type TNameIter;
-	TName key = keyText;
-	TNameIter nameIt = begin(searchText);
-	TNameIter nameItEnd = end(searchText);
-	for(;nameIt != nameItEnd;++nameIt) {
-		TNameIter keyIt = begin(key);
-		TNameIter keyItEnd = end(key);
-		TNameIter localNameIt = nameIt;
-		while((localNameIt != nameItEnd) && (keyIt != keyItEnd) && (value(localNameIt) == value(keyIt))) {
-			++keyIt;
-			++localNameIt;
-		}
-		if (keyIt == keyItEnd) {
-			while ((value(localNameIt) != ']') && (value(localNameIt) != ',')) {
-				appendValue(result, value(localNameIt));
-				++localNameIt;
-			}
-			break;
-		}
-	}
-}
-
-//////////////////////////////////////////////////////////////////////////////////
-
-template <typename TOptions, typename TAlphabet, typename TSpec, typename TFragmentStore, typename TLibraryStore, typename TContigStore>
-inline bool
-convertSimpleReadFile(ReadStore<TAlphabet, TSpec>& readSt,
-					  TFragmentStore& frgSt,
-					  TLibraryStore& libSt,
-					  TContigStore& ctgSt,
-					  TOptions& consOpt,
-					  bool moveToFront)
-{
-	typedef typename Size<TFragmentStore>::Type TSize;
-	typedef String<char> TName;
-
-
-
-	// Convert reads
-	typedef String<TAlphabet> TSequence;
-	StringSet<String<TAlphabet>, Owner<> > origStrSet;
-	String<TName> names;
-	String<char>  filePath;
-	filePath = consOpt.readsfile;
-	TSize count = _loadSequences(filePath, origStrSet, names);
-	if (count == 0) return false;
-	else {
-		for(TSize i = 0; i<length(origStrSet); ++i) {
-			// Get the begin and end position
-			TSize begRead;
-			if (readSt.data_pos_count == 0) begRead = 0;
-			else begRead = (value(readSt.data_begin_end, readSt.data_pos_count - 1)).i2;
-			TSize endRead = begRead + length(value(origStrSet, i));
-			appendValue(readSt.data_begin_end, Pair<TSize,TSize>(begRead, endRead));
-
-			// Save the read
-			typedef typename Iterator<String<TAlphabet> >::Type TSeqIter;
-			TSeqIter itSeq = begin(value(origStrSet, i));
-			TSeqIter itSeqEnd = end(value(origStrSet, i));
-			for(;itSeq != itSeqEnd; ++itSeq) {
-				appendValue(readSt.data_reads, *itSeq);
-				appendValue(readSt.data_qualities, char(48+60)); // Dummy quality value
-			}
-			
-			// Get the fragment id
-			TSize fragId = i;
-			TName valKey;
-			__findThis(value(names, i), "fragId=", valKey);
-			if (!empty(valKey)) fragId = _stringToNumber<TSize>(valKey);
-			appendValue(readSt.data_frg_id, fragId);
-			
-			// Build eid string
-			std::stringstream input;
-			clear(valKey);
-			__findThis(value(names, i), "id=", valKey);
-			if (empty(valKey)) input << "R" << i;
-			else input << valKey;
-
-			// Possibly append repeatId
-			clear(valKey);
-			__findThis(value(names, i), "repeatId=", valKey);
-			if (!empty(valKey)) input << "-" << valKey;
-			String<char> tmp(input.str().c_str());
-			appendValue(readSt.data_names, tmp);
-
-			// Append a clear range
-			appendValue(readSt.data_clr, Pair<TSize, TSize>(0, length(value(origStrSet, i))));
-			++readSt.data_pos_count;
-		}
-	}
-
-
-
-
-	// Write minimal contig
-
-	// Create a contig name
-	String<char> tmp = "C0";
-	appendValue(ctgSt.data_names, tmp);
-
-	// Create a string of gapped reads
-	appendValue(ctgSt.data_reads, String<GappedRead<> >());
-	TSize lastLetter = 0;
-	for(TSize i = 0; i<length(names); ++i) {
-		// Add the original read id
-		GappedRead<> gapRead;
-		gapRead.data_source = i;
-
-		// Add the offset and clear range
-		typedef typename Iterator<TName>::Type TNameIter;
-		TNameIter nameIt = begin(value(names, i));
-		TNameIter nameItEnd = end(value(names, i));
-		bool before = true;
-		String<char> inf1; String<char> inf2;
-		for(;nameIt != nameItEnd; goNext(nameIt)) {
-			if (value(nameIt) == ',') before = false;
-			else {
-				if (before) appendValue(inf1, value(nameIt));
-				else appendValue(inf2, value(nameIt));
-			}
-		}
-		TSize posI = _stringToNumber<TSize>(inf1);
-		TSize posJ = _stringToNumber<TSize>(inf2);
-		if (posI < posJ) {
-			if (posJ > lastLetter) lastLetter = posJ;
-			gapRead.data_offset = posI;
-			gapRead.data_clr = Pair<TSize, TSize>(0, length(value(origStrSet, i)));
-		} else {
-			if (posI > lastLetter) lastLetter = posI;
-			gapRead.data_offset = posJ;
-			gapRead.data_clr = Pair<TSize, TSize>(length(value(origStrSet, i)), 0);
-		}
-		appendValue(value(ctgSt.data_reads, ctgSt.data_pos_count), gapRead);
-	}
-
-	// Create a contig sequence	
-	StringSet<String<char>, Owner<> > seqSet;
-	String<TName> seqNames;
-	clear(filePath);
-	if (!consOpt.source.empty()) {
-		filePath = consOpt.source;
-	} else {
-		filePath = consOpt.readsfile;
-		appendValue(filePath, 'S');
-	}
-	count = _loadSequences(filePath, seqSet, seqNames);
-	if (count != 0) {
-		for(TSize l = 0;l < length(value(seqSet,0)); ++l) {
-			appendValue(ctgSt.data_contig, value(value(seqSet, 0), l));
-			appendValue(ctgSt.data_quality, char(48+60)); // Dummy quality value
-		}
-		appendValue(ctgSt.data_begin_end, Pair<TSize,TSize>(0, length(value(seqSet,0))));
-	} else {
-		for(TSize l = 0;l < lastLetter; ++l) {
-			appendValue(ctgSt.data_contig, '-'); // Dummy letter
-			appendValue(ctgSt.data_quality, char(48+60)); // Dummy quality value
-		}
-		appendValue(ctgSt.data_begin_end, Pair<TSize, TSize>(0, lastLetter));
-	}
-	++ctgSt.data_pos_count; // Added just one contig
-
-
-
-	// Convert Libraries
-	clear(filePath);
-	filePath = consOpt.readsfile;
-	appendValue(filePath, 'L');
-	StringSet<String<char>, Owner<> > libSet;
-	String<TName> libIds;
-	count = _loadSequences(filePath, libSet, libIds);
-	if (count != 0) {
-		for(TSize i = 0; i<length(libSet); ++i) {
-			// Create the library name
-			std::stringstream input;
-			input << "L" << i;
-			String<char> tmp(input.str().c_str());
-			appendValue(libSt.data_names, tmp);
-
-			// Get the mean and std
-			typedef typename Iterator<String<char> >::Type TStrIter;
-			TStrIter nameIt = begin(value(libSet, i));
-			TStrIter nameItEnd = end(value(libSet, i));
-			bool before = true;
-			String<char> inf1; String<char> inf2;
-			for(;nameIt != nameItEnd; goNext(nameIt)) {
-				if (value(nameIt) == ',') before = false;
-				else {
-					if (before) appendValue(inf1, value(nameIt));
-					else appendValue(inf2, value(nameIt));
-				}
-			}
-			TSize mean = _stringToNumber<TSize>(inf1);
-			TSize std = _stringToNumber<TSize>(inf2);
-			appendValue(libSt.data_mean, mean);
-			appendValue(libSt.data_std, std);
-			++libSt.data_pos_count;
-		}
-	} else {
-		appendValue(libSt.data_names, "L0");
-		appendValue(libSt.data_mean, 0);
-		appendValue(libSt.data_std, 0);
-		++libSt.data_pos_count;
-	}
-
-
-
-	// Convert Fragments
-	filePath = consOpt.readsfile;
-	appendValue(filePath, 'F');
-	StringSet<String<char>, Owner<> > fragSet;
-	String<TName> fragIds;
-	count = _loadSequences(filePath, fragSet, fragIds);
-	if (count != 0) {
-		for(TSize i = 0;i<length(fragSet); ++i) {
-			// Create the fragment name
-			std::stringstream input;
-			input << "F" << i;
-			String<char> tmp(input.str().c_str());
-			appendValue(frgSt.data_names, tmp);
-			
-			// Find the library id
-			TSize libId = i;
-			TName valKey;
-			__findThis(value(fragIds, i), "libId=", valKey);
-			if (!empty(valKey)) libId = _stringToNumber<TSize>(valKey);
-			appendValue(frgSt.data_lib_id, libId);
-			
-			// Get rds1 and rds2
-			typedef typename Iterator<String<char> >::Type TStrIter;
-			TStrIter nameIt = begin(value(fragSet, i));
-			TStrIter nameItEnd = end(value(fragSet, i));
-			bool before = true;
-			String<char> inf1; String<char> inf2;
-			for(;nameIt != nameItEnd; goNext(nameIt)) {
-				if (value(nameIt) == ',') before = false;
-				else {
-					if (before) appendValue(inf1, value(nameIt));
-					else appendValue(inf2, value(nameIt));
-				}
-			}
-			TSize rds1 = _stringToNumber<TSize>(inf1);
-			TSize rds2 = _stringToNumber<TSize>(inf2);
-			if (rds1 < rds2) appendValue(frgSt.data_rds, Pair<TSize, TSize>(rds1, rds2));
-			else appendValue(frgSt.data_rds, Pair<TSize, TSize>(rds2, rds1));
-			++frgSt.data_pos_count;
-		}
-	} else {
-		for(TSize i = 0; i<readSt.data_pos_count; ++i) {
-			std::stringstream input;
-			input << "F" << i;
-			String<char> tmp(input.str().c_str());
-			appendValue(frgSt.data_names, tmp);
-			appendValue(frgSt.data_lib_id, 0);
-			appendValue(frgSt.data_rds, Pair<TSize, TSize>(0, 0));
-			++frgSt.data_pos_count;
-		}
-	}
-
-
-
-	// Find smallest offset and reset all contig offsets
-	if (moveToFront) {
-		for(TSize i = 0; i<length(ctgSt); ++i) {
-			TSize smallestOffset = length(ctgSt.data_contig);
-			String<GappedRead<> >& gappedReads = value(ctgSt.data_reads, i);
-			for(TSize k = 0; k<length(gappedReads); ++k) {
-				if ((value(gappedReads, k)).data_offset < smallestOffset) smallestOffset = (value(gappedReads, k)).data_offset;
-			}
-			if (smallestOffset > 0) {
-				for(TSize k = 0; k<length(gappedReads); ++k) {
-					(value(gappedReads, k)).data_offset -= smallestOffset;
-				}
-			}
-		}
-	}
-	return true;
-}
-
-
-
-//////////////////////////////////////////////////////////////////////////////////
-
 int main(int argc, const char *argv[]) {
 	
 	typedef unsigned int TSize;
@@ -528,25 +240,21 @@ int main(int argc, const char *argv[]) {
 	}
 
 
-
-
-
-	// Load simulation file, afg file or celera consensus file
-	ReadStore<> readSt;
-	FrgStore<> frgSt;
-	LibStore<> libSt;
-	CtgStore<> ctgSt;
-
+	// Fragment store
 	_FragmentStore<> fragStore;
 
-
+	// Load the reads and layout positions
 	TSize numberOfContigs = 0;
 	if (!consOpt.readsfile.empty()) {
-		bool success = convertSimpleReadFile(readSt, frgSt, libSt, ctgSt, consOpt, consOpt.moveToFront);
+		// Load simple read file
+		std::fstream strmReads;
+		strmReads.open(consOpt.readsfile.c_str(), ::std::ios_base::in | ::std::ios_base::binary);
+		bool success = _convertSimpleReadFile(strmReads, fragStore, consOpt.readsfile, consOpt.moveToFront);
+		strmReads.close();
 		if (!success) { printHelp(); exit(1); }
 		numberOfContigs = 1;
 	} else if (!consOpt.afgfile.empty()) {
-		// Read Amos
+		// Load Amos message file
 		std::fstream strmReads;
 		strmReads.open(consOpt.afgfile.c_str(), ::std::ios_base::in | ::std::ios_base::binary);
 		read(strmReads, fragStore, Amos());	
@@ -557,7 +265,7 @@ int main(int argc, const char *argv[]) {
 		exit(1);
 	}
 
-	/*
+/*
 
 	// Just convert the input file
 	if (consOpt.convert != 0) {

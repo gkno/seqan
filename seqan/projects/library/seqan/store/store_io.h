@@ -66,9 +66,6 @@ read(TFile & file,
 	typedef typename Value<typename TFragmentStore::TReadStore>::Type TReadStoreElement;
 	typedef typename Value<typename TFragmentStore::TAlignedReadStore>::Type TAlignedElement;
 
-	// Initialization
-	TId myPairMatchId = 0;  // Dummy variable to count the matches
-
 	// All maps to mirror file ids to our ids
 	typedef std::map<TId, TId> TIdMap;
 	TIdMap libIdMap;
@@ -315,9 +312,6 @@ read(TFile & file,
 							diff -= clr2;
 							appendValue(alignEl.gaps, TContigGapAnchor(lenRead, lenRead + diff));
 						}
-
-						// Set the pairMatchId
-						alignEl.pairMatchId = myPairMatchId++;
 						
 						// Set begin and end position
 						if (clr1 < clr2) {
@@ -444,6 +438,7 @@ read(TFile & file,
 			else readIt->matePairId = TReadStoreElement::INVALID_ID;
 		}
 	}
+	TId myPairMatchId = 0;  // Dummy variable to count the matches
 	typedef typename Iterator<typename TFragmentStore::TAlignedReadStore>::Type TAlignIter;
 	TAlignIter alignIt = begin(fragStore.alignedReadStore);
 	TAlignIter alignItEnd = end(fragStore.alignedReadStore);
@@ -453,6 +448,7 @@ read(TFile & file,
 			if (readIdPos != readIdMap.end()) alignIt->readId = readIdPos->second;
 			else alignIt->readId = TAlignedElement::INVALID_ID;
 		}
+		alignIt->pairMatchId = myPairMatchId++;
 	}
 }
 
@@ -714,6 +710,381 @@ write(TFile & target,
 		_streamWrite(target,"}\n");
 	}
 }
+
+
+//////////////////////////////////////////////////////////////////////////////
+// Read: Simple fasta read file with positions (Read simulator format)
+//////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////////////
+
+
+template<typename TFile, typename TSpec, typename TConfig, typename TFilePath>
+inline bool 
+_convertSimpleReadFile(TFile& file,
+					   _FragmentStore<TSpec, TConfig>& fragStore,
+					   TFilePath& filePath, 
+					   bool moveToFront)
+{
+	SEQAN_CHECKPOINT
+	// Basic types
+	typedef _FragmentStore<TSpec, TConfig> TFragmentStore;
+	typedef typename Id<TFragmentStore>::Type TId;
+	typedef typename Size<TFragmentStore>::Type TSize;
+	typedef typename Value<TFile>::Type TValue;
+	typedef typename TFragmentStore::TContigPos TPos;
+
+	// All fragment store element types
+	typedef typename Value<typename TFragmentStore::TContigStore>::Type TContigElement;
+	typedef typename Value<typename TFragmentStore::TLibraryStore>::Type TLibraryStoreElement;
+	typedef typename Value<typename TFragmentStore::TMatePairStore>::Type TMatePairElement;
+	typedef typename Value<typename TFragmentStore::TReadStore>::Type TReadStoreElement;
+	typedef typename Value<typename TFragmentStore::TAlignedReadStore>::Type TAlignedElement;
+
+	// All maps to mirror file ids to our internal ids
+	typedef std::map<TId, TId> TIdMap;
+	TIdMap libIdMap;
+	TIdMap frgIdMap;
+	TIdMap readIdMap;
+
+
+	// Parse the file and convert the internal ids
+	TPos maxPos = 0;
+	TPos minPos = 0;
+	TId count = 0;
+	TValue c;
+	if (_streamEOF(file)) return false;
+	else c = _streamGet(file);
+	while (!_streamEOF(file)) {
+		if (_streamEOF(file)) break;
+
+		// New read?
+		if (c == '>') {
+			TReadStoreElement readEl;
+			TAlignedElement alignEl;
+			TId id = count;
+			TId fragId = count;
+			TId repeatId = 0;
+			
+			c = _streamGet(file);
+			_parse_skipWhitespace(file, c);
+
+			// Get the layout positions
+			alignEl.beginPos = _parse_readNumber(file, c);
+			if ((count == 0) || (alignEl.beginPos < minPos)) minPos = alignEl.beginPos;
+			if (alignEl.beginPos > maxPos) maxPos = alignEl.beginPos;
+			c = _streamGet(file);
+			_parse_skipWhitespace(file, c);
+			alignEl.endPos = _parse_readNumber(file, c);
+			if (alignEl.endPos < minPos) minPos = alignEl.endPos;
+			if (alignEl.endPos > maxPos) maxPos = alignEl.endPos;
+			
+			// Any attributes?
+			String<char> eid;
+			String<char> qlt;
+			if (c == '[') {
+				String<char> fdIdentifier;
+				while (c != ']') {
+					c = _streamGet(file);
+					_parse_skipWhitespace(file, c);
+					clear(fdIdentifier);
+					_parse_readIdentifier(file, fdIdentifier, c);
+					if (fdIdentifier == "id") {
+						c = _streamGet(file);
+						id = _parse_readNumber(file, c);
+					} else if (fdIdentifier == "fragId") {
+						c = _streamGet(file);
+						fragId = _parse_readNumber(file, c);
+					} else if (fdIdentifier == "repeatId") {
+						c = _streamGet(file);
+						repeatId = _parse_readNumber(file, c);
+					} else if (fdIdentifier == "eid") {
+						c = _streamGet(file);
+						while ((c != ',') && (c != ']')) {
+							appendValue(eid, c);
+							c = _streamGet(file);
+						}
+					} else if (fdIdentifier == "qlt") {
+						c = _streamGet(file);
+						while ((c != ',') && (c != ']')) {
+							appendValue(qlt, c);
+							c = _streamGet(file);
+						}
+					} else {
+						// Jump to next attribute
+						while ((c != ',') && (c != ']')) {
+							c = _streamGet(file);
+						}
+					}
+				}
+			}
+			_parse_skipLine(file, c);
+			_parse_skipWhitespace(file, c);
+			while ((!_streamEOF(file)) && (c != '>')) {
+				_parse_readSequenceData(file,c,readEl.seq);
+				_parse_skipWhitespace(file, c);
+			}
+
+			// Set quality
+			typedef typename Iterator<typename TFragmentStore::TReadSeq>::Type TReadIter;
+			typedef typename Iterator<String<char> >::Type TQualIter;
+			TReadIter begIt = begin(readEl.seq);
+			TReadIter begItEnd = begin(readEl.seq);
+			if (length(qlt)) {
+				TQualIter qualIt = begin(qlt);
+				TQualIter qualItEnd = end(qlt);
+				for(;qualIt != qualItEnd; goNext(qualIt), goNext(begIt)) assignQualityValue(value(begIt), value(qualIt));
+			} else {
+				for(;begIt != begItEnd; goNext(begIt)) assignQualityValue(value(begIt), 'D');
+			}
+
+			// Set eid if not given
+			if (empty(eid)) {
+				std::stringstream input;
+				input << "R" << id;
+				input << "-" << repeatId;
+				eid = input.str().c_str();
+			}
+
+			// Set mate pair id
+			readEl.matePairId = fragId;
+
+			// Insert the read
+			readIdMap.insert(std::make_pair(id, length(fragStore.readStore)));
+			appendValue(fragStore.readStore, readEl);
+			appendValue(fragStore.readNameStore, eid);
+
+
+			// Insert an aligned read
+			alignEl.readId = id;
+			alignEl.pairMatchId =  fragId;
+			alignEl.contigId = 0;
+			appendValue(fragStore.alignedReadStore, alignEl);
+
+			++count;
+		} else {
+			_parse_skipLine(file, c);
+		}
+	}
+
+	// Read contig or reference sequence
+	TContigElement contigEl;
+	std::string fileName = filePath + 'S';
+	std::fstream strmRef;
+	strmRef.open(fileName.c_str(), ::std::ios_base::in | ::std::ios_base::binary);
+	String<char> contigEid = "C0";
+	if (!_streamEOF(strmRef)) {
+		c = _streamGet(strmRef);
+		while (!_streamEOF(strmRef)) {
+			if (_streamEOF(strmRef)) break;
+			if (c == '>') {
+				clear(contigEid);
+				c = _streamGet(strmRef);
+				while ((c != '\r') && (c != '\n')) {
+					appendValue(contigEid, c);
+					c = _streamGet(strmRef);
+				}
+				_parse_skipLine(strmRef, c);
+				_parse_skipWhitespace(strmRef, c);
+				while ((!_streamEOF(strmRef)) && (c != '>')) {
+					_parse_readSequenceData(strmRef,c,contigEl.seq);
+					_parse_skipWhitespace(strmRef, c);
+				}
+			} else {
+				_parse_skipLine(strmRef, c);
+			}
+		}
+	}
+	strmRef.close();
+	if (empty(contigEl.seq)) {
+		typedef typename TFragmentStore::TContigGapAnchor TContigGapAnchor;
+		if (moveToFront) appendValue(contigEl.gaps, TContigGapAnchor(0, maxPos - minPos));
+		else appendValue(contigEl.gaps, TContigGapAnchor(0, maxPos));
+	}
+	appendValue(fragStore.contigStore, contigEl);
+	appendValue(fragStore.contigNameStore, contigEid);
+
+
+	// Read fragments
+	fileName = filePath + 'F';
+	std::fstream strmFrag;
+	strmFrag.open(fileName.c_str(), ::std::ios_base::in | ::std::ios_base::binary);
+	if (!_streamEOF(strmFrag)) {
+		c = _streamGet(strmFrag);
+		while (!_streamEOF(strmFrag)) {
+			if (_streamEOF(strmFrag)) break;
+			if (c == '>') {
+				TMatePairElement matePairEl;
+				c = _streamGet(strmFrag);
+				_parse_skipWhitespace(strmFrag, c);
+
+				// Get the fragment id
+				TId id = _parse_readNumber(strmFrag, c);
+			
+				// Any attributes?
+				std::stringstream input;
+				input << "F" << id;
+				String<char> eid(input.str().c_str());
+				if (c == '[') {
+					String<char> fdIdentifier;
+					while (c != ']') {
+						c = _streamGet(strmFrag);
+						_parse_skipWhitespace(strmFrag, c);
+						clear(fdIdentifier);
+						_parse_readIdentifier(strmFrag, fdIdentifier, c);
+						if (fdIdentifier == "libId") {
+							c = _streamGet(strmFrag);
+							matePairEl.libId = _parse_readNumber(strmFrag, c);
+						} else if (fdIdentifier == "eid") {
+							clear(eid);
+							c = _streamGet(strmFrag);
+							while ((c != ',') && (c != ']')) {
+								appendValue(eid, c);
+								c = _streamGet(strmFrag);
+							}
+						} else {
+							// Jump to next attribute
+							while ((c != ',') && (c != ']')) {
+								c = _streamGet(strmFrag);
+							}
+						}
+					}
+				}
+				_parse_skipLine(strmFrag, c);
+				_parse_skipWhitespace(strmFrag, c);
+
+				// Read the two reads belonging to this mate pair
+				matePairEl.readId[0] = _parse_readNumber(strmFrag, c);
+				c = _streamGet(strmFrag);
+				_parse_skipWhitespace(strmFrag, c);
+				matePairEl.readId[1] = _parse_readNumber(strmFrag, c);
+				_parse_skipLine(strmFrag, c);
+
+				// Insert mate pair
+				frgIdMap.insert(std::make_pair(id, length(fragStore.matePairStore)));
+				appendValue(fragStore.matePairStore, matePairEl);
+				appendValue(fragStore.matePairNameStore, eid);
+			} else {
+				_parse_skipLine(strmFrag, c);
+			}
+		}
+	}
+	strmFrag.close();
+
+	// Read libraries
+	fileName = filePath + 'L';
+	std::fstream strmLib;
+	strmLib.open(fileName.c_str(), ::std::ios_base::in | ::std::ios_base::binary);
+	if (!_streamEOF(strmLib)) {
+		c = _streamGet(strmLib);
+		while (!_streamEOF(strmLib)) {
+			if (_streamEOF(strmLib)) break;
+			if (c == '>') {
+
+				TLibraryStoreElement libEl;
+				c = _streamGet(strmLib);
+				_parse_skipWhitespace(strmLib, c);
+
+				// Get the fragment id
+				TId id = _parse_readNumber(strmLib, c);
+			
+				// Any attributes?
+				std::stringstream input;
+				input << "L" << id;
+				String<char> eid(input.str().c_str());
+				if (c == '[') {
+					String<char> fdIdentifier;
+					while (c != ']') {
+						c = _streamGet(strmLib);
+						_parse_skipWhitespace(strmLib, c);
+						clear(fdIdentifier);
+						_parse_readIdentifier(strmLib, fdIdentifier, c);
+						if (fdIdentifier == "eid") {
+							clear(eid);
+							c = _streamGet(strmLib);
+							while ((c != ',') && (c != ']')) {
+								appendValue(eid, c);
+								c = _streamGet(strmLib);
+							}
+						} else {
+							// Jump to next attribute
+							while ((c != ',') && (c != ']')) {
+								c = _streamGet(strmLib);
+							}
+						}
+					}
+				}
+				_parse_skipLine(strmLib, c);
+				_parse_skipWhitespace(strmLib, c);
+
+				// Read the mean and standard deviation
+				libEl.mean = _parse_readNumber(strmLib, c);
+				c = _streamGet(strmLib);
+				_parse_skipWhitespace(strmLib, c);
+				libEl.std = _parse_readNumber(strmLib, c);
+				_parse_skipLine(strmLib, c);
+
+				// Insert mate pair
+				libIdMap.insert(std::make_pair(id, length(fragStore.libraryStore)));
+				appendValue(fragStore.libraryStore, libEl);
+				appendValue(fragStore.libraryNameStore, eid);
+			} else {
+				_parse_skipLine(strmLib, c);
+			}
+		}
+	}
+	strmLib.close();
+	
+	// Renumber all ids
+	typedef typename TIdMap::const_iterator TIdMapIter;
+	typedef typename Iterator<typename TFragmentStore::TMatePairStore>::Type TMateIter;
+	TMateIter mateIt = begin(fragStore.matePairStore);
+	TMateIter mateItEnd = end(fragStore.matePairStore);
+	for(;mateIt != mateItEnd; goNext(mateIt)) {
+		if (mateIt->libId != TMatePairElement::INVALID_ID) {
+			TIdMapIter libIdPos = libIdMap.find(mateIt->libId);
+			if (libIdPos != libIdMap.end()) mateIt->libId = libIdPos->second;
+			else mateIt->libId = TMatePairElement::INVALID_ID;
+		}
+		if (mateIt->readId[0] != TMatePairElement::INVALID_ID) {
+			TIdMapIter readIdPos = readIdMap.find(mateIt->readId[0]);
+			if (readIdPos != readIdMap.end()) mateIt->readId[0] = readIdPos->second;
+			else mateIt->readId[0] = TMatePairElement::INVALID_ID;
+		}
+		if (mateIt->readId[1]!= TMatePairElement::INVALID_ID) {
+			TIdMapIter readIdPos = readIdMap.find(mateIt->readId[1]);
+			if (readIdPos != readIdMap.end()) mateIt->readId[1] = readIdPos->second;
+			else mateIt->readId[0] = TMatePairElement::INVALID_ID;
+		}
+	}
+	typedef typename Iterator<typename TFragmentStore::TReadStore>::Type TReadIter;
+	TReadIter readIt = begin(fragStore.readStore);
+	TReadIter readItEnd = end(fragStore.readStore);
+	for(;readIt != readItEnd; goNext(readIt)) {
+		if (readIt->matePairId != TReadStoreElement::INVALID_ID) {
+			TIdMapIter mateIdPos = frgIdMap.find(readIt->matePairId);
+			if (mateIdPos != frgIdMap.end()) readIt->matePairId = mateIdPos->second;
+			else readIt->matePairId = TReadStoreElement::INVALID_ID;
+		}
+	}
+	typedef typename Iterator<typename TFragmentStore::TAlignedReadStore>::Type TAlignIter;
+	TAlignIter alignIt = begin(fragStore.alignedReadStore);
+	TAlignIter alignItEnd = end(fragStore.alignedReadStore);
+	for(;alignIt != alignItEnd; goNext(alignIt)) {
+		if (alignIt->readId != TAlignedElement::INVALID_ID) {
+			TIdMapIter readIdPos = readIdMap.find(alignIt->readId);
+			if (readIdPos != readIdMap.end()) alignIt->readId = readIdPos->second;
+			else alignIt->readId = TAlignedElement::INVALID_ID;
+		}
+		if (moveToFront) {
+			alignIt->beginPos -= minPos;
+			alignIt->endPos -= minPos;
+		}
+	}
+	return true;
+}
+
 
 
 
