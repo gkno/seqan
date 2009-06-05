@@ -55,6 +55,110 @@ AlignedReadStoreElement<TPos, TGapAnchor, TSpec>::INVALID_ID = SupremumValue<typ
 
 //////////////////////////////////////////////////////////////////////////////
 
+//////////////////////////////////////////////////////////////////////////////
+// Sorting tags
+//////////////////////////////////////////////////////////////////////////////
+
+
+struct _SortContigId;
+typedef Tag<_SortContigId> const SortContigId;
+
+
+struct _SortId;
+typedef Tag<_SortId> const SortId;
+
+struct _SortBeginPos;
+typedef Tag<_SortBeginPos> const SortBeginPos;
+
+struct _SortEndPos;
+typedef Tag<_SortEndPos> const SortEndPos;
+
+struct _SortPairMatchId;
+typedef Tag<_SortPairMatchId> const SortPairMatchId;
+
+struct _SortReadId;
+typedef Tag<_SortReadId> const SortReadId;
+
+//////////////////////////////////////////////////////////////////////////////
+
+
+template <typename TAlignedRead, typename TTag>
+struct _LessAlignedRead;
+
+template <typename TAlignedRead>
+struct _LessAlignedRead<TAlignedRead, SortId> :
+	public ::std::unary_function<TAlignedRead, bool>
+{
+	inline bool 
+	operator() (TAlignedRead const& a1, TAlignedRead const& a2) const {
+		return (a1.id) < (a2.id);
+	}
+};
+
+template <typename TAlignedRead>
+struct _LessAlignedRead<TAlignedRead, SortContigId> :
+	public ::std::unary_function<TAlignedRead, bool>
+{
+	inline bool 
+	operator() (TAlignedRead const& a1, TAlignedRead const& a2) const {
+		return a1.contigId < a2.contigId;
+	}
+};
+
+template <typename TAlignedRead>
+struct _LessAlignedRead<TAlignedRead, SortBeginPos> :
+	public ::std::unary_function<TAlignedRead, bool>
+{
+	inline bool 
+	operator() (TAlignedRead const& a1, TAlignedRead const& a2) const {
+		return _min(a1.beginPos, a1.endPos) < _min(a2.beginPos, a2.endPos);
+	}
+};
+
+template <typename TAlignedRead>
+struct _LessAlignedRead<TAlignedRead, SortEndPos> :
+	public ::std::unary_function<TAlignedRead, bool>
+{
+	inline bool 
+	operator() (TAlignedRead const& a1, TAlignedRead const& a2) const {
+		return _max(a1.beginPos, a1.endPos) < _max(a2.beginPos, a2.endPos);
+	}
+};
+
+template <typename TAlignedRead>
+struct _LessAlignedRead<TAlignedRead, SortPairMatchId> :
+	public ::std::unary_function<TAlignedRead, bool>
+{
+	inline bool 
+	operator() (TAlignedRead const& a1, TAlignedRead const& a2) const {
+		return a1.pairMatchId < a2.pairMatchId;
+	}
+};
+
+template <typename TAlignedRead>
+struct _LessAlignedRead<TAlignedRead, SortReadId> :
+	public ::std::unary_function<TAlignedRead, bool>
+{
+	inline bool 
+	operator() (TAlignedRead const& a1, TAlignedRead const& a2) const {
+		return a1.readId < a2.readId;
+	}
+};
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TAlign, typename TSortSpec>
+inline void
+sortAlignedReads(TAlign& alignStore, Tag<TSortSpec>) 
+{
+	std::sort(
+		begin(alignStore, Standard() ), 
+		end(alignStore, Standard() ), 
+		_LessAlignedRead<typename Value<TAlign>::Type, Tag<TSortSpec> const>() );
+}
+	
+
 
 }// namespace SEQAN_NAMESPACE_MAIN
 

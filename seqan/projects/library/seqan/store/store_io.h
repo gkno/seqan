@@ -456,20 +456,6 @@ read(TFile & file,
 
 //////////////////////////////////////////////////////////////////////////////
 
-
-template <typename TPos, typename TGapAnchor, typename TSpec>
-struct _LessContigIdSort :
-	public ::std::unary_function<AlignedReadStoreElement<TPos, TGapAnchor, TSpec>, bool>
-{
-	inline bool 
-	operator() (AlignedReadStoreElement<TPos, TGapAnchor, TSpec> const& a1, AlignedReadStoreElement<TPos, TGapAnchor, TSpec> const& a2) const {
-		return a1.contigId < a2.contigId;
-	}
-};
-
-
-//////////////////////////////////////////////////////////////////////////////
-
 template<typename TFile, typename TSpec, typename TConfig>
 inline void 
 write(TFile & target,
@@ -590,8 +576,7 @@ write(TFile & target,
 	}
 
 	// Sort aligned reads according to contigId
-	std::sort(begin(fragStore.alignedReadStore, Standard() ), end(fragStore.alignedReadStore, Standard() ), _LessContigIdSort<typename TFragmentStore::TContigPos, typename TFragmentStore::TReadGapAnchor, typename TFragmentStore::TAlignedReadStoreElementSpec>() );
-	
+	sortAlignedReads(fragStore.alignedReadStore, SortContigId());
 
 	// Write Contigs
 	typedef typename Iterator<typename TFragmentStore::TContigStore>::Type TContigIter;
