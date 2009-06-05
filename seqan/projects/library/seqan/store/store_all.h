@@ -54,7 +54,7 @@ template <typename TSpec = void, typename TConfig = FragmentStoreConfig<TSpec> >
 struct _FragmentStore
 {
 	typedef typename TConfig::TMean					TMean;
-	typedef typename TConfig::TVariance				TVariance;
+	typedef typename TConfig::TStd					TStd;
 	
 	typedef typename TConfig::TReadSeq				TReadSeq;
 	typedef typename TConfig::TContigSeq			TContigSeq;
@@ -70,9 +70,9 @@ struct _FragmentStore
 	typedef typename TConfig::TContigStoreElementSpec		TContigStoreElementSpec;
 	typedef typename TConfig::TAlignedReadStoreElementSpec	TAlignedReadStoreElementSpec;
 	
-	typedef String< ReadStoreElement< TReadSeq, TReadStoreElementSpec > >									TReadStore;
+	typedef String< ReadStoreElement< TReadSeq, TReadPos, TReadStoreElementSpec > >							TReadStore;
 	typedef String< MatePairStoreElement< TMatePairStoreElementSpec > >										TMatePairStore;
-	typedef String< LibraryStoreElement< TMean, TVariance, TLibraryStoreElementSpec > >						TLibraryStore;
+	typedef String< LibraryStoreElement< TMean, TStd, TLibraryStoreElementSpec > >							TLibraryStore;
 	typedef String< ContigStoreElement< TContigSeq, TContigGapAnchor, TContigStoreElementSpec > >			TContigStore;
 	typedef String< AlignedReadStoreElement< TContigPos, TReadGapAnchor, TAlignedReadStoreElementSpec > >	TAlignedReadStore;
 	

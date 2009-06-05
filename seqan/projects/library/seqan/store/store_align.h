@@ -32,6 +32,8 @@ template <typename TPos, typename TGapAnchor, typename TSpec = void>
 struct AlignedReadStoreElement
 {
 	typedef typename Id<AlignedReadStoreElement>::Type TId;
+
+	static const TId INVALID_ID;
 	
 	TId					readId;
 	TId					contigId;
@@ -39,7 +41,16 @@ struct AlignedReadStoreElement
 	TPos				beginPos;		// begin position of the gapped sequence in gapped contig sequence
 	TPos				endPos;			// end position of ..., for reverse aligned reads holds end < begin
 	String<TGapAnchor>	gaps;
+
+	AlignedReadStoreElement() : readId(INVALID_ID), contigId(INVALID_ID), pairMatchId(INVALID_ID), beginPos(0), endPos(0) {}
 };
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TPos, typename TGapAnchor, typename TSpec>
+const typename Id<AlignedReadStoreElement<TPos, TGapAnchor, TSpec> >::Type
+AlignedReadStoreElement<TPos, TGapAnchor, TSpec>::INVALID_ID = SupremumValue<typename Id<AlignedReadStoreElement<TPos, TGapAnchor, TSpec> >::Type>::VALUE;
+
 
 //////////////////////////////////////////////////////////////////////////////
 

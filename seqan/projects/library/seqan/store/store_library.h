@@ -35,6 +35,8 @@ struct LibraryStoreElement
 {
 	TMean		mean;		// mean library size in bps
 	TStd		std;	// library size variance
+
+	LibraryStoreElement() : mean(0), std(0) {}
 };
 
 //////////////////////////////////////////////////////////////////////////////

@@ -527,11 +527,18 @@ int main(int argc, const char *argv[]) {
 		}
 	}
 
+
+
+
+
 	// Load simulation file, afg file or celera consensus file
 	ReadStore<> readSt;
 	FrgStore<> frgSt;
 	LibStore<> libSt;
 	CtgStore<> ctgSt;
+
+	_FragmentStore<> fragStore;
+
 
 	TSize numberOfContigs = 0;
 	if (!consOpt.readsfile.empty()) {
@@ -542,13 +549,15 @@ int main(int argc, const char *argv[]) {
 		// Read Amos
 		std::fstream strmReads;
 		strmReads.open(consOpt.afgfile.c_str(), ::std::ios_base::in | ::std::ios_base::binary);
-		read(strmReads, readSt, frgSt, libSt, ctgSt, Amos());	
+		read(strmReads, fragStore, Amos());	
 		strmReads.close();
-		numberOfContigs = length(ctgSt);
+		numberOfContigs = length(fragStore.contigStore);
 	} else {
 		printHelp();
 		exit(1);
 	}
+
+	/*
 
 	// Just convert the input file
 	if (consOpt.convert != 0) {
@@ -672,13 +681,15 @@ int main(int argc, const char *argv[]) {
 		std::cout << "Output done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
 #endif
 	}
+
+	*/
 	
 	// Write the AMOS message file
 	if (consOpt.output == 1) {
 		// Write Amos
 		std::fstream strmWrite;
 		strmWrite.open(consOpt.outfile.c_str(), ::std::ios_base::out | ::std::ios_base::trunc);
-		write(strmWrite,readSt,frgSt,libSt,ctgSt,Amos());	
+		write(strmWrite, fragStore, Amos());	
 		strmWrite.close();
 	}
 

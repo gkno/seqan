@@ -29,6 +29,7 @@
 #include <seqan/refinement.h>
 #include <seqan/graph_align.h>
 #include <seqan/graph_msa.h>
+#include <seqan/store.h>
 
 
 #ifdef SEQAN_SWITCH_USE_FORWARDS

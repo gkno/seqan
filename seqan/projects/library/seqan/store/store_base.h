@@ -34,6 +34,9 @@ template <typename TPos>
 struct GapAnchor {
 	TPos	seqPos;			// sequence character position in the ungapped sequence
 	TPos	gapPos;			// sequence character position in the gapped sequence
+
+	GapAnchor() : seqPos(0), gapPos(0) {}
+	GapAnchor(TPos sP, TPos gP) : seqPos(sP), gapPos(gP) {}
 };
 
 // We store gap anchors

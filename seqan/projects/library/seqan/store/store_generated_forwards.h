@@ -54,7 +54,7 @@ template <typename TPos> struct GapAnchor;       	// "projects/library/seqan/sto
 //____________________________________________________________________________
 // LibraryStoreElement
 
-template <typename TMean , typename TVariance , typename TSpec > struct LibraryStoreElement;       	// "projects/library/seqan/store/store_library.h"(35)
+template <typename TMean , typename TStd , typename TSpec > struct LibraryStoreElement;       	// "projects/library/seqan/store/store_library.h"(35)
 
 //____________________________________________________________________________
 // MatePairStoreElement
@@ -64,22 +64,57 @@ template <typename TSpec > struct MatePairStoreElement;       	// "projects/libr
 //____________________________________________________________________________
 // ReadStoreElement
 
-template <typename TReadSeq, typename TSpec > struct ReadStoreElement;       	// "projects/library/seqan/store/store_read.h"(33)
+template <typename TReadSeq, typename TPos, typename TSpec > struct ReadStoreElement;       	// "projects/library/seqan/store/store_read.h"(33)
+
+//____________________________________________________________________________
+// TagAmos_
+
+struct TagAmos_;       	// "projects/library/seqan/store/store_io.h"(37)
 
 //____________________________________________________________________________
 // _FragmentStore
 
-template <typename TSpec , typename TConfig > struct _FragmentStore;       	// "projects/library/seqan/store/store_all.h"(54)
+template <typename TSpec , typename TConfig > struct _FragmentStore;       	// "projects/library/seqan/store/store_all.h"(55)
+
+//____________________________________________________________________________
+// _LessContigIdSort
+
+template <typename TPos, typename TGapAnchor, typename TSpec> struct _LessContigIdSort;       	// "projects/library/seqan/store/store_io.h"(466)
 
 } //namespace SEQAN_NAMESPACE_MAIN
 
 
 //////////////////////////////////////////////////////////////////////////////
 // TYPEDEFS
+//////////////////////////////////////////////////////////////////////////////
+
+namespace SEQAN_NAMESPACE_MAIN {
+
+//____________________________________________________________________________
+// Amos
+
+typedef Tag<TagAmos_> const Amos;       	// "projects/library/seqan/store/store_io.h"(38)
+
+} //namespace SEQAN_NAMESPACE_MAIN
 
 
 //////////////////////////////////////////////////////////////////////////////
 // FUNCTIONS
+//////////////////////////////////////////////////////////////////////////////
+
+namespace SEQAN_NAMESPACE_MAIN {
+
+//____________________________________________________________________________
+// read
+
+template <typename TFile, typename TSpec, typename TConfig> inline void read(TFile & file, _FragmentStore<TSpec, TConfig>& fragStore, Amos);       	// "projects/library/seqan/store/store_io.h"(54)
+
+//____________________________________________________________________________
+// write
+
+template <typename TFile, typename TSpec, typename TConfig> inline void write(TFile & target, _FragmentStore<TSpec, TConfig>& fragStore, Amos);       	// "projects/library/seqan/store/store_io.h"(481)
+
+} //namespace SEQAN_NAMESPACE_MAIN
 
 #endif
 

@@ -28,14 +28,30 @@ namespace SEQAN_NAMESPACE_MAIN
 // Read Store
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TReadSeq, typename TSpec = void>
+template <typename TReadSeq, typename TPos, typename TSpec = void>
 struct ReadStoreElement
 {
 	typedef typename Id<ReadStoreElement>::Type TId;
 	
-	TId			matePairId;		// refers to the mate-pair, -1 if not part of a mate-pair
-	TReadSeq	seq;
+	static const TId INVALID_ID;
+	
+	
+	TId matePairId;				// refers to the mate-pair, INVALID_ID if not part of a mate-pair
+	TReadSeq seq;
+
+	//Clear range, currently disabled
+	//TPos leftClr;				// Number of characters to the left that are clipped
+	//TPos rightClr;				// Number of characters to the right that are clipped
+	//ReadStoreElement() : matePairId(INVALID_ID), leftClr(0), rightClr(0) {}
+	
+	ReadStoreElement() : matePairId(INVALID_ID) {}
 };
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TReadSeq, typename TPos, typename TSpec>
+const typename Id<ReadStoreElement<TReadSeq, TPos, TSpec> >::Type
+ReadStoreElement<TReadSeq, TPos, TSpec>::INVALID_ID = SupremumValue<typename Id<ReadStoreElement<TReadSeq, TPos, TSpec> >::Type>::VALUE;
 
 //////////////////////////////////////////////////////////////////////////////
 
