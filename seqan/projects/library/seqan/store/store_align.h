@@ -35,6 +35,7 @@ struct AlignedReadStoreElement
 
 	static const TId INVALID_ID;
 	
+	TId					id;
 	TId					readId;
 	TId					contigId;
 	TId					pairMatchId;	// unique id. for multiple mate-pair matches
@@ -42,7 +43,7 @@ struct AlignedReadStoreElement
 	TPos				endPos;			// end position of ..., for reverse aligned reads holds end < begin
 	String<TGapAnchor>	gaps;
 
-	AlignedReadStoreElement() : readId(INVALID_ID), contigId(INVALID_ID), pairMatchId(INVALID_ID), beginPos(0), endPos(0) {}
+	AlignedReadStoreElement() : id(INVALID_ID), readId(INVALID_ID), contigId(INVALID_ID), pairMatchId(INVALID_ID), beginPos(0), endPos(0) {}
 };
 
 //////////////////////////////////////////////////////////////////////////////

@@ -323,6 +323,7 @@ read(TFile & file,
 						}
 
 						// Append new align fragment, note: contigId must still be set
+						alignEl.id = length(fragStore.alignedReadStore);
 						appendValue(fragStore.alignedReadStore, alignEl);
 					} else {
 						clear(fieldIdentifier);
@@ -860,6 +861,7 @@ _convertSimpleReadFile(TFile& file,
 			alignEl.readId = id;
 			alignEl.pairMatchId =  fragId;
 			alignEl.contigId = 0;
+			alignEl.id = length(fragStore.alignedReadStore);
 			appendValue(fragStore.alignedReadStore, alignEl);
 
 			++count;
