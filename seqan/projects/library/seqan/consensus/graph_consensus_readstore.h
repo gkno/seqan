@@ -103,6 +103,204 @@ class ReadStore
 // FUNCTIONS
 //////////////////////////////////////////////////////////////////////////////
 
+template<typename TSpec>
+inline void 
+reverseComplementInPlace(String<Dna5Q, TSpec>& str1)
+{
+	typedef typename Size<String<Dna5Q, TSpec> >::Type TSize;
+	TSize pos1 = 0;
+	TSize pos2 = length(str1)-1;
+	for(;((pos1 < length(str1)) && (pos1<=pos2)); ++pos1, --pos2) {
+		if ((str1[pos1] == 'A') && (str1[pos2] == 'A')) {
+			Dna5Q c = 'T';
+			assignQualityValue(c, getQualityValue(str1[pos2]));
+			str1[pos1] = c;
+			c = 'T';
+			assignQualityValue(c, getQualityValue(str1[pos1]));
+			str1[pos2] = c;
+		} else if ((str1[pos1] == 'A') && (str1[pos2] == 'C')) {
+			Dna5Q c = 'G';
+			assignQualityValue(c, getQualityValue(str1[pos2]));
+			str1[pos1] = c;
+			c = 'T';
+			assignQualityValue(c, getQualityValue(str1[pos1]));
+			str1[pos2] = c;
+		} else if ((str1[pos1] == 'A') && (str1[pos2] == 'G')) {
+			Dna5Q c = 'C';
+			assignQualityValue(c, getQualityValue(str1[pos2]));
+			str1[pos1] = c;
+			c = 'T';
+			assignQualityValue(c, getQualityValue(str1[pos1]));
+			str1[pos2] = c;
+		} else if ((str1[pos1] == 'A') && (str1[pos2] == 'T')) {
+			Dna5Q c = 'A';
+			assignQualityValue(c, getQualityValue(str1[pos2]));
+			str1[pos1] = c;
+			c = 'T';
+			assignQualityValue(c, getQualityValue(str1[pos1]));
+			str1[pos2] = c;
+		} else if ((str1[pos1] == 'A') && (str1[pos2] == 'N')) {
+			Dna5Q c = 'N';
+			assignQualityValue(c, getQualityValue(str1[pos2]));
+			str1[pos1] = c;
+			c = 'T';
+			assignQualityValue(c, getQualityValue(str1[pos1]));
+			str1[pos2] = c;
+		} else if ((str1[pos1] == 'C') && (str1[pos2] == 'A')) {
+			Dna5Q c = 'T';
+			assignQualityValue(c, getQualityValue(str1[pos2]));
+			str1[pos1] = c;
+			c = 'G';
+			assignQualityValue(c, getQualityValue(str1[pos1]));
+			str1[pos2] = c;
+		} else if ((str1[pos1] == 'C') && (str1[pos2] == 'C')) {
+			Dna5Q c = 'G';
+			assignQualityValue(c, getQualityValue(str1[pos2]));
+			str1[pos1] = c;
+			c = 'G';
+			assignQualityValue(c, getQualityValue(str1[pos1]));
+			str1[pos2] = c;
+		} else if ((str1[pos1] == 'C') && (str1[pos2] == 'G')) {
+			Dna5Q c = 'C';
+			assignQualityValue(c, getQualityValue(str1[pos2]));
+			str1[pos1] = c;
+			c = 'G';
+			assignQualityValue(c, getQualityValue(str1[pos1]));
+			str1[pos2] = c;
+		} else if ((str1[pos1] == 'C') && (str1[pos2] == 'T')) {
+			Dna5Q c = 'A';
+			assignQualityValue(c, getQualityValue(str1[pos2]));
+			str1[pos1] = c;
+			c = 'G';
+			assignQualityValue(c, getQualityValue(str1[pos1]));
+			str1[pos2] = c;
+		} else if ((str1[pos1] == 'C') && (str1[pos2] == 'N')) {
+			Dna5Q c = 'N';
+			assignQualityValue(c, getQualityValue(str1[pos2]));
+			str1[pos1] = c;
+			c = 'G';
+			assignQualityValue(c, getQualityValue(str1[pos1]));
+			str1[pos2] = c;
+		} else if ((str1[pos1] == 'G') && (str1[pos2] == 'A')) {
+			Dna5Q c = 'T';
+			assignQualityValue(c, getQualityValue(str1[pos2]));
+			str1[pos1] = c;
+			c = 'C';
+			assignQualityValue(c, getQualityValue(str1[pos1]));
+			str1[pos2] = c;
+		} else if ((str1[pos1] == 'G') && (str1[pos2] == 'C')) {
+			Dna5Q c = 'G';
+			assignQualityValue(c, getQualityValue(str1[pos2]));
+			str1[pos1] = c;
+			c = 'C';
+			assignQualityValue(c, getQualityValue(str1[pos1]));
+			str1[pos2] = c;
+		} else if ((str1[pos1] == 'G') && (str1[pos2] == 'G')) {
+			Dna5Q c = 'C';
+			assignQualityValue(c, getQualityValue(str1[pos2]));
+			str1[pos1] = c;
+			c = 'C';
+			assignQualityValue(c, getQualityValue(str1[pos1]));
+			str1[pos2] = c;
+		} else if ((str1[pos1] == 'G') && (str1[pos2] == 'T')) {
+			Dna5Q c = 'A';
+			assignQualityValue(c, getQualityValue(str1[pos2]));
+			str1[pos1] = c;
+			c = 'C';
+			assignQualityValue(c, getQualityValue(str1[pos1]));
+			str1[pos2] = c;
+		} else if ((str1[pos1] == 'G') && (str1[pos2] == 'N')) {
+			Dna5Q c = 'N';
+			assignQualityValue(c, getQualityValue(str1[pos2]));
+			str1[pos1] = c;
+			c = 'C';
+			assignQualityValue(c, getQualityValue(str1[pos1]));
+			str1[pos2] = c;
+		}  else if ((str1[pos1] == 'T') && (str1[pos2] == 'A')) {
+			Dna5Q c = 'T';
+			assignQualityValue(c, getQualityValue(str1[pos2]));
+			str1[pos1] = c;
+			c = 'A';
+			assignQualityValue(c, getQualityValue(str1[pos1]));
+			str1[pos2] = c;
+		} else if ((str1[pos1] == 'T') && (str1[pos2] == 'C')) {
+			Dna5Q c = 'G';
+			assignQualityValue(c, getQualityValue(str1[pos2]));
+			str1[pos1] = c;
+			c = 'A';
+			assignQualityValue(c, getQualityValue(str1[pos1]));
+			str1[pos2] = c;
+		} else if ((str1[pos1] == 'T') && (str1[pos2] == 'G')) {
+			Dna5Q c = 'C';
+			assignQualityValue(c, getQualityValue(str1[pos2]));
+			str1[pos1] = c;
+			c = 'A';
+			assignQualityValue(c, getQualityValue(str1[pos1]));
+			str1[pos2] = c;
+		} else if ((str1[pos1] == 'T') && (str1[pos2] == 'T')) {
+			Dna5Q c = 'A';
+			assignQualityValue(c, getQualityValue(str1[pos2]));
+			str1[pos1] = c;
+			c = 'A';
+			assignQualityValue(c, getQualityValue(str1[pos1]));
+			str1[pos2] = c;
+		} else if ((str1[pos1] == 'T') && (str1[pos2] == 'N')) {
+			Dna5Q c = 'N';
+			assignQualityValue(c, getQualityValue(str1[pos2]));
+			str1[pos1] = c;
+			c = 'A';
+			assignQualityValue(c, getQualityValue(str1[pos1]));
+			str1[pos2] = c;
+		} else if ((str1[pos1] == 'N') && (str1[pos2] == 'A')) {
+			Dna5Q c = 'T';
+			assignQualityValue(c, getQualityValue(str1[pos2]));
+			str1[pos1] = c;
+			c = 'N';
+			assignQualityValue(c, getQualityValue(str1[pos1]));
+			str1[pos2] = c;
+		} else if ((str1[pos1] == 'N') && (str1[pos2] == 'C')) {
+			Dna5Q c = 'G';
+			assignQualityValue(c, getQualityValue(str1[pos2]));
+			str1[pos1] = c;
+			c = 'N';
+			assignQualityValue(c, getQualityValue(str1[pos1]));
+			str1[pos2] = c;
+		} else if ((str1[pos1] == 'N') && (str1[pos2] == 'G')) {
+			Dna5Q c = 'C';
+			assignQualityValue(c, getQualityValue(str1[pos2]));
+			str1[pos1] = c;
+			c = 'N';
+			assignQualityValue(c, getQualityValue(str1[pos1]));
+			str1[pos2] = c;
+		} else if ((str1[pos1] == 'N') && (str1[pos2] == 'T')) {
+			Dna5Q c = 'A';
+			assignQualityValue(c, getQualityValue(str1[pos2]));
+			str1[pos1] = c;
+			c = 'N';
+			assignQualityValue(c, getQualityValue(str1[pos1]));
+			str1[pos2] = c;
+		} else if ((str1[pos1] == 'N') && (str1[pos2] == 'N')) {
+			Dna5Q c = 'N';
+			assignQualityValue(c, getQualityValue(str1[pos2]));
+			str1[pos1] = c;
+			c = 'N';
+			assignQualityValue(c, getQualityValue(str1[pos1]));
+			str1[pos2] = c;
+		}
+	}
+}
+
+
+template<typename TSpec>
+inline void 
+reverseComplementInPlace(String<Dna5Q, TSpec> const& str1)
+{
+	reverseComplementInPlace(const_cast<String<Dna5Q, TSpec>&>(str1));
+}
+
+
+
+
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -194,75 +392,6 @@ length(ReadStore<TAlphabet, TSpec>& readSt)
 	return readSt.data_pos_count;
 }
 
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TAlphabet, typename TSpec, typename TAlph2, typename TSpec2, typename TSize, typename TStringSet, typename TLayoutPos>
-inline void
-loadReadsClr(ReadStore<TAlphabet, TSpec>& readSt,
-			 CtgStore<TAlph2, TSpec2>& ctgSt,
-			 TSize index,
-			 TStringSet& strSet,
-			 TLayoutPos& startEndPos) 
-{
-	SEQAN_CHECKPOINT
-	typedef typename Value<TLayoutPos>::Type TPair;
-	String<GappedRead<> >& gapReads = value(ctgSt.data_reads, index);
-	TSize numReads = length(gapReads);
-	resize(strSet, numReads);
-	String<TAlphabet> all = readSt.data_reads;
-	for(TSize i = 0; i<numReads; ++i) {
-		GappedRead<>& gRead = value(gapReads, i);
-		String<TAlphabet> seq;
-		loadRead(readSt, all, gRead.data_source , seq);
-		if (gRead.data_clr.i1 < gRead.data_clr.i2) {
-			value(strSet, i) = infix(seq, gRead.data_clr.i1, gRead.data_clr.i2);
-		} else {
-			value(strSet, i) = infix(seq, gRead.data_clr.i2, gRead.data_clr.i1);
-			reverseComplementInPlace(value(strSet, i));
-		}
-		appendValue(startEndPos, TPair(gRead.data_clr.i1 + gRead.data_offset, gRead.data_clr.i2 + gRead.data_offset));
-	}
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TAlphabet, typename TSpec, typename TAlph2, typename TSpec2, typename TSize, typename TReadClrSet, typename TQualityClrSet, typename TLayoutPos>
-inline void
-loadReadsClr(ReadStore<TAlphabet, TSpec>& readSt,
-             CtgStore<TAlph2, TSpec2>& ctgSt,
-             TSize index,
-             TReadClrSet& readSet,
-             TQualityClrSet& qualitySet,
-             TLayoutPos& startEndPos) 
-{
-    SEQAN_CHECKPOINT
-
-    typedef typename Value<TLayoutPos>::Type TPair;
-    String<GappedRead<> >& gapReads = value(ctgSt.data_reads, index);
-    TSize numReads = length(gapReads);
-	
-    resize(readSet, numReads);
-    resize(qualitySet, numReads);
-
-	String<TAlphabet> all = readSt.data_reads;
-    for(TSize i = 0; i<numReads; ++i) {
-        GappedRead<>& gRead = value(gapReads, i);
-        String<TAlphabet> seq;
-        String<char> quality;
-        loadRead(readSt, all, gRead.data_source , seq);
-        loadQuality(readSt,gRead.data_source, quality);
-        if (gRead.data_clr.i1 < gRead.data_clr.i2) {
-            value(readSet, i) = infix(seq, gRead.data_clr.i1, gRead.data_clr.i2);
-            value(qualitySet, i) = infix(quality, gRead.data_clr.i1, gRead.data_clr.i2);
-        } else {
-            value(readSet, i) = infix(seq, gRead.data_clr.i2, gRead.data_clr.i1);
-            value(qualitySet, i) = infix(quality, gRead.data_clr.i2, gRead.data_clr.i1);
-            reverseComplementInPlace(value(readSet, i));
-            reverseInPlace(value(qualitySet,i) );
-        }
-        appendValue(startEndPos, TPair(gRead.data_clr.i1 + gRead.data_offset, gRead.data_clr.i2 + gRead.data_offset));
-    }
-}
 
 
 //////////////////////////////////////////////////////////////////////////////

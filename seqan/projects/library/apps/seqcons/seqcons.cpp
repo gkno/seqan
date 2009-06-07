@@ -96,6 +96,145 @@ printHelp() {
 
 //////////////////////////////////////////////////////////////////////////////////
 
+
+
+//////////////////////////////////////////////////////////////////////////////////
+
+template <typename TAlignedRead, typename TContigId>
+struct _SimpleLess : 
+	public ::std::binary_function<TAlignedRead, TContigId, bool> 
+{
+	inline bool 
+	operator()(const TAlignedRead& a1, const TAlignedRead& a2) const 
+	{
+		return a1.contigId < a2.contigId;
+	}
+
+	bool operator()(const TAlignedRead& a1, TContigId contigId) const {
+		return(a1.contigId < contigId);
+	}
+
+	bool operator()(TContigId contigId, const TAlignedRead& a2) const {
+		return(contigId < a2.contigId);
+	} 
+};
+
+
+
+//////////////////////////////////////////////////////////////////////////////////
+
+template<typename TValue, typename TStrSpec, typename TPosPair, typename TStringSpec, typename TSpec, typename TConfig, typename TId>
+inline void 
+getContigReads(StringSet<TValue, Owner<TStrSpec> >& strSet,
+			   String<TPosPair, TStringSpec>& startEndPos,
+			   _FragmentStore<TSpec, TConfig> const& fragStore,
+			   TId const contigId)
+{
+	typedef _FragmentStore<TSpec, TConfig> TFragmentStore;
+	typedef typename Size<TFragmentStore>::Type TSize;
+
+	// All fragment store element types
+	typedef typename Value<typename TFragmentStore::TReadStore>::Type TReadStoreElement;
+	typedef typename Value<typename TFragmentStore::TAlignedReadStore>::Type TAlignedElement;
+
+	// Sort aligned reads according to contig id
+	sortAlignedReads(fragStore.alignedReadStore, SortContigId());
+
+	// ToDo: Take into account the clear range
+	typedef typename Iterator<typename TFragmentStore::TAlignedReadStore>::Type TAlignIter;
+	TAlignIter alignIt = ::std::lower_bound(begin(fragStore.alignedReadStore, Standard()), end(fragStore.alignedReadStore, Standard()), contigId, _SimpleLess<TAlignedElement, TId>());
+	TAlignIter alignItEnd = end(fragStore.alignedReadStore, Standard() );
+	for(TSize i = 0;alignIt != alignItEnd; goNext(alignIt), ++i) {
+		if (alignIt->contigId != contigId) break;
+		resize(strSet, i + 1);
+		TSize offset = _min(alignIt->beginPos, alignIt->endPos);
+		value(strSet, i) = (value(fragStore.readStore, alignIt->readId)).seq;
+		TSize lenRead = length(value(strSet, i));
+		if (alignIt->beginPos < alignIt->endPos) {
+			appendValue(startEndPos, TPosPair(offset, offset + lenRead));
+		} else {
+			reverseComplementInPlace(value(strSet, i));
+			appendValue(startEndPos, TPosPair(offset + lenRead, offset));
+		}
+	}
+}
+/*
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TAlphabet, typename TSpec, typename TAlph2, typename TSpec2, typename TSize, typename TStringSet, typename TLayoutPos>
+inline void
+loadReadsClr(ReadStore<TAlphabet, TSpec>& readSt,
+			 CtgStore<TAlph2, TSpec2>& ctgSt,
+			 TSize index,
+			 TStringSet& strSet,
+			 TLayoutPos& startEndPos) 
+{
+	SEQAN_CHECKPOINT
+	typedef typename Value<TLayoutPos>::Type TPair;
+	String<GappedRead<> >& gapReads = value(ctgSt.data_reads, index);
+	TSize numReads = length(gapReads);
+	resize(strSet, numReads);
+	String<TAlphabet> all = readSt.data_reads;
+	for(TSize i = 0; i<numReads; ++i) {
+		GappedRead<>& gRead = value(gapReads, i);
+		String<TAlphabet> seq;
+		loadRead(readSt, all, gRead.data_source , seq);
+		if (gRead.data_clr.i1 < gRead.data_clr.i2) {
+			value(strSet, i) = infix(seq, gRead.data_clr.i1, gRead.data_clr.i2);
+		} else {
+			value(strSet, i) = infix(seq, gRead.data_clr.i2, gRead.data_clr.i1);
+			reverseComplementInPlace(value(strSet, i));
+		}
+		appendValue(startEndPos, TPair(gRead.data_clr.i1 + gRead.data_offset, gRead.data_clr.i2 + gRead.data_offset));
+	}
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TAlphabet, typename TSpec, typename TAlph2, typename TSpec2, typename TSize, typename TReadClrSet, typename TQualityClrSet, typename TLayoutPos>
+inline void
+loadReadsClr(ReadStore<TAlphabet, TSpec>& readSt,
+             CtgStore<TAlph2, TSpec2>& ctgSt,
+             TSize index,
+             TReadClrSet& readSet,
+             TQualityClrSet& qualitySet,
+             TLayoutPos& startEndPos) 
+{
+    SEQAN_CHECKPOINT
+
+    typedef typename Value<TLayoutPos>::Type TPair;
+    String<GappedRead<> >& gapReads = value(ctgSt.data_reads, index);
+    TSize numReads = length(gapReads);
+	
+    resize(readSet, numReads);
+    resize(qualitySet, numReads);
+
+	String<TAlphabet> all = readSt.data_reads;
+    for(TSize i = 0; i<numReads; ++i) {
+        GappedRead<>& gRead = value(gapReads, i);
+        String<TAlphabet> seq;
+        String<char> quality;
+        loadRead(readSt, all, gRead.data_source , seq);
+        loadQuality(readSt,gRead.data_source, quality);
+        if (gRead.data_clr.i1 < gRead.data_clr.i2) {
+            value(readSet, i) = infix(seq, gRead.data_clr.i1, gRead.data_clr.i2);
+            value(qualitySet, i) = infix(quality, gRead.data_clr.i1, gRead.data_clr.i2);
+        } else {
+            value(readSet, i) = infix(seq, gRead.data_clr.i2, gRead.data_clr.i1);
+            value(qualitySet, i) = infix(quality, gRead.data_clr.i2, gRead.data_clr.i1);
+            reverseComplementInPlace(value(readSet, i));
+            reverseInPlace(value(qualitySet,i) );
+        }
+        appendValue(startEndPos, TPair(gRead.data_clr.i1 + gRead.data_offset, gRead.data_clr.i2 + gRead.data_offset));
+    }
+}
+*/
+
+
+
+//////////////////////////////////////////////////////////////////////////////////
+
 int main(int argc, const char *argv[]) {
 	
 	typedef unsigned int TSize;
@@ -241,7 +380,8 @@ int main(int argc, const char *argv[]) {
 
 
 	// Fragment store
-	_FragmentStore<> fragStore;
+	typedef _FragmentStore<> TFragmentStore;
+	TFragmentStore fragStore;
 
 	// Load the reads and layout positions
 	TSize numberOfContigs = 0;
@@ -265,25 +405,27 @@ int main(int argc, const char *argv[]) {
 		exit(1);
 	}
 
-/*
-
 	// Just convert the input file
 	if (consOpt.convert != 0) {
 		if (consOpt.convert == 1) {
 			std::fstream strmWrite;
 			strmWrite.open(consOpt.outfile.c_str(), ::std::ios_base::out | ::std::ios_base::trunc);
-			write(strmWrite,readSt,frgSt,libSt,ctgSt,Amos());	
+			write(strmWrite, fragStore, Amos());	
 			strmWrite.close();
 		} else if (consOpt.convert == 2) {
-			std::fstream strmWrite;
-			strmWrite.open(consOpt.outfile.c_str(), ::std::ios_base::out | ::std::ios_base::trunc);
-			write(strmWrite,readSt,frgSt,libSt,ctgSt,CeleraFrg());	
-			strmWrite.close();
+			//ToDo: Celera output 
+
+			//std::fstream strmWrite;
+			//strmWrite.open(consOpt.outfile.c_str(), ::std::ios_base::out | ::std::ios_base::trunc);
+			//write(strmWrite,readSt,frgSt,libSt,ctgSt,CeleraFrg());	
+			//strmWrite.close();
 		} else if (consOpt.convert == 3) {
-			std::fstream strmWrite;
-			strmWrite.open(consOpt.outfile.c_str(), ::std::ios_base::out | ::std::ios_base::trunc);
-			write(strmWrite,readSt,frgSt,libSt,ctgSt,CeleraCgb());	
-			strmWrite.close();
+			//ToDo: Celera output 
+
+			//std::fstream strmWrite;
+			//strmWrite.open(consOpt.outfile.c_str(), ::std::ios_base::out | ::std::ios_base::trunc);
+			//write(strmWrite,readSt,frgSt,libSt,ctgSt,CeleraCgb());	
+			//strmWrite.close();
 		}
 		return 0;
 	}
@@ -297,19 +439,25 @@ int main(int argc, const char *argv[]) {
 #endif
 
 		// Import all reads of the given contig
-		typedef String<Dna> TSequence;
-		typedef Id<TSequence>::Type TId;
-		StringSet<TSequence, Owner<> > origStrSet;
+		typedef TFragmentStore::TReadSeq TReadSeq;
+		typedef Id<TFragmentStore>::Type TId;
+		StringSet<TReadSeq, Owner<> > readSet;
 		String<Pair<TSize, TSize> > begEndPos;
-		loadReadsClr(readSt, ctgSt, currentContig, origStrSet, begEndPos);
-		TSize nseq = length(origStrSet);
+
+		// No just get begin and end pointers
+		getContigReads(readSet, begEndPos, fragStore, currentContig);
+		TSize nseq = length(readSet);
+		//for(TSize i = 0; i<nseq; ++i) {
+		//	std::cout << value(readSet, i) << std::endl;
+		//	std::cout << value(begEndPos, i).i1 << ',' << value(begEndPos, i).i2 << std::endl;
+		//}
 		if (nseq == 0) continue;
 #ifdef SEQAN_PROFILE
 		::std::cout << "Import sequences done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << ::std::endl;
 #endif
 
 		// Align the reads
-		Graph<Alignment<StringSet<TSequence, Dependent<> >, void, WithoutEdgeId> > gOut(origStrSet);
+		Graph<Alignment<StringSet<TReadSeq, Dependent<> >, void, WithoutEdgeId> > gOut(readSet);
 		consensusAlignment(gOut, begEndPos, consOpt);
 
 		// Build the read alignment matrix
@@ -337,7 +485,7 @@ int main(int argc, const char *argv[]) {
 			std::fstream strm;
 			if (currentContig == 0) strm.open(consOpt.outfile.c_str(), ::std::ios_base::out | ::std::ios_base::trunc);
 			else strm.open(consOpt.outfile.c_str(), ::std::ios_base::out | ::std::ios_base::app);
-			write(strm, origStrSet, alignmentMatrix, begEndPos, readBegEndRowPos, gappedConsensus, coverage, FastaReadFormat());
+			write(strm, readSet, alignmentMatrix, begEndPos, readBegEndRowPos, gappedConsensus, coverage, FastaReadFormat());
 			strm.close();
 
 			//// Debug code for CA
@@ -365,6 +513,9 @@ int main(int argc, const char *argv[]) {
 			//strm2.close();
 		} 
 		else if (consOpt.output == 1) {
+			// ToDo: Reset aligned reads
+
+			/*
 			TSize len = length(gappedConsensus);
 			TSize begContig = (value(ctgSt.data_begin_end, ctgSt.data_pos_count - 1)).i2;
 			TSize endContig = begContig + length(gappedConsensus);
@@ -384,13 +535,12 @@ int main(int argc, const char *argv[]) {
 				value(value(ctgSt.data_reads, currentContig), i).data_gap = gaps;
 				value(value(ctgSt.data_reads, currentContig), i).data_offset = (readBegEndRowPos[i]).i1;
 			}
+			*/
 		}
 #ifdef SEQAN_PROFILE
 		std::cout << "Output done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
 #endif
 	}
-
-	*/
 	
 	// Write the AMOS message file
 	if (consOpt.output == 1) {

@@ -152,7 +152,7 @@ template <typename TAlign, typename TSortSpec>
 inline void
 sortAlignedReads(TAlign& alignStore, Tag<TSortSpec>) 
 {
-	std::sort(
+	std::stable_sort(
 		begin(alignStore, Standard() ), 
 		end(alignStore, Standard() ), 
 		_LessAlignedRead<typename Value<TAlign>::Type, Tag<TSortSpec> const>() );
