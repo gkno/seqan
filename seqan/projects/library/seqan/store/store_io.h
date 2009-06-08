@@ -285,19 +285,20 @@ read(TFile & file,
 						TPosIter posIt = begin(gaps); TPosIter posItEnd = end(gaps);
 						TContigPos lastGap = 0;
 						TSize gapLen = 0;
+						TSize totalGapLen = 0;
 						for(;posIt!=posItEnd; goNext(posIt)) {
 							if (gapLen == 0) {
-								++gapLen;
+								++gapLen; ++totalGapLen;
 								++diff;
 								lastGap = value(posIt);
 							} 
 							else if (lastGap == value(posIt)) {
-								++gapLen;
+								++gapLen; ++totalGapLen;
 								++diff;
 							}
 							else {
 								appendValue(alignEl.gaps, TContigGapAnchor(offset + lastGap, offset + lastGap + diff));								
-								gapLen = 1;
+								gapLen = 1; ++totalGapLen;
 								lastGap = value(posIt);
 								++diff;
 							}
@@ -307,7 +308,6 @@ read(TFile & file,
 						if ((clr1 < clr2) && (clr2 < lenRead)) {
 							diff -= (lenRead - clr2);				
 							appendValue(alignEl.gaps, TContigGapAnchor(lenRead, lenRead + diff));
-
 						} else if ((clr1 > clr2) && (clr2 > 0)) {
 							diff -= clr2;
 							appendValue(alignEl.gaps, TContigGapAnchor(lenRead, lenRead + diff));
@@ -316,9 +316,9 @@ read(TFile & file,
 						// Set begin and end position
 						if (clr1 < clr2) {
 							alignEl.beginPos = offsetPos;
-							alignEl.endPos = offsetPos + length(gaps) + (clr2 - clr1);
+							alignEl.endPos = offsetPos + totalGapLen + (clr2 - clr1);
 						} else {
-							alignEl.beginPos = offsetPos + length(gaps) + (clr1 - clr2);
+							alignEl.beginPos = offsetPos + totalGapLen + (clr1 - clr2);
 							alignEl.endPos = offsetPos;
 						}
 

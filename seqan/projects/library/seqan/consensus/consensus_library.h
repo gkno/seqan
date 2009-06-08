@@ -470,6 +470,7 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 		assignValueById(pairSet, const_cast<StringSet<TString, TSpec>&>(str), id1);
 		assignValueById(pairSet, const_cast<StringSet<TString, TSpec>&>(str), id2);
 		
+
 		// Overlap alignment
 		TSize from = length(matches);
 		//TScoreValue myScore = globalAlignment(matches, pairSet, score_type, AlignConfig<true,true,true,true>(), Gotoh() );

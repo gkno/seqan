@@ -527,10 +527,10 @@ int main(int argc, const char *argv[]) {
 		// No just get begin and end pointers
 		getContigReads(readSet, begEndPos, fragStore, currentContig);
 		TSize nseq = length(readSet);
-		//for(TSize i = 0; i<nseq; ++i) {
-		//	std::cout << value(readSet, i) << std::endl;
-		//	std::cout << value(begEndPos, i).i1 << ',' << value(begEndPos, i).i2 << std::endl;
-		//}
+		for(TSize i = 0; i<nseq; ++i) {
+			std::cout << value(readSet, i) << std::endl;
+			std::cout << value(begEndPos, i).i1 << ',' << value(begEndPos, i).i2 << std::endl;
+		}
 		if (nseq == 0) continue;
 #ifdef SEQAN_PROFILE
 		::std::cout << "Import sequences done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << ::std::endl;

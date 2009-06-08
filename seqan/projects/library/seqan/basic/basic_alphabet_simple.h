@@ -109,21 +109,23 @@ SEQAN_CHECKPOINT
 	//this cannot be a template since a template would be in conflict to
 	//the template c'tor
 
+	operator __int64() const
+	{
+SEQAN_CHECKPOINT
+		__int64 c;
+		assign(c, *this);
+		return c;
+	}
 
-	operator long() const
+	operator __uint64() const
 	{
 SEQAN_CHECKPOINT
-		long c;
+		__uint64 c;
 		assign(c, *this);
 		return c;
 	}
-	operator unsigned long() const
-	{
-SEQAN_CHECKPOINT
-		unsigned long c;
-		assign(c, *this);
-		return c;
-	}
+
+
 	operator int() const
 	{
 SEQAN_CHECKPOINT
@@ -368,6 +370,24 @@ SEQAN_CHECKPOINT
 	c_target = source.value;
 }
 
+//__uint64
+template <typename TValue, typename TSpec>
+inline void 
+assign(__uint64 & c_target, 
+	   SimpleType<TValue, TSpec> & source)
+{
+SEQAN_CHECKPOINT
+	c_target = source.value;
+}
+template <typename TValue, typename TSpec>
+inline void 
+assign(__uint64 & c_target, 
+	   SimpleType<TValue, TSpec> const & source)
+{
+SEQAN_CHECKPOINT
+	c_target = source.value;
+}
+
 //int
 template <typename TValue, typename TSpec>
 inline void 
@@ -403,6 +423,7 @@ assign(unsigned int & c_target,
 SEQAN_CHECKPOINT
 	c_target = source.value;
 }
+
 
 //short
 template <typename TValue, typename TSpec>
@@ -1415,25 +1436,6 @@ template <>
 struct CompareType<DnaQ, DnaQ> { typedef Dna Type; };
 
 //////////////////////////////////////////////////////////////////////////////
-//ASCII
-
-inline void assign(Ascii & c_target, 
-				   DnaQ const & source)
-{
-SEQAN_CHECKPOINT
-	assign(c_target, (Dna)source);
-}
-//____________________________________________________________________________
-
-inline void assign(Ascii & c_target, 
-				   Dna5Q const & source)
-{
-SEQAN_CHECKPOINT
-	assign(c_target, (Dna5)source);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////
 //DNA (4 letters) with Qualities (0..60)
 
 
@@ -1615,6 +1617,348 @@ SEQAN_CHECKPOINT
 }
 
 //____________________________________________________________________________
+
+
+
+//__int64
+
+inline void 
+assign(__int64 & c_target, 
+	   DnaQ & source)
+{
+SEQAN_CHECKPOINT
+	c_target = Dna(source);
+}
+
+inline void 
+assign(__int64 & c_target, 
+	   DnaQ const & source)
+{
+SEQAN_CHECKPOINT
+	c_target = Dna(source);
+}
+
+//__uint64
+
+inline void 
+assign(__uint64 & c_target, 
+	   DnaQ & source)
+{
+SEQAN_CHECKPOINT
+	c_target = Dna(source);
+}
+
+inline void 
+assign(__uint64 & c_target, 
+	   DnaQ const & source)
+{
+SEQAN_CHECKPOINT
+	c_target = Dna(source);
+}
+
+//int
+
+inline void 
+assign(int & c_target, 
+	   DnaQ & source)
+{
+SEQAN_CHECKPOINT
+	c_target = Dna(source);
+}
+
+inline void 
+assign(int & c_target, 
+	   DnaQ const & source)
+{
+SEQAN_CHECKPOINT
+	c_target = Dna(source);
+}
+
+//unsigned int
+
+inline void 
+assign(unsigned int & c_target, 
+	   DnaQ & source)
+{
+SEQAN_CHECKPOINT
+	c_target = Dna(source);
+}
+
+inline void 
+assign(unsigned int & c_target, 
+	   DnaQ const & source)
+{
+SEQAN_CHECKPOINT
+	c_target = Dna(source);
+}
+
+
+//short
+
+inline void 
+assign(short & c_target, 
+	   DnaQ & source)
+{
+SEQAN_CHECKPOINT
+	c_target = Dna(source);
+}
+
+inline void 
+assign(short & c_target, 
+	   DnaQ const & source)
+{
+SEQAN_CHECKPOINT
+	c_target = Dna(source);
+}
+
+//unsigned short
+
+inline void 
+assign(unsigned short & c_target, 
+	   DnaQ & source)
+{
+SEQAN_CHECKPOINT
+	c_target = Dna(source);
+}
+
+inline void 
+assign(unsigned short & c_target, 
+	   DnaQ const & source)
+{
+SEQAN_CHECKPOINT
+	c_target = Dna(source);
+}
+
+//char
+
+inline void 
+assign(char & c_target, 
+	   DnaQ & source)
+{
+SEQAN_CHECKPOINT
+	c_target = Dna(source);
+}
+
+inline void 
+assign(char & c_target, 
+	   DnaQ const & source)
+{
+SEQAN_CHECKPOINT
+	c_target = Dna(source);
+}
+
+//signed char
+
+inline void 
+assign(signed char & c_target, 
+	   DnaQ & source)
+{
+SEQAN_CHECKPOINT
+	c_target = Dna(source);
+}
+
+inline void 
+assign(signed char & c_target, 
+	   DnaQ const & source)
+{
+SEQAN_CHECKPOINT
+	c_target = Dna(source);
+}
+
+//unsigned char
+
+inline void 
+assign(unsigned char & c_target, 
+	   DnaQ & source)
+{
+SEQAN_CHECKPOINT
+	c_target = Dna(source);
+}
+
+inline void 
+assign(unsigned char & c_target, 
+	   DnaQ const & source)
+{
+SEQAN_CHECKPOINT
+	c_target = Dna(source);
+}
+
+
+//__int64
+
+inline void 
+assign(__int64 & c_target, 
+	   Dna5Q & source)
+{
+SEQAN_CHECKPOINT
+	c_target = Dna5(source);
+}
+
+inline void 
+assign(__int64 & c_target, 
+	   Dna5Q const & source)
+{
+SEQAN_CHECKPOINT
+	c_target = Dna5(source);
+}
+
+//__uint64
+
+inline void 
+assign(__uint64 & c_target, 
+	   Dna5Q & source)
+{
+SEQAN_CHECKPOINT
+	c_target = Dna5(source);
+}
+
+inline void 
+assign(__uint64 & c_target, 
+	   Dna5Q const & source)
+{
+SEQAN_CHECKPOINT
+	c_target = Dna5(source);
+}
+
+//int
+
+inline void 
+assign(int & c_target, 
+	   Dna5Q & source)
+{
+SEQAN_CHECKPOINT
+	c_target = Dna5(source);
+}
+
+inline void 
+assign(int & c_target, 
+	   Dna5Q const & source)
+{
+SEQAN_CHECKPOINT
+	c_target = Dna5(source);
+}
+
+//unsigned int
+
+inline void 
+assign(unsigned int & c_target, 
+	   Dna5Q & source)
+{
+SEQAN_CHECKPOINT
+	c_target = Dna5(source);
+}
+
+inline void 
+assign(unsigned int & c_target, 
+	   Dna5Q const & source)
+{
+SEQAN_CHECKPOINT
+	c_target = Dna5(source);
+}
+
+
+//short
+
+inline void 
+assign(short & c_target, 
+	   Dna5Q & source)
+{
+SEQAN_CHECKPOINT
+	c_target = Dna5(source);
+}
+
+inline void 
+assign(short & c_target, 
+	   Dna5Q const & source)
+{
+SEQAN_CHECKPOINT
+	c_target = Dna5(source);
+}
+
+//unsigned short
+
+inline void 
+assign(unsigned short & c_target, 
+	   Dna5Q & source)
+{
+SEQAN_CHECKPOINT
+	c_target = Dna5(source);
+}
+
+inline void 
+assign(unsigned short & c_target, 
+	   Dna5Q const & source)
+{
+SEQAN_CHECKPOINT
+	c_target = Dna5(source);
+}
+
+//char
+
+inline void 
+assign(char & c_target, 
+	   Dna5Q & source)
+{
+SEQAN_CHECKPOINT
+	c_target = Dna5(source);
+}
+
+inline void 
+assign(char & c_target, 
+	   Dna5Q const & source)
+{
+SEQAN_CHECKPOINT
+	c_target = Dna5(source);
+}
+
+//signed char
+
+inline void 
+assign(signed char & c_target, 
+	   Dna5Q & source)
+{
+SEQAN_CHECKPOINT
+	c_target = Dna5(source);
+}
+
+inline void 
+assign(signed char & c_target, 
+	   Dna5Q const & source)
+{
+SEQAN_CHECKPOINT
+	c_target = Dna5(source);
+}
+
+//unsigned char
+
+inline void 
+assign(unsigned char & c_target, 
+	   Dna5Q & source)
+{
+SEQAN_CHECKPOINT
+	c_target = Dna5(source);
+}
+
+inline void 
+assign(unsigned char & c_target, 
+	   Dna5Q const & source)
+{
+SEQAN_CHECKPOINT
+	c_target = Dna5(source);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 inline int getQualityValue(DnaQ const &c) 

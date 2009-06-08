@@ -778,6 +778,8 @@ inline unsigned ordValue(SimpleType<TValue,TSpec> const &c)
 	return c;
 }
 
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 } //namespace SEQAN_NAMESPACE_MAIN
