@@ -37,11 +37,7 @@
 #endif
 
 // Consensus tool
-#include <seqan/consensus/graph_consensus_base.h>
-#include <seqan/consensus/graph_consensus_ctgstore.h>
-#include <seqan/consensus/graph_consensus_library.h>
-#include <seqan/consensus/graph_consensus_readstore.h>
-#include <seqan/consensus/graph_consensus_frgstore.h>
-#include <seqan/consensus/graph_consensus_libstore.h>
+#include <seqan/consensus/consensus_base.h>
+#include <seqan/consensus/consensus_library.h>
 
 #endif //#ifndef SEQAN_HEADER_...

@@ -120,6 +120,58 @@ struct _SimpleLess :
 };
 
 
+//////////////////////////////////////////////////////////////////////////////
+
+
+
+template <typename TSpec, typename TConfig, typename TPos, typename TGapAnchor, typename TSpecAlign, typename TBeginClr, typename TEndClr>
+inline void
+getClrRange(_FragmentStore<TSpec, TConfig> const& fragStore,
+			AlignedReadStoreElement<TPos, TGapAnchor, TSpecAlign> const& alignEl,
+			TBeginClr& begClr,		// Out-parameter: left / begin position of the clear range
+			TEndClr& endClr)		// Out-parameter: right / end position of the clear range
+{
+	typedef _FragmentStore<TSpec, TConfig> TFragmentStore;
+	typedef typename Size<TFragmentStore>::Type TSize;
+	typedef typename Iterator<String<TGapAnchor>, Standard>::Type TGapIter;
+	TSize lenRead = length((value(fragStore.readStore, alignEl.readId)).seq);
+
+	TGapIter itGap = begin(alignEl.gaps, Standard() );
+	TGapIter itGapEnd = end(alignEl.gaps, Standard() );
+	
+	// Any gaps or clipped characters?
+	if (itGap == itGapEnd) {
+		begClr = 0;
+		endClr = lenRead;
+		return;
+	}
+
+	// Begin clear range
+	if (itGap->gapPos == 0) begClr = itGap->seqPos;
+	else begClr = 0;
+
+	TSize lenGaps = length(alignEl.gaps);
+	if ((value(alignEl.gaps, lenGaps - 1)).seqPos != lenRead) {
+		endClr = lenRead;
+	} else {
+		int diff = 0;
+		if (lenGaps > 1) diff = (value(alignEl.gaps, lenGaps - 2)).gapPos - (value(alignEl.gaps, lenGaps - 2)).seqPos;
+		int newDiff = (value(alignEl.gaps, lenGaps - 1)).gapPos - (value(alignEl.gaps, lenGaps - 1)).seqPos;
+		if (newDiff < diff) {
+			endClr = lenRead - (diff - newDiff);
+		} else {
+			endClr = lenRead;
+		}
+	}
+
+	// For reverse reads adapt clear ranges
+	if (alignEl.beginPos > alignEl.endPos) {
+		TBeginClr tmp = begClr;
+		begClr = lenRead - endClr;
+		endClr = lenRead - tmp;
+	}
+}
+
 
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -132,6 +184,7 @@ getContigReads(StringSet<TValue, Owner<TStrSpec> >& strSet,
 {
 	typedef _FragmentStore<TSpec, TConfig> TFragmentStore;
 	typedef typename Size<TFragmentStore>::Type TSize;
+	typedef typename TFragmentStore::TReadPos TReadPos;
 
 	// All fragment store element types
 	typedef typename Value<typename TFragmentStore::TReadStore>::Type TReadStoreElement;
@@ -140,7 +193,7 @@ getContigReads(StringSet<TValue, Owner<TStrSpec> >& strSet,
 	// Sort aligned reads according to contig id
 	sortAlignedReads(fragStore.alignedReadStore, SortContigId());
 
-	// ToDo: Take into account the clear range
+	// Retrieve all reads, limit them to the clear range and if required reverse complement them
 	typedef typename Iterator<typename TFragmentStore::TAlignedReadStore>::Type TAlignIter;
 	TAlignIter alignIt = ::std::lower_bound(begin(fragStore.alignedReadStore, Standard()), end(fragStore.alignedReadStore, Standard()), contigId, _SimpleLess<TAlignedElement, TId>());
 	TAlignIter alignItEnd = end(fragStore.alignedReadStore, Standard() );
@@ -148,7 +201,10 @@ getContigReads(StringSet<TValue, Owner<TStrSpec> >& strSet,
 		if (alignIt->contigId != contigId) break;
 		resize(strSet, i + 1);
 		TSize offset = _min(alignIt->beginPos, alignIt->endPos);
-		value(strSet, i) = (value(fragStore.readStore, alignIt->readId)).seq;
+		TReadPos begClr = 0;
+		TReadPos endClr = 0;
+		getClrRange(fragStore, value(alignIt), begClr, endClr);
+		value(strSet, i) = infix((value(fragStore.readStore, alignIt->readId)).seq, begClr, endClr);
 		TSize lenRead = length(value(strSet, i));
 		if (alignIt->beginPos < alignIt->endPos) {
 			appendValue(startEndPos, TPosPair(offset, offset + lenRead));
@@ -158,80 +214,104 @@ getContigReads(StringSet<TValue, Owner<TStrSpec> >& strSet,
 		}
 	}
 }
-/*
-//////////////////////////////////////////////////////////////////////////////
 
-template<typename TAlphabet, typename TSpec, typename TAlph2, typename TSpec2, typename TSize, typename TStringSet, typename TLayoutPos>
-inline void
-loadReadsClr(ReadStore<TAlphabet, TSpec>& readSt,
-			 CtgStore<TAlph2, TSpec2>& ctgSt,
-			 TSize index,
-			 TStringSet& strSet,
-			 TLayoutPos& startEndPos) 
+//////////////////////////////////////////////////////////////////////////////////
+
+template<typename TSpec, typename TConfig, typename TPosTriple, typename TAlignMatrix, typename TGappedCons, typename TId>
+inline void 
+updateContigReads(_FragmentStore<TSpec, TConfig>& fragStore,
+				  TPosTriple& readBegEndRowPos,
+				  TAlignMatrix& alignmentMatrix,
+				  TGappedCons& gappedCons,
+				  TId const contigId)
 {
-	SEQAN_CHECKPOINT
-	typedef typename Value<TLayoutPos>::Type TPair;
-	String<GappedRead<> >& gapReads = value(ctgSt.data_reads, index);
-	TSize numReads = length(gapReads);
-	resize(strSet, numReads);
-	String<TAlphabet> all = readSt.data_reads;
-	for(TSize i = 0; i<numReads; ++i) {
-		GappedRead<>& gRead = value(gapReads, i);
-		String<TAlphabet> seq;
-		loadRead(readSt, all, gRead.data_source , seq);
-		if (gRead.data_clr.i1 < gRead.data_clr.i2) {
-			value(strSet, i) = infix(seq, gRead.data_clr.i1, gRead.data_clr.i2);
-		} else {
-			value(strSet, i) = infix(seq, gRead.data_clr.i2, gRead.data_clr.i1);
-			reverseComplementInPlace(value(strSet, i));
+	typedef _FragmentStore<TSpec, TConfig> TFragmentStore;
+	typedef typename Size<TFragmentStore>::Type TSize;
+	typedef typename TFragmentStore::TReadPos TReadPos;
+	char gapChar = gapValue<char>();
+	TSize len = length(alignmentMatrix) / length(readBegEndRowPos);
+
+	// Fragment store typedefs
+	typedef typename Value<typename TFragmentStore::TContigStore>::Type TContigStoreElement;
+	typedef typename Value<typename TFragmentStore::TAlignedReadStore>::Type TAlignedElement;
+	
+	// Update the contig
+	TContigStoreElement& contigEl = value(fragStore.contigStore, contigId);
+	clear(contigEl.gaps);
+	clear(contigEl.seq);
+
+	// Create the gap anchors
+	typedef typename Iterator<String<char> >::Type TStringIter;
+	TStringIter seqIt = begin(gappedCons);
+	TStringIter seqItEnd = end(gappedCons);
+	typedef typename TFragmentStore::TReadPos TPos;
+	typedef typename TFragmentStore::TContigGapAnchor TContigGapAnchor;
+	TPos ungappedPos = 0;
+	TPos gappedPos = 0;
+	bool gapOpen = false;
+	for(;seqIt != seqItEnd; goNext(seqIt), ++gappedPos) {
+		if (value(seqIt) == gapChar) gapOpen = true;				
+		else {
+			if (gapOpen) {
+				appendValue(contigEl.gaps, TContigGapAnchor(ungappedPos, gappedPos));
+				gapOpen = false;
+			}
+			Dna5Q letter = value(seqIt);
+			assignQualityValue(letter, 'D');
+			appendValue(contigEl.seq, letter);
+			++ungappedPos;
 		}
-		appendValue(startEndPos, TPair(gRead.data_clr.i1 + gRead.data_offset, gRead.data_clr.i2 + gRead.data_offset));
+	}
+	if (gapOpen) appendValue(contigEl.gaps, TContigGapAnchor(ungappedPos, gappedPos));
+
+
+	// Update all aligned reads
+	typedef typename Iterator<typename TFragmentStore::TAlignedReadStore>::Type TAlignIter;
+	TAlignIter alignIt = ::std::lower_bound(begin(fragStore.alignedReadStore, Standard()), end(fragStore.alignedReadStore, Standard()), contigId, _SimpleLess<TAlignedElement, TId>());
+	TAlignIter alignItEnd = end(fragStore.alignedReadStore, Standard() );
+	for(TSize i = 0;alignIt != alignItEnd; goNext(alignIt), ++i) {
+		if (alignIt->contigId != contigId) break;
+		TSize lenRead = length((value(fragStore.readStore, alignIt->readId)).seq);
+		TReadPos begClr = 0;
+		TReadPos endClr = 0;
+		getClrRange(fragStore, value(alignIt), begClr, endClr);
+		clear(alignIt->gaps);
+		ungappedPos = begClr;
+		if (alignIt->beginPos > alignIt->endPos) ungappedPos = lenRead - endClr;
+		if (ungappedPos != 0) appendValue(alignIt->gaps, TContigGapAnchor(ungappedPos, 0));
+		gappedPos = 0;
+		gapOpen = false;
+		for(TSize column = (readBegEndRowPos[i]).i1; column<(readBegEndRowPos[i]).i2; ++column, ++gappedPos) {
+			if (value(alignmentMatrix, (readBegEndRowPos[i]).i3 * len + column) == gapChar) gapOpen = true;				
+			else {
+				if (gapOpen) {
+					appendValue(alignIt->gaps, TContigGapAnchor(ungappedPos, gappedPos));
+					gapOpen = false;
+				}
+				++ungappedPos;
+			}
+		}
+		if (gapOpen) appendValue(alignIt->gaps, TContigGapAnchor(ungappedPos, gappedPos));
+		if (alignIt->beginPos < alignIt->endPos) {
+			if (endClr != lenRead) {
+				appendValue(alignIt->gaps, TContigGapAnchor(lenRead, lenRead + (gappedPos - ungappedPos) - (lenRead - endClr)));
+			}
+		} else {
+			if (begClr != 0) {
+				appendValue(alignIt->gaps, TContigGapAnchor(lenRead, lenRead + (gappedPos - ungappedPos) - begClr));
+			}
+		}
+
+		// Set new begin and end position
+		if (alignIt->beginPos < alignIt->endPos) {
+			alignIt->beginPos = (readBegEndRowPos[i]).i1;
+			alignIt->endPos = (readBegEndRowPos[i]).i2;
+		} else {
+			alignIt->beginPos = (readBegEndRowPos[i]).i2;
+			alignIt->endPos = (readBegEndRowPos[i]).i1;
+		}
 	}
 }
-
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TAlphabet, typename TSpec, typename TAlph2, typename TSpec2, typename TSize, typename TReadClrSet, typename TQualityClrSet, typename TLayoutPos>
-inline void
-loadReadsClr(ReadStore<TAlphabet, TSpec>& readSt,
-             CtgStore<TAlph2, TSpec2>& ctgSt,
-             TSize index,
-             TReadClrSet& readSet,
-             TQualityClrSet& qualitySet,
-             TLayoutPos& startEndPos) 
-{
-    SEQAN_CHECKPOINT
-
-    typedef typename Value<TLayoutPos>::Type TPair;
-    String<GappedRead<> >& gapReads = value(ctgSt.data_reads, index);
-    TSize numReads = length(gapReads);
-	
-    resize(readSet, numReads);
-    resize(qualitySet, numReads);
-
-	String<TAlphabet> all = readSt.data_reads;
-    for(TSize i = 0; i<numReads; ++i) {
-        GappedRead<>& gRead = value(gapReads, i);
-        String<TAlphabet> seq;
-        String<char> quality;
-        loadRead(readSt, all, gRead.data_source , seq);
-        loadQuality(readSt,gRead.data_source, quality);
-        if (gRead.data_clr.i1 < gRead.data_clr.i2) {
-            value(readSet, i) = infix(seq, gRead.data_clr.i1, gRead.data_clr.i2);
-            value(qualitySet, i) = infix(quality, gRead.data_clr.i1, gRead.data_clr.i2);
-        } else {
-            value(readSet, i) = infix(seq, gRead.data_clr.i2, gRead.data_clr.i1);
-            value(qualitySet, i) = infix(quality, gRead.data_clr.i2, gRead.data_clr.i1);
-            reverseComplementInPlace(value(readSet, i));
-            reverseInPlace(value(qualitySet,i) );
-        }
-        appendValue(startEndPos, TPair(gRead.data_clr.i1 + gRead.data_offset, gRead.data_clr.i2 + gRead.data_offset));
-    }
-}
-*/
-
-
 
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -471,6 +551,7 @@ int main(int argc, const char *argv[]) {
 #endif
 
 		// Call the consensus
+		// ToDo: Qualtiy-based consensus calling
 		String<unsigned int> coverage;
 		String<char> gappedConsensus;
 		String<Dna> consensusSequence;
@@ -513,29 +594,7 @@ int main(int argc, const char *argv[]) {
 			//strm2.close();
 		} 
 		else if (consOpt.output == 1) {
-			// ToDo: Reset aligned reads
-
-			/*
-			TSize len = length(gappedConsensus);
-			TSize begContig = (value(ctgSt.data_begin_end, ctgSt.data_pos_count - 1)).i2;
-			TSize endContig = begContig + length(gappedConsensus);
-			for(TSize i = 0; i<len; ++i) appendValue(ctgSt.data_contig, gappedConsensus[i]);
-			for(TSize i = 0; i<len; ++i) appendValue(ctgSt.data_quality, 'D');
-			value(ctgSt.data_begin_end, currentContig) = Pair<TSize, TSize>(begContig, endContig);
-			for(TSize i = 0; i < length(readBegEndRowPos); ++i) {
-				String<TSize> gaps;
-				TSize letterCount = 0;
-				TSize gapCount = 0;
-				for(TSize column = (readBegEndRowPos[i]).i1; column<(readBegEndRowPos[i]).i2; ++column) {
-					if (value(alignmentMatrix, (readBegEndRowPos[i]).i3 * len + column) == '-') {
-						++gapCount;
-						appendValue(gaps, letterCount);
-					} else ++letterCount;
-				}
-				value(value(ctgSt.data_reads, currentContig), i).data_gap = gaps;
-				value(value(ctgSt.data_reads, currentContig), i).data_offset = (readBegEndRowPos[i]).i1;
-			}
-			*/
+			updateContigReads(fragStore, readBegEndRowPos, alignmentMatrix, gappedConsensus, currentContig);
 		}
 #ifdef SEQAN_PROFILE
 		std::cout << "Output done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;

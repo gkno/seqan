@@ -685,12 +685,14 @@ write(TFile & target,
 			_streamPut(target, ',');
 			_streamPutInt(target, clr2);
 			_streamPut(target, '\n');
-			_streamWrite(target,"gap:\n");
-			for(TSize z = 0;z<length(gaps); ++z) {
-				_streamPutInt(target, value(gaps, z));
-				_streamPut(target, '\n');
+			if (length(gaps)) {
+				_streamWrite(target,"gap:\n");
+				for(TSize z = 0;z<length(gaps); ++z) {
+					_streamPutInt(target, value(gaps, z));
+					_streamPut(target, '\n');
+				}
+				_streamWrite(target, ".\n");
 			}
-			_streamWrite(target, ".\n");
 			_streamWrite(target,"}\n");
 		}
 		_streamWrite(target,"}\n");

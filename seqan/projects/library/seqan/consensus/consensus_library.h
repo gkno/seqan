@@ -18,8 +18,8 @@
   $Id: graph_consensus_library.h 1809 2008-03-31 12:57:59Z rausch@PCPOOL.MI.FU-BERLIN.DE $
  ==========================================================================*/
 
-#ifndef SEQAN_HEADER_GRAPH_CONSENSUS_LIBRARY_H
-#define SEQAN_HEADER_GRAPH_CONSENSUS_LIBRARY_H
+#ifndef SEQAN_HEADER_CONSENSUS_LIBRARY_H
+#define SEQAN_HEADER_CONSENSUS_LIBRARY_H
 
 namespace SEQAN_NAMESPACE_MAIN
 {
