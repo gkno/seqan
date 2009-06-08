@@ -126,12 +126,12 @@ struct _SimpleLess :
 
 template <typename TSpec, typename TConfig, typename TPos, typename TGapAnchor, typename TSpecAlign, typename TBeginClr, typename TEndClr>
 inline void
-getClrRange(_FragmentStore<TSpec, TConfig> const& fragStore,
+getClrRange(FragmentStore<TSpec, TConfig> const& fragStore,
 			AlignedReadStoreElement<TPos, TGapAnchor, TSpecAlign> const& alignEl,
 			TBeginClr& begClr,		// Out-parameter: left / begin position of the clear range
 			TEndClr& endClr)		// Out-parameter: right / end position of the clear range
 {
-	typedef _FragmentStore<TSpec, TConfig> TFragmentStore;
+	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
 	typedef typename Size<TFragmentStore>::Type TSize;
 	typedef typename Iterator<String<TGapAnchor>, Standard>::Type TGapIter;
 	TSize lenRead = length((value(fragStore.readStore, alignEl.readId)).seq);
@@ -179,10 +179,10 @@ template<typename TValue, typename TStrSpec, typename TPosPair, typename TString
 inline void 
 getContigReads(StringSet<TValue, Owner<TStrSpec> >& strSet,
 			   String<TPosPair, TStringSpec>& startEndPos,
-			   _FragmentStore<TSpec, TConfig> const& fragStore,
+			   FragmentStore<TSpec, TConfig> const& fragStore,
 			   TId const contigId)
 {
-	typedef _FragmentStore<TSpec, TConfig> TFragmentStore;
+	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
 	typedef typename Size<TFragmentStore>::Type TSize;
 	typedef typename TFragmentStore::TReadPos TReadPos;
 
@@ -219,13 +219,13 @@ getContigReads(StringSet<TValue, Owner<TStrSpec> >& strSet,
 
 template<typename TSpec, typename TConfig, typename TPosTriple, typename TAlignMatrix, typename TGappedCons, typename TId>
 inline void 
-updateContigReads(_FragmentStore<TSpec, TConfig>& fragStore,
+updateContigReads(FragmentStore<TSpec, TConfig>& fragStore,
 				  TPosTriple& readBegEndRowPos,
 				  TAlignMatrix& alignmentMatrix,
 				  TGappedCons& gappedCons,
 				  TId const contigId)
 {
-	typedef _FragmentStore<TSpec, TConfig> TFragmentStore;
+	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
 	typedef typename Size<TFragmentStore>::Type TSize;
 	typedef typename TFragmentStore::TReadPos TReadPos;
 	char gapChar = gapValue<char>();
@@ -460,7 +460,7 @@ int main(int argc, const char *argv[]) {
 
 
 	// Fragment store
-	typedef _FragmentStore<> TFragmentStore;
+	typedef FragmentStore<> TFragmentStore;
 	TFragmentStore fragStore;
 
 	// Load the reads and layout positions

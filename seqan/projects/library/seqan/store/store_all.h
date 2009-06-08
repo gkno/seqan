@@ -51,7 +51,7 @@ struct FragmentStoreConfig
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TSpec = void, typename TConfig = FragmentStoreConfig<TSpec> >
-struct _FragmentStore
+struct FragmentStore
 {
 	typedef typename TConfig::TMean					TMean;
 	typedef typename TConfig::TStd					TStd;

@@ -49,12 +49,12 @@ typedef Tag<TagAmos_> const Amos;
 template<typename TFile, typename TSpec, typename TConfig>
 inline void 
 read(TFile & file,
-	 _FragmentStore<TSpec, TConfig>& fragStore,
+	 FragmentStore<TSpec, TConfig>& fragStore,
 	 Amos) 
 {
 	SEQAN_CHECKPOINT
 	// Basic types
-	typedef _FragmentStore<TSpec, TConfig> TFragmentStore;
+	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
 	typedef typename Id<TFragmentStore>::Type TId;
 	typedef typename Size<TFragmentStore>::Type TSize;
 	typedef typename Value<TFile>::Type TValue;
@@ -459,12 +459,12 @@ read(TFile & file,
 template<typename TFile, typename TSpec, typename TConfig>
 inline void 
 write(TFile & target,
-	  _FragmentStore<TSpec, TConfig>& fragStore,
+	  FragmentStore<TSpec, TConfig>& fragStore,
 	  Amos) 
 {
 	SEQAN_CHECKPOINT
 	// Basic types
-	typedef _FragmentStore<TSpec, TConfig> TFragmentStore;
+	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
 	typedef typename Id<TFragmentStore>::Type TId;
 	typedef typename Size<TFragmentStore>::Type TSize;
 	typedef typename Value<TFile>::Type TValue;
@@ -711,13 +711,13 @@ write(TFile & target,
 template<typename TFile, typename TSpec, typename TConfig, typename TFilePath>
 inline bool 
 _convertSimpleReadFile(TFile& file,
-					   _FragmentStore<TSpec, TConfig>& fragStore,
+					   FragmentStore<TSpec, TConfig>& fragStore,
 					   TFilePath& filePath, 
 					   bool moveToFront)
 {
 	SEQAN_CHECKPOINT
 	// Basic types
-	typedef _FragmentStore<TSpec, TConfig> TFragmentStore;
+	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
 	typedef typename Id<TFragmentStore>::Type TId;
 	typedef typename Size<TFragmentStore>::Type TSize;
 	typedef typename Value<TFile>::Type TValue;
