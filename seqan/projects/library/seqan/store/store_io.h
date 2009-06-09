@@ -590,6 +590,20 @@ write(TFile & target,
 		_streamWrite(target,"}\n");
 	}
 
+	// Get clear ranges
+	typedef Pair<typename TFragmentStore::TReadPos, typename TFragmentStore::TReadPos> TClrRange;
+	String<TClrRange> clrRange;
+	resize(clrRange, length(fragStore.readStore));
+	typedef typename Iterator<typename TFragmentStore::TAlignedReadStore>::Type TAlignIter;
+	TAlignIter alignIt = begin(fragStore.alignedReadStore);
+	TAlignIter alignItEnd = end(fragStore.alignedReadStore);
+	for(;alignIt != alignItEnd; goNext(alignIt)) {
+		typename TFragmentStore::TReadPos begClr = 0;
+		typename TFragmentStore::TReadPos endClr = 0;
+		getClrRange(fragStore, value(alignIt), begClr, endClr);
+		value(clrRange, alignIt->readId) = TClrRange(begClr, endClr);
+	}
+
 	// Write reads
 	typedef typename Iterator<typename TFragmentStore::TReadStore>::Type TReadIter;
 	TReadIter readIt = begin(fragStore.readStore);
@@ -629,6 +643,11 @@ write(TFile & target,
 			_streamPutInt(target, readIt->matePairId + 1);
 			_streamPut(target, '\n');
 		}
+		_streamWrite(target,"clr:");
+		_streamPutInt(target, (value(clrRange, idCount)).i1);
+		_streamPut(target, ',');
+		_streamPutInt(target, (value(clrRange, idCount)).i2);
+		_streamPut(target, '\n');
 		_streamWrite(target,"}\n");
 	}
 
@@ -639,9 +658,8 @@ write(TFile & target,
 	typedef typename Iterator<typename TFragmentStore::TContigStore>::Type TContigIter;
 	TContigIter contigIt = begin(fragStore.contigStore);
 	TContigIter contigItEnd = end(fragStore.contigStore);
-	typedef typename Iterator<typename TFragmentStore::TAlignedReadStore>::Type TAlignIter;
-	TAlignIter alignIt = begin(fragStore.alignedReadStore);
-	TAlignIter alignItEnd = end(fragStore.alignedReadStore);
+	alignIt = begin(fragStore.alignedReadStore);
+	alignItEnd = end(fragStore.alignedReadStore);
 	noNamesPresent = (length(fragStore.contigNameStore) == 0);
 	for(TSize idCount = 0;contigIt != contigItEnd; goNext(contigIt), ++idCount) {
 		_streamWrite(target,"{CTG\n");
@@ -1008,9 +1026,11 @@ _convertSimpleReadFile(TFile& file,
 				_parse_skipLine(strmFrag, c);
 
 				// Insert mate pair
-				frgIdMap.insert(std::make_pair(id, length(fragStore.matePairStore)));
-				appendValue(fragStore.matePairStore, matePairEl);
-				appendValue(fragStore.matePairNameStore, eid);
+				if (matePairEl.readId[0] != matePairEl.readId[1]) {
+					frgIdMap.insert(std::make_pair(id, length(fragStore.matePairStore)));
+					appendValue(fragStore.matePairStore, matePairEl);
+					appendValue(fragStore.matePairNameStore, eid);
+				}
 			} else {
 				_parse_skipLine(strmFrag, c);
 			}
