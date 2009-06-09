@@ -26,6 +26,111 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 
+template<typename TSpec, typename TConfig, typename TId>
+inline void 
+reAlign(FragmentStore<TSpec, TConfig>& fragStore,
+		TId& contigId)
+{
+	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
+	typedef typename Size<TFragmentStore>::Type TSize;
+	typedef typename TFragmentStore::TAlignedReadStore TAlignedReadStore;
+	typedef typename TFragmentStore::TReadPos TReadPos;
+	typedef typename TFragmentStore::TReadSeq TReadSeq;
+	typedef typename Value<typename TFragmentStore::TReadSeq>::Type TAlphabet;
+	
+	// Copy all reads belonging to this contig
+	TAlignedReadStore contigReads;
+	typedef typename Iterator<typename TFragmentStore::TAlignedReadStore>::Type TAlignIter;
+	TAlignIter alignIt = begin(fragStore.alignedReadStore);
+	TAlignIter alignItEnd = end(fragStore.alignedReadStore);
+	TReadPos maxPos = 0;
+	TReadPos minPos = SupremumValue<TReadPos>::VALUE;
+	for(;alignIt != alignItEnd; goNext(alignIt)) {
+		if (alignIt->contigId == contigId) {
+			if (_min(alignIt->beginPos, alignIt->endPos) < minPos) minPos = _min(alignIt->beginPos, alignIt->endPos);
+			if (_max(alignIt->beginPos, alignIt->endPos) > maxPos) maxPos = _max(alignIt->beginPos, alignIt->endPos);
+			appendValue(contigReads, value(alignIt));
+		}
+	}
+
+	// Sort the reads according to the begin position
+	sortAlignedReads(fragStore.alignedReadStore, SortBeginPos());
+	
+	// Create the consensus sequence
+	TSize gapPos = ValueSize<TAlphabet>::VALUE;
+	typedef ProfileType<ModifiedAlphabet<TAlphabet, ModExpand<'-'> > > TProfileAlphabet;
+	typedef String<TProfileAlphabet> TProfileString;
+	typedef typename Iterator<TProfileString, Standard>::Type TConsIter;
+	TProfileString consensus;
+	fill(consensus, maxPos - minPos, TProfileAlphabet());
+	TConsIter itCons = begin(consensus, Standard() );
+	TConsIter itConsEnd = end(consensus, Standard() );
+	alignIt = begin(fragStore.alignedReadStore);
+	for(;alignIt != alignItEnd; goNext(alignIt)) {
+		itCons = begin(consensus);
+		goFurther(itCons, _min(alignIt->beginPos, alignIt->endPos));
+
+		if (alignIt->beginPos > alignIt->endPos) reverseComplementInPlace(value(fragStore.readStore, alignIt->readId).seq);
+		typedef typename Iterator<TReadSeq>::Type TReadIter;
+		TReadIter itRead = begin(value(fragStore.readStore, alignIt->readId).seq);
+		TReadIter itReadEnd = end(value(fragStore.readStore, alignIt->readId).seq);
+		typedef typename Iterator<String<typename TFragmentStore::TReadGapAnchor> >::Type TReadGapsIter;
+		TReadGapsIter itGaps = begin(alignIt->gaps);
+		TReadGapsIter itGapsEnd = end(alignIt->gaps);
+
+		TReadPos old = 0;
+		int diff = 0;
+		bool clippedEnd = false;
+		if ((itGaps != itGapsEnd) && (itGaps->gapPos == 0)) {
+			old = itGaps->seqPos;
+			goFurther(itRead, old);
+			diff -= old;
+			goNext(itGaps);
+		}
+		for(;itGaps != itGapsEnd; goNext(itGaps)) {
+			TReadPos limit = itGaps->seqPos;
+			int newDiff = (itGaps->gapPos - limit);
+			if (diff > newDiff) {
+				limit -= (diff - newDiff);
+				clippedEnd = true;
+			}
+			for(;old < limit; ++old, goNext(itRead)) ++(value(itCons++)).count[ordValue(value(itRead))];
+			for(;diff < newDiff; ++diff) ++(value(itCons++)).count[gapPos];
+		}
+		if (!clippedEnd) {
+			for(;itRead!=itReadEnd;goNext(itRead)) ++(value(itCons++)).count[ordValue(value(itRead))];
+		}
+	}
+
+	// Compute the score
+	int score = 0;
+	itCons = begin(consensus, Standard() );
+	for(;itCons != itConsEnd; goNext(itCons)) {
+		TSize maxCount = 0;
+		TSize sumCount = 0;
+		TSize tmp;
+		for(TSize i = 0; i<gapPos + 1; ++i) {
+			if ((tmp = (value(itCons)).count[i]) > maxCount) maxCount = tmp;
+			sumCount += tmp;
+		}
+		score += (sumCount - maxCount);
+	}
+
+	
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TFragment, typename TSpec1, typename TStringSet, typename TSize>
