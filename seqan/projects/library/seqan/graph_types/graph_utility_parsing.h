@@ -473,7 +473,7 @@ _stringToNumber(TString& str)
 
 
 //////////////////////////////////////////////////////////////////////////////
-// File reading and timing functions
+// File reading
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -515,19 +515,6 @@ _loadSequences(TPath const& in_path,
     file.close();
 
 	return count;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TText>
-inline void
-_alignTiming(std::clock_t& startTime,
-			 TText const& text)
-{
-	std::clock_t endTime=clock();
-	double time=((float)(endTime-startTime)/CLOCKS_PER_SEC);
-	startTime = endTime;
-	std::cout << text << time << " sec" << std::endl;
 }
 
 

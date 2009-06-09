@@ -120,59 +120,6 @@ struct _SimpleLess :
 };
 
 
-//////////////////////////////////////////////////////////////////////////////
-
-
-
-template <typename TSpec, typename TConfig, typename TPos, typename TGapAnchor, typename TSpecAlign, typename TBeginClr, typename TEndClr>
-inline void
-getClrRange(FragmentStore<TSpec, TConfig> const& fragStore,
-			AlignedReadStoreElement<TPos, TGapAnchor, TSpecAlign> const& alignEl,
-			TBeginClr& begClr,		// Out-parameter: left / begin position of the clear range
-			TEndClr& endClr)		// Out-parameter: right / end position of the clear range
-{
-	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
-	typedef typename Size<TFragmentStore>::Type TSize;
-	typedef typename Iterator<String<TGapAnchor>, Standard>::Type TGapIter;
-	TSize lenRead = length((value(fragStore.readStore, alignEl.readId)).seq);
-
-	TGapIter itGap = begin(alignEl.gaps, Standard() );
-	TGapIter itGapEnd = end(alignEl.gaps, Standard() );
-	
-	// Any gaps or clipped characters?
-	if (itGap == itGapEnd) {
-		begClr = 0;
-		endClr = lenRead;
-		return;
-	}
-
-	// Begin clear range
-	if (itGap->gapPos == 0) begClr = itGap->seqPos;
-	else begClr = 0;
-
-	TSize lenGaps = length(alignEl.gaps);
-	if ((value(alignEl.gaps, lenGaps - 1)).seqPos != lenRead) {
-		endClr = lenRead;
-	} else {
-		int diff = 0;
-		if (lenGaps > 1) diff = (value(alignEl.gaps, lenGaps - 2)).gapPos - (value(alignEl.gaps, lenGaps - 2)).seqPos;
-		int newDiff = (value(alignEl.gaps, lenGaps - 1)).gapPos - (value(alignEl.gaps, lenGaps - 1)).seqPos;
-		if (newDiff < diff) {
-			endClr = lenRead - (diff - newDiff);
-		} else {
-			endClr = lenRead;
-		}
-	}
-
-	// For reverse reads adapt clear ranges
-	if (alignEl.beginPos > alignEl.endPos) {
-		TBeginClr tmp = begClr;
-		begClr = lenRead - endClr;
-		endClr = lenRead - tmp;
-	}
-}
-
-
 //////////////////////////////////////////////////////////////////////////////////
 
 template<typename TValue, typename TStrSpec, typename TPosPair, typename TStringSpec, typename TSpec, typename TConfig, typename TId>
@@ -493,19 +440,15 @@ int main(int argc, const char *argv[]) {
 			write(strmWrite, fragStore, Amos());	
 			strmWrite.close();
 		} else if (consOpt.convert == 2) {
-			//ToDo: Celera output 
-
-			//std::fstream strmWrite;
-			//strmWrite.open(consOpt.outfile.c_str(), ::std::ios_base::out | ::std::ios_base::trunc);
-			//write(strmWrite,readSt,frgSt,libSt,ctgSt,CeleraFrg());	
-			//strmWrite.close();
+			std::fstream strmWrite;
+			strmWrite.open(consOpt.outfile.c_str(), ::std::ios_base::out | ::std::ios_base::trunc);
+			_writeCeleraFrg(strmWrite, fragStore);	
+			strmWrite.close();
 		} else if (consOpt.convert == 3) {
-			//ToDo: Celera output 
-
-			//std::fstream strmWrite;
-			//strmWrite.open(consOpt.outfile.c_str(), ::std::ios_base::out | ::std::ios_base::trunc);
-			//write(strmWrite,readSt,frgSt,libSt,ctgSt,CeleraCgb());	
-			//strmWrite.close();
+			std::fstream strmWrite;
+			strmWrite.open(consOpt.outfile.c_str(), ::std::ios_base::out | ::std::ios_base::trunc);
+			_writeCeleraCgb(strmWrite, fragStore);	
+			strmWrite.close();
 		}
 		return 0;
 	}

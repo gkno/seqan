@@ -37,6 +37,63 @@ namespace SEQAN_NAMESPACE_MAIN
 struct TagAmos_;
 typedef Tag<TagAmos_> const Amos;
 
+//////////////////////////////////////////////////////////////////////////////
+// Auxillary functions
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+
+
+
+template <typename TSpec, typename TConfig, typename TPos, typename TGapAnchor, typename TSpecAlign, typename TBeginClr, typename TEndClr>
+inline void
+getClrRange(FragmentStore<TSpec, TConfig> const& fragStore,
+			AlignedReadStoreElement<TPos, TGapAnchor, TSpecAlign> const& alignEl,
+			TBeginClr& begClr,		// Out-parameter: left / begin position of the clear range
+			TEndClr& endClr)		// Out-parameter: right / end position of the clear range
+{
+	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
+	typedef typename Size<TFragmentStore>::Type TSize;
+	typedef typename Iterator<String<TGapAnchor>, Standard>::Type TGapIter;
+	TSize lenRead = length((value(fragStore.readStore, alignEl.readId)).seq);
+
+	TGapIter itGap = begin(alignEl.gaps, Standard() );
+	TGapIter itGapEnd = end(alignEl.gaps, Standard() );
+	
+	// Any gaps or clipped characters?
+	if (itGap == itGapEnd) {
+		begClr = 0;
+		endClr = lenRead;
+		return;
+	}
+
+	// Begin clear range
+	if (itGap->gapPos == 0) begClr = itGap->seqPos;
+	else begClr = 0;
+
+	TSize lenGaps = length(alignEl.gaps);
+	if ((value(alignEl.gaps, lenGaps - 1)).seqPos != lenRead) {
+		endClr = lenRead;
+	} else {
+		int diff = 0;
+		if (lenGaps > 1) diff = (value(alignEl.gaps, lenGaps - 2)).gapPos - (value(alignEl.gaps, lenGaps - 2)).seqPos;
+		int newDiff = (value(alignEl.gaps, lenGaps - 1)).gapPos - (value(alignEl.gaps, lenGaps - 1)).seqPos;
+		if (newDiff < diff) {
+			endClr = lenRead - (diff - newDiff);
+		} else {
+			endClr = lenRead;
+		}
+	}
+
+	// For reverse reads adapt clear ranges
+	if (alignEl.beginPos > alignEl.endPos) {
+		TBeginClr tmp = begClr;
+		begClr = lenRead - endClr;
+		endClr = lenRead - tmp;
+	}
+}
+
+
 
 //////////////////////////////////////////////////////////////////////////////
 // Read / Write of AMOS message files (*.afg)
@@ -701,7 +758,7 @@ write(TFile & target,
 
 
 //////////////////////////////////////////////////////////////////////////////
-// Read: Simple fasta read file with positions (Read simulator format)
+// Read simulator format: Simple fasta read file with positions
 //////////////////////////////////////////////////////////////////////////////
 
 
@@ -1073,6 +1130,153 @@ _convertSimpleReadFile(TFile& file,
 	}
 	return true;
 }
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+// Rudimentary write functions for CeleraFrg and Celera Cgb
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TFile, typename TSpec, typename TConfig>
+inline void 
+_writeCeleraFrg(TFile& target,
+				FragmentStore<TSpec, TConfig>& fragStore) 
+{
+
+	SEQAN_CHECKPOINT
+	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
+	typedef typename Size<TFragmentStore>::Type TSize;
+	typedef typename TFragmentStore::TReadPos TReadPos;
+
+	// Iterate over all aligned reads to get the clear ranges
+	typedef Pair<TReadPos, TReadPos> TClrRange;
+	String<TClrRange> clearStr;
+	resize(clearStr, length(fragStore.readStore));
+	typedef typename Iterator<typename TFragmentStore::TAlignedReadStore>::Type TAlignIter;
+	TAlignIter alignIt = begin(fragStore.alignedReadStore);
+	TAlignIter alignItEnd = end(fragStore.alignedReadStore);
+	for(;alignIt != alignItEnd; goNext(alignIt)) {
+		TReadPos begClr = 0;
+		TReadPos endClr = 0;
+		getClrRange(fragStore, value(alignIt), begClr, endClr);
+		value(clearStr, alignIt->readId) = TClrRange(begClr, endClr);
+	}
+
+	// Write Reads
+	typedef typename Iterator<typename TFragmentStore::TReadStore>::Type TReadIter;
+	TReadIter readIt = begin(fragStore.readStore);
+	TReadIter readItEnd = end(fragStore.readStore);
+	bool noNamesPresent = (length(fragStore.readNameStore) == 0);
+	for(TSize idCount = 0;readIt != readItEnd; goNext(readIt), ++idCount) {
+		_streamWrite(target,"{FRG\n");
+		_streamWrite(target,"act:");
+		_streamPut(target, 'A');
+		_streamPut(target, '\n');
+		_streamWrite(target,"acc:");
+		_streamPutInt(target, idCount + 1);
+		_streamPut(target, '\n');
+		_streamWrite(target,"typ:");
+		_streamPut(target, 'R');
+		_streamPut(target, '\n');
+		if (!noNamesPresent) {
+			_streamWrite(target,"src:\n");
+			_streamWrite(target, value(fragStore.readNameStore, idCount));
+			_streamWrite(target, "\n.\n");
+		}
+		_streamWrite(target,"etm:");
+		_streamPut(target, '0');
+		_streamPut(target, '\n');
+		_streamWrite(target,"seq:\n");
+		typedef typename Iterator<typename TFragmentStore::TReadSeq>::Type TSeqIter;
+		typedef typename Value<typename TFragmentStore::TReadSeq>::Type TAlphabet;
+		TSeqIter seqIt = begin(readIt->seq);
+		TSeqIter seqItEnd = end(readIt->seq);
+		for(TSize k = 0;seqIt!=seqItEnd;goNext(seqIt), ++k) {
+			if ((k % 70 == 0) && (k != 0)) _streamPut(target, '\n');
+			_streamPut(target, getValue(seqIt));
+		}
+		_streamWrite(target, "\n.\n");
+		_streamWrite(target,"qlt:\n");
+		seqIt = begin(readIt->seq);
+		for(TSize k = 0;seqIt!=seqItEnd;goNext(seqIt), ++k) {
+			if ((k % 70 == 0) && (k != 0)) _streamPut(target, '\n');
+			Ascii c = ' ';
+			convertQuality(c, getQualityValue(value(seqIt)));
+			_streamPut(target, c);
+		}
+		_streamWrite(target, "\n.\n");
+		// Note: Clear range does not have to be ordered, e.g. no indication for reverse complemented reads, this is happening in cgb records
+		_streamWrite(target,"clr:");
+		_streamPutInt(target, (value(clearStr, idCount)).i1);
+		_streamPut(target, ',');
+		_streamPutInt(target, (value(clearStr, idCount)).i2);
+		_streamPut(target, '\n');
+		_streamWrite(target,"}\n");
+	}
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+
+template<typename TFile, typename TSpec, typename TConfig>
+inline void 
+_writeCeleraCgb(TFile& target,
+				FragmentStore<TSpec, TConfig>& fragStore) 
+{
+	SEQAN_CHECKPOINT
+	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
+	typedef typename Size<TFragmentStore>::Type TSize;
+	typedef typename Id<TFragmentStore>::Type TId;
+	typedef typename TFragmentStore::TReadPos TReadPos;
+
+
+	// Write the first contig
+	TId contigId = 0;
+
+	// Sort the reads according to position
+	sortAlignedReads(fragStore.alignedReadStore, SortBeginPos());
+
+	// Write Header
+	_streamWrite(target,"{IUM\nacc:0\nsrc:\ngen> @@ [0,0]\n.\ncov:0.000\nsta:X\nfur:X\nabp:0\nbbp:0\n");
+	_streamWrite(target,"len:");
+	_streamPutInt(target, length((value(fragStore.contigStore, contigId)).seq));
+	_streamPut(target, '\n');
+	_streamWrite(target,"cns:\n.\nqlt:\n.\nfor:0\n");
+	_streamWrite(target,"nfr:");
+	_streamPutInt(target, length(fragStore.readStore));
+	_streamPut(target, '\n');
+
+	// Write reads
+	typedef typename Iterator<typename TFragmentStore::TAlignedReadStore>::Type TAlignIter;
+	TAlignIter alignIt = begin(fragStore.alignedReadStore);
+	TAlignIter alignItEnd = end(fragStore.alignedReadStore);
+	TSize offsetLeft = _min(alignIt->beginPos, alignIt->endPos);
+	for(;alignIt != alignItEnd; goNext(alignIt)) {
+		if (contigId != alignIt->contigId) continue;
+		_streamWrite(target,"{IMP\n");
+		_streamWrite(target,"typ:");
+		_streamPut(target, 'R');
+		_streamPut(target, '\n');
+		_streamWrite(target,"mid:");
+		_streamPutInt(target, alignIt->readId + 1);
+		_streamPut(target, '\n');
+		_streamWrite(target,"con:");
+		_streamPut(target, '0');
+		_streamPut(target, '\n');
+		_streamWrite(target,"pos:");
+		_streamPutInt(target, alignIt->beginPos - offsetLeft);
+		_streamPut(target, ',');
+		_streamPutInt(target, alignIt->endPos - offsetLeft);
+		_streamPut(target, '\n');
+		_streamWrite(target,"dln:0\n");
+		_streamWrite(target,"del:\n");
+		_streamWrite(target,"}\n");
+	}
+	_streamWrite(target,"}\n");
+}
+
 
 
 
