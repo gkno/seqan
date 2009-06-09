@@ -108,11 +108,11 @@ read(TFile & file,
 						_parse_skipLine(file, c);
 					} else if (fieldIdentifier == "mea") {
 						c = _streamGet(file);
-						libEl.mean = _parse_readNumber(file, c);
+						libEl.mean = _parse_readDouble(file, c);
 						_parse_skipLine(file, c);
 					} else if (fieldIdentifier == "std") {
 						c = _streamGet(file);
-						libEl.std = _parse_readNumber(file, c);
+						libEl.std = _parse_readDouble(file, c);
 						_parse_skipLine(file, c);
 					} else {
 						_parse_skipLine(file, c);
