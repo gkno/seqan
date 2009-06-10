@@ -139,27 +139,30 @@ getContigReads(StringSet<TValue, Owner<TStrSpec> >& strSet,
 
 	// Sort aligned reads according to contig id
 	sortAlignedReads(fragStore.alignedReadStore, SortContigId());
+	resize(strSet, length(fragStore.alignedReadStore));
 
 	// Retrieve all reads, limit them to the clear range and if required reverse complement them
 	typedef typename Iterator<typename TFragmentStore::TAlignedReadStore>::Type TAlignIter;
 	TAlignIter alignIt = ::std::lower_bound(begin(fragStore.alignedReadStore, Standard()), end(fragStore.alignedReadStore, Standard()), contigId, _SimpleLess<TAlignedElement, TId>());
 	TAlignIter alignItEnd = end(fragStore.alignedReadStore, Standard() );
-	for(TSize i = 0;alignIt != alignItEnd; goNext(alignIt), ++i) {
+	TSize numRead = 0;
+	for(;alignIt != alignItEnd; goNext(alignIt)) {
 		if (alignIt->contigId != contigId) break;
-		resize(strSet, i + 1);
 		TSize offset = _min(alignIt->beginPos, alignIt->endPos);
 		TReadPos begClr = 0;
 		TReadPos endClr = 0;
 		getClrRange(fragStore, value(alignIt), begClr, endClr);
-		value(strSet, i) = infix((value(fragStore.readStore, alignIt->readId)).seq, begClr, endClr);
-		TSize lenRead = length(value(strSet, i));
+		value(strSet, numRead) = infix((value(fragStore.readStore, alignIt->readId)).seq, begClr, endClr);
+		TSize lenRead = length(value(strSet, numRead));
 		if (alignIt->beginPos < alignIt->endPos) {
-			appendValue(startEndPos, TPosPair(offset, offset + lenRead));
+			appendValue(startEndPos, TPosPair(offset, offset + lenRead), Generous());
 		} else {
-			reverseComplementInPlace(value(strSet, i));
-			appendValue(startEndPos, TPosPair(offset + lenRead, offset));
+			reverseComplementInPlace(value(strSet, numRead));
+			appendValue(startEndPos, TPosPair(offset + lenRead, offset), Generous());
 		}
+		++numRead;
 	}
+	resize(strSet, numRead, Exact());
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -414,10 +417,9 @@ int main(int argc, const char *argv[]) {
 	TSize numberOfContigs = 0;
 	if (!consOpt.readsfile.empty()) {
 		// Load simple read file
-		std::fstream strmReads;
-		strmReads.open(consOpt.readsfile.c_str(), ::std::ios_base::in | ::std::ios_base::binary);
+		FILE* strmReads = fopen(consOpt.readsfile.c_str(), "rb");
 		bool success = _convertSimpleReadFile(strmReads, fragStore, consOpt.readsfile, consOpt.moveToFront);
-		strmReads.close();
+		fclose(strmReads);
 		if (!success) { printHelp(); exit(1); }
 		numberOfContigs = 1;
 	} else if (!consOpt.afgfile.empty()) {

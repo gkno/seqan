@@ -83,26 +83,6 @@ typedef Tag<NewickFormat_> const NewickFormat;
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TFile, typename TChar, typename TString>
-inline void
-_parse_readSequenceData(TFile & file,
-						TChar & c,
-						TString& str)
-{
-	SEQAN_CHECKPOINT
-
-	append(str, c);
-
-	// Read word
-	while (!_streamEOF(file)) {
-		c = _streamGet(file);
-		if (!_parse_isLetter(c)) break;
-		append(str, c);
-	}
-}
-
-
-
 //////////////////////////////////////////////////////////////////////////////
 
 

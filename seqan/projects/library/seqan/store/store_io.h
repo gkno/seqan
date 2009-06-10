@@ -814,7 +814,7 @@ _convertSimpleReadFile(TFile& file,
 
 	// Parse the file and convert the internal ids
 	TPos maxPos = 0;
-	TPos minPos = 0;
+	TPos minPos = SupremumValue<TPos>::VALUE;
 	TId count = 0;
 	TValue c;
 	if (_streamEOF(file)) return false;
@@ -835,7 +835,7 @@ _convertSimpleReadFile(TFile& file,
 
 			// Get the layout positions
 			alignEl.beginPos = _parse_readNumber(file, c);
-			if ((count == 0) || (alignEl.beginPos < minPos)) minPos = alignEl.beginPos;
+			if (alignEl.beginPos < minPos) minPos = alignEl.beginPos;
 			if (alignEl.beginPos > maxPos) maxPos = alignEl.beginPos;
 			c = _streamGet(file);
 			_parse_skipWhitespace(file, c);
@@ -865,13 +865,13 @@ _convertSimpleReadFile(TFile& file,
 					} else if (fdIdentifier == "eid") {
 						c = _streamGet(file);
 						while ((c != ',') && (c != ']')) {
-							appendValue(eid, c);
+							appendValue(eid, c, Generous());
 							c = _streamGet(file);
 						}
 					} else if (fdIdentifier == "qlt") {
 						c = _streamGet(file);
 						while ((c != ',') && (c != ']')) {
-							appendValue(qlt, c);
+							appendValue(qlt, c, Generous());
 							c = _streamGet(file);
 						}
 					} else {
@@ -888,12 +888,12 @@ _convertSimpleReadFile(TFile& file,
 				_parse_readSequenceData(file,c,readEl.seq);
 				_parse_skipWhitespace(file, c);
 			}
-
+			
 			// Set quality
-			typedef typename Iterator<typename TFragmentStore::TReadSeq>::Type TReadIter;
+			typedef typename Iterator<typename TFragmentStore::TReadSeq, Standard>::Type TReadIter;
 			typedef typename Iterator<String<char> >::Type TQualIter;
-			TReadIter begIt = begin(readEl.seq);
-			TReadIter begItEnd = begin(readEl.seq);
+			TReadIter begIt = begin(readEl.seq, Standard() );
+			TReadIter begItEnd = begin(readEl.seq, Standard() );
 			if (length(qlt)) {
 				TQualIter qualIt = begin(qlt);
 				TQualIter qualItEnd = end(qlt);
@@ -913,19 +913,18 @@ _convertSimpleReadFile(TFile& file,
 			// Set mate pair id
 			readEl.matePairId = fragId;
 
+			
 			// Insert the read
 			readIdMap.insert(std::make_pair(id, length(fragStore.readStore)));
-			appendValue(fragStore.readStore, readEl);
-			appendValue(fragStore.readNameStore, eid);
-
+			appendValue(fragStore.readStore, readEl, Generous());
+			appendValue(fragStore.readNameStore, eid, Generous());
 
 			// Insert an aligned read
 			alignEl.readId = id;
 			alignEl.pairMatchId =  fragId;
 			alignEl.contigId = 0;
 			alignEl.id = length(fragStore.alignedReadStore);
-			appendValue(fragStore.alignedReadStore, alignEl);
-
+			appendValue(fragStore.alignedReadStore, alignEl, Generous());
 			++count;
 		} else {
 			_parse_skipLine(file, c);
@@ -935,8 +934,7 @@ _convertSimpleReadFile(TFile& file,
 	// Read contig or reference sequence
 	TContigElement contigEl;
 	std::string fileName = filePath + 'S';
-	std::fstream strmRef;
-	strmRef.open(fileName.c_str(), ::std::ios_base::in | ::std::ios_base::binary);
+	FILE* strmRef = fopen(fileName.c_str(), "rb");
 	String<char> contigEid = "C0";
 	if (!_streamEOF(strmRef)) {
 		c = _streamGet(strmRef);
@@ -946,7 +944,7 @@ _convertSimpleReadFile(TFile& file,
 				clear(contigEid);
 				c = _streamGet(strmRef);
 				while ((c != '\r') && (c != '\n')) {
-					appendValue(contigEid, c);
+					appendValue(contigEid, c, Generous());
 					c = _streamGet(strmRef);
 				}
 				_parse_skipLine(strmRef, c);
@@ -960,20 +958,19 @@ _convertSimpleReadFile(TFile& file,
 			}
 		}
 	}
-	strmRef.close();
+	fclose(strmRef);
 	if (empty(contigEl.seq)) {
 		typedef typename TFragmentStore::TContigGapAnchor TContigGapAnchor;
-		if (moveToFront) appendValue(contigEl.gaps, TContigGapAnchor(0, maxPos - minPos));
-		else appendValue(contigEl.gaps, TContigGapAnchor(0, maxPos));
+		if (moveToFront) appendValue(contigEl.gaps, TContigGapAnchor(0, maxPos - minPos), Generous());
+		else appendValue(contigEl.gaps, TContigGapAnchor(0, maxPos), Generous());
 	}
-	appendValue(fragStore.contigStore, contigEl);
-	appendValue(fragStore.contigNameStore, contigEid);
+	appendValue(fragStore.contigStore, contigEl, Generous());
+	appendValue(fragStore.contigNameStore, contigEid, Generous());
 
 
 	// Read fragments
 	fileName = filePath + 'F';
-	std::fstream strmFrag;
-	strmFrag.open(fileName.c_str(), ::std::ios_base::in | ::std::ios_base::binary);
+	FILE* strmFrag = fopen(fileName.c_str(), "rb");
 	if (!_streamEOF(strmFrag)) {
 		c = _streamGet(strmFrag);
 		while (!_streamEOF(strmFrag)) {
@@ -1004,7 +1001,7 @@ _convertSimpleReadFile(TFile& file,
 							clear(eid);
 							c = _streamGet(strmFrag);
 							while ((c != ',') && (c != ']')) {
-								appendValue(eid, c);
+								appendValue(eid, c, Generous());
 								c = _streamGet(strmFrag);
 							}
 						} else {
@@ -1028,20 +1025,19 @@ _convertSimpleReadFile(TFile& file,
 				// Insert mate pair
 				if (matePairEl.readId[0] != matePairEl.readId[1]) {
 					frgIdMap.insert(std::make_pair(id, length(fragStore.matePairStore)));
-					appendValue(fragStore.matePairStore, matePairEl);
-					appendValue(fragStore.matePairNameStore, eid);
+					appendValue(fragStore.matePairStore, matePairEl, Generous());
+					appendValue(fragStore.matePairNameStore, eid, Generous());
 				}
 			} else {
 				_parse_skipLine(strmFrag, c);
 			}
 		}
 	}
-	strmFrag.close();
+	fclose(strmFrag);
 
 	// Read libraries
 	fileName = filePath + 'L';
-	std::fstream strmLib;
-	strmLib.open(fileName.c_str(), ::std::ios_base::in | ::std::ios_base::binary);
+	FILE* strmLib = fopen(fileName.c_str(), "rb");
 	if (!_streamEOF(strmLib)) {
 		c = _streamGet(strmLib);
 		while (!_streamEOF(strmLib)) {
@@ -1070,7 +1066,7 @@ _convertSimpleReadFile(TFile& file,
 							clear(eid);
 							c = _streamGet(strmLib);
 							while ((c != ',') && (c != ']')) {
-								appendValue(eid, c);
+								appendValue(eid, c, Generous());
 								c = _streamGet(strmLib);
 							}
 						} else {
@@ -1093,14 +1089,14 @@ _convertSimpleReadFile(TFile& file,
 
 				// Insert mate pair
 				libIdMap.insert(std::make_pair(id, length(fragStore.libraryStore)));
-				appendValue(fragStore.libraryStore, libEl);
-				appendValue(fragStore.libraryNameStore, eid);
+				appendValue(fragStore.libraryStore, libEl, Generous());
+				appendValue(fragStore.libraryNameStore, eid, Generous());
 			} else {
 				_parse_skipLine(strmLib, c);
 			}
 		}
 	}
-	strmLib.close();
+	fclose(strmLib);
 	
 	// Renumber all ids
 	typedef typename TIdMap::const_iterator TIdMapIter;

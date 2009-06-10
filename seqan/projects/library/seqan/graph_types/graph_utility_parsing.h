@@ -40,13 +40,13 @@ template<typename TFile, typename TChar>
 inline void 
 _parse_skipLine(TFile& file, TChar& c)
 {
-	if (c == '\n' || (c == '\r' && _streamPeek(file) != '\n')) {
+	if (c == '\n') {
 		c = _streamGet(file);
 		return;
 	}
 	while (!_streamEOF(file)) {
 		c = _streamGet(file);
-		if (c == '\n' || (c == '\r' && _streamPeek(file) != '\n')) break;
+		if (c == '\n') break;
 	}
 	c = _streamGet(file);
 }
@@ -57,10 +57,10 @@ template<typename TFile, typename TChar>
 inline void 
 _parse_skipWhitespace(TFile& file, TChar& c)
 {
-	if ((c!=' ') && (c != '\t') && (c != '\n') && (c != '\r')) return;
+	if ((unsigned) c > 32) return;
 	while (!_streamEOF(file)) {
 		c = _streamGet(file);
-		if ((c!=' ') && (c != '\t') && (c != '\n') && (c != '\r')) break;
+		if ((unsigned) c > 32) break;
 	}
 }
 
@@ -70,9 +70,7 @@ template<typename TChar>
 inline bool
 _parse_isDigit(TChar const c)
 {
-	//return (((unsigned) c >=  48) && ((unsigned) c <=  57));
-	return ((c == '0') || (c == '1') || (c == '2') || (c == '3') || (c == '4') || 
-		    (c == '5') || (c == '6') || (c == '7') || (c == '8') || (c == '9'));
+	return (((unsigned) c >  47) && ((unsigned) c <  58));
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -81,18 +79,7 @@ template<typename TChar>
 inline bool
 _parse_isLetter(TChar const c)
 {
-	//return ((((unsigned) c >=  97) && ((unsigned) c <=  122)) || (((unsigned) c >=  65) && ((unsigned) c <=  90)));
-	return ((c == 'a') || (c == 'b') || (c == 'c') || (c == 'd') || (c == 'e') || 
-			(c == 'f') || (c == 'g') || (c == 'h') || (c == 'i') || (c == 'j') ||
-			(c == 'k') || (c == 'l') || (c == 'm') || (c == 'n') || (c == 'o') || 
-			(c == 'p') || (c == 'q') || (c == 'r') || (c == 's') || (c == 't') ||
-			(c == 'u') || (c == 'v') || (c == 'w') || (c == 'x') || (c == 'y') || 
-			(c == 'z') || (c == 'A') || (c == 'B') || (c == 'C') || (c == 'D') ||
-			(c == 'E') || (c == 'F') || (c == 'G') || (c == 'H') || (c == 'I') || 
-			(c == 'J') || (c == 'K') || (c == 'L') || (c == 'M') || (c == 'N') ||
-			(c == 'O') || (c == 'P') || (c == 'Q') || (c == 'R') || (c == 'S') || 
-			(c == 'T') || (c == 'U') || (c == 'V') || (c == 'W') || (c == 'X') ||
-			(c == 'Y') || (c == 'Z'));
+	return ( (((unsigned) c > 64) && ((unsigned) c < 91)) || (((unsigned) c > 96) && ((unsigned) c < 123)) );
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -231,8 +218,25 @@ _parse_readWordUntilWhitespace(TFile& file, TChar& c)
 }
 
 
+//////////////////////////////////////////////////////////////////////////////
 
+template<typename TFile, typename TChar, typename TString>
+inline void
+_parse_readSequenceData(TFile & file,
+						TChar & c,
+						TString& str)
+{
+	SEQAN_CHECKPOINT
 
+	append(str, c);
+
+	// Read sequence
+	while (!_streamEOF(file)) {
+		c = _streamGet(file);
+		if (!_parse_isLetter(c)) break;
+		else append(str, c);
+	}
+}
 
 
 
