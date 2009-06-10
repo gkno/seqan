@@ -97,6 +97,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..signature:Index<TText[, TSpec]>
 ..param.TText:The text type.
 ...type:Class.String
+...type:Class.StringSet
 ...metafunction:Metafunction.Host
 ..param.TSpec:The index type.
 ...default:The result of @Metafunction.DefaultIndexSpec@
@@ -127,13 +128,16 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 /**
 .Metafunction.Fibre:
-..summary:Type of a specific bundle member (fibre).
+..summary:Type of a specific index member (fibre).
 ..signature:Fibre<TIndex, TSpec>::Type
 ..cat:Index
-..param.TIndex:The fibre container type.
-..param.TSpec:Type to specify the fibre.
+..param.TIndex:The index type.
+...type:Class.Index
+..param.TSpec:Tag to specify the fibre.
 ..returns:Fibre type.
 ..remarks:An @Class.Index@ can be seen as a bundle consisting of various fibres. In most cases this type is $String<Size<TIndex>::Type>$.
+The fibre interface was designed to unify the access to the members of different index data structures.
+To get a reference or the type of a specific fibre use @Function.getFibre@ or @Metafunction.Fibre@.		
 ..remarks:A @Metafunction.Fibre@ need not to be a real container. It can also be view (see @Tag.ESA Index Fibres.ESA_RawText@).
 */
 	// meta function to get the type of a bundle fibre
@@ -277,11 +281,11 @@ struct SAValue< StringSet<TString, TSpec> > {
 		Compressed
 	> Type;
 };
-..note:SAValue is the return type of various function, e.g. @Function.position@ for the @Class.Index@ @Class.Finder@ class, @Function.getOccurrence@, @Function.getOccurrences@ etc.
+..remarks.note:SAValue is the return type of various function, e.g. @Function.position@ for the @Class.Index@ @Class.Finder@ class, @Function.getOccurrence@, @Function.getOccurrences@ etc.
 You should always use the type of this meta-function to store the return values.
 If you want to write algorithms for both variants (local and global positions) you 
 should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Function.getSeqNo@ and @Function.getSeqOffset@.
-..note:If $TObject$ is an @Class.Index@, @Metafunction.Position@ returns the same value as $SAValue$. You can change the position type of an index by overloading $SAValue$, not @Metafunction.Position@.
+..remarks.note:If $TObject$ is an @Class.Index@, @Metafunction.Position@ returns the same value as $SAValue$. You can change the position type of an index by overloading $SAValue$, not @Metafunction.Position@.
 */
 	template <typename TObject>
 	struct SAValue:

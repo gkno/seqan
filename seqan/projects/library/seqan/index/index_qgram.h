@@ -30,29 +30,51 @@ namespace SEQAN_NAMESPACE_MAIN
 
 /**
 .Tag.QGram Index Fibres
-..summary:Tag to select a specific fibre (e.g. table, object, ...) of an @Spec.Index_QGram.q-gram@ index.
-..remarks:These tags can be used to get @Metafunction.Fibre.Fibres@ of an Enhanced Suffix Array based @Spec.Index_ESA.Index@.
+..summary:Tag to select a specific fibre (e.g. table, object, ...) of a @Spec.Index_QGram.q-gram Index@.
+..remarks:These tags can be used to get @Metafunction.Fibre.Fibres@ of a @Spec.Index_QGram.q-gram Index@.
 ..cat:Index
 
 ..tag.QGram_Text:The original text the index should be based on.
 
-..tag.QGram_RawText:The raw text the index is really based on.
+..tag.QGram_RawText:The concatenation of all text sequences.
 ...remarks:$QGram_Text$ and $QGram_RawText$ fibres are equal by default.
 They differ if the index text is a set of strings. Then, raw text is the concatenation of all strings in this set.
 
 ..tag.QGram_SA:The suffix array.
-...remarks:The suffix array contains the indices of all suffices of $QGram_RawText$ in lexicographical order.
+...remarks:Contains all occurrences of q-grams, s.t. the occurrences of a single q-gram are stored in a contiguous block (q-gram bucket).
+q-grams exceeding the end of the text are ignored.
+The beginning of each bucket can be determined by the q-gram directory ($QGram_Dir$, see below).
+...remarks:It corresponds to a suffix array which is sorted by the first q-gram.
 ...remarks:@Metafunction.Fibre@ returns a @Class.String@ over the alphabet of the @Metafunction.SAValue@ of $TIndex$.
 
 ..tag.QGram_Dir:The directory/hash table.
-...remarks:The directory contains the start indices of the q-gram buckets. A q-gram bucket is a contiguous interval in the suffix array ($QGram_SA$).
+...remarks:The directory contains for every possible q-gram hash value the start index of the q-gram bucket.
+A q-gram bucket is a contiguous interval in the suffix array ($QGram_SA$, see above).
 Each suffix in this interval begins with the same q-gram.
+The end index is the start index of the next bucket.
+...remarks:@Metafunction.Fibre@ returns a @Class.String@ over the alphabet of a size type.
+
+..tag.QGram_Counts:The counts array.
+...remarks:Contains the numbers of occurrences per sequence of each q-gram, s.t. the numbers of the same q-gram are stored in a contiguous block (q-gram count bucket).
+A bucket contains entries (seqNo,count) of sequences with at least one q-gram occurrence. q-grams exceeding the end of the text are ignored.
+The beginning of each count bucket can be determined by the q-gram counts directory ($QGram_CountsDir$, see below).
+...remarks:@Metafunction.Fibre@ returns a @Class.String@ over the alphabet of the @Metafunction.SAValue@ of $TIndex$.
+
+..tag.QGram_CountsDir:The counts directory.
+...remarks:The counts directory contains for every possible q-gram hash value the start index of the q-gram count bucket.
+A q-gram count bucket is a contiguous interval in the counts array ($QGram_Counts$, see above).
+The end index is the start index of the next bucket.
 ...remarks:@Metafunction.Fibre@ returns a @Class.String@ over the alphabet of a size type.
 
 ..tag.QGram_Shape:The shape the index is based on.
 ...remarks:The q-gram index needs an underlying @Class.Shape@. This shape can be gapped or ungapped.
 The number of '1's (relevant positions) in the shape determines $q$ and the size of the directory table.
+...remarks:Dynamic shapes (@Spec.SimpleShape@, @Spec.GenericShape@, ...) must be initialized before the index can be used.
 
+..tag.QGram_SADir:The union of suffix array and directory.
+...remarks:In most applications a q-gram index consisting of both of these table is required.
+To efficiently create them at once use this tag for @Function.indexRequire@ or @Function.indexCreate@.
+ 
 ..see:Metafunction.Fibre
 ..see:Function.getFibre
 ..see:Spec.Index_QGram
@@ -288,26 +310,26 @@ The number of '1's (relevant positions) in the shape determines $q$ and the size
 */
 
 	template <typename TPos, typename TIndex>
-	inline typename Reference<typename Fibre<TIndex, Fibre_Dir>::Type>::Type dirAt(TPos i, TIndex &index) {
+	inline typename Reference<typename Fibre<TIndex, Fibre_Dir>::Type>::Type 
+	dirAt(TPos i, TIndex &index) {
 		return value(getFibre(index, Fibre_Dir()), i);
 	}
 	template <typename TPos, typename TIndex>
-	inline typename Reference<typename Fibre<TIndex const, Fibre_Dir>::Type>::Type dirAt(TPos i, TIndex const &index) {
+	inline typename Reference<typename Fibre<TIndex const, Fibre_Dir>::Type>::Type 
+	dirAt(TPos i, TIndex const &index) {
 		return value(getFibre(index, Fibre_Dir()), i);
 	}
 
 
 //////////////////////////////////////////////////////////////////////////////
 /**
-.Function.indexShape:
-..summary:Shortcut for $getFibre(.., QGram_Shape)$.
+.Function.indexCounts:
+..summary:Shortcut for $getFibre(.., QGram_Counts)$.
 ..cat:Index
-..signature:indexShape(index)
+..signature:indexCounts(index)
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.Index_QGram
-..returns:Returns a reference to the @Class.Shape@ object of a q-gram index.
-Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
-...type:Class.Shape
+..returns:A reference to the @Tag.QGram Index Fibres.QGram_Counts@ fibre (counts array).
 */
 
 	template <typename TText, typename TSpec>
@@ -321,6 +343,17 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 		return getFibre(index, Fibre_Counts()); 
 	}
 
+//////////////////////////////////////////////////////////////////////////////
+/**
+.Function.indexCountsDir:
+..summary:Shortcut for $getFibre(.., QGram_CountsDir)$.
+..cat:Index
+..signature:indexCountsDir(index)
+..param.index:The @Class.Index@ object holding the fibre.
+...type:Spec.Index_QGram
+..returns:A reference to the @Tag.QGram Index Fibres.QGram_CountsDir@ fibre (counts directory).
+*/
+
 	template <typename TText, typename TSpec>
 	inline typename Fibre<Index<TText, TSpec>, Fibre_CountsDir>::Type & 
 	indexCountsDir(Index<TText, TSpec> &index) {
@@ -331,6 +364,19 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 	indexCountsDir(Index<TText, TSpec> const &index) {
 		return getFibre(index, Fibre_CountsDir()); 
 	}
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+.Function.indexShape:
+..summary:Shortcut for $getFibre(.., QGram_Shape)$.
+..cat:Index
+..signature:indexShape(index)
+..param.index:The @Class.Index@ object holding the fibre.
+...type:Spec.Index_QGram
+..returns:Returns a reference to the @Class.Shape@ object of a q-gram index.
+Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
+...type:Class.Shape
+*/
 
 	template <typename TText, typename TSpec>
 	inline typename Fibre<Index<TText, TSpec>, Fibre_Shape>::Type & 
@@ -1555,9 +1601,23 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 	}
 */
 
+
 //////////////////////////////////////////////////////////////////////////////
-// getKmerSimilarityMatrix
-//     for the whole StringSet
+/**
+.Function.getKmerSimilarityMatrix:
+..summary:Creates a matrix storing the number of common q-grams between all pairs of sequences.
+..cat:Index
+..signature:getKmerSimilarityMatrix(index, distMat[, seqSet])
+..param.index:A q-gram index.
+...type:Spec.Index_QGram
+..param.distMat:The resulting q-gram similarity matrix.
+...type:Concept.Container
+..param.seqSet:Contains sequence numbers if only a subset of sequences should be compared.
+...type:Concept.Container
+..remarks:$distMat$ will be resized to $seqCount*seqCount$, where $seqCount$ is the number of sequences in the index/in $seqSet$.
+The number of common q-grams between sequence $i$ and $j$ is stored at position $i*seqCount + j$.
+It sums up the minimum number of q-gram occurrences between both sequences for each q-gram.
+*/
 
 	template < typename TObject, typename TShapeSpec, typename TSpec, typename TDistMatrix >
 	inline void getKmerSimilarityMatrix(

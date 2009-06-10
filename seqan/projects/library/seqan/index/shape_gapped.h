@@ -35,8 +35,8 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.P1, P2, ..., Pn:Px is the distance of the x'th '1' to the next '1' in the shape.
 ...remarks:At most 20 parameters are allowed, so the maximal shape weight is 21.
 ..remarks:You can use this structure to define your one gapped shapes in conjunction with @Spec.GappedShape@.
-..note:The shape $1100101$ corresponds to $HardwiredShape<1,3,2>$.
-..note:The following predefined shapes are already available in $seqan/index/shape_predefined.h$:
+...note:The shape $1100101$ corresponds to $HardwiredShape<1,3,2>$.
+...note:The following predefined shapes are already available in $seqan/index/shape_predefined.h$:
 ..file:../projects/library/seqan/index/shape_predefined.h
 */
 

@@ -58,7 +58,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			blockLen2(_blockLen2)
 		{
 		SEQAN_CHECKPOINT
-			typedef typename Value< Shape<TValue, SimpleShape> >::Type	THValue;
+			typedef typename Value< Shape<TValue, OneGappedShape> >::Type	THValue;
 			factor1 = _intPow((THValue)ValueSize<TValue>::VALUE, weight(*this) - 1);
 			factor2 = _intPow((THValue)ValueSize<TValue>::VALUE, blockLen2);
 		}
@@ -267,8 +267,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		TShapeString const &bitmap)
 	{
 	SEQAN_CHECKPOINT
-		typedef typename Iterator<TShapeString const>::Type			TIter;
-		typedef typename Value< Shape<TValue, SimpleShape> >::Type	THValue;
+		typedef typename Iterator<TShapeString const>::Type				TIter;
+		typedef typename Value< Shape<TValue, OneGappedShape> >::Type	THValue;
 
 		TIter it = begin(bitmap, Standard());
 		TIter itEnd = end(bitmap, Standard());
@@ -313,9 +313,12 @@ namespace SEQAN_NAMESPACE_MAIN
 	reverse(Shape<TValue, OneGappedShape> &me)
 	{
 	SEQAN_CHECKPOINT
+		typedef typename Value< Shape<TValue, OneGappedShape> >::Type	THValue;
+
 		unsigned temp = me.blockLen1;
 		me.blockLen1 = me.blockLen2;
 		me.blockLen2 = temp;
+		me.factor2 = _intPow((THValue)ValueSize<TValue>::VALUE, me.blockLen2);
 	}
 	
 }	// namespace seqan
