@@ -436,20 +436,17 @@ int main(int argc, const char *argv[]) {
 	// Just convert the input file
 	if (consOpt.convert != 0) {
 		if (consOpt.convert == 1) {
-			std::fstream strmWrite;
-			strmWrite.open(consOpt.outfile.c_str(), ::std::ios_base::out | ::std::ios_base::trunc);
+			FILE* strmWrite = fopen(consOpt.outfile.c_str(), "w");
 			write(strmWrite, fragStore, Amos());	
-			strmWrite.close();
+			fclose(strmWrite);
 		} else if (consOpt.convert == 2) {
-			std::fstream strmWrite;
-			strmWrite.open(consOpt.outfile.c_str(), ::std::ios_base::out | ::std::ios_base::trunc);
+			FILE* strmWrite = fopen(consOpt.outfile.c_str(), "w");
 			_writeCeleraFrg(strmWrite, fragStore);	
-			strmWrite.close();
+			fclose(strmWrite);
 		} else if (consOpt.convert == 3) {
-			std::fstream strmWrite;
-			strmWrite.open(consOpt.outfile.c_str(), ::std::ios_base::out | ::std::ios_base::trunc);
+			FILE* strmWrite = fopen(consOpt.outfile.c_str(), "w");
 			_writeCeleraCgb(strmWrite, fragStore);	
-			strmWrite.close();
+			fclose(strmWrite);
 		}
 		return 0;
 	}
@@ -511,11 +508,11 @@ int main(int argc, const char *argv[]) {
 
 		// Output of aligned reads
 		if (consOpt.output == 0) {
-			std::fstream strm;
-			if (currentContig == 0) strm.open(consOpt.outfile.c_str(), ::std::ios_base::out | ::std::ios_base::trunc);
-			else strm.open(consOpt.outfile.c_str(), ::std::ios_base::out | ::std::ios_base::app);
+			FILE* strm;
+			if (currentContig == 0) strm = fopen(consOpt.outfile.c_str(), "w");
+			else strm = fopen(consOpt.outfile.c_str(), "a");
 			write(strm, readSet, alignmentMatrix, begEndPos, readBegEndRowPos, gappedConsensus, coverage, FastaReadFormat());
-			strm.close();
+			fclose(strm);
 
 			//// Debug code for CA
 			//mtRandInit();
@@ -552,10 +549,9 @@ int main(int argc, const char *argv[]) {
 	// Write the AMOS message file
 	if (consOpt.output == 1) {
 		// Write Amos
-		std::fstream strmWrite;
-		strmWrite.open(consOpt.outfile.c_str(), ::std::ios_base::out | ::std::ios_base::trunc);
+		FILE* strmWrite = fopen(consOpt.outfile.c_str(), "w");
 		write(strmWrite, fragStore, Amos());	
-		strmWrite.close();
+		fclose(strmWrite);
 	}
 
 	return 0;
