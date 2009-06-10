@@ -91,7 +91,8 @@ struct SwiftParameters {
 
 		TSize					firstIncrement;
 		TSize					lastIncrement;
-		TShortSize				counter;
+		TShortSize				counter;		// q-gram hits
+		TShortSize				threshold;		// at least threshold q-gram hits induce an approx match
 #ifdef SEQAN_DEBUG_SWIFT
 		TSize					_lastIncDiag;
 #endif
@@ -104,7 +105,8 @@ struct SwiftParameters {
 		typedef _TShortSize		TShortSize;
 
 		TSize					lastIncrement;
-		TShortSize				counter;
+		TShortSize				counter;		// q-gram hits
+		TShortSize				threshold;		// at least threshold q-gram hits induce an approx match
 #ifdef SEQAN_DEBUG_SWIFT
 		int						_lastIncDiag;
 #endif
@@ -118,9 +120,9 @@ struct SwiftParameters {
 
 		TSize			firstBucket;	// first _SwiftBucket entry in pattern.buckets
 		TSize			reuseMask;		// 2^ceil(log2(x)) reuse every x-th bucket)
+		TShortSize		threshold;		// at least threshold q-gram hits induce an approx match
 //		TShortSize		distanceCut;	// if lastIncrement is this far or farer away, threshold can't be reached
 		TShortSize		delta;			// buckets begin at multiples of delta
-		TShortSize		threshold;		// at least threshold q-gram hits induce an approx match
 		TShortSize		overlap;		// number of diagonals/columns a bucket shares with its neighbor
 		TShortSize		tabooLength;	// minimal genomic distance between q-gram hits
 		unsigned char	logDelta;		// log2(delta)
@@ -393,6 +395,36 @@ _swiftBucketNo(Pattern<TIndex, Swift<TSpec> > const &, TParams &bucketParams, TS
 		return bucketParams.firstBucket;
 }
 
+template <typename TIndex, typename TSpec, typename TSeqNo>
+inline int
+_qgramLemma(Pattern<TIndex, Swift<TSpec> > const & pattern, TSeqNo seqNo, int errors)
+{
+	// q-gram lemma: How many conserved q-grams we see at least?
+	// each error destroys at most <weight> many (gapped) q-grams
+	return 
+		sequenceLength(seqNo, host(pattern)) - length(indexShape(host(pattern))) + 1 
+		- errors * weight(indexShape(host(pattern)));
+}
+
+template <typename TIndex, typename TSpec, typename TSeqNo, typename TThreshold>
+inline void
+setMinThreshold(Pattern<TIndex, Swift<TSpec> > & pattern, TSeqNo seqNo, TThreshold thresh) 
+{
+	typedef Pattern<TIndex, Swift<TSpec> >						TPattern;
+	typedef typename TPattern::TBucketParams					TBucketParams;
+	typedef typename TPattern::TBucketString					TBucketString;
+	typedef typename Iterator<TBucketString, Standard>::Type	TBucketIterator;
+
+	TBucketParams &bucketParams = _swiftBucketParams(pattern, seqNo);
+	TBucketIterator it = begin(pattern.buckets, Standard()) + bucketParams.firstBucket;
+	TBucketIterator itEnd = it + bucketParams.reuseMask;
+
+	for (; it != itEnd; ++it)
+		if ((*it).threshold < thresh)
+			(*it).threshold = thresh;
+}
+
+
 template <typename TIndex, typename TFloat, typename _TSize, typename TSpec>
 inline void _patternInit(Pattern<TIndex, Swift<TSpec> > &pattern, TFloat errorRate, _TSize minLengthForAll) 
 {
@@ -474,7 +506,7 @@ inline void _patternInit(Pattern<TIndex, Swift<TSpec> > &pattern, TFloat errorRa
 
 			// q-gram lemma: How many conserved q-grams we see at least?
 			// (define a minimal threshold of 1)
-			int threshold = length + 1 - span * (errorsWC + 1);
+			int threshold = length - span + 1 - errorsWC * weight(pattern.shape);
 			if (threshold > pattern.params.minThreshold)
 				bucketParams.threshold = threshold;
 			else
@@ -554,6 +586,7 @@ inline void _patternInit(Pattern<TIndex, Swift<TSpec> > &pattern, TFloat errorRa
 		{
 			(*bkt).lastIncrement = (TBucketSize)0 - (TBucketSize)bucketParams.tabooLength;
 			(*bkt).counter = 0;
+			(*bkt).threshold = bucketParams.threshold;
 		}
 	}
 }
@@ -626,7 +659,7 @@ inline bool _swiftMultiProcessQGram(
 			(*bkt)._lastIncDiag = diag;
 #endif
 
-			if (hitCount == bucketParams.threshold)
+			if (hitCount == (*bkt).threshold)
 			{
 
 				TSize height = 0;
