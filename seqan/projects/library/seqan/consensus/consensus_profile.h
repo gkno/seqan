@@ -123,7 +123,21 @@ empty(ProfileType<TSourceValue, TSourceCount, TSourceSpec> const & source,
 	return true;
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStream, typename TValue, typename TCount, typename TSpec>
+TStream& operator<<(TStream& os, ProfileType<TValue, TCount, TSpec> const& rhs) {
+	typedef typename Size<ProfileType<TValue, TCount, TSpec> const>::Type TSize;
+	for(TSize i = 0; i<ValueSize<TValue>::VALUE; ++i) {
+		os << i << ':' << ' ' << rhs.count[i] << std::endl;
+	}
+	return os;
+}
+
+
 /*
+
+
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TSourceValue, typename TSourceCount, typename TSourceSpec>
@@ -173,17 +187,6 @@ convertImpl(Convert<TTarget, T> const,
 			ProfileType<TSourceValue, TSourceCount, TSourceSpec> const & source)
 {
 	return convertImpl(Convert<TTarget, T>(), TSourceValue(source));
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TStream, typename TValue, typename TCount, typename TSpec>
-TStream& operator<<(TStream& os, ProfileType<TValue, TCount, TSpec> const& rhs) {
-	typedef typename Size<ProfileType<TValue, TCount, TSpec> const>::Type TSize;
-	for(TSize i = 0; i<ValueSize<TValue>::VALUE; ++i) {
-		os << i << ':' << ' ' << rhs.count[i] << std::endl;
-	}
-	return os;
 }
 
 template <typename TValue, typename TSpec, typename TSourceValue, typename TSourceCount, typename TSourceSpec>

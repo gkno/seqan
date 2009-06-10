@@ -59,8 +59,9 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 	
 	// Create the consensus sequence
 	typedef ModifiedAlphabet<TAlphabet, ModExpand<'-'> > TProfileChar;
-	TProfileChar gapChar = '-';
-	TSize gapPos = ordValue(gapChar);
+	//TProfileChar gapChar = '-';
+	//TSize gapPos = ordValue(gapChar);
+	TSize gapPos = ValueSize<TAlphabet>::VALUE;
 	typedef ProfileType<TProfileChar> TProfile;
 	typedef String<TProfile> TProfileString;
 	typedef typename Iterator<TProfileString, Standard>::Type TConsIter;
@@ -118,8 +119,8 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 		}
 		score += (sumCount - maxCount);
 	}
-/*
 
+/*
 	// Remove each fragment and realign it to the profile
 	alignIt = begin(fragStore.alignedReadStore, Standard() );
 	for(;alignIt != alignItEnd; goNext(alignIt)) {
@@ -127,6 +128,7 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 
 		// Initialize the consensus of the band
 		TProfileString bandConsensus;
+		TReadSeq myRead;
 		TReadPos offset = _min(alignIt->beginPos, alignIt->endPos);
 		TReadPos bandOffset = 0;
 		if (bandwidth < offset) {
@@ -138,8 +140,7 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 		}
 
 
-		// Remove sequence from profile
-		goFurther(itCons, _min(alignIt->beginPos, alignIt->endPos));
+		// Remove sequence from profile and add to the consensus
 		typedef typename Iterator<TReadSeq, Standard>::Type TReadIter;
 		TReadIter itRead = begin(value(fragStore.readStore, alignIt->readId).seq, Standard() );
 		TReadIter itReadEnd = end(value(fragStore.readStore, alignIt->readId).seq, Standard() );
@@ -165,6 +166,7 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 			for(;old < limit; ++old, goNext(itRead)) {
 				--(value(itCons)).count[ordValue(value(itRead))];
 				if (!empty(value(itCons), gapPos)) appendValue(bandConsensus, value(itCons), Generous() );
+				appendValue(myRead, value(itRead), Generous());
 				goNext(itCons);
 			}
 			for(;diff < newDiff; ++diff) {
@@ -177,9 +179,24 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 			for(;itRead!=itReadEnd;goNext(itRead)) {
 				--(value(itCons)).count[ordValue(value(itRead))];
 				if (!empty(value(itCons), gapPos)) appendValue(bandConsensus, value(itCons), Generous() );
+				appendValue(myRead, value(itRead), Generous());
 				goNext(itCons);
 			}
 		}
+
+		// Go further up to the bandwidth
+		itConsEnd = end(consensus, Standard() );
+		for(TReadPos iPos = 0; ((itCons != itConsEnd) && (iPos < bandwidth)); goNext(itCons), ++iPos) {
+			appendValue(bandConsensus, value(itCons), Generous() );
+		}
+
+
+		for(TSize i = 0; i<length(bandConsensus); ++i) {
+			std::cout << bandConsensus[i] << std::endl;
+		}
+		std::cout << myRead << std::endl;
+
+
 
 
 	}
