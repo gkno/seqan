@@ -26,10 +26,11 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 
-template<typename TSpec, typename TConfig, typename TId>
+template<typename TSpec, typename TConfig, typename TId, typename TBandwidth>
 inline void 
 reAlign(FragmentStore<TSpec, TConfig>& fragStore,
-		TId& contigId)
+		TId const contigId,
+		TBandwidth const bandwidth)
 {
 	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
 	typedef typename Size<TFragmentStore>::Type TSize;
@@ -40,16 +41,16 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 	
 	// Copy all reads belonging to this contig
 	TAlignedReadStore contigReads;
-	typedef typename Iterator<typename TFragmentStore::TAlignedReadStore>::Type TAlignIter;
-	TAlignIter alignIt = begin(fragStore.alignedReadStore);
-	TAlignIter alignItEnd = end(fragStore.alignedReadStore);
+	typedef typename Iterator<typename TFragmentStore::TAlignedReadStore, Standard>::Type TAlignIter;
+	TAlignIter alignIt = begin(fragStore.alignedReadStore, Standard() );
+	TAlignIter alignItEnd = end(fragStore.alignedReadStore, Standard() );
 	TReadPos maxPos = 0;
 	TReadPos minPos = SupremumValue<TReadPos>::VALUE;
 	for(;alignIt != alignItEnd; goNext(alignIt)) {
 		if (alignIt->contigId == contigId) {
 			if (_min(alignIt->beginPos, alignIt->endPos) < minPos) minPos = _min(alignIt->beginPos, alignIt->endPos);
 			if (_max(alignIt->beginPos, alignIt->endPos) > maxPos) maxPos = _max(alignIt->beginPos, alignIt->endPos);
-			appendValue(contigReads, value(alignIt));
+			appendValue(contigReads, value(alignIt), Generous() );
 		}
 	}
 
@@ -57,26 +58,28 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 	sortAlignedReads(fragStore.alignedReadStore, SortBeginPos());
 	
 	// Create the consensus sequence
-	TSize gapPos = ValueSize<TAlphabet>::VALUE;
-	typedef ProfileType<ModifiedAlphabet<TAlphabet, ModExpand<'-'> > > TProfileAlphabet;
-	typedef String<TProfileAlphabet> TProfileString;
+	typedef ModifiedAlphabet<TAlphabet, ModExpand<'-'> > TProfileChar;
+	TProfileChar gapChar = '-';
+	TSize gapPos = ordValue(gapChar);
+	typedef ProfileType<TProfileChar> TProfile;
+	typedef String<TProfile> TProfileString;
 	typedef typename Iterator<TProfileString, Standard>::Type TConsIter;
 	TProfileString consensus;
-	fill(consensus, maxPos - minPos, TProfileAlphabet());
+	fill(consensus, maxPos - minPos, TProfile());
 	TConsIter itCons = begin(consensus, Standard() );
 	TConsIter itConsEnd = end(consensus, Standard() );
-	alignIt = begin(fragStore.alignedReadStore);
+	alignIt = begin(fragStore.alignedReadStore, Standard() );
 	for(;alignIt != alignItEnd; goNext(alignIt)) {
-		itCons = begin(consensus);
+		itCons = begin(consensus, Standard() );
 		goFurther(itCons, _min(alignIt->beginPos, alignIt->endPos));
 
 		if (alignIt->beginPos > alignIt->endPos) reverseComplementInPlace(value(fragStore.readStore, alignIt->readId).seq);
-		typedef typename Iterator<TReadSeq>::Type TReadIter;
-		TReadIter itRead = begin(value(fragStore.readStore, alignIt->readId).seq);
-		TReadIter itReadEnd = end(value(fragStore.readStore, alignIt->readId).seq);
-		typedef typename Iterator<String<typename TFragmentStore::TReadGapAnchor> >::Type TReadGapsIter;
-		TReadGapsIter itGaps = begin(alignIt->gaps);
-		TReadGapsIter itGapsEnd = end(alignIt->gaps);
+		typedef typename Iterator<TReadSeq, Standard>::Type TReadIter;
+		TReadIter itRead = begin(value(fragStore.readStore, alignIt->readId).seq, Standard() );
+		TReadIter itReadEnd = end(value(fragStore.readStore, alignIt->readId).seq, Standard() );
+		typedef typename Iterator<String<typename TFragmentStore::TReadGapAnchor>, Standard>::Type TReadGapsIter;
+		TReadGapsIter itGaps = begin(alignIt->gaps, Standard() );
+		TReadGapsIter itGapsEnd = end(alignIt->gaps, Standard() );
 
 		TReadPos old = 0;
 		int diff = 0;
@@ -115,9 +118,72 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 		}
 		score += (sumCount - maxCount);
 	}
+/*
 
-	
+	// Remove each fragment and realign it to the profile
+	alignIt = begin(fragStore.alignedReadStore, Standard() );
+	for(;alignIt != alignItEnd; goNext(alignIt)) {
+		itCons = begin(consensus, Standard() );
 
+		// Initialize the consensus of the band
+		TProfileString bandConsensus;
+		TReadPos offset = _min(alignIt->beginPos, alignIt->endPos);
+		TReadPos bandOffset = 0;
+		if (bandwidth < offset) {
+			bandOffset = offset - bandwidth;
+			goFurther(itCons, bandOffset);
+		}
+		for(TReadPos iPos = bandOffset; iPos < offset; goNext(itCons), ++iPos) {
+			appendValue(bandConsensus, value(itCons), Generous() );
+		}
+
+
+		// Remove sequence from profile
+		goFurther(itCons, _min(alignIt->beginPos, alignIt->endPos));
+		typedef typename Iterator<TReadSeq, Standard>::Type TReadIter;
+		TReadIter itRead = begin(value(fragStore.readStore, alignIt->readId).seq, Standard() );
+		TReadIter itReadEnd = end(value(fragStore.readStore, alignIt->readId).seq, Standard() );
+		typedef typename Iterator<String<typename TFragmentStore::TReadGapAnchor>, Standard>::Type TReadGapsIter;
+		TReadGapsIter itGaps = begin(alignIt->gaps, Standard() );
+		TReadGapsIter itGapsEnd = end(alignIt->gaps, Standard() );
+		TReadPos old = 0;
+		int diff = 0;
+		bool clippedEnd = false;
+		if ((itGaps != itGapsEnd) && (itGaps->gapPos == 0)) {
+			old = itGaps->seqPos;
+			goFurther(itRead, old);
+			diff -= old;
+			goNext(itGaps);
+		}
+		for(;itGaps != itGapsEnd; goNext(itGaps)) {
+			TReadPos limit = itGaps->seqPos;
+			int newDiff = (itGaps->gapPos - limit);
+			if (diff > newDiff) {
+				limit -= (diff - newDiff);
+				clippedEnd = true;
+			}
+			for(;old < limit; ++old, goNext(itRead)) {
+				--(value(itCons)).count[ordValue(value(itRead))];
+				if (!empty(value(itCons), gapPos)) appendValue(bandConsensus, value(itCons), Generous() );
+				goNext(itCons);
+			}
+			for(;diff < newDiff; ++diff) {
+				--(value(itCons)).count[gapPos];
+				if (!empty(value(itCons), gapPos)) appendValue(bandConsensus, value(itCons), Generous() );
+				goNext(itCons);
+			}
+		}
+		if (!clippedEnd) {
+			for(;itRead!=itReadEnd;goNext(itRead)) {
+				--(value(itCons)).count[ordValue(value(itRead))];
+				if (!empty(value(itCons), gapPos)) appendValue(bandConsensus, value(itCons), Generous() );
+				goNext(itCons);
+			}
+		}
+
+
+	}
+	*/
 }
 
 

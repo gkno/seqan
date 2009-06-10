@@ -454,7 +454,7 @@ int main(int argc, const char *argv[]) {
 	// Iterate over all contigs
 	for(TSize currentContig = 0; currentContig < numberOfContigs; ++currentContig) {
 
-		//reAlign(fragStore, currentContig);
+		//reAlign(fragStore, currentContig, 4);
 		//exit(0);
 	
 // Profiling
