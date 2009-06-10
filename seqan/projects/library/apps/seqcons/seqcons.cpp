@@ -424,10 +424,9 @@ int main(int argc, const char *argv[]) {
 		numberOfContigs = 1;
 	} else if (!consOpt.afgfile.empty()) {
 		// Load Amos message file
-		std::fstream strmReads;
-		strmReads.open(consOpt.afgfile.c_str(), ::std::ios_base::in | ::std::ios_base::binary);
+		FILE* strmReads = fopen(consOpt.afgfile.c_str(), "rb");
 		read(strmReads, fragStore, Amos());	
-		strmReads.close();
+		fclose(strmReads);
 		numberOfContigs = length(fragStore.contigStore);
 	} else {
 		printHelp();

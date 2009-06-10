@@ -159,7 +159,7 @@ read(TFile & file,
 					} else if (fieldIdentifier == "eid") {
 						c = _streamGet(file);
 						while ((c != '\n') && (c != '\r')) {
-							appendValue(eid, c);
+							appendValue(eid, c, Generous());
 							c = _streamGet(file);
 						}
 						_parse_skipLine(file, c);
@@ -176,8 +176,8 @@ read(TFile & file,
 					}
 				}
 				libIdMap.insert(std::make_pair(id, length(fragStore.libraryStore)));
-				appendValue(fragStore.libraryStore, libEl);
-				appendValue(fragStore.libraryNameStore, eid);
+				appendValue(fragStore.libraryStore, libEl, Generous() );
+				appendValue(fragStore.libraryNameStore, eid, Generous() );
 			} else if (blockIdentifier == "FRG") {  // Fragment block
 				TMatePairElement matePairEl;
 				TId id = 0;
@@ -194,7 +194,7 @@ read(TFile & file,
 					} else if (fieldIdentifier == "eid") {
 						c = _streamGet(file);
 						while ((c != '\n') && (c != '\r')) {
-							appendValue(eid, c);
+							appendValue(eid, c, Generous() );
 							c = _streamGet(file);
 						}
 						_parse_skipLine(file, c);
@@ -216,8 +216,8 @@ read(TFile & file,
 				// Only insert valid mate pairs
 				if (foundRds) {
 					frgIdMap.insert(std::make_pair(id, length(fragStore.matePairStore)));
-					appendValue(fragStore.matePairStore, matePairEl);
-					appendValue(fragStore.matePairNameStore, eid);
+					appendValue(fragStore.matePairStore, matePairEl, Generous() );
+					appendValue(fragStore.matePairNameStore, eid, Generous() );
 				}
 			} else if (blockIdentifier == "RED") {   // Read block
 				TReadStoreElement readEl;
@@ -235,7 +235,7 @@ read(TFile & file,
 					} else if (fieldIdentifier == "eid") {
 						c = _streamGet(file);
 						while ((c != '\n') && (c != '\r')) {
-							appendValue(eid, c);
+							appendValue(eid, c, Generous() );
 							c = _streamGet(file);
 						}
 						_parse_skipLine(file, c);
@@ -255,7 +255,7 @@ read(TFile & file,
 						c = _streamGet(file);
 						_parse_skipWhitespace(file, c);
 						while (c != '.') {
-							if ((c!=' ') && (c != '\t') && (c != '\n') && (c != '\r')) appendValue(qual, c);
+							if ((c!=' ') && (c != '\t') && (c != '\n') && (c != '\r')) appendValue(qual, c, Generous() );
 							c = _streamGet(file);
 						}
 					} else {
@@ -263,17 +263,17 @@ read(TFile & file,
 					}
 				}
 				// Set quality
-				typedef typename Iterator<typename TFragmentStore::TReadSeq>::Type TReadIter;
+				typedef typename Iterator<typename TFragmentStore::TReadSeq, Standard>::Type TReadIter;
 				typedef typename Iterator<String<char> >::Type TQualIter;
-				TReadIter begIt = begin(readEl.seq);
+				TReadIter begIt = begin(readEl.seq, Standard() );
 				TQualIter qualIt = begin(qual);
 				TQualIter qualItEnd = end(qual);
 				for(;qualIt != qualItEnd; goNext(qualIt), goNext(begIt)) assignQualityValue(value(begIt), value(qualIt));
 
 				// Insert the read
 				readIdMap.insert(std::make_pair(id, length(fragStore.readStore)));
-				appendValue(fragStore.readStore, readEl);
-				appendValue(fragStore.readNameStore, eid);
+				appendValue(fragStore.readStore, readEl, Generous() );
+				appendValue(fragStore.readNameStore, eid, Generous() );
 			} else if (blockIdentifier == "CTG") {   // Contig block
 				TContigElement contigEl;
 				TSize fromAligned = length(fragStore.alignedReadStore);
@@ -315,7 +315,7 @@ read(TFile & file,
 								while (c != '.') {
 									if ((c!=' ') && (c != '\t') && (c != '\n') && (c != '\r')) {
 										TSize nextGap = _parse_readNumber(file, c);
-										appendValue(gaps, nextGap);
+										appendValue(gaps, nextGap, Generous() );
 									}
 									c = _streamGet(file);
 								}
@@ -336,10 +336,11 @@ read(TFile & file,
 						else if ((clr1 > clr2) && (clr1 < lenRead)) offset = lenRead - clr1;
 						int diff = -1 * (int) (offset);
 						// Clipped begin
-						if (offset != 0) appendValue(alignEl.gaps, TContigGapAnchor(offset, 0));
+						if (offset != 0) appendValue(alignEl.gaps, TContigGapAnchor(offset, 0), Generous() );
 						// Internal gaps
-						typedef typename Iterator<String<TContigPos> >::Type TPosIter;
-						TPosIter posIt = begin(gaps); TPosIter posItEnd = end(gaps);
+						typedef typename Iterator<String<TContigPos>, Standard>::Type TPosIter;
+						TPosIter posIt = begin(gaps, Standard() ); 
+						TPosIter posItEnd = end(gaps, Standard() );
 						TContigPos lastGap = 0;
 						TSize gapLen = 0;
 						TSize totalGapLen = 0;
@@ -354,20 +355,20 @@ read(TFile & file,
 								++diff;
 							}
 							else {
-								appendValue(alignEl.gaps, TContigGapAnchor(offset + lastGap, offset + lastGap + diff));								
+								appendValue(alignEl.gaps, TContigGapAnchor(offset + lastGap, offset + lastGap + diff), Generous() );
 								gapLen = 1; ++totalGapLen;
 								lastGap = value(posIt);
 								++diff;
 							}
 						}
-						if (gapLen > 0) appendValue(alignEl.gaps, TContigGapAnchor(offset + lastGap, offset + lastGap + diff));
+						if (gapLen > 0) appendValue(alignEl.gaps, TContigGapAnchor(offset + lastGap, offset + lastGap + diff), Generous() );
 						// Clipped end
 						if ((clr1 < clr2) && (clr2 < lenRead)) {
 							diff -= (lenRead - clr2);				
-							appendValue(alignEl.gaps, TContigGapAnchor(lenRead, lenRead + diff));
+							appendValue(alignEl.gaps, TContigGapAnchor(lenRead, lenRead + diff), Generous() );
 						} else if ((clr1 > clr2) && (clr2 > 0)) {
 							diff -= clr2;
-							appendValue(alignEl.gaps, TContigGapAnchor(lenRead, lenRead + diff));
+							appendValue(alignEl.gaps, TContigGapAnchor(lenRead, lenRead + diff), Generous() );
 						}
 						
 						// Set begin and end position
@@ -381,7 +382,7 @@ read(TFile & file,
 
 						// Append new align fragment, note: contigId must still be set
 						alignEl.id = length(fragStore.alignedReadStore);
-						appendValue(fragStore.alignedReadStore, alignEl);
+						appendValue(fragStore.alignedReadStore, alignEl, Generous() );
 					} else {
 						clear(fieldIdentifier);
 						_parse_readIdentifier(file, fieldIdentifier, c);
@@ -392,7 +393,7 @@ read(TFile & file,
 						} else if (fieldIdentifier == "eid") {
 							c = _streamGet(file);
 							while ((c != '\n') && (c != '\r')) {
-								appendValue(eid, c);
+								appendValue(eid, c, Generous() );
 								c = _streamGet(file);
 							}
 							_parse_skipLine(file, c);
@@ -410,7 +411,7 @@ read(TFile & file,
 							_parse_skipWhitespace(file, c);
 							while (c != '.') {
 								if ((c!=' ') && (c != '\t') && (c != '\n') && (c != '\r')) {
-									appendValue(contigQual, c);
+									appendValue(contigQual, c, Generous() );
 								}
 								c = _streamGet(file);
 							}
@@ -435,16 +436,16 @@ read(TFile & file,
 					if (value(seqIt) == gapChar) gapOpen = true;				
 					else {
 						if (gapOpen) {
-							appendValue(contigEl.gaps, TContigGapAnchor(ungappedPos, gappedPos));
+							appendValue(contigEl.gaps, TContigGapAnchor(ungappedPos, gappedPos), Generous() );
 							gapOpen = false;
 						}
 						Dna5Q letter = value(seqIt);
 						assignQualityValue(letter, value(qualIt));
-						appendValue(contigEl.seq, letter);
+						appendValue(contigEl.seq, letter, Generous() );
 						++ungappedPos;
 					}
 				}
-				if (gapOpen) appendValue(contigEl.gaps, TContigGapAnchor(ungappedPos, gappedPos));
+				if (gapOpen) appendValue(contigEl.gaps, TContigGapAnchor(ungappedPos, gappedPos), Generous() );
 
 				// Set the contigId in all aligned reads
 				TSize toAligned = length(fragStore.alignedReadStore);
@@ -454,8 +455,8 @@ read(TFile & file,
 				}
 
 				// Insert the contig
-				appendValue(fragStore.contigStore, contigEl);
-				appendValue(fragStore.contigNameStore, eid);
+				appendValue(fragStore.contigStore, contigEl, Generous() );
+				appendValue(fragStore.contigNameStore, eid, Generous() );
 			} else {
 				_parse_skipLine(file, c);
 			}	
@@ -537,9 +538,9 @@ write(TFile & target,
 	_streamWrite(target,"{UNV\niid:1\neid:seqan\ncom:\nafg file created with SeqAn\n.\n}\n");
 	
 	// Write Libraries
-	typedef typename Iterator<typename TFragmentStore::TLibraryStore>::Type TLibIter;
-	TLibIter libIt = begin(fragStore.libraryStore);
-	TLibIter libItEnd = end(fragStore.libraryStore);
+	typedef typename Iterator<typename TFragmentStore::TLibraryStore, Standard>::Type TLibIter;
+	TLibIter libIt = begin(fragStore.libraryStore, Standard() );
+	TLibIter libItEnd = end(fragStore.libraryStore, Standard() );
 	bool noNamesPresent = (length(fragStore.libraryNameStore) == 0);
 	for(TSize idCount = 0;libIt != libItEnd; goNext(libIt), ++idCount) {
 		_streamWrite(target,"{LIB\n");
@@ -563,9 +564,9 @@ write(TFile & target,
 	}
 
 	// Write Fragments / mate pairs
-	typedef typename Iterator<typename TFragmentStore::TMatePairStore>::Type TMateIter;
-	TMateIter mateIt = begin(fragStore.matePairStore);
-	TMateIter mateItEnd = end(fragStore.matePairStore);
+	typedef typename Iterator<typename TFragmentStore::TMatePairStore, Standard>::Type TMateIter;
+	TMateIter mateIt = begin(fragStore.matePairStore, Standard() );
+	TMateIter mateItEnd = end(fragStore.matePairStore, Standard() );
 	noNamesPresent = (length(fragStore.matePairNameStore) == 0);
 	for(TSize idCount = 0;mateIt != mateItEnd; goNext(mateIt), ++idCount) {
 		_streamWrite(target,"{FRG\n");
@@ -594,9 +595,9 @@ write(TFile & target,
 	typedef Pair<typename TFragmentStore::TReadPos, typename TFragmentStore::TReadPos> TClrRange;
 	String<TClrRange> clrRange;
 	resize(clrRange, length(fragStore.readStore));
-	typedef typename Iterator<typename TFragmentStore::TAlignedReadStore>::Type TAlignIter;
-	TAlignIter alignIt = begin(fragStore.alignedReadStore);
-	TAlignIter alignItEnd = end(fragStore.alignedReadStore);
+	typedef typename Iterator<typename TFragmentStore::TAlignedReadStore, Standard>::Type TAlignIter;
+	TAlignIter alignIt = begin(fragStore.alignedReadStore, Standard() );
+	TAlignIter alignItEnd = end(fragStore.alignedReadStore, Standard() );
 	for(;alignIt != alignItEnd; goNext(alignIt)) {
 		typename TFragmentStore::TReadPos begClr = 0;
 		typename TFragmentStore::TReadPos endClr = 0;
@@ -605,9 +606,9 @@ write(TFile & target,
 	}
 
 	// Write reads
-	typedef typename Iterator<typename TFragmentStore::TReadStore>::Type TReadIter;
-	TReadIter readIt = begin(fragStore.readStore);
-	TReadIter readItEnd = end(fragStore.readStore);
+	typedef typename Iterator<typename TFragmentStore::TReadStore, Standard>::Type TReadIter;
+	TReadIter readIt = begin(fragStore.readStore, Standard() );
+	TReadIter readItEnd = end(fragStore.readStore, Standard() );
 	noNamesPresent = (length(fragStore.readNameStore) == 0);
 	for(TSize idCount = 0;readIt != readItEnd; goNext(readIt), ++idCount) {
 		_streamWrite(target,"{RED\n");
@@ -655,9 +656,9 @@ write(TFile & target,
 	sortAlignedReads(fragStore.alignedReadStore, SortContigId());
 
 	// Write Contigs
-	typedef typename Iterator<typename TFragmentStore::TContigStore>::Type TContigIter;
-	TContigIter contigIt = begin(fragStore.contigStore);
-	TContigIter contigItEnd = end(fragStore.contigStore);
+	typedef typename Iterator<typename TFragmentStore::TContigStore, Standard>::Type TContigIter;
+	TContigIter contigIt = begin(fragStore.contigStore, Standard() );
+	TContigIter contigItEnd = end(fragStore.contigStore, Standard() );
 	alignIt = begin(fragStore.alignedReadStore);
 	alignItEnd = end(fragStore.alignedReadStore);
 	noNamesPresent = (length(fragStore.contigNameStore) == 0);
@@ -690,14 +691,14 @@ write(TFile & target,
 				_streamPut(target, value(seqContigIt));
 				Ascii c = ' ';
 				convertQuality(c, getQualityValue(value(seqContigIt)));
-				appendValue(qlt, c);
+				appendValue(qlt, c, Generous() );
 				goNext(seqContigIt);++mySeqPos;
 			}
 			for(int i = 0; i < ((int) itGaps->gapPos - (int) itGaps->seqPos) - diff; ++i) {
 				if ((k % 60 == 0) && (k != 0)) _streamPut(target, '\n');
 				++k;
 				_streamPut(target, gapChar);
-				appendValue(qlt, '0');
+				appendValue(qlt, '0', Generous() );
 			}
 			diff = (itGaps->gapPos - itGaps->seqPos);
 		}
@@ -707,7 +708,7 @@ write(TFile & target,
 			_streamPut(target, value(seqContigIt));
 			Ascii c = ' ';
 			convertQuality(c, getQualityValue(value(seqContigIt)));
-			appendValue(qlt, c);
+			appendValue(qlt, c, Generous() );
 		}
 		_streamWrite(target, "\n.\n");
 		_streamWrite(target,"qlt:\n");
@@ -739,7 +740,7 @@ write(TFile & target,
 			String<unsigned int> gaps;
 			for(;itGaps != itGapsEnd; goNext(itGaps)) {
 				for(int i = 0; i< diff - ((int) itGaps->seqPos - (int) itGaps->gapPos); ++i) {
-					appendValue(gaps, itGaps->seqPos - clr1);
+					appendValue(gaps, itGaps->seqPos - clr1, Generous() );
 				}
 				// Clipped sequence
 				if (diff - ((int) itGaps->seqPos - (int) itGaps->gapPos) < 0) {
