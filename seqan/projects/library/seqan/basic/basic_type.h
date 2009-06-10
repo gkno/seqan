@@ -528,7 +528,7 @@ struct _Pointer<T *>
 template <typename T>
 struct _Pointer<T * const>
 {
-	typedef T * const Type;
+	typedef T * Type;
 };
 
 template <typename T, size_t I>
