@@ -19,18 +19,18 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ==========================================================================*/
 
-#define SEQAN_PROFILE			// enable time measuring
-//#define SEQAN_DEBUG_SWIFT		// test SWIFT correctness and print bucket parameters
-//#define RAZERS_DEBUG			// print verification regions
-#define RAZERS_PRUNE_QGRAM_INDEX
-#define RAZERS_CONCATREADS		// use <ConcatDirect> StringSet to store reads
-#define RAZERS_MEMOPT			// optimize memory consumption
-#define RAZERS_MASK_READS		// remove matches with max-hits optimal hits on-the-fly
-//#define NO_PARAM_CHOOSER
-//#define RAZERS_PARALLEL			// parallelize using Intel's Threading Building Blocks
-#define RAZERS_MATEPAIRS
+#define SEQAN_PROFILE					// enable time measuring
+//#define SEQAN_DEBUG_SWIFT				// test SWIFT correctness and print bucket parameters
+//#define RAZERS_DEBUG					// print verification regions
+#define RAZERS_PRUNE_QGRAM_INDEX		// ignore highly abundant q-grams
+#define RAZERS_CONCATREADS				// use <ConcatDirect> StringSet to store reads
+#define RAZERS_MEMOPT					// optimize memory consumption
+#define RAZERS_MASK_READS				// remove matches with max-hits optimal hits on-the-fly
+//#define NO_PARAM_CHOOSER				// disable loss-rate parameter choosing
+//#define RAZERS_PARALLEL				// parallelize using Intel's Threading Building Blocks
+#define RAZERS_MATEPAIRS				// enable paired-end matching
 //#define RAZERS_DIRECT_MAQ_MAPPING
-//#define SEQAN_USE_SSE2_WORDS	// use SSE2 128-bit integers for MyersBitVector
+//#define SEQAN_USE_SSE2_WORDS			// use SSE2 128-bit integers for MyersBitVector
 
 #include "seqan/platform.h"
 #ifdef PLATFORM_WINDOWS
@@ -190,7 +190,7 @@ int mapReads(
 void printVersion() 
 {
 	string rev = "$Revision$";
-	cerr << "RazerS version 0.3 20090223 [" << rev.substr(11, 4) << "] (prerelease)" << endl;
+	cerr << "RazerS version 1.0 20090610 [" << rev.substr(11, 4) << "]" << endl;
 }
 
 template <typename TSpec>
@@ -202,10 +202,10 @@ void printHelp(int, const char *[], RazerSOptions<TSpec> &options, ParamChooserO
 		return;
 	}
 
-	cerr << "********************************************" << endl;
-	cerr << "*** RazerS - Fast Mapping of Short Reads ***" << endl;
-	cerr << "*** written by David Weese (c) Aug 2008  ***" << endl;
-	cerr << "********************************************" << endl << endl;
+	cerr << "***********************************************************" << endl;
+	cerr << "*** RazerS - Fast Read Mapping with Sensitivity Control ***" << endl;
+	cerr << "***          (c) Copyright 2009 by David Weese          ***" << endl;
+	cerr << "**********************************************************" << endl << endl;
 	cerr << "Usage: razers [OPTION]... <GENOME FILE> <READS FILE>" << endl;
 #ifdef RAZERS_MATEPAIRS
 	cerr << "       razers [OPTION]... <GENOME FILE> <MP-READS FILE1> <MP-READS FILE2>" << endl;
@@ -847,13 +847,13 @@ int main(int argc, const char *argv[])
 		pm_options.optionErrorRate = options.errorRate;
 		if (options.hammingOnly)
 		{
-			pm_options.optionProbINSERT = 0.0;
-			pm_options.optionProbDELETE = 0.0;
+			pm_options.optionProbINSERT = (ParamChooserOptions::TFloat)0.0;
+			pm_options.optionProbDELETE = (ParamChooserOptions::TFloat)0.0;
 		}
 		else
 		{
-			pm_options.optionProbINSERT = 0.01;	//this number is basically without meaning, any value > 0 will lead to
-			pm_options.optionProbDELETE = 0.01;	//edit distance parameter choosing
+			pm_options.optionProbINSERT = (ParamChooserOptions::TFloat)0.01;	//this number is basically without meaning, any value > 0 will lead to
+			pm_options.optionProbDELETE = (ParamChooserOptions::TFloat)0.01;	//edit distance parameter choosing
 		}
 
 		if(length(pm_options.paramFolder) == 0) 

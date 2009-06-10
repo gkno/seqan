@@ -450,7 +450,7 @@ void assignMappingQuality(TMatches &matches, TReads & reads, TCooc & cooc, TCoun
 			if(secondBestQualSum == -1000) qualTerm1 = 99;
 			else
 			{
-				qualTerm1 = secondBestQualSum - bestQualSum - 4.343 * log((double)secondBestMatches);
+				qualTerm1 = (int)(secondBestQualSum - bestQualSum - 4.343 * log((double)secondBestMatches));
 				//if (secondBestKPrime - kPrime <= 1 && qualTerm1 > options.mutationRateQual) qualTerm1 = options.mutationRateQual; //TODO abchecken was mehr sinn macht
 				if (secondBestDist - bestDist <= 1 && qualTerm1 > options.mutationRateQual) qualTerm1 = options.mutationRateQual;
 			}
@@ -471,7 +471,7 @@ void assignMappingQuality(TMatches &matches, TReads & reads, TCooc & cooc, TCoun
 				avgSeedQual/=options.artSeedLength;
 				//-10 log10(28-2) = 14;
 				//generalize to -10 log10(artSeedLength - maxSeedErrors +1 ) // 14 fits for seedlength 28 to 32 with 2 errors
-				if((avgSeedQual-=14)>0) qualTerm2 += ((maxSeedErrors-kPrime)*(avgSeedQual));
+				if(avgSeedQual>14) qualTerm2 += (int)((maxSeedErrors-kPrime)*(avgSeedQual-14));
 			}
 		}
 		if (!mappingQualityFound) mappingQuality = (qualTerm1<qualTerm2) ? qualTerm1:qualTerm2;
@@ -607,18 +607,19 @@ void dumpMatches(
 		countMatches(matches, stats);
 	}
 
+	Nothing nothing;
 	unsigned currSeqNo = 0;
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 	if(options.maqMapping)
 	{
 		String<int> cooc;
-		compactMatches(matches, stats, options, false); //only best two matches per read are kept
+		compactMatches(matches, stats, options, nothing, false); //only best two matches per read are kept
 		countCoocurrences(matches,cooc,options);	//coocurrence statistics are filled
 		assignMappingQuality(matches,reads,cooc,stats,options);//mapping qualities are assigned and only one match per read is kept
 	}
 	else	 
 #endif
-	compactMatches(matches, stats, options);
+	compactMatches(matches, stats, options, nothing);
 
 	switch (options.sortOrder) {
 		case 0:
@@ -1078,5 +1079,6 @@ void dumpMatches(
 
 
 }
+
 #endif
 

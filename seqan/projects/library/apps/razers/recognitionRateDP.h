@@ -656,7 +656,7 @@ void computeFilteringLoss(
 	// columns n-1 and n for recursion 
 	TMatrixCol col0;
 	TMatrixCol col1;
-	fill(col0, maxErrors * statesCount * maxT, _transform(0.0));
+	fill(col0, maxErrors * statesCount * maxT, (TFloat)_transform(0.0));
 	resize(col1, maxErrors * statesCount * maxT);
 
 #ifdef COUNT_LOSSES

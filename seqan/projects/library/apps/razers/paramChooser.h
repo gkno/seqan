@@ -115,9 +115,9 @@ struct ParamChooserOptions
 		// global input parameters
 		totalN = 32;				// sequence length
 		totalK = 2;					// errors
-		optionLossRate = 0.01;		// in
-		chosenLossRate = 0.0;			// out
-		optionErrorRate = 0.05;		// 
+		optionLossRate = (TFloat)0.01;		// in
+		chosenLossRate = (TFloat)0.0;		// out
+		optionErrorRate = (TFloat)0.05;		// 
 		optionHammingOnly = false;
 
 		extrapolate = false;
@@ -130,8 +130,8 @@ struct ParamChooserOptions
 		chooseUngappedOnly = false;      // choose ungapped shape (discard all gapped shapes)
 		useDefaultShapes = true;
 		
-		optionProbINSERT = 0.0;
-		optionProbDELETE = 0.0;
+		optionProbINSERT = (TFloat)0.0;
+		optionProbDELETE = (TFloat)0.0;
 
 		qualityCutoff = 20;
 		fnameCount0 = 0;
@@ -186,7 +186,7 @@ qualityDistributionFromPrbFile(TFile & file, TDistribution & avg, ParamChooserOp
 
 	String<TFloat> qualitySum;
 	String<int> count;
-	fill(qualitySum,pm_options.totalN,0);
+	fill(qualitySum,pm_options.totalN,(TFloat)0.0);
 	fill(count,pm_options.totalN,0);
 
 	if (_streamEOF(file)) return;
@@ -243,7 +243,7 @@ qualityDistributionFromPrbFile(TFile & file, TDistribution & avg, ParamChooserOp
 	::std::cout << " Readcount = " << count[0] << "\t";
 	::std::cout << " kicked out " << kickout << " low quality reads." << std::endl;
 
-	fill(avg,pm_options.totalN,0.0);
+	fill(avg,pm_options.totalN,(TFloat)0.0);
 	for(unsigned t = 0; t < pm_options.totalN; ++t)
 	{
 		TFloat f = (TFloat) qualitySum[t] / (TFloat)count[t];
@@ -286,7 +286,7 @@ qualityDistributionFromFastQFile(TFile & file, TDistribution & avg, ParamChooser
 	}
 	if(pm_options.verbose)::std::cout << " Readcount = " << count[0] << std::endl;
 
-	fill(avg,pm_options.totalN,0.0);
+	fill(avg,pm_options.totalN,(TFloat)0.0);
 	for(unsigned t = 0; t < pm_options.totalN; ++t)
 	{
 		TFloat f = (TFloat) qualitySum[t] / (TFloat)count[t];
@@ -330,7 +330,7 @@ qualityDistributionFromFastQIntFile(TFile & file, TDistribution & avg, ParamChoo
 	}
 	::std::cout << " Readcount = " << count[0] << std::endl;
 
-	fill(avg,pm_options.totalN,0.0);
+	fill(avg,pm_options.totalN,(TFloat)0.0);
 	for(unsigned t = 0; t < pm_options.totalN; ++t)
 	{
 		TFloat f = (TFloat) qualitySum[t] / (TFloat)count[t];
@@ -349,7 +349,7 @@ getAvgFromPrbDirectory(TPath prbPath, TError & errorDistribution, ParamChooserOp
 {
 	typedef typename Value<TError>::Type TFloat;
 
-	fill(errorDistribution,pm_options.totalN,0.0);
+	fill(errorDistribution,pm_options.totalN,(TFloat)0.0);
 	
 	String< ::std::string > files;
 	getDir(prbPath,files);
@@ -1082,7 +1082,7 @@ extrapolateNK(TOptions & pm_options)
 			bestN = currN;
 	}
 	pm_options.extrapolN = bestN;
-	pm_options.extrapolK = ceil(((double)bestN * 1.0/recErrorRatio)-0.00001);
+	pm_options.extrapolK = (unsigned)ceil(((double)bestN * 1.0/recErrorRatio)-0.00001);
 	
 
 }
@@ -1093,7 +1093,7 @@ bool
 chooseParams(RazerSOptions<TSpec> & r_options, ParamChooserOptions & pm_options)
 {
 	typedef float TFloat;
-	static const TFloat epsilon = 0.00000000001;	
+	static const TFloat epsilon = (TFloat)0.00000000001;	
 	pm_options.optionLossRate += epsilon;
 
 

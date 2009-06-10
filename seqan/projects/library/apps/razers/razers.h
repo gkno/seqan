@@ -345,9 +345,8 @@ bool loadReads(
 	if (options.readNaming == 0)
 		resize(fastaIDs, seqCount, Exact());
 	
-	Dna5String seq;
+	String<Dna5Q> seq;
 	CharString qual;
-	String<Dna5Q> hybridSeq;
 	
 	unsigned kickoutcount = 0;
 	for(unsigned i = 0; i < seqCount; ++i) 
@@ -386,46 +385,21 @@ bool loadReads(
 //			if (count > cutoffCount) continue;
 		}
 
-		resize(hybridSeq, length(seq));
-		unsigned j = 0;
-
 		// store dna and quality together
-		for (; j < length(qual) && j < length(seq); ++j)
-		{
-			if(ordValue(seq[j])>3)
+		for (unsigned j = 0; j < length(qual) && j < length(seq); ++j)
+			assignQualityValue(seq[j], (int)(ordValue(qual[j]) - 33));
+/*			if(ordValue(seq[j])>3)
 				setValue(hybridSeq[j],(unsigned int)164); //N=164 such that &3 == 0
 			else
 				setValue(hybridSeq[j],(unsigned int)((ordValue(qual[j]) - 33) * 4 + ordValue(seq[j])));
-		}
-
-		// fill non-existent qualities with q40
-		for (; j < length(seq); ++j)
-		{
-			if(ordValue(seq[j])>3)
-				setValue(hybridSeq[j],(unsigned int)164); //N=164 such that &3 == 0
-			else
-				setValue(hybridSeq[j],(unsigned int) (160 + ordValue(seq[j])));
-		//	seq[j] = (unsigned int) ((40 << 2) | ordValue(helpString[j]));
-		}
-
-// 		// store dna and quality together
-// 		for (; j < length(qual) && j < length(seq); ++j)
-// 			hybridSeq[j] = (unsigned int) (
-// 				(((ordValue(qual[j]) <= 64)? ordValue(qual[j]) - 33: 31) << 3) 
-// 				| ordValue(seq[j]));
-// 
-// 		// fill non-existent qualities with q31
-// 		for (; j < length(seq); ++j)
-// 			hybridSeq[j] = (unsigned int) ((31 << 3) | ordValue(seq[j]));
-
-
-		if (options.trimLength > 0 && length(hybridSeq) > (unsigned)options.trimLength)
-			resize(hybridSeq, options.trimLength);
+*/
+		if (options.trimLength > 0 && length(seq) > (unsigned)options.trimLength)
+			resize(seq, options.trimLength);
 
 #ifdef RAZERS_CONCATREADS
-		appendValue(reads, hybridSeq, Generous());
+		appendValue(reads, seq, Generous());
 #else
-		assign(reads[i], hybridSeq, Exact());
+		assign(reads[i], seq, Exact());
 #endif
 	}
 #ifdef RAZERS_CONCATREADS
@@ -721,17 +695,36 @@ void countMatches(TMatches &matches, TCounts &cnt)
 }
 
 //////////////////////////////////////////////////////////////////////////////
+
+template < typename TReadNo, typename TMaxErrors >
+inline void 
+setMaxErrors(Nothing &, TReadNo, TMaxErrors)
+{
+}
+
+template < typename TSwift, typename TReadNo, typename TMaxErrors >
+inline void 
+setMaxErrors(TSwift &swift, TReadNo readNo, TMaxErrors maxErrors)
+{
+	int minT = _qgramLemma(swift, readNo, maxErrors);
+	if (minT > 1)
+	{
+//		::std::cout<<" read:"<<readNo<<" newThresh:"<<minT;
+		setMinThreshold(swift, readNo, (unsigned)minT);
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
 // Remove low quality matches
-template < typename TMatches, typename TCounts, typename TSpec >
-void compactMatches(TMatches &matches, 
-		TCounts & 
+template < typename TMatches, typename TCounts, typename TSpec, typename TSwift >
+void compactMatches(TMatches &matches, TCounts & 
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 		cnts
 #endif
-		, RazerSOptions<TSpec> &options)
+	, RazerSOptions<TSpec> &options, TSwift &swift)
 {
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
-	if(options.maqMapping) compactMatches(matches, cnts,options,true);
+	if(options.maqMapping) compactMatches(matches, cnts,options,swift,true);
 #endif
 	typedef typename Value<TMatches>::Type					TMatch;
 	typedef typename Iterator<TMatches, Standard>::Type		TIterator;
@@ -761,19 +754,18 @@ void compactMatches(TMatches &matches,
 #ifdef RAZERS_MASK_READS
 				if (hitCount == hitCountCutOff)
 				{
+					// we have enough, now look for better matches
+					int maxErrors = (*it).editDist - 1;
 					if (options.purgeAmbiguous)
-					{
+						maxErrors = -1;
+
+					setMaxErrors(swift, readNo, maxErrors);
+
+					if (maxErrors == -1 && options._debugLevel >= 2)
+						::std::cerr << "(read #" << readNo << " disabled)";
+
+					if (options.purgeAmbiguous)
 						dit = ditBeg;
-						if (options._debugLevel >= 2)
-							::std::cerr << "(read #" << readNo << " disabled)";
-						options.readMask[readNo / options.WORD_SIZE] &= ~(1ul << (readNo % options.WORD_SIZE));
-					} else
-						if ((*it).editDist == 0)
-						{
-							if (options._debugLevel >= 2)
-								::std::cerr << "(read #" << readNo << " disabled)";
-							options.readMask[readNo / options.WORD_SIZE] &= ~(1ul << (readNo % options.WORD_SIZE));
-						}
 				}
 #endif
 				continue;
@@ -797,8 +789,8 @@ void compactMatches(TMatches &matches,
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 //////////////////////////////////////////////////////////////////////////////
 // Remove low quality matches
-template < typename TMatches, typename TCounts, typename TSpec >
-void compactMatches(TMatches &matches, TCounts &cnts, RazerSOptions<TSpec> &, bool dontCountFirstTwo)
+template < typename TMatches, typename TCounts, typename TSpec, typename TSwift >
+void compactMatches(TMatches &matches, TCounts &cnts, RazerSOptions<TSpec> &, TSwift &, bool dontCountFirstTwo)
 {
 	typedef typename Value<TMatches>::Type				TMatch;
 	typedef typename Iterator<TMatches, Standard>::Type		TIterator;
@@ -1185,7 +1177,7 @@ void mapSingleReads(
 
 	
 	// FILTRATION
-	typedef Finder<TGenome, Swift<TSwiftSpec> >			TSwiftFinder;
+	typedef Finder<TGenome, Swift<TSwiftSpec> >				TSwiftFinder;
 	typedef Pattern<TReadIndex, Swift<TSwiftSpec> >			TSwiftPattern;
 
 	// iterate all genomic sequences
@@ -1218,9 +1210,6 @@ void mapSingleReads(
 	{
 		unsigned rseqNo = (*swiftFinder.curHit).ndlSeqNo;
 		if (!options.spec.DONT_VERIFY && 
-#ifdef RAZERS_MASK_READS
-			((options.readMask[rseqNo / options.WORD_SIZE] & (1ul << (rseqNo % options.WORD_SIZE))) != 0) &&
-#endif
 			matchVerify(m, range(swiftFinder, genome), rseqNo, readSet, forwardPatterns, options, TSwiftSpec()))
 		{
 			// transform coordinates to the forward strand
@@ -1247,11 +1236,11 @@ void mapSingleReads(
 					typename Size<TMatches>::Type oldSize = length(matches);
 					maskDuplicates(matches);	// overlapping parallelograms cause duplicates
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
-				if(options.maqMapping)
-					compactMatches(matches, cnts, options, true);
-				else	
+					if(options.maqMapping)
+						compactMatches(matches, cnts, options, swiftPattern, true);
+					else	
 #endif
-					compactMatches(matches, cnts, options);
+						compactMatches(matches, cnts, options, swiftPattern);
 					options.compactThresh += (options.compactThresh >> 1);
 					if (options._debugLevel >= 2)
 						::std::cerr << '(' << oldSize - length(matches) << " matches removed)";
@@ -1336,12 +1325,6 @@ int mapSingleReads(
 			_patternMatchNOfFinder(forwardPatterns[i], options.matchN);
 		}
 	}
-
-#ifdef RAZERS_MASK_READS
-	// init read mask
-	clear(options.readMask);
-	fill(options.readMask, (readCount + options.WORD_SIZE - 1) / options.WORD_SIZE, (unsigned long)-1);
-#endif
 
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 	if(options.maqMapping)
