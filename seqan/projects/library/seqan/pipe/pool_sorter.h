@@ -112,7 +112,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ...type:Spec.SorterConfig
 ...type:Spec.SorterConfigSize
 ..remarks:The Pool's input/output type is $TValue$ and the size type is determined by the $TConfig$.
-..note:If there exists an explicit function mapping input elements to their destined positions in the output stream, @Spec.MapperSpec@ should be preferred.
+...note:If there exists an explicit function mapping input elements to their destined positions in the output stream, @Spec.MapperSpec@ should be preferred.
 */
 
     template < typename TConfig >
