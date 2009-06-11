@@ -311,14 +311,12 @@ countCoocurrences(TMatches & matches, TCounts & cooc, TOptions & options)
 			if(preEditDist <= 1) ++count;
 		}
 	}
-/*	fprintf(stderr, "[abs_mapping_count] %d, %d, %d, %d\n", cooc[0], cooc[1], cooc[2], cooc[3]);
-	printf("n=%i\n",count);*/
 	for (unsigned i = 0; i < length(cooc); ++i)
 	{
 		cooc[i] = (int)(-4.343 * log((double)cooc[i]/count) );
 		if (cooc[i] < 0) cooc[i] = 0;
 	}
-	if(options._debugLevel > 0)
+	if(options._debugLevel > 1)
 	{
 		::std::cerr << "[mapping_count] ";
 		for(unsigned j = 0; j < length(cooc); ++j)

@@ -879,7 +879,7 @@ int main(int argc, const char *argv[])
 					cerr << "Couldn't find preprocessed parameter files. Please configure manually (options --shape and --threshold)." << endl;
 				cerr << "Using default configurations (shape = " << options.shape << " and q-gram lemma)." << endl;
 			}
-			cerr << endl;
+			if (options._debugLevel >= 1) cerr << endl;
 		} else
 		{
 			cerr << "Failed to load reads" << endl;

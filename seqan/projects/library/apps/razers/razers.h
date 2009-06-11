@@ -756,7 +756,7 @@ void compactMatches(TMatches &matches, TCounts &
 				{
 					// we have enough, now look for better matches
 					int maxErrors = (*it).editDist - 1;
-					if (options.purgeAmbiguous)
+					if (options.purgeAmbiguous && (options.distanceRange == 0 || (*it).editDist < options.distanceRange))
 						maxErrors = -1;
 
 					setMaxErrors(swift, readNo, maxErrors);
@@ -764,7 +764,7 @@ void compactMatches(TMatches &matches, TCounts &
 					if (maxErrors == -1 && options._debugLevel >= 2)
 						::std::cerr << "(read #" << readNo << " disabled)";
 
-					if (options.purgeAmbiguous)
+					if (options.purgeAmbiguous && (options.distanceRange == 0 || (*it).editDist < options.distanceRange))
 						dit = ditBeg;
 				}
 #endif

@@ -20,14 +20,13 @@
  ==========================================================================*/
 
 #define USE_LOGVALUES		// this is recommended when using probability values
-//#define RUN_RAZERS
-//#define RUN_RAZERS_ONEGAPPED	
+#define RUN_RAZERS
 #define RAZERS_CONCATREADS		// use <ConcatDirect> StringSet to store reads
 #define RAZERS_MEMOPT			// optimize memory consumption
 #define RAZERS_PRUNE_QGRAM_INDEX
 #define SEQAN_PROFILE
 #define NON_REDUNDANT
-//#define LOSSRATE_VALIDATION	//generates output for loss rate validation (empirical vs computed), only for ungapped
+//#define LOSSRATE_VALIDATION	//generates output for loss rate validation (empirical vs computed)
 
 #include <iostream>
 #include <sstream>
@@ -51,30 +50,6 @@ typedef float TFloat;
 
 
 
-//////////////////////////////////////////////////////////////////////////////
-// 
-// template<typename TSStr>
-// void
-// getParamsFilename(TSStr & paramsfile)
-// {
-// 	paramsfile.str("");
-// 	if(doSelectedGapped || doAllOneGapped)
-// 	{
-// 		paramsfile << pm_options.fgparams<< pm_options.fprefix[0]<<"_N" << pm_options.totalN << "_E" << totalK;
-// 		//if(prefixCount) paramsfile << fgparams<< fprefix[0]<<"_N" << totalN << "_E" << totalK;
-// 		//else paramsfile << fgparams<<"userdef_N" << totalN << "_E" << totalK;
-// 		if(pm_options.optionHammingOnly) paramsfile << "_H";
-// 		else paramsfile << "_L";
-// 		if(pm_options.doAllOneGapped) paramsfile << "_onegapped.dat";
-// 		else paramsfile << ".dat";
-// 	}
-// 	else
-// 	{
-// 		paramsfile << pm_options.fparams<< pm_options.fprefix[0]<<"_QE0_N" << pm_options.totalN << "_E" << totalK << ".dat";
-// 		//if(prefixCount) paramsfile << fparams<< fprefix[0]<<"_QE0_N" << totalN << "_E" << totalK << ".dat";
-// 		//else paramsfile << fparams<<"userdef_QE0_N" << totalN << "_E" << totalK << ".dat";
-// 	}
-// }
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -82,7 +57,7 @@ typedef float TFloat;
 void printHelp(int, const char *[], ParamChooserOptions & pm_options, bool longHelp = false) 
 {
 	cerr << "*******************************************************************" << endl;
-	cerr << "**** Compute efficient filter parameters (shape and threshold) ****" << endl;
+	cerr << "********** Compute filter parameters for given loss rate **********" << endl;
 	cerr << "*******************************************************************" << endl << endl;
 	cerr << "Usage: paramChooser [OPTIONS]... " << endl;
 	if (longHelp) {
@@ -361,92 +336,8 @@ int main(int argc, const char *argv[])
 
 	r_options.hammingOnly = pm_options.optionHammingOnly;
 
-	fill(pm_options.firstTimeK,20,true);//set maximal number of errors considered in parameter computation to <10
 
         chooseParams(r_options, pm_options);
-/*
-// compute data specific loss rates
-	if (fnameCount0 || pm_options.fnameCount1) 
-	{
-		if(!prefixCount)
-		{
-			fprefix[0] = "userdef";
-			cout << "\nNo session id given, using prefix 'userdef'\n";
-		}
-		String<TFloat> errorDistribution;
-		resize(errorDistribution,totalN);
-		//error distribution given --> read file containing error distr and compute loss rates
-		if(fnameCount1)
-		{
-			fstream file;
-			file.open(fname[1],ios_base::in | ios_base::binary);
-			if(!file.is_open())
-			{
-				cout << "Couldn't open file "<<fname[1]<<"\n";
-				return 0;
-			}
-			unsigned count = 0;
-			char c = _streamGet(file);
-			while(!_streamEOF(file) && count < totalN)
-			{
-				_parse_skipWhitespace(file,c);
-				errorDistribution[count] = _parse_readEValue(file,c);// + (TFloat) 1.0/maxN;
-				++count;
-			}
-			file.close();
-			if(count != totalN)
-			{
-				cerr << "Error distribution file must contain at least " << totalN << " probability values (one value per line).\n";
-				return 0;
-			}
-		}
-		else // read qualtiy files and compute position dependent avg error probabilites
-		{
-			getAvgFromPrbDirectory(fname[0],errorDistribution);
-		}
 
-		fstream file;
-		//if(prefixCount)
-		if(doAllOneGapped) makeOneGappedStatsFile(errorDistribution);
-		if(doSelectedGapped) makeSelectedStatsFile(errorDistribution);
-		if(doUngapped) makeUngappedStatsFile(errorDistribution);
-	}
-	else if(!prefixCount) fprefix[0] = "results";
-
-	totalK = (int)(optionErrorRate * totalN);
-	
-	//prioritize
-	if(doSelectedGapped)
-	{
-		doAllOneGapped = false;
-		doUngapped = false;
-	}
-	if(doAllOneGapped) doUngapped = false;
-	file
-	// decide on which loss rate file to parse
-	stringstream paramsfile;
-	getParamsFilename(paramsfile,options);
-
-	cout << "\nRead length      = " << totalN << "bp\n";
-	cout << "Max num errors   = " << totalK << "\n";
-	cout << "Recognition rate = " <<  100.0*(1.0-optionLossRate) << "%\n";
-			
-	// parse loss rate file and find appropriate filter criterium
-	if(verbose)cout << "\n--> Reading " <<  paramsfile.str()<<"\n";
-	fstream file;
-	file.open(paramsfile.str().c_str(),ios_base::in | ios_base::binary);
-	if(!file.is_open())
-	{
-		cout << "Couldn't open file "<<paramsfile.str()<<"\n";
-		return 0;
-	}
-	else
-	{
-		if(doSelectedGapped || doAllOneGapped) parseGappedParams(file,pm_options);
-		else parseParams(file);
-		cout << "\n Choose \nshape: " << chosenShape << "\n and \nthreshold: " << chosenThreshold<< "\n to achieve optimal performance for expected recognition rate >= " << (100.0-100.0*optionLossRate) << "% (expected recognition = " << (100.0-chosenLossRate*100.0) <<"%)\n\n";
-		file.close();
-	}
-*/
 	return 0;
 }

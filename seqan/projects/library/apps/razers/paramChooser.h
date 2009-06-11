@@ -105,7 +105,6 @@ struct ParamChooserOptions
 
 	bool appendToPrevious;
 	bool verbose;
-	String<bool> firstTimeK;
 
 	ParamChooserOptions()
 	{
@@ -534,6 +533,7 @@ makeSelectedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 		else if(pm_options.verbose) std::cerr << result <<" shapes parsed." << std::endl;
 		filestrm.close();
 	}
+	
 	if(pm_options.useDefaultShapes)
 	{
 		//q=14
@@ -697,7 +697,7 @@ makeSelectedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 	//StringSet<Dna5String> testReads;
 	StringSet<CharString> dummyIDs;
 	resize(testGenome, 1);
-	simulateGenome(testGenome[0], 1000000);					// generate 1Mbp genomic sequence
+	simulateGenome(testGenome[0], 500000);					// generate 1Mbp genomic sequence
 	simulateReads(
 		testReads, dummyIDs, testGenome, 
 		50000, maxErrors+1, logErrorDistribution, 0, 0, 0.5, true);	// generate 50K reads
@@ -705,6 +705,7 @@ makeSelectedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 #endif
 
 
+	bool first = true;
 	
 	for(int i = length(shapeStrings)-1; i >= 0; --i)
 	{
@@ -717,7 +718,7 @@ makeSelectedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 		
 		String< State<TFloat> > states;
 		//if(pm_options.verbose)::std::cout << "do DP\n";
-		if(pm_options.verbose)::std::cerr << "do DP";
+//		if(pm_options.verbose)::std::cerr << "do loss rate DP" << std::endl;
 		try 
 		{
 			initPatterns(states, shapeStrings[i], maxErrors-1, logErrorDistribution, pm_options.optionHammingOnly);
@@ -739,21 +740,21 @@ makeSelectedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 				}
 				if(lossrate > 0.2) continue;
 
-				unsigned gminCov = getMinCov(weights[i], length(shapeStrings[i]), t);
+//				unsigned gminCov = getMinCov(weights[i], length(shapeStrings[i]), t);
 
 				// create the whole file name
 				::std::stringstream datName;
 				datName << pm_options.fgparams;
-				datName << "/" <<pm_options.fprefix[0]<<"_N" << totalN << "_E" << e << "_";
+				datName << pm_options.fprefix[0]<<"_N" << totalN << "_";
 				if(!pm_options.optionHammingOnly) datName << "L.dat";
 				else datName <<"H.dat";
 				
-				// if datName-file doesnt exist, write the title on it
-				if(!pm_options.appendToPrevious && pm_options.firstTimeK[e]==true){
-					pm_options.firstTimeK[e] = false;
+				// if datName-file doesnt exist, write the title on
+				if(!pm_options.appendToPrevious && first){
+					first = false;
 					::std::ofstream fout(datName.str().c_str(), ::std::ios::out);
-					fout << "shape\t\tt\t\tlossrate\t\tminCoverage";
-					fout << "\tPM\t\truntime";
+					fout << "errors\tshape\t\tt\t\tlossrate";
+					fout << "\tPM";
 					fout << ::std::endl << ::std::endl;
 					fout.close();
 				}
@@ -774,15 +775,16 @@ makeSelectedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 
 				// write shape with its properties into file
 				::std::ofstream fout(datName.str().c_str(), ::std::ios::app | ::std::ios::out);
+				if(!fout.is_open())
+					std::cerr << "Couldn't write to file " << datName.str() << std::endl;
+				fout << e << "\t";
 				fout << shapeStrings[i] << "\t\t";
 				fout << t << "\t\t";
-				fout << lossrate << "\t\t";
-				fout << gminCov;
+				fout << lossrate;
 #ifdef RUN_RAZERS
 				fout << "\t\t" << razersOptions.FP + razersOptions.TP;
-				fout << "\t\t" << razersOptions.timeMapReads;
 #else
-				fout << "\t\t0\t\t0";
+				fout << "\t\t0";
 #endif
 				fout << ::std::endl;
 				fout.close();
@@ -798,19 +800,14 @@ void
 getParamsFilename(TSStr & paramsfile, ParamChooserOptions & pm_options)
 {
 	int N = pm_options.totalN;
-	int K = pm_options.totalK;
 	if(pm_options.extrapolate)
-	{
 		N = pm_options.extrapolN;
-		K = pm_options.extrapolK;
-	}
 	paramsfile.str("");
-//	paramsfile << pm_options.fgparams << pm_options.fprefix[0];
 	paramsfile << pm_options.fgparams << pm_options.fprefix[0];
 
-	paramsfile << "_N" << N << "_E" << K;
-	//if(prefixCount) paramsfile << fgparams<< fprefix[0]<<"_N" << totalN << "_E" << totalK;
-	//else paramsfile << fgparams<<"userdef_N" << totalN << "_E" << totalK;
+	paramsfile << "_N" << N ;
+	//if(prefixCount) paramsfile << fgparams<< fprefix[0]<<"_N" << totalN;
+	//else paramsfile << fgparams<<"userdef_N" << totalN;
 	if(pm_options.optionHammingOnly) paramsfile << "_H";
 	else paramsfile << "_L";
 	paramsfile << ".dat";
@@ -928,12 +925,17 @@ parseGappedParams(RazerSOptions<TSpec> & r_options,TFile & file, ParamChooserOpt
 	String<unsigned> thresholds;
 	resize(thresholds,14); //corresponding t
 	String<unsigned> measure;
-	resize(measure,14); //potential matches (or mincov if doAllOneGapped==true)
+	resize(measure,14); //potential matches 
 	String<TFloat> lossrates;
 	resize(lossrates,14); //lossrates
 	double extrapolFactor = 1.0; // no extrapolation
-	if(pm_options.extrapolate) extrapolFactor = (double)pm_options.totalN/pm_options.extrapolN;
-	
+	unsigned errorsWanted = (int)(pm_options.optionErrorRate * pm_options.totalN);
+	if(pm_options.extrapolate)
+	{
+		extrapolFactor = (double)pm_options.totalN/pm_options.extrapolN;
+		errorsWanted = pm_options.extrapolK;
+	}
+
 	char c = _streamGet(file);
 	if(_streamEOF(file))
 	{
@@ -945,10 +947,18 @@ parseGappedParams(RazerSOptions<TSpec> & r_options,TFile & file, ParamChooserOpt
 		_parse_skipLine(file,c);
 		_parse_skipLine(file,c);
 	}
-
+	
 	bool atLeastOneFound = false;
 	while(!_streamEOF(file))
 	{
+		unsigned numErrors = _parse_readNumber(file,c);
+		_parse_skipWhitespace(file,c);
+		if(numErrors != errorsWanted)
+		{
+			_parse_skipLine(file,c);
+			continue;
+		}
+
 		CharString currShape;
 		_parse_readShape(file, c, currShape);
 		if((pm_options.chooseUngappedOnly && numGaps(currShape)>0) || (pm_options.chooseOneGappedOnly && numGaps(currShape)>1))
@@ -956,22 +966,15 @@ parseGappedParams(RazerSOptions<TSpec> & r_options,TFile & file, ParamChooserOpt
 			_parse_skipLine(file,c); 
 			continue;
 		}
-	//            if(!r_options.hammingOnly && numGaps(currShape)>0)
-	//            {
-	//                _parse_skipLine(file,c); 
-	//                continue;
-	//            }
 		_parse_skipWhitespace(file,c);
-//		unsigned currThreshold = _parse_readNumber(file,c);
 		unsigned currThreshold = (unsigned)(_parse_readNumber(file,c) * extrapolFactor); //when extrapolating from shorter read lengths, threshold can be at least linearly increased
 		_parse_skipWhitespace(file,c);
+
 		TFloat currLossrate = _parse_readEValue(file,c);
 		_parse_skipWhitespace(file,c);
-		unsigned currMeasure = _parse_readNumber(file,c); //minCov in the case of oneGapped
+		unsigned currMeasure = _parse_readNumber(file,c); // potential matches measured on simulated reads
 
-		_parse_skipWhitespace(file,c);
-		currMeasure = _parse_readNumber(file,c); //PM in the case of selectedGapped
-
+		//std::cout << numErrors << "\t" << currShape << "\t" << currThreshold << "\t" << currLossrate << "\t" << currMeasure << std::endl;
 		if(currThreshold >= pm_options.minThreshold && currLossrate <= pm_options.optionLossRate /*&& val > bestSoFar*/)
 		{
 			
@@ -980,12 +983,10 @@ parseGappedParams(RazerSOptions<TSpec> & r_options,TFile & file, ParamChooserOpt
 				if(currShape[pos] == '1')
 					++weight;
 			if(length(shapes[weight-1]) > 0)  // if this is not the first shape with weight weight
-			{				  // compare currShape to the best one found so far
-//#ifndef RUN_RAZERS
-//				if(currMeasure >= measure[weight-1]) //if neither pm nor runtime available -> use mincov (approximation)
-//#else
+			{
+				// compare currShape to the best one found so far
 				if( currMeasure <= measure[weight-1])
-//#endif
+
 				{
 					if(currMeasure == measure[weight-1])
 					{
@@ -1137,8 +1138,6 @@ chooseParams(RazerSOptions<TSpec> & r_options, ParamChooserOptions & pm_options)
 	
 	if(pm_options.optionProbINSERT <= epsilon && pm_options.optionProbDELETE <= epsilon)
 		pm_options.optionHammingOnly=true;
-
-	fill(pm_options.firstTimeK,20,true);//maximal number of errors considered in parameter computation is always <20
 
 
 	pm_options.totalK = (int)(pm_options.optionErrorRate * pm_options.totalN);
