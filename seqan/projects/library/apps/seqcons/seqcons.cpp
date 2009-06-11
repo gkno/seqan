@@ -96,32 +96,6 @@ printHelp() {
 
 //////////////////////////////////////////////////////////////////////////////////
 
-
-
-//////////////////////////////////////////////////////////////////////////////////
-
-template <typename TAlignedRead, typename TContigId>
-struct _SimpleLess : 
-	public ::std::binary_function<TAlignedRead, TContigId, bool> 
-{
-	inline bool 
-	operator()(const TAlignedRead& a1, const TAlignedRead& a2) const 
-	{
-		return a1.contigId < a2.contigId;
-	}
-
-	bool operator()(const TAlignedRead& a1, TContigId contigId) const {
-		return(a1.contigId < contigId);
-	}
-
-	bool operator()(TContigId contigId, const TAlignedRead& a2) const {
-		return(contigId < a2.contigId);
-	} 
-};
-
-
-//////////////////////////////////////////////////////////////////////////////////
-
 template<typename TValue, typename TStrSpec, typename TPosPair, typename TStringSpec, typename TSpec, typename TConfig, typename TId>
 inline void 
 getContigReads(StringSet<TValue, Owner<TStrSpec> >& strSet,
@@ -143,11 +117,10 @@ getContigReads(StringSet<TValue, Owner<TStrSpec> >& strSet,
 
 	// Retrieve all reads, limit them to the clear range and if required reverse complement them
 	typedef typename Iterator<typename TFragmentStore::TAlignedReadStore>::Type TAlignIter;
-	TAlignIter alignIt = ::std::lower_bound(begin(fragStore.alignedReadStore, Standard()), end(fragStore.alignedReadStore, Standard()), contigId, _SimpleLess<TAlignedElement, TId>());
-	TAlignIter alignItEnd = end(fragStore.alignedReadStore, Standard() );
+	TAlignIter alignIt = lowerBoundAlignedReads(fragStore.alignedReadStore, contigId, SortContigId());
+	TAlignIter alignItEnd = upperBoundAlignedReads(fragStore.alignedReadStore, contigId, SortContigId());
 	TSize numRead = 0;
 	for(;alignIt != alignItEnd; goNext(alignIt)) {
-		if (alignIt->contigId != contigId) break;
 		TSize offset = _min(alignIt->beginPos, alignIt->endPos);
 		TReadPos begClr = 0;
 		TReadPos endClr = 0;
@@ -217,10 +190,9 @@ updateContigReads(FragmentStore<TSpec, TConfig>& fragStore,
 
 	// Update all aligned reads
 	typedef typename Iterator<typename TFragmentStore::TAlignedReadStore>::Type TAlignIter;
-	TAlignIter alignIt = ::std::lower_bound(begin(fragStore.alignedReadStore, Standard()), end(fragStore.alignedReadStore, Standard()), contigId, _SimpleLess<TAlignedElement, TId>());
-	TAlignIter alignItEnd = end(fragStore.alignedReadStore, Standard() );
+	TAlignIter alignIt = lowerBoundAlignedReads(fragStore.alignedReadStore, contigId, SortContigId());
+	TAlignIter alignItEnd = upperBoundAlignedReads(fragStore.alignedReadStore, contigId, SortContigId());
 	for(TSize i = 0;alignIt != alignItEnd; goNext(alignIt), ++i) {
-		if (alignIt->contigId != contigId) break;
 		TSize lenRead = length((value(fragStore.readStore, alignIt->readId)).seq);
 		TReadPos begClr = 0;
 		TReadPos endClr = 0;
