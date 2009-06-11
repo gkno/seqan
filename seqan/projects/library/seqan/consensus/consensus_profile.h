@@ -18,7 +18,9 @@ Lesser General Public License for more details.
 #ifndef SEQAN_HEADER_SEQAN_CONSENSUS_PROFILE_H
 #define SEQAN_HEADER_SEQAN_CONSENSUS_PROFILE_H
 
-using namespace seqan;
+
+namespace SEQAN_NAMESPACE_MAIN
+{
 
 
 template<typename TValue, typename TCount = unsigned int, typename TSpec = Default>
@@ -95,6 +97,15 @@ class ProfileType {
 			return false;
 		}
 	*/
+};
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TValue, typename TCount, typename TSpec>
+struct ValueSize<ProfileType<TValue, TCount, TSpec> >
+{
+	enum { VALUE = ValueSize<TValue>::VALUE };
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -200,6 +211,8 @@ score(Score<TValue, TSpec> const & me,
 	else return scoreMismatch(me);
 }
 */
+
+}
 
 #endif
 
