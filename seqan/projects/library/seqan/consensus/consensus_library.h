@@ -34,10 +34,17 @@ removeGap(AlignedReadStoreElement<TPos, TGapAnchor, TSpec>& alignedRead,
 	if (gapPos < alignedRead.beginPos) {
 		--alignedRead.beginPos; --alignedRead.endPos;
 	} else if (gapPos < alignedRead.endPos) {
-		//TGapPos offset = _min(alignedRead.beginPos, alignedRead.endPos);
-
+		typedef String<TGapAnchor> TGaps;
+		typedef typename Iterator<TGaps, Standard>::Type TGapIter;
+		TGapIter gapIt = upperBoundGapAnchor(alignedRead.gaps, gapPos, SortGapPos() );
+		TGapIter gapItEnd = end(alignedRead.gaps, Standard());
+		for(;gapIt != gapItEnd; goNext(gapIt)) {
+			--(gapIt->gapPos);						// Note: We might create empty gaps here
+		}
 	}
 }
+
+//////////////////////////////////////////////////////////////////////////////////
 
 template <typename TAlignedReads, typename TSpec, typename TGapPos>
 inline void
@@ -51,7 +58,6 @@ removeGap(String<TAlignedReads, TSpec>& alignedReadStore,
 	TAlignIter alignItEnd = end(alignedReadStore, Standard());
 	for(;alignIt != alignItEnd; goNext(alignIt)) removeGap(value(alignIt), gapPos);
 }
-
 
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -114,19 +120,16 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 
 		// Initialize the consensus of the band
 		TConsensus bandConsensus;
-		TReadSeq myRead;
-		TReadPos offsetBeg = alignIt->beginPos;
-		//TReadPos offsetEnd = alignIt->endPos;
-		alignIt->beginPos = alignIt->endPos = 0; // So this read is discarded in all gap operations
-
+		TConsensus myRead;
 		TReadPos bandOffset = 0;
-		if ((TReadPos) bandwidth < (TReadPos) offsetBeg) {
-			bandOffset = offsetBeg - bandwidth;
+		if ((TReadPos) bandwidth < (TReadPos) alignIt->beginPos) {
+			bandOffset = alignIt->beginPos - bandwidth;
 			goFurther(itCons, bandOffset); itConsPos += bandOffset;
 		}
-		for(TReadPos iPos = bandOffset; iPos < offsetBeg; goNext(itCons), ++itConsPos, ++iPos) {
+		for(TReadPos iPos = bandOffset; iPos < alignIt->beginPos; goNext(itCons), ++itConsPos, ++iPos) {
 			appendValue(bandConsensus, value(itCons), Generous() );
 		}
+		alignIt->beginPos = alignIt->endPos = 0; // So this read is discarded in all gap operations
 
 
 		// Remove sequence from profile and add to the consensus
@@ -154,24 +157,30 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 			}
 			for(;old < limit; ++old, goNext(itRead)) {
 				--(value(itCons)).count[ordValue(value(itRead))];
-				if (!empty(value(itCons), gapPos)) appendValue(bandConsensus, value(itCons), Generous() );
-				else removeGap(contigReads, itConsPos);
-				appendValue(myRead, value(itRead), Generous());
-				goNext(itCons); ++itConsPos;
+				if (!empty(value(itCons), gapPos)) {
+					appendValue(bandConsensus, value(itCons), Generous() );
+					++itConsPos;
+				} else removeGap(contigReads, itConsPos);
+				appendValue(myRead, TProfileChar(value(itRead)), Generous());
+				goNext(itCons);
 			}
 			for(;diff < newDiff; ++diff) {
 				--(value(itCons)).count[gapPos];
-				if (!empty(value(itCons), gapPos)) appendValue(bandConsensus, value(itCons), Generous() );
-				else removeGap(contigReads, itConsPos);
+				if (!empty(value(itCons), gapPos)) {
+					appendValue(bandConsensus, value(itCons), Generous() );
+					++itConsPos;
+				} else removeGap(contigReads, itConsPos);
 				goNext(itCons);
 			}
 		}
 		if (!clippedEnd) {
 			for(;itRead!=itReadEnd;goNext(itRead)) {
 				--(value(itCons)).count[ordValue(value(itRead))];
-				if (!empty(value(itCons), gapPos)) appendValue(bandConsensus, value(itCons), Generous() );
-				else removeGap(contigReads, itConsPos);
-				appendValue(myRead, value(itRead), Generous());
+				if (!empty(value(itCons), gapPos)) {
+					appendValue(bandConsensus, value(itCons), Generous() );
+					++itConsPos;
+				} else removeGap(contigReads, itConsPos);
+				appendValue(myRead, TProfileChar(value(itRead)), Generous());
 				goNext(itCons);
 			}
 		}
@@ -182,13 +191,76 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 		}
 
 
-		for(TSize i = 0; i<length(bandConsensus); ++i) {
-			std::cout << bandConsensus[i] << std::endl;
+		// ReAlign the consensus with the sequence
+		typedef StringSet<TConsensus, Dependent<> > TStringSet;
+		TStringSet pairSet;
+		appendValue(pairSet, bandConsensus);
+		appendValue(pairSet, myRead);
+
+		Score<int, ConsensusScore> consScore;
+		typedef String<Fragment<> > TFragmentString;
+		TFragmentString matches;
+		//globalAlignment(tmp, pairSet, score_type, AlignConfig<true,true,true,true>(), (value(itDiag)).i1, (value(itDiag)).i2, BandedGotoh() );
+		globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), NeedlemanWunsch() );
+
+		//// Debug code
+		// Profile to profile alignment
+		//for(TSize i = 0; i<length(bandConsensus); ++i) {
+		//	std::cout << bandConsensus[i] << std::endl;
+		//}
+		//std::cout << std::endl;
+		Graph<Alignment<TStringSet, void, WithoutEdgeId> > g(pairSet);
+		std::cout << globalAlignment(g, pairSet, consScore, AlignConfig<true,false,false,true>(), NeedlemanWunsch() ) << std::endl;
+		std::cout << g << std::endl;
+
+		// Add the read back to the consensus and build the new consensus
+		TConsensus newConsensus = infix(consensus, 0, bandOffset);
+		TConsIter bandIt = begin(bandConsensus, Standard());
+		TConsIter bandItEnd = end(bandConsensus, Standard());
+		typedef typename Iterator<TFragmentString, Standard>::Type TFragIter;
+		TFragIter fragIt = end(matches, Standard() );
+		TFragIter fragItEnd = begin(matches, Standard() );
+		TReadPos consPos = 0;
+		TReadPos readPos = 0;
+		do {
+			goPrevious(fragIt);
+			while(consPos < fragIt->begin1) {
+				++value(bandIt).count[gapPos];
+				appendValue(newConsensus, value(bandIt));
+				goNext(bandIt); ++consPos;
+			}
+			while(readPos < fragIt->begin2) {
+				appendValue(newConsensus, myRead[readPos]);
+				// addGap
+				++readPos;
+			}
+			for(TSize i = 0; i<fragIt->len; ++i, goNext(bandIt), ++consPos, ++readPos) {
+				TSize ordRead = 0;
+				for(TSize i = 0; i<ValueSize<TProfileChar>::VALUE; ++i) {
+					if (myRead[readPos].count[i] > 0) {
+						ordRead = i;
+						break;
+					}
+				}
+				++value(bandIt).count[ordRead];
+				appendValue(newConsensus, value(bandIt));
+			}
+		} while (fragIt != fragItEnd);
+		for(; readPos < length(myRead); ++readPos) {
+			appendValue(newConsensus, myRead[readPos]);
+			// addGap
 		}
-		std::cout << myRead << std::endl;
-		break;
-
-
+		for(;bandIt != bandItEnd; goNext(bandIt)) appendValue(newConsensus, value(bandIt));
+		for(;itCons != itConsEnd; goNext(itCons)) appendValue(newConsensus, value(itCons));
+		
+		
+		// Profile to profile alignment
+		//for(TSize i = 0; i<length(bandConsensus); ++i) {
+		//	std::cout << bandConsensus[i] << std::endl;
+		//}
+		//std::cout << std::endl;
+		std::cout << newConsensus << std::endl;
+		consensus = newConsensus;
 
 	}
 }

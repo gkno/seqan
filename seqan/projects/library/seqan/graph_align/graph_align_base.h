@@ -246,7 +246,7 @@ _align_trace_print(String<TFragment>& matches,
 	} else if (tv == Vertical) {
 		// Nop, no match
 	} else if (tv == Diagonal) {
-		appendValue(matches, TFragment(id1, pos1, id2, pos2, seqLen));
+		appendValue(matches, TFragment(id1, pos1, id2, pos2, seqLen), Generous() );
 	}
 }
 

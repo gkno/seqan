@@ -39,7 +39,7 @@ class ProfileType {
 		}
 
 		~ProfileType() {}
-/*
+
 		ProfileType(ProfileType const& _other) {
 			for(TSize i = 0; i<ValueSize<TValue>::VALUE; ++i) count[i] = _other.count[i];
 		}
@@ -66,22 +66,9 @@ class ProfileType {
 			return *this;
 		}
 
-
-		template <typename TPos>
-		inline TCount&
-		operator [] (TPos pos) {
-			return count[pos];
-		}
-
-		inline TCount&
-		operator [] (TValue val) {
-			return count[ordValue(val)];
-		}
-
 		operator char() { 
 			return (char) TValue(*this); 
 		}
-
 
 		bool operator==(ProfileType const& other_data) const {
 			for(TSize i = 0; i<ValueSize<TValue>::VALUE; ++i) {
@@ -96,7 +83,6 @@ class ProfileType {
 			}
 			return false;
 		}
-	*/
 };
 
 
@@ -133,21 +119,6 @@ empty(ProfileType<TSourceValue, TSourceCount, TSourceSpec> const & source,
 	}
 	return true;
 }
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TStream, typename TValue, typename TCount, typename TSpec>
-TStream& operator<<(TStream& os, ProfileType<TValue, TCount, TSpec> const& rhs) {
-	typedef typename Size<ProfileType<TValue, TCount, TSpec> const>::Type TSize;
-	for(TSize i = 0; i<ValueSize<TValue>::VALUE; ++i) {
-		os << i << ':' << ' ' << rhs.count[i] << std::endl;
-	}
-	return os;
-}
-
-
-/*
-
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -200,17 +171,63 @@ convertImpl(Convert<TTarget, T> const,
 	return convertImpl(Convert<TTarget, T>(), TSourceValue(source));
 }
 
-template <typename TValue, typename TSpec, typename TSourceValue, typename TSourceCount, typename TSourceSpec>
-inline TValue
-score(Score<TValue, TSpec> const & me,
-	  ProfileType<TSourceValue, TSourceCount, TSourceSpec> left,
-	  ProfileType<TSourceValue, TSourceCount, TSourceSpec> right)
-{
-	// Todo
-	if (left == right) return scoreMatch(me);
-	else return scoreMismatch(me);
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStream, typename TValue, typename TCount, typename TSpec>
+TStream& operator<<(TStream& os, ProfileType<TValue, TCount, TSpec> const& rhs) {
+	typedef typename Size<ProfileType<TValue, TCount, TSpec> const>::Type TSize;
+	for(TSize i = 0; i<ValueSize<TValue>::VALUE; ++i) {
+		os << i << ':' << ' ' << rhs.count[i] << std::endl;
+	}
+	return os;
 }
-*/
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+struct ConsensusScore_;
+typedef Tag<ConsensusScore_> const ConsensusScore;
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TValue>
+class Score<TValue, ConsensusScore>
+{
+public:
+	TValue data_gap_extend;
+	TValue data_gap_open;
+
+public:
+	Score():
+		data_gap_extend(-1),
+		data_gap_open(-1)
+	{}
+
+};
+
+
+template <typename TValue, typename TSourceValue, typename TSourceCount, typename TSourceSpec>
+inline TValue
+score(Score<TValue, ConsensusScore> const &,
+	  ProfileType<TSourceValue, TSourceCount, TSourceSpec> left,   // Consensus profile
+	  ProfileType<TSourceValue, TSourceCount, TSourceSpec> right)  // Single string
+{
+	typedef ProfileType<TSourceValue, TSourceCount, TSourceSpec> TProfileType;
+	typedef typename Size<TProfileType>::Type TSize;
+	TSize indexRight = 0;
+	for(TSize i = 0; i<ValueSize<TProfileType>::VALUE; ++i) {
+		if (right.count[i] > 0) {
+			indexRight = i;
+			break;
+		}
+	}
+	TSourceCount maxCount = left.count[indexRight];
+	for(TSize i = 0; i<ValueSize<TProfileType>::VALUE; ++i) {
+		if (left.count[i] > maxCount) return -1;
+	}
+	return 0;
+}
 
 }
 
