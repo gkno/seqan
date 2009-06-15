@@ -258,7 +258,7 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 
-template <typename TFile, typename TString, typename TData>
+template <typename TFile, typename TData>
 void
 write(TFile & file,
 	  TData const & data,
