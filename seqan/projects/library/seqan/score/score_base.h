@@ -78,6 +78,81 @@ struct Value< Score<TValue, TSpec> >
 
 //////////////////////////////////////////////////////////////////////////////
 
+// ATTENTION: scoreGap...(TScore) is deprecated
+// Better use the following functions:
+
+template <typename TValue, typename TSpec, typename TPos1, typename TPos2, typename TSeq1, typename TSeq2>
+inline TValue
+scoreGapOpenHorizontal(
+	Score<TValue, TSpec> const & me,
+	TPos1 pos1,
+	TPos2 pos2,
+	TSeq1 const &seq1,
+	TSeq2 const &seq2)
+{
+	return scoreGapOpen(me);
+}
+
+template <typename TValue, typename TSpec, typename TPos1, typename TPos2, typename TSeq1, typename TSeq2>
+inline TValue
+scoreGapOpenVertical(
+	Score<TValue, TSpec> const & me,
+	TPos1 pos1,
+	TPos2 pos2,
+	TSeq1 const &seq1,
+	TSeq2 const &seq2)
+{
+	return scoreGapOpen(me);
+}
+
+template <typename TValue, typename TSpec, typename TPos1, typename TPos2, typename TSeq1, typename TSeq2>
+inline TValue
+scoreGapExtendHorizontal(
+	Score<TValue, TSpec> const & me,
+	TPos1 pos1,
+	TPos2 pos2,
+	TSeq1 const &seq1,
+	TSeq2 const &seq2)
+{
+	return scoreGapExtend(me);
+}
+
+template <typename TValue, typename TSpec, typename TPos1, typename TPos2, typename TSeq1, typename TSeq2>
+inline TValue
+scoreGapExtendVertical(
+	Score<TValue, TSpec> const & me,
+	TPos1 pos1,
+	TPos2 pos2,
+	TSeq1 const &seq1,
+	TSeq2 const &seq2)
+{
+	return scoreGapExtend(me);
+}
+
+template <typename TValue, typename TSpec, typename TPos1, typename TPos2, typename TSeq1, typename TSeq2>
+inline TValue
+scoreGapHorizontal(
+	Score<TValue, TSpec> const & me,
+	TPos1 pos1,
+	TPos2 pos2,
+	TSeq1 const &seq1,
+	TSeq2 const &seq2)
+{
+	return scoreGap(me);
+}
+
+template <typename TValue, typename TSpec, typename TPos1, typename TPos2, typename TSeq1, typename TSeq2>
+inline TValue
+scoreGapVertical(
+	Score<TValue, TSpec> const & me,
+	TPos1 pos1,
+	TPos2 pos2,
+	TSeq1 const &seq1,
+	TSeq2 const &seq2)
+{
+	return scoreGap(me);
+}
+
 // ATTENTION: score(TScore, TVal1, TVal2) is deprecated
 // Better use the following function:
 
