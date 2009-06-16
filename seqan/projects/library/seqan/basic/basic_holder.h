@@ -593,13 +593,27 @@ _holderAllocateObject(THolder & me, TValue const & data)
 
 template <typename THolder, typename TValue>
 inline typename Value<THolder, 0>::Type
-_holderAllocatePointer(THolder & me, TValue * data)
+_holderAllocatePointer(THolder & me, TValue * data, True)			// is a pointer to an *array* of objects
 {
 	typename Value<THolder>::Type ret;
 	size_t len = length(data)+1;
 	allocate(me, ret, len);
 	arrayConstructCopy(data, data + len, ret);
 	return ret;
+}
+
+template <typename THolder, typename TValue>
+inline typename Value<THolder, 0>::Type
+_holderAllocatePointer(THolder & me, TValue * data, False)			// is a pointer to *one* object
+{
+	return data;
+}
+
+template <typename THolder, typename TValue>
+inline typename Value<THolder, 0>::Type
+_holderAllocatePointer(THolder & me, TValue * data)
+{
+	return _holderAllocatePointer(me, data, IsSimple<TValue>());	// try to distinguish between a pointer to one/array of object(s)
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -614,11 +628,24 @@ _holderDeallocate(THolder & me, TValue const & data)
 
 template <typename THolder, typename TValue>
 inline void
-_holderDeallocate(THolder & me, TValue * data)
+_holderDeallocate(THolder & me, TValue * data, True)				// is a pointer to an *array* of objects
 {
 	size_t len = length(data)+1;
 	arrayDestruct(data, data+len);
 	deallocate(me, data, len);
+}
+
+template <typename THolder, typename TValue>
+inline void
+_holderDeallocate(THolder & me, TValue * data, False)				// is a pointer to *one* object
+{
+}
+
+template <typename THolder, typename TValue>
+inline void
+_holderDeallocate(THolder & me, TValue * data)
+{
+	return _holderDeallocate(me, data, IsSimple<TValue>());			// try to distinguish between a pointer to one/array of object(s)
 }
 
 
