@@ -22,6 +22,10 @@ Lesser General Public License for more details.
 namespace SEQAN_NAMESPACE_MAIN
 {
 
+//////////////////////////////////////////////////////////////////////////////
+// Profile alphabet character
+//////////////////////////////////////////////////////////////////////////////
+
 
 template<typename TValue, typename TCount = unsigned int, typename TSpec = Default>
 class ProfileType;
@@ -180,53 +184,6 @@ TStream& operator<<(TStream& os, ProfileType<TValue, TCount, TSpec> const& rhs) 
 		os << i << ':' << ' ' << rhs.count[i] << std::endl;
 	}
 	return os;
-}
-
-
-
-//////////////////////////////////////////////////////////////////////////////
-
-struct ConsensusScore_;
-typedef Tag<ConsensusScore_> const ConsensusScore;
-
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename TValue>
-class Score<TValue, ConsensusScore>
-{
-public:
-	TValue data_gap_extend;
-	TValue data_gap_open;
-
-public:
-	Score():
-		data_gap_extend(-1),
-		data_gap_open(-1)
-	{}
-
-};
-
-
-template <typename TValue, typename TSourceValue, typename TSourceCount, typename TSourceSpec>
-inline TValue
-score(Score<TValue, ConsensusScore> const &,
-	  ProfileType<TSourceValue, TSourceCount, TSourceSpec> left,   // Consensus profile
-	  ProfileType<TSourceValue, TSourceCount, TSourceSpec> right)  // Single string
-{
-	typedef ProfileType<TSourceValue, TSourceCount, TSourceSpec> TProfileType;
-	typedef typename Size<TProfileType>::Type TSize;
-	TSize indexRight = 0;
-	for(TSize i = 0; i<ValueSize<TProfileType>::VALUE; ++i) {
-		if (right.count[i] > 0) {
-			indexRight = i;
-			break;
-		}
-	}
-	TSourceCount maxCount = left.count[indexRight];
-	for(TSize i = 0; i<ValueSize<TProfileType>::VALUE; ++i) {
-		if (left.count[i] > maxCount) return -1;
-	}
-	return 0;
 }
 
 }

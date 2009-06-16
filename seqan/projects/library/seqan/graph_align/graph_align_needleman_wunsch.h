@@ -143,11 +143,11 @@ _align_needleman_wunsch(TTrace & trace,
 	TString const& str2 = str[1];
 	TSize len1 = length(str1);
 	TSize len2 = length(str2);
-	TScoreValue gap = scoreGapExtend(sc);
 	resize(column, len2 + 1);  
 	resize(trace, len1*len2);
-	for(TSize row = 1; row <= len2; ++row) _initFirstColumn(TAlignConfig(), value(column, row), row*gap);
+	for(TSize row = 1; row <= len2; ++row) _initFirstColumn(TAlignConfig(), value(column, row), (TScoreValue) (row) * scoreGapExtendVertical(sc, -1, row - 1, str1, str2));
 	assignValue(column, 0, 0);
+	//for(TSize i = 0; i <= len2; ++i) std::cout << value(column, i) << std::endl;
 	
 	// Classical DP
 	typedef typename Iterator<TTrace, Standard>::Type TTraceIter;
@@ -163,7 +163,7 @@ _align_needleman_wunsch(TTrace & trace,
 	for(TSize col = 0; col < len1; ++col) 
 	{
 		TScoreValue diagVal = getValue(column, 0);
-		_initFirstRow(TAlignConfig(), value(column, 0), (col+1) * gap);
+		_initFirstRow(TAlignConfig(), value(column, 0), (TScoreValue) (col+1) * scoreGapExtendHorizontal(sc, col, -1, str1, str2));
 		TScoreValue vertiVal = getValue(column, 0);
 
 //		typedef typename Value<TString>::Type TStringValue;
@@ -186,13 +186,15 @@ _align_needleman_wunsch(TTrace & trace,
 			{
 				max_hori_verti = *coit;
 				tv_hori_verti = Horizontal;
+				max_hori_verti += scoreGapExtendHorizontal(sc, col, col2, str1, str2);
 			}
 			else
 			{
 				max_hori_verti = vertiVal;
 				tv_hori_verti = Vertical;
+				max_hori_verti += scoreGapExtendVertical(sc, col, col2, str1, str2);
 			}
-			max_hori_verti += gap;
+			
 
 			// (deprecated scoring)
 //			vertiVal = diagVal + score(_sc, char1, *s2_it); //compute the maximum in vertiVal 

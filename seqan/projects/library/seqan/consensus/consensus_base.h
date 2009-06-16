@@ -112,6 +112,9 @@ public:
 	// Offset all reads, so the first read starts at position 0
 	bool moveToFront;
 
+	// Realign mode;
+	bool realign;
+
 	// Scoring object for overlap alignments
 	Score<int> sc;
 
@@ -122,7 +125,7 @@ public:
 	std::string outfile;				// Output file name
 	
 	// Initialization
-	ConsensusOptions() : bandwidth(8), overlaps(3), matchlength(15), quality(80), window(0), snp(0), output(0), convert(0), moveToFront(false), outfile("readAlign.txt") 
+	ConsensusOptions() : bandwidth(8), overlaps(3), matchlength(15), quality(80), window(0), snp(0), output(0), convert(0), moveToFront(false), realign(false), outfile("readAlign.txt") 
 	{
 		sc = Score<int>(2,-6,-4,-9);
 	}

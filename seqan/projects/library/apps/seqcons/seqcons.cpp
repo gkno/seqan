@@ -367,6 +367,17 @@ int main(int argc, const char *argv[]) {
 					}
 				}
 			}
+			else if (strcmp(argv[arg], "-realign") == 0) {
+				if (arg + 1 < argc) {
+					++arg;
+					if (strcmp(argv[arg], "false") == 0) {
+						consOpt.realign = false;
+					} 
+					else if (strcmp(argv[arg], "true") == 0) {
+						consOpt.realign = true;
+					}
+				}
+			}
 			else if (strcmp(argv[arg], "-source") == 0) {
 				if (arg + 1 < argc) {
 					++arg;
@@ -426,96 +437,99 @@ int main(int argc, const char *argv[]) {
 	// Iterate over all contigs
 	for(TSize currentContig = 0; currentContig < numberOfContigs; ++currentContig) {
 
-		//reAlign(fragStore, currentContig, 4);
-		//exit(0);
-	
+		if (consOpt.realign) {
+			Score<double, WeightedConsensusScore<Score<double, FractionalScore>, Score<int, ConsensusScore> > > combinedScore;
+			reAlign(fragStore, combinedScore, currentContig, consOpt.bandwidth);
+		} else {
+			
 // Profiling
 #ifdef SEQAN_PROFILE
-		SEQAN_PROTIMEUPDATE(__myProfileTime); 
+			SEQAN_PROTIMEUPDATE(__myProfileTime); 
 #endif
 
-		// Import all reads of the given contig
-		typedef TFragmentStore::TReadSeq TReadSeq;
-		typedef Id<TFragmentStore>::Type TId;
-		StringSet<TReadSeq, Owner<> > readSet;
-		String<Pair<TSize, TSize> > begEndPos;
-
-		// No just get begin and end pointers
-		getContigReads(readSet, begEndPos, fragStore, currentContig);
-		TSize nseq = length(readSet);
-		if (nseq == 0) continue;
-
-		//for(TSize i = 0; i<nseq; ++i) {
-		//	std::cout << value(readSet, i) << std::endl;
-		//	std::cout << value(begEndPos, i).i1 << ',' << value(begEndPos, i).i2 << std::endl;
-		//}
+			// Import all reads of the given contig
+			typedef TFragmentStore::TReadSeq TReadSeq;
+			typedef Id<TFragmentStore>::Type TId;
+			StringSet<TReadSeq, Owner<> > readSet;
+			String<Pair<TSize, TSize> > begEndPos;
+	
+			// No just get begin and end pointers
+			getContigReads(readSet, begEndPos, fragStore, currentContig);
+			TSize nseq = length(readSet);
+			if (nseq == 0) continue;
+	
+			//for(TSize i = 0; i<nseq; ++i) {
+			//	std::cout << value(readSet, i) << std::endl;
+			//	std::cout << value(begEndPos, i).i1 << ',' << value(begEndPos, i).i2 << std::endl;
+			//}
 #ifdef SEQAN_PROFILE
-		::std::cout << "Import sequences done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << ::std::endl;
+			::std::cout << "Import sequences done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << ::std::endl;
 #endif
 
-		// Align the reads
-		Graph<Alignment<StringSet<TReadSeq, Dependent<> >, void, WithoutEdgeId> > gOut(readSet);
-		consensusAlignment(gOut, begEndPos, consOpt);
-
-		// Build the read alignment matrix
-		TSize alignDepth;
-		String<char> alignmentMatrix;
-		String<Triple<unsigned int, unsigned int, unsigned int> > readBegEndRowPos;
-		multireadAlignment(gOut, alignmentMatrix, readBegEndRowPos, alignDepth);
-		clear(gOut);
+			// Align the reads
+			Graph<Alignment<StringSet<TReadSeq, Dependent<> >, void, WithoutEdgeId> > gOut(readSet);
+			consensusAlignment(gOut, begEndPos, consOpt);
+	
+			// Build the read alignment matrix
+			TSize alignDepth;
+			String<char> alignmentMatrix;
+			String<Triple<unsigned int, unsigned int, unsigned int> > readBegEndRowPos;
+			multireadAlignment(gOut, alignmentMatrix, readBegEndRowPos, alignDepth);
+			clear(gOut);
 #ifdef SEQAN_PROFILE
-		std::cout << "Multi-read Alignment done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
+			std::cout << "Multi-read Alignment done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
 #endif
 
-		// Call the consensus
-		// ToDo: Qualtiy-based consensus calling
-		String<unsigned int> coverage;
-		String<char> gappedConsensus;
-		String<Dna> consensusSequence;
-		if (consOpt.snp == 0) consensusCalling(alignmentMatrix, consensusSequence, gappedConsensus, coverage, alignDepth, Majority_Vote() );
-		else consensusCalling(alignmentMatrix, consensusSequence, gappedConsensus, coverage, alignDepth, Bayesian() );
+			// Call the consensus
+			// ToDo: Qualtiy-based consensus calling
+			String<unsigned int> coverage;
+			String<char> gappedConsensus;
+			String<Dna> consensusSequence;
+			if (consOpt.snp == 0) consensusCalling(alignmentMatrix, consensusSequence, gappedConsensus, coverage, alignDepth, Majority_Vote() );
+			else consensusCalling(alignmentMatrix, consensusSequence, gappedConsensus, coverage, alignDepth, Bayesian() );
 #ifdef SEQAN_PROFILE		
-		std::cout << "Consensus done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
+			std::cout << "Consensus done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
 #endif
 
-		// Output of aligned reads
-		if (consOpt.output == 0) {
-			FILE* strm;
-			if (currentContig == 0) strm = fopen(consOpt.outfile.c_str(), "w");
-			else strm = fopen(consOpt.outfile.c_str(), "a");
-			write(strm, readSet, alignmentMatrix, begEndPos, readBegEndRowPos, gappedConsensus, coverage, FastaReadFormat());
-			fclose(strm);
+			// Output of aligned reads
+			if (consOpt.output == 0) {
+				FILE* strm;
+				if (currentContig == 0) strm = fopen(consOpt.outfile.c_str(), "w");
+				else strm = fopen(consOpt.outfile.c_str(), "a");
+				write(strm, readSet, alignmentMatrix, begEndPos, readBegEndRowPos, gappedConsensus, coverage, FastaReadFormat());
+				fclose(strm);
 
-			//// Debug code for CA
-			//mtRandInit();
-			//String<char> fileTmp1 = "tmp1";
-			//String<char> fileTmp2 = "tmp2";
-			//for(int i = 0; i<10; ++i) {
-			//	int file = (mtRand() % 20) + 65;
-			//	appendValue(fileTmp1, char(file));
-			//	appendValue(fileTmp2, char(file));
-			//}
-			//std::fstream strm3;
-			//strm3.open(toCString(fileTmp2), std::ios_base::out | std::ios_base::trunc);
-			//for(int i = 0;i<(int) length(origStrSet); ++i) {
-			//	std::stringstream name;
-			//	name << value(begEndPos, i).i1 << "," << value(begEndPos, i).i2;
-			//	String<char> myTitle = name.str();
-			//	write(strm3, origStrSet[i], myTitle, Fasta());			
-			//	if (value(begEndPos, i).i1 > value(begEndPos, i).i2) reverseComplementInPlace(origStrSet[i]);
-			//}
-			//strm3.close();
-			//std::fstream strm2;
-			//strm2.open(toCString(fileTmp1), std::ios_base::out | std::ios_base::trunc);
-			//write(strm2, seqSet, alignmentMatrix, begEndPos, readBegEndRowPos, gappedConsensus, coverage, FastaReadFormat());
-			//strm2.close();
-		} 
-		else if (consOpt.output == 1) {
-			updateContigReads(fragStore, readBegEndRowPos, alignmentMatrix, gappedConsensus, currentContig);
-		}
+				//// Debug code for CA
+				//mtRandInit();
+				//String<char> fileTmp1 = "tmp1";
+				//String<char> fileTmp2 = "tmp2";
+				//for(int i = 0; i<10; ++i) {
+				//	int file = (mtRand() % 20) + 65;
+				//	appendValue(fileTmp1, char(file));
+				//	appendValue(fileTmp2, char(file));
+				//}
+				//std::fstream strm3;
+				//strm3.open(toCString(fileTmp2), std::ios_base::out | std::ios_base::trunc);
+				//for(int i = 0;i<(int) length(origStrSet); ++i) {
+				//	std::stringstream name;
+				//	name << value(begEndPos, i).i1 << "," << value(begEndPos, i).i2;
+				//	String<char> myTitle = name.str();
+				//	write(strm3, origStrSet[i], myTitle, Fasta());			
+				//	if (value(begEndPos, i).i1 > value(begEndPos, i).i2) reverseComplementInPlace(origStrSet[i]);
+				//}
+				//strm3.close();
+				//std::fstream strm2;
+				//strm2.open(toCString(fileTmp1), std::ios_base::out | std::ios_base::trunc);
+				//write(strm2, seqSet, alignmentMatrix, begEndPos, readBegEndRowPos, gappedConsensus, coverage, FastaReadFormat());
+				//strm2.close();
+			} 
+			else if (consOpt.output == 1) {
+				updateContigReads(fragStore, readBegEndRowPos, alignmentMatrix, gappedConsensus, currentContig);
+			}
 #ifdef SEQAN_PROFILE
-		std::cout << "Output done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
+			std::cout << "Output done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
 #endif
+		}
 	}
 	
 	// Write the AMOS message file
