@@ -737,7 +737,7 @@ void dumpMatches(
 					if (pos != fastaID.npos) {
 						::std::istringstream iss(fastaID.substr(pos + 3));
 						iss >> id;
-						appendMatchId = false;
+//						appendMatchId = false;
 					}
 					pos = fastaID.find("fragId=");
 					if (pos != fastaID.npos) {
