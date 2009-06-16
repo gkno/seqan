@@ -18,6 +18,8 @@
   $Id$
  ==========================================================================*/
 
+//SEQAN_NO_GENERATED_FORWARDS: no forwards are generated for this file
+
 #define PLATFORM_WINDOWS
 #define PLATFORM_WINDOWS_VS
 

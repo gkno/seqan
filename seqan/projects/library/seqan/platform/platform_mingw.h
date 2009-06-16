@@ -18,6 +18,8 @@
   $Id$
  ==========================================================================*/
 
+//SEQAN_NO_GENERATED_FORWARDS: no forwards are generated for this file
+
 #define PLATFORM_WINDOWS
 #define PLATFORM_WINDOWS_MINGW
 
@@ -29,3 +31,9 @@ typedef unsigned __int64 __uint64;
 
 //define SEQAN_SWITCH_USE_FORWARDS to use generated forwards 
 #define SEQAN_SWITCH_USE_FORWARDS
+
+#include "platform_generated_forwards.h"
+
+#ifndef SEQAN_HEADER_PLATFORM_GENERATED_FORWARDS_H
+#error To use the SeqAn library you first have to execute 'make forwards' in the root directory
+#endif
