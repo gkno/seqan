@@ -76,7 +76,7 @@ _align_needleman_wunsch_trace(TAlign& align,
 	// Now follow the trace
 	if ((len1 != 0) && (len2 !=0)) {
 		do {
-			tv = getValue(trace, (len1-1)*numRows + (len2-1));
+			tv = value(trace, (len1-1)*numRows + (len2-1));
 			if (tv == Diagonal) {
 				if (tv != tvOld) {
 					_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
@@ -146,7 +146,7 @@ _align_needleman_wunsch(TTrace & trace,
 	resize(column, len2 + 1);  
 	resize(trace, len1*len2);
 	for(TSize row = 1; row <= len2; ++row) _initFirstColumn(TAlignConfig(), value(column, row), (TScoreValue) (row) * scoreGapExtendVertical(sc, -1, row - 1, str1, str2));
-	assignValue(column, 0, 0);
+	value(column, 0) = 0;
 	//for(TSize i = 0; i <= len2; ++i) std::cout << value(column, i) << std::endl;
 	
 	// Classical DP
@@ -162,9 +162,9 @@ _align_needleman_wunsch(TTrace & trace,
 	
 	for(TSize col = 0; col < len1; ++col) 
 	{
-		TScoreValue diagVal = getValue(column, 0);
+		TScoreValue diagVal = value(column, 0);
 		_initFirstRow(TAlignConfig(), value(column, 0), (TScoreValue) (col+1) * scoreGapExtendHorizontal(sc, col, -1, str1, str2));
-		TScoreValue vertiVal = getValue(column, 0);
+		TScoreValue vertiVal = value(column, 0);
 
 //		typedef typename Value<TString>::Type TStringValue;
 //		TStringValue char1 = str1[col];
@@ -258,10 +258,6 @@ _globalAlignment(TAlign& align,
 	typedef typename Value<TScore>::Type TScoreValue;
 	typedef typename Size<TStringSet>::Type TSize;
 
-	// Gap extension score is taken as the constant gap score!!!
-	//SEQAN_TASSERT(scoreGapOpen(sc) == 0) 
-	//testing for 0 does not make sense, it must be: SEQAN_TASSERT(scoreGapOpen(sc) == scoreGapExtend(sc))
-
 	// Create the trace
 	String<TraceBack> trace;
 	std::pair<TScoreValue, TScoreValue> overallMaxValue;
@@ -288,10 +284,6 @@ _globalAlignment(TStringSet const& str,
 	typedef typename Value<TScore>::Type TScoreValue;
 	typedef typename Size<TStringSet>::Type TSize;
 	
-	// Gap extension score is taken as the constant gap score!!!
-	//SEQAN_TASSERT(scoreGapOpen(sc) == 0)
-	//testing for 0 does not make sense, it must be: SEQAN_TASSERT(scoreGapOpen(sc) == scoreGapExtend(sc))
-
 	String<TraceBack> trace;
 	std::pair<TScoreValue, TScoreValue> overallMaxValue;
 	std::pair<TSize, TSize> overallMaxIndex;

@@ -235,17 +235,8 @@ _align_trace_print(String<TFragment>& matches,
 				   TTraceValue const tv)
 {
 	SEQAN_CHECKPOINT
-
-	// TraceBack values
-	TTraceValue Diagonal = 0; TTraceValue Horizontal = 1; TTraceValue Vertical = 2;
-	
-	if (seqLen == 0) return;
-
-	if (tv == Horizontal) {
-		// Nop, no match
-	} else if (tv == Vertical) {
-		// Nop, no match
-	} else if (tv == Diagonal) {
+	// Only the diagonal case
+	if ((seqLen) && (tv == 0)) {
 		appendValue(matches, TFragment(id1, pos1, id2, pos2, seqLen), Generous() );
 	}
 }
