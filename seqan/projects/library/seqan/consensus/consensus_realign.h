@@ -221,15 +221,19 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 		// Initialize the consensus of the band
 		TConsensus bandConsensus;
 		TConsensus myRead;
-		reserve(myRead, length(value(fragStore.readStore, alignIt->readId).seq));
-		reserve(bandConsensus, 2 * bandwidth + (alignIt->endPos - alignIt->beginPos));
+		fill(myRead, length(value(fragStore.readStore, alignIt->readId).seq), TProfileChar());
+		resize(bandConsensus, 2 * bandwidth + (alignIt->endPos - alignIt->beginPos));
+		TConsIter bandConsIt = begin(bandConsensus);
+		TConsIter myReadIt = begin(myRead);
+		TSize bandConsLen = 0;
+		TSize myReadLen = 0;
 		TReadPos bandOffset = 0;
 		if ((TReadPos) bandwidth < (TReadPos) alignIt->beginPos) {
 			bandOffset = alignIt->beginPos - bandwidth;
 			goFurther(itCons, bandOffset); itConsPos += bandOffset;
 		}
 		for(TReadPos iPos = bandOffset; iPos < alignIt->beginPos; goNext(itCons), ++itConsPos, ++iPos) {
-			appendValue(bandConsensus, value(itCons), Generous() );
+			value(bandConsIt) = value(itCons); ++bandConsIt; ++bandConsLen;
 		}
 		alignIt->beginPos = alignIt->endPos = 0; // So this read is discarded in all gap operations
 
@@ -262,18 +266,16 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 			for(;old < limit; ++old, goNext(itRead)) {
 				--(value(itCons)).count[ordValue(value(itRead))];
 				if (!empty(value(itCons), gapPos)) {
-					appendValue(bandConsensus, value(itCons), Generous() );
+					value(bandConsIt) = value(itCons); ++bandConsIt; ++bandConsLen;
 					++itConsPos;
 				} else removeGap(contigReads, itConsPos);
-				TProfileChar tmpChar;
-				tmpChar.count[0] = ordValue(value(itRead));
-				appendValue(myRead, tmpChar, Generous());
+				value(myReadIt).count[0] = ordValue(value(itRead)); ++myReadIt; ++myReadLen;
 				goNext(itCons);
 			}
 			for(;diff < newDiff; ++diff) {
 				--(value(itCons)).count[gapPos];
 				if (!empty(value(itCons), gapPos)) {
-					appendValue(bandConsensus, value(itCons), Generous() );
+					value(bandConsIt) = value(itCons); ++bandConsIt; ++bandConsLen;
 					++itConsPos;
 				} else removeGap(contigReads, itConsPos);
 				goNext(itCons);
@@ -283,20 +285,20 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 			for(;itRead!=itReadEnd;goNext(itRead)) {
 				--(value(itCons)).count[ordValue(value(itRead))];
 				if (!empty(value(itCons), gapPos)) {
-					appendValue(bandConsensus, value(itCons), Generous() );
+					value(bandConsIt) = value(itCons); ++bandConsIt; ++bandConsLen;
 					++itConsPos;
 				} else removeGap(contigReads, itConsPos);
-				TProfileChar tmpChar;
-				tmpChar.count[0] = ordValue(value(itRead));
-				appendValue(myRead, tmpChar, Generous());
+				(value(myReadIt)).count[0] = ordValue(value(itRead)); ++myReadIt; ++myReadLen;
 				goNext(itCons);
 			}
 		}
 
 		// Go further up to the bandwidth
 		for(TReadPos iPos = 0; ((itCons != itConsEnd) && (iPos < (TReadPos) bandwidth)); goNext(itCons), ++iPos) {
-			appendValue(bandConsensus, value(itCons), Generous() );
+			value(bandConsIt) = value(itCons); ++bandConsIt; ++bandConsLen;
 		}
+		resize(bandConsensus, bandConsLen);
+		resize(myRead, myReadLen);
 
 
 		// ReAlign the consensus with the sequence
