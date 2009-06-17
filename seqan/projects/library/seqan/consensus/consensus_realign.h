@@ -221,6 +221,8 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 		// Initialize the consensus of the band
 		TConsensus bandConsensus;
 		TConsensus myRead;
+		reserve(myRead, length(value(fragStore.readStore, alignIt->readId).seq));
+		reserve(bandConsensus, 2 * bandwidth + (alignIt->endPos - alignIt->beginPos));
 		TReadPos bandOffset = 0;
 		if ((TReadPos) bandwidth < (TReadPos) alignIt->beginPos) {
 			bandOffset = alignIt->beginPos - bandwidth;
@@ -263,7 +265,9 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 					appendValue(bandConsensus, value(itCons), Generous() );
 					++itConsPos;
 				} else removeGap(contigReads, itConsPos);
-				appendValue(myRead, TProfileChar(value(itRead)), Generous());
+				TProfileChar tmpChar;
+				tmpChar.count[0] = ordValue(value(itRead));
+				appendValue(myRead, tmpChar, Generous());
 				goNext(itCons);
 			}
 			for(;diff < newDiff; ++diff) {
@@ -282,7 +286,9 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 					appendValue(bandConsensus, value(itCons), Generous() );
 					++itConsPos;
 				} else removeGap(contigReads, itConsPos);
-				appendValue(myRead, TProfileChar(value(itRead)), Generous());
+				TProfileChar tmpChar;
+				tmpChar.count[0] = ordValue(value(itRead));
+				appendValue(myRead, tmpChar, Generous());
 				goNext(itCons);
 			}
 		}
@@ -301,7 +307,7 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 
 		typedef String<Fragment<> > TFragmentString;
 		TFragmentString matches;
-		//globalAlignment(tmp, pairSet, score_type, AlignConfig<true,true,true,true>(), (value(itDiag)).i1, (value(itDiag)).i2, BandedGotoh() );
+		//globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), -5, 10, BandedGotoh() );
 		globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), NeedlemanWunsch() );
 
 		//// Debug code
@@ -344,7 +350,9 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 					gapLen = 0;
 				}
 				int numGaps = insertGap(contigReads, bandOffset + alignPos);
-				TProfileChar tmpChar = myRead[readPos];
+				typedef typename Value<TProfileChar>::Type TAlphabet;
+				TProfileChar tmpChar;
+				++tmpChar.count[myRead[readPos].count[0]];
 				tmpChar.count[gapPos] += numGaps;
 				appendValue(newConsensus, tmpChar);
 				++readPos; ++alignPos;
@@ -358,20 +366,15 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 					appendValue(alignIt->gaps, TGapAnchor(clippedBeginPos + readPos, clippedBeginPos + readPos + diff));
 					gapLen = 0;
 				}
-				TSize ordRead = 0;
-				for(TSize i = 0; i<ValueSize<TProfileChar>::VALUE; ++i) {
-					if (myRead[readPos].count[i] > 0) {
-						ordRead = i;
-						break;
-					}
-				}
-				++value(bandIt).count[ordRead];
+				++value(bandIt).count[myRead[readPos].count[0]];
 				appendValue(newConsensus, value(bandIt));
 			}
 		} while (fragIt != fragItEnd);
 		for(; readPos < length(myRead); ++readPos) {
 			int numGaps = insertGap(contigReads, bandOffset + alignPos);
-			TProfileChar tmpChar = myRead[readPos];
+			typedef typename Value<TProfileChar>::Type TAlphabet;
+			TProfileChar tmpChar;
+			++tmpChar.count[myRead[readPos].count[0]];
 			tmpChar.count[gapPos] += numGaps;
 			appendValue(newConsensus, tmpChar);
 			++alignPos;

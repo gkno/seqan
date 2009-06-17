@@ -111,10 +111,9 @@ scoreGapExtendHorizontal(
 	TSeq1 const &seq1,
 	TSeq2 const &)
 {
-	typedef typename Value<TSeq1>::Type TProfileType;
 	if ((int) pos2 < (int) 0) return me.data_penalty;
 	if ((int) pos1 != me.column) _update(const_cast<Score<TValue, ConsensusScore>&>(me), pos1, seq1);
-	return (value(me.consensus_set, ValueSize<TProfileType>::VALUE - 1)) ? me.data_match : me.data_penalty;
+	return (getValue(me.consensus_set, ValueSize<typename Value<TSeq1>::Type>::VALUE - 1)) ? me.data_match : me.data_penalty;
 }
 
 
@@ -139,17 +138,8 @@ score(Score<TValue, ConsensusScore> const & me,
 	  TSeq1 const &seq1,
 	  TSeq2 const &seq2)
 {
-	typedef typename Value<TSeq1>::Type TProfileType;
-	typedef typename Size<TProfileType>::Type TSize;
 	if ((int) pos1 != me.column) _update(const_cast<Score<TValue, ConsensusScore>&>(me), pos1, seq1);
-	TProfileType const& right = seq2[pos2];
-	for(TSize i = 0; i<ValueSize<TProfileType>::VALUE; ++i) {
-		if (right.count[i] > 0) {
-			return (value(me.consensus_set, i)) ? me.data_match : me.data_penalty;
-			break;
-		}
-	}
-	return me.data_penalty;
+	return (getValue(me.consensus_set, seq2[pos2].count[0])) ? me.data_match : me.data_penalty;
 }
 
 
@@ -189,12 +179,9 @@ _update(Score<TValue, FractionalScore>& me,
 		TPos1 const pos1,
 		TSeq1 const& seq1)
 {
-	typedef typename Value<TSeq1>::Type TProfileType;
-	typedef typename Size<TProfileType>::Type TSize;
-	TProfileType const& myC = value(seq1, pos1);
-	TSize alphSize = ValueSize<TProfileType>::VALUE;
+	typedef typename Size<TSeq1>::Type TSize;
 	me.sum = 0;
-	for(TSize i = 0; i<alphSize; ++i) me.sum += myC.count[i];
+	for(TSize i = 0; i < (TSize) ValueSize<typename Value<TSeq1>::Type>::VALUE; ++i) me.sum += (value(seq1, pos1)).count[i];
 	me.column = pos1;
 }
 
@@ -208,13 +195,9 @@ scoreGapExtendHorizontal(
 	TSeq1 const &seq1,
 	TSeq2 const &)
 {
-	typedef typename Value<TSeq1>::Type TProfileType;
-	typedef typename Size<TProfileType>::Type TSize;
-	if ((int) pos2 < (int) 0) return me.data_penalty;
+	if ((int) pos2 < 0) return me.data_penalty;
 	if ((int) pos1 != me.column) _update(const_cast<Score<TValue, FractionalScore>&>(me), pos1, seq1);
-	TProfileType const& myC = value(seq1, pos1);
-	TSize gapPos = ValueSize<TProfileType>::VALUE - 1;
-	return me.data_penalty * ((me.sum - (TValue) myC.count[gapPos]) / me.sum);
+	return me.data_penalty * ((me.sum - (TValue) (value(seq1, pos1)).count[ValueSize<typename Value<TSeq1>::Type>::VALUE - 1]) / me.sum);
 }
 
 
@@ -239,15 +222,8 @@ score(Score<TValue, FractionalScore> const & me,
 	  TSeq1 const &seq1,
 	  TSeq2 const &seq2)
 {
-	typedef typename Value<TSeq1>::Type TProfileType;
-	typedef typename Size<TProfileType>::Type TSize;
 	if ((int) pos1 != me.column) _update(const_cast<Score<TValue, FractionalScore>&>(me), pos1, seq1);
-	TProfileType const& left = seq1[pos1];
-	TProfileType const& right = seq2[pos2];
-	for(TSize i = 0; i<ValueSize<TProfileType>::VALUE; ++i) {
-		if (right.count[i] > 0) return me.data_penalty * ((me.sum - (TValue) left.count[i]) / me.sum);
-	}
-	return me.data_penalty;
+	return me.data_penalty * ((me.sum - (TValue) seq1[pos1].count[seq2[pos2].count[0]]) / me.sum);
 }
 
 

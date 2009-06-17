@@ -124,6 +124,7 @@ empty(ProfileType<TSourceValue, TSourceCount, TSourceSpec> const & source,
 	return true;
 }
 
+
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TSourceValue, typename TSourceCount, typename TSourceSpec>
