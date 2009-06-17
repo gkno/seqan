@@ -190,7 +190,7 @@ int mapReads(
 void printVersion() 
 {
 	string rev = "$Revision$";
-	cerr << "RazerS version 1.0 20090610 [" << rev.substr(11, 4) << "]" << endl;
+	cerr << "RazerS version 1.0 20090617 [" << rev.substr(11, 4) << "]" << endl;
 }
 
 template <typename TSpec>
@@ -205,7 +205,7 @@ void printHelp(int, const char *[], RazerSOptions<TSpec> &options, ParamChooserO
 	cerr << "***********************************************************" << endl;
 	cerr << "*** RazerS - Fast Read Mapping with Sensitivity Control ***" << endl;
 	cerr << "***          (c) Copyright 2009 by David Weese          ***" << endl;
-	cerr << "**********************************************************" << endl << endl;
+	cerr << "***********************************************************" << endl << endl;
 	cerr << "Usage: razers [OPTION]... <GENOME FILE> <READS FILE>" << endl;
 #ifdef RAZERS_MATEPAIRS
 	cerr << "       razers [OPTION]... <GENOME FILE> <MP-READS FILE1> <MP-READS FILE2>" << endl;
@@ -225,6 +225,7 @@ void printHelp(int, const char *[], RazerSOptions<TSpec> &options, ParamChooserO
 		cerr << "  -le, --library-error NUM     \t" << "mate-pair library length tolerance (default " << options.libraryError << ')' << endl;
 #endif
 		cerr << "  -m,  --max-hits NUM          \t" << "output only NUM of the best hits (default " << options.maxHits << ')' << endl;
+		cerr << "       --unique                \t" << "output only unique best matches (-m 1 -dr 0 -pa)" << endl;
 		cerr << "  -tr, --trim-reads NUM        \t" << "trim reads to length NUM (default off)" << endl;
 		cerr << "  -o,  --output FILE           \t" << "change output filename (default <READS FILE>.result)" << endl;
 		cerr << "  -v,  --verbose               \t" << "verbose mode" << endl;
@@ -447,6 +448,13 @@ int main(int argc, const char *argv[])
 				}
 				printHelp(argc, argv, options, pm_options);
 				return 0;
+			}
+			if (strcmp(argv[arg], "--unique") == 0) {
+				++arg;
+				options.maxHits = 1;
+				options.distanceRange = 1;
+				options.purgeAmbiguous = true;
+				continue;
 			}
 			if (strcmp(argv[arg], "-dr") == 0 || strcmp(argv[arg], "--distance-range") == 0) {
 				if (arg + 1 < argc) {

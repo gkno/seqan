@@ -1,4 +1,4 @@
-*** RazerS - Fast Read Mapping with Controlled Loss Rate ***
+*** RazerS - Fast Read Mapping with Sensitivity Control ***
 http://www.seqan.de/projects/razers.html
 
 ---------------------------------------------------------------------------
@@ -15,9 +15,9 @@ Table of Contents
 1. Overview
 ---------------------------------------------------------------------------
 
-RazerS is a tool for mapping millions of short genomic reads against a 
+RazerS is a tool for mapping millions of short genomic reads onto a 
 reference genome. It was designed with focus on mapping next-generation 
-sequencing reads against whole DNA genomes. RazerS searches for matches of
+sequencing reads onto whole DNA genomes. RazerS searches for matches of
 reads with a percent identity above a given threshold, whereby it detects
 matches with mismatches as well as gaps.
 RazerS uses a k-mer index of all reads and counts common k-mers of reads
@@ -35,8 +35,18 @@ http://www.seqan.de). To build RazerS do the following:
 
   1)  Download the latest snapshot of SeqAn
   2)  Unzip it to a directory of your choice (e.g. snapshot)
-  3)  cd snapshot
-  4)  cd apps
+  3)  cd snapshot/apps
+  4)  make razers
+  5)  cd razers
+  6)  ./razers --help
+
+Alternatively you can check out the latest SVN version of RazerS and SeqAn
+with:
+
+  1)  svn co http://svn.mi.fu-berlin.de/seqan/trunk/seqan
+  2)  cd seqan
+  3)  make forwards
+  4)  cd projects/library/apps
   5)  make razers
   6)  cd razers
   7)  ./razers --help
@@ -52,16 +62,17 @@ To get a short usage description of RazerS, you can execute razers -h or
 razers --help.
 
 Usage: razers [OPTION]... <GENOME FILE> <READS FILE>
+       razers [OPTION]... <GENOME FILE> <MP-READS FILE1> <MP-READS FILE2>
 
-RazerS expects the names of two DNA (multi-)Fasta files. The first contains 
-a reference genome and the second contains genomic reads that should be 
-mapped against the reference. Without any additional parameters RazerS 
-would map all reads against both strands of the reference genome with 92% 
-identity (i.e. 8% errors per read) and dump all found matches in an output  
-file. The output file name is the read file name extended by the suffix 
-".result".
-The default behaviour can be modified by adding the following options to 
-the command line:
+RazerS expects the names of two or three DNA (multi-)Fasta files. The first
+contains a reference genome and the second (and third) contains genomic reads
+that should be mapped onto the reference. If two read files are given, both 
+have to contain exactly the same number of reads, which are considered as
+mate-pairs. Without any additional parameters RazerS would map all reads onto
+both strands of the reference genome with 92% identity (i.e. 8% errors per
+read) and dump all found matches in an output file. The output file name is
+the read file name extended by the suffix ".result". The default behaviour 
+can be modified by adding the following options to the command line:
 
 ---------------------------------------------------------------------------
 3.1. Main Options
@@ -69,12 +80,12 @@ the command line:
 
   [ -f ],  [ --forward ]
 
-  Only map reads against the positive/forward strand of the genome. By
+  Only map reads onto the positive/forward strand of the genome. By
   default, both strands are scanned.
 
   [ -r ],  [ --reverse ]
 
-  Only map reads against the negative/reverse-complement strand of the
+  Only map reads onto the negative/reverse-complement strand of the
   genome. By default, both strands are scanned.
 
   [ -i NUM ],  [ --percent-identity NUM ]
@@ -96,16 +107,38 @@ the command line:
   mapping. Depending on the desired recogition rate, the percent identity
   and the read length the filter is configured to run as fast as possible.
   Therefore it needs access to files with precomputed filtration settings
-  in a 'gapped_params' subfolder which resides in the razers folder.
+  in a 'gapped_params' subfolder which resides in the razers folder. This 
+  value is ignored if the shape (-s) or the minimum threshold (-t) is set
+  manually.
   
   [ -id ],  [ --indels ]
   
   Consider insertions, deletions and mismatches as errors. By default, only 
   mismatches are recognized.
   
+  [ -ll NUM ],  [ --library-length NUM ]
+  
+  Set the mean library size, default is 2000. The library size is the outer
+  distance of the two reads of a mate-pair. This value is used only for
+  paired-end read mapping.
+  
+  [ -le NUM ],  [ --library-error NUM ]
+  
+  Set the tolerated absolute deviation of the library size, default value is
+  200. This value is used only for paired-end read mapping.
+  
   [ -m NUM ],  [ --max-hits NUM ]
   
-  Output at most NUM of the best matches.
+  Output at most NUM of the best matches, default value is 100.
+  
+  [ --unique ]
+  
+  Output only unique best matches (like ELAND). This flag corresponds to 
+  '-m 1 -dr 0 -pa'.
+  
+  [ -tr NUM ],  [ --trim-reads NUM ]
+  
+  Trim reads to length NUM.
 
   [ -o FILE ],  [ --output FILE ]
 
@@ -255,16 +288,16 @@ RazerS supports currently 3 different output formats selectable via the
   0 = Razer Format
   1 = Enhanced Fasta Format
   2 = Eland Format
+  3 = GFF Format
  
 ---------------------------------------------------------------------------
 4.1. Razer Format
 ---------------------------------------------------------------------------
 
 The output file is a text file whose lines represent matches. A line 
-consists of different comma separated match values in the following 
-format:
+consists of different tab separated match values in the following format:
 
-RNAME,RBEGIN,REND,GSTRAND,GNAME,GBEGIN,GEND,PERCID
+RNAME RBEGIN REND GSTRAND GNAME GBEGIN GEND PERCID [PAIRID PAIRSCR MATEDIST]
 
 Match value description:
 
@@ -277,6 +310,13 @@ Match value description:
   GEND         End position in the genome sequence
   PERCID       Percent identity (see --percent-identity)
 
+For paired-end read mapping 3 additional values are dumped:
+
+  PAIRID       Unique number to identify the two corresponding mate matches
+  PAIRSCR      The sum of the negative number of errors in both matches
+  MATEDIST     Relative outer distance to the mate match
+               The absolute value is the insert size
+
 For matches on the reverse strand, GBEGIN and GEND are positions on the 
 related forward strand. It holds GBEGIN < GEND, regardless of GSTRAND.
 
@@ -287,16 +327,23 @@ related forward strand. It holds GBEGIN < GEND, regardless of GSTRAND.
 The matches are stored in the same order as in the Razer format. Each match
 is stored in two lines:
 
->GBEGIN,GEND[id=ID,fragId=FRAGID,errors=ERRORS,percId=PERCID,ambiguity=AMB]
+>GBEGIN,GEND[KEY1=VALUE1,KEY2=VALUE2,...]
 READSEQ
 
-Additional value description:
+Match value description:
 
-  ID           ID value of the input file Fasta header (>..[id=ID,..]..)
-  FRAGID       Fragment ID value (>..[..,fragId=FRAGID,..]..)
-  ERRORS       Absolute numbers of errors in this match
-  AMB          Number of matches of this read as good as this.
+  GBEGIN       Beginning position in the genome sequence
+  GEND         End position in the genome sequence
   READSEQ      Read sequence.
+
+The following keys are output:
+
+  id           ID value of the input file Fasta header (>..[id=ID,..]..)
+  fragId       Fragment ID value (>..[..,fragId=FRAGID,..]..)
+  contigId     Name of the genome sequence (see --genome-naming)
+  errors       Absolute numbers of errors in this match
+  percId       Percent identity (see --percent-identity)
+  ambiguity    Number of matches of this read as good as or better than this
 
 If the ID or fragment ID values of a read couldn't be found in the reads file
 the read number (beginning with 0) is used instead. For matches on the
@@ -325,42 +372,56 @@ Additional value description:
                (e.g. 12A: 12'th base was A in the genome)
 
 ---------------------------------------------------------------------------
+4.3. GFF Format
+---------------------------------------------------------------------------
+
+...
+
+---------------------------------------------------------------------------
 5. Example
 ---------------------------------------------------------------------------
 
-There are example read and genome files in the folder in snapshot/apps/
-razers/ containing 2 27bp reads and a short genome sequence. The 2 reads 
-and their reverse-complements were implanted with errors into the genome.
-To see map the example reads against the genome do the following:
+---------------------------------------------------------------------------
+5.1. Single read mapping
+---------------------------------------------------------------------------
 
-  1)  cd snapshot
-  2)  cd apps
-  3)  cd razers
-  4)  ./razers example/genome.fa example/reads.fa -id -a -mN -v
-  5)  less example/reads.fa.result
+There are example read and genome files in the folder in snapshot/apps/
+razers/example containing 3 27bp reads and two short genome sequences. The 3
+reads and their reverse-complements were implanted with errors into the 
+genome. To map the example reads onto the genome do the following:
+
+  1)  cd snapshot/apps/razers
+  2)  ./razers example/genome.fa example/reads.fa -id -a -mN -v
+  3)  less example/reads.fa.result
 
 On success, RazerS dumped the resulting matches with their corresponding 
 semi-global alignments into the file example/reads.fa.result:
 
-read1,0,27,F,genome1,47,73,92.593
+read1	0	27	F	genome1	47	73	92.593
 #Read:   AATTGAATGAGGTCTTGCAGCCATGGC
 #Genome: AATTGAATGACGTC-TGCAGCCATGGC
-read1,0,27,R,genome2,180,208,92.593
+read1	0	27	R	genome2	180	208	92.593
 #Read:   AATTGAATGAGGTCTT-GCAGCCATGGC
 #Genome: AATTGAATGAGGTCTTCGCAGTCATGGC
-read2,0,27,R,genome2,108,135,96.296
+read2	0	27	R	genome2	108	135	96.296
 #Read:   CAGGAGATAAGCTGGATCGTTTACGGT
 #Genome: CAGGAGATAAGCTGGATCGTTTACAGT
-read3,0,27,F,genome2,215,242,100
+read3	0	27	F	genome2	215	242	100
 #Read:   GCCATTAGAGGCCACCACACCAGACGT
-#Genome: GCCATTAGAGGCCACCACACCAGNNNN
+#Genome: GCCATTAGAGGCCACCACACCAG----
 
 If alignments are not needed '-a' can be omited resulting in:
 
-read1,0,27,F,genome1,47,73,92.593
-read1,0,27,R,genome2,180,208,92.593
-read2,0,27,R,genome2,108,135,96.296
-read3,0,27,F,genome2,215,242,100
+read1	0	27	F	genome1	47	73	92.593
+read1	0	27	R	genome2	180	208	92.593
+read2	0	27	R	genome2	108	135	96.296
+read3	0	27	F	genome2	215	242	100
+
+---------------------------------------------------------------------------
+5.2. Paired-end read mapping
+---------------------------------------------------------------------------
+
+...
 
 ---------------------------------------------------------------------------
 6. Contact
@@ -368,3 +429,4 @@ read3,0,27,F,genome2,215,242,100
 
 For questions or comments, contact:
   David Weese <weese@inf.fu-berlin.de>
+  Anne-Katrin Emde <emde@inf.fu-berlin.de>
