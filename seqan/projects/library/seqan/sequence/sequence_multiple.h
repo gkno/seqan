@@ -2057,8 +2057,8 @@ end(StringSet< TString, TSpec > const & me,
 		inline void _testBegin() {
             while (_cur == _begin && objNo > 0) {
                 --objNo;
-				_begin = host->_begin(objNo);
-				_end = _cur = host->_end(objNo);
+				_begin = begin((*host)[objNo]);
+				_end = _cur = end((*host)[objNo]);
             }
         }
 
