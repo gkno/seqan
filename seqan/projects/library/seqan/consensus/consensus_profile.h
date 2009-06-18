@@ -36,66 +36,86 @@ class ProfileType {
 	public:
 		typedef typename Size<ProfileType>::Type TSize;
 
-		TCount count[ValueSize<TValue>::VALUE];
+		TCount count[ValueSize<ProfileType>::VALUE];
 
+		inline
 		ProfileType() {
-			for(TSize i = 0; i<ValueSize<TValue>::VALUE; ++i) count[i] = 0;
+			::std::fill(count, count + ValueSize<ProfileType>::VALUE, 0);
 		}
 
+		inline
 		~ProfileType() {}
 
-		ProfileType(ProfileType const& _other) {
-			for(TSize i = 0; i<ValueSize<TValue>::VALUE; ++i) count[i] = _other.count[i];
+		inline
+		ProfileType(ProfileType const& other_data) {
+			for(TSize i = 0; i<ValueSize<ProfileType>::VALUE; ++i) 
+				count[i] = other_data.count[i];
 		}
 
+
 		template <typename TOther> 
+		inline
 		ProfileType(TOther const& other_data) {
-			for(TSize i = 0; i<ValueSize<TValue>::VALUE; ++i) count[i] = 0;
+			::std::fill(count, count + ValueSize<ProfileType>::VALUE, 0);
 			count[ordValue(TValue(other_data))] = 1;
 		}
 
+		inline
 		ProfileType const& 
 		operator = (ProfileType const& other_data) 
 		{
 			if (this == &other_data) return *this;
-			for(TSize i = 0; i<ValueSize<TValue>::VALUE; ++i) count[i] = other_data.count[i];
+			for(TSize i = 0; i<ValueSize<ProfileType>::VALUE; ++i) 
+				count[i] = other_data.count[i];
 			return *this;
 		}
 
-		template <typename TOther> 
+		template <typename TOther>
+		inline
 		ProfileType const& 
 		operator = (TOther const& other_data) {
-			for(TSize i = 0; i<ValueSize<TValue>::VALUE; ++i) count[i] = 0;
+			::std::fill(count, count + ValueSize<ProfileType>::VALUE, 0);
 			count[ordValue(TValue(other_data))] = 1;
 			return *this;
 		}
 
+		inline
 		operator char() { 
-			return (char) TValue(*this); 
+			typedef typename Size<ProfileType>::Type TSize;
+			TSize maxIndex = 0;
+			TCount maxCount = count[0];
+			for(TSize i = 1; i<ValueSize<ProfileType>::VALUE; ++i) {
+				if (count[i] > maxCount) {
+					maxIndex = i;
+					maxCount = count[i];
+				}
+			}
+			return (maxIndex == ValueSize<ProfileType>::VALUE - 1) ? gapValue<char>() : (char) TValue(maxIndex);
 		}
 
-		bool operator==(ProfileType const& other_data) const {
-			for(TSize i = 0; i<ValueSize<TValue>::VALUE; ++i) {
+		inline bool 
+		operator==(ProfileType const& other_data) const {
+			for(TSize i = 0; i<ValueSize<ProfileType>::VALUE; ++i) {
 				if (count[i] != other_data.count[i]) return false;
 			}
 			return true;
 		}
 
-		bool operator!=(ProfileType const& other_data) const {
-			for(TSize i = 0; i<ValueSize<TValue>::VALUE; ++i) {
+		inline bool 
+		operator!=(ProfileType const& other_data) const {
+			for(TSize i = 0; i<ValueSize<ProfileType>::VALUE; ++i) {
 				if (count[i] != other_data.count[i]) return true;
 			}
 			return false;
 		}
 };
 
-
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TValue, typename TCount, typename TSpec>
 struct ValueSize<ProfileType<TValue, TCount, TSpec> >
 {
-	enum { VALUE = ValueSize<TValue>::VALUE };
+	enum { VALUE = ValueSize<TValue>::VALUE + 1};
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -105,25 +125,12 @@ inline bool
 empty(ProfileType<TSourceValue, TSourceCount, TSourceSpec> const & source)
 {
 	typedef typename Size<ProfileType<TSourceValue, TSourceCount, TSourceSpec> const >::Type TSize;
+	// Check if there are only gaps
 	for(TSize i = 0; i<ValueSize<TSourceValue>::VALUE; ++i) {
 		if (source.count[i]) return false;
 	}
 	return true;
 }
-
-// Empty iff no letters or only gaps
-template <typename TSourceValue, typename TSourceCount, typename TSourceSpec, typename TGapOrdValue>
-inline bool
-empty(ProfileType<TSourceValue, TSourceCount, TSourceSpec> const & source,
-	  TGapOrdValue gapOrdVal)
-{
-	typedef typename Size<ProfileType<TSourceValue, TSourceCount, TSourceSpec> const >::Type TSize;
-	for(TSize i = 0; i<ValueSize<TSourceValue>::VALUE; ++i) {
-		if ((i != gapOrdVal) && (source.count[i])) return false;
-	}
-	return true;
-}
-
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -131,10 +138,11 @@ template <typename TSourceValue, typename TSourceCount, typename TSourceSpec>
 inline typename Size<ProfileType<TSourceValue, TSourceCount, TSourceSpec> const >::Type
 _getMaxIndex(ProfileType<TSourceValue, TSourceCount, TSourceSpec> const & source)
 {
-	typedef typename Size<ProfileType<TSourceValue, TSourceCount, TSourceSpec> const >::Type TSize;
+	typedef ProfileType<TSourceValue, TSourceCount, TSourceSpec> TProfileType;
+	typedef typename Size<TProfileType>::Type TSize;
 	TSize maxIndex = 0;
 	TSourceCount maxCount = source.count[0];
-	for(TSize i = 1; i<ValueSize<TSourceValue>::VALUE; ++i) {
+	for(TSize i = 1; i<ValueSize<TProfileType>::VALUE; ++i) {
 		if (source.count[i] > maxCount) {
 			maxIndex = i;
 			maxCount = source.count[i];
@@ -154,18 +162,6 @@ assign(SimpleType<TTargetValue, TTargetSpec> & target,
 	target.value = _getMaxIndex(source);
 }
 
-////////////////////////////////////////////////////////////////////////////////
-
-template <typename THost, char CHAR, typename TSpec, typename T, typename TSourceValue, typename TSourceCount, typename TSourceSpec>
-inline typename Convert<ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> >, ProfileType<TSourceValue, TSourceCount, TSourceSpec> >::Type
-convertImpl(Convert<ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> >, T> const,
-			ProfileType<TSourceValue, TSourceCount, TSourceSpec> const & source)
-{
-	ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> > my;
-	my.data = _getMaxIndex(source);
-	return my;
-}
-
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TTarget, typename T, typename TSourceValue, typename TSourceCount, typename TSourceSpec>
@@ -180,8 +176,9 @@ convertImpl(Convert<TTarget, T> const,
 
 template<typename TStream, typename TValue, typename TCount, typename TSpec>
 TStream& operator<<(TStream& os, ProfileType<TValue, TCount, TSpec> const& rhs) {
-	typedef typename Size<ProfileType<TValue, TCount, TSpec> const>::Type TSize;
-	for(TSize i = 0; i<ValueSize<TValue>::VALUE; ++i) {
+	typedef ProfileType<TValue, TCount, TSpec> TProfileType;
+	typedef typename Size<TProfileType>::Type TSize;
+	for(TSize i = 0; i<ValueSize<TProfileType>::VALUE; ++i) {
 		os << i << ':' << ' ' << rhs.count[i] << std::endl;
 	}
 	return os;

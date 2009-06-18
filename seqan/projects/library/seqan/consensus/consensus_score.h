@@ -22,6 +22,9 @@ Lesser General Public License for more details.
 namespace SEQAN_NAMESPACE_MAIN
 {
 
+
+static const int SEQAN_CONSENSUS_UNITY = 1 << 20;
+
 //////////////////////////////////////////////////////////////////////////////
 // Consensus score tags
 //////////////////////////////////////////////////////////////////////////////
@@ -65,15 +68,13 @@ template <typename TValue>
 class Score<TValue, ConsensusScore>
 {
 public:
-	TValue data_penalty; // Not a consensus element
-	TValue data_match;	 // Is a consensus element
-
-	String<bool> consensus_set;		// Is the alphabet character part of the consensus set in the given column
 	int column;
+	String<TValue> consensus_set;		// Is the alphabet character part of the consensus set in the given column
+
 
 
 public:
-	Score(): data_penalty(-1), data_match(0), column(-1) {}
+	Score(): column(-1) {}
 
 };
 
@@ -94,10 +95,8 @@ _update(Score<TValue, ConsensusScore>& me,
 	for(TSize i = 0; i<alphSize; ++i) {
 		if (myC.count[i] > maxCount) maxCount = myC.count[i];
 	}
-	for(TSize i = 0; i<alphSize; ++i) {
-		if (myC.count[i] == maxCount) value(me.consensus_set, i) = true;
-		else value(me.consensus_set, i) = false;
-	}
+	for(TSize i = 0; i<alphSize; ++i)
+		me.consensus_set[i] = (myC.count[i] == maxCount)? 0 : (-SEQAN_CONSENSUS_UNITY);
 	me.column = pos1;
 }
 
@@ -111,22 +110,22 @@ scoreGapExtendHorizontal(
 	TSeq1 const &seq1,
 	TSeq2 const &)
 {
-	if ((int) pos2 < (int) 0) return me.data_penalty;
+	if ((int) pos2 < 0) return -SEQAN_CONSENSUS_UNITY;
 	if ((int) pos1 != me.column) _update(const_cast<Score<TValue, ConsensusScore>&>(me), pos1, seq1);
-	return (getValue(me.consensus_set, ValueSize<typename Value<TSeq1>::Type>::VALUE - 1)) ? me.data_match : me.data_penalty;
+	return me.consensus_set[ValueSize<typename Value<TSeq1>::Type>::VALUE - 1];
 }
 
 
 template <typename TValue, typename TPos1, typename TPos2, typename TSeq1, typename TSeq2>
 inline TValue
 scoreGapExtendVertical(
-	Score<TValue, ConsensusScore> const & me,
+	Score<TValue, ConsensusScore> const &,
 	TPos1,
 	TPos2,
 	TSeq1 const &,
 	TSeq2 const &)
 {
-	return me.data_penalty;
+	return -SEQAN_CONSENSUS_UNITY;
 }
 
 
@@ -139,7 +138,7 @@ score(Score<TValue, ConsensusScore> const & me,
 	  TSeq2 const &seq2)
 {
 	if ((int) pos1 != me.column) _update(const_cast<Score<TValue, ConsensusScore>&>(me), pos1, seq1);
-	return (getValue(me.consensus_set, seq2[pos2].count[0])) ? me.data_match : me.data_penalty;
+	return me.consensus_set[seq2[pos2].count[0]];
 }
 
 
@@ -161,14 +160,12 @@ template <typename TValue>
 class Score<TValue, FractionalScore>
 {
 public:
-	TValue data_penalty; 
-	
 	int sum;		// Total number of profile characters in the given column
 	int column;
 
 
 public:
-	Score(): data_penalty(-1), column(-1) {}
+	Score(): column(-1) {}
 
 };
 
@@ -181,7 +178,7 @@ _update(Score<TValue, FractionalScore>& me,
 {
 	typedef typename Size<TSeq1>::Type TSize;
 	me.sum = 0;
-	for(TSize i = 0; i < (TSize) ValueSize<typename Value<TSeq1>::Type>::VALUE; ++i) me.sum += (value(seq1, pos1)).count[i];
+	for(TSize i = 0; i < (TSize) ValueSize<typename Value<TSeq1>::Type>::VALUE; ++i) me.sum += seq1[pos1].count[i];
 	me.column = pos1;
 }
 
@@ -195,22 +192,22 @@ scoreGapExtendHorizontal(
 	TSeq1 const &seq1,
 	TSeq2 const &)
 {
-	if ((int) pos2 < 0) return me.data_penalty;
+	if ((int) pos2 < 0) return -SEQAN_CONSENSUS_UNITY;
 	if ((int) pos1 != me.column) _update(const_cast<Score<TValue, FractionalScore>&>(me), pos1, seq1);
-	return me.data_penalty * ((me.sum - (TValue) (value(seq1, pos1)).count[ValueSize<typename Value<TSeq1>::Type>::VALUE - 1]) / me.sum);
+	return ((TValue) (( (int) seq1[pos1].count[ValueSize<typename Value<TSeq1>::Type>::VALUE - 1] - me.sum) * SEQAN_CONSENSUS_UNITY) / me.sum);
 }
 
 
 template <typename TValue, typename TPos1, typename TPos2, typename TSeq1, typename TSeq2>
 inline TValue
 scoreGapExtendVertical(
-	Score<TValue, FractionalScore> const & me,
+	Score<TValue, FractionalScore> const &,
 	TPos1,
 	TPos2,
 	TSeq1 const &,
 	TSeq2 const &)
 {
-	return me.data_penalty;
+	return -SEQAN_CONSENSUS_UNITY;
 }
 
 
@@ -223,7 +220,7 @@ score(Score<TValue, FractionalScore> const & me,
 	  TSeq2 const &seq2)
 {
 	if ((int) pos1 != me.column) _update(const_cast<Score<TValue, FractionalScore>&>(me), pos1, seq1);
-	return me.data_penalty * ((me.sum - (TValue) seq1[pos1].count[seq2[pos2].count[0]]) / me.sum);
+	return ((TValue) (((int) seq1[pos1].count[seq2[pos2].count[0]] - me.sum ) * SEQAN_CONSENSUS_UNITY) / me.sum);
 }
 
 
@@ -262,7 +259,7 @@ scoreGapExtendHorizontal(
 	TSeq1 const &seq1,
 	TSeq2 const &seq2)
 {
-	return (0.5 * (TValue) scoreGapExtendHorizontal(me.sc1, pos1, pos2, seq1, seq2) + 0.5 * (TValue) scoreGapExtendHorizontal(me.sc2, pos1, pos2, seq1, seq2));
+	return (scoreGapExtendHorizontal(me.sc1, pos1, pos2, seq1, seq2) + scoreGapExtendHorizontal(me.sc2, pos1, pos2, seq1, seq2)) / (TValue) 2;
 }
 
 
@@ -275,7 +272,7 @@ scoreGapExtendVertical(
 	TSeq1 const & seq1,
 	TSeq2 const & seq2)
 {
-	return (0.5 * (TValue) scoreGapExtendVertical(me.sc1, pos1, pos2, seq1, seq2) + 0.5 * (TValue) scoreGapExtendVertical(me.sc2, pos1, pos2, seq1, seq2));
+	return (scoreGapExtendVertical(me.sc1, pos1, pos2, seq1, seq2) + scoreGapExtendVertical(me.sc2, pos1, pos2, seq1, seq2)) / (TValue) 2;
 }
 
 
@@ -287,7 +284,7 @@ score(Score<TValue, WeightedConsensusScore<TScore1, TScore2> > const & me,
 	  TSeq1 const &seq1,
 	  TSeq2 const &seq2)
 {
-	return (0.5 * (TValue) score(me.sc1, pos1, pos2, seq1, seq2) + 0.5 * (TValue) score(me.sc2, pos1, pos2, seq1, seq2));
+	return (score(me.sc1, pos1, pos2, seq1, seq2) + score(me.sc2, pos1, pos2, seq1, seq2)) / (TValue) 2;
 }
 
 }

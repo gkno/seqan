@@ -438,7 +438,9 @@ int main(int argc, const char *argv[]) {
 	for(TSize currentContig = 0; currentContig < numberOfContigs; ++currentContig) {
 
 		if (consOpt.realign) {
-			Score<double, WeightedConsensusScore<Score<double, FractionalScore>, Score<int, ConsensusScore> > > combinedScore;
+			Score<int, WeightedConsensusScore<Score<int, FractionalScore>, Score<int, ConsensusScore> > > combinedScore;
+			//Score<int, ConsensusScore> combinedScore;
+			//Score<int, FractionalScore> combinedScore;
 			reAlign(fragStore, combinedScore, currentContig, consOpt.bandwidth);
 		} else {
 			

@@ -116,7 +116,7 @@ template <typename TTrace, typename TStringSet, typename TScore, typename TValPa
 inline typename Value<TScore>::Type
 _align_needleman_wunsch(TTrace & trace,
 						TStringSet const & str,
-						TScore const & sc,
+						TScore const & _sc,
 						TValPair & overallMaxValue,
 						TIndexPair & overallMaxIndex,
 						TAlignConfig const) 
@@ -129,8 +129,6 @@ _align_needleman_wunsch(TTrace & trace,
 	TTraceValue Diagonal = 0;
 	TTraceValue Horizontal = 1;
 	TTraceValue Vertical = 2;
-
-	TScore const & _sc = sc;
 
 	// One DP Matrix column
 	typedef typename Value<TScore>::Type TScoreValue;
@@ -145,14 +143,14 @@ _align_needleman_wunsch(TTrace & trace,
 	TSize len2 = length(str2);
 	resize(column, len2 + 1);  
 	resize(trace, len1*len2);
-	for(TSize row = 1; row <= len2; ++row) _initFirstColumn(TAlignConfig(), value(column, row), (TScoreValue) (row) * scoreGapExtendVertical(sc, -1, row - 1, str1, str2));
+	for(TSize row = 1; row <= len2; ++row) _initFirstColumn(TAlignConfig(), value(column, row), (TScoreValue) (row) * scoreGapExtendVertical(_sc, -1, row - 1, str1, str2));
 	value(column, 0) = 0;
 	//for(TSize i = 0; i <= len2; ++i) std::cout << value(column, i) << std::endl;
 	
 	// Classical DP
 	typedef typename Iterator<TTrace, Standard>::Type TTraceIter;
 	TTraceIter it = begin(trace, Standard() );
-	TScoreValue infValue = -1 * _getInfinityDistance<TScoreValue>();
+	TScoreValue infValue = InfimumValue<TScoreValue>::VALUE;
 	overallMaxValue = std::make_pair(infValue, infValue);
 	overallMaxIndex = std::make_pair(len1, len2);
 
@@ -163,16 +161,10 @@ _align_needleman_wunsch(TTrace & trace,
 	for(TSize col = 0; col < len1; ++col) 
 	{
 		TScoreValue diagVal = value(column, 0);
-		_initFirstRow(TAlignConfig(), value(column, 0), (TScoreValue) (col+1) * scoreGapExtendHorizontal(sc, col, -1, str1, str2));
+		_initFirstRow(TAlignConfig(), value(column, 0), (TScoreValue) (col+1) * scoreGapExtendHorizontal(_sc, col, -1, str1, str2));
 		TScoreValue vertiVal = value(column, 0);
 
-//		typedef typename Value<TString>::Type TStringValue;
-//		TStringValue char1 = str1[col];
-
 		TColIterator coit = begin(column, Standard());
-
-//		typedef typename Iterator<TString, Standard>::Type TStringIterator;
-//		TStringIterator s2_it = begin(str2, Standard());
 		TSize col2 = 0;
 
 		while (true)
@@ -186,20 +178,15 @@ _align_needleman_wunsch(TTrace & trace,
 			{
 				max_hori_verti = *coit;
 				tv_hori_verti = Horizontal;
-				max_hori_verti += scoreGapExtendHorizontal(sc, col, col2, str1, str2);
+				max_hori_verti += scoreGapExtendHorizontal(_sc, col, col2, str1, str2);
 			}
 			else
 			{
 				max_hori_verti = vertiVal;
 				tv_hori_verti = Vertical;
-				max_hori_verti += scoreGapExtendVertical(sc, col, col2, str1, str2);
+				max_hori_verti += scoreGapExtendVertical(_sc, col, col2, str1, str2);
 			}
-			
 
-			// (deprecated scoring)
-//			vertiVal = diagVal + score(_sc, char1, *s2_it); //compute the maximum in vertiVal 
-//			++s2_it;
-			
 			// better: use position dependent scoring
 			vertiVal = diagVal + score(_sc, col, col2, str1, str2); //compute the maximum in vertiVal 
 			++col2;
