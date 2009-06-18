@@ -818,7 +818,7 @@ _convertSimpleReadFile(TFile& file,
 	TPos minPos = SupremumValue<TPos>::VALUE;
 	TId count = 0;
 	TValue c;
-	if (_streamEOF(file)) return false;
+	if ((!file) || (_streamEOF(file))) return false;
 	else c = _streamGet(file);
 	while (!_streamEOF(file)) {
 		if (_streamEOF(file)) break;
@@ -914,7 +914,6 @@ _convertSimpleReadFile(TFile& file,
 			// Set mate pair id
 			readEl.matePairId = fragId;
 
-			
 			// Insert the read
 			readIdMap.insert(std::make_pair(id, length(fragStore.readStore)));
 			appendValue(fragStore.readStore, readEl, Generous());
@@ -937,7 +936,7 @@ _convertSimpleReadFile(TFile& file,
 	std::string fileName = filePath + 'S';
 	FILE* strmRef = fopen(fileName.c_str(), "rb");
 	String<char> contigEid = "C0";
-	if (!_streamEOF(strmRef)) {
+	if ((strmRef) && (!_streamEOF(strmRef))) {
 		c = _streamGet(strmRef);
 		while (!_streamEOF(strmRef)) {
 			if (_streamEOF(strmRef)) break;
@@ -958,8 +957,8 @@ _convertSimpleReadFile(TFile& file,
 				_parse_skipLine(strmRef, c);
 			}
 		}
+		fclose(strmRef);
 	}
-	fclose(strmRef);
 	if (empty(contigEl.seq)) {
 		typedef typename TFragmentStore::TContigGapAnchor TContigGapAnchor;
 		if (moveToFront) appendValue(contigEl.gaps, TContigGapAnchor(0, maxPos - minPos), Generous());
@@ -972,7 +971,7 @@ _convertSimpleReadFile(TFile& file,
 	// Read fragments
 	fileName = filePath + 'F';
 	FILE* strmFrag = fopen(fileName.c_str(), "rb");
-	if (!_streamEOF(strmFrag)) {
+	if ((strmFrag) && (!_streamEOF(strmFrag))) {
 		c = _streamGet(strmFrag);
 		while (!_streamEOF(strmFrag)) {
 			if (_streamEOF(strmFrag)) break;
@@ -1033,13 +1032,14 @@ _convertSimpleReadFile(TFile& file,
 				_parse_skipLine(strmFrag, c);
 			}
 		}
+		fclose(strmFrag);
 	}
-	fclose(strmFrag);
+	
 
 	// Read libraries
 	fileName = filePath + 'L';
 	FILE* strmLib = fopen(fileName.c_str(), "rb");
-	if (!_streamEOF(strmLib)) {
+	if ((strmLib) && (!_streamEOF(strmLib))) {
 		c = _streamGet(strmLib);
 		while (!_streamEOF(strmLib)) {
 			if (_streamEOF(strmLib)) break;
@@ -1096,8 +1096,9 @@ _convertSimpleReadFile(TFile& file,
 				_parse_skipLine(strmLib, c);
 			}
 		}
+		fclose(strmLib);
 	}
-	fclose(strmLib);
+	
 	
 	// Renumber all ids
 	typedef typename TIdMap::const_iterator TIdMapIter;
