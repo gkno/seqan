@@ -262,7 +262,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <unsigned char c>
 	struct MemsetConstValueWorker<0, true, c> {
-		finline static void run(unsigned char* ptr) {}
+		finline static void run(unsigned char*) {}
 	};
 
 	template <unsigned char c>

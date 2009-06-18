@@ -40,7 +40,7 @@ class ProfileType {
 
 		inline
 		ProfileType() {
-			::std::fill(count, count + ValueSize<ProfileType>::VALUE, 0);
+			memset<ValueSize<ProfileType>::VALUE * sizeof(TCount), (unsigned char) 0>(count);
 		}
 
 		inline
@@ -56,7 +56,7 @@ class ProfileType {
 		template <typename TOther> 
 		inline
 		ProfileType(TOther const& other_data) {
-			::std::fill(count, count + ValueSize<ProfileType>::VALUE, 0);
+			memset<ValueSize<ProfileType>::VALUE * sizeof(TCount), (unsigned char) 0>(count);
 			count[ordValue(TValue(other_data))] = 1;
 		}
 
@@ -74,7 +74,7 @@ class ProfileType {
 		inline
 		ProfileType const& 
 		operator = (TOther const& other_data) {
-			::std::fill(count, count + ValueSize<ProfileType>::VALUE, 0);
+			memset<ValueSize<ProfileType>::VALUE * sizeof(TCount), (unsigned char) 0>(count);
 			count[ordValue(TValue(other_data))] = 1;
 			return *this;
 		}
