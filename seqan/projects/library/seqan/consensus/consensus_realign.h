@@ -176,7 +176,8 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 		String<TAlignedRead, TSpec>& contigReads,
 		TConsensus& consensus,
 		TScore const& consScore,
-		TBandwidth const bandwidth)
+		TBandwidth const bandwidth,
+		bool includeReference)
 {
 	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
 	typedef String<TAlignedRead, TSpec> TAlignedReadStore;
@@ -194,6 +195,7 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 	// Remove each fragment and realign it to the profile
 	TAlignedReadIter alignIt = begin(contigReads, Standard() );
 	TAlignedReadIter alignItEnd = end(contigReads, Standard() );
+	if (includeReference) --alignItEnd;
 	TConsensus bandConsensus;
 	TConsensus myRead;
 	TConsensus newConsensus;
@@ -231,7 +233,7 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 			bandOffset = alignIt->beginPos - bandwidth;
 			itCons += bandOffset; itConsPos += bandOffset;
 		}
-		for(TReadPos iPos = bandOffset; iPos < alignIt->beginPos; ++itCons, ++bandConsIt, ++itConsPos, ++iPos) 
+		for(TReadPos iPos = bandOffset; iPos < alignIt->beginPos; ++itCons, ++bandConsIt, ++itConsPos, ++iPos)
 			*bandConsIt = *itCons;
 		alignIt->beginPos = alignIt->endPos = 0; // So this read is discarded in all gap operations
 
@@ -297,8 +299,8 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 		}
 
 		// Go further up to the bandwidth
-		for(TReadPos iPos = 0; ((itCons != itConsEnd) && (iPos < (TReadPos) bandwidth)); ++itCons, ++iPos, ++bandConsIt) 
-			*bandConsIt = *itCons;
+		for(TReadPos iPos = 0; ((itCons != itConsEnd) && (iPos < (TReadPos) bandwidth)); ++itCons, ++iPos, ++bandConsIt)
+				*bandConsIt = *itCons;
 		resize(bandConsensus, bandConsIt - begin(bandConsensus));
 		resize(myRead, myReadIt - begin(myRead));
 
@@ -307,6 +309,15 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 		TStringSet pairSet;
 		appendValue(pairSet, bandConsensus);
 		appendValue(pairSet, myRead);
+
+		//for(TSize i = 0; i<length( pairSet[0]); ++i) {
+		//	std::cout <<  pairSet[0][i] << std::endl;
+		//}
+		//std::cout << "_______________" << std::endl;
+		//for(TSize i = 0; i<length( pairSet[1]); ++i) {
+		//	std::cout <<   pairSet[1][i] << std::endl;
+		//}
+		//std::cout << "..............." << std::endl;
 
 		typedef String<Fragment<> > TFragmentString;
 		TFragmentString matches;
@@ -406,7 +417,8 @@ inline void
 reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 		TScore const& consScore,
 		TId const contigId,
-		TBandwidth const bandwidth)
+		TBandwidth const bandwidth,
+		bool includeReference)
 {
 	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
 	typedef typename Size<TFragmentStore>::Type TSize;
@@ -416,7 +428,9 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 	typedef typename TFragmentStore::TReadSeq TReadSeq;
 	typedef typename TFragmentStore::TReadGapAnchor TGapAnchor;
 	typedef typename Value<typename TFragmentStore::TReadSeq>::Type TAlphabet;
-	
+	typedef typename Value<TAlignedReadStore>::Type TAlignedElement;
+	typedef typename Value<typename TFragmentStore::TReadStore>::Type TReadElement;
+
 	// Sort the reads according to the begin position
 	sortAlignedReads(fragStore.alignedReadStore, SortBeginPos());
 
@@ -434,7 +448,7 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 		if ((TId) alignIt->contigId == contigId) {
 			if (alignIt->beginPos > alignIt->endPos) {
 				reverseComplementInPlace(fragStore.readStore[alignIt->readId].seq);
-				typename Value<TAlignedReadStore>::Type alignedEl = *alignIt;
+				TAlignedElement alignedEl = *alignIt;
 				TReadPos tmp = alignedEl.beginPos;
 				alignedEl.beginPos = alignedEl.endPos;
 				alignedEl.endPos = tmp;
@@ -447,6 +461,20 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 				appendValue(contigReads, value(alignIt), Generous() );
 			}
 		}
+	}
+	if (includeReference) {
+		TId dummyReadId = length(fragStore.readStore);
+		TReadElement rEl;
+		rEl.seq = fragStore.contigStore[contigId].seq;
+		appendValue(fragStore.readStore, rEl, Generous());
+		appendValue(fragStore.readNameStore, fragStore.contigNameStore[contigId], Generous());
+		fragStore.contigNameStore[contigId] += " - Consensus";
+		TAlignedElement el;
+		el.readId = dummyReadId;
+		el.contigId = contigId;
+		minPos = el.beginPos = 0;
+		maxPos = el.endPos = length(rEl.seq);
+		appendValue(contigReads, el, Generous() );
 	}
 
 	// Create the consensus sequence
@@ -500,13 +528,13 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 	}
 
 
-	reAlign(fragStore, contigReads, consensus, consScore, bandwidth);
+	reAlign(fragStore, contigReads, consensus, consScore, bandwidth, includeReference);
 	int score = scoreConsensus(consensus);
 	int oldScore = score + 1;
 	while(score < oldScore) {
 		std::cout << "Score: " << score << std::endl;
 		oldScore = score;
-		reAlign(fragStore, contigReads, consensus, consScore, bandwidth);
+		reAlign(fragStore, contigReads, consensus, consScore, bandwidth, includeReference);
 		score = scoreConsensus(consensus);
 	}
 	std::cout << "Score: " << score << std::endl;
@@ -563,6 +591,8 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 
 	}
 
+	if (includeReference) 
+		appendValue(fragStore.alignedReadStore, contigReads[length(contigReads) - 1], Generous() );
 
 }
 

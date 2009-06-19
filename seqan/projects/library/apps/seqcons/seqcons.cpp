@@ -441,7 +441,7 @@ int main(int argc, const char *argv[]) {
 			Score<int, WeightedConsensusScore<Score<int, FractionalScore>, Score<int, ConsensusScore> > > combinedScore;
 			//Score<int, ConsensusScore> combinedScore;
 			//Score<int, FractionalScore> combinedScore;
-			reAlign(fragStore, combinedScore, currentContig, consOpt.bandwidth);
+			reAlign(fragStore, combinedScore, currentContig, consOpt.bandwidth, true);
 		} else {
 			
 // Profiling

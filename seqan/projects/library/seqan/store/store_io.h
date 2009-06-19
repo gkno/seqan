@@ -836,13 +836,9 @@ _convertSimpleReadFile(TFile& file,
 
 			// Get the layout positions
 			alignEl.beginPos = _parse_readNumber(file, c);
-			if (alignEl.beginPos < minPos) minPos = alignEl.beginPos;
-			if (alignEl.beginPos > maxPos) maxPos = alignEl.beginPos;
 			c = _streamGet(file);
 			_parse_skipWhitespace(file, c);
 			alignEl.endPos = _parse_readNumber(file, c);
-			if (alignEl.endPos < minPos) minPos = alignEl.endPos;
-			if (alignEl.endPos > maxPos) maxPos = alignEl.endPos;
 			
 			// Any attributes?
 			String<char> eid;
@@ -920,6 +916,20 @@ _convertSimpleReadFile(TFile& file,
 			appendValue(fragStore.readNameStore, eid, Generous());
 
 			// Insert an aligned read
+			TSize readLen = length(readEl.seq);
+			if (alignEl.beginPos < alignEl.endPos) {
+				if (readLen != alignEl.endPos - alignEl.beginPos) {
+					alignEl.endPos = alignEl.beginPos + readLen;
+				}
+				if (alignEl.beginPos < minPos) minPos = alignEl.beginPos;
+				if (alignEl.endPos > maxPos) maxPos = alignEl.endPos;
+			} else {
+				if (readLen != alignEl.beginPos - alignEl.endPos) {
+					alignEl.beginPos = alignEl.endPos + readLen;
+				}
+				if (alignEl.endPos < minPos) minPos = alignEl.endPos;
+				if (alignEl.beginPos > maxPos) maxPos = alignEl.beginPos;
+			}
 			alignEl.readId = id;
 			alignEl.pairMatchId =  fragId;
 			alignEl.contigId = 0;

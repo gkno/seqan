@@ -194,7 +194,8 @@ scoreGapExtendHorizontal(
 {
 	if ((int) pos2 < 0) return -SEQAN_CONSENSUS_UNITY;
 	if ((int) pos1 != me.column) _update(const_cast<Score<TValue, FractionalScore>&>(me), pos1, seq1);
-	return ((TValue) (( (int) seq1[pos1].count[ValueSize<typename Value<TSeq1>::Type>::VALUE - 1] - me.sum) * SEQAN_CONSENSUS_UNITY) / me.sum);
+	return (me.sum == 0) ? -SEQAN_CONSENSUS_UNITY : ((TValue) (( (int) seq1[pos1].count[ValueSize<typename Value<TSeq1>::Type>::VALUE - 1] - me.sum) * SEQAN_CONSENSUS_UNITY) / me.sum);
+	//return ((TValue) (( (int) seq1[pos1].count[ValueSize<typename Value<TSeq1>::Type>::VALUE - 1] - me.sum) * SEQAN_CONSENSUS_UNITY) / me.sum);
 }
 
 
@@ -220,7 +221,8 @@ score(Score<TValue, FractionalScore> const & me,
 	  TSeq2 const &seq2)
 {
 	if ((int) pos1 != me.column) _update(const_cast<Score<TValue, FractionalScore>&>(me), pos1, seq1);
-	return ((TValue) (((int) seq1[pos1].count[seq2[pos2].count[0]] - me.sum ) * SEQAN_CONSENSUS_UNITY) / me.sum);
+	return (me.sum == 0) ? -SEQAN_CONSENSUS_UNITY : ((TValue) (((int) seq1[pos1].count[seq2[pos2].count[0]] - me.sum ) * SEQAN_CONSENSUS_UNITY) / me.sum);
+	//return ((TValue) (((int) seq1[pos1].count[seq2[pos2].count[0]] - me.sum ) * SEQAN_CONSENSUS_UNITY) / me.sum);
 }
 
 

@@ -179,7 +179,7 @@ TStream& operator<<(TStream& os, ProfileType<TValue, TCount, TSpec> const& rhs) 
 	typedef ProfileType<TValue, TCount, TSpec> TProfileType;
 	typedef typename Size<TProfileType>::Type TSize;
 	for(TSize i = 0; i<ValueSize<TProfileType>::VALUE; ++i) {
-		os << i << ':' << ' ' << rhs.count[i] << std::endl;
+		os << i << ':' << rhs.count[i] << ' ' << ';';
 	}
 	return os;
 }
