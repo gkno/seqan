@@ -122,7 +122,7 @@ struct ParamChooserOptions
 		extrapolate = false;
 		extrapolN = 65;
 		extrapolK = 4;
-		maxComputedEditN = 65;
+		maxComputedEditN = 59;
 		maxComputedHammingN = 75;
 
 		chooseOneGappedOnly = false;      // choose onegapped (or ungapped) shape (discard all other gapped shapes)

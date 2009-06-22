@@ -212,6 +212,7 @@ int main(int argc, const char *argv[])
 				if (arg + 1 < argc) {
 					++arg;
 					pm_options.shapeFile = argv[arg];
+					pm_options.useDefaultShapes = false;
 //					cout << "Session id prefix specified\n";
 				}
 				else 
