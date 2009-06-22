@@ -372,10 +372,53 @@ Additional value description:
                (e.g. 12A: 12'th base was A in the genome)
 
 ---------------------------------------------------------------------------
-4.3. GFF Format
+4.3. General Feature Format
 ---------------------------------------------------------------------------
 
-...
+The General Feature Format is specified by the Sanger Institute as a tab-
+delimited text format with the following columns:
+
+<seqname> <src> <feat> <start> <end> <score> <strand> <frame> [attr] [cmts]
+
+See also http://www.sanger.ac.uk/Software/formats/GFF/GFF_Spec.shtml
+
+Consistent with this specification razers GFF output looks as follows:
+
+GNAME razers read GBEGIN GEND PERCID GSTRAND . ATTRIBUTES
+
+Match value description:
+
+  GNAME        Name of the genome sequence (see --genome-naming)
+  razers       Constant
+  read         Constant
+  GBEGIN       Beginning position in the genome sequence 
+               (positions are counted from 1)
+  GEND         End position in the genome sequence (included!)
+  PERCID       Percent identity (see --percent-identity)
+  GSTRAND      '+'=forward strand or '-'=reverse strand
+  .            Constant
+  ATTRIBUTES   A list of attributes in the format <tag_name>[=<tag>] 
+               separated by ';'
+
+Attributes are: 
+
+  ID=          Name of the read
+  quality=     Ascii coded quality values of the read
+  cigar=       Read-reference alignment description in cigar format*
+  mutations=   Positions and bases that differ from the reference
+               with respect to the read (counting from 1)
+  unique       This is the best read match and it is unique
+  multi        This is one of multiple best machtes 
+  suboptimal   This is a suboptimal read match
+
+The original read sequence can be retrieved using the genomic subsequence 
+and the information contained in the 'cigar' and 'mutations' tags. 
+
+For matches on the reverse strand, GBEGIN and GEND are positions on the 
+related forward strand. It holds GBEGIN < GEND, regardless of GSTRAND.
+
+*http://may2005.archive.ensembl.org/Docs/wiki/html/EnsemblDocs/CigarFormat.html
+
 
 ---------------------------------------------------------------------------
 5. Example

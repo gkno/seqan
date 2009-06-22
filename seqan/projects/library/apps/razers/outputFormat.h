@@ -338,12 +338,11 @@ getCigarLine(TAlign & align, TString & cigar, TString & mutations)
 	typedef typename Row<TAlign>::Type TRow;
 	typedef typename Iterator<TRow, Rooted>::Type TAlignIterator;
 
-	TAlignIterator ali_it0_stop = iter(row(align,0),endPosition(row(align,0)));
-	TAlignIterator ali_it1_stop = iter(row(align,1),endPosition(row(align,1)));
-	TAlignIterator ali_it0 = iter(row(align,0),beginPosition(row(align,0)));
-	TAlignIterator ali_it1 = iter(row(align,1),beginPosition(row(align,1)));					
+	TAlignIterator ali_it0_stop = iter(row(align,0),endPosition(cols(align)));
+	TAlignIterator ali_it1_stop = iter(row(align,1),endPosition(cols(align)));
+	TAlignIterator ali_it0 = iter(row(align,0),beginPosition(cols(align)));
+	TAlignIterator ali_it1 = iter(row(align,1),beginPosition(cols(align)));					
 	TStringIterator readBase = begin(source(row(align,0))); 
-	
 	//std::cout << "getting cigar line\n";//ali0 len = " <<ali_it0_stop-ali_it0 << " \t ali1 len = "<<ali_it1_stop-ali_it1<<"\n";
 	int readPos = 0;
 	bool first = true;
@@ -932,7 +931,8 @@ void dumpMatches(
 								break;
 						}
 					//	std::cout << "hier3\n";
-						file <<  options.runID << "_razers\tread";
+						//file <<  options.runID << "_razers\tread";
+						file << "razers\tread";
 						file << '\t' << ((*it).gBegin + options.positionFormat) << '\t' << (*it).gEnd << '\t';
 		//				if ((*it).orientation == 'F')
 		//					file << '\t' << ((*it).gBegin + options.positionFormat) << '\t' << (*it).gEnd <<'\t';
@@ -980,9 +980,16 @@ void dumpMatches(
 								if ((*it).orientation == 'R')
 									reverseComplementInPlace(gInf);
 								bool first = true;
-								file << ";cigar=" << length(gInf) << "M";
+								file << ";cigar=" << length(reads[currReadNo]) << "M";
 								file << ";mutations=";
-								for (unsigned i = 0; i < length(gInf); ++i)
+								unsigned i = 0;
+//								while ((*it).gBegin == 0 && i < length(reads[currReadNo])-length(gInf) )
+//								{
+//									if(first){ file << i + 1 << (Dna5)reads[currReadNo][i]; first = false;}
+//									else file <<','<< i + 1 << (Dna5)reads[currReadNo][i];
+//									++i;
+//								}
+								for (; i < length(gInf); ++i)
 									if ((options.compMask[ordValue(reads[currReadNo][i])] & 
 										options.compMask[ordValue(gInf[i])]) == 0)
 									{
@@ -991,6 +998,13 @@ void dumpMatches(
 										if(first){ file << i + 1 << (Dna5)reads[currReadNo][i]; first = false;}
 										else file <<','<< i + 1 << (Dna5)reads[currReadNo][i];
 									}
+//								while ((*it).gEnd == length(currGenome) && i < length(reads[currReadNo]) )
+//								{
+//									if(first){ file << i + 1 << (Dna5)reads[currReadNo][i]; first = false;}
+//									else file <<','<< i + 1 << (Dna5)reads[currReadNo][i];
+//									++i;
+//								}
+								
 							}
 							else
 							{
