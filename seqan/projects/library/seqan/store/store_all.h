@@ -39,12 +39,12 @@ struct FragmentStoreConfig
 	typedef double			TMean;
 	typedef double			TStd;
 		
-	typedef void			TReadStoreElementSpec;
-	typedef ConcatDirect<>	TReadSeqStoreSpec;
-	typedef void			TMatePairStoreElementSpec;
-	typedef void			TLibraryStoreElementSpec;
-	typedef void			TContigStoreElementSpec;
-	typedef void			TAlignedReadStoreElementSpec;
+	typedef void					TReadStoreElementSpec;
+	typedef Owner<ConcatDirect<> >	TReadSeqStoreSpec;
+	typedef void					TMatePairStoreElementSpec;
+	typedef void					TLibraryStoreElementSpec;
+	typedef void					TContigStoreElementSpec;
+	typedef void					TAlignedReadStoreElementSpec;
 };
 
 //////////////////////////////////////////////////////////////////////////////
