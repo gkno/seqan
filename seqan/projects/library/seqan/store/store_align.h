@@ -38,7 +38,7 @@ struct AlignedReadStoreElement
 	TId					id;
 	TId					readId;
 	TId					contigId;
-	TId					pairMatchId;	// unique id. for multiple mate-pair matches
+	TId					pairMatchId;	// unique id. for multiple mate-pair matches (not matePairId)
 	TPos				beginPos;		// begin position of the gapped sequence in gapped contig sequence
 	TPos				endPos;			// end position of ..., for reverse aligned reads holds end < begin
 	String<TGapAnchor>	gaps;

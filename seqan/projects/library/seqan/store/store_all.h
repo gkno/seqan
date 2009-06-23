@@ -40,6 +40,7 @@ struct FragmentStoreConfig
 	typedef double			TStd;
 		
 	typedef void			TReadStoreElementSpec;
+	typedef ConcatDirect<>	TReadSeqStoreSpec;
 	typedef void			TMatePairStoreElementSpec;
 	typedef void			TLibraryStoreElementSpec;
 	typedef void			TContigStoreElementSpec;
@@ -47,12 +48,21 @@ struct FragmentStoreConfig
 };
 
 //////////////////////////////////////////////////////////////////////////////
-// Contig Store
+// Fragment Store
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TSpec = void, typename TConfig = FragmentStoreConfig<TSpec> >
 struct FragmentStore
 {
+private:
+	typedef typename TConfig::TReadStoreElementSpec			TReadStoreElementSpec;
+	typedef typename TConfig::TReadSeqStoreSpec				TReadSeqStoreSpec;
+	typedef typename TConfig::TMatePairStoreElementSpec		TMatePairStoreElementSpec;
+	typedef typename TConfig::TLibraryStoreElementSpec		TLibraryStoreElementSpec;
+	typedef typename TConfig::TContigStoreElementSpec		TContigStoreElementSpec;
+	typedef typename TConfig::TAlignedReadStoreElementSpec	TAlignedReadStoreElementSpec;
+
+public:
 	typedef typename TConfig::TMean					TMean;
 	typedef typename TConfig::TStd					TStd;
 	
@@ -64,24 +74,26 @@ struct FragmentStore
 	typedef GapAnchor<TReadPos>						TReadGapAnchor;
 	typedef GapAnchor<TContigPos>					TContigGapAnchor;
 
-	typedef typename TConfig::TReadStoreElementSpec			TReadStoreElementSpec;
-	typedef typename TConfig::TMatePairStoreElementSpec		TMatePairStoreElementSpec;
-	typedef typename TConfig::TLibraryStoreElementSpec		TLibraryStoreElementSpec;
-	typedef typename TConfig::TContigStoreElementSpec		TContigStoreElementSpec;
-	typedef typename TConfig::TAlignedReadStoreElementSpec	TAlignedReadStoreElementSpec;
-	
 	typedef String< ReadStoreElement< TReadSeq, TReadPos, TReadStoreElementSpec > >							TReadStore;
 	typedef String< MatePairStoreElement< TMatePairStoreElementSpec > >										TMatePairStore;
 	typedef String< LibraryStoreElement< TMean, TStd, TLibraryStoreElementSpec > >							TLibraryStore;
 	typedef String< ContigStoreElement< TContigSeq, TContigGapAnchor, TContigStoreElementSpec > >			TContigStore;
 	typedef String< AlignedReadStoreElement< TContigPos, TReadGapAnchor, TAlignedReadStoreElementSpec > >	TAlignedReadStore;
 	
-	TReadStore			readStore;
-	TMatePairStore		matePairStore;
-	TLibraryStore		libraryStore;
-	TContigStore		contigStore;
-	TAlignedReadStore	alignedReadStore;
-	
+	// main containers
+	TReadStore			readStore;			// readId     -> matePairId
+	TMatePairStore		matePairStore;		// matePairId -> readId0, readId1, libraryId
+	TLibraryStore		libraryStore;		// libraryId  -> libSizeMean, libSizeStd
+	TContigStore		contigStore;		// contigId   -> contigSeq, contigGaps
+	TAlignedReadStore	alignedReadStore;	//            -> id, readId, contigId, pairMatchId (not matePairId!), beginPos, endPos, gaps
+											//
+											// The alignedReadStore can arbitrarily be resorted. The unique identifier id should
+											// be used to address additional information for each alignedRead in additional tables.
+
+	// we store the read sequences in a seperate stringset to reduce the memory overhead 
+	StringSet<TReadSeq, TReadSeqStoreSpec>	readSeqStore;
+
+	// retrieve the names of reads, mate-pairs, libraries, contigs by their ids
 	StringSet<CharString>	readNameStore;
 	StringSet<CharString>	matePairNameStore;
 	StringSet<CharString>	libraryNameStore;
@@ -90,6 +102,56 @@ struct FragmentStore
 
 //////////////////////////////////////////////////////////////////////////////
 
+//////////////////////////////////////////////////////////////////////////////
+// Read Store Accessors
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TSpec, typename TConfig>
+inline void
+clearReads(FragmentStore<TSpec, TConfig> &me)
+{
+	clear(me.readStore);
+	clear(me.readSeqStore);
+}
+
+template <typename TSpec, typename TConfig, typename TRead, typename TId>
+inline typename Size<typename FragmentStore<TSpec, TConfig>::TReadStore>::Type
+appendRead(
+	FragmentStore<TSpec, TConfig> &me, 
+	TRead const &read, 
+	TId matePairId)
+{
+	SEQAN_ASSERT(length(me.readStore) == length(me.readSeqStore))
+
+	typedef typename FragmentStore<TSpec, TConfig>::TReadStore TReadStore;
+	typename Value<TReadStore>::Type r;
+	r.matePairId = matePairId;
+
+	appendValue(me.readStore, r, Generous());
+	appendValue(me.readSeqStore, read, Generous());
+	return length(me.readStore);
+}
+
+template <typename TSpec, typename TConfig, typename TRead>
+inline typename Size<typename FragmentStore<TSpec, TConfig>::TReadStore>::Type
+appendRead(
+	FragmentStore<TSpec, TConfig> &me, 
+	TRead const &read)
+{
+	typedef typename FragmentStore<TSpec, TConfig>::TReadStore TReadStore;
+	return appendRead(me, read, TReadStore::INVALID_ID);
+}
+
+template <typename TSpec, typename TConfig, typename TId>
+inline typename Value<typename FragmentStore<TSpec, TConfig>::TReadSeqStore>::Type
+getRead(
+	FragmentStore<TSpec, TConfig> &me, 
+	TId id)
+{
+	return value(me.readSeqStore, id);
+}
+
+//////////////////////////////////////////////////////////////////////////////
 
 }// namespace SEQAN_NAMESPACE_MAIN
 
