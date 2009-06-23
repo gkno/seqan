@@ -36,5 +36,6 @@
 #include <seqan/store/store_align.h>
 #include <seqan/store/store_all.h>
 #include <seqan/store/store_io.h>
+#include <seqan/store/store_io_sam.h>
 
 #endif //#ifndef SEQAN_HEADER_...
