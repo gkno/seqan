@@ -139,7 +139,9 @@ appendRead(
 	TRead const &read)
 {
 	typedef typename FragmentStore<TSpec, TConfig>::TReadStore TReadStore;
-	return appendRead(me, read, TReadStore::INVALID_ID);
+    typedef typename Value<TReadStore>::Type TReadStoreElement;
+    
+	return appendRead(me, read, TReadStoreElement::INVALID_ID);
 }
 
 template <typename TSpec, typename TConfig, typename TId>
