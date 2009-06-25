@@ -36,6 +36,7 @@
 #include <seqan/graph_align/graph_align_config.h>
 #include <seqan/graph_align/graph_align_interface.h>
 #include <seqan/graph_align/graph_align_needleman_wunsch.h>
+#include <seqan/graph_align/graph_align_banded_needleman_wunsch.h>
 #include <seqan/graph_align/graph_align_gotoh.h>
 #include <seqan/graph_align/graph_align_banded_gotoh.h>
 #include <seqan/graph_align/graph_align_hirschberg.h>
