@@ -55,7 +55,7 @@ getClrRange(FragmentStore<TSpec, TConfig> const& fragStore,
 	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
 	typedef typename Size<TFragmentStore>::Type TSize;
 	typedef typename Iterator<String<TGapAnchor>, Standard>::Type TGapIter;
-	TSize lenRead = length((value(fragStore.readStore, alignEl.readId)).seq);
+	TSize lenRead = length(fragStore.readSeqStore[alignEl.readId]);
 
 	TGapIter itGap = begin(alignEl.gaps, Standard() );
 	TGapIter itGapEnd = end(alignEl.gaps, Standard() );
@@ -115,6 +115,7 @@ read(TFile & file,
 	typedef typename Id<TFragmentStore>::Type TId;
 	typedef typename Size<TFragmentStore>::Type TSize;
 	typedef typename Value<TFile>::Type TValue;
+	typedef typename TFragmentStore::TReadSeq TReadSeq;
 
 	// All fragment store element types
 	typedef typename Value<typename TFragmentStore::TContigStore>::Type TContigElement;
@@ -220,11 +221,12 @@ read(TFile & file,
 					appendValue(fragStore.matePairNameStore, eid, Generous() );
 				}
 			} else if (blockIdentifier == "RED") {   // Read block
-				TReadStoreElement readEl;
 				TId id = 0;
 				String<char> fieldIdentifier;
 				String<char> eid;
 				String<char> qual;
+				TId matePairId = 0;
+				TReadSeq seq;
 				while (c != '}') {
 					clear(fieldIdentifier);
 					_parse_readIdentifier(file, fieldIdentifier, c);
@@ -241,13 +243,13 @@ read(TFile & file,
 						_parse_skipLine(file, c);
 					} else if (fieldIdentifier == "frg") {
 						c = _streamGet(file);
-						readEl.matePairId = _parse_readNumber(file, c);
+						matePairId = _parse_readNumber(file, c);
 						_parse_skipLine(file, c);
 					} else if (fieldIdentifier == "seq") {
 						c = _streamGet(file);
 						_parse_skipWhitespace(file, c);
 						while (c != '.') {
-							_parse_readSequenceData(file,c,readEl.seq);
+							_parse_readSequenceData(file,c,seq);
 							_parse_skipLine(file, c);
 						}
 					} else if (fieldIdentifier == "qlt") {
@@ -263,16 +265,16 @@ read(TFile & file,
 					}
 				}
 				// Set quality
-				typedef typename Iterator<typename TFragmentStore::TReadSeq, Standard>::Type TReadIter;
+				typedef typename Iterator<TReadSeq, Standard>::Type TReadIter;
 				typedef typename Iterator<String<char> >::Type TQualIter;
-				TReadIter begIt = begin(readEl.seq, Standard() );
+				TReadIter begIt = begin(seq, Standard() );
 				TQualIter qualIt = begin(qual);
 				TQualIter qualItEnd = end(qual);
 				for(;qualIt != qualItEnd; goNext(qualIt), goNext(begIt)) assignQualityValue(value(begIt), value(qualIt));
 
 				// Insert the read
 				readIdMap.insert(std::make_pair(id, length(fragStore.readStore)));
-				appendValue(fragStore.readStore, readEl, Generous() );
+				appendRead(fragStore, seq, matePairId);
 				appendValue(fragStore.readNameStore, eid, Generous() );
 			} else if (blockIdentifier == "CTG") {   // Contig block
 				TContigElement contigEl;
@@ -327,7 +329,7 @@ read(TFile & file,
 
 						// Get the length of the read
 						TId readId = (readIdMap.find(alignEl.readId))->second;
-						TSize lenRead = length((value(fragStore.readStore, readId)).seq);
+						TSize lenRead = length(value(fragStore.readSeqStore, readId));
 
 						// Create the gap anchors
 						typedef typename TFragmentStore::TContigGapAnchor TContigGapAnchor;
@@ -610,7 +612,7 @@ write(TFile & target,
 	TReadIter readIt = begin(fragStore.readStore, Standard() );
 	TReadIter readItEnd = end(fragStore.readStore, Standard() );
 	noNamesPresent = (length(fragStore.readNameStore) == 0);
-	for(TSize idCount = 0;readIt != readItEnd; goNext(readIt), ++idCount) {
+	for(TSize idCount = 0;readIt != readItEnd; ++readIt, ++idCount) {
 		_streamWrite(target,"{RED\n");
 		_streamWrite(target,"iid:");
 		_streamPutInt(target, idCount + 1);
@@ -623,15 +625,15 @@ write(TFile & target,
 		_streamWrite(target,"seq:\n");
 		typedef typename Iterator<typename TFragmentStore::TReadSeq>::Type TSeqIter;
 		typedef typename Value<typename TFragmentStore::TReadSeq>::Type TAlphabet;
-		TSeqIter seqIt = begin(readIt->seq);
-		TSeqIter seqItEnd = end(readIt->seq);
+		TSeqIter seqIt = begin(value(fragStore.readSeqStore, idCount));
+		TSeqIter seqItEnd = end(value(fragStore.readSeqStore, idCount));
 		for(TSize k = 0;seqIt!=seqItEnd;goNext(seqIt), ++k) {
 			if ((k % 60 == 0) && (k != 0)) _streamPut(target, '\n');
 			_streamPut(target, getValue(seqIt));
 		}
 		_streamWrite(target, "\n.\n");
 		_streamWrite(target,"qlt:\n");
-		seqIt = begin(readIt->seq);
+		seqIt = begin(value(fragStore.readSeqStore, idCount));
 		for(TSize k = 0;seqIt!=seqItEnd;goNext(seqIt), ++k) {
 			if ((k % 60 == 0) && (k != 0)) _streamPut(target, '\n');
 			Ascii c = ' ';
@@ -731,7 +733,7 @@ write(TFile & target,
 			TReadGapsIter itGapsEnd = end(alignIt->gaps);
 
 			// Create the gaps string and the clear ranges
-			typename TFragmentStore::TReadPos lenRead = length((value(fragStore.readStore, alignIt->readId)).seq);
+			typename TFragmentStore::TReadPos lenRead = length(value(fragStore.readSeqStore, alignIt->readId));
 			TSize clr1 = 0;
 			TSize clr2 = lenRead;
 			// Create first clear range
@@ -798,6 +800,7 @@ _convertSimpleReadFile(TFile& file,
 	typedef typename Size<TFragmentStore>::Type TSize;
 	typedef typename Value<TFile>::Type TValue;
 	typedef typename TFragmentStore::TContigPos TPos;
+	typedef typename TFragmentStore::TReadSeq TReadSeq;
 
 	// All fragment store element types
 	typedef typename Value<typename TFragmentStore::TContigStore>::Type TContigElement;
@@ -805,6 +808,7 @@ _convertSimpleReadFile(TFile& file,
 	typedef typename Value<typename TFragmentStore::TMatePairStore>::Type TMatePairElement;
 	typedef typename Value<typename TFragmentStore::TReadStore>::Type TReadStoreElement;
 	typedef typename Value<typename TFragmentStore::TAlignedReadStore>::Type TAlignedElement;
+	
 
 	// All maps to mirror file ids to our internal ids
 	typedef std::map<TId, TId> TIdMap;
@@ -825,7 +829,6 @@ _convertSimpleReadFile(TFile& file,
 
 		// New read?
 		if (c == '>') {
-			TReadStoreElement readEl;
 			TAlignedElement alignEl;
 			TId id = count;
 			TId fragId = count;
@@ -843,6 +846,7 @@ _convertSimpleReadFile(TFile& file,
 			// Any attributes?
 			String<char> eid;
 			String<char> qlt;
+			TReadSeq seq;
 			if (c == '[') {
 				String<char> fdIdentifier;
 				while (c != ']') {
@@ -882,15 +886,15 @@ _convertSimpleReadFile(TFile& file,
 			_parse_skipLine(file, c);
 			_parse_skipWhitespace(file, c);
 			while ((!_streamEOF(file)) && (c != '>')) {
-				_parse_readSequenceData(file,c,readEl.seq);
+				_parse_readSequenceData(file,c, seq);
 				_parse_skipWhitespace(file, c);
 			}
 			
 			// Set quality
-			typedef typename Iterator<typename TFragmentStore::TReadSeq, Standard>::Type TReadIter;
+			typedef typename Iterator<TReadSeq, Standard>::Type TReadIter;
 			typedef typename Iterator<String<char> >::Type TQualIter;
-			TReadIter begIt = begin(readEl.seq, Standard() );
-			TReadIter begItEnd = begin(readEl.seq, Standard() );
+			TReadIter begIt = begin(seq, Standard() );
+			TReadIter begItEnd = begin(seq, Standard() );
 			if (length(qlt)) {
 				TQualIter qualIt = begin(qlt);
 				TQualIter qualItEnd = end(qlt);
@@ -907,16 +911,13 @@ _convertSimpleReadFile(TFile& file,
 				eid = input.str().c_str();
 			}
 
-			// Set mate pair id
-			readEl.matePairId = fragId;
-
 			// Insert the read
 			readIdMap.insert(std::make_pair(id, length(fragStore.readStore)));
-			appendValue(fragStore.readStore, readEl, Generous());
+			appendRead(fragStore, seq, fragId);
 			appendValue(fragStore.readNameStore, eid, Generous());
 
 			// Insert an aligned read
-			TSize readLen = length(readEl.seq);
+			TSize readLen = length(seq);
 			if (alignEl.beginPos < alignEl.endPos) {
 				if (readLen != alignEl.endPos - alignEl.beginPos) {
 					alignEl.endPos = alignEl.beginPos + readLen;
@@ -1218,15 +1219,15 @@ _writeCeleraFrg(TFile& target,
 		_streamWrite(target,"seq:\n");
 		typedef typename Iterator<typename TFragmentStore::TReadSeq>::Type TSeqIter;
 		typedef typename Value<typename TFragmentStore::TReadSeq>::Type TAlphabet;
-		TSeqIter seqIt = begin(readIt->seq);
-		TSeqIter seqItEnd = end(readIt->seq);
+		TSeqIter seqIt = begin(value(fragStore.readSeqStore, idCount));
+		TSeqIter seqItEnd = end(value(fragStore.readSeqStore, idCount));
 		for(TSize k = 0;seqIt!=seqItEnd;goNext(seqIt), ++k) {
 			if ((k % 70 == 0) && (k != 0)) _streamPut(target, '\n');
 			_streamPut(target, getValue(seqIt));
 		}
 		_streamWrite(target, "\n.\n");
 		_streamWrite(target,"qlt:\n");
-		seqIt = begin(readIt->seq);
+		seqIt = begin(value(fragStore.readSeqStore, idCount));
 		for(TSize k = 0;seqIt!=seqItEnd;goNext(seqIt), ++k) {
 			if ((k % 70 == 0) && (k != 0)) _streamPut(target, '\n');
 			Ascii c = ' ';

@@ -37,7 +37,6 @@ struct ReadStoreElement
 	
 	
 	TId matePairId;				// refers to the mate-pair, INVALID_ID if not part of a mate-pair
-	TReadSeq seq;
 
 	ReadStoreElement() : matePairId(INVALID_ID) {}
 };

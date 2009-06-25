@@ -125,7 +125,7 @@ getContigReads(StringSet<TValue, Owner<TStrSpec> >& strSet,
 		TReadPos begClr = 0;
 		TReadPos endClr = 0;
 		getClrRange(fragStore, value(alignIt), begClr, endClr);
-		value(strSet, numRead) = infix((value(fragStore.readStore, alignIt->readId)).seq, begClr, endClr);
+		value(strSet, numRead) = infix(fragStore.readSeqStore[alignIt->readId], begClr, endClr);
 		TSize lenRead = length(value(strSet, numRead));
 		if (alignIt->beginPos < alignIt->endPos) {
 			appendValue(startEndPos, TPosPair(offset, offset + lenRead), Generous());
@@ -193,7 +193,7 @@ updateContigReads(FragmentStore<TSpec, TConfig>& fragStore,
 	TAlignIter alignIt = lowerBoundAlignedReads(fragStore.alignedReadStore, contigId, SortContigId());
 	TAlignIter alignItEnd = upperBoundAlignedReads(fragStore.alignedReadStore, contigId, SortContigId());
 	for(TSize i = 0;alignIt != alignItEnd; goNext(alignIt), ++i) {
-		TSize lenRead = length((value(fragStore.readStore, alignIt->readId)).seq);
+		TSize lenRead = length(fragStore.readSeqStore[alignIt->readId]);
 		TReadPos begClr = 0;
 		TReadPos endClr = 0;
 		getClrRange(fragStore, value(alignIt), begClr, endClr);
@@ -441,7 +441,7 @@ int main(int argc, const char *argv[]) {
 			Score<int, WeightedConsensusScore<Score<int, FractionalScore>, Score<int, ConsensusScore> > > combinedScore;
 			//Score<int, ConsensusScore> combinedScore;
 			//Score<int, FractionalScore> combinedScore;
-			reAlign(fragStore, combinedScore, currentContig, consOpt.bandwidth, true);
+			reAlign(fragStore, combinedScore, currentContig, consOpt.bandwidth, false);
 		} else {
 			
 // Profiling
