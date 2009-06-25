@@ -349,6 +349,18 @@ namespace SEQAN_NAMESPACE_MAIN
 			*it = F(*it);
 	}
 
+	template < typename TSequence, typename TFunctor >
+	inline void
+	convertInPlace(TSequence const & sequence, TFunctor const &F)
+	{
+		typedef typename Iterator<TSequence, Standard>::Type	TIter;
+
+		TIter it = begin(sequence, Standard());
+		TIter itEnd = end(sequence, Standard());
+		for(; it != itEnd; ++it)
+			*it = F(*it);
+	}
+
 }
 
 #endif

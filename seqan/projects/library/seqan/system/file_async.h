@@ -58,7 +58,7 @@ namespace SEQAN_NAMESPACE_MAIN
         bool open(char const *fileName, int openMode = DefaultOpenMode<File>::VALUE) {
 			SEQAN_PROADD(SEQAN_PROOPENFILES, 1);
             noBuffering = getExtraFlags(openMode | OPEN_ASYNC) & (FILE_FLAG_NO_BUFFERING | FILE_FLAG_OVERLAPPED);
-            handleAsync = CreateFile(fileName,
+            handleAsync = CreateFileA(fileName,
                                 getFileAccess(openMode | OPEN_ASYNC),
                                 FILE_SHARE_DELETE | FILE_SHARE_READ | FILE_SHARE_WRITE,
                                 NULL,
@@ -77,7 +77,7 @@ namespace SEQAN_NAMESPACE_MAIN
             #endif
 
             if (noBuffering) {
-                handle = CreateFile(fileName,                // in this case io must be sector aligned
+                handle = CreateFileA(fileName,                // in this case io must be sector aligned
                                 getFileAccess(openMode),    // so we open a second file, for unaligned access
                                 FILE_SHARE_DELETE | FILE_SHARE_READ | FILE_SHARE_WRITE,
                                 NULL,
@@ -105,13 +105,13 @@ namespace SEQAN_NAMESPACE_MAIN
             static const char szTempPath[MAX_PATH] = SEQAN_DEFAULT_TMPDIR;
 #else
             char szTempPath[MAX_PATH];
-            if (!GetTempPath(MAX_PATH, szTempPath)) {
+            if (!GetTempPathA(MAX_PATH, szTempPath)) {
 				if (!(openMode & OPEN_QUIET))
 					::std::cerr << "Couldn't get a temporary path name. (ErrNo=" << GetLastError() << ")" << ::std::endl;
                 return false;
             }
 #endif
-            if (!GetTempFileName(szTempPath, "GNDX", 0, szTempName)) {
+            if (!GetTempFileNameA(szTempPath, "GNDX", 0, szTempName)) {
 				if (!(openMode & OPEN_QUIET))
 					::std::cerr << "Couldn't get a temporary file name. (ErrNo=" << GetLastError() << ")" << ::std::endl;
                 return false;

@@ -518,6 +518,15 @@ namespace SEQAN_NAMESPACE_MAIN
 			reverseComplementInPlace(stringSet[seqNo]);
 	}
 
+	template < typename TSequence, typename TSpec >
+	inline void
+	reverseInPlace(StringSet<TSequence, TSpec> const & stringSet) 
+	{
+		unsigned seqCount = length(stringSet);
+		for(unsigned seqNo = 0; seqNo < seqCount; ++seqNo)
+			reverseComplementInPlace(stringSet[seqNo]);
+	}
+
 //////////////////////////////////////////////////////////////////////////////
 // shortcut
 

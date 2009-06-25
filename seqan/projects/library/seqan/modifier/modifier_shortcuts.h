@@ -64,8 +64,22 @@ inline void complementInPlace(TSequence & sequence)
 	convertInPlace(sequence, FunctorComplement<typename Value<TSequence>::Type>());
 } 
 
+template < typename TSequence >
+inline void complementInPlace(TSequence const & sequence) 
+{
+	convertInPlace(sequence, FunctorComplement<typename Value<TSequence>::Type>());
+} 
+
 template < typename TSequence, typename TSpec >
 inline void complementInPlace(StringSet<TSequence, TSpec> & stringSet)
+{
+	unsigned seqCount = length(stringSet);
+	for(unsigned seqNo = 0; seqNo < seqCount; ++seqNo)
+		complementInPlace(stringSet[seqNo]);
+}
+
+template < typename TSequence, typename TSpec >
+inline void complementInPlace(StringSet<TSequence, TSpec> const & stringSet)
 {
 	unsigned seqCount = length(stringSet);
 	for(unsigned seqNo = 0; seqNo < seqCount; ++seqNo)
@@ -79,8 +93,23 @@ inline void reverseComplementInPlace(TSequence & sequence)
 	reverseInPlace(sequence);
 } 
 
+template < typename TSequence >
+inline void reverseComplementInPlace(TSequence const & sequence) 
+{
+	convertInPlace(sequence, FunctorComplement<typename Value<TSequence>::Type>());
+	reverseInPlace(sequence);
+} 
+
 template < typename TSequence, typename TSpec >
 inline void reverseComplementInPlace(StringSet<TSequence, TSpec> & stringSet)
+{
+	unsigned seqCount = length(stringSet);
+	for(unsigned seqNo = 0; seqNo < seqCount; ++seqNo)
+		reverseComplementInPlace(stringSet[seqNo]);
+}
+
+template < typename TSequence, typename TSpec >
+inline void reverseComplementInPlace(StringSet<TSequence, TSpec> const & stringSet)
 {
 	unsigned seqCount = length(stringSet);
 	for(unsigned seqNo = 0; seqNo < seqCount; ++seqNo)
