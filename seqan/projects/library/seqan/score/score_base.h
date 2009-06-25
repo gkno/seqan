@@ -97,10 +97,10 @@ template <typename TValue, typename TSpec, typename TPos1, typename TPos2, typen
 inline TValue
 scoreGapOpenVertical(
 	Score<TValue, TSpec> const & me,
-	TPos1 pos1,
-	TPos2 pos2,
-	TSeq1 const &seq1,
-	TSeq2 const &seq2)
+	TPos1,
+	TPos2,
+	TSeq1 const &,
+	TSeq2 const &)
 {
 	return scoreGapOpen(me);
 }
@@ -109,10 +109,10 @@ template <typename TValue, typename TSpec, typename TPos1, typename TPos2, typen
 inline TValue
 scoreGapExtendHorizontal(
 	Score<TValue, TSpec> const & me,
-	TPos1 pos1,
-	TPos2 pos2,
-	TSeq1 const &seq1,
-	TSeq2 const &seq2)
+	TPos1,
+	TPos2,
+	TSeq1 const &,
+	TSeq2 const &)
 {
 	return scoreGapExtend(me);
 }
@@ -121,10 +121,10 @@ template <typename TValue, typename TSpec, typename TPos1, typename TPos2, typen
 inline TValue
 scoreGapExtendVertical(
 	Score<TValue, TSpec> const & me,
-	TPos1 pos1,
-	TPos2 pos2,
-	TSeq1 const &seq1,
-	TSeq2 const &seq2)
+	TPos1,
+	TPos2,
+	TSeq1 const &,
+	TSeq2 const &)
 {
 	return scoreGapExtend(me);
 }
@@ -133,10 +133,10 @@ template <typename TValue, typename TSpec, typename TPos1, typename TPos2, typen
 inline TValue
 scoreGapHorizontal(
 	Score<TValue, TSpec> const & me,
-	TPos1 pos1,
-	TPos2 pos2,
-	TSeq1 const &seq1,
-	TSeq2 const &seq2)
+	TPos1,
+	TPos2,
+	TSeq1 const &,
+	TSeq2 const &)
 {
 	return scoreGap(me);
 }

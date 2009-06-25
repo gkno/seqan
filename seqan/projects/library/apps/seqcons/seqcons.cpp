@@ -238,6 +238,30 @@ updateContigReads(FragmentStore<TSpec, TConfig>& fragStore,
 //////////////////////////////////////////////////////////////////////////////////
 
 int main(int argc, const char *argv[]) {
+
+
+/*
+	typedef String<Dna> TSequence;
+	TSequence seq1 = "atcgaatgcgga";
+	TSequence seq2 = "actcgttgca";
+	Score<int> score(0, -1, -1, -1);
+
+	typedef StringSet<TSequence, Dependent<> > TStringSet;
+	typedef Graph<Alignment<TStringSet, void> > TAlignmentGraph;
+
+	TStringSet string_set;
+	appendValue(string_set, seq1);
+	appendValue(string_set, seq2);
+	TAlignmentGraph alignment_graph(string_set);
+
+	::std::cout << "Score = " << globalAlignment(alignment_graph, score, AlignConfig<>(), -1 * length(string_set[1]), length(string_set[0]), BandedNeedlemanWunsch()) << ::std::endl;
+	::std::cout << "Score = " << globalAlignment(alignment_graph, score, AlignConfig<>(), -1 * length(string_set[1]), length(string_set[0]), BandedGotoh()) << ::std::endl;
+	::std::cout << alignment_graph << ::std::endl;
+	return 0;
+*/
+
+
+
 	
 	typedef unsigned int TSize;
 

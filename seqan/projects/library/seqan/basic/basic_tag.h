@@ -86,6 +86,16 @@ typedef Tag<NeedlemanWunsch_> const NeedlemanWunsch;
 //////////////////////////////////////////////////////////////////////////////
 
 /**
+.Tag.Global Alignment Algorithms.value.BandedNeedlemanWunsch:
+	The Needleman-Wunsch alignment algorithm in a banded version.
+*/
+struct BandedNeedlemanWunsch_;
+typedef Tag<BandedNeedlemanWunsch_> const BandedNeedlemanWunsch;
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
 .Tag.Global Alignment Algorithms.value.Gotoh:
 	Gotoh's affine gap cost alignment algorithm.
 */
