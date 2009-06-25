@@ -448,9 +448,6 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 		if ((TId) alignIt->contigId == contigId) {
 			if (alignIt->beginPos > alignIt->endPos) {
 				reverseComplementInPlace(fragStore.readSeqStore[alignIt->readId]);
-				//typename TFragmentStore::TReadSeq seq = fragStore.readSeqStore[alignIt->readId];
-				//reverseComplementInPlace(seq);
-				//fragStore.readSeqStore[alignIt->readId] = seq;
 				TAlignedElement alignedEl = *alignIt;
 				TReadPos tmp = alignedEl.beginPos;
 				alignedEl.beginPos = alignedEl.endPos;
@@ -546,10 +543,7 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 	for(;alignIt != alignItEnd; ++alignIt) {
 		if ((TId) alignIt->contigId == contigId) {
 			if (alignIt->beginPos > alignIt->endPos) {
-				//reverseComplementInPlace(fragStore.readSeqStore[alignIt->readId]);
-				typename TFragmentStore::TReadSeq seq = fragStore.readSeqStore[alignIt->readId];
-				reverseComplementInPlace(seq);
-				fragStore.readSeqStore[alignIt->readId] = seq;
+				reverseComplementInPlace(fragStore.readSeqStore[alignIt->readId]);
 				alignIt->beginPos = contigReadIt->endPos;
 				alignIt->endPos = contigReadIt->beginPos;
 			} else {
